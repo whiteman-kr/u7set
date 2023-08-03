@@ -325,7 +325,7 @@ namespace Builder
 
 		if (m_linkedFiles.contains(buildFile) == false)
 		{
-			m_linkedFiles.append(buildFile);
+			m_linkedFiles.insert(buildFile);
 		}
 		else
 		{
@@ -351,7 +351,7 @@ namespace Builder
 			return false;
 		}
 
-		m_linkedFiles.append(buildFile);
+		m_linkedFiles.insert(buildFile);
 
 		return true;
 	}
@@ -379,16 +379,11 @@ namespace Builder
 	{
 		m_xmlWriter.writeStartElement("Files");
 
-		m_xmlWriter.writeAttribute("Count", QString("%1").arg(m_linkedFiles.count()));
+		m_xmlWriter.writeAttribute("Count", QString("%1").arg(m_linkedFiles.size()));
 
 		for(const BuildFile* buildFile : m_linkedFiles)
 		{
-			if (buildFile == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
+			TEST_PTR_CONTINUE(buildFile);
 			buildFile->getBuildFileInfo().writeToXml(m_xmlWriter);
 		}
 
@@ -429,7 +424,7 @@ namespace Builder
 		return result;
 	}
 
-	bool BuildResult::finalize(const HashedVector<QString, BuildFile*>& buildFiles)
+	bool BuildResult::finalize(const std::map<QString, BuildFile*>& buildFiles)
 	{
 		bool result = true;
 
@@ -511,36 +506,15 @@ namespace Builder
 		return true;
 	}
 
-	bool BuildResult::writeBuildXmlFilesSection(const HashedVector<QString, BuildFile*>& buildFiles)
+	bool BuildResult::writeBuildXmlFilesSection(const std::map<QString, BuildFile*>& buildFiles)
 	{
-		std::vector<const BuildFile*> files;
-
-		files.reserve(buildFiles.size());
-
-		for(const BuildFile* buildFile : buildFiles)
-		{
-			TEST_PTR_CONTINUE(buildFile);
-			files.push_back(buildFile);
-		}
-
-		std::sort(files.begin(), files.end(),
-					[](const BuildFile* f1, const BuildFile* f2)
-					{
-						return f1->lowercasePathFileName() < f2->lowercasePathFileName();
-					});
-
 		m_xmlWriter.writeStartElement("Files");
-		m_xmlWriter.writeAttribute("Count", QString::number(files.size()));
+		m_xmlWriter.writeAttribute("Count", QString::number(buildFiles.size()));
 
-		for(const BuildFile* buildFile : files)
+		for(const auto& [fileName, file] : buildFiles)
 		{
-			if (buildFile == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			buildFile->getBuildFileInfo().writeToXml(m_xmlWriter);
+			TEST_PTR_CONTINUE(file);
+			file->getBuildFileInfo().writeToXml(m_xmlWriter);
 		}
 
 		m_xmlWriter.writeEndElement();			// </Files>
@@ -578,15 +552,12 @@ namespace Builder
 
 	BuildResultWriter::~BuildResultWriter()
 	{
-		for(BuildFile* file : m_buildFiles)
+		for(const auto& [fileName, file] : m_buildFiles)
 		{
-			if (file == nullptr)
+			if (file != nullptr)
 			{
-				assert(false);
-				continue;
+				delete file;
 			}
-
-			delete file;
 		}
 
 		m_buildFiles.clear();
@@ -777,7 +748,7 @@ namespace Builder
 
 		ConfigurationXmlFile* cfgFile = new ConfigurationXmlFile(*this, subDir);
 
-		m_cfgFiles.insert(subDir, cfgFile);
+		m_cfgFiles.emplace(subDir, cfgFile);
 
 		return cfgFile;
 	}
@@ -832,7 +803,7 @@ namespace Builder
 
 	bool BuildResultWriter::writeConfigurationXmlFiles()
 	{
-		if (m_cfgFiles.isEmpty())
+		if (m_cfgFiles.empty())
 		{
 			return true;
 		}
@@ -841,8 +812,10 @@ namespace Builder
 
 		LOG_MESSAGE(m_log, QString(tr("Software configuration files writing...")));
 
-		for(ConfigurationXmlFile* cfgFile : m_cfgFiles)
+		for(const auto& p : m_cfgFiles)
 		{
+			ConfigurationXmlFile* cfgFile = p.second;
+
 			if (cfgFile == nullptr)
 			{
 				assert(false);
@@ -874,16 +847,17 @@ namespace Builder
 
 	BuildFile* BuildResultWriter::getBuildFile(const QString& pathFileName) const
 	{
-		BuildFile* buildFile = m_buildFiles.value(pathFileName, nullptr);
+		auto it = m_buildFiles.find(pathFileName);
 
-		if (buildFile == nullptr)
+		if (it == m_buildFiles.end())
 		{
 			// Can't find build file %1.
 			//
 			m_log->errCMN0020(pathFileName);
+			return nullptr;
 		}
 
-		return buildFile;
+		return it->second;
 	}
 
 	BuildFile* BuildResultWriter::getBuildFileByID(const QString& subDir /* same as EquipmentID or common dirs */, const QString& buildFileID) const
@@ -913,14 +887,11 @@ namespace Builder
 
 	bool BuildResultWriter::checkBuildFilePtr(const BuildFile* buildFile) const
 	{
-		for(const BuildFile* bFile : m_buildFiles)
-		{
-			if (bFile == buildFile)
-			{
-				return true;
-			}
-		}
-		return false;
+		TEST_PTR_RETURN_FALSE(buildFile);
+
+		BuildFile* existsFile = getBuildFile(buildFile->pathFileName());
+
+		return existsFile == buildFile;
 	}
 
 	QString BuildResultWriter::outputPath() const
@@ -1030,7 +1001,7 @@ namespace Builder
 			return nullptr;
 		}
 
-		m_buildFiles.insert(pathFileName, buildFile);
+		m_buildFiles.emplace(pathFileName, buildFile);
 
 		if (id.isEmpty() == false)
 		{

@@ -93,7 +93,7 @@ namespace Builder
 		IssueLogger* m_log = nullptr;
 		QString m_subDir;
 
-		QList<BuildFile*> m_linkedFiles;
+		std::set<BuildFile*> m_linkedFiles;
 	};
 
 	class BuildResult : public QObject
@@ -102,7 +102,7 @@ namespace Builder
 		BuildResult();
 
 		bool create(const QString& buildDir, const QString& fullPath, const OnlineLib::BuildInfo& buildInfo, IssueLogger* log);
-		bool finalize(const HashedVector<QString, BuildFile*>& buildFiles);
+		bool finalize(const std::map<QString, BuildFile*>& buildFiles);
 
 		bool enableMessages() const { return m_enableMessages; }
 		void setEnableMessages(bool enable) { m_enableMessages = enable; }
@@ -114,7 +114,7 @@ namespace Builder
 		void clearDirectory(const QString& directory);
 
 		bool createBuildXml(const OnlineLib::BuildInfo& buildInfo);
-		bool writeBuildXmlFilesSection(const HashedVector<QString, BuildFile*>& buildFiles);
+		bool writeBuildXmlFilesSection(const std::map<QString, BuildFile*>& buildFiles);
 		bool closeBuildXml();
 
 	private:
@@ -193,9 +193,9 @@ namespace Builder
 		IssueLogger* m_log = nullptr;
 		DbController* m_dbController = nullptr;
 
-		HashedVector<QString, BuildFile*> m_buildFiles;
+		std::map<QString, BuildFile*> m_buildFiles;				// pathFileName => BuildFile*
 
-		HashedVector<QString, ConfigurationXmlFile*> m_cfgFiles;
+		std::map<QString, ConfigurationXmlFile*> m_cfgFiles;	// softwareSubdirectory => ConfigurationXmlFile*
 
 		Hardware::ModuleFirmwareWriter m_firmwareWriter;
 
