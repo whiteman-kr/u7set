@@ -6,7 +6,7 @@
 
 // Ordered hash of unique pairs key->valuse
 //
-
+/*
 template <typename KEY, typename VALUE>
 class OrderedHash : public QVector<QPair<KEY, VALUE>>
 {
@@ -303,12 +303,13 @@ std::vector<std::pair<KEY, VALUE>> OrderedHash<KEY, VALUE>::getKeyValueVector() 
 
 	return result;
 }
-
+*/
 
 // -------------------------------------------------------------------------------------------------
+//
 // PtrOrderedHash class
 //
-
+// -------------------------------------------------------------------------------------------------
 
 template <typename KEY, typename VALUE>
 class PtrOrderedHash
@@ -628,7 +629,6 @@ private:
 	VALUE m_notValidValue;
 };
 
-
 template <typename KEY, typename VALUE>
 void HashedVector<KEY, VALUE>::insert(const KEY& key, const VALUE& value)
 {
@@ -643,7 +643,6 @@ void HashedVector<KEY, VALUE>::insert(const KEY& key, const VALUE& value)
 	m_map.emplace(key, index);
 }
 
-
 template <typename KEY, typename VALUE>
 VALUE& HashedVector<KEY, VALUE>::operator[](qsizetype i)
 {
@@ -651,13 +650,12 @@ VALUE& HashedVector<KEY, VALUE>::operator[](qsizetype i)
 	return m_vector[i];
 }
 
-
 template <typename KEY, typename VALUE>
 const VALUE& HashedVector<KEY, VALUE>::operator[](qsizetype i) const
 {
 	Q_ASSERT(i >= 0 && i < count());
-	return m_vector[i];}
-
+	return m_vector[i];
+}
 
 template <typename KEY, typename VALUE>
 VALUE& HashedVector<KEY, VALUE>::operator[](const KEY& key)
@@ -673,7 +671,6 @@ VALUE& HashedVector<KEY, VALUE>::operator[](const KEY& key)
 	return m_vector[it->second];
 }
 
-
 template <typename KEY, typename VALUE>
 const VALUE& HashedVector<KEY, VALUE>::operator[](const KEY& key) const
 {
@@ -688,7 +685,6 @@ const VALUE& HashedVector<KEY, VALUE>::operator[](const KEY& key) const
 	return m_vector[it->second];
 }
 
-
 template <typename KEY, typename VALUE>
 const VALUE HashedVector<KEY, VALUE>::value(const KEY& key) const
 {
@@ -702,7 +698,6 @@ const VALUE HashedVector<KEY, VALUE>::value(const KEY& key) const
 
 	return m_vector[it->second];
 }
-
 
 template <typename KEY, typename VALUE>
 const VALUE HashedVector<KEY, VALUE>::value(const KEY& key, const VALUE& defaultValue) const

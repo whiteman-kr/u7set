@@ -693,7 +693,6 @@ public:
 	bool containsHash(Hash hash) const;
 
 	const AppSignal* getSignalByID(const QString& appSignalID) const;		// rename => getByAppSignalID
-	// add getByCustomAppSignalID
 
 	const AppSignal* getSignalByHash(Hash hash) const;
 
@@ -708,12 +707,6 @@ public:
 
 private:
 	std::vector<AppSignal*> m_signals;				// dynamic AppSignal object owner
-
-	// remove this map!!!
-	std::map<QString, AppSignal*> m_idToSignal;		// appSignalID => appSignal
-	// remove this map!!!
-
-	// add hashes from customAppSignalID also
 	std::map<Hash, AppSignal*> m_hashToSignal;		// Hash => appSignal
 };
 

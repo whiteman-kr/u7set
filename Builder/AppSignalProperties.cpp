@@ -409,16 +409,3 @@ void AppSignalProperties::deleteSpecificProperties()
 	}
 }
 
-
-std::shared_ptr<OrderedHash<int, QString> > AppSignalProperties::generateOrderedHashFromStringArray(const char* const* array, size_t size)
-{
-	auto result = std::make_shared<OrderedHash<int, QString>>();
-	result->reserve(size);
-
-	for (size_t i = 0; i < size; i++)
-	{
-		result->append(static_cast<const int>(i), array[i]);
-	}
-	return result;
-}
-

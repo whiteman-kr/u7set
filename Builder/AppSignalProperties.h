@@ -126,15 +126,11 @@ private:
 						   std::function<TYPE (const AppSignal&)> getter,
 						   std::function<void (AppSignal&, TYPE)> setter = std::function<void (AppSignal&, TYPE)>());
 
-	static std::shared_ptr<OrderedHash<int, QString>> generateOrderedHashFromStringArray(const char* const* array, size_t size);
-
 private:
 	AppSignal m_signal;
 	AppSignalSpecPropValues m_specPropValues;
 
 	std::vector<AppSignalPropertyDescription> m_propertyDescription;
-
-	static std::shared_ptr<OrderedHash<int, QString>> m_outputModeHash;
 };
 
 template <class TYPE>

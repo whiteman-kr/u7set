@@ -80,43 +80,6 @@ PropertyValueNoGetterSetter* PropertyObject::addProperty(const QString& caption,
 	return property.get();
 }
 
-PropertyValue<OrderedHash<int, QString>>* PropertyObject::addDynamicEnumProperty(
-		const QString& caption,
-		const std::shared_ptr<OrderedHash<int, QString>>& enumValues,
-		bool visible /*= false*/,
-		const std::function<int(void)>& getter /*= std::function<int(void)>()*/,
-		const std::function<void(int)>& setter /*= std::function<void(int)>()*/)
-{
-	if (enumValues.get() == nullptr)
-	{
-		Q_ASSERT(enumValues);
-		return nullptr;
-	}
-
-	std::shared_ptr<PropertyValue<OrderedHash<int, QString>>> property = std::make_shared<PropertyValue<OrderedHash<int, QString>>>(enumValues);
-
-	property->setCaption(caption);
-	property->setVisible(visible);
-	property->setGetter(getter);
-	property->setSetter(setter);
-
-	if (!getter)
-	{
-		property->setValue(QVariant::fromValue(int()));
-	}
-
-	if (!setter)
-	{
-		property->setReadOnly(true);
-	}
-
-	m_properties[caption] = property;
-
-	emit propertyListChanged();
-
-	return property.get();
-}
-
 PropertyValue<std::vector<std::pair<QString, int>>>* PropertyObject::addDynamicEnumProperty(
 		const QString& caption,
 		const std::vector<std::pair<QString, int>>& enumValues,
