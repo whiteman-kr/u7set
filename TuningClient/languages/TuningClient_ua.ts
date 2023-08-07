@@ -32,18 +32,18 @@
         <location filename="../../lib/Tuning/TuningFilterEditor.cpp" line="53"/>
         <location filename="../../lib/Tuning/TuningFilterEditor.cpp" line="139"/>
         <source>AppSignalID</source>
-        <translation></translation>
+        <translation>Внутр. ІД</translation>
     </message>
     <message>
         <location filename="../../lib/Tuning/TuningFilterEditor.cpp" line="54"/>
         <location filename="../../lib/Tuning/TuningFilterEditor.cpp" line="138"/>
         <source>CustomAppSignalID</source>
-        <translation></translation>
+        <translation>ІД сигналу</translation>
     </message>
     <message>
         <location filename="../../lib/Tuning/TuningFilterEditor.cpp" line="55"/>
         <source>EquipmentID</source>
-        <translation></translation>
+        <translation>ІД обладнання</translation>
     </message>
     <message>
         <location filename="../../lib/Tuning/TuningFilterEditor.cpp" line="56"/>
@@ -312,7 +312,7 @@ Updated: %2 signals</source>
     <message>
         <location filename="../DialogChooseFilter.cpp" line="65"/>
         <source>Cancel</source>
-        <translation>Відміна</translation>
+        <translation>Скасувати</translation>
     </message>
 </context>
 <context>
@@ -330,7 +330,7 @@ Updated: %2 signals</source>
     <message>
         <location filename="../DialogFilterEditor.cpp" line="31"/>
         <source>Cancel</source>
-        <translation>Відміна</translation>
+        <translation>Скасувати</translation>
     </message>
 </context>
 <context>
@@ -343,7 +343,7 @@ Updated: %2 signals</source>
     <message>
         <location filename="../../lib/Tuning/TuningModel.cpp" line="1110"/>
         <source>Cancel</source>
-        <translation>Відміна</translation>
+        <translation>Скасувати</translation>
     </message>
     <message>
         <location filename="../../lib/Tuning/TuningModel.cpp" line="1138"/>
@@ -911,12 +911,12 @@ Data will not be available at the time of reconnection.</source>
     <message>
         <location filename="../../lib/PropertyEditor.cpp" line="3536"/>
         <source>Property</source>
-        <translation></translation>
+        <translation>Властивість</translation>
     </message>
     <message>
         <location filename="../../lib/PropertyEditor.cpp" line="3537"/>
         <source>Value</source>
-        <translation></translation>
+        <translation>Значення</translation>
     </message>
     <message>
         <location filename="../../lib/PropertyEditor.cpp" line="3738"/>
@@ -937,7 +937,7 @@ Data will not be available at the time of reconnection.</source>
     <message>
         <location filename="../../lib/PropertyEditor.cpp" line="3800"/>
         <source>Property: %1 - incorrect input value</source>
-        <translation></translation>
+        <translation>Властивість: %1 - невірне вхідне значення</translation>
     </message>
     <message>
         <location filename="../../lib/PropertyEditor.cpp" line="3921"/>
@@ -1435,13 +1435,13 @@ Colld not save crash dump file:
         <location filename="../../lib/ClientBehavior.cpp" line="351"/>
         <location filename="../../lib/ClientBehavior.cpp" line="435"/>
         <location filename="../../lib/ClientBehavior.cpp" line="689"/>
-        <location filename="../../lib/Tuning/TuningFilter.cpp" line="2139"/>
+        <location filename="../../lib/Tuning/TuningFilter.cpp" line="2142"/>
         <source>Unknown tag: </source>
         <translation></translation>
     </message>
     <message>
         <location filename="../../lib/ClientBehavior.cpp" line="640"/>
-        <location filename="../../lib/Tuning/TuningFilter.cpp" line="2094"/>
+        <location filename="../../lib/Tuning/TuningFilter.cpp" line="2097"/>
         <source>Failed to load root element.</source>
         <translation></translation>
     </message>
@@ -1501,25 +1501,25 @@ Colld not save crash dump file:
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Tuning/TuningFilter.cpp" line="2040"/>
-        <location filename="../../lib/Tuning/TuningFilter.cpp" line="2134"/>
+        <location filename="../../lib/Tuning/TuningFilter.cpp" line="2043"/>
+        <location filename="../../lib/Tuning/TuningFilter.cpp" line="2137"/>
         <source>All Signals</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Tuning/TuningFilter.cpp" line="2067"/>
+        <location filename="../../lib/Tuning/TuningFilter.cpp" line="2070"/>
         <source>Error opening file:
 
 %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Tuning/TuningFilter.cpp" line="2101"/>
+        <location filename="../../lib/Tuning/TuningFilter.cpp" line="2104"/>
         <source>The file is not an ObjectFilterStorage file.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Tuning/TuningFilter.cpp" line="2195"/>
+        <location filename="../../lib/Tuning/TuningFilter.cpp" line="2198"/>
         <source>TuningFilterStorage::save: failed to save presets in file %1.</source>
         <translation>TuningFilterStorage::помилка запису фільтрів у файл %1.</translation>
     </message>
@@ -1970,17 +1970,17 @@ Are you sure you STILL WANT TO APPLY the changes?</source>
     <message>
         <location filename="../../lib/Tuning/TuningModel.cpp" line="277"/>
         <source>CustomAppSignalID</source>
-        <translation></translation>
+        <translation>ІД сигналу</translation>
     </message>
     <message>
         <location filename="../../lib/Tuning/TuningModel.cpp" line="278"/>
         <source>EquipmentID</source>
-        <translation></translation>
+        <translation>ІД обладнання</translation>
     </message>
     <message>
         <location filename="../../lib/Tuning/TuningModel.cpp" line="279"/>
         <source>AppSignalID</source>
-        <translation></translation>
+        <translation>Внутр. ІД</translation>
     </message>
     <message>
         <location filename="../../lib/Tuning/TuningModel.cpp" line="280"/>
@@ -1990,7 +1990,7 @@ Are you sure you STILL WANT TO APPLY the changes?</source>
     <message>
         <location filename="../../lib/Tuning/TuningModel.cpp" line="281"/>
         <source>Units</source>
-        <translation>Одиниці</translation>
+        <translation>Од. вим</translation>
     </message>
     <message>
         <location filename="../../lib/Tuning/TuningModel.cpp" line="282"/>
@@ -2369,17 +2369,17 @@ Are you sure you STILL WANT TO APPLY the changes?</source>
     <message>
         <location filename="../TuningPage.cpp" line="2579"/>
         <source>Set All Discretes To On</source>
-        <translation>Встановити всі в 1</translation>
+        <translation>Встановити всі дискрети в 1</translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="2610"/>
         <source>Set All Discretes To Off</source>
-        <translation>Встановити всі в 0</translation>
+        <translation>Встановити всі дискрети в 0</translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="2642"/>
         <source>Set All To Defaults</source>
-        <translation>Встановтит всі за замовчуванням</translation>
+        <translation>Встановити всі за замовчуванням</translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="2670"/>
@@ -2415,12 +2415,12 @@ Are you sure you STILL WANT TO APPLY the changes?</source>
     <message>
         <location filename="../TuningSignalInfo.ui" line="24"/>
         <source>LmEquipmentId</source>
-        <translation></translation>
+        <translation>ІД логічного модуля</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.ui" line="31"/>
         <source>CustomAppSignalId</source>
-        <translation></translation>
+        <translation>ІД сигналу</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.ui" line="38"/>
@@ -2430,17 +2430,17 @@ Are you sure you STILL WANT TO APPLY the changes?</source>
     <message>
         <location filename="../TuningSignalInfo.ui" line="59"/>
         <source>EquipmentId</source>
-        <translation></translation>
+        <translation>ІД обладнання</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.ui" line="83"/>
         <source>AppSignalId</source>
-        <translation></translation>
+        <translation>Внутр. ІД</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.ui" line="107"/>
         <source>Tags</source>
-        <translation></translation>
+        <translation>Теги</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.ui" line="131"/>
@@ -2509,103 +2509,120 @@ Are you sure you STILL WANT TO APPLY the changes?</source>
         <location filename="../TuningSignalInfo.cpp" line="202"/>
         <source>NewValue:		Disabled
 </source>
-        <translation></translation>
+        <translation>Нове значення:	Заборонено
+</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="215"/>
         <source>NewValue:		%1
 </source>
-        <translation></translation>
+        <translation>Нове значення:	%1
+</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="219"/>
         <source>NewValue:		-
 </source>
-        <translation></translation>
+        <translation>Нове значення:	-
+</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="225"/>
         <source>Source:		%1
 </source>
-        <translation></translation>
+        <translation>Джерело:		%1
+</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="229"/>
         <source>Valid:		%1
 </source>
-        <translation></translation>
+        <translation>Валідність:		%1
+</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="230"/>
         <source>OutOfRange:		%1
 </source>
-        <translation></translation>
+        <translation>Поза діапазоном:	%1
+</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="231"/>
         <source>WriteInProgress:	%1
 </source>
-        <translation></translation>
+        <translation>Запис:		%1
+</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="232"/>
         <source>ControlIsEnabled:	%1
 </source>
-        <translation></translation>
+        <translation>Дозвіл керування:	%1
+</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="233"/>
         <source>TuningDefault:		%1
 </source>
-        <translation></translation>
+        <translation>За замовченням:	%1
+</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="239"/>
         <source>WritingIsEnabled:	%1
 </source>
-        <translation></translation>
+        <translation>Запис дозволений:	%1
+</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="242"/>
         <source>WriteClientHash:	%1
 </source>
-        <translation></translation>
+        <translation>Хеш клієнта:	%1
+</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="243"/>
         <source>WriteErrorCode:	%1
 </source>
-        <translation></translation>
+        <translation>Код помилки запису:	%1
+</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="247"/>
         <source>LM Time:		%1
 </source>
-        <translation></translation>
+        <translation>Час LM:		%1
+</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="251"/>
         <source>SuccessfulReadTime:	%1
 </source>
-        <translation></translation>
+        <translation>Час читання:		%1
+</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="252"/>
         <source>WriteRequestTime:	%1
 </source>
-        <translation></translation>
+        <translation>Час запиту на запис:	%1
+</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="253"/>
         <source>SuccessfulWriteTime:	%1
 </source>
-        <translation></translation>
+        <translation>Час успішного запису:	%1
+</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="254"/>
         <source>UnsuccessfulWriteTime:	%1
 </source>
-        <translation></translation>
+        <translation>Час неуспішного запису:	%1
+</translation>
     </message>
 </context>
 <context>

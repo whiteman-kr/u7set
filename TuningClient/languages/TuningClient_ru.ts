@@ -1686,7 +1686,7 @@ Data will not be available at the time of reconnection.</source>
         <location filename="../../lib/ClientBehavior.cpp" line="351"/>
         <location filename="../../lib/ClientBehavior.cpp" line="435"/>
         <location filename="../../lib/ClientBehavior.cpp" line="689"/>
-        <location filename="../../lib/Tuning/TuningFilter.cpp" line="2139"/>
+        <location filename="../../lib/Tuning/TuningFilter.cpp" line="2142"/>
         <source>Unknown tag: </source>
         <translation></translation>
     </message>
@@ -1701,13 +1701,13 @@ Data will not be available at the time of reconnection.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Tuning/TuningFilter.cpp" line="2040"/>
-        <location filename="../../lib/Tuning/TuningFilter.cpp" line="2134"/>
+        <location filename="../../lib/Tuning/TuningFilter.cpp" line="2043"/>
+        <location filename="../../lib/Tuning/TuningFilter.cpp" line="2137"/>
         <source>All Signals</source>
         <translation>Все сигналы</translation>
     </message>
     <message>
-        <location filename="../../lib/Tuning/TuningFilter.cpp" line="2067"/>
+        <location filename="../../lib/Tuning/TuningFilter.cpp" line="2070"/>
         <source>Error opening file:
 
 %1</source>
@@ -1715,17 +1715,17 @@ Data will not be available at the time of reconnection.</source>
     </message>
     <message>
         <location filename="../../lib/ClientBehavior.cpp" line="640"/>
-        <location filename="../../lib/Tuning/TuningFilter.cpp" line="2094"/>
+        <location filename="../../lib/Tuning/TuningFilter.cpp" line="2097"/>
         <source>Failed to load root element.</source>
         <translation>Ошибка чтения корневого элемента.</translation>
     </message>
     <message>
-        <location filename="../../lib/Tuning/TuningFilter.cpp" line="2101"/>
+        <location filename="../../lib/Tuning/TuningFilter.cpp" line="2104"/>
         <source>The file is not an ObjectFilterStorage file.</source>
         <translation>Файл не является хранилищем ObjectFilterStorage.</translation>
     </message>
     <message>
-        <location filename="../../lib/Tuning/TuningFilter.cpp" line="2195"/>
+        <location filename="../../lib/Tuning/TuningFilter.cpp" line="2198"/>
         <source>TuningFilterStorage::save: failed to save presets in file %1.</source>
         <translation></translation>
     </message>
