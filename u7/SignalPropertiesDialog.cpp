@@ -612,11 +612,14 @@ bool SignalPropertiesDialog::checkoutSignal(AppSignal& s, QString& message)
 		}
 	}
 
-	QVector<int> signalsIDs;
-	signalsIDs << s.ID();
+	SignalIDsSet signalsIDs;
+
+	signalsIDs.insert(s.ID());
 
 	QVector<ObjectState> objectStates;
-	m_dbController->checkoutSignals(&signalsIDs, &objectStates, m_parent);
+
+	m_dbController->checkoutSignals(signalsIDs, &objectStates, m_parent);
+
 	if (objectStates.count() == 0)
 	{
 		return false;

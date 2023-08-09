@@ -254,10 +254,9 @@ namespace Builder
 		//
 		QVector<Metrology::SignalParam> signalsToWrite;
 
-		int signalCount = TO_INT(m_signalSet->count());
-		for(int i = 0; i < signalCount; i++)
+		for(const AppSignal* s : *m_signalSet)
 		{
-			AppSignal& signal = (*m_signalSet)[i];
+			const AppSignal& signal = *s;
 
 			if (signal.isAcquired() == false)
 			{

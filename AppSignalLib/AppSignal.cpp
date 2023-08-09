@@ -1110,7 +1110,7 @@ bool AppSignal::createSpecPropValues()
 	return true;
 }
 
-void AppSignal::cacheSpecPropValues()
+void AppSignal::cacheSpecPropValues() const
 {
 	if (m_cachedSpecPropValues == nullptr)
 	{
@@ -1284,7 +1284,7 @@ QString AppSignal::regValueAddrStr() const
 }
 
 
-void AppSignal::writeToAzpzXml(XmlWriteHelper& xml)
+void AppSignal::writeToAzpzXml(XmlWriteHelper& xml) const
 {
 	//
 	// Writing AppSignals.xml for old AZPZ software
@@ -1360,7 +1360,7 @@ void AppSignal::writeToAzpzXml(XmlWriteHelper& xml)
 	xml.writeEndElement();				// </Signal>
 }
 
-void AppSignal::writeDoubleSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName)
+void AppSignal::writeDoubleSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName) const
 {
 	QVariant v;
 	bool isEnum = false;
@@ -1376,7 +1376,7 @@ void AppSignal::writeDoubleSpecPropAttribute(XmlWriteHelper& xml, const QString&
 	}
 }
 
-void AppSignal::writeIntSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName)
+void AppSignal::writeIntSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName) const
 {
 	QVariant v;
 	bool isEnum = false;
@@ -1392,7 +1392,7 @@ void AppSignal::writeIntSpecPropAttribute(XmlWriteHelper& xml, const QString& pr
 	}
 }
 
-void AppSignal::writeToXml(XmlWriteHelper& xml)
+void AppSignal::writeToXml(XmlWriteHelper& xml) const
 {
 	xml.writeStartElement(XmlElement::SIGNAL_ELEM);	// <Signal>
 
@@ -2386,6 +2386,11 @@ void AppSignal::clearTags()
 //
 // --------------------------------------------------------------------------------------------------------
 
+void AppSignalSet::SignalsGroups::swap(SignalsGroups& signalGroups)
+{
+	m_groups.swap(signalGroups.m_groups);
+}
+
 void AppSignalSet::SignalsGroups::clear()
 {
 	m_groups.clear();
@@ -2397,7 +2402,7 @@ void AppSignalSet::SignalsGroups::insert(const AppSignal* appSignal)
 
 	int groupID = appSignal->signalGroupID();
 
-	if (groupID == 0)
+	if (groupID == SINGLE_CHANNEL)
 	{
 		return;
 	}
@@ -2408,7 +2413,7 @@ void AppSignalSet::SignalsGroups::insert(const AppSignal* appSignal)
 
 	if (it == m_groups.end())
 	{
-		m_groups.emplace(groupID, std::set<int>({ signalID }));
+		m_groups.emplace(groupID, SignalIDsSet({ signalID }));
 	}
 	else
 	{
@@ -2416,9 +2421,9 @@ void AppSignalSet::SignalsGroups::insert(const AppSignal* appSignal)
 	}
 }
 
-void AppSignalSet::SignalsGroups::remove(const AppSignal& appSignal)
+void AppSignalSet::SignalsGroups::remove(const AppSignal* appSignal)
 {
-	remove(appSignal.signalGroupID(), appSignal.ID());
+	remove(appSignal->signalGroupID(), appSignal->ID());
 }
 
 void AppSignalSet::SignalsGroups::remove(int groupID, int signalID)
@@ -2438,28 +2443,26 @@ void AppSignalSet::SignalsGroups::remove(int groupID, int signalID)
 	it->second.erase(signalID);
 }
 
-void AppSignalSet::SignalsGroups::getGroupSignalsIDs(int groupID, QList<int>& signalsIDs) const
+bool AppSignalSet::SignalsGroups::getGroupSignalIDs(int signalID, int groupID, SignalIDsSet* signalsIDs) const
 {
-	signalsIDs.clear();
+	TEST_PTR_RETURN_FALSE(signalsIDs);
 
-	if (groupID == 0)
+	if (groupID == SINGLE_CHANNEL)
 	{
-		return;
+		signalsIDs->clear();
+		signalsIDs->insert(signalID);
+		return false;
 	}
 
 	auto it = m_groups.find(groupID);
 
-	if (it == m_groups.end())
+	if (it != m_groups.end())
 	{
-		return;
+		*signalsIDs = it->second;
+		return true;
 	}
 
-	const std::set<int>& ids = it->second;
-
-	for(int id : ids)
-	{
-		signalsIDs.append(id);
-	}
+	return false;
 }
 
 // --------------------------------------------------------------------------------------------------------
@@ -2477,186 +2480,241 @@ AppSignalSet::~AppSignalSet()
 	clear();
 }
 
+void AppSignalSet::swap(AppSignalSet& appSignalSet)
+{
+	m_signals.swap(appSignalSet.m_signals);
+	m_idToIndex.swap(appSignalSet.m_idToIndex);
+	m_hashToIndex.swap(appSignalSet.m_hashToIndex);
+	m_groups.swap(appSignalSet.m_groups);
+}
+
 void AppSignalSet::clear()
 {
-	SignalPtrOrderedHash::clear();
+	for(AppSignal* s : m_signals)
+	{
+		if (s != nullptr)
+		{
+			delete s;
+		}
+	}
 
+	m_signals.clear();
+	m_idToIndex.clear();
+	m_hashToIndex.clear();
 	m_groups.clear();
-	m_strID2IndexMap.clear();
 }
 
 void AppSignalSet::reserve(int n)
 {
-	SignalPtrOrderedHash::reserve(n);
+	Q_ASSERT(m_signals.size() == 0);
+	m_signals.reserve(n);
 }
 
-void AppSignalSet::buildID2IndexMap()
+void AppSignalSet::append(int signalID, AppSignal* signal)
 {
-	m_strID2IndexMap.clear();
+	TEST_PTR_RETURN(signal);
 
-	qsizetype signalCount = count();
+	Hash hash = calcHash(signal->appSignalID());
 
-	if (signalCount == 0)
-	{
-		return;
-	}
+	qsizetype index = m_signals.size();
 
-	m_strID2IndexMap.reserve(static_cast<int>(signalCount * 1.3));
+	m_signals.push_back(signal);
 
-	for(qsizetype i = 0; i < signalCount; i++)
-	{
-		AppSignal& s = (*this)[i];
+	auto [it, inserted] = m_idToIndex.emplace(signalID, index);
 
-		if (m_strID2IndexMap.contains(s.appSignalID()) == true)
-		{
-			assert(false && "There are at least two signals with same AppSignalID");
-		}
-		else
-		{
-			updateID2IndexInMap(s.appSignalID(), static_cast<int>(i));
-		}
-	}
-}
+	Q_ASSERT(inserted == true);
 
-void AppSignalSet::updateID2IndexInMap(const QString& appSignalId, int index)
-{
-	m_strID2IndexMap.insert(appSignalId, index);
-}
+	auto [it2, inserted2] = m_hashToIndex.emplace(hash, index);
 
-void AppSignalSet::updateID2IndexInMap(const AppSignal* appSignal)
-{
-	TEST_PTR_RETURN(appSignal);
+	Q_ASSERT(inserted2 == true);
 
-	int index = static_cast<int>(keyIndex(appSignal->ID()));
-
-	updateID2IndexInMap(appSignal->appSignalID(), index);
-}
-
-bool AppSignalSet::ID2IndexMapIsEmpty()
-{
-	return m_strID2IndexMap.isEmpty();
-}
-
-bool AppSignalSet::contains(const QString& appSignalID) const
-{
-	if (count() > 0 && m_strID2IndexMap.isEmpty() == true)
-	{
-		assert(false);		//call buildStrID2IndexMap() before
-		return false;
-	}
-
-	return m_strID2IndexMap.contains(appSignalID.trimmed());
-}
-
-AppSignal* AppSignalSet::getSignal(const QString& appSignalID)
-{
-	if (count() > 0 && m_strID2IndexMap.isEmpty() == true)
-	{
-		assert(false);		//	call buildStrID2IndexMap() before
-		return nullptr;
-	}
-
-	int index = m_strID2IndexMap.value(appSignalID.trimmed(), -1);
-
-	if (index == -1)
-	{
-		return nullptr;
-	}
-
-	return &(*this)[index];
-}
-
-const AppSignal* AppSignalSet::getSignal(const QString& appSignalID) const
-{
-	if (count() > 0 && m_strID2IndexMap.isEmpty() == true)
-	{
-		assert(false);		//	call buildStrID2IndexMap() before
-		return nullptr;
-	}
-
-	int index = m_strID2IndexMap.value(appSignalID.trimmed(), -1);
-
-	if (index == -1)
-	{
-		return nullptr;
-	}
-
-	return &(*this)[index];
-}
-
-void AppSignalSet::append(const int& signalID, AppSignal* signal)
-{
-	if (signalID > m_maxID)
-	{
-		m_maxID = signalID;
-	}
-
-	SignalPtrOrderedHash::append(signalID, signal);
-
-	int groupID = signal->signalGroupID();
-
-	if (groupID != 0)
-	{
-		m_groups.insert(signal);
-	}
+	m_groups.insert(signal);
 }
 
 void AppSignalSet::append(AppSignal* signal)
 {
-	int newID = getMaxID() + 1;
+	int newID = m_idToIndex.rbegin()->first + 1;
+
+	signal->setID(newID);
 
 	append(newID, signal);
 }
 
-void AppSignalSet::remove(const int& signalID)
+void AppSignalSet::append(const ID_AppSignalID& id)
 {
-	AppSignal signal = value(signalID);
+	append(new AppSignal(id));
+}
 
-	SignalPtrOrderedHash::remove(signalID);
+void AppSignalSet::remove(int signalID)
+{
+	auto it = m_idToIndex.find(signalID);
 
+	if (it == m_idToIndex.end())
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	qsizetype index = it->second;
+
+	AppSignal* signal = m_signals.at(index);
+
+	TEST_PTR_RETURN(signal);
+
+	m_signals.erase(m_signals.begin() + index);
+	m_idToIndex.erase(it);
+	m_hashToIndex.erase(calcHash(signal->appSignalID()));
 	m_groups.remove(signal);
 }
 
-void AppSignalSet::removeAt(const qsizetype index)
+bool AppSignalSet::contains(const QString& appSignalID) const
 {
-	const AppSignal& signal = SignalPtrOrderedHash::operator [](index);
-
-	int signalGroupID = signal.signalGroupID();
-	int signalID = signal.ID();
-
-	SignalPtrOrderedHash::removeAt(index);
-
-	m_groups.remove(signalGroupID, signalID);
+	return m_hashToIndex.contains(calcHash(appSignalID.trimmed()));
 }
 
-QVector<int> AppSignalSet::getChannelSignalsID(const AppSignal& signal) const
+int AppSignalSet::count() const
 {
-	return getChannelSignalsID(signal.signalGroupID());
+	return static_cast<int>(m_signals.size());
 }
 
-QVector<int> AppSignalSet::getChannelSignalsID(int signalGroupID) const
+bool AppSignalSet::isEmpty() const
 {
-	if (signalGroupID == 0)
+	return m_signals.empty();
+}
+
+const std::vector<AppSignal*>& AppSignalSet::signalsVector() const
+{
+	return m_signals;
+}
+
+std::vector<AppSignal*>::iterator AppSignalSet::begin()
+{
+	return m_signals.begin();
+}
+
+std::vector<AppSignal*>::const_iterator AppSignalSet::begin() const
+{
+	return m_signals.cbegin();
+}
+
+std::vector<AppSignal*>::iterator AppSignalSet::end()
+{
+	return m_signals.end();
+}
+
+std::vector<AppSignal*>::const_iterator AppSignalSet::end() const
+{
+	return m_signals.cend();
+}
+
+AppSignal* AppSignalSet::getSignal(const QString& appSignalID)
+{
+	return const_cast<AppSignal*>(privateGetSignal(appSignalID));
+}
+
+const AppSignal* AppSignalSet::getSignal(const QString& appSignalID) const
+{
+	return privateGetSignal(appSignalID);
+}
+
+AppSignal* AppSignalSet::getSignal(int signalID)
+{
+	return const_cast<AppSignal*>(privateGetSignal(signalID));
+}
+
+const AppSignal* AppSignalSet::getSignal(int signalID) const
+{
+	return privateGetSignal(signalID);
+}
+
+AppSignal* AppSignalSet::at(int index)
+{
+	return const_cast<AppSignal*>(privateAt(index));
+}
+
+const AppSignal* AppSignalSet::at(int index) const
+{
+	return privateAt(index);
+}
+
+int AppSignalSet::signalIndex(int signalID) const
+{
+	auto it = m_idToIndex.find(signalID);
+
+	if (it == m_idToIndex.end())
 	{
 		Q_ASSERT(false);
-		return QList<int>();
+		return -1;
 	}
 
-	QList<int> signalsIDs;
-
-	m_groups.getGroupSignalsIDs(signalGroupID, signalsIDs);
-
-	return signalsIDs;
+	return it->second;
 }
 
-void AppSignalSet::resetAddresses()
+bool AppSignalSet::getChannelSignalsID(const AppSignal& signal, SignalIDsSet* channelSignalIDs) const
 {
-	qsizetype signalCount = count();
+	return m_groups.getGroupSignalIDs(signal.ID(), signal.signalGroupID(), channelSignalIDs);
+}
 
-	for(qsizetype i = 0; i < signalCount; i++)
+bool AppSignalSet::getChannelSignalsID(int signalID, int groupID, SignalIDsSet* channelSignalIDs) const
+{
+	return m_groups.getGroupSignalIDs(signalID, groupID, channelSignalIDs);
+}
+
+void AppSignalSet::appSignalIdsListSorted(bool removeNumberSign, QStringList* list) const
+{
+	TEST_PTR_RETURN(list);
+
+	std::set<QString> ids;
+
+	for (AppSignal* s : m_signals)
 	{
-		(*this)[i].resetAddresses();
+		TEST_PTR_CONTINUE(s);
+
+		QString appSignalId = s->appSignalID();
+
+		if (removeNumberSign == true &&
+			appSignalId.isEmpty() == false &&
+			appSignalId.at(0) == QChar('#'))
+		{
+			ids.emplace(appSignalId.remove(0, 1));
+		}
+		else
+		{
+			ids.emplace(appSignalId);
+		}
 	}
+
+	list->clear();
+	list->resize(ids.size());
+
+	for(const QString& id : ids)
+	{
+		list->append(id);
+	}
+}
+
+AppSignal* AppSignalSet::replaceOrAppendIfNotExists(const AppSignal& s)
+{
+	int signalID = s.ID();
+
+	auto it = m_idToIndex.find(signalID);
+
+	if (it == m_idToIndex.end())
+	{
+		AppSignal* newSignal = new AppSignal(s);
+		append(signalID, newSignal);
+		return newSignal;
+	}
+
+	AppSignal* existSignal = m_signals[it->second];
+
+	QString oldAppSignalID = existSignal->appSignalID();
+
+	*existSignal = s;
+
+	updateMaps(oldAppSignalID, existSignal);
+
+	return existSignal;
 }
 
 bool AppSignalSet::serializeFromProtoFile(const QString& filePath)
@@ -2701,76 +2759,133 @@ bool AppSignalSet::serializeFromProtoFile(const QString& filePath)
 	return true;
 }
 
-int AppSignalSet::getMaxID()
+void AppSignalSet::updateMaps(const QString& oldAppSignalID, const AppSignal* updatedSignal)
 {
-	if (m_maxID >= 0)
+	TEST_PTR_RETURN(updatedSignal);
+
+	if (oldAppSignalID != updatedSignal->appSignalID())
 	{
-		return m_maxID;
-	}
+		auto  itID = m_idToIndex.find(updatedSignal->ID());
 
-	qsizetype count = SignalPtrOrderedHash::count();
-
-	m_maxID = -1;
-
-	for(qsizetype i = 0; i < count; i++)
-	{
-		int keyI = key(i);
-
-		if (keyI > m_maxID)
+		if (itID == m_idToIndex.end())
 		{
-			m_maxID = keyI;
+			Q_ASSERT(false);
+			return;
 		}
-	}
 
-	return m_maxID;
+		qsizetype trueIndex = itID->second;
+
+		Hash newHash = calcHash(updatedSignal->appSignalID());
+
+		auto itNewHash = m_hashToIndex.find(newHash);
+
+		if (itNewHash != m_hashToIndex.end() && itNewHash->second != trueIndex)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		auto it = m_hashToIndex.find(calcHash(oldAppSignalID));
+
+		if (it != m_hashToIndex.end())
+		{
+			Q_ASSERT(it->second == trueIndex);
+
+			m_hashToIndex.erase(it);
+		}
+
+		m_hashToIndex.emplace(newHash, trueIndex);
+	}
 }
 
-QStringList AppSignalSet::appSignalIdsList(bool removeNumberSign, bool sort) const
+const AppSignal* AppSignalSet::privateGetSignal(const QString& appSignalID) const
 {
-	QStringList result;
-	result.reserve(count());
+	Hash hash = calcHash(appSignalID);
 
-	for (qsizetype i = 0; i < count(); i++)
+	auto it = m_hashToIndex.find(hash);
+
+	if (it == m_hashToIndex.end())
 	{
-		const AppSignal& signal = operator[](i);
-		const QString& appSignalId = signal.appSignalID();
+		return nullptr;
+	}
 
-		if (removeNumberSign == false ||
-			appSignalId.isEmpty() == true ||
-			appSignalId.at(0) != QChar('#'))
+	qsizetype index = it->second;
+
+	Q_ASSERT(index >= 0 && index < m_signals.size());
+
+	return m_signals[index];
+}
+
+const AppSignal* AppSignalSet::privateGetSignal(int signalID) const
+{
+	auto it = m_idToIndex.find(signalID);
+
+	if (it == m_idToIndex.end())
+	{
+		return nullptr;
+	}
+
+	qsizetype index = it->second;
+
+	Q_ASSERT(index >= 0 && index < m_signals.size());
+
+	return m_signals[index];
+}
+
+const AppSignal* AppSignalSet::privateAt(int index) const
+{
+	if (index < 0 || index >= m_signals.size())
+	{
+		return nullptr;
+	}
+
+	return m_signals[index];
+}
+
+void AppSignalSet::buildID2IndexMap()
+{
+/*	m_strID2IndexMap.clear();
+
+	qsizetype signalCount = count();
+
+	if (signalCount == 0)
+	{
+		return;
+	}
+
+	m_strID2IndexMap.reserve(static_cast<int>(signalCount * 1.3));
+
+	for(qsizetype i = 0; i < signalCount; i++)
+	{
+		AppSignal& s = (*this)[i];
+
+		if (m_strID2IndexMap.contains(s.appSignalID()) == true)
 		{
-			result.push_back(appSignalId);
+			assert(false && "There are at least two signals with same AppSignalID");
 		}
 		else
 		{
-			QString chooped = appSignalId;
-			result.push_back(chooped.remove(0, 1));
+			updateID2IndexInMap(s.appSignalID(), static_cast<int>(i));
 		}
-	}
-
-	if (sort == true)
-	{
-		std::sort(result.begin(), result.end());
-	}
-
-	return result;
+	}*/
 }
 
-void AppSignalSet::replaceOrAppendIfNotExists(int signalID, const AppSignal& s)
+/*
+void AppSignalSet::updateID2IndexInMap(const QString& appSignalId, int index)
 {
-	AppSignal* existsSignal = valuePtr(signalID);
-
-	if (existsSignal != nullptr)
-	{
-		*existsSignal = s;
-	}
-	else
-	{
-		append(signalID, new AppSignal(s));
-	}
-
-	m_strID2IndexMap.insert(s.appSignalID(), static_cast<int>(keyIndex(signalID)));
+	m_strID2IndexMap.insert(appSignalId, index);
 }
+
+void AppSignalSet::updateID2IndexInMap(const AppSignal* appSignal)
+{
+	TEST_PTR_RETURN(appSignal);
+
+	int index = static_cast<int>(keyIndex(appSignal->ID()));
+
+	updateID2IndexInMap(appSignal->appSignalID(), index);
+}*/
+
+
 
 // -------------------------------------------------------------------------------
 //

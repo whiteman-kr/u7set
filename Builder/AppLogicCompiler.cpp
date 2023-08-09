@@ -1138,6 +1138,9 @@ namespace Builder
 
 	bool ApplicationLogicCompiler::checkSignalsHashes()
 	{
+		Q_ASSERT(false);
+		return false;	// check on load from DB
+		/*
 		std::map<Hash, QString> hashMap;
 		bool noEqualHashesFound = true;
 
@@ -1165,12 +1168,14 @@ namespace Builder
 			}
 		}
 
-		return noEqualHashesFound;
+		return noEqualHashesFound;*/
 	}
 
 	bool ApplicationLogicCompiler::writeAppSignalSetFile()
 	{
-		if (signalSet() == nullptr)
+		SignalSet* sigSet = signalSet();
+
+		if (sigSet == nullptr)
 		{
 			assert(false);
 			return false;
@@ -1180,15 +1185,11 @@ namespace Builder
 
 		// fill signals
 		//
-		qsizetype signalCount = signalSet()->count();
-
-		for(qsizetype i = 0; i < signalCount; i++)
+		for(const AppSignal* s : *sigSet)
 		{
-			const AppSignal& s = (*signalSet())[i];
-
 			::Proto::AppSignal* protoAppSignal = protoAppSignalSet.add_appsignal();
 
-			s.saveToProto(protoAppSignal);
+			s->saveToProto(protoAppSignal);
 		}
 
 		int dataSize = static_cast<int>(protoAppSignalSet.ByteSizeLong());

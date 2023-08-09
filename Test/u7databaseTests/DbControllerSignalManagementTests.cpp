@@ -1452,19 +1452,19 @@ void DbControllerSignalTests::dbcTest_checkoutSignals()
 
 	// try checkout NOT exist signal
 	//
-	QVector<int> ids;
-	ids.append(id1 + 100500);
+	SignalIDsSet ids;
+	ids.insert(id1 + 100500);
 
-	QVERIFY(m_dbcAdmin->checkoutSignals(&ids, &obStates, nullptr) == true);
+	QVERIFY(m_dbcAdmin->checkoutSignals(ids, &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_NOT_FOUND);
 
 	ids.clear();
-	ids.append(id1);
+	ids.insert(id1);
 
 	// try checkout signal by Admin
 	//
-	QVERIFY(m_dbcAdmin->checkoutSignals(&ids, &obStates, nullptr) == true);
+	QVERIFY(m_dbcAdmin->checkoutSignals(ids, &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_OK);
 
@@ -1475,9 +1475,9 @@ void DbControllerSignalTests::dbcTest_checkoutSignals()
 	// try checkout by User2
 	//
 	ids.clear();
-	ids.append(id2);
+	ids.insert(id2);
 
-	QVERIFY(m_dbcUser2->checkoutSignals(&ids, &obStates, nullptr) == true);
+	QVERIFY(m_dbcUser2->checkoutSignals(ids, &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_OK);
 
@@ -1486,7 +1486,7 @@ void DbControllerSignalTests::dbcTest_checkoutSignals()
 
 	// try checkout by Admin
 	//
-	QVERIFY(m_dbcAdmin->checkoutSignals(&ids, &obStates, nullptr) == true);
+	QVERIFY(m_dbcAdmin->checkoutSignals(ids, &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER);
 
@@ -1499,11 +1499,11 @@ void DbControllerSignalTests::dbcTest_checkoutSignals()
 	QVERIFY(stdObStates.size() == 1);
 	QVERIFY(stdObStates[0].errCode == ERR_SIGNAL_OK);
 
-	QVERIFY(m_dbcAdmin->checkoutSignals(&ids, &obStates, nullptr) == true);
+	QVERIFY(m_dbcAdmin->checkoutSignals(ids, &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_DELETED);
 
-	QVERIFY(m_dbcUser3->checkoutSignals(&ids, &obStates, nullptr) == true);
+	QVERIFY(m_dbcUser3->checkoutSignals(ids, &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_DELETED);
 }

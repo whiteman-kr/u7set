@@ -139,13 +139,9 @@ namespace Builder
 		//
 		tuningSet->Clear();
 
-		qsizetype signalsCount = signalSet->count();
-
-		for (qsizetype i = 0; i < signalsCount; i++)
+		for (const AppSignal* s : *signalSet)
 		{
-			const AppSignal& s = (*signalSet)[i];
-
-			if (s.enableTuning() == false)
+			if (s->enableTuning() == false)
 			{
 				continue;
 			}
@@ -166,7 +162,7 @@ namespace Builder
 				QRegularExpression rx(QRegularExpression::wildcardToRegularExpression(m));
 				//rx.setPatternSyntax(QRegExp::Wildcard);
 
-				if (rx.match(s.lmEquipmentID()).hasMatch() == true)		// exactMatch
+				if (rx.match(s->lmEquipmentID()).hasMatch() == true)		// exactMatch
 				{
 					result = true;
 					break;
@@ -179,7 +175,7 @@ namespace Builder
 			}
 
 			::Proto::AppSignal* aspMessage = tuningSet->add_appsignal();
-			s.saveToProto(aspMessage);
+			s->saveToProto(aspMessage);
 		}
 
 		return true;

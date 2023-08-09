@@ -48,6 +48,8 @@ namespace Builder
 
 		bool isSignalExists(const QString& appSignalID) const;
 
+		void resetAddresses();
+
 	private:
 		QString expandBusSignalCaptionTemplate(const AppSignal& busParentSignal, BusShared bus, const BusSignal& busSignal) const;
 
@@ -62,7 +64,7 @@ namespace Builder
 
 		//
 
-		QHash<qsizetype, QString> m_busSignals;
+		//QHash<qsizetype, QString> m_busSignals;
 
 		Busses m_busses;
 

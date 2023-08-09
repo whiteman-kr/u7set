@@ -59,18 +59,14 @@ namespace Builder
 
 		archInfo.set_archiveserviceid(m_software->equipmentIdTemplate().toStdString());
 
-		int count = static_cast<int>(m_signalSet->count());
-
-		for(int i = 0; i < count; i++)
+		for(const AppSignal* s : *m_signalSet)
 		{
-			AppSignal& s = (*m_signalSet)[i];
-
-			if (s.acquire() == false)
+			if (s->acquire() == false)
 			{
 				continue;
 			}
 
-			switch(s.signalType())
+			switch(s->signalType())
 			{
 			case E::SignalType::Discrete:
 				{
@@ -78,8 +74,8 @@ namespace Builder
 
 					TEST_PTR_BREAK(archSignal);
 
-					archSignal->set_appsignalid(s.appSignalID().toStdString());
-					archSignal->set_signaltype(TO_INT(s.signalType()));
+					archSignal->set_appsignalid(s->appSignalID().toStdString());
+					archSignal->set_signaltype(TO_INT(s->signalType()));
 				}
 				break;
 
@@ -89,13 +85,13 @@ namespace Builder
 
 					TEST_PTR_BREAK(archSignal);
 
-					archSignal->set_appsignalid(s.appSignalID().toStdString());
-					archSignal->set_signaltype(TO_INT(s.signalType()));
-					archSignal->set_lowlimit(s.lowEngineeringUnits());
-					archSignal->set_highlimit(s.highEngineeringUnits());
-					archSignal->set_unit(s.unit().toStdString());
-					archSignal->set_fineaperture(s.fineAperture());
-					archSignal->set_coarseaperture(s.coarseAperture());
+					archSignal->set_appsignalid(s->appSignalID().toStdString());
+					archSignal->set_signaltype(TO_INT(s->signalType()));
+					archSignal->set_lowlimit(s->lowEngineeringUnits());
+					archSignal->set_highlimit(s->highEngineeringUnits());
+					archSignal->set_unit(s->unit().toStdString());
+					archSignal->set_fineaperture(s->fineAperture());
+					archSignal->set_coarseaperture(s->coarseAperture());
 				}
 				break;
 

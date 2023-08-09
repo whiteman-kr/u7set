@@ -154,7 +154,7 @@ public slots:
 	bool addSignal(E::SignalType signalType, QVector<AppSignal>* newSignal);
 	bool setSignalWorkcopy(QSqlDatabase& db, const AppSignal& s, ObjectState& objectState, QString& errMsg);
 
-    void slot_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates);
+	void slot_checkoutSignals(const std::set<int>& signalIDs, QVector<ObjectState>* objectStates);
 	void slot_setSignalWorkcopy(AppSignal *signal, ObjectState *objectState);
 	void slot_setSignalsWorkcopies(const QVector<AppSignal>* signalsList);
 

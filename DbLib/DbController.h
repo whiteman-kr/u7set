@@ -156,7 +156,7 @@ public:
 	bool getLatestSignalsWithoutProgress(QVector<int> signalIDs, QVector<AppSignal>* signalsArray, QWidget* parentWidget);
 	bool getLatestSignalsWithUserID(std::vector<AppSignal>* out, QWidget* parentWidget);
 
-	bool checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates, QWidget* parentWidget);
+	bool checkoutSignals(const std::set<int>& signalIDs, QVector<ObjectState>* objectStates, QWidget* parentWidget);
 	bool setSignalWorkcopy(AppSignal* signal, ObjectState* objectState, QWidget* parentWidget);
 	bool setSignalsWorkcopies(const QVector<AppSignal>* signalsList, QWidget* parentWidget);
 
@@ -277,7 +277,7 @@ signals:
 	void signal_getCheckedOutSignalsIDs(QVector<int>* signalIDs);
 	void signal_addSignal(E::SignalType signalType, QVector<AppSignal>* newSignal);
 
-	void signal_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates);
+	void signal_checkoutSignals(const std::set<int>& signalIDs, QVector<ObjectState>* objectStates);
 	void signal_setSignalWorkcopy(AppSignal* signal, ObjectState* objectState);
 	void signal_setSignalsWorkcopies(const QVector<AppSignal>* signalsList);
 	void signal_deleteSignal(int signalID, ObjectState* objectState);

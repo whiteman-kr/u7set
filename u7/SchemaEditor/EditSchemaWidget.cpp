@@ -5276,7 +5276,8 @@ bool EditSchemaWidget::f2KeyForReceiver(SchemaItemPtr item, bool setViaEditEngin
 	AppSignalSetProvider* signalSetProvider = AppSignalSetProvider::getInstance();
 	Q_ASSERT(signalSetProvider);
 
-	QStringList appSignalIdsCompleterList = signalSetProvider->signalSet().appSignalIdsList(true, true);
+	QStringList appSignalIdsCompleterList;
+	signalSetProvider->signalSet().appSignalIdsListSorted(true, &appSignalIdsCompleterList);
 
 	QCompleter* appSignalsCompleter = new QCompleter(appSignalIdsCompleterList, &d);
 	appSignalsCompleter->setFilterMode(Qt::MatchContains);
@@ -5827,7 +5828,8 @@ void EditSchemaWidget::f2KeyForSignal(SchemaItemPtr item)
 	AppSignalSetProvider* signalSetProvider = AppSignalSetProvider::getInstance();
 	Q_ASSERT(signalSetProvider);
 
-	QStringList appSignalIdsCompleterList = signalSetProvider->signalSet().appSignalIdsList(true, true);
+	QStringList appSignalIdsCompleterList;
+	signalSetProvider->signalSet().appSignalIdsListSorted(true, &appSignalIdsCompleterList);
 
 	QCompleter* completer = new QCompleter(appSignalIdsCompleterList, &d);
 	completer->setFilterMode(Qt::MatchContains);

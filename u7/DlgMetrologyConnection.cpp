@@ -163,7 +163,7 @@ QVariant MetrologyConnectionTable::data(const QModelIndex &index, int role) cons
 	{
 		if (column == METROLOGY_CONNECTION_COLUMN_IN_ID)
 		{
-			::AppSignal* pSignal = m_signalSetProvider->getSignalByStrID(connection.appSignalID(Metrology::ConnectionIoType::Source));
+			::AppSignal* pSignal = m_signalSetProvider->getSignal(connection.appSignalID(Metrology::ConnectionIoType::Source));
 			TEST_PTR_RETURN_VALUE(pSignal, QColor(0xFF, 0xA0, 0xA0)); // if input signal is not exist
 		}
 
@@ -177,7 +177,7 @@ QVariant MetrologyConnectionTable::data(const QModelIndex &index, int role) cons
 
 		if (column == METROLOGY_CONNECTION_COLUMN_OUT_ID)
 		{
-			::AppSignal* pSignal = m_signalSetProvider->getSignalByStrID(connection.appSignalID(Metrology::ConnectionIoType::Destination));
+			::AppSignal* pSignal = m_signalSetProvider->getSignal(connection.appSignalID(Metrology::ConnectionIoType::Destination));
 			TEST_PTR_RETURN_VALUE(pSignal, QColor(0xFF, 0xA0, 0xA0)); // if output signal is not exist
 		}
 
@@ -446,7 +446,7 @@ void DialogMetrologyConnectionItem::onOk()
 	//
 	//
 
-	AppSignal* pInSignal = m_signalSetProvider->getSignalByStrID(inputAppSignalID);
+	AppSignal* pInSignal = m_signalSetProvider->getSignal(inputAppSignalID);
 	if (pInSignal == nullptr)
 	{
 		QMessageBox::information(this,
@@ -467,7 +467,7 @@ void DialogMetrologyConnectionItem::onOk()
 		return;
 	}
 
-	AppSignal* pOutSignal = m_signalSetProvider->getSignalByStrID(outputAppSignalID);
+	AppSignal* pOutSignal = m_signalSetProvider->getSignal(outputAppSignalID);
 	if (pOutSignal == nullptr)
 	{
 		QMessageBox::information(this,
@@ -896,7 +896,7 @@ void DialogMetrologyConnection::findSignal_in_signalSet()
 				continue;
 			}
 
-			AppSignal* pSignal = m_signalSetProvider->getSignalByStrID(connection->appSignalID(ioType));
+			AppSignal* pSignal = m_signalSetProvider->getSignal(connection->appSignalID(ioType));
 			if (pSignal == nullptr)
 			{
 				qDebug() << __FUNCTION__ << "Signal" << connection->appSignalID(ioType) << "was not found";
@@ -1623,7 +1623,7 @@ void DialogMetrologyConnection::importConnections()
 
 		for(int ioType = 0; ioType < Metrology::CONNECTION_IO_TYPE_COUNT; ioType++)
 		{
-			AppSignal* pSignal = m_signalSetProvider->getSignalByStrID(pConnection->appSignalID(ioType));
+			AppSignal* pSignal = m_signalSetProvider->getSignal(pConnection->appSignalID(ioType));
 			if (pSignal == nullptr)
 			{
 				qDebug() << __FUNCTION__ << "Signal" << pConnection->appSignalID(ioType) << "was not found";

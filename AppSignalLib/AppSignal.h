@@ -6,6 +6,7 @@
 #include <QRegularExpression>
 #include <utility>
 #include <set>
+#include <vector>
 
 #include "../UtilsLib/Address16.h"
 #include "../UtilsLib/WUtils.h"
@@ -328,7 +329,7 @@ public:
 	void setProtoSpecPropValues(const QByteArray& protoSpecPropValues) { m_protoSpecPropValues = protoSpecPropValues; }
 	const QByteArray& protoSpecPropValues() const { return m_protoSpecPropValues; }
 
-	void cacheSpecPropValues();
+	void cacheSpecPropValues() const;
 
 	double getSpecPropDouble(const QString& name, QString* err) const;
 	int getSpecPropInt(const QString& name, QString* err) const;
@@ -447,12 +448,12 @@ public:
 
 	//
 
-	void writeToAzpzXml(XmlWriteHelper& xml);
+	void writeToAzpzXml(XmlWriteHelper& xml) const;
 
-	void writeDoubleSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName = QString());
-	void writeIntSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName = QString());
+	void writeDoubleSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName = QString()) const;
+	void writeIntSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName = QString()) const;
 
-	void writeToXml(XmlWriteHelper& xml);
+	void writeToXml(XmlWriteHelper& xml) const;
 	bool readFromXml(XmlReadHelper& xml);
 	bool readTuningValuesFromXml(XmlReadHelper& xml);
 
@@ -560,7 +561,7 @@ private:
 	QString m_specPropStruct;
 	QByteArray m_protoSpecPropValues;					// serialized protobuf message Proto::PropertyValues
 
-	std::shared_ptr<AppSignalSpecPropValues> m_cachedSpecPropValues;
+	mutable std::shared_ptr<AppSignalSpecPropValues> m_cachedSpecPropValues;
 
 	std::set<QString> m_tags;
 
@@ -615,69 +616,96 @@ private:
 	bool m_needConversion = false;
 };
 
-typedef std::shared_ptr<AppSignal> AppSignalShared;
+using SignalIDsSet = std::set<int>;
+using SignalIDsVector = std::vector<int>;
 
-typedef PtrOrderedHash<int, AppSignal> SignalPtrOrderedHash;
-
-class AppSignalSet : public SignalPtrOrderedHash
+class AppSignalSet
 {
 private:
+
+	static const int SINGLE_CHANNEL = 0;
+
 	class SignalsGroups
 	{
 	public:
+		void swap(SignalsGroups& signalGroups);
 		void clear();
 		void insert(const AppSignal* appSignal);
-		void remove(const AppSignal& appSignal);
+		void remove(const AppSignal* appSignal);
 		void remove(int groupID, int signalID);
-		void getGroupSignalsIDs(int groupID, QList<int>& signalsIDs) const;
+
+		bool getGroupSignalIDs(int signalID, int groupID, SignalIDsSet* signalsIDs) const;
 
 	private:
-		std::map<int, std::set<int>> m_groups;		// signalGroupID => set of signalIDs
-													// signalGroupID == 0 is NOT placed in this map!
+		std::map<int, SignalIDsSet> m_groups;		// signalGroupID => set of signalIDs
+													// signalGroupID == SINGLE_CHANNEL is NOT placed in this map!
 	};
 
 public:
 	AppSignalSet();
 	virtual ~AppSignalSet();
 
-	virtual void clear() override;
+	void swap(AppSignalSet& appSignalSet);
 
+	void clear();
 	void reserve(int n);
 
-	void buildID2IndexMap();
-	void updateID2IndexInMap(const QString& appSignalId, int index);
-	void updateID2IndexInMap(const AppSignal* appSignal);
-	void clearID2IndexMap() { m_strID2IndexMap.clear(); }
-	bool ID2IndexMapIsEmpty();
+	void append(int signalID, AppSignal* signal);
+	void append(AppSignal* signal);
+	void append(const ID_AppSignalID& id);
+
+	void remove(int signalID);
 
 	bool contains(const QString& appSignalID) const;
+	int count() const;
+	bool isEmpty() const;
+
+	const std::vector<AppSignal*>& signalsVector() const;
+
+	std::vector<AppSignal*>::iterator begin();
+	std::vector<AppSignal*>::const_iterator begin() const;
+
+	std::vector<AppSignal*>::iterator end();
+	std::vector<AppSignal*>::const_iterator end() const;
 
 	AppSignal* getSignal(const QString& appSignalID);
 	const AppSignal* getSignal(const QString& appSignalID) const;
 
-	virtual void append(const int& signalID, AppSignal* signal) override;
-	void append(AppSignal* signal);
+	AppSignal* getSignal(int signalID);
+	const AppSignal* getSignal(int signalID) const;
 
-	virtual void remove(const int& signalID) override;
-	virtual void removeAt(const qsizetype index) override;
+	AppSignal* at(int index);
+	const AppSignal* at(int index) const;
 
-	QVector<int> getChannelSignalsID(const AppSignal& signal) const;
-	QVector<int> getChannelSignalsID(int signalGroupID) const;
+	int signalIndex(int signalID) const;
 
-	void resetAddresses();
+	bool getChannelSignalsID(const AppSignal& signal, SignalIDsSet* channelSignalIDs) const;
+	bool getChannelSignalsID(int signalID, int groupID, SignalIDsSet* channelSignalIDs) const;
+
+	void appSignalIdsListSorted(bool removeNumberSign, QStringList* list) const;
+
+	[[nodiscard]] AppSignal* replaceOrAppendIfNotExists(const AppSignal& s);
 
 	bool serializeFromProtoFile(const QString& filePath);
 
-	int getMaxID();
-	QStringList appSignalIdsList(bool removeNumberSign, bool sort) const;
+	// delete
+	void buildID2IndexMap();
+//	void updateID2IndexInMap(const QString& appSignalId, int index);
+//	void updateID2IndexInMap(const AppSignal* appSignal);
 
-	void replaceOrAppendIfNotExists(int signalID, const AppSignal& s);
+	void updateMaps(const QString& oldAppSignalID, const AppSignal* updatedSignal);
 
 private:
-	SignalsGroups m_groups;
-	QHash<QString, int> m_strID2IndexMap;
+	const AppSignal* privateGetSignal(const QString& appSignalID) const;
+	const AppSignal* privateGetSignal(int signalID) const;
+	const AppSignal* privateAt(int index) const;
 
-	int m_maxID = -1;
+private:
+	std::vector<AppSignal*> m_signals;
+	std::map<int, qsizetype> m_idToIndex;			// signal.ID => Index in m_signals
+	std::map<Hash, qsizetype> m_hashToIndex;		// Hash(AppSignalID) => Index in m_signals
+
+	SignalsGroups m_groups;
 };
 
 class AppSignals

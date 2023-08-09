@@ -55,16 +55,14 @@ namespace Builder
 		LOG_EMPTY_LINE(m_log);
 		LOG_MESSAGE(m_log, QString(tr("Checking application signals...")));
 
-		QHash<QString, qsizetype> appSignalIDs;
-		QHash<QString, qsizetype> customAppSignalIDs;
+		std::set<QString> appSignalIDs;
+		std::set<QString> customAppSignalIDs;
 
-		appSignalIDs.reserve(static_cast<qsizetype>(signalCount * 1.3));
+		//m_busSignals.clear(); DEBUG_STOP
 
-		m_busSignals.clear();
-
-		for(qsizetype i = 0; i < signalCount; i++)
+		for(AppSignal* sg : *this)
 		{
-			AppSignal& s = (*this)[i];
+			AppSignal& s = *sg;
 
 			// check AppSignalID
 			//
@@ -77,7 +75,7 @@ namespace Builder
 				continue;
 			}
 
-			appSignalIDs.insert(s.appSignalID(), i);
+			appSignalIDs.emplace(s.appSignalID());
 
 			// check CustomAppSignalID
 			//
@@ -90,7 +88,7 @@ namespace Builder
 				continue;
 			}
 
-			customAppSignalIDs.insert(s.customAppSignalID(), i);
+			customAppSignalIDs.emplace(s.customAppSignalID());
 
 			// check other signal properties
 			//
@@ -162,7 +160,7 @@ namespace Builder
 					}
 					else
 					{
-						m_busSignals.insert(i, s.appSignalID());
+						//m_busSignals.insert(i, s.appSignalID()); DEBUG_STOP
 
 						s.setDataSize(bus->sizeW() * SIZE_16BIT);
 					}
@@ -238,15 +236,13 @@ namespace Builder
 	{
 		TEST_PTR_RETURN_FALSE(equipment);
 
-		qsizetype signalCount = count();
-
 		bool result = true;
 
 		m_signalToLm.clear();
 
-		for(qsizetype i = 0; i < signalCount; i++)
+		for(AppSignal* sg : *this)
 		{
-			AppSignal& s = (*this)[i];
+			AppSignal& s = *sg;
 
 			// check EquipmentID
 			//
@@ -277,7 +273,7 @@ namespace Builder
 
 					if (module != nullptr && (module->isLogicModule() == true || module->isBvb() == true))
 					{
-						linkSignalToLm(&s, module);
+						linkSignalToLm(sg, module);
 					}
 					else
 					{
@@ -339,25 +335,17 @@ namespace Builder
 
 	void SignalSet::initCalculatedSignalsProperties()
 	{
-		qsizetype signalsCount = count();
-
-		for(qsizetype i = 0; i < signalsCount; i++)
+		for(AppSignal* s : *this)
 		{
-			AppSignal& s = (*this)[i];
-
-			s.initCalculatedProperties();
+			s->initCalculatedProperties();
 		}
 	}
 
 	void SignalSet::cacheSpecPropValues()
 	{
-		qsizetype signalsCount = count();
-
-		for(qsizetype i = 0; i < signalsCount; i++)
+		for(AppSignal* s : *this)
 		{
-			AppSignal& s = (*this)[i];
-
-			s.cacheSpecPropValues();
+			s->cacheSpecPropValues();
 		}
 	}
 
@@ -370,87 +358,85 @@ namespace Builder
 			return true;
 		}
 
-		QHash<QString, AppSignal*> expandedCustomAppSignalIDs;
-
-		expandedCustomAppSignalIDs.reserve(signalCount);
+		std::map<QString, AppSignal*> expandedCustomAppSignalIDs;
 
 		bool result = true;
 
-		for(qsizetype i = 0; i < signalCount; i++)
+		for(AppSignal* s : *this)
 		{
-			AppSignal& s = (*this)[i];
-
-			if (s.customAppSignalIDContainsMacro() == false &&
-					s.captionContainsMacro() == false)
+			if (s->customAppSignalIDContainsMacro() == false &&
+					s->captionContainsMacro() == false)
 			{
 				continue;
 			}
 
-			const Hardware::DeviceObject* deviceObject = equipment->deviceObject(s.equipmentID()).get();
+			const Hardware::DeviceObject* deviceObject = equipment->deviceObject(s->equipmentID()).get();
 
 			if (deviceObject == nullptr)
 			{
 				// Application signal %1 is bound to unknown device object %2.
 				//
-				m_log->errALC5013(s.appSignalID(), s.equipmentID());
+				m_log->errALC5013(s->appSignalID(), s->equipmentID());
 				result = false;
 				continue;
 			}
 
-			if (s.customAppSignalIDContainsMacro() == true)
+			if (s->customAppSignalIDContainsMacro() == true)
 			{
 				QString errMsg;
 
-				QString expandedCustomID = Hardware::expandDeviceSignalTemplate(*deviceObject, s.customAppSignalID(), &errMsg);
+				QString expandedCustomID = Hardware::expandDeviceSignalTemplate(*deviceObject, s->customAppSignalID(), &errMsg);
 
 				if (errMsg.isEmpty() == false)
 				{
 					// App signal %1 macro expanding error: %2
 					//
-					m_log->errALC5182(s.appSignalID(), errMsg);
+					m_log->errALC5182(s->appSignalID(), errMsg);
 					result = false;
 					continue;
 				}
 
-				AppSignal* existsSignal = expandedCustomAppSignalIDs.value(expandedCustomID, nullptr);
+				auto it = expandedCustomAppSignalIDs.find(expandedCustomID);
 
-				if (existsSignal != nullptr)
+				if (it != expandedCustomAppSignalIDs.end())
 				{
+					AppSignal* existsSignal = it->second;
+
 					// Non unique CustomAppSignalID after macro expansion in signals %1 and %2
 					//
-					m_log->errALC5183(existsSignal->appSignalID(), s.appSignalID());
+					m_log->errALC5183(existsSignal->appSignalID(), s->appSignalID());
 					result = false;
 					continue;
 				}
 
-				s.setCustomAppSignalID(expandedCustomID);
+				s->setCustomAppSignalID(expandedCustomID);
 
-				expandedCustomAppSignalIDs.insert(expandedCustomID, &s);
+				expandedCustomAppSignalIDs.emplace(expandedCustomID, s);
 			}
 
-			if (s.captionContainsMacro() == true)
+			if (s->captionContainsMacro() == true)
 			{
 				QString errMsg;
 
-				QString expandedCaption = Hardware::expandDeviceSignalTemplate(*deviceObject, s.caption(), &errMsg);
+				QString expandedCaption = Hardware::expandDeviceSignalTemplate(*deviceObject, s->caption(), &errMsg);
 
 				if (errMsg.isEmpty() == false)
 				{
 					// App signal %1 macro expanding error: %2
 					//
-					m_log->errALC5182(s.appSignalID(), errMsg);
+					m_log->errALC5182(s->appSignalID(), errMsg);
 					result = false;
 					continue;
 				}
 
-				s.setCaption(expandedCaption);
+				s->setCaption(expandedCaption);
 			}
 		}
 
 		if (result == true)
 		{
 			LOG_MESSAGE(m_log, QString("App signal macrosses are successfully expanded - %1").
-							arg(expandedCustomAppSignalIDs.count()));
+							arg(expandedCustomAppSignalIDs.size()));
 		}
 
 		return result;
@@ -535,27 +521,23 @@ namespace Builder
 
 	void SignalSet::findAndRemoveExcludedFromBuildSignals()
 	{
-		QVector<int> excludedFromBuidSignalsIDs;
+		std::vector<int> excludedFromBuidSignalsIDs;
 
-		qsizetype signalCount = count();
-
-		for(qsizetype i = 0; i < signalCount; i++)
+		for(const AppSignal* s : *this)
 		{
-			const AppSignal& s = (*this)[i];
-
-			if (s.excludeFromBuild() == true)
+			if (s->excludeFromBuild() == true)
 			{
-				excludedFromBuidSignalsIDs.append(s.ID());
+				excludedFromBuidSignalsIDs.push_back(s->ID());
 
 				// Signal %1 is excluded from build.
 				//
-				m_log->wrnALC5167(s.appSignalID());											// Signal %1 is excluded from build.
+				m_log->wrnALC5167(s->appSignalID());											// Signal %1 is excluded from build.
 			}
 		}
 
 		for(int id : excludedFromBuidSignalsIDs)
 		{
-			remove(id);
+			remove(id);		// DEBUG_STOP !!!!!!!
 		}
 	}
 
@@ -627,6 +609,14 @@ namespace Builder
 	bool SignalSet::isSignalExists(const QString& appSignalID) const
 	{
 		return (getSignal(appSignalID) != nullptr);
+	}
+
+	void SignalSet::resetAddresses()
+	{
+		for(AppSignal* s : *this)
+		{
+			s->resetAddresses();
+		}
 	}
 
 	bool SignalSet::checkSignalPropertiesRanges(const AppSignal& s)

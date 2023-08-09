@@ -325,6 +325,10 @@ void AppSignalPropertyManager::detectNewProperties(const AppSignal& signal)
 {
 	PropertyObject propObject;
 
+	//
+	// WMTD: create map with already processed signal->specPropStruct() to avoid repeated parsing!
+	//
+
 	std::pair<bool, QString> result = propObject.parseSpecificPropertiesStruct(signal.specPropStruct());
 
 	if (result.first == false)

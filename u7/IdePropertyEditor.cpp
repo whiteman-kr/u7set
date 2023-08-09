@@ -710,14 +710,13 @@ IdeTuningFiltersEditor::IdeTuningFiltersEditor(DbController* dbController, QWidg
 	//
 
 	bool ok = m_dbController->getTunableSignals(&tuningSignalSet, parent);
+
 	if (ok == true)
 	{
-		qsizetype count = tuningSignalSet.count();
-
-		for (qsizetype i = 0; i < count; i++)
+		for (const AppSignal* s : tuningSignalSet)
 		{
 			Proto::AppSignal* pas = appSignalSet.add_appsignal();
-			tuningSignalSet[i].saveToProto(pas);
+			s->saveToProto(pas);
 		}
 	}
 

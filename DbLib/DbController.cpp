@@ -2291,14 +2291,8 @@ bool DbController::getLatestSignalsWithUserID(std::vector<AppSignal>* out, QWidg
 
 }
 
-bool DbController::checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates, QWidget* parentWidget)
+bool DbController::checkoutSignals(const std::set<int>& signalIDs, QVector<ObjectState>* objectStates, QWidget* parentWidget)
 {
-	if (signalIDs == nullptr)
-	{
-		assert(signalIDs != nullptr);
-		return false;
-	}
-
 	if (objectStates == nullptr)
 	{
 		assert(objectStates != nullptr);
@@ -2321,8 +2315,7 @@ bool DbController::checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>
 	return ok;
 }
 
-
-bool DbController::setSignalWorkcopy(AppSignal *signal, ObjectState *objectState, QWidget* parentWidget)
+bool DbController::setSignalWorkcopy(AppSignal* signal, ObjectState *objectState, QWidget* parentWidget)
 {
 	if (signal == nullptr ||
 		objectState == nullptr)

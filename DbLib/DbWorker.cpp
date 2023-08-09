@@ -5405,25 +5405,19 @@ bool DbWorker::setSignalWorkcopy(QSqlDatabase& db, const AppSignal& s, ObjectSta
 	return true;
 }
 
-void DbWorker::slot_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates)
+void DbWorker::slot_checkoutSignals(const std::set<int>& signalIDs, QVector<ObjectState>* objectStates)
 {
 	AUTO_COMPLETE
 
 	// Check parameters
 	//
-	if (signalIDs == nullptr)
-	{
-		assert(signalIDs != nullptr);
-		return;
-	}
-
 	if (objectStates == nullptr)
 	{
 		assert(objectStates != nullptr);
 		return;
 	}
 
-	if (signalIDs->size() == 0)
+	if (signalIDs.size() == 0)
 	{
 		return;				// nothing to checkout
 	}
@@ -5443,31 +5437,28 @@ void DbWorker::slot_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState
 	// Log action
 	//
 	QString logMessage = QString("slot_checkoutSignals: SignalCount %1, SignalIDs ")
-						 .arg(signalIDs->size());
+						 .arg(signalIDs.size());
+	QString idsStr;
 
-	for (int id : *signalIDs)
+	for (int id : signalIDs)
 	{
 		logMessage += QString("%1 ").arg(id);
+
+		if (idsStr.isEmpty() == false)
+		{
+			idsStr += QStringLiteral(",");
+		}
+
+		idsStr += QString::number(id);
 	}
+
 	addLogRecord(db, logMessage);
 
 	// request
 	//
-	QString request = QString("SELECT * FROM checkout_signals(%1,ARRAY[").arg(currentUser().userId());
-
-	qsizetype count = signalIDs->count();
-
-	for(qsizetype i = 0; i < count; i++)
-	{
-		if (i < count - 1)
-		{
-			request += QString("%1,").arg((*signalIDs)[i]);
-		}
-		else
-		{
-			request += QString("%1])").arg((*signalIDs)[i]);
-		}
-	}
+	QString request = QString("SELECT * FROM checkout_signals(%1,ARRAY[%2]").
+							arg(currentUser().userId()).
+							arg(idsStr);
 
 	QSqlQuery q(db);
 

@@ -101,7 +101,7 @@ namespace Builder
 	//
 	// ------------------------------------------------------------------------
 
-	JsSignalSet::JsSignalSet(SignalSet* signalSet):
+	JsSignalSet::JsSignalSet(const SignalSet* signalSet):
 		m_signalSet(signalSet)
 	{
 		if (m_signalSet == nullptr)
@@ -118,11 +118,11 @@ namespace Builder
 			return nullptr;
 		}
 
-		for (int i = 0; i < m_signalSet->count(); i++)
+		for (const AppSignal* s : *m_signalSet)
 		{
-			if ((*m_signalSet)[i].equipmentID() == equpmentID)
+			if (s->equipmentID() == equpmentID)
 			{
-				AppSignalProperties* sp = new AppSignalProperties((*m_signalSet)[i]);
+				AppSignalProperties* sp = new AppSignalProperties(*s);
 				return sp;
 
 				//QObject* c = &(*m_signalSet)[i];

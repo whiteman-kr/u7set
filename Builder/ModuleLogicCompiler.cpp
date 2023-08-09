@@ -750,14 +750,12 @@ namespace Builder
 	{
 		bool result = true;
 
-		qsizetype signalCount = m_signals->count();
-
 		m_chassisSignals.clear();
 		m_ioSignals.clear();
 
-		for(qsizetype i = 0; i < signalCount; i++)
+		for(AppSignal* sg : *m_signals)
 		{
-			AppSignal& s = (*m_signals)[i];
+			AppSignal& s = *sg;
 
 			if (s.equipmentID().isEmpty() == true)
 			{
@@ -2095,7 +2093,7 @@ namespace Builder
 				else
 				{
 					m_signals->append(validitySignal, m_lmShared);
-					m_signals->updateID2IndexInMap(validitySignal);
+
 					m_chassisSignals.insert({validitySignal->appSignalID(), validitySignal});
 					m_ioSignals.insert(validitySignal->appSignalID(), validitySignal);
 					m_equipmentSignals.insert(validitySignalEquipmentID, validitySignal);

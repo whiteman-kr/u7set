@@ -184,20 +184,17 @@ namespace Builder
 		extXml.writeStartElement(XmlElement::SIGNALS);
 		extXml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(m_acquiredAppSignals.size()));
 
-		qsizetype signalCount = m_signalSet->count();
 		int writtenSignalsCount = 0;
 
-		for(qsizetype i = 0; i < signalCount; i++)
+		for(const AppSignal* signal : *m_signalSet)
 		{
-			AppSignal& signal = (*m_signalSet)[i];
-
-			if (m_acquiredAppSignals.contains(signal.appSignalID()) == false)
+			if (m_acquiredAppSignals.contains(signal->appSignalID()) == false)
 			{
 				continue;
 			}
 
-			signal.writeToAzpzXml(azpzXml);
-			signal.writeToXml(extXml);
+			signal->writeToAzpzXml(azpzXml);
+			signal->writeToXml(extXml);
 
 			writtenSignalsCount++;
 		}
@@ -311,15 +308,11 @@ namespace Builder
 
 		const Hardware::DeviceChassis* dataSourceChassis = lm->getParentChassis();
 
-		qsizetype signalCount = m_signalSet->count();
-
-		for(qsizetype i = 0; i < signalCount; i++)
+		for(const AppSignal* appSignal : *m_signalSet)
 		{
-			const AppSignal& appSignal =  (*m_signalSet)[i];
+			CONTINUE_IF_FALSE(appSignal->isAcquired());
 
-			CONTINUE_IF_FALSE(appSignal.isAcquired());
-
-			QString appSignalEquipmentID = appSignal.equipmentID();
+			QString appSignalEquipmentID = appSignal->equipmentID();
 
 			if (appSignalEquipmentID.isEmpty())
 			{
@@ -331,7 +324,7 @@ namespace Builder
 			if (device == nullptr)
 			{
 				LOG_WARNING_OBSOLETE(m_log, IssuePrefix::NotDefined, QString("Signal '%1' bound with an unknown device '%2'").
-					arg(appSignal.appSignalID()).arg(appSignalEquipmentID));
+					arg(appSignal->appSignalID()).arg(appSignalEquipmentID));
 				continue;
 			}
 
@@ -339,9 +332,9 @@ namespace Builder
 
 			if (chassis == dataSourceChassis)
 			{
-				appDataSource.appendAssociatedSignal(E::LanControllerType::AppData, appSignal.appSignalID());
+				appDataSource.appendAssociatedSignal(E::LanControllerType::AppData, appSignal->appSignalID());
 
-				m_acquiredAppSignals.insert(appSignal.appSignalID());
+				m_acquiredAppSignals.insert(appSignal->appSignalID());
 			}
 		}
 
