@@ -6,8 +6,6 @@
 #include "CircularLogger.h"
 #include "../lib/ConstStrings.h"
 
-#include <QXmlStreamReader>
-#include <QStandardPaths>
 
 // -------------------------------------------------------------------------------------
 //

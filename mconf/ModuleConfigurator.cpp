@@ -1,10 +1,11 @@
-#include "Stable.h"
-#include "ModuleConfigurator.h"
 #include "../lib/Configurator.h"
-#include "SettingsForm.h"
-#include "DiagTabPage.h"
-#include "ApplicationTabPage.h"
 #include "../lib/Ui/DialogAbout.h"
+
+#include "ApplicationTabPage.h"
+#include "DiagTabPage.h"
+#include "Globals.h"
+#include "ModuleConfigurator.h"
+#include "SettingsForm.h"
 
 #if __has_include("../gitlabci_version.h")
 #	include "../gitlabci_version.h"

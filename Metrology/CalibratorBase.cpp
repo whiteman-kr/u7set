@@ -1,15 +1,7 @@
 #include "CalibratorBase.h"
 
-#include <QApplication>
-#include <QMessageBox>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QComboBox>
-#include <QPushButton>
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
-#include <QKeyEvent>
 
 #include "ProcessData.h"
 

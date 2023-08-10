@@ -1,5 +1,4 @@
 #include "TuningController.h"
-#include "../AppSignalLib/AppSignalParam.h"
 #include "../AppSignalLib/ITuningSignalManager.h"
 
 namespace VFrame30

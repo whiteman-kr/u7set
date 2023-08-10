@@ -1,7 +1,8 @@
 #pragma once
 
-#include <QtCore>
+#include <QObject>
 #include <QList>
+#include <QVector>
 
 #include "../CommonLib/Types.h"
 #include "../AppSignalLib/AppSignal.h"

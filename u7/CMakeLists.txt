@@ -371,8 +371,8 @@ target_precompile_headers(${TARGET} PRIVATE
 	<type_traits>
 	<utility>
 	<vector>
+	<ranges>
 
-	<QtCore>
 	<QtDebug>
 	<QtGui>
 	<QtNetwork>
@@ -382,11 +382,14 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QtSvg>
 	<QtWidgets>
 	<QtXml>
+	<QtPrintSupport>
 
+	"../DbLib/DbController.h"
 	"../CommonLib/DebugInstCounter.h"
 	"../CommonLib/Factory.h"
 	"../CommonLib/Types.h"
 	"../Proto/ProtoSerialization.h"
+	"../Proto/serialization.pb.h"
 )
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Sql Qt6::Network Qt6::Qml	Qt6::Svg

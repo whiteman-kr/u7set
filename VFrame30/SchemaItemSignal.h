@@ -3,6 +3,7 @@
 #include "FblItemRect.h"
 #include "DrawParam.h"
 #include "../AppSignalLib/AppSignalParam.h"
+#include "../AppSignalLib/AppSignalState.h"
 
 namespace VFrame30
 {

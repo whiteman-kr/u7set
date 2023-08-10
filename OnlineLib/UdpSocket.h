@@ -6,11 +6,10 @@
 #include <QUuid>
 
 #include "SocketIO.h"
-#include "../UtilsLib/SimpleThread.h"
 #include "CircularLogger.h"
+#include "../UtilsLib/SimpleThread.h"
 #include "../UtilsLib/WUtils.h"
-
-#include "../Proto/network.pb.h"
+#include "../Protobuf/google/protobuf/message.h"
 
 class UdpClientSocket;
 class UdpServerSocket;

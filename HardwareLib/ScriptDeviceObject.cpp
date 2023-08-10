@@ -3,7 +3,6 @@
 #endif
 
 #include "ScriptDeviceObject.h"
-#include <QHostAddress>
 #include "DeviceObject.h"
 
 namespace Hardware

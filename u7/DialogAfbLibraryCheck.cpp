@@ -2,8 +2,6 @@
 #include "../HardwareLib/LmDescription.h"
 #include "Settings.h"
 
-#include <QSplitter>
-
 DialogAfbLibraryCheck* theDialogAfbLibraryCheck = nullptr;
 
 DialogAfbCheckResult::DialogAfbCheckResult(QString message, QWidget* parent)

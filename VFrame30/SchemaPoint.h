@@ -1,6 +1,5 @@
 #pragma once
 #include <QPointF>
-#include "../Proto/ProtoSerialization.h"
 
 namespace Proto
 {

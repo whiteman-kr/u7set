@@ -92,25 +92,28 @@ qt_add_library(${TARGET} STATIC
 )
 
 target_precompile_headers(${TARGET} PUBLIC
-	<bit>
-	<memory>
-	<map>
-	<unordered_map>
-	<optional>
-	<queue>
-	<array>
-	<vector>
-	<queue>
 	<algorithm>
+	<array>
+	<bit>
+	<cfenv>
+	<chrono>
+	<cmath>
 	<cstring>
 	<filesystem>
+	<map>
+	<memory>
+	<optional>
+	<queue>
+	<unordered_map>
+	<vector>
 
-	<QtCore>
 	<QtQml>
 	<QtNetwork>
 	<QtConcurrent>
 	<QtXml>
 	<QVector>
+
+	"../AppSignalLib/AppSignalParam.h"
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Xml Qt6::Qml Qt6::Core Qt6::Concurrent Qt6::Network)

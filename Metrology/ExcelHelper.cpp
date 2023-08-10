@@ -1,7 +1,3 @@
-#include <QString>
-#include <QFile>
-#include <stdexcept>
-
 #include "ExcelHelper.h"
 
 ExcelExportHelper::ExcelExportHelper(bool closeExcelOnExit)

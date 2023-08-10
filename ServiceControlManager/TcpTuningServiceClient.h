@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../OnlineLib/Tcp.h"
-#include "../Proto/network.pb.h"
 #include "../ClientLib/TuningSourceState.h"
 #include "../AppSignalLib/AppSignal.h"
 #include "../AppSignalLib/TuningSignalState.h"

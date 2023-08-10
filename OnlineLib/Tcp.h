@@ -10,8 +10,7 @@
 #include <QSslKey>
 #include <cassert>
 
-#include "../Proto/serialization.pb.h"
-#include "../Proto/network.pb.h"
+#include "../Protobuf/google/protobuf/message.h"
 
 #include "../UtilsLib/SimpleThread.h"
 #include "../UtilsLib/WUtils.h"

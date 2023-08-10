@@ -31,7 +31,6 @@ add_executable(${TARGET}
 
 target_precompile_headers(${TARGET} PRIVATE
 	<QVector>
-	<QtCore>
 	<QHostAddress>
 )
 

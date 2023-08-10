@@ -1,11 +1,6 @@
 #include "ConfigSocket.h"
-
-#include <cassert>
-#include <QtConcurrent>
-
-#include "../OnlineLib/SoftwareSettings.h"
-
 #include "SignalBase.h"
+#include "../OnlineLib/SoftwareSettings.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 

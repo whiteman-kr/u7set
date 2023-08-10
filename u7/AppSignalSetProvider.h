@@ -2,7 +2,6 @@
 
 #include "../AppSignalLib/AppSignalParam.h"
 #include "../Builder/SignalSet.h"
-#include "../DbLib/DbController.h"
 #include "AppSignalPropertyManager.h"
 
 class AppSignalSetProvider : public QObject

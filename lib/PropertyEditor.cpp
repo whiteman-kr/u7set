@@ -1,5 +1,3 @@
-#include "Stable.h"
-
 #include "../lib/PropertyEditor.h"
 #include "../UtilsLib/Ui/UiTools.h"
 #include "../AppSignalLib/TuningValue.h"

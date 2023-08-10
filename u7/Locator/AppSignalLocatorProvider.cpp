@@ -1,6 +1,5 @@
 #include "AppSignalLocatorProvider.h"
 #include "../AppSignalSetProvider.h"
-#include <ranges>
 
 namespace Locator
 {

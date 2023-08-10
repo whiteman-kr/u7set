@@ -4,9 +4,13 @@
 #include "../UtilsLib/XmlHelper.h"
 #include "../UtilsLib/DomXmlHelper.h"
 #include "../UtilsLib/WUtils.h"
-#include "../Proto/network.pb.h"
 #include "../CommonLib/HostAddressPort.h"
 #include "DataProtocols.h"
+
+namespace Network
+{
+	class LanControllerInfo;
+}
 
 struct LanControllerInfo
 {

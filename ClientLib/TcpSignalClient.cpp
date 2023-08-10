@@ -2,7 +2,6 @@
 #error Do not include this file in the project! Link ClientLib instead.
 #endif
 
-#include <QTimeZone>
 #include "TcpSignalClient.h"
 
 namespace ClientLib

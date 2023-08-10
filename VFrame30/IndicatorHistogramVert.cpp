@@ -2,7 +2,6 @@
 #include "SchemaItemIndicator.h"
 #include "PropertyNames.h"
 #include "DrawParam.h"
-#include "../AppSignalLib/AppSignalParam.h"
 #include "../AppSignalLib/ComparatorSet.h"
 #include "Schema.h"
 #include "TuningController.h"

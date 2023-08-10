@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "CentralWidget.h"
 #include "MainTabPage.h"
 #include "UploadTabPage.h"

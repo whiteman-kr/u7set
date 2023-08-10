@@ -1,7 +1,11 @@
 #pragma once
 
 #include "../CommonLib/Types.h"
-#include "../Proto/network.pb.h"
+
+namespace Network
+{
+	class SoftwareInfo;
+}
 
 class SoftwareInfo
 {

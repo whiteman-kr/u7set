@@ -1,10 +1,16 @@
 #pragma once
 
 #include "../CommonLib/Types.h"
-#include "../Proto/serialization.pb.h"
 
 #include <QUuid>
 #include <QMutex>
+
+namespace Proto
+{
+	class ComparatorSignal;
+	class Comparator;
+	class ComparatorSet;
+}
 
 // ------------------------------------------------------------------------------------------------
 //

@@ -24,6 +24,7 @@ if (MSVC)
 	/wd4506 # no definition for inline function 'function'
 	/wd4800 # 'type' : forcing value to bool 'true' or 'false' (performance warning)
 	/wd4996 # The compiler encountered a deprecated declaration.
+	/wd26495 # Variable 'variable' is uninitialized. Always initialize a member variable (type.6).
   )
 endif (MSVC)
 

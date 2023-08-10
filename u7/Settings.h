@@ -1,10 +1,5 @@
 #pragma once
 
-#include <QSize>
-#include <QPoint>
-#include <QMap>
-#include <QString>
-
 using maptype = QMap<QString, int>;
 Q_DECLARE_METATYPE(maptype)
 

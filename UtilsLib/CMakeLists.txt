@@ -38,6 +38,63 @@ qt_add_library(${TARGET} STATIC
 	CrashExceptionHandler.cpp
 )
 
+target_precompile_headers(${TARGET} PUBLIC
+	<algorithm>
+	<array>
+	<atomic>
+	<cassert>
+	<chrono>
+	<cmath>
+	<cstdint>
+	<functional>
+	<memory>
+	<set>
+	<type_traits>
+	<vector>
+
+	<QAbstractItemModel>
+	<QAction>
+	<QApplication>
+	<QClipboard>
+	<QComboBox>
+	<QCoreApplication>
+	<QDateTime>
+	<QDateTimeEdit>
+	<QDebug>
+	<QDesktopServices>
+	<QDir>
+	<QDomDocument>
+	<QFile>
+	<QFileDialog>
+	<QHeaderView>
+	<QHostAddress>
+	<QKeyEvent>
+	<QLineEdit>
+	<QMessageBox>
+	<QMetaMethod>
+	<QMutex>
+	<QObject>
+	<QOperatingSystemVersion>
+	<QProcess>
+	<QRegularExpression>
+	<QScreen>
+	<QScrollBar>
+	<QSettings>
+	<QShortcut>
+	<QStandardPaths>
+	<QString>
+	<QTableView>
+	<QtEndian>
+	<QTextStream>
+	<QThread>
+	<QTimer>
+	<QUuid>
+	<QVariant>
+	<QVBoxLayout>
+	<QXmlStreamReader>
+	<QXmlStreamWriter>
+)
+
 target_link_libraries(${TARGET} PUBLIC Qt6::Core Qt6::Network Qt6::Xml Qt6::Widgets)
 target_link_libraries(${TARGET} PUBLIC CommonLib)
 

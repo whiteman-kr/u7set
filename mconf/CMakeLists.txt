@@ -29,6 +29,8 @@ add_executable(${TARGET} WIN32
 	DiagTabPage.cpp
 	DiagTabPage.h
 	ftdi/ftd2xx.h
+	Globals.cpp
+	Globals.h
 	main.cpp
 	ModuleConfigurator.cpp
 	ModuleConfigurator.h
@@ -49,7 +51,6 @@ target_precompile_headers(${TARGET} PRIVATE
 	<algorithm>
 	<functional>
 
-	<QtCore>
 	<QtWidgets>
 	<QDateEdit>
 	<QDebug>

@@ -2,35 +2,7 @@
 #error Do not include this file in the project! Link UtilsLib instead.
 #endif
 
-#include <array>
 #include "LogFile.h"
-#include <QApplication>
-#include <QDir>
-#include <QFile>
-#include <QTimer>
-#include <QTextStream>
-#include <QDateTime>
-#include <QAbstractItemModel>
-#include <QComboBox>
-#include <QUuid>
-#include <QScreen>
-#include <QTableView>
-#include <QFileDialog>
-#include <QHeaderView>
-#include <QVBoxLayout>
-#include <QMessageBox>
-#include <QLineEdit>
-#include <QKeyEvent>
-#include <QClipboard>
-#include <QAction>
-#include <QShortcut>
-#include <QDesktopServices>
-#include <QDateTimeEdit>
-#include <QScrollBar>
-#include <QStandardPaths>
-#include <QSettings>
-#include <QProcess>
-#include <QOperatingSystemVersion>
 #include "./Ui/UiTools.h"
 #include "../CommonLib/Hash.h"
 

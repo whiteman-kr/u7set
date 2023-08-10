@@ -5,7 +5,6 @@
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../CommonLib/Hash.h"
 #include "../CommonLib/Times.h"
-#include "../Proto/network.pb.h"
 #include "../TrendView/TrendSignalSet.h"
 
 

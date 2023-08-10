@@ -168,7 +168,6 @@ target_precompile_headers(${TARGET} PRIVATE
 
 	# Qt includes
 	#
-	<QtCore>
 	<QtPrintSupport>
 	<QtQml>
 	<QtWidgets>
@@ -177,6 +176,9 @@ target_precompile_headers(${TARGET} PRIVATE
 	# Project includes
 	#
 	"../CommonLib/Types.h"
+
+	"../Proto/network.pb.h"
+	"../Proto/serialization.pb.h"
 )
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network Qt6::Qml Qt6::Xml Qt6::Svg Qt6::PrintSupport)

@@ -46,6 +46,44 @@ qt_add_library(${TARGET} STATIC
 	TuningUserManager.h
 )
 
+target_precompile_headers(${TARGET} PUBLIC
+	<algorithm>
+	<cassert>
+	<chrono>
+	<cstdint>
+	<functional>
+	<list>
+	<map>
+	<memory>
+	<mutex>
+	<queue>
+	<ranges>
+	<set>
+	<unordered_map>
+	<unordered_set>
+	<vector>
+
+	<QApplication>
+	<QComboBox>
+	<QCoreApplication>
+	<QDateTime>
+	<QDialog>
+	<QDomDocument>
+	<QHBoxLayout>
+	<QLabel>
+	<QLineEdit>
+	<QLocale>
+	<QMessageBox>
+	<QPushButton>
+	<QReadWriteLock>
+	<QSharedMemory>
+	<QTimeZone>
+	<QTranslator>
+	<QVBoxLayout>
+
+	"../Proto/network.pb.h"
+)
+
 target_link_libraries(${TARGET} PUBLIC Qt6::Gui Qt6::Xml Qt6::Network Qt6::Widgets)
 target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib OnlineLib AppSignalLib TrendView)
 

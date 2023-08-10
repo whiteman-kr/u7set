@@ -1,9 +1,4 @@
 #include "MeasureBase.h"
-
-#include <QThread>
-#include <QtConcurrent>
-#include <QMessageBox>
-
 #include "UnitsConvertor.h"
 #include "Database.h"
 #include "Options.h"

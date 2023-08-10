@@ -2390,18 +2390,18 @@ namespace Builder
 	/// Description:
 	///		UFB Schema has distinct LmDescriptionFile from LogicSchema, UFB Item %1, UFB Schema %2, LogicSchema %3, UFBSchema LmDescriptionFile %4, LogicSchema LmDescriptionFile %5.
 	///
-	void IssueLogger::errALP4019(QString schema, QString schemaItem, QString ufbElement, QUuid itemUuid, QString ufbLmDescriptionFile, QString schemaLmDecriptionFile)
+	void IssueLogger::errALP4019(QString schema, QString schemaItem, QString ufbElement, QUuid itemUuid, QString ufbLmDescriptionFile, QString schemaLmDescriptionFile)
 	{
 		addItemsIssues(OutputMessageLevel::Error, 4019, itemUuid, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4019,
-				  tr("UFB Schema has disctinct LmDescriptionFile from LogicSchema, UFB Item %1, UFB Schema %2, LogicSchema %3, UFBSchema LmDescriptionFile %4, LogicSchema LmDescriptionFile %5.")
+				  tr("UFB Schema has distinct LmDescriptionFile from LogicSchema, UFB Item %1, UFB Schema %2, LogicSchema %3, UFBSchema LmDescriptionFile %4, LogicSchema LmDescriptionFile %5.")
 				  .arg(schemaItem)
 				  .arg(ufbElement)
 				  .arg(schema)
 				  .arg(ufbLmDescriptionFile)
-				  .arg(schemaLmDecriptionFile));
+				  .arg(schemaLmDescriptionFile));
 	}
 
 	/// IssueCode: ALP4020

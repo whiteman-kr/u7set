@@ -7,7 +7,6 @@
 #include <cassert>
 
 #include "../CommonLib/Types.h"
-#include "../Proto/serialization.pb.h"
 
 namespace OnlineLib
 {

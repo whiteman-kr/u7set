@@ -1,8 +1,5 @@
 #pragma once
 
-#include "../Proto/network.pb.h"
-#include "../Proto/serialization.pb.h"
-
 #include "../OnlineLib/Tcp.h"
 
 #include "AppDataSource.h"
@@ -70,40 +67,6 @@ private:
 	//
 	int m_acquiredSignalCount = 0;
 	int m_acquiredSignalListPartCount = 0;
-
-	// reused protobuf messages
-	//
-	Network::AppDataServiceState m_getAppDataServiceState;
-
-	Network::GetSignalListStartReply m_getSignalListStartReply;
-
-	Network::GetSignalListNextRequest m_getSignalListNextRequest;
-	Network::GetSignalListNextReply m_getSignalListNextReply;
-
-	Network::GetAppSignalParamRequest m_getAppSignalParamRequest;
-	Network::GetAppSignalParamReply m_getAppSignalParamReply;
-
-	Network::GetAppSignalRequest m_getAppSignalRequest;
-	Network::GetAppSignalReply m_getAppSignalReply;
-
-	Network::GetAppSignalStateRequest m_getAppSignalStateRequest;
-	Network::GetAppSignalStateReply m_getAppSignalStateReply;
-	int m_sentGetAppSignalStateReplyCount = 0;
-
-	Network::GetAppSignalStateChangesRequest m_getAppSignalStateChangesRequest;
-	Network::GetAppSignalStateChangesReply m_getAppSignalStateChangesReply;
-	int m_sentGetAppSignalStateChangesReplyCount = 0;
-
-	Network::GatewayGetAppSignalStateChangesRequest m_gwGetAppSignalStateChangesRequest;
-	Network::GatewayGetAppSignalStateChangesReply m_gwGetAppSignalStateChangesReply;
-	int m_sentGatewayGetAppSignalStateChangesReplyCount = 0;
-
-	//
-
-	Network::GetDataSourcesInfoReply m_getDataSourcesInfoReply;
-	Network::GetAppDataSourcesStatesReply m_getAppDataSourcesStatesReply;
-
-	Network::ServiceSettings m_getServiceSettings;
 };
 
 

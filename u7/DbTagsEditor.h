@@ -2,7 +2,6 @@
 #define DBTAGSEDITOR_H
 
 #include "../lib/PropertyEditor.h"
-#include "../DbLib/DbController.h"
 #include "../lib/Ui/DialogChooseTags.h"
 
 class DbTagsEditor : public ExtWidgets::PropertyTextEditor

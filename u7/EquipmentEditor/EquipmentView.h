@@ -1,6 +1,5 @@
 #pragma once
 #include "../../HardwareLib/DeviceObject.h"
-#include "../../DbLib/DbController.h"
 
 class EquipmentModel;
 

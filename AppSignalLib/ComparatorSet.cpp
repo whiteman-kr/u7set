@@ -2,9 +2,7 @@
 #error Do not include this file in the project! Link AppSignalLib instead.
 #endif
 
-
 #include "ComparatorSet.h"
-#include "../Proto/ProtoSerialization.h"
 
 // ------------------------------------------------------------------------------------------------
 //

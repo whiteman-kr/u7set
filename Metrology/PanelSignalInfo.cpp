@@ -1,11 +1,5 @@
 #include "PanelSignalInfo.h"
 
-#include <QApplication>
-#include <QIcon>
-#include <QHeaderView>
-#include <QVBoxLayout>
-#include <QKeyEvent>
-
 #include "UnitsConvertor.h"
 #include "ProcessData.h"
 #include "DialogObjectProperties.h"

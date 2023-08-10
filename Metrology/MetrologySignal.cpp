@@ -1,5 +1,6 @@
 #include "MetrologySignal.h"
 #include "UnitsConvertor.h"
+#include "../Proto/serialization.pb.h"
 
 namespace Metrology
 {

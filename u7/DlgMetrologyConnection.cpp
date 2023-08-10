@@ -1,13 +1,5 @@
 #include "DlgMetrologyConnection.h"
-
-#include <QApplication>
-#include <QFileDialog>
-#include <QClipboard>
-#include <QMessageBox>
-#include <QKeyEvent>
-
 #include "../lib/StandardColors.h"
-
 #include "Settings.h"
 
 // -------------------------------------------------------------------------------------------------------------------

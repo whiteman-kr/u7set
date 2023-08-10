@@ -6,7 +6,6 @@
 #include <QUuid>
 #include <QRectF>
 #include <QSize>
-#include <QtGlobal>
 
 using Hash = quint64;
 

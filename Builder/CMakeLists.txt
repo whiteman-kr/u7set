@@ -164,7 +164,6 @@ target_precompile_headers(${TARGET} PUBLIC
 	<unordered_set>
 	<vector>
 
-	<QtCore>
 	<QtGui>
 	<QtQml>
 	<QtConcurrent>

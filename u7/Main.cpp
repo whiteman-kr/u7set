@@ -1,9 +1,7 @@
-#include "Stable.h"
 #include "MainWindow.h"
 #include "Settings.h"
 #include "GlobalMessanger.h"
 #include "../VFrame30/VFrame30Library.h"
-#include "../DbLib/DbController.h"
 #include "../HardwareLib/DeviceObject.h"
 #include "../CommonLib/PropertyObject.h"
 #include "../CommonLib/Times.h"
@@ -12,8 +10,6 @@
 #include "../lib/Configurator.h"
 #include "../Builder/Builder.h"
 #include "../AppSignalLib/AppSignal.h"
-#include <QList>
-#include <optional>
 #include "../Protobuf/google/protobuf/message.h"
 #include "../UtilsLib/CrashExceptionHandler.h"
 

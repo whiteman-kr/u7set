@@ -86,7 +86,6 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QTextStream>
 	<QThread>
 	<QTimer>
-	<QtCore>
 	<QtGlobal>
 	<QtNetwork/QHostAddress>
 	<QUdpSocket>
@@ -95,6 +94,10 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QVector>
 	<QXmlStreamReader>
 	<QXmlStreamWriter>
+
+	# Project includes
+	#
+	"../Proto/network.pb.h"
 )
 
 target_include_directories(${TARGET} PRIVATE ./../asio/include)

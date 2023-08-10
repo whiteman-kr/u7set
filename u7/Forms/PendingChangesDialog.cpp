@@ -1,6 +1,4 @@
 #include "PendingChangesDialog.h"
-#include <QGridLayout>
-#include <QSplitter>
 #include "GlobalMessanger.h"
 
 //

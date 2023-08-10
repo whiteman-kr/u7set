@@ -1,6 +1,5 @@
 #include "SpecificPropertiesEditor.h"
 #include "Settings.h"
-#include <algorithm>
 #include "../UtilsLib/CsvFile.h"
 
 //

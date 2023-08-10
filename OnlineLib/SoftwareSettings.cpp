@@ -1,12 +1,6 @@
-#include <QXmlStreamReader>
-#include <QXmlStreamWriter>
-#include <QObject>
-
 #include "../UtilsLib/XmlHelper.h"
 #include "../UtilsLib/WUtils.h"
-#include "../Proto/network.pb.h"
 #include "SocketIO.h"
-
 #include "SoftwareSettings.h"
 
 // -------------------------------------------------------------------------------------

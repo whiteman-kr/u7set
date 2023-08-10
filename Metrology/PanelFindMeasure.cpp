@@ -1,15 +1,5 @@
 #include "PanelFindMeasure.h"
 
-#include <QApplication>
-#include <QSettings>
-#include <QIcon>
-#include <QHeaderView>
-#include <QVBoxLayout>
-#include <QStatusBar>
-#include <QTableWidget>
-#include <QMessageBox>
-#include <QCompleter>
-
 #include "ProcessData.h"
 #include "Delegate.h"
 #include "Options.h"

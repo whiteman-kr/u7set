@@ -1,9 +1,6 @@
 #pragma once
 
 #include "../OnlineLib/Tcp.h"
-
-#include "../Proto/network.pb.h"
-#include "../Proto/serialization.pb.h"
 #include "../CommonLib/Times.h"
 
 #include "Archive.h"

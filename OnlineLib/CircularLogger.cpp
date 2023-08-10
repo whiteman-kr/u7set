@@ -2,11 +2,6 @@
 #error Do not include this file in the project! Link OnlineLib instead.
 #endif
 
-#include <QDir>
-#include <QStandardPaths>
-#include <QDateTime>
-#include <QCoreApplication>
-
 #include "../UtilsLib/WUtils.h"
 #include "CircularLogger.h"
 

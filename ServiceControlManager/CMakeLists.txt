@@ -104,7 +104,6 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QTextStream>
 	<QThread>
 	<QTimer>
-	<QtCore>
 	<QtGlobal>
 	<QtNetwork/QHostAddress>
 	<QUdpSocket>
@@ -113,6 +112,8 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QVector>
 	<QXmlStreamReader>
 	<QXmlStreamWriter>
+
+	"../Proto/network.pb.h"
 )
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Network Qt6::Qml Qt6::Xml Qt6::Widgets)

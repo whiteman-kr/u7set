@@ -2,7 +2,6 @@
 #include "Settings.h"
 #include "SignalPropertiesDialog.h"
 #include "BusStorage.h"
-#include "../DbLib/DbController.h"
 #include "../Builder/AppSignalProperties.h"
 #include "AppSignalSetProvider.h"
 #include "../lib/WidgetUtils.h"
@@ -10,20 +9,6 @@
 #include "../lib/StandardColors.h"
 #include "../UtilsLib/WUtils.h"
 #include "./Forms/ComparePropertyObjectDialog.h"
-#include <QMessageBox>
-#include <QFormLayout>
-#include <QDialogButtonBox>
-#include <QToolBar>
-#include <QLabel>
-#include <QCompleter>
-#include <QPushButton>
-#include <QTableView>
-#include <QHeaderView>
-#include <QClipboard>
-#include <QSplitter>
-#include <QScrollBar>
-#include <QStandardItemModel>
-#include <QAbstractItemModelTester>
 
 
 const int DEFAULT_COLUMN_WIDTH = 50;

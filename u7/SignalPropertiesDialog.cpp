@@ -1,11 +1,7 @@
-#include <QMessageBox>
-#include <QDialogButtonBox>
-#include <QVBoxLayout>
 #include "SignalPropertiesDialog.h"
 #include "SignalsTabPage.h"
 #include "Settings.h"
 #include "../lib/PropertyEditor.h"
-#include "../DbLib/DbController.h"
 #include "../lib/WidgetUtils.h"
 #include "AppSignalSetProvider.h"
 

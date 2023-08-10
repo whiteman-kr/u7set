@@ -1,8 +1,4 @@
 #include "DialogMetrologyConnection.h"
-
-#include <QFileDialog>
-#include <QMessageBox>
-
 #include "DialogSignalList.h"
 #include "SignalBase.h"
 #include "DialogObjectProperties.h"

@@ -7,6 +7,7 @@
 
 #include "../../AppSignalLib/AppSignal.h"
 #include "../../AppSignalLib/AppSignalParam.h"
+#include "../../AppSignalLib/AppSignalState.h"
 #include "../../CommonLib/Hash.h"
 
 // ==============================================================================================

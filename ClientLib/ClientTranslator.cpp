@@ -1,6 +1,5 @@
 #include "ClientTranslator.h"
-#include <QLocale>
-#include <QApplication>
+
 
 namespace ClientLib
 {

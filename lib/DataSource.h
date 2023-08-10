@@ -2,8 +2,6 @@
 
 #include <QObject>
 
-#include "../Proto/network.pb.h"
-
 #include "../UtilsLib/WUtils.h"
 #include "../UtilsLib/Queue.h"
 #include "../UtilsLib/XmlHelper.h"
@@ -15,6 +13,12 @@
 #include "../CommonLib/HostAddressPort.h"
 #include "ConstStrings.h"
 #include "../HardwareLib/LanControllerInfo.h"
+
+namespace Network
+{
+	class DataSourceInfo;
+}
+
 
 class DataSource
 {

@@ -1,6 +1,5 @@
 #include "ConnectionsInfo.h"
-#include <QFile>
-#include <QFileInfo>
+
 
 // -----------------------------------------------------------------------------------
 //

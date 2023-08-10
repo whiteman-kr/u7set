@@ -1,7 +1,6 @@
 #include "SimOverridePane.h"
 #include "../../AppSignalLib/AppSignalParam.h"
 #include "../../Simulator/SimOverrideSignals.h"
-#include "../../Proto/serialization.pb.h"
 #include "SimOverrideValueWidget.h"
 
 

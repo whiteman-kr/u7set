@@ -2,7 +2,6 @@
 
 #include "../../lib/Ui/ClickableLabel.h"
 #include "../AppSignalSetProvider.h"
-#include "../DbLib/DbController.h"
 #include "MainTabPage.h"
 
 class SchemaControlTabPage;

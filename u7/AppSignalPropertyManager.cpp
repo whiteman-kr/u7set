@@ -1,6 +1,4 @@
 #include "AppSignalPropertyManager.h"
-#include "../DbLib/DbController.h"
-#include <QMessageBox>
 #include "AppSignalSetProvider.h"
 
 AppSignalPropertyManager* AppSignalPropertyManager::m_instance = nullptr;

@@ -1,8 +1,4 @@
 #include "DialogMeasurePoint.h"
-
-#include <QMessageBox>
-#include <QHeaderView>
-
 #include "Delegate.h"
 
 // -------------------------------------------------------------------------------------------------------------------

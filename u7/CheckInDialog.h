@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../DbLib/DbController.h"
-
 namespace Ui {
 	class CheckInDialog;
 }

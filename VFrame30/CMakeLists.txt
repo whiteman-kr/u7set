@@ -203,7 +203,9 @@ target_precompile_headers(${TARGET} PUBLIC
 		<QJsonObject>
 
 		"VFrameTools.h"
+		"../AppSignalLib/AppSignalParam.h"
 		"../Proto/ProtoSerialization.h"
+		"../Proto/serialization.pb.h"
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Widgets Qt6::Qml Qt6::Xml Qt6::Svg)

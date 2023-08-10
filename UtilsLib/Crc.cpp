@@ -2,12 +2,6 @@
 #error Do not include this file in the project! Link UtilsLib instead.
 #endif
 
-#include <array>
-#include <vector>
-#include <cassert>
-#include <QtEndian>
-#include <QString>
-
 #include "Crc.h"
 
 // Using normal poly 0x000000000000001B

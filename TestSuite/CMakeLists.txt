@@ -59,11 +59,9 @@ target_precompile_headers(${TARGET} PRIVATE
 	<algorithm>
 	<functional>
 
-	<QtCore>
 	<QtGui>
 	<QtWidgets>
 	<QtNetwork>
-	<QtQml>
 	<QtSql>
 	<QtXml>
 	<QtTest>

@@ -60,7 +60,6 @@ target_precompile_headers(${TARGET} PRIVATE
 
 	# Qt includes
 	#
-	<QtCore>
 	<QtNetwork>
 	<QtQml>
 )

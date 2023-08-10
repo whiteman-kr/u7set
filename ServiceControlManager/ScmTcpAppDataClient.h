@@ -6,7 +6,6 @@
 #include "../CommonLib/OrderedHash.h"
 #include "../AppSignalLib/AppSignal.h"
 #include "../AppDataService/AppDataSource.h"
-#include "../Proto/network.pb.h"
 
 
 class QTimer;
