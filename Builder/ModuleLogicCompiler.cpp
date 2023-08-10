@@ -1092,10 +1092,6 @@ namespace Builder
 
 		result &= checkBusProcessingItemsConnections();
 
-		RETURN_IF_FALSE(result);
-
-		signalSet()->buildID2IndexMap();
-
 		return result;
 	}
 

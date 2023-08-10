@@ -4,28 +4,60 @@ AppSignalSetProvider* AppSignalSetProvider::m_instance = nullptr;
 
 AppSignalSetProvider::AppSignalSetProvider(DbController* dbController, QWidget* parentWidget) :
 	QObject(parentWidget),
-	m_dbController(dbController),
-	m_propertyManager(dbController, parentWidget)
+	m_db(dbController),
+	m_propertyManager(dbController, parentWidget),
+	m_signalsLoadTimer(this)
 {
-	assert(m_instance == nullptr);
+	Q_ASSERT(m_instance == nullptr);
 	m_instance = this;
 
-	connect(this, &AppSignalSetProvider::signalPropertiesChanged, &m_propertyManager, &AppSignalPropertyManager::detectNewProperties);
+	TEST_PTR_RETURN(dbController);
+
+	connect(this, &AppSignalSetProvider::signalsPropertiesChanged,
+			&m_propertyManager, &AppSignalPropertyManager::detectSignalsNewProperties);
+
+	connect(&m_signalsLoadTimer, &QTimer::timeout, this, &AppSignalSetProvider::onSignalsLoadTimer);
 }
 
 AppSignalSetProvider::~AppSignalSetProvider()
 {
-	if (m_lazyLoadSignalsTimer != nullptr)
-	{
-		m_lazyLoadSignalsTimer->stop();
-		delete m_lazyLoadSignalsTimer;
-	}
 }
 
 AppSignalSetProvider* AppSignalSetProvider::getInstance()
 {
-	assert(m_instance != nullptr);
+	Q_ASSERT(m_instance != nullptr);
 	return m_instance;
+}
+
+void AppSignalSetProvider::projectOpened(DbController* dbController)
+{
+	TEST_PTR_RETURN(dbController);
+
+	m_signalSet.clear();
+
+	m_currentUserID = dbController->currentUser().userId();
+	m_currentUserIsAdmin = dbController->currentUser().isAdminstrator();
+
+	loadUsers();
+
+	m_propertyManager.init();
+	m_propertyManager.reloadPropertyBehaviour();
+
+	startSignalsLoading();
+}
+
+void AppSignalSetProvider::projectClosed()
+{
+	terminateSignalsLoading();
+
+	m_currentUserID = -1;
+	m_currentUserIsAdmin = false;
+
+	m_signalSet.clear();
+	m_users.clear();
+	m_propertyManager.clear();
+
+	emit signalCountChanged();
 }
 
 const AppSignalSet& AppSignalSetProvider::signalSet() const
@@ -38,9 +70,122 @@ AppSignalPropertyManager& AppSignalSetProvider::signalPropertyManager()
 	return m_propertyManager;
 }
 
+void AppSignalSetProvider::reloadSignals()
+{
+	startSignalsLoading();
+}
+
+void AppSignalSetProvider::loadSignals(const std::vector<int>& signalIds, bool withoutProgress)
+{
+	if (signalIds.size() == 0)
+	{
+		return;
+	}
+
+	std::vector<AppSignal> signalsToLoad;
+
+	std::vector<const AppSignal*> updatedSignals;
+	std::vector<int> updatedindexes;
+
+	if (withoutProgress == true)
+	{
+		dbController()->getLatestSignalsWithoutProgress(signalIds, &signalsToLoad, nullptr);
+	}
+	else
+	{
+		dbController()->getLatestSignals(signalIds, &signalsToLoad, nullptr);
+	}
+	int signalIndex = 0;
+
+	for (const AppSignal& loadedSignal: signalsToLoad)
+	{
+		const AppSignal* s = m_signalSet.updateSignal(loadedSignal, &signalIndex);
+
+		if (s !=  nullptr)
+		{
+			updatedSignals.push_back(s);
+			updatedindexes.push_back(signalIndex);
+		}
+	}
+
+	emit signalsUpdated(updatedindexes);
+	emit signalsPropertiesChanged(updatedSignals);
+}
+
+void AppSignalSetProvider::reloadSignals(const std::vector<int>& signalIds)
+{
+	loadSignals(signalIds, true);
+}
+
+void AppSignalSetProvider::enforceAllSignalsLoading()
+{
+	if (m_signalsLoading == false)
+	{
+		return;
+	}
+
+	m_signalsLoadTimer.stop();
+
+	std::vector<int> signalIds;
+
+	for (const AppSignal* s : m_signalSet)
+	{
+		if (s->isLoaded() == false)
+		{
+			signalIds.push_back(s->ID());
+		}
+	}
+
+	loadSignals(signalIds, false);
+
+	m_signalsLoading = false;
+	m_signalsLoadTimer.stop();
+}
+
+const AppSignal* AppSignalSetProvider::loadSignal(int signalId)
+{
+	AppSignal loadedSignal;
+
+	dbController()->getLatestSignal(signalId, &loadedSignal, nullptr);
+
+	const AppSignal* updatedSignal = m_signalSet.updateSignal(loadedSignal);
+
+	TEST_PTR_RETURN_NULLPTR(updatedSignal);
+
+	int index = m_signalSet.signalIndex(signalId);
+
+	emit signalsUpdated(std::vector{index});
+	emit signalsPropertiesChanged(std::vector{updatedSignal});
+
+	return updatedSignal;
+}
+
 void AppSignalSetProvider::setMiddleVisibleSignalIndex(int signalIndex)
 {
 	m_middleVisibleSignalIndex = signalIndex;
+}
+
+QString AppSignalSetProvider::getUserName(int userId)
+{
+	auto it = m_users.find(userId);
+
+	if (it != m_users.end())
+	{
+		return it->second;
+	}
+
+	loadUsers();		// try to reload users
+
+	it = m_users.find(userId);
+
+	if (it != m_users.end())
+	{
+		return it->second;
+	}
+
+	Q_ASSERT(false);
+
+	return QString("UnknownUser");
 }
 
 AppSignal* AppSignalSetProvider::getSignal(const QString& appSignalID)
@@ -77,23 +222,30 @@ int AppSignalSetProvider::signalID(int index) const
 	return s->ID();
 }
 
-AppSignal* AppSignalSetProvider::getLoadedSignal(int index)
+AppSignal* AppSignalSetProvider::getLoadedSignal(AppSignal* s)
 {
-	AppSignal* s = m_signalSet.at(index);
-
 	TEST_PTR_RETURN_NULLPTR(s);
 
 	if (s->isLoaded() == false)
 	{
-		int oldIndex = m_middleVisibleSignalIndex;
-		m_middleVisibleSignalIndex = index;
-
-		loadNextSignalsPortion();	// force loading this signal
-
-		m_middleVisibleSignalIndex = oldIndex;
+		loadSignal(s->ID());
 	}
 
 	return s;
+}
+
+AppSignal* AppSignalSetProvider::getLoadedSignalByID(int signalID)
+{
+	AppSignal* s = m_signalSet.getSignal(signalID);
+
+	return getLoadedSignal(s);
+}
+
+AppSignal* AppSignalSetProvider::getLoadedSignal(int index)
+{
+	AppSignal* s = m_signalSet.at(index);
+
+	return getLoadedSignal(s);
 }
 
 AppSignalParam AppSignalSetProvider::getAppSignalParam(int index)
@@ -156,16 +308,9 @@ QVector<int> AppSignalSetProvider::getSameChannelSignals(int index)
 	return sameChannelSignalRows;
 }
 
-void AppSignalSetProvider::loadUsers()
+bool AppSignalSetProvider::isEditableSignal(int index) const
 {
-	std::vector<DbUser> list;
-	m_dbController->getUserList(&list, nullptr);
-
-	m_usernameMap.clear();
-	for (size_t i = 0; i < list.size(); i++)
-	{
-		m_usernameMap[list[i].userId()] = list[i].username();
-	}
+	return isEditableSignal(m_signalSet.at(index));
 }
 
 bool AppSignalSetProvider::isEditableSignal(const AppSignal* signal) const
@@ -173,12 +318,17 @@ bool AppSignalSetProvider::isEditableSignal(const AppSignal* signal) const
 	TEST_PTR_RETURN_FALSE(signal);
 
 	if (!signal->checkedOut() ||
-		(signal->userID() == m_dbController->currentUser().userId() || m_dbController->currentUser().isAdminstrator()))
+		(signal->userID() == m_currentUserID || m_currentUserIsAdmin))
 	{
 		return true;
 	}
 
 	return false;
+}
+
+bool AppSignalSetProvider::isCheckinableSignalForMe(int index) const
+{
+	return isCheckinableSignalForMe(m_signalSet.at(index));
 }
 
 bool AppSignalSetProvider::isCheckinableSignalForMe(const AppSignal* signal) const
@@ -186,24 +336,12 @@ bool AppSignalSetProvider::isCheckinableSignalForMe(const AppSignal* signal) con
 	TEST_PTR_RETURN_FALSE(signal);
 
 	if (signal->checkedOut() &&
-		(signal->userID() == m_dbController->currentUser().userId() || m_dbController->currentUser().isAdminstrator()))
+		(signal->userID() == m_db->currentUser().userId() || m_db->currentUser().isAdminstrator()))
 	{
 		return true;
 	}
 
 	return false;
-}
-
-QString AppSignalSetProvider::getUserName(int userId) const
-{
-	auto it = m_usernameMap.find(userId);
-
-	if (it != m_usernameMap.end())
-	{
-		return it->second;
-	}
-
-	return QString();
 }
 
 bool AppSignalSetProvider::checkoutSignal(int index, QString* message)
@@ -214,7 +352,7 @@ bool AppSignalSetProvider::checkoutSignal(int index, QString* message)
 
 	if (s->checkedOut() == true)
 	{
-		if (s->userID() == m_dbController->currentUser().userId() ||
+		if (s->userID() == m_db->currentUser().userId() ||
 			dbController()->currentUser().isAdminstrator())
 		{
 			return true;
@@ -231,7 +369,7 @@ bool AppSignalSetProvider::checkoutSignal(int index, QString* message)
 
 	QVector<ObjectState> objectStates;
 
-	m_dbController->checkoutSignals(signalsIDs, &objectStates, nullptr);
+	m_db->checkoutSignals(signalsIDs, &objectStates, nullptr);
 
 	if (objectStates.count() == 0)
 	{
@@ -274,16 +412,129 @@ bool AppSignalSetProvider::checkoutSignal(int index, QString* message)
 	return true;
 }
 
-AppSignal* AppSignalSetProvider::privateGetLoadedSignal(AppSignal* signal)
+void AppSignalSetProvider::loadUsers()
 {
-	TEST_PTR_RETURN_NULLPTR(signal);
+	std::vector<DbUser> users;
 
-	if (signal->isLoaded() == false)
+	m_db->getUserList(&users, nullptr);
+
+	m_users.clear();
+
+	for (auto const& user : users)
 	{
-		loadSignal(signal->ID());
+		m_users.emplace(user.userId(), user.username());
+	}
+}
+
+void AppSignalSetProvider::startSignalsLoading()
+{
+	if (m_signalsLoading == true)
+	{
+		terminateSignalsLoading();
 	}
 
-	return signal;
+	loadIdAppSignalId();
+
+	m_signalsLoadTimer.setInterval(100);
+	m_signalsLoadTimer.start();
+
+	emit signalCountChanged();
+}
+
+void AppSignalSetProvider::terminateSignalsLoading()
+{
+	m_signalsLoadTimer.stop();
+	m_signalsLoading = false;
+}
+
+void AppSignalSetProvider::loadIdAppSignalId()
+{
+	std::vector<ID_AppSignalID> ids;
+
+	m_db->getSignalsIDAppSignalID(&ids, false, nullptr);
+
+	m_signalSet.clear();
+	m_signalSet.reserve(ids.size());
+
+	for(const ID_AppSignalID& id : ids)
+	{
+		m_signalSet.append(id);
+	}
+}
+
+void AppSignalSetProvider::onSignalsLoadTimer()
+{
+	if (m_signalsLoading == false)
+	{
+		Q_ASSERT(false);
+		m_signalsLoadTimer.stop();
+		return;
+	}
+
+	static const int MAX_SIGNALS_COUNT = 1000;
+
+	std::vector<int> signalIds;
+
+	signalIds.reserve(MAX_SIGNALS_COUNT);
+
+	int low = -1;
+	int high = 0;
+
+	if (m_middleVisibleSignalIndex >= 0)
+	{
+		low = m_middleVisibleSignalIndex - 1;
+		high = m_middleVisibleSignalIndex;
+	}
+	else
+	{
+		high = 0;
+	}
+
+	int signalCount = m_signalSet.count();
+
+	AppSignal* s = nullptr;
+
+	while ((low >= 0 || high < signalCount) &&
+		   signalIds.size() <= (MAX_SIGNALS_COUNT - 2))
+	{
+		while(low >= 0)
+		{
+			s = m_signalSet.at(low);
+
+			low--;
+
+			if (s != nullptr && s->isLoaded() == false)
+			{
+				signalIds.push_back(s->ID());
+				break;
+			}
+		}
+
+		while(high < signalCount)
+		{
+			s = m_signalSet.at(high);
+
+			high++;
+
+			if (s != nullptr && s->isLoaded() == false)
+			{
+				signalIds.push_back(s->ID());
+				break;
+			}
+		}
+	}
+
+	if (signalIds.size() > 0)
+	{
+		loadSignals(signalIds, true);
+	}
+
+	if (signalIds.size() == 0 ||
+		(low < 0 && high >= signalCount))
+	{
+		m_signalsLoadTimer.stop();
+		m_signalsLoading = false;
+	}
 }
 
 // Converts ObjectState to human readable message
@@ -293,7 +544,7 @@ QString AppSignalSetProvider::errorMessage(const ObjectState& state)
 	switch(state.errCode)
 	{
 		case ERR_SIGNAL_IS_NOT_CHECKED_OUT: return tr("Signal %1 is not checked out").arg(state.id);
-		case ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER: return tr("Signal %1 is checked out by \"%2\"").arg(state.id).arg(m_usernameMap[state.userId]);
+		case ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER: return tr("Signal %1 is checked out by \"%2\"").arg(state.id).arg(m_users[state.userId]);
 		case ERR_SIGNAL_DELETED: return tr("Signal %1 was deleted already").arg(state.id);
 		case ERR_SIGNAL_NOT_FOUND: return tr("Signal %1 not found").arg(state.id);
 		case ERR_SIGNAL_EXISTS: return "";				// error message is displayed by PGSql driver
@@ -341,6 +592,17 @@ void AppSignalSetProvider::showErrors(const QVector<ObjectState>& states)
 	}
 }
 
+void AppSignalSetProvider::trimSignalTextFields(AppSignal& signal)
+{
+	signal.setAppSignalID(signal.appSignalID().trimmed());
+	signal.setCustomAppSignalID(signal.customAppSignalID().trimmed());
+	signal.setEquipmentID(signal.equipmentID().trimmed());
+	signal.setBusTypeID(signal.busTypeID().trimmed());
+	signal.setCaption(signal.caption().trimmed());
+	signal.setUnit(signal.unit().trimmed());
+}
+
+/*
 void AppSignalSetProvider::initLazyLoadSignals()
 {
 	loadUsers();
@@ -357,65 +619,21 @@ void AppSignalSetProvider::initLazyLoadSignals()
 	}
 
 	emit signalCountChanged();
-	m_partialLoading = true;
+	m_signalsLoading = true;
 
-	if (m_lazyLoadSignalsTimer == nullptr)
+	if (m_signalsLoadTimer == nullptr)
 	{
-		m_lazyLoadSignalsTimer = new QTimer(this);
-		connect(m_lazyLoadSignalsTimer, &QTimer::timeout, this, &AppSignalSetProvider::loadNextSignalsPortion);
+		m_signalsLoadTimer = new QTimer(this);
+		connect(m_signalsLoadTimer, &QTimer::timeout, this, &AppSignalSetProvider::loadNextSignalsPortion);
 	}
 
-	m_lazyLoadSignalsTimer->start(100);
-}
+	m_signalsLoadTimer->start(100);
+}*/
 
-void AppSignalSetProvider::stopLoadingSignals()
-{
-	if (m_partialLoading == true)
-	{
-		m_lazyLoadSignalsTimer->stop();
-		m_partialLoading = false;
-	}
-}
-
-void AppSignalSetProvider::finishLoadingSignals()
-{
-	if (m_partialLoading == true)
-	{
-		m_lazyLoadSignalsTimer->stop();
-
-		QVector<int> signalIds;
-
-		for (const AppSignal* s : m_signalSet)
-		{
-			if (s->isLoaded() == false)
-			{
-				signalIds.push_back(s->ID());
-			}
-		}
-
-		if (signalIds.size() > 0)
-		{
-			QVector<AppSignal> signalsToLoad;
-			signalsToLoad.reserve(signalIds.size());
-
-			dbController()->getLatestSignals(signalIds, &signalsToLoad, nullptr);
-
-			for (const AppSignal& loadedSignal: signalsToLoad)
-			{
-				AppSignal* s = m_signalSet.replaceOrAppendIfNotExists(loadedSignal);
-
-				emit signalUpdated(signalIndex(s->ID()));
-				emit signalPropertiesChanged(*s);
-			}
-		}
-	}
-
-	m_partialLoading = false;
-}
-
+/*
 void AppSignalSetProvider::loadNextSignalsPortion()
 {
-	if (m_partialLoading == false)
+	if (m_signalsLoading == false)
 	{
 		return;
 	}
@@ -473,7 +691,7 @@ void AppSignalSetProvider::loadNextSignalsPortion()
 
 		for (const AppSignal& loadedSignal : signalsToLoad)
 		{
-			AppSignal* s = m_signalSet.replaceOrAppendIfNotExists(loadedSignal);
+			AppSignal* s = m_signalSet.updateSignal(loadedSignal);
 
 			emit signalUpdated(signalIndex(s->ID()));
 			emit signalPropertiesChanged(*s);
@@ -481,10 +699,10 @@ void AppSignalSetProvider::loadNextSignalsPortion()
 	}
 	else
 	{
-		m_partialLoading = false;
+		m_signalsLoading = false;
 	}
 }
-
+*/
 bool AppSignalSetProvider::undoSignal(int id)
 {
 	const AppSignal* s = m_signalSet.getSignal(id);
@@ -541,8 +759,9 @@ void AppSignalSetProvider::deleteSignal(int signalID)
 
 void AppSignalSetProvider::addSignal(AppSignal& signal)
 {
-	AppSignal* s = m_signalSet.replaceOrAppendIfNotExists(signal);
-	Q_UNUSED(s);
+	Q_ASSERT(false); // REMOVED m_signalSet.replaceOrAppendIfNotExists(signal); CHECK THIS!
+
+	m_signalSet.append(new AppSignal(signal));
 }
 
 void AppSignalSetProvider::deleteSignals(const SignalIDsSet& signalIDs)
@@ -552,43 +771,16 @@ void AppSignalSetProvider::deleteSignals(const SignalIDsSet& signalIDs)
 		deleteSignal(signalID);
 	}
 
-	loadSignals();
+	reloadSignals();
 }
 
-void AppSignalSetProvider::loadSignalSet(QVector<int> keys)
-{
-	for (int i = 0; i < keys.count(); i++)
-	{
-		loadSignal(keys[i]);
-	}
-}
-
-const AppSignal* AppSignalSetProvider::loadSignal(int signalId)
-{
-	AppSignal* signalToLoad = m_signalSet.getSignal(signalId);
-
-	TEST_PTR_RETURN_NULLPTR(signalToLoad)
-
-	QString oldAppSignalID = signalToLoad->appSignalID();
-
-	dbController()->getLatestSignal(signalId, signalToLoad, nullptr);
-
-	m_signalSet.updateMaps(oldAppSignalID, signalToLoad);
-
-	int index = m_signalSet.signalIndex(signalId);
-
-	emit signalUpdated(index);
-	emit signalPropertiesChanged(*getLoadedSignal(index));
-
-	return signalToLoad;
-}
-
+/*
 void AppSignalSetProvider::loadSignals()
 {
-	if (m_partialLoading == true)
+	if (m_signalsLoading == true)
 	{
-		m_lazyLoadSignalsTimer->stop();
-		m_partialLoading = false;
+		m_signalsLoadTimer.>stop();
+		m_signalsLoading = false;
 	}
 
 	m_propertyManager.init();
@@ -611,7 +803,7 @@ void AppSignalSetProvider::loadSignals()
 	m_signalSet.swap(signalSetForReplacement);
 
 	emit signalCountChanged();
-}
+} */
 
 void AppSignalSetProvider::saveSignal(AppSignal& signal)
 {
@@ -625,28 +817,32 @@ void AppSignalSetProvider::saveSignal(AppSignal& signal)
 		showError(state);
 	}
 
-	loadSignal(signal.ID());
+	m_signalSet.updateSignal(signal);
 }
 
-void AppSignalSetProvider::saveSignals(QVector<AppSignal*> signalVector)
+void AppSignalSetProvider::saveSignals(const std::vector<AppSignal*>& signalVector)
 {
 	QVector<ObjectState> states;
-	for (int i = 0; i < signalVector.count(); i++)
+
+	for (AppSignal* s : signalVector)
 	{
 		ObjectState state;
-		trimSignalTextFields(*signalVector[i]);
 
-		dbController()->setSignalWorkcopy(signalVector[i], &state, nullptr);
+		trimSignalTextFields(*s);
+
+		dbController()->setSignalWorkcopy(s, &state, nullptr);
+
 		states.append(state);
 
-		loadSignal(signalVector[i]->ID());
+		m_signalSet.updateSignal(*s);
 	}
+
 	showErrors(states);
 }
 
-QVector<int> AppSignalSetProvider::cloneSignals(const SignalIDsSet& signalIDsToClone)
+std::vector<int> AppSignalSetProvider::cloneSignals(const SignalIDsSet& signalIDsToClone)
 {
-	QVector<int> resultSignalIDs;
+	std::vector<int> resultSignalIDs;
 
 	SignalIDsSet clonedSignalIDs;
 
@@ -704,10 +900,10 @@ QVector<int> AppSignalSetProvider::cloneSignals(const SignalIDsSet& signalIDsToC
 		if (suffixNumerator >= 1000)
 		{
 			assert(false);
-			return QVector<int>();
+			return std::vector<int>();
 		}
 
-		QVector<AppSignal> signalsToCreate(groupSignalIDs.size());
+		std::vector<AppSignal> signalsToCreate(groupSignalIDs.size());
 
 		int i = 0;
 
@@ -730,20 +926,18 @@ QVector<int> AppSignalSetProvider::cloneSignals(const SignalIDsSet& signalIDsToC
 
 		dbController()->addSignal(type, &signalsToCreate, nullptr);
 
-		qsizetype prevSize = resultSignalIDs.size();
-		resultSignalIDs.resize(prevSize + signalsToCreate.count());
-
-		for (int i = 0; i < signalsToCreate.count(); i++)
+		for (const AppSignal& s : signalsToCreate)
 		{
-			resultSignalIDs[prevSize + i] = signalsToCreate[i].ID();
+			resultSignalIDs.push_back(s.ID());
 		}
 	}
 
-	loadSignals();
+	reloadSignals();
 
 	return resultSignalIDs;
 }
 
+/*
 void AppSignalSetProvider::clearSignals()
 {
 	if (m_signalSet.count() != 0)
@@ -752,14 +946,5 @@ void AppSignalSetProvider::clearSignals()
 		m_signalSet.clear();
 		emit signalCountChanged();
 	}
-}
+}*/
 
-void AppSignalSetProvider::trimSignalTextFields(AppSignal& signal)
-{
-	signal.setAppSignalID(signal.appSignalID().trimmed());
-	signal.setCustomAppSignalID(signal.customAppSignalID().trimmed());
-	signal.setEquipmentID(signal.equipmentID().trimmed());
-	signal.setBusTypeID(signal.busTypeID().trimmed());
-	signal.setCaption(signal.caption().trimmed());
-	signal.setUnit(signal.unit().trimmed());
-}

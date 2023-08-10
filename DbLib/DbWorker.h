@@ -140,22 +140,22 @@ public slots:
     // Signal management
     //
     void slot_getSignalsIDs(QVector<int>* signalsIDs);
-	void slot_getSignalsIDAppSignalID(QVector<ID_AppSignalID>* signalsIDAppSignalID);
+	void slot_getSignalsIDAppSignalID(std::vector<ID_AppSignalID>* signalsIDAppSignalID, bool withDeleted);
 	void slot_getSignals(AppSignalSet* signalSet, bool excludeDeleted);
 	void slot_getTunableSignals(AppSignalSet* signalSet);
 	void getSignals(AppSignalSet* signalSet, bool excludeDeleted, bool tunableOnly);
     void slot_getLatestSignal(int signalID, AppSignal* signal);
-	void slot_getLatestSignals(QVector<int> signalIDs, QVector<AppSignal>* signalsArray);
+	void slot_getLatestSignals(const std::vector<int>& signalIDs, std::vector<AppSignal>*signalsArray);
 	void slot_getLatestSignalsByAppSignalIDs(QStringList appSignalIds, QVector<AppSignal>* signalArray);
 	void slot_getLatestSignalsWithUserID(std::vector<AppSignal>* out);
-	void slot_getCheckedOutSignalsIDs(QVector<int>* signalsIDs);
-	void slot_addSignal(E::SignalType signalType, QVector<AppSignal>* newSignal);
+	void slot_getCheckedOutSignalsIDs(std::vector<int>* signalsIDs);
+	void slot_addSignal(E::SignalType signalType, std::vector<AppSignal>* newSignal);
 
-	bool addSignal(E::SignalType signalType, QVector<AppSignal>* newSignal);
+	bool addSignal(E::SignalType signalType, std::vector<AppSignal>* newSignal);
 	bool setSignalWorkcopy(QSqlDatabase& db, const AppSignal& s, ObjectState& objectState, QString& errMsg);
 
 	void slot_checkoutSignals(const std::set<int>& signalIDs, QVector<ObjectState>* objectStates);
-	void slot_setSignalWorkcopy(AppSignal *signal, ObjectState *objectState);
+	void slot_setSignalWorkcopy(AppSignal* signal, ObjectState* objectState);
 	void slot_setSignalsWorkcopies(const QVector<AppSignal>* signalsList);
 
     void slot_deleteSignal(int signalID, ObjectState* objectState);
@@ -241,8 +241,10 @@ public:
     DbUser currentUser() const;
     void setCurrentUser(const DbUser& user);
 
+	int currentUserId() const;
+
     DbProject currentProject() const;
-    void setCurrentProject(const DbProject& project);
+	void setCurrentProject(const DbProject& project);
 
 private:
 	const QString& sessionKey() const;

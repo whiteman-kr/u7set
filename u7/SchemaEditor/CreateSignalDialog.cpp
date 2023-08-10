@@ -321,9 +321,9 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 		return QStringList();
 	}
 
-	// Generatuing Signal and show it's properties
+	// Generating Signal and show it's properties
 	//
-	QVector<AppSignal> newSignals;
+	std::vector<AppSignal> newSignals;
 
 	CreateSignalDialogResult resultData = d.resultData();
 
@@ -409,7 +409,7 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 
 	// Show properties dialog
 	//
-	QVector<AppSignal*> signalPtrVector;
+	std::vector<AppSignal*> signalPtrVector;
 
 	for (AppSignal& signal : newSignals)
 	{
@@ -429,14 +429,16 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 		AppSignalSetProvider::trimSignalTextFields(signal);
 	}
 
-	bool ok = dbc->addSignal(newSignals.front().signalType(), &newSignals, parent);
+	bool ok = dbc->addSignal(newSignals.begin()->signalType(), &newSignals, parent);
+
 	if (ok == false)
 	{
 		return {};
 	}
 
-	AppSignalSetProvider* model = AppSignalSetProvider::getInstance();
-	model->loadSignals();
+	AppSignalSetProvider* provider = AppSignalSetProvider::getInstance();
+
+	provider->reloadSignals();
 
 	QVector<int> selectIdList(newSignals.size());
 	int currentIdIndex = 0;

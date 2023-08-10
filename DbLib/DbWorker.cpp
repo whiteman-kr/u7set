@@ -13,6 +13,8 @@
 #include <QHostInfo>
 #include <QElapsedTimer>
 
+#include <QMessageBox>
+
 #include "DbWorker.h"
 #include "DbProgress.h"
 #include "../HardwareLib/DeviceObject.h"
@@ -4695,17 +4697,11 @@ void DbWorker::slot_getSignalsIDs(QVector<int>* signalsIDs)
 	return;
 }
 
-void DbWorker::slot_getSignalsIDAppSignalID(QVector<ID_AppSignalID>* signalsIDAppSignalID)
+void DbWorker::slot_getSignalsIDAppSignalID(std::vector<ID_AppSignalID>* signalsIDAppSignalID, bool withDeleted)
 {
 	AUTO_COMPLETE
 
-	// Check parameters
-	//
-	if (signalsIDAppSignalID == nullptr)
-	{
-		Q_ASSERT(signalsIDAppSignalID);
-		return;
-	}
+	TEST_PTR_RETURN(signalsIDAppSignalID);
 
 	signalsIDAppSignalID->clear();
 
@@ -4721,8 +4717,8 @@ void DbWorker::slot_getSignalsIDAppSignalID(QVector<ID_AppSignalID>* signalsIDAp
 
 	// request
 	//
-	QString request = QString("SELECT * FROM get_signals_id_appsignalid(%1, %2)")
-		.arg(currentUser().userId()).arg("false");
+	QString request = QString("SELECT * FROM get_signals_id_appsignalid(%1, %2)").
+								arg(currentUserId()).arg(boolToString(withDeleted));
 	QSqlQuery q(db);
 
 	bool result = q.exec(request);
@@ -4733,22 +4729,21 @@ void DbWorker::slot_getSignalsIDAppSignalID(QVector<ID_AppSignalID>* signalsIDAp
 		return;
 	}
 
-	ID_AppSignalID iasi;
+	signalsIDAppSignalID->reserve(q.size());
+
+	static const int COLUMN_SIGNAL_ID = 0;
+	static const int COLUMN_SIGNAL_GROUP_ID = 1;
+	static const int COLUMN_APP_SIGNAL_ID = 2;
 
 	while(q.next() != false)
 	{
-
-		iasi.ID = q.value(0).toInt();
-		iasi.signalGroupID = q.value(1).toInt();
-		iasi.appSignalID = q.value(2).toString();
-
-		signalsIDAppSignalID->append(iasi);
+		signalsIDAppSignalID->emplace_back(	q.value(COLUMN_SIGNAL_ID).toInt(),
+											q.value(COLUMN_SIGNAL_GROUP_ID).toInt(),
+											q.value(COLUMN_APP_SIGNAL_ID).toString());
 	}
 
 	return;
 }
-
-
 
 void DbWorker::slot_getSignals(AppSignalSet* signalSet, bool excludeDeleted)
 {
@@ -4773,6 +4768,8 @@ void DbWorker::getSignals(AppSignalSet* signalSet, bool excludeDeleted, bool tun
 		assert(signalSet != nullptr);
 		return;
 	}
+
+	signalSet->clear();
 
 	// Operation
 	//
@@ -4805,8 +4802,12 @@ void DbWorker::getSignals(AppSignalSet* signalSet, bool excludeDeleted, bool tun
 		dProgress = signalCount / 20;
 	}
 
+	QElapsedTimer tm;
+
 	request = QString("SELECT * FROM get_latest_signals_all(%1)")
 		.arg(currentUser().userId());
+
+	tm.start();
 
 	result = q.exec(request);
 
@@ -4815,6 +4816,8 @@ void DbWorker::getSignals(AppSignalSet* signalSet, bool excludeDeleted, bool tun
 		emitError(db, tr("Can't get signal workcopy! Error: ") +  q.lastError().text());
 		return;
 	}
+
+	signalSet->reserve(q.size());
 
 	int n = 0;
 
@@ -4843,10 +4846,8 @@ void DbWorker::getSignals(AppSignalSet* signalSet, bool excludeDeleted, bool tun
 			continue;
 		}
 
-		signalSet->append(s->ID(), s);
+		signalSet->append(s);
 	}
-
-	signalSet->buildID2IndexMap();
 
 	m_progress->setValue(100);
 
@@ -4899,15 +4900,15 @@ void DbWorker::slot_getLatestSignal(int signalID, AppSignal* signal)
 	return;
 }
 
-void DbWorker::slot_getLatestSignals(QVector<int> signalIDs, QVector<AppSignal>* signalsArray)
+void DbWorker::slot_getLatestSignals(const std::vector<int>& signalIDs, std::vector<AppSignal>* signalsArray)
 {
 	AUTO_COMPLETE
+	TEST_PTR_RETURN(signalsArray);
 
-	// Check parameters
-	//
-	if (signalsArray == nullptr)
+	signalsArray->clear();
+
+	if (signalIDs.size() == 0)
 	{
-		assert(signalsArray != nullptr);
 		return;
 	}
 
@@ -4921,32 +4922,34 @@ void DbWorker::slot_getLatestSignals(QVector<int> signalIDs, QVector<AppSignal>*
 		return;
 	}
 
-	signalsArray->clear();
-	signalsArray->reserve(signalIDs.count());
+	signalsArray->reserve(signalIDs.size());
 
 	// request
 	//
 
-	QString idsStr("ARRAY[");
+	QString request;
+
+	request.reserve(45 + signalIDs.size() * 6);
+
+	request.append(QStringLiteral("SELECT * FROM get_latest_signals("));
+	request.append(QString::number(currentUserId()));
+	request.append(QStringLiteral(",ARRAY["));
+
 	bool first = true;
 
 	for(int id : signalIDs)
 	{
-		if (first == true)
+		if (first == false)
 		{
-			idsStr += QString("%1").arg(id);
-			first = false;
+			request.append(QStringLiteral(","));
 		}
-		else
-		{
-			idsStr += QString(",%1").arg(id);
-		}
+
+		request.append(QString::number(id));
+		first = false;
 	}
 
-	idsStr += "]";
+	request.append(QStringLiteral("])"));
 
-	QString request = QString("SELECT * FROM get_latest_signals(%1, %2)")
-		.arg(currentUser().userId()).arg(idsStr);
 	QSqlQuery q(db);
 
 	bool result = q.exec(request);
@@ -4957,13 +4960,7 @@ void DbWorker::slot_getLatestSignals(QVector<int> signalIDs, QVector<AppSignal>*
 		return;
 	}
 
-	while(q.next() != false)
-	{
-		AppSignal s;
-		getSignalData(q, s);
-
-		signalsArray->append(s);
-	}
+	readSignalsToVector(q, signalsArray);
 
 	return;
 }
@@ -5078,17 +5075,12 @@ void DbWorker::slot_getLatestSignalsWithUserID(std::vector<AppSignal>* out)
 	return;
 }
 
-void DbWorker::slot_getCheckedOutSignalsIDs(QVector<int>* signalsIDs)
+void DbWorker::slot_getCheckedOutSignalsIDs(std::vector<int>* signalsIDs)
 {
 	AUTO_COMPLETE
+	TEST_PTR_RETURN(signalsIDs);
 
-	// Check parameters
-	//
-	if (signalsIDs == nullptr)
-	{
-		assert(signalsIDs != nullptr);
-		return;
-	}
+	signalsIDs->clear();
 
 	// Operation
 	//
@@ -5102,8 +5094,8 @@ void DbWorker::slot_getCheckedOutSignalsIDs(QVector<int>* signalsIDs)
 
 	// request
 	//
-	QString request = QString("SELECT * FROM get_checked_out_signals_ids(%1)")
-		.arg(currentUser().userId());
+	QString request = QString("SELECT * FROM get_checked_out_signals_ids(%1)").
+									arg(currentUserId());
 	QSqlQuery q(db);
 
 	bool result = q.exec(request);
@@ -5114,14 +5106,13 @@ void DbWorker::slot_getCheckedOutSignalsIDs(QVector<int>* signalsIDs)
 		return;
 	}
 
-	signalsIDs->clear();
 	signalsIDs->reserve(q.size());
 
 	while(q.next() != false)
 	{
 		int signalID = q.value(0).toInt();
 
-		signalsIDs->append(signalID);
+		signalsIDs->push_back(signalID);
 	}
 
 	return;
@@ -5216,14 +5207,14 @@ QString DbWorker::getSignalDataStr(const AppSignal& s)
 	return str;
 }
 
-void DbWorker::slot_addSignal(E::SignalType signalType, QVector<AppSignal>* newSignal)
+void DbWorker::slot_addSignal(E::SignalType signalType, std::vector<AppSignal>* newSignal)
 {
 	AUTO_COMPLETE
 
 	addSignal(signalType, newSignal);
 }
 
-bool DbWorker::addSignal(E::SignalType signalType, QVector<AppSignal>* newSignal)
+bool DbWorker::addSignal(E::SignalType signalType, std::vector<AppSignal>* newSignal)
 {
 	TEST_PTR_RETURN_FALSE(newSignal);
 
@@ -5233,8 +5224,6 @@ bool DbWorker::addSignal(E::SignalType signalType, QVector<AppSignal>* newSignal
 		return false;
 	}
 
-	// Operation
-	//
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 
 	if (db.isOpen() == false)
@@ -5245,19 +5234,22 @@ bool DbWorker::addSignal(E::SignalType signalType, QVector<AppSignal>* newSignal
 
 	// Log action
 	//
-	QString logMessage = QString("addSignal: SignalCount %1, SignalIDs ")
-						 .arg(newSignal->size());
+	QString logMessage = QString("addSignal: SignalCount %1, SignalIDs ").
+										arg(newSignal->size());
 
 	for (const AppSignal& s : *newSignal)
 	{
 		logMessage += s.appSignalID() + QLatin1String(" ");
 	}
+
 	addLogRecord(db, logMessage);
 
 	// request
 	//
-	QString request = QString("SELECT * FROM add_signal(%1, %2, %3)")
-		.arg(currentUser().userId()).arg(TO_INT(signalType)).arg(newSignal->count());
+	QString request = QString("SELECT * FROM add_signal(%1, %2, %3)").
+									arg(currentUserId()).
+									arg(TO_INT(signalType)).
+									arg(newSignal->size());
 	QSqlQuery q(db);
 
 	bool result = q.exec(request);
@@ -5364,9 +5356,8 @@ bool DbWorker::setSignalWorkcopy(QSqlDatabase& db, const AppSignal& s, ObjectSta
 
 	QString sds = getSignalDataStr(s);
 
-	QString request = QString("SELECT * FROM set_signal_workcopy(%1, %2)")
-		.arg(currentUser().userId()).arg(sds);
-
+	QString request = QString("SELECT * FROM set_signal_workcopy(%1, %2)").
+									arg(currentUserId()).arg(sds);
 	QSqlQuery q(db);
 
 	bool result = q.exec(request);
@@ -5480,25 +5471,12 @@ void DbWorker::slot_checkoutSignals(const std::set<int>& signalIDs, QVector<Obje
 	}
 }
 
-
-void DbWorker::slot_setSignalWorkcopy(AppSignal* signal, ObjectState *objectState)
+void DbWorker::slot_setSignalWorkcopy(AppSignal* signal, ObjectState* objectState)
 {
 	AUTO_COMPLETE
+	TEST_PTR_RETURN(signal);
+	TEST_PTR_RETURN(objectState);
 
-	if (signal == nullptr)
-	{
-		assert(signal != nullptr);
-		return;
-	}
-
-	if (objectState == nullptr)
-	{
-		assert(objectState != nullptr);
-		return;
-	}
-
-	// Operation
-	//
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 
 	if (db.isOpen() == false)
@@ -5506,11 +5484,6 @@ void DbWorker::slot_setSignalWorkcopy(AppSignal* signal, ObjectState *objectStat
 		emitError(db, tr("Cannot set signal workcopy. Database connection is not opened."));
 		return;
 	}
-
-	// request
-	//
-	//signal->setCreated(QDateTime::currentDateTime());
-	//signal->setInstanceCreated(QDateTime::currentDateTime());
 
 	QString errMsg;
 
@@ -5522,8 +5495,8 @@ void DbWorker::slot_setSignalWorkcopy(AppSignal* signal, ObjectState *objectStat
 		return;
 	}
 
-	QString request2 = QString("SELECT * FROM get_latest_signal(%1, %2)")
-		.arg(currentUser().userId()).arg(signal->ID());
+	QString request2 = QString("SELECT * FROM get_latest_signal(%1, %2)").
+									arg(currentUserId()).arg(signal->ID());
 
 	QSqlQuery q2(db);
 
@@ -5895,9 +5868,9 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>
 					return;
 				}
 
-				QVector<AppSignal> newSignals;
+				std::vector<AppSignal> newSignals;
 
-				newSignals.append(appSignal);
+				newSignals.emplace_back(appSignal);
 
 				bool result = addSignal(appSignal.signalType(), &newSignals);
 
@@ -6510,8 +6483,14 @@ void DbWorker::readSignalsToVector(QSqlQuery& q, std::vector<AppSignal>* out)
 
 	out->clear();
 
-	int dProgress = 0;
 	int signalCount = q.size();
+
+	if (signalCount == 0)
+	{
+		return;
+	}
+
+	int dProgress = 0;
 
 	if (signalCount != -1)
 	{
@@ -7432,6 +7411,11 @@ void DbWorker::setCurrentUser(const DbUser& user)
 {
 	QWriteLocker wl(&m_lock);
 	m_currentUser = user;
+}
+
+int DbWorker::currentUserId() const
+{
+	return currentUser().userId();
 }
 
 DbProject DbWorker::currentProject() const

@@ -35,7 +35,7 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& sig
 		}
 	}
 
-	QVector<AppSignal*> signalPtrVector;
+	std::vector<AppSignal*> signalPtrVector;
 
 	QStringList foundSignalID;
 
@@ -45,7 +45,9 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& sig
 		{
 			continue;
 		}
+
 		foundSignalID.push_back(signal.appSignalID());
+
 		signalPtrVector.push_back(&signal);
 	}
 
@@ -60,7 +62,7 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& sig
 		}
 	}
 
-	if (signalPtrVector.isEmpty() == true)
+	if (signalPtrVector.empty() == true)
 	{
 		if (signalId.count() > 1)
 		{
@@ -73,7 +75,7 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& sig
 		return result;
 	}
 
-	result.resize(signalPtrVector.count());
+	result.resize(signalPtrVector.size());
 
 	SignalPropertiesDialog dlg(dbController, signalPtrVector, readOnly, true, parent);
 
@@ -85,7 +87,8 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& sig
 	if (dlg.exec() == QDialog::Accepted)
 	{
 		QString message;
-		for (int i = 0; i < signalPtrVector.count(); i++)
+
+		for (AppSignal* s : signalPtrVector)
 		{
 			if (!dlg.isEditedSignal(signalPtrVector[i]->ID()))
 			{
@@ -223,8 +226,9 @@ void initNewSignal(AppSignal& signal)
 	signal.setByteOrder(E::ByteOrder::BigEndian);
 }
 
-
-SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVector<AppSignal*> signalVector, bool readOnly, bool tryCheckout, QWidget *parent) :
+SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController,
+											   const std::vector<AppSignal*>& signalVector,
+											   bool readOnly, bool tryCheckout, QWidget* parent) :
 	QDialog(parent),
 	m_dbController(dbController),
 	m_signalVector(signalVector),
@@ -339,7 +343,8 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 		int precision = appSignal.decimalPlaces();
 
 		AppSignalPropertyManager& manager = *AppSignalPropertyManager::getInstance();
-		manager.detectNewProperties(appSignal);
+
+		manager.detectNewProperties(&appSignal);
 		manager.loadNotSpecificProperties();
 		manager.reloadPropertyBehaviour();
 

@@ -1224,7 +1224,7 @@ void DbControllerSignalTests::dbcTest_addSignal()
 	//
 	OPEN_DATABASE();
 
-	QVector<AppSignal> newSignals;
+	std::vector<AppSignal> newSignals;
 
 	AppSignal s;
 
@@ -1233,7 +1233,7 @@ void DbControllerSignalTests::dbcTest_addSignal()
 	s.setCustomAppSignalID("DBC_ADD_SIGNAL_TEST_1");
 	s.setCaption("Caption DBC_ADD_SIGNAL_TEST_1");
 
-	newSignals.append(s);
+	newSignals.push_back(s);
 
 	QVERIFY(m_dbcAdmin->addSignal(E::SignalType::Discrete, &newSignals, nullptr) == true);
 	TS_VERIFY(check_signalIsExist(ADMIN_ID, newSignals[0].ID(), E::SignalType::Discrete, 0, 0, true));
@@ -1241,7 +1241,7 @@ void DbControllerSignalTests::dbcTest_addSignal()
 	// try add another one signal with same IDs
 	//
 	newSignals.clear();
-	newSignals.append(s);
+	newSignals.push_back(s);
 
 	QVERIFY(m_dbcAdmin->addSignal(E::SignalType::Discrete, &newSignals, nullptr) == false);
 	QVERIFY(m_dbcAdmin->lastError().contains("already exists"));
@@ -1259,7 +1259,7 @@ void DbControllerSignalTests::dbcTest_addSignal()
 		s.setCustomAppSignalID(QString("DBC_ADD_SIGNAL_TEST_S%1").arg(i));
 		s.setCaption(QString("Caption DBC_ADD_SIGNAL_TEST_S%1").arg(i));
 
-		newSignals.append(s);
+		newSignals.push_back(s);
 	}
 
 	QVERIFY(m_dbcAdmin->addSignal(E::SignalType::Analog, &newSignals, nullptr) == true);
@@ -1286,7 +1286,7 @@ void DbControllerSignalTests::dbcTest_addSignal()
 		s.setCustomAppSignalID(QString("DBC_ADD_SIGNAL_TEST_SS%1").arg(i));
 		s.setCaption(QString("Caption DBC_ADD_SIGNAL_TEST_SS%1").arg(i));
 
-		newSignals.append(s);
+		newSignals.push_back(s);
 	}
 
 	QVERIFY(m_dbcAdmin->addSignal(E::SignalType::Analog, &newSignals, nullptr) == false);
@@ -1305,7 +1305,7 @@ void DbControllerSignalTests::dbcTest_addSignal()
 		s.setCustomAppSignalID(QString("DBC_ADD_SIGNAL_TEST_ANOTHER_S%1").arg(i));
 		s.setCaption(QString("Caption DBC_ADD_SIGNAL_TEST_ANOTHER_S%1").arg(i));
 
-		newSignals.append(s);
+		newSignals.push_back(s);
 	}
 
 	QVERIFY(m_dbcUser3->addSignal(E::SignalType::Discrete, &newSignals, nullptr) == true);
@@ -1901,13 +1901,11 @@ void DbControllerSignalTests::dbcTest_getSignalsIDAppSignalID()
 
 	TS_VERIFY(addTestSignals(USER2_ID, E::SignalType::Analog, 1, 5 + rand0to(2), &stdUser2SignalsIDs));
 
-	QVector<ID_AppSignalID> qvResult;
 	std::vector<ID_AppSignalID> result;
 
 	// Admin should see all signals
 	//
-	QVERIFY(m_dbcAdmin->getSignalsIDAppSignalID(&qvResult, nullptr));
-	result = toPairsVector(qvResult);
+	QVERIFY(m_dbcAdmin->getSignalsIDAppSignalID(&result, false, nullptr));
 
 	TS_VERIFY(removePairsWithID(&result, initialIDs));
 
@@ -1916,8 +1914,7 @@ void DbControllerSignalTests::dbcTest_getSignalsIDAppSignalID()
 
 	// User2 should see only their signals
 	//
-	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
-	result = toPairsVector(qvResult);
+	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&result, false, nullptr) == true);
 
 	TS_VERIFY(removePairsWithID(&result, initialIDs));
 
@@ -1930,8 +1927,7 @@ void DbControllerSignalTests::dbcTest_getSignalsIDAppSignalID()
 
 	// User2 should see their signals and Admin's signals
 	//
-	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
-	result = toPairsVector(qvResult);
+	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&result, false, nullptr) == true);
 
 	TS_VERIFY(removePairsWithID(&result, initialIDs));
 
@@ -1946,8 +1942,7 @@ void DbControllerSignalTests::dbcTest_getSignalsIDAppSignalID()
 	// DbController::getSignalsIDAppSignalID() always return withDeleted == false,
 	// User2 should see only their signals
 	//
-	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
-	result = toPairsVector(qvResult);
+	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&result, false, nullptr) == true);
 
 	TS_VERIFY(removePairsWithID(&result, initialIDs));
 
@@ -1964,7 +1959,7 @@ void DbControllerSignalTests::dbcTest_getSignalsIDAppSignalID()
 
 	TS_VERIFY(checkinSignals(USER2_ID, std::vector<int>({id}), "checkin user2 signal", nullptr));
 
-	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
+	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&result, false, nullptr) == true);
 
 	QVERIFY(findPairWithID(id, result, &p) == true);
 	QVERIFY(p.appSignalID == OLD_APP_SIGNAL_ID);
@@ -1986,23 +1981,19 @@ void DbControllerSignalTests::dbcTest_getSignalsIDAppSignalID()
 
 	// under User2, should see OLD_APP_SIGNAL_ID
 	//
-	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
-	result = toPairsVector(qvResult);
+	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&result, false, nullptr) == true);
 
 	QVERIFY(findPairWithID(id, result, &p) == true);
 	QVERIFY(p.appSignalID == OLD_APP_SIGNAL_ID);
 
 	// under Admin and User3, should see NEW_APP_SIGNAL_ID
 	//
-	QVERIFY(m_dbcAdmin->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
-	result = toPairsVector(qvResult);
+	QVERIFY(m_dbcAdmin->getSignalsIDAppSignalID(&result, false, nullptr) == true);
 
 	QVERIFY(findPairWithID(id, result, &p) == true);
 	QVERIFY(p.appSignalID == NEW_APP_SIGNAL_ID);
 
-	QVERIFY(m_dbcUser3->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
-
-	result = toPairsVector(qvResult);
+	QVERIFY(m_dbcUser3->getSignalsIDAppSignalID(&result, false, nullptr) == true);
 
 	QVERIFY(findPairWithID(id, result, &p) == true);
 	QVERIFY(p.appSignalID == NEW_APP_SIGNAL_ID);
@@ -2011,18 +2002,18 @@ void DbControllerSignalTests::dbcTest_getSignalsIDAppSignalID()
 
 	// All should see NEW_APP_SIGNAL_ID
 	//
-	QVERIFY(m_dbcAdmin->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
-	result = toPairsVector(qvResult);
+	QVERIFY(m_dbcAdmin->getSignalsIDAppSignalID(&result, false, nullptr) == true);
+
 	QVERIFY(findPairWithID(id, result, &p) == true);
 	QVERIFY(p.appSignalID == NEW_APP_SIGNAL_ID);
 
-	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
-	result = toPairsVector(qvResult);
+	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&result, false, nullptr) == true);
+
 	QVERIFY(findPairWithID(id, result, &p) == true);
 	QVERIFY(p.appSignalID == NEW_APP_SIGNAL_ID);
 
-	QVERIFY(m_dbcUser3->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
-	result = toPairsVector(qvResult);
+	QVERIFY(m_dbcUser3->getSignalsIDAppSignalID(&result, false, nullptr) == true);
+
 	QVERIFY(findPairWithID(id, result, &p) == true);
 	QVERIFY(p.appSignalID == NEW_APP_SIGNAL_ID);
 
@@ -2128,7 +2119,7 @@ QString DbControllerSignalTests::dbc_addSignal(DbController* dbc,
 		addedIDs->clear();
 	}
 
-	QVector<AppSignal> newSignals;
+	std::vector<AppSignal> newSignals;
 
 	for(QString appSignalID : appSignalIDs)
 	{
@@ -2140,7 +2131,7 @@ QString DbControllerSignalTests::dbc_addSignal(DbController* dbc,
 		s.setCustomAppSignalID(appSignalID.replace("#", ""));
 		s.setCustomAppSignalID(QString("Caption ") + s.customAppSignalID());
 
-		newSignals.append(s);
+		newSignals.emplace_back(s);
 	}
 
 	TS_VERIFY_RETURN_ERR(dbc->addSignal(type, &newSignals, nullptr) == true, dbc->lastError());

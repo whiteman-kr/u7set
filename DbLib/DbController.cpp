@@ -2033,7 +2033,9 @@ bool DbController::getSignalsIDs(QVector<int>* signalIDs, QWidget* parentWidget)
 	return ok;
 }
 
-bool DbController::getSignalsIDAppSignalID(QVector<ID_AppSignalID>* signalsIDAppSignalID, QWidget* parentWidget)
+bool DbController::getSignalsIDAppSignalID(std::vector<ID_AppSignalID>* signalsIDAppSignalID,
+										   bool withDeleted,
+										   QWidget* parentWidget)
 {
 	if (signalsIDAppSignalID == nullptr)
 	{
@@ -2050,7 +2052,7 @@ bool DbController::getSignalsIDAppSignalID(QVector<ID_AppSignalID>* signalsIDApp
 		return false;
 	}
 
-	emit signal_getSignalsIDAppSignalID(signalsIDAppSignalID);
+	emit signal_getSignalsIDAppSignalID(signalsIDAppSignalID, withDeleted);
 
 	ok = waitForComplete(parentWidget, tr("Getting signals' IDs"));
 
@@ -2129,13 +2131,10 @@ bool DbController::getLatestSignal(int signalID, AppSignal* signal, QWidget* par
 	return ok;
 }
 
-bool DbController::getLatestSignals(QVector<int> signalIDs, QVector<AppSignal>* signalsArray, QWidget* parentWidget)
+bool DbController::getLatestSignals(const std::vector<int>& signalIDs,
+									std::vector<AppSignal>* signalsArray, QWidget* parentWidget)
 {
-	if (signalsArray == nullptr)
-	{
-		assert(signalsArray != nullptr);
-		return false;
-	}
+	TEST_PTR_RETURN_FALSE(signalsArray);
 
 	// Init progress and check availability
 	//
@@ -2179,7 +2178,7 @@ bool DbController::getLatestSignalsByAppSignalIDs(QStringList appSignalIDs, QVec
 
 }
 
-bool DbController::getCheckedOutSignalsIDs(QVector<int> *signalIDs, QWidget* parentWidget)
+bool DbController::getCheckedOutSignalsIDs(std::vector<int>* signalIDs, QWidget* parentWidget)
 {
 	if (signalIDs == nullptr)
 	{
@@ -2203,7 +2202,7 @@ bool DbController::getCheckedOutSignalsIDs(QVector<int> *signalIDs, QWidget* par
 	return ok;
 }
 
-bool DbController::addSignal(E::SignalType signalType, QVector<AppSignal>* newSignal, QWidget* parentWidget)
+bool DbController::addSignal(E::SignalType signalType, std::vector<AppSignal>* newSignal, QWidget* parentWidget)
 {
 	if (newSignal == nullptr)
 	{
@@ -2227,7 +2226,9 @@ bool DbController::addSignal(E::SignalType signalType, QVector<AppSignal>* newSi
 	return ok;
 }
 
-bool DbController::getLatestSignalsWithoutProgress(QVector<int> signalIDs, QVector<AppSignal>* signalsArray, QWidget* parentWidget)
+bool DbController::getLatestSignalsWithoutProgress(const std::vector<int>& signalIDs,
+												   std::vector<AppSignal>* signalsArray,
+												   QWidget* parentWidget)
 {
 	if (signalsArray == nullptr)
 	{

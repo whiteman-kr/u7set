@@ -52,7 +52,8 @@ signals:
 	void propertyCountDecreased();
 
 public slots:
-	void detectNewProperties(const AppSignal& signal);
+	void detectSignalsNewProperties(const std::vector<const AppSignal *>& signalsArray);
+	void detectNewProperties(const AppSignal* signal);
 
 private:
 	static inline const int SIGNAL_TYPE_COUNT = QMetaEnum::fromType<E::SignalType>().keyCount();
@@ -92,6 +93,8 @@ private:
 	DbController* m_dbController = nullptr;
 	QWidget* m_parentWidget = nullptr;
 	static AppSignalPropertyManager* m_instance;
+
+	std::set<Hash> m_parsedSpecPropStruct;
 
 	static const std::vector<AppSignalPropertyDescription> m_replacedPropertyDescription;
 

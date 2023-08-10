@@ -1166,20 +1166,20 @@ void AppSignal::saveProtoData(Proto::ProtoAppSignalData* protoData) const
 	protoData->set_tags(tagsStr().toStdString());
 }
 
-void AppSignal::loadProtoData(const QByteArray& protoDataArray)
+void AppSignal::loadProtoData(const char* protoDataPtr, int protoDataSize)
 {
 	Proto::ProtoAppSignalData protoData;
 
-	bool res = protoData.ParseFromArray(protoDataArray.constData(), static_cast<int>(protoDataArray.size()));
+	bool res = protoData.ParseFromArray(protoDataPtr, protoDataSize);
 
-	assert(res == true);
-	Q_UNUSED(res)
+	if (res == false)
+	{
+		Q_ASSERT(false);
+		return;
+	}
 
-	loadProtoData(protoData);
-}
+	//
 
-void AppSignal::loadProtoData(const Proto::ProtoAppSignalData& protoData)
-{
 	m_busTypeID = QString::fromStdString(protoData.bustypeid());
 	m_caption = QString::fromStdString(protoData.caption());
 	m_channel = static_cast<E::Channel>(protoData.channel());
@@ -1221,6 +1221,11 @@ void AppSignal::loadProtoData(const Proto::ProtoAppSignalData& protoData)
 	//
 
 	setTagsStr(QString::fromStdString(protoData.tags()));
+}
+
+void AppSignal::loadProtoData(const QByteArray& protoDataArray)
+{
+	loadProtoData(protoDataArray.constData(), static_cast<int>(protoDataArray.size()));
 }
 
 QDateTime AppSignal::created() const
@@ -2510,9 +2515,26 @@ void AppSignalSet::reserve(int n)
 	m_signals.reserve(n);
 }
 
-void AppSignalSet::append(int signalID, AppSignal* signal)
+void AppSignalSet::append(AppSignal* signal)
 {
 	TEST_PTR_RETURN(signal);
+
+	int signalID = signal->ID();
+
+	if (signalID == 0)
+	{
+		if ( m_enableIdGeneration == true)
+		{
+			signalID = m_idToIndex.empty() == true ? 1 : m_idToIndex.rbegin()->first + 1;
+			signal->setID(signalID);
+		}
+		else
+		{
+			Q_ASSERT(false);				// assing signal->ID() before
+											// or enable ID generation
+			return;
+		}
+	}
 
 	Hash hash = calcHash(signal->appSignalID());
 
@@ -2529,15 +2551,6 @@ void AppSignalSet::append(int signalID, AppSignal* signal)
 	Q_ASSERT(inserted2 == true);
 
 	m_groups.insert(signal);
-}
-
-void AppSignalSet::append(AppSignal* signal)
-{
-	int newID = m_idToIndex.rbegin()->first + 1;
-
-	signal->setID(newID);
-
-	append(newID, signal);
 }
 
 void AppSignalSet::append(const ID_AppSignalID& id)
@@ -2580,6 +2593,11 @@ int AppSignalSet::count() const
 bool AppSignalSet::isEmpty() const
 {
 	return m_signals.empty();
+}
+
+void AppSignalSet::enableIdGeneration()
+{
+	m_enableIdGeneration = true;
 }
 
 const std::vector<AppSignal*>& AppSignalSet::signalsVector() const
@@ -2693,7 +2711,7 @@ void AppSignalSet::appSignalIdsListSorted(bool removeNumberSign, QStringList* li
 	}
 }
 
-AppSignal* AppSignalSet::replaceOrAppendIfNotExists(const AppSignal& s)
+AppSignal* AppSignalSet::updateSignal(const AppSignal& s, int* index)
 {
 	int signalID = s.ID();
 
@@ -2701,18 +2719,49 @@ AppSignal* AppSignalSet::replaceOrAppendIfNotExists(const AppSignal& s)
 
 	if (it == m_idToIndex.end())
 	{
-		AppSignal* newSignal = new AppSignal(s);
-		append(signalID, newSignal);
-		return newSignal;
+		Q_ASSERT(false);			// signal should be exists!
+		return nullptr;
 	}
 
-	AppSignal* existSignal = m_signals[it->second];
+	int signalIndex = it->second;
+
+	if (index != nullptr)
+	{
+		*index = signalIndex;
+	}
+
+	AppSignal* existSignal = m_signals[signalIndex];
 
 	QString oldAppSignalID = existSignal->appSignalID();
 
 	*existSignal = s;
 
-	updateMaps(oldAppSignalID, existSignal);
+	if (oldAppSignalID != s.appSignalID())
+	{
+		auto oldHashIt = m_hashToIndex.find(calcHash(oldAppSignalID));
+
+		if (oldHashIt == m_hashToIndex.end())
+		{
+			Q_ASSERT(false);
+			return nullptr;
+		}
+
+		Q_ASSERT(oldHashIt->second == signalIndex);
+
+		Hash newHash = calcHash(s.appSignalID());
+
+		auto newHashIt = m_hashToIndex.find(newHash);
+
+		if (newHashIt != m_hashToIndex.end())
+		{
+			Q_ASSERT(false);
+			return nullptr;
+		}
+
+		m_hashToIndex.erase(oldHashIt);
+
+		m_hashToIndex.emplace(newHash, signalIndex);
+	}
 
 	return existSignal;
 }
@@ -2741,7 +2790,7 @@ bool AppSignalSet::serializeFromProtoFile(const QString& filePath)
 
 	int signalCount = protoAppSignalSet.appsignal_size();
 
-	reserve(static_cast<int>(signalCount * 1.3));
+	reserve(signalCount);
 
 	for(int i = 0; i < signalCount; i++)
 	{
@@ -2751,51 +2800,10 @@ bool AppSignalSet::serializeFromProtoFile(const QString& filePath)
 
 		newSignal->loadFromProto(protoAppSignal);
 
-		append(newSignal->ID(), newSignal);
+		append(newSignal);
 	}
-
-	buildID2IndexMap();
 
 	return true;
-}
-
-void AppSignalSet::updateMaps(const QString& oldAppSignalID, const AppSignal* updatedSignal)
-{
-	TEST_PTR_RETURN(updatedSignal);
-
-	if (oldAppSignalID != updatedSignal->appSignalID())
-	{
-		auto  itID = m_idToIndex.find(updatedSignal->ID());
-
-		if (itID == m_idToIndex.end())
-		{
-			Q_ASSERT(false);
-			return;
-		}
-
-		qsizetype trueIndex = itID->second;
-
-		Hash newHash = calcHash(updatedSignal->appSignalID());
-
-		auto itNewHash = m_hashToIndex.find(newHash);
-
-		if (itNewHash != m_hashToIndex.end() && itNewHash->second != trueIndex)
-		{
-			Q_ASSERT(false);
-			return;
-		}
-
-		auto it = m_hashToIndex.find(calcHash(oldAppSignalID));
-
-		if (it != m_hashToIndex.end())
-		{
-			Q_ASSERT(it->second == trueIndex);
-
-			m_hashToIndex.erase(it);
-		}
-
-		m_hashToIndex.emplace(newHash, trueIndex);
-	}
 }
 
 const AppSignal* AppSignalSet::privateGetSignal(const QString& appSignalID) const
@@ -2841,51 +2849,6 @@ const AppSignal* AppSignalSet::privateAt(int index) const
 
 	return m_signals[index];
 }
-
-void AppSignalSet::buildID2IndexMap()
-{
-/*	m_strID2IndexMap.clear();
-
-	qsizetype signalCount = count();
-
-	if (signalCount == 0)
-	{
-		return;
-	}
-
-	m_strID2IndexMap.reserve(static_cast<int>(signalCount * 1.3));
-
-	for(qsizetype i = 0; i < signalCount; i++)
-	{
-		AppSignal& s = (*this)[i];
-
-		if (m_strID2IndexMap.contains(s.appSignalID()) == true)
-		{
-			assert(false && "There are at least two signals with same AppSignalID");
-		}
-		else
-		{
-			updateID2IndexInMap(s.appSignalID(), static_cast<int>(i));
-		}
-	}*/
-}
-
-/*
-void AppSignalSet::updateID2IndexInMap(const QString& appSignalId, int index)
-{
-	m_strID2IndexMap.insert(appSignalId, index);
-}
-
-void AppSignalSet::updateID2IndexInMap(const AppSignal* appSignal)
-{
-	TEST_PTR_RETURN(appSignal);
-
-	int index = static_cast<int>(keyIndex(appSignal->ID()));
-
-	updateID2IndexInMap(appSignal->appSignalID(), index);
-}*/
-
-
 
 // -------------------------------------------------------------------------------
 //

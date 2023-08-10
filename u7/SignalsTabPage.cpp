@@ -405,7 +405,7 @@ SignalsModel::SignalsModel(AppSignalSetProvider* signalSetProvider, SignalsTabPa
 
 {
 	connect(m_signalSetProvider, &AppSignalSetProvider::signalCountChanged, this, &SignalsModel::changeRowCount);
-	connect(m_signalSetProvider, &AppSignalSetProvider::signalUpdated, this, &SignalsModel::updateSignal);
+	connect(m_signalSetProvider, &AppSignalSetProvider::signalsUpdated, this, &SignalsModel::updateSignals);
 	connect(&m_signalSetProvider->signalPropertyManager(), &AppSignalPropertyManager::propertyCountWillIncrease, this, &SignalsModel::beginIncreaseColumnCount, Qt::DirectConnection);
 	connect(&m_signalSetProvider->signalPropertyManager(), &AppSignalPropertyManager::propertyCountWillDecrease, this, &SignalsModel::beginDecreaseColumnCount, Qt::DirectConnection);
 	connect(&m_signalSetProvider->signalPropertyManager(), &AppSignalPropertyManager::propertyCountIncreased, this, &SignalsModel::endIncreaseColumnCount, Qt::DirectConnection);
@@ -616,6 +616,11 @@ Qt::ItemFlags SignalsModel::flags(const QModelIndex &index) const
 	}
 }
 
+void SignalsModel::prepareForReset()
+{
+	beginResetModel();
+}
+
 void SignalsModel::finishReset()
 {
 	m_rowCount = m_signalSetProvider->signalCount();
@@ -623,10 +628,13 @@ void SignalsModel::finishReset()
 	endResetModel();
 }
 
-void SignalsModel::updateSignal(int signalIndex)
+void SignalsModel::updateSignals(const std::vector<int> indexes)
 {
-	assert(signalIndex < m_rowCount);
-	emit dataChanged(index(signalIndex, 0), index(signalIndex, m_columnCount));
+	for(int indx : indexes)
+	{
+		Q_ASSERT(indx >= 0 && indx < m_rowCount);
+		emit dataChanged(index(indx, 0), index(indx, m_columnCount));
+	}
 }
 
 void SignalsModel::changeRowCount()
@@ -806,7 +814,7 @@ SignalsTabPage::SignalsTabPage(AppSignalSetProvider* signalSetProvider, DbContro
 	connect(delegate, &SignalsDelegate::itemDoubleClicked, this, &SignalsTabPage::editSignal);
 	connect(m_signalTypeFilterCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &SignalsTabPage::changeSignalTypeFilter);
 
-	connect(m_signalsView->verticalScrollBar(), &QScrollBar::valueChanged, this, &SignalsTabPage::changeLazySignalLoadingSequence);
+	connect(m_signalsView->verticalScrollBar(), &QScrollBar::valueChanged, this, &SignalsTabPage::changeSignalsLoadingSequence);
 	connect(m_signalsView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &SignalsTabPage::onSignalSelectionChanged);
 
 	connect(signalSetProvider, &AppSignalSetProvider::error, this, &SignalsTabPage::showError);
@@ -1150,22 +1158,20 @@ void SignalsTabPage::projectOpened()
 {
 	this->setEnabled(true);
 
-	m_signalSetProvider->initLazyLoadSignals();
+	m_signalSetProvider->projectOpened(dbController());
 
-	changeLazySignalLoadingSequence();
+	changeSignalsLoadingSequence();
 }
 
 void SignalsTabPage::projectClosed()
 {
-	m_signalSetProvider->stopLoadingSignals();
+	m_signalsModel->prepareForReset();
+	m_signalSetProvider->projectClosed();
+	m_signalsModel->finishReset();
 
 	m_signalsColumnVisibilityController->saveAllHeaderGeomery();
 
 	this->setEnabled(false);
-
-	m_signalsModel->prepareForReset();
-	m_signalSetProvider->clearSignals();
-	m_signalsModel->finishReset();
 
 	resetSignalIdFilter();
 
@@ -1209,7 +1215,7 @@ void SignalsTabPage::onTabPageChanged()
 void SignalsTabPage::loadSignals()
 {
 	saveSelection();
-	m_signalSetProvider->loadSignals();
+	m_signalSetProvider->reloadSignals();
 	restoreSelection();
 }
 
@@ -1290,7 +1296,9 @@ void SignalsTabPage::addSignal()
 		signal.setCaption(newId);
 	}
 
-	SignalPropertiesDialog dlg(dbController(), QVector<AppSignal*>() << &signal, false, false, this);
+	std::vector<AppSignal*> signalToEdit = { &signal };
+
+	SignalPropertiesDialog dlg(dbController(), signalToEdit, false, false, this);
 
 	AppSignalSetProvider::trimSignalTextFields(signal);
 
@@ -1360,12 +1368,12 @@ void SignalsTabPage::editSignal()
 	int currentColumn = m_signalsView->currentIndex().column();
 	int currentId = m_signalSetProvider->signalID(currentRow);
 
-	QVector<int> selectedSignalId;
+	std::vector<int> selectedSignalId;
 
 	for (int i = 0; i < selection.count(); i++)
 	{
 		int row = m_signalsProxyModel->mapToSource(selection[i]).row();
-		selectedSignalId.append(m_signalSetProvider->signalID(row));
+		selectedSignalId.push_back(m_signalSetProvider->signalID(row));
 	}
 
 	editSignals(selectedSignalId);
@@ -1373,25 +1381,27 @@ void SignalsTabPage::editSignal()
 	m_signalsView->scrollTo(m_signalsProxyModel->mapFromSource(m_signalsModel->index(m_signalSetProvider->signalIndex(currentId), currentColumn)));
 }
 
-bool SignalsTabPage::editSignals(QVector<int> ids)
+bool SignalsTabPage::editSignals(const std::vector<int>& ids)
 {
-	m_signalSetProvider->loadSignalSet(ids);
+	m_signalSetProvider->loadSignals(ids);
 
 	bool readOnly = false;
-	QVector<AppSignal*> signalVector;
+	std::vector<AppSignal*> signalVector;
 
-	for (int i = 0; i < ids.count(); i++)
+	for (int id : ids)
 	{
-		int index = m_signalSetProvider->signalIndex(ids[i]);
+		AppSignal* s = m_signalSetProvider->getLoadedSignalByID(id);
 
-		AppSignal* signal = new AppSignal(*m_signalSetProvider->getLoadedSignal(index));
+		TEST_PTR_CONTINUE(s)
 
-		if (!m_signalSetProvider->isEditableSignal(index))
+		AppSignal* signal = new AppSignal(*s);
+
+		if (!m_signalSetProvider->isEditableSignal(s))
 		{
 			readOnly = true;
 		}
 
-		signalVector.append(signal);
+		signalVector.push_back(signal);
 	}
 
 	SignalPropertiesDialog dlg(dbController(), signalVector, readOnly, true, this);
@@ -1405,17 +1415,17 @@ bool SignalsTabPage::editSignals(QVector<int> ids)
 
 	if (dlg.exec() == QDialog::Accepted)
 	{
-		QVector<AppSignal*> signalsToSave;
+		std::vector<AppSignal*> signalsToSave;
 
-		for (int i = 0; i < ids.count(); i++)
+		for (AppSignal* s : signalVector)
 		{
-			if (dlg.isEditedSignal(ids[i]) == true)
+			if (dlg.isEditedSignal(s->ID()) == true)
 			{
-				signalsToSave.append(signalVector[i]);
+				signalsToSave.push_back(s);
 			}
 		}
 
-		if (signalsToSave.isEmpty() == false)
+		if (signalsToSave.empty() == false)
 		{
 			hasEditedSignals = true;
 
@@ -1424,9 +1434,9 @@ bool SignalsTabPage::editSignals(QVector<int> ids)
 		}
 	}
 
-	for (int i = 0; i < signalVector.count(); i++)
+	for (AppSignal* s : signalVector)
 	{
-		delete signalVector[i];
+		delete s;
 	}
 
 	return hasEditedSignals;
@@ -1504,7 +1514,7 @@ void SignalsTabPage::findAndReplaceSignal()
 
 void SignalsTabPage::undoSignalChanges()
 {
-	m_signalSetProvider->finishLoadingSignals();
+	m_signalSetProvider->enforceAllSignalsLoading();
 
 	UndoSignalsDialog dlg(m_signalsModel, m_signalsColumnVisibilityController, this);
 
@@ -1517,7 +1527,7 @@ void SignalsTabPage::undoSignalChanges()
 		return;
 	}
 
-	m_signalSetProvider->loadSignals();
+	m_signalSetProvider->reloadSignals(dlg.undoedSignalsIDs());
 }
 
 void SignalsTabPage::checkIn()
@@ -1525,7 +1535,7 @@ void SignalsTabPage::checkIn()
 	const QItemSelection& proxySelection = m_signalsView->selectionModel()->selection();
 	const QItemSelection& sourceSelection = m_signalsProxyModel->mapSelectionToSource(proxySelection);
 
-	m_signalSetProvider->finishLoadingSignals();
+	m_signalSetProvider->enforceAllSignalsLoading();
 
 	CheckinSignalsDialog dlg(m_signalsModel, m_signalsColumnVisibilityController, sourceSelection.indexes(), this);
 
@@ -1663,7 +1673,7 @@ void SignalsTabPage::metrologyDialogClosed()
 	deleteMetrologyDialog();
 }
 
-void SignalsTabPage::changeLazySignalLoadingSequence()
+void SignalsTabPage::changeSignalsLoadingSequence()
 {
 	m_signalSetProvider->setMiddleVisibleSignalIndex(getMiddleVisibleRow());
 }
@@ -2283,33 +2293,42 @@ void UndoSignalsDialog::undoSelected()
 
 	AppSignalSetProvider* signalSetProvider = AppSignalSetProvider::getInstance();
 
-	QVector<int> IDs;
+	m_undoedSignalsIDs.clear();
+
 	for (int i = 0; i < m_proxyModel->rowCount(); i++)
 	{
 		QModelIndex proxyIndex = m_proxyModel->index(i, 0);
+
 		if (m_proxyModel->data(proxyIndex, Qt::CheckStateRole) != Qt::Checked)
 		{
 			continue;
 		}
 		int sourceRow = m_proxyModel->mapToSource(proxyIndex).row();
-		IDs << signalSetProvider->signalID(sourceRow);
+
+		m_undoedSignalsIDs.push_back(signalSetProvider->signalID(sourceRow));
 	}
-	if (IDs.count() == 0)
+
+	if (m_undoedSignalsIDs.count() == 0)
 	{
 		QMessageBox::warning(m_sourceModel->parentWindow(), tr("Warning"), tr("No one signal was selected!"));
 		return;
 	}
+
 	QVector<ObjectState> states;
-	foreach (int ID, IDs)
+
+	for(int ID : m_undoedSignalsIDs)
 	{
 		ObjectState state;
+
 		signalSetProvider->dbController()->undoSignalChanges(ID, &state, m_sourceModel->parentWindow());
+
 		if (state.errCode != ERR_SIGNAL_OK)
 		{
 			states << state;
 		}
 	}
-	if (!states.isEmpty())
+
+	if (states.isEmpty() == false)
 	{
 		signalSetProvider->showErrors(states);
 	}
@@ -2329,8 +2348,8 @@ SignalsProxyModel::SignalsProxyModel(SignalsModel *sourceModel, QObject *parent)
 	m_sourceModel(sourceModel)
 {
 	m_signalSetProvider = AppSignalSetProvider::getInstance();
-	connect(this, &SignalsProxyModel::aboutToSort, m_signalSetProvider, &AppSignalSetProvider::finishLoadingSignals, Qt::DirectConnection);
-	connect(this, &SignalsProxyModel::aboutToFilter, m_signalSetProvider, &AppSignalSetProvider::finishLoadingSignals, Qt::DirectConnection);
+	connect(this, &SignalsProxyModel::aboutToSort, m_signalSetProvider, &AppSignalSetProvider::enforceAllSignalsLoading, Qt::DirectConnection);
+	connect(this, &SignalsProxyModel::aboutToFilter, m_signalSetProvider, &AppSignalSetProvider::enforceAllSignalsLoading, Qt::DirectConnection);
 	setSourceModel(sourceModel);
 }
 

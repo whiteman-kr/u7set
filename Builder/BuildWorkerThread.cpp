@@ -1705,8 +1705,6 @@ namespace Builder
 
 		result = signalSet->checkSignals();
 
-		signalSet->buildID2IndexMap();
-
 		result &= signalSet->bindSignalsToLMs(equipment);
 
 		signalSet->initCalculatedSignalsProperties();

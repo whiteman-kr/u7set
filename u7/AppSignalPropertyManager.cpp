@@ -321,21 +321,36 @@ bool AppSignalPropertyManager::isHiddenFor(E::SignalType type, const int propert
 	return true;
 }
 
-void AppSignalPropertyManager::detectNewProperties(const AppSignal& signal)
+void AppSignalPropertyManager::detectSignalsNewProperties(const std::vector<const AppSignal*>& signalsArray)
 {
+	for(const AppSignal* s : signalsArray)
+	{
+		detectNewProperties(s);
+	}
+}
+
+void AppSignalPropertyManager::detectNewProperties(const AppSignal* signal)
+{
+	TEST_PTR_RETURN(signal);
+
+	Hash specPropStructHash = calcHash(signal->specPropStruct());
+
+	if (m_parsedSpecPropStruct.contains(specPropStructHash) == true)
+	{
+		return;
+	}
+
 	PropertyObject propObject;
 
-	//
-	// WMTD: create map with already processed signal->specPropStruct() to avoid repeated parsing!
-	//
-
-	std::pair<bool, QString> result = propObject.parseSpecificPropertiesStruct(signal.specPropStruct());
+	std::pair<bool, QString> result = propObject.parseSpecificPropertiesStruct(signal->specPropStruct());
 
 	if (result.first == false)
 	{
 		Q_ASSERT(false);
 		return;
 	}
+
+	m_parsedSpecPropStruct.insert(specPropStructHash);
 
 	std::vector<std::shared_ptr<Property>> specificProperties = propObject.properties();
 
@@ -347,7 +362,7 @@ void AppSignalPropertyManager::detectNewProperties(const AppSignal& signal)
 
 		if (propIndex != -1)
 		{
-			m_propertyDescription[propIndex].appendSignalID(signal.ID());
+			m_propertyDescription[propIndex].appendSignalID(signal->ID());
 
 			if (propertyIsEnum == true)
 			{
@@ -367,7 +382,7 @@ void AppSignalPropertyManager::detectNewProperties(const AppSignal& signal)
 		newProperty.name = propertyName;
 		newProperty.caption = AppSignalProperties::generateCaption(propertyName);
 		newProperty.type = type;
-		newProperty.appendSignalID(signal.ID());
+		newProperty.appendSignalID(signal->ID());
 
 		if (propertyIsEnum)
 		{
@@ -478,21 +493,28 @@ void AppSignalPropertyManager::reloadPropertyBehaviour()
 	int etcFileId = m_dbController->systemFileId(DbDir::EtcDir);
 
 	DbFileInfo propertyBehaviorFile;
-	m_dbController->getFileInfo(etcFileId, QString(Db::File::SignalPropertyBehaviorFileName), &propertyBehaviorFile, nullptr);
+
+	m_dbController->getFileInfo(etcFileId, QString(Db::File::SignalPropertyBehaviorFileName),
+								&propertyBehaviorFile, nullptr);
 
 	if (propertyBehaviorFile.isNull() == true)
 	{
-		QMessageBox::critical(m_parentWidget, "Error", QString("File \"%1\" is not found!").arg(Db::File::SignalPropertyBehaviorFileName));
+		QMessageBox::critical(m_parentWidget, "Error", QString("File \"%1\" is not found!").
+										arg(Db::File::SignalPropertyBehaviorFileName));
 		return;
 	}
 
 	std::shared_ptr<DbFile> file;
+
 	bool result = m_dbController->getLatestVersion(propertyBehaviorFile, &file, nullptr);
+
 	if (result == false)
 	{
-		QMessageBox::critical(m_parentWidget, "Error", QString("Could not load file \"%1\"").arg(Db::File::SignalPropertyBehaviorFileName));
+		QMessageBox::critical(m_parentWidget, "Error", QString("Could not load file \"%1\"").
+										arg(Db::File::SignalPropertyBehaviorFileName));
 		return;
 	}
+
 	QString fileText = file->data();
 	QStringList rows = fileText.split("\n", Qt::SkipEmptyParts);
 
@@ -503,6 +525,7 @@ void AppSignalPropertyManager::reloadPropertyBehaviour()
 	}
 
 	QStringList fieldNameList = rows[0].split(';', Qt::KeepEmptyParts);
+
 	trimm(fieldNameList);
 
 	rows.removeFirst();
@@ -510,6 +533,7 @@ void AppSignalPropertyManager::reloadPropertyBehaviour()
 	QString uncorrectFileMessage =  QString("Uncorrect format of file \"%1\"").arg(Db::File::SignalPropertyBehaviorFileName);
 
 	qsizetype nameIndex = fieldNameList.indexOf("PropertyName");
+
 	if (nameIndex < 0)
 	{
 		QMessageBox::critical(m_parentWidget, "Error", uncorrectFileMessage + ": PropertyName column not found");
@@ -593,6 +617,8 @@ void AppSignalPropertyManager::reloadPropertyBehaviour()
 
 void AppSignalPropertyManager::clear()
 {
+	m_parsedSpecPropStruct.clear();
+
 	if (m_propertyDescription.size() > m_replacedPropertyDescription.size())
 	{
 		emit propertyCountWillDecrease(static_cast<int>(m_replacedPropertyDescription.size()));

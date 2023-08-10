@@ -536,7 +536,6 @@ void PendingChangesDialog::undoChanges()
 	return;
 }
 
-
 void PendingChangesDialog::updateData()
 {
 	m_model.resetData();
@@ -569,13 +568,13 @@ void PendingChangesDialog::updateData()
 
 	// Get checked out signals
 	//
-	QVector<int> checkedOutSignalsIds;
+	std::vector<int> checkedOutSignalsIds;
+
 	db()->getCheckedOutSignalsIDs(&checkedOutSignalsIds, this);
 
 	if (checkedOutSignalsIds.empty() == false)
 	{
-		QVector<AppSignal> checkedOutSignals;
-		checkedOutSignals.reserve(checkedOutSignalsIds.size());
+		std::vector<AppSignal> checkedOutSignals;
 
 		if (bool ok = db()->getLatestSignals(checkedOutSignalsIds, &checkedOutSignals, this);
 			ok == true)

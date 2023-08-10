@@ -103,6 +103,12 @@
 										return false; \
 									}
 
+#define ASSERT_RETURN_IF_FALSE(result)		if ((result) == false) \
+											{ \
+												Q_ASSERT(false); \
+												return false; \
+											}
+
 #define RETURN_VALUE_IF_FALSE(result, value)		if ((result) == false) \
 													{ \
 														return value; \
@@ -154,6 +160,7 @@ inline qint32 reverseInt32(qint32 val)	  { return reverseBytes<qint32>(val);  }
 inline qint64 reverseInt64(qint64 val)	  { return reverseBytes<qint64>(val);  }
 
 inline float reverseFloat(float val)	  { return reverseBytes<float>(val);   }
+inline double reverseDouble(double val)	  { return reverseBytes<double>(val);  }
 
 // Format time to string:  2022.12.31 06:24:59.239
 //

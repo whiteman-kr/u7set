@@ -121,6 +121,7 @@ class AppSignal
 {
 	friend class DbWorker;
 	friend class AppSignalSet;
+	friend class AppSignalSetProvider;
 	friend class SignalTests;
 	friend class DbControllerSignalTests;
 
@@ -374,8 +375,8 @@ public:
 	void saveProtoData(QByteArray* protoDataArray) const;
 	void saveProtoData(Proto::ProtoAppSignalData* protoData) const;
 
+	void loadProtoData(const char* protoDataPtr, int protoDataSize);
 	void loadProtoData(const QByteArray& protoDataArray);
-	void loadProtoData(const Proto::ProtoAppSignalData& protoData);
 
 	// Signal fields from database
 
@@ -501,6 +502,13 @@ private:
 	void setInstanceAction(E::VcsItemAction action) { m_instanceAction = action; }
 	void initCreatedDates();
 
+	QString* appSignalIDPtr() { return &m_appSignalID; }
+	QString* customAppSignalIDPtr() { return &m_customAppSignalID; }
+	QString* equipmentIDPtr() { return &m_equipmentID; }
+	QString* specPropStructPtr() { return &m_specPropStruct; }
+
+	QByteArray* protoSpecPropValuesPtr() { return &m_protoSpecPropValues; }
+
 	bool isCompatibleFormatPrivate(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder, const QString& busTypeID) const;
 
 	void updateTuningValuesType();
@@ -617,7 +625,6 @@ private:
 };
 
 using SignalIDsSet = std::set<int>;
-using SignalIDsVector = std::vector<int>;
 
 class AppSignalSet
 {
@@ -650,7 +657,6 @@ public:
 	void clear();
 	void reserve(int n);
 
-	void append(int signalID, AppSignal* signal);
 	void append(AppSignal* signal);
 	void append(const ID_AppSignalID& id);
 
@@ -659,6 +665,8 @@ public:
 	bool contains(const QString& appSignalID) const;
 	int count() const;
 	bool isEmpty() const;
+
+	void enableIdGeneration();
 
 	const std::vector<AppSignal*>& signalsVector() const;
 
@@ -684,16 +692,9 @@ public:
 
 	void appSignalIdsListSorted(bool removeNumberSign, QStringList* list) const;
 
-	[[nodiscard]] AppSignal* replaceOrAppendIfNotExists(const AppSignal& s);
+	[[nodiscard]] AppSignal* updateSignal(const AppSignal& s, int* index = nullptr);
 
 	bool serializeFromProtoFile(const QString& filePath);
-
-	// delete
-	void buildID2IndexMap();
-//	void updateID2IndexInMap(const QString& appSignalId, int index);
-//	void updateID2IndexInMap(const AppSignal* appSignal);
-
-	void updateMaps(const QString& oldAppSignalID, const AppSignal* updatedSignal);
 
 private:
 	const AppSignal* privateGetSignal(const QString& appSignalID) const;
@@ -706,6 +707,8 @@ private:
 	std::map<Hash, qsizetype> m_hashToIndex;		// Hash(AppSignalID) => Index in m_signals
 
 	SignalsGroups m_groups;
+
+	bool m_enableIdGeneration = false;
 };
 
 class AppSignals

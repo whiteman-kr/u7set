@@ -105,12 +105,11 @@ public:
 
 	SignalsTabPage* parentWindow() { return m_parentWindow; }
 
-	void prepareForReset() { beginResetModel(); }
+	void prepareForReset();
 	void finishReset();
 
-
 public slots:
-	void updateSignal(int signalIndex);
+	void updateSignals(const std::vector<int> indexes);
 	void changeRowCount();
 	void beginIncreaseColumnCount(int newColumnCount);
 	void beginDecreaseColumnCount(int newColumnCount);
@@ -216,6 +215,8 @@ public:
 	void setCheckStates(QModelIndexList selection, bool fromSourceModel);
 	void saveDialogGeometry();
 
+	const std::vector<int>& undoedSignalsIDs() const { return m_undoedSignalsIDs; }
+
 public slots:
 	void undoSelected();
 
@@ -223,10 +224,11 @@ protected:
 	void closeEvent(QCloseEvent* event);
 
 private:
-	SignalsModel *m_sourceModel;
-	CheckedoutSignalsModel* m_proxyModel;
-};
+	SignalsModel* m_sourceModel = nullptr;
+	CheckedoutSignalsModel* m_proxyModel = nullptr;
 
+	std::vector<int> m_undoedSignalsIDs;
+};
 
 class SignalHistoryDialog : public QDialog
 {
@@ -242,7 +244,6 @@ private:
 	QStandardItemModel* m_historyModel = nullptr;
 	int m_signalId = -1;
 };
-
 
 class FindSignalDialog : public QDialog
 {
@@ -367,7 +368,6 @@ private:
 	bool m_shouldReopen = true;
 };
 
-
 class SignalsTabPage : public MainTabPage
 {
 	Q_OBJECT
@@ -378,7 +378,8 @@ public:
 
 	static bool updateSignalsSpecProps(DbController* dbc, const QVector<Hardware::DeviceAppSignal*>& deviceSignalsToUpdate, const QStringList& forceUpdateProperties);
 	int getMiddleVisibleRow();
-	bool editSignals(QVector<int> ids);
+
+	bool editSignals(const std::vector<int> &ids);
 
 protected:
 	void CreateActions(QToolBar* toolBar);
@@ -412,7 +413,7 @@ public slots:
 	void addMetrologyConnection();
 	void metrologyDialogClosed();
 
-	void changeLazySignalLoadingSequence();
+	void changeSignalsLoadingSequence();
 
 	void setSelection(const QVector<int> &selectedRowsSignalID, int focusedCellSignalID = -1);
 	void saveSelection();
