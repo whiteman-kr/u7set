@@ -4858,18 +4858,11 @@ void DbWorker::slot_getLatestSignal(int signalID, AppSignal* signal)
 {
 	AUTO_COMPLETE
 
-	// Check parameters
-	//
-	if (signal == nullptr)
-	{
-		assert(signal != nullptr);
-		return;
-	}
+	TEST_PTR_RETURN(signal);
+	Q_ASSERT(signalID > 0);
 
 	signal->setID(0);		// bad signal flag
 
-	// Operation
-	//
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 
 	if (db.isOpen() == false)
@@ -4880,8 +4873,7 @@ void DbWorker::slot_getLatestSignal(int signalID, AppSignal* signal)
 
 	// request
 	//
-	QString request = QString("SELECT * FROM get_latest_signal(%1, %2)")
-		.arg(currentUser().userId()).arg(signalID);
+	QString request = QString("SELECT * FROM get_latest_signal(%1, %2)").arg(currentUserId()).arg(signalID);
 	QSqlQuery q(db);
 
 	bool result = q.exec(request);
@@ -4896,6 +4888,8 @@ void DbWorker::slot_getLatestSignal(int signalID, AppSignal* signal)
 	{
 		getSignalData(q, *signal);
 	}
+
+	signal->setLoaded(true);
 
 	return;
 }
@@ -4927,28 +4921,11 @@ void DbWorker::slot_getLatestSignals(const std::vector<int>& signalIDs, std::vec
 	// request
 	//
 
-	QString request;
+	QString request = QString("SELECT * FROM get_latest_signals(%1,").arg(currentUserId());
 
-	request.reserve(45 + signalIDs.size() * 6);
+	appendIDsArray(signalIDs, &request);
 
-	request.append(QStringLiteral("SELECT * FROM get_latest_signals("));
-	request.append(QString::number(currentUserId()));
-	request.append(QStringLiteral(",ARRAY["));
-
-	bool first = true;
-
-	for(int id : signalIDs)
-	{
-		if (first == false)
-		{
-			request.append(QStringLiteral(","));
-		}
-
-		request.append(QString::number(id));
-		first = false;
-	}
-
-	request.append(QStringLiteral("])"));
+	request.append(QStringLiteral(")"));
 
 	QSqlQuery q(db);
 
@@ -5172,7 +5149,7 @@ void DbWorker::getSignalData(QSqlQuery& q, AppSignal& s)
 
 	s.setInstanceAction(static_cast<E::VcsItemAction>(q.value(SD_INSTANCE_ACTION).toInt()));
 
-	s.setIsLoaded(true);
+	s.setLoaded(true);
 }
 
 
@@ -5396,7 +5373,7 @@ bool DbWorker::setSignalWorkcopy(QSqlDatabase& db, const AppSignal& s, ObjectSta
 	return true;
 }
 
-void DbWorker::slot_checkoutSignals(const std::set<int>& signalIDs, QVector<ObjectState>* objectStates)
+void DbWorker::slot_checkoutSignals(const std::vector<int>& signalIDs, std::vector<ObjectState>* objectStates)
 {
 	AUTO_COMPLETE
 
@@ -5461,13 +5438,15 @@ void DbWorker::slot_checkoutSignals(const std::set<int>& signalIDs, QVector<Obje
 		return;
 	}
 
+	objectStates->reserve(q.size());
+
 	while(q.next() != false)
 	{
 		ObjectState os;
 
 		db_objectState(q, &os);
 
-		objectStates->append(os);
+		objectStates->emplace_back(os);
 	}
 }
 
@@ -5738,26 +5717,14 @@ void DbWorker::slot_undoSignalsChanges(QVector<int> signalIDs, QVector<ObjectSta
 	}
 }
 
-void DbWorker::slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState> *objectState)
+void DbWorker::slot_checkinSignals(const std::vector<int>& signalIDs, QString comment, std::vector<ObjectState>* objectState)
 {
 	AUTO_COMPLETE
 
-	if (signalIDs == nullptr)
-	{
-		assert(signalIDs != nullptr);
-		return;
-	}
-
-	if (objectState == nullptr)
-	{
-		assert(objectState != nullptr);
-		return;
-	}
+	TEST_PTR_RETURN(objectState);
 
 	objectState->clear();
 
-	// Operation
-	//
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 
 	if (db.isOpen() == false)
@@ -5768,36 +5735,21 @@ void DbWorker::slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVe
 
 	// Log action
 	//
-	QString logMessage = QString("slot_checkinSignals: Comment '%1', SiganlCount %2, SignalIDs ")
-						 .arg(comment)
-						 .arg(signalIDs->size());
+	QString logMessage = QString("slot_checkinSignals: Comment '%1', SiganlCount %2, SignalIDs ").
+										arg(comment).arg(signalIDs.size());
 
-	for (int id : *signalIDs)
+	for (int id : signalIDs)
 	{
 		logMessage += QString("%1 ").arg(id);
 	}
+
 	addLogRecord(db, logMessage);
 
-	// --
-	//
-	qsizetype count = signalIDs->count();
+	QString request = QString("SELECT * FROM checkin_signals(%1,").arg(currentUserId());
 
-	QString request = QString("SELECT * FROM checkin_signals(%1, ARRAY[")
-		.arg(currentUser().userId());
+	appendIDsArray(signalIDs, &request);
 
-	for(qsizetype i = 0; i < count; i++)
-	{
-		if (i < count-1)
-		{
-			request += QString("%1,").arg(signalIDs->at(i));
-		}
-		else
-		{
-			request += QString("%1],").arg(signalIDs->at(i));
-		}
-	}
-
-	request += QString("'%1')").arg(comment);
+	request.append(QString(",'%1')").arg(comment));
 
 	QSqlQuery q(db);
 
@@ -5809,13 +5761,15 @@ void DbWorker::slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVe
 		return;
 	}
 
+	objectState->reserve(q.size());
+
 	while(q.next())
 	{
 		ObjectState os;
 
 		db_objectState(q, &os);
 
-		objectState->append(os);
+		objectState->emplace_back(os);
 	}
 }
 
@@ -7876,4 +7830,29 @@ bool DbWorker::processingAfterDatabaseUpgrade0302(QSqlDatabase& db, QString* err
 
 	return result;
 }
+
+void DbWorker::appendIDsArray(const std::vector<int>& ids, QString* request) const
+{
+	TEST_PTR_RETURN(request);
+
+	// appends string "ARRAY[id1,id2,...,idN]" to request
+
+	request->append(QStringLiteral("ARRAY["));
+
+	bool first = true;
+
+	for(int id : ids)
+	{
+		if (first == false)
+		{
+			request->append(QStringLiteral(","));
+		}
+
+		request->append(QString::number(id));
+		first = false;
+	}
+
+	request->append(QStringLiteral("]"));
+}
+
 

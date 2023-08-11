@@ -1324,19 +1324,18 @@ void DbControllerSignalTests::dbcTest_addSignal()
 
 void DbControllerSignalTests::dbcTest_checkinSignals()
 {
-	QVector<ObjectState> obStates;
-	std::vector<ObjectState> stdObStates;
+	std::vector<ObjectState> obStates;
 	ObjectState obState;
 
 	// try check in unknown signal
 	//
-	QVector<int> ids({100500});
+	std::vector<int> ids({100500});
 
-	QVERIFY(m_dbcAdmin->checkinSignals(&ids, "comment", &obStates, nullptr) == true);
+	QVERIFY(m_dbcAdmin->checkinSignals(ids, "comment", &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_IS_NOT_CHECKED_OUT);
 
-	QVERIFY(m_dbcUser2->checkinSignals(&ids, "comment", &obStates, nullptr) == true);
+	QVERIFY(m_dbcUser2->checkinSignals(ids, "comment", &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_IS_NOT_CHECKED_OUT);
 
@@ -1344,36 +1343,32 @@ void DbControllerSignalTests::dbcTest_checkinSignals()
 
 	//	add signal by Admin
 	//
-	std::vector<int> stdAdminSignals;
+	std::vector<int> adminSignals;
 
-	TS_VERIFY(dbc_addSignal(m_dbcAdmin, E::SignalType::Analog, 1, &stdAdminSignals));
-
-	QVector<int> adminSignals = toQVector(stdAdminSignals);
+	TS_VERIFY(dbc_addSignal(m_dbcAdmin, E::SignalType::Analog, 1, &adminSignals));
 
 	// try checkin by User3
 	//
-	QVERIFY(m_dbcUser3->checkinSignals(&adminSignals, "comment user3", &obStates, nullptr) == true);
+	QVERIFY(m_dbcUser3->checkinSignals(adminSignals, "comment user3", &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER);
 
 	// try checkin by Admin
 	//
-	QVERIFY(m_dbcAdmin->checkinSignals(&adminSignals, "comment admin", &obStates, nullptr) == true);
+	QVERIFY(m_dbcAdmin->checkinSignals(adminSignals, "comment admin", &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_OK);
 	TS_VERIFY(check_signalIsCheckedIn(adminSignals[0]));
 
 	// add signal by User3
 	//
-	std::vector<int> stdUser3Signals;
+	std::vector<int> user3Signals;
 
-	TS_VERIFY(dbc_addSignal(m_dbcUser3, E::SignalType::Bus, 2, &stdUser3Signals));
-
-	QVector<int> user3Signals = toQVector(stdUser3Signals);
+	TS_VERIFY(dbc_addSignal(m_dbcUser3, E::SignalType::Bus, 2, &user3Signals));
 
 	// try checkin by User2
 	//
-	QVERIFY(m_dbcUser2->checkinSignals(&user3Signals, "comment user2", &obStates, nullptr) == true);
+	QVERIFY(m_dbcUser2->checkinSignals(user3Signals, "comment user2", &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 2);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER);
 	QVERIFY(obStates[1].errCode == ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER);
@@ -1386,29 +1381,29 @@ void DbControllerSignalTests::dbcTest_checkinSignals()
 	// try checkin first channel by Admin
 	//
 	ids.clear();
-	ids.append(ch1ID);
+	ids.push_back(ch1ID);
 
-	QVERIFY(m_dbcAdmin->checkinSignals(&ids, "comment admin", &obStates, nullptr) == true);
+	QVERIFY(m_dbcAdmin->checkinSignals(ids, "comment admin", &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_OK);
 	TS_VERIFY(check_signalIsCheckedIn(ids[0]));
 
 	// try checkin already checkedin signal
 	//
-	QVERIFY(m_dbcUser3->checkinSignals(&ids, "comment user3", &obStates, nullptr) == true);
+	QVERIFY(m_dbcUser3->checkinSignals(ids, "comment user3", &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_IS_NOT_CHECKED_OUT);
 
 	// delete signal ch1ID
 	//
 	TS_VERIFY(deleteSignal(USER3_ID, ch1ID, nullptr));		// signal is auto checkedout here
-	QVERIFY(m_dbcUser3->checkinSignals(&ids, "comment user3", &obStates, nullptr) == true);
+	QVERIFY(m_dbcUser3->checkinSignals(ids, "comment user3", &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_OK);
 
 	// try checkin deleted signal that has checkedin instance
 	//
-	QVERIFY(m_dbcUser3->checkinSignals(&ids, "comment user3", &obStates, nullptr) == true);
+	QVERIFY(m_dbcUser3->checkinSignals(ids, "comment user3", &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_IS_NOT_CHECKED_OUT);
 
@@ -1420,47 +1415,44 @@ void DbControllerSignalTests::dbcTest_checkinSignals()
 	// try checkin deleted signal that has no checkedin instance
 	//
 	ids.clear();
-	ids.append(ch2ID);
+	ids.push_back(ch2ID);
 
-	QVERIFY(m_dbcUser3->checkinSignals(&ids, "comment user3", &obStates, nullptr) == true);
+	QVERIFY(m_dbcUser3->checkinSignals(ids, "comment user3", &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_IS_NOT_CHECKED_OUT);
 }
 
 void DbControllerSignalTests::dbcTest_checkoutSignals()
 {
-	QVector<ObjectState> obStates;
-	std::vector<ObjectState> stdObStates;
+	std::vector<ObjectState> obStates;
 	ObjectState obState;
 
 	// add signal and checkin it
 	//
-	std::vector<int> stdAdminSignals;
+	std::vector<int> adminSignals;
 
-	TS_VERIFY(dbc_addSignal(m_dbcAdmin, E::SignalType::Discrete, 2, &stdAdminSignals));
-	QVERIFY(stdAdminSignals.size() == 2);
+	TS_VERIFY(dbc_addSignal(m_dbcAdmin, E::SignalType::Discrete, 2, &adminSignals));
+	QVERIFY(adminSignals.size() == 2);
 
-	int id1 = stdAdminSignals[0];
-	int id2 = stdAdminSignals[1];
+	int id1 = adminSignals[0];
+	int id2 = adminSignals[1];
 
-	QVector adminSignals = toQVector<int>(stdAdminSignals);
-
-	QVERIFY(m_dbcAdmin->checkinSignals(&adminSignals, "checkout", &obStates, nullptr));
+	QVERIFY(m_dbcAdmin->checkinSignals(adminSignals, "checkout", &obStates, nullptr));
 	QVERIFY(obStates.size() == 2);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_OK);
 	QVERIFY(obStates[1].errCode == ERR_SIGNAL_OK);
 
 	// try checkout NOT exist signal
 	//
-	SignalIDsSet ids;
-	ids.insert(id1 + 100500);
+	std::vector<int> ids;
+	ids.push_back(id1 + 100500);
 
 	QVERIFY(m_dbcAdmin->checkoutSignals(ids, &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_NOT_FOUND);
 
 	ids.clear();
-	ids.insert(id1);
+	ids.push_back(id1);
 
 	// try checkout signal by Admin
 	//
@@ -1475,7 +1467,7 @@ void DbControllerSignalTests::dbcTest_checkoutSignals()
 	// try checkout by User2
 	//
 	ids.clear();
-	ids.insert(id2);
+	ids.push_back(id2);
 
 	QVERIFY(m_dbcUser2->checkoutSignals(ids, &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
@@ -1495,9 +1487,9 @@ void DbControllerSignalTests::dbcTest_checkoutSignals()
 	TS_VERIFY(deleteSignal(USER2_ID, id2, &obState));
 	QVERIFY(obState.errCode == ERR_SIGNAL_OK);
 
-	TS_VERIFY(checkinSignals(USER2_ID, std::vector<int>({id2}), "Checkin signal", &stdObStates));
-	QVERIFY(stdObStates.size() == 1);
-	QVERIFY(stdObStates[0].errCode == ERR_SIGNAL_OK);
+	TS_VERIFY(checkinSignals(USER2_ID, std::vector<int>({id2}), "Checkin signal", &obStates));
+	QVERIFY(obStates.size() == 1);
+	QVERIFY(obStates[0].errCode == ERR_SIGNAL_OK);
 
 	QVERIFY(m_dbcAdmin->checkoutSignals(ids, &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);

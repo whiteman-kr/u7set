@@ -17,7 +17,7 @@ public:
 
 	static AppSignalSetProvider* getInstance();
 
-	void projectOpened(DbController* dbController);
+	void projectOpened();
 	void projectClosed();
 
 	const AppSignalSet& signalSet() const;					// may be delete!
@@ -38,8 +38,8 @@ public:
 	AppSignal* getSignal(const QString& appSignalID);
 	AppSignal* getSignal(int signalID);
 
-	bool getChannelSignalsID(const AppSignal& signal, SignalIDsSet* channelSignalIDs) const;
-	bool getChannelSignalsID(int signalID, int groupID, SignalIDsSet* channelSignalIDs) const;
+	bool getChannelSignalsID(const AppSignal& signal, std::vector<int>* channelSignalIDs) const;
+	bool getChannelSignalsID(int signalID, int groupID, std::vector<int>* channelSignalIDs) const;
 
 	int signalIndex(int signalID) const;
 	int signalID(int index) const;
@@ -59,25 +59,33 @@ public:
 	bool isCheckinableSignalForMe(int index) const;
 	bool isCheckinableSignalForMe(const AppSignal* signal) const;
 
-	DbController* dbController() { return m_db; }
-	const DbController* dbController() const { return m_db; }
+//	DbController* dbController() { return m_db; }
+//	const DbController* dbController() const { return m_db; }
 
 	bool checkoutSignal(int index, QString* message);
 	bool undoSignal(int id);
 
 	void deleteSignalGroups(const QSet<int>& signalGroupIDs);
-	void deleteSignals(const SignalIDsSet& signalIDs);
+	void deleteSignals(const std::vector<int>& signalIDs);
 	void deleteSignal(int signalID);
 
 	void addSignal(AppSignal& signal);
 	void saveSignal(AppSignal& signal);
 	void saveSignals(const std::vector<AppSignal*>& signalVector);
-	std::vector<int> cloneSignals(const SignalIDsSet& signalIDsToClone);
+	std::vector<int> cloneSignals(const std::vector<int>& signalIDsToClone);
 
 	void showError(const ObjectState& state);
-	void showErrors(const QVector<ObjectState>& states);
+	void showErrors(const std::vector<ObjectState>& states);
 
 	static void trimSignalTextFields(AppSignal& signal);
+
+	// DbController calls
+
+	bool checkinSignals(const std::vector<int>& signalIDs,
+						QString comment,
+						std::vector<ObjectState>* objectStates);
+
+	bool undoSignalChanges(int signalID, ObjectState* objectStates);
 
 signals:
 	void error(const QString& message);						// for throwing message boxes
@@ -112,6 +120,7 @@ private:
 	static const int BAD_INDEX = -1;
 
 	DbController* m_db = nullptr;
+	QWidget* m_parentWidget = nullptr;
 
 	int m_currentUserID = -1;
 	bool m_currentUserIsAdmin = false;
@@ -121,7 +130,6 @@ private:
 	AppSignalSet m_signalSet;
 
 	AppSignalPropertyManager m_propertyManager;
-
 
 	//
 

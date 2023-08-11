@@ -90,13 +90,15 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& sig
 
 		for (AppSignal* s : signalPtrVector)
 		{
-			if (!dlg.isEditedSignal(signalPtrVector[i]->ID()))
+			if (!dlg.isEditedSignal(s->ID()))
 			{
 				continue;
 			}
+
 			ObjectState state;
-			AppSignalSetProvider::trimSignalTextFields(*signalPtrVector[i]);
-			dbController->setSignalWorkcopy(signalPtrVector[i], &state, parent);
+			AppSignalSetProvider::trimSignalTextFields(*s);
+			dbController->setSignalWorkcopy(s, &state, parent);
+
 			if (state.errCode != ERR_SIGNAL_OK)
 			{
 				switch(state.errCode)
@@ -138,7 +140,7 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& sig
 		return {};	// Cancel is pressed
 	}
 
-	for (int i = 0; i < signalPtrVector.count(); i++)
+	for (int i = 0; i < signalPtrVector.size(); i++)
 	{
 		result[i].first = foundSignalID[i];
 		result[i].second = signalPtrVector[i]->appSignalID();
@@ -295,9 +297,15 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController,
 		}
 	}
 
-	for (int i = 0; i < signalVector.count(); i++)
+	AppSignalPropertyManager& manager = *AppSignalPropertyManager::getInstance();
+
+	manager.reloadPropertyBehaviour();
+
+	for (AppSignal* s : signalVector)
 	{
-		AppSignal& appSignal = *signalVector[i];
+		TEST_PTR_CONTINUE(s);
+
+		AppSignal& appSignal = *s;
 
 		bool uppercaseAppSignalID = true;
 		if (m_dbController->getProjectProperty(Db::ProjectProperty::UppercaseAppSignalId, &uppercaseAppSignalID, this) == false)
@@ -346,7 +354,6 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController,
 
 		manager.detectNewProperties(&appSignal);
 		manager.loadNotSpecificProperties();
-		manager.reloadPropertyBehaviour();
 
 		for (auto property : signalProperties->properties())
 		{
@@ -415,15 +422,14 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 {
 	// Check
 	//
-	for (auto object : m_objList)
+	for(auto object : m_objList)
 	{
 		auto signalProperties = dynamic_cast<AppSignalProperties*>(object.get());
-		if (signalProperties == nullptr)
-		{
-			assert(false);
-			continue;
-		}
+
+		TEST_PTR_CONTINUE(signalProperties);
+
 		AppSignal& signal = signalProperties->signal();
+
 		if (signal.appSignalID().trimmed().isEmpty())
 		{
 			QMessageBox::critical(this, "Error: Application signal ID is empty", "Fill Application signal ID");
@@ -435,16 +441,13 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 
 	// Save
 	//
-	for (qsizetype i = m_signalVector.count() - 1; i >= 0; i--)
+	for (qsizetype i = m_signalVector.size() - 1; i >= 0; i--)
 	{
 		AppSignal& signal = *m_signalVector[i];
 
 		AppSignalProperties* signalProperties = dynamic_cast<AppSignalProperties*>(m_objList[i].get());
-		if (signalProperties == nullptr)
-		{
-			assert(false);
-			continue;
-		}
+
+		TEST_PTR_CONTINUE(signalProperties);
 
 		signalProperties->updateSpecPropValues();
 
@@ -454,12 +457,14 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 		signal = editedSignalCopy;
 
 		signal.setAppSignalID(signal.appSignalID().trimmed());
+
 		if (signal.appSignalID().isEmpty() || signal.appSignalID()[0] != '#')
 		{
 			signal.setAppSignalID("#" + signal.appSignalID());
 		}
 
 		bool uppercaseAppSignalId = true;
+
 		if (m_dbController->getProjectProperty(Db::ProjectProperty::UppercaseAppSignalId, &uppercaseAppSignalId, this) == false)
 		{
 			assert(false);
@@ -473,10 +478,12 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 		}
 
 		signal.setCustomAppSignalID(signal.customAppSignalID().trimmed());
+
 		if (signal.customAppSignalID().isEmpty())
 		{
 			signal.setCustomAppSignalID(signal.appSignalID().mid(1));
 		}
+
 		if (!signal.customAppSignalID().isEmpty() && signal.customAppSignalID()[0] == '#')
 		{
 			signal.setCustomAppSignalID(signal.customAppSignalID().mid(1));
@@ -617,15 +624,15 @@ bool SignalPropertiesDialog::checkoutSignal(AppSignal& s, QString& message)
 		}
 	}
 
-	SignalIDsSet signalsIDs;
+	std::vector<int> signalsIDs;
 
-	signalsIDs.insert(s.ID());
+	signalsIDs.push_back(s.ID());
 
-	QVector<ObjectState> objectStates;
+	std::vector<ObjectState> objectStates;
 
 	m_dbController->checkoutSignals(signalsIDs, &objectStates, m_parent);
 
-	if (objectStates.count() == 0)
+	if (objectStates.empty())
 	{
 		return false;
 	}

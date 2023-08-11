@@ -29,13 +29,6 @@ class QStandardItemModel;
 class TableDataVisibilityController;
 class AppSignalSetProvider;
 
-
-const int	ST_ANALOG = TO_INT(E::SignalType::Analog),
-			ST_DISCRETE = TO_INT(E::SignalType::Discrete),
-			ST_BUS = TO_INT(E::SignalType::Bus),
-			ST_ANY = 0xff;
-
-
 const int	FI_ANY = 0,
 			FI_APP_SIGNAL_ID = 1,
 			FI_CUSTOM_APP_SIGNAL_ID = 2,
@@ -58,7 +51,10 @@ class SignalsDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
-	explicit SignalsDelegate(AppSignalSetProvider* signalSetProvider, SignalsModel* model, SignalsProxyModel* signalsProxyModel, QObject *parent = nullptr);
+	explicit SignalsDelegate(AppSignalSetProvider* signalSetProvider,
+							 SignalsModel* model,
+							 SignalsProxyModel* signalsProxyModel,
+							 QObject* parent = nullptr);
 
 	QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const;
 
@@ -85,78 +81,7 @@ private:
 };
 
 
-class SignalsModel : public QAbstractTableModel
-{
-	Q_OBJECT
-public:
-	SignalsModel(AppSignalSetProvider* signalSetProvider, SignalsTabPage* parent = nullptr);
-	virtual ~SignalsModel() override;
 
-	virtual int rowCount(const QModelIndex& parentIndex = QModelIndex()) const override;
-	virtual int columnCount(const QModelIndex& parentIndex = QModelIndex()) const override;
-
-	virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
-	virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-
-	bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole) override;
-	Qt::ItemFlags flags(const QModelIndex & index) const override;
-
-	SignalsDelegate* createDelegate(SignalsProxyModel* signalsProxyModel) { return new SignalsDelegate(m_signalSetProvider, this, signalsProxyModel, parent()); }
-
-	SignalsTabPage* parentWindow() { return m_parentWindow; }
-
-	void prepareForReset();
-	void finishReset();
-
-public slots:
-	void updateSignals(const std::vector<int> indexes);
-	void changeRowCount();
-	void beginIncreaseColumnCount(int newColumnCount);
-	void beginDecreaseColumnCount(int newColumnCount);
-	void endIncreaseColumnCount();
-	void endDecreaseColumnCount();
-
-private:
-	// Data
-	//
-	AppSignalSetProvider* m_signalSetProvider;
-	int m_rowCount = 0;
-	int m_columnCount = 0;
-
-	SignalsTabPage* m_parentWindow;
-	QString getUserStr(int userId) const;
-};
-
-
-class SignalsProxyModel : public QSortFilterProxyModel
-{
-	Q_OBJECT
-public:
-	SignalsProxyModel(SignalsModel* sourceModel, QObject* parent = nullptr);
-
-	bool filterAcceptsRow(int source_row, const QModelIndex&) const override;
-	bool lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const override;
-
-	void setSignalTypeFilter(int signalType);
-	void setSignalIdFilter(QStringList strIds);
-	void setIdFilterField(int field);
-
-signals:
-	void aboutToSort();	// Before sorting or filtering signals should be fully loaded
-	void aboutToFilter();
-
-protected:
-	void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
-
-private:
-	void applyNewFilter();
-
-	SignalsModel* m_sourceModel;
-	AppSignalSetProvider* m_signalSetProvider;
-	int m_signalType = ST_ANY;
-	int m_idFilterField = FI_EQUIPMENT_ID;
-	QStringList m_strIdMasks;
-};
 
 
 class CheckedoutSignalsModel : public QSortFilterProxyModel
@@ -368,9 +293,18 @@ private:
 	bool m_shouldReopen = true;
 };
 
+class SignalsModel;
+class SignalsProxyModel;
+
 class SignalsTabPage : public MainTabPage
 {
 	Q_OBJECT
+
+public:
+	static const int FILTER_ST_ANALOG = TO_INT(E::SignalType::Analog);
+	static const int FILTER_ST_DISCRETE = TO_INT(E::SignalType::Discrete);
+	static const int FILTER_ST_BUS = TO_INT(E::SignalType::Bus);
+	static const int FILTER_ST_ANY = 0xff;
 
 public:
 	SignalsTabPage(AppSignalSetProvider* signalSetProvider, DbController* dbController, QWidget* parent);
@@ -415,7 +349,7 @@ public slots:
 
 	void changeSignalsLoadingSequence();
 
-	void setSelection(const QVector<int> &selectedRowsSignalID, int focusedCellSignalID = -1);
+	void setSelection(const std::vector<int>& selectedRowsSignalID, int focusedCellSignalID = -1);
 	void saveSelection();
 	void restoreSelection(int focusedSignalId = -1);
 	void onSignalSelectionChanged();
@@ -432,10 +366,14 @@ public slots:
 	// Data
 	//
 private:
+	DbController* m_db = nullptr;
 	static SignalsTabPage* m_instance;
+
 	SignalsModel* m_signalsModel = nullptr;
-	AppSignalSetProvider* m_signalSetProvider = nullptr;
 	SignalsProxyModel* m_signalsProxyModel = nullptr;
+
+	AppSignalSetProvider* m_signalSetProvider = nullptr;
+
 	QTableView* m_signalsView = nullptr;
 	TableDataVisibilityController* m_signalsColumnVisibilityController = nullptr;
 	QComboBox* m_signalTypeFilterCombo = nullptr;
@@ -449,9 +387,78 @@ private:
 	DialogMetrologyConnection* m_metrologyDialog = nullptr;
 	QAction* m_addMetrologyConnectionAction = nullptr;
 
-	QVector<int> m_selectedRowsSignalID;
+	std::vector<int> m_selectedRowsSignalID;
 	int m_focusedCellSignalID = -1;
 	int m_focusedCellColumn = -1;
+};
+
+class SignalsModel : public QAbstractTableModel
+{
+	Q_OBJECT
+public:
+	SignalsModel(AppSignalSetProvider* signalSetProvider, SignalsTabPage* parent = nullptr);
+	virtual ~SignalsModel() override;
+
+	virtual int rowCount(const QModelIndex& parentIndex = QModelIndex()) const override;
+	virtual int columnCount(const QModelIndex& parentIndex = QModelIndex()) const override;
+
+	virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+	virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+
+	bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
+	Qt::ItemFlags flags(const QModelIndex& index) const override;
+
+	SignalsDelegate* createDelegate(SignalsProxyModel* signalsProxyModel);
+
+	SignalsTabPage* parentWindow();
+
+	void prepareForReset();
+	void finishReset();
+
+public slots:
+	void updateSignals(const std::vector<int>& indexes);
+	void changeRowCount();
+	void beginIncreaseColumnCount(int newColumnCount);
+	void beginDecreaseColumnCount(int newColumnCount);
+	void endIncreaseColumnCount();
+	void endDecreaseColumnCount();
+
+private:
+	AppSignalSetProvider* m_signalSetProvider = nullptr;
+	SignalsTabPage* m_parentWindow;
+
+	int m_rowCount = 0;
+	int m_columnCount = 0;
+};
+
+class SignalsProxyModel : public QSortFilterProxyModel
+{
+	Q_OBJECT
+public:
+	SignalsProxyModel(SignalsModel* sourceModel, QObject* parent = nullptr);
+
+	bool filterAcceptsRow(int sourceRow, const QModelIndex&) const override;
+	bool lessThan(const QModelIndex& source_left, const QModelIndex& source_right) const override;
+
+	void setSignalTypeFilter(int signalType);
+	void setSignalIdFilter(QStringList strIds);
+	void setIdFilterField(int field);
+
+signals:
+	void aboutToSort();	// Before sorting or filtering signals should be fully loaded
+	void aboutToFilter();
+
+protected:
+	void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
+
+private:
+	void applyNewFilter();
+
+	SignalsModel* m_sourceModel;
+	AppSignalSetProvider* m_signalSetProvider;
+	int m_signalType = SignalsTabPage::FILTER_ST_ANY;
+	int m_idFilterField = FI_EQUIPMENT_ID;
+	QStringList m_strIdMasks;
 };
 
 

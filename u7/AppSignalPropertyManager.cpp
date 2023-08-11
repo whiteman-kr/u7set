@@ -309,15 +309,18 @@ bool AppSignalPropertyManager::dependsOnPrecision(const int propertyIndex) const
 bool AppSignalPropertyManager::isHiddenFor(E::SignalType type, const int propertyIndex, bool isExpert) const
 {
 	auto inOutTypeEnum = QMetaEnum::fromType<E::SignalInOutType>();
+
 	for (int i = 0; i < IN_OUT_TYPE_COUNT; i++)
 	{
 		E::SignalInOutType directionType = static_cast<E::SignalInOutType>(inOutTypeEnum.value(i));
 		E::PropertyBehaviourType behaviour = getBehaviour(type, directionType, propertyIndex);
+
 		if (isHidden(behaviour, isExpert) == false)
 		{
 			return false;
 		}
 	}
+
 	return true;
 }
 

@@ -153,8 +153,8 @@ public:
 
 	void initSpecificProperties();
 
-	bool isLoaded() const { return m_isLoaded; }
-	void setIsLoaded(bool isLoaded) { m_isLoaded = isLoaded; }
+	bool isLoaded() const { return m_loaded; }
+	void setLoaded(bool loaded) { m_loaded = loaded; }
 
 	// Signal identificators
 
@@ -516,7 +516,7 @@ private:
 	QString specPropNotExistErr(const QString &propName) const;
 
 private:
-	bool m_isLoaded = false;										// == false - only m_ID and m_appSignalID fields is initialized from database
+	bool m_loaded = false;										// == false - only m_ID and m_appSignalID fields is initialized from database
 																	// == true - all Signal fields is initialized from database
 
 	// Signal identificators
@@ -624,8 +624,6 @@ private:
 	bool m_needConversion = false;
 };
 
-using SignalIDsSet = std::set<int>;
-
 class AppSignalSet
 {
 private:
@@ -641,11 +639,11 @@ private:
 		void remove(const AppSignal* appSignal);
 		void remove(int groupID, int signalID);
 
-		bool getGroupSignalIDs(int signalID, int groupID, SignalIDsSet* signalsIDs) const;
+		bool getGroupSignalIDs(int signalID, int groupID, std::vector<int>* signalsIDs) const;
 
 	private:
-		std::map<int, SignalIDsSet> m_groups;		// signalGroupID => set of signalIDs
-													// signalGroupID == SINGLE_CHANNEL is NOT placed in this map!
+		std::map<int, std::vector<int>> m_groups;		// signalGroupID => set of signalIDs
+														// signalGroupID == SINGLE_CHANNEL is NOT placed in this map!
 	};
 
 public:
@@ -687,14 +685,16 @@ public:
 
 	int signalIndex(int signalID) const;
 
-	bool getChannelSignalsID(const AppSignal& signal, SignalIDsSet* channelSignalIDs) const;
-	bool getChannelSignalsID(int signalID, int groupID, SignalIDsSet* channelSignalIDs) const;
+	bool getChannelSignalsID(const AppSignal& signal, std::vector<int>* channelSignalIDs) const;
+	bool getChannelSignalsID(int signalID, int groupID, std::vector<int>* channelSignalIDs) const;
 
 	void appSignalIdsListSorted(bool removeNumberSign, QStringList* list) const;
 
-	[[nodiscard]] AppSignal* updateSignal(const AppSignal& s, int* index = nullptr);
+	AppSignal* updateSignal(const AppSignal& s, int* index = nullptr);
 
 	bool serializeFromProtoFile(const QString& filePath);
+
+	static const int BAD_INDEX = -1;
 
 private:
 	const AppSignal* privateGetSignal(const QString& appSignalID) const;

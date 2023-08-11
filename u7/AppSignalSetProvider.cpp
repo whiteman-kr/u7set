@@ -5,6 +5,7 @@ AppSignalSetProvider* AppSignalSetProvider::m_instance = nullptr;
 AppSignalSetProvider::AppSignalSetProvider(DbController* dbController, QWidget* parentWidget) :
 	QObject(parentWidget),
 	m_db(dbController),
+	m_parentWidget(parentWidget),
 	m_propertyManager(dbController, parentWidget),
 	m_signalsLoadTimer(this)
 {
@@ -29,14 +30,12 @@ AppSignalSetProvider* AppSignalSetProvider::getInstance()
 	return m_instance;
 }
 
-void AppSignalSetProvider::projectOpened(DbController* dbController)
+void AppSignalSetProvider::projectOpened()
 {
-	TEST_PTR_RETURN(dbController);
-
 	m_signalSet.clear();
 
-	m_currentUserID = dbController->currentUser().userId();
-	m_currentUserIsAdmin = dbController->currentUser().isAdminstrator();
+	m_currentUserID = m_db->currentUser().userId();
+	m_currentUserIsAdmin = m_db->currentUser().isAdminstrator();
 
 	loadUsers();
 
@@ -89,11 +88,11 @@ void AppSignalSetProvider::loadSignals(const std::vector<int>& signalIds, bool w
 
 	if (withoutProgress == true)
 	{
-		dbController()->getLatestSignalsWithoutProgress(signalIds, &signalsToLoad, nullptr);
+		m_db->getLatestSignalsWithoutProgress(signalIds, &signalsToLoad, nullptr);
 	}
 	else
 	{
-		dbController()->getLatestSignals(signalIds, &signalsToLoad, nullptr);
+		m_db->getLatestSignals(signalIds, &signalsToLoad, nullptr);
 	}
 	int signalIndex = 0;
 
@@ -144,18 +143,33 @@ void AppSignalSetProvider::enforceAllSignalsLoading()
 
 const AppSignal* AppSignalSetProvider::loadSignal(int signalId)
 {
+	static int id = -1;
+
+	if (id = -1)
+	{
+		id = signalId;
+	}
+	else
+	{
+		if (id == signalId)
+		{
+			DEBUG_STOP;
+		}
+	}
+
 	AppSignal loadedSignal;
 
-	dbController()->getLatestSignal(signalId, &loadedSignal, nullptr);
+	m_db->getLatestSignal(signalId, &loadedSignal, nullptr);
 
-	const AppSignal* updatedSignal = m_signalSet.updateSignal(loadedSignal);
+	int index = BAD_INDEX;
+
+	const AppSignal* updatedSignal = m_signalSet.updateSignal(loadedSignal, &index);
 
 	TEST_PTR_RETURN_NULLPTR(updatedSignal);
+	Q_ASSERT(index != BAD_INDEX);
 
-	int index = m_signalSet.signalIndex(signalId);
-
-	emit signalsUpdated(std::vector{index});
-	emit signalsPropertiesChanged(std::vector{updatedSignal});
+	emit signalsUpdated({index});
+//	emit signalsPropertiesChanged({updatedSignal});
 
 	return updatedSignal;
 }
@@ -185,7 +199,7 @@ QString AppSignalSetProvider::getUserName(int userId)
 
 	Q_ASSERT(false);
 
-	return QString("UnknownUser");
+	return QString("Unknown user ID=%1").arg(userId);
 }
 
 AppSignal* AppSignalSetProvider::getSignal(const QString& appSignalID)
@@ -198,12 +212,12 @@ AppSignal* AppSignalSetProvider::getSignal(int signalID)
 	return m_signalSet.getSignal(signalID);
 }
 
-bool AppSignalSetProvider::getChannelSignalsID(const AppSignal& signal, SignalIDsSet* channelSignalIDs) const
+bool AppSignalSetProvider::getChannelSignalsID(const AppSignal& signal, std::vector<int>* channelSignalIDs) const
 {
 	return m_signalSet.getChannelSignalsID(signal, channelSignalIDs);
 }
 
-bool AppSignalSetProvider::getChannelSignalsID(int signalID, int groupID, SignalIDsSet* channelSignalIDs) const
+bool AppSignalSetProvider::getChannelSignalsID(int signalID, int groupID, std::vector<int>* channelSignalIDs) const
 {
 	return m_signalSet.getChannelSignalsID(signalID, groupID, channelSignalIDs);
 }
@@ -292,11 +306,11 @@ QVector<int> AppSignalSetProvider::getSameChannelSignals(int index)
 
 	if (s->signalGroupID() != 0)
 	{
-		SignalIDsSet sameChannelSignalIDs;
+		std::vector<int> sameChannelSignalIDs;
 
 		m_signalSet.getChannelSignalsID(*s, &sameChannelSignalIDs);
 
-		foreach (const int id, sameChannelSignalIDs)
+		for(int id : sameChannelSignalIDs)
 		{
 			sameChannelSignalRows.append(m_signalSet.signalIndex(id));
 		}
@@ -305,6 +319,7 @@ QVector<int> AppSignalSetProvider::getSameChannelSignals(int index)
 	{
 		sameChannelSignalRows.append(index);
 	}
+
 	return sameChannelSignalRows;
 }
 
@@ -352,8 +367,8 @@ bool AppSignalSetProvider::checkoutSignal(int index, QString* message)
 
 	if (s->checkedOut() == true)
 	{
-		if (s->userID() == m_db->currentUser().userId() ||
-			dbController()->currentUser().isAdminstrator())
+		if (s->userID() == m_currentUserID ||
+			m_currentUserIsAdmin)
 		{
 			return true;
 		}
@@ -363,15 +378,15 @@ bool AppSignalSetProvider::checkoutSignal(int index, QString* message)
 		}
 	}
 
-	SignalIDsSet signalsIDs;
+	std::vector<int> signalsIDs;
 
 	getChannelSignalsID(*s, &signalsIDs);
 
-	QVector<ObjectState> objectStates;
+	std::vector<ObjectState> objectStates;
 
 	m_db->checkoutSignals(signalsIDs, &objectStates, nullptr);
 
-	if (objectStates.count() == 0)
+	if (objectStates.empty())
 	{
 		return false;
 	}
@@ -391,14 +406,11 @@ bool AppSignalSetProvider::checkoutSignal(int index, QString* message)
 		}
 	}
 
-	int currentUserID = dbController()->currentUser().userId();
-	bool userIsAdmin = dbController()->currentUser().isAdminstrator();
-
-	for (const ObjectState& objectState : objectStates)
+	for(const ObjectState& objectState : objectStates)
 	{
 		if (objectState.errCode == ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER &&
-			objectState.userId != currentUserID &&
-			!userIsAdmin)
+			objectState.userId != m_currentUserID &&
+			!m_currentUserIsAdmin)
 		{
 			return false;
 		}
@@ -437,6 +449,8 @@ void AppSignalSetProvider::startSignalsLoading()
 
 	m_signalsLoadTimer.setInterval(100);
 	m_signalsLoadTimer.start();
+
+	m_signalsLoading = true;
 
 	emit signalCountChanged();
 }
@@ -569,8 +583,13 @@ void AppSignalSetProvider::showError(const ObjectState& state)
 
 // Throws single error signal with human readable message for set of ObjectState
 //
-void AppSignalSetProvider::showErrors(const QVector<ObjectState>& states)
+void AppSignalSetProvider::showErrors(const std::vector<ObjectState>& states)
 {
+	if (states.empty())
+	{
+		return;
+	}
+
 	QString message;
 
 	for(const ObjectState& state : states)
@@ -601,6 +620,19 @@ void AppSignalSetProvider::trimSignalTextFields(AppSignal& signal)
 	signal.setCaption(signal.caption().trimmed());
 	signal.setUnit(signal.unit().trimmed());
 }
+
+bool AppSignalSetProvider::checkinSignals(const std::vector<int>& signalIDs,
+										  QString comment,
+										  std::vector<ObjectState>* objectStates)
+{
+	return m_db->checkinSignals(signalIDs, comment, objectStates, m_parentWidget);
+}
+
+bool AppSignalSetProvider::undoSignalChanges(int signalID, ObjectState* objectStates)
+{
+	return m_db->undoSignalChanges(signalID, objectStates, m_parentWidget);
+}
+
 
 /*
 void AppSignalSetProvider::initLazyLoadSignals()
@@ -714,25 +746,25 @@ bool AppSignalSetProvider::undoSignal(int id)
 		return false;
 	}
 
-	SignalIDsSet signalsIDs;
+	std::vector<int> signalsIDs;
 
 	m_signalSet.getChannelSignalsID(*s, &signalsIDs);
 
-	QVector<ObjectState> states;
+	std::vector<ObjectState> states;
 
 	for (int signalId : signalsIDs)
 	{
 		ObjectState state;
 
-		dbController()->undoSignalChanges(signalId, &state, nullptr);
+		m_db->undoSignalChanges(signalId, &state, nullptr);
 
 		if (state.errCode != ERR_SIGNAL_OK)
 		{
-			states << state;
+			states.emplace_back(state);
 		}
 	}
 
-	if (!states.isEmpty())
+	if (!states.empty())
 	{
 		showErrors(states);
 	}
@@ -749,7 +781,7 @@ void AppSignalSetProvider::deleteSignal(int signalID)
 {
 	ObjectState state;
 
-	dbController()->deleteSignal(signalID, &state, nullptr);
+	m_db->deleteSignal(signalID, &state, nullptr);
 
 	if (state.errCode != ERR_SIGNAL_OK)
 	{
@@ -764,7 +796,7 @@ void AppSignalSetProvider::addSignal(AppSignal& signal)
 	m_signalSet.append(new AppSignal(signal));
 }
 
-void AppSignalSetProvider::deleteSignals(const SignalIDsSet& signalIDs)
+void AppSignalSetProvider::deleteSignals(const std::vector<int>& signalIDs)
 {
 	for (const int signalID : signalIDs)
 	{
@@ -810,7 +842,7 @@ void AppSignalSetProvider::saveSignal(AppSignal& signal)
 	ObjectState state;
 	trimSignalTextFields(signal);
 
-	dbController()->setSignalWorkcopy(&signal, &state, nullptr);
+	m_db->setSignalWorkcopy(&signal, &state, nullptr);
 
 	if (state.errCode != ERR_SIGNAL_OK)
 	{
@@ -822,7 +854,7 @@ void AppSignalSetProvider::saveSignal(AppSignal& signal)
 
 void AppSignalSetProvider::saveSignals(const std::vector<AppSignal*>& signalVector)
 {
-	QVector<ObjectState> states;
+	std::vector<ObjectState> states;
 
 	for (AppSignal* s : signalVector)
 	{
@@ -830,9 +862,9 @@ void AppSignalSetProvider::saveSignals(const std::vector<AppSignal*>& signalVect
 
 		trimSignalTextFields(*s);
 
-		dbController()->setSignalWorkcopy(s, &state, nullptr);
+		m_db->setSignalWorkcopy(s, &state, nullptr);
 
-		states.append(state);
+		states.emplace_back(state);
 
 		m_signalSet.updateSignal(*s);
 	}
@@ -840,11 +872,11 @@ void AppSignalSetProvider::saveSignals(const std::vector<AppSignal*>& signalVect
 	showErrors(states);
 }
 
-std::vector<int> AppSignalSetProvider::cloneSignals(const SignalIDsSet& signalIDsToClone)
+std::vector<int> AppSignalSetProvider::cloneSignals(const std::vector<int>& signalIDsToClone)
 {
 	std::vector<int> resultSignalIDs;
 
-	SignalIDsSet clonedSignalIDs;
+	std::set<int> clonedSignalIDs;
 
 	for (const int signalID : signalIDsToClone)
 	{
@@ -860,7 +892,7 @@ std::vector<int> AppSignalSetProvider::cloneSignals(const SignalIDsSet& signalID
 		const AppSignal signal(*signalToClone);
 
 		E::SignalType type = signal.signalType();
-		SignalIDsSet groupSignalIDs;
+		std::vector<int> groupSignalIDs;
 
 		m_signalSet.getChannelSignalsID(signal, &groupSignalIDs);
 
@@ -924,7 +956,7 @@ std::vector<int> AppSignalSetProvider::cloneSignals(const SignalIDsSet& signalID
 			i++;
 		}
 
-		dbController()->addSignal(type, &signalsToCreate, nullptr);
+		m_db->addSignal(type, &signalsToCreate, nullptr);
 
 		for (const AppSignal& s : signalsToCreate)
 		{

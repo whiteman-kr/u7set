@@ -62,7 +62,7 @@ private:
 
 private:
 	DbController* m_dbController;
-	std::vector<AppSignal*>& m_signalVector;
+	const std::vector<AppSignal*>& m_signalVector;
 	std::set<int> m_editedSignalsId;
 	QDialogButtonBox* m_buttonBox;
 	QList<std::shared_ptr<PropertyObject>> m_objList;

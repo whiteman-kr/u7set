@@ -156,7 +156,7 @@ public:
 	bool getLatestSignalsWithoutProgress(const std::vector<int>& signalIDs, std::vector<AppSignal>* signalsArray, QWidget* parentWidget);
 	bool getLatestSignalsWithUserID(std::vector<AppSignal>* out, QWidget* parentWidget);
 
-	bool checkoutSignals(const std::set<int>& signalIDs, QVector<ObjectState>* objectStates, QWidget* parentWidget);
+	bool checkoutSignals(const std::vector<int>& signalIDs, std::vector<ObjectState>* objectStates, QWidget* parentWidget);
 	bool setSignalWorkcopy(AppSignal* signal, ObjectState* objectState, QWidget* parentWidget);
 	bool setSignalsWorkcopies(const QVector<AppSignal>* signalsList, QWidget* parentWidget);
 
@@ -164,7 +164,7 @@ public:
 	bool undoSignalChanges(int signalID, ObjectState* objectState, QWidget* parentWidget);
 	bool undoSignalsChanges(QVector<int> signalIDs, QVector<ObjectState>* objectStates, QWidget* parentWidget);
 
-	bool checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState, QWidget* parentWidget);
+	bool checkinSignals(const std::vector<int>& signalIDs, QString comment, std::vector<ObjectState>* objectState, QWidget* parentWidget);
 
 	bool autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals, std::vector<AppSignal>* addedSignals, QWidget* parentWidget);
 	bool autoDeleteSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals, QWidget* parentWidget);
@@ -277,13 +277,13 @@ signals:
 	void signal_getCheckedOutSignalsIDs(std::vector<int>* signalIDs);
 	void signal_addSignal(E::SignalType signalType, std::vector<AppSignal>* newSignal);
 
-	void signal_checkoutSignals(const std::set<int>& signalIDs, QVector<ObjectState>* objectStates);
+	void signal_checkoutSignals(const std::vector<int>& signalIDs, std::vector<ObjectState>* objectStates);
 	void signal_setSignalWorkcopy(AppSignal* signal, ObjectState* objectState);
 	void signal_setSignalsWorkcopies(const QVector<AppSignal>* signalsList);
 	void signal_deleteSignal(int signalID, ObjectState* objectState);
 	void signal_undoSignalChanges(int signalID, ObjectState* objectState);
 	bool signal_undoSignalsChanges(QVector<int> signalIDs, QVector<ObjectState>* objectStates);
-	void signal_checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState);
+	void signal_checkinSignals(const std::vector<int>& signalIDs, QString comment, std::vector<ObjectState>* objectState);
 
 	void signal_autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals, std::vector<AppSignal>* addedSignals);
 	void signal_autoDeleteSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals);

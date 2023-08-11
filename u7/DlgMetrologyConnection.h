@@ -136,7 +136,9 @@ class DialogMetrologyConnection : public QDialog
 
 public:
 
-	DialogMetrologyConnection(AppSignalSetProvider* signalSetProvider, QWidget* parent = nullptr);
+	DialogMetrologyConnection(AppSignalSetProvider* signalSetProvider,
+							  DbController* dbController,
+							  QWidget* parent = nullptr);
 	virtual ~DialogMetrologyConnection() override;
 
 public:
@@ -158,6 +160,7 @@ public:
 	void findSignal_in_signalSet();
 
 private:
+	DbController* m_db = nullptr;
 
 	Metrology::DbConnectionBase m_connectionBase;
 	bool m_isModified = false;

@@ -575,7 +575,7 @@ AppSignal::AppSignal(const ID_AppSignalID& ids)
 	m_signalGroupID = ids.signalGroupID;
 	m_appSignalID = ids.appSignalID;
 
-	m_isLoaded = false;
+	m_loaded = false;
 }
 
 AppSignal::~AppSignal()
@@ -2418,11 +2418,11 @@ void AppSignalSet::SignalsGroups::insert(const AppSignal* appSignal)
 
 	if (it == m_groups.end())
 	{
-		m_groups.emplace(groupID, SignalIDsSet({ signalID }));
+		m_groups.emplace(groupID, std::vector<int>{ signalID });
 	}
 	else
 	{
-		it->second.insert(signalID);
+		it->second.push_back(signalID);
 	}
 }
 
@@ -2445,17 +2445,28 @@ void AppSignalSet::SignalsGroups::remove(int groupID, int signalID)
 		return;
 	}
 
-	it->second.erase(signalID);
+	std::vector<int>& ids = it->second;
+
+	auto it2 = ids.begin();
+
+	while(it2 != ids.end())
+	{
+		if (*it2 == signalID)
+		{
+			ids.erase(it2);
+			break;
+		}
+	}
 }
 
-bool AppSignalSet::SignalsGroups::getGroupSignalIDs(int signalID, int groupID, SignalIDsSet* signalsIDs) const
+bool AppSignalSet::SignalsGroups::getGroupSignalIDs(int signalID, int groupID, std::vector<int>* signalsIDs) const
 {
 	TEST_PTR_RETURN_FALSE(signalsIDs);
 
 	if (groupID == SINGLE_CHANNEL)
 	{
 		signalsIDs->clear();
-		signalsIDs->insert(signalID);
+		signalsIDs->push_back(signalID);
 		return false;
 	}
 
@@ -2662,18 +2673,18 @@ int AppSignalSet::signalIndex(int signalID) const
 	if (it == m_idToIndex.end())
 	{
 		Q_ASSERT(false);
-		return -1;
+		return BAD_INDEX;
 	}
 
 	return it->second;
 }
 
-bool AppSignalSet::getChannelSignalsID(const AppSignal& signal, SignalIDsSet* channelSignalIDs) const
+bool AppSignalSet::getChannelSignalsID(const AppSignal& signal, std::vector<int>* channelSignalIDs) const
 {
 	return m_groups.getGroupSignalIDs(signal.ID(), signal.signalGroupID(), channelSignalIDs);
 }
 
-bool AppSignalSet::getChannelSignalsID(int signalID, int groupID, SignalIDsSet* channelSignalIDs) const
+bool AppSignalSet::getChannelSignalsID(int signalID, int groupID, std::vector<int>* channelSignalIDs) const
 {
 	return m_groups.getGroupSignalIDs(signalID, groupID, channelSignalIDs);
 }
@@ -2720,6 +2731,12 @@ AppSignal* AppSignalSet::updateSignal(const AppSignal& s, int* index)
 	if (it == m_idToIndex.end())
 	{
 		Q_ASSERT(false);			// signal should be exists!
+
+		if (index != nullptr)
+		{
+			*index = BAD_INDEX;
+		}
+
 		return nullptr;
 	}
 

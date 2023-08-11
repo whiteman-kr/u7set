@@ -406,6 +406,7 @@ SignalsModel::SignalsModel(AppSignalSetProvider* signalSetProvider, SignalsTabPa
 {
 	connect(m_signalSetProvider, &AppSignalSetProvider::signalCountChanged, this, &SignalsModel::changeRowCount);
 	connect(m_signalSetProvider, &AppSignalSetProvider::signalsUpdated, this, &SignalsModel::updateSignals);
+
 	connect(&m_signalSetProvider->signalPropertyManager(), &AppSignalPropertyManager::propertyCountWillIncrease, this, &SignalsModel::beginIncreaseColumnCount, Qt::DirectConnection);
 	connect(&m_signalSetProvider->signalPropertyManager(), &AppSignalPropertyManager::propertyCountWillDecrease, this, &SignalsModel::beginDecreaseColumnCount, Qt::DirectConnection);
 	connect(&m_signalSetProvider->signalPropertyManager(), &AppSignalPropertyManager::propertyCountIncreased, this, &SignalsModel::endIncreaseColumnCount, Qt::DirectConnection);
@@ -434,13 +435,6 @@ int SignalsModel::columnCount(const QModelIndex& parentIndex) const
 	}
 	return m_columnCount + 1;	// Usual properties and "Last change user"
 }
-
-QString SignalsModel::getUserStr(int userId) const
-{
-	QString user = m_signalSetProvider->getUserName(userId);
-	return user == "" ? tr("Unknown user ID = %1").arg(userId) : user;
-}
-
 
 QVariant SignalsModel::data(const QModelIndex &index, int role) const
 {
@@ -495,7 +489,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 
 		if (col >= manager.count())
 		{
-			return signal->checkedOut() ? getUserStr(signal->userID()) : "";
+			return signal->checkedOut() ? m_signalSetProvider->getUserName(signal->userID()) : "";
 		}
 
 		QVariant value = manager.value(signal, col, theSettings.isExpertMode());
@@ -616,6 +610,16 @@ Qt::ItemFlags SignalsModel::flags(const QModelIndex &index) const
 	}
 }
 
+SignalsDelegate* SignalsModel::createDelegate(SignalsProxyModel* signalsProxyModel)
+{
+	return new SignalsDelegate(m_signalSetProvider, this, signalsProxyModel, parent());
+}
+
+SignalsTabPage* SignalsModel::parentWindow()
+{
+	return m_parentWindow;
+}
+
 void SignalsModel::prepareForReset()
 {
 	beginResetModel();
@@ -628,7 +632,7 @@ void SignalsModel::finishReset()
 	endResetModel();
 }
 
-void SignalsModel::updateSignals(const std::vector<int> indexes)
+void SignalsModel::updateSignals(const std::vector<int>& indexes)
 {
 	for(int indx : indexes)
 	{
@@ -687,7 +691,8 @@ SignalsTabPage* SignalsTabPage::m_instance = nullptr;
 
 SignalsTabPage::SignalsTabPage(AppSignalSetProvider* signalSetProvider, DbController* dbController, QWidget* parent) :
 	MainTabPage(dbController, parent),
-	m_signalSetProvider(signalSetProvider)
+	m_signalSetProvider(signalSetProvider),
+	m_db(dbController)
 {
 	assert(signalSetProvider != nullptr);
 	assert(m_instance == nullptr);
@@ -695,10 +700,10 @@ SignalsTabPage::SignalsTabPage(AppSignalSetProvider* signalSetProvider, DbContro
 	m_instance = this;
 
 	m_signalTypeFilterCombo = new QComboBox(this);
-	m_signalTypeFilterCombo->addItem(tr("All signals"), ST_ANY);
-	m_signalTypeFilterCombo->addItem(tr("Analog signals"), ST_ANALOG);
-	m_signalTypeFilterCombo->addItem(tr("Discrete signals"), ST_DISCRETE);
-	m_signalTypeFilterCombo->addItem(tr("Bus signals"), ST_BUS);
+	m_signalTypeFilterCombo->addItem(tr("All signals"), SignalsTabPage::FILTER_ST_ANY);
+	m_signalTypeFilterCombo->addItem(tr("Analog signals"), SignalsTabPage::FILTER_ST_ANALOG);
+	m_signalTypeFilterCombo->addItem(tr("Discrete signals"), SignalsTabPage::FILTER_ST_DISCRETE);
+	m_signalTypeFilterCombo->addItem(tr("Bus signals"), SignalsTabPage::FILTER_ST_BUS);
 
 	m_signalIdFieldCombo = new QComboBox(this);
 	m_signalIdFieldCombo->addItem(tr("Any"), FI_ANY);
@@ -885,7 +890,7 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 		return false;
 	}
 
-	SignalIDsSet checkoutSignalIDs;
+	std::vector<int> checkoutSignalIDs;
 	QVector<AppSignal> newSignalWorkcopies;
 
 	for(const Hardware::DeviceAppSignal* deviceSignal: deviceSignalsToUpdate)
@@ -974,7 +979,7 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 			s.setSpecPropStruct(deviceSignalSpecPropStruct);
 			s.setProtoSpecPropValues(newValues);
 
-			checkoutSignalIDs.insert(signalID);
+			checkoutSignalIDs.push_back(signalID);
 			newSignalWorkcopies.append(s);
 		}
 	}
@@ -984,7 +989,7 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 		return true;
 	}
 
-	QVector<ObjectState> objStates;
+	std::vector<ObjectState> objStates;
 
 	result = dbc->checkoutSignals(checkoutSignalIDs, &objStates, nullptr);
 
@@ -1158,7 +1163,7 @@ void SignalsTabPage::projectOpened()
 {
 	this->setEnabled(true);
 
-	m_signalSetProvider->projectOpened(dbController());
+	m_signalSetProvider->projectOpened();
 
 	changeSignalsLoadingSequence();
 }
@@ -1310,11 +1315,12 @@ void SignalsTabPage::addSignal()
 
 		for (int s = 0; s < signalCount; s++)
 		{
-			QVector<AppSignal> signalVector;
+			std::vector<AppSignal> signalVector;
 
 			for (int i = 0; i < channelCount; i++)
 			{
-				signalVector << signal;
+				signalVector.emplace_back(signal);
+
 				QString suffix;
 
 				if (signalCount > 1)
@@ -1333,9 +1339,9 @@ void SignalsTabPage::addSignal()
 
 			if (dbController()->addSignal(E::SignalType(signalTypeCombo->currentIndex()), &signalVector, this))
 			{
-				for (int i = 0; i < signalVector.count(); i++)
+				for (const AppSignal& s : signalVector)
 				{
-					resultSignalVector.append(signalVector[i]);
+					resultSignalVector.append(s);
 				}
 			}
 		}
@@ -1343,11 +1349,13 @@ void SignalsTabPage::addSignal()
 		if (!resultSignalVector.isEmpty())
 		{
 			int addedSignalId = -1;
+
 			for (int i = 0; i < resultSignalVector.count(); i++)
 			{
 				m_signalSetProvider->addSignal(resultSignalVector[i]);
 				addedSignalId = resultSignalVector[i].ID();
 			}
+
 			m_signalsModel->changeRowCount();
 			restoreSelection(addedSignalId);
 		}
@@ -1430,7 +1438,6 @@ bool SignalsTabPage::editSignals(const std::vector<int>& ids)
 			hasEditedSignals = true;
 
 			m_signalSetProvider->saveSignals(signalsToSave);
-			m_signalSetProvider->loadSignalSet(ids);
 		}
 	}
 
@@ -1450,17 +1457,19 @@ void SignalsTabPage::cloneSignal()
 		QMessageBox::warning(this, tr("Warning"), tr("No one signal was selected!"));
 	}
 
-	SignalIDsSet clonedSignalIDs;
+	std::vector<int> clonedSignalIDs;
 
 	for (int i = 0; i < selection.count(); i++)
 	{
 		int row = m_signalsProxyModel->mapToSource(selection[i]).row();
 		int id = m_signalSetProvider->signalID(row);
-		clonedSignalIDs.insert(id);
+
+		clonedSignalIDs.push_back(id);
 	}
 
 	m_selectedRowsSignalID = m_signalSetProvider->cloneSignals(clonedSignalIDs);
-	if (!m_selectedRowsSignalID.isEmpty())
+
+	if (m_selectedRowsSignalID.empty() == false)
 	{
 		m_focusedCellSignalID = m_selectedRowsSignalID[0];
 	}
@@ -1479,17 +1488,17 @@ void SignalsTabPage::deleteSignal()
 		QMessageBox::warning(this, tr("Warning"), tr("No one signal was selected!"));
 	}
 
-	SignalIDsSet deletedSignalIDs;
+	std::vector<int> deletedSignalIDs;
 
 	for (int i = 0; i < selection.count(); i++)
 	{
 		int row = m_signalsProxyModel->mapToSource(selection[i]).row();
 
-		SignalIDsSet channelSignalsIDs;
+		std::vector<int> channelSignalsIDs;
 
 		m_signalSetProvider->getChannelSignalsID(*m_signalSetProvider->getLoadedSignal(row), &channelSignalsIDs);
 
-		deletedSignalIDs.insert(channelSignalsIDs.begin(), channelSignalsIDs.end());
+		deletedSignalIDs.insert(deletedSignalIDs.end(), channelSignalsIDs.begin(), channelSignalsIDs.end());
 	}
 
 	m_signalSetProvider->deleteSignals(deletedSignalIDs);
@@ -1543,8 +1552,6 @@ void SignalsTabPage::checkIn()
 	{
 		return;
 	}
-
-	m_signalSetProvider->loadSignals();
 }
 
 void SignalsTabPage::viewSignalHistory()
@@ -1573,7 +1580,8 @@ DialogMetrologyConnection* SignalsTabPage::createMetrologyDialog()
 		return nullptr;
 	}
 
-	DialogMetrologyConnection* pMetrologyDialog = new DialogMetrologyConnection(m_signalSetProvider, this);
+	DialogMetrologyConnection* pMetrologyDialog = new DialogMetrologyConnection(m_signalSetProvider, m_db, this);
+
 	if (pMetrologyDialog == nullptr)
 	{
 		return nullptr;
@@ -1678,16 +1686,18 @@ void SignalsTabPage::changeSignalsLoadingSequence()
 	m_signalSetProvider->setMiddleVisibleSignalIndex(getMiddleVisibleRow());
 }
 
-void SignalsTabPage::setSelection(const QVector<int>& selectedRowsSignalID, int focusedCellSignalID)
+void SignalsTabPage::setSelection(const std::vector<int>& selectedRowsSignalID, int focusedCellSignalID)
 {
-	if (selectedRowsSignalID.isEmpty())
+	if (selectedRowsSignalID.empty())
 	{
 		return;
 	}
+
 	if (focusedCellSignalID == -1)
 	{
-		focusedCellSignalID = selectedRowsSignalID.last();
+		focusedCellSignalID = selectedRowsSignalID.back();
 	}
+
 	m_selectedRowsSignalID = selectedRowsSignalID;
 
 	int focusedRow = m_signalSetProvider->signalIndex(focusedCellSignalID);
@@ -1724,6 +1734,11 @@ void SignalsTabPage::saveSelection()
 
 void SignalsTabPage::restoreSelection(int focusedSignalId)
 {
+	if (focusedSignalId == -1)
+	{
+		return;
+	}
+
 	if (focusedSignalId != -1)
 	{
 		m_focusedCellSignalID = focusedSignalId;
@@ -1772,7 +1787,7 @@ void SignalsTabPage::changeSignalTypeFilter(int selectedType)
 
 	for (int i = 0; i < m_signalsModel->columnCount(); i++)
 	{
-		if (signalType == ST_ANY ||
+		if (signalType == SignalsTabPage::FILTER_ST_ANY ||
 			m_signalSetProvider->signalPropertyManager().isHiddenFor(static_cast<E::SignalType>(signalType), i, theSettings.isExpertMode()) == false)
 		{
 			bool hidden = m_signalsColumnVisibilityController->getColumnVisibility(i) == false;
@@ -1791,7 +1806,7 @@ void SignalsTabPage::changeSignalIdFilter(QStringList strIds, bool refreshSignal
 	//
 	if (refreshSignalList == true)
 	{
-		m_signalSetProvider->loadSignals();
+		m_signalSetProvider->reloadSignals();
 	}
 
 	// Reset signal type filter
@@ -1801,12 +1816,12 @@ void SignalsTabPage::changeSignalIdFilter(QStringList strIds, bool refreshSignal
 	{
 		for (int i = 0; i < m_signalTypeFilterCombo->count(); i++)
 		{
-			if (m_signalTypeFilterCombo->itemData(i) == ST_ANY)
+			if (m_signalTypeFilterCombo->itemData(i) == SignalsTabPage::FILTER_ST_ANY)
 			{
 				m_signalTypeFilterCombo->setCurrentIndex(i);
 			}
 		}
-		m_signalsProxyModel->setSignalTypeFilter(ST_ANY);
+		m_signalsProxyModel->setSignalTypeFilter(SignalsTabPage::FILTER_ST_ANY);
 		m_signalIdFieldCombo->setCurrentIndex(FI_EQUIPMENT_ID);
 		m_signalsProxyModel->setIdFilterField(FI_EQUIPMENT_ID);
 	}
@@ -1852,7 +1867,7 @@ void SignalsTabPage::applySignalIdFilter()
 void SignalsTabPage::resetSignalIdFilter()
 {
 	m_signalsProxyModel->setSignalIdFilter(QStringList());
-	m_signalsProxyModel->setSignalTypeFilter(ST_ANY);
+	m_signalsProxyModel->setSignalTypeFilter(SignalsTabPage::FILTER_ST_ANY);
 	m_filterEdit->setText("");
 	m_signalTypeFilterCombo->setCurrentIndex(0);
 }
@@ -2165,36 +2180,44 @@ void CheckinSignalsDialog::checkinSelected()
 	saveDialogGeometry();
 
 	QString commentText = m_commentEdit->toPlainText();
+
 	if (commentText.isEmpty())
 	{
 		QMessageBox::warning(m_sourceModel->parentWindow(), tr("Warning"), tr("Checkin comment is empty"));
 		return;
 	}
-	QVector<int> IDs;
+
+	std::vector<int> IDs;
+
 	AppSignalSetProvider* signalSetProvider = AppSignalSetProvider::getInstance();
+
 	for (int i = 0; i < m_proxyModel->rowCount(); i++)
 	{
 		QModelIndex proxyIndex = m_proxyModel->index(i, 0);
+
 		if (m_proxyModel->data(proxyIndex, Qt::CheckStateRole) != Qt::Checked)
 		{
 			continue;
 		}
+
 		int sourceRow = m_proxyModel->mapToSource(proxyIndex).row();
-		IDs << signalSetProvider->signalID(sourceRow);
+
+		IDs.push_back(signalSetProvider->signalID(sourceRow));
 	}
-	if (IDs.count() == 0)
+
+	if (IDs.size() == 0)
 	{
 		QMessageBox::warning(m_sourceModel->parentWindow(), tr("Warning"), tr("No one signal was selected!"));
 		return;
 	}
-	QVector<ObjectState> states;
-	states.resize(IDs.size());
-	signalSetProvider->dbController()->checkinSignals(&IDs, commentText, &states, this);
+
+	std::vector<ObjectState> states;
+
+	signalSetProvider->checkinSignals(IDs, commentText, &states);
 	signalSetProvider->showErrors(states);
 
 	accept();
 }
-
 
 void CheckinSignalsDialog::cancel()
 {
@@ -2308,30 +2331,27 @@ void UndoSignalsDialog::undoSelected()
 		m_undoedSignalsIDs.push_back(signalSetProvider->signalID(sourceRow));
 	}
 
-	if (m_undoedSignalsIDs.count() == 0)
+	if (m_undoedSignalsIDs.empty())
 	{
 		QMessageBox::warning(m_sourceModel->parentWindow(), tr("Warning"), tr("No one signal was selected!"));
 		return;
 	}
 
-	QVector<ObjectState> states;
+	std::vector<ObjectState> states;
 
 	for(int ID : m_undoedSignalsIDs)
 	{
 		ObjectState state;
 
-		signalSetProvider->dbController()->undoSignalChanges(ID, &state, m_sourceModel->parentWindow());
+		signalSetProvider->undoSignalChanges(ID, &state);
 
 		if (state.errCode != ERR_SIGNAL_OK)
 		{
-			states << state;
+			states.emplace_back(state);
 		}
 	}
 
-	if (states.isEmpty() == false)
-	{
-		signalSetProvider->showErrors(states);
-	}
+	signalSetProvider->showErrors(states);
 
 	accept();
 }
@@ -2353,11 +2373,18 @@ SignalsProxyModel::SignalsProxyModel(SignalsModel *sourceModel, QObject *parent)
 	setSourceModel(sourceModel);
 }
 
-bool SignalsProxyModel::filterAcceptsRow(int source_row, const QModelIndex &) const
+bool SignalsProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex&) const
 {
-	const AppSignal& currentSignal = *m_signalSetProvider->getLoadedSignal(source_row);
+	if (m_signalType == SignalsTabPage::FILTER_ST_ANY && m_strIdMasks.isEmpty())
+	{
+		return true;
 
-	if (!(m_signalType == ST_ANY || m_signalType == TO_INT(currentSignal.signalType())))
+	}
+
+	const AppSignal& currentSignal = *m_signalSetProvider->getLoadedSignal(sourceRow);
+
+	if (m_signalType != SignalsTabPage::FILTER_ST_ANY &&
+		m_signalType != TO_INT(currentSignal.signalType()))
 	{
 		return false;
 	}
@@ -2417,21 +2444,21 @@ bool SignalsProxyModel::filterAcceptsRow(int source_row, const QModelIndex &) co
 	return false;
 }
 
-bool SignalsProxyModel::lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const
+bool SignalsProxyModel::lessThan(const QModelIndex& sourceLeft, const QModelIndex& sourceRight) const
 {
-	QVariant l = m_sourceModel->data(source_left);
-	QVariant r = m_sourceModel->data(source_right);
+	QVariant l = m_sourceModel->data(sourceLeft);
+	QVariant r = m_sourceModel->data(sourceRight);
 
 	if (l == r)
 	{
-		const AppSignal* sl = m_signalSetProvider->getLoadedSignal(source_left.row());
-		const AppSignal* sr = m_signalSetProvider->getLoadedSignal(source_right.row());
+		const AppSignal* sl = m_signalSetProvider->getLoadedSignal(sourceLeft.row());
+		const AppSignal* sr = m_signalSetProvider->getLoadedSignal(sourceRight.row());
 
 		return sl->appSignalID() < sr->appSignalID();
 	}
 	else
 	{
-		return QSortFilterProxyModel::lessThan(source_left, source_right);
+		return QSortFilterProxyModel::lessThan(sourceLeft, sourceRight);
 	}
 }
 
@@ -2583,7 +2610,7 @@ SignalHistoryDialog::SignalHistoryDialog(DbController* dbController, const QStri
 		if (signalInstance.size() == 1)
 		{
 			signalInstances.push_back(signalInstance[0]);
-			pSignalPropertyManager->detectNewProperties(signalInstance[0]);
+			pSignalPropertyManager->detectNewProperties(&signalInstance[0]);
 			signalInstance.clear();
 		}
 		else

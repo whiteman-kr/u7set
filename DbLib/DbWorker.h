@@ -154,7 +154,7 @@ public slots:
 	bool addSignal(E::SignalType signalType, std::vector<AppSignal>* newSignal);
 	bool setSignalWorkcopy(QSqlDatabase& db, const AppSignal& s, ObjectState& objectState, QString& errMsg);
 
-	void slot_checkoutSignals(const std::set<int>& signalIDs, QVector<ObjectState>* objectStates);
+	void slot_checkoutSignals(const std::vector<int>& signalIDs, std::vector<ObjectState>* objectStates);
 	void slot_setSignalWorkcopy(AppSignal* signal, ObjectState* objectState);
 	void slot_setSignalsWorkcopies(const QVector<AppSignal>* signalsList);
 
@@ -162,7 +162,7 @@ public slots:
     void slot_undoSignalChanges(int signalID, ObjectState* objectState);
 	void slot_undoSignalsChanges(QVector<int> signalIDs, QVector<ObjectState>* objectStates);
 
-    void slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState);
+	void slot_checkinSignals(const std::vector<int>& signalIDs, QString comment, std::vector<ObjectState>* objectState);
 
 	void slot_autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals, std::vector<AppSignal>* addedSignals);
 	static QString initAppSignalFromDeviceAppSignal(const Hardware::DeviceAppSignal& deviceSignal, AppSignal* appSignal);
@@ -260,6 +260,7 @@ private:
 	bool processingAfterDatabaseUpgrade0302(QSqlDatabase& db, QString* errorMessage);
 //	void getSignalDataAfterDatabaseUpdate0211(QSqlQuery& q, Signal& s);
 
+	void appendIDsArray(const std::vector<int>& ids, QString* request) const;
 
 private:
 	mutable QReadWriteLock m_lock;

@@ -2230,13 +2230,9 @@ bool DbController::getLatestSignalsWithoutProgress(const std::vector<int>& signa
 												   std::vector<AppSignal>* signalsArray,
 												   QWidget* parentWidget)
 {
-	if (signalsArray == nullptr)
-	{
-		assert(signalsArray != nullptr);
-		return false;
-	}
+	TEST_PTR_RETURN_FALSE(signalsArray);
 
-	if (signalIDs.size() > 250)
+	if (signalIDs.size() > 1000)
 	{
 		assert(false);
 		return false;
@@ -2292,7 +2288,7 @@ bool DbController::getLatestSignalsWithUserID(std::vector<AppSignal>* out, QWidg
 
 }
 
-bool DbController::checkoutSignals(const std::set<int>& signalIDs, QVector<ObjectState>* objectStates, QWidget* parentWidget)
+bool DbController::checkoutSignals(const std::vector<int>& signalIDs, std::vector<ObjectState>* objectStates, QWidget* parentWidget)
 {
 	if (objectStates == nullptr)
 	{
@@ -2434,19 +2430,10 @@ bool DbController::undoSignalsChanges(QVector<int> signalIDs, QVector<ObjectStat
 
 }
 
-bool DbController::checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState> *objectState, QWidget* parentWidget)
+bool DbController::checkinSignals(const std::vector<int>& signalIDs, QString comment,
+								  std::vector<ObjectState>* objectState, QWidget* parentWidget)
 {
-	if (signalIDs == nullptr)
-	{
-		assert(signalIDs != nullptr);
-		return false;
-	}
-
-	if (objectState == nullptr)
-	{
-		assert(objectState != nullptr);
-		return false;
-	}
+	TEST_PTR_RETURN_FALSE(objectState);
 
 	// Init progress and check availability
 	//
@@ -2465,8 +2452,6 @@ bool DbController::checkinSignals(QVector<int>* signalIDs, QString comment, QVec
 
 	return ok;
 }
-
-
 
 bool DbController::autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals, std::vector<AppSignal>* addedSignals, QWidget* parentWidget)
 {

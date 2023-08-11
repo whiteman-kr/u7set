@@ -425,7 +425,7 @@ void PendingChangesDialog::checkIn()
 	std::vector<DbFileInfo> checkInFiles;
 	checkInFiles.reserve(objects.size());
 
-	QVector<int> checkInSignals;
+	std::vector<int> checkInSignals;
 	checkInSignals.reserve(static_cast<int>(objects.size()));
 
 	for (const PendingChangesObject& o : objects)
@@ -462,8 +462,9 @@ void PendingChangesDialog::checkIn()
 	//
 	if (checkInSignals.empty() == false)
 	{
-		QVector<ObjectState> signalObjectState;
-		db()->checkinSignals(&checkInSignals, comment, &signalObjectState, this);
+		std::vector<ObjectState> signalObjectState;
+
+		db()->checkinSignals(checkInSignals, comment, &signalObjectState, this);
 	}
 
 	// --

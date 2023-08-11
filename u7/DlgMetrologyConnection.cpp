@@ -610,14 +610,17 @@ void DialogMetrologyConnectionItem::onOk()
 // -------------------------------------------------------------------------------------------------------------------
 // class DialogMetrologyConnection
 
-DialogMetrologyConnection::DialogMetrologyConnection(AppSignalSetProvider* signalSetProvider, QWidget* parent) :
+DialogMetrologyConnection::DialogMetrologyConnection(AppSignalSetProvider* signalSetProvider,
+													 DbController* dbController,
+													 QWidget* parent) :
 	QDialog(parent),
-	m_signalSetProvider(signalSetProvider)
+	m_signalSetProvider(signalSetProvider),
+	m_db(dbController)
 {
 	TEST_PTR_RETURN(m_signalSetProvider);
 
 	m_connectionTable.setSignalSetProvider(m_signalSetProvider);
-	m_connectionBase.setDbController(m_signalSetProvider->dbController());
+	m_connectionBase.setDbController(m_db);
 
 	m_isModified = false;
 
