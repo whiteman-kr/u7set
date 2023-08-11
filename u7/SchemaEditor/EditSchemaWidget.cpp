@@ -4265,12 +4265,24 @@ void EditSchemaWidget::layers()
 
 void EditSchemaWidget::setActiveLayer(QString name)
 {
+	if (schema() == nullptr)
+	{
+		return;
+	}
+
+	if (activeLayer() != nullptr && activeLayer()->name() == name)
+	{
+		return;
+	}
+
 	for (auto layers = schema()->layers();
 		 auto layer : layers)
 	{
 		if (layer->name() == name)
 		{
 			editSchemaView()->setActiveLayer(layer);
+			editSchemaView()->clearSelection();
+			editSchemaView()->update();
 			break;
 		}
 	}

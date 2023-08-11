@@ -6,11 +6,12 @@
 namespace ClientLib
 {
 	//
-	// Signle connection to AppDataService for providing real time data for trends
+	// Single connection to AppDataService for providing real time data for trends
 	//
 	class RtConnection : public QObject
 	{
 		Q_OBJECT
+
 	public:
 		RtConnection() = delete;
 		RtConnection(const RtConnection&) = delete;
