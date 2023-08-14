@@ -14,7 +14,7 @@ message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Add LTO for Rlease and Windows only. 
+# Add LTO for Release and Windows only. 
 # It is diasbale for Unix to speed up CI bulid.
 #
 if(CMAKE_BUILD_TYPE STREQUAL "Release" AND MSVC)
@@ -27,25 +27,38 @@ if (DEFINED BIN_OUT_DIR)
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN_OUT_DIR})
 	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${BIN_OUT_DIR})
 else()
-	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin/debug)
-	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${BIN_OUT_DIR})
-	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin/release)
-	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin/release)
-	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_BINARY_DIR}/bin/minsizerel)
-	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_BINARY_DIR}/bin/minsizerel)
-	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}/bin/relwithdebuginfo)
-	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}/bin/relwithdebuginfo)
+	string(TOLOWER ${CMAKE_BUILD_TYPE} BUILD_TYPE_LOWERCASE)
+
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/${BUILD_TYPE_LOWERCASE})
+	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/${BUILD_TYPE_LOWERCASE})
 endif()
 
 option(CODE_COVERAGE "Code coverage (Linux only)" OFF)
 include(./cmake/codecoverage.cmake)
 
+# AddressSanitizer
+#
+option(ADDRESS_SANITIZER "Address Sanitizer (alwasy ON for debug)" OFF)
+
+if(ADDRESS_SANITIZER OR CMAKE_BUILD_TYPE STREQUAL "Debug")
+	set(ADDRESS_SANITIZER, ON)
+	add_compile_options(-fsanitize=address)
+	add_link_options(-fsanitize=address)
+endif()
+
+
 message("-----------------------------------------")
 message(${PROJECT_NAME})
 message("Version: " ${CMAKE_PROJECT_VERSION})
-message("Build type: " ${CMAKE_BUILD_TYPE})
+if(CMAKE_CONFIGURATION_TYPES)
+	message("Build types: ${CMAKE_CONFIGURATION_TYPES}")
+	message(FATAL_ERROR "Multiple configuration is not supported.")
+else()
+	message("Build type: " ${CMAKE_BUILD_TYPE})
+endif()
 message("Build output dir set to: " ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 message("Code coverage: " ${CODE_COVERAGE})
+message("AddressSanitizer: " ${ADDRESS_SANITIZER})
 message("-----------------------------------------")
 
 # Add projects.
