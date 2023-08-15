@@ -38,10 +38,9 @@ include(./cmake/codecoverage.cmake)
 
 # AddressSanitizer
 #
-option(ADDRESS_SANITIZER "Address Sanitizer (alwasy ON for debug)" OFF)
+option(ADDRESS_SANITIZER "Address Sanitizer" OFF)
 
-if(ADDRESS_SANITIZER OR CMAKE_BUILD_TYPE STREQUAL "Debug")
-	set(ADDRESS_SANITIZER, ON)
+if(ADDRESS_SANITIZER)
 	add_compile_options(-fsanitize=address)
 	add_link_options(-fsanitize=address)
 endif()

@@ -208,7 +208,7 @@ namespace VFrame30
 
 		if (control->text() != text() ||
 			control->placeholderText() != placeholderText() ||
-			static_cast<int>(control->alignment()) != (m_horzAlign | m_vertAlign) ||
+			static_cast<int>(control->alignment()) != static_cast<int>(m_horzAlign) | static_cast<int>(m_vertAlign) ||
 			control->maxLength() != maxLength() ||
 			control->isReadOnly() != readOnly())
 		{
@@ -221,7 +221,7 @@ namespace VFrame30
 
 			control->setText(text());
 			control->setPlaceholderText(placeholderText());
-			control->setAlignment(static_cast<Qt::Alignment>(m_horzAlign | m_vertAlign));
+			control->setAlignment(static_cast<Qt::Alignment>(static_cast<int>(m_horzAlign) | static_cast<int>(m_vertAlign)));
 			control->setMaxLength(maxLength());
 			control->setReadOnly(readOnly());
 

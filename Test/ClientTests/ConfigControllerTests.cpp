@@ -288,6 +288,10 @@ TEST(ConfigControllerTests, twoClientsOnSameComputer)
 	MonitorConfigControllerStub configController2{softwareInfo, host, &log};
 	MonitorConfigControllerStub configController3{softwareInfo, host, &log};
 
+	configController1.start();
+	configController2.start();
+	configController3.start();
+
 	EXPECT_NE(configController1.appInstanceNo(), configController2.appInstanceNo());
 	EXPECT_NE(configController1.appInstanceNo(), configController3.appInstanceNo());
 	EXPECT_NE(configController2.appInstanceNo(), configController3.appInstanceNo());

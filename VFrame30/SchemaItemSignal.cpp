@@ -809,7 +809,7 @@ namespace VFrame30
 											   text,
 											   cellFillColor(row, cellColumnIndex),
 											   cellTextColor(row, cellColumnIndex),
-											   static_cast<int>(column.horzAlign | Qt::AlignVCenter),
+											   static_cast<int>(column.horzAlign) | static_cast<int>(Qt::AlignVCenter),
 											   m_font.drawSize() / 8.0);
 
 							cellColumnIndex ++;
@@ -847,7 +847,7 @@ namespace VFrame30
 									   text,
 									   cellFillColor(row, cellColumnIndex),
 									   cellTextColor(row, cellColumnIndex),
-									   column.horzAlign | Qt::AlignVCenter,
+									   static_cast<int>(column.horzAlign) | static_cast<int>(Qt::AlignVCenter),
 									   m_font.drawSize() / 4.0);
 
 					cellColumnIndex ++;
@@ -1177,14 +1177,14 @@ namespace VFrame30
 #ifdef VFRAME30_CACHE_DRAW_TEXT
 				if (drawParam->pdfMode() == true)
 				{
-					DrawHelper::drawText(painter, m_font, itemUnit(), text, textRect, c.horzAlign | Qt::AlignTop);
+					DrawHelper::drawText(painter, m_font, itemUnit(), text, textRect, c.horzAlign | static_cast<int>(Qt::AlignTop));
 				}
 				else
 				{
-					DrawHelper::drawTextCahed(painter, m_font, itemUnit(), text, textRect, c.horzAlign | Qt::AlignTop, drawParam->schemaView()->zoom());
+					DrawHelper::drawTextCahed(painter, m_font, itemUnit(), text, textRect, c.horzAlign | static_cast<int>(Qt::AlignTop), drawParam->schemaView()->zoom());
 				}
 #else
-				DrawHelper::drawText(painter, m_font, itemUnit(), text, textRect, c.horzAlign | Qt::AlignTop);
+				DrawHelper::drawText(painter, m_font, itemUnit(), text, textRect, static_cast<int>(c.horzAlign) | static_cast<int>(Qt::AlignTop));
 #endif
 			}
 		}

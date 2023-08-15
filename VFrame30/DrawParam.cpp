@@ -656,7 +656,8 @@ thread_local QCache<Hash, DrawTextCacheItem> cache{50'000'000};			// 50Mb of ima
 										rect.height() * dpiY * zoomFactor :
 										rect.height() * zoomFactor;
 
-		QSize imageSize{std::lround(imageWidth) + extraSizePx, std::lround(imageHeight) + extraSizePx};
+		QSize imageSize{static_cast<int>(std::lround(imageWidth)) + extraSizePx,
+						static_cast<int>(std::lround(imageHeight)) + extraSizePx};
 
 		Hash cacheItemHash = DrawSvgCacheItem::getHash(unit, svg, imageSize, dpiX, dpiY, zoom);
 		bool newCacheItem = false;
