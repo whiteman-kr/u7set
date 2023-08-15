@@ -30,11 +30,11 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	m_translator.addLanguage("en", "English");
 	m_translator.addLanguage("uk", "Ukrainian");
 
-	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/languages/Monitor_uk.qm");
-	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/languages/ClientLib_uk.qm");
-	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/languages/TrendView_uk.qm");
-	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/languages/UtilsLib_uk.qm");
-	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/languages/qt_uk.qm");
+	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/Monitor_uk.qm");
+	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/ClientLib_uk.qm");
+	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/TrendView_uk.qm");
+	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/UtilsLib_uk.qm");
+	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/qt_uk.qm");
 
 	{
 		QStringList failedTranslations;
