@@ -99,7 +99,7 @@ target_precompile_headers(${TARGET} PUBLIC
 
 #Add translations
 #
-add_translation()
+add_translation(${TARGET} ${CMAKE_COMMAND} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Core Qt6::Network Qt6::Xml Qt6::Widgets)
 target_link_libraries(${TARGET} PUBLIC CommonLib)
