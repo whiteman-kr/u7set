@@ -24,7 +24,7 @@ namespace ClientLib
 
 		// Language switching
 		//
-		bool setLanguage(const QString& code);
+		bool setLanguage(const QString& code, QStringList& failedFiles);
 
 	private:
 		std::map<QString, QString> m_languages;			// Key is locale code, value is language name

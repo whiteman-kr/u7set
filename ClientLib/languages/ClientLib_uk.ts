@@ -4,37 +4,37 @@
 <context>
     <name>ClientLib::ConfigController</name>
     <message>
-        <location filename="../ConfigController.cpp" line="69"/>
+        <location filename="../ConfigController.cpp" line="68"/>
         <source>getFileBlocked() Can&apos;t get file %1, error %2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ConfigController.cpp" line="73"/>
+        <location filename="../ConfigController.cpp" line="72"/>
         <source>getFileBlocked(&apos;%1&apos;) Success</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ConfigController.cpp" line="91"/>
+        <location filename="../ConfigController.cpp" line="90"/>
         <source>getFileBlockedById() Can&apos;t get fileid %1, error %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ConfigController.cpp" line="95"/>
+        <location filename="../ConfigController.cpp" line="94"/>
         <source>getFileBlockedById(&apos;%1&apos;) Success</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ConfigController.cpp" line="196"/>
+        <location filename="../ConfigController.cpp" line="195"/>
         <source>Cannot create or attach to shared memory to determine software instance no. Error: %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ConfigController.cpp" line="230"/>
+        <location filename="../ConfigController.cpp" line="229"/>
         <source>Cannot create or attach to shared memory to determine software instance no, there is no free slots.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ConfigController.cpp" line="318"/>
+        <location filename="../ConfigController.cpp" line="317"/>
         <source>MonitorConfigController::start()</source>
         <translation></translation>
     </message>
@@ -46,27 +46,27 @@
         <translation type="vanished">Вхід</translation>
     </message>
     <message>
-        <location filename="../TuningUserManager.cpp" line="233"/>
+        <location filename="../TuningUserManager.cpp" line="225"/>
         <source>User Authorization</source>
         <translation>Авторизація</translation>
     </message>
     <message>
-        <location filename="../TuningUserManager.cpp" line="245"/>
+        <location filename="../TuningUserManager.cpp" line="237"/>
         <source>Login:</source>
         <translation>Логін:</translation>
     </message>
     <message>
-        <location filename="../TuningUserManager.cpp" line="248"/>
+        <location filename="../TuningUserManager.cpp" line="240"/>
         <source>Password:</source>
         <translation>Пароль:</translation>
     </message>
     <message>
-        <location filename="../TuningUserManager.cpp" line="255"/>
+        <location filename="../TuningUserManager.cpp" line="247"/>
         <source>OK</source>
         <translation>ОК</translation>
     </message>
     <message>
-        <location filename="../TuningUserManager.cpp" line="259"/>
+        <location filename="../TuningUserManager.cpp" line="251"/>
         <source>Cancel</source>
         <translation>Скасувати</translation>
     </message>
@@ -74,12 +74,12 @@
 <context>
     <name>ClientLib::RtTrendTcpClient</name>
     <message>
-        <location filename="../RtTrendTcpClient.cpp" line="237"/>
+        <location filename="../RtTrendTcpClient.cpp" line="236"/>
         <source>Cannot parse reply to RT_TRENDS_MANAGEMENT</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../RtTrendTcpClient.cpp" line="291"/>
+        <location filename="../RtTrendTcpClient.cpp" line="290"/>
         <source>Cannot parse reply to RT_TRENDS_GET_STATE_CHANGES</source>
         <translation></translation>
     </message>
@@ -418,7 +418,7 @@
         <translation>Нове значення</translation>
     </message>
     <message>
-        <location filename="../TuningUserManager.cpp" line="214"/>
+        <location filename="../TuningUserManager.cpp" line="206"/>
         <source>Wrong password!</source>
         <translation>Невірний пароль!</translation>
     </message>

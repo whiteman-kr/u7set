@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 project(TuningClient LANGUAGES CXX)
 
 include(../cmake/vld.cmake)
+include(../cmake/translations.cmake)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -16,7 +17,7 @@ if (MSVC)
   )
 endif (MSVC)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Sql Network Qml Xml Svg PrintSupport)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Sql Network Qml Xml Svg PrintSupport LinguistTools)
 qt_standard_project_setup()
 
 set (TC_SOURCES
@@ -174,6 +175,10 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QMouseEvent>
 	<QtQml>
 )
+
+#Add translations
+#
+add_translation()
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Sql Qt6::Network Qt6::Qml Qt6::Xml Qt6::Svg Qt6::PrintSupport)
 target_link_libraries(${TARGET} PRIVATE CommonLib UtilsLib AppSignalLib OnlineLib VFrame30 ClientLib)

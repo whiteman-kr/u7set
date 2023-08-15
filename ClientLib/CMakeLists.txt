@@ -2,11 +2,13 @@ cmake_minimum_required(VERSION 3.16)
 
 project(ClientLib LANGUAGES CXX)
 
+include(../cmake/translations.cmake)
+
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Gui Xml Network Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Gui Xml Network Widgets LinguistTools)
 
 set(TARGET ClientLib)
 
@@ -83,6 +85,10 @@ target_precompile_headers(${TARGET} PUBLIC
 
 	"../Proto/network.pb.h"
 )
+
+#Add translations
+#
+add_translation()
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Gui Qt6::Xml Qt6::Network Qt6::Widgets)
 target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib OnlineLib AppSignalLib TrendView)

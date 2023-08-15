@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 project(Monitor LANGUAGES CXX)
 
 include(../cmake/vld.cmake)
+include(../cmake/translations.cmake)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -17,7 +18,7 @@ if (MSVC)
   )
 endif (MSVC)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Network Qml Xml Svg PrintSupport)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Network Qml Xml Svg PrintSupport LinguistTools)
 qt_standard_project_setup()
 
 set (MONITOR_SOURCES
@@ -142,6 +143,10 @@ add_executable(${TARGET} WIN32
 	${MONITOR_SOURCES}
 	${MONITOR_RESOURCES}
 )
+
+#Add translations
+#
+add_translation()
 
 target_precompile_headers(${TARGET} PRIVATE
 	# C includes, must be before c++ includes

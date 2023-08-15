@@ -2,11 +2,13 @@ cmake_minimum_required(VERSION 3.16)
 
 project(UtilsLib LANGUAGES CXX)
 
+include(../cmake/translations.cmake)
+
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Network Xml Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Network Xml Widgets LinguistTools)
 
 set(TARGET UtilsLib)
 
@@ -94,6 +96,10 @@ target_precompile_headers(${TARGET} PUBLIC
 	<QXmlStreamReader>
 	<QXmlStreamWriter>
 )
+
+#Add translations
+#
+add_translation()
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Core Qt6::Network Qt6::Xml Qt6::Widgets)
 target_link_libraries(${TARGET} PUBLIC CommonLib)

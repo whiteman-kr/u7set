@@ -270,8 +270,8 @@
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../Trend.cpp" line="480"/>
-        <location filename="../Trend.cpp" line="536"/>
+        <location filename="../Trend.cpp" line="484"/>
+        <location filename="../Trend.cpp" line="543"/>
         <source> [can&apos;t render the trend, scale is not valid for current mode]</source>
         <translation></translation>
     </message>
@@ -317,387 +317,387 @@
 <context>
     <name>TrendLib::TrendMainWindow</name>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="70"/>
-        <location filename="../TrendMainWindow.cpp" line="417"/>
+        <location filename="../TrendMainWindow.cpp" line="61"/>
+        <location filename="../TrendMainWindow.cpp" line="403"/>
         <source>Refresh</source>
         <translation>Оновити</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="304"/>
+        <location filename="../TrendMainWindow.cpp" line="290"/>
         <source>  Interval: </source>
         <translation>  Інтервал: </translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="311"/>
+        <location filename="../TrendMainWindow.cpp" line="297"/>
         <source>2 sec</source>
         <translation>2 сек</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="312"/>
+        <location filename="../TrendMainWindow.cpp" line="298"/>
         <source>5 sec</source>
         <translation>5 сек</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="313"/>
+        <location filename="../TrendMainWindow.cpp" line="299"/>
         <source>10 sec</source>
         <translation>10 сек</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="314"/>
+        <location filename="../TrendMainWindow.cpp" line="300"/>
         <source>30 sec</source>
         <translation>30 сек</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="315"/>
+        <location filename="../TrendMainWindow.cpp" line="301"/>
         <source>1 min</source>
         <translation>1 хв</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="316"/>
+        <location filename="../TrendMainWindow.cpp" line="302"/>
         <source>5 min</source>
         <translation>5 хв</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="317"/>
+        <location filename="../TrendMainWindow.cpp" line="303"/>
         <source>10 min</source>
         <translation>10 хв</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="318"/>
+        <location filename="../TrendMainWindow.cpp" line="304"/>
         <source>30 min</source>
         <translation>30 хв</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="319"/>
+        <location filename="../TrendMainWindow.cpp" line="305"/>
         <source>1 hour</source>
         <translation>1 год</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="320"/>
+        <location filename="../TrendMainWindow.cpp" line="306"/>
         <source>3 hour</source>
         <translation>3 год</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="321"/>
+        <location filename="../TrendMainWindow.cpp" line="307"/>
         <source>6 hour</source>
         <translation>6 год</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="322"/>
+        <location filename="../TrendMainWindow.cpp" line="308"/>
         <source>12 hour</source>
         <translation>12 год</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="323"/>
+        <location filename="../TrendMainWindow.cpp" line="309"/>
         <source>24 hour</source>
         <translation>24 год</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="324"/>
+        <location filename="../TrendMainWindow.cpp" line="310"/>
         <source>1 week</source>
         <translation>1 тиж</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="335"/>
+        <location filename="../TrendMainWindow.cpp" line="321"/>
         <source>  Lanes: </source>
         <translation>  Смуг: </translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="340"/>
+        <location filename="../TrendMainWindow.cpp" line="326"/>
         <source>1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="341"/>
+        <location filename="../TrendMainWindow.cpp" line="327"/>
         <source>2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="342"/>
+        <location filename="../TrendMainWindow.cpp" line="328"/>
         <source>3</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="343"/>
+        <location filename="../TrendMainWindow.cpp" line="329"/>
         <source>4</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="344"/>
+        <location filename="../TrendMainWindow.cpp" line="330"/>
         <source>5</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="345"/>
+        <location filename="../TrendMainWindow.cpp" line="331"/>
         <source>6</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="351"/>
+        <location filename="../TrendMainWindow.cpp" line="337"/>
         <source>  View: </source>
         <translation>  Вид: </translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="356"/>
+        <location filename="../TrendMainWindow.cpp" line="342"/>
         <source>Separated</source>
         <translation>Роздільно</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="357"/>
+        <location filename="../TrendMainWindow.cpp" line="343"/>
         <source>Overlapped</source>
         <translation>Разом</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="364"/>
+        <location filename="../TrendMainWindow.cpp" line="350"/>
         <source>  Scale: </source>
         <translation>  Шкала: </translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="369"/>
+        <location filename="../TrendMainWindow.cpp" line="355"/>
         <source>Linear</source>
         <translation>Лінійний</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="370"/>
+        <location filename="../TrendMainWindow.cpp" line="356"/>
         <source>Logarithmic</source>
         <translation>Логарифмічний</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="371"/>
+        <location filename="../TrendMainWindow.cpp" line="357"/>
         <source>Period</source>
         <translation>Період</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="378"/>
+        <location filename="../TrendMainWindow.cpp" line="364"/>
         <source>  Time Type: </source>
         <translation>  Тип часу: </translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="383"/>
+        <location filename="../TrendMainWindow.cpp" line="369"/>
         <source>Server Time</source>
         <translation>Час сервера</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="384"/>
+        <location filename="../TrendMainWindow.cpp" line="370"/>
         <source>Server Time UTC%100</source>
         <translation>Час сервера UTC%100</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="385"/>
+        <location filename="../TrendMainWindow.cpp" line="371"/>
         <source>Plant Time</source>
         <translation>Час станції</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="397"/>
+        <location filename="../TrendMainWindow.cpp" line="383"/>
         <source>Realtime</source>
         <translation>Реалтайм</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="401"/>
+        <location filename="../TrendMainWindow.cpp" line="387"/>
         <source>&gt;&gt;&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="633"/>
+        <location filename="../TrendMainWindow.cpp" line="618"/>
         <source>Open Trend File</source>
         <translation>Відкити файл графіку</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="635"/>
+        <location filename="../TrendMainWindow.cpp" line="620"/>
         <source>Trend (*.u7trend);;All Files (*.*)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="658"/>
+        <location filename="../TrendMainWindow.cpp" line="643"/>
         <source>Loading trend error: %1
 </source>
         <translation>Помилка завантаження: %1
 </translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="708"/>
+        <location filename="../TrendMainWindow.cpp" line="693"/>
         <source>Save File</source>
         <translation>Зберегти файл</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="710"/>
+        <location filename="../TrendMainWindow.cpp" line="695"/>
         <source>Trend (*.u7trend);;Images (*.png *.bmp *.jpg);;PDF files (*.pdf)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="744"/>
+        <location filename="../TrendMainWindow.cpp" line="729"/>
         <source>Saving trend error: %1
 </source>
         <translation>Помилка збереження: %1
 </translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="759"/>
+        <location filename="../TrendMainWindow.cpp" line="744"/>
         <source>Writing file error. File %1</source>
         <translation>Помилка запису файла: %1</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="774"/>
+        <location filename="../TrendMainWindow.cpp" line="759"/>
         <source>Page Setup</source>
         <translation>Властивості сторінки</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="780"/>
+        <location filename="../TrendMainWindow.cpp" line="766"/>
         <source>Page Size</source>
         <translation>Розмір сторінки</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="801"/>
+        <location filename="../TrendMainWindow.cpp" line="787"/>
         <source>Orientation</source>
         <translation>Орієнтація</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="804"/>
+        <location filename="../TrendMainWindow.cpp" line="790"/>
         <source>Portrait</source>
         <translation>Портрет</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="805"/>
+        <location filename="../TrendMainWindow.cpp" line="791"/>
         <source>Lanscape</source>
         <translation>Пейзаж</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="836"/>
+        <location filename="../TrendMainWindow.cpp" line="822"/>
         <source>Unsupported file format.</source>
         <translation>Непідтримуваний формат.</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="893"/>
+        <location filename="../TrendMainWindow.cpp" line="879"/>
         <source>About Trends</source>
         <translation>Про графіки</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="901"/>
+        <location filename="../TrendMainWindow.cpp" line="887"/>
         <source>&lt;b&gt;JSC Radiy&lt;/b&gt;&lt;br&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="902"/>
+        <location filename="../TrendMainWindow.cpp" line="888"/>
         <source>&lt;b&gt;Trends&lt;/b&gt;&lt;br&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="904"/>
+        <location filename="../TrendMainWindow.cpp" line="890"/>
         <source>Version: %1 (Debug)&lt;br&gt;</source>
         <translation>Версія: %1 (Debug)&lt;br&gt;</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="906"/>
+        <location filename="../TrendMainWindow.cpp" line="892"/>
         <source>Version: %1 (Release)&lt;br&gt;</source>
         <translation>Версія: %1 (Release)&lt;br&gt;</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="908"/>
+        <location filename="../TrendMainWindow.cpp" line="894"/>
         <source>Build architecture: %1&lt;br&gt;</source>
         <translation>Архітектура: %1&lt;br&gt;</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="910"/>
+        <location filename="../TrendMainWindow.cpp" line="896"/>
         <source>&lt;br&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="911"/>
+        <location filename="../TrendMainWindow.cpp" line="897"/>
         <source>ProcessID: %1&lt;br&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="912"/>
+        <location filename="../TrendMainWindow.cpp" line="898"/>
         <source>Executable: %1&lt;br&gt;</source>
         <translation>Файл ПЗ: %1&lt;br&gt;</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="913"/>
+        <location filename="../TrendMainWindow.cpp" line="899"/>
         <source>Arguments: %1&lt;br&gt;</source>
         <translation>Аргументи: %1&lt;br&gt;</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="1110"/>
+        <location filename="../TrendMainWindow.cpp" line="1096"/>
         <source>Ruler Properties</source>
         <translation>Властивості мітки</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="1118"/>
+        <location filename="../TrendMainWindow.cpp" line="1105"/>
         <source>Date:</source>
         <translation>Дата:</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="1119"/>
+        <location filename="../TrendMainWindow.cpp" line="1106"/>
         <source>Time:</source>
         <translation>Час:</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="1177"/>
-        <location filename="../TrendMainWindow.cpp" line="1284"/>
-        <location filename="../TrendMainWindow.cpp" line="1286"/>
-        <location filename="../TrendMainWindow.cpp" line="1288"/>
+        <location filename="../TrendMainWindow.cpp" line="1164"/>
+        <location filename="../TrendMainWindow.cpp" line="1271"/>
+        <location filename="../TrendMainWindow.cpp" line="1273"/>
+        <location filename="../TrendMainWindow.cpp" line="1275"/>
         <source>Custom</source>
         <translation>Власний</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="1313"/>
+        <location filename="../TrendMainWindow.cpp" line="1300"/>
         <source>Line Weight 1</source>
         <translation>Товщина лінії: 1</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="1323"/>
+        <location filename="../TrendMainWindow.cpp" line="1309"/>
         <source>Line Weight 2</source>
         <translation>Товщина лінії: 2</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="1333"/>
+        <location filename="../TrendMainWindow.cpp" line="1318"/>
         <source>Line Weight 3</source>
         <translation>Товщина лінії: 3</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="1343"/>
+        <location filename="../TrendMainWindow.cpp" line="1327"/>
         <source>Scale to Fit</source>
         <translation>Масштабувати за розміром</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="1346"/>
+        <location filename="../TrendMainWindow.cpp" line="1330"/>
         <source>Remove</source>
         <translation>Видалити</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="1354"/>
+        <location filename="../TrendMainWindow.cpp" line="1337"/>
         <source>Properties...</source>
         <translation>Властивості...</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="422"/>
-        <location filename="../TrendMainWindow.cpp" line="1361"/>
-        <location filename="../TrendMainWindow.cpp" line="1464"/>
+        <location filename="../TrendMainWindow.cpp" line="408"/>
+        <location filename="../TrendMainWindow.cpp" line="1343"/>
+        <location filename="../TrendMainWindow.cpp" line="1449"/>
         <source>Signals...</source>
         <translation>Сигнали...</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="1402"/>
+        <location filename="../TrendMainWindow.cpp" line="1392"/>
         <source>Add Ruler</source>
         <translation>Додати мітку</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="1409"/>
+        <location filename="../TrendMainWindow.cpp" line="1398"/>
         <source>Delete Ruler</source>
         <translation>Видалити мітку</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="1417"/>
+        <location filename="../TrendMainWindow.cpp" line="1405"/>
         <source>Ruler Properties...</source>
         <translation>Властивості мітки...</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="1426"/>
+        <location filename="../TrendMainWindow.cpp" line="1413"/>
         <source>Select View...</source>
         <translation>Обрати вид...</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="1441"/>
+        <location filename="../TrendMainWindow.cpp" line="1428"/>
         <source>Signals Properties</source>
         <translation>Властивості сигнала</translation>
     </message>
@@ -705,33 +705,33 @@
 <context>
     <name>TrendLib::TrendWidget</name>
     <message>
-        <location filename="../TrendWidget.cpp" line="148"/>
+        <location filename="../TrendWidget.cpp" line="149"/>
         <source>Serialize trend structure error.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TrendWidget.cpp" line="160"/>
+        <location filename="../TrendWidget.cpp" line="161"/>
         <source>Serialize message to string error.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TrendWidget.cpp" line="173"/>
+        <location filename="../TrendWidget.cpp" line="174"/>
         <source>Write file error. </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TrendWidget.cpp" line="217"/>
-        <location filename="../TrendWidget.cpp" line="219"/>
+        <location filename="../TrendWidget.cpp" line="218"/>
+        <location filename="../TrendWidget.cpp" line="220"/>
         <source>Parse trend file error. </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TrendWidget.cpp" line="227"/>
+        <location filename="../TrendWidget.cpp" line="228"/>
         <source>Read trend data structure error.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TrendWidget.cpp" line="400"/>
+        <location filename="../TrendWidget.cpp" line="401"/>
         <source>Rendering initial image, please wait...</source>
         <translation>Відбувається відображення, очікуйте...</translation>
     </message>

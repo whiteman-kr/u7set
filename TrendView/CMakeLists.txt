@@ -2,12 +2,14 @@ cmake_minimum_required(VERSION 3.16)
 
 project(TrendView LANGUAGES CXX)
 
+include(../cmake/translations.cmake)
+
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Gui Svg Widgets PrintSupport)
+find_package(Qt6 REQUIRED COMPONENTS Gui Svg Widgets PrintSupport LinguistTools)
 
 set(TARGET TrendView)
 
@@ -56,6 +58,10 @@ qt_add_library(${TARGET} STATIC
 
 	TrendView.qrc
 )
+
+#Add translations
+#
+add_translation()
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Gui Qt6::Svg Qt6::Widgets Qt6::PrintSupport)
 target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib AppSignalLib )

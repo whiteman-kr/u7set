@@ -1267,175 +1267,178 @@ Server: %14</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="59"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1301"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1432"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="122"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1308"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1439"/>
         <source>Caption</source>
         <translation>Найменування</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="150"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1308"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1439"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="191"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1315"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1446"/>
         <source>EquipmentID</source>
         <translation>ІД обладнання</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="188"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1307"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1438"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="153"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1314"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1445"/>
         <source>AppSignalID</source>
         <translation>Внутрішній ІД</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="249"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="82"/>
         <source>SignalID</source>
         <translation>ІД сигналу</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="267"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1619"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1626"/>
         <source>Type</source>
         <translation>Тип</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="283"/>
         <source>Channel</source>
-        <translation>Канал</translation>
+        <translation type="vanished">Канал</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="326"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="229"/>
+        <source>Other</source>
+        <translation>Інше</translation>
+    </message>
+    <message>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="294"/>
         <source>State</source>
         <translation>Стан</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="353"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="321"/>
         <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="611"/>
         <source>Plant Time</source>
         <translation>Час станції</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="407"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="682"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="375"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="650"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;0.0&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="440"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="715"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="408"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="683"/>
         <source>%c</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="455"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="465"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="846"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="856"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="873"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="904"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="914"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="423"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="433"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="814"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="824"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="841"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="872"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="882"/>
         <source>TextLabel</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="494"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="462"/>
         <source>Server Time</source>
         <translation>Час сервера</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="507"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="475"/>
         <source>Flags:</source>
         <translation>Прапори:</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="520"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="488"/>
         <source>Value:</source>
         <translation>Значення:</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="546"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="514"/>
         <source>Properties</source>
         <translation>Властивості</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="566"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="534"/>
         <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="616"/>
         <source>Extended</source>
         <translation>Додатково</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="582"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="550"/>
         <source>Setpoints</source>
         <translation>Уставки</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="598"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="566"/>
         <source>Schemas</source>
         <translation>Схеми</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="617"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1402"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1548"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1757"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1768"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="585"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1409"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1555"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1764"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1775"/>
         <source>Tuning</source>
         <translation>Тюнінг</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="631"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="599"/>
         <source>Tuning Value:</source>
         <translation>Значення тюнінга:</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="733"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="701"/>
         <source>Tuning Flags:</source>
         <translation>Прапори тюнінга:</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="777"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="745"/>
         <source>Write 0</source>
         <translation>Запис 0</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="790"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="758"/>
         <source>Write 1</source>
         <translation>Запис 1</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="819"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="787"/>
         <source>Write</source>
         <translation>Запис</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="863"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="831"/>
         <source>Write Request Time</source>
         <translation>Час запиту на запис</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="880"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="848"/>
         <source>Successful Write Time</source>
         <translation>Час успішного запису</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="887"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="855"/>
         <source>Successful Read Time</source>
         <translation>Час успішного читання</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="894"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="862"/>
         <source>LM Time</source>
         <translation>Час LM</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="921"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.ui" line="889"/>
         <source>Unsuccessful Write Time</source>
         <translation>Час неуспішного запису</translation>
     </message>
     <message>
         <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="726"/>
         <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="760"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="2112"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="2119"/>
         <source>Copy</source>
         <translation>Копіювати</translation>
     </message>
@@ -1464,49 +1467,49 @@ to signal &apos;%2&apos; (&apos;%3&apos;)?</source>
         <translation>Невірне вхідне значення!</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1305"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1436"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1312"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1443"/>
         <source>General</source>
         <translation>Загальне</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1324"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1331"/>
         <source>Servers</source>
         <translation>Сервери</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1329"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1446"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1336"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1453"/>
         <source>Unit</source>
         <translation>Од. виміру</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1332"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1449"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1339"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1456"/>
         <source>Tags</source>
         <translation>Теги</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1337"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1454"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1344"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1461"/>
         <source>Format</source>
         <translation>Формат</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1341"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1458"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1348"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1465"/>
         <source>ByteOrder</source>
         <translation>Порядок байт</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1348"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1468"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1355"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1475"/>
         <source>Parameters</source>
         <translation>Параметри</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1350"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1470"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1357"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1477"/>
         <source>Precision</source>
         <translation>Точність</translation>
     </message>
@@ -1515,82 +1518,82 @@ to signal &apos;%2&apos; (&apos;%3&apos;)?</source>
         <translation type="vanished">Апертура</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1353"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1511"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1360"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1518"/>
         <source>FilteringTime</source>
         <translation>Час фільтрування</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1354"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1512"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1361"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1519"/>
         <source>SpreadTolerance</source>
         <translation>Розбіжність</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1362"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1483"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1369"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1490"/>
         <source>Limits</source>
         <translation>Діапазон</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1364"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1490"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1371"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1497"/>
         <source>LowEngineeringUnits</source>
         <translation>Ниж. інженерний діапазон</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1365"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1491"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1372"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1498"/>
         <source>HighEngineeringUnits</source>
         <translation>Верх. інженерний діапазон</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1366"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1492"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1373"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1499"/>
         <source>LowValidRange</source>
         <translation>Ниж. діапазон</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1367"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1493"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1374"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1500"/>
         <source>HighValidRange</source>
         <translation>Верх. діапазон</translation>
     </message>
     <message>
         <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1276"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1375"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1501"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1382"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1508"/>
         <source>Input</source>
         <translation>Вхідний</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1377"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1503"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1384"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1510"/>
         <source>InputLowLimit</source>
         <translation>Ниж. вхідний діапазон</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1378"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1504"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1385"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1511"/>
         <source>InputHighLimit</source>
         <translation>Верх. вхідний діапазон</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1379"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1505"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1386"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1512"/>
         <source>InputUnitID</source>
         <translation>Од. виміру</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1380"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1387"/>
         <source>InputSensorID</source>
         <translation>ІД датчика</translation>
     </message>
     <message>
         <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1277"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1388"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1533"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1622"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1395"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1540"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1629"/>
         <source>Output</source>
         <translation>Вихідний</translation>
     </message>
@@ -1620,348 +1623,358 @@ to signal &apos;%2&apos; (&apos;%3&apos;)?</source>
         <translation>Внутрішній</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1390"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1535"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1397"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1542"/>
         <source>OutputLowLimit</source>
         <translation>Ниж. вихідний діапазон</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1391"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1536"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1398"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1543"/>
         <source>OutputHighLimit</source>
         <translation>Верх. вихідний діапазон</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1392"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1537"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1399"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1544"/>
         <source>OutputUnitID</source>
         <translation>Од. виміру</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1393"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1400"/>
         <source>OutputSensorID</source>
         <translation>ІД датчика</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1394"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1540"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1401"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1547"/>
         <source>OutputMode</source>
         <translation>Вих. режим</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1404"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1550"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1411"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1557"/>
         <source>EnableTuning</source>
         <translation>Сигнал тюнінгу</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1404"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1442"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1471"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1472"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1475"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1550"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1575"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1579"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1594"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1411"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1449"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1478"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1479"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1482"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1557"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1582"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1586"/>
         <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1601"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1603"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1608"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1610"/>
         <source>Yes</source>
         <translation>Так</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1404"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1442"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1471"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1472"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1475"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1550"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1575"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1579"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1594"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1411"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1449"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1478"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1479"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1482"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1557"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1582"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1586"/>
         <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1601"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1603"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1608"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1610"/>
         <source>No</source>
         <translation>Ні</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1405"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1551"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1412"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1558"/>
         <source>TuningDefaultValue</source>
         <translation>Знач. за замовчуванням</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1406"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1552"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1413"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1559"/>
         <source>TuningLowBound</source>
         <translation>Ниж. значення тюнінгу</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1407"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1553"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1414"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1560"/>
         <source>TuningHighBound</source>
         <translation>Верх. значення тюнінгу</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1440"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1447"/>
         <source>LmEquipmentID</source>
         <translation>ІД логічного модуля</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1441"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1448"/>
         <source>BusTypeID</source>
         <translation>ІД типу шини</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1442"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1449"/>
         <source>ExcludeFromBuild</source>
         <translation>Викл. з проекту</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1459"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1466"/>
         <source>DataSize</source>
         <translation>Розмір даних</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1460"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1467"/>
         <source>DataFormat</source>
         <translation>Формат даних</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1471"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1478"/>
         <source>Acquire</source>
         <translation>Отримувати</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1472"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1479"/>
         <source>Archive</source>
         <translation>Архівувати</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1352"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1473"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1359"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1480"/>
         <source>CoarseAperture</source>
         <translation>Груба апертура</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1351"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1474"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1284"/>
+        <source>Channel: %1, %2 (%3), %4</source>
+        <translation>Канал: %1, %2 (%3), %4</translation>
+    </message>
+    <message>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1292"/>
+        <source>Channel: %1, %2, %3</source>
+        <translation>Канал: %1, %2, %3</translation>
+    </message>
+    <message>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1358"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1481"/>
         <source>FineAperture</source>
         <translation>Точна апертура</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1475"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1482"/>
         <source>AdaptiveAperture</source>
         <translation>Адаптивна апертура</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1485"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1492"/>
         <source>LowADC</source>
         <translation>Ниж. АЦП</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1486"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1493"/>
         <source>HighADC</source>
         <translation>Верх. АЦП</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1487"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1494"/>
         <source>LowDAC</source>
         <translation>Ниж. ЦАП</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1488"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1495"/>
         <source>HighDAC</source>
         <translation>Верх. ЦАП</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1507"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1514"/>
         <source>rload_Ohm</source>
         <translation>Опір навантаження</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1508"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1515"/>
         <source>r0_Ohm</source>
         <translation>Опір R0</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1510"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1539"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1517"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1546"/>
         <source>SensorType</source>
         <translation>Тип датчика</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1560"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1567"/>
         <source>Specific properties</source>
         <translation>Спеціальні властивості</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1562"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1569"/>
         <source>specPropStruct</source>
         <translation>Структура</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1569"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1576"/>
         <source>Signal fields from database</source>
         <translation>Поля сигналу з БД</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1571"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1578"/>
         <source>ID</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1572"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1579"/>
         <source>signalGroupID</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1573"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1580"/>
         <source>signalInstanceID</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1574"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1581"/>
         <source>changesetID</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1575"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1582"/>
         <source>checkedOut</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1576"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1583"/>
         <source>userID</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1578"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1585"/>
         <source>created</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1579"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1586"/>
         <source>deleted</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1580"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1587"/>
         <source>instanceCreated</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1581"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1588"/>
         <source>instanceAction</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1588"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1595"/>
         <source>Compile-time Properties</source>
         <translation>Властивості часу компіляції</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1590"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1597"/>
         <source>ioBufAddr</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1591"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1598"/>
         <source>tuningAddr</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1592"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1599"/>
         <source>tuningAbsAddr</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1593"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1600"/>
         <source>ualAddr</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1594"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1601"/>
         <source>ualAddrIsValid</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1595"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1602"/>
         <source>regBufAddr</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1596"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1603"/>
         <source>regValueAddr</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1597"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1604"/>
         <source>regValidityAddr</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1599"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1606"/>
         <source>lmRamAccess</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1600"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1607"/>
         <source>regValueAddrStr</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1601"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1608"/>
         <source>needConversion</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1603"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1610"/>
         <source>isConst</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1604"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1611"/>
         <source>constValue</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1620"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1627"/>
         <source>Compare To</source>
         <translation>Порівняти з</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="2128"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="2135"/>
         <source>Server State</source>
         <translation>Вибір сервера</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="2136"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="2143"/>
         <source>Latest</source>
         <translation>Актуальний</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1302"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1433"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1621"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1623"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1309"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1440"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1628"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1630"/>
         <source>Value</source>
         <translation>Значення</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1624"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1737"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1631"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1744"/>
         <source>Schema</source>
         <translation>Схема</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1639"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1646"/>
         <source>Const</source>
         <translation>Константа</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1657"/>
-        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1694"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1664"/>
+        <location filename="../../lib/Ui/DialogSignalInfo.cpp" line="1701"/>
         <source>Not acquired</source>
         <translation>Не отримується</translation>
     </message>
@@ -1969,27 +1982,27 @@ to signal &apos;%2&apos; (&apos;%3&apos;)?</source>
 <context>
     <name>DialogSignalSearch</name>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSearch.cpp" line="298"/>
+        <location filename="../../lib/Ui/DialogSignalSearch.cpp" line="297"/>
         <source>Signal Search</source>
         <translation>Пошук сигналу</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSearch.cpp" line="310"/>
+        <location filename="../../lib/Ui/DialogSignalSearch.cpp" line="309"/>
         <source>SignalID</source>
         <translation>ІД сигналу</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSearch.cpp" line="329"/>
+        <location filename="../../lib/Ui/DialogSignalSearch.cpp" line="328"/>
         <source>Open</source>
         <translation>Відкрити</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSearch.cpp" line="388"/>
+        <location filename="../../lib/Ui/DialogSignalSearch.cpp" line="387"/>
         <source>Enter SignalID here</source>
         <translation>Введіть ІД сигналу</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSearch.cpp" line="485"/>
+        <location filename="../../lib/Ui/DialogSignalSearch.cpp" line="484"/>
         <source>Signals found: %1</source>
         <translation>Знайдено сигналів: %1</translation>
     </message>
@@ -2642,391 +2655,391 @@ Data will not be available at the time of reconnection.</source>
 <context>
     <name>MonitorMainWindow</name>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="107"/>
+        <location filename="../MonitorMainWindow.cpp" line="120"/>
         <source>Schemas List</source>
         <translation>Список схем</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="268"/>
-        <location filename="../MonitorMainWindow.cpp" line="1710"/>
+        <location filename="../MonitorMainWindow.cpp" line="281"/>
+        <location filename="../MonitorMainWindow.cpp" line="1723"/>
         <source>Logged Out
 00:00:00</source>
         <translation>Виконано вихід
 00:00:00</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="269"/>
+        <location filename="../MonitorMainWindow.cpp" line="282"/>
         <source>Click to re-login with current user</source>
         <translation>Натисніть для повторного входу</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="273"/>
-        <location filename="../MonitorMainWindow.cpp" line="558"/>
-        <location filename="../MonitorMainWindow.cpp" line="1714"/>
+        <location filename="../MonitorMainWindow.cpp" line="286"/>
+        <location filename="../MonitorMainWindow.cpp" line="571"/>
+        <location filename="../MonitorMainWindow.cpp" line="1727"/>
         <source>Logged Out</source>
         <translation>Виконано вихід</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="274"/>
+        <location filename="../MonitorMainWindow.cpp" line="287"/>
         <source>Click to log out current user</source>
         <translation>Натисніть для виходу</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="389"/>
+        <location filename="../MonitorMainWindow.cpp" line="402"/>
         <source>Export Schema...</source>
         <translation>Експорт схеми...</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="390"/>
+        <location filename="../MonitorMainWindow.cpp" line="403"/>
         <source>Export current schema to a file</source>
         <translation>Експортувати поточну схему до файлу</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="396"/>
+        <location filename="../MonitorMainWindow.cpp" line="409"/>
         <source>Exit</source>
         <translation>Вихід</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="397"/>
+        <location filename="../MonitorMainWindow.cpp" line="410"/>
         <source>Quit the application</source>
         <translation>Вихід з програми</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="404"/>
+        <location filename="../MonitorMainWindow.cpp" line="417"/>
         <source>Connection Statistics...</source>
         <translation>Статистика з&apos;єднання...</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="405"/>
+        <location filename="../MonitorMainWindow.cpp" line="418"/>
         <source>View Connection Statistics</source>
         <translation>Перегляд статистики з&apos;єднання</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="410"/>
+        <location filename="../MonitorMainWindow.cpp" line="423"/>
         <source>Data Sources...</source>
         <translation>Джерела даних...</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="411"/>
+        <location filename="../MonitorMainWindow.cpp" line="424"/>
         <source>View Data Sources</source>
         <translation>Перегляд джерела даних</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="416"/>
+        <location filename="../MonitorMainWindow.cpp" line="429"/>
         <source>Settings...</source>
         <translation>Налаштування...</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="417"/>
+        <location filename="../MonitorMainWindow.cpp" line="430"/>
         <source>Change application settings</source>
         <translation>Зміна налаштувань</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="422"/>
+        <location filename="../MonitorMainWindow.cpp" line="435"/>
         <source>MATS User Manual</source>
         <translation>Посібник користувача</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="423"/>
+        <location filename="../MonitorMainWindow.cpp" line="436"/>
         <source>Show MATS User Manual</source>
         <translation>Посібник користувача</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="426"/>
+        <location filename="../MonitorMainWindow.cpp" line="439"/>
         <source>DevTools...</source>
         <translation>Для розробників...</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="427"/>
+        <location filename="../MonitorMainWindow.cpp" line="440"/>
         <source>Show software statistics</source>
         <translation>Перегляд статистики програми</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="431"/>
+        <location filename="../MonitorMainWindow.cpp" line="444"/>
         <source>Debug...</source>
         <translation>Для відлагодження...</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="432"/>
+        <location filename="../MonitorMainWindow.cpp" line="445"/>
         <source>Perform some debug actions, don&apos;t run it!</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="436"/>
+        <location filename="../MonitorMainWindow.cpp" line="449"/>
         <source>Log...</source>
         <translation>Журнал...</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="437"/>
+        <location filename="../MonitorMainWindow.cpp" line="450"/>
         <source>Show application log</source>
         <translation>Перегляд журналу</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="440"/>
+        <location filename="../MonitorMainWindow.cpp" line="453"/>
         <source>Tuning Log...</source>
         <translation>Журнал тюнінгу...</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="441"/>
+        <location filename="../MonitorMainWindow.cpp" line="454"/>
         <source>Show tuning log</source>
         <translation>Перегляд журналу тюнінгу</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="445"/>
+        <location filename="../MonitorMainWindow.cpp" line="458"/>
         <source>About Qt...</source>
         <translation>Про Qt...</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="446"/>
+        <location filename="../MonitorMainWindow.cpp" line="459"/>
         <source>Show Qt information</source>
         <translation>Перегляд інформації про Qt</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="450"/>
+        <location filename="../MonitorMainWindow.cpp" line="463"/>
         <source>About Monitor...</source>
         <translation>Про Monitor...</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="451"/>
+        <location filename="../MonitorMainWindow.cpp" line="464"/>
         <source>Show application information</source>
         <translation>Перегляд інформації про програму</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="456"/>
+        <location filename="../MonitorMainWindow.cpp" line="469"/>
         <source>Schemas</source>
         <translation>Схеми</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="457"/>
+        <location filename="../MonitorMainWindow.cpp" line="470"/>
         <source>Open schema list page...</source>
         <translation>Відкрити список схем...</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="467"/>
+        <location filename="../MonitorMainWindow.cpp" line="480"/>
         <source>New Tab</source>
         <translation>Нова вкладка</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="468"/>
+        <location filename="../MonitorMainWindow.cpp" line="481"/>
         <source>Open current schema in new tab page</source>
         <translation>Відкрити схему в новій вкладці</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="478"/>
+        <location filename="../MonitorMainWindow.cpp" line="491"/>
         <source>Close Tab</source>
         <translation>Закрити вкладку</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="479"/>
+        <location filename="../MonitorMainWindow.cpp" line="492"/>
         <source>Close current tab page</source>
         <translation>Закрити поточну вкладку</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="486"/>
+        <location filename="../MonitorMainWindow.cpp" line="499"/>
         <source>Zoom In</source>
         <translation>Збільшити масштаб</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="487"/>
+        <location filename="../MonitorMainWindow.cpp" line="500"/>
         <source>Zoom in schema view</source>
         <translation>Збільшити масштаб</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="493"/>
+        <location filename="../MonitorMainWindow.cpp" line="506"/>
         <source>Zoom Out</source>
         <translation>Зменшити масштаб</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="494"/>
+        <location filename="../MonitorMainWindow.cpp" line="507"/>
         <source>Zoom out schema view</source>
         <translation>Зменшити масштаб</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="500"/>
+        <location filename="../MonitorMainWindow.cpp" line="513"/>
         <source>Zoom 100%</source>
         <translation>Масштаб 100%</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="501"/>
+        <location filename="../MonitorMainWindow.cpp" line="514"/>
         <source>Set zoom to 100%</source>
         <translation>Масштаб 100%</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="506"/>
+        <location filename="../MonitorMainWindow.cpp" line="519"/>
         <source>Fit to Screen</source>
         <translation>Масштаб по екрану</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="507"/>
+        <location filename="../MonitorMainWindow.cpp" line="520"/>
         <source>Set zoom to fit screen</source>
         <translation>Масштаб по екрану</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="513"/>
+        <location filename="../MonitorMainWindow.cpp" line="526"/>
         <source>Go Back</source>
         <translation>Назад</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="514"/>
+        <location filename="../MonitorMainWindow.cpp" line="527"/>
         <source>Click to go back</source>
         <translation>Перейти назад</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="520"/>
+        <location filename="../MonitorMainWindow.cpp" line="533"/>
         <source>Go Forward</source>
         <translation>Вперед</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="521"/>
+        <location filename="../MonitorMainWindow.cpp" line="534"/>
         <source>Click to go forward</source>
         <translation>Перейти вперед</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="527"/>
+        <location filename="../MonitorMainWindow.cpp" line="540"/>
         <source>Archive</source>
         <translation>Архів</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="533"/>
+        <location filename="../MonitorMainWindow.cpp" line="546"/>
         <source>Trends</source>
         <translation>Графіки</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="539"/>
+        <location filename="../MonitorMainWindow.cpp" line="552"/>
         <source>Signals Snapshot</source>
         <translation>Знімок сигналів</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="540"/>
+        <location filename="../MonitorMainWindow.cpp" line="553"/>
         <source>View signals state in real time</source>
         <translation>Перегляд поточного стану сигналів</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="545"/>
+        <location filename="../MonitorMainWindow.cpp" line="558"/>
         <source>Find Signal</source>
         <translation>Пошук сигналу</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="546"/>
+        <location filename="../MonitorMainWindow.cpp" line="559"/>
         <source>Find signal by it&apos;s ID</source>
         <translation>Пошук сигналу по IД</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="552"/>
+        <location filename="../MonitorMainWindow.cpp" line="565"/>
         <source>Login</source>
         <translation>Вхід для тюнінгу</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="553"/>
+        <location filename="../MonitorMainWindow.cpp" line="566"/>
         <source>Log in to change tunable values</source>
         <translation>Виконати вхід для зміни сигналів тюнінгу</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="569"/>
+        <location filename="../MonitorMainWindow.cpp" line="582"/>
         <source>&amp;File</source>
         <translation>&amp;Файл</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="577"/>
+        <location filename="../MonitorMainWindow.cpp" line="590"/>
         <source>&amp;Schema</source>
         <translation>&amp;Схема</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="585"/>
+        <location filename="../MonitorMainWindow.cpp" line="598"/>
         <source>&amp;View</source>
         <translation>&amp;Вид</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="599"/>
+        <location filename="../MonitorMainWindow.cpp" line="612"/>
         <source>&amp;Tools</source>
         <translation>&amp;Сервіс</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="614"/>
+        <location filename="../MonitorMainWindow.cpp" line="627"/>
         <source>&amp;?</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="641"/>
+        <location filename="../MonitorMainWindow.cpp" line="654"/>
         <source>ToolBar</source>
         <translation>Панель інструментів</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="725"/>
+        <location filename="../MonitorMainWindow.cpp" line="738"/>
         <source>Error and warning counters in the log (click to view log)</source>
         <translation>Помилки та попередження в журналі (клікність для перегляду)</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="761"/>
+        <location filename="../MonitorMainWindow.cpp" line="774"/>
         <source>CfgService</source>
         <translation>Сервіс конфігурації</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="769"/>
+        <location filename="../MonitorMainWindow.cpp" line="782"/>
         <source>AppDataService</source>
         <translation>Сервіс даних</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="777"/>
+        <location filename="../MonitorMainWindow.cpp" line="790"/>
         <source>TuningService</source>
         <translation>Сервіс тюнінгу</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="787"/>
+        <location filename="../MonitorMainWindow.cpp" line="800"/>
         <source> Project: %1   Build: %2  </source>
         <translation> Проект: %1   Збірка: %2  </translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="802"/>
+        <location filename="../MonitorMainWindow.cpp" line="815"/>
         <source> Log E: %1 W: %2 </source>
         <translation> Журнал E: %1 W: %2 </translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="836"/>
+        <location filename="../MonitorMainWindow.cpp" line="849"/>
         <source>%1:
 </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="840"/>
+        <location filename="../MonitorMainWindow.cpp" line="853"/>
         <source>Not configured</source>
         <translation>Не налаштовано</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="857"/>
         <location filename="../MonitorMainWindow.cpp" line="870"/>
+        <location filename="../MonitorMainWindow.cpp" line="883"/>
         <source>ok</source>
         <translation>ОК</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="857"/>
         <location filename="../MonitorMainWindow.cpp" line="870"/>
+        <location filename="../MonitorMainWindow.cpp" line="883"/>
         <source>down</source>
         <translation>не з&apos;єднано</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="868"/>
+        <location filename="../MonitorMainWindow.cpp" line="881"/>
         <source>%1: %2 (Replies: %3)</source>
         <translation>%1: %2 (Відповідей: %3)</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="875"/>
+        <location filename="../MonitorMainWindow.cpp" line="888"/>
         <source>%1: %2/%3 (Replies: %4)</source>
         <translation>%1: %2/%3 (Відповідей: %4)</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1023"/>
+        <location filename="../MonitorMainWindow.cpp" line="1036"/>
         <source> allows user to view schemas and trends.&lt;br&gt;</source>
         <translation> дозволяє користувачеві переглядати схеми та графіки.&lt;br&gt;</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1205"/>
+        <location filename="../MonitorMainWindow.cpp" line="1218"/>
         <source>Signals database is not loaded!</source>
         <translation>База сигналів не завантажена!</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1233"/>
-        <location filename="../MonitorMainWindow.cpp" line="1393"/>
+        <location filename="../MonitorMainWindow.cpp" line="1246"/>
+        <location filename="../MonitorMainWindow.cpp" line="1406"/>
         <source>Signals with specified identifiers were not found:
 
 %1
@@ -3039,7 +3052,7 @@ and %2 more.</source>
 та ще %2.</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1239"/>
+        <location filename="../MonitorMainWindow.cpp" line="1252"/>
         <source>Signals with specified identifiers were not found:
 
 %1
@@ -3050,22 +3063,22 @@ and %2 more.</source>
 </translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1248"/>
+        <location filename="../MonitorMainWindow.cpp" line="1261"/>
         <source>No signals supplied!</source>
         <translation>Сигналів не знайдено!</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1256"/>
+        <location filename="../MonitorMainWindow.cpp" line="1269"/>
         <source>Incorrect time type! Supported values: 0 - Plant, 1 - System, 2 - Local.</source>
         <translation>Невірний тип часу! Значення: 0 - Plant, 1 - System, 2 - Local.</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1262"/>
+        <location filename="../MonitorMainWindow.cpp" line="1275"/>
         <source>Archive request Start Time (%1) shoud be earlier than End Time (%2).</source>
         <translation>Початковий час (%1) повинен бути меншим за кінцевий час (%2).</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1400"/>
+        <location filename="../MonitorMainWindow.cpp" line="1413"/>
         <source>Signals with specified identifiers were not found!
 
 %1</source>
@@ -3074,17 +3087,17 @@ and %2 more.</source>
 %1</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1544"/>
+        <location filename="../MonitorMainWindow.cpp" line="1557"/>
         <source>Configuration error: %1</source>
         <translation>Помилка конфігурації: %1</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1692"/>
+        <location filename="../MonitorMainWindow.cpp" line="1705"/>
         <source>Tuning logged in, username: %1.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1706"/>
+        <location filename="../MonitorMainWindow.cpp" line="1719"/>
         <source>Tuning logged out.</source>
         <translation></translation>
     </message>
@@ -3148,8 +3161,8 @@ and %2 more.</source>
 </translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveWidget.cpp" line="72"/>
         <location filename="../../lib/Ui/DialogSignalSnapshot.cpp" line="38"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="72"/>
         <source>Generated: %1
 </source>
         <translation>Згенеровано: %1
@@ -3176,7 +3189,7 @@ and %2 more.</source>
 </translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1724"/>
+        <location filename="../MonitorMainWindow.cpp" line="1737"/>
         <source>Tuning signals file loading error.</source>
         <translation></translation>
     </message>
@@ -3345,12 +3358,12 @@ To apply the filter, enter tags and press Enter.</source>
 <context>
     <name>SignalSearchItemModel</name>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSearch.cpp" line="51"/>
+        <location filename="../../lib/Ui/DialogSignalSearch.cpp" line="50"/>
         <source>Signal ID</source>
         <translation>ІД сигналу</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/DialogSignalSearch.cpp" line="52"/>
+        <location filename="../../lib/Ui/DialogSignalSearch.cpp" line="51"/>
         <source>Caption</source>
         <translation>Найменування</translation>
     </message>

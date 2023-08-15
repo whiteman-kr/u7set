@@ -30,19 +30,32 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	//
 	m_translator.addLanguage("en", "English");
 	m_translator.addLanguage("ru", "Russian");
-	m_translator.addLanguage("ua", "Ukrainian");
+	m_translator.addLanguage("uk", "Ukrainian");
 
-	m_translator.addTranslationFile("ru", ":/languages/TuningClient_ru.qm");
-	m_translator.addTranslationFile("ru", ":/languages/qtbase_ru.qm");
-	m_translator.addTranslationFile("ru", ":/ClientLib/languages/ClientLib_ru.qm");
-	m_translator.addTranslationFile("ru", ":/UtilsLib/languages/UtilsLib_ru.qm");
+	m_translator.addTranslationFile("ru", qApp->applicationDirPath() + "/languages/TuningClient_ru.qm");
+	m_translator.addTranslationFile("ru", qApp->applicationDirPath() + "/languages/ClientLib_ru.qm");
+	m_translator.addTranslationFile("ru", qApp->applicationDirPath() + "/languages/UtilsLib_ru.qm");
+	m_translator.addTranslationFile("ru", qApp->applicationDirPath() + "/languages/qt_ru.qm");
 
-	m_translator.addTranslationFile("ua", ":/languages/TuningClient_ua.qm");
-	m_translator.addTranslationFile("ua", ":/languages/qtbase_uk.qm");
-	m_translator.addTranslationFile("ua", ":/ClientLib/languages/ClientLib_ua.qm");
-	m_translator.addTranslationFile("ua", ":/UtilsLib/languages/UtilsLib_ua.qm");
+	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/languages/TuningClient_uk.qm");
+	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/languages/ClientLib_uk.qm");
+	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/languages/UtilsLib_uk.qm");
+	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/languages/qt_uk.qm");
 
-	m_translator.setLanguage(theSettings.language());
+	{
+		QStringList failedTranslations;
+		if (m_translator.setLanguage(theSettings.language(), failedTranslations) == false)
+		{
+			if (failedTranslations.isEmpty() == false)
+			{
+				m_logFile.writeError("Failed to load translation files:\n" + failedTranslations.join('\n'));
+			}
+			else
+			{
+				m_logFile.writeError("Failed to set language: " + theSettings.language());
+			}
+		}
+	}
 
 	// -
 	m_sorTooltipText = QObject::tr("SOR counter (click for details)");

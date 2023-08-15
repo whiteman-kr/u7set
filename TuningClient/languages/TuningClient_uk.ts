@@ -753,22 +753,22 @@ Data will not be available at the time of reconnection.</source>
 <context>
     <name>ExtWidgets::MultiArrayEdit</name>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="2938"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2936"/>
         <source>&lt;PropertyVector&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="2946"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2944"/>
         <source>&lt;PropertyList&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="2951"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2949"/>
         <source>&lt;StringList&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="2956"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2954"/>
         <source>QColor [0 items]</source>
         <translation></translation>
     </message>
@@ -776,17 +776,17 @@ Data will not be available at the time of reconnection.</source>
 <context>
     <name>ExtWidgets::MultiCheckBox</name>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="3224"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="3222"/>
         <source>True</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="3225"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="3223"/>
         <source>False</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="3226"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="3224"/>
         <source>&lt;Different values&gt;</source>
         <translation></translation>
     </message>
@@ -794,48 +794,48 @@ Data will not be available at the time of reconnection.</source>
 <context>
     <name>ExtWidgets::MultiTextEdit</name>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="2440"/>
-        <location filename="../../lib/PropertyEditor.cpp" line="2474"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2438"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2472"/>
         <source>Select File</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="2450"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2448"/>
         <source>File loading error!</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="2496"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2494"/>
         <source>Select Directory</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="2526"/>
-        <location filename="../../lib/PropertyEditor.cpp" line="2736"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2524"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2734"/>
         <source>[%1, %2]</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="2573"/>
-        <location filename="../../lib/PropertyEditor.cpp" line="2650"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2571"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2648"/>
         <source>Data &lt;%1 bytes&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="2583"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2581"/>
         <source>Image loading error!</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="2594"/>
-        <location filename="../../lib/PropertyEditor.cpp" line="2659"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2592"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2657"/>
         <source>Image &lt;Width = %1 Height = %2&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="2617"/>
-        <location filename="../../lib/PropertyEditor.cpp" line="2672"/>
-        <location filename="../../lib/PropertyEditor.cpp" line="2697"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2615"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2670"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2695"/>
         <source>&lt;%1 bytes&gt;</source>
         <translation></translation>
     </message>
@@ -843,22 +843,22 @@ Data will not be available at the time of reconnection.</source>
 <context>
     <name>ExtWidgets::MultiTextEditorDialog</name>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="2128"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2126"/>
         <source> (Read-Only)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="2198"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2196"/>
         <source>OK</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="2202"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2200"/>
         <source>Cancel</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="2281"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="2279"/>
         <source>Do you want to save your changes?</source>
         <translation></translation>
     </message>
@@ -866,42 +866,42 @@ Data will not be available at the time of reconnection.</source>
 <context>
     <name>ExtWidgets::PropertyArrayEditorDialog</name>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="735"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="733"/>
         <source>Property</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="751"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="749"/>
         <source>Up</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="755"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="753"/>
         <source>Down</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="765"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="763"/>
         <source>Add</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="769"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="767"/>
         <source>Remove</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="803"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="801"/>
         <source>OK</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="807"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="805"/>
         <source>Cancel</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="1093"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="1091"/>
         <source>%1 - %2</source>
         <translation></translation>
     </message>
@@ -909,43 +909,43 @@ Data will not be available at the time of reconnection.</source>
 <context>
     <name>ExtWidgets::PropertyEditor</name>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="3536"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="3534"/>
         <source>Property</source>
         <translation>Властивість</translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="3537"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="3535"/>
         <source>Value</source>
         <translation>Значення</translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="3738"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="3736"/>
         <source>&lt;PropertyVector&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="3743"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="3741"/>
         <source>&lt;PropertyList&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="3750"/>
-        <location filename="../../lib/PropertyEditor.cpp" line="3759"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="3748"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="3757"/>
         <source>&lt;Different values&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="3800"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="3798"/>
         <source>Property: %1 - incorrect input value</source>
         <translation>Властивість: %1 - невірне вхідне значення</translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="3921"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="3919"/>
         <source>Error</source>
         <translation>Помилка</translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="4086"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="4084"/>
         <source>[ReadOnly] </source>
         <translation></translation>
     </message>
@@ -953,47 +953,47 @@ Data will not be available at the time of reconnection.</source>
 <context>
     <name>ExtWidgets::VectorEditorDialog</name>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="1292"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="1290"/>
         <source>Strings</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="1296"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="1294"/>
         <source>Colors</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="1312"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="1310"/>
         <source>Add</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="1316"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="1314"/>
         <source>Remove</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="1320"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="1318"/>
         <source>Up</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="1324"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="1322"/>
         <source>Down</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="1344"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="1342"/>
         <source>OK</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="1348"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="1346"/>
         <source>Cancel</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="1416"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="1414"/>
         <source>String - %1</source>
         <translation></translation>
     </message>
@@ -1027,293 +1027,293 @@ Data will not be available at the time of reconnection.</source>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../MainWindow.cpp" line="70"/>
+        <location filename="../MainWindow.cpp" line="83"/>
         <source>Waiting for configuration...</source>
         <translation>Очікування конфігурації...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="91"/>
+        <location filename="../MainWindow.cpp" line="104"/>
         <source>Failed to load user filters: %1</source>
         <translation>Помилка читання фільтрів користувача: %1</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="94"/>
-        <location filename="../MainWindow.cpp" line="420"/>
-        <location filename="../MainWindow.cpp" line="1186"/>
+        <location filename="../MainWindow.cpp" line="107"/>
+        <location filename="../MainWindow.cpp" line="433"/>
+        <location filename="../MainWindow.cpp" line="1199"/>
         <source>Error</source>
         <translation>Помилка</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="146"/>
+        <location filename="../MainWindow.cpp" line="159"/>
         <source>Exit</source>
         <translation>Вихід</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="147"/>
+        <location filename="../MainWindow.cpp" line="160"/>
         <source>Quit the application</source>
         <translation>Вихід</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="155"/>
+        <location filename="../MainWindow.cpp" line="168"/>
         <source>Filter Editor...</source>
         <translation>Редактор фільтрів...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="156"/>
+        <location filename="../MainWindow.cpp" line="169"/>
         <source>Edit user filters</source>
         <translation>Редагувати фільтри</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="161"/>
+        <location filename="../MainWindow.cpp" line="174"/>
         <source>Settings...</source>
         <translation>Налаштування...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="162"/>
+        <location filename="../MainWindow.cpp" line="175"/>
         <source>Change application settings</source>
         <translation>Зміна налаштувань</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="167"/>
+        <location filename="../MainWindow.cpp" line="180"/>
         <source>Tuning sources...</source>
         <translation>Джерела тюнінгу...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="168"/>
+        <location filename="../MainWindow.cpp" line="181"/>
         <source>View tuning sources</source>
         <translation>Перегляд джерел тюнінгу</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="173"/>
+        <location filename="../MainWindow.cpp" line="186"/>
         <source>Connection Statistics...</source>
         <translation>Статистика з&apos;єднань...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="174"/>
+        <location filename="../MainWindow.cpp" line="187"/>
         <source>View Connection Statistics</source>
         <translation>Перегляд статистики</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="178"/>
+        <location filename="../MainWindow.cpp" line="191"/>
         <source>Application Log...</source>
         <translation>Журнал програми...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="179"/>
+        <location filename="../MainWindow.cpp" line="192"/>
         <source>Show application log</source>
         <translation>Перегляд журналу програми</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="182"/>
+        <location filename="../MainWindow.cpp" line="195"/>
         <source>Signals Log...</source>
         <translation>Журнал зміни сигналів...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="183"/>
+        <location filename="../MainWindow.cpp" line="196"/>
         <source>Show signals log</source>
         <translation>Перегляд журналу зміни сигналів</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="186"/>
+        <location filename="../MainWindow.cpp" line="199"/>
         <source>About Qt...</source>
         <translation>Про Qt...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="187"/>
+        <location filename="../MainWindow.cpp" line="200"/>
         <source>Show Qt information</source>
         <translation>Інформація про Qt</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="191"/>
+        <location filename="../MainWindow.cpp" line="204"/>
         <source>About TuningClient...</source>
         <translation>Про TuningClient...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="192"/>
+        <location filename="../MainWindow.cpp" line="205"/>
         <source>Show application information</source>
         <translation>Інформація про TuningClient</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="197"/>
+        <location filename="../MainWindow.cpp" line="210"/>
         <source>Tuning User Manual</source>
         <translation>Посібник користувача</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="198"/>
+        <location filename="../MainWindow.cpp" line="211"/>
         <source>Show Tuning User Manual</source>
         <translation>Перегляд посібника користувача</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="207"/>
+        <location filename="../MainWindow.cpp" line="220"/>
         <source>&amp;File</source>
         <translation>&amp;Файл</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="213"/>
+        <location filename="../MainWindow.cpp" line="226"/>
         <source>&amp;Service</source>
         <translation>&amp;Сервіс</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="221"/>
+        <location filename="../MainWindow.cpp" line="234"/>
         <source>&amp;?</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="256"/>
+        <location filename="../MainWindow.cpp" line="269"/>
         <source>LM Errors (click for details)</source>
         <translation>Помилки LM (клкініть для деталей)</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="278"/>
+        <location filename="../MainWindow.cpp" line="291"/>
         <source>Error and warning counters in the log (click to view log)</source>
         <translation>Лічильники помилок та попереджень (клікніть для перегляду журналу)</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="332"/>
+        <location filename="../MainWindow.cpp" line="345"/>
         <source>Warning! Some values were modified but not written. Are you sure you want to exit?</source>
         <translation>Увага! Деякі значення були модифіковані, але не записані. Ви впевнені, що хочете вийти?</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="502"/>
+        <location filename="../MainWindow.cpp" line="515"/>
         <source>Schemas</source>
         <translation>Схеми</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="539"/>
+        <location filename="../MainWindow.cpp" line="552"/>
         <source>No workspaces exist, configuration error.</source>
         <translation>Відсутні робочі простори, помилка конфігурації.</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="571"/>
+        <location filename="../MainWindow.cpp" line="584"/>
         <source>Signals</source>
         <translation>Сигнали</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="660"/>
+        <location filename="../MainWindow.cpp" line="673"/>
         <source>Project %1, build %2</source>
         <translation>Проект %1, збірка %2</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="683"/>
+        <location filename="../MainWindow.cpp" line="696"/>
         <source> ConfigService: </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="687"/>
+        <location filename="../MainWindow.cpp" line="700"/>
         <source> no connection</source>
         <translation> нема з&apos;єднання</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="691"/>
+        <location filename="../MainWindow.cpp" line="704"/>
         <source>%1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="701"/>
+        <location filename="../MainWindow.cpp" line="714"/>
         <source>Address: %1</source>
         <translation>Адреса: %1</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="753"/>
+        <location filename="../MainWindow.cpp" line="766"/>
         <source>Counter %1</source>
         <translation>Лічильник: %1</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="792"/>
+        <location filename="../MainWindow.cpp" line="805"/>
         <source> %1 %2 </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="827"/>
+        <location filename="../MainWindow.cpp" line="840"/>
         <source> LM Errors: %1 </source>
         <translation> Помилок LM %1 </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="859"/>
+        <location filename="../MainWindow.cpp" line="872"/>
         <source> SOR: -</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="865"/>
+        <location filename="../MainWindow.cpp" line="878"/>
         <source> SOR: ? </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="871"/>
+        <location filename="../MainWindow.cpp" line="884"/>
         <source> SOR: No </source>
         <translation> SOR: Ні </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="877"/>
+        <location filename="../MainWindow.cpp" line="890"/>
         <source> SOR: Yes </source>
         <translation> SOR: Так </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="881"/>
+        <location filename="../MainWindow.cpp" line="894"/>
         <source> SOR: Yes [%1] </source>
         <translation> SOR: Так [%1] </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="921"/>
+        <location filename="../MainWindow.cpp" line="934"/>
         <source> Log E: %1 W: %2 </source>
         <translation> Журнал E: %1 W: %2 </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="951"/>
+        <location filename="../MainWindow.cpp" line="964"/>
         <source>%1:
 </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="955"/>
+        <location filename="../MainWindow.cpp" line="968"/>
         <source>Not configured</source>
         <translation>Не налаштовано</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="972"/>
         <location filename="../MainWindow.cpp" line="985"/>
+        <location filename="../MainWindow.cpp" line="998"/>
         <source>ok</source>
         <translation>ок</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="972"/>
         <location filename="../MainWindow.cpp" line="985"/>
+        <location filename="../MainWindow.cpp" line="998"/>
         <source>down</source>
         <translation>не з&apos;єднано</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="983"/>
+        <location filename="../MainWindow.cpp" line="996"/>
         <source>%1: %2 (Replies: %3)</source>
         <translation>%1: %2 (Відповідей: %3)</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="990"/>
+        <location filename="../MainWindow.cpp" line="1003"/>
         <source>%1: %2/%3 (Replies: %4)</source>
         <translation>%1: %2/%3 (Відповідей: %4)</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1027"/>
-        <location filename="../MainWindow.cpp" line="1046"/>
+        <location filename="../MainWindow.cpp" line="1040"/>
+        <location filename="../MainWindow.cpp" line="1059"/>
         <source>Warning</source>
         <translation>Попередження</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1027"/>
+        <location filename="../MainWindow.cpp" line="1040"/>
         <source>Program configuraton has been changed. Press OK to restart the program.</source>
         <translation>Конфігурація програми змінилася. Натисніть ОК для перезапуску програми.</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1046"/>
+        <location filename="../MainWindow.cpp" line="1059"/>
         <source>Program configuration has been changed and will be updated.</source>
         <translation>Конфігурація програми змінилася та буде оновлена.</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1128"/>
+        <location filename="../MainWindow.cpp" line="1141"/>
         <source>Configuration error: %1</source>
         <translation>Помилка конфігурації: %1</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1263"/>
+        <location filename="../MainWindow.cpp" line="1276"/>
         <source> allows user to modify tuning values.</source>
         <translation> дозволяє користувачеві змінювати значення сигналів тюнінгу.</translation>
     </message>
@@ -1361,32 +1361,32 @@ Colld not save crash dump file:
         <translation>Програма вже запущена!</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="48"/>
+        <location filename="../MainWindow.cpp" line="61"/>
         <source>SOR counter (click for details)</source>
         <translation>Лічильник SOR (клікніть для деталей)</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1063"/>
+        <location filename="../MainWindow.cpp" line="1076"/>
         <source>Single LM Control Mode</source>
         <translation>Режим керування одним LM</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1064"/>
+        <location filename="../MainWindow.cpp" line="1077"/>
         <source>Multiple LM Control Mode</source>
         <translation>Режим керування всіма LM</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1065"/>
+        <location filename="../MainWindow.cpp" line="1078"/>
         <source>Mixed LM Control Mode</source>
         <translation>Змішаний режим керування LM</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1110"/>
+        <location filename="../MainWindow.cpp" line="1123"/>
         <source>Object Filters file loading error: %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1119"/>
+        <location filename="../MainWindow.cpp" line="1132"/>
         <source>Tuning signals file loading error.</source>
         <translation></translation>
     </message>
@@ -1456,47 +1456,47 @@ Colld not save crash dump file:
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="47"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="45"/>
         <source>PropertyVector [%1 items]</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="61"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="59"/>
         <source>PropertyList [%1 items]</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="80"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="78"/>
         <source>QStringList [%1 items]</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="183"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="181"/>
         <source>True</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="183"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="181"/>
         <source>False</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="192"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="190"/>
         <source>&lt;%1 bytes&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="239"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="237"/>
         <source>Data &lt;%1 bytes&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="246"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="244"/>
         <source>Image &lt;Width = %1 Height = %2&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/PropertyEditor.cpp" line="253"/>
+        <location filename="../../lib/PropertyEditor.cpp" line="251"/>
         <source>[%1, %2]</source>
         <translation></translation>
     </message>

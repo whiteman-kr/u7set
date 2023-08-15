@@ -1278,17 +1278,24 @@ void DialogSignalInfo::fillSignalInfo()
 								  tr("Internal")};
 	Q_UNUSED(signalProperties);
 
-	QString str = tr(E::valueToString<E::SignalType>(m_signal.type()).toUtf8());
+	QString str;
 	if (m_signal.isAnalog())
 	{
-		str = QString("%1 (%2)").arg(str).arg(E::valueToString<E::AnalogAppSignalFormat>(static_cast<int>(m_signal.analogSignalFormat())));
+		str = tr("Channel: %1, %2 (%3), %4")
+				.arg(E::valueToString<E::Channel>(m_signal.channel()))
+				.arg(tr(E::valueToString<E::SignalType>(m_signal.type()).toUtf8()))
+				.arg(E::valueToString<E::AnalogAppSignalFormat>(static_cast<int>(m_signal.analogSignalFormat())))
+				.arg(tr(E::valueToString<E::SignalInOutType>(m_signal.inOutType()).toUtf8()));
+	}
+	else
+	{
+		str = tr("Channel: %1, %2, %3")
+				.arg(E::valueToString<E::Channel>(m_signal.channel()))
+				.arg(tr(E::valueToString<E::SignalType>(m_signal.type()).toUtf8()))
+				.arg(tr(E::valueToString<E::SignalInOutType>(m_signal.inOutType()).toUtf8()));
 	}
 
-	str = QString("%1, %2").arg(str).arg(tr(E::valueToString<E::SignalInOutType>(m_signal.inOutType()).toUtf8()));
-
-	ui->editSignalType->setText(str);
-
-	ui->editChannel->setText(E::valueToString<E::Channel>(m_signal.channel()));
+	ui->editSignalOther->setText(str);
 }
 
 void DialogSignalInfo::fillProperties()
