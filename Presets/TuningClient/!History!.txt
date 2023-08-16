@@ -1,0 +1,3 @@
+TuningClient
+	16.08.2023	Version: 1	TuningClient_v1.u7devp	RPCT-3631: Property OnConfigurationArrived removed, now it is a part of the GlobalScript.
+

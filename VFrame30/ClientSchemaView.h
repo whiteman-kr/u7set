@@ -1,25 +1,31 @@
 #pragma once
 
-#include "SchemaView.h"
-#include "SchemaManager.h"
-#include "TuningController.h"
-#include "AppSignalController.h"
-#include "LogController.h"
-#include "SchemaItem.h"
-#include "ISchemaViewHistory.h"
-#include "IViewVariables.h"
 #include "../lib/ClientBehavior.h"
 #include "../lib/ITimeStats.h"
+
+#include "AppSignalController.h"
+#include "ISchemaViewHistory.h"
+#include "IViewVariables.h"
+#include "LogController.h"
+#include "SchemaItem.h"
+#include "SchemaManager.h"
+#include "SchemaView.h"
+#include "TuningController.h"
 
 class QPaintEvent;
 class QTimerEvent;
 class QMouseEvent;
 
-
 namespace VFrame30
 {
 	class ClientSchemaView;
 
+	struct GlobalScriptEvents
+	{
+		inline static const QString OnConfigurationArrived{"OnConfigurationArrived"};
+		inline static const QString OnTimerEvent{"OnTimerEvent"};
+	};
+	
 	// Proxy class for using in scripts
 	//
 	/*! \class ScriptSchemaView
@@ -136,7 +142,7 @@ namespace VFrame30
 		Q_PROPERTY(double zoomFactor READ zoomFactor)
 		Q_PROPERTY(double ZoomFactor READ zoomFactor)
 
-	public:
+	  public:
 		explicit ScriptSchemaView(ClientSchemaView* clientSchemaView,
 								  ISchemaViewHistory* schemaViewHistory,
 								  QObject* parent = nullptr);
@@ -144,23 +150,55 @@ namespace VFrame30
 
 		// Public slots which are part of Script API
 		//
-	public slots:
-		void debugOutput(QString str);					// Debug output to qDebug
+	  public slots:
+		void debugOutput(QString str); // Debug output to qDebug
 
 		/// \brief Sets the active schema specified in schemaId parameter.
-		void setSchema(QString schemaId);				// Set schema by SchemaID
+		void setSchema(QString schemaId); // Set schema by SchemaID
 
 		/// \brief Finds schema item by its name (ObjectName property). Returned value has SchemaItem type or undefined if item is not found.
-		QObject* findSchemaItem(QString objectName);	// Find SchemaItem by ObjectName
+		QObject* findSchemaItem(QString objectName); // Find SchemaItem by ObjectName
 
 		/// \brief Finds a schema control widget (edit control, button, etc...) by its name (ObjectName property).
 		///
 		/// Finds a schema control widget (edit control, button, etc...) by its name (ObjectName property).
 		/// Return value type depends on an object type and can be one of following: PushButtonWidget, LineEditWidget, etc.
 		/// Return value is set to <i>undefined</i> if item is not found.
-		QObject* findWidget(QString objectName);		// Find Widget associated with SchemaItem
+		QObject* findWidget(QString objectName); // Find Widget associated with SchemaItem
 
-		void update();									// Update (redraw) schema view
+		void update();                           // Update (redraw) schema view
+
+		/// @brief Starts or restarts the timer with a timeout of duration intervalMs milliseconds.
+		/// @param intervalMs Timer interval, milliseconds.
+		/// @param timerId Timer identifier, string.
+		///
+		/// A timer event will occur every intervalMs milliseconds until killTimer() or killAllTimers() is called.
+		/// The GlobalScript function named OnTimerEvent() is called with the timerId parameter when a timer event occurs.
+		/// Each schema tab has its own set of timers.
+		///
+		/// @code {.js}
+		/// ...
+		/// view.startTimer(500, "My500MsTimer");
+		/// ...
+		/// // GlobalScript:
+		/// //
+		/// function OnTimerEvent(timerId)
+		/// {
+		///		if (timerId == "My500MsTimer")
+		///		{
+		///			// Timer event code
+		///		}
+		/// }
+		///
+		/// @endcode
+		void startTimer(int intervalMs, QString timerId);
+
+		/// @brief Kills the timer with timer identifier.
+		/// @param timerId Timer identifier
+		void killTimer(QString timerId);
+
+		/// @brief Kills all active timers for the current schema tab.
+		void killAllTimers();
 
 		// History functions
 		//
@@ -236,7 +274,7 @@ namespace VFrame30
 		//
 		QString schemaIdByIndex(int schemaIndex) const;
 
-	private:
+	  private:
 		QString schemaId() const;
 		QString schemaCaption() const;
 
@@ -247,7 +285,7 @@ namespace VFrame30
 
 		// Data
 		//
-	private:
+	  private:
 		ClientSchemaView* m_clientSchemaView = nullptr;
 		ISchemaViewHistory* m_schemaViewHistory = nullptr;
 	};
@@ -256,22 +294,23 @@ namespace VFrame30
 	//
 	// ClientSchemaView
 	//
-	class ClientSchemaView : public VFrame30::SchemaViewWidget, public IViewVariables
+	class ClientSchemaView : public VFrame30::SchemaViewWidget,
+							 public IViewVariables
 	{
 		Q_OBJECT
 
-	public:
+	  public:
 		explicit ClientSchemaView(VFrame30::SchemaManager* schemaManager,
 								  ISchemaViewHistory* schemaViewHistory,
 								  ITimeStats* timeStats,
 								  QWidget* parent = nullptr);
 		virtual ~ClientSchemaView();
 
-	public:
+	  public:
 		void setSchema(QString schemaId);
 		void setSchema(QString schemaId, const QStringList& highlightAppSignalIds);
 
-	protected:
+	  protected:
 		virtual void paintEvent(QPaintEvent* event) override;
 		virtual void timerEvent(QTimerEvent* event) override;
 		virtual void mouseMoveEvent(QMouseEvent* event) override;
@@ -280,15 +319,15 @@ namespace VFrame30
 
 		virtual void updateScriptGlobalVars(QJSEngine& engine);
 
-	protected slots:
+	  protected slots:
 		void startRepaintTimer();
 
-	signals:
+	  signals:
 		void signal_setSchema(QString schemaId, QStringList highlightIds);
 
 		// Properties
 		//
-	public:
+	  public:
 		VFrame30::SchemaManager* schemaManager();
 		const VFrame30::SchemaManager* schemaManager() const;
 
@@ -306,8 +345,8 @@ namespace VFrame30
 		TuningController* tuningController();
 		const TuningController* tuningController() const;
 		void setTuningController(ITuningSignalManager& signalManager,
-									ITuningConnection& tuningConnection,
-									ITuningAuthorization& tuningAuthorization);
+								 ITuningConnection& tuningConnection,
+								 ITuningAuthorization& tuningAuthorization);
 
 		//  AppSignalController
 		//
@@ -324,10 +363,9 @@ namespace VFrame30
 
 		void setLogController(LogController* value);
 
-		// User must provide GlobalScript and onConfigurationArrivedScript
+		// User must provide GlobalScript
 		//
 		void setGlobalScript(QString value);
-		void setOnConfigurationArrivedScript(QString value);
 
 		// --
 		//
@@ -335,17 +373,27 @@ namespace VFrame30
 
 		bool runScript(QJSValue& evaluatedJs, QString where, bool reportError);
 
+		bool runGlobalScriptEvent(const QString& functionName, const QJSValueList& arguments, bool funcIsOptional);
 	private:
+		bool privateRunGlobalScriptEvent(QJSEngine& engine, const QString& functionName, const QJSValueList& arguments, bool funcIsOptional);
+
+	  private:
 		bool reEvaluateGlobalScript();
 		bool execOnConfigurationArrived();
 
-	public:
+	  public:
 		QJSValue evaluateScript(QString script, QString where, bool reportError);
 		[[nodiscard]] QString formatScriptError(const QJSValue& scriptValue) const;
 		void reportScriptError(const QJSValue& scriptValue, QString where);
 
 		bool scriptMessageBoxAllowed() const;
 		bool setScriptMessageBoxAllowed(bool enable);
+
+		// Script timers.
+		//
+		void scriptStartTimer(int intervalMs, QString timerId);
+		void scriptKillTimer(QString timerId);
+		void scriptKillAllTimers();
 
 		// IViewVariables implementation
 		//
@@ -372,21 +420,21 @@ namespace VFrame30
 		void setTuningClientBehavior(const TuningClientBehavior& src);
 		void setTuningClientBehavior(TuningClientBehavior&& src);
 
-	private:
+	  private:
 		VFrame30::SchemaManager* m_schemaManager = nullptr;
-		VFrame30::ISchemaViewHistory* m_schemaViewHistory = nullptr;		// Can be nullptr if widget does not support history navigation
+		VFrame30::ISchemaViewHistory* m_schemaViewHistory = nullptr; // Can be nullptr if widget does not support history navigation
 
-	protected:
+	  protected:
 		std::unique_ptr<TuningController> m_tuningController;
 		AppSignalController* m_appSignalController = nullptr;
 		std::unique_ptr<ScriptAppSignalController> m_scriptAppSignalController;
 		LogController* m_logController = nullptr;
 
-	private:
-		bool m_periodicUpdate = true;		// Update widget every 250 ms
-		bool m_infoMode = false;			// Show some additional info like labels
+	  private:
+		bool m_periodicUpdate = true; // Update widget every 250 ms
+		bool m_infoMode = false;      // Show some additional info like labels
 
-		QStringList m_highlightIds;			// Highlighted IDs, can be any, like AppSignalID, ConnectionID... depends on item
+		QStringList m_highlightIds;   // Highlighted IDs, can be any, like AppSignalID, ConnectionID... depends on item
 
 		// --
 		//
@@ -398,7 +446,8 @@ namespace VFrame30
 		bool m_allowScriptMessageBox = false; // Allow or disable using message box in scripts
 
 		QString m_globalScript;
-		QString m_onConfigurationArrivedScript;
+
+		std::unordered_map<int, QString> m_scriptTimers; // Key is value returned by QObject::startTimer, value is script timerId.
 
 		mutable ITimeStats* m_timeStats = nullptr;
 
@@ -409,12 +458,11 @@ namespace VFrame30
 
 		// Variables
 		//
-		QVariantHash m_variables;		// Key is variable name
+		QVariantHash m_variables; // Key is variable name
 
 		// Behaviors
 		//
 		MonitorBehavior m_monitorBehavior;
 		TuningClientBehavior m_tuningClientBehavior;
 	};
-}
-
+} // namespace VFrame30

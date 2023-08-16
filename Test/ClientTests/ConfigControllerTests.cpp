@@ -31,9 +31,6 @@ namespace
 			ok = getFileBlocked("/" + softwareInfo().equipmentID() + "/GlobalScript.js", &ba, &parsingError);
 			rf.emplace_back("GlobalScript.js", ok, ba);
 
-			ok = getFileBlocked("/" + softwareInfo().equipmentID() + "/OnConfigurationArrived.js", &ba, &parsingError);
-			rf.emplace_back(QString{"OnConfigurationArrived.js"}, ok, ba);
-
 			ok = getFileBlockedById(CfgFileId::LOGO, &ba, &parsingError);
 			rf.emplace_back(std::make_tuple("CfgFileId::LOGO", ok, ba));
 

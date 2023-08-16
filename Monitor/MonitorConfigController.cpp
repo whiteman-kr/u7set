@@ -82,7 +82,6 @@ bool MonitorConfigController::updateConfiguration(const ClientLib::Configuration
 
 	config.globalScript = getScriptFunc("/" + MonitorAppSettings::instance().equipmentId() + "/GlobalScript.js");
 	config.logoImage = getImageFunc(CfgFileId::LOGO);
-	config.onConfigurationArrivedScript = getScriptFunc("/" + MonitorAppSettings::instance().equipmentId() + "/OnConfigurationArrived.js");
 
 	// Get tuning signal files
 	//

@@ -612,23 +612,6 @@ namespace Builder
 			m_cfgXml->addLinkToFile(globalScriptBuildFile);
 		}
 
-		// Writing OnConfigurationArrived
-		//
-		result = true;
-
-		if (m_software->propertyExists("OnConfigurationArrived") == false)
-		{
-			m_log->errCFG3000("OnConfigurationArrived", m_software->equipmentIdTemplate());
-			result = false;
-		}
-		else
-		{
-			QString arrivedScript = m_software->propertyValue("OnConfigurationArrived").toString();
-			BuildFile* arrivedScriptBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "OnConfigurationArrivedScript.js", CfgFileId::TUNING_CONFIGARRIVEDSCRIPT, "", arrivedScript);
-
-			m_cfgXml->addLinkToFile(arrivedScriptBuildFile);
-		}
-
 		return result;
 	}
 

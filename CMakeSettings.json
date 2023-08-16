@@ -12,6 +12,24 @@
       "ctestCommandArgs": ""
     },
     {
+      "name": "x64-Debug-ASan",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${configurationType}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.5.2\\msvc2019_64",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "variables": [
+        {
+          "name": "ADDRESS_SANITIZER",
+          "value": "True",
+          "type": "BOOL"
+        }
+      ]
+    },
+    {
       "name": "x64-Release",
       "generator": "Ninja",
       "configurationType": "Release",

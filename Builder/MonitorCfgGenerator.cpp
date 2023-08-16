@@ -50,10 +50,6 @@ namespace Builder
 
 		result &= saveScriptProperties("GlobalScript", "GlobalScript.js");
 
-		// Writing event scripts: OnConfigurationArrived
-		//
-		result &= saveScriptProperties("OnConfigurationArrived", "OnConfigurationArrived.js");
-
 		result &= initSchemaTags();
 
 		result &= initTuningSources();
