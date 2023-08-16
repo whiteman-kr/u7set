@@ -2,13 +2,10 @@
 
 #include <QStyledItemDelegate>
 #include <QSortFilterProxyModel>
-#include <QDialog>
-#include <QHash>
 
-#include "../Builder/AppSignalProperties.h"
+#include "../DbLib/DbStruct.h"
 #include "MainTabPage.h"
 #include "GlobalMessanger.h"
-#include "DlgMetrologyConnection.h"
 
 class DbController;
 class QTableView;
@@ -28,13 +25,13 @@ class QActionGroup;
 class QStandardItemModel;
 class TableDataVisibilityController;
 class AppSignalSetProvider;
+class FindSignalDialog;
+class DialogMetrologyConnection;
 
-const int	FI_ANY = 0,
-			FI_APP_SIGNAL_ID = 1,
-			FI_CUSTOM_APP_SIGNAL_ID = 2,
-			FI_EQUIPMENT_ID = 3,
-			FI_CAPTION = 4,
-			FI_TAGS = 5;
+namespace Hardware
+{
+	class DeviceAppSignal;
+}
 
 struct CreatingSignalOptions
 {
@@ -81,218 +78,6 @@ private:
 };
 
 
-
-
-
-class CheckedoutSignalsModel : public QSortFilterProxyModel
-{
-	Q_OBJECT
-public:
-	CheckedoutSignalsModel(SignalsModel* sourceModel, QTableView* view, QObject* parent = nullptr);
-
-	virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
-	bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole) override;
-	Qt::ItemFlags flags(const QModelIndex & index) const override;
-
-	bool filterAcceptsRow(int source_row, const QModelIndex&) const override;
-
-	void initCheckStates(const QModelIndexList& list, bool fromSourceModel = true);
-	void setAllCheckStates(bool state);
-	void setCheckState(int row, Qt::CheckState state);
-
-private:
-	SignalsModel* m_sourceModel;
-	QTableView* m_view;
-	QVector<Qt::CheckState> states;
-};
-
-
-class CheckinSignalsDialog : public QDialog
-{
-	Q_OBJECT
-public:
-	CheckinSignalsDialog(SignalsModel* sourceModel, TableDataVisibilityController* columnManager, QModelIndexList selection, QWidget *parent = nullptr);
-
-public slots:
-	void checkinSelected();
-	void cancel();
-
-protected:
-	void closeEvent(QCloseEvent* event);
-
-private:
-	SignalsModel *m_sourceModel;
-	CheckedoutSignalsModel* m_proxyModel;
-	QTableView* m_signalsView = nullptr;
-	QPlainTextEdit* m_commentEdit;
-	QSplitter* m_splitter;
-
-	void saveDialogGeometry();
-};
-
-
-class UndoSignalsDialog : public QDialog
-{
-	Q_OBJECT
-public:
-	UndoSignalsDialog(SignalsModel* sourceModel, TableDataVisibilityController* columnManager, QWidget *parent = nullptr);
-
-	void setCheckStates(QModelIndexList selection, bool fromSourceModel);
-	void saveDialogGeometry();
-
-	const std::vector<int>& undoedSignalsIDs() const { return m_undoedSignalsIDs; }
-
-public slots:
-	void undoSelected();
-
-protected:
-	void closeEvent(QCloseEvent* event);
-
-private:
-	SignalsModel* m_sourceModel = nullptr;
-	CheckedoutSignalsModel* m_proxyModel = nullptr;
-
-	std::vector<int> m_undoedSignalsIDs;
-};
-
-class SignalHistoryDialog : public QDialog
-{
-	Q_OBJECT
-public:
-	SignalHistoryDialog(DbController* dbController, const QString& appSignalId, int signalId, QWidget *parent = nullptr);
-
-protected:
-	void closeEvent(QCloseEvent* event);
-
-private:
-	DbController* m_dbController = nullptr;
-	QStandardItemModel* m_historyModel = nullptr;
-	int m_signalId = -1;
-};
-
-class FindSignalDialog : public QDialog
-{
-	Q_OBJECT
-
-	class SearchOptions
-	{
-	public:
-		QString findString;
-		int searchedPropertyIndex;
-		bool searchInSelected;
-		bool caseSensitive;
-		bool wholeWords;
-
-		bool operator==(const SearchOptions &other) const {
-			return findString == other.findString &&
-					searchedPropertyIndex == other.searchedPropertyIndex &&
-					searchInSelected == other.searchInSelected &&
-					caseSensitive == other.caseSensitive &&
-					wholeWords == other.wholeWords;
-		}
-	};
-
-	static const QString notUniqueMessage;
-	static const QString notEditableMessage;
-	static const QString notCorrectIdMessage;
-	static const QString cannotCheckoutMessage;
-	static const QString replaceableMessage;
-	static const QString replacedMessage;
-
-public:
-	FindSignalDialog(int currentUserId, bool currentUserIsAdmin, QTableView* parent = nullptr);
-
-	bool shouldReopen() { return m_shouldReopen; }
-	void allowReopen() { m_shouldReopen = true; }
-
-signals:
-	void signalSelected(int signalId);
-
-protected:
-	virtual void reject() override;
-
-private:
-	void addSignalIfNeeded(const AppSignal& signal);
-	bool match(QString signalProperty, qsizetype& start, qsizetype& end);
-	bool checkForEditableSignal(const AppSignal& signal);
-	bool checkForUniqueSignalId(const QString& original, const QString& replaced);
-	bool checkForCorrectSignalId(const QString& replaced);
-	SearchOptions getCurrentSearchOptions();
-	QString getProperty(const AppSignal& signal);
-	void setProperty(AppSignal& signal, const QString& value);
-	int getSignalId(int row);
-	int getSelectedRow();
-	void selectRow(int row);
-	bool isReplaceable(int row);
-	void replace(int row);
-	void reloadCurrentIdsMap();
-	void markFistInstancesIfItTheyNotUnique();
-	void generateListIfNeeded();
-
-	void updateCounters();
-
-	void saveDialogGeometry();
-	void saveFindCompleter();
-	void saveReplaceCompleter();
-
-private slots:
-	void generateListIfNeededWithWarning();
-	void updateAllReplacement();
-	void updateReplacement(int row);
-	void updateReplacement(const AppSignal& signal, int row);
-	void replaceAll();
-	void replaceAndFindNext();
-	void findPrevious();
-	void findNext();
-	void selectCurrentSignalOnAppSignalsTab();
-	void blinkReplaceableSignalQuantity();
-
-private:
-	QTableView* m_signalTable = nullptr;
-	SignalsProxyModel* m_signalProxyModel = nullptr;
-	SignalsModel* m_signalModel = nullptr;
-
-	AppSignalSetProvider* m_signalSetProvider = nullptr;
-
-	QLineEdit* m_findString = nullptr;
-	QLineEdit* m_replaceString = nullptr;
-
-	QCompleter* m_findCompleter = nullptr;
-	QCompleter* m_replaceCompleter = nullptr;
-
-	QComboBox* m_searchInPropertyList = nullptr;
-
-	QCheckBox* m_caseSensitive = nullptr;
-	QCheckBox* m_wholeWords = nullptr;
-	QCheckBox* m_searchInSelected = nullptr;
-
-	QLabel* m_signalsQuantityLabel = nullptr;
-	QLabel* m_canBeReplacedQuantityLabel = nullptr;
-
-	QTableView* m_foundList = nullptr;
-	QStandardItemModel* m_foundListModel = nullptr;
-
-	QPushButton* m_replaceAllButton = nullptr;
-	QPushButton* m_replaceAndFindNextButton = nullptr;
-	QPushButton* m_findPreviousButton = nullptr;
-	QPushButton* m_findNextButton = nullptr;
-
-	int m_totalSignalQuantity = 0;
-	int m_replaceableSignalQuantity = 0;
-	bool m_checkCorrectnessOfId = false;
-	QTimer* m_replaceableSignalQuantityBlinkTimer = nullptr;
-	bool m_replaceableSignalQuantityBlinkIsOn = false;
-
-	SearchOptions m_searchOptionsUsedLastTime;
-	bool m_isMatchToCurrentSignalSet = false;
-	QSet<QString> m_signalIds;
-	QSet<QString> m_repeatedSignalIds;
-	QRegularExpression m_regExp4Id;
-	int m_currentUserId = -1;
-	bool m_currentUserIsAdmin = false;
-	bool m_shouldReopen = true;
-};
-
 class SignalsModel;
 class SignalsProxyModel;
 
@@ -305,6 +90,13 @@ public:
 	static const int FILTER_ST_DISCRETE = TO_INT(E::SignalType::Discrete);
 	static const int FILTER_ST_BUS = TO_INT(E::SignalType::Bus);
 	static const int FILTER_ST_ANY = 0xff;
+
+	static const int FILTER_STR_ANY = 0;
+	static const int FILTER_STR_APP_SIGNAL_ID = 1;
+	static const int FILTER_STR_CUSTOM_APP_SIGNAL_ID = 2;
+	static const int FILTER_STR_EQUIPMENT_ID = 3;
+	static const int FILTER_STR_CAPTION = 4;
+	static const int FILTER_STR_TAGS = 5;
 
 public:
 	SignalsTabPage(AppSignalSetProvider* signalSetProvider, DbController* dbController, QWidget* parent);
@@ -416,8 +208,8 @@ public:
 	void finishReset();
 
 public slots:
-	void updateSignals(const std::vector<int>& indexes);
-	void changeRowCount();
+	void slot_signalsUpdated(const std::vector<int>& indexes);
+	void slot_signalsContChanged();
 	void beginIncreaseColumnCount(int newColumnCount);
 	void beginDecreaseColumnCount(int newColumnCount);
 	void endIncreaseColumnCount();
@@ -457,8 +249,32 @@ private:
 	SignalsModel* m_sourceModel;
 	AppSignalSetProvider* m_signalSetProvider;
 	int m_signalType = SignalsTabPage::FILTER_ST_ANY;
-	int m_idFilterField = FI_EQUIPMENT_ID;
+	int m_idFilterField = SignalsTabPage::FILTER_STR_APP_SIGNAL_ID;
 	QStringList m_strIdMasks;
 };
+
+class CheckedoutSignalsModel : public QSortFilterProxyModel
+{
+	Q_OBJECT
+
+public:
+	CheckedoutSignalsModel(SignalsModel* sourceModel, QTableView* view, QObject* parent = nullptr);
+
+	virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+	bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole) override;
+	Qt::ItemFlags flags(const QModelIndex & index) const override;
+
+	bool filterAcceptsRow(int source_row, const QModelIndex&) const override;
+
+	void initCheckStates(const QModelIndexList& list, bool fromSourceModel = true);
+	void setAllCheckStates(bool state);
+	void setCheckState(int row, Qt::CheckState state);
+
+private:
+	SignalsModel* m_sourceModel;
+	QTableView* m_view;
+	QVector<Qt::CheckState> states;
+};
+
 
 

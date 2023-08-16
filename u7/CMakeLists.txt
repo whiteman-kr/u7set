@@ -81,6 +81,8 @@ set (U7_SOURCES
 	CentralWidget.h
 	CheckInDialog.cpp
 	CheckInDialog.h
+	CheckinSignalsDialog.cpp
+	CheckinSignalsDialog.h
 	CreateProjectDialog.cpp
 	CreateProjectDialog.h
 	CreateUserDialogDialog.cpp
@@ -145,6 +147,8 @@ set (U7_SOURCES
 	EquipmentEditor/EquipmentView.h
 	FilesTabPage.cpp
 	FilesTabPage.h
+	FindSignalDialog.cpp
+	FindSignalDialog.h
 	Forms/ChangesetDetailsDialog.cpp
 	Forms/ChangesetDetailsDialog.h
 	Forms/ChooseAfbDialog.cpp
@@ -238,6 +242,8 @@ set (U7_SOURCES
 	SchemaEditor/SchemasTabPage.h
 	Settings.cpp
 	Settings.h
+	SignalHistoryDialog.cpp
+	SignalHistoryDialog.h
 	SignalPropertiesDialog.cpp
 	SignalPropertiesDialog.h
 	SignalsTabPage.cpp
@@ -296,6 +302,8 @@ set (U7_SOURCES
 	TestsTabPage.h
 	TuningConnectionStub.cpp
 	TuningConnectionStub.h
+	UndoSignalsDialog.cpp
+	UndoSignalsDialog.h
 	UploadTabPage.cpp
 	UploadTabPage.h
 	UserManagementDialog.cpp

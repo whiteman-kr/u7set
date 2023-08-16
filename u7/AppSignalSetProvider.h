@@ -90,9 +90,9 @@ public:
 signals:
 	void error(const QString& message);						// for throwing message boxes
 
-	// for reloading entire signal model content
+	// for reloading entire signal model content or any signal count changes
 	//
-	void signalCountChanged();
+	void signalsCountChanged();
 
 	// for updating row in signal view (throwing models DataChanged signal)
 	//

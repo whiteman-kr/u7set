@@ -56,7 +56,7 @@ void AppSignalSetProvider::projectClosed()
 	m_users.clear();
 	m_propertyManager.clear();
 
-	emit signalCountChanged();
+	emit signalsCountChanged();
 }
 
 const AppSignalSet& AppSignalSetProvider::signalSet() const
@@ -452,7 +452,7 @@ void AppSignalSetProvider::startSignalsLoading()
 
 	m_signalsLoading = true;
 
-	emit signalCountChanged();
+	emit signalsCountChanged();
 }
 
 void AppSignalSetProvider::terminateSignalsLoading()
@@ -485,7 +485,7 @@ void AppSignalSetProvider::onSignalsLoadTimer()
 		return;
 	}
 
-	static const int MAX_SIGNALS_COUNT = 1000;
+	static const int MAX_SIGNALS_COUNT = 500;
 
 	std::vector<int> signalIds;
 
@@ -968,15 +968,4 @@ std::vector<int> AppSignalSetProvider::cloneSignals(const std::vector<int>& sign
 
 	return resultSignalIDs;
 }
-
-/*
-void AppSignalSetProvider::clearSignals()
-{
-	if (m_signalSet.count() != 0)
-	{
-		m_propertyManager.clear();
-		m_signalSet.clear();
-		emit signalCountChanged();
-	}
-}*/
 

@@ -1,5 +1,4 @@
-#ifndef WIDGETUTILS_H
-#define WIDGETUTILS_H
+#pragma once
 
 class QTableView;
 class QStandardItem;
@@ -73,5 +72,3 @@ private:
 
 	bool m_changingItems = false;
 };
-
-#endif // WIDGETUTILS_H
