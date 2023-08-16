@@ -188,6 +188,18 @@ TEST_F(TuningConnectionTests, connect)
 	EXPECT_CALL(signalUpdater, signalHashes(lmHashes))
 			.Times(2);
 
+	EXPECT_CALL(signalUpdater, setStates(_, ::calcHash(s_tuningServices[0].equipmentId)))
+		.Times(AtLeast(1));	// At least one reply from TuningService is processed;
+
+	EXPECT_CALL(signalUpdater, setStates(_, ::calcHash(s_tuningServices[1].equipmentId)))
+		.Times(AtLeast(1));	// At least one reply from TuningService is processed;
+
+	EXPECT_CALL(recentAppSignals, recentlyUsedAppSignals(s_tuningServices[0].equipmentId))
+		.Times(AtLeast(1));	// Process at least one reply for recent signals;
+
+	EXPECT_CALL(recentAppSignals, recentlyUsedAppSignals(s_tuningServices[1].equipmentId))
+		.Times(AtLeast(1));	// Process at least one reply for recent signals;
+
 	ClientLib::TuningLogStub tuningLog;
 
 	{
@@ -224,6 +236,7 @@ TEST_F(TuningConnectionTests, connect)
 
 		EXPECT_EQ(connStates[0].peerAddr, s_tuningServices[0].clientRequestAddress);
 		EXPECT_EQ(connStates[1].peerAddr, s_tuningServices[1].clientRequestAddress);
+
 	}
 
 	return;
