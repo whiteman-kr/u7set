@@ -61,7 +61,7 @@ qt_add_library(${TARGET} STATIC
 
 #Add translations
 #
-add_translation(${TARGET} ${CMAKE_COMMAND} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Gui Qt6::Svg Qt6::Widgets Qt6::PrintSupport)
 target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib AppSignalLib )

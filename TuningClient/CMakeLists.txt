@@ -178,7 +178,7 @@ target_precompile_headers(${TARGET} PRIVATE
 
 #Add translations
 #
-add_translation(${TARGET} ${CMAKE_COMMAND} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Sql Qt6::Network Qt6::Qml Qt6::Xml Qt6::Svg Qt6::PrintSupport)
 target_link_libraries(${TARGET} PRIVATE CommonLib UtilsLib AppSignalLib OnlineLib VFrame30 ClientLib)

@@ -146,7 +146,7 @@ add_executable(${TARGET} WIN32
 
 #Add translations
 #
-add_translation(${TARGET} ${CMAKE_COMMAND} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 target_precompile_headers(${TARGET} PRIVATE
 	# C includes, must be before c++ includes

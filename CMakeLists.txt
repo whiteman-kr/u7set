@@ -45,6 +45,10 @@ if(ADDRESS_SANITIZER)
 	add_link_options(-fsanitize=address)
 endif()
 
+# Update Translations
+# Updates .ts files
+#
+option(UPDATE_TRANSLATIONS "Update Translations" OFF)
 
 message("-----------------------------------------")
 message(${PROJECT_NAME})
@@ -58,6 +62,7 @@ endif()
 message("Build output dir set to: " ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 message("Code coverage: " ${CODE_COVERAGE})
 message("AddressSanitizer: " ${ADDRESS_SANITIZER})
+message("Update translations: " ${UPDATE_TRANSLATIONS})
 message("-----------------------------------------")
 
 # Add projects.
