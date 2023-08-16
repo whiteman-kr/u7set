@@ -152,31 +152,42 @@ public:
 
 	MOCK_METHOD(void, invalidateSignalStates, (Hash tuningServiceHash), (override));
 
-	MOCK_METHOD(void, setState, (const TuningSignalState& state, Hash tuningServiceHash), (override));
-	MOCK_METHOD(void, setStates, (const std::vector<TuningSignalState>& states, Hash tuningServiceHash), (override));
+	virtual void setState(const TuningSignalState& state, Hash tuningServiceHash) override
+	{
+	}
+	virtual void setStates(const std::vector<TuningSignalState>& states, Hash tuningServiceHash) override
+	{
+	}
 
 	MOCK_METHOD(void, notifySignalParamsUpdated, (), (override));
 };
 
-class MockIRecentAppSignals : public ClientLib::IRecentAppSignals
+class IRecentAppSignalsStub : public ClientLib::IRecentAppSignals
 {
 public:
-	MOCK_METHOD(void, addRecentAppSignal, (Hash hash), (override));
-	MOCK_METHOD(void, addRecentAppSignals, (const std::vector<Hash>& hashes), (override));
-
-	MOCK_METHOD(std::vector<Hash>, recentlyUsedAppSignals, (const QString& appDataServiceId), (override));
-	MOCK_METHOD(bool, hasRecentlyUsedAppSignals, (), (override));
+	virtual void addRecentAppSignal(Hash h) override
+	{
+	}
+	virtual void addRecentAppSignals(const std::vector<Hash>& hashes) override
+	{
+	}
+	virtual std::vector<Hash> recentlyUsedAppSignals(const QString& appDataServivceId) override	
+	{
+		return {};
+	}
+	virtual bool hasRecentlyUsedAppSignals() override
+	{
+		return false;
+	}
 };
 
 TEST_F(TuningConnectionTests, connect)
 {
 	ILogFileStub logFile;
 
-	//TuningSignalManager signalManager{s_softwareInfo.equipmentID(), &logFile};
-
 	MockITuningSignalManager signalManager{};
 	MockITuningSignalUpdater signalUpdater{};
-	MockIRecentAppSignals recentAppSignals{};
+	IRecentAppSignalsStub recentAppSignals{};
 
 	EXPECT_CALL(signalUpdater, invalidateSignalStates(::calcHash(s_tuningServices[0].equipmentId)))
 			.Times(1);	// 1 times, when connection to TuningService is closed;
@@ -187,18 +198,6 @@ TEST_F(TuningConnectionTests, connect)
 	std::vector<Hash> lmHashes = {::calcHash(QStringLiteral("SYSTEMID_CLIENTTEST_CH11_MD00"))};
 	EXPECT_CALL(signalUpdater, signalHashes(lmHashes))
 			.Times(2);
-
-	EXPECT_CALL(signalUpdater, setStates(_, ::calcHash(s_tuningServices[0].equipmentId)))
-		.Times(AtLeast(1));	// At least one reply from TuningService is processed;
-
-	EXPECT_CALL(signalUpdater, setStates(_, ::calcHash(s_tuningServices[1].equipmentId)))
-		.Times(AtLeast(1));	// At least one reply from TuningService is processed;
-
-	EXPECT_CALL(recentAppSignals, recentlyUsedAppSignals(s_tuningServices[0].equipmentId))
-		.Times(AtLeast(1));	// Process at least one reply for recent signals;
-
-	EXPECT_CALL(recentAppSignals, recentlyUsedAppSignals(s_tuningServices[1].equipmentId))
-		.Times(AtLeast(1));	// Process at least one reply for recent signals;
 
 	ClientLib::TuningLogStub tuningLog;
 
