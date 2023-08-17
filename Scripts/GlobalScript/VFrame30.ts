@@ -31,10 +31,20 @@ module VFrame30 {
 		//
 		setSchema(schemaId: string): void;
 
+		update(): void;		// Update (redraw) schema view
+
 		// Schema items and widgets functions
 		//
 		findSchemaItem(objectName: string): SchemaItem;
 		findWidget(objectName: string): QWidget;
+
+		// Timer functions
+		//
+		startTimer(intervalMs: number, timerId: string): void;	// Starts or restarts the timer with a timeout of duration intervalMs milliseconds.
+																// intervalMs Timer interval, milliseconds.
+																// timerId Timer identifier, string.
+		killTimer(timerId: string): void;	// Kills the timer with timer identifier.
+		killAllTimers(): void;				//Kills all active timers for the current schema tab.
 
 		// History functions
 		//
