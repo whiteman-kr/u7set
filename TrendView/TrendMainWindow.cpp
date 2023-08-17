@@ -45,7 +45,7 @@ namespace TrendLib
 		m_trendWidget = new TrendLib::TrendWidget(this);
 		layout->addWidget(m_trendWidget, 0, 0);
 
-		m_trendWidget->setViewMode(static_cast<TrendLib::TrendViewMode>(theSettings.m_viewType));
+		m_trendWidget->setViewMode(static_cast<E::TrendViewMode>(theSettings.m_viewType));
 		m_trendWidget->setTimeType(static_cast<E::TimeType>(theSettings.m_timeType));
 		m_trendWidget->setLaneCount(theSettings.m_laneCount);
 
@@ -339,8 +339,8 @@ namespace TrendLib
 		m_toolBar->addWidget(viewLabel);
 
 		m_viewCombo = new QComboBox(m_toolBar);
-		m_viewCombo->addItem(tr("Separated"), QVariant::fromValue(TrendLib::TrendViewMode::Separated));
-		m_viewCombo->addItem(tr("Overlapped"), QVariant::fromValue(TrendLib::TrendViewMode::Overlapped));
+		m_viewCombo->addItem(tr("Separated"), QVariant::fromValue(E::TrendViewMode::Separated));
+		m_viewCombo->addItem(tr("Overlapped"), QVariant::fromValue(E::TrendViewMode::Overlapped));
 		m_toolBar->addWidget(m_viewCombo);
 
 		this->addToolBar(Qt::TopToolBarArea, m_toolBar);
@@ -1172,7 +1172,7 @@ namespace TrendLib
 
 	void TrendMainWindow::viewComboCurrentIndexChanged(int index)
 	{
-		TrendLib::TrendViewMode view = m_viewCombo->itemData(index).value<TrendLib::TrendViewMode>();
+		E::TrendViewMode view = m_viewCombo->itemData(index).value<E::TrendViewMode>();
 		m_trendWidget->setViewMode(view);
 
 		m_trendWidget->updateWidget();

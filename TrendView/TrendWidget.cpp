@@ -684,7 +684,7 @@ namespace TrendLib
 					{
 						std::vector<TrendSignalParam> analogsToShift;
 
-						if (m_trendParam.viewMode() == TrendViewMode::Separated)
+						if (m_trendParam.viewMode() == E::TrendViewMode::Separated)
 						{
 							analogsToShift.push_back(m_mouseScrollSignal);		// signalRect is calculated
 						}
@@ -861,14 +861,14 @@ namespace TrendLib
 			//
 			std::vector<TrendSignalParam> signalsToScale;
 
-			if (m_trendParam.viewMode() == TrendViewMode::Overlapped)
+			if (m_trendParam.viewMode() == E::TrendViewMode::Overlapped)
 			{
 				// Scale all analog signals
 				//
 				signalsToScale = signalSet().analogSignals();
 			}
 
-			if (m_trendParam.viewMode() == TrendViewMode::Separated)
+			if (m_trendParam.viewMode() == E::TrendViewMode::Separated)
 			{
 				// Scale analog signal where is mouse now
 				//
@@ -1050,7 +1050,7 @@ namespace TrendLib
 		{
 			std::vector<TrendSignalParam> analogs;
 
-			if (viewMode() == TrendLib::TrendViewMode::Overlapped)
+			if (viewMode() == E::TrendViewMode::Overlapped)
 			{
 				analogs = signalSet().analogSignals();
 				std::vector<TrendSignalParam> discretes = signalSet().discreteSignals();
@@ -1186,12 +1186,12 @@ namespace TrendLib
 		return m_trend;
 	}
 
-	TrendViewMode TrendWidget::viewMode() const
+	E::TrendViewMode TrendWidget::viewMode() const
 	{
 		return m_trendParam.viewMode();
 	}
 
-	void TrendWidget::setViewMode(TrendViewMode value)
+	void TrendWidget::setViewMode(E::TrendViewMode value)
 	{
 		m_trendParam.setViewMode(value);
 		return;

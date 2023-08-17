@@ -126,6 +126,21 @@ namespace VFrame30
 	{
 		Property* p = nullptr;
 
+		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(E::TrendViewMode, PropertyNames::indicatorTrendViewMode, true, IndicatorTrend::viewMode, IndicatorTrend::setViewMode);
+		p->setCategory(PropertyNames::indicatorSettings);
+
+		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(E::TrendScaleType, PropertyNames::indicatorTrendScaleType, true, IndicatorTrend::scaleType, IndicatorTrend::setScaleType);
+		p->setCategory(PropertyNames::indicatorSettings);
+
+		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::indicatorTrendLaneCount, true, IndicatorTrend::laneCount, IndicatorTrend::setLaneCount);
+		p->setCategory(PropertyNames::indicatorSettings);
+
+		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(QColor, PropertyNames::indicatorTrendBackColor1st, true, IndicatorTrend::backColor1st, IndicatorTrend::setBackColor1st);
+		p->setCategory(PropertyNames::indicatorSettings);
+
+		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(QColor, PropertyNames::indicatorTrendBackColor2nd, true, IndicatorTrend::backColor2nd, IndicatorTrend::setBackColor2nd);
+		p->setCategory(PropertyNames::indicatorSettings);
+
 		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(E::RtTrendsSamplePeriod, PropertyNames::indicatorTrendSamplePeriod, true, IndicatorTrend::samplePeriod, IndicatorTrend::setSamplePeriod);
 		p->setCategory(PropertyNames::indicatorSettings);
 
@@ -179,6 +194,31 @@ namespace VFrame30
 			m_trendSignalParams.push_back(tsp);
 		}
 
+		if (m.has_viewmode() == true)
+		{
+			m_trendParam.setViewMode(static_cast<E::TrendViewMode>(m.viewmode()));
+		}
+
+		if (m.has_scaletype() == true)
+		{
+			m_trendParam.setScaleType(static_cast<E::TrendScaleType>(m.scaletype()));
+		}
+
+		if (m.has_lanecount() == true)
+		{
+			m_trendParam.setLaneCount(m.lanecount());
+		}
+
+		if (m.has_backcolor1st() == true)
+		{
+			m_trendParam.setBackColor1st(m.backcolor1st());
+		}
+
+		if (m.has_backcolor2nd() == true)
+		{
+			m_trendParam.setBackColor2nd(m.backcolor2nd());
+		}
+
 		return true;
 	}
 
@@ -194,6 +234,12 @@ namespace VFrame30
 
 		auto m = message->mutable_indicatortrend();						// Line to change 1
 
+		m->set_viewmode(static_cast<int>(viewMode()));
+		m->set_scaletype(static_cast<int>(scaleType()));
+		m->set_lanecount(laneCount());
+		m->set_backcolor1st(backColor1st().rgba());
+		m->set_backcolor2nd(backColor2nd().rgba());
+				
 		m->set_sampleperiod(static_cast<int>(m_samplePeriod));
 		m->set_timetype(static_cast<int>(m_timeType));
 		m->set_redrawinterval(m_redrawInterval);
@@ -375,6 +421,56 @@ namespace VFrame30
 	const TrendLib::Trend& IndicatorTrend::trend() const
 	{
 		return m_trend;
+	}
+
+	E::TrendViewMode IndicatorTrend::viewMode() const
+	{
+		return m_trendParam.viewMode();
+	}
+
+	void IndicatorTrend::setViewMode(E::TrendViewMode value)
+	{
+		m_trendParam.setViewMode(value);
+	}
+
+	E::TrendScaleType IndicatorTrend::scaleType() const
+	{
+		return m_trendParam.scaleType();
+	}
+
+	void IndicatorTrend::setScaleType(E::TrendScaleType value)
+	{
+		m_trendParam.setScaleType(value);
+	}
+
+	int IndicatorTrend::laneCount() const
+	{
+		return m_trendParam.laneCount();
+	}
+
+	void IndicatorTrend::setLaneCount(int value)
+	{
+		m_trendParam.setLaneCount(value);
+	}
+
+	QColor IndicatorTrend::backColor1st() const
+	{
+		return m_trendParam.backColor1st();
+	}
+
+	void IndicatorTrend::setBackColor1st(const QColor& value)
+	{
+		m_trendParam.setBackColor1st(value);
+	}
+
+	QColor IndicatorTrend::backColor2nd() const
+	{
+		return m_trendParam.backColor2nd();
+	}
+
+	void IndicatorTrend::setBackColor2nd(const QColor& value)
+	{
+		m_trendParam.setBackColor2nd(value);
 	}
 
 	E::RtTrendsSamplePeriod IndicatorTrend::samplePeriod() const

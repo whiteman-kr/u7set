@@ -5,10 +5,10 @@ namespace VFrame30
 
 	class PropertyNames
 	{
-	public:
+	  public:
 		PropertyNames() = delete;
 
-	public:
+	  public:
 		inline static const QString schemaId{"SchemaID"};
 
 		inline static const QString top{"Top"};
@@ -116,11 +116,16 @@ namespace VFrame30
 		inline static const QString timeType{"TimeType"};
 		inline static const QString timeTypeToolTip{"Plant: plant time received from LogicModule, System: server time (UTC+0), Local: localized server time (UTC+Time Zone)"};
 
-		inline static const QString indicatorTrendSamplePeriod{"SamplePeriod"};
-		inline static const QString indicatorTrendRedrawInterval{"RedrawInterval"};
-		inline static const QString indicatorTrendRedrawIntervalToolTip{"Trend image update time, ms"};
+		inline static const QString indicatorTrendBackColor1st{"BackColor1st"};
+		inline static const QString indicatorTrendBackColor2nd{"BackColor2nd"};
+		inline static const QString indicatorTrendLaneCount{"LaneCount"};
 		inline static const QString indicatorTrendLaneDuration{"LaneDuration"};
 		inline static const QString indicatorTrendLaneDurationToolTip{"Lane duration, seconds"};
+		inline static const QString indicatorTrendRedrawInterval{"RedrawInterval"};
+		inline static const QString indicatorTrendRedrawIntervalToolTip{"Trend image update time, ms"};
+		inline static const QString indicatorTrendSamplePeriod{"SamplePeriod"};
+		inline static const QString indicatorTrendScaleType{"ScaleType"};
+		inline static const QString indicatorTrendViewMode{"ViewMode"};
 
 		inline static const QString indicatorMargingLeft{"MarginLeft"};
 		inline static const QString indicatorMargingTop{"MarginTop"};
@@ -143,8 +148,8 @@ namespace VFrame30
 															 "$(signalid) SignalID (CustomSignalID)\n"
 															 "$(appsignalid) AppSignalID (#APPSIGANLID)\n"
 															 "$(equipmentid) Signal EquipmentID (LM for internal signals, input/output equipment port for IO signals)\n"};
-															 //"$(highlimit) High limit\n"
-															 //"$(lowlimit) Low limit"};
+		//"$(highlimit) High limit\n"
+		//"$(lowlimit) Low limit"};
 
 		inline static const QString userText{"UserText"};
 		inline static const QString userTextPos{"UserTextPos"};
@@ -270,4 +275,4 @@ namespace VFrame30
 		inline static const QString scriptGlobalVariableSignals{"signals"};
 		inline static const QString scriptGlobalVariableLog{"log"};
 	};
-}
+} // namespace VFrame30

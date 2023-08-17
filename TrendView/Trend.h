@@ -103,7 +103,7 @@ namespace TrendLib
 	public:
 		enum class MouseOn
 		{
-			Outside,			// Outside any posible rect
+			Outside,			// Outside any possible rect
 			OutsideTrendArea,	// Outside lane but in the rect
 			InsideTrendArea,	// Inside lane rectangle
 			OnSignalDescription,// Over Signal Description (id + caption)

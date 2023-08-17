@@ -79,6 +79,21 @@ namespace VFrame30
 		// Properties
 		//
 	public:
+		E::TrendViewMode viewMode() const;
+		void setViewMode(E::TrendViewMode value);
+
+		E::TrendScaleType scaleType() const;
+		void setScaleType(E::TrendScaleType value);
+
+		int laneCount() const;
+		void setLaneCount(int value);
+
+		QColor backColor1st() const;
+		void setBackColor1st(const QColor& value);
+
+		QColor backColor2nd() const;
+		void setBackColor2nd(const QColor& value);
+
 		E::RtTrendsSamplePeriod samplePeriod() const;
 		void setSamplePeriod(E::RtTrendsSamplePeriod value);
 
@@ -90,7 +105,7 @@ namespace VFrame30
 
 		int durationSeconds() const;
 		void setDurationSeconds(int value);
-
+		
 		// Data
 		//
 	private:

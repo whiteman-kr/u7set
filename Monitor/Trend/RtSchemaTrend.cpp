@@ -376,13 +376,13 @@ RtSchemaTrend::~RtSchemaTrend()
 	return;
 }
 
-// Updates m_rtConnections from SchemaDetaisSet
+// Updates m_rtConnections from SchemaDetailsSet
 //
 void RtSchemaTrend::updateRealtimeConnections()
 {
 	Q_ASSERT(QThread::currentThreadId() == this->thread()->currentThreadId());
 
-	// We could make this function slot and connecte it to MonitorConfigController::configurationArrived
+	// We could make this function slot and connect it to MonitorConfigController::configurationArrived
 	// But we need to be sure that
 	//
 	auto softwareInfo = m_configController.softwareInfo();
