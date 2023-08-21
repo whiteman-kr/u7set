@@ -1085,7 +1085,8 @@ QVariant TuningModel::headerData(int section, Qt::Orientation orientation, int r
 // DialogInputTuningValue
 //
 
-DialogInputTuningValue::DialogInputTuningValue(TuningValue value, TuningValue defaultValue, bool sameValue, TuningValue lowLimit, TuningValue highLimit, E::AnalogFormat analogFormat, int decimalPlaces, QWidget* parent) :
+DialogInputTuningValue::DialogInputTuningValue(TuningValue value, TuningValue defaultValue, bool sameValue, bool sameDefaultValue,
+	TuningValue lowLimit, TuningValue highLimit, E::AnalogFormat analogFormat, int decimalPlaces, QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	m_value(value),
 	m_defaultValue(defaultValue),
@@ -1170,6 +1171,12 @@ DialogInputTuningValue::DialogInputTuningValue(TuningValue value, TuningValue de
 		}
 
 		m_buttonDefault->setText(tr("Default: ") + m_defaultValue.toString(analogFormat, m_decimalPlaces));
+	}
+
+	if (sameDefaultValue == false)
+	{
+		m_buttonDefault->setText(tr("Default: ") + "...");
+		m_buttonDefault->setEnabled(false);
 	}
 }
 

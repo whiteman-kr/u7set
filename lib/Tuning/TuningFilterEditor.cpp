@@ -564,6 +564,7 @@ void ChooseTuningSignalsWidget::on_m_setValue_clicked()
 	TuningValue defaultValue;
 
 	bool sameValue = true;
+	bool sameDefaultValue = true;
 
 	QList<QTreeWidgetItem*> selectedItems = m_filterValuesTree->selectedItems();
 
@@ -636,14 +637,21 @@ void ChooseTuningSignalsWidget::on_m_setValue_clicked()
 				}
 			}
 
-			if (fv.useValue() == true && fv.value() != value)
+			if (fv.useValue() == true)
 			{
-				sameValue = false;
+				if (fv.value() != value)
+				{
+					sameValue = false;
+				}
+			}
+			if (defaultValue != asp.tuningDefaultValue())
+			{
+				sameDefaultValue = false;
 			}
 		}
 	}
 
-	DialogInputTuningValue d(value, defaultValue, sameValue, lowLimit, highLimit, E::AnalogFormat::g_9_or_9e, precision, this);
+	DialogInputTuningValue d(value, defaultValue, sameValue, sameDefaultValue, lowLimit, highLimit, E::AnalogFormat::g_9_or_9e, precision, this);
 	if (d.exec() != QDialog::Accepted)
 	{
 		return;
