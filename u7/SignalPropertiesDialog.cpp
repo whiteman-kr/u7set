@@ -16,7 +16,7 @@
 //
 std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& signalId, DbController* dbController, QWidget* parent)
 {
-	QVector<AppSignal> signalVector;
+	std::vector<AppSignal> signalVector;
 
 	for (QString& id : signalId)
 	{
@@ -25,14 +25,7 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& sig
 
 	if (!dbController->getLatestSignalsByAppSignalIDs(signalId, &signalVector, parent))
 	{
-		if (signalId.count() > 1)
-		{
-			QMessageBox::critical(parent, "Error", "Could not load signals from database");
-		}
-		else
-		{
-			QMessageBox::critical(parent, "Error", "Could not load signal from database");
-		}
+		QMessageBox::critical(parent, "Error", "Could not load signal(s) from database");
 	}
 
 	std::vector<AppSignal*> signalPtrVector;

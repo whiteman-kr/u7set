@@ -139,14 +139,14 @@ public slots:
 
     // Signal management
     //
-    void slot_getSignalsIDs(QVector<int>* signalsIDs);
+	void slot_getSignalsIDs(std::vector<int>* signalsIDs);
 	void slot_getSignalsIDAppSignalID(std::vector<ID_AppSignalID>* signalsIDAppSignalID, bool withDeleted);
 	void slot_getSignals(AppSignalSet* signalSet, bool excludeDeleted);
 	void slot_getTunableSignals(AppSignalSet* signalSet);
 	void getSignals(AppSignalSet* signalSet, bool excludeDeleted, bool tunableOnly);
     void slot_getLatestSignal(int signalID, AppSignal* signal);
-	void slot_getLatestSignals(const std::vector<int>& signalIDs, std::vector<AppSignal>*signalsArray);
-	void slot_getLatestSignalsByAppSignalIDs(QStringList appSignalIds, QVector<AppSignal>* signalArray);
+	void slot_getLatestSignals(const std::vector<int>& signalIDs, std::vector<AppSignal>* signalsArray);
+	void slot_getLatestSignalsByAppSignalIDs(const QStringList& appSignalIds, std::vector<AppSignal>* signalArray);
 	void slot_getLatestSignalsWithUserID(std::vector<AppSignal>* out);
 	void slot_getCheckedOutSignalsIDs(std::vector<int>* signalsIDs);
 	void slot_addSignal(E::SignalType signalType, std::vector<AppSignal>* newSignal);
@@ -156,32 +156,32 @@ public slots:
 
 	void slot_checkoutSignals(const std::vector<int>& signalIDs, std::vector<ObjectState>* objectStates);
 	void slot_setSignalWorkcopy(AppSignal* signal, ObjectState* objectState);
-	void slot_setSignalsWorkcopies(const QVector<AppSignal>* signalsList);
+	void slot_setSignalsWorkcopies(const std::vector<AppSignal>& signalsList);
 
     void slot_deleteSignal(int signalID, ObjectState* objectState);
     void slot_undoSignalChanges(int signalID, ObjectState* objectState);
-	void slot_undoSignalsChanges(QVector<int> signalIDs, QVector<ObjectState>* objectStates);
+	void slot_undoSignalsChanges(const std::vector<int>& signalIDs, std::vector<ObjectState>* objectStates);
 
 	void slot_checkinSignals(const std::vector<int>& signalIDs, QString comment, std::vector<ObjectState>* objectState);
 
-	void slot_autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals, std::vector<AppSignal>* addedSignals);
+	void slot_autoAddSignals(const std::vector<const Hardware::DeviceAppSignal*>& deviceSignals, std::vector<AppSignal>* addedSignals);
 	static QString initAppSignalFromDeviceAppSignal(const Hardware::DeviceAppSignal& deviceSignal, AppSignal* appSignal);
 
-    void slot_autoDeleteSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals);
+	void slot_autoDeleteSignals(const std::vector<const Hardware::DeviceAppSignal*>& deviceSignals);
 
 	bool isSignalWithEquipmentIDExists(const QString& equipmentID);
 
-	void slot_getSignalsIDsWithAppSignalID(QString appSignalID, QVector<int>* signalIDs);
+/*	void slot_getSignalsIDsWithAppSignalID(QString appSignalID, QVector<int>* signalIDs);
 	void slot_getSignalsIDsWithCustomAppSignalID(QString customAppSignalID, QVector<int>* signalIDs);
-	void slot_getSignalsIDsWithEquipmentID(QString equipmentID, QVector<int>* signalIDs);
-	void slot_getMultipleSignalsIDsWithEquipmentID(const QStringList& equipmentIDs, QMultiHash<QString, int>* signalIDs);
+	void slot_getSignalsIDsWithEquipmentID(QString equipmentID, QVector<int>* signalIDs);*/
+
+	void slot_getMultipleSignalsIDsWithEquipmentID(const QStringList& equipmentIDs, std::map<QString, std::set<int>>* signalIDs);
 
 	void slot_getSignalHistory(int signalID, std::vector<DbChangeset>* out);
 
-	void slot_getSpecificSignals(const std::vector<int>* signalIDs, int changesetId, std::vector<AppSignal>* out);
-
-	void slot_getSpecificSignals(int changesetId, std::vector<AppSignal>* out);
-	void slot_getSpecificSignals(QDateTime date, std::vector<AppSignal>* out);
+	void slot_getSpecificSignalsByIDs(const std::vector<int>& signalIDs, int changesetId, std::vector<AppSignal>* out);
+	void slot_getSpecificSignalsByChangesetID(int changesetId, std::vector<AppSignal>* out);
+	void slot_getSpecificSignalsByDate(QDateTime date, std::vector<AppSignal>* out);
 
 	void readSignalsToVector(QSqlQuery& q, std::vector<AppSignal>* out);
 
@@ -260,7 +260,8 @@ private:
 	bool processingAfterDatabaseUpgrade0302(QSqlDatabase& db, QString* errorMessage);
 //	void getSignalDataAfterDatabaseUpdate0211(QSqlQuery& q, Signal& s);
 
-	void appendIDsArray(const std::vector<int>& ids, QString* request) const;
+	void appendIDsArray(const std::vector<int>& ids, QString* request,
+						bool appendCloseBracket, QString* logMessage) const;
 
 private:
 	mutable QReadWriteLock m_lock;

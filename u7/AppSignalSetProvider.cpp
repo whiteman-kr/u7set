@@ -1,6 +1,7 @@
 #include "AppSignalSetProvider.h"
 
 AppSignalSetProvider* AppSignalSetProvider::m_instance = nullptr;
+QThread* AppSignalSetProvider::m_thread = nullptr;
 
 AppSignalSetProvider::AppSignalSetProvider(DbController* dbController, QWidget* parentWidget) :
 	QObject(parentWidget),
@@ -11,6 +12,8 @@ AppSignalSetProvider::AppSignalSetProvider(DbController* dbController, QWidget* 
 {
 	Q_ASSERT(m_instance == nullptr);
 	m_instance = this;
+
+	m_thread = QThread::currentThread();
 
 	TEST_PTR_RETURN(dbController);
 
@@ -32,6 +35,8 @@ AppSignalSetProvider* AppSignalSetProvider::getInstance()
 
 void AppSignalSetProvider::projectOpened()
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	m_signalSet.clear();
 
 	m_currentUserID = m_db->currentUser().userId();
@@ -47,6 +52,8 @@ void AppSignalSetProvider::projectOpened()
 
 void AppSignalSetProvider::projectClosed()
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	terminateSignalsLoading();
 
 	m_currentUserID = -1;
@@ -71,11 +78,15 @@ AppSignalPropertyManager& AppSignalSetProvider::signalPropertyManager()
 
 void AppSignalSetProvider::reloadSignals()
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	startSignalsLoading();
 }
 
 void AppSignalSetProvider::loadSignals(const std::vector<int>& signalIds, bool withoutProgress)
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	if (signalIds.size() == 0)
 	{
 		return;
@@ -113,11 +124,15 @@ void AppSignalSetProvider::loadSignals(const std::vector<int>& signalIds, bool w
 
 void AppSignalSetProvider::reloadSignals(const std::vector<int>& signalIds)
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	loadSignals(signalIds, true);
 }
 
 void AppSignalSetProvider::enforceAllSignalsLoading()
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	if (m_signalsLoading == false)
 	{
 		return;
@@ -143,19 +158,7 @@ void AppSignalSetProvider::enforceAllSignalsLoading()
 
 const AppSignal* AppSignalSetProvider::loadSignal(int signalId)
 {
-	static int id = -1;
-
-	if (id = -1)
-	{
-		id = signalId;
-	}
-	else
-	{
-		if (id == signalId)
-		{
-			DEBUG_STOP;
-		}
-	}
+	Q_ASSERT(m_thread == QThread::currentThread());
 
 	AppSignal loadedSignal;
 
@@ -181,6 +184,8 @@ void AppSignalSetProvider::setMiddleVisibleSignalIndex(int signalIndex)
 
 QString AppSignalSetProvider::getUserName(int userId)
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	auto it = m_users.find(userId);
 
 	if (it != m_users.end())
@@ -204,31 +209,43 @@ QString AppSignalSetProvider::getUserName(int userId)
 
 AppSignal* AppSignalSetProvider::getSignal(const QString& appSignalID)
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	return m_signalSet.getSignal(appSignalID);
 }
 
 AppSignal* AppSignalSetProvider::getSignal(int signalID)
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	return m_signalSet.getSignal(signalID);
 }
 
 bool AppSignalSetProvider::getChannelSignalsID(const AppSignal& signal, std::vector<int>* channelSignalIDs) const
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	return m_signalSet.getChannelSignalsID(signal, channelSignalIDs);
 }
 
 bool AppSignalSetProvider::getChannelSignalsID(int signalID, int groupID, std::vector<int>* channelSignalIDs) const
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	return m_signalSet.getChannelSignalsID(signalID, groupID, channelSignalIDs);
 }
 
 int AppSignalSetProvider::signalIndex(int signalID) const
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	return m_signalSet.signalIndex(signalID);
 }
 
 int AppSignalSetProvider::signalID(int index) const
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	const AppSignal* s = m_signalSet.at(index);
 
 	TEST_PTR_RETURN_VALUE(s, -1);
@@ -238,6 +255,8 @@ int AppSignalSetProvider::signalID(int index) const
 
 AppSignal* AppSignalSetProvider::getLoadedSignal(AppSignal* s)
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	TEST_PTR_RETURN_NULLPTR(s);
 
 	if (s->isLoaded() == false)
@@ -250,6 +269,8 @@ AppSignal* AppSignalSetProvider::getLoadedSignal(AppSignal* s)
 
 AppSignal* AppSignalSetProvider::getLoadedSignalByID(int signalID)
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	AppSignal* s = m_signalSet.getSignal(signalID);
 
 	return getLoadedSignal(s);
@@ -257,6 +278,8 @@ AppSignal* AppSignalSetProvider::getLoadedSignalByID(int signalID)
 
 AppSignal* AppSignalSetProvider::getLoadedSignal(int index)
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	AppSignal* s = m_signalSet.at(index);
 
 	return getLoadedSignal(s);
@@ -264,6 +287,8 @@ AppSignal* AppSignalSetProvider::getLoadedSignal(int index)
 
 AppSignalParam AppSignalSetProvider::getAppSignalParam(int index)
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	AppSignal signal(*getLoadedSignal(index));
 
 	signal.cacheSpecPropValues();
@@ -277,6 +302,8 @@ AppSignalParam AppSignalSetProvider::getAppSignalParam(int index)
 
 AppSignalParam AppSignalSetProvider::getAppSignalParam(const QString& appSignalId)
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	AppSignalParam param;
 
 	AppSignal* signal = getSignal(appSignalId);
@@ -298,6 +325,8 @@ AppSignalParam AppSignalSetProvider::getAppSignalParam(const QString& appSignalI
 
 QVector<int> AppSignalSetProvider::getSameChannelSignals(int index)
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	QVector<int> sameChannelSignalRows;
 
 	const AppSignal* s = m_signalSet.at(index);
@@ -325,11 +354,15 @@ QVector<int> AppSignalSetProvider::getSameChannelSignals(int index)
 
 bool AppSignalSetProvider::isEditableSignal(int index) const
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	return isEditableSignal(m_signalSet.at(index));
 }
 
 bool AppSignalSetProvider::isEditableSignal(const AppSignal* signal) const
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	TEST_PTR_RETURN_FALSE(signal);
 
 	if (!signal->checkedOut() ||
@@ -343,15 +376,19 @@ bool AppSignalSetProvider::isEditableSignal(const AppSignal* signal) const
 
 bool AppSignalSetProvider::isCheckinableSignalForMe(int index) const
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	return isCheckinableSignalForMe(m_signalSet.at(index));
 }
 
 bool AppSignalSetProvider::isCheckinableSignalForMe(const AppSignal* signal) const
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	TEST_PTR_RETURN_FALSE(signal);
 
 	if (signal->checkedOut() &&
-		(signal->userID() == m_db->currentUser().userId() || m_db->currentUser().isAdminstrator()))
+		(signal->userID() == m_currentUserID || m_currentUserIsAdmin))
 	{
 		return true;
 	}
@@ -361,6 +398,8 @@ bool AppSignalSetProvider::isCheckinableSignalForMe(const AppSignal* signal) con
 
 bool AppSignalSetProvider::checkoutSignal(int index, QString* message)
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	AppSignal* s = m_signalSet.at(index);
 
 	TEST_PTR_RETURN_FALSE(s);
@@ -426,6 +465,8 @@ bool AppSignalSetProvider::checkoutSignal(int index, QString* message)
 
 void AppSignalSetProvider::loadUsers()
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	std::vector<DbUser> users;
 
 	m_db->getUserList(&users, nullptr);
@@ -440,6 +481,8 @@ void AppSignalSetProvider::loadUsers()
 
 void AppSignalSetProvider::startSignalsLoading()
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	if (m_signalsLoading == true)
 	{
 		terminateSignalsLoading();
@@ -457,12 +500,16 @@ void AppSignalSetProvider::startSignalsLoading()
 
 void AppSignalSetProvider::terminateSignalsLoading()
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	m_signalsLoadTimer.stop();
 	m_signalsLoading = false;
 }
 
 void AppSignalSetProvider::loadIdAppSignalId()
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	std::vector<ID_AppSignalID> ids;
 
 	m_db->getSignalsIDAppSignalID(&ids, false, nullptr);
@@ -478,6 +525,8 @@ void AppSignalSetProvider::loadIdAppSignalId()
 
 void AppSignalSetProvider::onSignalsLoadTimer()
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	if (m_signalsLoading == false)
 	{
 		Q_ASSERT(false);
@@ -574,6 +623,7 @@ void AppSignalSetProvider::showError(const ObjectState& state)
 	if (state.errCode != ERR_SIGNAL_OK)
 	{
 		QString message = errorMessage(state);
+
 		if (!message.isEmpty())
 		{
 			emit error(message);
@@ -625,11 +675,15 @@ bool AppSignalSetProvider::checkinSignals(const std::vector<int>& signalIDs,
 										  QString comment,
 										  std::vector<ObjectState>* objectStates)
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	return m_db->checkinSignals(signalIDs, comment, objectStates, m_parentWidget);
 }
 
 bool AppSignalSetProvider::undoSignalChanges(int signalID, ObjectState* objectStates)
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	return m_db->undoSignalChanges(signalID, objectStates, m_parentWidget);
 }
 
@@ -737,6 +791,8 @@ void AppSignalSetProvider::loadNextSignalsPortion()
 */
 bool AppSignalSetProvider::undoSignal(int id)
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	const AppSignal* s = m_signalSet.getSignal(id);
 
 	TEST_PTR_RETURN_FALSE(s);
@@ -779,6 +835,8 @@ bool AppSignalSetProvider::undoSignal(int id)
 
 void AppSignalSetProvider::deleteSignal(int signalID)
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	ObjectState state;
 
 	m_db->deleteSignal(signalID, &state, nullptr);
@@ -791,6 +849,8 @@ void AppSignalSetProvider::deleteSignal(int signalID)
 
 void AppSignalSetProvider::addSignal(AppSignal& signal)
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	Q_ASSERT(false); // REMOVED m_signalSet.replaceOrAppendIfNotExists(signal); CHECK THIS!
 
 	m_signalSet.append(new AppSignal(signal));
@@ -798,6 +858,8 @@ void AppSignalSetProvider::addSignal(AppSignal& signal)
 
 void AppSignalSetProvider::deleteSignals(const std::vector<int>& signalIDs)
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	for (const int signalID : signalIDs)
 	{
 		deleteSignal(signalID);
@@ -839,6 +901,8 @@ void AppSignalSetProvider::loadSignals()
 
 void AppSignalSetProvider::saveSignal(AppSignal& signal)
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	ObjectState state;
 	trimSignalTextFields(signal);
 
@@ -854,6 +918,8 @@ void AppSignalSetProvider::saveSignal(AppSignal& signal)
 
 void AppSignalSetProvider::saveSignals(const std::vector<AppSignal*>& signalVector)
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	std::vector<ObjectState> states;
 
 	for (AppSignal* s : signalVector)
@@ -874,6 +940,8 @@ void AppSignalSetProvider::saveSignals(const std::vector<AppSignal*>& signalVect
 
 std::vector<int> AppSignalSetProvider::cloneSignals(const std::vector<int>& signalIDsToClone)
 {
+	Q_ASSERT(m_thread == QThread::currentThread());
+
 	std::vector<int> resultSignalIDs;
 
 	std::set<int> clonedSignalIDs;

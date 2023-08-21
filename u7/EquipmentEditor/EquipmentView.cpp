@@ -1181,7 +1181,7 @@ void EquipmentView::addInOutsToSignals(std::shared_ptr<Hardware::DeviceModule> m
 
 	// Get all hardware inputs outputs from the module
 	//
-	std::vector<Hardware::DeviceAppSignal*> inOuts;
+	std::vector<const Hardware::DeviceAppSignal*> inOuts;
 
 	std::function<void(Hardware::DeviceObject*)> getInOuts =
 		[&inOuts, &getInOuts](Hardware::DeviceObject* device)
@@ -1264,14 +1264,14 @@ void EquipmentView::addInOutsToSignals(std::shared_ptr<Hardware::DeviceModule> m
 	// Add signals to the project DB
 	//
 	std::sort(std::begin(inOuts), std::end(inOuts),
-		[](Hardware::DeviceObject* a, Hardware::DeviceObject* b)
+		[](const Hardware::DeviceObject* a, const Hardware::DeviceObject* b)
 		{
 			return a->equipmentIdTemplate() < b->equipmentIdTemplate();
 		});
 
 	std::vector<AppSignal> addedSignals;
 
-	bool result = db()->autoAddSignals(&inOuts, &addedSignals, this);
+	bool result = db()->autoAddSignals(inOuts, &addedSignals, this);
 
 	qDebug() << "Signals added:" << addedSignals.size();
 
@@ -1336,7 +1336,7 @@ void EquipmentView::addInOutsToSignals(std::vector<std::shared_ptr<Hardware::Dev
 
 	// Get all hardware inputs outputs
 	//
-	std::vector<Hardware::DeviceAppSignal*> inOuts;
+	std::vector<const Hardware::DeviceAppSignal*> inOuts;
 
 	for (auto has : hardwareAppSignals)
 	{
@@ -1378,14 +1378,14 @@ void EquipmentView::addInOutsToSignals(std::vector<std::shared_ptr<Hardware::Dev
 	// Add signals to the project DB
 	//
 	std::sort(std::begin(inOuts), std::end(inOuts),
-		[](Hardware::DeviceObject* a, Hardware::DeviceObject* b)
+		[](const Hardware::DeviceObject* a, const Hardware::DeviceObject* b)
 		{
 			return a->equipmentIdTemplate() < b->equipmentIdTemplate();
 		});
 
 	std::vector<AppSignal> addedSignals;
 
-	bool result = db()->autoAddSignals(&inOuts, &addedSignals, this);
+	bool result = db()->autoAddSignals(inOuts, &addedSignals, this);
 
 	qDebug() << "Signals added:" << addedSignals.size();
 
@@ -2595,8 +2595,8 @@ void EquipmentView::updateFromPreset()
 	std::vector<Hardware::DeviceObject*> deleteDeviceList;
 	std::vector<std::pair<int, int>> addDeviceList;		// first: parent fileId, second: preset file id
 
-	QVector<Hardware::DeviceAppSignal*> deviceSignalsToUpdateAppSignals;	// This array will be passed to application signals to
-																			// to updater them
+	std::vector<const Hardware::DeviceAppSignal*> deviceSignalsToUpdateAppSignals;	// This array will be passed to application signals to
+																					// to updater them
 
 	updateDeviceList.reserve(65536 * 2);
 	deleteDeviceList.reserve(65536);
@@ -2792,7 +2792,7 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 										   std::vector<std::shared_ptr<Hardware::DeviceObject>>* updateDeviceList,
 										   std::vector<Hardware::DeviceObject*>* deleteDeviceList,	// Devices to delete after update
 										   std::vector<std::pair<int, int>>* addDeviceList,			// Devices to add after update
-										   QVector<Hardware::DeviceAppSignal*>* deviceSignalsToUpdateAppSignals)	// DeviceSignal list to updateA ppSignals
+										   std::vector<const Hardware::DeviceAppSignal*>* deviceSignalsToUpdateAppSignals)	// DeviceSignal list to updateA ppSignals
 {
 	if (updateDeviceList == nullptr ||
 		deleteDeviceList == nullptr ||

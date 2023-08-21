@@ -59,9 +59,6 @@ public:
 	bool isCheckinableSignalForMe(int index) const;
 	bool isCheckinableSignalForMe(const AppSignal* signal) const;
 
-//	DbController* dbController() { return m_db; }
-//	const DbController* dbController() const { return m_db; }
-
 	bool checkoutSignal(int index, QString* message);
 	bool undoSignal(int id);
 
@@ -116,6 +113,7 @@ private:
 
 private:
 	static AppSignalSetProvider* m_instance;
+	static QThread* m_thread;
 
 	static const int BAD_INDEX = -1;
 

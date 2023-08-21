@@ -658,7 +658,7 @@ public:
 	void append(AppSignal* signal);
 	void append(const ID_AppSignalID& id);
 
-	void remove(int signalID);
+	void removeSignals(const std::set<int>& signalToRemoveIDs);
 
 	bool contains(const QString& appSignalID) const;
 	int count() const;

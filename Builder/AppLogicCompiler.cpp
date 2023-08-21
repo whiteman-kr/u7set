@@ -68,7 +68,6 @@ namespace Builder
 			&ApplicationLogicCompiler::writeOptoConnectionsReport,
 			&ApplicationLogicCompiler::writeOptoConnectionsXml,
 			&ApplicationLogicCompiler::writeOptoVhdFiles,
-			&ApplicationLogicCompiler::checkSignalsHashes,
 			&ApplicationLogicCompiler::writeAppSignalSetFile,
 			&ApplicationLogicCompiler::writeComparatorSetFile,
 			&ApplicationLogicCompiler::writeSubsystemsXml,
@@ -1134,41 +1133,6 @@ namespace Builder
 		buildResultWriter()->addFile(Directory::OPTO_VHD, bdfFileName, bdfFile.stringList());
 
 		return true;
-	}
-
-	bool ApplicationLogicCompiler::checkSignalsHashes()
-	{
-		Q_ASSERT(false);
-		return false;	// check on load from DB
-		/*
-		std::map<Hash, QString> hashMap;
-		bool noEqualHashesFound = true;
-
-		int signalCount = static_cast<int>(signalSet()->count());
-
-		for(int i = 0; i < signalCount; i++)
-		{
-			const AppSignal& s = (*signalSet())[i];
-
-			Hash hash = calcHash(s.appSignalID());
-
-			auto it = hashMap.find(hash);
-
-			if (it == hashMap.end())
-			{
-				hashMap.insert({hash, s.appSignalID()});
-			}
-			else
-			{
-				noEqualHashesFound = false;
-
-				// Signals %1 and %2 have equal hash (%3) of AppSignalIDs.
-				//
-				log()->errALC5198(it->second, s.appSignalID(), hash);
-			}
-		}
-
-		return noEqualHashesFound;*/
 	}
 
 	bool ApplicationLogicCompiler::writeAppSignalSetFile()

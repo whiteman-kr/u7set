@@ -62,10 +62,6 @@ namespace Builder
 		std::shared_ptr<BuildResultWriter> m_resultWriter = nullptr;
 		IssueLogger* m_log = nullptr;
 
-		//
-
-		//QHash<qsizetype, QString> m_busSignals;
-
 		Busses m_busses;
 
 		std::map<const AppSignal*, DeviceModuleShared> m_signalToLm;

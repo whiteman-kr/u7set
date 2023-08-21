@@ -336,6 +336,11 @@ void AppSignalPropertyManager::detectNewProperties(const AppSignal* signal)
 {
 	TEST_PTR_RETURN(signal);
 
+	if (signal->specPropStruct().isEmpty() == true)
+	{
+		return;
+	}
+
 	Hash specPropStructHash = calcHash(signal->specPropStruct());
 
 	if (m_parsedSpecPropStruct.contains(specPropStructHash) == true)

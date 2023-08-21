@@ -87,7 +87,7 @@ SignalHistoryDialog::SignalHistoryDialog(DbController* dbController, const QStri
 			m_historyModel->setData(m_historyModel->index(row, i), changesetColumnDescription[i].second(changeset));
 		}
 
-		dbController->getSpecificSignals(&signalIds, changeset.changeset(), &signalInstance, this);
+		dbController->getSpecificSignals(signalIds, changeset.changeset(), &signalInstance, this);
 
 		if (signalInstance.size() == 1)
 		{

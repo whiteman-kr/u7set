@@ -1803,7 +1803,7 @@ void DbControllerSignalTests::dbcTest_getSignalsIDs()
 	QVERIFY(sets_intersect<int>(stdAdminSignalsIDs, stdUser3SignalsIDs) == false);
 	QVERIFY(sets_intersect<int>(stdUser2SignalsIDs, stdUser3SignalsIDs) == false);
 
-	QVector<int> ids;
+	std::vector<int> ids;
 	std::vector<int> stdIds;
 
 	// request IDs under Admin
@@ -1811,7 +1811,7 @@ void DbControllerSignalTests::dbcTest_getSignalsIDs()
 	//
 	QVERIFY(m_dbcAdmin->getSignalsIDs(&ids, nullptr) == true);
 
-	stdIds = sets_difference<int>(toStdVector<int>(ids), initialIDs);
+	stdIds = sets_difference<int>(ids, initialIDs);
 
 	QVERIFY(sets_equal(stdIds, sets_union(stdAdminSignalsIDs, sets_union(stdUser2SignalsIDs, stdUser3SignalsIDs))) == true);
 
@@ -1820,7 +1820,7 @@ void DbControllerSignalTests::dbcTest_getSignalsIDs()
 	//
 	QVERIFY(m_dbcUser2->getSignalsIDs(&ids, nullptr) == true);
 
-	stdIds = sets_difference<int>(toStdVector(ids), initialIDs);
+	stdIds = sets_difference<int>(ids, initialIDs);
 
 	QVERIFY(sets_equal(stdIds, stdUser2SignalsIDs) == true);
 
@@ -1833,7 +1833,7 @@ void DbControllerSignalTests::dbcTest_getSignalsIDs()
 	//
 	QVERIFY(m_dbcUser3->getSignalsIDs(&ids, nullptr) == true);
 
-	stdIds = sets_difference<int>(toStdVector<int>(ids), initialIDs);
+	stdIds = sets_difference<int>(ids, initialIDs);
 
 	QVERIFY(sets_equal(stdIds, sets_union(stdUser2SignalsIDs, stdUser3SignalsIDs)));
 
@@ -1842,7 +1842,7 @@ void DbControllerSignalTests::dbcTest_getSignalsIDs()
 	//
 	QVERIFY(m_dbcAdmin->getSignalsIDs(&ids, nullptr) == true);
 
-	stdIds = sets_difference<int>(toStdVector(ids), initialIDs);
+	stdIds = sets_difference<int>(ids, initialIDs);
 
 	QVERIFY(sets_equal(stdIds, sets_union(stdAdminSignalsIDs, sets_union(stdUser2SignalsIDs, stdUser3SignalsIDs))) == true);
 
@@ -1856,7 +1856,7 @@ void DbControllerSignalTests::dbcTest_getSignalsIDs()
 	//
 	QVERIFY(m_dbcUser2->getSignalsIDs(&ids, nullptr) == true);
 
-	stdIds = sets_difference<int>(toStdVector(ids), initialIDs);
+	stdIds = sets_difference<int>(ids, initialIDs);
 
 	QVERIFY(sets_equal(stdIds, sets_union(stdAdminSignalsIDs, sets_union(stdUser2SignalsIDs, stdUser3SignalsIDs))) == true);
 
@@ -1870,7 +1870,7 @@ void DbControllerSignalTests::dbcTest_getSignalsIDs()
 	//
 	QVERIFY(m_dbcUser3->getSignalsIDs(&ids, nullptr) == true);
 
-	stdIds = sets_difference<int>(toStdVector(ids), initialIDs);
+	stdIds = sets_difference<int>(ids, initialIDs);
 
 	QVERIFY(sets_equal(stdIds, sets_union(stdAdminSignalsIDs, stdUser3SignalsIDs)) == true);
 

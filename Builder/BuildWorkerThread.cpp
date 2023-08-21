@@ -1695,6 +1695,8 @@ namespace Builder
 			return false;
 		}
 
+		signalSet->enableIdGeneration();
+
 		signalSet->findAndRemoveExcludedFromBuildSignals();
 
 		signalSet->cacheSpecPropValues();

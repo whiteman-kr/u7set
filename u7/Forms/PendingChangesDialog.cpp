@@ -489,7 +489,7 @@ void PendingChangesDialog::undoChanges()
 	std::vector<DbFileInfo> undoFilesFiles;
 	undoFilesFiles.reserve(objects.size());
 
-	QVector<int> undoSignals;
+	std::vector<int> undoSignals;
 	undoSignals.reserve(static_cast<int>(objects.size()));
 
 	for (const PendingChangesObject& o : objects)
@@ -526,7 +526,7 @@ void PendingChangesDialog::undoChanges()
 	//
 	if (undoSignals.empty() == false)
 	{
-		QVector<ObjectState> signalObjectState;
+		std::vector<ObjectState> signalObjectState;
 		db()->undoSignalsChanges(undoSignals, &signalObjectState, this);
 	}
 

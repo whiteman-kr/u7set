@@ -2534,7 +2534,7 @@ void AppSignalSet::append(AppSignal* signal)
 
 	if (signalID == 0)
 	{
-		if ( m_enableIdGeneration == true)
+		if (m_enableIdGeneration == true)
 		{
 			signalID = m_idToIndex.empty() == true ? 1 : m_idToIndex.rbegin()->first + 1;
 			signal->setID(signalID);
@@ -2569,26 +2569,56 @@ void AppSignalSet::append(const ID_AppSignalID& id)
 	append(new AppSignal(id));
 }
 
-void AppSignalSet::remove(int signalID)
+void AppSignalSet::removeSignals(const std::set<int>& signalToRemoveIDs)
 {
-	auto it = m_idToIndex.find(signalID);
+	int removedCount = 0;
 
-	if (it == m_idToIndex.end())
+	for(int id : signalToRemoveIDs)
 	{
-		Q_ASSERT(false);
-		return;
+		auto it = m_idToIndex.find(id);
+
+		if (it == m_idToIndex.end())
+		{
+			Q_ASSERT(false);
+			continue;
+		}
+
+		qsizetype index = it->second;
+
+		AppSignal* s = m_signals[index];
+
+		TEST_PTR_CONTINUE(s);
+
+		m_groups.remove(s);
+		delete s;
+		m_signals[index] = nullptr;
+		removedCount++;
 	}
 
-	qsizetype index = it->second;
+	std::vector<AppSignal*> tempSignals;
 
-	AppSignal* signal = m_signals.at(index);
+	tempSignals.reserve(m_signals.size() - removedCount);
 
-	TEST_PTR_RETURN(signal);
+	m_idToIndex.clear();
+	m_hashToIndex.clear();
 
-	m_signals.erase(m_signals.begin() + index);
-	m_idToIndex.erase(it);
-	m_hashToIndex.erase(calcHash(signal->appSignalID()));
-	m_groups.remove(signal);
+	qsizetype index = 0;
+
+	for(AppSignal* s : m_signals)
+	{
+		if (s == nullptr)
+		{
+			continue;
+		}
+
+		m_idToIndex.emplace(s->ID(), index);
+		m_hashToIndex.emplace(calcHash(s->appSignalID()), index);
+		tempSignals.push_back(s);
+
+		index++;
+	}
+
+	m_signals.swap(tempSignals);
 }
 
 bool AppSignalSet::contains(const QString& appSignalID) const

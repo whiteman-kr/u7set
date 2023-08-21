@@ -55,10 +55,8 @@ namespace Builder
 		LOG_EMPTY_LINE(m_log);
 		LOG_MESSAGE(m_log, QString(tr("Checking application signals...")));
 
-		std::set<QString> appSignalIDs;
-		std::set<QString> customAppSignalIDs;
-
-		//m_busSignals.clear(); DEBUG_STOP
+		std::map<Hash, int> appSignalIDs;		// calcHash(signal.appSignalID) => signal.ID
+		std::set<Hash> customAppSignalIDs;		// set of calcHash(signal.customAppSignalID)
 
 		for(AppSignal* sg : *this)
 		{
@@ -66,20 +64,49 @@ namespace Builder
 
 			// check AppSignalID
 			//
-			if (appSignalIDs.contains(s.appSignalID()) == true)
+
+			Hash h = calcHash(s.appSignalID());
+
+			auto it = appSignalIDs.find(h);
+
+			if (it != appSignalIDs.end())
 			{
-				// Application signal identifier '%1' is not unique.
-				//
-				m_log->errALC5016(s.appSignalID());
-				result = false;
-				continue;
+				AppSignal* s2 = getSignal(it->second);
+
+				if (s2 == nullptr)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					result = false;
+					continue;
+				}
+
+				if (s.appSignalID() == s2->appSignalID())
+				{
+					// Application signal identifier '%1' is not unique.
+					//
+					m_log->errALC5016(s.appSignalID());
+					result = false;
+					continue;
+				}
+				else
+				{
+					// Signals %1 and %2 have equal hash (%3) of AppSignalIDs.
+					//
+					m_log->errALC5198(s2->appSignalID(), s.appSignalID(), h);
+
+					result = false;
+					continue;
+				}
 			}
 
-			appSignalIDs.emplace(s.appSignalID());
+			appSignalIDs.emplace(h, s.ID());
 
 			// check CustomAppSignalID
 			//
-			if (customAppSignalIDs.contains(s.customAppSignalID()) == true)
+
+			h = calcHash(s.customAppSignalID());
+
+			if (customAppSignalIDs.contains(h) == true)
 			{
 				// Custom application signal identifier '%1' is not unique.
 				//
@@ -88,7 +115,7 @@ namespace Builder
 				continue;
 			}
 
-			customAppSignalIDs.emplace(s.customAppSignalID());
+			customAppSignalIDs.insert(h);
 
 			// check other signal properties
 			//
@@ -160,8 +187,6 @@ namespace Builder
 					}
 					else
 					{
-						//m_busSignals.insert(i, s.appSignalID()); DEBUG_STOP
-
 						s.setDataSize(bus->sizeW() * SIZE_16BIT);
 					}
 				}
@@ -521,13 +546,13 @@ namespace Builder
 
 	void SignalSet::findAndRemoveExcludedFromBuildSignals()
 	{
-		std::vector<int> excludedFromBuidSignalsIDs;
+		std::set<int> excludedFromBuidSignalsIDs;
 
 		for(const AppSignal* s : *this)
 		{
 			if (s->excludeFromBuild() == true)
 			{
-				excludedFromBuidSignalsIDs.push_back(s->ID());
+				excludedFromBuidSignalsIDs.insert(s->ID());
 
 				// Signal %1 is excluded from build.
 				//
@@ -535,10 +560,7 @@ namespace Builder
 			}
 		}
 
-		for(int id : excludedFromBuidSignalsIDs)
-		{
-			remove(id);		// DEBUG_STOP !!!!!!!
-		}
+		removeSignals(excludedFromBuidSignalsIDs);
 	}
 
 	void SignalSet::linkSignalToLm(AppSignal* appSignal, DeviceModuleShared lm)

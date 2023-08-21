@@ -874,7 +874,9 @@ SignalsTabPage::~SignalsTabPage()
 	deleteMetrologyDialog();
 }
 
-bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Hardware::DeviceAppSignal*>& deviceSignalsToUpdate, const QStringList& forceUpdateProperties)
+bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc,
+											const std::vector<const Hardware::DeviceAppSignal*>& deviceSignalsToUpdate,
+											const QStringList& forceUpdateProperties)
 {
 	Q_UNUSED(forceUpdateProperties)
 
@@ -888,7 +890,7 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 		equipmentIDs.append(deviceSignal->equipmentId());
 	}
 
-	QMultiHash<QString, int> signalIDsMap;
+	std::map<QString, std::set<int>> signalIDsMap;
 
 	bool result = dbc->getMultipleSignalsIDsWithEquipmentID(equipmentIDs, &signalIDsMap, nullptr);
 
@@ -898,7 +900,7 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 	}
 
 	std::vector<int> checkoutSignalIDs;
-	QVector<AppSignal> newSignalWorkcopies;
+	std::vector<AppSignal> newSignalWorkcopies;
 
 	for(const Hardware::DeviceAppSignal* deviceSignal: deviceSignalsToUpdate)
 	{
@@ -917,9 +919,16 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 			return false;
 		}
 
-		QList<int> signalIDs = signalIDsMap.values(deviceSignal->equipmentId());
+		auto mapIt = signalIDsMap.find(deviceSignal->equipmentId());
 
-		if (signalIDs.count() == 0)
+		if (mapIt == signalIDsMap.end())
+		{
+			continue;
+		}
+
+		const std::set<int>& signalIDs = mapIt->second;
+
+		if (signalIDs.size() == 0)
 		{
 			continue;
 		}
@@ -987,7 +996,7 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 			s.setProtoSpecPropValues(newValues);
 
 			checkoutSignalIDs.push_back(signalID);
-			newSignalWorkcopies.append(s);
+			newSignalWorkcopies.emplace_back(s);
 		}
 	}
 
@@ -1035,7 +1044,7 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 		return false;
 	}
 
-	result = dbc->setSignalsWorkcopies(&newSignalWorkcopies, nullptr);
+	result = dbc->setSignalsWorkcopies(newSignalWorkcopies, nullptr);
 
 	if (result == false)
 	{
@@ -1045,22 +1054,7 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 		return false;
 	}
 
-
-/*
-	for(Signal& s : newSignalWorkcopies)
-	{
-		ObjectState objState;
-
-		result = dbc->setSignalWorkcopy(&s, &objState, nullptr);
-
-		if (result == false)
-		{
-			QMessageBox::critical(m_instance,
-						  QApplication::applicationName(),
-						  QString(tr("Cannot set workcopy of signal %1, update from preset is aborted.")).arg(s.appSignalID()));
-			return false;
-		}
-	}*/
+	AppSignalSetProvider::getInstance()->reloadSignals();
 
 	return result;
 }
@@ -1915,7 +1909,7 @@ void SignalsTabPage::compareObject(DbChangesetObject object, CompareData compare
 
 			std::vector<AppSignal> outSignals;
 
-			bool ok = db()->getSpecificSignals(&signalIds, compareData.sourceChangeset, &outSignals, this);
+			bool ok = db()->getSpecificSignals(signalIds, compareData.sourceChangeset, &outSignals, this);
 			if (ok == true && outSignals.size() == 1)
 			{
 				source = std::make_shared<AppSignalProperties>(outSignals.front());
@@ -1960,7 +1954,7 @@ void SignalsTabPage::compareObject(DbChangesetObject object, CompareData compare
 
 			std::vector<AppSignal> outSignals;
 
-			bool ok = db()->getSpecificSignals(&signalIds, compareData.targetChangeset, &outSignals, this);
+			bool ok = db()->getSpecificSignals(signalIds, compareData.targetChangeset, &outSignals, this);
 			if (ok == true && outSignals.size() == 1)
 			{
 				target = std::make_shared<AppSignalProperties>(outSignals.front());
@@ -1999,8 +1993,6 @@ void SignalsTabPage::compareObject(DbChangesetObject object, CompareData compare
 	return;
 }
 
-
-
 SignalsProxyModel::SignalsProxyModel(SignalsModel *sourceModel, QObject *parent) :
 	QSortFilterProxyModel(parent),
 	m_sourceModel(sourceModel)
@@ -2035,7 +2027,6 @@ bool SignalsProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex&) cons
 	for (const QString& idMask : m_strIdMasks)
 	{
 		QRegularExpression rx(QRegularExpression::wildcardToRegularExpression(idMask.trimmed()));
-		//rx.setPatternSyntax(QRegExp::Wildcard);
 
 		bool result = false;
 
