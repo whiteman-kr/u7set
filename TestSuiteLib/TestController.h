@@ -61,7 +61,7 @@ namespace TestSuite
 		bool expectSignalValue(QString appSignalId, double value, qint64 timeoutMs);
 
 		/// \brief Remove all overriden signals.
-		/// <b>Note:</b> It is recommended to call <b>waitForSignalOverrides<b> after this function to ensure all signals were reset.
+		/// <b>Note:</b> It is recommended to call <b>waitForSignalOverrides</b> after this function to ensure all signals were reset.
 		void overridesReset();
 
 		/// \brief Checks if a LogicModule exists.
