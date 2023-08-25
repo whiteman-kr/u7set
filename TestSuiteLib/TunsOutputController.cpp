@@ -66,7 +66,7 @@ namespace TestSuite
 			return false;
 		}
 
-		// Wait that TuningConnection loads all signal params.
+		// Wait that TuningConnection loads all tuning sources info
 		//
 		timer.restart();
 
@@ -88,6 +88,31 @@ namespace TestSuite
 		}
 
 		m_appLog.writeMessage("TuningSources info arrived");
+
+		// Wait that TuningConnection loads all tuning sources info
+		//
+		m_appLog.writeMessage("Waiting for all TuningSignalStates to be requested...");
+
+		timer.restart();
+
+		while (timer.hasExpired(30'000) == false && m_connection.signalStatesLoaded() == false)
+		{
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				return false;
+			}
+
+			QThread::msleep(200);
+		}
+
+		if (m_connection.signalStatesLoaded() == false)
+		{
+			m_appLog.writeError("Loading TuningSignalStates timeout!");
+			return false;
+		}
+
+		m_appLog.writeMessage("All TuningSignalStates are requested.");
+
 		return true;
 	}
 

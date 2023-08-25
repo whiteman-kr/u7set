@@ -41,6 +41,8 @@ namespace ClientLib
 			void stopAndDestroy();
 			HostAddressPort address() const;
 
+			bool signalStatesLoaded() const;
+
 			// --
 			//
 			ClientLib::TuningTcpClient* tcpTuningClient = nullptr;
@@ -102,6 +104,8 @@ namespace ClientLib
 		bool writeTuningSignals(const std::vector<TuningWriteCommand>& writeCommands);
 		virtual bool writeTuningSignal(const QString& appSignalId, const TuningValue& tuningValue) override;
 		virtual bool writeTuningSignal(const QString& appSignalId, QVariant value) override;
+
+		bool signalStatesLoaded() const;
 
 		/// Apply functions
 		///

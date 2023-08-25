@@ -61,6 +61,8 @@ namespace TestSuite
 
 		// Wait that AdsConnection loads all signal params.
 		//
+		m_appLog.writeMessage("Waiting for all AppSignalParams to load...");
+
 		timer.restart();
 
 		while (timer.hasExpired(30'000) == false && m_connection.signalParamsLoaded() == false)
@@ -75,11 +77,36 @@ namespace TestSuite
 
 		if (m_connection.signalParamsLoaded() == false)
 		{
-			m_appLog.writeError("Loading AppSignalParams timeout");
+			m_appLog.writeError("Loading AppSignalParams timeout!");
 			return false;
 		}
 
-		m_appLog.writeMessage("All AppSignalParams are loaded");
+		m_appLog.writeMessage("All AppSignalParams are loaded.");
+
+		// Wait that AdsConnection requests all signal states at least once.
+		//
+		m_appLog.writeMessage("Waiting for all AppSignalStates to be requested...");
+
+		timer.restart();
+
+		while (timer.hasExpired(30'000) == false && m_connection.signalStatesLoaded() == false)
+		{
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				return false;
+			}
+
+			QThread::msleep(200);
+		}
+
+		if (m_connection.signalStatesLoaded() == false)
+		{
+			m_appLog.writeError("Loading AppSignalStates timeout!");
+			return false;
+		}
+
+		m_appLog.writeMessage("All AppSignalStates are requested.");
+
 		return true;
 	}
 

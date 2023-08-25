@@ -39,6 +39,7 @@ namespace ClientLib
 			HostAddressPort address() const;
 
 			bool signalParamsLoaded() const;
+			bool signalStatesLoaded() const;
 
 			// --
 			//
@@ -64,6 +65,7 @@ namespace ClientLib
 		std::vector<Tcp::ConnectionState> recentSignalConnStates() const;
 
 		bool signalParamsLoaded() const;
+		bool signalStatesLoaded() const;
 
 		// --
 		//

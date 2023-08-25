@@ -168,6 +168,8 @@ namespace ClientLib
 		//
 		void applyTuningSignals();
 
+		bool signalStatesLoaded() const;
+
 	private:
 		virtual void onClientThreadStarted() override;
 		virtual void onClientThreadFinished() override;
@@ -251,6 +253,8 @@ namespace ClientLib
 		mutable QReadWriteLock m_signalHashesLock;			// For access to m_signalHashes and m_signalHashesSet
 		std::vector<Hash> m_signalHashes;					// SORTED Hash Vector for iterating all processed signals
 		std::unordered_set<Hash> m_signalHashesSet;			// Hash Table for fast checking if signal is processed by this client
+		
+		std::set<Hash> m_signalStatesSet;					// Signal hash is added here when signal state is received
 
 	private:
 		// Data
@@ -288,6 +292,8 @@ namespace ClientLib
 
 		int m_readTuningSignalIndex = 0;
 		int m_readTuningSignalCount = 0;
+
+		std::atomic<bool> m_signalStatesLoaded{false};
 
 		// Active client processing
 		//

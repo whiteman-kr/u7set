@@ -654,6 +654,14 @@ void TuningSignalManager::setUnappliedValue(Hash hash, const TuningValue& value)
 			//qDebug() << "+Unapplied: " << hash;
 			m_unappliedStates.insert(hash);
 		}
+		else
+		{
+			if (m_unappliedStates.contains(hash))
+			{
+				//qDebug() << "Undo Unapplied: " << hash;
+				m_unappliedStates.erase(hash);
+			}
+		}
 	}
 
 }
