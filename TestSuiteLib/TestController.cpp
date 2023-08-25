@@ -141,7 +141,7 @@ namespace TestSuite
 		return m_inputController.expectSignalValue(appSignalId, value, timeoutMs - elapsedMs);
 	}
 
-	void TestController::overridesReset()
+	void TestController::overridesReset(qint64 timeoutMs)
 	{
 		for (const QString& appSignalId : m_overridedSignals)
 		{
@@ -155,6 +155,13 @@ namespace TestSuite
 			}
 		}
 		m_overridedSignals.clear();
+
+		bool ok = waitForSignalOverrides(timeoutMs);
+		if (ok == false)
+		{
+			throwScriptException(this, tr("waitForSignalOverrides failed."));
+			return;
+		}
 	}
 
 	bool TestController::signalExists(QString appSignalId) const

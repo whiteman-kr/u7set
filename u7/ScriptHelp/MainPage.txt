@@ -147,7 +147,7 @@ The first approach does not require physical hardware. RPCT simulates applicatio
 on developer's computer. Simulator can set required input signal values and allows to see how logic works. 
 Simulation tools cover all AFBL library elements, connections, busses and other parts of the project.
 
-The second approach requires physical hardware. It requires application logic code to be downloaded to logic modules.
+The second approach requires physical hardware. It requires application logic code to be uploaded to logic modules.
 The TestSuite application is used for running tests. While testing, input signal values are set to different states 
 using tuning interface, and output values are received from application logic interface and checked for expected values 
 defined by algorithms.

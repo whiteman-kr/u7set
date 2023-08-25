@@ -52,6 +52,8 @@ namespace TestSuite
 		double signalValue(QString appSignalId);
 
 		/// \brief Override signal value. Returns true if signal value is overriden.
+		/// <b>Note:</b> After overriding all required signals, it is recommended to call <b>waitForSignalOverrides</b> function to wait for all signals to be written.
+		/// After it returns, the test can continue and its further results can be analyzed.
 		bool overrideSignalValue(QString appSignalId, QVariant value);
 
 		/// \brief Waits while all overrided signal value is written to LM. Returns true if signal value is overriden, false on timeout.
@@ -61,8 +63,9 @@ namespace TestSuite
 		bool expectSignalValue(QString appSignalId, double value, qint64 timeoutMs);
 
 		/// \brief Remove all overriden signals.
-		/// <b>Note:</b> It is recommended to call <b>waitForSignalOverrides</b> after this function to ensure all signals were reset.
-		void overridesReset();
+		/// <b>Note:</b> This function automatically calls <b>waitForSignalOverrides</b> with specified timeout (or with default value - 5000 ms) to wait for all signals to be reset.
+		/// So it is not required to call <b>waitForSignalOverrides</b> manually.
+		void overridesReset(qint64 timeoutMs = 5000);
 
 		/// \brief Checks if a LogicModule exists.
 		//bool logicModuleExists(QString equipmentId) const;
