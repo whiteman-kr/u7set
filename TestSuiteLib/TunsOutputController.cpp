@@ -130,7 +130,7 @@ namespace TestSuite
 		return m_connection.writeTuningSignal(appSignalId, value);
 	}
 
-	bool TunsOutputController::waitForAllSignalsWritten(qint64 timeoutMs) const
+	bool TunsOutputController::waitForAllSignalsWritten(qint64 timeoutMs, quint64& timeElapsedMs) const
 	{
 		using namespace std::chrono_literals;
 		using namespace std::chrono;
@@ -150,10 +150,13 @@ namespace TestSuite
 
 			if (m_signalManager.waitForAllApplied(duration_cast<milliseconds>(timeLeftUs)) == true)
 			{
+				timeElapsedMs = timer.nsecsElapsed() / 1'000'000;
+				assert(timeElapsedMs <= timeoutMs);
 				return true;
 			}
 		}
 
+		timeElapsedMs = timeoutMs;
 		return false;
 	}
 }

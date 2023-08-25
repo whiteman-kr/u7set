@@ -123,12 +123,22 @@ namespace TestSuite
 
 	bool TestController::waitForSignalOverrides(qint64 timeoutMs)
 	{
-		return m_outputController.waitForAllSignalsWritten(timeoutMs);
+		quint64 elapsedMs = 0;
+		return m_outputController.waitForAllSignalsWritten(timeoutMs, elapsedMs);
 	}
 
 	bool TestController::expectSignalValue(QString appSignalId, double value, qint64 timeoutMs)
 	{
-		return m_inputController.expectSignalValue(appSignalId, value, timeoutMs);
+		// Before expecting any values, wait for all writing processes are finished
+		//
+		quint64 elapsedMs = 0;
+		bool allWritten = m_outputController.waitForAllSignalsWritten(timeoutMs, elapsedMs);
+		if (allWritten == false)
+		{
+			return false;
+		}
+
+		return m_inputController.expectSignalValue(appSignalId, value, timeoutMs - elapsedMs);
 	}
 
 	void TestController::overridesReset()

@@ -9,7 +9,7 @@ namespace TestSuite
 
 		virtual bool waitForConnection(qint64 timeoutMs) const = 0;
 		virtual bool writeSignalValue(const QString& appSignalId, const QVariant& value) = 0;
-		virtual bool waitForAllSignalsWritten(qint64 timeoutMs) const = 0;
+		virtual bool waitForAllSignalsWritten(qint64 timeoutMs, quint64& timeElapsedMs) const = 0;
 	};
 
 	class OutputControllerStub : public IOutputController
@@ -17,7 +17,7 @@ namespace TestSuite
 	public:
 		bool waitForConnection(qint64 /*timeoutMs*/) const override {return false;}
 		bool writeSignalValue(const QString& /*appSignalId*/, const QVariant& /*value*/) override {return false;}
-		bool waitForAllSignalsWritten(qint64 /*timeoutMs*/) const override {return false;}
+		bool waitForAllSignalsWritten(qint64 /*timeoutMs*/, quint64& /*timeElapsedMs*/ ) const override { return false; }
 	};
 }
 
