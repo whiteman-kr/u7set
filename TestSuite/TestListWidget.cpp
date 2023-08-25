@@ -268,7 +268,7 @@ void TestListWidget::onTestFinished(QString scriptFileName, QString testFunction
 				QTreeWidgetItem* childItem = parentItem->child(c);
 				if (childItem->data(ColumnsData::TestFunction, Qt::UserRole).toString() == testFunction)
 				{
-					childItem->setText(Columns::Result, result ? "OK" : "Failed");
+					childItem->setText(Columns::Result, result ? "PASS" : "FAIL");
 
 					if (result == false)
 					{

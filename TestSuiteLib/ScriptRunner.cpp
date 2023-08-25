@@ -100,6 +100,8 @@ namespace TestSuite
 				m_status.m_testFunction = testFunc;
 			}
 
+			m_scriptTestLog.writeMessage(testFunc + ": RUN");
+
 			// init() - called before each test function is executed.
 			//
 			if (bool initOk = runScriptFunction("init");
@@ -108,17 +110,17 @@ namespace TestSuite
 				m_scriptTestLog.writeError(testFunc + ": init() failed, test terminated.");
 				break;
 			}
-
+			
 			bool testOk = runScriptFunction(testFunc);
 			if (testOk == true)
 			{
-				m_scriptTestLog.writeMessage(testFunc + ": ok");
+				m_scriptTestLog.writeMessage(testFunc + ": PASS");
 			}
 			else
 			{
 				failed ++;
 				//totalFailed ++;
-				m_scriptTestLog.writeError(testFunc + ": FAILED");
+				m_scriptTestLog.writeError(testFunc + ": FAIL");
 			}
 
 			// cleanup() - called after every test function.
