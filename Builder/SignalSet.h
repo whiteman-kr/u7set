@@ -23,6 +23,7 @@ namespace Builder
 
 		bool prepareBusses();
 		bool checkSignals();
+		bool checkSignalsIDsAndHashes();
 		bool bindSignalsToLMs(Hardware::EquipmentSet* equipment);
 		void initCalculatedSignalsProperties();
 		void cacheSpecPropValues();

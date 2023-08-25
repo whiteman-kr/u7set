@@ -76,7 +76,7 @@ AppSignalPropertyManager& AppSignalSetProvider::signalPropertyManager()
 	return m_propertyManager;
 }
 
-void AppSignalSetProvider::reloadSignals()
+void AppSignalSetProvider::reloadAllSignals()
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
 
@@ -95,7 +95,7 @@ void AppSignalSetProvider::loadSignals(const std::vector<int>& signalIds, bool w
 	std::vector<AppSignal> signalsToLoad;
 
 	std::vector<const AppSignal*> updatedSignals;
-	std::vector<int> updatedindexes;
+	std::vector<int> updatedIndexes;
 
 	if (withoutProgress == true)
 	{
@@ -114,11 +114,11 @@ void AppSignalSetProvider::loadSignals(const std::vector<int>& signalIds, bool w
 		if (s !=  nullptr)
 		{
 			updatedSignals.push_back(s);
-			updatedindexes.push_back(signalIndex);
+			updatedIndexes.push_back(signalIndex);
 		}
 	}
 
-	emit signalsUpdated(updatedindexes);
+	emit signalsUpdated(updatedIndexes);
 	emit signalsPropertiesChanged(updatedSignals);
 }
 
@@ -156,7 +156,7 @@ void AppSignalSetProvider::enforceAllSignalsLoading()
 	m_signalsLoadTimer.stop();
 }
 
-const AppSignal* AppSignalSetProvider::loadSignal(int signalId)
+const AppSignal* AppSignalSetProvider::loadSignal(int signalId, bool updateViews)
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
 
@@ -171,8 +171,11 @@ const AppSignal* AppSignalSetProvider::loadSignal(int signalId)
 	TEST_PTR_RETURN_NULLPTR(updatedSignal);
 	Q_ASSERT(index != BAD_INDEX);
 
-	emit signalsUpdated({index});
-//	emit signalsPropertiesChanged({updatedSignal});
+	if (updateViews == true)
+	{
+		emit signalsUpdated({index});
+		emit signalsPropertiesChanged({updatedSignal});
+	}
 
 	return updatedSignal;
 }
@@ -214,11 +217,21 @@ AppSignal* AppSignalSetProvider::getSignal(const QString& appSignalID)
 	return m_signalSet.getSignal(appSignalID);
 }
 
-AppSignal* AppSignalSetProvider::getSignal(int signalID)
+AppSignal* AppSignalSetProvider::getSignalByID(int signalID)
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
 
 	return m_signalSet.getSignal(signalID);
+}
+
+AppSignal* AppSignalSetProvider::getSignal(int index)
+{
+	if (index >= 0 && index < m_signalSet.count())
+	{
+		return m_signalSet.at(index);
+	}
+
+	return nullptr;
 }
 
 bool AppSignalSetProvider::getChannelSignalsID(const AppSignal& signal, std::vector<int>* channelSignalIDs) const
@@ -253,7 +266,7 @@ int AppSignalSetProvider::signalID(int index) const
 	return s->ID();
 }
 
-AppSignal* AppSignalSetProvider::getLoadedSignal(AppSignal* s)
+AppSignal* AppSignalSetProvider::getLoadedSignal(AppSignal* s, bool updateViews)
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
 
@@ -261,35 +274,35 @@ AppSignal* AppSignalSetProvider::getLoadedSignal(AppSignal* s)
 
 	if (s->isLoaded() == false)
 	{
-		loadSignal(s->ID());
+		loadSignal(s->ID(), updateViews);
 	}
 
 	return s;
 }
 
-AppSignal* AppSignalSetProvider::getLoadedSignalByID(int signalID)
+AppSignal* AppSignalSetProvider::getLoadedSignalByID(int signalID, bool updateViews)
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
 
 	AppSignal* s = m_signalSet.getSignal(signalID);
 
-	return getLoadedSignal(s);
+	return getLoadedSignal(s, updateViews);
 }
 
-AppSignal* AppSignalSetProvider::getLoadedSignal(int index)
+AppSignal* AppSignalSetProvider::getLoadedSignal(int index, bool updateViews)
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
 
 	AppSignal* s = m_signalSet.at(index);
 
-	return getLoadedSignal(s);
+	return getLoadedSignal(s, updateViews);
 }
 
 AppSignalParam AppSignalSetProvider::getAppSignalParam(int index)
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
 
-	AppSignal signal(*getLoadedSignal(index));
+	AppSignal signal(*getLoadedSignal(index, false));
 
 	signal.cacheSpecPropValues();
 
@@ -457,7 +470,7 @@ bool AppSignalSetProvider::checkoutSignal(int index, QString* message)
 
 	for (int id : signalsIDs)
 	{
-		loadSignal(id);
+		loadSignal(id, true);
 	}
 
 	return true;
@@ -827,7 +840,7 @@ bool AppSignalSetProvider::undoSignal(int id)
 
 	for (int signalId : signalsIDs)
 	{
-		loadSignal(signalId);
+		loadSignal(signalId, true);
 	}
 
 	return true;

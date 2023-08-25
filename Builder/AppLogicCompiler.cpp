@@ -62,6 +62,7 @@ namespace Builder
 		{
 			&ApplicationLogicCompiler::checkLmIpAddresses,
 			&ApplicationLogicCompiler::compileModulesLogicsPass1,
+			&ApplicationLogicCompiler::checkSignalsIDsAndHashes,		// SignalSet checking after AUTO-signals creation
 			&ApplicationLogicCompiler::compileModulesLogicsPass2,
 			&ApplicationLogicCompiler::writeResourcesUsageReport,
 			&ApplicationLogicCompiler::writeSerialDataXml,
@@ -374,6 +375,11 @@ namespace Builder
 		}
 
 		return result;
+	}
+
+	bool ApplicationLogicCompiler::checkSignalsIDsAndHashes()
+	{
+		return signalSet()->checkSignalsIDsAndHashes();
 	}
 
 	bool ApplicationLogicCompiler::writeResourcesUsageReport()

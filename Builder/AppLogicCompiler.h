@@ -53,6 +53,8 @@ namespace Builder
 		bool compileModulesLogicsPass1();
 		bool compileModulesLogicsPass2();
 
+		bool checkSignalsIDsAndHashes();
+
 		bool writeResourcesUsageReport();
 
 		bool writeSerialDataXml();

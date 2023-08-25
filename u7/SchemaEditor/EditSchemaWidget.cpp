@@ -4765,7 +4765,7 @@ void EditSchemaWidget::appSignalsProperties(QStringList strIds)
 	//		first: previous AppSignalID
 	//		second: new AppSignalID
 	//
-	std::vector<std::pair<QString, QString>> result = ::editApplicationSignals(strIds, db(), this);
+	std::vector<std::pair<QString, QString>> result = SignalPropertiesDialog::editApplicationSignals(strIds, db(), this);
 
 	if (result.empty() == true)
 	{

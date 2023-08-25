@@ -1705,7 +1705,8 @@ namespace Builder
 
 		RETURN_IF_FALSE(result);
 
-		result = signalSet->checkSignals();
+		result &= signalSet->checkSignals();
+		result &= signalSet->checkSignalsIDsAndHashes();
 
 		result &= signalSet->bindSignalsToLMs(equipment);
 

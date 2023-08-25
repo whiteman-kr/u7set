@@ -43,79 +43,19 @@ namespace Builder
 
 	bool SignalSet::checkSignals()
 	{
-		bool result = true;
-
-		qsizetype signalCount = count();
-
-		if (signalCount == 0)
+		if (count() == 0)
 		{
 			return true;
 		}
 
+		bool result = true;
+
 		LOG_EMPTY_LINE(m_log);
 		LOG_MESSAGE(m_log, QString(tr("Checking application signals...")));
-
-		std::map<Hash, int> appSignalIDs;		// calcHash(signal.appSignalID) => signal.ID
-		std::set<Hash> customAppSignalIDs;		// set of calcHash(signal.customAppSignalID)
 
 		for(AppSignal* sg : *this)
 		{
 			AppSignal& s = *sg;
-
-			// check AppSignalID
-			//
-
-			Hash h = calcHash(s.appSignalID());
-
-			auto it = appSignalIDs.find(h);
-
-			if (it != appSignalIDs.end())
-			{
-				AppSignal* s2 = getSignal(it->second);
-
-				if (s2 == nullptr)
-				{
-					LOG_INTERNAL_ERROR(m_log);
-					result = false;
-					continue;
-				}
-
-				if (s.appSignalID() == s2->appSignalID())
-				{
-					// Application signal identifier '%1' is not unique.
-					//
-					m_log->errALC5016(s.appSignalID());
-					result = false;
-					continue;
-				}
-				else
-				{
-					// Signals %1 and %2 have equal hash (%3) of AppSignalIDs.
-					//
-					m_log->errALC5198(s2->appSignalID(), s.appSignalID(), h);
-
-					result = false;
-					continue;
-				}
-			}
-
-			appSignalIDs.emplace(h, s.ID());
-
-			// check CustomAppSignalID
-			//
-
-			h = calcHash(s.customAppSignalID());
-
-			if (customAppSignalIDs.contains(h) == true)
-			{
-				// Custom application signal identifier '%1' is not unique.
-				//
-				m_log->errALC5017(s.customAppSignalID());
-				result = false;
-				continue;
-			}
-
-			customAppSignalIDs.insert(h);
 
 			// check other signal properties
 			//
@@ -252,6 +192,83 @@ namespace Builder
 					}
 				}
 			}
+		}
+
+		return result;
+	}
+
+	bool SignalSet::checkSignalsIDsAndHashes()
+	{
+		if (count() == 0)
+		{
+			return true;
+		}
+
+		bool result = true;
+
+		LOG_EMPTY_LINE(m_log);
+		LOG_MESSAGE(m_log, QString(tr("Checking application signals IDs and hashes...")));
+
+		std::map<Hash, int> appSignalIDs;		// calcHash(signal.appSignalID) => signal.ID
+		std::set<Hash> customAppSignalIDs;		// set of calcHash(signal.customAppSignalID)
+
+		for(AppSignal* sg : *this)
+		{
+			AppSignal& s = *sg;
+
+			// check AppSignalID
+			//
+
+			Hash h = calcHash(s.appSignalID());
+
+			auto it = appSignalIDs.find(h);
+
+			if (it != appSignalIDs.end())
+			{
+				AppSignal* s2 = getSignal(it->second);
+
+				if (s2 == nullptr)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					result = false;
+					continue;
+				}
+
+				if (s.appSignalID() == s2->appSignalID())
+				{
+					// Application signal identifier '%1' is not unique.
+					//
+					m_log->errALC5016(s.appSignalID());
+					result = false;
+					continue;
+				}
+				else
+				{
+					// Signals %1 and %2 have equal hash (%3) of AppSignalIDs.
+					//
+					m_log->errALC5198(s2->appSignalID(), s.appSignalID(), h);
+
+					result = false;
+					continue;
+				}
+			}
+
+			appSignalIDs.emplace(h, s.ID());
+
+			// check CustomAppSignalID
+			//
+			h = calcHash(s.customAppSignalID());
+
+			if (customAppSignalIDs.contains(h) == true)
+			{
+				// Custom application signal identifier '%1' is not unique.
+				//
+				m_log->errALC5017(s.customAppSignalID());
+				result = false;
+				continue;
+			}
+
+			customAppSignalIDs.insert(h);
 		}
 
 		return result;

@@ -204,7 +204,7 @@ void FindSignalDialog::generateListIfNeeded()
 	{
 		for (int i = 0; i < m_signalModel->rowCount(); i++)
 		{
-			addSignalIfNeeded(*m_signalSetProvider->getLoadedSignal(i));
+			addSignalIfNeeded(*m_signalSetProvider->getLoadedSignal(i, false));
 		}
 	}
 	else
@@ -217,7 +217,7 @@ void FindSignalDialog::generateListIfNeeded()
 		for (int i = 0; i < selection.count(); i++)
 		{
 			int row = m_signalProxyModel->mapToSource(selection[i]).row();
-			addSignalIfNeeded(*m_signalSetProvider->getLoadedSignal(row));
+			addSignalIfNeeded(*m_signalSetProvider->getLoadedSignal(row, false));
 		}
 	}
 
@@ -256,7 +256,7 @@ void FindSignalDialog::updateReplacement(int row)
 {
 	int signalId = getSignalId(row);
 	int signalIndex = m_signalSetProvider->signalIndex(signalId);
-	const AppSignal& signal = *m_signalSetProvider->getLoadedSignal(signalIndex);
+	const AppSignal& signal = *m_signalSetProvider->getLoadedSignal(signalIndex, false);
 
 	updateReplacement(signal, row);
 }
@@ -497,7 +497,7 @@ bool FindSignalDialog::isReplaceable(int row)
 	}
 	int signalId = getSignalId(row);
 
-	m_signalSetProvider->loadSignal(signalId);
+	m_signalSetProvider->getLoadedSignalByID(signalId, false);
 
 	int signalIndex = m_signalSetProvider->signalIndex(signalId);
 	if (signalIndex == -1)	// Doesn't exist???
@@ -528,7 +528,7 @@ void FindSignalDialog::replace(int row)
 		return;
 	}
 
-	AppSignal signal(*m_signalSetProvider->getSignal(signalId));
+	AppSignal signal(*m_signalSetProvider->getSignalByID(signalId));
 	QString newValue = m_foundListModel->data(m_foundListModel->index(row, 1), Qt::DisplayRole).toString();
 
 	setProperty(signal, newValue);
@@ -551,7 +551,7 @@ void FindSignalDialog::reloadCurrentIdsMap()
 
 	for (int i = 0; i < m_signalModel->rowCount(); i++)
 	{
-		QString id = getProperty(*m_signalSetProvider->getLoadedSignal(i));
+		QString id = getProperty(*m_signalSetProvider->getLoadedSignal(i, false));
 		if (m_signalIds.contains(id))
 		{
 			m_repeatedSignalIds.insert(id);

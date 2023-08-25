@@ -379,7 +379,7 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 			return {};
 		}
 
-		initNewSignal(signal);
+		SignalPropertiesDialog::initNewSignal(signal);
 
 		// Do it here, as initNewSignal sets EnableTuning to the last value from settings
 		//

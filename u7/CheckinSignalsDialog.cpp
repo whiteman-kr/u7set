@@ -141,6 +141,7 @@ void CheckinSignalsDialog::checkinSelected()
 
 	signalSetProvider->checkinSignals(IDs, commentText, &states);
 	signalSetProvider->showErrors(states);
+	signalSetProvider->reloadSignals();
 
 	accept();
 }

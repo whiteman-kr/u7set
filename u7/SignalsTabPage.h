@@ -52,6 +52,7 @@ public:
 							 SignalsModel* model,
 							 SignalsProxyModel* signalsProxyModel,
 							 QObject* parent = nullptr);
+	~SignalsDelegate();
 
 	QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const;
 
@@ -211,7 +212,7 @@ public:
 
 public slots:
 	void slot_signalsUpdated(const std::vector<int>& indexes);
-	void slot_signalsContChanged();
+	void slot_signalsCountChanged();
 	void beginIncreaseColumnCount(int newColumnCount);
 	void beginDecreaseColumnCount(int newColumnCount);
 	void endIncreaseColumnCount();

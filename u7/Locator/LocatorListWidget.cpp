@@ -211,7 +211,7 @@ namespace Locator
 			appSignalList.push_back(item->what);
 
 			m_doubleCklickShowsModalDialog = true;
-			::editApplicationSignals(appSignalList, m_dbc, this);
+			SignalPropertiesDialog::editApplicationSignals(appSignalList, m_dbc, this);
 			m_doubleCklickShowsModalDialog = false;
 			return;
 		}

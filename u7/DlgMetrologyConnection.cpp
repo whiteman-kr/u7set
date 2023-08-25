@@ -906,7 +906,7 @@ void DialogMetrologyConnection::findSignal_in_signalSet()
 				continue;
 			}
 
-			m_signalSetProvider->loadSignal(pSignal->ID());
+			m_signalSetProvider->getLoadedSignalByID(pSignal->ID(), false);
 
 			connection->setSignal(ioType, pSignal);
 		}

@@ -1,5 +1,4 @@
-#ifndef SIGNALPROPERTIESDIALOG_H
-#define SIGNALPROPERTIESDIALOG_H
+#pragma once
 
 #include "../AppSignalLib/AppSignal.h"
 #include "IdePropertyEditor.h"
@@ -14,16 +13,10 @@ class QtTreePropertyBrowser;
 class QDialogButtonBox;
 enum class SignalType;
 
-
 namespace ExtWidgets
 {
 	class PropertyEditor;
 }
-
-
-std::vector<std::pair<QString, QString> > editApplicationSignals(QStringList& signalId, DbController* dbController, QWidget *parent = 0);
-void initNewSignal(AppSignal& signal);
-
 
 class SignalPropertiesDialog : public QDialog
 {
@@ -35,8 +28,15 @@ public:
 
 	bool isEditedSignal(int id) const { return m_editedSignalsId.contains(id); }
 	bool hasEditedSignals() const { return m_editedSignalsId.empty() == false; }
-
 	bool isValid() const { return m_isValid; }
+
+	//
+
+	static std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& signalId,
+																		   DbController* dbController,
+																		   QWidget* parent = nullptr);
+	static void initNewSignal(AppSignal& signal);
+
 
 signals:
 	void signalChanged(int id, bool updateView);
@@ -57,22 +57,23 @@ private:
 	bool checkoutSignal(AppSignal& s, QString& message);
 	QString errorMessage(const ObjectState& state) const;
 
-	bool isPropertyDependentOnPrecision(const QString& propName) { return m_propertiesDependentOnPrecision.value(propName, false); }
-	void addPropertyDependentOnPrecision(const QString& propName) { m_propertiesDependentOnPrecision.insert(propName, true); }
+	bool isPropertyDependentOnPrecision(const QString& propName) const;
+	void addPropertyDependentOnPrecision(const QString& propName);
 
 private:
 	DbController* m_dbController;
 	const std::vector<AppSignal*>& m_signalVector;
 	std::set<int> m_editedSignalsId;
-	QDialogButtonBox* m_buttonBox;
-	QList<std::shared_ptr<PropertyObject>> m_objList;
+	std::vector<std::shared_ptr<PropertyObject>> m_objList;
 	bool m_tryCheckout;
-	QWidget* m_parent;
-	IdePropertyEditor* m_propertyEditor;
+
+	QWidget* m_parent = nullptr;
+	QDialogButtonBox* m_buttonBox = nullptr;
+
+	IdePropertyEditor* m_propertyEditor = nullptr;
 
 	bool m_isValid = false;
 
-	QHash<QString, bool> m_propertiesDependentOnPrecision;
+	std::set<QString> m_propertiesDependentOnPrecision;
 };
 
-#endif // SIGNALPROPERTIESDIALOG_H

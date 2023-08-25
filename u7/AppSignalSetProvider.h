@@ -25,18 +25,21 @@ public:
 
 	int signalCount() { return m_signalSet.count(); }
 
-	void reloadSignals();
+	void reloadAllSignals();
+
 	void loadSignals(const std::vector<int>& signalIds, bool withoutProgress = true);
 	void reloadSignals(const std::vector<int>& signalIds);
+
 	void enforceAllSignalsLoading();
-	const AppSignal* loadSignal(int signalId);
+	const AppSignal* loadSignal(int signalId, bool updateViews);
 
 	void setMiddleVisibleSignalIndex(int signalIndex);
 
 	QString getUserName(int userId);
 
 	AppSignal* getSignal(const QString& appSignalID);
-	AppSignal* getSignal(int signalID);
+	AppSignal* getSignalByID(int signalID);
+	AppSignal* getSignal(int index);
 
 	bool getChannelSignalsID(const AppSignal& signal, std::vector<int>* channelSignalIDs) const;
 	bool getChannelSignalsID(int signalID, int groupID, std::vector<int>* channelSignalIDs) const;
@@ -46,9 +49,9 @@ public:
 
 	QVector<int> getSameChannelSignals(int index);
 
-	AppSignal* getLoadedSignal(AppSignal* s);
-	AppSignal* getLoadedSignalByID(int signalID);
-	AppSignal* getLoadedSignal(int index);
+	AppSignal* getLoadedSignal(AppSignal* s, bool updateViews);
+	AppSignal* getLoadedSignalByID(int signalID, bool updateViews);
+	AppSignal* getLoadedSignal(int index, bool updateViews);
 
 	AppSignalParam getAppSignalParam(int index);
 	AppSignalParam getAppSignalParam(const QString& appSignalId);

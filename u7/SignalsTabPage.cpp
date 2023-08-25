@@ -43,6 +43,11 @@ SignalsDelegate::SignalsDelegate(AppSignalSetProvider* signalSetProvider, Signal
 	connect(this, &QAbstractItemDelegate::closeEditor, this, &SignalsDelegate::onCloseEditorEvent);
 }
 
+SignalsDelegate::~SignalsDelegate()
+{
+	DEBUG_STOP;
+}
+
 QWidget* SignalsDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
 	int col = index.column();
@@ -50,9 +55,7 @@ QWidget* SignalsDelegate::createEditor(QWidget* parent, const QStyleOptionViewIt
 
 	int editedSignalID = m_signalSetProvider->signalID(row);
 
-	m_signalSetProvider->loadSignal(editedSignalID);	// get current checkedOut state
-
-	const AppSignal* s = m_signalSetProvider->getLoadedSignal(row);
+	const AppSignal* s = m_signalSetProvider->loadSignal(editedSignalID, true);	// get current checkedOut state
 
 	TEST_PTR_RETURN_NULLPTR(s);
 
@@ -92,7 +95,7 @@ QWidget* SignalsDelegate::createEditor(QWidget* parent, const QStyleOptionViewIt
 		return nullptr;
 	}
 
-	const AppSignal* appSignal = m_signalSetProvider->loadSignal(editedSignalID);	// update new checkedOut state on view
+	const AppSignal* appSignal = m_signalSetProvider->loadSignal(editedSignalID, true);	// update new checkedOut state on view
 
 	TEST_PTR_RETURN_VALUE(appSignal, nullptr);
 
@@ -198,7 +201,7 @@ void SignalsDelegate::setEditorData(QWidget* editor, const QModelIndex& index) c
 
 	QComboBox* cb = dynamic_cast<QComboBox*>(editor);
 
-	const AppSignal* s = m_signalSetProvider->getLoadedSignal(row);
+	const AppSignal* s = m_signalSetProvider->getLoadedSignal(row, true);
 
 	TEST_PTR_RETURN(s);
 
@@ -274,7 +277,7 @@ void SignalsDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, c
 
 	QComboBox* cb = dynamic_cast<QComboBox*>(editor);
 
-	const AppSignal* ls = m_signalSetProvider->getLoadedSignal(row);
+	const AppSignal* ls = m_signalSetProvider->getLoadedSignal(row, true);
 
 	AppSignal s(*ls);
 
@@ -410,7 +413,7 @@ SignalsModel::SignalsModel(AppSignalSetProvider* signalSetProvider, SignalsTabPa
 	m_parentWindow(parent)
 
 {
-	connect(m_signalSetProvider, &AppSignalSetProvider::signalsCountChanged, this, &SignalsModel::slot_signalsContChanged);
+	connect(m_signalSetProvider, &AppSignalSetProvider::signalsCountChanged, this, &SignalsModel::slot_signalsCountChanged);
 	connect(m_signalSetProvider, &AppSignalSetProvider::signalsUpdated, this, &SignalsModel::slot_signalsUpdated);
 
 	connect(&m_signalSetProvider->signalPropertyManager(), &AppSignalPropertyManager::propertyCountWillIncrease, this, &SignalsModel::beginIncreaseColumnCount, Qt::DirectConnection);
@@ -447,7 +450,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 	int row = index.row();
 	int col = index.column();
 
-	const AppSignal* signal = m_signalSetProvider->getLoadedSignal(row);
+	const AppSignal* signal = m_signalSetProvider->getLoadedSignal(row, false);
 
 	TEST_PTR_RETURN_VALUE(signal, QVariant());
 
@@ -565,7 +568,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 
 		assert(row < m_signalSetProvider->signalCount());
 
-		const AppSignal* ls = m_signalSetProvider->getLoadedSignal(row);
+		const AppSignal* ls = m_signalSetProvider->getLoadedSignal(row, false);
 
 		AppSignal s(*ls);
 
@@ -603,7 +606,7 @@ Qt::ItemFlags SignalsModel::flags(const QModelIndex &index) const
 
 	assert(row < m_signalSetProvider->signalCount());
 
-	const AppSignal* s = m_signalSetProvider->getLoadedSignal(row);
+	const AppSignal* s = m_signalSetProvider->getLoadedSignal(row, false);
 
 	TEST_PTR_RETURN_VALUE(s, Qt::NoItemFlags);
 
@@ -648,7 +651,7 @@ void SignalsModel::slot_signalsUpdated(const std::vector<int>& indexes)
 	}
 }
 
-void SignalsModel::slot_signalsContChanged()
+void SignalsModel::slot_signalsCountChanged()
 {
 	if (m_rowCount != m_signalSetProvider->signalCount())
 	{
@@ -1153,7 +1156,7 @@ void SignalsTabPage::keyPressEvent(QKeyEvent* e)
 		{
 			int row = m_signalsProxyModel->mapToSource(selection[i]).row();
 
-			selectedSignalIds.append(m_signalSetProvider->getLoadedSignal(row)->appSignalID() + "\n");
+			selectedSignalIds.append(m_signalSetProvider->getLoadedSignal(row, false)->appSignalID() + "\n");
 		}
 
 		QApplication::clipboard()->setText(selectedSignalIds);
@@ -1286,7 +1289,7 @@ void SignalsTabPage::addSignal()
 		signal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
 	}
 
-	initNewSignal(signal);
+	SignalPropertiesDialog::initNewSignal(signal);
 
 	if (!deviceIdEdit->text().isEmpty())
 	{
@@ -1357,7 +1360,7 @@ void SignalsTabPage::addSignal()
 				addedSignalId = resultSignalVector[i].ID();
 			}
 
-			m_signalsModel->slot_signalsContChanged();
+			m_signalsModel->slot_signalsCountChanged();
 			restoreSelection(addedSignalId);
 		}
 	}
@@ -1399,7 +1402,7 @@ bool SignalsTabPage::editSignals(const std::vector<int>& ids)
 
 	for (int id : ids)
 	{
-		AppSignal* s = m_signalSetProvider->getLoadedSignalByID(id);
+		AppSignal* s = m_signalSetProvider->getLoadedSignalByID(id, false);
 
 		TEST_PTR_CONTINUE(s)
 
@@ -1497,7 +1500,7 @@ void SignalsTabPage::deleteSignal()
 
 		std::vector<int> channelSignalsIDs;
 
-		m_signalSetProvider->getChannelSignalsID(*m_signalSetProvider->getLoadedSignal(row), &channelSignalsIDs);
+		m_signalSetProvider->getChannelSignalsID(*m_signalSetProvider->getLoadedSignal(row, false), &channelSignalsIDs);
 
 		deletedSignalIDs.insert(deletedSignalIDs.end(), channelSignalsIDs.begin(), channelSignalsIDs.end());
 	}
@@ -1564,7 +1567,7 @@ void SignalsTabPage::viewSignalHistory()
 		return;
 	}
 
-	const AppSignal* signal = m_signalSetProvider->getLoadedSignal(row);
+	const AppSignal* signal = m_signalSetProvider->getLoadedSignal(row, false);
 
 	TEST_PTR_RETURN(signal);
 
@@ -1650,7 +1653,7 @@ void SignalsTabPage::addMetrologyConnection()
 		return;
 	}
 
-	AppSignal signal(*m_signalSetProvider->getSignal(m_signalSetProvider->signalID(row)));
+	AppSignal signal(*m_signalSetProvider->getSignal(row));
 
 	if (signal.isAnalog() == false)
 	{
@@ -1769,7 +1772,8 @@ void SignalsTabPage::onSignalSelectionChanged()
 		return;
 	}
 	int row = m_signalsProxyModel->mapToSource(selection[0]).row();
-	if (m_signalSetProvider->getLoadedSignal(row)->isAnalog())
+
+	if (m_signalSetProvider->getLoadedSignal(row, true)->isAnalog(), true)
 	{
 		m_addMetrologyConnectionAction->setEnabled(true);
 	}
@@ -2008,10 +2012,9 @@ bool SignalsProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex&) cons
 	if (m_signalType == SignalsTabPage::FILTER_ST_ANY && m_strIdMasks.isEmpty())
 	{
 		return true;
-
 	}
 
-	const AppSignal& currentSignal = *m_signalSetProvider->getLoadedSignal(sourceRow);
+	const AppSignal& currentSignal = *m_signalSetProvider->getLoadedSignal(sourceRow, false);
 
 	if (m_signalType != SignalsTabPage::FILTER_ST_ANY &&
 		m_signalType != TO_INT(currentSignal.signalType()))
@@ -2080,8 +2083,8 @@ bool SignalsProxyModel::lessThan(const QModelIndex& sourceLeft, const QModelInde
 
 	if (l == r)
 	{
-		const AppSignal* sl = m_signalSetProvider->getLoadedSignal(sourceLeft.row());
-		const AppSignal* sr = m_signalSetProvider->getLoadedSignal(sourceRight.row());
+		const AppSignal* sl = m_signalSetProvider->getLoadedSignal(sourceLeft.row(), false);
+		const AppSignal* sr = m_signalSetProvider->getLoadedSignal(sourceRight.row(), false);
 
 		return sl->appSignalID() < sr->appSignalID();
 	}
