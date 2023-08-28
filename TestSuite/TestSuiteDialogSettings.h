@@ -20,6 +20,7 @@ public:
 
 private:
 	void createLanguagesList();
+	void accept() override;
 
 private slots:
 	void on_TestSuiteDialogSettings_accepted();

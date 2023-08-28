@@ -131,9 +131,11 @@ TestListWidget::TestListWidget(QWidget* parent):
 
 	QByteArray headerState = QSettings().value("TestsListWidget/headerState").toByteArray();
 	m_treeWidget->header()->restoreState(headerState);
+	m_treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 
 	connect(m_treeWidget, &QTreeWidget::itemDoubleClicked, this, &TestListWidget::testItemDoubleClicked);
 	connect(m_treeWidget, &QTreeWidget::itemChanged, this, &TestListWidget::testItemChanged);
+	connect(m_treeWidget, &QTreeWidget::customContextMenuRequested, this, &TestListWidget::contextMenuRequested);
 
 	layout->addWidget(m_testsPathLabel);
 	layout->addWidget(m_treeWidget);
@@ -141,7 +143,7 @@ TestListWidget::TestListWidget(QWidget* parent):
 	setLayout(layout);
 }
 
-void TestListWidget::updateTestsList(const TestSuite::TestScriptsStorage& tests)
+void TestListWidget::fillTestsTree(const TestSuite::TestScriptsStorage& tests)
 {
 	TestSuite::OutputControllerStub outputControllerStub;
 	TestSuite::InputControllerStub inputControllerStub;
@@ -151,16 +153,47 @@ void TestListWidget::updateTestsList(const TestSuite::TestScriptsStorage& tests)
 	TestSuite::ControlStatus fakeStatus;
 	QMutex fakeStatusMutex;
 
+	// Remember all previous top-level item states and their expand/check status
+	//
+	std::map<QString, bool> prevItemsStates;	// Key is item name, value is "expanded" for file items, "checked" for test items
+	
+	int count = m_treeWidget->topLevelItemCount();
+	for (int i = 0; i < count; i++)
+	{
+		QTreeWidgetItem* parentItem = m_treeWidget->topLevelItem(i);
+		if (parentItem == nullptr)
+		{
+			Q_ASSERT(parentItem);
+			return;
+		}
+		prevItemsStates[parentItem->text(Columns::Caption)] = parentItem->isExpanded();
+
+		int childCount = parentItem->childCount();
+		for (int c = 0; c < childCount; c++)
+		{
+			QTreeWidgetItem* childItem = parentItem->child(c);
+			if (childItem == nullptr)
+			{
+				Q_ASSERT(childItem);
+				return;
+			}
+			prevItemsStates[parentItem->text(Columns::Caption) + childItem->text(Columns::Caption)] = childItem->checkState(0) == Qt::Checked;
+		}
+	}
+
+	// Clear previous contents
+	//
 	clearTestsList();
 
-	int count = static_cast<int>(tests.count());
+	// Fill new tests
+	//
+	count = static_cast<int>(tests.count());
 	for (int i = 0; i < count; i++)
 	{
 		TestSuite::ScriptRunner sr(testController, testLog, fakeStatus, fakeStatusMutex);
 		const TestSuite::TestScript& script = tests.script(i);
 
 		QTreeWidgetItem* scriptItem = new QTreeWidgetItem(QStringList() << script.fileName());
-		scriptItem->setCheckState(0, Qt::Checked);
 		scriptItem->setData(ColumnsData::ScriptName, Qt::UserRole, script.fileName());
 		m_treeWidget->addTopLevelItem(scriptItem);
 
@@ -171,16 +204,31 @@ void TestListWidget::updateTestsList(const TestSuite::TestScriptsStorage& tests)
 			continue;
 		}
 
+		auto prevScriptItemIt = prevItemsStates.find(script.fileName());
+
 		for (const QString& func : functions)
 		{
 			QTreeWidgetItem* funcItem = new QTreeWidgetItem(QStringList() << func);
-			funcItem->setCheckState(0, Qt::Checked);
 			funcItem->setData(ColumnsData::ScriptName, Qt::UserRole, script.fileName());
 			funcItem->setData(ColumnsData::TestFunction, Qt::UserRole, func);
 			scriptItem->addChild(funcItem);
+
+			if (prevScriptItemIt == prevItemsStates.end())
+			{
+				// If this function is from the new file - check it
+				//
+				funcItem->setCheckState(0, Qt::Checked);
+			}
+			else
+			{
+				// If this function is from existing file - check it if it was selected earlier
+				//
+				auto prevFuncItemIt = prevItemsStates.find(script.fileName() + func);
+				funcItem->setCheckState(0, prevFuncItemIt != prevItemsStates.end() && prevFuncItemIt->second == true ? Qt::Checked : Qt::Unchecked);
+			}
 		}
 
-		scriptItem->setExpanded(true);
+		scriptItem->setExpanded(prevScriptItemIt == prevItemsStates.end() || prevScriptItemIt->second == true);
 	}
 
 	m_treeWidget->resizeColumnToContents(Columns::Caption);
@@ -190,7 +238,6 @@ void TestListWidget::clearTestsList()
 {
 	m_treeWidget->clear();
 }
-
 
 void TestListWidget::clearTestsResults()
 {
@@ -208,14 +255,17 @@ void TestListWidget::clearTestsResults()
 	}
 }
 
-void TestListWidget::fillTestScriptFilter(TestSuite::TestScriptFilter& filter) const
+TestSuite::TestScriptSelection TestListWidget::testScriptSelection() const
 {
+	TestSuite::TestScriptSelection selection;
+
 	int count = m_treeWidget->topLevelItemCount();
 	for (int i = 0; i < count; i++)
 	{
 		QTreeWidgetItem* parentItem = m_treeWidget->topLevelItem(i);
-		if (parentItem->checkState(0) == Qt::Unchecked)
+		if (parentItem == nullptr)
 		{
+			Q_ASSERT(parentItem);
 			continue;
 		}
 
@@ -226,31 +276,34 @@ void TestListWidget::fillTestScriptFilter(TestSuite::TestScriptFilter& filter) c
 			continue;
 		}
 
-		QStringList functions;
-
-		int childCount = parentItem->childCount();
-		for (int c = 0; c < childCount; c++)
+		if (parentItem->checkState(0) != Qt::Unchecked)
 		{
-			QTreeWidgetItem* childItem = parentItem->child(c);
-			if (childItem->checkState(0) == Qt::Unchecked)
+			QStringList functions;
+
+			int childCount = parentItem->childCount();
+			for (int c = 0; c < childCount; c++)
 			{
-				continue;
+				QTreeWidgetItem* childItem = parentItem->child(c);
+				if (childItem->checkState(0) == Qt::Unchecked)
+				{
+					continue;
+				}
+
+				QString func = childItem->data(ColumnsData::TestFunction, Qt::UserRole).toString();
+				if (func.isEmpty() == true)
+				{
+					Q_ASSERT(false);
+					continue;
+				}
+
+				functions.push_back(func);
 			}
 
-			QString func = childItem->data(ColumnsData::TestFunction, Qt::UserRole).toString();
-			if (func.isEmpty() == true)
-			{
-				Q_ASSERT(false);
-				continue;
-			}
-
-			functions.push_back(func);
+			selection.setSelectedFunctions(scriptFileName, functions);
 		}
-
-		filter.setTestFunctions(scriptFileName, functions);
 	}
 
-	return;
+	return selection;
 }
 
 void TestListWidget::onTestFinished(QString scriptFileName, QString testFunction, bool result)
@@ -297,7 +350,16 @@ void TestListWidget::testItemDoubleClicked(QTreeWidgetItem *item, int /*column*/
 	}
 	if (item->parent() == nullptr)	// Check if this is top level item
 	{
-		emit testItemClicked(item->text(Columns::Caption));
+		QString fileName = item->text(Columns::Caption);
+		
+		emit testItemClicked(fileName, QString());
+	}
+	else
+	{
+		QString fileName = item->parent()->text(Columns::Caption);
+		QString function = item->text(Columns::Caption);
+		
+		emit testItemClicked(fileName, function);
 	}
 }
 
@@ -340,4 +402,45 @@ void TestListWidget::testItemChanged(QTreeWidgetItem *item, int column)
 		m_treeWidget->setParentItemsCheckState();
 		m_treeWidget->blockSignals(false);
 	}
+
+	emit testSelectionChanged();
+}
+
+void TestListWidget::contextMenuRequested()
+{
+	auto items = m_treeWidget->selectedItems();
+	if (items.isEmpty() == true)
+	{
+		return;
+	}
+
+	QMenu menu(this);
+
+	for (auto item : items)
+	{
+		QAction* a;
+		if (item->parent() == nullptr)
+		{
+			a = menu.addAction(tr("View script '%1'").arg(item->text(Columns::Caption)));
+		}
+		else
+		{
+			a = menu.addAction(tr("View function '%1'").arg(item->text(Columns::Caption)));
+		}
+
+		connect(a, &QAction::triggered, this, [this, item]()
+			{
+				if (item->parent() == nullptr)	// Check if this is top level item (script)
+				{
+					emit testItemClicked(item->text(Columns::Caption), QString());
+				}
+				else
+				{
+					emit testItemClicked(item->parent()->text(Columns::Caption), item->text(Columns::Caption));
+				}
+			}
+		);
+	}
+
+	menu.exec(QCursor::pos());
 }

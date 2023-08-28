@@ -42,9 +42,9 @@ private:
 	void loadScriptsFromConfiguration();
 	void loadScriptsFromLocalPath();
 
-	void clearTestsTree();
-	void fillTestsTree();
     void createReportActions();
+	
+	void updateTestViewTabPages();
 	void updateActionsState();
 
 	bool loadTestLog();
@@ -73,8 +73,8 @@ private slots:
 	void showAppLog();
 	void showAboutQt();
 	void showAbout();
-	void onTestsRefresh();
-	void onShowTestContents(const QString& testName);
+	void onTestsScriptsReload();
+	void onShowTestContents(const QString& scriptName, const QString& functionName);
 	void onTabCloseRequested(int index);
     void onGenerateReport(const QString& caption);
 
@@ -95,7 +95,7 @@ private:
 	QAction* m_aboutQtAction = nullptr;
 	QAction* m_pAboutAction = nullptr;
 
-	QAction* m_refreshTestsAction = nullptr;
+	QAction* m_reloadTestsScriptsAction = nullptr;
 	QAction* m_runAction = nullptr;
 	//QAction* m_pauseAction = nullptr;
 	QAction* m_stopAction = nullptr;

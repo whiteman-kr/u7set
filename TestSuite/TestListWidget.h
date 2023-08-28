@@ -35,22 +35,24 @@ public:
 	};
 
 public:
-	void updateTestsList(const TestSuite::TestScriptsStorage& tests);
+	void fillTestsTree(const TestSuite::TestScriptsStorage& tests);
 	void clearTestsList();
 
 	void clearTestsResults();
 
-	void fillTestScriptFilter(TestSuite::TestScriptFilter& filter) const;
+	TestSuite::TestScriptSelection testScriptSelection() const;
 
 public slots:
 	void onTestFinished(QString scriptFileName, QString testFunction, bool result);
 
 signals:
-	void testItemClicked(const QString& testName);
+	void testSelectionChanged();
+	void testItemClicked(const QString& scriptName, const QString& functionName);
 
 private slots:
 	void testItemDoubleClicked(QTreeWidgetItem *item, int column);
 	void testItemChanged(QTreeWidgetItem *item, int column);
+	void contextMenuRequested();
 
 private:
 	QLabel* m_testsPathLabel = nullptr;

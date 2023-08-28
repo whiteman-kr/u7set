@@ -60,7 +60,7 @@ void TestSuiteDialogSettings::createLanguagesList()
 	}
 }
 
-void TestSuiteDialogSettings::on_TestSuiteDialogSettings_accepted()
+void TestSuiteDialogSettings::accept()
 {
 	// ID
 
@@ -89,6 +89,14 @@ void TestSuiteDialogSettings::on_TestSuiteDialogSettings_accepted()
 	m_settings.setUseLocalScriptsPath(ui->loadSciptsPathCheck->isChecked() == true);
 	m_settings.setLocalScriptsPath(ui->loadSciptsPath->text());
 
+	if (m_settings.localScriptsPath().isEmpty() == true && m_settings.useLocalScriptsPath() == true)
+	{
+		QMessageBox::warning(this, qAppName(), tr("Scripts are chosen to be loaded from a directoty. Please specify a directory with scripts files."));
+		ui->tabWidget->setCurrentIndex(1);
+		ui->loadSciptsPath->setFocus();
+		return;
+	}
+
 	// IP Configuration
 	HostAddressPort address1{ui->m_IP1->text(), ui->m_port1->text().toInt()};
 	HostAddressPort address2{ui->m_IP2->text(), ui->m_port2->text().toInt()};
@@ -113,11 +121,17 @@ void TestSuiteDialogSettings::on_TestSuiteDialogSettings_accepted()
 	if (lang != m_settings.language())
 	{
 		m_settings.setLanguage(lang);
-
 		QMessageBox::warning(this, qAppName(), tr("Language has been changed, please restart the application."));
 	}
 
 	//
+
+	QDialog::accept();
+}
+
+void TestSuiteDialogSettings::on_TestSuiteDialogSettings_accepted()
+{
+	
 }
 
 void TestSuiteDialogSettings::on_loadSciptsPathBrowse_clicked()

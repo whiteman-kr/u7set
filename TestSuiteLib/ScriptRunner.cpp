@@ -37,7 +37,7 @@ namespace TestSuite
 		return evaluateScript(script, {}, functionsList, errorMsg);
 	}
 
-	bool ScriptRunner::runScript(const TestScript& script, const TestScriptFilter& filter)
+	bool ScriptRunner::runScript(const TestScript& script, const TestScriptSelection& filter)
 	{
 		{
 			QMutexLocker l(&m_statusMutex);
@@ -169,7 +169,7 @@ namespace TestSuite
 		return failed == 0;
 	}
 
-	bool ScriptRunner::evaluateScript(const TestScript& script, const TestScriptFilter& filter, QStringList& functionsList, QString& errorMsg)
+	bool ScriptRunner::evaluateScript(const TestScript& script, const TestScriptSelection& filter, QStringList& functionsList, QString& errorMsg)
 	{
 		// Evaluate script.
 		//
@@ -204,7 +204,7 @@ namespace TestSuite
 
 				// Process function list filter
 				//
-				const QStringList& functions = filter.testFunctions(script.fileName());
+				const QStringList& functions = filter.selectedFunctions(script.fileName());
 				if (functions.empty() == false)
 				{
 					if (std::find(functions.begin(), functions.end(), functionName) == functions.end())

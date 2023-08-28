@@ -431,7 +431,7 @@ int main(int argc, char* argv[])
 
 	// Run tests.
 	//
-	TestSuite::TestScriptFilter filter(args.testsFilter);
+	TestSuite::TestScriptSelection filter(args.testsFilter);
 
 	ok = testSuite.execute({}, args.scriptsPath, filter, QString::fromStdString(userName), QString::fromStdString(password));
 	if (ok == false)

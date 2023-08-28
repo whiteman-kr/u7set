@@ -1,4 +1,5 @@
 #include <QSignalSpy>
+#include <QtConcurrent>
 #include "Control.h"
 #include "AdsInputController.h"
 #include "TunsOutputController.h"
@@ -44,7 +45,7 @@ namespace TestSuite
 									  const TestSuiteSettings& settings,
 									  const QStringList& scriptsFiles,		// List of script files for execution, if empty then exec all.
 									  const QString& scriptsPath,			// Load scripts from disk, path to dir for *.js files.)
-									  const TestScriptFilter& testsFilter,			// Tests filter
+									  const TestScriptSelection& testsFilter,			// Tests filter
 									  const QString& userName,
 									  const QString& password)
 	{
@@ -396,7 +397,7 @@ namespace TestSuite
 						  const TestSuiteSettings& settings,
 						  const QStringList& scriptsFiles,		// List of script files for execution, if empty then exec all.
 						  const QString& scriptsPath,			// Load scripts from disk, path to dir for *.js files.
-						  const TestScriptFilter& testsFilter,			// Tests filter
+						  const TestScriptSelection& testsFilter,			// Tests filter
 						  const QString& userName,
 						  const QString& password)
 	{
@@ -420,12 +421,31 @@ namespace TestSuite
 
 	bool Control::stop()
 	{
-		m_controlThread.requestInterruption();
-
-		if (m_controlThread.wait(120'000) == false)
+		if (m_stopRequested.load() == false)
 		{
-			qDebug() << "Control::stop(): m_controlThread was not finished in time, terminate().";
-			m_controlThread.terminate();
+			// Request test thread to stop
+			//
+			m_stopRequested.store(true);
+			m_controlThread.requestInterruption();
+
+			// Wait for thread to stop in other thread and do not block interface thread
+			//
+			auto waitForThreadStop = [this]()->void
+				{
+					if (m_controlThread.wait(120'000) == false)
+					{
+						qDebug() << "Control::stop(): m_controlThread was not finished in time, terminate().";
+						m_controlThread.terminate();
+					}
+
+					m_stopRequested.store(false);
+				};
+
+			QFuture<void> future = QtConcurrent::run(waitForThreadStop);
+		}
+		else
+		{
+			m_appLog->writeWarning("Already waiting for testing thread to stop.");
 		}
 
 		return true;

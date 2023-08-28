@@ -19,6 +19,11 @@ if (MSVC)
 	set (WINDOWS_RESOURCES ./WinResources/WinResources.rc)
 endif (MSVC)
 
+set (TC_FORMS
+	DialogReport.ui
+	TestSuiteDialogSettings.ui 
+)
+
 add_executable(${TARGET} WIN32
 	../lib/CodeEditor.cpp
 	../lib/CodeEditor.h
@@ -46,9 +51,9 @@ add_executable(${TARGET} WIN32
 	TestSuiteLog.cpp
 	TestSuiteMainWindow.cpp
 	TestViewTabPage.cpp
-
 	Resources.qrc
 	${WINDOWS_RESOURCES}
+	${TC_FORMS}
 )
 
 target_precompile_headers(${TARGET} PRIVATE

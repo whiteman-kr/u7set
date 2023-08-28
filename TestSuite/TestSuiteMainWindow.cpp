@@ -110,6 +110,7 @@ void TestSuiteMainWindow::createDocks()
 
 	m_testListWidget = new TestListWidget{this};
 	connect(m_testListWidget, &TestListWidget::testItemClicked, this, &TestSuiteMainWindow::onShowTestContents);
+	connect(m_testListWidget, &TestListWidget::testSelectionChanged, this, [this]() { updateActionsState(); });
 	testsListDock->setWidget(m_testListWidget);
 
 	addDockWidget(Qt::LeftDockWidgetArea, testsListDock);
@@ -159,7 +160,7 @@ void TestSuiteMainWindow::createToolbar()
 
 	// --
 	//
-	m_toolBar->addAction(m_refreshTestsAction);
+	m_toolBar->addAction(m_reloadTestsScriptsAction);
 
 	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_runAction);
@@ -210,16 +211,15 @@ void TestSuiteMainWindow::createActions()
 	m_pExitAction->setEnabled(true);
 	connect(m_pExitAction, &QAction::triggered, this, &TestSuiteMainWindow::onExit);
 
-	m_refreshTestsAction = new QAction{QIcon(":/Images/Images/TestsRefresh.svg"), tr("Refresh"), this};
-	m_refreshTestsAction->setShortcut(QKeySequence::Refresh);
-	connect(m_refreshTestsAction, &QAction::triggered, this, &TestSuiteMainWindow::onTestsRefresh);
+	m_reloadTestsScriptsAction = new QAction{QIcon(":/Images/Images/TestsRefresh.svg"), tr("Reload Tests Scripts"), this};
+	m_reloadTestsScriptsAction->setVisible(theSettings.useLocalScriptsPath() == true);
+	connect(m_reloadTestsScriptsAction, &QAction::triggered, this, &TestSuiteMainWindow::onTestsScriptsReload);
 
 	// --
 	//
 	m_runAction = new QAction{QIcon(":/Images/Images/TestsRun.svg"), tr("Run tests"), this};
 	QList<QKeySequence> runsKeys;
-	runsKeys << QKeySequence{Qt::CTRL | Qt::Key_R};
-	runsKeys << QKeySequence{Qt::CTRL | Qt::Key_F5};
+	runsKeys << QKeySequence{Qt::Key_F5};
 	m_runAction->setShortcuts(runsKeys);
 	connect(m_runAction, &QAction::triggered, this, &TestSuiteMainWindow::on_m_run_clicked);
 
@@ -299,8 +299,8 @@ void TestSuiteMainWindow::createMenu()
 
 	// Service
 	//
-	QMenu* pServiceMenu = menuBar()->addMenu(tr("&Service"));
-	pServiceMenu->addAction(m_pSettingsAction);
+	QMenu* pToolsMenu = menuBar()->addMenu(tr("&Tools"));
+	pToolsMenu->addAction(m_pSettingsAction);
 
 	// Help
 	//
@@ -532,7 +532,7 @@ void TestSuiteMainWindow::showSoftwareConnection(const QString& caption,
 void TestSuiteMainWindow::loadScriptsFromConfiguration()
 {
 	m_testScriptsStorage.setScripts(m_configController.scripts());
-	fillTestsTree();
+	m_testListWidget->fillTestsTree(m_testScriptsStorage);
 }
 
 void TestSuiteMainWindow::loadScriptsFromLocalPath()
@@ -545,17 +545,7 @@ void TestSuiteMainWindow::loadScriptsFromLocalPath()
 		return;
 	}
 
-	fillTestsTree();
-}
-
-void TestSuiteMainWindow::clearTestsTree()
-{
-	m_testListWidget->clearTestsList();
-}
-
-void TestSuiteMainWindow::fillTestsTree()
-{
-	m_testListWidget->updateTestsList(m_testScriptsStorage);
+	m_testListWidget->fillTestsTree(m_testScriptsStorage);
 }
 
 void TestSuiteMainWindow::createReportActions()
@@ -585,9 +575,54 @@ void TestSuiteMainWindow::createReportActions()
     m_reportsMenu->setEnabled(m_reportActions.empty() == false);
 }
 
+void TestSuiteMainWindow::updateTestViewTabPages()
+{
+	std::vector<int> tabsToClose;
+
+	for (int i = 0; i < m_tabWidget->count(); i++)
+	{
+		// Check if tab page with this script already exists, open it if so
+		QWidget* w = m_tabWidget->widget(i);
+		if (w == nullptr)
+		{
+			Q_ASSERT(w);
+			continue;
+		}
+		TestViewTabPage* p = dynamic_cast<TestViewTabPage*>(w);
+		if (p == nullptr)
+		{
+			continue;
+		}
+
+		if (m_testScriptsStorage.hasScript(p->script().fileNameHash()) == false)
+		{
+			// No such script, close the tab
+			tabsToClose.push_back(i);
+		}
+		else
+		{
+			// Update script contents if it has been changed
+			const TestSuite::TestScript& script = m_testScriptsStorage.script(p->script().fileNameHash());
+			if (script.script() != p->script().script())
+			{
+				p->setScript(script);
+			}
+		}
+	}
+
+	// Close tabs with non-existing more scripts
+	std::sort(tabsToClose.begin(), tabsToClose.end(), std::greater<int>());
+	for (int i : tabsToClose)
+	{
+		onTabCloseRequested(i);
+	}
+}
+	
 void TestSuiteMainWindow::updateActionsState()
 {
-	m_runAction->setEnabled(!m_testSuite.isRunning());
+	auto selection = m_testListWidget->testScriptSelection();
+
+	m_runAction->setEnabled(m_testSuite.isRunning() == false && selection.isEmpty() == false);
 	m_stopAction->setEnabled(m_testSuite.isRunning());
 }
 
@@ -602,6 +637,11 @@ bool TestSuiteMainWindow::loadTestLog()
 	{
 		return false;
 	}
+
+	// Clear previous log
+	m_testSuite.testLog().clear();
+	m_testLogTabPage->clearOutputWidget();
+
 
 	QString errorMsg;
 	bool ok = m_testSuite.testLog().loadFromCSV(fileName, &errorMsg);
@@ -801,11 +841,8 @@ void TestSuiteMainWindow::on_m_run_clicked()
 
 	// Create a list of tests user has selected to run
 	//
-	TestSuite::TestScriptFilter filter;
-	m_testListWidget->fillTestScriptFilter(filter);
-
-	QStringList scriptsFiles = filter.scriptFiles();
-	if (scriptsFiles.isEmpty() == true)
+	TestSuite::TestScriptSelection selection = m_testListWidget->testScriptSelection();
+	if (selection.isEmpty() == true)
 	{
 		QMessageBox::warning(this, qAppName(), tr("Please choose at least one test to run."));
 		return;
@@ -820,9 +857,9 @@ void TestSuiteMainWindow::on_m_run_clicked()
 
 	// Run tests
 	//
-	bool ok = m_testSuite.execute(scriptsFiles,
+	bool ok = m_testSuite.execute(selection.selectedFiles(),
 								  theSettings.useLocalScriptsPath() ? theSettings.localScriptsPath() : QString(),
-								  filter,
+								  selection,
 								  userName,
 								  password);
 	if (ok == false)
@@ -904,6 +941,12 @@ void TestSuiteMainWindow::onSettings()
 
 		// --
 		//
+		theSettings = d.settings();
+		theSettings.StoreSystem();
+		theSettings.StoreUser();
+
+		// --
+		//
 		if (currentSettings.useLocalScriptsPath() == true && d.settings().useLocalScriptsPath() == false)
 		{
 			// Tests are NOT loaded from local folder now - clear them
@@ -920,12 +963,6 @@ void TestSuiteMainWindow::onSettings()
 			}
 		}
 
-		// --
-		//
-		theSettings = d.settings();
-		theSettings.StoreSystem();
-		theSettings.StoreUser();
-
 		// Reconnect
 		//
 		if (needReconnect == true)
@@ -934,6 +971,8 @@ void TestSuiteMainWindow::onSettings()
 															   theSettings.librarySettings().configuratorAddress1(),
 															   theSettings.librarySettings().configuratorAddress2());
 		}
+
+		m_reloadTestsScriptsAction->setVisible(theSettings.useLocalScriptsPath() == true);
 
 		return;
 	}
@@ -980,7 +1019,7 @@ void TestSuiteMainWindow::showAbout()
 	DialogAbout::show(this, text, ":/Images/Images/logo.png");
 }
 
-void TestSuiteMainWindow::onTestsRefresh()
+void TestSuiteMainWindow::onTestsScriptsReload()
 {
 	// Reload scripts that displayed by the user interface. Actual executed scripts are loaded at testing start.
 	//
@@ -992,11 +1031,13 @@ void TestSuiteMainWindow::onTestsRefresh()
 	{
 		loadScriptsFromConfiguration();
 	}
+
+	updateTestViewTabPages();
 }
 
-void TestSuiteMainWindow::onShowTestContents(const QString& testName)
+void TestSuiteMainWindow::onShowTestContents(const QString& scriptName, const QString& functionName)
 {
-	const TestSuite::TestScript& script = m_testScriptsStorage.script(::calcHash(testName));
+	const TestSuite::TestScript& script = m_testScriptsStorage.script(::calcHash(scriptName));
 
 	for (int i = 0; i < m_tabWidget->count(); i++)
 	{
@@ -1013,14 +1054,22 @@ void TestSuiteMainWindow::onShowTestContents(const QString& testName)
 		{
 			continue;
 		}
-		if (p->script().hash() == script.hash())
+		if (p->script().fileNameHash() == script.fileNameHash())
 		{
-			m_tabWidget->setCurrentIndex(i);;
+			m_tabWidget->setCurrentIndex(i);
+			if (functionName.isEmpty() == false)
+			{
+				p->scrollToFunction(functionName);
+			}
 			return;
 		}
 	}
 
 	TestViewTabPage* p = new TestViewTabPage(script, this);
+	if (functionName.isEmpty() == false)
+	{
+		p->scrollToFunction(functionName);
+	}
 	m_tabWidget->addTab(p, script.fileName());
 	m_tabWidget->setCurrentIndex(m_tabWidget->count() - 1);
 
@@ -1041,8 +1090,8 @@ void TestSuiteMainWindow::onTabCloseRequested(int index)
 		return;
 	}
 
-	delete w;
 	m_tabWidget->removeTab(index);
+	w->deleteLater();
 }
 
 void TestSuiteMainWindow::onGenerateReport(const QString& caption)
@@ -1074,9 +1123,13 @@ void TestSuiteMainWindow::onConfigurationArrived()
 	if (theSettings.useLocalScriptsPath() == false)
 	{
 		loadScriptsFromConfiguration();
+
+		updateTestViewTabPages();
 	}
 
     createReportActions();
+
+	updateActionsState();
 
 	return;
 }
