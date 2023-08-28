@@ -6,8 +6,51 @@
 #include "../AppSignalLib/AppSignal.h"
 #include "../CommonLib/PropertyObject.h"
 
+class AppSignalPropertyBehavior
+{
+public:
+	void setDependsOnPrecision(bool depends);
+	bool dependsOnPrecision() const;
+
+	void set(E::SignalType signalType, E::SignalInOutType inOutType, E::PropertyBehaviourType behaviour);
+
+	E::PropertyBehaviourType get(E::SignalType signalType, E::SignalInOutType inOutType) const;
+	E::PropertyBehaviourType get(const AppSignal& s) const;
+
+	void clear();
+
+private:
+	int calcIndex(E::SignalType signalType, E::SignalInOutType inOutType) const;
+	void privateSet(int index, E::PropertyBehaviourType behaviour);
+	E::PropertyBehaviourType privateGet(int index) const;
+
+private:
+	static inline const int SIGNAL_TYPE_COUNT = QMetaEnum::fromType<E::SignalType>().keyCount();
+	static inline const int IN_OUT_TYPE_COUNT = QMetaEnum::fromType<E::SignalInOutType>().keyCount();
+	static inline const int TOTAL_SIGNAL_TYPE_COUNT = SIGNAL_TYPE_COUNT * IN_OUT_TYPE_COUNT;
+
+
+	bool m_dependsOnPrecision = false;
+
+	// property behaviour for all possible combinations of signalType and signalInOutType
+	//
+	// index in this array is calculated as signalType * IN_OUT_TYPE_COUNT + signalTypeCount
+	//
+	std::vector<E::PropertyBehaviourType> m_behaviourType = std::vector<E::PropertyBehaviourType>(
+																TOTAL_SIGNAL_TYPE_COUNT,
+																E::PropertyBehaviourType::Write);
+};
+
 struct AppSignalPropertyDescription
 {
+	AppSignalPropertyDescription();
+	AppSignalPropertyDescription(const QString& propName,
+								 const QString& propCaption,
+								 QMetaType::Type propType,
+								 std::function<QVariant (const AppSignal*)> getter,
+								 std::function<void (AppSignal*, const QVariant&)> setter,
+								 const std::map<int, QString>& propEnumValues);
+
 	bool specificProperty = false;
 	QString name;
 	QString caption;
@@ -20,6 +63,10 @@ struct AppSignalPropertyDescription
 
 	std::map<int, QString> enumValues;
 	std::set<int> signalsWithThisProperty;			// set of Signal.ID
+
+	//
+
+	AppSignalPropertyBehavior behaviour;
 
 	//
 

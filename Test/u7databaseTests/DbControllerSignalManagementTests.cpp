@@ -430,17 +430,18 @@ void DbControllerSignalTests::test_deleteSignal()
 	QVERIFY(obState.errCode == ERR_SIGNAL_OK);
 
 	QSqlQuery q;
+	QString err;
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalid=%1").arg(id1));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalid=%1").arg(id1));
 	QVERIFY2(q.size() == 0, "SignalInstance record is not deleted");
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM Signal WHERE signalid=%1").arg(id1));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM Signal WHERE signalid=%1").arg(id1));
 	QVERIFY2(q.size() == 0, "Signal record is not deleted");
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM CheckOut WHERE signalid=%1").arg(id1));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM CheckOut WHERE signalid=%1").arg(id1));
 	QVERIFY2(q.size() == 0, "CheckOut record is not deleted");
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalGroup WHERE signalgroupid=%1").arg(signalGroupID1));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM SignalGroup WHERE signalgroupid=%1").arg(signalGroupID1));
 	QVERIFY2(q.size() == 1, "SignalGroup record is deleted");
 
 	// try delete second channel of signal
@@ -448,16 +449,16 @@ void DbControllerSignalTests::test_deleteSignal()
 	TS_VERIFY(deleteSignal(USER2_ID, id2, &obState));
 	QVERIFY(obState.errCode == ERR_SIGNAL_OK);
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalid=%1").arg(id2));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalid=%1").arg(id2));
 	QVERIFY2(q.size() == 0, "SignalInstance record is not deleted");
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM Signal WHERE signalid=%1").arg(id2));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM Signal WHERE signalid=%1").arg(id2));
 	QVERIFY2(q.size() == 0, "Signal record is not deleted");
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM CheckOut WHERE signalid=%1").arg(id2));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM CheckOut WHERE signalid=%1").arg(id2));
 	QVERIFY2(q.size() == 0, "CheckOut record is not deleted");
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalGroup WHERE signalgroupid=%1").arg(signalGroupID1));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM SignalGroup WHERE signalgroupid=%1").arg(signalGroupID1));
 	QVERIFY2(q.size() == 0, "SignalGroup record is not deleted");
 
 	// add THREE channel signal
@@ -497,16 +498,16 @@ void DbControllerSignalTests::test_deleteSignal()
 	TS_VERIFY(deleteSignal(USER3_ID, sid2, &obState));
 	QVERIFY(obState.errCode == ERR_SIGNAL_OK);
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM Signal WHERE signalid=%1").arg(sid2));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM Signal WHERE signalid=%1").arg(sid2));
 	QVERIFY(q.first() == true);
 
 	int chInInstanceID = q.value("checkedininstanceid").toInt();
 	int chOutInstanceID = q.value("checkedoutinstanceid").toInt();
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalinstanceid=%1").arg(chInInstanceID));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalinstanceid=%1").arg(chInInstanceID));
 	QVERIFY(q.first() == true);
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalinstanceid=%1").arg(chOutInstanceID));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalinstanceid=%1").arg(chOutInstanceID));
 	QVERIFY(q.first() == true);
 	QVERIFY(q.value("action").toInt() == static_cast<int>(E::VcsItemAction::Deleted));
 
@@ -1532,17 +1533,18 @@ void DbControllerSignalTests::dbcTest_deleteSignal()
 	QVERIFY(obState.errCode == ERR_SIGNAL_OK);
 
 	QSqlQuery q;
+	QString err;
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalid=%1").arg(id1));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalid=%1").arg(id1));
 	QVERIFY2(q.size() == 0, "SignalInstance record is not deleted");
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM Signal WHERE signalid=%1").arg(id1));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM Signal WHERE signalid=%1").arg(id1));
 	QVERIFY2(q.size() == 0, "Signal record is not deleted");
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM CheckOut WHERE signalid=%1").arg(id1));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM CheckOut WHERE signalid=%1").arg(id1));
 	QVERIFY2(q.size() == 0, "CheckOut record is not deleted");
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalGroup WHERE signalgroupid=%1").arg(signalGroupID1));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM SignalGroup WHERE signalgroupid=%1").arg(signalGroupID1));
 	QVERIFY2(q.size() == 1, "SignalGroup record is deleted");
 
 	// try delete second channel of signal
@@ -1550,16 +1552,16 @@ void DbControllerSignalTests::dbcTest_deleteSignal()
 	QVERIFY(m_dbcAdmin->deleteSignal(id2, &obState, nullptr) == true);
 	QVERIFY(obState.errCode == ERR_SIGNAL_OK);
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalid=%1").arg(id2));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalid=%1").arg(id2));
 	QVERIFY2(q.size() == 0, "SignalInstance record is not deleted");
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM Signal WHERE signalid=%1").arg(id2));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM Signal WHERE signalid=%1").arg(id2));
 	QVERIFY2(q.size() == 0, "Signal record is not deleted");
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM CheckOut WHERE signalid=%1").arg(id2));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM CheckOut WHERE signalid=%1").arg(id2));
 	QVERIFY2(q.size() == 0, "CheckOut record is not deleted");
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalGroup WHERE signalgroupid=%1").arg(signalGroupID1));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM SignalGroup WHERE signalgroupid=%1").arg(signalGroupID1));
 	QVERIFY2(q.size() == 0, "SignalGroup record is not deleted");
 
 	// add THREE channel signal
@@ -1597,16 +1599,16 @@ void DbControllerSignalTests::dbcTest_deleteSignal()
 	QVERIFY(m_dbcUser3->deleteSignal(sid2, &obState, nullptr) == true);
 	QVERIFY(obState.errCode == ERR_SIGNAL_OK);
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM Signal WHERE signalid=%1").arg(sid2));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM Signal WHERE signalid=%1").arg(sid2));
 	QVERIFY(q.first() == true);
 
 	int chInInstanceID = q.value("checkedininstanceid").toInt();
 	int chOutInstanceID = q.value("checkedoutinstanceid").toInt();
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalinstanceid=%1").arg(chInInstanceID));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalinstanceid=%1").arg(chInInstanceID));
 	QVERIFY(q.first() == true);
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalinstanceid=%1").arg(chOutInstanceID));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalinstanceid=%1").arg(chOutInstanceID));
 	QVERIFY(q.first() == true);
 	QVERIFY(q.value("action").toInt() == static_cast<int>(E::VcsItemAction::Deleted));
 

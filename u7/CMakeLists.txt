@@ -25,6 +25,7 @@ set (U7_SOURCES
 	../lib/CodeEditor.h
 	../lib/Configurator.cpp
 	../lib/Configurator.h
+	../lib/ConstStrings.h
 	../lib/diff_match_patch.h
 	../lib/ExportPrint.cpp
 	../lib/ExportPrint.h

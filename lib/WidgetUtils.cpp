@@ -186,29 +186,37 @@ void TableDataVisibilityController::checkNewColumns()
 	for (int i = 0; i < newColumnCount; i++)
 	{
 		QString columnName = model->headerData(i, Qt::Horizontal, Qt::DisplayRole).toString();
+
 		if (m_columnNameList.contains(columnName))
 		{
 			assert(false);	// Columns should be named differently
 		}
+
 		m_columnNameList.push_back(columnName);
 
 		columnName = columnName.replace("/", "|").replace("\n", " ");
+
 		int columnWidth = settings.value(m_settingBranchName + "/ColumnWidth/" + columnName, -1).toInt();
+
 		if (columnWidth == -1)
 		{
 			columnWidth = m_tableView->columnWidth(0);
 		}
+
 		if (columnWidth == 0)	// Looks like invisible
 		{
 			columnWidth = 100;
 		}
+
 		m_tableView->setColumnWidth(i, columnWidth);
 
 		bool visible = m_defaultVisibleColumnSet.contains(i);
+
 		if (m_showAllDefaultColumns == false)
 		{
 			visible = settings.value(m_settingBranchName + "/ColumnVisibility/" + columnName, visible).toBool();
 		}
+
 		horizontalHeader->setSectionHidden(i, !visible);
 	}
 
@@ -290,7 +298,10 @@ EditColumnsVisibilityDialog::EditColumnsVisibilityDialog(QTableView* tableView, 
 
 	m_columnModel = new QStandardItemModel(this);
 	m_header = tableView->horizontalHeader();
-	for (int i = 0; i < m_header->count(); i++)
+
+	int columnsCount = m_header->count();
+
+	for (int i = 0; i < columnsCount; i++)
 	{
 		auto item = new QStandardItem;
 		item->setCheckable(true);

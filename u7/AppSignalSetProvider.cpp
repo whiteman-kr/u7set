@@ -44,8 +44,8 @@ void AppSignalSetProvider::projectOpened()
 
 	loadUsers();
 
-	m_propertyManager.init();
-	m_propertyManager.reloadPropertyBehaviour();
+	m_propertyManager.clear();
+	m_propertyManager.reloadPropertiesBehaviour();
 
 	startSignalsLoading();
 }
@@ -878,7 +878,7 @@ void AppSignalSetProvider::deleteSignals(const std::vector<int>& signalIDs)
 		deleteSignal(signalID);
 	}
 
-	reloadSignals();
+	reloadAllSignals();
 }
 
 /*
@@ -1045,7 +1045,7 @@ std::vector<int> AppSignalSetProvider::cloneSignals(const std::vector<int>& sign
 		}
 	}
 
-	reloadSignals();
+	reloadAllSignals();
 
 	return resultSignalIDs;
 }

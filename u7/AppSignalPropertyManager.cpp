@@ -7,103 +7,103 @@ AppSignalPropertyManager* AppSignalPropertyManager::m_instance = nullptr;
 const std::map<int, QString> AppSignalPropertyManager::m_emptyEnumValuesMap;
 const AppSignalPropertyDescription AppSignalPropertyManager::m_notValidPropDescription;
 
-const std::vector<AppSignalPropertyDescription> AppSignalPropertyManager::m_replacedPropertyDescription =
+const std::vector<AppSignalPropertyDescription> AppSignalPropertyManager::m_replacedPropDescriptions =
 {
 	{
-		false,
 		AppSignalPropNames::TYPE,
 		"A/D/B",
 		QMetaType::QString,
 		[](const AppSignal* s){ return E::valueToString<E::SignalType>(s->signalType()).left(1); },
 		nullptr,
 		{},
-		{}
 	},
 
 	{
-		false,
 		AppSignalPropNames::IN_OUT_TYPE,
 		"Input-output type",
 		QMetaType::QString,
 		[](const AppSignal* s) { return E::valueToString<E::SignalInOutType>(s->inOutType()); },
 		nullptr,
 		{},
-		{}
 	},
 
 	{
-		false,
 		AppSignalPropNames::BYTE_ORDER_PROP,
 		"Byte order",
 		QMetaType::QString,
 		[](const AppSignal* s) { return E::valueToString<E::ByteOrder>(s->byteOrder()); },
 		nullptr,
 		{},
-		{}
 	},
 
 	{
-		false,
 		AppSignalPropNames::ANALOG_SIGNAL_FORMAT,
-		"Analog signal format",
+		"Analog format",
 		QMetaType::QString,
 		[](const AppSignal* s) { return E::valueToString<E::AnalogAppSignalFormat>(s->analogSignalFormat()); },
 		[](AppSignal* s, const QVariant& v) { s->setAnalogSignalFormat(static_cast<E::AnalogAppSignalFormat>(v.toInt())); },
 		E::enumValuesMap<E::AnalogAppSignalFormat>(),
-		{}
 	},
 };
+
+std::vector<AppSignalPropertyDescription> AppSignalPropertyManager::m_notSpecificPropDescriptions;
+
+const std::vector<E::SignalType> AppSignalPropertyManager::m_signalTypes = E::values<E::SignalType>();
+const std::vector<E::SignalInOutType> AppSignalPropertyManager::m_inOutTypes = E::values<E::SignalInOutType>();
 
 AppSignalPropertyManager::AppSignalPropertyManager(DbController* dbController, QWidget* parentWidget) :
 	m_dbController(dbController),
 	m_parentWidget(parentWidget)
 {
-	assert (m_instance == nullptr);
-	init();
+	Q_ASSERT(m_instance == nullptr);
 	m_instance = this;
+
+	initNotSpecificPropDescriptions();
 }
 
 AppSignalPropertyManager* AppSignalPropertyManager::getInstance()
 {
-	assert (m_instance != nullptr);
+	Q_ASSERT(m_instance != nullptr);
 	return m_instance;
 }
 
 int AppSignalPropertyManager::count() const
 {
-	return static_cast<int>(m_propertyDescription.size());
-}
-
-int AppSignalPropertyManager::index(const QString& name)
-{
-	for (size_t i = 0; i < m_propertyDescription.size(); i++)
-	{
-		if (m_propertyDescription[i].name == name)
-		{
-			return static_cast<int>(i);
-		}
-	}
-	return -1;
+	return static_cast<int>(m_propDescriptions.size());
 }
 
 QString AppSignalPropertyManager::caption(int propertyIndex) const
 {
-	if (isNotCorrect(propertyIndex))
+	if (isValidPropIndex(propertyIndex) == false)
 	{
 		Q_ASSERT(false);
 		return QString();
 	}
-	return m_propertyDescription[static_cast<size_t>(propertyIndex)].caption;
+
+	return m_propDescriptions[propertyIndex].caption;
 }
 
 QString AppSignalPropertyManager::name(int propertyIndex)
 {
-	if (isNotCorrect(propertyIndex))
+	if (isValidPropIndex(propertyIndex) == false)
 	{
 		Q_ASSERT(false);
 		return QString();
 	}
-	return m_propertyDescription[static_cast<size_t>(propertyIndex)].name;
+
+	return m_propDescriptions[propertyIndex].name;
+}
+
+int AppSignalPropertyManager::propertyIndex(const QString& name)
+{
+	auto it = m_propNameToIndex.find(name);
+
+	if (it == m_propNameToIndex.end())
+	{
+		return -1;
+	}
+
+	return it->second;
 }
 
 bool AppSignalPropertyManager::getSignalEnumPropertyValues(const AppSignal& s, int propertyIndex,
@@ -113,13 +113,13 @@ bool AppSignalPropertyManager::getSignalEnumPropertyValues(const AppSignal& s, i
 
 	enumValues->clear();
 
-	if (isNotCorrect(propertyIndex))
+	if (isValidPropIndex(propertyIndex) == false)
 	{
 		Q_ASSERT(false);
 		return false;
 	}
 
-	const AppSignalPropertyDescription& appSignalProperty = m_propertyDescription[static_cast<size_t>(propertyIndex)];
+	const AppSignalPropertyDescription& appSignalProperty = m_propDescriptions[propertyIndex];
 
 	Q_ASSERT(appSignalProperty.isEnumProperty());
 
@@ -151,20 +151,20 @@ bool AppSignalPropertyManager::getSignalEnumPropertyValues(const AppSignal& s, i
 
 bool AppSignalPropertyManager::isEnumProperty(int propertyIndex) const
 {
-	if (isNotCorrect(propertyIndex))
+	if (isValidPropIndex(propertyIndex) == false)
 	{
 		Q_ASSERT(false);
 		return false;
 	}
 
-	return m_propertyDescription[static_cast<size_t>(propertyIndex)].isEnumProperty();
+	return m_propDescriptions[propertyIndex].isEnumProperty();
 }
 
 QVariant AppSignalPropertyManager::value(const AppSignal* signal, int propertyIndex, bool isExpert) const
 {
 	TEST_PTR_RETURN_VALUE(signal, QVariant());
 
-	if (isNotCorrect(propertyIndex))
+	if (isValidPropIndex(propertyIndex) == false)
 	{
 		Q_ASSERT(false);
 		return QVariant();
@@ -177,7 +177,7 @@ QVariant AppSignalPropertyManager::value(const AppSignal* signal, int propertyIn
 		return QVariant();
 	}
 
-	const AppSignalPropertyDescription& property = m_propertyDescription[static_cast<size_t>(propertyIndex)];
+	const AppSignalPropertyDescription& property = m_propDescriptions[propertyIndex];
 
 	if (property.isSpecificProperty() == false)
 	{
@@ -210,7 +210,7 @@ QVariant AppSignalPropertyManager::value(const AppSignal* signal, int propertyIn
 
 void AppSignalPropertyManager::setValue(AppSignal* signal, int propertyIndex, const QVariant& value, bool isExpert)
 {
-	if (isNotCorrect(propertyIndex))
+	if (isValidPropIndex(propertyIndex) == false)
 	{
 		Q_ASSERT(false);
 	}
@@ -221,99 +221,63 @@ void AppSignalPropertyManager::setValue(AppSignal* signal, int propertyIndex, co
 		Q_ASSERT(false);
 	}
 
-	m_propertyDescription[static_cast<size_t>(propertyIndex)].valueSetter(signal, value);
+	m_propDescriptions[propertyIndex].valueSetter(signal, value);
 }
 
 const AppSignalPropertyDescription& AppSignalPropertyManager::getPropertyDescription(int propertyIndex) const
 {
-	if (isNotCorrect(propertyIndex))
+	if (isValidPropIndex(propertyIndex) == false)
 	{
 		Q_ASSERT(false);
 		return m_notValidPropDescription;
 	}
 
-	return m_propertyDescription[propertyIndex];
+	return m_propDescriptions[propertyIndex];
 }
 
 QMetaType::Type AppSignalPropertyManager::type(const int propertyIndex) const
 {
-	if (isNotCorrect(propertyIndex))
+	if (isValidPropIndex(propertyIndex) == false)
 	{
 		Q_ASSERT(false);
 		return QMetaType::UnknownType;
 	}
 
-	return m_propertyDescription[static_cast<size_t>(propertyIndex)].type;
+	return m_propDescriptions[propertyIndex].type;
 }
 
 E::PropertyBehaviourType AppSignalPropertyManager::getBehaviour(const AppSignal& signal, const int propertyIndex) const
 {
-	if (isNotCorrect(propertyIndex))
+	if (isValidPropIndex(propertyIndex) == false)
 	{
 		Q_ASSERT(false);
 		return m_defaultBehaviour;
 	}
 
-	return getBehaviour(signal.signalType(), signal.inOutType(), propertyIndex);
+	return m_propDescriptions[propertyIndex].behaviour.get(signal);
 }
 
-E::PropertyBehaviourType AppSignalPropertyManager::getBehaviour(E::SignalType type, E::SignalInOutType directionType, const int propertyIndex) const
+bool AppSignalPropertyManager::dependsOnPrecision(const QString& propName) const
 {
-	int bhIndex = behaviourIndex(propertyIndex);
-
-	if (bhIndex == -1)
-	{
-		return m_defaultBehaviour;
-	}
-
-	auto typeEnum = QMetaEnum::fromType<E::SignalType>();
-	auto inOutTypeEnum = QMetaEnum::fromType<E::SignalInOutType>();
-
-	for (int i = 0; i < SIGNAL_TYPE_COUNT; i++)
-	{
-		if (type != typeEnum.value(i))
-		{
-			continue;
-		}
-
-		for (int j = 0; j < IN_OUT_TYPE_COUNT; j++)
-		{
-			if (directionType == static_cast<E::SignalInOutType>(inOutTypeEnum.value(j)))
-			{
-				return m_propertyBehaviorDescription[bhIndex].behaviourType[i * typeEnum.keyCount() + j];
-			}
-		}
-	}
-
-	return m_defaultBehaviour;
+	return dependsOnPrecision(propertyIndex(propName));
 }
 
-bool AppSignalPropertyManager::dependsOnPrecision(const int propertyIndex) const
+bool AppSignalPropertyManager::dependsOnPrecision(int propIndex) const
 {
-	if (isNotCorrect(propertyIndex))
-	{
-		Q_ASSERT(false);
-		return false;
-	}
+	ASSERT_RETURN_IF_FALSE(isValidPropIndex(propIndex));
 
-	int bhIndex = behaviourIndex(propertyIndex);
-
-	if (bhIndex == -1)
-	{
-		return false;
-	}
-
-	return m_propertyBehaviorDescription[static_cast<size_t>(bhIndex)].dependsOnPrecision;
+	return m_propDescriptions[propIndex].behaviour.dependsOnPrecision();
 }
 
 bool AppSignalPropertyManager::isHiddenFor(E::SignalType type, const int propertyIndex, bool isExpert) const
 {
-	auto inOutTypeEnum = QMetaEnum::fromType<E::SignalInOutType>();
+	ASSERT_RETURN_IF_FALSE(isValidPropIndex(propertyIndex));
 
-	for (int i = 0; i < IN_OUT_TYPE_COUNT; i++)
+	const AppSignalPropertyDescription& propDescription = m_propDescriptions[propertyIndex];
+
+	for (E::SignalInOutType inOutType : m_inOutTypes)
 	{
-		E::SignalInOutType directionType = static_cast<E::SignalInOutType>(inOutTypeEnum.value(i));
-		E::PropertyBehaviourType behaviour = getBehaviour(type, directionType, propertyIndex);
+		E::PropertyBehaviourType behaviour = propDescription.behaviour.get(type, inOutType);
 
 		if (isHidden(behaviour, isExpert) == false)
 		{
@@ -370,11 +334,11 @@ void AppSignalPropertyManager::detectNewProperties(const AppSignal* signal)
 
 		if (propIndex != -1)
 		{
-			m_propertyDescription[propIndex].appendSignalID(signal->ID());
+			m_propDescriptions[propIndex].appendSignalID(signal->ID());
 
 			if (propertyIsEnum == true)
 			{
-				m_propertyDescription[propIndex].joinEnumValues(specificProperty->enumValues());
+				m_propDescriptions[propIndex].joinEnumValues(specificProperty->enumValues());
 			}
 
 			continue;
@@ -441,57 +405,75 @@ void AppSignalPropertyManager::detectNewProperties(const AppSignal* signal)
 			continue;
 		}
 
-		addNewProperty(newProperty);
+		addNewProperty(newProperty, true);
 	}
 }
 
-void AppSignalPropertyManager::updatePropertyName2IndexMap()
+void AppSignalPropertyManager::initNotSpecificPropDescriptions()
 {
-	m_propertyName2IndexMap.clear();
+	m_notSpecificPropDescriptions.clear();
 
-	for (size_t i = 0; i < m_propertyDescription.size(); i++)
-	{
-		m_propertyName2IndexMap.emplace(m_propertyDescription[i].name, static_cast<int>(i));
-	}
-}
+	m_notSpecificPropDescriptions = m_replacedPropDescriptions;
 
-int AppSignalPropertyManager::propertyIndex(const QString& propName) const
-{
-	auto it = m_propertyName2IndexMap.find(propName);
-
-	return (it == m_propertyName2IndexMap.end() ? -1 : it->second);
-}
-
-int AppSignalPropertyManager::behaviourIndex(int propertyIndex) const
-{
-	auto it = m_propertyIndex2BehaviourIndexMap.find(propertyIndex);
-
-	return (it == m_propertyIndex2BehaviourIndexMap.end() ? -1 : it->second);
-}
-
-void AppSignalPropertyManager::loadNotSpecificProperties()
-{
 	AppSignal signal;
 	AppSignalProperties signalProperties(signal, true);
 	std::vector<AppSignalPropertyDescription> propertyDescriptions = signalProperties.getProperties();
 
 	for (AppSignalPropertyDescription& property : propertyDescriptions)
 	{
-		property.specificProperty = false;
-
-		if (index(property.name) == -1)
+		if (property.name == "AppSignalID")
 		{
-			auto propertyPtr = signalProperties.propertyByCaption(property.name);
+			DEBUG_STOP;
+		}
+		Q_ASSERT(property.specificProperty == false);
 
-			if (propertyPtr != nullptr && propertyPtr->category().isEmpty() == false)
-			{
-				addNewProperty(property);
-			}
+		addNewProperty(property, true);	// property will not added if present in m_replacedPropDescriptions
+
+/*		auto propertyPtr = signalProperties.propertyByCaption(property.name);
+
+		if (propertyPtr != nullptr && propertyPtr->category().isEmpty() == false)
+		{
+			addNewProperty(property, true);	// property will not added if present in m_replacedPropDescriptions
+		}*/
+	}
+}
+
+void AppSignalPropertyManager::updatePropertyName2IndexMap()
+{
+	m_propNameToIndex.clear();
+
+	for (size_t i = 0; i < m_propDescriptions.size(); i++)
+	{
+		m_propNameToIndex.emplace(m_propDescriptions[i].name, static_cast<int>(i));
+	}
+}
+
+void AppSignalPropertyManager::updatePropertyDescriptionsBehaviour()
+{
+	for(AppSignalPropertyDescription& propDesc : m_propDescriptions)
+	{
+		auto it = m_propertiesBehaviour.find(propDesc.name);
+
+		if (it == m_propertiesBehaviour.end())
+		{
+			propDesc.behaviour.clear();
+		}
+		else
+		{
+			propDesc.behaviour = it->second;
 		}
 	}
 }
 
-void AppSignalPropertyManager::reloadPropertyBehaviour()
+
+int AppSignalPropertyManager::propertyIndex(const QString& propName) const
+{
+	auto it = m_propNameToIndex.find(propName);
+
+	return (it == m_propNameToIndex.end() ? -1 : it->second);
+}
+
+void AppSignalPropertyManager::reloadPropertiesBehaviour()
 {
 	if (m_dbController == nullptr)
 	{
@@ -536,7 +518,7 @@ void AppSignalPropertyManager::reloadPropertyBehaviour()
 
 	trimm(fieldNameList);
 
-	rows.removeFirst();
+	rows.removeFirst();				// header row removed!
 
 	QString uncorrectFileMessage =  QString("Uncorrect format of file \"%1\"").arg(Db::File::SignalPropertyBehaviorFileName);
 
@@ -549,24 +531,12 @@ void AppSignalPropertyManager::reloadPropertyBehaviour()
 	}
 
 	qsizetype precisionIndex = fieldNameList.indexOf("DependsOnPrecision");
+
 	if (precisionIndex < 0)
 	{
 		QMessageBox::critical(m_parentWidget, "Error", uncorrectFileMessage + ": DependosOnPrecision column not found");
 		return;
 	}
-
-	std::vector<int> typeIndexes(TOTAL_SIGNAL_TYPE_COUNT, -1);
-
-	for (int i = 0; i < SIGNAL_TYPE_COUNT; i++)
-	{
-		for (int j = 0; j < IN_OUT_TYPE_COUNT; j++)
-		{
-			typeIndexes[i * SIGNAL_TYPE_COUNT + j] = static_cast<int>(fieldNameList.indexOf(typeName(i, j)));
-		}
-	}
-
-	m_propertyBehaviorDescription.clear();
-	m_propertyIndex2BehaviourIndexMap.clear();
 
 	for (QString row : rows)
 	{
@@ -580,85 +550,101 @@ void AppSignalPropertyManager::reloadPropertyBehaviour()
 		QStringList fields = row.split(';', Qt::KeepEmptyParts);
 		trimm(fields);
 
-		if (nameIndex > fields.size())
+		if (nameIndex >= fields.size() ||
+			precisionIndex >= fields.size())
 		{
+			Q_ASSERT(false);
 			continue;
 		}
 
-		PropertyBehaviourDescription behaviour;
-		behaviour.name = fields[nameIndex];
+		QString propName = fields[nameIndex];
 
-		if (precisionIndex < fields.size())
+		if (m_propertiesBehaviour.contains(propName) == true)
 		{
-			behaviour.dependsOnPrecision = fields[precisionIndex].toLower() == "true";
+			Q_ASSERT(false);
+			continue;
 		}
 
-		for (size_t i = 0; i < static_cast<size_t>(TOTAL_SIGNAL_TYPE_COUNT); i++)
+		AppSignalPropertyBehavior behaviour;
+
+		behaviour.setDependsOnPrecision(fields[precisionIndex].toLower() == "true");
+
+		int fieldIndex = precisionIndex + 1;
+
+		for(E::SignalType signalType : m_signalTypes)
 		{
-			if (typeIndexes[i] < 0 && typeIndexes[i] >= fields.size())
+			for(E::SignalInOutType inOutType : m_inOutTypes)
 			{
-				continue;
-			}
+				if (fieldIndex >= 0 && fieldIndex <= fields.size())
+				{
+					bool ok = false;
 
-			bool ok = false;
-			E::PropertyBehaviourType behaviourType = E::stringToValue<E::PropertyBehaviourType>(fields[typeIndexes[i]], &ok);
-			if (ok == true)
-			{
-				behaviour.behaviourType[i] = behaviourType;
+					E::PropertyBehaviourType behaviourType = E::stringToValue<E::PropertyBehaviourType>(fields[fieldIndex], &ok);
+
+					if (ok == true)
+					{
+						behaviour.set(signalType, inOutType, behaviourType);
+					}
+					else
+					{
+						Q_ASSERT(false);
+					}
+				}
+				else
+				{
+					Q_ASSERT(false);
+				}
+
+				fieldIndex++;
 			}
 		}
 
-		m_propertyBehaviorDescription.push_back(behaviour);
-
-		int propIndex = propertyIndex(behaviour.name);
-
-		if (propIndex != -1)
-		{
-			int behaviourIndex = static_cast<int>(m_propertyBehaviorDescription.size()) - 1;
-
-			Q_ASSERT(m_propertyDescription[propIndex].name == m_propertyBehaviorDescription[behaviourIndex].name);
-
-			m_propertyIndex2BehaviourIndexMap.emplace(propIndex, behaviourIndex);
-		}
+		m_propertiesBehaviour.emplace(propName, behaviour);
 	}
+
+	updatePropertyDescriptionsBehaviour();
 }
 
 void AppSignalPropertyManager::clear()
 {
+	bool increased = false;
+	bool decreased = false;
+
+	if (m_notSpecificPropDescriptions.size() > m_propDescriptions.size())
+	{
+		increased = true;
+		emit propertyCountWillIncrease(static_cast<int>(m_notSpecificPropDescriptions.size()));
+	}
+	else
+	{
+		if (m_notSpecificPropDescriptions.size() < m_propDescriptions.size())
+		{
+			decreased = true;
+			emit propertyCountWillDecrease(static_cast<int>(m_notSpecificPropDescriptions.size()));
+		}
+	}
+
 	m_parsedSpecPropStruct.clear();
 
-	if (m_propertyDescription.size() > m_replacedPropertyDescription.size())
-	{
-		emit propertyCountWillDecrease(static_cast<int>(m_replacedPropertyDescription.size()));
-		m_propertyDescription = m_replacedPropertyDescription;
-		updatePropertyName2IndexMap();
-		emit propertyCountDecreased();
-		return;
-	}
+	m_propDescriptions = m_notSpecificPropDescriptions;
+	updatePropertyName2IndexMap();
 
-	if (m_propertyDescription.size() < m_replacedPropertyDescription.size())
+	if (increased == true)
 	{
-		emit propertyCountWillIncrease(static_cast<int>(m_replacedPropertyDescription.size()));
-		m_propertyDescription = m_replacedPropertyDescription;
-		updatePropertyName2IndexMap();
 		emit propertyCountIncreased();
-		return;
 	}
-}
-
-void AppSignalPropertyManager::init()
-{
-	clear();
-	loadNotSpecificProperties();
-}
-
-bool AppSignalPropertyManager::isNotCorrect(int propertyIndex) const
-{
-	if (propertyIndex < 0 || propertyIndex >= static_cast<int>(m_propertyDescription.size()))
+	else
 	{
-		return true;
+		if (decreased == true)
+		{
+			emit propertyCountDecreased();
+		}
 	}
-	return false;
+}
+
+bool AppSignalPropertyManager::isValidPropIndex(int propertyIndex) const
+{
+	return (propertyIndex >= 0 && propertyIndex < static_cast<int>(m_propDescriptions.size()));
 }
 
 QString AppSignalPropertyManager::typeName(E::SignalType type, E::SignalInOutType inOutType)
@@ -698,36 +684,25 @@ bool AppSignalPropertyManager::isReadOnly(E::PropertyBehaviourType behaviour, bo
 	return readOnly;
 }
 
-void AppSignalPropertyManager::addNewProperty(const AppSignalPropertyDescription& newProperty)
+void AppSignalPropertyManager::addNewProperty(const AppSignalPropertyDescription& newProperty, bool emitSignals)
 {
-	if (m_propertyName2IndexMap.contains(newProperty.name))
+	if (m_propNameToIndex.contains(newProperty.name))
 	{
 		Q_ASSERT(false);
 		return;
 	}
 
-	if (index(newProperty.name) != -1)
+	if (emitSignals == true)
 	{
-		return;
+		emit propertyCountWillIncrease(static_cast<int>(m_propDescriptions.size() + 1));
 	}
 
-	emit propertyCountWillIncrease(static_cast<int>(m_propertyDescription.size() + 1));
+	m_propNameToIndex.emplace(newProperty.name, static_cast<int>(m_propDescriptions.size()));
+	m_propDescriptions.emplace_back(newProperty);
 
-	int propertyIndex = static_cast<int>(m_propertyDescription.size());
-
-	m_propertyDescription.push_back(newProperty);
-
-	m_propertyName2IndexMap.emplace(newProperty.name, propertyIndex);
-
-	emit propertyCountIncreased();
-
-	for (size_t i = 0; i < m_propertyBehaviorDescription.size(); i++)
+	if (emitSignals == true)
 	{
-		if (newProperty.name == m_propertyBehaviorDescription[i].name)
-		{
-			m_propertyIndex2BehaviourIndexMap.emplace(propertyIndex, static_cast<int>(i));
-			break;
-		}
+		emit propertyCountIncreased();
 	}
 }
 
@@ -738,4 +713,3 @@ void AppSignalPropertyManager::trimm(QStringList& stringList)
 		string = string.trimmed();
 	}
 }
-

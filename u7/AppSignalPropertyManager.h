@@ -18,9 +18,10 @@ public:
 
 	int count() const;
 
-	int index(const QString& name);
 	QString caption(int propertyIndex) const;
 	QString name(int propertyIndex);
+
+	int propertyIndex(const QString& name);
 
 	bool getSignalEnumPropertyValues(const AppSignal& s, int propertyIndex,
 									 std::vector<std::pair<int, QString>>* enumValues) const;
@@ -33,17 +34,15 @@ public:
 	QMetaType::Type type(const int propertyIndex) const;
 
 	E::PropertyBehaviourType getBehaviour(const AppSignal& signal, const int propertyIndex) const;
-	E::PropertyBehaviourType getBehaviour(E::SignalType type, E::SignalInOutType directionType, const int propertyIndex) const;
 
-	bool dependsOnPrecision(const int propertyIndex) const;
+	bool dependsOnPrecision(const QString& propName) const;
+	bool dependsOnPrecision(int propIndex) const;
 	bool isHiddenFor(E::SignalType type, const int propertyIndex, bool isExpert) const;
 	bool isHidden(E::PropertyBehaviourType behaviour, bool isExpert) const;
 	bool isReadOnly(E::PropertyBehaviourType behaviour, bool isExpert) const;
 
-	void loadNotSpecificProperties();
-	void reloadPropertyBehaviour();
+	void reloadPropertiesBehaviour();
 	void clear();
-	void init();
 
 signals:
 	void propertyCountWillIncrease(int newPropertyCount);
@@ -56,51 +55,55 @@ public slots:
 	void detectNewProperties(const AppSignal* signal);
 
 private:
-	static inline const int SIGNAL_TYPE_COUNT = QMetaEnum::fromType<E::SignalType>().keyCount();
-	static inline const int IN_OUT_TYPE_COUNT = QMetaEnum::fromType<E::SignalInOutType>().keyCount();
-	static inline const int TOTAL_SIGNAL_TYPE_COUNT = SIGNAL_TYPE_COUNT * IN_OUT_TYPE_COUNT;
-
-	struct PropertyBehaviourDescription
-	{
-		QString name;
-		bool dependsOnPrecision = false;
-		std::vector<E::PropertyBehaviourType> behaviourType = std::vector<E::PropertyBehaviourType>(
-																	TOTAL_SIGNAL_TYPE_COUNT,
-																	E::PropertyBehaviourType::Write);
-	};
-
 	static const E::PropertyBehaviourType m_defaultBehaviour = E::PropertyBehaviourType::Write;
 	static const std::map<int, QString> m_emptyEnumValuesMap;
 	static const AppSignalPropertyDescription m_notValidPropDescription;
 
 private:
+	void initNotSpecificPropDescriptions();
+
 	void updatePropertyName2IndexMap();
 
-	int propertyIndex(const QString& propName) const;
-	int behaviourIndex(int propertyIndex) const;
+	void updatePropertyDescriptionsBehaviour();
 
-	bool isNotCorrect(int propertyIndex) const;
+	int propertyIndex(const QString& propName) const;
+
+	bool isValidPropIndex(int propertyIndex) const;
 	QString typeName(E::SignalType type, E::SignalInOutType inOutType);
 	QString typeName(int typeIndex, int inOutTypeIndex);
 
 	static TuningValue variant2TuningValue(const QVariant& variant, TuningValueType type);
 
-	void addNewProperty(const AppSignalPropertyDescription& newProperty);
+	void addNewProperty(const AppSignalPropertyDescription& newProperty, bool emitSignals);
 
 	static void trimm(QStringList& stringList);
 
 private:
 	DbController* m_dbController = nullptr;
 	QWidget* m_parentWidget = nullptr;
+
 	static AppSignalPropertyManager* m_instance;
+
+	static const std::vector<AppSignalPropertyDescription> m_replacedPropDescriptions;
+	static std::vector<AppSignalPropertyDescription> m_notSpecificPropDescriptions;	// with m_replacedPropDescriptions
+
+	static const std::vector<E::SignalType> m_signalTypes;
+	static const std::vector<E::SignalInOutType> m_inOutTypes;
+
+	std::vector<AppSignalPropertyDescription> m_propDescriptions;
+	std::map<QString, int> m_propNameToIndex;			// propertyName => index in m_propDescriptions
+
+	// loaded from file SignalPropertyBehavior.csv
+	// propertyName => AppSignalPropertyBehavior
+	//
+	std::map<QString, AppSignalPropertyBehavior> m_propertiesBehaviour;
+
+	//
 
 	std::set<Hash> m_parsedSpecPropStruct;
 
-	static const std::vector<AppSignalPropertyDescription> m_replacedPropertyDescription;
-
-	std::vector<AppSignalPropertyDescription> m_propertyDescription;
-	std::map<QString, int> m_propertyName2IndexMap;		// propName => index in m_propertyDescription
+/*	std::map<QString, int> m_propertyName2IndexMap;
 
 	std::vector<PropertyBehaviourDescription> m_propertyBehaviorDescription;
-	std::map<int, int> m_propertyIndex2BehaviourIndexMap;
+	std::map<int, int> m_propertyIndex2BehaviourIndexMap; */
 };

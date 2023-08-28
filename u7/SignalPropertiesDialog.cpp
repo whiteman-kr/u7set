@@ -25,63 +25,14 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController,
 
 	m_propertyEditor->setExpertMode(theSettings.isExpertMode());
 
-	int etcFileId = dbController->systemFileId(DbDir::EtcDir);
+	connect(m_propertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &SignalPropertiesDialog::onSignalPropertyChanged);
 
-	DbFileInfo propertyBehaviorFile;
-	dbController->getFileInfo(etcFileId, QString(Db::File::SignalPropertyBehaviorFileName), &propertyBehaviorFile, parent);
+	bool uppercaseAppSignalID = false;
 
-	if (propertyBehaviorFile.isNull() == true)
-	{
-		QMessageBox::critical(parent, "Error", QString("File \"%1\" is not found!").arg(Db::File::SignalPropertyBehaviorFileName));
-		return;
-	}
-
-	std::shared_ptr<DbFile> file;
-	bool result = dbController->getLatestVersion(propertyBehaviorFile, &file, parent);
-	QVector<QStringList> fileFields;
-	if (result == true)
-	{
-		QString fileText = file->data();
-		QStringList rows = fileText.split("\n", Qt::SkipEmptyParts);
-
-		for (QString row : rows)
-		{
-			row = row.trimmed();
-
-			if (row.isEmpty() == true)
-			{
-				continue;
-			}
-
-			QStringList&& fields = row.split(';', Qt::KeepEmptyParts);
-
-			for (QString& field : fields)
-			{
-				field = field.trimmed();
-				assert(field.length() > 0);
-			}
-
-			fileFields.push_back(fields);
-		}
-	}
-	else
+	if (m_dbController->getProjectProperty(Db::ProjectProperty::UppercaseAppSignalId, &uppercaseAppSignalID, this) == false)
 	{
 		assert(false);
 	}
-
-	connect(m_propertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &SignalPropertiesDialog::onSignalPropertyChanged);
-
-	for (const QStringList& propertyDescription : fileFields)
-	{
-		if (propertyDescription[1].toLower() == "true")
-		{
-			addPropertyDependentOnPrecision(propertyDescription[0]);
-		}
-	}
-
-	AppSignalPropertyManager& manager = *AppSignalPropertyManager::getInstance();
-
-	manager.reloadPropertyBehaviour();
 
 	for (AppSignal* s : signalVector)
 	{
@@ -89,11 +40,6 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController,
 
 		AppSignal& appSignal = *s;
 
-		bool uppercaseAppSignalID = true;
-		if (m_dbController->getProjectProperty(Db::ProjectProperty::UppercaseAppSignalId, &uppercaseAppSignalID, this) == false)
-		{
-			assert(false);
-		}
 		if (uppercaseAppSignalID)
 		{
 			QString upperAppSignalId = appSignal.appSignalID().toUpper();
@@ -101,6 +47,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController,
 			if (appSignal.appSignalID() != upperAppSignalId)
 			{
 				QString message;
+
 				bool checkOutResult = m_tryCheckout ? checkoutSignal(appSignal, message) : true;
 
 				if (readOnly == false && checkOutResult == false)
@@ -109,7 +56,9 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController,
 					{
 						showError(message);
 					}
+
 					setWindowTitle("Signal properties (read only)");
+
 					readOnly = true;
 				}
 
@@ -120,6 +69,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController,
 				}
 			}
 		}
+
 		std::shared_ptr<AppSignalProperties> signalProperties = std::make_shared<AppSignalProperties>(appSignal, true);
 
 		if (readOnly == true)
@@ -135,21 +85,12 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController,
 		AppSignalPropertyManager& manager = *AppSignalPropertyManager::getInstance();
 
 		manager.detectNewProperties(&appSignal);
-		manager.loadNotSpecificProperties();
 
 		for (auto property : signalProperties->properties())
 		{
-			int propertyIndex = manager.index(property->caption());
+			int propertyIndex = manager.propertyIndex(property->caption());
 
-			if (propertyIndex == -1)
-			{
-				if (property->category().isEmpty() == false)
-				{
-					// PropertyManager have to know about all properties
-					assert(false);
-				}
-				continue;
-			}
+			Q_ASSERT(propertyIndex != -1);
 
 			if (manager.dependsOnPrecision(propertyIndex))
 			{
@@ -157,6 +98,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController,
 			}
 
 			E::PropertyBehaviourType behaviour = manager.getBehaviour(appSignal, propertyIndex);
+
 			if (manager.isHidden(behaviour, theSettings.isExpertMode()))
 			{
 				property->setVisible(false);
@@ -187,6 +129,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController,
 		m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Cancel, this);
 		connect(m_buttonBox, &QDialogButtonBox::accepted, this, &SignalPropertiesDialog::reject);
 	}
+
 	connect(m_buttonBox, &QDialogButtonBox::rejected, this, &SignalPropertiesDialog::rejectCheckoutProperty);
 	connect(m_buttonBox, &QDialogButtonBox::rejected, this, &SignalPropertiesDialog::reject);
 	connect(this, &SignalPropertiesDialog::finished, this, &SignalPropertiesDialog::saveDialogSettings);
@@ -355,7 +298,7 @@ void SignalPropertiesDialog::initNewSignal(AppSignal& signal)
 	AppSignalPropertyManager& propertyManager = *AppSignalPropertyManager::getInstance();
 
 	auto setter = [&signal, &propertyManager](const QString& name, QVariant value) {
-		int index = propertyManager.index(name);
+		int index = propertyManager.propertyIndex(name);
 		if (index == -1)
 		{
 			return;

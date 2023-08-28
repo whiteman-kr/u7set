@@ -17,6 +17,90 @@
 	}
 
 
+void AppSignalPropertyBehavior::setDependsOnPrecision(bool depends)
+{
+	m_dependsOnPrecision = depends;
+}
+
+bool AppSignalPropertyBehavior::dependsOnPrecision() const
+{
+	return m_dependsOnPrecision;
+}
+
+void AppSignalPropertyBehavior::set(E::SignalType signalType,
+									E::SignalInOutType inOutType,
+									E::PropertyBehaviourType behaviour)
+{
+	privateSet(calcIndex(signalType, inOutType), behaviour);
+}
+
+E::PropertyBehaviourType AppSignalPropertyBehavior::get(E::SignalType signalType, E::SignalInOutType inOutType) const
+{
+	return privateGet(calcIndex(signalType, inOutType));
+}
+
+E::PropertyBehaviourType AppSignalPropertyBehavior::get(const AppSignal& s) const
+{
+	return get(s.signalType(), s.inOutType());
+}
+
+void AppSignalPropertyBehavior::clear()
+{
+	m_dependsOnPrecision = false;
+
+	m_behaviourType = std::vector<E::PropertyBehaviourType>(TOTAL_SIGNAL_TYPE_COUNT,
+															E::PropertyBehaviourType::Write);
+}
+
+int AppSignalPropertyBehavior::calcIndex(E::SignalType signalType, E::SignalInOutType inOutType) const
+{
+	return TO_INT(signalType) * IN_OUT_TYPE_COUNT + TO_INT(inOutType);
+}
+
+void AppSignalPropertyBehavior::privateSet(int index, E::PropertyBehaviourType behaviour)
+{
+	if (index >= 0 && index < static_cast<int>(m_behaviourType.size()))
+	{
+		m_behaviourType[index] = behaviour;
+	}
+	else
+	{
+		Q_ASSERT(false);
+	}
+}
+
+E::PropertyBehaviourType AppSignalPropertyBehavior::privateGet(int index) const
+{
+	if (index >= 0 && index < static_cast<int>(m_behaviourType.size()))
+	{
+		return m_behaviourType[index];
+	}
+
+	Q_ASSERT(false);
+
+	return E::PropertyBehaviourType::Write;
+}
+
+
+AppSignalPropertyDescription::AppSignalPropertyDescription()
+{
+}
+
+AppSignalPropertyDescription::AppSignalPropertyDescription(const QString& propName,
+							 const QString& propCaption,
+							 QMetaType::Type propType,
+							 std::function<QVariant (const AppSignal*)> getter,
+							 std::function<void (AppSignal*, const QVariant&)> setter,
+							 const std::map<int, QString>& propEnumValues) :
+	name(propName),
+	caption(propCaption),
+	type(propType),
+	valueGetter(getter),
+	valueSetter(setter),
+	enumValues(propEnumValues)
+{
+}
+
 bool AppSignalPropertyDescription::isValid() const
 {
 	return name.isEmpty() == false;

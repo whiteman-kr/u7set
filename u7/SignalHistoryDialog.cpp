@@ -77,7 +77,7 @@ SignalHistoryDialog::SignalHistoryDialog(DbController* dbController, const QStri
 	std::vector<AppSignal> signalInstance;
 
 	AppSignalPropertyManager* pSignalPropertyManager = AppSignalPropertyManager::getInstance();
-	pSignalPropertyManager->reloadPropertyBehaviour();
+	pSignalPropertyManager->reloadPropertiesBehaviour();
 
 	int row = 0;
 	for (DbChangeset& changeset : signalChanges)

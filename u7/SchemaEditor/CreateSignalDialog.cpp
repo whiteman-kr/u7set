@@ -438,7 +438,7 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 
 	AppSignalSetProvider* provider = AppSignalSetProvider::getInstance();
 
-	provider->reloadSignals();
+	provider->reloadAllSignals();
 
 	QVector<int> selectIdList(newSignals.size());
 	int currentIdIndex = 0;

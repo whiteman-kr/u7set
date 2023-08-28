@@ -428,7 +428,7 @@ FindSignalDialog::SearchOptions FindSignalDialog::getCurrentSearchOptions()
 		return options;
 	}
 
-	int propertyIndex = AppSignalPropertyManager::getInstance()->index(m_searchInPropertyList->currentText());
+	int propertyIndex = AppSignalPropertyManager::getInstance()->propertyIndex(m_searchInPropertyList->currentText());
 
 	if (propertyIndex == -1)
 	{

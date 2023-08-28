@@ -70,7 +70,7 @@ QWidget* SignalsDelegate::createEditor(QWidget* parent, const QStyleOptionViewIt
 		return nullptr;
 	}
 
-	manager.reloadPropertyBehaviour();
+	manager.reloadPropertiesBehaviour();
 
 	bool isExpert = theSettings.isExpertMode();
 
@@ -534,7 +534,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 
 QVariant SignalsModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-	AppSignalPropertyManager& propertyManager = m_signalSetProvider->signalPropertyManager();
+	AppSignalPropertyManager& propertyManager = *AppSignalPropertyManager::getInstance();
 
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
@@ -547,6 +547,7 @@ QVariant SignalsModel::headerData(int section, Qt::Orientation orientation, int 
 
 			return propertyManager.caption(section);
 		}
+
 		if (orientation == Qt::Vertical)
 		{
 			if (section < m_signalSetProvider->signalCount())
@@ -792,11 +793,11 @@ SignalsTabPage::SignalsTabPage(AppSignalSetProvider* signalSetProvider, DbContro
 	auto& propertyManager = signalSetProvider->signalPropertyManager();
 	int wideColumnWidth = 400;
 
-	m_signalsView->setColumnWidth(propertyManager.index(AppSignalPropNames::APP_SIGNAL_ID), wideColumnWidth);
-	m_signalsView->setColumnWidth(propertyManager.index(AppSignalPropNames::CUSTOM_APP_SIGNAL_ID), wideColumnWidth);
-	m_signalsView->setColumnWidth(propertyManager.index(AppSignalPropNames::BUS_TYPE_ID), wideColumnWidth);
-	m_signalsView->setColumnWidth(propertyManager.index(AppSignalPropNames::CAPTION), wideColumnWidth);
-	m_signalsView->setColumnWidth(propertyManager.index(AppSignalPropNames::EQUIPMENT_ID), wideColumnWidth);
+	m_signalsView->setColumnWidth(propertyManager.propertyIndex(AppSignalPropNames::APP_SIGNAL_ID), wideColumnWidth);
+	m_signalsView->setColumnWidth(propertyManager.propertyIndex(AppSignalPropNames::CUSTOM_APP_SIGNAL_ID), wideColumnWidth);
+	m_signalsView->setColumnWidth(propertyManager.propertyIndex(AppSignalPropNames::BUS_TYPE_ID), wideColumnWidth);
+	m_signalsView->setColumnWidth(propertyManager.propertyIndex(AppSignalPropNames::CAPTION), wideColumnWidth);
+	m_signalsView->setColumnWidth(propertyManager.propertyIndex(AppSignalPropNames::EQUIPMENT_ID), wideColumnWidth);
 
 	QVector<int> defaultColumnVisibility;
 
@@ -814,7 +815,7 @@ SignalsTabPage::SignalsTabPage(AppSignalSetProvider* signalSetProvider, DbContro
 
 	for (const QString& columnName : defaultSignalPropertyVisibility)
 	{
-		defaultColumnVisibility.push_back(propertyManager.index(columnName));
+		defaultColumnVisibility.push_back(propertyManager.propertyIndex(columnName));
 	}
 
 	m_signalsColumnVisibilityController = new TableDataVisibilityController(m_signalsView, "SignalsTabPage", defaultColumnVisibility);
@@ -1057,7 +1058,7 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc,
 		return false;
 	}
 
-	AppSignalSetProvider::getInstance()->reloadSignals();
+	AppSignalSetProvider::getInstance()->reloadAllSignals();
 
 	return result;
 }
@@ -1224,7 +1225,7 @@ void SignalsTabPage::onTabPageChanged()
 void SignalsTabPage::loadSignals()
 {
 	saveSelection();
-	m_signalSetProvider->reloadSignals();
+	m_signalSetProvider->reloadAllSignals();
 	restoreSelection();
 }
 
@@ -1811,7 +1812,7 @@ void SignalsTabPage::changeSignalIdFilter(QStringList strIds, bool refreshSignal
 	//
 	if (refreshSignalList == true)
 	{
-		m_signalSetProvider->reloadSignals();
+		m_signalSetProvider->reloadAllSignals();
 	}
 
 	// Reset signal type filter
