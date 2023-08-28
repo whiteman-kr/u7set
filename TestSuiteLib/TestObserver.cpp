@@ -64,9 +64,9 @@ namespace TestSuite
 		// have pre initial condition and to calculate how long it took to satisfy all times.
 		//
 		{
-			QObject::connect(m_rtDataProvide.get(), &ClientLib::RtDataProvider::dataReady, this, &TestObserver::dataReady, Qt::QueuedConnection);
-			QObject::connect(m_rtDataProvide.get(), &ClientLib::RtDataProvider::requestError, this, &TestObserver::requestError, Qt::QueuedConnection);
-			QObject::connect(m_rtDataProvide.get(), &ClientLib::RtDataProvider::connectionLost, this, &TestObserver::connectionLost, Qt::QueuedConnection);
+			QObject::connect(m_rtDataProvide.get(), &ClientLib::RtDataProvider::dataReady, this, &TestObserver::dataReady);
+			QObject::connect(m_rtDataProvide.get(), &ClientLib::RtDataProvider::requestError, this, &TestObserver::requestError);
+			QObject::connect(m_rtDataProvide.get(), &ClientLib::RtDataProvider::connectionLost, this, &TestObserver::connectionLost);
 
 			QEventLoop eventLoop;
 			QTimer::singleShot(1000, &eventLoop, &QEventLoop::quit);
