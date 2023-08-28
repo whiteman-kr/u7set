@@ -6,6 +6,7 @@
 !include ./AppSignalLib.puml
 !include ./HardwareLib.puml
 !include ./OnlineLib.puml
+!include ./ClientLib.puml
 !include ./TrendView.puml
 
 [Simulator]
@@ -15,6 +16,7 @@ Simulator -up-> [UtilsLib]
 Simulator -up-> [AppSignalLib]
 Simulator -up-> [HardwareLib]
 Simulator -up-> [OnlineLib]
+Simulator -up-> [ClientLib]
 Simulator -up-> [TrendView]
 
 @enduml

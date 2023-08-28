@@ -159,7 +159,7 @@ namespace TestSuite
 
 		configController.start();
 
-		// Wait that configuration arrived or error accured.
+		// Wait that configuration arrived or error occurred.
 		//
 		QSignalSpy spySuccess{&configController, &TestSuiteConfigController::configurationArrived};
 		QSignalSpy spyError{&configController, &TestSuiteConfigController::configrationError};
@@ -177,7 +177,7 @@ namespace TestSuite
 
 		if (spyError.isEmpty() == false)
 		{
-			// Read configuration errror.
+			// Read configuration error.
 			//
 			throw 1;
 		}
@@ -327,7 +327,7 @@ namespace TestSuite
 			m_status.m_scriptCount = runScripts.size();
 		}
 
-		TestController testController{*m_inputController, *m_outputController};
+		TestController testController{m_configuration, m_softwareInfo, &m_signals, m_appLog.logFile(), *m_inputController, *m_outputController, this};
 
 		bool fileTestResult = true;
 
@@ -369,7 +369,6 @@ namespace TestSuite
 		}
 
 		return;
-
 	}
 
 

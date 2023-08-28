@@ -8,7 +8,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Gui Xml Network Widgets LinguistTools)
+find_package(Qt6 REQUIRED COMPONENTS Gui Xml Network Widgets LinguistTools Qml)
 
 set(TARGET ClientLib)
 
@@ -25,11 +25,14 @@ qt_add_library(${TARGET} STATIC
 	ConfigController.h
 	IAppSignalUpdater.h
 	IRecentAppSignals.h
+	ITestObserver.h
 	ITuningLog.h
 	RtDataProvider.cpp
 	RtDataProvider.h
 	RtTrendTcpClient.cpp
 	RtTrendTcpClient.h
+	ScriptTestObserver.cpp
+	ScriptTestObserver.h
 	TcpAppSourcesState.cpp
 	TcpAppSourcesState.h
 	TcpSignalClient.cpp
@@ -72,6 +75,7 @@ target_precompile_headers(${TARGET} PUBLIC
 	<QDialog>
 	<QDomDocument>
 	<QHBoxLayout>
+	<QJSEngine>
 	<QLabel>
 	<QLineEdit>
 	<QLocale>
@@ -90,7 +94,7 @@ target_precompile_headers(${TARGET} PUBLIC
 #
 add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-target_link_libraries(${TARGET} PUBLIC Qt6::Gui Qt6::Xml Qt6::Network Qt6::Widgets)
+target_link_libraries(${TARGET} PUBLIC Qt6::Gui Qt6::Xml Qt6::Network Qt6::Widgets Qt6::Qml)
 target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib OnlineLib AppSignalLib TrendView)
 
 if (MSVC)

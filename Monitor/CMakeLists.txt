@@ -161,12 +161,14 @@ target_precompile_headers(${TARGET} PRIVATE
 	<atomic>
 	<chrono>
 	<concepts>
+	<deque>
 	<functional>
 	<limits>
 	<list>
 	<map>
 	<memory>
 	<queue>
+	<ranges>
 	<set>
 	<type_traits>
 	<vector>

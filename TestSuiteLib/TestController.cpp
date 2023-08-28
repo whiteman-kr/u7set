@@ -1,15 +1,25 @@
+#include "../ClientLib/ScriptTestObserver.h"
+
 #include "TestController.h"
+#include "TestObserver.h"
+#include "TestSuiteConfigController.h"
 
 namespace TestSuite
 {
-	TestController::TestController(IInputController& inputController, IOutputController& outputController, QObject* parent) :
+	TestController::TestController(const ConfigSettings& configuration,
+								   const SoftwareInfo& softwareInfo,
+								   ISignalDataServer* signalDataServer,
+								   ILogFile* appLog,
+								   IInputController& inputController,
+								   IOutputController& outputController,
+								   QObject* parent) :
 		QObject{parent},
+		m_configuration{configuration},
+		m_softwareInfo{softwareInfo},
+		m_signalDataServer{signalDataServer},
+		m_appLog{appLog},
 		m_inputController{inputController},
 		m_outputController{outputController}
-	{
-	}
-
-	TestController::~TestController()
 	{
 	}
 
@@ -69,6 +79,34 @@ namespace TestSuite
 		return true;
 	}
 
+	QJSValue TestController::createObserver()
+	{
+		QJSValue result;
+
+		QJSEngine* jsEngine = qjsEngine(this);
+		if (jsEngine == nullptr)
+		{
+			assert(jsEngine);
+			return result;
+		}
+
+		if (m_configuration.appDataServices.empty() == true || m_signalDataServer == nullptr || m_appLog == nullptr)
+		{
+			jsEngine->throwError(tr("ScriptTestObserver can not be created as there is no configured AppDataService(s)."));
+			return result;
+		}
+
+		auto testObserver = std::make_unique<TestSuite::TestObserver>(*m_signalDataServer, 
+																	  m_softwareInfo,
+																	  m_configuration.appDataServices, 
+																	  m_appLog);
+
+		ScriptTestObserver* observer = new ScriptTestObserver{std::move(testObserver), this};
+		result = jsEngine->newQObject(observer);
+
+		return result;
+	}
+
 
 	QJSValue TestController::signalState(QString appSignalId)
 	{
@@ -115,7 +153,7 @@ namespace TestSuite
 		}
 		else
 		{
-			m_overridedSignals.insert(appSignalId);
+			m_overridenSignals.insert(appSignalId);
 		}
 
 		return ok;
@@ -143,7 +181,7 @@ namespace TestSuite
 
 	void TestController::overridesReset(qint64 timeoutMs)
 	{
-		for (const QString& appSignalId : m_overridedSignals)
+		for (const QString& appSignalId : m_overridenSignals)
 		{
 			AppSignalParam asp = signalParam(appSignalId);
 
@@ -154,7 +192,7 @@ namespace TestSuite
 				return;
 			}
 		}
-		m_overridedSignals.clear();
+		m_overridenSignals.clear();
 
 		bool ok = waitForSignalOverrides(timeoutMs);
 		if (ok == false)
@@ -182,4 +220,4 @@ namespace TestSuite
 		return result;
 	}
 
-}
+} // namespace TestSuite

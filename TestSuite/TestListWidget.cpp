@@ -145,7 +145,8 @@ void TestListWidget::updateTestsList(const TestSuite::TestScriptsStorage& tests)
 {
 	TestSuite::OutputControllerStub outputControllerStub;
 	TestSuite::InputControllerStub inputControllerStub;
-	TestSuite::TestController testController{inputControllerStub, outputControllerStub, nullptr};
+	TestSuite::ConfigSettings configSettings;
+	TestSuite::TestController testController{configSettings, SoftwareInfo{}, nullptr, nullptr, inputControllerStub, outputControllerStub, nullptr};
 	TestSuite::TestLogStub testLog;
 	TestSuite::ControlStatus fakeStatus;
 	QMutex fakeStatusMutex;

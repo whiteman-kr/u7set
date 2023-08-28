@@ -1,10 +1,12 @@
 #pragma once
 #include <QQmlEngine>
+
 #include "../AppSignalLib/AppSignalParam.h"
-#include "SimScriptSignal.h"
+
+#include "SimScriptConnection.h"
 #include "SimScriptDevUtils.h"
 #include "SimScriptLmDescription.h"
-#include "SimScriptConnection.h"
+#include "SimScriptSignal.h"
 
 
 namespace Sim
@@ -30,7 +32,7 @@ namespace Sim
 	private:
 		virtual void run() override;
 
-        bool runScriptFunction(const QString& functionName);
+		bool runScriptFunction(const QString& functionName);
 
 	public:
 		void start(QThread::Priority priority = InheritPriority);
@@ -47,10 +49,10 @@ namespace Sim
 		std::vector<SimScriptItem> m_scripts;
 
 		std::unique_ptr<QJSEngine> m_jsEngine;
-        QJSValue m_jsThis;
+		QJSValue m_jsThis;
 		QJSValue m_jsLog;
 
-        std::atomic_bool m_result{true};
+		std::atomic_bool m_result{true};
 	};
 
 
@@ -79,11 +81,11 @@ namespace Sim
 		/// \brief This param can increase or decrease simulation speed but it depends on underlying hardware and project size. Accepts values [0.1 - 256.0].
 		Q_PROPERTY(double speedFactor READ speedFactor WRITE setSpeedFactor)
 
-		/// \brief Allows or disables LogicModules' LAN communications like Application Data transmittion to AppDataSrv, TuningService communications (note: Tuning Key and Arming Key must be set to 1). This is global flag for all simulated communications.
+		/// \brief Allows or disables LogicModules' LAN communications like Application Data transmission to AppDataSrv, TuningService communications (note: Tuning Key and Arming Key must be set to 1). This is global flag for all simulated communications.
 		Q_PROPERTY(bool enabledLanComm READ enabledLanComm WRITE setEnabledLanComm)
 
 		/// \brief Allows or disables debug log messages.
-		Q_PROPERTY(bool debugMessagesEnabled READ (m_log.debugMessagesEnabled) WRITE (m_log.setDebugMessagesEnabled))
+		Q_PROPERTY(bool debugMessagesEnabled READ(m_log.debugMessagesEnabled) WRITE(m_log.setDebugMessagesEnabled))
 
 	public:
 		explicit ScriptSimulator(Simulator* simulator, QObject* parent = nullptr);
@@ -94,7 +96,7 @@ namespace Sim
 
 		bool isRunning() const;
 
-		bool wait(unsigned long msecs = ULONG_MAX);		// Wait script to stop
+		bool wait(unsigned long msecs = ULONG_MAX); // Wait script to stop
 		bool result() const;
 
 		static void throwScriptException(const QObject* object, QString text);
@@ -102,16 +104,20 @@ namespace Sim
 		// Public slots which are part of Script API
 		//
 	public slots:
-        void debugOutput(QString str);					// Debug output to qDebug
+		void debugOutput(QString str); // Debug output to qDebug
 
-        /// \brief Run the simulation for \a msec milliseconds, if \a msec is -1 then simulation will last till the programm interrupted.
+									   /// \brief Run the simulation for \a msec milliseconds, if \a msec is -1 then simulation will last till the programm interrupted.
 		/// <b>Note:</b> Simulation process can last longer than \a msec milliseconds, it depends on project size and simulation hardware.
 		bool startForMs(int msecs);
-		//bool waitForMs(int msecs);
+		// bool waitForMs(int msecs);
 
 		/// \brief Reset all simulations to initial state.
 		/// <b>Note:</b> Function sets reset flag and actual reset will be performed on the next \c startForMs call.
 		bool reset();
+
+		/// @brief Creates a new test observer object.
+		/// @return A newly created empty ScriptTestObserver.
+		QJSValue createObserver();
 
 		/// \brief Get signal state, if signal is not found then exception is thrown.
 		QJSValue signalState(QString appSignalId);
@@ -125,11 +131,11 @@ namespace Sim
 		/// <b>Note:</b> Not all signals can be overriden. For example, some signals can be optimized to constant value, as they don not have location in RAM they connot be overriden.
 		bool overrideSignalValue(QString appSignalId, double value);
 
-//		/// \brief Waits while all overrided signal value is written to LM. Returns true if signal value is overriden, false on timeout.
-//		bool waitForSignalOverrides(qint64 timeoutMs);
+		//		/// \brief Waits while all overriden signal value is written to LM. Returns true if signal value is overriden, false on timeout.
+		//		bool waitForSignalOverrides(qint64 timeoutMs);
 
-//		/// \brief Waits while signal value is set to specified value. Returns true if value is correct, false on timeout.
-//		bool expectSignalValue(QString appSignalId, double value, qint64 timeoutMs);
+		//		/// \brief Waits while signal value is set to specified value. Returns true if value is correct, false on timeout.
+		//		bool expectSignalValue(QString appSignalId, double value, qint64 timeoutMs);
 
 		/// \brief Remove all overriden signals.
 		/// <b>Note:</b> At least one work cycle must be run [startForMs(5)] to apply this function.
@@ -200,9 +206,8 @@ namespace Sim
 
 		ScriptWorkerThread m_workerThread{this};
 
-		std::atomic<qint64> m_executionTimeout = -1;		// Script execution timeout in milliseconds, negative means no timeout
-		std::atomic<bool> m_checkSkipOnBuildConst = false;	// If true then check script global variable SkipOnBuild, and both re true the SKIP this file
+		std::atomic<qint64> m_executionTimeout = -1;       // Script execution timeout in milliseconds, negative means no timeout
+		std::atomic<bool> m_checkSkipOnBuildConst = false; // If true then check script global variable SkipOnBuild, and both re true the SKIP this file
 	};
 
-}
-
+} // namespace Sim

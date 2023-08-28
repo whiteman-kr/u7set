@@ -25,6 +25,8 @@ qt_add_library(${TARGET} STATIC
 	TestController.h
 	TestLog.cpp
 	TestLog.h
+	TestObserver.cpp
+	TestObserver.h
 	TestReport.cpp
 	TestReport.h
 	TestScriptsStorage.cpp

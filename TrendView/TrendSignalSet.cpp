@@ -1539,7 +1539,7 @@ namespace TrendLib
 			{
 				if (archive.realTimeActiveServiceId == sourceEquipmentId)
 				{
-					// Ok, this is correcect source, check if it is still valid
+					// Ok, this is correct source, check if it is still valid
 					//
 					if (states.back().isValid() == false)
 					{
@@ -1566,14 +1566,14 @@ namespace TrendLib
 						}
 						else
 						{
-							// This source is not valid either, ingore it
+							// This source is not valid either, ignore it
 							//
 							return;
 						}
 					}
 					else
 					{
-						// This is the wrong source, skip it, but check timeouit firts
+						// This is the wrong source, skip it, but check timeout first
 						//
 						if (archive.serviceUpdateTimer.hasExpired(2000) == true)
 						{

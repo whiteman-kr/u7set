@@ -1009,7 +1009,7 @@ namespace Sim
 		if (int cs = changesCounter();
 			ram.overrideSignalsLastCounter(cs) == cs)
 		{
-			// Data has not been changesd since last update
+			// Data has not been changed since last update
 			//
 			return;
 		}

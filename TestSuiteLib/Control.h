@@ -16,6 +16,7 @@ namespace TestSuite
 {
 	using namespace std::literals::chrono_literals;
 
+
 	class TestSuiteUserManager : public ClientLib::TuningUserManager
 	{
 	public:
@@ -28,6 +29,7 @@ namespace TestSuite
 		QString m_userName;
 		QString m_password;
 	};
+
 
 	class ControlThread : public QThread
 	{

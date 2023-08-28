@@ -1350,7 +1350,7 @@ namespace Sim
 		// COMMENTED as for now there is no need to zero IO modules memory
 		// as there is no control of reading uninitialized memory.
 		//
-		//m_ram.clearMemoryAreasOnStartCycle();				// Reset to 0 some meory areas before start work cylce (like memory area for write i/o modules)
+		//m_ram.clearMemoryAreasOnStartCycle();				// Reset to 0 some memory areas before start work cycle (like memory area for write i/o modules)
 
 		// Get data from fiber optic channels (LM, OCM)
 		// !!! receiveConnectionsData !!! was moved to Sim::Control,

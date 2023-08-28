@@ -77,6 +77,8 @@ qt_add_library(${TARGET} STATIC
 	SimSoftware.h
 	SimSubsystem.cpp
 	SimSubsystem.h
+	SimTestObserver.cpp
+	SimTestObserver.h
 	SimTuningLanInterface.cpp
 	SimTuningLanInterface.h
 	SimTuningRecord.cpp
@@ -99,11 +101,13 @@ target_precompile_headers(${TARGET} PUBLIC
 	<chrono>
 	<cmath>
 	<cstring>
+	<deque>
 	<filesystem>
 	<map>
 	<memory>
 	<optional>
 	<queue>
+	<ranges>
 	<unordered_map>
 	<vector>
 
@@ -117,7 +121,7 @@ target_precompile_headers(${TARGET} PUBLIC
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Xml Qt6::Qml Qt6::Core Qt6::Concurrent Qt6::Network)
-target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib AppSignalLib HardwareLib OnlineLib TrendView)
+target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib AppSignalLib HardwareLib OnlineLib ClientLib TrendView)
 
 target_compile_definitions(${TARGET} PRIVATE SIMULATOR_LIBRARY)
 target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
