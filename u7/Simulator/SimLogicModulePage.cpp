@@ -2,12 +2,10 @@
 #include "SimSignalSnapshot.h"
 #include "SimWidget.h"
 
-SimLogicModulePage::SimLogicModulePage(SimIdeSimulator* simulator, VFrame30::AppSignalController* appSignalController,
-									   QString equipmentId,
-									   QWidget* parent)
-	: SimBasePage(simulator, parent),
-	  m_lmEquipmentId(equipmentId),
-	  m_appSignalController(appSignalController)
+SimLogicModulePage::SimLogicModulePage(SimIdeSimulator* simulator, VFrame30::AppSignalController* appSignalController, QString equipmentId, QWidget* parent) :
+	SimBasePage(simulator, parent),
+	m_lmEquipmentId(equipmentId),
+	m_appSignalController(appSignalController)
 {
 	assert(m_simulator);
 	assert(m_appSignalController);
@@ -16,9 +14,9 @@ SimLogicModulePage::SimLogicModulePage(SimIdeSimulator* simulator, VFrame30::App
 	// --
 	//
 #if defined(Q_OS_WIN)
-		QFont font = QFont("Consolas");
+	QFont font = QFont("Consolas");
 #else
-		QFont font = QFont("Courier");
+	QFont font = QFont("Courier");
 #endif
 	QFont fontBold{font};
 	fontBold.setBold(true);
@@ -114,57 +112,57 @@ SimLogicModulePage::SimLogicModulePage(SimIdeSimulator* simulator, VFrame30::App
 
 		layout->addWidget(&m_equipmentIdLabel, row, 0, 1, 1);
 		layout->addWidget(&m_equipmentIdValue, row, 1, 1, 2);
-		row ++;
+		row++;
 
 		layout->addWidget(&m_subsystemIdLabel, row, 0, 1, 1);
 		layout->addWidget(&m_subsystemIdValue, row, 1, 1, 2);
-		row ++;
+		row++;
 
 		layout->addWidget(&m_channelLabel, row, 0, 1, 1);
 		layout->addWidget(&m_channelValue, row, 1, 1, 2);
-		row ++;
+		row++;
 
 		layout->addWidget(&m_moduleLabel, row, 0, 1, 1);
 		layout->addWidget(&m_moduleValue, row, 1, 1, 2);
-		row ++;
+		row++;
 
 		layout->addWidget(&m_stateLine, row, 0, 1, 3);
-		row ++;
+		row++;
 
 		layout->addWidget(&m_disableButton, row, 0, 1, 1);
 		layout->addWidget(&m_stateLabel, row, 1, 1, 2);
-		row ++;
+		row++;
 
 		layout->addWidget(&m_runtimeModeLabel, row, 0, 1, 1);
 		layout->addWidget(&m_runtimeModeValue, row, 1, 1, 2);
-		row ++;
+		row++;
 
 		layout->addWidget(&m_sorLine, row, 0, 1, 3);
-		row ++;
+		row++;
 
 		layout->addWidget(&m_sorResetSwitchButton, row, 0, 1, 1);
 		layout->addWidget(&m_sorIsSetLabel, row, 1, 1, 2);
-		row ++;
+		row++;
 
 		layout->addWidget(&m_sorSetSwitch1Button, row, 0, 1, 1);
 		layout->addWidget(&m_sorSetSwitch2Button, row, 1, 1, 1);
 		layout->addWidget(&m_sorSetSwitch3Button, row, 2, 1, 1);
-		row ++;
+		row++;
 
 		layout->addWidget(&m_tuningLine, row, 0, 1, 3);
-		row ++;
+		row++;
 
 		layout->addWidget(&m_tuningModeLabel, row, 0, 1, 1);
 		layout->addWidget(&m_tuningModeValue, row, 1, 1, 2);
-		row ++;
+		row++;
 
 		layout->addWidget(&m_armingKeyButton, row, 0, 1, 1);
 		layout->addWidget(&m_armingKeyStateLabel, row, 1, 1, 1);
-		row ++;
+		row++;
 
 		layout->addWidget(&m_tuningKeyButton, row, 0, 1, 1);
 		layout->addWidget(&m_tuningKeyStateLabel, row, 1, 1, 1);
-		row ++;
+		row++;
 
 
 		// Add horizontal spacer to column 3 (0-based index)
@@ -209,12 +207,16 @@ SimLogicModulePage::SimLogicModulePage(SimIdeSimulator* simulator, VFrame30::App
 
 	// --
 	//
+	simulatorStateChanged(m_simulator->control().state());
 	updateLogicModuleInfoInfo();
+	updateModuleStates(m_simulator->control().controlData());
+
 	m_schemasList->resizeColumnToContents(0);
 
 	// --
 	//
-	connect(m_simulator, &Sim::Simulator::projectUpdated, this, &SimLogicModulePage::projectUpdated);
+	connect(m_simulator, &SimIdeSimulator::projectUpdated, this, &SimLogicModulePage::projectUpdated);
+	connect(&m_simulator->control(), &Sim::Control::stateChanged, this, &SimLogicModulePage::simulatorStateChanged);
 
 	connect(&m_disableButton, &QPushButton::toggled, this, &SimLogicModulePage::powerOff);
 	connect(&m_armingKeyButton, &QPushButton::toggled, this, &SimLogicModulePage::armingKeyToggled);
@@ -265,6 +267,16 @@ SimLogicModulePage::~SimLogicModulePage()
 	return;
 }
 
+void SimLogicModulePage::simulatorStateChanged(Sim::SimControlState state)
+{
+	m_disableButton.setDisabled(state == Sim::SimControlState::Stop);
+	m_sorResetSwitchButton.setDisabled(state == Sim::SimControlState::Stop);
+
+	updateModuleStates(m_simulator->control().controlData());
+
+	return;
+}
+
 void SimLogicModulePage::updateLogicModuleInfoInfo()
 {
 	auto lm = logicModule();
@@ -278,14 +290,14 @@ void SimLogicModulePage::updateLogicModuleInfoInfo()
 	m_equipmentIdValue.setText(lmInfoExtras.equipmentID);
 
 	m_subsystemIdValue.setText(QString("%1 (LMNumber: %2)")
-							   .arg(lmInfoExtras.subsystemID)
-							   .arg(lmInfoExtras.lmNumber));
+								   .arg(lmInfoExtras.subsystemID)
+								   .arg(lmInfoExtras.lmNumber));
 
 	m_channelValue.setText(lmInfoExtras.subsystemChannel);
 
 	m_moduleValue.setText(QString("%1 (%2)")
-							.arg(lmInfoExtras.caption)
-							.arg(lmInfoExtras.lmDescriptionFile));
+							  .arg(lmInfoExtras.caption)
+							  .arg(lmInfoExtras.lmDescriptionFile));
 
 	// Fill schema list
 	//
@@ -313,7 +325,10 @@ void SimLogicModulePage::fillSchemaList()
 	{
 		schemas.erase(std::remove_if(schemas.begin(),
 									 schemas.end(),
-									 [&filter](const auto& s) {	return s.searchForString(filter) == false; }),
+									 [&filter](const auto& s)
+									 {
+										 return s.searchForString(filter) == false;
+									 }),
 					  schemas.end());
 	}
 
@@ -340,6 +355,7 @@ void SimLogicModulePage::fillSchemaList()
 void SimLogicModulePage::projectUpdated()
 {
 	updateLogicModuleInfoInfo();
+	updateModuleStates(m_simulator->control().controlData());
 	return;
 }
 
@@ -423,7 +439,7 @@ void SimLogicModulePage::sorSwitch3Toggled(bool value)
 
 void SimLogicModulePage::signalsButtonClicked()
 {
-	// Show snapshot with applied filter lmEquipmnetId()
+	// Show snapshot with applied filter lmEquipmentId()
 	//
 
 	SimWidget* simWidget = nullptr;
@@ -603,51 +619,73 @@ void SimLogicModulePage::updateFilterCompleter()
 
 void SimLogicModulePage::updateModuleStates(Sim::ControlStatus state)
 {
-	auto it = std::find_if(std::begin(state.m_lmDeviceModes),
-						   std::end(state.m_lmDeviceModes),
-						   [this](const Sim::ControlStatus::LmMode& p)
-						   {
-								return p.lmEquipmentId == this->equipmentId();
-						   });
-
-	if (it == std::end(state.m_lmDeviceModes))
 	{
-		return;
-	}
+		auto it = std::find_if(std::begin(state.m_lmDeviceModes),
+							   std::end(state.m_lmDeviceModes),
+							   [this](const Sim::ControlStatus::LmMode& p)
+							   {
+								   return p.lmEquipmentId == this->equipmentId();
+							   });
 
-	const Sim::ControlStatus::LmMode& lmState = *it;
-
-	QColor color{Qt::black};
-
-	QString text;
-	text.reserve(64);
-
-	if (state.m_state == Sim::SimControlState::Pause)
-	{
-		text = QObject::tr("Pause - ");
-	}
-
-	if (state.m_state != Sim::SimControlState::Stop)
-	{
-		switch (lmState.deviceState)
+		if (it != std::end(state.m_lmDeviceModes))
 		{
-		case Sim::DeviceState::Off:
-			text += QStringLiteral("Off");
-			break;
-		case Sim::DeviceState::Start:
-			text += QStringLiteral("Start");
-			break;
-		case Sim::DeviceState::Fault:
-			text += QStringLiteral("Fault");
-			color = qRgb(0xD0, 0x00, 0x00);
-			break;
-		case Sim::DeviceState::Operate:
-			text += QStringLiteral("Operate");
-			break;
-		default:
-			Q_ASSERT(false);
-			text += QStringLiteral("Unknown");
-			color = qRgb(0xD0, 0x00, 0x00);
+			const Sim::ControlStatus::LmMode& lmState = *it;
+
+			QColor color{Qt::black};
+
+			QString text;
+			text.reserve(64);
+
+			if (state.m_state == Sim::SimControlState::Pause)
+			{
+				text = QObject::tr("Pause - ");
+			}
+
+			if (state.m_state != Sim::SimControlState::Stop)
+			{
+				switch (lmState.deviceState)
+				{
+				case Sim::DeviceState::Off:
+					text += QStringLiteral("Off");
+					break;
+				case Sim::DeviceState::Start:
+					text += QStringLiteral("Start");
+					break;
+				case Sim::DeviceState::Fault:
+					text += QStringLiteral("Fault");
+					color = qRgb(0xD0, 0x00, 0x00);
+					break;
+				case Sim::DeviceState::Operate:
+					text += QStringLiteral("Operate");
+					break;
+				default:
+					Q_ASSERT(false);
+					text += QStringLiteral("Unknown");
+					color = qRgb(0xD0, 0x00, 0x00);
+				}
+			}
+
+			// State
+			//
+			QString stateText;
+			if (m_simulator->isLoaded() == true)
+			{
+				if (m_simulator->isStopped() == true)
+				{
+					stateText = tr("State: Stopped");
+				}
+				else
+				{
+					stateText = text;
+				}
+			}
+
+			if (stateText.isEmpty() == false)
+			{
+				stateText = "{" + stateText + "}";
+			}
+
+			m_stateLabel.setText(stateText);
 		}
 	}
 
@@ -678,9 +716,23 @@ void SimLogicModulePage::updateModuleStates(Sim::ControlStatus state)
 		sorSwitch3 = lm->sorSetSwitch3();
 	}
 
-	if (m_disableButton.isChecked() != disabled)
+	switch (state.m_state)
 	{
-		m_disableButton.setChecked(disabled);
+	case Sim::SimControlState::Stop:
+		m_disableButton.setChecked(false);
+		break;
+	case Sim::SimControlState::Run:
+		if (m_disableButton.isChecked() != disabled)
+		{
+			m_disableButton.setChecked(disabled);
+		}
+		break;
+	case Sim::SimControlState::Pause:
+		if (m_disableButton.isChecked() != disabled)
+		{
+			m_disableButton.setChecked(disabled);
+		}
+		break;
 	}
 
 	{
@@ -720,9 +772,9 @@ void SimLogicModulePage::updateModuleStates(Sim::ControlStatus state)
 		m_armingKeyButton.setChecked(armingKey);
 	}
 
-	if (m_tuningKeyButton.isChecked() != tuningKey )
+	if (m_tuningKeyButton.isChecked() != tuningKey)
 	{
-		m_tuningKeyButton.setChecked(tuningKey );
+		m_tuningKeyButton.setChecked(tuningKey);
 	}
 
 	m_tuningModeValue.setText(tuningMode ? QStringLiteral("{1}") : QStringLiteral("{0}"));
@@ -747,28 +799,6 @@ void SimLogicModulePage::updateModuleStates(Sim::ControlStatus state)
 	}
 
 	m_sorIsSetLabel.setText(tr("SOR is Set: {%1}").arg(sorIsSet ? 1 : 0));
-
-	// State
-	//
-	QString stateText;
-	if (m_simulator->isLoaded() == true)
-	{
-		if (m_simulator->isStopped() == true)
-		{
-			stateText = tr("State: Stopped");
-		}
-		else
-		{
-			stateText = text;
-		}
-	}
-
-	if (stateText.isEmpty() == false)
-	{
-		stateText = "{" + stateText + "}";
-	}
-
-	m_stateLabel.setText(stateText);
 
 	return;
 }
