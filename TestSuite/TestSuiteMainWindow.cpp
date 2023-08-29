@@ -10,10 +10,6 @@
 #include "DialogReport.h"
 #include "../ClientLib/TuningUserManager.h"
 
-#if __has_include("../gitlabci_version.h")
-#	include "../gitlabci_version.h"
-#endif
-
 TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
 	: QMainWindow(parent),
 	m_appLog(qAppName(), QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + theSettings.librarySettings().instanceStrId()),

@@ -19,7 +19,7 @@
 #endif
 
 const int MajorVersion = 0;
-const int MinorVersion = 9;
+const int MinorVersion = 2;
 
 
 void showHelp()

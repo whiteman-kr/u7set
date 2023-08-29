@@ -178,10 +178,12 @@ windows_build_job:
     - "# ----------------------------------------------"
     - "#               Request documents from SVN"
     - "# ----------------------------------------------"
-    - "pushd ."	
-    - "cd $Env:CI_PROJECT_DIR/doc"
-    - "&./SvnGetDocs.bat"
-    - "popd"
+# TEMPORARY DISABLED WHILE SVN SERVER IS DOWN
+#    - "pushd ."	
+#    - "cd $Env:CI_PROJECT_DIR/doc"
+#    - "&./SvnGetDocs.bat"
+#    - "popd"
+# TEMPORARY DISABLED WHILE SVN SERVER IS DOWN
 
 #Build Installer
     - "# ----------------------------------------------"
