@@ -15,19 +15,20 @@
 /// Example of usage :
 /// @code
 /// // Create observer.
-/// let observer = view.createObserver();
+/// let observer = ctrl.createObserver();
 ///
 /// // Add expectation which will be initial condition.
-/// let initiatorId = observer.addEqualExpectation("#INPUT3", 1);
+/// let initiatorId = observer.addEqualExpectation("#INPUT", 1);
 /// observer.setInitiator(initiatorId);
 ///
 /// // Add expectations for measure time.
 /// observer.addEqualExpectation("#OUTPUT1", 1); // Wait this signal to become 1.
 /// observer.addEqualExpectation("#OUTPUT2", 0); // Wait this signal to become 0.
 ///
-/// observer.start();                      // Observer links to AppDataService for signal state retrieval, start of measurements.
+/// // Observer connects to AppDataService for signal state retrieval, start of measurements.
+/// observer.start();
 ///
-/// sim.overrideSignalValue("#INPUT3", 1); // Set initial signal.
+/// sim.overrideSignalValue("#INPUT", 1); // Set initial signal.
 ///
 /// let waitResult = observer.wait(5000);  // Wait for satisfying all three expectations.
 /// assert(waitResult);                    // returns true if all expectations were fulfilled.

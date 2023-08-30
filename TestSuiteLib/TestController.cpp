@@ -220,4 +220,38 @@ namespace TestSuite
 		return result;
 	}
 
+	QString TestController::projectName() const
+	{
+		// TODO
+		return "TODOProjectName";
+	}
+
+	int TestController::buildNo() const
+	{
+		// TODO
+		return -1;
+	}
+
+	qint64 TestController::executionTimeout() const
+	{
+		// TODO
+		return -1;
+	}
+
+	void TestController::setExecutionTimeout(qint64 value)
+	{
+		// TODO
+	}
+
+	bool TestController::debugMessagesEnabled() const
+	{
+		// TODO
+		return false;
+	}
+
+	void TestController::setDebugMessagesEnabled(bool value)
+	{
+		// TODO
+	}
+
 } // namespace TestSuite

@@ -448,6 +448,11 @@ namespace Sim
 		return ok;
 	}
 
+	bool ScriptSimulator::waitForMs(int msecs)
+	{
+		return startForMs(msecs);
+	}
+
 	bool ScriptSimulator::reset()
 	{
 		if (m_simulator->isRunning() == true)
@@ -532,9 +537,27 @@ namespace Sim
 		return true;
 	}
 
-	void ScriptSimulator::overridesReset()
+	bool ScriptSimulator::waitForSignalOverrides(qint64 timeoutMs)
+	{
+		return startForMs(1);
+	}
+
+	bool ScriptSimulator::expectSignalValue(QString appSignalId, double value, qint64 timeoutMs)
+	{
+		auto deadline = m_simulator->control().controlData().m_currentTime + std::chrono::milliseconds{timeoutMs};
+
+		while (signalValue(appSignalId) != value && m_simulator->control().controlData().m_currentTime < deadline)
+		{
+			startForMs(1);
+		}
+
+		return signalValue(appSignalId) == value;
+	}
+
+	void ScriptSimulator::overridesReset(qint64 timeoutMs /*= 5000*/)
 	{
 		m_simulator->overrideSignals().clear();
+		startForMs(1);
 	}
 
 	bool ScriptSimulator::logicModuleExists(QString equipmentId) const
@@ -668,6 +691,11 @@ namespace Sim
 	QString ScriptSimulator::buildPath() const
 	{
 		return m_simulator->buildPath();
+	}
+
+	QString ScriptSimulator::projectName() const
+	{
+		return m_simulator->projectName();
 	}
 
 	int ScriptSimulator::buildNo() const

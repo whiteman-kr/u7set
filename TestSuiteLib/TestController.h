@@ -24,11 +24,17 @@ namespace TestSuite
 		/// \brief Loaded project build directory, if empty then project is not loaded.
 		// Q_PROPERTY(QString buildPath READ buildPath)
 
+		/// \brief Loaded ProjectName.
+		Q_PROPERTY(QString projectName READ projectName)
+
+		/// \brief Loaded project build number, if 0 then project is not loaded.
+		Q_PROPERTY(int buildNo READ buildNo)
+
 		/// \brief Script execution timeout in milliseconds, if -1 then timeout is not applied.
-		// Q_PROPERTY(qint64 executionTimeout READ executionTimeout WRITE setExecutionTimeout)
+		Q_PROPERTY(qint64 executionTimeout READ executionTimeout WRITE setExecutionTimeout)
 
 		/// \brief Allows or disables debug log messages.
-		// Q_PROPERTY(bool debugMessagesEnabled READ (m_log.debugMessagesEnabled) WRITE (m_log.setDebugMessagesEnabled))
+		Q_PROPERTY(bool debugMessagesEnabled READ debugMessagesEnabled WRITE setDebugMessagesEnabled)
 
 	public:
 		explicit TestController(const ConfigSettings& configuration,
@@ -46,13 +52,11 @@ namespace TestSuite
 	public slots:
 		void debugOutput(QString str); // Debug output to qDebug
 
-		/// \brief Wait for specified numbers of milliseconds
+		/// \brief Wait for specified numbers of milliseconds, same as waitForMs().
 		bool startForMs(int msecs);
-		bool waitForMs(int msecs);
 
-		//		/// \brief Reset all simulations to initial state.
-		//		/// <b>Note:</b> Function sets reset flag and actual reset will be performed on the next \c startForMs call.
-		//		bool reset();
+		/// \brief Wait for specified numbers of milliseconds, same as startForMs().
+		bool waitForMs(int msecs);
 
 		/// @brief Creates a new test observer object.
 		/// @return A newly created empty ScriptTestObserver.
@@ -76,22 +80,13 @@ namespace TestSuite
 		/// \brief Waits while signal value is set to specified value. Returns true if value is correct, false on timeout.
 		bool expectSignalValue(QString appSignalId, double value, qint64 timeoutMs);
 
-		/// \brief Remove all overriden signals.
-		/// <b>Note:</b> This function automatically calls <b>waitForSignalOverrides</b> with specified timeout (or with default value - 5000 ms) to wait for all signals to be reset.
-		/// So it is not required to call <b>waitForSignalOverrides</b> manually.
+		/// \brief Resets all overridden signals.
+		/// 
+		/// This function resets all overridden signals to their default values. 
+		/// It automatically calls \c waitForSignalOverrides with a specified timeout (default value: 5000 ms) 
+		/// to wait for all signals to be reset. If the function times out, an exception is thrown.
+		/// \param timeoutMs The timeout value in milliseconds for waiting on signal overrides.
 		void overridesReset(qint64 timeoutMs = 5000);
-
-		/// \brief Checks if a LogicModule exists.
-		// bool logicModuleExists(QString equipmentId) const;
-
-		/// \brief Returns LogicModule (type ScriptLogicModule) or undefined if it is not exists.
-		// QJSValue logicModule(QString equipmentId);
-
-		/// \brief Returns Connection by ID (type ScriptConnection) or undefined if it is not exists.
-		// QJSValue connection(QString connectionID);
-
-		/// \brief Sets enable property to all connections.
-		// void connectionsSetEnabled(bool value);
 
 		/// \brief Checks if a signal exists.
 		bool signalExists(QString appSignalId) const;
@@ -99,21 +94,16 @@ namespace TestSuite
 		/// \brief Get signal description, if a signal is not found then exception is thrown.
 		AppSignalParam signalParam(QString appSignalId);
 
-		/// \brief Get full signal description, if a signal is not found then exception is thrown.
-		// ScriptSignal signalParamExt(QString appSignalId);
-
-		/// \brief Returns ScriptLmDescription for LM  with specified equipmentId, if LM is not found then exception is thrown.
-		// ScriptLmDescription scriptLmDescription(QString equipmentId);
-
-		// ScriptDevUtils devUtils();
-
-		/// \brief Returns uninitialized RamAddress object
-		// RamAddress createRamAddress();
-
-		/// \brief Returns initialized RamAddress object
-		// RamAddress createRamAddress(int offset, int bit);
-
 	public:
+		QString projectName() const;
+		int buildNo() const;
+
+		qint64 executionTimeout() const;
+		void setExecutionTimeout(qint64 value);
+
+		bool debugMessagesEnabled() const;
+		void setDebugMessagesEnabled(bool value);
+
 		// Data
 		//
 	private:
