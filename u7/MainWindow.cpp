@@ -77,7 +77,9 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 					nullptr};
 
 	m_equipmentTab = new EquipmentTabPage(dbController(), nullptr);
-	m_signalsTab = new SignalsTabPage(m_signalSetProvider, dbController(), nullptr);
+	m_signalsTab = new SignalsTabPage(AppSignalSetProvider::getInstance(),
+									  AppSignalPropertyManager::getInstance(),
+									  dbController(), nullptr);
 
 	m_filesTabPage = new FilesTabPage(dbController(), nullptr);
 	m_filesTabPage->setWindowTitle(tr("Files"));

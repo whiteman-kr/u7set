@@ -87,13 +87,11 @@ AppSignalPropertyDescription::AppSignalPropertyDescription()
 }
 
 AppSignalPropertyDescription::AppSignalPropertyDescription(const QString& propName,
-							 const QString& propCaption,
 							 QMetaType::Type propType,
 							 std::function<QVariant (const AppSignal*)> getter,
 							 std::function<void (AppSignal*, const QVariant&)> setter,
 							 const std::map<int, QString>& propEnumValues) :
 	name(propName),
-	caption(propCaption),
 	type(propType),
 	valueGetter(getter),
 	valueSetter(setter),
@@ -155,7 +153,19 @@ bool AppSignalPropertyDescription::getEnumValuesVector(std::vector<std::pair<int
 
 bool AppSignalPropertyDescription::isEnumProperty() const
 {
-	return enumValues.size() > 0;
+	return enumValues.empty() == false;
+}
+
+QString AppSignalPropertyDescription::getEnumValueStr(int enumValue) const
+{
+	auto it = enumValues.find(enumValue);
+
+	if (it == enumValues.end())
+	{
+		return QString();
+	}
+
+	return it->second;
 }
 
 void AppSignalPropertyDescription::appendSignalID(int signalID)
@@ -187,42 +197,6 @@ const QString AppSignalProperties::categoryElectricParameters("5 Electric parame
 const QString AppSignalProperties::categoryOnlineMonitoringSystem("6 Online Monitoring System");
 const QString AppSignalProperties::categoryTuning("7 Tuning");
 const QString AppSignalProperties::categoryExpertProperties("8 Expert properties");
-
-QString AppSignalProperties::generateCaption(const QString& name)
-{
-	QString result;
-	if (name.isEmpty())
-	{
-		assert(false);
-		return result;
-	}
-	result += name[0].toUpper();
-	for (int i = 1; i < name.count(); i++)
-	{
-		if (name[i].isUpper())
-		{
-			if (i + 1 < name.count() && name[i + 1].isUpper())	// abbreviation?
-			{
-				result += ' ';
-				while (i < name.count() && name[i].isUpper())
-				{
-					result += name[i];
-					i++;
-				}
-				result += ' ';
-			}
-			else
-			{
-				result += ' ' + name[i].toLower();
-			}
-		}
-		else
-		{
-			result += name[i];
-		}
-	}
-	return result.trimmed();
-}
 
 AppSignalProperties::AppSignalProperties(const AppSignal& signal, bool savePropertyDescription) :
 	m_signal(signal)

@@ -655,7 +655,8 @@ public:
 	void clear();
 	void reserve(int n);
 
-	void append(AppSignal* signal);
+	void append(AppSignal* signal);					// takes ownership on "signal"
+	void append(const AppSignal& signal);			// appends new AppSignal(signal) (make copy)
 	void append(const ID_AppSignalID& id);
 
 	void removeSignals(const std::set<int>& signalToRemoveIDs);
@@ -685,6 +686,7 @@ public:
 
 	int signalIndex(int signalID) const;
 
+	bool getChannelSignalsID(int signalID, std::vector<int>* channelSignalIDs) const;
 	bool getChannelSignalsID(const AppSignal& signal, std::vector<int>* channelSignalIDs) const;
 	bool getChannelSignalsID(int signalID, int groupID, std::vector<int>* channelSignalIDs) const;
 

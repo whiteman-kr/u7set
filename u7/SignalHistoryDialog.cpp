@@ -137,7 +137,7 @@ SignalHistoryDialog::SignalHistoryDialog(DbController* dbController, const QStri
 		}
 
 		m_historyModel->appendColumn(column);
-		m_historyModel->setHeaderData(columnIndex, Qt::Horizontal, pSignalPropertyManager->caption(propertyIndex));
+		m_historyModel->setHeaderData(columnIndex, Qt::Horizontal, pSignalPropertyManager->name(propertyIndex));
 	}
 
 	new TableDataVisibilityController(historyView, "SignalHistoryDialog", defaultColumns);

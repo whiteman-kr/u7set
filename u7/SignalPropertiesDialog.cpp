@@ -88,6 +88,11 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController,
 
 		for (auto property : signalProperties->properties())
 		{
+			if (property->isCategorized() == false)
+			{
+				continue;
+			}
+
 			int propertyIndex = manager.propertyIndex(property->caption());
 
 			Q_ASSERT(propertyIndex != -1);
@@ -272,13 +277,30 @@ std::vector<std::pair<QString, QString>> SignalPropertiesDialog::editApplication
 
 void SignalPropertiesDialog::initNewSignal(AppSignal& signal)
 {
-	QSettings settings;
+	AppSignalPropertyManager* propManager = AppSignalPropertyManager::getInstance();
+
+	auto setter = [&signal, &propManager](const QString& name, QVariant value) {
+		int index = propManager->propertyIndex(name);
+		if (index == -1)
+		{
+			return;
+		}
+
+		if (propManager->getBehaviour(signal, index) == E::PropertyBehaviourType::Write)
+		{
+			propManager->setValue(&signal, index, value, theSettings.isExpertMode());
+		}
+	};
+
+	signal.initSpecificProperties();
 
 	switch (signal.signalType())
 	{
 	case E::SignalType::Analog:
 	{
 		signal.setDataSize(FLOAT32_SIZE);
+		setter(AppSignalPropNames::LOW_ENGINEERING_UNITS, 0.0);
+		setter(AppSignalPropNames::HIGH_ENGINEERING_UNITS, 100.0);
 		break;
 	}
 
@@ -293,36 +315,17 @@ void SignalPropertiesDialog::initNewSignal(AppSignal& signal)
 		break;
 	}
 
-	signal.initSpecificProperties();
-
-	AppSignalPropertyManager& propertyManager = *AppSignalPropertyManager::getInstance();
-
-	auto setter = [&signal, &propertyManager](const QString& name, QVariant value) {
-		int index = propertyManager.propertyIndex(name);
-		if (index == -1)
-		{
-			return;
-		}
-
-		if (propertyManager.getBehaviour(signal, index) == E::PropertyBehaviourType::Write)
-		{
-			propertyManager.setValue(&signal, index, value, theSettings.isExpertMode());
-		}
-	};
-
-	setter(AppSignalPropNames::LOW_ENGINEERING_UNITS, 0.0);
-	setter(AppSignalPropNames::HIGH_ENGINEERING_UNITS, 100.0);
-
+	QSettings settings;
 	QString propKeyPrefix = AppSignalProperties::lastEditedSignalPropsPrefix(signal);
 
-	for (int i = 0; i < propertyManager.count(); i++)
+	for (int i = 0; i < propManager->count(); i++)
 	{
-		if (propertyManager.getBehaviour(signal, i) != E::PropertyBehaviourType::Write)
+		if (propManager->getBehaviour(signal, i) != E::PropertyBehaviourType::Write)
 		{
 			continue;
 		}
 
-		QString propName = propertyManager.name(i);
+		QString propName = propManager->name(i);
 
 		QVariant value = settings.value(propKeyPrefix + propName, QVariant());
 
@@ -331,7 +334,7 @@ void SignalPropertiesDialog::initNewSignal(AppSignal& signal)
 			continue;
 		}
 
-		QVariant propertyManagerValue = propertyManager.value(&signal, i, theSettings.isExpertMode());
+		QVariant propertyManagerValue = propManager->value(&signal, i, theSettings.isExpertMode());
 		QMetaType type = propertyManagerValue.metaType();
 
 		if (type.id() == QMetaType::QString && propertyManagerValue.toString().isEmpty() == false)
@@ -341,7 +344,7 @@ void SignalPropertiesDialog::initNewSignal(AppSignal& signal)
 
 		if (value.canConvert(type) && value.convert(type))
 		{
-			propertyManager.setValue(&signal, i, value, theSettings.isExpertMode());
+			propManager->setValue(&signal, i, value, theSettings.isExpertMode());
 		}
 	}
 

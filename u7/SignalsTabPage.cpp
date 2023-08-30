@@ -34,9 +34,8 @@
 
 const int DEFAULT_COLUMN_WIDTH = 50;
 
-SignalsDelegate::SignalsDelegate(AppSignalSetProvider* signalSetProvider, SignalsModel* model, SignalsProxyModel* proxyModel, QObject *parent) :
+SignalsDelegate::SignalsDelegate(SignalsModel* model, SignalsProxyModel* proxyModel, QObject* parent) :
 	QStyledItemDelegate(parent),
-	m_signalSetProvider(signalSetProvider),
 	m_model(model),
 	m_proxyModel(proxyModel)
 {
@@ -50,33 +49,41 @@ SignalsDelegate::~SignalsDelegate()
 
 QWidget* SignalsDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
+	AppSignalSetProvider* provider = m_model->signalSetProvider();
+	AppSignalPropertyManager* manager = m_model->propManager();
+
+	TEST_PTR_RETURN_NULLPTR(provider);
+	TEST_PTR_RETURN_NULLPTR(manager);
+
 	int col = index.column();
 	int row = m_proxyModel->mapToSource(index).row();
 
-	int editedSignalID = m_signalSetProvider->signalID(row);
+	int editedSignalID = provider->signalID(row);
 
-	const AppSignal* s = m_signalSetProvider->loadSignal(editedSignalID, true);	// get current checkedOut state
+	const AppSignal* s = provider->loadSignal(editedSignalID, true);	// get current checkedOut state
 
 	TEST_PTR_RETURN_NULLPTR(s);
 
 	Q_ASSERT(editedSignalID == s->ID());
 
-	AppSignalPropertyManager& manager = m_signalSetProvider->signalPropertyManager();
+	const AppSignalPropertyDescription& propDesc = manager->getPropertyDescription(col);
 
-	const AppSignalPropertyDescription& propDesc = manager.getPropertyDescription(col);
+	if (propDesc.isValid() == false)
+	{
+		Q_ASSERT(false);
+		return nullptr;
+	}
 
 	if (AppSignalProperties::isPropertyExists(*s, propDesc.name) == false)
 	{
 		return nullptr;
 	}
 
-	manager.reloadPropertiesBehaviour();
-
 	bool isExpert = theSettings.isExpertMode();
 
-	E::PropertyBehaviourType behaviour = manager.getBehaviour(*s, col);
+	E::PropertyBehaviourType behaviour = manager->getBehaviour(*s, col);
 
-	if (manager.isHidden(behaviour, isExpert) || manager.isReadOnly(behaviour, isExpert))
+	if (manager->isHidden(behaviour, isExpert) || manager->isReadOnly(behaviour, isExpert))
 	{
 		return nullptr;
 	}
@@ -90,20 +97,20 @@ QWidget* SignalsDelegate::createEditor(QWidget* parent, const QStyleOptionViewIt
 		signalIdForUndoOnCancelEditing = -1;
 	}
 
-	if (!m_signalSetProvider->checkoutSignal(row, nullptr))
+	if (!provider->checkoutSignal(row, nullptr))
 	{
 		return nullptr;
 	}
 
-	const AppSignal* appSignal = m_signalSetProvider->loadSignal(editedSignalID, true);	// update new checkedOut state on view
+	const AppSignal* appSignal = provider->loadSignal(editedSignalID, true);	// update new checkedOut state on view
 
 	TEST_PTR_RETURN_VALUE(appSignal, nullptr);
 
-	if (manager.isEnumProperty(col) == true)
+	if (manager->isEnumProperty(col) == true)
 	{
 		std::vector<std::pair<int, QString>> enumPropValues;
 
-		manager.getSignalEnumPropertyValues(*appSignal, col, &enumPropValues);
+		manager->getSignalEnumPropertyValues(*appSignal, col, &enumPropValues);
 
 		QComboBox* cb = new QComboBox(parent);
 
@@ -115,13 +122,13 @@ QWidget* SignalsDelegate::createEditor(QWidget* parent, const QStyleOptionViewIt
 		return cb;
 	}
 
-	switch (manager.type(col))
+	switch (manager->type(col))
 	{
 	case QMetaType::QString:
 	{
 		QLineEdit* le = new QLineEdit(parent);
 
-		if (manager.name(col).right(2) == "ID")
+		if (manager->name(col).right(2) == "ID")
 		{
 			QRegularExpression rx4ID(AppSignal::IDENTIFICATORS_VALIDATOR);
 			le->setValidator(new QRegularExpressionValidator(rx4ID, le));
@@ -155,7 +162,7 @@ QWidget* SignalsDelegate::createEditor(QWidget* parent, const QStyleOptionViewIt
 		return cb;
 	}
 	default:
-		if (manager.type(col) == qMetaTypeId<TuningValue>())
+		if (manager->type(col) == qMetaTypeId<TuningValue>())
 		{
 			QLineEdit* le = new QLineEdit(parent);
 			if (s->isAnalog())
@@ -192,24 +199,28 @@ void SignalsDelegate::updateEditorGeometry(QWidget* editor, const QStyleOptionVi
 
 void SignalsDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
 {
+	AppSignalSetProvider* provider = m_model->signalSetProvider();
+	AppSignalPropertyManager* manager = m_model->propManager();
+
+	TEST_PTR_RETURN(provider);
+	TEST_PTR_RETURN(manager);
+
 	int col = index.column();
 	int row = m_proxyModel->mapToSource(index).row();
-	if (row >= m_signalSetProvider->signalCount())
+	if (row >= provider->signalCount())
 	{
 		return;
 	}
 
 	QComboBox* cb = dynamic_cast<QComboBox*>(editor);
 
-	const AppSignal* s = m_signalSetProvider->getLoadedSignal(row, true);
+	const AppSignal* s = provider->getLoadedSignal(row, true);
 
 	TEST_PTR_RETURN(s);
 
-	AppSignalPropertyManager& manager = m_signalSetProvider->signalPropertyManager();
-
 	bool isExpert = theSettings.isExpertMode();
 
-	if (manager.isEnumProperty(col))
+	if (manager->isEnumProperty(col))
 	{
 		if (cb == nullptr)
 		{
@@ -217,12 +228,12 @@ void SignalsDelegate::setEditorData(QWidget* editor, const QModelIndex& index) c
 			return;
 		}
 
-		int curIndex = cb->findText(manager.value(s, col, isExpert).toString());
+		int curIndex = cb->findText(manager->value(s, col, isExpert).toString());
 		cb->setCurrentIndex(curIndex);
 		return;
 	}
 
-	QMetaType::Type type = manager.type(col);
+	QMetaType::Type type = manager->type(col);
 
 	if (type == QMetaType::Bool)
 	{
@@ -232,7 +243,7 @@ void SignalsDelegate::setEditorData(QWidget* editor, const QModelIndex& index) c
 			return;
 		}
 
-		cb->setCurrentIndex(cb->findData(manager.value(s, col, isExpert).toBool()));
+		cb->setCurrentIndex(cb->findData(manager->value(s, col, isExpert).toBool()));
 		return;
 	}
 
@@ -249,12 +260,12 @@ void SignalsDelegate::setEditorData(QWidget* editor, const QModelIndex& index) c
 	case QMetaType::Double:
 	case QMetaType::Int:
 	case QMetaType::UInt:
-		le->setText(manager.value(s, col, isExpert).toString());
+		le->setText(manager->value(s, col, isExpert).toString());
 		break;
 	default:
 		if (type == qMetaTypeId<TuningValue>())
 		{
-			le->setText(manager.value(s, col, isExpert).toString());
+			le->setText(manager->value(s, col, isExpert).toString());
 		}
 		else
 		{
@@ -266,38 +277,49 @@ void SignalsDelegate::setEditorData(QWidget* editor, const QModelIndex& index) c
 
 void SignalsDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
 {
+	AppSignalSetProvider* provider = m_model->signalSetProvider();
+	AppSignalPropertyManager* manager = m_model->propManager();
+
+	TEST_PTR_RETURN(provider);
+	TEST_PTR_RETURN(manager);
+
 	Q_UNUSED(model);
 
 	int col = index.column();
 	int row = m_proxyModel->mapToSource(index).row();
-	if (row >= m_signalSetProvider->signalCount())
+	if (row >= provider->signalCount())
 	{
 		return;
 	}
 
-	QComboBox* cb = dynamic_cast<QComboBox*>(editor);
-
-	const AppSignal* ls = m_signalSetProvider->getLoadedSignal(row, true);
+	AppSignal* ls = provider->getLoadedSignal(row, true);
 
 	AppSignal s(*ls);
 
-	AppSignalPropertyManager& manager = m_signalSetProvider->signalPropertyManager();
+	bool valueChanged = false;
+
 	bool isExpert = theSettings.isExpertMode();
 
-	if (manager.isEnumProperty(col) == true)
+	if (manager->isEnumProperty(col) == true)
 	{
-		if (cb == nullptr)
-		{
-			assert(false);
-			return;
-		}
+		QComboBox* cb = dynamic_cast<QComboBox*>(editor);
+
+		TEST_PTR_RETURN(cb);
 
 		QVariant data = cb->currentData();
 
 		if (data.isValid())
 		{
-			manager.setValue(&s, col, data, isExpert);
-			m_signalSetProvider->saveSignal(s);
+			valueChanged = manager->setValue(&s, col, data, isExpert);
+
+			if (valueChanged == true)
+			{
+				provider->saveSignal(s);
+			}
+			else
+			{
+				provider->undoSignal(s);
+			}
 
 			signalIdForUndoOnCancelEditing = -1;
 		}
@@ -305,28 +327,32 @@ void SignalsDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, c
 		return;
 	}
 
-	QMetaType::Type type = manager.type(col);
+	QMetaType::Type type = manager->type(col);
 
 	if (type == QMetaType::Bool)
 	{
-		if (cb == nullptr)
+		QComboBox* cb = dynamic_cast<QComboBox*>(editor);
+
+		TEST_PTR_RETURN(cb);
+
+		valueChanged = manager->setValue(&s, col, cb->currentData(), isExpert);
+
+		if (valueChanged == true)
 		{
-			assert(false);
-			return;
+			provider->saveSignal(s);
+		}
+		else
+		{
+			provider->undoSignal(s);
 		}
 
-		manager.setValue(&s, col, cb->currentData(), isExpert);
-		m_signalSetProvider->saveSignal(s);
 		signalIdForUndoOnCancelEditing = -1;
 		return;
 	}
 
 	QLineEdit* le = dynamic_cast<QLineEdit*>(editor);
-	if (le == nullptr)
-	{
-		assert(false);
-		return;
-	}
+
+	TEST_PTR_RETURN(le);
 
 	QString value = le->text();
 
@@ -334,7 +360,7 @@ void SignalsDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, c
 	{
 	case QMetaType::QString:
 	{
-		QString name = manager.name(col);
+		QString name = manager->name(col);
 
 		if (name == AppSignalPropNames::APP_SIGNAL_ID &&
 				(value.isEmpty() || value[0] != '#'))
@@ -352,31 +378,44 @@ void SignalsDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, c
 		{
 			value = value.trimmed();
 		}
-		manager.setValue(&s, col, value, isExpert);
+
+		valueChanged = manager->setValue(&s, col, value, isExpert);
+
 		break;
 	}
+
 	case QMetaType::Double:
-		manager.setValue(&s, col, value.toDouble(), isExpert);
+		valueChanged = manager->setValue(&s, col, value.toDouble(), isExpert);
 		break;
+
 	case QMetaType::Int:
-		manager.setValue(&s, col, value.toInt(), isExpert);
+		valueChanged = manager->setValue(&s, col, value.toInt(), isExpert);
 		break;
+
 	case QMetaType::UInt:
-		manager.setValue(&s, col, value.toUInt(), isExpert);
+		valueChanged = manager->setValue(&s, col, value.toUInt(), isExpert);
 		break;
+
 	default:
 		if (type == qMetaTypeId<TuningValue>())
 		{
-			manager.setValue(&s, col, value, isExpert);
+			valueChanged = manager->setValue(&s, col, value, isExpert);
 		}
 		else
 		{
-			assert(false);
-			return;
+			Q_ASSERT(false);
 		}
 	}
 
-	m_signalSetProvider->saveSignal(s);
+	if (valueChanged == true)
+	{
+		provider->saveSignal(s);
+	}
+	else
+	{
+		provider->undoSignal(s);
+	}
+
 	signalIdForUndoOnCancelEditing = -1;
 }
 
@@ -384,7 +423,12 @@ void SignalsDelegate::onCloseEditorEvent(QWidget*, QAbstractItemDelegate::EndEdi
 {
 	if (hint == QAbstractItemDelegate::RevertModelCache && signalIdForUndoOnCancelEditing != -1)
 	{
-		m_signalSetProvider->undoSignal(signalIdForUndoOnCancelEditing);
+		AppSignalSetProvider* provider = m_model->signalSetProvider();
+
+		TEST_PTR_RETURN(provider);
+
+		provider->undoSignal(signalIdForUndoOnCancelEditing);
+
 		signalIdForUndoOnCancelEditing = -1;
 	}
 }
@@ -405,26 +449,41 @@ bool SignalsDelegate::editorEvent(QEvent* event, QAbstractItemModel* model,
 }
 
 
-SignalsModel::SignalsModel(AppSignalSetProvider* signalSetProvider, SignalsTabPage* parent) :
+SignalsModel::SignalsModel(AppSignalSetProvider* signalSetProvider,
+						   AppSignalPropertyManager* propManager,
+						   SignalsTabPage* parent) :
 	QAbstractTableModel(parent),
 	m_signalSetProvider(signalSetProvider),
+	m_propManager(propManager),
 	m_rowCount(signalSetProvider->signalCount()),
 	m_columnCount(signalSetProvider->signalPropertyManager().count()),
 	m_parentWindow(parent)
 
 {
+	TEST_PTR_RETURN(m_signalSetProvider);
+	TEST_PTR_RETURN(m_propManager);
+
 	connect(m_signalSetProvider, &AppSignalSetProvider::signalsCountChanged, this, &SignalsModel::slot_signalsCountChanged);
 	connect(m_signalSetProvider, &AppSignalSetProvider::signalsUpdated, this, &SignalsModel::slot_signalsUpdated);
 
-	connect(&m_signalSetProvider->signalPropertyManager(), &AppSignalPropertyManager::propertyCountWillIncrease, this, &SignalsModel::beginIncreaseColumnCount, Qt::DirectConnection);
-	connect(&m_signalSetProvider->signalPropertyManager(), &AppSignalPropertyManager::propertyCountWillDecrease, this, &SignalsModel::beginDecreaseColumnCount, Qt::DirectConnection);
-	connect(&m_signalSetProvider->signalPropertyManager(), &AppSignalPropertyManager::propertyCountIncreased, this, &SignalsModel::endIncreaseColumnCount, Qt::DirectConnection);
-	connect(&m_signalSetProvider->signalPropertyManager(), &AppSignalPropertyManager::propertyCountDecreased, this, &SignalsModel::endDecreaseColumnCount, Qt::DirectConnection);
+	connect(m_propManager, &AppSignalPropertyManager::propertyCountWillIncrease, this, &SignalsModel::beginIncreaseColumnCount, Qt::DirectConnection);
+	connect(m_propManager, &AppSignalPropertyManager::propertyCountWillDecrease, this, &SignalsModel::beginDecreaseColumnCount, Qt::DirectConnection);
+	connect(m_propManager, &AppSignalPropertyManager::propertyCountIncreased, this, &SignalsModel::endIncreaseColumnCount, Qt::DirectConnection);
+	connect(m_propManager, &AppSignalPropertyManager::propertyCountDecreased, this, &SignalsModel::endDecreaseColumnCount, Qt::DirectConnection);
 }
 
 SignalsModel::~SignalsModel()
 {
+}
 
+AppSignalSetProvider* SignalsModel::signalSetProvider()
+{
+	return m_signalSetProvider;
+}
+
+AppSignalPropertyManager* SignalsModel::propManager()
+{
+	return m_propManager;
 }
 
 int SignalsModel::rowCount(const QModelIndex& parentIndex) const
@@ -442,7 +501,8 @@ int SignalsModel::columnCount(const QModelIndex& parentIndex) const
 	{
 		return 0;
 	}
-	return m_columnCount + 1;	// Usual properties and "Last change user"
+
+	return m_columnCount;
 }
 
 QVariant SignalsModel::data(const QModelIndex &index, int role) const
@@ -494,16 +554,9 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
-		AppSignalPropertyManager& manager = m_signalSetProvider->signalPropertyManager();
+		QVariant value = m_propManager->value(signal, col, theSettings.isExpertMode());
 
-		if (col >= manager.count())
-		{
-			return signal->checkedOut() ? m_signalSetProvider->getUserName(signal->userID()) : "";
-		}
-
-		QVariant value = manager.value(signal, col, theSettings.isExpertMode());
-
-		if (value.isValid() && signal->isAnalog() && manager.dependsOnPrecision(col))
+		if (value.isValid() && signal->isAnalog() && m_propManager->dependsOnPrecision(col))
 		{
 			switch (value.typeId())
 			{
@@ -523,7 +576,6 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 				assert(false);
 				return QVariant();
 			}
-
 		}
 
 		return value;
@@ -534,18 +586,11 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 
 QVariant SignalsModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-	AppSignalPropertyManager& propertyManager = *AppSignalPropertyManager::getInstance();
-
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
 		if (orientation == Qt::Horizontal)
 		{
-			if (section == propertyManager.count())
-			{
-				return "Last change user";
-			}
-
-			return propertyManager.caption(section);
+			return m_propManager->name(section);
 		}
 
 		if (orientation == Qt::Vertical)
@@ -561,24 +606,25 @@ QVariant SignalsModel::headerData(int section, Qt::Orientation orientation, int 
 
 bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-	AppSignalPropertyManager& propertyManager = m_signalSetProvider->signalPropertyManager();
-
 	if (role == Qt::EditRole)
 	{
 		int row = index.row();
 
-		assert(row < m_signalSetProvider->signalCount());
+		if (row >= m_signalSetProvider->signalCount())
+		{
+			Q_ASSERT(false);
+			return false;
+		}
 
 		const AppSignal* ls = m_signalSetProvider->getLoadedSignal(row, false);
 
 		AppSignal s(*ls);
 
-		propertyManager.setValue(&s, index.column(), value, theSettings.isExpertMode());
+		m_propManager->setValue(&s, index.column(), value, theSettings.isExpertMode());
 
 		// This should be done by SignalsDelegate::setModelData
+		Q_ASSERT(false);
 		m_signalSetProvider->saveSignal(s);
-
-		//m_signalSetProvider->loadSignal(s.ID());
 	}
 	else
 	{
@@ -590,8 +636,6 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 
 Qt::ItemFlags SignalsModel::flags(const QModelIndex &index) const
 {
-	AppSignalPropertyManager& propertyManager = m_signalSetProvider->signalPropertyManager();
-
 	if (index.isValid() == false)
 	{
 		return QAbstractTableModel::flags(index);
@@ -600,7 +644,7 @@ Qt::ItemFlags SignalsModel::flags(const QModelIndex &index) const
 	int row = index.row();
 	int column = index.column();
 
-	if (column >= propertyManager.count())
+	if (column >= m_propManager->count())
 	{
 		return QAbstractTableModel::flags(index) & ~Qt::ItemIsEditable;
 	}
@@ -611,7 +655,7 @@ Qt::ItemFlags SignalsModel::flags(const QModelIndex &index) const
 
 	TEST_PTR_RETURN_VALUE(s, Qt::NoItemFlags);
 
-	if (propertyManager.getBehaviour(*s, index.column()) == E::PropertyBehaviourType::Write)
+	if (m_propManager->getBehaviour(*s, index.column()) == E::PropertyBehaviourType::Write)
 	{
 		return QAbstractTableModel::flags(index) | Qt::ItemIsEditable;
 	}
@@ -623,7 +667,7 @@ Qt::ItemFlags SignalsModel::flags(const QModelIndex &index) const
 
 SignalsDelegate* SignalsModel::createDelegate(SignalsProxyModel* signalsProxyModel)
 {
-	return new SignalsDelegate(m_signalSetProvider, this, signalsProxyModel, parent());
+	return new SignalsDelegate(this, signalsProxyModel, parent());
 }
 
 SignalsTabPage* SignalsModel::parentWindow()
@@ -700,13 +744,18 @@ void SignalsModel::endDecreaseColumnCount()
 SignalsTabPage* SignalsTabPage::m_instance = nullptr;
 
 
-SignalsTabPage::SignalsTabPage(AppSignalSetProvider* signalSetProvider, DbController* dbController, QWidget* parent) :
+SignalsTabPage::SignalsTabPage(AppSignalSetProvider* signalSetProvider,
+							   AppSignalPropertyManager* propManager,
+							   DbController* dbController,
+							   QWidget* parent) :
 	MainTabPage(dbController, parent),
 	m_signalSetProvider(signalSetProvider),
 	m_db(dbController)
 {
-	assert(signalSetProvider != nullptr);
-	assert(m_instance == nullptr);
+	TEST_PTR_RETURN(signalSetProvider);
+	TEST_PTR_RETURN(propManager);
+
+	Q_ASSERT(m_instance == nullptr);
 
 	m_instance = this;
 
@@ -761,7 +810,7 @@ SignalsTabPage::SignalsTabPage(AppSignalSetProvider* signalSetProvider, DbContro
 
 	// Property View
 	//
-	m_signalsModel = new SignalsModel(signalSetProvider, this);
+	m_signalsModel = new SignalsModel(signalSetProvider, propManager, this);
 
 	//For testing purposes
 	//
@@ -790,18 +839,17 @@ SignalsTabPage::SignalsTabPage(AppSignalSetProvider* signalSetProvider, DbContro
 
 	horizontalHeader->setDefaultSectionSize(150);
 
-	auto& propertyManager = signalSetProvider->signalPropertyManager();
 	int wideColumnWidth = 400;
 
-	m_signalsView->setColumnWidth(propertyManager.propertyIndex(AppSignalPropNames::APP_SIGNAL_ID), wideColumnWidth);
-	m_signalsView->setColumnWidth(propertyManager.propertyIndex(AppSignalPropNames::CUSTOM_APP_SIGNAL_ID), wideColumnWidth);
-	m_signalsView->setColumnWidth(propertyManager.propertyIndex(AppSignalPropNames::BUS_TYPE_ID), wideColumnWidth);
-	m_signalsView->setColumnWidth(propertyManager.propertyIndex(AppSignalPropNames::CAPTION), wideColumnWidth);
-	m_signalsView->setColumnWidth(propertyManager.propertyIndex(AppSignalPropNames::EQUIPMENT_ID), wideColumnWidth);
+	m_signalsView->setColumnWidth(propManager->propertyIndex(AppSignalPropNames::APP_SIGNAL_ID), wideColumnWidth);
+	m_signalsView->setColumnWidth(propManager->propertyIndex(AppSignalPropNames::CUSTOM_APP_SIGNAL_ID), wideColumnWidth);
+	m_signalsView->setColumnWidth(propManager->propertyIndex(AppSignalPropNames::BUS_TYPE_ID), wideColumnWidth);
+	m_signalsView->setColumnWidth(propManager->propertyIndex(AppSignalPropNames::CAPTION), wideColumnWidth);
+	m_signalsView->setColumnWidth(propManager->propertyIndex(AppSignalPropNames::EQUIPMENT_ID), wideColumnWidth);
 
 	QVector<int> defaultColumnVisibility;
 
-	const QVector<QString> defaultSignalPropertyVisibility =
+	const std::vector<QString> defaultSignalPropertyVisibility =
 	{
 		AppSignalPropNames::APP_SIGNAL_ID,
 		AppSignalPropNames::CUSTOM_APP_SIGNAL_ID,
@@ -815,11 +863,11 @@ SignalsTabPage::SignalsTabPage(AppSignalSetProvider* signalSetProvider, DbContro
 
 	for (const QString& columnName : defaultSignalPropertyVisibility)
 	{
-		defaultColumnVisibility.push_back(propertyManager.propertyIndex(columnName));
+		defaultColumnVisibility.push_back(propManager->propertyIndex(columnName));
 	}
 
 	m_signalsColumnVisibilityController = new TableDataVisibilityController(m_signalsView, "SignalsTabPage", defaultColumnVisibility);
-	connect(&signalSetProvider->signalPropertyManager(), &AppSignalPropertyManager::propertyCountIncreased, m_signalsColumnVisibilityController, &TableDataVisibilityController::checkNewColumns);
+	connect(propManager, &AppSignalPropertyManager::propertyCountIncreased, m_signalsColumnVisibilityController, &TableDataVisibilityController::checkNewColumns);
 
 	m_signalsView->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_signalsView->fontMetrics().height() * 1.4));
 	m_signalsView->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
@@ -837,7 +885,7 @@ SignalsTabPage::SignalsTabPage(AppSignalSetProvider* signalSetProvider, DbContro
 
 	// Create Actions
 	//
-	CreateActions(toolBar);
+	createActions(toolBar);
 
 	//
 	// Layouts
@@ -1069,7 +1117,7 @@ int SignalsTabPage::getMiddleVisibleRow()
 	return m_signalsView->indexAt(rect.center()).row();
 }
 
-void SignalsTabPage::CreateActions(QToolBar *toolBar)
+void SignalsTabPage::createActions(QToolBar *toolBar)
 {
 	QAction* action = nullptr;
 
@@ -1998,13 +2046,17 @@ void SignalsTabPage::compareObject(DbChangesetObject object, CompareData compare
 	return;
 }
 
-SignalsProxyModel::SignalsProxyModel(SignalsModel *sourceModel, QObject *parent) :
+SignalsProxyModel::SignalsProxyModel(SignalsModel* sourceModel, QObject *parent) :
 	QSortFilterProxyModel(parent),
 	m_sourceModel(sourceModel)
 {
-	m_signalSetProvider = AppSignalSetProvider::getInstance();
-	connect(this, &SignalsProxyModel::aboutToSort, m_signalSetProvider, &AppSignalSetProvider::enforceAllSignalsLoading, Qt::DirectConnection);
-	connect(this, &SignalsProxyModel::aboutToFilter, m_signalSetProvider, &AppSignalSetProvider::enforceAllSignalsLoading, Qt::DirectConnection);
+	TEST_PTR_RETURN(m_sourceModel);
+
+	AppSignalSetProvider* provider = m_sourceModel->signalSetProvider();
+	TEST_PTR_RETURN(provider);
+
+	connect(this, &SignalsProxyModel::aboutToSort, provider, &AppSignalSetProvider::enforceAllSignalsLoading, Qt::DirectConnection);
+	connect(this, &SignalsProxyModel::aboutToFilter, provider, &AppSignalSetProvider::enforceAllSignalsLoading, Qt::DirectConnection);
 	setSourceModel(sourceModel);
 }
 
@@ -2015,10 +2067,15 @@ bool SignalsProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex&) cons
 		return true;
 	}
 
-	const AppSignal& currentSignal = *m_signalSetProvider->getLoadedSignal(sourceRow, false);
+	AppSignalSetProvider* provider = m_sourceModel->signalSetProvider();
+	TEST_PTR_RETURN_FALSE(provider);
+
+	const AppSignal* currentSignal = provider->getLoadedSignal(sourceRow, false);
+
+	TEST_PTR_RETURN_FALSE(currentSignal);
 
 	if (m_signalType != SignalsTabPage::FILTER_ST_ANY &&
-		m_signalType != TO_INT(currentSignal.signalType()))
+		m_signalType != TO_INT(currentSignal->signalType()))
 	{
 		return false;
 	}
@@ -2037,30 +2094,30 @@ bool SignalsProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex&) cons
 		switch (m_idFilterField)
 		{
 			case SignalsTabPage::FILTER_STR_ANY:
-				result = rx.match(currentSignal.appSignalID().trimmed()).hasMatch() ||
-						 rx.match(currentSignal.customAppSignalID().trimmed()).hasMatch() ||
-						 rx.match(currentSignal.equipmentID().trimmed()).hasMatch() ||
-						 rx.match(currentSignal.caption().trimmed()).hasMatch();
+				result = rx.match(currentSignal->appSignalID().trimmed()).hasMatch() ||
+						 rx.match(currentSignal->customAppSignalID().trimmed()).hasMatch() ||
+						 rx.match(currentSignal->equipmentID().trimmed()).hasMatch() ||
+						 rx.match(currentSignal->caption().trimmed()).hasMatch();
 				break;
 
 			case SignalsTabPage::FILTER_STR_APP_SIGNAL_ID:
-				result = rx.match(currentSignal.appSignalID().trimmed()).hasMatch();
+				result = rx.match(currentSignal->appSignalID().trimmed()).hasMatch();
 				break;
 
 			case SignalsTabPage::FILTER_STR_CUSTOM_APP_SIGNAL_ID:
-				result = rx.match(currentSignal.customAppSignalID().trimmed()).hasMatch();
+				result = rx.match(currentSignal->customAppSignalID().trimmed()).hasMatch();
 				break;
 
 			case SignalsTabPage::FILTER_STR_EQUIPMENT_ID:
-				result = rx.match(currentSignal.equipmentID().trimmed()).hasMatch();
+				result = rx.match(currentSignal->equipmentID().trimmed()).hasMatch();
 				break;
 
 			case SignalsTabPage::FILTER_STR_CAPTION:
-				result = rx.match(currentSignal.caption().trimmed()).hasMatch();
+				result = rx.match(currentSignal->caption().trimmed()).hasMatch();
 				break;
 
 			case SignalsTabPage::FILTER_STR_TAGS:
-				result = rx.match(currentSignal.tagsStr().trimmed()).hasMatch();
+				result = rx.match(currentSignal->tagsStr().trimmed()).hasMatch();
 				break;
 
 			default:
@@ -2084,8 +2141,11 @@ bool SignalsProxyModel::lessThan(const QModelIndex& sourceLeft, const QModelInde
 
 	if (l == r)
 	{
-		const AppSignal* sl = m_signalSetProvider->getLoadedSignal(sourceLeft.row(), false);
-		const AppSignal* sr = m_signalSetProvider->getLoadedSignal(sourceRight.row(), false);
+		AppSignalSetProvider* provider = m_sourceModel->signalSetProvider();
+		TEST_PTR_RETURN_FALSE(provider);
+
+		const AppSignal* sl = provider->getLoadedSignal(sourceLeft.row(), false);
+		const AppSignal* sr = provider->getLoadedSignal(sourceRight.row(), false);
 
 		return sl->appSignalID() < sr->appSignalID();
 	}

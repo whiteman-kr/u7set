@@ -7,20 +7,20 @@ AppSignalPropertyManager* AppSignalPropertyManager::m_instance = nullptr;
 const std::map<int, QString> AppSignalPropertyManager::m_emptyEnumValuesMap;
 const AppSignalPropertyDescription AppSignalPropertyManager::m_notValidPropDescription;
 
+// this replacement for properties required to change getter return type from E::* to QString
+//
 const std::vector<AppSignalPropertyDescription> AppSignalPropertyManager::m_replacedPropDescriptions =
 {
 	{
 		AppSignalPropNames::TYPE,
-		"A/D/B",
 		QMetaType::QString,
-		[](const AppSignal* s){ return E::valueToString<E::SignalType>(s->signalType()).left(1); },
+		[](const AppSignal* s){ return E::valueToString<E::SignalType>(s->signalType()); },
 		nullptr,
 		{},
 	},
 
 	{
 		AppSignalPropNames::IN_OUT_TYPE,
-		"Input-output type",
 		QMetaType::QString,
 		[](const AppSignal* s) { return E::valueToString<E::SignalInOutType>(s->inOutType()); },
 		nullptr,
@@ -29,7 +29,6 @@ const std::vector<AppSignalPropertyDescription> AppSignalPropertyManager::m_repl
 
 	{
 		AppSignalPropNames::BYTE_ORDER_PROP,
-		"Byte order",
 		QMetaType::QString,
 		[](const AppSignal* s) { return E::valueToString<E::ByteOrder>(s->byteOrder()); },
 		nullptr,
@@ -37,8 +36,19 @@ const std::vector<AppSignalPropertyDescription> AppSignalPropertyManager::m_repl
 	},
 
 	{
+		AppSignalPropNames::CHECKOUT_BY_USER,
+		QMetaType::QString,
+		[](const AppSignal* s) {
+									return (s->checkedOut() ?
+												AppSignalSetProvider::getInstance()->getUserName(s->userID()) :
+												QString());
+								},
+		nullptr,
+		{},
+	},
+
+	{
 		AppSignalPropNames::ANALOG_SIGNAL_FORMAT,
-		"Analog format",
 		QMetaType::QString,
 		[](const AppSignal* s) { return E::valueToString<E::AnalogAppSignalFormat>(s->analogSignalFormat()); },
 		[](AppSignal* s, const QVariant& v) { s->setAnalogSignalFormat(static_cast<E::AnalogAppSignalFormat>(v.toInt())); },
@@ -70,17 +80,6 @@ AppSignalPropertyManager* AppSignalPropertyManager::getInstance()
 int AppSignalPropertyManager::count() const
 {
 	return static_cast<int>(m_propDescriptions.size());
-}
-
-QString AppSignalPropertyManager::caption(int propertyIndex) const
-{
-	if (isValidPropIndex(propertyIndex) == false)
-	{
-		Q_ASSERT(false);
-		return QString();
-	}
-
-	return m_propDescriptions[propertyIndex].caption;
 }
 
 QString AppSignalPropertyManager::name(int propertyIndex)
@@ -179,6 +178,8 @@ QVariant AppSignalPropertyManager::value(const AppSignal* signal, int propertyIn
 
 	const AppSignalPropertyDescription& property = m_propDescriptions[propertyIndex];
 
+	TEST_PTR_RETURN_VALUE(property.valueGetter, QVariant());
+
 	if (property.isSpecificProperty() == false)
 	{
 		return property.valueGetter(signal);
@@ -208,20 +209,51 @@ QVariant AppSignalPropertyManager::value(const AppSignal* signal, int propertyIn
 	}
 }
 
-void AppSignalPropertyManager::setValue(AppSignal* signal, int propertyIndex, const QVariant& value, bool isExpert)
+bool AppSignalPropertyManager::setValue(AppSignal* signal, int propertyIndex, const QVariant& newValue, bool isExpert)
 {
 	if (isValidPropIndex(propertyIndex) == false)
 	{
 		Q_ASSERT(false);
+		return false;
 	}
 
 	E::PropertyBehaviourType behaviour = getBehaviour(*signal, propertyIndex);
+
 	if (isHidden(behaviour, isExpert) || isReadOnly(behaviour, isExpert))
 	{
 		Q_ASSERT(false);
+		return false;
 	}
 
-	m_propDescriptions[propertyIndex].valueSetter(signal, value);
+	AppSignalPropertyDescription& propDesc = m_propDescriptions[propertyIndex];
+
+	QVariant prevValue = value(signal, propertyIndex, isExpert);
+
+	if (propDesc.isEnumProperty() == true)
+	{
+		// for enum properties prevValue returnes as string, ex. "SignedInt32", but newValue is a number
+		// so, convertion of newValue from number to enum value String is required!
+		//
+		QVariant newValueStr = propDesc.getEnumValueStr(newValue.toInt());
+
+		if (prevValue == newValueStr)
+		{
+			return false;
+		}
+	}
+	else
+	{
+		if (prevValue == newValue)
+		{
+			return false;
+		}
+	}
+
+	TEST_PTR_RETURN_FALSE(propDesc.valueSetter);
+
+	propDesc.valueSetter(signal, newValue);
+
+	return true;
 }
 
 const AppSignalPropertyDescription& AppSignalPropertyManager::getPropertyDescription(int propertyIndex) const
@@ -352,7 +384,7 @@ void AppSignalPropertyManager::detectNewProperties(const AppSignal* signal)
 
 		newProperty.specificProperty = true;
 		newProperty.name = propertyName;
-		newProperty.caption = AppSignalProperties::generateCaption(propertyName);
+//		newProperty.caption = AppSignalProperties::generateCaption(propertyName);
 		newProperty.type = type;
 		newProperty.appendSignalID(signal->ID());
 
@@ -415,30 +447,34 @@ void AppSignalPropertyManager::initNotSpecificPropDescriptions()
 
 	m_notSpecificPropDescriptions = m_replacedPropDescriptions;
 
+	std::set<QString> existPropNames;
+
+	for(const AppSignalPropertyDescription& propDesc : m_notSpecificPropDescriptions)
+	{
+		existPropNames.emplace(propDesc.name);
+	}
+
 	AppSignal signal;
 	AppSignalProperties signalProperties(signal, true);
 	std::vector<AppSignalPropertyDescription> propertyDescriptions = signalProperties.getProperties();
 
-	for (AppSignalPropertyDescription& property : propertyDescriptions)
+	for (const AppSignalPropertyDescription& propDesc : propertyDescriptions)
 	{
-		if (property.name == "AppSignalID")
+		if (existPropNames.contains(propDesc.name))
 		{
-			DEBUG_STOP;
+			continue;
 		}
-		Q_ASSERT(property.specificProperty == false);
 
-		addNewProperty(property, true);	// property will not added if present in m_replacedPropDescriptions
+		auto propPtr = signalProperties.propertyByCaption(propDesc.name);
 
-/*		auto propertyPtr = signalProperties.propertyByCaption(property.name);
-
-		if (propertyPtr != nullptr && propertyPtr->category().isEmpty() == false)
+		if (propPtr != nullptr && propPtr->isCategorized() == true)
 		{
-			addNewProperty(property, true);	// property will not added if present in m_replacedPropDescriptions
-		}*/
+			m_notSpecificPropDescriptions.emplace_back(propDesc);
+		}
 	}
 }
 
-void AppSignalPropertyManager::updatePropertyName2IndexMap()
+void AppSignalPropertyManager::updatePropNameToIndexMap()
 {
 	m_propNameToIndex.clear();
 
@@ -448,7 +484,7 @@ void AppSignalPropertyManager::updatePropertyName2IndexMap()
 	}
 }
 
-void AppSignalPropertyManager::updatePropertyDescriptionsBehaviour()
+void AppSignalPropertyManager::updatePropDescriptionsBehaviour()
 {
 	for(AppSignalPropertyDescription& propDesc : m_propDescriptions)
 	{
@@ -465,7 +501,6 @@ void AppSignalPropertyManager::updatePropertyDescriptionsBehaviour()
 	}
 }
 
-
 int AppSignalPropertyManager::propertyIndex(const QString& propName) const
 {
 	auto it = m_propNameToIndex.find(propName);
@@ -475,19 +510,16 @@ int AppSignalPropertyManager::propertyIndex(const QString& propName) const
 
 void AppSignalPropertyManager::reloadPropertiesBehaviour()
 {
-	if (m_dbController == nullptr)
-	{
-		return;
-	}
+	TEST_PTR_RETURN(m_dbController);
 
 	int etcFileId = m_dbController->systemFileId(DbDir::EtcDir);
 
-	DbFileInfo propertyBehaviorFile;
+	DbFileInfo propBehaviourFileInfo;
 
 	m_dbController->getFileInfo(etcFileId, QString(Db::File::SignalPropertyBehaviorFileName),
-								&propertyBehaviorFile, nullptr);
+								&propBehaviourFileInfo, nullptr);
 
-	if (propertyBehaviorFile.isNull() == true)
+	if (propBehaviourFileInfo.isNull() == true)
 	{
 		QMessageBox::critical(m_parentWidget, "Error", QString("File \"%1\" is not found!").
 										arg(Db::File::SignalPropertyBehaviorFileName));
@@ -496,7 +528,7 @@ void AppSignalPropertyManager::reloadPropertiesBehaviour()
 
 	std::shared_ptr<DbFile> file;
 
-	bool result = m_dbController->getLatestVersion(propertyBehaviorFile, &file, nullptr);
+	bool result = m_dbController->getLatestVersion(propBehaviourFileInfo, &file, nullptr);
 
 	if (result == false)
 	{
@@ -537,6 +569,8 @@ void AppSignalPropertyManager::reloadPropertiesBehaviour()
 		QMessageBox::critical(m_parentWidget, "Error", uncorrectFileMessage + ": DependosOnPrecision column not found");
 		return;
 	}
+
+	m_propertiesBehaviour.clear();
 
 	for (QString row : rows)
 	{
@@ -602,7 +636,7 @@ void AppSignalPropertyManager::reloadPropertiesBehaviour()
 		m_propertiesBehaviour.emplace(propName, behaviour);
 	}
 
-	updatePropertyDescriptionsBehaviour();
+	updatePropDescriptionsBehaviour();
 }
 
 void AppSignalPropertyManager::clear()
@@ -624,10 +658,10 @@ void AppSignalPropertyManager::clear()
 		}
 	}
 
-	m_parsedSpecPropStruct.clear();
-
 	m_propDescriptions = m_notSpecificPropDescriptions;
-	updatePropertyName2IndexMap();
+	updatePropNameToIndexMap();
+
+	m_parsedSpecPropStruct.clear();
 
 	if (increased == true)
 	{

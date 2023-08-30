@@ -45,7 +45,6 @@ struct AppSignalPropertyDescription
 {
 	AppSignalPropertyDescription();
 	AppSignalPropertyDescription(const QString& propName,
-								 const QString& propCaption,
 								 QMetaType::Type propType,
 								 std::function<QVariant (const AppSignal*)> getter,
 								 std::function<void (AppSignal*, const QVariant&)> setter,
@@ -53,9 +52,8 @@ struct AppSignalPropertyDescription
 
 	bool specificProperty = false;
 	QString name;
-	QString caption;
 	QMetaType::Type type = QMetaType::UnknownType;
-
+	
 	std::function<QVariant (const AppSignal*)> valueGetter;
 	std::function<void (AppSignal*, const QVariant&)> valueSetter;
 
@@ -77,6 +75,8 @@ struct AppSignalPropertyDescription
 	bool getEnumValuesVector(std::vector<std::pair<int, QString>>* enumValuesVector) const;
 
 	bool isEnumProperty() const;
+	QString getEnumValueStr(int enumValue) const;
+
 	void appendSignalID(int signalID);
 	bool isSignalHaveProperty(int signalID) const;
 	bool isSpecificProperty() const;
@@ -87,8 +87,6 @@ class AppSignalProperties : public PropertyObject
 	Q_OBJECT
 
 public:
-	static QString generateCaption(const QString& name);
-
 	static const QString appSignalIDTemplateCaption;
 	static const QString customAppSignalIDTemplateCaption;
 	static const QString appSignalCaptionTemplateCaption;
@@ -191,7 +189,7 @@ AppSignalProperties::addPropertyDescription(const QString& name,
 	AppSignalPropertyDescription newProperty;
 
 	newProperty.name = name;
-	newProperty.caption = generateCaption(name);
+	//newProperty.caption = generateCaption(name);
 
 	newProperty.enumValues = E::enumValuesMap<TYPE>();
 	newProperty.type = QMetaType::Int;
@@ -220,8 +218,6 @@ AppSignalProperties::addPropertyDescription(const QString& name,
 	AppSignalPropertyDescription newProperty;
 
 	newProperty.name = name;
-	newProperty.caption = generateCaption(name);
-
 	newProperty.type = static_cast<QMetaType::Type>(qMetaTypeId<TYPE>());
 
 	newProperty.valueGetter = [getter](const AppSignal* s)
@@ -254,8 +250,6 @@ AppSignalProperties::addPropertyDescription(const QString& name,
 	AppSignalPropertyDescription newProperty;
 
 	newProperty.name = name;
-	newProperty.caption = generateCaption(name);
-
 	newProperty.type = static_cast<QMetaType::Type>(qMetaTypeId<TuningValue>());
 
 	newProperty.valueGetter = [getter](const AppSignal* s){ return getter(*s).toVariant(); };

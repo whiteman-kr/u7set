@@ -522,6 +522,7 @@ namespace AppSignalPropNames
 	inline const QString CHANGESET_ID("ChangesetID");
 	inline const QString CHECKED_OUT("CheckedOut");
 	inline const QString USER_ID("UserID");
+	inline const QString CHECKOUT_BY_USER("CheckoutByUser");
 	inline const QString CHANNEL("Channel");
 	inline const QString EXCLUDE_FROM_BUILD("ExcludeFromBuild");
 	inline const QString CREATED("Created");

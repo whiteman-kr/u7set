@@ -13,12 +13,8 @@ public:
 
 	static AppSignalPropertyManager* getInstance();
 
-	// Data for models
-	//
-
 	int count() const;
 
-	QString caption(int propertyIndex) const;
 	QString name(int propertyIndex);
 
 	int propertyIndex(const QString& name);
@@ -28,7 +24,7 @@ public:
 	bool isEnumProperty(int propertyIndex) const;
 
 	QVariant value(const AppSignal* signal, int propertyIndex, bool isExpert) const;
-	void setValue(AppSignal* signal, int propertyIndex, const QVariant& value, bool isExpert);
+	bool setValue(AppSignal* signal, int propertyIndex, const QVariant& newValue, bool isExpert);	// returns true if value changed
 
 	const AppSignalPropertyDescription& getPropertyDescription(int propertyIndex) const;
 	QMetaType::Type type(const int propertyIndex) const;
@@ -62,9 +58,9 @@ private:
 private:
 	void initNotSpecificPropDescriptions();
 
-	void updatePropertyName2IndexMap();
+	void updatePropNameToIndexMap();
 
-	void updatePropertyDescriptionsBehaviour();
+	void updatePropDescriptionsBehaviour();
 
 	int propertyIndex(const QString& propName) const;
 

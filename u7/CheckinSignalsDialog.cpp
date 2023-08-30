@@ -137,11 +137,7 @@ void CheckinSignalsDialog::checkinSelected()
 		return;
 	}
 
-	std::vector<ObjectState> states;
-
-	signalSetProvider->checkinSignals(IDs, commentText, &states);
-	signalSetProvider->showErrors(states);
-	signalSetProvider->reloadAllSignals();
+	signalSetProvider->checkinSignals(IDs, commentText);
 
 	accept();
 }
@@ -152,7 +148,6 @@ void CheckinSignalsDialog::cancel()
 
 	reject();
 }
-
 
 void CheckinSignalsDialog::closeEvent(QCloseEvent* event)
 {

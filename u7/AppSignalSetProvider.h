@@ -62,9 +62,6 @@ public:
 	bool isCheckinableSignalForMe(int index) const;
 	bool isCheckinableSignalForMe(const AppSignal* signal) const;
 
-	bool checkoutSignal(int index, QString* message);
-	bool undoSignal(int id);
-
 	void deleteSignalGroups(const QSet<int>& signalGroupIDs);
 	void deleteSignals(const std::vector<int>& signalIDs);
 	void deleteSignal(int signalID);
@@ -74,18 +71,21 @@ public:
 	void saveSignals(const std::vector<AppSignal*>& signalVector);
 	std::vector<int> cloneSignals(const std::vector<int>& signalIDsToClone);
 
-	void showError(const ObjectState& state);
-	void showErrors(const std::vector<ObjectState>& states);
+	bool showError(const ObjectState& state);
+	bool showErrors(const std::vector<ObjectState>& states);
 
 	static void trimSignalTextFields(AppSignal& signal);
 
 	// DbController calls
 
-	bool checkinSignals(const std::vector<int>& signalIDs,
-						QString comment,
-						std::vector<ObjectState>* objectStates);
+	bool checkoutSignal(int index, QString* message);
 
-	bool undoSignalChanges(int signalID, ObjectState* objectStates);
+	bool checkinSignals(const std::vector<int>& signalIDs,
+						QString comment);
+
+	bool undoSignalsChanges(const std::vector<int>& signalIDs);
+	bool undoSignal(int id);
+	bool undoSignal(const AppSignal& s);
 
 signals:
 	void error(const QString& message);						// for throwing message boxes

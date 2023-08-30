@@ -2,6 +2,7 @@
 #include <QGridLayout>
 #include <QSplitter>
 #include "GlobalMessanger.h"
+#include "AppSignalSetProvider.h"
 
 //
 // PendingChangesModel
@@ -462,9 +463,7 @@ void PendingChangesDialog::checkIn()
 	//
 	if (checkInSignals.empty() == false)
 	{
-		std::vector<ObjectState> signalObjectState;
-
-		db()->checkinSignals(checkInSignals, comment, &signalObjectState, this);
+		AppSignalSetProvider::getInstance()->checkinSignals(checkInSignals, comment);
 	}
 
 	// --

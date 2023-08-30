@@ -97,21 +97,7 @@ void UndoSignalsDialog::undoSelected()
 		return;
 	}
 
-	std::vector<ObjectState> states;
-
-	for(int ID : m_undoedSignalsIDs)
-	{
-		ObjectState state;
-
-		signalSetProvider->undoSignalChanges(ID, &state);
-
-		if (state.errCode != ERR_SIGNAL_OK)
-		{
-			states.emplace_back(state);
-		}
-	}
-
-	signalSetProvider->showErrors(states);
+	signalSetProvider->undoSignalsChanges(m_undoedSignalsIDs);
 
 	accept();
 }

@@ -25,6 +25,7 @@ class QActionGroup;
 class QStandardItemModel;
 class TableDataVisibilityController;
 class AppSignalSetProvider;
+class AppSignalPropertyManager;
 class FindSignalDialog;
 class DialogMetrologyConnection;
 
@@ -48,8 +49,7 @@ class SignalsDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
-	explicit SignalsDelegate(AppSignalSetProvider* signalSetProvider,
-							 SignalsModel* model,
+	explicit SignalsDelegate(SignalsModel* model,
 							 SignalsProxyModel* signalsProxyModel,
 							 QObject* parent = nullptr);
 	~SignalsDelegate();
@@ -72,8 +72,7 @@ protected:
 					 const QStyleOptionViewItem& option, const QModelIndex& index);
 
 private:
-	AppSignalSetProvider* m_signalSetProvider;
-	SignalsModel* m_model;
+	SignalsModel* m_model = nullptr;
 	SignalsProxyModel* m_proxyModel;
 	mutable int signalIdForUndoOnCancelEditing = -1;
 };
@@ -100,7 +99,10 @@ public:
 	static const int FILTER_STR_TAGS = 5;
 
 public:
-	SignalsTabPage(AppSignalSetProvider* signalSetProvider, DbController* dbController, QWidget* parent);
+	SignalsTabPage(AppSignalSetProvider* signalSetProvider,
+				   AppSignalPropertyManager* propManager,
+				   DbController* dbController,
+				   QWidget* parent);
 	virtual ~SignalsTabPage() override;
 
 	static bool updateSignalsSpecProps(DbController* dbc,
@@ -111,7 +113,7 @@ public:
 	bool editSignals(const std::vector<int> &ids);
 
 protected:
-	void CreateActions(QToolBar* toolBar);
+	void createActions(QToolBar* toolBar);
 
 	// Events
 	//
@@ -191,8 +193,13 @@ class SignalsModel : public QAbstractTableModel
 {
 	Q_OBJECT
 public:
-	SignalsModel(AppSignalSetProvider* signalSetProvider, SignalsTabPage* parent = nullptr);
+	SignalsModel(AppSignalSetProvider* signalSetProvider,
+				 AppSignalPropertyManager* propManager,
+				 SignalsTabPage* parent = nullptr);
 	virtual ~SignalsModel() override;
+
+	AppSignalSetProvider* signalSetProvider();
+	AppSignalPropertyManager* propManager();
 
 	virtual int rowCount(const QModelIndex& parentIndex = QModelIndex()) const override;
 	virtual int columnCount(const QModelIndex& parentIndex = QModelIndex()) const override;
@@ -220,6 +227,7 @@ public slots:
 
 private:
 	AppSignalSetProvider* m_signalSetProvider = nullptr;
+	AppSignalPropertyManager* m_propManager = nullptr;
 	SignalsTabPage* m_parentWindow;
 
 	int m_rowCount = 0;
@@ -250,7 +258,6 @@ private:
 	void applyNewFilter();
 
 	SignalsModel* m_sourceModel;
-	AppSignalSetProvider* m_signalSetProvider;
 	int m_signalType = SignalsTabPage::FILTER_ST_ANY;
 	int m_idFilterField = SignalsTabPage::FILTER_STR_APP_SIGNAL_ID;
 	QStringList m_strIdMasks;

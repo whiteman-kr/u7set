@@ -2564,6 +2564,11 @@ void AppSignalSet::append(AppSignal* signal)
 	m_groups.insert(signal);
 }
 
+void AppSignalSet::append(const AppSignal& signal)
+{
+	append(new AppSignal(signal));
+}
+
 void AppSignalSet::append(const ID_AppSignalID& id)
 {
 	append(new AppSignal(id));
@@ -2707,6 +2712,15 @@ int AppSignalSet::signalIndex(int signalID) const
 	}
 
 	return it->second;
+}
+
+bool AppSignalSet::getChannelSignalsID(int signalID, std::vector<int>* channelSignalIDs) const
+{
+	const AppSignal* s = getSignal(signalID);
+
+	TEST_PTR_RETURN_FALSE(s);
+
+	return m_groups.getGroupSignalIDs(s->ID(), s->signalGroupID(), channelSignalIDs);
 }
 
 bool AppSignalSet::getChannelSignalsID(const AppSignal& signal, std::vector<int>* channelSignalIDs) const

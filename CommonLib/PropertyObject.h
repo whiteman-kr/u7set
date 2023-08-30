@@ -142,6 +142,11 @@ public:
 		return *this;
 	}
 
+	[[nodiscard]] bool isCategorized() const noexcept
+	{
+		return !m_category.isEmpty();
+	}
+
 	[[nodiscard]] const QString& validator() const noexcept
 	{
 		return m_validator;
