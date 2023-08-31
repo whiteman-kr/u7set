@@ -125,8 +125,20 @@ namespace TestSuite
 			return false;
 		}
 
-		m_signalManager.setUnappliedValue(::calcHash(appSignalId), TuningValue{asp.tuningType(), value.toDouble()});
+		TuningSignalState state = m_signalManager.state(appSignalId, &found);
+		if (found == false)
+		{
+			return false;
+		}
 
+		if (state.valid() == false ||
+			state.controlIsEnabled() == false ||
+			state.writingIsEnabled() == false)
+		{
+			return false;
+		}
+
+		m_signalManager.setUnappliedValue(::calcHash(appSignalId), TuningValue{ asp.tuningType(), value.toDouble() });
 		return m_connection.writeTuningSignal(appSignalId, value);
 	}
 
