@@ -416,7 +416,7 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 		signalPtrVector.push_back(&signal);
 	}
 
-	SignalPropertiesDialog signalPropDialog(dbc, signalPtrVector, false, false, parent);
+	SignalPropertiesDialog signalPropDialog(signalPtrVector, false, false, parent);
 
 	dialogResult = signalPropDialog.exec();
 	if (dialogResult != QDialog::Accepted)

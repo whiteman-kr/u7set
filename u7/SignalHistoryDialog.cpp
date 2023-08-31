@@ -4,15 +4,16 @@
 #include "AppSignalSetProvider.h"
 #include "Settings.h"
 
-SignalHistoryDialog::SignalHistoryDialog(DbController* dbController, const QString& appSignalId, int signalId, QWidget* parent) :
+SignalHistoryDialog::SignalHistoryDialog(const AppSignal& s, QWidget* parent) :
 	QDialog(parent),
-	m_dbController(dbController),
-	m_signalId(signalId)
+	m_signalSetProvider(AppSignalSetProvider::getInstance()),
+	m_propManager(AppSignalPropertyManager::getInstance())
 {
-	// Initial data
-	//
+	int signalID = s.ID();
+
 	std::vector<DbChangeset> signalChanges;
-	dbController->getSignalHistory(signalId, &signalChanges, this);
+
+	m_signalSetProvider->getSignalHistory(signalID, &signalChanges);
 
 	QVector<std::pair<QString, std::function<QVariant (DbChangeset&)>>> changesetColumnDescription =
 	{
@@ -26,7 +27,7 @@ SignalHistoryDialog::SignalHistoryDialog(DbController* dbController, const QStri
 
 	// Interface
 	//
-	setWindowTitle(tr("History - ") + appSignalId);
+	setWindowTitle(tr("History - ") + s.appSignalID());
 
 	setWindowPosition(this, "SignalHistoryDialog");
 
@@ -71,13 +72,11 @@ SignalHistoryDialog::SignalHistoryDialog(DbController* dbController, const QStri
 		defaultColumns.push_back(i);
 	}
 
-	QVector<AppSignal> signalInstances;
-	signalInstances.reserve(static_cast<int>(signalChanges.size()));
-	std::vector<int> signalIds = { signalId };
-	std::vector<AppSignal> signalInstance;
+	std::vector<AppSignal> signalInstances;
+	signalInstances.reserve(signalChanges.size());
 
-	AppSignalPropertyManager* pSignalPropertyManager = AppSignalPropertyManager::getInstance();
-	pSignalPropertyManager->reloadPropertiesBehaviour();
+	std::vector<int> signalIds = { signalID };
+	std::vector<AppSignal> signalInstance;
 
 	int row = 0;
 	for (DbChangeset& changeset : signalChanges)
@@ -87,57 +86,63 @@ SignalHistoryDialog::SignalHistoryDialog(DbController* dbController, const QStri
 			m_historyModel->setData(m_historyModel->index(row, i), changesetColumnDescription[i].second(changeset));
 		}
 
-		dbController->getSpecificSignals(signalIds, changeset.changeset(), &signalInstance, this);
+		m_signalSetProvider->getSpecificSignals(signalIds, changeset.changeset(), &signalInstance);
 
 		if (signalInstance.size() == 1)
 		{
 			signalInstances.push_back(signalInstance[0]);
-			pSignalPropertyManager->detectNewProperties(&signalInstance[0]);
+
+			m_propManager->detectNewProperties(&signalInstance[0]);
+
 			signalInstance.clear();
 		}
 		else
 		{
-			assert(false);
+			Q_ASSERT(false);
 		}
 
 		row++;
 	}
 
+	bool isExpert = theSettings.isExpertMode();
+
 	// Signal instances details
 	//
-	for (int propertyIndex = 0; propertyIndex < pSignalPropertyManager->count(); propertyIndex++)
+	for (int propertyIndex = 0; propertyIndex < m_propManager->count(); propertyIndex++)
 	{
-		if (signalInstances.count() == 0)
+		if (signalInstances.size() == 0)
 		{
 			break;
 		}
 
-		bool isExpert = theSettings.isExpertMode();
-
-		QVariant previousValue = pSignalPropertyManager->value(&signalInstances[0], propertyIndex, isExpert);
+		QVariant previousValue = m_propManager->value(&signalInstances[0], propertyIndex, isExpert);
 
 		QList<QStandardItem*> column;
 		int columnIndex = m_historyModel->columnCount();
 
-		for (int signalIndex = 0; signalIndex < signalInstances.count(); signalIndex++)
+		for (int signalIndex = 0; signalIndex < static_cast<int>(signalInstances.size()); signalIndex++)
 		{
-			QVariant currentValue = pSignalPropertyManager->value(&signalInstances[signalIndex], propertyIndex, isExpert);
+			QVariant currentValue = m_propManager->value(&signalInstances[signalIndex], propertyIndex, isExpert);
+
 			QStandardItem* newItem = new QStandardItem(currentValue.toString());
 
 			if (currentValue != previousValue)
 			{
 				column.last()->setData(QColor(Qt::yellow), Qt::BackgroundRole);
+
 				previousValue = currentValue;
+
 				if (defaultColumns.contains(columnIndex) == false)
 				{
 					defaultColumns.push_back(columnIndex);
 				}
 			}
+
 			column.push_back(newItem);
 		}
 
 		m_historyModel->appendColumn(column);
-		m_historyModel->setHeaderData(columnIndex, Qt::Horizontal, pSignalPropertyManager->name(propertyIndex));
+		m_historyModel->setHeaderData(columnIndex, Qt::Horizontal, m_propManager->name(propertyIndex));
 	}
 
 	new TableDataVisibilityController(historyView, "SignalHistoryDialog", defaultColumns);

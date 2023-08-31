@@ -4,7 +4,7 @@
 #include "SignalsTabPage.h"
 #include "AppSignalSetProvider.h"
 
-CheckinSignalsDialog::CheckinSignalsDialog(SignalsModel* sourceModel, TableDataVisibilityController *columnManager, QModelIndexList selection, QWidget* parent) :
+CheckinSignalsDialog::CheckinSignalsDialog(SignalsModel* sourceModel, TableDataVisibilityController* columnManager, QModelIndexList selection, QWidget* parent) :
 	QDialog(parent),
 	m_sourceModel(sourceModel)
 {
@@ -49,6 +49,7 @@ CheckinSignalsDialog::CheckinSignalsDialog(SignalsModel* sourceModel, TableDataV
 	int signalPropertyCount = AppSignalPropertyManager::getInstance()->count();
 
 	QSettings settings;
+
 	m_signalsView->setColumnWidth(0, columnManager->getColumnWidth(0) + 30);	// basic column width + checkbox size
 
 	for (int i = 1; i < signalPropertyCount; i++)

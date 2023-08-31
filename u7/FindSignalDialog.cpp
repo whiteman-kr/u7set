@@ -13,10 +13,11 @@ const QString FindSignalDialog::cannotCheckoutMessage("No - can't checkout");
 const QString FindSignalDialog::replaceableMessage("Yes");
 const QString FindSignalDialog::replacedMessage("Yes - replaced");
 
-FindSignalDialog::FindSignalDialog(int currentUserId, bool currentUserIsAdmin, QTableView* parent) :
+FindSignalDialog::FindSignalDialog(QTableView* parent) :
 	QDialog(parent, Qt::Dialog),
 	m_signalTable(parent),
 	m_signalSetProvider(AppSignalSetProvider::getInstance()),
+	m_propManager(AppSignalPropertyManager::getInstance()),
 	m_findString(new QLineEdit(this)),
 	m_replaceString(new QLineEdit(this)),
 	m_searchInPropertyList(new QComboBox(this)),
@@ -32,10 +33,11 @@ FindSignalDialog::FindSignalDialog(int currentUserId, bool currentUserIsAdmin, Q
 	m_findPreviousButton(new QPushButton("Find Previous", this)),
 	m_findNextButton(new QPushButton("Find Next", this)),
 	m_replaceableSignalQuantityBlinkTimer(new QTimer(this)),
-	m_regExp4Id(AppSignal::IDENTIFICATORS_VALIDATOR),
-	m_currentUserId(currentUserId),
-	m_currentUserIsAdmin(currentUserIsAdmin)
+	m_regExp4Id(AppSignal::IDENTIFICATORS_VALIDATOR)
 {
+	m_currentUserId = m_signalSetProvider->currentUserID();
+	m_currentUserIsAdmin = m_signalSetProvider->currentUserIsAdmin();
+
 	setWindowTitle("Find and Replace");
 
 	m_signalProxyModel = dynamic_cast<SignalsProxyModel*>(m_signalTable->model());
@@ -204,7 +206,7 @@ void FindSignalDialog::generateListIfNeeded()
 	{
 		for (int i = 0; i < m_signalModel->rowCount(); i++)
 		{
-			addSignalIfNeeded(*m_signalSetProvider->getLoadedSignal(i, false));
+			addSignalIfNeeded(*m_signalSetProvider->getLoadedSignalByIndex(i, false));
 		}
 	}
 	else
@@ -217,7 +219,7 @@ void FindSignalDialog::generateListIfNeeded()
 		for (int i = 0; i < selection.count(); i++)
 		{
 			int row = m_signalProxyModel->mapToSource(selection[i]).row();
-			addSignalIfNeeded(*m_signalSetProvider->getLoadedSignal(row, false));
+			addSignalIfNeeded(*m_signalSetProvider->getLoadedSignalByIndex(row, false));
 		}
 	}
 
@@ -255,8 +257,8 @@ void FindSignalDialog::updateAllReplacement()
 void FindSignalDialog::updateReplacement(int row)
 {
 	int signalId = getSignalId(row);
-	int signalIndex = m_signalSetProvider->signalIndex(signalId);
-	const AppSignal& signal = *m_signalSetProvider->getLoadedSignal(signalIndex, false);
+
+	const AppSignal& signal = *m_signalSetProvider->getLoadedSignalByID(signalId, false);
 
 	updateReplacement(signal, row);
 }
@@ -428,7 +430,7 @@ FindSignalDialog::SearchOptions FindSignalDialog::getCurrentSearchOptions()
 		return options;
 	}
 
-	int propertyIndex = AppSignalPropertyManager::getInstance()->propertyIndex(m_searchInPropertyList->currentText());
+	int propertyIndex = m_propManager->propertyIndex(m_searchInPropertyList->currentText());
 
 	if (propertyIndex == -1)
 	{
@@ -459,7 +461,7 @@ QString FindSignalDialog::getProperty(const AppSignal& signal)
 		return QString();
 	}
 
-	return AppSignalPropertyManager::getInstance()->value(&signal, m_searchOptionsUsedLastTime.searchedPropertyIndex, theSettings.isExpertMode()).toString();
+	return m_propManager->value(&signal, m_searchOptionsUsedLastTime.searchedPropertyIndex, theSettings.isExpertMode()).toString();
 }
 
 void FindSignalDialog::setProperty(AppSignal& signal, const QString& value)
@@ -470,7 +472,7 @@ void FindSignalDialog::setProperty(AppSignal& signal, const QString& value)
 		return;
 	}
 
-	AppSignalPropertyManager::getInstance()->setValue(&signal, m_searchOptionsUsedLastTime.searchedPropertyIndex, value, theSettings.isExpertMode());
+	m_propManager->setValue(&signal, m_searchOptionsUsedLastTime.searchedPropertyIndex, value, theSettings.isExpertMode());
 }
 
 int FindSignalDialog::getSignalId(int row)
@@ -520,7 +522,7 @@ void FindSignalDialog::replace(int row)
 	}
 
 	QString errorMessage;
-	bool checkedout = m_signalSetProvider->checkoutSignal(signalIndex, &errorMessage);
+	bool checkedout = m_signalSetProvider->checkoutSignalByIndex(signalIndex, &errorMessage);
 	if (checkedout == false)
 	{
 		m_foundListModel->setData(m_foundListModel->index(row, 2), cannotCheckoutMessage + ':' + errorMessage, Qt::DisplayRole);
@@ -551,7 +553,7 @@ void FindSignalDialog::reloadCurrentIdsMap()
 
 	for (int i = 0; i < m_signalModel->rowCount(); i++)
 	{
-		QString id = getProperty(*m_signalSetProvider->getLoadedSignal(i, false));
+		QString id = getProperty(*m_signalSetProvider->getLoadedSignalByIndex(i, false));
 		if (m_signalIds.contains(id))
 		{
 			m_repeatedSignalIds.insert(id);

@@ -663,6 +663,7 @@ public:
 
 	bool contains(const QString& appSignalID) const;
 	int count() const;
+	int size() const;
 	bool isEmpty() const;
 
 	void enableIdGeneration();

@@ -2,18 +2,22 @@
 
 class DbController;
 
+class AppSignal;
+class AppSignalSetProvider;
+class AppSignalPropertyManager;
+
 class SignalHistoryDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	SignalHistoryDialog(DbController* dbController, const QString& appSignalId, int signalId, QWidget *parent = nullptr);
+	SignalHistoryDialog(const AppSignal& s, QWidget* parent = nullptr);
 
 protected:
 	void closeEvent(QCloseEvent* event);
 
 private:
-	DbController* m_dbController = nullptr;
-	QStandardItemModel* m_historyModel = nullptr;
-	int m_signalId = -1;
-};
+	AppSignalSetProvider* m_signalSetProvider = nullptr;
+	AppSignalPropertyManager* m_propManager = nullptr;
 
+	QStandardItemModel* m_historyModel = nullptr;
+};

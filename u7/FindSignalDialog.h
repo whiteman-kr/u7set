@@ -2,10 +2,12 @@
 
 #include <QDialog>
 
+class AppSignal;
 class AppSignalSetProvider;
+class AppSignalPropertyManager;
+
 class SignalsModel;
 class SignalsProxyModel;
-class AppSignal;
 
 class FindSignalDialog : public QDialog
 {
@@ -37,7 +39,7 @@ class FindSignalDialog : public QDialog
 	static const QString replacedMessage;
 
 public:
-	FindSignalDialog(int currentUserId, bool currentUserIsAdmin, QTableView* parent = nullptr);
+	FindSignalDialog(QTableView* parent = nullptr);
 
 	bool shouldReopen() { return m_shouldReopen; }
 	void allowReopen() { m_shouldReopen = true; }
@@ -88,7 +90,9 @@ private:
 	QTableView* m_signalTable = nullptr;
 	SignalsProxyModel* m_signalProxyModel = nullptr;
 	SignalsModel* m_signalModel = nullptr;
+
 	AppSignalSetProvider* m_signalSetProvider = nullptr;
+	AppSignalPropertyManager* m_propManager = nullptr;
 
 	//
 

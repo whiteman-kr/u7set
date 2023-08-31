@@ -104,6 +104,11 @@ public:
 	explicit AppSignalProperties(const AppSignal& signal, bool savePropertyDescription = false);
 
 	AppSignal& signal() { return m_signal; }
+	const AppSignal& signal() const { return m_signal; }
+
+	int signalID() const { return m_signal.ID(); }
+	bool signalCheckedOut() const { return m_signal.checkedOut(); }
+
 	void updateSpecPropValues();
 
 	QString specPropStruct() const { return m_signal.specPropStruct(); }

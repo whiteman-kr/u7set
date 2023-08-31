@@ -133,7 +133,6 @@ struct ObjectState
 	int errCode;
 };
 
-
 //
 //
 // DbProject

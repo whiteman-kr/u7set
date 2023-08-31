@@ -2636,6 +2636,11 @@ int AppSignalSet::count() const
 	return static_cast<int>(m_signals.size());
 }
 
+int AppSignalSet::size() const
+{
+	return static_cast<int>(m_signals.size());
+}
+
 bool AppSignalSet::isEmpty() const
 {
 	return m_signals.empty();

@@ -3,14 +3,17 @@
 #include "../AppSignalLib/AppSignal.h"
 #include "IdePropertyEditor.h"
 
-class QtProperty;
+/*class QtProperty;
 class QtStringPropertyManager;
 class QtEnumPropertyManager;
 class QtIntPropertyManager;
 class QtDoublePropertyManager;
 class QtBoolPropertyManager;
 class QtTreePropertyBrowser;
-class QDialogButtonBox;
+class QDialogButtonBox;*/
+class AppSignalSetProvider;
+class AppSignalPropertyManager;
+
 enum class SignalType;
 
 namespace ExtWidgets
@@ -22,8 +25,7 @@ class SignalPropertiesDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	explicit SignalPropertiesDialog(DbController* dbController,
-									const std::vector<AppSignal*>& signalVector,
+	explicit SignalPropertiesDialog(const std::vector<AppSignal*>& signalVector,
 									bool readOnly, bool tryCheckout, QWidget* parent = nullptr);
 
 	bool isEditedSignal(int id) const { return m_editedSignalsId.contains(id); }
@@ -48,20 +50,23 @@ public slots:
 	void onSignalPropertyChanged(QList<std::shared_ptr<PropertyObject> > objects);
 	void checkoutSignals(QList<std::shared_ptr<PropertyObject>> objects);
 	void saveLastEditedSignalProperties();
-	void showError(QString errorString);
+	void showError(const QString&errorString);
 
 protected:
 	void closeEvent(QCloseEvent* event);
 
 private:
-	bool checkoutSignal(AppSignal& s, QString& message);
-	QString errorMessage(const ObjectState& state) const;
+	bool checkoutSignal(const AppSignal& s, QString* message);
 
 	bool isPropertyDependentOnPrecision(const QString& propName) const;
 	void addPropertyDependentOnPrecision(const QString& propName);
 
 private:
-	DbController* m_dbController;
+	AppSignalSetProvider* m_signalSetProvider = nullptr;
+	AppSignalPropertyManager* m_propManager = nullptr;
+
+	bool m_uppercaseAppSignalID = false;
+
 	const std::vector<AppSignal*>& m_signalVector;
 	std::set<int> m_editedSignalsId;
 	std::vector<std::shared_ptr<PropertyObject>> m_objList;

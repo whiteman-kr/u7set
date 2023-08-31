@@ -17,8 +17,15 @@ public:
 
 	static AppSignalSetProvider* getInstance();
 
+	DbController* dbController();
+
 	void projectOpened();
 	void projectClosed();
+
+	bool projectProperty_uppercaseAppSignalID() const;
+
+	int currentUserID() const;
+	bool currentUserIsAdmin() const;
 
 	const AppSignalSet& signalSet() const;					// may be delete!
 	AppSignalPropertyManager& signalPropertyManager();
@@ -26,8 +33,6 @@ public:
 	int signalCount() { return m_signalSet.count(); }
 
 	void reloadAllSignals();
-
-	void loadSignals(const std::vector<int>& signalIds, bool withoutProgress = true);
 	void reloadSignals(const std::vector<int>& signalIds);
 
 	void enforceAllSignalsLoading();
@@ -39,7 +44,7 @@ public:
 
 	AppSignal* getSignal(const QString& appSignalID);
 	AppSignal* getSignalByID(int signalID);
-	AppSignal* getSignal(int index);
+	AppSignal* getSignalByIndex(int index);
 
 	bool getChannelSignalsID(const AppSignal& signal, std::vector<int>* channelSignalIDs) const;
 	bool getChannelSignalsID(int signalID, int groupID, std::vector<int>* channelSignalIDs) const;
@@ -51,7 +56,7 @@ public:
 
 	AppSignal* getLoadedSignal(AppSignal* s, bool updateViews);
 	AppSignal* getLoadedSignalByID(int signalID, bool updateViews);
-	AppSignal* getLoadedSignal(int index, bool updateViews);
+	AppSignal* getLoadedSignalByIndex(int index, bool updateViews);
 
 	AppSignalParam getAppSignalParam(int index);
 	AppSignalParam getAppSignalParam(const QString& appSignalId);
@@ -71,14 +76,22 @@ public:
 	void saveSignals(const std::vector<AppSignal*>& signalVector);
 	std::vector<int> cloneSignals(const std::vector<int>& signalIDsToClone);
 
+	QString errorMessage(const ObjectState& state);	// Converts ObjectState to human readable text
+
+	// if no errors returns TRUE
+	// returns FALSE if errors presents
+	//
 	bool showError(const ObjectState& state);
 	bool showErrors(const std::vector<ObjectState>& states);
+
+	//
 
 	static void trimSignalTextFields(AppSignal& signal);
 
 	// DbController calls
 
-	bool checkoutSignal(int index, QString* message);
+	bool checkoutSignalByIndex(int index, QString* message);
+	bool checkoutSignal(const AppSignal* s, QString* message);
 
 	bool checkinSignals(const std::vector<int>& signalIDs,
 						QString comment);
@@ -87,6 +100,11 @@ public:
 	bool undoSignal(int id);
 	bool undoSignal(const AppSignal& s);
 
+	bool getSignalHistory(int signalID, std::vector<DbChangeset>* changesets);
+
+	bool getSpecificSignals(const std::vector<int>& signalIDs,
+							int changesetId,
+							std::vector<AppSignal>* signalsInstances);
 signals:
 	void error(const QString& message);						// for throwing message boxes
 
@@ -109,10 +127,9 @@ private:
 	void terminateSignalsLoading();
 
 	void loadIdAppSignalId();
+	void loadSignals(const std::vector<int>& signalIds);
 
 	void onSignalsLoadTimer();
-
-	QString errorMessage(const ObjectState& state);	// Converts ObjectState to human readable text
 
 private:
 	static AppSignalSetProvider* m_instance;

@@ -33,6 +33,11 @@ AppSignalSetProvider* AppSignalSetProvider::getInstance()
 	return m_instance;
 }
 
+DbController* AppSignalSetProvider::dbController()
+{
+	return m_db;
+}
+
 void AppSignalSetProvider::projectOpened()
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
@@ -66,6 +71,27 @@ void AppSignalSetProvider::projectClosed()
 	emit signalsCountChanged();
 }
 
+bool AppSignalSetProvider::projectProperty_uppercaseAppSignalID() const
+{
+	bool uppercaseAppSignalID = false;
+
+	bool result = m_db->getProjectProperty(Db::ProjectProperty::UppercaseAppSignalId, &uppercaseAppSignalID, m_parentWidget);
+
+	ASSERT_RETURN_IF_FALSE(result);
+
+	return uppercaseAppSignalID;
+}
+
+int AppSignalSetProvider::currentUserID() const
+{
+	return m_currentUserID;
+}
+
+bool AppSignalSetProvider::currentUserIsAdmin() const
+{
+	return m_currentUserIsAdmin;
+}
+
 const AppSignalSet& AppSignalSetProvider::signalSet() const
 {
 	return m_signalSet;
@@ -83,7 +109,7 @@ void AppSignalSetProvider::reloadAllSignals()
 	startSignalsLoading();
 }
 
-void AppSignalSetProvider::loadSignals(const std::vector<int>& signalIds, bool withoutProgress)
+void AppSignalSetProvider::reloadSignals(const std::vector<int>& signalIds)
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
 
@@ -97,14 +123,16 @@ void AppSignalSetProvider::loadSignals(const std::vector<int>& signalIds, bool w
 	std::vector<const AppSignal*> updatedSignals;
 	std::vector<int> updatedIndexes;
 
-	if (withoutProgress == true)
+	m_db->getLatestSignalsWithoutProgress(signalIds, &signalsToLoad, nullptr);
+
+/*	if (withoutProgress == true)
 	{
 		m_db->getLatestSignalsWithoutProgress(signalIds, &signalsToLoad, nullptr);
 	}
 	else
 	{
 		m_db->getLatestSignals(signalIds, &signalsToLoad, nullptr);
-	}
+	}*/
 
 	int signalIndex = 0;
 
@@ -123,13 +151,6 @@ void AppSignalSetProvider::loadSignals(const std::vector<int>& signalIds, bool w
 	emit signalsPropertiesChanged(updatedSignals);
 }
 
-void AppSignalSetProvider::reloadSignals(const std::vector<int>& signalIds)
-{
-	Q_ASSERT(m_thread == QThread::currentThread());
-
-	loadSignals(signalIds, true);
-}
-
 void AppSignalSetProvider::enforceAllSignalsLoading()
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
@@ -143,6 +164,8 @@ void AppSignalSetProvider::enforceAllSignalsLoading()
 
 	std::vector<int> signalIds;
 
+	signalIds.reserve(m_signalSet.size());
+
 	for (const AppSignal* s : m_signalSet)
 	{
 		if (s->isLoaded() == false)
@@ -151,7 +174,7 @@ void AppSignalSetProvider::enforceAllSignalsLoading()
 		}
 	}
 
-	loadSignals(signalIds, false);
+	loadSignals(signalIds);
 
 	m_signalsLoading = false;
 	m_signalsLoadTimer.stop();
@@ -225,7 +248,7 @@ AppSignal* AppSignalSetProvider::getSignalByID(int signalID)
 	return m_signalSet.getSignal(signalID);
 }
 
-AppSignal* AppSignalSetProvider::getSignal(int index)
+AppSignal* AppSignalSetProvider::getSignalByIndex(int index)
 {
 	if (index >= 0 && index < m_signalSet.count())
 	{
@@ -290,7 +313,7 @@ AppSignal* AppSignalSetProvider::getLoadedSignalByID(int signalID, bool updateVi
 	return getLoadedSignal(s, updateViews);
 }
 
-AppSignal* AppSignalSetProvider::getLoadedSignal(int index, bool updateViews)
+AppSignal* AppSignalSetProvider::getLoadedSignalByIndex(int index, bool updateViews)
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
 
@@ -303,7 +326,7 @@ AppSignalParam AppSignalSetProvider::getAppSignalParam(int index)
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
 
-	AppSignal signal(*getLoadedSignal(index, false));
+	AppSignal signal(*getLoadedSignalByIndex(index, false));
 
 	signal.cacheSpecPropValues();
 
@@ -410,7 +433,6 @@ bool AppSignalSetProvider::isCheckinableSignalForMe(const AppSignal* signal) con
 	return false;
 }
 
-
 void AppSignalSetProvider::loadUsers()
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
@@ -469,6 +491,39 @@ void AppSignalSetProvider::loadIdAppSignalId()
 	{
 		m_signalSet.append(id);
 	}
+}
+
+void AppSignalSetProvider::loadSignals(const std::vector<int>& signalIds)
+{
+	Q_ASSERT(m_thread == QThread::currentThread());
+
+	if (signalIds.size() == 0)
+	{
+		return;
+	}
+
+	std::vector<AppSignal> signalsToLoad;
+
+	std::vector<const AppSignal*> updatedSignals;
+	std::vector<int> updatedIndexes;
+
+	m_db->getLatestSignalsWithoutProgress(signalIds, &signalsToLoad, nullptr);
+
+	int signalIndex = 0;
+
+	for (const AppSignal& loadedSignal: signalsToLoad)
+	{
+		const AppSignal* s = m_signalSet.updateSignal(loadedSignal, &signalIndex);
+
+		if (s !=  nullptr)
+		{
+			updatedSignals.push_back(s);
+			updatedIndexes.push_back(signalIndex);
+		}
+	}
+
+	emit signalsUpdated(updatedIndexes);
+	emit signalsPropertiesChanged(updatedSignals);
 }
 
 void AppSignalSetProvider::onSignalsLoadTimer()
@@ -537,7 +592,7 @@ void AppSignalSetProvider::onSignalsLoadTimer()
 
 	if (signalIds.size() > 0)
 	{
-		loadSignals(signalIds, true);
+		loadSignals(signalIds);
 	}
 
 	if (signalIds.size() == 0 ||
@@ -548,26 +603,36 @@ void AppSignalSetProvider::onSignalsLoadTimer()
 	}
 }
 
-// Converts ObjectState to human readable message
-//
 QString AppSignalSetProvider::errorMessage(const ObjectState& state)
 {
+	// Converts ObjectState.errCode to human readable message
+	//
 	switch(state.errCode)
 	{
-		case ERR_SIGNAL_IS_NOT_CHECKED_OUT: return tr("Signal %1 is not checked out").arg(state.id);
-		case ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER: return tr("Signal %1 is checked out by \"%2\"").arg(state.id).arg(m_users[state.userId]);
-		case ERR_SIGNAL_DELETED: return tr("Signal %1 was deleted already").arg(state.id);
-		case ERR_SIGNAL_NOT_FOUND: return tr("Signal %1 not found").arg(state.id);
-		case ERR_SIGNAL_EXISTS: return "";				// error message is displayed by PGSql driver
+		case ERR_SIGNAL_IS_NOT_CHECKED_OUT:
+			return QString("Signal %1 is not checked out").arg(state.id);
+
+		case ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER:
+			return QString("Signal %1 is checked out by user %2").arg(state.id).arg(getUserName(state.userId));
+
+		case ERR_SIGNAL_DELETED:
+			return QString("Signal %1 was deleted already").arg(state.id);
+
+		case ERR_SIGNAL_NOT_FOUND:
+			return QString("Signal %1 not found").arg(state.id);
+
+		case ERR_SIGNAL_EXISTS:
+				return QString();				// error message is displayed by PGSql driver
+
 		default:
-			return tr("Unknown error %1").arg(state.errCode);
+			return QString("Unknown error code %1").arg(state.errCode);
 	}
 }
 
-// Throws error signal with human readable message for single ObjectState
-//
 bool AppSignalSetProvider::showError(const ObjectState& state)
 {
+	// Throws error signal with human readable message for single ObjectState
+	//
 	if (state.errCode != ERR_SIGNAL_OK)
 	{
 		QString message = errorMessage(state);
@@ -583,10 +648,10 @@ bool AppSignalSetProvider::showError(const ObjectState& state)
 	return true;
 }
 
-// Throws single error signal with human readable message for set of ObjectState
-//
 bool AppSignalSetProvider::showErrors(const std::vector<ObjectState>& states)
 {
+	// Throws single error signal with human readable message for set of ObjectState
+	//
 	if (states.empty())
 	{
 		return true;
@@ -600,7 +665,7 @@ bool AppSignalSetProvider::showErrors(const std::vector<ObjectState>& states)
 		{
 			if (message.isEmpty() == false)
 			{
-				message += "\n";
+				message.append(QStringLiteral("\n"));
 			}
 
 			message += errorMessage(state);
@@ -626,11 +691,18 @@ void AppSignalSetProvider::trimSignalTextFields(AppSignal& signal)
 	signal.setUnit(signal.unit().trimmed());
 }
 
-bool AppSignalSetProvider::checkoutSignal(int index, QString* message)
+bool AppSignalSetProvider::checkoutSignalByIndex(int index, QString* message)
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
 
 	AppSignal* s = m_signalSet.at(index);
+
+	return checkoutSignal(s, message);
+}
+
+bool AppSignalSetProvider::checkoutSignal(const AppSignal* s, QString* message)
+{
+	Q_ASSERT(m_thread == QThread::currentThread());
 
 	TEST_PTR_RETURN_FALSE(s);
 
@@ -643,6 +715,8 @@ bool AppSignalSetProvider::checkoutSignal(int index, QString* message)
 		}
 		else
 		{
+			*message = QString(tr("Signal %1 is already checked out by user %2")).
+								arg(s->appSignalID()).arg(getUserName(s->userID()));
 			return false;
 		}
 	}
@@ -653,7 +727,9 @@ bool AppSignalSetProvider::checkoutSignal(int index, QString* message)
 
 	std::vector<ObjectState> objectStates;
 
-	m_db->checkoutSignals(signalsIDs, &objectStates, nullptr);
+	bool res = m_db->checkoutSignals(signalsIDs, &objectStates, nullptr);
+
+	RETURN_IF_FALSE(res);
 
 	if (objectStates.empty())
 	{
@@ -679,16 +755,13 @@ bool AppSignalSetProvider::checkoutSignal(int index, QString* message)
 	{
 		if (objectState.errCode == ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER &&
 			objectState.userId != m_currentUserID &&
-			!m_currentUserIsAdmin)
+			m_currentUserIsAdmin == false)
 		{
 			return false;
 		}
 	}
 
-	for (int id : signalsIDs)
-	{
-		loadSignal(id, true);
-	}
+	loadSignals(signalsIDs);
 
 	return true;
 }
@@ -788,13 +861,27 @@ void AppSignalSetProvider::deleteSignal(int signalID)
 	}
 }
 
+bool AppSignalSetProvider::getSignalHistory(int signalID, std::vector<DbChangeset>* changesets)
+{
+	return m_db->getSignalHistory(signalID, changesets, m_parentWidget);
+}
+
+bool AppSignalSetProvider::getSpecificSignals(const std::vector<int>& signalIDs,
+												int changesetId,
+												std::vector<AppSignal>* signalsInstances)
+{
+	return m_db->getSpecificSignals(signalIDs, changesetId, signalsInstances, m_parentWidget);
+}
+
 void AppSignalSetProvider::addSignal(AppSignal& signal)
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
 
-	Q_ASSERT(false); // REMOVED m_signalSet.replaceOrAppendIfNotExists(signal); CHECK THIS!
+//	Q_ASSERT(false); // REMOVED m_signalSet.replaceOrAppendIfNotExists(signal); CHECK THIS!
 
-	m_signalSet.append(new AppSignal(signal));
+	AppSignal* newSignal = new AppSignal(signal);
+
+	m_signalSet.append(newSignal);
 }
 
 void AppSignalSetProvider::deleteSignals(const std::vector<int>& signalIDs)
@@ -838,7 +925,7 @@ void AppSignalSetProvider::loadSignals()
 	m_signalSet.swap(signalSetForReplacement);
 
 	emit signalCountChanged();
-} */
+}  */
 
 void AppSignalSetProvider::saveSignal(AppSignal& signal)
 {

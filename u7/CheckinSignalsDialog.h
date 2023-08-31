@@ -23,9 +23,9 @@ private:
 	void saveDialogGeometry();
 
 private:
-	SignalsModel* m_sourceModel;
-	CheckedoutSignalsModel* m_proxyModel;
+	SignalsModel* m_sourceModel = nullptr;
+	CheckedoutSignalsModel* m_proxyModel = nullptr;
 	QTableView* m_signalsView = nullptr;
-	QPlainTextEdit* m_commentEdit;
-	QSplitter* m_splitter;
+	QPlainTextEdit* m_commentEdit = nullptr;
+	QSplitter* m_splitter = nullptr;
 };
