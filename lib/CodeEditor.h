@@ -86,11 +86,18 @@ public:
     // Utility functions
     //
     void lineNumberAreaPaintEvent(QPaintEvent *event);
+
+protected:
+    bool eventFilter(QObject* object, QEvent* event) override;
+
 private:
     void keyPressEvent( QKeyEvent* e) override;
     void resizeEvent(QResizeEvent* event) override;
     void contextMenuEvent (QContextMenuEvent *e) override;
 	void paintEvent(QPaintEvent *event) override;
+
+    bool processAutoIdent(QKeyEvent* e);
+    bool processPrefix(const QString& prefix, int operationCode);
 
 	void updateHighlighter();
 

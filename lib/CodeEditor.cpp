@@ -8,7 +8,8 @@
 //
 CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
 {
-    m_tabSymbol.fill(QChar::Space, 4);
+    //m_tabSymbol.fill(QChar::Space, 4);
+    m_tabSymbol = "\t";
 
     m_lineNumberArea = new LineNumberArea(this);
 
@@ -34,6 +35,8 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
 
     QFontMetrics fm(font());
     setLineNumberOffset(static_cast<int>(fm.horizontalAdvance(QChar::Space) * 0.75));
+
+    installEventFilter(this);
 }
 
 QString CodeEditor::text() const
@@ -121,7 +124,7 @@ void CodeEditor::setCaretWidth(int w)
 
 void CodeEditor::setTabWidth(int w)
 {
-    m_tabSymbol.fill(QChar::Space, w);
+    //m_tabSymbol.fill(QChar::Space, w);
 
     QFontMetrics fm(font());
     setTabStopDistance(fm.horizontalAdvance(m_tabSymbol));
@@ -339,110 +342,267 @@ void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
     }
 }
 
-void CodeEditor::keyPressEvent(QKeyEvent* e)
+bool CodeEditor::processAutoIdent(QKeyEvent* e)
 {
-	if (m_autoIndent == true && qApp->keyboardModifiers() == Qt::NoModifier &&
-            (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return || e->text() == "}"))
+    QString documentContents = document()->toPlainText();
+
+    if (documentContents.isEmpty() == true)
     {
-        QString documentContents = document()->toPlainText();
-
-        if(documentContents.isEmpty() == false)
-        {
-            int indexToLeftOfCursor = textCursor().position() - 1;
-
-            if(indexToLeftOfCursor >= 0 && indexToLeftOfCursor < documentContents.length())
-            {
-                bool hitEnterAfterOpeningBrace = documentContents.at(indexToLeftOfCursor) == '{';
-                bool hitClosingBrace = e->text() == "}";
-
-                // Find the beginning of the current line
-                //
-                qsizetype currentLineStartIndex = documentContents.lastIndexOf('\n', indexToLeftOfCursor);
-                if (currentLineStartIndex == -1)
-                {
-                    currentLineStartIndex = 0;    // the beginning of the text
-                }
-                else
-                {
-                    currentLineStartIndex++;
-                }
-
-                if (hitClosingBrace == true)
-                {
-                    qsizetype openBracePos = documentContents.indexOf('{', currentLineStartIndex);
-                    bool lineHasOpeningBrace =  openBracePos != -1 && openBracePos < indexToLeftOfCursor;   // Needed to skip '{}' situation
-
-                    // Remove one tab symbol in current line
-                    //
-                    qsizetype lastTabSymbolStartIndex = documentContents.lastIndexOf(m_tabSymbol, indexToLeftOfCursor);
-                    if (lineHasOpeningBrace == false &&
-                            lastTabSymbolStartIndex != -1 &&
-                            currentLineStartIndex <= lastTabSymbolStartIndex)
-                    {
-                        // Set cursor before last tabSymbol
-
-                        qsizetype moveCount = indexToLeftOfCursor - lastTabSymbolStartIndex + 1 /*}*/;
-                        for (int i = 0; i < moveCount; i++)
-                        {
-                            moveCursor(QTextCursor::Left, QTextCursor::MoveAnchor);
-                        }
-
-                        // Select tab symbol
-
-                        for (int i = 0; i < m_tabSymbol.length(); i++)
-                        {
-                            moveCursor(QTextCursor::Right, QTextCursor::KeepAnchor);
-                        }
-
-                        // Remove tab symbol
-
-                        textCursor().removeSelectedText();
-
-                        // Move cursor after '}'
-
-                        for (int i = 0; i < (moveCount - m_tabSymbol.length()); i++)
-                        {
-                            moveCursor(QTextCursor::Right, QTextCursor::MoveAnchor);
-                        }
-                    }
-
-                    insertPlainText("}");
-                }
-                else
-                {
-                    QPlainTextEdit::keyPressEvent(e);   // insert \n
-
-                    // Find a whitespace part of the string from the beginning of the current line
-                    //
-
-                    static QRegularExpression regexp("\\S+");
-
-                    qsizetype currentTextStartIndex = documentContents.indexOf(regexp, currentLineStartIndex);
-
-                    if (currentTextStartIndex > currentLineStartIndex)
-                    {
-                        // Insert whitespace to the next line
-                        //
-                        QString currentLineStartWhiteSpace = documentContents.mid(currentLineStartIndex, currentTextStartIndex - currentLineStartIndex);
-
-						currentLineStartWhiteSpace.remove('\n');
-						currentLineStartWhiteSpace.remove('\r');
-
-                        insertPlainText(currentLineStartWhiteSpace);
-                    }
-
-                    if(hitEnterAfterOpeningBrace)
-                    {
-                        insertPlainText(m_tabSymbol);
-                    }
-                }
-
-                return;
-            }
-        }
+        return false;
     }
 
-    QPlainTextEdit::keyPressEvent(e);
+    int indexToLeftOfCursor = textCursor().position() - 1;
+
+    if (indexToLeftOfCursor < 0 || indexToLeftOfCursor >= documentContents.length())
+    {
+        return false;
+    }
+
+	bool hitEnterAfterOpeningBrace = documentContents.at(indexToLeftOfCursor) == '{';
+	bool hitClosingBrace = e->text() == "}";
+
+	// Find the beginning of the current line
+	//
+	qsizetype currentLineStartIndex = documentContents.lastIndexOf('\n', indexToLeftOfCursor);
+	if (currentLineStartIndex == -1)
+	{
+		currentLineStartIndex = 0;    // the beginning of the text
+	}
+	else
+	{
+		currentLineStartIndex++;
+	}
+
+	if (hitClosingBrace == true)
+	{
+		qsizetype openBracePos = documentContents.indexOf('{', currentLineStartIndex);
+		bool lineHasOpeningBrace = openBracePos != -1 && openBracePos < indexToLeftOfCursor;   // Needed to skip '{}' situation
+
+		// Remove one tab symbol in current line
+		//
+		qsizetype lastTabSymbolStartIndex = documentContents.lastIndexOf(m_tabSymbol, indexToLeftOfCursor);
+		if (lineHasOpeningBrace == false &&
+			lastTabSymbolStartIndex != -1 &&
+			currentLineStartIndex <= lastTabSymbolStartIndex)
+		{
+			// Set cursor before last tabSymbol
+
+			qsizetype moveCount = indexToLeftOfCursor - lastTabSymbolStartIndex + 1 /*}*/;
+			for (int i = 0; i < moveCount; i++)
+			{
+				moveCursor(QTextCursor::Left, QTextCursor::MoveAnchor);
+			}
+
+			// Select tab symbol
+
+			for (int i = 0; i < m_tabSymbol.length(); i++)
+			{
+				moveCursor(QTextCursor::Right, QTextCursor::KeepAnchor);
+			}
+
+			// Remove tab symbol
+
+			textCursor().removeSelectedText();
+
+			// Move cursor after '}'
+
+			for (int i = 0; i < (moveCount - m_tabSymbol.length()); i++)
+			{
+				moveCursor(QTextCursor::Right, QTextCursor::MoveAnchor);
+			}
+		}
+
+		QPlainTextEdit::keyPressEvent(e);   // insert }
+	}
+	else
+	{
+		QPlainTextEdit::keyPressEvent(e);   // insert \n or {
+
+		// Find a whitespace part of the string from the beginning of the current line
+		//
+
+		static QRegularExpression regexp("[\\S+\\n]");
+
+		qsizetype currentTextStartIndex = documentContents.indexOf(regexp, currentLineStartIndex);
+
+		if (currentTextStartIndex > currentLineStartIndex)
+		{
+			// Insert whitespace to the next line
+			//
+			QString currentLineStartWhiteSpace = documentContents.mid(currentLineStartIndex, currentTextStartIndex - currentLineStartIndex);
+
+			currentLineStartWhiteSpace.remove('\n');
+			currentLineStartWhiteSpace.remove('\r');
+
+			insertPlainText(currentLineStartWhiteSpace);
+		}
+
+		if (hitEnterAfterOpeningBrace)
+		{
+			insertPlainText(m_tabSymbol);
+		}
+	}
+
+    return true;
+}
+
+// Add, remove or toggle line prefix. Operation is specified by operationCode : -1 - remove, 1 - add, 0 - toggle
+//
+bool CodeEditor::processPrefix(const QString& prefix, int operationCode)
+{
+    QTextCursor c = textCursor();
+    int position = c.position();
+
+    bool clearSelection = false;
+    if (c.hasSelection() == false)
+    {
+        // If no text is selected - select current line
+        //
+		clearSelection = true;
+		c.select(QTextCursor::LineUnderCursor);
+    }
+
+    int selectionStart = c.selectionStart();
+    int selectionEnd = c.selectionEnd();
+
+    // Check if selection starts from the beginning of the line. If not, extend selection to the beginning
+    //
+    QTextBlock startBlock = document()->findBlock(selectionStart);
+    int startBlockPosition = startBlock.position();
+    if (startBlockPosition != selectionStart)
+    {
+        selectionStart = startBlockPosition;
+        c.clearSelection();
+		c.setPosition(selectionStart);
+		c.setPosition(selectionEnd, QTextCursor::KeepAnchor);
+    }
+
+    // Split selection into lines and process its prefix
+    //
+    QString s = c.selection().toPlainText();
+        
+	QStringList l = s.split("\n", Qt::KeepEmptyParts);
+    if (l.isEmpty() == true)
+    {
+        return false;
+    }
+
+    bool prefixState = false;
+    
+    switch (operationCode)
+    {
+    case 0:
+        prefixState = l[0].startsWith(prefix);  // Toggle operation is based on first line state
+        break;
+    case -1:
+        prefixState = true;
+        break;
+    case 1:
+        prefixState = false;
+        break;
+    }
+
+    int changesCount = 0;
+
+    for (int i = 0; i < l.length(); i++)
+    {
+        QString& s = l[i];
+
+        if (s.trimmed().isEmpty() == false)
+        {
+            if (prefixState == true)
+            {
+                // remove prefix
+                //
+                if (s.startsWith(prefix) == true)
+                {
+                    int commentIndex = s.indexOf(prefix);
+                    if (commentIndex != -1)
+                    {
+                        s = s.remove(commentIndex, prefix.length());
+                        changesCount--;
+                    }
+                }
+            }
+            else
+            {
+                // add prefix
+                //
+                s = prefix + s;
+                changesCount++;
+            }
+        }
+
+        if (i < l.length() - 1)
+        {
+            s.append("\n");
+        }
+		c.insertText(s);
+	}
+    
+    // Restore selection state
+    //
+    if (clearSelection == true)
+	{
+		c.clearSelection();
+        c.setPosition(position + changesCount * prefix.length());
+	}
+	else
+	{
+		c.setPosition(selectionStart);
+		c.setPosition(selectionEnd + changesCount * prefix.length(), QTextCursor::KeepAnchor);
+    }
+	setTextCursor(c);
+
+    return true;
+}
+
+bool CodeEditor::eventFilter(QObject *object, QEvent *event)
+{
+    if (object == this && event->type() == QEvent::KeyPress) 
+    {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+
+        if (keyEvent->key() == Qt::Key_Tab && hasSelectedText() == true)
+		{
+			if ((qApp->keyboardModifiers() & Qt::ControlModifier) == 0)
+			{
+				// Tab - add ident
+				//
+				processPrefix(m_tabSymbol, 1);
+			}
+			else
+			{
+				// Ctrl+Tab - remove ident
+				//
+				processPrefix(m_tabSymbol, -1);
+			}
+			return true;
+		}
+    }
+    return false;
+}
+
+void CodeEditor::keyPressEvent(QKeyEvent* e)
+{
+    bool keyEventProcessed = false;
+
+    if (m_autoIndent == true
+        && (qApp->keyboardModifiers() == Qt::NoModifier && (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return))  // Enter key 
+        || e->text() == "}")
+    {
+        keyEventProcessed |= processAutoIdent(e);
+    }
+
+    if ((qApp->keyboardModifiers() & Qt::ControlModifier)  != 0 && e->key() == Qt::Key_Slash)
+    {
+        keyEventProcessed |= processPrefix("//", 0);
+    }
+
+    if (keyEventProcessed == false)
+    {
+        QPlainTextEdit::keyPressEvent(e);
+    }
 }
 
 void CodeEditor::resizeEvent(QResizeEvent *e)
