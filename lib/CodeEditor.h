@@ -141,6 +141,7 @@ private:
     FindContext m_findContext;
 
     QString m_tabSymbol;
+    int m_tabWidth = 4;
 
 	int m_startPosPrev = 0;
 	int m_endPosPrev = 0;

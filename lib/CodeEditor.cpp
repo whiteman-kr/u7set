@@ -85,7 +85,7 @@ void CodeEditor::setFont(const QFont& f)
     QPlainTextEdit::setFont(f);
 
     QFontMetrics fm(f);
-    setTabStopDistance(fm.horizontalAdvance(m_tabSymbol));
+    setTabStopDistance(fm.horizontalAdvance(' ') * m_tabWidth);
 
     setLineNumberOffset(static_cast<int>(fm.horizontalAdvance(QChar::Space) * 0.75));
 
@@ -124,10 +124,10 @@ void CodeEditor::setCaretWidth(int w)
 
 void CodeEditor::setTabWidth(int w)
 {
-    //m_tabSymbol.fill(QChar::Space, w);
+    m_tabWidth = w;
 
     QFontMetrics fm(font());
-    setTabStopDistance(fm.horizontalAdvance(m_tabSymbol));
+    setTabStopDistance(fm.horizontalAdvance(' ') * m_tabWidth);
 }
 
 void CodeEditor::getCursorPosition(int* line, int* index) const
