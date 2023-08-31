@@ -7,6 +7,7 @@
 #include <QPlainTextEdit>
 #include <QSyntaxHighlighter>
 #include <QRegularExpression>
+#include <stack>
 
 class Highlighter;
 
@@ -100,6 +101,13 @@ private:
     bool processPrefix(const QString& prefix, int operationCode);
 
 	void updateHighlighter();
+    void highlightCurrentLine();
+
+    // Cursor history functions
+    //
+    void saveCursorHistory();
+    void goBack();
+    void goForward();
 
 signals:
     void customContextMenuAboutToBeShown();
@@ -108,7 +116,7 @@ private slots:
     void updateLineNumberAreaWidth();
     void updateLineNumberArea(const QRect &rect, int dy);
 
-    void highlightCurrentLine();
+    void onCursorPositionChanged();
 
 private:
     QWidget* m_lineNumberArea = nullptr;
@@ -136,6 +144,12 @@ private:
 
 	int m_startPosPrev = 0;
 	int m_endPosPrev = 0;
+
+    // Cursor position history
+    //
+    int m_lastCursorPosition = 0;
+    std::stack<int> m_cursorBackwardHistory;
+    std::stack<int> m_cursorForwardHistory;
 };
 
 class LineNumberArea : public QWidget

@@ -15,11 +15,11 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
 
     connect(this, &CodeEditor::blockCountChanged, this, &CodeEditor::updateLineNumberAreaWidth);
     connect(this, &CodeEditor::updateRequest, this, &CodeEditor::updateLineNumberArea);
-    connect(this, &CodeEditor::cursorPositionChanged, this, &CodeEditor::highlightCurrentLine);
+    connect(this, &CodeEditor::cursorPositionChanged, this, &CodeEditor::onCursorPositionChanged);
 
 	updateLineNumberAreaWidth();
 
-	highlightCurrentLine();
+	onCursorPositionChanged();
 
 	setWordWrapMode(QTextOption::NoWrap);
 
@@ -599,6 +599,18 @@ void CodeEditor::keyPressEvent(QKeyEvent* e)
         keyEventProcessed |= processPrefix("//", 0);
     }
 
+    if ((qApp->keyboardModifiers() & Qt::AltModifier) != 0 && e->key() == Qt::Key_Left)
+    {
+        goBack();
+        keyEventProcessed = true;
+    }
+
+    if ((qApp->keyboardModifiers() & Qt::AltModifier) != 0 && e->key() == Qt::Key_Right)
+    {
+        goForward();
+        keyEventProcessed = true;
+    }
+
     if (keyEventProcessed == false)
     {
         QPlainTextEdit::keyPressEvent(e);
@@ -692,6 +704,137 @@ void CodeEditor::updateHighlighter()
 	}
 }
 
+void CodeEditor::highlightCurrentLine()
+{
+    // highlight Current Line
+    //
+    QList<QTextEdit::ExtraSelection> extraSelections;
+
+    if (m_caretLineVisible == true && isReadOnly() == false)
+    {
+        QTextEdit::ExtraSelection selection;
+
+        selection.format.setBackground(m_caretLineColor);
+        selection.format.setProperty(QTextFormat::FullWidthSelection, true);
+        selection.cursor = textCursor();
+        selection.cursor.clearSelection();
+        extraSelections.append(selection);
+    }
+
+    setExtraSelections(extraSelections);
+}
+
+void CodeEditor::saveCursorHistory()
+{
+    // Process cursor position history
+    //
+    int cursorPosition = textCursor().position();
+
+	// Push the last cursor position onto the "back" history stack if it is empty
+	//
+	if (m_cursorBackwardHistory.empty() == true)
+	{
+		m_cursorBackwardHistory.push(m_lastCursorPosition);
+	}
+
+    // Write new cursor position if it is changed in more than 1 position or line
+    //
+    int lastLine = document()->findBlock(m_lastCursorPosition).blockNumber();
+    int currentLine = document()->findBlock(cursorPosition).blockNumber();
+
+    if (lastLine != currentLine || abs(m_lastCursorPosition - cursorPosition) > 1)
+    {
+        // Clear the "forward" history stack since any forward history should be invalidated when the cursor moves
+        //
+        while (m_cursorForwardHistory.empty() == false)
+        {
+            m_cursorForwardHistory.pop();
+        }
+
+        // Push the current cursor position onto the "back" history stack
+        //
+        m_cursorBackwardHistory.push(cursorPosition);
+    }
+
+    // Save current cursor position as last
+    //
+    m_lastCursorPosition = cursorPosition;
+}
+
+void CodeEditor::goBack()
+{
+    // Pop the top element from the "back" history stack (if it's not empty).
+    //
+    if (m_cursorBackwardHistory.empty() == true)
+    {
+        return;
+    }
+
+    int currentPosition = textCursor().position();
+
+    // Push the current positon to forward history
+    //
+    m_cursorForwardHistory.push(currentPosition);
+
+    int backPos = currentPosition;
+    while (backPos == currentPosition && m_cursorBackwardHistory.empty() == false)
+    {
+        backPos = m_cursorBackwardHistory.top();
+        m_cursorBackwardHistory.pop();
+    }
+
+    // Set the cursor position to the popped position.
+    //
+    QTextCursor c = textCursor();
+    c.setPosition(backPos);
+    m_lastCursorPosition = backPos;
+
+    blockSignals(true);
+    setTextCursor(c);
+    blockSignals(false);
+
+    //Push the popped position onto the "forward" history stack.
+    //
+    m_cursorForwardHistory.push(backPos);
+}
+
+void CodeEditor::goForward()
+{
+    // Pop the top element from the "forward" history stack (if it's not empty).
+    //
+    if (m_cursorForwardHistory.empty() == true)
+    {
+        return;
+    }
+
+    int currentPosition = textCursor().position();
+
+    // Push the current positon to backward history
+    //
+    m_cursorBackwardHistory.push(currentPosition);
+
+    int forwardPos = currentPosition;
+    while (forwardPos == currentPosition && m_cursorForwardHistory.empty() == false)
+    {
+        forwardPos = m_cursorForwardHistory.top();
+        m_cursorForwardHistory.pop();
+    }
+
+    // Set the cursor position to the popped position.
+    //
+	QTextCursor c = textCursor();
+	c.setPosition(forwardPos);
+    m_lastCursorPosition = forwardPos;
+
+	blockSignals(true);
+	setTextCursor(c);
+	blockSignals(false);
+
+    //Push the popped position onto the "back" history stack.
+    //
+    m_cursorBackwardHistory.push(forwardPos);
+}
+
 void CodeEditor::updateLineNumberAreaWidth()
 {
     setViewportMargins(getLineNumberAreaWidth(), 0, 0, 0);
@@ -714,22 +857,11 @@ void CodeEditor::updateLineNumberArea(const QRect &rect, int dy)
     }
 }
 
-void CodeEditor::highlightCurrentLine()
+void CodeEditor::onCursorPositionChanged()
 {
-    QList<QTextEdit::ExtraSelection> extraSelections;
+    saveCursorHistory();
 
-    if (m_caretLineVisible == true && isReadOnly() == false)
-    {
-        QTextEdit::ExtraSelection selection;
-
-        selection.format.setBackground(m_caretLineColor);
-        selection.format.setProperty(QTextFormat::FullWidthSelection, true);
-        selection.cursor = textCursor();
-        selection.cursor.clearSelection();
-        extraSelections.append(selection);
-    }
-
-    setExtraSelections(extraSelections);
+    highlightCurrentLine();
 }
 
 //
