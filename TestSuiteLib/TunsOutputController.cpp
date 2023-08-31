@@ -145,7 +145,7 @@ namespace TestSuite
 			microseconds timeLeftUs{std::min<qint64>((nsecs - timer.nsecsElapsed()) / 1'000, 100'000)};
 			if (timeLeftUs <= 0us)
 			{
-				break;
+				timeLeftUs = 0us;
 			}
 
 			if (m_signalManager.waitForAllApplied(duration_cast<milliseconds>(timeLeftUs)) == true)
@@ -153,6 +153,11 @@ namespace TestSuite
 				timeElapsedMs = timer.nsecsElapsed() / 1'000'000;
 				assert(timeElapsedMs <= timeoutMs);
 				return true;
+			}
+
+			if (timeLeftUs <= 0us)
+			{
+				break;
 			}
 		}
 
