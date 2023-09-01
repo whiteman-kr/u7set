@@ -426,7 +426,7 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 
 	for (AppSignal& signal : newSignals)
 	{
-		AppSignalSetProvider::trimSignalTextFields(signal);
+		signal.trimTextFields();
 	}
 
 	bool ok = dbc->addSignal(newSignals.begin()->signalType(), &newSignals, parent);

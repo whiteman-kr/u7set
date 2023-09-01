@@ -71,7 +71,6 @@ public:
 	void deleteSignals(const std::vector<int>& signalIDs);
 	void deleteSignal(int signalID);
 
-	void addSignal(AppSignal& signal);
 	void saveSignal(AppSignal& signal);
 	void saveSignals(const std::vector<AppSignal*>& signalVector);
 	std::vector<int> cloneSignals(const std::vector<int>& signalIDsToClone);
@@ -83,10 +82,6 @@ public:
 	//
 	bool showError(const ObjectState& state);
 	bool showErrors(const std::vector<ObjectState>& states);
-
-	//
-
-	static void trimSignalTextFields(AppSignal& signal);
 
 	// DbController calls
 
@@ -105,6 +100,17 @@ public:
 	bool getSpecificSignals(const std::vector<int>& signalIDs,
 							int changesetId,
 							std::vector<AppSignal>* signalsInstances);
+
+	int getNextSignalCounter();
+
+	bool updateSignalsSpecProps(const std::vector<const Hardware::DeviceAppSignal*>& deviceSignalsToUpdate,
+								QString* errMsg);
+
+	bool createNewSignals(const AppSignal& signalTemplate,
+						  int channelsCount, int signalsCount,
+						  std::vector<int>* addedSignalIDs);
+
+
 signals:
 	void error(const QString& message);						// for throwing message boxes
 

@@ -480,6 +480,8 @@ public:
 
 	static QString removeNumberSign(const QString& appSignalID);
 
+	void trimTextFields();
+
 private:
 	// Private setters for fields, wich can't be changed outside DB engine
 	// Should be used only by friends

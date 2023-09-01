@@ -681,16 +681,6 @@ bool AppSignalSetProvider::showErrors(const std::vector<ObjectState>& states)
 	return true;
 }
 
-void AppSignalSetProvider::trimSignalTextFields(AppSignal& signal)
-{
-	signal.setAppSignalID(signal.appSignalID().trimmed());
-	signal.setCustomAppSignalID(signal.customAppSignalID().trimmed());
-	signal.setEquipmentID(signal.equipmentID().trimmed());
-	signal.setBusTypeID(signal.busTypeID().trimmed());
-	signal.setCaption(signal.caption().trimmed());
-	signal.setUnit(signal.unit().trimmed());
-}
-
 bool AppSignalSetProvider::checkoutSignalByIndex(int index, QString* message)
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
@@ -873,15 +863,246 @@ bool AppSignalSetProvider::getSpecificSignals(const std::vector<int>& signalIDs,
 	return m_db->getSpecificSignals(signalIDs, changesetId, signalsInstances, m_parentWidget);
 }
 
-void AppSignalSetProvider::addSignal(AppSignal& signal)
+int AppSignalSetProvider::getNextSignalCounter()
 {
-	Q_ASSERT(m_thread == QThread::currentThread());
+	return m_db->nextCounterValue();
+}
 
-//	Q_ASSERT(false); // REMOVED m_signalSet.replaceOrAppendIfNotExists(signal); CHECK THIS!
+bool AppSignalSetProvider::updateSignalsSpecProps(const std::vector<const Hardware::DeviceAppSignal*>& deviceSignalsToUpdate,
+													QString* errMsg)
+{
+	TEST_PTR_RETURN_FALSE(errMsg)
 
-	AppSignal* newSignal = new AppSignal(signal);
+	QStringList equipmentIDs;
 
-	m_signalSet.append(newSignal);
+	for(const Hardware::DeviceAppSignal* deviceSignal: deviceSignalsToUpdate)
+	{
+		TEST_PTR_CONTINUE(deviceSignal)
+		equipmentIDs.append(deviceSignal->equipmentId());
+	}
+
+	std::map<QString, std::set<int>> signalIDsMap;
+
+	bool result = m_db->getMultipleSignalsIDsWithEquipmentID(equipmentIDs, &signalIDsMap, nullptr);
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	std::vector<int> checkoutSignalIDs;
+	std::vector<AppSignal> newSignalWorkcopies;
+
+	for(const Hardware::DeviceAppSignal* deviceSignal: deviceSignalsToUpdate)
+	{
+		TEST_PTR_CONTINUE(deviceSignal)
+
+		QString deviceSignalSpecPropStruct = deviceSignal->signalSpecPropsStruct();
+
+		if (	deviceSignalSpecPropStruct.contains(AppSignalPropNames::MISPRINT_lowEngineeringUnitsCaption) ||
+				deviceSignalSpecPropStruct.contains(AppSignalPropNames::MISPRINT_highEngineeringUnitsCaption))
+		{
+			*errMsg = QString(tr("Misprinted signal specific properties HighEngEneeringUnits/LowEngEneeringUnits has detected in device signal %1. \n\n"
+								"Update module preset first. \n\nUpdating from preset is aborted!")).
+								arg(deviceSignal->equipmentId());
+			return false;
+		}
+
+		auto mapIt = signalIDsMap.find(deviceSignal->equipmentId());
+
+		if (mapIt == signalIDsMap.end())
+		{
+			continue;
+		}
+
+		const std::set<int>& signalIDs = mapIt->second;
+
+		if (signalIDs.size() == 0)
+		{
+			continue;
+		}
+
+		for(int signalID : signalIDs)
+		{
+			bool signalChanged = false;
+
+			AppSignal s;
+
+			result = m_db->getLatestSignal(signalID, &s, nullptr);
+
+			if (result == false)
+			{
+				*errMsg = QString(tr("Cannot getLatestSignal with id = %1, update from preset is aborted.")).arg(signalID);
+				return false;
+			}
+
+			if (s.specPropStruct() != deviceSignalSpecPropStruct)
+			{
+				signalChanged = true;
+			}
+
+			AppSignalSpecPropValues specPropValues;
+
+			result = specPropValues.parseValuesFromArray(s.protoSpecPropValues());
+
+			if (result == false)
+			{
+				*errMsg = QString(tr("Signal %1 specific properties values parsing error, \nupdate from preset is aborted.")).arg(s.appSignalID());
+				return false;
+			}
+
+			result = specPropValues.updateFromSpecPropStruct(deviceSignalSpecPropStruct);
+
+			if (result == false)
+			{
+				*errMsg = QString(tr("Signal %1 specific properties values updating error, \nupdate from preset is aborted.")).arg(s.appSignalID());
+				return false;
+			}
+
+			QByteArray newValues;
+
+			result = specPropValues.serializeValuesToArray(&newValues);
+
+			if (newValues != s.protoSpecPropValues())		// compare proto-data arrays
+			{
+				signalChanged = true;
+			}
+
+			if (signalChanged == false)
+			{
+				continue;
+			}
+
+			// signal should be updated
+			//
+			s.setSpecPropStruct(deviceSignalSpecPropStruct);
+			s.setProtoSpecPropValues(newValues);
+
+			checkoutSignalIDs.push_back(signalID);
+			newSignalWorkcopies.emplace_back(s);
+		}
+	}
+
+	if (checkoutSignalIDs.size() == 0)
+	{
+		return true;
+	}
+
+	std::vector<ObjectState> objStates;
+
+	result = m_db->checkoutSignals(checkoutSignalIDs, &objStates, nullptr);
+
+	if (result == false)
+	{
+		*errMsg = QString(tr("App signals check out error, update is not possible!"));
+		return false;
+	}
+
+	if (objStates.size() != checkoutSignalIDs.size())
+	{
+		*errMsg = QString(tr("Not all necessery app signals was checked out, update is not possible!"));
+		return false;
+	}
+
+	bool allSignalsCheckedOut = true;
+
+	for(const ObjectState& objState : objStates)
+	{
+		if (objState.checkedOut == false || objState.errCode != ERR_SIGNAL_OK)
+		{
+			allSignalsCheckedOut = false;
+			break;
+		}
+	}
+
+	if (allSignalsCheckedOut == false)
+	{
+		*errMsg = QString(tr("Cannot check out one or more app signals, update from preset is not posible."));
+		return false;
+	}
+
+	result = m_db->setSignalsWorkcopies(newSignalWorkcopies, nullptr);
+
+	if (result == false)
+	{
+		*errMsg = QString(tr("Error setting signals new workcopies, update from preset is aborted."));
+		return false;
+	}
+
+	reloadSignals(checkoutSignalIDs);
+
+	return result;
+}
+
+bool AppSignalSetProvider::createNewSignals(const AppSignal& signalTemplate,
+											int channelsCount,
+											int signalsCount,
+											std::vector<int>* addedSignalIDs)
+{
+	TEST_PTR_RETURN_FALSE(addedSignalIDs);
+
+	std::vector<AppSignal> resultSignalVector;
+
+	resultSignalVector.reserve(signalsCount * channelsCount);
+
+	bool uppercase = projectProperty_uppercaseAppSignalID();
+
+	for (int s = 0; s < signalsCount; s++)
+	{
+		std::vector<AppSignal> newSignalsVector;
+
+		for (int ch = 0; ch < channelsCount; ch++)
+		{
+			AppSignal& newSignal = newSignalsVector.emplace_back(signalTemplate);
+
+			QString suffix;
+
+			if (signalsCount > 1)
+			{
+				suffix = QString("_SIG%1").arg(s, 3, 10, QChar('0'));
+			}
+
+			if (channelsCount > 1)
+			{
+				suffix += "_" + QString(QChar('A' + ch));
+			}
+
+			QString appSignalID = newSignal.appSignalID() + suffix;
+			QString customAppSignalID = newSignal.customAppSignalID() + suffix;
+
+			if (uppercase)
+			{
+				appSignalID = appSignalID.toUpper();
+				customAppSignalID = customAppSignalID.toUpper();
+			}
+
+			newSignal.setAppSignalID(appSignalID);
+			newSignal.setCustomAppSignalID(customAppSignalID);
+		}
+
+		if (m_db->addSignal(signalTemplate.signalType(), &newSignalsVector, m_parentWidget) == true)
+		{
+			for (const AppSignal& s : newSignalsVector)
+			{
+				resultSignalVector.emplace_back(s);
+			}
+		}
+		else
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		for(const AppSignal& newSignal : newSignalsVector)
+		{
+			m_signalSet.append(newSignal);
+			addedSignalIDs->push_back(newSignal.ID());
+		}
+	}
+
+	signalsCountChanged();
+
+	return true;
 }
 
 void AppSignalSetProvider::deleteSignals(const std::vector<int>& signalIDs)
@@ -932,7 +1153,8 @@ void AppSignalSetProvider::saveSignal(AppSignal& signal)
 	Q_ASSERT(m_thread == QThread::currentThread());
 
 	ObjectState state;
-	trimSignalTextFields(signal);
+
+	signal.trimTextFields();
 
 	m_db->setSignalWorkcopy(&signal, &state, nullptr);
 
@@ -954,7 +1176,7 @@ void AppSignalSetProvider::saveSignals(const std::vector<AppSignal*>& signalVect
 	{
 		ObjectState state;
 
-		trimSignalTextFields(*s);
+		s->trimTextFields();
 
 		m_db->setSignalWorkcopy(s, &state, nullptr);
 
@@ -1044,7 +1266,8 @@ std::vector<int> AppSignalSetProvider::cloneSignals(const std::vector<int>& sign
 			AppSignal& signalToCreate = signalsToCreate[i];
 
 			signalToCreate = *groupSignal;
-			trimSignalTextFields(signalToCreate);
+
+			signalToCreate.trimTextFields();
 
 			signalToCreate.setAppSignalID(groupSignal->appSignalID() + cloneSuffix);
 			signalToCreate.setCustomAppSignalID(groupSignal->customAppSignalID() + cloneSuffix);

@@ -2055,6 +2055,17 @@ QString AppSignal::removeNumberSign(const QString& appSignalID)
 	return appSignalID;
 }
 
+void AppSignal::trimTextFields()
+{
+	m_appSignalID = m_appSignalID.trimmed();
+	m_customAppSignalID = m_customAppSignalID.trimmed();
+	m_equipmentID = m_equipmentID.trimmed();
+	m_lmEquipmentID = m_lmEquipmentID.trimmed();
+	m_busTypeID = m_busTypeID.trimmed();
+	m_caption = m_caption.trimmed();
+	m_unit = m_unit.trimmed();
+}
+
 void AppSignal::initCreatedDates()
 {
 	m_createdMcs = QDateTime::currentDateTime().toMSecsSinceEpoch() * 1000;

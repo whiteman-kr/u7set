@@ -6651,6 +6651,7 @@ void DbWorker::slot_nextCounterValue(int* counter)
 	}
 
 	q.next();
+
 	*counter = q.value(0).toInt();
 
 	return;

@@ -105,8 +105,7 @@ public:
 				   QWidget* parent);
 	virtual ~SignalsTabPage() override;
 
-	static bool updateSignalsSpecProps(DbController* dbc,
-									   const std::vector<const Hardware::DeviceAppSignal*>& deviceSignalsToUpdate,
+	static bool updateSignalsSpecProps(const std::vector<const Hardware::DeviceAppSignal*>& deviceSignalsToUpdate,
 									   const QStringList& forceUpdateProperties);
 	int getMiddleVisibleRow();
 
@@ -128,7 +127,7 @@ public slots:
 	void onTabPageChanged();
 
 	void loadSignals();
-	void addSignal();
+	void createNewSignals();
 	void editSignal();
 	void cloneSignal();
 	void deleteSignal();
@@ -148,7 +147,8 @@ public slots:
 
 	void setSelection(const std::vector<int>& selectedRowsSignalID, int focusedCellSignalID = -1);
 	void saveSelection();
-	void restoreSelection(int focusedSignalId = -1);
+	void restoreSelection(int selectedSignalID = -1);
+	void restoreSelections(const std::vector<int>& selectedSignalIDs);
 	void onSignalSelectionChanged();
 
 	void changeSignalTypeFilter(int selectedType);

@@ -2770,7 +2770,7 @@ void EquipmentView::updateFromPreset()
 	//
 	if (updateAppSignals == true)
 	{
-		SignalsTabPage::updateSignalsSpecProps(db(), deviceSignalsToUpdateAppSignals, forceUpdateProperties);
+		SignalsTabPage::updateSignalsSpecProps(deviceSignalsToUpdateAppSignals, forceUpdateProperties);
 	}
 
 	// Reset model

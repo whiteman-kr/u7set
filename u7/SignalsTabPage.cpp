@@ -13,8 +13,6 @@
 #include <QStandardItemModel>
 #include <QAbstractItemModelTester>
 
-#include "../DbLib/DbController.h"
-#include "../Builder/AppSignalProperties.h"
 #include "../lib/WidgetUtils.h"
 #include "../lib/ConstStrings.h"
 #include "../lib/StandardColors.h"
@@ -926,187 +924,19 @@ SignalsTabPage::~SignalsTabPage()
 	deleteMetrologyDialog();
 }
 
-bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc,
-											const std::vector<const Hardware::DeviceAppSignal*>& deviceSignalsToUpdate,
+bool SignalsTabPage::updateSignalsSpecProps(const std::vector<const Hardware::DeviceAppSignal*>& deviceSignalsToUpdate,
 											const QStringList& forceUpdateProperties)
 {
 	Q_UNUSED(forceUpdateProperties)
 
-	TEST_PTR_RETURN_FALSE(dbc)
+	QString errMsg;
 
-	QStringList equipmentIDs;
+	bool result = AppSignalSetProvider::getInstance()->updateSignalsSpecProps(deviceSignalsToUpdate, &errMsg);
 
-	for(const Hardware::DeviceAppSignal* deviceSignal: deviceSignalsToUpdate)
+	if (errMsg.isEmpty() == false)
 	{
-		TEST_PTR_CONTINUE(deviceSignal)
-		equipmentIDs.append(deviceSignal->equipmentId());
+		QMessageBox::critical(m_instance, QApplication::applicationName(), errMsg);
 	}
-
-	std::map<QString, std::set<int>> signalIDsMap;
-
-	bool result = dbc->getMultipleSignalsIDsWithEquipmentID(equipmentIDs, &signalIDsMap, nullptr);
-
-	if (result == false)
-	{
-		return false;
-	}
-
-	std::vector<int> checkoutSignalIDs;
-	std::vector<AppSignal> newSignalWorkcopies;
-
-	for(const Hardware::DeviceAppSignal* deviceSignal: deviceSignalsToUpdate)
-	{
-		TEST_PTR_CONTINUE(deviceSignal)
-
-		QString deviceSignalSpecPropStruct = deviceSignal->signalSpecPropsStruct();
-
-		if (	deviceSignalSpecPropStruct.contains(AppSignalPropNames::MISPRINT_lowEngineeringUnitsCaption) ||
-				deviceSignalSpecPropStruct.contains(AppSignalPropNames::MISPRINT_highEngineeringUnitsCaption))
-		{
-			QMessageBox::critical(m_instance,
-						  QApplication::applicationName(),
-						  QString(tr("Misprinted signal specific properties HighEngEneeringUnits/LowEngEneeringUnits has detected in device signal %1. \n\n"
-									 "Update module preset first. \n\nUpdating from preset is aborted!")).
-											arg(deviceSignal->equipmentId()));
-			return false;
-		}
-
-		auto mapIt = signalIDsMap.find(deviceSignal->equipmentId());
-
-		if (mapIt == signalIDsMap.end())
-		{
-			continue;
-		}
-
-		const std::set<int>& signalIDs = mapIt->second;
-
-		if (signalIDs.size() == 0)
-		{
-			continue;
-		}
-
-		for(int signalID : signalIDs)
-		{
-			bool signalChanged = false;
-
-			AppSignal s;
-
-			result = dbc->getLatestSignal(signalID, &s, nullptr);
-
-			if (result == false)
-			{
-				QMessageBox::critical(m_instance,
-							  QApplication::applicationName(),
-							  QString(tr("Cannot getLatestSignal with id = %1, update from preset is aborted.")).arg(signalID));
-				return false;
-			}
-
-			if (s.specPropStruct() != deviceSignalSpecPropStruct)
-			{
-				signalChanged = true;
-			}
-
-			AppSignalSpecPropValues specPropValues;
-
-			result = specPropValues.parseValuesFromArray(s.protoSpecPropValues());
-
-			if (result == false)
-			{
-				QMessageBox::critical(m_instance,
-							  QApplication::applicationName(),
-							  QString(tr("Signal %1 specific properties values parsing error, \nupdate from preset is aborted.")).arg(s.appSignalID()));
-				return false;
-			}
-
-			result = specPropValues.updateFromSpecPropStruct(deviceSignalSpecPropStruct);
-
-			if (result == false)
-			{
-				QMessageBox::critical(m_instance,
-							  QApplication::applicationName(),
-							  QString(tr("Signal %1 specific properties values updating error, \nupdate from preset is aborted.")).arg(s.appSignalID()));
-				return false;
-			}
-
-			QByteArray newValues;
-
-			result = specPropValues.serializeValuesToArray(&newValues);
-
-			if (newValues != s.protoSpecPropValues())		// compare proto-data arrays
-			{
-				signalChanged = true;
-			}
-
-			if (signalChanged == false)
-			{
-				continue;
-			}
-
-			// signal should be updated
-			//
-			s.setSpecPropStruct(deviceSignalSpecPropStruct);
-			s.setProtoSpecPropValues(newValues);
-
-			checkoutSignalIDs.push_back(signalID);
-			newSignalWorkcopies.emplace_back(s);
-		}
-	}
-
-	if (checkoutSignalIDs.size() == 0)
-	{
-		return true;
-	}
-
-	std::vector<ObjectState> objStates;
-
-	result = dbc->checkoutSignals(checkoutSignalIDs, &objStates, nullptr);
-
-	if (result == false)
-	{
-		QMessageBox::critical(m_instance,
-							  QApplication::applicationName(),
-							  tr("App signals check out error, update is not possible!"));
-		return false;
-	}
-
-	if (objStates.size() != checkoutSignalIDs.size())
-	{
-		QMessageBox::critical(m_instance,
-							  QApplication::applicationName(),
-							  tr("Not all necessery app signals was checked out, update is not possible!"));
-		return false;
-	}
-
-	bool allSignalsCheckedOut = true;
-
-	for(const ObjectState& objState : objStates)
-	{
-		if (objState.checkedOut == false || objState.errCode != ERR_SIGNAL_OK)
-		{
-			allSignalsCheckedOut = false;
-			break;
-		}
-	}
-
-	if (allSignalsCheckedOut == false)
-	{
-		QMessageBox::critical(m_instance,
-					  QApplication::applicationName(),
-					  tr("Cannot check out one or more app signals, update from preset is not posible."));
-		return false;
-	}
-
-	result = dbc->setSignalsWorkcopies(newSignalWorkcopies, nullptr);
-
-	if (result == false)
-	{
-		QMessageBox::critical(m_instance,
-					  QApplication::applicationName(),
-					  QString(tr("Error setting signals new workcopies, update from preset is aborted.")));
-		return false;
-	}
-
-	AppSignalSetProvider::getInstance()->reloadAllSignals();
 
 	return result;
 }
@@ -1128,7 +958,7 @@ void SignalsTabPage::createActions(QToolBar *toolBar)
 
 	action = new QAction(QIcon(":/Images/Images/SchemaAddFile.svg"), tr("New signal"), this);
 	action->setShortcut(QKeySequence::StandardKey::New);
-	connect(action, &QAction::triggered, this, &SignalsTabPage::addSignal);
+	connect(action, &QAction::triggered, this, &SignalsTabPage::createNewSignals);
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
 
@@ -1277,7 +1107,7 @@ void SignalsTabPage::loadSignals()
 	restoreSelection();
 }
 
-void SignalsTabPage::addSignal()
+void SignalsTabPage::createNewSignals()
 {
 	QDialog signalTypeDialog(this, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
 	QFormLayout* fl = new QFormLayout(&signalTypeDialog);
@@ -1345,7 +1175,8 @@ void SignalsTabPage::addSignal()
 		signal.setEquipmentID(deviceIdEdit->text());
 	}
 
-	int signalCounter = dbController()->nextCounterValue();
+	int signalCounter = m_signalSetProvider->getNextSignalCounter();
+
 	if (signalCounter >= 0)
 	{
 		QString newId = QString(E::valueToString<E::SignalType>(signal.signalType()).toUpper() + "_%1").arg(signalCounter, 3, 10, Latin1Char::ZERO);
@@ -1358,61 +1189,18 @@ void SignalsTabPage::addSignal()
 
 	SignalPropertiesDialog dlg(signalToEdit, false, false, this);
 
-	AppSignalSetProvider::trimSignalTextFields(signal);
+	signal.trimTextFields();
 
-	if (dlg.exec() == QDialog::Accepted)
+	if (dlg.exec() == QDialog::Rejected)
 	{
-		QVector<AppSignal> resultSignalVector;
-
-		resultSignalVector.reserve(signalCount * channelCount);
-
-		for (int s = 0; s < signalCount; s++)
-		{
-			std::vector<AppSignal> signalVector;
-
-			for (int i = 0; i < channelCount; i++)
-			{
-				signalVector.emplace_back(signal);
-
-				QString suffix;
-
-				if (signalCount > 1)
-				{
-					suffix = QString("_SIG%1").arg(s, 3, 10, QChar('0'));
-				}
-
-				if (channelCount > 1)
-				{
-					suffix += "_" + QString(QChar('A' + i));
-				}
-
-				signalVector[i].setAppSignalID((signalVector[i].appSignalID() + suffix).toUpper());
-				signalVector[i].setCustomAppSignalID((signalVector[i].customAppSignalID() + suffix));
-			}
-
-			if (dbController()->addSignal(E::SignalType(signalTypeCombo->currentIndex()), &signalVector, this))
-			{
-				for (const AppSignal& s : signalVector)
-				{
-					resultSignalVector.append(s);
-				}
-			}
-		}
-
-		if (!resultSignalVector.isEmpty())
-		{
-			int addedSignalId = -1;
-
-			for (int i = 0; i < resultSignalVector.count(); i++)
-			{
-				m_signalSetProvider->addSignal(resultSignalVector[i]);
-				addedSignalId = resultSignalVector[i].ID();
-			}
-
-			m_signalsModel->slot_signalsCountChanged();
-			restoreSelection(addedSignalId);
-		}
+		return;
 	}
+
+	std::vector<int> addedSignalIDs;
+
+	m_signalSetProvider->createNewSignals(signal, channelCount, signalCount, &addedSignalIDs);
+
+	restoreSelections(addedSignalIDs);
 }
 
 void SignalsTabPage::editSignal()
@@ -1505,6 +1293,7 @@ bool SignalsTabPage::editSignals(const std::vector<int>& ids)
 void SignalsTabPage::cloneSignal()
 {
 	QModelIndexList selection = m_signalsView->selectionModel()->selectedRows(0);
+
 	if (selection.count() == 0)
 	{
 		QMessageBox::warning(this, tr("Warning"), tr("No one signal was selected!"));
@@ -1529,7 +1318,7 @@ void SignalsTabPage::cloneSignal()
 
 	m_signalsView->clearSelection();
 
-	restoreSelection();
+	restoreSelections(clonedSignalIDs);
 }
 
 void SignalsTabPage::deleteSignal()
@@ -1784,29 +1573,48 @@ void SignalsTabPage::saveSelection()
 	m_lastVerticalScrollPosition = m_signalsView->verticalScrollBar()->value();
 }
 
-void SignalsTabPage::restoreSelection(int focusedSignalId)
+void SignalsTabPage::restoreSelection(int selectedSignalID)
 {
-	if (focusedSignalId == -1)
+	restoreSelections(std::vector<int>{selectedSignalID});
+}
+
+void SignalsTabPage::restoreSelections(const std::vector<int>& selectedSignalIDs)
+{
+	if (selectedSignalIDs.empty())
 	{
 		return;
 	}
 
-	if (focusedSignalId != -1)
+	m_focusedCellColumn = 0;
+	m_focusedCellSignalID = selectedSignalIDs.back();
+
+	QModelIndex lastProxyIndex;
+
+	for(int selectedSignalID : selectedSignalIDs)
 	{
-		m_focusedCellSignalID = focusedSignalId;
-		m_focusedCellColumn = 0;
+		if (selectedSignalID == -1)
+		{
+			continue;
+		}
+
+		int signalIndex = m_signalSetProvider->signalIndex(selectedSignalID);
+
+		QModelIndex currentSourceIndex = m_signalsModel->index(signalIndex, m_focusedCellColumn);
+		QModelIndex currentProxyIndex = m_signalsProxyModel->mapFromSource(currentSourceIndex);
+
+		m_signalsView->selectionModel()->setCurrentIndex(currentProxyIndex, QItemSelectionModel::Select);
+		m_signalsView->selectionModel()->select(currentProxyIndex, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+
+		lastProxyIndex = currentProxyIndex;
 	}
-
-	QModelIndex currentSourceIndex = m_signalsModel->index(m_signalSetProvider->signalIndex(m_focusedCellSignalID), m_focusedCellColumn);
-	QModelIndex currentProxyIndex = m_signalsProxyModel->mapFromSource(currentSourceIndex);
-
-	m_signalsView->selectionModel()->setCurrentIndex(currentProxyIndex, QItemSelectionModel::Select);
-	m_signalsView->selectionModel()->select(currentProxyIndex, QItemSelectionModel::Select | QItemSelectionModel::Rows);
 
 	m_signalsView->horizontalScrollBar()->setValue(m_lastHorizontalScrollPosition);
 	m_signalsView->verticalScrollBar()->setValue(m_lastVerticalScrollPosition);
 
-	m_signalsView->scrollTo(currentProxyIndex);
+	if (lastProxyIndex.isValid())
+	{
+		m_signalsView->scrollTo(lastProxyIndex);
+	}
 }
 
 // Checks only first selected signal, because Metrology editor reads only first signal
