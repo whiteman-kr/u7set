@@ -28,7 +28,7 @@
 /// // Observer connects to AppDataService for signal state retrieval, start of measurements.
 /// observer.start();
 ///
-/// sim.overrideSignalValue("#INPUT", 1); // Set initial signal.
+/// ctrl.overrideSignalValue("#INPUT", 1); // Set initial signal.
 ///
 /// let waitResult = observer.wait(5000);  // Wait for satisfying all three expectations.
 /// assert(waitResult);                    // returns true if all expectations were fulfilled.
@@ -70,10 +70,9 @@ public slots:
 	///        The default option is to use plant time.
 	void useSystemTime();
 
-	/// @brief Set an initial condition based on a previously added expectation.
+	/// @brief Set an initial condition based on a previously added expectation. Throws an exception if initiator was not set.
 	/// @param initialExpectationId The identifier of an added expectation using an add* function.
-	/// @return `true` if the initial condition was successfully set; `false` if not.
-	bool setInitiator(int initialExpectationId);
+	void setInitiator(int initialExpectationId);
 
 	/// @brief Adds an expectation for signal to be nearly equal to the specified value within a given tolerance range.
 	/// @param appSignalId Application signal identifier.
@@ -105,7 +104,7 @@ public slots:
 	int expectationResult(int expectationId) const;
 
 private:
-	void reportError(const QString& message);
+	void reportError(const QString& message, bool throwException);
 
 private:
 	std::unique_ptr<ITestObserver> m_observer;

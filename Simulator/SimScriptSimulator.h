@@ -136,7 +136,7 @@ namespace Sim
 
 		/// \brief Override signal value. Returns true if signal value is overriden.
 		/// <b>Note:</b> At least one work cycle must be run [startForMs(5)] to apply override to signal.
-		/// <b>Note:</b> Not all signals can be overriden. For example, some signals can be optimized to constant value, as they don not have location in RAM they connot be overriden.
+		/// <b>Note:</b> Not all signals can be overriden. For example, some signals can be optimized to constant value, as they don not have location in RAM they cannot be overriden.
 		bool overrideSignalValue(QString appSignalId, double value);
 
 		/// \brief Waits while all overriden signal value is written to LM. 

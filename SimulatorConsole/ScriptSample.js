@@ -148,7 +148,7 @@ function test2(ctrl)
 
 	// Set initial signal.
 	//
-	sim.overrideSignalValue("#INPUT", 1);
+	ctrl.overrideSignalValue("#INPUT", 1);
 
 	// Wait for satisfying all three expectations.
 	// returns true if all expectations were fulfilled.

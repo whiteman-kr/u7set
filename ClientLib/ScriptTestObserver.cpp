@@ -16,7 +16,7 @@ bool ScriptTestObserver::start()
 	bool result = m_observer->start();
 	if (result == false)
 	{
-		reportError("ScriptTestObserver::start() failed, check connection to services.");
+		reportError("ScriptTestObserver::start() failed, check connection to services.", false);
 	}
 
 	return result;
@@ -37,7 +37,7 @@ bool ScriptTestObserver::wait(int timeoutMs)
 	bool result = m_observer->wait(timeoutMs);
 	if (result == false)
 	{
-		reportError("ScriptTestObserver::wait() filed.");
+		reportError("ScriptTestObserver::wait() failed.", false);
 	}
 
 	return result;
@@ -53,15 +53,15 @@ void ScriptTestObserver::useSystemTime()
 	return m_observer->setTimeType(E::TimeType::System);
 }
 
-bool ScriptTestObserver::setInitiator(int initialExpectationId)
+void ScriptTestObserver::setInitiator(int initialExpectationId)
 {
 	bool result = m_observer->setInitiator(initialExpectationId);
 	if (result == false)
 	{
-		reportError(tr("ScriptTestObserver::setInitiator() Initiator was not set, wrong initialExpectationId %1.").arg(initialExpectationId));
+		reportError(tr("ScriptTestObserver::setInitiator() Initiator was not set, wrong initialExpectationId %1.").arg(initialExpectationId), true);
 	}
 
-	return result;
+	return;
 }
 
 int ScriptTestObserver::addEqualExpectation(QString appSignalId, double expectedValue, double tolerance)
@@ -69,7 +69,7 @@ int ScriptTestObserver::addEqualExpectation(QString appSignalId, double expected
 	int result = m_observer->addEqualExpectation(appSignalId, expectedValue, tolerance);
 	if (result == ITestObserver::InvalidExpectationId)
 	{
-		reportError(tr("ScriptTestObserver::addEqualExpectation() Expectation was not added, check appSignalId %1.").arg(appSignalId));
+		reportError(tr("ScriptTestObserver::addEqualExpectation() Expectation was not added, check appSignalId %1.").arg(appSignalId), true);
 	}
 
 	return result;
@@ -80,7 +80,7 @@ int ScriptTestObserver::addGreaterExpectation(QString appSignalId, double thresh
 	int result = m_observer->addGreaterExpectation(appSignalId, threshold);
 	if (result == ITestObserver::InvalidExpectationId)
 	{
-		reportError(tr("ScriptTestObserver::addGreaterExpectation() Expectation was not added, check appSignalId %1.").arg(appSignalId));
+		reportError(tr("ScriptTestObserver::addGreaterExpectation() Expectation was not added, check appSignalId %1.").arg(appSignalId), true);
 	}
 
 	return result;
@@ -91,7 +91,7 @@ int ScriptTestObserver::addLessExpectation(QString appSignalId, double threshold
 	int result = m_observer->addLessExpectation(appSignalId, threshold);
 	if (result == ITestObserver::InvalidExpectationId)
 	{
-		reportError(tr("ScriptTestObserver::addLessExpectation() Expectation was not added, check appSignalId %1.").arg(appSignalId));
+		reportError(tr("ScriptTestObserver::addLessExpectation() Expectation was not added, check appSignalId %1.").arg(appSignalId), true);
 	}
 
 	return result;
@@ -107,7 +107,7 @@ int ScriptTestObserver::expectationResult(int expectationId) const
 	return m_observer->expectationResult(expectationId);
 }
 
-void ScriptTestObserver::reportError(const QString& message)
+void ScriptTestObserver::reportError(const QString& message, bool throwException)
 {
 	qDebug() << message;
 

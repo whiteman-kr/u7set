@@ -229,6 +229,12 @@ namespace TestSuite
 								continue;
 							}
 
+							// Mark all as unsatisfied.
+							// As they could be marked as satisfied right after start(), but before wait();
+							//
+							expectation->operative.satisified = false;
+							expectation->operative.metConditions = false;
+
 							auto& states = expectation->operative.states; // Just short ref name.
 
 							for (auto statesIt = states.begin(); statesIt != states.end();)
@@ -270,6 +276,11 @@ namespace TestSuite
 		{
 			for (auto& e : m_expectations)
 			{
+				if (e->appSignalHash != chunk.appSignalHash)
+				{
+					continue;
+				}
+
 				// Process only unsatisfied expectations.
 				//
 				if (e->operative.satisified == true || e->operative.isInitial == true)
@@ -277,26 +288,28 @@ namespace TestSuite
 					continue;
 				}
 
-				if (e->appSignalHash == chunk.appSignalHash)
+				for (const TrendLib::TrendStateItem& state : chunk.states)
 				{
-					for (const TrendLib::TrendStateItem& state : chunk.states)
+					if (m_waitPrivateData.metConditionsTime != 0 && state.getTime(m_timeType) < m_waitPrivateData.metConditionsTime)
 					{
-						// Add one point.
-						//
-						e->fill(sourceEquipmentId, state);
+						continue;
+					}
 
-						// Check met() only if initial condition was already satisfied.
-						//
-						if (m_waitPrivateData.initialConditionPtr == nullptr && e->met() == true)
-						{
-							break; // Do not add any other points, as this particular point is a timestamp when the condition was satisfied.
-						}
+					// Add one point.
+					//
+					e->fill(sourceEquipmentId, state);
+
+					// Check met() only if initial condition was already satisfied.
+					//
+					if (m_waitPrivateData.initialConditionPtr == nullptr && e->met() == true)
+					{
+						break; // Do not add any other points, as this particular point is a timestamp when the condition was satisfied.
 					}
 				}
 			}
 		}
 
-		emit dataReceived(); // Wakeup TestObserver::waitPrivate(...).
+		emit dataReceived();   // Wakeup TestObserver::waitPrivate(...).
 		return;
 	}
 

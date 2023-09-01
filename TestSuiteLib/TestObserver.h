@@ -42,21 +42,7 @@ namespace TestSuite
 				return;
 			}
 
-			// Add only really changed states.
-			//
-			if (operative.states.empty() == true)
-			{
-				operative.states.push_back(state);
-				return;
-			}
-
-			const auto& lastState = operative.states.back();
-
-			if (lastState.value != state.value || lastState.flags != state.flags)
-			{
-				operative.states.push_back(state);
-			}
-
+			operative.states.push_back(state);
 			return;
 		}
 
