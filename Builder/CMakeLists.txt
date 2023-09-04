@@ -125,6 +125,8 @@ qt_add_library(${TARGET} STATIC
 	RunOrder.h
 	SchemasReportGenerator.cpp
 	SchemasReportGenerator.h
+	ScriptChecker.cpp
+	ScriptChecker.h
 	SignalSet.cpp
 	SignalSet.h
 	SignalsHeap.cpp

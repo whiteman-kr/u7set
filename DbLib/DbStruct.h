@@ -30,7 +30,7 @@ enum class DbDir
 	EtcDir,						// $root$/ETC
 	TestsDir,					// $root$/Tests
 	SimTestsDir,				// $root$/Tests/SimTests
-	HardwareTestsDir,			// $root$/Tests/HadrwareTestsDir
+	HardwareTestsDir,			// $root$/Tests/HardwareTestsDir
 	DiagSignalTypesDir			// $root$/DiagSignalTypes
 };
 
@@ -334,7 +334,7 @@ public:
 	[[nodiscard]] int size() const;
 	[[nodiscard]] bool empty() const;
 
-	[[nodiscard]] bool isDbFile() const;		// true if contains DbFile whith data or tree is empty
+	[[nodiscard]] bool isDbFile() const;		// true if contains DbFile with data or tree is empty
 	[[nodiscard]] bool isDbFileInfo() const;	// true if contains DbFileInfo or tree is empty
 
 	[[nodiscard]] bool isRoot(int fileId) const;
@@ -396,12 +396,12 @@ private:
 	};
 
 private:
-	// WARNING, assigment move is present, adding new member, modify operator=(DbFileTree&&)!!!
+	// WARNING, assignment move is present, adding new member, modify operator=(DbFileTree&&)!!!
 	//
-	std::map<int, FileChildren> m_fileIdToChildren;				// Key is fileid, values are its' children
+	std::map<int, FileChildren> m_fileIdToChildren;				// Key is fileId, values are its' children
 	std::map<int, std::shared_ptr<DbFileInfo>> m_files;			// Key if fileId, value is DbFile(Info) object
 	int m_rootFileId = -1;
-	// WARNING, assigment move is present, adding new member, modify operator=(DbFileTree&&)!!!
+	// WARNING, assignment move is present, adding new member, modify operator=(DbFileTree&&)!!!
 	//
 };
 

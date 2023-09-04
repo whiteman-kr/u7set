@@ -8744,6 +8744,30 @@ namespace Builder
 					.arg(profile));
 	}
 
+	/// IssueCode: EQP6300
+	///
+	/// IssueType: Error
+	///
+	/// Title: Script evaluation error: file: %1, line: %2, message: %3.
+	///
+	/// Parameters:
+	///		%1 File name or file identifier
+	///		%2 Line number
+	///		%3 Evaluation error message
+	///
+	/// Description:
+	///		Failed script file evaluation.
+	///
+	void IssueLogger::errEQP6300(QString fileName, int lineNumber, QString message)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6300,
+				  tr("Script evaluation error: file: %1, line: %2, message: %3.")
+					  .arg(fileName)
+					  .arg(lineNumber)
+					  .arg(message));
+	}
+
 	// --
 	//
 	void IssueLogger::addItemsIssues(OutputMessageLevel level, int issueCode, const std::vector<QUuid>& itemsUuids)

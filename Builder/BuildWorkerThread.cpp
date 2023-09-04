@@ -1,23 +1,26 @@
-#include "BuildWorkerThread.h"
-#include "Parser.h"
-#include "ConfigurationBuilder.h"
-#include "AppLogicCompiler.h"
-#include "SoftwareCfgGenerator.h"
-#include "AppDataServiceCfgGenerator.h"
-#include "DiagDataServiceCfgGenerator.h"
-#include "MonitorCfgGenerator.h"
-#include "TuningServiceCfgGenerator.h"
-#include "TuningClientCfgGenerator.h"
-#include "TestSuiteCfgGenerator.h"
-#include "ConfigurationServiceCfgGenerator.h"
-#include "ArchivingServiceCfgGenerator.h"
-#include "MetrologyCfgGenerator.h"
-#include "TestClientCfgGenerator.h"
-#include "GatewayServiceCfgGenerator.h"
-#include "../Simulator/Simulator.h"
 #include "../HardwareLib/Subsystem.h"
-#include "SchemasReportGenerator.h"
+#include "../Simulator/Simulator.h"
+
+#include "AppDataServiceCfgGenerator.h"
+#include "AppLogicCompiler.h"
+#include "ArchivingServiceCfgGenerator.h"
+#include "BuildWorkerThread.h"
+#include "ConfigurationBuilder.h"
+#include "ConfigurationServiceCfgGenerator.h"
+#include "DiagDataServiceCfgGenerator.h"
+#include "GatewayServiceCfgGenerator.h"
 #include "LogicModulesInfoWriter.h"
+#include "MetrologyCfgGenerator.h"
+#include "MonitorCfgGenerator.h"
+#include "Parser.h"
+#include "SchemasReportGenerator.h"
+#include "ScriptChecker.h"
+#include "SoftwareCfgGenerator.h"
+#include "TestClientCfgGenerator.h"
+#include "TestSuiteCfgGenerator.h"
+#include "TuningClientCfgGenerator.h"
+#include "TuningServiceCfgGenerator.h"
+
 
 namespace Builder
 {
@@ -1012,12 +1015,12 @@ namespace Builder
 		QStringList windowsScript;
 		QStringList linuxScript;
 
-		for (const QString& c: scriptHeader)
+		for (const QString& c : scriptHeader)
 		{
 			windowsScript.push_back(commStartWindows + c);
 		}
 
-		for (const QString& c: scriptHeader)
+		for (const QString& c : scriptHeader)
 		{
 			linuxScript.push_back(commStartLinux + c);
 		}
@@ -1031,13 +1034,15 @@ namespace Builder
 		windowsScriptEnd.append("@exit /b 1");
 
 		QStringList linuxScriptEnd;
-        linuxScriptEnd.append("exit 0");
+		linuxScriptEnd.append("exit 0");
 
 		// --
 		//
 		const std::map<int, std::shared_ptr<DbFileInfo>>& files = fileTree.files();
 
 		QString javaScriptFileExtension{Db::File::JavaScriptFileExtension};
+
+		bool filesResult = true;
 
 		for (auto& [fileId, fileInfo] : files)
 		{
@@ -1046,9 +1051,8 @@ namespace Builder
 				continue;
 			}
 
-			QString fileExt = fileInfo->extension();
-
-			if (fileExt.compare(javaScriptFileExtension, Qt::CaseInsensitive) != 0)
+			if (QString fileExt = fileInfo->extension();
+				fileExt.compare(javaScriptFileExtension, Qt::CaseInsensitive) != 0)
 			{
 				continue;
 			}
@@ -1056,87 +1060,109 @@ namespace Builder
 			std::shared_ptr<DbFile> file;
 
 			bool ok = m_context->m_db.getLatestVersion(*fileInfo, &file, nullptr);
-			if (ok == true)
+			if (ok == false)
 			{
-				BuildFile* buildFile = m_context->m_buildResultWriter->addFile(Directory::TESTS + fileTree.filePath(fileId), file->fileName(), file->data(), false);
-				if (buildFile == nullptr)
-				{
-					Q_ASSERT(buildFile);
-					return false;
-				}
+				m_context->m_log->errPDB2002(fileInfo->fileId(), fileInfo->fileName(), m_context->m_db.lastError());
+				filesResult = false;
+				continue;
+			}
 
+			// Check script.
+			//
+			{
+				QString fullFileName = fileTree.filePath(file->fileId()) + "/" + file->fileName();
+
+				if (bool evaluateResult = ScriptChecker::checkFile(file->data(), fullFileName, *m_context->m_log);
+					evaluateResult == false)
+				{
+					filesResult = false;
+					continue;
+				}
+			}
+
+			// Add file to output.
+			//
+			if (BuildFile* buildFile = m_context->m_buildResultWriter->addFile(Directory::TESTS + fileTree.filePath(fileId), file->fileName(), file->data(), false);
+				buildFile == nullptr)
+			{
+				Q_ASSERT(buildFile);
+				return false;
+			}
+
+			// Further work only with simulator scripts.
+			//
+			{
 				QString folderPath = Db::File::systemDirToName(DbDir::RootDir) + "/";
+				QStringList pathList;
+				std::shared_ptr<DbFileInfo> f = fileTree.file(fileId);
 
+				while (f != nullptr)
 				{
-					QStringList pathList;
-					std::shared_ptr<DbFileInfo> f = fileTree.file(fileId);
+					f = fileTree.file(f->parentId());
 
-					while (f != nullptr)
+					if (f != nullptr)
 					{
-						f = fileTree.file(f->parentId());
-
-						if (f != nullptr)
-						{
-							pathList.push_front(f->fileName());
-						}
+						pathList.push_front(f->fileName());
 					}
-
-					folderPath += pathList.join(QChar('/'));
 				}
+
+				folderPath += pathList.join(QChar('/'));
 
 				if (folderPath.startsWith(Db::File::systemDirToName(DbDir::SimTestsDir)) == false)
 				{
 					continue;
 				}
-
-				QString runScriptWindowsTemplate = "SimulatorConsole.exe -build=%1 -script=%2 -profile=Default\n"
-										   "@if %ERRORLEVEL% NEQ 0 goto ERROR";
-				QString runScriptLinuxTemplate = "./SimulatorConsole -build=%1 -script=%2 -profile=Default\n"
-										 "if [ $? -ne 0 ]; then\n"
-										 "echo \"Script execution failed!\"\n"
-										 "exit 1\n"
-										 "fi\n";
-
-				// Create run script
-				//
-				QString scriptFileName = file->fileName();
-				scriptFileName.chop(javaScriptFileExtension.size());
-
-				QString outputPath = QDir::fromNativeSeparators(m_context->m_buildResultWriter->outputPath());
-				if (outputPath.endsWith("/") == true)
-				{
-					outputPath.truncate(outputPath.length() - 1);
-				}
-
-				QString buildDir = QString("%1/%2/build")
-						.arg(outputPath)
-						.arg(m_context->m_db.currentProject().projectName());
-
-				QString scriptDir = QString("%1/%2")
-						.arg(buildDir)
-						.arg(Directory::TESTS + fileTree.filePath(fileId));
-
-				// Windows script
-				//
-				QString runScriptWindows = tr(runScriptWindowsTemplate.toLocal8Bit())
-						.arg(QDir::toNativeSeparators(buildDir))
-						.arg(QDir::toNativeSeparators(scriptDir + "/" + file->fileName()));
-
-				windowsScript.push_back(runScriptWindows);
-
-				// Linux script
-				//
-				QString runScriptLinux = tr(runScriptLinuxTemplate.toLocal8Bit())
-						.arg(buildDir)
-						.arg(scriptDir + "/" + file->fileName());
-
-				linuxScript.push_back(runScriptLinux);
 			}
-			else
+
+			// --
+			//
+			QString runScriptWindowsTemplate = "SimulatorConsole.exe -build=%1 -script=%2 -profile=Default\n"
+											   "@if %ERRORLEVEL% NEQ 0 goto ERROR";
+			QString runScriptLinuxTemplate = "./SimulatorConsole -build=%1 -script=%2 -profile=Default\n"
+											 "if [ $? -ne 0 ]; then\n"
+											 "echo \"Script execution failed!\"\n"
+											 "exit 1\n"
+											 "fi\n";
+
+			// Create run script
+			//
+			QString scriptFileName = file->fileName();
+			scriptFileName.chop(javaScriptFileExtension.size());
+
+			QString outputPath = QDir::fromNativeSeparators(m_context->m_buildResultWriter->outputPath());
+			if (outputPath.endsWith("/") == true)
 			{
-				m_context->m_log->errPDB2002(fileInfo->fileId(), fileInfo->fileName(), m_context->m_db.lastError());
-				return false;
+				outputPath.truncate(outputPath.length() - 1);
 			}
+
+			QString buildDir = QString("%1/%2/build")
+								   .arg(outputPath)
+								   .arg(m_context->m_db.currentProject().projectName());
+
+			QString scriptDir = QString("%1/%2")
+									.arg(buildDir)
+									.arg(Directory::TESTS + fileTree.filePath(fileId));
+
+			// Windows script
+			//
+			QString runScriptWindows = tr(runScriptWindowsTemplate.toLocal8Bit())
+										   .arg(QDir::toNativeSeparators(buildDir))
+										   .arg(QDir::toNativeSeparators(scriptDir + "/" + file->fileName()));
+
+			windowsScript.push_back(runScriptWindows);
+
+			// Linux script
+			//
+			QString runScriptLinux = tr(runScriptLinuxTemplate.toLocal8Bit())
+										 .arg(buildDir)
+										 .arg(scriptDir + "/" + file->fileName());
+
+			linuxScript.push_back(runScriptLinux);
+		}
+
+		if (filesResult == false)
+		{
+			return false;
 		}
 
 		// Add script files
