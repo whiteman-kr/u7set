@@ -116,5 +116,8 @@ namespace TestSuite
 		IOutputController& m_outputController;
 
 		std::set<QString> m_overridenSignals; // Contains AppSignalIds of overriden signals
+
+		std::atomic<qint64> m_executionTimeout{ -1 };
+		bool m_debugMessagesEnabled = false;
 	};
 } // namespace TestSuite

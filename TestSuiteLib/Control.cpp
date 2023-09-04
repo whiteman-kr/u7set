@@ -1,5 +1,4 @@
 #include <QSignalSpy>
-#include <QtConcurrent>
 #include "Control.h"
 #include "AdsInputController.h"
 #include "TunsOutputController.h"
@@ -338,8 +337,41 @@ namespace TestSuite
 				QMutexLocker l(&m_statusMutex);
 				m_status.m_scriptIndex++;
 				m_status.m_scriptFile = script->fileName();
+
+				m_status.setStartTime();
 			}
 
+			std::condition_variable callFinishedCondVariable;
+			std::atomic<bool> callFinished{false};
+
+			QThread* scriptRunThread = QThread::currentThread();
+
+			// Execution timeout checking function
+			//
+			auto checkTestExecutionTime = [&callFinishedCondVariable, &callFinished, scriptRunThread, &testController, script, this]()->void
+				{
+					do
+					{
+						if (testController.executionTimeout() > 0 && status().duration().count() > testController.executionTimeout())
+						{
+							QString logMessage = tr("Script %1 execution timeout (%2 ms).").arg(script->fileName()).arg(status().duration().count());
+							m_appLog.writeError(logMessage);
+							requestInterruption();
+							break;
+						}
+
+						std::mutex fakeMutex;
+						std::unique_lock l(fakeMutex);
+						auto threadStopped = callFinishedCondVariable.wait_for(
+							l, 
+							std::chrono::milliseconds{200},
+							[&callFinished, scriptRunThread]() {return callFinished.load() || scriptRunThread->isInterruptionRequested(); });
+					} while (callFinished.load() == false && scriptRunThread->isInterruptionRequested() == false);
+
+					return;
+				};
+			auto f = std::async(std::launch::async, checkTestExecutionTime);
+			
 			checkAndInterruptTestExecution();
 
 			QString logMessage = tr("Run test script: %1").arg(script->fileName());
@@ -352,6 +384,11 @@ namespace TestSuite
 			});
 
 			fileTestResult &= scriptRunner.runScript(*script, m_testsFilter);
+
+			callFinished.store(true);
+			callFinishedCondVariable.notify_one();
+
+			f.wait();	// Wait for checkTestExecutionTime function to complete
 		}
 
 		if (fileTestResult == false)
@@ -441,7 +478,7 @@ namespace TestSuite
 					m_stopRequested.store(false);
 				};
 
-			QFuture<void> future = QtConcurrent::run(waitForThreadStop);
+			[[maybe_unused]] auto f = std::async(std::launch::async, waitForThreadStop);
 		}
 		else
 		{
@@ -465,6 +502,5 @@ namespace TestSuite
 	{
 		return m_controlThread.reportTemplates();
 	}
-
 }
 

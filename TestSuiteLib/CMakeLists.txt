@@ -6,7 +6,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Qml Xml Concurrent Test)
+find_package(Qt6 REQUIRED COMPONENTS Qml Xml Test)
 
 set(TARGET TestSuiteLib)
 
@@ -45,11 +45,10 @@ target_precompile_headers(${TARGET} PUBLIC
 	<QtQml>
 	<QtXml>
 	<QtTest>
-	<QtConcurrent>
 )
 
 
-target_link_libraries(${TARGET} PUBLIC Qt6::Qml Qt6::Xml Qt6::Concurrent Qt6::Test)
+target_link_libraries(${TARGET} PUBLIC Qt6::Qml Qt6::Xml Qt6::Test)
 target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib AppSignalLib OnlineLib ClientLib)
 
 target_compile_definitions(${TARGET} PRIVATE TEST_SUITE_LIBRARY)

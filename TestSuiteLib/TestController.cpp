@@ -44,7 +44,11 @@ namespace TestSuite
 
 	void TestController::debugOutput(QString str)
 	{
-		qDebug() << str;
+		if (m_debugMessagesEnabled == true)
+		{
+			qDebug() << str;
+			m_appLog->writeMessage("<DEBUG> " + str);
+		}
 	}
 
 	bool TestController::startForMs(int msecs)
@@ -222,36 +226,32 @@ namespace TestSuite
 
 	QString TestController::projectName() const
 	{
-		// TODO
-		return "TODOProjectName";
+		return m_configuration.configInfo.project;
 	}
 
 	int TestController::buildNo() const
 	{
-		// TODO
-		return -1;
+		return m_configuration.configInfo.buildNo;
 	}
 
 	qint64 TestController::executionTimeout() const
 	{
-		// TODO
-		return -1;
+		return m_executionTimeout.load();
 	}
 
 	void TestController::setExecutionTimeout(qint64 value)
 	{
-		// TODO
+		m_executionTimeout.store(value);
 	}
 
 	bool TestController::debugMessagesEnabled() const
 	{
-		// TODO
-		return false;
+		return m_debugMessagesEnabled;
 	}
 
 	void TestController::setDebugMessagesEnabled(bool value)
 	{
-		// TODO
+		m_debugMessagesEnabled = true;
 	}
 
 } // namespace TestSuite

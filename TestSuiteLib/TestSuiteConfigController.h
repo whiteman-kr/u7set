@@ -16,10 +16,6 @@ namespace TestSuite
 
 		ClientLib::ConfigurationInfo configInfo;
 
-		int buildNo = -1;
-		QString softwareEquipmentId;
-		QString project;
-
 		// AppData settings
 		//
 		std::vector<SoftwareEndpoint::AppDataService> appDataServices;
