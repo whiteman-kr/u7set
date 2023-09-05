@@ -247,7 +247,7 @@ namespace  Sim
 			appDir += '/';
 		}
 
-		if (QFile file(appDir + "GlobalScript.js");
+		if (QFile file(appDir + File::GLOBAL_SCRIPT);
 			file.open(QIODevice::ReadOnly | QIODevice::Text) == true)
 		{
 			m_globalScript = file.readAll();

@@ -2,6 +2,7 @@
 #include "GlobalMessanger.h"
 #include "Forms/ComparePropertyObjectDialog.h"
 #include "Simulator/SimSelectBuildDialog.h"
+#include "../lib/ConstStrings.h"
 
 
 #ifdef QT_DEBUG
@@ -1895,6 +1896,17 @@ void TestsWidget::runTestCurrentFile()
 
 	std::vector<int> fileIds;
 	fileIds.push_back(m_currentFileId);
+
+	{
+		DbFileInfo globalScriptFileInfo;
+		bool ok = dbc()->getFileInfo(File::GLOBAL_SCRIPT_FULL_PATH, &globalScriptFileInfo, this);
+
+		if (ok == true && globalScriptFileInfo.isNull() == false && globalScriptFileInfo.deleted() == false)
+		{
+			fileIds.push_back(globalScriptFileInfo.fileId());
+		}
+	}
+
 	runTests(fileIds);
 	return;
 }
@@ -2830,25 +2842,38 @@ void TestsWidget::runSimTests(const QString& buildPath, const std::vector<DbFile
 
 	if (ok == false)
 	{
-		QMessageBox::critical(this, qAppName(), tr("Cannot open project for simultaion. For details see Output window."));
+		QMessageBox::critical(this, qAppName(), tr("Cannot open project for simulation. For details see Output window."));
 		return;
 	}
 
-	// Run simualtion for all LogicModule(s)
+	// Run simulation for all LogicModule(s)
 	//
 	m_simulator.control().setRunList({});
 
 	// Start tests
 	//
+	Sim::SimScriptItem globalScript;
 	std::vector<Sim::SimScriptItem> scripts;
 	scripts.reserve(latestFiles.size());
 
 	for (const std::shared_ptr<DbFile>& file : latestFiles)
 	{
-		scripts.emplace_back(Sim::SimScriptItem{file->data(), file->fileName()});
+		if (file->fileName() == File::GLOBAL_SCRIPT)
+		{
+			globalScript = {file->data(), file->fileName()};
+		}
+		else
+		{
+			scripts.emplace_back(file->data(), file->fileName());
+		}
 	}
 
-	m_simulator.runScripts(scripts, projectProperties.simTestsTimeout());
+	if (scripts.empty() == true)
+	{
+		return;
+	}
+
+	m_simulator.runScripts(scripts, globalScript, projectProperties.simTestsTimeout());
 
 	return;
 }

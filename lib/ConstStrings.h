@@ -485,6 +485,9 @@ namespace File
 	inline const QString ARCH_INFO_PROTO_BAK = "ArchInfo.proto.bak";
 
 	inline const QString READONLY = "readonly";
+
+	inline static const QString GLOBAL_SCRIPT = "GlobalScript.js";
+	inline static const QString GLOBAL_SCRIPT_FULL_PATH = "$root$/Tests/GlobalScript.js";
 }
 
 namespace Separator

@@ -28,8 +28,8 @@ namespace
 			QByteArray ba;
 			bool ok;
 
-			ok = getFileBlocked("/" + softwareInfo().equipmentID() + "/GlobalScript.js", &ba, &parsingError);
-			rf.emplace_back("GlobalScript.js", ok, ba);
+			ok = getFileBlocked("/" + softwareInfo().equipmentID() + "/" + File::GLOBAL_SCRIPT, &ba, &parsingError);
+			rf.emplace_back(File::GLOBAL_SCRIPT, ok, ba);
 
 			ok = getFileBlockedById(CfgFileId::LOGO, &ba, &parsingError);
 			rf.emplace_back(std::make_tuple("CfgFileId::LOGO", ok, ba));

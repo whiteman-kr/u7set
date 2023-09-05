@@ -80,11 +80,29 @@ namespace Sim
 				m_jsEngine->globalObject().setProperty("isSimulator", QJSValue{true});
 				m_jsEngine->globalObject().setProperty("isTestSuite", QJSValue{false});
 
+				// Evaluate GlobalScript
+				//
+				if (QJSValue globalScriptValue = m_jsEngine->evaluate(m_globalScript.script);
+					globalScriptValue.isError() == true)
+				{
+					m_log.writeError(tr("GlobalScript %1 evaluate error at line %2\n"
+										"\tClass: %3\n"
+										"\tStack: %4\n"
+										"\tMessage: %5")
+									 .arg(m_globalScript.scriptCaption)
+									 .arg(globalScriptValue.property("lineNumber").toInt())
+									 .arg(metaObject()->className())
+									 .arg(globalScriptValue.property("stack").toString())
+									 .arg(globalScriptValue.toString()));
+
+					m_result = false;
+					return;
+				}
+
 				// Evaluate script
 				//
-				QJSValue scriptValue = m_jsEngine->evaluate(script.script);
-
-				if (scriptValue.isError() == true)
+				if (QJSValue scriptValue = m_jsEngine->evaluate(script.script);
+					scriptValue.isError() == true)
 				{
 					m_log.writeError(tr("Script %1 evaluate error at line %2\n"
 										"\tClass: %3\n"
@@ -295,8 +313,9 @@ namespace Sim
 		return m_result;
 	}
 
-	void ScriptWorkerThread::setScripts(const std::vector<SimScriptItem>& scripts)
+	void ScriptWorkerThread::setScripts(const std::vector<SimScriptItem>& scripts, const SimScriptItem& globalScript)
 	{
+		m_globalScript = globalScript;
 		m_scripts = scripts;
 
 		std::sort(m_scripts.begin(),
@@ -324,7 +343,7 @@ namespace Sim
 		stopScript();
 	}
 
-	bool ScriptSimulator::runScripts(const std::vector<SimScriptItem>& scripts)
+	bool ScriptSimulator::runScripts(const std::vector<SimScriptItem>& scripts, const SimScriptItem& globalScript)
 	{
 		if (m_simulator == nullptr)
 		{
@@ -350,7 +369,7 @@ namespace Sim
 
 		// Set script and start thread
 		//
-		m_workerThread.setScripts(scripts);
+		m_workerThread.setScripts(scripts, globalScript);
 		m_workerThread.start();
 
 		return true;

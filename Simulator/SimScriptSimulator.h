@@ -40,12 +40,13 @@ namespace Sim
 
 		bool result() const;
 
-		void setScripts(const std::vector<SimScriptItem>& scripts);
+		void setScripts(const std::vector<SimScriptItem>& scripts, const SimScriptItem& globalScript);
 
 	private:
 		ScriptSimulator* m_scriptSimulator = nullptr;
 		ScopedLog m_log;
 
+		SimScriptItem m_globalScript;
 		std::vector<SimScriptItem> m_scripts;
 
 		std::unique_ptr<QJSEngine> m_jsEngine;
@@ -94,7 +95,7 @@ namespace Sim
 		explicit ScriptSimulator(Simulator* simulator, QObject* parent = nullptr);
 		virtual ~ScriptSimulator();
 
-		bool runScripts(const std::vector<SimScriptItem>& scripts);
+		bool runScripts(const std::vector<SimScriptItem>& scripts, const SimScriptItem& globalScript);
 		bool stopScript();
 
 		bool isRunning() const;

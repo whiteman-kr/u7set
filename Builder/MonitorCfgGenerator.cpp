@@ -48,7 +48,7 @@ namespace Builder
 		//
 		bool result = true;
 
-		result &= saveScriptProperties("GlobalScript", "GlobalScript.js");
+		result &= saveScriptProperties("GlobalScript", File::GLOBAL_SCRIPT);
 
 		result &= initSchemaTags();
 
