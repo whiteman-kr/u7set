@@ -1070,7 +1070,8 @@ namespace Builder
 			// Check script.
 			//
 			{
-				QString fullFileName = fileTree.filePath(file->fileId()) + "/" + file->fileName();
+				QString fullFileName = "/Tests" + fileTree.filePath(file->fileId()) + "/" + file->fileName();
+				fullFileName.replace("//", "/");
 
 				if (bool evaluateResult = ScriptChecker::checkFile(file->data(), fullFileName, *m_context->m_log);
 					evaluateResult == false)
