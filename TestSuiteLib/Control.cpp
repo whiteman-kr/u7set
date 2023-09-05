@@ -304,14 +304,18 @@ namespace TestSuite
 
 		std::vector<const TestScript*> runScripts;
 
+
+		TestScript* globalScript = nullptr;
+
 		// Build list of scripts to run
 
-		for (const auto& script : m_scripts)
+		for (auto& script : m_scripts)
 		{
-			// Do not execute global scripts
-			//
 			if (script.isGlobalScript() == true)
 			{
+				// GlobalScript found
+				//
+				globalScript = &script;
 				continue;
 			}
 
@@ -390,7 +394,7 @@ namespace TestSuite
 				emit testFinished(scriptFileName, testFunction, result);
 			});
 
-			fileTestResult &= scriptRunner.runScript(*script, m_testsFilter);
+			fileTestResult &= scriptRunner.runScript(*script, globalScript, m_testsFilter);
 
 			callFinished.store(true);
 			callFinishedCondVariable.notify_one();

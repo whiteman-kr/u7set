@@ -9,22 +9,6 @@
 //
 var SkipOnBuild = false;
 
-// Use these constants as parameters for ReadRam*/WriteRam* simulator functions.
-//
-const RamReadAccess = 1;
-const RamWriteAccess = 2;
-const RamReadWriteAccess = 3;
-
-//
-function assert(condition, message)
-{
-	if (!condition)
-	{
-		message = message || "Assertion failed";
-		throw new Error(message);
-	}
-}
-
 // initTestCase() - will be called before the first test function is executed.
 //
 function initTestCase(ctrl)

@@ -37,12 +37,25 @@ namespace TestSuite
 		return evaluateScript(script, {}, functionsList, errorMsg);
 	}
 
-	bool ScriptRunner::runScript(const TestScript& script, const TestScriptSelection& filter)
+	bool ScriptRunner::runScript(const TestScript& script, const TestScript* globalScript, const TestScriptSelection& filter)
 	{
 		{
 			QMutexLocker l(&m_statusMutex);
 			m_status.m_testIndex = 0;
 			m_status.m_testFunction = "evaluate";
+		}
+
+		if (globalScript != nullptr)
+		{
+			// Evaluate global script
+			// 
+			QString errorMsg;
+			QStringList functionsList;
+			if (evaluateScript(*globalScript, {}, functionsList, errorMsg) == false)
+			{
+				m_scriptTestLog.writeError(errorMsg);
+				return false;
+			}
 		}
 
 		// Evaluate script

@@ -20,7 +20,7 @@ namespace TestSuite
 
 	public:
 		bool getScriptTestFunctions(const TestScript& script, QStringList& functionsList, QString& errorMsg);
-		bool runScript(const TestScript& script, const TestScriptSelection& filter);
+		bool runScript(const TestScript& script, const TestScript* globalScript, const TestScriptSelection& filter);
 
 	signals:
 		void testFinished(QString scriptFileName, QString testFunction, bool result);
