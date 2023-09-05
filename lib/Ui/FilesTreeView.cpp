@@ -990,13 +990,17 @@ void FileTreeModel::updateFile(QModelIndex index, const DbFileInfo& file)
 		return;
 	}
 
+	FileTreeModelItem* parentFile = nullptr;
+
 	QModelIndex parentIndex = index.parent();
 	if (parentIndex.isValid() == false)
 	{
-		return;
+		parentFile = m_root.get();
 	}
-
-	FileTreeModelItem* parentFile = fileItem(parentIndex);
+	else
+	{
+		parentFile = fileItem(parentIndex);
+	}
 	if (parentFile == nullptr)
 	{
 		assert(parentFile);
@@ -1004,7 +1008,6 @@ void FileTreeModel::updateFile(QModelIndex index, const DbFileInfo& file)
 	}
 
 	FileTreeModelItem* childFile = parentFile->childByFileId(file.fileId());
-
 	if (childFile == nullptr)
 	{
 		assert(childFile);
@@ -2104,15 +2107,15 @@ void FileTreeView::checkOutFiles(QModelIndexList indexList)
 
 	for (QModelIndex& mi : indexList)
 	{
-		if (mi.parent().isValid() == false)
+		FileTreeModelItem* f = m_model->fileItem(mi);
+		assert(f);
+
+		if (mi.parent().isValid() == false && f->isFolder() == true)
 		{
 			// Forbid to check out root "folders"
 			//
 			continue;
 		}
-
-		FileTreeModelItem* f = m_model->fileItem(mi);
-		assert(f);
 
 		if (f->state() == E::VcsState::CheckedOut)
 		{
@@ -2168,15 +2171,15 @@ void FileTreeView::checkInFiles(QModelIndexList indexList)
 
 	for (QModelIndex& mi : indexList)
 	{
-		if (mi.parent().isValid() == false)
+		FileTreeModelItem* f = m_model->fileItem(mi);
+		assert(f);
+
+		if (mi.parent().isValid() == false && f->isFolder() == true)
 		{
 			// Forbid to check in root "folders"
 			//
 			continue;
 		}
-
-		FileTreeModelItem* f = m_model->fileItem(mi);
-		assert(f);
 
 		if (f->state() == E::VcsState::CheckedOut &&
 			(db()->currentUser().isAdminstrator() == true || db()->currentUser().userId() == f->userId()))
@@ -2243,15 +2246,15 @@ bool FileTreeView::undoChangesFiles(QModelIndexList indexList)
 
 	for (QModelIndex& mi : indexList)
 	{
-		if (mi.parent().isValid() == false)
+		FileTreeModelItem* f = m_model->fileItem(mi);
+		assert(f);
+
+		if (mi.parent().isValid() == false && f->isFolder() == true)
 		{
-			// Forbid any actions to root items
+			// Forbid to undo root "folders"
 			//
 			continue;
 		}
-
-		FileTreeModelItem* f = m_model->fileItem(mi);
-		assert(f);
 
 		if (f->state() == E::VcsState::CheckedOut &&
 			(db()->currentUser().isAdminstrator() == true || db()->currentUser().userId() == f->userId()))

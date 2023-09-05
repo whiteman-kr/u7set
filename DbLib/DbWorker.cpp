@@ -412,6 +412,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0389.sql", "Upgrade to version 389, LMs SR05, SR20, SR90: AFB MEM changed from version 8 to version 9"},
 	{":/DatabaseUpgrade/Upgrade0390.sql", "Upgrade to version 390, New instructions for LMs SR05, SR20, SR90"},
 	{":/DatabaseUpgrade/Upgrade0391.sql", "Upgrade to version 391, Removed property OnConfigurationArrived from Monitor, TuningClient"},
+	{":/DatabaseUpgrade/Upgrade0392.sql", "Upgrade to version 392, Add file Tests/GlobalScript.js"},
 };
 
 int DbWorker::counter = 0;

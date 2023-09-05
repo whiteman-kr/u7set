@@ -3398,22 +3398,20 @@ void TestsWidget::setTestsTreeActionsState()
 	bool canAnyBeCheckedIn = false;
 	bool canAnyBeCheckedOut = false;
 
+	bool rootItemSelected = false;
+
 	for (const QModelIndex& mi : selectedIndexList)
 	{
-		if (mi.parent().isValid() == false)
-		{
-			// Forbid root folders processing
-			//
-			folderSelected = true;
-
-			continue;
-		}
-
 		const FileTreeModelItem* file = m_testsTreeModel->fileItem(mi);
 		if (file == nullptr)
 		{
 			assert(file);
 			return;
+		}
+
+		if (mi.parent().isValid() == false)
+		{
+			rootItemSelected = true;
 		}
 
 		if (file->isFolder() == true)
@@ -3436,17 +3434,24 @@ void TestsWidget::setTestsTreeActionsState()
 		{
 			canAnyBeCheckedOut = true;
 		}
-
 	}
 
-	// Enable Actions
+	bool fileSelected = !folderSelected;
+
+	// Enable only when file is selected
 	//
-	m_openFileAction->setEnabled(selectedIndexList.size() == 1 && editableExtension == true);
-	m_newFileAction->setEnabled(selectedIndexList.size() == 1);
-	m_newFolderAction->setEnabled(selectedIndexList.size() == 1);
-	m_addFileAction->setEnabled(selectedIndexList.size() == 1);
-	m_renameFileAction->setEnabled(selectedIndexList.size() == 1 && canAnyBeCheckedIn);
-	m_moveFileAction->setEnabled(canAnyBeCheckedIn && folderSelected == false);
+	m_openFileAction->setEnabled(folderSelected == false && selectedIndexList.size() == 1 && editableExtension == true);
+	
+	// Enable when folder is selected only
+	//
+	m_newFileAction->setEnabled(folderSelected == true && selectedIndexList.size() == 1);
+	m_newFolderAction->setEnabled(folderSelected == true && selectedIndexList.size() == 1);
+	m_addFileAction->setEnabled(folderSelected == true && selectedIndexList.size() == 1);
+
+	// Enable only when non-root file is selected
+	//
+	m_renameFileAction->setEnabled(folderSelected == false && rootItemSelected == false && selectedIndexList.size() == 1 && canAnyBeCheckedIn);
+	m_moveFileAction->setEnabled(folderSelected == false && rootItemSelected == false && canAnyBeCheckedIn);
 
 	// Delete Items action
 	//
@@ -3480,9 +3485,14 @@ void TestsWidget::setTestsTreeActionsState()
 		}
 	}
 
-	m_checkInAction->setEnabled(canAnyBeCheckedIn);
-	m_checkOutAction->setEnabled(canAnyBeCheckedOut);
-	m_undoChangesAction->setEnabled(canAnyBeCheckedIn);
+	// Process only non-root folders or files
+	//
+	m_checkInAction->setEnabled((fileSelected == true || (folderSelected == true && rootItemSelected == false)) && canAnyBeCheckedIn);
+	m_checkOutAction->setEnabled((fileSelected == true || (folderSelected == true && rootItemSelected == false)) && canAnyBeCheckedOut);
+	m_undoChangesAction->setEnabled((fileSelected == true || (folderSelected == true && rootItemSelected == false)) && canAnyBeCheckedIn);
+
+	// Enable only when file is selected
+	//
 	m_historyAction->setEnabled(selectedIndexList.size() == 1 && folderSelected == false);
 	m_compareAction->setEnabled(selectedIndexList.size() == 1 && folderSelected == false);
 
