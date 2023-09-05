@@ -77,6 +77,7 @@ private slots:
 	void onShowTestContents(const QString& scriptName, const QString& functionName);
 	void onTabCloseRequested(int index);
     void onGenerateReport(const QString& caption);
+	void viewGlobalScript();
 
 	// Processing slots
 	//
@@ -99,6 +100,8 @@ private:
 	QAction* m_runAction = nullptr;
 	//QAction* m_pauseAction = nullptr;
 	QAction* m_stopAction = nullptr;
+
+	QAction* m_viewGlobalScriptAction = nullptr;
 
 	QAction* m_reportAction = nullptr;
 

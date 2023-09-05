@@ -191,7 +191,12 @@ void TestListWidget::fillTestsTree(const TestSuite::TestScriptsStorage& tests)
 	for (int i = 0; i < count; i++)
 	{
 		TestSuite::ScriptRunner sr(testController, testLog, fakeStatus, fakeStatusMutex);
+
 		const TestSuite::TestScript& script = tests.script(i);
+		if (script.isGlobalScript() == true)
+		{
+			continue;
+		}
 
 		QTreeWidgetItem* scriptItem = new QTreeWidgetItem(QStringList() << script.fileName());
 		scriptItem->setData(ColumnsData::ScriptName, Qt::UserRole, script.fileName());

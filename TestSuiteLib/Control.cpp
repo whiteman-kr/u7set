@@ -308,6 +308,13 @@ namespace TestSuite
 
 		for (const auto& script : m_scripts)
 		{
+			// Do not execute global scripts
+			//
+			if (script.isGlobalScript() == true)
+			{
+				continue;
+			}
+
 			// Process script files list, if it is not empty
 			//
 			if (m_scriptsToRun.empty() == false)

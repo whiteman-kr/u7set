@@ -262,6 +262,11 @@ void TestSuiteMainWindow::createActions()
 	//m_pAboutAction->setEnabled(true);
 	connect(m_pAboutAction, &QAction::triggered, this, &TestSuiteMainWindow::showAbout);
 
+
+	m_viewGlobalScriptAction = new QAction(tr("View GlobalScript"), this);
+	m_viewGlobalScriptAction->setStatusTip(tr("View GlobalScript Code"));
+	connect(m_viewGlobalScriptAction, &QAction::triggered, this, &TestSuiteMainWindow::viewGlobalScript);
+
 	/*m_manualTuningAction = new QAction(tr("Tuning User Manual"), this);
 	m_manualTuningAction->setStatusTip(tr("Show Tuning User Manual"));
 	connect(m_manualTuningAction, &QAction::triggered, this, &MainWindow::showTuningUserManual);*/
@@ -312,6 +317,9 @@ void TestSuiteMainWindow::createMenu()
 
 	pHelpMenu->addSeparator();
 
+	pHelpMenu->addAction(m_viewGlobalScriptAction);
+
+	pHelpMenu->addSeparator();
 	//pHelpMenu->addAction(m_manualTuningAction);
 
 	//pHelpMenu->addSeparator();
@@ -1112,6 +1120,19 @@ void TestSuiteMainWindow::onGenerateReport(const QString& caption)
 	TestSuite::TestReport::generateReport(m_configController.reportTemplates(), m_testSuite.testLog(), caption, this);
 
     return;
+}
+
+void TestSuiteMainWindow::viewGlobalScript()
+{
+	int count = m_testScriptsStorage.count();
+	for (int i = 0; i < count; i++)
+	{
+		auto& script = m_testScriptsStorage.script(i);
+		if (script.isGlobalScript() == true)
+		{
+			onShowTestContents(script.fileName(), QString());
+		}
+	}
 }
 
 void TestSuiteMainWindow::onConfigurationArrived()
