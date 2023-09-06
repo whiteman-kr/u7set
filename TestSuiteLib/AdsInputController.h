@@ -24,7 +24,7 @@ namespace TestSuite
 		virtual AppSignalParam signalParam(const QString& appSignalId, bool* found) const override;
 		virtual AppSignalState signalState(const QString& appSignalId, bool* found) const override;
 
-		virtual bool expectSignalValue(QString appSignalId, double value, qint64 timeoutMs) const override;
+		virtual bool expectSignalValue(QString appSignalId, qint64 timeoutMs, double value, double tolerance = 0) const override;
 
 		// End of IInputController
 		//

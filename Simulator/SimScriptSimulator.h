@@ -144,8 +144,9 @@ namespace Sim
 		/// <b>Note:</b> For the simulator, \a timeoutMs is ignored and function runs one work cycle to apply overrides.
 		bool waitForSignalOverrides(qint64 timeoutMs);
 
-		/// \brief Runs simulation and waits while signal value is set to specified value. Returns true if value is correct, false on timeout.
-		bool expectSignalValue(QString appSignalId, double value, qint64 timeoutMs);
+		/// \brief Waits while signal value is set to specified value. Returns true if value is correct, false on timeout. 
+		/// Optional tolerance parameter specifies accuracy of comparison, recommended for use with analog signals.
+		bool expectSignalValue(QString appSignalId, qint64 timeoutMs, double value, double tolerance = 0);
 
 		/// \brief Removes all overridden signals.
 		/// 

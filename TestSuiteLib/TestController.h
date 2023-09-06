@@ -78,8 +78,9 @@ namespace TestSuite
 		/// \brief Waits while all overriden signal value is written to LM. Returns true if signal value is overriden, false on timeout.
 		bool waitForSignalOverrides(qint64 timeoutMs);
 
-		/// \brief Waits while signal value is set to specified value. Returns true if value is correct, false on timeout.
-		bool expectSignalValue(QString appSignalId, double value, qint64 timeoutMs);
+		/// \brief Waits while signal value is set to specified value. Returns true if value is correct, false on timeout. 
+		/// Optional tolerance parameter specifies accuracy of comparison, recommended for use with analog signals.
+		bool expectSignalValue(QString appSignalId, qint64 timeoutMs, double value, double tolerance = 0);
 
 		/// \brief Resets all overridden signals.
 		/// 

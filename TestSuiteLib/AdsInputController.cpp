@@ -125,7 +125,7 @@ namespace TestSuite
 		return m_signalManager.signalState(appSignalId, found);
 	}
 
-	bool AdsInputController::expectSignalValue(QString appSignalId, double value, qint64 timeoutMs) const
+	bool AdsInputController::expectSignalValue(QString appSignalId, qint64 timeoutMs, double value, double tolerance) const
 	{
 		QElapsedTimer timer;
 		timer.start();
@@ -143,7 +143,7 @@ namespace TestSuite
 				return false;
 			}
 
-			if (fabs(state.value() - value) < std::numeric_limits<double>::epsilon())
+			if (fabs(state.value() - value) < (tolerance == 0 ? std::numeric_limits<double>::epsilon() : tolerance))
 			{
 				return true;
 			}

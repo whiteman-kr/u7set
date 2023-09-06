@@ -20,7 +20,7 @@ namespace TestSuite
 
 		virtual AppSignalState signalState(const QString& appSignalId, bool* found) const = 0;
 
-		virtual bool expectSignalValue(QString appSignalId, double value, qint64 timeoutMs) const = 0;
+		virtual bool expectSignalValue(QString appSignalId, qint64 timeoutMs, double value, double tolerance = 0) const = 0;
 	};
 
 	class InputControllerStub : public IInputController
@@ -32,6 +32,6 @@ namespace TestSuite
 		//		virtual bool isAnalog(const QString& signalId) const = 0;
 		//		virtual int precision(const QString& signalId) const = 0;
 		virtual AppSignalState signalState(const QString& /*appSignalId*/, bool* /*found*/) const override {return {};}
-		virtual bool expectSignalValue(QString /*appSignalId*/, double /*value*/, qint64 /*timeoutMs*/) const override {return false;}
+		virtual bool expectSignalValue(QString /*appSignalId*/, qint64 /*timeoutMs*/, double /*value*/, double /*tolerance*/ = 0) const override { return false; }
 	};
 }
