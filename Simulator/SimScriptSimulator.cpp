@@ -89,11 +89,11 @@ namespace Sim
 										"\tClass: %3\n"
 										"\tStack: %4\n"
 										"\tMessage: %5")
-									 .arg(m_globalScript.scriptCaption)
-									 .arg(globalScriptValue.property("lineNumber").toInt())
-									 .arg(metaObject()->className())
-									 .arg(globalScriptValue.property("stack").toString())
-									 .arg(globalScriptValue.toString()));
+										 .arg(m_globalScript.scriptCaption)
+										 .arg(globalScriptValue.property("lineNumber").toInt())
+										 .arg(metaObject()->className())
+										 .arg(globalScriptValue.property("stack").toString())
+										 .arg(globalScriptValue.toString()));
 
 					m_result = false;
 					return;
@@ -565,10 +565,10 @@ namespace Sim
 	{
 		auto deadline = m_simulator->control().controlData().m_currentTime + std::chrono::milliseconds{timeoutMs};
 
-		auto isEqual = [](double expectedValue, double value, double tolerance) ->bool
-			{
-				return fabs(expectedValue - value) < tolerance;
-			};
+		auto isEqual = [](double expectedValue, double value, double tolerance)
+		{
+			return std::abs(expectedValue - value) < tolerance;
+		};
 
 		while (isEqual(value, signalValue(appSignalId), tolerance) == false && m_simulator->control().controlData().m_currentTime < deadline)
 		{

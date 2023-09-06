@@ -143,7 +143,7 @@ namespace TestSuite
 				return false;
 			}
 
-			if (fabs(state.value() - value) < (tolerance == 0 ? std::numeric_limits<double>::epsilon() : tolerance))
+			if (std::abs(state.value() - value) < (tolerance == 0 ? std::numeric_limits<double>::epsilon() : tolerance))
 			{
 				return true;
 			}
