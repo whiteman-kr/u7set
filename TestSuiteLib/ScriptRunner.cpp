@@ -115,39 +115,45 @@ namespace TestSuite
 
 			m_scriptTestLog.writeMessage(testFunc + ": RUN");
 
+			bool initOk = false;
+			bool testOk = false;
+			bool cleanupOk = false;
+			
 			// init() - called before each test function is executed.
 			//
-			if (bool initOk = runScriptFunction("init");
-				initOk == false)
+			initOk = runScriptFunction("init");
+			if (initOk == true)
 			{
-				m_scriptTestLog.writeError(testFunc + ": init() failed, test terminated.");
-				break;
-			}
-			
-			bool testOk = runScriptFunction(testFunc);
-			if (testOk == true)
-			{
-				m_scriptTestLog.writeMessage(testFunc + ": PASS");
+				// run test function
+				//
+				testOk = runScriptFunction(testFunc);
+				if (testOk == true)
+				{
+					m_scriptTestLog.writeMessage(testFunc + ": PASS");
+				}
+				else
+				{
+					failed++;
+					//totalFailed ++;
+					m_scriptTestLog.writeError(testFunc + ": FAIL");
+				}
+
+				// cleanup() - called after every test function.
+				//
+				cleanupOk = runScriptFunction("cleanup");
+				if (cleanupOk == false)
+				{
+					m_scriptTestLog.writeError(testFunc + ": cleanup() failed, test terminated.");
+				}
 			}
 			else
 			{
-				failed ++;
-				//totalFailed ++;
-				m_scriptTestLog.writeError(testFunc + ": FAIL");
+				m_scriptTestLog.writeError(testFunc + ": init() failed, test terminated.");
 			}
+			
+			emit testFinished(script.fileName(), testFunc, initOk == true && testOk == true && cleanupOk == true);
 
-			// cleanup() - called after every test function.
-			//
-			bool cleanupOk = runScriptFunction("cleanup");
-			if (cleanupOk == false)
-			{
-				m_scriptTestLog.writeError(testFunc + ": cleanup() failed, test terminated.");
-				break;
-			}
-
-			emit testFinished(script.fileName(), testFunc, testOk);
-
-			if (cleanupOk == false)
+			if (initOk == false || testOk == false || cleanupOk == false)
 			{
 				break;
 			}
