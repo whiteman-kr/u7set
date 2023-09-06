@@ -111,31 +111,31 @@ void OutputDockLog::swapData(QStringList* data, int* errorCount, int* warningCou
 	return;
 }
 
-bool OutputDockLog::writeAlert(const QString& text)
+bool OutputDockLog::writeAlert(const QString& text, const QString& /*tag = {}*/)
 {
 	write(QtMsgType::QtCriticalMsg, text);
 	return true;
 }
 
-bool OutputDockLog::writeError(const QString& text)
+bool OutputDockLog::writeError(const QString& text, const QString& /*tag = {}*/)
 {
 	write(QtMsgType::QtCriticalMsg, text);
 	return true;
 }
 
-bool OutputDockLog::writeWarning(const QString& text)
+bool OutputDockLog::writeWarning(const QString& text, const QString& /*tag = {}*/)
 {
 	write(QtMsgType::QtWarningMsg, text);
 	return true;
 }
 
-bool OutputDockLog::writeMessage(const QString& text)
+bool OutputDockLog::writeMessage(const QString& text, const QString& /*tag = {}*/)
 {
 	write(QtMsgType::QtInfoMsg, text);
 	return true;
 }
 
-bool OutputDockLog::writeText(const QString& text)
+bool OutputDockLog::writeText(const QString& text, const QString& /*tag = {}*/)
 {
 	write(QtMsgType::QtInfoMsg, text);
 	return true;

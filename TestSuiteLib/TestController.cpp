@@ -10,6 +10,7 @@ namespace TestSuite
 								   const SoftwareInfo& softwareInfo,
 								   ISignalDataServer* signalDataServer,
 								   ILogFile* appLog,
+								   ILogFile* testLog,
 								   IInputController& inputController,
 								   IOutputController& outputController,
 								   QObject* parent) :
@@ -18,6 +19,7 @@ namespace TestSuite
 		m_softwareInfo{softwareInfo},
 		m_signalDataServer{signalDataServer},
 		m_appLog{appLog},
+		m_testLog{testLog},
 		m_inputController{inputController},
 		m_outputController{outputController}
 	{
@@ -105,7 +107,7 @@ namespace TestSuite
 																	  m_configuration.appDataServices, 
 																	  m_appLog);
 
-		ScriptTestObserver* observer = new ScriptTestObserver{std::move(testObserver), this};
+		ScriptTestObserver* observer = new ScriptTestObserver{std::move(testObserver), m_testLog, this};
 		result = jsEngine->newQObject(observer);
 
 		return result;

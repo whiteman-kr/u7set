@@ -31,7 +31,7 @@ namespace TestSuite
 	// ControlThread
 	//
 
-	ControlThread::ControlThread(ILogFile* appLog, ITestLog* testLog) :
+	ControlThread::ControlThread(ILogFile* appLog, ILogFile* testLog) :
 		m_appLog{appLog, "ControlThread"},
 		m_testLog{testLog},
 		m_signals(appLog)
@@ -338,7 +338,7 @@ namespace TestSuite
 			m_status.m_scriptCount = runScripts.size();
 		}
 
-		TestController testController{m_configuration, m_softwareInfo, &m_signals, m_appLog.logFile(), *m_inputController, *m_outputController, this};
+		TestController testController{m_configuration, m_softwareInfo, &m_signals, m_appLog.logFile(), m_testLog, *m_inputController, *m_outputController, this};
 
 		bool fileTestResult = true;
 
@@ -421,7 +421,7 @@ namespace TestSuite
 	}
 
 
-	Control::Control(ILogFile* appLog, ITestLog* testLog) :
+	Control::Control(ILogFile* appLog, ILogFile* testLog) :
 		QObject{nullptr},
 		m_appLog{appLog},
 		m_testLog{testLog},

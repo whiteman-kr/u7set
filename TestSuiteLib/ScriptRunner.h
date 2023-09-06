@@ -15,7 +15,7 @@ namespace TestSuite
 		Q_OBJECT
 
 	public:
-		ScriptRunner(TestController& testController, ITestLog& scriptTestLog, ControlStatus& status, QMutex& statusMutex);
+		ScriptRunner(TestController& testController, ILogFile& scriptTestLog, ControlStatus& status, QMutex& statusMutex);
 		virtual ~ScriptRunner();
 
 	public:

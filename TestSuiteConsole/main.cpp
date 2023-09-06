@@ -113,30 +113,30 @@ public:
 	{
 	}
 
-	bool writeAlert(const QString& text) override
+	bool writeAlert(const QString& text, const QString& /*tag*/ = {}) override
 	{
 		std::string msg = std::string("\x1B[91m") + text.toStdString() + std::string("\x1B[0m");
 		qCritical() << msg.data();
 		return Log::LogFile::writeAlert(text);
 	}
-	bool writeError(const QString& text) override
+	bool writeError(const QString& text, const QString& /*tag*/ = {}) override
 	{
 		std::string msg = std::string("\x1B[91m") + text.toStdString() + std::string("\x1B[0m");
 		qCritical() << msg.data();
 		return Log::LogFile::writeError(text);
 	}
-	bool writeWarning(const QString& text) override
+	bool writeWarning(const QString& text, const QString& /*tag*/ = {}) override
 	{
 		std::string msg = std::string("\x1B[33m") + text.toStdString() + std::string("\x1B[0m");
 		qWarning() << msg.data();
 		return Log::LogFile::writeWarning(text);
 	}
-	bool writeMessage(const QString& text) override
+	bool writeMessage(const QString& text, const QString& /*tag*/ = {}) override
 	{
 		qInfo() << text.toStdString().data();
 		return Log::LogFile::writeMessage(text);
 	}
-	bool writeText(const QString& text) override
+	bool writeText(const QString& text, const QString& /*tag*/ = {}) override
 	{
 		qInfo() << text.toStdString().data();
 		return Log::LogFile::writeText(text);

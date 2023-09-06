@@ -496,7 +496,7 @@ namespace Sim
 			return result;
 		}
 
-		ScriptTestObserver* observer = new ScriptTestObserver{std::make_unique<Sim::TestObserver>(*m_simulator), nullptr};
+		ScriptTestObserver* observer = new ScriptTestObserver{std::make_unique<Sim::TestObserver>(*m_simulator), m_log.logInterface(), nullptr};
 		result = jsEngine->newQObject(observer);
 
 		return result;

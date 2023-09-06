@@ -148,8 +148,8 @@ void TestListWidget::fillTestsTree(const TestSuite::TestScriptsStorage& tests)
 	TestSuite::OutputControllerStub outputControllerStub;
 	TestSuite::InputControllerStub inputControllerStub;
 	TestSuite::ConfigSettings configSettings;
-	TestSuite::TestController testController{configSettings, SoftwareInfo{}, nullptr, nullptr, inputControllerStub, outputControllerStub, nullptr};
-	TestSuite::TestLogStub testLog;
+	TestSuite::TestController testController{configSettings, SoftwareInfo{}, nullptr, nullptr, nullptr, inputControllerStub, outputControllerStub, nullptr};
+	ILogFileStub testLog;
 	TestSuite::ControlStatus fakeStatus;
 	QMutex fakeStatusMutex;
 

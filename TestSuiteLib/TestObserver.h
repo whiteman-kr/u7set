@@ -84,6 +84,8 @@ namespace TestSuite
 			}
 		}
 
+		virtual QString toString() const = 0;
+
 		// Data
 		//
 		const QString appSignalId;
@@ -120,6 +122,11 @@ namespace TestSuite
 
 			return std::abs(expectedValue - operative.states.back().value) <= tolerance;
 		}
+
+		virtual QString toString() const override
+		{
+			return QString("%1 == %2 (tolerance %3)").arg(appSignalId).arg(expectedValue).arg(tolerance);
+		}
 	};
 
 	struct ToExpectationGreater : ToExpectation
@@ -140,6 +147,11 @@ namespace TestSuite
 			}
 
 			return operative.states.back().value > threshold;
+		}
+
+		virtual QString toString() const override
+		{
+			return QString("%1 > %2").arg(appSignalId).arg(threshold);
 		}
 	};
 
@@ -162,6 +174,11 @@ namespace TestSuite
 
 			return operative.states.back().value < threshold;
 		}
+
+		virtual QString toString() const override
+		{
+			return QString("%1 < %2").arg(appSignalId).arg(threshold);
+		}
 	};
 
 
@@ -182,22 +199,25 @@ namespace TestSuite
 		// ITestObserver implementation.
 		//
 	public:
-		bool start() override;
-		void stop() override;
-		void clear() override;
+		virtual bool start() override;
+		virtual void stop() override;
+		virtual void clear() override;
 
-		bool wait(int timeoutMs) override;
+		virtual bool wait(int timeoutMs) override;
 		
-		void setTimeType(E::TimeType timeType) override;
-		bool setInitiator(int initialExpectationId) override;
+		virtual void setTimeType(E::TimeType timeType) override;
+		virtual bool setInitiator(int initialExpectationId) override;
 
-		int addEqualExpectation(const QString& appSignalId, double expectedValue, double tolerance) override;
-		int addGreaterExpectation(const QString& appSignalId, double threshold) override;
-		int addLessExpectation(const QString& appSignalId, double threshold) override;
+		virtual int addEqualExpectation(const QString& appSignalId, double expectedValue, double tolerance) override;
+		virtual int addGreaterExpectation(const QString& appSignalId, double threshold) override;
+		virtual int addLessExpectation(const QString& appSignalId, double threshold) override;
 
-		int elapsedMs(const QString& appSignalId) const override;
+		virtual int elapsedMs(const QString& appSignalId) const override;
+		virtual int expectationResult(int expectationId) const override;
 
-		int expectationResult(int expectationId) const override;
+		virtual std::vector<int> expectations() const override;
+		virtual QString expectationStr(int expectationId) const override;
+
 		// End of ITestObserver
 
 	private slots:

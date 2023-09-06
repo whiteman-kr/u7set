@@ -1,5 +1,6 @@
 #pragma once
 #include "ITestObserver.h"
+#include "../UtilsLib/ILogFile.h"
 
 /// @class ScriptTestObserver
 /// @ingroup testsuite simulator
@@ -43,7 +44,7 @@ class ScriptTestObserver : public QObject
 
 public:
 	ScriptTestObserver() = delete;
-	ScriptTestObserver(std::unique_ptr<ITestObserver> observer, QObject* parent = nullptr);
+	ScriptTestObserver(std::unique_ptr<ITestObserver> observer, ILogFile* logFile, QObject* parent);
 
 public slots:
 	/// @brief Start all the threads and waits until all connections are established.
@@ -108,4 +109,5 @@ private:
 
 private:
 	std::unique_ptr<ITestObserver> m_observer;
+	ILogFile* m_logFile = nullptr;
 };

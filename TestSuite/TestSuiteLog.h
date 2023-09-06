@@ -7,14 +7,15 @@
 class TestSuiteLogFile : public Log::LogFile
 {
 	Q_OBJECT
+
 public:
 	TestSuiteLogFile(const QString& fileName, const QString& path, int maxFileSize = 1048576, int maxFilesCount = 64, bool addAppInfoOnStart = true);
 
-	bool writeAlert(const QString& text) override;
-	bool writeError(const QString& text) override;
-	bool writeWarning(const QString& text) override;
-	bool writeMessage(const QString& text) override;
-	bool writeText(const QString& text) override;
+	bool writeAlert(const QString& text, const QString& tag = {}) override;
+	bool writeError(const QString& text, const QString& tag = {}) override;
+	bool writeWarning(const QString& text, const QString& tag = {}) override;
+	bool writeMessage(const QString& text, const QString& tag = {}) override;
+	bool writeText(const QString& text, const QString& tag = {}) override;
 };
 
 class TestSuiteTestLogOutput : public TestSuite::ITestLogOutput

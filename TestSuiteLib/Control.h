@@ -36,7 +36,7 @@ namespace TestSuite
 		Q_OBJECT
 
 	public:
-		ControlThread(ILogFile* appLog, ITestLog* testLog);
+		ControlThread(ILogFile* appLog, ILogFile* testLog);
 
 	public:
 		void setTestParams(const SoftwareInfo& softwareInfo,
@@ -72,7 +72,7 @@ namespace TestSuite
 
 	private:
 		HasLogFile m_appLog;
-		ITestLog* m_testLog = nullptr;
+		ILogFile* m_testLog = nullptr;
 
 		SoftwareInfo m_softwareInfo;
 		TestSuiteSettings m_settings;
@@ -107,7 +107,7 @@ namespace TestSuite
 		Q_OBJECT
 
 	public:
-		explicit Control(ILogFile* appLog, ITestLog* testLog);
+		explicit Control(ILogFile* appLog, ILogFile* testLog);
 
 	public:
 		bool execute(const SoftwareInfo& softwareInfo,
@@ -130,7 +130,7 @@ namespace TestSuite
 
 	private:
 		ILogFile* m_appLog = nullptr;
-		ITestLog* m_testLog = nullptr;
+		ILogFile* m_testLog = nullptr;
 
 		ControlThread m_controlThread;
 		std::atomic_bool m_stopRequested = false;

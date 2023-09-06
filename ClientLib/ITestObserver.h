@@ -1,4 +1,6 @@
 #pragma once
+#include <vector>
+#include "../CommonLib/Types.h"
 
 /// @class ITestObserver
 /// @brief An interface for observing and managing test expectations.
@@ -22,6 +24,9 @@ public:
 
 	virtual int elapsedMs(const QString& appSignalId) const = 0;
 	virtual int expectationResult(int expectationId) const = 0;
+
+	virtual std::vector<int> expectations() const = 0;
+	virtual QString expectationStr(int expectationId) const = 0;
 
 	static const int InvalidExpectationId = -1;
 };

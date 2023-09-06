@@ -41,6 +41,7 @@ namespace TestSuite
 								const SoftwareInfo& softwareInfo,
 								ISignalDataServer* signalDataServer,
 								ILogFile* appLog,
+								ILogFile* testLog,
 								IInputController& inputController,
 								IOutputController& outputController,
 								QObject* parent = nullptr);
@@ -110,7 +111,9 @@ namespace TestSuite
 		const ConfigSettings m_configuration;
 		const SoftwareInfo m_softwareInfo;
 		ISignalDataServer* m_signalDataServer = nullptr;
+		
 		ILogFile* m_appLog = nullptr;
+		ILogFile* m_testLog = nullptr;
 
 		IInputController& m_inputController;
 		IOutputController& m_outputController;

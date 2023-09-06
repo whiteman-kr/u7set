@@ -30,23 +30,23 @@ namespace
 	public:
 		SimLogger(OutputLog* log) : m_log(log) {}
 
-		virtual bool writeAlert(const QString& text) override
+		virtual bool writeAlert(const QString& text, const QString& /*tag*/ = {}) override
 		{
 			m_log->writeError(text); return true;
 		};
-		virtual bool writeError(const QString& text) override
+		virtual bool writeError(const QString& text, const QString & /*tag*/ = {}) override
 		{
 			m_log->writeError(text); return true;
 		};
-		virtual bool writeWarning(const QString& text) override
+		virtual bool writeWarning(const QString& text, const QString & /*tag*/ = {}) override
 		{
 			m_log->writeWarning0(text); return true;
 		};
-		virtual bool writeMessage(const QString& text) override
+		virtual bool writeMessage(const QString& text, const QString & /*tag*/ = {}) override
 		{
 			m_log->writeMessage(text); return true;
 		};
-		virtual bool writeText(const QString& text) override
+		virtual bool writeText(const QString& text, const QString & /*tag*/ = {}) override
 		{
 			m_log->writeMessage(text); return true;
 		};

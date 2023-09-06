@@ -11,7 +11,7 @@ namespace TestSuite
 		Q_OBJECT
 
 	public:
-		ScriptTestLog(ITestLog& testLog);
+		ScriptTestLog(ILogFile& testLog);
 
 	public slots:
 		void writeError(QString message, QString tag = QString());
@@ -20,6 +20,6 @@ namespace TestSuite
 		void writeText(QString message, QString tag = QString());
 
 	private:
-		ITestLog& m_testLog;
+		ILogFile& m_testLog;
 	};
 }

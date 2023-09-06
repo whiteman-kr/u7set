@@ -135,6 +135,33 @@ namespace Sim
 		return elapsedMs;
 	}
 
+	std::vector<int> TestObserver::expectations() const
+	{
+		std::vector<int> result(m_expectations.size());
+		std::iota(result.begin(), result.end(), 0);
+
+		return result;
+	}
+
+	QString TestObserver::expectationStr(int expectationId) const
+	{
+		QString result;
+
+		if (expectationId >= 0 && expectationId < m_expectations.size())
+		{
+			auto it = m_expectations.begin();
+			std::advance(it, expectationId);
+
+			result = (*it)->toString();
+		}
+		else
+		{
+			result = QString("Wrong expectationId %1").arg(expectationId);
+		}
+
+		return result;
+	}
+
 	bool TestObserver::waitPrivate(std::list<ToExpectation*> expectations, int timeoutMs)
 	{
 		if (m_simulator.isRunning() == true)

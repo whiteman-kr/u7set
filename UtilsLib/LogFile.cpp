@@ -2557,12 +2557,12 @@ namespace Log
 		return;
 	}
 
-	bool LogFile::writeMessage(const QString& text)
+	bool LogFile::writeMessage(const QString& text, const QString& /*tag*/)
 	{
 		return write(MessageType::Message, text);
 	}
 
-	bool LogFile::writeAlert(const QString& text)
+	bool LogFile::writeAlert(const QString& text, const QString& /*tag*/)
 	{
 		m_alertAckCounter++;
 
@@ -2571,21 +2571,21 @@ namespace Log
 		return write(MessageType::Alert, text);
 	}
 
-	bool LogFile::writeError(const QString& text)
+	bool LogFile::writeError(const QString& text, const QString& /*tag*/)
 	{
 		m_errorAckCounter++;
 
 		return write(MessageType::Error, text);
 	}
 
-	bool LogFile::writeWarning(const QString& text)
+	bool LogFile::writeWarning(const QString& text, const QString& /*tag*/)
 	{
 		m_warningAckCounter++;
 
 		return write(MessageType::Warning, text);
 	}
 
-	bool LogFile::writeText(const QString& text)
+	bool LogFile::writeText(const QString& text, const QString& /*tag*/)
 	{
 		return write(MessageType::Text, text);
 	}

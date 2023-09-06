@@ -1,8 +1,9 @@
 #include "ScriptTestObserver.h"
 
-ScriptTestObserver::ScriptTestObserver(std::unique_ptr<ITestObserver> observer, QObject* parent) :
+ScriptTestObserver::ScriptTestObserver(std::unique_ptr<ITestObserver> observer, ILogFile* logFile, QObject* parent) :
 	QObject{parent},
-	m_observer{std::move(observer)}
+	m_observer{std::move(observer)},
+	m_logFile(logFile)
 {
 	if (m_observer == nullptr)
 	{
@@ -37,7 +38,24 @@ bool ScriptTestObserver::wait(int timeoutMs)
 	bool result = m_observer->wait(timeoutMs);
 	if (result == false)
 	{
-		reportError("ScriptTestObserver::wait() failed.", false);
+		QString errorMessage = tr("ScriptTestObserver::wait() failed.");
+		reportError(errorMessage.trimmed(), false);
+
+		auto expectations = m_observer->expectations();
+		for (int expectationId : expectations)
+		{
+			// -1 means expectation has not been met.
+			//
+			if (m_observer->expectationResult(expectationId) == -1)
+			{
+				// Expectation has not been met.
+				//
+				QString expectationStr = m_observer->expectationStr(expectationId);
+				reportError(QString("Failed expectation: ") + expectationStr, false);
+			}
+		}
+
+		reportError("ScriptTestObserver::wait() test terminated.", true);
 	}
 
 	return result;
@@ -114,9 +132,14 @@ void ScriptTestObserver::reportError(const QString& message, bool throwException
 	QJSEngine* jsEngine = qjsEngine(this);
 	Q_ASSERT(jsEngine);
 
-	if (jsEngine != nullptr)
+	if ((jsEngine != nullptr && throwException == true) || m_logFile == nullptr)
 	{
 		jsEngine->throwError(message);
+	}
+	else
+	{
+		assert(m_logFile);
+		m_logFile->writeError(message);
 	}
 
 	return;

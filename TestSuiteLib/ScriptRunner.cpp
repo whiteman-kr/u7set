@@ -2,7 +2,7 @@
 
 namespace TestSuite
 {
-	ScriptRunner::ScriptRunner(TestController& testController, ITestLog& scriptTestLog, ControlStatus& status, QMutex& statusMutex) :
+	ScriptRunner::ScriptRunner(TestController& testController, ILogFile& scriptTestLog, ControlStatus& status, QMutex& statusMutex) :
 		m_testController(testController),
 		m_scriptTestLog(scriptTestLog),
 		m_status(status),
