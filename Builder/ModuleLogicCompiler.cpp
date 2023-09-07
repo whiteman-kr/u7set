@@ -116,6 +116,13 @@ namespace Builder
 	const char* ModuleLogicCompiler::OUTPUT_CONTROLLER_SUFFIX = "_CTRLOUT";
 	const char* ModuleLogicCompiler::PLATFORM_INTERFACE_CONTROLLER_SUFFIX = "_PI";
 
+	const QString ModuleLogicCompiler::FB_SCALE_16UI_FP("scale_16ui_fp");
+	const QString ModuleLogicCompiler::FB_SCALE_16UI_SI("scale_16ui_si");
+	const QString ModuleLogicCompiler::FB_SCALE_FP_16UI("scale_fp_16ui");
+	const QString ModuleLogicCompiler::FB_SCALE_SI_16UI("scale_si_16ui");
+	const QString ModuleLogicCompiler::FB_TCONV_FP_SI("tconv_fp_si");
+	const QString ModuleLogicCompiler::FB_TCONV_SI_FP("tconv_si_fp");
+
 	const char* ModuleLogicCompiler::BUS_COMPOSER_CAPTION = "BusComposer";
 	const char* ModuleLogicCompiler::BUS_EXTRACTOR_CAPTION = "BusExtractor";
 
@@ -6355,7 +6362,7 @@ namespace Builder
 
 		bool result = true;
 
-		// append FBs  for analog input signals conversion
+		// append FBs for analog input signals conversion
 		//
 		QVector<UalSignal*> analogInputSignals;
 
@@ -6400,7 +6407,7 @@ namespace Builder
 			}
 		}
 
-		// append FBs  for analog output signals conversion
+		// append FBs for analog output signals conversion
 		//
 		for(AppSignal* s : m_analogOutputSignalsToConversion)
 		{
@@ -6445,59 +6452,67 @@ namespace Builder
 
 		// find AFB: scale_16ui_32fp, scale_16ui_32si, scale_32fp_16ui, scale_32si_16ui
 		//
-		const char* const fbScaleCaption[] =
+		static const QString fbConvCaption[] =
 		{
-
 			// for input signals conversion
 			//
-
-			"scale_16ui_fp",				// FB_SCALE_16UI_FP_INDEX
-			"scale_16ui_si",				// FB_SCALE_16UI_SI_INDEX
+			FB_SCALE_16UI_FP,
+			FB_SCALE_16UI_SI,
 
 			// for output signals conversion
 			//
+			FB_SCALE_FP_16UI,
+			FB_SCALE_SI_16UI,
 
-			"scale_fp_16ui",				// FB_SCALE_FP_16UI_INDEX
-			"scale_si_16ui",				// FB_SCALE_SI_16UI_INDEX
-
-			"tconv_fp_si",					// FB_TCONV_FP_SI_INDEX
-			"tconv_si_fp",					// FB_TCONV_SI_FP_INDEX
+			// for int/out signals conversion
+			//
+			FB_TCONV_FP_SI,
+			FB_TCONV_SI_FP,
 		};
 
-		const char* const FB_SCALE_X1_OPNAME = "x1";
-		const char* const FB_SCALE_X2_OPNAME = "x2";
-		const char* const FB_SCALE_Y1_OPNAME = "y1";
-		const char* const FB_SCALE_Y2_OPNAME = "y2";
+		static const QString FB_SCALE_X1_OPNAME("x1");
+		static const QString FB_SCALE_X2_OPNAME("x2");
+		static const QString FB_SCALE_Y1_OPNAME("y1");
+		static const QString FB_SCALE_Y2_OPNAME("y2");
 
-		const char* const FB_SCALE_INPUT_SIGNAL_CAPTION = "i_data";
-		const char* const FB_SCALE_OUTPUT_SIGNAL_CAPTION = "o_result";
+		// same signals for scale_* and tconv_* AFBs
+		//
+		static const QString FB_INPUT_SIGNAL_CAPTION("i_data");
+		static const QString FB_OUTPUT_SIGNAL_CAPTION("o_result");
 
-		for(const char* const fbCaption : fbScaleCaption)
+		static const QString FB_SCALE_PREFIX("scale_");
+
+		for(const QString& fbCaption : fbConvCaption)
 		{
 			bool fbFound = false;
 
-			for(std::shared_ptr<Afb::AfbElement> afbElement : m_lmDescription->afbElements())
+			for(const std::shared_ptr<Afb::AfbElement>& afbElement : m_lmDescription->afbElements())
 			{
 				if (afbElement->caption() != fbCaption)
 				{
 					continue;
 				}
 
-				bool isScaleAfb = QString(fbCaption).startsWith("scale_");
+				bool isScaleAfb = fbCaption.startsWith(FB_SCALE_PREFIX);
 
 				fbFound = true;
 
-				FbScal fb;
+				FbConv fb;
 
 				fb.caption = fbCaption;
 				fb.pointer = afbElement;
 
-				int index = 0;
-
 				if (isScaleAfb == true)
 				{
+					int index = 0;
+
 					for(const Afb::AfbParam& afbParam : afbElement->params())
 					{
+						// do not replace 'index' on 'afbParam.operandIndex()' !
+						//
+						// operandIndex() for parameters always == -1
+						//
+
 						if (afbParam.opName() == FB_SCALE_X1_OPNAME)
 						{
 							fb.x1ParamIndex = index;
@@ -6553,11 +6568,12 @@ namespace Builder
 					break;
 				}
 
-				for(Afb::AfbSignal afbSignal : afbElement->inputSignals())
+				for(const Afb::AfbSignal& afbSignal : afbElement->inputSignals())
 				{
-					if (afbSignal.opName() == FB_SCALE_INPUT_SIGNAL_CAPTION)
+					if (afbSignal.opName() == FB_INPUT_SIGNAL_CAPTION)
 					{
 						fb.inputSignalIndex = afbSignal.operandIndex();
+						fb.inputSignalDataSize = afbSignal.size();
 						break;
 					}
 				}
@@ -6566,16 +6582,17 @@ namespace Builder
 				{
 					// Required pin %1 of AFB %2 is missing.
 					//
-					m_log->errALC5173(FB_SCALE_INPUT_SIGNAL_CAPTION, fbCaption, QUuid());
+					m_log->errALC5173(FB_INPUT_SIGNAL_CAPTION, fbCaption, QUuid());
 					result = false;
 					break;
 				}
 
-				for(Afb::AfbSignal afbSignal : afbElement->outputSignals())
+				for(const Afb::AfbSignal& afbSignal : afbElement->outputSignals())
 				{
-					if (afbSignal.opName() == FB_SCALE_OUTPUT_SIGNAL_CAPTION)
+					if (afbSignal.opName() == FB_OUTPUT_SIGNAL_CAPTION)
 					{
 						fb.outputSignalIndex = afbSignal.operandIndex();
+						fb.outputSignalDataSize = afbSignal.size();
 						break;
 					}
 				}
@@ -6584,12 +6601,12 @@ namespace Builder
 				{
 					// Required pin %1 of AFB %2 is missing.
 					//
-					m_log->errALC5173(FB_SCALE_INPUT_SIGNAL_CAPTION, fbCaption, QUuid());
+					m_log->errALC5173(FB_OUTPUT_SIGNAL_CAPTION, fbCaption, QUuid());
 					result = false;
 					break;
 				}
 
-				m_fbScal.append(fb);
+				m_fbConv.emplace(fb.caption, fb);
 			}
 
 			if (fbFound == false)
@@ -6673,21 +6690,31 @@ namespace Builder
 				{
 					conversionIsKnown = true;
 
-					FbScal fb = m_fbScal[FB_SCALE_16UI_FP_INDEX];
+					auto it = m_fbConv.find(FB_SCALE_16UI_FP);
 
-					fb.pointer->params()[fb.x1ParamIndex].afbParamValue().setValue(QVariant(x1));
-					fb.pointer->params()[fb.x2ParamIndex].afbParamValue().setValue(QVariant(x2));
-
-					fb.pointer->params()[fb.y1ParamIndex].afbParamValue().setValue(QVariant(y1));
-					fb.pointer->params()[fb.y2ParamIndex].afbParamValue().setValue(QVariant(y2));
-
-					result &= appItem->init(fb.pointer, errorMsg);
-					appItem->setLabel(signal.appSignalID());
-
-					if (errorMsg.isEmpty() == false)
+					if (it == m_fbConv.end())
 					{
-						LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+						LOG_INTERNAL_ERROR(m_log);
 						result = false;
+					}
+					else
+					{
+						const FbConv& fb = it->second;
+
+						fb.pointer->params()[fb.x1ParamIndex].afbParamValue().setValue(QVariant(x1));
+						fb.pointer->params()[fb.x2ParamIndex].afbParamValue().setValue(QVariant(x2));
+
+						fb.pointer->params()[fb.y1ParamIndex].afbParamValue().setValue(QVariant(y1));
+						fb.pointer->params()[fb.y2ParamIndex].afbParamValue().setValue(QVariant(y2));
+
+						result &= appItem->init(fb.pointer, errorMsg);
+						appItem->setLabel(signal.appSignalID());
+
+						if (errorMsg.isEmpty() == false)
+						{
+							LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+							result = false;
+						}
 					}
 				}
 
@@ -6697,21 +6724,31 @@ namespace Builder
 				{
 					conversionIsKnown = true;
 
-					FbScal& fb = m_fbScal[FB_SCALE_16UI_SI_INDEX];
+					auto it = m_fbConv.find(FB_SCALE_16UI_SI);
 
-					fb.pointer->params()[fb.x1ParamIndex].afbParamValue().setValue(QVariant(x1));
-					fb.pointer->params()[fb.x2ParamIndex].afbParamValue().setValue(QVariant(x2));
-
-					fb.pointer->params()[fb.y1ParamIndex].afbParamValue().setValue(QVariant(y1).toInt());
-					fb.pointer->params()[fb.y2ParamIndex].afbParamValue().setValue(QVariant(y2).toInt());
-
-					result &= appItem->init(fb.pointer, errorMsg);
-					appItem->setLabel(signal.appSignalID());
-
-					if (errorMsg.isEmpty() == false)
+					if (it == m_fbConv.end())
 					{
-						LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+						LOG_INTERNAL_ERROR(m_log);
 						result = false;
+					}
+					else
+					{
+						const FbConv& fb = it->second;
+
+						fb.pointer->params()[fb.x1ParamIndex].afbParamValue().setValue(QVariant(x1));
+						fb.pointer->params()[fb.x2ParamIndex].afbParamValue().setValue(QVariant(x2));
+
+						fb.pointer->params()[fb.y1ParamIndex].afbParamValue().setValue(QVariant(y1).toInt());
+						fb.pointer->params()[fb.y2ParamIndex].afbParamValue().setValue(QVariant(y2).toInt());
+
+						result &= appItem->init(fb.pointer, errorMsg);
+						appItem->setLabel(signal.appSignalID());
+
+						if (errorMsg.isEmpty() == false)
+						{
+							LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+							result = false;
+						}
 					}
 				}
 
@@ -6732,15 +6769,25 @@ namespace Builder
 				{
 					conversionIsKnown = true;
 
-					FbScal& fb = m_fbScal[FB_TCONV_FP_SI_INDEX];
+					auto it = m_fbConv.find(FB_TCONV_FP_SI);
 
-					result &= appItem->init(fb.pointer, errorMsg);
-					appItem->setLabel(signal.appSignalID());
-
-					if (errorMsg.isEmpty() == false)
+					if (it == m_fbConv.end())
 					{
-						LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+						LOG_INTERNAL_ERROR(m_log);
 						result = false;
+					}
+					else
+					{
+						const FbConv& fb = it->second;
+
+						result &= appItem->init(fb.pointer, errorMsg);
+						appItem->setLabel(signal.appSignalID());
+
+						if (errorMsg.isEmpty() == false)
+						{
+							LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+							result = false;
+						}
 					}
 				}
 
@@ -6761,15 +6808,25 @@ namespace Builder
 				{
 					conversionIsKnown = true;
 
-					FbScal& fb = m_fbScal[FB_TCONV_SI_FP_INDEX];
+					auto it = m_fbConv.find(FB_TCONV_SI_FP);
 
-					result &= appItem->init(fb.pointer, errorMsg);
-					appItem->setLabel(signal.appSignalID());
-
-					if (errorMsg.isEmpty() == false)
+					if (it == m_fbConv.end())
 					{
-						LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+						LOG_INTERNAL_ERROR(m_log);
 						result = false;
+					}
+					else
+					{
+						const FbConv& fb = it->second;
+
+						result &= appItem->init(fb.pointer, errorMsg);
+						appItem->setLabel(signal.appSignalID());
+
+						if (errorMsg.isEmpty() == false)
+						{
+							LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+							result = false;
+						}
 					}
 				}
 
@@ -6855,21 +6912,31 @@ namespace Builder
 				{
 					conversionIsKnown = true;
 
-					FbScal& fb = m_fbScal[FB_SCALE_FP_16UI_INDEX];
+					auto it = m_fbConv.find(FB_SCALE_FP_16UI);
 
-					fb.pointer->params()[fb.x1ParamIndex].afbParamValue().setValue(QVariant(x1));
-					fb.pointer->params()[fb.x2ParamIndex].afbParamValue().setValue(QVariant(x2));
-
-					fb.pointer->params()[fb.y1ParamIndex].afbParamValue().setValue(QVariant(y1).toInt());
-					fb.pointer->params()[fb.y2ParamIndex].afbParamValue().setValue(QVariant(y2).toInt());
-
-					result = appItem->init(fb.pointer, errorMsg);
-					appItem->setLabel(signal.appSignalID());
-
-					if (errorMsg.isEmpty() == false)
+					if (it == m_fbConv.end())
 					{
-						LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+						LOG_INTERNAL_ERROR(m_log);
 						result = false;
+					}
+					else
+					{
+						const FbConv& fb = it->second;
+
+						fb.pointer->params()[fb.x1ParamIndex].afbParamValue().setValue(QVariant(x1));
+						fb.pointer->params()[fb.x2ParamIndex].afbParamValue().setValue(QVariant(x2));
+
+						fb.pointer->params()[fb.y1ParamIndex].afbParamValue().setValue(QVariant(y1).toInt());
+						fb.pointer->params()[fb.y2ParamIndex].afbParamValue().setValue(QVariant(y2).toInt());
+
+						result = appItem->init(fb.pointer, errorMsg);
+						appItem->setLabel(signal.appSignalID());
+
+						if (errorMsg.isEmpty() == false)
+						{
+							LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+							result = false;
+						}
 					}
 				}
 
@@ -6879,21 +6946,31 @@ namespace Builder
 				{
 					conversionIsKnown = true;
 
-					FbScal& fb = m_fbScal[FB_SCALE_SI_16UI_INDEX];
+					auto it = m_fbConv.find(FB_SCALE_SI_16UI);
 
-					fb.pointer->params()[fb.x1ParamIndex].afbParamValue().setValue(QVariant(x1).toInt());
-					fb.pointer->params()[fb.x2ParamIndex].afbParamValue().setValue(QVariant(x2).toInt());
-
-					fb.pointer->params()[fb.y1ParamIndex].afbParamValue().setValue(QVariant(y1).toInt());
-					fb.pointer->params()[fb.y2ParamIndex].afbParamValue().setValue(QVariant(y2).toInt());
-
-					result = appItem->init(fb.pointer, errorMsg);
-					appItem->setLabel(signal.appSignalID());
-
-					if (errorMsg.isEmpty() == false)
+					if (it == m_fbConv.end())
 					{
-						LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+						LOG_INTERNAL_ERROR(m_log);
 						result = false;
+					}
+					else
+					{
+						const FbConv& fb = it->second;
+
+						fb.pointer->params()[fb.x1ParamIndex].afbParamValue().setValue(QVariant(x1).toInt());
+						fb.pointer->params()[fb.x2ParamIndex].afbParamValue().setValue(QVariant(x2).toInt());
+
+						fb.pointer->params()[fb.y1ParamIndex].afbParamValue().setValue(QVariant(y1).toInt());
+						fb.pointer->params()[fb.y2ParamIndex].afbParamValue().setValue(QVariant(y2).toInt());
+
+						result = appItem->init(fb.pointer, errorMsg);
+						appItem->setLabel(signal.appSignalID());
+
+						if (errorMsg.isEmpty() == false)
+						{
+							LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+							result = false;
+						}
 					}
 				}
 
@@ -6914,15 +6991,25 @@ namespace Builder
 				{
 					conversionIsKnown = true;
 
-					FbScal& fb = m_fbScal[FB_TCONV_SI_FP_INDEX];
+					auto it = m_fbConv.find(FB_TCONV_SI_FP);
 
-					result &= appItem->init(fb.pointer, errorMsg);
-					appItem->setLabel(signal.appSignalID());
-
-					if (errorMsg.isEmpty() == false)
+					if (it == m_fbConv.end())
 					{
-						LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+						LOG_INTERNAL_ERROR(m_log);
 						result = false;
+					}
+					else
+					{
+						const FbConv& fb = it->second;
+
+						result &= appItem->init(fb.pointer, errorMsg);
+						appItem->setLabel(signal.appSignalID());
+
+						if (errorMsg.isEmpty() == false)
+						{
+							LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+							result = false;
+						}
 					}
 				}
 
@@ -6943,15 +7030,25 @@ namespace Builder
 				{
 					conversionIsKnown = true;
 
-					FbScal& fb = m_fbScal[FB_TCONV_FP_SI_INDEX];
+					auto it = m_fbConv.find(FB_TCONV_FP_SI);
 
-					result &= appItem->init(fb.pointer, errorMsg);
-					appItem->setLabel(signal.appSignalID());
-
-					if (errorMsg.isEmpty() == false)
+					if (it == m_fbConv.end())
 					{
-						LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+						LOG_INTERNAL_ERROR(m_log);
 						result = false;
+					}
+					else
+					{
+						const FbConv& fb = it->second;
+
+						result &= appItem->init(fb.pointer, errorMsg);
+						appItem->setLabel(signal.appSignalID());
+
+						if (errorMsg.isEmpty() == false)
+						{
+							LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+							result = false;
+						}
 					}
 				}
 
@@ -8777,44 +8874,38 @@ namespace Builder
 
 			if (appFb == nullptr)
 			{
-				ASSERT_RETURN_FALSE;
-			}
-
-			bool isTconvAfb = appFb->caption().startsWith("tconv_");
-
-			FbScal fbScal;
-
-			switch(s->analogSignalFormat())
-			{
-			case E::AnalogAppSignalFormat::Float32:
-				fbScal = m_fbScal[FB_SCALE_16UI_FP_INDEX];
-				break;
-
-			case E::AnalogAppSignalFormat::SignedInt32:
-				if (isTconvAfb == true)
-				{
-					fbScal = m_fbScal[FB_TCONV_FP_SI_INDEX];
-				}
-				else
-				{
-					fbScal = m_fbScal[FB_SCALE_16UI_SI_INDEX];
-				}
-				break;
-
-			default:
-				assert(false);			// unknown format
+				LOG_INTERNAL_ERROR(m_log);
+				Q_ASSERT(false);
 				return false;
 			}
 
-			if (isTconvAfb == true)
+			auto it = m_fbConv.find(appFb->caption());
+
+			if (it == m_fbConv.end())
 			{
-				cmd.writeFuncBlock32(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
-								   s->ioBufAddr().offset(), appFb->caption());
+				LOG_INTERNAL_ERROR(m_log);
+				Q_ASSERT(false);
+				return false;
 			}
-			else
+
+			const FbConv& fbConv = it->second;
+
+			switch(fbConv.inputSignalDataSize)
 			{
-				cmd.writeFuncBlock(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
+			case SIZE_32BIT:
+				cmd.writeFuncBlock32(appFb->opcode(), appFb->instance(), fbConv.inputSignalIndex,
 								   s->ioBufAddr().offset(), appFb->caption());
+				break;
+
+			case SIZE_16BIT:
+				cmd.writeFuncBlock(appFb->opcode(), appFb->instance(), fbConv.inputSignalIndex,
+								   s->ioBufAddr().offset(), appFb->caption());
+				break;
+
+			default:
+				LOG_INTERNAL_ERROR(m_log);
+				Q_ASSERT(false);
+				return false;
 			}
 
 			cmd.setComment(QString(tr("conversion of analog input %1")).arg(s->appSignalID()));
@@ -8824,8 +8915,10 @@ namespace Builder
 			cmd.clearComment();
 			code->append(cmd);
 
+			Q_ASSERT(fbConv.outputSignalDataSize == SIZE_32BIT);
+
 			cmd.readFuncBlock32(s->ualAddr().offset(), appFb->opcode(), appFb->instance(),
-								fbScal.outputSignalIndex, appFb->caption());
+								fbConv.outputSignalIndex, appFb->caption());
 			code->append(cmd);
 
 			code->newLine();
@@ -14090,44 +14183,31 @@ namespace Builder
 
 			TEST_PTR_CONTINUE(appFb);
 
-			bool isTconvAfb = appFb->caption().startsWith("tconv_");
+			auto it = m_fbConv.find(appFb->caption());
 
-			FbScal fbScal;
-
-			switch(s->analogSignalFormat())
+			if (it == m_fbConv.end())
 			{
-			case E::AnalogAppSignalFormat::Float32:
-
-				fbScal = m_fbScal[FB_SCALE_FP_16UI_INDEX];
-				break;
-
-			case E::AnalogAppSignalFormat::SignedInt32:
-				if (isTconvAfb == true)
-				{
-					fbScal = m_fbScal[FB_TCONV_SI_FP_INDEX];
-				}
-				else
-				{
-					fbScal = m_fbScal[FB_SCALE_SI_16UI_INDEX];
-				}
-				break;
-
-			default:
-				assert(false);
+				LOG_INTERNAL_ERROR(m_log);
+				Q_ASSERT(false);
+				return false;
 			}
+
+			const FbConv& fbConv = it->second;
+
+			Q_ASSERT(fbConv.inputSignalDataSize == SIZE_32BIT);
 
 			if (ualSignal->isConst() == true)
 			{
 				if(constIsFloat == true)
 				{
-					cmd.writeFuncBlockConstFloat(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
+					cmd.writeFuncBlockConstFloat(appFb->opcode(), appFb->instance(), fbConv.inputSignalIndex,
 													constFloatValue, appFb->caption());
 					cmd.setComment(QString(tr("float const %1 to output analog %2 conversion")).
 										arg(constFloatValue).arg(s->appSignalID()));
 				}
 				else
 				{
-					cmd.writeFuncBlockConstInt32(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
+					cmd.writeFuncBlockConstInt32(appFb->opcode(), appFb->instance(), fbConv.inputSignalIndex,
 													constIntValue, appFb->caption());
 					cmd.setComment(QString(tr("int const %1 to output analog %2 conversion")).
 										arg(constIntValue).arg(s->appSignalID()));
@@ -14137,7 +14217,7 @@ namespace Builder
 			}
 			else
 			{
-				cmd.writeFuncBlock32(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
+				cmd.writeFuncBlock32(appFb->opcode(), appFb->instance(), fbConv.inputSignalIndex,
 								   s->ualAddr().offset(), appFb->caption());
 				cmd.setComment(QString(tr("output analog %1 conversion")).arg(s->appSignalID()));
 				code->append(cmd);
@@ -14147,18 +14227,26 @@ namespace Builder
 			cmd.clearComment();
 			code->append(cmd);
 
-			if (isTconvAfb == true)
+			switch(fbConv.outputSignalDataSize)
 			{
+			case SIZE_32BIT:
 				cmd.readFuncBlock32(s->ioBufAddr().offset(),
 								  appFb->opcode(), appFb->instance(),
-								  fbScal.outputSignalIndex, appFb->caption());
-			}
-			else
-			{
+								  fbConv.outputSignalIndex, appFb->caption());
+				break;
+
+			case SIZE_16BIT:
 				cmd.readFuncBlock(s->ioBufAddr().offset(),
 								  appFb->opcode(), appFb->instance(),
-								  fbScal.outputSignalIndex, appFb->caption());
+								  fbConv.outputSignalIndex, appFb->caption());
+				break;
+
+			default:
+				LOG_INTERNAL_ERROR(m_log);
+				Q_ASSERT(false);
+				return false;
 			}
+
 			code->append(cmd);
 			code->newLine();
 		}
