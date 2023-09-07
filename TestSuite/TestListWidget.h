@@ -40,6 +40,8 @@ public:
 
 	void clearTestsResults();
 
+	void setSelectionEnabled(bool enable);
+
 	TestSuite::TestScriptSelection testScriptSelection() const;
 
 public slots:
