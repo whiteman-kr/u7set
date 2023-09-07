@@ -6,6 +6,7 @@
 
 class TestLogTabPage : public QWidget
 {
+	Q_OBJECT
 public:
 	TestLogTabPage(TestSuite::TestLog& testLog, TestSuiteTestLogOutput& testLogOutput, QWidget* parent);
 

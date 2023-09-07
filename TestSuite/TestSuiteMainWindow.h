@@ -8,6 +8,7 @@
 #include "../lib/Ui/DialogTcpStatistics.h"
 #include "../lib/Ui/DialogAlert.h"
 #include "../OnlineLib/TcpClientStatistics.h"
+#include "../ClientLib/ClientTranslator.h"
 
 #include "AppLogOutputWidget.h"
 #include "TestListWidget.h"
@@ -86,7 +87,11 @@ private slots:
 
 private:
 	// Ui
-	//Ui::TestSuiteMainWindow *ui;
+	// User interface
+	//
+	ClientLib::ClientTranslator m_translator;
+
+
 	DialogAlert m_dialogAlert;
 
 	QAction* m_pExitAction = nullptr;

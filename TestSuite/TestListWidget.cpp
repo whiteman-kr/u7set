@@ -1,5 +1,6 @@
 #include "TestListWidget.h"
 #include "../TestSuiteLib/ScriptRunner.h"
+#include "AppConfigSettings.h"
 
 void TestTreeWidget::setParentItemsCheckState()
 {
@@ -113,7 +114,7 @@ TestListWidget::TestListWidget(QWidget* parent):
 {
 	QVBoxLayout* layout = new QVBoxLayout;
 
-	m_testsPathLabel = new QLabel("Tests Path: Not loaded");
+	m_testsPathLabel = new QLabel(tr("Test Scripts:"));
 	m_testsPathLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Minimum);
 	m_testsPathLabel->setTextFormat(Qt::RichText);
 	m_testsPathLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
@@ -237,6 +238,17 @@ void TestListWidget::fillTestsTree(const TestSuite::TestScriptsStorage& tests)
 	}
 
 	m_treeWidget->resizeColumnToContents(Columns::Caption);
+
+	// 
+	if (theSettings.useLocalScriptsPath() == true)
+	{
+		QString path = theSettings.localScriptsPath();
+		m_testsPathLabel->setText(tr("Test Scripts: <a href=\"%1\">%1</a>").arg(path));
+	}
+	else
+	{
+		m_testsPathLabel->setText(tr("Test Scripts:"));
+	}
 }
 
 void TestListWidget::clearTestsList()
@@ -327,7 +339,7 @@ void TestListWidget::onTestFinished(QString scriptFileName, QString testFunction
 				QTreeWidgetItem* childItem = parentItem->child(c);
 				if (childItem->data(ColumnsData::TestFunction, Qt::UserRole).toString() == testFunction)
 				{
-					childItem->setText(Columns::Result, result ? "PASS" : "FAIL");
+					childItem->setText(Columns::Result, result ? tr("PASS") : tr("FAIL"));
 
 					if (result == false)
 					{

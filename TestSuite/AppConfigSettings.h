@@ -42,12 +42,6 @@ public:
 	const QStringList& outputSearchCompleter() const;
 	QStringList& outputSearchCompleter();
 
-public:
-	int m_requestInterval = 100;
-
-	bool m_useLocalScriptsPath = false;
-	QString m_localScriptsPath;
-
 	// MainWindow options
 
 	QPoint m_mainWindowPos;
@@ -60,14 +54,18 @@ private:
 private:
 
 	// System settings set by operator
-
+	//
 	TestSuite::TestSuiteSettings m_librarySettings;
+
+	bool m_useLocalScriptsPath = false;
+	QString m_localScriptsPath;
 
 	QString m_language = "en";
 
-	// User settings
-
 	QStringList m_instanceHistory;
+
+	// Local settings
+	//
 	QString m_localAppDataPath;
 
 	mutable QMutex m;
@@ -79,7 +77,10 @@ public:
 
 		m_useLocalScriptsPath = That.m_useLocalScriptsPath;
 		m_localScriptsPath = That.m_localScriptsPath;
+
 		m_language = That.m_language;
+
+		m_instanceHistory = That.m_instanceHistory;
 
 		return *this;
 	};

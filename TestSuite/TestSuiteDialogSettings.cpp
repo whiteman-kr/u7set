@@ -1,12 +1,12 @@
 #include "TestSuiteDialogSettings.h"
 #include "ui_TestSuiteDialogSettings.h"
 
-TestSuiteDialogSettings::TestSuiteDialogSettings(QWidget *parent) :
+TestSuiteDialogSettings::TestSuiteDialogSettings(const ClientLib::ClientTranslator& translator, QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::TestSuiteDialogSettings)
 {
 	ui->setupUi(this);
-	createLanguagesList();
+	createLanguagesList(translator);
 }
 
 TestSuiteDialogSettings::~TestSuiteDialogSettings()
@@ -37,23 +37,24 @@ const AppConfigSettings& TestSuiteDialogSettings::settings() const
 	return m_settings;
 }
 
-void TestSuiteDialogSettings::createLanguagesList()
+void TestSuiteDialogSettings::createLanguagesList(const ClientLib::ClientTranslator& translator)
 {
-	ui->m_languageCombo->addItem("English", "en");
-	ui->m_languageCombo->setCurrentIndex(0);
-
-	QDirIterator it(":/languages", QDirIterator::Subdirectories);
-	while (it.hasNext())
+	QStringList languages = translator.languagesList();
+	if (languages.isEmpty() == true)
 	{
-		QString locale = it.next();
-		locale.truncate(locale.lastIndexOf('.')); // "TestSuite_"
-		locale.remove(0, locale.indexOf('_') + 1); // "de"
+		ui->m_languageCombo->addItem("English", "en");
+		ui->m_languageCombo->setCurrentIndex(0);
+		ui->m_languageCombo->setEnabled(false);
+		return;
+	}
 
-		QString lang = QLocale::languageToString(QLocale(locale).language());
+	for (const QString& code : languages)
+	{
+		QString name = translator.languageName(code);
 
-		ui->m_languageCombo->addItem(lang, locale);
+		ui->m_languageCombo->addItem(name, code);
 
-		if (theSettings.language() == locale)
+		if (theSettings.language() == code)
 		{
 			ui->m_languageCombo->setCurrentIndex(ui->m_languageCombo->count() - 1);
 		}
@@ -75,7 +76,7 @@ void TestSuiteDialogSettings::accept()
 		}
 	}
 
-	QString instanceStrId = ui->m_instanceCombo->currentText().toUpper();
+	QString instanceStrId = ui->m_instanceCombo->currentText().toUpper().trimmed();
 
 	if (instanceHistory.contains(instanceStrId) == false)
 	{

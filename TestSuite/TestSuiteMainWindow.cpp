@@ -9,6 +9,7 @@
 #include "TestViewTabPage.h"
 #include "DialogReport.h"
 #include "../ClientLib/TuningUserManager.h"
+#include "../ClientLib/ClientTranslator.h"
 
 TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
 	: QMainWindow(parent),
@@ -20,6 +21,33 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 {
 	setWindowFlags(Qt::Widget);
 	setDockOptions(AnimatedDocks | AllowTabbedDocks | GroupedDragging);
+
+	// Init translator
+	//
+	m_translator.addLanguage("en", "English");
+	m_translator.addLanguage("uk", "Ukrainian");
+
+	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/TestSuite_uk.qm");
+	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/TestSuiteLib_uk.qm");
+	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/ClientLib_uk.qm");
+	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/UtilsLib_uk.qm");
+	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/qt_uk.qm");
+
+	{
+		QStringList failedTranslations;
+		if (m_translator.setLanguage(theSettings.language(), failedTranslations) == false)
+		{
+			if (failedTranslations.isEmpty() == false)
+			{
+				m_appLog.writeError("Failed to load translation files:\n" + failedTranslations.join('\n'));
+			}
+			else
+			{
+				m_appLog.writeError("Failed to set language: " + theSettings.language());
+			}
+		}
+	}
+	//
 
 	m_tabWidget = new TabWidgetEx{this};
 	m_tabWidget->setDocumentMode(false);
@@ -37,7 +65,7 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 	layout->setContentsMargins(margins);
 
 	m_testLogTabPage = new TestLogTabPage(m_testSuite.testLog(), m_testLogOutput, this);
-	m_tabWidget->addTab(m_testLogTabPage, "Test Log");
+	m_tabWidget->addTab(m_testLogTabPage, tr("Test Log"));
 	m_tabWidget->tabBar()->setTabButton(0, QTabBar::RightSide, 0);	// This tab is not closable
 
 	m_testLogOutput.setHtmlFont("Verdana");
@@ -99,7 +127,7 @@ void TestSuiteMainWindow::createDocks()
 
 	// Tests List dock
 	//
-	QDockWidget* testsListDock = new QDockWidget{"TestListWidget", this};
+	QDockWidget* testsListDock = new QDockWidget{tr("TestListWidget"), this};
 	testsListDock->setObjectName("TestListWidget");
 	testsListDock->setFeatures(QDockWidget::NoDockWidgetFeatures);
 	testsListDock->setTitleBarWidget(new QWidget{});		// Hides title bar
@@ -124,7 +152,7 @@ void TestSuiteMainWindow::createDocks()
 	//
 //	if (m_slaveWindow == false)
 	{
-		m_appLogPaneDock = new QDockWidget{"Output", this};
+		m_appLogPaneDock = new QDockWidget{tr("Output"), this};
 		m_appLogPaneDock->setObjectName("AppLogOutputWidget");
 
 		m_appLogoutputWidget = new AppLogOutputWidget{m_appLogPaneDock};
@@ -138,7 +166,7 @@ void TestSuiteMainWindow::createDocks()
 
 void TestSuiteMainWindow::createToolbar()
 {
-	m_toolBar = new QToolBar{"ToolBar"};
+	m_toolBar = new QToolBar{tr("ToolBar")};
 	addToolBar(m_toolBar);
 
 	//
@@ -295,7 +323,7 @@ void TestSuiteMainWindow::createMenu()
 	pReportsMenu->addAction(m_clearTestLogAction);
     pReportsMenu->addSeparator();
 
-    m_reportsMenu = pReportsMenu->addMenu("Report");
+    m_reportsMenu = pReportsMenu->addMenu(tr("Report"));
 	m_reportsMenu->setEnabled(false);
 
 	// Service
@@ -502,7 +530,7 @@ void TestSuiteMainWindow::showSoftwareConnection(const QString& caption,
 		toolTipText += QString("%1 %2 (%3)\n")
 							.arg(state.connectedSoftwareInfo.equipmentID())
 							.arg(state.peerAddr.addressPortStr())
-							.arg(state.isConnected ? "ok" : "down");
+							.arg(state.isConnected ? tr("ok") : tr("down"));
 	}
 	toolTipText = toolTipText.trimmed();
 
@@ -515,7 +543,7 @@ void TestSuiteMainWindow::showSoftwareConnection(const QString& caption,
 	{
 		statusText = tr("%1: %2 (Replies: %3)")
 					 .arg(caption)
-					 .arg(statusOk ? "ok" : "down")
+					 .arg(statusOk ? tr("ok") : tr("down"))
 					 .arg(replyCount);
 	}
 	else
@@ -710,7 +738,7 @@ void TestSuiteMainWindow::updateStatusIndicator()
 		break;
 	case TestSuite::ControlState::InitOutputController:
 		{
-			text = tr("Initializing output controller...");
+			text = tr("Initializing output controller...\n");
 		}
 		break;
 	case TestSuite::ControlState::RunningTests:
@@ -923,7 +951,7 @@ void TestSuiteMainWindow::onClearTestLog()
 
 void TestSuiteMainWindow::onSettings()
 {
-	TestSuiteDialogSettings d(this);
+	TestSuiteDialogSettings d(m_translator, this);
 	d.setSettings(theSettings);
 
 	int result = d.exec();
