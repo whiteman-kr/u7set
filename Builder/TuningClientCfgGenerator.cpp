@@ -1,5 +1,7 @@
 #include "TuningClientCfgGenerator.h"
+#include "ScriptChecker.h"
 #include "SoftwareSettingsGetter.h"
+
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../VFrame30/Schema.h"
 #include "../lib/ClientBehavior.h"
@@ -607,6 +609,13 @@ namespace Builder
 		else
 		{
 			QString globalScript = m_software->propertyValue("GlobalScript").toString();
+
+			// Check script correctness
+			//
+			result &= ScriptChecker::checkEquipmentProperty(globalScript, equipmentID(), "GlobalScript", *m_log);
+
+			// Write file.
+			//
 			BuildFile* globalScriptBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), File::GLOBAL_SCRIPT, CfgFileId::TUNING_GLOBALSCRIPT, "", globalScript);
 
 			m_cfgXml->addLinkToFile(globalScriptBuildFile);

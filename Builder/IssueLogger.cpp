@@ -8768,6 +8768,91 @@ namespace Builder
 					  .arg(message));
 	}
 
+	/// IssueCode: EQP6301
+	///
+	/// IssueType: Error
+	///
+	/// Title: Script property %1.%2 evaluation error, line: %3, message: %4.
+	///
+	/// Parameters:
+	///		%1 EquipmentID
+	///		%2 Property name
+	///		%3 Line number
+	///		%4 Evaluation error message
+	///
+	/// Description:
+	///		Failed to evaluate script property for the equipment.
+	///
+	void IssueLogger::errEQP6301(QString equipmentId, QString property, int lineNumber, QString message)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6301,
+				  tr("Script property %1.%2 evaluation error, line: %3, message: %4.")
+				  .arg(equipmentId)
+				  .arg(property)
+				  .arg(lineNumber)
+				  .arg(message));
+	}
+
+
+	/// IssueCode: EQP6302
+	///
+	/// IssueType: Error
+	///
+	/// Title: Schema %1 script property %2 evaluation error, line: %3, message: %4.
+	///
+	/// Parameters:
+	///		%1 SchemaID
+	///		%2 Property name
+	///		%3 Line number
+	///		%4 Evaluation error message
+	///
+	/// Description:
+	///		Failed to evaluate schema script property for the equipment.
+	///
+	void IssueLogger::errEQP6302(QString schemaId, QString property, int lineNumber, QString message)
+	{
+		addSchemaIssue(OutputMessageLevel::Error, 6302, schemaId);
+
+		LOG_ERROR(IssueType::Equipment,
+				  6302,
+				  tr("Schema %1 script property %2 evaluation error, line: %3, message: %4")
+					  .arg(schemaId)
+					  .arg(property)
+					  .arg(lineNumber)
+					  .arg(message));
+	}
+
+	/// IssueCode: EQP6303
+	///
+	/// IssueType: Error
+	///
+	/// Title: Schema item %1 on schema %2, script property %3 evaluation error, line: %4, message: %5.
+	///
+	/// Parameters:
+	///		%1 Schema item
+	///		%2 SchemaID
+	///		%3 Property name
+	///		%4 Line number
+	///		%5 Evaluation error message
+	///
+	/// Description:
+	///		Failed to evaluate script property of the schema item.
+	///
+	void IssueLogger::errEQP6303(QString schemaId, QString schemaItem, QUuid itemUuid, QString property, int lineNumber, QString message)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 6303, itemUuid, schemaId);
+
+		LOG_ERROR(IssueType::Equipment,
+				  6303,
+				  tr("Schema item %1 on schema %2, script property %3 evaluation error, line: %4, message: %5.")
+				  .arg(schemaItem)
+				  .arg(schemaId)
+				  .arg(property)
+				  .arg(lineNumber)
+				  .arg(message));
+	}
+
 	// --
 	//
 	void IssueLogger::addItemsIssues(OutputMessageLevel level, int issueCode, const std::vector<QUuid>& itemsUuids)
