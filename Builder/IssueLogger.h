@@ -485,6 +485,8 @@ namespace Builder
 		void errALC5196(QString signalID, QString inbusSignalID, QString schemaID);		// Unknown conversion from inbus signal %1 to app signal %2 (Logic schema %3).
 		void errALC5197(QString moduleEquipmentID);										// Tuning data is not found for module %1
 		void errALC5198(QString appSignalID1, QString appSignalID2, quint64 h);			// Signals %1 and %2 have equal hash (%3) of AppSignalIDs.
+		void errALC5199(QString afbCaption, QUuid itemUuid, QString schemaID);			// AFB '%1' parameters calculation result out of Int32 range (Schema %2).
+		void errALC5200(QString afbCaption, QUuid itemUuid, QString schemaID);			// AFB '%1' parameters calculation result out of Float32 range (Schema %2).
 
 		// firmware writing errors
 

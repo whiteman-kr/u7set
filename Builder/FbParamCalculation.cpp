@@ -378,6 +378,7 @@ namespace Builder
 					BCOMP_32SI_GREAT = 2,
 					BCOMP_32SI_LESS = 3,
 					BCOMP_32SI_NOT_EQU = 4,
+
 					BCOMP_32FP_EQU = 5,
 					BCOMP_32FP_GREAT = 6,
 					BCOMP_32FP_LESS = 7,
@@ -387,6 +388,7 @@ namespace Builder
 					//
 					BCOMP_32SI_GREAT_EQU = 9,
 					BCOMP_32SI_LESS_EQU = 10,
+
 					BCOMP_32FP_GREAT_EQU = 11,
 					BCOMP_32FP_LESS_EQU = 12;
 
@@ -404,8 +406,8 @@ namespace Builder
 			CHECK_SIGNED_INT32(rSettingParam)
 			CHECK_SIGNED_INT32(hysteresisParam)
 
-			int sSetting = sSettingParam.signedIntValue();
-			int hysteresis = hysteresisParam.signedIntValue();
+			qint64 sSetting = sSettingParam.signedIntValue();
+			qint64 hysteresis = hysteresisParam.signedIntValue();
 
 			if (hysteresis < 0)
 			{
@@ -418,23 +420,67 @@ namespace Builder
 			switch(iConf)
 			{
 			case BCOMP_32SI_EQU:
-				sSettingParam.setSignedIntValue(sSetting + hysteresis / 2);
-				rSettingParam.setSignedIntValue(sSetting - hysteresis / 2);
+				{
+					qint64 sValue = sSetting + hysteresis / 2;
+					qint64 rValue = sSetting - hysteresis / 2;
+
+					if (checkInt32Range(sValue) == false ||
+						checkInt32Range(rValue) == false)
+					{
+						m_log->errALC5199(caption(), guid(), schemaID());
+						return false;
+					}
+
+					sSettingParam.setSignedIntValue(sValue);
+					rSettingParam.setSignedIntValue(rValue);
+				}
 				break;
 
 			case BCOMP_32SI_GREAT:
 			case BCOMP_32SI_GREAT_EQU:
-				rSettingParam.setSignedIntValue(sSetting - hysteresis);
+				{
+					qint64 rValue = sSetting - hysteresis;
+
+					if (checkInt32Range(rValue) == false)
+					{
+						m_log->errALC5199(caption(), guid(), schemaID());
+						return false;
+					}
+
+					rSettingParam.setSignedIntValue(rValue);
+				}
 				break;
 
 			case BCOMP_32SI_LESS:
 			case BCOMP_32SI_LESS_EQU:
-				rSettingParam.setSignedIntValue(sSetting + hysteresis);
+				{
+					qint64 rValue = sSetting + hysteresis;
+
+					if (checkInt32Range(rValue) == false)
+					{
+						m_log->errALC5199(caption(), guid(), schemaID());
+						return false;
+					}
+
+					rSettingParam.setSignedIntValue(rValue);
+				}
 				break;
 
 			case BCOMP_32SI_NOT_EQU:
-				sSettingParam.setSignedIntValue(sSetting + hysteresis / 2);
-				rSettingParam.setSignedIntValue(sSetting - hysteresis / 2);
+				{
+					qint64 sValue = sSetting + hysteresis / 2;
+					qint64 rValue = sSetting - hysteresis / 2;
+
+					if (checkInt32Range(sValue) == false ||
+						checkInt32Range(rValue) == false)
+					{
+						m_log->errALC5199(caption(), guid(), schemaID());
+						return false;
+					}
+
+					sSettingParam.setSignedIntValue(sValue);
+					rSettingParam.setSignedIntValue(rValue);
+				}
 				break;
 
 			default:
@@ -479,23 +525,67 @@ namespace Builder
 			switch(iConf)
 			{
 			case BCOMP_32FP_EQU:
-				sSettingParam.setFloatValue(sSetting + hysteresis / 2);
-				rSettingParam.setFloatValue(sSetting - hysteresis / 2);
+				{
+					double sValue = sSetting + hysteresis / 2;
+					double rValue = sSetting - hysteresis / 2;
+
+					if (checkFloat32Range(sValue) == false ||
+						checkFloat32Range(rValue) == false)
+					{
+						m_log->errALC5200(caption(), guid(), schemaID());
+						return false;
+					}
+
+					sSettingParam.setFloatValue(sValue);
+					rSettingParam.setFloatValue(rValue);
+				}
 				break;
 
 			case BCOMP_32FP_GREAT:
 			case BCOMP_32FP_GREAT_EQU:
-				rSettingParam.setFloatValue(sSetting - hysteresis);
+				{
+					double rValue = sSetting - hysteresis;
+
+					if (checkFloat32Range(rValue) == false)
+					{
+						m_log->errALC5200(caption(), guid(), schemaID());
+						return false;
+					}
+
+					rSettingParam.setFloatValue(rValue);
+				}
 				break;
 
 			case BCOMP_32FP_LESS:
 			case BCOMP_32FP_LESS_EQU:
-				rSettingParam.setFloatValue(sSetting + hysteresis);
+				{
+					double rValue = sSetting + hysteresis;
+
+					if (checkFloat32Range(rValue) == false)
+					{
+						m_log->errALC5200(caption(), guid(), schemaID());
+						return false;
+					}
+
+					rSettingParam.setFloatValue(rValue);
+				}
 				break;
 
 			case BCOMP_32FP_NOT_EQU:
-				sSettingParam.setFloatValue(sSetting + hysteresis / 2);
-				rSettingParam.setFloatValue(sSetting - hysteresis / 2);
+				{
+					double sValue = sSetting + hysteresis / 2;
+					double rValue = sSetting - hysteresis / 2;
+
+					if (checkFloat32Range(sValue) == false ||
+						checkFloat32Range(rValue) == false)
+					{
+						m_log->errALC5200(caption(), guid(), schemaID());
+						return false;
+					}
+
+					sSettingParam.setFloatValue(sValue);
+					rSettingParam.setFloatValue(rValue);
+				}
 				break;
 
 			default:

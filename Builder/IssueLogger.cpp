@@ -7530,6 +7530,52 @@ namespace Builder
 							arg(appSignalID1).arg(appSignalID2).arg(QString::number(h, 16).toUpper()));
 	}
 
+	/// IssueCode: ALC5199
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   AFB '%1' parameters calculation result out of Int32 range (Schema %2).
+	///
+	/// Parameters:
+	///		%1 AFB caption
+	///		%2 SchemaID
+	///
+	/// Description:
+	///		 AFB parameters calculation result out of Int32 range. Check AFB parameters.
+	///
+	void IssueLogger::errALC5199(QString afbCaption, QUuid itemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 5199, itemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5199,
+				  QString(tr("AFB '%1' parameters calculation result out of Int32 range (Schema %2).").
+							arg(afbCaption).arg(schemaID)));
+	}
+
+	/// IssueCode: ALC5200
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   AFB '%1' parameters calculation result out of Float32 range (Schema %2).
+	///
+	/// Parameters:
+	///		%1 AFB caption
+	///		%2 SchemaID
+	///
+	/// Description:
+	///		 AFB parameters calculation result out of Float32 range. Check AFB parameters.
+	///
+	void IssueLogger::errALC5200(QString afbCaption, QUuid itemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 5200, itemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5200,
+				  QString(tr("AFB '%1' parameters calculation result out of Float32 range (Schema %2).").
+							arg(afbCaption).arg(schemaID)));
+	}
+
 	/// IssueCode: ALC5800
 	///
 	/// IssueType: Warning

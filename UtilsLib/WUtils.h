@@ -288,3 +288,15 @@ inline QString boolToString(bool value)
 {
 	return QString(value ? "true" : "false");
 }
+
+inline bool checkInt32Range(qint64 value)
+{
+	return	value <= std::numeric_limits<qint32>::max() &&
+			value >= std::numeric_limits<qint32>::lowest();
+}
+
+inline bool checkFloat32Range(double value)
+{
+	return	value <= std::numeric_limits<float>::max() &&
+			value >= std::numeric_limits<float>::lowest();
+}
