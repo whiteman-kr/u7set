@@ -230,54 +230,92 @@ int DynamicAppSignalState::setState(const Times& time,
 				break;
 
 			case E::SignalType::Analog:
-
-				// is analog signal, check aperture changes
-				//
-				if (m_adaptiveAperture == true)
 				{
-					if (m_fineStoredValue != 0)
-					{
-						double fineAbsAperture = fabs((fabs(value - m_fineStoredValue) * 100) / m_fineStoredValue);
+					AnalogValueStatus curValueStatus = analogValueStatus(curState.value);
+					AnalogValueStatus prevValueStatus = analogValueStatus(prevState.value);
 
-						if (fineAbsAperture > m_fineAperture)
+					cl;asmc;alsmc;ams
+					bool checkApertures = true;
+
+					if (curValueStatus == AnalogValueStatus::Normal)
+					{
+						// curValue is Normal
+						//
+						if (prevValueStatus != AnalogValueStatus::Normal)
 						{
 							curState.flags.fineAperture = 1;
+							curState.flags.coarseAperture = 1;
+
+							m_fineStoredValue = curState.value;
+							m_coarseStoredValue = curState.value;
+
+							checkApertures = false;
 						}
 					}
 					else
 					{
-						m_fineStoredValue = curState.value;
-					}
-
-					if (m_coarseStoredValue != 0)
-					{
-						double coarseAbsAperture = fabs((fabs(value - m_coarseStoredValue) * 100) / m_coarseStoredValue);
-
-						if (coarseAbsAperture > m_coarseAperture)
+						// curValue is NaN or Inf
+						//
+						if (prevValueStatus != curValueStatus)
 						{
+							curState.flags.fineAperture = 1;
 							curState.flags.coarseAperture = 1;
 						}
-					}
-					else
-					{
-						m_coarseStoredValue = curState.value;
-					}
-				}
-				else
-				{
-					if (fabs(m_fineStoredValue - curState.value) > m_absFineAperture)
-					{
-						curState.flags.fineAperture = 1;
+
+						checkApertures = false;
 					}
 
-					if (fabs(m_coarseStoredValue - curState.value) > m_absCoarseAperture)
+					// check aperture changes
+					//
+					if (checkApertures == true)
 					{
-						curState.flags.coarseAperture = 1;
+						if (m_adaptiveAperture == true)
+						{
+							if (m_fineStoredValue != 0)
+							{
+								double fineAbsAperture = fabs((fabs(value - m_fineStoredValue) * 100) / m_fineStoredValue);
+
+								if (fineAbsAperture > m_fineAperture)
+								{
+									curState.flags.fineAperture = 1;
+								}
+							}
+							else
+							{
+								m_fineStoredValue = curState.value;
+							}
+
+							if (m_coarseStoredValue != 0)
+							{
+								double coarseAbsAperture = fabs((fabs(value - m_coarseStoredValue) * 100) / m_coarseStoredValue);
+
+								if (coarseAbsAperture > m_coarseAperture)
+								{
+									curState.flags.coarseAperture = 1;
+								}
+							}
+							else
+							{
+								m_coarseStoredValue = curState.value;
+							}
+						}
+						else
+						{
+							if (fabs(m_fineStoredValue - curState.value) > m_absFineAperture)
+							{
+								curState.flags.fineAperture = 1;
+							}
+
+							if (fabs(m_coarseStoredValue - curState.value) > m_absCoarseAperture)
+							{
+								curState.flags.coarseAperture = 1;
+							}
+						}
+
+						curState.flags.aboveHighLimit = (curState.value > m_highLimit ? 1 : 0);
+						curState.flags.belowLowLimit = (curState.value < m_lowLimit ? 1 : 0);
 					}
 				}
-
-				curState.flags.aboveHighLimit = (curState.value > m_highLimit ? 1 : 0);
-				curState.flags.belowLowLimit = (curState.value < m_lowLimit ? 1 : 0);
 
 				break;
 
