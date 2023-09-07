@@ -272,6 +272,28 @@ void TestListWidget::clearTestsResults()
 	}
 }
 
+void TestListWidget::setSelectionEnabled(bool enable)
+{
+	m_treeWidget->blockSignals(true);
+
+	int count = m_treeWidget->topLevelItemCount();
+	for (int i = 0; i < count; i++)
+	{
+		QTreeWidgetItem* parentItem = m_treeWidget->topLevelItem(i);
+
+		if (enable == true)
+		{
+			parentItem->setFlags(parentItem->flags() | Qt::ItemIsEnabled);
+		}
+		else
+		{
+			parentItem->setFlags(parentItem->flags() & ~Qt::ItemIsEnabled);
+		}
+	}
+
+	m_treeWidget->blockSignals(false);
+}
+
 TestSuite::TestScriptSelection TestListWidget::testScriptSelection() const
 {
 	TestSuite::TestScriptSelection selection;

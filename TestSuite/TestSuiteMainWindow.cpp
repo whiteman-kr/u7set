@@ -654,8 +654,23 @@ void TestSuiteMainWindow::updateActionsState()
 {
 	auto selection = m_testListWidget->testScriptSelection();
 
-	m_runAction->setEnabled(m_testSuite.isRunning() == false && selection.isEmpty() == false);
-	m_stopAction->setEnabled(m_testSuite.isRunning());
+	bool isRunning = m_testSuite.isRunning();
+
+	m_runAction->setEnabled(isRunning == false && selection.isEmpty() == false);
+	m_stopAction->setEnabled(isRunning == true);
+
+	m_pSettingsAction->setEnabled(isRunning == false);
+	m_reloadTestsScriptsAction->setEnabled(isRunning == false);
+	for (QAction* a : m_reportActions)
+	{
+		a->setEnabled(isRunning == false);
+	}
+	m_reportAction->setEnabled(isRunning == false);
+	m_saveTestLogAction->setEnabled(isRunning == false);
+	m_loadTestLogAction->setEnabled(isRunning == false);
+	m_clearTestLogAction->setEnabled(isRunning == false);
+
+	m_testListWidget->setSelectionEnabled(isRunning == false);
 }
 
 bool TestSuiteMainWindow::loadTestLog()
