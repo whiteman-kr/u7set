@@ -1,4 +1,4 @@
-<AFB id="#mismatch_fp_v1" Caption="mismatch_fp" Version="1.0013">
+<AFB id="#mismatch_fp_v1" Caption="mismatch_fp" Version="1.0014">
 	<Properties>
 		<Description>Analog mismatch block</Description>
 		<Category>Other</Category>
@@ -102,7 +102,7 @@
 				</Changed>
 			</Script>
 		</Param>
-		<Param OpName="AssignFlags" Caption="AssignFlags" Visible="true" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+		<Param OpName="AssignFlags" Caption="AssignFlags" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 			<Value>1</Value>
 			<Default>1</Default>
 			<Script>
