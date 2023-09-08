@@ -421,19 +421,22 @@ namespace Builder
 		//
 		bool createRegularSignal(const UalItem* ualItem, AppSignal* s);
 
-		bool createConstSignal(const UalItem* ualItem,
+		bool createConstSignal(	const QString& lmEquipmentID,
+								const UalItem* ualItem,
 								const QString& constSignalID,
 								E::SignalType constSignalType,
 								E::AnalogAppSignalFormat constAnalogFormat,
 								AppSignal** autoSignalPtr);
 
-		bool createAutoSignal(const UalItem* ualItem,
+		bool createAutoSignal(	const QString& lmEquipmentID,
+								const UalItem* ualItem,
 								const QString& signalID,
 								E::SignalType signalType,
 								E::AnalogAppSignalFormat analogFormat,
 								AppSignal** autoSignalPtr);
 
-		bool createBusParentSignal(const UalItem* ualItem,
+		bool createBusParentSignal( const QString& lmEquipmentID,
+									const UalItem* ualItem,
 									AppSignal* busSignal,
 									BusShared bus,
 									const QString& outPinCaption,

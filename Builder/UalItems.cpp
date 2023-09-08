@@ -1229,7 +1229,8 @@ namespace Builder
 		return true;
 	}
 
-	bool UalSignal::createConstSignal(const UalItem* ualItem,
+	bool UalSignal::createConstSignal(	const QString& lmEquipmentID,
+										const UalItem* ualItem,
 										const QString& constSignalID,
 										E::SignalType constSignalType,
 										E::AnalogAppSignalFormat constAnalogFormat,
@@ -1248,6 +1249,8 @@ namespace Builder
 
 		AppSignal* autoSignal = *autoSignalPtr = new AppSignal;
 
+		autoSignal->setEquipmentID(lmEquipmentID);
+		autoSignal->setLmEquipmentID(lmEquipmentID);
 		autoSignal->setAppSignalID(constSignalID);
 		autoSignal->setCustomAppSignalID(QString(constSignalID).remove("#"));
 		autoSignal->setCaption(autoSignal->customAppSignalID());
@@ -1301,10 +1304,11 @@ namespace Builder
 		return true;
 	}
 
-	bool UalSignal::createAutoSignal(const UalItem* ualItem,
-									const QString& signalID,
-									E::SignalType signalType,
-									E::AnalogAppSignalFormat analogFormat,
+	bool UalSignal::createAutoSignal(const QString& lmEquipmentID,
+									 const UalItem* ualItem,
+									 const QString& signalID,
+									 E::SignalType signalType,
+									 E::AnalogAppSignalFormat analogFormat,
 									AppSignal** autoSignalPtr)
 	{
 		TEST_PTR_RETURN_FALSE(ualItem);
@@ -1318,6 +1322,8 @@ namespace Builder
 
 		AppSignal* autoSignal = *autoSignalPtr = new AppSignal;
 
+		autoSignal->setEquipmentID(lmEquipmentID);
+		autoSignal->setLmEquipmentID(lmEquipmentID);
 		autoSignal->setAppSignalID(signalID);
 		autoSignal->setCustomAppSignalID(QString(signalID).remove("#"));
 		autoSignal->setCaption(autoSignal->customAppSignalID());
@@ -1349,7 +1355,8 @@ namespace Builder
 		return true;
 	}
 
-	bool UalSignal::createBusParentSignal(const UalItem* ualItem,
+	bool UalSignal::createBusParentSignal(  const QString& lmEquipmentID,
+											const UalItem* ualItem,
 											AppSignal* appBusSignal,
 											Builder::BusShared bus,
 											const QString& outPinCaption,
@@ -1391,6 +1398,8 @@ namespace Builder
 
 			*autoSignalPtr = appBusSignal = new AppSignal;
 
+			appBusSignal->setEquipmentID(lmEquipmentID);
+			appBusSignal->setLmEquipmentID(lmEquipmentID);
 			appBusSignal->setAppSignalID(appSignalID);
 			appBusSignal->setCustomAppSignalID(appSignalID.remove("#"));
 			appBusSignal->setCaption(appBusSignal->customAppSignalID());
@@ -1404,6 +1413,8 @@ namespace Builder
 		}
 		else
 		{
+			assert(appBusSignal->equipmentID().isEmpty() == false);
+			assert(appBusSignal->lmEquipmentID() == lmEquipmentID);
 			assert(appBusSignal->isBus());
 			assert(appBusSignal->busTypeID() == bus->busTypeID());
 		}
@@ -2623,11 +2634,12 @@ namespace Builder
 
 		AppSignal* autoSignalPtr = nullptr;
 
-		bool result = ualSignal->createConstSignal(ualItem,
-									  constSignalID,
-									  constSignalType,
-									  constAnalogFormat,
-									  &autoSignalPtr);
+		bool result = ualSignal->createConstSignal(m_compiler.lmEquipmentID(),
+													ualItem,
+													constSignalID,
+													constSignalType,
+													constAnalogFormat,
+													&autoSignalPtr);
 		if (result == false)
 		{
 			DELETE_IF_NOT_NULL(autoSignalPtr);
@@ -2755,7 +2767,8 @@ namespace Builder
 
 		AppSignal* autoSignalPtr = nullptr;
 
-		bool result = busParentSignal->createBusParentSignal(ualItem, appBusSignal, bus, outPinCaption,
+		bool result = busParentSignal->createBusParentSignal(m_compiler.lmEquipmentID(), ualItem,
+															 appBusSignal, bus, outPinCaption,
 															 m_compiler.getLmSharedPtr(), &autoSignalPtr);
 
 		if (result == false)
@@ -3254,7 +3267,8 @@ namespace Builder
 
 		AppSignal* autoSignalPtr = nullptr;
 
-		bool result = ualSignal->createAutoSignal(ualItem, signalID, signalType, analogFormat, &autoSignalPtr);
+		bool result = ualSignal->createAutoSignal(m_compiler.lmEquipmentID(), ualItem,
+												  signalID, signalType, analogFormat, &autoSignalPtr);
 
 		if (result == false)
 		{
