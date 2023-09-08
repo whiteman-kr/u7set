@@ -1,7 +1,5 @@
 #include "SchemasReport.h"
 #include "../../lib/Ui/DialogProgress.h"
-#include <QPageSetupDialog>
-#include <QPrinter>
 #include "DialogSchemasReport.h"
 #include "../UtilsLib/Ui/UiTools.h"
 #include "Settings.h"

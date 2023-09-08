@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "SettingsForm.h"
 
 SettingsForm::SettingsForm(const Settings& settings, QWidget* parent)

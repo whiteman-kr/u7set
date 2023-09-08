@@ -2,10 +2,6 @@
 #error Do not include this file in the project! Link UtilsLib instead.
 #endif
 
-#include <cassert>
-#include <QTimer>
-#include <QMetaMethod>
-
 #include "SimpleThread.h"
 
 // -------------------------------------------------------------------------------------

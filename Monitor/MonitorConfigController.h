@@ -8,7 +8,7 @@
 
 struct ConfigSettings
 {
-	int configurationId = -1;		// Counter to detect that configuartion was updated
+	int configurationId = -1;		// Counter to detect that configuration was updated
 
 	ClientLib::ConfigurationInfo configInfo;
 
@@ -18,7 +18,6 @@ struct ConfigSettings
 
 	QString startSchemaId;
 	QString globalScript;
-	QString onConfigurationArrivedScript;
 	QImage logoImage;
 	MonitorBehavior monitorBeahvior;
 

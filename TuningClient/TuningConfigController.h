@@ -18,7 +18,6 @@ struct ConfigSettings
 	TuningClientSettings clientSettings;	//BuildInfo buildInfo;
 
 	QString scriptGlobal;
-	QString scriptConfigArrived;
 
 	TuningClientSettings::LmStatusFlagMode lmStatusFlagMode() const
 	{

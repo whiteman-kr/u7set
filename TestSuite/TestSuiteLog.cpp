@@ -8,31 +8,31 @@ TestSuiteLogFile::TestSuiteLogFile(const QString& fileName, const QString& path,
 
 }
 
-bool TestSuiteLogFile::writeAlert(const QString& text)
+bool TestSuiteLogFile::writeAlert(const QString& text, const QString& /*tag = {}*/)
 {
 	qCCritical(testsuite_applog).noquote() << text;
 	return Log::LogFile::writeAlert(text);
 }
 
-bool TestSuiteLogFile::writeError(const QString& text)
+bool TestSuiteLogFile::writeError(const QString& text, const QString& /*tag = {}*/)
 {
 	qCCritical(testsuite_applog).noquote() << text;
 	return Log::LogFile::writeError(text);
 }
 
-bool TestSuiteLogFile::writeWarning(const QString& text)
+bool TestSuiteLogFile::writeWarning(const QString& text, const QString& /*tag = {}*/)
 {
 	qCWarning(testsuite_applog).noquote() << text;
 	return Log::LogFile::writeWarning(text);
 }
 
-bool TestSuiteLogFile::writeMessage(const QString& text)
+bool TestSuiteLogFile::writeMessage(const QString& text, const QString& /*tag = {}*/)
 {
 	qCInfo(testsuite_applog).noquote() << text;
 	return Log::LogFile::writeMessage(text);
 }
 
-bool TestSuiteLogFile::writeText(const QString& text)
+bool TestSuiteLogFile::writeText(const QString& text, const QString& /*tag = {}*/)
 {
 	qCInfo(testsuite_applog).noquote() << text;
 	return Log::LogFile::writeText(text);

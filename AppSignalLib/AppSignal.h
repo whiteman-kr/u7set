@@ -18,6 +18,13 @@
 
 #include "TuningValue.h"
 
+namespace Proto
+{
+	class SignalSpecPropValue;
+	class ProtoAppSignalData;
+	class AppSignal;
+}
+
 class XmlWriteHelper;
 class XmlReadHelper;
 

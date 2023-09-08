@@ -246,7 +246,10 @@ namespace Builder
 					folderPath += pathList.join(QChar('/'));
 				}
 
-				if (folderPath.startsWith(Db::File::systemDirToName(DbDir::HardwareTestsDir)))
+				// Process files from Tests or HardwareTests folders
+				//
+				if (folderPath.startsWith(Db::File::systemDirToName(DbDir::TestsDir)) ||
+					folderPath.startsWith(Db::File::systemDirToName(DbDir::HardwareTestsDir)))
 				{
 					BuildFile* buildFile = m_context->m_buildResultWriter->addFile(m_software->equipmentIdTemplate() + fileTree.filePath(fileId),
 																				   file->fileName(),

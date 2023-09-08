@@ -1,7 +1,6 @@
 #include "BuildTabPage.h"
 #include "Settings.h"
 #include "GlobalMessanger.h"
-#include "../DbLib/DbController.h"
 
 
 //

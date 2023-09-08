@@ -7,8 +7,6 @@
 #	include "../gitlabci_version.h"
 #endif
 
-OutputLog theLog;
-
 Q_DECLARE_METATYPE(std::vector<quint8>)
 
 int main(int argc, char *argv[])

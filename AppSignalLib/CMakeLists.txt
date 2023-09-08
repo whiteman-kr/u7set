@@ -11,27 +11,72 @@ find_package(Qt6 REQUIRED COMPONENTS Network)
 set(TARGET AppSignalLib)
 
 qt_add_library(${TARGET} STATIC
-	AppSignalStateFlags.h
+	AppSignal.cpp
+	AppSignal.h
+	AppSignalParam.cpp
+	AppSignalParam.h
+	AppSignalState.cpp
+	AppSignalState.h
 	AppSignalStateFlags.cpp
-	ComparatorSet.h
+	AppSignalStateFlags.h
 	ComparatorSet.cpp
+	ComparatorSet.h
 	IAppSignalManager.h
 	ITuningSignalManager.h
 	ITuningSignalUpdater.h
-	AppSignal.h
-	AppSignal.cpp
-	AppSignalParam.h
-	AppSignalParam.cpp
-	TuningSignalManager.h
-	TuningSignalManager.cpp
-	RecentUsed.h
 	RecentUsed.cpp
-	TuningValue.h
-	TuningValue.cpp
-	TuningSignalState.h
-	TuningSignalState.cpp
-	SimpleAppSignalState.h
+	RecentUsed.h
 	SimpleAppSignalState.cpp
+	SimpleAppSignalState.h
+	TuningSignalManager.cpp
+	TuningSignalManager.h
+	TuningSignalState.cpp
+	TuningSignalState.h
+	TuningValue.cpp
+	TuningValue.h
+)
+
+target_precompile_headers(${TARGET} PUBLIC
+	<algorithm>
+	<array>
+	<atomic>
+	<cassert>
+	<chrono>
+	<cmath>
+	<concepts>
+	<condition_variable>
+	<cstdint>
+	<functional>
+	<limits>
+	<list>
+	<map>
+	<memory>
+	<queue>
+	<set>
+	<type_traits>
+	<unordered_map>
+	<utility>
+	<vector>
+	<version>
+
+	# Qt includes
+	#
+	<QDateTime>
+	<QDebug>
+	<QElapsedTimer>
+	<QFile>
+	<QHostAddress>
+	<QMetaEnum>
+	<QMultiHash>
+	<QRegularExpression>
+	<QVariant>
+
+	# Project includes
+	#
+	"../Proto/ProtoSerialization.h"
+	"../Proto/serialization.pb.h"
+	"../Proto/network.pb.h"
+	"../CommonLib/Types.h"
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Network)

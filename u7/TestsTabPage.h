@@ -62,11 +62,11 @@ public:
 private:
 	// ILogFile implementation
 	//
-	bool writeAlert(const QString& text) override;
-	bool writeError(const QString& text)  override;
-	bool writeWarning(const QString& text) override;
-	bool writeMessage(const QString& text)  override;
-	bool writeText(const QString& text)  override;
+	bool writeAlert(const QString& text, const QString & tag = {}) override;
+	bool writeError(const QString& text, const QString& tag = {})  override;
+	bool writeWarning(const QString& text, const QString& tag = {}) override;
+	bool writeMessage(const QString& text, const QString& tag = {})  override;
+	bool writeText(const QString& text, const QString& tag = {})  override;
 
 	void write(QtMsgType type, const QString& msg);
 

@@ -2,8 +2,6 @@
 #error Do not include this file in the project! Link UtilsLib instead.
 #endif
 
-#include <cassert>
-
 #include "Queue.h"
 #include "../UtilsLib/WUtils.h"
 

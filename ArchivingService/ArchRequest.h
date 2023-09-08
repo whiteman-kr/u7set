@@ -1,14 +1,9 @@
 #pragma once
 
-#include <QSqlQuery>
-
 #include "../UtilsLib/SimpleThread.h"
 #include "../OnlineLib/CircularLogger.h"
 #include "../CommonLib/Times.h"
 #include "../CommonLib/Hash.h"
-#include "../UtilsLib/Queue.h"
-#include "../OnlineLib/SocketIO.h"
-#include "../Proto/network.pb.h"
 #include "ArchFile.h"
 
 class ArchRequestParam

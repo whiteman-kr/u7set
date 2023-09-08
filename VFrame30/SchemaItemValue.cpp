@@ -5,7 +5,6 @@
 #include "TuningController.h"
 #include "AppSignalController.h"
 #include "SchemaView.h"
-#include "../AppSignalLib/AppSignalParam.h"
 #include "../AppSignalLib/TuningSignalState.h"
 
 

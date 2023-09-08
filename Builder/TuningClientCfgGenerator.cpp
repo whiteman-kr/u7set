@@ -1,5 +1,7 @@
 #include "TuningClientCfgGenerator.h"
+#include "ScriptChecker.h"
 #include "SoftwareSettingsGetter.h"
+
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../VFrame30/Schema.h"
 #include "../lib/ClientBehavior.h"
@@ -603,26 +605,16 @@ namespace Builder
 		else
 		{
 			QString globalScript = m_software->propertyValue("GlobalScript").toString();
-			BuildFile* globalScriptBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "GlobalScript.js", CfgFileId::TUNING_GLOBALSCRIPT, "", globalScript);
+
+			// Check script correctness
+			//
+			result &= ScriptChecker::checkEquipmentProperty(globalScript, equipmentID(), "GlobalScript", *m_log);
+
+			// Write file.
+			//
+			BuildFile* globalScriptBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), File::GLOBAL_SCRIPT, CfgFileId::TUNING_GLOBALSCRIPT, "", globalScript);
 
 			m_cfgXml->addLinkToFile(globalScriptBuildFile);
-		}
-
-		// Writing OnConfigurationArrived
-		//
-		result = true;
-
-		if (m_software->propertyExists("OnConfigurationArrived") == false)
-		{
-			m_log->errCFG3000("OnConfigurationArrived", m_software->equipmentIdTemplate());
-			result = false;
-		}
-		else
-		{
-			QString arrivedScript = m_software->propertyValue("OnConfigurationArrived").toString();
-			BuildFile* arrivedScriptBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "OnConfigurationArrivedScript.js", CfgFileId::TUNING_CONFIGARRIVEDSCRIPT, "", arrivedScript);
-
-			m_cfgXml->addLinkToFile(arrivedScriptBuildFile);
 		}
 
 		return result;

@@ -221,12 +221,17 @@ namespace TestSuite
 		return m_items.empty();
 	}
 
-	void TestLog::writeError(const QString& text, const QString& tag)
+	bool TestLog::writeAlert(const QString& text, const QString& tag)
+	{
+		return writeError(text, tag);
+	}
+
+	bool TestLog::writeError(const QString& text, const QString& tag)
 	{
 		if (m_logOutput == nullptr)
 		{
 			Q_ASSERT(m_logOutput);
-			return;
+			return false;
 		}
 
 		TestLogItem ti(no++, TestLogItemType::Error, text, tag);
@@ -234,14 +239,16 @@ namespace TestSuite
 
 		QWriteLocker l(&m_itemsLock);
 		m_items.push_back(ti);
+
+		return true;
 	}
 
-	void TestLog::writeWarning(const QString& text, const QString& tag)
+	bool TestLog::writeWarning(const QString& text, const QString& tag)
 	{
 		if (m_logOutput == nullptr)
 		{
 			Q_ASSERT(m_logOutput);
-			return;
+			return false;
 		}
 
 		TestLogItem ti(no++, TestLogItemType::Warning, text, tag);
@@ -249,14 +256,16 @@ namespace TestSuite
 
 		QWriteLocker l(&m_itemsLock);
 		m_items.push_back(ti);
+		
+		return true;
 	}
 
-	void TestLog::writeMessage(const QString& text, const QString& tag)
+	bool TestLog::writeMessage(const QString& text, const QString& tag)
 	{
 		if (m_logOutput == nullptr)
 		{
 			Q_ASSERT(m_logOutput);
-			return;
+			return false;
 		}
 
 		TestLogItem ti(no++, TestLogItemType::Message, text, tag);
@@ -264,14 +273,16 @@ namespace TestSuite
 
 		QWriteLocker l(&m_itemsLock);
 		m_items.push_back(ti);
+
+		return true;
 	}
 
-	void TestLog::writeText(const QString& text, const QString& tag)
+	bool TestLog::writeText(const QString& text, const QString& tag)
 	{
 		if (m_logOutput == nullptr)
 		{
 			Q_ASSERT(m_logOutput);
-			return;
+			return false;
 		}
 
 		TestLogItem ti(-1, TestLogItemType::Text, text, tag);
@@ -279,6 +290,8 @@ namespace TestSuite
 
 		QWriteLocker l(&m_itemsLock);
 		m_items.push_back(ti);
+
+		return true;
 	}
 
 	std::vector<TestLogItem> TestLog::items() const

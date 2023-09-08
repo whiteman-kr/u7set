@@ -82,6 +82,7 @@ namespace ClientLib
 
 	public:
 		bool signalParamsLoaded() const;
+		bool signalStatesLoaded() const;
 
 	private:
 		void checkTimeDiscrepancy(qint64 serverUtcTimeMs, qint64 serverLocalTimeMs);
@@ -90,17 +91,19 @@ namespace ClientLib
 		SoftwareEndpoint::AppDataService m_serverSettings;
 		IAppSignalUpdater& m_signalUpdater;
 
-		// Cache protobuf messages
-		//
 	private:
 		std::atomic<bool> m_signalParamsLoaded{false};
-
+		std::atomic<bool> m_signalStatesLoaded{false};
+		
+		// Cache protobuf messages
+		//
 		::Network::GetSignalListStartReply m_getSignalListStartReply;
 
 		::Network::GetSignalListNextRequest m_getSignalListNextRequest;
 		::Network::GetSignalListNextReply m_getSignalListNextReply;
 
 		std::vector<Hash> m_signalList;
+		std::set<Hash> m_signalStatesSet;		// Signal hash is added here when signal state is received
 
 		::Network::GetAppSignalParamRequest m_getSignalParamRequest;
 		::Network::GetAppSignalParamReply m_getSignalParamReply;

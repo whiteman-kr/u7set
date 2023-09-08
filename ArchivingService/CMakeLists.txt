@@ -90,7 +90,6 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QTextStream>
 	<QThread>
 	<QTimer>
-	<QtCore>
 	<QtGlobal>
 	<QtNetwork/QHostAddress>
 	<QUdpSocket>
@@ -99,6 +98,9 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QVector>
 	<QXmlStreamReader>
 	<QXmlStreamWriter>
+
+	"../Proto/network.pb.h"
+	"../Proto/serialization.pb.h"
 )
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Network Qt6::Widgets Qt6::Qml Qt6::Sql Qt6::Xml)

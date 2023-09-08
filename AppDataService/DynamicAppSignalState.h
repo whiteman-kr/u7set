@@ -3,6 +3,7 @@
 #include "../AppSignalLib/AppSignalParam.h"
 #include "../AppSignalLib/TuningValue.h"
 #include "../AppSignalLib/SimpleAppSignalState.h"
+#include "../UtilsLib/Address16.h"
 
 namespace RtTrends
 {
@@ -18,6 +19,29 @@ public:
 	static const int NO_INDEX = -1;
 	static const int NO_AUTOARCHIVING_GROUP = -1;
 	static const int NOT_INITIALIZED_AUTOARCHIVING_GROUP = -2;
+
+private:
+	enum class AnalogValueStatus
+	{
+		Normal,
+		Nan,
+		Inf
+	};
+
+	inline AnalogValueStatus analogValueStatus(double value)
+	{
+		if (std::isnan(value))
+		{
+			return AnalogValueStatus::Nan;
+		}
+
+		if (std::isinf(value))
+		{
+			return AnalogValueStatus::Inf;
+		}
+
+		return AnalogValueStatus::Normal;
+	}
 
 public:
 	DynamicAppSignalState();

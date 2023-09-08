@@ -5,6 +5,7 @@
 #include "../ReportLib/ReportPrinter.h"
 #include "../DbLib/DbController.h"
 
+#include "../VFrame30/Schema.h"
 #include "../VFrame30/SchemaItemSignal.h"
 #include "../VFrame30/SchemaItemConnection.h"
 #include "../VFrame30/SchemaItemLoopback.h"

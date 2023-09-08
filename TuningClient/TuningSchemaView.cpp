@@ -73,7 +73,6 @@ void TuningSchemaView::configurationArrived(ConfigSettings configuration)
 	m_configurationId = configuration.configurationId;
 
 	setGlobalScript(configuration.scriptGlobal);
-	setOnConfigurationArrivedScript(configuration.scriptConfigArrived);
 
 	return;
 }

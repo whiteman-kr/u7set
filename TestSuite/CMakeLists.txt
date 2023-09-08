@@ -3,12 +3,13 @@ cmake_minimum_required(VERSION 3.16)
 project(TestSuite LANGUAGES CXX)
 
 include(../cmake/vld.cmake)
+include(../cmake/translations.cmake)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Network Qml Sql Xml Test)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Network Qml Sql Xml Test LinguistTools)
 qt_standard_project_setup()
 
 set(TARGET TestSuite)
@@ -18,6 +19,11 @@ set(TARGET TestSuite)
 if (MSVC)
 	set (WINDOWS_RESOURCES ./WinResources/WinResources.rc)
 endif (MSVC)
+
+set (TC_FORMS
+	DialogReport.ui
+	TestSuiteDialogSettings.ui 
+)
 
 add_executable(${TARGET} WIN32
 	../lib/CodeEditor.cpp
@@ -46,9 +52,9 @@ add_executable(${TARGET} WIN32
 	TestSuiteLog.cpp
 	TestSuiteMainWindow.cpp
 	TestViewTabPage.cpp
-
 	Resources.qrc
 	${WINDOWS_RESOURCES}
+	${TC_FORMS}
 )
 
 target_precompile_headers(${TARGET} PRIVATE
@@ -59,15 +65,17 @@ target_precompile_headers(${TARGET} PRIVATE
 	<algorithm>
 	<functional>
 
-	<QtCore>
 	<QtGui>
 	<QtWidgets>
 	<QtNetwork>
-	<QtQml>
 	<QtSql>
 	<QtXml>
 	<QtTest>
 )
+
+#Add translations
+#
+add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network Qt6::Qml Qt6::Sql Qt6::Xml Qt6::Test)
 target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib OnlineLib ClientLib TestSuiteLib ReportLib)

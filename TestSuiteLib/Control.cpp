@@ -31,7 +31,7 @@ namespace TestSuite
 	// ControlThread
 	//
 
-	ControlThread::ControlThread(ILogFile* appLog, ITestLog* testLog) :
+	ControlThread::ControlThread(ILogFile* appLog, ILogFile* testLog) :
 		m_appLog{appLog, "ControlThread"},
 		m_testLog{testLog},
 		m_signals(appLog)
@@ -44,7 +44,7 @@ namespace TestSuite
 									  const TestSuiteSettings& settings,
 									  const QStringList& scriptsFiles,		// List of script files for execution, if empty then exec all.
 									  const QString& scriptsPath,			// Load scripts from disk, path to dir for *.js files.)
-									  const TestScriptFilter& testsFilter,			// Tests filter
+									  const TestScriptSelection& testsFilter,			// Tests filter
 									  const QString& userName,
 									  const QString& password)
 	{
@@ -159,7 +159,7 @@ namespace TestSuite
 
 		configController.start();
 
-		// Wait that configuration arrived or error accured.
+		// Wait that configuration arrived or error occurred.
 		//
 		QSignalSpy spySuccess{&configController, &TestSuiteConfigController::configurationArrived};
 		QSignalSpy spyError{&configController, &TestSuiteConfigController::configrationError};
@@ -177,7 +177,7 @@ namespace TestSuite
 
 		if (spyError.isEmpty() == false)
 		{
-			// Read configuration errror.
+			// Read configuration error.
 			//
 			throw 1;
 		}
@@ -304,10 +304,21 @@ namespace TestSuite
 
 		std::vector<const TestScript*> runScripts;
 
+
+		TestScript* globalScript = nullptr;
+
 		// Build list of scripts to run
 
-		for (const auto& script : m_scripts)
+		for (auto& script : m_scripts)
 		{
+			if (script.isGlobalScript() == true)
+			{
+				// GlobalScript found
+				//
+				globalScript = &script;
+				continue;
+			}
+
 			// Process script files list, if it is not empty
 			//
 			if (m_scriptsToRun.empty() == false)
@@ -327,7 +338,7 @@ namespace TestSuite
 			m_status.m_scriptCount = runScripts.size();
 		}
 
-		TestController testController{*m_inputController, *m_outputController};
+		TestController testController{m_configuration, m_softwareInfo, &m_signals, m_appLog.logFile(), m_testLog, *m_inputController, *m_outputController, this};
 
 		bool fileTestResult = true;
 
@@ -337,8 +348,41 @@ namespace TestSuite
 				QMutexLocker l(&m_statusMutex);
 				m_status.m_scriptIndex++;
 				m_status.m_scriptFile = script->fileName();
+
+				m_status.setStartTime();
 			}
 
+			std::condition_variable callFinishedCondVariable;
+			std::atomic<bool> callFinished{false};
+
+			QThread* scriptRunThread = QThread::currentThread();
+
+			// Execution timeout checking function
+			//
+			auto checkTestExecutionTime = [&callFinishedCondVariable, &callFinished, scriptRunThread, &testController, script, this]()->void
+				{
+					do
+					{
+						if (testController.executionTimeout() > 0 && status().duration().count() > testController.executionTimeout())
+						{
+							QString logMessage = tr("Script %1 execution timeout (%2 ms).").arg(script->fileName()).arg(status().duration().count());
+							m_appLog.writeError(logMessage);
+							requestInterruption();
+							break;
+						}
+
+						std::mutex fakeMutex;
+						std::unique_lock l(fakeMutex);
+						auto threadStopped = callFinishedCondVariable.wait_for(
+							l, 
+							std::chrono::milliseconds{200},
+							[&callFinished, scriptRunThread]() {return callFinished.load() || scriptRunThread->isInterruptionRequested(); });
+					} while (callFinished.load() == false && scriptRunThread->isInterruptionRequested() == false);
+
+					return;
+				};
+			auto f = std::async(std::launch::async, checkTestExecutionTime);
+			
 			checkAndInterruptTestExecution();
 
 			QString logMessage = tr("Run test script: %1").arg(script->fileName());
@@ -350,7 +394,12 @@ namespace TestSuite
 				emit testFinished(scriptFileName, testFunction, result);
 			});
 
-			fileTestResult &= scriptRunner.runScript(*script, m_testsFilter);
+			fileTestResult &= scriptRunner.runScript(*script, globalScript, m_testsFilter);
+
+			callFinished.store(true);
+			callFinishedCondVariable.notify_one();
+
+			f.wait();	// Wait for checkTestExecutionTime function to complete
 		}
 
 		if (fileTestResult == false)
@@ -369,11 +418,10 @@ namespace TestSuite
 		}
 
 		return;
-
 	}
 
 
-	Control::Control(ILogFile* appLog, ITestLog* testLog) :
+	Control::Control(ILogFile* appLog, ILogFile* testLog) :
 		QObject{nullptr},
 		m_appLog{appLog},
 		m_testLog{testLog},
@@ -397,7 +445,7 @@ namespace TestSuite
 						  const TestSuiteSettings& settings,
 						  const QStringList& scriptsFiles,		// List of script files for execution, if empty then exec all.
 						  const QString& scriptsPath,			// Load scripts from disk, path to dir for *.js files.
-						  const TestScriptFilter& testsFilter,			// Tests filter
+						  const TestScriptSelection& testsFilter,			// Tests filter
 						  const QString& userName,
 						  const QString& password)
 	{
@@ -421,12 +469,31 @@ namespace TestSuite
 
 	bool Control::stop()
 	{
-		m_controlThread.requestInterruption();
-
-		if (m_controlThread.wait(120'000) == false)
+		if (m_stopRequested.load() == false)
 		{
-			qDebug() << "Control::stop(): m_controlThread was not finished in time, terminate().";
-			m_controlThread.terminate();
+			// Request test thread to stop
+			//
+			m_stopRequested.store(true);
+			m_controlThread.requestInterruption();
+
+			// Wait for thread to stop in other thread and do not block interface thread
+			//
+			auto waitForThreadStop = [this]()->void
+				{
+					if (m_controlThread.wait(120'000) == false)
+					{
+						qDebug() << "Control::stop(): m_controlThread was not finished in time, terminate().";
+						m_controlThread.terminate();
+					}
+
+					m_stopRequested.store(false);
+				};
+
+			[[maybe_unused]] auto f = std::async(std::launch::async, waitForThreadStop);
+		}
+		else
+		{
+			m_appLog->writeWarning("Already waiting for testing thread to stop.");
 		}
 
 		return true;
@@ -446,6 +513,5 @@ namespace TestSuite
 	{
 		return m_controlThread.reportTemplates();
 	}
-
 }
 

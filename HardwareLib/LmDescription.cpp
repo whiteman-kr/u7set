@@ -2,7 +2,6 @@
 #error Do not include this file in the project! Link HardwareLib instead.
 #endif
 
-#include <set>
 #include "LmDescription.h"
 #include "DeviceObject.h"
 #include "DataProtocols.h"

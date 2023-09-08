@@ -885,6 +885,15 @@ TuningPage::TuningPage(TuningConfigController& configController,
 	else
 	{
 		connect(filterLineEdit, &QLineEdit::returnPressed, this, &TuningPage::slot_ApplyFilter);
+
+		filterLineEdit->setClearButtonEnabled(true);
+		connect(filterLineEdit, &QLineEdit::textChanged, this, [this](const QString& str) {
+			if (str.isEmpty() == true)
+			{
+				// Process mask if text was cleared
+				slot_ApplyFilter();
+			}
+			});
 	}
 
 	// Filter button
@@ -1622,6 +1631,7 @@ void TuningPage::slot_setValue()
 	TuningValue value;
 	TuningValue defaultValue;
 	bool sameValue = true;
+	bool sameDefaultValue = true;
 	int precision = 0;
 	TuningValue lowLimit;
 	TuningValue highLimit;
@@ -1698,6 +1708,11 @@ void TuningPage::slot_setValue()
 				{
 					sameValue = false;
 				}
+
+				if (defaultValue != m_model->defaultValue(asp))
+				{
+					sameDefaultValue = false;
+				}
 			}
 
 			selectedHashes.push_back(hash);
@@ -1709,7 +1724,7 @@ void TuningPage::slot_setValue()
 		return;
 	}
 
-	DialogInputTuningValue d(value, defaultValue, sameValue, lowLimit, highLimit, m_model->analogFormat(), precision, this);
+	DialogInputTuningValue d(value, defaultValue, sameValue, sameDefaultValue, lowLimit, highLimit, m_model->analogFormat(), precision, this);
 	if (d.exec() != QDialog::Accepted)
 	{
 		return;

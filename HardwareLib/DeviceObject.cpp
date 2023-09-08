@@ -5,19 +5,6 @@
 #include "DeviceObject.h"
 #include "ScriptDeviceObject.h"
 #include "../lib/ConstStrings.h"
-#include "../Proto/ProtoSerialization.h"
-#include <utility>
-#include <QJSEngine>
-#include <QQmlEngine>
-#include <QDebug>
-#include <QFile>
-#include <QMetaObject>
-#include <QMetaProperty>
-#include <QXmlStreamReader>
-#include <QFile>
-#include <QMetaProperty>
-#include <QtConcurrent>
-#include <QFuture>
 
 namespace Hardware
 {

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../OnlineLib/Tcp.h"
-#include "../Proto/network.pb.h"
 #include "TuningSource.h"
 
 namespace Tuning

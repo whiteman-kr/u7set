@@ -5,6 +5,7 @@
 #include "../../VFrame30/PosRectImpl.h"
 #include "../../VFrame30/AppSignalController.h"
 #include "../../VFrame30/TuningController.h"
+#include "../../Builder/IssueLogger.h"
 #include "AutoFblItemConnection.h"
 #include "EditSchemaTypes.h"
 #include "EditConnectionLine.h"

@@ -28,11 +28,8 @@ namespace
 			QByteArray ba;
 			bool ok;
 
-			ok = getFileBlocked("/" + softwareInfo().equipmentID() + "/GlobalScript.js", &ba, &parsingError);
-			rf.emplace_back("GlobalScript.js", ok, ba);
-
-			ok = getFileBlocked("/" + softwareInfo().equipmentID() + "/OnConfigurationArrived.js", &ba, &parsingError);
-			rf.emplace_back(QString{"OnConfigurationArrived.js"}, ok, ba);
+			ok = getFileBlocked("/" + softwareInfo().equipmentID() + "/" + File::GLOBAL_SCRIPT, &ba, &parsingError);
+			rf.emplace_back(File::GLOBAL_SCRIPT, ok, ba);
 
 			ok = getFileBlockedById(CfgFileId::LOGO, &ba, &parsingError);
 			rf.emplace_back(std::make_tuple("CfgFileId::LOGO", ok, ba));
@@ -287,6 +284,10 @@ TEST(ConfigControllerTests, twoClientsOnSameComputer)
 	MonitorConfigControllerStub configController1{softwareInfo, host, &log};
 	MonitorConfigControllerStub configController2{softwareInfo, host, &log};
 	MonitorConfigControllerStub configController3{softwareInfo, host, &log};
+
+	configController1.start();
+	configController2.start();
+	configController3.start();
 
 	EXPECT_NE(configController1.appInstanceNo(), configController2.appInstanceNo());
 	EXPECT_NE(configController1.appInstanceNo(), configController3.appInstanceNo());

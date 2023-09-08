@@ -2,35 +2,7 @@
 #error Do not include this file in the project! Link UtilsLib instead.
 #endif
 
-#include <array>
 #include "LogFile.h"
-#include <QApplication>
-#include <QDir>
-#include <QFile>
-#include <QTimer>
-#include <QTextStream>
-#include <QDateTime>
-#include <QAbstractItemModel>
-#include <QComboBox>
-#include <QUuid>
-#include <QScreen>
-#include <QTableView>
-#include <QFileDialog>
-#include <QHeaderView>
-#include <QVBoxLayout>
-#include <QMessageBox>
-#include <QLineEdit>
-#include <QKeyEvent>
-#include <QClipboard>
-#include <QAction>
-#include <QShortcut>
-#include <QDesktopServices>
-#include <QDateTimeEdit>
-#include <QScrollBar>
-#include <QStandardPaths>
-#include <QSettings>
-#include <QProcess>
-#include <QOperatingSystemVersion>
 #include "./Ui/UiTools.h"
 #include "../CommonLib/Hash.h"
 
@@ -2585,12 +2557,12 @@ namespace Log
 		return;
 	}
 
-	bool LogFile::writeMessage(const QString& text)
+	bool LogFile::writeMessage(const QString& text, const QString& /*tag*/)
 	{
 		return write(MessageType::Message, text);
 	}
 
-	bool LogFile::writeAlert(const QString& text)
+	bool LogFile::writeAlert(const QString& text, const QString& /*tag*/)
 	{
 		m_alertAckCounter++;
 
@@ -2599,21 +2571,21 @@ namespace Log
 		return write(MessageType::Alert, text);
 	}
 
-	bool LogFile::writeError(const QString& text)
+	bool LogFile::writeError(const QString& text, const QString& /*tag*/)
 	{
 		m_errorAckCounter++;
 
 		return write(MessageType::Error, text);
 	}
 
-	bool LogFile::writeWarning(const QString& text)
+	bool LogFile::writeWarning(const QString& text, const QString& /*tag*/)
 	{
 		m_warningAckCounter++;
 
 		return write(MessageType::Warning, text);
 	}
 
-	bool LogFile::writeText(const QString& text)
+	bool LogFile::writeText(const QString& text, const QString& /*tag*/)
 	{
 		return write(MessageType::Text, text);
 	}

@@ -72,7 +72,7 @@ namespace Builder
 
 	CodeChecker::~CodeChecker()
 	{
-		DELETE_IF_NOT_NULL(m_mem);
+		DELETE_ARRAY_IF_NOT_NULL(m_mem);
 	}
 
 	bool CodeChecker::check(const AppLogicCode& appLogicCode)

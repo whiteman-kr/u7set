@@ -66,7 +66,7 @@ namespace TestSuite
 			return false;
 		}
 
-		// Wait that TuningConnection loads all signal params.
+		// Wait that TuningConnection loads all tuning sources info
 		//
 		timer.restart();
 
@@ -88,6 +88,31 @@ namespace TestSuite
 		}
 
 		m_appLog.writeMessage("TuningSources info arrived");
+
+		// Wait that TuningConnection loads all tuning sources info
+		//
+		m_appLog.writeMessage("Waiting for all TuningSignalStates to be requested...");
+
+		timer.restart();
+
+		while (timer.hasExpired(30'000) == false && m_connection.signalStatesLoaded() == false)
+		{
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				return false;
+			}
+
+			QThread::msleep(200);
+		}
+
+		if (m_connection.signalStatesLoaded() == false)
+		{
+			m_appLog.writeError("Loading TuningSignalStates timeout!");
+			return false;
+		}
+
+		m_appLog.writeMessage("All TuningSignalStates are requested.");
+
 		return true;
 	}
 
@@ -100,12 +125,24 @@ namespace TestSuite
 			return false;
 		}
 
-		m_signalManager.setUnappliedValue(::calcHash(appSignalId), TuningValue{asp.tuningType(), value.toDouble()});
+		TuningSignalState state = m_signalManager.state(appSignalId, &found);
+		if (found == false)
+		{
+			return false;
+		}
 
+		if (state.valid() == false ||
+			state.controlIsEnabled() == false ||
+			state.writingIsEnabled() == false)
+		{
+			return false;
+		}
+
+		m_signalManager.setUnappliedValue(::calcHash(appSignalId), TuningValue{ asp.tuningType(), value.toDouble() });
 		return m_connection.writeTuningSignal(appSignalId, value);
 	}
 
-	bool TunsOutputController::waitForAllSignalsWritten(qint64 timeoutMs) const
+	bool TunsOutputController::waitForAllSignalsWritten(qint64 timeoutMs, quint64& timeElapsedMs) const
 	{
 		using namespace std::chrono_literals;
 		using namespace std::chrono;
@@ -120,15 +157,23 @@ namespace TestSuite
 			microseconds timeLeftUs{std::min<qint64>((nsecs - timer.nsecsElapsed()) / 1'000, 100'000)};
 			if (timeLeftUs <= 0us)
 			{
-				break;
+				timeLeftUs = 0us;
 			}
 
 			if (m_signalManager.waitForAllApplied(duration_cast<milliseconds>(timeLeftUs)) == true)
 			{
+				timeElapsedMs = timer.nsecsElapsed() / 1'000'000;
+				assert(timeElapsedMs <= timeoutMs);
 				return true;
+			}
+
+			if (timeLeftUs <= 0us)
+			{
+				break;
 			}
 		}
 
+		timeElapsedMs = timeoutMs;
 		return false;
 	}
 }

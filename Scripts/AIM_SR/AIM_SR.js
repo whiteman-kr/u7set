@@ -127,12 +127,6 @@ function generate_aimsr(confFirmware, module, LMNumber, frame, log, signalSet, o
 				log.errCFG3013("HighPhysicalUnits", highADC, compareEqual, "LowPhysicalUnits", lowADC, 0, signalStrId);
 				return false;
 			}
-			if (highEngineeringUnits < lowEngineeringUnits)
-			{
-				// error
-				log.errCFG3013("HighEngineeringUnits", highEngineeringUnits, compareLess, "LowEngineeringUnits", lowEngineeringUnits, signal.decimalPlaces(), signalStrId);
-				return false;
-			}
 			if (highEngineeringUnits == lowEngineeringUnits)
 			{
 				// error

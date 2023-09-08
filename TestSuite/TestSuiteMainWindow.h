@@ -8,6 +8,7 @@
 #include "../lib/Ui/DialogTcpStatistics.h"
 #include "../lib/Ui/DialogAlert.h"
 #include "../OnlineLib/TcpClientStatistics.h"
+#include "../ClientLib/ClientTranslator.h"
 
 #include "AppLogOutputWidget.h"
 #include "TestListWidget.h"
@@ -42,9 +43,9 @@ private:
 	void loadScriptsFromConfiguration();
 	void loadScriptsFromLocalPath();
 
-	void clearTestsTree();
-	void fillTestsTree();
     void createReportActions();
+	
+	void updateTestViewTabPages();
 	void updateActionsState();
 
 	bool loadTestLog();
@@ -73,10 +74,11 @@ private slots:
 	void showAppLog();
 	void showAboutQt();
 	void showAbout();
-	void onTestsRefresh();
-	void onShowTestContents(const QString& testName);
+	void onTestsScriptsReload();
+	void onShowTestContents(const QString& scriptName, const QString& functionName);
 	void onTabCloseRequested(int index);
     void onGenerateReport(const QString& caption);
+	void viewGlobalScript();
 
 	// Processing slots
 	//
@@ -85,7 +87,11 @@ private slots:
 
 private:
 	// Ui
-	//Ui::TestSuiteMainWindow *ui;
+	// User interface
+	//
+	ClientLib::ClientTranslator m_translator;
+
+
 	DialogAlert m_dialogAlert;
 
 	QAction* m_pExitAction = nullptr;
@@ -95,10 +101,12 @@ private:
 	QAction* m_aboutQtAction = nullptr;
 	QAction* m_pAboutAction = nullptr;
 
-	QAction* m_refreshTestsAction = nullptr;
+	QAction* m_reloadTestsScriptsAction = nullptr;
 	QAction* m_runAction = nullptr;
 	//QAction* m_pauseAction = nullptr;
 	QAction* m_stopAction = nullptr;
+
+	QAction* m_viewGlobalScriptAction = nullptr;
 
 	QAction* m_reportAction = nullptr;
 

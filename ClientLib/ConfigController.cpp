@@ -3,8 +3,7 @@
 #endif
 
 #include "ConfigController.h"
-#include <QCoreApplication>
-#include <mutex>
+
 
 namespace ClientLib
 {

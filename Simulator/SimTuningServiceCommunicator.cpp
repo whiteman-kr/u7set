@@ -836,7 +836,6 @@ namespace Sim
 
 		if (m_waitingConfirmationID.has_value() == true)
 		{
-			Q_ASSERT(false);
 			cancelOperations();
 		}
 

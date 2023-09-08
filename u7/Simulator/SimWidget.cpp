@@ -297,6 +297,7 @@ void SimWidget::createToolBar()
 
 	m_findSignalAction = new QAction{QIcon(":/Images/Images/SimFindSignal.svg"), tr("Find Signal"), this};
 	m_findSignalAction->setEnabled(true);
+	m_findSignalAction->setShortcut(QKeySequence::Find);
 	connect(m_findSignalAction, &QAction::triggered, this, &SimWidget::showFindSignal);
 
 

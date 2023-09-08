@@ -125,6 +125,8 @@ qt_add_library(${TARGET} STATIC
 	RunOrder.h
 	SchemasReportGenerator.cpp
 	SchemasReportGenerator.h
+	ScriptChecker.cpp
+	ScriptChecker.h
 	SignalSet.cpp
 	SignalSet.h
 	SignalsHeap.cpp
@@ -164,7 +166,6 @@ target_precompile_headers(${TARGET} PUBLIC
 	<unordered_set>
 	<vector>
 
-	<QtCore>
 	<QtGui>
 	<QtQml>
 	<QtConcurrent>

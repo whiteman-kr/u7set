@@ -4,20 +4,27 @@
 
 namespace TestSuite
 {
-	class TestScriptFilter
+	class TestScriptSelection
 	{
 	public:
-		TestScriptFilter() = default;
-		explicit TestScriptFilter(const QString& testMasks);
+		TestScriptSelection() = default;
+		explicit TestScriptSelection(const QString& testMasks);
 
+		// Tests masks operations
+		//
 		const QStringList& testMasks() const;
 
-		QStringList scriptFiles() const;
-		const QStringList& testFunctions(const QString& scriptName) const;
-		void setTestFunctions(const QString& scriptName, const QStringList& functons);
+		// Selected files and tests operations
+		//
+		bool isEmpty() const;	// returns true if list of selected functions is empty
+		QStringList selectedFiles() const;
+		
+		const QStringList& selectedFunctions(const QString& scriptName) const;
+		void setSelectedFunctions(const QString& scriptName, const QStringList& functons);
 
 	private:
 		QStringList m_testMasks;
+
 		std::map<QString, QStringList> m_testFunctions;	// Key is script filename, value is list of functions
 	};
 
@@ -26,12 +33,13 @@ namespace TestSuite
 	public:
 		TestScript() = default;
 		TestScript(const QString& name, const QString& contents):
-			m_fileName(name), m_script(contents), m_hash(::calcHash(name))
+			m_fileName(name), m_fileNameHash(::calcHash(name)), m_script(contents)
 		{
+			m_globalScript = name.contains(GlobalScriptID, Qt::CaseInsensitive);
 		}
-		Hash hash() const
+		Hash fileNameHash() const
 		{
-			return m_hash;
+			return m_fileNameHash;
 		}
 		const QString fileName() const
 		{
@@ -40,7 +48,7 @@ namespace TestSuite
 		void setFileName(const QString& name)
 		{
 			m_fileName = name;
-			m_hash = ::calcHash(name);
+			m_fileNameHash = ::calcHash(name);
 		}
 		const QString& script() const
 		{
@@ -50,11 +58,18 @@ namespace TestSuite
 		{
 			m_script = contents;
 		}
+		bool isGlobalScript() const
+		{
+			return m_globalScript;
+		}
+
+		static inline QString GlobalScriptID = "GlobalScript";
 
 	private:
-		Hash m_hash = UNDEFINED_HASH;
+		Hash m_fileNameHash = UNDEFINED_HASH;
 		QString m_fileName;
 		QString m_script;
+		bool m_globalScript = false;
 	};
 
 	class TestScriptsStorage
@@ -66,6 +81,9 @@ namespace TestSuite
 		//
 		//std::vector<TestScript>& scripts();
 		const std::vector<TestScript>& scripts() const;
+
+		bool hasScript(Hash hash) const;
+
 		const TestScript& script(Hash hash) const;
 		const TestScript& script(int index) const;
 

@@ -1,4 +1,3 @@
-#include <QCoreApplication>
 #include "MetrologyFormula.h"
 #include "UnitsConvertorTable.h"
 

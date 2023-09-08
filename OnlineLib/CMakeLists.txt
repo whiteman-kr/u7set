@@ -33,6 +33,83 @@ qt_add_library(${TARGET} STATIC
 	UdpSocket.h
 )
 
+target_precompile_headers(${TARGET} PUBLIC
+	# C++ includes
+	#
+	<algorithm>
+	<array>
+	<atomic>
+	<cassert>
+	<chrono>
+	<cmath>
+	<concepts>
+	<condition_variable>
+	<cstdint>
+	<cstdlib>
+	<functional>
+	<limits>
+	<list>
+	<map>
+	<memory>
+	<optional>
+	<queue>
+	<set>
+	<type_traits>
+	<unordered_map>
+	<utility>
+	<vector>
+
+	# Qt includes
+	#
+	<QAbstractSocket>
+	<QCommandLineParser>
+	<QCoreApplication>
+	<QCryptographicHash>
+	<QDateTime>
+	<QDebug>
+	<QDir>
+	<QElapsedTimer>
+	<QEventLoop>
+	<QFile>
+	<QFileInfo>
+	<QHash>
+	<QHostAddress>
+	<QList>
+	<QMap>
+	<QMetaClassInfo>
+	<QMetaEnum>
+	<QMetaObject>
+	<QMutex>
+	<QMutexLocker>
+	<QObject>
+	<QQueue>
+	<QSettings>
+	<QSslCertificate>
+	<QSslPreSharedKeyAuthenticator>
+	<QSslSocket>
+	<QStandardPaths>
+	<QString>
+	<QStringList>
+	<QTextStream>
+	<QtGlobal>
+	<QThread>
+	<QTimer>
+	<QHostAddress>
+	<QUdpSocket>
+	<QUuid>
+	<QVariant>
+	<QVector>
+	<QXmlStreamReader>
+	<QXmlStreamWriter>
+
+
+	# Project includes
+	#
+	"../Proto/ProtoSerialization.h"
+	"../Proto/serialization.pb.h"
+	"../Proto/network.pb.h"
+)
+
 target_link_libraries(${TARGET} PRIVATE Qt6::Network)
 target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib)
 

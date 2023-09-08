@@ -1,15 +1,27 @@
+#include "../ClientLib/ScriptTestObserver.h"
+
 #include "TestController.h"
+#include "TestObserver.h"
+#include "TestSuiteConfigController.h"
 
 namespace TestSuite
 {
-	TestController::TestController(IInputController& inputController, IOutputController& outputController, QObject* parent) :
+	TestController::TestController(const ConfigSettings& configuration,
+								   const SoftwareInfo& softwareInfo,
+								   ISignalDataServer* signalDataServer,
+								   ILogFile* appLog,
+								   ILogFile* testLog,
+								   IInputController& inputController,
+								   IOutputController& outputController,
+								   QObject* parent) :
 		QObject{parent},
+		m_configuration{configuration},
+		m_softwareInfo{softwareInfo},
+		m_signalDataServer{signalDataServer},
+		m_appLog{appLog},
+		m_testLog{testLog},
 		m_inputController{inputController},
 		m_outputController{outputController}
-	{
-	}
-
-	TestController::~TestController()
 	{
 	}
 
@@ -34,7 +46,11 @@ namespace TestSuite
 
 	void TestController::debugOutput(QString str)
 	{
-		qDebug() << str;
+		if (m_debugMessagesEnabled == true)
+		{
+			qDebug() << str;
+			m_appLog->writeMessage("<DEBUG> " + str);
+		}
 	}
 
 	bool TestController::startForMs(int msecs)
@@ -67,6 +83,34 @@ namespace TestSuite
 		}
 
 		return true;
+	}
+
+	QJSValue TestController::createObserver()
+	{
+		QJSValue result;
+
+		QJSEngine* jsEngine = qjsEngine(this);
+		if (jsEngine == nullptr)
+		{
+			assert(jsEngine);
+			return result;
+		}
+
+		if (m_configuration.appDataServices.empty() == true || m_signalDataServer == nullptr || m_appLog == nullptr)
+		{
+			jsEngine->throwError(tr("ScriptTestObserver can not be created as there is no configured AppDataService(s)."));
+			return result;
+		}
+
+		auto testObserver = std::make_unique<TestSuite::TestObserver>(*m_signalDataServer, 
+																	  m_softwareInfo,
+																	  m_configuration.appDataServices, 
+																	  m_appLog);
+
+		ScriptTestObserver* observer = new ScriptTestObserver{std::move(testObserver), m_testLog, this};
+		result = jsEngine->newQObject(observer);
+
+		return result;
 	}
 
 
@@ -115,7 +159,7 @@ namespace TestSuite
 		}
 		else
 		{
-			m_overridedSignals.insert(appSignalId);
+			m_overridenSignals.insert(appSignalId);
 		}
 
 		return ok;
@@ -123,17 +167,27 @@ namespace TestSuite
 
 	bool TestController::waitForSignalOverrides(qint64 timeoutMs)
 	{
-		return m_outputController.waitForAllSignalsWritten(timeoutMs);
+		quint64 elapsedMs = 0;
+		return m_outputController.waitForAllSignalsWritten(timeoutMs, elapsedMs);
 	}
 
-	bool TestController::expectSignalValue(QString appSignalId, double value, qint64 timeoutMs)
+	bool TestController::expectSignalValue(QString appSignalId, qint64 timeoutMs, double value, double tolerance /*= 0*/)
 	{
-		return m_inputController.expectSignalValue(appSignalId, value, timeoutMs);
+		// Before expecting any values, wait for all writing processes are finished
+		//
+		quint64 elapsedMs = 0;
+		bool allWritten = m_outputController.waitForAllSignalsWritten(timeoutMs, elapsedMs);
+		if (allWritten == false)
+		{
+			return false;
+		}
+
+		return m_inputController.expectSignalValue(appSignalId, timeoutMs - elapsedMs, value, tolerance);
 	}
 
-	void TestController::overridesReset()
+	void TestController::overridesReset(qint64 timeoutMs)
 	{
-		for (const QString& appSignalId : m_overridedSignals)
+		for (const QString& appSignalId : m_overridenSignals)
 		{
 			AppSignalParam asp = signalParam(appSignalId);
 
@@ -144,7 +198,14 @@ namespace TestSuite
 				return;
 			}
 		}
-		m_overridedSignals.clear();
+		m_overridenSignals.clear();
+
+		bool ok = waitForSignalOverrides(timeoutMs);
+		if (ok == false)
+		{
+			throwScriptException(this, tr("waitForSignalOverrides failed."));
+			return;
+		}
 	}
 
 	bool TestController::signalExists(QString appSignalId) const
@@ -165,4 +226,34 @@ namespace TestSuite
 		return result;
 	}
 
-}
+	QString TestController::projectName() const
+	{
+		return m_configuration.configInfo.project;
+	}
+
+	int TestController::buildNo() const
+	{
+		return m_configuration.configInfo.buildNo;
+	}
+
+	qint64 TestController::executionTimeout() const
+	{
+		return m_executionTimeout.load();
+	}
+
+	void TestController::setExecutionTimeout(qint64 value)
+	{
+		m_executionTimeout.store(value);
+	}
+
+	bool TestController::debugMessagesEnabled() const
+	{
+		return m_debugMessagesEnabled;
+	}
+
+	void TestController::setDebugMessagesEnabled(bool value)
+	{
+		m_debugMessagesEnabled = true;
+	}
+
+} // namespace TestSuite

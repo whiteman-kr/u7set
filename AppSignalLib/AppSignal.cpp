@@ -5,8 +5,6 @@
 #include "AppSignal.h"
 #include "../UtilsLib/XmlHelper.h"
 
-#include "../Proto/serialization.pb.h"
-
 template<typename ENUM_TYPE>
 void writeEnumValueStrSpecPropAttribute(XmlWriteHelper& xml, const AppSignal& s,
 									   const QString& propName, const QString& attributeName)

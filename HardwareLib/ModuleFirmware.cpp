@@ -4,15 +4,6 @@
 
 #include "ModuleFirmware.h"
 #include "../UtilsLib/Crc.h"
-#include <QFile>
-#include <QMap>
-#include <QHash>
-#include <QtEndian>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonValue>
-#include <QJsonArray>
-#include <cmath>
 
 
 namespace Hardware

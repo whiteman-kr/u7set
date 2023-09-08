@@ -1,8 +1,6 @@
 #ifndef CHANGESETDETAILSDIALOG_H
 #define CHANGESETDETAILSDIALOG_H
 
-#include "../DbLib/DbController.h"
-
 namespace Ui {
 	class ChangesetDetailsDialog;
 }

@@ -2,7 +2,6 @@
 #error Do not include this file in the project! Link ClientLib instead.
 #endif
 
-#include <QTimeZone>
 #include "TcpSignalClient.h"
 
 namespace ClientLib
@@ -136,6 +135,9 @@ namespace ClientLib
 		m_signalList.clear();
 		m_signalParamsLoaded.store(false);
 
+		m_signalStatesSet.clear();
+		m_signalStatesLoaded.store(false);
+
 		m_lastSignalParamStartIndex = 0;
 		m_lastSignalStateStartIndex = 0;
 
@@ -223,6 +225,9 @@ namespace ClientLib
 			m_signalList.clear();
 			m_signalParamsLoaded.store(false);
 
+			m_signalStatesSet.clear();
+			m_signalStatesLoaded.store(false);
+
 			// request params
 			//
 			requestSignalParam(0);
@@ -232,6 +237,9 @@ namespace ClientLib
 		m_signalList.clear();
 		m_signalList.reserve(m_getSignalListStartReply.totalitemcount());
 		m_signalParamsLoaded.store(false);
+
+		m_signalStatesSet.clear();
+		m_signalStatesLoaded.store(false);
 
 		requestSignalListNext(0);
 
@@ -470,6 +478,16 @@ namespace ClientLib
 		{
 			const AppSignalState& state = states.emplace_back(m_getSignalStateChangesReply.appsignalstates(i));
 			Q_ASSERT(state.hash() != 0);
+
+			if (m_signalStatesSet.contains(state.hash()) == false)
+			{
+				m_signalStatesSet.insert(state.hash());	// Mark signal as received at least once
+				
+				if (m_signalStatesSet.size() == m_signalList.size())
+				{
+					m_signalStatesLoaded.store(true);	// Notify that states of all signals are received
+				}
+			}
 		}
 
 		m_signalUpdater.setState(states, ::calcHash(m_serverSettings.equipmentId), QThread::currentThreadId());
@@ -546,6 +564,16 @@ namespace ClientLib
 		{
 			const AppSignalState& state = states.emplace_back(m_getSignalStateReply.appsignalstates(i));
 			Q_ASSERT(state.m_hash != 0);
+
+			if (m_signalStatesSet.contains(state.hash()) == false)
+			{
+				m_signalStatesSet.insert(state.hash());	// Mark signal as received at least once
+				
+				if (m_signalStatesSet.size() == m_signalList.size())
+				{
+					m_signalStatesLoaded.store(true);	// Notify that states of all signals are received
+				}
+			}
 		}
 
 		m_signalUpdater.setState(states, ::calcHash(m_serverSettings.equipmentId), QThread::currentThreadId());
@@ -557,6 +585,11 @@ namespace ClientLib
 	bool TcpSignalClient::signalParamsLoaded() const
 	{
 		return m_signalParamsLoaded.load();
+	}
+
+	bool TcpSignalClient::signalStatesLoaded() const
+	{
+		return m_signalStatesLoaded.load();
 	}
 
 	void TcpSignalClient::checkTimeDiscrepancy(qint64 serverUtcTimeMs, qint64 serverLocalTimeMs)

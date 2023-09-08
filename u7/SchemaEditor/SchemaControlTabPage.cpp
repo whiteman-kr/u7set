@@ -26,7 +26,10 @@
 #include "DialogClientBehavior.h"
 #include "Reports/SchemasReport.h"
 #include "Reports/DialogSchemasExport.h"
-#include <QPageLayout>
+
+#ifdef _DEBUG
+#include <QAbstractItemModelTester>
+#endif
 
 //
 //

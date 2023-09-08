@@ -2,7 +2,7 @@
 
 namespace TestSuite
 {
-	ScriptRunner::ScriptRunner(TestController& testController, ITestLog& scriptTestLog, ControlStatus& status, QMutex& statusMutex) :
+	ScriptRunner::ScriptRunner(TestController& testController, ILogFile& scriptTestLog, ControlStatus& status, QMutex& statusMutex) :
 		m_testController(testController),
 		m_scriptTestLog(scriptTestLog),
 		m_status(status),
@@ -37,12 +37,25 @@ namespace TestSuite
 		return evaluateScript(script, {}, functionsList, errorMsg);
 	}
 
-	bool ScriptRunner::runScript(const TestScript& script, const TestScriptFilter& filter)
+	bool ScriptRunner::runScript(const TestScript& script, const TestScript* globalScript, const TestScriptSelection& filter)
 	{
 		{
 			QMutexLocker l(&m_statusMutex);
 			m_status.m_testIndex = 0;
 			m_status.m_testFunction = "evaluate";
+		}
+
+		if (globalScript != nullptr)
+		{
+			// Evaluate global script
+			// 
+			QString errorMsg;
+			QStringList functionsList;
+			if (evaluateScript(*globalScript, {}, functionsList, errorMsg) == false)
+			{
+				m_scriptTestLog.writeError(errorMsg);
+				return false;
+			}
 		}
 
 		// Evaluate script
@@ -100,39 +113,47 @@ namespace TestSuite
 				m_status.m_testFunction = testFunc;
 			}
 
+			m_scriptTestLog.writeMessage(testFunc + ": RUN");
+
+			bool initOk = false;
+			bool testOk = false;
+			bool cleanupOk = false;
+			
 			// init() - called before each test function is executed.
 			//
-			if (bool initOk = runScriptFunction("init");
-				initOk == false)
+			initOk = runScriptFunction("init");
+			if (initOk == true)
 			{
-				m_scriptTestLog.writeError(testFunc + ": init() failed, test terminated.");
-				break;
-			}
+				// run test function
+				//
+				testOk = runScriptFunction(testFunc);
+				if (testOk == true)
+				{
+					m_scriptTestLog.writeMessage(testFunc + ": PASS");
+				}
+				else
+				{
+					failed++;
+					//totalFailed ++;
+					m_scriptTestLog.writeError(testFunc + ": FAIL");
+				}
 
-			bool testOk = runScriptFunction(testFunc);
-			if (testOk == true)
-			{
-				m_scriptTestLog.writeMessage(testFunc + ": ok");
+				// cleanup() - called after every test function.
+				//
+				cleanupOk = runScriptFunction("cleanup");
+				if (cleanupOk == false)
+				{
+					m_scriptTestLog.writeError(testFunc + ": cleanup() failed, test terminated.");
+				}
 			}
 			else
 			{
-				failed ++;
-				//totalFailed ++;
-				m_scriptTestLog.writeError(testFunc + ": FAILED");
+				m_scriptTestLog.writeError(testFunc + ": init() failed, test terminated.");
 			}
+			
+			emit testFinished(script.fileName(), testFunc, initOk == true && testOk == true && cleanupOk == true);
 
-			// cleanup() - called after every test function.
-			//
-			bool cleanupOk = runScriptFunction("cleanup");
-			if (cleanupOk == false)
-			{
-				m_scriptTestLog.writeError(testFunc + ": cleanup() failed, test terminated.");
-				break;
-			}
-
-			emit testFinished(script.fileName(), testFunc, testOk);
-
-			if (cleanupOk == false)
+			if (initOk == false || testOk == false || cleanupOk == false)
 			{
 				break;
 			}
@@ -167,7 +188,7 @@ namespace TestSuite
 		return failed == 0;
 	}
 
-	bool ScriptRunner::evaluateScript(const TestScript& script, const TestScriptFilter& filter, QStringList& functionsList, QString& errorMsg)
+	bool ScriptRunner::evaluateScript(const TestScript& script, const TestScriptSelection& filter, QStringList& functionsList, QString& errorMsg)
 	{
 		// Evaluate script.
 		//
@@ -202,7 +223,7 @@ namespace TestSuite
 
 				// Process function list filter
 				//
-				const QStringList& functions = filter.testFunctions(script.fileName());
+				const QStringList& functions = filter.selectedFunctions(script.fileName());
 				if (functions.empty() == false)
 				{
 					if (std::find(functions.begin(), functions.end(), functionName) == functions.end())

@@ -1,6 +1,5 @@
 #pragma once
 #include "Settings.h"
-#include "../Proto/serialization.pb.h"
 #include "VFrameTools.h"
 
 namespace VFrame30

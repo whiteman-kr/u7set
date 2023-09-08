@@ -36,7 +36,6 @@
 #include "Settings.h"
 #include "../lib/Ui/TextEditCompleter.h"
 #include "../lib/QDoublevalidatorEx.h"
-#include <cfloat>
 #include "../lib/CodeEditor.h"
 
 const EditSchemaWidget::MouseStateCursor EditSchemaWidget::m_mouseStateCursor[] =
@@ -4266,12 +4265,24 @@ void EditSchemaWidget::layers()
 
 void EditSchemaWidget::setActiveLayer(QString name)
 {
+	if (schema() == nullptr)
+	{
+		return;
+	}
+
+	if (activeLayer() != nullptr && activeLayer()->name() == name)
+	{
+		return;
+	}
+
 	for (auto layers = schema()->layers();
 		 auto layer : layers)
 	{
 		if (layer->name() == name)
 		{
 			editSchemaView()->setActiveLayer(layer);
+			editSchemaView()->clearSelection();
+			editSchemaView()->update();
 			break;
 		}
 	}

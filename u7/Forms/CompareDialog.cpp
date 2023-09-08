@@ -1,6 +1,5 @@
 #include "CompareDialog.h"
 #include "ui_CompareDialog.h"
-#include "../../DbLib/DbController.h"
 #include "SelectChangesetDialog.h"
 #include "GlobalMessanger.h"
 

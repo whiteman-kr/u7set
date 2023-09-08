@@ -647,6 +647,11 @@ message IndicatorTrend
 {
     optional int32 sampleperiod = 90;
 	optional int32 timeType = 91;
+	optional int32 viewMode = 92;		// E::TrendViewMode
+	optional int32 scaleType = 93;		// E::TrendScaleType
+	optional int32 laneCount = 94;
+	optional fixed32 backColor1st = 95;
+	optional fixed32 backColor2nd = 96;
     optional int64 redrawinterval = 100;
 	optional int64 duration = 51;
 

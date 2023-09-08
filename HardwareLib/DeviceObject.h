@@ -34,7 +34,7 @@ namespace Hardware
 	class DeviceDiagSignal;
 
 
-	// Device type, for defining hierrarche, don't save these data to file, can be changed (new level) later
+	// Device type, for defining hierarchy, don't save these data to file, can be changed (new level) later
 	// If you add or change order in this enum, DO NOT FORGET TO CHANGE !!!!DeviceObjectExtensions!!!!
 	//
 	enum class DeviceType

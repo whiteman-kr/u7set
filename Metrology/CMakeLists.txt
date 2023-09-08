@@ -145,6 +145,7 @@ add_executable(${TARGET} WIN32
 )
 
 target_precompile_headers(${TARGET} PRIVATE
+	<cassert>	
 	<algorithm>
 	<atomic>
 	<functional>
@@ -156,78 +157,86 @@ target_precompile_headers(${TARGET} PRIVATE
 	<vector>
 	<set>
 	<type_traits>
+	<stdexcept>
 
+	<QAbstractItemModel>
 	<QAbstractSocket>
+	<QAbstractTableModel>
+	<QAction>
 	<QApplication>
+	<QCheckBox>
+	<QCloseEvent>
+	<QColorDialog>
+	<QComboBox>
 	<QCommandLineParser>
+	<QCompleter>
 	<QCoreApplication>
-	<QDebug>
+	<QCoreApplication>
 	<QDateTime>
+	<QDebug>
 	<QElapsedTimer>
+	<QErrorMessage>
 	<QEventLoop>
 	<QFile>
+	<QFileDialog>
 	<QFileInfo>
+	<QGroupBox>
 	<QHash>
+	<QHBoxLayout>
+	<QHeaderView>
 	<QHostAddress>
+	<QInputDialog>
+	<QLabel>
+	<QListView>
+	<QListWidget>
+	<QMainWindow>
 	<QMap>
+	<QMenu>
+	<QMenuBar>
+	<QMessageBox>
 	<QMetaClassInfo>
 	<QMetaEnum>
 	<QMetaObject>
 	<QMutex>
 	<QMutexLocker>
 	<QObject>
+	<QPainter>
+	<QProgressBar>
+	<QProgressDialog>
+	<QPushButton>
 	<QQueue>
+	<QRegularExpression>
+	<QRegularExpressionValidator>
+	<QScreen>
+	<QScrollArea>
+	<QScrollBar>
 	<QSettings>
+	<QSplitter>
+	<QStatusBar>
 	<QString>
 	<QStringList>
+	<QTableWidget>
+	<QTabWidget>
+	<QtConcurrent>
+	<QTextEdit>
 	<QTextStream>
+	<QtGlobal>
 	<QThread>
 	<QTimer>
-	<QTranslator>
-	<QtCore>
-	<QtGlobal>
 	<QtNetwork/QHostAddress>
+	<QTranslator>
+	<QTreeWidget>
 	<QUdpSocket>
 	<QUuid>
 	<QVariant>
+	<QVBoxLayout>
 	<QVector>
 	<QXmlStreamReader>
 	<QXmlStreamWriter>
-	<QRegularExpression>
-	<QRegularExpressionValidator>
-	<QAbstractItemModel>
-	<QAbstractTableModel>
-	<QAction>
-	<QComboBox>
-	<QCheckBox>
-	<QCloseEvent>
-	<QErrorMessage>
-	<QFileDialog>
-	<QHBoxLayout>
-	<QHeaderView>
-	<QInputDialog>
-	<QLabel>
-	<QListView>
-	<QListWidget>
-	<QMainWindow>
-	<QMenu>
-	<QMenuBar>
-	<QMessageBox>
-	<QVBoxLayout>
-	<QPainter>
-	<QProgressDialog>
-	<QPushButton>
-	<QScrollArea>
-	<QScrollBar>
-	<QSplitter>
-	<QStatusBar>
-	<QTableWidget>
-	<QTabWidget>
-	<QTextEdit>
-	<QTreeWidget>
-	<QScreen>
-	<QCompleter>
-	<QProgressBar>
+
+	"../Proto/ProtoSerialization.h"
+	"../Proto/serialization.pb.h"
+	"../Proto/network.pb.h"
 )
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Concurrent Qt6::SerialPort Qt6::Network Qt6::Sql Qt6::Qml Qt6::Xml Qt6::Charts)
@@ -244,15 +253,7 @@ if (MSVC)
 		${CMAKE_CURRENT_SOURCE_DIR}/../bin_Win64/visaUtilities.dll
 	)
 
-	# Get the output directory where the executable will be built
-	#
-	if (DEFINED BIN_OUT_DIR)
-		set(METROLOGY_OUTPUT_DIRECTORY ${BIN_OUT_DIR})
-	else()
-		set(METROLOGY_OUTPUT_DIRECTORY $<TARGET_FILE_DIR:${TARGET}>)
-	endif()
-
-	add_custom_command(TARGET ${TARGET} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${DLL_COPY_FILE_LIST} ${METROLOGY_OUTPUT_DIRECTORY})
+	add_custom_command(TARGET ${TARGET} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${DLL_COPY_FILE_LIST} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 endif()
 
 

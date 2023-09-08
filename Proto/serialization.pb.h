@@ -9726,9 +9726,14 @@ class IndicatorTrend PROTOBUF_FINAL :
 
   enum : int {
     kTrendSignalParamsFieldNumber = 110,
+    kBackColor2NdFieldNumber = 96,
     kDurationFieldNumber = 51,
     kSampleperiodFieldNumber = 90,
     kTimeTypeFieldNumber = 91,
+    kViewModeFieldNumber = 92,
+    kScaleTypeFieldNumber = 93,
+    kLaneCountFieldNumber = 94,
+    kBackColor1StFieldNumber = 95,
     kRedrawintervalFieldNumber = 100,
   };
   // repeated .Proto.IndicatorTrendSignalParam trendSignalParams = 110;
@@ -9748,6 +9753,19 @@ class IndicatorTrend PROTOBUF_FINAL :
   ::Proto::IndicatorTrendSignalParam* add_trendsignalparams();
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::IndicatorTrendSignalParam >&
       trendsignalparams() const;
+
+  // optional fixed32 backColor2nd = 96;
+  bool has_backcolor2nd() const;
+  private:
+  bool _internal_has_backcolor2nd() const;
+  public:
+  void clear_backcolor2nd();
+  ::PROTOBUF_NAMESPACE_ID::uint32 backcolor2nd() const;
+  void set_backcolor2nd(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_backcolor2nd() const;
+  void _internal_set_backcolor2nd(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
 
   // optional int64 duration = 51;
   bool has_duration() const;
@@ -9788,6 +9806,58 @@ class IndicatorTrend PROTOBUF_FINAL :
   void _internal_set_timetype(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
+  // optional int32 viewMode = 92;
+  bool has_viewmode() const;
+  private:
+  bool _internal_has_viewmode() const;
+  public:
+  void clear_viewmode();
+  ::PROTOBUF_NAMESPACE_ID::int32 viewmode() const;
+  void set_viewmode(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_viewmode() const;
+  void _internal_set_viewmode(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int32 scaleType = 93;
+  bool has_scaletype() const;
+  private:
+  bool _internal_has_scaletype() const;
+  public:
+  void clear_scaletype();
+  ::PROTOBUF_NAMESPACE_ID::int32 scaletype() const;
+  void set_scaletype(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_scaletype() const;
+  void _internal_set_scaletype(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int32 laneCount = 94;
+  bool has_lanecount() const;
+  private:
+  bool _internal_has_lanecount() const;
+  public:
+  void clear_lanecount();
+  ::PROTOBUF_NAMESPACE_ID::int32 lanecount() const;
+  void set_lanecount(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_lanecount() const;
+  void _internal_set_lanecount(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional fixed32 backColor1st = 95;
+  bool has_backcolor1st() const;
+  private:
+  bool _internal_has_backcolor1st() const;
+  public:
+  void clear_backcolor1st();
+  ::PROTOBUF_NAMESPACE_ID::uint32 backcolor1st() const;
+  void set_backcolor1st(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_backcolor1st() const;
+  void _internal_set_backcolor1st(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
   // optional int64 redrawinterval = 100;
   bool has_redrawinterval() const;
   private:
@@ -9811,9 +9881,14 @@ class IndicatorTrend PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::IndicatorTrendSignalParam > trendsignalparams_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 backcolor2nd_;
   ::PROTOBUF_NAMESPACE_ID::int64 duration_;
   ::PROTOBUF_NAMESPACE_ID::int32 sampleperiod_;
   ::PROTOBUF_NAMESPACE_ID::int32 timetype_;
+  ::PROTOBUF_NAMESPACE_ID::int32 viewmode_;
+  ::PROTOBUF_NAMESPACE_ID::int32 scaletype_;
+  ::PROTOBUF_NAMESPACE_ID::int32 lanecount_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 backcolor1st_;
   ::PROTOBUF_NAMESPACE_ID::int64 redrawinterval_;
   friend struct ::TableStruct_serialization_2eproto;
 };
@@ -39828,7 +39903,7 @@ inline void IndicatorTrendSignalParam::set_highlimit(double value) {
 
 // optional int32 sampleperiod = 90;
 inline bool IndicatorTrend::_internal_has_sampleperiod() const {
-  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
   return value;
 }
 inline bool IndicatorTrend::has_sampleperiod() const {
@@ -39836,7 +39911,7 @@ inline bool IndicatorTrend::has_sampleperiod() const {
 }
 inline void IndicatorTrend::clear_sampleperiod() {
   sampleperiod_ = 0;
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 IndicatorTrend::_internal_sampleperiod() const {
   return sampleperiod_;
@@ -39846,7 +39921,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 IndicatorTrend::sampleperiod() const {
   return _internal_sampleperiod();
 }
 inline void IndicatorTrend::_internal_set_sampleperiod(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000004u;
   sampleperiod_ = value;
 }
 inline void IndicatorTrend::set_sampleperiod(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -39856,7 +39931,7 @@ inline void IndicatorTrend::set_sampleperiod(::PROTOBUF_NAMESPACE_ID::int32 valu
 
 // optional int32 timeType = 91;
 inline bool IndicatorTrend::_internal_has_timetype() const {
-  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
   return value;
 }
 inline bool IndicatorTrend::has_timetype() const {
@@ -39864,7 +39939,7 @@ inline bool IndicatorTrend::has_timetype() const {
 }
 inline void IndicatorTrend::clear_timetype() {
   timetype_ = 0;
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 IndicatorTrend::_internal_timetype() const {
   return timetype_;
@@ -39874,7 +39949,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 IndicatorTrend::timetype() const {
   return _internal_timetype();
 }
 inline void IndicatorTrend::_internal_set_timetype(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000008u;
   timetype_ = value;
 }
 inline void IndicatorTrend::set_timetype(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -39882,9 +39957,149 @@ inline void IndicatorTrend::set_timetype(::PROTOBUF_NAMESPACE_ID::int32 value) {
   // @@protoc_insertion_point(field_set:Proto.IndicatorTrend.timeType)
 }
 
+// optional int32 viewMode = 92;
+inline bool IndicatorTrend::_internal_has_viewmode() const {
+  bool value = (_has_bits_[0] & 0x00000010u) != 0;
+  return value;
+}
+inline bool IndicatorTrend::has_viewmode() const {
+  return _internal_has_viewmode();
+}
+inline void IndicatorTrend::clear_viewmode() {
+  viewmode_ = 0;
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 IndicatorTrend::_internal_viewmode() const {
+  return viewmode_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 IndicatorTrend::viewmode() const {
+  // @@protoc_insertion_point(field_get:Proto.IndicatorTrend.viewMode)
+  return _internal_viewmode();
+}
+inline void IndicatorTrend::_internal_set_viewmode(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000010u;
+  viewmode_ = value;
+}
+inline void IndicatorTrend::set_viewmode(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_viewmode(value);
+  // @@protoc_insertion_point(field_set:Proto.IndicatorTrend.viewMode)
+}
+
+// optional int32 scaleType = 93;
+inline bool IndicatorTrend::_internal_has_scaletype() const {
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
+  return value;
+}
+inline bool IndicatorTrend::has_scaletype() const {
+  return _internal_has_scaletype();
+}
+inline void IndicatorTrend::clear_scaletype() {
+  scaletype_ = 0;
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 IndicatorTrend::_internal_scaletype() const {
+  return scaletype_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 IndicatorTrend::scaletype() const {
+  // @@protoc_insertion_point(field_get:Proto.IndicatorTrend.scaleType)
+  return _internal_scaletype();
+}
+inline void IndicatorTrend::_internal_set_scaletype(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000020u;
+  scaletype_ = value;
+}
+inline void IndicatorTrend::set_scaletype(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_scaletype(value);
+  // @@protoc_insertion_point(field_set:Proto.IndicatorTrend.scaleType)
+}
+
+// optional int32 laneCount = 94;
+inline bool IndicatorTrend::_internal_has_lanecount() const {
+  bool value = (_has_bits_[0] & 0x00000040u) != 0;
+  return value;
+}
+inline bool IndicatorTrend::has_lanecount() const {
+  return _internal_has_lanecount();
+}
+inline void IndicatorTrend::clear_lanecount() {
+  lanecount_ = 0;
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 IndicatorTrend::_internal_lanecount() const {
+  return lanecount_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 IndicatorTrend::lanecount() const {
+  // @@protoc_insertion_point(field_get:Proto.IndicatorTrend.laneCount)
+  return _internal_lanecount();
+}
+inline void IndicatorTrend::_internal_set_lanecount(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000040u;
+  lanecount_ = value;
+}
+inline void IndicatorTrend::set_lanecount(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_lanecount(value);
+  // @@protoc_insertion_point(field_set:Proto.IndicatorTrend.laneCount)
+}
+
+// optional fixed32 backColor1st = 95;
+inline bool IndicatorTrend::_internal_has_backcolor1st() const {
+  bool value = (_has_bits_[0] & 0x00000080u) != 0;
+  return value;
+}
+inline bool IndicatorTrend::has_backcolor1st() const {
+  return _internal_has_backcolor1st();
+}
+inline void IndicatorTrend::clear_backcolor1st() {
+  backcolor1st_ = 0u;
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 IndicatorTrend::_internal_backcolor1st() const {
+  return backcolor1st_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 IndicatorTrend::backcolor1st() const {
+  // @@protoc_insertion_point(field_get:Proto.IndicatorTrend.backColor1st)
+  return _internal_backcolor1st();
+}
+inline void IndicatorTrend::_internal_set_backcolor1st(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _has_bits_[0] |= 0x00000080u;
+  backcolor1st_ = value;
+}
+inline void IndicatorTrend::set_backcolor1st(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_backcolor1st(value);
+  // @@protoc_insertion_point(field_set:Proto.IndicatorTrend.backColor1st)
+}
+
+// optional fixed32 backColor2nd = 96;
+inline bool IndicatorTrend::_internal_has_backcolor2nd() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool IndicatorTrend::has_backcolor2nd() const {
+  return _internal_has_backcolor2nd();
+}
+inline void IndicatorTrend::clear_backcolor2nd() {
+  backcolor2nd_ = 0u;
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 IndicatorTrend::_internal_backcolor2nd() const {
+  return backcolor2nd_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 IndicatorTrend::backcolor2nd() const {
+  // @@protoc_insertion_point(field_get:Proto.IndicatorTrend.backColor2nd)
+  return _internal_backcolor2nd();
+}
+inline void IndicatorTrend::_internal_set_backcolor2nd(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _has_bits_[0] |= 0x00000001u;
+  backcolor2nd_ = value;
+}
+inline void IndicatorTrend::set_backcolor2nd(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_backcolor2nd(value);
+  // @@protoc_insertion_point(field_set:Proto.IndicatorTrend.backColor2nd)
+}
+
 // optional int64 redrawinterval = 100;
 inline bool IndicatorTrend::_internal_has_redrawinterval() const {
-  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  bool value = (_has_bits_[0] & 0x00000100u) != 0;
   return value;
 }
 inline bool IndicatorTrend::has_redrawinterval() const {
@@ -39892,7 +40107,7 @@ inline bool IndicatorTrend::has_redrawinterval() const {
 }
 inline void IndicatorTrend::clear_redrawinterval() {
   redrawinterval_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000100u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 IndicatorTrend::_internal_redrawinterval() const {
   return redrawinterval_;
@@ -39902,7 +40117,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 IndicatorTrend::redrawinterval() const {
   return _internal_redrawinterval();
 }
 inline void IndicatorTrend::_internal_set_redrawinterval(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000100u;
   redrawinterval_ = value;
 }
 inline void IndicatorTrend::set_redrawinterval(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -39912,7 +40127,7 @@ inline void IndicatorTrend::set_redrawinterval(::PROTOBUF_NAMESPACE_ID::int64 va
 
 // optional int64 duration = 51;
 inline bool IndicatorTrend::_internal_has_duration() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
   return value;
 }
 inline bool IndicatorTrend::has_duration() const {
@@ -39920,7 +40135,7 @@ inline bool IndicatorTrend::has_duration() const {
 }
 inline void IndicatorTrend::clear_duration() {
   duration_ = PROTOBUF_LONGLONG(0);
-  _has_bits_[0] &= ~0x00000001u;
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 IndicatorTrend::_internal_duration() const {
   return duration_;
@@ -39930,7 +40145,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 IndicatorTrend::duration() const {
   return _internal_duration();
 }
 inline void IndicatorTrend::_internal_set_duration(::PROTOBUF_NAMESPACE_ID::int64 value) {
-  _has_bits_[0] |= 0x00000001u;
+  _has_bits_[0] |= 0x00000002u;
   duration_ = value;
 }
 inline void IndicatorTrend::set_duration(::PROTOBUF_NAMESPACE_ID::int64 value) {

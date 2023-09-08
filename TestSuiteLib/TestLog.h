@@ -1,18 +1,9 @@
 #pragma once
 #include <iostream>
+#include "../UtilsLib/ILogFile.h"
 
 namespace TestSuite
 {
-	class ITestLog
-	{
-	public:
-		virtual ~ITestLog() = default;
-		virtual void writeError(const QString& text, const QString& tag) = 0;
-		virtual void writeWarning(const QString& text, const QString& tag) = 0;
-		virtual void writeMessage(const QString& text, const QString& tag) = 0;
-		virtual void writeText(const QString& text, const QString& tag) = 0;
-	};
-
 	enum class TestLogItemType
 	{
 		Error = 0x0001,
@@ -65,7 +56,7 @@ namespace TestSuite
 		virtual void logItemArrived(const TestLogItem& item) = 0;
 	};
 
-	class TestLog : public ITestLog
+	class TestLog : public ILogFile
 	{
 	public:
 		explicit TestLog(ITestLogOutput* logOutput);
@@ -73,10 +64,11 @@ namespace TestSuite
 		void clear();
 		bool empty() const;
 
-		void writeError(const QString& text, const QString& tag) override;
-		void writeWarning(const QString& text, const QString& tag) override;
-		void writeMessage(const QString& text, const QString& tag) override;
-		void writeText(const QString& text, const QString& tag) override;
+		bool writeAlert(const QString& text, const QString& tag) override;
+		bool writeError(const QString& text, const QString& tag) override;
+		bool writeWarning(const QString& text, const QString& tag) override;
+		bool writeMessage(const QString& text, const QString& tag) override;
+		bool writeText(const QString& text, const QString& tag) override;
 
 		std::vector<TestLogItem> items() const;
 
@@ -90,16 +82,6 @@ namespace TestSuite
 		std::vector<TestLogItem> m_items;
 
 		ITestLogOutput* m_logOutput = nullptr;
-	};
-
-	class TestLogStub : public ITestLog
-	{
-	public:
-		virtual ~TestLogStub() = default;
-		virtual void writeError(const QString& /*text*/, const QString& /*tag*/) override {}
-		virtual void writeWarning(const QString& /*text*/, const QString& /*tag*/) override {}
-		virtual void writeMessage(const QString& /*text*/, const QString& /*tag*/) override {}
-		virtual void writeText(const QString& /*text*/, const QString& /*tag*/) override {}
 	};
 
 }

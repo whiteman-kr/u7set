@@ -351,7 +351,6 @@ namespace CfgFileId
 	inline const QString TUNING_SCHEMAS_DETAILS("TUNING_SCHEMAS_DETAILS");
 	inline const QString TUNING_FILTERS("TUNING_FILTERS");
 	inline const QString TUNING_GLOBALSCRIPT("TUNING_GLOBALSCRIPT");
-	inline const QString TUNING_CONFIGARRIVEDSCRIPT("TUNING_CONFIGARRIVEDSCRIPT");
 
 	inline const QString CLIENT_BEHAVIOR("CLIENT_BEHAVIOR");
 	inline const QString LOGO("LOGO");
@@ -486,6 +485,9 @@ namespace File
 	inline const QString ARCH_INFO_PROTO_BAK = "ArchInfo.proto.bak";
 
 	inline const QString READONLY = "readonly";
+
+	inline static const QString GLOBAL_SCRIPT = "GlobalScript.js";
+	inline static const QString GLOBAL_SCRIPT_FULL_PATH = "$root$/Tests/GlobalScript.js";
 }
 
 namespace Separator

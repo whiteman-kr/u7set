@@ -606,8 +606,10 @@ bool IdeCodeEditor::eventFilter(QObject* obj, QEvent* event)
                 return true;
             }
 
-            if (keyEvent->key() == Qt::Key_Tab && (keyEvent->modifiers() & Qt::ControlModifier))
+            if (keyEvent->key() == Qt::Key_Tab && (keyEvent->modifiers() & Qt::ControlModifier) && 
+                hasSelectedText() == false) // When text is selected, Ctrl+Tab removes tab ident level
             {
+                
                 emit ctrlTabKeyPressed();
                 return true;
             }

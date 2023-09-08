@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../DbLib/DbController.h"
 #include "../ReportLib/Report.h"
 #include "../Builder/SchemasReportGenerator.h"
 

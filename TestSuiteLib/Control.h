@@ -16,6 +16,7 @@ namespace TestSuite
 {
 	using namespace std::literals::chrono_literals;
 
+
 	class TestSuiteUserManager : public ClientLib::TuningUserManager
 	{
 	public:
@@ -29,19 +30,20 @@ namespace TestSuite
 		QString m_password;
 	};
 
+
 	class ControlThread : public QThread
 	{
 		Q_OBJECT
 
 	public:
-		ControlThread(ILogFile* appLog, ITestLog* testLog);
+		ControlThread(ILogFile* appLog, ILogFile* testLog);
 
 	public:
 		void setTestParams(const SoftwareInfo& softwareInfo,
 						   const TestSuiteSettings& settings,
 						   const QStringList& scriptsFiles,		// List of script files for execution, if empty then exec all.
 						   const QString& scriptsPath,			// Load scripts from disk, path to dir for *.js files.
-						   const TestScriptFilter& testsFilter,			// Tests filter
+						   const TestScriptSelection& testsFilter,			// Tests filter
 						   const QString& userName,
 						   const QString& password);
 
@@ -70,14 +72,14 @@ namespace TestSuite
 
 	private:
 		HasLogFile m_appLog;
-		ITestLog* m_testLog = nullptr;
+		ILogFile* m_testLog = nullptr;
 
 		SoftwareInfo m_softwareInfo;
 		TestSuiteSettings m_settings;
 
 		QStringList m_scriptsToRun;		// List of script files for execution, if empty then exec all.
 		QString m_scriptsPath;			// Load scripts from disk, path to dir for *.js files.
-		TestScriptFilter m_testsFilter;	// Tests filter
+		TestScriptSelection m_testsFilter;	// Tests filter
 		QString m_userName;
 		QString m_password;
 
@@ -105,14 +107,14 @@ namespace TestSuite
 		Q_OBJECT
 
 	public:
-		explicit Control(ILogFile* appLog, ITestLog* testLog);
+		explicit Control(ILogFile* appLog, ILogFile* testLog);
 
 	public:
 		bool execute(const SoftwareInfo& softwareInfo,
 					 const TestSuiteSettings& settings,
 					 const QStringList& scriptsFiles,
 					 const QString& scriptsPath,
-					 const TestScriptFilter& testsFilter,
+					 const TestScriptSelection& testsFilter,
 					 const QString& userName,
 					 const QString& password);
 		bool stop();
@@ -128,8 +130,9 @@ namespace TestSuite
 
 	private:
 		ILogFile* m_appLog = nullptr;
-		ITestLog* m_testLog = nullptr;
+		ILogFile* m_testLog = nullptr;
 
 		ControlThread m_controlThread;
+		std::atomic_bool m_stopRequested = false;
 	};
 }

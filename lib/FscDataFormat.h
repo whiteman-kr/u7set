@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QtCore>
+#include <QtTypes>
 
 // --------------------------- FCS Data stream formats ------------------------
 //

@@ -3,8 +3,6 @@
 #include "../lib/PropertyEditor.h"
 #include "PropertyTable.h"
 
-#include "Stable.h"
-
 namespace ExtWidgets
 {
 	//

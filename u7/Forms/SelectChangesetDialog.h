@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../DbLib/DbController.h"
 #include "../DbLib/DbStruct.h"
 
 namespace Ui {

@@ -2,11 +2,6 @@
 #error Do not include this file in the project! Link UtilsLib instead.
 #endif
 
-#include <QDebug>
-#include <QDateTime>
-#include <QDir>
-#include <QStandardPaths>
-#include <QCoreApplication>
 #include "CrashExceptionHandler.h"
 
 #if defined (Q_OS_WIN)

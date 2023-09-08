@@ -21,7 +21,7 @@ namespace TestSuite
 		virtual bool waitForConnection(qint64 timeoutMs) const override;
 		virtual bool writeSignalValue(const QString& appSignalId, const QVariant& value) override;
 
-		virtual bool waitForAllSignalsWritten(qint64 timeoutMs) const override;
+		virtual bool waitForAllSignalsWritten(qint64 timeoutMs, quint64& timeElapsedMs) const override;
 
 	private:
 		TuningSignalManager m_signalManager;

@@ -1,12 +1,13 @@
 #pragma once
 
-#include "../VFrame30/AppSignalController.h"
+#include "../AppSignalLib/IAppSignalManager.h"
+#include "../AppSignalLib/AppSignal.h"
 
 namespace ReportLib
 {
 	//
 	//
-	// ReportAppSignalProvider - this calss is used to provide app signals for drawing schemas, showing and getting signal ids, description, preciosion, etc...
+	// ReportAppSignalProvider - this class is used to provide app signals for drawing schemas, showing and getting signal ids, description, precision, etc...
 	//
 	//
 	class ReportAppSignalProvider final : public IAppSignalManager

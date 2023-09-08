@@ -15,18 +15,18 @@ namespace TestSuite
 		Q_OBJECT
 
 	public:
-		ScriptRunner(TestController& testController, ITestLog& scriptTestLog, ControlStatus& status, QMutex& statusMutex);
+		ScriptRunner(TestController& testController, ILogFile& scriptTestLog, ControlStatus& status, QMutex& statusMutex);
 		virtual ~ScriptRunner();
 
 	public:
 		bool getScriptTestFunctions(const TestScript& script, QStringList& functionsList, QString& errorMsg);
-		bool runScript(const TestScript& script, const TestScriptFilter& filter);
+		bool runScript(const TestScript& script, const TestScript* globalScript, const TestScriptSelection& filter);
 
 	signals:
 		void testFinished(QString scriptFileName, QString testFunction, bool result);
 
 	private:
-		bool evaluateScript(const TestScript& script, const TestScriptFilter& filter, QStringList& functionsList, QString& errorMsg);
+		bool evaluateScript(const TestScript& script, const TestScriptSelection& filter, QStringList& functionsList, QString& errorMsg);
 		bool runScriptFunction(const QString& functionName);
 
 	private:

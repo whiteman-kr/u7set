@@ -131,22 +131,6 @@ bool TuningConfigController::updateConfiguration(const ClientLib::ConfigurationI
 		}
 	}
 
-	// Get file TUNING_CONFIGARRIVEDSCRIPT
-	//
-	{
-		QByteArray data;
-		bool fok = getFileBlockedById(CfgFileId::TUNING_CONFIGARRIVEDSCRIPT, &data, nullptr);
-
-		if (fok == true)
-		{
-			readConfig.scriptConfigArrived = QString{data};
-		}
-		else
-		{
-			readConfig.scriptConfigArrived.clear();
-		}
-	}
-
 	// Check if some files were updated
 	//
 	bool uiFilesUpdated = false;

@@ -20,7 +20,7 @@ namespace TestSuite
 
 	bool TestSuite::execute(const QStringList& scriptsFiles,		// List of script files for execution, if empty then exec all.
 							const QString& scriptsPath,				// Load scripts from disk, path to dir for *.js files.
-							const TestScriptFilter& testsFilter,				// Tests filter
+							const TestScriptSelection& testsFilter,				// Tests filter
 							const QString& userName,
 							const QString& password)
 	{

@@ -1,7 +1,6 @@
 #include "LogicModulesInfo.h"
 #include "../lib/ConstStrings.h"
-#include <QFile>
-#include <QFileInfo>
+
 
 // -----------------------------------------------------------------------------------
 //

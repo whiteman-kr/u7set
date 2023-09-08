@@ -1,5 +1,4 @@
 #include "SvgEditor.h"
-#include <QSvgRenderer>
 #include "Settings.h"
 
 SvgWidget::SvgWidget(QWidget* parent)

@@ -6,9 +6,7 @@
 
 class MonitorSchemaManager extends VFrame30::SchemaManager 
 {
-	
 	MonitorConfigController* : m_configController
-	QString : m_onConfigurationArrivedScript
 
 	RtTrendSchema : m_rtTrendSchemas
 }

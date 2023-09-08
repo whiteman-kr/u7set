@@ -12,7 +12,7 @@ namespace ClientLib
 	{
 		Q_ASSERT(m_logFile);
 		m_logFile->writeMessage(QString("TrendRtConn::TrendRtConn, server %1 (%2), address %3.")
-								.arg(m_server.equipmentId, m_server.shortenId, m_server.realtimeAddress.toString()));
+									.arg(m_server.equipmentId, m_server.shortenId, m_server.realtimeAddress.toString()));
 
 		// --
 		//
@@ -73,13 +73,13 @@ namespace ClientLib
 
 	RtDataProvider::~RtDataProvider()
 	{
-		Q_ASSERT(QThread::currentThreadId() == this->thread()->currentThreadId());
+		Q_ASSERT(QThread::currentThread() == this->thread());
 		return;
 	}
 
 	void RtDataProvider::clear()
 	{
-		Q_ASSERT(QThread::currentThreadId() == this->thread()->currentThreadId());
+		Q_ASSERT(QThread::currentThread() == this->thread());
 
 		m_createdConnectionsServers.clear();
 		m_connections.clear();
@@ -90,7 +90,7 @@ namespace ClientLib
 	void RtDataProvider::createConnections(const SoftwareInfo& softwareInfo,
 										   const std::vector<SoftwareEndpoint::AppDataService>& appDataServices)
 	{
-		Q_ASSERT(QThread::currentThreadId() == this->thread()->currentThreadId());
+		Q_ASSERT(QThread::currentThread() == this->thread());
 
 		clear();
 
@@ -111,10 +111,10 @@ namespace ClientLib
 	void RtDataProvider::updateConnections(const SoftwareInfo& softwareInfo,
 										   const std::vector<SoftwareEndpoint::AppDataService>& appDataServices)
 	{
-		Q_ASSERT(QThread::currentThreadId() == this->thread()->currentThreadId());
+		Q_ASSERT(QThread::currentThread() == this->thread());
 
 		// New configuration arrived, server configuration could be changed,
-		// if so, restart comminications threads.
+		// if so, restart communications threads.
 		//
 		m_logFile->writeMessage("RtTrends: New configuration arrived.");
 
@@ -129,11 +129,11 @@ namespace ClientLib
 
 	bool RtDataProvider::setData(E::RtTrendsSamplePeriod samplePeriod, const QStringList& trendSignals)
 	{
-		Q_ASSERT(QThread::currentThreadId() == this->thread()->currentThreadId());
+		Q_ASSERT(QThread::currentThread() == this->thread());
 
 		for (auto& conn : m_connections)
 		{
-			// Add all signals to conneccvtions, because posiible the situaltion when signal were not downloaded yet from the server, and then
+			// Add all signals to connections, because possible the situation when signal were not downloaded yet from the server, and then
 			// m_signalDataServer.dataServiceHasSignal cannot provide valid data, so, we set all signals and
 			// in connection each time use only right signals
 			//
@@ -145,7 +145,7 @@ namespace ClientLib
 
 	void RtDataProvider::setSamplePeriod(E::RtTrendsSamplePeriod samplePeriod)
 	{
-		Q_ASSERT(QThread::currentThreadId() == this->thread()->currentThreadId());
+		Q_ASSERT(QThread::currentThread() == this->thread());
 
 		for (auto& conn : m_connections)
 		{
@@ -157,13 +157,13 @@ namespace ClientLib
 
 	size_t RtDataProvider::size() const
 	{
-		Q_ASSERT(QThread::currentThreadId() == this->thread()->currentThreadId());
+		Q_ASSERT(QThread::currentThread() == this->thread());
 		return m_connections.size();
 	}
 
 	RtTrendTcpClient::Stat RtDataProvider::statistics() const
 	{
-		Q_ASSERT(QThread::currentThreadId() == this->thread()->currentThreadId());
+		Q_ASSERT(QThread::currentThread() == this->thread());
 
 		RtTrendTcpClient::Stat result{};
 
@@ -189,4 +189,20 @@ namespace ClientLib
 
 		return result;
 	}
-}
+
+	bool RtDataProvider::allConnected(std::chrono::milliseconds timeout) const
+	{
+		Q_ASSERT(QThread::currentThread() == this->thread());
+
+		QDeadlineTimer timer{timeout};
+
+		auto stats = statistics();
+		while (stats.isConnected != size() && timer.hasExpired() == false)
+		{
+			QThread::msleep(timer.remainingTime() > 50 ? 50 : timer.remainingTime());
+			stats = statistics();
+		}
+
+		return stats.isConnected == size();
+	}
+} // namespace ClientLib

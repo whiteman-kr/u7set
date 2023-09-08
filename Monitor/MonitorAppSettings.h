@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../OnlineLib/SocketIO.h"
-#include "MonitorSignalSnapshot.h"
 #include "../lib/Ui/DialogSignalSearch.h"
+#include "../VFrame30/ClientSchemaWidget.h"
 
 class MonitorAppSettings
 {

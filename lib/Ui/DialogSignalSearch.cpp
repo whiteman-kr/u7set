@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "DialogSignalSearch.h"
 
 SignalSearchSorter::SignalSearchSorter(std::vector<AppSignalParam>* appSignalParamVec):

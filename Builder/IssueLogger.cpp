@@ -2390,18 +2390,18 @@ namespace Builder
 	/// Description:
 	///		UFB Schema has distinct LmDescriptionFile from LogicSchema, UFB Item %1, UFB Schema %2, LogicSchema %3, UFBSchema LmDescriptionFile %4, LogicSchema LmDescriptionFile %5.
 	///
-	void IssueLogger::errALP4019(QString schema, QString schemaItem, QString ufbElement, QUuid itemUuid, QString ufbLmDescriptionFile, QString schemaLmDecriptionFile)
+	void IssueLogger::errALP4019(QString schema, QString schemaItem, QString ufbElement, QUuid itemUuid, QString ufbLmDescriptionFile, QString schemaLmDescriptionFile)
 	{
 		addItemsIssues(OutputMessageLevel::Error, 4019, itemUuid, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4019,
-				  tr("UFB Schema has disctinct LmDescriptionFile from LogicSchema, UFB Item %1, UFB Schema %2, LogicSchema %3, UFBSchema LmDescriptionFile %4, LogicSchema LmDescriptionFile %5.")
+				  tr("UFB Schema has distinct LmDescriptionFile from LogicSchema, UFB Item %1, UFB Schema %2, LogicSchema %3, UFBSchema LmDescriptionFile %4, LogicSchema LmDescriptionFile %5.")
 				  .arg(schemaItem)
 				  .arg(ufbElement)
 				  .arg(schema)
 				  .arg(ufbLmDescriptionFile)
-				  .arg(schemaLmDecriptionFile));
+				  .arg(schemaLmDescriptionFile));
 	}
 
 	/// IssueCode: ALP4020
@@ -7530,6 +7530,52 @@ namespace Builder
 							arg(appSignalID1).arg(appSignalID2).arg(QString::number(h, 16).toUpper()));
 	}
 
+	/// IssueCode: ALC5199
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   AFB '%1' parameters calculation result out of Int32 range (Schema %2).
+	///
+	/// Parameters:
+	///		%1 AFB caption
+	///		%2 SchemaID
+	///
+	/// Description:
+	///		 AFB parameters calculation result out of Int32 range. Check AFB parameters.
+	///
+	void IssueLogger::errALC5199(QString afbCaption, QUuid itemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 5199, itemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5199,
+				  QString(tr("AFB '%1' parameters calculation result out of Int32 range (Schema %2).").
+							arg(afbCaption).arg(schemaID)));
+	}
+
+	/// IssueCode: ALC5200
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   AFB '%1' parameters calculation result out of Float32 range (Schema %2).
+	///
+	/// Parameters:
+	///		%1 AFB caption
+	///		%2 SchemaID
+	///
+	/// Description:
+	///		 AFB parameters calculation result out of Float32 range. Check AFB parameters.
+	///
+	void IssueLogger::errALC5200(QString afbCaption, QUuid itemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 5200, itemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5200,
+				  QString(tr("AFB '%1' parameters calculation result out of Float32 range (Schema %2).").
+							arg(afbCaption).arg(schemaID)));
+	}
+
 	/// IssueCode: ALC5800
 	///
 	/// IssueType: Warning
@@ -8742,6 +8788,115 @@ namespace Builder
 					.arg(startSchemaId)
 					.arg(monitorId)
 					.arg(profile));
+	}
+
+	/// IssueCode: EQP6300
+	///
+	/// IssueType: Error
+	///
+	/// Title: Script evaluation error: file: %1, line: %2, message: %3.
+	///
+	/// Parameters:
+	///		%1 File name or file identifier
+	///		%2 Line number
+	///		%3 Evaluation error message
+	///
+	/// Description:
+	///		Failed script file evaluation.
+	///
+	void IssueLogger::errEQP6300(QString fileName, int lineNumber, QString message)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6300,
+				  tr("Script evaluation error: file: %1, line: %2, message: %3.")
+					  .arg(fileName)
+					  .arg(lineNumber)
+					  .arg(message));
+	}
+
+	/// IssueCode: EQP6301
+	///
+	/// IssueType: Error
+	///
+	/// Title: Script property %1.%2 evaluation error, line: %3, message: %4.
+	///
+	/// Parameters:
+	///		%1 EquipmentID
+	///		%2 Property name
+	///		%3 Line number
+	///		%4 Evaluation error message
+	///
+	/// Description:
+	///		Failed to evaluate script property for the equipment.
+	///
+	void IssueLogger::errEQP6301(QString equipmentId, QString property, int lineNumber, QString message)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6301,
+				  tr("Script property %1.%2 evaluation error, line: %3, message: %4.")
+				  .arg(equipmentId)
+				  .arg(property)
+				  .arg(lineNumber)
+				  .arg(message));
+	}
+
+
+	/// IssueCode: EQP6302
+	///
+	/// IssueType: Error
+	///
+	/// Title: Schema %1 script property %2 evaluation error, line: %3, message: %4.
+	///
+	/// Parameters:
+	///		%1 SchemaID
+	///		%2 Property name
+	///		%3 Line number
+	///		%4 Evaluation error message
+	///
+	/// Description:
+	///		Failed to evaluate schema script property for the equipment.
+	///
+	void IssueLogger::errEQP6302(QString schemaId, QString property, int lineNumber, QString message)
+	{
+		addSchemaIssue(OutputMessageLevel::Error, 6302, schemaId);
+
+		LOG_ERROR(IssueType::Equipment,
+				  6302,
+				  tr("Schema %1 script property %2 evaluation error, line: %3, message: %4")
+					  .arg(schemaId)
+					  .arg(property)
+					  .arg(lineNumber)
+					  .arg(message));
+	}
+
+	/// IssueCode: EQP6303
+	///
+	/// IssueType: Error
+	///
+	/// Title: Schema item %1 on schema %2, script property %3 evaluation error, line: %4, message: %5.
+	///
+	/// Parameters:
+	///		%1 Schema item
+	///		%2 SchemaID
+	///		%3 Property name
+	///		%4 Line number
+	///		%5 Evaluation error message
+	///
+	/// Description:
+	///		Failed to evaluate script property of the schema item.
+	///
+	void IssueLogger::errEQP6303(QString schemaId, QString schemaItem, QUuid itemUuid, QString property, int lineNumber, QString message)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 6303, itemUuid, schemaId);
+
+		LOG_ERROR(IssueType::Equipment,
+				  6303,
+				  tr("Schema item %1 on schema %2, script property %3 evaluation error, line: %4, message: %5.")
+				  .arg(schemaItem)
+				  .arg(schemaId)
+				  .arg(property)
+				  .arg(lineNumber)
+				  .arg(message));
 	}
 
 	// --

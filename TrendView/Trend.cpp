@@ -189,8 +189,8 @@ namespace TrendLib
 
 		// Specific drawing for analog signals
 		//
-		Q_ASSERT(drawParam.viewMode() == TrendViewMode::Separated ||
-				 drawParam.viewMode() == TrendViewMode::Overlapped);
+		Q_ASSERT(drawParam.viewMode() == E::TrendViewMode::Separated ||
+				 drawParam.viewMode() == E::TrendViewMode::Overlapped);
 
 		if (analogs.empty() == true &&
 			lastDiscreteRect.isEmpty() == false)
@@ -204,7 +204,7 @@ namespace TrendLib
 			painter->fillRect(blankArea, signalBackColor);
 		}
 
-		if (drawParam.viewMode() == TrendViewMode::Separated  &&
+		if (drawParam.viewMode() == E::TrendViewMode::Separated  &&
 			analogs.empty() == false)
 		{
 			for (const TrendSignalParam& ts : analogs)
@@ -220,7 +220,7 @@ namespace TrendLib
 			}
 		}
 
-		if (drawParam.viewMode() == TrendViewMode::Overlapped &&
+		if (drawParam.viewMode() == E::TrendViewMode::Overlapped &&
 			analogs.empty() == false)
 		{
 			QRectF signalRect = analogs.front().tempDrawRect();
@@ -439,10 +439,10 @@ namespace TrendLib
 
 		// Draw ANALOG signal id, caption and scale for TrendView::Separated mode
 		//
-		Q_ASSERT(drawParam.viewMode() == TrendViewMode::Separated ||
-				 drawParam.viewMode() == TrendViewMode::Overlapped);
+		Q_ASSERT(drawParam.viewMode() == E::TrendViewMode::Separated ||
+				 drawParam.viewMode() == E::TrendViewMode::Overlapped);
 
-		if (drawParam.viewMode() == TrendViewMode::Separated  &&
+		if (drawParam.viewMode() == E::TrendViewMode::Separated  &&
 			analogs.empty() == false)
 		{
 			for (const TrendSignalParam& ts : analogs)
@@ -506,7 +506,7 @@ namespace TrendLib
 
 		// Draw ANALOG signal id, caption and scale for TrendView::Overlapped mode
 		//
-		if (drawParam.viewMode() == TrendViewMode::Overlapped && analogs.empty() == false)
+		if (drawParam.viewMode() == E::TrendViewMode::Overlapped && analogs.empty() == false)
 		{
 			QRectF signalRect = analogs.front().tempDrawRect();
 
@@ -1898,7 +1898,7 @@ namespace TrendLib
 			ts.setTempDrawRect(signalRect);
 		}
 
-		if (drawParam.viewMode() == TrendViewMode::Separated &&
+		if (drawParam.viewMode() == E::TrendViewMode::Separated &&
 			analogs->empty() == false)
 		{
 			const double analogSignalsHeight = qMax((insideRect.bottom() - y) / analogs->size(), discreteSignalHeight);
@@ -1924,7 +1924,7 @@ namespace TrendLib
 			}
 		}
 
-		if (drawParam.viewMode() == TrendViewMode::Overlapped  &&
+		if (drawParam.viewMode() == E::TrendViewMode::Overlapped  &&
 			analogs->empty() == false)
 		{
 			const double analogSignalsHeight = qMax(insideRect.bottom() - y, discreteSignalHeight);
@@ -1948,8 +1948,8 @@ namespace TrendLib
 			}
 		}
 
-		Q_ASSERT(drawParam.viewMode() == TrendViewMode::Separated ||
-				 drawParam.viewMode() == TrendViewMode::Overlapped);
+		Q_ASSERT(drawParam.viewMode() == E::TrendViewMode::Separated ||
+				 drawParam.viewMode() == E::TrendViewMode::Overlapped);
 
 		return;
 	}
@@ -1990,7 +1990,7 @@ namespace TrendLib
 		//
 		QRectF insideRect;
 
-		if (drawParam.viewMode() == TrendViewMode::Separated)
+		if (drawParam.viewMode() == E::TrendViewMode::Separated)
 		{
 			insideRect.setLeft(laneRect.left() + 3.0 / 4.0);
 			insideRect.setRight(laneRect.right() - 1.0 / 4.0);
@@ -1998,7 +1998,7 @@ namespace TrendLib
 			insideRect.setBottom(laneRect.bottom() - 3.0 / 8.0);
 		}
 
-		if (drawParam.viewMode() == TrendViewMode::Overlapped)
+		if (drawParam.viewMode() == E::TrendViewMode::Overlapped)
 		{
 			if (analogSignalCount < 2)	// 0 or 1
 			{

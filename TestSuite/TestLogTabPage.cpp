@@ -29,10 +29,10 @@ TestLogTabPage::TestLogTabPage(TestSuite::TestLog& testLog, TestSuiteTestLogOutp
 	m_outputWidget->setStyleSheet(selectionColor);
 
 	m_typeCombo = new QComboBox();
-	m_typeCombo->addItem("All Messages",	static_cast<int>(TestSuite::TestLogItemType::All));
-	m_typeCombo->addItem("Errors&Warnings",	static_cast<int>(TestSuite::TestLogItemType::Error) | static_cast<int>(TestSuite::TestLogItemType::Warning));
-	m_typeCombo->addItem("Errors",			static_cast<int>(TestSuite::TestLogItemType::Error));
-	m_typeCombo->addItem("Warnings",		static_cast<int>(TestSuite::TestLogItemType::Warning));
+	m_typeCombo->addItem(tr("All Messages"),	static_cast<int>(TestSuite::TestLogItemType::All));
+	m_typeCombo->addItem(tr("Errors&Warnings"),	static_cast<int>(TestSuite::TestLogItemType::Error) | static_cast<int>(TestSuite::TestLogItemType::Warning));
+	m_typeCombo->addItem(tr("Errors"),			static_cast<int>(TestSuite::TestLogItemType::Error));
+	m_typeCombo->addItem(tr("Warnings"),		static_cast<int>(TestSuite::TestLogItemType::Warning));
 	connect(m_typeCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TestLogTabPage::slot_typeChanged);
 
 	m_prevIssueButton = new QPushButton(tr("Prev Issue <Shift+F6>"));
@@ -42,7 +42,7 @@ TestLogTabPage::TestLogTabPage(TestSuite::TestLog& testLog, TestSuiteTestLogOutp
 	m_nextIssueButton->setShortcut(Qt::Key_F6);
 
 	m_findTextEdit = new QLineEdit();
-	m_findTextEdit->setPlaceholderText("Find Text");
+	m_findTextEdit->setPlaceholderText(tr("Find Text"));
 	m_findTextEdit->setMinimumWidth(300);
 
 	QCompleter* searchCompleter = new QCompleter(theSettings.outputSearchCompleter(), this);
@@ -237,20 +237,20 @@ void TestLogTabPage::search()
 
 	// Update completer
 	//
-	/*
-	if (theSettings.buildSearchCompleter().contains(searchText, Qt::CaseInsensitive) == false)
+	
+	if (theSettings.outputSearchCompleter().contains(searchText, Qt::CaseInsensitive) == false)
 	{
-		theSettings.buildSearchCompleter() << searchText;
+		theSettings.outputSearchCompleter() << searchText;
 
 		QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_findTextEdit->completer()->model());
 		assert(completerModel);
 
 		if (completerModel != nullptr)
 		{
-			completerModel->setStringList(theSettings.buildSearchCompleter());
+			completerModel->setStringList(theSettings.outputSearchCompleter());
 		}
 	}
-	*/
+	
 
 	// Find
 	//

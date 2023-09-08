@@ -1,6 +1,5 @@
 #include "../Forms/ProjectPropertiesForm.h"
 #include "../../lib/PropertyEditorDialog.h"
-#include <memory>
 
 //
 // ProjectPropertiesForm

@@ -7,6 +7,7 @@
 #include <QPlainTextEdit>
 #include <QSyntaxHighlighter>
 #include <QRegularExpression>
+#include <stack>
 
 class Highlighter;
 
@@ -86,13 +87,27 @@ public:
     // Utility functions
     //
     void lineNumberAreaPaintEvent(QPaintEvent *event);
+
+protected:
+    bool eventFilter(QObject* object, QEvent* event) override;
+
 private:
     void keyPressEvent( QKeyEvent* e) override;
     void resizeEvent(QResizeEvent* event) override;
     void contextMenuEvent (QContextMenuEvent *e) override;
 	void paintEvent(QPaintEvent *event) override;
 
+    bool processAutoIdent(QKeyEvent* e);
+    bool processPrefix(const QString& prefix, int operationCode);
+
 	void updateHighlighter();
+    void highlightCurrentLine();
+
+    // Cursor history functions
+    //
+    void saveCursorHistory();
+    void goBack();
+    void goForward();
 
 signals:
     void customContextMenuAboutToBeShown();
@@ -101,7 +116,7 @@ private slots:
     void updateLineNumberAreaWidth();
     void updateLineNumberArea(const QRect &rect, int dy);
 
-    void highlightCurrentLine();
+    void onCursorPositionChanged();
 
 private:
     QWidget* m_lineNumberArea = nullptr;
@@ -126,9 +141,16 @@ private:
     FindContext m_findContext;
 
     QString m_tabSymbol;
+    int m_tabWidth = 4;
 
 	int m_startPosPrev = 0;
 	int m_endPosPrev = 0;
+
+    // Cursor position history
+    //
+    int m_lastCursorPosition = 0;
+    std::stack<int> m_cursorBackwardHistory;
+    std::stack<int> m_cursorForwardHistory;
 };
 
 class LineNumberArea : public QWidget

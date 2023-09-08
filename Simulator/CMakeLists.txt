@@ -77,6 +77,8 @@ qt_add_library(${TARGET} STATIC
 	SimSoftware.h
 	SimSubsystem.cpp
 	SimSubsystem.h
+	SimTestObserver.cpp
+	SimTestObserver.h
 	SimTuningLanInterface.cpp
 	SimTuningLanInterface.h
 	SimTuningRecord.cpp
@@ -92,29 +94,34 @@ qt_add_library(${TARGET} STATIC
 )
 
 target_precompile_headers(${TARGET} PUBLIC
+	<algorithm>
+	<array>
 	<bit>
-	<memory>
+	<cfenv>
+	<chrono>
+	<cmath>
+	<cstring>
+	<deque>
+	<filesystem>
 	<map>
-	<unordered_map>
+	<memory>
 	<optional>
 	<queue>
-	<array>
+	<ranges>
+	<unordered_map>
 	<vector>
-	<queue>
-	<algorithm>
-	<cstring>
-	<filesystem>
 
-	<QtCore>
 	<QtQml>
 	<QtNetwork>
 	<QtConcurrent>
 	<QtXml>
 	<QVector>
+
+	"../AppSignalLib/AppSignalParam.h"
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Xml Qt6::Qml Qt6::Core Qt6::Concurrent Qt6::Network)
-target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib AppSignalLib HardwareLib OnlineLib TrendView)
+target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib AppSignalLib HardwareLib OnlineLib ClientLib TrendView)
 
 target_compile_definitions(${TARGET} PRIVATE SIMULATOR_LIBRARY)
 target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

@@ -3,7 +3,6 @@
 #endif
 
 #include "OutputLog.h"
-#include <cassert>
 
 
 OutputLogItem::OutputLogItem(int messageNo) :

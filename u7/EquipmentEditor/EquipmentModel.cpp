@@ -1,5 +1,4 @@
 #include "EquipmentModel.h"
-#include "../../DbLib/DbController.h"
 #include "../../lib/StandardColors.h"
 #include "../CheckInDialog.h"
 

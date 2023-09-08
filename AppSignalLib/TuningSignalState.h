@@ -2,7 +2,11 @@
 
 #include "AppSignalParam.h"
 #include "../CommonLib/Hash.h"
-#include "../Proto/network.pb.h"
+
+namespace Network
+{
+	class TuningSignalState;
+}
 
 union TuningSignalStateFlags
 {

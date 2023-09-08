@@ -3,6 +3,7 @@
 #include "FblItemRect.h"
 #include "DrawParam.h"
 #include "../AppSignalLib/AppSignalParam.h"
+#include "../AppSignalLib/AppSignalState.h"
 
 namespace VFrame30
 {
@@ -76,7 +77,7 @@ namespace VFrame30
 
 		/** \brief Cell column count. May differ from <b>columnCount</b> as column can have several cells.
 		To get cell data type use function \ref cellData, returns \ref E::ColumnData "ColumnData".
-		To get AppSignaID associated with cell use function \ref cellAppSignalId.
+		To get AppSignaID associated with cell use function \ref cellAppSignalID.
 		*/
 		Q_PROPERTY(int cellColumnCount READ cellColumnCount )
 

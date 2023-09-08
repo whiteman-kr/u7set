@@ -215,6 +215,11 @@ namespace ClientLib
 		return;
 	}
 
+	bool TuningTcpClient::signalStatesLoaded() const
+	{
+		return m_signalStatesLoaded.load();
+	}
+	
 	void TuningTcpClient::onClientThreadStarted()
 	{
 		return;
@@ -564,6 +569,7 @@ namespace ClientLib
 				m_signalHashesSet.insert(hash);
 			}
 
+			m_signalStatesSet.clear();
 		}
 
 		emit tuningSourcesInfoArrived();
@@ -978,6 +984,17 @@ namespace ClientLib
 				{
 					continue;
 				}
+
+				if (m_signalStatesSet.contains(arrivedStates.back().hash()) == false)
+				{
+					m_signalStatesSet.insert(arrivedStates.back().hash());	// Mark signal as received at least once
+
+					QReadLocker l(&m_signalHashesLock);
+					if (m_signalStatesSet.size() == m_signalHashes.size())
+					{
+						m_signalStatesLoaded.store(true);	// Notify that states of all signals are received
+					}
+				}
 			}
 
 			m_signalUpdater.setStates(arrivedStates, m_tuningServiceHash);
@@ -1153,6 +1170,17 @@ namespace ClientLib
 			if (processTuningSignalStateMessage(stateMessage, arrivedStates) == false)
 			{
 				continue;
+			}
+
+			if (m_signalStatesSet.contains(arrivedStates.back().hash()) == false)
+			{
+				m_signalStatesSet.insert(arrivedStates.back().hash());	// Mark signal as received at least once
+
+				QReadLocker l(&m_signalHashesLock);
+				if (m_signalStatesSet.size() == m_signalHashes.size())
+				{
+					m_signalStatesLoaded.store(true);	// Notify that states of all signals are received
+				}
 			}
 		}
 

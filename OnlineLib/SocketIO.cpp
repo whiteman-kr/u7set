@@ -3,7 +3,6 @@
 #endif
 
 #include "SocketIO.h"
-#include <cassert>
 
 
 

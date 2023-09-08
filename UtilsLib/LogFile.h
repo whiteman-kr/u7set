@@ -350,11 +350,11 @@ namespace Log
 		LogFile(const QString& logName, const QString& path = QString(), int maxFileSize = 1048576, int maxFilesCount = 64, bool addAppInfoOnStart = true);
 		virtual ~LogFile();
 
-		virtual bool writeMessage(const QString& text) override;
-		virtual bool writeAlert(const QString& text) override;
-		virtual bool writeError(const QString& text) override;
-		virtual bool writeWarning(const QString& text) override;
-		virtual bool writeText(const QString& text) override;
+		virtual bool writeMessage(const QString& text, const QString& tag = {}) override;
+		virtual bool writeAlert(const QString& text, const QString& tag = {}) override;
+		virtual bool writeError(const QString& text, const QString& tag = {}) override;
+		virtual bool writeWarning(const QString& text, const QString& tag = {}) override;
+		virtual bool writeText(const QString& text, const QString& tag = {}) override;
 
 		bool writeArray(const QStringList& textArray);
 		bool write(MessageType type, const QString& text);

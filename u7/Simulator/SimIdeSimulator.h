@@ -13,14 +13,19 @@ public:
 	virtual ~SimIdeSimulator();
 
 public:
-	bool load(QString buildPath);	// Overload from Sim::Simulator
-	void clear();	// Overload from Sim::Simulator
+	bool load(QString buildPath); // Overload from Sim::Simulator
+	void clear();                 // Overload from Sim::Simulator
 
 	const VFrame30::SchemaDetailsSet& schemaDetails() const;
 	std::vector<VFrame30::SchemaDetails> schemasForLm(QString equipmentId) const;
 
 signals:
 	void schemaDetailsUpdated();
+
+	// Sim::Simulator has signal projectUpdated() too, but we need to override it for SimIdeSimulator, as in load(...)
+	// there is restoring of tuning/arming key, and we need to receive this signal AFTER these keys were restored.
+	//
+	void projectUpdated();
 
 protected:
 	bool loadSchemaDetails(QString buildPath);

@@ -2,7 +2,7 @@
 
 namespace TestSuite
 {
-	ScriptTestLog::ScriptTestLog(ITestLog& testLog):
+	ScriptTestLog::ScriptTestLog(ILogFile& testLog):
 		m_testLog(testLog)
 	{
 	}

@@ -1,8 +1,4 @@
 #include "MeasureThread.h"
-
-#include <cassert>
-#include <QTime>
-
 #include "UnitsConvertor.h"
 #include "Options.h"
 

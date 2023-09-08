@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "DiagTabPage.h"
 
 DiagTabPage::DiagTabPage(QWidget *parent)

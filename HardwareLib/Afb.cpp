@@ -1,6 +1,3 @@
-#include <QDomElement>
-#include <QXmlStreamReader>
-#include "../Proto/serialization.pb.h"
 #include "Afb.h"
 
 namespace Afb

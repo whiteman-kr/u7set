@@ -1,5 +1,7 @@
 #pragma once
 
+#include <chrono>
+
 namespace TestSuite
 {
 	enum class ControlState
@@ -16,10 +18,6 @@ namespace TestSuite
 	{
 		ControlStatus() = default;
 
-		//std::chrono::microseconds m_startTime = 0us;	// When testing was started, it's computer time
-		//std::chrono::microseconds m_currentTime = 0us;	// Current time in testing
-
-		//std::chrono::microseconds m_duration{0};
 		ControlState m_state = ControlState::Stop;
 
 		QString m_scriptFile;
@@ -29,6 +27,21 @@ namespace TestSuite
 		QString m_testFunction;
 		qsizetype m_testIndex{0};
 		qsizetype m_testCount{0};
+
+	private:
+		std::chrono::milliseconds m_startTime{0};	// Test start time, default value is 0
+
+	public:
+		void setStartTime()
+		{
+			m_startTime = duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+		}
+
+		std::chrono::milliseconds duration()
+		{
+			std::chrono::milliseconds m_currentTime = duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+			return m_currentTime - m_startTime;
+		}
 
 		void reset()
 		{
@@ -41,6 +54,7 @@ namespace TestSuite
 			m_testFunction.clear();
 			m_testIndex = 0;
 			m_testCount = 0;
+
 		}
 	};
 }

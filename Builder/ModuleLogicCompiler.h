@@ -110,7 +110,7 @@ namespace Builder
 
 	private:
 
-		struct FbScal
+		struct FbConv
 		{
 			QString caption;
 
@@ -122,7 +122,10 @@ namespace Builder
 			int y2ParamIndex = -1;
 
 			int inputSignalIndex = -1;
+			int inputSignalDataSize = -1;
+
 			int outputSignalIndex = -1;
+			int outputSignalDataSize = -1;
 		};
 
 		struct BusProcessingStepInfo
@@ -1011,14 +1014,14 @@ namespace Builder
 
 		ResourcesUsageInfo m_resourcesUsageInfo;
 
-		QVector<FbScal> m_fbScal;
+		std::map<QString, FbConv> m_fbConv;								// AFB caption => FbConv structure
 
-		static const int FB_SCALE_16UI_FP_INDEX = 0;
-		static const int FB_SCALE_16UI_SI_INDEX = 1;
-		static const int FB_SCALE_FP_16UI_INDEX = 2;
-		static const int FB_SCALE_SI_16UI_INDEX = 3;
-		static const int FB_TCONV_FP_SI_INDEX = 4;
-		static const int FB_TCONV_SI_FP_INDEX = 5;
+		static const QString FB_SCALE_16UI_FP;
+		static const QString FB_SCALE_16UI_SI;
+		static const QString FB_SCALE_FP_16UI;
+		static const QString FB_SCALE_SI_16UI;
+		static const QString FB_TCONV_FP_SI;
+		static const QString FB_TCONV_SI_FP;
 
 		static const char* INPUT_CONTROLLER_SUFFIX;
 		static const char* OUTPUT_CONTROLLER_SUFFIX;

@@ -1,8 +1,6 @@
 #include "MetrologyMainWindow.h"
 #include "Options.h"
 
-#include "../Proto/ProtoSerialization.h"
-
 #if __has_include("../gitlabci_version.h")
 #	include "../gitlabci_version.h"
 #endif

@@ -2,9 +2,9 @@
 #include <map>
 #include <vector>
 
-#include <chrono>
-#include "../CommonLib/Hash.h"
 #include <QElapsedTimer>
+
+#include "../CommonLib/Hash.h"
 
 namespace ClientLib
 {

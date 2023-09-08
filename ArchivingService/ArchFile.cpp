@@ -1,5 +1,7 @@
 #include "../lib/ConstStrings.h"
 
+#include <QDirIterator>
+
 #include "ArchFile.h"
 #include "ArchWriterThread.h"
 #include "BinSearch.h"

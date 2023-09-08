@@ -35,6 +35,67 @@ qt_add_library(${TARGET} STATIC
 	Subsystem.h
 )
 
+target_precompile_headers(${TARGET} PUBLIC
+	# C++ includes
+	#
+	<algorithm>
+	<array>
+	<atomic>
+	<cassert>
+	<cmath>
+	<condition_variable>
+	<cstdint>
+	<cstdlib>
+	<functional>
+	<iostream>
+	<limits>
+	<list>
+	<map>
+	<memory>
+	<optional>
+	<queue>
+	<set>
+	<type_traits>
+	<unordered_map>
+	<utility>
+	<vector>
+
+	# Qt includes
+	#
+	<QBitArray>
+	<QDate>
+	<QDebug>
+	<QDomElement>
+	<QFile>
+	<QFileInfo>
+	<QFuture>
+	<QHash>
+	<QHostAddress>
+	<QJSEngine>
+	<QJsonArray>
+	<QJsonDocument>
+	<QJsonObject>
+	<QJsonValue>
+	<QMap>
+	<QMetaObject>
+	<QMetaProperty>
+	<QObject>
+	<QQmlEngine>
+	<QtEndian>
+	<QTime>
+	<QUuid>
+	<QXmlStreamReader>
+	<QXmlStreamWriter>
+
+	<QtConcurrent>
+
+	# Project includes
+	#
+	"../Proto/ProtoSerialization.h"
+	"../Proto/serialization.pb.h"
+	"../Proto/network.pb.h"
+)
+
 target_link_libraries(${TARGET} PUBLIC Qt6::Core Qt6::Network Qt6::Xml Qt6::Concurrent Qt6::Qml)
 target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib)
 

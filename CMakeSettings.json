@@ -1,37 +1,73 @@
 ﻿{
   "configurations": [
     {
-      "name": "x64-Debug",
-      "generator": "Ninja",
-      "configurationType": "Debug",
-      "inheritEnvironments": [ "msvc_x64_x64" ],
-      "buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${configurationType}",
-      "installRoot": "${projectDir}\\out\\install\\${name}",
-      "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.5.2\\msvc2019_64",
-      "buildCommandArgs": "",
-      "ctestCommandArgs": ""
+        "name": "Debug",
+        "generator": "Ninja",
+        "configurationType": "Debug",
+        "inheritEnvironments": [ "msvc_x64_x64" ],
+        "buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}",
+        "installRoot": "${projectDir}\\out\\install\\${name}",
+        "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.5.2\\msvc2019_64",
+        "buildCommandArgs": "",
+        "ctestCommandArgs": ""
     },
     {
-      "name": "x64-Release",
-      "generator": "Ninja",
-      "configurationType": "Release",
-      "buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${configurationType}",
-      "installRoot": "${projectDir}\\out\\install\\${name}",
-      "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.5.2\\msvc2019_64",
-      "buildCommandArgs": "",
-      "ctestCommandArgs": "",
-      "inheritEnvironments": [ "msvc_x64_x64" ]
+        "name": "Debug-ASan",
+        "generator": "Ninja",
+        "configurationType": "Debug",
+        "inheritEnvironments": [ "msvc_x64_x64" ],
+        "buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}",
+        "installRoot": "${projectDir}\\out\\install\\${name}",
+        "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.5.2\\msvc2019_64",
+        "buildCommandArgs": "",
+        "ctestCommandArgs": "",
+        "variables": [
+            {
+                "name": "ADDRESS_SANITIZER",
+                "value": "True",
+                "type": "BOOL"
+            }
+        ]
     },
     {
-      "name": "x64-ReleaseDebugInfo",
-      "generator": "Ninja",
-      "configurationType": "RelWithDebInfo",
-      "buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${configurationType}",
-      "installRoot": "${projectDir}\\out\\install\\${name}",
-      "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.5.2\\msvc2019_64",
-      "buildCommandArgs": "",
-      "ctestCommandArgs": "",
-      "inheritEnvironments": [ "msvc_x64_x64" ]
+        "name": "Debug-UpdateTranslations",
+        "generator": "Ninja",
+        "configurationType": "Debug",
+        "inheritEnvironments": [ "msvc_x64_x64" ],
+        "buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}",
+        "installRoot": "${projectDir}\\out\\install\\${name}",
+        "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.5.2\\msvc2019_64",
+        "buildCommandArgs": "",
+        "ctestCommandArgs": "",
+        "variables": [
+            {
+                "name": "UPDATE_TRANSLATIONS",
+                "value": "True",
+                "type": "BOOL"
+            }
+        ]
+    },
+    {
+        "name": "Release",
+        "generator": "Ninja",
+        "configurationType": "Release",
+        "buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}",
+        "installRoot": "${projectDir}\\out\\install\\${name}",
+        "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.5.2\\msvc2019_64",
+        "buildCommandArgs": "",
+        "ctestCommandArgs": "",
+        "inheritEnvironments": [ "msvc_x64_x64" ]
+    },
+    {
+        "name": "ReleaseDebugInfo",
+        "generator": "Ninja",
+        "configurationType": "RelWithDebInfo",
+        "buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}",
+        "installRoot": "${projectDir}\\out\\install\\${name}",
+        "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.5.2\\msvc2019_64",
+        "buildCommandArgs": "",
+        "ctestCommandArgs": "",
+        "inheritEnvironments": [ "msvc_x64_x64" ]
     }
   ]
 }

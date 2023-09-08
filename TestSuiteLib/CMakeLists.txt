@@ -2,11 +2,13 @@ cmake_minimum_required(VERSION 3.16)
 
 project(TestSuiteLib LANGUAGES CXX)
 
+include(../cmake/translations.cmake)
+
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Qml Xml Test)
+find_package(Qt6 REQUIRED COMPONENTS Qml Xml Test LinguistTools)
 
 set(TARGET TestSuiteLib)
 
@@ -25,6 +27,8 @@ qt_add_library(${TARGET} STATIC
 	TestController.h
 	TestLog.cpp
 	TestLog.h
+	TestObserver.cpp
+	TestObserver.h
 	TestReport.cpp
 	TestReport.h
 	TestScriptsStorage.cpp
@@ -45,6 +49,9 @@ target_precompile_headers(${TARGET} PUBLIC
 	<QtTest>
 )
 
+#Add translations
+#
+add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Qml Qt6::Xml Qt6::Test)
 target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib AppSignalLib OnlineLib ClientLib)

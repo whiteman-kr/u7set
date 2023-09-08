@@ -9,14 +9,6 @@
 #include <lm.h>
 #endif
 
-#include <QCoreApplication>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QPushButton>
-#include <QMessageBox>
-#include <QDateTime>
-
 namespace ClientLib
 {
 	//

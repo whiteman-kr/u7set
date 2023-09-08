@@ -1,10 +1,10 @@
-<AFB id="#mux_v1" Caption="mux" Version="1.0001">
+<AFB id="#mux_v1" Caption="mux" Version="1.0002">
 	<Properties>
 		<Description>Multiplexor Block selects one of two discrete input signals and output result in accordance with control signal.</Description>
 		<Category>Other</Category>
 		<OpCode>21</OpCode>
 		<InternalUse>false</InternalUse>
-		<MinWidth>22</MinWidth>
+		<MinWidth>14</MinWidth>
 	</Properties>
 	<Inputs>
 		<Pin OpName="i_sel" Caption="sel" Type="Discrete" ByteOrder="BigEndian" OpIndex="0" Size="1"/>

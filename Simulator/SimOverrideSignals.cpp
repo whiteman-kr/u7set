@@ -1,9 +1,7 @@
 #include "SimOverrideSignals.h"
 #include "Simulator.h"
 #include "SimRam.h"
-#include "../Proto/ProtoSerialization.h"
-#include <QJSEngine>
-#include <fstream>
+
 
 namespace Sim
 {
@@ -1011,7 +1009,7 @@ namespace Sim
 		if (int cs = changesCounter();
 			ram.overrideSignalsLastCounter(cs) == cs)
 		{
-			// Data has not been changesd since last update
+			// Data has not been changed since last update
 			//
 			return;
 		}

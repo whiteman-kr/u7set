@@ -54,6 +54,12 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 		return tcpTuningClient->serverAddressPort1();
 	}
 
+	bool TuningConnection::Connection::signalStatesLoaded() const
+	{
+		Q_ASSERT(tcpTuningClient);
+		return tcpTuningClient->signalStatesLoaded();
+	}
+
 	TuningConnection::TuningConnection(ITuningSignalManager& tuningSignalManager,
 									   ITuningSignalUpdater& tuningSignalUpdater,
 									   IRecentAppSignals& recentTuningSignals,
@@ -473,6 +479,11 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 		return writeTuningSignal(appSignalId, tuningValue);
 	}
 
+	bool TuningConnection::signalStatesLoaded() const
+	{
+		return std::all_of(m_conns.begin(), m_conns.end(), [](const Connection& c) { return c.signalStatesLoaded(); });
+	}
+	
 	void TuningConnection::applyTuningSignals(const std::vector<Hash>& signalHashes)
 	{
 		for (const Connection& c : m_conns)

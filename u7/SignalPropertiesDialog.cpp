@@ -1,15 +1,10 @@
-#include <QMessageBox>
-#include <QDialogButtonBox>
-#include <QVBoxLayout>
+#include "../lib/PropertyEditor.h"
+#include "../lib/WidgetUtils.h"
+
 #include "SignalPropertiesDialog.h"
 #include "SignalsTabPage.h"
 #include "Settings.h"
-#include "../lib/PropertyEditor.h"
-#include "../DbLib/DbController.h"
-#include "../AppSignalLib/AppSignal.h"
-#include "../lib/WidgetUtils.h"
 #include "AppSignalSetProvider.h"
-
 
 SignalPropertiesDialog::SignalPropertiesDialog(const std::vector<AppSignal*>& signalVector,
 											   bool readOnly, bool tryCheckout, QWidget* parent) :

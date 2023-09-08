@@ -1,16 +1,5 @@
 #include "MetrologyMainWindow.h"
 
-#include <QApplication>
-#include <QSettings>
-#include <QMessageBox>
-#include <QMenuBar>
-#include <QToolBar>
-#include <QStatusBar>
-#include <QTabWidget>
-#include <QTableView>
-#include <QDockWidget>
-#include <QCloseEvent>
-
 #include "../lib/Ui/DialogAbout.h"
 #include "../lib/ConstStrings.h"
 #include "../UtilsLib/Ui/UiTools.h"

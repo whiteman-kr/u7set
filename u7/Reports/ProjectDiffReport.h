@@ -4,7 +4,6 @@
 
 #include "GlobalMessanger.h"
 #include "../HardwareLib/DeviceObject.h"
-#include "../DbLib/DbController.h"
 
 #include "../ReportLib/ReportAppSignalProvider.h"
 #include "../ReportLib/ReportPrinter.h"

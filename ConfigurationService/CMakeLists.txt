@@ -73,7 +73,6 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QTextStream>
 	<QThread>
 	<QTimer>
-	<QtCore>
 	<QtGlobal>
 	<QtNetwork/QHostAddress>
 	<QUdpSocket>

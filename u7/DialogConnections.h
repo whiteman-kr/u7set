@@ -1,7 +1,6 @@
 #ifndef DIALOGCONNECTIONS_H
 #define DIALOGCONNECTIONS_H
 
-#include "../DbLib/DbController.h"
 #include "../lib/PropertyEditor.h"
 #include "../lib/PropertyEditorDialog.h"
 #include "../Builder/ConnectionStorage.h"

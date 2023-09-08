@@ -1,8 +1,5 @@
-#include <QApplication>
-
 #include "MainWindow.h"
 #include "Options.h"
-#include "../Proto/ProtoSerialization.h"
 #include "../HardwareLib/DataProtocols.h"
 
 #if __has_include("../../gitlabci_version.h")

@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 project(Monitor LANGUAGES CXX)
 
 include(../cmake/vld.cmake)
+include(../cmake/translations.cmake)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -17,7 +18,7 @@ if (MSVC)
   )
 endif (MSVC)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Network Qml Xml Svg PrintSupport)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Network Qml Xml Svg PrintSupport LinguistTools)
 qt_standard_project_setup()
 
 set (MONITOR_SOURCES
@@ -143,6 +144,10 @@ add_executable(${TARGET} WIN32
 	${MONITOR_RESOURCES}
 )
 
+#Add translations
+#
+add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
 target_precompile_headers(${TARGET} PRIVATE
 	# C includes, must be before c++ includes
 	#
@@ -156,19 +161,20 @@ target_precompile_headers(${TARGET} PRIVATE
 	<atomic>
 	<chrono>
 	<concepts>
+	<deque>
 	<functional>
 	<limits>
 	<list>
 	<map>
 	<memory>
 	<queue>
+	<ranges>
 	<set>
 	<type_traits>
 	<vector>
 
 	# Qt includes
 	#
-	<QtCore>
 	<QtPrintSupport>
 	<QtQml>
 	<QtWidgets>
@@ -177,6 +183,9 @@ target_precompile_headers(${TARGET} PRIVATE
 	# Project includes
 	#
 	"../CommonLib/Types.h"
+
+	"../Proto/network.pb.h"
+	"../Proto/serialization.pb.h"
 )
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network Qt6::Qml Qt6::Xml Qt6::Svg Qt6::PrintSupport)

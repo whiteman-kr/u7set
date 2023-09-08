@@ -1,23 +1,58 @@
-#include "BuildWorkerThread.h"
-#include "Parser.h"
-#include "ConfigurationBuilder.h"
-#include "AppLogicCompiler.h"
-#include "SoftwareCfgGenerator.h"
-#include "AppDataServiceCfgGenerator.h"
-#include "DiagDataServiceCfgGenerator.h"
-#include "MonitorCfgGenerator.h"
-#include "TuningServiceCfgGenerator.h"
-#include "TuningClientCfgGenerator.h"
-#include "TestSuiteCfgGenerator.h"
-#include "ConfigurationServiceCfgGenerator.h"
-#include "ArchivingServiceCfgGenerator.h"
-#include "MetrologyCfgGenerator.h"
-#include "TestClientCfgGenerator.h"
-#include "GatewayServiceCfgGenerator.h"
-#include "../Simulator/Simulator.h"
 #include "../HardwareLib/Subsystem.h"
-#include "SchemasReportGenerator.h"
+#include "../Simulator/Simulator.h"
+
+#include "AppDataServiceCfgGenerator.h"
+#include "AppLogicCompiler.h"
+#include "ArchivingServiceCfgGenerator.h"
+#include "BuildWorkerThread.h"
+#include "ConfigurationBuilder.h"
+#include "ConfigurationServiceCfgGenerator.h"
+#include "DiagDataServiceCfgGenerator.h"
+#include "GatewayServiceCfgGenerator.h"
 #include "LogicModulesInfoWriter.h"
+#include "MetrologyCfgGenerator.h"
+#include "MonitorCfgGenerator.h"
+#include "Parser.h"
+#include "SchemasReportGenerator.h"
+#include "ScriptChecker.h"
+#include "SoftwareCfgGenerator.h"
+#include "TestClientCfgGenerator.h"
+#include "TestSuiteCfgGenerator.h"
+#include "TuningClientCfgGenerator.h"
+#include "TuningServiceCfgGenerator.h"
+
+namespace
+{
+	class SimLogger : public ILogFile
+	{
+		OutputLog* m_log = nullptr;
+
+	public:
+		SimLogger(OutputLog* log) : m_log(log) {}
+
+		virtual bool writeAlert(const QString& text, const QString& /*tag*/ = {}) override
+		{
+			m_log->writeError(text); return true;
+		};
+		virtual bool writeError(const QString& text, const QString & /*tag*/ = {}) override
+		{
+			m_log->writeError(text); return true;
+		};
+		virtual bool writeWarning(const QString& text, const QString & /*tag*/ = {}) override
+		{
+			m_log->writeWarning0(text); return true;
+		};
+		virtual bool writeMessage(const QString& text, const QString & /*tag*/ = {}) override
+		{
+			m_log->writeMessage(text); return true;
+		};
+		virtual bool writeText(const QString& text, const QString & /*tag*/ = {}) override
+		{
+			m_log->writeMessage(text); return true;
+		};
+	};
+}
+
 
 namespace Builder
 {
@@ -51,7 +86,7 @@ namespace Builder
 
 			bool taskResult = (this->*task.func)();
 
-			// Seva task results
+			// Save task results
 			//
 			task.result.emplace();
 			task.result.value().result = taskResult;
@@ -82,7 +117,7 @@ namespace Builder
 		//
 		qDebug("Leave BuildWorkerThread::run()");
 
-		// QThread::finished will be emitted, it should be counted as reasultReady
+		// QThread::finished will be emitted, it should be counted as resultReady
 		//
 		return;
 	}
@@ -112,7 +147,7 @@ namespace Builder
 		m_context->m_log->startStrLogging();
 		m_context->m_log->clearItemsIssues();
 
-		// Log softaware version
+		// Log software version
 		//
 		LOG_MESSAGE(m_context->m_log, qApp->applicationName() + " v" + qApp->applicationVersion());
 		LOG_MESSAGE(m_context->m_log, tr("Started at: ") + QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss"));
@@ -204,17 +239,17 @@ namespace Builder
 			// The build was cancelled.
 			//
 			m_context->m_log->errCMN0016();
-			m_context->m_log->clear();		// Log can contain thouthands of messages, if it some kind of "same ids" error
+			m_context->m_log->clear();		// Log can contain thousands of messages, if it some kind of "same ids" error
 		}
 
 		// Display build time
 		//
-		qint64 buildEllapsed = m_buildTimer.elapsed() / 1000;
-		qint64 durationSecs = buildEllapsed % 60;
-		qint64 durationMins = buildEllapsed / 60;
+		qint64 buildElapsed = m_buildTimer.elapsed() / 1000;
+		qint64 durationSecs = buildElapsed % 60;
+		qint64 durationMins = buildElapsed / 60;
 		LOG_MESSAGE(m_context->m_log, QString("Build time: %1 minute(s) %2 second(s)").arg(durationMins).arg(durationSecs));
 
-		// Relese resources
+		// Release resources
 		//
 		this->m_context.reset();
 
@@ -303,7 +338,7 @@ namespace Builder
 			return false;
 		}
 
-		//int to_do_thre_are_two_places_in_build_checking_checked_out_objects;
+		//int to_do_there_are_two_places_in_build_checking_checked_out_objects;
 
 		//int checkedOutCount = 0;
 		//ok = m_context->m_db.isAnyCheckedOut(&checkedOutCount);
@@ -407,7 +442,7 @@ namespace Builder
 		}
 
 		//
-		// Check child restirictions
+		// Check child restrictions
 		//
 		if (bool ok = checkChildRestrictions(m_context->m_equipmentSet->root());
 			ok == false)
@@ -451,8 +486,8 @@ namespace Builder
 
 		// Load files' latest version
 		//
-		std::vector<std::shared_ptr<DbFile>> presetLatesFiles;
-		ok = dbc.getLatestVersion(presetFiles, &presetLatesFiles, nullptr);
+		std::vector<std::shared_ptr<DbFile>> presetLatestFiles;
+		ok = dbc.getLatestVersion(presetFiles, &presetLatestFiles, nullptr);
 
 		if (ok == false)
 		{
@@ -470,9 +505,9 @@ namespace Builder
 		std::map<QString, int> presetNameToVersion;						// Key is presetName, value is presetVersion
 
 		std::vector<std::shared_ptr<Hardware::DeviceObject>> presets;
-		presets.reserve(presetLatesFiles.size());
+		presets.reserve(presetLatestFiles.size());
 
-		for (std::shared_ptr<DbFile>& file : presetLatesFiles)
+		for (std::shared_ptr<DbFile>& file : presetLatestFiles)
 		{
 			if (file->deleted() == true ||
 				(file->state() == E::VcsState::CheckedOut && file->action() == E::VcsItemAction::Deleted))
@@ -497,7 +532,7 @@ namespace Builder
 			presetNameToVersion[d->presetName()] = d->presetVersion();
 		}
 
-		presetLatesFiles.clear();	//Just free memory
+		presetLatestFiles.clear();	//Just free memory
 
 		if (QThread::currentThread()->isInterruptionRequested() == true)
 		{
@@ -771,7 +806,7 @@ namespace Builder
 
 				if (it != lmNumbers.end())
 				{
-					// Property System\\LMNumber (%1) is not uinique in logic modules %2 and %3.
+					// Property System\\LMNumber (%1) is not unique in logic modules %2 and %3.
 					//
 					m_context->m_log->errCFG3103(lmNumber, it->second, lm->equipmentIdTemplate());
 
@@ -1012,12 +1047,12 @@ namespace Builder
 		QStringList windowsScript;
 		QStringList linuxScript;
 
-		for (const QString& c: scriptHeader)
+		for (const QString& c : scriptHeader)
 		{
 			windowsScript.push_back(commStartWindows + c);
 		}
 
-		for (const QString& c: scriptHeader)
+		for (const QString& c : scriptHeader)
 		{
 			linuxScript.push_back(commStartLinux + c);
 		}
@@ -1031,13 +1066,15 @@ namespace Builder
 		windowsScriptEnd.append("@exit /b 1");
 
 		QStringList linuxScriptEnd;
-        linuxScriptEnd.append("exit 0");
+		linuxScriptEnd.append("exit 0");
 
 		// --
 		//
 		const std::map<int, std::shared_ptr<DbFileInfo>>& files = fileTree.files();
 
 		QString javaScriptFileExtension{Db::File::JavaScriptFileExtension};
+
+		bool filesResult = true;
 
 		for (auto& [fileId, fileInfo] : files)
 		{
@@ -1046,9 +1083,8 @@ namespace Builder
 				continue;
 			}
 
-			QString fileExt = fileInfo->extension();
-
-			if (fileExt.compare(javaScriptFileExtension, Qt::CaseInsensitive) != 0)
+			if (QString fileExt = fileInfo->extension();
+				fileExt.compare(javaScriptFileExtension, Qt::CaseInsensitive) != 0)
 			{
 				continue;
 			}
@@ -1056,87 +1092,110 @@ namespace Builder
 			std::shared_ptr<DbFile> file;
 
 			bool ok = m_context->m_db.getLatestVersion(*fileInfo, &file, nullptr);
-			if (ok == true)
+			if (ok == false)
 			{
-				BuildFile* buildFile = m_context->m_buildResultWriter->addFile(Directory::TESTS + fileTree.filePath(fileId), file->fileName(), file->data(), false);
-				if (buildFile == nullptr)
-				{
-					Q_ASSERT(buildFile);
-					return false;
-				}
+				m_context->m_log->errPDB2002(fileInfo->fileId(), fileInfo->fileName(), m_context->m_db.lastError());
+				filesResult = false;
+				continue;
+			}
 
+			// Check script.
+			//
+			{
+				QString fullFileName = "/Tests" + fileTree.filePath(file->fileId()) + "/" + file->fileName();
+				fullFileName.replace("//", "/");
+
+				if (bool evaluateResult = ScriptChecker::checkFile(file->data(), fullFileName, *m_context->m_log);
+					evaluateResult == false)
+				{
+					filesResult = false;
+					continue;
+				}
+			}
+
+			// Add file to output.
+			//
+			if (BuildFile* buildFile = m_context->m_buildResultWriter->addFile(Directory::TESTS + fileTree.filePath(fileId), file->fileName(), file->data(), false);
+				buildFile == nullptr)
+			{
+				Q_ASSERT(buildFile);
+				return false;
+			}
+
+			// Further work only with simulator scripts.
+			//
+			{
 				QString folderPath = Db::File::systemDirToName(DbDir::RootDir) + "/";
+				QStringList pathList;
+				std::shared_ptr<DbFileInfo> f = fileTree.file(fileId);
 
+				while (f != nullptr)
 				{
-					QStringList pathList;
-					std::shared_ptr<DbFileInfo> f = fileTree.file(fileId);
+					f = fileTree.file(f->parentId());
 
-					while (f != nullptr)
+					if (f != nullptr)
 					{
-						f = fileTree.file(f->parentId());
-
-						if (f != nullptr)
-						{
-							pathList.push_front(f->fileName());
-						}
+						pathList.push_front(f->fileName());
 					}
-
-					folderPath += pathList.join(QChar('/'));
 				}
+
+				folderPath += pathList.join(QChar('/'));
 
 				if (folderPath.startsWith(Db::File::systemDirToName(DbDir::SimTestsDir)) == false)
 				{
 					continue;
 				}
-
-				QString runScriptWindowsTemplate = "SimulatorConsole.exe -build=%1 -script=%2 -profile=Default\n"
-										   "@if %ERRORLEVEL% NEQ 0 goto ERROR";
-				QString runScriptLinuxTemplate = "./SimulatorConsole -build=%1 -script=%2 -profile=Default\n"
-										 "if [ $? -ne 0 ]; then\n"
-										 "echo \"Script execution failed!\"\n"
-										 "exit 1\n"
-										 "fi\n";
-
-				// Create run script
-				//
-				QString scriptFileName = file->fileName();
-				scriptFileName.chop(javaScriptFileExtension.size());
-
-				QString outputPath = QDir::fromNativeSeparators(m_context->m_buildResultWriter->outputPath());
-				if (outputPath.endsWith("/") == true)
-				{
-					outputPath.truncate(outputPath.length() - 1);
-				}
-
-				QString buildDir = QString("%1/%2/build")
-						.arg(outputPath)
-						.arg(m_context->m_db.currentProject().projectName());
-
-				QString scriptDir = QString("%1/%2")
-						.arg(buildDir)
-						.arg(Directory::TESTS + fileTree.filePath(fileId));
-
-				// Windows script
-				//
-				QString runScriptWindows = tr(runScriptWindowsTemplate.toLocal8Bit())
-						.arg(QDir::toNativeSeparators(buildDir))
-						.arg(QDir::toNativeSeparators(scriptDir + "/" + file->fileName()));
-
-				windowsScript.push_back(runScriptWindows);
-
-				// Linux script
-				//
-				QString runScriptLinux = tr(runScriptLinuxTemplate.toLocal8Bit())
-						.arg(buildDir)
-						.arg(scriptDir + "/" + file->fileName());
-
-				linuxScript.push_back(runScriptLinux);
 			}
-			else
+
+			// --
+			//
+			QString runScriptWindowsTemplate = "SimulatorConsole.exe -build=%1 -script=%2 -profile=Default\n"
+											   "@if %ERRORLEVEL% NEQ 0 goto ERROR";
+			QString runScriptLinuxTemplate = "./SimulatorConsole -build=%1 -script=%2 -profile=Default\n"
+											 "if [ $? -ne 0 ]; then\n"
+											 "echo \"Script execution failed!\"\n"
+											 "exit 1\n"
+											 "fi\n";
+
+			// Create run script
+			//
+			QString scriptFileName = file->fileName();
+			scriptFileName.chop(javaScriptFileExtension.size());
+
+			QString outputPath = QDir::fromNativeSeparators(m_context->m_buildResultWriter->outputPath());
+			if (outputPath.endsWith("/") == true)
 			{
-				m_context->m_log->errPDB2002(fileInfo->fileId(), fileInfo->fileName(), m_context->m_db.lastError());
-				return false;
+				outputPath.truncate(outputPath.length() - 1);
 			}
+
+			QString buildDir = QString("%1/%2/build")
+								   .arg(outputPath)
+								   .arg(m_context->m_db.currentProject().projectName());
+
+			QString scriptDir = QString("%1/%2")
+									.arg(buildDir)
+									.arg(Directory::TESTS + fileTree.filePath(fileId));
+
+			// Windows script
+			//
+			QString runScriptWindows = tr(runScriptWindowsTemplate.toLocal8Bit())
+										   .arg(QDir::toNativeSeparators(buildDir))
+										   .arg(QDir::toNativeSeparators(scriptDir + "/" + file->fileName()));
+
+			windowsScript.push_back(runScriptWindows);
+
+			// Linux script
+			//
+			QString runScriptLinux = tr(runScriptLinuxTemplate.toLocal8Bit())
+										 .arg(buildDir)
+										 .arg(scriptDir + "/" + file->fileName());
+
+			linuxScript.push_back(runScriptLinux);
+		}
+
+		if (filesResult == false)
+		{
+			return false;
 		}
 
 		// Add script files
@@ -1416,7 +1475,7 @@ namespace Builder
 				continue;
 			}
 
-			LOG_MESSAGE(m_context->m_log, tr("Getting equipment object, fileid: %1, details: %2").arg(fi.fileId()).arg(fi.details()));
+			LOG_MESSAGE(m_context->m_log, tr("Getting equipment object, file id: %1, details: %2").arg(fi.fileId()).arg(fi.details()));
 
 			std::shared_ptr<Hardware::DeviceObject> device;
 			ok = m_context->m_db.getDeviceTreeLatestVersion(fi, &device, nullptr);
@@ -1424,7 +1483,7 @@ namespace Builder
 			if (ok == false ||
 				device.get() == nullptr)
 			{
-				LOG_ERROR_OBSOLETE(m_context->m_log, "", tr("Failed to load equipment, fileid: %1").arg(fi.fileId()));
+				LOG_ERROR_OBSOLETE(m_context->m_log, "", tr("Failed to load equipment, file id: %1").arg(fi.fileId()));
 				continue;
 			}
 
@@ -1832,7 +1891,7 @@ namespace Builder
 			// Enumerate objects in the profile
 			//
 			const QStringList objectList = profile.equipment();
-			bool allAppliedSuccesfully = true;
+			bool allAppliedSuccessfully = true;
 
 			for (QString equipmentId : objectList)
 			{
@@ -1841,8 +1900,8 @@ namespace Builder
 				std::shared_ptr<Hardware::DeviceObject> object = m_context->m_equipmentSet->deviceObject(equipmentId);
 				if (object == nullptr)
 				{
-					m_log->errEQP6011(equipmentId, QString("appling %1 SimProfile").arg(profileName));
-					allAppliedSuccesfully = false;
+					m_log->errEQP6011(equipmentId, QString("applying %1 SimProfile").arg(profileName));
+					allAppliedSuccessfully = false;
 					continue;
 				}
 
@@ -1857,12 +1916,12 @@ namespace Builder
 				if (applyOk == false)
 				{
 					m_log->errEQP6030(profileName, errorMessage);
-					allAppliedSuccesfully = false;
+					allAppliedSuccessfully = false;
 					continue;
 				}
 			}
 
-			if (allAppliedSuccesfully == false)
+			if (allAppliedSuccessfully == false)
 			{
 				continue;
 			}
@@ -2433,7 +2492,7 @@ namespace Builder
 
 		DbController& db = m_context->m_db;
 
-		// Get test scripts
+		// Get test scripts.
 		//
 		DbFileTree scriptFilesTree;
 		int simTestsFileId = db.systemFileId(DbDir::SimTestsDir);
@@ -2452,21 +2511,20 @@ namespace Builder
 
 		std::vector<DbFileInfo> fileInfos = scriptFilesTree.toVector(true);
 
-		auto filter = [](const DbFileInfo& fi) -> bool
-		{
-			return fi.isFolder() || fi.fileName().endsWith(".js") == false || fi.deleted() == true;
-		};
-
-		fileInfos.erase(std::remove_if(fileInfos.begin(),
-									   fileInfos.end(),
-									   filter),
-						fileInfos.end());
+		std::erase_if(fileInfos, [](const DbFileInfo& fi)
+					  {
+						  return fi.isFolder() ||
+							  fi.fileName().endsWith(".js") == false ||
+							  fi.deleted() == true;
+					  });
 
 		if (fileInfos.empty() == true)
 		{
 			return true;
 		}
 
+		// Get the latest version of sim tests.
+		//
 		std::vector<std::shared_ptr<DbFile>> files;
 
 		ok = db.getLatestVersion(fileInfos, &files, nullptr);
@@ -2481,6 +2539,26 @@ namespace Builder
 			return true;
 		}
 
+		// Get the latest version of GlobalScript.js
+		//
+		Sim::SimScriptItem globalScript;
+
+		{
+			DbFileInfo globalScriptFileInfo;
+			bool ok = db.getFileInfo(File::GLOBAL_SCRIPT_FULL_PATH, &globalScriptFileInfo, nullptr);
+
+			if (ok == true && globalScriptFileInfo.isNull() == false && globalScriptFileInfo.deleted() == false)
+			{
+				std::shared_ptr<DbFile> globalScriptFile;
+
+				ok = db.getLatestVersion(globalScriptFileInfo, &globalScriptFile, nullptr);
+				if (ok == true && globalScriptFile != nullptr)
+				{
+					globalScript = {globalScriptFile->data(), globalScriptFile->fileName()};
+				}
+			}
+		}
+
 		// Run tests
 		//
 		std::vector<Sim::SimScriptItem> testScripts;
@@ -2491,34 +2569,10 @@ namespace Builder
 			testScripts.emplace_back(f->data(), scriptFilesTree.filePath(f->fileId()) + "/" + f->fileName());
 		}
 
-		class SimLogger : public ILogFile
+		if (testScripts.empty() == true)
 		{
-			OutputLog* m_log = nullptr;
-
-		public:
-			SimLogger(OutputLog* log) : m_log(log) {}
-
-			virtual bool writeAlert(const QString& text) override
-			{
-				m_log->writeError(text); return true;
-			};
-			virtual bool writeError(const QString& text) override
-			{
-				m_log->writeError(text); return true;
-			};
-			virtual bool writeWarning(const QString& text) override
-			{
-				m_log->writeWarning0(text); return true;
-			};
-			virtual bool writeMessage(const QString& text) override
-			{
-				m_log->writeMessage(text); return true;
-			};
-			virtual bool writeText(const QString& text) override
-			{
-				m_log->writeMessage(text); return true;
-			};
-		};
+			return true;
+		}
 
 		SimLogger simLogger(m_log);
 		QString buildPath = m_context->m_buildResultWriter->fullOutputPathes()[0];
@@ -2546,7 +2600,7 @@ namespace Builder
 		//
 		simulator.setCheckSkipOnBuildConst(true);
 
-		ok = simulator.runScripts(testScripts, timeout);
+		ok = simulator.runScripts(testScripts, globalScript, timeout);
 		if (ok == false)
 		{
 			return false;
@@ -2560,7 +2614,7 @@ namespace Builder
 		{
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
-				return false;	// simulator.stopScript(); will be called on destructr od simulator
+				return false;	// simulator.stopScript(); will be called on destruct of simulator.
 			}
 
 			ok = simulator.waitScript(100);

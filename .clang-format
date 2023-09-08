@@ -13,22 +13,26 @@ AlignAfterOpenBracket: Align
 
 # Ok
 AlignConsecutiveAssignments: None
-
 # Ok
+
 AlignConsecutiveDeclarations: None
 
 AlignEscapedNewlines: DontAlign
 
 AlignOperands: Align
 
+UseTab: ForContinuationAndIndentation
 ColumnLimit: '0'
 IndentWidth: '4'
 TabWidth: '4'
 
+#IndentAccessModifiers: false
+AccessModifierOffset: '-4'
+
 # Ok
 AlignTrailingComments:
   Kind: Always
-  OverEmptyLines: 3
+  OverEmptyLines: 5
 
 # Ok - Always break before braces.
 BreakBeforeBraces: Allman

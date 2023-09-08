@@ -112,7 +112,6 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QTimer>
 	<QTranslator>
 	<QtConcurrent/QtConcurrent>
-	<QtCore>
 	<QtGlobal>
 	<QtNetwork/QHostAddress>
 	<QUdpSocket>
@@ -158,6 +157,10 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QToolBar>
 	<QTreeWidget>
 	<QVBoxLayout>
+
+	# Project includes
+	#
+	"../../Proto/ProtoSerialization.h"
 )
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network Qt6::Sql Qt6::Qml Qt6::Xml Qt6::Concurrent)

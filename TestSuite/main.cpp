@@ -1,10 +1,13 @@
 
 #include "main.h"
 #include "TestSuiteMainWindow.h"
-
 #include "AppConfigSettings.h"
 
 #include <QApplication>
+
+#if __has_include("../gitlabci_version.h")
+#	include "../gitlabci_version.h"
+#endif
 
 QSharedMemory* theSharedMemorySingleApp = nullptr;
 
@@ -46,9 +49,9 @@ int main(int argc, char *argv[])
 	a.setOrganizationDomain(Manufacturer::SITE);
 
 #ifdef GITLAB_CI_BUILD
-	a.setApplicationVersion(QString("0.9.%1 (%2)").arg(CI_PIPELINE_ID).arg(CI_COMMIT_REF_SLUG));
+	a.setApplicationVersion(QString("0.2.%1 (%2)").arg(CI_PIPELINE_ID).arg(CI_COMMIT_REF_SLUG));
 #else
-	a.setApplicationVersion(QString("0.9.LOCALBUILD"));
+	a.setApplicationVersion(QString("0.2.LOCALBUILD"));
 #endif
 
 	int result = 0;

@@ -1,6 +1,5 @@
 #include "ClientTranslator.h"
-#include <QLocale>
-#include <QApplication>
+
 
 namespace ClientLib
 {
@@ -56,8 +55,10 @@ namespace ClientLib
 		return true;
 	}
 
-	bool ClientTranslator::setLanguage(const QString& code)
+	bool ClientTranslator::setLanguage(const QString& code, QStringList& failedFiles)
 	{
+		failedFiles.clear();
+
 		if (m_languages.find(code) == m_languages.end())
 		{
 			Q_ASSERT(false);
@@ -97,7 +98,7 @@ namespace ClientLib
 			}
 			else
 			{
-				Q_ASSERT(false);
+				failedFiles.push_back(fileName);
 				ok = false;
 			}
 		}

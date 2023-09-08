@@ -1,7 +1,6 @@
 #include "SimOverridePane.h"
 #include "../../AppSignalLib/AppSignalParam.h"
 #include "../../Simulator/SimOverrideSignals.h"
-#include "../../Proto/serialization.pb.h"
 #include "SimOverrideValueWidget.h"
 
 
@@ -1008,6 +1007,12 @@ namespace
 {
 	class NoCurrentRectItemDelegate : public QStyledItemDelegate
 	{
+	public:
+		NoCurrentRectItemDelegate(QObject* parent) :
+			QStyledItemDelegate(parent)
+		{
+		}
+
 	protected:
 		void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 		{
@@ -1046,7 +1051,7 @@ QOverrideListWidget::QOverrideListWidget(Sim::Simulator* simulator, QWidget* par
 	// Set selection and draw focused cell workaround.
 	//
 	setSelectionMode(QAbstractItemView::ExtendedSelection);
-	setItemDelegate(new NoCurrentRectItemDelegate);
+	setItemDelegate(new NoCurrentRectItemDelegate(this));
 
 	return;
 }

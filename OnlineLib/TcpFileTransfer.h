@@ -6,7 +6,11 @@
 #include "../CommonLib/Hash.h"
 #include "Tcp.h"
 #include "CircularLogger.h"
-#include "../Proto/network.pb.h"
+
+namespace Network
+{
+	class GetFileReply;
+}
 
 namespace Tcp
 {
@@ -129,7 +133,7 @@ namespace Tcp
 		void processGetFileStartNextReply(bool startReply, const char* replyData, quint32 replyDataSize);
 
 	private:
-		Network::GetFileReply m_reply;
+		std::unique_ptr<Network::GetFileReply> m_reply;		// unique_ptr for build time optimization.
 	};
 
 	// -------------------------------------------------------------------------------------
@@ -170,7 +174,7 @@ namespace Tcp
 	private:
 		QByteArray m_fileData;
 
-		Network::GetFileReply m_reply;
+		std::unique_ptr<Network::GetFileReply> m_reply;		// unique_ptr for build time optimization.
 
 		QTimer m_transmitionFilesTimer;
 	};
