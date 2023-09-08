@@ -24,11 +24,6 @@
         <translation>Помилка читання даних з рядку %1 файлу %2.</translation>
     </message>
     <message>
-        <location filename="../TestObserver.cpp" line="33"/>
-        <source>RtDataProvider connection timeout, connected %1 of %2 AppDataServices.</source>
-        <translation></translation>
-    </message>
-    <message>
         <location filename="../TestReport.cpp" line="73"/>
         <source>Save File</source>
         <translation>Зберегти файл</translation>
@@ -94,48 +89,53 @@ Do you with to open it?</source>
         <source>Failed to load contents of the file %1, error in line %2, column %3, message %4</source>
         <translation>Помилка завантаження файлу %1, рядок %2, колонка %3, повідомлення %4</translation>
     </message>
+    <message>
+        <location filename="../TestObserver.cpp" line="33"/>
+        <source>RtDataProvider connection timeout, connected %1 of %2 AppDataServices.</source>
+        <translation></translation>
+    </message>
 </context>
 <context>
     <name>TestSuite::ControlThread</name>
     <message>
         <location filename="../Control.cpp" line="118"/>
         <source>ThreadFinished, exit code %1</source>
-        <translation type="unfinished">Тестувння завершене, код виходу %1</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../Control.cpp" line="141"/>
         <source>Test execution was interrupted by user.</source>
-        <translation type="unfinished">Виконання тесту зупинене користувачем.</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../Control.cpp" line="189"/>
         <source>Cannot connect to CfgService, address1 %1, address2 %2, InstanceID %3</source>
-        <translation type="unfinished">Помилка з&apos;єднання з CfgService, адреса1 %1, адреса2 %2, ІД екземпляра %3</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../Control.cpp" line="214"/>
         <source>Load script file error, path %1, error message: %2</source>
-        <translation type="unfinished">Помилка завантаження файла сценарію, папка %1, помилка: %2</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../Control.cpp" line="234"/>
         <source>Tests execution failed: no user name is supplied! Please check the configuration.</source>
-        <translation type="unfinished">Тестування не виконане: не введене ім&apos;я користувача! Перевірте конфігурацію.</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../Control.cpp" line="243"/>
         <source>Tests execution failed: authorization failed!</source>
-        <translation type="unfinished">Тестування не виконане: помилка авторизації!</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../Control.cpp" line="368"/>
         <source>Script %1 execution timeout (%2 ms).</source>
-        <translation type="unfinished">Таймаут виконання сценарію %1 (%2 мс).</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../Control.cpp" line="388"/>
         <source>Run test script: %1</source>
-        <translation type="unfinished">Запуск сценарію: %1</translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -199,33 +199,33 @@ Do you with to open it?</source>
     <message>
         <location filename="../TestController.cpp" line="101"/>
         <source>ScriptTestObserver can not be created as there is no configured AppDataService(s).</source>
-        <translation type="unfinished">ScriptTestObserver не може бути створено, не налаштований AppDataService.</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../TestController.cpp" line="124"/>
         <source>signalState(%1), signal not found.</source>
-        <translation type="unfinished">signalState(%1), сигнал не знайдено.</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../TestController.cpp" line="145"/>
         <source>signalValue(%1), signal not found.</source>
-        <translation type="unfinished">signalValue(%1), сигнал не знайдено.</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../TestController.cpp" line="157"/>
         <location filename="../TestController.cpp" line="197"/>
         <source>overrideSignalValue(%1, ...), signal write error.</source>
-        <translation type="unfinished">overrideSignalValue(%1, ...), помилка запису значення сигналу.</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../TestController.cpp" line="206"/>
         <source>waitForSignalOverrides failed.</source>
-        <translation type="unfinished">помилка waitForSignalOverrides.</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../TestController.cpp" line="223"/>
         <source>signalParam(%1), signal not found.</source>
-        <translation type="unfinished">signalParam(%1), сигнал не знайдено.</translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -233,12 +233,12 @@ Do you with to open it?</source>
     <message>
         <location filename="../TestObserver.cpp" line="347"/>
         <source>ScriptTestObserver: RtDataProvider request error: %1</source>
-        <translation type="unfinished">ScriptTestObserver: RtDataProvider помилка запиту: %1</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../TestObserver.cpp" line="357"/>
         <source>ScriptTestObserver: RtDataProvider lost connection to AppDataService %1</source>
-        <translation type="unfinished">ScriptTestObserver: RtDataProvider втратив зв&apos;язок з AppDataService %1</translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -246,49 +246,48 @@ Do you with to open it?</source>
     <message>
         <location filename="../TestSuiteConfigController.cpp" line="45"/>
         <source>Testing user authorization is disabled. Tests can be executed without supplying a password!</source>
-        <translation type="unfinished">Авторизація користувачів відключена. Тести будуть запущені без авторизації!</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../TestSuiteConfigController.cpp" line="76"/>
         <source>updateConfiguration: Get %1 file error:
 %2</source>
-        <translation type="unfinished">updateConfiguration: Помилка отримання файлу %1:
-%2</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../TestSuiteConfigController.cpp" line="133"/>
         <source>New configuration arrived:</source>
-        <translation type="unfinished">Прийнято конфігурацію:</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../TestSuiteConfigController.cpp" line="156"/>
         <source>AppDatService(s): %1.</source>
-        <translation type="unfinished">AppDatService(s): %1.</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../TestSuiteConfigController.cpp" line="162"/>
         <source>Service: id, address: %1, %2.</source>
-        <translation type="unfinished">ІД AppDataService, адреса: %1, %2.</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../TestSuiteConfigController.cpp" line="170"/>
         <source>TuningService(s): %1.</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../TestSuiteConfigController.cpp" line="175"/>
         <source>TuningService: id, address: %1, %2.</source>
-        <translation type="unfinished">ІД TuningService, адреса: %1, %2.</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../TestSuiteConfigController.cpp" line="178"/>
         <source>TuningSources: %1.</source>
-        <translation type="unfinished">Джерела даних: %1.</translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../TestSuiteConfigController.cpp" line="185"/>
         <source>Script File: %1</source>
-        <translation type="unfinished">Файл сценарію: %1</translation>
+        <translation></translation>
     </message>
 </context>
 </TS>
