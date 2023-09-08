@@ -231,7 +231,7 @@ int DynamicAppSignalState::setState(const Times& time,
 
 					if (curValueStatus == AnalogValueStatus::Normal)
 					{
-						if (prevValueStatus != AnalogValueStatus::Normal)
+						if (prevValueStatus != AnalogValueStatus::Normal && !m_prevStateIsStored)
 						{
 							PUSH_AUTO_POINT(prevState)
 
@@ -244,7 +244,7 @@ int DynamicAppSignalState::setState(const Times& time,
 					{
 						// curValue is NaN or Inf
 						//
-						if (prevValueStatus != curValueStatus)
+						if (prevValueStatus != curValueStatus && !m_prevStateIsStored)
 						{
 							PUSH_AUTO_POINT(prevState)
 
