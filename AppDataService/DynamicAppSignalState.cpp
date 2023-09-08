@@ -111,6 +111,18 @@ void DynamicAppSignalState::setQueues(SimpleAppSignalStatesArchiveFlagQueue* sig
 	m_gwStatesQueue = gatewaySignalStatesQueue;
 }
 
+#define PUSH_AUTO_POINT(state)	{																\
+									if (m_archive == true)										\
+									{															\
+										m_statesQueue->pushAutoPoint(state, m_archive, thread); \
+										pushedStatesCtr++;										\
+									}															\
+									if (m_hasRtSessions == true)								\
+									{															\
+										rtSessionsProcessing(state, true, thread);				\
+									}															\
+								}
+
 // returns count of states pushed in statesQueue
 //
 int DynamicAppSignalState::setState(const Times& time,
@@ -171,17 +183,7 @@ int DynamicAppSignalState::setState(const Times& time,
 			//
 			if (m_prevStateIsStored == false)
 			{
-				if (m_archive == true)
-				{
-					m_statesQueue->pushAutoPoint(prevState, m_archive, thread);
-					pushedStatesCtr++;
-				}
-
-				if (m_hasRtSessions == true)
-				{
-					rtSessionsProcessing(prevState, true, thread);
-				}
-
+				PUSH_AUTO_POINT(prevState)
 				m_prevStateIsStored = true;
 			}
 		}
@@ -196,23 +198,14 @@ int DynamicAppSignalState::setState(const Times& time,
 		//
 		if (prevState.flags.valid == AppSignalState::INVALID)
 		{
-			// prevState is invalid, archive invalid autopoint
+			// prevState is invalid, archive invalid autopoint with time (curState.time - 1)
 			//
 			SimpleAppSignalState tmpState = prevState;
 
 			tmpState.time = curState.time;
 			tmpState.time += -1;						// current time offset back on 1 ms
 
-			if (m_archive == true)
-			{
-				m_statesQueue->pushAutoPoint(tmpState, m_archive, thread);
-				pushedStatesCtr++;
-			}
-
-			if (m_hasRtSessions == true)
-			{
-				rtSessionsProcessing(tmpState, true, thread);
-			}
+			PUSH_AUTO_POINT(tmpState)
 		}
 		else
 		{
@@ -234,21 +227,16 @@ int DynamicAppSignalState::setState(const Times& time,
 					AnalogValueStatus curValueStatus = analogValueStatus(curState.value);
 					AnalogValueStatus prevValueStatus = analogValueStatus(prevState.value);
 
-					cl;asmc;alsmc;ams
 					bool checkApertures = true;
 
 					if (curValueStatus == AnalogValueStatus::Normal)
 					{
-						// curValue is Normal
-						//
 						if (prevValueStatus != AnalogValueStatus::Normal)
 						{
+							PUSH_AUTO_POINT(prevState)
+
 							curState.flags.fineAperture = 1;
 							curState.flags.coarseAperture = 1;
-
-							m_fineStoredValue = curState.value;
-							m_coarseStoredValue = curState.value;
-
 							checkApertures = false;
 						}
 					}
@@ -258,6 +246,8 @@ int DynamicAppSignalState::setState(const Times& time,
 						//
 						if (prevValueStatus != curValueStatus)
 						{
+							PUSH_AUTO_POINT(prevState)
+
 							curState.flags.fineAperture = 1;
 							curState.flags.coarseAperture = 1;
 						}
@@ -358,7 +348,7 @@ int DynamicAppSignalState::setState(const Times& time,
 			{
 			case E::AppSignalStateFlagType::Validity:
 			case E::AppSignalStateFlagType::StateAvailable:
-				assert(false);								// this flags should not be in m_flagsSignalsParceInfo array!
+				assert(false);								// this flags should NOT be in m_flagsSignalsParceInfo array!
 				break;
 
 			case E::AppSignalStateFlagType::Simulated:
@@ -401,15 +391,16 @@ int DynamicAppSignalState::setState(const Times& time,
 		m_statesQueue->push(curState, m_archive, thread);
 		pushedStatesCtr++;
 
-		// update stored states
+		// update apertures stored states
 		//
-		if (curState.flags.hasShortTermArchivingReasonOnly() == true)
+		if (curState.flags.fineAperture == 1)
 		{
 			m_fineStoredValue = curState.value;
 		}
-		else
+
+		if (curState.flags.coarseAperture == 1)
 		{
-			m_fineStoredValue = m_coarseStoredValue = curState.value;
+			m_coarseStoredValue = curState.value;
 		}
 
 		m_prevStateIsStored = true;

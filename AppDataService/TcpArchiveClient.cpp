@@ -106,8 +106,6 @@ bool TcpArchiveClient::sendSignalStatesToArchiveRequest(bool sendNow)
 
 	request.set_clientequipmentid(equipmentID().toStdString());
 
-//	qDebug() << "ARCHS_SAVE_APP_SIGNALS_STATES = " << count;
-
 	sendRequest(ARCHS_SAVE_APP_SIGNALS_STATES, request);
 
 	m_timer.start();
