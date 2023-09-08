@@ -29,9 +29,9 @@ void showHelp()
 	std::cout << "TestSuiteConsole is a command-line tool that performs hardware testing of RPCT projects." << std::endl;
 	std::cout << std::endl << "Command line parameters:" << std::endl;
 #ifdef Q_OS_WINDOWS
-	std::cout << "\tTestSuiteConsole -settings=<FileName.xml> [-scripts_path=<ScriptsPath>] [-tests_filter=<TestsFilter>] [-tests_log=<filename>|default] [-cp=NNNN] [-nosecurity] - run build task with settings taken from <FileName.xml> file." << std::endl;
+	std::cout << "\tTestSuiteConsole -settings=<FileName.xml> [-scripts_path=<ScriptsPath>] [-reports_path=<ReportsPath>] [-tests_filter=<TestsFilter>] [-test_log=<filename>|default] [-cp=NNNN] [-nosecurity] - run build task with settings taken from <FileName.xml> file." << std::endl;
 #else
-	std::cout << "\tTestSuiteConsole -settings=<FileName.xml> [-scripts_path=<ScriptsPath>] [-tests_filter=<TestsFilter>] [-tests_log=<filename>|default]  [-nosecurity] - run build task with settings taken from <FileName.xml> file." << std::endl;
+	std::cout << "\tTestSuiteConsole -settings=<FileName.xml> [-scripts_path=<ScriptsPath>] [-reports_path=<ReportsPath>] [-tests_filter=<TestsFilter>] [-test_log=<filename>|default]  [-nosecurity] - run build task with settings taken from <FileName.xml> file." << std::endl;
 #endif
 	std::cout << "\t\t\tOptional -scripts_path parameter specifies a directory where test scripts are stored." << std::endl;
 	std::cout << "\t\t\tOptional -tests_filter parameter specifies a filter for running tests. Filter contains test function name" << std::endl;
