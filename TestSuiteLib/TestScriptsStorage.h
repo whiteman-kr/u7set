@@ -35,7 +35,6 @@ namespace TestSuite
 		TestScript(const QString& name, const QString& contents):
 			m_fileName(name), m_fileNameHash(::calcHash(name)), m_script(contents)
 		{
-			m_globalScript = name.contains(GlobalScriptID, Qt::CaseInsensitive);
 		}
 		Hash fileNameHash() const
 		{
@@ -60,7 +59,7 @@ namespace TestSuite
 		}
 		bool isGlobalScript() const
 		{
-			return m_globalScript;
+			return m_fileName.contains(GlobalScriptID, Qt::CaseInsensitive);
 		}
 
 		static inline QString GlobalScriptID = "GlobalScript";
@@ -69,7 +68,6 @@ namespace TestSuite
 		Hash m_fileNameHash = UNDEFINED_HASH;
 		QString m_fileName;
 		QString m_script;
-		bool m_globalScript = false;
 	};
 
 	class TestScriptsStorage

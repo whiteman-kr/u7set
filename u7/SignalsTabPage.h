@@ -4,6 +4,9 @@
 #include <QSortFilterProxyModel>
 
 #include "../DbLib/DbStruct.h"
+
+#include "../lib/QDoublevalidatorEx.h"
+#include "../Builder/AppSignalProperties.h"
 #include "MainTabPage.h"
 #include "GlobalMessanger.h"
 
@@ -45,6 +48,9 @@ struct CreatingSignalOptions
 	QRect settingsWindowPositionRect;
 };
 
+class SignalsModel;
+class SignalsProxyModel;
+
 class SignalsDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
@@ -74,12 +80,11 @@ protected:
 private:
 	SignalsModel* m_model = nullptr;
 	SignalsProxyModel* m_proxyModel;
+	QLocale m_defaultLocale;
+	QDoubleValidatorEx m_dblValidatorEx;
+
 	mutable int signalIdForUndoOnCancelEditing = -1;
 };
-
-
-class SignalsModel;
-class SignalsProxyModel;
 
 class SignalsTabPage : public MainTabPage
 {
@@ -229,6 +234,7 @@ private:
 	AppSignalSetProvider* m_signalSetProvider = nullptr;
 	AppSignalPropertyManager* m_propManager = nullptr;
 	SignalsTabPage* m_parentWindow;
+	QLocale m_defaultLocale;
 
 	int m_rowCount = 0;
 	int m_columnCount = 0;
