@@ -414,6 +414,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0391.sql", "Upgrade to version 391, Removed property OnConfigurationArrived from Monitor, TuningClient"},
 	{":/DatabaseUpgrade/Upgrade0392.sql", "Upgrade to version 392, Add file Tests/GlobalScript.js"},
 	{":/DatabaseUpgrade/Upgrade0393.sql", "Upgrade to version 393, Hidden AssignFlag from mismatch_*, changed minimum size for mux"},
+	{":/DatabaseUpgrade/Upgrade0394.sql", "Upgrade to version 394, Add TestSuite preset to database updates"},
 };
 
 int DbWorker::counter = 0;
