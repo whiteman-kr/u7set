@@ -10,14 +10,14 @@
 #include "../UtilsLib/WUtils.h"
 #include "./Forms/ComparePropertyObjectDialog.h"
 
-
 const int DEFAULT_COLUMN_WIDTH = 50;
 
 SignalsDelegate::SignalsDelegate(AppSignalSetProvider* signalSetProvider, SignalsModel* model, SignalsProxyModel* proxyModel, QObject *parent) :
 	QStyledItemDelegate(parent),
 	m_signalSetProvider(signalSetProvider),
 	m_model(model),
-	m_proxyModel(proxyModel)
+	m_proxyModel(proxyModel),
+	m_dblValidatorEx(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max(), 1000, false)
 {
 	connect(this, &QAbstractItemDelegate::closeEditor, this, &SignalsDelegate::onCloseEditorEvent);
 }
@@ -103,10 +103,11 @@ QWidget* SignalsDelegate::createEditor(QWidget* parent, const QStyleOptionViewIt
 
 		return le;
 	}
+	case QMetaType::Float:
 	case QMetaType::Double:
 	{
 		QLineEdit* le = new QLineEdit(parent);
-		le->setValidator(new QDoubleValidator(le));
+		le->setValidator(&m_dblValidatorEx);
 		return le;
 	}
 	case QMetaType::Int:
@@ -129,7 +130,7 @@ QWidget* SignalsDelegate::createEditor(QWidget* parent, const QStyleOptionViewIt
 			QLineEdit* le = new QLineEdit(parent);
 			if (s.isAnalog())
 			{
-				le->setValidator(new QDoubleValidator(le));
+				le->setValidator(&m_dblValidatorEx);
 			}
 			else
 			{
@@ -211,8 +212,9 @@ void SignalsDelegate::setEditorData(QWidget* editor, const QModelIndex& index) c
 
 	switch (type)
 	{
-	case QMetaType::QString:
+	case QMetaType::Float:
 	case QMetaType::Double:
+	case QMetaType::QString:
 	case QMetaType::Int:
 	case QMetaType::UInt:
 		le->setText(manager.value(&s, col, isExpert).toString());
@@ -320,7 +322,14 @@ void SignalsDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, c
 		break;
 	}
 	case QMetaType::Double:
-		manager.setValue(&s, col, value.toDouble(), isExpert);
+	case QMetaType::Float:
+		{
+			bool ok = false;
+
+			double dbl = m_defaultLocale.toDouble(value, &ok);
+
+			manager.setValue(&s, col, dbl, isExpert);
+		}
 		break;
 	case QMetaType::Int:
 		manager.setValue(&s, col, value.toInt(), isExpert);
@@ -471,27 +480,11 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 
 		QVariant value = manager.value(&signal, col, theSettings.isExpertMode());
 
-		if (value.isValid() && signal.isAnalog() && manager.dependsOnPrecision(col))
+		if (value.isValid() == true &&
+			manager.dependsOnPrecision(col) == true &&
+			(value.typeId() == QMetaType::Float || value.typeId() == QMetaType::Double))
 		{
-			switch (value.typeId())
-			{
-			case QMetaType::Double:
-			case QMetaType::Float:
-				return QString::number(value.toDouble(), 'f', signal.decimalPlaces());
-			case QMetaType::Short:
-			case QMetaType::UShort:
-			case QMetaType::Int:
-			case QMetaType::UInt:
-			case QMetaType::Long:
-			case QMetaType::ULong:
-			case QMetaType::LongLong:
-			case QMetaType::ULongLong:
-				return value.toString();
-			default:
-				assert(false);
-				return QVariant();
-			}
-
+			return m_defaultLocale.toString(value.toDouble(), 'f', signal.decimalPlaces());
 		}
 
 		return value;

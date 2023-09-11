@@ -5,6 +5,7 @@
 #include <QDialog>
 #include <QHash>
 
+#include "../lib/QDoublevalidatorEx.h"
 #include "../Builder/AppSignalProperties.h"
 #include "MainTabPage.h"
 #include "GlobalMessanger.h"
@@ -81,6 +82,9 @@ private:
 	AppSignalSetProvider* m_signalSetProvider;
 	SignalsModel* m_model;
 	SignalsProxyModel* m_proxyModel;
+	QLocale m_defaultLocale;
+	QDoubleValidatorEx m_dblValidatorEx;
+
 	mutable int signalIdForUndoOnCancelEditing = -1;
 };
 
@@ -126,6 +130,7 @@ private:
 
 	SignalsTabPage* m_parentWindow;
 	QString getUserStr(int userId) const;
+	QLocale m_defaultLocale;
 };
 
 

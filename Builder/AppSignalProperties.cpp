@@ -329,9 +329,11 @@ void AppSignalProperties::initProperties(bool savePropertyDescription)
 	decimalPlacesProperty->setCategory(categoryOnlineMonitoringSystem);
 
 	auto coarseApertureProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(double, AppSignalPropNames::COARSE_APERTURE, true, AppSignal::coarseAperture, AppSignal::setCoarseAperture, m_signal);
+	coarseApertureProperty->setPrecision(4);
 	coarseApertureProperty->setCategory(categoryOnlineMonitoringSystem);
 
 	auto fineApertureProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(double, AppSignalPropNames::FINE_APERTURE, true, AppSignal::fineAperture, AppSignal::setFineAperture, m_signal);
+	fineApertureProperty->setPrecision(4);
 	fineApertureProperty->setCategory(categoryOnlineMonitoringSystem);
 
 	auto adaptiveApertureProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(bool, AppSignalPropNames::ADAPTIVE_APERTURE, true, AppSignal::adaptiveAperture, AppSignal::setAdaptiveAperture, m_signal);
