@@ -146,6 +146,13 @@ namespace TestSuite
 
 		clear();
 
+		return loadScriptsFromPath(path, errorMsg);
+	}
+
+	bool TestScriptsStorage::loadScriptsFromPath(const QString& path, QString* errorMsg)
+	{
+		QDir dir(path);
+
 		QStringList files = dir.entryList(QStringList() << "*.js", QDir::Files, QDir::Name);
 		for (const QString& file : files)
 		{
@@ -163,7 +170,13 @@ namespace TestSuite
 			add(ts);
 		}
 
-		return true;
+		QStringList subdirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
 
+		for (const QString& sd : subdirs)
+		{	
+			loadScriptsFromPath(path + QDir::separator() + sd, errorMsg);
+		}
+
+		return true;
 	}
 }

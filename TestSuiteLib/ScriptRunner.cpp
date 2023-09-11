@@ -153,7 +153,7 @@ namespace TestSuite
 			
 			emit testFinished(script.fileName(), testFunc, initOk == true && testOk == true && cleanupOk == true);
 
-			if (initOk == false || testOk == false || cleanupOk == false)
+			if (initOk == false || cleanupOk == false)
 			{
 				break;
 			}

@@ -97,6 +97,10 @@ namespace TestSuite
 		bool loadFromPath(const QString& path, QString* errorMsg);
 
 	private:
+		bool loadScriptsFromPath(const QString& path, QString* errorMsg);
+
+
+	private:
 		std::vector<TestScript> m_scripts;
 	};
 
