@@ -3201,10 +3201,14 @@ namespace Builder
 		}
 	}
 
-	void UalSignalsMap::finalizeHeaps()
+	bool UalSignalsMap::finalizeHeaps()
 	{
-		m_discreteSignalsHeap.finalize();
-		m_analogAndBusSignalsHeap.finalize();
+		bool result = true;
+
+		result &= m_discreteSignalsHeap.finalize();
+		result &= m_analogAndBusSignalsHeap.finalize();
+
+		return result;
 	}
 
 	void UalSignalsMap::getHeapsLog(QStringList* log) const

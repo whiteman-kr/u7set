@@ -28,7 +28,7 @@ namespace Builder
 		virtual ~SignalsHeap();
 
 		void init(int heapStartAddrW, int heapSizeW);
-		void finalize();
+		bool finalize();
 
 		void appendItem(const UalSignal &ualSignal, std::optional<int> expectedReadCount);
 		void removeItem(const UalSignal &ualSignal);
