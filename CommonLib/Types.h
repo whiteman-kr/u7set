@@ -247,6 +247,17 @@ public:
 	};
 	Q_ENUM(AnalogAppSignalFormat)
 
+	// Types of aperture calculations. Stores in DB!
+	//
+	enum class ApertureType
+	{
+		RangePercent,			// Aperture is a percent of range from LowEngineeringUnits to HihgEngineeringUnits
+		ValuePercent,			// Aperture is a percent of current signal value,
+								// corresponds to obsolete property AdaptiveAperture == true
+		AbsValue,				// Aperture is an absolute value in engineering units
+	};
+	Q_ENUM(ApertureType)
+
 	// MemoryArea
 	//
 	enum class MemoryArea

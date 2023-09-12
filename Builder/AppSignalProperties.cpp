@@ -260,10 +260,6 @@ void AppSignalProperties::initProperties(bool savePropertyDescription)
 	ADD_SIGNAL_PROPERTY_GETTER(bool, AppSignalPropNames::DELETED, false, AppSignal::deleted, m_signal);
 	ADD_SIGNAL_PROPERTY_GETTER(QDateTime, AppSignalPropNames::INSTANCE_CREATED, false, AppSignal::instanceCreated, m_signal);
 
-	auto excludeFromBuildProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(bool, AppSignalPropNames::EXCLUDE_FROM_BUILD, true,
-																		AppSignal::excludeFromBuild, AppSignal::setExcludeFromBuild, m_signal);
-	excludeFromBuildProperty->setCategory(categorySignalProcessing);
-
 	auto signalTypeProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(E::SignalType, AppSignalPropNames::TYPE,
 																true, AppSignal::signalType, AppSignal::setSignalType, m_signal);
 	signalTypeProperty->setCategory(categorySignalType);
@@ -317,10 +313,18 @@ void AppSignalProperties::initProperties(bool savePropertyDescription)
 
 	dataSizeProperty->setCategory(categoryDataFormat);
 
+	auto byteOrderProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(E::ByteOrder, AppSignalPropNames::BYTE_ORDER_PROP, true, AppSignal::byteOrder, AppSignal::setByteOrder, m_signal);
+	byteOrderProperty->setCategory(categoryDataFormat);
+
+
 	auto analogSignalFormatProperty = addProperty<E::AnalogAppSignalFormat>(AppSignalPropNames::ANALOG_SIGNAL_FORMAT, QString(), true,
 																		  (std::function<E::AnalogAppSignalFormat(void)>)std::bind(&AppSignal::analogSignalFormat, &m_signal),
 																		  std::bind(static_cast<void (AppSignal::*)(E::AnalogAppSignalFormat)>(&AppSignal::setAnalogSignalFormat), &m_signal, std::placeholders::_1));
 	analogSignalFormatProperty->setCategory(categoryDataFormat);
+
+	auto excludeFromBuildProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(bool, AppSignalPropNames::EXCLUDE_FROM_BUILD, true,
+																		AppSignal::excludeFromBuild, AppSignal::setExcludeFromBuild, m_signal);
+	excludeFromBuildProperty->setCategory(categorySignalProcessing);
 
 	auto unitProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(QString, AppSignalPropNames::UNIT, true, AppSignal::unit, AppSignal::setUnit, m_signal);
 	unitProperty->setCategory(categorySignalProcessing);
@@ -344,9 +348,6 @@ void AppSignalProperties::initProperties(bool savePropertyDescription)
 
 	auto archiveProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(bool, AppSignalPropNames::ARCHIVE, true, AppSignal::archive, AppSignal::setArchive, m_signal);
 	archiveProperty->setCategory(categoryOnlineMonitoringSystem);
-
-	auto byteOrderProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(E::ByteOrder, AppSignalPropNames::BYTE_ORDER_PROP, true, AppSignal::byteOrder, AppSignal::setByteOrder, m_signal);
-	byteOrderProperty->setCategory(categoryDataFormat);
 
 	auto tagsProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(QString, AppSignalPropNames::TAGS, true, AppSignal::tagsStr, AppSignal::setTagsStr, m_signal);
 	tagsProperty->setCategory(categoryOnlineMonitoringSystem);

@@ -526,6 +526,7 @@ namespace AppSignalPropNames
 	inline const QString USER_ID("UserID");
 	inline const QString CHANNEL("Channel");
 	inline const QString EXCLUDE_FROM_BUILD("ExcludeFromBuild");
+	inline const QString INVERT_SIGNAL("InvertSignal");
 	inline const QString CREATED("Created");
 	inline const QString DELETED("Deleted");
 	inline const QString INSTANCE_CREATED("InstanceCreated");
@@ -562,7 +563,8 @@ namespace AppSignalPropNames
 	inline const QString DECIMAL_PLACES("DecimalPlaces");
 	inline const QString COARSE_APERTURE("CoarseAperture");
 	inline const QString FINE_APERTURE("FineAperture");
-	inline const QString ADAPTIVE_APERTURE("AdaptiveAperture");
+	inline const QString OBSOLETE_ADAPTIVE_APERTURE("AdaptiveAperture");
+	inline const QString APERTURE_TYPE("ApertureType");
 	inline const QString FILTERING_TIME("FilteringTime");
 	inline const QString SPREAD_TOLERANCE("SpreadTolerance");
 	inline const QString BYTE_ORDER_PROP("ByteOrder");
@@ -615,7 +617,6 @@ namespace AppSignalDefaultSpecPropStruct
 		"4;LowEngineeringUnits;4 Signal processing;double;;;0;10;false;false;Low engineering units;true;None\n"
 		"4;OutputMode;5 Electric parameters;DynamicEnum [Plus0_Plus5_V=0,Plus4_Plus20_mA=1,Minus10_Plus10_V=2,Plus0_Plus5_mA=3];;;Plus0_Plus5_V;0;false;false;;true;None\n");
 
-
 	inline const QString INTERNAL_ANALOG(
 		"4;HighEngineeringUnits;4 Signal processing;double;;;100;10;false;false;High engineering units;true;None\n"
 		"4;LowEngineeringUnits;4 Signal processing;double;;;0;10;false;false;Low engineering units;true;None\n");
@@ -627,6 +628,12 @@ namespace AppSignalDefaultSpecPropStruct
 		"4;LowADC;4 Signal processing;uint32;0;65535;0;0;false;false;Low ADC value;true;None\n"
 		"4;LowEngineeringUnits;4 Signal processing;double;;;0;10;false;false;Low engineering units;true;None\n"
 		"4;LowValidRange;4 Signal processing;double;;;0;10;false;false;Low valid range of signal;true;None\n");
+
+	inline const QString INPUT_DISCRETE(
+		"7;InvertSignal;4 Signal processing;bool;;;false;0;true;false;Invert input signal;true;None;65535;false;false\n");
+
+	inline const QString OUTPUT_DISCRETE(
+		"7;InvertSignal;4 Signal processing;bool;;;false;0;true;false;Invert output signal;true;None;65535;false;false\n");
 }
 
 namespace Manufacturer
