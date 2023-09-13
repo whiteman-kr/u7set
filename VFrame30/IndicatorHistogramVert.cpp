@@ -545,6 +545,8 @@ namespace VFrame30
 			rectPen.setJoinStyle(Qt::MiterJoin);
 
 			p->setPen(rectPen);
+			p->setBrush(Qt::NoBrush);
+
 			p->drawRect(rect);
 		}
 
@@ -1524,45 +1526,51 @@ namespace VFrame30
 			p->drawLine(QPointF{barRect.left() - mainGridWidth, drawParam->gridToDpiY(y)},
 						QPointF{barRect.right() + mainGridWidth, drawParam->gridToDpiY(y)});
 
-			// Draw setpoint value
+			// Draw setpoint text for all columns if m_drawGridValueForAllBars or
+			// if it is the last column.
 			//
-			QChar cmpSymbol;
-			switch (ds.indicatorSetpoint.comparator->cmpType())
+			if (m_drawGridValueForAllBars == true || &ds == &setpoints.back())
 			{
-			case E::CmpType::Equal:
-				cmpSymbol = QChar('=');
-				break;
-			case E::CmpType::Greate:
-				cmpSymbol = QChar(0x25B2);
-				break;
-			case E::CmpType::Less:
-				cmpSymbol = QChar(0x25B2);
-				break;
-			case E::CmpType::NotEqual:
-				cmpSymbol = QChar(0x2260);
-				break;
-			case E::CmpType::GreateEqual:
-				cmpSymbol = QChar(0x2265);
-				break;
-			case E::CmpType::LessEqual:
-				cmpSymbol = QChar(0x2264);
-				break;
-			default:
-				Q_ASSERT(false);
-			}
-
-			if (ds.indicatorSetpoint.value.has_value() == true)
-			{
-				if (alerted == false ||
-					(alerted == true && drawParam->blinkPhase() == true))
+				// Draw setpoint value
+				//
+				QChar cmpSymbol;
+				switch (ds.indicatorSetpoint.comparator->cmpType())
 				{
-					valueString = QString(" %1%2")
-									  .arg(value, 0, static_cast<char>(analogFormat()), precision())
-									  .arg(cmpSymbol);
+				case E::CmpType::Equal:
+					cmpSymbol = QChar('=');
+					break;
+				case E::CmpType::Greate:
+					cmpSymbol = QChar(0x25B2);
+					break;
+				case E::CmpType::Less:
+					cmpSymbol = QChar(0x25B2);
+					break;
+				case E::CmpType::NotEqual:
+					cmpSymbol = QChar(0x2260);
+					break;
+				case E::CmpType::GreateEqual:
+					cmpSymbol = QChar(0x2265);
+					break;
+				case E::CmpType::LessEqual:
+					cmpSymbol = QChar(0x2264);
+					break;
+				default:
+					Q_ASSERT(false);
+				}
 
-					QRectF textRect{barRect.right() + mainGridWidth, drawParam->gridToDpiY(y), 0, 0};
+				if (ds.indicatorSetpoint.value.has_value() == true)
+				{
+					if (alerted == false ||
+						(alerted == true && drawParam->blinkPhase() == true))
+					{
+						valueString = QString(" %1%2")
+							.arg(value, 0, static_cast<char>(analogFormat()), precision())
+							.arg(cmpSymbol);
 
-					DrawHelper::drawText(p, font(), schemaItem->itemUnit(), valueString, textRect, Qt::AlignLeft | Qt::AlignVCenter | Qt::TextDontClip | Qt::TextSingleLine);
+						QRectF textRect{barRect.right() + mainGridWidth, drawParam->gridToDpiY(y), 0, 0};
+
+						DrawHelper::drawText(p, font(), schemaItem->itemUnit(), valueString, textRect, Qt::AlignLeft | Qt::AlignVCenter | Qt::TextDontClip | Qt::TextSingleLine);
+					}
 				}
 			}
 		}
