@@ -1500,13 +1500,33 @@ namespace VFrame30
 		double mainGridWidth = font().drawSize() / 1.8;
 		QString valueString;
 
+		auto maxIt = std::max_element(setpoints.begin(), setpoints.end(), [](const auto& a, const auto& b) { return a.signalIndex < b.signalIndex; });
+		int maxSignalIndex = (maxIt == setpoints.end()) ? -1 : maxIt->signalIndex;
+
 		for (const DrawSetpointStruct& ds : setpoints)
 		{
+			if (ds.indicatorSetpoint.value.has_value() == false)
+			{
+				continue;
+			}
+
+			double value = ds.indicatorSetpoint.value.value();
+			
+			if (valueDiff >= 0 && (value < lowLimit || value > highLimit))
+			{
+				continue;
+			}
+
+			if (valueDiff < 0 && (value > lowLimit || value < highLimit))
+			{
+				continue;
+			}
+
 			const QRectF& barRect = ds.barRect;
 			bool alerted = ds.indicatorSetpoint.alerted.value_or(true);
 
 			const double factor = barRect.height() / valueDiff;
-			double value = ds.indicatorSetpoint.value.value_or(lowLimit);
+			
 			double scaleValue = pointToScaleValue(value);
 			double y = barRect.bottom() - (scaleValue - lowLimit) * factor;
 
@@ -1529,7 +1549,7 @@ namespace VFrame30
 			// Draw setpoint text for all columns if m_drawGridValueForAllBars or
 			// if it is the last column.
 			//
-			if (m_drawGridValueForAllBars == true || &ds == &setpoints.back())
+			if (m_drawGridValueForAllBars == true || ds.signalIndex == maxSignalIndex)
 			{
 				// Draw setpoint value
 				//
@@ -1540,10 +1560,10 @@ namespace VFrame30
 					cmpSymbol = QChar('=');
 					break;
 				case E::CmpType::Greate:
-					cmpSymbol = QChar(0x25B2);
+					cmpSymbol = valueDiff > 0 ? QChar(0x25B2) : QChar('>'); // For upside-down histogramm draw symbol >, as up triangle can confuse the user.
 					break;
 				case E::CmpType::Less:
-					cmpSymbol = QChar(0x25B2);
+					cmpSymbol = valueDiff > 0 ? QChar(0x25B2) : QChar('<'); // For upside-down histogramm draw symbol <, as down triangle can confuse the user.
 					break;
 				case E::CmpType::NotEqual:
 					cmpSymbol = QChar(0x2260);
@@ -1560,11 +1580,15 @@ namespace VFrame30
 
 				if (ds.indicatorSetpoint.value.has_value() == true)
 				{
-					if (alerted == false ||
-						(alerted == true && drawParam->blinkPhase() == true))
+					// Do not take value from earlier defined variable 'value', as that one is
+					// for drawing horizontal line, and it is bound to [lowLimit - highLimit]
+					//
+					double setpointValue = ds.indicatorSetpoint.value.value();
+
+					if (alerted == false || (alerted == true && drawParam->blinkPhase() == true))
 					{
 						valueString = QString(" %1%2")
-							.arg(value, 0, static_cast<char>(analogFormat()), precision())
+							.arg(setpointValue, 0, static_cast<char>(analogFormat()), precision())
 							.arg(cmpSymbol);
 
 						QRectF textRect{barRect.right() + mainGridWidth, drawParam->gridToDpiY(y), 0, 0};
