@@ -5,6 +5,7 @@
 #include "../TestSuiteLib/TestController.h"
 #include "../TestSuiteLib/TestLog.h"
 #include "../TestSuiteLib/TestScriptsStorage.h"
+#include "TestSuiteLog.h"
 
 class TestTreeWidget : public QTreeWidget
 {
@@ -21,7 +22,7 @@ class TestListWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	TestListWidget(QWidget* parent);
+	TestListWidget(TestSuiteLogFile& appLog, QWidget* parent);
 
 	enum Columns
 	{
@@ -59,6 +60,7 @@ private slots:
 private:
 	QLabel* m_testsPathLabel = nullptr;
 	TestTreeWidget* m_treeWidget = nullptr;
+	TestSuiteLogFile& m_appLog;
 };
 
 #endif // TESTLISTWIDGET_H

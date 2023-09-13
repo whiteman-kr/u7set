@@ -167,7 +167,7 @@ void OutputDockLog::write(QtMsgType type, const QString& msg)
 				   .arg(time)
 				   .arg(color)
 				   .arg(prefix)
-				   .arg(msg);
+				   .arg(msg.toHtmlEscaped());
 
 	QMutexLocker l(&m_mutex);
 	m_data.push_back(html);

@@ -109,8 +109,9 @@ void TestTreeWidget::keyReleaseEvent(QKeyEvent *event)
 	QTreeWidget::keyReleaseEvent(event);
 }
 
-TestListWidget::TestListWidget(QWidget* parent):
-	QWidget(parent)
+TestListWidget::TestListWidget(TestSuiteLogFile& appLog, QWidget* parent):
+	QWidget(parent),
+	m_appLog(appLog)
 {
 	QVBoxLayout* layout = new QVBoxLayout;
 
@@ -207,6 +208,7 @@ void TestListWidget::fillTestsTree(const TestSuite::TestScriptsStorage& tests)
 		QString errorMsg;
 		if (sr.getScriptTestFunctions(script, functions, errorMsg) == false)
 		{
+			m_appLog.writeError(errorMsg);
 			continue;
 		}
 
