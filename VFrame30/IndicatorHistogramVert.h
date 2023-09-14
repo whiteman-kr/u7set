@@ -67,21 +67,24 @@ namespace VFrame30
 		std::optional<double> value;
 		std::optional<bool> alerted;
 		QRgb setpointColor;
+		QRgb textColor;
 
 		// --
 		//
-		IndicatorSetpoint(const std::shared_ptr<Comparator>& comparator_,
+		IndicatorSetpoint(std::shared_ptr<Comparator> comparator_,
 						  SetpointSource setpointSource_,
 						  const std::shared_ptr<CustomSetPoint> customSetpointData_,
 						  std::optional<double> value_,
 						  std::optional<bool> alerted_,
-						  QRgb setpointColor_) :
-			comparator(comparator_),
+						  QRgb setpointColor_,
+						  QRgb textColor_) :
+			comparator(std::move(comparator_)),
 			source(setpointSource_),
-			customSetpointData(customSetpointData_),
+			customSetpointData(std::move(customSetpointData_)),
 			value(value_),
 			alerted(alerted_),
-			setpointColor(setpointColor_)
+			setpointColor(setpointColor_),
+			textColor(textColor_)
 		{
 		}
 	};
