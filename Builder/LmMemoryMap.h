@@ -171,6 +171,7 @@ namespace Builder
 		bool appendNonAcquiredDiscreteInternalSignals(const QVector<UalSignal*>& ualSignals);
 
 		bool appendAcquiredDiscreteInputSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
+		bool appendAcquiredDiscreteInvertedInputSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredDiscreteStrictOutputSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredDiscreteInternalSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
 		bool appendAcquiredDiscreteOptoSignalsInRegBuf(const QVector<UalSignal*>& ualSignals);
@@ -200,6 +201,7 @@ namespace Builder
 
 		bool appendNonAcquiredOutputBusses(const QVector<UalSignal*>& ualSignals);
 		bool appendNonAcquiredInternalBusses(const QVector<UalSignal*>& ualSignals);
+		bool appendNonAcquiredDiscreteInvertedInputSignals(const QVector<UalSignal*>& ualSignals);
 
 		Address16 setAcquiredRawDataSize(int sizeW);
 
@@ -298,6 +300,7 @@ namespace Builder
 			MemoryArea acquiredOptoBuses;
 
 			MemoryArea acquiredDiscreteInputSignals;
+			MemoryArea acquiredDiscreteInvertedInputSignals;
 			MemoryArea acquiredDiscreteOutputSignals;				// copying from this->appBitAdressed.acquiredDiscreteOutputSignals
 			MemoryArea acquiredDiscreteInternalSignals;				// copying from this->appBitAdressed.acquiredDiscreteInternalSignals
 			MemoryArea acquiredDiscreteOptoSignals;
@@ -312,6 +315,8 @@ namespace Builder
 			// non-Acquired Input Buses are disposed in IO modules memory
 			MemoryArea nonAcquiredOutputBuses;
 			MemoryArea nonAcquiredInternalBuses;
+
+			MemoryArea nonAcquiredDiscreteInvertedInputSignals;
 
 			MemoryArea wordAccumulator;
 

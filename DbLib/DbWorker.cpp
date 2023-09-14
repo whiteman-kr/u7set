@@ -7688,7 +7688,7 @@ bool DbWorker::processingAfterDatabaseUpgrade0215(QSqlDatabase& db, QString* err
 		protoData.set_decimalplaces(q.value(SD_DECIMAL_PLACES).toInt());
 		protoData.set_coarseaperture(q.value(SD_COARSE_APERTURE).toDouble());
 		protoData.set_fineaperture(q.value(SD_FINE_APERTURE).toDouble());
-		protoData.set_adaptiveaperture(q.value(SD_ADAPTIVE_APERTURE).toBool());
+		protoData.set_obsolete_adaptiveaperture(q.value(SD_ADAPTIVE_APERTURE).toBool());
 
 		int protoDataSize = static_cast<int>(protoData.ByteSizeLong());
 
@@ -7850,7 +7850,8 @@ bool DbWorker::processingAfterDatabaseUpgrade0302(QSqlDatabase& db, QString* err
 		{
 			if (parseErrorCount < 10)
 			{
-				*errorMessage += QString(tr("SignalInstance %1 specPropValues data parsing error\n"));
+				*errorMessage += QString(tr("SignalInstance %1 specPropValues data parsing error\n")).
+										arg(signalInstanceID);
 			}
 
 			parseErrorCount++;
@@ -7879,7 +7880,8 @@ bool DbWorker::processingAfterDatabaseUpgrade0302(QSqlDatabase& db, QString* err
 			{
 				if (updateErrorCount < 10)
 				{
-					*errorMessage += QString(tr("SignalInstance %1 specPropValues updating error\n"));
+					*errorMessage += QString(tr("SignalInstance %1 specPropValues updating error\n")).
+											arg(signalInstanceID);
 				}
 
 				updateErrorCount++;
@@ -7942,7 +7944,7 @@ bool DbWorker::processingAfterDatabaseUpgrade0395(QSqlDatabase& db, QString* err
 	{
 		int signalInstanceID = q.value(COL_SIGNAL_INSTANCE_ID).toInt();
 		E::SignalType signalType = static_cast<E::SignalType>(q.value(COL_SIGNAL_TYPE).toInt());
-		E::SignalType signalInOutType = static_cast<E::SignalInOutType>(q.value(COL_SIGNAL_IN_OUT_TYPE).toInt());
+		E::SignalInOutType signalInOutType = static_cast<E::SignalInOutType>(q.value(COL_SIGNAL_IN_OUT_TYPE).toInt());
 
 		if (signalType == E::SignalType::Discrete &&
 			(signalInOutType == E::SignalInOutType::Input || signalInOutType == E::SignalInOutType::Output))
@@ -7951,7 +7953,7 @@ bool DbWorker::processingAfterDatabaseUpgrade0395(QSqlDatabase& db, QString* err
 			// Add InvertSignal specific property to Input and Output Discrete signals
 			//
 
-			QStyring specPropStruct = q.value(COL_SPEC_PROP_STRUCT).toString();
+			QString specPropStruct = q.value(COL_SPEC_PROP_STRUCT).toString();
 
 			if (specPropStruct.contains(INVERT_SIGNAL_PROP_NAME) == true)
 			{
@@ -7983,7 +7985,8 @@ bool DbWorker::processingAfterDatabaseUpgrade0395(QSqlDatabase& db, QString* err
 			{
 				if (parseErrorCount < 10)
 				{
-					*errorMessage += QString(tr("SignalInstance %1 specPropValues data parsing error\n"));
+					*errorMessage += QString(tr("SignalInstance %1 specPropValues data parsing error\n")).
+												arg(signalInstanceID);
 				}
 
 				parseErrorCount++;
@@ -8010,14 +8013,13 @@ bool DbWorker::processingAfterDatabaseUpgrade0395(QSqlDatabase& db, QString* err
 			{
 				if (updateErrorCount < 10)
 				{
-					*errorMessage += QString(tr("SignalInstance %1 updating error\n"));
+					*errorMessage += QString(tr("SignalInstance %1 updating error\n")).
+											arg(signalInstanceID);
 				}
 
 				updateErrorCount++;
 				continue;
 			}
-
-			qDebug() << "Update discrete signal instanceID" << signalInstanceID << "OK";
 
 			continue;
 		}
@@ -8036,7 +8038,8 @@ bool DbWorker::processingAfterDatabaseUpgrade0395(QSqlDatabase& db, QString* err
 			{
 				if (parseErrorCount < 10)
 				{
-					*errorMessage += QString(tr("SignalInstance %1 signalProtoData data parsing error\n"));
+					*errorMessage += QString(tr("SignalInstance %1 signalProtoData data parsing error\n")).
+											arg(signalInstanceID);
 				}
 
 				parseErrorCount++;
@@ -8059,8 +8062,8 @@ bool DbWorker::processingAfterDatabaseUpgrade0395(QSqlDatabase& db, QString* err
 
 			psd.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(signalProtoData.data()));
 
-			QString queryStr = QString(	"UPDATE SignalInstance SET ProtoData = '%1' "
-										"WHERE SignalInstanceID = %3").
+			QString queryStr = QString(	"UPDATE SignalInstance SET ProtoData = %1 "
+										"WHERE SignalInstanceID = %2").
 												arg(toSqlByteaStr(signalProtoData)).
 												arg(signalInstanceID);
 			QSqlQuery updateQuery(db);
@@ -8071,14 +8074,13 @@ bool DbWorker::processingAfterDatabaseUpgrade0395(QSqlDatabase& db, QString* err
 			{
 				if (updateErrorCount < 10)
 				{
-					*errorMessage += QString(tr("SignalInstance %1 updating error\n"));
+					*errorMessage += QString(tr("SignalInstance %1 updating error\n")).
+											arg(signalInstanceID);
 				}
 
 				updateErrorCount++;
 				continue;
 			}
-
-			qDebug() << "Update analog signal instanceID" << signalInstanceID << "OK";
 		}
 	}
 

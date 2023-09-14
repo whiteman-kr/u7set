@@ -87,12 +87,25 @@ void DynamicAppSignalState::setSignalParams(const AppSignal* signal, const AppSi
 
 	m_lowLimit = signal->lowEngineeringUnits();
 	m_highLimit = signal->highEngineeringUnits();
-	m_adaptiveAperture = signal->adaptiveAperture();
+	m_apertureType = signal->apertureType();
 
-	if (m_adaptiveAperture == false)
+	switch(m_apertureType)
 	{
+	case E::ApertureType::RangePercent:
 		m_absCoarseAperture = fabs(m_highLimit - m_lowLimit) * (m_coarseAperture / 100.0);
 		m_absFineAperture = fabs(m_highLimit - m_lowLimit) * (m_fineAperture / 100.0);
+		break;
+
+	case E::ApertureType::ValuePercent:		// ex AdaptiveAperture
+		break;
+
+	case E::ApertureType::AbsValue:
+		m_absCoarseAperture = signal->coarseAperture();
+		m_absFineAperture = signal->fineAperture();
+		break;
+
+	default:
+		Q_ASSERT(false);
 	}
 
 	m_current[0].hash = m_current[1].hash = m_signalHash;
@@ -259,8 +272,10 @@ int DynamicAppSignalState::setState(const Times& time,
 					//
 					if (checkApertures == true)
 					{
-						if (m_adaptiveAperture == true)
+						switch(m_apertureType)
 						{
+						case E::ApertureType::ValuePercent:
+
 							if (m_fineStoredValue != 0)
 							{
 								double fineAbsAperture = fabs((fabs(value - m_fineStoredValue) * 100) / m_fineStoredValue);
@@ -288,9 +303,12 @@ int DynamicAppSignalState::setState(const Times& time,
 							{
 								m_coarseStoredValue = curState.value;
 							}
-						}
-						else
-						{
+
+							break;
+
+						case E::ApertureType::RangePercent:
+						case E::ApertureType::AbsValue:
+
 							if (fabs(m_fineStoredValue - curState.value) > m_absFineAperture)
 							{
 								curState.flags.fineAperture = 1;
@@ -300,6 +318,11 @@ int DynamicAppSignalState::setState(const Times& time,
 							{
 								curState.flags.coarseAperture = 1;
 							}
+
+							break;
+
+						default:
+							Q_ASSERT(false);
 						}
 
 						curState.flags.aboveHighLimit = (curState.value > m_highLimit ? 1 : 0);

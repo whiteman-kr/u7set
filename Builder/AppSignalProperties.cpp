@@ -340,8 +340,9 @@ void AppSignalProperties::initProperties(bool savePropertyDescription)
 	fineApertureProperty->setPrecision(4);
 	fineApertureProperty->setCategory(categoryOnlineMonitoringSystem);
 
-	auto adaptiveApertureProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(bool, AppSignalPropNames::ADAPTIVE_APERTURE, true, AppSignal::adaptiveAperture, AppSignal::setAdaptiveAperture, m_signal);
-	adaptiveApertureProperty->setCategory(categoryOnlineMonitoringSystem);
+	auto apertureTypeProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(E::ApertureType, AppSignalPropNames::APERTURE_TYPE,
+															true, AppSignal::apertureType, AppSignal::setApertureType, m_signal);
+	apertureTypeProperty->setCategory(categoryOnlineMonitoringSystem);
 
 	auto acquireProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(bool, AppSignalPropNames::ACQUIRE, true, AppSignal::acquire, AppSignal::setAcquire, m_signal);
 	acquireProperty->setCategory(categoryOnlineMonitoringSystem);

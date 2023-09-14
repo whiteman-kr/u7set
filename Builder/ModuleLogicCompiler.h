@@ -368,6 +368,7 @@ namespace Builder
 		bool createNonAcquiredDiscreteInputSignalsList();
 		bool createNonAcquiredDiscreteStrictOutputSignalsList();
 		bool createNonAcquiredDiscreteInternalSignalsList();
+		bool createDiscreteInvertedOutputSignalsList();
 
 		bool createAcquiredAnalogInputSignalsList();
 		bool createAcquiredAnalogStrictOutputSignalsList();
@@ -397,7 +398,7 @@ namespace Builder
 		bool groupTxSignals();
 
 		bool listsUniquenessCheck() const;
-		bool listUniquenessCheck(QHash<UalSignal*, UalSignal*>& signalsMap, const QVector<UalSignal*>& signalList) const;
+		bool listUniquenessCheck(std::set<UalSignal*>* presentSignalsSet, const QVector<UalSignal*>& signalList) const;
 
 		void sortSignalList(QVector<UalSignal*>& signalList);
 		void sortSignalList(QVector<const UalSignal*>& signalList);
@@ -414,6 +415,7 @@ namespace Builder
 		//
 		bool setDiscreteAndBusInputSignalsUalAddresses();
 		bool disposeDiscreteSignalsInBitMemory();
+		bool disposeNonAcquiredDiscreteInvertedInputSignals();
 		bool disposeDiscreteSignalsHeap();
 
 		// disposing acquired analog, discrete and bus signals in registration buffer (word-addressed memory)
@@ -432,8 +434,8 @@ namespace Builder
 
 		bool setSignalsRegValidityAddr();
 
-		bool appendAfbsForAnalogInOutSignalsConversion();
-		bool findFbsForAnalogInOutSignalsConversion();
+		bool appendAfbsForInOutSignalsConversion();
+		bool findFbsForInOutSignalsConversion();
 		bool createAfbForAnalogInputSignalConversion(const AppSignal& signal, UalItem* appItem, bool* needConversion);
 		bool createFbForAnalogOutputSignalConversion(const AppSignal& signal, UalItem* appItem, bool* needConversion);
 		bool isDeviceAndAppSignalsIsCompatible(const Hardware::DeviceAppSignal& deviceAppSignal, const AppSignal& appSignal);
@@ -505,6 +507,7 @@ namespace Builder
 		bool generateIdrCodeStop(CodeSnippet* code);
 
 		bool copyAcquiredRawDataInRegBuf(CodeSnippet* code);
+		bool invertDiscreteInputSignals(CodeSnippet* code);
 		bool convertAnalogInputSignals(CodeSnippet* code);
 
 		bool generateAppLogicCode(CodeSnippet* code);
@@ -566,6 +569,10 @@ namespace Builder
 
 		bool generateAfbBitAccOrCode(CodeSnippet* code, const UalAfb* ualAfb, bool* result);
 		bool generateAfbBitAccAndCode(CodeSnippet* code, const UalAfb* ualAfb, bool* result);
+
+		bool generateInvertDiscreteInputsCode(CodeSnippet* code,
+											  const QVector<UalSignal*>& inSignals,
+											  const QString& comment);
 
 		bool calcBusProcessingSteps(const UalAfb* ualAfb, std::vector<int>* busProcessingStepsSizes);
 		bool getPinsAndSignalsBusSizes(const UalAfb* ualAfb, const std::vector<LogicPin>& pins,
@@ -968,6 +975,9 @@ namespace Builder
 		Loopbacks m_loopbacks;
 
 		QVector<UalSignal*> m_acquiredDiscreteInputSignals;				// acquired discrete input signals, no matter used in UAL or NOT
+																		// with property InvertSignal == false
+
+		QVector<UalSignal*> m_acquiredDiscreteInvertedInputSignals;		// same as above but with property InvertSignal == true
 
 		QVector<UalSignal*> m_acquiredDiscreteStrictOutputSignals;		// acquired discrete Strict Output Signals, used in UAL
 																		//
@@ -980,10 +990,13 @@ namespace Builder
 		QVector<UalSignal*> m_acquiredDiscreteOptoSignals;
 		QVector<UalSignal*> m_acquiredDiscreteBusChildSignals;
 
-		QVector<UalSignal*> m_nonAcquiredDiscreteInputSignals;			// non acquired discrete input signals, used in UAL
+		QVector<UalSignal*> m_nonAcquiredDiscreteInputSignals;			// non acquired discrete input signals, used in UAL, with property InvertSignal == false
+		QVector<UalSignal*> m_nonAcquiredDiscreteInvertedInputSignals;	// same as above but with property InvertSignal == true
+
 		QVector<UalSignal*> m_nonAcquiredDiscreteStrictOutputSignals;	// non acquired discrete output signals, used in UAL
 		QVector<UalSignal*> m_nonAcquiredDiscreteInternalSignals;		// non acquired discrete internal non tuningbale signals, used in UAL
-		QVector<UalSignal*> m_nonAcquiredDiscreteOptoSignals;			// non acquired discrete internal opto signals, used in UAL
+//		QVector<UalSignal*> m_nonAcquiredDiscreteOptoSignals;			// non acquired discrete internal opto signals, used in UAL
+		QVector<UalSignal*> m_discreteInvertedOutputSignals;			// non acquired discrete internal opto signals, used in UAL
 
 		QVector<UalSignal*> m_acquiredAnalogInputSignals;				// acquired analog input signals, no matter used in UAL or not
 		QVector<UalSignal*> m_acquiredAnalogStrictOutputSignals;		// acquired analog strict output signals, used in UAL
@@ -1016,12 +1029,8 @@ namespace Builder
 
 		std::map<QString, FbConv> m_fbConv;								// AFB caption => FbConv structure
 
-		static const QString FB_SCALE_16UI_FP;
-		static const QString FB_SCALE_16UI_SI;
-		static const QString FB_SCALE_FP_16UI;
-		static const QString FB_SCALE_SI_16UI;
-		static const QString FB_TCONV_FP_SI;
-		static const QString FB_TCONV_SI_FP;
+		UalAfb* m_afbBusNot = nullptr;
+		UalAfb* m_afbNot = nullptr;
 
 		static const char* INPUT_CONTROLLER_SUFFIX;
 		static const char* OUTPUT_CONTROLLER_SUFFIX;

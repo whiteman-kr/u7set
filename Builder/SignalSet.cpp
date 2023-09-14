@@ -528,7 +528,7 @@ namespace Builder
 		newSignal->setDecimalPlaces(2);				// !!!
 		newSignal->setCoarseAperture(1);
 		newSignal->setFineAperture(0.5);
-		newSignal->setAdaptiveAperture(false);
+		newSignal->setApertureType(E::ApertureType::RangePercent);
 
 		return newSignal;
 	}

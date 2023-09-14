@@ -50,6 +50,18 @@ const std::vector<AppSignalPropertyDescription> AppSignalPropertyManager::m_repl
 		E::enumValuesMap<E::AnalogAppSignalFormat>(),
 		{}
 	},
+
+	{
+		false,
+		AppSignalPropNames::APERTURE_TYPE,
+		"Aperture type",
+		QMetaType::QString,
+		[](const AppSignal* s) { return E::valueToString<E::ApertureType>(s->apertureType()); },
+		[](AppSignal* s, const QVariant& v) { s->setApertureType(static_cast<E::ApertureType>(v.toInt())); },
+		E::enumValuesMap<E::ApertureType>(),
+		{}
+	},
+
 };
 
 AppSignalPropertyManager::AppSignalPropertyManager(DbController* dbController, QWidget* parentWidget) :

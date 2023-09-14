@@ -490,6 +490,7 @@ namespace Builder
 		bool isAnalog() const { return m_refSignals[0]->isAnalog(); }
 		bool isDiscrete() const { return m_refSignals[0]->isDiscrete(); }
 		bool isBus() const { return m_refSignals[0]->isBus(); }
+		bool invertSignal() const { return m_refSignals[0]->invertSignal(); }
 
 		bool isHeapPlaced() const { return m_isHeapPlaced; }
 
