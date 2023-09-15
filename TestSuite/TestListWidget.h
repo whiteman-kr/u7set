@@ -9,12 +9,17 @@
 
 class TestTreeWidget : public QTreeWidget
 {
+	Q_OBJECT
 public:
 	void setParentItemsCheckState();
 
 private:
 	void keyPressEvent(QKeyEvent *event) override;
 	void keyReleaseEvent(QKeyEvent *event) override;
+
+signals:
+	void testSelectionChanged();
+
 };
 
 

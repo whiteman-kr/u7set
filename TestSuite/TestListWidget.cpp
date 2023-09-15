@@ -102,6 +102,8 @@ void TestTreeWidget::keyPressEvent(QKeyEvent *event)
 
 		blockSignals(false);
 	}
+
+	emit testSelectionChanged();
 }
 
 void TestTreeWidget::keyReleaseEvent(QKeyEvent *event)
@@ -138,6 +140,7 @@ TestListWidget::TestListWidget(TestSuiteLogFile& appLog, QWidget* parent):
 	connect(m_treeWidget, &QTreeWidget::itemDoubleClicked, this, &TestListWidget::testItemDoubleClicked);
 	connect(m_treeWidget, &QTreeWidget::itemChanged, this, &TestListWidget::testItemChanged);
 	connect(m_treeWidget, &QTreeWidget::customContextMenuRequested, this, &TestListWidget::contextMenuRequested);
+	connect(m_treeWidget, &TestTreeWidget::testSelectionChanged, this, &TestListWidget::testSelectionChanged);
 
 	layout->addWidget(m_testsPathLabel);
 	layout->addWidget(m_treeWidget);
@@ -444,7 +447,7 @@ void TestListWidget::testItemChanged(QTreeWidgetItem *item, int column)
 		m_treeWidget->blockSignals(false);
 	}
 
-	emit testSelectionChanged();
+ 	emit testSelectionChanged();
 }
 
 void TestListWidget::contextMenuRequested()

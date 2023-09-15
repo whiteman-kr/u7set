@@ -32,6 +32,9 @@ namespace TestSuite
 					 const TestScriptSelection& testsFilter,	// Tests filter
 					 const QString& userName,
 					 const QString& password);
+
+		void updateSettings(const TestSuiteSettings& settings);
+
 		void stop();
 
 		bool isRunning() const;

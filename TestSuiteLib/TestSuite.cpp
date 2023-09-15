@@ -29,6 +29,12 @@ namespace TestSuite
 		return m_control.execute(m_softwareInfo, m_settings, scriptsFiles, scriptsPath, testsFilter, userName, password);
 	}
 
+	void TestSuite::updateSettings(const TestSuiteSettings& settings)
+	{
+		m_settings = settings;
+		m_softwareInfo.setEquipmentID(settings.instanceStrId());
+	}
+
 	void TestSuite::stop()
 	{
 		m_control.stop();

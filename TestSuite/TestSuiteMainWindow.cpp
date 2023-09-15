@@ -1017,6 +1017,8 @@ void TestSuiteMainWindow::onSettings()
 			m_configController.setConnectionParams(theSettings.librarySettings().instanceStrId(),
 															   theSettings.librarySettings().configuratorAddress1(),
 															   theSettings.librarySettings().configuratorAddress2());
+
+			m_testSuite.updateSettings(theSettings.librarySettings());
 		}
 
 		m_reloadTestsScriptsAction->setVisible(theSettings.useLocalScriptsPath() == true);
