@@ -259,7 +259,7 @@ namespace TestSuite
 							// Mark all as unsatisfied.
 							// As they could be marked as satisfied right after start(), but before wait();
 							//
-							expectation->operative.satisified = false;
+							expectation->operative.satisfied = false;
 							expectation->operative.metConditions = false;
 
 							auto& states = expectation->operative.states; // Just short ref name.
@@ -310,7 +310,7 @@ namespace TestSuite
 
 				// Process only unsatisfied expectations.
 				//
-				if (e->operative.satisified == true || e->operative.isInitial == true)
+				if (e->operative.satisfied == true || e->operative.isInitial == true)
 				{
 					continue;
 				}
@@ -403,7 +403,7 @@ namespace TestSuite
 			{
 				bool met = std::all_of(m_expectations.begin(), m_expectations.end(), [](const auto& e)
 									   {
-										   return e->operative.satisified == true;
+										   return e->operative.satisfied == true;
 									   });
 				if (met == true)
 				{

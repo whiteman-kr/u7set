@@ -57,7 +57,7 @@ namespace TestSuite
 
 			if (operative.metConditions == true)
 			{
-				operative.satisified = true;
+				operative.satisfied = true;
 			}
 
 			return operative.metConditions;
@@ -96,7 +96,7 @@ namespace TestSuite
 			QString dataSourceEquipmentId; // Several realtime data sources can be configured, but we take the only one, the first arrived.
 			std::deque<TrendLib::TrendStateItem> states;
 			bool metConditions = false;
-			bool satisified = false;
+			bool satisfied = false;
 			bool isInitial = false;
 		} operative;
 	};
@@ -106,7 +106,7 @@ namespace TestSuite
 		ToExpectationEqual(const QString& appSignalId, double expectedValue, double tolerance) :
 			ToExpectation{appSignalId},
 			expectedValue{expectedValue},
-			tolerance{}
+			tolerance{tolerance}
 		{
 		}
 
@@ -120,7 +120,19 @@ namespace TestSuite
 				return false;
 			}
 
-			return std::abs(expectedValue - operative.states.back().value) <= tolerance;
+			double value = operative.states.back().value;
+
+			if (std::isnan(expectedValue) == true && std::isnan(value) == true)
+			{
+				return true;
+			}
+
+			if (std::isinf(expectedValue) == true && std::isinf(value) == true && std::signbit(expectedValue) == std::signbit(value))
+			{
+				return true;
+			}
+
+			return std::abs(expectedValue - value) <= tolerance;
 		}
 
 		virtual QString toString() const override

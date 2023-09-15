@@ -86,7 +86,20 @@ namespace Sim
 		bool metPrivate() const override
 		{
 			Q_ASSERT(states.empty() == false);
-			return std::abs(expectedValue - states.back().value()) <= tolerance;
+
+			double value = states.back().value();
+
+			if (std::isnan(expectedValue) == true && std::isnan(value) == true)
+			{
+				return true;
+			}
+
+			if (std::isinf(expectedValue) == true && std::isinf(value) == true && std::signbit(expectedValue) == std::signbit(value))
+			{
+				return true;
+			}
+
+			return std::abs(expectedValue - value) <= tolerance;
 		}
 
 		virtual QString toString() const override
