@@ -112,21 +112,16 @@ namespace Builder
 	//
 	// ---------------------------------------------------------------------------------
 
-	const char* ModuleLogicCompiler::INPUT_CONTROLLER_SUFFIX = "_CTRLIN";
-	const char* ModuleLogicCompiler::OUTPUT_CONTROLLER_SUFFIX = "_CTRLOUT";
-	const char* ModuleLogicCompiler::PLATFORM_INTERFACE_CONTROLLER_SUFFIX = "_PI";
+//	const char* ModuleLogicCompiler::INPUT_CONTROLLER_SUFFIX = "_CTRLIN";
+//	const char* ModuleLogicCompiler::OUTPUT_CONTROLLER_SUFFIX = "_CTRLOUT";
+//	const char* ModuleLogicCompiler::PLATFORM_INTERFACE_CONTROLLER_SUFFIX = "_PI";
 
-/*	const QString ModuleLogicCompiler::FB_SCALE_16UI_FP("scale_16ui_fp");
-	const QString ModuleLogicCompiler::FB_SCALE_16UI_SI("scale_16ui_si");
-	const QString ModuleLogicCompiler::FB_SCALE_FP_16UI("scale_fp_16ui");
-	const QString ModuleLogicCompiler::FB_SCALE_SI_16UI("scale_si_16ui");
-	const QString ModuleLogicCompiler::FB_TCONV_FP_SI("tconv_fp_si");
-	const QString ModuleLogicCompiler::FB_TCONV_SI_FP("tconv_si_fp");*/
+//	const char* ModuleLogicCompiler::BUS_COMPOSER_CAPTION = "BusComposer";
+//	const char* ModuleLogicCompiler::BUS_EXTRACTOR_CAPTION = "BusExtractor";
 
-	const char* ModuleLogicCompiler::BUS_COMPOSER_CAPTION = "BusComposer";
-	const char* ModuleLogicCompiler::BUS_EXTRACTOR_CAPTION = "BusExtractor";
+//	const char* ModuleLogicCompiler::TEST_DATA_DIR = "TestData/";
 
-	const char* ModuleLogicCompiler::TEST_DATA_DIR = "TestData/";
+	const QString ModuleLogicCompiler::EMPTY_STR(QStringLiteral(""));
 
 	ModuleLogicCompiler::ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, const Hardware::DeviceModule* lm) :
 		m_appLogicCompiler(appLogicCompiler),
@@ -315,7 +310,7 @@ namespace Builder
 		{
 			assert(false);
 			LOG_NULLPTR_ERROR(m_log);
-			return QString();
+			return EMPTY_STR;
 		}
 
 		return m_lm->equipmentIdTemplate();
@@ -1317,7 +1312,7 @@ namespace Builder
 			}
 		}
 
-		return QString();
+		return EMPTY_STR;
 	}
 
 	bool ModuleLogicCompiler::findLoopbackSources()
@@ -3604,7 +3599,7 @@ namespace Builder
 								signalWithFlagID,
 								currentStateFlagSignalID,
 								(setFlagsItem == nullptr ? QUuid() : setFlagsItem->guid()),
-								(setFlagsItem == nullptr ? QString() : setFlagsItem->schemaID()));
+								(setFlagsItem == nullptr ? EMPTY_STR : setFlagsItem->schemaID()));
 			return false;
 		}
 
@@ -3906,7 +3901,7 @@ namespace Builder
 
 	AppSignal* ModuleLogicCompiler::getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal)
 	{
-		return getCompatibleConnectedSignal(outPin, outAfbSignal, QString());
+		return getCompatibleConnectedSignal(outPin, outAfbSignal, EMPTY_STR);
 	}
 
 	AppSignal* ModuleLogicCompiler::getCompatibleConnectedSignal(const LogicPin& outPin, const AppSignal& s)
@@ -6431,6 +6426,23 @@ namespace Builder
 			return true;
 		}
 
+		auto assignUalAfbToFbConv = [this](const UalAfb* ualAfb) -> bool
+									{
+										TEST_PTR_RETURN_FALSE(ualAfb);
+
+										auto it = this->m_fbConv.find(ualAfb->caption());
+
+										if (it == this->m_fbConv.end())
+										{
+											LOG_INTERNAL_ERROR(m_log);
+											return false;
+										}
+
+										it->second.ualAfbs.insert(ualAfb);
+
+										return true;
+									};
+
 		bool result = true;
 
 		// append FBs for analog input signals conversion
@@ -6472,11 +6484,18 @@ namespace Builder
 
 			if (needConversion == true)
 			{
-				UalAfb* appFb = createUalAfb(appItem);
+				UalAfb* ualAfb = createUalAfb(appItem);
 
-				m_inOutSignalsToScalAppFbMap.insert(s->appSignalID(), appFb);
+				if (assignUalAfbToFbConv(ualAfb) == false)
+				{
+					return false;
+				}
+
+				m_inOutSignalsToScalAppFbMap.insert(s->appSignalID(), ualAfb);
 			}
 		}
+
+		RETURN_IF_FALSE(result);
 
 		// append FBs for analog output signals conversion
 		//
@@ -6503,62 +6522,66 @@ namespace Builder
 
 			if (needConversion == true)
 			{
-				UalAfb* appFb = createUalAfb(appItem);
+				UalAfb* ualAfb = createUalAfb(appItem);
 
-				m_inOutSignalsToScalAppFbMap.insert(s->appSignalID(), appFb);
+				RETURN_IF_FALSE(assignUalAfbToFbConv(ualAfb) == false);
+
+				m_inOutSignalsToScalAppFbMap.insert(s->appSignalID(), ualAfb);
 			}
 		}
 
+		RETURN_IF_FALSE(result);
+
 		// append FBs for discrete in/output signals conversion
 		//
-		if (m_bitAccAvailable == false)
+		if ((m_acquiredDiscreteInvertedInputSignals.size() +
+			m_nonAcquiredDiscreteInvertedInputSignals.size() +
+			m_discreteInvertedOutputSignals.size()) > 0)
 		{
-			auto findAndCreateAfb = [this](const QString& afbCaption) -> UalAfb*
-									{
-										UalAfb* afb = nullptr;
-
-										auto it = this->m_fbConv.find(afbCaption);
-
-										if (it != this->m_fbConv.end())
-										{
-											const FbConv& fb = it->second;
-
-											QString errorMsg;
-
-											UalItem appItem;
-
-											appItem.init(fb.pointer, errorMsg);
-
-											if (errorMsg.isEmpty() == false)
-											{
-												LOG_INTERNAL_ERROR_MSG(this->m_log, errorMsg);
-											}
-											else
-											{
-												afb = createUalAfb(appItem);
-											}
-										}
-										else
-										{
-											LOG_INTERNAL_ERROR(this->m_log);
-										}
-
-										return afb;
-									};
-
-			if ((m_acquiredDiscreteInvertedInputSignals.size() +
-				m_nonAcquiredDiscreteInvertedInputSignals.size()) > 0)
+			static const std::vector<QString> afbsNotCaptions =
 			{
-				m_afbBusNot = findAndCreateAfb(Afb::AFB_BUS_NOT);
+				Afb::AFB_BUS_NOT,
+				Afb::AFB_NOT
+			};
 
-				result &= (m_afbBusNot != nullptr);
-			}
-
-			if (m_discreteInvertedOutputSignals.size() > 0)
+			for(const QString& afbCaption : afbsNotCaptions)
 			{
-				m_afbNot = findAndCreateAfb(Afb::AFB_NOT);
+				UalAfb* ualAfb = nullptr;
 
-				result &= (m_afbNot != nullptr);
+				auto it = this->m_fbConv.find(afbCaption);
+
+				if (it == this->m_fbConv.end())
+				{
+					LOG_INTERNAL_ERROR(this->m_log);
+					result = false;
+					continue;
+				}
+
+				FbConv& fb = it->second;
+
+				QString errorMsg;
+				UalItem appItem;
+
+				appItem.init(fb.pointer, errorMsg);
+
+				if (errorMsg.isEmpty() == false)
+				{
+					LOG_INTERNAL_ERROR_MSG(this->m_log, errorMsg);
+					result = false;
+					continue;
+				}
+
+				ualAfb = createUalAfb(appItem);
+
+				if (ualAfb != nullptr)
+				{
+					fb.ualAfbs.insert(ualAfb);
+				}
+				else
+				{
+					LOG_INTERNAL_ERROR(this->m_log);
+					result = false;
+				}
 			}
 		}
 
@@ -7235,27 +7258,27 @@ namespace Builder
 			return nullptr;
 		}
 
-		UalAfb* appFb = new UalAfb(appItem, afbl->isBusProcessingAfb());
+		UalAfb* ualAfb = new UalAfb(appItem, afbl->isBusProcessingAfb());
 
-		if (appFb->calculateFbParamValues(this) == false)
+		if (ualAfb->calculateFbParamValues(this) == false)
 		{
-			delete appFb;
+			delete ualAfb;
 			return nullptr;
 		}
 
 		// get Functional Block instance
 		//
-		bool result = m_afbls.addInstance(appFb, m_log);
+		bool result = m_afbls.addInstance(ualAfb, m_log);
 
 		if (result == false)
 		{
-			delete appFb;
+			delete ualAfb;
 			return nullptr;
 		}
 
-		m_ualAfbs.insert(appFb);
+		m_ualAfbs.insert(ualAfb);
 
-		return appFb;
+		return ualAfb;
 	}
 
 	bool ModuleLogicCompiler::setOutputSignalsAsComputed()
@@ -10608,20 +10631,32 @@ namespace Builder
 		RETURN_IF_FALSE(result);
 
 		const FbConv* fbBusNot = nullptr;
+		const UalAfb* afbBusNot = nullptr;
 
 		if (m_bitAccAvailable == false)
 		{
 			auto it = m_fbConv.find(Afb::AFB_BUS_NOT);
 
-			if (it != m_fbConv.end())
-			{
-				fbBusNot = &it->second;
-			}
-
-			if (fbBusNot == nullptr || m_afbBusNot == nullptr)
+			if (it == m_fbConv.end())
 			{
 				LOG_INTERNAL_ERROR(m_log);
-				result = false;
+				return false;
+			}
+
+			fbBusNot = &it->second;
+
+			if (fbBusNot->ualAfbs.size() != 1)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
+
+			afbBusNot = *fbBusNot->ualAfbs.begin();
+
+			if (afbBusNot == nullptr)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
 			}
 		}
 
@@ -10705,22 +10740,22 @@ namespace Builder
 					bitNo++;
 				}
 
-				*code << cmd.writeFuncBlock(m_afbBusNot->opcode(),
-										   m_afbBusNot->instance(),
+				*code << cmd.writeFuncBlock(afbBusNot->opcode(),
+										   afbBusNot->instance(),
 										   fbBusNot->inputSignalIndex,
 										   bitAccAddr,
-										   m_afbBusNot->caption());
+										   afbBusNot->caption());
 
-				*code << cmd.startafb(m_afbBusNot->opcode(),
-									 m_afbBusNot->instance(),
-									 m_afbBusNot->caption(),
-									 m_afbBusNot->runTime());
+				*code << cmd.startafb(afbBusNot->opcode(),
+									 afbBusNot->instance(),
+									 afbBusNot->caption(),
+									 afbBusNot->runTime());
 
 				*code << cmd.readFuncBlock(offset,
-										  m_afbBusNot->opcode(),
-										  m_afbBusNot->instance(),
+										  afbBusNot->opcode(),
+										  afbBusNot->instance(),
 										  fbBusNot->outputSignalIndex,
-										  m_afbBusNot->caption());
+										  afbBusNot->caption());
 			}
 
 			code->newLine();
@@ -11856,7 +11891,7 @@ namespace Builder
 				srcSignals.insert({ busChildSignal->ualAddr(), { inSignal, readUalAddr, comment } });
 			}
 
-			result &= codeCopyBits(code, busChildSignalsOffset, srcSignals);
+			result &= codeCopyBits2(code, busChildSignalsOffset, srcSignals);
 			code->newLine();
 
 			busFilling->fillWord(inbusOffset);
@@ -14253,7 +14288,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::copyScatteredDiscreteSignalsInRegBuf(CodeSnippet* code, const QVector<UalSignal*>& signalsList, const QString &description)
+	bool ModuleLogicCompiler::copyScatteredDiscreteSignalsInRegBuf(CodeSnippet* code, const QVector<UalSignal*>& signalsList, const QString& description)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 
@@ -14289,7 +14324,7 @@ namespace Builder
 			{
 				if (srcSignals.empty() == false)
 				{
-					result &= codeCopyBits(code, destAddressOffset, srcSignals);
+					result &= codeCopyBits2(code, destAddressOffset, srcSignals);
 					code->newLine();
 
 					srcSignals.clear();
@@ -14303,7 +14338,7 @@ namespace Builder
 
 		if (srcSignals.empty() == false)
 		{
-			result &= codeCopyBits(code, destAddressOffset, srcSignals);
+			result &= codeCopyBits2(code, destAddressOffset, srcSignals);
 			code->newLine();
 		}
 
@@ -14672,7 +14707,7 @@ namespace Builder
 				continue;
 			}
 
-			writeAddrSignals.insert({writeAddr, { ualSignal, ualSignal->ualAddrWithoutChecks(), QString() }});
+			writeAddrSignals.insert({writeAddr, { ualSignal, ualSignal->ualAddrWithoutChecks(), EMPTY_STR }});
 		}
 
 		RETURN_IF_FALSE(result);
@@ -14684,7 +14719,7 @@ namespace Builder
 
 		for(auto& [writeAddrOffset, writeAddrSignals] : writeAddressesMap)
 		{
-			bool res = codeCopyBits(code, writeAddrOffset, writeAddrSignals);
+			bool res = codeCopyBits2(code, writeAddrOffset, writeAddrSignals);
 
 			if (res == false)
 			{
@@ -17515,7 +17550,7 @@ namespace Builder
 			return appItem->schemaID();
 		}
 
-		return QString();
+		return EMPTY_STR;
 	}
 
 	bool ModuleLogicCompiler::getLMIntProperty(const QString& name, int *value)
@@ -17789,9 +17824,287 @@ namespace Builder
 		return cmd;
 	}
 
-	bool ModuleLogicCompiler::codeCopyBits(CodeSnippet* code,
+	bool ModuleLogicCompiler::codeCopyBits(CodeSnippet* code, const CopyBitsMap& copyBitsMap)
+	{
+		TEST_PTR_RETURN_FALSE(m_log);
+		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
+
+		if (copyBitsMap.empty() == true)
+		{
+			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		int destAddrOffset = copyBitsMap.begin()->first.offset();
+
+		bool result = true;
+
+		int const1Count = 0;
+		int nonConstCount = 0;
+
+		int invertedBitsCount = 0;
+
+		std::set<Address16> uniqueSrcBitAddrs;
+
+		for(const auto& [destBitAddr, copyBitInfo] : copyBitsMap)
+		{
+			if (destBitAddr.isValid() == false ||
+				destBitAddr.offset() != destAddrOffset ||
+				copyBitInfo.srcBitAddr.isValid() == false ||
+				copyBitInfo.ualSignal == nullptr)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			if (copyBitInfo.ualSignal->isConstDiscrete() == true )
+			{
+				int constVal = copyBitInfo.ualSignal->constDiscreteValue();
+
+				if (copyBitInfo.invertBit)
+				{
+					constVal ^= 1;
+				}
+
+				const1Count +=  constVal;
+			}
+			else
+			{
+				if (copyBitInfo.ualSignal->isDiscrete() == false)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					result = false;
+					continue;
+				}
+
+				nonConstCount++;
+
+				uniqueSrcBitAddrs.insert(copyBitInfo.srcBitAddr);
+			}
+
+			if (copyBitInfo.invertBit == true)
+			{
+				invertedBitsCount++;
+			}
+		}
+
+		RETURN_IF_FALSE(result);
+
+		auto getComment = [](const UalSignal* ualSignal, const QString& comment) -> QString
+		{
+			if (comment.isEmpty() == false)
+			{
+				return comment;
+			}
+
+			return QString("copy %1").arg(ualSignal->refSignalIDsJoined());
+		};
+
+		CodeItem cmd;
+
+		//
+
+		if (const1Count == SIZE_16BIT)
+		{
+			const CopyBitInfo& first = *copyBitsMap.begin();
+
+			*code << cmd.movConst(destAddrOffset, 0xFFFF, getComment(first.ualSignal, first.comment));
+
+			return true;
+		}
+
+		if (const1Count + nonConstCount == 0)
+		{
+			const CopyBitInfo& first = *copyBitsMap.begin();
+
+			*code << cmd.movConst(destAddrOffset, 0x0000, getComment(first.ualSignal, first.comment));
+
+			return true;
+		}
+		'lvcmsa;vm;msdvewvrrv'
+		//
+
+		if (notConstCount == SIZE_16BIT && uniqueSrcBitAddrs.size() == 1)
+		{
+			const CopyBitInfo& cbi = copyBitsMap.begin()->second;
+
+			Address16 srcSignalAddr = *uniqueSrcBitAddrs.begin();
+
+			if (invertedBitsCount == 0)
+			{
+				*code << cmd.fillb(Address16(destAddrOffset, 0),
+										  srcSignalAddr,
+										  getComment(cbi.ualSignal, cbi.comment));
+				return true;
+			}
+
+			if (invertedBitsCount == SIZE_16BIT)
+			{
+				*code << cmd.fillb(wordAccumulatorAddress16(),
+									srcSignalAddr,
+									getComment(cbi.ualSignal, cbi.comment));
+
+				result &= codeNotWord(code, wordAccumulatorAddress16(), EMPTY_STR,
+									  Address16(destAddrOffset, 0), EMPTY_STR);
+				return result;
+			}
+
+			// else continue below
+		}
+
+		bool initializedBy0 = false;
+
+		if (m_bitAccAvailable == false || invertedBitsCount > 0)
+		{
+			int destAccAddr = destAddrOffset;
+
+			if (addressInBitMemory(destAddrOffset) == false)
+			{
+				destAccAddr = bitAccumulatorAddress();
+			}
+
+			if (const1Count + nonConstCount > 0)
+			{
+				if (const1Count > const0Count)
+				{
+					// destAcc <= 0xFFFF
+					//
+					*code << cmd.movConst(destAccAddr, 0xFFFF);
+					initializedBy1 = true;
+				}
+				else
+				{
+					// destAcc <= 0x0000
+					//
+					*code << cmd.movConst(destAccAddr, 0);
+					initializedBy0 = true;
+				}
+			}
+
+			for(const auto& [destBitAddr, copyBitInfo] : copyBitsMap)
+			{
+				if (copyBitInfo.ualSignal->isConstDiscrete() == true)
+				{
+					int constDiscreteValue = ualSignal->constDiscreteValue();
+
+					if (CopyBitInfo.inertBit == true)
+					{
+						constDiscreteValue ^= 1;
+					}
+
+					if ((constDiscreteValue == 0 && initializedBy0 == false) ||
+						(constDiscreteValue == 1 && initializedBy1 == false)
+					{
+						if ()
+						{
+							*code << cmd.movBitConst(destAccAddr, destAddr.bit(), 0,
+															getComment(ualSignal, comment));
+						}
+					}
+					else
+					{
+						if (initializedBy1 == false)
+						{
+								*code << cmd.movBitConst(destAccAddr, destAddr.bit(), 1,
+																getComment(ualSignal, comment));
+						}
+					}
+				}
+				else
+				{
+					if (ualSignal->invertSignal() == true)
+					{
+						result &= codeNotBit(code, srcAddr, getComment(ualSignal, comment),
+											 Address16(destAccAddr, destAddr.bit()), EMPTY_STR);
+					}
+					else
+					{
+						*code << cmd.movBit(destAccAddr, destAddr.bit(), srcAddr.offset(), srcAddr.bit(),
+														getComment(ualSignal, comment));
+					}
+				}
+			}
+
+			if (destAccAddr != destAddrOffset)
+			{
+				*code << cmd.mov(destAddrOffset, destAccAddr);
+			}
+		}
+		else
+		{
+			//
+
+			auto srcSignal = copyBitsMap.rbegin();
+
+			int usedBit = -1;
+
+			while(srcSignal != copyBitsMap.rend())
+			{
+				const auto& [ualSignal, srcAddr, comment] = srcSignal->second;
+
+				usedBit = srcSignal->first.bit();
+
+				if (ualSignal->isConstDiscrete() == false ||
+					(ualSignal->isConstDiscrete() &&
+					ualSignal->constDiscreteValue() == 1))
+				{
+					break;
+				}
+
+				srcSignal++;
+			}
+
+			Q_ASSERT(usedBit >= 0);
+
+			if (usedBit < SIZE_16BIT - 1)
+			{
+				*code << cmd.resetAcc();
+			}
+
+			while(srcSignal != copyBitsMap.rend() && usedBit >= 0)
+			{
+				const Address16& destAddr = srcSignal->first;
+				const auto& [ualSignal, srcAddr, comment] = srcSignal->second;
+
+				if (usedBit == destAddr.bit())
+				{
+					if (ualSignal->isConstDiscrete() == true)
+					{
+						if (ualSignal->constDiscreteValue() == 0)
+						{
+							*code << cmd.lshift0Acc(getComment(ualSignal, comment));
+						}
+						else
+						{
+							*code << cmd.lshift1Acc(getComment(ualSignal, comment));
+						}
+					}
+					else
+					{
+						*code << cmd.movBitAccAddr(srcAddr, getComment(ualSignal, comment));
+					}
+
+					srcSignal++;
+				}
+				else
+				{
+					*code << cmd.lshift0Acc();
+				}
+
+				usedBit--;
+			}
+
+			*code << cmd.movAddrAcc(destAddrOffset);
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::codeCopyBits2(CodeSnippet* code,
 										   int destAddrOffset,
-										   const std::map<Address16, std::tuple<const UalSignal *, Address16, QString> > &srcSignals)
+										   const std::map<Address16, std::tuple<const UalSignal *, Address16, QString>>& srcSignals)
 	{
 		TEST_PTR_RETURN_FALSE(m_log);
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
@@ -17810,6 +18123,7 @@ namespace Builder
 		int const0Count = 0;
 		int const1Count = 0;
 		int signalCount = 0;
+		int invertedSignalCount = 0;
 
 		std::set<Address16> uniqueSrcSignalsAddr;
 
@@ -17842,6 +18156,11 @@ namespace Builder
 				{
 					signalCount++;
 					uniqueSrcSignalsAddr.insert(srcAddr);
+
+					if (ualSignal->invertSignal() == true)
+					{
+						invertedSignalCount++;
+					}
 				}
 				else
 				{
@@ -17864,20 +18183,40 @@ namespace Builder
 			return QString("copy %1").arg(ualSignal->refSignalIDsJoined());
 		};
 
+		CodeItem cmd;
+
 		if (signalCount == SIZE_16BIT && uniqueSrcSignalsAddr.size() == 1)
 		{
 			const auto& [ualSignal, srcAddr, comment] = srcSignals.begin()->second;
 
-			*code << CodeItem().fillb(destAddrOffset,
-									  uniqueSrcSignalsAddr.begin()->offset(), uniqueSrcSignalsAddr.begin()->bit(),
-									  getComment(ualSignal, comment));
-			return true;
+			Address16 srcSignalAddr = *uniqueSrcSignalsAddr.begin();
+
+			if (invertedSignalCount == 0)
+			{
+				*code << cmd.fillb(Address16(destAddrOffset, 0),
+										  srcSignalAddr,
+										  getComment(ualSignal, comment));
+				return true;
+			}
+
+			if (invertedSignalCount == SIZE_16BIT)
+			{
+				*code << cmd.fillb(wordAccumulatorAddress16(),
+									srcSignalAddr,
+									getComment(ualSignal, comment));
+
+				result &= codeNotWord(code, wordAccumulatorAddress16(), EMPTY_STR,
+									  Address16(destAddrOffset, 0), EMPTY_STR);
+				return result;
+			}
+
+			// continue below
 		}
 
 		bool initializedBy0 = false;
 		bool initializedBy1 = false;
 
-		if (m_bitAccAvailable == false)
+		if (m_bitAccAvailable == false || invertedSignalCount > 0)
 		{
 			int destAccAddr = destAddrOffset;
 
@@ -17892,14 +18231,14 @@ namespace Builder
 				{
 					// destAcc <= 0xFFFF
 					//
-					*code << CodeItem().movConst(destAccAddr, 0xFFFF);
+					*code << cmd.movConst(destAccAddr, 0xFFFF);
 					initializedBy1 = true;
 				}
 				else
 				{
 					// destAcc <= 0
 					//
-					*code << CodeItem().movConst(destAccAddr, 0);
+					*code << cmd.movConst(destAccAddr, 0);
 					initializedBy0 = true;
 				}
 			}
@@ -17915,7 +18254,7 @@ namespace Builder
 					{
 						if (initializedBy0 == false)
 						{
-							*code << CodeItem().movBitConst(destAccAddr, destAddr.bit(), 0,
+							*code << cmd.movBitConst(destAccAddr, destAddr.bit(), 0,
 															getComment(ualSignal, comment));
 						}
 					}
@@ -17923,21 +18262,29 @@ namespace Builder
 					{
 						if (initializedBy1 == false)
 						{
-								*code << CodeItem().movBitConst(destAccAddr, destAddr.bit(), 1,
+								*code << cmd.movBitConst(destAccAddr, destAddr.bit(), 1,
 																getComment(ualSignal, comment));
 						}
 					}
 				}
 				else
 				{
-					*code << CodeItem().movBit(destAccAddr, destAddr.bit(), srcAddr.offset(), srcAddr.bit(),
-													getComment(ualSignal, comment));
+					if (ualSignal->invertSignal() == true)
+					{
+						result &= codeNotBit(code, srcAddr, getComment(ualSignal, comment),
+											 Address16(destAccAddr, destAddr.bit()), EMPTY_STR);
+					}
+					else
+					{
+						*code << cmd.movBit(destAccAddr, destAddr.bit(), srcAddr.offset(), srcAddr.bit(),
+														getComment(ualSignal, comment));
+					}
 				}
 			}
 
 			if (destAccAddr != destAddrOffset)
 			{
-				*code << CodeItem().mov(destAddrOffset, destAccAddr);
+				*code << cmd.mov(destAddrOffset, destAccAddr);
 			}
 		}
 		else
@@ -17968,7 +18315,7 @@ namespace Builder
 
 			if (usedBit < SIZE_16BIT - 1)
 			{
-				*code << CodeItem().resetAcc();
+				*code << cmd.resetAcc();
 			}
 
 			while(srcSignal != srcSignals.rend() && usedBit >= 0)
@@ -17982,32 +18329,152 @@ namespace Builder
 					{
 						if (ualSignal->constDiscreteValue() == 0)
 						{
-							*code << CodeItem().lshift0Acc(getComment(ualSignal, comment));
+							*code << cmd.lshift0Acc(getComment(ualSignal, comment));
 						}
 						else
 						{
-							*code << CodeItem().lshift1Acc(getComment(ualSignal, comment));
+							*code << cmd.lshift1Acc(getComment(ualSignal, comment));
 						}
 					}
 					else
 					{
-						*code << CodeItem().movBitAccAddr(srcAddr, getComment(ualSignal, comment));
+						*code << cmd.movBitAccAddr(srcAddr, getComment(ualSignal, comment));
 					}
 
 					srcSignal++;
 				}
 				else
 				{
-					*code << CodeItem().lshift0Acc();
+					*code << cmd.lshift0Acc();
 				}
 
 				usedBit--;
 			}
 
-			*code << CodeItem().movAddrAcc(destAddrOffset);
+			*code << cmd.movAddrAcc(destAddrOffset);
 		}
 
 		return result;
+	}
+
+	bool ModuleLogicCompiler::codeNotWord(CodeSnippet* code,
+										  const Address16& srcAddr,
+										  const QString& srcComment,
+										  const Address16& destAddr,
+										  const QString& destComment) const
+	{
+		CodeItem cmd;
+
+		if (m_bitAccAvailable == true)
+		{
+			// code used bit acc
+			//
+			*code << cmd.movAccAddr(srcAddr, srcComment);
+			*code << cmd.notAcc();
+			*code << cmd.movAddrAcc(destAddr, destComment);
+
+			return true;
+		}
+
+		// code used AFB bus_not
+		//
+		auto it = m_fbConv.find(Afb::AFB_BUS_NOT);
+
+		if (it == m_fbConv.end())
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		const FbConv& fbBusNot = it->second;
+
+		if (fbBusNot.ualAfbs.size() != 1)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		const UalAfb* afbBusNot = *fbBusNot.ualAfbs.begin();
+
+		*code << cmd.writeFuncBlock(afbBusNot->opcode(),
+								   afbBusNot->instance(),
+								   fbBusNot.inputSignalIndex,
+								   srcAddr,
+								   afbBusNot->caption(),
+								   srcComment);
+
+		*code << cmd.startafb(afbBusNot->opcode(),
+							 afbBusNot->instance(),
+							 afbBusNot->caption(),
+							 afbBusNot->runTime());
+
+		*code << cmd.readFuncBlock(destAddr,
+								  afbBusNot->opcode(),
+								  afbBusNot->instance(),
+								  fbBusNot.outputSignalIndex,
+								  afbBusNot->caption(),
+								  destComment);
+		return true;
+	}
+
+	bool ModuleLogicCompiler::codeNotBit(CodeSnippet* code,
+										  const Address16& srcAddr,
+										  const QString& srcComment,
+										  const Address16& destAddr,
+										  const QString& destComment) const
+	{
+		CodeItem cmd;
+
+		if (m_bitAccAvailable == true)
+		{
+			// code used bit acc
+			//
+			*code << cmd.movBitAccAddr(srcAddr, srcComment);
+			*code << cmd.notAcc();
+			*code << cmd.movBitAddrAcc(destAddr, destComment);
+
+			return true;
+		}
+
+		// code used AFB bus_not
+		//
+		auto it = m_fbConv.find(Afb::AFB_NOT);
+
+		if (it == m_fbConv.end())
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		const FbConv& fbNot = it->second;
+
+		if (fbNot.ualAfbs.size() != 1)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		const UalAfb* afbNot = *fbNot.ualAfbs.begin();
+
+		*code << cmd.writeFuncBlockBit(afbNot->opcode(),
+									   afbNot->instance(),
+									   fbNot.inputSignalIndex,
+									   srcAddr,
+									   afbNot->caption(),
+									   srcComment);
+
+		*code << cmd.startafb(afbNot->opcode(),
+							 afbNot->instance(),
+							 afbNot->caption(),
+							 afbNot->runTime());
+
+		*code << cmd.readFuncBlockBit(destAddr,
+									  afbNot->opcode(),
+									  afbNot->instance(),
+									  fbNot.outputSignalIndex,
+									  afbNot->caption(),
+									  destComment);
+		return true;
 	}
 
 	QString ModuleLogicCompiler::getFormatStr(const Hardware::DeviceAppSignal& ds)
@@ -18459,10 +18926,9 @@ namespace Builder
 		if (device == nullptr)
 		{
 			Q_ASSERT(false);
-			return QString();
+			return EMPTY_STR;
 		}
 
 		return device->equipmentIdTemplate();
 	}
-
 }

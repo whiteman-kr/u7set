@@ -115,6 +115,7 @@ namespace Builder
 			QString caption;
 
 			std::shared_ptr<Afb::AfbElement> pointer;
+			std::set<const UalAfb*> ualAfbs;			// pointer to ualAfb instances doing conversion
 
 			int x1ParamIndex = -1;
 			int x2ParamIndex = -1;
@@ -137,6 +138,20 @@ namespace Builder
 
 			bool isLastStep() const { return currentStep == (stepsNumber - 1); }
 		};
+
+		// helper structs to copy bits in one word code generation
+		//
+		struct CopyBitInfo
+		{
+			const UalSignal* ualSignal = nullptr;
+			Address16 srcBitAddr;
+			bool invertBit = false;
+			QString comment;
+		};
+
+		using CopyBitsMap = std::map<Address16, CopyBitInfo>;	// destBitAddr => CopyBitInfo;
+																// destBitAddr ascending ordered in map
+																// destBitAddr.offset() for all in map should have equal!
 
 		class BusFilling
 		{
@@ -755,7 +770,7 @@ namespace Builder
 		bool copyAcquiredDiscreteOutputAndInternalSignalsInRegBuf(CodeSnippet* code);
 		bool copyAcquiredDiscreteConstSignalsInRegBuf(CodeSnippet* code);
 
-		bool copyScatteredDiscreteSignalsInRegBuf(CodeSnippet* code, const QVector<UalSignal *>& signalsList, const QString& description);
+		bool copyScatteredDiscreteSignalsInRegBuf(CodeSnippet* code, const QVector<UalSignal*>& signalsList, const QString& description);
 
 		bool copyOutputSignalsInOutputModulesMemory(CodeSnippet* code);
 		bool initOutputModulesMemory(CodeSnippet* code);
@@ -860,9 +875,16 @@ namespace Builder
 
 		CodeItem codeSetMemory(int addrFrom, quint16 constValue, int sizeW, const QString& comment = QStringLiteral(""));
 
-		bool codeCopyBits(CodeSnippet* code,
+		bool codeCopyBits(CodeSnippet* code, const CopyBitsMap& copyBitsMap);
+
+		bool codeCopyBits2(CodeSnippet* code,
 						  int destAddrOffset,
 						  const std::map<Address16, std::tuple<const UalSignal*, Address16, QString>>& srcSignals);
+
+		bool codeNotWord(CodeSnippet* code, const Address16& srcAddr, const QString& srcComment,
+						 const Address16& destAddr, const QString& destComment) const;
+		bool codeNotBit(CodeSnippet* code, const Address16& srcAddr, const QString& srcComment,
+						 const Address16& destAddr, const QString& destComment) const;
 
 		UalSignalsMap& ualSignals() { return m_ualSignals; }
 
@@ -1027,19 +1049,23 @@ namespace Builder
 
 		ResourcesUsageInfo m_resourcesUsageInfo;
 
+		//
+
 		std::map<QString, FbConv> m_fbConv;								// AFB caption => FbConv structure
 
-		UalAfb* m_afbBusNot = nullptr;
-		UalAfb* m_afbNot = nullptr;
+//		UalAfb* m_afbBusNot = nullptr;
+//		UalAfb* m_afbNot = nullptr;
 
-		static const char* INPUT_CONTROLLER_SUFFIX;
-		static const char* OUTPUT_CONTROLLER_SUFFIX;
-		static const char* PLATFORM_INTERFACE_CONTROLLER_SUFFIX;
+		//
 
-		static const char* BUS_COMPOSER_CAPTION;
-		static const char* BUS_EXTRACTOR_CAPTION;
+//		static const char* INPUT_CONTROLLER_SUFFIX;
+//		static const char* OUTPUT_CONTROLLER_SUFFIX;
+//		static const char* PLATFORM_INTERFACE_CONTROLLER_SUFFIX;
 
-		static const char* TEST_DATA_DIR;
+//		static const char* BUS_COMPOSER_CAPTION;
+//		static const char* BUS_EXTRACTOR_CAPTION;
+
+//		static const char* TEST_DATA_DIR;
 
 		QVector<UalItem*> m_scalAppItems;
 		QHash<QString, UalAfb*> m_inOutSignalsToScalAppFbMap;
@@ -1047,6 +1073,8 @@ namespace Builder
 		Tuning::TuningDataShared m_tuningData;
 
 		const QVector<ModuleLogicCompiler*>* m_moduleCompilers = nullptr;
+
+		static const QString EMPTY_STR;
 	};
 
 
