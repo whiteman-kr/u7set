@@ -451,9 +451,9 @@ windows_code_sign:
     - /^.*rpct-.*$/
     - /^.*RPCT-.*$/
   script:
-    - "printenv"
-    - "echo $CI_COMMIT_SHA"
-    - "cd $CI_PROJECT_DIR"
+#    - "printenv"
+#    - "echo $CI_COMMIT_SHA"
+#    - "cd $CI_PROJECT_DIR"
     - "git status"
     - "git log -1"
 #  artifacts:
