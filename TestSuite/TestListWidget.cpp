@@ -102,6 +102,8 @@ void TestTreeWidget::keyPressEvent(QKeyEvent *event)
 
 		blockSignals(false);
 	}
+
+	emit testSelectionChanged();
 }
 
 void TestTreeWidget::keyReleaseEvent(QKeyEvent *event)
@@ -109,8 +111,9 @@ void TestTreeWidget::keyReleaseEvent(QKeyEvent *event)
 	QTreeWidget::keyReleaseEvent(event);
 }
 
-TestListWidget::TestListWidget(QWidget* parent):
-	QWidget(parent)
+TestListWidget::TestListWidget(TestSuiteLogFile& appLog, QWidget* parent):
+	QWidget(parent),
+	m_appLog(appLog)
 {
 	QVBoxLayout* layout = new QVBoxLayout;
 
@@ -137,6 +140,7 @@ TestListWidget::TestListWidget(QWidget* parent):
 	connect(m_treeWidget, &QTreeWidget::itemDoubleClicked, this, &TestListWidget::testItemDoubleClicked);
 	connect(m_treeWidget, &QTreeWidget::itemChanged, this, &TestListWidget::testItemChanged);
 	connect(m_treeWidget, &QTreeWidget::customContextMenuRequested, this, &TestListWidget::contextMenuRequested);
+	connect(m_treeWidget, &TestTreeWidget::testSelectionChanged, this, &TestListWidget::testSelectionChanged);
 
 	layout->addWidget(m_testsPathLabel);
 	layout->addWidget(m_treeWidget);
@@ -207,6 +211,7 @@ void TestListWidget::fillTestsTree(const TestSuite::TestScriptsStorage& tests)
 		QString errorMsg;
 		if (sr.getScriptTestFunctions(script, functions, errorMsg) == false)
 		{
+			m_appLog.writeError(errorMsg);
 			continue;
 		}
 
@@ -442,7 +447,7 @@ void TestListWidget::testItemChanged(QTreeWidgetItem *item, int column)
 		m_treeWidget->blockSignals(false);
 	}
 
-	emit testSelectionChanged();
+ 	emit testSelectionChanged();
 }
 
 void TestListWidget::contextMenuRequested()

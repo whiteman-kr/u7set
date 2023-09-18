@@ -7,7 +7,7 @@
 #include "DeviceHelper.h"
 #include "SoftwareCfgGenerator.h"
 #include "Parser.h"
-#include "LmDescriptionSet.h" 
+#include "LmDescriptionSet.h"
 
 #define LOG_UNDEFINED_UAL_ADDRESS(log, ualSignal) log->writeError(QString("Undefined signal's ualAddress: %1 (File: %2 Line: %3 Function: %4)").arg(ualSignal->refSignalIDs().join(", ")).arg(__FILE__).arg(__LINE__).arg(SHORT_FUNC_INFO));
 
@@ -3309,7 +3309,7 @@ namespace Builder
 				continue;
 			}
 
-            if (ualItem->assignFlags(log()) == false)
+			if (ualItem->assignFlags(log()) == false)
 			{
 				continue;
 			}
@@ -3382,7 +3382,7 @@ namespace Builder
 				continue;
 			}
 
-            if (ualItem->assignFlags(log()) == false)
+			if (ualItem->assignFlags(log()) == false)
 			{
 				continue;
 			}
@@ -8127,9 +8127,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::cleanupHeaps()
 	{
-		m_ualSignals.finalizeHeaps();
-
-		return true;
+		return m_ualSignals.finalizeHeaps();
 	}
 
 	bool ModuleLogicCompiler::optimizeAppLogicCode()
@@ -10316,7 +10314,6 @@ namespace Builder
 				if (inSignal->constDiscreteValue() == 1)
 				{
 					hasConst1 = true;
-					break;
 				}
 
 				continue;			// skip const 0 value
@@ -10458,7 +10455,6 @@ namespace Builder
 				if (inSignal->constDiscreteValue() == 0)
 				{
 					hasConst0 = true;
-					break;
 				}
 
 				continue;			// skip const 1 value
@@ -15983,7 +15979,7 @@ namespace Builder
 		}
 
 		return DeviceHelper::setIntProperty(const_cast<Hardware::DeviceModule*>(m_lm),
-		                                    EquipmentPropNames::LM_APP_LAN_DATA_SIZE,
+											EquipmentPropNames::LM_APP_LAN_DATA_SIZE,
 											m_memoryMap.regBufSizeW(),
 											m_log);
 	}
@@ -16692,7 +16688,7 @@ namespace Builder
 		m_appLogicUniqueID = crc.result();
 
 		return DeviceHelper::setUIntProperty(const_cast<Hardware::DeviceModule*>(m_lm),
-		                                    EquipmentPropNames::LM_APP_LAN_DATA_UID,
+											EquipmentPropNames::LM_APP_LAN_DATA_UID,
 											crc.result32(),
 											m_log);
 	}

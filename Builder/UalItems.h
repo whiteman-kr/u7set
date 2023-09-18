@@ -704,7 +704,7 @@ namespace Builder
 
 		void disposeSignalsInHeaps(const std::unordered_set<UalSignal*>& flagsSignals);
 
-		void finalizeHeaps();
+		bool finalizeHeaps();
 
 		const SignalsHeap& discreteSignalsHeap() const { return m_discreteSignalsHeap; }
 		const SignalsHeap& analogAndBusSignalsHeap() const { return m_analogAndBusSignalsHeap; }

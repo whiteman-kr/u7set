@@ -42,16 +42,19 @@ namespace Builder
 		logInit();
 	}
 
-	void SignalsHeap::finalize()
+	bool SignalsHeap::finalize()
 	{
+		bool result = true;
+
 		if (m_itemsInHeap.size() != 0)
 		{
-			Q_ASSERT(false);
-
 			LOG_INTERNAL_ERROR_MSG(m_log, "Heap is not clear on destruction!");
+			result = false;
 		}
 
 		logFinalize();
+
+		return result;
 	}
 
 	void SignalsHeap::appendItem(const UalSignal& ualSignal, std::optional<int> expectedReadCount)

@@ -362,6 +362,11 @@ namespace TestSuite
 			return false;
 		}
 
+		if (callResult.isBool())
+		{
+			return callResult.toBool();
+		}
+
 		return true;
 	}
 }

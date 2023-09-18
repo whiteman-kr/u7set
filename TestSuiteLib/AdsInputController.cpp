@@ -143,7 +143,17 @@ namespace TestSuite
 				return false;
 			}
 
-			if (std::abs(state.value() - value) < (tolerance == 0 ? std::numeric_limits<double>::epsilon() : tolerance))
+			if (std::isnan(value) == true && std::isnan(state.value()) == true)
+			{
+				return true;
+			}
+
+			if (std::isinf(value) == true && std::isinf(state.value()) == true && std::signbit(value) == std::signbit(state.value()))
+			{
+				return true;
+			}
+
+			if (std::abs(state.value() - value) <= tolerance)
 			{
 				return true;
 			}

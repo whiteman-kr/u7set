@@ -304,7 +304,7 @@ namespace VFrame30
 			{
 				if (s.startsWith('@') == true)
 				{
-					s = context->appSignalController()->appSignalManager()->equipmentToAppSiganlId(s);
+					s = context->appSignalController()->appSignalManager()->equipmentToAppSignalId(s);
 				}
 			}
 		}
@@ -339,7 +339,7 @@ namespace VFrame30
 			{
 				if (s.startsWith('@') == true)
 				{
-					s = context->appSignalController()->appSignalManager()->equipmentToAppSiganlId(s);
+					s = context->appSignalController()->appSignalManager()->equipmentToAppSignalId(s);
 				}
 			}
 		}

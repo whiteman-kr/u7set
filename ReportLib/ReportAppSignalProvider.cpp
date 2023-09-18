@@ -235,7 +235,7 @@ namespace ReportLib
 		return signalType(::calcHash(appSignalId), found);
 	}
 
-	QString ReportAppSignalProvider::equipmentToAppSiganlId(const QString& /*equipmentId*/) const
+	QString ReportAppSignalProvider::equipmentToAppSignalId(const QString& /*equipmentId*/) const
 	{
 		Q_ASSERT(false);	// todo
 		return {};

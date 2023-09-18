@@ -54,8 +54,6 @@ bool ScriptTestObserver::wait(int timeoutMs)
 				reportError(QString("Failed expectation: ") + expectationStr, false);
 			}
 		}
-
-		reportError("ScriptTestObserver::wait() test terminated.", true);
 	}
 
 	return result;

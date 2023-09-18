@@ -93,19 +93,71 @@ namespace ReportLib
 					return false;
 				}
 
-				if (t->tag().isEmpty() == false)
-				{
+				const QString& tag = t->tag();
 
-					// Create text object
-					bool ok = false;
-					do
+				if (tag.isEmpty() == false)
+				{
+					static QString firstTag = "$FIRST(";
+					static QString lastTag = "$LAST(";
+
+					if (tag.startsWith(firstTag) && tag.endsWith(")"))
 					{
-						QString s = text(t->tag(), &ok);
+						// Show only first tag
+						//
+						QString tagValue = tag;
+						tagValue = tagValue.remove(0, firstTag.length());
+						tagValue.chop(1);
+						
+						bool ok = false;
+						QString s = text(tagValue, &ok);
 						if (ok == true)
 						{
 							section.addText(s + "\n", t->format());
 						}
-					}while (ok == true);
+					}
+					else
+					{
+						if (tag.startsWith(lastTag) && tag.endsWith(")"))
+						{
+							// Show only last tag
+							//
+							QString tagValue = tag;
+							tagValue = tagValue.remove(0, lastTag.length());
+							tagValue.chop(1);
+
+							bool ok = false;
+							bool tagFound = false;
+							QString s;
+							do
+							{
+								QString t = text(tagValue, &ok);
+								if (ok == true)
+								{
+									s = t;
+									tagFound = true;
+								}
+							} while (ok == true);
+
+							if (tagFound == true)
+							{
+								section.addText(s + "\n", t->format());
+							}
+						}
+						else
+						{
+							// Show all text with all tag instances
+							//
+							bool ok = false;
+							do
+							{
+								QString s = text(t->tag(), &ok);
+								if (ok == true)
+								{
+									section.addText(s + "\n", t->format());
+								}
+							} while (ok == true);
+						}
+					}
 				}
 				else
 				{

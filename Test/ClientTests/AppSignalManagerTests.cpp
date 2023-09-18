@@ -742,7 +742,7 @@ TEST(AppSignalManagerTests, signalType)
 	return;
 }
 
-TEST(AppSignalManagerTests, equipmentToAppSiganlId)
+TEST(AppSignalManagerTests, equipmentToAppSignalId)
 {
 	ILogFileStub log;
 	ClientLib::AppSignalManager sm{&log};
@@ -763,10 +763,10 @@ TEST(AppSignalManagerTests, equipmentToAppSiganlId)
 	sm.addSignal(sp2, "ADS");
 	sm.addSignal(sp3, "ADS");
 
-	EXPECT_EQ(sm.equipmentToAppSiganlId("@USB_LM1_IN1"), "#SP1");	// Symbol @ must be at the beginning
-	EXPECT_EQ(sm.equipmentToAppSiganlId("@USB_LM1_IN2"), "#SP2");
-	EXPECT_EQ(sm.equipmentToAppSiganlId("@USB_LM1_IN3"), "#SP3");
-	EXPECT_EQ(sm.equipmentToAppSiganlId("@FAIL"), "");
+	EXPECT_EQ(sm.equipmentToAppSignalId("@USB_LM1_IN1"), "#SP1");	// Symbol @ must be at the beginning
+	EXPECT_EQ(sm.equipmentToAppSignalId("@USB_LM1_IN2"), "#SP2");
+	EXPECT_EQ(sm.equipmentToAppSignalId("@USB_LM1_IN3"), "#SP3");
+	EXPECT_EQ(sm.equipmentToAppSignalId("@FAIL"), "");
 
 	return;
 }
