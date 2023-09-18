@@ -415,7 +415,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0392.sql", "Upgrade to version 392, Add file Tests/GlobalScript.js"},
 	{":/DatabaseUpgrade/Upgrade0393.sql", "Upgrade to version 393, Hidden AssignFlag from mismatch_*, changed minimum size for mux"},
 	{":/DatabaseUpgrade/Upgrade0394.sql", "Upgrade to version 394, Add TestSuite preset to database updates"},
-	{":/DatabaseUpgrade/Upgrade0395.sql", "Upgrade to version 395, Add InvertSignal and ApertureType properties"},
+	{":/DatabaseUpgrade/Upgrade0396.sql", "Upgrade to version 396, Add InvertSignal and ApertureType properties"},
 };
 
 int DbWorker::counter = 0;
@@ -7521,8 +7521,8 @@ bool DbWorker::processingAfterDatabaseUpgrade(QSqlDatabase& db, int currentVersi
 	case 302:
 		return processingAfterDatabaseUpgrade0302(db, errorMessage);
 
-	case 395:
-		return processingAfterDatabaseUpgrade0395(db, errorMessage);
+	case 396:
+		return processingAfterDatabaseUpgrade0396(db, errorMessage);
 	}
 
 	return true;
@@ -7908,7 +7908,7 @@ bool DbWorker::processingAfterDatabaseUpgrade0302(QSqlDatabase& db, QString* err
 	return result;
 }
 
-bool DbWorker::processingAfterDatabaseUpgrade0395(QSqlDatabase& db, QString* errorMessage)
+bool DbWorker::processingAfterDatabaseUpgrade0396(QSqlDatabase& db, QString* errorMessage)
 {
 	TEST_PTR_RETURN_FALSE(errorMessage);
 

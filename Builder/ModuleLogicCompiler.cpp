@@ -11864,7 +11864,8 @@ namespace Builder
 				continue;
 			}
 
-			std::map<Address16, std::tuple<const UalSignal*, Address16, QString>> srcSignals;
+			//std::map<Address16, std::tuple<const UalSignal*, Address16, QString>> srcSignals;
+			CopyBitsMap srcSignals;
 
 			int busChildSignalsOffset = -1;
 
@@ -11872,26 +11873,36 @@ namespace Builder
 			{
 				const auto [inSignal, busChildSignal] = inBusSignals;
 
+				if (inSignal == nullptr || busChildSignal == nullptr)
+				{
+					Q_ASSERT(false);
+					LOG_INTERNAL_ERROR(m_log);
+					result = false;
+					continue;
+				}
+
 				if (busChildSignalsOffset == -1)
 				{
 					busChildSignalsOffset = busSignalUalAddrOffset + inbusOffset;
 				}
 
-				Address16 readUalAddr;
+				CopyBitInfo cbi;
+
+				cbi.ualSignal = inSignal;
 
 				if (inSignal->isConstDiscrete() == false)
 				{
-					readUalAddr = m_ualSignals.getSignalReadAddress(*inSignal, true);
+					cbi.srcBitAddr = m_ualSignals.getSignalReadAddress(*inSignal, true);
 				}
 
-				QString comment = QString("%1 <= %2").
-											arg(busChildSignal->appSignalID()).
-											arg(inSignal->refSignalIDsJoined());
+				cbi.comment = QString("%1 <= %2").
+										arg(busChildSignal->appSignalID()).
+										arg(inSignal->refSignalIDsJoined());
 
-				srcSignals.insert({ busChildSignal->ualAddr(), { inSignal, readUalAddr, comment } });
+				srcSignals.emplace(busChildSignal->ualAddr(), cbi);
 			}
 
-			result &= codeCopyBits2(code, busChildSignalsOffset, srcSignals);
+			result &= codeCopyBits(code, busChildSignalsOffset, srcSignals);
 			code->newLine();
 
 			busFilling->fillWord(inbusOffset);
@@ -14301,7 +14312,7 @@ namespace Builder
 
 		code->comment_nl(QString("Copy %1 in regBuf").arg(description));
 
-		std::map<Address16, std::tuple<const UalSignal*, Address16, QString>> srcSignals;
+		CopyBitsMap srcSignals;
 
 		TEST_PTR_LOG_RETURN_FALSE(signalsList[0], m_log);
 
@@ -14324,7 +14335,7 @@ namespace Builder
 			{
 				if (srcSignals.empty() == false)
 				{
-					result &= codeCopyBits2(code, destAddressOffset, srcSignals);
+					result &= codeCopyBits(code, destAddressOffset, srcSignals);
 					code->newLine();
 
 					srcSignals.clear();
@@ -14333,12 +14344,17 @@ namespace Builder
 				destAddressOffset = ualSignal->regBufAddr().offset();
 			}
 
-			srcSignals.insert({ ualSignal->regBufAddr(), { ualSignal, ualSignal->ualAddr(), Separator::EMPTY_STR }});
+			CopyBitInfo cbi;
+
+			cbi.ualSignal = ualSignal;
+			cbi.srcBitAddr = ualSignal->ualAddr();
+
+			srcSignals.emplace(ualSignal->regBufAddr(), cbi);
 		}
 
 		if (srcSignals.empty() == false)
 		{
-			result &= codeCopyBits2(code, destAddressOffset, srcSignals);
+			result &= codeCopyBits(code, destAddressOffset, srcSignals);
 			code->newLine();
 		}
 
@@ -14661,9 +14677,7 @@ namespace Builder
 
 		bool result = true;
 
-		// writeAddresOffset => (map: destAddr (ioBufAddr) => pair <UalSignal_to_copy*, sourceAddr>)
-		//
-		std::map<int, std::map<Address16, std::tuple<const UalSignal*, Address16, QString>>> writeAddressesMap;
+		std::map<int, CopyBitsMap> destCopyMaps;	// destAddrOffset => CopyBitsMap
 
 		for(AppSignal* s : m_ioSignals)
 		{
@@ -14686,28 +14700,39 @@ namespace Builder
 				continue;
 			}
 
-			Address16 writeAddr = s->ioBufAddr();
-			int writeAddrOffset = writeAddr.offset();
+			Address16 destAddr = s->ioBufAddr();
+			int destAddrOffset = destAddr.offset();
 
-			auto it = writeAddressesMap.find(writeAddrOffset);
+			auto it = destCopyMaps.find(destAddrOffset);
 
-			if (it == writeAddressesMap.end())
+			if (it == destCopyMaps.end())
 			{
-				auto [new_it, b] = writeAddressesMap.emplace(writeAddrOffset,
-											std::map<Address16, std::tuple<const UalSignal*, Address16, QString>>());
+				auto [new_it, b] = destCopyMaps.emplace(destAddrOffset,
+											CopyBitsMap{});
 				it = new_it;
 			}
 
-			std::map<Address16, std::tuple<const UalSignal*, Address16, QString>>& writeAddrSignals = it->second;
+			CopyBitsMap& copyBitsMap = it->second;
 
-			if (writeAddrSignals.contains(writeAddr))
+			if (copyBitsMap.contains(destAddr))
 			{
 				LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal %1 has duplicate IO buf addr").arg(s->appSignalID()));
 				result = false;
 				continue;
 			}
 
-			writeAddrSignals.insert({writeAddr, { ualSignal, ualSignal->ualAddrWithoutChecks(), EMPTY_STR }});
+			CopyBitInfo cbi;
+
+			cbi.ualSignal = ualSignal;
+
+			if (ualSignal->isConstDiscrete() == false)
+			{
+				cbi.srcBitAddr = ualSignal->ualAddr();
+			}
+
+			cbi.invertBit = s->invertSignal();
+
+			copyBitsMap.emplace(destAddr, cbi);
 		}
 
 		RETURN_IF_FALSE(result);
@@ -14717,9 +14742,9 @@ namespace Builder
 
 		code->comment_nl("Copy output discrete signals to output modules memory");
 
-		for(auto& [writeAddrOffset, writeAddrSignals] : writeAddressesMap)
+		for(const auto& [destAddrOffset, copyBitsMap] : destCopyMaps)
 		{
-			bool res = codeCopyBits2(code, writeAddrOffset, writeAddrSignals);
+			bool res = codeCopyBits(code, destAddrOffset, copyBitsMap);
 
 			if (res == false)
 			{
@@ -14729,66 +14754,10 @@ namespace Builder
 
 			code->newLine();
 
-			if (writeAddrOffset == lmOutputsAddress)
+			if (destAddrOffset == lmOutputsAddress)
 			{
 				lmOutputsIsWritten = true;
 			}
-
-/*			CodeItem cmd;
-
-			cmd.movConst(bitAccAddr, 0);
-			code->append(cmd);
-
-			for(const std::pair<int, AppSignal*> pair: sortedWriteSignals)
-			{
-				AppSignal* s = pair.second;
-
-				TEST_PTR_CONTINUE(s);
-
-				if (s->ioBufAddr().isValid() == false)
-				{
-					assert(false);
-					LOG_INTERNAL_ERROR(m_log);
-					result = false;
-					continue;
-				}
-
-				UalSignal* ualSignal = m_ualSignals.get(s->appSignalID());
-
-				if (ualSignal == nullptr)
-				{
-					assert(false);
-					LOG_NULLPTR_ERROR(m_log);
-					result = false;
-					continue;
-				}
-
-				if (ualSignal->isConst() == true)
-				{
-					cmd.movBitConst(bitAccAddr, s->ioBufAddr().bit(), ualSignal->constDiscreteValue());
-				}
-				else
-				{
-					if (s->ualAddrIsValid() == false)
-					{
-						assert(false);
-						LOG_INTERNAL_ERROR(m_log);
-						result = false;
-						continue;
-					}
-
-					cmd.movBit(bitAccAddr, s->ioBufAddr().bit(), s->ualAddr().offset(), s->ualAddr().bit());
-				}
-
-				cmd.setComment(s->appSignalID());
-
-				code->append(cmd);
-			}
-
-			cmd.mov(writeAddr, bitAccAddr);
-			cmd.clearComment();
-			code->append(cmd);
-			code->newLine();*/
 		}
 
 		if (lmOutputsIsWritten == false)
@@ -17824,7 +17793,7 @@ namespace Builder
 		return cmd;
 	}
 
-	bool ModuleLogicCompiler::codeCopyBits(CodeSnippet* code, const CopyBitsMap& copyBitsMap)
+	bool ModuleLogicCompiler::codeCopyBits(CodeSnippet* code, int destAddrOffset, const CopyBitsMap& copyBitsMap)
 	{
 		TEST_PTR_RETURN_FALSE(m_log);
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
@@ -17836,14 +17805,12 @@ namespace Builder
 			return false;
 		}
 
-		int destAddrOffset = copyBitsMap.begin()->first.offset();
-
 		bool result = true;
 
+		int const0Count = 0;
 		int const1Count = 0;
 		int nonConstCount = 0;
-
-		int invertedBitsCount = 0;
+		int nonConstInvertedBitsCount = 0;
 
 		std::set<Address16> uniqueSrcBitAddrs;
 
@@ -17851,8 +17818,8 @@ namespace Builder
 		{
 			if (destBitAddr.isValid() == false ||
 				destBitAddr.offset() != destAddrOffset ||
-				copyBitInfo.srcBitAddr.isValid() == false ||
-				copyBitInfo.ualSignal == nullptr)
+				copyBitInfo.ualSignal == nullptr ||
+				(copyBitInfo.ualSignal->isConstDiscrete() == false && copyBitInfo.srcBitAddr.isValid() == false))
 			{
 				LOG_INTERNAL_ERROR(m_log);
 				result = false;
@@ -17861,14 +17828,14 @@ namespace Builder
 
 			if (copyBitInfo.ualSignal->isConstDiscrete() == true )
 			{
-				int constVal = copyBitInfo.ualSignal->constDiscreteValue();
+				copyBitInfo.constValue = copyBitInfo.ualSignal->constDiscreteValue();
 
 				if (copyBitInfo.invertBit)
 				{
-					constVal ^= 1;
+					copyBitInfo.constValue ^= 1;
 				}
 
-				const1Count +=  constVal;
+				const1Count += copyBitInfo.constValue;
 			}
 			else
 			{
@@ -17881,25 +17848,27 @@ namespace Builder
 
 				nonConstCount++;
 
-				uniqueSrcBitAddrs.insert(copyBitInfo.srcBitAddr);
-			}
+				if (copyBitInfo.invertBit == true)
+				{
+					nonConstInvertedBitsCount++;
+				}
 
-			if (copyBitInfo.invertBit == true)
-			{
-				invertedBitsCount++;
+				uniqueSrcBitAddrs.insert(copyBitInfo.srcBitAddr);
 			}
 		}
 
+		const0Count = SIZE_16BIT - (nonConstCount + const1Count);
+
 		RETURN_IF_FALSE(result);
 
-		auto getComment = [](const UalSignal* ualSignal, const QString& comment) -> QString
+		auto getComment = [](const CopyBitInfo& cbi) -> QString
 		{
-			if (comment.isEmpty() == false)
+			if (cbi.comment.isEmpty() == false)
 			{
-				return comment;
+				return cbi.comment;
 			}
 
-			return QString("copy %1").arg(ualSignal->refSignalIDsJoined());
+			return QString("copy %1").arg(cbi.ualSignal->refSignalIDsJoined());
 		};
 
 		CodeItem cmd;
@@ -17908,55 +17877,53 @@ namespace Builder
 
 		if (const1Count == SIZE_16BIT)
 		{
-			const CopyBitInfo& first = *copyBitsMap.begin();
+			const CopyBitInfo& first = copyBitsMap.begin()->second;
 
-			*code << cmd.movConst(destAddrOffset, 0xFFFF, getComment(first.ualSignal, first.comment));
+			*code << cmd.movConst(destAddrOffset, 0xFFFF, getComment(first));
+
+			return true;
+		}
+
+		if (const0Count == SIZE_16BIT)
+		{
+			const CopyBitInfo& first = copyBitsMap.begin()->second;
+
+			*code << cmd.movConst(destAddrOffset, 0x0000, getComment(first));
 
 			return true;
 		}
 
-		if (const1Count + nonConstCount == 0)
+		if (nonConstCount == SIZE_16BIT && uniqueSrcBitAddrs.size() == 1)
 		{
-			const CopyBitInfo& first = *copyBitsMap.begin();
-
-			*code << cmd.movConst(destAddrOffset, 0x0000, getComment(first.ualSignal, first.comment));
-
-			return true;
-		}
-		'lvcmsa;vm;msdvewvrrv'
-		//
-
-		if (notConstCount == SIZE_16BIT && uniqueSrcBitAddrs.size() == 1)
-		{
+			// whole word fills by one non constant bit
+			//
 			const CopyBitInfo& cbi = copyBitsMap.begin()->second;
 
-			Address16 srcSignalAddr = *uniqueSrcBitAddrs.begin();
+			Address16 srcBitAddrAddr = *uniqueSrcBitAddrs.begin();
 
-			if (invertedBitsCount == 0)
+			if (nonConstInvertedBitsCount == 0)
 			{
 				*code << cmd.fillb(Address16(destAddrOffset, 0),
-										  srcSignalAddr,
-										  getComment(cbi.ualSignal, cbi.comment));
+										  srcBitAddrAddr, getComment(cbi));
 				return true;
 			}
 
-			if (invertedBitsCount == SIZE_16BIT)
+			if (nonConstInvertedBitsCount == SIZE_16BIT)
 			{
 				*code << cmd.fillb(wordAccumulatorAddress16(),
-									srcSignalAddr,
-									getComment(cbi.ualSignal, cbi.comment));
+									srcBitAddrAddr, getComment(cbi));
 
 				result &= codeNotWord(code, wordAccumulatorAddress16(), EMPTY_STR,
 									  Address16(destAddrOffset, 0), EMPTY_STR);
 				return result;
 			}
 
-			// else continue below
+			// else, i.e. invertedBitsCount > 0 && < SIZE_16BIT, continue below
 		}
 
-		bool initializedBy0 = false;
+		int initializedBy = -1;
 
-		if (m_bitAccAvailable == false || invertedBitsCount > 0)
+		if (m_bitAccAvailable == false || nonConstInvertedBitsCount > 0)
 		{
 			int destAccAddr = destAddrOffset;
 
@@ -17965,320 +17932,59 @@ namespace Builder
 				destAccAddr = bitAccumulatorAddress();
 			}
 
-			if (const1Count + nonConstCount > 0)
+			if (nonConstCount < SIZE_16BIT)
 			{
 				if (const1Count > const0Count)
 				{
 					// destAcc <= 0xFFFF
 					//
 					*code << cmd.movConst(destAccAddr, 0xFFFF);
-					initializedBy1 = true;
+					initializedBy = 1;
 				}
 				else
 				{
 					// destAcc <= 0x0000
 					//
 					*code << cmd.movConst(destAccAddr, 0);
-					initializedBy0 = true;
+					initializedBy = 0;
 				}
 			}
 
 			for(const auto& [destBitAddr, copyBitInfo] : copyBitsMap)
 			{
-				if (copyBitInfo.ualSignal->isConstDiscrete() == true)
+				switch(copyBitInfo.constValue)
 				{
-					int constDiscreteValue = ualSignal->constDiscreteValue();
-
-					if (CopyBitInfo.inertBit == true)
+				case CopyBitInfo::CONST_0:
+					if (initializedBy != CopyBitInfo::CONST_0)
 					{
-						constDiscreteValue ^= 1;
+						*code << cmd.movBitConst(destAccAddr, destBitAddr.bit(), 0, getComment(copyBitInfo));
 					}
-
-					if ((constDiscreteValue == 0 && initializedBy0 == false) ||
-						(constDiscreteValue == 1 && initializedBy1 == false)
-					{
-						if ()
-						{
-							*code << cmd.movBitConst(destAccAddr, destAddr.bit(), 0,
-															getComment(ualSignal, comment));
-						}
-					}
-					else
-					{
-						if (initializedBy1 == false)
-						{
-								*code << cmd.movBitConst(destAccAddr, destAddr.bit(), 1,
-																getComment(ualSignal, comment));
-						}
-					}
-				}
-				else
-				{
-					if (ualSignal->invertSignal() == true)
-					{
-						result &= codeNotBit(code, srcAddr, getComment(ualSignal, comment),
-											 Address16(destAccAddr, destAddr.bit()), EMPTY_STR);
-					}
-					else
-					{
-						*code << cmd.movBit(destAccAddr, destAddr.bit(), srcAddr.offset(), srcAddr.bit(),
-														getComment(ualSignal, comment));
-					}
-				}
-			}
-
-			if (destAccAddr != destAddrOffset)
-			{
-				*code << cmd.mov(destAddrOffset, destAccAddr);
-			}
-		}
-		else
-		{
-			//
-
-			auto srcSignal = copyBitsMap.rbegin();
-
-			int usedBit = -1;
-
-			while(srcSignal != copyBitsMap.rend())
-			{
-				const auto& [ualSignal, srcAddr, comment] = srcSignal->second;
-
-				usedBit = srcSignal->first.bit();
-
-				if (ualSignal->isConstDiscrete() == false ||
-					(ualSignal->isConstDiscrete() &&
-					ualSignal->constDiscreteValue() == 1))
-				{
 					break;
-				}
 
-				srcSignal++;
-			}
-
-			Q_ASSERT(usedBit >= 0);
-
-			if (usedBit < SIZE_16BIT - 1)
-			{
-				*code << cmd.resetAcc();
-			}
-
-			while(srcSignal != copyBitsMap.rend() && usedBit >= 0)
-			{
-				const Address16& destAddr = srcSignal->first;
-				const auto& [ualSignal, srcAddr, comment] = srcSignal->second;
-
-				if (usedBit == destAddr.bit())
-				{
-					if (ualSignal->isConstDiscrete() == true)
+				case CopyBitInfo::CONST_1:
+					if (initializedBy != CopyBitInfo::CONST_1)
 					{
-						if (ualSignal->constDiscreteValue() == 0)
-						{
-							*code << cmd.lshift0Acc(getComment(ualSignal, comment));
-						}
-						else
-						{
-							*code << cmd.lshift1Acc(getComment(ualSignal, comment));
-						}
+						*code << cmd.movBitConst(destAccAddr, destBitAddr.bit(), 1, getComment(copyBitInfo));
+					}
+					break;
+
+				case CopyBitInfo::NON_CONST:
+					if (copyBitInfo.invertBit == true)
+					{
+						result &= codeNotBit(code, copyBitInfo.srcBitAddr, getComment(copyBitInfo),
+											 Address16(destAccAddr, destBitAddr.bit()), EMPTY_STR);
 					}
 					else
 					{
-						*code << cmd.movBitAccAddr(srcAddr, getComment(ualSignal, comment));
+						*code << cmd.movBit(Address16(destAccAddr, destBitAddr.bit()),
+											copyBitInfo.srcBitAddr, getComment(copyBitInfo));
 					}
+					break;
 
-					srcSignal++;
-				}
-				else
-				{
-					*code << cmd.lshift0Acc();
-				}
-
-				usedBit--;
-			}
-
-			*code << cmd.movAddrAcc(destAddrOffset);
-		}
-
-		return result;
-	}
-
-	bool ModuleLogicCompiler::codeCopyBits2(CodeSnippet* code,
-										   int destAddrOffset,
-										   const std::map<Address16, std::tuple<const UalSignal *, Address16, QString>>& srcSignals)
-	{
-		TEST_PTR_RETURN_FALSE(m_log);
-		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
-
-		if (srcSignals.empty() == true)
-		{
-			Q_ASSERT(false);
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		bool result = true;
-
-		// map<Address16, std::pair<const UalSignal*, Address16, QString>: destAddr => <srcUalSignal (discrete), srcAddr, comment>
-
-		int const0Count = 0;
-		int const1Count = 0;
-		int signalCount = 0;
-		int invertedSignalCount = 0;
-
-		std::set<Address16> uniqueSrcSignalsAddr;
-
-		for(const auto& srcSignal : srcSignals)
-		{
-			const Address16& destAddr = srcSignal.first;
-			const auto& [ualSignal, srcAddr, comment] = srcSignal.second;
-
-			if (destAddr.offset() != destAddrOffset)
-			{
-				LOG_INTERNAL_ERROR(m_log);
-				result = false;
-				continue;
-			}
-
-			if (ualSignal->isConstDiscrete() == true)
-			{
-				if (ualSignal->constDiscreteValue() == 0)
-				{
-					const0Count++;
-				}
-				else
-				{
-					const1Count++;
-				}
-			}
-			else
-			{
-				if (ualSignal->isDiscrete() == true)
-				{
-					signalCount++;
-					uniqueSrcSignalsAddr.insert(srcAddr);
-
-					if (ualSignal->invertSignal() == true)
-					{
-						invertedSignalCount++;
-					}
-				}
-				else
-				{
+				default:
+					Q_ASSERT(false);
 					LOG_INTERNAL_ERROR(m_log);
-					result = false;
-					continue;
-				}
-			}
-		}
-
-		RETURN_IF_FALSE(result);
-
-		auto getComment = [](const UalSignal* ualSignal, const QString& comment) -> QString
-		{
-			if (comment.isEmpty() == false)
-			{
-				return comment;
-			}
-
-			return QString("copy %1").arg(ualSignal->refSignalIDsJoined());
-		};
-
-		CodeItem cmd;
-
-		if (signalCount == SIZE_16BIT && uniqueSrcSignalsAddr.size() == 1)
-		{
-			const auto& [ualSignal, srcAddr, comment] = srcSignals.begin()->second;
-
-			Address16 srcSignalAddr = *uniqueSrcSignalsAddr.begin();
-
-			if (invertedSignalCount == 0)
-			{
-				*code << cmd.fillb(Address16(destAddrOffset, 0),
-										  srcSignalAddr,
-										  getComment(ualSignal, comment));
-				return true;
-			}
-
-			if (invertedSignalCount == SIZE_16BIT)
-			{
-				*code << cmd.fillb(wordAccumulatorAddress16(),
-									srcSignalAddr,
-									getComment(ualSignal, comment));
-
-				result &= codeNotWord(code, wordAccumulatorAddress16(), EMPTY_STR,
-									  Address16(destAddrOffset, 0), EMPTY_STR);
-				return result;
-			}
-
-			// continue below
-		}
-
-		bool initializedBy0 = false;
-		bool initializedBy1 = false;
-
-		if (m_bitAccAvailable == false || invertedSignalCount > 0)
-		{
-			int destAccAddr = destAddrOffset;
-
-			if (addressInBitMemory(destAddrOffset) == false)
-			{
-				destAccAddr = bitAccumulatorAddress();
-			}
-
-			if (signalCount < SIZE_16BIT)
-			{
-				if (const1Count > const0Count)
-				{
-					// destAcc <= 0xFFFF
-					//
-					*code << cmd.movConst(destAccAddr, 0xFFFF);
-					initializedBy1 = true;
-				}
-				else
-				{
-					// destAcc <= 0
-					//
-					*code << cmd.movConst(destAccAddr, 0);
-					initializedBy0 = true;
-				}
-			}
-
-			for(const auto& srcSignal : srcSignals)
-			{
-				const Address16& destAddr = srcSignal.first;
-				const auto& [ualSignal, srcAddr, comment] = srcSignal.second;
-
-				if (ualSignal->isConstDiscrete() == true)
-				{
-					if (ualSignal->constDiscreteValue() == 0)
-					{
-						if (initializedBy0 == false)
-						{
-							*code << cmd.movBitConst(destAccAddr, destAddr.bit(), 0,
-															getComment(ualSignal, comment));
-						}
-					}
-					else
-					{
-						if (initializedBy1 == false)
-						{
-								*code << cmd.movBitConst(destAccAddr, destAddr.bit(), 1,
-																getComment(ualSignal, comment));
-						}
-					}
-				}
-				else
-				{
-					if (ualSignal->invertSignal() == true)
-					{
-						result &= codeNotBit(code, srcAddr, getComment(ualSignal, comment),
-											 Address16(destAccAddr, destAddr.bit()), EMPTY_STR);
-					}
-					else
-					{
-						*code << cmd.movBit(destAccAddr, destAddr.bit(), srcAddr.offset(), srcAddr.bit(),
-														getComment(ualSignal, comment));
-					}
+					return false;
 				}
 			}
 
@@ -18289,66 +17995,72 @@ namespace Builder
 		}
 		else
 		{
+			auto it = copyBitsMap.rbegin();
+
+			// find highest non-zero bitNo
 			//
+			int bitNo = SIZE_16BIT - 1;
 
-			auto srcSignal = srcSignals.rbegin();
-
-			int usedBit = -1;
-
-			while(srcSignal != srcSignals.rend())
+			while(it != copyBitsMap.rend())
 			{
-				const auto& [ualSignal, srcAddr, comment] = srcSignal->second;
+				const auto& [destBitAddr, copyBitInfo] = *it;
 
-				usedBit = srcSignal->first.bit();
+				bitNo = destBitAddr.bit();
 
-				if (ualSignal->isConstDiscrete() == false ||
-					(ualSignal->isConstDiscrete() &&
-					ualSignal->constDiscreteValue() == 1))
+				if (copyBitInfo.constValue != CopyBitInfo::CONST_0)
 				{
 					break;
 				}
 
-				srcSignal++;
+				it++;
 			}
 
-			Q_ASSERT(usedBit >= 0);
-
-			if (usedBit < SIZE_16BIT - 1)
+			if (bitNo < SIZE_16BIT - 1)
 			{
 				*code << cmd.resetAcc();
 			}
 
-			while(srcSignal != srcSignals.rend() && usedBit >= 0)
+			while(bitNo >= 0)
 			{
-				const Address16& destAddr = srcSignal->first;
-				const auto& [ualSignal, srcAddr, comment] = srcSignal->second;
+				bool bitWritten = false;
 
-				if (usedBit == destAddr.bit())
+				if (it != copyBitsMap.rend())
 				{
-					if (ualSignal->isConstDiscrete() == true)
-					{
-						if (ualSignal->constDiscreteValue() == 0)
-						{
-							*code << cmd.lshift0Acc(getComment(ualSignal, comment));
-						}
-						else
-						{
-							*code << cmd.lshift1Acc(getComment(ualSignal, comment));
-						}
-					}
-					else
-					{
-						*code << cmd.movBitAccAddr(srcAddr, getComment(ualSignal, comment));
-					}
+					const auto& [destBitAddr, copyBitInfo] = *it;
 
-					srcSignal++;
+					if (bitNo == destBitAddr.bit())
+					{
+						switch(copyBitInfo.constValue)
+						{
+						case CopyBitInfo::NON_CONST:
+							*code << cmd.movBitAccAddr(copyBitInfo.srcBitAddr, getComment(copyBitInfo));
+							break;
+
+						case CopyBitInfo::CONST_0:
+								*code << cmd.lshift0Acc(getComment(copyBitInfo));
+							break;
+
+						case CopyBitInfo::CONST_1:
+								*code << cmd.lshift1Acc(getComment(copyBitInfo));
+							break;
+
+						default:
+							Q_ASSERT(false);
+							LOG_INTERNAL_ERROR(m_log);
+							return false;
+						}
+
+						it++;
+						bitWritten = true;
+					}
 				}
-				else
+
+				if (bitWritten == false)
 				{
 					*code << cmd.lshift0Acc();
 				}
 
-				usedBit--;
+				bitNo--;
 			}
 
 			*code << cmd.movAddrAcc(destAddrOffset);

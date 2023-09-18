@@ -143,10 +143,20 @@ namespace Builder
 		//
 		struct CopyBitInfo
 		{
+			// must be initialized before call codeCopyBits
+
 			const UalSignal* ualSignal = nullptr;
 			Address16 srcBitAddr;
 			bool invertBit = false;
 			QString comment;
+
+			// will be set inside codeCopyBits function
+
+			static const int NON_CONST = -1;
+			static const int CONST_0 = 0;
+			static const int CONST_1 = 1;
+
+			mutable int constValue = NON_CONST;
 		};
 
 		using CopyBitsMap = std::map<Address16, CopyBitInfo>;	// destBitAddr => CopyBitInfo;
@@ -875,14 +885,11 @@ namespace Builder
 
 		CodeItem codeSetMemory(int addrFrom, quint16 constValue, int sizeW, const QString& comment = QStringLiteral(""));
 
-		bool codeCopyBits(CodeSnippet* code, const CopyBitsMap& copyBitsMap);
-
-		bool codeCopyBits2(CodeSnippet* code,
-						  int destAddrOffset,
-						  const std::map<Address16, std::tuple<const UalSignal*, Address16, QString>>& srcSignals);
+		bool codeCopyBits(CodeSnippet* code, int destAddrOffset, const CopyBitsMap& copyBitsMap);
 
 		bool codeNotWord(CodeSnippet* code, const Address16& srcAddr, const QString& srcComment,
 						 const Address16& destAddr, const QString& destComment) const;
+
 		bool codeNotBit(CodeSnippet* code, const Address16& srcAddr, const QString& srcComment,
 						 const Address16& destAddr, const QString& destComment) const;
 
