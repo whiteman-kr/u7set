@@ -49,7 +49,7 @@ public:
 	virtual E::SignalType signalType(Hash signalHash, bool* found) const override;
 	virtual E::SignalType signalType(const QString& appSignalId, bool* found) const override;
 
-	virtual QString equipmentToAppSiganlId(const QString& equipmentId) const override;
+	virtual QString equipmentToAppSignalId(const QString& equipmentId) const override;
 
 	// Setpoints
 	//
@@ -66,7 +66,7 @@ private:
 
 //
 //
-// EditSchemaTuningSignalProvider - this calss is used to provide tuning signals for drawing schemas, showing and getting signal ids, description, preciosion, etc...
+// EditSchemaTuningSignalProvider - this class is used to provide tuning signals for drawing schemas, showing and getting signal ids, description, preciosion, etc...
 //
 //
 class EditSchemaTuningSignalProvider : public ITuningSignalManager

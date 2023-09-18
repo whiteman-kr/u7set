@@ -1005,7 +1005,7 @@ static const AppSignalParam dummy;
 		return signalType(::calcHash(appSignalId), found);
 	}
 
-	QString AppSignalManager::equipmentToAppSiganlId(const QString& /*equipmentId*/) const
+	QString AppSignalManager::equipmentToAppSignalId(const QString& /*equipmentId*/) const
 	{
 		Q_ASSERT(false);	// to do
 		return {};

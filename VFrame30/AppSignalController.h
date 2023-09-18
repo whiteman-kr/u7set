@@ -133,7 +133,10 @@ namespace VFrame30
 		QJSValue signalParam(QString signalId) const;		// Returns AppSignalParam
 		QJSValue signalParam(Hash signalHash) const;		// Returns AppSignalParam
 
-		/// \brief Returns AppSignalID for specified EquipmentID, note: such conversion is possible for input/output signals and impossible for internal LogigModule signals (returns an empty string).
+		/// \brief Returns AppSignalID for specified EquipmentID, note: EquipmentID must start from symbol @, and such conversion is possible for input/output signals and impossible for internal LogicModule signals (returns an empty string).
+		QString equipmentToAppSignalId(QString equipmentId) const;
+
+		// This version was before the typo was fixed, left for script compatibility.
 		QString equipmentToAppSiganlId(QString equipmentId) const;
 
 		/// \brief Returns AppSignalState structure of signal specified by <b>signalId</b>. If error occurs, the return value is <b>undefined</b>.
