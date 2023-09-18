@@ -2512,9 +2512,12 @@ namespace Builder
 
 		std::erase_if(fileInfos, [](const DbFileInfo& fi)
 					  {
+						  bool checkedOutAndDeleted = fi.state() == E::VcsState::CheckedOut && fi.action() == E::VcsItemAction::Deleted;
+
 						  return fi.isFolder() ||
-							  fi.fileName().endsWith(".js") == false ||
-							  fi.deleted() == true;
+								 fi.fileName().endsWith(".js") == false ||
+								 fi.deleted() == true ||
+								 checkedOutAndDeleted == true;
 					  });
 
 		if (fileInfos.empty() == true)

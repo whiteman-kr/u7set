@@ -1722,7 +1722,8 @@ void TestsWidget::runAllTestFiles()
 
 	std::vector<DbFileInfo> testsFiles = testsTree.toVectorIf([this](const DbFileInfo& f)
 	{
-		return isEditableExtension(f.fileName());
+		bool checkedOutAndDeleted = f.state() == E::VcsState::CheckedOut && f.action() == E::VcsItemAction::Deleted;
+		return isEditableExtension(f.fileName()) && f.deleted() == false && checkedOutAndDeleted == false;
 	});
 
 	if (testsFiles.empty() == true)
