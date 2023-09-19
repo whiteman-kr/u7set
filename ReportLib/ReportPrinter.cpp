@@ -381,8 +381,16 @@ namespace ReportLib
 				{
 					if (topRect.width() >= textBoundingRect.width() && topRect.height() >= textBoundingRect.height())
 					{
+						QRect textRect{topRect};
+						textRect.setBottom(textRect.bottom() - fm.height() / 2);
+						
 						int alignment = itemAlignment & ~Qt::AlignTop;
-						painter.drawText(topRect, alignment | Qt::AlignBottom, text + "\n");
+						painter.drawText(textRect, alignment | Qt::AlignBottom, text);
+						
+						QPen pen = painter.pen();
+						painter.setPen(QPen(Qt::gray, 1.5));
+						painter.drawLine(topRect.bottomLeft(), topRect.bottomRight());
+						painter.setPen(pen);
 					}
 				}
 				else
@@ -391,8 +399,16 @@ namespace ReportLib
 					{
 						if (bottomRect.width() >= textBoundingRect.width() && bottomRect.height() >= textBoundingRect.height())
 						{
+							QRect textRect{bottomRect};
+							textRect.setTop(textRect.top() + fm.height() / 2);
+
 							int alignment = itemAlignment & ~Qt::AlignBottom;
-							painter.drawText(bottomRect, alignment | Qt::AlignTop, "\n" + text);
+							painter.drawText(textRect, alignment | Qt::AlignTop, text);
+
+							QPen pen = painter.pen();
+							painter.setPen(QPen(Qt::gray, 1.5));
+							painter.drawLine(bottomRect.topLeft(), bottomRect.topRight());
+							painter.setPen(pen);
 						}
 					}
 				}
@@ -605,9 +621,9 @@ namespace ReportLib
 #ifdef DEBUG_PRINT_PAGE_RECT
 				if (firstRenderedSection == true)
 				{
-					auto fullRect = rs.pageLayout.fullRectPixels(report.resolution());
+					auto fullRect = rs.pageLayout().fullRectPixels(report.resolution());
 
-					auto pageRect = rs.pageLayout.paintRectPixels(report.resolution());
+					auto pageRect = rs.pageLayout().paintRectPixels(report.resolution());
 
 					painter.save();
 

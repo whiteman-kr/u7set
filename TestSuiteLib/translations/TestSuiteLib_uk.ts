@@ -75,7 +75,7 @@ Do you with to open it?</source>
         <translation>Помилка: Шлях розташування сценаріїв &quot;%1&quot; не існує!</translation>
     </message>
     <message>
-        <location filename="../TestScriptsStorage.cpp" line="158"/>
+        <location filename="../TestScriptsStorage.cpp" line="165"/>
         <source>Error: Can&apos;t open file &quot;%1&quot; for reading!</source>
         <translation>Помилка відкриття файлу %1 для читання!</translation>
     </message>
@@ -93,6 +93,26 @@ Do you with to open it?</source>
         <location filename="../TestObserver.cpp" line="33"/>
         <source>RtDataProvider connection timeout, connected %1 of %2 AppDataServices.</source>
         <translation></translation>
+    </message>
+    <message>
+        <location filename="../ScriptRunner.cpp" line="48"/>
+        <source>%1 ms</source>
+        <translation>%1 мс</translation>
+    </message>
+    <message>
+        <location filename="../ScriptRunner.cpp" line="55"/>
+        <source>%1 s %2 ms</source>
+        <translation>%1 с %2 мс</translation>
+    </message>
+    <message>
+        <location filename="../ScriptRunner.cpp" line="62"/>
+        <source>%1m %2s %3ms</source>
+        <translation>%1хв %2с %3мс</translation>
+    </message>
+    <message>
+        <location filename="../ScriptRunner.cpp" line="65"/>
+        <source>%1h %2m %3s %3ms</source>
+        <translation>%1г %2хв %3с %3мс</translation>
     </message>
 </context>
 <context>
@@ -141,23 +161,69 @@ Do you with to open it?</source>
 <context>
     <name>TestSuite::ScriptRunner</name>
     <message>
-        <location filename="../ScriptRunner.cpp" line="77"/>
+        <location filename="../ScriptRunner.cpp" line="107"/>
         <source>********** Start test script %1 **********</source>
         <translation>********** Запуск сценарію %1 **********</translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="179"/>
-        <location filename="../ScriptRunner.cpp" line="183"/>
+        <location filename="../ScriptRunner.cpp" line="185"/>
+        <source>%1: PASS</source>
+        <translation>%1: ПРОЙШОВ</translation>
+    </message>
+    <message>
+        <location filename="../ScriptRunner.cpp" line="191"/>
+        <source>%1: FAIL</source>
+        <translation>%1: НЕ ПРОЙШОВ</translation>
+    </message>
+    <message>
+        <location filename="../ScriptRunner.cpp" line="199"/>
+        <source>%1: cleanup() failed, test terminated.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../ScriptRunner.cpp" line="204"/>
+        <source>%1: init() failed, test terminated.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../ScriptRunner.cpp" line="216"/>
+        <source>⠀%1;%2;%3</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../ScriptRunner.cpp" line="218"/>
+        <location filename="../ScriptRunner.cpp" line="260"/>
+        <source>PASSED</source>
+        <translation>ПРОЙШОВ</translation>
+    </message>
+    <message>
+        <location filename="../ScriptRunner.cpp" line="218"/>
+        <source>FAILED</source>
+        <translation>НЕ ПРОЙШОВ</translation>
+    </message>
+    <message>
+        <location filename="../ScriptRunner.cpp" line="246"/>
+        <location filename="../ScriptRunner.cpp" line="250"/>
         <source>Totals: %1 tests, %2 failed, %3ms</source>
         <translation>Результат: %1 тест(ів), %2 з помилкою, %3мс</translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="186"/>
+        <location filename="../ScriptRunner.cpp" line="253"/>
         <source>********** Finished test script %1 **********</source>
         <translation>********** Завершення сценарію %1 **********</translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="199"/>
+        <location filename="../ScriptRunner.cpp" line="258"/>
+        <source>%1;%2;%3</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../ScriptRunner.cpp" line="260"/>
+        <source>%1 FAILED</source>
+        <translation>%1 НЕ ПРОЙШОВ</translation>
+    </message>
+    <message>
+        <location filename="../ScriptRunner.cpp" line="279"/>
         <source>Script %1 evaluate error at line %2
 	Class: %3
 	Stack: %4
@@ -168,24 +234,24 @@ Do you with to open it?</source>
 	Помилка: %5</translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="281"/>
+        <location filename="../ScriptRunner.cpp" line="394"/>
         <source>%1 is callable function</source>
         <translation>%1 не є функцією</translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="329"/>
+        <location filename="../ScriptRunner.cpp" line="442"/>
         <source>Unexpected exception occured in %1.</source>
         <translation>Виникло виключення в %1.</translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="348"/>
+        <location filename="../ScriptRunner.cpp" line="461"/>
         <source>Error, stack trace: %1
 	Message: %2</source>
         <translation>Помилка, трасування: %1
 	Помилка: %2</translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="354"/>
+        <location filename="../ScriptRunner.cpp" line="467"/>
         <source>Error at line %1
 	Stack: %2
 	Message: %3</source>
@@ -249,43 +315,43 @@ Do you with to open it?</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TestSuiteConfigController.cpp" line="76"/>
+        <location filename="../TestSuiteConfigController.cpp" line="80"/>
         <source>updateConfiguration: Get %1 file error:
 %2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TestSuiteConfigController.cpp" line="133"/>
+        <location filename="../TestSuiteConfigController.cpp" line="137"/>
         <source>New configuration arrived:</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TestSuiteConfigController.cpp" line="156"/>
+        <location filename="../TestSuiteConfigController.cpp" line="160"/>
         <source>AppDatService(s): %1.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TestSuiteConfigController.cpp" line="162"/>
+        <location filename="../TestSuiteConfigController.cpp" line="166"/>
         <source>Service: id, address: %1, %2.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TestSuiteConfigController.cpp" line="170"/>
+        <location filename="../TestSuiteConfigController.cpp" line="174"/>
         <source>TuningService(s): %1.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TestSuiteConfigController.cpp" line="175"/>
+        <location filename="../TestSuiteConfigController.cpp" line="179"/>
         <source>TuningService: id, address: %1, %2.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TestSuiteConfigController.cpp" line="178"/>
+        <location filename="../TestSuiteConfigController.cpp" line="182"/>
         <source>TuningSources: %1.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TestSuiteConfigController.cpp" line="185"/>
+        <location filename="../TestSuiteConfigController.cpp" line="189"/>
         <source>Script File: %1</source>
         <translation></translation>
     </message>

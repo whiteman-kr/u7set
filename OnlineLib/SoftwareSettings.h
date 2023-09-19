@@ -561,6 +561,12 @@ public:
 
 	std::vector<SoftwareEndpoint::TuningService> tuningServices;
 
+	// Report Settings
+	//
+	QString plant;
+	QString unit;
+	QString system;
+
 private:
 	// this methods should be call by SoftwareSettingsSet only
 	//

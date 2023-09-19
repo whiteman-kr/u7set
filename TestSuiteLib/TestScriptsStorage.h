@@ -44,6 +44,24 @@ namespace TestSuite
 		{
 			return m_fileName;
 		}
+		const QString shortFileName() const
+		{
+			QString shortFileName = m_fileName;
+			int nPos1 = shortFileName.lastIndexOf('/'); 
+			int nPos2 = shortFileName.lastIndexOf('\\'); 
+			if (nPos1 != -1)
+			{
+				shortFileName = shortFileName.right(shortFileName.length() - nPos1 - 1);
+			}
+			else
+			{
+				if (nPos2 != -1)
+				{
+					shortFileName = shortFileName.right(shortFileName.length() - nPos2 - 1);
+				}
+			}
+			return shortFileName;
+		}
 		void setFileName(const QString& name)
 		{
 			m_fileName = name;

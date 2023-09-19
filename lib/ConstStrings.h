@@ -182,6 +182,12 @@ namespace EquipmentPropNames
 	inline const QString TESTING_LOGIN("TestingLogin");
 	inline const QString TESTING_USER_ACCOUNTS("TestingUserAccounts");
 
+	// Testing Reports properties
+	//
+	inline const QString TESTING_PLANT("Plant");
+	inline const QString TESTING_UNIT("Unit");
+	inline const QString TESTING_SYSTEM("System");
+
 	// Opto modules properties
 	//
 	inline const QString ALLOW_INCHASSIS_OPTO_CONNECTIONS("AllowInchassisOptoConnections");
@@ -224,6 +230,8 @@ namespace XmlElement
 
 	inline const QString TUNING_SECURITY("TuningSecurity");
 	inline const QString TESTING_SECURITY("TestingSecurity");
+
+	inline const QString TESTING_REPORTS("TestingReports");
 
 	inline const QString LOGIC_MODULES("LogicModules");
 	inline const QString LOGIC_MODULE("LogicModule");
