@@ -45,6 +45,10 @@ namespace TestSuite
 			m_logFile.writeWarning(tr("Testing user authorization is disabled. Tests can be executed without supplying a password!"));
 		}
 
+		config.plant = settings.plant;
+		config.unit = settings.unit;
+		config.system = settings.system;
+
 		// Get test files list
 		//
 		for (const OnlineLib::BuildFileInfo& buildFileInfo : files)

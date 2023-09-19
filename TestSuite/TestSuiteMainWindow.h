@@ -43,7 +43,7 @@ private:
 	void loadScriptsFromConfiguration();
 	void loadScriptsFromLocalPath();
 
-    void createReportActions();
+    void updateReportActions();
 	
 	void updateTestViewTabPages();
 	void updateActionsState();
@@ -64,6 +64,7 @@ private slots:
 	void on_m_run_clicked();
 	void on_m_stop_clicked();
 	void on_m_report_clicked();
+	void on_m_single_report_clicked();
 
 	void onSaveTestLog();
 	void onLoadTestLog();
@@ -108,14 +109,16 @@ private:
 
 	QAction* m_viewGlobalScriptAction = nullptr;
 
-	QAction* m_reportAction = nullptr;
+	QAction* m_reportToolbarAction = nullptr;	// Report button on the toolbar
 
 	QAction* m_saveTestLogAction = nullptr;
 	QAction* m_loadTestLogAction = nullptr;
 	QAction* m_clearTestLogAction = nullptr;
 
-    QMenu* m_reportsMenu;
-    std::vector<QAction*> m_reportActions;
+	QAction* m_singleReportAction = nullptr;	// Single report action
+    
+	QMenu* m_multipleReportsMenu = nullptr;		// Multiple reports submenu
+    std::vector<QAction*> m_multipleReportActions;
 
 	TabWidgetEx* m_tabWidget = nullptr;
 

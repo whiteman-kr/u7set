@@ -194,7 +194,7 @@ void TestSuiteMainWindow::createToolbar()
 
 	m_toolBar->addAction(m_loadTestLogAction);
 	m_toolBar->addAction(m_saveTestLogAction);
-	m_toolBar->addAction(m_reportAction);
+	m_toolBar->addAction(m_reportToolbarAction);
 
 	m_toolBar->addSeparator();
 
@@ -256,8 +256,12 @@ void TestSuiteMainWindow::createActions()
 
 	// --
 	//
-	m_reportAction = new QAction{QIcon(":/Images/Images/TestsReport.svg"), tr("Create Report"), this};
-	connect(m_reportAction, &QAction::triggered, this, &TestSuiteMainWindow::on_m_report_clicked);
+	m_reportToolbarAction = new QAction{QIcon(":/Images/Images/TestsReport.svg"), tr("Create Report"), this};
+	connect(m_reportToolbarAction, &QAction::triggered, this, &TestSuiteMainWindow::on_m_report_clicked);
+
+	m_singleReportAction = new QAction(tr("Report..."), this);
+	m_singleReportAction->setStatusTip(tr("Generate the report"));
+	connect(m_singleReportAction, &QAction::triggered, this, &TestSuiteMainWindow::on_m_single_report_clicked);
 
 	m_pSettingsAction = new QAction(tr("Settings..."), this);
 	m_pSettingsAction->setStatusTip(tr("Change application settings"));
@@ -323,8 +327,12 @@ void TestSuiteMainWindow::createMenu()
 	pReportsMenu->addAction(m_clearTestLogAction);
     pReportsMenu->addSeparator();
 
-    m_reportsMenu = pReportsMenu->addMenu(tr("Report"));
-	m_reportsMenu->setEnabled(false);
+    m_multipleReportsMenu = pReportsMenu->addMenu(tr("Report"));
+	m_multipleReportsMenu->setEnabled(false);
+	m_multipleReportsMenu->menuAction()->setVisible(false);
+	
+	pReportsMenu->addAction(m_singleReportAction);
+	m_singleReportAction->setVisible(false);
 
 	// Service
 	//
@@ -580,31 +588,41 @@ void TestSuiteMainWindow::loadScriptsFromLocalPath()
 	m_testListWidget->fillTestsTree(m_testScriptsStorage);
 }
 
-void TestSuiteMainWindow::createReportActions()
+void TestSuiteMainWindow::updateReportActions()
 {
-    Q_ASSERT(m_reportsMenu);
-    m_reportsMenu->clear();
+    Q_ASSERT(m_multipleReportsMenu);
+    m_multipleReportsMenu->clear();
 
-    for (QAction* a : m_reportActions)
+    for (QAction* a : m_multipleReportActions)
     {
         delete a;
     }
-    m_reportActions.clear();
+    m_multipleReportActions.clear();
 
-	for (const ReportLib::ReportTemplate& report : m_configController.reportTemplates().templates())
-    {
-        QAction* a = new QAction(report.caption(), this);
-        a->setStatusTip(tr("Generate report: %1").arg(report.caption()));
-        a->setEnabled(true);
-        connect(a, &QAction::triggered, this, [this, report](){
-            onGenerateReport(report.caption());
-        });
 
-        m_reportActions.push_back(a);
-        m_reportsMenu->addAction(a);
-    }
+	const auto& templates = m_configController.reportTemplates().templates();
 
-    m_reportsMenu->setEnabled(m_reportActions.empty() == false);
+	m_singleReportAction->setVisible(templates.size() == 1);
+	m_multipleReportsMenu->menuAction()->setVisible(templates.size() > 1);
+
+	if (templates.size() > 1)
+	{
+		for (const ReportLib::ReportTemplate& report : templates)
+		{
+			QAction* a = new QAction(report.caption(), this);
+			a->setStatusTip(tr("Generate report: %1").arg(report.caption()));
+			a->setEnabled(true);
+			connect(a, &QAction::triggered, this, [this, report]()
+					{
+						onGenerateReport(report.caption());
+					});
+
+			m_multipleReportActions.push_back(a);
+			m_multipleReportsMenu->addAction(a);
+		}
+	}
+
+    m_multipleReportsMenu->setEnabled(m_multipleReportActions.empty() == false);
 }
 
 void TestSuiteMainWindow::updateTestViewTabPages()
@@ -661,11 +679,11 @@ void TestSuiteMainWindow::updateActionsState()
 
 	m_pSettingsAction->setEnabled(isRunning == false);
 	m_reloadTestsScriptsAction->setEnabled(isRunning == false);
-	for (QAction* a : m_reportActions)
+	for (QAction* a : m_multipleReportActions)
 	{
 		a->setEnabled(isRunning == false);
 	}
-	m_reportAction->setEnabled(isRunning == false);
+	m_reportToolbarAction->setEnabled(isRunning == false);
 	m_saveTestLogAction->setEnabled(isRunning == false);
 	m_loadTestLogAction->setEnabled(isRunning == false);
 	m_clearTestLogAction->setEnabled(isRunning == false);
@@ -944,8 +962,26 @@ void TestSuiteMainWindow::on_m_report_clicked()
 		}
 	}
 
-	DialogReport d(m_configController, m_testSuite.testLog(), this);
-	d.exec();
+	if (m_configController.reportTemplates().templates().size() == 1)
+	{
+		on_m_single_report_clicked();
+	}
+	else
+	{
+		DialogReport d(m_configController, m_testSuite.testLog(), this);
+		d.exec();
+	}
+}
+
+void TestSuiteMainWindow::on_m_single_report_clicked()
+{
+	if (m_configController.reportTemplates().templates().size() != 1)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	onGenerateReport(m_configController.reportTemplates().templates()[0].caption());
 }
 
 void TestSuiteMainWindow::onSaveTestLog()
@@ -1189,7 +1225,7 @@ void TestSuiteMainWindow::onConfigurationArrived()
 		updateTestViewTabPages();
 	}
 
-    createReportActions();
+    updateReportActions();
 
 	updateActionsState();
 

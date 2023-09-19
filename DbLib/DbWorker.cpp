@@ -417,6 +417,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0394.sql", "Upgrade to version 394, Add TestSuite preset to database updates"},
 	{":/DatabaseUpgrade/Upgrade0395.sql", "Upgrade to version 395, TestSuite preset report template update"},
 	{":/DatabaseUpgrade/Upgrade0396.sql", "Upgrade to version 396, Add InvertSignal and ApertureType properties"},
+	{":/DatabaseUpgrade/Upgrade0397.sql", "Upgrade to version 397, TestSuite preset report template update"},
 };
 
 int DbWorker::counter = 0;
