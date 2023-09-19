@@ -102,6 +102,8 @@ void TestTreeWidget::keyPressEvent(QKeyEvent *event)
 
 		blockSignals(false);
 	}
+
+	emit testSelectionChanged();
 }
 
 void TestTreeWidget::keyReleaseEvent(QKeyEvent *event)
@@ -109,8 +111,9 @@ void TestTreeWidget::keyReleaseEvent(QKeyEvent *event)
 	QTreeWidget::keyReleaseEvent(event);
 }
 
-TestListWidget::TestListWidget(QWidget* parent):
-	QWidget(parent)
+TestListWidget::TestListWidget(TestSuiteLogFile& appLog, QWidget* parent):
+	QWidget(parent),
+	m_appLog(appLog)
 {
 	QVBoxLayout* layout = new QVBoxLayout;
 
@@ -137,6 +140,7 @@ TestListWidget::TestListWidget(QWidget* parent):
 	connect(m_treeWidget, &QTreeWidget::itemDoubleClicked, this, &TestListWidget::testItemDoubleClicked);
 	connect(m_treeWidget, &QTreeWidget::itemChanged, this, &TestListWidget::testItemChanged);
 	connect(m_treeWidget, &QTreeWidget::customContextMenuRequested, this, &TestListWidget::contextMenuRequested);
+	connect(m_treeWidget, &TestTreeWidget::testSelectionChanged, this, &TestListWidget::testSelectionChanged);
 
 	layout->addWidget(m_testsPathLabel);
 	layout->addWidget(m_treeWidget);
@@ -191,7 +195,7 @@ void TestListWidget::fillTestsTree(const TestSuite::TestScriptsStorage& tests)
 	count = static_cast<int>(tests.count());
 	for (int i = 0; i < count; i++)
 	{
-		TestSuite::ScriptRunner sr(testController, testLog, fakeStatus, fakeStatusMutex);
+		TestSuite::ScriptRunner sr(configSettings, testController, testLog, fakeStatus, fakeStatusMutex);
 
 		const TestSuite::TestScript& script = tests.script(i);
 		if (script.isGlobalScript() == true)
@@ -203,20 +207,23 @@ void TestListWidget::fillTestsTree(const TestSuite::TestScriptsStorage& tests)
 		scriptItem->setData(ColumnsData::ScriptName, Qt::UserRole, script.fileName());
 		m_treeWidget->addTopLevelItem(scriptItem);
 
-		QStringList functions;
+		TestSuite::ScriptInfo scriptInfo;
 		QString errorMsg;
-		if (sr.getScriptTestFunctions(script, functions, errorMsg) == false)
+		if (sr.getScriptTestList(script, scriptInfo, errorMsg) == false)
 		{
+			m_appLog.writeError(errorMsg);
 			continue;
 		}
 
 		auto prevScriptItemIt = prevItemsStates.find(script.fileName());
 
-		for (const QString& func : functions)
+		for (const QString& f : scriptInfo.functionsList)
 		{
-			QTreeWidgetItem* funcItem = new QTreeWidgetItem(QStringList() << func);
+			QString caption = scriptInfo.caption(f);
+
+			QTreeWidgetItem* funcItem = new QTreeWidgetItem(QStringList() << caption);
 			funcItem->setData(ColumnsData::ScriptName, Qt::UserRole, script.fileName());
-			funcItem->setData(ColumnsData::TestFunction, Qt::UserRole, func);
+			funcItem->setData(ColumnsData::TestFunction, Qt::UserRole, f);	// Data is test function
 			scriptItem->addChild(funcItem);
 
 			if (prevScriptItemIt == prevItemsStates.end())
@@ -229,7 +236,7 @@ void TestListWidget::fillTestsTree(const TestSuite::TestScriptsStorage& tests)
 			{
 				// If this function is from existing file - check it if it was selected earlier
 				//
-				auto prevFuncItemIt = prevItemsStates.find(script.fileName() + func);
+				auto prevFuncItemIt = prevItemsStates.find(script.fileName() + caption);
 				funcItem->setCheckState(0, prevFuncItemIt != prevItemsStates.end() && prevFuncItemIt->second == true ? Qt::Checked : Qt::Unchecked);
 			}
 		}
@@ -361,7 +368,7 @@ void TestListWidget::onTestFinished(QString scriptFileName, QString testFunction
 				QTreeWidgetItem* childItem = parentItem->child(c);
 				if (childItem->data(ColumnsData::TestFunction, Qt::UserRole).toString() == testFunction)
 				{
-					childItem->setText(Columns::Result, result ? tr("PASS") : tr("FAIL"));
+					childItem->setText(Columns::Result, result ? tr("PASSED") : tr("FAILED"));
 
 					if (result == false)
 					{
@@ -442,7 +449,7 @@ void TestListWidget::testItemChanged(QTreeWidgetItem *item, int column)
 		m_treeWidget->blockSignals(false);
 	}
 
-	emit testSelectionChanged();
+ 	emit testSelectionChanged();
 }
 
 void TestListWidget::contextMenuRequested()

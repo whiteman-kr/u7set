@@ -490,6 +490,7 @@ namespace Builder
 		bool isAnalog() const { return m_refSignals[0]->isAnalog(); }
 		bool isDiscrete() const { return m_refSignals[0]->isDiscrete(); }
 		bool isBus() const { return m_refSignals[0]->isBus(); }
+		bool invertSignal() const { return m_refSignals[0]->invertSignal(); }
 
 		bool isHeapPlaced() const { return m_isHeapPlaced; }
 
@@ -703,7 +704,7 @@ namespace Builder
 
 		void disposeSignalsInHeaps(const std::unordered_set<UalSignal*>& flagsSignals);
 
-		void finalizeHeaps();
+		bool finalizeHeaps();
 
 		const SignalsHeap& discreteSignalsHeap() const { return m_discreteSignalsHeap; }
 		const SignalsHeap& analogAndBusSignalsHeap() const { return m_analogAndBusSignalsHeap; }

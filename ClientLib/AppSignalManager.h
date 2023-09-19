@@ -107,9 +107,9 @@ namespace ClientLib
 		virtual E::SignalType signalType(Hash signalHash, bool* found) const override final;
 		virtual E::SignalType signalType(const QString& appSignalId, bool* found) const override final;
 
-		virtual QString equipmentToAppSiganlId(const QString& equipmentId) const override final;
+		virtual QString equipmentToAppSignalId(const QString& equipmentId) const override final;
 
-		// IAppSignalManager implememntation - Setpoints
+		// IAppSignalManager implementation - Setpoints
 		//
 		virtual std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const override final;
 

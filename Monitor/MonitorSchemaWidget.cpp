@@ -320,7 +320,7 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 			{
 				if (s.startsWith('@') == true)
 				{
-					s = signalManager()->equipmentToAppSiganlId(s);
+					s = signalManager()->equipmentToAppSignalId(s);
 				}
 			};
 

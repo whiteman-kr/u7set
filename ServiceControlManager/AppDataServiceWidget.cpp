@@ -163,7 +163,7 @@ SC_ARCHIVE = 18,
 SC_DECIMAL_PLACES = 19,
 SC_COARSE_APERTURE = 20,
 SC_FINE_APERTURE = 21,
-SC_ADAPTIVE_APERTURE = 22,
+SC_APERTURE_TYPE = 22,
 SC_IO_BUF_ADDR = 23,
 SC_TUNING_ADDR = 24,
 SC_UAL_ADDR = 25,
@@ -860,7 +860,7 @@ QVariant SignalStateModel::data(const QModelIndex& index, int role) const
 		case SC_DECIMAL_PLACES: return s.decimalPlaces();
 		case SC_COARSE_APERTURE: return s.coarseAperture();
 		case SC_FINE_APERTURE: return s.fineAperture();
-		case SC_ADAPTIVE_APERTURE: return s.adaptiveAperture() ? yes : no;
+		case SC_APERTURE_TYPE: return E::valueToString<E::ApertureType>(s.apertureType());
 		case SC_IO_BUF_ADDR: return s.ioBufAddr().toString();
 		case SC_TUNING_ADDR: return s.tuningAddr().toString();
 		case SC_UAL_ADDR: return s.ualAddr().toString();

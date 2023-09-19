@@ -4,6 +4,10 @@ IF NOT EXIST %BIN_OUT_DIR%\docs (
 	mkdir %BIN_OUT_DIR%\docs
 )
 
+if DEFINED SKIP_DELO (
+    goto :SkipDelo
+)
+
 FOR /F "delims=|" %%d  IN (SvnDocList.txt) DO (
 
 	svn checkout "https://delo:8443/svn//RadICS_Platform/trunk/Docs/FSC Documents/FSC Safety Manual/%%d" %BIN_OUT_DIR%\docs\%%d --depth empty --non-interactive --trust-server-cert --username=gitlab --password gitl@b
@@ -39,6 +43,12 @@ IF NOT EXIST "%BIN_OUT_DIR%\docs\RPCT Quick Start Guide.pdf" goto SvnError
 
 :SvnSuccess
 echo All files were successfully received from SVN.
+cmd /c exit 0
+echo Errorlevel = %errorlevel%
+goto Done
+
+:SkipDelo
+echo Getting documents from the SVN server was skipped
 cmd /c exit 0
 echo Errorlevel = %errorlevel%
 goto Done

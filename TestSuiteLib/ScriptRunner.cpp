@@ -2,7 +2,8 @@
 
 namespace TestSuite
 {
-	ScriptRunner::ScriptRunner(TestController& testController, ILogFile& scriptTestLog, ControlStatus& status, QMutex& statusMutex) :
+	ScriptRunner::ScriptRunner(ConfigSettings& configuration, TestController& testController, ILogFile& scriptTestLog, ControlStatus& status, QMutex& statusMutex) :
+		m_configuration(configuration),
 		m_testController(testController),
 		m_scriptTestLog(scriptTestLog),
 		m_status(status),
@@ -32,10 +33,37 @@ namespace TestSuite
 		qDebug() << "ScriptRunner::~ScriptRunner()";
 	}
 
-	bool ScriptRunner::getScriptTestFunctions(const TestScript& script, QStringList& functionsList, QString& errorMsg)
+	bool ScriptRunner::getScriptTestList(const TestScript& script, ScriptInfo& scriptInfo, QString& errorMsg)
 	{
-		return evaluateScript(script, {}, functionsList, errorMsg);
+		return evaluateScript(script, {}, scriptInfo, errorMsg);
 	}
+
+	static QString timeMsToStr(qint64 mss)
+	{
+
+		quint64 ms = mss % 1000;
+		mss /= 1000;
+		if (mss == 0)
+		{
+			return QObject::tr("%1 ms").arg(ms);
+		}
+
+		quint64 sec = mss % 60;
+		mss /= 60;
+		if (mss == 0)
+		{
+			return QObject::tr("%1 s %2 ms").arg(sec).arg(ms);
+		}
+
+		quint64 min = mss % 60;
+		mss /= 60;
+		if (mss == 0)
+		{
+			return QObject::tr("%1m %2s %3ms").arg(min).arg(sec).arg(ms);
+		}
+
+		return QObject::tr("%1h %2m %3s %3ms").arg(mss).arg(min).arg(sec).arg(ms);
+	};
 
 	bool ScriptRunner::runScript(const TestScript& script, const TestScript* globalScript, const TestScriptSelection& filter)
 	{
@@ -50,8 +78,8 @@ namespace TestSuite
 			// Evaluate global script
 			// 
 			QString errorMsg;
-			QStringList functionsList;
-			if (evaluateScript(*globalScript, {}, functionsList, errorMsg) == false)
+			ScriptInfo scriptInfo;
+			if (evaluateScript(*globalScript, {}, scriptInfo, errorMsg) == false)
 			{
 				m_scriptTestLog.writeError(errorMsg);
 				return false;
@@ -61,20 +89,37 @@ namespace TestSuite
 		// Evaluate script
 
 		QString errorMsg;
-		QStringList functionsList;
-		if (evaluateScript(script, filter, functionsList, errorMsg) == false)
+		ScriptInfo scriptInfo;
+		if (evaluateScript(script, filter, scriptInfo, errorMsg) == false)
 		{
 			m_scriptTestLog.writeError(errorMsg);
 			return false;
 		}
 
 		// Exit if no functions to run in this file
-		if (functionsList.empty() == true)
+		if (scriptInfo.count() == 0)
 		{
 			return true;
 		}
 
+		QStringList reportStrings;
+
 		m_scriptTestLog.writeMessage(tr("********** Start test script %1 **********").arg(script.fileName()));
+
+		// Write plant name, unit name and system name to test log if they are specified in configuration
+		//
+		if (m_configuration.plant.isEmpty() == false)
+		{
+			m_scriptTestLog.writeMessage(m_configuration.plant, "PLANT");
+		}
+		if (m_configuration.unit.isEmpty() == false)
+		{
+			m_scriptTestLog.writeMessage(m_configuration.unit, "UNIT");
+		}
+		if (m_configuration.system.isEmpty() == false)
+		{
+			m_scriptTestLog.writeMessage(m_configuration.system, "SYSTEM");
+		}
 
 		// initTestCase() - will be called before the first test function is executed.
 		// cleanupTestCase() - will be called after the last test function was executed.
@@ -101,11 +146,11 @@ namespace TestSuite
 		{
 			QMutexLocker l(&m_statusMutex);
 			m_status.m_testIndex = 0;
-			m_status.m_testCount = functionsList.size();
+			m_status.m_testCount = scriptInfo.count();
 		}
 
 		int failed = 0;
-		for (const QString& testFunc : functionsList)
+		for (const QString& testFunc : scriptInfo.functionsList)
 		{
 			{
 				QMutexLocker l(&m_statusMutex);
@@ -113,7 +158,15 @@ namespace TestSuite
 				m_status.m_testFunction = testFunc;
 			}
 
-			m_scriptTestLog.writeMessage(testFunc + ": RUN");
+			// Find test caption
+			//
+			QString testCaption = scriptInfo.caption(testFunc);
+
+			// Mark test function start time
+			//
+			qint64 startMsTestFunc = timer.elapsed();
+
+			m_scriptTestLog.writeMessage(testCaption + ": RUN");
 
 			bool initOk = false;
 			bool testOk = false;
@@ -129,13 +182,13 @@ namespace TestSuite
 				testOk = runScriptFunction(testFunc);
 				if (testOk == true)
 				{
-					m_scriptTestLog.writeMessage(testFunc + ": PASS");
+					m_scriptTestLog.writeMessage(tr("%1: PASS").arg(testCaption));
 				}
 				else
 				{
 					failed++;
 					//totalFailed ++;
-					m_scriptTestLog.writeError(testFunc + ": FAIL");
+					m_scriptTestLog.writeError(tr("%1: FAIL").arg(testCaption));
 				}
 
 				// cleanup() - called after every test function.
@@ -143,17 +196,31 @@ namespace TestSuite
 				cleanupOk = runScriptFunction("cleanup");
 				if (cleanupOk == false)
 				{
-					m_scriptTestLog.writeError(testFunc + ": cleanup() failed, test terminated.");
+					m_scriptTestLog.writeError(tr("%1: cleanup() failed, test terminated.").arg(testCaption));
 				}
 			}
 			else
 			{
-				m_scriptTestLog.writeError(testFunc + ": init() failed, test terminated.");
+				m_scriptTestLog.writeError(tr("%1: init() failed, test terminated.").arg(testCaption));
 			}
-			
-			emit testFinished(script.fileName(), testFunc, initOk == true && testOk == true && cleanupOk == true);
 
-			if (initOk == false || testOk == false || cleanupOk == false)
+			bool testFuncResult = initOk == true && testOk == true && cleanupOk == true;
+
+			// Mark test function finish time
+			//
+			qint64 elapsedMsTestFunc = timer.elapsed();
+
+			// Write message to the test log for generating default report
+			//
+
+			reportStrings.push_back(tr("\u2800%1;%2;%3")
+										.arg(testCaption)
+										.arg(testFuncResult ? tr("PASSED") : tr("FAILED"))
+										.arg(timeMsToStr(elapsedMsTestFunc - startMsTestFunc)));
+			
+			emit testFinished(script.fileName(), testFunc, testFuncResult);
+
+			if (initOk == false || cleanupOk == false)
 			{
 				break;
 			}
@@ -176,19 +243,32 @@ namespace TestSuite
 
 		if (failed == 0)
 		{
-			m_scriptTestLog.writeMessage(tr("Totals: %1 tests, %2 failed, %3ms").arg(functionsList.size()).arg(failed).arg(elapsedMsTotal));
+			m_scriptTestLog.writeMessage(tr("Totals: %1 tests, %2 failed, %3ms").arg(scriptInfo.count()).arg(failed).arg(elapsedMsTotal));
 		}
 		else
 		{
-			m_scriptTestLog.writeError(tr("Totals: %1 tests, %2 failed, %3ms").arg(functionsList.size()).arg(failed).arg(elapsedMsTotal));
+			m_scriptTestLog.writeError(tr("Totals: %1 tests, %2 failed, %3ms").arg(scriptInfo.count()).arg(failed).arg(elapsedMsTotal));
 		}
 
 		m_scriptTestLog.writeMessage(tr("********** Finished test script %1 **********").arg(script.fileName()));
 
+		// Write report messages
+		//
+		reportStrings.insert(reportStrings.begin(), 
+			tr("%1;%2;%3")
+								 .arg(script.shortFileName())
+								 .arg(failed == 0 ? tr("PASSED") : tr("%1 FAILED").arg(failed))
+								 .arg(timeMsToStr(elapsedMsTotal)));
+
+		for (const QString& s : reportStrings)
+		{
+			m_scriptTestLog.writeMessage(s, "TEST_RESULT");
+		}
+
 		return failed == 0;
 	}
 
-	bool ScriptRunner::evaluateScript(const TestScript& script, const TestScriptSelection& filter, QStringList& functionsList, QString& errorMsg)
+	bool ScriptRunner::evaluateScript(const TestScript& script, const TestScriptSelection& filter, ScriptInfo& scriptInfo, QString& errorMsg)
 	{
 		// Evaluate script.
 		//
@@ -208,6 +288,11 @@ namespace TestSuite
 			return false;
 		}
 
+		// This map contains values of caption$TestName variables like captionWaterPressure
+		// Key is variable name, value is variable value 
+		//
+		std::map<QString, QString> captionValues;	
+
 		// Find all functions which starts from 'test', like 'testTgnAboveTNom(), using filter'
 		//
 		QJSValueIterator it(m_jsEngine.globalObject());
@@ -215,10 +300,24 @@ namespace TestSuite
 		{
 			it.next();
 
-			QString functionName = it.name();
+			QString objectName = it.name();
 
-			if (functionName.startsWith("test"))
+			if (objectName.startsWith("caption"))
 			{
+				// This is a variable named like captionWaterPressure
+				//
+				QString value = it.value().toString();
+				if (value.isEmpty() == false)
+				{
+					captionValues[objectName] = value;
+				}
+				continue;
+			}
+
+			if (objectName.startsWith("test"))
+			{
+				// This is a variable named testTestName
+				//
 				bool filterMatch = true;
 
 				// Process function list filter
@@ -226,7 +325,7 @@ namespace TestSuite
 				const QStringList& functions = filter.selectedFunctions(script.fileName());
 				if (functions.empty() == false)
 				{
-					if (std::find(functions.begin(), functions.end(), functionName) == functions.end())
+					if (std::find(functions.begin(), functions.end(), objectName) == functions.end())
 					{
 						filterMatch = false;
 					}
@@ -246,7 +345,7 @@ namespace TestSuite
 					QRegularExpression rx(QRegularExpression::wildcardToRegularExpression(
 											  matchValue ? mask : mask.right(mask.length() - 1)));
 
-					if(rx.match(functionName).hasMatch() != matchValue)
+					if(rx.match(objectName).hasMatch() != matchValue)
 					{
 						filterMatch = false;
 					}
@@ -259,11 +358,25 @@ namespace TestSuite
 
 				// Add function for execution
 				//
-				functionsList.push_back(functionName);
+				scriptInfo.functionsList.push_back(objectName);
 			}
 		}
 
-		std::sort(functionsList.begin(), functionsList.end());
+		std::sort(scriptInfo.functionsList.begin(), scriptInfo.functionsList.end());
+
+		// Build tests captions map
+		//
+		for (const QString& testFunc : scriptInfo.functionsList)
+		{
+			QString captionVariable = "caption" + testFunc;
+			captionVariable.replace("captiontest", "caption", Qt::CaseSensitive);
+			 
+			auto it = captionValues.find(captionVariable);
+			if (it != captionValues.end())
+			{
+				scriptInfo.functionsCaptions[testFunc] = it->second;
+			}
+		}
 
 		return true;
 	}
@@ -360,6 +473,11 @@ namespace TestSuite
 			}
 
 			return false;
+		}
+
+		if (callResult.isBool())
+		{
+			return callResult.toBool();
 		}
 
 		return true;

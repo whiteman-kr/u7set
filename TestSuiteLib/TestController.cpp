@@ -191,7 +191,7 @@ namespace TestSuite
 		{
 			AppSignalParam asp = signalParam(appSignalId);
 
-			bool ok = m_outputController.writeSignalValue(appSignalId, asp.tuningDefaultValueToVariant());
+			bool ok = m_outputController.writeSignalValue(appSignalId, asp.tuningDefaultValueToVariant().toDouble());
 			if (ok == false)
 			{
 				throwScriptException(this, tr("overrideSignalValue(%1, ...), signal write error.").arg(appSignalId));

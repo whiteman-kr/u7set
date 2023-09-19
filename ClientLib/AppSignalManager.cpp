@@ -505,7 +505,7 @@ namespace ClientLib
 		return signalType(::calcHash(appSignalId), found);
 	}
 
-	QString AppSignalManager::equipmentToAppSiganlId(const QString& equipmentId) const
+	QString AppSignalManager::equipmentToAppSignalId(const QString& equipmentId) const
 	{
 		QString result;
 

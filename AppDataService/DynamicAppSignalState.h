@@ -155,6 +155,8 @@ private:
 	bool m_enableTuning = false;
 	TuningValue m_tuningDefaultValue;
 
+	bool m_reverseLimits = false;
+
 	double m_absCoarseAperture = 0;
 	double m_absFineAperture = 0;
 
@@ -171,7 +173,7 @@ private:
 
 	bool m_archive = false;
 
-	bool m_adaptiveAperture = false;
+	E::ApertureType m_apertureType = E::ApertureType::RangePercent;
 
 	double m_coarseAperture = 0;
 	double m_fineAperture = 0;

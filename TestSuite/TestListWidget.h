@@ -5,15 +5,21 @@
 #include "../TestSuiteLib/TestController.h"
 #include "../TestSuiteLib/TestLog.h"
 #include "../TestSuiteLib/TestScriptsStorage.h"
+#include "TestSuiteLog.h"
 
 class TestTreeWidget : public QTreeWidget
 {
+	Q_OBJECT
 public:
 	void setParentItemsCheckState();
 
 private:
 	void keyPressEvent(QKeyEvent *event) override;
 	void keyReleaseEvent(QKeyEvent *event) override;
+
+signals:
+	void testSelectionChanged();
+
 };
 
 
@@ -21,7 +27,7 @@ class TestListWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	TestListWidget(QWidget* parent);
+	TestListWidget(TestSuiteLogFile& appLog, QWidget* parent);
 
 	enum Columns
 	{
@@ -59,6 +65,7 @@ private slots:
 private:
 	QLabel* m_testsPathLabel = nullptr;
 	TestTreeWidget* m_treeWidget = nullptr;
+	TestSuiteLogFile& m_appLog;
 };
 
 #endif // TESTLISTWIDGET_H

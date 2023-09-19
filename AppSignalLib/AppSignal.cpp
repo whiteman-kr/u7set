@@ -676,6 +676,25 @@ QString AppSignal::initFromDeviceSignal(const QString& deviceSignalEquipmentID,
 										arg(deviceSignalEquipmentID);
 	}
 
+	if (m_signalType == E::SignalType::Discrete &&
+		(m_inOutType == E::SignalInOutType::Input || m_inOutType == E::SignalInOutType::Output) &&
+		m_specPropStruct.contains(";InvertSignal;") == false)
+	{
+		if (m_specPropStruct.isEmpty() == false && m_specPropStruct.endsWith(Separator::NEW_LINE) == false)
+		{
+			m_specPropStruct += Separator::NEW_LINE;
+		}
+
+		if (m_inOutType == E::SignalInOutType::Input)
+		{
+			m_specPropStruct += AppSignalDefaultSpecPropStruct::INPUT_DISCRETE;
+		}
+		else
+		{
+			m_specPropStruct += AppSignalDefaultSpecPropStruct::OUTPUT_DISCRETE;
+		}
+	}
+
 	AppSignalSpecPropValues spv;
 
 	spv.createFromSpecPropStruct(m_specPropStruct);
@@ -732,7 +751,28 @@ void AppSignal::initSpecificProperties()
 		}
 
 		break;
+
 	case E::SignalType::Discrete:
+
+		switch(m_inOutType)
+		{
+		case E::SignalInOutType::Input:
+			specPropStruct = AppSignalDefaultSpecPropStruct::INPUT_DISCRETE;
+			break;
+
+		case E::SignalInOutType::Output:
+			specPropStruct = AppSignalDefaultSpecPropStruct::OUTPUT_DISCRETE;
+			break;
+
+		case E::SignalInOutType::Internal:
+			break;
+
+		default:
+			assert(false);
+		}
+
+		break;
+
 	case E::SignalType::Bus:
 		break;
 
@@ -906,6 +946,16 @@ bool AppSignal::isCompatibleFormat(E::SignalType signalType, const QString& busT
 									 SIZE_1BIT,							// param is not checked for Bus signals
 									 E::BigEndian,						// param is not checked for Bus signals
 									 busTypeID);
+}
+
+bool AppSignal::invertSignal(QString* err) const
+{
+	return getSpecPropBool(AppSignalPropNames::INVERT_SIGNAL, err);
+}
+
+void AppSignal::setSetInvertSignal(bool invert)
+{
+	setSpecPropBool(AppSignalPropNames::INVERT_SIGNAL, invert);
 }
 
 int AppSignal::lowADC(QString* err) const
@@ -1139,12 +1189,13 @@ void AppSignal::saveProtoData(Proto::ProtoAppSignalData* protoData) const
 
 	protoData->set_bustypeid(m_busTypeID.toStdString());
 	protoData->set_caption(m_caption.toStdString());
-	protoData->set_channel(static_cast<int>(m_channel));
+	protoData->set_channel(TO_INT(m_channel));
 	protoData->set_excludefrombuild(m_excludeFromBuild);
 
 	protoData->set_datasize(m_dataSize);
-	protoData->set_byteorder(static_cast<int>(m_byteOrder));
-	protoData->set_analogsignalformat(static_cast<int>(m_analogSignalFormat));
+	protoData->set_byteorder(TO_INT(m_byteOrder));
+
+	protoData->set_analogsignalformat(TO_INT(m_analogSignalFormat));
 	protoData->set_unit(m_unit.toStdString());
 
 	protoData->set_enabletuning(m_enableTuning);
@@ -1157,7 +1208,7 @@ void AppSignal::saveProtoData(Proto::ProtoAppSignalData* protoData) const
 	protoData->set_decimalplaces(m_decimalPlaces);
 	protoData->set_coarseaperture(m_coarseAperture);
 	protoData->set_fineaperture(m_fineAperture);
-	protoData->set_adaptiveaperture(m_adaptiveAperture);
+	protoData->set_aperturetype(TO_INT(m_apertureType));
 
 	//
 
@@ -1214,7 +1265,7 @@ void AppSignal::loadProtoData(const char* protoDataPtr, int protoDataSize)
 	m_decimalPlaces = protoData.decimalplaces();
 	m_coarseAperture = protoData.coarseaperture();
 	m_fineAperture = protoData.fineaperture();
-	m_adaptiveAperture = protoData.adaptiveaperture();
+	m_apertureType = static_cast<E::ApertureType>(protoData.aperturetype());
 
 	//
 
@@ -1343,7 +1394,7 @@ void AppSignal::writeToAzpzXml(XmlWriteHelper& xml) const
 	xml.writeStringAttribute("TuningHighBound", tuningHighBound().toString());
 
 	xml.writeStringAttribute("BusTypeID", busTypeID());
-	xml.writeBoolAttribute("AdaptiveAperture", adaptiveAperture());
+	xml.writeBoolAttribute("AdaptiveAperture", (apertureType() == E::ApertureType::ValuePercent));
 
 	xml.writeIntAttribute("RamAddrOffset", ualAddr().offset());
 	xml.writeIntAttribute("RamAddrBit", ualAddr().bit());
@@ -1433,7 +1484,7 @@ void AppSignal::writeToXml(XmlWriteHelper& xml) const
 
 	if (isAnalog() == true)
 	{
-		xml.writeBoolAttribute(AppSignalPropNames::ADAPTIVE_APERTURE, m_adaptiveAperture);
+		xml.writeEnumKeyValueAttribute(AppSignalPropNames::APERTURE_TYPE, m_apertureType);
 		xml.writeDoubleAttribute(AppSignalPropNames::FINE_APERTURE, m_fineAperture);
 		xml.writeDoubleAttribute(AppSignalPropNames::COARSE_APERTURE, m_coarseAperture);
 		xml.writeIntAttribute(AppSignalPropNames::DECIMAL_PLACES, m_decimalPlaces);
@@ -1548,14 +1599,14 @@ bool AppSignal::readFromXml(XmlReadHelper& xml)
 
 	if (isAnalog() == true)
 	{
-		result &= xml.readBoolAttribute(AppSignalPropNames::ADAPTIVE_APERTURE, &m_adaptiveAperture);
+		result &= xml.readEnumValueAttribute(AppSignalPropNames::APERTURE_TYPE, &m_apertureType);
 		result &= xml.readDoubleAttribute(AppSignalPropNames::FINE_APERTURE, &m_fineAperture);
 		result &= xml.readDoubleAttribute(AppSignalPropNames::COARSE_APERTURE, &m_coarseAperture);
 		result &= xml.readIntAttribute(AppSignalPropNames::DECIMAL_PLACES, &m_decimalPlaces);
 	}
 	else
 	{
-		m_adaptiveAperture = false;
+		m_apertureType = E::ApertureType::RangePercent;
 		m_fineAperture = 0;
 		m_coarseAperture = 0;
 		m_decimalPlaces = 0;
@@ -1681,7 +1732,7 @@ void AppSignal::saveToProto(Proto::AppSignal* s) const
 	s->set_decimalplaces(m_decimalPlaces);
 	s->set_coarseaperture(m_coarseAperture);
 	s->set_fineaperture(m_fineAperture);
-	s->set_adaptiveaperture(m_adaptiveAperture);
+	s->set_aperturetype(TO_INT(m_apertureType));
 
 	// Signal fields from database
 
@@ -1901,7 +1952,7 @@ void AppSignal::loadFromProto(const Proto::AppSignal& s)
 	m_decimalPlaces = s.decimalplaces();
 	m_coarseAperture = s.coarseaperture();
 	m_fineAperture = s.fineaperture();
-	m_adaptiveAperture = s.adaptiveaperture();
+	m_apertureType = static_cast<E::ApertureType>(s.aperturetype());
 
 	// Signal fields from database
 
@@ -2124,6 +2175,28 @@ QString AppSignal::specPropNotExistErr(const QString& propName) const
 	return QString("Specific property %1 is not exists in signal %2").arg(m_appSignalID).arg(propName);
 }
 
+bool AppSignal::getSpecPropBool(const QString& name, QString* err) const
+{
+	QVariant qv;
+	bool isEnum = false;
+
+	bool result = getSpecPropValue(name, &qv, &isEnum, err);
+
+	if (result == false)
+	{
+		if (err != nullptr)
+		{
+			*err = specPropNotExistErr(name);
+		}
+
+		return 0;
+	}
+
+	assert(qv.metaType().id() == QMetaType::Bool && isEnum == false);
+
+	return qv.toBool();
+}
+
 double AppSignal::getSpecPropDouble(const QString& name, QString* err) const
 {
 	QVariant qv;
@@ -2266,6 +2339,13 @@ bool AppSignal::isSpecPropExists(const QString& name) const
 	}
 
 	return spv.isExists(name);
+}
+
+bool AppSignal::setSpecPropBool(const QString& name, bool value)
+{
+	QVariant qv(value);
+
+	return setSpecPropValue(name, qv, false);
 }
 
 bool AppSignal::setSpecPropDouble(const QString& name, double value)

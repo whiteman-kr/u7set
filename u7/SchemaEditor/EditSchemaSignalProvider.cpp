@@ -228,7 +228,7 @@ E::SignalType EditSchemaAppSignalProvider::signalType(const QString& appSignalId
 	return signalType(::calcHash(appSignalId), found);
 }
 
-QString EditSchemaAppSignalProvider::equipmentToAppSiganlId(const QString& /*equipmentId*/) const
+QString EditSchemaAppSignalProvider::equipmentToAppSignalId(const QString& /*equipmentId*/) const
 {
 	Q_ASSERT(false);	// todo
 	return {};

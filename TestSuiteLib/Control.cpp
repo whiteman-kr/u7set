@@ -388,7 +388,7 @@ namespace TestSuite
 			QString logMessage = tr("Run test script: %1").arg(script->fileName());
 			m_appLog.writeMessage(logMessage);
 
-			ScriptRunner scriptRunner{testController, *m_testLog, m_status, m_statusMutex};
+			ScriptRunner scriptRunner{m_configuration, testController, *m_testLog, m_status, m_statusMutex};
 
 			connect(&scriptRunner, &ScriptRunner::testFinished, [this](QString scriptFileName, QString testFunction, bool result){
 				emit testFinished(scriptFileName, testFunction, result);

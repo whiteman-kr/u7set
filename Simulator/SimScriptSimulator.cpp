@@ -567,7 +567,17 @@ namespace Sim
 
 		auto isEqual = [](double expectedValue, double value, double tolerance)
 		{
-			return std::abs(expectedValue - value) < tolerance;
+			if (std::isnan(expectedValue) == true && std::isnan(value) == true)
+			{
+				return true;
+			}
+
+			if (std::isinf(expectedValue) == true && std::isinf(value) == true && std::signbit(expectedValue) == std::signbit(value))
+			{
+				return true;
+			}
+
+			return std::abs(expectedValue - value) <= tolerance;
 		};
 
 		while (isEqual(value, signalValue(appSignalId), tolerance) == false && m_simulator->control().controlData().m_currentTime < deadline)

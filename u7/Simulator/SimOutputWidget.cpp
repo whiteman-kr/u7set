@@ -57,7 +57,7 @@ void SimOutputWidget::simulatorOutputHandler(QtMsgType type, const QMessageLogCo
 							   "<font face=\"Courier\" size=\"4\" color=%2>%3</font>")
 					   .arg(time)
 					   .arg(color)
-					   .arg(msg);
+					   .arg(msg.toHtmlEscaped());
 
 		QMutexLocker l(&m_mutex);
 		m_data.push_back(html);

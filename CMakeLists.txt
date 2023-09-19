@@ -92,6 +92,7 @@ add_subdirectory(ConfigurationService)
 add_subdirectory(AppDataService)
 add_subdirectory(ArchivingService)
 add_subdirectory(TuningService)
+add_subdirectory(GatewayService)
 add_subdirectory(DiagDataService)
 
 # Do not compile these projects if code coverage is on.

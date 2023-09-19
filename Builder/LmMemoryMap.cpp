@@ -284,6 +284,7 @@ namespace Builder
 		m_appWordAdressed.acquiredOptoBuses.setStartAddress(appLogicWordData.startAddress());
 
 		m_appWordAdressed.acquiredDiscreteInputSignals.setStartAddress(appLogicWordData.startAddress());
+		m_appWordAdressed.acquiredDiscreteInvertedInputSignals.setStartAddress(appLogicWordData.startAddress());
 		m_appWordAdressed.acquiredDiscreteOutputSignals.setStartAddress(appLogicWordData.startAddress());
 		m_appWordAdressed.acquiredDiscreteInternalSignals.setStartAddress(appLogicWordData.startAddress());
 		m_appWordAdressed.acquiredDiscreteOptoSignals.setStartAddress(appLogicWordData.startAddress());
@@ -297,6 +298,7 @@ namespace Builder
 
 		m_appWordAdressed.nonAcquiredOutputBuses.setStartAddress(appLogicWordData.startAddress());
 		m_appWordAdressed.nonAcquiredInternalBuses.setStartAddress(appLogicWordData.startAddress());
+		m_appWordAdressed.nonAcquiredDiscreteInvertedInputSignals.setStartAddress(appLogicWordData.startAddress());
 
 		m_appWordAdressed.wordAccumulator.setStartAddress(appLogicWordData.startAddress());
 		m_appWordAdressed.wordAccumulator.setSizeW(WORD_ACCUMULATOR_SIZE_W * 2);			// 2 accumulators allocation
@@ -356,7 +358,8 @@ namespace Builder
 		// Acquired Discrete Signals
 		//
 		m_appWordAdressed.acquiredDiscreteInputSignals.setStartAddress(m_appWordAdressed.acquiredOptoBuses.nextAddress());
-		m_appWordAdressed.acquiredDiscreteOutputSignals.setStartAddress(m_appWordAdressed.acquiredDiscreteInputSignals.nextAddress());
+		m_appWordAdressed.acquiredDiscreteInvertedInputSignals.setStartAddress(m_appWordAdressed.acquiredDiscreteInputSignals.nextAddress());
+		m_appWordAdressed.acquiredDiscreteOutputSignals.setStartAddress(m_appWordAdressed.acquiredDiscreteInvertedInputSignals.nextAddress());
 		m_appWordAdressed.acquiredDiscreteInternalSignals.setStartAddress(m_appWordAdressed.acquiredDiscreteOutputSignals.nextAddress());
 
 		m_appWordAdressed.acquiredDiscreteOptoSignals.setStartAddress(m_appWordAdressed.acquiredDiscreteInternalSignals.nextAddress());
@@ -373,8 +376,9 @@ namespace Builder
 
 		m_appWordAdressed.nonAcquiredOutputBuses.setStartAddress(m_appWordAdressed.nonAcquiredAnalogInternalSignals.nextAddress());
 		m_appWordAdressed.nonAcquiredInternalBuses.setStartAddress(m_appWordAdressed.nonAcquiredOutputBuses.nextAddress());
+		m_appWordAdressed.nonAcquiredDiscreteInvertedInputSignals.setStartAddress(m_appWordAdressed.nonAcquiredInternalBuses.nextAddress());
 
-		m_appWordAdressed.wordAccumulator.setStartAddress(m_appWordAdressed.nonAcquiredInternalBuses.nextAddress());
+		m_appWordAdressed.wordAccumulator.setStartAddress(m_appWordAdressed.nonAcquiredDiscreteInvertedInputSignals.nextAddress());
 		m_appWordAdressed.wordAccumulator.setSizeW(WORD_ACCUMULATOR_SIZE_W * 2);
 
 		m_appWordAdressed.analogAndBusSignalsHeap.setStartAddress(m_appWordAdressed.wordAccumulator.nextAddress());
@@ -512,6 +516,7 @@ namespace Builder
 		addRecordSignals(memFile, m_appWordAdressed.acquiredOptoBuses, "acquired opto buses", sectionStartAddrW);
 
 		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteInputSignals, "acquired discrete input signals", sectionStartAddrW);
+		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteInvertedInputSignals, "acquired discrete inverted input signals", sectionStartAddrW);
 		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteOutputSignals, "acquired discrete output signals (from bit memory)", sectionStartAddrW);
 		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteInternalSignals, "acquired discrete internal signals (from bit memory)", sectionStartAddrW);
 		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteOptoSignals, "acquired discrete opto signals", sectionStartAddrW);
@@ -525,6 +530,7 @@ namespace Builder
 
 		addRecordSignals(memFile, m_appWordAdressed.nonAcquiredOutputBuses, "non acquired output buses", sectionStartAddrW);
 		addRecordSignals(memFile, m_appWordAdressed.nonAcquiredInternalBuses, "non acquired internal buses", sectionStartAddrW);
+		addRecordSignals(memFile, m_appWordAdressed.nonAcquiredDiscreteInvertedInputSignals, "non acquired discrete inverted input signals", sectionStartAddrW);
 
 		addRecord(memFile, m_appWordAdressed.wordAccumulator, "2 word accumulators ", sectionStartAddrW);
 		memFile.append("");
@@ -802,6 +808,16 @@ namespace Builder
 		bool result = true;
 
 		result &= appendRegSignals(m_appWordAdressed.acquiredDiscreteInputSignals, ualSignals, false);
+		result &= recalculateAddresses();
+
+		return result;
+	}
+
+	bool LmMemoryMap::appendAcquiredDiscreteInvertedInputSignalsInRegBuf(const QVector<UalSignal*>& ualSignals)
+	{
+		bool result = true;
+
+		result &= appendRegSignals(m_appWordAdressed.acquiredDiscreteInvertedInputSignals, ualSignals, true);
 		result &= recalculateAddresses();
 
 		return result;
@@ -1088,6 +1104,16 @@ namespace Builder
 		bool result = true;
 
 		result &= appendUalSignals(m_appWordAdressed.nonAcquiredInternalBuses, ualSignals);
+		result &= recalculateAddresses();
+
+		return result;
+	}
+
+	bool LmMemoryMap::appendNonAcquiredDiscreteInvertedInputSignals(const QVector<UalSignal*>& ualSignals)
+	{
+		bool result = true;
+
+		result &= appendUalSignals(m_appWordAdressed.nonAcquiredDiscreteInvertedInputSignals, ualSignals);
 		result &= recalculateAddresses();
 
 		return result;

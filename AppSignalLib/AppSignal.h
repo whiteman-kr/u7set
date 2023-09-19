@@ -233,6 +233,9 @@ public:
 	bool isCompatibleFormat(const AppSignal& s) const;
 	bool isCompatibleFormat(E::SignalType signalType, const QString& busTypeID) const;
 
+	bool invertSignal(QString* err = nullptr) const;
+	void setSetInvertSignal(bool invert);
+
 	// Analog signal properties
 
 	int lowADC(QString* err = nullptr) const;
@@ -324,8 +327,8 @@ public:
 	double fineAperture() const { return m_fineAperture; }
 	void setFineAperture(double aperture) { m_fineAperture = aperture; }
 
-	bool adaptiveAperture() const { return m_adaptiveAperture; }
-	void setAdaptiveAperture(bool adaptive) { m_adaptiveAperture = adaptive; }
+	E::ApertureType apertureType() const { return m_apertureType; }
+	void setApertureType(E::ApertureType type) { m_apertureType = type; }
 
 	// Specific properties
 
@@ -339,6 +342,7 @@ public:
 
 	void cacheSpecPropValues() const;
 
+	bool getSpecPropBool(const QString& name, QString* err) const;
 	double getSpecPropDouble(const QString& name, QString* err) const;
 	int getSpecPropInt(const QString& name, QString* err) const;
 	unsigned int getSpecPropUInt(const QString& name, QString* err) const;
@@ -346,6 +350,7 @@ public:
 	bool getSpecPropValue(const QString& name, QVariant* qv, bool* isEnum, QString* err) const;
 	bool isSpecPropExists(const QString& name) const;
 
+	bool setSpecPropBool(const QString& name, bool value);
 	bool setSpecPropDouble(const QString& name, double value);
 	bool setSpecPropInt(const QString& name, int value);
 	bool setSpecPropUInt(const QString& name, unsigned int value);
@@ -536,6 +541,7 @@ private:
 	QString m_equipmentID;											// should be transformed to portEquipmentID
 	QString m_lmEquipmentID;										// now fills in compile time only
 	QString m_busTypeID;											// only for: m_signalType == E::SignalType::Bus
+
 	E::Channel m_channel = E::Channel::A;
 	bool m_excludeFromBuild = false;
 
@@ -571,7 +577,7 @@ private:
 	int m_decimalPlaces = 2;
 	double m_coarseAperture = 1;
 	double m_fineAperture = 0.5;
-	bool m_adaptiveAperture = false;
+	E::ApertureType m_apertureType = E::ApertureType::RangePercent;
 
 	// Signal specific properties
 	//

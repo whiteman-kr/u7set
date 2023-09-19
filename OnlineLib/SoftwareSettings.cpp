@@ -1853,6 +1853,16 @@ bool TestSuiteSettings::writeToXml(XmlWriteHelper& xml) const
 
 	xml.writeEndElement();			// </TestSecurity>
 
+	// --
+	//
+	xml.writeStartElement(XmlElement::TESTING_REPORTS);
+
+	xml.writeStringAttribute(EquipmentPropNames::TESTING_PLANT, plant);
+	xml.writeStringAttribute(EquipmentPropNames::TESTING_UNIT, unit);
+	xml.writeStringAttribute(EquipmentPropNames::TESTING_SYSTEM, system);
+
+	xml.writeEndElement();			// </TestingReports>
+
 	writeEndSettings(xml);;			// </Settings>
 
 	return true;
@@ -1941,6 +1951,11 @@ bool TestSuiteSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.findElement(XmlElement::TESTING_SECURITY);
 	result &= xml.readBoolAttribute(EquipmentPropNames::TESTING_LOGIN, &login);
 	result &= xml.readStringAttribute(EquipmentPropNames::TESTING_USER_ACCOUNTS, &userAccounts);
+
+	result &= xml.findElement(XmlElement::TESTING_REPORTS);
+	result &= xml.readStringAttribute(EquipmentPropNames::TESTING_PLANT, &plant);
+	result &= xml.readStringAttribute(EquipmentPropNames::TESTING_UNIT, &unit);
+	result &= xml.readStringAttribute(EquipmentPropNames::TESTING_SYSTEM, &system);
 
 	return result;
 }

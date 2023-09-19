@@ -98,7 +98,7 @@ namespace Sim
 		virtual E::SignalType signalType(Hash signalHash, bool* found) const override;
 		virtual E::SignalType signalType(const QString& appSignalId, bool* found) const override;
 
-		virtual QString equipmentToAppSiganlId(const QString& equipmentId) const override;
+		virtual QString equipmentToAppSignalId(const QString& equipmentId) const override;
 
 		// Implementing IAppSignalManager - Setpoints/Comparators
 		//

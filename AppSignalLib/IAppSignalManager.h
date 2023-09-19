@@ -45,7 +45,7 @@ public:
 	[[nodiscard]] virtual E::SignalType signalType(Hash signalHash, bool* found) const = 0;
 	[[nodiscard]] virtual E::SignalType signalType(const QString& appSignalId, bool* found) const = 0;
 
-	[[nodiscard]] virtual QString equipmentToAppSiganlId(const QString& equipmentId) const = 0;
+	[[nodiscard]] virtual QString equipmentToAppSignalId(const QString& equipmentId) const = 0;
 
 	// Setpoints
 	//

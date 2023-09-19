@@ -1479,7 +1479,7 @@ void DialogSignalInfo::fillExtProperties()
 		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("Archive") << (signalExt.archive() ? tr("Yes") : tr("No")) ));
 		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("CoarseAperture") << QString::number(signalExt.coarseAperture(), 'f', signalExt.decimalPlaces())));
 		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("FineAperture") << QString::number(signalExt.fineAperture(), 'f', signalExt.decimalPlaces())));
-		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("AdaptiveAperture") << (signalExt.adaptiveAperture() ? tr("Yes") : tr("No")) ));
+		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("ApertureType") << E::valueToString<E::ApertureType>(signalExt.apertureType()) ));
 
 		ui->treePropertiesExt->addTopLevelItem(itemGroup3);
 		itemGroup3->setExpanded(true);
