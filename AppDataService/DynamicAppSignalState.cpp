@@ -87,6 +87,9 @@ void DynamicAppSignalState::setSignalParams(const AppSignal* signal, const AppSi
 
 	m_lowLimit = signal->lowEngineeringUnits();
 	m_highLimit = signal->highEngineeringUnits();
+
+	m_reverseLimits = (m_lowLimit > m_highLimit);
+
 	m_apertureType = signal->apertureType();
 
 	switch(m_apertureType)
@@ -325,8 +328,16 @@ int DynamicAppSignalState::setState(const Times& time,
 							Q_ASSERT(false);
 						}
 
-						curState.flags.aboveHighLimit = (curState.value > m_highLimit ? 1 : 0);
-						curState.flags.belowLowLimit = (curState.value < m_lowLimit ? 1 : 0);
+						if (m_reverseLimits == false)
+						{
+							curState.flags.aboveHighLimit = (curState.value > m_highLimit ? 1 : 0);
+							curState.flags.belowLowLimit = (curState.value < m_lowLimit ? 1 : 0);
+						}
+						else
+						{
+							curState.flags.aboveHighLimit = (curState.value < m_highLimit ? 1 : 0);
+							curState.flags.belowLowLimit = (curState.value > m_lowLimit ? 1 : 0);
+						}
 					}
 				}
 

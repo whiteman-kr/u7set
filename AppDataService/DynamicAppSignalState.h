@@ -155,6 +155,8 @@ private:
 	bool m_enableTuning = false;
 	TuningValue m_tuningDefaultValue;
 
+	bool m_reverseLimits = false;
+
 	double m_absCoarseAperture = 0;
 	double m_absFineAperture = 0;
 
