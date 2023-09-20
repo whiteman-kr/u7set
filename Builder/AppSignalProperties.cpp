@@ -365,6 +365,7 @@ void AppSignalProperties::initProperties(bool savePropertyDescription)
 														 &AppSignal::analogSignalFormat,
 														 static_cast<void (AppSignal::*)(E::AnalogAppSignalFormat)>(&AppSignal::setAnalogSignalFormat));
 	}
+
 	auto dataSizeProperty = addProperty<int>(AppSignalPropNames::DATA_SIZE, QString(), true,
 										(std::function<int(void)>)std::bind(&AppSignal::dataSize, &m_signal),
 										std::bind(static_cast<void (AppSignal::*)(int)>(&AppSignal::setDataSize), &m_signal, std::placeholders::_1));
@@ -401,6 +402,9 @@ void AppSignalProperties::initProperties(bool savePropertyDescription)
 	auto apertureTypeProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(E::ApertureType, AppSignalPropNames::APERTURE_TYPE,
 															true, AppSignal::apertureType, AppSignal::setApertureType, m_signal);
 	apertureTypeProperty->setCategory(categoryOnlineMonitoringSystem);
+	apertureTypeProperty->setDescription(QString("RangePercent - aperture is set in % of signal range\n"
+												 "ValuePercent - aperture is set in % of current signal value\n"
+												 "AbsValue - aperture is set in absolute engineering units"));
 
 	auto acquireProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(bool, AppSignalPropNames::ACQUIRE, true, AppSignal::acquire, AppSignal::setAcquire, m_signal);
 	acquireProperty->setCategory(categoryOnlineMonitoringSystem);
