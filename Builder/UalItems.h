@@ -2,7 +2,6 @@
 
 #include "../AppSignalLib/AppSignal.h"
 #include "../UtilsLib/WUtils.h"
-
 #include "../VFrame30/FblItemRect.h"
 #include "../VFrame30/SchemaItemSignal.h"
 #include "../VFrame30/SchemaItemAfb.h"
@@ -12,6 +11,7 @@
 #include "../VFrame30/SchemaItemLoopback.h"
 #include "../VFrame30/FblItem.h"
 #include "../VFrame30/LogicSchema.h"
+#include "../CommonLib/HashedVector.h"
 
 #include "Parser.h"
 #include "AppLogicCode.h"

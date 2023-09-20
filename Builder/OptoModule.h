@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../CommonLib/OrderedHash.h"
+#include "../CommonLib/HashedVector.h"
 #include "../HardwareLib/DeviceObject.h"
 #include "../HardwareLib/Connection.h"
 #include "../UtilsLib/Address16.h"

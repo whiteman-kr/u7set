@@ -109,7 +109,7 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 										   SessionParams sessionParams,
 										   std::shared_ptr<const SoftwareSettings> curSettingsProfile)
 {
-	qDebug() << __FUNCTION__ << "File count: " << buildFileInfoArray.count();
+	qDebug() << __FUNCTION__ << "Files count: " << buildFileInfoArray.size();
 
 	Q_UNUSED(sessionParams)
 

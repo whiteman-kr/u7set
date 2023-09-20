@@ -28,23 +28,12 @@ public:
 	VALUE& operator[](qsizetype i);
 	const VALUE& operator[](qsizetype i) const;
 
-	VALUE& operator[](const KEY& key);
-	const VALUE& operator[](const KEY& key) const;
+	VALUE& value(const KEY& key);
+	const VALUE& value(const KEY& key) const;
 
-	const VALUE value(const KEY& key) const;
-	const VALUE value(const KEY& key, const VALUE& defaultValue) const;
+	const VALUE& value(const KEY& key, const VALUE& defaultValue) const;
 
-	qsizetype indexOf(const KEY& key) const
-	{
-		auto it = m_map.find(key);
-
-		if (it == m_map.end())
-		{
-			return -1;
-		}
-
-		return it->second;
-	}
+	qsizetype indexOf(const KEY& key) const;
 
 	void clear() { m_map.clear(); m_vector.clear(); }
 
@@ -89,7 +78,7 @@ const VALUE& HashedVector<KEY, VALUE>::operator[](qsizetype i) const
 }
 
 template <typename KEY, typename VALUE>
-VALUE& HashedVector<KEY, VALUE>::operator[](const KEY& key)
+VALUE& HashedVector<KEY, VALUE>::value(const KEY& key)
 {
 	auto it = m_map.find(key);
 
@@ -103,7 +92,7 @@ VALUE& HashedVector<KEY, VALUE>::operator[](const KEY& key)
 }
 
 template <typename KEY, typename VALUE>
-const VALUE& HashedVector<KEY, VALUE>::operator[](const KEY& key) const
+const VALUE& HashedVector<KEY, VALUE>::value(const KEY& key) const
 {
 	auto it = m_map.find(key);
 
@@ -117,21 +106,7 @@ const VALUE& HashedVector<KEY, VALUE>::operator[](const KEY& key) const
 }
 
 template <typename KEY, typename VALUE>
-const VALUE HashedVector<KEY, VALUE>::value(const KEY& key) const
-{
-	auto it = m_map.find(key);
-
-	if (it == m_map.end())
-	{
-		Q_ASSERT(false);
-		return m_notValidValue;
-	}
-
-	return m_vector[it->second];
-}
-
-template <typename KEY, typename VALUE>
-const VALUE HashedVector<KEY, VALUE>::value(const KEY& key, const VALUE& defaultValue) const
+const VALUE& HashedVector<KEY, VALUE>::value(const KEY& key, const VALUE& defaultValue) const
 {
 	auto it = m_map.find(key);
 
@@ -142,3 +117,17 @@ const VALUE HashedVector<KEY, VALUE>::value(const KEY& key, const VALUE& default
 
 	return m_vector[it->second];
 }
+
+template <typename KEY, typename VALUE>
+qsizetype HashedVector<KEY, VALUE>::indexOf(const KEY& key) const
+{
+	auto it = m_map.find(key);
+
+	if (it == m_map.end())
+	{
+		return -1;
+	}
+
+	return it->second;
+}
+

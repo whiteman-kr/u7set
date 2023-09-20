@@ -15,8 +15,8 @@ qt_add_library(${TARGET} STATIC
   DebugInstCounter.h
   Factory.h
   Hash.h
+  HashedVector.h
   HostAddressPort.h
-  OrderedHash.h
   PropertyObject.cpp
   PropertyObject.h
   Times.cpp

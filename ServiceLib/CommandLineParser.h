@@ -4,7 +4,6 @@
 #include <QStringList>
 #include <QSettings>
 #include <memory>
-#include "../CommonLib/OrderedHash.h"
 #include "../UtilsLib/WUtils.h"
 
 class CircularLogger;

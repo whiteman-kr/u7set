@@ -891,13 +891,12 @@ namespace Builder
 			//
 			if (m_ualItems.contains(logicItem.m_fblItem->guid()) == true)
 			{
-				UalItem* firstItem = m_ualItems[logicItem.m_fblItem->guid()];
+				UalItem* firstItem = m_ualItems.value(logicItem.m_fblItem->guid());
 
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 								   QString(tr("Duplicate GUID %1 of %2 and %3 elements")).
 										arg(logicItem.m_fblItem->guid().toString()).arg(firstItem->strID()).
 										arg(getUalItemStrID(logicItem)));
-
 				result = false;
 
 				continue;

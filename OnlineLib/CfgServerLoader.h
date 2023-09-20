@@ -4,11 +4,10 @@
 
 #include "TcpFileTransfer.h"
 #include "SoftwareSettings.h"
-#include "../CommonLib/OrderedHash.h"
+#include "../CommonLib/HashedVector.h"
 #include "../OnlineLib/BuildInfo.h"
 
-
-typedef QVector<OnlineLib::BuildFileInfo> BuildFileInfoArray;
+using BuildFileInfoArray = std::vector<OnlineLib::BuildFileInfo>;
 
 // -------------------------------------------------------------------------------------
 //
@@ -188,7 +187,7 @@ private:
 		bool md5IsValid = false;
 	};
 
-	typedef HashedVector<QString, CfgFileInfo> CfgFilesInfo;
+	using CfgFilesInfo = HashedVector<QString, CfgFileInfo> ;
 
 	struct FileDownloadRequest
 	{
