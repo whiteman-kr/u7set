@@ -346,24 +346,30 @@ void AppSignalPropertyManager::detectNewProperties(const AppSignal* signal)
 
 	Hash specPropStructHash = calcHash(signal->specPropStruct());
 
-	if (m_parsedSpecPropStruct.contains(specPropStructHash) == true)
+	auto it = m_parsedSpecPropStruct.find(specPropStructHash);
+
+	const PropertyObject* propObject = nullptr;
+
+	if (it == m_parsedSpecPropStruct.end())
 	{
-		return;
+		auto [newIt, b] = m_parsedSpecPropStruct.emplace(specPropStructHash, PropertyObject{});
+
+		std::pair<bool, QString> result = newIt->second.parseSpecificPropertiesStruct(signal->specPropStruct());
+
+		if (result.first == false)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		propObject = &newIt->second;
+	}
+	else
+	{
+		propObject = &it->second;
 	}
 
-	PropertyObject propObject;
-
-	std::pair<bool, QString> result = propObject.parseSpecificPropertiesStruct(signal->specPropStruct());
-
-	if (result.first == false)
-	{
-		Q_ASSERT(false);
-		return;
-	}
-
-	m_parsedSpecPropStruct.insert(specPropStructHash);
-
-	std::vector<std::shared_ptr<Property>> specificProperties = propObject.properties();
+	std::vector<std::shared_ptr<Property>> specificProperties = propObject->properties();
 
 	for(const std::shared_ptr<Property>& specificProperty : specificProperties)
 	{
@@ -391,7 +397,6 @@ void AppSignalPropertyManager::detectNewProperties(const AppSignal* signal)
 
 		newProperty.specificProperty = true;
 		newProperty.name = propertyName;
-//		newProperty.caption = AppSignalProperties::generateCaption(propertyName);
 		newProperty.type = type;
 		newProperty.appendSignalID(signal->ID());
 

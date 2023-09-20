@@ -814,6 +814,11 @@ bool AppSignalSetProvider::undoSignalsChanges(const std::vector<int>& signalIDs)
 		ids.insert(ids.end(), channelIDs.begin(), channelIDs.end());
 	}
 
+	if (ids.empty() == true)
+	{
+		return true;
+	}
+
 	std::vector<ObjectState> states;
 
 	bool result = m_db->undoSignalsChanges(ids, &states, m_parentWidget);

@@ -96,10 +96,5 @@ private:
 
 	//
 
-	std::set<Hash> m_parsedSpecPropStruct;
-
-/*	std::map<QString, int> m_propertyName2IndexMap;
-
-	std::vector<PropertyBehaviourDescription> m_propertyBehaviorDescription;
-	std::map<int, int> m_propertyIndex2BehaviourIndexMap; */
+	std::map<Hash, PropertyObject> m_parsedSpecPropStruct;
 };

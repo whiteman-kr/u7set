@@ -607,19 +607,30 @@ QString AppSignal::initFromDeviceSignal(const QString& deviceSignalEquipmentID,
 	switch(m_signalType)
 	{
 	case E::SignalType::Analog:
-		if (m_analogSignalFormat != E::AnalogAppSignalFormat::Float32 &&
-			m_analogSignalFormat != E::AnalogAppSignalFormat::SignedInt32)
-		{
-			Q_ASSERT(false);
 
+		switch(m_analogSignalFormat)
+		{
+		case E::AnalogAppSignalFormat::Float32:
+			m_dataSize = FLOAT32_SIZE;
+			break;
+
+		case E::AnalogAppSignalFormat::SignedInt32:
+			m_dataSize = SIGNED_INT32_SIZE;
+			break;
+
+		default:
+			Q_ASSERT(false);
 			return QString("Unknown E::AnalogAppSignalFormat");
 		}
 
-		// no break, it is Ok!
+		initTuningValues();
+
+		break;
 
 	case E::SignalType::Discrete:
 
-		setDataSize(m_signalType, m_analogSignalFormat);
+		m_dataSize = DISCRETE_SIZE;
+
 		initTuningValues();
 
 		break;
@@ -796,43 +807,6 @@ void AppSignal::setSignalType(E::SignalType type)
 {
 	m_signalType = type;
 	updateTuningValuesType();
-}
-
-void AppSignal::setDataSize(E::SignalType signalType, E::AnalogAppSignalFormat dataFormat)
-{
-	switch(signalType)
-	{
-	case E::SignalType::Discrete:
-		m_dataSize = DISCRETE_SIZE;
-		break;
-
-	case E::SignalType::Analog:
-
-		switch(dataFormat)
-		{
-		case E::AnalogAppSignalFormat::Float32:
-			m_dataSize = FLOAT32_SIZE;
-			break;
-
-		case E::AnalogAppSignalFormat::SignedInt32:
-			m_dataSize = SIGNED_INT32_SIZE;
-			break;
-
-		default:
-			assert(false);		// unknown data format
-		}
-
-		break;
-
-	case E::SignalType::Bus:
-
-		assert(false);						// function setDataSize should not be call for Bus signals
-											// data size of bus signals is defined by BusTypeID
-		break;
-
-	default:
-		assert(false);		// unknown signal type
-	}
 }
 
 void AppSignal::setDataSizeW(int sizeW)

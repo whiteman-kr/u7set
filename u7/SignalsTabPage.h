@@ -79,7 +79,7 @@ protected:
 
 private:
 	SignalsModel* m_model = nullptr;
-	SignalsProxyModel* m_proxyModel;
+	SignalsProxyModel* m_proxyModel = nullptr;
 	QLocale m_defaultLocale;
 	QDoubleValidatorEx m_dblValidatorEx;
 

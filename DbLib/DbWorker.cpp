@@ -5626,6 +5626,11 @@ void DbWorker::slot_undoSignalsChanges(const std::vector<int>& signalIDs, std::v
 	AUTO_COMPLETE
 	TEST_PTR_RETURN(objectStates);
 
+	if (signalIDs.empty() == true)
+	{
+		return;
+	}
+
 	// Operation
 	//
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());

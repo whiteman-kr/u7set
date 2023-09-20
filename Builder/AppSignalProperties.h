@@ -29,7 +29,6 @@ private:
 	static inline const int IN_OUT_TYPE_COUNT = QMetaEnum::fromType<E::SignalInOutType>().keyCount();
 	static inline const int TOTAL_SIGNAL_TYPE_COUNT = SIGNAL_TYPE_COUNT * IN_OUT_TYPE_COUNT;
 
-
 	bool m_dependsOnPrecision = false;
 
 	// property behaviour for all possible combinations of signalType and signalInOutType
@@ -112,7 +111,7 @@ public:
 	void updateSpecPropValues();
 
 	QString specPropStruct() const { return m_signal.specPropStruct(); }
-	void setSpecPropStruct(const QString & specPropStruct);
+	void setSpecPropStruct(const QString& specPropStruct);
 
 	int getPrecision();
 
@@ -154,7 +153,7 @@ public:
 	Q_INVOKABLE float tuningHighBound() const { return m_signal.tuningHighBound().toFloat(); }
 
 private:
-	void initProperties(bool savePropertyDescription = false);
+	void initProperties(bool savePropertyDescription);
 	void createSpecificProperties();
 	void deleteSpecificProperties();
 
@@ -194,7 +193,6 @@ AppSignalProperties::addPropertyDescription(const QString& name,
 	AppSignalPropertyDescription newProperty;
 
 	newProperty.name = name;
-	//newProperty.caption = generateCaption(name);
 
 	newProperty.enumValues = E::enumValuesMap<TYPE>();
 	newProperty.type = QMetaType::Int;
