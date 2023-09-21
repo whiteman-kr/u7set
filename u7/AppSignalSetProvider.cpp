@@ -118,37 +118,26 @@ void AppSignalSetProvider::reloadSignals(const std::vector<int>& signalIds)
 		return;
 	}
 
-	std::vector<AppSignal> signalsToLoad;
+	std::vector<AppSignal> updatedSignals;
 
-	std::vector<const AppSignal*> updatedSignals;
-	std::vector<int> updatedIndexes;
+	m_db->getLatestSignalsWithoutProgress(signalIds, &updatedSignals, nullptr);
 
-	m_db->getLatestSignalsWithoutProgress(signalIds, &signalsToLoad, nullptr);
+	std::vector<const AppSignal*> signalsPtrs;
+	std::vector<int> signalsIndexes;
 
-/*	if (withoutProgress == true)
+	for (const AppSignal& updatedSignal: updatedSignals)
 	{
-		m_db->getLatestSignalsWithoutProgress(signalIds, &signalsToLoad, nullptr);
-	}
-	else
-	{
-		m_db->getLatestSignals(signalIds, &signalsToLoad, nullptr);
-	}*/
-
-	int signalIndex = 0;
-
-	for (const AppSignal& loadedSignal: signalsToLoad)
-	{
-		const AppSignal* s = m_signalSet.updateSignal(loadedSignal, &signalIndex);
+		auto [s, index] = m_signalSet.updateSignal(updatedSignal);
 
 		if (s !=  nullptr)
 		{
-			updatedSignals.push_back(s);
-			updatedIndexes.push_back(signalIndex);
+			signalsPtrs.push_back(s);
+			signalsIndexes.push_back(index);
 		}
 	}
 
-	emit signalsUpdated(updatedIndexes);
-	emit signalsPropertiesChanged(updatedSignals);
+	emit signalsUpdated(signalsIndexes);
+	emit signalsPropertiesChanged(signalsPtrs);
 }
 
 void AppSignalSetProvider::enforceAllSignalsLoading()
@@ -188,9 +177,7 @@ const AppSignal* AppSignalSetProvider::loadSignal(int signalId, bool updateViews
 
 	m_db->getLatestSignal(signalId, &loadedSignal, nullptr);
 
-	int index = BAD_INDEX;
-
-	const AppSignal* updatedSignal = m_signalSet.updateSignal(loadedSignal, &index);
+	auto [updatedSignal, index] = m_signalSet.updateSignal(loadedSignal);
 
 	TEST_PTR_RETURN_NULLPTR(updatedSignal);
 	Q_ASSERT(index != BAD_INDEX);
@@ -493,37 +480,26 @@ void AppSignalSetProvider::loadIdAppSignalId()
 	}
 }
 
-void AppSignalSetProvider::loadSignals(const std::vector<int>& signalIds)
+void AppSignalSetProvider::appendSignalsAndUpdateViews(const std::vector<AppSignal>& newSignals)
 {
-	Q_ASSERT(m_thread == QThread::currentThread());
-
-	if (signalIds.size() == 0)
+	if (newSignals.size() == 0)
 	{
 		return;
 	}
 
-	std::vector<AppSignal> signalsToLoad;
-
 	std::vector<const AppSignal*> updatedSignals;
-	std::vector<int> updatedIndexes;
 
-	m_db->getLatestSignalsWithoutProgress(signalIds, &signalsToLoad, nullptr);
-
-	int signalIndex = 0;
-
-	for (const AppSignal& loadedSignal: signalsToLoad)
+	for(const AppSignal& newSignal : newSignals)
 	{
-		const AppSignal* s = m_signalSet.updateSignal(loadedSignal, &signalIndex);
+		auto [ns, index] = m_signalSet.append(newSignal);
 
-		if (s !=  nullptr)
-		{
-			updatedSignals.push_back(s);
-			updatedIndexes.push_back(signalIndex);
-		}
+		updatedSignals.push_back(ns);
 	}
 
-	emit signalsUpdated(updatedIndexes);
-	emit signalsPropertiesChanged(updatedSignals);
+	// emit signalsUpdated(updatedIndexes);	 signalsCountChanged() will do this update
+
+	emit signalsPropertiesChanged(updatedSignals);		// to check new signals properties
+	emit signalsCountChanged();
 }
 
 void AppSignalSetProvider::onSignalsLoadTimer()
@@ -681,6 +657,48 @@ bool AppSignalSetProvider::showErrors(const std::vector<ObjectState>& states)
 	return true;
 }
 
+bool AppSignalSetProvider::addSignals(E::SignalType signalType, std::vector<AppSignal>* newSignals, QWidget* parentWidget)
+{
+	TEST_PTR_RETURN_FALSE(newSignals);
+
+	bool result = m_db->addSignals(signalType, newSignals, parentWidget);
+
+	if (result == true)
+	{
+		appendSignalsAndUpdateViews(*newSignals);
+	}
+
+	return result;
+}
+
+bool AppSignalSetProvider::autoAddSignals(const std::vector<const Hardware::DeviceAppSignal*>& deviceSignals,
+					std::vector<AppSignal>* newSignals, QWidget* parentWidget)
+{
+	TEST_PTR_RETURN_FALSE(newSignals);
+
+	bool result = m_db->autoAddSignals(deviceSignals, newSignals, parentWidget);
+
+	if (result == true)
+	{
+		appendSignalsAndUpdateViews(*newSignals);
+	}
+
+	return result;
+}
+
+bool AppSignalSetProvider::setSignalWorkcopy(AppSignal* signal, ObjectState* objectState, QWidget* parentWidget)
+{
+	bool result = m_db->setSignalWorkcopy(signal, objectState, parentWidget);
+
+	if (result == true)
+	{
+		auto [s, index] = m_signalSet.updateSignal(*signal);
+
+		emit signalsPropertiesChanged({s});
+		emit signalsUpdated({index});
+	}
+}
+
 bool AppSignalSetProvider::checkoutSignalByIndex(int index, QString* message)
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
@@ -790,7 +808,7 @@ bool AppSignalSetProvider::checkinSignals(const std::vector<int>& signalIDs,
 	return result;
 }
 
-bool AppSignalSetProvider::undoSignalsChanges(const std::vector<int>& signalIDs)
+bool AppSignalSetProvider::undoSignalsChanges(const std::vector<int>& signalIDs, QWidget* parentWidget)
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
 
@@ -819,9 +837,14 @@ bool AppSignalSetProvider::undoSignalsChanges(const std::vector<int>& signalIDs)
 		return true;
 	}
 
+	if (parentWidget == nullptr)
+	{
+		parentWidget = m_parentWidget;
+	}
+
 	std::vector<ObjectState> states;
 
-	bool result = m_db->undoSignalsChanges(ids, &states, m_parentWidget);
+	bool result = m_db->undoSignalsChanges(ids, &states, parentWidget);
 
 	RETURN_IF_FALSE(result);
 
@@ -854,23 +877,6 @@ void AppSignalSetProvider::deleteSignal(int signalID)
 	{
 		showError(state);
 	}
-}
-
-bool AppSignalSetProvider::getSignalHistory(int signalID, std::vector<DbChangeset>* changesets)
-{
-	return m_db->getSignalHistory(signalID, changesets, m_parentWidget);
-}
-
-bool AppSignalSetProvider::getSpecificSignals(const std::vector<int>& signalIDs,
-												int changesetId,
-												std::vector<AppSignal>* signalsInstances)
-{
-	return m_db->getSpecificSignals(signalIDs, changesetId, signalsInstances, m_parentWidget);
-}
-
-int AppSignalSetProvider::getNextSignalCounter()
-{
-	return m_db->nextCounterValue();
 }
 
 bool AppSignalSetProvider::updateSignalsSpecProps(const std::vector<const Hardware::DeviceAppSignal*>& deviceSignalsToUpdate,
@@ -1085,7 +1091,7 @@ bool AppSignalSetProvider::createNewSignals(const AppSignal& signalTemplate,
 			newSignal.setCustomAppSignalID(customAppSignalID);
 		}
 
-		if (m_db->addSignal(signalTemplate.signalType(), &newSignalsVector, m_parentWidget) == true)
+		if (m_db->addSignals(signalTemplate.signalType(), &newSignalsVector, m_parentWidget) == true)
 		{
 			for (const AppSignal& s : newSignalsVector)
 			{
@@ -1105,7 +1111,7 @@ bool AppSignalSetProvider::createNewSignals(const AppSignal& signalTemplate,
 		}
 	}
 
-	signalsCountChanged();
+	emit signalsCountChanged();
 
 	return true;
 }
@@ -1280,7 +1286,7 @@ std::vector<int> AppSignalSetProvider::cloneSignals(const std::vector<int>& sign
 			i++;
 		}
 
-		m_db->addSignal(type, &signalsToCreate, nullptr);
+		m_db->addSignals(type, &signalsToCreate, nullptr);
 
 		for (const AppSignal& s : signalsToCreate)
 		{

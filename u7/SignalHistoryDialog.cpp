@@ -4,16 +4,18 @@
 #include "AppSignalSetProvider.h"
 #include "Settings.h"
 
-SignalHistoryDialog::SignalHistoryDialog(const AppSignal& s, QWidget* parent) :
+SignalHistoryDialog::SignalHistoryDialog(DbController* db, const AppSignal& s, QWidget* parent) :
 	QDialog(parent),
-	m_signalSetProvider(AppSignalSetProvider::getInstance()),
+	m_db(db),
 	m_propManager(AppSignalPropertyManager::getInstance())
 {
+	TEST_PTR_RETURN(m_db);
+
 	int signalID = s.ID();
 
 	std::vector<DbChangeset> signalChanges;
 
-	m_signalSetProvider->getSignalHistory(signalID, &signalChanges);
+	m_db->getSignalHistory(signalID, &signalChanges, this);
 
 	QVector<std::pair<QString, std::function<QVariant (DbChangeset&)>>> changesetColumnDescription =
 	{
@@ -86,7 +88,7 @@ SignalHistoryDialog::SignalHistoryDialog(const AppSignal& s, QWidget* parent) :
 			m_historyModel->setData(m_historyModel->index(row, i), changesetColumnDescription[i].second(changeset));
 		}
 
-		m_signalSetProvider->getSpecificSignals(signalIds, changeset.changeset(), &signalInstance);
+		m_db->getSpecificSignals(signalIds, changeset.changeset(), &signalInstance, this);
 
 		if (signalInstance.size() == 1)
 		{

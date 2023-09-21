@@ -10,13 +10,13 @@ class SignalHistoryDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	SignalHistoryDialog(const AppSignal& s, QWidget* parent = nullptr);
+	SignalHistoryDialog(DbController *db, const AppSignal& s, QWidget* parent = nullptr);
 
 protected:
 	void closeEvent(QCloseEvent* event);
 
 private:
-	AppSignalSetProvider* m_signalSetProvider = nullptr;
+	DbController* m_db = nullptr;
 	AppSignalPropertyManager* m_propManager = nullptr;
 
 	QStandardItemModel* m_historyModel = nullptr;

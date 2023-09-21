@@ -217,7 +217,7 @@ std::vector<std::pair<QString, QString>> SignalPropertiesDialog::editApplication
 
 		s->trimTextFields();
 
-		dbController->setSignalWorkcopy(s, &state, parent);
+		m_signalSetProvider->setSignalWorkcopy(s, &state, parent);
 
 		if (state.errCode != ERR_SIGNAL_OK)
 		{

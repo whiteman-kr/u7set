@@ -523,8 +523,7 @@ void PendingChangesDialog::undoChanges()
 	//
 	if (undoSignals.empty() == false)
 	{
-		std::vector<ObjectState> signalObjectState;
-		db()->undoSignalsChanges(undoSignals, &signalObjectState, this);
+		AppSignalSetProvider::getInstance()->undoSignalsChanges(undoSignals, this);
 	}
 
 	// --

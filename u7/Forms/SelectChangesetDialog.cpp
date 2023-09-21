@@ -141,6 +141,7 @@ int SelectChangesetDialog::getSignalChangeset(DbController* db, DbChangesetObjec
 	// Get signal history
 	//
 	std::vector<DbChangeset> signalHistory;
+
 	db->getSignalHistory(signal.id(), &signalHistory, parent);
 
 	SelectChangesetDialog cd("Select Changeset - " + signal.name(), db, signalHistory, parent);

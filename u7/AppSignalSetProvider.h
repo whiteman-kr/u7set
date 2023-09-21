@@ -80,7 +80,14 @@ public:
 	bool showError(const ObjectState& state);
 	bool showErrors(const std::vector<ObjectState>& states);
 
-	// DbController calls
+	// Signal set modifications DbController calls
+	//
+	bool addSignals(E::SignalType signalType, std::vector<AppSignal>* newSignals, QWidget* parentWidget = nullptr);
+
+	bool autoAddSignals(const std::vector<const Hardware::DeviceAppSignal*>& deviceSignals,
+						std::vector<AppSignal>* addedSignals, QWidget* parentWidget = nullptr);
+
+	bool setSignalWorkcopy(AppSignal* signal, ObjectState* objectState, QWidget* parentWidget);
 
 	bool checkoutSignalByIndex(int index, QString* message);
 	bool checkoutSignal(const AppSignal* s, QString* message);
@@ -88,17 +95,9 @@ public:
 	bool checkinSignals(const std::vector<int>& signalIDs,
 						QString comment);
 
-	bool undoSignalsChanges(const std::vector<int>& signalIDs);
+	bool undoSignalsChanges(const std::vector<int>& signalIDs, QWidget* parentWidget = nullptr);
 	bool undoSignal(int id);
 	bool undoSignal(const AppSignal& s);
-
-	bool getSignalHistory(int signalID, std::vector<DbChangeset>* changesets);
-
-	bool getSpecificSignals(const std::vector<int>& signalIDs,
-							int changesetId,
-							std::vector<AppSignal>* signalsInstances);
-
-	int getNextSignalCounter();
 
 	bool updateSignalsSpecProps(const std::vector<const Hardware::DeviceAppSignal*>& deviceSignalsToUpdate,
 								QString* errMsg);
@@ -131,6 +130,8 @@ private:
 
 	void loadIdAppSignalId();
 	void loadSignals(const std::vector<int>& signalIds);
+
+	void appendSignalsAndUpdateViews(const std::vector<AppSignal>& newSignals);
 
 	void onSignalsLoadTimer();
 

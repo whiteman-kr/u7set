@@ -10,7 +10,6 @@
 #include "../SchemaEditor/CreateSignalDialog.h"
 #include "../SignalsTabPage.h"
 
-
 //
 //
 // EquipmentView
@@ -1270,7 +1269,7 @@ void EquipmentView::addInOutsToSignals(std::shared_ptr<Hardware::DeviceModule> m
 
 	std::vector<AppSignal> addedSignals;
 
-	bool result = db()->autoAddSignals(inOuts, &addedSignals, this);
+	bool result = AppSignalSetProvider::getInstance()->autoAddSignals(inOuts, &addedSignals, this);
 
 	qDebug() << "Signals added:" << addedSignals.size();
 
@@ -1384,7 +1383,7 @@ void EquipmentView::addInOutsToSignals(std::vector<std::shared_ptr<Hardware::Dev
 
 	std::vector<AppSignal> addedSignals;
 
-	bool result = db()->autoAddSignals(inOuts, &addedSignals, this);
+	bool result = AppSignalSetProvider::getInstance()->autoAddSignals(inOuts, &addedSignals, this);
 
 	qDebug() << "Signals added:" << addedSignals.size();
 

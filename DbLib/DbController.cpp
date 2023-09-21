@@ -96,7 +96,7 @@ DbController::DbController() :
 	connect(this, &DbController::signal_getLatestSignalsByAppSignalIDs, m_worker, &DbWorker::slot_getLatestSignalsByAppSignalIDs);
 	connect(this, &DbController::signal_getLatestSignalsWithUserID, m_worker, &DbWorker::slot_getLatestSignalsWithUserID);
 	connect(this, &DbController::signal_getCheckedOutSignalsIDs, m_worker, &DbWorker::slot_getCheckedOutSignalsIDs);
-	connect(this, &DbController::signal_addSignal, m_worker, &DbWorker::slot_addSignal);
+	connect(this, &DbController::signal_addSignals, m_worker, &DbWorker::slot_addSignal);
 	connect(this, &DbController::signal_checkoutSignals, m_worker, &DbWorker::slot_checkoutSignals);
 	connect(this, &DbController::signal_setSignalWorkcopy, m_worker, &DbWorker::slot_setSignalWorkcopy);
 	connect(this, &DbController::signal_setSignalsWorkcopies, m_worker, &DbWorker::slot_setSignalsWorkcopies);
@@ -2155,7 +2155,7 @@ bool DbController::getCheckedOutSignalsIDs(std::vector<int>* signalIDs, QWidget*
 	return ok;
 }
 
-bool DbController::addSignal(E::SignalType signalType, std::vector<AppSignal>* newSignal, QWidget* parentWidget)
+bool DbController::addSignals(E::SignalType signalType, std::vector<AppSignal>* newSignal, QWidget* parentWidget)
 {
 	// Init progress and check availability
 	//
@@ -2166,7 +2166,7 @@ bool DbController::addSignal(E::SignalType signalType, std::vector<AppSignal>* n
 		return false;
 	}
 
-	emit signal_addSignal(signalType, newSignal);
+	emit signal_addSignals(signalType, newSignal);
 
 	ok = waitForComplete(parentWidget, tr("Adding signals"));
 

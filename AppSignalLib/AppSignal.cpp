@@ -2589,32 +2589,32 @@ void AppSignalSet::reserve(int n)
 	m_signals.reserve(n);
 }
 
-void AppSignalSet::append(AppSignal* signal)
+std::pair<AppSignal*, int> AppSignalSet::append(AppSignal* newSignal)
 {
-	TEST_PTR_RETURN(signal);
+	TEST_PTR_RETURN_VALUE(newSignal, (std::pair<AppSignal*, int>{nullptr, BAD_INDEX}));
 
-	int signalID = signal->ID();
+	int signalID = newSignal->ID();
 
 	if (signalID == 0)
 	{
 		if (m_enableIdGeneration == true)
 		{
 			signalID = m_idToIndex.empty() == true ? 1 : m_idToIndex.rbegin()->first + 1;
-			signal->setID(signalID);
+			newSignal->setID(signalID);
 		}
 		else
 		{
 			Q_ASSERT(false);				// assing signal->ID() before
 											// or enable ID generation
-			return;
+			return {nullptr, BAD_INDEX};
 		}
 	}
 
-	Hash hash = calcHash(signal->appSignalID());
+	Hash hash = calcHash(newSignal->appSignalID());
 
 	qsizetype index = m_signals.size();
 
-	m_signals.push_back(signal);
+	m_signals.push_back(newSignal);
 
 	auto [it, inserted] = m_idToIndex.emplace(signalID, index);
 
@@ -2624,17 +2624,21 @@ void AppSignalSet::append(AppSignal* signal)
 
 	Q_ASSERT(inserted2 == true);
 
-	m_groups.insert(signal);
+	m_groups.insert(newSignal);
+
+	return {newSignal, index};
 }
 
-void AppSignalSet::append(const AppSignal& signal)
+std::pair<AppSignal*, int> AppSignalSet::append(const AppSignal& signal)
 {
-	append(new AppSignal(signal));
+	auto newSignal = new AppSignal(signal);
+	return append(newSignal);
 }
 
-void AppSignalSet::append(const ID_AppSignalID& id)
+std::pair<AppSignal*, int> AppSignalSet::append(const ID_AppSignalID& id)
 {
-	append(new AppSignal(id));
+	auto newSignal = new AppSignal(id);
+	return append(newSignal);
 }
 
 void AppSignalSet::removeSignals(const std::set<int>& signalToRemoveIDs)
@@ -2834,7 +2838,7 @@ void AppSignalSet::appSignalIdsListSorted(bool removeNumberSign, QStringList* li
 	}
 }
 
-AppSignal* AppSignalSet::updateSignal(const AppSignal& s, int* index)
+std::pair<AppSignal*, int> AppSignalSet::updateSignal(const AppSignal& s)
 {
 	int signalID = s.ID();
 
@@ -2842,22 +2846,10 @@ AppSignal* AppSignalSet::updateSignal(const AppSignal& s, int* index)
 
 	if (it == m_idToIndex.end())
 	{
-		Q_ASSERT(false);			// signal should be exists!
-
-		if (index != nullptr)
-		{
-			*index = BAD_INDEX;
-		}
-
-		return nullptr;
+		return {nullptr, BAD_INDEX};
 	}
 
 	int signalIndex = it->second;
-
-	if (index != nullptr)
-	{
-		*index = signalIndex;
-	}
 
 	AppSignal* existSignal = m_signals[signalIndex];
 
@@ -2872,7 +2864,7 @@ AppSignal* AppSignalSet::updateSignal(const AppSignal& s, int* index)
 		if (oldHashIt == m_hashToIndex.end())
 		{
 			Q_ASSERT(false);
-			return nullptr;
+			return {nullptr, BAD_INDEX};
 		}
 
 		Q_ASSERT(oldHashIt->second == signalIndex);
@@ -2884,7 +2876,7 @@ AppSignal* AppSignalSet::updateSignal(const AppSignal& s, int* index)
 		if (newHashIt != m_hashToIndex.end())
 		{
 			Q_ASSERT(false);
-			return nullptr;
+			return {nullptr, BAD_INDEX};
 		}
 
 		m_hashToIndex.erase(oldHashIt);
@@ -2892,7 +2884,7 @@ AppSignal* AppSignalSet::updateSignal(const AppSignal& s, int* index)
 		m_hashToIndex.emplace(newHash, signalIndex);
 	}
 
-	return existSignal;
+	return {existSignal, signalIndex};
 }
 
 bool AppSignalSet::serializeFromProtoFile(const QString& filePath)

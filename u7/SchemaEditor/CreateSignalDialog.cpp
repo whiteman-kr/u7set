@@ -428,16 +428,12 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 		signal.trimTextFields();
 	}
 
-	bool ok = dbc->addSignal(newSignals.begin()->signalType(), &newSignals, parent);
+	bool ok = AppSignalSetProvider::getInstance()->addSignals(newSignals.begin()->signalType(), &newSignals, parent);
 
 	if (ok == false)
 	{
 		return {};
 	}
-
-	AppSignalSetProvider* provider = AppSignalSetProvider::getInstance();
-
-	provider->reloadAllSignals();
 
 	QVector<int> selectIdList(newSignals.size());
 	int currentIdIndex = 0;

@@ -3,14 +3,6 @@
 #include "../AppSignalLib/AppSignal.h"
 #include "IdePropertyEditor.h"
 
-/*class QtProperty;
-class QtStringPropertyManager;
-class QtEnumPropertyManager;
-class QtIntPropertyManager;
-class QtDoublePropertyManager;
-class QtBoolPropertyManager;
-class QtTreePropertyBrowser;
-class QDialogButtonBox;*/
 class AppSignalSetProvider;
 class AppSignalPropertyManager;
 

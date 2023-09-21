@@ -668,9 +668,11 @@ public:
 	void clear();
 	void reserve(int n);
 
-	void append(AppSignal* signal);					// takes ownership on "signal"
-	void append(const AppSignal& signal);			// appends new AppSignal(signal) (make copy)
-	void append(const ID_AppSignalID& id);
+	// return pair is <newAppSignalPtr, newAppSignalIndex>
+	//
+	std::pair<AppSignal*, int> append(AppSignal* newSignal);		// takes ownership on "newSignal"
+	std::pair<AppSignal*, int> append(const AppSignal& signal);		// appends new AppSignal(signal) (make copy)
+	std::pair<AppSignal*, int> append(const ID_AppSignalID& id);
 
 	void removeSignals(const std::set<int>& signalToRemoveIDs);
 
@@ -706,7 +708,7 @@ public:
 
 	void appSignalIdsListSorted(bool removeNumberSign, QStringList* list) const;
 
-	AppSignal* updateSignal(const AppSignal& s, int* index = nullptr);
+	std::pair<AppSignal*, int> updateSignal(const AppSignal& s);
 
 	bool serializeFromProtoFile(const QString& filePath);
 

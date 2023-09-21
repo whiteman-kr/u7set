@@ -7,7 +7,6 @@
 #include "DbProgress.h"
 #include "../HardwareLib/DeviceObject.h"
 
-
 class DbController : public QObject
 {
 	Q_OBJECT
@@ -143,6 +142,8 @@ public:
 	bool getDeviceTreeLatestVersion(const DbFileInfo& file, std::shared_ptr<Hardware::DeviceObject>* out, QWidget* parentWidget);
 
 	// Signals management
+
+	// get* functions is public
 	//
 	bool getSignalsIDs(std::vector<int>* signalIDs, QWidget* parentWidget);
 	bool getSignalsIDAppSignalID(std::vector<ID_AppSignalID>* signalsIDAppSignalID, bool withDeleted, QWidget* parentWidget);
@@ -152,9 +153,26 @@ public:
 	bool getLatestSignals(const std::vector<int>& signalIDs, std::vector<AppSignal>* signalsArray, QWidget* parentWidget);
 	bool getLatestSignalsByAppSignalIDs(const QStringList& appSignalIDs, std::vector<AppSignal>* signalArray, QWidget* parentWidget);
 	bool getCheckedOutSignalsIDs(std::vector<int>* signalIDs, QWidget* parentWidget);
-	bool addSignal(E::SignalType signalType, std::vector<AppSignal>* newSignal, QWidget* parentWidget);
 	bool getLatestSignalsWithoutProgress(const std::vector<int>& signalIDs, std::vector<AppSignal>* signalsArray, QWidget* parentWidget);
 	bool getLatestSignalsWithUserID(std::vector<AppSignal>* out, QWidget* parentWidget);
+	bool getSignalsIDsWithAppSignalID(QString appSignalID, QVector<int>* signalIDs, QWidget* parentWidget);
+	bool getSignalsIDsWithCustomAppSignalID(QString customAppSignalID, QVector<int>* signalIDs, QWidget* parentWidget);
+	bool getSignalsIDsWithEquipmentID(const QString& equipmentID, QVector<int>* signalIDs, QWidget* parentWidget);
+	bool getMultipleSignalsIDsWithEquipmentID(const QStringList& equipmentIDs, std::map<QString, std::set<int>>* signalIDs, QWidget* parentWidget);
+	bool getSignalHistory(int signalID, std::vector<DbChangeset>* out, QWidget* parentWidget);
+	bool getSpecificSignals(const std::vector<int>& signalIDs, int changesetId, std::vector<AppSignal>* out, QWidget* parentWidget);
+	bool getSpecificSignals(int changesetId, std::vector<AppSignal>* out, QWidget* parentWidget);
+	bool getSpecificSignals(QDateTime date, std::vector<AppSignal>* out, QWidget* parentWidget);
+	bool hasCheckedOutSignals(bool* hasCheckedOut, QWidget* parentWidget);
+
+private:
+	// signals modification functions should be called via AppSignalSetProvider::getInstance()
+	// except testing purposes
+	//
+	friend class AppSignalSetProvider;
+	friend class DbControllerSignalTests;
+
+	bool addSignals(E::SignalType signalType, std::vector<AppSignal>* newSignal, QWidget* parentWidget);
 
 	bool checkoutSignals(const std::vector<int>& signalIDs, std::vector<ObjectState>* objectStates, QWidget* parentWidget);
 	bool setSignalWorkcopy(AppSignal* signal, ObjectState* objectState, QWidget* parentWidget);
@@ -169,19 +187,7 @@ public:
 	bool autoAddSignals(const std::vector<const Hardware::DeviceAppSignal*>& deviceSignals, std::vector<AppSignal>* addedSignals, QWidget* parentWidget);
 	bool autoDeleteSignals(const std::vector<const Hardware::DeviceAppSignal*>& deviceSignals, QWidget* parentWidget);
 
-	bool getSignalsIDsWithAppSignalID(QString appSignalID, QVector<int>* signalIDs, QWidget* parentWidget);
-	bool getSignalsIDsWithCustomAppSignalID(QString customAppSignalID, QVector<int>* signalIDs, QWidget* parentWidget);
-	bool getSignalsIDsWithEquipmentID(const QString& equipmentID, QVector<int>* signalIDs, QWidget* parentWidget);
-	bool getMultipleSignalsIDsWithEquipmentID(const QStringList& equipmentIDs, std::map<QString, std::set<int>>* signalIDs, QWidget* parentWidget);
-
-	bool getSignalHistory(int signalID, std::vector<DbChangeset>* out, QWidget* parentWidget);
-	bool getSpecificSignals(const std::vector<int>& signalIDs, int changesetId, std::vector<AppSignal>* out, QWidget* parentWidget);
-
-	bool getSpecificSignals(int changesetId, std::vector<AppSignal>* out, QWidget* parentWidget);
-	bool getSpecificSignals(QDateTime date, std::vector<AppSignal>* out, QWidget* parentWidget);
-
-	bool hasCheckedOutSignals(bool* hasCheckedOut, QWidget* parentWidget);
-
+public:
 	// Build management
 	//
 	bool buildStart(QString workstation, int changeset, int* buildID, QWidget *parentWidget);
@@ -275,7 +281,7 @@ signals:
 	void signal_getLatestSignalsByAppSignalIDs(const QStringList& appSignalIDs, std::vector<AppSignal>* signalArray);
 	void signal_getLatestSignalsWithUserID(std::vector<AppSignal>* out);
 	void signal_getCheckedOutSignalsIDs(std::vector<int>* signalIDs);
-	void signal_addSignal(E::SignalType signalType, std::vector<AppSignal>* newSignal);
+	void signal_addSignals(E::SignalType signalType, std::vector<AppSignal>* newSignal);
 
 	void signal_checkoutSignals(const std::vector<int>& signalIDs, std::vector<ObjectState>* objectStates);
 	void signal_setSignalWorkcopy(AppSignal* signal, ObjectState* objectState);

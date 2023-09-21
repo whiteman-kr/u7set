@@ -3,14 +3,14 @@
 #include <QStyledItemDelegate>
 #include <QSortFilterProxyModel>
 
-#include "../DbLib/DbStruct.h"
-
+#include "../DbLib/DbController.h"
 #include "../lib/QDoublevalidatorEx.h"
+
 #include "../Builder/AppSignalProperties.h"
 #include "MainTabPage.h"
 #include "GlobalMessanger.h"
+#include "AppSignalSetProvider.h"
 
-class DbController;
 class QTableView;
 class QMenu;
 class SignalsModel;
@@ -27,8 +27,6 @@ class QCompleter;
 class QActionGroup;
 class QStandardItemModel;
 class TableDataVisibilityController;
-class AppSignalSetProvider;
-class AppSignalPropertyManager;
 class FindSignalDialog;
 class DialogMetrologyConnection;
 

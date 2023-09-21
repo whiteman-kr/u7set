@@ -1236,7 +1236,7 @@ void DbControllerSignalTests::dbcTest_addSignal()
 
 	newSignals.push_back(s);
 
-	QVERIFY(m_dbcAdmin->addSignal(E::SignalType::Discrete, &newSignals, nullptr) == true);
+	QVERIFY(m_dbcAdmin->addSignals(E::SignalType::Discrete, &newSignals, nullptr) == true);
 	TS_VERIFY(check_signalIsExist(ADMIN_ID, newSignals[0].ID(), E::SignalType::Discrete, 0, 0, true));
 
 	// try add another one signal with same IDs
@@ -1244,7 +1244,7 @@ void DbControllerSignalTests::dbcTest_addSignal()
 	newSignals.clear();
 	newSignals.push_back(s);
 
-	QVERIFY(m_dbcAdmin->addSignal(E::SignalType::Discrete, &newSignals, nullptr) == false);
+	QVERIFY(m_dbcAdmin->addSignals(E::SignalType::Discrete, &newSignals, nullptr) == false);
 	QVERIFY(m_dbcAdmin->lastError().contains("already exists"));
 
 	// try add multichannel signal
@@ -1263,7 +1263,7 @@ void DbControllerSignalTests::dbcTest_addSignal()
 		newSignals.push_back(s);
 	}
 
-	QVERIFY(m_dbcAdmin->addSignal(E::SignalType::Analog, &newSignals, nullptr) == true);
+	QVERIFY(m_dbcAdmin->addSignals(E::SignalType::Analog, &newSignals, nullptr) == true);
 
 	int sg1 = 0;
 
@@ -1290,7 +1290,7 @@ void DbControllerSignalTests::dbcTest_addSignal()
 		newSignals.push_back(s);
 	}
 
-	QVERIFY(m_dbcAdmin->addSignal(E::SignalType::Analog, &newSignals, nullptr) == false);
+	QVERIFY(m_dbcAdmin->addSignals(E::SignalType::Analog, &newSignals, nullptr) == false);
 	QVERIFY(m_dbcAdmin->lastError().contains("channelCount"));
 
 	// try add multichannel signal by another User2
@@ -1309,7 +1309,7 @@ void DbControllerSignalTests::dbcTest_addSignal()
 		newSignals.push_back(s);
 	}
 
-	QVERIFY(m_dbcUser3->addSignal(E::SignalType::Discrete, &newSignals, nullptr) == true);
+	QVERIFY(m_dbcUser3->addSignals(E::SignalType::Discrete, &newSignals, nullptr) == true);
 
 	sg1 = 0;
 
@@ -2128,7 +2128,7 @@ QString DbControllerSignalTests::dbc_addSignal(DbController* dbc,
 		newSignals.emplace_back(s);
 	}
 
-	TS_VERIFY_RETURN_ERR(dbc->addSignal(type, &newSignals, nullptr) == true, dbc->lastError());
+	TS_VERIFY_RETURN_ERR(dbc->addSignals(type, &newSignals, nullptr) == true, dbc->lastError());
 
 	if (addedIDs != nullptr)
 	{
