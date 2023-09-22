@@ -9,6 +9,14 @@
         <translation></translation>
     </message>
     <message>
+        <source>PASSED</source>
+        <translation type="vanished">ВИКОНАНО</translation>
+    </message>
+    <message>
+        <source>FAILED</source>
+        <translation type="vanished">ПОМИЛКА</translation>
+    </message>
+    <message>
         <location filename="../TestLog.cpp" line="327"/>
         <source>Cannot open file %1 for writing.</source>
         <translation>Помилка відкриття файлу %1 для запису.</translation>
@@ -116,6 +124,19 @@ Do you with to open it?</source>
     </message>
 </context>
 <context>
+    <name>TestSuite::ConstStrings</name>
+    <message>
+        <location filename="../TestLog.h" line="13"/>
+        <source>PASSED</source>
+        <translation>ВИКОНАНО</translation>
+    </message>
+    <message>
+        <location filename="../TestLog.h" line="17"/>
+        <source>FAILED</source>
+        <translation>ПОМИЛКА</translation>
+    </message>
+</context>
+<context>
     <name>TestSuite::ControlThread</name>
     <message>
         <location filename="../Control.cpp" line="118"/>
@@ -166,14 +187,12 @@ Do you with to open it?</source>
         <translation>********** Запуск сценарію %1 **********</translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="185"/>
         <source>%1: PASS</source>
-        <translation>%1: ПРОЙШОВ</translation>
+        <translation type="vanished">%1: ПРОЙШОВ</translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="191"/>
         <source>%1: FAIL</source>
-        <translation>%1: НЕ ПРОЙШОВ</translation>
+        <translation type="vanished">%1: НЕ ПРОЙШОВ</translation>
     </message>
     <message>
         <location filename="../ScriptRunner.cpp" line="199"/>
@@ -191,15 +210,12 @@ Do you with to open it?</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="218"/>
-        <location filename="../ScriptRunner.cpp" line="260"/>
         <source>PASSED</source>
-        <translation>ПРОЙШОВ</translation>
+        <translation type="vanished">ПРОЙШОВ</translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="218"/>
         <source>FAILED</source>
-        <translation>НЕ ПРОЙШОВ</translation>
+        <translation type="vanished">НЕ ПРОЙШОВ</translation>
     </message>
     <message>
         <location filename="../ScriptRunner.cpp" line="246"/>
@@ -218,9 +234,19 @@ Do you with to open it?</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="260"/>
         <source>%1 FAILED</source>
-        <translation>%1 НЕ ПРОЙШОВ</translation>
+        <translation type="vanished">%1 НЕ ПРОЙШОВ</translation>
+    </message>
+    <message>
+        <location filename="../ScriptRunner.cpp" line="185"/>
+        <location filename="../ScriptRunner.cpp" line="191"/>
+        <source>%1: %2</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../ScriptRunner.cpp" line="260"/>
+        <source>%1 %2</source>
+        <translation></translation>
     </message>
     <message>
         <location filename="../ScriptRunner.cpp" line="279"/>
@@ -234,24 +260,24 @@ Do you with to open it?</source>
 	Помилка: %5</translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="394"/>
+        <location filename="../ScriptRunner.cpp" line="408"/>
         <source>%1 is callable function</source>
         <translation>%1 не є функцією</translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="442"/>
+        <location filename="../ScriptRunner.cpp" line="456"/>
         <source>Unexpected exception occured in %1.</source>
         <translation>Виникло виключення в %1.</translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="461"/>
+        <location filename="../ScriptRunner.cpp" line="475"/>
         <source>Error, stack trace: %1
 	Message: %2</source>
         <translation>Помилка, трасування: %1
 	Помилка: %2</translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="467"/>
+        <location filename="../ScriptRunner.cpp" line="481"/>
         <source>Error at line %1
 	Stack: %2
 	Message: %3</source>

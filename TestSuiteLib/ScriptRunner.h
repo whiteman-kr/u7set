@@ -12,6 +12,8 @@ namespace TestSuite
 
 	struct ScriptInfo
 	{
+		QString scriptCaption;
+
 		QStringList functionsList;
 		std::map<QString, QString> functionsCaptions;	// Key is function name, value is function caption
 
@@ -20,7 +22,7 @@ namespace TestSuite
 			return functionsList.size();
 		}
 
-		QString caption(const QString& function, bool* found = nullptr)
+		QString functionCaption(const QString& function, bool* found = nullptr)
 		{
 			auto it = functionsCaptions.find(function);
 			if (it == functionsCaptions.end())

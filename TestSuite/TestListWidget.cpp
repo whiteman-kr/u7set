@@ -171,8 +171,15 @@ void TestListWidget::fillTestsTree(const TestSuite::TestScriptsStorage& tests)
 			Q_ASSERT(parentItem);
 			return;
 		}
-		prevItemsStates[parentItem->text(Columns::Caption)] = parentItem->isExpanded();
 
+		QString scriptFileName = parentItem->data(ColumnsData::ScriptName, Qt::UserRole).toString();
+		
+		// Remebmber if parent item is expanded
+		//
+		prevItemsStates[scriptFileName] = parentItem->isExpanded();
+
+		// Remember if child items are checked
+		//
 		int childCount = parentItem->childCount();
 		for (int c = 0; c < childCount; c++)
 		{
@@ -182,7 +189,9 @@ void TestListWidget::fillTestsTree(const TestSuite::TestScriptsStorage& tests)
 				Q_ASSERT(childItem);
 				return;
 			}
-			prevItemsStates[parentItem->text(Columns::Caption) + childItem->text(Columns::Caption)] = childItem->checkState(0) == Qt::Checked;
+
+			QString functionName = childItem->text(Columns::Caption);
+			prevItemsStates[scriptFileName + functionName] = childItem->checkState(0) == Qt::Checked;
 		}
 	}
 
@@ -195,17 +204,13 @@ void TestListWidget::fillTestsTree(const TestSuite::TestScriptsStorage& tests)
 	count = static_cast<int>(tests.count());
 	for (int i = 0; i < count; i++)
 	{
-		TestSuite::ScriptRunner sr(configSettings, testController, testLog, fakeStatus, fakeStatusMutex);
-
 		const TestSuite::TestScript& script = tests.script(i);
 		if (script.isGlobalScript() == true)
 		{
 			continue;
 		}
 
-		QTreeWidgetItem* scriptItem = new QTreeWidgetItem(QStringList() << script.fileName());
-		scriptItem->setData(ColumnsData::ScriptName, Qt::UserRole, script.fileName());
-		m_treeWidget->addTopLevelItem(scriptItem);
+		TestSuite::ScriptRunner sr(configSettings, testController, testLog, fakeStatus, fakeStatusMutex);
 
 		TestSuite::ScriptInfo scriptInfo;
 		QString errorMsg;
@@ -215,11 +220,15 @@ void TestListWidget::fillTestsTree(const TestSuite::TestScriptsStorage& tests)
 			continue;
 		}
 
+		QTreeWidgetItem* scriptItem = new QTreeWidgetItem(QStringList() << scriptInfo.scriptCaption);
+		scriptItem->setData(ColumnsData::ScriptName, Qt::UserRole, script.fileName());
+		m_treeWidget->addTopLevelItem(scriptItem);
+
 		auto prevScriptItemIt = prevItemsStates.find(script.fileName());
 
 		for (const QString& f : scriptInfo.functionsList)
 		{
-			QString caption = scriptInfo.caption(f);
+			QString caption = scriptInfo.functionCaption(f);
 
 			QTreeWidgetItem* funcItem = new QTreeWidgetItem(QStringList() << caption);
 			funcItem->setData(ColumnsData::ScriptName, Qt::UserRole, script.fileName());
@@ -241,7 +250,7 @@ void TestListWidget::fillTestsTree(const TestSuite::TestScriptsStorage& tests)
 			}
 		}
 
-		scriptItem->setExpanded(prevScriptItemIt == prevItemsStates.end() || prevScriptItemIt->second == true);
+		scriptItem->setExpanded(prevScriptItemIt != prevItemsStates.end() && prevScriptItemIt->second == true);
 	}
 
 	m_treeWidget->resizeColumnToContents(Columns::Caption);
@@ -368,7 +377,7 @@ void TestListWidget::onTestFinished(QString scriptFileName, QString testFunction
 				QTreeWidgetItem* childItem = parentItem->child(c);
 				if (childItem->data(ColumnsData::TestFunction, Qt::UserRole).toString() == testFunction)
 				{
-					childItem->setText(Columns::Result, result ? tr("PASSED") : tr("FAILED"));
+					childItem->setText(Columns::Result, result ? TestSuite::ConstStrings::TEST_PASSED() : TestSuite::ConstStrings::TEST_FAILED());
 
 					if (result == false)
 					{
