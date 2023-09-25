@@ -746,7 +746,7 @@ namespace Builder
 	{
 		for(const AppFbParamValue& pv : *this)
 		{
-			if (pv.operandIndex() != AppFbParamValue::NOT_FB_OPERAND_INDEX)
+			if (pv.isNoFbOperand() == false)
 			{
 				return true;
 			}

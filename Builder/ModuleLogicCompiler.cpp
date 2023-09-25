@@ -8501,11 +8501,9 @@ namespace Builder
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 
-		//		m_alpCode_init(&m_resourcesUsageInfo.initAfbs);
-
 		LOG_MESSAGE(m_log, QString(tr("Generation of AFB initialization code...")));
 
-		QHash<QString, QString> instanceUsedBy;
+		std::map<QString, QString> instanceUsedBy;
 
 		for(UalAfb* ualAfb : m_ualAfbs)
 		{
@@ -8518,13 +8516,17 @@ namespace Builder
 
 			QString instantiatorID = ualAfb->instantiatorID();
 
-			if (instanceUsedBy.contains(instantiatorID) == false)
+			auto it = instanceUsedBy.find(instantiatorID);
+
+			if (it == instanceUsedBy.end())
 			{
-				instanceUsedBy.insert(instantiatorID, ualAfb->label());
+				instanceUsedBy.emplace(instantiatorID, ualAfb->label());
 			}
 			else
-			{
-				instanceUsedBy.insert(instantiatorID, QString("%1, %2").arg(instanceUsedBy.value(instantiatorID)).arg(ualAfb->label()));
+			{	QString& labels = it->second;
+
+				labels += QStringLiteral(", ");
+				labels += ualAfb->label();
 			}
 		}
 
@@ -8532,7 +8534,7 @@ namespace Builder
 
 		code->comment_nl("AFBs initialization code");
 
-		QHash<QString, int> instantiatorStrIDsMap;
+		std::set<QString> processedInstantiatorsID;
 
 		for(Afbl* afbl : m_afbls)
 		{
@@ -8551,7 +8553,7 @@ namespace Builder
 				{
 					// initialize all params for each instance of FB with RAM
 					//
-					result &= generateInitAppFbParamsCode(code, *ualAfb, ualAfb->label());
+					result &= generateIDRPhaseInitAppFbParamsCode(code, *ualAfb, ualAfb->label());
 				}
 				else
 				{
@@ -8560,22 +8562,28 @@ namespace Builder
 					//
 					QString instantiatorID = ualAfb->instantiatorID();
 
-					if (instantiatorStrIDsMap.contains(instantiatorID) == false)
+					if (processedInstantiatorsID.contains(instantiatorID) == false)
 					{
-						instantiatorStrIDsMap.insert(instantiatorID, 0);
+						auto it = instanceUsedBy.find(instantiatorID);
 
-						result &= generateInitAppFbParamsCode(code, *ualAfb, instanceUsedBy.value(instantiatorID));
+						if (it == instanceUsedBy.end())
+						{
+							Q_ASSERT(false);
+						}
+						else
+						{
+							result &= generateIDRPhaseInitAppFbParamsCode(code, *ualAfb, it->second);
+							processedInstantiatorsID.emplace(instantiatorID);
+						}
 					}
 				}
 			}
 		}
 
-		//m_alpCode_calculate(&m_resourcesUsageInfo.initAfbs);
-
 		return result;
 	}
 
-	bool ModuleLogicCompiler::generateInitAppFbParamsCode(CodeSnippet* code, const UalAfb& appFb, const QString& usedBy)
+	bool ModuleLogicCompiler::generateIDRPhaseInitAppFbParamsCode(CodeSnippet* code, const UalAfb& appFb, const QString& usedBy)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 
@@ -8606,16 +8614,42 @@ namespace Builder
 
 		code->newLine();
 
-		bool commandAdded = false;
+		CodeSnippet initCode;
+
+		result &= generateInitAppFbParamsCode(&initCode, appFb, true);
+
+		if (initCode.isEmpty() == false)
+		{
+			code->append(initCode);
+			code->newLine();
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::generateInitAppFbParamsCode(CodeSnippet* code, const UalAfb& appFb, bool instantiator)
+	{
+		const AppFbParamValuesArray& appFbParamValues = appFb.paramValuesArray();
+
+		QString fbCaption = appFb.caption();
+		int fbOpcode = appFb.opcode();
+		int fbInstance = appFb.instance();
+
+		bool result = true;
 
 		for(const AppFbParamValue& paramValue : appFbParamValues)
 		{
-			int operandIndex = paramValue.operandIndex();
-
-			if (operandIndex == AppFbParamValue::NOT_FB_OPERAND_INDEX)
+			if (paramValue.isNoFbOperand() == true)
 			{
 				continue;
 			}
+
+			if (paramValue.instantiator() != instantiator)
+			{
+				continue;
+			}
+
+			int operandIndex = paramValue.operandIndex();
 
 			QString opName = paramValue.opName();
 
@@ -8629,9 +8663,6 @@ namespace Builder
 				cmd.setComment(QString("%1 <= %2").arg(opName).arg(paramValue.unsignedIntValue()));
 
 				code->append(cmd);
-
-				commandAdded = true;
-
 				continue;
 			}
 
@@ -8678,26 +8709,18 @@ namespace Builder
 					break;
 
 				case E::DataFormat::Float:
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("Afb parameter '%1' with Float data format must have dataSize == 32")).arg(opName));
+					LOG_INTERNAL_ERROR_MSG(m_log, QString("Afb parameter '%1' with Float data format must have dataSize == 32").arg(opName));
 					result = false;
 					break;
 
 				default:
-					assert(false);
 
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("Unknown Afb parameter data format"));
+					LOG_INTERNAL_ERROR_MSG(m_log, QString("Unknown Afb parameter data format"));
 					result = false;
 				}
 			}
 
 			code->append(cmd);
-
-			commandAdded = true;
-		}
-
-		if (commandAdded == true)
-		{
-			code->newLine();
 		}
 
 		return result;
@@ -8724,6 +8747,11 @@ namespace Builder
 			}
 
 			commentStr.append(QString(" = %1").arg(paramValue.toString()));
+
+			if (paramValue.instantiator() == true)
+			{
+				commentStr.append(QStringLiteral(" (instantiator)"));
+			}
 
 			code->comment(commentStr);
 		}
@@ -9223,6 +9251,8 @@ namespace Builder
 
 			if (bitAccCodeGenerated == false)
 			{
+				result &= generateInitAppFbParamsCode(code, *ualAfb, false);
+
 				result &= generateSignalsToAfbInputsCode(code, ualAfb, bpStepInfo);
 
 				result &= startAfb(code, ualAfb, bpStepInfo);
