@@ -572,7 +572,7 @@ void TestSuiteMainWindow::showSoftwareConnection(const QString& caption,
 void TestSuiteMainWindow::loadScriptsFromConfiguration()
 {
 	m_testScriptsStorage.setScripts(m_configController.scripts());
-	m_testListWidget->fillTestsTree(m_testScriptsStorage);
+	m_testListWidget->setTests(m_testScriptsStorage);
 }
 
 void TestSuiteMainWindow::loadScriptsFromLocalPath()
@@ -585,7 +585,7 @@ void TestSuiteMainWindow::loadScriptsFromLocalPath()
 		return;
 	}
 
-	m_testListWidget->fillTestsTree(m_testScriptsStorage);
+	m_testListWidget->setTests(m_testScriptsStorage);
 }
 
 void TestSuiteMainWindow::updateReportActions()
