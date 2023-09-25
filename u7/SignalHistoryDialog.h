@@ -10,7 +10,7 @@ class SignalHistoryDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	SignalHistoryDialog(DbController *db, const AppSignal& s, QWidget* parent = nullptr);
+	SignalHistoryDialog(DbController* db, const AppSignal& s, QWidget* parent = nullptr);
 
 protected:
 	void closeEvent(QCloseEvent* event);

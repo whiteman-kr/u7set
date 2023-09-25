@@ -1021,14 +1021,17 @@ void SignalsTabPage::keyPressEvent(QKeyEvent* e)
 	if(e->type() == QKeyEvent::KeyPress && e->matches(QKeySequence::Copy))
 	{
 		QModelIndexList selection = m_signalsView->selectionModel()->selectedRows(0);
+
 		if (selection.count() == 0)
 		{
 			QMessageBox::warning(this, tr("Warning"), tr("No one signal was selected!"));
 		}
+
 		QString selectedSignalIds;
-		for (int i = 0; i < selection.count(); i++)
+
+		for (const QModelIndex& selIndex : selection)
 		{
-			int row = m_signalsProxyModel->mapToSource(selection[i]).row();
+			int row = getMappedSourceRow(selIndex);
 
 			selectedSignalIds.append(m_signalSetProvider->getLoadedSignalByIndex(row, false)->appSignalID() + "\n");
 		}
@@ -1170,7 +1173,7 @@ void SignalsTabPage::createNewSignals()
 		signal.setEquipmentID(deviceIdEdit->text());
 	}
 
-	int signalCounter = m_signalSetProvider->getNextSignalCounter();
+	int signalCounter = db()->nextCounterValue();
 
 	if (signalCounter >= 0)
 	{
@@ -1208,15 +1211,16 @@ void SignalsTabPage::editSignal()
 		return;
 	}
 
-	int currentRow = m_signalsProxyModel->mapToSource(m_signalsView->currentIndex()).row();
+	int currentRow = getMappedSourceRow(m_signalsView->currentIndex());
 	int currentColumn = m_signalsView->currentIndex().column();
 	int currentId = m_signalSetProvider->signalID(currentRow);
 
 	std::vector<int> selectedSignalId;
 
-	for (int i = 0; i < selection.count(); i++)
+	for (const QModelIndex& selIndex : selection)
 	{
-		int row = m_signalsProxyModel->mapToSource(selection[i]).row();
+		int row = getMappedSourceRow(selIndex);
+
 		selectedSignalId.push_back(m_signalSetProvider->signalID(row));
 	}
 
@@ -1296,9 +1300,9 @@ void SignalsTabPage::cloneSignal()
 
 	std::vector<int> clonedSignalIDs;
 
-	for (int i = 0; i < selection.count(); i++)
+	for (const QModelIndex selIndex : selection)
 	{
-		int row = m_signalsProxyModel->mapToSource(selection[i]).row();
+		int row = getMappedSourceRow(selIndex);
 		int id = m_signalSetProvider->signalID(row);
 
 		clonedSignalIDs.push_back(id);
@@ -1327,9 +1331,9 @@ void SignalsTabPage::deleteSignal()
 
 	std::vector<int> deletedSignalIDs;
 
-	for (int i = 0; i < selection.count(); i++)
+	for (const QModelIndex& selIndex : selection)
 	{
-		int row = m_signalsProxyModel->mapToSource(selection[i]).row();
+		int row = getMappedSourceRow(selIndex);
 
 		std::vector<int> channelSignalsIDs;
 
@@ -1393,13 +1397,13 @@ void SignalsTabPage::checkIn()
 
 void SignalsTabPage::viewSignalHistory()
 {
-	int row = m_signalsProxyModel->mapToSource(m_signalsView->currentIndex()).row();
+	int row = getMappedSourceRow(m_signalsView->currentIndex());
 
 	const AppSignal* signal = m_signalSetProvider->getLoadedSignalByIndex(row, false);
 
 	TEST_PTR_RETURN(signal);
 
-	SignalHistoryDialog dlg(*signal, this);
+	SignalHistoryDialog dlg(db(), *signal, this);
 
 	dlg.exec();
 }
@@ -1469,13 +1473,15 @@ void SignalsTabPage::addMetrologyConnection()
 	}
 
 	QModelIndexList selection = m_signalsView->selectionModel()->selectedRows(0);
+
 	if (selection.count() == 0)
 	{
 		QMessageBox::warning(this, tr("Metrology connections"), tr("No one signal was selected!"));
 		return;
 	}
 
-	int row = m_signalsProxyModel->mapToSource(selection[0]).row();
+	int row = getMappedSourceRow(selection[0]);
+
 	if (row < 0 || row >= m_signalSetProvider->signalCount())
 	{
 		return;
@@ -1549,21 +1555,28 @@ void SignalsTabPage::saveSelection()
 	// Save signal id list of selected rows and signal id with column number of focused cell
 	//
 	m_selectedRowsSignalID.clear();
+
 	QModelIndexList selectedList = m_signalsView->selectionModel()->selectedRows(0);
 	m_selectedRowsSignalID.resize(selectedList.size());
+
 	int currentIdIndex = 0;
+
 	foreach (const QModelIndex& index, selectedList)
 	{
-		int row = m_signalsProxyModel->mapToSource(index).row();
+		int row = getMappedSourceRow(index);
+
 		m_selectedRowsSignalID[currentIdIndex++] = m_signalSetProvider->signalID(row);
 	}
+
 	QModelIndex index = m_signalsView->currentIndex();
+
 	if (index.isValid())
 	{
-		int row = m_signalsProxyModel->mapToSource(index).row();
+		int row = getMappedSourceRow(index);
 		m_focusedCellSignalID = m_signalSetProvider->signalID(row);
 		m_focusedCellColumn = index.column();
 	}
+
 	m_lastHorizontalScrollPosition = m_signalsView->horizontalScrollBar()->value();
 	m_lastVerticalScrollPosition = m_signalsView->verticalScrollBar()->value();
 }
@@ -1622,7 +1635,7 @@ void SignalsTabPage::onSignalSelectionChanged()
 		m_addMetrologyConnectionAction->setEnabled(false);
 		return;
 	}
-	int row = m_signalsProxyModel->mapToSource(selection[0]).row();
+	int row = getMappedSourceRow(selection[0]);
 
 	if (m_signalSetProvider->getLoadedSignalByIndex(row, true)->isAnalog(), true)
 	{
@@ -1846,6 +1859,11 @@ void SignalsTabPage::compareObject(DbChangesetObject object, CompareData compare
 	ComparePropertyObjectDialog::showDialog(object, compareData, source, target, this);
 
 	return;
+}
+
+int SignalsTabPage::getMappedSourceRow(const QModelIndex& proxyIndex) const
+{
+	return m_signalsProxyModel->mapToSource(proxyIndex).row();
 }
 
 SignalsProxyModel::SignalsProxyModel(SignalsModel* sourceModel, QObject *parent) :

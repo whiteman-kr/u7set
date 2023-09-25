@@ -163,6 +163,10 @@ public slots:
 
 	void compareObject(DbChangesetObject object, CompareData compareData);
 
+private:
+	int getMappedSourceRow(const QModelIndex& modelIndex) const;
+
+
 	// Data
 	//
 private:

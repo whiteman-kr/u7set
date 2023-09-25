@@ -2,11 +2,7 @@
 
 #include "../AppSignalLib/AppSignal.h"
 #include "IdePropertyEditor.h"
-
-class AppSignalSetProvider;
-class AppSignalPropertyManager;
-
-enum class SignalType;
+#include "AppSignalSetProvider.h"
 
 namespace ExtWidgets
 {

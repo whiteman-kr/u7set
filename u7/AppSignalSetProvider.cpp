@@ -163,7 +163,7 @@ void AppSignalSetProvider::enforceAllSignalsLoading()
 		}
 	}
 
-	loadSignals(signalIds);
+	reloadSignals(signalIds);
 
 	m_signalsLoading = false;
 	m_signalsLoadTimer.stop();
@@ -568,7 +568,7 @@ void AppSignalSetProvider::onSignalsLoadTimer()
 
 	if (signalIds.size() > 0)
 	{
-		loadSignals(signalIds);
+		reloadSignals(signalIds);
 	}
 
 	if (signalIds.size() == 0 ||
@@ -697,6 +697,8 @@ bool AppSignalSetProvider::setSignalWorkcopy(AppSignal* signal, ObjectState* obj
 		emit signalsPropertiesChanged({s});
 		emit signalsUpdated({index});
 	}
+
+	return result;
 }
 
 bool AppSignalSetProvider::checkoutSignalByIndex(int index, QString* message)
@@ -1127,37 +1129,6 @@ void AppSignalSetProvider::deleteSignals(const std::vector<int>& signalIDs)
 
 	reloadAllSignals();
 }
-
-/*
-void AppSignalSetProvider::loadSignals()
-{
-	if (m_signalsLoading == true)
-	{
-		m_signalsLoadTimer.>stop();
-		m_signalsLoading = false;
-	}
-
-	m_propertyManager.init();
-	m_propertyManager.reloadPropertyBehaviour();
-
-	loadUsers();
-
-	AppSignalSet signalSetForReplacement;
-
-	if (!dbController()->getSignals(&signalSetForReplacement, false, nullptr))
-	{
-		emit error(tr("Could not load signals"));
-	}
-
-	for (const AppSignal* s : signalSetForReplacement)
-	{
-		m_propertyManager.detectNewProperties(*s);
-	}
-
-	m_signalSet.swap(signalSetForReplacement);
-
-	emit signalCountChanged();
-}  */
 
 void AppSignalSetProvider::saveSignal(AppSignal& signal)
 {

@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../AppSignalLib/AppSignalParam.h"
 #include "../DbLib/DbController.h"
+#include "../AppSignalLib/AppSignalParam.h"
+
 #include "AppSignalPropertyManager.h"
 
 class AppSignalSetProvider : public QObject
@@ -105,8 +106,6 @@ public:
 	bool createNewSignals(const AppSignal& signalTemplate,
 						  int channelsCount, int signalsCount,
 						  std::vector<int>* addedSignalIDs);
-
-
 signals:
 	void error(const QString& message);						// for throwing message boxes
 
@@ -129,7 +128,6 @@ private:
 	void terminateSignalsLoading();
 
 	void loadIdAppSignalId();
-	void loadSignals(const std::vector<int>& signalIds);
 
 	void appendSignalsAndUpdateViews(const std::vector<AppSignal>& newSignals);
 

@@ -2,9 +2,7 @@
 #include "../lib/WidgetUtils.h"
 
 #include "SignalPropertiesDialog.h"
-#include "SignalsTabPage.h"
 #include "Settings.h"
-#include "AppSignalSetProvider.h"
 
 SignalPropertiesDialog::SignalPropertiesDialog(const std::vector<AppSignal*>& signalVector,
 											   bool readOnly, bool tryCheckout, QWidget* parent) :
@@ -139,7 +137,6 @@ SignalPropertiesDialog::SignalPropertiesDialog(const std::vector<AppSignal*>& si
 	m_isValid = true;
 }
 
-
 // Returns vector of pairs,
 //	first: previous AppSignalID
 //  second: new AppSignalID
@@ -181,8 +178,10 @@ std::vector<std::pair<QString, QString>> SignalPropertiesDialog::editApplication
 		return {};
 	}
 
-	int currentUserID = dbController->currentUser().userId();
-	bool currentUserIsAdmin = dbController->currentUser().isAdminstrator();
+	AppSignalSetProvider* signalSetProvider = AppSignalSetProvider::getInstance();
+
+	int currentUserID = signalSetProvider->currentUserID();
+	bool currentUserIsAdmin = signalSetProvider->currentUserIsAdmin();
 
 	int readOnly = false;
 
@@ -217,7 +216,7 @@ std::vector<std::pair<QString, QString>> SignalPropertiesDialog::editApplication
 
 		s->trimTextFields();
 
-		m_signalSetProvider->setSignalWorkcopy(s, &state, parent);
+		signalSetProvider->setSignalWorkcopy(s, &state, parent);
 
 		if (state.errCode != ERR_SIGNAL_OK)
 		{
