@@ -1044,7 +1044,7 @@ void SignalsTabPage::projectOpened()
 {
 	this->setEnabled(true);
 
-	m_signalSetProvider->projectOpened();
+	m_signalSetProvider->onProjectOpened();
 
 	changeSignalsLoadingSequence();
 }
@@ -1052,7 +1052,7 @@ void SignalsTabPage::projectOpened()
 void SignalsTabPage::projectClosed()
 {
 	m_signalsModel->prepareForReset();
-	m_signalSetProvider->projectClosed();
+	m_signalSetProvider->onProjectClosed();
 	m_signalsModel->finishReset();
 
 	m_signalsColumnVisibilityController->saveAllHeaderGeomery();
@@ -1370,6 +1370,7 @@ void SignalsTabPage::undoSignalChanges()
 
 	const QItemSelection& proxySelection = m_signalsView->selectionModel()->selection();
 	const QItemSelection& sourceSelection = m_signalsProxyModel->mapSelectionToSource(proxySelection);
+
 	dlg.setCheckStates(sourceSelection.indexes(), true);
 
 	if (dlg.exec() == QDialog::Rejected)

@@ -674,7 +674,7 @@ public:
 	std::pair<AppSignal*, int> append(const AppSignal& signal);		// appends new AppSignal(signal) (make copy)
 	std::pair<AppSignal*, int> append(const ID_AppSignalID& id);
 
-	void removeSignals(const std::set<int>& signalToRemoveIDs);
+	void removeSignals(const std::vector<int>& signalToRemoveIDs);
 
 	bool contains(const QString& appSignalID) const;
 	int count() const;

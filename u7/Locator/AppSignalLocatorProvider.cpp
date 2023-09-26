@@ -22,8 +22,7 @@ namespace Locator
 
 		// Blocking search.
 		//
-		const AppSignalSet& signalSet = m_signalProvider->signalSet();
-		const auto& allSignals = signalSet.signalsVector();
+		const auto& allSignals = m_signalProvider->signalsVector();
 
 		// Filter signals.
 		//

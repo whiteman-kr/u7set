@@ -17,34 +17,38 @@ public:
 
 	DbController* dbController();
 
-	void projectOpened();
-	void projectClosed();
+	const AppSignalSet& signalSet() const;
+	int signalCount() const;
+
+	AppSignalPropertyManager& signalPropertyManager();
+
+	void onProjectOpened();
+	void onProjectClosed();
 
 	bool projectProperty_uppercaseAppSignalID() const;
 
 	int currentUserID() const;
 	bool currentUserIsAdmin() const;
-
-	const AppSignalSet& signalSet() const;					// may be delete!
-	AppSignalPropertyManager& signalPropertyManager();
-
-	int signalCount() { return m_signalSet.count(); }
+	QString getUserName(int userId);
 
 	void reloadAllSignals();
 	void reloadSignals(const std::vector<int>& signalIds);
-
 	void enforceAllSignalsLoading();
 	const AppSignal* loadSignal(int signalId, bool updateViews);
 
 	void setMiddleVisibleSignalIndex(int signalIndex);
 
-	QString getUserName(int userId);
-
 	AppSignal* getSignal(const QString& appSignalID);
+	const AppSignal* getSignal(const QString& appSignalID) const;
+
 	AppSignal* getSignalByID(int signalID);
 
 	AppSignal* getSignalByIndex(int index);
 	const AppSignal* getSignalByIndex(int index) const;
+
+	bool signalExists(const QString& appSignalID) const;
+
+	const std::vector<AppSignal*>& signalsVector() const;
 
 	bool getChannelSignalsID(const AppSignal& signal, std::vector<int>* channelSignalIDs) const;
 	bool getChannelSignalsID(int signalID, int groupID, std::vector<int>* channelSignalIDs) const;
@@ -67,14 +71,6 @@ public:
 	bool isCheckinableSignalForMe(int index) const;
 	bool isCheckinableSignalForMe(const AppSignal* signal) const;
 
-	void deleteSignalGroups(const QSet<int>& signalGroupIDs);
-	void deleteSignals(const std::vector<int>& signalIDs);
-	void deleteSignal(int signalID);
-
-	void saveSignal(AppSignal& signal);
-	void saveSignals(const std::vector<AppSignal*>& signalVector);
-	std::vector<int> cloneSignals(const std::vector<int>& signalIDsToClone);
-
 	QString errorMessage(const ObjectState& state);	// Converts ObjectState to human readable text
 
 	// if no errors returns TRUE
@@ -85,6 +81,10 @@ public:
 
 	// Signal set modifications DbController calls
 	//
+	bool createNewSignals(const AppSignal& signalTemplate,
+						  int channelsCount, int signalsCount,
+						  std::vector<int>* addedSignalIDs);
+
 	bool addSignals(E::SignalType signalType, std::vector<AppSignal>* newSignals, QWidget* parentWidget = nullptr);
 
 	bool autoAddSignals(const std::vector<const Hardware::DeviceAppSignal*>& deviceSignals,
@@ -105,9 +105,15 @@ public:
 	bool updateSignalsSpecProps(const std::vector<const Hardware::DeviceAppSignal*>& deviceSignalsToUpdate,
 								QString* errMsg);
 
-	bool createNewSignals(const AppSignal& signalTemplate,
-						  int channelsCount, int signalsCount,
-						  std::vector<int>* addedSignalIDs);
+	void deleteSignals(const std::vector<int>& signalIDs);
+
+	void saveSignal(AppSignal& signal);
+	void saveSignals(const std::vector<AppSignal*>& signalVector);
+	std::vector<int> cloneSignals(const std::vector<int>& signalIDsToClone);
+
+
+
+
 signals:
 	void error(const QString& message);						// for throwing message boxes
 

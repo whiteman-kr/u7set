@@ -2641,7 +2641,7 @@ std::pair<AppSignal*, int> AppSignalSet::append(const ID_AppSignalID& id)
 	return append(newSignal);
 }
 
-void AppSignalSet::removeSignals(const std::set<int>& signalToRemoveIDs)
+void AppSignalSet::removeSignals(const std::vector<int> &signalToRemoveIDs)
 {
 	int removedCount = 0;
 

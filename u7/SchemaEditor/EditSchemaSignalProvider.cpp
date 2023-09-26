@@ -40,13 +40,13 @@ bool EditSchemaAppSignalProvider::signalExists(Hash hash) const
 
 bool EditSchemaAppSignalProvider::signalExists(const QString& appSignalId) const
 {
-	return m_signalSetProvider->signalSet().contains(appSignalId);
+	return m_signalSetProvider->signalExists(appSignalId);
 }
 
 bool EditSchemaAppSignalProvider::signalsExist(const QStringList& signalIds) const
 {
 	return std::all_of(signalIds.begin(), signalIds.end(), [this](const QString& appSignalId) {
-		return m_signalSetProvider->signalSet().contains(appSignalId);
+		return m_signalSetProvider->signalExists(appSignalId);
 	});
 }
 

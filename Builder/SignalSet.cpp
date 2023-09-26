@@ -563,13 +563,13 @@ namespace Builder
 
 	void SignalSet::findAndRemoveExcludedFromBuildSignals()
 	{
-		std::set<int> excludedFromBuidSignalsIDs;
+		std::vector<int> excludedFromBuidSignalsIDs;
 
 		for(const AppSignal* s : *this)
 		{
 			if (s->excludeFromBuild() == true)
 			{
-				excludedFromBuidSignalsIDs.insert(s->ID());
+				excludedFromBuidSignalsIDs.push_back(s->ID());
 
 				// Signal %1 is excluded from build.
 				//

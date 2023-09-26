@@ -37,10 +37,26 @@ AppSignalSetProvider* AppSignalSetProvider::getInstance()
 
 DbController* AppSignalSetProvider::dbController()
 {
+	Q_ASSERT(m_db != nullptr);
 	return m_db;
 }
 
-void AppSignalSetProvider::projectOpened()
+const AppSignalSet& AppSignalSetProvider::signalSet() const
+{
+	return m_signalSet;
+}
+
+int AppSignalSetProvider::signalCount() const
+{
+	return m_signalSet.count();
+}
+
+AppSignalPropertyManager& AppSignalSetProvider::signalPropertyManager()
+{
+	return m_propertyManager;
+}
+
+void AppSignalSetProvider::onProjectOpened()
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
 
@@ -55,7 +71,7 @@ void AppSignalSetProvider::projectOpened()
 	startSignalsLoading();
 }
 
-void AppSignalSetProvider::projectClosed()
+void AppSignalSetProvider::onProjectClosed()
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
 
@@ -92,14 +108,29 @@ bool AppSignalSetProvider::currentUserIsAdmin() const
 	return m_currentUserIsAdmin;
 }
 
-const AppSignalSet& AppSignalSetProvider::signalSet() const
+QString AppSignalSetProvider::getUserName(int userId)
 {
-	return m_signalSet;
-}
+	Q_ASSERT(m_thread == QThread::currentThread());
 
-AppSignalPropertyManager& AppSignalSetProvider::signalPropertyManager()
-{
-	return m_propertyManager;
+	auto it = m_users.find(userId);
+
+	if (it != m_users.end())
+	{
+		return it->second;
+	}
+
+	loadUsers();		// try to reload users
+
+	it = m_users.find(userId);
+
+	if (it != m_users.end())
+	{
+		return it->second;
+	}
+
+	Q_ASSERT(false);
+
+	return QString("Unknown user ID=%1").arg(userId);
 }
 
 void AppSignalSetProvider::reloadAllSignals()
@@ -191,32 +222,14 @@ void AppSignalSetProvider::setMiddleVisibleSignalIndex(int signalIndex)
 	m_middleVisibleSignalIndex = signalIndex;
 }
 
-QString AppSignalSetProvider::getUserName(int userId)
+AppSignal* AppSignalSetProvider::getSignal(const QString& appSignalID)
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
 
-	auto it = m_users.find(userId);
-
-	if (it != m_users.end())
-	{
-		return it->second;
-	}
-
-	loadUsers();		// try to reload users
-
-	it = m_users.find(userId);
-
-	if (it != m_users.end())
-	{
-		return it->second;
-	}
-
-	Q_ASSERT(false);
-
-	return QString("Unknown user ID=%1").arg(userId);
+	return m_signalSet.getSignal(appSignalID);
 }
 
-AppSignal* AppSignalSetProvider::getSignal(const QString& appSignalID)
+const AppSignal* AppSignalSetProvider::getSignal(const QString& appSignalID) const
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
 
@@ -238,6 +251,16 @@ AppSignal* AppSignalSetProvider::getSignalByIndex(int index)
 const AppSignal* AppSignalSetProvider::getSignalByIndex(int index) const
 {
 	return m_signalSet.at(index);
+}
+
+bool AppSignalSetProvider::signalExists(const QString& appSignalID) const
+{
+	return (getSignal(appSignalID) != nullptr);
+}
+
+const std::vector<AppSignal*>& AppSignalSetProvider::signalsVector() const
+{
+	return m_signalSet.signalsVector();
 }
 
 bool AppSignalSetProvider::getChannelSignalsID(const AppSignal& signal, std::vector<int>* channelSignalIDs) const
@@ -532,7 +555,7 @@ void AppSignalSetProvider::appendSignalsAndUpdateViews(const std::vector<AppSign
 		newIndexes.push_back(index);
 	}
 
-	emit signalsUpdated(newIndexes);		// to check new signals properties
+	emit detectNewProperties(newIndexes);
 	emit signalsCountChanged();
 }
 
@@ -611,84 +634,6 @@ void AppSignalSetProvider::onSignalsLoadTimer()
 		m_signalsLoadTimer.stop();
 		m_signalsLoading = false;
 	}
-}
-
-QString AppSignalSetProvider::errorMessage(const ObjectState& state)
-{
-	// Converts ObjectState.errCode to human readable message
-	//
-	switch(state.errCode)
-	{
-		case ERR_SIGNAL_IS_NOT_CHECKED_OUT:
-			return QString("Signal %1 is not checked out").arg(state.id);
-
-		case ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER:
-			return QString("Signal %1 is checked out by user %2").arg(state.id).arg(getUserName(state.userId));
-
-		case ERR_SIGNAL_DELETED:
-			return QString("Signal %1 was deleted already").arg(state.id);
-
-		case ERR_SIGNAL_NOT_FOUND:
-			return QString("Signal %1 not found").arg(state.id);
-
-		case ERR_SIGNAL_EXISTS:
-				return QString();				// error message is displayed by PGSql driver
-
-		default:
-			return QString("Unknown error code %1").arg(state.errCode);
-	}
-}
-
-bool AppSignalSetProvider::showError(const ObjectState& state)
-{
-	// Throws error signal with human readable message for single ObjectState
-	//
-	if (state.errCode != ERR_SIGNAL_OK)
-	{
-		QString message = errorMessage(state);
-
-		if (!message.isEmpty())
-		{
-			emit error(message);
-		}
-
-		return false;
-	}
-
-	return true;
-}
-
-bool AppSignalSetProvider::showErrors(const std::vector<ObjectState>& states)
-{
-	// Throws single error signal with human readable message for set of ObjectState
-	//
-	if (states.empty())
-	{
-		return true;
-	}
-
-	QString message;
-
-	for(const ObjectState& state : states)
-	{
-		if (state.errCode != ERR_SIGNAL_OK)
-		{
-			if (message.isEmpty() == false)
-			{
-				message.append(QStringLiteral("\n"));
-			}
-
-			message += errorMessage(state);
-		}
-	}
-
-	if (message.isEmpty() == false)
-	{
-		emit error(message);
-		return false;
-	}
-
-	return true;
 }
 
 bool AppSignalSetProvider::addSignals(E::SignalType signalType, std::vector<AppSignal>* newSignals, QWidget* parentWidget)
@@ -820,24 +765,35 @@ bool AppSignalSetProvider::checkinSignals(const std::vector<int>& signalIDs,
 
 	showErrors(states);
 
-	bool reloadAll = false;
+	std::vector<int> updatedIDs;
+	std::vector<int> removedIDs;
 
 	for(const ObjectState& state : states)
 	{
+		if (state.errCode != ERR_SIGNAL_OK)
+		{
+			continue;
+		}
+
 		if (state.deleted == true)
 		{
-			reloadAll = true;
-			break;
+			removedIDs.push_back(state.id);
+		}
+		else
+		{
+			updatedIDs.push_back(state.id);
 		}
 	}
 
-	if (reloadAll)
+	if (updatedIDs.empty() == false)
 	{
-		reloadAllSignals();
+		reloadSignals(updatedIDs);
 	}
-	else
+
+	if (removedIDs.empty() == false)
 	{
-		reloadSignals(signalIDs);
+		m_signalSet.removeSignals(removedIDs);
+		emit signalsCountChanged();
 	}
 
 	return result;
@@ -898,20 +854,6 @@ bool AppSignalSetProvider::undoSignal(int id)
 bool AppSignalSetProvider::undoSignal(const AppSignal& s)
 {
 	return undoSignal(s.ID());
-}
-
-void AppSignalSetProvider::deleteSignal(int signalID)
-{
-	Q_ASSERT(m_thread == QThread::currentThread());
-
-	ObjectState state;
-
-	m_db->deleteSignal(signalID, &state, nullptr);
-
-	if (state.errCode != ERR_SIGNAL_OK)
-	{
-		showError(state);
-	}
 }
 
 bool AppSignalSetProvider::updateSignalsSpecProps(const std::vector<const Hardware::DeviceAppSignal*>& deviceSignalsToUpdate,
@@ -1080,87 +1022,55 @@ bool AppSignalSetProvider::updateSignalsSpecProps(const std::vector<const Hardwa
 	return result;
 }
 
-bool AppSignalSetProvider::createNewSignals(const AppSignal& signalTemplate,
-											int channelsCount,
-											int signalsCount,
-											std::vector<int>* addedSignalIDs)
-{
-	TEST_PTR_RETURN_FALSE(addedSignalIDs);
-
-	std::vector<AppSignal> resultSignalVector;
-
-	resultSignalVector.reserve(signalsCount * channelsCount);
-
-	bool uppercase = projectProperty_uppercaseAppSignalID();
-
-	for (int s = 0; s < signalsCount; s++)
-	{
-		std::vector<AppSignal> newSignalsVector;
-
-		for (int ch = 0; ch < channelsCount; ch++)
-		{
-			AppSignal& newSignal = newSignalsVector.emplace_back(signalTemplate);
-
-			QString suffix;
-
-			if (signalsCount > 1)
-			{
-				suffix = QString("_SIG%1").arg(s, 3, 10, QChar('0'));
-			}
-
-			if (channelsCount > 1)
-			{
-				suffix += "_" + QString(QChar('A' + ch));
-			}
-
-			QString appSignalID = newSignal.appSignalID() + suffix;
-			QString customAppSignalID = newSignal.customAppSignalID() + suffix;
-
-			if (uppercase)
-			{
-				appSignalID = appSignalID.toUpper();
-				customAppSignalID = customAppSignalID.toUpper();
-			}
-
-			newSignal.setAppSignalID(appSignalID);
-			newSignal.setCustomAppSignalID(customAppSignalID);
-		}
-
-		if (m_db->addSignals(signalTemplate.signalType(), &newSignalsVector, m_parentWidget) == true)
-		{
-			for (const AppSignal& s : newSignalsVector)
-			{
-				resultSignalVector.emplace_back(s);
-			}
-		}
-		else
-		{
-			Q_ASSERT(false);
-			return false;
-		}
-
-		for(const AppSignal& newSignal : newSignalsVector)
-		{
-			m_signalSet.append(newSignal);
-			addedSignalIDs->push_back(newSignal.ID());
-		}
-	}
-
-	emit signalsCountChanged();
-
-	return true;
-}
 
 void AppSignalSetProvider::deleteSignals(const std::vector<int>& signalIDs)
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
 
+	std::vector<int> updatedIDs;
+	std::vector<int> removedIDs;
+
 	for (const int signalID : signalIDs)
 	{
-		deleteSignal(signalID);
+		ObjectState state;
+
+		m_db->deleteSignal(signalID, &state, nullptr);
+
+		if (state.errCode != ERR_SIGNAL_OK)
+		{
+			showError(state);
+			continue;
+		}
+
+		Q_ASSERT(state.deleted == true);
+
+		if (state.checkedOut == true)
+		{
+			// deletion of previously checked in signal
+			// signal is checked out and marked as deleted
+			// but NOT physically deleted
+			//
+			updatedIDs.push_back(signalID);
+		}
+		else
+		{
+			// deletion of just added (not yet checked in) signal
+			// signal is physically removed
+			//
+			removedIDs.push_back(signalID);
+		}
 	}
 
-	reloadAllSignals();
+	if (updatedIDs.empty() == false)
+	{
+		reloadSignals(updatedIDs);
+	}
+
+	if (removedIDs.empty() == false)
+	{
+		m_signalSet.removeSignals(removedIDs);
+		emit signalsCountChanged();
+	}
 }
 
 void AppSignalSetProvider::saveSignal(AppSignal& signal)
@@ -1302,4 +1212,150 @@ std::vector<int> AppSignalSetProvider::cloneSignals(const std::vector<int>& sign
 
 	return resultSignalIDs;
 }
+
+QString AppSignalSetProvider::errorMessage(const ObjectState& state)
+{
+	// Converts ObjectState.errCode to human readable message
+	//
+	switch(state.errCode)
+	{
+		case ERR_SIGNAL_IS_NOT_CHECKED_OUT:
+			return QString("Signal %1 is not checked out").arg(state.id);
+
+		case ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER:
+			return QString("Signal %1 is checked out by user %2").arg(state.id).arg(getUserName(state.userId));
+
+		case ERR_SIGNAL_DELETED:
+			return QString("Signal %1 was deleted already").arg(state.id);
+
+		case ERR_SIGNAL_NOT_FOUND:
+			return QString("Signal %1 not found").arg(state.id);
+
+		case ERR_SIGNAL_EXISTS:
+				return QString();				// error message is displayed by PGSql driver
+
+		default:
+			return QString("Unknown error code %1").arg(state.errCode);
+	}
+}
+
+bool AppSignalSetProvider::showError(const ObjectState& state)
+{
+	// Throws error signal with human readable message for single ObjectState
+	//
+	if (state.errCode != ERR_SIGNAL_OK)
+	{
+		QString message = errorMessage(state);
+
+		if (!message.isEmpty())
+		{
+			emit error(message);
+		}
+
+		return false;
+	}
+
+	return true;
+}
+
+bool AppSignalSetProvider::showErrors(const std::vector<ObjectState>& states)
+{
+	// Throws single error signal with human readable message for set of ObjectState
+	//
+	if (states.empty())
+	{
+		return true;
+	}
+
+	QString message;
+
+	for(const ObjectState& state : states)
+	{
+		if (state.errCode != ERR_SIGNAL_OK)
+		{
+			if (message.isEmpty() == false)
+			{
+				message.append(QStringLiteral("\n"));
+			}
+
+			message += errorMessage(state);
+		}
+	}
+
+	if (message.isEmpty() == false)
+	{
+		emit error(message);
+		return false;
+	}
+
+	return true;
+}
+
+bool AppSignalSetProvider::createNewSignals(const AppSignal& signalTemplate,
+											int channelsCount,
+											int signalsCount,
+											std::vector<int>* addedSignalIDs)
+{
+	TEST_PTR_RETURN_FALSE(addedSignalIDs);
+
+	bool uppercase = projectProperty_uppercaseAppSignalID();
+
+	std::vector<int> newIndexes;
+	std::vector<AppSignal> newSignalsVector;
+
+	for (int s = 0; s < signalsCount; s++)
+	{
+		for (int ch = 0; ch < channelsCount; ch++)
+		{
+			AppSignal& newSignal = newSignalsVector.emplace_back(signalTemplate);
+
+			QString suffix;
+
+			if (signalsCount > 1)
+			{
+				suffix = QString("_SIG%1").arg(s, 3, 10, QChar('0'));
+			}
+
+			if (channelsCount > 1)
+			{
+				suffix += "_" + QString(QChar('A' + ch));
+			}
+
+			QString appSignalID = newSignal.appSignalID() + suffix;
+			QString customAppSignalID = newSignal.customAppSignalID() + suffix;
+
+			if (uppercase)
+			{
+				appSignalID = appSignalID.toUpper();
+				customAppSignalID = customAppSignalID.toUpper();
+			}
+
+			newSignal.setAppSignalID(appSignalID);
+			newSignal.setCustomAppSignalID(customAppSignalID);
+		}
+	}
+
+	if (m_db->addSignals(signalTemplate.signalType(), &newSignalsVector, m_parentWidget) == true)
+	{
+		for (const AppSignal& newSignal : newSignalsVector)
+		{
+			auto [s, index] = m_signalSet.append(newSignal);
+			addedSignalIDs->push_back(newSignal.ID());
+			newIndexes.push_back(index);
+		}
+	}
+	else
+	{
+		Q_ASSERT(false);
+		return false;
+	}
+
+	emit detectNewProperties(newIndexes);
+	emit signalsCountChanged();
+
+	return true;
+}
+
+
+
 
