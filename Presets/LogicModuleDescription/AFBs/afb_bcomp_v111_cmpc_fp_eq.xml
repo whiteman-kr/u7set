@@ -1,4 +1,4 @@
-<AFB id="#cmpc_fp_eq_v1" Caption="cmpc_fp_eq" Version="1.0008">
+<AFB id="#cmpc_fp_eq_v1" Caption="cmpc_fp_eq" Version="1.9">
 	<Properties>
 		<Description>Comparator Block, equal single-precision floating-point comparison with constant value</Description>
 		<Category>Compare</Category>
@@ -14,7 +14,7 @@
 		<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="10" Size="1"/>
 	</Outputs>
 	<Params>
-		<Param OpName="i_sp_s" Caption="SetPoint" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
+		<Param OpName="i_sp_s" Caption="SetPoint" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
 			<Value>0</Value>
 			<Default>0</Default>
 			<LowLimit>-3.40282e+38</LowLimit>
@@ -23,7 +23,7 @@
 				<Changed/>
 			</Script>
 		</Param>
-		<Param OpName="i_sp_r" Caption="ValueR" Visible="false" OpIndex="3" Size="32" Instantiator="false" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
+		<Param OpName="i_sp_r" Caption="ValueR" Visible="false" OpIndex="3" Size="32" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
 			<Value>0</Value>
 			<Default>0</Default>
 			<LowLimit>-3.40282e+38</LowLimit>

@@ -1,4 +1,4 @@
-<AFB id="#cmpc_si_ls_v1" Caption="cmpc_si_ls" Version="1.0012">
+<AFB id="#cmpc_si_ls_v1" Caption="cmpc_si_ls" Version="1.13">
 	<Properties>
 		<Description>Comparator Block, less than 32-bit signed integer comparison with constant value</Description>
 		<Category>Compare</Category>
@@ -15,7 +15,7 @@
 		<Pin OpName="o_sync_out" Caption="s_out" Type="Discrete" ByteOrder="BigEndian" OpIndex="9" Size="1"/>
 	</Outputs>
 	<Params>
-		<Param OpName="i_sp_s" Caption="SetPoint" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
+		<Param OpName="i_sp_s" Caption="SetPoint" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
 			<Value>0</Value>
 			<Default>0</Default>
 			<LowLimit>-2147483648</LowLimit>
@@ -24,7 +24,7 @@
 				<Changed/>
 			</Script>
 		</Param>
-		<Param OpName="i_sp_r" Caption="ValueR" Visible="false" OpIndex="3" Size="32" Instantiator="false" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
+		<Param OpName="i_sp_r" Caption="ValueR" Visible="false" OpIndex="3" Size="32" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
 			<Value>0</Value>
 			<Default>0</Default>
 			<LowLimit>-2147483648</LowLimit>

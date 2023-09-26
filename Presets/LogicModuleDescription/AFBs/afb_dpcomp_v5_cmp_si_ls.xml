@@ -1,4 +1,4 @@
-<AFB id="#cmp_si_ls_v1" Caption="cmp_si_ls" Version="1.0007">
+<AFB id="#cmp_si_ls_v1" Caption="cmp_si_ls" Version="1.8">
 	<Properties>
 		<Description>Comparator Block, less than 32-bit signed integer comparison</Description>
 		<Category>Compare</Category>
@@ -14,7 +14,7 @@
 		<Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="9" Size="1"/>
 	</Outputs>
 	<Params>
-		<Param OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
+		<Param OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
 			<Value>0</Value>
 			<Default>0</Default>
 			<LowLimit>0</LowLimit>
