@@ -9,6 +9,13 @@
 //
 var SkipOnBuild = false;
 
+// To give a custom caption to the the whole script function, declare a variable that has the same name as 
+// the script file name without path and extention and add 'caption' prefix.
+// Custom script caption is displayed in TestSuite user interface and in reports.
+// Example: 'ScriptSample.js' file should have 'captionScriptSample' caption variable name.
+//
+//var captionScriptSample = "Script Sample";
+
 // initTestCase() - will be called before the first test function is executed.
 //
 function initTestCase(ctrl)

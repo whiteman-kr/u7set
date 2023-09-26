@@ -7,6 +7,19 @@
 #include "../TestSuiteLib/TestScriptsStorage.h"
 #include "TestSuiteLog.h"
 
+struct TestTreeFunction
+{
+	QString caption;
+	QString function;
+};
+
+struct TestTreeScript
+{
+	QString caption;
+	QString fileName;
+	std::vector<TestTreeFunction> functions;
+};
+
 class TestTreeWidget : public QTreeWidget
 {
 	Q_OBJECT
@@ -19,7 +32,6 @@ private:
 
 signals:
 	void testSelectionChanged();
-
 };
 
 
@@ -41,8 +53,7 @@ public:
 	};
 
 public:
-	void fillTestsTree(const TestSuite::TestScriptsStorage& tests);
-	void clearTestsList();
+	void setTests(const TestSuite::TestScriptsStorage& tests);
 
 	void clearTestsResults();
 
@@ -57,14 +68,25 @@ signals:
 	void testSelectionChanged();
 	void testItemClicked(const QString& scriptName, const QString& functionName);
 
+private:
+	void fillTestsTree();
+
 private slots:
 	void testItemDoubleClicked(QTreeWidgetItem *item, int column);
 	void testItemChanged(QTreeWidgetItem *item, int column);
 	void contextMenuRequested();
+	void onFilterApply();
 
 private:
 	QLabel* m_testsPathLabel = nullptr;
 	TestTreeWidget* m_treeWidget = nullptr;
+	QLineEdit* m_filterEdit = nullptr;
+	QPushButton* m_filterButton = nullptr;
+
+	std::vector<TestTreeScript> m_scriptItems;
+
+	bool m_selectionEnabled = false;
+	
 	TestSuiteLogFile& m_appLog;
 };
 

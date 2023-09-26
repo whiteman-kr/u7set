@@ -160,7 +160,7 @@ namespace TestSuite
 
 			// Find test caption
 			//
-			QString testCaption = scriptInfo.caption(testFunc);
+			QString testCaption = scriptInfo.functionCaption(testFunc);
 
 			// Mark test function start time
 			//
@@ -182,13 +182,13 @@ namespace TestSuite
 				testOk = runScriptFunction(testFunc);
 				if (testOk == true)
 				{
-					m_scriptTestLog.writeMessage(tr("%1: PASS").arg(testCaption));
+					m_scriptTestLog.writeMessage(tr("%1: %2").arg(testCaption).arg(ConstStrings::TEST_PASSED()));
 				}
 				else
 				{
 					failed++;
 					//totalFailed ++;
-					m_scriptTestLog.writeError(tr("%1: FAIL").arg(testCaption));
+					m_scriptTestLog.writeError(tr("%1: %2").arg(testCaption).arg(ConstStrings::TEST_FAILED()));
 				}
 
 				// cleanup() - called after every test function.
@@ -215,7 +215,7 @@ namespace TestSuite
 
 			reportStrings.push_back(tr("\u2800%1;%2;%3")
 										.arg(testCaption)
-										.arg(testFuncResult ? tr("PASSED") : tr("FAILED"))
+										.arg(testFuncResult ? ConstStrings::TEST_PASSED() : ConstStrings::TEST_FAILED())
 										.arg(timeMsToStr(elapsedMsTestFunc - startMsTestFunc)));
 			
 			emit testFinished(script.fileName(), testFunc, testFuncResult);
@@ -256,8 +256,8 @@ namespace TestSuite
 		//
 		reportStrings.insert(reportStrings.begin(), 
 			tr("%1;%2;%3")
-								 .arg(script.shortFileName())
-								 .arg(failed == 0 ? tr("PASSED") : tr("%1 FAILED").arg(failed))
+								 .arg(scriptInfo.scriptCaption)
+								 .arg(failed == 0 ? ConstStrings::TEST_PASSED() : tr("%1 %2").arg(ConstStrings::TEST_FAILED()).arg(failed))
 								 .arg(timeMsToStr(elapsedMsTotal)));
 
 		for (const QString& s : reportStrings)
@@ -375,6 +375,20 @@ namespace TestSuite
 			if (it != captionValues.end())
 			{
 				scriptInfo.functionsCaptions[testFunc] = it->second;
+			}
+		}
+
+		// Parse script filename caption
+		//
+		scriptInfo.scriptCaption = script.fileName();
+		{
+			QFileInfo fi(scriptInfo.scriptCaption);
+			QString scriptCaption = fi.baseName(); // Get the filename without path and extension
+
+			auto it = captionValues.find("caption" + scriptCaption);
+			if (it != captionValues.end())
+			{
+				scriptInfo.scriptCaption = it->second;
 			}
 		}
 
