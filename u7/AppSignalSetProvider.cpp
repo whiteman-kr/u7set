@@ -263,20 +263,6 @@ const std::vector<AppSignal*>& AppSignalSetProvider::signalsVector() const
 	return m_signalSet.signalsVector();
 }
 
-bool AppSignalSetProvider::getChannelSignalsID(const AppSignal& signal, std::vector<int>* channelSignalIDs) const
-{
-	Q_ASSERT(m_thread == QThread::currentThread());
-
-	return m_signalSet.getChannelSignalsID(signal, channelSignalIDs);
-}
-
-bool AppSignalSetProvider::getChannelSignalsID(int signalID, int groupID, std::vector<int>* channelSignalIDs) const
-{
-	Q_ASSERT(m_thread == QThread::currentThread());
-
-	return m_signalSet.getChannelSignalsID(signalID, groupID, channelSignalIDs);
-}
-
 int AppSignalSetProvider::signalIndex(int signalID) const
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
@@ -327,71 +313,35 @@ AppSignal* AppSignalSetProvider::getLoadedSignalByIndex(int index, bool updateVi
 	return getLoadedSignal(s, updateViews);
 }
 
-AppSignalParam AppSignalSetProvider::getAppSignalParam(int index)
+void AppSignalSetProvider::getSameChannelSignalsIndexes(int signalIndex, std::vector<int>* sameChannelIndexes)
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
 
-	AppSignal signal(*getLoadedSignalByIndex(index, false));
+	TEST_PTR_RETURN(sameChannelIndexes);
 
-	signal.cacheSpecPropValues();
+	sameChannelIndexes->clear();
 
-	AppSignalParam param;
+	const AppSignal* s = m_signalSet.at(signalIndex);
 
-	param.load(signal);
+	TEST_PTR_RETURN(s);
 
-	return param;
-}
+	std::vector<int> sameChannelIDs;
 
-AppSignalParam AppSignalSetProvider::getAppSignalParam(const QString& appSignalId)
-{
-	Q_ASSERT(m_thread == QThread::currentThread());
+	m_signalSet.getChannelSignalsID(*s, &sameChannelIDs);
 
-	AppSignalParam param;
-
-	AppSignal* signal = getSignal(appSignalId);
-	if (signal == nullptr)
+	for(int id : sameChannelIDs)
 	{
-		assert(false);
-		return param;
-	}
+		int index = m_signalSet.signalIndex(id);
 
-	if (signal->isLoaded())
-	{
-		signal->cacheSpecPropValues();
-		param.load(*signal);
-		return param;
-	}
-
-	return getAppSignalParam(m_signalSet.signalIndex(signal->ID()));
-}
-
-QVector<int> AppSignalSetProvider::getSameChannelSignals(int index)
-{
-	Q_ASSERT(m_thread == QThread::currentThread());
-
-	QVector<int> sameChannelSignalRows;
-
-	const AppSignal* s = m_signalSet.at(index);
-
-	TEST_PTR_RETURN_VALUE(s, sameChannelSignalRows);
-
-	if (s->signalGroupID() != 0)
-	{
-		std::vector<int> sameChannelSignalIDs;
-
-		m_signalSet.getChannelSignalsID(*s, &sameChannelSignalIDs);
-
-		for(int id : sameChannelSignalIDs)
+		if (index != BAD_INDEX)
 		{
-			sameChannelSignalRows.append(m_signalSet.signalIndex(id));
+			sameChannelIndexes->push_back(index);
+		}
+		else
+		{
+			Q_ASSERT(false);
 		}
 	}
-	else
-	{
-		sameChannelSignalRows.append(index);
-	}
-
-	return sameChannelSignalRows;
 }
 
 bool AppSignalSetProvider::isEditableSignal(int index) const
@@ -437,6 +387,101 @@ bool AppSignalSetProvider::isCheckinableSignalForMe(const AppSignal* signal) con
 
 	return false;
 }
+
+bool AppSignalSetProvider::createNewSignals(const AppSignal& signalTemplate,
+											int channelsCount,
+											int signalsCount,
+											std::vector<int>* addedSignalIDs)
+{
+	TEST_PTR_RETURN_FALSE(addedSignalIDs);
+
+	bool uppercase = projectProperty_uppercaseAppSignalID();
+
+	std::vector<int> newIndexes;
+	std::vector<AppSignal> newSignalsVector;
+
+	for (int s = 0; s < signalsCount; s++)
+	{
+		for (int ch = 0; ch < channelsCount; ch++)
+		{
+			AppSignal& newSignal = newSignalsVector.emplace_back(signalTemplate);
+
+			QString suffix;
+
+			if (signalsCount > 1)
+			{
+				suffix = QString("_SIG%1").arg(s, 3, 10, QChar('0'));
+			}
+
+			if (channelsCount > 1)
+			{
+				suffix += "_" + QString(QChar('A' + ch));
+			}
+
+			QString appSignalID = newSignal.appSignalID() + suffix;
+			QString customAppSignalID = newSignal.customAppSignalID() + suffix;
+
+			if (uppercase)
+			{
+				appSignalID = appSignalID.toUpper();
+				customAppSignalID = customAppSignalID.toUpper();
+			}
+
+			newSignal.setAppSignalID(appSignalID);
+			newSignal.setCustomAppSignalID(customAppSignalID);
+		}
+	}
+
+	if (m_db->addSignals(signalTemplate.signalType(), &newSignalsVector, m_parentWidget) == true)
+	{
+		for (const AppSignal& newSignal : newSignalsVector)
+		{
+			auto [s, index] = m_signalSet.append(newSignal);
+			addedSignalIDs->push_back(newSignal.ID());
+			newIndexes.push_back(index);
+		}
+	}
+	else
+	{
+		Q_ASSERT(false);
+		return false;
+	}
+
+	emit detectNewProperties(newIndexes);
+	emit signalsCountChanged();
+
+	return true;
+}
+
+bool AppSignalSetProvider::addSignals(E::SignalType signalType, std::vector<AppSignal>* newSignals, QWidget* parentWidget)
+{
+	TEST_PTR_RETURN_FALSE(newSignals);
+
+	bool result = m_db->addSignals(signalType, newSignals, parentWidget);
+
+	if (result == true)
+	{
+		appendSignalsAndUpdateViews(*newSignals);
+	}
+
+	return result;
+}
+
+bool AppSignalSetProvider::autoAddSignals(const std::vector<const Hardware::DeviceAppSignal*>& deviceSignals,
+					std::vector<AppSignal>* newSignals, QWidget* parentWidget)
+{
+	TEST_PTR_RETURN_FALSE(newSignals);
+
+	bool result = m_db->autoAddSignals(deviceSignals, newSignals, parentWidget);
+
+	if (result == true)
+	{
+		appendSignalsAndUpdateViews(*newSignals);
+	}
+
+	return result;
+}
+
 
 void AppSignalSetProvider::loadUsers()
 {
@@ -636,35 +681,6 @@ void AppSignalSetProvider::onSignalsLoadTimer()
 	}
 }
 
-bool AppSignalSetProvider::addSignals(E::SignalType signalType, std::vector<AppSignal>* newSignals, QWidget* parentWidget)
-{
-	TEST_PTR_RETURN_FALSE(newSignals);
-
-	bool result = m_db->addSignals(signalType, newSignals, parentWidget);
-
-	if (result == true)
-	{
-		appendSignalsAndUpdateViews(*newSignals);
-	}
-
-	return result;
-}
-
-bool AppSignalSetProvider::autoAddSignals(const std::vector<const Hardware::DeviceAppSignal*>& deviceSignals,
-					std::vector<AppSignal>* newSignals, QWidget* parentWidget)
-{
-	TEST_PTR_RETURN_FALSE(newSignals);
-
-	bool result = m_db->autoAddSignals(deviceSignals, newSignals, parentWidget);
-
-	if (result == true)
-	{
-		appendSignalsAndUpdateViews(*newSignals);
-	}
-
-	return result;
-}
-
 bool AppSignalSetProvider::setSignalWorkcopy(AppSignal* signal, ObjectState* objectState, QWidget* parentWidget)
 {
 	bool result = m_db->setSignalWorkcopy(signal, objectState, parentWidget);
@@ -711,7 +727,7 @@ bool AppSignalSetProvider::checkoutSignal(const AppSignal* s, QString* message)
 
 	std::vector<int> signalsIDs;
 
-	getChannelSignalsID(*s, &signalsIDs);
+	m_signalSet.getChannelSignalsID(s->ID(), &signalsIDs);
 
 	std::vector<ObjectState> objectStates;
 
@@ -1027,10 +1043,23 @@ void AppSignalSetProvider::deleteSignals(const std::vector<int>& signalIDs)
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
 
+	std::set<int> signalsToDeleteIDs;
+
+	std::vector<int> channelSignalsIDs;
+
+	for(int signalID : signalIDs)
+	{
+		channelSignalsIDs.clear();
+		m_signalSet.getChannelSignalsID(signalID, &channelSignalsIDs);
+
+		std::copy(channelSignalsIDs.begin(), channelSignalsIDs.end(),
+				  std::inserter(signalsToDeleteIDs, signalsToDeleteIDs.end()));
+	}
+
 	std::vector<int> updatedIDs;
 	std::vector<int> removedIDs;
 
-	for (const int signalID : signalIDs)
+	for (const int signalID : signalsToDeleteIDs)
 	{
 		ObjectState state;
 
@@ -1073,7 +1102,7 @@ void AppSignalSetProvider::deleteSignals(const std::vector<int>& signalIDs)
 	}
 }
 
-void AppSignalSetProvider::saveSignal(AppSignal& signal)
+/*void AppSignalSetProvider::saveSignal(AppSignal& signal)
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
 
@@ -1111,14 +1140,14 @@ void AppSignalSetProvider::saveSignals(const std::vector<AppSignal*>& signalVect
 	}
 
 	showErrors(states);
-}
+}*/
 
 std::vector<int> AppSignalSetProvider::cloneSignals(const std::vector<int>& signalIDsToClone)
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
 
-	std::vector<int> resultSignalIDs;
-
+	std::vector<int> newSignalIDs;
+	std::vector<int> newSignalIndexes;
 	std::set<int> clonedSignalIDs;
 
 	for (const int signalID : signalIDsToClone)
@@ -1204,14 +1233,21 @@ std::vector<int> AppSignalSetProvider::cloneSignals(const std::vector<int>& sign
 
 		for (const AppSignal& s : signalsToCreate)
 		{
-			resultSignalIDs.push_back(s.ID());
+			auto [s, index] = m_signalSet.append(s);
+
+			TEST_PTR_CONTINUE(s);
+
+			newSignalIDs.push_back(s->ID());
+			newSignalIndexes.push_back(index);
 		}
 	}
 
-	reloadAllSignals();
+	emit detectNewProperties(newSignalIndexes);
+	emit signalsCountChanged();
 
-	return resultSignalIDs;
+	return newSignalIDs;
 }
+
 
 QString AppSignalSetProvider::errorMessage(const ObjectState& state)
 {
@@ -1290,72 +1326,6 @@ bool AppSignalSetProvider::showErrors(const std::vector<ObjectState>& states)
 
 	return true;
 }
-
-bool AppSignalSetProvider::createNewSignals(const AppSignal& signalTemplate,
-											int channelsCount,
-											int signalsCount,
-											std::vector<int>* addedSignalIDs)
-{
-	TEST_PTR_RETURN_FALSE(addedSignalIDs);
-
-	bool uppercase = projectProperty_uppercaseAppSignalID();
-
-	std::vector<int> newIndexes;
-	std::vector<AppSignal> newSignalsVector;
-
-	for (int s = 0; s < signalsCount; s++)
-	{
-		for (int ch = 0; ch < channelsCount; ch++)
-		{
-			AppSignal& newSignal = newSignalsVector.emplace_back(signalTemplate);
-
-			QString suffix;
-
-			if (signalsCount > 1)
-			{
-				suffix = QString("_SIG%1").arg(s, 3, 10, QChar('0'));
-			}
-
-			if (channelsCount > 1)
-			{
-				suffix += "_" + QString(QChar('A' + ch));
-			}
-
-			QString appSignalID = newSignal.appSignalID() + suffix;
-			QString customAppSignalID = newSignal.customAppSignalID() + suffix;
-
-			if (uppercase)
-			{
-				appSignalID = appSignalID.toUpper();
-				customAppSignalID = customAppSignalID.toUpper();
-			}
-
-			newSignal.setAppSignalID(appSignalID);
-			newSignal.setCustomAppSignalID(customAppSignalID);
-		}
-	}
-
-	if (m_db->addSignals(signalTemplate.signalType(), &newSignalsVector, m_parentWidget) == true)
-	{
-		for (const AppSignal& newSignal : newSignalsVector)
-		{
-			auto [s, index] = m_signalSet.append(newSignal);
-			addedSignalIDs->push_back(newSignal.ID());
-			newIndexes.push_back(index);
-		}
-	}
-	else
-	{
-		Q_ASSERT(false);
-		return false;
-	}
-
-	emit detectNewProperties(newIndexes);
-	emit signalsCountChanged();
-
-	return true;
-}
-
 
 
 

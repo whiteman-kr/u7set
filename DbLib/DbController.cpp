@@ -96,7 +96,7 @@ DbController::DbController() :
 	connect(this, &DbController::signal_getLatestSignalsByAppSignalIDs, m_worker, &DbWorker::slot_getLatestSignalsByAppSignalIDs);
 	connect(this, &DbController::signal_getLatestSignalsWithUserID, m_worker, &DbWorker::slot_getLatestSignalsWithUserID);
 	connect(this, &DbController::signal_getCheckedOutSignalsIDs, m_worker, &DbWorker::slot_getCheckedOutSignalsIDs);
-	connect(this, &DbController::signal_addSignals, m_worker, &DbWorker::slot_addSignal);
+	connect(this, &DbController::signal_addSignals, m_worker, &DbWorker::slot_addSignals);
 	connect(this, &DbController::signal_checkoutSignals, m_worker, &DbWorker::slot_checkoutSignals);
 	connect(this, &DbController::signal_setSignalWorkcopy, m_worker, &DbWorker::slot_setSignalWorkcopy);
 	connect(this, &DbController::signal_setSignalsWorkcopies, m_worker, &DbWorker::slot_setSignalsWorkcopies);

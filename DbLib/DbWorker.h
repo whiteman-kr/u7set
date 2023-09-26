@@ -149,9 +149,9 @@ public slots:
 	void slot_getLatestSignalsByAppSignalIDs(const QStringList& appSignalIds, std::vector<AppSignal>* signalArray);
 	void slot_getLatestSignalsWithUserID(std::vector<AppSignal>* out);
 	void slot_getCheckedOutSignalsIDs(std::vector<int>* signalsIDs);
-	void slot_addSignal(E::SignalType signalType, std::vector<AppSignal>* newSignal);
+	void slot_addSignals(E::SignalType signalType, std::vector<AppSignal>* newSignal);
 
-	bool addSignal(E::SignalType signalType, std::vector<AppSignal>* newSignal);
+	bool addSignals(E::SignalType signalType, std::vector<AppSignal>* newSignal);
 	bool setSignalWorkcopy(QSqlDatabase& db, const AppSignal& s, ObjectState& objectState, QString& errMsg);
 
 	void slot_checkoutSignals(const std::vector<int>& signalIDs, std::vector<ObjectState>* objectStates);

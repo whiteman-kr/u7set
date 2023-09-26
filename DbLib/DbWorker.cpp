@@ -5168,14 +5168,14 @@ QString DbWorker::getSignalDataStr(const AppSignal& s)
 	return str;
 }
 
-void DbWorker::slot_addSignal(E::SignalType signalType, std::vector<AppSignal>* newSignal)
+void DbWorker::slot_addSignals(E::SignalType signalType, std::vector<AppSignal>* newSignal)
 {
 	AUTO_COMPLETE
 
-	addSignal(signalType, newSignal);
+	addSignals(signalType, newSignal);
 }
 
-bool DbWorker::addSignal(E::SignalType signalType, std::vector<AppSignal>* newSignal)
+bool DbWorker::addSignals(E::SignalType signalType, std::vector<AppSignal>* newSignal)
 {
 	TEST_PTR_RETURN_FALSE(newSignal);
 
@@ -5770,7 +5770,7 @@ void DbWorker::slot_autoAddSignals(const std::vector<const Hardware::DeviceAppSi
 					return;
 				}
 
-				bool result = addSignal(newSignal.signalType(), &newSignals);
+				bool result = addSignals(newSignal.signalType(), &newSignals);
 
 				if (result == true)
 				{

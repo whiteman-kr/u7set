@@ -50,34 +50,20 @@ public:
 
 	const std::vector<AppSignal*>& signalsVector() const;
 
-	bool getChannelSignalsID(const AppSignal& signal, std::vector<int>* channelSignalIDs) const;
-	bool getChannelSignalsID(int signalID, int groupID, std::vector<int>* channelSignalIDs) const;
-
 	int signalIndex(int signalID) const;
 	int signalID(int index) const;
 
-	QVector<int> getSameChannelSignals(int index);
+	void getSameChannelSignalsIndexes(int signalIndex, std::vector<int>* sameChannelIndexes);
 
 	AppSignal* getLoadedSignal(AppSignal* s, bool updateViews);
 	AppSignal* getLoadedSignalByID(int signalID, bool updateViews);
 	AppSignal* getLoadedSignalByIndex(int index, bool updateViews);
-
-	AppSignalParam getAppSignalParam(int index);
-	AppSignalParam getAppSignalParam(const QString& appSignalId);
 
 	bool isEditableSignal(int index) const;
 	bool isEditableSignal(const AppSignal* signal) const;
 
 	bool isCheckinableSignalForMe(int index) const;
 	bool isCheckinableSignalForMe(const AppSignal* signal) const;
-
-	QString errorMessage(const ObjectState& state);	// Converts ObjectState to human readable text
-
-	// if no errors returns TRUE
-	// returns FALSE if errors presents
-	//
-	bool showError(const ObjectState& state);
-	bool showErrors(const std::vector<ObjectState>& states);
 
 	// Signal set modifications DbController calls
 	//
@@ -107,8 +93,8 @@ public:
 
 	void deleteSignals(const std::vector<int>& signalIDs);
 
-	void saveSignal(AppSignal& signal);
-	void saveSignals(const std::vector<AppSignal*>& signalVector);
+//	void saveSignal(AppSignal& signal);
+//	void saveSignals(const std::vector<AppSignal*>& signalVector);
 	std::vector<int> cloneSignals(const std::vector<int>& signalIDsToClone);
 
 
@@ -142,6 +128,16 @@ private:
 	void appendSignalsAndUpdateViews(const std::vector<AppSignal>& newSignals);
 
 	void onSignalsLoadTimer();
+
+	//
+
+	QString errorMessage(const ObjectState& state);	// Converts ObjectState to human readable text
+
+	// if no errors returns TRUE
+	// returns FALSE if errors presents
+	//
+	bool showError(const ObjectState& state);
+	bool showErrors(const std::vector<ObjectState>& states);
 
 private:
 	static AppSignalSetProvider* m_instance;

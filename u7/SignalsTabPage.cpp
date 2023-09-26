@@ -1298,17 +1298,17 @@ void SignalsTabPage::cloneSignal()
 		QMessageBox::warning(this, tr("Warning"), tr("No one signal was selected!"));
 	}
 
-	std::vector<int> clonedSignalIDs;
+	std::vector<int> signalsToCloneIDs;
 
 	for (const QModelIndex selIndex : selection)
 	{
 		int row = getMappedSourceRow(selIndex);
 		int id = m_signalSetProvider->signalID(row);
 
-		clonedSignalIDs.push_back(id);
+		signalsToCloneIDs.push_back(id);
 	}
 
-	m_selectedRowsSignalID = m_signalSetProvider->cloneSignals(clonedSignalIDs);
+	m_selectedRowsSignalID = m_signalSetProvider->cloneSignals(signalsToCloneIDs);
 
 	if (m_selectedRowsSignalID.empty() == false)
 	{
@@ -1317,7 +1317,7 @@ void SignalsTabPage::cloneSignal()
 
 	m_signalsView->clearSelection();
 
-	restoreSelections(clonedSignalIDs);
+	restoreSelections(signalsToCloneIDs);
 }
 
 void SignalsTabPage::deleteSignal()
@@ -1329,20 +1329,16 @@ void SignalsTabPage::deleteSignal()
 		QMessageBox::warning(this, tr("Warning"), tr("No one signal was selected!"));
 	}
 
-	std::vector<int> deletedSignalIDs;
+	std::vector<int> signalsToDeleteIDs;
 
 	for (const QModelIndex& selIndex : selection)
 	{
 		int row = getMappedSourceRow(selIndex);
 
-		std::vector<int> channelSignalsIDs;
-
-		m_signalSetProvider->getChannelSignalsID(*m_signalSetProvider->getLoadedSignalByIndex(row, false), &channelSignalsIDs);
-
-		deletedSignalIDs.insert(deletedSignalIDs.end(), channelSignalsIDs.begin(), channelSignalsIDs.end());
+		signalsToDeleteIDs.push_back(m_signalSetProvider->signalID(row));
 	}
 
-	m_signalSetProvider->deleteSignals(deletedSignalIDs);
+	m_signalSetProvider->deleteSignals(signalsToDeleteIDs);
 }
 
 void SignalsTabPage::findAndReplaceSignal()
@@ -1601,12 +1597,12 @@ void SignalsTabPage::restoreSelections(const std::vector<int>& selectedSignalIDs
 
 	for(int selectedSignalID : selectedSignalIDs)
 	{
-		if (selectedSignalID == -1)
+		int signalIndex = m_signalSetProvider->signalIndex(selectedSignalID);
+
+		if (signalIndex == -1)
 		{
 			continue;
 		}
-
-		int signalIndex = m_signalSetProvider->signalIndex(selectedSignalID);
 
 		QModelIndex currentSourceIndex = m_signalsModel->index(signalIndex, m_focusedCellColumn);
 		QModelIndex currentProxyIndex = m_signalsProxyModel->mapFromSource(currentSourceIndex);
@@ -2108,15 +2104,23 @@ void CheckedoutSignalsModel::setAllCheckStates(bool state)
 
 void CheckedoutSignalsModel::setCheckState(int row, Qt::CheckState state)
 {
-	QVector<int> sourceRows = AppSignalSetProvider::getInstance()->getSameChannelSignals(mapToSource(index(row, 0)).row());
+	std::vector<int> sourceRows;
+
+	int signalIndex = mapToSource(index(row, 0)).row();
+
+	AppSignalSetProvider::getInstance()->getSameChannelSignalsIndexes(signalIndex, &sourceRows);
+
 	foreach (const int sourceRow, sourceRows)
 	{
 		QModelIndex changedIndex = mapFromSource(m_sourceModel->index(sourceRow, 0));
+
 		if (!changedIndex.isValid())
 		{
 			continue;
 		}
+
 		states[changedIndex.row()] = state;
+
 		emit dataChanged(changedIndex, changedIndex, QVector<int>() << Qt::CheckStateRole);
 	}
 }
