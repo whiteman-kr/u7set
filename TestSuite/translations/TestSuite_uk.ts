@@ -209,7 +209,7 @@ Data will not be available at the time of reconnection.</source>
     </message>
     <message>
         <location filename="../TestListWidget.cpp" line="120"/>
-        <location filename="../TestListWidget.cpp" line="257"/>
+        <location filename="../TestListWidget.cpp" line="266"/>
         <source>Test Scripts:</source>
         <translation>Сценарії тестування:</translation>
     </message>
@@ -224,19 +224,17 @@ Data will not be available at the time of reconnection.</source>
         <translation>Результат</translation>
     </message>
     <message>
-        <location filename="../TestListWidget.cpp" line="253"/>
+        <location filename="../TestListWidget.cpp" line="262"/>
         <source>Test Scripts: &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;</source>
         <translation>Сценарії тестування: &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="../TestListWidget.cpp" line="371"/>
         <source>PASSED</source>
-        <translation>ПРОЙШОВ</translation>
+        <translation type="vanished">ПРОЙШОВ</translation>
     </message>
     <message>
-        <location filename="../TestListWidget.cpp" line="371"/>
         <source>FAILED</source>
-        <translation>НЕ ПРОЙШОВ</translation>
+        <translation type="vanished">НЕ ПРОЙШОВ</translation>
     </message>
     <message>
         <source>PASS</source>
@@ -247,12 +245,12 @@ Data will not be available at the time of reconnection.</source>
         <translation type="vanished">ПОМИЛКА</translation>
     </message>
     <message>
-        <location filename="../TestListWidget.cpp" line="470"/>
+        <location filename="../TestListWidget.cpp" line="479"/>
         <source>View script &apos;%1&apos;</source>
         <translation>Перегляд сценарію &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../TestListWidget.cpp" line="474"/>
+        <location filename="../TestListWidget.cpp" line="483"/>
         <source>View function &apos;%1&apos;</source>
         <translation>Перегляд функції &apos;%1&apos;</translation>
     </message>
