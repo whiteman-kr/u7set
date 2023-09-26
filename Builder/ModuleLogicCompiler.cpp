@@ -10320,7 +10320,7 @@ namespace Builder
 
 		*result = true;
 
-		std::map<const UalSignal*, Address16> inSignals;			// ualSignal => readAddress
+		std::vector<std::pair<const UalSignal*, Address16>> inSignals;			// pair<ualSignal, readAddress>
 
 		const std::vector<LogicPin>& inputs = ualAfb->inputs();
 
@@ -10364,7 +10364,7 @@ namespace Builder
 					return false;
 				}
 
-				inSignals.insert({ inSignal, readAddr });
+				inSignals.emplace_back(inSignal, readAddr);
 				continue;
 			}
 
@@ -10439,11 +10439,8 @@ namespace Builder
 
 		*code << CodeItem().resetAcc();
 
-		for(auto const& p : inSignals)
+		for(auto const& [inSignal, readAddr] : inSignals)
 		{
-			const UalSignal* inSignal = p.first;
-			Address16 readAddr = p.second;
-
 			*code << CodeItem().movBitAccAddr(readAddr, QString("ACC <= %1").arg(inSignal->refSignalIDsJoined()));
 		}
 
@@ -10461,7 +10458,7 @@ namespace Builder
 
 		*result = true;
 
-		std::map<const UalSignal*, Address16> inSignals;			// ualSignal => readAddress
+		std::vector<std::pair<const UalSignal*, Address16>> inSignals;	// pair<ualSignal, readAddress>
 
 		const std::vector<LogicPin>& inputs = ualAfb->inputs();
 
@@ -10505,7 +10502,7 @@ namespace Builder
 					return false;
 				}
 
-				inSignals.insert({ inSignal, readAddr });
+				inSignals.emplace_back(inSignal, readAddr);
 				continue;
 			}
 
@@ -10580,11 +10577,8 @@ namespace Builder
 
 		*code << CodeItem().setAcc();
 
-		for(auto const& p : inSignals)
+		for(const auto& [inSignal, readAddr] : inSignals)
 		{
-			const UalSignal* inSignal = p.first;
-			Address16 readAddr = p.second;
-
 			*code << CodeItem().movBitAccAddr(readAddr, QString("ACC <= %1").arg(inSignal->refSignalIDsJoined()));
 		}
 
