@@ -1,9 +1,23 @@
 #pragma once
-#include <iostream>
 #include "../UtilsLib/ILogFile.h"
+#include <iostream>
 
 namespace TestSuite
 {
+	class ConstStrings : public QObject
+	{
+		Q_OBJECT
+	public:
+		static QString TEST_PASSED()
+		{
+			return tr("PASSED");
+		}
+		static QString TEST_FAILED()
+		{
+			return tr("FAILED");
+		}
+	};
+
 	enum class TestLogItemType
 	{
 		Error = 0x0001,
@@ -41,9 +55,9 @@ namespace TestSuite
 		QString m_message;
 		QString m_tag;
 
-//		QString m_file;
-//		int m_fileLine = 0;
-//		QString m_func;
+		//		QString m_file;
+		//		int m_fileLine = 0;
+		//		QString m_func;
 		QString m_htmlFont;
 
 		static const int CsvVersion = 1;
