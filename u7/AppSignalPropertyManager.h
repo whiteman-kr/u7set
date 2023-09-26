@@ -9,7 +9,7 @@ class AppSignalPropertyManager : public QObject
 	Q_OBJECT
 
 public:
-	AppSignalPropertyManager(DbController* dbController, QWidget* parentWidget);
+	AppSignalPropertyManager();
 
 	static AppSignalPropertyManager* getInstance();
 
@@ -37,7 +37,7 @@ public:
 	bool isHidden(E::PropertyBehaviourType behaviour, bool isExpert) const;
 	bool isReadOnly(E::PropertyBehaviourType behaviour, bool isExpert) const;
 
-	void reloadPropertiesBehaviour();
+	void updatePropertiesBehaviour(const QString& propBehavoiurFile, QString* errMsg);
 	void clear();
 
 signals:
@@ -47,7 +47,7 @@ signals:
 	void propertyCountDecreased();
 
 public slots:
-	void detectSignalsNewProperties(const std::vector<const AppSignal *>& signalsArray);
+	void slot_detectNewProperties(const std::vector<int>& signalIndexes);
 	void detectNewProperties(const AppSignal* signal);
 
 private:
@@ -75,9 +75,6 @@ private:
 	static void trimm(QStringList& stringList);
 
 private:
-	DbController* m_dbController = nullptr;
-	QWidget* m_parentWidget = nullptr;
-
 	static AppSignalPropertyManager* m_instance;
 
 	static const std::vector<AppSignalPropertyDescription> m_replacedPropDescriptions;

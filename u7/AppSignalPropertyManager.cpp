@@ -1,10 +1,6 @@
 #include "AppSignalPropertyManager.h"
 #include "AppSignalSetProvider.h"
 
-AppSignalPropertyManager* AppSignalPropertyManager::m_instance = nullptr;
-const std::map<int, QString> AppSignalPropertyManager::m_emptyEnumValuesMap;
-const AppSignalPropertyDescription AppSignalPropertyManager::m_notValidPropDescription;
-
 // this replacement for properties required to change getter return type from E::* to QString
 //
 const std::vector<AppSignalPropertyDescription> AppSignalPropertyManager::m_replacedPropDescriptions =
@@ -63,14 +59,17 @@ const std::vector<AppSignalPropertyDescription> AppSignalPropertyManager::m_repl
 
 };
 
+AppSignalPropertyManager* AppSignalPropertyManager::m_instance = nullptr;
+
+const std::map<int, QString> AppSignalPropertyManager::m_emptyEnumValuesMap;
+const AppSignalPropertyDescription AppSignalPropertyManager::m_notValidPropDescription;
+
 std::vector<AppSignalPropertyDescription> AppSignalPropertyManager::m_notSpecificPropDescriptions;
 
 const std::vector<E::SignalType> AppSignalPropertyManager::m_signalTypes = E::values<E::SignalType>();
 const std::vector<E::SignalInOutType> AppSignalPropertyManager::m_inOutTypes = E::values<E::SignalInOutType>();
 
-AppSignalPropertyManager::AppSignalPropertyManager(DbController* dbController, QWidget* parentWidget) :
-	m_dbController(dbController),
-	m_parentWidget(parentWidget)
+AppSignalPropertyManager::AppSignalPropertyManager()
 {
 	Q_ASSERT(m_instance == nullptr);
 	m_instance = this;
@@ -327,11 +326,13 @@ bool AppSignalPropertyManager::isHiddenFor(E::SignalType type, const int propert
 	return true;
 }
 
-void AppSignalPropertyManager::detectSignalsNewProperties(const std::vector<const AppSignal*>& signalsArray)
+void AppSignalPropertyManager::slot_detectNewProperties(const std::vector<int>& signalIndexes)
 {
-	for(const AppSignal* s : signalsArray)
+	const AppSignalSetProvider* provider = AppSignalSetProvider::getInstance();
+
+	for(int index : signalIndexes)
 	{
-		detectNewProperties(s);
+		detectNewProperties(provider->getSignalByIndex(index));
 	}
 }
 
@@ -520,41 +521,15 @@ int AppSignalPropertyManager::propertyIndex(const QString& propName) const
 	return (it == m_propNameToIndex.end() ? -1 : it->second);
 }
 
-void AppSignalPropertyManager::reloadPropertiesBehaviour()
+void AppSignalPropertyManager::updatePropertiesBehaviour(const QString& propBehavoiurFile, QString* errMsg)
 {
-	TEST_PTR_RETURN(m_dbController);
+	TEST_PTR_RETURN(errMsg);
 
-	int etcFileId = m_dbController->systemFileId(DbDir::EtcDir);
-
-	DbFileInfo propBehaviourFileInfo;
-
-	m_dbController->getFileInfo(etcFileId, QString(Db::File::SignalPropertyBehaviorFileName),
-								&propBehaviourFileInfo, nullptr);
-
-	if (propBehaviourFileInfo.isNull() == true)
-	{
-		QMessageBox::critical(m_parentWidget, "Error", QString("File \"%1\" is not found!").
-										arg(Db::File::SignalPropertyBehaviorFileName));
-		return;
-	}
-
-	std::shared_ptr<DbFile> file;
-
-	bool result = m_dbController->getLatestVersion(propBehaviourFileInfo, &file, nullptr);
-
-	if (result == false)
-	{
-		QMessageBox::critical(m_parentWidget, "Error", QString("Could not load file \"%1\"").
-										arg(Db::File::SignalPropertyBehaviorFileName));
-		return;
-	}
-
-	QString fileText = file->data();
-	QStringList rows = fileText.split("\n", Qt::SkipEmptyParts);
+	QStringList rows = propBehavoiurFile.split("\n", Qt::SkipEmptyParts);
 
 	if (rows.isEmpty() == true)
 	{
-		QMessageBox::critical(m_parentWidget, "Error", QString("File \"%1\" is empty").arg(Db::File::SignalPropertyBehaviorFileName));
+		*errMsg = "File SignalPropertyBehavior.csv is empty";
 		return;
 	}
 
@@ -564,13 +539,13 @@ void AppSignalPropertyManager::reloadPropertiesBehaviour()
 
 	rows.removeFirst();				// header row removed!
 
-	QString uncorrectFileMessage =  QString("Uncorrect format of file \"%1\"").arg(Db::File::SignalPropertyBehaviorFileName);
+	QString uncorrectFileMsg = "Uncorrect format of file SignalPropertyBehavior.csv: ";
 
 	qsizetype nameIndex = fieldNameList.indexOf("PropertyName");
 
 	if (nameIndex < 0)
 	{
-		QMessageBox::critical(m_parentWidget, "Error", uncorrectFileMessage + ": PropertyName column not found");
+		*errMsg = uncorrectFileMsg + " PropertyName column not found";
 		return;
 	}
 
@@ -578,7 +553,7 @@ void AppSignalPropertyManager::reloadPropertiesBehaviour()
 
 	if (precisionIndex < 0)
 	{
-		QMessageBox::critical(m_parentWidget, "Error", uncorrectFileMessage + ": DependosOnPrecision column not found");
+		*errMsg = uncorrectFileMsg + " DependosOnPrecision column not found";
 		return;
 	}
 

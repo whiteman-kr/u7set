@@ -227,6 +227,7 @@ public:
 public slots:
 	void slot_signalsUpdated(const std::vector<int>& indexes);
 	void slot_signalsCountChanged();
+
 	void beginIncreaseColumnCount(int newColumnCount);
 	void beginDecreaseColumnCount(int newColumnCount);
 	void endIncreaseColumnCount();

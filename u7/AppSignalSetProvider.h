@@ -42,7 +42,9 @@ public:
 
 	AppSignal* getSignal(const QString& appSignalID);
 	AppSignal* getSignalByID(int signalID);
+
 	AppSignal* getSignalByIndex(int index);
+	const AppSignal* getSignalByIndex(int index) const;
 
 	bool getChannelSignalsID(const AppSignal& signal, std::vector<int>* channelSignalIDs) const;
 	bool getChannelSignalsID(int signalID, int groupID, std::vector<int>* channelSignalIDs) const;
@@ -114,15 +116,17 @@ signals:
 	void signalsCountChanged();
 
 	// for updating row in signal view (throwing models DataChanged signal)
+	// also update known properties in AppSignalPropertyManager
 	//
 	void signalsUpdated(const std::vector<int>& indexes);
 
-	// for updating property list if new properties exist in signal
+	// only update known properties in AppSignalPropertyManager
 	//
-	void signalsPropertiesChanged(const std::vector<const AppSignal*>& signalsArray);
+	void detectNewProperties(const std::vector<int>& indexes);
 
 private:
 	void loadUsers();
+	void reloadPropertiesBehaviour();
 
 	void startSignalsLoading();
 	void terminateSignalsLoading();

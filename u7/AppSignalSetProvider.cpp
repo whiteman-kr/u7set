@@ -7,7 +7,6 @@ AppSignalSetProvider::AppSignalSetProvider(DbController* dbController, QWidget* 
 	QObject(parentWidget),
 	m_db(dbController),
 	m_parentWidget(parentWidget),
-	m_propertyManager(dbController, parentWidget),
 	m_signalsLoadTimer(this)
 {
 	Q_ASSERT(m_instance == nullptr);
@@ -17,8 +16,11 @@ AppSignalSetProvider::AppSignalSetProvider(DbController* dbController, QWidget* 
 
 	TEST_PTR_RETURN(dbController);
 
-	connect(this, &AppSignalSetProvider::signalsPropertiesChanged,
-			&m_propertyManager, &AppSignalPropertyManager::detectSignalsNewProperties);
+	connect(this, &AppSignalSetProvider::signalsUpdated,
+			&m_propertyManager, &AppSignalPropertyManager::slot_detectNewProperties);
+
+	connect(this, &AppSignalSetProvider::detectNewProperties,
+			&m_propertyManager, &AppSignalPropertyManager::slot_detectNewProperties);
 
 	connect(&m_signalsLoadTimer, &QTimer::timeout, this, &AppSignalSetProvider::onSignalsLoadTimer);
 }
@@ -48,9 +50,7 @@ void AppSignalSetProvider::projectOpened()
 	m_currentUserIsAdmin = m_db->currentUser().isAdminstrator();
 
 	loadUsers();
-
-	m_propertyManager.clear();
-	m_propertyManager.reloadPropertiesBehaviour();
+	reloadPropertiesBehaviour();
 
 	startSignalsLoading();
 }
@@ -122,22 +122,19 @@ void AppSignalSetProvider::reloadSignals(const std::vector<int>& signalIds)
 
 	m_db->getLatestSignalsWithoutProgress(signalIds, &updatedSignals, nullptr);
 
-	std::vector<const AppSignal*> signalsPtrs;
 	std::vector<int> signalsIndexes;
 
 	for (const AppSignal& updatedSignal: updatedSignals)
 	{
 		auto [s, index] = m_signalSet.updateSignal(updatedSignal);
 
-		if (s !=  nullptr)
+		if (index != BAD_INDEX)
 		{
-			signalsPtrs.push_back(s);
 			signalsIndexes.push_back(index);
 		}
 	}
 
 	emit signalsUpdated(signalsIndexes);
-	emit signalsPropertiesChanged(signalsPtrs);
 }
 
 void AppSignalSetProvider::enforceAllSignalsLoading()
@@ -180,12 +177,10 @@ const AppSignal* AppSignalSetProvider::loadSignal(int signalId, bool updateViews
 	auto [updatedSignal, index] = m_signalSet.updateSignal(loadedSignal);
 
 	TEST_PTR_RETURN_NULLPTR(updatedSignal);
-	Q_ASSERT(index != BAD_INDEX);
 
-	if (updateViews == true)
+	if (updateViews == true && index != BAD_INDEX)
 	{
 		emit signalsUpdated({index});
-		emit signalsPropertiesChanged({updatedSignal});
 	}
 
 	return updatedSignal;
@@ -237,12 +232,12 @@ AppSignal* AppSignalSetProvider::getSignalByID(int signalID)
 
 AppSignal* AppSignalSetProvider::getSignalByIndex(int index)
 {
-	if (index >= 0 && index < m_signalSet.count())
-	{
-		return m_signalSet.at(index);
-	}
+	return m_signalSet.at(index);
+}
 
-	return nullptr;
+const AppSignal* AppSignalSetProvider::getSignalByIndex(int index) const
+{
+	return m_signalSet.at(index);
 }
 
 bool AppSignalSetProvider::getChannelSignalsID(const AppSignal& signal, std::vector<int>* channelSignalIDs) const
@@ -436,6 +431,47 @@ void AppSignalSetProvider::loadUsers()
 	}
 }
 
+void AppSignalSetProvider::reloadPropertiesBehaviour()
+{
+	TEST_PTR_RETURN(m_db);
+
+	int etcFileId = m_db->systemFileId(DbDir::EtcDir);
+
+	DbFileInfo propBehaviourFileInfo;
+
+	m_db->getFileInfo(etcFileId, QString(Db::File::SignalPropertyBehaviorFileName),
+								&propBehaviourFileInfo, nullptr);
+
+	if (propBehaviourFileInfo.isNull() == true)
+	{
+		QMessageBox::critical(m_parentWidget, "Error", QString("File \"%1\" is not found!").
+										arg(Db::File::SignalPropertyBehaviorFileName));
+		return;
+	}
+
+	std::shared_ptr<DbFile> file;
+
+	bool result = m_db->getLatestVersion(propBehaviourFileInfo, &file, nullptr);
+
+	if (result == false)
+	{
+		QMessageBox::critical(m_parentWidget, "Error", QString("Could not load file \"%1\"").
+										arg(Db::File::SignalPropertyBehaviorFileName));
+		return;
+	}
+
+	m_propertyManager.clear();
+
+	QString errMsg;
+
+	m_propertyManager.updatePropertiesBehaviour(file->data(), &errMsg);
+
+	if (errMsg.isEmpty() == false)
+	{
+		QMessageBox::critical(m_parentWidget, "Error", errMsg);
+	}
+}
+
 void AppSignalSetProvider::startSignalsLoading()
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
@@ -487,18 +523,16 @@ void AppSignalSetProvider::appendSignalsAndUpdateViews(const std::vector<AppSign
 		return;
 	}
 
-	std::vector<const AppSignal*> updatedSignals;
+	std::vector<int> newIndexes;
 
 	for(const AppSignal& newSignal : newSignals)
 	{
 		auto [ns, index] = m_signalSet.append(newSignal);
 
-		updatedSignals.push_back(ns);
+		newIndexes.push_back(index);
 	}
 
-	// emit signalsUpdated(updatedIndexes);	 signalsCountChanged() will do this update
-
-	emit signalsPropertiesChanged(updatedSignals);		// to check new signals properties
+	emit signalsUpdated(newIndexes);		// to check new signals properties
 	emit signalsCountChanged();
 }
 
@@ -694,7 +728,6 @@ bool AppSignalSetProvider::setSignalWorkcopy(AppSignal* signal, ObjectState* obj
 	{
 		auto [s, index] = m_signalSet.updateSignal(*signal);
 
-		emit signalsPropertiesChanged({s});
 		emit signalsUpdated({index});
 	}
 
@@ -771,7 +804,7 @@ bool AppSignalSetProvider::checkoutSignal(const AppSignal* s, QString* message)
 		}
 	}
 
-	loadSignals(signalsIDs);
+	reloadSignals(signalsIDs);
 
 	return true;
 }
