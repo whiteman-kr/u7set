@@ -1,4 +1,4 @@
-<AFB id="#cmp_fp_gr_v1" Caption="cmp_fp_gr" Version="1.0008">
+<AFB id="#cmp_fp_gr_v1" Caption="cmp_fp_gr" Version="1.9">
 	<Properties>
 		<Description>Comparator Block, greater than single-precision floating-point format comparison</Description>
 		<Category>Compare</Category>
@@ -17,7 +17,7 @@
 		<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="13" Size="1"/>
 	</Outputs>
 	<Params>
-		<Param OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
+		<Param OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
 			<Value>0</Value>
 			<Default>0</Default>
 			<LowLimit>0</LowLimit>

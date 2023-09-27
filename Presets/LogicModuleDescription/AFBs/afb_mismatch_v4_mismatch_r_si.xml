@@ -1,4 +1,4 @@
-<AFB id="#mismatch_r_si_v1" Caption="mismatch_r_si" Version="1.0011">
+<AFB id="#mismatch_r_si_v1" Caption="mismatch_r_si" Version="1.12">
 	<Properties>
 		<Description>Analog mismatch block with limits</Description>
 		<Category>Other</Category>
@@ -51,7 +51,7 @@
 				<Changed/>
 			</Script>
 		</Param>
-		<Param OpName="i_relvalue" Caption="RelValue" Visible="true" OpIndex="-1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="float">
+		<Param OpName="i_relvalue" Caption="RelValue" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="float">
 			<Value>5</Value>
 			<Default>0</Default>
 			<LowLimit>0</LowLimit>
@@ -61,7 +61,7 @@
 			</Script>
 			<Units>%</Units>
 		</Param>
-		<Param OpName="i_lowlim" Caption="LowLimit" Visible="true" OpIndex="-1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
+		<Param OpName="i_lowlim" Caption="LowLimit" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
 			<Value>0</Value>
 			<Default>0</Default>
 			<LowLimit>-2147483647</LowLimit>
@@ -70,7 +70,7 @@
 				<Changed/>
 			</Script>
 		</Param>
-		<Param OpName="i_highlim" Caption="HighLimit" Visible="true" OpIndex="-1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
+		<Param OpName="i_highlim" Caption="HighLimit" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
 			<Value>100</Value>
 			<Default>100</Default>
 			<LowLimit>-2147483647</LowLimit>

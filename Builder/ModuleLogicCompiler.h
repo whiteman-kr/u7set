@@ -524,7 +524,8 @@ namespace Builder
 		bool generateCustomCode(CodeSnippet* code);
 		bool generateAfbsVersionCheckingCode(CodeSnippet* code);
 		bool generateInitAfbsCode(CodeSnippet* code);
-		bool generateInitAppFbParamsCode(CodeSnippet* code, const UalAfb& appFb, const QString& usedBy);
+		bool generateIDRPhaseInitAppFbParamsCode(CodeSnippet* code, const UalAfb& appFb, const QString& usedBy);
+		bool generateInitAppFbParamsCode(CodeSnippet* code, const UalAfb& appFb, bool instantiator);
 		bool displayAfbParams(CodeSnippet* code, const UalAfb& appFb);
 		bool generateLoopbacksRefreshingCode(CodeSnippet* code);
 		bool getRefreshingCode(CodeSnippet* code, const QString& loopbackID, const UalSignal* lbSignal);

@@ -1,4 +1,4 @@
-<AFB id="#cmp_fp_ls_v1" Caption="cmp_fp_ls" Version="1.0012">
+<AFB id="#cmp_fp_ls_v1" Caption="cmp_fp_ls" Version="1.13">
 	<Properties>
 		<Description>Comparator Block, less than single-precision floating-point comparison</Description>
 		<Category>Compare</Category>
@@ -19,7 +19,7 @@
 		<Pin OpName="o_sync_out" Caption="s_out" Type="Discrete" ByteOrder="BigEndian" OpIndex="9" Size="1"/>
 	</Outputs>
 	<Params>
-		<Param OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
+		<Param OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
 			<Value>0</Value>
 			<Default>0</Default>
 			<LowLimit>0</LowLimit>

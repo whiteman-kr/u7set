@@ -1560,7 +1560,7 @@
 		</AfterCreation>
       </CommonScript>
     </AFB>
-    <AFB id="#tctc_filter_v1" Caption="tctc_filter" Version="1.0008">
+    <AFB id="#tctc_filter_v1" Caption="tctc_filter" Version="1.9">
       <Properties>
         <Description>Time Counter Block with constant time value, filtering function</Description>
         <Category>Delay</Category>
@@ -1576,7 +1576,7 @@
         <Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="8" Size="1" />
       </Outputs>
       <Params>
-        <Param OpName="i_counter" Caption="Time" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+        <Param OpName="i_counter" Caption="Time" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
           <Value>1000</Value>
           <Default>1000</Default>
           <LowLimit>5</LowLimit>
@@ -1601,7 +1601,7 @@
         <AfterCreation />
       </CommonScript>
     </AFB>
-    <AFB id="#tctc_off_v1" Caption="tctc_off" Version="1.0009">
+    <AFB id="#tctc_off_v1" Caption="tctc_off" Version="1.10">
       <Properties>
         <Description>Time Counter Block with constant time value, turn off delay function</Description>
         <Category>Delay</Category>
@@ -1617,7 +1617,7 @@
         <Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="8" Size="1" />
       </Outputs>
       <Params>
-        <Param OpName="i_counter" Caption="Time" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+        <Param OpName="i_counter" Caption="Time" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
           <Value>1000</Value>
           <Default>1000</Default>
           <LowLimit>5</LowLimit>
@@ -1642,7 +1642,7 @@
         <AfterCreation />
       </CommonScript>
     </AFB>
-    <AFB id="#tctc_on_v1" Caption="tctc_on" Version="1.0008">
+    <AFB id="#tctc_on_v1" Caption="tctc_on" Version="1.9">
       <Properties>
         <Description>Time Counter Block with constant time value, turn on delay function</Description>
         <Category>Delay</Category>
@@ -1658,7 +1658,7 @@
         <Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="8" Size="1" />
       </Outputs>
       <Params>
-        <Param OpName="i_counter" Caption="Time" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+        <Param OpName="i_counter" Caption="Time" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
           <Value>1000</Value>
           <Default>1000</Default>
           <LowLimit>5</LowLimit>
@@ -1683,7 +1683,7 @@
         <AfterCreation />
       </CommonScript>
     </AFB>
-    <AFB id="#tctc_rsv_v1" Caption="tctc_rsv" Version="1.0008">
+    <AFB id="#tctc_rsv_v1" Caption="tctc_rsv" Version="1.9">
       <Properties>
         <Description>Time Counter Block with constant time value, delay function</Description>
         <Category>Delay</Category>
@@ -1699,7 +1699,7 @@
         <Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="8" Size="1" />
       </Outputs>
       <Params>
-        <Param OpName="i_counter" Caption="Time" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+        <Param OpName="i_counter" Caption="Time" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
           <Value>1000</Value>
           <Default>1000</Default>
           <LowLimit>5</LowLimit>
@@ -1724,7 +1724,7 @@
         <AfterCreation />
       </CommonScript>
     </AFB>
-    <AFB id="#tctc_vibr_v1" Caption="tctc_vibr" Version="1.0008">
+    <AFB id="#tctc_vibr_v1" Caption="tctc_vibr" Version="1.9">
       <Properties>
         <Description>Time Counter Block with constant time value, single vibrator function</Description>
         <Category>Delay</Category>
@@ -1740,7 +1740,7 @@
         <Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="8" Size="1" />
       </Outputs>
       <Params>
-        <Param OpName="i_counter" Caption="Time" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+        <Param OpName="i_counter" Caption="Time" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
           <Value>1000</Value>
           <Default>1000</Default>
           <LowLimit>5</LowLimit>
@@ -3169,7 +3169,7 @@
       </CommonScript>
     </AFB>
     
-    <AFB id="#cmpc_fp_eq_v1" Caption="cmpc_fp_eq" Version="1.0008">
+    <AFB id="#cmpc_fp_eq_v1" Caption="cmpc_fp_eq" Version="1.9">
       <Properties>
         <Description>Comparator Block, equal single-precision floating-point comparison with constant value</Description>
         <Category>Compare</Category>
@@ -3185,7 +3185,7 @@
         <Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="10" Size="1" />
       </Outputs>
       <Params>
-        <Param OpName="i_sp_s" Caption="SetPoint" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
+        <Param OpName="i_sp_s" Caption="SetPoint" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
           <Value>0</Value>
           <Default>0</Default>
           <LowLimit>-3.40282e+38</LowLimit>
@@ -3194,7 +3194,7 @@
             <Changed />
           </Script>
         </Param>
-        <Param OpName="i_sp_r" Caption="ValueR" Visible="false" OpIndex="3" Size="32" Instantiator="false" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
+        <Param OpName="i_sp_r" Caption="ValueR" Visible="false" OpIndex="3" Size="32" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
           <Value>0</Value>
           <Default>0</Default>
           <LowLimit>-3.40282e+38</LowLimit>
@@ -3274,7 +3274,7 @@
 		</AfterCreation>
       </CommonScript>
     </AFB>
-    <AFB id="#cmpc_fp_gr_v1" Caption="cmpc_fp_gr" Version="1.0012">
+    <AFB id="#cmpc_fp_gr_v1" Caption="cmpc_fp_gr" Version="1.13">
       <Properties>
         <Description>Comparator Block, greater than single-precision floating-point format comparison with constant value</Description>
         <Category>Compare</Category>
@@ -3292,7 +3292,7 @@
         <Pin OpName="o_sync_out" Caption="s_out" Type="Discrete" ByteOrder="BigEndian" OpIndex="9" Size="1" />
       </Outputs>
       <Params>
-        <Param OpName="i_sp_s" Caption="SetPoint" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
+        <Param OpName="i_sp_s" Caption="SetPoint" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
           <Value>0</Value>
           <Default>0</Default>
           <LowLimit>-3.40282e+38</LowLimit>
@@ -3301,7 +3301,7 @@
             <Changed />
           </Script>
         </Param>
-        <Param OpName="i_sp_r" Caption="ValueR" Visible="false" OpIndex="3" Size="32" Instantiator="false" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
+        <Param OpName="i_sp_r" Caption="ValueR" Visible="false" OpIndex="3" Size="32" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
           <Value>0</Value>
           <Default>0</Default>
           <LowLimit>-3.40282e+38</LowLimit>
@@ -3414,7 +3414,7 @@
 		</AfterCreation>
       </CommonScript>
     </AFB>
-    <AFB id="#cmpc_fp_ls_v1" Caption="cmpc_fp_ls" Version="1.0012">
+    <AFB id="#cmpc_fp_ls_v1" Caption="cmpc_fp_ls" Version="1.13">
       <Properties>
         <Description>Comparator Block, less than single-precision floating-point comparison with constant value</Description>
         <Category>Compare</Category>
@@ -3432,7 +3432,7 @@
         <Pin OpName="o_sync_out" Caption="s_out" Type="Discrete" ByteOrder="BigEndian" OpIndex="9" Size="1" />
       </Outputs>
       <Params>
-        <Param OpName="i_sp_s" Caption="SetPoint" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
+        <Param OpName="i_sp_s" Caption="SetPoint" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
           <Value>0</Value>
           <Default>0</Default>
           <LowLimit>-3.40282e+38</LowLimit>
@@ -3441,7 +3441,7 @@
             <Changed />
           </Script>
         </Param>
-        <Param OpName="i_sp_r" Caption="ValueR" Visible="false" OpIndex="3" Size="32" Instantiator="false" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
+        <Param OpName="i_sp_r" Caption="ValueR" Visible="false" OpIndex="3" Size="32" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
           <Value>0</Value>
           <Default>0</Default>
           <LowLimit>-3.40282e+38</LowLimit>
@@ -3554,7 +3554,7 @@
 		</AfterCreation>
       </CommonScript>
     </AFB>
-    <AFB id="#cmpc_fp_ne_v1" Caption="cmpc_fp_ne" Version="1.0008">
+    <AFB id="#cmpc_fp_ne_v1" Caption="cmpc_fp_ne" Version="1.9">
       <Properties>
         <Description>Comparator Block, not equal single-precision floating-point format comparison with constant value</Description>
         <Category>Compare</Category>
@@ -3570,7 +3570,7 @@
         <Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="10" Size="1" />
       </Outputs>
       <Params>
-        <Param OpName="i_sp_s" Caption="SetPoint" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
+        <Param OpName="i_sp_s" Caption="SetPoint" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
           <Value>0</Value>
           <Default>0</Default>
           <LowLimit>-3.40282e+38</LowLimit>
@@ -3579,7 +3579,7 @@
             <Changed />
           </Script>
         </Param>
-        <Param OpName="i_sp_r" Caption="ValueR" Visible="false" OpIndex="3" Size="32" Instantiator="false" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
+        <Param OpName="i_sp_r" Caption="ValueR" Visible="false" OpIndex="3" Size="32" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
           <Value>0</Value>
           <Default>0</Default>
           <LowLimit>-3.40282e+38</LowLimit>
@@ -3659,7 +3659,7 @@
 		</AfterCreation>
       </CommonScript>
     </AFB>
-    <AFB id="#cmpc_si_eq_v1" Caption="cmpc_si_eq" Version="1.0007">
+    <AFB id="#cmpc_si_eq_v1" Caption="cmpc_si_eq" Version="1.8">
       <Properties>
         <Description>Comparator Block, equal 32-bit signed int comparison with constant value</Description>
         <Category>Compare</Category>
@@ -3674,7 +3674,7 @@
         <Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="9" Size="1" />
       </Outputs>
       <Params>
-        <Param OpName="i_sp_s" Caption="SetPoint" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
+        <Param OpName="i_sp_s" Caption="SetPoint" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
           <Value>0</Value>
           <Default>0</Default>
           <LowLimit>-2147483648</LowLimit>
@@ -3683,7 +3683,7 @@
             <Changed />
           </Script>
         </Param>
-        <Param OpName="i_sp_r" Caption="ValueR" Visible="false" OpIndex="3" Size="32" Instantiator="false" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
+        <Param OpName="i_sp_r" Caption="ValueR" Visible="false" OpIndex="3" Size="32" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
           <Value>0</Value>
           <Default>0</Default>
           <LowLimit>-2147483648</LowLimit>
@@ -3716,7 +3716,7 @@
         <AfterCreation />
       </CommonScript>
     </AFB>
-    <AFB id="#cmpc_si_gr_v1" Caption="cmpc_si_gr" Version="1.0012">
+    <AFB id="#cmpc_si_gr_v1" Caption="cmpc_si_gr" Version="1.13">
       <Properties>
         <Description>Comparator Block, greater than 32-bit signed integer comparison with constant value</Description>
         <Category>Compare</Category>
@@ -3733,7 +3733,7 @@
         <Pin OpName="o_sync_out" Caption="s_out" Type="Discrete" ByteOrder="BigEndian" OpIndex="9" Size="1" />
       </Outputs>
       <Params>
-        <Param OpName="i_sp_s" Caption="SetPoint" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
+        <Param OpName="i_sp_s" Caption="SetPoint" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
           <Value>0</Value>
           <Default>0</Default>
           <LowLimit>-2147483648</LowLimit>
@@ -3742,7 +3742,7 @@
             <Changed />
           </Script>
         </Param>
-        <Param OpName="i_sp_r" Caption="ValueR" Visible="false" OpIndex="3" Size="32" Instantiator="false" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
+        <Param OpName="i_sp_r" Caption="ValueR" Visible="false" OpIndex="3" Size="32" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
           <Value>0</Value>
           <Default>0</Default>
           <LowLimit>-2147483648</LowLimit>
@@ -3817,7 +3817,7 @@
 		</AfterCreation>
       </CommonScript>
     </AFB>
-    <AFB id="#cmpc_si_ls_v1" Caption="cmpc_si_ls" Version="1.0012">
+    <AFB id="#cmpc_si_ls_v1" Caption="cmpc_si_ls" Version="1.13">
       <Properties>
         <Description>Comparator Block, less than 32-bit signed integer comparison with constant value</Description>
         <Category>Compare</Category>
@@ -3834,7 +3834,7 @@
         <Pin OpName="o_sync_out" Caption="s_out" Type="Discrete" ByteOrder="BigEndian" OpIndex="9" Size="1" />
       </Outputs>
       <Params>
-        <Param OpName="i_sp_s" Caption="SetPoint" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
+        <Param OpName="i_sp_s" Caption="SetPoint" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
           <Value>0</Value>
           <Default>0</Default>
           <LowLimit>-2147483648</LowLimit>
@@ -3843,7 +3843,7 @@
             <Changed />
           </Script>
         </Param>
-        <Param OpName="i_sp_r" Caption="ValueR" Visible="false" OpIndex="3" Size="32" Instantiator="false" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
+        <Param OpName="i_sp_r" Caption="ValueR" Visible="false" OpIndex="3" Size="32" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
           <Value>0</Value>
           <Default>0</Default>
           <LowLimit>-2147483648</LowLimit>
@@ -3918,7 +3918,7 @@
 		</AfterCreation>
       </CommonScript>
     </AFB>
-    <AFB id="#cmpc_si_ne_v1" Caption="cmpc_si_ne" Version="1.0007">
+    <AFB id="#cmpc_si_ne_v1" Caption="cmpc_si_ne" Version="1.8">
       <Properties>
         <Description>Comparator Block, not equal 32-bit signed integer comparison with constant value</Description>
         <Category>Compare</Category>
@@ -3933,7 +3933,7 @@
         <Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="9" Size="1" />
       </Outputs>
       <Params>
-        <Param OpName="i_sp_s" Caption="SetPoint" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
+        <Param OpName="i_sp_s" Caption="SetPoint" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
           <Value>0</Value>
           <Default>0</Default>
           <LowLimit>-2147483648</LowLimit>
@@ -3942,7 +3942,7 @@
             <Changed />
           </Script>
         </Param>
-        <Param OpName="i_sp_r" Caption="ValueR" Visible="false" OpIndex="3" Size="32" Instantiator="false" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
+        <Param OpName="i_sp_r" Caption="ValueR" Visible="false" OpIndex="3" Size="32" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
           <Value>0</Value>
           <Default>0</Default>
           <LowLimit>-2147483648</LowLimit>
@@ -4258,7 +4258,7 @@
 		</AfterCreation>
       </CommonScript>
     </AFB>
-    <AFB id="#dampc_fp_v1" Caption="dampc_fp" Version="1.0014">
+    <AFB id="#dampc_fp_v1" Caption="dampc_fp" Version="1.15">
       <Properties>
         <Description>Damper Block with float data format</Description>
         <Category>Damper</Category>
@@ -4280,7 +4280,7 @@
         <Pin OpName="o_sync_out" Caption="s_out" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="11" Size="32" />
       </Outputs>
       <Params>
-        <Param OpName="i_del" Caption="DTime" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
+        <Param OpName="i_del" Caption="DTime" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
           <Value>5</Value>
           <Default>5</Default>
           <LowLimit>5</LowLimit>
@@ -4454,7 +4454,7 @@
 		</AfterCreation>
       </CommonScript>
     </AFB>
-    <AFB id="#dampc_si_v1" Caption="dampc_si" Version="1.0014">
+    <AFB id="#dampc_si_v1" Caption="dampc_si" Version="1.15">
       <Properties>
         <Description>Damper Block with signed int data format</Description>
         <Category>Damper</Category>
@@ -4471,7 +4471,7 @@
         <Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="19" Size="1" />
       </Outputs>
       <Params>
-        <Param OpName="i_del" Caption="DTime" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
+        <Param OpName="i_del" Caption="DTime" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
           <Value>5</Value>
           <Default>5</Default>
           <LowLimit>5</LowLimit>
@@ -8014,7 +8014,7 @@
 		</AfterCreation>
       </CommonScript>
     </AFB>
-    <AFB id="#cmp_fp_eq_v1" Caption="cmp_fp_eq" Version="1.0008">
+    <AFB id="#cmp_fp_eq_v1" Caption="cmp_fp_eq" Version="1.9">
       <Properties>
         <Description>Comparator Block, equal single-precision floating-point comparison</Description>
         <Category>Compare</Category>
@@ -8033,7 +8033,7 @@
         <Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="13" Size="1" />
       </Outputs>
       <Params>
-        <Param OpName="hysteresis" Caption="Deadband" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
+        <Param OpName="hysteresis" Caption="Deadband" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
           <Value>0</Value>
           <Default>0</Default>
           <LowLimit>0</LowLimit>
@@ -8130,7 +8130,7 @@
 		</AfterCreation>
       </CommonScript>
     </AFB>
-    <AFB id="#cmp_fp_gr_v1" Caption="cmp_fp_gr" Version="1.0008">
+    <AFB id="#cmp_fp_gr_v1" Caption="cmp_fp_gr" Version="1.9">
       <Properties>
         <Description>Comparator Block, greater than single-precision floating-point format comparison</Description>
         <Category>Compare</Category>
@@ -8149,7 +8149,7 @@
         <Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="13" Size="1" />
       </Outputs>
       <Params>
-        <Param OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
+        <Param OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
           <Value>0</Value>
           <Default>0</Default>
           <LowLimit>0</LowLimit>
@@ -8246,7 +8246,7 @@
       </CommonScript>
     </AFB>
     
-    <AFB id="#cmp_fp_ls_v1" Caption="cmp_fp_ls" Version="1.0008">
+    <AFB id="#cmp_fp_ls_v1" Caption="cmp_fp_ls" Version="1.9">
       <Properties>
         <Description>Comparator Block, less than single-precision floating-point comparison</Description>
         <Category>Compare</Category>
@@ -8265,7 +8265,7 @@
         <Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="13" Size="1" />
       </Outputs>
       <Params>
-        <Param OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
+        <Param OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
           <Value>0</Value>
           <Default>0</Default>
           <LowLimit>0</LowLimit>
@@ -8362,7 +8362,7 @@
 		</AfterCreation>
       </CommonScript>
     </AFB>
-    <AFB id="#cmp_fp_ne_v1" Caption="cmp_fp_ne" Version="1.0008">
+    <AFB id="#cmp_fp_ne_v1" Caption="cmp_fp_ne" Version="1.9">
       <Properties>
         <Description>Comparator Block, not equal single-precision floating-point format comparison</Description>
         <Category>Compare</Category>
@@ -8381,7 +8381,7 @@
         <Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="13" Size="1" />
       </Outputs>
       <Params>
-        <Param OpName="hysteresis" Caption="Deadband" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
+        <Param OpName="hysteresis" Caption="Deadband" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
           <Value>0</Value>
           <Default>0</Default>
           <LowLimit>0</LowLimit>
@@ -8479,7 +8479,7 @@
       </CommonScript>
     </AFB>
     
-    <AFB id="#cmp_si_eq_v1" Caption="cmp_si_eq" Version="1.0007">
+    <AFB id="#cmp_si_eq_v1" Caption="cmp_si_eq" Version="1.8">
       <Properties>
         <Description>Comparator Block, equal 32-bit signed int comparison</Description>
         <Category>Compare</Category>
@@ -8495,7 +8495,7 @@
         <Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="9" Size="1" />
       </Outputs>
       <Params>
-        <Param OpName="hysteresis" Caption="Deadband" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
+        <Param OpName="hysteresis" Caption="Deadband" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
           <Value>0</Value>
           <Default>0</Default>
           <LowLimit>0</LowLimit>
@@ -8519,7 +8519,7 @@
         <AfterCreation />
       </CommonScript>
     </AFB>
-    <AFB id="#cmp_si_gr_v1" Caption="cmp_si_gr" Version="1.0007">
+    <AFB id="#cmp_si_gr_v1" Caption="cmp_si_gr" Version="1.8">
       <Properties>
         <Description>Comparator Block, greater than 32-bit signed integer comparison</Description>
         <Category>Compare</Category>
@@ -8535,7 +8535,7 @@
         <Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="9" Size="1" />
       </Outputs>
       <Params>
-        <Param OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
+        <Param OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
           <Value>0</Value>
           <Default>0</Default>
           <LowLimit>0</LowLimit>
@@ -8559,7 +8559,7 @@
         <AfterCreation />
       </CommonScript>
     </AFB>
-    <AFB id="#cmp_si_ls_v1" Caption="cmp_si_ls" Version="1.0007">
+    <AFB id="#cmp_si_ls_v1" Caption="cmp_si_ls" Version="1.8">
       <Properties>
         <Description>Comparator Block, less than 32-bit signed integer comparison</Description>
         <Category>Compare</Category>
@@ -8575,7 +8575,7 @@
         <Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="9" Size="1" />
       </Outputs>
       <Params>
-        <Param OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
+        <Param OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
           <Value>0</Value>
           <Default>0</Default>
           <LowLimit>0</LowLimit>
@@ -8599,7 +8599,7 @@
         <AfterCreation />
       </CommonScript>
     </AFB>
-    <AFB id="#cmp_si_ne_v1" Caption="cmp_si_ne" Version="1.0007">
+    <AFB id="#cmp_si_ne_v1" Caption="cmp_si_ne" Version="1.8">
       <Properties>
         <Description>Comparator Block, not equal 32-bit signed integer comparison</Description>
         <Category>Compare</Category>
@@ -8615,7 +8615,7 @@
         <Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="9" Size="1" />
       </Outputs>
       <Params>
-        <Param OpName="hysteresis" Caption="Deadband" Visible="true" OpIndex="1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
+        <Param OpName="hysteresis" Caption="Deadband" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
           <Value>0</Value>
           <Default>0</Default>
           <LowLimit>0</LowLimit>
@@ -10943,7 +10943,7 @@
 		</AfterCreation>
       </CommonScript>
     </AFB>
-    <AFB id="#mismatch_r_fp_v1" Caption="mismatch_r_fp" Version="1.0011">
+    <AFB id="#mismatch_r_fp_v1" Caption="mismatch_r_fp" Version="1.12">
       <Properties>
         <Description>Analog mismatch block with limits</Description>
         <Category>Other</Category>
@@ -10999,7 +10999,7 @@
             <Changed />
           </Script>
         </Param>
-        <Param OpName="i_relvalue" Caption="RelValue" Visible="true" OpIndex="-1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
+        <Param OpName="i_relvalue" Caption="RelValue" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
           <Value>5</Value>
           <Default>0</Default>
           <LowLimit>0</LowLimit>
@@ -11009,7 +11009,7 @@
           </Script>
           <Units>%</Units>
         </Param>
-        <Param OpName="i_lowlim" Caption="LowLimit" Visible="true" OpIndex="-1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
+        <Param OpName="i_lowlim" Caption="LowLimit" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
           <Value>0</Value>
           <Default>0</Default>
           <LowLimit>-3.40282e+38</LowLimit>
@@ -11018,7 +11018,7 @@
             <Changed />
           </Script>
         </Param>
-        <Param OpName="i_highlim" Caption="HighLimit" Visible="true" OpIndex="-1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
+        <Param OpName="i_highlim" Caption="HighLimit" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
           <Value>100</Value>
           <Default>100</Default>
           <LowLimit>-3.40282e+38</LowLimit>
@@ -11185,7 +11185,7 @@
 		</AfterCreation>
       </CommonScript>
     </AFB>
-    <AFB id="#mismatch_r_si_v1" Caption="mismatch_r_si" Version="1.0011">
+    <AFB id="#mismatch_r_si_v1" Caption="mismatch_r_si" Version="1.12">
       <Properties>
         <Description>Analog mismatch block with limits</Description>
         <Category>Other</Category>
@@ -11238,7 +11238,7 @@
             <Changed />
           </Script>
         </Param>
-        <Param OpName="i_relvalue" Caption="RelValue" Visible="true" OpIndex="-1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="float">
+        <Param OpName="i_relvalue" Caption="RelValue" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="float">
           <Value>5</Value>
           <Default>0</Default>
           <LowLimit>0</LowLimit>
@@ -11248,7 +11248,7 @@
           </Script>
           <Units>%</Units>
         </Param>
-        <Param OpName="i_lowlim" Caption="LowLimit" Visible="true" OpIndex="-1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
+        <Param OpName="i_lowlim" Caption="LowLimit" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
           <Value>0</Value>
           <Default>0</Default>
           <LowLimit>-2147483647</LowLimit>
@@ -11257,7 +11257,7 @@
             <Changed />
           </Script>
         </Param>
-        <Param OpName="i_highlim" Caption="HighLimit" Visible="true" OpIndex="-1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
+        <Param OpName="i_highlim" Caption="HighLimit" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
           <Value>100</Value>
           <Default>100</Default>
           <LowLimit>-2147483647</LowLimit>
