@@ -159,17 +159,15 @@ std::vector<std::pair<QString, QString>> SignalPropertiesDialog::editApplication
 	}
 
 	std::vector<AppSignal*> signalPtrVector;
-	std::vector<QString> foundSignalID;
+	std::vector<QString> initialAppSignalID;
 
 	for (AppSignal& signal : signalVector)
 	{
-		if (!signalId.contains(signal.appSignalID()))
+		if (signalId.contains(signal.appSignalID()) == true)
 		{
-			continue;
+			signalPtrVector.push_back(&signal);
+			initialAppSignalID.emplace_back(signal.appSignalID());
 		}
-
-		foundSignalID.emplace_back(signal.appSignalID());
-		signalPtrVector.push_back(&signal);
 	}
 
 	if (signalPtrVector.empty() == true)
@@ -203,67 +201,25 @@ std::vector<std::pair<QString, QString>> SignalPropertiesDialog::editApplication
 		return {};
 	}
 
-	QString message;
+	std::vector<AppSignal*> editedSignals;
+	std::vector<std::pair<QString, QString>> result;
+
+	result.reserve(signalPtrVector.size());
+
+	int i = 0;
 
 	for (AppSignal* s : signalPtrVector)
 	{
-		if (dlg.isEditedSignal(s->ID()) == false)
+		if (dlg.isEditedSignal(s->ID()) == true)
 		{
-			continue;
+			editedSignals.push_back(s);
+			result.emplace_back(initialAppSignalID[i], s->appSignalID());
 		}
 
-		ObjectState state;
-
-		s->trimTextFields();
-
-		signalSetProvider->setSignalWorkcopy(s, &state, parent);
-
-		if (state.errCode != ERR_SIGNAL_OK)
-		{
-			switch(state.errCode)
-			{
-				case ERR_SIGNAL_IS_NOT_CHECKED_OUT:
-				{
-					message += QString("Signal %1 could not be checked out\n").arg(state.id);
-					break;
-				}
-				case ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER:
-				{
-					message += QString("Signal %1 is checked out by other user\n").arg(state.id);
-					break;
-				}
-				case ERR_SIGNAL_DELETED:
-				{
-					message += QString("Signal %1 was deleted already\n").arg(state.id);
-					break;
-				}
-				case ERR_SIGNAL_NOT_FOUND:
-				{
-					message += QString("Signal %1 not found\n").arg(state.id);
-					break;
-				}
-				default:
-				{
-					message += QString("Unknown error %1\n").arg(state.errCode);
-				}
-			}
-		}
+		i++;
 	}
 
-	if (!message.isEmpty())
-	{
-		QMessageBox::critical(parent, "Error", message);
-	}
-
-	std::vector<std::pair<QString, QString>> result;
-
-	result.resize(signalPtrVector.size());
-
-	for (int i = 0; i < signalPtrVector.size(); i++)
-	{
-		result[i].first = foundSignalID[i];
-		result[i].second = signalPtrVector[i]->appSignalID();
-	}
+	signalSetProvider->saveSignals(editedSignals, parent);
 
 	return result;
 }

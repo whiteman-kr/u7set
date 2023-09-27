@@ -491,6 +491,7 @@ public:
 	static QString removeNumberSign(const QString& appSignalID);
 
 	void trimTextFields();
+	void uppercaseAppSignalID(bool uppercase);
 
 private:
 	// Private setters for fields, wich can't be changed outside DB engine
@@ -713,6 +714,7 @@ public:
 	bool serializeFromProtoFile(const QString& filePath);
 
 	static const int BAD_INDEX = -1;
+	static const int BAD_ID = -1;
 
 private:
 	const AppSignal* privateGetSignal(const QString& appSignalID) const;

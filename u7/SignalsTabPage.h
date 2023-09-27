@@ -81,7 +81,7 @@ private:
 	QLocale m_defaultLocale;
 	QDoubleValidatorEx m_dblValidatorEx;
 
-	mutable int signalIdForUndoOnCancelEditing = -1;
+	mutable int signalIdForUndoOnCancelEditing = AppSignalSet::BAD_ID;
 };
 
 class SignalsTabPage : public MainTabPage
@@ -148,9 +148,9 @@ public slots:
 
 	void changeSignalsLoadingSequence();
 
-	void setSelection(const std::vector<int>& selectedRowsSignalID, int focusedCellSignalID = -1);
+	void setSelection(const std::vector<int>& selectedRowsSignalID, int focusedCellSignalID = AppSignalSet::BAD_ID);
 	void saveSelection();
-	void restoreSelection(int selectedSignalID = -1);
+	void restoreSelection(int selectedSignalID = AppSignalSet::BAD_ID);
 	void restoreSelections(const std::vector<int>& selectedSignalIDs);
 	void onSignalSelectionChanged();
 
@@ -192,7 +192,7 @@ private:
 	QAction* m_addMetrologyConnectionAction = nullptr;
 
 	std::vector<int> m_selectedRowsSignalID;
-	int m_focusedCellSignalID = -1;
+	int m_focusedCellSignalID = AppSignalSet::BAD_ID;
 	int m_focusedCellColumn = -1;
 };
 

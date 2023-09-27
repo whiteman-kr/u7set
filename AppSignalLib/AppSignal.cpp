@@ -2089,6 +2089,14 @@ void AppSignal::trimTextFields()
 	m_unit = m_unit.trimmed();
 }
 
+void AppSignal::uppercaseAppSignalID(bool uppercase)
+{
+	if (uppercase)
+	{
+		m_appSignalID = m_appSignalID.toUpper();
+	}
+}
+
 void AppSignal::initCreatedDates()
 {
 	m_createdMcs = QDateTime::currentDateTime().toMSecsSinceEpoch() * 1000;

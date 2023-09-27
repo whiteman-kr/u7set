@@ -276,7 +276,7 @@ int AppSignalSetProvider::signalID(int index) const
 
 	const AppSignal* s = m_signalSet.at(index);
 
-	TEST_PTR_RETURN_VALUE(s, -1);
+	TEST_PTR_RETURN_VALUE(s, AppSignalSet::BAD_ID);
 
 	return s->ID();
 }
@@ -482,208 +482,126 @@ bool AppSignalSetProvider::autoAddSignals(const std::vector<const Hardware::Devi
 	return result;
 }
 
-
-void AppSignalSetProvider::loadUsers()
+std::vector<int> AppSignalSetProvider::cloneSignals(const std::vector<int>& signalIDsToClone)
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
 
-	std::vector<DbUser> users;
+	std::vector<int> newSignalIDs;
+	std::vector<int> newSignalIndexes;
+	std::set<int> clonedSignalIDs;
 
-	m_db->getUserList(&users, nullptr);
-
-	m_users.clear();
-
-	for (auto const& user : users)
+	for (const int signalID : signalIDsToClone)
 	{
-		m_users.emplace(user.userId(), user.username());
-	}
-}
-
-void AppSignalSetProvider::reloadPropertiesBehaviour()
-{
-	TEST_PTR_RETURN(m_db);
-
-	int etcFileId = m_db->systemFileId(DbDir::EtcDir);
-
-	DbFileInfo propBehaviourFileInfo;
-
-	m_db->getFileInfo(etcFileId, QString(Db::File::SignalPropertyBehaviorFileName),
-								&propBehaviourFileInfo, nullptr);
-
-	if (propBehaviourFileInfo.isNull() == true)
-	{
-		QMessageBox::critical(m_parentWidget, "Error", QString("File \"%1\" is not found!").
-										arg(Db::File::SignalPropertyBehaviorFileName));
-		return;
-	}
-
-	std::shared_ptr<DbFile> file;
-
-	bool result = m_db->getLatestVersion(propBehaviourFileInfo, &file, nullptr);
-
-	if (result == false)
-	{
-		QMessageBox::critical(m_parentWidget, "Error", QString("Could not load file \"%1\"").
-										arg(Db::File::SignalPropertyBehaviorFileName));
-		return;
-	}
-
-	m_propertyManager.clear();
-
-	QString errMsg;
-
-	m_propertyManager.updatePropertiesBehaviour(file->data(), &errMsg);
-
-	if (errMsg.isEmpty() == false)
-	{
-		QMessageBox::critical(m_parentWidget, "Error", errMsg);
-	}
-}
-
-void AppSignalSetProvider::startSignalsLoading()
-{
-	Q_ASSERT(m_thread == QThread::currentThread());
-
-	if (m_signalsLoading == true)
-	{
-		terminateSignalsLoading();
-	}
-
-	loadIdAppSignalId();
-
-	m_signalsLoadTimer.setInterval(100);
-	m_signalsLoadTimer.start();
-
-	m_signalsLoading = true;
-
-	emit signalsCountChanged();
-}
-
-void AppSignalSetProvider::terminateSignalsLoading()
-{
-	Q_ASSERT(m_thread == QThread::currentThread());
-
-	m_signalsLoadTimer.stop();
-	m_signalsLoading = false;
-}
-
-void AppSignalSetProvider::loadIdAppSignalId()
-{
-	Q_ASSERT(m_thread == QThread::currentThread());
-
-	std::vector<ID_AppSignalID> ids;
-
-	m_db->getSignalsIDAppSignalID(&ids, false, nullptr);
-
-	m_signalSet.clear();
-	m_signalSet.reserve(ids.size());
-
-	for(const ID_AppSignalID& id : ids)
-	{
-		m_signalSet.append(id);
-	}
-}
-
-void AppSignalSetProvider::appendSignalsAndUpdateViews(const std::vector<AppSignal>& newSignals)
-{
-	if (newSignals.size() == 0)
-	{
-		return;
-	}
-
-	std::vector<int> newIndexes;
-
-	for(const AppSignal& newSignal : newSignals)
-	{
-		auto [ns, index] = m_signalSet.append(newSignal);
-
-		newIndexes.push_back(index);
-	}
-
-	emit detectNewProperties(newIndexes);
-	emit signalsCountChanged();
-}
-
-void AppSignalSetProvider::onSignalsLoadTimer()
-{
-	Q_ASSERT(m_thread == QThread::currentThread());
-
-	if (m_signalsLoading == false)
-	{
-		Q_ASSERT(false);
-		m_signalsLoadTimer.stop();
-		return;
-	}
-
-	static const int MAX_SIGNALS_COUNT = 500;
-
-	std::vector<int> signalIds;
-
-	signalIds.reserve(MAX_SIGNALS_COUNT);
-
-	int low = -1;
-	int high = 0;
-
-	if (m_middleVisibleSignalIndex >= 0)
-	{
-		low = m_middleVisibleSignalIndex - 1;
-		high = m_middleVisibleSignalIndex;
-	}
-	else
-	{
-		high = 0;
-	}
-
-	int signalCount = m_signalSet.count();
-
-	AppSignal* s = nullptr;
-
-	while ((low >= 0 || high < signalCount) &&
-		   signalIds.size() <= (MAX_SIGNALS_COUNT - 2))
-	{
-		while(low >= 0)
+		if (clonedSignalIDs.contains(signalID))
 		{
-			s = m_signalSet.at(low);
-
-			low--;
-
-			if (s != nullptr && s->isLoaded() == false)
-			{
-				signalIds.push_back(s->ID());
-				break;
-			}
+			continue;
 		}
 
-		while(high < signalCount)
+		const AppSignal* signalToClone = m_signalSet.getSignal(signalID);
+
+		TEST_PTR_CONTINUE(signalToClone);
+
+		const AppSignal signal(*signalToClone);
+
+		E::SignalType type = signal.signalType();
+		std::vector<int> groupSignalIDs;
+
+		m_signalSet.getChannelSignalsID(signal, &groupSignalIDs);
+
+		clonedSignalIDs.insert(groupSignalIDs.begin(), groupSignalIDs.end());
+
+		QString cloneSuffix = "_CLONE";
+		int suffixNumerator = 1;
+		bool hasConflict = false;
+
+		do
 		{
-			s = m_signalSet.at(high);
+			hasConflict = false;
 
-			high++;
-
-			if (s != nullptr && s->isLoaded() == false)
+			for(int groupSignalID : groupSignalIDs)
 			{
-				signalIds.push_back(s->ID());
-				break;
+				const AppSignal* groupSignal = m_signalSet.getSignal(groupSignalID);
+
+				TEST_PTR_CONTINUE(groupSignal);
+
+				QString cloneAppSignalID = groupSignal->appSignalID() + cloneSuffix;
+
+				if (m_signalSet.contains(cloneAppSignalID))
+				{
+					hasConflict = true;
+					break;
+				}
 			}
+
+			if (hasConflict)
+			{
+				suffixNumerator++;
+				cloneSuffix = QString("_CLONE%1").arg(suffixNumerator);
+			}
+		}
+		while (hasConflict && suffixNumerator < 1000);
+
+		if (suffixNumerator >= 1000)
+		{
+			assert(false);
+			return std::vector<int>();
+		}
+
+		std::vector<AppSignal> signalsToCreate(groupSignalIDs.size());
+
+		int i = 0;
+
+		for(int groupSignalID : groupSignalIDs)
+		{
+			const AppSignal* groupSignal = m_signalSet.getSignal(groupSignalID);
+
+			TEST_PTR_CONTINUE(groupSignal);
+
+			AppSignal& signalToCreate = signalsToCreate[i];
+
+			signalToCreate = *groupSignal;
+
+			signalToCreate.trimTextFields();
+
+			signalToCreate.setAppSignalID(groupSignal->appSignalID() + cloneSuffix);
+			signalToCreate.setCustomAppSignalID(groupSignal->customAppSignalID() + cloneSuffix);
+
+			i++;
+		}
+
+		m_db->addSignals(type, &signalsToCreate, nullptr);
+
+		for (const AppSignal& s : signalsToCreate)
+		{
+			auto [s, index] = m_signalSet.append(s);
+
+			TEST_PTR_CONTINUE(s);
+
+			newSignalIDs.push_back(s->ID());
+			newSignalIndexes.push_back(index);
 		}
 	}
 
-	if (signalIds.size() > 0)
-	{
-		reloadSignals(signalIds);
-	}
+	emit detectNewProperties(newSignalIndexes);
+	emit signalsCountChanged();
 
-	if (signalIds.size() == 0 ||
-		(low < 0 && high >= signalCount))
-	{
-		m_signalsLoadTimer.stop();
-		m_signalsLoading = false;
-	}
+	return newSignalIDs;
 }
 
-bool AppSignalSetProvider::setSignalWorkcopy(AppSignal* signal, ObjectState* objectState, QWidget* parentWidget)
+bool AppSignalSetProvider::saveSignal(AppSignal* signal, QWidget* parentWidget)
 {
-	bool result = m_db->setSignalWorkcopy(signal, objectState, parentWidget);
+	Q_ASSERT(m_thread == QThread::currentThread());
+
+	TEST_PTR_RETURN_FALSE(signal);
+
+	signal->trimTextFields();
+	signal->uppercaseAppSignalID(projectProperty_uppercaseAppSignalID());
+
+	ObjectState state;
+
+	bool result = m_db->setSignalWorkcopy(signal, &state, nullptr);
+
+	result &= showError(state);
 
 	if (result == true)
 	{
@@ -691,6 +609,45 @@ bool AppSignalSetProvider::setSignalWorkcopy(AppSignal* signal, ObjectState* obj
 
 		emit signalsUpdated({index});
 	}
+
+	return result;
+}
+
+bool AppSignalSetProvider::saveSignals(const std::vector<AppSignal*>& signalsVector, QWidget* parentWidget)
+{
+	Q_ASSERT(m_thread == QThread::currentThread());
+
+	bool result = true;
+
+	std::vector<ObjectState> states;
+	std::vector<int> updatedIndexes;
+
+	for (AppSignal* s : signalsVector)
+	{
+		ObjectState state;
+
+		s->trimTextFields();
+
+		bool res = m_db->setSignalWorkcopy(s, &state, parentWidget);
+
+		result &= res;
+
+		states.emplace_back(state);
+
+		if (res == true && state.errCode == ERR_SIGNAL_OK)
+		{
+			auto [s, index] = m_signalSet.updateSignal(*s);
+
+			updatedIndexes.push_back(index);
+		}
+	}
+
+	if (updatedIndexes.empty() == false)
+	{
+		emit signalsUpdated(updatedIndexes);
+	}
+
+	result &= showErrors(states);
 
 	return result;
 }
@@ -735,14 +692,9 @@ bool AppSignalSetProvider::checkoutSignal(const AppSignal* s, QString* message)
 
 	RETURN_IF_FALSE(res);
 
-	if (objectStates.empty())
-	{
-		return false;
-	}
-
 	if (message == nullptr)
 	{
-		showErrors(objectStates);
+		res = showErrors(objectStates);
 	}
 	else
 	{
@@ -751,6 +703,8 @@ bool AppSignalSetProvider::checkoutSignal(const AppSignal* s, QString* message)
 			if (objectState.errCode != ERR_SIGNAL_OK)
 			{
 				*message += errorMessage(objectState) + "\n";
+
+				res = false;
 			}
 		}
 	}
@@ -761,13 +715,14 @@ bool AppSignalSetProvider::checkoutSignal(const AppSignal* s, QString* message)
 			objectState.userId != m_currentUserID &&
 			m_currentUserIsAdmin == false)
 		{
-			return false;
+			res = false;
+			break;
 		}
 	}
 
 	reloadSignals(signalsIDs);
 
-	return true;
+	return res;
 }
 
 bool AppSignalSetProvider::checkinSignals(const std::vector<int>& signalIDs,
@@ -1102,176 +1057,240 @@ void AppSignalSetProvider::deleteSignals(const std::vector<int>& signalIDs)
 	}
 }
 
-/*void AppSignalSetProvider::saveSignal(AppSignal& signal)
+
+void AppSignalSetProvider::loadUsers()
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
 
-	ObjectState state;
+	std::vector<DbUser> users;
 
-	signal.trimTextFields();
+	m_db->getUserList(&users, nullptr);
 
-	m_db->setSignalWorkcopy(&signal, &state, nullptr);
+	m_users.clear();
 
-	if (state.errCode != ERR_SIGNAL_OK)
+	for (auto const& user : users)
 	{
-		showError(state);
+		m_users.emplace(user.userId(), user.username());
 	}
-
-	m_signalSet.updateSignal(signal);
 }
 
-void AppSignalSetProvider::saveSignals(const std::vector<AppSignal*>& signalVector)
+void AppSignalSetProvider::reloadPropertiesBehaviour()
+{
+	TEST_PTR_RETURN(m_db);
+
+	int etcFileId = m_db->systemFileId(DbDir::EtcDir);
+
+	DbFileInfo propBehaviourFileInfo;
+
+	m_db->getFileInfo(etcFileId, QString(Db::File::SignalPropertyBehaviorFileName),
+								&propBehaviourFileInfo, nullptr);
+
+	if (propBehaviourFileInfo.isNull() == true)
+	{
+		QMessageBox::critical(m_parentWidget, "Error", QString("File \"%1\" is not found!").
+										arg(Db::File::SignalPropertyBehaviorFileName));
+		return;
+	}
+
+	std::shared_ptr<DbFile> file;
+
+	bool result = m_db->getLatestVersion(propBehaviourFileInfo, &file, nullptr);
+
+	if (result == false)
+	{
+		QMessageBox::critical(m_parentWidget, "Error", QString("Could not load file \"%1\"").
+										arg(Db::File::SignalPropertyBehaviorFileName));
+		return;
+	}
+
+	m_propertyManager.clear();
+
+	QString errMsg;
+
+	m_propertyManager.updatePropertiesBehaviour(file->data(), &errMsg);
+
+	if (errMsg.isEmpty() == false)
+	{
+		QMessageBox::critical(m_parentWidget, "Error", errMsg);
+	}
+}
+
+void AppSignalSetProvider::startSignalsLoading()
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
 
-	std::vector<ObjectState> states;
-
-	for (AppSignal* s : signalVector)
+	if (m_signalsLoading == true)
 	{
-		ObjectState state;
-
-		s->trimTextFields();
-
-		m_db->setSignalWorkcopy(s, &state, nullptr);
-
-		states.emplace_back(state);
-
-		m_signalSet.updateSignal(*s);
+		terminateSignalsLoading();
 	}
 
-	showErrors(states);
-}*/
+	loadIdAppSignalId();
 
-std::vector<int> AppSignalSetProvider::cloneSignals(const std::vector<int>& signalIDsToClone)
-{
-	Q_ASSERT(m_thread == QThread::currentThread());
+	m_signalsLoadTimer.setInterval(100);
+	m_signalsLoadTimer.start();
 
-	std::vector<int> newSignalIDs;
-	std::vector<int> newSignalIndexes;
-	std::set<int> clonedSignalIDs;
+	m_signalsLoading = true;
 
-	for (const int signalID : signalIDsToClone)
-	{
-		if (clonedSignalIDs.contains(signalID))
-		{
-			continue;
-		}
-
-		const AppSignal* signalToClone = m_signalSet.getSignal(signalID);
-
-		TEST_PTR_CONTINUE(signalToClone);
-
-		const AppSignal signal(*signalToClone);
-
-		E::SignalType type = signal.signalType();
-		std::vector<int> groupSignalIDs;
-
-		m_signalSet.getChannelSignalsID(signal, &groupSignalIDs);
-
-		clonedSignalIDs.insert(groupSignalIDs.begin(), groupSignalIDs.end());
-
-		QString cloneSuffix = "_CLONE";
-		int suffixNumerator = 1;
-		bool hasConflict = false;
-
-		do
-		{
-			hasConflict = false;
-
-			for(int groupSignalID : groupSignalIDs)
-			{
-				const AppSignal* groupSignal = m_signalSet.getSignal(groupSignalID);
-
-				TEST_PTR_CONTINUE(groupSignal);
-
-				QString cloneAppSignalID = groupSignal->appSignalID() + cloneSuffix;
-
-				if (m_signalSet.contains(cloneAppSignalID))
-				{
-					hasConflict = true;
-					break;
-				}
-			}
-
-			if (hasConflict)
-			{
-				suffixNumerator++;
-				cloneSuffix = QString("_CLONE%1").arg(suffixNumerator);
-			}
-		}
-		while (hasConflict && suffixNumerator < 1000);
-
-		if (suffixNumerator >= 1000)
-		{
-			assert(false);
-			return std::vector<int>();
-		}
-
-		std::vector<AppSignal> signalsToCreate(groupSignalIDs.size());
-
-		int i = 0;
-
-		for(int groupSignalID : groupSignalIDs)
-		{
-			const AppSignal* groupSignal = m_signalSet.getSignal(groupSignalID);
-
-			TEST_PTR_CONTINUE(groupSignal);
-
-			AppSignal& signalToCreate = signalsToCreate[i];
-
-			signalToCreate = *groupSignal;
-
-			signalToCreate.trimTextFields();
-
-			signalToCreate.setAppSignalID(groupSignal->appSignalID() + cloneSuffix);
-			signalToCreate.setCustomAppSignalID(groupSignal->customAppSignalID() + cloneSuffix);
-
-			i++;
-		}
-
-		m_db->addSignals(type, &signalsToCreate, nullptr);
-
-		for (const AppSignal& s : signalsToCreate)
-		{
-			auto [s, index] = m_signalSet.append(s);
-
-			TEST_PTR_CONTINUE(s);
-
-			newSignalIDs.push_back(s->ID());
-			newSignalIndexes.push_back(index);
-		}
-	}
-
-	emit detectNewProperties(newSignalIndexes);
 	emit signalsCountChanged();
-
-	return newSignalIDs;
 }
 
+void AppSignalSetProvider::terminateSignalsLoading()
+{
+	Q_ASSERT(m_thread == QThread::currentThread());
+
+	m_signalsLoadTimer.stop();
+	m_signalsLoading = false;
+}
+
+void AppSignalSetProvider::loadIdAppSignalId()
+{
+	Q_ASSERT(m_thread == QThread::currentThread());
+
+	std::vector<ID_AppSignalID> ids;
+
+	m_db->getSignalsIDAppSignalID(&ids, false, nullptr);
+
+	m_signalSet.clear();
+	m_signalSet.reserve(ids.size());
+
+	for(const ID_AppSignalID& id : ids)
+	{
+		m_signalSet.append(id);
+	}
+}
+
+void AppSignalSetProvider::appendSignalsAndUpdateViews(const std::vector<AppSignal>& newSignals)
+{
+	if (newSignals.size() == 0)
+	{
+		return;
+	}
+
+	std::vector<int> newIndexes;
+
+	for(const AppSignal& newSignal : newSignals)
+	{
+		auto [ns, index] = m_signalSet.append(newSignal);
+
+		newIndexes.push_back(index);
+	}
+
+	emit detectNewProperties(newIndexes);
+	emit signalsCountChanged();
+}
+
+void AppSignalSetProvider::onSignalsLoadTimer()
+{
+	Q_ASSERT(m_thread == QThread::currentThread());
+
+	if (m_signalsLoading == false)
+	{
+		Q_ASSERT(false);
+		m_signalsLoadTimer.stop();
+		return;
+	}
+
+	static const int MAX_SIGNALS_COUNT = 500;
+
+	std::vector<int> signalIds;
+
+	signalIds.reserve(MAX_SIGNALS_COUNT);
+
+	int low = -1;
+	int high = 0;
+
+	if (m_middleVisibleSignalIndex >= 0)
+	{
+		low = m_middleVisibleSignalIndex - 1;
+		high = m_middleVisibleSignalIndex;
+	}
+	else
+	{
+		high = 0;
+	}
+
+	int signalCount = m_signalSet.count();
+
+	AppSignal* s = nullptr;
+
+	while ((low >= 0 || high < signalCount) &&
+		   signalIds.size() <= (MAX_SIGNALS_COUNT - 2))
+	{
+		while(low >= 0)
+		{
+			s = m_signalSet.at(low);
+
+			low--;
+
+			if (s != nullptr && s->isLoaded() == false)
+			{
+				signalIds.push_back(s->ID());
+				break;
+			}
+		}
+
+		while(high < signalCount)
+		{
+			s = m_signalSet.at(high);
+
+			high++;
+
+			if (s != nullptr && s->isLoaded() == false)
+			{
+				signalIds.push_back(s->ID());
+				break;
+			}
+		}
+	}
+
+	if (signalIds.size() > 0)
+	{
+		reloadSignals(signalIds);
+	}
+
+	if (signalIds.size() == 0 ||
+		(low < 0 && high >= signalCount))
+	{
+		m_signalsLoadTimer.stop();
+		m_signalsLoading = false;
+	}
+}
 
 QString AppSignalSetProvider::errorMessage(const ObjectState& state)
 {
 	// Converts ObjectState.errCode to human readable message
 	//
+	QString signalID = QString::number(state.id);
+
+	AppSignal* s = getSignalByID(state.id);
+
+	if (s != nullptr)
+	{
+		signalID = s->appSignalID();
+	}
+
 	switch(state.errCode)
 	{
-		case ERR_SIGNAL_IS_NOT_CHECKED_OUT:
-			return QString("Signal %1 is not checked out").arg(state.id);
+	case ERR_SIGNAL_OK:
+		return QString();
 
-		case ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER:
-			return QString("Signal %1 is checked out by user %2").arg(state.id).arg(getUserName(state.userId));
+	case ERR_SIGNAL_IS_NOT_CHECKED_OUT:
+		return QString("Signal %1 is not checked out").arg(signalID);
 
-		case ERR_SIGNAL_DELETED:
-			return QString("Signal %1 was deleted already").arg(state.id);
+	case ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER:
+		return QString("Signal %1 is checked out by user %2").arg(signalID).arg(getUserName(state.userId));
 
-		case ERR_SIGNAL_NOT_FOUND:
-			return QString("Signal %1 not found").arg(state.id);
+	case ERR_SIGNAL_DELETED:
+		return QString("Signal %1 was deleted already").arg(signalID);
 
-		case ERR_SIGNAL_EXISTS:
-				return QString();				// error message is displayed by PGSql driver
+	case ERR_SIGNAL_NOT_FOUND:
+		return QString("Signal %1 not found").arg(signalID);
 
-		default:
-			return QString("Unknown error code %1").arg(state.errCode);
+	case ERR_SIGNAL_EXISTS:
+			return QString();				// error message is displayed by PGSql driver
+
+	default:
+		return QString("Unknown error code %1").arg(state.errCode);
 	}
 }
 
@@ -1326,6 +1345,3 @@ bool AppSignalSetProvider::showErrors(const std::vector<ObjectState>& states)
 
 	return true;
 }
-
-
-

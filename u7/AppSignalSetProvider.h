@@ -76,7 +76,10 @@ public:
 	bool autoAddSignals(const std::vector<const Hardware::DeviceAppSignal*>& deviceSignals,
 						std::vector<AppSignal>* addedSignals, QWidget* parentWidget = nullptr);
 
-	bool setSignalWorkcopy(AppSignal* signal, ObjectState* objectState, QWidget* parentWidget);
+	std::vector<int> cloneSignals(const std::vector<int>& signalIDsToClone);
+
+	bool saveSignal(AppSignal* signal, QWidget* parentWidget);
+	bool saveSignals(const std::vector<AppSignal*>& signalsVector, QWidget* parentWidget);
 
 	bool checkoutSignalByIndex(int index, QString* message);
 	bool checkoutSignal(const AppSignal* s, QString* message);
@@ -92,13 +95,6 @@ public:
 								QString* errMsg);
 
 	void deleteSignals(const std::vector<int>& signalIDs);
-
-//	void saveSignal(AppSignal& signal);
-//	void saveSignals(const std::vector<AppSignal*>& signalVector);
-	std::vector<int> cloneSignals(const std::vector<int>& signalIDsToClone);
-
-
-
 
 signals:
 	void error(const QString& message);						// for throwing message boxes

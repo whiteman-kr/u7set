@@ -76,9 +76,10 @@ private:
 
 private slots:
 	void generateListIfNeededWithWarning();
+	bool uppercase() const;
 	void updateAllReplacement();
-	void updateReplacement(int row);
-	void updateReplacement(const AppSignal& signal, int row);
+	void updateReplacement(int row, bool uppercase);
+	void updateReplacement(const AppSignal& signal, int row, bool uppercase);
 	void replaceAll();
 	void replaceAndFindNext();
 	void findPrevious();

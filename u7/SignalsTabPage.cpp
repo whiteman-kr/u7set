@@ -93,7 +93,7 @@ QWidget* SignalsDelegate::createEditor(QWidget* parent, const QStyleOptionViewIt
 	}
 	else
 	{
-		signalIdForUndoOnCancelEditing = -1;
+		signalIdForUndoOnCancelEditing = AppSignalSet::BAD_ID;
 	}
 
 	if (!provider->checkoutSignalByIndex(row, nullptr))
@@ -315,14 +315,14 @@ void SignalsDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, c
 
 			if (valueChanged == true)
 			{
-				provider->saveSignal(s);
+				provider->saveSignal(&s, nullptr);
 			}
 			else
 			{
 				provider->undoSignal(s);
 			}
 
-			signalIdForUndoOnCancelEditing = -1;
+			signalIdForUndoOnCancelEditing = AppSignalSet::BAD_ID;
 		}
 
 		return;
@@ -340,14 +340,14 @@ void SignalsDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, c
 
 		if (valueChanged == true)
 		{
-			provider->saveSignal(s);
+			provider->saveSignal(&s, nullptr);
 		}
 		else
 		{
 			provider->undoSignal(s);
 		}
 
-		signalIdForUndoOnCancelEditing = -1;
+		signalIdForUndoOnCancelEditing = AppSignalSet::BAD_ID;
 		return;
 	}
 
@@ -417,19 +417,19 @@ void SignalsDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, c
 
 	if (valueChanged == true)
 	{
-		provider->saveSignal(s);
+		provider->saveSignal(&s, nullptr);
 	}
 	else
 	{
 		provider->undoSignal(s);
 	}
 
-	signalIdForUndoOnCancelEditing = -1;
+	signalIdForUndoOnCancelEditing = AppSignalSet::BAD_ID;
 }
 
 void SignalsDelegate::onCloseEditorEvent(QWidget*, QAbstractItemDelegate::EndEditHint hint)
 {
-	if (hint == QAbstractItemDelegate::RevertModelCache && signalIdForUndoOnCancelEditing != -1)
+	if (hint == QAbstractItemDelegate::RevertModelCache && signalIdForUndoOnCancelEditing != AppSignalSet::BAD_ID)
 	{
 		AppSignalSetProvider* provider = m_model->signalSetProvider();
 
@@ -437,7 +437,7 @@ void SignalsDelegate::onCloseEditorEvent(QWidget*, QAbstractItemDelegate::EndEdi
 
 		provider->undoSignal(signalIdForUndoOnCancelEditing);
 
-		signalIdForUndoOnCancelEditing = -1;
+		signalIdForUndoOnCancelEditing = AppSignalSet::BAD_ID;
 	}
 }
 
@@ -617,7 +617,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 
 		// This should be done by SignalsDelegate::setModelData
 		Q_ASSERT(false);
-		m_signalSetProvider->saveSignal(s);
+		m_signalSetProvider->saveSignal(&s,  m_parentWindow);
 	}
 	else
 	{
@@ -1277,7 +1277,7 @@ bool SignalsTabPage::editSignals(const std::vector<int>& ids)
 		{
 			hasEditedSignals = true;
 
-			m_signalSetProvider->saveSignals(signalsToSave);
+			m_signalSetProvider->saveSignals(signalsToSave, this);
 		}
 	}
 
@@ -1317,7 +1317,9 @@ void SignalsTabPage::cloneSignal()
 
 	m_signalsView->clearSelection();
 
-	restoreSelections(signalsToCloneIDs);
+	// restoreSelections(signalsToCloneIDs);
+
+	restoreSelections(m_selectedRowsSignalID);
 }
 
 void SignalsTabPage::deleteSignal()
@@ -1532,7 +1534,7 @@ void SignalsTabPage::setSelection(const std::vector<int>& selectedRowsSignalID, 
 		return;
 	}
 
-	if (focusedCellSignalID == -1)
+	if (focusedCellSignalID == AppSignalSet::BAD_ID)
 	{
 		focusedCellSignalID = selectedRowsSignalID.back();
 	}
@@ -1554,15 +1556,22 @@ void SignalsTabPage::saveSelection()
 	m_selectedRowsSignalID.clear();
 
 	QModelIndexList selectedList = m_signalsView->selectionModel()->selectedRows(0);
-	m_selectedRowsSignalID.resize(selectedList.size());
 
-	int currentIdIndex = 0;
+	m_selectedRowsSignalID.reserve(selectedList.size());
 
 	foreach (const QModelIndex& index, selectedList)
 	{
 		int row = getMappedSourceRow(index);
 
-		m_selectedRowsSignalID[currentIdIndex++] = m_signalSetProvider->signalID(row);
+		int id = m_signalSetProvider->signalID(row);
+
+		if (id == AppSignalSet::BAD_ID)
+		{
+			Q_ASSERT(false);
+			continue;
+		}
+
+		m_selectedRowsSignalID.push_back(id);
 	}
 
 	QModelIndex index = m_signalsView->currentIndex();
@@ -1597,9 +1606,14 @@ void SignalsTabPage::restoreSelections(const std::vector<int>& selectedSignalIDs
 
 	for(int selectedSignalID : selectedSignalIDs)
 	{
+		if (selectedSignalID == AppSignalSet::BAD_ID)
+		{
+			continue;
+		}
+
 		int signalIndex = m_signalSetProvider->signalIndex(selectedSignalID);
 
-		if (signalIndex == -1)
+		if (signalIndex == AppSignalSet::BAD_INDEX)
 		{
 			continue;
 		}
