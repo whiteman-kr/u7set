@@ -15,7 +15,7 @@ fi
 
 if psql -lqt --port $3 | cut -d \| -f 1 | grep -qw $2; then
     echo Database $2 already exists, deleting it.
-    psql -U postgres --port 5433 -c "DROP DATABASE $2;"
+    psql -U postgres --port $3 -c "DROP DATABASE $2;"
 fi
 
 echo Importing database $2.
