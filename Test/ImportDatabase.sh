@@ -21,4 +21,4 @@ fi
 echo Importing database $2.
 
 psql -U postgres --port $3 -c "CREATE DATABASE $2 OWNER u7;"
-time psql $2 < $1
+time psql --port $3 $2 < $1
