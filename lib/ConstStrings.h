@@ -184,6 +184,8 @@ namespace EquipmentPropNames
 
 	// Testing Reports properties
 	//
+
+	inline const QString TESTING_SCRIPTTAGS("ScriptTags");
 	inline const QString TESTING_PLANT("Plant");
 	inline const QString TESTING_UNIT("Unit");
 	inline const QString TESTING_SYSTEM("System");

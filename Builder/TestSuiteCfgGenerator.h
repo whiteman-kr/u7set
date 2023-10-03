@@ -24,6 +24,8 @@ protected:
 	bool writeTestScripts();
 	bool writeReportTemplates();
 
+	bool checkScriptFileTags(std::shared_ptr<DbFile>& file, const QStringList& scriptTags);
+
 private:
 	QStringList m_tuningSources;
 };

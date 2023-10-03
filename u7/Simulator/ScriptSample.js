@@ -9,6 +9,14 @@
 //
 var SkipOnBuild = false;
 
+// Using script tags, project developer can create multiple instances of TestSuite preset that process different set scripts.
+// ScriptTags variable is a string array that contains a set of tags. Script tags are also specified
+// in ScriptTags property of TestSuite preset. Test scripts are processed by TestSuite if both test and preset script tags match,
+// or if no tags are specified at all.
+// Note: GlobalScript.js file is always processed by every TestSuite.
+
+var ScriptTags = ["default"];
+
 // To give a custom caption to the the whole script function, declare a variable that has the same name as 
 // the script file name without path and extention and add 'caption' prefix.
 // Custom script caption is displayed in TestSuite user interface and in reports.
