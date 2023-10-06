@@ -588,10 +588,30 @@ namespace Sim
 		return isEqual(value, signalValue(appSignalId), tolerance) == true;
 	}
 
-	void ScriptSimulator::overridesReset(qint64 timeoutMs /*= 5000*/)
+	void ScriptSimulator::overridesReset(qint64 timeoutMs /*= 5000*/, QStringList excludeAppSignals /*= {}*/)
 	{
-		m_simulator->overrideSignals().clear();
+		if (excludeAppSignals.isEmpty() == true)
+		{
+			m_simulator->overrideSignals().clear();
+		}
+		else
+		{
+			QStringList overridenSignals = m_simulator->overrideSignals().overrideSignalIds();
+			for (const QString& appSignalId : overridenSignals)
+			{
+				if (excludeAppSignals.contains(appSignalId) == false)
+				{
+					m_simulator->overrideSignals().removeSignal(appSignalId);
+				}
+			}
+		}
+
 		startForMs(1);
+	}
+
+	QStringList ScriptSimulator::getOverridenSignals() const
+	{
+		return m_simulator->overrideSignals().overrideSignalIds();
 	}
 
 	bool ScriptSimulator::logicModuleExists(QString equipmentId) const
