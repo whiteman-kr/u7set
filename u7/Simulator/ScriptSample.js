@@ -15,7 +15,7 @@ var SkipOnBuild = false;
 // or if no tags are specified at all.
 // Note: GlobalScript.js file is always processed by every TestSuite.
 
-var ScriptTags = ["default"];
+var ScriptTags = ["simtest"];
 
 // To give a custom caption to the the whole script function, declare a variable that has the same name as 
 // the script file name without path and extention and add 'caption' prefix.
