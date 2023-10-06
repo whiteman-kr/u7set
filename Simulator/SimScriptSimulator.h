@@ -154,7 +154,7 @@ namespace Sim
 		/// It automatically calls \c waitForSignalOverrides with a specified timeout (default value: 5000 ms) 
 		/// to wait for all signals to be reset. If the function times out, an exception is thrown.
 		/// \param timeoutMs The timeout value in milliseconds for waiting on signal overrides.
-		/// Optional \param excludeAppSignals specifies the list of signals that should not be reset.
+		/// \param excludeAppSignals Optionally specifies the list of signals that should not be reset.
 		void overridesReset(qint64 timeoutMs = 5000, QStringList excludeAppSignals = {});
 
 		/// \brief Get overriden signals list

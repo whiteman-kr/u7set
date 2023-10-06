@@ -211,21 +211,10 @@ namespace TestSuite
 			}
 		}
 
-		if (excludeAppSignals.isEmpty() == true)
-		{
-			m_overridenSignals.clear();
-		}
-		else
-		{
-			std::set<QString> prevOverridenSignals = std::move(m_overridenSignals);
-			for (const QString& appSignalId : prevOverridenSignals)
-			{
-				if (excludeAppSignals.contains(appSignalId) == true)
-				{
-					m_overridenSignals.insert(appSignalId);
-				}
-			}
-		}
+		std::erase_if(m_overridenSignals, [&excludeAppSignals](const QString& s)
+					  {
+						  return excludeAppSignals.contains(s) == false;
+					  });
 
 		bool ok = waitForSignalOverrides(timeoutMs);
 		if (ok == false)

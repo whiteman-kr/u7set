@@ -687,13 +687,22 @@ namespace Sim
 		return true;
 	}
 
-	void OverrideSignals::removeSignal(QString appSignalId)
+	void OverrideSignals::removeSignal(const QString& appSignalId)
+	{
+		return removeSignals({appSignalId});
+	}
+
+	void OverrideSignals::removeSignals(const QStringList& appSignalIds)
 	{
 		{
 			QWriteLocker locker(&m_lock);
-			m_changesCounter ++;
+			m_changesCounter++;
 
-			m_signals.erase(appSignalId);
+			std::erase_if(m_signals, [&appSignalIds](const auto& item)
+						  {
+							  auto const& [key, value] = item;
+							  return appSignalIds.contains(key) == true;
+						  });
 		}
 
 		emit signalsChanged({});
