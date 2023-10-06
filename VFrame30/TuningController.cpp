@@ -129,7 +129,7 @@ namespace VFrame30
 	{
 		if (m_tuningAuthorization.checkTuningAccess(m_parent) == false)
 		{
-			return true;	// Access is denied, this is not an error
+			return false;
 		}
 
 		return m_tuningConnection.writeTuningSignal(appSignalId, value);
