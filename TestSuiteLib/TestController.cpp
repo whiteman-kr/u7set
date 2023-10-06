@@ -146,6 +146,11 @@ namespace TestSuite
 			return -1;
 		}
 
+		if (state.isStateAvailable() == false || state.isValid() == false)
+		{
+			return std::numeric_limits<double>::quiet_NaN();
+		}
+
 		return state.value();
 	}
 
