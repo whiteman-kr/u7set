@@ -1,27 +1,26 @@
 #include "Parser.h"
+#include "Context.h"
+
 #include <QtConcurrentRun>
 
 #include "../DbLib/DbController.h"
 #include "../HardwareLib/LmDescription.h"
-
-#include "../VFrame30/UfbSchema.h"
-#include "../VFrame30/SchemaPoint.h"
-#include "../VFrame30/SchemaLayer.h"
-#include "../VFrame30/LogicSchema.h"
-#include "../VFrame30/SchemaItemLink.h"
 #include "../VFrame30/FblItemRect.h"
-#include "../VFrame30/SchemaItemAfb.h"
-#include "../VFrame30/SchemaItemSignal.h"
-#include "../VFrame30/SchemaItemConst.h"
-#include "../VFrame30/SchemaItemUfb.h"
-#include "../VFrame30/SchemaItemBus.h"
-#include "../VFrame30/SchemaItemTerminator.h"
-#include "../VFrame30/SchemaItemLoopback.h"
-#include "../VFrame30/SchemaItemConnection.h"
 #include "../VFrame30/HorzVertLinks.h"
+#include "../VFrame30/LogicSchema.h"
 #include "../VFrame30/PropertyNames.h"
-
-#include "Context.h"
+#include "../VFrame30/SchemaItemAfb.h"
+#include "../VFrame30/SchemaItemBus.h"
+#include "../VFrame30/SchemaItemConnection.h"
+#include "../VFrame30/SchemaItemConst.h"
+#include "../VFrame30/SchemaItemLink.h"
+#include "../VFrame30/SchemaItemLoopback.h"
+#include "../VFrame30/SchemaItemSignal.h"
+#include "../VFrame30/SchemaItemTerminator.h"
+#include "../VFrame30/SchemaItemUfb.h"
+#include "../VFrame30/SchemaLayer.h"
+#include "../VFrame30/SchemaPoint.h"
+#include "../VFrame30/UfbSchema.h"
 
 
 namespace Builder
@@ -284,7 +283,7 @@ namespace Builder
 	}
 
 	// Function finds branch with a point on it.
-	// Returns branch index or -1 if a brach was not found
+	// Returns branch index or -1 if a branch was not found
 	//
 	int BushContainer::getBranchByPinPos(VFrame30::SchemaPoint pt) const
 	{
@@ -376,7 +375,7 @@ namespace Builder
 
 	void BushContainer::removeEmptyBushes()
 	{
-		// Remove bushes without fbls
+		// Remove bushes without FBLs
 		//
 		bushes.erase(std::remove_if(bushes.begin(), bushes.end(),
 					[](const Bush& b)
@@ -551,15 +550,15 @@ namespace Builder
 			return false;
 		}
 
-		// Create a copy of bushcontainer, as in case of processing multisignlas in multichannel schemas
-		// these multisignals will be created for all channels
+		// Create a copy of bush-container, as in case of processing multi-signals in multichannel schemas
+		// these multi-signals will be created for all channels
 		//
 		BushContainer bushContainer = bushes;
 
 		if (bushContainer.bushes.empty() == true)
 		{
 			//LOG_WARNING_OBSOLETE(log, Builder::IssueType::NotDefined, QObject::tr("Logic schema does no contains any correct links."));
-			assert(false);	// if fires then add error to IussueLogger
+			assert(false);	// if fires then add error to IssueLogger
 			return true;
 		}
 
@@ -641,12 +640,12 @@ namespace Builder
 		{
 			if (item.second.m_fblItem->inputsCount() == 0)
 			{
-				orderedList.push_front(item.second);	// items without inputs must be at the begining of the list
+				orderedList.push_front(item.second);	// items without inputs must be at the beginning of the list
 				continue;
 			}
 		}
 
-		// Get all outputs and assigned to them inputs, it's a dependand map
+		// Get all outputs and assigned to them inputs, it's a dependant map
 		//
 		std::multimap<QUuid, AppLogicItem> outputPinToInputItem;				// Key is QUuid of output connected to input
 
@@ -687,7 +686,7 @@ namespace Builder
 			{
 				auto range = outputPinToInputItem.equal_range(out.guid());
 
-				std::map<QUuid, AppLogicItem> rangeItemsMap;	// set removes duplicats
+				std::map<QUuid, AppLogicItem> rangeItemsMap;	// set removes duplicates
 				for (auto rangeIt = range.first; rangeIt != range.second; ++rangeIt)
 				{
 					const AppLogicItem& appItem = rangeIt->second;
@@ -727,7 +726,7 @@ namespace Builder
 
 			qDebug() << "Pass " << ++pass;
 
-			// If this is not firts pass, then we need to start oreder loop form the last item (pass > 1)
+			// If this is not first pass, then we need to start order loop form the last item (pass > 1)
 			// as all items before just added (in the end of this loop orderedList.push_back(item);) already were ordered
 			//
 			bool startLoopFromLastItem = pass > 1;
@@ -839,7 +838,7 @@ namespace Builder
 			itemsCopy.push_back(aliCopy);
 		}
 
-		// Set new inputs/ouputs guids to the copied items
+		// Set new inputs/outputs guids to the copied items
 		// Keep connections to in<->out (Associated IOs)
 		//
 		std::map<QUuid, QUuid> oldToNewPins;			// key is old, value in new QUuid of the pin
@@ -976,7 +975,7 @@ namespace Builder
 				{
 					if (pin.IsInput() == false)
 					{
-						throw QString("Pin is in iutput list but has an output type. item %1, pin.caption %2")
+						throw QString("Pin is in input list but has an output type. item %1, pin.caption %2")
 								.arg(ali.m_fblItem->label())
 								.arg(pin.caption());
 					}
@@ -1130,7 +1129,7 @@ namespace Builder
 					continue;
 				}
 
-				throw QString("pin is neither inpur nor output. item %1, pin.caption %2")
+				throw QString("pin is neither input nor output. item %1, pin.caption %2")
 						.arg(ali.m_fblItem->label())
 						.arg(pin.caption());
 			}
@@ -1159,7 +1158,7 @@ namespace Builder
 
 	bool AppLogicModule::removeInOutItemKeepAssoc(const QUuid& itemGuid)
 	{
-		// Find item iteself
+		// Find item itself
 		//
 		auto itemIt = m_fblItemsAcc.find(itemGuid);
 
@@ -1402,22 +1401,22 @@ namespace Builder
 						continue;
 					}
 
-					// Dependant item is above currentItem, so let's move currentItem right before dependand one
+					// Dependant item is above currentItem, so let's move currentItem right before dependant one
 					// in orderedList
 					//
 					auto tempIter = currentIt;
 
-					currentIt = orderedItems.insert(dependantIsAbove, currentItem);	// Upate currrentIt, it is important and
+					currentIt = orderedItems.insert(dependantIsAbove, currentItem);	// Update currentIt, it is important and
 																					// the part of the the algorithm!
 
 					orderedItems.erase(tempIter);
 
-					continue;	// Process other dependtants, do not break!
+					continue;	// Process other dependents, do not break!
 				}
 
 				Q_ASSERT(false);
 
-				// Process other dependtants, do not break!
+				// Process other dependents, do not break!
 				//
 			}
 		}
@@ -1622,7 +1621,7 @@ namespace Builder
 
 		if (moduleIt == m_modules.end())
 		{
-			// Module was not found, addit
+			// Module was not found, add it
 			//
 			module = std::make_shared<AppLogicModule>(equipmentId, schema->lmDescriptionFile());
 			m_modules.push_back(module);
@@ -1634,7 +1633,7 @@ namespace Builder
 
 		assert(module);
 
-		// Check if the schema and module have the same LmDescritionFile
+		// Check if the schema and module have the same LmDescriptionFile
 		//
 		if (schema->lmDescriptionFile() != module->lmDescriptionFile())
 		{
@@ -1685,7 +1684,7 @@ namespace Builder
 
 		if (moduleIt == m_ufbs.end())
 		{
-			// Module was not found, addit
+			// Module was not found, add it
 			//
 			module = std::make_shared<AppLogicModule>(schema->schemaId(), schema->lmDescriptionFile());
 			m_ufbs[schema->schemaId()] = module;
@@ -1756,7 +1755,7 @@ namespace Builder
 			}
 			else
 			{
-				// Set iterruptRequest, so work threads can get it and exit
+				// Set interruptRequest, so work threads can get it and exit
 				//
 				iterruptRequest = QThread::currentThread()->isInterruptionRequested();
 				QThread::yieldCurrentThread();
@@ -1781,17 +1780,17 @@ namespace Builder
 		}
 
 		bool result = true;
-		bool iterruptRequest = false;
+		bool interruptRequest = false;
 
 		for (std::pair<QString, std::shared_ptr<AppLogicModule>> ufbModule : m_ufbs)
 		{
-			iterruptRequest = QThread::currentThread()->isInterruptionRequested();
-			if (iterruptRequest == true)
+			interruptRequest = QThread::currentThread()->isInterruptionRequested();
+			if (interruptRequest == true)
 			{
 				return false;
 			}
 
-			ufbModule.second->orderItems(log, &iterruptRequest);
+			ufbModule.second->orderItems(log, &interruptRequest);
 		}
 
 		return result;
@@ -1806,12 +1805,12 @@ namespace Builder
 		}
 
 		bool result = true;
-		bool iterruptRequest = false;
+		bool interruptRequest = false;
 
 		for (std::shared_ptr<AppLogicModule> module : m_modules)
 		{
-			iterruptRequest = QThread::currentThread()->isInterruptionRequested();
-			if (iterruptRequest == true)
+			interruptRequest = QThread::currentThread()->isInterruptionRequested();
+			if (interruptRequest == true)
 			{
 				return false;
 			}
@@ -1895,7 +1894,7 @@ namespace Builder
 				}
 
 				// Check for the special case, input is connected to output of the same item
-				// SchemaItemUfb has loop withot any items
+				// SchemaItemUfb has loop without any items
 				//        +-[UFB]-+
 				//        |       |
 				//        +-------+
@@ -2354,7 +2353,7 @@ namespace Builder
 					}
 
 					// Set values to references Inputs/Outputs
-					// Some Inputs or outputs in UFB can be Refernces to SchemaItemUfb.Property
+					// Some Inputs or outputs in UFB can be References to SchemaItemUfb.Property
 					//
 					if (VFrame30::SchemaItemSignal* signalItem = ufbSchemaItem.m_fblItem->toSignalElement();
 						signalItem != nullptr)
@@ -2569,7 +2568,7 @@ namespace Builder
 
 	bool AppLogicData::bindTwoPins(VFrame30::AfbPin& outPint, VFrame30::AfbPin& inputPin)
 	{
-		// Function binds two pins to each other, it is done by setting assocation vector
+		// Function binds two pins to each other, it is done by setting association vector
 		//
 		if (outPint.IsOutput() == false ||
 			inputPin.IsInput() == false)
@@ -2751,7 +2750,7 @@ namespace Builder
 			return ok;
 		}
 
-		// Check if some LmDescripnFiles were not loaded
+		// Check if some LmDescriptionFiles were not loaded
 		//
 		bool ok = true;
 
@@ -2770,7 +2769,7 @@ namespace Builder
 			return ok;
 		}
 
-		// Check for the same lables in ufbs
+		// Check for the same labels in UFBs
 		//
 		if (ok = checkSameLabelsAndGuids(ufbs);
 			ok == false)
@@ -2778,7 +2777,7 @@ namespace Builder
 			result = false;
 		}
 
-		// Check for the same inputs and outputs in ufbs
+		// Check for the same inputs and outputs in UFBs
 		//
 		if (ok = checkSameInputsAndOutputs(ufbs);
 			ok == false)
@@ -2791,11 +2790,11 @@ namespace Builder
 			return result;
 		}
 
-		// Check Ufbs SchemaItemAfb.afbElement versions
+		// Check UFBs SchemaItemAfb.afbElement versions
 		//
 		for (std::shared_ptr<VFrame30::UfbSchema> schema : ufbs)
 		{
-			checkAfbItemsVersion(schema.get());
+			result &= checkAfbItemsVersion(schema.get());
 		}
 
 		// Check UFBs Busses versions
@@ -2803,14 +2802,19 @@ namespace Builder
 		Q_ASSERT(m_busSet);
 		for (std::shared_ptr<VFrame30::UfbSchema> schema : ufbs)
 		{
-			checkBusItemsVersion(schema.get(), *m_busSet);
+			result &= checkBusItemsVersion(schema.get(), *m_busSet);
 		}
 
-		// Check UFBs LooopbackSource.loopbackId for uniness
+		// Check UFBs LoopbackSource.loopbackId for uniqueness
 		//
 		for (std::shared_ptr<VFrame30::UfbSchema> schema : ufbs)
 		{
-			checkForUniqueLoopbackId(schema.get());
+			result &= checkForUniqueLoopbackId(schema.get());
+		}
+
+		if (ok == false)
+		{
+			return ok;
 		}
 
 		// Parse User Functional Blocks (UFBs)
@@ -2838,7 +2842,7 @@ namespace Builder
 		}
 
 		// The result is set of AppLogicModule (m_modules), but items are not ordered yet
-		// Order itmes in all modules
+		// Order items in all modules
 		//
 		LOG_MESSAGE(m_log, "");
 		LOG_MESSAGE(m_log, tr("Ordering User Functional Blocks items..."));
@@ -2866,11 +2870,11 @@ namespace Builder
 
 		if (schemas.empty() == true)
 		{
-			LOG_MESSAGE(m_log, tr("There is no appliction logic files in the project."));
+			LOG_MESSAGE(m_log, tr("There is no application logic files in the project."));
 			return true;
 		}
 
-		// Check if some LmDescripnFiles were not loaded
+		// Check if some LmDescriptionFiles were not loaded
 		//
 		//double loadSchemaProgress = 0;		// 0 - 1
 		//double loadSchemaItem = 1.0 / schemas.size();				// All load is 5%
@@ -2894,7 +2898,7 @@ namespace Builder
 			return ok;
 		}
 
-		// Check for the same lables in schemas
+		// Check for the same labels in schemas
 		//
 		ok = checkSameLabelsAndGuids(schemas);
 		if (ok == false)
@@ -2906,21 +2910,21 @@ namespace Builder
 		//
 		for (std::shared_ptr<VFrame30::LogicSchema> schema : schemas)
 		{
-			checkEquipmentIds(schema.get());
+			ok &= checkEquipmentIds(schema.get());
 		}
 
 		// Check LmDescriptionFile must be as in LogicModule
 		//
 		for (std::shared_ptr<VFrame30::LogicSchema> schema : schemas)
 		{
-			checkLmDescription(schema.get());
+			ok &= checkLmDescription(schema.get());
 		}
 
 		// Check SchemaItemAfb.afbElement versions
 		//
 		for (std::shared_ptr<VFrame30::LogicSchema> schema : schemas)
 		{
-			checkAfbItemsVersion(schema.get());
+			ok &= checkAfbItemsVersion(schema.get());
 		}
 
 		// Check SchemaItemBus bus versions
@@ -2928,14 +2932,20 @@ namespace Builder
 		Q_ASSERT(m_busSet);
 		for (std::shared_ptr<VFrame30::LogicSchema> schema : schemas)
 		{
-			checkBusItemsVersion(schema.get(), *m_busSet);
+			ok &= checkBusItemsVersion(schema.get(), *m_busSet);
 		}
 
 		// Check SchemaItemUfb versions
 		//
 		for (std::shared_ptr<VFrame30::LogicSchema> schema : schemas)
 		{
-			checkUfbItemsVersion(schema.get(), ufbs);
+			ok &= checkUfbItemsVersion(schema.get(), ufbs);
+		}
+
+		if (ok == false)
+		{
+			result = false;
+			return result;
 		}
 
 		// Save schemas to context
@@ -2952,7 +2962,7 @@ namespace Builder
 		std::vector<QFuture<bool>> parseTasks;
 		parseTasks.reserve(schemas.size());
 
-		bool iterruptRequest = false;
+		bool interruptRequest = false;
 
 		for (std::shared_ptr<VFrame30::LogicSchema> schema : schemas)
 		{
@@ -2962,11 +2972,11 @@ namespace Builder
 			}
 
 			QFuture<bool> task =  QtConcurrent::run(
-				[this, schema, &readyParseDataContainer, &iterruptRequest]() -> bool
+				[this, schema, &readyParseDataContainer, &interruptRequest]() -> bool
 				{
 					try
 					{
-						return this->parseAppLogicSchema(schema, &readyParseDataContainer, &iterruptRequest);
+						return this->parseAppLogicSchema(schema, &readyParseDataContainer, &interruptRequest);
 					}
 					catch (std::exception& e)
 					{
@@ -3006,9 +3016,9 @@ namespace Builder
 			}
 			else
 			{
-				// Set iterruptRequest, so work threads can get it and exit
+				// Set interruptRequest, so work threads can get it and exit
 				//
-				iterruptRequest = QThread::currentThread()->isInterruptionRequested();
+				interruptRequest = QThread::currentThread()->isInterruptionRequested();
 				QThread::yieldCurrentThread();
 			}
 		}
@@ -3034,7 +3044,7 @@ namespace Builder
 		}
 
 		// The result is set of AppLogicModule (m_modules), but items are not ordered yet
-		// Order itmes in all modules
+		// Order items in all modules
 		//
 		LOG_MESSAGE(m_log, tr("Ordering AppLogic items..."));
 
@@ -3045,7 +3055,7 @@ namespace Builder
 			result = false;
 		}
 
-		// Check for relations conistency
+		// Check for relations consistency
 		//
 		LOG_MESSAGE(m_log, tr("Checking relations consistency..."));
 
@@ -3066,7 +3076,7 @@ namespace Builder
 			return result;
 		}
 
-		// Check UFBs LooopbackSource.loopbackId for uniness
+		// Check UFBs LoopbackSource.loopbackId for uniqueness
 		//
 		for (std::shared_ptr<AppLogicModule> module : m_applicationData->modules())
 		{
@@ -3252,7 +3262,7 @@ namespace Builder
 
 		// Wait for finish and process interrupt request
 		//
-		bool iterruptRequest = false;
+		bool interruptRequest = false;
 
 		do
 		{
@@ -3273,9 +3283,9 @@ namespace Builder
 			}
 			else
 			{
-				// Set iterruptRequest, so work threads can get it and exit
+				// Set interruptRequest, so work threads can get it and exit
 				//
-				iterruptRequest = QThread::currentThread()->isInterruptionRequested();
+				interruptRequest = QThread::currentThread()->isInterruptionRequested();
 				QThread::yieldCurrentThread();
 			}
 		}
@@ -3422,7 +3432,7 @@ namespace Builder
 		{
 			if (labels.count(labelPair.first) != 1)
 			{
-				log()->errINT1001(tr("Please, report to developers: Schemas contain duplicate lables %1").arg(labelPair.first), labelPair.second);
+				log()->errINT1001(tr("Please, report to developers: Schemas contain duplicate labels %1").arg(labelPair.first), labelPair.second);
 				result = false;
 			}
 		}
@@ -3891,7 +3901,7 @@ namespace Builder
 		if (schema == nullptr)
 		{
 			Q_ASSERT(schema);
-			m_log->errINT1000(QString(__FUNCTION__) + QString(", Schema is nulllptr."));
+			m_log->errINT1000(QString(__FUNCTION__) + QString(", Schema is nullptr."));
 			return false;
 		}
 
@@ -4137,7 +4147,7 @@ namespace Builder
 				// All theses items are allowed to be used on UFB schema
 				//
 
-				// Check if Input/Output has particulary ONE assigned AppSignalID
+				// Check if Input/Output has particularly ONE assigned AppSignalID
 				//
 				if (item->isType<VFrame30::SchemaItemSignal>() == true)
 				{
@@ -4349,12 +4359,12 @@ namespace Builder
 
 		if (alienLmIds == true)
 		{
-			// There were an error, the progreamm signaled about it, just leave this func
+			// There were an error, the program signaled about it, just leave this func
 			//
 			return false;
 		}
 
-		// Serializae layer, so it can be restored for each equipmentId
+		// Serialize layer, so it can be restored for each equipmentId
 		//
 		QByteArray layerData;
 		layer->saveToByteArray(&layerData);
@@ -4364,7 +4374,7 @@ namespace Builder
 		for (QString equipmentId : equipmentIds)
 		{
 			std::shared_ptr<VFrame30::SchemaLayer> moduleLayer = VFrame30::SchemaLayer::Create(layerData);	// We don't want to spoil layer, it cab be used later
-																											// In stroring schamas, in TuningClient, et cetera.
+																											// In storing schemas, in TuningClient, et cetera.
 			if (moduleLayer.get() == nullptr)
 			{
 				Q_ASSERT(moduleLayer);
@@ -4379,7 +4389,7 @@ namespace Builder
 
 			if (logicSchema->isMultichannelSchema() == true)
 			{
-				// Multischema checks. All multichannel signals must be transformed to singlechannel here
+				// Multi-schema checks. All multichannel signals must be transformed to single-channel here
 				//
 				result = multichannelProcessing(logicSchema, moduleLayer, equipmentId);
 			}
@@ -4418,7 +4428,7 @@ namespace Builder
 				return false;
 			}
 
-			// Filter singlechannel logic branches in multischema drawing
+			// Filter single-channel logic branches in multi-schema drawing
 			//
 			if (logicSchema->isMultichannelSchema() == true)
 			{
@@ -4572,7 +4582,7 @@ namespace Builder
 
 				if (connectionIds.size() == 1)
 				{
-					// If it's singlechannel receiver and has more then one appsignalid then error
+					// If it's single-channel receiver and has more then one appSignalId then error
 					//
 					if (receiverAppSignalIds.size() != 1)
 					{
@@ -4587,7 +4597,7 @@ namespace Builder
 				}
 
 				// Check if this is receiver in multichannel schema, then it must have the same numbers of conntion ids and
-				// appsignal ids
+				// appSignalIds
 				//
 				if (connectionIds.size() != schema->channelCount() || receiverAppSignalIds.size() != schema->channelCount())
 				{
@@ -4687,7 +4697,7 @@ namespace Builder
 
 		while (bushes.empty() == false)
 		{
-			std::list<Bush> bushAcc;			// Whole jonedBranch Accumulator
+			std::list<Bush> bushAcc;			// Whole joinedBranch Accumulator
 
 			Bush startBush = bushes.front();
 			bushAcc.push_back(startBush);		// Move front of bushes to the accumulator
@@ -4696,7 +4706,7 @@ namespace Builder
 
 			// Get all bushes related to this bushAcc
 			//
-			auto accItertaor = bushAcc.begin();		// Just added one iterato, so it cannot be empty
+			auto accIterator = bushAcc.begin();		// Just added one iterator, so it cannot be empty
 			do
 			{
 				if (bushes.empty() == true)
@@ -4709,7 +4719,7 @@ namespace Builder
 				auto findIt = bushes.begin();		// bushes is not empty!!!
 				do
 				{
-					if (accItertaor->hasCommonFbls(*findIt) == true)
+					if (accIterator->hasCommonFbls(*findIt) == true)
 					{
 						bushAcc.push_back(*findIt);
 
@@ -4720,17 +4730,17 @@ namespace Builder
 							break;
 						}
 
-						continue;		// findIt already incremente
+						continue;		// findIt already increment
 					}
 				}
 				while (++findIt != bushes.end());
 			}
-			while (++accItertaor != bushAcc.end());
+			while (++accIterator != bushAcc.end());
 
 			// if bushAcc has all this channel signals, then add it
 			//
 			bool allSignalsFromThisChannel = true;
-			QString lmEquipmnetId;
+			QString lmEquipmentId;
 			for (const Bush& b : bushAcc)
 			{
 				for (std::pair<QUuid,std::shared_ptr<VFrame30::FblItemRect>> fbl : b.fblItems)
@@ -4742,7 +4752,7 @@ namespace Builder
 
 						QString appSignalId = signalElement->appSignalIds();
 
-						// Check if appSignalid from this channel
+						// Check if appSignalId from this channel
 						//
 						AppSignal* signal = m_signalSet->getSignal(appSignalId);
 
@@ -4766,15 +4776,15 @@ namespace Builder
 						{
 							allSignalsFromThisChannel = false;
 
-							if (lmEquipmnetId.isEmpty() == true)
+							if (lmEquipmentId.isEmpty() == true)
 							{
-								// The first occurance LM, init lmEquipmnetId
+								// The first occurrence LM, init lmEquipmentId
 								//
-								lmEquipmnetId = lm->equipmentIdTemplate();
+								lmEquipmentId = lm->equipmentIdTemplate();
 							}
 							else
 							{
-								if (lmEquipmnetId != lm->equipmentIdTemplate())
+								if (lmEquipmentId != lm->equipmentIdTemplate())
 								{
 									// Branch contains signals (%1) from different channels (LogicSchema '%2').
 									//
@@ -4784,7 +4794,7 @@ namespace Builder
 						}
 						else
 						{
-							lmEquipmnetId = lm->equipmentIdTemplate();	// Init lmEquipmnetId with first LM
+							lmEquipmentId = lm->equipmentIdTemplate();	// Init lmEquipmentId with first LM
 						}
 					}
 				}
@@ -4822,7 +4832,7 @@ namespace Builder
 		}
 
 
-		// FblItems can conatain input or output pins, if input connects to output directly (without link)
+		// FblItems can contain input or output pins, if input connects to output directly (without link)
 		// then create fake link for it.
 		// This is for special case, when input connects to output without link.
 		//
@@ -4893,7 +4903,7 @@ namespace Builder
 					continue;
 				}
 
-				// Decompose link on different parts and put them to horzlinks and vertlinks
+				// Decompose link on different parts and put them to horzLinks and vertLinks
 				//
 				horzVertLinks.AddLinks(pointList, link->guid());
 
@@ -4927,7 +4937,7 @@ namespace Builder
 			std::list<QUuid> itemsUnderFrontPoint = horzVertLinks.getSchemaItemsUnderPoint(pointList.front(), link->guid());
 			std::list<QUuid> itemsUnderBackPoint = horzVertLinks.getSchemaItemsUnderPoint(pointList.back(), link->guid());
 
-			// Find item branch, if branch is not exists, make a new brach
+			// Find item branch, if branch is not exists, make a new branch
 			//
 			auto foundBranch = std::find_if(bushes.begin(), bushes.end(),
 				[link](const std::set<QUuid>& b)
@@ -4962,7 +4972,7 @@ namespace Builder
 		// branches can contain same items,
 		// all such branches must be joined
 		//
-		bool wasJoining = false;	// if branch was joinedto other branch, then process currentBranch one more time
+		bool wasJoining = false;	// if branch was joined to an other branch, then process currentBranch one more time
 
 		for (auto currentBranch = bushes.begin();
 			 currentBranch != bushes.end();
@@ -5112,7 +5122,7 @@ namespace Builder
 			{
 				// SchemaItem has inputs and outputs
 				// Get coordinates for each input/output and
-				// find branche with point on the pin
+				// find branch with point on the pin
 				//
 				fblItem->ClearAssociatedConnections();
 				fblItem->SetConnectionsPos(schema->gridSize(), schema->pinGridStep());
@@ -5130,7 +5140,7 @@ namespace Builder
 
 					if (branchIndex == -1)
 					{
-						// Pin is not connectext to any link, this is error
+						// Pin is not connected to any link, this is error
 						//
 						log()->errALP4006(schema->schemaId(), fblItem->buildName(), in.caption(), item->guid());
 						result = false;
@@ -5152,7 +5162,7 @@ namespace Builder
 
 					if (branchIndex == -1)
 					{
-						// Pin is not connectext to any link, this is error
+						// Pin is not connected to any link, this is error
 						//
 						log()->errALP4006(schema->schemaId(), fblItem->buildName(), out.caption(), item->guid());
 
@@ -5214,7 +5224,7 @@ namespace Builder
 
 				// SchemaItem has inputs and outputs
 				// Get coordinates for each input/output and
-				// find branche with point on the pin
+				// find branch with point on the pin
 				//
 				fblElement->ClearAssociatedConnections();
 				fblElement->SetConnectionsPos(schema->gridSize(), schema->pinGridStep());
@@ -5228,12 +5238,12 @@ namespace Builder
 
 					if (branchIndex == -1)
 					{
-						// Pin is not connectext to any link, this is error
+						// Pin is not connected to any link, this is error
 						//
 						Q_ASSERT(false);
 
 						LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined,
-								  tr("LogicSchema %1: Internalerror in function, branch suppose to be found, %2.")
+								  tr("LogicSchema %1: Internal error in function, branch suppose to be found, %2.")
 								  .arg(schema->caption())
 								  .arg(__FUNCTION__));
 
@@ -5255,7 +5265,7 @@ namespace Builder
 						continue;
 					}
 
-					// Set sourche pin guid for this pin
+					// Set source pin guid for this pin
 					//
 					in.AddAssociattedIOs(bush.outputPin);
 				}
@@ -5266,10 +5276,10 @@ namespace Builder
 
 					if (branchIndex == -1)
 					{
-						// Pin is not connectext to any link, this is error
+						// Pin is not connected to any link, this is error
 						//
 						LOG_ERROR_OBSOLETE(log(), Builder::IssueType::NotDefined,
-								  tr("LogicSchema %1: Internalerror in function, branch suppose to be found, %2.")
+								  tr("LogicSchema %1: Internal error in function, branch suppose to be found, %2.")
 								  .arg(schema->caption())
 								  .arg(__FUNCTION__));
 
