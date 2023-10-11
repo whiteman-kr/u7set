@@ -4,23 +4,19 @@
 // LogonWorkspace
 //
 
-LogonWorkspace::LogonWorkspace(ClientLib::TuningUserManager& userManager, QWidget* parent):
+LogonWidget::LogonWidget(ClientLib::TuningUserManager& userManager, QWidget* parent):
 	QWidget(parent),
 	m_userManager(userManager)
 {
 	QHBoxLayout* l = new QHBoxLayout(this);
+	l->setContentsMargins(0, 0, 10, 0);
 
 	l->addStretch();
 
-	m_loginButton = new QPushButton(tr("Login"));
-	connect(m_loginButton, &QPushButton::clicked, this, &LogonWorkspace::onButtonLogin);
+	m_loginButton = new QPushButton(loginString);
+	connect(m_loginButton, &QPushButton::clicked, this, &LogonWidget::onButtonLogin);
 	l->addWidget(m_loginButton);
 	m_loginButton->setEnabled(m_userManager.isLoggedIn() == false);
-
-	m_logoutButton = new QPushButton(tr("Logout"));
-	connect(m_logoutButton, &QPushButton::clicked, this, &LogonWorkspace::onButtonLogout);
-	l->addWidget(m_logoutButton);
-	m_logoutButton->setEnabled(m_userManager.isLoggedIn() == true);
 
 	m_loginUserName = new QLabel(loggedOutString);
 	m_loginUserName->setAlignment(Qt::AlignCenter);
@@ -50,43 +46,41 @@ LogonWorkspace::LogonWorkspace(ClientLib::TuningUserManager& userManager, QWidge
 	m.setBottom(0);
 	l->setContentsMargins(m);
 
-	connect(&m_userManager, &ClientLib::TuningUserManager::loggedIn, this, &LogonWorkspace::onUserManagerLogin);
-	connect(&m_userManager, &ClientLib::TuningUserManager::loggedOut, this, &LogonWorkspace::onUserManagerLogout);
+	connect(&m_userManager, &ClientLib::TuningUserManager::loggedIn, this, &LogonWidget::onUserManagerLogin);
+	connect(&m_userManager, &ClientLib::TuningUserManager::loggedOut, this, &LogonWidget::onUserManagerLogout);
 }
 
-void LogonWorkspace::onButtonLogin()
+void LogonWidget::onButtonLogin()
 {
 	if (m_userManager.isLoggedIn() == true)
 	{
-		return;
+		m_userManager.logout();
 	}
-
-	m_userManager.login(this);
+	else
+	{
+		m_userManager.login(this);
+	}
 }
 
-void LogonWorkspace::onButtonLogout()
+void LogonWidget::onUserManagerLogin()
 {
-	m_userManager.logout();
-}
+	m_loginButton->setText(logoutString);
 
-void LogonWorkspace::onUserManagerLogin()
-{
-	m_loginButton->setEnabled(false);
-	m_logoutButton->setEnabled(true);
-
+	m_loginUserName->setStyleSheet("QLabel {background-color:blue; color: white;}");
 	m_loginUserName->setText(m_userManager.loggedInUser());
 }
 
-void LogonWorkspace::onUserManagerLogout()
+void LogonWidget::onUserManagerLogout()
 {
-	m_loginButton->setEnabled(true);
-	m_logoutButton->setEnabled(false);
+	m_loginButton->setText(loginString);
 
+	m_loginUserName->setStyleSheet(QString());
 	m_loginUserName->setText(loggedOutString);
+
 	m_logoutPendingTime->setText(zeroTimeString);
 }
 
-void LogonWorkspace::onTimer()
+void LogonWidget::onTimer()
 {
 	if (m_userManager.isLoggedIn() == true)
 	{

@@ -250,6 +250,9 @@ void MainWindow::createMenu()
 	pHelpMenu->addAction(m_aboutQtAction);
 	pHelpMenu->addAction(m_pAboutAction);
 
+	m_logonWidget = new LogonWidget(m_userManager, this);
+	connect(this, &MainWindow::timerTick500, m_logonWidget, &LogonWidget::onTimer);
+	menuBar()->setCornerWidget(m_logonWidget, Qt::TopRightCorner);
 }
 
 void MainWindow::createStatusBar()
@@ -440,13 +443,11 @@ void MainWindow::createWorkspace()
 	// Check if previous workspace is deleted
 
 	if (m_noWorkspaceLabel != nullptr ||
-		m_logonWorkspace != nullptr ||
 		m_tuningWorkspace != nullptr ||
 		m_schemasWorkspaces.empty() == false ||
 		m_tabWidget != nullptr)
 	{
 		Q_ASSERT(m_noWorkspaceLabel == nullptr);
-		Q_ASSERT(m_logonWorkspace == nullptr);
 		Q_ASSERT(m_tuningWorkspace == nullptr);
 		Q_ASSERT(m_schemasWorkspaces.empty() == true);
 		Q_ASSERT(m_tabWidget == nullptr);
@@ -536,13 +537,13 @@ void MainWindow::createWorkspace()
 
 	// Create login workspace
 
-	if (m_userManager.loginPerOperation() == false && m_userManager.tuningUserAccounts().empty() == false)
+	if (m_userManager.tuningLogin() == true && m_userManager.loginPerOperation() == false && m_userManager.tuningUserAccounts().empty() == false)
 	{
-		m_logonWorkspace = new LogonWorkspace(m_userManager, this);
-
-		connect(this, &MainWindow::timerTick500, m_logonWorkspace, &LogonWorkspace::onTimer);
-
-		m_mainLayout->addWidget(m_logonWorkspace);
+		m_logonWidget->setVisible(true);
+	}
+	else
+	{
+		m_logonWidget->setVisible(false);
 	}
 
 	// Now choose, what workspace to display. If both exists, create a tab page.
@@ -598,12 +599,6 @@ void MainWindow::deleteWorkspace()
 	{
 		delete m_noWorkspaceLabel;
 		m_noWorkspaceLabel = nullptr;
-	}
-
-	if (m_logonWorkspace != nullptr)
-	{
-		delete m_logonWorkspace;
-		m_logonWorkspace = nullptr;
 	}
 
 	if (m_tuningWorkspace != nullptr)
