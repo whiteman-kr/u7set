@@ -222,7 +222,7 @@ namespace VFrame30
 
 			if (editMode == true)
 			{
-				controlItem->updateWidgetProperties(childWidget);
+				controlItem->updateWidgetProperties(childWidget, editMode);
 			}
 
 			controlItems.erase(widgetUuid);

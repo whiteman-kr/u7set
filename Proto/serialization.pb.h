@@ -61,7 +61,7 @@ struct TableStruct_serialization_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[108]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[109]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -331,6 +331,9 @@ extern SchemaItemSignalDefaultTypeInternal _SchemaItemSignal_default_instance_;
 class SchemaItemSignalColumn;
 struct SchemaItemSignalColumnDefaultTypeInternal;
 extern SchemaItemSignalColumnDefaultTypeInternal _SchemaItemSignalColumn_default_instance_;
+class SchemaItemSlider;
+struct SchemaItemSliderDefaultTypeInternal;
+extern SchemaItemSliderDefaultTypeInternal _SchemaItemSlider_default_instance_;
 class SchemaItemTerminator;
 struct SchemaItemTerminatorDefaultTypeInternal;
 extern SchemaItemTerminatorDefaultTypeInternal _SchemaItemTerminator_default_instance_;
@@ -483,6 +486,7 @@ template<> ::Proto::SchemaItemReceiver* Arena::CreateMaybeMessage<::Proto::Schem
 template<> ::Proto::SchemaItemRect* Arena::CreateMaybeMessage<::Proto::SchemaItemRect>(Arena*);
 template<> ::Proto::SchemaItemSignal* Arena::CreateMaybeMessage<::Proto::SchemaItemSignal>(Arena*);
 template<> ::Proto::SchemaItemSignalColumn* Arena::CreateMaybeMessage<::Proto::SchemaItemSignalColumn>(Arena*);
+template<> ::Proto::SchemaItemSlider* Arena::CreateMaybeMessage<::Proto::SchemaItemSlider>(Arena*);
 template<> ::Proto::SchemaItemTerminator* Arena::CreateMaybeMessage<::Proto::SchemaItemTerminator>(Arena*);
 template<> ::Proto::SchemaItemTransmitter* Arena::CreateMaybeMessage<::Proto::SchemaItemTransmitter>(Arena*);
 template<> ::Proto::SchemaItemUfb* Arena::CreateMaybeMessage<::Proto::SchemaItemUfb>(Arena*);
@@ -5834,6 +5838,7 @@ class SchemaItem PROTOBUF_FINAL :
     kControlFieldNumber = 200,
     kPushButtonFieldNumber = 210,
     kLineEditFieldNumber = 211,
+    kSliderFieldNumber = 212,
     kItemUnitFieldNumber = 4,
     kIsStaticFieldNumber = 2,
     kIsLockedFieldNumber = 3,
@@ -6589,6 +6594,24 @@ class SchemaItem PROTOBUF_FINAL :
       ::Proto::SchemaItemLineEdit* lineedit);
   ::Proto::SchemaItemLineEdit* unsafe_arena_release_lineedit();
 
+  // optional .Proto.SchemaItemSlider slider = 212;
+  bool has_slider() const;
+  private:
+  bool _internal_has_slider() const;
+  public:
+  void clear_slider();
+  const ::Proto::SchemaItemSlider& slider() const;
+  ::Proto::SchemaItemSlider* release_slider();
+  ::Proto::SchemaItemSlider* mutable_slider();
+  void set_allocated_slider(::Proto::SchemaItemSlider* slider);
+  private:
+  const ::Proto::SchemaItemSlider& _internal_slider() const;
+  ::Proto::SchemaItemSlider* _internal_mutable_slider();
+  public:
+  void unsafe_arena_set_allocated_slider(
+      ::Proto::SchemaItemSlider* slider);
+  ::Proto::SchemaItemSlider* unsafe_arena_release_slider();
+
   // required .Proto.SchemaUnit itemUnit = 4;
   bool has_itemunit() const;
   private:
@@ -6720,6 +6743,7 @@ class SchemaItem PROTOBUF_FINAL :
   ::Proto::SchemaItemControl* control_;
   ::Proto::SchemaItemPushButton* pushbutton_;
   ::Proto::SchemaItemLineEdit* lineedit_;
+  ::Proto::SchemaItemSlider* slider_;
   int itemunit_;
   bool isstatic_;
   bool islocked_;
@@ -15851,6 +15875,430 @@ class SchemaItemLineEdit PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class SchemaItemSlider PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.SchemaItemSlider) */ {
+ public:
+  inline SchemaItemSlider() : SchemaItemSlider(nullptr) {}
+  virtual ~SchemaItemSlider();
+  explicit constexpr SchemaItemSlider(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  SchemaItemSlider(const SchemaItemSlider& from);
+  SchemaItemSlider(SchemaItemSlider&& from) noexcept
+    : SchemaItemSlider() {
+    *this = ::std::move(from);
+  }
+
+  inline SchemaItemSlider& operator=(const SchemaItemSlider& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline SchemaItemSlider& operator=(SchemaItemSlider&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
+    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
+  }
+  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
+    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const SchemaItemSlider& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const SchemaItemSlider* internal_default_instance() {
+    return reinterpret_cast<const SchemaItemSlider*>(
+               &_SchemaItemSlider_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    64;
+
+  friend void swap(SchemaItemSlider& a, SchemaItemSlider& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(SchemaItemSlider* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(SchemaItemSlider* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline SchemaItemSlider* New() const final {
+    return CreateMaybeMessage<SchemaItemSlider>(nullptr);
+  }
+
+  SchemaItemSlider* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<SchemaItemSlider>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const SchemaItemSlider& from);
+  void MergeFrom(const SchemaItemSlider& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(SchemaItemSlider* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Proto.SchemaItemSlider";
+  }
+  protected:
+  explicit SchemaItemSlider(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_serialization_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kScriptAfterCreateFieldNumber = 31,
+    kScriptSliderMovedFieldNumber = 32,
+    kScriptSliderPressedFieldNumber = 33,
+    kScriptSliderReleasedFieldNumber = 34,
+    kScriptValueChangedFieldNumber = 35,
+    kInvertedAppearanceFieldNumber = 2,
+    kInvertedControlsFieldNumber = 3,
+    kEnableMouseWheelFieldNumber = 4,
+    kMinimumFieldNumber = 7,
+    kTickPositionFieldNumber = 21,
+    kDefaultValueFieldNumber = 17,
+    kTickIntervalFieldNumber = 20,
+    kTrackingFieldNumber = 16,
+    kMaximumFieldNumber = 6,
+    kOrientationFieldNumber = 10,
+    kPageStepFieldNumber = 12,
+    kSingleStepFieldNumber = 13,
+  };
+  // optional string scriptAfterCreate = 31;
+  bool has_scriptaftercreate() const;
+  private:
+  bool _internal_has_scriptaftercreate() const;
+  public:
+  void clear_scriptaftercreate();
+  const std::string& scriptaftercreate() const;
+  void set_scriptaftercreate(const std::string& value);
+  void set_scriptaftercreate(std::string&& value);
+  void set_scriptaftercreate(const char* value);
+  void set_scriptaftercreate(const char* value, size_t size);
+  std::string* mutable_scriptaftercreate();
+  std::string* release_scriptaftercreate();
+  void set_allocated_scriptaftercreate(std::string* scriptaftercreate);
+  private:
+  const std::string& _internal_scriptaftercreate() const;
+  void _internal_set_scriptaftercreate(const std::string& value);
+  std::string* _internal_mutable_scriptaftercreate();
+  public:
+
+  // optional string scriptSliderMoved = 32;
+  bool has_scriptslidermoved() const;
+  private:
+  bool _internal_has_scriptslidermoved() const;
+  public:
+  void clear_scriptslidermoved();
+  const std::string& scriptslidermoved() const;
+  void set_scriptslidermoved(const std::string& value);
+  void set_scriptslidermoved(std::string&& value);
+  void set_scriptslidermoved(const char* value);
+  void set_scriptslidermoved(const char* value, size_t size);
+  std::string* mutable_scriptslidermoved();
+  std::string* release_scriptslidermoved();
+  void set_allocated_scriptslidermoved(std::string* scriptslidermoved);
+  private:
+  const std::string& _internal_scriptslidermoved() const;
+  void _internal_set_scriptslidermoved(const std::string& value);
+  std::string* _internal_mutable_scriptslidermoved();
+  public:
+
+  // optional string scriptSliderPressed = 33;
+  bool has_scriptsliderpressed() const;
+  private:
+  bool _internal_has_scriptsliderpressed() const;
+  public:
+  void clear_scriptsliderpressed();
+  const std::string& scriptsliderpressed() const;
+  void set_scriptsliderpressed(const std::string& value);
+  void set_scriptsliderpressed(std::string&& value);
+  void set_scriptsliderpressed(const char* value);
+  void set_scriptsliderpressed(const char* value, size_t size);
+  std::string* mutable_scriptsliderpressed();
+  std::string* release_scriptsliderpressed();
+  void set_allocated_scriptsliderpressed(std::string* scriptsliderpressed);
+  private:
+  const std::string& _internal_scriptsliderpressed() const;
+  void _internal_set_scriptsliderpressed(const std::string& value);
+  std::string* _internal_mutable_scriptsliderpressed();
+  public:
+
+  // optional string scriptSliderReleased = 34;
+  bool has_scriptsliderreleased() const;
+  private:
+  bool _internal_has_scriptsliderreleased() const;
+  public:
+  void clear_scriptsliderreleased();
+  const std::string& scriptsliderreleased() const;
+  void set_scriptsliderreleased(const std::string& value);
+  void set_scriptsliderreleased(std::string&& value);
+  void set_scriptsliderreleased(const char* value);
+  void set_scriptsliderreleased(const char* value, size_t size);
+  std::string* mutable_scriptsliderreleased();
+  std::string* release_scriptsliderreleased();
+  void set_allocated_scriptsliderreleased(std::string* scriptsliderreleased);
+  private:
+  const std::string& _internal_scriptsliderreleased() const;
+  void _internal_set_scriptsliderreleased(const std::string& value);
+  std::string* _internal_mutable_scriptsliderreleased();
+  public:
+
+  // optional string scriptValueChanged = 35;
+  bool has_scriptvaluechanged() const;
+  private:
+  bool _internal_has_scriptvaluechanged() const;
+  public:
+  void clear_scriptvaluechanged();
+  const std::string& scriptvaluechanged() const;
+  void set_scriptvaluechanged(const std::string& value);
+  void set_scriptvaluechanged(std::string&& value);
+  void set_scriptvaluechanged(const char* value);
+  void set_scriptvaluechanged(const char* value, size_t size);
+  std::string* mutable_scriptvaluechanged();
+  std::string* release_scriptvaluechanged();
+  void set_allocated_scriptvaluechanged(std::string* scriptvaluechanged);
+  private:
+  const std::string& _internal_scriptvaluechanged() const;
+  void _internal_set_scriptvaluechanged(const std::string& value);
+  std::string* _internal_mutable_scriptvaluechanged();
+  public:
+
+  // optional bool invertedAppearance = 2 [default = false];
+  bool has_invertedappearance() const;
+  private:
+  bool _internal_has_invertedappearance() const;
+  public:
+  void clear_invertedappearance();
+  bool invertedappearance() const;
+  void set_invertedappearance(bool value);
+  private:
+  bool _internal_invertedappearance() const;
+  void _internal_set_invertedappearance(bool value);
+  public:
+
+  // optional bool invertedControls = 3 [default = false];
+  bool has_invertedcontrols() const;
+  private:
+  bool _internal_has_invertedcontrols() const;
+  public:
+  void clear_invertedcontrols();
+  bool invertedcontrols() const;
+  void set_invertedcontrols(bool value);
+  private:
+  bool _internal_invertedcontrols() const;
+  void _internal_set_invertedcontrols(bool value);
+  public:
+
+  // optional bool enableMouseWheel = 4 [default = false];
+  bool has_enablemousewheel() const;
+  private:
+  bool _internal_has_enablemousewheel() const;
+  public:
+  void clear_enablemousewheel();
+  bool enablemousewheel() const;
+  void set_enablemousewheel(bool value);
+  private:
+  bool _internal_enablemousewheel() const;
+  void _internal_set_enablemousewheel(bool value);
+  public:
+
+  // optional int32 minimum = 7 [default = 0];
+  bool has_minimum() const;
+  private:
+  bool _internal_has_minimum() const;
+  public:
+  void clear_minimum();
+  ::PROTOBUF_NAMESPACE_ID::int32 minimum() const;
+  void set_minimum(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_minimum() const;
+  void _internal_set_minimum(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int32 tickPosition = 21 [default = 0];
+  bool has_tickposition() const;
+  private:
+  bool _internal_has_tickposition() const;
+  public:
+  void clear_tickposition();
+  ::PROTOBUF_NAMESPACE_ID::int32 tickposition() const;
+  void set_tickposition(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_tickposition() const;
+  void _internal_set_tickposition(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int32 defaultValue = 17 [default = 0];
+  bool has_defaultvalue() const;
+  private:
+  bool _internal_has_defaultvalue() const;
+  public:
+  void clear_defaultvalue();
+  ::PROTOBUF_NAMESPACE_ID::int32 defaultvalue() const;
+  void set_defaultvalue(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_defaultvalue() const;
+  void _internal_set_defaultvalue(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int32 tickInterval = 20 [default = 0];
+  bool has_tickinterval() const;
+  private:
+  bool _internal_has_tickinterval() const;
+  public:
+  void clear_tickinterval();
+  ::PROTOBUF_NAMESPACE_ID::int32 tickinterval() const;
+  void set_tickinterval(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_tickinterval() const;
+  void _internal_set_tickinterval(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional bool tracking = 16 [default = true];
+  bool has_tracking() const;
+  private:
+  bool _internal_has_tracking() const;
+  public:
+  void clear_tracking();
+  bool tracking() const;
+  void set_tracking(bool value);
+  private:
+  bool _internal_tracking() const;
+  void _internal_set_tracking(bool value);
+  public:
+
+  // optional int32 maximum = 6 [default = 99];
+  bool has_maximum() const;
+  private:
+  bool _internal_has_maximum() const;
+  public:
+  void clear_maximum();
+  ::PROTOBUF_NAMESPACE_ID::int32 maximum() const;
+  void set_maximum(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_maximum() const;
+  void _internal_set_maximum(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int32 orientation = 10 [default = 2];
+  bool has_orientation() const;
+  private:
+  bool _internal_has_orientation() const;
+  public:
+  void clear_orientation();
+  ::PROTOBUF_NAMESPACE_ID::int32 orientation() const;
+  void set_orientation(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_orientation() const;
+  void _internal_set_orientation(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int32 pageStep = 12 [default = 10];
+  bool has_pagestep() const;
+  private:
+  bool _internal_has_pagestep() const;
+  public:
+  void clear_pagestep();
+  ::PROTOBUF_NAMESPACE_ID::int32 pagestep() const;
+  void set_pagestep(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_pagestep() const;
+  void _internal_set_pagestep(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int32 singleStep = 13 [default = 1];
+  bool has_singlestep() const;
+  private:
+  bool _internal_has_singlestep() const;
+  public:
+  void clear_singlestep();
+  ::PROTOBUF_NAMESPACE_ID::int32 singlestep() const;
+  void set_singlestep(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_singlestep() const;
+  void _internal_set_singlestep(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:Proto.SchemaItemSlider)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr scriptaftercreate_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr scriptslidermoved_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr scriptsliderpressed_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr scriptsliderreleased_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr scriptvaluechanged_;
+  bool invertedappearance_;
+  bool invertedcontrols_;
+  bool enablemousewheel_;
+  ::PROTOBUF_NAMESPACE_ID::int32 minimum_;
+  ::PROTOBUF_NAMESPACE_ID::int32 tickposition_;
+  ::PROTOBUF_NAMESPACE_ID::int32 defaultvalue_;
+  ::PROTOBUF_NAMESPACE_ID::int32 tickinterval_;
+  bool tracking_;
+  ::PROTOBUF_NAMESPACE_ID::int32 maximum_;
+  ::PROTOBUF_NAMESPACE_ID::int32 orientation_;
+  ::PROTOBUF_NAMESPACE_ID::int32 pagestep_;
+  ::PROTOBUF_NAMESPACE_ID::int32 singlestep_;
+  friend struct ::TableStruct_serialization_2eproto;
+};
+// -------------------------------------------------------------------
+
 class DeviceObject PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.DeviceObject) */ {
  public:
@@ -15901,7 +16349,7 @@ class DeviceObject PROTOBUF_FINAL :
                &_DeviceObject_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    64;
+    65;
 
   friend void swap(DeviceObject& a, DeviceObject& b) {
     a.Swap(&b);
@@ -16475,7 +16923,7 @@ class DeviceRoot PROTOBUF_FINAL :
                &_DeviceRoot_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    65;
+    66;
 
   friend void swap(DeviceRoot& a, DeviceRoot& b) {
     a.Swap(&b);
@@ -16606,7 +17054,7 @@ class DeviceSystem PROTOBUF_FINAL :
                &_DeviceSystem_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    66;
+    67;
 
   friend void swap(DeviceSystem& a, DeviceSystem& b) {
     a.Swap(&b);
@@ -16737,7 +17185,7 @@ class DeviceRack PROTOBUF_FINAL :
                &_DeviceRack_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    67;
+    68;
 
   friend void swap(DeviceRack& a, DeviceRack& b) {
     a.Swap(&b);
@@ -16868,7 +17316,7 @@ class DeviceChassis PROTOBUF_FINAL :
                &_DeviceChassis_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    68;
+    69;
 
   friend void swap(DeviceChassis& a, DeviceChassis& b) {
     a.Swap(&b);
@@ -17017,7 +17465,7 @@ class DeviceModule PROTOBUF_FINAL :
                &_DeviceModule_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    69;
+    70;
 
   friend void swap(DeviceModule& a, DeviceModule& b) {
     a.Swap(&b);
@@ -17240,7 +17688,7 @@ class DeviceController PROTOBUF_FINAL :
                &_DeviceController_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    70;
+    71;
 
   friend void swap(DeviceController& a, DeviceController& b) {
     a.Swap(&b);
@@ -17371,7 +17819,7 @@ class DeviceAppSignal PROTOBUF_FINAL :
                &_DeviceAppSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    71;
+    72;
 
   friend void swap(DeviceAppSignal& a, DeviceAppSignal& b) {
     a.Swap(&b);
@@ -17796,7 +18244,7 @@ class Workstation PROTOBUF_FINAL :
                &_Workstation_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    72;
+    73;
 
   friend void swap(Workstation& a, Workstation& b) {
     a.Swap(&b);
@@ -17967,7 +18415,7 @@ class Software PROTOBUF_FINAL :
                &_Software_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    73;
+    74;
 
   friend void swap(Software& a, Software& b) {
     a.Swap(&b);
@@ -18116,7 +18564,7 @@ class ModuleConfiguration PROTOBUF_FINAL :
                &_ModuleConfiguration_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    74;
+    75;
 
   friend void swap(ModuleConfiguration& a, ModuleConfiguration& b) {
     a.Swap(&b);
@@ -18314,7 +18762,7 @@ class ModuleConfigurationValue PROTOBUF_FINAL :
                &_ModuleConfigurationValue_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    75;
+    76;
 
   friend void swap(ModuleConfigurationValue& a, ModuleConfigurationValue& b) {
     a.Swap(&b);
@@ -18495,7 +18943,7 @@ class Property PROTOBUF_FINAL :
                &_Property_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    76;
+    77;
 
   friend void swap(Property& a, Property& b) {
     a.Swap(&b);
@@ -18676,7 +19124,7 @@ class SignalSpecPropValue PROTOBUF_FINAL :
                &_SignalSpecPropValue_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    77;
+    78;
 
   friend void swap(SignalSpecPropValue& a, SignalSpecPropValue& b) {
     a.Swap(&b);
@@ -18977,7 +19425,7 @@ class SignalSpecPropValues PROTOBUF_FINAL :
                &_SignalSpecPropValues_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    78;
+    79;
 
   friend void swap(SignalSpecPropValues& a, SignalSpecPropValues& b) {
     a.Swap(&b);
@@ -19130,7 +19578,7 @@ class Address16 PROTOBUF_FINAL :
                &_Address16_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    79;
+    80;
 
   friend void swap(Address16& a, Address16& b) {
     a.Swap(&b);
@@ -19297,7 +19745,7 @@ class Unit PROTOBUF_FINAL :
                &_Unit_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    80;
+    81;
 
   friend void swap(Unit& a, Unit& b) {
     a.Swap(&b);
@@ -19471,7 +19919,7 @@ class UnitSet PROTOBUF_FINAL :
                &_UnitSet_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    81;
+    82;
 
   friend void swap(UnitSet& a, UnitSet& b) {
     a.Swap(&b);
@@ -19624,7 +20072,7 @@ class TuningValue PROTOBUF_FINAL :
                &_TuningValue_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    82;
+    83;
 
   friend void swap(TuningValue& a, TuningValue& b) {
     a.Swap(&b);
@@ -19803,7 +20251,7 @@ class AppSignalDbField PROTOBUF_FINAL :
                &_AppSignalDbField_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    83;
+    84;
 
   friend void swap(AppSignalDbField& a, AppSignalDbField& b) {
     a.Swap(&b);
@@ -20087,7 +20535,7 @@ class StateFlagSignal PROTOBUF_FINAL :
                &_StateFlagSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    84;
+    85;
 
   friend void swap(StateFlagSignal& a, StateFlagSignal& b) {
     a.Swap(&b);
@@ -20258,7 +20706,7 @@ class AppSignalCalculatedParam PROTOBUF_FINAL :
                &_AppSignalCalculatedParam_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    85;
+    86;
 
   friend void swap(AppSignalCalculatedParam& a, AppSignalCalculatedParam& b) {
     a.Swap(&b);
@@ -20607,7 +21055,7 @@ class AppSignal PROTOBUF_FINAL :
                &_AppSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    86;
+    87;
 
   friend void swap(AppSignal& a, AppSignal& b) {
     a.Swap(&b);
@@ -21275,7 +21723,7 @@ class AppSignalSet PROTOBUF_FINAL :
                &_AppSignalSet_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    87;
+    88;
 
   friend void swap(AppSignalSet& a, AppSignalSet& b) {
     a.Swap(&b);
@@ -21428,7 +21876,7 @@ class ProtoAppSignalData PROTOBUF_FINAL :
                &_ProtoAppSignalData_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    88;
+    89;
 
   friend void swap(ProtoAppSignalData& a, ProtoAppSignalData& b) {
     a.Swap(&b);
@@ -21949,7 +22397,7 @@ class AppSignalState PROTOBUF_FINAL :
                &_AppSignalState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    89;
+    90;
 
   friend void swap(AppSignalState& a, AppSignalState& b) {
     a.Swap(&b);
@@ -22203,7 +22651,7 @@ class Connection PROTOBUF_FINAL :
                &_Connection_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    90;
+    91;
 
   friend void swap(Connection& a, Connection& b) {
     a.Swap(&b);
@@ -22752,7 +23200,7 @@ class SchemaDetailsSet PROTOBUF_FINAL :
                &_SchemaDetailsSet_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    91;
+    92;
 
   friend void swap(SchemaDetailsSet& a, SchemaDetailsSet& b) {
     a.Swap(&b);
@@ -22905,7 +23353,7 @@ class SchemaDetails_TrendIndicatorSchemaItems PROTOBUF_FINAL :
                &_SchemaDetails_TrendIndicatorSchemaItems_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    92;
+    93;
 
   friend void swap(SchemaDetails_TrendIndicatorSchemaItems& a, SchemaDetails_TrendIndicatorSchemaItems& b) {
     a.Swap(&b);
@@ -23130,7 +23578,7 @@ class SchemaDetails PROTOBUF_FINAL :
                &_SchemaDetails_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    93;
+    94;
 
   friend void swap(SchemaDetails& a, SchemaDetails& b) {
     a.Swap(&b);
@@ -23602,7 +24050,7 @@ class BuildInfo PROTOBUF_FINAL :
                &_BuildInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    94;
+    95;
 
   friend void swap(BuildInfo& a, BuildInfo& b) {
     a.Swap(&b);
@@ -23854,7 +24302,7 @@ class ArchSignal PROTOBUF_FINAL :
                &_ArchSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    95;
+    96;
 
   friend void swap(ArchSignal& a, ArchSignal& b) {
     a.Swap(&b);
@@ -24110,7 +24558,7 @@ class ArchInfo PROTOBUF_FINAL :
                &_ArchInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    96;
+    97;
 
   friend void swap(ArchInfo& a, ArchInfo& b) {
     a.Swap(&b);
@@ -24309,7 +24757,7 @@ class BusSignal PROTOBUF_FINAL :
                &_BusSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    97;
+    98;
 
   friend void swap(BusSignal& a, BusSignal& b) {
     a.Swap(&b);
@@ -24756,7 +25204,7 @@ class Bus PROTOBUF_FINAL :
                &_Bus_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    98;
+    99;
 
   friend void swap(Bus& a, Bus& b) {
     a.Swap(&b);
@@ -25012,7 +25460,7 @@ class ComparatorSignal PROTOBUF_FINAL :
                &_ComparatorSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    99;
+    100;
 
   friend void swap(ComparatorSignal& a, ComparatorSignal& b) {
     a.Swap(&b);
@@ -25213,7 +25661,7 @@ class Comparator PROTOBUF_FINAL :
                &_Comparator_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    100;
+    101;
 
   friend void swap(Comparator& a, Comparator& b) {
     a.Swap(&b);
@@ -25551,7 +25999,7 @@ class LmComparatorSet PROTOBUF_FINAL :
                &_LmComparatorSet_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    101;
+    102;
 
   friend void swap(LmComparatorSet& a, LmComparatorSet& b) {
     a.Swap(&b);
@@ -25727,7 +26175,7 @@ class ComparatorSet PROTOBUF_FINAL :
                &_ComparatorSet_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    102;
+    103;
 
   friend void swap(ComparatorSet& a, ComparatorSet& b) {
     a.Swap(&b);
@@ -25880,7 +26328,7 @@ class MetrologySignalLocation PROTOBUF_FINAL :
                &_MetrologySignalLocation_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    103;
+    104;
 
   friend void swap(MetrologySignalLocation& a, MetrologySignalLocation& b) {
     a.Swap(&b);
@@ -26184,7 +26632,7 @@ class MetrologySignal PROTOBUF_FINAL :
                &_MetrologySignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    104;
+    105;
 
   friend void swap(MetrologySignal& a, MetrologySignal& b) {
     a.Swap(&b);
@@ -26493,7 +26941,7 @@ class MetrologySignalSet PROTOBUF_FINAL :
                &_MetrologySignalSet_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    105;
+    106;
 
   friend void swap(MetrologySignalSet& a, MetrologySignalSet& b) {
     a.Swap(&b);
@@ -26646,7 +27094,7 @@ class SimOverrideSignal PROTOBUF_FINAL :
                &_SimOverrideSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    106;
+    107;
 
   friend void swap(SimOverrideSignal& a, SimOverrideSignal& b) {
     a.Swap(&b);
@@ -26889,7 +27337,7 @@ class SimOverrideSignalWorkspace PROTOBUF_FINAL :
                &_SimOverrideSignalWorkspace_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    107;
+    108;
 
   friend void swap(SimOverrideSignalWorkspace& a, SimOverrideSignalWorkspace& b) {
     a.Swap(&b);
@@ -33836,7 +34284,7 @@ inline void SchemaItem::set_allocated_uuid(::Proto::Uuid* uuid) {
 
 // required bool isStatic = 2;
 inline bool SchemaItem::_internal_has_isstatic() const {
-  bool value = (_has_bits_[1] & 0x00000400u) != 0;
+  bool value = (_has_bits_[1] & 0x00000800u) != 0;
   return value;
 }
 inline bool SchemaItem::has_isstatic() const {
@@ -33844,7 +34292,7 @@ inline bool SchemaItem::has_isstatic() const {
 }
 inline void SchemaItem::clear_isstatic() {
   isstatic_ = false;
-  _has_bits_[1] &= ~0x00000400u;
+  _has_bits_[1] &= ~0x00000800u;
 }
 inline bool SchemaItem::_internal_isstatic() const {
   return isstatic_;
@@ -33854,7 +34302,7 @@ inline bool SchemaItem::isstatic() const {
   return _internal_isstatic();
 }
 inline void SchemaItem::_internal_set_isstatic(bool value) {
-  _has_bits_[1] |= 0x00000400u;
+  _has_bits_[1] |= 0x00000800u;
   isstatic_ = value;
 }
 inline void SchemaItem::set_isstatic(bool value) {
@@ -33864,7 +34312,7 @@ inline void SchemaItem::set_isstatic(bool value) {
 
 // required bool isLocked = 3;
 inline bool SchemaItem::_internal_has_islocked() const {
-  bool value = (_has_bits_[1] & 0x00000800u) != 0;
+  bool value = (_has_bits_[1] & 0x00001000u) != 0;
   return value;
 }
 inline bool SchemaItem::has_islocked() const {
@@ -33872,7 +34320,7 @@ inline bool SchemaItem::has_islocked() const {
 }
 inline void SchemaItem::clear_islocked() {
   islocked_ = false;
-  _has_bits_[1] &= ~0x00000800u;
+  _has_bits_[1] &= ~0x00001000u;
 }
 inline bool SchemaItem::_internal_islocked() const {
   return islocked_;
@@ -33882,7 +34330,7 @@ inline bool SchemaItem::islocked() const {
   return _internal_islocked();
 }
 inline void SchemaItem::_internal_set_islocked(bool value) {
-  _has_bits_[1] |= 0x00000800u;
+  _has_bits_[1] |= 0x00001000u;
   islocked_ = value;
 }
 inline void SchemaItem::set_islocked(bool value) {
@@ -33892,7 +34340,7 @@ inline void SchemaItem::set_islocked(bool value) {
 
 // required .Proto.SchemaUnit itemUnit = 4;
 inline bool SchemaItem::_internal_has_itemunit() const {
-  bool value = (_has_bits_[1] & 0x00000200u) != 0;
+  bool value = (_has_bits_[1] & 0x00000400u) != 0;
   return value;
 }
 inline bool SchemaItem::has_itemunit() const {
@@ -33900,7 +34348,7 @@ inline bool SchemaItem::has_itemunit() const {
 }
 inline void SchemaItem::clear_itemunit() {
   itemunit_ = 0;
-  _has_bits_[1] &= ~0x00000200u;
+  _has_bits_[1] &= ~0x00000400u;
 }
 inline ::Proto::SchemaUnit SchemaItem::_internal_itemunit() const {
   return static_cast< ::Proto::SchemaUnit >(itemunit_);
@@ -33911,7 +34359,7 @@ inline ::Proto::SchemaUnit SchemaItem::itemunit() const {
 }
 inline void SchemaItem::_internal_set_itemunit(::Proto::SchemaUnit value) {
   assert(::Proto::SchemaUnit_IsValid(value));
-  _has_bits_[1] |= 0x00000200u;
+  _has_bits_[1] |= 0x00000400u;
   itemunit_ = value;
 }
 inline void SchemaItem::set_itemunit(::Proto::SchemaUnit value) {
@@ -33921,7 +34369,7 @@ inline void SchemaItem::set_itemunit(::Proto::SchemaUnit value) {
 
 // optional bool acceptClick = 5 [default = false];
 inline bool SchemaItem::_internal_has_acceptclick() const {
-  bool value = (_has_bits_[1] & 0x00001000u) != 0;
+  bool value = (_has_bits_[1] & 0x00002000u) != 0;
   return value;
 }
 inline bool SchemaItem::has_acceptclick() const {
@@ -33929,7 +34377,7 @@ inline bool SchemaItem::has_acceptclick() const {
 }
 inline void SchemaItem::clear_acceptclick() {
   acceptclick_ = false;
-  _has_bits_[1] &= ~0x00001000u;
+  _has_bits_[1] &= ~0x00002000u;
 }
 inline bool SchemaItem::_internal_acceptclick() const {
   return acceptclick_;
@@ -33939,7 +34387,7 @@ inline bool SchemaItem::acceptclick() const {
   return _internal_acceptclick();
 }
 inline void SchemaItem::_internal_set_acceptclick(bool value) {
-  _has_bits_[1] |= 0x00001000u;
+  _has_bits_[1] |= 0x00002000u;
   acceptclick_ = value;
 }
 inline void SchemaItem::set_acceptclick(bool value) {
@@ -34022,7 +34470,7 @@ inline void SchemaItem::set_allocated_clickscript(std::string* clickscript) {
 
 // optional bool isCommented = 8 [default = false];
 inline bool SchemaItem::_internal_has_iscommented() const {
-  bool value = (_has_bits_[1] & 0x00002000u) != 0;
+  bool value = (_has_bits_[1] & 0x00004000u) != 0;
   return value;
 }
 inline bool SchemaItem::has_iscommented() const {
@@ -34030,7 +34478,7 @@ inline bool SchemaItem::has_iscommented() const {
 }
 inline void SchemaItem::clear_iscommented() {
   iscommented_ = false;
-  _has_bits_[1] &= ~0x00002000u;
+  _has_bits_[1] &= ~0x00004000u;
 }
 inline bool SchemaItem::_internal_iscommented() const {
   return iscommented_;
@@ -34040,7 +34488,7 @@ inline bool SchemaItem::iscommented() const {
   return _internal_iscommented();
 }
 inline void SchemaItem::_internal_set_iscommented(bool value) {
-  _has_bits_[1] |= 0x00002000u;
+  _has_bits_[1] |= 0x00004000u;
   iscommented_ = value;
 }
 inline void SchemaItem::set_iscommented(bool value) {
@@ -34269,7 +34717,7 @@ inline void SchemaItem::set_allocated_label(std::string* label) {
 
 // optional int32 labelPos = 15 [default = 2];
 inline bool SchemaItem::_internal_has_labelpos() const {
-  bool value = (_has_bits_[1] & 0x00004000u) != 0;
+  bool value = (_has_bits_[1] & 0x00008000u) != 0;
   return value;
 }
 inline bool SchemaItem::has_labelpos() const {
@@ -34277,7 +34725,7 @@ inline bool SchemaItem::has_labelpos() const {
 }
 inline void SchemaItem::clear_labelpos() {
   labelpos_ = 2;
-  _has_bits_[1] &= ~0x00004000u;
+  _has_bits_[1] &= ~0x00008000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItem::_internal_labelpos() const {
   return labelpos_;
@@ -34287,7 +34735,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItem::labelpos() const {
   return _internal_labelpos();
 }
 inline void SchemaItem::_internal_set_labelpos(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[1] |= 0x00004000u;
+  _has_bits_[1] |= 0x00008000u;
   labelpos_ = value;
 }
 inline void SchemaItem::set_labelpos(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -37271,6 +37719,89 @@ inline void SchemaItem::set_allocated_lineedit(::Proto::SchemaItemLineEdit* line
   }
   lineedit_ = lineedit;
   // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItem.lineEdit)
+}
+
+// optional .Proto.SchemaItemSlider slider = 212;
+inline bool SchemaItem::_internal_has_slider() const {
+  bool value = (_has_bits_[1] & 0x00000200u) != 0;
+  PROTOBUF_ASSUME(!value || slider_ != nullptr);
+  return value;
+}
+inline bool SchemaItem::has_slider() const {
+  return _internal_has_slider();
+}
+inline void SchemaItem::clear_slider() {
+  if (slider_ != nullptr) slider_->Clear();
+  _has_bits_[1] &= ~0x00000200u;
+}
+inline const ::Proto::SchemaItemSlider& SchemaItem::_internal_slider() const {
+  const ::Proto::SchemaItemSlider* p = slider_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Proto::SchemaItemSlider&>(
+      ::Proto::_SchemaItemSlider_default_instance_);
+}
+inline const ::Proto::SchemaItemSlider& SchemaItem::slider() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItem.slider)
+  return _internal_slider();
+}
+inline void SchemaItem::unsafe_arena_set_allocated_slider(
+    ::Proto::SchemaItemSlider* slider) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(slider_);
+  }
+  slider_ = slider;
+  if (slider) {
+    _has_bits_[1] |= 0x00000200u;
+  } else {
+    _has_bits_[1] &= ~0x00000200u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.SchemaItem.slider)
+}
+inline ::Proto::SchemaItemSlider* SchemaItem::release_slider() {
+  _has_bits_[1] &= ~0x00000200u;
+  ::Proto::SchemaItemSlider* temp = slider_;
+  slider_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::Proto::SchemaItemSlider* SchemaItem::unsafe_arena_release_slider() {
+  // @@protoc_insertion_point(field_release:Proto.SchemaItem.slider)
+  _has_bits_[1] &= ~0x00000200u;
+  ::Proto::SchemaItemSlider* temp = slider_;
+  slider_ = nullptr;
+  return temp;
+}
+inline ::Proto::SchemaItemSlider* SchemaItem::_internal_mutable_slider() {
+  _has_bits_[1] |= 0x00000200u;
+  if (slider_ == nullptr) {
+    auto* p = CreateMaybeMessage<::Proto::SchemaItemSlider>(GetArena());
+    slider_ = p;
+  }
+  return slider_;
+}
+inline ::Proto::SchemaItemSlider* SchemaItem::mutable_slider() {
+  // @@protoc_insertion_point(field_mutable:Proto.SchemaItem.slider)
+  return _internal_mutable_slider();
+}
+inline void SchemaItem::set_allocated_slider(::Proto::SchemaItemSlider* slider) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete slider_;
+  }
+  if (slider) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(slider);
+    if (message_arena != submessage_arena) {
+      slider = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, slider, submessage_arena);
+    }
+    _has_bits_[1] |= 0x00000200u;
+  } else {
+    _has_bits_[1] &= ~0x00000200u;
+  }
+  slider_ = slider;
+  // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItem.slider)
 }
 
 // -------------------------------------------------------------------
@@ -45884,6 +46415,711 @@ inline void SchemaItemLineEdit::set_allocated_scripttextchanged(std::string* scr
   scripttextchanged_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), scripttextchanged,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItemLineEdit.scriptTextChanged)
+}
+
+// -------------------------------------------------------------------
+
+// SchemaItemSlider
+
+// optional bool invertedAppearance = 2 [default = false];
+inline bool SchemaItemSlider::_internal_has_invertedappearance() const {
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
+  return value;
+}
+inline bool SchemaItemSlider::has_invertedappearance() const {
+  return _internal_has_invertedappearance();
+}
+inline void SchemaItemSlider::clear_invertedappearance() {
+  invertedappearance_ = false;
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline bool SchemaItemSlider::_internal_invertedappearance() const {
+  return invertedappearance_;
+}
+inline bool SchemaItemSlider::invertedappearance() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemSlider.invertedAppearance)
+  return _internal_invertedappearance();
+}
+inline void SchemaItemSlider::_internal_set_invertedappearance(bool value) {
+  _has_bits_[0] |= 0x00000020u;
+  invertedappearance_ = value;
+}
+inline void SchemaItemSlider::set_invertedappearance(bool value) {
+  _internal_set_invertedappearance(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemSlider.invertedAppearance)
+}
+
+// optional bool invertedControls = 3 [default = false];
+inline bool SchemaItemSlider::_internal_has_invertedcontrols() const {
+  bool value = (_has_bits_[0] & 0x00000040u) != 0;
+  return value;
+}
+inline bool SchemaItemSlider::has_invertedcontrols() const {
+  return _internal_has_invertedcontrols();
+}
+inline void SchemaItemSlider::clear_invertedcontrols() {
+  invertedcontrols_ = false;
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline bool SchemaItemSlider::_internal_invertedcontrols() const {
+  return invertedcontrols_;
+}
+inline bool SchemaItemSlider::invertedcontrols() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemSlider.invertedControls)
+  return _internal_invertedcontrols();
+}
+inline void SchemaItemSlider::_internal_set_invertedcontrols(bool value) {
+  _has_bits_[0] |= 0x00000040u;
+  invertedcontrols_ = value;
+}
+inline void SchemaItemSlider::set_invertedcontrols(bool value) {
+  _internal_set_invertedcontrols(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemSlider.invertedControls)
+}
+
+// optional bool enableMouseWheel = 4 [default = false];
+inline bool SchemaItemSlider::_internal_has_enablemousewheel() const {
+  bool value = (_has_bits_[0] & 0x00000080u) != 0;
+  return value;
+}
+inline bool SchemaItemSlider::has_enablemousewheel() const {
+  return _internal_has_enablemousewheel();
+}
+inline void SchemaItemSlider::clear_enablemousewheel() {
+  enablemousewheel_ = false;
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline bool SchemaItemSlider::_internal_enablemousewheel() const {
+  return enablemousewheel_;
+}
+inline bool SchemaItemSlider::enablemousewheel() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemSlider.enableMouseWheel)
+  return _internal_enablemousewheel();
+}
+inline void SchemaItemSlider::_internal_set_enablemousewheel(bool value) {
+  _has_bits_[0] |= 0x00000080u;
+  enablemousewheel_ = value;
+}
+inline void SchemaItemSlider::set_enablemousewheel(bool value) {
+  _internal_set_enablemousewheel(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemSlider.enableMouseWheel)
+}
+
+// optional int32 maximum = 6 [default = 99];
+inline bool SchemaItemSlider::_internal_has_maximum() const {
+  bool value = (_has_bits_[0] & 0x00002000u) != 0;
+  return value;
+}
+inline bool SchemaItemSlider::has_maximum() const {
+  return _internal_has_maximum();
+}
+inline void SchemaItemSlider::clear_maximum() {
+  maximum_ = 99;
+  _has_bits_[0] &= ~0x00002000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemSlider::_internal_maximum() const {
+  return maximum_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemSlider::maximum() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemSlider.maximum)
+  return _internal_maximum();
+}
+inline void SchemaItemSlider::_internal_set_maximum(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00002000u;
+  maximum_ = value;
+}
+inline void SchemaItemSlider::set_maximum(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_maximum(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemSlider.maximum)
+}
+
+// optional int32 minimum = 7 [default = 0];
+inline bool SchemaItemSlider::_internal_has_minimum() const {
+  bool value = (_has_bits_[0] & 0x00000100u) != 0;
+  return value;
+}
+inline bool SchemaItemSlider::has_minimum() const {
+  return _internal_has_minimum();
+}
+inline void SchemaItemSlider::clear_minimum() {
+  minimum_ = 0;
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemSlider::_internal_minimum() const {
+  return minimum_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemSlider::minimum() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemSlider.minimum)
+  return _internal_minimum();
+}
+inline void SchemaItemSlider::_internal_set_minimum(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000100u;
+  minimum_ = value;
+}
+inline void SchemaItemSlider::set_minimum(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_minimum(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemSlider.minimum)
+}
+
+// optional int32 orientation = 10 [default = 2];
+inline bool SchemaItemSlider::_internal_has_orientation() const {
+  bool value = (_has_bits_[0] & 0x00004000u) != 0;
+  return value;
+}
+inline bool SchemaItemSlider::has_orientation() const {
+  return _internal_has_orientation();
+}
+inline void SchemaItemSlider::clear_orientation() {
+  orientation_ = 2;
+  _has_bits_[0] &= ~0x00004000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemSlider::_internal_orientation() const {
+  return orientation_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemSlider::orientation() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemSlider.orientation)
+  return _internal_orientation();
+}
+inline void SchemaItemSlider::_internal_set_orientation(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00004000u;
+  orientation_ = value;
+}
+inline void SchemaItemSlider::set_orientation(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_orientation(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemSlider.orientation)
+}
+
+// optional int32 pageStep = 12 [default = 10];
+inline bool SchemaItemSlider::_internal_has_pagestep() const {
+  bool value = (_has_bits_[0] & 0x00008000u) != 0;
+  return value;
+}
+inline bool SchemaItemSlider::has_pagestep() const {
+  return _internal_has_pagestep();
+}
+inline void SchemaItemSlider::clear_pagestep() {
+  pagestep_ = 10;
+  _has_bits_[0] &= ~0x00008000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemSlider::_internal_pagestep() const {
+  return pagestep_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemSlider::pagestep() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemSlider.pageStep)
+  return _internal_pagestep();
+}
+inline void SchemaItemSlider::_internal_set_pagestep(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00008000u;
+  pagestep_ = value;
+}
+inline void SchemaItemSlider::set_pagestep(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_pagestep(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemSlider.pageStep)
+}
+
+// optional int32 singleStep = 13 [default = 1];
+inline bool SchemaItemSlider::_internal_has_singlestep() const {
+  bool value = (_has_bits_[0] & 0x00010000u) != 0;
+  return value;
+}
+inline bool SchemaItemSlider::has_singlestep() const {
+  return _internal_has_singlestep();
+}
+inline void SchemaItemSlider::clear_singlestep() {
+  singlestep_ = 1;
+  _has_bits_[0] &= ~0x00010000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemSlider::_internal_singlestep() const {
+  return singlestep_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemSlider::singlestep() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemSlider.singleStep)
+  return _internal_singlestep();
+}
+inline void SchemaItemSlider::_internal_set_singlestep(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00010000u;
+  singlestep_ = value;
+}
+inline void SchemaItemSlider::set_singlestep(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_singlestep(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemSlider.singleStep)
+}
+
+// optional bool tracking = 16 [default = true];
+inline bool SchemaItemSlider::_internal_has_tracking() const {
+  bool value = (_has_bits_[0] & 0x00001000u) != 0;
+  return value;
+}
+inline bool SchemaItemSlider::has_tracking() const {
+  return _internal_has_tracking();
+}
+inline void SchemaItemSlider::clear_tracking() {
+  tracking_ = true;
+  _has_bits_[0] &= ~0x00001000u;
+}
+inline bool SchemaItemSlider::_internal_tracking() const {
+  return tracking_;
+}
+inline bool SchemaItemSlider::tracking() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemSlider.tracking)
+  return _internal_tracking();
+}
+inline void SchemaItemSlider::_internal_set_tracking(bool value) {
+  _has_bits_[0] |= 0x00001000u;
+  tracking_ = value;
+}
+inline void SchemaItemSlider::set_tracking(bool value) {
+  _internal_set_tracking(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemSlider.tracking)
+}
+
+// optional int32 defaultValue = 17 [default = 0];
+inline bool SchemaItemSlider::_internal_has_defaultvalue() const {
+  bool value = (_has_bits_[0] & 0x00000400u) != 0;
+  return value;
+}
+inline bool SchemaItemSlider::has_defaultvalue() const {
+  return _internal_has_defaultvalue();
+}
+inline void SchemaItemSlider::clear_defaultvalue() {
+  defaultvalue_ = 0;
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemSlider::_internal_defaultvalue() const {
+  return defaultvalue_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemSlider::defaultvalue() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemSlider.defaultValue)
+  return _internal_defaultvalue();
+}
+inline void SchemaItemSlider::_internal_set_defaultvalue(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000400u;
+  defaultvalue_ = value;
+}
+inline void SchemaItemSlider::set_defaultvalue(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_defaultvalue(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemSlider.defaultValue)
+}
+
+// optional int32 tickInterval = 20 [default = 0];
+inline bool SchemaItemSlider::_internal_has_tickinterval() const {
+  bool value = (_has_bits_[0] & 0x00000800u) != 0;
+  return value;
+}
+inline bool SchemaItemSlider::has_tickinterval() const {
+  return _internal_has_tickinterval();
+}
+inline void SchemaItemSlider::clear_tickinterval() {
+  tickinterval_ = 0;
+  _has_bits_[0] &= ~0x00000800u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemSlider::_internal_tickinterval() const {
+  return tickinterval_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemSlider::tickinterval() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemSlider.tickInterval)
+  return _internal_tickinterval();
+}
+inline void SchemaItemSlider::_internal_set_tickinterval(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000800u;
+  tickinterval_ = value;
+}
+inline void SchemaItemSlider::set_tickinterval(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_tickinterval(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemSlider.tickInterval)
+}
+
+// optional int32 tickPosition = 21 [default = 0];
+inline bool SchemaItemSlider::_internal_has_tickposition() const {
+  bool value = (_has_bits_[0] & 0x00000200u) != 0;
+  return value;
+}
+inline bool SchemaItemSlider::has_tickposition() const {
+  return _internal_has_tickposition();
+}
+inline void SchemaItemSlider::clear_tickposition() {
+  tickposition_ = 0;
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemSlider::_internal_tickposition() const {
+  return tickposition_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemSlider::tickposition() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemSlider.tickPosition)
+  return _internal_tickposition();
+}
+inline void SchemaItemSlider::_internal_set_tickposition(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000200u;
+  tickposition_ = value;
+}
+inline void SchemaItemSlider::set_tickposition(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_tickposition(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemSlider.tickPosition)
+}
+
+// optional string scriptAfterCreate = 31;
+inline bool SchemaItemSlider::_internal_has_scriptaftercreate() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool SchemaItemSlider::has_scriptaftercreate() const {
+  return _internal_has_scriptaftercreate();
+}
+inline void SchemaItemSlider::clear_scriptaftercreate() {
+  scriptaftercreate_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& SchemaItemSlider::scriptaftercreate() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemSlider.scriptAfterCreate)
+  return _internal_scriptaftercreate();
+}
+inline void SchemaItemSlider::set_scriptaftercreate(const std::string& value) {
+  _internal_set_scriptaftercreate(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemSlider.scriptAfterCreate)
+}
+inline std::string* SchemaItemSlider::mutable_scriptaftercreate() {
+  // @@protoc_insertion_point(field_mutable:Proto.SchemaItemSlider.scriptAfterCreate)
+  return _internal_mutable_scriptaftercreate();
+}
+inline const std::string& SchemaItemSlider::_internal_scriptaftercreate() const {
+  return scriptaftercreate_.Get();
+}
+inline void SchemaItemSlider::_internal_set_scriptaftercreate(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  scriptaftercreate_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void SchemaItemSlider::set_scriptaftercreate(std::string&& value) {
+  _has_bits_[0] |= 0x00000001u;
+  scriptaftercreate_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.SchemaItemSlider.scriptAfterCreate)
+}
+inline void SchemaItemSlider::set_scriptaftercreate(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000001u;
+  scriptaftercreate_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.SchemaItemSlider.scriptAfterCreate)
+}
+inline void SchemaItemSlider::set_scriptaftercreate(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000001u;
+  scriptaftercreate_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.SchemaItemSlider.scriptAfterCreate)
+}
+inline std::string* SchemaItemSlider::_internal_mutable_scriptaftercreate() {
+  _has_bits_[0] |= 0x00000001u;
+  return scriptaftercreate_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* SchemaItemSlider::release_scriptaftercreate() {
+  // @@protoc_insertion_point(field_release:Proto.SchemaItemSlider.scriptAfterCreate)
+  if (!_internal_has_scriptaftercreate()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return scriptaftercreate_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SchemaItemSlider::set_allocated_scriptaftercreate(std::string* scriptaftercreate) {
+  if (scriptaftercreate != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  scriptaftercreate_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), scriptaftercreate,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItemSlider.scriptAfterCreate)
+}
+
+// optional string scriptSliderMoved = 32;
+inline bool SchemaItemSlider::_internal_has_scriptslidermoved() const {
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool SchemaItemSlider::has_scriptslidermoved() const {
+  return _internal_has_scriptslidermoved();
+}
+inline void SchemaItemSlider::clear_scriptslidermoved() {
+  scriptslidermoved_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline const std::string& SchemaItemSlider::scriptslidermoved() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemSlider.scriptSliderMoved)
+  return _internal_scriptslidermoved();
+}
+inline void SchemaItemSlider::set_scriptslidermoved(const std::string& value) {
+  _internal_set_scriptslidermoved(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemSlider.scriptSliderMoved)
+}
+inline std::string* SchemaItemSlider::mutable_scriptslidermoved() {
+  // @@protoc_insertion_point(field_mutable:Proto.SchemaItemSlider.scriptSliderMoved)
+  return _internal_mutable_scriptslidermoved();
+}
+inline const std::string& SchemaItemSlider::_internal_scriptslidermoved() const {
+  return scriptslidermoved_.Get();
+}
+inline void SchemaItemSlider::_internal_set_scriptslidermoved(const std::string& value) {
+  _has_bits_[0] |= 0x00000002u;
+  scriptslidermoved_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void SchemaItemSlider::set_scriptslidermoved(std::string&& value) {
+  _has_bits_[0] |= 0x00000002u;
+  scriptslidermoved_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.SchemaItemSlider.scriptSliderMoved)
+}
+inline void SchemaItemSlider::set_scriptslidermoved(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000002u;
+  scriptslidermoved_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.SchemaItemSlider.scriptSliderMoved)
+}
+inline void SchemaItemSlider::set_scriptslidermoved(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000002u;
+  scriptslidermoved_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.SchemaItemSlider.scriptSliderMoved)
+}
+inline std::string* SchemaItemSlider::_internal_mutable_scriptslidermoved() {
+  _has_bits_[0] |= 0x00000002u;
+  return scriptslidermoved_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* SchemaItemSlider::release_scriptslidermoved() {
+  // @@protoc_insertion_point(field_release:Proto.SchemaItemSlider.scriptSliderMoved)
+  if (!_internal_has_scriptslidermoved()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000002u;
+  return scriptslidermoved_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SchemaItemSlider::set_allocated_scriptslidermoved(std::string* scriptslidermoved) {
+  if (scriptslidermoved != nullptr) {
+    _has_bits_[0] |= 0x00000002u;
+  } else {
+    _has_bits_[0] &= ~0x00000002u;
+  }
+  scriptslidermoved_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), scriptslidermoved,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItemSlider.scriptSliderMoved)
+}
+
+// optional string scriptSliderPressed = 33;
+inline bool SchemaItemSlider::_internal_has_scriptsliderpressed() const {
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline bool SchemaItemSlider::has_scriptsliderpressed() const {
+  return _internal_has_scriptsliderpressed();
+}
+inline void SchemaItemSlider::clear_scriptsliderpressed() {
+  scriptsliderpressed_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline const std::string& SchemaItemSlider::scriptsliderpressed() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemSlider.scriptSliderPressed)
+  return _internal_scriptsliderpressed();
+}
+inline void SchemaItemSlider::set_scriptsliderpressed(const std::string& value) {
+  _internal_set_scriptsliderpressed(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemSlider.scriptSliderPressed)
+}
+inline std::string* SchemaItemSlider::mutable_scriptsliderpressed() {
+  // @@protoc_insertion_point(field_mutable:Proto.SchemaItemSlider.scriptSliderPressed)
+  return _internal_mutable_scriptsliderpressed();
+}
+inline const std::string& SchemaItemSlider::_internal_scriptsliderpressed() const {
+  return scriptsliderpressed_.Get();
+}
+inline void SchemaItemSlider::_internal_set_scriptsliderpressed(const std::string& value) {
+  _has_bits_[0] |= 0x00000004u;
+  scriptsliderpressed_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void SchemaItemSlider::set_scriptsliderpressed(std::string&& value) {
+  _has_bits_[0] |= 0x00000004u;
+  scriptsliderpressed_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.SchemaItemSlider.scriptSliderPressed)
+}
+inline void SchemaItemSlider::set_scriptsliderpressed(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000004u;
+  scriptsliderpressed_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.SchemaItemSlider.scriptSliderPressed)
+}
+inline void SchemaItemSlider::set_scriptsliderpressed(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000004u;
+  scriptsliderpressed_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.SchemaItemSlider.scriptSliderPressed)
+}
+inline std::string* SchemaItemSlider::_internal_mutable_scriptsliderpressed() {
+  _has_bits_[0] |= 0x00000004u;
+  return scriptsliderpressed_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* SchemaItemSlider::release_scriptsliderpressed() {
+  // @@protoc_insertion_point(field_release:Proto.SchemaItemSlider.scriptSliderPressed)
+  if (!_internal_has_scriptsliderpressed()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000004u;
+  return scriptsliderpressed_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SchemaItemSlider::set_allocated_scriptsliderpressed(std::string* scriptsliderpressed) {
+  if (scriptsliderpressed != nullptr) {
+    _has_bits_[0] |= 0x00000004u;
+  } else {
+    _has_bits_[0] &= ~0x00000004u;
+  }
+  scriptsliderpressed_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), scriptsliderpressed,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItemSlider.scriptSliderPressed)
+}
+
+// optional string scriptSliderReleased = 34;
+inline bool SchemaItemSlider::_internal_has_scriptsliderreleased() const {
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  return value;
+}
+inline bool SchemaItemSlider::has_scriptsliderreleased() const {
+  return _internal_has_scriptsliderreleased();
+}
+inline void SchemaItemSlider::clear_scriptsliderreleased() {
+  scriptsliderreleased_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline const std::string& SchemaItemSlider::scriptsliderreleased() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemSlider.scriptSliderReleased)
+  return _internal_scriptsliderreleased();
+}
+inline void SchemaItemSlider::set_scriptsliderreleased(const std::string& value) {
+  _internal_set_scriptsliderreleased(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemSlider.scriptSliderReleased)
+}
+inline std::string* SchemaItemSlider::mutable_scriptsliderreleased() {
+  // @@protoc_insertion_point(field_mutable:Proto.SchemaItemSlider.scriptSliderReleased)
+  return _internal_mutable_scriptsliderreleased();
+}
+inline const std::string& SchemaItemSlider::_internal_scriptsliderreleased() const {
+  return scriptsliderreleased_.Get();
+}
+inline void SchemaItemSlider::_internal_set_scriptsliderreleased(const std::string& value) {
+  _has_bits_[0] |= 0x00000008u;
+  scriptsliderreleased_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void SchemaItemSlider::set_scriptsliderreleased(std::string&& value) {
+  _has_bits_[0] |= 0x00000008u;
+  scriptsliderreleased_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.SchemaItemSlider.scriptSliderReleased)
+}
+inline void SchemaItemSlider::set_scriptsliderreleased(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000008u;
+  scriptsliderreleased_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.SchemaItemSlider.scriptSliderReleased)
+}
+inline void SchemaItemSlider::set_scriptsliderreleased(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000008u;
+  scriptsliderreleased_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.SchemaItemSlider.scriptSliderReleased)
+}
+inline std::string* SchemaItemSlider::_internal_mutable_scriptsliderreleased() {
+  _has_bits_[0] |= 0x00000008u;
+  return scriptsliderreleased_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* SchemaItemSlider::release_scriptsliderreleased() {
+  // @@protoc_insertion_point(field_release:Proto.SchemaItemSlider.scriptSliderReleased)
+  if (!_internal_has_scriptsliderreleased()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000008u;
+  return scriptsliderreleased_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SchemaItemSlider::set_allocated_scriptsliderreleased(std::string* scriptsliderreleased) {
+  if (scriptsliderreleased != nullptr) {
+    _has_bits_[0] |= 0x00000008u;
+  } else {
+    _has_bits_[0] &= ~0x00000008u;
+  }
+  scriptsliderreleased_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), scriptsliderreleased,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItemSlider.scriptSliderReleased)
+}
+
+// optional string scriptValueChanged = 35;
+inline bool SchemaItemSlider::_internal_has_scriptvaluechanged() const {
+  bool value = (_has_bits_[0] & 0x00000010u) != 0;
+  return value;
+}
+inline bool SchemaItemSlider::has_scriptvaluechanged() const {
+  return _internal_has_scriptvaluechanged();
+}
+inline void SchemaItemSlider::clear_scriptvaluechanged() {
+  scriptvaluechanged_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline const std::string& SchemaItemSlider::scriptvaluechanged() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemSlider.scriptValueChanged)
+  return _internal_scriptvaluechanged();
+}
+inline void SchemaItemSlider::set_scriptvaluechanged(const std::string& value) {
+  _internal_set_scriptvaluechanged(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemSlider.scriptValueChanged)
+}
+inline std::string* SchemaItemSlider::mutable_scriptvaluechanged() {
+  // @@protoc_insertion_point(field_mutable:Proto.SchemaItemSlider.scriptValueChanged)
+  return _internal_mutable_scriptvaluechanged();
+}
+inline const std::string& SchemaItemSlider::_internal_scriptvaluechanged() const {
+  return scriptvaluechanged_.Get();
+}
+inline void SchemaItemSlider::_internal_set_scriptvaluechanged(const std::string& value) {
+  _has_bits_[0] |= 0x00000010u;
+  scriptvaluechanged_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void SchemaItemSlider::set_scriptvaluechanged(std::string&& value) {
+  _has_bits_[0] |= 0x00000010u;
+  scriptvaluechanged_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.SchemaItemSlider.scriptValueChanged)
+}
+inline void SchemaItemSlider::set_scriptvaluechanged(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000010u;
+  scriptvaluechanged_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.SchemaItemSlider.scriptValueChanged)
+}
+inline void SchemaItemSlider::set_scriptvaluechanged(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000010u;
+  scriptvaluechanged_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.SchemaItemSlider.scriptValueChanged)
+}
+inline std::string* SchemaItemSlider::_internal_mutable_scriptvaluechanged() {
+  _has_bits_[0] |= 0x00000010u;
+  return scriptvaluechanged_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* SchemaItemSlider::release_scriptvaluechanged() {
+  // @@protoc_insertion_point(field_release:Proto.SchemaItemSlider.scriptValueChanged)
+  if (!_internal_has_scriptvaluechanged()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000010u;
+  return scriptvaluechanged_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SchemaItemSlider::set_allocated_scriptvaluechanged(std::string* scriptvaluechanged) {
+  if (scriptvaluechanged != nullptr) {
+    _has_bits_[0] |= 0x00000010u;
+  } else {
+    _has_bits_[0] &= ~0x00000010u;
+  }
+  scriptvaluechanged_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), scriptvaluechanged,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItemSlider.scriptValueChanged)
 }
 
 // -------------------------------------------------------------------
@@ -60021,6 +61257,8 @@ SimOverrideSignalWorkspace::overridesignals() const {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

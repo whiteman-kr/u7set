@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PosRectImpl.h"
+#include "ClientSchemaView.h"
 
 namespace VFrame30
 {
@@ -10,7 +11,7 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
-		/// \brief Get widget linked to SchemaItem. User must check the returned value for null. 
+		/// \brief Get the widget linked to SchemaItem. User must check the returned value for null. 
 		Q_PROPERTY(QWidget* widget MEMBER m_widget)
 
 	public:
@@ -31,7 +32,7 @@ namespace VFrame30
 		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
 
 		QWidget* createWidget(QWidget* parent, bool editMode, double zoom);
-		virtual void updateWidgetProperties(QWidget* widget) const;
+		virtual void updateWidgetProperties(QWidget* widget, bool editMode) const;
 
 		void updateWidgetPosAndSize(QWidget* widget, double zoom);
 
@@ -45,6 +46,9 @@ namespace VFrame30
 
 	protected:
 		QJSValue evaluateScript(QWidget* controlWidget, QString script);
+
+		template <typename WidgetType, typename... ScriptArgs>
+		void runEventScript(QJSValue& evaluatedJs, bool allowMessageBox, WidgetType* widget, ScriptArgs... scriptArgs);
 
 		// Properties and Data
 		//
@@ -61,4 +65,58 @@ namespace VFrame30
 
 		QWidget* m_widget = nullptr;
 	};
+
+
+	template <typename WidgetType, typename... ScriptArgs>
+	void SchemaItemControl::runEventScript(QJSValue& evaluatedJs, bool allowMessageBox, WidgetType* widget, ScriptArgs... scriptArgs)
+	{
+		if (evaluatedJs.isError() == true ||
+			evaluatedJs.isNull() == true)
+		{
+			return;
+		}
+
+		// Suppose that parent of sender is ClientSchemaView, if not, then this is EditMode?
+		//
+		ClientSchemaView* schemaView = dynamic_cast<ClientSchemaView*>(widget->parentWidget());
+		if (schemaView == nullptr)
+		{
+			assert(schemaView);
+			return;
+		}
+
+		bool prevAllowMessageBoxState = schemaView->setScriptMessageBoxAllowed(allowMessageBox);
+
+		QJSEngine* engine = schemaView->jsEngine();
+		assert(engine);
+
+		// Set argument list
+		//
+		QJSValue jsSchemaItem = engine->newQObject(this);
+		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
+
+		QJSValue jsWidget = engine->newQObject(widget);
+		QQmlEngine::setObjectOwnership(widget, QQmlEngine::CppOwnership);
+
+		QJSValueList args;
+
+		args << jsSchemaItem;
+		args << jsWidget;
+		(args.push_back(scriptArgs), ...); // Push all other specific arguments.
+
+		// Run script
+		//
+		QJSValue jsResult = evaluatedJs.call(args);
+
+		schemaView->setScriptMessageBoxAllowed(prevAllowMessageBoxState);
+
+		if (jsResult.isError() == true)
+		{
+			reportScriptError(jsResult, schemaView->logFile());
+			return;
+		}
+
+		engine->collectGarbage();
+		return;
+	}
 }

@@ -15,10 +15,10 @@ namespace VFrame30
 	{
 		Property* p = nullptr;
 
-		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::styleSheet, PropertyNames::controlCategory, true, SchemaItemControl::styleSheet, SchemaItemControl::setStyleSheet);
+		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::styleSheet, PropertyNames::appearanceCategory, true, SchemaItemControl::styleSheet, SchemaItemControl::setStyleSheet);
 		p->setDescription(PropertyNames::widgetPropStyleSheet);
 
-		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::toolTip, PropertyNames::controlCategory, true, SchemaItemControl::toolTip, SchemaItemControl::setToolTip);
+		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::toolTip, PropertyNames::commonCategory, true, SchemaItemControl::toolTip, SchemaItemControl::setToolTip);
 		p->setDescription(PropertyNames::widgetPropToolTip);
 
 		// --
@@ -115,7 +115,7 @@ namespace VFrame30
 		return afterCreateImpl(control);
 	}
 
-	void SchemaItemControl::updateWidgetProperties(QWidget* widget) const
+	void SchemaItemControl::updateWidgetProperties(QWidget* widget, bool editMode) const
 	{
 		if (widget == nullptr)
 		{

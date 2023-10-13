@@ -155,7 +155,7 @@ namespace VFrame30
 		QLineEdit* control = new QLineEdit(m_text, parent);
 		control->setObjectName(guid().toString());
 
-		updateWidgetProperties(control);
+		updateWidgetProperties(control, editMode);
 
 		control->setText(text());
 
@@ -192,7 +192,7 @@ namespace VFrame30
 
 	// Update widget properties
 	//
-	void SchemaItemLineEdit::updateWidgetProperties(QWidget* widget) const
+	void SchemaItemLineEdit::updateWidgetProperties(QWidget* widget, bool editMode) const
 	{
 		QLineEdit* control = dynamic_cast<QLineEdit*>(widget);
 
@@ -202,7 +202,7 @@ namespace VFrame30
 			return;
 		}
 
-		SchemaItemControl::updateWidgetProperties(widget);
+		SchemaItemControl::updateWidgetProperties(widget, editMode);
 
 		bool updateRequired = false;
 
@@ -380,54 +380,7 @@ namespace VFrame30
 
 	void SchemaItemLineEdit::runEventScript(QJSValue& evaluatedJs, QLineEdit* controlWidget, bool allowMessageBox)
 	{
-		if (evaluatedJs.isError() == true ||
-			evaluatedJs.isNull() == true)
-		{
-			return;
-		}
-
-		// Suppose that parent of sender is SchemaView
-		//
-		ClientSchemaView* schemaView = dynamic_cast<ClientSchemaView*>(controlWidget->parentWidget());
-		if (schemaView == nullptr)
-		{
-			assert(schemaView);
-			return;
-		}
-
-		bool prevAllowMessageBoxState = schemaView->setScriptMessageBoxAllowed(allowMessageBox);
-
-		QJSEngine* engine = schemaView->jsEngine();
-		assert(engine);
-
-		// Set argument list
-		//
-		QJSValue jsSchemaItem = engine->newQObject(this);
-		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
-
-		QJSValue jsWidget = engine->newQObject(controlWidget);
-		QQmlEngine::setObjectOwnership(controlWidget, QQmlEngine::CppOwnership);
-
-		QJSValueList args;
-
-		args << jsSchemaItem;
-		args << jsWidget;
-		args << controlWidget->text();
-
-		// Run script
-		//
-		QJSValue jsResult = evaluatedJs.call(args);
-
-		schemaView->setScriptMessageBoxAllowed(prevAllowMessageBoxState);
-
-		if (jsResult.isError() == true)
-		{
-			reportScriptError(jsResult, schemaView->logFile());
-			return;
-		}
-
-		engine->collectGarbage();
-		return;
+		return SchemaItemControl::runEventScript<QLineEdit>(evaluatedJs, allowMessageBox, controlWidget, controlWidget->text());
 	}
 
 	// Properties and Data

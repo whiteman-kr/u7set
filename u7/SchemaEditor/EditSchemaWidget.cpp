@@ -1,42 +1,48 @@
-#include "EditEngine/EditEngine.h"
 #include "EditSchemaWidget.h"
-#include "SchemaPropertiesDialog.h"
-#include "SchemaLayersDialog.h"
-#include "SchemaItemPropertiesDialog.h"
 #include "DbTagsEditor.h"
+#include "EditEngine/EditEngine.h"
+#include "Forms/ComparePropertyObjectDialog.h"
+#include "GlobalMessanger.h"
+#include "SchemaItemPropertiesDialog.h"
+#include "SchemaLayersDialog.h"
+#include "SchemaPropertiesDialog.h"
+#include "Settings.h"
+#include "SignalPropertiesDialog.h"
+
 #include "./Forms/ChooseAfbDialog.h"
 #include "./Forms/ChooseUfbDialog.h"
-#include "SignalPropertiesDialog.h"
-#include "GlobalMessanger.h"
+
+#include "../lib/CodeEditor.h"
+#include "../lib/QDoublevalidatorEx.h"
+#include "../lib/Ui/TextEditCompleter.h"
+
+#include "../AppSignalSetProvider.h"
 #include "../Builder/ConnectionStorage.h"
-#include "../VFrame30/SchemaLayer.h"
-#include "../VFrame30/UfbSchema.h"
-#include "../VFrame30/SchemaItemLine.h"
-#include "../VFrame30/SchemaItemRect.h"
+#include "../HardwareLib/LmDescription.h"
+
+#include "../VFrame30/Bus.h"
+#include "../VFrame30/SchemaItemAfb.h"
+#include "../VFrame30/SchemaItemConst.h"
 #include "../VFrame30/SchemaItemFrame.h"
 #include "../VFrame30/SchemaItemImage.h"
-#include "../VFrame30/SchemaItemPath.h"
-#include "../VFrame30/SchemaItemSignal.h"
-#include "../VFrame30/SchemaItemAfb.h"
-#include "../VFrame30/SchemaItemLink.h"
-#include "../VFrame30/SchemaItemConst.h"
-#include "../VFrame30/SchemaItemUfb.h"
-#include "../VFrame30/SchemaItemTerminator.h"
-#include "../VFrame30/SchemaItemValue.h"
 #include "../VFrame30/SchemaItemImageValue.h"
-#include "../VFrame30/SchemaItemPushButton.h"
-#include "../VFrame30/SchemaItemLineEdit.h"
 #include "../VFrame30/SchemaItemIndicator.h"
+#include "../VFrame30/SchemaItemLine.h"
+#include "../VFrame30/SchemaItemLineEdit.h"
+#include "../VFrame30/SchemaItemLink.h"
 #include "../VFrame30/SchemaItemLoopback.h"
+#include "../VFrame30/SchemaItemPath.h"
+#include "../VFrame30/SchemaItemPushButton.h"
+#include "../VFrame30/SchemaItemRect.h"
+#include "../VFrame30/SchemaItemSignal.h"
+#include "../VFrame30/SchemaItemSlider.h"
+#include "../VFrame30/SchemaItemTerminator.h"
+#include "../VFrame30/SchemaItemUfb.h"
+#include "../VFrame30/SchemaItemValue.h"
+#include "../VFrame30/SchemaLayer.h"
 #include "../VFrame30/Session.h"
-#include "../VFrame30/Bus.h"
-#include "../HardwareLib/LmDescription.h"
-#include "../AppSignalSetProvider.h"
-#include "Forms/ComparePropertyObjectDialog.h"
-#include "Settings.h"
-#include "../lib/Ui/TextEditCompleter.h"
-#include "../lib/QDoublevalidatorEx.h"
-#include "../lib/CodeEditor.h"
+#include "../VFrame30/UfbSchema.h"
+
 
 const EditSchemaWidget::MouseStateCursor EditSchemaWidget::m_mouseStateCursor[] =
 	{
@@ -558,6 +564,16 @@ void EditSchemaWidget::createActions()
 				addItem(item);
 			});
 
+	m_addSliderAction = new QAction(tr("Slider"), this);
+	m_addSliderAction->setEnabled(true);
+	m_addSliderAction->setIcon(QIcon(":/Images/Images/SchemaItemSlider.svg"));
+	connect(m_addSliderAction, &QAction::triggered,
+			[this](bool)
+			{
+				auto item = std::make_shared<VFrame30::SchemaItemSlider>(schema()->unit());
+				addItem(item);
+			});
+
 	m_addIndicatorAction = new QAction(tr("Indicator"), this);
 	m_addIndicatorAction->setEnabled(true);
 	m_addIndicatorAction->setIcon(QIcon(":/Images/Images/SchemaItemIndicator.svg"));
@@ -1020,6 +1036,7 @@ void EditSchemaWidget::createActions()
 			m_addSubMenu->addAction(m_addImageValueAction);
 			m_addSubMenu->addAction(m_addPushButtonAction);
 			m_addSubMenu->addAction(m_addLineEditAction);
+			m_addSubMenu->addAction(m_addSliderAction);
 			m_addSubMenu->addAction(m_addIndicatorAction);
 		}
 
@@ -1029,6 +1046,7 @@ void EditSchemaWidget::createActions()
 			m_addSubMenu->addAction(m_addImageValueAction);
 			m_addSubMenu->addAction(m_addPushButtonAction);
 			m_addSubMenu->addAction(m_addLineEditAction);
+			m_addSubMenu->addAction(m_addSliderAction);
 		}
 
 	m_editSubMenu = new QMenu(tr("Edit"), this);

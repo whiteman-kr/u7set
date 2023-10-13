@@ -201,7 +201,7 @@ namespace VFrame30
 		// Methods
 	public:
 		virtual QWidget* createWidgetImpl(QWidget* parent, bool editMode, double zoom) override;
-		virtual void updateWidgetProperties(QWidget* widget) const  override;
+		virtual void updateWidgetProperties(QWidget* widget, bool editMode) const  override;
 
 	protected:
 		virtual void afterCreateImpl(QWidget* control) override;
@@ -328,7 +328,7 @@ namespace VFrame30
 
 		/*! \brief This property holds the widget's style sheet
 
-		The style sheet contains a textual description of customizations to the widget's style, as described in the <a href="https://doc.qt.io/qt-5/stylesheet.html">Qt Style Sheets</a> document.
+		The style sheet contains a textual description of customizations to the widget's style, as described in the <a href="https://doc.qt.io/qt-6/stylesheet.html">Qt Style Sheets</a> document.
 
 		<b>Example</b>
 
