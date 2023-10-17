@@ -23,7 +23,7 @@ namespace Sim
 			bool hasState = false;
 			AppSignalState state = signalManager.signalState(::calcHash(appSignalId), &hasState);
 
-			if (hasState == false || state.isValid() == false)
+			if (hasState == false || state.isStateAvailable() == false)
 			{
 				return;
 			}
@@ -85,7 +85,11 @@ namespace Sim
 
 		bool metPrivate() const override
 		{
-			Q_ASSERT(states.empty() == false);
+			if (states.empty() == true)
+			{
+				Q_ASSERT(states.empty() == false);
+				return false;
+			}
 
 			double value = states.back().value();
 
