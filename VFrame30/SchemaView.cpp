@@ -493,13 +493,13 @@ namespace VFrame30
 
 				if (schema()->unit() == SchemaUnit::Display)
 				{
-					horzScaleFactor = (viewportSize.width() * devicePixelRatioF() * 0.99) / schema()->docWidth();
-					vertScaleFactor = (viewportSize.height() * devicePixelRatioF() * 0.99) / schema()->docHeight();
+					horzScaleFactor = (viewportSize.width() * devicePixelRatioF()) / schema()->docWidth();
+					vertScaleFactor = (viewportSize.height() * devicePixelRatioF()) / schema()->docHeight();
 				}
 				else
 				{
-					horzScaleFactor = (viewportSize.width() * devicePixelRatioF() * 0.99) / (schema()->docWidth() * realDpiX);
-					vertScaleFactor = (viewportSize.height() * devicePixelRatioF() * 0.99) / (schema()->docHeight() * realDpiY);
+					horzScaleFactor = (viewportSize.width() * devicePixelRatioF()) / (schema()->docWidth() * realDpiX);
+					vertScaleFactor = (viewportSize.height() * devicePixelRatioF()) / (schema()->docHeight() * realDpiY);
 				}
 
 				value = std::min(vertScaleFactor, horzScaleFactor) * 100.0;
@@ -512,16 +512,25 @@ namespace VFrame30
 
 		m_zoom = value;
 
-		// Width and height of the document in physical dpis, taking into account devicePixelRatio
-		//
-		int widthInPixel = static_cast<int>(schema()->GetDocumentWidth(realDpiX, m_zoom));
-		int heightInPixel = static_cast<int>(schema()->GetDocumentHeight(realDpiY, m_zoom));
+		// Width and height of the document in physical dpi's, taking into account devicePixelRatio
+		// schema()->GetDocumentWidth() returns integer, for better precision we use double.
+		// 
+		//int widthInPixel = static_cast<int>(schema()->GetDocumentWidth(realDpiX, m_zoom));
+		//int heightInPixel = static_cast<int>(schema()->GetDocumentHeight(realDpiY, m_zoom));
+
+		double widthInPixel = schema()->unit() == SchemaUnit::Display ?
+								  schema()->docWidth() * (m_zoom / 100.0) :
+								  schema()->docWidth() * realDpiX * (m_zoom / 100.0);
+
+		double heightInPixel = schema()->unit() == SchemaUnit::Display ?
+								   schema()->docHeight() * (m_zoom / 100.0) :
+								   schema()->docHeight() * realDpiY * (m_zoom / 100.0);
 
 		// The size of window is set in different points
 		// Qt widget points must be corrected according to devicePixelRatio()
 		//
-		int widthInQtPoints = static_cast<int>(widthInPixel / devicePixelRatio());
-		int heightInQtPixel = static_cast<int>(heightInPixel / devicePixelRatio());
+		int widthInQtPoints = std::round(widthInPixel / devicePixelRatio());
+		int heightInQtPixel = std::round(heightInPixel / devicePixelRatio());
 
 		QSize scaledPixelSize{widthInQtPoints, heightInQtPixel};
 
