@@ -80,8 +80,11 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 	createStatusBar();
 
 	connect(&m_configController, &TestSuite::TestSuiteConfigController::configurationArrived, this, &TestSuiteMainWindow::onConfigurationArrived);
+	connect(&m_testSuite, &TestSuite::TestSuite::testStarted, m_testListWidget, &TestListWidget::onTestStarted);
 	connect(&m_testSuite, &TestSuite::TestSuite::testFinished, m_testListWidget, &TestListWidget::onTestFinished);
 	connect(&m_testSuite, &TestSuite::TestSuite::finished, this, &TestSuiteMainWindow::onTestingFinished);
+	connect(&m_testSuite, &TestSuite::TestSuite::globalPermissionChanged, this, &TestSuiteMainWindow::onGlobalPermissionChanged);
+	connect(&m_testSuite, &TestSuite::TestSuite::scriptPermissionChanged, m_testListWidget, &TestListWidget::onScriptPermissionChanged);
 
 	// Logs
 	//
@@ -132,7 +135,7 @@ void TestSuiteMainWindow::createDocks()
 	testsListDock->setFeatures(QDockWidget::NoDockWidgetFeatures);
 	testsListDock->setTitleBarWidget(new QWidget{});		// Hides title bar
 
-	m_testListWidget = new TestListWidget{m_appLog, this};
+	m_testListWidget = new TestListWidget{m_appLog, m_testScriptsStorage, this};
 	connect(m_testListWidget, &TestListWidget::testItemClicked, this, &TestSuiteMainWindow::onShowTestContents);
 	connect(m_testListWidget, &TestListWidget::testSelectionChanged, this, [this]() { updateActionsState(); });
 	testsListDock->setWidget(m_testListWidget);
@@ -446,7 +449,7 @@ void TestSuiteMainWindow::updateStatusBar()
 
 	// AppDataService connection
 	//
-	if (m_configController.configuration().appDataServices.empty() == false)
+	if (m_configuration.appDataServices.empty() == false)
 	{
 		showSoftwareConnection("AppDataService",
 							   "TcpSignal",
@@ -456,7 +459,7 @@ void TestSuiteMainWindow::updateStatusBar()
 
 	// TuningService connection
 	//
-	if (m_configController.configuration().tuningEnabled == true)
+	if (m_configuration.tuningEnabled == true)
 	{
 		showSoftwareConnection("TuningService",
 							   "TuningTcpClient",
@@ -571,8 +574,21 @@ void TestSuiteMainWindow::showSoftwareConnection(const QString& caption,
 
 void TestSuiteMainWindow::loadScriptsFromConfiguration()
 {
-	m_testScriptsStorage.setScripts(m_configController.scripts());
-	m_testListWidget->setTests(m_testScriptsStorage);
+	m_testScriptsStorage.setScripts(m_configData.scripts);
+	
+	m_testListWidget->fillTestsTree();
+
+	// Reset or restart tests run control thread
+	//
+	if (m_testSuite.hasRunControl() == false)
+	{
+		m_testSuite.executeRunControl(TestSuite::ControlParams{theSettings.useLocalScriptsPath() ? theSettings.localScriptsPath() : QString()});
+	}
+	else
+	{
+		m_testSuite.resetRunControl();
+	}
+
 }
 
 void TestSuiteMainWindow::loadScriptsFromLocalPath()
@@ -585,7 +601,18 @@ void TestSuiteMainWindow::loadScriptsFromLocalPath()
 		return;
 	}
 
-	m_testListWidget->setTests(m_testScriptsStorage);
+	m_testListWidget->fillTestsTree();
+
+	// Reset or restart tests run control thread
+	//
+	if (m_testSuite.hasRunControl() == false)
+	{
+		m_testSuite.executeRunControl(TestSuite::ControlParams{theSettings.useLocalScriptsPath() ? theSettings.localScriptsPath() : QString()});
+	}
+	else
+	{
+		m_testSuite.resetRunControl();
+	}
 }
 
 void TestSuiteMainWindow::updateReportActions()
@@ -600,7 +627,7 @@ void TestSuiteMainWindow::updateReportActions()
     m_multipleReportActions.clear();
 
 
-	const auto& templates = m_configController.reportTemplates().templates();
+	const auto& templates = m_configData.reportTemplates.templates();
 
 	m_singleReportAction->setVisible(templates.size() == 1);
 	m_multipleReportsMenu->menuAction()->setVisible(templates.size() > 1);
@@ -670,7 +697,7 @@ void TestSuiteMainWindow::updateTestViewTabPages()
 	
 void TestSuiteMainWindow::updateActionsState()
 {
-	auto selection = m_testListWidget->testScriptSelection();
+	auto selection = m_testListWidget->getTestScriptSelection();
 
 	bool isRunning = m_testSuite.isRunning();
 
@@ -748,55 +775,69 @@ bool TestSuiteMainWindow::saveTestLog()
 
 void TestSuiteMainWindow::updateStatusIndicator()
 {
-	TestSuite::ControlStatus status = m_testSuite.status();
-
 	QString text;
+	QString styleSheet;
 
-	switch(status.m_state)
+	TestSuite::ControlStatus runStatus = m_testSuite.runStatus();
+	if (runStatus.m_state == TestSuite::ControlState::NoPermission)
 	{
-	case TestSuite::ControlState::Stop:
+		text = tr("No permission to start testing.\n");
+		styleSheet = "QLabel {color : #ff0000;}";
+	}
+	else
+	{
+		TestSuite::ControlStatus testStatus = m_testSuite.testStatus();
+
+		switch (testStatus.m_state)
 		{
-			text = tr("Tests are not running.\n");
+		case TestSuite::ControlState::Stop:
+			{
+				text = tr("Tests are not running.\n");
+			}
+			break;
+		case TestSuite::ControlState::RequestingConfiguration:
+			{
+				text = tr("Requesting test configuration...\n");
+			}
+			break;
+		case TestSuite::ControlState::InitInputController:
+			{
+				text = tr("Initializing input controller...\n");
+			}
+			break;
+		case TestSuite::ControlState::InitOutputController:
+			{
+				text = tr("Initializing output controller...\n");
+			}
+			break;
+		case TestSuite::ControlState::RunningTests:
+			{
+				text = tr("Running script file: %1 (%2 of %3)\nTest function: %4 (%5 of %6)")
+						   .arg(testStatus.m_scriptFile)
+						   .arg(testStatus.m_scriptIndex)
+						   .arg(testStatus.m_scriptCount)
+						   .arg(testStatus.m_testFunction)
+						   .arg(testStatus.m_testIndex)
+						   .arg(testStatus.m_testCount);
+			}
+			break;
+		case TestSuite::ControlState::CreatingReports:
+			{
+				text = tr("Creating reports...\n");
+			}
+			break;
+		default:
+			Q_ASSERT(false);
 		}
-		break;
-	case TestSuite::ControlState::RequestingConfiguration:
-		{
-			text = tr("Requesting test configuration...\n");
-		}
-		break;
-	case TestSuite::ControlState::InitInputController:
-		{
-			text = tr("Initializing input controller...\n");
-		}
-		break;
-	case TestSuite::ControlState::InitOutputController:
-		{
-			text = tr("Initializing output controller...\n");
-		}
-		break;
-	case TestSuite::ControlState::RunningTests:
-		{
-			text = tr("Running script file: %1 (%2 of %3)\nTest function: %4 (%5 of %6)")
-					.arg(status.m_scriptFile)
-					.arg(status.m_scriptIndex)
-					.arg(status.m_scriptCount)
-					.arg(status.m_testFunction)
-					.arg(status.m_testIndex)
-					.arg(status.m_testCount);
-		}
-		break;
-	case TestSuite::ControlState::CreatingReports:
-		{
-			text = tr("Creating reports...\n");
-		}
-		break;
-	default:
-		Q_ASSERT(false);
 	}
 
 	if (text != m_statusIndicator->text())
 	{
 		m_statusIndicator->setText(text);
+	}
+	if (styleSheet != m_statusIndicator->styleSheet())
+	{
+		m_statusIndicator->setStyleSheet(styleSheet);
 	}
 
 	return;
@@ -867,10 +908,10 @@ void TestSuiteMainWindow::on_m_run_clicked()
 	QString userName;
 	QString password;
 
-	if (m_configController.configuration().login == true)
+	if (m_configuration.login == true)
 	{
 		ClientLib::TuningUserManager userManager;
-		userManager.setConfiguration(true, m_configController.configuration().userAccounts, true, 120);
+		userManager.setConfiguration(true, m_configuration.userAccounts, true, 120);
 
 		bool loggedIn = false;
 
@@ -885,7 +926,7 @@ void TestSuiteMainWindow::on_m_run_clicked()
 			password = d.password();
 
 			TestSuite::TestSuiteUserManager checkPasswordUserManager(d.userName(), d.password());
-			checkPasswordUserManager.setConfiguration(true, m_configController.configuration().userAccounts, true, 120);
+			checkPasswordUserManager.setConfiguration(true, m_configuration.userAccounts, true, 120);
 
 			if (checkPasswordUserManager.login(nullptr) == true)
 			{
@@ -906,7 +947,7 @@ void TestSuiteMainWindow::on_m_run_clicked()
 
 	// Create a list of tests user has selected to run
 	//
-	TestSuite::TestScriptSelection selection = m_testListWidget->testScriptSelection();
+	TestSuite::TestScriptSelection selection = m_testListWidget->getTestScriptSelection();
 	if (selection.isEmpty() == true)
 	{
 		QMessageBox::warning(this, qAppName(), tr("Please choose at least one test to run."));
@@ -922,11 +963,16 @@ void TestSuiteMainWindow::on_m_run_clicked()
 
 	// Run tests
 	//
-	bool ok = m_testSuite.execute(selection.selectedFiles(),
-								  theSettings.useLocalScriptsPath() ? theSettings.localScriptsPath() : QString(),
-								  selection,
-								  userName,
-								  password);
+	TestSuite::ControlParams controlParams{
+		selection.selectedFiles(),
+		theSettings.useLocalScriptsPath() ? theSettings.localScriptsPath() : QString(),	// Scripts path
+		{}, // Reports path
+		selection,
+		userName,
+		password};
+
+
+	bool ok = m_testSuite.execute(controlParams);
 	if (ok == false)
 	{
 		return;
@@ -962,26 +1008,26 @@ void TestSuiteMainWindow::on_m_report_clicked()
 		}
 	}
 
-	if (m_configController.reportTemplates().templates().size() == 1)
+	if (m_configData.reportTemplates.templates().size() == 1)
 	{
 		on_m_single_report_clicked();
 	}
 	else
 	{
-		DialogReport d(m_configController, m_testSuite.testLog(), this);
+		DialogReport d(m_configData.reportTemplates, m_testSuite.testLog(), this);
 		d.exec();
 	}
 }
 
 void TestSuiteMainWindow::on_m_single_report_clicked()
 {
-	if (m_configController.reportTemplates().templates().size() != 1)
+	if (m_configData.reportTemplates.templates().size() != 1)
 	{
 		Q_ASSERT(false);
 		return;
 	}
 
-	onGenerateReport(m_configController.reportTemplates().templates()[0].caption());
+	onGenerateReport(m_configData.reportTemplates.templates()[0].caption());
 }
 
 void TestSuiteMainWindow::onSaveTestLog()
@@ -1012,6 +1058,7 @@ void TestSuiteMainWindow::onSettings()
 		// --
 		//
 		bool needReconnect = false;
+		bool needReloadScripts = false;
 
 		auto currentSettings = theSettings;
 
@@ -1021,6 +1068,13 @@ void TestSuiteMainWindow::onSettings()
 		{
 			needReconnect = true;
 		}
+
+		if (currentSettings.localScriptsPath() != d.settings().localScriptsPath() ||
+			currentSettings.useLocalScriptsPath() != d.settings().useLocalScriptsPath())
+		{
+			needReloadScripts = true;
+		}
+
 
 		// --
 		//
@@ -1053,8 +1107,12 @@ void TestSuiteMainWindow::onSettings()
 			m_configController.setConnectionParams(theSettings.librarySettings().instanceStrId(),
 															   theSettings.librarySettings().configuratorAddress1(),
 															   theSettings.librarySettings().configuratorAddress2());
+		}
 
-			m_testSuite.updateSettings(theSettings.librarySettings());
+		if (needReconnect == true || needReloadScripts == true)
+		{
+			m_testSuite.updateSettings(theSettings.librarySettings(), 
+				TestSuite::ControlParams{theSettings.useLocalScriptsPath() ? theSettings.localScriptsPath() : QString()});
 		}
 
 		m_reloadTestsScriptsAction->setVisible(theSettings.useLocalScriptsPath() == true);
@@ -1198,7 +1256,7 @@ void TestSuiteMainWindow::onGenerateReport(const QString& caption)
 		}
 	}
 
-	TestSuite::TestReport::generateReport(m_configController.reportTemplates(), m_testSuite.testLog(), caption, this);
+	TestSuite::TestReport::generateReport(m_configData.reportTemplates, m_testSuite.testLog(), caption, this);
 
     return;
 }
@@ -1218,12 +1276,18 @@ void TestSuiteMainWindow::viewGlobalScript()
 
 void TestSuiteMainWindow::onConfigurationArrived()
 {
+	m_configuration = m_configController.configuration();
+	m_configData = m_configController.configData();
+
 	if (theSettings.useLocalScriptsPath() == false)
 	{
 		loadScriptsFromConfiguration();
 
 		updateTestViewTabPages();
 	}
+
+	m_testSuite.updateSettings(theSettings.librarySettings(), 
+		TestSuite::ControlParams{theSettings.useLocalScriptsPath() ? theSettings.localScriptsPath() : QString()});
 
     updateReportActions();
 
@@ -1233,6 +1297,11 @@ void TestSuiteMainWindow::onConfigurationArrived()
 }
 
 void TestSuiteMainWindow::onTestingFinished(int /*result*/)
+{
+	updateActionsState();
+}
+
+void TestSuiteMainWindow::onGlobalPermissionChanged(bool /*result*/)
 {
 	updateActionsState();
 }

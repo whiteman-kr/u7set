@@ -98,6 +98,8 @@ namespace TestSuite
 		//std::vector<TestScript>& scripts();
 		const std::vector<TestScript>& scripts() const;
 
+		const TestScript* globalScript() const;
+
 		bool hasScript(Hash hash) const;
 
 		const TestScript& script(Hash hash) const;
@@ -110,7 +112,7 @@ namespace TestSuite
 		//
 		void clear();
 		void add(const TestScript& script);
-		void setScripts(std::vector<TestScript>&& scripts);	// Sets scripts by moving them from source
+		void setScripts(const std::vector<TestScript>& scripts);	// Sets scripts by moving them from source
 
 		bool loadFromPath(const QString& path, QString* errorMsg);
 

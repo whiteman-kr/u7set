@@ -275,22 +275,6 @@ void saveTestLog(QString fileName, TestSuite::TestLog& testLog, ConsoleLogFile& 
 	return;
 }
 
-void createTestReports(const ReportLib::ReportTemplateStorage& templates,
-					   const TestSuite::TestLog& testLog,
-					   const QString& path,
-					   ILogFile* appLog)
-{
-	QString reportsPath{path};
-
-	if (reportsPath.contains("default") == true)
-	{
-		reportsPath.replace("default", QString("TestReport_%1").arg(QDateTime::currentDateTime().toString("ddMMyyyy_HHmmss")));
-	}
-
-	TestSuite::TestReport::generateReports(templates, testLog, QString(), reportsPath, appLog);
-	return;
-}
-
 int main(int argc, char* argv[])
 {
 	ProtobufLibShutdowner protobufLibShutdowner;
@@ -433,7 +417,15 @@ int main(int argc, char* argv[])
 	//
 	TestSuite::TestScriptSelection filter(args.testsFilter);
 
-	ok = testSuite.execute({}, args.scriptsPath, filter, QString::fromStdString(userName), QString::fromStdString(password));
+	TestSuite::ControlParams controlParams{
+		{},
+		args.scriptsPath,
+		args.reportsPath,
+		filter,
+		QString::fromStdString(userName),
+		QString::fromStdString(password)};
+
+	ok = testSuite.execute(controlParams);
 	if (ok == false)
 	{
 		return EXIT_FAILURE;
@@ -446,13 +438,6 @@ int main(int argc, char* argv[])
 		if (args.testLogFileName.isEmpty() == false)
 		{
 			saveTestLog(args.testLogFileName, testSuite.testLog(), appLog);
-		}
-
-		// Save test log to the file
-		//
-		if (args.reportsPath.isEmpty() == false)
-		{
-			createTestReports(testSuite.reportTemplates(), testSuite.testLog(), args.reportsPath, &appLog);
 		}
 
 		// Exit the application

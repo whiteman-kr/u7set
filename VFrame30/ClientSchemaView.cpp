@@ -752,7 +752,7 @@ namespace VFrame30
 											   ITuningConnection& tuningConnection,
 											   ITuningAuthorization& tuningAuthorization)
 	{
-		m_tuningController = std::make_unique<TuningController>(signalManager, tuningConnection, tuningAuthorization);
+		m_tuningController = std::make_unique<TuningController>(signalManager, tuningConnection, tuningAuthorization, this->parentWidget());
 		m_jsEngineGlobalsWereCreated = false; // it will make jsEngine() to initialize global script vars again
 
 		return;
