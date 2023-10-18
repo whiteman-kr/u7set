@@ -17,6 +17,10 @@ qt_add_library(${TARGET} STATIC
 	AdsInputController.h
 	Control.cpp
 	Control.h
+	RunControl.cpp
+	RunControl.h
+	TestControl.cpp
+	TestControl.h
 	IInputController.h
 	IOutputController.h
 	ScriptRunner.cpp

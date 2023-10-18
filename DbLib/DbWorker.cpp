@@ -420,6 +420,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0397.sql", "Upgrade to version 397, TestSuite preset report template update"},
 	{":/DatabaseUpgrade/Upgrade0398.sql", "Upgrade to version 398, Attribute instantiator revision in all AFBs"},
 	{":/DatabaseUpgrade/Upgrade0399.sql", "Upgrade to version 399, TestSuite preset update (added script tags)"},
+	{":/DatabaseUpgrade/Upgrade0400.sql", "Upgrade to version 400, Update file Tests/GlobalScript.js"},
 };
 
 int DbWorker::counter = 0;

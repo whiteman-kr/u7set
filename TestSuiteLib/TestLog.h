@@ -16,6 +16,18 @@ namespace TestSuite
 		{
 			return tr("FAILED");
 		}
+		static QString TEST_RUNNING()
+		{
+			return tr("RUNNING");
+		}
+		static QString TEST_ALLOWED()
+		{
+			return tr("Allowed");
+		}
+		static QString TEST_DENIED()
+		{
+			return tr("Denied");
+		}
 	};
 
 	enum class TestLogItemType

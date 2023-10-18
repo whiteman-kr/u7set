@@ -9,14 +9,12 @@
 #include "IInputController.h"
 #include "IOutputController.h"
 #include "ControlState.h"
+#include "ScriptRunner.h"
 #include "../ClientLib/AppSignalManager.h"
 #include "../ClientLib/TuningUserManager.h"
 
 namespace TestSuite
 {
-	using namespace std::literals::chrono_literals;
-
-
 	class TestSuiteUserManager : public ClientLib::TuningUserManager
 	{
 	public:
@@ -30,58 +28,82 @@ namespace TestSuite
 		QString m_password;
 	};
 
+	struct ControlParams
+	{
+
+		ControlParams() = default;
+
+		ControlParams(const QStringList& scriptsFiles,
+					  const QString& scriptsPath,
+					  const QString& reportsPath,
+					  const TestScriptSelection& testsFilter,
+					  const QString& userName,
+					  const QString& password)
+		{
+			this->scriptsFiles = scriptsFiles;
+			this->scriptsPath = scriptsPath;
+			this->reportsPath = reportsPath;
+			this->testsFilter = testsFilter;
+			this->userName = userName;
+			this->password = password;
+		}
+			
+		explicit ControlParams(const QString& scriptsPath)
+		{
+			this->scriptsPath = scriptsPath;
+		}
+
+		QStringList scriptsFiles;        // List of script files for execution, if empty then exec all.
+		QString scriptsPath;             // Load scripts from disk, path to dir for *.js files.
+		QString reportsPath;             // Save reports to disk if path is not empty
+		TestScriptSelection testsFilter; // Tests filter
+		QString userName;
+		QString password;
+	};
 
 	class ControlThread : public QThread
 	{
-		Q_OBJECT
-
 	public:
-		ControlThread(ILogFile* appLog, ILogFile* testLog);
+		ControlThread(ILogFile* appLog, TestLog* testLog, const QString& runContext);
+		virtual ~ControlThread();
 
 	public:
 		void setTestParams(const SoftwareInfo& softwareInfo,
 						   const TestSuiteSettings& settings,
-						   const QStringList& scriptsFiles,		// List of script files for execution, if empty then exec all.
-						   const QString& scriptsPath,			// Load scripts from disk, path to dir for *.js files.
-						   const TestScriptSelection& testsFilter,			// Tests filter
-						   const QString& userName,
-						   const QString& password);
+						   const ControlParams& controlParams);
 
 		int result() const;
 
 		ControlStatus status() const;
 
-		ReportLib::ReportTemplateStorage reportTemplates() const;	// Returns templates received by taskCfgServiceConnection
-
-	signals:
-		void testFinished(QString scriptFileName, QString testFunction, bool result);
+	protected:
+		virtual void run() = 0;
 
 	protected:
-		virtual void run() override;
-
-	private:
-		void cleanUp();
 		void checkAndInterruptTestExecution();
 
+		void cleanUp();
 		void taskCfgServiceConnection();
 		void taskInitInputController();
 		void taskInitOutputController();
 
-		void taskRunTests();
-		void taskCreateReports();
-
-	private:
+	protected:
 		HasLogFile m_appLog;
-		ILogFile* m_testLog = nullptr;
+		TestLog* m_testLog = nullptr;
 
+		// --
+		//
 		SoftwareInfo m_softwareInfo;
 		TestSuiteSettings m_settings;
+		ConfigSettings m_configuration;
+		ConfigData m_configData;
+		ControlParams m_controlParams;
 
-		QStringList m_scriptsToRun;		// List of script files for execution, if empty then exec all.
-		QString m_scriptsPath;			// Load scripts from disk, path to dir for *.js files.
-		TestScriptSelection m_testsFilter;	// Tests filter
-		QString m_userName;
-		QString m_password;
+		// --
+		//
+		ClientLib::AppSignalManager m_signals;
+		std::unique_ptr<IInputController> m_inputController;
+		std::unique_ptr<IOutputController> m_outputController;
 
 		// --
 		//
@@ -89,50 +111,30 @@ namespace TestSuite
 		ControlStatus m_status;
 
 		std::atomic<int> m_result{0};
-
-		ConfigSettings m_configuration;
-		std::vector<TestScript> m_scripts;
-
-		mutable QMutex m_reportTemplatesMutex;
-		ReportLib::ReportTemplateStorage m_reportTemplates;
-
-		ClientLib::AppSignalManager m_signals;
-		std::unique_ptr<IInputController> m_inputController;
-		std::unique_ptr<IOutputController> m_outputController;
 	};
-
 
 	class Control : public QObject
 	{
-		Q_OBJECT
-
 	public:
-		explicit Control(ILogFile* appLog, ILogFile* testLog);
+		Control(ILogFile* appLog, TestLog* testLog, ControlThread* controlThread);
+		virtual ~Control();
 
 	public:
 		bool execute(const SoftwareInfo& softwareInfo,
 					 const TestSuiteSettings& settings,
-					 const QStringList& scriptsFiles,
-					 const QString& scriptsPath,
-					 const TestScriptSelection& testsFilter,
-					 const QString& userName,
-					 const QString& password);
+					 const ControlParams& controlParams);
 		bool stop();
 		bool isRunning() const;
 
 		ControlStatus status() const;
 
-		ReportLib::ReportTemplateStorage reportTemplates() const;	// Returns templates received by taskCfgServiceConnection
+	protected:
+		ILogFile* m_appLog = nullptr;
+		TestLog* m_testLog = nullptr;
 
-	signals:
-		void testFinished(QString scriptFileName, QString testFunction, bool result);
-		void finished(int result);
+		std::unique_ptr<ControlThread> m_controlThread{nullptr};
 
 	private:
-		ILogFile* m_appLog = nullptr;
-		ILogFile* m_testLog = nullptr;
-
-		ControlThread m_controlThread;
-		std::atomic_bool m_stopRequested = false;
+		std::atomic<bool> m_stopRequested{false};
 	};
 }

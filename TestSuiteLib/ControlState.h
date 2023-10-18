@@ -6,6 +6,13 @@ namespace TestSuite
 {
 	enum class ControlState
 	{
+		// RunControlState states
+		//
+		NoPermission,	
+		Permission,		
+
+		//TestControlState states
+		//
 		Stop,
 		RequestingConfiguration,
 		InitInputController,

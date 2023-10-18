@@ -3,12 +3,12 @@
 
 #include "TestReport.h"
 
-DialogReport::DialogReport(const TestSuite::TestSuiteConfigController& configController,
+DialogReport::DialogReport(const ReportLib::ReportTemplateStorage& templates,
 						   const TestSuite::TestLog& testLog,
 						   QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::DialogReport),
-	m_configController(configController),
+	m_templates(templates),
 	m_testLog(testLog)
 {
 	ui->setupUi(this);
@@ -22,9 +22,7 @@ DialogReport::~DialogReport()
 
 void DialogReport::fillReportsList()
 {
-	const std::vector<ReportLib::ReportTemplate>& templates = m_configController.reportTemplates().templates();
-
-	for (const auto& t : templates)
+	for (const auto& t : m_templates.templates())
 	{
 		ui->listReports->addItem(t.caption());
 	}
@@ -38,7 +36,7 @@ void DialogReport::on_btnGenerate_clicked()
 		return;
 	}
 
-	TestSuite::TestReport::generateReport(m_configController.reportTemplates(), m_testLog, item->text(), this);
+	TestSuite::TestReport::generateReport(m_templates, m_testLog, item->text(), this);
 }
 
 

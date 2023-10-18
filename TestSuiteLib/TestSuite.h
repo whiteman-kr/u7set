@@ -4,7 +4,8 @@
 #include "../OnlineLib/SoftwareInfo.h"
 #include "TestSuiteSettings.h"
 #include "TestSuiteConfigController.h"
-#include "Control.h"
+#include "RunControl.h"
+#include "TestControl.h"
 #include "TestLog.h"
 
 //#include "InputController.h"
@@ -24,30 +25,31 @@ namespace TestSuite
 
 	public:
 		TestSuite(const SoftwareInfo& softwareInfo, const TestSuiteSettings& settings, ILogFile* appLog, ITestLogOutput* testOutput);
-		~TestSuite() = default;
+		virtual ~TestSuite();
 
 	public:
-		bool execute(const QStringList& scriptsFiles,		// List of script files for execution, if empty then exec all.
-					 const QString& scriptsPath,			// Load scripts from disk, path to dir for *.js files.
-					 const TestScriptSelection& testsFilter,	// Tests filter
-					 const QString& userName,
-					 const QString& password);
+		bool executeRunControl(const ControlParams& controlParams);
+		bool hasRunControl();
+		void resetRunControl();
+		void stopRunControl();
 
-		void updateSettings(const TestSuiteSettings& settings);
-
+		bool execute(const ControlParams& controlParams);
 		void stop();
-
 		bool isRunning() const;
 
+		void updateSettings(const TestSuiteSettings& settings, const ControlParams& controlParams);
+
 		TestLog& testLog();
-
-		ControlStatus status() const;
-
-		ReportLib::ReportTemplateStorage reportTemplates() const;	// Returns templates received by taskCfgServiceConnection in Control thread
+		ControlStatus testStatus() const;
+		ControlStatus runStatus() const;
 
 	signals:
+		void testStarted(QString scriptFileName, QString testFunction);
 		void testFinished(QString scriptFileName, QString testFunction, bool result);
 		void finished(int result);
+		void scriptPermissionChanged(QString scriptFileName, bool result);
+		void globalPermissionChanged(bool result);
+
 
 	private:
 		HasLogFile m_appLog;
@@ -58,7 +60,11 @@ namespace TestSuite
 
 		// Test runtime
 		//
-		Control m_control;
+		TestControl m_testControl;
+
+		// Run runtime
+		//
+		RunControl m_runControl;
 	};
 }
 

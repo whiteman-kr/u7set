@@ -8,42 +8,81 @@ namespace TestSuite
 		m_testLog{testOutput},
 		m_softwareInfo{softwareInfo},
 		m_settings{settings},
-		m_control{appLog, &m_testLog}
+		m_testControl{appLog, &m_testLog},
+		m_runControl{appLog, &m_testLog}
 	{
-		connect(&m_control, &Control::testFinished, [this](QString scriptFileName, QString testFunction, bool result){
+		connect(&m_testControl, &TestControl::testStarted, [this](QString scriptFileName, QString testFunction){
+			emit testStarted(scriptFileName, testFunction);
+		});
+		connect(&m_testControl, &TestControl::testFinished, [this](QString scriptFileName, QString testFunction, bool result){
 			emit testFinished(scriptFileName, testFunction, result);
 		});
 
-		connect(&m_control, &Control::finished, this, &TestSuite::finished);
+		connect(&m_testControl, &TestControl::finished, this, &TestSuite::finished);
+
+		connect(&m_runControl, &RunControl::scriptPermissionChanged, this, &TestSuite::scriptPermissionChanged);
+		connect(&m_runControl, &RunControl::globalPermissionChanged, this, &TestSuite::globalPermissionChanged);
+
 		return;
 	}
 
-	bool TestSuite::execute(const QStringList& scriptsFiles,		// List of script files for execution, if empty then exec all.
-							const QString& scriptsPath,				// Load scripts from disk, path to dir for *.js files.
-							const TestScriptSelection& testsFilter,				// Tests filter
-							const QString& userName,
-							const QString& password)
+	TestSuite::~TestSuite()
 	{
-		m_testLog.clear();
-
-		return m_control.execute(m_softwareInfo, m_settings, scriptsFiles, scriptsPath, testsFilter, userName, password);
+		stopRunControl();
 	}
 
-	void TestSuite::updateSettings(const TestSuiteSettings& settings)
+	bool TestSuite::executeRunControl(const ControlParams& controlParams)
 	{
-		m_settings = settings;
-		m_softwareInfo.setEquipmentID(settings.instanceStrId());
+		return m_runControl.execute(m_softwareInfo, m_settings, controlParams);
+	}
+
+	bool TestSuite::hasRunControl()
+	{
+		return m_runControl.isRunning();
+	}
+
+	void TestSuite::resetRunControl()
+	{
+		m_runControl.reset();
+	}
+
+	void TestSuite::stopRunControl()
+	{
+		if (m_runControl.isRunning() == true)
+		{
+			m_runControl.stop();
+		}
+	}
+
+	bool TestSuite::execute(const ControlParams& controlParams)
+	{
+		m_testLog.clear();
+		return m_testControl.execute(m_softwareInfo, m_settings, controlParams);
 	}
 
 	void TestSuite::stop()
 	{
-		m_control.stop();
+		m_testControl.stop();
 		return;
 	}
 
 	bool TestSuite::isRunning() const
 	{
-		return m_control.isRunning();
+		return m_testControl.isRunning();
+	}
+
+	void TestSuite::updateSettings(const TestSuiteSettings& settings, const ControlParams& controlParams)
+	{
+		m_settings = settings;
+		m_softwareInfo.setEquipmentID(settings.instanceStrId());
+
+		// Restart run control with new parameters
+		//
+		if (m_runControl.isRunning() == true)
+		{
+			m_runControl.stop();
+			m_runControl.execute(m_softwareInfo, m_settings, controlParams);
+		}
 	}
 
 	TestLog& TestSuite::testLog()
@@ -51,13 +90,13 @@ namespace TestSuite
 		return m_testLog;
 	}
 
-	ControlStatus TestSuite::status() const
+	ControlStatus TestSuite::testStatus() const
 	{
-		return m_control.status();
+		return m_testControl.status();
 	}
 
-	ReportLib::ReportTemplateStorage TestSuite::reportTemplates() const
+	ControlStatus TestSuite::runStatus() const
 	{
-		return m_control.reportTemplates();
+		return m_runControl.status();
 	}
 }
