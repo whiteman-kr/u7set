@@ -73,16 +73,16 @@ namespace VFrame30
 		/// \brief Return true if is Diag schema.
 		bool isDiagSchema() const;
 
-		/// \brief Get schema layer by index.
+		/// \brief Get schema layer by index. Returned value has type ScriptSchemaLayer or undefined if layer is not found.
 		QJSValue layer(int index);
 
-		/// \brief Get schema layer by caption.
+		/// \brief Get schema layer by caption. Returned value has type ScriptSchemaLayer or undefined if layer is not found.
 		QJSValue layer(QString caption);
 
 		/// \brief Get schema items with specified tag.
 		QVariantList itemsByTag(QString tag);
 
-		/// \brief Finds schema item by its name (ObjectName property). Returned value has SchemaItem type or undefined if item is not found.
+		/// \brief Finds schema item by its name (ObjectName property). Returned value has type SchemaItem or undefined if item is not found.
 		QJSValue findSchemaItem(QString objectName);
 
 	private:
@@ -459,6 +459,6 @@ namespace VFrame30
 		std::map<QString, std::shared_ptr<SchemaDetails>> m_details;	// Key is schemaId
 	};
 
-}
+} // namespace VFrame30
 
 

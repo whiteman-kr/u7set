@@ -355,7 +355,7 @@ namespace VFrame30
 		Proto::Read(schema.schemaid(), &m_schemaID);
 		Proto::Read(schema.caption(), &m_caption);
 
-		if (schema.has_tags() == true)	// if schema does not have saved tags, then default values are teaken from the each schema type constructor
+		if (schema.has_tags() == true)	// if schema does not have saved tags, then default values are taken from the each schema type constructor
 		{
 			setTags(QString::fromStdString(schema.tags()));
 		}
