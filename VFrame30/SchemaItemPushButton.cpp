@@ -263,7 +263,7 @@ namespace VFrame30
 		//
 		if (m_jsAfterCreate.isUndefined() == true)
 		{
-			m_jsAfterCreate = evaluateScript(pushButtonWidget, m_scriptAfterCreate);
+			m_jsAfterCreate = evaluateScript("AfterCreate", pushButtonWidget, m_scriptAfterCreate);
 
 			if (m_jsAfterCreate.isError() == true ||
 				m_jsAfterCreate.isNull() == true)
@@ -274,7 +274,7 @@ namespace VFrame30
 
 		// Run script
 		//
-		runEventScript(m_jsAfterCreate, pushButtonWidget, false);
+		runEventScript("AfterCreate", m_jsAfterCreate, pushButtonWidget, false);
 
 		return;
 	}
@@ -298,7 +298,7 @@ namespace VFrame30
 		//
 		if (m_jsClicked.isUndefined() == true)
 		{
-			m_jsClicked = evaluateScript(senderWidget, m_scriptClicked);
+			m_jsClicked = evaluateScript("Clicked", senderWidget, m_scriptClicked);
 
 			if (m_jsClicked.isError() == true ||
 				m_jsClicked.isNull() == true)
@@ -309,7 +309,7 @@ namespace VFrame30
 
 		// Run script
 		//
-		runEventScript(m_jsClicked, senderWidget, true);
+		runEventScript("Clicked", m_jsClicked, senderWidget, true);
 
 		return;
 	}
@@ -333,7 +333,7 @@ namespace VFrame30
 		//
 		if (m_jsPressed.isUndefined() == true)
 		{
-			m_jsPressed = evaluateScript(senderWidget, m_scriptPressed);
+			m_jsPressed = evaluateScript("Pressed", senderWidget, m_scriptPressed);
 
 			if (m_jsPressed.isError() == true ||
 				m_jsPressed.isNull() == true)
@@ -344,7 +344,7 @@ namespace VFrame30
 
 		// Run script
 		//
-		runEventScript(m_jsPressed, senderWidget, true);
+		runEventScript("Pressed", m_jsPressed, senderWidget, true);
 
 		return;
 	}
@@ -368,7 +368,7 @@ namespace VFrame30
 		//
 		if (m_jsReleased.isUndefined() == true)
 		{
-			m_jsReleased = evaluateScript(senderWidget, m_scriptReleased);
+			m_jsReleased = evaluateScript("Released", senderWidget, m_scriptReleased);
 
 			if (m_jsReleased.isError() == true ||
 				m_jsReleased.isNull() == true)
@@ -379,7 +379,7 @@ namespace VFrame30
 
 		// Run script
 		//
-		runEventScript(m_jsReleased, senderWidget, true);
+		runEventScript("Released", m_jsReleased, senderWidget, true);
 
 		return;
 	}
@@ -403,7 +403,7 @@ namespace VFrame30
 		//
 		if (m_jsToggled.isUndefined() == true)
 		{
-			m_jsToggled = evaluateScript(senderWidget, m_scriptToggled);
+			m_jsToggled = evaluateScript("Toggled", senderWidget, m_scriptToggled);
 
 			if (m_jsToggled.isError() == true ||
 				m_jsToggled.isNull() == true)
@@ -414,14 +414,14 @@ namespace VFrame30
 
 		// Run script
 		//
-		runEventScript(m_jsToggled, senderWidget, true);
+		runEventScript("Toggled", m_jsToggled, senderWidget, true);
 
 		return;
 	}
 
-	void SchemaItemPushButton::runEventScript(QJSValue& evaluatedJs, QPushButton* buttonWidget, bool allowMessageBox)
+	void SchemaItemPushButton::runEventScript(QString scriptName, QJSValue& evaluatedJs, QPushButton* buttonWidget, bool allowMessageBox)
 	{
-		return SchemaItemControl::runEventScript<QPushButton>(evaluatedJs, allowMessageBox, buttonWidget, buttonWidget->isChecked());
+		return SchemaItemControl::runEventScript<QPushButton>(evaluatedJs, allowMessageBox, scriptName, buttonWidget, buttonWidget->isChecked());
 	}
 
 	// Properties and Data

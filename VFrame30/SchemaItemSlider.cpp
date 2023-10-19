@@ -410,7 +410,7 @@ namespace VFrame30
 		//
 		if (m_jsAfterCreate.isUndefined() == true)
 		{
-			m_jsAfterCreate = evaluateScript(sliderWidget, m_scriptAfterCreate);
+			m_jsAfterCreate = evaluateScript("AfterCreate", sliderWidget, m_scriptAfterCreate);
 
 			if (m_jsAfterCreate.isError() == true ||
 				m_jsAfterCreate.isNull() == true)
@@ -421,32 +421,32 @@ namespace VFrame30
 
 		// Run script
 		//
-		runEventScript(m_jsAfterCreate, sliderWidget, false);
+		runEventScript("AfterCreate", m_jsAfterCreate, sliderWidget, false);
 
 		return;
 	}
 
 	void SchemaItemSlider::sliderMoved(int /*value*/)
 	{
-		return runEventScript(m_scriptSliderMoved, m_jsSliderMoved, dynamic_cast<QSlider*>(sender()));
+		return runEventScript("SliderMoved", m_scriptSliderMoved, m_jsSliderMoved, dynamic_cast<QSlider*>(sender()));
 	}
 
 	void SchemaItemSlider::sliderPressed()
 	{
-		return runEventScript(m_scriptSliderPressed, m_jsSliderPressed, dynamic_cast<QSlider*>(sender()));
+		return runEventScript("SliderPressed", m_scriptSliderPressed, m_jsSliderPressed, dynamic_cast<QSlider*>(sender()));
 	}
 
 	void SchemaItemSlider::sliderReleased()
 	{
-		return runEventScript(m_scriptSliderReleased, m_jsSliderReleased, dynamic_cast<QSlider*>(sender()));
+		return runEventScript("SliderReleased", m_scriptSliderReleased, m_jsSliderReleased, dynamic_cast<QSlider*>(sender()));
 	}
 
 	void SchemaItemSlider::valueChanged(int value)
 	{
-		return runEventScript(m_scriptValueChanged, m_jsValueChanged, dynamic_cast<QSlider*>(sender()));
+		return runEventScript("ValueChanged", m_scriptValueChanged, m_jsValueChanged, dynamic_cast<QSlider*>(sender()));
 	}
 
-	void SchemaItemSlider::runEventScript(const QString& script, QJSValue& js, QSlider* sliderWidget)
+	void SchemaItemSlider::runEventScript(QString scriptName, const QString& script, QJSValue& js, QSlider* sliderWidget)
 	{
 		if (sliderWidget == nullptr)
 		{
@@ -464,7 +464,7 @@ namespace VFrame30
 		//
 		if (js.isUndefined() == true)
 		{
-			js = evaluateScript(sliderWidget, script);
+			js = evaluateScript(scriptName, sliderWidget, script);
 
 			if (js.isError() == true ||
 				js.isNull() == true)
@@ -475,13 +475,13 @@ namespace VFrame30
 
 		// Run script
 		//
-		runEventScript(js, sliderWidget, true);
+		runEventScript(scriptName, js, sliderWidget, true);
 		return;
 	}
 
-	void SchemaItemSlider::runEventScript(QJSValue& evaluatedJs, QSlider* sliderWidget, bool allowMessageBox)
+	void SchemaItemSlider::runEventScript(QString scriptName, QJSValue& evaluatedJs, QSlider* sliderWidget, bool allowMessageBox)
 	{
-		return SchemaItemControl::runEventScript<QSlider>(evaluatedJs, allowMessageBox, sliderWidget, sliderWidget->value());
+		return SchemaItemControl::runEventScript<QSlider>(evaluatedJs, allowMessageBox, scriptName, sliderWidget, sliderWidget->value());
 	}
 
 	// Properties and Data

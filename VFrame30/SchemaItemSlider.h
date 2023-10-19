@@ -93,8 +93,8 @@ namespace VFrame30
 		void sliderReleased();
 		void valueChanged(int value);
 
-		void runEventScript(const QString& script, QJSValue& js, QSlider* sliderWidget);
-		void runEventScript(QJSValue& evaluatedJs, QSlider* sliderWidget, bool allowMessageBox);
+		void runEventScript(QString scriptName, const QString& script, QJSValue& js, QSlider* sliderWidget);
+		void runEventScript(QString scriptName, QJSValue& evaluatedJs, QSlider* sliderWidget, bool allowMessageBox);
 
 		// Properties and Data
 		//

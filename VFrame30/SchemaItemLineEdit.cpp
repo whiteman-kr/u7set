@@ -208,7 +208,7 @@ namespace VFrame30
 
 		if (control->text() != text() ||
 			control->placeholderText() != placeholderText() ||
-			static_cast<int>(control->alignment()) != static_cast<int>(m_horzAlign) | static_cast<int>(m_vertAlign) ||
+			static_cast<int>(control->alignment()) != (static_cast<int>(m_horzAlign) | static_cast<int>(m_vertAlign)) ||
 			control->maxLength() != maxLength() ||
 			control->isReadOnly() != readOnly())
 		{
@@ -251,7 +251,7 @@ namespace VFrame30
 		//
 		if (m_jsAfterCreate.isUndefined() == true)
 		{
-			m_jsAfterCreate = evaluateScript(lineEditWidget, m_scriptAfterCreate);
+			m_jsAfterCreate = evaluateScript("AfterCreate", lineEditWidget, m_scriptAfterCreate);
 
 			if (m_jsAfterCreate.isError() == true ||
 				m_jsAfterCreate.isNull() == true)
@@ -262,7 +262,7 @@ namespace VFrame30
 
 		// Run script
 		//
-		runEventScript(m_jsAfterCreate, lineEditWidget, false);
+		runEventScript("AfterCreate", m_jsAfterCreate, lineEditWidget, false);
 
 		return;
 	}
@@ -288,7 +288,7 @@ namespace VFrame30
 		//
 		if (m_jsEditingFinished.isUndefined() == true)
 		{
-			m_jsEditingFinished = evaluateScript(senderWidget, m_scriptEditingFinished);
+			m_jsEditingFinished = evaluateScript("EditingFinished", senderWidget, m_scriptEditingFinished);
 
 			if (m_jsEditingFinished.isError() == true ||
 				m_jsEditingFinished.isNull() == true)
@@ -299,7 +299,7 @@ namespace VFrame30
 
 		// Run script
 		//
-		runEventScript(m_jsEditingFinished, senderWidget, true);
+		runEventScript("EditingFinished", m_jsEditingFinished, senderWidget, true);
 
 		return;
 	}
@@ -325,7 +325,7 @@ namespace VFrame30
 		//
 		if (m_jsReturnPressed.isUndefined() == true)
 		{
-			m_jsReturnPressed = evaluateScript(senderWidget, m_scriptReturnPressed);
+			m_jsReturnPressed = evaluateScript("ReturnPressed", senderWidget, m_scriptReturnPressed);
 
 			if (m_jsReturnPressed.isError() == true ||
 				m_jsReturnPressed.isNull() == true)
@@ -336,7 +336,7 @@ namespace VFrame30
 
 		// Run script
 		//
-		runEventScript(m_jsReturnPressed, senderWidget, true);
+		runEventScript("ReturnPressed", m_jsReturnPressed, senderWidget, true);
 
 		return;
 	}
@@ -362,7 +362,7 @@ namespace VFrame30
 		//
 		if (m_jsTextChanged.isUndefined() == true)
 		{
-			m_jsTextChanged = evaluateScript(senderWidget, m_scriptTextChanged);
+			m_jsTextChanged = evaluateScript("TextChanged", senderWidget, m_scriptTextChanged);
 
 			if (m_jsTextChanged.isError() == true ||
 				m_jsTextChanged.isNull() == true)
@@ -373,14 +373,14 @@ namespace VFrame30
 
 		// Run script
 		//
-		runEventScript(m_jsTextChanged, senderWidget, true);
+		runEventScript("TextChanged", m_jsTextChanged, senderWidget, true);
 
 		return;
 	}
 
-	void SchemaItemLineEdit::runEventScript(QJSValue& evaluatedJs, QLineEdit* controlWidget, bool allowMessageBox)
+	void SchemaItemLineEdit::runEventScript(QString scriptName, QJSValue& evaluatedJs, QLineEdit* controlWidget, bool allowMessageBox)
 	{
-		return SchemaItemControl::runEventScript<QLineEdit>(evaluatedJs, allowMessageBox, controlWidget, controlWidget->text());
+		return SchemaItemControl::runEventScript<QLineEdit>(evaluatedJs, allowMessageBox, scriptName, controlWidget, controlWidget->text());
 	}
 
 	// Properties and Data

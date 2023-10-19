@@ -47,10 +47,7 @@ public:
 
 	virtual TimeStamp maxTimeStamp(QUuid trendUuid, E::TimeType timeType) const override;
 
-	// Slots
-	//
-protected slots:
-	void slot_configurationArrived(ConfigSettings configuration);
+	void updateConfiguration(const ConfigSettings& configuration);
 
 public:
 	[[nodiscard]] MonitorConfigController& monitorConfigController();

@@ -254,7 +254,7 @@ namespace VFrame30
 		}
 	}
 
-	QJSValue SchemaItemControl::evaluateScript(QWidget* controlWidget, QString script)
+	QJSValue SchemaItemControl::evaluateScript(QString scriptName, QWidget* controlWidget, QString script)
 	{
 		if (controlWidget == nullptr)
 		{
@@ -274,7 +274,7 @@ namespace VFrame30
 		QJSEngine* engine = schemaView->jsEngine();
 		assert(engine);
 
-		QJSValue result = SchemaItem::evaluateScript(script, engine, schemaView);
+		QJSValue result = SchemaItem::evaluateScript(scriptName, script, engine, schemaView);
 		return result;
 	}
 

@@ -45,10 +45,10 @@ namespace VFrame30
 		void afterCreate(QWidget* control);
 
 	protected:
-		QJSValue evaluateScript(QWidget* controlWidget, QString script);
+		QJSValue evaluateScript(QString scriptName, QWidget* controlWidget, QString script);
 
 		template <typename WidgetType, typename... ScriptArgs>
-		void runEventScript(QJSValue& evaluatedJs, bool allowMessageBox, WidgetType* widget, ScriptArgs... scriptArgs);
+		void runEventScript(QJSValue& evaluatedJs, bool allowMessageBox, QString scriptName, WidgetType* widget, ScriptArgs... scriptArgs);
 
 		// Properties and Data
 		//
@@ -68,7 +68,7 @@ namespace VFrame30
 
 
 	template <typename WidgetType, typename... ScriptArgs>
-	void SchemaItemControl::runEventScript(QJSValue& evaluatedJs, bool allowMessageBox, WidgetType* widget, ScriptArgs... scriptArgs)
+	void SchemaItemControl::runEventScript(QJSValue& evaluatedJs, bool allowMessageBox, QString scriptName, WidgetType* widget, ScriptArgs... scriptArgs)
 	{
 		if (evaluatedJs.isError() == true ||
 			evaluatedJs.isNull() == true)
@@ -112,7 +112,7 @@ namespace VFrame30
 
 		if (jsResult.isError() == true)
 		{
-			reportScriptError(jsResult, schemaView->logFile());
+			reportScriptError(scriptName, jsResult, schemaView->logFile());
 			return;
 		}
 
