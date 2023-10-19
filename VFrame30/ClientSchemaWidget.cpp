@@ -39,7 +39,10 @@ namespace VFrame30
 
 		// --
 		//
-		connect(clientSchemaView(), &VFrame30::ClientSchemaView::signal_setSchema, this, &VFrame30::ClientSchemaWidget::setSchema);
+		connect(clientSchemaView(), &VFrame30::ClientSchemaView::signal_setSchema, this, [this](QString schemaId, QStringList highlightIds)
+				{
+					setSchema(schemaId, highlightIds, false);
+				});
 
 		// Init history
 		//
@@ -371,8 +374,10 @@ namespace VFrame30
 		return;
 	}
 
-	void ClientSchemaWidget::setSchema(QString schemaId, QStringList highlightIds)
+	void ClientSchemaWidget::setSchema(QString schemaId, QStringList highlightIds, bool forceSchemaUpdate)
 	{
+		// forceSchemaUpdate is required only once, when the new configuration arrived and we need to update schema and call onShowScript.
+		//
 		if (schemaManager() == nullptr)
 		{
 			Q_ASSERT(schemaManager());
@@ -383,7 +388,7 @@ namespace VFrame30
 		//
 		clientSchemaView()->setHighlightIds(highlightIds);
 
-		if (schemaId == this->schemaId())
+		if (forceSchemaUpdate == false && schemaId == this->schemaId())
 		{
 			// Highlighted signals already set
 			//

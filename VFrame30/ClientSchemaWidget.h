@@ -72,7 +72,9 @@ namespace VFrame30
 		void emitHistoryChanged();
 
 	public slots:
-		virtual void setSchema(QString schemaId, QStringList highlightIds);
+		// using BaseSchemaWidget::setSchema -- use ClientSchemaWidget::setSchema and it's overloads.
+		//
+		virtual void setSchema(QString schemaId, QStringList highlightIds, bool forceSchemaUpdate);
 
 		virtual void setZoom(double zoom, bool repaint, int horzScrollValue = -1, int vertScrollValue = -1) override;
 

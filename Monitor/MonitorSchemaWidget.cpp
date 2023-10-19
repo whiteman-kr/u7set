@@ -404,7 +404,7 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 			{
 				if (schemaId != this->schemaId())
 				{
-					setSchema(schemaId, appSignals + impactSignals + loopbacks);
+					setSchema(schemaId, appSignals + impactSignals + loopbacks, false);
 				}
 			};
 
@@ -424,7 +424,7 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 			{
 				if (schemaId != this->schemaId())
 				{
-					setSchema(schemaId, appSignals + impactSignals + loopbacks);
+					setSchema(schemaId, appSignals + impactSignals + loopbacks, false);
 				}
 			};
 
@@ -444,7 +444,7 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 			{
 				if (schemaId != this->schemaId())
 				{
-					setSchema(schemaId, appSignals + impactSignals + loopbacks);
+					setSchema(schemaId, appSignals + impactSignals + loopbacks, false);
 				}
 			};
 

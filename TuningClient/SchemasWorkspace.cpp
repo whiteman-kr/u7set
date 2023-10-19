@@ -83,7 +83,7 @@ void SchemasWorkspace::slot_itemSelectionChanged()
 
 	double zoom = m_schemaWidget->zoom();
 
-	m_schemaWidget->setSchema(schemaId, QStringList{});
+	m_schemaWidget->setSchema(schemaId, QStringList{}, false);
 
 	m_schemaWidget->setZoom(zoom, true);
 
