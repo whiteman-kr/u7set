@@ -55,6 +55,10 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	//
 	setWindowTitle(MonitorAppSettings::instance().windowCaption());
 
+	// Set application name so all message boxes will have correct caption.
+	//
+	qApp->setApplicationName(MonitorAppSettings::instance().windowCaption());
+
 	connect(&m_configController, &MonitorConfigController::configurationArrived, this, &MonitorMainWindow::slot_configurationArrived);
 	connect(&m_configController, &MonitorConfigController::tuningSignalsArrived, this, &MonitorMainWindow::slot_tuningSignalsArrived);
 	connect(&m_configController, &MonitorConfigController::error, this, &MonitorMainWindow::slot_configurationError);
@@ -995,6 +999,10 @@ void MonitorMainWindow::showSettings()
 		}
 
 		setWindowTitle(MonitorAppSettings::instance().windowCaption());
+
+		// Set application name so all message boxes will have correct caption.
+		//
+		qApp->setApplicationName(MonitorAppSettings::instance().windowCaption());
 
 		return;
 	}

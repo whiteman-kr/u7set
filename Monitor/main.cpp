@@ -33,12 +33,12 @@ int main(int argc, char *argv[])
 
 	// Parse command line
 	//
-	QStringList aruments = a.arguments();
+	QStringList arguments = a.arguments();
 	QString settingsFileName;
 
-	if (aruments.size() > 1)
+	if (arguments.size() > 1)
 	{
-		settingsFileName = aruments[1];
+		settingsFileName = arguments[1];
 	}
 
 	if (settingsFileName.isEmpty() == false && QFile::exists(settingsFileName) == false)
@@ -62,6 +62,11 @@ int main(int argc, char *argv[])
 			return 1;
 		}
 	}
+
+	// Set application name again, as new app caption could be assign via settings.
+	// Set application name so all message boxes will have correct caption.
+	//
+	a.setApplicationName(MonitorAppSettings::instance().windowCaption());
 
 	// Init TrendLib resources
 	//
@@ -109,7 +114,7 @@ int main(int argc, char *argv[])
 	//
 
 	VFrame30::shutdown();
-	//Hardware::Shutdwon();
+	//Hardware::Shutdown();
 	google::protobuf::ShutdownProtobufLibrary();
 
 	return result;

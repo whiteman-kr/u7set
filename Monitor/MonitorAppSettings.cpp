@@ -9,14 +9,14 @@ MonitorAppSettings& MonitorAppSettings::instance()
 
 void MonitorAppSettings::save() const
 {
-	QSettings s{};
+	QSettings s{qApp->organizationName(), "Monitor3"};	// Explicitly point app name, as it can be changed via settings.
 	save(s);
 	return;
 }
 
 void MonitorAppSettings::restore()
 {
-	QSettings s{};
+	QSettings s{qApp->organizationName(), "Monitor3"};	// Explicitly point app name, as it can be changed via settings.
 	load(s);
 	m_wasLoadedFromFile = false;
 	return;
