@@ -5,8 +5,7 @@
 
 namespace
 {
-	// Subclass QSlider to filter mouse wheel events when slider value reached min or max, to avoid
-	// propagation event to the parent, so mouse wheel will not zoomIn/zoomOut.
+	// Subclass control to filter mouse input events for schema editor.
 	//
 	class QLimitMouseWheelSlider : public QSlider
 	{
@@ -16,14 +15,16 @@ namespace
 			m_enableMouseWheel(enableMouseWheel),
 			m_editMode(editMode)
 		{
-			// Focus does not appear in the Monitor initial Tab key is pressed, I did not dig deep enough to understand
-			// the nature of this behavior. Just forbad focus.
-			//
-			setFocusPolicy(Qt::FocusPolicy::NoFocus);
+			//// Focus does not appear in the Monitor initial Tab key is pressed, I did not dig deep enough to understand
+			//// the nature of this behavior. Just forbad focus.
+			////
+			//setFocusPolicy(Qt::FocusPolicy::NoFocus);
 
 			if (m_editMode == true)
 			{
 				setTracking(false);
+				setMouseTracking(false);
+				setAttribute(Qt::WA_TransparentForMouseEvents);
 			}
 		}
 

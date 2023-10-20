@@ -4,6 +4,30 @@
 #include "DrawParam.h"
 #include <QStyleOptionButton>
 
+namespace
+{
+	// Subclass control to filter mouse input events for schema editor.
+	//
+	class QEditorPushButton : public QPushButton
+	{
+	public:
+		QEditorPushButton(QString text, QWidget* parent, bool editMode) :
+			QPushButton{text, parent},
+			m_editMode(editMode)
+		{
+			if (m_editMode == true)
+			{
+				setMouseTracking(false);
+				setAttribute(Qt::WA_TransparentForMouseEvents);
+			}
+		}
+
+	public:
+		bool m_editMode = true;
+	};
+} // namespace
+
+
 namespace VFrame30
 {
 	SchemaItemPushButton::SchemaItemPushButton(void) :
@@ -157,7 +181,7 @@ namespace VFrame30
 			return nullptr;
 		}
 
-		QPushButton* control = new QPushButton(m_text, parent);
+		QPushButton* control = new QEditorPushButton(m_text, parent, editMode);
 		control->setObjectName(guid().toString());
 
 		updateWidgetProperties(control, editMode);

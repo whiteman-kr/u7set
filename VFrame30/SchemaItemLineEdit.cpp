@@ -4,6 +4,34 @@
 #include "DrawParam.h"
 #include <QStyleOptionFrame>
 
+
+namespace
+{
+	// Subclass control to filter mouse input events for schema editor.
+	//
+	class QEditorLineEdit : public QLineEdit
+	{
+	public:
+		QEditorLineEdit(QString text, QWidget* parent, bool editMode) :
+			QLineEdit{text, parent},
+			m_editMode(editMode)
+		{
+			// Focus does not appear in the Monitor initial Tab key is pressed, I did not dig deep enough to understand
+			// the nature of this behavior. Just forbad focus.
+			//
+			if (m_editMode == true)
+			{
+				setMouseTracking(false);
+				setAttribute(Qt::WA_TransparentForMouseEvents);
+			}
+		}
+
+	public:
+		bool m_editMode = true;
+	};
+} // namespace
+
+
 namespace VFrame30
 {
 	SchemaItemLineEdit::SchemaItemLineEdit(void) :
@@ -152,7 +180,7 @@ namespace VFrame30
 			return nullptr;
 		}
 
-		QLineEdit* control = new QLineEdit(m_text, parent);
+		QLineEdit* control = new QEditorLineEdit(m_text, parent, editMode);
 		control->setObjectName(guid().toString());
 
 		updateWidgetProperties(control, editMode);
