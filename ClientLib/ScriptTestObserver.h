@@ -69,7 +69,7 @@ public slots:
 	/// @brief Use system time (server time, assigned when LogicModule data is received) for time measurements.
 	///        This option is recommended when tested signals are from different LogicModules and/or plant time is not stable.
 	///        The default option is to use plant time.
-	void useSystemTime();
+	void useLocalTime();
 
 	/// @brief Set an initial condition based on a previously added expectation. Throws an exception if initiator was not set.
 	/// @param initialExpectationId The identifier of an added expectation using an add* function.
