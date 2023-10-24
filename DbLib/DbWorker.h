@@ -257,6 +257,7 @@ private:
 	bool processingAfterDatabaseUpgrade0215(QSqlDatabase& db, QString* errorMessage);
 	bool processingAfterDatabaseUpgrade0302(QSqlDatabase& db, QString* errorMessage);
 	bool processingAfterDatabaseUpgrade0396(QSqlDatabase& db, QString* errorMessage);
+	bool processingAfterDatabaseUpgrade0401(QSqlDatabase& db, QString* errorMessage);
 
 private:
 	mutable QReadWriteLock m_lock;

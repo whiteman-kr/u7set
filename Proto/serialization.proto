@@ -1355,6 +1355,8 @@ message ProtoAppSignalData
 	optional bytes userSpecPropValues = 21;					// serialized message Proto::SignalSpecPropValues
 
 	optional int32 apertureType = 22 [default = 0 /* E::ApertureType::RangePercent */];
+	
+	optional bool invertSignal = 23 [default = false];
 }
 
 // Data structs

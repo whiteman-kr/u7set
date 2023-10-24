@@ -101,11 +101,12 @@ public:
 	QVector<AppSignalSpecPropValue>& values() { return m_specPropValues; }
 
 	void append(const AppSignalSpecPropValue& value);
+	bool removeValue(const QString& propName);
 
 	bool replaceName(const QString& oldName, const QString& newName);			// returns true if replacing is occured
 
 private:
-	void buildPropNamesMap();
+	void rebuildPropNamesMap();
 
 	bool setValue(const QString& name, const QVariant& value, bool isEnum);
 
@@ -113,7 +114,7 @@ private:
 
 private:
 	QVector<AppSignalSpecPropValue> m_specPropValues;
-	QHash<QString, int> m_propNamesMap;									// prop name => index in m_propSpecValues
+	std::map<QString, int> m_propNamesMap;									// prop name => index in m_propSpecValues
 };
 
 template<typename ENUM_TYPE>
@@ -231,8 +232,8 @@ public:
 	bool isCompatibleFormat(const AppSignal& s) const;
 	bool isCompatibleFormat(E::SignalType signalType, const QString& busTypeID) const;
 
-	bool invertSignal(QString* err = nullptr) const;
-	void setSetInvertSignal(bool invert);
+	bool invertSignal() const;
+	void setInvertSignal(bool invert);
 
 	// Analog signal properties
 
@@ -567,6 +568,7 @@ private:
 	double m_coarseAperture = 1;
 	double m_fineAperture = 0.5;
 	E::ApertureType m_apertureType = E::ApertureType::RangePercent;
+	bool m_invertSignal = false;
 
 	// Signal specific properties
 	//

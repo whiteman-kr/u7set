@@ -638,12 +638,6 @@ namespace AppSignalDefaultSpecPropStruct
 		"4;LowADC;4 Signal processing;uint32;0;65535;0;0;false;false;Low ADC value;true;None\n"
 		"4;LowEngineeringUnits;4 Signal processing;double;;;0;10;false;false;Low engineering units;true;None\n"
 		"4;LowValidRange;4 Signal processing;double;;;0;10;false;false;Low valid range of signal;true;None\n");
-
-	inline const QString INPUT_DISCRETE(
-		"7;InvertSignal;4 Signal processing;bool;;;false;0;true;false;Invert input signal;true;None;65535;false;false\n");
-
-	inline const QString OUTPUT_DISCRETE(
-		"7;InvertSignal;4 Signal processing;bool;;;false;0;true;false;Invert output signal;true;None;65535;false;false\n");
 }
 
 namespace Manufacturer

@@ -21959,6 +21959,7 @@ class ProtoAppSignalData PROTOBUF_FINAL :
     kEnableTuningFieldNumber = 8,
     kObsoleteAdaptiveApertureFieldNumber = 17,
     kExcludefromBuildFieldNumber = 18,
+    kInvertSignalFieldNumber = 23,
     kApertureTypeFieldNumber = 22,
     kDecimalPlacesFieldNumber = 14,
     kDataSizeFieldNumber = 4,
@@ -22195,6 +22196,19 @@ class ProtoAppSignalData PROTOBUF_FINAL :
   void _internal_set_excludefrombuild(bool value);
   public:
 
+  // optional bool invertSignal = 23 [default = false];
+  bool has_invertsignal() const;
+  private:
+  bool _internal_has_invertsignal() const;
+  public:
+  void clear_invertsignal();
+  bool invertsignal() const;
+  void set_invertsignal(bool value);
+  private:
+  bool _internal_invertsignal() const;
+  void _internal_set_invertsignal(bool value);
+  public:
+
   // optional int32 apertureType = 22 [default = 0];
   bool has_aperturetype() const;
   private:
@@ -22334,6 +22348,7 @@ class ProtoAppSignalData PROTOBUF_FINAL :
   bool enabletuning_;
   bool obsolete_adaptiveaperture_;
   bool excludefrombuild_;
+  bool invertsignal_;
   ::PROTOBUF_NAMESPACE_ID::int32 aperturetype_;
   ::PROTOBUF_NAMESPACE_ID::int32 decimalplaces_;
   ::PROTOBUF_NAMESPACE_ID::int32 datasize_;
@@ -53761,7 +53776,7 @@ inline void ProtoAppSignalData::set_channel(::PROTOBUF_NAMESPACE_ID::int32 value
 
 // optional int32 dataSize = 4 [default = 32];
 inline bool ProtoAppSignalData::_internal_has_datasize() const {
-  bool value = (_has_bits_[0] & 0x00008000u) != 0;
+  bool value = (_has_bits_[0] & 0x00010000u) != 0;
   return value;
 }
 inline bool ProtoAppSignalData::has_datasize() const {
@@ -53769,7 +53784,7 @@ inline bool ProtoAppSignalData::has_datasize() const {
 }
 inline void ProtoAppSignalData::clear_datasize() {
   datasize_ = 32;
-  _has_bits_[0] &= ~0x00008000u;
+  _has_bits_[0] &= ~0x00010000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 ProtoAppSignalData::_internal_datasize() const {
   return datasize_;
@@ -53779,7 +53794,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 ProtoAppSignalData::datasize() const {
   return _internal_datasize();
 }
 inline void ProtoAppSignalData::_internal_set_datasize(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00008000u;
+  _has_bits_[0] |= 0x00010000u;
   datasize_ = value;
 }
 inline void ProtoAppSignalData::set_datasize(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -53789,7 +53804,7 @@ inline void ProtoAppSignalData::set_datasize(::PROTOBUF_NAMESPACE_ID::int32 valu
 
 // optional int32 byteOrder = 5 [default = 1];
 inline bool ProtoAppSignalData::_internal_has_byteorder() const {
-  bool value = (_has_bits_[0] & 0x00010000u) != 0;
+  bool value = (_has_bits_[0] & 0x00020000u) != 0;
   return value;
 }
 inline bool ProtoAppSignalData::has_byteorder() const {
@@ -53797,7 +53812,7 @@ inline bool ProtoAppSignalData::has_byteorder() const {
 }
 inline void ProtoAppSignalData::clear_byteorder() {
   byteorder_ = 1;
-  _has_bits_[0] &= ~0x00010000u;
+  _has_bits_[0] &= ~0x00020000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 ProtoAppSignalData::_internal_byteorder() const {
   return byteorder_;
@@ -53807,7 +53822,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 ProtoAppSignalData::byteorder() const {
   return _internal_byteorder();
 }
 inline void ProtoAppSignalData::_internal_set_byteorder(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00010000u;
+  _has_bits_[0] |= 0x00020000u;
   byteorder_ = value;
 }
 inline void ProtoAppSignalData::set_byteorder(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -53817,7 +53832,7 @@ inline void ProtoAppSignalData::set_byteorder(::PROTOBUF_NAMESPACE_ID::int32 val
 
 // optional int32 analogSignalFormat = 6 [default = 2];
 inline bool ProtoAppSignalData::_internal_has_analogsignalformat() const {
-  bool value = (_has_bits_[0] & 0x00020000u) != 0;
+  bool value = (_has_bits_[0] & 0x00040000u) != 0;
   return value;
 }
 inline bool ProtoAppSignalData::has_analogsignalformat() const {
@@ -53825,7 +53840,7 @@ inline bool ProtoAppSignalData::has_analogsignalformat() const {
 }
 inline void ProtoAppSignalData::clear_analogsignalformat() {
   analogsignalformat_ = 2;
-  _has_bits_[0] &= ~0x00020000u;
+  _has_bits_[0] &= ~0x00040000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 ProtoAppSignalData::_internal_analogsignalformat() const {
   return analogsignalformat_;
@@ -53835,7 +53850,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 ProtoAppSignalData::analogsignalformat() c
   return _internal_analogsignalformat();
 }
 inline void ProtoAppSignalData::_internal_set_analogsignalformat(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00020000u;
+  _has_bits_[0] |= 0x00040000u;
   analogsignalformat_ = value;
 }
 inline void ProtoAppSignalData::set_analogsignalformat(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -54195,7 +54210,7 @@ inline void ProtoAppSignalData::set_allocated_tuninghighbound(::Proto::TuningVal
 
 // optional bool acquire = 12 [default = true];
 inline bool ProtoAppSignalData::_internal_has_acquire() const {
-  bool value = (_has_bits_[0] & 0x00040000u) != 0;
+  bool value = (_has_bits_[0] & 0x00080000u) != 0;
   return value;
 }
 inline bool ProtoAppSignalData::has_acquire() const {
@@ -54203,7 +54218,7 @@ inline bool ProtoAppSignalData::has_acquire() const {
 }
 inline void ProtoAppSignalData::clear_acquire() {
   acquire_ = true;
-  _has_bits_[0] &= ~0x00040000u;
+  _has_bits_[0] &= ~0x00080000u;
 }
 inline bool ProtoAppSignalData::_internal_acquire() const {
   return acquire_;
@@ -54213,7 +54228,7 @@ inline bool ProtoAppSignalData::acquire() const {
   return _internal_acquire();
 }
 inline void ProtoAppSignalData::_internal_set_acquire(bool value) {
-  _has_bits_[0] |= 0x00040000u;
+  _has_bits_[0] |= 0x00080000u;
   acquire_ = value;
 }
 inline void ProtoAppSignalData::set_acquire(bool value) {
@@ -54223,7 +54238,7 @@ inline void ProtoAppSignalData::set_acquire(bool value) {
 
 // optional bool archive = 13 [default = true];
 inline bool ProtoAppSignalData::_internal_has_archive() const {
-  bool value = (_has_bits_[0] & 0x00080000u) != 0;
+  bool value = (_has_bits_[0] & 0x00100000u) != 0;
   return value;
 }
 inline bool ProtoAppSignalData::has_archive() const {
@@ -54231,7 +54246,7 @@ inline bool ProtoAppSignalData::has_archive() const {
 }
 inline void ProtoAppSignalData::clear_archive() {
   archive_ = true;
-  _has_bits_[0] &= ~0x00080000u;
+  _has_bits_[0] &= ~0x00100000u;
 }
 inline bool ProtoAppSignalData::_internal_archive() const {
   return archive_;
@@ -54241,7 +54256,7 @@ inline bool ProtoAppSignalData::archive() const {
   return _internal_archive();
 }
 inline void ProtoAppSignalData::_internal_set_archive(bool value) {
-  _has_bits_[0] |= 0x00080000u;
+  _has_bits_[0] |= 0x00100000u;
   archive_ = value;
 }
 inline void ProtoAppSignalData::set_archive(bool value) {
@@ -54251,7 +54266,7 @@ inline void ProtoAppSignalData::set_archive(bool value) {
 
 // optional int32 decimalPlaces = 14 [default = 2];
 inline bool ProtoAppSignalData::_internal_has_decimalplaces() const {
-  bool value = (_has_bits_[0] & 0x00004000u) != 0;
+  bool value = (_has_bits_[0] & 0x00008000u) != 0;
   return value;
 }
 inline bool ProtoAppSignalData::has_decimalplaces() const {
@@ -54259,7 +54274,7 @@ inline bool ProtoAppSignalData::has_decimalplaces() const {
 }
 inline void ProtoAppSignalData::clear_decimalplaces() {
   decimalplaces_ = 2;
-  _has_bits_[0] &= ~0x00004000u;
+  _has_bits_[0] &= ~0x00008000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 ProtoAppSignalData::_internal_decimalplaces() const {
   return decimalplaces_;
@@ -54269,7 +54284,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 ProtoAppSignalData::decimalplaces() const 
   return _internal_decimalplaces();
 }
 inline void ProtoAppSignalData::_internal_set_decimalplaces(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00004000u;
+  _has_bits_[0] |= 0x00008000u;
   decimalplaces_ = value;
 }
 inline void ProtoAppSignalData::set_decimalplaces(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -54279,7 +54294,7 @@ inline void ProtoAppSignalData::set_decimalplaces(::PROTOBUF_NAMESPACE_ID::int32
 
 // optional double coarseAperture = 15 [default = 1];
 inline bool ProtoAppSignalData::_internal_has_coarseaperture() const {
-  bool value = (_has_bits_[0] & 0x00100000u) != 0;
+  bool value = (_has_bits_[0] & 0x00200000u) != 0;
   return value;
 }
 inline bool ProtoAppSignalData::has_coarseaperture() const {
@@ -54287,7 +54302,7 @@ inline bool ProtoAppSignalData::has_coarseaperture() const {
 }
 inline void ProtoAppSignalData::clear_coarseaperture() {
   coarseaperture_ = 1;
-  _has_bits_[0] &= ~0x00100000u;
+  _has_bits_[0] &= ~0x00200000u;
 }
 inline double ProtoAppSignalData::_internal_coarseaperture() const {
   return coarseaperture_;
@@ -54297,7 +54312,7 @@ inline double ProtoAppSignalData::coarseaperture() const {
   return _internal_coarseaperture();
 }
 inline void ProtoAppSignalData::_internal_set_coarseaperture(double value) {
-  _has_bits_[0] |= 0x00100000u;
+  _has_bits_[0] |= 0x00200000u;
   coarseaperture_ = value;
 }
 inline void ProtoAppSignalData::set_coarseaperture(double value) {
@@ -54307,7 +54322,7 @@ inline void ProtoAppSignalData::set_coarseaperture(double value) {
 
 // optional double fineAperture = 16 [default = 0.5];
 inline bool ProtoAppSignalData::_internal_has_fineaperture() const {
-  bool value = (_has_bits_[0] & 0x00200000u) != 0;
+  bool value = (_has_bits_[0] & 0x00400000u) != 0;
   return value;
 }
 inline bool ProtoAppSignalData::has_fineaperture() const {
@@ -54315,7 +54330,7 @@ inline bool ProtoAppSignalData::has_fineaperture() const {
 }
 inline void ProtoAppSignalData::clear_fineaperture() {
   fineaperture_ = 0.5;
-  _has_bits_[0] &= ~0x00200000u;
+  _has_bits_[0] &= ~0x00400000u;
 }
 inline double ProtoAppSignalData::_internal_fineaperture() const {
   return fineaperture_;
@@ -54325,7 +54340,7 @@ inline double ProtoAppSignalData::fineaperture() const {
   return _internal_fineaperture();
 }
 inline void ProtoAppSignalData::_internal_set_fineaperture(double value) {
-  _has_bits_[0] |= 0x00200000u;
+  _has_bits_[0] |= 0x00400000u;
   fineaperture_ = value;
 }
 inline void ProtoAppSignalData::set_fineaperture(double value) {
@@ -54610,7 +54625,7 @@ inline void ProtoAppSignalData::set_allocated_userspecpropvalues(std::string* us
 
 // optional int32 apertureType = 22 [default = 0];
 inline bool ProtoAppSignalData::_internal_has_aperturetype() const {
-  bool value = (_has_bits_[0] & 0x00002000u) != 0;
+  bool value = (_has_bits_[0] & 0x00004000u) != 0;
   return value;
 }
 inline bool ProtoAppSignalData::has_aperturetype() const {
@@ -54618,7 +54633,7 @@ inline bool ProtoAppSignalData::has_aperturetype() const {
 }
 inline void ProtoAppSignalData::clear_aperturetype() {
   aperturetype_ = 0;
-  _has_bits_[0] &= ~0x00002000u;
+  _has_bits_[0] &= ~0x00004000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 ProtoAppSignalData::_internal_aperturetype() const {
   return aperturetype_;
@@ -54628,12 +54643,40 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 ProtoAppSignalData::aperturetype() const {
   return _internal_aperturetype();
 }
 inline void ProtoAppSignalData::_internal_set_aperturetype(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00002000u;
+  _has_bits_[0] |= 0x00004000u;
   aperturetype_ = value;
 }
 inline void ProtoAppSignalData::set_aperturetype(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_aperturetype(value);
   // @@protoc_insertion_point(field_set:Proto.ProtoAppSignalData.apertureType)
+}
+
+// optional bool invertSignal = 23 [default = false];
+inline bool ProtoAppSignalData::_internal_has_invertsignal() const {
+  bool value = (_has_bits_[0] & 0x00002000u) != 0;
+  return value;
+}
+inline bool ProtoAppSignalData::has_invertsignal() const {
+  return _internal_has_invertsignal();
+}
+inline void ProtoAppSignalData::clear_invertsignal() {
+  invertsignal_ = false;
+  _has_bits_[0] &= ~0x00002000u;
+}
+inline bool ProtoAppSignalData::_internal_invertsignal() const {
+  return invertsignal_;
+}
+inline bool ProtoAppSignalData::invertsignal() const {
+  // @@protoc_insertion_point(field_get:Proto.ProtoAppSignalData.invertSignal)
+  return _internal_invertsignal();
+}
+inline void ProtoAppSignalData::_internal_set_invertsignal(bool value) {
+  _has_bits_[0] |= 0x00002000u;
+  invertsignal_ = value;
+}
+inline void ProtoAppSignalData::set_invertsignal(bool value) {
+  _internal_set_invertsignal(value);
+  // @@protoc_insertion_point(field_set:Proto.ProtoAppSignalData.invertSignal)
 }
 
 // -------------------------------------------------------------------

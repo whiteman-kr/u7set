@@ -1554,6 +1554,7 @@ constexpr ProtoAppSignalData::ProtoAppSignalData(
   , enabletuning_(false)
   , obsolete_adaptiveaperture_(false)
   , excludefrombuild_(false)
+  , invertsignal_(false)
   , aperturetype_(0)
   , decimalplaces_(2)
   , datasize_(32)
@@ -3437,27 +3438,29 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_serialization_2eproto::offsets
   PROTOBUF_FIELD_OFFSET(::Proto::ProtoAppSignalData, userspecpropstruct_),
   PROTOBUF_FIELD_OFFSET(::Proto::ProtoAppSignalData, userspecpropvalues_),
   PROTOBUF_FIELD_OFFSET(::Proto::ProtoAppSignalData, aperturetype_),
+  PROTOBUF_FIELD_OFFSET(::Proto::ProtoAppSignalData, invertsignal_),
   0,
   1,
   9,
-  15,
   16,
   17,
+  18,
   2,
   10,
   6,
   7,
   8,
-  18,
   19,
-  14,
   20,
+  15,
   21,
+  22,
   11,
   12,
   3,
   4,
   5,
+  14,
   13,
   PROTOBUF_FIELD_OFFSET(::Proto::AppSignalState, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::Proto::AppSignalState, _internal_metadata_),
@@ -3925,26 +3928,26 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 1383, 1400, sizeof(::Proto::AppSignalCalculatedParam)},
   { 1412, 1446, sizeof(::Proto::AppSignal)},
   { 1475, -1, sizeof(::Proto::AppSignalSet)},
-  { 1481, 1508, sizeof(::Proto::ProtoAppSignalData)},
-  { 1530, 1543, sizeof(::Proto::AppSignalState)},
-  { 1551, 1581, sizeof(::Proto::Connection)},
-  { 1606, -1, sizeof(::Proto::SchemaDetailsSet)},
-  { 1612, 1622, sizeof(::Proto::SchemaDetails_TrendIndicatorSchemaItems)},
-  { 1627, 1647, sizeof(::Proto::SchemaDetails)},
-  { 1662, 1673, sizeof(::Proto::BuildInfo)},
-  { 1679, 1691, sizeof(::Proto::ArchSignal)},
-  { 1698, 1706, sizeof(::Proto::ArchInfo)},
-  { 1709, 1733, sizeof(::Proto::BusSignal)},
-  { 1752, 1764, sizeof(::Proto::Bus)},
-  { 1771, 1780, sizeof(::Proto::ComparatorSignal)},
-  { 1784, 1800, sizeof(::Proto::Comparator)},
-  { 1811, 1818, sizeof(::Proto::LmComparatorSet)},
-  { 1820, -1, sizeof(::Proto::ComparatorSet)},
-  { 1826, 1840, sizeof(::Proto::MetrologySignalLocation)},
-  { 1849, 1865, sizeof(::Proto::MetrologySignal)},
-  { 1876, -1, sizeof(::Proto::MetrologySignalSet)},
-  { 1882, 1893, sizeof(::Proto::SimOverrideSignal)},
-  { 1899, -1, sizeof(::Proto::SimOverrideSignalWorkspace)},
+  { 1481, 1509, sizeof(::Proto::ProtoAppSignalData)},
+  { 1532, 1545, sizeof(::Proto::AppSignalState)},
+  { 1553, 1583, sizeof(::Proto::Connection)},
+  { 1608, -1, sizeof(::Proto::SchemaDetailsSet)},
+  { 1614, 1624, sizeof(::Proto::SchemaDetails_TrendIndicatorSchemaItems)},
+  { 1629, 1649, sizeof(::Proto::SchemaDetails)},
+  { 1664, 1675, sizeof(::Proto::BuildInfo)},
+  { 1681, 1693, sizeof(::Proto::ArchSignal)},
+  { 1700, 1708, sizeof(::Proto::ArchInfo)},
+  { 1711, 1735, sizeof(::Proto::BusSignal)},
+  { 1754, 1766, sizeof(::Proto::Bus)},
+  { 1773, 1782, sizeof(::Proto::ComparatorSignal)},
+  { 1786, 1802, sizeof(::Proto::Comparator)},
+  { 1813, 1820, sizeof(::Proto::LmComparatorSet)},
+  { 1822, -1, sizeof(::Proto::ComparatorSet)},
+  { 1828, 1842, sizeof(::Proto::MetrologySignalLocation)},
+  { 1851, 1867, sizeof(::Proto::MetrologySignal)},
+  { 1878, -1, sizeof(::Proto::MetrologySignalSet)},
+  { 1884, 1895, sizeof(::Proto::SimOverrideSignal)},
+  { 1901, -1, sizeof(::Proto::SimOverrideSignalWorkspace)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -4458,8 +4461,8 @@ const char descriptor_table_protodef_serialization_2eproto[] PROTOBUF_SECTION_VA
   "\004tags\030\\ \003(\t\022(\n\007dbField\030x \001(\0132\027.Proto.App"
   "SignalDbField\0222\n\tcalcParam\030y \001(\0132\037.Proto"
   ".AppSignalCalculatedParam\"3\n\014AppSignalSe"
-  "t\022#\n\tappSignal\030\001 \003(\0132\020.Proto.AppSignal\"\363"
-  "\004\n\022ProtoAppSignalData\022\021\n\tbusTypeID\030\001 \001(\t"
+  "t\022#\n\tappSignal\030\001 \003(\0132\020.Proto.AppSignal\"\220"
+  "\005\n\022ProtoAppSignalData\022\021\n\tbusTypeID\030\001 \001(\t"
   "\022\017\n\007caption\030\002 \001(\t\022\022\n\007channel\030\003 \001(\005:\0010\022\024\n"
   "\010dataSize\030\004 \001(\005:\00232\022\024\n\tbyteOrder\030\005 \001(\005:\001"
   "1\022\035\n\022analogSignalFormat\030\006 \001(\005:\0012\022\014\n\004unit"
@@ -4474,121 +4477,122 @@ const char descriptor_table_protodef_serialization_2eproto[] PROTOBUF_SECTION_VA
   "perture\030\021 \001(\010:\005false\022\037\n\020excludefromBuild"
   "\030\022 \001(\010:\005false\022\014\n\004tags\030\023 \001(\t\022\032\n\022userSpecP"
   "ropStruct\030\024 \001(\t\022\032\n\022userSpecPropValues\030\025 "
-  "\001(\014\022\027\n\014apertureType\030\026 \001(\005:\0010\"\264\001\n\016AppSign"
-  "alState\022\017\n\004hash\030\001 \001(\004:\0010\022\020\n\005value\030\002 \001(\001:"
-  "\0010\022\020\n\005flags\030\003 \001(\r:\0010\022\025\n\nsystemTime\030\004 \001(\020"
-  ":\0010\022\024\n\tlocalTime\030\005 \001(\020:\0010\022\024\n\tplantTime\030\006"
-  " \001(\020:\0010\022\025\n\tarchiveId\030\007 \001(\020:\002-1\022\023\n\010packet"
-  "No\030\010 \001(\r:\0010\"\212\006\n\nConnection\022\024\n\014Connection"
-  "ID\030\002 \001(\t\022\030\n\020Port1EquipmentID\030\003 \001(\t\022\030\n\020Po"
-  "rt2EquipmentID\030\004 \001(\t\022\037\n\027Port1RawDataDesc"
-  "ription\030\005 \001(\t\022\037\n\027Port2RawDataDescription"
-  "\030\006 \001(\t\022\035\n\016ManualSettings\030\013 \001(\010:\005false\022\034\n"
-  "\rDisableDataID\030\014 \001(\010:\005false\022\036\n\017GenerateV"
-  "HDFile\030\r \001(\010:\005false\022\036\n\023Port1TxStartAddre"
-  "ss\030\016 \001(\005:\0010\022!\n\024Port1TxWordsQuantity\030\017 \001("
-  "\005:\003479\022!\n\024Port1RxWordsQuantity\030\020 \001(\005:\00347"
-  "9\022\036\n\023Port2TxStartAddress\030\021 \001(\005:\0010\022!\n\024Por"
-  "t2TxWordsQuantity\030\022 \001(\005:\003479\022!\n\024Port2RxW"
-  "ordsQuantity\030\023 \001(\005:\003479\022\031\n\004uuid\030\024 \001(\0132\013."
-  "Proto.Uuid\022 \n\021Port1EnableSerial\030\025 \001(\010:\005f"
-  "alse\022\032\n\017Port1SerialMode\030\026 \001(\005:\0010\022 \n\021Port"
-  "1EnableDuplex\030\027 \001(\010:\005false\022 \n\021Port2Enabl"
-  "eSerial\030\030 \001(\010:\005false\022\032\n\017Port2SerialMode\030"
-  "\031 \001(\005:\0010\022 \n\021Port2EnableDuplex\030\032 \001(\010:\005fal"
-  "se\022\017\n\004Type\030\033 \001(\005:\0010\022\027\n\014ObsoleteMode\030\010 \001("
-  "\005:\0010\022\035\n\022ObsoleteSerialMode\030\007 \001(\005:\0010\022#\n\024O"
-  "bsoleteEnableDuplex\030\n \001(\010:\005false\"@\n\020Sche"
-  "maDetailsSet\022,\n\016schemasDetails\030\002 \003(\0132\024.P"
-  "roto.SchemaDetails\"\206\004\n\rSchemaDetails\022\017\n\007"
-  "version\030\002 \001(\005\022\020\n\010schemaId\030\004 \001(\t\022\017\n\007capti"
-  "on\030\005 \001(\t\022\031\n\021excludedfromBuild\030\006 \001(\010\022\023\n\013e"
-  "quipmentId\030\007 \001(\t\022\031\n\021lmDescriptionFile\030\010 "
-  "\001(\t\022\014\n\004path\030\t \001(\t\022\021\n\tsignalIds\030\024 \003(\t\022\016\n\006"
-  "labels\030\025 \003(\t\022\023\n\013connections\030\026 \003(\t\022\032\n\005gui"
-  "ds\030\027 \003(\0132\013.Proto.Uuid\022\022\n\nschematags\030\030 \003("
-  "\t\022\021\n\tloopbacks\030\031 \003(\t\022\020\n\010itemtags\030\032 \003(\t\022G"
-  "\n\017trendIndicators\030\036 \003(\0132..Proto.SchemaDe"
-  "tails.TrendIndicatorSchemaItems\032\221\001\n\031Tren"
-  "dIndicatorSchemaItems\022\035\n\010itemUuid\030\002 \001(\0132"
-  "\013.Proto.Uuid\022\024\n\014samplePeriod\030\003 \001(\005\022\020\n\010ti"
-  "meType\030\004 \001(\005\022\027\n\017durationSeconds\030\005 \001(\005\022\024\n"
-  "\014appSignalIds\030\006 \003(\t\"{\n\tBuildInfo\022\017\n\007proj"
-  "ect\030\001 \001(\t\022\022\n\007buildNo\030\002 \001(\005:\0010\022\020\n\010dateTim"
-  "e\030\003 \001(\t\022\024\n\tchangeset\030\004 \001(\005:\0010\022\014\n\004user\030\005 "
-  "\001(\t\022\023\n\013workstation\030\006 \001(\t\"\242\001\n\nArchSignal\022"
-  "\023\n\013appSignalID\030\001 \002(\t\022\022\n\nsignalType\030\002 \002(\005"
-  "\022\023\n\010lowLimit\030\003 \001(\001:\0010\022\024\n\thighLimit\030\004 \001(\001"
-  ":\0010\022\014\n\004unit\030\005 \001(\t\022\027\n\014fineAperture\030\006 \001(\001:"
-  "\0010\022\031\n\016coarseAperture\030\007 \001(\001:\0010\"p\n\010ArchInf"
-  "o\022#\n\tbuildInfo\030\001 \002(\0132\020.Proto.BuildInfo\022\030"
-  "\n\020archiveServiceID\030\002 \002(\t\022%\n\narchSignal\030\003"
-  " \003(\0132\021.Proto.ArchSignal\"\326\003\n\tBusSignal\022\020\n"
-  "\010signalId\030\001 \001(\t\022\017\n\007caption\030\002 \001(\t\022\014\n\004type"
-  "\030\003 \001(\005\022\r\n\005units\030\004 \001(\t\022\024\n\014analogFormat\030\n "
-  "\001(\005\022\024\n\tprecision\030\013 \001(\005:\0012\022\031\n\016coarseApert"
-  "ure\030\014 \001(\001:\0011\022\031\n\014fineAperture\030\r \001(\001:\0030.5\022"
-  "\037\n\020adaptiveAperture\030\016 \001(\010:\005false\022\021\n\tbusT"
-  "ypeId\030\017 \001(\t\022\023\n\013inbusOffset\030  \001(\005\022\032\n\022inbu"
-  "sDiscreteBitNo\030( \001(\005\022\027\n\017inbusAnalogSize\030"
-  "2 \001(\005\022\031\n\021inbusAnalogFormat\0303 \001(\005\022\034\n\024inbu"
-  "sAnalogByteOrder\0304 \001(\005\022\031\n\021busAnalogLowLi"
-  "mit\0305 \001(\001\022\032\n\022busAnalogHighLimit\0306 \001(\001\022\033\n"
-  "\023inbusAnalogLowLimit\0307 \001(\001\022\034\n\024inbusAnalo"
-  "gHighLimit\0308 \001(\001\"\355\001\n\003Bus\022\031\n\004uuid\030\001 \001(\0132\013"
-  ".Proto.Uuid\022\021\n\tbusTypeId\030\002 \001(\t\022$\n\nbusSig"
-  "nals\030\003 \003(\0132\020.Proto.BusSignal\022!\n\023autoSign"
-  "alPlacement\030\n \001(\010:\004true\022\030\n\rmanualBusSize"
-  "\030\013 \001(\005:\0010\022\"\n\023enableManualBusSize\030\014 \001(\010:\005"
-  "false\0221\n#enableManualBusSizeIsNotInitial"
-  "ized\030\r \001(\010:\004true\"p\n\020ComparatorSignal\022\025\n\007"
-  "isConst\030\001 \001(\010:\004true\022\025\n\nconstValue\030\002 \001(\001:"
-  "\0010\022\023\n\013appSignalId\030\003 \001(\t\022\031\n\nisAcquired\030\004 "
-  "\001(\010:\005false\"\352\002\n\nComparator\022\022\n\007cmpType\030\001 \001"
-  "(\005:\0011\022\037\n\024inAnalogSignalFormat\030\002 \001(\005:\0011\022&"
-  "\n\005input\030\003 \001(\0132\027.Proto.ComparatorSignal\022("
-  "\n\007compare\030\004 \001(\0132\027.Proto.ComparatorSignal"
-  "\022+\n\nhysteresis\030\005 \001(\0132\027.Proto.ComparatorS"
-  "ignal\022\'\n\006output\030\006 \001(\0132\027.Proto.Comparator"
-  "Signal\022#\n\024allSignalsIsAcquired\030\007 \001(\010:\005fa"
-  "lse\022\024\n\tprecision\030\010 \001(\005:\0012\022\r\n\005label\030\t \001(\t"
-  "\022\020\n\010schemaId\030\n \001(\t\022#\n\016schemaItemUuid\030\013 \001"
-  "(\0132\013.Proto.Uuid\"O\n\017LmComparatorSet\022\025\n\rlm"
-  "EquipmentID\030\001 \001(\t\022%\n\ncomparator\030\002 \003(\0132\021."
-  "Proto.Comparator\"@\n\rComparatorSet\022/\n\017lmC"
-  "omparatorSet\030\001 \003(\0132\026.Proto.LmComparatorS"
-  "et\"\321\001\n\027MetrologySignalLocation\022\016\n\006rackID"
-  "\030\001 \001(\t\022\021\n\tchassisID\030\002 \001(\t\022\023\n\007chassis\030\003 \001"
-  "(\005:\002-1\022\025\n\rmoduleCaption\030\t \001(\t\022\020\n\010moduleI"
-  "D\030\004 \001(\t\022\022\n\006module\030\005 \001(\005:\002-1\022\021\n\005place\030\006 \001"
-  "(\005:\002-1\022\017\n\007contact\030\007 \001(\t\022\035\n\016shownOnSchema"
-  "s\030\010 \001(\010:\005false\"\347\002\n\017MetrologySignal\022#\n\tap"
-  "pSignal\030\001 \001(\0132\020.Proto.AppSignal\0220\n\010locat"
-  "ion\030\002 \001(\0132\036.Proto.MetrologySignalLocatio"
-  "n\022\033\n\020electricLowLimit\030\003 \001(\001:\0010\022\034\n\021electr"
-  "icHighLimit\030\004 \001(\001:\0010\022\031\n\016electricUnitID\030\005"
-  " \001(\005:\0011\022\035\n\022electricSensorType\030\006 \001(\005:\0011\022\030"
-  "\n\relectricRload\030\013 \001(\001:\0010\022\025\n\nelectricR0\030\007"
-  " \001(\001:\0010\022\034\n\021electricPrecision\030\010 \001(\005:\0014\022\033\n"
-  "\020physicalLowLimit\030\t \001(\001:\0010\022\034\n\021physicalHi"
-  "ghLimit\030\n \001(\001:\0010\"E\n\022MetrologySignalSet\022/"
-  "\n\017metrologySignal\030\001 \003(\0132\026.Proto.Metrolog"
-  "ySignal\"\240\001\n\021SimOverrideSignal\022\017\n\007enabled"
-  "\030\002 \001(\010\022\r\n\005index\030\003 \001(\005\022\023\n\013appSignalId\030\n \001"
-  "(\t\022\026\n\016overrideMethod\030\036 \001(\005\022&\n\roverrideVa"
-  "lue\030( \001(\0132\017.Proto.qvariant\022\026\n\016overrideSc"
-  "ript\0302 \001(\t\"O\n\032SimOverrideSignalWorkspace"
-  "\0221\n\017overrideSignals\030\002 \003(\0132\030.Proto.SimOve"
-  "rrideSignal*3\n\nSchemaUnit\022\013\n\007Display\020\000\022\016"
-  "\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionDi"
-  "rrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rFblSi"
-  "gnalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*:\n\rFb"
-  "lDataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\tSignedIn"
-  "t\020\001\022\t\n\005Float\020\002"
+  "\001(\014\022\027\n\014apertureType\030\026 \001(\005:\0010\022\033\n\014invertSi"
+  "gnal\030\027 \001(\010:\005false\"\264\001\n\016AppSignalState\022\017\n\004"
+  "hash\030\001 \001(\004:\0010\022\020\n\005value\030\002 \001(\001:\0010\022\020\n\005flags"
+  "\030\003 \001(\r:\0010\022\025\n\nsystemTime\030\004 \001(\020:\0010\022\024\n\tloca"
+  "lTime\030\005 \001(\020:\0010\022\024\n\tplantTime\030\006 \001(\020:\0010\022\025\n\t"
+  "archiveId\030\007 \001(\020:\002-1\022\023\n\010packetNo\030\010 \001(\r:\0010"
+  "\"\212\006\n\nConnection\022\024\n\014ConnectionID\030\002 \001(\t\022\030\n"
+  "\020Port1EquipmentID\030\003 \001(\t\022\030\n\020Port2Equipmen"
+  "tID\030\004 \001(\t\022\037\n\027Port1RawDataDescription\030\005 \001"
+  "(\t\022\037\n\027Port2RawDataDescription\030\006 \001(\t\022\035\n\016M"
+  "anualSettings\030\013 \001(\010:\005false\022\034\n\rDisableDat"
+  "aID\030\014 \001(\010:\005false\022\036\n\017GenerateVHDFile\030\r \001("
+  "\010:\005false\022\036\n\023Port1TxStartAddress\030\016 \001(\005:\0010"
+  "\022!\n\024Port1TxWordsQuantity\030\017 \001(\005:\003479\022!\n\024P"
+  "ort1RxWordsQuantity\030\020 \001(\005:\003479\022\036\n\023Port2T"
+  "xStartAddress\030\021 \001(\005:\0010\022!\n\024Port2TxWordsQu"
+  "antity\030\022 \001(\005:\003479\022!\n\024Port2RxWordsQuantit"
+  "y\030\023 \001(\005:\003479\022\031\n\004uuid\030\024 \001(\0132\013.Proto.Uuid\022"
+  " \n\021Port1EnableSerial\030\025 \001(\010:\005false\022\032\n\017Por"
+  "t1SerialMode\030\026 \001(\005:\0010\022 \n\021Port1EnableDupl"
+  "ex\030\027 \001(\010:\005false\022 \n\021Port2EnableSerial\030\030 \001"
+  "(\010:\005false\022\032\n\017Port2SerialMode\030\031 \001(\005:\0010\022 \n"
+  "\021Port2EnableDuplex\030\032 \001(\010:\005false\022\017\n\004Type\030"
+  "\033 \001(\005:\0010\022\027\n\014ObsoleteMode\030\010 \001(\005:\0010\022\035\n\022Obs"
+  "oleteSerialMode\030\007 \001(\005:\0010\022#\n\024ObsoleteEnab"
+  "leDuplex\030\n \001(\010:\005false\"@\n\020SchemaDetailsSe"
+  "t\022,\n\016schemasDetails\030\002 \003(\0132\024.Proto.Schema"
+  "Details\"\206\004\n\rSchemaDetails\022\017\n\007version\030\002 \001"
+  "(\005\022\020\n\010schemaId\030\004 \001(\t\022\017\n\007caption\030\005 \001(\t\022\031\n"
+  "\021excludedfromBuild\030\006 \001(\010\022\023\n\013equipmentId\030"
+  "\007 \001(\t\022\031\n\021lmDescriptionFile\030\010 \001(\t\022\014\n\004path"
+  "\030\t \001(\t\022\021\n\tsignalIds\030\024 \003(\t\022\016\n\006labels\030\025 \003("
+  "\t\022\023\n\013connections\030\026 \003(\t\022\032\n\005guids\030\027 \003(\0132\013."
+  "Proto.Uuid\022\022\n\nschematags\030\030 \003(\t\022\021\n\tloopba"
+  "cks\030\031 \003(\t\022\020\n\010itemtags\030\032 \003(\t\022G\n\017trendIndi"
+  "cators\030\036 \003(\0132..Proto.SchemaDetails.Trend"
+  "IndicatorSchemaItems\032\221\001\n\031TrendIndicatorS"
+  "chemaItems\022\035\n\010itemUuid\030\002 \001(\0132\013.Proto.Uui"
+  "d\022\024\n\014samplePeriod\030\003 \001(\005\022\020\n\010timeType\030\004 \001("
+  "\005\022\027\n\017durationSeconds\030\005 \001(\005\022\024\n\014appSignalI"
+  "ds\030\006 \003(\t\"{\n\tBuildInfo\022\017\n\007project\030\001 \001(\t\022\022"
+  "\n\007buildNo\030\002 \001(\005:\0010\022\020\n\010dateTime\030\003 \001(\t\022\024\n\t"
+  "changeset\030\004 \001(\005:\0010\022\014\n\004user\030\005 \001(\t\022\023\n\013work"
+  "station\030\006 \001(\t\"\242\001\n\nArchSignal\022\023\n\013appSigna"
+  "lID\030\001 \002(\t\022\022\n\nsignalType\030\002 \002(\005\022\023\n\010lowLimi"
+  "t\030\003 \001(\001:\0010\022\024\n\thighLimit\030\004 \001(\001:\0010\022\014\n\004unit"
+  "\030\005 \001(\t\022\027\n\014fineAperture\030\006 \001(\001:\0010\022\031\n\016coars"
+  "eAperture\030\007 \001(\001:\0010\"p\n\010ArchInfo\022#\n\tbuildI"
+  "nfo\030\001 \002(\0132\020.Proto.BuildInfo\022\030\n\020archiveSe"
+  "rviceID\030\002 \002(\t\022%\n\narchSignal\030\003 \003(\0132\021.Prot"
+  "o.ArchSignal\"\326\003\n\tBusSignal\022\020\n\010signalId\030\001"
+  " \001(\t\022\017\n\007caption\030\002 \001(\t\022\014\n\004type\030\003 \001(\005\022\r\n\005u"
+  "nits\030\004 \001(\t\022\024\n\014analogFormat\030\n \001(\005\022\024\n\tprec"
+  "ision\030\013 \001(\005:\0012\022\031\n\016coarseAperture\030\014 \001(\001:\001"
+  "1\022\031\n\014fineAperture\030\r \001(\001:\0030.5\022\037\n\020adaptive"
+  "Aperture\030\016 \001(\010:\005false\022\021\n\tbusTypeId\030\017 \001(\t"
+  "\022\023\n\013inbusOffset\030  \001(\005\022\032\n\022inbusDiscreteBi"
+  "tNo\030( \001(\005\022\027\n\017inbusAnalogSize\0302 \001(\005\022\031\n\021in"
+  "busAnalogFormat\0303 \001(\005\022\034\n\024inbusAnalogByte"
+  "Order\0304 \001(\005\022\031\n\021busAnalogLowLimit\0305 \001(\001\022\032"
+  "\n\022busAnalogHighLimit\0306 \001(\001\022\033\n\023inbusAnalo"
+  "gLowLimit\0307 \001(\001\022\034\n\024inbusAnalogHighLimit\030"
+  "8 \001(\001\"\355\001\n\003Bus\022\031\n\004uuid\030\001 \001(\0132\013.Proto.Uuid"
+  "\022\021\n\tbusTypeId\030\002 \001(\t\022$\n\nbusSignals\030\003 \003(\0132"
+  "\020.Proto.BusSignal\022!\n\023autoSignalPlacement"
+  "\030\n \001(\010:\004true\022\030\n\rmanualBusSize\030\013 \001(\005:\0010\022\""
+  "\n\023enableManualBusSize\030\014 \001(\010:\005false\0221\n#en"
+  "ableManualBusSizeIsNotInitialized\030\r \001(\010:"
+  "\004true\"p\n\020ComparatorSignal\022\025\n\007isConst\030\001 \001"
+  "(\010:\004true\022\025\n\nconstValue\030\002 \001(\001:\0010\022\023\n\013appSi"
+  "gnalId\030\003 \001(\t\022\031\n\nisAcquired\030\004 \001(\010:\005false\""
+  "\352\002\n\nComparator\022\022\n\007cmpType\030\001 \001(\005:\0011\022\037\n\024in"
+  "AnalogSignalFormat\030\002 \001(\005:\0011\022&\n\005input\030\003 \001"
+  "(\0132\027.Proto.ComparatorSignal\022(\n\007compare\030\004"
+  " \001(\0132\027.Proto.ComparatorSignal\022+\n\nhystere"
+  "sis\030\005 \001(\0132\027.Proto.ComparatorSignal\022\'\n\006ou"
+  "tput\030\006 \001(\0132\027.Proto.ComparatorSignal\022#\n\024a"
+  "llSignalsIsAcquired\030\007 \001(\010:\005false\022\024\n\tprec"
+  "ision\030\010 \001(\005:\0012\022\r\n\005label\030\t \001(\t\022\020\n\010schemaI"
+  "d\030\n \001(\t\022#\n\016schemaItemUuid\030\013 \001(\0132\013.Proto."
+  "Uuid\"O\n\017LmComparatorSet\022\025\n\rlmEquipmentID"
+  "\030\001 \001(\t\022%\n\ncomparator\030\002 \003(\0132\021.Proto.Compa"
+  "rator\"@\n\rComparatorSet\022/\n\017lmComparatorSe"
+  "t\030\001 \003(\0132\026.Proto.LmComparatorSet\"\321\001\n\027Metr"
+  "ologySignalLocation\022\016\n\006rackID\030\001 \001(\t\022\021\n\tc"
+  "hassisID\030\002 \001(\t\022\023\n\007chassis\030\003 \001(\005:\002-1\022\025\n\rm"
+  "oduleCaption\030\t \001(\t\022\020\n\010moduleID\030\004 \001(\t\022\022\n\006"
+  "module\030\005 \001(\005:\002-1\022\021\n\005place\030\006 \001(\005:\002-1\022\017\n\007c"
+  "ontact\030\007 \001(\t\022\035\n\016shownOnSchemas\030\010 \001(\010:\005fa"
+  "lse\"\347\002\n\017MetrologySignal\022#\n\tappSignal\030\001 \001"
+  "(\0132\020.Proto.AppSignal\0220\n\010location\030\002 \001(\0132\036"
+  ".Proto.MetrologySignalLocation\022\033\n\020electr"
+  "icLowLimit\030\003 \001(\001:\0010\022\034\n\021electricHighLimit"
+  "\030\004 \001(\001:\0010\022\031\n\016electricUnitID\030\005 \001(\005:\0011\022\035\n\022"
+  "electricSensorType\030\006 \001(\005:\0011\022\030\n\relectricR"
+  "load\030\013 \001(\001:\0010\022\025\n\nelectricR0\030\007 \001(\001:\0010\022\034\n\021"
+  "electricPrecision\030\010 \001(\005:\0014\022\033\n\020physicalLo"
+  "wLimit\030\t \001(\001:\0010\022\034\n\021physicalHighLimit\030\n \001"
+  "(\001:\0010\"E\n\022MetrologySignalSet\022/\n\017metrology"
+  "Signal\030\001 \003(\0132\026.Proto.MetrologySignal\"\240\001\n"
+  "\021SimOverrideSignal\022\017\n\007enabled\030\002 \001(\010\022\r\n\005i"
+  "ndex\030\003 \001(\005\022\023\n\013appSignalId\030\n \001(\t\022\026\n\016overr"
+  "ideMethod\030\036 \001(\005\022&\n\roverrideValue\030( \001(\0132\017"
+  ".Proto.qvariant\022\026\n\016overrideScript\0302 \001(\t\""
+  "O\n\032SimOverrideSignalWorkspace\0221\n\017overrid"
+  "eSignals\030\002 \003(\0132\030.Proto.SimOverrideSignal"
+  "*3\n\nSchemaUnit\022\013\n\007Display\020\000\022\016\n\nMillimete"
+  "r\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionDirrection\022\t\n"
+  "\005Input\020\000\022\n\n\006Output\020\001*)\n\rFblSignalType\022\n\n"
+  "\006Analog\020\000\022\014\n\010Discrete\020\001*:\n\rFblDataFormat"
+  "\022\017\n\013UnsignedInt\020\000\022\r\n\tSignedInt\020\001\022\t\n\005Floa"
+  "t\020\002"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_serialization_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_serialization_2eproto = {
-  false, false, 20974, descriptor_table_protodef_serialization_2eproto, "serialization.proto", 
+  false, false, 21003, descriptor_table_protodef_serialization_2eproto, "serialization.proto", 
   &descriptor_table_serialization_2eproto_once, nullptr, 0, 109,
   schemas, file_default_instances, TableStruct_serialization_2eproto::offsets,
   file_level_metadata_serialization_2eproto, file_level_enum_descriptors_serialization_2eproto, file_level_service_descriptors_serialization_2eproto,
@@ -39815,13 +39819,13 @@ class ProtoAppSignalData::_Internal {
     (*has_bits)[0] |= 512u;
   }
   static void set_has_datasize(HasBits* has_bits) {
-    (*has_bits)[0] |= 32768u;
-  }
-  static void set_has_byteorder(HasBits* has_bits) {
     (*has_bits)[0] |= 65536u;
   }
-  static void set_has_analogsignalformat(HasBits* has_bits) {
+  static void set_has_byteorder(HasBits* has_bits) {
     (*has_bits)[0] |= 131072u;
+  }
+  static void set_has_analogsignalformat(HasBits* has_bits) {
+    (*has_bits)[0] |= 262144u;
   }
   static void set_has_unit(HasBits* has_bits) {
     (*has_bits)[0] |= 4u;
@@ -39842,19 +39846,19 @@ class ProtoAppSignalData::_Internal {
     (*has_bits)[0] |= 256u;
   }
   static void set_has_acquire(HasBits* has_bits) {
-    (*has_bits)[0] |= 262144u;
-  }
-  static void set_has_archive(HasBits* has_bits) {
     (*has_bits)[0] |= 524288u;
   }
-  static void set_has_decimalplaces(HasBits* has_bits) {
-    (*has_bits)[0] |= 16384u;
-  }
-  static void set_has_coarseaperture(HasBits* has_bits) {
+  static void set_has_archive(HasBits* has_bits) {
     (*has_bits)[0] |= 1048576u;
   }
-  static void set_has_fineaperture(HasBits* has_bits) {
+  static void set_has_decimalplaces(HasBits* has_bits) {
+    (*has_bits)[0] |= 32768u;
+  }
+  static void set_has_coarseaperture(HasBits* has_bits) {
     (*has_bits)[0] |= 2097152u;
+  }
+  static void set_has_fineaperture(HasBits* has_bits) {
+    (*has_bits)[0] |= 4194304u;
   }
   static void set_has_obsolete_adaptiveaperture(HasBits* has_bits) {
     (*has_bits)[0] |= 2048u;
@@ -39872,6 +39876,9 @@ class ProtoAppSignalData::_Internal {
     (*has_bits)[0] |= 32u;
   }
   static void set_has_aperturetype(HasBits* has_bits) {
+    (*has_bits)[0] |= 16384u;
+  }
+  static void set_has_invertsignal(HasBits* has_bits) {
     (*has_bits)[0] |= 8192u;
   }
 };
@@ -40043,9 +40050,9 @@ void ProtoAppSignalData::Clear() {
         reinterpret_cast<char*>(&aperturetype_) -
         reinterpret_cast<char*>(&channel_)) + sizeof(aperturetype_));
     decimalplaces_ = 2;
-    datasize_ = 32;
   }
-  if (cached_has_bits & 0x003f0000u) {
+  if (cached_has_bits & 0x007f0000u) {
+    datasize_ = 32;
     byteorder_ = 1;
     analogsignalformat_ = 2;
     acquire_ = true;
@@ -40253,6 +40260,14 @@ const char* ProtoAppSignalData::_InternalParse(const char* ptr, ::PROTOBUF_NAMES
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
+      // optional bool invertSignal = 23 [default = false];
+      case 23:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 184)) {
+          _Internal::set_has_invertsignal(&has_bits);
+          invertsignal_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
       default: {
       handle_unusual:
         if ((tag & 7) == 4 || tag == 0) {
@@ -40310,19 +40325,19 @@ failure:
   }
 
   // optional int32 dataSize = 4 [default = 32];
-  if (cached_has_bits & 0x00008000u) {
+  if (cached_has_bits & 0x00010000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(4, this->_internal_datasize(), target);
   }
 
   // optional int32 byteOrder = 5 [default = 1];
-  if (cached_has_bits & 0x00010000u) {
+  if (cached_has_bits & 0x00020000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(5, this->_internal_byteorder(), target);
   }
 
   // optional int32 analogSignalFormat = 6 [default = 2];
-  if (cached_has_bits & 0x00020000u) {
+  if (cached_has_bits & 0x00040000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(6, this->_internal_analogsignalformat(), target);
   }
@@ -40368,31 +40383,31 @@ failure:
   }
 
   // optional bool acquire = 12 [default = true];
-  if (cached_has_bits & 0x00040000u) {
+  if (cached_has_bits & 0x00080000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(12, this->_internal_acquire(), target);
   }
 
   // optional bool archive = 13 [default = true];
-  if (cached_has_bits & 0x00080000u) {
+  if (cached_has_bits & 0x00100000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(13, this->_internal_archive(), target);
   }
 
   // optional int32 decimalPlaces = 14 [default = 2];
-  if (cached_has_bits & 0x00004000u) {
+  if (cached_has_bits & 0x00008000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(14, this->_internal_decimalplaces(), target);
   }
 
   // optional double coarseAperture = 15 [default = 1];
-  if (cached_has_bits & 0x00100000u) {
+  if (cached_has_bits & 0x00200000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(15, this->_internal_coarseaperture(), target);
   }
 
   // optional double fineAperture = 16 [default = 0.5];
-  if (cached_has_bits & 0x00200000u) {
+  if (cached_has_bits & 0x00400000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(16, this->_internal_fineaperture(), target);
   }
@@ -40436,9 +40451,15 @@ failure:
   }
 
   // optional int32 apertureType = 22 [default = 0];
-  if (cached_has_bits & 0x00002000u) {
+  if (cached_has_bits & 0x00004000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(22, this->_internal_aperturetype(), target);
+  }
+
+  // optional bool invertSignal = 23 [default = false];
+  if (cached_has_bits & 0x00002000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(23, this->_internal_invertsignal(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -40546,60 +40567,65 @@ size_t ProtoAppSignalData::ByteSizeLong() const {
       total_size += 2 + 1;
     }
 
-    // optional int32 apertureType = 22 [default = 0];
+    // optional bool invertSignal = 23 [default = false];
     if (cached_has_bits & 0x00002000u) {
+      total_size += 2 + 1;
+    }
+
+    // optional int32 apertureType = 22 [default = 0];
+    if (cached_has_bits & 0x00004000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_aperturetype());
     }
 
     // optional int32 decimalPlaces = 14 [default = 2];
-    if (cached_has_bits & 0x00004000u) {
+    if (cached_has_bits & 0x00008000u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_decimalplaces());
     }
 
+  }
+  if (cached_has_bits & 0x007f0000u) {
     // optional int32 dataSize = 4 [default = 32];
-    if (cached_has_bits & 0x00008000u) {
+    if (cached_has_bits & 0x00010000u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_datasize());
     }
 
-  }
-  if (cached_has_bits & 0x003f0000u) {
     // optional int32 byteOrder = 5 [default = 1];
-    if (cached_has_bits & 0x00010000u) {
+    if (cached_has_bits & 0x00020000u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_byteorder());
     }
 
     // optional int32 analogSignalFormat = 6 [default = 2];
-    if (cached_has_bits & 0x00020000u) {
+    if (cached_has_bits & 0x00040000u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_analogsignalformat());
     }
 
     // optional bool acquire = 12 [default = true];
-    if (cached_has_bits & 0x00040000u) {
-      total_size += 1 + 1;
-    }
-
-    // optional bool archive = 13 [default = true];
     if (cached_has_bits & 0x00080000u) {
       total_size += 1 + 1;
     }
 
-    // optional double coarseAperture = 15 [default = 1];
+    // optional bool archive = 13 [default = true];
     if (cached_has_bits & 0x00100000u) {
+      total_size += 1 + 1;
+    }
+
+    // optional double coarseAperture = 15 [default = 1];
+    if (cached_has_bits & 0x00200000u) {
       total_size += 1 + 8;
     }
 
     // optional double fineAperture = 16 [default = 0.5];
-    if (cached_has_bits & 0x00200000u) {
+    if (cached_has_bits & 0x00400000u) {
       total_size += 2 + 8;
     }
 
@@ -40679,33 +40705,36 @@ void ProtoAppSignalData::MergeFrom(const ProtoAppSignalData& from) {
       excludefrombuild_ = from.excludefrombuild_;
     }
     if (cached_has_bits & 0x00002000u) {
-      aperturetype_ = from.aperturetype_;
+      invertsignal_ = from.invertsignal_;
     }
     if (cached_has_bits & 0x00004000u) {
-      decimalplaces_ = from.decimalplaces_;
+      aperturetype_ = from.aperturetype_;
     }
     if (cached_has_bits & 0x00008000u) {
-      datasize_ = from.datasize_;
+      decimalplaces_ = from.decimalplaces_;
     }
     _has_bits_[0] |= cached_has_bits;
   }
-  if (cached_has_bits & 0x003f0000u) {
+  if (cached_has_bits & 0x007f0000u) {
     if (cached_has_bits & 0x00010000u) {
-      byteorder_ = from.byteorder_;
+      datasize_ = from.datasize_;
     }
     if (cached_has_bits & 0x00020000u) {
-      analogsignalformat_ = from.analogsignalformat_;
+      byteorder_ = from.byteorder_;
     }
     if (cached_has_bits & 0x00040000u) {
-      acquire_ = from.acquire_;
+      analogsignalformat_ = from.analogsignalformat_;
     }
     if (cached_has_bits & 0x00080000u) {
-      archive_ = from.archive_;
+      acquire_ = from.acquire_;
     }
     if (cached_has_bits & 0x00100000u) {
-      coarseaperture_ = from.coarseaperture_;
+      archive_ = from.archive_;
     }
     if (cached_has_bits & 0x00200000u) {
+      coarseaperture_ = from.coarseaperture_;
+    }
+    if (cached_has_bits & 0x00400000u) {
       fineaperture_ = from.fineaperture_;
     }
     _has_bits_[0] |= cached_has_bits;

@@ -188,9 +188,9 @@ public:
 	//
 	enum SignalType
 	{
-		Analog,
-		Discrete,
-		Bus
+		Analog,			//	0
+		Discrete,		//	1
+		Bus				//  2
 	};
 	Q_ENUM(SignalType)
 

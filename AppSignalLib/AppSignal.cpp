@@ -252,7 +252,7 @@ bool AppSignalSpecPropValues::createFromSpecPropStruct(const QString& specPropSt
 
 	if (buildNamesMap == true)
 	{
-		buildPropNamesMap();
+		rebuildPropNamesMap();
 	}
 
 	return true;
@@ -269,9 +269,9 @@ bool AppSignalSpecPropValues::updateFromSpecPropStruct(const QString& specPropSt
 		return false;
 	}
 
-	buildPropNamesMap();
+	rebuildPropNamesMap();
 
-	QStringList namesToDelete;
+	std::set<QString> namesToDelete;
 	QHash<QString, std::shared_ptr<Property>> namesToCreate;
 
 	std::vector<std::shared_ptr<Property>> properties = pob.properties();
@@ -283,72 +283,67 @@ bool AppSignalSpecPropValues::updateFromSpecPropStruct(const QString& specPropSt
 		if (isExists(propName) == false)
 		{
 			namesToCreate.insert(propName, property);
+			continue;
+		}
+
+		// value of property is exists
+		//
+		QVariant value;
+		bool isEnum = false;
+
+		getValue(propName, &value, &isEnum);
+
+		// checking that property end value types are equal
+		//
+		if (property->value().metaType() == value.metaType() && property->isEnum() == isEnum)
+		{
+			// equal, update existing value if nessesery
+			//
+			if (property->updateFromPreset() == true)
+			{
+				setValue(propName, property->value(), property->isEnum());
+			}
 		}
 		else
 		{
-			// value of property is exists
+			// property type has been changed, recreate value
 			//
-			QVariant value;
-			bool isEnum = false;
-
-			getValue(propName, &value, &isEnum);
-
-			// checking that property end value types are equal
-			//
-			if (property->value().metaType() == value.metaType() && property->isEnum() == isEnum)
-			{
-				// equal, update existing value if nessesery
-				//
-				if (property->updateFromPreset() == true)
-				{
-					setValue(propName, property->value(), property->isEnum());
-				}
-			}
-			else
-			{
-				// property type has been changed, recreate value
-				//
-				namesToDelete.append(propName);
-				namesToCreate.insert(propName, property);
-			}
+			namesToDelete.insert(propName);
+			namesToCreate.insert(propName, property);
 		}
 	}
-
-	buildPropNamesMap();
 
 	for(const AppSignalSpecPropValue& specPropValue : m_specPropValues)
 	{
 		if (pob.propertyByCaption(specPropValue.name()) == nullptr)
 		{
-			namesToDelete.append(specPropValue.name());
+			namesToDelete.insert(specPropValue.name());
 		}
 	}
 
-	for(const QString& nameToDelete : namesToDelete)
-	{
-		int index = getPropertyIndex(nameToDelete);
+	QVector<AppSignalSpecPropValue> newSpecPropValues;
 
-		if (index != -1)
+	for(const auto& propVal : m_specPropValues)
+	{
+		if (namesToDelete.contains(propVal.name()) == false)
 		{
-			m_specPropValues.removeAt(index);
-			buildPropNamesMap();
-		}
-		else
-		{
-			assert(false);
+			newSpecPropValues.emplace_back(propVal);
 		}
 	}
 
 	// create new property value, set to default
 	//
+	AppSignalSpecPropValue specPropValue;
+
 	for(const std::shared_ptr<Property>& property : namesToCreate)
 	{
-		AppSignalSpecPropValue specPropValue;
-
 		specPropValue.create(property);
-
-		m_specPropValues.append(specPropValue);
+		newSpecPropValues.emplace_back(specPropValue);
 	}
+
+	m_specPropValues.swap(newSpecPropValues);
+
+	rebuildPropNamesMap();
 
 	return true;
 }
@@ -421,7 +416,7 @@ bool AppSignalSpecPropValues::getValue(const QString& name, QVariant* qv, bool* 
 	return true;
 }
 
-bool AppSignalSpecPropValues::	serializeValuesToArray(QByteArray* protoData) const
+bool AppSignalSpecPropValues::serializeValuesToArray(QByteArray* protoData) const
 {
 	TEST_PTR_RETURN_FALSE(protoData);
 
@@ -464,14 +459,37 @@ bool AppSignalSpecPropValues::parseValuesFromArray(const QByteArray& protoData)
 		m_specPropValues.append(specPropValue);
 	}
 
-	buildPropNamesMap();
+	rebuildPropNamesMap();
 
 	return true;
 }
 
 void AppSignalSpecPropValues::append(const AppSignalSpecPropValue& value)
 {
+	Q_ASSERT(m_propNamesMap.contains(value.name()) == false);
+
+	int index = m_specPropValues.size();
+
 	m_specPropValues.append(value);
+	m_propNamesMap.emplace(value.name(), index);
+}
+
+bool AppSignalSpecPropValues::removeValue(const QString& propName)
+{
+	auto it = m_propNamesMap.find(propName);
+
+	if (it == m_propNamesMap.end())
+	{
+		return false;
+	}
+
+	int index = it->second;
+
+	m_specPropValues.erase(m_specPropValues.begin() + index);
+
+	rebuildPropNamesMap();
+
+	return true;
 }
 
 bool AppSignalSpecPropValues::replaceName(const QString& oldName, const QString& newName)
@@ -491,11 +509,9 @@ bool AppSignalSpecPropValues::replaceName(const QString& oldName, const QString&
 	return replacingIsOccured;
 }
 
-void AppSignalSpecPropValues::buildPropNamesMap()
+void AppSignalSpecPropValues::rebuildPropNamesMap()
 {
 	m_propNamesMap.clear();
-
-	m_propNamesMap.reserve(static_cast<int>(m_specPropValues.size() * 1.2));
 
 	int index = 0;
 
@@ -503,7 +519,7 @@ void AppSignalSpecPropValues::buildPropNamesMap()
 	{
 		if (m_propNamesMap.contains(specPropValue.name()) == false)
 		{
-			m_propNamesMap.insert(specPropValue.name(), index);
+			m_propNamesMap.emplace(specPropValue.name(), index);
 		}
 		else
 		{
@@ -528,9 +544,16 @@ bool AppSignalSpecPropValues::setValue(const QString& name, const QVariant& valu
 
 int AppSignalSpecPropValues::getPropertyIndex(const QString& name) const
 {
-	if (m_propNamesMap.isEmpty() == false)
+	if (m_propNamesMap.empty() == false)
 	{
-		return m_propNamesMap.value(name, -1);
+		auto it = m_propNamesMap.find(name);
+
+		if (it == m_propNamesMap.end())
+		{
+			return -1;
+		}
+
+		return it->second;
 	}
 
 	int index = 0;
@@ -676,25 +699,6 @@ QString AppSignal::initFromDeviceSignal(const QString& deviceSignalEquipmentID,
 										arg(deviceSignalEquipmentID);
 	}
 
-	if (m_signalType == E::SignalType::Discrete &&
-		(m_inOutType == E::SignalInOutType::Input || m_inOutType == E::SignalInOutType::Output) &&
-		m_specPropStruct.contains(";InvertSignal;") == false)
-	{
-		if (m_specPropStruct.isEmpty() == false && m_specPropStruct.endsWith(Separator::NEW_LINE) == false)
-		{
-			m_specPropStruct += Separator::NEW_LINE;
-		}
-
-		if (m_inOutType == E::SignalInOutType::Input)
-		{
-			m_specPropStruct += AppSignalDefaultSpecPropStruct::INPUT_DISCRETE;
-		}
-		else
-		{
-			m_specPropStruct += AppSignalDefaultSpecPropStruct::OUTPUT_DISCRETE;
-		}
-	}
-
 	AppSignalSpecPropValues spv;
 
 	spv.createFromSpecPropStruct(m_specPropStruct);
@@ -753,24 +757,6 @@ void AppSignal::initSpecificProperties()
 		break;
 
 	case E::SignalType::Discrete:
-
-		switch(m_inOutType)
-		{
-		case E::SignalInOutType::Input:
-			specPropStruct = AppSignalDefaultSpecPropStruct::INPUT_DISCRETE;
-			break;
-
-		case E::SignalInOutType::Output:
-			specPropStruct = AppSignalDefaultSpecPropStruct::OUTPUT_DISCRETE;
-			break;
-
-		case E::SignalInOutType::Internal:
-			break;
-
-		default:
-			assert(false);
-		}
-
 		break;
 
 	case E::SignalType::Bus:
@@ -948,14 +934,14 @@ bool AppSignal::isCompatibleFormat(E::SignalType signalType, const QString& busT
 									 busTypeID);
 }
 
-bool AppSignal::invertSignal(QString* err) const
+bool AppSignal::invertSignal() const
 {
-	return getSpecPropBool(AppSignalPropNames::INVERT_SIGNAL, err);
+	return m_invertSignal;
 }
 
-void AppSignal::setSetInvertSignal(bool invert)
+void AppSignal::setInvertSignal(bool invert)
 {
-	setSpecPropBool(AppSignalPropNames::INVERT_SIGNAL, invert);
+	m_invertSignal = invert;
 }
 
 int AppSignal::lowADC(QString* err) const
@@ -1209,6 +1195,7 @@ void AppSignal::saveProtoData(Proto::ProtoAppSignalData* protoData) const
 	protoData->set_coarseaperture(m_coarseAperture);
 	protoData->set_fineaperture(m_fineAperture);
 	protoData->set_aperturetype(TO_INT(m_apertureType));
+	protoData->set_invertsignal(m_invertSignal);
 
 	//
 
@@ -1266,6 +1253,7 @@ void AppSignal::loadProtoData(const Proto::ProtoAppSignalData& protoData)
 	m_coarseAperture = protoData.coarseaperture();
 	m_fineAperture = protoData.fineaperture();
 	m_apertureType = static_cast<E::ApertureType>(protoData.aperturetype());
+	m_invertSignal = protoData.invertsignal();
 
 	//
 

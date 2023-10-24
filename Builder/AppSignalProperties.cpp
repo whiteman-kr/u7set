@@ -323,6 +323,9 @@ void AppSignalProperties::initProperties(bool savePropertyDescription)
 																		  std::bind(static_cast<void (AppSignal::*)(E::AnalogAppSignalFormat)>(&AppSignal::setAnalogSignalFormat), &m_signal, std::placeholders::_1));
 	analogSignalFormatProperty->setCategory(categoryDataFormat);
 
+	auto invertSignalProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(bool, AppSignalPropNames::INVERT_SIGNAL, true, AppSignal::invertSignal, AppSignal::setInvertSignal, m_signal);
+	invertSignalProperty->setCategory(categorySignalProcessing);
+
 	auto excludeFromBuildProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(bool, AppSignalPropNames::EXCLUDE_FROM_BUILD, true,
 																		AppSignal::excludeFromBuild, AppSignal::setExcludeFromBuild, m_signal);
 	excludeFromBuildProperty->setCategory(categorySignalProcessing);
