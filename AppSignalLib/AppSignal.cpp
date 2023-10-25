@@ -1465,7 +1465,7 @@ void AppSignal::writeToXml(XmlWriteHelper& xml)
 
 	// Data format
 	//
-	xml.writeEnumKeyValueAttribute(AppSignalPropNames::BYTE_ORDER, m_byteOrder);
+	xml.writeEnumKeyValueAttribute(AppSignalPropNames::BYTE_ORDER_PROP, m_byteOrder);
 	xml.writeIntAttribute(AppSignalPropNames::DATA_SIZE, m_dataSize);
 	xml.writeEnumKeyValueAttribute(AppSignalPropNames::ANALOG_SIGNAL_FORMAT, m_analogSignalFormat);
 	xml.writeStringAttribute(AppSignalPropNames::BUS_TYPE_ID, m_busTypeID);
@@ -1583,7 +1583,7 @@ bool AppSignal::readFromXml(XmlReadHelper& xml)
 
 	// Data format
 	//
-	result &= xml.readEnumValueAttribute(AppSignalPropNames::BYTE_ORDER, &m_byteOrder);
+	result &= xml.readEnumValueAttribute(AppSignalPropNames::BYTE_ORDER_PROP, &m_byteOrder);
 	result &= xml.readIntAttribute(AppSignalPropNames::DATA_SIZE, &m_dataSize);
 	result &= xml.readEnumValueAttribute(AppSignalPropNames::ANALOG_SIGNAL_FORMAT, &m_analogSignalFormat);
 	result &= xml.readStringAttribute(AppSignalPropNames::BUS_TYPE_ID, &m_busTypeID);
