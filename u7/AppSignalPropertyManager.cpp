@@ -31,7 +31,7 @@ const std::vector<AppSignalPropertyDescription> AppSignalPropertyManager::m_repl
 
 	{
 		false,
-		AppSignalPropNames::BYTE_ORDER_PROP,
+		AppSignalPropNames::BYTE_ORDER,
 		"Byte order",
 		QMetaType::QString,
 		[](const AppSignal* s) { return E::valueToString<E::ByteOrder>(s->byteOrder()); },

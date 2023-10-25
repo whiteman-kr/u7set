@@ -570,6 +570,7 @@ namespace AppSignalPropNames
     inline const QString INPUT_RANGE("InputRange");
 	inline const QString ACQUIRE("Acquire");
 	inline const QString ARCHIVE("Archive");
+	inline const QString RESERVED("Reserved");
 	inline const QString DECIMAL_PLACES("DecimalPlaces");
 	inline const QString COARSE_APERTURE("CoarseAperture");
 	inline const QString FINE_APERTURE("FineAperture");
@@ -577,7 +578,7 @@ namespace AppSignalPropNames
 	inline const QString APERTURE_TYPE("ApertureType");
 	inline const QString FILTERING_TIME("FilteringTime");
 	inline const QString SPREAD_TOLERANCE("SpreadTolerance");
-	inline const QString BYTE_ORDER_PROP("ByteOrder");
+	inline const QString BYTE_ORDER("ByteOrder");
 	inline const QString EQUIPMENT_ID("EquipmentID");
 
 	inline const QString ENABLE_TUNING("EnableTuning");

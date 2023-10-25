@@ -7570,10 +7570,31 @@ namespace Builder
 	{
 		addItemsIssues(OutputMessageLevel::Error, 5200, itemUuid, schemaID);
 
-		LOG_ERROR(IssueType::AlCompiler,
-				  5200,
+		LOG_ERROR(IssueType::AlCompiler, 5200,
 				  QString(tr("AFB '%1' parameters calculation result out of Float32 range (Schema %2).").
 							arg(afbCaption).arg(schemaID)));
+	}
+
+
+	/// IssueCode: ALC5201
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Reserved signal %1 used on schema %2.
+	///
+	/// Parameters:
+	///		%1 AppSignalID
+	///		%2 SchemaID
+	///
+	/// Description:
+	///		Turn off Reserved property of signal.
+	///
+	void IssueLogger::errALC5201(QString appSignalID, QUuid itemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 5201, itemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler, 5201,
+				  QString(tr("Reserved signal %1 used on schema %2.").arg(appSignalID).arg(schemaID)));
 	}
 
 	/// IssueCode: ALC5800

@@ -289,6 +289,8 @@ namespace Builder
 												std::set<const UalItem*>* linkedItems,
 												std::map<QUuid, const UalItem*>* linkedPins);
 
+		bool createUalItemSignalsList();
+
 		bool createUalSignalsFromInputAndTuningAcquiredSignals();
 
 		bool createUalSignalsFromBusComposers();
@@ -808,6 +810,7 @@ namespace Builder
 
 		bool setLmAppLANDataSize();
 		bool detectUnusedSignals();
+		bool detectUsedReservedSignals();
 		bool fillAnalogSignalsOnSchemas();
 		bool calculateCodeRunTime();
 
@@ -998,6 +1001,8 @@ namespace Builder
 		QHash<QString, AppSignal*> m_equipmentSignals;			// equipment signals to app signals map, signal EquipmentID => Signal*
 		std::map<QString, UalSignal*> m_optoPortValiditySignal;	// OptoPort EquipmentID => OptoPort validity signal
 		std::map<QString, UalSignal*> m_busChildSignalsRequiredConversion;	// Bus child signal required conversion ID => Corresponding CONVERTED UAL signal
+
+		std::map<Hash, std::set<const UalItem*>> m_ualItemsSignals;		// Hash(appSignalID) => set of UalItems (type Signal) with this appSignalID
 
 		::std::set<QString> m_signalsWithFlagsIDs;
 		::std::unordered_set<UalSignal*> m_signalsWithFlagsAndFlagSignals;

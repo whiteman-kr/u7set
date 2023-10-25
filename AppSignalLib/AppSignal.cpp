@@ -944,6 +944,16 @@ void AppSignal::setInvertSignal(bool invert)
 	m_invertSignal = invert;
 }
 
+bool AppSignal::reserved() const
+{
+	return m_reserved;
+}
+
+void AppSignal::setReserved(bool reserved)
+{
+	m_reserved = reserved;
+}
+
 int AppSignal::lowADC(QString* err) const
 {
 	return static_cast<int>(getSpecPropUInt(AppSignalPropNames::LOW_ADC, err));
@@ -1196,6 +1206,7 @@ void AppSignal::saveProtoData(Proto::ProtoAppSignalData* protoData) const
 	protoData->set_fineaperture(m_fineAperture);
 	protoData->set_aperturetype(TO_INT(m_apertureType));
 	protoData->set_invertsignal(m_invertSignal);
+	protoData->set_reserved(m_reserved);
 
 	//
 
@@ -1254,6 +1265,7 @@ void AppSignal::loadProtoData(const Proto::ProtoAppSignalData& protoData)
 	m_fineAperture = protoData.fineaperture();
 	m_apertureType = static_cast<E::ApertureType>(protoData.aperturetype());
 	m_invertSignal = protoData.invertsignal();
+	m_reserved = protoData.reserved();
 
 	//
 
@@ -1433,46 +1445,54 @@ void AppSignal::writeToXml(XmlWriteHelper& xml)
 {
 	xml.writeStartElement(XmlElement::SIGNAL_ELEM);	// <Signal>
 
+	// Identification
+	//
 	xml.writeIntAttribute(AppSignalPropNames::ID, m_ID);
 
 	xml.writeStringAttribute(AppSignalPropNames::APP_SIGNAL_ID, m_appSignalID);
 	xml.writeStringAttribute(AppSignalPropNames::CUSTOM_APP_SIGNAL_ID, m_customAppSignalID);
 	xml.writeStringAttribute(AppSignalPropNames::CAPTION, m_caption);
 	xml.writeStringAttribute(AppSignalPropNames::EQUIPMENT_ID, m_equipmentID);
+	xml.writeEnumKeyValueAttribute(AppSignalPropNames::CHANNEL, m_channel);
 
 	xml.writeIntAttribute(AppSignalPropNames::SIGNAL_GROUP_ID, m_signalGroupID);
 	xml.writeIntAttribute(AppSignalPropNames::SIGNAL_INSTANCE_ID, m_signalInstanceID);
 
+	// Type
+	//
 	xml.writeEnumKeyValueAttribute(AppSignalPropNames::TYPE, m_signalType);
 	xml.writeEnumKeyValueAttribute(AppSignalPropNames::IN_OUT_TYPE, m_inOutType);
-	xml.writeEnumKeyValueAttribute(AppSignalPropNames::BYTE_ORDER_PROP, m_byteOrder);
-	xml.writeEnumKeyValueAttribute(AppSignalPropNames::ANALOG_SIGNAL_FORMAT, m_analogSignalFormat);
+
+	// Data format
+	//
+	xml.writeEnumKeyValueAttribute(AppSignalPropNames::BYTE_ORDER, m_byteOrder);
 	xml.writeIntAttribute(AppSignalPropNames::DATA_SIZE, m_dataSize);
-	xml.writeEnumKeyValueAttribute(AppSignalPropNames::CHANNEL, m_channel);
-
+	xml.writeEnumKeyValueAttribute(AppSignalPropNames::ANALOG_SIGNAL_FORMAT, m_analogSignalFormat);
 	xml.writeStringAttribute(AppSignalPropNames::BUS_TYPE_ID, m_busTypeID);
-	xml.writeStringAttribute(AppSignalPropNames::UNIT, m_unit);
 
-	xml.writeAddress16Attribute(AppSignalPropNames::UAL_ADDR, m_ualAddr);
-
+	// MATS and processing props
+	//
+	xml.writeBoolAttribute(AppSignalPropNames::INVERT_SIGNAL, m_invertSignal);
 	xml.writeBoolAttribute(AppSignalPropNames::ACQUIRE, m_acquire);
-
-	if (m_acquire == true)
-	{
-		xml.writeAddress16Attribute(AppSignalPropNames::REG_VALUE_ADDR, m_regValueAddr);
-		xml.writeAddress16Attribute(AppSignalPropNames::REG_VALIDITY_ADDR, m_regValidityAddr);
-	}
-
 	xml.writeBoolAttribute(AppSignalPropNames::ARCHIVE, m_archive);
+	xml.writeBoolAttribute(AppSignalPropNames::RESERVED, m_reserved);
 
-	if (isAnalog() == true)
-	{
-		xml.writeEnumKeyValueAttribute(AppSignalPropNames::APERTURE_TYPE, m_apertureType);
-		xml.writeDoubleAttribute(AppSignalPropNames::FINE_APERTURE, m_fineAperture);
-		xml.writeDoubleAttribute(AppSignalPropNames::COARSE_APERTURE, m_coarseAperture);
-		xml.writeIntAttribute(AppSignalPropNames::DECIMAL_PLACES, m_decimalPlaces);
-	}
+	xml.writeEnumKeyValueAttribute(AppSignalPropNames::APERTURE_TYPE, m_apertureType);
+	xml.writeDoubleAttribute(AppSignalPropNames::FINE_APERTURE, m_fineAperture);
+	xml.writeDoubleAttribute(AppSignalPropNames::COARSE_APERTURE, m_coarseAperture);
 
+	xml.writeStringAttribute(AppSignalPropNames::UNIT, m_unit);
+	xml.writeIntAttribute(AppSignalPropNames::DECIMAL_PLACES, m_decimalPlaces);
+	xml.writeStringAttribute(AppSignalPropNames::TAGS, tags().join(Separator::COMMA));
+
+	// Addresses
+	//
+	xml.writeAddress16Attribute(AppSignalPropNames::UAL_ADDR, m_ualAddr);
+	xml.writeAddress16Attribute(AppSignalPropNames::REG_VALUE_ADDR, m_regValueAddr);
+	xml.writeAddress16Attribute(AppSignalPropNames::REG_VALIDITY_ADDR, m_regValidityAddr);
+
+	// Tuning
+	//
 	xml.writeBoolAttribute(AppSignalPropNames::ENABLE_TUNING, m_enableTuning);
 
 	if (m_enableTuning == true)
@@ -1488,7 +1508,7 @@ void AppSignal::writeToXml(XmlWriteHelper& xml)
 		xml.writeAddress16Attribute(AppSignalPropNames::TUNING_ABS_ADDR, m_tuningAddr);
 	}
 
-	// write spec properties
+	// Specific properties
 	//
 	xml.writeStringAttribute(AppSignalPropNames::SPEC_PROP_STRUCT, m_specPropStruct);
 
@@ -1529,8 +1549,6 @@ void AppSignal::writeToXml(XmlWriteHelper& xml)
 		}
 	}
 
-	xml.writeStringAttribute(AppSignalPropNames::TAGS, tags().join(Separator::COMMA));
-
 	xml.writeEndElement();				// </Signal>
 }
 
@@ -1543,58 +1561,67 @@ bool AppSignal::readFromXml(XmlReadHelper& xml)
 		return false;
 	}
 
+	resetAddresses();
+
+	// Identification
+	//
 	result &= xml.readIntAttribute(AppSignalPropNames::ID, &m_ID);
 
 	result &= xml.readStringAttribute(AppSignalPropNames::APP_SIGNAL_ID, &m_appSignalID);
 	result &= xml.readStringAttribute(AppSignalPropNames::CUSTOM_APP_SIGNAL_ID, &m_customAppSignalID);
 	result &= xml.readStringAttribute(AppSignalPropNames::CAPTION, &m_caption);
 	result &= xml.readStringAttribute(AppSignalPropNames::EQUIPMENT_ID, &m_equipmentID);
+	result &= xml.readEnumValueAttribute(AppSignalPropNames::CHANNEL, &m_channel);
 
 	result &= xml.readIntAttribute(AppSignalPropNames::SIGNAL_GROUP_ID, &m_signalGroupID);
 	result &= xml.readIntAttribute(AppSignalPropNames::SIGNAL_INSTANCE_ID, &m_signalInstanceID);
 
+	// Type
+	//
 	result &= xml.readEnumValueAttribute(AppSignalPropNames::TYPE, &m_signalType);
 	result &= xml.readEnumValueAttribute(AppSignalPropNames::IN_OUT_TYPE, &m_inOutType);
-	result &= xml.readEnumValueAttribute(AppSignalPropNames::BYTE_ORDER_PROP, &m_byteOrder);
-	result &= xml.readEnumValueAttribute(AppSignalPropNames::ANALOG_SIGNAL_FORMAT, &m_analogSignalFormat);
+
+	// Data format
+	//
+	result &= xml.readEnumValueAttribute(AppSignalPropNames::BYTE_ORDER, &m_byteOrder);
 	result &= xml.readIntAttribute(AppSignalPropNames::DATA_SIZE, &m_dataSize);
-	result &= xml.readEnumValueAttribute(AppSignalPropNames::CHANNEL, &m_channel);
-
+	result &= xml.readEnumValueAttribute(AppSignalPropNames::ANALOG_SIGNAL_FORMAT, &m_analogSignalFormat);
 	result &= xml.readStringAttribute(AppSignalPropNames::BUS_TYPE_ID, &m_busTypeID);
-	result &= xml.readStringAttribute(AppSignalPropNames::UNIT, &m_unit);
 
-	result &= xml.readAddress16Attribute(AppSignalPropNames::UAL_ADDR, &m_ualAddr);
-
+	// MATS and processing props
+	//
+	result &= xml.readBoolAttribute(AppSignalPropNames::INVERT_SIGNAL, &m_invertSignal);
 	result &= xml.readBoolAttribute(AppSignalPropNames::ACQUIRE, &m_acquire);
-
-	if (m_acquire == true)
-	{
-		result &= xml.readAddress16Attribute(AppSignalPropNames::REG_VALUE_ADDR, &m_regValueAddr);
-		result &= xml.readAddress16Attribute(AppSignalPropNames::REG_VALIDITY_ADDR, &m_regValidityAddr);
-	}
-	else
-	{
-		m_regValueAddr.reset();
-		m_regValidityAddr.reset();
-	}
-
 	result &= xml.readBoolAttribute(AppSignalPropNames::ARCHIVE, &m_archive);
+	result &= xml.readBoolAttribute(AppSignalPropNames::RESERVED, &m_reserved);
 
-	if (isAnalog() == true)
-	{
-		result &= xml.readEnumValueAttribute(AppSignalPropNames::APERTURE_TYPE, &m_apertureType);
-		result &= xml.readDoubleAttribute(AppSignalPropNames::FINE_APERTURE, &m_fineAperture);
-		result &= xml.readDoubleAttribute(AppSignalPropNames::COARSE_APERTURE, &m_coarseAperture);
-		result &= xml.readIntAttribute(AppSignalPropNames::DECIMAL_PLACES, &m_decimalPlaces);
-	}
-	else
-	{
-		m_apertureType = E::ApertureType::RangePercent;
-		m_fineAperture = 0;
-		m_coarseAperture = 0;
-		m_decimalPlaces = 0;
-	}
+	m_apertureType = E::ApertureType::RangePercent;
+	m_fineAperture = 0;
+	m_coarseAperture = 0;
+	m_decimalPlaces = 0;
+	m_unit.clear();
 
+	result &= xml.readEnumValueAttribute(AppSignalPropNames::APERTURE_TYPE, &m_apertureType);
+	result &= xml.readDoubleAttribute(AppSignalPropNames::FINE_APERTURE, &m_fineAperture);
+	result &= xml.readDoubleAttribute(AppSignalPropNames::COARSE_APERTURE, &m_coarseAperture);
+
+	result &= xml.readStringAttribute(AppSignalPropNames::UNIT, &m_unit);
+	result &= xml.readIntAttribute(AppSignalPropNames::DECIMAL_PLACES, &m_decimalPlaces);
+
+	QString tagsStr;
+
+	result &= xml.readStringAttribute(AppSignalPropNames::TAGS, &tagsStr);
+
+	setTags(tagsStr.split(Separator::COMMA, Qt::SkipEmptyParts));
+
+	// Addresses
+	//
+	result &= xml.readAddress16Attribute(AppSignalPropNames::UAL_ADDR, &m_ualAddr);
+	result &= xml.readAddress16Attribute(AppSignalPropNames::REG_VALUE_ADDR, &m_regValueAddr);
+	result &= xml.readAddress16Attribute(AppSignalPropNames::REG_VALIDITY_ADDR, &m_regValidityAddr);
+
+	// Tuning
+	//
 	result &= xml.readBoolAttribute(AppSignalPropNames::ENABLE_TUNING, &m_enableTuning);
 
 	if (m_enableTuning == true)
@@ -1627,6 +1654,8 @@ bool AppSignal::readFromXml(XmlReadHelper& xml)
 		result &= xml.readAddress16Attribute(AppSignalPropNames::TUNING_ABS_ADDR, &m_tuningAbsAddr);
 	}
 
+	// Specific properties
+	//
 	result &= xml.readStringAttribute(AppSignalPropNames::SPEC_PROP_STRUCT, &m_specPropStruct);
 
 	AppSignalSpecPropValues spvs;
@@ -1653,12 +1682,6 @@ bool AppSignal::readFromXml(XmlReadHelper& xml)
 
 	spvs.serializeValuesToArray(&m_protoSpecPropValues);
 
-	QString tagsStr;
-
-	result &= xml.readStringAttribute(AppSignalPropNames::TAGS, &tagsStr);
-
-	setTags(tagsStr.split(Separator::COMMA, Qt::SkipEmptyParts));
-
 	return result;
 }
 
@@ -1680,6 +1703,9 @@ void AppSignal::saveToProto(Proto::AppSignal* s) const
 	s->set_bustypeid(m_busTypeID.toStdString());
 	s->set_channel(TO_INT(m_channel));
 	s->set_excludefrombuild(m_excludeFromBuild);
+
+	s->set_invertsignal(m_invertSignal);
+	s->set_reserved(m_reserved);
 
 	// Signal type
 
@@ -1716,6 +1742,7 @@ void AppSignal::saveToProto(Proto::AppSignal* s) const
 	s->set_coarseaperture(m_coarseAperture);
 	s->set_fineaperture(m_fineAperture);
 	s->set_aperturetype(TO_INT(m_apertureType));
+	s->set_acquire(m_acquire);
 
 	// Signal fields from database
 
@@ -1900,6 +1927,9 @@ void AppSignal::loadFromProto(const Proto::AppSignal& s)
 	m_busTypeID = QString::fromStdString(s.bustypeid());
 	m_channel = static_cast<E::Channel>(s.channel());
 	m_excludeFromBuild = s.excludefrombuild();
+
+	m_invertSignal = s.invertsignal();
+	m_reserved = s.reserved();
 
 	// Signal type
 

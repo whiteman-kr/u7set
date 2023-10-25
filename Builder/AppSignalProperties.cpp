@@ -314,7 +314,7 @@ void AppSignalProperties::initProperties(bool savePropertyDescription)
 
 	dataSizeProperty->setCategory(categoryDataFormat);
 
-	auto byteOrderProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(E::ByteOrder, AppSignalPropNames::BYTE_ORDER_PROP, true, AppSignal::byteOrder, AppSignal::setByteOrder, m_signal);
+	auto byteOrderProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(E::ByteOrder, AppSignalPropNames::BYTE_ORDER, true, AppSignal::byteOrder, AppSignal::setByteOrder, m_signal);
 	byteOrderProperty->setCategory(categoryDataFormat);
 
 
@@ -356,6 +356,9 @@ void AppSignalProperties::initProperties(bool savePropertyDescription)
 
 	auto archiveProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(bool, AppSignalPropNames::ARCHIVE, true, AppSignal::archive, AppSignal::setArchive, m_signal);
 	archiveProperty->setCategory(categoryOnlineMonitoringSystem);
+
+	auto reservedProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(bool, AppSignalPropNames::RESERVED, true, AppSignal::reserved, AppSignal::setReserved, m_signal);
+	reservedProperty->setCategory(categoryOnlineMonitoringSystem);
 
 	auto tagsProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(QString, AppSignalPropNames::TAGS, true, AppSignal::tagsStr, AppSignal::setTagsStr, m_signal);
 	tagsProperty->setCategory(categoryOnlineMonitoringSystem);

@@ -1264,6 +1264,9 @@ message AppSignal
     optional int32 channel = 7 [default = 0];
 	optional bool excludeFromBuild = 8 [default = false];
 
+	optional bool invertSignal = 9 [default = false];
+	optional bool reserved = 10 [default = false];
+
     // Signal type
 
     optional int32 signalType = 16 [default = 1];		// E::SignalType::Discrete
@@ -1357,6 +1360,7 @@ message ProtoAppSignalData
 	optional int32 apertureType = 22 [default = 0 /* E::ApertureType::RangePercent */];
 	
 	optional bool invertSignal = 23 [default = false];
+	optional bool reserved = 24 [default = false];
 }
 
 // Data structs

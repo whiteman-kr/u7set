@@ -487,6 +487,7 @@ namespace Builder
 		void errALC5198(QString appSignalID1, QString appSignalID2, quint64 h);			// Signals %1 and %2 have equal hash (%3) of AppSignalIDs.
 		void errALC5199(QString afbCaption, QUuid itemUuid, QString schemaID);			// AFB '%1' parameters calculation result out of Int32 range (Schema %2).
 		void errALC5200(QString afbCaption, QUuid itemUuid, QString schemaID);			// AFB '%1' parameters calculation result out of Float32 range (Schema %2).
+		void errALC5201(QString appSignalID, QUuid itemUuid, QString schemaID);			// Reserved signal %1 used on schema %2.
 
 		// firmware writing errors
 

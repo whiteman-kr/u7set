@@ -277,6 +277,7 @@ namespace Builder
 
 			PROC_TO_CALL(ModuleLogicCompiler::setLmAppLANDataSize),
 			PROC_TO_CALL(ModuleLogicCompiler::detectUnusedSignals),
+			PROC_TO_CALL(ModuleLogicCompiler::detectUsedReservedSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::fillAnalogSignalsOnSchemas),
 			PROC_TO_CALL(ModuleLogicCompiler::writeResult)
 		};
@@ -1000,6 +1001,8 @@ namespace Builder
 
 		result &= writeUalItemsFile();
 
+		result &= createUalItemSignalsList();
+
 		result &= loopbacksPreprocessing();
 
 		// primarily created signals
@@ -1493,6 +1496,41 @@ namespace Builder
 		}
 
 		return result;
+	}
+
+	bool ModuleLogicCompiler::createUalItemSignalsList()
+	{
+		m_ualItemsSignals.clear();
+
+		for(const UalItem* ualItem : m_ualItems)
+		{
+			TEST_PTR_CONTINUE(ualItem);
+
+			if (ualItem->isSignal() == false)
+			{
+				continue;
+			}
+
+			QStringList appSignalIDs = ualItem->signal().appSignalIdList();
+
+			for(const QString& id : appSignalIDs)
+			{
+				Hash idHash = calcHash(id);
+
+				auto it = m_ualItemsSignals.find(idHash);
+
+				if (it == m_ualItemsSignals.end())
+				{
+					auto [newIt, b] = m_ualItemsSignals.emplace(idHash, std::set<const UalItem*>());
+
+					it = newIt;
+				}
+
+				it->second.insert(ualItem);
+			}
+		}
+
+		return true;
 	}
 
 	bool ModuleLogicCompiler::createUalSignalsFromInputAndTuningAcquiredSignals()
@@ -16010,7 +16048,26 @@ namespace Builder
 
 	bool ModuleLogicCompiler::detectUnusedSignals()
 	{
-		QStringList unusedSignals;
+		for(const auto& pair : m_chassisSignals)
+		{
+			const AppSignal* s = pair.second;
+
+			TEST_PTR_CONTINUE(s);
+
+			if (s->isInternal() == true &&
+				s->reserved() == false &&
+				m_ualSignals.contains(s->appSignalID()) == false)
+			{
+				m_log->wrnALC5148(s->appSignalID());
+			}
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::detectUsedReservedSignals()
+	{
+		bool result = true;
 
 		for(const auto& pair : m_chassisSignals)
 		{
@@ -16018,22 +16075,32 @@ namespace Builder
 
 			TEST_PTR_CONTINUE(s);
 
-			if (s->isInternal() == true && m_ualSignals.contains(s->appSignalID()) == false)
+			if (s->reserved() == false)
 			{
-				unusedSignals.append(s->appSignalID());
+				continue;
+			}
+
+			auto it = m_ualItemsSignals.find(calcHash(s->appSignalID()));
+
+			if (it == m_ualItemsSignals.end())
+			{
+				continue;
+			}
+
+			const std::set<const UalItem*>& ualItems = it->second;
+
+			for(const UalItem* ualItem : ualItems)
+			{
+				TEST_PTR_CONTINUE(ualItem);
+
+				// Reserved signal %1 used on schema %2.
+				//
+				m_log->errALC5201(s->appSignalID(), ualItem->guid(), ualItem->schemaID());
+				result = false;
 			}
 		}
 
-		unusedSignals.sort();
-
-		for(const QString& unusedSignal : unusedSignals)
-		{
-			// Internal signal %1 is unused.
-			//
-			m_log->wrnALC5148(unusedSignal);
-		}
-
-		return true;
+		return result;
 	}
 
 	bool ModuleLogicCompiler::fillAnalogSignalsOnSchemas()

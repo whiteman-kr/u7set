@@ -235,6 +235,9 @@ public:
 	bool invertSignal() const;
 	void setInvertSignal(bool invert);
 
+	bool reserved() const;
+	void setReserved(bool reserved);
+
 	// Analog signal properties
 
 	int lowADC(QString* err = nullptr) const;
@@ -569,6 +572,7 @@ private:
 	double m_fineAperture = 0.5;
 	E::ApertureType m_apertureType = E::ApertureType::RangePercent;
 	bool m_invertSignal = false;
+	bool m_reserved  = false;
 
 	// Signal specific properties
 	//
