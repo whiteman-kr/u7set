@@ -229,12 +229,13 @@ namespace Builder
 		xml.writeEndDocument();
 
 
-		// Create and write build file MetrologySignals.xml
+		// Create and write build file MetrologyItems.xml
 		//
-		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(), File::METROLOGY_ITEMS_XML, CfgFileId::METROLOGY_ITEMS, "",  data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(), File::METROLOGY_ITEMS_XML,
+															CfgFileId::METROLOGY_ITEMS, "",  data);
 		TEST_PTR_RETURN_FALSE(buildFile);
 
-		// add link to file MetrologySignals.xml in Configuration.xml
+		// add link to file MetrologyItems.xml in Configuration.xml
 		//
 		bool result = m_cfgXml->addLinkToFile(buildFile);
 		if (result == false)
@@ -252,83 +253,69 @@ namespace Builder
 	{
 		// Creating signal list
 		//
+		bool result = true;
+
 		QVector<Metrology::SignalParam> signalsToWrite;
 
 		int signalCount = TO_INT(m_signalSet->count());
+
 		for(int i = 0; i < signalCount; i++)
 		{
 			AppSignal& signal = (*m_signalSet)[i];
 
-			if (signal.isAcquired() == false)
+			if (signal.isAcquired() == false ||
+				(signal.isAnalog() && signal.isInput()) == false)
 			{
 				continue;
 			}
 
-			bool hasWrongField = false;
-
-			if (signal.isAnalog() == true && signal.isInput() == true)
+			if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_UNIT) == true)
 			{
-				if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_UNIT) == true)
+				bool testResult = true;
+
+				E::ElectricUnit electricUnit = signal.electricUnit();
+
+				switch (electricUnit)
 				{
-					switch (signal.electricUnit())
-					{
-						case E::ElectricUnit::mA:
+					case E::ElectricUnit::NoUnit:
+						break;
 
-							if (testElectricLimit_Input_mA(signal) == false)
-							{
-								hasWrongField = true;
-							}
-							break;
+					case E::ElectricUnit::mA:
+						testResult = testElectricLimit_Input_mA(signal);
+						break;
 
-						case E::ElectricUnit::mV:
+					case E::ElectricUnit::mV:
+						testResult = testElectricLimit_Input_mV(signal);
+						break;
 
-							if (testElectricLimit_Input_mV(signal) == false)
-							{
-								hasWrongField = true;
-							}
-							break;
+					case E::ElectricUnit::Ohm:
+						testResult = testElectricLimit_Input_Ohm(signal);
+						break;
 
-						case E::ElectricUnit::Ohm:
+					case E::ElectricUnit::V:
+						testResult = testElectricLimit_Input_V(signal);
+						break;
 
-							if (testElectricLimit_Input_Ohm(signal) == false)
-							{
-								hasWrongField = true;
-							}
-							break;
+					case E::ElectricUnit::uA:
+						testResult = testElectricLimit_Input_uA(signal);
+						break;
 
-						case E::ElectricUnit::V:
+					case E::ElectricUnit::Hz:
+						testResult = testElectricLimit_Input_Hz(signal);
+						break;
 
-							if (testElectricLimit_Input_V(signal) == false)
-							{
-								hasWrongField = true;
-							}
-							break;
-
-						case E::ElectricUnit::uA:
-
-							if (testElectricLimit_Input_uA(signal) == false)
-							{
-								hasWrongField = true;
-							}
-							break;
-
-						case E::ElectricUnit::Hz:
-
-							if (testElectricLimit_Input_Hz(signal) == false)
-							{
-								hasWrongField = true;
-							}
-							break;
-
-						default:
-							Q_ASSERT(false);
-                    }
+					default:
+						Q_ASSERT(false);
+						testResult = false;
+						LOG_INTERNAL_ERROR_MSG(m_log, QString("Unknown value of property ElectricUnit in signal %1").
+														arg(signal.appSignalID()));
 				}
-			}
 
-			if (hasWrongField == true)
-			{
-				continue;
+				if (testResult == false)
+				{
+					result = false;
+					continue;
+				}
 			}
 
 			// signal is shown in the schemas - only analog signals
@@ -349,6 +336,8 @@ namespace Builder
 			//
 			signalsToWrite.append(Metrology::SignalParam(signal, location));
 		}
+
+		RETURN_IF_FALSE(result);
 
 		// Writing signals
 		//
@@ -371,7 +360,8 @@ namespace Builder
 		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(), File::METROLOGY_SIGNAL_SET, CfgFileId::METROLOGY_SIGNAL_SET, "",  data);
 		TEST_PTR_RETURN_FALSE(buildFile);
 
-		bool result = m_cfgXml->addLinkToFile(buildFile);
+		result &= m_cfgXml->addLinkToFile(buildFile);
+
 		if (result == false)
 		{
 			// Can't link build file %1 into /%2/MetrologySignals.set.
@@ -380,7 +370,8 @@ namespace Builder
 			return false;
 		}
 
-		result = m_cfgXml->addLinkToFile(Directory::COMMON, File::COMPARATORS_SET);
+		result &= m_cfgXml->addLinkToFile(Directory::COMMON, File::COMPARATORS_SET);
+
 		if (result == false)
 		{
 			// Can't link build file %1 into /%2/Comparators.set.xml.
@@ -389,7 +380,7 @@ namespace Builder
 			return false;
 		}
 
-		return true;
+		return result;
 	}
 
 	void MetrologyCfgGenerator::getSignalLocation(Hardware::DeviceObject* pDeviceObject, Metrology::SignalLocation& l)

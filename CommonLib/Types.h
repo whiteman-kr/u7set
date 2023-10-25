@@ -338,7 +338,7 @@ public:
 		uA = 5,
 		Hz = 6,
 
-		// oder version
+		// older version
 		// NoInputUnit = 1,
 		// mA = 15,
 		// mV = 11,
