@@ -54,8 +54,12 @@ namespace TrendLib
 			return;
 		}
 
-		// QTime timeMeasures;
-		// timeMeasures.start();
+//#define DEBUG_TIME
+
+#ifdef DEBUG_TIME
+		QElapsedTimer timeMeasures;
+		timeMeasures.start();
+#endif
 
 		image->fill(Qt::white);
 
@@ -65,7 +69,9 @@ namespace TrendLib
 
 		draw(&painter, drawParam, true);
 
-		// qDebug() << "Trend draw time: " << timeMeasures.elapsed() << " ms";
+#ifdef DEBUG_TIME
+		qDebug() << "Trend draw time: " << timeMeasures.elapsed() << " ms";
+#endif
 		return;
 	}
 
@@ -1048,8 +1054,8 @@ namespace TrendLib
 					 Qt::SolidLine);
 		painter->setPen(linePen);
 
-		static const int recomendedSize = 8192;
-		QVector<QPointF> lines;
+		const int recomendedSize = 8192 * 2;
+		std::vector<QPointF> lines;
 		lines.reserve(recomendedSize);
 
 		TimeStamp startTimeStamp = drawParam.startTimeStamp();
@@ -1063,6 +1069,7 @@ namespace TrendLib
 		yPos0 = static_cast<double>(static_cast<int>(yPos0 * dpiY)) / dpiY;		// Make sure that Y is proper alligned for nice look of cosmetic pen
 		yPos1 = static_cast<double>(static_cast<int>(yPos1 * dpiY)) / dpiY;		// Make sure that Y is proper alligned for nice look of cosmetic pen
 
+		double rectLeft = signalRect.left();
 		double rectRight = signalRect.right();
 
 		double lastX = 0;
@@ -1084,7 +1091,7 @@ namespace TrendLib
 					//
 					if (state.isValid() == false)
 					{
-						if (lines.isEmpty() == false)
+						if (lines.empty() == false)
 						{
 							drawPolyline(painter, lines, signalRect);
 							lines.clear();
@@ -1103,7 +1110,7 @@ namespace TrendLib
 					//qDebug() << "pointIndex: " << pointIndex;
 					//pointIndex ++;
 
-					if (lines.isEmpty() == true)
+					if (lines.empty() == true)
 					{
 						lines.push_back(QPointF{x, y});
 
@@ -1129,11 +1136,24 @@ namespace TrendLib
 						}
 					}
 
+					// Check if the last points are before the left edge. If so, then compress them to one point.
+					//
+					if (lines.size() >= 2)
+					{
+						const QPointF& p1 = lines[lines.size() - 2];
+						QPointF p2 = lines[lines.size() - 1];	// Do not make it ref, as lines.clear() will lead to the dangling reference.
+
+						if (p1.x() < rectLeft && p2.x() < rectLeft)
+						{
+							lines.clear();
+							lines.push_back(p2);
+						}
+					}
+
 					if (lastX >= rectRight)
 					{
 						break;		// end of drawing
 					}
-
 				}	// for (const TrendStateItem& state : record.states)
 
 				if (lines.size() >= recomendedSize)
@@ -1212,13 +1232,14 @@ namespace TrendLib
 					 (signal.lineWeight() <= 1.0) ? drawParam.cosmeticPenWidth() : signal.lineWeight() / drawParam.realDpiY());
 		painter->setPen(linePen);
 
-		static const int recomendedSize = 8192;
-		QVector<QPointF> lines;
+		const int recomendedSize = 8192 * 2;
+		std::vector<QPointF> lines;
 		lines.reserve(recomendedSize);
 
 		TimeStamp startTimeStamp = drawParam.startTimeStamp();
 		qint64 duration = drawParam.duration();
 
+		double rectLeft = signalRect.left();
 		double rectRight = signalRect.right();
 
 		double lastX = 0;
@@ -1234,15 +1255,11 @@ namespace TrendLib
 			{
 				for (const TrendStateItem& state : record.states)
 				{
-					const TimeStamp& ct = state.getTime(timeType);
-
-					double value = TrendScale::valueToScaleValue(state.value, drawParam.scaleType(), &ok);
-
 					// Break line if it is not valid point or value has wrong value (e.g. logarithm from negative)
 					//
 					if (state.isValid() == false || ok == false)
 					{
-						if (lines.isEmpty() == false)
+						if (lines.empty() == false)
 						{
 							drawPolyline(painter, lines, signalRect);
 							lines.clear();
@@ -1250,6 +1267,11 @@ namespace TrendLib
 
 						continue;
 					}
+
+					// --
+					//
+					const TimeStamp& ct = state.getTime(timeType);
+					double value = TrendScale::valueToScaleValue(state.value, drawParam.scaleType(), &ok);
 
 					double x = TrendScale::timeToScaledPixel(ct, signalRect, startTimeStamp, duration);
 					double y = TrendScale::valueToScaledPixel(value, signalRect, lowLimit, highLimit);
@@ -1262,7 +1284,7 @@ namespace TrendLib
 					//							 << ", timestamp: " << ct.toDateTime().toString("HH:mm:ss.zzz");
 					//					pointIndex ++;
 
-					if (lines.isEmpty() == true)
+					if (lines.empty() == true)
 					{
 						lines.push_back(QPointF(x, y));
 						lastX = x;
@@ -1270,7 +1292,7 @@ namespace TrendLib
 					}
 					else
 					{
-						if (x != lastX || y != lastY)		// If prev point the same, don't add this point
+						if (x != lastX || y != lastY)		// If prev point is the same, don't add this point
 						{
 							if (lastY == y)
 							{
@@ -1297,7 +1319,20 @@ namespace TrendLib
 							lastX = x;
 							lastY = y;
 						}
+					}
 
+					// Check if the last points are before the left edge. If so, then compress them to one point.
+					//
+					if (lines.size() >= 2)
+					{
+						const QPointF& p1 = lines[lines.size() - 2];
+						QPointF p2 = lines[lines.size() - 1];	// Do not make it ref, as lines.clear() will lead to the dangling reference.
+
+						if (p1.x() < rectLeft && p2.x() < rectLeft)
+						{
+							lines.clear();
+							lines.push_back(p2);
+						}
 					}
 
 					if (lastX >= rectRight)
@@ -1810,7 +1845,7 @@ namespace TrendLib
 		return;
 	}
 
-	void Trend::drawPolyline(QPainter* painter, const QVector<QPointF>& lines, const QRectF& rect) const
+	void Trend::drawPolyline(QPainter* painter, const std::vector<QPointF>& lines, const QRectF& rect) const
 	{
 		Q_ASSERT(painter);
 
@@ -1822,14 +1857,14 @@ namespace TrendLib
 		double left = rect.left();
 		double right = rect.right();
 
-		if (lines.first().x() > right ||
-			lines.last().x() < left)
+		if (lines.front().x() > right ||
+			lines.back().x() < left)
 		{
 			return;
 		}
 
 		qsizetype size = lines.size();
-		const QPointF* ptrToFirst = lines.constData();
+		const QPointF* ptrToFirst = lines.data();
 
 		qsizetype index = 0;
 		for (; index < size; index++)

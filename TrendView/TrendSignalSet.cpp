@@ -132,19 +132,19 @@ namespace TrendLib
 		{
 			QMutexLocker l(&m_archiveMutex);
 
-			for (const auto&[hash, trendArchive] : m_archiveLocalTime)
+			for (const auto& [hash, trendArchive] : m_archiveLocalTime)
 			{
 				::Proto::TrendArchive* messageTrenaArchive = message->add_archive_local_time();
 				ok &= trendArchive.save(trendArchive.trendSignalPlusServerId, messageTrenaArchive);
 			}
 
-			for (const auto&[hash, trendArchive] : m_archiveSystemTime)
+			for (const auto& [hash, trendArchive] : m_archiveSystemTime)
 			{
 				::Proto::TrendArchive* messageTrenaArchive = message->add_archive_system_time();
 				ok &= trendArchive.save(trendArchive.trendSignalPlusServerId, messageTrenaArchive);
 			}
 
-			for (const auto&[hash, trendArchive] : m_archivePlantTime)
+			for (const auto& [hash, trendArchive] : m_archivePlantTime)
 			{
 				::Proto::TrendArchive* messageTrenaArchive = message->add_archive_plant_time();
 				ok &= trendArchive.save(trendArchive.trendSignalPlusServerId, messageTrenaArchive);
@@ -192,10 +192,10 @@ namespace TrendLib
 				const ::Proto::TrendArchive& messageArchive = message.archive_local_time(i);
 
 				TrendSignalPlusServerId tsps
-					{
-						.appSignalId = QString::fromStdString(messageArchive.app_signal_id()),
-						.archiveServerId = QString::fromStdString(messageArchive.archive_server_id())
-					};
+				{
+					.appSignalId = QString::fromStdString(messageArchive.app_signal_id()),
+					.archiveServerId = QString::fromStdString(messageArchive.archive_server_id())
+				};
 
 				auto itp = m_archiveLocalTime.emplace(tsps, TrendArchive{tsps});
 
@@ -208,10 +208,10 @@ namespace TrendLib
 				const ::Proto::TrendArchive& messageArchive = message.archive_system_time(i);
 
 				TrendSignalPlusServerId tsps
-					{
-						.appSignalId = QString::fromStdString(messageArchive.app_signal_id()),
-						.archiveServerId = QString::fromStdString(messageArchive.archive_server_id())
-					};
+				{
+					.appSignalId = QString::fromStdString(messageArchive.app_signal_id()),
+					.archiveServerId = QString::fromStdString(messageArchive.archive_server_id())
+				};
 
 				auto itp = m_archiveSystemTime.emplace(tsps, TrendArchive{tsps});
 
@@ -224,10 +224,10 @@ namespace TrendLib
 				const ::Proto::TrendArchive& messageArchive = message.archive_plant_time(i);
 
 				TrendSignalPlusServerId tsps
-					{
-						.appSignalId = QString::fromStdString(messageArchive.app_signal_id()),
-						.archiveServerId = QString::fromStdString(messageArchive.archive_server_id())
-					};
+				{
+					.appSignalId = QString::fromStdString(messageArchive.app_signal_id()),
+					.archiveServerId = QString::fromStdString(messageArchive.archive_server_id())
+				};
 
 				auto itp = m_archivePlantTime.emplace(tsps, TrendArchive{tsps});
 
@@ -249,11 +249,11 @@ namespace TrendLib
 		}
 
 		auto foundIt = std::find_if(m_signalParams.begin(), m_signalParams.end(),
-			[&signal](const TrendSignalParam& s)
-			{
-				return s.signalId() == signal.signalId() &&
-					   s.archiveServerId() == signal.archiveServerId();
-			});
+									[&signal](const TrendSignalParam& s)
+									{
+										return s.signalId() == signal.signalId() &&
+											s.archiveServerId() == signal.archiveServerId();
+									});
 
 		if (foundIt != m_signalParams.end())
 		{
@@ -288,7 +288,7 @@ namespace TrendLib
 			[&signal](const TrendSignalParam& s)
 			{
 				return s.appSignalId() == signal.appSignalId() &&
-					   s.archiveServerShortId() == signal.archiveServerShortId();
+					s.archiveServerShortId() == signal.archiveServerShortId();
 			});
 
 		return;
@@ -312,10 +312,10 @@ namespace TrendLib
 		for (const auto& targetSignal : targetOrder)
 		{
 			auto it = std::find_if(m_signalParams.begin(), m_signalParams.end(), [&targetSignal](const TrendSignalParam& ts)
-				{
-					return ts.appSignalId() == targetSignal.appSignalId() &&
-						   ts.archiveServerId() == targetSignal.archiveServerId();
-				});
+								   {
+									   return ts.appSignalId() == targetSignal.appSignalId() &&
+										   ts.archiveServerId() == targetSignal.archiveServerId();
+								   });
 
 			if (it != m_signalParams.end())
 			{
@@ -481,7 +481,7 @@ namespace TrendLib
 		{
 			if (s.isDiscrete() == true)
 			{
-				count ++;
+				count++;
 			}
 		}
 
@@ -497,7 +497,7 @@ namespace TrendLib
 		{
 			if (s.isAnalog() == true)
 			{
-				count ++;
+				count++;
 			}
 		}
 
@@ -543,7 +543,7 @@ namespace TrendLib
 		// --
 		//
 		//for (TimeStamp archHour : allTimeStamps)
-		for (const auto&[archHour, hourData] : archive.m_hours)
+		for (const auto& [archHour, hourData] : archive.m_hours)
 		{
 			if (archHour.toDateTime().time().minute() != 0 ||
 				archHour.toDateTime().time().second() != 0 ||
@@ -614,12 +614,12 @@ namespace TrendLib
 		TimeStamp fromTimeStamp((from.toMSecsSinceEpoch() / 1_hour) * 1_hour);
 		TimeStamp toTimeStamp((to.toMSecsSinceEpoch() / 1_hour) * 1_hour + (to.toMSecsSinceEpoch() % 1_hour == 0 ? 0 : 1_hour));
 
-//		qDebug() << "getExistingTrendData for appSignalID: " << appSignalId;
-//		qDebug() << "\tAsk data from " << from << ", rounded to " << fromTimeStamp.toDateTime();
-//		qDebug() << "\tAsk data to  " << to << ", rounded to " << toTimeStamp.toDateTime();
+		//		qDebug() << "getExistingTrendData for appSignalID: " << appSignalId;
+		//		qDebug() << "\tAsk data from " << from << ", rounded to " << fromTimeStamp.toDateTime();
+		//		qDebug() << "\tAsk data to  " << to << ", rounded to " << toTimeStamp.toDateTime();
 
-		// --
-		//
+				// --
+				//
 		for (TimeStamp archHour = fromTimeStamp; archHour < toTimeStamp; archHour.timeStamp += 1_hour)
 		{
 			if (archHour.toDateTime().time().minute() != 0 ||
