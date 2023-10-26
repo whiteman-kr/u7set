@@ -173,10 +173,10 @@ function generate_aimsr(confFirmware, module, LMNumber, frame, log, signalSet, o
 			
 			// Calculate flags and ranges depending on signal type
 			
-			var sensorType = signal.propertyValue("SensorType");
+			var sensorType = signal.propertyValue("SensorRange");
 			if (sensorType == undefined) 
 			{
-				log.errCFG3000("SensorType", signalStrId);
+				log.errCFG3000("SensorRange", signalStrId);
 				return false;
 			}
 				
