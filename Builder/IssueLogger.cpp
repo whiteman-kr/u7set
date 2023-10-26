@@ -8108,30 +8108,33 @@ namespace Builder
 				  );
 	}
 
-
 	/// IssueCode: EQP6102
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signal %1 has wrong type of sensor: %2.
+	/// Title: Signal %1 has wrong SensorType %2.
 	///
 	/// Parameters:
-	///		%1 Application signal ID
-	///		%2 Wrong type of sensor
+	///		%1 AppSignalID
+	///		%2 SensorType
 	///
 	/// Description:
 	///		Wrong type of sensor. It is required to set type of sensor to the correct value.
 	///
-	void IssueLogger::errEQP6102(QString appSignalID, int sensorType)
+	void IssueLogger::errEQP6102(QString appSignalID, E::SensorType sensorType)
 	{
-		LOG_ERROR(IssueType::Equipment,
-				  6102,
-				  tr("Signal %1 has wrong type of sensor: %2.")
-				  .arg(appSignalID)
-				  .arg(sensorType)
-				  );
-	}
+		QString sensorTypeStr = E::valueToString(sensorType);
 
+		if (sensorTypeStr.isEmpty())
+		{
+			sensorTypeStr = QString("UnknownValue (%1)").arg(TO_INT(sensorType));
+		}
+
+		LOG_ERROR(IssueType::Equipment, 6102,
+				  QString(tr("Signal %1 has wrong SensorType - %2.")).
+						arg(appSignalID).
+						arg(sensorTypeStr));
+	}
 
 	/// IssueCode: EQP6103
 	///

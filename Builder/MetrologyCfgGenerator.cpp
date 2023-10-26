@@ -305,7 +305,6 @@ namespace Builder
 						break;
 
 					default:
-						Q_ASSERT(false);
 						testResult = false;
 						LOG_INTERNAL_ERROR_MSG(m_log, QString("Unknown value of property ElectricUnit in signal %1").
 														arg(signal.appSignalID()));
@@ -313,6 +312,8 @@ namespace Builder
 
 				if (testResult == false)
 				{
+					LOG_INTERNAL_ERROR_MSG(m_log, QString("Metrology parameters checking error of signal %1.").
+												arg(signal.appSignalID()));
 					result = false;
 					continue;
 				}
@@ -430,13 +431,12 @@ namespace Builder
 			return false;
 		}
 
-		QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
-
 		if (signal.electricLowLimit() < lowLimit || signal.electricLowLimit() > highLimit)
 		{
 			//  Signal %1 has wrong low electric limit: %2 %5. Electric limit: %3 .. %4 %5.
 			//
-			m_log->errEQP6116(signal.appSignalID(), signal.electricLowLimit(), lowLimit, highLimit, meu.key(signal.electricUnit()), 4);
+			m_log->errEQP6116(signal.appSignalID(), signal.electricLowLimit(), lowLimit, highLimit,
+							  E::valueToString(signal.electricUnit()), 4);
 
 			return false;
 		}
@@ -445,7 +445,8 @@ namespace Builder
 		{
 			//  Signal %1 has wrong high electric limit: %2 %5. Electric limit: %3 .. %4 %5.
 			//
-			m_log->errEQP6117(signal.appSignalID(), signal.electricHighLimit(), lowLimit, highLimit, meu.key(signal.electricUnit()), 4);
+			m_log->errEQP6117(signal.appSignalID(), signal.electricHighLimit(), lowLimit, highLimit,
+							  E::valueToString(signal.electricUnit()), 4);
 
 			return false;
 		}
@@ -464,8 +465,6 @@ namespace Builder
 		{
 			return false;
 		}
-
-		QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
 
 		if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false || signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
 		{
@@ -504,7 +503,8 @@ namespace Builder
 		{
 			// Signal %1 - low engineering limit mismatch low electrical limit: %2 %4, set low electrical Limit: %3 %4.
 			//
-			m_log->errEQP6112(signal.appSignalID(), signal.electricLowLimit(), lowElectricVal, meu.key(signal.electricUnit()), 4);
+			m_log->errEQP6112(signal.appSignalID(), signal.electricLowLimit(), lowElectricVal,
+							  E::valueToString(signal.electricUnit()), 4);
 			return false;
 		}
 
@@ -512,7 +512,8 @@ namespace Builder
 		{
 			// Signal %1 - high engineering limit mismatch high electrical limit: %2 %4, set high electrical Limit: %3 %4.
 			//
-			m_log->errEQP6113(signal.appSignalID(), signal.electricHighLimit(), highElectricVal, meu.key(signal.electricUnit()), 4);
+			m_log->errEQP6113(signal.appSignalID(), signal.electricHighLimit(), highElectricVal,
+							  E::valueToString(signal.electricUnit()), 4);
 			return false;
 		}
 
@@ -548,12 +549,15 @@ namespace Builder
 			return true;
 		}
 
-        if (signal.sensorType() != E::SensorType::V_0_5 &&
+/*        if (signal.sensorType() != E::SensorType::V_0_5 &&
             signal.sensorType() != E::SensorType::V_m10_p10 &&
             signal.sensorType() != E::SensorType::NoSensor)
         {
+			// Signal %1 has wrong SensorType %2.
+			//
+			m_log->errEQP6102(signal.appSignalID(), signal.sensorType());
             return false;
-        }
+		}*/
 
 		if (signal.isSpecPropExists(AppSignalPropNames::RLOAD_OHM) == false)
 		{
@@ -561,7 +565,7 @@ namespace Builder
 		}
 		else
 		{
-			if (signal.rload_Ohm() < RLOAD_OHM_LOW_LIMIT || signal.rload_Ohm() > RLOAD_OHM_HIGH_LIMIT)
+			if (UnitsConvertor::rloadIsValid(signal.rload_Ohm()) == false)
 			{
 				// Signal %1 has wrong RLoad (mA).
 				//
@@ -570,16 +574,15 @@ namespace Builder
 			}
 		}
 
-		UnitsConvertor uc;
+		SignalElectricLimit electricLimit = UnitsConvertor::getElectricLimit(signal.electricUnit(), signal.sensorType());
 
-		SignalElectricLimit electricLimit = uc.getElectricLimit(signal.electricUnit(), signal.sensorType());
 		if(electricLimit.isValid() == false)
 		{
 			return false;
 		}
 
-		double lowLimit = electricLimit.lowLimit  / signal.rload_Ohm() * RLOAD_OHM_HIGH_LIMIT;
-		double highLimit = electricLimit.highLimit / signal.rload_Ohm() * RLOAD_OHM_HIGH_LIMIT;
+		double lowLimit = electricLimit.lowLimit / signal.rload_Ohm() * UnitsConvertor::RLOAD_OHM_HIGH_LIMIT;
+		double highLimit = electricLimit.highLimit / signal.rload_Ohm() * UnitsConvertor::RLOAD_OHM_HIGH_LIMIT;
 
 		if (testElectricLimit(signal, lowLimit, highLimit) == false)
 		{
@@ -670,14 +673,11 @@ namespace Builder
 
 		E::SensorType sensorType = signal.sensorType();
 
-
-		UnitsConvertor uc;
-
-		double r0 = uc.r0_from_signal(signal);
+		double r0 = UnitsConvertor::r0_from_signal(signal);
 
 		if (sensorType != E::SensorType::NoSensor && sensorType != E::SensorType::Ohm_Raw)
 		{
-			if (r0 < R0_OHM_LOW_LIMIT || r0 > R0_OHM_HIGH_LIMIT)
+			if (UnitsConvertor::r0_OhmIsValid(r0) == false)
 			{
 				// Signal %1 has wrong R0 (ThermoResistor)
 				//
@@ -686,7 +686,8 @@ namespace Builder
 			}
 		}
 
-		SignalElectricLimit electricLimit = uc.getElectricLimit(signal.electricUnit(), signal.sensorType());
+		SignalElectricLimit electricLimit = UnitsConvertor::getElectricLimit(signal.electricUnit(), signal.sensorType());
+
 		if(electricLimit.isValid() == false)
 		{
 			return false;
@@ -744,8 +745,12 @@ namespace Builder
 		}
 		else
 		{
-			if (signal.sensorType() != E::SensorType::V_0_5 && signal.sensorType() != E::SensorType::V_m10_p10)
+			if (signal.sensorType() != E::SensorType::V_0_5 &&
+				signal.sensorType() != E::SensorType::V_m10_p10)
 			{
+				// Signal %1 has wrong SensorType %2.
+				//
+				m_log->errEQP6102(signal.appSignalID(), signal.sensorType());
 				return false;
 			}
 		}
@@ -798,6 +803,9 @@ namespace Builder
 		{
 			if (signal.sensorType() != E::SensorType::uA_m20_p20)
 			{
+				// Signal %1 has wrong SensorType %2.
+				//
+				m_log->errEQP6102(signal.appSignalID(), signal.sensorType());
 				return false;
 			}
 		}
@@ -850,6 +858,9 @@ namespace Builder
 		{
 			if (signal.sensorType() != E::SensorType::Hz_005_50000)
 			{
+				// Signal %1 has wrong SensorType %2.
+				//
+				m_log->errEQP6102(signal.appSignalID(), signal.sensorType());
 				return false;
 			}
 		}

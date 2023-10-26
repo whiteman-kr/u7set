@@ -6,7 +6,6 @@
 
 namespace Builder
 {
-
 	class MetrologyCfgGenerator : public SoftwareCfgGenerator
 	{
 	public:

@@ -1,5 +1,4 @@
-#ifndef DIALOGCALCULATOR_H
-#define DIALOGCALCULATOR_H
+#pragma once
 
 #include <QObject>
 #include <QDialog>
@@ -116,8 +115,6 @@ private:
 	void			conversionDr();
 
 private slots:
-
-
 	void			onLinRadio() { conversionLin(); }
 	void			onLinValue(QString) { conversionLin(); }
 
@@ -135,7 +132,3 @@ private slots:
 	void			onDrRadio() { conversionDr(); }
 	void			onDrValue(QString) { conversionDr(); }
 };
-
-// ==============================================================================================
-
-#endif // DIALOGCALCULATOR_H

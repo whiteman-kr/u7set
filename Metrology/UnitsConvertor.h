@@ -4,104 +4,6 @@
 #include "../CommonLib/Types.h"
 
 // ==============================================================================================
-//
-struct SignalElectricLimit
-{
-	bool isValid();
-
-	double lowLimit = 0;
-	double highLimit = 0;
-
-	E::ElectricUnit unit = E::ElectricUnit::NoUnit;
-	E::SensorType sensorType = E::SensorType::NoSensor;
-};
-
-const SignalElectricLimit SignalElectricLimits[] =
-{
-	// V
-	//
-	{   0,		5.1,	E::ElectricUnit::V,		E::SensorType::V_0_5,				},						// module AIM
-	{ -11,		11,		E::ElectricUnit::V,		E::SensorType::V_m10_p10,			},						// module MAI and WAIM
-
-	// mA
-	//
-	{   0,		5.1,	E::ElectricUnit::mA,	E::SensorType::V_0_5,				},						// module AIM from Rload
-	{ -12,		12,		E::ElectricUnit::mA,	E::SensorType::V_m10_p10,			},						// module MAI from Rload
-
-	// micro A
-	//
-	{   -20,	20,		E::ElectricUnit::uA,	E::SensorType::uA_m20_p20,			},						// module MAIM
-
-	// Ohm - types of thermistors																			// all ohm electric limits and tables for R0=100
-	//
-	{ 17.24,	395.16,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt50_W1391,		},	// -200 .. 850		// non ptaform module from R0=50
-	{ 17.24,	395.16,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt100_W1391,		},	// -200 .. 850		// non ptaform module from R0=100
-	{ 18.52,	390.48,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt50_W1385,		},	// -200 .. 850		// non ptaform module from R0=50
-	{ 18.52,	390.48,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt100_W1385,		},	// -200 .. 850		// non ptaform module from R0=100
-
-	{ 20.53,	185.60,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu50_W1428,		},	// -180 .. 200		// non ptaform module from R0=50
-	{ 20.53,	185.60,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu100_W1428,		},	// -180 .. 200		// non ptaform module from R0=100
-	{ 78.70,	185.20,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu50_W1426,		},	//  -50 .. 200		// non ptaform module from R0=50
-	{ 78.70,	185.20,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu100_W1426,		},	//  -50 .. 200		// non ptaform module from R0=100
-
-	{ 17.24,	395.16,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt_a_391,		},	// -200 .. 850		// module MAI and RIM from R0
-	{ 18.52,	390.48,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt_a_385,		},	// -200 .. 850		// module MAI and RIM from R0
-	{ 20.53,	185.60,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu_a_428,		},	// -180 .. 200		// module MAI and RIM from R0
-	{ 78.70,	185.20,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu_a_426,		},	//  -50 .. 200		// module MAI and RIM from R0
-	{ 64.83,	223.21,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Ni_a_617,		},	//  -70 .. 180		// module MAI and RIM from R0
-
-	{ 17.28,	283.80,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt21,			},	// -200 .. 500		// module MAI and non ptaform module from R0=100
-	{ 78.70,	176.68,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu23,			},	//  -50 .. 180		// module MAI and non ptaform module from R0=100
-
-	{  0.00,	 10000,	E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Raw,				},						// module MAI and RIM
-
-	// mV - types of thermocouple
-	//
-	{ -5.891,	52.410,	E::ElectricUnit::mV,	E::SensorType::mV_K_TXA,			},	// -200 .. 1300		// module non ptaform
-	{ -9.488,	66.466,	E::ElectricUnit::mV,	E::SensorType::mV_L_TXK,			},	// -200 .. 800		// module non ptaform
-	{ -4.345,	47.513,	E::ElectricUnit::mV,	E::SensorType::mV_N_THH,			},	// -270 .. 1300		// module non ptaform
-
-	{  0.000,	13.763,	E::ElectricUnit::mV,	E::SensorType::mV_Type_B,			},	//    0 .. 1815		// module TIM (-+5 C) and MAI
-	{ -8.696,	75.997,	E::ElectricUnit::mV,	E::SensorType::mV_Type_E,			},	// -195 .. 995		// module TIM (-+5 C) and MAI
-	{ -7.996,	69.267,	E::ElectricUnit::mV,	E::SensorType::mV_Type_J,			},	// -205 .. 1195		// module TIM (-+5 C) and MAI
-	{ -5.813,	54.717,	E::ElectricUnit::mV,	E::SensorType::mV_Type_K,			},	// -195 .. 1367		// module TIM (-+5 C) and MAI
-	{ -3.939,	47.333,	E::ElectricUnit::mV,	E::SensorType::mV_Type_N,			},	// -195 .. 1295		// module TIM (-+5 C) and MAI
-	{ -0.226,	21.040,	E::ElectricUnit::mV,	E::SensorType::mV_Type_R,			},	//  -50 .. 1763		// module TIM (-+5 C) and MAI
-	{ -0.236,	18.641,	E::ElectricUnit::mV,	E::SensorType::mV_Type_S,			},	//  -50 .. 1763		// module TIM (-+5 C) and MAI
-	{ -5.523,	20.872,	E::ElectricUnit::mV,	E::SensorType::mV_Type_T,			},	// -195 .. 400		// module TIM (-+5 C) and MAI
-	{ -9.488,	66.466,	E::ElectricUnit::mV,	E::SensorType::mV_Type_L,			},	// -200 .. 800		// module MAI
-	{ -6.154,	 4.722,	E::ElectricUnit::mV,	E::SensorType::mV_Type_M,			},	// -200 .. 100		// module MAI
-
-
-	{ -35.000,	100.00,	E::ElectricUnit::mV,	E::SensorType::mV_Raw_Mul_8,		},						// module TIM
-	{ -8.500,	19.000,	E::ElectricUnit::mV,	E::SensorType::mV_Raw_Mul_32,		},						// module TIM
-	{ -1200,	1200,	E::ElectricUnit::mV,	E::SensorType::mV_Raw_m1200_p1200,	},						// module MAI
-
-	// Hz
-	//
-	{  0.05,	50000,	E::ElectricUnit::Hz,	E::SensorType::Hz_005_50000,		},						// module FIM
-};
-
-const int SignalElectricLimitCount = sizeof(SignalElectricLimits) / sizeof(SignalElectricLimits[0]);
-
-// ==============================================================================================
-
-// limits for Rload_Ohm if AIM use units mA
-//
-const double RLOAD_OHM_LOW_LIMIT = 10;																		// module AIM and Rload
-const double RLOAD_OHM_HIGH_LIMIT = 1000;																	// module AIM and Rload
-
-// limits for R0_Ohm of MAI
-//
-const double R0_OHM_LOW_LIMIT = 1;																			// module MAI and R0
-const double R0_OHM_HIGH_LIMIT = 2000;																		// module MAI and R0
-
-// limits for output signals of module AOM
-//
-const double OUT_PH_LOW_LIMIT = 0;																			// module AOM
-const double OUT_PH_HIGH_LIMIT = 65535;																		// module AOM
-
-// ==============================================================================================
 // class UnitsConvertResult
 //
 
@@ -189,12 +91,113 @@ enum class ConversionDirection
 Q_DECLARE_METATYPE(ConversionDirection)
 
 // ==============================================================================================
+
+struct SignalElectricLimit
+{
+	bool isValid() const;
+
+	E::ElectricUnit unit = E::ElectricUnit::NoUnit;
+	E::SensorType sensorType = E::SensorType::NoSensor;
+
+	double lowLimit = 0;
+	double highLimit = 0;
+};
+
+#define ELECTRIC_LIMIT(electricUnit, sensorType, lowLimit, highLimit) \
+					{ \
+						{ E::ElectricUnit::##electricUnit, E::SensorType::##sensorType },	\
+						{ E::ElectricUnit::##electricUnit, E::SensorType::##sensorType, lowLimit, highLimit } 	\
+					}
+
+// ==============================================================================================
 // class UnitsConvertor
 //
 
 class UnitsConvertor : public QObject
 {
 	Q_OBJECT
+
+	inline static const std::map<std::pair<E::ElectricUnit, E::SensorType>, SignalElectricLimit> m_electricLimits =
+	{
+		// V
+		//
+		ELECTRIC_LIMIT(V,	V_0_5,				0,			5.1),		// module AIM
+		ELECTRIC_LIMIT(V,	V_m10_p10,			-11,		11),		// module MAI and WAIM
+
+		// mA
+		//
+		ELECTRIC_LIMIT(mA,	V_0_5,				0,			5.1),		// module AIM from Rload
+		ELECTRIC_LIMIT(mA,	V_m10_p10,			-12,		12),		// module MAI from Rload
+
+		// micro A
+		//
+		ELECTRIC_LIMIT(uA,	uA_m20_p20,			-20,		20),		// module MAIM
+
+		// Ohm - types of thermistors									// all ohm electric limits and tables for R0=100
+		//
+		ELECTRIC_LIMIT(Ohm,	Ohm_Pt50_W1391,		17.24,		395.16),	// -200 .. 850		// non platform module from R0=50
+		ELECTRIC_LIMIT(Ohm,	Ohm_Pt100_W1391,	17.24,		395.16),	// -200 .. 850		// non platform module from R0=100
+		ELECTRIC_LIMIT(Ohm,	Ohm_Pt50_W1385,		18.52,		390.48),	// -200 .. 850		// non platform module from R0=50
+		ELECTRIC_LIMIT(Ohm,	Ohm_Pt100_W1385,	18.52,		390.48),	// -200 .. 850		// non platform module from R0=100
+
+		ELECTRIC_LIMIT(Ohm,	Ohm_Cu50_W1428,		20.53,		185.60),	// -180 .. 200		// non platform module from R0=50
+		ELECTRIC_LIMIT(Ohm,	Ohm_Cu100_W1428,	20.53,		185.60),	// -180 .. 200		// non platform module from R0=100
+		ELECTRIC_LIMIT(Ohm,	Ohm_Cu50_W1426,		78.70,		185.20),	//  -50 .. 200		// non platform module from R0=50
+		ELECTRIC_LIMIT(Ohm,	Ohm_Cu100_W1426,	78.70,		185.20),	//  -50 .. 200		// non platform module from R0=100
+
+		ELECTRIC_LIMIT(Ohm,	Ohm_Pt_a_391,		17.24,		395.16),	// -200 .. 850		// module MAI and RIM from R0
+		ELECTRIC_LIMIT(Ohm,	Ohm_Pt_a_385,		18.52,		390.48),	// -200 .. 850		// module MAI and RIM from R0
+		ELECTRIC_LIMIT(Ohm,	Ohm_Cu_a_428,		20.53,		185.60),	// -180 .. 200		// module MAI and RIM from R0
+		ELECTRIC_LIMIT(Ohm,	Ohm_Cu_a_426,		78.70,		185.20),	//  -50 .. 200		// module MAI and RIM from R0
+		ELECTRIC_LIMIT(Ohm,	Ohm_Ni_a_617,		64.83,		223.21),	//  -70 .. 180		// module MAI and RIM from R0
+
+		ELECTRIC_LIMIT(Ohm,	Ohm_Pt21,			17.28,		283.80),	// -200 .. 500		// module MAI and non platform module from R0=100
+		ELECTRIC_LIMIT(Ohm,	Ohm_Cu23,			78.70,		176.68),	//  -50 .. 180		// module MAI and non platform module from R0=100
+
+		ELECTRIC_LIMIT(Ohm,	Ohm_Raw,			0.00,		10000),		// module MAI and RIM
+
+		// mV - types of thermocouple
+		//
+		ELECTRIC_LIMIT(mV,	mV_K_TXA,			-5.891,		52.410),	// -200 .. 1300		// module non platform
+		ELECTRIC_LIMIT(mV,	mV_L_TXK,			-9.488,		66.466),	// -200 .. 800		// module non platform
+		ELECTRIC_LIMIT(mV,	mV_N_THH,			-4.345,		47.513),	// -270 .. 1300		// module non platform
+
+		ELECTRIC_LIMIT(mV,	mV_Type_B,			0.000,		13.763),	//    0 .. 1815		// module TIM (-+5 C) and MAI
+		ELECTRIC_LIMIT(mV,	mV_Type_E,			-8.696,		75.997),	// -195 .. 995		// module TIM (-+5 C) and MAI
+		ELECTRIC_LIMIT(mV,	mV_Type_J,			-7.996,		69.267),	// -205 .. 1195		// module TIM (-+5 C) and MAI
+		ELECTRIC_LIMIT(mV,	mV_Type_K,			-5.813,		54.717),	// -195 .. 1367		// module TIM (-+5 C) and MAI
+		ELECTRIC_LIMIT(mV,	mV_Type_N,			-3.939,		47.333),	// -195 .. 1295		// module TIM (-+5 C) and MAI
+		ELECTRIC_LIMIT(mV,	mV_Type_R,			-0.226,		21.040),	//  -50 .. 1763		// module TIM (-+5 C) and MAI
+		ELECTRIC_LIMIT(mV,	mV_Type_S,			-0.236,		18.641),	//  -50 .. 1763		// module TIM (-+5 C) and MAI
+		ELECTRIC_LIMIT(mV,	mV_Type_T,			-5.523,		20.872),	// -195 .. 400		// module TIM (-+5 C) and MAI
+		ELECTRIC_LIMIT(mV,	mV_Type_L,			-9.488,		66.466),	// -200 .. 800		// module MAI
+		ELECTRIC_LIMIT(mV,	mV_Type_M,			-6.154,		4.722),		// -200 .. 100		// module MAI
+
+		ELECTRIC_LIMIT(mV,	mV_Raw_Mul_8,		-35.000,	100.00),	// module TIM
+		ELECTRIC_LIMIT(mV,	mV_Raw_Mul_32,		-8.500,		19.000),	// module TIM
+		ELECTRIC_LIMIT(mV,	mV_Raw_m1200_p1200,	-1200,		1200),		// module MAI
+
+		// Hz
+		//
+		ELECTRIC_LIMIT(Hz,	Hz_005_50000,		0.05,	50000),			// module FIM
+	};
+
+	// limits for R0_Ohm of MAI
+	//
+	inline static const double R0_OHM_LOW_LIMIT = 1;
+	inline static const double R0_OHM_HIGH_LIMIT = 2000;
+
+	// limits for output signals of module AOM
+	//
+	inline static const double OUT_PH_LOW_LIMIT = 0;
+	inline static const double OUT_PH_HIGH_LIMIT = 65535;
+
+public:
+
+	// limits for Rload_Ohm if AIM use units mA
+	//
+	inline static const double RLOAD_OHM_LOW_LIMIT = 10;
+	inline static const double RLOAD_OHM_HIGH_LIMIT = 1000;
 
 public:
 
@@ -210,12 +213,24 @@ public:
 
 	Q_INVOKABLE double conversionByConnection(double val, int connectionType, const AppSignal& sourSignal, const AppSignal& destSignal, ConversionDirection directType);		// conversion for Metrology connections, return converted value
 
-	double r0_from_signal(const AppSignal& signal);																																// for signals of module MAI and RIM
-	bool r0_is_use(E::SensorType sensorType);																																	// for signals of module MAI and RIM
-	double default_r0(E::SensorType sensorType);																																// for signals of module MAI and RIM
+	static double r0_from_signal(const AppSignal& signal);																																// for signals of module MAI and RIM
+	static bool r0_is_use(E::SensorType sensorType);																																	// for signals of module MAI and RIM
+	static double default_r0(E::SensorType sensorType);																																// for signals of module MAI and RIM
 
-	SignalElectricLimit getElectricLimit(int unitID, int sensorType);																											// take limit by unit and sensorType
-	UnitsConvertResult electricLimitIsValid(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType, double r0 = 0);						// test electrical value - out of electrical range?
+	static SignalElectricLimit getElectricLimit(E::ElectricUnit unit, E::SensorType sensorType);
+
+	// test electrical value - out of electrical range?
+	//
+	static UnitsConvertResult electricLimitIsValid(double elVal, double electricLowLimit, double electricHighLimit,
+											E::ElectricUnit unitID, E::SensorType sensorType, double r0 = 0);
+	static UnitsConvertResult electricLimitIsValid(double elVal, double electricLowLimit, double electricHighLimit,
+											int unitID, int sensorType, double r0 = 0);
+
+	static bool rloadIsValid(double rload);
+	static bool r0_OhmIsValid(double r0_Ohm);
+
+	static QString electricUnitName(E::ElectricUnit unit);
+	static QString sensorTypeName(E::SensorType sensorType);
 
 	Q_INVOKABLE UnitsConvertResult electricToPhysical_Input(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType, double rload);			// get physical value for blocks of input signals			- module AIM, WAIM, MAIM, FIM
 	Q_INVOKABLE UnitsConvertResult electricToPhysical_ThermoCouple(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType);				// get physical value for blocks of thermocouple signals	- module TIM
@@ -225,6 +240,4 @@ public:
 	Q_INVOKABLE QString electricUnitName(int electricUnit) const;
 	Q_INVOKABLE QString sensorTypeName(int sensorType) const;
 };
-
-// ==============================================================================================
 
