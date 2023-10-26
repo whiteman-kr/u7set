@@ -140,18 +140,6 @@ function generate_aimsr(confFirmware, module, LMNumber, frame, log, signalSet, o
 				log.errCFG3013("HighValidRange", signal.highValidRange(), compareEqual, "LowValidRange", signal.lowValidRange(), signal.decimalPlaces(), signalStrId);
 				return false;
 			}
-			if (highEngineeringUnits > lowEngineeringUnits && signal.highValidRange() < signal.lowValidRange())
-			{
-				// error
-				log.errCFG3013("HighValidRange", signal.highValidRange(), compareLess, "LowValidRange", signal.lowValidRange(), signal.decimalPlaces(), signalStrId);
-				return false;
-			}
-			if (highEngineeringUnits < lowEngineeringUnits && signal.highValidRange() > signal.lowValidRange())
-			{
-				// error
-				log.errCFG3013("HighValidRange", signal.highValidRange(), compareMore, "LowValidRange", signal.lowValidRange(), signal.decimalPlaces(), signalStrId);
-				return false;
-			}
 	
 			// Get signals properties
 			
