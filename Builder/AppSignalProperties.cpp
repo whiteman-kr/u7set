@@ -314,7 +314,7 @@ void AppSignalProperties::initProperties(bool savePropertyDescription)
 
 	dataSizeProperty->setCategory(categoryDataFormat);
 
-	auto byteOrderProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(E::ByteOrder, AppSignalPropNames::BYTE_ORDER, true, AppSignal::byteOrder, AppSignal::setByteOrder, m_signal);
+	auto byteOrderProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(E::ByteOrder, AppSignalPropNames::BYTE_ORDER_PROP, true, AppSignal::byteOrder, AppSignal::setByteOrder, m_signal);
 	byteOrderProperty->setCategory(categoryDataFormat);
 
 

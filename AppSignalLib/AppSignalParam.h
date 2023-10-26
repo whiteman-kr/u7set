@@ -233,6 +233,7 @@ public:
 
 	[[nodiscard]] bool isAnalog() const;
 	[[nodiscard]] bool isDiscrete() const;
+	[[nodiscard]] bool isBus() const;
 	[[nodiscard]] E::SignalType type() const;
 	void setType(E::SignalType value);
 

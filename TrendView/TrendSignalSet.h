@@ -120,7 +120,7 @@ namespace TrendLib
 
 		void clear(E::TimeType timeType);
 
-		/// Clear all rahive data where request was not processed yet or there is not data.
+		/// Clear all archive data where request was not processed yet or there is not data.
 		/// This function is used when the new configuration is arriving, so the request can be sent again
 		///
 		void clearArchiveWithouthRecord();

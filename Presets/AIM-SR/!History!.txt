@@ -1,0 +1,5 @@
+AIM_SR
+	21.08.2023	Version: 1	AIM-SR_v1.u7devp		Engineering units scale can be reversed
+	23.10.2023	Version: 2	AIM-SR_v2.u7devp		Valid Range can be inversed compared to Engineering units
+	26.10.2023	Version: 3	AIM-SR_v3.u7devp		Added new property SensorRange, SensorType is set to 0=Linear
+

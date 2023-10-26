@@ -88,6 +88,8 @@ private:
 	QLabel* m_statusBarQueueSizeLabel = nullptr;
 	QLabel* m_statusBarNetworkRequestsLabel = nullptr;
 	QLabel* m_statusBarConnectionStateLabel = nullptr;
+
+	QElapsedTimer m_realtimeUpdateTimer;
 };
 
 #endif // MONITORTRENDS_H

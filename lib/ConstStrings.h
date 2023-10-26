@@ -578,7 +578,7 @@ namespace AppSignalPropNames
 	inline const QString APERTURE_TYPE("ApertureType");
 	inline const QString FILTERING_TIME("FilteringTime");
 	inline const QString SPREAD_TOLERANCE("SpreadTolerance");
-	inline const QString BYTE_ORDER("ByteOrder");
+	inline const QString BYTE_ORDER_PROP("ByteOrder");
 	inline const QString EQUIPMENT_ID("EquipmentID");
 
 	inline const QString ENABLE_TUNING("EnableTuning");
