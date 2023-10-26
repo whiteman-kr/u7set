@@ -164,6 +164,11 @@ bool AppSignalParam::isDiscrete() const
 	return m_data->m_signalType == E::SignalType::Discrete;
 }
 
+bool AppSignalParam::isBus() const
+{
+	return m_data->m_signalType == E::SignalType::Bus;
+}
+
 E::SignalType AppSignalParam::type() const
 {
 	return m_data->m_signalType;

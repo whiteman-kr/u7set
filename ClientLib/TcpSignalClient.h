@@ -85,6 +85,7 @@ namespace ClientLib
 		bool signalStatesLoaded() const;
 
 	private:
+		void reset();
 		void checkTimeDiscrepancy(qint64 serverUtcTimeMs, qint64 serverLocalTimeMs);
 
 	private:
@@ -103,6 +104,7 @@ namespace ClientLib
 		::Network::GetSignalListNextReply m_getSignalListNextReply;
 
 		std::vector<Hash> m_signalList;
+		std::set<Hash> m_busSignalHashes;		// Bus signal hash set. These hashes are later removed from m_signalList
 		std::set<Hash> m_signalStatesSet;		// Signal hash is added here when signal state is received
 
 		::Network::GetAppSignalParamRequest m_getSignalParamRequest;

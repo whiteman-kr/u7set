@@ -132,11 +132,7 @@ namespace ClientLib
 	{
 		QThread::msleep(RequestTimeIntervalMs);
 
-		m_signalList.clear();
-		m_signalParamsLoaded.store(false);
-
-		m_signalStatesSet.clear();
-		m_signalStatesLoaded.store(false);
+		reset();
 
 		m_lastSignalParamStartIndex = 0;
 		m_lastSignalStateStartIndex = 0;
@@ -222,11 +218,7 @@ namespace ClientLib
 			Q_ASSERT(m_getSignalListStartReply.totalitemcount() == 0);
 			Q_ASSERT(m_getSignalListStartReply.partcount() == 0);
 
-			m_signalList.clear();
-			m_signalParamsLoaded.store(false);
-
-			m_signalStatesSet.clear();
-			m_signalStatesLoaded.store(false);
+			reset();
 
 			// request params
 			//
@@ -234,12 +226,8 @@ namespace ClientLib
 			return;
 		}
 
-		m_signalList.clear();
+		reset();
 		m_signalList.reserve(m_getSignalListStartReply.totalitemcount());
-		m_signalParamsLoaded.store(false);
-
-		m_signalStatesSet.clear();
-		m_signalStatesLoaded.store(false);
 
 		requestSignalListNext(0);
 
@@ -354,6 +342,15 @@ namespace ClientLib
 			//
 			m_signalParamsLoaded.store(true);
 
+			// Clear bus signals hashes from total hashes list
+			//
+			for (const Hash& busHash : m_busSignalHashes)
+			{
+				std::erase_if(m_signalList, [busHash](Hash hash) {
+								   return hash == busHash;
+					});
+			}
+
 			resetToGetState(true);	// END OF RECEIVING SIGNALS PARAMS,
 			// Here the new loop starts!!!
 			return;
@@ -410,6 +407,12 @@ namespace ClientLib
 				Q_ASSERT(s.appSignalId().isEmpty() == false);
 
 				appSignals.pop_back();
+				continue;
+			}
+
+			if (s.isBus() == true)
+			{
+				m_busSignalHashes.insert(s.hash());
 			}
 		}
 
@@ -590,6 +593,16 @@ namespace ClientLib
 	bool TcpSignalClient::signalStatesLoaded() const
 	{
 		return m_signalStatesLoaded.load();
+	}
+
+	void TcpSignalClient::reset()
+	{
+		m_signalList.clear();
+		m_busSignalHashes.clear();
+		m_signalStatesSet.clear();
+
+		m_signalParamsLoaded.store(false);
+		m_signalStatesLoaded.store(false);
 	}
 
 	void TcpSignalClient::checkTimeDiscrepancy(qint64 serverUtcTimeMs, qint64 serverLocalTimeMs)
