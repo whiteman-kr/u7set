@@ -1,5 +1,5 @@
 #include "MeasureBase.h"
-#include "UnitsConvertor.h"
+#include "UnitsConverter.h"
 #include "Database.h"
 #include "Options.h"
 
@@ -1270,7 +1270,7 @@ namespace Measure
 			return;
 		}
 
-		UnitsConvertor uc;
+		UnitsConverter uc;
 
 		//
 		//
@@ -1404,7 +1404,7 @@ namespace Measure
 			return;
 		}
 
-		UnitsConvertor uc;
+		UnitsConverter uc;
 
 		//
 		//
@@ -1540,7 +1540,7 @@ namespace Measure
 			return;
 		}
 
-		UnitsConvertor uc;
+		UnitsConverter uc;
 
 		//
 		//
@@ -2395,7 +2395,7 @@ namespace Measure
 			return;
 		}
 
-		UnitsConvertor uc;
+		UnitsConverter uc;
 
 		//
 		//
@@ -2540,7 +2540,7 @@ namespace Measure
 			return;
 		}
 
-		UnitsConvertor uc;
+		UnitsConverter uc;
 
 		//
 		//
@@ -3722,7 +3722,7 @@ double conversionByConnection(double val, const IoSignalParam &ioParam, Conversi
 		return val;
 	}
 
-	UnitsConvertor uc;
+	UnitsConverter uc;
 
 	double retVal = uc.conversionByConnection(val, connectionType, inParam, outParam, directType);
 	return retVal;

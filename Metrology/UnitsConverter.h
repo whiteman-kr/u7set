@@ -109,11 +109,12 @@ struct SignalElectricLimit
 						{ E::ElectricUnit::##electricUnit, E::SensorType::##sensorType, lowLimit, highLimit } 	\
 					}
 
+
 // ==============================================================================================
-// class UnitsConvertor
+// class UnitsConverter
 //
 
-class UnitsConvertor : public QObject
+class UnitsConverter : public QObject
 {
 	Q_OBJECT
 
@@ -201,8 +202,8 @@ public:
 
 public:
 
-	explicit UnitsConvertor(QObject *parent = nullptr);
-	virtual ~UnitsConvertor() override;
+	explicit UnitsConverter(QObject *parent = nullptr);
+	virtual ~UnitsConverter() override;
 
 public:
 

@@ -1521,12 +1521,12 @@ namespace Builder
 
 				if (it == m_ualItemsSignals.end())
 				{
-					auto [newIt, b] = m_ualItemsSignals.emplace(idHash, std::set<const UalItem*>());
+					auto [newIt, b] = m_ualItemsSignals.emplace(idHash, std::set<QUuid>());
 
 					it = newIt;
 				}
 
-				it->second.insert(ualItem);
+				it->second.insert(ualItem->guid());
 			}
 		}
 
@@ -16087,10 +16087,12 @@ namespace Builder
 				continue;
 			}
 
-			const std::set<const UalItem*>& ualItems = it->second;
+			const std::set<QUuid>& ualItemGuids = it->second;
 
-			for(const UalItem* ualItem : ualItems)
+			for(auto const& guid : ualItemGuids)
 			{
+				const UalItem* ualItem = m_ualItems.value(guid, nullptr);
+
 				TEST_PTR_CONTINUE(ualItem);
 
 				// Reserved signal %1 used on schema %2.

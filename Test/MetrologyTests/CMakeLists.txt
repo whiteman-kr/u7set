@@ -18,15 +18,15 @@ add_executable(${TARGET}
 
 	../../Metrology/MetrologyFormula.cpp
 	../../Metrology/MetrologyFormula.h
-	../../Metrology/UnitsConvertor.cpp
-	../../Metrology/UnitsConvertor.h
-	../../Metrology/UnitsConvertorTable.cpp
-	../../Metrology/UnitsConvertorTable.h
+	../../Metrology/UnitsConverter.cpp
+	../../Metrology/UnitsConverter.h
+	../../Metrology/UnitsConverterTable.cpp
+	../../Metrology/UnitsConverterTable.h
 
 	MetrologyFormulaTests.cpp
 	MetrologyFormulaTests.h
-	UnitsConvertorTests.cpp
-	UnitsConvertorTests.h
+	UnitsConverterTests.cpp
+	UnitsConverterTests.h
 )
 
 target_precompile_headers(${TARGET} PRIVATE

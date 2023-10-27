@@ -1,5 +1,5 @@
 #include "MeasureThread.h"
-#include "UnitsConvertor.h"
+#include "UnitsConverter.h"
 #include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -508,7 +508,7 @@ void MeasureThread::measureLinearity()
 		return;
 	}
 
-	UnitsConvertor uc;
+	UnitsConverter uc;
 
 	saveStateTunSignals();
 
@@ -645,7 +645,7 @@ void MeasureThread::measureLinearity()
 
 void MeasureThread::measureCompratorsInSeries()
 {
-	UnitsConvertor uc;
+	UnitsConverter uc;
 
 	for(IoSignalParam& ioParam : m_activeIoParamList)
 	{
@@ -1172,7 +1172,7 @@ void MeasureThread::measureCompratorsInParallel()
 		return;
 	}
 
-	UnitsConvertor uc;
+	UnitsConverter uc;
 
 	// starting from startComparatorIndex
 	//

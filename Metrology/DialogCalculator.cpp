@@ -501,7 +501,7 @@ void DialogCalculator::conversionTr()
 
 	double r0 = m_pTrR0Edit->text().toDouble();
 
-	if (UnitsConvertor::r0_OhmIsValid(r0) == false)
+	if (UnitsConverter::r0_OhmIsValid(r0) == false)
 	{
 		r0 = 100.0;
 	}

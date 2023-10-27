@@ -471,7 +471,7 @@ namespace Builder
 			return false;
 		}
 
-		UnitsConvertor uc;
+		UnitsConverter uc;
 
 		double lowEngineeringLimit = uc.conversion(lowLimit, UnitsConvertType::ElectricToPhysical, signal);
 		double highEngineeringLimit = uc.conversion(highLimit, UnitsConvertType::ElectricToPhysical, signal);
@@ -565,7 +565,7 @@ namespace Builder
 		}
 		else
 		{
-			if (UnitsConvertor::rloadIsValid(signal.rload_Ohm()) == false)
+			if (UnitsConverter::rloadIsValid(signal.rload_Ohm()) == false)
 			{
 				// Signal %1 has wrong RLoad (mA).
 				//
@@ -574,15 +574,15 @@ namespace Builder
 			}
 		}
 
-		SignalElectricLimit electricLimit = UnitsConvertor::getElectricLimit(signal.electricUnit(), signal.sensorType());
+		SignalElectricLimit electricLimit = UnitsConverter::getElectricLimit(signal.electricUnit(), signal.sensorType());
 
 		if(electricLimit.isValid() == false)
 		{
 			return false;
 		}
 
-		double lowLimit = electricLimit.lowLimit / signal.rload_Ohm() * UnitsConvertor::RLOAD_OHM_HIGH_LIMIT;
-		double highLimit = electricLimit.highLimit / signal.rload_Ohm() * UnitsConvertor::RLOAD_OHM_HIGH_LIMIT;
+		double lowLimit = electricLimit.lowLimit / signal.rload_Ohm() * UnitsConverter::RLOAD_OHM_HIGH_LIMIT;
+		double highLimit = electricLimit.highLimit / signal.rload_Ohm() * UnitsConverter::RLOAD_OHM_HIGH_LIMIT;
 
 		if (testElectricLimit(signal, lowLimit, highLimit) == false)
 		{
@@ -621,7 +621,7 @@ namespace Builder
 			return true;
 		}
 
-		UnitsConvertor uc;
+		UnitsConverter uc;
 
 		SignalElectricLimit electricLimit = uc.getElectricLimit(signal.electricUnit(), signal.sensorType());
 		if(electricLimit.isValid() == false)
@@ -673,11 +673,11 @@ namespace Builder
 
 		E::SensorType sensorType = signal.sensorType();
 
-		double r0 = UnitsConvertor::r0_from_signal(signal);
+		double r0 = UnitsConverter::r0_from_signal(signal);
 
 		if (sensorType != E::SensorType::NoSensor && sensorType != E::SensorType::Ohm_Raw)
 		{
-			if (UnitsConvertor::r0_OhmIsValid(r0) == false)
+			if (UnitsConverter::r0_OhmIsValid(r0) == false)
 			{
 				// Signal %1 has wrong R0 (ThermoResistor)
 				//
@@ -686,7 +686,7 @@ namespace Builder
 			}
 		}
 
-		SignalElectricLimit electricLimit = UnitsConvertor::getElectricLimit(signal.electricUnit(), signal.sensorType());
+		SignalElectricLimit electricLimit = UnitsConverter::getElectricLimit(signal.electricUnit(), signal.sensorType());
 
 		if(electricLimit.isValid() == false)
 		{
@@ -755,7 +755,7 @@ namespace Builder
 			}
 		}
 
-		UnitsConvertor uc;
+		UnitsConverter uc;
 
 		SignalElectricLimit electricLimit = uc.getElectricLimit(signal.electricUnit(), signal.sensorType());
 		if(electricLimit.isValid() == false)
@@ -810,7 +810,7 @@ namespace Builder
 			}
 		}
 
-		UnitsConvertor uc;
+		UnitsConverter uc;
 
 		SignalElectricLimit electricLimit = uc.getElectricLimit(signal.electricUnit(), signal.sensorType());
 		if(electricLimit.isValid() == false)
@@ -865,7 +865,7 @@ namespace Builder
 			}
 		}
 
-		UnitsConvertor uc;
+		UnitsConverter uc;
 
 		SignalElectricLimit electricLimit = uc.getElectricLimit(signal.electricUnit(), signal.sensorType());
 		if(electricLimit.isValid() == false)

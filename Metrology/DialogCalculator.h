@@ -12,7 +12,7 @@
 
 #include "../CommonLib/Types.h"
 
-#include "UnitsConvertor.h"
+#include "UnitsConverter.h"
 
 // ==============================================================================================
 
@@ -106,7 +106,7 @@ private:
 
 	QFont*			m_digitFont = nullptr;
 
-	UnitsConvertor	m_uc;
+	UnitsConverter	m_uc;
 
 	void			conversionLin();
 	void			conversionTr();

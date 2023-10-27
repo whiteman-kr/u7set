@@ -38,10 +38,10 @@ qt_add_library(${TARGET} STATIC
 	../Metrology/MetrologyConnection.h
 	../Metrology/MetrologySignal.cpp
 	../Metrology/MetrologySignal.h
-	../Metrology/UnitsConvertor.cpp
-	../Metrology/UnitsConvertor.h
-	../Metrology/UnitsConvertorTable.cpp
-	../Metrology/UnitsConvertorTable.h
+	../Metrology/UnitsConverter.cpp
+	../Metrology/UnitsConverter.h
+	../Metrology/UnitsConverterTable.cpp
+	../Metrology/UnitsConverterTable.h
 	../TuningService/TuningSource.cpp
 	../TuningService/TuningSource.h
 	AppDataServiceCfgGenerator.cpp
