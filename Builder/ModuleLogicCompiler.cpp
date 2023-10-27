@@ -6539,10 +6539,7 @@ namespace Builder
 			{
 				UalAfb* ualAfb = createUalAfb(appItem);
 
-				if (assignUalAfbToFbConv(ualAfb) == false)
-				{
-					return false;
-				}
+				RETURN_IF_FALSE(assignUalAfbToFbConv(ualAfb));
 
 				m_inOutSignalsToScalAppFbMap.insert(s->appSignalID(), ualAfb);
 			}
@@ -6577,7 +6574,7 @@ namespace Builder
 			{
 				UalAfb* ualAfb = createUalAfb(appItem);
 
-				RETURN_IF_FALSE(assignUalAfbToFbConv(ualAfb) == false);
+				RETURN_IF_FALSE(assignUalAfbToFbConv(ualAfb));
 
 				m_inOutSignalsToScalAppFbMap.insert(s->appSignalID(), ualAfb);
 			}
