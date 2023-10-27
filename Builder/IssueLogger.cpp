@@ -6971,14 +6971,14 @@ namespace Builder
 	/// Description:
 	///		Required pin of specified AFB is missing. Contact to RPCT developers.
 	///
-	void IssueLogger::errALC5173(QString signalCaption, QString fbCaption, QUuid itemUuid)
+	void IssueLogger::errALC5173(QString pinCaption, QString fbCaption, QUuid itemUuid)
 	{
 		addItemsIssues(OutputMessageLevel::Error, 5173, itemUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5173,
 				  QString(tr("Required pin %1 of AFB %2 is missing.")).
-				  arg(signalCaption).arg(fbCaption));
+				  arg(pinCaption).arg(fbCaption));
 	}
 
 	/// IssueCode: ALC5174

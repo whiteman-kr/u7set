@@ -3995,13 +3995,13 @@ namespace Builder
 		return false;
 	}
 
-	bool ModuleLogicCompiler::isConnectedToTerminatorOnly(const LogicPin& outPin)
+	bool ModuleLogicCompiler::isConnectedToTerminatorOnly(const LogicPin& outPin) const
 	{
 		const std::vector<QUuid>& connectedPinsUuids = outPin.associatedIOs();
 
 		for(QUuid inPinUuid : connectedPinsUuids)
 		{
-			UalItem* connectedItem = m_pinParent.value(inPinUuid, nullptr);
+			const UalItem* connectedItem = m_pinParent.value(inPinUuid, nullptr);
 
 			TEST_PTR_CONTINUE(connectedItem);
 
@@ -4012,6 +4012,21 @@ namespace Builder
 		}
 
 		return true;
+	}
+
+	bool ModuleLogicCompiler::isOutConnectedToTerminatorOnly(const UalAfb* ualItem) const
+	{
+		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
+
+		const auto& outs = ualItem->outputs();
+
+		if (outs.size() != 1)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		return isConnectedToTerminatorOnly(outs[0]);
 	}
 
 	bool ModuleLogicCompiler::isConnectedToLoopback(const LogicPin& inPin, std::shared_ptr<Loopback>* loopback)
@@ -10063,11 +10078,23 @@ namespace Builder
 			ualAfb->caption() == Afb::AFB_BUS_NOT) &&
 			ualAfb->opcode() == Afb::AFB_NOT_ACC_OPCODE)
 		{
+			if (isOutConnectedToTerminatorOnly(ualAfb) == true)
+			{
+				*result = true;
+				return true;		// report like a "code generated"
+			}
+
 			return generateAfbBitAccNotCode(code, ualAfb, bpStepInfo, result);
 		}
 
 		if (ualAfb->opcode() == TO_INT(Afb::AfbType::LOGIC))
 		{
+			if (isOutConnectedToTerminatorOnly(ualAfb) == true)
+			{
+				*result = true;
+				return true;		// report like a "code generated"
+			}
+
 			if (m_afbOrInstances.contains(ualAfb->instance()))
 			{
 				return generateAfbBitAccOrCode(code, ualAfb, result);

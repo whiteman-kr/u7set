@@ -358,7 +358,8 @@ namespace Builder
 		AppSignal* getCompatibleConnectedBusSignal(const LogicPin& outPin, const QString& busTypeID);
 		bool isCompatible(const LogicAfbSignal& outAfbSignal, const QString& busTypeID, const AppSignal* s);
 
-		bool isConnectedToTerminatorOnly(const LogicPin& outPin);
+		bool isConnectedToTerminatorOnly(const LogicPin& outPin) const;
+		bool isOutConnectedToTerminatorOnly(const UalAfb* ualItem) const;
 		bool isConnectedToLoopback(const LogicPin& inPin, std::shared_ptr<Loopback>* loopback);
 		bool determineOutBusTypeID(UalAfb* ualAfb, QString* outBusTypeID);
 		bool determineBusTypeByInputs(const UalAfb* ualAfb, QString* outBusTypeID);
