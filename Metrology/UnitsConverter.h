@@ -105,8 +105,8 @@ struct SignalElectricLimit
 
 #define ELECTRIC_LIMIT(electricUnit, sensorType, lowLimit, highLimit) \
 					{ \
-						{ E::ElectricUnit::##electricUnit, E::SensorType::##sensorType },	\
-						{ E::ElectricUnit::##electricUnit, E::SensorType::##sensorType, lowLimit, highLimit } 	\
+						{ electricUnit, sensorType },	\
+						{ electricUnit, sensorType, lowLimit, highLimit } 	\
 					}
 
 
@@ -122,65 +122,65 @@ class UnitsConverter : public QObject
 	{
 		// V
 		//
-		ELECTRIC_LIMIT(V,	V_0_5,				0,			5.1),		// module AIM
-		ELECTRIC_LIMIT(V,	V_m10_p10,			-11,		11),		// module MAI and WAIM
+		ELECTRIC_LIMIT(E::ElectricUnit::V,		E::SensorType::V_0_5,				0,			5.1),		// module AIM
+		ELECTRIC_LIMIT(E::ElectricUnit::V,		E::SensorType::V_m10_p10,			-11,		11),		// module MAI and WAIM
 
 		// mA
 		//
-		ELECTRIC_LIMIT(mA,	V_0_5,				0,			5.1),		// module AIM from Rload
-		ELECTRIC_LIMIT(mA,	V_m10_p10,			-12,		12),		// module MAI from Rload
+		ELECTRIC_LIMIT(E::ElectricUnit::mA,		E::SensorType::V_0_5,				0,			5.1),		// module AIM from Rload
+		ELECTRIC_LIMIT(E::ElectricUnit::mA,		E::SensorType::V_m10_p10,			-12,		12),		// module MAI from Rload
 
 		// micro A
 		//
-		ELECTRIC_LIMIT(uA,	uA_m20_p20,			-20,		20),		// module MAIM
+		ELECTRIC_LIMIT(E::ElectricUnit::uA,		E::SensorType::uA_m20_p20,			-20,		20),		// module MAIM
 
 		// Ohm - types of thermistors									// all ohm electric limits and tables for R0=100
 		//
-		ELECTRIC_LIMIT(Ohm,	Ohm_Pt50_W1391,		17.24,		395.16),	// -200 .. 850		// non platform module from R0=50
-		ELECTRIC_LIMIT(Ohm,	Ohm_Pt100_W1391,	17.24,		395.16),	// -200 .. 850		// non platform module from R0=100
-		ELECTRIC_LIMIT(Ohm,	Ohm_Pt50_W1385,		18.52,		390.48),	// -200 .. 850		// non platform module from R0=50
-		ELECTRIC_LIMIT(Ohm,	Ohm_Pt100_W1385,	18.52,		390.48),	// -200 .. 850		// non platform module from R0=100
+		ELECTRIC_LIMIT(E::ElectricUnit::Ohm,	E::SensorType::Ohm_Pt50_W1391,		17.24,		395.16),	// -200 .. 850		// non platform module from R0=50
+		ELECTRIC_LIMIT(E::ElectricUnit::Ohm,	E::SensorType::Ohm_Pt100_W1391,		17.24,		395.16),	// -200 .. 850		// non platform module from R0=100
+		ELECTRIC_LIMIT(E::ElectricUnit::Ohm,	E::SensorType::Ohm_Pt50_W1385,		18.52,		390.48),	// -200 .. 850		// non platform module from R0=50
+		ELECTRIC_LIMIT(E::ElectricUnit::Ohm,	E::SensorType::Ohm_Pt100_W1385,		18.52,		390.48),	// -200 .. 850		// non platform module from R0=100
 
-		ELECTRIC_LIMIT(Ohm,	Ohm_Cu50_W1428,		20.53,		185.60),	// -180 .. 200		// non platform module from R0=50
-		ELECTRIC_LIMIT(Ohm,	Ohm_Cu100_W1428,	20.53,		185.60),	// -180 .. 200		// non platform module from R0=100
-		ELECTRIC_LIMIT(Ohm,	Ohm_Cu50_W1426,		78.70,		185.20),	//  -50 .. 200		// non platform module from R0=50
-		ELECTRIC_LIMIT(Ohm,	Ohm_Cu100_W1426,	78.70,		185.20),	//  -50 .. 200		// non platform module from R0=100
+		ELECTRIC_LIMIT(E::ElectricUnit::Ohm,	E::SensorType::Ohm_Cu50_W1428,		20.53,		185.60),	// -180 .. 200		// non platform module from R0=50
+		ELECTRIC_LIMIT(E::ElectricUnit::Ohm,	E::SensorType::Ohm_Cu100_W1428,		20.53,		185.60),	// -180 .. 200		// non platform module from R0=100
+		ELECTRIC_LIMIT(E::ElectricUnit::Ohm,	E::SensorType::Ohm_Cu50_W1426,		78.70,		185.20),	//  -50 .. 200		// non platform module from R0=50
+		ELECTRIC_LIMIT(E::ElectricUnit::Ohm,	E::SensorType::Ohm_Cu100_W1426,		78.70,		185.20),	//  -50 .. 200		// non platform module from R0=100
 
-		ELECTRIC_LIMIT(Ohm,	Ohm_Pt_a_391,		17.24,		395.16),	// -200 .. 850		// module MAI and RIM from R0
-		ELECTRIC_LIMIT(Ohm,	Ohm_Pt_a_385,		18.52,		390.48),	// -200 .. 850		// module MAI and RIM from R0
-		ELECTRIC_LIMIT(Ohm,	Ohm_Cu_a_428,		20.53,		185.60),	// -180 .. 200		// module MAI and RIM from R0
-		ELECTRIC_LIMIT(Ohm,	Ohm_Cu_a_426,		78.70,		185.20),	//  -50 .. 200		// module MAI and RIM from R0
-		ELECTRIC_LIMIT(Ohm,	Ohm_Ni_a_617,		64.83,		223.21),	//  -70 .. 180		// module MAI and RIM from R0
+		ELECTRIC_LIMIT(E::ElectricUnit::Ohm,	E::SensorType::Ohm_Pt_a_391,		17.24,		395.16),	// -200 .. 850		// module MAI and RIM from R0
+		ELECTRIC_LIMIT(E::ElectricUnit::Ohm,	E::SensorType::Ohm_Pt_a_385,		18.52,		390.48),	// -200 .. 850		// module MAI and RIM from R0
+		ELECTRIC_LIMIT(E::ElectricUnit::Ohm,	E::SensorType::Ohm_Cu_a_428,		20.53,		185.60),	// -180 .. 200		// module MAI and RIM from R0
+		ELECTRIC_LIMIT(E::ElectricUnit::Ohm,	E::SensorType::Ohm_Cu_a_426,		78.70,		185.20),	//  -50 .. 200		// module MAI and RIM from R0
+		ELECTRIC_LIMIT(E::ElectricUnit::Ohm,	E::SensorType::Ohm_Ni_a_617,		64.83,		223.21),	//  -70 .. 180		// module MAI and RIM from R0
 
-		ELECTRIC_LIMIT(Ohm,	Ohm_Pt21,			17.28,		283.80),	// -200 .. 500		// module MAI and non platform module from R0=100
-		ELECTRIC_LIMIT(Ohm,	Ohm_Cu23,			78.70,		176.68),	//  -50 .. 180		// module MAI and non platform module from R0=100
+		ELECTRIC_LIMIT(E::ElectricUnit::Ohm,	E::SensorType::Ohm_Pt21,			17.28,		283.80),	// -200 .. 500		// module MAI and non platform module from R0=100
+		ELECTRIC_LIMIT(E::ElectricUnit::Ohm,	E::SensorType::Ohm_Cu23,			78.70,		176.68),	//  -50 .. 180		// module MAI and non platform module from R0=100
 
-		ELECTRIC_LIMIT(Ohm,	Ohm_Raw,			0.00,		10000),		// module MAI and RIM
+		ELECTRIC_LIMIT(E::ElectricUnit::Ohm,	E::SensorType::Ohm_Raw,				0.00,		10000),		// module MAI and RIM
 
 		// mV - types of thermocouple
 		//
-		ELECTRIC_LIMIT(mV,	mV_K_TXA,			-5.891,		52.410),	// -200 .. 1300		// module non platform
-		ELECTRIC_LIMIT(mV,	mV_L_TXK,			-9.488,		66.466),	// -200 .. 800		// module non platform
-		ELECTRIC_LIMIT(mV,	mV_N_THH,			-4.345,		47.513),	// -270 .. 1300		// module non platform
+		ELECTRIC_LIMIT(E::ElectricUnit::mV,		E::SensorType::mV_K_TXA,			-5.891,		52.410),	// -200 .. 1300		// module non platform
+		ELECTRIC_LIMIT(E::ElectricUnit::mV,		E::SensorType::mV_L_TXK,			-9.488,		66.466),	// -200 .. 800		// module non platform
+		ELECTRIC_LIMIT(E::ElectricUnit::mV,		E::SensorType::mV_N_THH,			-4.345,		47.513),	// -270 .. 1300		// module non platform
 
-		ELECTRIC_LIMIT(mV,	mV_Type_B,			0.000,		13.763),	//    0 .. 1815		// module TIM (-+5 C) and MAI
-		ELECTRIC_LIMIT(mV,	mV_Type_E,			-8.696,		75.997),	// -195 .. 995		// module TIM (-+5 C) and MAI
-		ELECTRIC_LIMIT(mV,	mV_Type_J,			-7.996,		69.267),	// -205 .. 1195		// module TIM (-+5 C) and MAI
-		ELECTRIC_LIMIT(mV,	mV_Type_K,			-5.813,		54.717),	// -195 .. 1367		// module TIM (-+5 C) and MAI
-		ELECTRIC_LIMIT(mV,	mV_Type_N,			-3.939,		47.333),	// -195 .. 1295		// module TIM (-+5 C) and MAI
-		ELECTRIC_LIMIT(mV,	mV_Type_R,			-0.226,		21.040),	//  -50 .. 1763		// module TIM (-+5 C) and MAI
-		ELECTRIC_LIMIT(mV,	mV_Type_S,			-0.236,		18.641),	//  -50 .. 1763		// module TIM (-+5 C) and MAI
-		ELECTRIC_LIMIT(mV,	mV_Type_T,			-5.523,		20.872),	// -195 .. 400		// module TIM (-+5 C) and MAI
-		ELECTRIC_LIMIT(mV,	mV_Type_L,			-9.488,		66.466),	// -200 .. 800		// module MAI
-		ELECTRIC_LIMIT(mV,	mV_Type_M,			-6.154,		4.722),		// -200 .. 100		// module MAI
+		ELECTRIC_LIMIT(E::ElectricUnit::mV,		E::SensorType::mV_Type_B,			0.000,		13.763),	//    0 .. 1815		// module TIM (-+5 C) and MAI
+		ELECTRIC_LIMIT(E::ElectricUnit::mV,		E::SensorType::mV_Type_E,			-8.696,		75.997),	// -195 .. 995		// module TIM (-+5 C) and MAI
+		ELECTRIC_LIMIT(E::ElectricUnit::mV,		E::SensorType::mV_Type_J,			-7.996,		69.267),	// -205 .. 1195		// module TIM (-+5 C) and MAI
+		ELECTRIC_LIMIT(E::ElectricUnit::mV,		E::SensorType::mV_Type_K,			-5.813,		54.717),	// -195 .. 1367		// module TIM (-+5 C) and MAI
+		ELECTRIC_LIMIT(E::ElectricUnit::mV,		E::SensorType::mV_Type_N,			-3.939,		47.333),	// -195 .. 1295		// module TIM (-+5 C) and MAI
+		ELECTRIC_LIMIT(E::ElectricUnit::mV,		E::SensorType::mV_Type_R,			-0.226,		21.040),	//  -50 .. 1763		// module TIM (-+5 C) and MAI
+		ELECTRIC_LIMIT(E::ElectricUnit::mV,		E::SensorType::mV_Type_S,			-0.236,		18.641),	//  -50 .. 1763		// module TIM (-+5 C) and MAI
+		ELECTRIC_LIMIT(E::ElectricUnit::mV,		E::SensorType::mV_Type_T,			-5.523,		20.872),	// -195 .. 400		// module TIM (-+5 C) and MAI
+		ELECTRIC_LIMIT(E::ElectricUnit::mV,		E::SensorType::mV_Type_L,			-9.488,		66.466),	// -200 .. 800		// module MAI
+		ELECTRIC_LIMIT(E::ElectricUnit::mV,		E::SensorType::mV_Type_M,			-6.154,		4.722),		// -200 .. 100		// module MAI
 
-		ELECTRIC_LIMIT(mV,	mV_Raw_Mul_8,		-35.000,	100.00),	// module TIM
-		ELECTRIC_LIMIT(mV,	mV_Raw_Mul_32,		-8.500,		19.000),	// module TIM
-		ELECTRIC_LIMIT(mV,	mV_Raw_m1200_p1200,	-1200,		1200),		// module MAI
+		ELECTRIC_LIMIT(E::ElectricUnit::mV,		E::SensorType::mV_Raw_Mul_8,		-35.000,	100.00),	// module TIM
+		ELECTRIC_LIMIT(E::ElectricUnit::mV,		E::SensorType::mV_Raw_Mul_32,		-8.500,		19.000),	// module TIM
+		ELECTRIC_LIMIT(E::ElectricUnit::mV,		E::SensorType::mV_Raw_m1200_p1200,	-1200,		1200),		// module MAI
 
 		// Hz
 		//
-		ELECTRIC_LIMIT(Hz,	Hz_005_50000,		0.05,	50000),			// module FIM
+		ELECTRIC_LIMIT(E::ElectricUnit::Hz,		E::SensorType::Hz_005_50000,		0.05,	50000),			// module FIM
 	};
 
 	// limits for R0_Ohm of MAI
