@@ -22,6 +22,7 @@ namespace TestSuite
 														const BuildFileInfoArray& files)
 	{
 		ConfigSettings config{};
+		ConfigData configData{};
 
 		config.configInfo = conf;
 		config.appDataServices = settings.appDataServices;
@@ -65,8 +66,7 @@ namespace TestSuite
 
 		// Get script files form CfgService
 		//
-		std::vector<TestScript> scripts;
-		scripts.reserve(config.scriptFiles.size());
+		configData.scripts.reserve(config.scriptFiles.size());
 
 		for (const QString& fileName : config.scriptFiles)
 		{
@@ -83,8 +83,7 @@ namespace TestSuite
 				{
 					QWriteLocker locker(&m_confugurationLock);
 					m_configuration = {};
-					m_scripts.clear();
-					m_templates.clear();
+					m_configData = {};
 				}
 
 				emit configrationError();
@@ -98,7 +97,7 @@ namespace TestSuite
 				shortenFileName.remove(0, 1);
 			}
 			m_logFile.writeMessage("Loaded script file: " + shortenFileName);
-			scripts.emplace_back(shortenFileName, data);
+			configData.scripts.emplace_back(shortenFileName, data);
 		}
 
 		// Get file CfgFileId::TUNING_SIGNALS
@@ -123,8 +122,7 @@ namespace TestSuite
 		}
 
 		QString errorMsg;
-		ReportLib::ReportTemplateStorage templates;
-		if (templates.load(data, &errorMsg) == false)
+		if (configData.reportTemplates.load(data, &errorMsg) == false)
 		{
 			m_logFile.writeError("Failed to load report templates file: ReportTemplates.dat");
 			emit configrationError();
@@ -144,8 +142,7 @@ namespace TestSuite
 			QWriteLocker locker(&m_confugurationLock);
 			config.configurationId = s_configurationIdCounter++;
 			m_configuration = config;		// Cannot move config here as it is used later for `emit configurationArrived(config)`
-			m_scripts = std::move(scripts);
-			m_templates = std::move(templates);
+			m_configData = std::move(configData);
 		}
 
 		// Emit signal to inform everybody about new configuration
@@ -205,15 +202,9 @@ namespace TestSuite
 		return m_configuration.configInfo;
 	}
 
-	std::vector<TestSuite::TestScript> TestSuiteConfigController::scripts() const
+	ConfigData TestSuiteConfigController::configData() const
 	{
 		QReadLocker locker(&m_confugurationLock);
-		return m_scripts;
-	}
-
-	const ReportLib::ReportTemplateStorage& TestSuiteConfigController::reportTemplates() const
-	{
-		QReadLocker locker(&m_confugurationLock);
-		return m_templates;
+		return m_configData;
 	}
 }

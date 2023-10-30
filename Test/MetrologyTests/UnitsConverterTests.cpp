@@ -1,30 +1,30 @@
 #include <QTest>
-#include "UnitsConvertorTests.h"
-#include "../Metrology/UnitsConvertor.h"
+#include "UnitsConverterTests.h"
+#include "../Metrology/UnitsConverter.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
-UnitsConvertorTests::UnitsConvertorTests()
+UnitsConverterTests::UnitsConverterTests()
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void UnitsConvertorTests::initTestCase()
+void UnitsConverterTests::initTestCase()
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void UnitsConvertorTests::cleanupTestCase()
+void UnitsConverterTests::cleanupTestCase()
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void UnitsConvertorTests::test_ConversionLinearity()
+void UnitsConverterTests::test_ConversionLinearity()
 {
-	UnitsConvertor uc;
+	UnitsConverter uc;
 	double val = 0;
 
 	//
@@ -38,9 +38,9 @@ void UnitsConvertorTests::test_ConversionLinearity()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void UnitsConvertorTests::test_ConversionDegree_mV()
+void UnitsConverterTests::test_ConversionDegree_mV()
 {
-	UnitsConvertor uc;
+	UnitsConverter uc;
 	double val = 0;
 
 	//
@@ -128,9 +128,9 @@ void UnitsConvertorTests::test_ConversionDegree_mV()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void UnitsConvertorTests::test_ConversionDegree_Ohm()
+void UnitsConverterTests::test_ConversionDegree_Ohm()
 {
-	UnitsConvertor uc;
+	UnitsConverter uc;
 	double val = 0;
 
 	//
@@ -236,9 +236,9 @@ void UnitsConvertorTests::test_ConversionDegree_Ohm()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void UnitsConvertorTests::test_Celsius_Fahrenheit()
+void UnitsConverterTests::test_Celsius_Fahrenheit()
 {
-	UnitsConvertor uc;
+	UnitsConverter uc;
 	double val = 0;
 
 	//
@@ -252,9 +252,9 @@ void UnitsConvertorTests::test_Celsius_Fahrenheit()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void UnitsConvertorTests::test_electricToPhysical_Input()
+void UnitsConverterTests::test_electricToPhysical_Input()
 {
-	UnitsConvertor uc;
+	UnitsConverter uc;
 	UnitsConvertResult result;
 
 	result = uc.electricToPhysical_Input(2.5, 0, 5, E::ElectricUnit::mA, E::SensorType::V_0_5, 250);
@@ -290,9 +290,9 @@ void UnitsConvertorTests::test_electricToPhysical_Input()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void UnitsConvertorTests::test_electricToPhysical_ThermoCouple()
+void UnitsConverterTests::test_electricToPhysical_ThermoCouple()
 {
-	UnitsConvertor uc;
+	UnitsConverter uc;
 	UnitsConvertResult result;
 
 	result = uc.electricToPhysical_ThermoCouple(4.0960, -5.891, 52.410, E::ElectricUnit::mV, E::SensorType::mV_K_TXA);
@@ -380,9 +380,9 @@ void UnitsConvertorTests::test_electricToPhysical_ThermoCouple()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void UnitsConvertorTests::test_electricToPhysical_ThermoResistor()
+void UnitsConverterTests::test_electricToPhysical_ThermoResistor()
 {
-	UnitsConvertor uc;
+	UnitsConverter uc;
 	UnitsConvertResult result;
 
 	result = uc.electricToPhysical_ThermoResistor(69.5550, 17.24/2,	395.16/2, E::ElectricUnit::Ohm, E::SensorType::Ohm_Pt50_W1391, 50);

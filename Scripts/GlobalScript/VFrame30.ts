@@ -41,8 +41,8 @@ module VFrame30 {
 		// Timer functions
 		//
 		startTimer(intervalMs: number, timerId: string): void;	// Starts or restarts the timer with a timeout of duration intervalMs milliseconds.
-																// intervalMs Timer interval, milliseconds.
-																// timerId Timer identifier, string.
+		// intervalMs Timer interval, milliseconds.
+		// timerId Timer identifier, string.
 		killTimer(timerId: string): void;	// Kills the timer with timer identifier.
 		killAllTimers(): void;				//Kills all active timers for the current schema tab.
 
@@ -56,10 +56,10 @@ module VFrame30 {
 
 		// Message Box functons
 		//
-		warningMessageBox(text: string, details? : string): void;
-		errorMessageBox(text: string, details? : string): void;
-		infoMessageBox(text: string, details? : string): void;
-		questionMessageBox(text: string, details? : string): boolean;
+		warningMessageBox(text: string, details?: string): void;
+		errorMessageBox(text: string, details?: string): void;
+		infoMessageBox(text: string, details?: string): void;
+		questionMessageBox(text: string, details?: string): boolean;
 
 		// Variable functions
 		//
@@ -122,7 +122,7 @@ module VFrame30 {
 		label: string;
 
 		/** Object name.*/
-		objectName: string;	
+		objectName: string;
 
 		/** A script to run before each schema redraw event.*/
 		preDrawScript: string;
@@ -323,6 +323,10 @@ module VFrame30 {
 		widget: LineEditWidget;
 	}
 
+	export interface SchemaItemSlider extends SchemaItemControl {
+		widget: SliderWidget;
+	}
+
 	export interface PushButtonWidget extends QWidget {
 		text: string;
 
@@ -360,4 +364,23 @@ module VFrame30 {
 		toolTipDuration: number;
 	}
 
+	export interface SliderWidget extends QWidget {
+		orientation: Qt.Orientation;
+
+		invertedAppearance: boolean;	/**< This property holds whether or not a slider shows its values inverted.*/
+		invertedControls: boolean; 		/**< This property holds whether or not the slider inverts its wheel and key events.*/
+
+		maximum: number;				/**< This property holds the slider's maximum signed integer value.*/
+		minimum: number;				/**< This property holds the slider's minimum signed integer value.*/
+
+		pageStep: number;				/**< This property holds the page step.*/
+		singleStep: number;				/**< This property holds the single step.*/
+
+		tracking: boolean; 				/**< This property holds whether slider tracking is enabled.*/
+
+		tickInterval: number;			/**< This property holds the interval between tickmarks.*/
+		tickPosition: QSlider.TickPosition;	/**< This property holds the tickmark position for this slider.*/
+
+		value: number;					/**< This property holds the slider's current signed integer value.*/
+	}
 }

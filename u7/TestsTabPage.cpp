@@ -1201,6 +1201,34 @@ void TestsWidget::newFile()
 		templateScript = rcFile.readAll();
 	}
 
+	/* If hadrware(TestSuite) test is created, replace
+	 * var ScriptTags = ["simtest"];
+	 * string to
+	 * var ScriptTags = ["hwtest"];
+	 */
+	{
+		QModelIndexList selectedRows = m_testsTreeView->selectedSourceRows(); // Indexes from source model
+		if (selectedRows.size() != 1)
+		{
+			assert(selectedRows.size() == 1);
+			return;
+		}
+		QString newFilePath;
+		FileTreeModelItem* item = m_testsTreeModel->fileItem(selectedRows[0]);
+		while (item != nullptr)
+		{
+			newFilePath = item->fileName() + '/' + newFilePath;
+			item = item->parent();
+		}
+
+		if (newFilePath.contains("HardwareTests", Qt::CaseInsensitive) == true)
+		{
+			QString tempScript = QString::fromStdString(templateScript.toStdString());
+			tempScript.replace("var ScriptTags = [\"simtest\"];", "var ScriptTags = [\"hwtest\"];");
+			templateScript = tempScript.toUtf8();
+		}
+	}
+
 	// Create file and open it
 	//
 	bool result = m_testsTreeView->newFile(fileName, templateScript);

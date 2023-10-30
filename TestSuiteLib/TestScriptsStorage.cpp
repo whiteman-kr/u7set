@@ -55,6 +55,18 @@ namespace TestSuite
 		return m_scripts;
 	}
 
+	const TestScript* TestScriptsStorage::globalScript() const
+	{
+		for (const auto& ts : m_scripts)
+		{
+			if (ts.isGlobalScript() == true)
+			{
+				return &ts;
+			}
+		}
+		return nullptr;
+	}
+
 	bool TestScriptsStorage::hasScript(Hash hash) const
 	{
 		for (const auto& ts : m_scripts)
@@ -124,9 +136,9 @@ namespace TestSuite
 		return;
 	}
 
-	void TestScriptsStorage::setScripts(std::vector<TestScript>&& scripts)
+	void TestScriptsStorage::setScripts(const std::vector<TestScript>& scripts)
 	{
-		m_scripts = std::move(scripts);
+		m_scripts = scripts;
 	}
 
 	bool TestScriptsStorage::loadFromPath(const QString& path, QString* errorMsg)

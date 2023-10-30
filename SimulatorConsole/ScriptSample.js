@@ -9,12 +9,43 @@
 //
 var SkipOnBuild = false;
 
-// To give a custom caption to the the whole script function, declare a variable that has the same name as 
+// Using script tags, project developer can create multiple instances of TestSuite preset that process different set scripts.
+// ScriptTags variable is a string array that contains a set of tags. Script tags are also specified
+// in ScriptTags property of TestSuite preset. Test scripts are processed by TestSuite if both test and preset script tags match,
+// or if no tags are specified at all.
+// Note: GlobalScript.js file is always processed by every TestSuite.
+
+var ScriptTags = ["simtest"];
+
+// To give a custom caption to the the whole script function, declare a variable that has the same name as
 // the script file name without path and extention and add 'caption' prefix.
 // Custom script caption is displayed in TestSuite user interface and in reports.
 // Example: 'ScriptSample.js' file should have 'captionScriptSample' caption variable name.
 //
 //var captionScriptSample = "Script Sample";
+
+// Optional allow<FileName> function is used to give permission for running tests in current script.
+// To use current script running permission:
+// 1. Uncomment the next function example and replace SCRIPT_FILENAME_NO_EXT fragment with script filename,
+// for example "allowTestScript01" will be used for TestScript01.js script.
+// 2. Write the code that returns true if running script is allowed, otherwise returns false
+/*
+function allow<SCRIPT_FILENAME_NO_EXT>(ctrl)
+{
+    // Script execution is allowed when #SCRIPT1_PERMISSION_CH1, #SCRIPT1_PERMISSION_CH2 and #SCRIPT1_PERMISSION_CH3 values are set to 1.
+    //
+    const enabledSignals = ["#SCRIPT1_PERMISSION_CH1", "#SCRIPT1_PERMISSION_CH2", "#SCRIPT1_PERMISSION_CH3"];
+    for (let i = 0; i < enabledSignals.length; i++) 
+    {
+        let state = ctrl.signalState(enabledSignals[i]);
+        if (state.stateAvailable === false || state.valid === false || state.value === 0) 
+        {
+            return false;
+        }
+    }
+    return true;
+}
+*/
 
 // initTestCase() - will be called before the first test function is executed.
 //

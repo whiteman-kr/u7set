@@ -148,12 +148,19 @@ namespace Sim
 		/// Optional tolerance parameter specifies accuracy of comparison, recommended for use with analog signals.
 		bool expectSignalValue(QString appSignalId, qint64 timeoutMs, double value, double tolerance = 0);
 
-		/// \brief Removes all overridden signals.
+		/// \brief Resets all overridden signals.
 		/// 
-		/// This function removes all overridden signals. 
-		/// It automatically calls \c startForMs(1) to wait for all signals to be reset.
-		/// \param timeoutMs The timeout value is used for TestSuite and ignored in Simulator.
-		void overridesReset(qint64 timeoutMs = 5000);
+		/// This function resets all overridden signals to their default values. 
+		/// It automatically calls \c waitForSignalOverrides with a specified timeout (default value: 5000 ms) 
+		/// to wait for all signals to be reset. If the function times out, an exception is thrown.
+		/// \param timeoutMs The timeout value in milliseconds for waiting on signal overrides.
+		/// \param excludeAppSignals Optionally specifies the list of signals that should not be reset.
+		void overridesReset(qint64 timeoutMs = 5000, QStringList excludeAppSignals = {});
+
+		/// \brief Get overriden signals list
+		/// 
+		/// This function returns currently overridden signals identifiers. 
+		QStringList getOverridenSignals() const;
 
 		/// \brief Checks if a LogicModule exists. Simulator only.
 

@@ -110,7 +110,6 @@ private:
 
 	// Workspace items
 	//
-	LogonWorkspace* m_logonWorkspace = nullptr;
 	TuningWorkspace* m_tuningWorkspace = nullptr;
 	std::vector<SchemasWorkspace*> m_schemasWorkspaces;
 
@@ -146,6 +145,10 @@ private:
 	QLabel* m_statusBarConfigConnection = nullptr;
 	QLabel* m_statusBarTuningConnection = nullptr;
 	QLabel* m_statusBarLogAlerts = nullptr;
+
+	// Login controls
+	//
+	LogonWidget* m_logonWidget = nullptr;
 
 	// Status bar counters
 	//

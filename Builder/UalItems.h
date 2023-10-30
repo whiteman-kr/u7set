@@ -174,7 +174,7 @@ namespace Builder
 		QString label() const { return m_appLogicItem.m_fblItem->label(); }
 		void setLabel(const QString& label) { m_appLogicItem.m_fblItem->setLabel(label); }
 
-		const LogicSignal& signal() { return *(m_appLogicItem.m_fblItem->toSignalElement()); }
+		const LogicSignal& signal() const { return *(m_appLogicItem.m_fblItem->toSignalElement()); }
 
 		const LogicPin* getPin(QUuid pinUuid) const;
 		const LogicPin* getPin(const QString& pinCaption) const;

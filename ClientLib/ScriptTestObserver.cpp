@@ -64,9 +64,9 @@ void ScriptTestObserver::usePlantTime()
 	return m_observer->setTimeType(E::TimeType::Plant);
 }
 
-void ScriptTestObserver::useSystemTime()
+void ScriptTestObserver::useLocalTime()
 {
-	return m_observer->setTimeType(E::TimeType::System);
+	return m_observer->setTimeType(E::TimeType::Local);
 }
 
 void ScriptTestObserver::setInitiator(int initialExpectationId)

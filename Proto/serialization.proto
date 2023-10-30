@@ -464,6 +464,7 @@ message SchemaItem
     optional SchemaItemControl control = 200;				// +FblItemRect
 	optional SchemaItemPushButton pushButton = 210;			// +SchemaItemControl
 	optional SchemaItemLineEdit lineEdit = 211;				// +SchemaItemControl
+	optional SchemaItemSlider slider = 212;					// +SchemaItemControl
 }
 
 //
@@ -991,6 +992,32 @@ message SchemaItemLineEdit
 	optional string scriptTextChanged = 24;
 }
 
+//
+// SchemaItemSlider
+//
+message SchemaItemSlider
+{
+	optional bool invertedAppearance = 2 [default = false];
+	optional bool invertedControls = 3 [default = false];
+	optional bool enableMouseWheel = 4 [default = false];
+	optional int32 maximum = 6 [default = 99];
+	optional int32 minimum = 7 [default = 0];
+	optional int32 orientation = 10 [default = 2];		// Qt::Orientation - Qt::Horizontal(0x1), Qt::Vertical(0x2)
+	optional int32 pageStep = 12 [default = 10];
+	optional int32 singleStep = 13 [default = 1];
+	optional bool tracking = 16 [default = true];
+	optional int32 defaultValue = 17 [default = 0];
+
+	optional int32 tickInterval = 20 [default = 0];
+	optional int32 tickPosition = 21 [default = 0];	// QSlider::TickPosition 0 - QSlider::NoTicks
+
+    optional string scriptAfterCreate = 31;
+    optional string scriptSliderMoved = 32;
+	optional string scriptSliderPressed = 33;
+	optional string scriptSliderReleased = 34;
+	optional string scriptValueChanged = 35;
+}
+
 
 
 
@@ -1237,6 +1264,9 @@ message AppSignal
     optional int32 channel = 7 [default = 0];
 	optional bool excludeFromBuild = 8 [default = false];
 
+	optional bool invertSignal = 9 [default = false];
+	optional bool reserved = 10 [default = false];
+
     // Signal type
 
     optional int32 signalType = 16 [default = 1];		// E::SignalType::Discrete
@@ -1328,6 +1358,9 @@ message ProtoAppSignalData
 	optional bytes userSpecPropValues = 21;					// serialized message Proto::SignalSpecPropValues
 
 	optional int32 apertureType = 22 [default = 0 /* E::ApertureType::RangePercent */];
+	
+	optional bool invertSignal = 23 [default = false];
+	optional bool reserved = 24 [default = false];
 }
 
 // Data structs

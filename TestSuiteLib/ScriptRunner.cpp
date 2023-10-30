@@ -2,12 +2,13 @@
 
 namespace TestSuite
 {
-	ScriptRunner::ScriptRunner(ConfigSettings& configuration, TestController& testController, ILogFile& scriptTestLog, ControlStatus& status, QMutex& statusMutex) :
+	ScriptRunner::ScriptRunner(const TestScript& script, const TestScript* globalScript, ConfigSettings& configuration, TestController& testController, ILogFile& scriptTestLog, ControlStatus& status, QMutex& statusMutex) :
 		m_configuration(configuration),
 		m_testController(testController),
 		m_scriptTestLog(scriptTestLog),
 		m_status(status),
-		m_statusMutex(statusMutex)
+		m_statusMutex(statusMutex),
+		m_scriptInfo(script.fileName())
 	{
 		m_jsEngine.installExtensions(QJSEngine::ConsoleExtension);
 
@@ -25,17 +26,34 @@ namespace TestSuite
 		m_jsEngine.globalObject().setProperty("isSimulator", QJSValue{false});
 		m_jsEngine.globalObject().setProperty("isTestSuite", QJSValue{true});
 
+		// Evaluate scripts
+		//
+		if (globalScript != nullptr)
+		{
+			// Evaluate global script
+			//
+			QString errorMsg;
+			ScriptInfo scriptInfo{"GlobalScript"};
+			if (evaluateScript(*globalScript, scriptInfo, errorMsg) == false)
+			{
+				m_scriptTestLog.writeError(errorMsg);
+			}
+		}
+
+		// Evaluate script
+		//
+		QString errorMsg;
+		m_scriptInfo.fileName = script.fileName();
+		if (evaluateScript(script, m_scriptInfo, errorMsg) == false)
+		{
+			m_scriptTestLog.writeError(errorMsg);
+		}
+
 		return;
 	}
 
 	ScriptRunner::~ScriptRunner()
 	{
-		qDebug() << "ScriptRunner::~ScriptRunner()";
-	}
-
-	bool ScriptRunner::getScriptTestList(const TestScript& script, ScriptInfo& scriptInfo, QString& errorMsg)
-	{
-		return evaluateScript(script, {}, scriptInfo, errorMsg);
 	}
 
 	static QString timeMsToStr(qint64 mss)
@@ -65,46 +83,127 @@ namespace TestSuite
 		return QObject::tr("%1h %2m %3s %3ms").arg(mss).arg(min).arg(sec).arg(ms);
 	};
 
-	bool ScriptRunner::runScript(const TestScript& script, const TestScript* globalScript, const TestScriptSelection& filter)
+	bool ScriptRunner::queryPermission(bool& allowGlobal, bool& allowLocal)
 	{
+		// Check if script has functions (evaluated)
+		//
+		if (m_scriptInfo.empty() == true)
 		{
-			QMutexLocker l(&m_statusMutex);
-			m_status.m_testIndex = 0;
-			m_status.m_testFunction = "evaluate";
-		}
-
-		if (globalScript != nullptr)
-		{
-			// Evaluate global script
-			// 
-			QString errorMsg;
-			ScriptInfo scriptInfo;
-			if (evaluateScript(*globalScript, {}, scriptInfo, errorMsg) == false)
-			{
-				m_scriptTestLog.writeError(errorMsg);
-				return false;
-			}
-		}
-
-		// Evaluate script
-
-		QString errorMsg;
-		ScriptInfo scriptInfo;
-		if (evaluateScript(script, filter, scriptInfo, errorMsg) == false)
-		{
-			m_scriptTestLog.writeError(errorMsg);
+			allowGlobal = false;
+			allowLocal = false;
 			return false;
 		}
 
-		// Exit if no functions to run in this file
-		if (scriptInfo.count() == 0)
+		allowGlobal = true;
+		allowLocal = true;
+
+		// allowGlobal() - will be called before start of the script to check if testing is allowed
+		// allow<SCRIPT_FILE_NAME>() - will be called before start of the script to check if testing is allowed
+		// initTestCase() - will be called before the first test function is executed.
+		// cleanupTestCase() - will be called after the last test function was executed.
+		// init() - will be called before each test function is executed.
+		// cleanup() - will be called after every test function.
+		//
+
+		// allowGlobal() - will be called to check if testing is allowed
+		//
+		if (m_scriptInfo.globalAllowFunction.isEmpty() == false)
+		{
+			{
+				QMutexLocker l(&m_statusMutex);
+				m_status.m_testFunction = m_scriptInfo.globalAllowFunction;
+			}
+
+			if (bool allowGlobalResult = runScriptFunction(m_scriptInfo.globalAllowFunction);
+				allowGlobalResult == false)
+			{
+				allowGlobal = false;
+			}
+		}
+
+		// allow<SCRIPT_FILE_NAME>() - will be called to check if current script running is allowed
+		//
+		if (m_scriptInfo.allowFunction.isEmpty() == false)
+		{
+			{
+				QMutexLocker l(&m_statusMutex);
+				m_status.m_testFunction = m_scriptInfo.allowFunction;
+			}
+
+			if (bool allowResult = runScriptFunction(m_scriptInfo.allowFunction);
+				allowResult == false)
+			{
+				allowLocal = false;
+			}
+		}
+
+		return true;
+	}
+
+	bool ScriptRunner::runTests(const TestScriptSelection& filter)
+	{
+		// Check if script has functions (evaluated)
+		//
+		if (m_scriptInfo.empty() == true)
 		{
 			return true;
 		}
 
+		// Process tests filter
+		//
+		QStringList testsToRun;
+
+		for (const QString& testFunc : m_scriptInfo.testsList)
+		{
+			bool filterMatch = true;
+
+			// Process function list filter
+			//
+			const QStringList& functions = filter.selectedFunctions(m_scriptInfo.fileName);
+			if (functions.empty() == false)
+			{
+				if (std::find(functions.begin(), functions.end(), testFunc) == functions.end())
+				{
+					filterMatch = false;
+				}
+			}
+
+			if (filterMatch == false)
+			{
+				continue;
+			}
+
+			// Process function mask filter
+			//
+			for (const QString& mask : filter.testMasks())
+			{
+				bool matchValue = mask.startsWith('-') == false; // Should match if no '-', otherwise should NOT match
+
+				QRegularExpression rx(QRegularExpression::wildcardToRegularExpression(
+					matchValue ? mask : mask.right(mask.length() - 1)));
+
+				if (rx.match(testFunc).hasMatch() != matchValue)
+				{
+					filterMatch = false;
+				}
+			}
+
+			if (filterMatch == false)
+			{
+				continue;
+			}
+
+			testsToRun.push_back(testFunc);
+		}
+
+		if (testsToRun.isEmpty() == true)
+		{
+			return true;
+		}
+		
 		QStringList reportStrings;
 
-		m_scriptTestLog.writeMessage(tr("********** Start test script %1 **********").arg(script.fileName()));
+		m_scriptTestLog.writeMessage(tr("********** Start test script %1 **********").arg(m_scriptInfo.fileName));
 
 		// Write plant name, unit name and system name to test log if they are specified in configuration
 		//
@@ -120,7 +219,9 @@ namespace TestSuite
 		{
 			m_scriptTestLog.writeMessage(m_configuration.system, "SYSTEM");
 		}
-
+		
+		// allowGlobal() - will be called before start of the script to check if testing is allowed
+		// allow<SCRIPT_FILE_NAME>() - will be called before start of the script to check if testing is allowed
 		// initTestCase() - will be called before the first test function is executed.
 		// cleanupTestCase() - will be called after the last test function was executed.
 		// init() - will be called before each test function is executed.
@@ -128,6 +229,26 @@ namespace TestSuite
 		//
 		QElapsedTimer timer;
 		timer.start();
+
+		// Check script running permission
+		//
+		bool allowGlobal = true;
+		bool allowLocal = true;
+		if (queryPermission(allowGlobal, allowLocal) == false)
+		{
+			m_scriptTestLog.writeError(m_scriptInfo.fileName + ": queryPermission() failed, test terminated.");
+			throw 1;
+		}
+		if (allowGlobal == false)
+		{
+			m_scriptTestLog.writeError(m_scriptInfo.fileName + ": no global permission: script is not allowed to run.");
+			throw 1;
+		}
+		if (allowLocal == false)
+		{
+			m_scriptTestLog.writeError(m_scriptInfo.fileName + ": no local permission: script is not allowed to run.");
+			throw 1;
+		}
 
 		{
 			QMutexLocker l(&m_statusMutex);
@@ -139,19 +260,39 @@ namespace TestSuite
 		if (bool initTestCaseResult = runScriptFunction("initTestCase");
 			initTestCaseResult == false)
 		{
-			m_scriptTestLog.writeError(script.fileName() + ": initTestCase() failed, test terminated.");
+			m_scriptTestLog.writeError(m_scriptInfo.fileName + ": initTestCase() failed, test terminated.");
 			return false;
 		}
 
 		{
 			QMutexLocker l(&m_statusMutex);
 			m_status.m_testIndex = 0;
-			m_status.m_testCount = scriptInfo.count();
+			m_status.m_testCount = testsToRun.count();
 		}
 
 		int failed = 0;
-		for (const QString& testFunc : scriptInfo.functionsList)
+		for (const QString& testFunc : testsToRun)
 		{
+			// Check script running permission
+			//
+			bool allowGlobal = true;
+			bool allowLocal = true;
+			if (queryPermission(allowGlobal, allowLocal) == false)
+			{
+				m_scriptTestLog.writeError(m_scriptInfo.fileName + ": queryPermission() failed, test terminated.");
+				throw 1;
+			}
+			if (allowGlobal == false)
+			{
+				m_scriptTestLog.writeError(m_scriptInfo.fileName + ": no global permission: script is not allowed to run.");
+				throw 1;
+			}
+			if (allowLocal == false)
+			{
+				m_scriptTestLog.writeError(m_scriptInfo.fileName + ": no local permission: script is not allowed to run.");
+				throw 1;
+			}
+
 			{
 				QMutexLocker l(&m_statusMutex);
 				m_status.m_testIndex++;
@@ -160,13 +301,15 @@ namespace TestSuite
 
 			// Find test caption
 			//
-			QString testCaption = scriptInfo.functionCaption(testFunc);
+			QString testCaption = m_scriptInfo.testCaption(testFunc);
 
 			// Mark test function start time
 			//
 			qint64 startMsTestFunc = timer.elapsed();
 
 			m_scriptTestLog.writeMessage(testCaption + ": RUN");
+
+			emit testStarted(m_scriptInfo.fileName, testFunc);
 
 			bool initOk = false;
 			bool testOk = false;
@@ -218,7 +361,7 @@ namespace TestSuite
 										.arg(testFuncResult ? ConstStrings::TEST_PASSED() : ConstStrings::TEST_FAILED())
 										.arg(timeMsToStr(elapsedMsTestFunc - startMsTestFunc)));
 			
-			emit testFinished(script.fileName(), testFunc, testFuncResult);
+			emit testFinished(m_scriptInfo.fileName, testFunc, testFuncResult);
 
 			if (initOk == false || cleanupOk == false)
 			{
@@ -236,27 +379,27 @@ namespace TestSuite
 		if (bool cleanupTestCaseResult = runScriptFunction("cleanupTestCase");
 			cleanupTestCaseResult == false)
 		{
-			m_scriptTestLog.writeError(script.fileName() + ": cleanupTestCase() failed, test terminated.");
+			m_scriptTestLog.writeError(m_scriptInfo.fileName, + ": cleanupTestCase() failed, test terminated.");
 		}
 
 		qint64 elapsedMsTotal = timer.elapsed();
 
 		if (failed == 0)
 		{
-			m_scriptTestLog.writeMessage(tr("Totals: %1 tests, %2 failed, %3ms").arg(scriptInfo.count()).arg(failed).arg(elapsedMsTotal));
+			m_scriptTestLog.writeMessage(tr("Totals: %1 tests, %2 failed, %3ms").arg(testsToRun.count()).arg(failed).arg(elapsedMsTotal));
 		}
 		else
 		{
-			m_scriptTestLog.writeError(tr("Totals: %1 tests, %2 failed, %3ms").arg(scriptInfo.count()).arg(failed).arg(elapsedMsTotal));
+			m_scriptTestLog.writeError(tr("Totals: %1 tests, %2 failed, %3ms").arg(testsToRun.count()).arg(failed).arg(elapsedMsTotal));
 		}
 
-		m_scriptTestLog.writeMessage(tr("********** Finished test script %1 **********").arg(script.fileName()));
+		m_scriptTestLog.writeMessage(tr("********** Finished test script %1 **********").arg(m_scriptInfo.fileName));
 
 		// Write report messages
 		//
 		reportStrings.insert(reportStrings.begin(), 
 			tr("%1;%2;%3")
-								 .arg(scriptInfo.scriptCaption)
+								 .arg(m_scriptInfo.scriptCaption)
 								 .arg(failed == 0 ? ConstStrings::TEST_PASSED() : tr("%1 %2").arg(ConstStrings::TEST_FAILED()).arg(failed))
 								 .arg(timeMsToStr(elapsedMsTotal)));
 
@@ -267,9 +410,18 @@ namespace TestSuite
 
 		return failed == 0;
 	}
-
-	bool ScriptRunner::evaluateScript(const TestScript& script, const TestScriptSelection& filter, ScriptInfo& scriptInfo, QString& errorMsg)
+		
+	const ScriptInfo& ScriptRunner::scriptInfo() const
 	{
+		return m_scriptInfo;
+	}
+	
+	bool ScriptRunner::evaluateScript(const TestScript& script, ScriptInfo& scriptInfo, QString& errorMsg)
+	{
+		QFileInfo fi(script.fileName());
+		const QString allogGlobalFunctionName = "allowGlobal";
+		const QString allowFunctionName = tr("allow%1").arg(fi.baseName()).remove(".js", Qt::CaseInsensitive);
+
 		// Evaluate script.
 		//
 		QJSValue scriptValue = m_jsEngine.evaluate(script.script());
@@ -314,59 +466,33 @@ namespace TestSuite
 				continue;
 			}
 
+			// Check if this is permission function
+			//
+			if (objectName == allogGlobalFunctionName)
+			{
+				scriptInfo.globalAllowFunction = objectName;
+			}
+
+			if (objectName == allowFunctionName)
+			{
+				scriptInfo.allowFunction= objectName;
+			}
+
+			// Check if this is a test function
+			//
 			if (objectName.startsWith("test"))
 			{
 				// This is a variable named testTestName
 				//
-				bool filterMatch = true;
-
-				// Process function list filter
-				//
-				const QStringList& functions = filter.selectedFunctions(script.fileName());
-				if (functions.empty() == false)
-				{
-					if (std::find(functions.begin(), functions.end(), objectName) == functions.end())
-					{
-						filterMatch = false;
-					}
-				}
-
-				if (filterMatch == false)
-				{
-					continue;
-				}
-
-				// Process function mask filter
-				//
-				for (const QString& mask : filter.testMasks())
-				{
-					bool matchValue = mask.startsWith('-') == false;	// Should match if no '-', otherwise should NOT match
-
-					QRegularExpression rx(QRegularExpression::wildcardToRegularExpression(
-											  matchValue ? mask : mask.right(mask.length() - 1)));
-
-					if(rx.match(objectName).hasMatch() != matchValue)
-					{
-						filterMatch = false;
-					}
-				}
-
-				if (filterMatch == false)
-				{
-					continue;
-				}
-
-				// Add function for execution
-				//
-				scriptInfo.functionsList.push_back(objectName);
+				scriptInfo.testsList.push_back(objectName);
 			}
 		}
 
-		std::sort(scriptInfo.functionsList.begin(), scriptInfo.functionsList.end());
+		std::sort(scriptInfo.testsList.begin(), scriptInfo.testsList.end());
 
 		// Build tests captions map
 		//
-		for (const QString& testFunc : scriptInfo.functionsList)
+		for (const QString& testFunc : scriptInfo.testsList)
 		{
 			QString captionVariable = "caption" + testFunc;
 			captionVariable.replace("captiontest", "caption", Qt::CaseSensitive);
@@ -374,7 +500,7 @@ namespace TestSuite
 			auto it = captionValues.find(captionVariable);
 			if (it != captionValues.end())
 			{
-				scriptInfo.functionsCaptions[testFunc] = it->second;
+				scriptInfo.testsCaptions[testFunc] = it->second;
 			}
 		}
 

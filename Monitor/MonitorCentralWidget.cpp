@@ -349,7 +349,7 @@ void MonitorCentralWidget::slot_selectSchemaForCurrentTab(QString schemaId)
 		return;
 	}
 
-	tab->setSchema(schemaId, QStringList{});
+	tab->setSchema(schemaId, QStringList{}, false);
 
 	tab->emitHistoryChanged();
 
@@ -486,16 +486,9 @@ void MonitorCentralWidget::slot_resetSchema()
 			}
 		}
 
-		// Reload schema in widget
+		// Set schema for client widget. Force schema update, as we are reloading all schemas and onSomeEvent should be called.
 		//
-		auto context = VFrame30::Context::create(tabPage->clientSchemaView());
-
-		std::shared_ptr<VFrame30::Schema> schema = m_schemaManager->schema(schemaToLoad, std::move(context));
-		static_cast<VFrame30::BaseSchemaWidget*>(tabPage)->setSchema(schema, false);		// cast to BaseSchemaWidget as this function is hidden in ClientSchemaWidget
-
-		// Set schema for client widget
-		//
-		tabPage->setSchema(schemaToLoad, QStringList{});
+		tabPage->setSchema(schemaToLoad, tabPage->clientSchemaView()->highlightIds(), true);
 
 		tabPage->clientSchemaView()->deleteControlWidgets();		// deleteControlWidgets after loading new schema, as it will delete old widgets and later they will be created
 		tabPage->clientSchemaView()->updateControlWidgets(false);

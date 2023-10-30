@@ -17,9 +17,9 @@ namespace VFrame30
 
 	// Proxy class for using in scripts
 	//
-	/*! \class ScriptSchema
+	/*! \class ScriptSchemaLayer
 		\ingroup view
-		\brief Represents a class that contains schema. Can be get from global <b>view.Schema</b>.
+		\brief Represents a class that contains schema layer. Can be get from schema by index or by name.
 	*/
 	class ScriptSchemaLayer : public QObject
 	{
@@ -28,7 +28,7 @@ namespace VFrame30
 		/// \brief SchemaLayer caption.
 		Q_PROPERTY(QString caption READ caption)
 
-		/// \brief Layer count.
+		/// \brief SchemaLayer visibility.
 		Q_PROPERTY(bool visible READ visible WRITE setVisible)
 
 	public:
@@ -69,7 +69,7 @@ namespace VFrame30
 		friend Proto::ObjectSerialization<SchemaLayer>;
 
 	private:
-		// Use this func only while serialization, cause during obejcet creation it is not fully initialized
+		// Use this func only while serialization, cause during object creation it is not fully initialized
 		//
 		static std::shared_ptr<SchemaLayer> CreateObject(const Proto::Envelope& message);
 

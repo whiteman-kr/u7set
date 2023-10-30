@@ -5,7 +5,7 @@
 #include "MetrologySignal.h"
 #include "MetrologyFormula.h"
 #include "SignalBase.h"
-#include "UnitsConvertor.h"
+#include "UnitsConverter.h"
 
 namespace Measure
 {

@@ -752,7 +752,7 @@ namespace VFrame30
 											   ITuningConnection& tuningConnection,
 											   ITuningAuthorization& tuningAuthorization)
 	{
-		m_tuningController = std::make_unique<TuningController>(signalManager, tuningConnection, tuningAuthorization);
+		m_tuningController = std::make_unique<TuningController>(signalManager, tuningConnection, tuningAuthorization, this->parentWidget());
 		m_jsEngineGlobalsWereCreated = false; // it will make jsEngine() to initialize global script vars again
 
 		return;
@@ -820,7 +820,11 @@ namespace VFrame30
 	void ClientSchemaView::setGlobalScript(QString value)
 	{
 		m_globalScript = value + QChar::LineFeed;
-		m_jsEngineGlobalsWereCreated = false;
+		m_jsEngineGlobalsWereCreated = false; // it will make jsEngine() to initialize global script vars again.
+
+		jsEngine(); // jsEngine() prepares global script and calls execOnConfigurationArrived.
+
+		return;
 	}
 
 	QJSEngine* ClientSchemaView::jsEngine()
@@ -996,6 +1000,8 @@ namespace VFrame30
 
 	bool ClientSchemaView::reEvaluateGlobalScript()
 	{
+		qDebug() << "ClientSchemaView::reEvaluateGlobalScript()";
+
 		QJSValue result = m_jsEngine.evaluate(m_globalScript);
 
 		if (result.isError())

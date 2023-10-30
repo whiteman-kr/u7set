@@ -198,9 +198,12 @@ namespace Builder
 			return false;
 		}
 
-		// Script comments
+		bool result = true;
+
+		// Get script tags
 		//
-		//BuildInfo b = m_context->m_buildResultWriter->buildInfo();
+		QStringList scriptTags;
+		result &= DeviceHelper::getStrListProperty(m_software, EquipmentPropNames::TESTING_SCRIPTTAGS, &scriptTags, m_log);
 
 		// --
 		//
@@ -227,6 +230,17 @@ namespace Builder
 			bool ok = m_context->m_db.getLatestVersion(*fileInfo, &file, nullptr);
 			if (ok == true)
 			{
+				// Check script tags specified in ScriptTags variable of the script. GlobalScript is placed always.
+				//
+				if (fileInfo->fileName().endsWith(File::GLOBAL_SCRIPT, Qt::CaseInsensitive) == false)
+				{
+					bool checkTag = checkScriptFileTags(file, scriptTags);
+					if (checkTag == false)
+					{
+						continue;
+					}
+				}
+
 				QString folderPath = Db::File::systemDirToName(DbDir::RootDir) + "/";
 
 				{
@@ -297,4 +311,55 @@ namespace Builder
 		return result;
 	}
 
+	bool TestSuiteCfgGenerator::checkScriptFileTags(std::shared_ptr<DbFile>& file, const QStringList& scriptTags)
+	{
+		if (scriptTags.empty() == true)
+		{
+			// No ScriptTags property is empty, return positive result
+			//
+			return true;
+		}
+
+		QJSEngine jsEngine;
+
+		// Evaluate script.
+		//
+		QJSValue scriptValue = jsEngine.evaluate(QString::fromStdString(file->data().toStdString()));
+
+		if (scriptValue.isError() == true)
+		{
+			return false;
+		}
+
+		QJSValueIterator it(jsEngine.globalObject());
+		while (it.hasNext() == true)
+		{
+			it.next();
+
+			QString objectName = it.name();
+
+			if (objectName.compare("ScriptTags", Qt::CaseInsensitive) == 0)
+			{
+				QStringList value = QVariant().fromValue(it.value()).toStringList();
+
+				for (const QString& tag : value)
+				{
+					if (scriptTags.contains(tag) == true)
+					{
+						// Tag was found
+						return true;
+					}
+				}
+
+				// Tag was not found
+				//
+				return false;
+			}
+		}
+
+		// No ScriptTags variable found, return negative result
+		//
+		return false;
+	}
 }
+

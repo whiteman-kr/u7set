@@ -289,6 +289,8 @@ namespace Builder
 												std::set<const UalItem*>* linkedItems,
 												std::map<QUuid, const UalItem*>* linkedPins);
 
+		bool createUalItemSignalsList();
+
 		bool createUalSignalsFromInputAndTuningAcquiredSignals();
 
 		bool createUalSignalsFromBusComposers();
@@ -356,7 +358,8 @@ namespace Builder
 		AppSignal* getCompatibleConnectedBusSignal(const LogicPin& outPin, const QString& busTypeID);
 		bool isCompatible(const LogicAfbSignal& outAfbSignal, const QString& busTypeID, const AppSignal* s);
 
-		bool isConnectedToTerminatorOnly(const LogicPin& outPin);
+		bool isConnectedToTerminatorOnly(const LogicPin& outPin) const;
+		bool isOutConnectedToTerminatorOnly(const UalAfb* ualItem) const;
 		bool isConnectedToLoopback(const LogicPin& inPin, std::shared_ptr<Loopback>* loopback);
 		bool determineOutBusTypeID(UalAfb* ualAfb, QString* outBusTypeID);
 		bool determineBusTypeByInputs(const UalAfb* ualAfb, QString* outBusTypeID);
@@ -808,6 +811,7 @@ namespace Builder
 
 		bool setLmAppLANDataSize();
 		bool detectUnusedSignals();
+		bool detectUsedReservedSignals();
 		bool fillAnalogSignalsOnSchemas();
 		bool calculateCodeRunTime();
 
@@ -999,6 +1003,8 @@ namespace Builder
 		std::map<QString, UalSignal*> m_optoPortValiditySignal;	// OptoPort EquipmentID => OptoPort validity signal
 		std::map<QString, UalSignal*> m_busChildSignalsRequiredConversion;	// Bus child signal required conversion ID => Corresponding CONVERTED UAL signal
 
+		std::map<Hash, std::set<QUuid>> m_ualItemsSignals;		// Hash(appSignalID) => set of UalItem.guid (type Signal) with this appSignalID
+
 		::std::set<QString> m_signalsWithFlagsIDs;
 		::std::unordered_set<UalSignal*> m_signalsWithFlagsAndFlagSignals;
 
@@ -1025,7 +1031,6 @@ namespace Builder
 
 		QVector<UalSignal*> m_nonAcquiredDiscreteStrictOutputSignals;	// non acquired discrete output signals, used in UAL
 		QVector<UalSignal*> m_nonAcquiredDiscreteInternalSignals;		// non acquired discrete internal non tuningbale signals, used in UAL
-//		QVector<UalSignal*> m_nonAcquiredDiscreteOptoSignals;			// non acquired discrete internal opto signals, used in UAL
 		QVector<UalSignal*> m_discreteInvertedOutputSignals;			// non acquired discrete internal opto signals, used in UAL
 
 		QVector<UalSignal*> m_acquiredAnalogInputSignals;				// acquired analog input signals, no matter used in UAL or not

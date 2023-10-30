@@ -397,6 +397,10 @@ void AppSignalProperties::initProperties(bool savePropertyDescription)
 	propExcludeFromBuild->setCategory(categorySignalProcessing);
 	propExcludeFromBuild->setViewOrder(100);
 
+	auto propInvertSignal = ADD_SIGNAL_PROPERTY_GETTER_SETTER(bool, AppSignalPropNames::INVERT_SIGNAL, true, AppSignal::invertSignal, AppSignal::setInvertSignal, m_signal);
+	propInvertSignal->setCategory(categorySignalProcessing);
+	propInvertSignal->setViewOrder(110);
+
 	// 5 Electric parameters ()
 
 	// 6 Online monitoring system
@@ -411,6 +415,10 @@ void AppSignalProperties::initProperties(bool savePropertyDescription)
 	propArchive->setCategory(categoryOnlineMonitoringSystem);
 	propArchive->setViewOrder(20);
 
+	auto propReserved = ADD_SIGNAL_PROPERTY_GETTER_SETTER(bool, AppSignalPropNames::RESERVED, true, AppSignal::reserved, AppSignal::setReserved, m_signal);
+	propReserved->setCategory(categoryOnlineMonitoringSystem);
+	propReserved->setViewOrder(25);
+
 	auto propApertureType = ADD_SIGNAL_PROPERTY_GETTER_SETTER(E::ApertureType, AppSignalPropNames::APERTURE_TYPE,
 															true, AppSignal::apertureType, AppSignal::setApertureType, m_signal);
 	propApertureType->setCategory(categoryOnlineMonitoringSystem);
@@ -418,7 +426,6 @@ void AppSignalProperties::initProperties(bool savePropertyDescription)
 												 "ValuePercent - aperture is set in % of current signal value\n"
 												 "AbsValue - aperture is set in absolute engineering units"));
 	propApertureType->setViewOrder(30);
-
 
 	auto propFineAperture = ADD_SIGNAL_PROPERTY_GETTER_SETTER(double, AppSignalPropNames::FINE_APERTURE,
 															  true, AppSignal::fineAperture, AppSignal::setFineAperture, m_signal);

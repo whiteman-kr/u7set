@@ -421,6 +421,9 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0396.sql", "Upgrade to version 396, Add InvertSignal and ApertureType properties"},
 	{":/DatabaseUpgrade/Upgrade0397.sql", "Upgrade to version 397, TestSuite preset report template update"},
 	{":/DatabaseUpgrade/Upgrade0398.sql", "Upgrade to version 398, Attribute instantiator revision in all AFBs"},
+	{":/DatabaseUpgrade/Upgrade0399.sql", "Upgrade to version 399, TestSuite preset update (added script tags)"},
+	{":/DatabaseUpgrade/Upgrade0400.sql", "Upgrade to version 400, Update file Tests/GlobalScript.js"},
+	{":/DatabaseUpgrade/Upgrade0401.sql", "Upgrade to version 401, InvertSignal property bug fix"},
 };
 
 int DbWorker::counter = 0;
@@ -7358,6 +7361,9 @@ bool DbWorker::processingAfterDatabaseUpgrade(QSqlDatabase& db, int currentVersi
 
 	case 396:
 		return processingAfterDatabaseUpgrade0396(db, errorMessage);
+
+	case 401:
+		return processingAfterDatabaseUpgrade0401(db, errorMessage);
 	}
 
 	return true;
@@ -7749,9 +7755,117 @@ bool DbWorker::processingAfterDatabaseUpgrade0396(QSqlDatabase& db, QString* err
 
 	QSqlQuery q(db);
 
-	bool result = q.exec(QString("SELECT SI.SignalInstanceID, S.Type, SI.InOutType, "
-								 "SI.ProtoData, SI.SpecPropStruct, SI.SpecPropValues "
-								 "FROM Signal AS S, SignalInstance AS SI WHERE S.SignalID = SI.SignalID"));
+	bool result = q.exec(QString("SELECT SI.SignalInstanceID, SI.ProtoData "
+								 "FROM Signal AS S, SignalInstance AS SI WHERE S.SignalID=SI.SignalID AND "
+								 "S.Type=0"));		// Analog signal
+
+	if (result == false)
+	{
+		*errorMessage = QString(tr("Can't retrieve signal instances to update: %1")).arg(q.lastError().text());
+		return false;
+	}
+
+	int parseErrorCount = 0;
+	int updateErrorCount = 0;
+
+	const int COL_SIGNAL_INSTANCE_ID = 0;
+	const int COL_PROTO_DATA = 1;
+
+	while(q.next() == true)
+	{
+		int signalInstanceID = q.value(COL_SIGNAL_INSTANCE_ID).toInt();
+		QByteArray signalProtoData = q.value(COL_PROTO_DATA).toByteArray();
+
+		// Updating non-specific properties proto data due adding ApertureType property.
+		//
+		Proto::ProtoAppSignalData psd;
+
+		bool res = psd.ParseFromArray(signalProtoData.constData(), static_cast<int>(signalProtoData.size()));
+
+		if (res == false)
+		{
+			if (parseErrorCount < 10)
+			{
+				*errorMessage += QString(tr("SignalInstance %1 signalProtoData data parsing error\n")).
+										arg(signalInstanceID);
+			}
+
+			parseErrorCount++;
+			continue;
+		}
+
+		if (psd.obsolete_adaptiveaperture() == true)
+		{
+			psd.set_aperturetype(TO_INT(E::ApertureType::ValuePercent));
+		}
+		else
+		{
+			psd.set_aperturetype(TO_INT(E::ApertureType::RangePercent));
+		}
+
+		int protoDataSize = static_cast<int>(psd.ByteSizeLong());
+
+		signalProtoData.clear();
+		signalProtoData.resize(protoDataSize);
+
+		psd.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(signalProtoData.data()));
+
+		QString queryStr = QString(	"UPDATE SignalInstance SET ProtoData = %1 "
+									"WHERE SignalInstanceID = %2").
+											arg(toSqlByteaStr(signalProtoData)).
+											arg(signalInstanceID);
+		QSqlQuery updateQuery(db);
+
+		bool updateRes = updateQuery.exec(queryStr);
+
+		if (updateRes == false)
+		{
+			if (updateErrorCount < 10)
+			{
+				*errorMessage += QString(tr("SignalInstance %1 updating error\n")).
+										arg(signalInstanceID);
+			}
+
+			updateErrorCount++;
+			continue;
+		}
+	}
+
+	if (parseErrorCount > 0)
+	{
+		*errorMessage += QString(tr("Total parsing errors: %1\n")).arg(parseErrorCount);
+
+		result = false;
+	}
+
+	if (updateErrorCount > 0)
+	{
+
+		*errorMessage += QString(tr("Total updating errors: %1\n")).arg(updateErrorCount);
+
+		result = false;
+	}
+
+	return result;
+}
+
+bool DbWorker::processingAfterDatabaseUpgrade0401(QSqlDatabase& db, QString* errorMessage)
+{
+	TEST_PTR_RETURN_FALSE(errorMessage);
+
+	// Task RPCT-3720
+	//
+	// Moving InvertSignal property from specific properties to non-specific properties in
+	// Input and Output discrete signals
+	//
+
+	QSqlQuery q(db);
+
+	QString queryStr = QString("SELECT SI.SignalInstanceID, SI.ProtoData, SI.SpecPropStruct, SI.SpecPropValues "
+							   "FROM Signal AS S, SignalInstance AS SI WHERE S.SignalID = SI.SignalID AND "
+											  "S.Type=1 AND "							// == Discrete
+											  "(SI.InOutType=0 OR SI.InOutType=1)");	// == Input or Output
+	bool result = q.exec(queryStr);
 
 	if (result == false)
 	{
@@ -7763,58 +7877,49 @@ bool DbWorker::processingAfterDatabaseUpgrade0396(QSqlDatabase& db, QString* err
 	int updateErrorCount = 0;
 
 	const int COL_SIGNAL_INSTANCE_ID = 0;
-	const int COL_SIGNAL_TYPE = 1;
-	const int COL_SIGNAL_IN_OUT_TYPE = 2;
-	const int COL_PROTO_DATA = 3;
-	const int COL_SPEC_PROP_STRUCT = 4;
-	const int COL_SPEC_PROP_VALUES = 5;
-
-	AppSignalSpecPropValue spInvertSignal;
-
-	spInvertSignal.create(AppSignalPropNames::INVERT_SIGNAL, QVariant(false), false);
+	const int COL_PROTO_DATA = 1;
+	const int COL_SPEC_PROP_STRUCT = 2;
+	const int COL_SPEC_PROP_VALUES = 3;
 
 	const QString INVERT_SIGNAL_PROP_NAME = ";" + AppSignalPropNames::INVERT_SIGNAL + ";";
 
 	while(q.next() == true)
 	{
 		int signalInstanceID = q.value(COL_SIGNAL_INSTANCE_ID).toInt();
-		E::SignalType signalType = static_cast<E::SignalType>(q.value(COL_SIGNAL_TYPE).toInt());
-		E::SignalInOutType signalInOutType = static_cast<E::SignalInOutType>(q.value(COL_SIGNAL_IN_OUT_TYPE).toInt());
 
-		if (signalType == E::SignalType::Discrete &&
-			(signalInOutType == E::SignalInOutType::Input || signalInOutType == E::SignalInOutType::Output))
+		// read non-spec props
+		//
+		QByteArray signalProtoData = q.value(COL_PROTO_DATA).toByteArray();
+
+		Proto::ProtoAppSignalData psd;
+
+		bool res = psd.ParseFromArray(signalProtoData.constData(), static_cast<int>(signalProtoData.size()));
+
+		if (res == false)
 		{
+			if (parseErrorCount < 10)
+			{
+				*errorMessage += QString(tr("SignalInstance %1 signalProtoData data parsing error\n")).
+										arg(signalInstanceID);
+			}
+
+			parseErrorCount++;
+			continue;
+		}
+
+		// check is InvertSignal exists in spec props
+		//
+		QString specPropStructStr = q.value(COL_SPEC_PROP_STRUCT).toString();
+
+		if (specPropStructStr.contains(INVERT_SIGNAL_PROP_NAME) == true)
+		{
+			// read spec props values
 			//
-			// Add InvertSignal specific property to Input and Output Discrete signals
-			//
-
-			QString specPropStruct = q.value(COL_SPEC_PROP_STRUCT).toString();
-
-			if (specPropStruct.contains(INVERT_SIGNAL_PROP_NAME) == true)
-			{
-				continue;
-			}
-
-			if (specPropStruct.isEmpty() == false &&
-				specPropStruct.endsWith(Separator::NEW_LINE) == false)
-			{
-				specPropStruct += Separator::NEW_LINE;
-			}
-
-			if (signalInOutType == E::SignalInOutType::Input)
-			{
-				specPropStruct += AppSignalDefaultSpecPropStruct::INPUT_DISCRETE;
-			}
-			else
-			{
-				specPropStruct += AppSignalDefaultSpecPropStruct::OUTPUT_DISCRETE;
-			}
-
-			QByteArray specPropValues = q.value(COL_SPEC_PROP_VALUES).toByteArray();
+			QByteArray specPropValuesBin = q.value(COL_SPEC_PROP_VALUES).toByteArray();
 
 			AppSignalSpecPropValues spv;
 
-			bool res = spv.parseValuesFromArray(specPropValues);
+			bool res = spv.parseValuesFromArray(specPropValuesBin);
 
 			if (res == false)
 			{
@@ -7828,17 +7933,48 @@ bool DbWorker::processingAfterDatabaseUpgrade0396(QSqlDatabase& db, QString* err
 				continue;
 			}
 
-			spv.append(spInvertSignal);
+			// copy InvertSignal value from spec prop to non-spec prop
+			//
+			QVariant qv;
 
-			specPropValues.clear();
+			res = spv.getValue(AppSignalPropNames::INVERT_SIGNAL, &qv);
 
-			spv.serializeValuesToArray(&specPropValues);
+			Q_ASSERT(res);
 
+			psd.set_invertsignal(qv.toBool());
+
+			// remove InvertSignal from specPropStruct
+			//
+			QStringList specPropStructLines = specPropStructStr.split(Separator::NEW_LINE, Qt::SkipEmptyParts);
+
+			specPropStructStr.clear();
+
+			for(const QString& line : specPropStructLines)
+			{
+				if (line.contains(INVERT_SIGNAL_PROP_NAME) == true)
+				{
+					continue;		// skip InverSignal property description
+				}
+
+				specPropStructStr.append(line);
+				specPropStructStr.append(Separator::NEW_LINE);
+			}
+
+			// remove InvertSignal from specPropValues
+			//
+			spv.removeValue(AppSignalPropNames::INVERT_SIGNAL);
+
+			specPropValuesBin.clear();
+
+			spv.serializeValuesToArray(&specPropValuesBin);
+
+			// update SignalInstance table
+			//
 			QString queryStr = QString(	"UPDATE SignalInstance SET SpecPropStruct = '%1', "
 										"SpecPropValues = %2 "
 										"WHERE SignalInstanceID = %3").
-												arg(specPropStruct).
-												arg(toSqlByteaStr(specPropValues)).
+												arg(specPropStructStr).
+												arg(toSqlByteaStr(specPropValuesBin)).
 												arg(signalInstanceID);
 			QSqlQuery updateQuery(db);
 
@@ -7853,69 +7989,34 @@ bool DbWorker::processingAfterDatabaseUpgrade0396(QSqlDatabase& db, QString* err
 				}
 
 				updateErrorCount++;
-				continue;
 			}
-
-			continue;
 		}
 
-		if (signalType == E::SignalType::Analog)
+		int protoDataSize = static_cast<int>(psd.ByteSizeLong());
+
+		signalProtoData.clear();
+		signalProtoData.resize(protoDataSize);
+
+		psd.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(signalProtoData.data()));
+
+		QString queryStr = QString(	"UPDATE SignalInstance SET ProtoData = %1 "
+									"WHERE SignalInstanceID = %2").
+											arg(toSqlByteaStr(signalProtoData)).
+											arg(signalInstanceID);
+		QSqlQuery updateQuery(db);
+
+		bool updateRes = updateQuery.exec(queryStr);
+
+		if (updateRes == false)
 		{
-			// Updating non-specific properties proto data due adding ApertureType property.
-
-			QByteArray signalProtoData = q.value(COL_PROTO_DATA).toByteArray();
-
-			Proto::ProtoAppSignalData psd;
-
-			bool res = psd.ParseFromArray(signalProtoData.constData(), static_cast<int>(signalProtoData.size()));
-
-			if (res == false)
+			if (updateErrorCount < 10)
 			{
-				if (parseErrorCount < 10)
-				{
-					*errorMessage += QString(tr("SignalInstance %1 signalProtoData data parsing error\n")).
-											arg(signalInstanceID);
-				}
-
-				parseErrorCount++;
-				continue;
+				*errorMessage += QString(tr("SignalInstance %1 updating error\n")).
+										arg(signalInstanceID);
 			}
 
-			if (psd.obsolete_adaptiveaperture() == true)
-			{
-				psd.set_aperturetype(TO_INT(E::ApertureType::ValuePercent));
-			}
-			else
-			{
-				psd.set_aperturetype(TO_INT(E::ApertureType::RangePercent));
-			}
-
-			int protoDataSize = static_cast<int>(psd.ByteSizeLong());
-
-			signalProtoData.clear();
-			signalProtoData.resize(protoDataSize);
-
-			psd.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(signalProtoData.data()));
-
-			QString queryStr = QString(	"UPDATE SignalInstance SET ProtoData = %1 "
-										"WHERE SignalInstanceID = %2").
-												arg(toSqlByteaStr(signalProtoData)).
-												arg(signalInstanceID);
-			QSqlQuery updateQuery(db);
-
-			bool updateRes = updateQuery.exec(queryStr);
-
-			if (updateRes == false)
-			{
-				if (updateErrorCount < 10)
-				{
-					*errorMessage += QString(tr("SignalInstance %1 updating error\n")).
-											arg(signalInstanceID);
-				}
-
-				updateErrorCount++;
-				continue;
-			}
+			updateErrorCount++;
+			continue;
 		}
 	}
 

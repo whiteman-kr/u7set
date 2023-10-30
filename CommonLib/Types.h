@@ -188,9 +188,9 @@ public:
 	//
 	enum SignalType
 	{
-		Analog,
-		Discrete,
-		Bus
+		Analog,			//	0
+		Discrete,		//	1
+		Bus				//  2
 	};
 	Q_ENUM(SignalType)
 
@@ -338,7 +338,7 @@ public:
 		uA = 5,
 		Hz = 6,
 
-		// oder version
+		// older version
 		// NoInputUnit = 1,
 		// mA = 15,
 		// mV = 11,

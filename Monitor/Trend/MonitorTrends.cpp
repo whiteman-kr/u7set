@@ -1,8 +1,10 @@
 #include "MonitorTrends.h"
-#include "../lib/ISignalHasTag.h"
+
 #include "../ClientLib/RtTrendTcpClient.h"
-#include "../TrendView/TrendWidget.h"
 #include "../TrendView/DialogChooseTrendSignals.h"
+#include "../TrendView/TrendSignalState.h"
+#include "../TrendView/TrendWidget.h"
+#include "../lib/ISignalHasTag.h"
 
 std::list<MonitorTrendsWidget*> MonitorTrends::s_trendsList;
 
@@ -37,8 +39,8 @@ bool MonitorTrends::activateTrendWindow(MonitorTrendsWidget* trendWidget)
 
 bool MonitorTrends::startTrendApp(const MonitorSignalManager& signalManager,
 								  const MonitorConfigController& configController,
-                                  const std::vector<AppSignalParam>& appSignals,
-                                  QWidget* parent)
+								  const std::vector<AppSignalParam>& appSignals,
+								  QWidget* parent)
 {
 	MonitorTrendsWidget* window = new MonitorTrendsWidget(signalManager, configController, parent);
 
@@ -53,17 +55,15 @@ bool MonitorTrends::startTrendApp(const MonitorSignalManager& signalManager,
 	{
 		// Take the first available archive server for the signal.
 		//
-		auto archServerIt = std::find_if(archiveServers.begin(), archiveServers.end(),
-					[&appSignal, &signalManager](const auto& as)
-					{
-						return signalManager.dataServiceHasSignal(as.appDataServiceId, appSignal.appSignalId());
-					});
+		auto archServerIt = std::find_if(archiveServers.begin(), archiveServers.end(), [&appSignal, &signalManager](const auto& as)
+										 {
+											 return signalManager.dataServiceHasSignal(as.appDataServiceId, appSignal.appSignalId());
+										 });
 
-		auto appDataServerIt = std::find_if(appDataServers.begin(), appDataServers.end(),
-					[&appSignal, &signalManager](const auto& ads)
-					{
-						return signalManager.dataServiceHasSignal(ads.equipmentId, appSignal.appSignalId());
-					});
+		auto appDataServerIt = std::find_if(appDataServers.begin(), appDataServers.end(), [&appSignal, &signalManager](const auto& ads)
+											{
+												return signalManager.dataServiceHasSignal(ads.equipmentId, appSignal.appSignalId());
+											});
 
 		if (archServerIt != archiveServers.end())
 		{
@@ -114,7 +114,10 @@ void MonitorTrends::registerTrendWindow(MonitorTrendsWidget* window)
 
 void MonitorTrends::unregisterTrendWindow(const MonitorTrendsWidget* window)
 {
-	[[maybe_unused]] auto removed = s_trendsList.remove_if([window](MonitorTrendsWidget* w) { return w == window; });
+	[[maybe_unused]] auto removed = s_trendsList.remove_if([window](MonitorTrendsWidget* w)
+														   {
+															   return w == window;
+														   });
 	Q_ASSERT(removed == 1);
 
 	return;
@@ -130,7 +133,7 @@ MonitorTrendsWidget::MonitorTrendsWidget(const MonitorSignalManager& signalManag
 	m_archiveDataProvider(m_configController, m_configController.logFile()),
 	m_realtimeDataProvider(m_signalManager, m_configController.logFile())
 {
-static int no = 1;
+	static int no = 1;
 	QString trendName = tr("Monitor Trends %1").arg(no++);
 	MonitorTrends::registerTrendWindow(this);
 
@@ -164,9 +167,14 @@ static int no = 1;
 	connect(&m_trendWidget->signalSet(), &TrendLib::TrendSignalSet::requestData, this, &MonitorTrendsWidget::slot_requestData);
 	connect(&m_archiveDataProvider, &MonitorTrendArchiveConnections::dataReady, &signalSet(), &TrendLib::TrendSignalSet::slot_archiveDataReceived);
 	connect(&m_archiveDataProvider, &MonitorTrendArchiveConnections::requestError, &signalSet(), &TrendLib::TrendSignalSet::slot_archiveRequestError);
-	connect(&m_archiveDataProvider, &MonitorTrendArchiveConnections::dataReady, this, &MonitorTrendsWidget::slot_archiveDataReceived);	// For updating widget
+	connect(&m_archiveDataProvider, &MonitorTrendArchiveConnections::dataReady, this, &MonitorTrendsWidget::slot_archiveDataReceived); // For updating widget
 
 	// Realtime Trends connections
+	// IMPORTANT: The next to slot connections must be in that order, as TrendLib::TrendSignalSet::slot_realtimeDataReceived
+	// updates the "last realtime" point and MonitorTrendsWidget::slot_realtimeDataReceived makes autoshift based on the "last realtime" point.
+	//
+	// Qt doc says: If several slots are connected to one signal, the slots will be executed one after the other,
+	// in the order they have been connected, when the signal is emitted.
 	//
 	connect(&m_realtimeDataProvider, &ClientLib::RtDataProvider::dataReady, &signalSet(), &TrendLib::TrendSignalSet::slot_realtimeDataReceived);
 	connect(&m_realtimeDataProvider, &ClientLib::RtDataProvider::dataReady, this, &MonitorTrendsWidget::slot_realtimeDataReceived);
@@ -206,8 +214,8 @@ void MonitorTrendsWidget::timerEvent(QTimerEvent*)
 		m_statusBarTextLabel->setText(stat.text);
 		m_statusBarQueueSizeLabel->setText(QString(tr(" Queue: %1 ")).arg(stat.requestQueueSize));
 		m_statusBarNetworkRequestsLabel->setText(tr(" Requests/replies: %1/%2 ")
-												 .arg(stat.requestCount)
-												 .arg(stat.replyCount));
+													 .arg(stat.requestCount)
+													 .arg(stat.replyCount));
 
 		m_statusBarConnectionStateLabel->setText(tr(" Connected %1/%2").arg(stat.isConnected).arg(m_archiveDataProvider.size()));
 	}
@@ -224,8 +232,8 @@ void MonitorTrendsWidget::timerEvent(QTimerEvent*)
 		m_statusBarTextLabel->setText(stat.text);
 		m_statusBarQueueSizeLabel->setText("             ");
 		m_statusBarNetworkRequestsLabel->setText(QString(" Requests/replies: %1/%2 ")
-												 .arg(stat.requestCount)
-												 .arg(stat.replyCount));
+													 .arg(stat.requestCount)
+													 .arg(stat.replyCount));
 
 		m_statusBarConnectionStateLabel->setText(QString(" Connected %1/%2").arg(stat.isConnected).arg(m_realtimeDataProvider.size()));
 	}
@@ -280,7 +288,7 @@ void MonitorTrendsWidget::signalsButton()
 		{
 		}
 
-		virtual bool signalHasTag(const QString& signalId, const QString& tag) const  override
+		virtual bool signalHasTag(const QString& signalId, const QString& tag) const override
 		{
 			return monitorSignalManager.signalHasTag(signalId, tag);
 		}
@@ -295,7 +303,7 @@ void MonitorTrendsWidget::signalsButton()
 											  addedTrendSignals,
 											  trendArchiveServers,
 											  this);
-	
+
 	int result = dialog.exec();
 	if (result == QDialog::Rejected)
 	{
@@ -367,15 +375,15 @@ void MonitorTrendsWidget::dropEvent(QDropEvent* event)
 			//
 			auto archServerIt = std::find_if(archiveServers.begin(), archiveServers.end(),
 						[&appSignalParam, this](const SoftwareEndpoint::ArchiveService& as)
-						{
-							return m_signalManager.dataServiceHasSignal(as.appDataServiceId, appSignalParam.appSignalId());
-						});
+											 {
+												 return m_signalManager.dataServiceHasSignal(as.appDataServiceId, appSignalParam.appSignalId());
+											 });
 
 			auto appDataServerIt = std::find_if(appDataServers.begin(), appDataServers.end(),
 						[&appSignalParam, this](const SoftwareEndpoint::AppDataService& ads)
-						{
-							return m_signalManager.dataServiceHasSignal(ads.equipmentId, appSignalParam.appSignalId());
-						});
+												{
+													return m_signalManager.dataServiceHasSignal(ads.equipmentId, appSignalParam.appSignalId());
+												});
 
 			if (archServerIt != archiveServers.end())
 			{
@@ -390,7 +398,7 @@ void MonitorTrendsWidget::dropEvent(QDropEvent* event)
 				qDebug() << "MonitorTrendsWidget::dropEvent: Archive server for signal " << appSignalParam.appSignalId() << " is not found.";
 
 				// This situation is possible if archive service is not configured, but still realtime trends is possible, add it as is.
-				// 
+				//
 				if (appDataServerIt != appDataServers.end())
 				{
 					const SoftwareEndpoint::AppDataService& ads = *appDataServerIt;
@@ -529,8 +537,8 @@ void MonitorTrendsWidget::slot_archiveDataReceived(TrendLib::TrendSignalPlusServ
 
 void MonitorTrendsWidget::slot_realtimeDataReceived(QString /*sourceEquipmentId*/,
 													std::shared_ptr<TrendLib::RealtimeData> data,
-													TrendLib::TrendStateItem minState,
-													TrendLib::TrendStateItem maxState)
+													TrendLib::TrendStateItem minRecState,
+													TrendLib::TrendStateItem maxRecState)
 {
 	Q_ASSERT(m_trendWidget);
 	Q_ASSERT(m_trendSlider);
@@ -547,6 +555,10 @@ void MonitorTrendsWidget::slot_realtimeDataReceived(QString /*sourceEquipmentId*
 		return;
 	}
 
+#if 0
+	// This is the old way of shifting time axis, it is good when LMs have the same time,
+	// but it starts to flick when LMs have time disparency.
+	//  
 	TimeStamp minTime = minState.getTime(m_trendWidget->timeType());
 	TimeStamp maxTime = maxState.getTime(m_trendWidget->timeType());
 
@@ -564,6 +576,51 @@ void MonitorTrendsWidget::slot_realtimeDataReceived(QString /*sourceEquipmentId*
 	{
 		m_trendWidget->updateWidget();
 	}
+#else
+	auto timeType = m_trendWidget->timeType();
+	TrendLib::TrendStateItem maxState{};
+
+	for (const auto trendSignals = signalSet().trendSignalsHashes();
+		 const auto& trendSignalHash : trendSignals)
+	{
+		std::optional<TrendLib::TrendStateItem> state = signalSet().lastRealtimeState(trendSignalHash, timeType);
+
+		if (state.has_value() == true && state->getTime(timeType) > maxState.getTime(timeType))
+		{
+			maxState = *state;
+		}
+	}
+
+	// Shift view area if autoshift mode is turned on and maxState is present.
+	//
+	if (isRealtimeAutoShift() == true && maxState.getTime(timeType) != 0)
+	{
+		setRealtimeAutoShift(maxState.getTime(timeType));
+	}
+
+	// Update widget if received data somewhere in the current view.
+	//
+	TimeStamp minTime = minRecState.getTime(m_trendWidget->timeType());
+	TimeStamp maxTime = maxRecState.getTime(m_trendWidget->timeType());
+
+	if (m_realtimeUpdateTimer.isValid() == false)
+	{
+		m_realtimeUpdateTimer.start();
+	}
+
+	// Force to update trend every 500 ms, as signal values (indicator on the left)
+	// should be updated even if the trend point not in the current view.
+	//
+	bool updateByTimer = m_realtimeUpdateTimer.elapsed() > 500;
+
+	if (updateByTimer == true ||
+		(minTime >= TimeStamp{m_trendWidget->startTime().timeStamp - m_trendWidget->duration() / 10} &&
+		 maxTime <= TimeStamp{m_trendWidget->finishTime().timeStamp + m_trendWidget->duration() / 10}))
+	{
+		m_trendWidget->updateWidget();
+		m_realtimeUpdateTimer.restart();
+	}
+#endif
 
 	return;
 }
@@ -598,5 +655,4 @@ void MonitorTrendsWidget::slot_configurationArrived(ConfigSettings /*configurati
 		m_realtimeDataProvider.updateConnections(m_configController.softwareInfo(),
 												 m_configController.configuration().appDataRealTimeServices);
 	}
-
 }

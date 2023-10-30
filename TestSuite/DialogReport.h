@@ -15,7 +15,7 @@ class DialogReport : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogReport(const TestSuite::TestSuiteConfigController& configController,
+	explicit DialogReport(const ReportLib::ReportTemplateStorage& templates,
 						  const TestSuite::TestLog& testLog,
 						  QWidget *parent = nullptr);
 	~DialogReport();
@@ -30,7 +30,7 @@ private slots:
 
 private:
 	Ui::DialogReport *ui;
-	const TestSuite::TestSuiteConfigController& m_configController;
+	const ReportLib::ReportTemplateStorage& m_templates;
 	const TestSuite::TestLog& m_testLog;
 };
 

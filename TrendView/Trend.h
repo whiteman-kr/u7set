@@ -79,7 +79,7 @@ namespace TrendLib
 
 		static void adjustPainter(QPainter* painter, const TrendParam& trendParam);
 
-		void drawPolyline(QPainter* painter, const QVector<QPointF>& lines, const QRectF& rect) const;
+		void drawPolyline(QPainter* painter, const std::vector<QPointF>& lines, const QRectF& rect) const;
 
 	public:
 		static void calcSignalRects(const QRectF& insideRect,

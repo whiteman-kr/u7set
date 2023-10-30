@@ -9,8 +9,6 @@ MonitorSchemaManager::MonitorSchemaManager(MonitorConfigController& configContro
 	m_rtTrendSchemas(configController, signalDataServer)
 {
 
-	connect(&m_configController, &MonitorConfigController::configurationArrived, this, &MonitorSchemaManager::slot_configurationArrived);
-
 	return;
 }
 
@@ -94,7 +92,7 @@ TimeStamp MonitorSchemaManager::maxTimeStamp(QUuid trendUuid, E::TimeType /*time
 	return m_rtTrendSchemas.maxTimeStamp(trendUuid);
 }
 
-void MonitorSchemaManager::slot_configurationArrived(ConfigSettings /*configuration*/)
+void MonitorSchemaManager::updateConfiguration(const ConfigSettings& /*configuration*/)
 {
 	clear();
 

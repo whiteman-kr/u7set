@@ -1012,7 +1012,7 @@ namespace Hardware
 
 	}
 
-	UnitsConvertor* ModuleFirmwareWriter::jsGetUnitsConvertor()
+	UnitsConverter* ModuleFirmwareWriter::jsGetUnitsConvertor()
 	{
 		QQmlEngine::setObjectOwnership(&m_unitsConvertor, QQmlEngine::ObjectOwnership::CppOwnership);
 		return &m_unitsConvertor;

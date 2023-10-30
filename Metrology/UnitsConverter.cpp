@@ -1,5 +1,5 @@
-﻿#include "UnitsConvertor.h"
-#include "UnitsConvertorTable.h"
+﻿#include "UnitsConverter.h"
+#include "UnitsConverterTable.h"
 #include "MetrologyConnection.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -93,19 +93,19 @@ double UnitsConvertResult::expectedHighValidRange() const
 //
 // -------------------------------------------------------------------------------------------------------------------
 
-bool SignalElectricLimit::isValid()
+bool SignalElectricLimit::isValid() const
 {
-	if (lowLimit == 0.0 && highLimit == 0.0)
-	{
-		return false;
-	}
-
 	if (unit == E::ElectricUnit::NoUnit)
 	{
 		return false;
 	}
 
 	if (sensorType == E::SensorType::NoSensor)
+	{
+		return false;
+	}
+
+	if (lowLimit == 0.0 && highLimit == 0.0)
 	{
 		return false;
 	}
@@ -119,7 +119,7 @@ bool SignalElectricLimit::isValid()
 //
 // -------------------------------------------------------------------------------------------------------------------
 
-UnitsConvertor::UnitsConvertor(QObject *parent)
+UnitsConverter::UnitsConverter(QObject *parent)
 	: QObject(parent)
 {
 	static bool UnitsConvertResultRegistered = false;
@@ -130,11 +130,11 @@ UnitsConvertor::UnitsConvertor(QObject *parent)
 	}
 }
 
-UnitsConvertor::~UnitsConvertor()
+UnitsConverter::~UnitsConverter()
 {
 }
 
-double UnitsConvertor::conversion(double val, UnitsConvertType conversionType, const AppSignal& signal)
+double UnitsConverter::conversion(double val, UnitsConvertType conversionType, const AppSignal& signal)
 {
 	double retVal = 0;
 
@@ -383,7 +383,7 @@ double UnitsConvertor::conversion(double val, UnitsConvertType conversionType, c
 	return retVal;
 }
 
-double UnitsConvertor::conversionLinearity(double val, UnitsConvertType conversionType, double lowEn, double highEn, double lowEl, double highEl)
+double UnitsConverter::conversionLinearity(double val, UnitsConvertType conversionType, double lowEn, double highEn, double lowEl, double highEl)
 {
 	double retVal = 0;
 
@@ -409,7 +409,7 @@ double UnitsConvertor::conversionLinearity(double val, UnitsConvertType conversi
 	return retVal;
 }
 
-double UnitsConvertor::conversionDegree(double val, UnitsConvertType conversionType, E::ElectricUnit unitID, E::SensorType sensorType, double r0)
+double UnitsConverter::conversionDegree(double val, UnitsConvertType conversionType, E::ElectricUnit unitID, E::SensorType sensorType, double r0)
 {
 	double retVal = 0;
 
@@ -421,7 +421,7 @@ double UnitsConvertor::conversionDegree(double val, UnitsConvertType conversionT
 			{
 				case E::ElectricUnit::Ohm:
 
-					if (r0 < R0_OHM_LOW_LIMIT || r0 > R0_OHM_HIGH_LIMIT)
+					if (r0_OhmIsValid(r0) == false)
 					{
 						r0 = default_r0(sensorType);
 					}
@@ -517,7 +517,7 @@ double UnitsConvertor::conversionDegree(double val, UnitsConvertType conversionT
 			{
 				case E::ElectricUnit::Ohm:
 
-					if (r0 < R0_OHM_LOW_LIMIT || r0 > R0_OHM_HIGH_LIMIT)
+					if (r0_OhmIsValid(r0) == false)
 					{
 						r0 = default_r0(sensorType);
 					}
@@ -624,7 +624,7 @@ double UnitsConvertor::conversionDegree(double val, UnitsConvertType conversionT
 	return retVal;
 }
 
-double UnitsConvertor::conversionDegree(double val, UnitsConvertType conversionType)
+double UnitsConverter::conversionDegree(double val, UnitsConvertType conversionType)
 {
 	double retVal = 0;
 
@@ -640,7 +640,7 @@ double UnitsConvertor::conversionDegree(double val, UnitsConvertType conversionT
 	return retVal;
 }
 
-double UnitsConvertor::conversionByConnection(double val, int connectionType, const AppSignal& sourSignal, const AppSignal& destSignal, ConversionDirection directType)
+double UnitsConverter::conversionByConnection(double val, int connectionType, const AppSignal& sourSignal, const AppSignal& destSignal, ConversionDirection directType)
 {
 	if (ERR_METROLOGY_CONNECTION_TYPE(connectionType) == true)
 	{
@@ -792,7 +792,7 @@ double UnitsConvertor::conversionByConnection(double val, int connectionType, co
 	return retVal;
 }
 
-double UnitsConvertor::r0_from_signal(const AppSignal& signal)
+double UnitsConverter::r0_from_signal(const AppSignal& signal)
 {
 	double r0 = 0;
 
@@ -811,7 +811,7 @@ double UnitsConvertor::r0_from_signal(const AppSignal& signal)
 	return r0;
 }
 
-bool UnitsConvertor::r0_is_use(E::SensorType sensorType)
+bool UnitsConverter::r0_is_use(E::SensorType sensorType)
 {
 	bool result = false;
 
@@ -838,7 +838,7 @@ bool UnitsConvertor::r0_is_use(E::SensorType sensorType)
 	return result;
 }
 
-double UnitsConvertor::default_r0(E::SensorType sensorType)
+double UnitsConverter::default_r0(E::SensorType sensorType)
 {
 	double r0 = 0;
 
@@ -882,33 +882,20 @@ double UnitsConvertor::default_r0(E::SensorType sensorType)
 	return r0;
 }
 
-SignalElectricLimit UnitsConvertor::getElectricLimit(int unitID, int sensorType)
+SignalElectricLimit UnitsConverter::getElectricLimit(E::ElectricUnit unit, E::SensorType sensorType)
 {
-	SignalElectricLimit limit;
+	auto it = m_electricLimits.find({ unit, sensorType });
 
-	for(int i = 0; i < SignalElectricLimitCount; i++)
+	if (it == m_electricLimits.end())
 	{
-		const SignalElectricLimit& ul = SignalElectricLimits[i];
-
-		if (ul.unit != unitID)
-		{
-			continue;
-		}
-
-		if (ul.sensorType != sensorType)
-		{
-			continue;
-		}
-
-		limit = ul;
-
-		break;
+		return SignalElectricLimit();
 	}
 
-	return limit;
+	return it->second;
 }
 
-UnitsConvertResult UnitsConvertor::electricLimitIsValid(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType, double r0)
+UnitsConvertResult UnitsConverter::electricLimitIsValid(double elVal, double electricLowLimit, double electricHighLimit,
+														E::ElectricUnit unitID, E::SensorType sensorType, double r0)
 {
 	if (elVal < electricLowLimit || elVal > electricHighLimit)
 	{
@@ -916,6 +903,7 @@ UnitsConvertResult UnitsConvertor::electricLimitIsValid(double elVal, double ele
 	}
 
 	SignalElectricLimit el = getElectricLimit(unitID, sensorType);
+
 	if(el.isValid() == false)
 	{
 		assert(false);
@@ -930,7 +918,7 @@ UnitsConvertResult UnitsConvertor::electricLimitIsValid(double elVal, double ele
 	{
 		if (sensorType != E::SensorType::NoSensor && sensorType != E::SensorType::Ohm_Raw)
 		{
-			if (r0 < R0_OHM_LOW_LIMIT || r0 > R0_OHM_HIGH_LIMIT)
+			if (r0_OhmIsValid(r0) == false)
 			{
 				return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Incorrect R0 for Ohm"));
 			}
@@ -953,7 +941,50 @@ UnitsConvertResult UnitsConvertor::electricLimitIsValid(double elVal, double ele
 	return UnitsConvertResult(elVal);
 }
 
-UnitsConvertResult UnitsConvertor::electricToPhysical_Input(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType, double rload)
+UnitsConvertResult UnitsConverter::electricLimitIsValid(double elVal, double electricLowLimit, double electricHighLimit,
+										int unitID, int sensorType, double r0)
+{
+	return electricLimitIsValid(elVal, electricLowLimit, electricHighLimit,
+								static_cast<E::ElectricUnit>(unitID),
+								static_cast<E::SensorType>(sensorType), r0);
+}
+
+bool UnitsConverter::rloadIsValid(double rload)
+{
+	return rload >= RLOAD_OHM_LOW_LIMIT && rload <= RLOAD_OHM_HIGH_LIMIT;
+}
+
+bool UnitsConverter::r0_OhmIsValid(double r0_Ohm)
+{
+	return r0_Ohm >= R0_OHM_LOW_LIMIT && r0_Ohm <= R0_OHM_HIGH_LIMIT;
+}
+
+QString UnitsConverter::electricUnitName(E::ElectricUnit unit)
+{
+	QString unitName = E::valueToString(unit);
+
+	if (unitName.isEmpty())
+	{
+		unitName = QStringLiteral("Unknown");
+	}
+
+	return unitName	;
+}
+
+QString UnitsConverter::sensorTypeName(E::SensorType sensorType)
+{
+	QString sensorName = E::valueToString(sensorType);
+
+	if (sensorName.isEmpty())
+	{
+		sensorName = QStringLiteral("Unknown");
+	}
+
+	return sensorName;
+}
+
+UnitsConvertResult UnitsConverter::electricToPhysical_Input(double elVal, double electricLowLimit, double electricHighLimit,
+															int unitID, int sensorType, double rload)
 {
 	if (elVal < electricLowLimit || elVal > electricHighLimit)
 	{
@@ -969,7 +1000,7 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_Input(double elVal, double
 					return  UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown SensorType for mA"));
 				}
 
-				if (rload < RLOAD_OHM_LOW_LIMIT || rload > RLOAD_OHM_HIGH_LIMIT)
+				if (rloadIsValid(rload) == false)
 				{
 					return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Rload_Ohm argument is out of range"));
 				}
@@ -1036,7 +1067,7 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_Input(double elVal, double
 	return  UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown unitID"));
 }
 
-UnitsConvertResult UnitsConvertor::electricToPhysical_ThermoCouple(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType)
+UnitsConvertResult UnitsConverter::electricToPhysical_ThermoCouple(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType)
 {
 	if (elVal < electricLowLimit || elVal > electricHighLimit)
 	{
@@ -1063,7 +1094,7 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_ThermoCouple(double elVal,
 	return UnitsConvertResult(phVal);
 }
 
-UnitsConvertResult UnitsConvertor::electricToPhysical_ThermoResistor(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType, double r0)
+UnitsConvertResult UnitsConverter::electricToPhysical_ThermoResistor(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType, double r0)
 {
 	if (elVal < electricLowLimit || elVal > electricHighLimit)
 	{
@@ -1077,7 +1108,7 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_ThermoResistor(double elVa
 
 	if (sensorType != E::SensorType::NoSensor && sensorType != E::SensorType::Ohm_Raw)
 	{
-		if (r0 < R0_OHM_LOW_LIMIT || r0 > R0_OHM_HIGH_LIMIT)
+		if (r0_OhmIsValid(r0) == false)
 		{
 			return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Incorrect R0 for Ohm"));
 		}
@@ -1099,7 +1130,7 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_ThermoResistor(double elVa
 	return UnitsConvertResult(phVal);
 }
 
-UnitsConvertResult UnitsConvertor::electricToPhysical_Output(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int outputMode)
+UnitsConvertResult UnitsConverter::electricToPhysical_Output(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int outputMode)
 {
 	if (elVal < electricLowLimit || elVal > electricHighLimit)
 	{
@@ -1144,22 +1175,12 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_Output(double elVal, doubl
 	return UnitsConvertResult(phVal);
 }
 
-QString UnitsConvertor::electricUnitName(int electricUnit) const
+QString UnitsConverter::electricUnitName(int electricUnit) const
 {
-	if (E::contains<E::ElectricUnit>(electricUnit) == false)
-	{
-		return tr("Unknown");
-	}
-
-	return E::valueToString<E::ElectricUnit>(static_cast<E::ElectricUnit>(electricUnit));
+	return electricUnitName(static_cast<E::ElectricUnit>(electricUnit));
 }
 
-QString UnitsConvertor::sensorTypeName(int sensorType) const
+QString UnitsConverter::sensorTypeName(int sensorType) const
 {
-	if (E::contains<E::SensorType>(sensorType) == false)
-	{
-		return tr("Unknown");
-	}
-
-	return E::valueToString<E::SensorType>(static_cast<E::SensorType>(sensorType));
+	return sensorTypeName(static_cast<E::SensorType>(sensorType));
 }

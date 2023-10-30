@@ -13,7 +13,7 @@ namespace VFrame30
 
 		<b>Event handlers</b>
 
-		To customize item's apperance and behaviour, event handler code is placed to following properties of the schema item using RPCT:
+		To customize item's appearance and behaviour, event handler code is placed to following properties of the schema item using RPCT:
 
 		- <b>PreDrawScript</b> contains pre-draw event handler code. Pre-draw event is generated each time before item is redrawn;<br>
 		- <b>AfterCreate</b> contains creation event handler code. This event is generated when schema item is created;<br>
@@ -22,7 +22,7 @@ namespace VFrame30
 		- <b>Released</b> contains release event handler code. This event is generated when button is released;<br>
 		- <b>Toggled</b> contains toggle event handler code. This event is generated when button is toggled (for checkable buttons).<br>
 
-		<b>PreDrawScript</b> event handler function protype:
+		<b>PreDrawScript</b> event handler function porotype:
 
 		\code
 		function(schemaItem)
@@ -31,7 +31,7 @@ namespace VFrame30
 		Parameters:<br>
 		<i>schemaItem</i> - a handle to schema item, type: SchemaItemPushButton.<br>
 
-		<b>AfterCreate</b>, <b>Clicked</b>, <b>Pressed</b>, <b>Toggled</b> event handlers function protypes:
+		<b>AfterCreate</b>, <b>Clicked</b>, <b>Pressed</b>, <b>Toggled</b> event handlers function porotypes:
 
 		\code
 		function(schemaItem, pushButtonWidget, checked)
@@ -184,7 +184,7 @@ namespace VFrame30
 		//
 	public:
 		virtual QWidget* createWidgetImpl(QWidget* parent, bool editMode, double zoom) override;
-		virtual void updateWidgetProperties(QWidget* widget) const override;
+		virtual void updateWidgetProperties(QWidget* widget, bool editMode) const override;
 
 	protected:
 		virtual void afterCreateImpl(QWidget* control) override;
@@ -195,7 +195,7 @@ namespace VFrame30
 		void released();
 		void toggled(bool checked);
 
-		void runEventScript(QJSValue& evaluatedJs, QPushButton* buttonWidget, bool allowMessageBox);
+		void runEventScript(QString scriptName, QJSValue& evaluatedJs, QPushButton* buttonWidget, bool allowMessageBox);
 
 		// Properties and Data
 		//
@@ -291,7 +291,7 @@ namespace VFrame30
 
 		/// \brief This property holds the interval of auto-repetition
 		///
-		/// If autoRepeat is enabled, then autoRepeatInterval defines the length of the auto-repetition interval in millisecons.
+		/// If autoRepeat is enabled, then autoRepeatInterval defines the length of the auto-repetition interval in milliseconds.
 		Q_PROPERTY(int autoRepeatInterval READ someIntProperty WRITE setSomeIntProperty)
 
 		/// \brief This property holds whether the button is checkable
@@ -313,7 +313,7 @@ namespace VFrame30
 
 		/*! \brief This property holds the widget's style sheet
 
-		The style sheet contains a textual description of customizations to the widget's style, as described in the <a href="https://doc.qt.io/qt-5/stylesheet.html">Qt Style Sheets</a> document.
+		The style sheet contains a textual description of customizations to the widget's style, as described in the <a href="https://doc.qt.io/qt-6/stylesheet.html">Qt Style Sheets</a> document.
 
 		<b>Example</b>
 

@@ -1,6 +1,6 @@
 #include "DialogObjectProperties.h"
 
-#include "UnitsConvertor.h"
+#include "UnitsConverter.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -1929,7 +1929,7 @@ double DialogComparatorProperty::PropertyPattern::electricConstValue()
 		return 0;
 	}
 
-	UnitsConvertor uc;
+	UnitsConverter uc;
 
 	return uc.conversion(m_pObject->compareConstValue(), UnitsConvertType::PhysicalToElectric, m_pObject->inputSignal()->param());
 }

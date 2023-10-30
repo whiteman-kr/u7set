@@ -963,10 +963,9 @@ namespace TrendLib
 						}
 
 						bool ok = false;
-
 						double value = TrendScale::valueToScaleValue(state.value, m_trendWidget->scaleType(), &ok);
 
-						if (ok == false)
+						if (ok == false || std::isinf(value) == true || std::isnan(value) == true)
 						{
 							continue;
 						}

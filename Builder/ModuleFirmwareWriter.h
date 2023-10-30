@@ -3,7 +3,7 @@
 #include "../HardwareLib/ModuleFirmware.h"
 #include "IssueLogger.h"
 
-#include "../Metrology/UnitsConvertor.h"
+#include "../Metrology/UnitsConverter.h"
 
 namespace Hardware
 {
@@ -77,7 +77,7 @@ namespace Hardware
 
 		Q_INVOKABLE void jsSetUniqueID(int lmNumber, quint64 uniqueID);
 
-		Q_INVOKABLE UnitsConvertor* jsGetUnitsConvertor();
+		Q_INVOKABLE UnitsConverter* jsGetUnitsConvertor();
 
 		Q_INVOKABLE bool checkMacForUnique(quint16 m1, quint16 m2, quint16 m3);
 
@@ -113,7 +113,7 @@ namespace Hardware
 		ModuleFirmwareData* scriptFirmwareData = nullptr;
 		UartChannelData* scriptUartChannelData = nullptr;
 
-		UnitsConvertor m_unitsConvertor;
+		UnitsConverter m_unitsConvertor;
 
 	};
 

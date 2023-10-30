@@ -277,6 +277,7 @@ namespace Builder
 
 			PROC_TO_CALL(ModuleLogicCompiler::setLmAppLANDataSize),
 			PROC_TO_CALL(ModuleLogicCompiler::detectUnusedSignals),
+			PROC_TO_CALL(ModuleLogicCompiler::detectUsedReservedSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::fillAnalogSignalsOnSchemas),
 			PROC_TO_CALL(ModuleLogicCompiler::writeResult)
 		};
@@ -997,6 +998,8 @@ namespace Builder
 
 		result &= writeUalItemsFile();
 
+		result &= createUalItemSignalsList();
+
 		result &= loopbacksPreprocessing();
 
 		// primarily created signals
@@ -1486,6 +1489,41 @@ namespace Builder
 		}
 
 		return result;
+	}
+
+	bool ModuleLogicCompiler::createUalItemSignalsList()
+	{
+		m_ualItemsSignals.clear();
+
+		for(const UalItem* ualItem : m_ualItems)
+		{
+			TEST_PTR_CONTINUE(ualItem);
+
+			if (ualItem->isSignal() == false)
+			{
+				continue;
+			}
+
+			QStringList appSignalIDs = ualItem->signal().appSignalIdList();
+
+			for(const QString& id : appSignalIDs)
+			{
+				Hash idHash = calcHash(id);
+
+				auto it = m_ualItemsSignals.find(idHash);
+
+				if (it == m_ualItemsSignals.end())
+				{
+					auto [newIt, b] = m_ualItemsSignals.emplace(idHash, std::set<QUuid>());
+
+					it = newIt;
+				}
+
+				it->second.insert(ualItem->guid());
+			}
+		}
+
+		return true;
 	}
 
 	bool ModuleLogicCompiler::createUalSignalsFromInputAndTuningAcquiredSignals()
@@ -3950,13 +3988,13 @@ namespace Builder
 		return false;
 	}
 
-	bool ModuleLogicCompiler::isConnectedToTerminatorOnly(const LogicPin& outPin)
+	bool ModuleLogicCompiler::isConnectedToTerminatorOnly(const LogicPin& outPin) const
 	{
 		const std::vector<QUuid>& connectedPinsUuids = outPin.associatedIOs();
 
 		for(QUuid inPinUuid : connectedPinsUuids)
 		{
-			UalItem* connectedItem = m_pinParent.value(inPinUuid, nullptr);
+			const UalItem* connectedItem = m_pinParent.value(inPinUuid, nullptr);
 
 			TEST_PTR_CONTINUE(connectedItem);
 
@@ -3967,6 +4005,21 @@ namespace Builder
 		}
 
 		return true;
+	}
+
+	bool ModuleLogicCompiler::isOutConnectedToTerminatorOnly(const UalAfb* ualItem) const
+	{
+		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
+
+		const auto& outs = ualItem->outputs();
+
+		if (outs.size() != 1)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		return isConnectedToTerminatorOnly(outs[0]);
 	}
 
 	bool ModuleLogicCompiler::isConnectedToLoopback(const LogicPin& inPin, std::shared_ptr<Loopback>* loopback)
@@ -6479,10 +6532,7 @@ namespace Builder
 			{
 				UalAfb* ualAfb = createUalAfb(appItem);
 
-				if (assignUalAfbToFbConv(ualAfb) == false)
-				{
-					return false;
-				}
+				RETURN_IF_FALSE(assignUalAfbToFbConv(ualAfb));
 
 				m_inOutSignalsToScalAppFbMap.insert(s->appSignalID(), ualAfb);
 			}
@@ -6517,7 +6567,7 @@ namespace Builder
 			{
 				UalAfb* ualAfb = createUalAfb(appItem);
 
-				RETURN_IF_FALSE(assignUalAfbToFbConv(ualAfb) == false);
+				RETURN_IF_FALSE(assignUalAfbToFbConv(ualAfb));
 
 				m_inOutSignalsToScalAppFbMap.insert(s->appSignalID(), ualAfb);
 			}
@@ -10018,11 +10068,23 @@ namespace Builder
 			ualAfb->caption() == Afb::AFB_BUS_NOT) &&
 			ualAfb->opcode() == Afb::AFB_NOT_ACC_OPCODE)
 		{
+			if (isOutConnectedToTerminatorOnly(ualAfb) == true)
+			{
+				*result = true;
+				return true;		// report like a "code generated"
+			}
+
 			return generateAfbBitAccNotCode(code, ualAfb, bpStepInfo, result);
 		}
 
 		if (ualAfb->opcode() == TO_INT(Afb::AfbType::LOGIC))
 		{
+			if (isOutConnectedToTerminatorOnly(ualAfb) == true)
+			{
+				*result = true;
+				return true;		// report like a "code generated"
+			}
+
 			if (m_afbOrInstances.contains(ualAfb->instance()))
 			{
 				return generateAfbBitAccOrCode(code, ualAfb, result);
@@ -16003,7 +16065,26 @@ namespace Builder
 
 	bool ModuleLogicCompiler::detectUnusedSignals()
 	{
-		QStringList unusedSignals;
+		for(const auto& pair : m_chassisSignals)
+		{
+			const AppSignal* s = pair.second;
+
+			TEST_PTR_CONTINUE(s);
+
+			if (s->isInternal() == true &&
+				s->reserved() == false &&
+				m_ualSignals.contains(s->appSignalID()) == false)
+			{
+				m_log->wrnALC5148(s->appSignalID());
+			}
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::detectUsedReservedSignals()
+	{
+		bool result = true;
 
 		for(const auto& pair : m_chassisSignals)
 		{
@@ -16011,22 +16092,34 @@ namespace Builder
 
 			TEST_PTR_CONTINUE(s);
 
-			if (s->isInternal() == true && m_ualSignals.contains(s->appSignalID()) == false)
+			if (s->reserved() == false)
 			{
-				unusedSignals.append(s->appSignalID());
+				continue;
+			}
+
+			auto it = m_ualItemsSignals.find(calcHash(s->appSignalID()));
+
+			if (it == m_ualItemsSignals.end())
+			{
+				continue;
+			}
+
+			const std::set<QUuid>& ualItemGuids = it->second;
+
+			for(auto const& guid : ualItemGuids)
+			{
+				const UalItem* ualItem = m_ualItems.value(guid, nullptr);
+
+				TEST_PTR_CONTINUE(ualItem);
+
+				// Reserved signal %1 used on schema %2.
+				//
+				m_log->errALC5201(s->appSignalID(), ualItem->guid(), ualItem->schemaID());
+				result = false;
 			}
 		}
 
-		unusedSignals.sort();
-
-		for(const QString& unusedSignal : unusedSignals)
-		{
-			// Internal signal %1 is unused.
-			//
-			m_log->wrnALC5148(unusedSignal);
-		}
-
-		return true;
+		return result;
 	}
 
 	bool ModuleLogicCompiler::fillAnalogSignalsOnSchemas()

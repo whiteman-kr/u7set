@@ -1,5 +1,5 @@
 #include "MetrologySignal.h"
-#include "UnitsConvertor.h"
+#include "UnitsConverter.h"
 #include "../Proto/serialization.pb.h"
 
 namespace Metrology
@@ -354,7 +354,7 @@ namespace Metrology
 
 		if (signal.isAnalog() == true)
 		{
-			UnitsConvertor uc;
+			UnitsConverter uc;
 
 			UnitsConvertResult qpl;
 			UnitsConvertResult qph;
@@ -1387,7 +1387,7 @@ namespace Metrology
 
 					if (param.electricRangeIsValid() == true)
 					{
-						UnitsConvertor uc;
+						UnitsConverter uc;
 						double electric = uc.conversion(compareValue, UnitsConvertType::PhysicalToElectric, param);
 
 						value += "  [" + QString::number(electric, 'f', param.electricPrecision()) + " " + param.electricUnitStr() + "]";

@@ -6971,14 +6971,14 @@ namespace Builder
 	/// Description:
 	///		Required pin of specified AFB is missing. Contact to RPCT developers.
 	///
-	void IssueLogger::errALC5173(QString signalCaption, QString fbCaption, QUuid itemUuid)
+	void IssueLogger::errALC5173(QString pinCaption, QString fbCaption, QUuid itemUuid)
 	{
 		addItemsIssues(OutputMessageLevel::Error, 5173, itemUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5173,
 				  QString(tr("Required pin %1 of AFB %2 is missing.")).
-				  arg(signalCaption).arg(fbCaption));
+				  arg(pinCaption).arg(fbCaption));
 	}
 
 	/// IssueCode: ALC5174
@@ -7570,10 +7570,31 @@ namespace Builder
 	{
 		addItemsIssues(OutputMessageLevel::Error, 5200, itemUuid, schemaID);
 
-		LOG_ERROR(IssueType::AlCompiler,
-				  5200,
+		LOG_ERROR(IssueType::AlCompiler, 5200,
 				  QString(tr("AFB '%1' parameters calculation result out of Float32 range (Schema %2).").
 							arg(afbCaption).arg(schemaID)));
+	}
+
+
+	/// IssueCode: ALC5201
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Reserved signal %1 used on schema %2.
+	///
+	/// Parameters:
+	///		%1 AppSignalID
+	///		%2 SchemaID
+	///
+	/// Description:
+	///		Turn off Reserved property of signal.
+	///
+	void IssueLogger::errALC5201(QString appSignalID, QUuid itemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 5201, itemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler, 5201,
+				  QString(tr("Reserved signal %1 used on schema %2.").arg(appSignalID).arg(schemaID)));
 	}
 
 	/// IssueCode: ALC5800
@@ -8087,30 +8108,33 @@ namespace Builder
 				  );
 	}
 
-
 	/// IssueCode: EQP6102
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signal %1 has wrong type of sensor: %2.
+	/// Title: Signal %1 has wrong SensorType %2.
 	///
 	/// Parameters:
-	///		%1 Application signal ID
-	///		%2 Wrong type of sensor
+	///		%1 AppSignalID
+	///		%2 SensorType
 	///
 	/// Description:
 	///		Wrong type of sensor. It is required to set type of sensor to the correct value.
 	///
-	void IssueLogger::errEQP6102(QString appSignalID, int sensorType)
+	void IssueLogger::errEQP6102(QString appSignalID, E::SensorType sensorType)
 	{
-		LOG_ERROR(IssueType::Equipment,
-				  6102,
-				  tr("Signal %1 has wrong type of sensor: %2.")
-				  .arg(appSignalID)
-				  .arg(sensorType)
-				  );
-	}
+		QString sensorTypeStr = E::valueToString(sensorType);
 
+		if (sensorTypeStr.isEmpty())
+		{
+			sensorTypeStr = QString("UnknownValue (%1)").arg(TO_INT(sensorType));
+		}
+
+		LOG_ERROR(IssueType::Equipment, 6102,
+				  QString(tr("Signal %1 has wrong SensorType - %2.")).
+						arg(appSignalID).
+						arg(sensorTypeStr));
+	}
 
 	/// IssueCode: EQP6103
 	///

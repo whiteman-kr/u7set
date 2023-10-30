@@ -1,5 +1,4 @@
-﻿#ifndef UNITSCONVERTORTABLE_H
-#define UNITSCONVERTORTABLE_H
+﻿#pragma once
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -4865,5 +4864,3 @@ const int	CT_PROPABILITY_COUNT = 1;
 double studentK(int measureCount, int p = CT_PROPABILITY_95);
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------
-
-#endif // UNITSCONVERTORTABLE_H

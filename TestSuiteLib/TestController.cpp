@@ -146,6 +146,11 @@ namespace TestSuite
 			return -1;
 		}
 
+		if (state.isStateAvailable() == false || state.isValid() == false)
+		{
+			return std::numeric_limits<double>::quiet_NaN();
+		}
+
 		return state.value();
 	}
 
@@ -185,11 +190,18 @@ namespace TestSuite
 		return m_inputController.expectSignalValue(appSignalId, timeoutMs - elapsedMs, value, tolerance);
 	}
 
-	void TestController::overridesReset(qint64 timeoutMs)
+	void TestController::overridesReset(qint64 timeoutMs, QStringList excludeAppSignals)
 	{
 		for (const QString& appSignalId : m_overridenSignals)
 		{
 			AppSignalParam asp = signalParam(appSignalId);
+
+			// Exclude specified signals
+			//
+			if (excludeAppSignals.contains(appSignalId) == true)
+			{
+				continue;
+			}
 
 			bool ok = m_outputController.writeSignalValue(appSignalId, asp.tuningDefaultValueToVariant().toDouble());
 			if (ok == false)
@@ -198,7 +210,11 @@ namespace TestSuite
 				return;
 			}
 		}
-		m_overridenSignals.clear();
+
+		std::erase_if(m_overridenSignals, [&excludeAppSignals](const QString& s)
+					  {
+						  return excludeAppSignals.contains(s) == false;
+					  });
 
 		bool ok = waitForSignalOverrides(timeoutMs);
 		if (ok == false)
@@ -208,6 +224,17 @@ namespace TestSuite
 		}
 	}
 
+	QStringList TestController::getOverridenSignals() const
+	{
+		QStringList result;
+		result.reserve(m_overridenSignals.size());
+		for (const QString& appSignalId : m_overridenSignals)
+		{
+			result.push_back(appSignalId);
+		}
+		return result;
+	}
+	
 	bool TestController::signalExists(QString appSignalId) const
 	{
 		return m_inputController.signalExists(appSignalId);

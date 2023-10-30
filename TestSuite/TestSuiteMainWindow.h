@@ -85,6 +85,7 @@ private slots:
 	//
 	void onConfigurationArrived();
 	void onTestingFinished(int result);
+	void onGlobalPermissionChanged(bool result);
 
 private:
 	// Ui
@@ -136,6 +137,10 @@ private:
 	TestSuiteTestLogOutput m_testLogOutput;
 
 	TestSuite::TestSuiteConfigController m_configController;
+	TestSuite::ConfigSettings m_configuration;
+	TestSuite::ConfigData m_configData;
+
+
 	TestSuite::TestSuite m_testSuite;
 	TestSuite::TestScriptsStorage m_testScriptsStorage;
 

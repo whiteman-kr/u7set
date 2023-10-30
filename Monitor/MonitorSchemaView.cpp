@@ -229,11 +229,20 @@ void MonitorSchemaView::updateScriptGlobalVars(QJSEngine& engine)
 
 void MonitorSchemaView::configurationArrived(ConfigSettings configuration)
 {
+	qDebug() << "MonitorSchemaView::configurationArrived()";
+
 	m_configurationId = configuration.configurationId;
 
-	setGlobalScript(configuration.globalScript);
 	setMonitorBehavior(std::move(configuration.monitorBeahvior));
 
+	// This will update GlobalScripts and reevaluate them.
+	//
+	setGlobalScript(configuration.globalScript);
+
+	// updateConfiguration resets schema, which triggers after create scripts, which can require GlobalScript.
+	// At this point GlobalScript is considered evaluated.
+	//
+	monitorSchemaManager()->updateConfiguration(configuration);
 	return;
 }
 

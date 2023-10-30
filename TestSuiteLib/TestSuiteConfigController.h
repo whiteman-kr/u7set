@@ -8,6 +8,13 @@
 
 namespace TestSuite
 {
+	struct ConfigData
+	{
+		std::vector<TestScript> scripts;
+		ReportLib::ReportTemplateStorage reportTemplates;
+	};
+
+
 	struct ConfigSettings
 	{
 		int configurationId = -1;
@@ -69,8 +76,7 @@ namespace TestSuite
 		ConfigSettings configuration() const;
 		ClientLib::ConfigurationInfo configInfo() const;
 
-		std::vector<TestSuite::TestScript> scripts() const;
-		const ReportLib::ReportTemplateStorage& reportTemplates() const;
+		ConfigData configData() const;
 
 		// Data section
 		//
@@ -80,8 +86,6 @@ namespace TestSuite
 		mutable QReadWriteLock m_confugurationLock;		// for access to m_configuration and m_scripts
 		ConfigSettings m_configuration;
 
-		std::vector<TestScript> m_scripts;
-
-		ReportLib::ReportTemplateStorage m_templates;
+		ConfigData m_configData;
 	};
 }

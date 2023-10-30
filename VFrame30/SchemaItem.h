@@ -171,10 +171,10 @@ namespace VFrame30
 		virtual bool preDrawEvent(QJSEngine* engine);
 
 	protected:
-		bool runScript(QJSValue& evaluatedJs, QJSEngine* engine);
-		QJSValue evaluateScript(const QString& script, QJSEngine* engine, QWidget* parentWidget) const;
-		QString formatScriptError(const QJSValue& scriptValue) const;
-		void reportScriptError(const QJSValue& scriptValue, ILogFile* logFile) const;
+		bool runScript(QString scriptName, QJSValue& evaluatedJs, QJSEngine* engine);
+		QJSValue evaluateScript(QString scriptName, const QString& script, QJSEngine* engine, QWidget* parentWidget) const;
+		QString formatScriptError(QString scriptName, const QJSValue& scriptValue) const;
+		void reportScriptError(QString scriptName, const QJSValue& scriptValue, ILogFile* logFile) const;
 
 		// Text search/replace
 		//

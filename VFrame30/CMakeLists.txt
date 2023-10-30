@@ -117,6 +117,8 @@ qt_add_library(${TARGET} STATIC
 	SchemaItemRect.h
 	SchemaItemSignal.cpp
 	SchemaItemSignal.h
+	SchemaItemSlider.cpp
+	SchemaItemSlider.h
 	SchemaItemTerminator.cpp
 	SchemaItemTerminator.h
 	SchemaItemUfb.cpp
@@ -173,34 +175,38 @@ target_precompile_headers(${TARGET} PUBLIC
 		<type_traits>
 		<ranges>
 
-		<qglobal.h>
-		<QApplication>
-		<QMainWindow>
-		<QWindow>
-		<QScrollArea>
-		<QScrollBar>
-		<QMessageBox>
-		<QPushButton>
-		<QLineEdit>
-		<QtConcurrent/QtConcurrent>
-		<QPainter>
-		<QMouseEvent>
-		<QWheelEvent>
-		<QStaticText>
-		<QScreen>
-		<QUuid>
-		<QDebug>
-		<QRect>
-		<QMutex>
-		<QJSEngine>
-		<QQmlEngine>
 		<QAction>
-		<QDrag>
-		<QPdfWriter>
-		<QXmlStreamReader>
+		<QApplication>
+		<QDebug>
 		<QDomElement>
+		<QDrag>
+		<qglobal.h>
+		<QJSEngine>
 		<QJsonDocument>
 		<QJsonObject>
+		<QLineEdit>
+		<QMainWindow>
+		<QMessageBox>
+		<QMouseEvent>
+		<QMutex>
+		<QPainter>
+		<QPdfWriter>
+		<QPushButton>
+		<QQmlEngine>
+		<QRect>
+		<QScreen>
+		<QScrollArea>
+		<QScrollBar>
+		<QSlider>
+		<QStaticText>
+		<QStyleOptionButton>
+		<QSvgRenderer>
+		<QUuid>
+		<QWheelEvent>
+		<QWindow>
+		<QXmlStreamReader>
+
+		<QtConcurrent/QtConcurrent>
 
 		"VFrameTools.h"
 		"../AppSignalLib/AppSignalParam.h"

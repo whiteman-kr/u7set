@@ -184,6 +184,8 @@ namespace EquipmentPropNames
 
 	// Testing Reports properties
 	//
+
+	inline const QString TESTING_SCRIPTTAGS("ScriptTags");
 	inline const QString TESTING_PLANT("Plant");
 	inline const QString TESTING_UNIT("Unit");
 	inline const QString TESTING_SYSTEM("System");
@@ -569,6 +571,7 @@ namespace AppSignalPropNames
     inline const QString INPUT_RANGE("InputRange");
 	inline const QString ACQUIRE("Acquire");
 	inline const QString ARCHIVE("Archive");
+	inline const QString RESERVED("Reserved");
 	inline const QString DECIMAL_PLACES("DecimalPlaces");
 	inline const QString COARSE_APERTURE("CoarseAperture");
 	inline const QString FINE_APERTURE("FineAperture");
@@ -637,12 +640,6 @@ namespace AppSignalDefaultSpecPropStruct
 		"4;LowADC;4 Signal processing;uint32;0;65535;0;0;false;false;Low ADC value;true;None\n"
 		"4;LowEngineeringUnits;4 Signal processing;double;;;0;10;false;false;Low engineering units;true;None\n"
 		"4;LowValidRange;4 Signal processing;double;;;0;10;false;false;Low valid range of signal;true;None\n");
-
-	inline const QString INPUT_DISCRETE(
-		"7;InvertSignal;4 Signal processing;bool;;;false;0;true;false;Invert input signal;true;None;65535;false;false\n");
-
-	inline const QString OUTPUT_DISCRETE(
-		"7;InvertSignal;4 Signal processing;bool;;;false;0;true;false;Invert output signal;true;None;65535;false;false\n");
 }
 
 namespace Manufacturer

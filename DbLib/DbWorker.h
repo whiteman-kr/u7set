@@ -259,6 +259,7 @@ private:
 	bool processingAfterDatabaseUpgrade0215(QSqlDatabase& db, QString* errorMessage);
 	bool processingAfterDatabaseUpgrade0302(QSqlDatabase& db, QString* errorMessage);
 	bool processingAfterDatabaseUpgrade0396(QSqlDatabase& db, QString* errorMessage);
+	bool processingAfterDatabaseUpgrade0401(QSqlDatabase& db, QString* errorMessage);
 
 	void appendIDsArray(const std::vector<int>& ids, QString* request,
 						bool appendCloseBracket, QString* logMessage) const;

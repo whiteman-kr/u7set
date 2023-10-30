@@ -7,24 +7,39 @@
 #include "../TestSuiteLib/TestScriptsStorage.h"
 #include "TestSuiteLog.h"
 
-struct TestTreeFunction
+class TestTreeWidgetItem : public QTreeWidgetItem
 {
-	QString caption;
-	QString function;
+public:
+	TestTreeWidgetItem(const QString& caption);
+
+	QString fileName() const;
+	void setFileName(const QString& value);
+
+	QString function() const;
+	void setFunction(const QString& value);
+
+	bool permission() const;
+	void setPermission(bool value);
+
+	void saveCheckState();
+	void restoreCheckState();
+
+	void updatePermissionState(int columnStatus, bool selectionEnabled);
+
+	void setParentItemCheckState();
+
+private:
+	QString m_caption;
+	QString m_fileName;
+	QString m_function;
+	bool m_permission = true;
+	std::optional<Qt::CheckState> m_savedCheckState;
 };
 
-struct TestTreeScript
-{
-	QString caption;
-	QString fileName;
-	std::vector<TestTreeFunction> functions;
-};
 
 class TestTreeWidget : public QTreeWidget
 {
 	Q_OBJECT
-public:
-	void setParentItemsCheckState();
 
 private:
 	void keyPressEvent(QKeyEvent *event) override;
@@ -39,37 +54,37 @@ class TestListWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	TestListWidget(TestSuiteLogFile& appLog, QWidget* parent);
+	TestListWidget(TestSuiteLogFile& appLog, const TestSuite::TestScriptsStorage& tests, QWidget* parent);
 
 	enum Columns
 	{
 		Caption,
+		Status,
 		Result
 	};
 	enum ColumnsData
 	{
-		ScriptName,
+		ScriptTreeItem,	// First column is a pointer to TestTreeScript structure
 		TestFunction
 	};
 
 public:
-	void setTests(const TestSuite::TestScriptsStorage& tests);
-
+	void fillTestsTree();
 	void clearTestsResults();
-
+	
 	void setSelectionEnabled(bool enable);
 
-	TestSuite::TestScriptSelection testScriptSelection() const;
+	TestSuite::TestScriptSelection getTestScriptSelection() const;
 
 public slots:
+	void onScriptPermissionChanged(QString scriptFileName, bool result);
+	void onTestStarted(QString scriptFileName, QString testFunction);
 	void onTestFinished(QString scriptFileName, QString testFunction, bool result);
 
 signals:
 	void testSelectionChanged();
 	void testItemClicked(const QString& scriptName, const QString& functionName);
-
-private:
-	void fillTestsTree();
+	
 
 private slots:
 	void testItemDoubleClicked(QTreeWidgetItem *item, int column);
@@ -83,10 +98,9 @@ private:
 	QLineEdit* m_filterEdit = nullptr;
 	QPushButton* m_filterButton = nullptr;
 
-	std::vector<TestTreeScript> m_scriptItems;
-
 	bool m_selectionEnabled = false;
 	
+	const TestSuite::TestScriptsStorage& m_tests;
 	TestSuiteLogFile& m_appLog;
 };
 

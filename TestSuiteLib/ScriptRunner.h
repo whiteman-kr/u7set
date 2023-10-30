@@ -12,20 +12,34 @@ namespace TestSuite
 
 	struct ScriptInfo
 	{
+		QString fileName;
 		QString scriptCaption;
 
-		QStringList functionsList;
-		std::map<QString, QString> functionsCaptions;	// Key is function name, value is function caption
+		QStringList testsList;
+		std::map<QString, QString> testsCaptions;	// Key is function name, value is function caption
 
-		qsizetype count() const
+		QString globalAllowFunction;	// Name of global allow function (allowGlobal())
+		QString allowFunction;			// Name of local allow function (allow<SCRIPT_FILE_NAME>())
+
+		ScriptInfo(const QString& fileName)
 		{
-			return functionsList.size();
+			this->fileName = fileName;
 		}
 
-		QString functionCaption(const QString& function, bool* found = nullptr)
+		bool empty() const
 		{
-			auto it = functionsCaptions.find(function);
-			if (it == functionsCaptions.end())
+			return testsList.empty();	// No functions are in this script. Possibly, it is not evaluated
+		}
+
+		qsizetype testsCount() const
+		{
+			return testsList.size();
+		}
+
+		QString testCaption(const QString& function, bool* found = nullptr) const
+		{
+			auto it = testsCaptions.find(function);
+			if (it == testsCaptions.end())
 			{
 				if (found != nullptr)
 				{
@@ -49,24 +63,29 @@ namespace TestSuite
 		Q_OBJECT
 
 	public:
-		ScriptRunner(ConfigSettings& configuration, TestController& testController, ILogFile& scriptTestLog, ControlStatus& status, QMutex& statusMutex);
+		ScriptRunner(const TestScript& script, const TestScript* globalScript, ConfigSettings& configuration, TestController& testController, ILogFile& scriptTestLog, ControlStatus& status, QMutex& statusMutex);
 		virtual ~ScriptRunner();
 
 	public:
-		bool getScriptTestList(const TestScript& script, ScriptInfo& scriptInfo, QString& errorMsg);
-		bool runScript(const TestScript& script, const TestScript* globalScript, const TestScriptSelection& filter);
+		bool queryPermission(bool& allowGlobal, bool& allowLocal);
+		bool runTests(const TestScriptSelection& filter);
+
+		const ScriptInfo& scriptInfo() const;
 
 	signals:
+		void testStarted(QString scriptFileName, QString testFunction);
 		void testFinished(QString scriptFileName, QString testFunction, bool result);
 
 	private:
-		bool evaluateScript(const TestScript& script, const TestScriptSelection& filter, ScriptInfo& scriptInfo, QString& errorMsg);
+		bool evaluateScript(const TestScript& script, ScriptInfo& scriptInfo, QString& errorMsg);
 		bool runScriptFunction(const QString& functionName);
 
 	private:
 		ConfigSettings& m_configuration;
 		TestController& m_testController;
 		ScriptTestLog m_scriptTestLog;
+
+		ScriptInfo m_scriptInfo;
 
 		QJSEngine m_jsEngine;
 		QJSValue m_jsTestController;

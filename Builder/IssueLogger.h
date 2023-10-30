@@ -459,7 +459,7 @@ namespace Builder
 		void errALC5170(QString lmEquipmentID, QString appSignalID, QUuid itemUuid, QString schemaID);	// LM's %1 native signal %2 can't be received via opto connection (Logic schema %3)
 		void errALC5171(QString appSignalID, QString equipmentSignalID);				// Internal application signal %1 cannot be linked to equipment input/output signal %2.
 		void errALC5172(QString inputCaption, QString itemLabel, QUuid itemUuid, QString schemaID);			// Non-discrete busses is not allowed on pin '%1'. (Item %2, logic schema %3).
-		void errALC5173(QString signalCaption, QString fbCaption, QUuid itemUuid);		// Required pin %1 of AFB %2 is missing.
+		void errALC5173(QString pinCaption, QString fbCaption, QUuid itemUuid);		// Required pin %1 of AFB %2 is missing.
 		void errALC5174(QString fbCaption, QUuid itemUuid);								// Required AFB %1 is missing.
 		void errALC5175(QString signalID, QString inFormat, QString outFormat);			// Unknown conversion of signal %1 from %2 to %3 format.
 		void errALC5176(QString signalID, QString propertyName);						// Specific property %1 is not exists in signal %2
@@ -487,6 +487,7 @@ namespace Builder
 		void errALC5198(QString appSignalID1, QString appSignalID2, quint64 h);			// Signals %1 and %2 have equal hash (%3) of AppSignalIDs.
 		void errALC5199(QString afbCaption, QUuid itemUuid, QString schemaID);			// AFB '%1' parameters calculation result out of Int32 range (Schema %2).
 		void errALC5200(QString afbCaption, QUuid itemUuid, QString schemaID);			// AFB '%1' parameters calculation result out of Float32 range (Schema %2).
+		void errALC5201(QString appSignalID, QUuid itemUuid, QString schemaID);			// Reserved signal %1 used on schema %2.
 
 		// firmware writing errors
 
@@ -528,7 +529,7 @@ namespace Builder
 		//
 		void errEQP6100(QString softwareObjectStrId, QUuid uuid);
 		void errEQP6101(QString appSignalID, int unitID);			// Signal %1 has wrong unitID: %2.
-		void errEQP6102(QString appSignalID, int sensorType);		// Signal %1 has wrong type of sensor: %2.
+		void errEQP6102(QString appSignalID, E::SensorType sensorType);		// Signal %1 has wrong SensorType %2.
 		void errEQP6103(QString appSignalID, int outputMode);		// Signal %1 has wrong type of output range mode: %2.
 		void errEQP6104(QString appSignalID, int inOutType);		// Signal %1 has wrong input/output type: %2.
 		void errEQP6105(QString appSignalID, int byteOrder);		// Signal %1 has wrong order of byte: %2.

@@ -115,10 +115,10 @@ set (METROLOGY_SOURCES
 	TuningSignalBase.h
 	TuningSocket.cpp
 	TuningSocket.h
-	UnitsConvertor.cpp
-	UnitsConvertor.h
-	UnitsConvertorTable.cpp
-	UnitsConvertorTable.h
+	UnitsConverter.cpp
+	UnitsConverter.h
+	UnitsConverterTable.cpp
+	UnitsConverterTable.h
 	Visa/visa.h
 )
 

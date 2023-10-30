@@ -1,17 +1,14 @@
-#ifndef UNITS_CONVERTOR_TESTS_H
-#define UNITS_CONVERTOR_TESTS_H
+#pragma once
 
 #include <QObject>
 
-// ==============================================================================================
-
-class UnitsConvertorTests : public QObject
+class UnitsConverterTests : public QObject
 {
 	Q_OBJECT
 
 public:
 
-	UnitsConvertorTests();
+	UnitsConverterTests();
 
 private slots:
 
@@ -27,7 +24,3 @@ private slots:
 	void test_electricToPhysical_ThermoCouple();
 	void test_electricToPhysical_ThermoResistor();
 };
-
-// ==============================================================================================
-
-#endif // UNITS_CONVERTOR_TESTS_H
