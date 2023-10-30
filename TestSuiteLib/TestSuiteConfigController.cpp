@@ -50,6 +50,8 @@ namespace TestSuite
 		config.unit = settings.unit;
 		config.system = settings.system;
 
+		config.scriptTags = settings.scriptTags;
+
 		// Get test files list
 		//
 		for (const OnlineLib::BuildFileInfo& buildFileInfo : files)

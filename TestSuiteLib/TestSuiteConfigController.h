@@ -41,6 +41,7 @@ namespace TestSuite
 		// Scripts list
 		//
 		QStringList scriptFiles;
+		QString scriptTags;
 
 		// Reports settings
 		//

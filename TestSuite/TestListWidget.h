@@ -54,7 +54,7 @@ class TestListWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	TestListWidget(TestSuiteLogFile& appLog, const TestSuite::TestScriptsStorage& tests, QWidget* parent);
+	TestListWidget(TestSuiteLogFile& appLog, TestSuite::ConfigSettings& configuration, const TestSuite::TestScriptsStorage& tests, QWidget* parent);
 
 	enum Columns
 	{
@@ -100,6 +100,8 @@ private:
 
 	bool m_selectionEnabled = false;
 	
+	const TestSuite::ConfigSettings& m_configuration;
+
 	const TestSuite::TestScriptsStorage& m_tests;
 	TestSuiteLogFile& m_appLog;
 };

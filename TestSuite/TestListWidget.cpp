@@ -217,9 +217,10 @@ void TestTreeWidget::keyReleaseEvent(QKeyEvent* event)
 	QTreeWidget::keyReleaseEvent(event);
 }
 
-TestListWidget::TestListWidget(TestSuiteLogFile& appLog, const TestSuite::TestScriptsStorage& tests, QWidget* parent) :
+TestListWidget::TestListWidget(TestSuiteLogFile& appLog, TestSuite::ConfigSettings& configuration, const TestSuite::TestScriptsStorage& tests, QWidget* parent) :
 	QWidget(parent),
 	m_appLog(appLog),
+	m_configuration(configuration),
 	m_tests(tests)
 {
 	m_testsPathLabel = new QLabel(tr("Test Scripts:"));
@@ -357,6 +358,28 @@ void TestListWidget::fillTestsTree()
 			continue;
 		}
 
+		// Check script tags
+		//
+		if (scriptInfo.scriptTags.isEmpty() == false)
+		{
+			bool tagFound = false;
+			for (const QString& tag : scriptInfo.scriptTags)
+			{
+				if (m_configuration.scriptTags.contains(tag) == true)
+				{
+					// Tag was found
+					tagFound = true;
+					break;
+				}
+			}
+			if (tagFound == false)
+			{
+				continue;
+			}
+		}
+
+		// Create test item
+		//
 		TestTreeWidgetItem* scriptItem = new TestTreeWidgetItem(scriptInfo.scriptCaption);
 		scriptItem->setFileName(scriptInfo.fileName);
 

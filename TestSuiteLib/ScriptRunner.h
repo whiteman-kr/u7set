@@ -14,6 +14,7 @@ namespace TestSuite
 	{
 		QString fileName;
 		QString scriptCaption;
+		QStringList scriptTags;
 
 		QStringList testsList;
 		std::map<QString, QString> testsCaptions;	// Key is function name, value is function caption
