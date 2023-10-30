@@ -360,22 +360,9 @@ void TestListWidget::fillTestsTree()
 
 		// Check script tags
 		//
-		if (scriptInfo.scriptTags.isEmpty() == false)
+		if (scriptInfo.checkScriptTags(m_configuration.scriptTags) == false)
 		{
-			bool tagFound = false;
-			for (const QString& tag : scriptInfo.scriptTags)
-			{
-				if (m_configuration.scriptTags.contains(tag) == true)
-				{
-					// Tag was found
-					tagFound = true;
-					break;
-				}
-			}
-			if (tagFound == false)
-			{
-				continue;
-			}
+			continue;
 		}
 
 		// Create test item

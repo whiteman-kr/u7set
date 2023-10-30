@@ -163,6 +163,13 @@ namespace TestSuite
 				continue;
 			}
 
+			// Check script tags
+			//
+			if (runner->scriptInfo().checkScriptTags(m_configuration.scriptTags) == false)
+			{
+				continue;
+			}
+
 			{
 				QMutexLocker l(&m_statusMutex);
 				m_status.m_scriptIndex++;

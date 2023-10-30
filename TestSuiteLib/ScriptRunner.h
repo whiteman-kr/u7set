@@ -54,6 +54,28 @@ namespace TestSuite
 			}
 			return it->second;
 		}
+
+		bool checkScriptTags(const QString& tagsProperty) const
+		{
+			if (scriptTags.isEmpty() == false)
+			{
+				bool tagFound = false;
+				for (const QString& tag : scriptTags)
+				{
+					if (tagsProperty.contains(tag) == true)
+					{
+						// Tag was found
+						tagFound = true;
+						break;
+					}
+				}
+				if (tagFound == false)
+				{
+					return false;
+				}
+			}
+			return true;
+		}
 	};
 
 
