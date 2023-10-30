@@ -719,8 +719,8 @@ public:
 
 	bool serializeFromProtoFile(const QString& filePath);
 
-	static const int BAD_INDEX = -1;
-	static const int BAD_ID = -1;
+	inline static const int BAD_INDEX = -1;
+	inline static const int BAD_ID = -1;
 
 private:
 	const AppSignal* privateGetSignal(const QString& appSignalID) const;

@@ -2872,7 +2872,7 @@ std::pair<AppSignal*, int> AppSignalSet::updateSignal(const AppSignal& s)
 
 	if (it == m_idToIndex.end())
 	{
-		return {nullptr, AppSignalSet::BAD_INDEX};
+		return {nullptr, BAD_INDEX};
 	}
 
 	int signalIndex = it->second;
@@ -2890,7 +2890,7 @@ std::pair<AppSignal*, int> AppSignalSet::updateSignal(const AppSignal& s)
 		if (oldHashIt == m_hashToIndex.end())
 		{
 			Q_ASSERT(false);
-			return {nullptr, AppSignalSet::BAD_INDEX};
+			return {nullptr, BAD_INDEX};
 		}
 
 		Q_ASSERT(oldHashIt->second == signalIndex);
@@ -2902,7 +2902,7 @@ std::pair<AppSignal*, int> AppSignalSet::updateSignal(const AppSignal& s)
 		if (newHashIt != m_hashToIndex.end())
 		{
 			Q_ASSERT(false);
-			return {nullptr, AppSignalSet::BAD_INDEX};
+			return {nullptr, BAD_INDEX};
 		}
 
 		m_hashToIndex.erase(oldHashIt);
