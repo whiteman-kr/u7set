@@ -567,6 +567,10 @@ public:
 	QString unit;
 	QString system;
 
+	// Script tags
+	//
+	QString scriptTags;
+
 private:
 	// this methods should be call by SoftwareSettingsSet only
 	//

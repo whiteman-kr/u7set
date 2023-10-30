@@ -231,8 +231,9 @@ namespace XmlElement
 	inline const QString APP_DATA_SERVICES("AppDataServices");
 
 	inline const QString TUNING_SECURITY("TuningSecurity");
+	
+	inline const QString TESTING_SETTINGS("TestingSettings");
 	inline const QString TESTING_SECURITY("TestingSecurity");
-
 	inline const QString TESTING_REPORTS("TestingReports");
 
 	inline const QString LOGIC_MODULES("LogicModules");

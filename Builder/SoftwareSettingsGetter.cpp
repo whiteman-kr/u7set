@@ -1894,6 +1894,8 @@ bool TestSuiteSettingsGetter::readSettings(const Builder::Context* context,
 	result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::TESTING_UNIT, &unit, log);
 	result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::TESTING_SYSTEM, &system, log);
 
+	result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::TESTING_SCRIPTTAGS, &scriptTags, log);
+
 	return result;
 }
 

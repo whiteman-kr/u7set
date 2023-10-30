@@ -91,11 +91,6 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 	connect(&m_appLog, &Log::LogFile::alertArrived, &m_dialogAlert, &DialogAlert::onAlertArrived);
 	connect(&m_appLog, &Log::LogFile::writeFailure, &m_dialogAlert, &DialogAlert::onAlertArrived);
 
-	if (theSettings.useLocalScriptsPath() == true)
-	{
-		loadScriptsFromLocalPath();
-	}
-
 	if (theSettings.m_mainWindowPos.x() != -1 && theSettings.m_mainWindowPos.y() != -1)
 	{
 		move(theSettings.m_mainWindowPos);
@@ -135,7 +130,7 @@ void TestSuiteMainWindow::createDocks()
 	testsListDock->setFeatures(QDockWidget::NoDockWidgetFeatures);
 	testsListDock->setTitleBarWidget(new QWidget{});		// Hides title bar
 
-	m_testListWidget = new TestListWidget{m_appLog, m_testScriptsStorage, this};
+	m_testListWidget = new TestListWidget{m_appLog, m_configuration, m_testScriptsStorage, this};
 	connect(m_testListWidget, &TestListWidget::testItemClicked, this, &TestSuiteMainWindow::onShowTestContents);
 	connect(m_testListWidget, &TestListWidget::testSelectionChanged, this, [this]() { updateActionsState(); });
 	testsListDock->setWidget(m_testListWidget);
@@ -1282,9 +1277,13 @@ void TestSuiteMainWindow::onConfigurationArrived()
 	if (theSettings.useLocalScriptsPath() == false)
 	{
 		loadScriptsFromConfiguration();
-
-		updateTestViewTabPages();
 	}
+	else
+	{
+		loadScriptsFromLocalPath();
+	}
+
+	updateTestViewTabPages();
 
 	m_testSuite.updateSettings(theSettings.librarySettings(), 
 		TestSuite::ControlParams{theSettings.useLocalScriptsPath() ? theSettings.localScriptsPath() : QString()});

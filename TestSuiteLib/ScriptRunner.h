@@ -14,6 +14,7 @@ namespace TestSuite
 	{
 		QString fileName;
 		QString scriptCaption;
+		QStringList scriptTags;
 
 		QStringList testsList;
 		std::map<QString, QString> testsCaptions;	// Key is function name, value is function caption
@@ -52,6 +53,28 @@ namespace TestSuite
 				*found = true;
 			}
 			return it->second;
+		}
+
+		bool checkScriptTags(const QString& tagsProperty) const
+		{
+			if (scriptTags.isEmpty() == false)
+			{
+				bool tagFound = false;
+				for (const QString& tag : scriptTags)
+				{
+					if (tagsProperty.contains(tag) == true)
+					{
+						// Tag was found
+						tagFound = true;
+						break;
+					}
+				}
+				if (tagFound == false)
+				{
+					return false;
+				}
+			}
+			return true;
 		}
 	};
 

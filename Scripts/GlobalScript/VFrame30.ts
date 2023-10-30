@@ -362,6 +362,8 @@ module VFrame30 {
 
 		toolTip: string;
 		toolTipDuration: number;
+
+		modified: boolean;
 	}
 
 	export interface SliderWidget extends QWidget {

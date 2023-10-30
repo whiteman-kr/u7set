@@ -478,6 +478,11 @@ namespace TestSuite
 				scriptInfo.allowFunction= objectName;
 			}
 
+			if (objectName.compare("ScriptTags", Qt::CaseInsensitive) == 0)
+			{
+				scriptInfo.scriptTags = QVariant().fromValue(it.value()).toStringList();
+			}
+
 			// Check if this is a test function
 			//
 			if (objectName.startsWith("test"))

@@ -1863,6 +1863,14 @@ bool TestSuiteSettings::writeToXml(XmlWriteHelper& xml) const
 
 	xml.writeEndElement();			// </TestingReports>
 
+	// --
+	//
+	xml.writeStartElement(XmlElement::TESTING_SETTINGS);
+	xml.writeStringAttribute(EquipmentPropNames::TESTING_SCRIPTTAGS, scriptTags);
+	xml.writeEndElement();          // </TestingSettings>
+
+
+
 	writeEndSettings(xml);;			// </Settings>
 
 	return true;
@@ -1956,6 +1964,9 @@ bool TestSuiteSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readStringAttribute(EquipmentPropNames::TESTING_PLANT, &plant);
 	result &= xml.readStringAttribute(EquipmentPropNames::TESTING_UNIT, &unit);
 	result &= xml.readStringAttribute(EquipmentPropNames::TESTING_SYSTEM, &system);
+
+	result &= xml.findElement(XmlElement::TESTING_SETTINGS);
+	result &= xml.readStringAttribute(EquipmentPropNames::TESTING_SCRIPTTAGS, &scriptTags);
 
 	return result;
 }
