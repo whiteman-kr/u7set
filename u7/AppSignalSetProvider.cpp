@@ -573,11 +573,11 @@ std::vector<int> AppSignalSetProvider::cloneSignals(const std::vector<int>& sign
 
 		for (const AppSignal& s : signalsToCreate)
 		{
-			auto [s, index] = m_signalSet.append(s);
+			auto [sc, index] = m_signalSet.append(s);
 
-			TEST_PTR_CONTINUE(s);
+			TEST_PTR_CONTINUE(sc);
 
-			newSignalIDs.push_back(s->ID());
+			newSignalIDs.push_back(sc->ID());
 			newSignalIndexes.push_back(index);
 		}
 	}
@@ -636,7 +636,7 @@ bool AppSignalSetProvider::saveSignals(const std::vector<AppSignal*>& signalsVec
 
 		if (res == true && state.errCode == ERR_SIGNAL_OK)
 		{
-			auto [s, index] = m_signalSet.updateSignal(*s);
+			auto [su, index] = m_signalSet.updateSignal(*s);
 
 			updatedIndexes.push_back(index);
 		}
