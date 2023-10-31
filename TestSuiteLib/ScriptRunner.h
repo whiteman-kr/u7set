@@ -94,6 +94,7 @@ namespace TestSuite
 		bool runTests(const TestScriptSelection& filter);
 
 		const ScriptInfo& scriptInfo() const;
+		const TestController& testController() const;
 
 	signals:
 		void testStarted(QString scriptFileName, QString testFunction);

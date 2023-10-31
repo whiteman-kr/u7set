@@ -415,6 +415,11 @@ namespace TestSuite
 	{
 		return m_scriptInfo;
 	}
+
+	const TestController& ScriptRunner::testController() const
+	{
+		return m_testController;
+	}
 	
 	bool ScriptRunner::evaluateScript(const TestScript& script, ScriptInfo& scriptInfo, QString& errorMsg)
 	{

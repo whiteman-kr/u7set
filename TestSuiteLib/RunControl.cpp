@@ -123,9 +123,6 @@ namespace TestSuite
 		Q_ASSERT(m_inputController);
 		Q_ASSERT(m_outputController);
 
-		Q_ASSERT(m_testController == nullptr);
-		m_testController = std::make_unique<TestController>(m_configuration, m_softwareInfo, &m_signals, m_appLog.logFile(), m_testLog, *m_inputController, *m_outputController, this);
-
 		TestScript* globalScript = nullptr;
 
 		// Find global script
@@ -146,7 +143,20 @@ namespace TestSuite
 				continue;
 			}
 
-			m_runners.push_back(std::make_unique<ScriptRunner>(script, globalScript, m_configuration, *m_testController, *m_testLog, m_status, m_statusMutex));
+			m_testControllers.push_back(std::make_unique<TestController>(m_configuration, m_softwareInfo, &m_signals, m_appLog.logFile(), m_testLog, *m_inputController, *m_outputController, this));
+			m_runners.push_back(std::make_unique<ScriptRunner>(script, globalScript, m_configuration, *m_testControllers.back(), *m_testLog, m_status, m_statusMutex));
+
+			// Script tags are from other configuration or no allow functions exist
+			//
+			const auto& runner = m_runners.back();
+			if (runner->scriptInfo().checkScriptTags(m_configuration.scriptTags) == false ||
+				(runner->scriptInfo().globalAllowFunction.isEmpty() == true && runner->scriptInfo().allowFunction.isEmpty() == true))
+			{
+				// Remove just added test controller and runner
+				//
+				m_testControllers.pop_back();
+				m_runners.pop_back();
+			}
 		}
 	}
 
@@ -154,22 +164,14 @@ namespace TestSuite
 	{
 		Q_ASSERT(m_inputController);
 		Q_ASSERT(m_outputController);
-		Q_ASSERT(m_testController);
+
+		{
+			QMutexLocker l(&m_statusMutex);
+			m_status.m_scriptIndex = 0;
+		}
 
 		for (const auto& runner : m_runners)
 		{
-			if (runner->scriptInfo().globalAllowFunction.isEmpty() == true && runner->scriptInfo().allowFunction.isEmpty() == true)
-			{
-				continue;
-			}
-
-			// Check script tags
-			//
-			if (runner->scriptInfo().checkScriptTags(m_configuration.scriptTags) == false)
-			{
-				continue;
-			}
-
 			{
 				QMutexLocker l(&m_statusMutex);
 				m_status.m_scriptIndex++;
@@ -186,11 +188,11 @@ namespace TestSuite
 			// Execution timeout checking function
 			//
 			QString fileName = runner->scriptInfo().fileName;
-			auto checkTestExecutionTime = [&callFinishedCondVariable, &callFinished, scriptRunThread, fileName, this]() -> void
+			auto checkTestExecutionTime = [&callFinishedCondVariable, &callFinished, scriptRunThread, &runner, fileName, this]() -> void
 			{
 				do
 				{
-					if (m_testController->executionTimeout() > 0 && status().duration().count() > m_testController->executionTimeout())
+					if (runner->testController().executionTimeout() > 0 && status().duration().count() > runner->testController().executionTimeout())
 					{
 						QString logMessage = tr("Script %1 execution timeout (%2 ms).").arg(fileName).arg(status().duration().count());
 						m_appLog.writeError(logMessage);
@@ -276,7 +278,8 @@ namespace TestSuite
 	void RunControlThread::taskCleanup()
 	{
 		m_runners.clear();
-		m_testController.reset();
+		m_testControllers.clear();
+
 		m_scriptPermissions.clear();
 	}
 

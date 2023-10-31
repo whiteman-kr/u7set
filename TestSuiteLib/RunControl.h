@@ -27,7 +27,7 @@ namespace TestSuite
 		void globalPermissionChanged(bool result);
 
 	private:
-		std::unique_ptr<TestController> m_testController;
+		std::vector<std::unique_ptr<TestController>> m_testControllers;
 		std::vector<std::unique_ptr<ScriptRunner>> m_runners;
 
 		std::map<QString, bool> m_scriptPermissions;	// Key is script filename, value is running permission

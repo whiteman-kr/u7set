@@ -66,7 +66,8 @@ namespace TestSuite
 		Q_ASSERT(m_inputController);
 		Q_ASSERT(m_outputController);
 
-		std::vector<const TestScript*> runScripts;
+		std::vector<std::unique_ptr<TestController>> testControllers;
+		std::vector<std::unique_ptr<ScriptRunner>> runners;
 
 		TestScript* globalScript = nullptr;
 
@@ -92,25 +93,36 @@ namespace TestSuite
 				}
 			}
 
-			runScripts.push_back(&script);
+			// Create test controller and runner for it
+			//
+			testControllers.push_back(std::make_unique<TestController>(m_configuration, m_softwareInfo, &m_signals, m_appLog.logFile(), m_testLog, *m_inputController, *m_outputController, this));
+			runners.push_back(std::make_unique<ScriptRunner>(script, globalScript, m_configuration, *testControllers.back(), *m_testLog, m_status, m_statusMutex));
+
+			// Script tags are from other configuration
+			//
+			if (runners.back()->scriptInfo().checkScriptTags(m_configuration.scriptTags) == false)
+			{
+				// Remove just added test controller and runner
+				//
+				testControllers.pop_back();
+				runners.pop_back();
+			}
 		}
 
 		{
 			QMutexLocker l(&m_statusMutex);
 			m_status.m_state = ControlState::RunningTests;
-			m_status.m_scriptCount = runScripts.size();
+			m_status.m_scriptCount = runners.size();
 		}
-
-		TestController testController{m_configuration, m_softwareInfo, &m_signals, m_appLog.logFile(), m_testLog, *m_inputController, *m_outputController, this};
 
 		bool fileTestResult = true;
 
-		for (const auto& script : runScripts)
+		for (const auto& runner : runners)
 		{
 			{
 				QMutexLocker l(&m_statusMutex);
 				m_status.m_scriptIndex++;
-				m_status.m_scriptFile = script->fileName();
+				m_status.m_scriptFile = runner->scriptInfo().fileName;
 
 				m_status.setStartTime();
 			}
@@ -122,13 +134,13 @@ namespace TestSuite
 
 			// Execution timeout checking function
 			//
-			auto checkTestExecutionTime = [&callFinishedCondVariable, &callFinished, scriptRunThread, &testController, script, this]() -> void
+			auto checkTestExecutionTime = [&callFinishedCondVariable, &callFinished, scriptRunThread, &runner, this]() -> void
 			{
 				do
 				{
-					if (testController.executionTimeout() > 0 && status().duration().count() > testController.executionTimeout())
+					if (runner->testController().executionTimeout() > 0 && status().duration().count() > runner->testController().executionTimeout())
 					{
-						QString logMessage = tr("Script %1 execution timeout (%2 ms).").arg(script->fileName()).arg(status().duration().count());
+						QString logMessage = tr("Script %1 execution timeout (%2 ms).").arg(runner->scriptInfo().fileName).arg(status().duration().count());
 						m_appLog.writeError(logMessage);
 						requestInterruption();
 						break;
@@ -151,16 +163,14 @@ namespace TestSuite
 
 			checkAndInterruptTestExecution();
 
-			QString logMessage = tr("Run test script: %1").arg(script->fileName());
+			QString logMessage = tr("Run test script: %1").arg(runner->scriptInfo().fileName);
 			m_appLog.writeMessage(logMessage);
 
-			ScriptRunner scriptRunner{*script, globalScript, m_configuration, testController, *m_testLog, m_status, m_statusMutex};
-
-			connect(&scriptRunner, &ScriptRunner::testStarted, [this](QString scriptFileName, QString testFunction)
+			connect(runner.get(), &ScriptRunner::testStarted, [this](QString scriptFileName, QString testFunction)
 					{
 						emit testStarted(scriptFileName, testFunction);
 					});
-			connect(&scriptRunner, &ScriptRunner::testFinished, [this](QString scriptFileName, QString testFunction, bool result)
+			connect(runner.get(), &ScriptRunner::testFinished, [this](QString scriptFileName, QString testFunction, bool result)
 					{
 						emit testFinished(scriptFileName, testFunction, result);
 					});
@@ -169,7 +179,7 @@ namespace TestSuite
 
 			try
 			{
-				fileTestResult &= scriptRunner.runTests(m_controlParams.testsFilter);
+				fileTestResult &= runner->runTests(m_controlParams.testsFilter);
 			}
 			catch (int)
 			{
