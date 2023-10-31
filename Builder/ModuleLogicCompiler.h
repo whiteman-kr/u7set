@@ -989,24 +989,21 @@ namespace Builder
 		std::map<int, int> m_afbOrInstances;		// instanceNo => operand count
 		std::map<int, int> m_afbAndInstances;		// instanceNo => operand count
 
-		QHash<UalSignal*, UalSignal*> m_outUalSignals;		// output UAL signals map: outUalSignal -> sourceUalSignal
-
 		// service maps
 		//
 		HashedVector<QUuid, UalItem*> m_ualItems;				// item GUID => item ptr
-		QHash<QUuid, UalItem*> m_pinParent;						// pin GUID => parent item ptr
+		std::map<QUuid, UalItem*> m_pinParent;					// pin GUID => parent item ptr
 
 		std::map<QString, AppSignal*> m_chassisSignals;			// all signals available in current chassis, AppSignalID => AppSignal*
 		std::multimap<QString, const AppSignal*> m_chassisSignalsByEquipmentID;		// EquipementID => AppSignal*
 		QHash<QString, AppSignal*> m_ioSignals;					// input/output signals of current chassis, AppSignalID => AppSignal*
 		QHash<QString, AppSignal*> m_equipmentSignals;			// equipment signals to app signals map, signal EquipmentID => Signal*
 		std::map<QString, UalSignal*> m_optoPortValiditySignal;	// OptoPort EquipmentID => OptoPort validity signal
-		std::map<QString, UalSignal*> m_busChildSignalsRequiredConversion;	// Bus child signal required conversion ID => Corresponding CONVERTED UAL signal
 
 		std::map<Hash, std::set<QUuid>> m_ualItemsSignals;		// Hash(appSignalID) => set of UalItem.guid (type Signal) with this appSignalID
 
-		::std::set<QString> m_signalsWithFlagsIDs;
-		::std::unordered_set<UalSignal*> m_signalsWithFlagsAndFlagSignals;
+		std::set<QString> m_signalsWithFlagsIDs;
+		std::set<const UalSignal*> m_signalsWithFlagsAndFlagSignals;
 
 		Loopbacks m_loopbacks;
 
@@ -1065,20 +1062,6 @@ namespace Builder
 		//
 
 		std::map<QString, FbConv> m_fbConv;								// AFB caption => FbConv structure
-
-//		UalAfb* m_afbBusNot = nullptr;
-//		UalAfb* m_afbNot = nullptr;
-
-		//
-
-//		static const char* INPUT_CONTROLLER_SUFFIX;
-//		static const char* OUTPUT_CONTROLLER_SUFFIX;
-//		static const char* PLATFORM_INTERFACE_CONTROLLER_SUFFIX;
-
-//		static const char* BUS_COMPOSER_CAPTION;
-//		static const char* BUS_EXTRACTOR_CAPTION;
-
-//		static const char* TEST_DATA_DIR;
 
 		QVector<UalItem*> m_scalAppItems;
 		QHash<QString, UalAfb*> m_inOutSignalsToScalAppFbMap;

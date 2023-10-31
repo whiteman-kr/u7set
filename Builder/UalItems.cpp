@@ -3161,13 +3161,13 @@ namespace Builder
 		return m_analogAndBusSignalsHeap.getAddressForRead(ualSignal, decrementReadCount);
 	}
 
-	void UalSignalsMap::disposeSignalsInHeaps(const std::unordered_set<UalSignal *>& flagsSignals)
+	void UalSignalsMap::disposeSignalsInHeaps(const std::set<const UalSignal*>& flagsSignals)
 	{
 		for(UalSignal* ualSignal : *this)
 		{
 			TEST_PTR_CONTINUE(ualSignal);
 
-			if (flagsSignals.find(ualSignal) != flagsSignals.end())
+			if (flagsSignals.contains(ualSignal) == true)
 			{
 				// any signal used in flags processing can't be placed in heap
 				//

@@ -702,7 +702,7 @@ namespace Builder
 		Address16 getSignalWriteAddress(const UalSignal& ualSignal);
 		Address16 getSignalReadAddress(const UalSignal& ualSignal, bool decrementReadCount);
 
-		void disposeSignalsInHeaps(const std::unordered_set<UalSignal*>& flagsSignals);
+		void disposeSignalsInHeaps(const std::set<const UalSignal*> &flagsSignals);
 
 		bool finalizeHeaps();
 

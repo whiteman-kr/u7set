@@ -758,9 +758,9 @@ namespace Builder
 
 		for(AppSignal* sg : *m_signals)
 		{
-			AppSignal& s = *sg;
+			TEST_PTR_CONTINUE(sg);
 
-			if (s.equipmentID().isEmpty() == true)
+			if (sg->equipmentID().isEmpty() == true)
 			{
 				continue;
 			}
@@ -769,7 +769,7 @@ namespace Builder
 
 			bool isIoSignal = false;
 
-			Hardware::DeviceObject* device = m_equipmentSet->deviceObject(s.equipmentID()).get();
+			Hardware::DeviceObject* device = m_equipmentSet->deviceObject(sg->equipmentID()).get();
 
 			if (device == nullptr)
 			{
@@ -840,21 +840,21 @@ namespace Builder
 				continue;
 			}
 
-			if (m_chassisSignals.contains(s.appSignalID()) == true)
+			if (m_chassisSignals.contains(sg->appSignalID()) == true)
 			{
 				assert(false);				// duplicate signal!
 				continue;
 			}
 
-			m_chassisSignals.insert({s.appSignalID(), &s});
+			m_chassisSignals.insert({sg->appSignalID(), sg});
 
 			if (isIoSignal == true)
 			{
-				m_ioSignals.insert(s.appSignalID(), &s);
+				m_ioSignals.insert(sg->appSignalID(), sg);
 
 				if (deviceAppSignal != nullptr)
 				{
-					m_equipmentSignals.insert(deviceAppSignal->equipmentIdTemplate(), &s);
+					m_equipmentSignals.insert(deviceAppSignal->equipmentIdTemplate(), sg);
 				}
 				else
 				{
@@ -915,7 +915,8 @@ namespace Builder
 			//
 			for(const LogicPin& input : appItem->inputs())
 			{
-				UalItem* firstItem = m_pinParent.value(input.guid(), nullptr);
+				UalItem* firstItem = getValueOrNullptr(m_pinParent, input.guid());
+				//UalItem* firstItem = m_pinParent.value(input.guid(), nullptr);
 
 				if (firstItem != nullptr)
 				{
@@ -930,14 +931,14 @@ namespace Builder
 					continue;
 				}
 
-				m_pinParent.insert(input.guid(), appItem);
+				m_pinParent.emplace(input.guid(), appItem);
 			}
 
 			// add output pins
 			//
 			for(const LogicPin& output : appItem->outputs())
 			{
-				UalItem* firstItem = m_pinParent.value(output.guid(), nullptr);
+				UalItem* firstItem = getValueOrNullptr(m_pinParent, output.guid());
 
 				if (firstItem != nullptr)
 				{
@@ -952,7 +953,7 @@ namespace Builder
 					continue;
 				}
 
-				m_pinParent.insert(output.guid(), appItem);
+				m_pinParent.emplace(output.guid(), appItem);
 			}
 		}
 
@@ -1200,7 +1201,7 @@ namespace Builder
 
 					UalItem* newSourceUalItem = new UalItem(AppLogicItem(loopbackSource, ualItem->schema()));
 					createdItems.append(newSourceUalItem);
-					m_pinParent.insert(loopbackSource->inputs()[0].guid(), newSourceUalItem);
+					m_pinParent.emplace(loopbackSource->inputs()[0].guid(), newSourceUalItem);
 
 					// link ualItem output and loopback source input to each other
 					//
@@ -1237,7 +1238,7 @@ namespace Builder
 
 					UalItem* newTargetUalItem = new UalItem(AppLogicItem(loopbackTarget, ualItem->schema()));
 					createdItems.append(newTargetUalItem);
-					m_pinParent.insert(loopbackTarget->outputs()[0].guid(), newTargetUalItem);
+					m_pinParent.emplace(loopbackTarget->outputs()[0].guid(), newTargetUalItem);
 
 					// link loopback target output and ualItem input to each other
 					//
@@ -1266,7 +1267,7 @@ namespace Builder
 
 		for(const QUuid& pinGuid : associatedIOsGuids)
 		{
-			UalItem* pinParent = m_pinParent.value(pinGuid, nullptr);
+			UalItem* pinParent = getValueOrNullptr(m_pinParent, pinGuid);
 
 			if (pinParent == nullptr)
 			{
@@ -1287,7 +1288,7 @@ namespace Builder
 
 		for(const QUuid& pinGuid : associatedIOsGuids)
 		{
-			UalItem* pinParent = m_pinParent.value(pinGuid, nullptr);
+			UalItem* pinParent = getValueOrNullptr(m_pinParent, pinGuid);
 
 			if (pinParent == nullptr)
 			{
@@ -1417,7 +1418,7 @@ namespace Builder
 
 		for(QUuid inPin : associatedInPins)
 		{
-			const UalItem* linkedItem = m_pinParent.value(inPin, nullptr);
+			const UalItem* linkedItem = getValueOrNullptr(m_pinParent, inPin);
 
 			if (linkedItem == nullptr)
 			{
@@ -2606,7 +2607,7 @@ namespace Builder
 
 		for(QUuid inPinUuid : associatedInputs)
 		{
-			UalItem* destUalItem = m_pinParent.value(inPinUuid, nullptr);
+			UalItem* destUalItem = getValueOrNullptr(m_pinParent, inPinUuid);
 
 			if (destUalItem == nullptr)
 			{
@@ -2727,43 +2728,6 @@ namespace Builder
 			m_log->errALC5117(srcItem->guid(), srcItem->label(), signalItem->guid(), signalItem->label(), signalItem->schemaID());
 			return false;
 		}
-
-/*		if (s->isOutput() == true)
-		{
-			// create separate UAL signal for each output signal
-
-			UalSignal* outUalSignal = m_ualSignals.createSignal(s);
-
-			if (result == false)
-			{
-				return false;
-			}
-
-			result = m_ualSignals.appendRefPin(signalItem, inPinUuid, outUalSignal);
-
-			if (result == false)
-			{
-				return false;
-			}
-
-			m_outUalSignals.insert(outUalSignal, srcUalSignal);
-		}
-		else
-		{
-			result = m_ualSignals.appendRefPin(signalItem, inPinUuid, srcUalSignal);
-
-			if (result == false)
-			{
-				return false;
-			}
-
-			result = m_ualSignals.appendRefSignal(s, srcUalSignal);
-
-			if (result == false)
-			{
-				return false;
-			}
-		}*/
 
 		//
 
@@ -3824,7 +3788,7 @@ namespace Builder
 
 		for(QUuid inPinUuid : connectedPinsUuids)
 		{
-			UalItem* connectedItem = m_pinParent.value(inPinUuid, nullptr);
+			UalItem* connectedItem = getValueOrNullptr(m_pinParent, inPinUuid);
 
 			if (connectedItem == nullptr)
 			{
@@ -3994,7 +3958,7 @@ namespace Builder
 
 		for(QUuid inPinUuid : connectedPinsUuids)
 		{
-			const UalItem* connectedItem = m_pinParent.value(inPinUuid, nullptr);
+			const UalItem* connectedItem = getValueOrNullptr(m_pinParent, inPinUuid);
 
 			TEST_PTR_CONTINUE(connectedItem);
 
@@ -4294,7 +4258,7 @@ namespace Builder
 
 		for(const QUuid& inPinGuid : outPin.associatedIOs())
 		{
-			UalItem* inPinParentItem = m_pinParent.value(inPinGuid);
+			UalItem* inPinParentItem = getValueOrNullptr(m_pinParent, inPinGuid);
 
 			TEST_PTR_CONTINUE(inPinParentItem);
 
@@ -7600,7 +7564,7 @@ namespace Builder
 
 		for(QUuid outPinUuid : accosiatedOutputsUuids)
 		{
-			UalItem* ualItem = m_pinParent.value(outPinUuid, nullptr);
+			UalItem* ualItem = getValueOrNullptr(m_pinParent, outPinUuid);
 
 			TEST_PTR_CONTINUE(ualItem);
 
@@ -7629,7 +7593,7 @@ namespace Builder
 
 		for(QUuid outPinUuid : accosiatedOutputsUuids)
 		{
-			UalItem* ualItem = m_pinParent.value(outPinUuid, nullptr);
+			UalItem* ualItem = getValueOrNullptr(m_pinParent, outPinUuid);
 
 			if (ualItem == nullptr)
 			{
@@ -7661,7 +7625,7 @@ namespace Builder
 
 		QUuid outPinUuid = accosiatedOutputsUuids[0];						// take out pin of AFB1 item
 
-		UalItem* ualItem = m_pinParent.value(outPinUuid, nullptr);
+		UalItem* ualItem = getValueOrNullptr(m_pinParent, outPinUuid);
 
 		if (ualItem == nullptr)
 		{
@@ -7681,7 +7645,7 @@ namespace Builder
 
 		for(QUuid inPinUuid : associatedInputs)
 		{
-			UalItem* nearestUalItem = m_pinParent.value(inPinUuid, nullptr);
+			UalItem* nearestUalItem = getValueOrNullptr(m_pinParent, inPinUuid);
 
 			if (nearestUalItem == nullptr)
 			{
@@ -7727,7 +7691,7 @@ namespace Builder
 
 		for(QUuid linkedPin : linkedPins)
 		{
-			UalItem* ualItem = m_pinParent.value(linkedPin, nullptr);
+			UalItem* ualItem = getValueOrNullptr(m_pinParent, linkedPin);
 
 			TEST_PTR_CONTINUE(ualItem);
 
@@ -13085,7 +13049,7 @@ namespace Builder
 
 			*connectedOutPinUuid = associatedOuts[0];
 
-			connectedItem = m_pinParent.value(*connectedOutPinUuid, nullptr);
+			connectedItem = getValueOrNullptr(m_pinParent, *connectedOutPinUuid);
 
 			if (connectedItem == nullptr)
 			{
@@ -13130,7 +13094,7 @@ namespace Builder
 			*connectedOutPinUuid = associatedOuts[0];
 		}
 
-		UalItem* connectedOutPinParent = m_pinParent.value(associatedOuts[0], nullptr);
+		UalItem* connectedOutPinParent = getValueOrNullptr(m_pinParent, associatedOuts[0]);
 
 		if (connectedOutPinParent == nullptr)
 		{
@@ -13220,7 +13184,7 @@ namespace Builder
 
 		for(QUuid connectedPinUuid : pin.associatedIOs())
 		{
-			UalItem* connectedPinParent = m_pinParent.value(connectedPinUuid, nullptr);
+			UalItem* connectedPinParent = getValueOrNullptr(m_pinParent, connectedPinUuid);
 
 			if (connectedPinParent == nullptr)
 			{
@@ -13354,7 +13318,7 @@ namespace Builder
 
 		QUuid associatedOutUuid = associatedOuts[0];
 
-		const UalItem* connectedPinParent = m_pinParent.value(associatedOutUuid, nullptr);
+		const UalItem* connectedPinParent = getValueOrNullptr(m_pinParent, associatedOutUuid);
 
 		if (connectedPinParent == nullptr)
 		{

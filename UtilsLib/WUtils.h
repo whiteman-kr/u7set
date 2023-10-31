@@ -307,3 +307,22 @@ inline bool checkFloat32Range(double value)
 	return	value <= std::numeric_limits<float>::max() &&
 			value >= std::numeric_limits<float>::lowest();
 }
+
+template <typename KEY, typename VALUE>
+VALUE getValueOrDefault(const std::map<KEY, VALUE>& map, const KEY& key, const VALUE& def)
+{
+	auto it = map.find(key);
+
+	if (it == map.end())
+	{
+		return def;
+	}
+
+	return it->second;
+}
+
+template <typename KEY, typename VALUE>
+VALUE getValueOrNullptr(const std::map<KEY, VALUE>& map, const KEY& key)
+{
+	return getValueOrDefault<KEY, VALUE>(map, key, nullptr);
+}
