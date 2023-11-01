@@ -27,6 +27,38 @@ void DynamicAppSignalState::setSignalParams(const AppSignal* signal, const AppSi
 	m_byteOrder = signal->byteOrder();
 	m_dataSize = signal->dataSize();
 
+	m_archive = signal->archive();
+
+	m_lowLimit = signal->lowEngineeringUnits();
+	m_highLimit = signal->highEngineeringUnits();
+
+	m_reverseLimits = (m_lowLimit > m_highLimit);
+
+	m_apertureType = signal->apertureType();
+
+	switch(m_apertureType)
+	{
+	case E::ApertureType::RangePercent:
+		m_absCoarseAperture = fabs(((m_highLimit - m_lowLimit) * signal->coarseAperture()) / 100.0);
+		m_absFineAperture = fabs(((m_highLimit - m_lowLimit) * signal->fineAperture()) / 100.0);
+		break;
+
+	case E::ApertureType::ValuePercent:								// ex AdaptiveAperture
+		// no break - Ok!
+	case E::ApertureType::AbsValue:
+		m_absCoarseAperture = fabs(signal->coarseAperture());
+		m_absFineAperture = fabs(signal->fineAperture());
+		break;
+
+	default:
+		Q_ASSERT(false);
+	}
+
+	if (m_absFineAperture > m_absCoarseAperture)
+	{
+		std::swap(m_absFineAperture, m_absCoarseAperture);
+	}
+
 	m_enableTuning = signal->enableTuning();
 	m_tuningDefaultValue = signal->tuningDefaultValue();
 
@@ -71,44 +103,13 @@ void DynamicAppSignalState::setSignalParams(const AppSignal* signal, const AppSi
 
 			if (fspi.flagType == E::AppSignalStateFlagType::Validity)
 			{
-				m_validityAddr = fspi.flagSignalAddr;		// validity flag should not be append to m_flagsSignalsParceInfo, it is Ok
+				m_validityAddr = fspi.flagSignalAddr;		// validity flag should NOT be append to m_flagsSignalsParceInfo, it is Ok
 			}
 			else
 			{
-				m_flagsSignalsParceInfo.append(fspi);
+				m_flagsSignalsParceInfo.emplace_back(fspi);
 			}
 		}
-	}
-
-	m_archive = signal->archive();
-
-	m_coarseAperture = signal->coarseAperture();
-	m_fineAperture = signal->fineAperture();
-
-	m_lowLimit = signal->lowEngineeringUnits();
-	m_highLimit = signal->highEngineeringUnits();
-
-	m_reverseLimits = (m_lowLimit > m_highLimit);
-
-	m_apertureType = signal->apertureType();
-
-	switch(m_apertureType)
-	{
-	case E::ApertureType::RangePercent:
-		m_absCoarseAperture = fabs(m_highLimit - m_lowLimit) * (m_coarseAperture / 100.0);
-		m_absFineAperture = fabs(m_highLimit - m_lowLimit) * (m_fineAperture / 100.0);
-		break;
-
-	case E::ApertureType::ValuePercent:		// ex AdaptiveAperture
-		break;
-
-	case E::ApertureType::AbsValue:
-		m_absCoarseAperture = signal->coarseAperture();
-		m_absFineAperture = signal->fineAperture();
-		break;
-
-	default:
-		Q_ASSERT(false);
 	}
 
 	m_current[0].hash = m_current[1].hash = m_signalHash;
@@ -281,9 +282,9 @@ int DynamicAppSignalState::setState(const Times& time,
 
 							if (m_fineStoredValue != 0)
 							{
-								double fineAbsAperture = fabs((fabs(value - m_fineStoredValue) * 100) / m_fineStoredValue);
+								double fineAbsAperture = fabs(((value - m_fineStoredValue) * 100) / m_fineStoredValue);
 
-								if (fineAbsAperture > m_fineAperture)
+								if (fineAbsAperture > m_absFineAperture)
 								{
 									curState.flags.fineAperture = 1;
 								}
@@ -295,9 +296,9 @@ int DynamicAppSignalState::setState(const Times& time,
 
 							if (m_coarseStoredValue != 0)
 							{
-								double coarseAbsAperture = fabs((fabs(value - m_coarseStoredValue) * 100) / m_coarseStoredValue);
+								double coarseAbsAperture = fabs(((value - m_coarseStoredValue) * 100) / m_coarseStoredValue);
 
-								if (coarseAbsAperture > m_coarseAperture)
+								if (coarseAbsAperture > m_absCoarseAperture)
 								{
 									curState.flags.coarseAperture = 1;
 								}
@@ -582,7 +583,7 @@ void DynamicAppSignalState::appendRtSession(Hash signalHash,
 		rtSession.samplePeriodCounter = samplePeriodCounter;
 		rtSession.sampleCounter = 1000000;					// big value for first point immediately sending
 
-		m_rtSessions.insert(newSessionID, rtSession);
+		m_rtSessions.emplace(newSessionID, rtSession);
 
 		m_hasRtSessions = true;
 	}
@@ -611,9 +612,9 @@ void DynamicAppSignalState::removeRtSession(Hash signalHash,
 
 	takeRtProcessingOwnership(rtProcessingOwner);
 
-	assert(m_rtSessions.contains(sessionToRemoveID) == true);
+	int removedCount = m_rtSessions.erase(sessionToRemoveID);
 
-	m_rtSessions.remove(sessionToRemoveID);
+	Q_ASSERT(removedCount == 1);
 
 	if (m_rtSessions.size() == 0)
 	{
@@ -638,9 +639,11 @@ void DynamicAppSignalState::setRtSessionSamplePeriodCounter(Hash signalHash,
 
 	takeRtProcessingOwnership(rtProcessingOwner);
 
-	if (m_rtSessions.contains(sessionID) == true)
+	auto it = m_rtSessions.find(sessionID);
+
+	if (it != m_rtSessions.end())
 	{
-		m_rtSessions[sessionID].samplePeriodCounter = newSamplePeriodCounter;
+		it->second.samplePeriodCounter = newSamplePeriodCounter;
 	}
 
 	releaseRtProcessingOwnership(rtProcessingOwner);
@@ -652,7 +655,7 @@ void DynamicAppSignalState::rtSessionsProcessing(const SimpleAppSignalState& sta
 
 	takeRtProcessingOwnership(thread);
 
-	for(RtSession& session : m_rtSessions)
+	for(auto& [id, session] : m_rtSessions)
 	{
 		if (pushAnyway == true)
 		{

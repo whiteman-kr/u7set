@@ -372,7 +372,7 @@ namespace Builder
 		void errALC5087(QString schemaID, QString appSignalID, QUuid itemUuid);		// Can't assign value to input signal %1 (Logic schema %2).
 		void errALC5088(QString fbCaption, QString paramCaption, QUuid itemUuid);	// Value of parameter %1.%2 must be greater then 0.
 		void errALC5089(int addrTo, int bitTo, int addrFrom, int bitFrom);			// Command MOVB %1[%2], %3[%4] can't write out of application bit- or word-addressed memory.
-		void errALC5090(QString appSignalID);						// Analog signal aperture should be greater then 0.
+		void errALC5090(QString appSignalID);						// Analog signal aperture should be in range 0 to 100%.
 		void errALC5091(QString appSignalID);						// Input/output application signal %1 should be bound to equipment signal.
 		void errALC5092(QString busTypeID, QString appSignalID);	// Bus type ID %1 of signal %2 is undefined.
 		void wrnALC5093(QString appSignalID);						// Coarse aperture of signal %1 less then fine aperture.
@@ -438,7 +438,7 @@ namespace Builder
 		void errALC5154(QString signalID);												// Associated logic module is not found. Signal %1 cannot be processed.
 		void errALC5155(QString validitySignalEquipmentID, QString inputSignalID);		// Linked validity signal with EquipmentID %1 is not found (input signal %2).
 		void errALC5156(QString validitySignalID, QString inputSignalID);				// Linked validity signal %1 should have Discrete Input type (input signal %2).
-		void errALC5157(QString appSignalID);											// Analog signal %1 aperture should be less then 100.
+		void errALC5157(QString appSignalID);											// Analog signal %1 aperture should be less then abs(HighEngineeringUnits - LowEngineeringUnits).
 		void errALC5158(QString fbCaption, QString param1, QString param2, QUuid itemUuid, QString schemaID, QString itemLabel);			// Value of parameter %1.%2 must be greater or equal then the value of %1.%3.
 		void errALC5159(QUuid itemUuid, QString schemaID, QString moduleID);			// Receiver has no connection ID (Schema %1, module %2)
 		void errALC5160(QUuid itemUuid, QString schemaID, QString moduleID);			// Transmitter has no connection ID (Schema %1, module %2)

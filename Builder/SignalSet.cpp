@@ -79,38 +79,63 @@ namespace Builder
 				break;
 
 			case E::SignalType::Analog:
-				if (s.dataSize() != 32)
 				{
-					// Analog signal '%1' must have DataSize equal to 32.
-					//
-					m_log->errALC5015(s.appSignalID());
-					result = false;
-				}
+					if (s.dataSize() != 32)
+					{
+						// Analog signal '%1' must have DataSize equal to 32.
+						//
+						m_log->errALC5015(s.appSignalID());
+						result = false;
+					}
 
-				if (s.coarseAperture() <= 0 || s.fineAperture() <= 0)
-				{
-					// Analog signal '%1' aperture should be greate then 0.
-					//
-					m_log->errALC5090(s.appSignalID());
-					result = false;
-				}
+					if (s.coarseAperture() < s.fineAperture())
+					{
+						// Coarse aperture of signal '%1' less then fine aperture.
+						//
+						m_log->wrnALC5093(s.appSignalID());
+					}
 
-				if (s.coarseAperture() < s.fineAperture())
-				{
-					// Coarse aperture of signal '%1' less then fine aperture.
-					//
-					m_log->wrnALC5093(s.appSignalID());
-				}
+					double coarseAperture = s.coarseAperture();
+					double fineAperture = s.fineAperture();
 
-				if (s.coarseAperture() >= 100 ||
-					s.fineAperture() >= 100)
-				{
-					// Aperture of signal %1 should be less then 100.
-					//
-					m_log->errALC5157(s.appSignalID());
-				}
+					switch(s.apertureType())
+					{
+					case E::ApertureType::AbsValue:
+						if (s.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) &&
+							s.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS))
+						{
+							double low = s.lowEngineeringUnits();
+							double high = s.highEngineeringUnits();
 
-				result &= checkSignalPropertiesRanges(s);
+							if (abs(coarseAperture) > abs(high - low) ||
+								abs(fineAperture) > abs(high - low))
+							{
+								// Analog signal %1 aperture should be less then abs(HowEngineeringUnits - lowEngineeringUnits).
+								//
+								m_log->errALC5157(s.appSignalID());
+								result = false;
+							}
+						}
+						break;
+
+					case E::ApertureType::RangePercent:
+					case E::ApertureType::ValuePercent:
+						if (coarseAperture < 0 || coarseAperture > 100 ||
+							fineAperture < 0 || fineAperture > 100)
+						{
+							// Analog signal %1 aperture should be in range 0 to 100%.
+							//
+							m_log->errALC5090(s.appSignalID());
+							result = false;
+						}
+						break;
+
+					default:
+						Q_ASSERT(false);
+					}
+
+					result &= checkSignalPropertiesRanges(s);
+				}
 
 				break;
 

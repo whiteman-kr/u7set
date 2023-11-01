@@ -5145,19 +5145,19 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Analog signal %1 aperture should be greater then 0.
+	/// Title:	   Analog signal aperture should be in range 0 to 100%.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
 	///
 	/// Description:
-	///		Analog signal aperture should be greater then 0. Check properties of specified signal.
+	///		Analog signal aperture should be in range 0 to 100%. Check properties of specified signal.
 	///
 	void IssueLogger::errALC5090(QString appSignalID)
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5090,
-				  QString(tr("Analog signal %1 aperture should be greater then 0.")).
+				  QString(tr("Analog signal %1 aperture should be in range 0 to 100%.")).
 					arg(appSignalID));
 	}
 
@@ -6594,19 +6594,19 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Analog signal %1 aperture should be less then 100.
+	/// Title:	   Analog signal %1 aperture should be less then abs(HighEngineeringUnits - LowEngineeringUnits).
 	///
 	/// Parameters:
 	///		%1 Application signal ID
 	///
 	/// Description:
-	///		Analog signal aperture should be less then 100. Check properties of specified signal.
+	///		Analog signal aperture should be less then abs(HighEngineeringUnits - LowEngineeringUnits). Check properties of specified signal.
 	///
 	void IssueLogger::errALC5157(QString appSignalID)
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5157,
-				  QString(tr("Analog signal %1 aperture should be less then 100.")).
+				  QString(tr("Analog signal %1 aperture should be less then abs(HighEngineeringUnits - LowEngineeringUnits).")).
 					arg(appSignalID));
 	}
 
