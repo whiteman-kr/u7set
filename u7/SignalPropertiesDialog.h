@@ -33,7 +33,7 @@ signals:
 
 public slots:
 	void checkAndSaveSignal();
-	void rejectCheckoutProperty();
+	void undoCheckouts();
 	void saveDialogSettings();
 	void onSignalPropertyChanged(QList<std::shared_ptr<PropertyObject> > objects);
 	void checkoutSignals(QList<std::shared_ptr<PropertyObject>> objects);
@@ -57,6 +57,7 @@ private:
 
 	const std::vector<AppSignal*>& m_signalVector;
 	std::set<int> m_editedSignalsId;
+	std::set<int> m_checkedOutSignalsId;						// signals checked out by SignalPropertiesDialog
 	std::vector<std::shared_ptr<PropertyObject>> m_objList;
 	bool m_tryCheckout;
 

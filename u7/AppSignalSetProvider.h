@@ -125,6 +125,8 @@ private:
 
 	void onSignalsLoadTimer();
 
+	void emitSignalsUpdated(const std::vector<int>& indexes);
+
 	//
 
 	QString errorMessage(const ObjectState& state);	// Converts ObjectState to human readable text

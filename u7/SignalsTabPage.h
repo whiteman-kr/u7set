@@ -5,6 +5,7 @@
 
 #include "../DbLib/DbController.h"
 #include "../lib/QDoublevalidatorEx.h"
+#include "../lib/StandardColors.h"
 
 #include "../Builder/AppSignalProperties.h"
 #include "MainTabPage.h"
@@ -241,6 +242,14 @@ private:
 
 	int m_rowCount = 0;
 	int m_columnCount = 0;
+
+	//
+
+	inline static const QBrush m_checkedInBrush = { StandardColors::VcsCheckedIn };
+	inline static const QBrush m_addedBrush = { StandardColors::VcsAdded };
+	inline static const QBrush m_modifiedBrush = { StandardColors::VcsModified };
+	inline static const QBrush m_deletedBrush = { StandardColors::VcsDeleted };
+	inline static const QBrush m_excludedFromBuildBrush = { StandardColors::ExcludedFromBuildForeground };
 };
 
 class SignalsProxyModel : public QSortFilterProxyModel

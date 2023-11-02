@@ -125,8 +125,9 @@ SignalPropertiesDialog::SignalPropertiesDialog(const std::vector<AppSignal*>& si
 		connect(m_buttonBox, &QDialogButtonBox::accepted, this, &SignalPropertiesDialog::reject);
 	}
 
-	connect(m_buttonBox, &QDialogButtonBox::rejected, this, &SignalPropertiesDialog::rejectCheckoutProperty);
+	connect(m_buttonBox, &QDialogButtonBox::rejected, this, &SignalPropertiesDialog::undoCheckouts);
 	connect(m_buttonBox, &QDialogButtonBox::rejected, this, &SignalPropertiesDialog::reject);
+	connect(this, &QDialog::rejected, this, &SignalPropertiesDialog::undoCheckouts);
 	connect(this, &SignalPropertiesDialog::finished, this, &SignalPropertiesDialog::saveDialogSettings);
 
 	vl->addWidget(m_buttonBox);
@@ -383,8 +384,13 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 	accept();
 }
 
-void SignalPropertiesDialog::rejectCheckoutProperty()
+void SignalPropertiesDialog::undoCheckouts()
 {
+	if (m_checkedOutSignalsId.empty())
+	{
+		return;
+	}
+
 	std::vector<int> undoSignalIDs;
 
 	for (std::shared_ptr<PropertyObject>& object : m_objList)
@@ -395,11 +401,13 @@ void SignalPropertiesDialog::rejectCheckoutProperty()
 
 		int id = signalProperites->signalID();
 
-		if (signalProperites->signalCheckedOut() && m_editedSignalsId.contains(id))
+		if (signalProperites->signalCheckedOut() && m_checkedOutSignalsId.contains(id))
 		{
 			undoSignalIDs.push_back(id);
 		}
 	}
+
+	m_checkedOutSignalsId.clear();
 
 	m_signalSetProvider->undoSignalsChanges(undoSignalIDs);
 }
@@ -446,26 +454,44 @@ void SignalPropertiesDialog::onSignalPropertyChanged(QList<std::shared_ptr<Prope
 
 void SignalPropertiesDialog::checkoutSignals(QList<std::shared_ptr<PropertyObject>> objects)
 {
+	bool setReadOnly = false;
+
 	for (std::shared_ptr<PropertyObject> object : objects)
 	{
 		AppSignalProperties* signalProperites = dynamic_cast<AppSignalProperties*>(object.get());
 		AppSignal& signal = signalProperites->signal();
 		int id = signal.ID();
 
-		if (signal.checkedOut())
+		if (signal.checkedOut() == false)
 		{
-			m_editedSignalsId.insert(id);
-			continue;
+			QString message;
+
+			if (checkoutSignal(signal, &message) == false)
+			{
+				if (message.isEmpty() == false)
+				{
+					showError(message);
+				}
+
+				setReadOnly = true;
+			}
+			else
+			{
+				// update signal state in properties
+				//
+				signal = *m_signalSetProvider->getLoadedSignalByID(signal.ID(), false);
+			}
+		}
+		else
+		{
+			if (m_signalSetProvider->isEditableSignal(&signal) == false)
+			{
+				setReadOnly = true;
+			}
 		}
 
-		QString message;
-
-		if (checkoutSignal(signal, &message) == false)
+		if (setReadOnly == true)
 		{
-			if (message.isEmpty() == false)
-			{
-				showError(message);
-			}
 			setWindowTitle("Signal properties (read only)");
 			m_buttonBox->setStandardButtons(QDialogButtonBox::Cancel);
 			return;
@@ -516,11 +542,19 @@ void SignalPropertiesDialog::closeEvent(QCloseEvent* event)
 	saveDialogSettings();
 
 	QDialog::closeEvent(event);
+
 }
 
 bool SignalPropertiesDialog::checkoutSignal(const AppSignal& s, QString* message)
 {
-	return m_signalSetProvider->checkoutSignal(&s, message);
+	bool checkoutResult = m_signalSetProvider->checkoutSignal(&s, message);
+
+	if (checkoutResult == true)
+	{
+		m_checkedOutSignalsId.insert(s.ID());
+	}
+
+	return checkoutResult;
 }
 
 bool SignalPropertiesDialog::isPropertyDependentOnPrecision(const QString& propName) const

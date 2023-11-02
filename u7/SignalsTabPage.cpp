@@ -513,7 +513,7 @@ int SignalsModel::columnCount(const QModelIndex& parentIndex) const
 	return m_columnCount;
 }
 
-QVariant SignalsModel::data(const QModelIndex &index, int role) const
+QVariant SignalsModel::data(const QModelIndex& index, int role) const
 {
 	int row = index.row();
 	int col = index.column();
@@ -522,41 +522,34 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 
 	TEST_PTR_RETURN_VALUE(signal, QVariant());
 
-	if (row == m_signalSetProvider->signalCount() || signal->isLoaded() == false)
+	if (row >= m_signalSetProvider->signalCount() || signal->isLoaded() == false)
 	{
 		return QVariant();
 	}
 
 	if (role == Qt::BackgroundRole)
 	{
-		if (signal->checkedOut())
+		if (signal->checkedOut() == true)
 		{
-			QBrush b(StandardColors::VcsCheckedIn);
+			E::VcsItemAction action = signal->instanceAction();
 
-			switch (signal->instanceAction())
+			switch (action)
 			{
-			case E::VcsItemAction::Added:
-				b.setColor(StandardColors::VcsAdded);
-				break;
-			case E::VcsItemAction::Modified:
-				b.setColor(StandardColors::VcsModified);
-				break;
-			case E::VcsItemAction::Deleted:
-				b.setColor(StandardColors::VcsDeleted);
-				break;
-			default:
-				assert(false);
+			case E::VcsItemAction::Added:		return m_addedBrush;
+			case E::VcsItemAction::Modified:	return m_modifiedBrush;
+			case E::VcsItemAction::Deleted:		return m_deletedBrush;
+			default:							Q_ASSERT(false);
 			}
-
-			return QVariant(b);
 		}
+
+		return m_checkedInBrush;
 	}
 
 	if (role == Qt::ForegroundRole)
 	{
 		if (signal->excludeFromBuild() == true)
 		{
-			return QVariant(QBrush(StandardColors::ExcludedFromBuildForeground));
+			return m_excludedFromBuildBrush;
 		}
 	}
 
@@ -682,11 +675,28 @@ void SignalsModel::finishReset()
 
 void SignalsModel::slot_signalsUpdated(const std::vector<int>& indexes)
 {
+	if (indexes.empty())
+	{
+		return;
+	}
+
+	int minIndex = std::numeric_limits<int>::max();
+	int maxIndex = std::numeric_limits<int>::min();
+
 	for(int indx : indexes)
 	{
-		Q_ASSERT(indx >= 0 && indx < m_rowCount);
-		emit dataChanged(index(indx, 0), index(indx, m_columnCount));
+		if (indx < minIndex)
+		{
+			minIndex = indx;
+		}
+
+		if (indx > maxIndex)
+		{
+			maxIndex = indx;
+		}
 	}
+
+	emit dataChanged(index(minIndex, 0), index(maxIndex, m_columnCount));
 }
 
 void SignalsModel::slot_signalsCountChanged()

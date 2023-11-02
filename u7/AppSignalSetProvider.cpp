@@ -165,7 +165,7 @@ void AppSignalSetProvider::reloadSignals(const std::vector<int>& signalIds)
 		}
 	}
 
-	emit signalsUpdated(signalsIndexes);
+	emitSignalsUpdated(signalsIndexes);
 }
 
 void AppSignalSetProvider::enforceAllSignalsLoading()
@@ -211,7 +211,7 @@ const AppSignal* AppSignalSetProvider::loadSignal(int signalId, bool updateViews
 
 	if (updateViews == true && index != BAD_INDEX)
 	{
-		emit signalsUpdated({index});
+		emitSignalsUpdated({index});
 	}
 
 	return updatedSignal;
@@ -607,7 +607,7 @@ bool AppSignalSetProvider::saveSignal(AppSignal* signal, QWidget* parentWidget)
 	{
 		auto [s, index] = m_signalSet.updateSignal(*signal);
 
-		emit signalsUpdated({index});
+		emitSignalsUpdated({index});
 	}
 
 	return result;
@@ -644,7 +644,7 @@ bool AppSignalSetProvider::saveSignals(const std::vector<AppSignal*>& signalsVec
 
 	if (updatedIndexes.empty() == false)
 	{
-		emit signalsUpdated(updatedIndexes);
+		emitSignalsUpdated(updatedIndexes);
 	}
 
 	result &= showErrors(states);
@@ -1256,6 +1256,16 @@ void AppSignalSetProvider::onSignalsLoadTimer()
 	}
 }
 
+void AppSignalSetProvider::emitSignalsUpdated(const std::vector<int>& indexes)
+{
+	if (indexes[0] != 0 &&
+		indexes[0] != 499)
+	{
+		DEBUG_STOP;
+	}
+
+	emit signalsUpdated(indexes);
+}
 QString AppSignalSetProvider::errorMessage(const ObjectState& state)
 {
 	// Converts ObjectState.errCode to human readable message
