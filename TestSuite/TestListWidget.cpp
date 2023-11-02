@@ -738,14 +738,13 @@ void TestListWidget::contextMenuRequested()
 
 		connect(a, &QAction::triggered, this, [this, item]()
 				{
-					if (item->parent() == nullptr) // Check if this is top level item (script)
+					TestTreeWidgetItem* testItem = dynamic_cast<TestTreeWidgetItem*>(item);
+					if (testItem == nullptr)
 					{
-						emit testItemClicked(item->text(Columns::Caption), QString());
+						Q_ASSERT(testItem);
+						return;
 					}
-					else
-					{
-						emit testItemClicked(item->parent()->text(Columns::Caption), item->text(Columns::Caption));
-					}
+					emit testItemClicked(testItem->fileName(), testItem->function());
 				});
 	}
 
