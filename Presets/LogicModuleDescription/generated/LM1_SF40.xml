@@ -400,7 +400,7 @@
       <Pin OpName="o_latch_edi" OpIndex="14" PinType="Output" />
       <Pin OpName="o_version" OpIndex="15" PinType="Output" />
     </AFBComponent>
-    <AFBComponent Caption="LIM" OpCode="23" HasRam="true" ImpVersion="7" VersionOpIndex="14" MaxInstCount="256" SimulationFunc="afb_lim_v7">
+    <AFBComponent Caption="LIM" OpCode="23" HasRam="false" ImpVersion="7" VersionOpIndex="14" MaxInstCount="256" SimulationFunc="afb_lim_v7">
       <Pin OpName="i_conf" OpIndex="0" PinType="Param" />
       <Pin OpName="i_lim_max" OpIndex="1" PinType="Param" />
       <Pin OpName="i_lim_min" OpIndex="3" PinType="Param" />

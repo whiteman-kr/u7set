@@ -424,6 +424,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0399.sql", "Upgrade to version 399, TestSuite preset update (added script tags)"},
 	{":/DatabaseUpgrade/Upgrade0400.sql", "Upgrade to version 400, Update file Tests/GlobalScript.js"},
 	{":/DatabaseUpgrade/Upgrade0401.sql", "Upgrade to version 401, InvertSignal property bug fix"},
+	{":/DatabaseUpgrade/Upgrade0402.sql", "Upgrade to version 402, Fixed AFB Limiter attribute HasRAM (set to false)"},
 };
 
 int DbWorker::counter = 0;
