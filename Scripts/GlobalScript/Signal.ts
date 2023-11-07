@@ -117,5 +117,7 @@ module Signal {
 
 		writeValue(appSignalId: string, value: number): boolean;
 		apply(): void;
+		
+		isLoggedIn(): boolean;
 	}
 }

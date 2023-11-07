@@ -5,6 +5,7 @@
 
 class TuningAuthorizationStub : public ITuningAuthorization
 {
+	virtual bool isLoggedIn() const override;
 	virtual bool checkTuningAccess(QWidget* parent) override;
 };
 

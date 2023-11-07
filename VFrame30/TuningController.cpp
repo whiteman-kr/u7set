@@ -161,4 +161,9 @@ namespace VFrame30
 
 		return;
 	}
+
+	bool TuningController::isLoggedIn() const
+	{
+		return m_tuningAuthorization.isLoggedIn();
+	}
 }

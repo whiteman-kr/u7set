@@ -1,5 +1,10 @@
 #include "TuningConnectionStub.h"
 
+bool TuningAuthorizationStub::isLoggedIn() const
+{
+	return true;
+}
+
 bool TuningAuthorizationStub::checkTuningAccess(QWidget* /*parent*/)
 {
 	return true;

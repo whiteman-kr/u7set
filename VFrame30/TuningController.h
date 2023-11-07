@@ -141,6 +141,9 @@ namespace VFrame30
 		/// \brief Copies written values from <b>Tuning Mode Tuning Values</b> area to <b>Run Mode Tuning Values</b> area. Should be used in TuningClient scripts only when <b>AutoApply</b> property is set to <b>false</b>. Monitor always applies values automatically.
 		void apply();
 
+		/// \brief Returns state of tuning user authorization. If tuning authorization is disabled, also returns true.
+		bool isLoggedIn() const;
+
 	private:
 		QWidget* m_parent;
 		ITuningSignalManager& m_signalManager;
