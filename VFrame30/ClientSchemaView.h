@@ -249,6 +249,17 @@ namespace VFrame30
 		/// \warning Do not call this function from <b>PreDrawScript</b> and <b>AfterCreateScript</b> event handlers. This can cause user interface hang.
 		bool questionMessageBox(QString text, QString details = QString());
 
+		/// \brief Displays a question message box with specified text with specified buttons, default button and icon.
+		///
+		/// Displays a question message box with specified text with specified buttons, default button and icon.
+		/// Buttons are specified as QMessageBox::StandardButtons (mask of QMessageBox::StandardButtons enum values).
+		/// Default button is specified as a one of QMessageBox::StandardButton enum values.
+		/// Icon is specified as a one of QMessageBox::Icon enum values.
+		/// Return value is QMessageBox::StandardButton enum value.
+		///
+		/// \warning Do not call this function from <b>PreDrawScript</b> and <b>AfterCreateScript</b> event handlers. This can cause user interface hang.
+		int messageBox(QString text, QMessageBox::StandardButtons buttons, QMessageBox::StandardButton defaultButton, QMessageBox::Icon icon, QString details = QString());
+
 		// Variables functions
 		//
 		/// \brief Returns true if variable specified by name exists, otherwise returns false.

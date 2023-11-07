@@ -38,7 +38,7 @@ namespace ClientLib
 
 		// State
 		//
-		bool isLoggedIn() const;
+		bool isLoggedIn() const override;
 		QString loggedInUser() const;
 
 		int logoutPendingSeconds() const;

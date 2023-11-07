@@ -268,6 +268,29 @@ namespace VFrame30
 		}
 	}
 
+	int ScriptSchemaView::messageBox(QString text, QMessageBox::StandardButtons buttons, QMessageBox::StandardButton defaultButton, QMessageBox::Icon icon, QString details)
+	{
+		if (m_clientSchemaView->scriptMessageBoxAllowed() == true)
+		{
+			QMessageBox msgBox{m_clientSchemaView};
+			msgBox.setText(text);
+			if (details.isEmpty() == false)
+			{
+				msgBox.setDetailedText(details);
+			}
+			msgBox.setStandardButtons(buttons);
+			msgBox.setDefaultButton(defaultButton);
+			msgBox.setIcon(icon);
+			return msgBox.exec();
+		}
+		else
+		{
+			auto l = m_clientSchemaView->logController();
+			l->writeWarning(tr("MessageBox is not allowed at current script. Text: ") + text);
+			return QMessageBox::No;
+		}
+	}
+
 	bool ScriptSchemaView::variableExists(QString name) const
 	{
 		return m_clientSchemaView->variableExists(name);

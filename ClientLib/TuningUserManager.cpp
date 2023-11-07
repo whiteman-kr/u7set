@@ -99,6 +99,11 @@ namespace ClientLib
 
 	bool TuningUserManager::isLoggedIn() const
 	{
+		if (m_tuningLogin == false)
+		{
+			return true;
+		}
+
 		return m_loggedIn;
 	}
 
