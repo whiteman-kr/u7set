@@ -3,4 +3,5 @@ AIM_SR
 	23.10.2023	Version: 2	AIM-SR_v2.u7devp		Valid Range can be inversed compared to Engineering units
 	26.10.2023	Version: 3	AIM-SR_v3.u7devp		Added new property SensorRange, SensorType is set to 0=Linear
 	31.10.2023	Version: 4	AIM-SR_v4.u7devp		Property SensorRange renamed to InputRange, add new ElectricUnit values: mV=2,Ohm=3,V=4,Hz=6
+	07.11.2023	Version: 5	AIM-SR_v5.u7devp		Thermopairs sensors added to property SensorType (like in MPS-29 preset)
 
