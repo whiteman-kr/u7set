@@ -60,6 +60,7 @@ module VFrame30 {
 		errorMessageBox(text: string, details?: string): void;
 		infoMessageBox(text: string, details?: string): void;
 		questionMessageBox(text: string, details?: string): boolean;
+		messageBox(text: string, buttons: QMessageBox.StandardButton, defaultButton:QMessageBox.StandardButton, icon: QMessageBox.Icon, details?: string): number;
 
 		// Variable functions
 		//
