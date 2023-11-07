@@ -37,7 +37,9 @@ const std::vector<AppSignalPropertyDescription> AppSignalPropertyManager::m_repl
 												AppSignalSetProvider::getInstance()->getUserName(s->userID()) :
 												QString());
 								},
-		nullptr,
+		[](AppSignal* s, const QVariant& v) {
+													// no assigns
+											},
 		{},
 	},
 

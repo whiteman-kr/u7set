@@ -1,4 +1,4 @@
-#include <QMessageBox>
+﻿#include <QMessageBox>
 #include <QFormLayout>
 #include <QDialogButtonBox>
 #include <QToolBar>
@@ -43,7 +43,6 @@ SignalsDelegate::SignalsDelegate(SignalsModel* model, SignalsProxyModel* proxyMo
 
 SignalsDelegate::~SignalsDelegate()
 {
-	DEBUG_STOP;
 }
 
 QWidget* SignalsDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
@@ -680,23 +679,45 @@ void SignalsModel::slot_signalsUpdated(const std::vector<int>& indexes)
 		return;
 	}
 
-	int minIndex = std::numeric_limits<int>::max();
-	int maxIndex = std::numeric_limits<int>::min();
-
-	for(int indx : indexes)
+	if (indexes.size() == 1)
 	{
-		if (indx < minIndex)
-		{
-			minIndex = indx;
-		}
-
-		if (indx > maxIndex)
-		{
-			maxIndex = indx;
-		}
+		emit dataChanged(index(indexes[0], 0), index(indexes[0], m_columnCount));
+		return;
 	}
 
-	emit dataChanged(index(minIndex, 0), index(maxIndex, m_columnCount));
+	std::vector<int> varIndexes(indexes.begin(), indexes.end());
+
+	std::sort(varIndexes.begin(), varIndexes.end());
+
+	std::vector<std::pair<int, int>> ranges;
+
+	int rangeStartValue = 0;
+	int prevValue = 0;
+
+	rangeStartValue = prevValue = varIndexes[0];
+
+	for(int i = 1; i < varIndexes.size(); i++)
+	{
+		int curValue = varIndexes[i];
+
+		if (prevValue + 1 == curValue)
+		{
+			prevValue = curValue;
+			continue;
+		}
+
+		// add range
+		//
+		ranges.emplace_back(rangeStartValue, prevValue);
+		rangeStartValue = prevValue = curValue;
+	}
+
+	ranges.emplace_back(rangeStartValue, prevValue);
+
+	for(const auto& p : ranges)
+	{
+		emit dataChanged(index(p.first, 0), index(p.second, m_columnCount));
+	}
 }
 
 void SignalsModel::slot_signalsCountChanged()
@@ -1241,7 +1262,7 @@ void SignalsTabPage::editSignal()
 
 bool SignalsTabPage::editSignals(const std::vector<int>& ids)
 {
-	m_signalSetProvider->reloadSignals(ids);
+	m_signalSetProvider->reloadSignals(ids, true);
 
 	bool readOnly = false;
 	std::vector<AppSignal*> signalVector;
@@ -1386,7 +1407,7 @@ void SignalsTabPage::undoSignalChanges()
 		return;
 	}
 
-	m_signalSetProvider->reloadSignals(dlg.undoedSignalsIDs());
+	m_signalSetProvider->reloadSignals(dlg.undoedSignalsIDs(), true);
 }
 
 void SignalsTabPage::checkIn()

@@ -32,7 +32,7 @@ public:
 	QString getUserName(int userId);
 
 	void reloadAllSignals();
-	void reloadSignals(const std::vector<int>& signalIds);
+	void reloadSignals(const std::vector<int>& signalIds, bool updateViews);
 	void enforceAllSignalsLoading();
 	const AppSignal* loadSignal(int signalId, bool updateViews);
 
@@ -64,6 +64,7 @@ public:
 
 	bool isCheckinableSignalForMe(int index) const;
 	bool isCheckinableSignalForMe(const AppSignal* signal) const;
+	bool isCheckinableSignalForMe(const ObjectState& objState) const;
 
 	// Signal set modifications DbController calls
 	//
