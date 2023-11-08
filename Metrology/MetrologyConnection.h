@@ -94,7 +94,7 @@ namespace Metrology
 		//
 		QString strID() const;
 
-		static bool signalIsOk(const ::AppSignal& signal);
+		static bool signalIsOk(const ::AppSignal& signal, QString* err);
 
 		//
 		//
@@ -110,7 +110,7 @@ namespace Metrology
 
 		bool isExist(int ioType) const;							// signal has not been found in SignalSetProvider
 
-		void setSignal(int ioType, ::AppSignal* pSignal);
+		bool setSignal(int ioType, ::AppSignal* pSignal, QString* err);
 		void setSignal(int ioType, Metrology::Signal* pSignal);
 
 		Metrology::Signal* metrologySignal(int ioType) const;

@@ -591,8 +591,19 @@ void DialogMetrologyConnectionItem::onOk()
 	//
 	//
 
-	m_connection.setSignal(Metrology::ConnectionIoType::Source, pInSignal);
-	m_connection.setSignal(Metrology::ConnectionIoType::Destination, pOutSignal);
+	QString err;
+
+	if (m_connection.setSignal(Metrology::ConnectionIoType::Source, pInSignal, &err) == false)
+	{
+		QMessageBox::information(this, windowTitle(), err);
+		return;
+	}
+
+	if (m_connection.setSignal(Metrology::ConnectionIoType::Destination, pOutSignal, &err) == false)
+	{
+		QMessageBox::information(this, windowTitle(), err);
+		return;
+	}
 
 	accept();
 }
@@ -900,7 +911,8 @@ void DialogMetrologyConnection::findSignal_in_signalSet()
 
 			m_signalSetProvider->getLoadedSignalByID(pSignal->ID(), false);
 
-			connection->setSignal(ioType, pSignal);
+			QString err;
+			connection->setSignal(ioType, pSignal, &err);
 		}
 	}
 }
@@ -1106,12 +1118,14 @@ bool DialogMetrologyConnection::createConnectionBySignal(AppSignal* pSignal)
 
 	Metrology::Connection connection;
 
+	QString err;
+
 	switch (pSignal->inOutType())
 	{
 		case E::SignalInOutType::Input:
 
 			connection.setType(Metrology::ConnectionType::Input_Internal);
-			connection.setSignal(Metrology::ConnectionIoType::Source, pSignal);
+			connection.setSignal(Metrology::ConnectionIoType::Source, pSignal, &err);
 
 			break;
 
@@ -1120,12 +1134,12 @@ bool DialogMetrologyConnection::createConnectionBySignal(AppSignal* pSignal)
 			if (pSignal->enableTuning() == false)
 			{
 				connection.setType(Metrology::ConnectionType::Input_Internal);
-				connection.setSignal(Metrology::ConnectionIoType::Destination, pSignal);
+				connection.setSignal(Metrology::ConnectionIoType::Destination, pSignal, &err);
 			}
 			else
 			{
 				connection.setType(Metrology::ConnectionType::Tuning_Output);
-				connection.setSignal(Metrology::ConnectionIoType::Source, pSignal);
+				connection.setSignal(Metrology::ConnectionIoType::Source, pSignal, &err);
 			}
 
 			break;
@@ -1133,13 +1147,19 @@ bool DialogMetrologyConnection::createConnectionBySignal(AppSignal* pSignal)
 		case E::SignalInOutType::Output:
 
 			connection.setType(Metrology::ConnectionType::Input_Output);
-			connection.setSignal(Metrology::ConnectionIoType::Destination, pSignal);
+			connection.setSignal(Metrology::ConnectionIoType::Destination, pSignal, &err);
 			break;
 
 		default:
 
 			Q_ASSERT(false);
 			return false;
+	}
+
+	if (err.isEmpty() == false)
+	{
+		QMessageBox::information(this, m_windowTitle, err);
+		return false;
 	}
 
 	fillConnection(true, connection);
@@ -1625,7 +1645,8 @@ void DialogMetrologyConnection::importConnections()
 				continue;
 			}
 
-			pConnection->setSignal(ioType, pSignal);
+			QString err;
+			pConnection->setSignal(ioType, pSignal, &err);
 		}
 	}
 

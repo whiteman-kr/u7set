@@ -181,6 +181,100 @@ class UnitsConverter : public QObject
 		// Hz
 		//
 		ELECTRIC_LIMIT(E::ElectricUnit::Hz,		E::SensorType::Hz_005_50000,		0.05,	50000),			// module FIM
+		ELECTRIC_LIMIT(E::ElectricUnit::Hz,		E::SensorType::Hz_0_60000,			0.0,	60000),			// module FIM
+	};
+
+	inline static const std::map<E::ElectricUnit, std::set<E::SensorType>> electricUnitSensors =
+	{
+		{
+			E::ElectricUnit::NoUnit,
+			{
+				E::SensorType::NoSensor
+			}
+		},
+
+		{
+			E::ElectricUnit::mA,
+			{
+				// no sensor for now
+			}
+		},
+
+		{
+			E::ElectricUnit::mV,
+			{
+				E::SensorType::mV_K_TXA,
+				E::SensorType::mV_L_TXK,
+				E::SensorType::mV_N_THH,
+
+				E::SensorType::mV_Type_B,
+				E::SensorType::mV_Type_E,
+				E::SensorType::mV_Type_J,
+				E::SensorType::mV_Type_K,
+				E::SensorType::mV_Type_N,
+				E::SensorType::mV_Type_R,
+				E::SensorType::mV_Type_S,
+				E::SensorType::mV_Type_T,
+
+				E::SensorType::mV_Raw_Mul_8,
+				E::SensorType::mV_Raw_Mul_32,
+
+				E::SensorType::mV_Type_L,
+				E::SensorType::mV_Type_M,
+				E::SensorType::mV_Raw_m1200_p1200,
+			}
+		},
+
+		{
+			E::ElectricUnit::Ohm,
+			{
+				E::SensorType::Ohm_Pt50_W1391,
+				E::SensorType::Ohm_Pt100_W1391,
+				E::SensorType::Ohm_Pt50_W1385,
+				E::SensorType::Ohm_Pt100_W1385,
+
+				E::SensorType::Ohm_Cu50_W1428,
+				E::SensorType::Ohm_Cu100_W1428,
+				E::SensorType::Ohm_Cu50_W1426,
+				E::SensorType::Ohm_Cu100_W1426,
+
+				E::SensorType::Ohm_Pt21,
+				E::SensorType::Ohm_Cu23,
+
+				E::SensorType::Ohm_Ni50_W1617,
+				E::SensorType::Ohm_Ni100_W1617,
+
+				E::SensorType::Ohm_Pt_a_391,
+				E::SensorType::Ohm_Pt_a_385,
+				E::SensorType::Ohm_Cu_a_428,
+				E::SensorType::Ohm_Cu_a_426,
+				E::SensorType::Ohm_Ni_a_617,
+				E::SensorType::Ohm_Raw,
+			}
+		},
+
+		{
+			E::ElectricUnit::V,
+			{
+				E::SensorType::V_0_5,
+				E::SensorType::V_m10_p10,
+			}
+		},
+
+		{
+			E::ElectricUnit::uA,
+			{
+				E::SensorType::uA_m20_p20,
+			}
+		},
+
+		{
+			E::ElectricUnit::Hz,
+			{
+				E::SensorType::Hz_005_50000,
+				E::SensorType::Hz_0_60000
+			}
+		}
 	};
 
 	// limits for R0_Ohm of MAI
@@ -226,9 +320,10 @@ public:
 											E::ElectricUnit unitID, E::SensorType sensorType, double r0 = 0);
 	static UnitsConvertResult electricLimitIsValid(double elVal, double electricLowLimit, double electricHighLimit,
 											int unitID, int sensorType, double r0 = 0);
-
 	static bool rloadIsValid(double rload);
 	static bool r0_OhmIsValid(double r0_Ohm);
+
+	static bool isSensorValid(E::ElectricUnit electricUnit, E::SensorType sensorType);
 
 	static QString electricUnitName(E::ElectricUnit unit);
 	static QString sensorTypeName(E::SensorType sensorType);

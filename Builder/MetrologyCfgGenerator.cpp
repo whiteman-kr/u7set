@@ -826,6 +826,8 @@ namespace Builder
 
 	bool MetrologyCfgGenerator::testElectricLimit_Input_Hz(const AppSignal& signal)
 	{
+		Q_ASSERT(signal.electricUnit() == E::ElectricUnit::Hz);
+
 		if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false || signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
 		{
 			return true;
@@ -836,31 +838,17 @@ namespace Builder
 			return true;
 		}
 
-		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_UNIT) == false)
-		{
-			return true;
-		}
-		else
-		{
-			if (signal.electricUnit() != E::ElectricUnit::Hz)
-			{
-				return false;
-			}
-		}
-
 		if (signal.isSpecPropExists(AppSignalPropNames::SENSOR_TYPE) == false)
 		{
 			return true;
 		}
-		else
+
+		if (UnitsConverter::isSensorValid(E::ElectricUnit::Hz, signal.sensorType()) == false)
 		{
-			if (signal.sensorType() != E::SensorType::Hz_005_50000)
-			{
-				// Signal %1 has wrong SensorType %2.
-				//
-				m_log->errEQP6102(signal.appSignalID(), signal.sensorType());
-				return false;
-			}
+			// Signal %1 has wrong SensorType %2.
+			//
+			m_log->errEQP6102(signal.appSignalID(), signal.sensorType());
+			return false;
 		}
 
 		UnitsConverter uc;

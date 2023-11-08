@@ -864,7 +864,7 @@ bool AppSignalSetProvider::updateSignalsSpecProps(const std::vector<const Hardwa
 		return false;
 	}
 
-	std::vector<int> checkoutSignalIDs;
+	std::set<int> checkoutSignalIDsSet;
 	std::vector<AppSignal> newSignalWorkcopies;
 
 	for(const Hardware::DeviceAppSignal* deviceSignal: deviceSignalsToUpdate)
@@ -952,15 +952,18 @@ bool AppSignalSetProvider::updateSignalsSpecProps(const std::vector<const Hardwa
 			s.setSpecPropStruct(deviceSignalSpecPropStruct);
 			s.setProtoSpecPropValues(newValues);
 
-			checkoutSignalIDs.push_back(signalID);
 			newSignalWorkcopies.emplace_back(s);
+
+			checkoutSignalIDsSet.insert(signalID);
 		}
 	}
 
-	if (checkoutSignalIDs.size() == 0)
+	if (checkoutSignalIDsSet.size() == 0)
 	{
 		return true;
 	}
+
+	std::vector<int> checkoutSignalIDs(checkoutSignalIDsSet.begin(), checkoutSignalIDsSet.end());
 
 	std::vector<ObjectState> objStates;
 

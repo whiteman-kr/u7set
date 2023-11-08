@@ -2177,12 +2177,6 @@ bool DbController::getLatestSignalsWithoutProgress(const std::vector<int>& signa
 												   std::vector<AppSignal>* signalsArray,
 												   QWidget* parentWidget)
 {
-	if (signalIDs.size() > 1000)
-	{
-		assert(false);
-		return false;
-	}
-
 	// Init progress and check availability
 	//
 	bool ok = initOperation();

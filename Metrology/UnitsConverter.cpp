@@ -959,6 +959,20 @@ bool UnitsConverter::r0_OhmIsValid(double r0_Ohm)
 	return r0_Ohm >= R0_OHM_LOW_LIMIT && r0_Ohm <= R0_OHM_HIGH_LIMIT;
 }
 
+bool UnitsConverter::isSensorValid(E::ElectricUnit electricUnit, E::SensorType sensorType)
+{
+	auto it1 = electricUnitSensors.find(electricUnit);
+
+	if (it1 == electricUnitSensors.end())
+	{
+		return false;
+	}
+
+	const std::set<E::SensorType> sensors = it1->second;
+
+	return sensors.contains(sensorType);
+}
+
 QString UnitsConverter::electricUnitName(E::ElectricUnit unit)
 {
 	QString unitName = E::valueToString(unit);
@@ -1047,7 +1061,7 @@ UnitsConvertResult UnitsConverter::electricToPhysical_Input(double elVal, double
 
 		case E::ElectricUnit::Hz:
 			{
-				if (sensorType != E::SensorType::Hz_005_50000)
+				if (UnitsConverter::isSensorValid(E::ElectricUnit::Hz, static_cast<E::SensorType>(sensorType)) == false)
 				{
 					return  UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown SensorType for Hz"));
 				}
