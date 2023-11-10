@@ -81,17 +81,19 @@ AppSignalPropertyDescription::AppSignalPropertyDescription()
 {
 }
 
+
 AppSignalPropertyDescription::AppSignalPropertyDescription(const QString& propName,
 							 QMetaType::Type propType,
 							 std::function<QVariant (const AppSignal*)> getter,
 							 std::function<void (AppSignal*, const QVariant&)> setter,
+							 Hash specPropStructHash,
 							 const std::map<int, QString>& propEnumValues) :
 	name(propName),
 	type(propType),
 	valueGetter(getter),
-	valueSetter(setter),
-	enumValues(propEnumValues)
+	valueSetter(setter)
 {
+	enumsValues.emplace(specPropStructHash, propEnumValues);
 }
 
 bool AppSignalPropertyDescription::isValid() const
@@ -99,68 +101,96 @@ bool AppSignalPropertyDescription::isValid() const
 	return name.isEmpty() == false;
 }
 
-void AppSignalPropertyDescription::setEnumValues(const std::vector<std::pair<int, QString>>& enumValuesVector)
+void AppSignalPropertyDescription::setEnumValues(Hash specPropStructHash, const std::vector<std::pair<int, QString>>& enumValuesVector)
 {
-	enumValues.clear();
+	auto it = enumsValues.find(specPropStructHash);
 
-	for(const auto& p : enumValuesVector)
+	if (it == enumsValues.end())
 	{
-		enumValues.emplace(p.first, p.second);
+		auto [newIt, b] = enumsValues.emplace(specPropStructHash, std::map<int, QString>{ enumValuesVector.begin(), enumValuesVector.end() } );
+	}
+	else
+	{
+		it->second = std::map<int, QString>{ enumValuesVector.begin(), enumValuesVector.end() };
 	}
 }
 
-void AppSignalPropertyDescription::joinEnumValues(const std::vector<std::pair<int, QString>>& enumValuesVector)
+void AppSignalPropertyDescription::checkEnumValues(Hash specPropStructHash, const std::vector<std::pair<int, QString>>& enumValuesVector)
 {
+	auto it = enumsValues.find(specPropStructHash);
+
+	if (it == enumsValues.end())
+	{
+		enumsValues.emplace(specPropStructHash, std::map<int, QString>{ enumValuesVector.begin(), enumValuesVector.end() });
+		return;
+	}
+
+	std::map<int, QString>& enumValues = it->second;
+
+	if (enumValues.empty())
+	{
+		enumValues = std::map<int, QString>{ enumValuesVector.begin(), enumValuesVector.end() };
+		return;
+	}
+
 	for(const auto& p : enumValuesVector)
 	{
-#ifdef QT_DEBUG
 		auto it = enumValues.find(p.first);
 
 		if (it != enumValues.end())
 		{
 			Q_ASSERT(p.second == it->second);
 		}
-#endif
-		enumValues.emplace(p.first, p.second);
 	}
 }
 
-bool AppSignalPropertyDescription::getEnumValuesVector(std::vector<std::pair<int, QString>>* enumValuesVector) const
+bool AppSignalPropertyDescription::getEnumValuesVector(Hash specPropStructHash, std::vector<std::pair<int, QString>>* enumValuesVector) const
 {
 	TEST_PTR_RETURN_FALSE(enumValuesVector);
 
-	if (isEnumProperty() == false)
+	enumValuesVector->clear();
+
+	auto it = enumsValues.find(specPropStructHash);
+
+	if (it == enumsValues.end())
 	{
 		Q_ASSERT(false);
 		return false;
 	}
 
-	enumValuesVector->clear();
-	enumValuesVector->reserve(enumValues.size());
+	const std::map<int, QString>& enumValues = it->second;
 
-	for(const auto& p : enumValues)
-	{
-		enumValuesVector->emplace_back(p.first, p.second);
-	}
+	*enumValuesVector = std::vector<std::pair<int, QString>>{ enumValues.begin(), enumValues.end() };
 
 	return true;
 }
 
 bool AppSignalPropertyDescription::isEnumProperty() const
 {
-	return enumValues.empty() == false;
+	return enumsValues.empty() == false;
 }
 
-QString AppSignalPropertyDescription::getEnumValueStr(int enumValue) const
+QString AppSignalPropertyDescription::getEnumValueStr(Hash specPropStructHash, int enumValue) const
 {
-	auto it = enumValues.find(enumValue);
+	auto it = enumsValues.find(specPropStructHash);
 
-	if (it == enumValues.end())
+	if (it == enumsValues.end())
 	{
+		Q_ASSERT(false);
 		return QString();
 	}
 
-	return it->second;
+	const std::map<int, QString>& enumValues = it->second;
+
+	auto it2 = enumValues.find(enumValue);
+
+	if (it2 == enumValues.end())
+	{
+		Q_ASSERT(false);
+		return QString();
+	}
+
+	return it2->second;
 }
 
 void AppSignalPropertyDescription::appendSignalID(int signalID)

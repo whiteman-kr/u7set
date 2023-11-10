@@ -42,11 +42,14 @@ private:
 
 struct AppSignalPropertyDescription
 {
+	static const int NON_SPECIFIC_PROP_HASH = 0;
+
 	AppSignalPropertyDescription();
 	AppSignalPropertyDescription(const QString& propName,
 								 QMetaType::Type propType,
 								 std::function<QVariant (const AppSignal*)> getter,
 								 std::function<void (AppSignal*, const QVariant&)> setter,
+								 Hash specPropStructHash,
 								 const std::map<int, QString>& propEnumValues);
 
 	bool specificProperty = false;
@@ -58,8 +61,12 @@ struct AppSignalPropertyDescription
 
 	//
 
-	std::map<int, QString> enumValues;
-	std::set<int> signalsWithThisProperty;			// set of Signal.ID
+	std::map<Hash, std::map<int, QString>> enumsValues;		// specPropStructHash => enumValues
+															// due to different specPropStructs can have different sets of
+															// enum values with same property name
+															// for example property 'SensorType'
+
+	std::set<int> signalsWithThisProperty;					// set of Signal.ID
 
 	//
 
@@ -69,12 +76,12 @@ struct AppSignalPropertyDescription
 
 	bool isValid() const;
 
-	void setEnumValues(const std::vector<std::pair<int, QString>>& enumValuesVector);
-	void joinEnumValues(const std::vector<std::pair<int, QString>>& enumValuesVector);
-	bool getEnumValuesVector(std::vector<std::pair<int, QString>>* enumValuesVector) const;
+	void setEnumValues(Hash specPropStructHash, const std::vector<std::pair<int, QString>>& enumValuesVector);
+	void checkEnumValues(Hash specPropStructHash, const std::vector<std::pair<int, QString>>& enumValuesVector);
+	bool getEnumValuesVector(Hash specPropStructHash, std::vector<std::pair<int, QString>>* enumValuesVector) const;
 
 	bool isEnumProperty() const;
-	QString getEnumValueStr(int enumValue) const;
+	QString getEnumValueStr(Hash specPropStructHash, int enumValue) const;
 
 	void appendSignalID(int signalID);
 	bool isSignalHaveProperty(int signalID) const;
@@ -194,7 +201,7 @@ AppSignalProperties::addPropertyDescription(const QString& name,
 
 	newProperty.name = name;
 
-	newProperty.enumValues = E::enumValuesMap<TYPE>();
+	newProperty.enumsValues.emplace(AppSignalPropertyDescription::NON_SPECIFIC_PROP_HASH, E::enumValuesMap<TYPE>());
 	newProperty.type = QMetaType::Int;
 
 	newProperty.valueGetter = [getter](const AppSignal* s){ return TO_INT(getter(*s)); };

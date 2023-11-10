@@ -10,7 +10,8 @@ const std::vector<AppSignalPropertyDescription> AppSignalPropertyManager::m_repl
 		QMetaType::QString,
 		[](const AppSignal* s){ return E::valueToString<E::SignalType>(s->signalType()); },
 		nullptr,
-		{},
+		AppSignalPropertyDescription::NON_SPECIFIC_PROP_HASH,
+		E::enumValuesMap<E::SignalType>(),
 	},
 
 	{
@@ -18,7 +19,8 @@ const std::vector<AppSignalPropertyDescription> AppSignalPropertyManager::m_repl
 		QMetaType::QString,
 		[](const AppSignal* s) { return E::valueToString<E::SignalInOutType>(s->inOutType()); },
 		nullptr,
-		{},
+		AppSignalPropertyDescription::NON_SPECIFIC_PROP_HASH,
+		E::enumValuesMap<E::SignalInOutType>(),
 	},
 
 	{
@@ -26,7 +28,8 @@ const std::vector<AppSignalPropertyDescription> AppSignalPropertyManager::m_repl
 		QMetaType::QString,
 		[](const AppSignal* s) { return E::valueToString<E::ByteOrder>(s->byteOrder()); },
 		nullptr,
-		{},
+		AppSignalPropertyDescription::NON_SPECIFIC_PROP_HASH,
+		E::enumValuesMap<E::ByteOrder>(),
 	},
 
 	{
@@ -40,6 +43,7 @@ const std::vector<AppSignalPropertyDescription> AppSignalPropertyManager::m_repl
 		[](AppSignal* s, const QVariant& v) {
 													// no assigns
 											},
+		AppSignalPropertyDescription::NON_SPECIFIC_PROP_HASH,
 		{},
 	},
 
@@ -48,6 +52,7 @@ const std::vector<AppSignalPropertyDescription> AppSignalPropertyManager::m_repl
 		QMetaType::QString,
 		[](const AppSignal* s) { return E::valueToString<E::AnalogAppSignalFormat>(s->analogSignalFormat()); },
 		[](AppSignal* s, const QVariant& v) { s->setAnalogSignalFormat(static_cast<E::AnalogAppSignalFormat>(v.toInt())); },
+		AppSignalPropertyDescription::NON_SPECIFIC_PROP_HASH,
 		E::enumValuesMap<E::AnalogAppSignalFormat>(),
 	},
 
@@ -56,6 +61,7 @@ const std::vector<AppSignalPropertyDescription> AppSignalPropertyManager::m_repl
 		QMetaType::QString,
 		[](const AppSignal* s) { return E::valueToString<E::ApertureType>(s->apertureType()); },
 		[](AppSignal* s, const QVariant& v) { s->setApertureType(static_cast<E::ApertureType>(v.toInt())); },
+		AppSignalPropertyDescription::NON_SPECIFIC_PROP_HASH,
 		E::enumValuesMap<E::ApertureType>()
 	},
 
@@ -132,12 +138,12 @@ bool AppSignalPropertyManager::getSignalEnumPropertyValues(const AppSignal& s, i
 
 	if (appSignalProperty.isSpecificProperty() == false)
 	{
-		Q_ASSERT(appSignalProperty.enumValues.size() > 0);
-
-		return appSignalProperty.getEnumValuesVector(enumValues);
+		return appSignalProperty.getEnumValuesVector(AppSignalPropertyDescription::NON_SPECIFIC_PROP_HASH, enumValues);
 	}
 
-	PropertyObject propObject;
+	return appSignalProperty.getEnumValuesVector(s.specPropStructHash(), enumValues);
+
+/*	PropertyObject propObject;
 
 	std::pair<bool, QString> result = propObject.parseSpecificPropertiesStruct(s.specPropStruct());
 
@@ -153,7 +159,7 @@ bool AppSignalPropertyManager::getSignalEnumPropertyValues(const AppSignal& s, i
 
 	*enumValues = property->enumValues();
 
-	return true;
+	return true; */
 }
 
 bool AppSignalPropertyManager::isEnumProperty(int propertyIndex) const
@@ -202,19 +208,23 @@ QVariant AppSignalPropertyManager::value(const AppSignal* signal, int propertyIn
 	{
 		return property.valueGetter(signal);
 	}
-	else
+	int value = property.valueGetter(signal).toInt();
+
+	if (property.specificProperty == true)
 	{
-		int value = property.valueGetter(signal).toInt();
-
-		auto it = property.enumValues.find(value);
-
-		if (it != property.enumValues.end())
-		{
-			return it->second;
-		}
-
-		return QString("Unknown value (%1)").arg(value);
+		return property.getEnumValueStr(signal->specPropStructHash(), value);
 	}
+
+	return property.getEnumValueStr(AppSignalPropertyDescription::NON_SPECIFIC_PROP_HASH, value);
+
+/*	auto it = property.enumValues.find(value);
+
+	if (it != property.enumValues.end())
+	{
+		return it->second;
+	}
+
+	return QString("Unknown value (%1)").arg(value); */
 }
 
 bool AppSignalPropertyManager::setValue(AppSignal* signal, int propertyIndex, const QVariant& newValue, bool isExpert)
@@ -242,7 +252,7 @@ bool AppSignalPropertyManager::setValue(AppSignal* signal, int propertyIndex, co
 		// for enum properties prevValue returnes as string, ex. "SignedInt32", but newValue is a number
 		// so, convertion of newValue from number to enum value String is required!
 		//
-		QVariant newValueStr = propDesc.getEnumValueStr(newValue.toInt());
+		QVariant newValueStr = propDesc.getEnumValueStr(signal->specPropStructHash(),newValue.toInt());
 
 		if (prevValue == newValueStr)
 		{
@@ -347,7 +357,7 @@ void AppSignalPropertyManager::detectNewProperties(const AppSignal* signal)
 		return;
 	}
 
-	Hash specPropStructHash = calcHash(signal->specPropStruct());
+	Hash specPropStructHash = signal->specPropStructHash();
 
 	auto it = m_parsedSpecPropStruct.find(specPropStructHash);
 
@@ -386,7 +396,7 @@ void AppSignalPropertyManager::detectNewProperties(const AppSignal* signal)
 
 			if (propertyIsEnum == true)
 			{
-				m_propDescriptions[propIndex].joinEnumValues(specificProperty->enumValues());
+				m_propDescriptions[propIndex].checkEnumValues(specPropStructHash, specificProperty->enumValues());
 			}
 
 			continue;
@@ -405,7 +415,7 @@ void AppSignalPropertyManager::detectNewProperties(const AppSignal* signal)
 
 		if (propertyIsEnum)
 		{
-			newProperty.setEnumValues(specificProperty->enumValues());
+			newProperty.setEnumValues(specPropStructHash, specificProperty->enumValues());
 		}
 
 		newProperty.valueGetter = [propertyIsEnum, propertyName, type](const AppSignal* s)

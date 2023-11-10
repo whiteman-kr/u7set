@@ -335,7 +335,8 @@ public:
 	// Specific properties
 
 	QString specPropStruct() const { return m_specPropStruct; }
-	void setSpecPropStruct(const QString& specPropsStruct) { m_specPropStruct = specPropsStruct; }
+	void setSpecPropStruct(const QString& specPropsStruct);
+	Hash specPropStructHash() const;
 
 	bool createSpecPropValues();
 
@@ -587,6 +588,7 @@ private:
 	// Signal specific properties
 	//
 	QString m_specPropStruct;
+	mutable Hash m_specPropStructHash = 0;				// cached value, used only in signal editing
 	QByteArray m_protoSpecPropValues;					// serialized protobuf message Proto::PropertyValues
 
 	mutable std::shared_ptr<AppSignalSpecPropValues> m_cachedSpecPropValues;

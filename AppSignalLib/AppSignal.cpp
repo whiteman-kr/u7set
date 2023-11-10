@@ -1098,6 +1098,22 @@ void AppSignal::setR0_Ohm(double r0_Ohm)
 	setSpecPropDouble(AppSignalPropNames::R0_OHM, r0_Ohm);
 }
 
+void AppSignal::setSpecPropStruct(const QString& specPropsStruct)
+{
+	m_specPropStruct = specPropsStruct;
+	m_specPropStructHash = calcHash(m_specPropStruct);
+}
+
+Hash AppSignal::specPropStructHash() const
+{
+	if (m_specPropStructHash == 0)
+	{
+		m_specPropStructHash = calcHash(m_specPropStruct);
+	}
+
+	return m_specPropStructHash;
+}
+
 bool AppSignal::createSpecPropValues()
 {
 	PropertyObject propObject;
