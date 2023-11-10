@@ -42,7 +42,7 @@ private:
 
 struct AppSignalPropertyDescription
 {
-	static const int NON_SPECIFIC_PROP_HASH = 0;
+	inline static const int NON_SPECIFIC_PROP_HASH = 0;
 
 	AppSignalPropertyDescription();
 	AppSignalPropertyDescription(const QString& propName,
