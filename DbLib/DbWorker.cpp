@@ -425,6 +425,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0400.sql", "Upgrade to version 400, Update file Tests/GlobalScript.js"},
 	{":/DatabaseUpgrade/Upgrade0401.sql", "Upgrade to version 401, InvertSignal property bug fix"},
 	{":/DatabaseUpgrade/Upgrade0402.sql", "Upgrade to version 402, Fixed AFB Limiter attribute HasRAM (set to false)"},
+	{":/DatabaseUpgrade/Upgrade0403.sql", "Upgrade to version 403, In AOM-4PH validity signals link was removed from output signals"},
 };
 
 int DbWorker::counter = 0;
