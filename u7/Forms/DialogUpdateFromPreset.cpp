@@ -47,7 +47,7 @@ DialogUpdateFromPreset::DialogUpdateFromPreset(bool expertOptions, QStringList& 
 
 	// Set force update properties
 	//
-	QLabel* forceUpdateLabel = new QLabel(tr("<b>Force</b> update properties, coma separated (e.g. Caption, EquipmentIDTemplate, ...)"));
+	QLabel* forceUpdateLabel = new QLabel(tr("<b>Force</b> update properties, comma separated (e.g. Caption, EquipmentIDTemplate, ...)"));
 
 	m_forceUpdateEdit = new QTextEdit;
 	m_forceUpdateEdit->setAcceptRichText(false);

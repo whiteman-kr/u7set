@@ -98,6 +98,8 @@ namespace Hardware
 	const QString PropertyNames::presetName = "PresetName";
 	const QString PropertyNames::presetVersion = "PresetVersion";
 	const QString PropertyNames::presetObjectUuid = "PresetObjectUuid";
+	const QString PropertyNames::presetProtectedProperties = "PresetProtectedProperties";
+	const QString PropertyNames::presetProtectedPropertiesDescription = "Protected from \"Update from Preset\" comma separated property list";
 
 	const QString PropertyNames::lmDescriptionFile = "LmDescriptionFile";
 	const QString PropertyNames::lmNumber = "LMNumber";
@@ -155,13 +157,7 @@ namespace Hardware
 		auto presetProp = ADD_PROPERTY_GETTER(bool, PropertyNames::preset, true, DeviceObject::isPreset);
 		presetProp->setExpert(true);
 
-		auto presetRootProp = ADD_PROPERTY_GETTER(bool, PropertyNames::presetRoot, true, DeviceObject::presetRoot);
-		presetRootProp->setExpert(true);
-
 		setPreset(preset);
-
-		auto presetObjectUuidProp = ADD_PROPERTY_GETTER(QUuid, PropertyNames::presetObjectUuid, true, DeviceObject::presetObjectUuid);
-		presetObjectUuidProp->setExpert(true);
 
 		captionProp->setUpdateFromPreset(true);
 		childRestrProp->setUpdateFromPreset(true);
@@ -293,6 +289,7 @@ namespace Hardware
 
 			mutableDeviceObject->set_presetroot(presetRoot());
 			mutableDeviceObject->set_presetversion(presetVersion());
+			mutableDeviceObject->set_presetprotectedproperties(presetProtectedPropertiesStr().toStdString());
 
 			Proto::Write(mutableDeviceObject->mutable_presetname(), m_presetName);
 			Proto::Write(mutableDeviceObject->mutable_presetobjectuuid(), m_presetObjectUuid);
@@ -386,6 +383,7 @@ namespace Hardware
 
 			setPresetRoot(deviceobject.presetroot());
 			setPresetVersion(deviceobject.presetversion());
+			setPresetProtectedPropertiesStr(QString::fromStdString(deviceobject.presetprotectedproperties()));
 
 			Proto::Read(deviceobject.presetname(), &m_presetName);
 
@@ -1335,12 +1333,26 @@ R"DELIM({
 
 		if (m_preset == true)
 		{
-			auto presetNameProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::presetName, true, DeviceObject::presetName, DeviceObject::setPresetName);
-			presetNameProp->setExpert(true);
+			Property* p = ADD_PROPERTY_GETTER(bool, PropertyNames::presetRoot, true, DeviceObject::presetRoot);
+			p->setExpert(true);
+
+			p = ADD_PROPERTY_GETTER(QUuid, PropertyNames::presetObjectUuid, true, DeviceObject::presetObjectUuid);
+			p->setExpert(true);
+
+			p = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::presetName, true, DeviceObject::presetName, DeviceObject::setPresetName);
+			p->setExpert(true);
+
+			p = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::presetProtectedProperties, true, DeviceObject::presetProtectedPropertiesStr, DeviceObject::setPresetProtectedPropertiesStr);
+			p->setExpert(true);
+			p->setUpdateFromPreset(false);
+			p->setDescription(PropertyNames::presetProtectedPropertiesDescription);
 		}
 		else
 		{
+			removeProperty(PropertyNames::presetRoot);
+			removeProperty(PropertyNames::presetObjectUuid);
 			removeProperty(PropertyNames::presetName);
+			removeProperty(PropertyNames::presetProtectedProperties);
 		}
 	}
 
@@ -1355,7 +1367,7 @@ R"DELIM({
 
 		if (m_presetRoot == true)
 		{
-			auto p = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::presetVersion, true, DeviceObject::presetVersion, DeviceObject::setPresetVersion);
+			Property* p = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::presetVersion, true, DeviceObject::presetVersion, DeviceObject::setPresetVersion);
 			p->setUpdateFromPreset(true);
 			p->setExpert(true);
 		}
@@ -1397,6 +1409,27 @@ R"DELIM({
 		m_presetObjectUuid = value;
 	}
 
+	QString DeviceObject::presetProtectedPropertiesStr() const
+	{
+		return m_presetProtectedProperties.join(", ");
+	}
+
+	void DeviceObject::setPresetProtectedPropertiesStr(const QString& value)
+	{
+		// Split by comma, semicolon, return or space, remove empty parts.
+		//
+		m_presetProtectedProperties	= value.split(QRegularExpression(QStringLiteral("[,;\\n\\r\\s]")), Qt::SkipEmptyParts);
+	}
+
+	const QStringList& DeviceObject::presetProtectedProperties() const
+	{
+		return m_presetProtectedProperties;
+	}
+
+	void DeviceObject::setPresetProtectedProperties(const QStringList& value)
+	{
+		m_presetProtectedProperties = value;
+	}
 
 	DbFileInfo* DeviceObject::data()
 	{

@@ -1045,6 +1045,7 @@ message DeviceObject
 	optional Uuid presetObjectUuid = 35;
 	optional int32 childCountHint = 36 [default = 0];	// Hint for calling m_children.reserve()
 	optional int32 presetVersion = 37;
+	optional string presetProtectedProperties = 38;
 
 	// Derived from Hardware::DeviceObject
 	//

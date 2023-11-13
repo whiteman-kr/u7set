@@ -16422,6 +16422,7 @@ class DeviceObject PROTOBUF_FINAL :
     kPropertiesFieldNumber = 7,
     kChildrenFieldNumber = 200,
     kSpecificPropertiesStructFieldNumber = 6,
+    kPresetProtectedPropertiesFieldNumber = 38,
     kUuidFieldNumber = 1,
     kEquipmentIdFieldNumber = 2,
     kCaptionFieldNumber = 3,
@@ -16497,6 +16498,26 @@ class DeviceObject PROTOBUF_FINAL :
   const std::string& _internal_specific_properties_struct() const;
   void _internal_set_specific_properties_struct(const std::string& value);
   std::string* _internal_mutable_specific_properties_struct();
+  public:
+
+  // optional string presetProtectedProperties = 38;
+  bool has_presetprotectedproperties() const;
+  private:
+  bool _internal_has_presetprotectedproperties() const;
+  public:
+  void clear_presetprotectedproperties();
+  const std::string& presetprotectedproperties() const;
+  void set_presetprotectedproperties(const std::string& value);
+  void set_presetprotectedproperties(std::string&& value);
+  void set_presetprotectedproperties(const char* value);
+  void set_presetprotectedproperties(const char* value, size_t size);
+  std::string* mutable_presetprotectedproperties();
+  std::string* release_presetprotectedproperties();
+  void set_allocated_presetprotectedproperties(std::string* presetprotectedproperties);
+  private:
+  const std::string& _internal_presetprotectedproperties() const;
+  void _internal_set_presetprotectedproperties(const std::string& value);
+  std::string* _internal_mutable_presetprotectedproperties();
   public:
 
   // required .Proto.Uuid uuid = 1;
@@ -16849,6 +16870,7 @@ class DeviceObject PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::Property > properties_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::Envelope > children_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr specific_properties_struct_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr presetprotectedproperties_;
   ::Proto::Uuid* uuid_;
   ::Proto::wstring* equipmentid_;
   ::Proto::wstring* caption_;
@@ -47188,7 +47210,7 @@ inline void SchemaItemSlider::set_allocated_scriptvaluechanged(std::string* scri
 
 // required .Proto.Uuid uuid = 1;
 inline bool DeviceObject::_internal_has_uuid() const {
-  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
   PROTOBUF_ASSUME(!value || uuid_ != nullptr);
   return value;
 }
@@ -47197,7 +47219,7 @@ inline bool DeviceObject::has_uuid() const {
 }
 inline void DeviceObject::clear_uuid() {
   if (uuid_ != nullptr) uuid_->Clear();
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline const ::Proto::Uuid& DeviceObject::_internal_uuid() const {
   const ::Proto::Uuid* p = uuid_;
@@ -47215,14 +47237,14 @@ inline void DeviceObject::unsafe_arena_set_allocated_uuid(
   }
   uuid_ = uuid;
   if (uuid) {
-    _has_bits_[0] |= 0x00000002u;
+    _has_bits_[0] |= 0x00000004u;
   } else {
-    _has_bits_[0] &= ~0x00000002u;
+    _has_bits_[0] &= ~0x00000004u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.uuid)
 }
 inline ::Proto::Uuid* DeviceObject::release_uuid() {
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000004u;
   ::Proto::Uuid* temp = uuid_;
   uuid_ = nullptr;
   if (GetArena() != nullptr) {
@@ -47232,13 +47254,13 @@ inline ::Proto::Uuid* DeviceObject::release_uuid() {
 }
 inline ::Proto::Uuid* DeviceObject::unsafe_arena_release_uuid() {
   // @@protoc_insertion_point(field_release:Proto.DeviceObject.uuid)
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000004u;
   ::Proto::Uuid* temp = uuid_;
   uuid_ = nullptr;
   return temp;
 }
 inline ::Proto::Uuid* DeviceObject::_internal_mutable_uuid() {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000004u;
   if (uuid_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::Uuid>(GetArena());
     uuid_ = p;
@@ -47261,9 +47283,9 @@ inline void DeviceObject::set_allocated_uuid(::Proto::Uuid* uuid) {
       uuid = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, uuid, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000002u;
+    _has_bits_[0] |= 0x00000004u;
   } else {
-    _has_bits_[0] &= ~0x00000002u;
+    _has_bits_[0] &= ~0x00000004u;
   }
   uuid_ = uuid;
   // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.uuid)
@@ -47271,7 +47293,7 @@ inline void DeviceObject::set_allocated_uuid(::Proto::Uuid* uuid) {
 
 // required .Proto.wstring equipmentId = 2;
 inline bool DeviceObject::_internal_has_equipmentid() const {
-  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
   PROTOBUF_ASSUME(!value || equipmentid_ != nullptr);
   return value;
 }
@@ -47280,7 +47302,7 @@ inline bool DeviceObject::has_equipmentid() const {
 }
 inline void DeviceObject::clear_equipmentid() {
   if (equipmentid_ != nullptr) equipmentid_->Clear();
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline const ::Proto::wstring& DeviceObject::_internal_equipmentid() const {
   const ::Proto::wstring* p = equipmentid_;
@@ -47298,14 +47320,14 @@ inline void DeviceObject::unsafe_arena_set_allocated_equipmentid(
   }
   equipmentid_ = equipmentid;
   if (equipmentid) {
-    _has_bits_[0] |= 0x00000004u;
+    _has_bits_[0] |= 0x00000008u;
   } else {
-    _has_bits_[0] &= ~0x00000004u;
+    _has_bits_[0] &= ~0x00000008u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.equipmentId)
 }
 inline ::Proto::wstring* DeviceObject::release_equipmentid() {
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000008u;
   ::Proto::wstring* temp = equipmentid_;
   equipmentid_ = nullptr;
   if (GetArena() != nullptr) {
@@ -47315,13 +47337,13 @@ inline ::Proto::wstring* DeviceObject::release_equipmentid() {
 }
 inline ::Proto::wstring* DeviceObject::unsafe_arena_release_equipmentid() {
   // @@protoc_insertion_point(field_release:Proto.DeviceObject.equipmentId)
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000008u;
   ::Proto::wstring* temp = equipmentid_;
   equipmentid_ = nullptr;
   return temp;
 }
 inline ::Proto::wstring* DeviceObject::_internal_mutable_equipmentid() {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000008u;
   if (equipmentid_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::wstring>(GetArena());
     equipmentid_ = p;
@@ -47344,9 +47366,9 @@ inline void DeviceObject::set_allocated_equipmentid(::Proto::wstring* equipmenti
       equipmentid = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, equipmentid, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000004u;
+    _has_bits_[0] |= 0x00000008u;
   } else {
-    _has_bits_[0] &= ~0x00000004u;
+    _has_bits_[0] &= ~0x00000008u;
   }
   equipmentid_ = equipmentid;
   // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.equipmentId)
@@ -47354,7 +47376,7 @@ inline void DeviceObject::set_allocated_equipmentid(::Proto::wstring* equipmenti
 
 // required .Proto.wstring caption = 3;
 inline bool DeviceObject::_internal_has_caption() const {
-  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  bool value = (_has_bits_[0] & 0x00000010u) != 0;
   PROTOBUF_ASSUME(!value || caption_ != nullptr);
   return value;
 }
@@ -47363,7 +47385,7 @@ inline bool DeviceObject::has_caption() const {
 }
 inline void DeviceObject::clear_caption() {
   if (caption_ != nullptr) caption_->Clear();
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline const ::Proto::wstring& DeviceObject::_internal_caption() const {
   const ::Proto::wstring* p = caption_;
@@ -47381,14 +47403,14 @@ inline void DeviceObject::unsafe_arena_set_allocated_caption(
   }
   caption_ = caption;
   if (caption) {
-    _has_bits_[0] |= 0x00000008u;
+    _has_bits_[0] |= 0x00000010u;
   } else {
-    _has_bits_[0] &= ~0x00000008u;
+    _has_bits_[0] &= ~0x00000010u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.caption)
 }
 inline ::Proto::wstring* DeviceObject::release_caption() {
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000010u;
   ::Proto::wstring* temp = caption_;
   caption_ = nullptr;
   if (GetArena() != nullptr) {
@@ -47398,13 +47420,13 @@ inline ::Proto::wstring* DeviceObject::release_caption() {
 }
 inline ::Proto::wstring* DeviceObject::unsafe_arena_release_caption() {
   // @@protoc_insertion_point(field_release:Proto.DeviceObject.caption)
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000010u;
   ::Proto::wstring* temp = caption_;
   caption_ = nullptr;
   return temp;
 }
 inline ::Proto::wstring* DeviceObject::_internal_mutable_caption() {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000010u;
   if (caption_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::wstring>(GetArena());
     caption_ = p;
@@ -47427,9 +47449,9 @@ inline void DeviceObject::set_allocated_caption(::Proto::wstring* caption) {
       caption = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, caption, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000008u;
+    _has_bits_[0] |= 0x00000010u;
   } else {
-    _has_bits_[0] &= ~0x00000008u;
+    _has_bits_[0] &= ~0x00000010u;
   }
   caption_ = caption;
   // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.caption)
@@ -47437,7 +47459,7 @@ inline void DeviceObject::set_allocated_caption(::Proto::wstring* caption) {
 
 // optional .Proto.wstring childRestriction = 4;
 inline bool DeviceObject::_internal_has_childrestriction() const {
-  bool value = (_has_bits_[0] & 0x00000010u) != 0;
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
   PROTOBUF_ASSUME(!value || childrestriction_ != nullptr);
   return value;
 }
@@ -47446,7 +47468,7 @@ inline bool DeviceObject::has_childrestriction() const {
 }
 inline void DeviceObject::clear_childrestriction() {
   if (childrestriction_ != nullptr) childrestriction_->Clear();
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline const ::Proto::wstring& DeviceObject::_internal_childrestriction() const {
   const ::Proto::wstring* p = childrestriction_;
@@ -47464,14 +47486,14 @@ inline void DeviceObject::unsafe_arena_set_allocated_childrestriction(
   }
   childrestriction_ = childrestriction;
   if (childrestriction) {
-    _has_bits_[0] |= 0x00000010u;
+    _has_bits_[0] |= 0x00000020u;
   } else {
-    _has_bits_[0] &= ~0x00000010u;
+    _has_bits_[0] &= ~0x00000020u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.childRestriction)
 }
 inline ::Proto::wstring* DeviceObject::release_childrestriction() {
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000020u;
   ::Proto::wstring* temp = childrestriction_;
   childrestriction_ = nullptr;
   if (GetArena() != nullptr) {
@@ -47481,13 +47503,13 @@ inline ::Proto::wstring* DeviceObject::release_childrestriction() {
 }
 inline ::Proto::wstring* DeviceObject::unsafe_arena_release_childrestriction() {
   // @@protoc_insertion_point(field_release:Proto.DeviceObject.childRestriction)
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000020u;
   ::Proto::wstring* temp = childrestriction_;
   childrestriction_ = nullptr;
   return temp;
 }
 inline ::Proto::wstring* DeviceObject::_internal_mutable_childrestriction() {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000020u;
   if (childrestriction_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::wstring>(GetArena());
     childrestriction_ = p;
@@ -47510,9 +47532,9 @@ inline void DeviceObject::set_allocated_childrestriction(::Proto::wstring* child
       childrestriction = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, childrestriction, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000010u;
+    _has_bits_[0] |= 0x00000020u;
   } else {
-    _has_bits_[0] &= ~0x00000010u;
+    _has_bits_[0] &= ~0x00000020u;
   }
   childrestriction_ = childrestriction;
   // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.childRestriction)
@@ -47520,7 +47542,7 @@ inline void DeviceObject::set_allocated_childrestriction(::Proto::wstring* child
 
 // optional int32 place = 5 [default = 0];
 inline bool DeviceObject::_internal_has_place() const {
-  bool value = (_has_bits_[0] & 0x00010000u) != 0;
+  bool value = (_has_bits_[0] & 0x00020000u) != 0;
   return value;
 }
 inline bool DeviceObject::has_place() const {
@@ -47528,7 +47550,7 @@ inline bool DeviceObject::has_place() const {
 }
 inline void DeviceObject::clear_place() {
   place_ = 0;
-  _has_bits_[0] &= ~0x00010000u;
+  _has_bits_[0] &= ~0x00020000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::_internal_place() const {
   return place_;
@@ -47538,7 +47560,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::place() const {
   return _internal_place();
 }
 inline void DeviceObject::_internal_set_place(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00010000u;
+  _has_bits_[0] |= 0x00020000u;
   place_ = value;
 }
 inline void DeviceObject::set_place(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -47660,7 +47682,7 @@ DeviceObject::properties() const {
 
 // optional bool preset = 32 [default = false];
 inline bool DeviceObject::_internal_has_preset() const {
-  bool value = (_has_bits_[0] & 0x00020000u) != 0;
+  bool value = (_has_bits_[0] & 0x00040000u) != 0;
   return value;
 }
 inline bool DeviceObject::has_preset() const {
@@ -47668,7 +47690,7 @@ inline bool DeviceObject::has_preset() const {
 }
 inline void DeviceObject::clear_preset() {
   preset_ = false;
-  _has_bits_[0] &= ~0x00020000u;
+  _has_bits_[0] &= ~0x00040000u;
 }
 inline bool DeviceObject::_internal_preset() const {
   return preset_;
@@ -47678,7 +47700,7 @@ inline bool DeviceObject::preset() const {
   return _internal_preset();
 }
 inline void DeviceObject::_internal_set_preset(bool value) {
-  _has_bits_[0] |= 0x00020000u;
+  _has_bits_[0] |= 0x00040000u;
   preset_ = value;
 }
 inline void DeviceObject::set_preset(bool value) {
@@ -47688,7 +47710,7 @@ inline void DeviceObject::set_preset(bool value) {
 
 // optional bool presetRoot = 33 [default = false];
 inline bool DeviceObject::_internal_has_presetroot() const {
-  bool value = (_has_bits_[0] & 0x00040000u) != 0;
+  bool value = (_has_bits_[0] & 0x00080000u) != 0;
   return value;
 }
 inline bool DeviceObject::has_presetroot() const {
@@ -47696,7 +47718,7 @@ inline bool DeviceObject::has_presetroot() const {
 }
 inline void DeviceObject::clear_presetroot() {
   presetroot_ = false;
-  _has_bits_[0] &= ~0x00040000u;
+  _has_bits_[0] &= ~0x00080000u;
 }
 inline bool DeviceObject::_internal_presetroot() const {
   return presetroot_;
@@ -47706,7 +47728,7 @@ inline bool DeviceObject::presetroot() const {
   return _internal_presetroot();
 }
 inline void DeviceObject::_internal_set_presetroot(bool value) {
-  _has_bits_[0] |= 0x00040000u;
+  _has_bits_[0] |= 0x00080000u;
   presetroot_ = value;
 }
 inline void DeviceObject::set_presetroot(bool value) {
@@ -47716,7 +47738,7 @@ inline void DeviceObject::set_presetroot(bool value) {
 
 // optional .Proto.wstring presetName = 34;
 inline bool DeviceObject::_internal_has_presetname() const {
-  bool value = (_has_bits_[0] & 0x00000020u) != 0;
+  bool value = (_has_bits_[0] & 0x00000040u) != 0;
   PROTOBUF_ASSUME(!value || presetname_ != nullptr);
   return value;
 }
@@ -47725,7 +47747,7 @@ inline bool DeviceObject::has_presetname() const {
 }
 inline void DeviceObject::clear_presetname() {
   if (presetname_ != nullptr) presetname_->Clear();
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000040u;
 }
 inline const ::Proto::wstring& DeviceObject::_internal_presetname() const {
   const ::Proto::wstring* p = presetname_;
@@ -47743,14 +47765,14 @@ inline void DeviceObject::unsafe_arena_set_allocated_presetname(
   }
   presetname_ = presetname;
   if (presetname) {
-    _has_bits_[0] |= 0x00000020u;
+    _has_bits_[0] |= 0x00000040u;
   } else {
-    _has_bits_[0] &= ~0x00000020u;
+    _has_bits_[0] &= ~0x00000040u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.presetName)
 }
 inline ::Proto::wstring* DeviceObject::release_presetname() {
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000040u;
   ::Proto::wstring* temp = presetname_;
   presetname_ = nullptr;
   if (GetArena() != nullptr) {
@@ -47760,13 +47782,13 @@ inline ::Proto::wstring* DeviceObject::release_presetname() {
 }
 inline ::Proto::wstring* DeviceObject::unsafe_arena_release_presetname() {
   // @@protoc_insertion_point(field_release:Proto.DeviceObject.presetName)
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000040u;
   ::Proto::wstring* temp = presetname_;
   presetname_ = nullptr;
   return temp;
 }
 inline ::Proto::wstring* DeviceObject::_internal_mutable_presetname() {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000040u;
   if (presetname_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::wstring>(GetArena());
     presetname_ = p;
@@ -47789,9 +47811,9 @@ inline void DeviceObject::set_allocated_presetname(::Proto::wstring* presetname)
       presetname = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, presetname, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000020u;
+    _has_bits_[0] |= 0x00000040u;
   } else {
-    _has_bits_[0] &= ~0x00000020u;
+    _has_bits_[0] &= ~0x00000040u;
   }
   presetname_ = presetname;
   // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.presetName)
@@ -47799,7 +47821,7 @@ inline void DeviceObject::set_allocated_presetname(::Proto::wstring* presetname)
 
 // optional .Proto.Uuid presetObjectUuid = 35;
 inline bool DeviceObject::_internal_has_presetobjectuuid() const {
-  bool value = (_has_bits_[0] & 0x00000040u) != 0;
+  bool value = (_has_bits_[0] & 0x00000080u) != 0;
   PROTOBUF_ASSUME(!value || presetobjectuuid_ != nullptr);
   return value;
 }
@@ -47808,7 +47830,7 @@ inline bool DeviceObject::has_presetobjectuuid() const {
 }
 inline void DeviceObject::clear_presetobjectuuid() {
   if (presetobjectuuid_ != nullptr) presetobjectuuid_->Clear();
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000080u;
 }
 inline const ::Proto::Uuid& DeviceObject::_internal_presetobjectuuid() const {
   const ::Proto::Uuid* p = presetobjectuuid_;
@@ -47826,14 +47848,14 @@ inline void DeviceObject::unsafe_arena_set_allocated_presetobjectuuid(
   }
   presetobjectuuid_ = presetobjectuuid;
   if (presetobjectuuid) {
-    _has_bits_[0] |= 0x00000040u;
+    _has_bits_[0] |= 0x00000080u;
   } else {
-    _has_bits_[0] &= ~0x00000040u;
+    _has_bits_[0] &= ~0x00000080u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.presetObjectUuid)
 }
 inline ::Proto::Uuid* DeviceObject::release_presetobjectuuid() {
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000080u;
   ::Proto::Uuid* temp = presetobjectuuid_;
   presetobjectuuid_ = nullptr;
   if (GetArena() != nullptr) {
@@ -47843,13 +47865,13 @@ inline ::Proto::Uuid* DeviceObject::release_presetobjectuuid() {
 }
 inline ::Proto::Uuid* DeviceObject::unsafe_arena_release_presetobjectuuid() {
   // @@protoc_insertion_point(field_release:Proto.DeviceObject.presetObjectUuid)
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000080u;
   ::Proto::Uuid* temp = presetobjectuuid_;
   presetobjectuuid_ = nullptr;
   return temp;
 }
 inline ::Proto::Uuid* DeviceObject::_internal_mutable_presetobjectuuid() {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000080u;
   if (presetobjectuuid_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::Uuid>(GetArena());
     presetobjectuuid_ = p;
@@ -47872,9 +47894,9 @@ inline void DeviceObject::set_allocated_presetobjectuuid(::Proto::Uuid* presetob
       presetobjectuuid = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, presetobjectuuid, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000040u;
+    _has_bits_[0] |= 0x00000080u;
   } else {
-    _has_bits_[0] &= ~0x00000040u;
+    _has_bits_[0] &= ~0x00000080u;
   }
   presetobjectuuid_ = presetobjectuuid;
   // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.presetObjectUuid)
@@ -47882,7 +47904,7 @@ inline void DeviceObject::set_allocated_presetobjectuuid(::Proto::Uuid* presetob
 
 // optional int32 childCountHint = 36 [default = 0];
 inline bool DeviceObject::_internal_has_childcounthint() const {
-  bool value = (_has_bits_[0] & 0x00080000u) != 0;
+  bool value = (_has_bits_[0] & 0x00100000u) != 0;
   return value;
 }
 inline bool DeviceObject::has_childcounthint() const {
@@ -47890,7 +47912,7 @@ inline bool DeviceObject::has_childcounthint() const {
 }
 inline void DeviceObject::clear_childcounthint() {
   childcounthint_ = 0;
-  _has_bits_[0] &= ~0x00080000u;
+  _has_bits_[0] &= ~0x00100000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::_internal_childcounthint() const {
   return childcounthint_;
@@ -47900,7 +47922,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::childcounthint() const {
   return _internal_childcounthint();
 }
 inline void DeviceObject::_internal_set_childcounthint(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00080000u;
+  _has_bits_[0] |= 0x00100000u;
   childcounthint_ = value;
 }
 inline void DeviceObject::set_childcounthint(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -47910,7 +47932,7 @@ inline void DeviceObject::set_childcounthint(::PROTOBUF_NAMESPACE_ID::int32 valu
 
 // optional int32 presetVersion = 37;
 inline bool DeviceObject::_internal_has_presetversion() const {
-  bool value = (_has_bits_[0] & 0x00100000u) != 0;
+  bool value = (_has_bits_[0] & 0x00200000u) != 0;
   return value;
 }
 inline bool DeviceObject::has_presetversion() const {
@@ -47918,7 +47940,7 @@ inline bool DeviceObject::has_presetversion() const {
 }
 inline void DeviceObject::clear_presetversion() {
   presetversion_ = 0;
-  _has_bits_[0] &= ~0x00100000u;
+  _has_bits_[0] &= ~0x00200000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::_internal_presetversion() const {
   return presetversion_;
@@ -47928,7 +47950,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::presetversion() const {
   return _internal_presetversion();
 }
 inline void DeviceObject::_internal_set_presetversion(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00100000u;
+  _has_bits_[0] |= 0x00200000u;
   presetversion_ = value;
 }
 inline void DeviceObject::set_presetversion(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -47936,9 +47958,82 @@ inline void DeviceObject::set_presetversion(::PROTOBUF_NAMESPACE_ID::int32 value
   // @@protoc_insertion_point(field_set:Proto.DeviceObject.presetVersion)
 }
 
+// optional string presetProtectedProperties = 38;
+inline bool DeviceObject::_internal_has_presetprotectedproperties() const {
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool DeviceObject::has_presetprotectedproperties() const {
+  return _internal_has_presetprotectedproperties();
+}
+inline void DeviceObject::clear_presetprotectedproperties() {
+  presetprotectedproperties_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline const std::string& DeviceObject::presetprotectedproperties() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.presetProtectedProperties)
+  return _internal_presetprotectedproperties();
+}
+inline void DeviceObject::set_presetprotectedproperties(const std::string& value) {
+  _internal_set_presetprotectedproperties(value);
+  // @@protoc_insertion_point(field_set:Proto.DeviceObject.presetProtectedProperties)
+}
+inline std::string* DeviceObject::mutable_presetprotectedproperties() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject.presetProtectedProperties)
+  return _internal_mutable_presetprotectedproperties();
+}
+inline const std::string& DeviceObject::_internal_presetprotectedproperties() const {
+  return presetprotectedproperties_.Get();
+}
+inline void DeviceObject::_internal_set_presetprotectedproperties(const std::string& value) {
+  _has_bits_[0] |= 0x00000002u;
+  presetprotectedproperties_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void DeviceObject::set_presetprotectedproperties(std::string&& value) {
+  _has_bits_[0] |= 0x00000002u;
+  presetprotectedproperties_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.DeviceObject.presetProtectedProperties)
+}
+inline void DeviceObject::set_presetprotectedproperties(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000002u;
+  presetprotectedproperties_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.DeviceObject.presetProtectedProperties)
+}
+inline void DeviceObject::set_presetprotectedproperties(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000002u;
+  presetprotectedproperties_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.DeviceObject.presetProtectedProperties)
+}
+inline std::string* DeviceObject::_internal_mutable_presetprotectedproperties() {
+  _has_bits_[0] |= 0x00000002u;
+  return presetprotectedproperties_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* DeviceObject::release_presetprotectedproperties() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceObject.presetProtectedProperties)
+  if (!_internal_has_presetprotectedproperties()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000002u;
+  return presetprotectedproperties_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void DeviceObject::set_allocated_presetprotectedproperties(std::string* presetprotectedproperties) {
+  if (presetprotectedproperties != nullptr) {
+    _has_bits_[0] |= 0x00000002u;
+  } else {
+    _has_bits_[0] &= ~0x00000002u;
+  }
+  presetprotectedproperties_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), presetprotectedproperties,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.presetProtectedProperties)
+}
+
 // optional .Proto.DeviceRoot Root = 100;
 inline bool DeviceObject::_internal_has_root() const {
-  bool value = (_has_bits_[0] & 0x00000080u) != 0;
+  bool value = (_has_bits_[0] & 0x00000100u) != 0;
   PROTOBUF_ASSUME(!value || root_ != nullptr);
   return value;
 }
@@ -47947,7 +48042,7 @@ inline bool DeviceObject::has_root() const {
 }
 inline void DeviceObject::clear_root() {
   if (root_ != nullptr) root_->Clear();
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000100u;
 }
 inline const ::Proto::DeviceRoot& DeviceObject::_internal_root() const {
   const ::Proto::DeviceRoot* p = root_;
@@ -47965,14 +48060,14 @@ inline void DeviceObject::unsafe_arena_set_allocated_root(
   }
   root_ = root;
   if (root) {
-    _has_bits_[0] |= 0x00000080u;
+    _has_bits_[0] |= 0x00000100u;
   } else {
-    _has_bits_[0] &= ~0x00000080u;
+    _has_bits_[0] &= ~0x00000100u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.Root)
 }
 inline ::Proto::DeviceRoot* DeviceObject::release_root() {
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000100u;
   ::Proto::DeviceRoot* temp = root_;
   root_ = nullptr;
   if (GetArena() != nullptr) {
@@ -47982,13 +48077,13 @@ inline ::Proto::DeviceRoot* DeviceObject::release_root() {
 }
 inline ::Proto::DeviceRoot* DeviceObject::unsafe_arena_release_root() {
   // @@protoc_insertion_point(field_release:Proto.DeviceObject.Root)
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000100u;
   ::Proto::DeviceRoot* temp = root_;
   root_ = nullptr;
   return temp;
 }
 inline ::Proto::DeviceRoot* DeviceObject::_internal_mutable_root() {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000100u;
   if (root_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::DeviceRoot>(GetArena());
     root_ = p;
@@ -48011,9 +48106,9 @@ inline void DeviceObject::set_allocated_root(::Proto::DeviceRoot* root) {
       root = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, root, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000080u;
+    _has_bits_[0] |= 0x00000100u;
   } else {
-    _has_bits_[0] &= ~0x00000080u;
+    _has_bits_[0] &= ~0x00000100u;
   }
   root_ = root;
   // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.Root)
@@ -48021,7 +48116,7 @@ inline void DeviceObject::set_allocated_root(::Proto::DeviceRoot* root) {
 
 // optional .Proto.DeviceSystem System = 101;
 inline bool DeviceObject::_internal_has_system() const {
-  bool value = (_has_bits_[0] & 0x00000100u) != 0;
+  bool value = (_has_bits_[0] & 0x00000200u) != 0;
   PROTOBUF_ASSUME(!value || system_ != nullptr);
   return value;
 }
@@ -48030,7 +48125,7 @@ inline bool DeviceObject::has_system() const {
 }
 inline void DeviceObject::clear_system() {
   if (system_ != nullptr) system_->Clear();
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000200u;
 }
 inline const ::Proto::DeviceSystem& DeviceObject::_internal_system() const {
   const ::Proto::DeviceSystem* p = system_;
@@ -48048,14 +48143,14 @@ inline void DeviceObject::unsafe_arena_set_allocated_system(
   }
   system_ = system;
   if (system) {
-    _has_bits_[0] |= 0x00000100u;
+    _has_bits_[0] |= 0x00000200u;
   } else {
-    _has_bits_[0] &= ~0x00000100u;
+    _has_bits_[0] &= ~0x00000200u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.System)
 }
 inline ::Proto::DeviceSystem* DeviceObject::release_system() {
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000200u;
   ::Proto::DeviceSystem* temp = system_;
   system_ = nullptr;
   if (GetArena() != nullptr) {
@@ -48065,13 +48160,13 @@ inline ::Proto::DeviceSystem* DeviceObject::release_system() {
 }
 inline ::Proto::DeviceSystem* DeviceObject::unsafe_arena_release_system() {
   // @@protoc_insertion_point(field_release:Proto.DeviceObject.System)
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000200u;
   ::Proto::DeviceSystem* temp = system_;
   system_ = nullptr;
   return temp;
 }
 inline ::Proto::DeviceSystem* DeviceObject::_internal_mutable_system() {
-  _has_bits_[0] |= 0x00000100u;
+  _has_bits_[0] |= 0x00000200u;
   if (system_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::DeviceSystem>(GetArena());
     system_ = p;
@@ -48094,9 +48189,9 @@ inline void DeviceObject::set_allocated_system(::Proto::DeviceSystem* system) {
       system = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, system, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000100u;
+    _has_bits_[0] |= 0x00000200u;
   } else {
-    _has_bits_[0] &= ~0x00000100u;
+    _has_bits_[0] &= ~0x00000200u;
   }
   system_ = system;
   // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.System)
@@ -48104,7 +48199,7 @@ inline void DeviceObject::set_allocated_system(::Proto::DeviceSystem* system) {
 
 // optional .Proto.DeviceRack Rack = 102;
 inline bool DeviceObject::_internal_has_rack() const {
-  bool value = (_has_bits_[0] & 0x00000200u) != 0;
+  bool value = (_has_bits_[0] & 0x00000400u) != 0;
   PROTOBUF_ASSUME(!value || rack_ != nullptr);
   return value;
 }
@@ -48113,7 +48208,7 @@ inline bool DeviceObject::has_rack() const {
 }
 inline void DeviceObject::clear_rack() {
   if (rack_ != nullptr) rack_->Clear();
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000400u;
 }
 inline const ::Proto::DeviceRack& DeviceObject::_internal_rack() const {
   const ::Proto::DeviceRack* p = rack_;
@@ -48131,14 +48226,14 @@ inline void DeviceObject::unsafe_arena_set_allocated_rack(
   }
   rack_ = rack;
   if (rack) {
-    _has_bits_[0] |= 0x00000200u;
+    _has_bits_[0] |= 0x00000400u;
   } else {
-    _has_bits_[0] &= ~0x00000200u;
+    _has_bits_[0] &= ~0x00000400u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.Rack)
 }
 inline ::Proto::DeviceRack* DeviceObject::release_rack() {
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000400u;
   ::Proto::DeviceRack* temp = rack_;
   rack_ = nullptr;
   if (GetArena() != nullptr) {
@@ -48148,13 +48243,13 @@ inline ::Proto::DeviceRack* DeviceObject::release_rack() {
 }
 inline ::Proto::DeviceRack* DeviceObject::unsafe_arena_release_rack() {
   // @@protoc_insertion_point(field_release:Proto.DeviceObject.Rack)
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000400u;
   ::Proto::DeviceRack* temp = rack_;
   rack_ = nullptr;
   return temp;
 }
 inline ::Proto::DeviceRack* DeviceObject::_internal_mutable_rack() {
-  _has_bits_[0] |= 0x00000200u;
+  _has_bits_[0] |= 0x00000400u;
   if (rack_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::DeviceRack>(GetArena());
     rack_ = p;
@@ -48177,9 +48272,9 @@ inline void DeviceObject::set_allocated_rack(::Proto::DeviceRack* rack) {
       rack = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, rack, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000200u;
+    _has_bits_[0] |= 0x00000400u;
   } else {
-    _has_bits_[0] &= ~0x00000200u;
+    _has_bits_[0] &= ~0x00000400u;
   }
   rack_ = rack;
   // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.Rack)
@@ -48187,7 +48282,7 @@ inline void DeviceObject::set_allocated_rack(::Proto::DeviceRack* rack) {
 
 // optional .Proto.DeviceChassis Chassis = 103;
 inline bool DeviceObject::_internal_has_chassis() const {
-  bool value = (_has_bits_[0] & 0x00000400u) != 0;
+  bool value = (_has_bits_[0] & 0x00000800u) != 0;
   PROTOBUF_ASSUME(!value || chassis_ != nullptr);
   return value;
 }
@@ -48196,7 +48291,7 @@ inline bool DeviceObject::has_chassis() const {
 }
 inline void DeviceObject::clear_chassis() {
   if (chassis_ != nullptr) chassis_->Clear();
-  _has_bits_[0] &= ~0x00000400u;
+  _has_bits_[0] &= ~0x00000800u;
 }
 inline const ::Proto::DeviceChassis& DeviceObject::_internal_chassis() const {
   const ::Proto::DeviceChassis* p = chassis_;
@@ -48214,14 +48309,14 @@ inline void DeviceObject::unsafe_arena_set_allocated_chassis(
   }
   chassis_ = chassis;
   if (chassis) {
-    _has_bits_[0] |= 0x00000400u;
+    _has_bits_[0] |= 0x00000800u;
   } else {
-    _has_bits_[0] &= ~0x00000400u;
+    _has_bits_[0] &= ~0x00000800u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.Chassis)
 }
 inline ::Proto::DeviceChassis* DeviceObject::release_chassis() {
-  _has_bits_[0] &= ~0x00000400u;
+  _has_bits_[0] &= ~0x00000800u;
   ::Proto::DeviceChassis* temp = chassis_;
   chassis_ = nullptr;
   if (GetArena() != nullptr) {
@@ -48231,13 +48326,13 @@ inline ::Proto::DeviceChassis* DeviceObject::release_chassis() {
 }
 inline ::Proto::DeviceChassis* DeviceObject::unsafe_arena_release_chassis() {
   // @@protoc_insertion_point(field_release:Proto.DeviceObject.Chassis)
-  _has_bits_[0] &= ~0x00000400u;
+  _has_bits_[0] &= ~0x00000800u;
   ::Proto::DeviceChassis* temp = chassis_;
   chassis_ = nullptr;
   return temp;
 }
 inline ::Proto::DeviceChassis* DeviceObject::_internal_mutable_chassis() {
-  _has_bits_[0] |= 0x00000400u;
+  _has_bits_[0] |= 0x00000800u;
   if (chassis_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::DeviceChassis>(GetArena());
     chassis_ = p;
@@ -48260,9 +48355,9 @@ inline void DeviceObject::set_allocated_chassis(::Proto::DeviceChassis* chassis)
       chassis = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, chassis, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000400u;
+    _has_bits_[0] |= 0x00000800u;
   } else {
-    _has_bits_[0] &= ~0x00000400u;
+    _has_bits_[0] &= ~0x00000800u;
   }
   chassis_ = chassis;
   // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.Chassis)
@@ -48270,7 +48365,7 @@ inline void DeviceObject::set_allocated_chassis(::Proto::DeviceChassis* chassis)
 
 // optional .Proto.DeviceModule Module = 104;
 inline bool DeviceObject::_internal_has_module() const {
-  bool value = (_has_bits_[0] & 0x00000800u) != 0;
+  bool value = (_has_bits_[0] & 0x00001000u) != 0;
   PROTOBUF_ASSUME(!value || module_ != nullptr);
   return value;
 }
@@ -48279,7 +48374,7 @@ inline bool DeviceObject::has_module() const {
 }
 inline void DeviceObject::clear_module() {
   if (module_ != nullptr) module_->Clear();
-  _has_bits_[0] &= ~0x00000800u;
+  _has_bits_[0] &= ~0x00001000u;
 }
 inline const ::Proto::DeviceModule& DeviceObject::_internal_module() const {
   const ::Proto::DeviceModule* p = module_;
@@ -48297,14 +48392,14 @@ inline void DeviceObject::unsafe_arena_set_allocated_module(
   }
   module_ = module;
   if (module) {
-    _has_bits_[0] |= 0x00000800u;
+    _has_bits_[0] |= 0x00001000u;
   } else {
-    _has_bits_[0] &= ~0x00000800u;
+    _has_bits_[0] &= ~0x00001000u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.Module)
 }
 inline ::Proto::DeviceModule* DeviceObject::release_module() {
-  _has_bits_[0] &= ~0x00000800u;
+  _has_bits_[0] &= ~0x00001000u;
   ::Proto::DeviceModule* temp = module_;
   module_ = nullptr;
   if (GetArena() != nullptr) {
@@ -48314,13 +48409,13 @@ inline ::Proto::DeviceModule* DeviceObject::release_module() {
 }
 inline ::Proto::DeviceModule* DeviceObject::unsafe_arena_release_module() {
   // @@protoc_insertion_point(field_release:Proto.DeviceObject.Module)
-  _has_bits_[0] &= ~0x00000800u;
+  _has_bits_[0] &= ~0x00001000u;
   ::Proto::DeviceModule* temp = module_;
   module_ = nullptr;
   return temp;
 }
 inline ::Proto::DeviceModule* DeviceObject::_internal_mutable_module() {
-  _has_bits_[0] |= 0x00000800u;
+  _has_bits_[0] |= 0x00001000u;
   if (module_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::DeviceModule>(GetArena());
     module_ = p;
@@ -48343,9 +48438,9 @@ inline void DeviceObject::set_allocated_module(::Proto::DeviceModule* module) {
       module = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, module, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000800u;
+    _has_bits_[0] |= 0x00001000u;
   } else {
-    _has_bits_[0] &= ~0x00000800u;
+    _has_bits_[0] &= ~0x00001000u;
   }
   module_ = module;
   // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.Module)
@@ -48353,7 +48448,7 @@ inline void DeviceObject::set_allocated_module(::Proto::DeviceModule* module) {
 
 // optional .Proto.DeviceController Controller = 105;
 inline bool DeviceObject::_internal_has_controller() const {
-  bool value = (_has_bits_[0] & 0x00001000u) != 0;
+  bool value = (_has_bits_[0] & 0x00002000u) != 0;
   PROTOBUF_ASSUME(!value || controller_ != nullptr);
   return value;
 }
@@ -48362,7 +48457,7 @@ inline bool DeviceObject::has_controller() const {
 }
 inline void DeviceObject::clear_controller() {
   if (controller_ != nullptr) controller_->Clear();
-  _has_bits_[0] &= ~0x00001000u;
+  _has_bits_[0] &= ~0x00002000u;
 }
 inline const ::Proto::DeviceController& DeviceObject::_internal_controller() const {
   const ::Proto::DeviceController* p = controller_;
@@ -48380,14 +48475,14 @@ inline void DeviceObject::unsafe_arena_set_allocated_controller(
   }
   controller_ = controller;
   if (controller) {
-    _has_bits_[0] |= 0x00001000u;
+    _has_bits_[0] |= 0x00002000u;
   } else {
-    _has_bits_[0] &= ~0x00001000u;
+    _has_bits_[0] &= ~0x00002000u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.Controller)
 }
 inline ::Proto::DeviceController* DeviceObject::release_controller() {
-  _has_bits_[0] &= ~0x00001000u;
+  _has_bits_[0] &= ~0x00002000u;
   ::Proto::DeviceController* temp = controller_;
   controller_ = nullptr;
   if (GetArena() != nullptr) {
@@ -48397,13 +48492,13 @@ inline ::Proto::DeviceController* DeviceObject::release_controller() {
 }
 inline ::Proto::DeviceController* DeviceObject::unsafe_arena_release_controller() {
   // @@protoc_insertion_point(field_release:Proto.DeviceObject.Controller)
-  _has_bits_[0] &= ~0x00001000u;
+  _has_bits_[0] &= ~0x00002000u;
   ::Proto::DeviceController* temp = controller_;
   controller_ = nullptr;
   return temp;
 }
 inline ::Proto::DeviceController* DeviceObject::_internal_mutable_controller() {
-  _has_bits_[0] |= 0x00001000u;
+  _has_bits_[0] |= 0x00002000u;
   if (controller_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::DeviceController>(GetArena());
     controller_ = p;
@@ -48426,9 +48521,9 @@ inline void DeviceObject::set_allocated_controller(::Proto::DeviceController* co
       controller = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, controller, submessage_arena);
     }
-    _has_bits_[0] |= 0x00001000u;
+    _has_bits_[0] |= 0x00002000u;
   } else {
-    _has_bits_[0] &= ~0x00001000u;
+    _has_bits_[0] &= ~0x00002000u;
   }
   controller_ = controller;
   // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.Controller)
@@ -48436,7 +48531,7 @@ inline void DeviceObject::set_allocated_controller(::Proto::DeviceController* co
 
 // optional .Proto.DeviceAppSignal AppSignal = 106;
 inline bool DeviceObject::_internal_has_appsignal() const {
-  bool value = (_has_bits_[0] & 0x00002000u) != 0;
+  bool value = (_has_bits_[0] & 0x00004000u) != 0;
   PROTOBUF_ASSUME(!value || appsignal_ != nullptr);
   return value;
 }
@@ -48445,7 +48540,7 @@ inline bool DeviceObject::has_appsignal() const {
 }
 inline void DeviceObject::clear_appsignal() {
   if (appsignal_ != nullptr) appsignal_->Clear();
-  _has_bits_[0] &= ~0x00002000u;
+  _has_bits_[0] &= ~0x00004000u;
 }
 inline const ::Proto::DeviceAppSignal& DeviceObject::_internal_appsignal() const {
   const ::Proto::DeviceAppSignal* p = appsignal_;
@@ -48463,14 +48558,14 @@ inline void DeviceObject::unsafe_arena_set_allocated_appsignal(
   }
   appsignal_ = appsignal;
   if (appsignal) {
-    _has_bits_[0] |= 0x00002000u;
+    _has_bits_[0] |= 0x00004000u;
   } else {
-    _has_bits_[0] &= ~0x00002000u;
+    _has_bits_[0] &= ~0x00004000u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.AppSignal)
 }
 inline ::Proto::DeviceAppSignal* DeviceObject::release_appsignal() {
-  _has_bits_[0] &= ~0x00002000u;
+  _has_bits_[0] &= ~0x00004000u;
   ::Proto::DeviceAppSignal* temp = appsignal_;
   appsignal_ = nullptr;
   if (GetArena() != nullptr) {
@@ -48480,13 +48575,13 @@ inline ::Proto::DeviceAppSignal* DeviceObject::release_appsignal() {
 }
 inline ::Proto::DeviceAppSignal* DeviceObject::unsafe_arena_release_appsignal() {
   // @@protoc_insertion_point(field_release:Proto.DeviceObject.AppSignal)
-  _has_bits_[0] &= ~0x00002000u;
+  _has_bits_[0] &= ~0x00004000u;
   ::Proto::DeviceAppSignal* temp = appsignal_;
   appsignal_ = nullptr;
   return temp;
 }
 inline ::Proto::DeviceAppSignal* DeviceObject::_internal_mutable_appsignal() {
-  _has_bits_[0] |= 0x00002000u;
+  _has_bits_[0] |= 0x00004000u;
   if (appsignal_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::DeviceAppSignal>(GetArena());
     appsignal_ = p;
@@ -48509,9 +48604,9 @@ inline void DeviceObject::set_allocated_appsignal(::Proto::DeviceAppSignal* apps
       appsignal = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, appsignal, submessage_arena);
     }
-    _has_bits_[0] |= 0x00002000u;
+    _has_bits_[0] |= 0x00004000u;
   } else {
-    _has_bits_[0] &= ~0x00002000u;
+    _has_bits_[0] &= ~0x00004000u;
   }
   appsignal_ = appsignal;
   // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.AppSignal)
@@ -48519,7 +48614,7 @@ inline void DeviceObject::set_allocated_appsignal(::Proto::DeviceAppSignal* apps
 
 // optional .Proto.Workstation Workstation = 107;
 inline bool DeviceObject::_internal_has_workstation() const {
-  bool value = (_has_bits_[0] & 0x00004000u) != 0;
+  bool value = (_has_bits_[0] & 0x00008000u) != 0;
   PROTOBUF_ASSUME(!value || workstation_ != nullptr);
   return value;
 }
@@ -48528,7 +48623,7 @@ inline bool DeviceObject::has_workstation() const {
 }
 inline void DeviceObject::clear_workstation() {
   if (workstation_ != nullptr) workstation_->Clear();
-  _has_bits_[0] &= ~0x00004000u;
+  _has_bits_[0] &= ~0x00008000u;
 }
 inline const ::Proto::Workstation& DeviceObject::_internal_workstation() const {
   const ::Proto::Workstation* p = workstation_;
@@ -48546,14 +48641,14 @@ inline void DeviceObject::unsafe_arena_set_allocated_workstation(
   }
   workstation_ = workstation;
   if (workstation) {
-    _has_bits_[0] |= 0x00004000u;
+    _has_bits_[0] |= 0x00008000u;
   } else {
-    _has_bits_[0] &= ~0x00004000u;
+    _has_bits_[0] &= ~0x00008000u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.Workstation)
 }
 inline ::Proto::Workstation* DeviceObject::release_workstation() {
-  _has_bits_[0] &= ~0x00004000u;
+  _has_bits_[0] &= ~0x00008000u;
   ::Proto::Workstation* temp = workstation_;
   workstation_ = nullptr;
   if (GetArena() != nullptr) {
@@ -48563,13 +48658,13 @@ inline ::Proto::Workstation* DeviceObject::release_workstation() {
 }
 inline ::Proto::Workstation* DeviceObject::unsafe_arena_release_workstation() {
   // @@protoc_insertion_point(field_release:Proto.DeviceObject.Workstation)
-  _has_bits_[0] &= ~0x00004000u;
+  _has_bits_[0] &= ~0x00008000u;
   ::Proto::Workstation* temp = workstation_;
   workstation_ = nullptr;
   return temp;
 }
 inline ::Proto::Workstation* DeviceObject::_internal_mutable_workstation() {
-  _has_bits_[0] |= 0x00004000u;
+  _has_bits_[0] |= 0x00008000u;
   if (workstation_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::Workstation>(GetArena());
     workstation_ = p;
@@ -48592,9 +48687,9 @@ inline void DeviceObject::set_allocated_workstation(::Proto::Workstation* workst
       workstation = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, workstation, submessage_arena);
     }
-    _has_bits_[0] |= 0x00004000u;
+    _has_bits_[0] |= 0x00008000u;
   } else {
-    _has_bits_[0] &= ~0x00004000u;
+    _has_bits_[0] &= ~0x00008000u;
   }
   workstation_ = workstation;
   // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.Workstation)
@@ -48602,7 +48697,7 @@ inline void DeviceObject::set_allocated_workstation(::Proto::Workstation* workst
 
 // optional .Proto.Software Software = 108;
 inline bool DeviceObject::_internal_has_software() const {
-  bool value = (_has_bits_[0] & 0x00008000u) != 0;
+  bool value = (_has_bits_[0] & 0x00010000u) != 0;
   PROTOBUF_ASSUME(!value || software_ != nullptr);
   return value;
 }
@@ -48611,7 +48706,7 @@ inline bool DeviceObject::has_software() const {
 }
 inline void DeviceObject::clear_software() {
   if (software_ != nullptr) software_->Clear();
-  _has_bits_[0] &= ~0x00008000u;
+  _has_bits_[0] &= ~0x00010000u;
 }
 inline const ::Proto::Software& DeviceObject::_internal_software() const {
   const ::Proto::Software* p = software_;
@@ -48629,14 +48724,14 @@ inline void DeviceObject::unsafe_arena_set_allocated_software(
   }
   software_ = software;
   if (software) {
-    _has_bits_[0] |= 0x00008000u;
+    _has_bits_[0] |= 0x00010000u;
   } else {
-    _has_bits_[0] &= ~0x00008000u;
+    _has_bits_[0] &= ~0x00010000u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.Software)
 }
 inline ::Proto::Software* DeviceObject::release_software() {
-  _has_bits_[0] &= ~0x00008000u;
+  _has_bits_[0] &= ~0x00010000u;
   ::Proto::Software* temp = software_;
   software_ = nullptr;
   if (GetArena() != nullptr) {
@@ -48646,13 +48741,13 @@ inline ::Proto::Software* DeviceObject::release_software() {
 }
 inline ::Proto::Software* DeviceObject::unsafe_arena_release_software() {
   // @@protoc_insertion_point(field_release:Proto.DeviceObject.Software)
-  _has_bits_[0] &= ~0x00008000u;
+  _has_bits_[0] &= ~0x00010000u;
   ::Proto::Software* temp = software_;
   software_ = nullptr;
   return temp;
 }
 inline ::Proto::Software* DeviceObject::_internal_mutable_software() {
-  _has_bits_[0] |= 0x00008000u;
+  _has_bits_[0] |= 0x00010000u;
   if (software_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::Software>(GetArena());
     software_ = p;
@@ -48675,9 +48770,9 @@ inline void DeviceObject::set_allocated_software(::Proto::Software* software) {
       software = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, software, submessage_arena);
     }
-    _has_bits_[0] |= 0x00008000u;
+    _has_bits_[0] |= 0x00010000u;
   } else {
-    _has_bits_[0] &= ~0x00008000u;
+    _has_bits_[0] &= ~0x00010000u;
   }
   software_ = software;
   // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.Software)

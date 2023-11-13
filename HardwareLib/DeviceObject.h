@@ -78,6 +78,8 @@ namespace Hardware
 		static const QString presetName;
 		static const QString presetVersion;
 		static const QString presetObjectUuid;
+		static const QString presetProtectedProperties;
+		static const QString presetProtectedPropertiesDescription;
 
 		static const QString lmDescriptionFile;
 		static const QString lmNumber;
@@ -321,6 +323,12 @@ public:
 		[[nodiscard]] QUuid presetObjectUuid() const;
 		void setPresetObjectUuid(QUuid value);
 
+		[[nodiscard]] QString presetProtectedPropertiesStr() const;
+		void setPresetProtectedPropertiesStr(const QString& value);
+
+		[[nodiscard]] const QStringList& presetProtectedProperties() const;
+		void setPresetProtectedProperties(const QStringList& value);
+
 		[[nodiscard]] DbFileInfo* data();
 		[[nodiscard]] const DbFileInfo* data() const;
 		void setData(std::shared_ptr<DbFileInfo> data);
@@ -351,6 +359,7 @@ public:
 		QString m_presetName;				// PresetName, if it is preset
 		QUuid m_presetObjectUuid;			// In configuration this field has uuid of the PRESET object from which it was constructed
 											// In preset edit mode this field has the same value with m_uuid
+		QStringList m_presetProtectedProperties; // Properties that cannot be update from preset
 
 		std::shared_ptr<DbFileInfo> m_data;	// Application-specific value associated with the specified item (DbFileInfo)
 	};

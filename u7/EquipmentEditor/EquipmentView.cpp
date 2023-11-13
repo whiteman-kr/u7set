@@ -2886,10 +2886,20 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 
 			for (auto dit = deviceProperties.begin(); dit != deviceProperties.end(); /*iterator incremented in the loop body*/)
 			{
-				std::shared_ptr<Property> deviceProperty = *dit;
+				Property* deviceProperty = dit->get();
 
+				// Is property protected for update from preset?
+				//
+				if (device->presetProtectedProperties().contains(deviceProperty->caption(), Qt::CaseInsensitive) == true)
+				{
+					++dit;
+					continue;
+				}
+
+				// --
+				//
 				auto pit = std::find_if(presetProperties.begin(), presetProperties.end(),
-										[&deviceProperty](const std::shared_ptr<Property>& preset)
+										[deviceProperty](const std::shared_ptr<Property>& preset)
 										{
 											return preset->caption() == deviceProperty->caption();
 										});
@@ -2940,7 +2950,7 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 			//
 			for (auto pit = presetProperties.begin(); pit != presetProperties.end();)
 			{
-				std::shared_ptr<Property> presetProperty = *pit;
+				Property* presetProperty = pit->get();
 
 				auto dit = std::find_if(deviceProperties.begin(), deviceProperties.end(),
 										[presetProperty](const std::shared_ptr<Property>& device)
@@ -2954,12 +2964,12 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 					//
 					std::shared_ptr<Property> newDeviceProperty;
 
-					if (dynamic_cast<PropertyValueNoGetterSetter*>(presetProperty.get()) != nullptr)
+					if (dynamic_cast<PropertyValueNoGetterSetter*>(presetProperty) != nullptr)
 					{
 						newDeviceProperty = std::make_shared<PropertyValueNoGetterSetter>();
 					}
 
-					if (auto x = dynamic_cast<PropertyValue<std::vector<std::pair<QString, int>>>*>(presetProperty.get());
+					if (auto x = dynamic_cast<PropertyValue<std::vector<std::pair<QString, int>>>*>(presetProperty);
 						x != nullptr)
 					{
 						auto enumList = x->enumValues();
@@ -2978,7 +2988,7 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 
 					if (newDeviceProperty != nullptr)
 					{
-						newDeviceProperty->updateFromPreset(presetProperty.get(), true);
+						newDeviceProperty->updateFromPreset(presetProperty, true);
 						deviceProperties.push_back(newDeviceProperty);
 					}
 
