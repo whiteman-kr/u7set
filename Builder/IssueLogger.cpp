@@ -8620,6 +8620,27 @@ namespace Builder
 				  );
 	}
 
+	/// IssueCode: EQP6123
+	///
+	/// IssueType: Error
+	///
+	/// Title: Metrology parameters checking error of signal %1: %2
+	///
+	/// Parameters:
+	///		%1 AppSignalID
+	///		%2 checking issue
+	///
+	/// Description:
+	///		 Signal metrology parameters checking error.
+	///
+	void IssueLogger::errEQP6123(QString appSignalID, QString errMsg)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6123,
+				  QString(tr("Metrology parameters checking error of signal %1: %2.")).
+						arg(appSignalID).arg(errMsg));
+	}
+
 	/// IssueCode: EQP6200
 	///
 	/// IssueType: Error
