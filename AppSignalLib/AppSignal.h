@@ -258,6 +258,8 @@ public:
 	double highEngineeringUnits(QString* err = nullptr) const;
 	void setHighEngineeringUnits(double highEngineeringUnits);
 
+	bool isReverseEngineeringLimits() const;
+
 	double lowValidRange(QString* err = nullptr) const;
 	void setLowValidRange(double lowValidRange);
 

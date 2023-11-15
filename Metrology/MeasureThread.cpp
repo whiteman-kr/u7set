@@ -677,7 +677,10 @@ void MeasureThread::measureCompratorsInSeries()
 			continue;
 		}
 
+		bool reverseEngineeringLimits = param.isReverseEngineeringLimits();
+
 		comparatorCount = param.comparatorCount();
+
 		if (comparatorCount == 0)
 		{
 			continue;
@@ -793,6 +796,11 @@ void MeasureThread::measureCompratorsInSeries()
 
 							default:
 								break;
+						}
+
+						if (reverseEngineeringLimits == true)
+						{
+							deltaVal = -deltaVal;
 						}
 
 						double engineeringVal = 0;
@@ -1004,18 +1012,27 @@ void MeasureThread::measureCompratorsInSeries()
 					//
 					if (comparatorEx->outputState() == activeDiscreteOutputState)
 					{
+						bool stepUp = false;
 						switch (cmpValueType)
 						{
 							case Metrology::CmpValueType::SetPoint:
 
 								switch (comparatorEx->cmpType())
 								{
-									case E::CmpType::Greate:	ioParam.isNegativeRange() == false ? pCalibratorManager->stepUp()	:
-																									 pCalibratorManager->stepDown();
+									case E::CmpType::Greate:
+
+										stepUp = !(reverseEngineeringLimits ^ ioParam.isNegativeRange());
+
+										/*ioParam.isNegativeRange() == false ? pCalibratorManager->stepUp()	:
+																									 pCalibratorManager->stepDown();*/
 										break;
 
-									case E::CmpType::Less:		ioParam.isNegativeRange() == false ? pCalibratorManager->stepDown() :
-																									 pCalibratorManager->stepUp();
+									case E::CmpType::Less:
+
+										stepUp = reverseEngineeringLimits ^ ioParam.isNegativeRange();
+
+										/*ioParam.isNegativeRange() == false ? pCalibratorManager->stepDown() :
+																									 pCalibratorManager->stepUp();*/
 										break;
 
 									default:
@@ -1028,12 +1045,20 @@ void MeasureThread::measureCompratorsInSeries()
 
 								switch (comparatorEx->cmpType())
 								{
-									case E::CmpType::Greate:	ioParam.isNegativeRange() == false ? pCalibratorManager->stepDown()	:
-																									 pCalibratorManager->stepUp();
+									case E::CmpType::Greate:
+
+										stepUp = reverseEngineeringLimits ^ ioParam.isNegativeRange();
+
+										/*ioParam.isNegativeRange() == false ? pCalibratorManager->stepDown()	:
+																									 pCalibratorManager->stepUp();*/
 										break;
 
-									case E::CmpType::Less:		ioParam.isNegativeRange() == false ? pCalibratorManager->stepUp() :
-																									 pCalibratorManager->stepDown();
+									case E::CmpType::Less:
+
+										stepUp = !(reverseEngineeringLimits ^ ioParam.isNegativeRange());
+
+										/*ioParam.isNegativeRange() == false ? pCalibratorManager->stepUp() :
+																									 pCalibratorManager->stepDown();*/
 										break;
 
 									default:
@@ -1044,6 +1069,15 @@ void MeasureThread::measureCompratorsInSeries()
 
 							default:
 								break;
+						}
+
+						if (stepUp)
+						{
+							pCalibratorManager->stepUp();
+						}
+						else
+						{
+							pCalibratorManager->stepDown();
 						}
 
 						// red string in the StatusBar reduce error >= limit of error
