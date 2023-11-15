@@ -218,22 +218,24 @@ namespace TestSuite
 
 		if (m_configuration.tuningEnabled == false)
 		{
-			m_outputController.reset();
-			return;
+			auto controller = std::make_unique<OutputControllerStub>();
+			m_outputController = std::move(controller);
 		}
-
-		auto controller = std::make_unique<TunsOutputController>(m_softwareInfo,
-																 m_configuration.tuningServices,
-																 m_configuration.tuningSignalsFile,
-																 TuningClientSettings::LmStatusFlagMode::None, // Access key?
-																 m_appLog.logFile());
-		bool ok = controller->waitForConnection(ServiceConnectTimeoutMs);
-		if (ok == false)
+		else
 		{
-			throw 1;
+			auto controller = std::make_unique<TunsOutputController>(m_softwareInfo,
+																	 m_configuration.tuningServices,
+																	 m_configuration.tuningSignalsFile,
+																	 TuningClientSettings::LmStatusFlagMode::None, // Access key?
+																	 m_appLog.logFile());
+			bool ok = controller->waitForConnection(ServiceConnectTimeoutMs);
+			if (ok == false)
+			{
+				throw 1;
+			}
+			m_outputController = std::move(controller);
 		}
 
-		m_outputController = std::move(controller);
 		return;
 	}
 
