@@ -382,9 +382,9 @@ bool MainWindow::createToolBars()
 		pMeasureTimeoutList->setEditable(true);
 		pMeasureTimeoutList->setValidator(validator);
 
-		for(int t = 0; t < Measure::TIMEOUT_COUNT; t++)
+		for(int t : Measure::Timeout)
 		{
-			pMeasureTimeoutList->addItem(QString::number(Measure::Timeout[t], 'f', 1));
+			pMeasureTimeoutList->addItem(QString::number(t, 'f', 1));
 		}
 
 		m_measureTimeout = theOptions.toolBar().measureTimeout();
