@@ -364,39 +364,12 @@ namespace ClientLib
 				break;
 			}
 		case ReadRequestType::SourceState:
+			if (sendWriteRequest(0) == false)
 			{
-				bool noTuningSignalsExist = false;
-				{
-					QReadLocker l(&m_signalHashesLock);
-					noTuningSignalsExist = m_signalHashes.empty() == true;
-				}
-
-				if (noTuningSignalsExist == true)
-				{
-					// No signals exist at all, set flag that all signals states are received and reset to request source states
-					//
-					if (m_signalStatesLoaded.load() == false)
-					{
-						m_signalStatesLoaded.store(true);
-					}
-
-					QThread::msleep(m_requestInterval);
-
-					m_lastReadRequestType = ReadRequestType::SourceState;
-					requestTuningSourcesState();
-				}
-				else
-				{
-					// Request changed signals states
-					//
-					if (sendWriteRequest(0) == false)
-					{
-						m_lastReadRequestType = ReadRequestType::Changed;
-						requestReadChangedTuningSignals();
-					}
-				}
-				break;
+				m_lastReadRequestType = ReadRequestType::Changed;
+				requestReadChangedTuningSignals();
 			}
+			break;
 		case ReadRequestType::Changed:
 			{
 				if (sendWriteRequest(0) == false)
@@ -1212,6 +1185,23 @@ namespace ClientLib
 			}
 
 			m_signalUpdater.setStates(arrivedStates, m_tuningServiceHash);
+		}
+		else
+		{
+			bool noTuningSignalsExist = false;
+			{
+				QReadLocker l(&m_signalHashesLock);
+				noTuningSignalsExist = m_signalHashes.empty() == true;
+			}
+			if (noTuningSignalsExist == true)
+			{
+				// No signals exist at all, set flag that all signals states are received
+				//
+				if (m_signalStatesLoaded.load() == false)
+				{
+					m_signalStatesLoaded.store(true);
+				}
+			}
 		}
 
 		return true;
