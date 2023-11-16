@@ -766,6 +766,18 @@ void CalibratorManager::stepUp()
 	emit calibratorStepUp();
 }
 
+void CalibratorManager::step(bool up)
+{
+	if (up)
+	{
+		stepUp();
+	}
+	else
+	{
+		stepDown();
+	}
+}
+
 // -------------------------------------------------------------------------------------------------------------------
 
 

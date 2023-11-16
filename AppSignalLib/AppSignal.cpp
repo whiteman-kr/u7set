@@ -988,6 +988,11 @@ void AppSignal::setHighEngineeringUnits(double highEngineeringUnits)
 	setSpecPropDouble(AppSignalPropNames::HIGH_ENGINEERING_UNITS, highEngineeringUnits);
 }
 
+bool AppSignal::isReverseEngineeringLimits() const
+{
+	return lowEngineeringUnits() > highEngineeringUnits();
+}
+
 double AppSignal::lowValidRange(QString* err) const
 {
 	return getSpecPropDouble(AppSignalPropNames::LOW_VALID_RANGE, err);
