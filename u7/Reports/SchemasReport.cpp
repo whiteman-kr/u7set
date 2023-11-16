@@ -17,9 +17,39 @@ void SchemasAlbumGenerator::createSchemasAlbums(DbController* db, const AppSigna
 		schemaTypesParams = Builder::SchemasReportGenerator::defaultFileTypesParams(db);
 	}
 
+	// Get all schemas tags
+	//
+	std::set<QString> schemaTags;
+
+	{
+		// Approach 2 - parse all files and get ALL tags from details, slower
+		DbFileTree tree;
+		if (db->getFileListTree(&tree, db->systemFileId(DbDir::SchemasDir), true, parent) == false)
+		{
+			return;
+		}
+		auto filePointers = tree.toVectorOfSharedPointers(true);
+
+		VFrame30::SchemaDetails details;
+		for (const auto& file : filePointers)
+		{
+			bool ok = details.parseDetails(file->details());
+			if (ok == true)
+			{
+				for (const QString& tag : details.schemaTags())
+				{
+					schemaTags.insert(tag);
+				}
+			}
+		}
+	}
+
 	Builder::SchemasReportOptions options;
 	options.load(db);
+	options.setTags(schemaTags);
 
+	// Show dialog with report options
+	//
 	DialogSchemasReport d(path, schemaTypesParams,
 						  Builder::SchemasReportGenerator::defaultFileTypesParams(db), options, parent);
 	if (d.exec() != QDialog::Accepted)
@@ -93,11 +123,10 @@ void SchemasReportGeneratorThread::exportSchemasToSinglePdf(const QString& fileN
 	run(TaskType::ExportFilesToSinglePdf, fileName, files);
 }
 
-void SchemasReportGeneratorThread::exportAllSchemasToAlbum(const QString& fileName)
+void SchemasReportGeneratorThread::exportAllSchemasToAlbum(const QString& pdfPath)
 {
-	QString pdfPath = QFileInfo(fileName).absolutePath();
 	QDir().mkpath(pdfPath);
-	run(TaskType::ExportAllSchemasToAlbum, fileName, {});
+	run(TaskType::ExportAllSchemasToAlbum, pdfPath, {});
 }
 
 void SchemasReportGeneratorThread::run(TaskType task,

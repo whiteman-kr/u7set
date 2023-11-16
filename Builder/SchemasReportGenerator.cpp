@@ -26,6 +26,21 @@ namespace Builder
 		db->getUserProperty("SchemasReportOptions.signalsDetails", &value, "false", nullptr);
 		signalsDetails = (value == "true") ? true : false;
 
+		db->getUserProperty("SchemasReportOptions.schemaTags", &value, "false", nullptr);
+		QStringList tagsStrings = value.split(";", Qt::SkipEmptyParts);
+		schemaTags.clear();
+		for (const QString& tagsString : tagsStrings)
+		{
+			QStringList ts = tagsString.split("=");
+			if (ts.size() != 2)
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+			schemaTags[ts[0]] = ts[1] == "1" ? true : false;
+		}
+
+
 		return true;
 	}
 
@@ -40,7 +55,27 @@ namespace Builder
 		db->setUserProperty("SchemasReportOptions.footers", footers ? "true" : "false", nullptr);
 		db->setUserProperty("SchemasReportOptions.itemsLabels", itemsLabels ? "true" : "false", nullptr);
 		db->setUserProperty("SchemasReportOptions.signalsDetails", signalsDetails ? "true" : "false", nullptr);
+
+		QString tagsString;
+		for (const auto& it : schemaTags)
+		{
+			tagsString.append(it.first + "=");
+			tagsString.append(it.second == true ? "1;" : "0;");
+		}
+		db->setUserProperty("SchemasReportOptions.schemaTags", tagsString, nullptr);
+
 		return true;
+	}
+
+	void SchemasReportOptions::setTags(const std::set<QString>& tagsSet)
+	{
+		for (const QString& tag : tagsSet)
+		{
+			if (schemaTags.find(tag) == schemaTags.end())
+			{
+				schemaTags[tag] = true;
+			}
+		}
 	}
 
 	//
@@ -630,6 +665,8 @@ namespace Builder
 				{
 					const std::shared_ptr<DbFileInfo>& fi = it->second;
 
+					// Filter files by extension
+					//
 					if (fi->fileName().endsWith("." + QString(Db::File::AlFileExtension)) == false &&
 							fi->fileName().endsWith("." + QString(Db::File::UfbFileExtension)) == false &&
 							fi->fileName().endsWith("." + QString(Db::File::MvsFileExtension)) == false &&
@@ -639,6 +676,29 @@ namespace Builder
 						continue;
 					}
 
+					// Filter files by schema tags
+					//
+					VFrame30::SchemaDetails details;
+					bool ok = details.parseDetails(fi->details());
+					if (ok == true)
+					{
+						bool schemaTagFound = false;
+						for (const auto& [tag, tagEnabled] : m_options.schemaTags)
+						{
+							if (tagEnabled == true && details.schemaTags().contains(tag) == true)
+							{
+								schemaTagFound = true;
+								break;
+							}
+						}
+						if (schemaTagFound == false)
+						{
+							continue;
+						}
+					}
+
+					// Add file to list
+					//
 					schemasFiles.push_back(*fi);
 				}
 

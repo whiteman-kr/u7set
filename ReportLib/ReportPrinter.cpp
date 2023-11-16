@@ -162,9 +162,14 @@ namespace ReportLib
 
 		// Calculate the upper schema offset
 		//
-		const QRect pageRect = pdfWriter.pageLayout().paintRectPixels(pdfWriter.resolution());
+		QRect pageRect = pdfWriter.pageLayout().paintRectPixels(pdfWriter.resolution());
 
-		int schemaTop = m_verticalOffset;
+		// Set margins area as 1% of area height
+		//
+		int schemaMargin = pageRect.height() * 0.01;
+		pageRect = pageRect.marginsRemoved(QMargins(schemaMargin, schemaMargin, schemaMargin, schemaMargin));
+
+		int schemaTop = m_verticalOffset + (schemaMargin * 2);
 		int schemaLeft = 0;
 
 		const int schemaMaxHeight = pageRect.height() - schemaTop;

@@ -27,7 +27,7 @@ public:
 
 	void exportSchemasToMultiplePdf(const QString& filePath, const std::vector<DbFileInfo>& files);
 	void exportSchemasToSinglePdf(const QString& fileName, const std::vector<DbFileInfo>& files);
-	void exportAllSchemasToAlbum(const QString& filePath);
+	void exportAllSchemasToAlbum(const QString& pdfPath);
 
 private:
 	enum class TaskType
