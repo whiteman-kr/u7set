@@ -337,10 +337,10 @@ namespace VFrame30
 		SchemaDetails() noexcept = default;
 		SchemaDetails(const SchemaDetails&) = default;
 		SchemaDetails(SchemaDetails&&) = default;
-		SchemaDetails(const QString& details) noexcept;
-
 		SchemaDetails& operator=(const SchemaDetails&) = default;
 		SchemaDetails& operator=(SchemaDetails&&) noexcept = default;
+
+		SchemaDetails(const QString& details) noexcept;
 
 		bool operator<(const SchemaDetails& b) const noexcept;
 
@@ -378,6 +378,7 @@ namespace VFrame30
 		std::set<QString> m_loopbacks;
 		std::set<QString> m_schemaTags;		// All tags are kept in lowercase
 		std::set<QString> m_itemTags;		// All tags are kept in lowercase
+		std::set<QString> m_packedLogicIds;
 		std::set<QUuid> m_guids;
 
 		// SchemaItemIndicator, type trend

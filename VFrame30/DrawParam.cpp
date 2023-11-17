@@ -498,7 +498,7 @@ namespace VFrame30
 								   int flags,
 								   double zoom)
 	{
-		if (painter == nullptr || str.isEmpty())
+		if (painter == nullptr || str.isEmpty() || rect.isEmpty() == true)
 		{
 			Q_ASSERT(painter);
 			return;

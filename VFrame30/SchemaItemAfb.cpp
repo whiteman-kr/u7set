@@ -44,10 +44,6 @@ namespace VFrame30
 		return;
 	}
 
-	SchemaItemAfb::~SchemaItemAfb(void)
-	{
-	}
-
 	void SchemaItemAfb::draw(CDrawParam* drawParam) const
 	{
 		QPainter* p = drawParam->painter();
@@ -64,27 +60,7 @@ namespace VFrame30
 
 		// Draw other
 		//
-		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
-
-		if (std::abs(r.left() - r.right()) < 0.000001)
-		{
-			r.setRight(r.left() + 0.000001);
-		}
-
-		if (std::abs(r.bottom() - r.top()) < 0.000001)
-		{
-			r.setBottom(r.top() + 0.000001);
-		}
-
-		if (inputsCount() > 0)
-		{
-			r.setLeft(r.left() + pinWidth);
-		}
-
-		if (outputsCount() > 0)
-		{
-			r.setRight(r.right() - pinWidth);
-		}
+		QRectF r = itemRectPinIndent(drawParam);
 
 		r.setLeft(r.left() + m_font.drawSize() / 4.0);
 		r.setRight(r.right() - m_font.drawSize() / 4.0);
@@ -111,8 +87,8 @@ namespace VFrame30
 		// Draw params
 		//
 		text.clear();
-		r.setTop(topDocPt() + m_font.drawSize() * 1.4);
-		r.setHeight(heightDocPt() - m_font.drawSize() * 1.4);
+		r.setTop(topDocPt() + m_font.drawSize() * 1.2);
+		r.setBottom(r.bottom() - m_font.drawSize() / 8.0);
 
 		const std::vector<Afb::AfbParam>& params = m_afbElement.params();
 
@@ -139,6 +115,16 @@ namespace VFrame30
 			{
 				text.append(QString("\n%1").arg(paramStr));
 			}
+		}
+
+		if (isPackedLogic() == true)
+		{
+			if (text.isEmpty() == false)
+			{
+				text.append("\n--");
+			}
+
+			text += "\n" + packedLogicId();
 		}
 
 		p->setPen(textColor());
@@ -462,6 +448,8 @@ namespace VFrame30
 		vifble->set_precision(m_precision);
 		m_afbElement.saveToXml(vifble->mutable_afbelement());
 
+		vifble->set_packedlogicid(m_packedLogicId.toStdString());
+
 		return true;
 	}
 
@@ -517,6 +505,8 @@ namespace VFrame30
 				return false;
 			}
 		}
+
+		m_packedLogicId = QString::fromStdString(vifble.packedlogicid());
 
 		// Add afb properties to class meta object
 		//
@@ -840,6 +830,8 @@ namespace VFrame30
 			}
 		}
 
+		textLineCount += isPackedLogic() ? 1 : 0; // +1 line for packed logic id.
+
 		double pinVertGap =	VFrame30::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
 
 		double minPinHeight = VFrame30::snapToGrid(pinVertGap * static_cast<double>(pinCount), gridSize);
@@ -895,6 +887,20 @@ namespace VFrame30
 			}
 			prop->setPrecision(precision());
 		}
+
+		// Add or remoive special property for packed logic.
+		//
+		if (m_afbElement.isPackedLogic() == true)
+		{
+			ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::packedLogicId, PropertyNames::parametersCategory, true, SchemaItemAfb::packedLogicId, SchemaItemAfb::setPackedLogicId)
+				->setEssential(true);
+		}
+		else
+		{
+			removeProperty(PropertyNames::packedLogicId);
+		}
+
+		return;
 	}
 
 	bool SchemaItemAfb::executeScript(const QString& script, const Afb::AfbElement& afb, QString* errorMessage)
@@ -1252,5 +1258,24 @@ namespace VFrame30
 
 		return;
 	}
-}
 
+	bool SchemaItemAfb::isPackedLogic() const
+	{
+		return m_afbElement.isPackedLogic();
+	}
+
+	void SchemaItemAfb::setPackedLogicId(const QString& value)
+	{
+		m_packedLogicId = value;
+	}
+
+	const QString& SchemaItemAfb::packedLogicId() const
+	{
+		return m_packedLogicId;
+	}
+
+	Afb::AfbElement::PackedLogicData SchemaItemAfb::packedLogic() const
+	{
+		return m_afbElement.packedLogic();
+	}
+}

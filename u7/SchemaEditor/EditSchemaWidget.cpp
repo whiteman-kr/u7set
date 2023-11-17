@@ -7698,12 +7698,25 @@ void EditSchemaWidget::addAfbElement()
 		std::shared_ptr<Afb::AfbElement> afb = afbs[index];
 
 		QString errorMsg;
-		addItem(std::make_shared<VFrame30::SchemaItemAfb>(schema()->unit(), *(afb.get()), &errorMsg));
+		auto newSchemaItem = std::make_shared<VFrame30::SchemaItemAfb>(schema()->unit(), *(afb.get()), &errorMsg);
 
 		if (errorMsg.isEmpty() == false)
 		{
 			QMessageBox::critical(this, QObject::tr("Error"), errorMsg);
+			return;
 		}
+
+		if (newSchemaItem->isPackedLogic() == true)
+		{
+			// Assign new PackedLogicId
+			//
+			QString packedLogicId = QString("%1%2")
+										.arg(newSchemaItem->packedLogic().idPrefix)
+										.arg(db()->nextCounterValue());
+			newSchemaItem->setPackedLogicId(packedLogicId);
+		}
+
+		addItem(newSchemaItem);
 	}
 
 	return;

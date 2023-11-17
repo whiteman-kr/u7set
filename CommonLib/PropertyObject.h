@@ -1657,6 +1657,7 @@ public:
 	std::pair<bool, QString> parseSpecificPropertiesStructV5(const QStringList& columns);
 	std::pair<bool, QString> parseSpecificPropertiesStructV6(const QStringList& columns);
 	std::pair<bool, QString> parseSpecificPropertiesStructV7(const QStringList& columns);
+private:
 	std::pair<bool, QString> parseSpecificPropertiesCreate(int version,
 														   const QString& name,
 														   const QString& category,
@@ -1674,6 +1675,7 @@ public:
 														   const QString& strEssential,
 														   const QString& strReadOnly);
 
+public:
 	static std::pair<E::SpecificPropertyType, bool> parseSpecificPropertyType(const QString& strType);
 	static std::vector<std::pair<QString, int>> parseSpecificPropertyTypeDynamicEnum(const QString& strType, bool* ok);
 

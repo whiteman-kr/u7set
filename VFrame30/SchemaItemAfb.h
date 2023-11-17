@@ -18,8 +18,6 @@ namespace VFrame30
 		explicit SchemaItemAfb(SchemaUnit unit);
 		SchemaItemAfb(SchemaUnit unit, const Afb::AfbElement& fblElement, QString* errorMsg);
 
-		virtual ~SchemaItemAfb(void);
-
 		// Draw Functions
 		//
 	public:
@@ -96,8 +94,17 @@ namespace VFrame30
 		int precision() const;
 		void setPrecision(int value);
 
+		bool isPackedLogic() const;
+
+		const QString& packedLogicId() const;
+		void setPackedLogicId(const QString& value);
+
+		Afb::AfbElement::PackedLogicData packedLogic() const;
+
 	private:
 		int m_precision = 2;
 		Afb::AfbElement m_afbElement;
+
+		QString m_packedLogicId;	// If this item is packed, this is the ID of the packed item.
 	};
 }

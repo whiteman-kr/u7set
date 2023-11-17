@@ -494,6 +494,54 @@
       <Pin OpName="o_param_err" OpIndex="16" PinType="Output" />
       <Pin OpName="o_version" OpIndex="17" PinType="Output" />
     </AFBComponent>
+    <AFBComponent Caption="PACKED_AND" OpCode="252" HasRam="false" ImpVersion="1" VersionOpIndex="-1" MaxInstCount="-1" SimulationFunc="afb_no_simulation">
+      <Pin OpName="i_oprd_quant" OpIndex="0" PinType="Param" />
+      <Pin OpName="i_bus_width" OpIndex="1" PinType="Param" />
+      <Pin OpName="i_conf" OpIndex="2" PinType="Param" />
+      <Pin OpName="i_1_oprd" OpIndex="3" PinType="Input" />
+      <Pin OpName="i_2_oprd" OpIndex="4" PinType="Input" />
+      <Pin OpName="i_3_oprd" OpIndex="5" PinType="Input" />
+      <Pin OpName="i_4_oprd" OpIndex="6" PinType="Input" />
+      <Pin OpName="i_5_oprd" OpIndex="7" PinType="Input" />
+      <Pin OpName="i_6_oprd" OpIndex="8" PinType="Input" />
+      <Pin OpName="i_7_oprd" OpIndex="9" PinType="Input" />
+      <Pin OpName="i_8_oprd" OpIndex="10" PinType="Input" />
+      <Pin OpName="i_9_oprd" OpIndex="11" PinType="Input" />
+      <Pin OpName="i_10_oprd" OpIndex="12" PinType="Input" />
+      <Pin OpName="i_11_oprd" OpIndex="13" PinType="Input" />
+      <Pin OpName="i_12_oprd" OpIndex="14" PinType="Input" />
+      <Pin OpName="i_13_oprd" OpIndex="15" PinType="Input" />
+      <Pin OpName="i_14_oprd" OpIndex="16" PinType="Input" />
+      <Pin OpName="i_15_oprd" OpIndex="17" PinType="Input" />
+      <Pin OpName="i_16_oprd" OpIndex="18" PinType="Input" />
+      <Pin OpName="o_result" OpIndex="20" PinType="Output" />
+      <Pin OpName="o_logic_edi" OpIndex="21" PinType="Output" />
+      <Pin OpName="o_version" OpIndex="22" PinType="Output" />
+    </AFBComponent>
+    <AFBComponent Caption="PACKED_OR" OpCode="253" HasRam="false" ImpVersion="1" VersionOpIndex="-1" MaxInstCount="-1" SimulationFunc="afb_no_simulation">
+      <Pin OpName="i_oprd_quant" OpIndex="0" PinType="Param" />
+      <Pin OpName="i_bus_width" OpIndex="1" PinType="Param" />
+      <Pin OpName="i_conf" OpIndex="2" PinType="Param" />
+      <Pin OpName="i_1_oprd" OpIndex="3" PinType="Input" />
+      <Pin OpName="i_2_oprd" OpIndex="4" PinType="Input" />
+      <Pin OpName="i_3_oprd" OpIndex="5" PinType="Input" />
+      <Pin OpName="i_4_oprd" OpIndex="6" PinType="Input" />
+      <Pin OpName="i_5_oprd" OpIndex="7" PinType="Input" />
+      <Pin OpName="i_6_oprd" OpIndex="8" PinType="Input" />
+      <Pin OpName="i_7_oprd" OpIndex="9" PinType="Input" />
+      <Pin OpName="i_8_oprd" OpIndex="10" PinType="Input" />
+      <Pin OpName="i_9_oprd" OpIndex="11" PinType="Input" />
+      <Pin OpName="i_10_oprd" OpIndex="12" PinType="Input" />
+      <Pin OpName="i_11_oprd" OpIndex="13" PinType="Input" />
+      <Pin OpName="i_12_oprd" OpIndex="14" PinType="Input" />
+      <Pin OpName="i_13_oprd" OpIndex="15" PinType="Input" />
+      <Pin OpName="i_14_oprd" OpIndex="16" PinType="Input" />
+      <Pin OpName="i_15_oprd" OpIndex="17" PinType="Input" />
+      <Pin OpName="i_16_oprd" OpIndex="18" PinType="Input" />
+      <Pin OpName="o_result" OpIndex="20" PinType="Output" />
+      <Pin OpName="o_logic_edi" OpIndex="21" PinType="Output" />
+      <Pin OpName="o_version" OpIndex="22" PinType="Output" />
+    </AFBComponent>
     <AFBComponent Caption="SET_FLAGS" OpCode="255" HasRam="false" ImpVersion="1" VersionOpIndex="-1" MaxInstCount="-1" SimulationFunc="afb_set_flags">
 </AFBComponent>
   </AFBImplementation>
@@ -14333,6 +14381,84 @@
           </Script>
         </Param>
       </Params>
+      <CommonScript>
+        <Library />
+        <AfterCreation />
+      </CommonScript>
+    </AFB>
+    
+    <AFB id="#packed_and_in_v1" Caption="packed_and_in" Version="1.1">
+      <Properties>
+        <Description>The input section of the packed logical AND item, transfers inputs to the counterpart packed_and_out item.</Description>
+        <Category>Logic</Category>
+        <OpCode>252</OpCode>
+        <InternalUse>false</InternalUse>
+        <MinWidth>26</MinWidth>
+        <PackedLogic Counterpart="packed_and_out" IdPrefix="AND_" />
+      </Properties>
+      <Inputs>
+        <Pin OpName="in" Caption="in" Type="Discrete" ByteOrder="BigEndian" OpIndex="-1" Size="1" />
+      </Inputs>
+      <Outputs />
+      <Params />
+      <CommonScript>
+        <Library />
+        <AfterCreation />
+      </CommonScript>
+    </AFB>
+    <AFB id="#packed_and_out_v1" Caption="packed_and_out" Version="1.1">
+      <Properties>
+        <Description>The output part of the packed logical AND item, output signal resulting from the logical AND operation on input signals received from the input item packed_and_in.</Description>
+        <Category>Logic</Category>
+        <OpCode>252</OpCode>
+        <InternalUse>false</InternalUse>
+        <MinWidth>26</MinWidth>
+        <PackedLogic Counterpart="packed_and_in" IdPrefix="AND_" MinInputCount="1" />
+      </Properties>
+      <Inputs />
+      <Outputs>
+        <Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="20" Size="1" />
+      </Outputs>
+      <Params />
+      <CommonScript>
+        <Library />
+        <AfterCreation />
+      </CommonScript>
+    </AFB>
+    
+    <AFB id="#packed_or_in_v1" Caption="packed_or_in" Version="1.1">
+      <Properties>
+        <Description>The input section of the packed logical OR item, transfers inputs to the counterpart packed_or_out item.</Description>
+        <Category>Logic</Category>
+        <OpCode>253</OpCode>
+        <InternalUse>false</InternalUse>
+        <MinWidth>26</MinWidth>
+        <PackedLogic Counterpart="packed_or_out" IdPrefix="OR_" />
+      </Properties>
+      <Inputs>
+        <Pin OpName="in" Caption="in" Type="Discrete" ByteOrder="BigEndian" OpIndex="-1" Size="1" />
+      </Inputs>
+      <Outputs />
+      <Params />
+      <CommonScript>
+        <Library />
+        <AfterCreation />
+      </CommonScript>
+    </AFB>
+    <AFB id="#packed_or_out_v1" Caption="packed_or_out" Version="1.1">
+      <Properties>
+        <Description>The output part of the packed logical OR item, output signal resulting from the logical OR operation on input signals received from the input item packed_or_in.</Description>
+        <Category>Logic</Category>
+        <OpCode>253</OpCode>
+        <InternalUse>false</InternalUse>
+        <MinWidth>26</MinWidth>
+        <PackedLogic Counterpart="packed_or_in" IdPrefix="OR_" MinInputCount="1" />
+      </Properties>
+      <Inputs />
+      <Outputs>
+        <Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="20" Size="1" />
+      </Outputs>
+      <Params />
       <CommonScript>
         <Library />
         <AfterCreation />

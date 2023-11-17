@@ -227,6 +227,8 @@ namespace Builder
 
 		bool setAfbComponents(const LmDescriptionSet* lmDescriptionSet, IssueLogger* log);
 
+		bool resolvePackedLogicAfbs(IssueLogger* log);
+
 		// Properties
 		//
 	public:

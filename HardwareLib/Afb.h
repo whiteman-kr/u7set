@@ -376,7 +376,7 @@ private:
 	public:
 		AfbElement(void) = default;
 		AfbElement(const AfbElement& that);
-		AfbElement& operator=(const AfbElement& that) noexcept;
+		AfbElement& operator=(const AfbElement& that);
 
 		// Serialization
 		//
@@ -391,8 +391,8 @@ private:
 		Q_INVOKABLE QObject* getAfbSignalByOpIndex(int opIndex);
 		Q_INVOKABLE QObject* getAfbSignalByCaption(QString caption);
 
-	// Properties and Datas
-	//
+		// Properties and Datas
+		//
 	public:
 		const QString& strID() const;
 		void setStrID(const QString& strID);
@@ -448,32 +448,45 @@ private:
 
 		QString componentCaption() const;
 
+	public:
+		// <PackedLogic Counterpart="packed_or_out" IdPrefix="OR_" / >
+		//
+		struct PackedLogicData
+		{
+			QString counterpart;	// AFB caption of the counterpart item.
+			QString idPrefix;		// PackedID prefix, is used for initial creation of the ID.
+			int minInputCount{};	// Minimum inputs count which resulting output must have, this is udes only for output part.
+		};
+
+		bool isPackedLogic() const;
+		const PackedLogicData& packedLogic() const;
+
 	private:
-		// ATTENTION!!! AfbElement has operator =, add copy of any new member to it!!!!
-		//
-		QString m_strId;
-		QString m_caption;
-		QString m_description;
-		QString m_version = "0.0000";
-		QString m_category;
-		int m_opCode = -1;
-		std::optional<bool> m_hasRam;
-		bool m_internalUse = false;
-		int m_minWidth = 10;			// Min width in GridSize, so read minwidth is m_minWidth * GridSize
-		int m_minHeight = 0;
+		struct
+		{
+			QString strId;
+			QString caption;
+			QString description;
+			QString version = "0.0000";
+			QString category;
+			int opCode = -1;
+			std::optional<bool> hasRam;
+			bool internalUse = false;
+			int minWidth = 10;			// Min width in GridSize, so read minwidth is m_minWidth * GridSize
+			int minHeight = 0;
 
-		QString m_libraryScript;
-		QString m_afterCreationScript;
+			PackedLogicData packedLogic;
 
-		std::vector<AfbSignal> m_inputSignals;
-		std::vector<AfbSignal> m_outputSignals;
+			QString libraryScript;
+			QString afterCreationScript;
 
-		std::vector<AfbParam> m_params;
+			std::vector<AfbSignal> inputSignals;
+			std::vector<AfbSignal> outputSignals;
 
-		std::shared_ptr<Afb::AfbComponent> m_component;
+			std::vector<AfbParam> params;
 
-		// ATTENTION!!! AfbElement has operator =, add copy of any new member to it!!!!
-		//
+			std::shared_ptr<Afb::AfbComponent> component;
+		} m_data;
 	};
 
 	//

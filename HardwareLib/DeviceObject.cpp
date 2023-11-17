@@ -353,7 +353,7 @@ namespace Hardware
 		for (const ::Proto::Property& p :  deviceobject.properties())
 		{
 			auto it = std::find_if(specificProps.begin(), specificProps.end(),
-				[p](std::shared_ptr<Property>& dp)
+				[p](const std::shared_ptr<Property>& dp)
 				{
 					return dp->caption().toStdString() == p.name();
 				});
@@ -364,7 +364,7 @@ namespace Hardware
 			}
 			else
 			{
-				std::shared_ptr<Property>& property = *it;
+				Property* property = it->get();
 
 				Q_ASSERT(property->specific() == true);	// it's suppose to be specific property;
 

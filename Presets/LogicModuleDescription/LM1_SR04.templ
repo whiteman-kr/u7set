@@ -127,16 +127,18 @@
 		<xi:include href="./afbs/afb_tconv_v0.xml" parse="xml"/>
 		<xi:include href="./afbs/afb_indication_v1.xml" parse="xml"/>
 		<xi:include href="./afbs/afb_pulse_gen_v0.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_packed_and_v1.xml" parse="xml" />
+		<xi:include href="./afbs/afb_packed_or_v1.xml" parse="xml" />
 		<xi:include href="./afbs/afb_set_flags.xml" parse="xml"/>
 	</AFBImplementation>
 	<AFBL>
 		<!-- afb_logic_v207, opcode 1 -->
-		<xi:include href="./afbs/afb_logic_v207_and.xml" parse="xml"/>
-		<xi:include href="./afbs/afb_logic_v207_bus_and.xml" parse="xml"/>
-		<xi:include href="./afbs/afb_logic_v207_bus_or.xml" parse="xml"/>
-		<xi:include href="./afbs/afb_logic_v207_bus_xor.xml" parse="xml"/>
-		<xi:include href="./afbs/afb_logic_v207_or.xml" parse="xml"/>
-		<xi:include href="./afbs/afb_logic_v207_xor.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_logic_v207_and.xml" parse="xml" />
+		<xi:include href="./afbs/afb_logic_v207_bus_and.xml" parse="xml" />
+		<xi:include href="./afbs/afb_logic_v207_bus_or.xml" parse="xml" />
+		<xi:include href="./afbs/afb_logic_v207_bus_xor.xml" parse="xml" />
+		<xi:include href="./afbs/afb_logic_v207_or.xml" parse="xml" />
+		<xi:include href="./afbs/afb_logic_v207_xor.xml" parse="xml" />
 
 		<!-- afb_not_v103, opcode 2 -->
 		<xi:include href="./afbs/afb_not_v103_bus_not.xml" parse="xml"/>
@@ -306,6 +308,14 @@
 
 		<!-- afb_pulse_gen_v0, opcode 30 -->
 		<xi:include href="./afbs/afb_pulse_gen_v0_pulse_gen.xml" parse="xml"/>
+
+		<!-- afb_packed_and, opcode 252 -->
+		<xi:include href="./afbs/afb_packed_and_v1_packed_and_in.xml" parse="xml" />
+		<xi:include href="./afbs/afb_packed_and_v1_packed_and_out.xml" parse="xml" />
+
+		<!-- afb_packed_or, opcode 253 -->
+		<xi:include href="./afbs/afb_packed_or_v1_packed_or_in.xml" parse="xml" />
+		<xi:include href="./afbs/afb_packed_or_v1_packed_or_out.xml" parse="xml" />
 
 		<!-- afb_set_flags, opcode 255 -->
 		<xi:include href="./afbs/afb_set_flags_set_flags.xml" parse="xml"/>

@@ -2635,6 +2635,226 @@ namespace Builder
 		return result;
 	}
 
+	bool AppLogicData::resolvePackedLogicAfbs(IssueLogger* log)
+	{
+		// Connect packed logic items.
+		// Items are coupled by SchemaItemAfb::packedLogicId().
+		// The source items have input(s), the output part must have the only item.
+		// These inputs are linked to the output item, then the source items are removed.
+		//
+		bool result = true;
+
+		struct PackedLogic
+		{
+			std::list<AppLogicItem*> inputs;
+			AppLogicItem* output{};
+		};
+
+		for (std::shared_ptr<AppLogicModule> module : m_modules)
+		{
+			std::map<QString, PackedLogic> packedLogics;	// key is PackedLogicID
+
+			// Find all packed logic items and put them to maps.
+			//
+			auto& moduleItems = module->fblItemsAcc(); // Work with mutable reference, as we will modificate items and remove some of them.
+
+			for (auto&[_, item] : moduleItems)
+			{
+				auto schemaItemAfb = item.m_fblItem->toAfbElement();
+				if (schemaItemAfb == nullptr || schemaItemAfb->isPackedLogic() == false)
+				{
+					continue;
+				}
+
+				QString packedLogicId = schemaItemAfb->packedLogicId();
+				PackedLogic& packedLogic = packedLogics[packedLogicId];
+
+				// --
+				//
+				if (schemaItemAfb->inputsCount() != 0 && schemaItemAfb->outputsCount() == 0)
+				{
+					// This item is input part of packed logic.
+					//
+					packedLogic.inputs.push_back(&item);
+					continue;
+				}
+
+				// --
+				//
+				if (schemaItemAfb->inputsCount() == 0 && schemaItemAfb->outputsCount() != 0)
+				{
+					// This item is an output part of packed logic. It must be the only one.
+					//
+					if (packedLogic.output == nullptr)
+					{
+						packedLogic.output = &item;
+					}
+					else
+					{
+						// There is already an output item for this packed logic.
+						//
+						auto item1 = packedLogic.output;
+
+						// Ambiguous PackedLogicID %1 in SchemaItem %2 (LogicSchema %3) and SchemaItem %4 (LogicSchema %5).
+						//
+						log->errALP4300(item1->m_schema->schemaId(), item1->m_fblItem->label(), item1->m_fblItem->guid(), 
+										item.m_schema->schemaId(), item.m_fblItem->label(), item.m_fblItem->guid(), 
+										packedLogicId);
+
+						result = false;
+					}
+											
+					continue;
+				}
+
+				// Interanal error
+				//
+				log->errINT1000(QString("AppLogicData::resolvePackedLogicAfbs: PackedLogic item %1 has %2 inputs and %3 outputs, impossible to detect input/output parts.")
+									.arg(schemaItemAfb->label())
+									.arg(schemaItemAfb->inputsCount())
+									.arg(schemaItemAfb->outputsCount()));
+				result = false;
+			}
+
+			if (result == false)
+			{
+				// Check next module.
+				//
+				continue;
+			}
+
+			// Checks.
+			//
+			for (const auto&[packedLogicId, packedLogic] : packedLogics)
+			{
+				if (packedLogic.output == nullptr)
+				{
+					Q_ASSERT(packedLogic.inputs.empty() == false);
+
+					// There is no output item for this packed logic.
+					//
+					const auto firstInputItem = packedLogic.inputs.front();
+					Q_ASSERT(firstInputItem);
+
+					log->errALP4301(firstInputItem->m_schema->schemaId(), 
+									firstInputItem->m_fblItem->label(), 
+									firstInputItem->m_fblItem->guid(), 
+									firstInputItem->afbElement().packedLogic().counterpart,
+									packedLogicId);
+
+					result = false;
+					continue;
+				}
+
+				const auto outputItem = packedLogic.output;
+				Q_ASSERT(outputItem != nullptr);
+
+				// Input and output items have different packed logic counterpart, possible missused pair of items.
+				// Check counterpart mismatch.
+				//
+				for (const auto& inputItem : packedLogic.inputs)
+				{
+					if (inputItem->afbElement().packedLogic().counterpart != outputItem->afbElement().caption())
+					{
+						// Input and output items have different packed logic counterpart, possible missused pair of items.
+						//
+						log->errALP4303(inputItem->m_schema->schemaId(),
+										inputItem->m_fblItem->label(),
+										inputItem->m_fblItem->guid(),
+										inputItem->afbElement().packedLogic().counterpart,
+										outputItem->m_schema->schemaId(),
+										outputItem->m_fblItem->label(),
+										outputItem->m_fblItem->guid(),
+										outputItem->afbElement().caption(),
+										packedLogicId);
+
+						result = false;
+						continue;
+					}
+
+					if (outputItem->afbElement().packedLogic().counterpart != inputItem->afbElement().caption())
+					{
+						// Input and output items have different packed logic counterpart, possible missused pair of items.
+						//
+						log->errALP4303(inputItem->m_schema->schemaId(),
+										inputItem->m_fblItem->label(),
+										inputItem->m_fblItem->guid(),
+										outputItem->afbElement().packedLogic().counterpart,
+										outputItem->m_schema->schemaId(),
+										outputItem->m_fblItem->label(),
+										outputItem->m_fblItem->guid(),
+										inputItem->afbElement().caption(),
+										packedLogicId);
+
+						result = false;
+						continue;
+					}
+				}
+
+				// Check that minimum input count is satisfied.
+				//
+				if (packedLogic.inputs.size() < outputItem->afbElement().packedLogic().minInputCount)
+				{
+					// Not enough inputs for output item.
+					//
+					log->errALP4304(outputItem->m_schema->schemaId(),
+									outputItem->m_fblItem->label(),
+									outputItem->m_fblItem->guid(),
+									outputItem->afbElement().packedLogic().minInputCount,
+									packedLogic.inputs.size(),
+									packedLogicId);
+
+					result = false;
+					continue;
+				}
+			}
+
+			if (result == false)
+			{
+				// Parsing error, check next module. Cannpot connect inputs to outputs.
+				return false;
+			}
+
+			// Connect inputs of the input items to the output item. Remove input items.
+			//
+			for (auto& [packedLogicId, packedLogic] : packedLogics)
+			{
+				const auto outputItem = packedLogic.output;
+				Q_ASSERT(outputItem != nullptr);
+
+				for (const auto& inputItem : packedLogic.inputs)
+				{
+					Q_ASSERT(inputItem->m_fblItem->inputsCount() > 0);
+
+					for (const VFrame30::AfbPin& inputPin : inputItem->m_fblItem->inputs())
+					{
+						if (inputPin.IsInput() == false)
+						{
+							Q_ASSERT(inputPin.IsInput() == true);
+							continue;
+						}
+
+						// Copy input pin to the output item. Later this input item will be delete with all it's pins.
+						//
+						outputItem->m_fblItem->inputs().push_back(inputPin);
+
+						// Set new name to the added input.
+						//
+						outputItem->m_fblItem->inputs().back().setCaption(QString("%1_%2")
+																		  .arg(inputPin.caption())
+																		  .arg(outputItem->m_fblItem->inputsCount()));
+					}
+
+					// Remove input item.
+					//
+					moduleItems.erase(inputItem->m_fblItem->guid());
+				}
+			}
+		}
+
+		return result;
+	}
+
 	const std::list<std::shared_ptr<AppLogicModule>>& AppLogicData::modules() const
 	{
 		return m_modules;
@@ -2870,7 +3090,7 @@ namespace Builder
 
 		if (schemas.empty() == true)
 		{
-			LOG_MESSAGE(m_log, tr("There is no application logic files in the project."));
+			LOG_MESSAGE(m_log, tr("There are no application logic files in the project."));
 			return true;
 		}
 
@@ -3042,6 +3262,13 @@ namespace Builder
 		{
 			result = false;
 		}
+
+		// Connect packed logic items.
+		// Items are coupled by SchemaItemAfb::packedLogicId().
+		// The source items have input(s), the output part must have the only item.
+		// These inputs are transfered to the output item, then the source items are removed.
+		//
+		m_applicationData->resolvePackedLogicAfbs(m_log);
 
 		// The result is set of AppLogicModule (m_modules), but items are not ordered yet
 		// Order items in all modules

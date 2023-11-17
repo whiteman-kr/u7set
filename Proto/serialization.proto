@@ -786,6 +786,7 @@ message SchemaItemAfb
 	optional AfbElementXml deprecated_afbelement = 5;	// Old formatted XML for AFB, use now afbelement = 7
 	optional string deprecated_label = 6;				// Don't use 6 anymore
 	optional AfbElementXml afbelement = 7;
+	optional string packedLogicId = 8;
 }
 
 //
@@ -1448,6 +1449,7 @@ message SchemaDetails
 	repeated string schematags = 24;
 	repeated string loopbacks = 25;
 	repeated string itemtags = 26;
+	repeated string packedLogicIds = 27;
 
     message TrendIndicatorSchemaItems
 	{

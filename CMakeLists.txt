@@ -63,6 +63,9 @@ message("Build output dir set to: " ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 message("Code coverage: " ${CODE_COVERAGE})
 message("AddressSanitizer: " ${ADDRESS_SANITIZER})
 message("Update translations: " ${UPDATE_TRANSLATIONS})
+message("CMake executable:  ${CMAKE_COMMAND}")
+message("CMake version:  ${CMAKE_VERSION}")
+message("Current file path:  ${CMAKE_CURRENT_LIST_FILE}")
 message("-----------------------------------------")
 
 # Add projects.

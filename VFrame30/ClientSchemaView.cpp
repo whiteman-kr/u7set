@@ -845,7 +845,7 @@ namespace VFrame30
 		m_globalScript = value + QChar::LineFeed;
 		m_jsEngineGlobalsWereCreated = false; // it will make jsEngine() to initialize global script vars again.
 
-		jsEngine(); // jsEngine() prepares global script and calls execOnConfigurationArrived.
+		std::ignore = jsEngine(); // jsEngine() prepares global script and calls execOnConfigurationArrived.
 
 		return;
 	}

@@ -12128,6 +12128,7 @@ class SchemaItemAfb PROTOBUF_FINAL :
   enum : int {
     kParamsFieldNumber = 2,
     kDeprecatedLabelFieldNumber = 6,
+    kPackedLogicIdFieldNumber = 8,
     kAfbStridFieldNumber = 3,
     kDeprecatedAfbelementFieldNumber = 5,
     kAfbelementFieldNumber = 7,
@@ -12169,6 +12170,26 @@ class SchemaItemAfb PROTOBUF_FINAL :
   const std::string& _internal_deprecated_label() const;
   void _internal_set_deprecated_label(const std::string& value);
   std::string* _internal_mutable_deprecated_label();
+  public:
+
+  // optional string packedLogicId = 8;
+  bool has_packedlogicid() const;
+  private:
+  bool _internal_has_packedlogicid() const;
+  public:
+  void clear_packedlogicid();
+  const std::string& packedlogicid() const;
+  void set_packedlogicid(const std::string& value);
+  void set_packedlogicid(std::string&& value);
+  void set_packedlogicid(const char* value);
+  void set_packedlogicid(const char* value, size_t size);
+  std::string* mutable_packedlogicid();
+  std::string* release_packedlogicid();
+  void set_allocated_packedlogicid(std::string* packedlogicid);
+  private:
+  const std::string& _internal_packedlogicid() const;
+  void _internal_set_packedlogicid(const std::string& value);
+  std::string* _internal_mutable_packedlogicid();
   public:
 
   // optional .Proto.wstring afbStrid = 3;
@@ -12249,6 +12270,7 @@ class SchemaItemAfb PROTOBUF_FINAL :
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::AfbParam > params_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr deprecated_label_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr packedlogicid_;
   ::Proto::wstring* afbstrid_;
   ::Proto::AfbElementXml* deprecated_afbelement_;
   ::Proto::AfbElementXml* afbelement_;
@@ -23739,6 +23761,7 @@ class SchemaDetails PROTOBUF_FINAL :
     kSchematagsFieldNumber = 24,
     kLoopbacksFieldNumber = 25,
     kItemtagsFieldNumber = 26,
+    kPackedLogicIdsFieldNumber = 27,
     kTrendIndicatorsFieldNumber = 30,
     kSchemaIdFieldNumber = 4,
     kCaptionFieldNumber = 5,
@@ -23910,6 +23933,30 @@ class SchemaDetails PROTOBUF_FINAL :
   std::string* _internal_add_itemtags();
   public:
 
+  // repeated string packedLogicIds = 27;
+  int packedlogicids_size() const;
+  private:
+  int _internal_packedlogicids_size() const;
+  public:
+  void clear_packedlogicids();
+  const std::string& packedlogicids(int index) const;
+  std::string* mutable_packedlogicids(int index);
+  void set_packedlogicids(int index, const std::string& value);
+  void set_packedlogicids(int index, std::string&& value);
+  void set_packedlogicids(int index, const char* value);
+  void set_packedlogicids(int index, const char* value, size_t size);
+  std::string* add_packedlogicids();
+  void add_packedlogicids(const std::string& value);
+  void add_packedlogicids(std::string&& value);
+  void add_packedlogicids(const char* value);
+  void add_packedlogicids(const char* value, size_t size);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& packedlogicids() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_packedlogicids();
+  private:
+  const std::string& _internal_packedlogicids(int index) const;
+  std::string* _internal_add_packedlogicids();
+  public:
+
   // repeated .Proto.SchemaDetails.TrendIndicatorSchemaItems trendIndicators = 30;
   int trendindicators_size() const;
   private:
@@ -24070,6 +24117,7 @@ class SchemaDetails PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> schematags_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> loopbacks_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> itemtags_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> packedlogicids_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::SchemaDetails_TrendIndicatorSchemaItems > trendindicators_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr schemaid_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr caption_;
@@ -42535,7 +42583,7 @@ SchemaItemAfb::params() const {
 
 // optional .Proto.wstring afbStrid = 3;
 inline bool SchemaItemAfb::_internal_has_afbstrid() const {
-  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
   PROTOBUF_ASSUME(!value || afbstrid_ != nullptr);
   return value;
 }
@@ -42544,7 +42592,7 @@ inline bool SchemaItemAfb::has_afbstrid() const {
 }
 inline void SchemaItemAfb::clear_afbstrid() {
   if (afbstrid_ != nullptr) afbstrid_->Clear();
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline const ::Proto::wstring& SchemaItemAfb::_internal_afbstrid() const {
   const ::Proto::wstring* p = afbstrid_;
@@ -42562,14 +42610,14 @@ inline void SchemaItemAfb::unsafe_arena_set_allocated_afbstrid(
   }
   afbstrid_ = afbstrid;
   if (afbstrid) {
-    _has_bits_[0] |= 0x00000002u;
+    _has_bits_[0] |= 0x00000004u;
   } else {
-    _has_bits_[0] &= ~0x00000002u;
+    _has_bits_[0] &= ~0x00000004u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.SchemaItemAfb.afbStrid)
 }
 inline ::Proto::wstring* SchemaItemAfb::release_afbstrid() {
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000004u;
   ::Proto::wstring* temp = afbstrid_;
   afbstrid_ = nullptr;
   if (GetArena() != nullptr) {
@@ -42579,13 +42627,13 @@ inline ::Proto::wstring* SchemaItemAfb::release_afbstrid() {
 }
 inline ::Proto::wstring* SchemaItemAfb::unsafe_arena_release_afbstrid() {
   // @@protoc_insertion_point(field_release:Proto.SchemaItemAfb.afbStrid)
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000004u;
   ::Proto::wstring* temp = afbstrid_;
   afbstrid_ = nullptr;
   return temp;
 }
 inline ::Proto::wstring* SchemaItemAfb::_internal_mutable_afbstrid() {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000004u;
   if (afbstrid_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::wstring>(GetArena());
     afbstrid_ = p;
@@ -42608,9 +42656,9 @@ inline void SchemaItemAfb::set_allocated_afbstrid(::Proto::wstring* afbstrid) {
       afbstrid = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, afbstrid, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000002u;
+    _has_bits_[0] |= 0x00000004u;
   } else {
-    _has_bits_[0] &= ~0x00000002u;
+    _has_bits_[0] &= ~0x00000004u;
   }
   afbstrid_ = afbstrid;
   // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItemAfb.afbStrid)
@@ -42618,7 +42666,7 @@ inline void SchemaItemAfb::set_allocated_afbstrid(::Proto::wstring* afbstrid) {
 
 // optional int32 precision = 4 [default = 2];
 inline bool SchemaItemAfb::_internal_has_precision() const {
-  bool value = (_has_bits_[0] & 0x00000010u) != 0;
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
   return value;
 }
 inline bool SchemaItemAfb::has_precision() const {
@@ -42626,7 +42674,7 @@ inline bool SchemaItemAfb::has_precision() const {
 }
 inline void SchemaItemAfb::clear_precision() {
   precision_ = 2;
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemAfb::_internal_precision() const {
   return precision_;
@@ -42636,7 +42684,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemAfb::precision() const {
   return _internal_precision();
 }
 inline void SchemaItemAfb::_internal_set_precision(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000020u;
   precision_ = value;
 }
 inline void SchemaItemAfb::set_precision(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -42646,7 +42694,7 @@ inline void SchemaItemAfb::set_precision(::PROTOBUF_NAMESPACE_ID::int32 value) {
 
 // optional .Proto.AfbElementXml deprecated_afbelement = 5;
 inline bool SchemaItemAfb::_internal_has_deprecated_afbelement() const {
-  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
   PROTOBUF_ASSUME(!value || deprecated_afbelement_ != nullptr);
   return value;
 }
@@ -42655,7 +42703,7 @@ inline bool SchemaItemAfb::has_deprecated_afbelement() const {
 }
 inline void SchemaItemAfb::clear_deprecated_afbelement() {
   if (deprecated_afbelement_ != nullptr) deprecated_afbelement_->Clear();
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline const ::Proto::AfbElementXml& SchemaItemAfb::_internal_deprecated_afbelement() const {
   const ::Proto::AfbElementXml* p = deprecated_afbelement_;
@@ -42673,14 +42721,14 @@ inline void SchemaItemAfb::unsafe_arena_set_allocated_deprecated_afbelement(
   }
   deprecated_afbelement_ = deprecated_afbelement;
   if (deprecated_afbelement) {
-    _has_bits_[0] |= 0x00000004u;
+    _has_bits_[0] |= 0x00000008u;
   } else {
-    _has_bits_[0] &= ~0x00000004u;
+    _has_bits_[0] &= ~0x00000008u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.SchemaItemAfb.deprecated_afbelement)
 }
 inline ::Proto::AfbElementXml* SchemaItemAfb::release_deprecated_afbelement() {
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000008u;
   ::Proto::AfbElementXml* temp = deprecated_afbelement_;
   deprecated_afbelement_ = nullptr;
   if (GetArena() != nullptr) {
@@ -42690,13 +42738,13 @@ inline ::Proto::AfbElementXml* SchemaItemAfb::release_deprecated_afbelement() {
 }
 inline ::Proto::AfbElementXml* SchemaItemAfb::unsafe_arena_release_deprecated_afbelement() {
   // @@protoc_insertion_point(field_release:Proto.SchemaItemAfb.deprecated_afbelement)
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000008u;
   ::Proto::AfbElementXml* temp = deprecated_afbelement_;
   deprecated_afbelement_ = nullptr;
   return temp;
 }
 inline ::Proto::AfbElementXml* SchemaItemAfb::_internal_mutable_deprecated_afbelement() {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000008u;
   if (deprecated_afbelement_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::AfbElementXml>(GetArena());
     deprecated_afbelement_ = p;
@@ -42719,9 +42767,9 @@ inline void SchemaItemAfb::set_allocated_deprecated_afbelement(::Proto::AfbEleme
       deprecated_afbelement = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, deprecated_afbelement, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000004u;
+    _has_bits_[0] |= 0x00000008u;
   } else {
-    _has_bits_[0] &= ~0x00000004u;
+    _has_bits_[0] &= ~0x00000008u;
   }
   deprecated_afbelement_ = deprecated_afbelement;
   // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItemAfb.deprecated_afbelement)
@@ -42802,7 +42850,7 @@ inline void SchemaItemAfb::set_allocated_deprecated_label(std::string* deprecate
 
 // optional .Proto.AfbElementXml afbelement = 7;
 inline bool SchemaItemAfb::_internal_has_afbelement() const {
-  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  bool value = (_has_bits_[0] & 0x00000010u) != 0;
   PROTOBUF_ASSUME(!value || afbelement_ != nullptr);
   return value;
 }
@@ -42811,7 +42859,7 @@ inline bool SchemaItemAfb::has_afbelement() const {
 }
 inline void SchemaItemAfb::clear_afbelement() {
   if (afbelement_ != nullptr) afbelement_->Clear();
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline const ::Proto::AfbElementXml& SchemaItemAfb::_internal_afbelement() const {
   const ::Proto::AfbElementXml* p = afbelement_;
@@ -42829,14 +42877,14 @@ inline void SchemaItemAfb::unsafe_arena_set_allocated_afbelement(
   }
   afbelement_ = afbelement;
   if (afbelement) {
-    _has_bits_[0] |= 0x00000008u;
+    _has_bits_[0] |= 0x00000010u;
   } else {
-    _has_bits_[0] &= ~0x00000008u;
+    _has_bits_[0] &= ~0x00000010u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.SchemaItemAfb.afbelement)
 }
 inline ::Proto::AfbElementXml* SchemaItemAfb::release_afbelement() {
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000010u;
   ::Proto::AfbElementXml* temp = afbelement_;
   afbelement_ = nullptr;
   if (GetArena() != nullptr) {
@@ -42846,13 +42894,13 @@ inline ::Proto::AfbElementXml* SchemaItemAfb::release_afbelement() {
 }
 inline ::Proto::AfbElementXml* SchemaItemAfb::unsafe_arena_release_afbelement() {
   // @@protoc_insertion_point(field_release:Proto.SchemaItemAfb.afbelement)
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000010u;
   ::Proto::AfbElementXml* temp = afbelement_;
   afbelement_ = nullptr;
   return temp;
 }
 inline ::Proto::AfbElementXml* SchemaItemAfb::_internal_mutable_afbelement() {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000010u;
   if (afbelement_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::AfbElementXml>(GetArena());
     afbelement_ = p;
@@ -42875,12 +42923,85 @@ inline void SchemaItemAfb::set_allocated_afbelement(::Proto::AfbElementXml* afbe
       afbelement = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, afbelement, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000008u;
+    _has_bits_[0] |= 0x00000010u;
   } else {
-    _has_bits_[0] &= ~0x00000008u;
+    _has_bits_[0] &= ~0x00000010u;
   }
   afbelement_ = afbelement;
   // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItemAfb.afbelement)
+}
+
+// optional string packedLogicId = 8;
+inline bool SchemaItemAfb::_internal_has_packedlogicid() const {
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool SchemaItemAfb::has_packedlogicid() const {
+  return _internal_has_packedlogicid();
+}
+inline void SchemaItemAfb::clear_packedlogicid() {
+  packedlogicid_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline const std::string& SchemaItemAfb::packedlogicid() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemAfb.packedLogicId)
+  return _internal_packedlogicid();
+}
+inline void SchemaItemAfb::set_packedlogicid(const std::string& value) {
+  _internal_set_packedlogicid(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemAfb.packedLogicId)
+}
+inline std::string* SchemaItemAfb::mutable_packedlogicid() {
+  // @@protoc_insertion_point(field_mutable:Proto.SchemaItemAfb.packedLogicId)
+  return _internal_mutable_packedlogicid();
+}
+inline const std::string& SchemaItemAfb::_internal_packedlogicid() const {
+  return packedlogicid_.Get();
+}
+inline void SchemaItemAfb::_internal_set_packedlogicid(const std::string& value) {
+  _has_bits_[0] |= 0x00000002u;
+  packedlogicid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void SchemaItemAfb::set_packedlogicid(std::string&& value) {
+  _has_bits_[0] |= 0x00000002u;
+  packedlogicid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.SchemaItemAfb.packedLogicId)
+}
+inline void SchemaItemAfb::set_packedlogicid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000002u;
+  packedlogicid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.SchemaItemAfb.packedLogicId)
+}
+inline void SchemaItemAfb::set_packedlogicid(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000002u;
+  packedlogicid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.SchemaItemAfb.packedLogicId)
+}
+inline std::string* SchemaItemAfb::_internal_mutable_packedlogicid() {
+  _has_bits_[0] |= 0x00000002u;
+  return packedlogicid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* SchemaItemAfb::release_packedlogicid() {
+  // @@protoc_insertion_point(field_release:Proto.SchemaItemAfb.packedLogicId)
+  if (!_internal_has_packedlogicid()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000002u;
+  return packedlogicid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SchemaItemAfb::set_allocated_packedlogicid(std::string* packedlogicid) {
+  if (packedlogicid != nullptr) {
+    _has_bits_[0] |= 0x00000002u;
+  } else {
+    _has_bits_[0] &= ~0x00000002u;
+  }
+  packedlogicid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), packedlogicid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItemAfb.packedLogicId)
 }
 
 // -------------------------------------------------------------------
@@ -57309,6 +57430,80 @@ inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
 SchemaDetails::mutable_itemtags() {
   // @@protoc_insertion_point(field_mutable_list:Proto.SchemaDetails.itemtags)
   return &itemtags_;
+}
+
+// repeated string packedLogicIds = 27;
+inline int SchemaDetails::_internal_packedlogicids_size() const {
+  return packedlogicids_.size();
+}
+inline int SchemaDetails::packedlogicids_size() const {
+  return _internal_packedlogicids_size();
+}
+inline void SchemaDetails::clear_packedlogicids() {
+  packedlogicids_.Clear();
+}
+inline std::string* SchemaDetails::add_packedlogicids() {
+  // @@protoc_insertion_point(field_add_mutable:Proto.SchemaDetails.packedLogicIds)
+  return _internal_add_packedlogicids();
+}
+inline const std::string& SchemaDetails::_internal_packedlogicids(int index) const {
+  return packedlogicids_.Get(index);
+}
+inline const std::string& SchemaDetails::packedlogicids(int index) const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaDetails.packedLogicIds)
+  return _internal_packedlogicids(index);
+}
+inline std::string* SchemaDetails::mutable_packedlogicids(int index) {
+  // @@protoc_insertion_point(field_mutable:Proto.SchemaDetails.packedLogicIds)
+  return packedlogicids_.Mutable(index);
+}
+inline void SchemaDetails::set_packedlogicids(int index, const std::string& value) {
+  // @@protoc_insertion_point(field_set:Proto.SchemaDetails.packedLogicIds)
+  packedlogicids_.Mutable(index)->assign(value);
+}
+inline void SchemaDetails::set_packedlogicids(int index, std::string&& value) {
+  // @@protoc_insertion_point(field_set:Proto.SchemaDetails.packedLogicIds)
+  packedlogicids_.Mutable(index)->assign(std::move(value));
+}
+inline void SchemaDetails::set_packedlogicids(int index, const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  packedlogicids_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:Proto.SchemaDetails.packedLogicIds)
+}
+inline void SchemaDetails::set_packedlogicids(int index, const char* value, size_t size) {
+  packedlogicids_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:Proto.SchemaDetails.packedLogicIds)
+}
+inline std::string* SchemaDetails::_internal_add_packedlogicids() {
+  return packedlogicids_.Add();
+}
+inline void SchemaDetails::add_packedlogicids(const std::string& value) {
+  packedlogicids_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add:Proto.SchemaDetails.packedLogicIds)
+}
+inline void SchemaDetails::add_packedlogicids(std::string&& value) {
+  packedlogicids_.Add(std::move(value));
+  // @@protoc_insertion_point(field_add:Proto.SchemaDetails.packedLogicIds)
+}
+inline void SchemaDetails::add_packedlogicids(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  packedlogicids_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:Proto.SchemaDetails.packedLogicIds)
+}
+inline void SchemaDetails::add_packedlogicids(const char* value, size_t size) {
+  packedlogicids_.Add()->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:Proto.SchemaDetails.packedLogicIds)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>&
+SchemaDetails::packedlogicids() const {
+  // @@protoc_insertion_point(field_list:Proto.SchemaDetails.packedLogicIds)
+  return packedlogicids_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
+SchemaDetails::mutable_packedlogicids() {
+  // @@protoc_insertion_point(field_mutable_list:Proto.SchemaDetails.packedLogicIds)
+  return &packedlogicids_;
 }
 
 // repeated .Proto.SchemaDetails.TrendIndicatorSchemaItems trendIndicators = 30;

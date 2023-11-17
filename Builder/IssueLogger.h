@@ -278,6 +278,16 @@ namespace Builder
 		void errALP4203(QString schema, QString schemaItem, QString property, QUuid itemUuid);
 		void errALP4204(QString schema, QString schemaItem, QString property, QString propertyValue, QUuid itemUuid);
 
+		// PackedLogic
+		//
+		void errALP4300(QString schema1, QString schemaItem1, QUuid itemUuid1, 
+						QString schema2, QString schemaItem2, QUuid itemUuid2, QString packedLogicId);	// Packed logic ID %1 is not unique in schemas %2.%3 and %4.%5.
+		void errALP4301(QString schema, QString schemaItem, QUuid itemUuid, QString afbType, QString packedLogicId); // Packed logic ID %1 is not unique in AFB %2.%3.
+		void errALP4303(QString schema1, QString schemaItem1, QUuid itemUuid1, QString counterpart1,
+						QString schema2, QString schemaItem2, QUuid itemUuid2, QString counterpart2,
+						QString packedLogicId);
+		void errALP4304(QString schema, QString schemaItem, QUuid itemUuid, int minInputCount, int actuallyInputCount, QString packedLogicId);
+
 		// ALC			Application logic compiler				5000-5999
 		//
 		void errALC5000(QString appSignalID, QUuid itemUuid, QString schemaID);		// Signal identifier %1 is not found (Logic schema %2).

@@ -3177,6 +3177,130 @@ namespace Builder
 						.arg(schema)));
 	}
 
+	/// IssueCode: ALP4300
+	///
+	/// IssueType: Error
+	///
+	/// Title: Ambiguous PackedLogicID %1 in SchemaItem %2 (LogicSchema %3) and SchemaItem %4 (LogicSchema %5). The same PackedLogicID is used for two or more output packed schema items.
+	///
+	/// Parameters:
+	///		%1 PackedLogicID for both schema items
+	///		%2 The first ambiguous schema item
+	///		%3 LogicSchemaID for the first schema item
+	///		%4 The second ambiguous schema item
+	///		%5 LogicSchemaID for the second schema item
+	///
+	/// Description:
+	///		The same PackedLogicID is used for two or more output packed schema items.
+	///
+	void IssueLogger::errALP4300(QString schema1, QString schemaItem1, QUuid itemUuid1,
+								 QString schema2, QString schemaItem2, QUuid itemUuid2, QString packedLogicId)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4300, itemUuid1, schema1);
+		addItemsIssues(OutputMessageLevel::Error, 4300, itemUuid2, schema2);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4300,
+				  QString(tr("Ambiguous PackedLogicID %1 in SchemaItem %2 (LogicSchema %3) and SchemaItem %4 (LogicSchema %5). The same PackedLogicID is used for two or more output packed schema items.")
+						  .arg(packedLogicId)
+						  .arg(schemaItem1)						  
+						  .arg(schema1)
+						  .arg(schemaItem2)
+						  .arg(schema2)));
+	}
+
+	/// IssueCode: ALP4301
+	///
+	/// IssueType: Error
+	///
+	/// Title: Otput packed logic item '%1' for input item %2 (LogicSchema %3) is not found, PackedLogicID: %4.
+	///
+	/// Parameters:
+	///		%1 Type of AFB element
+	///		%2 SchemaItem
+	///		%3 LogicSchemaID
+	///		%4 PackedLogicID
+	///
+	/// Description:
+	///		Input packed logic items must have their counterpart output item.
+	///
+	void IssueLogger::errALP4301(QString schema, QString schemaItem, QUuid itemUuid, QString afbType, QString packedLogicId)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4301, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4301,
+				  QString(tr("Otput packed logic item '%1' for input item %2 (LogicSchema %3) is not found, PackedLogicID: %4.")
+						  .arg(afbType)
+						  .arg(schemaItem)
+						  .arg(schema)
+						  .arg(packedLogicId)));
+	}
+
+	/// IssueCode: ALP4303
+	///
+	/// IssueType: Error
+	///
+	/// Title: Packed logic item pairs have counterpart mismatches ('%1' vs '%2') for input item %3 (LogicSchema %4), output item %5 (LogicSchema %6), PackedLogicID %7.
+	///
+	/// Parameters:
+	///		%1 Expected couterpart for input item
+	///		%2 Expected couterpart for output item
+	///		%3 Packed input schema item
+	///		%4 LogicSchemaID for input item.
+	///		%5 Packed output schema item
+	///		%6 LogicSchemaID for input item.
+	///		%7 PackedLogicID for both schema items
+	///
+	/// Description:
+	///		Input and output items have different packed logic counterpart, possible missused pair of items.
+	///
+	void IssueLogger::errALP4303(QString schema1, QString schemaItem1, QUuid itemUuid1, QString counterpart1, QString schema2, QString schemaItem2, QUuid itemUuid2, QString counterpart2, QString packedLogicId)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4303, itemUuid1, schema1);
+		addItemsIssues(OutputMessageLevel::Error, 4303, itemUuid2, schema2);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4303,
+				  QString(tr("Packed logic item pairs have counterpart mismatches ('%1' vs '%2') for input item %3 (LogicSchema %4), output item %5 (LogicSchema %6), PackedLogicID %7.")
+						  .arg(counterpart1)
+						  .arg(counterpart2)
+						  .arg(schemaItem1)
+						  .arg(schema1)
+						  .arg(schemaItem2)
+						  .arg(schema2)
+						  .arg(packedLogicId)));
+	}
+
+	/// IssueCode: ALP4304
+	///
+	/// IssueType: Error
+	///
+	/// Title: Output packed logic item %1 (LogicSchema %2) has fewer inputs than expected. Expected at least %3, actual %4. PackedLogicID %5.
+	///
+	/// Parameters:
+	///		%1 Packed output logic item
+	///		%2 LogicSchemaID
+	///		%3 Expected input count
+	///		%4 Actual input count
+	///		%5 PackedLogicID for both schema items
+	///
+	/// Description:
+	///		Output packed logic item has fewer inputs than expected.
+	///
+	void IssueLogger::errALP4304(QString schema, QString schemaItem, QUuid itemUuid, int minInputCount, int actuallyInputCount, QString packedLogicId)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4304, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4304,
+				  QString(tr("Output packed logic item %1 (LogicSchema %2) has fewer inputs than expected. Expected at least %3, actual %4. PackedLogicID %5.")
+							  .arg(schemaItem)
+							  .arg(schema)
+							  .arg(minInputCount)
+							  .arg(actuallyInputCount)
+							  .arg(packedLogicId)));
+	}
 
 	// ALC			Application logic compiler				5000-5999
 	//

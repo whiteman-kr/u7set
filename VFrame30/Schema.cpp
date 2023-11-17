@@ -1945,6 +1945,7 @@ namespace VFrame30
 		//
 		QSet<QString> connections;
 		QSet<QString> loopbacks;
+		QSet<QString> packedLogicIds;
 		std::vector<TrendIndicatorSchemaItems> realTimeTrends;
 
 		for (const std::shared_ptr<SchemaLayer>& layer : schema->layers())
@@ -1980,6 +1981,12 @@ namespace VFrame30
 							lb != nullptr)
 						{
 							loopbacks << lb->loopbackId();
+						}
+
+						if (const SchemaItemAfb* afb = item->toType<SchemaItemAfb>();
+							afb != nullptr && afb->isPackedLogic() == true)
+						{
+							packedLogicIds << afb->packedLogicId();
 						}
 					}
 
@@ -2036,6 +2043,7 @@ namespace VFrame30
 		QVariant connectionsVariant(connections.values());
 		QVariant loopbacksVariant(loopbacks.values());
 		QVariant tagsVariant(schemaTags);
+		QVariant packedLogicIdsVariant(packedLogicIds.values());
 		QVariant itemTagsVariant(itemTags);
 		QVariant guidsVariant(guidsStringList);
 
@@ -2070,6 +2078,7 @@ namespace VFrame30
 		jsonObject.insert("Connections", QJsonValue::fromVariant(connectionsVariant));
 		jsonObject.insert("Loopbacks", QJsonValue::fromVariant(loopbacksVariant));
 		jsonObject.insert("Tags", QJsonValue::fromVariant(tagsVariant));
+		jsonObject.insert("PackedLogicIds", QJsonValue::fromVariant(packedLogicIdsVariant));
 		jsonObject.insert("ItemTags", QJsonValue::fromVariant(itemTagsVariant));
 		jsonObject.insert("ItemGuids", QJsonValue::fromVariant(guidsVariant));
 
@@ -2246,6 +2255,18 @@ namespace VFrame30
 					}
 				}
 
+				// m_packedLogicIds
+				//
+				{
+					m_packedLogicIds.clear();
+					QStringList packedIdList = jsonObject.value(QLatin1String("PackedLogicIds")).toVariant().toStringList();
+
+					for (const QString& str : packedIdList)
+					{
+						m_packedLogicIds.insert(str);
+					}
+				}
+
 				// ItemGuids
 				//
 				{
@@ -2322,6 +2343,11 @@ namespace VFrame30
 			message->add_itemtags(t.toStdString());
 		}
 
+		for (const QString& t : m_packedLogicIds)
+		{
+			message->add_packedlogicids(t.toStdString());
+		}
+
 		for (const QUuid& u : m_guids)
 		{
 			::Proto::Uuid* uuidMesage = message->add_guids();
@@ -2395,6 +2421,12 @@ namespace VFrame30
 			m_itemTags.insert(tag);
 		}
 
+		m_packedLogicIds.clear();
+		for (int i = 0, size = message.packedlogicids_size(); i < size; i++)
+		{
+			m_packedLogicIds.insert(QString::fromStdString(message.packedlogicids(i)));
+		}
+
 		m_guids.clear();
 		int guidCount = message.guids_size();
 		for (int i = 0; i < guidCount; i++)
@@ -2456,6 +2488,11 @@ namespace VFrame30
 		}
 
 		if (m_itemTags.contains(searchText.toLower()) == true)
+		{
+			return true;
+		}
+
+		if (m_packedLogicIds.contains(searchText) == true)
 		{
 			return true;
 		}

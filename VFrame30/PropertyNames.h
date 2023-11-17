@@ -238,6 +238,7 @@ namespace VFrame30
 		inline static const QString adaptiveAperture{"AdaptiveAperture"};
 
 		inline static const QString loopbackId{"LoopbackID"};
+		inline static const QString packedLogicId{"PackedLogicID"};
 
 		inline static const QString compareType{"CompareType"};
 

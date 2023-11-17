@@ -1,0 +1,19 @@
+<AFB id="#packed_and_in_v1" Caption="packed_and_in" Version="1.1">
+	<Properties>
+		<Description>The input section of the packed logical AND item, transfers inputs to the counterpart packed_and_out item.</Description>
+		<Category>Logic</Category>
+		<OpCode>252</OpCode>
+		<InternalUse>false</InternalUse>
+		<MinWidth>26</MinWidth>
+		<PackedLogic Counterpart="packed_and_out" IdPrefix="AND_"/>
+	</Properties>
+	<Inputs>
+		<Pin OpName="in" Caption="in" Type="Discrete" ByteOrder="BigEndian" OpIndex="-1" Size="1"/>
+	</Inputs>
+	<Outputs/>
+	<Params/>
+	<CommonScript>
+		<Library/>
+		<AfterCreation/>
+	</CommonScript>
+</AFB>
