@@ -270,6 +270,18 @@ DialogSchemasReport::DialogSchemasReport(const QString& path,
 		m_schemaTypesTree->addTopLevelItem(item);
 	}
 
+	// Schema tags tree
+	//
+	m_schemaTagsTree = new QTreeWidget();
+	m_schemaTagsTree->setHeaderLabels({tr("Schema tag")});
+	m_schemaTagsTree->setRootIsDecorated(false);
+	for (const auto& [tag, tagSelected] : options.schemaTags)
+	{
+		QTreeWidgetItem* item = new QTreeWidgetItem({tag});
+		item->setCheckState(0, tagSelected ? Qt::Checked : Qt::Unchecked);
+		m_schemaTagsTree->addTopLevelItem(item);
+	}
+
 	// Options buttons
 	//
 	//m_checkAddPageNumbers = new QCheckBox(tr("Add schemas information and page numbers"));
@@ -303,7 +315,7 @@ DialogSchemasReport::DialogSchemasReport(const QString& path,
 	QVBoxLayout* mainLayout = new QVBoxLayout();
 	mainLayout->addLayout(reportPathLayout);
 	mainLayout->addWidget(m_schemaTypesTree);
-	//mainLayout->addWidget(m_checkAddPageNumbers);
+	mainLayout->addWidget(m_schemaTagsTree);
 	mainLayout->addWidget(m_checkSignalsDetails);
 	mainLayout->addWidget(m_checkItemsLabels);
 	mainLayout->addLayout(buttonsLayout);
@@ -340,22 +352,39 @@ void DialogSchemasReport::okClicked()
 	m_options.signalsDetails = m_checkSignalsDetails->isChecked();
 	m_options.itemsLabels = m_checkItemsLabels->isChecked();
 
-	int selectedCount = 0;
-
+	int selectedTypesCount = 0;
 	for (int i = 0; i < m_schemaTypesTree->topLevelItemCount(); i++)
 	{
 		QTreeWidgetItem* item = m_schemaTypesTree->topLevelItem(i);
 		if (item->checkState(0) == Qt::Checked)
 		{
-			selectedCount++;
+			selectedTypesCount++;
 		}
 
 		m_schemaTypesParams[i].setSelected(item->checkState(0) == Qt::Checked);
 	}
 
-	if (selectedCount == 0)
+	if (selectedTypesCount == 0)
 	{
 		QMessageBox::critical(this, qAppName(), tr("Please choose at least one file type!"));
+		return;
+	}
+
+	int selectedTagsCount = 0;
+	for (int i = 0; i < m_schemaTagsTree->topLevelItemCount(); i++)
+	{
+		QTreeWidgetItem* item = m_schemaTagsTree->topLevelItem(i);
+		if (item->checkState(0) == Qt::Checked)
+		{
+			selectedTagsCount++;
+		}
+
+		m_options.schemaTags[item->text(0)] = item->checkState(0) == Qt::Checked;
+	}
+
+	if (selectedTagsCount == 0)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Please choose at least one schema tag!"));
 		return;
 	}
 

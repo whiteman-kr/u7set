@@ -21,9 +21,12 @@ namespace Builder
 		bool load(DbController* db);
 		bool save(DbController* db);
 
+		void setTags(const std::set<QString>& tagsSet);
+
 		bool footers = false;
 		bool itemsLabels = false;
 		bool signalsDetails = false;
+		std::map<QString, bool> schemaTags;
 	};
 
 	//
