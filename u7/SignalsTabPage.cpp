@@ -72,7 +72,7 @@ QWidget* SignalsDelegate::createEditor(QWidget* parent, const QStyleOptionViewIt
 		return nullptr;
 	}
 
-	if (AppSignalProperties::isPropertyExists(*s, propDesc.name) == false)
+	if (AppSignalProperties::isPropertyExists(*s, propDesc.name()) == false)
 	{
 		return nullptr;
 	}

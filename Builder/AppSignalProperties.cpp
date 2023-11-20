@@ -81,33 +81,131 @@ AppSignalPropertyDescription::AppSignalPropertyDescription()
 {
 }
 
-
-AppSignalPropertyDescription::AppSignalPropertyDescription(const QString& propName,
-							 QMetaType::Type propType,
-							 std::function<QVariant (const AppSignal*)> getter,
-							 std::function<void (AppSignal*, const QVariant&)> setter,
-							 Hash specPropStructHash,
-							 const std::map<int, QString>& propEnumValues) :
-	name(propName),
-	type(propType),
-	valueGetter(getter),
-	valueSetter(setter)
+// non enum property constructor
+//
+AppSignalPropertyDescription::AppSignalPropertyDescription(	const QString& propName,
+															QMetaType::Type propType,
+															bool isSpecificProperty,
+															std::function<QVariant (const AppSignal*)> getter,
+															std::function<void (AppSignal*, const QVariant&)> setter)
 {
-	enumsValues.emplace(specPropStructHash, propEnumValues);
+	initNonEnumProp(propName, propType, isSpecificProperty, getter, setter);
+}
+
+// enum property constructor
+//
+AppSignalPropertyDescription::AppSignalPropertyDescription(	const QString& propName,
+															QMetaType::Type propType,
+															bool isSpecificProperty,
+															std::function<QVariant (const AppSignal*)> getter,
+															std::function<void (AppSignal*, const QVariant&)> setter,
+															Hash specPropStructHash,
+															const std::map<int, QString>& propEnumValues)
+{
+	initEnumProp(propName, propType, isSpecificProperty, getter, setter, specPropStructHash, propEnumValues);
+}
+
+void AppSignalPropertyDescription::initNonEnumProp(const QString& propName,
+													QMetaType::Type propType,
+													bool isSpecificProperty,
+													std::function<QVariant (const AppSignal*)> getter,
+													std::function<void (AppSignal*, const QVariant&)> setter)
+{
+	init(propName, propType, isSpecificProperty, getter, setter,
+		 false, 0, std::map<int, QString>{});
+}
+
+void AppSignalPropertyDescription::initEnumProp(const QString& propName,
+												QMetaType::Type propType,
+												bool isSpecificProperty,
+												std::function<QVariant (const AppSignal*)> getter,
+												std::function<void (AppSignal*, const QVariant&)> setter,
+												Hash specPropStructHash,
+												const std::map<int, QString>& propEnumValues)
+{
+	init(propName, propType, isSpecificProperty, getter, setter,
+		 true, specPropStructHash, propEnumValues);
 }
 
 bool AppSignalPropertyDescription::isValid() const
 {
-	return name.isEmpty() == false;
+	return m_name.isEmpty() == false;
+}
+
+bool AppSignalPropertyDescription::isSpecificProperty() const
+{
+	return m_isSpecProp;
+}
+
+bool AppSignalPropertyDescription::isEnumProperty() const
+{
+	return m_isEnumProp;
+}
+
+const QString& AppSignalPropertyDescription::name() const
+{
+	return m_name;
+}
+
+QMetaType::Type AppSignalPropertyDescription::type() const
+{
+	return m_type;
+}
+
+E::PropertyBehaviourType AppSignalPropertyDescription::getBehaviour(E::SignalType signalType, E::SignalInOutType inOutType) const
+{
+	return m_behaviour.get(signalType, inOutType);
+}
+
+E::PropertyBehaviourType AppSignalPropertyDescription::getBehaviour(const AppSignal& s) const
+{
+	return m_behaviour.get(s);
+}
+
+bool AppSignalPropertyDescription::dependsOnPrecision() const
+{
+	return m_behaviour.dependsOnPrecision();
+}
+
+void AppSignalPropertyDescription::clearBehaviour()
+{
+	m_behaviour.clear();
+}
+
+void AppSignalPropertyDescription::setBehaviour(const AppSignalPropertyBehavior& bh)
+{
+	m_behaviour = bh;
 }
 
 void AppSignalPropertyDescription::setEnumValues(Hash specPropStructHash, const std::vector<std::pair<int, QString>>& enumValuesVector)
 {
-	auto it = enumsValues.find(specPropStructHash);
-
-	if (it == enumsValues.end())
+	if (m_isEnumProp == false)
 	{
-		auto [newIt, b] = enumsValues.emplace(specPropStructHash, std::map<int, QString>{ enumValuesVector.begin(), enumValuesVector.end() } );
+		Q_ASSERT(false);
+		return;
+	}
+
+	if (m_isSpecProp == false)
+	{
+		Q_ASSERT(specPropStructHash == AppSignalProperties::NON_SPECIFIC_PROP_HASH);
+	}
+	else
+	{
+		Q_ASSERT(specPropStructHash != AppSignalProperties::NON_SPECIFIC_PROP_HASH);
+	}
+
+	if (enumValuesVector.empty() == true)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	auto it = m_enumsValues.find(specPropStructHash);
+
+	if (it == m_enumsValues.end())
+	{
+		auto [newIt, b] = m_enumsValues.emplace(specPropStructHash, std::map<int, QString>{ enumValuesVector.begin(),
+																							enumValuesVector.end() } );
 	}
 	else
 	{
@@ -117,21 +215,32 @@ void AppSignalPropertyDescription::setEnumValues(Hash specPropStructHash, const 
 
 void AppSignalPropertyDescription::checkEnumValues(Hash specPropStructHash, const std::vector<std::pair<int, QString>>& enumValuesVector)
 {
-	auto it = enumsValues.find(specPropStructHash);
-
-	if (it == enumsValues.end())
+	if (m_isEnumProp == false)
 	{
-		enumsValues.emplace(specPropStructHash, std::map<int, QString>{ enumValuesVector.begin(), enumValuesVector.end() });
+		Q_ASSERT(false);
+		return;
+	}
+
+	if (enumValuesVector.empty() == true)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	if (m_isSpecProp == false)
+	{
+		specPropStructHash = AppSignalProperties::NON_SPECIFIC_PROP_HASH;
+	}
+
+	auto it = m_enumsValues.find(specPropStructHash);
+
+	if (it == m_enumsValues.end())
+	{
+		setEnumValues(specPropStructHash, enumValuesVector);
 		return;
 	}
 
 	std::map<int, QString>& enumValues = it->second;
-
-	if (enumValues.empty())
-	{
-		enumValues = std::map<int, QString>{ enumValuesVector.begin(), enumValuesVector.end() };
-		return;
-	}
 
 	for(const auto& p : enumValuesVector)
 	{
@@ -140,6 +249,10 @@ void AppSignalPropertyDescription::checkEnumValues(Hash specPropStructHash, cons
 		if (it != enumValues.end())
 		{
 			Q_ASSERT(p.second == it->second);
+		}
+		else
+		{
+			Q_ASSERT(false);			// different enumValuesVector for same specPropStructHash, why?
 		}
 	}
 }
@@ -150,9 +263,20 @@ bool AppSignalPropertyDescription::getEnumValuesVector(Hash specPropStructHash, 
 
 	enumValuesVector->clear();
 
-	auto it = enumsValues.find(specPropStructHash);
+	if (m_isEnumProp == false)
+	{
+		Q_ASSERT(false);
+		return false;
+	}
 
-	if (it == enumsValues.end())
+	if (m_isSpecProp == false)
+	{
+		specPropStructHash = AppSignalProperties::NON_SPECIFIC_PROP_HASH;
+	}
+
+	auto it = m_enumsValues.find(specPropStructHash);
+
+	if (it == m_enumsValues.end())
 	{
 		Q_ASSERT(false);
 		return false;
@@ -165,16 +289,22 @@ bool AppSignalPropertyDescription::getEnumValuesVector(Hash specPropStructHash, 
 	return true;
 }
 
-bool AppSignalPropertyDescription::isEnumProperty() const
-{
-	return enumsValues.empty() == false;
-}
-
 QString AppSignalPropertyDescription::getEnumValueStr(Hash specPropStructHash, int enumValue) const
 {
-	auto it = enumsValues.find(specPropStructHash);
+	if (m_isEnumProp == false)
+	{
+		Q_ASSERT(false);
+		return QString();
+	}
 
-	if (it == enumsValues.end())
+	if (m_isSpecProp == false)
+	{
+		specPropStructHash = AppSignalProperties::NON_SPECIFIC_PROP_HASH;
+	}
+
+	auto it = m_enumsValues.find(specPropStructHash);
+
+	if (it == m_enumsValues.end())
 	{
 		Q_ASSERT(false);
 		return QString();
@@ -195,18 +325,66 @@ QString AppSignalPropertyDescription::getEnumValueStr(Hash specPropStructHash, i
 
 void AppSignalPropertyDescription::appendSignalID(int signalID)
 {
-	signalsWithThisProperty.insert(signalID);
+	m_signalsWithThisProperty.insert(signalID);
 }
 
 bool AppSignalPropertyDescription::isSignalHaveProperty(int signalID) const
 {
-	return signalsWithThisProperty.contains(signalID);
+	return m_signalsWithThisProperty.contains(signalID);
 }
 
-bool AppSignalPropertyDescription::isSpecificProperty() const
+std::function<QVariant (const AppSignal*)> AppSignalPropertyDescription::getter() const
 {
-	return specificProperty;
+	return m_valueGetter;
 }
+
+std::function<void (AppSignal*, const QVariant&)> AppSignalPropertyDescription::setter()
+{
+	return m_valueSetter;
+}
+
+void AppSignalPropertyDescription::init(const QString& propName,
+										QMetaType::Type propType,
+										bool isSpecificProperty,
+										std::function<QVariant (const AppSignal*)> getter,
+										std::function<void (AppSignal*, const QVariant&)> setter,
+										bool isEnum,
+										Hash specPropStructHash,
+										const std::map<int, QString>& propEnumValues)
+{
+	m_name = propName;
+	m_type = propType;
+	m_isSpecProp = isSpecificProperty;
+	m_valueGetter = getter;
+	m_valueSetter= setter;
+	m_isEnumProp = isEnum;
+
+	if (m_isEnumProp == true)
+	{
+		if (m_isSpecProp)
+		{
+			Q_ASSERT(specPropStructHash != AppSignalProperties::NON_SPECIFIC_PROP_HASH);
+		}
+		else
+		{
+			Q_ASSERT(specPropStructHash == AppSignalProperties::NON_SPECIFIC_PROP_HASH);
+		}
+
+		if (propEnumValues.empty() == false)
+		{
+			m_enumsValues.emplace(specPropStructHash, propEnumValues);
+		}
+		else
+		{
+			Q_ASSERT(false);
+		}
+	}
+	else
+	{
+		m_enumsValues.clear();
+	}
+}
+
 
 // --------------------------------------------------------------------------------------------------
 //
@@ -300,7 +478,7 @@ bool AppSignalProperties::isNonSpecificPropertyExists(const QString& propertyNam
 
 	for(const AppSignalPropertyDescription& prop : m_propertyDescription)
 	{
-		if (prop.name == propertyName)
+		if (prop.name() == propertyName)
 		{
 			return true;
 		}
