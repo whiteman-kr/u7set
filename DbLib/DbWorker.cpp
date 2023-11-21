@@ -426,6 +426,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0401.sql", "Upgrade to version 401, InvertSignal property bug fix"},
 	{":/DatabaseUpgrade/Upgrade0402.sql", "Upgrade to version 402, Fixed AFB Limiter attribute HasRAM (set to false)"},
 	{":/DatabaseUpgrade/Upgrade0403.sql", "Upgrade to version 403, In AOM-4PH validity signals link was removed from output signals"},
+	{":/DatabaseUpgrade/Upgrade0404.sql", "Upgrade to version 404, Review module certifications (AIM, AOM), FIM and AIFM removed, FSC Chassis fix"},
 };
 
 int DbWorker::counter = 0;
