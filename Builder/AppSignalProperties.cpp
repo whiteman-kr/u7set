@@ -457,17 +457,14 @@ int AppSignalProperties::getPrecision()
 
 	if (precisionProperty == nullptr)
 	{
-		return 0;
+		return -1;				// is not an error!
 	}
 
 	bool ok = true;
 
 	int precision = precisionProperty->value().toInt(&ok);
 
-	if (ok == false)
-	{
-		return 0;
-	}
+	RETURN_VALUE_IF_FALSE(ok, 0);
 
 	return precision;
 }
@@ -485,6 +482,18 @@ bool AppSignalProperties::isNonSpecificPropertyExists(const QString& propertyNam
 	}
 
 	return false;
+}
+
+void AppSignalProperties::setReadOnly(bool readOnly)
+{
+	std::vector<std::shared_ptr<Property>> props = properties();
+
+	for (auto& p : props)
+	{
+		TEST_PTR_CONTINUE(p);
+
+		p->setReadOnly(readOnly);
+	}
 }
 
 bool AppSignalProperties::isPropertyExists(const AppSignal& signal, const QString& propertyName)

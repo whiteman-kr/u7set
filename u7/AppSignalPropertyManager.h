@@ -48,7 +48,7 @@ signals:
 
 public slots:
 	void slot_detectNewProperties(const std::vector<int>& signalIndexes);
-	void detectNewProperties(const AppSignal* signal);
+	void detectNewProperties(const AppSignal& signal);
 
 private:
 	static const E::PropertyBehaviourType m_defaultBehaviour = E::PropertyBehaviourType::Write;

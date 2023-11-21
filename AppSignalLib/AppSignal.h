@@ -95,8 +95,6 @@ public:
 	bool serializeValuesToArray(QByteArray* protoData) const;
 	bool parseValuesFromArray(const QByteArray& protoData);
 
-	//bool save(Proto::SignalSpecPropValues* protoValues) const;
-
 	const QVector<AppSignalSpecPropValue>& values() const { return m_specPropValues; }
 	QVector<AppSignalSpecPropValue>& values() { return m_specPropValues; }
 

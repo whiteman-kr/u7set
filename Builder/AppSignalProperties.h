@@ -173,6 +173,8 @@ public:
 
 	bool isNonSpecificPropertyExists(const QString& propertyName) const;
 
+	void setReadOnly(bool readOnly);
+
 	static bool isPropertyExists(const AppSignal& signal, const QString& propertyName);
 
 	static QString lastEditedSignalPropsPrefix(const AppSignal& s);

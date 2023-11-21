@@ -86,6 +86,8 @@ set (U7_SOURCES
 	CheckinSignalsDialog.h
 	CreateProjectDialog.cpp
 	CreateProjectDialog.h
+	CreateSignalsDialog.cpp
+	CreateSignalsDialog.h
 	CreateUserDialogDialog.cpp
 	CreateUserDialogDialog.h
 	DbTagsEditor.cpp

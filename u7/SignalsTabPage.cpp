@@ -29,6 +29,7 @@
 #include "FindSignalDialog.h"
 #include "CheckinSignalsDialog.h"
 #include "DlgMetrologyConnection.h"
+#include "CreateSignalsDialog.h"
 
 const int DEFAULT_COLUMN_WIDTH = 50;
 
@@ -1138,87 +1139,45 @@ void SignalsTabPage::loadSignals()
 
 void SignalsTabPage::createNewSignals()
 {
-	QDialog signalTypeDialog(this, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
-	QFormLayout* fl = new QFormLayout(&signalTypeDialog);
+	CreateSignalsDialog createSignalsDialog(this);
 
-	QLineEdit* deviceIdEdit = new QLineEdit(&signalTypeDialog);
-	deviceIdEdit->setText("");
-
-	fl->addRow(tr("EquipmentID"), deviceIdEdit);
-
-	QComboBox* signalTypeCombo = new QComboBox(&signalTypeDialog);
-	signalTypeCombo->addItems(QStringList() << tr("Analog") << tr("Discrete") << tr("Bus"));
-	signalTypeCombo->setCurrentIndex(1);
-
-	fl->addRow(tr("Signal type"), signalTypeCombo);
-
-	QLineEdit* signalChannelCountEdit = new QLineEdit(&signalTypeDialog);
-	signalChannelCountEdit->setText("1");
-	QRegularExpression channelRegExp("[1-6]");
-	QValidator *validator = new QRegularExpressionValidator(channelRegExp, &signalTypeDialog);
-	signalChannelCountEdit->setValidator(validator);
-
-	fl->addRow(tr("Signal channel count"), signalChannelCountEdit);
-
-	QLineEdit* signalCountEdit = new QLineEdit(&signalTypeDialog);
-	signalCountEdit->setText("1");
-	QRegularExpression countRegExp("[1-9]\\d{0,3}");
-	validator = new QRegularExpressionValidator(countRegExp, &signalTypeDialog);
-	signalCountEdit->setValidator(validator);
-
-	fl->addRow(tr("Signal count"), signalCountEdit);
-
-	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-
-	connect(buttonBox, &QDialogButtonBox::accepted, &signalTypeDialog, &QDialog::accept);
-	connect(buttonBox, &QDialogButtonBox::rejected, &signalTypeDialog, &QDialog::reject);
-
-	fl->addRow(buttonBox);
-
-	signalTypeDialog.setLayout(fl);
-	signalTypeDialog.setWindowTitle("Create signals");
-
-	if (signalTypeDialog.exec() != QDialog::Accepted)
+	if (createSignalsDialog.exec() != QDialog::Accepted)
 	{
 		return;
 	}
 
-	int channelCount = signalChannelCountEdit->text().toInt();
-	int signalCount = signalCountEdit->text().toInt();
+	QString equipmentID = createSignalsDialog.getEquipmentID();
+	E::SignalType type = createSignalsDialog.getSignalType();
+	int channelCount = createSignalsDialog.getChannelCount();
+	int signalCount = createSignalsDialog.getSignalCount();
 
-	AppSignal signal;
+	//
 
-	signal.setSignalType(static_cast<E::SignalType>(signalTypeCombo->currentIndex()));
+	AppSignal templateSignal;
 
-	if (signal.isAnalog())
-	{
-		// Temporary default value, should be removed later
-		//
-		signal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
-	}
+	templateSignal.setSignalType(type);
+	templateSignal.setEquipmentID(equipmentID);
 
-	SignalPropertiesDialog::initNewSignal(signal);
-
-	if (!deviceIdEdit->text().isEmpty())
-	{
-		signal.setEquipmentID(deviceIdEdit->text());
-	}
+	SignalPropertiesDialog::initNewSignal(templateSignal);
 
 	int signalCounter = db()->nextCounterValue();
 
 	if (signalCounter >= 0)
 	{
-		QString newId = QString(E::valueToString<E::SignalType>(signal.signalType()).toUpper() + "_%1").arg(signalCounter, 3, 10, Latin1Char::ZERO);
-		signal.setAppSignalID('#' + newId);
-		signal.setCustomAppSignalID(newId);
-		signal.setCaption(newId);
+		QString newId = QString("%1_%2").
+							arg(E::valueToString<E::SignalType>(type).toUpper()).
+							arg(signalCounter, 3, 10, Latin1Char::ZERO);
+
+		templateSignal.setAppSignalID("#" + newId);
+		templateSignal.setCustomAppSignalID(newId);
+		templateSignal.setCaption("Signal " + newId);
 	}
 
-	std::vector<AppSignal*> signalToEdit = { &signal };
+	std::vector<AppSignal*> signalToEdit = { &templateSignal };
 
 	SignalPropertiesDialog dlg(signalToEdit, false, false, this);
 
-	signal.trimTextFields();
+	templateSignal.trimTextFields();
 
 	if (dlg.exec() == QDialog::Rejected)
 	{
@@ -1227,7 +1186,7 @@ void SignalsTabPage::createNewSignals()
 
 	std::vector<int> addedSignalIDs;
 
-	m_signalSetProvider->createNewSignals(signal, channelCount, signalCount, &addedSignalIDs);
+	m_signalSetProvider->createNewSignals(templateSignal, channelCount, signalCount, &addedSignalIDs);
 
 	restoreSelections(addedSignalIDs);
 }

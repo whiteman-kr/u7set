@@ -83,7 +83,9 @@ public:
 	bool saveSignals(const std::vector<AppSignal*>& signalsVector, QWidget* parentWidget);
 
 	bool checkoutSignalByIndex(int index, QString* message);
-	bool checkoutSignal(const AppSignal* s, QString* message);
+	bool checkoutSignal(const AppSignal* s, QString* message, std::vector<int>* checkedOutIDs = nullptr);
+	bool checkoutSignals(const std::vector<AppSignal*>& appSignals, QString* message, std::vector<int>* checkedOutIDs = nullptr);
+	bool checkoutSignals(const std::vector<int>& appSignalIDs, QString* message, std::vector<int>* checkedOutIDs = nullptr);
 
 	bool checkinSignals(const std::vector<int>& signalIDs,
 						QString comment);

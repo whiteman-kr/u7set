@@ -348,20 +348,22 @@ void AppSignalPropertyManager::slot_detectNewProperties(const std::vector<int>& 
 
 	for(int index : signalIndexes)
 	{
-		detectNewProperties(provider->getSignalByIndex(index));
+		const AppSignal* s = provider->getSignalByIndex(index);
+
+		TEST_PTR_CONTINUE(s);
+
+		detectNewProperties(*s);
 	}
 }
 
-void AppSignalPropertyManager::detectNewProperties(const AppSignal* signal)
+void AppSignalPropertyManager::detectNewProperties(const AppSignal& signal)
 {
-	TEST_PTR_RETURN(signal);
-
-	if (signal->specPropStruct().isEmpty() == true)
+	if (signal.specPropStruct().isEmpty() == true)
 	{
 		return;
 	}
 
-	Hash specPropStructHash = signal->specPropStructHash();
+	Hash specPropStructHash = signal.specPropStructHash();
 
 	auto it = m_parsedSpecPropStruct.find(specPropStructHash);
 
@@ -371,7 +373,7 @@ void AppSignalPropertyManager::detectNewProperties(const AppSignal* signal)
 	{
 		auto [newIt, b] = m_parsedSpecPropStruct.emplace(specPropStructHash, PropertyObject{});
 
-		std::pair<bool, QString> result = newIt->second.parseSpecificPropertiesStruct(signal->specPropStruct());
+		std::pair<bool, QString> result = newIt->second.parseSpecificPropertiesStruct(signal.specPropStruct());
 
 		if (result.first == false)
 		{
@@ -396,7 +398,7 @@ void AppSignalPropertyManager::detectNewProperties(const AppSignal* signal)
 
 		if (propIndex != -1)
 		{
-			m_propDescriptions[propIndex].appendSignalID(signal->ID());
+			m_propDescriptions[propIndex].appendSignalID(signal.ID());
 
 			if (propertyIsEnum == true)
 			{

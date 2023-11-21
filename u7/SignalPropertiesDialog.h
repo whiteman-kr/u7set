@@ -13,12 +13,12 @@ class SignalPropertiesDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	explicit SignalPropertiesDialog(const std::vector<AppSignal*>& signalVector,
-									bool readOnly, bool tryCheckout, QWidget* parent = nullptr);
+	explicit SignalPropertiesDialog(const std::vector<AppSignal*>& signalsToEdit,
+									bool readOnly, bool isExistSignals, QWidget* parent = nullptr);
 
-	bool isEditedSignal(int id) const { return m_editedSignalsId.contains(id); }
-	bool hasEditedSignals() const { return m_editedSignalsId.empty() == false; }
-	bool isValid() const { return m_isValid; }
+	bool isEditedSignal(int id) const;
+	bool hasEditedSignals() const;
+	bool isValid() const;
 
 	//
 
@@ -31,43 +31,57 @@ public:
 signals:
 	void signalChanged(int id, bool updateView);
 
-public slots:
-	void checkAndSaveSignal();
-	void undoCheckouts();
-	void saveDialogSettings();
-	void onSignalPropertyChanged(QList<std::shared_ptr<PropertyObject> > objects);
-	void checkoutSignals(QList<std::shared_ptr<PropertyObject>> objects);
-	void saveLastEditedSignalProperties();
-	void showError(const QString&errorString);
+private slots:
+	void onSignalsPropChanged(QList<std::shared_ptr<PropertyObject>> objects);
+
+	void onOk();
+	void onCancel();
 
 protected:
-	void closeEvent(QCloseEvent* event);
+	void closeEvent(QCloseEvent* event) override;
 
 private:
+	void uppercaseAppSignalIDs();
+	void createSignalsProps();
+
+	void checkoutSignals(QList<std::shared_ptr<PropertyObject>> objects);
 	bool checkoutSignal(const AppSignal& s, QString* message);
 
-	bool isPropertyDependentOnPrecision(const QString& propName) const;
-	void addPropertyDependentOnPrecision(const QString& propName);
+	void limitPropsPrecisionOnPropChanged(const QList<std::shared_ptr<PropertyObject>>& objects);
+
+	bool checkAndSaveSignal();
+	void undoCheckouts();
+
+
+	void saveLastEditedSignalProperties();
+	void saveDialogSettings();
+
+	void setDialogEditable();
+	void setDialogReadOnly();
+
+	void showError(const QString& errMsg);
 
 private:
+	const std::vector<AppSignal*> m_signalsToEdit;
+	std::vector<std::shared_ptr<PropertyObject>> m_signalsProps;
+
 	AppSignalSetProvider* m_signalSetProvider = nullptr;
 	AppSignalPropertyManager* m_propManager = nullptr;
 
+	bool m_readOnly = false;
+	bool m_isExistSignals = false;						// exist signals should be checked out before properties changing
+														// new signals don't require checkout
 	bool m_uppercaseAppSignalID = false;
-
-	const std::vector<AppSignal*>& m_signalVector;
-	std::set<int> m_editedSignalsId;
-	std::set<int> m_checkedOutSignalsId;						// signals checked out by SignalPropertiesDialog
-	std::vector<std::shared_ptr<PropertyObject>> m_objList;
-	bool m_tryCheckout;
-
-	QWidget* m_parent = nullptr;
-	QDialogButtonBox* m_buttonBox = nullptr;
-
-	IdePropertyEditor* m_propertyEditor = nullptr;
-
 	bool m_isValid = false;
 
-	std::set<QString> m_propertiesDependentOnPrecision;
+	bool m_firstPropChange = true;
+	std::set<int> m_editedSignalsId;
+	std::set<int> m_checkedOutSignalsId;						// signals checked out by SignalPropertiesDialog
+	std::set<QString> m_propsWithPrecision;
+
+	//
+
+	IdePropertyEditor* m_propertyEditor = nullptr;
+	QDialogButtonBox* m_buttonBox = nullptr;
 };
 
