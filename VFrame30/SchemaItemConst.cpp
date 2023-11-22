@@ -389,6 +389,24 @@ namespace VFrame30
 		m_value.discrete.setValue(qBound<quint16>(0, v, 1));
 	}
 
+	const Afb::AfbParamValue& SchemaItemConst::value() const
+	{
+		switch (m_type)
+		{
+		case ConstType::IntegerType:
+			return m_value.signedInt32;
+		case ConstType::FloatType:
+			return m_value.float32;
+		case ConstType::Discrete:
+			return m_value.discrete;
+		default:
+			assert(false);
+			break;
+		}
+
+		return m_value.signedInt32;
+	}
+
 	int SchemaItemConst::precision() const
 	{
 		return m_precision;
