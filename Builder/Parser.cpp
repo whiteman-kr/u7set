@@ -535,8 +535,10 @@ namespace Builder
 			writer.writeAttribute("caption", pin.caption());
 			writer.writeAttribute("signalType", E::valueToString(pin.signalType()));
 			writer.writeAttribute("guid", pin.guid().toString());
+#if 0
 			writer.writeAttribute("x", QString::number(pin.x()));
 			writer.writeAttribute("y", QString::number(pin.y()));
+#endif
 			writer.writeAttribute("afbOperandIndex", QString::number(pin.afbOperandIndex()));
 
 			// Write associated inputs or outputs, separated by comma.
@@ -2940,7 +2942,7 @@ namespace Builder
 			// Write xml to the output file.
 			// Filename like: build\Subsystems\SUBSYSID00\subsysid00-1-parsed.xml
 			//
-			QString filePath = Directory::SUBSYSTEMS + QDir::separator() + subsystem;
+			QString filePath = Directory::SUBSYSTEMS + u'/' + subsystem;
 			QString fileName = subsystem.toLower() + "-" + lmNumber + "-" + "parsed.xml";
 
 			BuildFile* buildFile = buildResultWriter.addFile(filePath, fileName, data, false);
