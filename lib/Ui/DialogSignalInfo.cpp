@@ -1314,8 +1314,6 @@ void DialogSignalInfo::fillProperties()
 	itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("AppSignalID") << m_signal.appSignalId()));
 	itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("EquipmentID") << m_signal.equipmentId()));
 
-
-
 	if (m_signalDataServer != nullptr)
 	{
 		QStringList shortenIds;
@@ -1350,18 +1348,29 @@ void DialogSignalInfo::fillProperties()
 	ui->treeProperties->addTopLevelItem(itemGroup2);
 	itemGroup2->setExpanded(true);
 
-	if (m_signal.isAnalog())
 	{
-		QTreeWidgetItem* itemGroup3 = new QTreeWidgetItem(QStringList() << tr("Parameters"));
+		QTreeWidgetItem* itemGroupParameters = new QTreeWidgetItem(QStringList() << tr("Parameters"));
 
-		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("Precision") << QString::number(m_signal.precision())));
-		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("FineAperture") << QString::number(m_signal.fineAaperture(), 'f', m_signal.precision())));
-		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("CoarseAperture") << QString::number(m_signal.coarseAaperture(), 'f', m_signal.precision())));
-		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("FilteringTime") << QString::number(m_signal.filteringTime(), 'f', m_signal.precision())));
-		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("SpreadTolerance") << QString::number(m_signal.spreadTolerance(), 'f', m_signal.precision())));
+		if (m_signal.isAnalog() == true)
+		{
+			itemGroupParameters->addChild(new QTreeWidgetItem(QStringList() << tr("Precision") << QString::number(m_signal.precision())));
+			itemGroupParameters->addChild(new QTreeWidgetItem(QStringList() << tr("FineAperture") << QString::number(m_signal.fineAaperture(), 'f', m_signal.precision())));
+			itemGroupParameters->addChild(new QTreeWidgetItem(QStringList() << tr("CoarseAperture") << QString::number(m_signal.coarseAaperture(), 'f', m_signal.precision())));
+			itemGroupParameters->addChild(new QTreeWidgetItem(QStringList() << tr("FilteringTime") << QString::number(m_signal.filteringTime(), 'f', m_signal.precision())));
+			itemGroupParameters->addChild(new QTreeWidgetItem(QStringList() << tr("SpreadTolerance") << QString::number(m_signal.spreadTolerance(), 'f', m_signal.precision())));
+		}
 
-		ui->treeProperties->addTopLevelItem(itemGroup3);
-		itemGroup3->setExpanded(true);
+		if (m_signal.isDiscrete() == true)
+		{
+			QStringList inverted;
+			inverted << tr("Inverted");
+			inverted << (m_signal.isInverted() ? tr("Yes") : tr("No"));
+
+			itemGroupParameters->addChild(new QTreeWidgetItem(inverted));
+		}
+
+		ui->treeProperties->addTopLevelItem(itemGroupParameters);
+		itemGroupParameters->setExpanded(true);
 	}
 
 	if (m_signal.isAnalog())
@@ -1877,16 +1886,20 @@ void DialogSignalInfo::updateAppSignalState()
 		}
 	}
 
-	if (oldFontSize != m_currentFontSize)
+	if (oldFontSize != m_currentFontSize || ui->labelValue->font().underline() != m_signal.isInverted())
 	{
 		QFont font = ui->labelValue->font();
 		font.setPixelSize(m_currentFontSize);
 
-		ui->labelValue->setFont(font);
 		ui->labelValueTuning->setFont(font);
 
 		ui->labelStrUnit->setFont(font);
 		ui->labelStrUnitTuning->setFont(font);
+
+		// Underline (signal is inverted) is set only for state label.
+		//
+		font.setUnderline(m_signal.isInverted());
+		ui->labelValue->setFont(font);
 	}
 
 	// Set text
@@ -2200,12 +2213,17 @@ QString DialogSignalInfo::appSignalStateText(const AppSignalParam& param, const 
 {
 	// Generate value string even if signal is not valid
 	//
-
 	QString strValue;
 
 	if (param.isDiscrete() == true)
 	{
 		strValue = QString("%1").arg(state.m_value);
+#if 0
+		if (param.isInverted() == true)
+		{
+			strValue.append(" (inverted)");
+		}
+#endif
 	}
 
 	if (param.isAnalog() == true)

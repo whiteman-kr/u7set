@@ -1268,6 +1268,7 @@ class FontParam PROTOBUF_FINAL :
     kSizeFieldNumber = 2,
     kBoldFieldNumber = 3,
     kItalicFieldNumber = 4,
+    kUnderlineFieldNumber = 6,
   };
   // optional string name = 5;
   bool has_name() const;
@@ -1346,6 +1347,19 @@ class FontParam PROTOBUF_FINAL :
   void _internal_set_italic(bool value);
   public:
 
+  // optional bool underline = 6 [default = false];
+  bool has_underline() const;
+  private:
+  bool _internal_has_underline() const;
+  public:
+  void clear_underline();
+  bool underline() const;
+  void set_underline(bool value);
+  private:
+  bool _internal_underline() const;
+  void _internal_set_underline(bool value);
+  public:
+
   // @@protoc_insertion_point(class_scope:Proto.FontParam)
  private:
   class _Internal;
@@ -1363,6 +1377,7 @@ class FontParam PROTOBUF_FINAL :
   double size_;
   bool bold_;
   bool italic_;
+  bool underline_;
   friend struct ::TableStruct_serialization_2eproto;
 };
 // -------------------------------------------------------------------
@@ -28095,6 +28110,34 @@ inline void FontParam::set_allocated_name(std::string* name) {
   name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), name,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:Proto.FontParam.name)
+}
+
+// optional bool underline = 6 [default = false];
+inline bool FontParam::_internal_has_underline() const {
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
+  return value;
+}
+inline bool FontParam::has_underline() const {
+  return _internal_has_underline();
+}
+inline void FontParam::clear_underline() {
+  underline_ = false;
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline bool FontParam::_internal_underline() const {
+  return underline_;
+}
+inline bool FontParam::underline() const {
+  // @@protoc_insertion_point(field_get:Proto.FontParam.underline)
+  return _internal_underline();
+}
+inline void FontParam::_internal_set_underline(bool value) {
+  _has_bits_[0] |= 0x00000020u;
+  underline_ = value;
+}
+inline void FontParam::set_underline(bool value) {
+  _internal_set_underline(value);
+  // @@protoc_insertion_point(field_set:Proto.FontParam.underline)
 }
 
 // -------------------------------------------------------------------

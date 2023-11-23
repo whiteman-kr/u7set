@@ -781,6 +781,12 @@ namespace Sim
 			}
 		}
 
+		// For now validity is a state available flag, but in future it can be changed,
+		// if address for validity signal will be provided as current signal state address (AppSignal::actualAddr)
+		// and validity signal will be read from memory (if any present).
+		//
+		state.m_flags.valid = state.m_flags.stateAvailable;
+
 		return state;
 	}
 

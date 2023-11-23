@@ -182,6 +182,10 @@ class AppSignalParam
 	Q_PROPERTY(bool isEndpoint READ isEndpoint)
 	Q_PROPERTY(bool IsEndpoint READ isEndpoint)
 
+	/// \brief Signal state is inverted (applicable only for discrete signals)
+	Q_PROPERTY(bool isInverted READ isInverted)
+	Q_PROPERTY(bool IsInverted READ isInverted)
+
 public:
 	AppSignalParam(const AppSignal& signal);
 
@@ -289,6 +293,9 @@ public:
 	[[nodiscard]] bool isEndpoint() const;
 	void setEndpoint(bool value);
 
+	[[nodiscard]] bool isInverted() const;
+	void setInverted(bool value);
+
 	[[nodiscard]] TuningValue tuningDefaultValue() const;
 	[[nodiscard]] QVariant tuningDefaultValueToVariant() const;
 	void setTuningDefaultValue(const TuningValue& value);
@@ -358,7 +365,8 @@ private:
 		double m_filteringTime = 0.005;
 		double m_spreadTolerance = 2;
 		bool m_enableTuning = false;
-		bool m_isEndpoint = false;
+		bool m_endpoint = false;
+		bool m_inverted = false;
 		TuningValue m_tuningDefaultValue;
 		TuningValue m_tuningLowBound;
 		TuningValue m_tuningHighBound;

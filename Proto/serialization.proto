@@ -50,6 +50,7 @@ message FontParam
 	required bool bold = 3;
 	required bool italic = 4;
 	optional string name = 5;
+	optional bool underline = 6 [default = false];
 }
 
 //
