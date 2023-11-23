@@ -1266,10 +1266,12 @@ void DialogSignalInfo::fillSignalInfo()
 
 	ui->editAppSignalID->setText(m_signal.appSignalId());
 	ui->editCustomAppSignalID->setText(m_signal.customSignalId());
-	ui->editCaption->setPlainText(m_signal.caption());
 	ui->editEquipment->setText(m_signal.equipmentId());
 
-	// An array for translation
+	ui->editCaption->setFont(ui->editCustomAppSignalID->font());
+	ui->editCaption->document()->setDocumentMargin(2);
+	ui->editCaption->setPlainText(m_signal.caption());
+	
 	QString signalProperties[] = {tr("Analog"),		//E::SignalType
 								  tr("Discrete"),
 								  tr("Bus"),
@@ -1296,6 +1298,7 @@ void DialogSignalInfo::fillSignalInfo()
 	}
 
 	ui->editSignalOther->setText(str);
+	ui->editSignalOther->setFixedHeight(ui->editEquipment->frameGeometry().height());
 }
 
 void DialogSignalInfo::fillProperties()
