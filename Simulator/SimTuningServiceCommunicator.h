@@ -174,7 +174,7 @@ namespace Sim
 		{
 			QString lmEquipmentID;
 			QString portEquipmentID;
-			qint64 confirmedRecordID;
+			qint64 confirmedRecordID{};
 
 			WriteConfirmation()
 			{

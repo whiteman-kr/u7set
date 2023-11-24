@@ -83,7 +83,7 @@ namespace ClientLib
 		// Data
 
 		Hash appSignalHash = 0;
-		Hash equipmentHash;		// Used only for activation/deactivation LM
+		Hash equipmentHash = 0;		// Used only for activation/deactivation LM
 		TuningValue value;
 
 		TuningWriteCommandType type = TuningWriteCommandType::WriteValue;

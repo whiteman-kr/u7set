@@ -139,10 +139,10 @@ namespace Sim
 		struct TrendSignal
 		{
 			QString appSignalId;
-			Hash appSignalHash;
+			Hash appSignalHash{};
 
 			QString lmEquipmentId;
-			Hash lmEquipmentIdHash;
+			Hash lmEquipmentIdHash{};
 
 			std::vector<AppSignalState> states;
 		};

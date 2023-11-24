@@ -607,8 +607,8 @@ private:
 	int m_userID = 0;
 	bool m_deleted = false;
 
-	qint64 m_createdMcs;					// in microseconds, as in database
-	qint64 m_instanceCreatedMcs;			// in microseconds, as in database
+	qint64 m_createdMcs = 0;				// in microseconds, as in database
+	qint64 m_instanceCreatedMcs = 0;		// in microseconds, as in database
 
 	E::VcsItemAction m_instanceAction = E::VcsItemAction::Added;
 

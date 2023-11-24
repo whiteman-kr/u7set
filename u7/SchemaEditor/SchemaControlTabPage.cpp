@@ -1698,7 +1698,7 @@ void SchemaFileView::refreshFiles()
 	std::vector<int> selectedFilesIds;
 	selectedFilesIds.reserve(mappedSelection.size());
 
-	for (QModelIndex mi : mappedSelection.indexes())
+	for (const QModelIndex& mi : mappedSelection.indexes())
 	{
 		DbFileInfo file = m_filesModel.file(mi);
 		if (file.isNull() == false)

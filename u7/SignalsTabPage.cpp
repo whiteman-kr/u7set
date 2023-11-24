@@ -1679,7 +1679,7 @@ void SignalsTabPage::onSignalSelectionChanged()
 	}
 	int row = getMappedSourceRow(selection[0]);
 
-	if (m_signalSetProvider->getLoadedSignalByIndex(row, true)->isAnalog(), true)
+	if (m_signalSetProvider->getLoadedSignalByIndex(row, true)->isAnalog() == true)
 	{
 		m_addMetrologyConnectionAction->setEnabled(true);
 	}

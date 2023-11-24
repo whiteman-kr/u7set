@@ -228,6 +228,7 @@ void XmlWriteHelper::writeQVariantAttribute(const QString& name, const QVariant&
 
 	case QMetaType::Type::LongLong:
 		writeInt64Attribute(name, qv.toLongLong());
+		break;
 
 	case QMetaType::Type::UInt:
 		writeUInt64Attribute(name, qv.toUInt());

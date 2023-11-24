@@ -5,12 +5,11 @@
 // SnapshotExportPrint
 //
 
-SnapshotExportPrint::SnapshotExportPrint(QString projectName, QString softwareEquipmentId, QWidget* parent)
-	:ExportPrint(parent),
-	  m_projectName(projectName),
-	  m_softwareEquipmentId(softwareEquipmentId)
+SnapshotExportPrint::SnapshotExportPrint(QString projectName, QString softwareEquipmentId, QWidget* parent) :
+	ExportPrint(parent),
+	m_projectName(projectName),
+	m_softwareEquipmentId(softwareEquipmentId)
 {
-
 }
 
 void SnapshotExportPrint::generateHeader(QTextCursor& cursor)
@@ -46,7 +45,7 @@ void SnapshotExportPrint::generateHeader(QTextCursor& cursor)
 // SignalSnapshotSorter
 //
 
-SignalSnapshotSorter::SignalSnapshotSorter(int column, SignalSnapshotModel *model):
+SignalSnapshotSorter::SignalSnapshotSorter(int column, SignalSnapshotModel* model) :
 	m_column(column),
 	m_model(model)
 {
@@ -60,12 +59,11 @@ bool SignalSnapshotSorter::sortFunction(int index1, int index2) const
 		return false;
 	}
 
-	if (index1 < 0
-		|| index1 >= static_cast<int>(m_model->m_allSignals.size())
-		|| index2 >= static_cast<int>(m_model->m_allSignals.size())
-		|| index1 >= static_cast<int>(m_model->m_allStates.size())
-		|| index2 >= static_cast<int>(m_model->m_allStates.size())
-		)
+	if (index1 < 0 || 
+		index1 >= static_cast<int>(m_model->m_allSignals.size()) || 
+		index2 >= static_cast<int>(m_model->m_allSignals.size()) || 
+		index1 >= static_cast<int>(m_model->m_allStates.size()) || 
+		index2 >= static_cast<int>(m_model->m_allStates.size()))
 	{
 		Q_ASSERT(false);
 		return index1 < index2;
@@ -83,168 +81,132 @@ bool SignalSnapshotSorter::sortFunction(int index1, int index2) const
 	switch (static_cast<SnapshotColumns>(m_column))
 	{
 	case SnapshotColumns::SignalID:
-		{
-			v1 = s1.customSignalId();
-			v2 = s2.customSignalId();
-			break;
-		}
+		v1 = s1.customSignalId();
+		v2 = s2.customSignalId();
+		break;
 	case SnapshotColumns::EquipmentID:
-		{
-			v1 = s1.equipmentId();
-			v2 = s2.equipmentId();
-			break;
-		}
+		v1 = s1.equipmentId();
+		v2 = s2.equipmentId();
+		break;
 	case SnapshotColumns::LmEquipmentID:
-		{
-			v1 = s1.lmEquipmentId();
-			v2 = s2.lmEquipmentId();
-			break;
-		}
+		v1 = s1.lmEquipmentId();
+		v2 = s2.lmEquipmentId();
+		break;
 	case SnapshotColumns::AppSignalID:
-		{
-			v1 = s1.appSignalId();
-			v2 = s2.appSignalId();
-			break;
-		}
+		v1 = s1.appSignalId();
+		v2 = s2.appSignalId();
+		break;
 	case SnapshotColumns::Caption:
-		{
-			v1 = s1.caption();
-			v2 = s2.caption();
-			break;
-		}
+		v1 = s1.caption();
+		v2 = s2.caption();
+		break;
 	case SnapshotColumns::Units:
+		v1 = s1.unit();
+		v2 = s2.unit();
+		break;
+	case SnapshotColumns::Type:
+		if (s1.isDiscrete() == true && s2.isDiscrete() == true)
 		{
-			v1 = s1.unit();
-			v2 = s2.unit();
+			v1 = static_cast<int>(s1.inOutType());
+			v2 = static_cast<int>(s2.inOutType());
 			break;
 		}
-	case SnapshotColumns::Type:
+
+		if (s1.type() == s2.type())
 		{
-			if (s1.isDiscrete() == true && s2.isDiscrete() == true)
+			if (s1.analogSignalFormat() == s2.analogSignalFormat())
 			{
 				v1 = static_cast<int>(s1.inOutType());
 				v2 = static_cast<int>(s2.inOutType());
-				break;
-			}
-
-			if (s1.type() == s2.type())
-			{
-				if (s1.analogSignalFormat() == s2.analogSignalFormat())
-				{
-					v1 = static_cast<int>(s1.inOutType());
-					v2 = static_cast<int>(s2.inOutType());
-				}
-				else
-				{
-					v1 = static_cast<int>(s1.analogSignalFormat());
-					v2 = static_cast<int>(s2.analogSignalFormat());
-				}
 			}
 			else
 			{
-				v1 = static_cast<int>(s1.type());
-				v2 = static_cast<int>(s2.type());
+				v1 = static_cast<int>(s1.analogSignalFormat());
+				v2 = static_cast<int>(s2.analogSignalFormat());
 			}
-			break;
 		}
+		else
+		{
+			v1 = static_cast<int>(s1.type());
+			v2 = static_cast<int>(s2.type());
+		}
+		break;
 	case SnapshotColumns::Tags:
-		{
-			v1 = s1.tagStringList().join(' ');
-			v2 = s2.tagStringList().join(' ');
-			break;
-		}
+		v1 = s1.tagStringList().join(' ');
+		v2 = s2.tagStringList().join(' ');
+		break;
 	case SnapshotColumns::SystemTime:
-		{
-			v1 = st1.m_time.system.timeStamp;
-			v2 = st2.m_time.system.timeStamp;
-			break;
-		}
+		v1 = st1.m_time.system.timeStamp;
+		v2 = st2.m_time.system.timeStamp;
+		break;
 	case SnapshotColumns::LocalTime:
-		{
-			v1 = st1.m_time.local.timeStamp;
-			v2 = st2.m_time.local.timeStamp;
-			break;
-		}
+		v1 = st1.m_time.local.timeStamp;
+		v2 = st2.m_time.local.timeStamp;
+		break;
 	case SnapshotColumns::PlantTime:
-		{
-			v1 = st1.m_time.plant.timeStamp;
-			v2 = st2.m_time.plant.timeStamp;
-			break;
-		}
+		v1 = st1.m_time.plant.timeStamp;
+		v2 = st2.m_time.plant.timeStamp;
+		break;
 	case SnapshotColumns::Value:
-		{
-			if (st1.m_flags.valid != st2.m_flags.valid)
-			{
-				v1 = st1.m_flags.valid;
-				v2 = st2.m_flags.valid;
-			}
-			else
-			{
-				if (st1.m_flags.stateAvailable != st2.m_flags.stateAvailable)
-				{
-					v1 = st1.m_flags.stateAvailable;
-					v2 = st2.m_flags.stateAvailable;
-				}
-				else
-				{
-					if (s1.isAnalog() == s2.isAnalog())
-					{
-						v1 = st1.m_value;
-						v2 = st2.m_value;
-					}
-					else
-					{
-						v1 = s1.isAnalog();
-						v2 = s2.isAnalog();
-					}
-				}
-				break;
-			}
-		}
-	case SnapshotColumns::Valid:
+		if (st1.m_flags.valid != st2.m_flags.valid)
 		{
 			v1 = st1.m_flags.valid;
 			v2 = st2.m_flags.valid;
-			break;
 		}
-	case SnapshotColumns::StateAvailable:
+		else
 		{
-			v1 = st1.m_flags.stateAvailable;
-			v2 = st2.m_flags.stateAvailable;
-			break;
-		}
-	case SnapshotColumns::Simulated:
-		{
-			v1 = st1.m_flags.simulated;
-			v2 = st2.m_flags.simulated;
-			break;
-		}
-	case SnapshotColumns::Blocked:
-		{
-			v1 = st1.m_flags.blocked;
-			v2 = st2.m_flags.blocked;
-			break;
-		}
-	case SnapshotColumns::Mismatch:
-		{
-			v1 = st1.m_flags.mismatch;
-			v2 = st2.m_flags.mismatch;
-			break;
-		}
-	case SnapshotColumns::OutOfLimits:
-		{
-			if (st1.m_flags.belowLowLimit == st2.m_flags.belowLowLimit)
+			if (st1.m_flags.stateAvailable != st2.m_flags.stateAvailable)
 			{
-				v1 = st1.m_flags.aboveHighLimit;
-				v2 = st2.m_flags.aboveHighLimit;
+				v1 = st1.m_flags.stateAvailable;
+				v2 = st2.m_flags.stateAvailable;
 			}
 			else
 			{
-				v1 = st1.m_flags.belowLowLimit;
-				v2 = st2.m_flags.belowLowLimit;
+				if (s1.isAnalog() == s2.isAnalog())
+				{
+					v1 = st1.m_value;
+					v2 = st2.m_value;
+				}
+				else
+				{
+					v1 = s1.isAnalog();
+					v2 = s2.isAnalog();
+				}
 			}
-			break;
 		}
+		break;
+	case SnapshotColumns::Valid:
+		v1 = st1.m_flags.valid;
+		v2 = st2.m_flags.valid;
+		break;
+	case SnapshotColumns::StateAvailable:
+		v1 = st1.m_flags.stateAvailable;
+		v2 = st2.m_flags.stateAvailable;
+		break;
+	case SnapshotColumns::Simulated:
+		v1 = st1.m_flags.simulated;
+		v2 = st2.m_flags.simulated;
+		break;
+	case SnapshotColumns::Blocked:
+		v1 = st1.m_flags.blocked;
+		v2 = st2.m_flags.blocked;
+		break;
+	case SnapshotColumns::Mismatch:
+		v1 = st1.m_flags.mismatch;
+		v2 = st2.m_flags.mismatch;
+		break;
+	case SnapshotColumns::OutOfLimits:
+		if (st1.m_flags.belowLowLimit == st2.m_flags.belowLowLimit)
+		{
+			v1 = st1.m_flags.aboveHighLimit;
+			v2 = st2.m_flags.aboveHighLimit;
+		}
+		else
+		{
+			v1 = st1.m_flags.belowLowLimit;
+			v2 = st2.m_flags.belowLowLimit;
+		}
+		break;
 	default:
 		Q_ASSERT(false);
 		return index1 < index2;
@@ -259,45 +221,21 @@ bool SignalSnapshotSorter::sortFunction(int index1, int index2) const
 	switch (v1.userType())
 	{
 	case QMetaType::Bool:
-		{
-			return v1.toBool() < v2.toBool();
-			break;
-		}
+		return v1.toBool() < v2.toBool();
 	case QMetaType::QString:
-		{
-			return v1.toString() < v2.toString();
-			break;
-		}
+		return v1.toString() < v2.toString();
 	case QMetaType::Int:
-		{
-			return v1.toInt() < v2.toInt();
-			break;
-		}
+		return v1.toInt() < v2.toInt();
 	case QMetaType::UInt:
-		{
-			return v1.toUInt() < v2.toUInt();
-			break;
-		}
+		return v1.toUInt() < v2.toUInt();
 	case QMetaType::LongLong:
-		{
-			return v1.toLongLong() < v2.toLongLong();
-			break;
-		}
+		return v1.toLongLong() < v2.toLongLong();
 	case QMetaType::ULongLong:
-		{
-			return v1.toULongLong() < v2.toULongLong();
-			break;
-		}
+		return v1.toULongLong() < v2.toULongLong();
 	case QMetaType::Float:
-		{
-			return v1.toFloat() < v2.toFloat();
-			break;
-		}
+		return v1.toFloat() < v2.toFloat();
 	case QMetaType::Double:
-		{
-			return v1.toDouble() < v2.toDouble();
-			break;
-		}
+		return v1.toDouble() < v2.toDouble();
 	default:
 		break;
 	}
@@ -307,13 +245,13 @@ bool SignalSnapshotSorter::sortFunction(int index1, int index2) const
 }
 
 //
-//SnapshotItemModel
+// SnapshotItemModel
 //
 
-SignalSnapshotModel::SignalSnapshotModel(IAppSignalManager* appSignalManager, ISignalDataServer* signalDataServer, QObject* parent)
-	: QAbstractItemModel(parent),
-	  m_appSignalManager(appSignalManager),
-	  m_signalDataServer(signalDataServer)
+SignalSnapshotModel::SignalSnapshotModel(IAppSignalManager* appSignalManager, ISignalDataServer* signalDataServer, QObject* parent) :
+	QAbstractItemModel(parent),
+	m_appSignalManager(appSignalManager),
+	m_signalDataServer(signalDataServer)
 {
 	// Fill column names
 	//
@@ -351,20 +289,19 @@ QStringList SignalSnapshotModel::columnsNames() const
 	return m_columnsNames;
 }
 
-QModelIndex SignalSnapshotModel::index(int row, int column, const QModelIndex &parent) const
+QModelIndex SignalSnapshotModel::index(int row, int column, const QModelIndex& parent) const
 {
 	Q_UNUSED(parent);
 	return createIndex(row, column);
 }
 
-int SignalSnapshotModel::columnCount(const QModelIndex &parent) const
+int SignalSnapshotModel::columnCount(const QModelIndex& parent) const
 {
 	Q_UNUSED(parent);
 	return static_cast<int>(SnapshotColumns::ColumnCount);
-
 }
 
-int SignalSnapshotModel::rowCount(const QModelIndex &parent) const
+int SignalSnapshotModel::rowCount(const QModelIndex& parent) const
 {
 	Q_UNUSED(parent);
 	return static_cast<int>(m_filteredSignals.size());
@@ -525,6 +462,7 @@ void SignalSnapshotModel::fillSignals()
 
 			case MaskType::EquipmentId:
 				strIdList << s.equipmentId().trimmed();
+				break;
 
 			case MaskType::LmEquipmentId:
 				strIdList << s.lmEquipmentId().trimmed();
@@ -798,13 +736,13 @@ void SignalSnapshotModel::setAnalogPrecision(int precision)
 	m_analogPrecision = precision;
 }
 
-QModelIndex SignalSnapshotModel::parent(const QModelIndex &index) const
+QModelIndex SignalSnapshotModel::parent(const QModelIndex& index) const
 {
 	Q_UNUSED(index);
 	return QModelIndex();
 }
 
-QVariant SignalSnapshotModel::data(const QModelIndex &index, int role) const
+QVariant SignalSnapshotModel::data(const QModelIndex& index, int role) const
 {
 	int col = index.column();
 	if (col < 0 || col >= static_cast<int>(SnapshotColumns::ColumnCount))
@@ -832,8 +770,8 @@ QVariant SignalSnapshotModel::data(const QModelIndex &index, int role) const
 			return QVariant();
 		}
 
-		//QString str = QString("Col: %1, row: %2").arg(col).arg(row);
-		//qDebug() << str;
+		// QString str = QString("Col: %1, row: %2").arg(col).arg(row);
+		// qDebug() << str;
 
 		//
 		// State
@@ -969,10 +907,10 @@ QVariant SignalSnapshotModel::data(const QModelIndex &index, int role) const
 			{
 
 				// An array for translation
-				QString signalProperties[] = {tr("Analog"),		//E::SignalType
+				QString signalProperties[] = {tr("Analog"), // E::SignalType
 											  tr("Discrete"),
 											  tr("Bus"),
-											  tr("Input"),		//E::SignalInOutType
+											  tr("Input"),  // E::SignalInOutType
 											  tr("Output"),
 											  tr("Internal")};
 				Q_UNUSED(signalProperties);
@@ -1001,12 +939,12 @@ QVariant SignalSnapshotModel::data(const QModelIndex &index, int role) const
 	} // End of if (role == Qt::DisplayRole)
 
 	if (role == Qt::TextAlignmentRole &&
-		(columnIndex ==  SnapshotColumns::Value ||
-		 columnIndex ==  SnapshotColumns::Valid ||
-		 columnIndex ==  SnapshotColumns::StateAvailable ||
-		 columnIndex ==  SnapshotColumns::Simulated ||
-		 columnIndex ==  SnapshotColumns::Blocked ||
-		 columnIndex ==  SnapshotColumns::Mismatch))
+		(columnIndex == SnapshotColumns::Value ||
+		 columnIndex == SnapshotColumns::Valid ||
+		 columnIndex == SnapshotColumns::StateAvailable ||
+		 columnIndex == SnapshotColumns::Simulated ||
+		 columnIndex == SnapshotColumns::Blocked ||
+		 columnIndex == SnapshotColumns::Mismatch))
 	{
 		return QVariant(Qt::AlignCenter);
 	}
@@ -1037,7 +975,7 @@ QVariant SignalSnapshotModel::headerData(int section, Qt::Orientation orientatio
 
 
 //
-//DialogSignalSnapshotSettings
+// DialogSignalSnapshotSettings
 //
 
 void DialogSignalSnapshotSettings::restore()
@@ -1072,10 +1010,9 @@ void DialogSignalSnapshotSettings::store()
 // SnapshotTableView
 //
 
-SnapshotTableView::SnapshotTableView()
-	:QTableView()
+SnapshotTableView::SnapshotTableView() :
+	QTableView()
 {
-
 }
 
 void SnapshotTableView::mousePressEvent(QMouseEvent* event)
@@ -1118,14 +1055,14 @@ void SnapshotTableView::mouseMoveEvent(QMouseEvent* event)
 }
 
 //
-//DialogSignalSnapshot
+// DialogSignalSnapshot
 //
 DialogSignalSnapshot::DialogSignalSnapshot(IAppSignalManager* appSignalManager,
 										   ISignalDataServer* signalDataServer,
 										   const std::vector<SoftwareEndpoint::AppDataService>& appDataServices,
 										   const QString& projectName,
 										   const QString& equipmentId,
-										   QWidget *parent) :
+										   QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint),
 	m_appSignalManager(appSignalManager),
 	m_signalDataServer(signalDataServer),
@@ -1188,7 +1125,7 @@ DialogSignalSnapshot::DialogSignalSnapshot(IAppSignalManager* appSignalManager,
 DialogSignalSnapshot::DialogSignalSnapshot(IAppSignalManager* appSignalManager,
 										   const QString& projectName,
 										   const QString& equipmentId,
-										   QWidget* parent):
+										   QWidget* parent) :
 	DialogSignalSnapshot(appSignalManager, nullptr, {}, projectName, equipmentId, parent)
 {
 }
@@ -1235,13 +1172,13 @@ void DialogSignalSnapshot::setLmEquipmentId(const QString& lmEquipmentId)
 	//
 	m_editMask->setText(lmEquipmentId);
 
-	maskChanged(false/*addToCompleter*/);
+	maskChanged(false /*addToCompleter*/);
 
 	// Set Mask Type combo to All and prevent saving it in settings
 	//
 	m_storeMaskData = false;
 
-	m_maskTypeCombo->blockSignals(true);	// Block to prevent signals from updating automatically
+	m_maskTypeCombo->blockSignals(true); // Block to prevent signals from updating automatically
 	m_maskTypeCombo->setCurrentIndex(static_cast<int>(SignalSnapshotModel::MaskType::LmEquipmentId));
 	m_maskTypeCombo->blockSignals(false);
 
@@ -1261,13 +1198,13 @@ void DialogSignalSnapshot::setSignalsMask(const QStringList& masks)
 	//
 	m_editMask->setText(masks.join(';'));
 
-	maskChanged(false/*addToCompleter*/);
+	maskChanged(false /*addToCompleter*/);
 
 	// Set Mask Type combo to All and prevent saving it in settings
 	//
 	m_storeMaskData = false;
 
-	m_maskTypeCombo->blockSignals(true);	// Block to prevent signals from updating automatically
+	m_maskTypeCombo->blockSignals(true); // Block to prevent signals from updating automatically
 	m_maskTypeCombo->setCurrentIndex(static_cast<int>(SignalSnapshotModel::MaskType::All));
 	m_maskTypeCombo->blockSignals(false);
 
@@ -1366,7 +1303,7 @@ void DialogSignalSnapshot::showEvent(QShowEvent* /*e*/)
 	return;
 }
 
-void DialogSignalSnapshot::keyPressEvent(QKeyEvent *event)
+void DialogSignalSnapshot::keyPressEvent(QKeyEvent* event)
 {
 	int key = event->key();
 	if (key == Qt::Key_Return || key == Qt::Key_Enter || key == Qt::Key_Escape)
@@ -1398,7 +1335,7 @@ void DialogSignalSnapshot::headerColumnContextMenuRequested(const QPoint& pos)
 
 	QStringList columns = model->columnsNames();
 
-	for(int i = 0; i < columns.size(); i++)
+	for (int i = 0; i < columns.size(); i++)
 	{
 		actionsData.emplace_back(static_cast<SnapshotColumns>(i), columns[i]);
 	}
@@ -1413,7 +1350,7 @@ void DialogSignalSnapshot::headerColumnContextMenuRequested(const QPoint& pos)
 		if (m_tableView->horizontalHeader()->count() - m_tableView->horizontalHeader()->hiddenSectionCount() == 1 &&
 			action->isChecked() == true)
 		{
-			action->setEnabled(false);			// Impossible to uncheck the last column
+			action->setEnabled(false); // Impossible to uncheck the last column
 		}
 
 		connect(action, &QAction::toggled, this, &DialogSignalSnapshot::headerColumnToggled);
@@ -1432,7 +1369,7 @@ void DialogSignalSnapshot::headerColumnToggled(bool checked)
 	if (action == nullptr)
 	{
 		Q_ASSERT(action);
-		return ;
+		return;
 	}
 
 	int column = action->data().value<int>();
@@ -1454,7 +1391,6 @@ void DialogSignalSnapshot::headerColumnToggled(bool checked)
 
 	return;
 }
-
 
 
 void DialogSignalSnapshot::dialogFinished(int result)
@@ -1529,7 +1465,7 @@ void DialogSignalSnapshot::contextMenuRequested(const QPoint& pos)
 
 void DialogSignalSnapshot::createControls()
 {
-	//Filter layout
+	// Filter layout
 
 	QGridLayout* filterLayout = new QGridLayout();
 
@@ -1681,7 +1617,6 @@ void DialogSignalSnapshot::createControls()
 	mainLayout->addWidget(m_tableView);
 
 	setLayout(mainLayout);
-
 }
 
 void DialogSignalSnapshot::createMenus()
@@ -1692,37 +1627,56 @@ void DialogSignalSnapshot::createMenus()
 
 	m_formatAutoSelect = new QAction(tr("Auto-select"), this);
 	m_formatAutoSelect->setCheckable(true);
-	connect(m_formatAutoSelect, &QAction::triggered, this, [this]() { m_model->setAnalogFormat(E::AnalogFormat::g_9_or_9e); updateTableItems();});
+	connect(m_formatAutoSelect, &QAction::triggered, this, [this]()
+			{
+				m_model->setAnalogFormat(E::AnalogFormat::g_9_or_9e);
+				updateTableItems();
+			});
 	menuFormat->addAction(m_formatAutoSelect);
 
 	m_formatDecimal = new QAction(tr("Decimal (as [-]9.9)"), this);
 	m_formatDecimal->setCheckable(true);
-	connect(m_formatDecimal, &QAction::triggered, this, [this]() { m_model->setAnalogFormat(E::AnalogFormat::f_9); updateTableItems();});
+	connect(m_formatDecimal, &QAction::triggered, this, [this]()
+			{
+				m_model->setAnalogFormat(E::AnalogFormat::f_9);
+				updateTableItems();
+			});
 	menuFormat->addAction(m_formatDecimal);
 
 	m_formatExponential = new QAction(tr("Exponential (as [-]9.9e[+|-]999)"), this);
 	m_formatExponential->setCheckable(true);
-	connect(m_formatExponential, &QAction::triggered, this, [this]() { m_model->setAnalogFormat(E::AnalogFormat::e_9e); updateTableItems();});
+	connect(m_formatExponential, &QAction::triggered, this, [this]()
+			{
+				m_model->setAnalogFormat(E::AnalogFormat::e_9e);
+				updateTableItems();
+			});
 	menuFormat->addAction(m_formatExponential);
 
 	menuFormat->addSeparator();
 
 	m_precisionDefault = new QAction(tr("Default"), this);
 	m_precisionDefault->setCheckable(true);
-	connect(m_precisionDefault, &QAction::triggered, this, [this]() { m_model->setAnalogPrecision(-1); updateTableItems();});
+	connect(m_precisionDefault, &QAction::triggered, this, [this]()
+			{
+				m_model->setAnalogPrecision(-1);
+				updateTableItems();
+			});
 	menuFormat->addAction(m_precisionDefault);
 
 	for (int i = 0; i < 10; i++)
 	{
 		QAction* a = new QAction(tr(".%1").arg(QString().fill('0', i)), this);
 		a->setCheckable(true);
-		connect(a, &QAction::triggered, this, [this, i]() { m_model->setAnalogPrecision(i); updateTableItems();});
+		connect(a, &QAction::triggered, this, [this, i]()
+				{
+					m_model->setAnalogPrecision(i);
+					updateTableItems();
+				});
 		m_precisionActions << a;
 		menuFormat->addAction(a);
 	}
 
 	return;
-
 }
 
 void DialogSignalSnapshot::initFiltersView()
@@ -1764,8 +1718,11 @@ void DialogSignalSnapshot::initFiltersView()
 	m_maskTypeCombo->setCurrentIndex(static_cast<int>(m_storedMaskType));
 	m_maskTypeCombo->blockSignals(false);
 
-	connect(m_editMask, &QLineEdit::textEdited, [this](){m_maskCompleter->complete();});
-	connect(m_maskCompleter, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_editMask, &QLineEdit::setText);
+	connect(m_editMask, &QLineEdit::textEdited, [this]()
+			{
+				m_maskCompleter->complete();
+			});
+	connect(m_maskCompleter, static_cast<void (QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_editMask, &QLineEdit::setText);
 
 	// Servers setup
 	//
@@ -1789,8 +1746,11 @@ void DialogSignalSnapshot::initFiltersView()
 	m_editTags->setCompleter(m_tagsCompleter);
 	m_editTags->setToolTip(m_tagsHelp);
 
-	connect(m_editTags, &QLineEdit::textEdited, [this](){m_tagsCompleter->complete();});
-	connect(m_tagsCompleter, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_editTags, &QLineEdit::setText);
+	connect(m_editTags, &QLineEdit::textEdited, [this]()
+			{
+				m_tagsCompleter->complete();
+			});
+	connect(m_tagsCompleter, static_cast<void (QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_editTags, &QLineEdit::setText);
 }
 
 void DialogSignalSnapshot::initSignalsView()
@@ -1821,7 +1781,7 @@ void DialogSignalSnapshot::initSignalsView()
 
 	int fontHeight = fontMetrics().height() + 4;
 
-	QHeaderView *verticalHeader = m_tableView->verticalHeader();
+	QHeaderView* verticalHeader = m_tableView->verticalHeader();
 	verticalHeader->setSectionResizeMode(QHeaderView::Fixed);
 	verticalHeader->setDefaultSectionSize(fontHeight);
 
@@ -1833,7 +1793,7 @@ void DialogSignalSnapshot::initSignalsView()
 	connect(m_tableView->horizontalHeader(), &QWidget::customContextMenuRequested, this, &DialogSignalSnapshot::headerColumnContextMenuRequested);
 
 	m_tableView->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(m_tableView, &QTreeWidget::customContextMenuRequested,this, &DialogSignalSnapshot::contextMenuRequested);
+	connect(m_tableView, &QTreeWidget::customContextMenuRequested, this, &DialogSignalSnapshot::contextMenuRequested);
 
 	if (m_settings.horzHeader.isEmpty() == true || m_settings.horzHeaderCount != static_cast<int>(SnapshotColumns::ColumnCount))
 	{
@@ -1882,11 +1842,11 @@ void DialogSignalSnapshot::fillSchemas()
 
 	std::vector<VFrame30::SchemaDetails> details = schemasDetails();
 
-	for (const VFrame30::SchemaDetails& schema : details )
+	for (const VFrame30::SchemaDetails& schema : details)
 	{
 		m_schemaCombo->addItem(schema.m_schemaId + " - " + schema.m_caption, schema.m_schemaId);
 
-		if (currentStrId == schema.m_schemaId )
+		if (currentStrId == schema.m_schemaId)
 		{
 			selectedIndex = m_schemaCombo->count() - 1;
 		}
@@ -1918,7 +1878,7 @@ void DialogSignalSnapshot::timerEvent(QTimerEvent* event)
 {
 	Q_ASSERT(event);
 
-	if  (event->timerId() == m_updateStateTimerId)
+	if (event->timerId() == m_updateStateTimerId)
 	{
 		if (m_buttonFixate->isChecked() == false && m_model->rowCount() > 0)
 		{
@@ -2037,7 +1997,7 @@ void DialogSignalSnapshot::tagsChanged()
 	m_model->setTags(tags);
 }
 
-void DialogSignalSnapshot::tableViewdoubleClicked(const QModelIndex &index)
+void DialogSignalSnapshot::tableViewdoubleClicked(const QModelIndex& index)
 {
 	Q_UNUSED(index);
 
@@ -2058,9 +2018,10 @@ void DialogSignalSnapshot::tableViewdoubleClicked(const QModelIndex &index)
 		return;
 	}
 
-	QTimer::singleShot(10, [this, s] {
-		emit signalInfo(s.appSignalId());
-	});
+	QTimer::singleShot(10, [this, s]
+					   {
+						   emit signalInfo(s.appSignalId());
+					   });
 }
 
 void DialogSignalSnapshot::sortIndicatorChanged(int column, Qt::SortOrder order)
@@ -2088,7 +2049,7 @@ void DialogSignalSnapshot::roleComboCurrentIndexChanged(int index)
 void DialogSignalSnapshot::editMaskReturnPressed()
 {
 	m_storeMaskData = true;
-	maskChanged(true/*addToCompleter*/);
+	maskChanged(true /*addToCompleter*/);
 
 	fillSignals();
 }
@@ -2190,35 +2151,35 @@ void DialogSignalSnapshot::buttonPrintClicked()
 
 void DialogSignalSnapshot::buttonChooseTagsClicked()
 {
-    QDialog tagsSelectorDialog{this, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint};
+	QDialog tagsSelectorDialog{this, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint};
 
-    int width = QSettings().value("DialogSignalSnapshot/tagsSelectorDialog/width", 340).toInt();
-    int height = QSettings().value("DialogSignalSnapshot/tagsSelectorDialog/height", 400).toInt();
-    tagsSelectorDialog.resize(width, height);
+	int width = QSettings().value("DialogSignalSnapshot/tagsSelectorDialog/width", 340).toInt();
+	int height = QSettings().value("DialogSignalSnapshot/tagsSelectorDialog/height", 400).toInt();
+	tagsSelectorDialog.resize(width, height);
 
-    ChooseTagsWidget te{m_appSignalManager->tags(), this};
-    te.setText(m_editTags->text());
+	ChooseTagsWidget te{m_appSignalManager->tags(), this};
+	te.setText(m_editTags->text());
 
-    connect(&te, &ChooseTagsWidget::okPressed, &tagsSelectorDialog, &QDialog::accept);
-    connect(&te, &ChooseTagsWidget::cancelPressed, &tagsSelectorDialog, &QDialog::reject);
+	connect(&te, &ChooseTagsWidget::okPressed, &tagsSelectorDialog, &QDialog::accept);
+	connect(&te, &ChooseTagsWidget::cancelPressed, &tagsSelectorDialog, &QDialog::reject);
 
-    QHBoxLayout l;
-    l.addWidget(&te);
-    tagsSelectorDialog.setLayout(&l);
+	QHBoxLayout l;
+	l.addWidget(&te);
+	tagsSelectorDialog.setLayout(&l);
 
-    if (tagsSelectorDialog.exec() == QDialog::Accepted)
-    {
-        m_editTags->setText(te.text());
+	if (tagsSelectorDialog.exec() == QDialog::Accepted)
+	{
+		m_editTags->setText(te.text());
 
 		m_storeTags = true;
 
-        tagsChanged();
+		tagsChanged();
 
-        fillSignals();
-    }
+		fillSignals();
+	}
 
-    QSettings().setValue("DialogSignalSnapshot/tagsSelectorDialog/width", tagsSelectorDialog.width());
-    QSettings().setValue("DialogSignalSnapshot/tagsSelectorDialog/height", tagsSelectorDialog.height());
+	QSettings().setValue("DialogSignalSnapshot/tagsSelectorDialog/width", tagsSelectorDialog.width());
+	QSettings().setValue("DialogSignalSnapshot/tagsSelectorDialog/height", tagsSelectorDialog.height());
 }
 
 void DialogSignalSnapshot::buttonClearFilterClicked()
@@ -2243,7 +2204,7 @@ void DialogSignalSnapshot::buttonClearFilterClicked()
 	m_editMask->clear();
 	m_editMask->blockSignals(false);
 
-	m_maskTypeCombo->blockSignals(true);	// Block to prevent signals from updating automatically
+	m_maskTypeCombo->blockSignals(true); // Block to prevent signals from updating automatically
 	m_maskTypeCombo->setCurrentIndex(static_cast<int>(SignalSnapshotModel::MaskType::All));
 	m_maskTypeCombo->blockSignals(false);
 
@@ -2276,4 +2237,3 @@ void DialogSignalSnapshot::buttonClearFilterClicked()
 }
 
 DialogSignalSnapshotSettings theDialogSignalSnapshotSettings;
-

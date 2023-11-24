@@ -225,56 +225,43 @@ bool FileTreeProxyModel::lessThan(const QModelIndex &left, const QModelIndex &ri
 	switch (static_cast<FileTreeModel::Columns>(column))
 	{
 	case FileTreeModel::Columns::FileIdColumn:
+		if (f1->fileId() != f2->fileId())
 		{
-			if (f1->fileId() != f2->fileId())
-			{
-				return f1->fileId() < f2->fileId();
-			}
-			Q_ASSERT(false);
+			return f1->fileId() < f2->fileId();
 		}
-		//break;
+		Q_ASSERT(false);
+		[[fallthrough]];
 	case FileTreeModel::Columns::FileAttributesColumn:
+		if (f1->attributes() != f2->attributes())
 		{
-			if (f1->attributes() != f2->attributes())
-			{
-				return f1->attributes() < f2->attributes();
-			}
+			return f1->attributes() < f2->attributes();
 		}
-		//break;
+		[[fallthrough]];
 	case FileTreeModel::Columns::FileSizeColumn:
+		if (f1->size() != f2->size())
 		{
-			if (f1->size() != f2->size())
-			{
-				return f1->size() < f2->size();
-			}
+			return f1->size() < f2->size();
 		}
-		//break;
+		[[fallthrough]];
 	case FileTreeModel::Columns::FileUserColumn:
+		if ( m_sourceModel->db()->username(f1->userId()) !=  m_sourceModel->db()->username(f2->userId()))
 		{
-			if ( m_sourceModel->db()->username(f1->userId()) !=  m_sourceModel->db()->username(f2->userId()))
-			{
-				return m_sourceModel->db()->username(f1->userId()) < m_sourceModel->db()->username(f2->userId());
-			}
+			return m_sourceModel->db()->username(f1->userId()) < m_sourceModel->db()->username(f2->userId());
 		}
-		//break;
+		[[fallthrough]];
 	case FileTreeModel::Columns::FileStateColumn:
+		if (f1->state() != f2->state())
 		{
-			if (f1->state() != f2->state())
-			{
-				return f1->state() < f2->state();
-			}
+			return f1->state() < f2->state();
+		}
 
-			if (f1->action() != f2->action())
-			{
-				return static_cast<int>(f1->action()) < static_cast<int>(f2->action());
-			}
-		}
-		//break;
-	case FileTreeModel::Columns::FileNameColumn:
+		if (f1->action() != f2->action())
 		{
-			return f1->fileName() < f2->fileName();
+			return static_cast<int>(f1->action()) < static_cast<int>(f2->action());
 		}
-		break;
+		[[fallthrough]];
+	case FileTreeModel::Columns::FileNameColumn:
+		return f1->fileName() < f2->fileName();
 	}
 
 	// Custom column
