@@ -480,7 +480,7 @@ namespace TestSuite
 
 			if (objectName == allowFunctionName)
 			{
-				scriptInfo.allowFunction= objectName;
+				scriptInfo.allowFunction = objectName;
 			}
 
 			if (objectName.compare("ScriptTags", Qt::CaseInsensitive) == 0)

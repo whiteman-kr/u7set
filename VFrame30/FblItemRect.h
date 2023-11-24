@@ -17,8 +17,10 @@ namespace VFrame30
 	class SchemaItemReceiver;
 	class SchemaItemTransmitter;
 	class SchemaItemTerminator;
+	class SchemaItemBus;
 	class SchemaItemBusComposer;
 	class SchemaItemBusExtractor;
+	class SchemaItemLoopback;
 	class SchemaItemLoopbackSource;
 	class SchemaItemLoopbackTarget;
 }

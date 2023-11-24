@@ -26,13 +26,45 @@ namespace TestSuite
 		m_resetFlag.store(true);
 	}
 	
+	bool RunControlThread::scriptPermission(const QString& fileName) const
+	{
+		QMutexLocker l(&m_permissionsMutex);
+
+		const auto it = m_scriptPermissions.find(fileName);
+		if (it == m_scriptPermissions.end())
+		{
+			if (m_noPermissionsExist == true)
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		return it->second;
+	}
+	
+	bool RunControlThread::globalPermission() const
+	{
+		QMutexLocker l(&m_permissionsMutex);
+		if (m_globalPermission.has_value() == false)
+		{
+			if (m_noPermissionsExist == true)
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		
+		return m_globalPermission.value();
+	}
+
 	void RunControlThread::run()
 	{
-		{
-			QMutexLocker l(&m_statusMutex);
-			m_status.m_state = ControlState::Permission;
-		}
-
 		m_appLog.writeMessage("Started");
 		m_result.store(0);
 
@@ -62,10 +94,22 @@ namespace TestSuite
 				{
 					taskQueryPermission();
 
-					if (m_scriptPermissions.empty() == true && m_globalPermission.has_value() == false)
+
+					// Check if no permissions exist and exit
+					//
+					bool noPermissions = false;
+					{
+						QMutexLocker l(&m_permissionsMutex);
+						noPermissions = m_scriptPermissions.empty() == true && m_globalPermission.has_value() == false;
+						m_noPermissionsExist = noPermissions;
+					}
+
+					if (noPermissions == true)
 					{
 						m_appLog.writeMessage("No permission functons for tests exist, exit the permission control thread.");
 						requestInterruption();
+
+						emit noPermissionsExist();
 					}
 
 					// Wait 500 ms before repeating the request
@@ -149,8 +193,10 @@ namespace TestSuite
 			// Script tags are from other configuration or no allow functions exist
 			//
 			const auto& runner = m_runners.back();
-			if (runner->scriptInfo().checkScriptTags(m_configuration.scriptTags) == false ||
-				(runner->scriptInfo().globalAllowFunction.isEmpty() == true && runner->scriptInfo().allowFunction.isEmpty() == true))
+			const auto& scriptInfo = runner->scriptInfo();
+			if (scriptInfo.empty() == true ||
+				scriptInfo.checkScriptTags(m_configuration.scriptTags) == false ||
+				(scriptInfo.globalAllowFunction.isEmpty() == true && scriptInfo.allowFunction.isEmpty() == true))
 			{
 				// Remove just added test controller and runner
 				//
@@ -172,14 +218,6 @@ namespace TestSuite
 
 		for (const auto& runner : m_runners)
 		{
-			{
-				QMutexLocker l(&m_statusMutex);
-				m_status.m_scriptIndex++;
-				m_status.m_scriptFile = runner->scriptInfo().fileName;
-
-				m_status.setStartTime();
-			}
-
 			std::condition_variable callFinishedCondVariable;
 			std::atomic<bool> callFinished{false};
 
@@ -224,36 +262,50 @@ namespace TestSuite
 				bool globalPermission = true;
 				bool scriptPermission = true;
 
+				bool scriptPermissionWasChanged = false;
+				bool globalPermissionWasChanged = false;
+
 				fileTestResult = runner->queryPermission(globalPermission, scriptPermission);
 
 				bool permission = globalPermission && scriptPermission;
 
-				auto it = m_scriptPermissions.find(runner->scriptInfo().fileName);
-
-				if (it == m_scriptPermissions.end())
 				{
-					m_scriptPermissions[runner->scriptInfo().fileName] = permission;
+					QMutexLocker l(&m_permissionsMutex);
+
+					// Script permission
+					//
+					auto it = m_scriptPermissions.find(runner->scriptInfo().fileName);
+					if (it == m_scriptPermissions.end())
+					{
+						scriptPermissionWasChanged = true;
+						m_scriptPermissions[runner->scriptInfo().fileName] = permission;
+					}
+					else
+					{
+						if (permission != it->second)
+						{
+							scriptPermissionWasChanged = true;
+							m_scriptPermissions[runner->scriptInfo().fileName] = permission;
+						}
+					}
+
+					// Global permission
+					//
+					if (m_globalPermission.has_value() == false || m_globalPermission != globalPermission)
+					{
+						m_globalPermission = globalPermission;
+						globalPermissionWasChanged = true;
+					}
+				}
+
+				if (scriptPermissionWasChanged == true)
+				{
 					emit scriptPermissionChanged(runner->scriptInfo().fileName, permission);
 				}
-				else
-				{
-					if (permission != it->second)
-					{
-						m_scriptPermissions[runner->scriptInfo().fileName] = permission;
-						emit scriptPermissionChanged(runner->scriptInfo().fileName, permission);
-					}
-				}
 
-				if (m_globalPermission.has_value() == false || m_globalPermission != globalPermission)
+				if (globalPermissionWasChanged == true)
 				{
-					m_globalPermission = globalPermission;
-					emit globalPermissionChanged(m_globalPermission.value());
-
-					{
-						QMutexLocker l(&m_statusMutex);
-						m_status.m_state = m_globalPermission == true ? ControlState::Permission : ControlState::NoPermission;
-						m_status.m_scriptCount = m_runners.size();
-					}
+					emit globalPermissionChanged(globalPermission);
 				}
 			}
 			catch (int)
@@ -280,7 +332,10 @@ namespace TestSuite
 		m_runners.clear();
 		m_testControllers.clear();
 
-		m_scriptPermissions.clear();
+		{
+			QMutexLocker l(&m_permissionsMutex);
+			m_scriptPermissions.clear();
+		}
 	}
 
 	//
@@ -297,11 +352,26 @@ namespace TestSuite
 				{
 					emit globalPermissionChanged(result);
 				});
+		connect(static_cast<RunControlThread*>(m_controlThread.get()), &RunControlThread::noPermissionsExist, [this]()
+				{
+					emit noPermissionsExist();
+				});
 	}
 
 	void RunControl::reset()
 	{
 		static_cast<RunControlThread*>(m_controlThread.get())->reset();
 	}
+
+	bool RunControl::scriptPermission(const QString& fileName) const
+	{
+		return static_cast<RunControlThread*>(m_controlThread.get())->scriptPermission(fileName);
+	}
+
+	bool RunControl::globalPermission() const
+	{
+		return static_cast<RunControlThread*>(m_controlThread.get())->globalPermission();
+	}
+
 
 } // namespace TestSuite

@@ -18,6 +18,7 @@ namespace TestSuite
 	private:
 		virtual void run() override;
 		
+		void taskCheckLogin();
 		void taskRunTests();
 		void taskCreateReports();
 	};

@@ -390,7 +390,7 @@ public:
 private:
 	struct FileChildren
 	{
-		int m_fileId;
+		int m_fileId = -1;
 		std::vector<std::shared_ptr<DbFileInfo>> m_children;
 	};
 
@@ -604,7 +604,7 @@ private:
 	int m_userId = -1;
 	QString m_username;
 	QString m_comment;
-	E::VcsItemAction m_action;
+	E::VcsItemAction m_action = E::VcsItemAction::Unknown;
 };
 
 //

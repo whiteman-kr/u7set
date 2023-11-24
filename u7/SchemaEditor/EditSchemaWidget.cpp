@@ -4549,7 +4549,7 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 	//
 	if (isLogicSchema() == true)
 	{
-		QSet<QString> signalStrIds;		// QSet for unique strIds
+		std::set<QString> signalStrIds;		// QSet for unique strIds
 
 		if (selectedItems().empty() == false)
 		{
@@ -4568,7 +4568,7 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 					{
 						if (s.isEmpty() == false)
 						{
-							signalStrIds << s;
+							signalStrIds.insert(s);
 						}
 					}
 				}
@@ -4582,7 +4582,7 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 					{
 						if (appSignal.isEmpty() == false)
 						{
-							signalStrIds << appSignal;
+							signalStrIds.insert(appSignal);
 						}
 					}
 				}
@@ -4597,7 +4597,7 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 				for (QString s : signalStrIds)
 				{
 					QAction* signalAction = new QAction(s, &menu);
-					if (signalStrIds.size() == 1)	// If not 1, then this shorcut will be added to "All Signals %1 Properties..."
+					if (signalStrIds.size() == 1)	// If not 1, then this shortcut will be added to "All Signals %1 Properties..."
 					{
 						signalAction->setShortcut(Qt::ALT | Qt::Key_S);
 						signalAction->setShortcutVisibleInContextMenu(true);

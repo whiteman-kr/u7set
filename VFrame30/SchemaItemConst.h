@@ -74,6 +74,8 @@ namespace VFrame30
 		quint16 discreteNativeValue() const;
 		void setDiscreteNativeValue(quint16);
 
+		const Afb::AfbParamValue& value() const;
+
 		int precision() const;
 		void setPrecision(int value);
 

@@ -43,12 +43,16 @@ namespace TestSuite
 		ControlStatus testStatus() const;
 		ControlStatus runStatus() const;
 
+		bool scriptPermission(const QString& fileName) const;
+		bool globalPermission() const;
+
 	signals:
 		void testStarted(QString scriptFileName, QString testFunction);
 		void testFinished(QString scriptFileName, QString testFunction, bool result);
 		void finished(int result);
 		void scriptPermissionChanged(QString scriptFileName, bool result);
 		void globalPermissionChanged(bool result);
+		void noPermissionsExist();
 
 
 	private:

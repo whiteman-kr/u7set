@@ -100,7 +100,7 @@ namespace ClientLib
 
 		mutable QMutex m_dataMutex;
 
-		E::RtTrendsSamplePeriod m_samplePeriod;
+		E::RtTrendsSamplePeriod m_samplePeriod = E::RtTrendsSamplePeriod::sp_1s;
 		std::set<QString> m_signalSet;
 
 	private:
