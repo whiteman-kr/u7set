@@ -16,7 +16,6 @@ LogonWidget::LogonWidget(ClientLib::TuningUserManager& userManager, QWidget* par
 	m_loginButton = new QPushButton(loginString);
 	connect(m_loginButton, &QPushButton::clicked, this, &LogonWidget::onButtonLogin);
 	l->addWidget(m_loginButton);
-	m_loginButton->setEnabled(m_userManager.isLoggedIn() == false);
 
 	m_loginUserName = new QLabel(loggedOutString);
 	m_loginUserName->setAlignment(Qt::AlignCenter);
