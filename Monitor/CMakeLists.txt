@@ -79,6 +79,7 @@ set (MONITOR_SOURCES
 	DialogDataSources.h
 	DialogSettings.cpp
 	DialogSettings.h
+	Globals.cpp
 	Globals.h
 	InstanceResolver.cpp
 	InstanceResolver.h

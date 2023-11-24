@@ -19,6 +19,8 @@ MonitorSchemaView::MonitorSchemaView(MonitorSchemaManager* schemaManager,
 									 QWidget* parent)
 	: VFrame30::ClientSchemaView(schemaManager, schemaViewHistory, timeStats, parent)
 {
+	m_app.setMainWindow(theApp.mainWindow());
+
 	setAppSignalController(appSignalController);
 	setTuningController(theApp.mainWindow()->tuningSignalManager(),
 						theApp.mainWindow()->tuningConnection(),
@@ -32,9 +34,6 @@ MonitorSchemaView::MonitorSchemaView(MonitorSchemaManager* schemaManager,
 	// Updates scripts
 	//
 	configurationArrived(monitorSchemaManager()->monitorConfigController().configuration());
-
-	//
-	m_app.setMainWindow(theApp.mainWindow());
 
 	return;
 }
