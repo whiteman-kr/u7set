@@ -468,16 +468,6 @@ void AppSignalPropertyManager::detectNewProperties(const AppSignal& signal)
 			newProperty.initNonEnumProp(specificProperty->caption(), type, true, getter, setter);
 		}
 
-/*		newProperty.m_isSpecProp = true;
-		newProperty.m_name = propertyName;
-		newProperty.m_type = type;
-		newProperty.appendSignalID(signal->ID());
-
-		if (propertyIsEnum)
-		{
-			newProperty.setEnumValues(specPropStructHash, specificProperty->enumValues());
-		}*/
-
 		addNewProperty(newProperty, true);
 	}
 }

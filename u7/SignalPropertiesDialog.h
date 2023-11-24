@@ -22,12 +22,10 @@ public:
 
 	//
 
+	static void initNewSignal(AppSignal& signal);
 	static std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& signalId,
 																		   DbController* dbController,
 																		   QWidget* parent = nullptr);
-	static void initNewSignal(AppSignal& signal);
-
-
 signals:
 	void signalChanged(int id, bool updateView);
 
@@ -37,15 +35,12 @@ private slots:
 	void onOk();
 	void onCancel();
 
-protected:
-	void closeEvent(QCloseEvent* event) override;
-
 private:
 	void uppercaseAppSignalIDs();
 	void createSignalsProps();
 
 	void checkoutSignals(QList<std::shared_ptr<PropertyObject>> objects);
-	bool checkoutSignal(const AppSignal& s, QString* message);
+	bool checkoutSignal(AppSignal&s , QString* message);
 
 	void limitPropsPrecisionOnPropChanged(const QList<std::shared_ptr<PropertyObject>>& objects);
 

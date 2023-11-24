@@ -502,6 +502,8 @@ private:
 	// Private setters for fields, wich can't be changed outside DB engine
 	// Should be used only by friends
 	//
+	friend class SignalPropertiesDialog;
+
 	void setID(int signalID) { m_ID = signalID; }
 	void setSignalGroupID(int signalGroupID) { m_signalGroupID = signalGroupID; }
 	void setSignalInstanceID(int signalInstanceID) { m_signalInstanceID = signalInstanceID; }

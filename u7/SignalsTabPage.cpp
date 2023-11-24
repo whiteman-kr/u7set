@@ -1151,6 +1151,9 @@ void SignalsTabPage::createNewSignals()
 	int channelCount = createSignalsDialog.getChannelCount();
 	int signalCount = createSignalsDialog.getSignalCount();
 
+	channelCount = std::clamp(channelCount, MIN_CHANNEL_COUNT, MAX_CHANNEL_COUNT);
+	signalCount = std::clamp(signalCount, 1, 1000);
+
 	//
 
 	AppSignal templateSignal;
@@ -1164,7 +1167,7 @@ void SignalsTabPage::createNewSignals()
 
 	if (signalCounter >= 0)
 	{
-		QString newId = QString("%1_%2").
+		QString newId = QString("%1%2").
 							arg(E::valueToString<E::SignalType>(type).toUpper()).
 							arg(signalCounter, 3, 10, Latin1Char::ZERO);
 

@@ -404,15 +404,19 @@ bool AppSignalSetProvider::createNewSignals(const AppSignal& templateSignal,
 {
 	TEST_PTR_RETURN_FALSE(addedSignalIDs);
 
+	addedSignalIDs->clear();
+
 	bool uppercase = projectProperty_uppercaseAppSignalID();
 
-	std::vector<int> newIndexes;
+	channelsCount = std::clamp(channelsCount, MIN_CHANNEL_COUNT, MAX_CHANNEL_COUNT);
+
+	int newSignalIndex = -1;
 
 	for (int s = 0; s < signalsCount; s++)
 	{
 		std::vector<AppSignal> newSignalsVector;
 
-		for (int ch = 0; ch < channelsCount; ch++)
+		for (int ch = CHANNEL_1; ch < channelsCount; ch++)
 		{
 			AppSignal& newSignal = newSignalsVector.emplace_back(templateSignal);
 
@@ -420,12 +424,12 @@ bool AppSignalSetProvider::createNewSignals(const AppSignal& templateSignal,
 
 			if (signalsCount > 1)
 			{
-				suffix = QString("_SIG%1").arg(s, 3, 10, QChar('0'));
+				suffix = QString("_%1").arg(s, 3, 10, QChar('0'));
 			}
 
 			if (channelsCount > 1)
 			{
-				suffix += "_" + QString(QChar('A' + ch));
+				suffix += QString("_%1").arg(E::valueToString<E::Channel>(ch));
 			}
 
 			QString appSignalID = newSignal.appSignalID() + suffix;
@@ -434,11 +438,12 @@ bool AppSignalSetProvider::createNewSignals(const AppSignal& templateSignal,
 			if (uppercase)
 			{
 				appSignalID = appSignalID.toUpper();
-				customAppSignalID = customAppSignalID.toUpper();
+				//customAppSignalID = customAppSignalID.toUpper();
 			}
 
 			newSignal.setAppSignalID(appSignalID);
 			newSignal.setCustomAppSignalID(customAppSignalID);
+			newSignal.setCaption("Signal " + customAppSignalID);
 		}
 
 		if (m_db->addSignals(templateSignal.signalType(), &newSignalsVector, m_parentWidget) == true)
@@ -446,8 +451,9 @@ bool AppSignalSetProvider::createNewSignals(const AppSignal& templateSignal,
 			for (const AppSignal& newSignal : newSignalsVector)
 			{
 				auto [s, index] = m_signalSet.append(newSignal);
+
 				addedSignalIDs->push_back(newSignal.ID());
-				newIndexes.push_back(index);
+				newSignalIndex = index;
 			}
 		}
 		else
@@ -457,7 +463,11 @@ bool AppSignalSetProvider::createNewSignals(const AppSignal& templateSignal,
 		}
 	}
 
-	emit detectNewProperties(newIndexes);
+	// all signals of same type respectively have identical properties,
+	// so property checking of one signal is enough
+	//
+	emit detectNewProperties(std::vector<int>{newSignalIndex});
+
 	emit signalsCountChanged();
 
 	return true;
@@ -742,35 +752,37 @@ bool AppSignalSetProvider::checkoutSignals(const std::vector<int>& appSignalIDs,
 
 	RETURN_IF_FALSE(res);
 
-	if (errMsg == nullptr)
-	{
-		res = showErrors(objectStates);
-	}
-	else
-	{
-		foreach (const ObjectState& objectState, objectStates)
-		{
-			if (objectState.errCode != ERR_SIGNAL_OK &&
-				isCheckinableSignalForMe(objectState) == false)
-			{
-				*errMsg += errorMessage(objectState) + "\n";
-				res = false;
-			}
-		}
-	}
-
 	if (checkedOutIDs != nullptr)
 	{
 		checkedOutIDs->clear();
 		checkedOutIDs->reserve(objectStates.size());
+	}
 
-		for(const ObjectState& os : objectStates)
+	for(const ObjectState& os : objectStates)
+	{
+		if (os.errCode == ERR_SIGNAL_OK)
 		{
-			if (os.errCode != ERR_SIGNAL_OK)
+			if (checkedOutIDs != nullptr)
 			{
 				checkedOutIDs->push_back(os.id);
 			}
 		}
+		else
+		{
+			if (isCheckinableSignalForMe(os) == false)
+			{
+				if (errMsg != nullptr)
+				{
+					*errMsg += errorMessage(os) + "\n";
+					res = false;
+				}
+			}
+		}
+	}
+
+	if (errMsg == nullptr)
+	{
+		res = showErrors(objectStates);
 	}
 
 	reloadSignals(signalsIDsToCheckout, true);
@@ -783,7 +795,7 @@ bool AppSignalSetProvider::checkinSignals(const std::vector<int>& signalIDs,
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
 
-	std::set<int> chSignalsIDsSet;
+	std::set<int> uniqueSignalIDs;
 
 	for(int id : signalIDs)
 	{
@@ -791,16 +803,16 @@ bool AppSignalSetProvider::checkinSignals(const std::vector<int>& signalIDs,
 
 		m_signalSet.getChannelSignalsID(id, &chSignalsIDs);
 
-		chSignalsIDsSet.insert(chSignalsIDs.begin(), chSignalsIDs.end());
+		uniqueSignalIDs.insert(chSignalsIDs.begin(), chSignalsIDs.end());
 	}
 
-	std::vector<int> channelSignalsIDs(chSignalsIDsSet.begin(), chSignalsIDsSet.end());
+	std::vector<int> channelSignalsIDs(uniqueSignalIDs.begin(), uniqueSignalIDs.end());
 
 	std::vector<ObjectState> states;
 
 	bool result = m_db->checkinSignals(channelSignalsIDs, comment, &states, m_parentWidget);
 
-	showErrors(states);
+//	showErrors(states);
 
 	std::vector<int> updatedIDs;
 	std::vector<int> removedIDs;
@@ -841,7 +853,7 @@ bool AppSignalSetProvider::undoSignalsChanges(const std::vector<int>& signalIDs,
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
 
-	std::vector<int> ids;
+	std::set<int> uniqueIDs;
 
 	for(int id : signalIDs)
 	{
@@ -858,10 +870,10 @@ bool AppSignalSetProvider::undoSignalsChanges(const std::vector<int>& signalIDs,
 
 		m_signalSet.getChannelSignalsID(id, &channelIDs);
 
-		ids.insert(ids.end(), channelIDs.begin(), channelIDs.end());
+		uniqueIDs.insert(channelIDs.begin(), channelIDs.end());
 	}
 
-	if (ids.empty() == true)
+	if (uniqueIDs.empty() == true)
 	{
 		return true;
 	}
@@ -872,12 +884,11 @@ bool AppSignalSetProvider::undoSignalsChanges(const std::vector<int>& signalIDs,
 	}
 
 	std::vector<ObjectState> states;
+	std::vector<int> ids(uniqueIDs.begin(), uniqueIDs.end());
 
 	bool result = m_db->undoSignalsChanges(ids, &states, parentWidget);
 
 	RETURN_IF_FALSE(result);
-
-	result &= showErrors(states);
 
 	reloadSignals(ids, true);
 
