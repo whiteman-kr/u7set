@@ -165,26 +165,6 @@ namespace TestSuite
 			m_configData.scripts = scriptsStorage.scripts();
 		}
 
-		// Check user name
-		//
-		if (m_configuration.login == true)
-		{
-			if (m_controlParams.userName.isEmpty() == true)
-			{
-				m_appLog.writeError(tr("Tests execution failed: no user name is supplied! Please check the configuration."));
-				throw 1;
-			}
-
-			TestSuiteUserManager userManager(m_controlParams.userName, m_controlParams.password);
-			userManager.setConfiguration(true, m_configuration.userAccounts, true, 120);
-
-			if (userManager.login(nullptr) == false)
-			{
-				m_appLog.writeError(tr("Tests execution failed: authorization failed!"));
-				throw 1;
-			}
-		}
-
 		return;
 	}
 

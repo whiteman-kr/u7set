@@ -2,6 +2,7 @@
 #define TESTLISTWIDGET_H
 
 #include <QTreeWidget>
+#include "../TestSuiteLib/TestSuite.h"
 #include "../TestSuiteLib/TestController.h"
 #include "../TestSuiteLib/TestLog.h"
 #include "../TestSuiteLib/TestScriptsStorage.h"
@@ -54,7 +55,7 @@ class TestListWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	TestListWidget(TestSuiteLogFile& appLog, TestSuite::ConfigSettings& configuration, const TestSuite::TestScriptsStorage& tests, QWidget* parent);
+	TestListWidget(const TestSuite::TestSuite& testSuite, TestSuiteLogFile& appLog, TestSuite::ConfigSettings& configuration, const TestSuite::TestScriptsStorage& tests, QWidget* parent);
 
 	enum Columns
 	{
@@ -78,6 +79,8 @@ public:
 
 public slots:
 	void onScriptPermissionChanged(QString scriptFileName, bool result);
+	void onNoPermissionsExist();
+
 	void onTestStarted(QString scriptFileName, QString testFunction);
 	void onTestFinished(QString scriptFileName, QString testFunction, bool result);
 
@@ -100,6 +103,7 @@ private:
 
 	bool m_selectionEnabled = false;
 	
+	const TestSuite::TestSuite& m_testSuite;
 	const TestSuite::ConfigSettings& m_configuration;
 
 	const TestSuite::TestScriptsStorage& m_tests;
