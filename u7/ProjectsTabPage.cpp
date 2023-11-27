@@ -128,8 +128,6 @@ ProjectsTabPage::ProjectsTabPage(DbController* dbcontroller,
 	connect(dbController(), &DbController::projectOpened, this, &ProjectsTabPage::projectOpened);
 	connect(dbController(), &DbController::projectClosed, this, &ProjectsTabPage::projectClosed);
 
-	refreshProjectList();
-
 	return;
 }
 
@@ -188,6 +186,62 @@ void ProjectsTabPage::projectClosed()
 	m_deleteProjectAction->setEnabled(true);
 
 	GlobalMessanger::instance().fireProjectClosed();
+	return;
+}
+
+void ProjectsTabPage::refreshProjectList()
+{
+	assert(m_projectTable != nullptr);
+
+	// Save current selection
+	//
+	QString selectedProject;
+	QList<QTableWidgetItem*> selectedItems = m_projectTable->selectedItems();
+
+	if (selectedItems.size() != 0 && selectedItems[0]->column() == 0)
+	{
+		selectedProject = selectedItems[0]->text();
+	}
+
+	// clear all records
+	//
+	m_projectTable->setRowCount(0);
+
+	// Get project list from database (synchronous call)
+	//
+	std::vector<DbProject> projects;
+	bool result = dbController()->getProjectList(&projects, this);
+
+	if (result == false)
+	{
+		return;
+	}
+
+	// Fill the project list with the received values
+	//
+	m_projectTable->setRowCount(static_cast<int>(projects.size()));
+
+	m_projectTable->setSortingEnabled(false);
+
+	for (unsigned int i = 0; i < projects.size(); i++)
+	{
+		const DbProject& p = projects[i];
+
+		m_projectTable->setItem(i, 0, new QTableWidgetItem(p.projectName()));
+		m_projectTable->setItem(i, 1, new QTableWidgetItem(p.description()));
+
+		QTableWidgetItem* itemVersion = new QTableWidgetItem(QString::number(p.version()));
+		itemVersion->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+		m_projectTable->setItem(i, 2, itemVersion);
+	}
+
+	// Sort projects
+	//
+	m_projectTable->setSortingEnabled(true);
+	m_projectTable->sortByColumn(theSettings.m_projectsSortColumn, theSettings.m_projectsSortOrder);
+
+	selectProject(selectedProject);
+
 	return;
 }
 
@@ -526,62 +580,6 @@ void ProjectsTabPage::deleteProject()
 	dbController()->deleteProject(projectName, password, false, this);
 
 	refreshProjectList();
-	return;
-}
-
-void ProjectsTabPage::refreshProjectList()
-{
-	assert(m_projectTable != nullptr);
-
-	// Save current selection
-	//
-	QString selectedProject;
-	QList<QTableWidgetItem*> selectedItems = m_projectTable->selectedItems();
-
-	if (selectedItems.size() != 0 && selectedItems[0]->column() == 0)
-	{
-		selectedProject = selectedItems[0]->text();
-	}
-
-	// clear all records
-	//
-	m_projectTable->setRowCount(0);
-
-	// Get project list from database (synchronous call)
-	//
-	std::vector<DbProject> projects;
-	bool result = dbController()->getProjectList(&projects, this);
-
-	if (result == false)
-	{
-		return;
-	}
-
-	// Fill the project list with the received values
-	//
-	m_projectTable->setRowCount(static_cast<int>(projects.size()));
-
-	m_projectTable->setSortingEnabled(false);
-
-	for (unsigned int i = 0; i < projects.size(); i++)
-	{
-		const DbProject& p = projects[i];
-
-		m_projectTable->setItem(i, 0, new QTableWidgetItem(p.projectName()));
-		m_projectTable->setItem(i, 1, new QTableWidgetItem(p.description()));
-
-		QTableWidgetItem* itemVersion = new QTableWidgetItem(QString::number(p.version()));
-		itemVersion->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-		m_projectTable->setItem(i, 2, itemVersion);
-	}
-
-	// Sort projects
-	//
-	m_projectTable->setSortingEnabled(true);
-	m_projectTable->sortByColumn(theSettings.m_projectsSortColumn, theSettings.m_projectsSortOrder);
-
-	selectProject(selectedProject);
-
 	return;
 }
 
