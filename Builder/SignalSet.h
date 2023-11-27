@@ -22,7 +22,7 @@ namespace Builder
 		const ::AppSignalSet* appSignalSet() const;
 
 		bool prepareBusses();
-		bool checkSignals();
+		bool checkSignals(bool isSafetyProject);
 		bool checkSignalsIDsAndHashes();
 		bool bindSignalsToLMs(Hardware::EquipmentSet* equipment);
 		void initCalculatedSignalsProperties();

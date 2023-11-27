@@ -1138,6 +1138,21 @@ void AppSignalSetProvider::deleteSignals(const std::vector<int>& signalIDs)
 	}
 }
 
+bool AppSignalSetProvider::getProjectProperties(DbProjectProperties* projectProps) const
+{
+	TEST_PTR_RETURN_FALSE(projectProps);
+
+	return m_db->getProjectProperties(projectProps, m_parentWidget);
+}
+
+bool AppSignalSetProvider::isSafetyProject() const
+{
+	DbProjectProperties projectProps;
+
+	getProjectProperties(&projectProps);
+
+	return projectProps.safetyProject();
+}
 
 void AppSignalSetProvider::loadUsers()
 {

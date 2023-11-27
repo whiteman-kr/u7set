@@ -99,6 +99,9 @@ public:
 
 	void deleteSignals(const std::vector<int>& signalIDs);
 
+	bool getProjectProperties(DbProjectProperties* projectProps) const;
+	bool isSafetyProject() const;
+
 signals:
 	void error(const QString& message);						// for throwing message boxes
 

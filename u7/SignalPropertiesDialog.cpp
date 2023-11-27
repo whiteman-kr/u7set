@@ -380,20 +380,6 @@ void SignalPropertiesDialog::undoCheckouts()
 
 	std::vector<int> undoSignalIDs(m_checkedOutSignalsId.begin(), m_checkedOutSignalsId.end());
 
-/*	for (std::shared_ptr<PropertyObject>& object : m_signalsProps)
-	{
-		AppSignalProperties* signalProperites = dynamic_cast<AppSignalProperties*>(object.get());
-
-		TEST_PTR_CONTINUE(signalProperites);
-
-		int id = signalProperites->signalID();
-
-		if (signalProperites->signalCheckedOut() && m_checkedOutSignalsId.contains(id))
-		{
-			undoSignalIDs.push_back(id);
-		}
-	}*/
-
 	m_checkedOutSignalsId.clear();
 
 	m_signalSetProvider->undoSignalsChanges(undoSignalIDs);

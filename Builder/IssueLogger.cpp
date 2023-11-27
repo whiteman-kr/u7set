@@ -7597,6 +7597,24 @@ namespace Builder
 				  QString(tr("Reserved signal %1 used on schema %2.").arg(appSignalID).arg(schemaID)));
 	}
 
+	/// IssueCode: ALC5202
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Signal %1 inversion can't be used in safety project.
+	///
+	/// Parameters:
+	///		%1 AppSignalID
+	///
+	/// Description:
+	///		Turn off InvertSignal property of specified signal.
+	///
+	void IssueLogger::errALC5202(QString appSignalID)
+	{
+		LOG_ERROR(IssueType::AlCompiler, 5202,
+				  QString(tr("Signal %1 inversion can't be used in safety project.").arg(appSignalID)));
+	}
+
 	/// IssueCode: ALC5800
 	///
 	/// IssueType: Warning

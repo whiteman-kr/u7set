@@ -1764,7 +1764,7 @@ namespace Builder
 
 		RETURN_IF_FALSE(result);
 
-		result &= signalSet->checkSignals();
+		result &= signalSet->checkSignals(m_context->m_projectProperties.safetyProject());
 		result &= signalSet->checkSignalsIDsAndHashes();
 
 		result &= signalSet->bindSignalsToLMs(equipment);

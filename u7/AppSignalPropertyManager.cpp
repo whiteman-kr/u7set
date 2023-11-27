@@ -575,6 +575,8 @@ void AppSignalPropertyManager::updatePropertiesBehaviour(const QString& propBeha
 		return;
 	}
 
+	bool isSafetyProject = AppSignalSetProvider::getInstance()->isSafetyProject();
+
 	m_propertiesBehaviour.clear();
 
 	for (QString row : rows)
@@ -604,6 +606,14 @@ void AppSignalPropertyManager::updatePropertiesBehaviour(const QString& propBeha
 			continue;
 		}
 
+		bool hidePropery = false;
+
+		if (propName == AppSignalPropNames::INVERT_SIGNAL &&
+			isSafetyProject == true)
+		{
+			hidePropery = true;
+		}
+
 		AppSignalPropertyBehavior behaviour;
 
 		behaviour.setDependsOnPrecision(fields[precisionIndex].toLower() == "true");
@@ -622,6 +632,11 @@ void AppSignalPropertyManager::updatePropertiesBehaviour(const QString& propBeha
 
 					if (ok == true)
 					{
+						if (hidePropery == true)
+						{
+							behaviourType = E::PropertyBehaviourType::Hide;
+						}
+
 						behaviour.set(signalType, inOutType, behaviourType);
 					}
 					else
