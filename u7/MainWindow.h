@@ -194,5 +194,7 @@ private:
 //	QWinTaskbarButton* m_taskBarButton = nullptr;
 //	int m_timerId = -1;
 //#endif
+
+	int m_visibleTimerId = -1;
 };
 

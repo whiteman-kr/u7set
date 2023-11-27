@@ -20,13 +20,14 @@ public slots:
 	void projectOpened(DbProject project);
 	void projectClosed();
 
+	void refreshProjectList();
+
 private slots:
 	void createProject();
 	void openProject();
 	void closeProject();
 	void cloneProject();
 	void deleteProject();
-	void refreshProjectList();
 	void selectProject(const QString& projectName);
 	void projectsContextMenuRequested(const QPoint& pos);
 	void projectsSortIndicatorChanged(int column, Qt::SortOrder order);

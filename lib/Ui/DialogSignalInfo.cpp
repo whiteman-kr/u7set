@@ -545,7 +545,7 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 	m_appSignalManager(appSignalManager),
 	m_signalDataServer(signalDataServer),	// it can be nullptr
 	m_appDataServices(appDataServices),		// it can be emptu
-	m_tuningController(tuningSignalManager, tuningConnection, tuningAuthorization),
+	m_tuningController(tuningSignalManager, tuningConnection, tuningAuthorization, this),
 	m_tuningEnabled(tuningEnabled)
 {
 	if (m_appSignalManager == nullptr)
