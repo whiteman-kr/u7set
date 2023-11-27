@@ -187,7 +187,7 @@ namespace VFrame30
 
 			if (childWidget == nullptr)
 			{
-				assert(dynamic_cast<QWidget*>(childObject) != nullptr);
+				assert(dynamic_cast<QWidget*>(childObject) != nullptr || dynamic_cast<TuningController*>(childObject) != nullptr);
 				continue;
 			}
 

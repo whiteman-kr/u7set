@@ -92,7 +92,7 @@ namespace VFrame30
 		TuningController(ITuningSignalManager& signalManager,
 						 ITuningConnection& tuningConnection,
 						 ITuningAuthorization& tuningAuthorization,
-						 QWidget* parent = nullptr);
+						 QWidget* parent);
 
 	public:
 		AppSignalParam signalParam(const QString& appSignalId, bool* ok) const;
@@ -145,7 +145,7 @@ namespace VFrame30
 		bool isLoggedIn() const;
 
 	private:
-		QWidget* m_parent;
+		QWidget* m_parent{nullptr};
 		ITuningSignalManager& m_signalManager;
 		ITuningConnection& m_tuningConnection;
 		ITuningAuthorization& m_tuningAuthorization;
