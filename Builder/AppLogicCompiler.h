@@ -64,6 +64,7 @@ namespace Builder
 		bool writeOptoPortToPortVhdFile(const QString& connectionID, Hardware::OptoPortShared outPort, Hardware::OptoPortShared inPort);
 		bool writeOptoSinglePortVhdFile(const QString& connectionID, Hardware::OptoPortShared outPort);
 		bool writeAppSignalSetFile();
+		bool writeCommonAppSignalsExtXmlFile();
 		bool writeComparatorSetFile();
 		bool writeSubsystemsXml();
 

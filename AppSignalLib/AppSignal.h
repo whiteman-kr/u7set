@@ -708,6 +708,9 @@ public:
 	AppSignal* getSignal(int signalID);
 	const AppSignal* getSignal(int signalID) const;
 
+	AppSignal* getSignalByHash(Hash appSignalIDHash);
+	const AppSignal* getSignalByHash(Hash appSignalIDHash) const;
+
 	AppSignal* at(int index);
 	const AppSignal* at(int index) const;
 
@@ -728,7 +731,8 @@ public:
 
 private:
 	const AppSignal* privateGetSignal(const QString& appSignalID) const;
-	const AppSignal* privateGetSignal(int signalID) const;
+	const AppSignal* privateGetSignalByID(int signalID) const;
+	const AppSignal* privateGetSignalByHash(Hash appSignalIDHash) const;
 	const AppSignal* privateAt(int index) const;
 
 private:

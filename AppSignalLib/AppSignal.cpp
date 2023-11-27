@@ -2802,12 +2802,22 @@ const AppSignal* AppSignalSet::getSignal(const QString& appSignalID) const
 
 AppSignal* AppSignalSet::getSignal(int signalID)
 {
-	return const_cast<AppSignal*>(privateGetSignal(signalID));
+	return const_cast<AppSignal*>(privateGetSignalByID(signalID));
 }
 
 const AppSignal* AppSignalSet::getSignal(int signalID) const
 {
-	return privateGetSignal(signalID);
+	return privateGetSignalByID(signalID);
+}
+
+AppSignal* AppSignalSet::getSignalByHash(Hash appSignalIDHash)
+{
+	return const_cast<AppSignal*>(privateGetSignalByHash(appSignalIDHash));
+}
+
+const AppSignal* AppSignalSet::getSignalByHash(Hash appSignalIDHash) const
+{
+	return privateGetSignalByHash(appSignalIDHash);
 }
 
 AppSignal* AppSignalSet::at(int index)
@@ -2992,11 +3002,27 @@ const AppSignal* AppSignalSet::privateGetSignal(const QString& appSignalID) cons
 	return m_signals[index];
 }
 
-const AppSignal* AppSignalSet::privateGetSignal(int signalID) const
+const AppSignal* AppSignalSet::privateGetSignalByID(int signalID) const
 {
 	auto it = m_idToIndex.find(signalID);
 
 	if (it == m_idToIndex.end())
+	{
+		return nullptr;
+	}
+
+	qsizetype index = it->second;
+
+	Q_ASSERT(index >= 0 && index < m_signals.size());
+
+	return m_signals[index];
+}
+
+const AppSignal* AppSignalSet::privateGetSignalByHash(Hash appSignalIDHash) const
+{
+	auto it = m_hashToIndex.find(appSignalIDHash);
+
+	if (it == m_hashToIndex.end())
 	{
 		return nullptr;
 	}

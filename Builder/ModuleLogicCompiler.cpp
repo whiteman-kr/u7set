@@ -251,7 +251,7 @@ namespace Builder
 
 			PROC_TO_CALL(ModuleLogicCompiler::finalizeOptoConnectionsProcessing),
 			PROC_TO_CALL(ModuleLogicCompiler::setOptoUalSignalsAddresses),
-			PROC_TO_CALL(ModuleLogicCompiler::writeSignalLists),
+			//PROC_TO_CALL(ModuleLogicCompiler::writeSignalLists),			// extra debug info signal lists
 
 			// code generation functions
 
@@ -997,7 +997,7 @@ namespace Builder
 
 		bool result = true;
 
-		result &= writeUalItemsFile();
+		// result &= writeUalItemsFile();
 
 		result &= createUalItemSignalsList();
 
@@ -3764,8 +3764,8 @@ namespace Builder
 			file.append(str);
 		}
 
-		m_resultWriter->addFile(m_resultWriter->subsystemDirectory(lmSubsystemEquipmentIdPath()),
-								QString("SignalsWithFlags.csv"), file);
+		m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
+								getInfoFileName("swf"), file);		// Signals With Flags
 	}
 
 	bool ModuleLogicCompiler::sortUalSignals()
@@ -16579,9 +16579,8 @@ namespace Builder
 
 		m_ualSignals.getHeapsLog(&file);
 
-		BuildFile* bf = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(lmSubsystemEquipmentIdPath()),
+		BuildFile* bf = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
 												getInfoFileName("heaps"), file);
-
 		return bf != nullptr;
 	}
 
