@@ -560,9 +560,20 @@ namespace Builder
 
 	void AppLogicItem::writeXml(QXmlStreamWriter& writer, const VFrame30::SchemaItemAfb& item)
 	{
-		writer.writeStartElement("SchemaItemAfb");
-		writeXml(writer, item.afbElement());
-		writer.writeEndElement(); // SchemaItemAfb
+		writer.writeStartElement("SchemaItemAfb"); // <SchemaItemAfb>
+
+		// If this is a packed logic, then write a separate tag for it.
+		//
+		if (item.isPackedLogic() == true)
+		{
+			writer.writeStartElement("PackedLogic"); // <PackedLogic>
+			writer.writeAttribute("packedLogicId", item.packedLogicId());
+			writer.writeEndElement();                // </PackedLogic>
+		}
+
+		writeXml(writer, item.afbElement());         // <AfbElement>...</AfbElement>
+
+		writer.writeEndElement();                    // </SchemaItemAfb>
 
 		return;
 	}
@@ -633,32 +644,32 @@ namespace Builder
 
 	void AppLogicItem::writeXml(QXmlStreamWriter& writer, const Afb::AfbElement& afbElement)
 	{
-		writer.writeStartElement("AfbElement");
-
+		writer.writeStartElement("AfbElement"); // <AfbElement>
 		writer.writeAttribute("name", afbElement.caption());
 		writer.writeAttribute("opCode", QString::number(afbElement.opCode()));
 		writer.writeAttribute("afbComponent", afbElement.component() ? afbElement.component()->caption() : QString{"?"});
 
 		// Write params
 		//
-		writer.writeStartElement("AfbParams");
-		writer.writeAttribute("count", QString::number(afbElement.params().size()));
-		for (const Afb::AfbParam& param : afbElement.params())
 		{
-			writer.writeStartElement("AfbParam");
-			writer.writeAttribute("opIndex", QString::number(param.operandIndex()));
-			writer.writeAttribute("caption", param.caption());
-			writer.writeAttribute("value", param.afbParamValue().toString());
-			writer.writeAttribute("type", E::valueToString(param.type()));
-			writer.writeAttribute("dataFormat", E::valueToString(param.dataFormat()));
-			writer.writeAttribute("size", QString::number(param.size()));
-			writer.writeAttribute("byteOrder", E::valueToString(param.byteOrder()));
-			writer.writeAttribute("units", param.units());
-			writer.writeEndElement(); // AfbParam
+			writer.writeStartElement("AfbParams"); // <AfbParams>
+			writer.writeAttribute("count", QString::number(afbElement.params().size()));
+			for (const Afb::AfbParam& param : afbElement.params())
+			{
+				writer.writeStartElement("AfbParam");
+				writer.writeAttribute("opIndex", QString::number(param.operandIndex()));
+				writer.writeAttribute("caption", param.caption());
+				writer.writeAttribute("value", param.afbParamValue().toString());
+				writer.writeAttribute("type", E::valueToString(param.type()));
+				writer.writeAttribute("dataFormat", E::valueToString(param.dataFormat()));
+				writer.writeAttribute("size", QString::number(param.size()));
+				writer.writeAttribute("byteOrder", E::valueToString(param.byteOrder()));
+				writer.writeAttribute("units", param.units());
+				writer.writeEndElement(); // AfbParam
+			}
+			writer.writeEndElement();     // </AfbParams>
 		}
-		writer.writeEndElement();     // AfbParams
-
-		writer.writeEndElement();     // AfbElement
+		writer.writeEndElement();         // </AfbElement>
 
 		return;
 	}
