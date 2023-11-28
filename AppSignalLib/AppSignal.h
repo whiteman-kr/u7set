@@ -95,8 +95,6 @@ public:
 	bool serializeValuesToArray(QByteArray* protoData) const;
 	bool parseValuesFromArray(const QByteArray& protoData);
 
-	//bool save(Proto::SignalSpecPropValues* protoValues) const;
-
 	const QVector<AppSignalSpecPropValue>& values() const { return m_specPropValues; }
 	QVector<AppSignalSpecPropValue>& values() { return m_specPropValues; }
 
@@ -257,6 +255,8 @@ public:
 
 	double highEngineeringUnits(QString* err = nullptr) const;
 	void setHighEngineeringUnits(double highEngineeringUnits);
+
+	bool isReverseEngineeringLimits() const;
 
 	double lowValidRange(QString* err = nullptr) const;
 	void setLowValidRange(double lowValidRange);
@@ -502,6 +502,8 @@ private:
 	// Private setters for fields, wich can't be changed outside DB engine
 	// Should be used only by friends
 	//
+	friend class SignalPropertiesDialog;
+
 	void setID(int signalID) { m_ID = signalID; }
 	void setSignalGroupID(int signalGroupID) { m_signalGroupID = signalGroupID; }
 	void setSignalInstanceID(int signalInstanceID) { m_signalInstanceID = signalInstanceID; }
@@ -605,8 +607,8 @@ private:
 	int m_userID = 0;
 	bool m_deleted = false;
 
-	qint64 m_createdMcs;					// in microseconds, as in database
-	qint64 m_instanceCreatedMcs;			// in microseconds, as in database
+	qint64 m_createdMcs = 0;				// in microseconds, as in database
+	qint64 m_instanceCreatedMcs = 0;		// in microseconds, as in database
 
 	E::VcsItemAction m_instanceAction = E::VcsItemAction::Added;
 
@@ -706,6 +708,9 @@ public:
 	AppSignal* getSignal(int signalID);
 	const AppSignal* getSignal(int signalID) const;
 
+	AppSignal* getSignalByHash(Hash appSignalIDHash);
+	const AppSignal* getSignalByHash(Hash appSignalIDHash) const;
+
 	AppSignal* at(int index);
 	const AppSignal* at(int index) const;
 
@@ -726,7 +731,8 @@ public:
 
 private:
 	const AppSignal* privateGetSignal(const QString& appSignalID) const;
-	const AppSignal* privateGetSignal(int signalID) const;
+	const AppSignal* privateGetSignalByID(int signalID) const;
+	const AppSignal* privateGetSignalByHash(Hash appSignalIDHash) const;
 	const AppSignal* privateAt(int index) const;
 
 private:

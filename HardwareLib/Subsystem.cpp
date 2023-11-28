@@ -18,7 +18,7 @@ namespace Hardware
 		QObject(parent),
 		m_index(index),
 		m_key(key),
-		m_subsystemId(std::move(subsystemId)),
+		m_subsystemId(subsystemId),
 		m_caption(caption)
 	{
 

@@ -54,6 +54,7 @@ private slots:
 private:
 
 	QTreeWidget* m_schemaTypesTree = nullptr;
+	QTreeWidget* m_schemaTagsTree = nullptr;
 	//QCheckBox* m_checkAddPageNumbers = nullptr;
 	QCheckBox* m_checkItemsLabels = nullptr;
 	QCheckBox* m_checkSignalsDetails = nullptr;

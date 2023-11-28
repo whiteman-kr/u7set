@@ -17,10 +17,10 @@ class FindSignalDialog : public QDialog
 	{
 	public:
 		QString findString;
-		int searchedPropertyIndex;
-		bool searchInSelected;
-		bool caseSensitive;
-		bool wholeWords;
+		int searchedPropertyIndex{};
+		bool searchInSelected{};
+		bool caseSensitive{};
+		bool wholeWords{};
 
 		bool operator==(const SearchOptions &other) const {
 			return findString == other.findString &&

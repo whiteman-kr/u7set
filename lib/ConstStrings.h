@@ -354,6 +354,7 @@ namespace CfgFileId
 	inline const QString ACQUIRED_APP_SIGNALS("ACQUIRED_APP_SIGNALS");
 	inline const QString APP_SIGNALS_EXT("APP_SIGNALS_EXT");
 	inline const QString APP_SIGNAL_SET("APP_SIGNAL_SET");
+	inline const QString APP_SIGNALS_XML("APP_SIGNALS_XML");
 	inline const QString COMPARATOR_SET("COMPARATOR_SET");
 	inline const QString UNIT_SET("UNIT_SET");
 

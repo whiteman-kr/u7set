@@ -2,10 +2,6 @@
 #include "ui_SelectChangesetDialog.h"
 #include "CompareDialog.h"
 
-SelectChangesetDialog::SelectChangesetDialog()
-{
-	assert(false);
-}
 
 SelectChangesetDialog::SelectChangesetDialog(QString title, DbController* db, const std::vector<DbChangeset>& history, QWidget* parent) :
 	QDialog(parent),

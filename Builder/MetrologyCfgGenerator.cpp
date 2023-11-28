@@ -9,6 +9,10 @@
 
 namespace Builder
 {
+	const QString MetrologyCfgGenerator::ERR_WRONG_ELECTRIC_UNIT_SENSOR_TYPE_COMBINATION("wrong combination of ElectricUnit and SensorType");
+	const QString MetrologyCfgGenerator::ERR_WRONG_ELECTRIC_LIMITS("wrong electric limits");
+	const QString MetrologyCfgGenerator::ERR_WRONG_ENGINEERING_LIMITS("wrong engineering limits");
+
 	MetrologyCfgGenerator::MetrologyCfgGenerator(Context* context, Hardware::Software* software) :
 		SoftwareCfgGenerator(context, software),
 		m_subsystems(context->m_subsystems.get()),
@@ -261,8 +265,7 @@ namespace Builder
 		{
 			const AppSignal& signal = *s;
 
-			if (signal.isAcquired() == false ||
-				(signal.isAnalog() && signal.isInput()) == false)
+			if (signal.isAcquired() == false)
 			{
 				continue;
 			}
@@ -270,6 +273,7 @@ namespace Builder
 			if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_UNIT) == true)
 			{
 				bool testResult = true;
+				QString err;
 
 				E::ElectricUnit electricUnit = signal.electricUnit();
 
@@ -279,27 +283,27 @@ namespace Builder
 						break;
 
 					case E::ElectricUnit::mA:
-						testResult = testElectricLimit_Input_mA(signal);
+						testResult = testElectricLimit_Input_mA(signal, &err);
 						break;
 
 					case E::ElectricUnit::mV:
-						testResult = testElectricLimit_Input_mV(signal);
+						testResult = testElectricLimit_Input_mV(signal, &err);
 						break;
 
 					case E::ElectricUnit::Ohm:
-						testResult = testElectricLimit_Input_Ohm(signal);
+						testResult = testElectricLimit_Input_Ohm(signal, &err);
 						break;
 
 					case E::ElectricUnit::V:
-						testResult = testElectricLimit_Input_V(signal);
+						testResult = testElectricLimit_Input_V(signal, &err);
 						break;
 
 					case E::ElectricUnit::uA:
-						testResult = testElectricLimit_Input_uA(signal);
+						testResult = testElectricLimit_Input_uA(signal, &err);
 						break;
 
 					case E::ElectricUnit::Hz:
-						testResult = testElectricLimit_Input_Hz(signal);
+						testResult = testElectricLimit_Input_Hz(signal, &err);
 						break;
 
 					default:
@@ -308,10 +312,12 @@ namespace Builder
 														arg(signal.appSignalID()));
 				}
 
-				if (testResult == false)
+				if (testResult == false && err.isEmpty() == false)
 				{
-					LOG_INTERNAL_ERROR_MSG(m_log, QString("Metrology parameters checking error of signal %1.").
-												arg(signal.appSignalID()));
+					//  Metrology parameters checking error of signal %1: %2
+					//
+					m_log->errEQP6123(signal.appSignalID(), err);
+
 					result = false;
 					continue;
 				}
@@ -419,15 +425,14 @@ namespace Builder
 
 	bool MetrologyCfgGenerator::testElectricLimit(const AppSignal& signal, double lowLimit, double highLimit)
 	{
-		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false || signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
+		static const QStringList requiredProps =
 		{
-			return false;
-		}
+			AppSignalPropNames::ELECTRIC_LOW_LIMIT,
+			AppSignalPropNames::ELECTRIC_HIGH_LIMIT,
+			AppSignalPropNames::ELECTRIC_UNIT
+		};
 
-		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_UNIT) == false)
-		{
-			return false;
-		}
+		RETURN_IF_FALSE(checkRequiredProperties(signal, requiredProps));
 
 		if (signal.electricLowLimit() < lowLimit || signal.electricLowLimit() > highLimit)
 		{
@@ -454,20 +459,16 @@ namespace Builder
 
 	bool MetrologyCfgGenerator::testEngineeringLimit(const AppSignal& signal, double lowLimit, double highLimit)
 	{
-		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false || signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
+		static const QStringList requiredProps =
 		{
-			return false;
-		}
+			AppSignalPropNames::ELECTRIC_LOW_LIMIT,
+			AppSignalPropNames::ELECTRIC_HIGH_LIMIT,
+			AppSignalPropNames::ELECTRIC_UNIT,
+			AppSignalPropNames::LOW_ENGINEERING_UNITS,
+			AppSignalPropNames::HIGH_ENGINEERING_UNITS
+		};
 
-		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_UNIT) == false)
-		{
-			return false;
-		}
-
-		if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false || signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
-		{
-			return false;
-		}
+		RETURN_IF_FALSE(checkRequiredProperties(signal, requiredProps));
 
 		UnitsConverter uc;
 
@@ -518,28 +519,21 @@ namespace Builder
 		return true;
 	}
 
-	bool MetrologyCfgGenerator::testElectricLimit_Input_mA(const AppSignal& signal)
+	bool MetrologyCfgGenerator::testElectricLimit_Input_mA(const AppSignal& signal, QString* err)
 	{
-		if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false || signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
+		TEST_PTR_RETURN_FALSE(err);
+		Q_ASSERT(signal.electricUnit() == E::ElectricUnit::mA);
+
+		if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false ||
+			signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
 		{
 			return true;
 		}
 
-		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false || signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false ||
+			signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
 		{
 			return true;
-		}
-
-		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_UNIT) == false)
-		{
-			return true;
-		}
-		else
-		{
-			if (signal.electricUnit() != E::ElectricUnit::mA)
-			{
-				return false;
-			}
 		}
 
 		if (signal.isSpecPropExists(AppSignalPropNames::SENSOR_TYPE) == false)
@@ -547,15 +541,10 @@ namespace Builder
 			return true;
 		}
 
-/*        if (signal.sensorType() != E::SensorType::V_0_5 &&
-            signal.sensorType() != E::SensorType::V_m10_p10 &&
-            signal.sensorType() != E::SensorType::NoSensor)
+		if (signal.sensorType() == E::SensorType::NoSensor)
         {
-			// Signal %1 has wrong SensorType %2.
-			//
-			m_log->errEQP6102(signal.appSignalID(), signal.sensorType());
-            return false;
-		}*/
+			return true;
+		}
 
 		if (signal.isSpecPropExists(AppSignalPropNames::RLOAD_OHM) == false)
 		{
@@ -576,6 +565,7 @@ namespace Builder
 
 		if(electricLimit.isValid() == false)
 		{
+			*err = ERR_WRONG_ELECTRIC_UNIT_SENSOR_TYPE_COMBINATION;
 			return false;
 		}
 
@@ -584,20 +574,26 @@ namespace Builder
 
 		if (testElectricLimit(signal, lowLimit, highLimit) == false)
 		{
+			*err = ERR_WRONG_ELECTRIC_LIMITS;
 			return false;
 		}
 
 		return true;
 	}
 
-	bool MetrologyCfgGenerator::testElectricLimit_Input_mV(const AppSignal& signal)
+	bool MetrologyCfgGenerator::testElectricLimit_Input_mV(const AppSignal& signal, QString* err)
 	{
-		if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false || signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
+		TEST_PTR_RETURN_FALSE(err);
+		Q_ASSERT(signal.electricUnit() == E::ElectricUnit::mV);
+
+		if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false ||
+			signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
 		{
 			return true;
 		}
 
-		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false || signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false ||
+			signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
 		{
 			return true;
 		}
@@ -605,13 +601,6 @@ namespace Builder
 		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_UNIT) == false)
 		{
 			return true;
-		}
-		else
-		{
-			if (signal.electricUnit() != E::ElectricUnit::mV)
-			{
-				return false;
-			}
 		}
 
 		if (signal.isSpecPropExists(AppSignalPropNames::SENSOR_TYPE) == false)
@@ -624,30 +613,38 @@ namespace Builder
 		SignalElectricLimit electricLimit = uc.getElectricLimit(signal.electricUnit(), signal.sensorType());
 		if(electricLimit.isValid() == false)
 		{
+			*err = ERR_WRONG_ELECTRIC_UNIT_SENSOR_TYPE_COMBINATION;
 			return false;
 		}
 
 		if (testElectricLimit(signal, electricLimit.lowLimit, electricLimit.highLimit) == false)
 		{
+			*err = ERR_WRONG_ELECTRIC_LIMITS;
 			return false;
 		}
 
 		if (testEngineeringLimit(signal, electricLimit.lowLimit, electricLimit.highLimit) == false)
 		{
+			*err = ERR_WRONG_ENGINEERING_LIMITS;
 			return false;
 		}
 
 		return true;
 	}
 
-	bool MetrologyCfgGenerator::testElectricLimit_Input_Ohm(const AppSignal& signal)
+	bool MetrologyCfgGenerator::testElectricLimit_Input_Ohm(const AppSignal& signal, QString* err)
 	{
-		if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false || signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
+		TEST_PTR_RETURN_FALSE(err);
+		Q_ASSERT(signal.electricUnit() == E::ElectricUnit::Ohm);
+
+		if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false ||
+			signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
 		{
 			return true;
 		}
 
-		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false || signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false ||
+			signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
 		{
 			return true;
 		}
@@ -655,13 +652,6 @@ namespace Builder
 		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_UNIT) == false)
 		{
 			return true;
-		}
-		else
-		{
-			if (signal.electricUnit() != E::ElectricUnit::Ohm)
-			{
-				return false;
-			}
 		}
 
 		if (signal.isSpecPropExists(AppSignalPropNames::SENSOR_TYPE) == false)
@@ -688,6 +678,7 @@ namespace Builder
 
 		if(electricLimit.isValid() == false)
 		{
+			*err = ERR_WRONG_ELECTRIC_UNIT_SENSOR_TYPE_COMBINATION;
 			return false;
 		}
 
@@ -702,25 +693,32 @@ namespace Builder
 
 		if (testElectricLimit(signal, lowLimit, highLimit) == false)
 		{
+			*err = ERR_WRONG_ELECTRIC_LIMITS;
 			return false;
 		}
 
 		if (testEngineeringLimit(signal, lowLimit, highLimit) == false)
 		{
+			*err = ERR_WRONG_ENGINEERING_LIMITS;
 			return false;
 		}
 
 		return true;
 	}
 
-	bool MetrologyCfgGenerator::testElectricLimit_Input_V(const AppSignal& signal)
+	bool MetrologyCfgGenerator::testElectricLimit_Input_V(const AppSignal& signal, QString* err)
 	{
-		if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false || signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
+		TEST_PTR_RETURN_FALSE(err);
+		Q_ASSERT(signal.electricUnit() == E::ElectricUnit::V);
+
+		if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false ||
+			signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
 		{
 			return true;
 		}
 
-		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false || signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false ||
+			signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
 		{
 			return true;
 		}
@@ -728,13 +726,6 @@ namespace Builder
 		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_UNIT) == false)
 		{
 			return true;
-		}
-		else
-		{
-			if (signal.electricUnit() != E::ElectricUnit::V)
-			{
-				return false;
-			}
 		}
 
 		if (signal.isSpecPropExists(AppSignalPropNames::SENSOR_TYPE) == false)
@@ -758,25 +749,32 @@ namespace Builder
 		SignalElectricLimit electricLimit = uc.getElectricLimit(signal.electricUnit(), signal.sensorType());
 		if(electricLimit.isValid() == false)
 		{
+			*err = ERR_WRONG_ELECTRIC_UNIT_SENSOR_TYPE_COMBINATION;
 			return false;
 		}
 
 		if (testElectricLimit(signal, electricLimit.lowLimit, electricLimit.highLimit) == false)
 		{
+			*err = ERR_WRONG_ELECTRIC_LIMITS;
 			return false;
 		}
 
 		return true;
 	}
 
-	bool MetrologyCfgGenerator::testElectricLimit_Input_uA(const AppSignal& signal)
+	bool MetrologyCfgGenerator::testElectricLimit_Input_uA(const AppSignal& signal, QString* err)
 	{
-		if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false || signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
+		TEST_PTR_RETURN_FALSE(err);
+		Q_ASSERT(signal.electricUnit() == E::ElectricUnit::uA);
+
+		if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false ||
+			signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
 		{
 			return true;
 		}
 
-		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false || signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false ||
+			signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
 		{
 			return true;
 		}
@@ -784,13 +782,6 @@ namespace Builder
 		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_UNIT) == false)
 		{
 			return true;
-		}
-		else
-		{
-			if (signal.electricUnit() != E::ElectricUnit::uA)
-			{
-				return false;
-			}
 		}
 
 		if (signal.isSpecPropExists(AppSignalPropNames::SENSOR_TYPE) == false)
@@ -813,27 +804,32 @@ namespace Builder
 		SignalElectricLimit electricLimit = uc.getElectricLimit(signal.electricUnit(), signal.sensorType());
 		if(electricLimit.isValid() == false)
 		{
+			*err = ERR_WRONG_ELECTRIC_UNIT_SENSOR_TYPE_COMBINATION;
 			return false;
 		}
 
 		if (testElectricLimit(signal, electricLimit.lowLimit, electricLimit.highLimit) == false)
 		{
+			*err = ERR_WRONG_ELECTRIC_LIMITS;
 			return false;
 		}
 
 		return true;
 	}
 
-	bool MetrologyCfgGenerator::testElectricLimit_Input_Hz(const AppSignal& signal)
+	bool MetrologyCfgGenerator::testElectricLimit_Input_Hz(const AppSignal& signal, QString* err)
 	{
+		TEST_PTR_RETURN_FALSE(err);
 		Q_ASSERT(signal.electricUnit() == E::ElectricUnit::Hz);
 
-		if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false || signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false ||
+			signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
 		{
 			return true;
 		}
 
-		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false || signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
+		if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false ||
+			signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
 		{
 			return true;
 		}
@@ -856,16 +852,38 @@ namespace Builder
 		SignalElectricLimit electricLimit = uc.getElectricLimit(signal.electricUnit(), signal.sensorType());
 		if(electricLimit.isValid() == false)
 		{
+			*err = ERR_WRONG_ELECTRIC_UNIT_SENSOR_TYPE_COMBINATION;
 			return false;
 		}
 
 		if (testElectricLimit(signal, electricLimit.lowLimit, electricLimit.highLimit) == false)
 		{
+			*err = ERR_WRONG_ELECTRIC_LIMITS;
 			return false;
 		}
 
 		return true;
 	}
+
+	bool MetrologyCfgGenerator::checkRequiredProperties(const AppSignal& signal, const QStringList& propNames) const
+	{
+		bool result = true;
+
+		for(const QString& propName : propNames)
+		{
+			if (signal.isSpecPropExists(propName) == false)
+			{
+				// Specific property %1 is not exists in signal %2
+				//
+				m_log->errALC5176(signal.appSignalID(), propName);
+
+				result = false;
+			}
+		}
+
+		return result;
+	}
+
 }
 
 

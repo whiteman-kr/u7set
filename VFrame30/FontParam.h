@@ -15,6 +15,9 @@
 		bool get##propname##Italic() const; \
 		void set##propname##Italic(bool value);
 
+// Underline is not supported as a property yet, we use use it primary for indicating inverted signal. 
+// But in future there are no obstacles to use it as a property
+
 
 #define IMPLEMENT_FONT_PROPERTIES(classname, propname, varname) \
 	\
@@ -47,7 +50,7 @@ namespace VFrame30
 	{
 	public:
 		FontParam();
-		FontParam(const QString& name, double drawSize, bool bold, bool italic);
+		FontParam(const QString& name, double drawSize, bool bold, bool italic, bool underline = false);
 
 		bool operator==(const FontParam&) const = default;
 
@@ -79,6 +82,9 @@ namespace VFrame30
 		bool italic() const;
 		void setItalic(bool value);
 
+		bool underline() const;
+		void setUnderline(bool value);
+
 		// Data
 		//
 	private:
@@ -86,6 +92,7 @@ namespace VFrame30
 		double m_size = 0;
 		bool m_bold = false;
 		bool m_italic = false;
+		bool m_underline = false;
 	};
 }
 

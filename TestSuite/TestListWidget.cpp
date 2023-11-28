@@ -217,8 +217,9 @@ void TestTreeWidget::keyReleaseEvent(QKeyEvent* event)
 	QTreeWidget::keyReleaseEvent(event);
 }
 
-TestListWidget::TestListWidget(TestSuiteLogFile& appLog, TestSuite::ConfigSettings& configuration, const TestSuite::TestScriptsStorage& tests, QWidget* parent) :
+TestListWidget::TestListWidget(const TestSuite::TestSuite& testSuite, TestSuiteLogFile& appLog, TestSuite::ConfigSettings& configuration, const TestSuite::TestScriptsStorage& tests, QWidget* parent) :
 	QWidget(parent),
+	m_testSuite(testSuite),
 	m_appLog(appLog),
 	m_configuration(configuration),
 	m_tests(tests)
@@ -287,7 +288,21 @@ void TestListWidget::fillTestsTree()
 {
 	// Remember all previous top-level item states and their expand/check status
 	//
-	std::map<QString, bool> prevItemsStates; // Key is item name, value is "expanded" for file items, "checked" for test items
+
+	struct PrevItemState
+	{
+		PrevItemState() = default;
+		explicit PrevItemState(TestTreeWidgetItem* item):
+			expanded(item->isExpanded()),
+			checked(item->checkState(0) == Qt::Checked)
+		{
+		}
+
+		bool expanded{false};
+		bool checked{false};
+	};
+
+	std::map<QString, PrevItemState> prevItemsStates; // Key is item name, value previous state
 
 	int count = m_treeWidget->topLevelItemCount();
 	for (int i = 0; i < count; i++)
@@ -301,7 +316,7 @@ void TestListWidget::fillTestsTree()
 
 		// Remebmber if parent item is expanded
 		//
-		prevItemsStates[parentItem->fileName()] = parentItem->isExpanded();
+		prevItemsStates[parentItem->fileName()] = PrevItemState(parentItem);
 
 		// Remember if child items are checked
 		//
@@ -315,7 +330,7 @@ void TestListWidget::fillTestsTree()
 				return;
 			}
 
-			prevItemsStates[childItem->fileName() + childItem->function()] = childItem->checkState(0) == Qt::Checked;
+			prevItemsStates[childItem->fileName() + childItem->function()] = PrevItemState(childItem);
 		}
 	}
 
@@ -374,12 +389,12 @@ void TestListWidget::fillTestsTree()
 
 		for (const QString& function : scriptInfo.testsList)
 		{
-			if (function.contains(filterText) == false)
+			QString functionCaption = scriptInfo.testCaption(function);
+
+			if (functionCaption.contains(filterText) == false)
 			{
 				continue;
 			}
-
-			QString functionCaption = scriptInfo.testCaption(function);
 
 			TestTreeWidgetItem* funcItem = new TestTreeWidgetItem(functionCaption);
 			funcItem->setFileName(scriptInfo.fileName);
@@ -398,8 +413,11 @@ void TestListWidget::fillTestsTree()
 				// If this function is from existing file - check it if it was selected earlier
 				//
 				auto prevFuncItemIt = prevItemsStates.find(scriptInfo.fileName + function);
-				funcItem->setCheckState(0, prevFuncItemIt != prevItemsStates.end() && prevFuncItemIt->second == true ? Qt::Checked : Qt::Unchecked);
+				funcItem->setCheckState(0, prevFuncItemIt != prevItemsStates.end() && prevFuncItemIt->second.checked == true ? Qt::Checked : Qt::Unchecked);
 			}
+
+			funcItem->setPermission(m_testSuite.scriptPermission(scriptInfo.fileName) && m_testSuite.globalPermission());
+			funcItem->updatePermissionState(Columns::Status, m_selectionEnabled);
 		}
 
 		if (scriptItem->childCount() == 0)
@@ -410,13 +428,9 @@ void TestListWidget::fillTestsTree()
 
 		m_treeWidget->addTopLevelItem(scriptItem);
 		scriptItem->setParentItemCheckState();
-		scriptItem->setExpanded(prevScriptItemIt != prevItemsStates.end() && prevScriptItemIt->second == true);
+		scriptItem->setExpanded(prevScriptItemIt != prevItemsStates.end() && prevScriptItemIt->second.expanded == true);
 
-		// After creating an item, set initial permission state. If script contains permission functions,
-		// starting the script is initially denied. Otherwise, it is allowed.
-		//
-		bool hasPermissionFunctions = scriptInfo.globalAllowFunction.isEmpty() == false || scriptInfo.allowFunction.isEmpty() == false;
-		scriptItem->setPermission(hasPermissionFunctions ? false : true);
+		scriptItem->setPermission(m_testSuite.scriptPermission(scriptInfo.fileName) && m_testSuite.globalPermission());
 		scriptItem->updatePermissionState(Columns::Status, m_selectionEnabled);
 	}
 
@@ -552,6 +566,40 @@ void TestListWidget::onScriptPermissionChanged(QString scriptFileName, bool perm
 			parentItem->setParentItemCheckState();
 			break;
 		}			
+	}
+		
+	m_treeWidget->blockSignals(false);
+	
+	emit testSelectionChanged();
+	return;
+}
+
+void TestListWidget::onNoPermissionsExist()
+{
+	m_treeWidget->blockSignals(true);
+
+	int count = m_treeWidget->topLevelItemCount();
+	for (int i = 0; i < count; i++)
+	{
+		TestTreeWidgetItem* parentItem = dynamic_cast<TestTreeWidgetItem*>(m_treeWidget->topLevelItem(i));
+		if (parentItem == nullptr)
+		{
+			Q_ASSERT(parentItem);
+			continue;
+		}
+
+		parentItem->setPermission(true);
+		parentItem->updatePermissionState(Columns::Status, m_selectionEnabled);
+
+		int childCount = parentItem->childCount();
+		for (int c = 0; c < childCount; c++)
+		{
+			TestTreeWidgetItem* childItem = dynamic_cast<TestTreeWidgetItem*>(parentItem->child(c));
+			childItem->setPermission(true);
+			childItem->updatePermissionState(Columns::Status, m_selectionEnabled);
+		}
+
+		parentItem->setParentItemCheckState();
 	}
 		
 	m_treeWidget->blockSignals(false);

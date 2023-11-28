@@ -36,9 +36,9 @@ namespace Log
 
 	struct LogFileRecord
 	{
-		quint64 sessionHash;
-		qint64 time;			// msecs from 1970-01-01
-		MessageType type;
+		quint64 sessionHash{};
+		qint64 time{};			// msecs from 1970-01-01
+		MessageType type = MessageType::Error;
 		std::string text;
 
 		QString toString(const QString& sessionHashString) const;

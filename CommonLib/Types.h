@@ -972,6 +972,10 @@ const int	SIZE_2WORD = 2;
 const int	CHANNEL_1 = 0;
 const int	CHANNEL_2 = 1;
 const int	CHANNEL_3 = 2;
+const int	CHANNEL_4 = 3;
+
+const int	MIN_CHANNEL_COUNT = 1;
+const int	MAX_CHANNEL_COUNT = static_cast<int>(E::values<E::Channel>().size());
 
 // SchemaUnit
 //

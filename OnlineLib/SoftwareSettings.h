@@ -184,7 +184,7 @@ public:
 	struct ClientInfo
 	{
 		QString equipmentID;
-		E::SoftwareType softwareType;
+		E::SoftwareType softwareType = E::SoftwareType::Unknown;
 		QString hostname;
 	};
 

@@ -54,9 +54,9 @@ DialogWriteValues::DialogWriteValues(const std::vector<AppSignalParam>& params,
 									 E::AnalogFormat analogFormat,
 									 QWidget* parent):
 	QDialog(parent),
-	m_params(std::move(params)),
-	m_oldValues(std::move(oldValues)),
-	m_newValues(std::move(newValues)),
+	m_params(params),
+	m_oldValues(oldValues),
+	m_newValues(newValues),
 	m_analogFormat(analogFormat)
 {
 	if (m_params.size() != m_oldValues.size() || m_params.size() != m_newValues.size())

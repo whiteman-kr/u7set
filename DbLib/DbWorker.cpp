@@ -426,6 +426,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0401.sql", "Upgrade to version 401, InvertSignal property bug fix"},
 	{":/DatabaseUpgrade/Upgrade0402.sql", "Upgrade to version 402, Fixed AFB Limiter attribute HasRAM (set to false)"},
 	{":/DatabaseUpgrade/Upgrade0403.sql", "Upgrade to version 403, In AOM-4PH validity signals link was removed from output signals"},
+	{":/DatabaseUpgrade/Upgrade0404.sql", "Upgrade to version 404, Review module certifications (AIM, AOM), FIM and AIFM removed, FSC Chassis fix"},
 };
 
 int DbWorker::counter = 0;
@@ -728,23 +729,27 @@ void DbWorker::slot_getProjectList(std::vector<DbProject>* out)
 		db.close();
 	}
 
-	// Open each project and get it's version
-	//
-	for (auto pi = out->begin(); pi != out->end(); ++pi)
+	QElapsedTimer et;
+	et.start();
+	double oneProjectProgress = 100.0 / out->size();
+	double progress = 0.0;
+	m_progress->setValue(static_cast<int>(progress));
+
+	auto getProjectVersionFunc = [this, oneProjectProgress, &progress](DbProject* project, int instanceNo) -> bool
 	{
-		QString projectDatabaseConnectionName = QString("%1_%2 connection").arg(m_instanceNo).arg(pi->projectName());
+		Q_ASSERT(project);
+
+		QString projectDatabaseConnectionName = QString("%1_%2 connection").arg(instanceNo).arg(project->projectName());
 
 		std::shared_ptr<int*> removeDatabase(nullptr, [projectDatabaseConnectionName](void*)
-			{
-				QSqlDatabase::removeDatabase(projectDatabaseConnectionName);		// remove database
-			});
+											 {
+												 QSqlDatabase::removeDatabase(projectDatabaseConnectionName); // remove database
+											 });
 
-		// --
-		//
 		QSqlDatabase projectDb = QSqlDatabase::addDatabase("QPSQL", projectDatabaseConnectionName);
 		projectDb.setHostName(host());
 		projectDb.setPort(port());
-		projectDb.setDatabaseName(pi->databaseName());
+		projectDb.setDatabaseName(project->databaseName());
 		projectDb.setUserName(serverUsername());
 		projectDb.setPassword(serverPassword());
 
@@ -752,7 +757,10 @@ void DbWorker::slot_getProjectList(std::vector<DbProject>* out)
 		if (result == false)
 		{
 			emitError(projectDb, projectDb.lastError());
-			continue;
+
+			progress += oneProjectProgress;
+			m_progress->setValue(static_cast<int>(progress));
+			return false;
 		}
 
 		// Get project version, scope is for versionQuery
@@ -777,12 +785,12 @@ void DbWorker::slot_getProjectList(std::vector<DbProject>* out)
 				}
 			}
 
-			pi->setVersion(projectVersion);
+			project->setVersion(projectVersion);
 		}
 
 		// From this version ProjectProperties table is added, so it is possible to request propertyes
 		//
-		if (pi->version() >= 41)
+		if (project->version() >= 41)
 		{
 			QString getProjectDescriptionSql = QString("SELECT Value FROM ProjectProperties WHERE Name = 'Description';");
 
@@ -803,13 +811,38 @@ void DbWorker::slot_getProjectList(std::vector<DbProject>* out)
 				}
 			}
 
-			pi->setDescription(projectDescription);
+			project->setDescription(projectDescription);
 		}
+
+		qDebug() << "DbWorker::slot_getProjectList(): project: " << project->projectName() << ", version: " << project->version();
 
 		// --
 		//
 		projectDb.close();
+
+		progress += oneProjectProgress;
+		m_progress->setValue(static_cast<int>(progress));
+		return true;
+	};
+
+	// Open each project and get it's version
+	//
+	std::vector<QFuture<bool>> futures;
+	futures.reserve(out->size());
+
+	size_t index = m_instanceNo * 1000;
+	for (auto& project : *out)
+	{
+		auto f = QtConcurrent::run(getProjectVersionFunc, &project, index++);
+		futures.emplace_back(std::move(f));
 	}
+
+	for (const auto& f : futures)
+	{
+		std::ignore = f.result();
+	}
+
+	qDebug() << "DbWorker::slot_getProjectList(): Get project list time:" << et.elapsed() << "ms" << ", projects: " << out->size();
 
 	return;
 }

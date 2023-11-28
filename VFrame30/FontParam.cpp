@@ -7,11 +7,12 @@ namespace VFrame30
 	{
 	}
 
-	FontParam::FontParam(const QString& name, double drawSize, bool bold, bool italic) :
+	FontParam::FontParam(const QString& name, double drawSize, bool bold, bool italic, bool underline /*= false*/) :
 		m_name(name),
 		m_size(drawSize),
 		m_bold(bold),
-		m_italic(italic)
+		m_italic(italic),
+		m_underline(underline)
 	{
 	}
 
@@ -22,18 +23,20 @@ namespace VFrame30
 		message->set_size(m_size);
 		message->set_bold(m_bold);
 		message->set_italic(m_italic);
+		message->set_underline(m_underline);
 		return true;
 	}
 
 	FontParam::operator QString() const
 	{
-		return QString{"FontParam{name: %1, size(in): %2, size(px): %3, drawSize: %4, bold: %5, italic: %6}"}
+		return QString{"FontParam{name: %1, size(in): %2, size(px): %3, drawSize: %4, bold: %5, italic: %6, underline: %7}"}
 				.arg(name())
 				.arg(size(SchemaUnit::Inch))
 				.arg(size(SchemaUnit::Display))
 				.arg(drawSize())
 				.arg(bold())
-				.arg(italic());
+				.arg(italic())
+				.arg(underline());
 	}
 
 	bool FontParam::LoadData(const Proto::FontParam& message)
@@ -50,6 +53,7 @@ namespace VFrame30
 		m_size = message.size();
 		m_bold = message.bold();
 		m_italic = message.italic();
+		m_underline = message.underline();
 		return true;
 	}
 
@@ -59,6 +63,7 @@ namespace VFrame30
 
 		f.setBold(m_bold);
 		f.setItalic(m_italic);
+		f.setUnderline(m_underline);
 
 		if (unit == SchemaUnit::Display)
 		{
@@ -139,4 +144,13 @@ namespace VFrame30
 		m_italic = value;
 	}
 
+	bool FontParam::underline() const
+	{
+		return m_underline;
+	}
+
+	void FontParam::setUnderline(bool value)
+	{
+		m_underline = value;
+	}
 }

@@ -11,17 +11,14 @@ namespace TestSuite
 		m_testControl{appLog, &m_testLog},
 		m_runControl{appLog, &m_testLog}
 	{
-		connect(&m_testControl, &TestControl::testStarted, [this](QString scriptFileName, QString testFunction){
-			emit testStarted(scriptFileName, testFunction);
-		});
-		connect(&m_testControl, &TestControl::testFinished, [this](QString scriptFileName, QString testFunction, bool result){
-			emit testFinished(scriptFileName, testFunction, result);
-		});
+		connect(&m_testControl, &TestControl::testStarted, this, &TestSuite::testStarted);
+		connect(&m_testControl, &TestControl::testFinished, this, &TestSuite::testFinished);
 
 		connect(&m_testControl, &TestControl::finished, this, &TestSuite::finished);
 
 		connect(&m_runControl, &RunControl::scriptPermissionChanged, this, &TestSuite::scriptPermissionChanged);
 		connect(&m_runControl, &RunControl::globalPermissionChanged, this, &TestSuite::globalPermissionChanged);
+		connect(&m_runControl, &RunControl::noPermissionsExist, this, &TestSuite::noPermissionsExist);
 
 		return;
 	}
@@ -98,5 +95,15 @@ namespace TestSuite
 	ControlStatus TestSuite::runStatus() const
 	{
 		return m_runControl.status();
+	}
+
+	bool TestSuite::scriptPermission(const QString& fileName) const
+	{
+		return m_runControl.scriptPermission(fileName);
+	}
+
+	bool TestSuite::globalPermission() const
+	{
+		return m_runControl.globalPermission();
 	}
 }

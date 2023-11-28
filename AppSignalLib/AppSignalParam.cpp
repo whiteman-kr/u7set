@@ -388,13 +388,24 @@ void AppSignalParam::setEnableTuning(bool value)
 
 bool AppSignalParam::isEndpoint() const
 {
-	return m_data->m_isEndpoint;
+	return m_data->m_endpoint;
 }
 
 void AppSignalParam::setEndpoint(bool value)
 {
 	detach();
-	m_data->m_isEndpoint = value;
+	m_data->m_endpoint = value;
+}
+
+bool AppSignalParam::isInverted() const
+{
+	return m_data->m_inverted;
+}
+
+void AppSignalParam::setInverted(bool value)
+{
+	detach();
+	m_data->m_inverted = value;
 }
 
 TuningValue AppSignalParam::tuningDefaultValue() const
@@ -539,7 +550,8 @@ void AppSignalParam::PrivateData::load(const AppSignal& s)
 	m_filteringTime = s.filteringTime();
 	m_spreadTolerance = s.spreadTolerance();
 	m_enableTuning = s.enableTuning();
-	m_isEndpoint = s.isEndpoint();
+	m_endpoint = s.isEndpoint();
+	m_inverted = s.invertSignal();
 
 	m_tuningDefaultValue = s.tuningDefaultValue();
 	m_tuningLowBound = s.tuningLowBound();
@@ -586,14 +598,17 @@ void AppSignalParam::PrivateData::save(::Proto::AppSignal* message) const
 	message->set_specpropstruct(m_specPropStruct.toStdString());
 	message->set_specpropvalues(m_specPropValues.constData(), m_specPropValues.size());
 
+	message->set_invertsignal(m_inverted);
+
 	// Signal properties calculated in compile-time
 
 	Proto::AppSignalCalculatedParam* calcParam = message->mutable_calcparam();
 
 	if (calcParam != nullptr)
 	{
-		calcParam->set_isendpoint(m_isEndpoint);
+		calcParam->set_isendpoint(m_endpoint);
 	}
+
 
 	// Tags
 	//

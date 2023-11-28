@@ -1285,7 +1285,7 @@ QModelIndexList EquipmentModel::findObjects(const QModelIndex& findStartIndex, i
 	//
 	if (level == equipmentIdFragments.size())
 	{
-		for (auto mi : foundIndexes)
+		for (const auto& mi : foundIndexes)
 		{
 			if (canFetchMore(mi) == true)
 			{

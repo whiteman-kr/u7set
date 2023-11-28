@@ -40,52 +40,97 @@ private:
 																E::PropertyBehaviourType::Write);
 };
 
-struct AppSignalPropertyDescription
+class AppSignalPropertyDescription
 {
-	inline static const int NON_SPECIFIC_PROP_HASH = 0;
-
+public:
 	AppSignalPropertyDescription();
+
+	// non enum property constructor
+	//
 	AppSignalPropertyDescription(const QString& propName,
-								 QMetaType::Type propType,
-								 std::function<QVariant (const AppSignal*)> getter,
-								 std::function<void (AppSignal*, const QVariant&)> setter,
-								 Hash specPropStructHash,
-								 const std::map<int, QString>& propEnumValues);
+								QMetaType::Type propType,
+								bool isSpecificProperty,
+								std::function<QVariant (const AppSignal*)> getter,
+								std::function<void (AppSignal*, const QVariant&)> setter);
 
-	bool specificProperty = false;
-	QString name;
-	QMetaType::Type type = QMetaType::UnknownType;
-	
-	std::function<QVariant (const AppSignal*)> valueGetter;
-	std::function<void (AppSignal*, const QVariant&)> valueSetter;
-
+	// enum property constructor
 	//
+	AppSignalPropertyDescription(const QString& propName,
+								QMetaType::Type propType,
+								bool isSpecificProperty,
+								std::function<QVariant (const AppSignal*)> getter,
+								std::function<void (AppSignal*, const QVariant&)> setter,
+								Hash specPropStructHash,
+								const std::map<int, QString>& propEnumValues);
 
-	std::map<Hash, std::map<int, QString>> enumsValues;		// specPropStructHash => enumValues
-															// due to different specPropStructs can have different sets of
-															// enum values with same property name
-															// for example property 'SensorType'
+	void initNonEnumProp(const QString& propName,
+						QMetaType::Type propType,
+						bool isSpecificProperty,
+						std::function<QVariant (const AppSignal*)> getter,
+						std::function<void (AppSignal*, const QVariant&)> setter);
 
-	std::set<int> signalsWithThisProperty;					// set of Signal.ID
 
-	//
-
-	AppSignalPropertyBehavior behaviour;
-
-	//
+	void initEnumProp(const QString& propName,
+						QMetaType::Type propType,
+						bool isSpecificProperty,
+						std::function<QVariant (const AppSignal*)> getter,
+						std::function<void (AppSignal*, const QVariant&)> setter,
+						Hash specPropStructHash,
+						const std::map<int, QString>& propEnumValues);
 
 	bool isValid() const;
+	bool isSpecificProperty() const;
+	bool isEnumProperty() const;
+
+	const QString& name() const;
+	QMetaType::Type type() const;
+
+	E::PropertyBehaviourType getBehaviour(E::SignalType signalType, E::SignalInOutType inOutType) const;
+	E::PropertyBehaviourType getBehaviour(const AppSignal& s) const;
+	bool dependsOnPrecision() const;
+	void clearBehaviour();
+	void setBehaviour(const AppSignalPropertyBehavior& bh);
 
 	void setEnumValues(Hash specPropStructHash, const std::vector<std::pair<int, QString>>& enumValuesVector);
 	void checkEnumValues(Hash specPropStructHash, const std::vector<std::pair<int, QString>>& enumValuesVector);
 	bool getEnumValuesVector(Hash specPropStructHash, std::vector<std::pair<int, QString>>* enumValuesVector) const;
-
-	bool isEnumProperty() const;
 	QString getEnumValueStr(Hash specPropStructHash, int enumValue) const;
 
 	void appendSignalID(int signalID);
 	bool isSignalHaveProperty(int signalID) const;
-	bool isSpecificProperty() const;
+
+	std::function<QVariant (const AppSignal*)> getter() const;
+	std::function<void (AppSignal*, const QVariant&)> setter();
+
+private:
+	void init(const QString& propName,
+			  QMetaType::Type propType,
+			  bool isSpecificProperty,
+			  std::function<QVariant (const AppSignal*)> getter,
+			  std::function<void (AppSignal*, const QVariant&)> setter,
+			  bool isEnum,
+			  Hash specPropStructHash,
+			  const std::map<int, QString>& propEnumValues);
+
+private:
+	QString m_name;
+	QMetaType::Type m_type = QMetaType::UnknownType;
+
+	bool m_isSpecProp = false;
+
+	std::function<QVariant (const AppSignal*)> m_valueGetter;
+	std::function<void (AppSignal*, const QVariant&)> m_valueSetter;
+
+	bool m_isEnumProp = false;
+
+	std::map<Hash, std::map<int, QString>> m_enumsValues;		// specPropStructHash => enumValues
+																// due to different specPropStructs can have different sets of
+																// enum values with same property name
+																// for example property 'SensorType'
+
+	std::set<int> m_signalsWithThisProperty;					// set of Signal.ID()
+
+	AppSignalPropertyBehavior m_behaviour;
 };
 
 class AppSignalProperties : public PropertyObject
@@ -106,6 +151,8 @@ public:
 	static const QString categoryTuning;
 	static const QString categoryExpertProperties;
 
+	inline static const int NON_SPECIFIC_PROP_HASH = 0;
+
 public:
 	explicit AppSignalProperties(const AppSignal& signal, bool savePropertyDescription = false);
 
@@ -125,6 +172,8 @@ public:
 	std::vector<AppSignalPropertyDescription> getProperties() const { return m_propertyDescription; }
 
 	bool isNonSpecificPropertyExists(const QString& propertyName) const;
+
+	void setReadOnly(bool readOnly);
 
 	static bool isPropertyExists(const AppSignal& signal, const QString& propertyName);
 
@@ -197,22 +246,43 @@ AppSignalProperties::addPropertyDescription(const QString& name,
 {
 	static_assert(std::is_enum<TYPE>::value);
 
-	AppSignalPropertyDescription newProperty;
+	std::function<QVariant (const AppSignal*)> getterFunc = [getter](const AppSignal* s)
+															{
+																return TO_INT(getter(*s));
+															};
 
-	newProperty.name = name;
+	std::function<void (AppSignal*, const QVariant&)> setterFunc;
 
-	newProperty.enumsValues.emplace(AppSignalPropertyDescription::NON_SPECIFIC_PROP_HASH, E::enumValuesMap<TYPE>());
-	newProperty.type = QMetaType::Int;
-
-	newProperty.valueGetter = [getter](const AppSignal* s){ return TO_INT(getter(*s)); };
 	if (setter == nullptr)
 	{
-		newProperty.valueSetter = [](AppSignal*, const QVariant&){};
+		setterFunc = [](AppSignal*, const QVariant&){};
 	}
 	else
 	{
-		newProperty.valueSetter = [setter](AppSignal* s, const QVariant& v){ setter(*s, IntToEnum<TYPE>(v.toInt())); };
+		setterFunc = [setter](AppSignal* s, const QVariant& v)
+					{
+						setter(*s, IntToEnum<TYPE>(v.toInt()));
+					};
 	}
+
+	AppSignalPropertyDescription newProperty;
+
+	newProperty.initEnumProp(name, QMetaType::Int, false, getterFunc, setterFunc, NON_SPECIFIC_PROP_HASH, E::enumValuesMap<TYPE>());
+
+/*	newProperty.m_name = name;
+
+	newProperty.m_enumsValues.emplace(AppSignalPropertyDescription::NON_SPECIFIC_PROP_HASH, E::enumValuesMap<TYPE>());
+	newProperty.m_type = QMetaType::Int;
+
+	newProperty.m_valueGetter = [getter](const AppSignal* s){ return TO_INT(getter(*s)); };
+	if (setter == nullptr)
+	{
+		newProperty.m_valueSetter = [](AppSignal*, const QVariant&){};
+	}
+	else
+	{
+		newProperty.m_valueSetter = [setter](AppSignal* s, const QVariant& v){ setter(*s, IntToEnum<TYPE>(v.toInt())); };
+	}*/
 
 	m_propertyDescription.push_back(newProperty);
 }
@@ -225,12 +295,37 @@ AppSignalProperties::addPropertyDescription(const QString& name,
 {
 	static_assert(std::is_enum<TYPE>::value == false);
 
+	std::function<QVariant (const AppSignal*)> getterFunc = [getter](const AppSignal* s)
+	{
+		QVariant value = QVariant::fromValue<TYPE>(getter(*s));
+		if (value.typeId() == QMetaType::QString)
+		{
+			value = QVariant::fromValue<QString>(value.toString().replace(QChar::LineFeed, QChar::Space));
+		}
+		return value;
+	};
+
+	std::function<void (AppSignal*, const QVariant&)> setterFunc;
+
+	if (setter == nullptr)
+	{
+		setterFunc = [](AppSignal*, const QVariant&){};
+	}
+	else
+	{
+		setterFunc = [setter](AppSignal* s, const QVariant& v){ setter(*s, v.value<TYPE>()); };
+	}
+
+
 	AppSignalPropertyDescription newProperty;
 
-	newProperty.name = name;
-	newProperty.type = static_cast<QMetaType::Type>(qMetaTypeId<TYPE>());
+	newProperty.initNonEnumProp(name, static_cast<QMetaType::Type>(qMetaTypeId<TYPE>()), false,
+								getterFunc, setterFunc);
 
-	newProperty.valueGetter = [getter](const AppSignal* s)
+/*	newProperty.m_name = name;
+	newProperty.m_type = static_cast<QMetaType::Type>(qMetaTypeId<TYPE>())
+
+	newProperty.m_valueGetter = [getter](const AppSignal* s)
 	{
 		QVariant value = QVariant::fromValue<TYPE>(getter(*s));
 		if (value.typeId() == QMetaType::QString)
@@ -241,12 +336,12 @@ AppSignalProperties::addPropertyDescription(const QString& name,
 	};
 	if (setter == nullptr)
 	{
-		newProperty.valueSetter = [](AppSignal*, const QVariant&){};
+		newProperty.m_valueSetter = [](AppSignal*, const QVariant&){};
 	}
 	else
 	{
-		newProperty.valueSetter = [setter](AppSignal* s, const QVariant& v){ setter(*s, v.value<TYPE>()); };
-	}
+		newProperty.m_valueSetter = [setter](AppSignal* s, const QVariant& v){ setter(*s, v.value<TYPE>()); };
+	}*/
 
 	m_propertyDescription.push_back(newProperty);
 }
@@ -257,19 +352,20 @@ AppSignalProperties::addPropertyDescription(const QString& name,
 					   std::function<TYPE (const AppSignal&)> getter,
 					   std::function<void (AppSignal&, TYPE)> setter)
 {
-	AppSignalPropertyDescription newProperty;
+	std::function<QVariant (const AppSignal*)> getterFunc = [getter](const AppSignal* s)
+															{
+																return getter(*s).toVariant();
+															};
 
-	newProperty.name = name;
-	newProperty.type = static_cast<QMetaType::Type>(qMetaTypeId<TuningValue>());
+	std::function<void (AppSignal*, const QVariant&)> setterFunc;
 
-	newProperty.valueGetter = [getter](const AppSignal* s){ return getter(*s).toVariant(); };
 	if (setter == nullptr)
 	{
-		newProperty.valueSetter = [](AppSignal*, const QVariant&){};
+		setterFunc = [](AppSignal*, const QVariant&) {};
 	}
 	else
 	{
-		newProperty.valueSetter = [getter, setter](AppSignal* s, const QVariant& v)
+		setterFunc = [getter, setter](AppSignal* s, const QVariant& v)
 		{
 			TuningValue newValue(getter(*s));
 			if (v.typeId() == QMetaType::QString)
@@ -285,6 +381,38 @@ AppSignalProperties::addPropertyDescription(const QString& name,
 			setter(*s, newValue);
 		};
 	}
+
+	AppSignalPropertyDescription newProperty;
+
+	newProperty.initNonEnumProp(name, static_cast<QMetaType::Type>(qMetaTypeId<TuningValue>()),
+								false, getterFunc, setterFunc);
+
+/*	newProperty.m_name = name;
+	newProperty.m_type = static_cast<QMetaType::Type>(qMetaTypeId<TuningValue>());
+
+	newProperty.m_valueGetter = [getter](const AppSignal* s){ return getter(*s).toVariant(); };
+	if (setter == nullptr)
+	{
+		newProperty.m_valueSetter = [](AppSignal*, const QVariant&){};
+	}
+	else
+	{
+		newProperty.m_valueSetter = [getter, setter](AppSignal* s, const QVariant& v)
+		{
+			TuningValue newValue(getter(*s));
+			if (v.typeId() == QMetaType::QString)
+			{
+				bool ok = false;
+				newValue.fromString(v.toString(), &ok);
+				assert(ok == true);
+			}
+			else
+			{
+				newValue.fromVariant(v);
+			}
+			setter(*s, newValue);
+		};
+	}*/
 
 	m_propertyDescription.push_back(newProperty);
 }

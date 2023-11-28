@@ -364,14 +364,12 @@ namespace ClientLib
 				break;
 			}
 		case ReadRequestType::SourceState:
+			if (sendWriteRequest(0) == false)
 			{
-				if (sendWriteRequest(0) == false)
-				{
-					m_lastReadRequestType = ReadRequestType::Changed;
-					requestReadChangedTuningSignals();
-				}
-				break;
+				m_lastReadRequestType = ReadRequestType::Changed;
+				requestReadChangedTuningSignals();
 			}
+			break;
 		case ReadRequestType::Changed:
 			{
 				if (sendWriteRequest(0) == false)
@@ -1160,31 +1158,51 @@ namespace ClientLib
 
 		int stateCount = m_readTuningSignalsReply.tuningsignalstate_size();
 
-		std::vector<TuningSignalState> arrivedStates;
-		arrivedStates.reserve(stateCount);
-
-		for (int i = 0; i < stateCount; i++)
+		if (stateCount > 0)
 		{
-			const ::Network::TuningSignalState& stateMessage = m_readTuningSignalsReply.tuningsignalstate(i);
+			std::vector<TuningSignalState> arrivedStates;
+			arrivedStates.reserve(stateCount);
 
-			if (processTuningSignalStateMessage(stateMessage, arrivedStates) == false)
+			for (int i = 0; i < stateCount; i++)
 			{
-				continue;
+				const ::Network::TuningSignalState& stateMessage = m_readTuningSignalsReply.tuningsignalstate(i);
+
+				if (processTuningSignalStateMessage(stateMessage, arrivedStates) == false)
+				{
+					continue;
+				}
+
+				if (m_signalStatesSet.contains(arrivedStates.back().hash()) == false)
+				{
+					m_signalStatesSet.insert(arrivedStates.back().hash()); // Mark signal as received at least once
+
+					QReadLocker l(&m_signalHashesLock);
+					if (m_signalStatesSet.size() == m_signalHashes.size())
+					{
+						m_signalStatesLoaded.store(true);                  // Notify that states of all signals are received
+					}
+				}
 			}
 
-			if (m_signalStatesSet.contains(arrivedStates.back().hash()) == false)
+			m_signalUpdater.setStates(arrivedStates, m_tuningServiceHash);
+		}
+		else
+		{
+			bool noTuningSignalsExist = false;
 			{
-				m_signalStatesSet.insert(arrivedStates.back().hash());	// Mark signal as received at least once
-
 				QReadLocker l(&m_signalHashesLock);
-				if (m_signalStatesSet.size() == m_signalHashes.size())
+				noTuningSignalsExist = m_signalHashes.empty() == true;
+			}
+			if (noTuningSignalsExist == true)
+			{
+				// No signals exist at all, set flag that all signals states are received
+				//
+				if (m_signalStatesLoaded.load() == false)
 				{
-					m_signalStatesLoaded.store(true);	// Notify that states of all signals are received
+					m_signalStatesLoaded.store(true);
 				}
 			}
 		}
-
-		m_signalUpdater.setStates(arrivedStates, m_tuningServiceHash);
 
 		return true;
 	}

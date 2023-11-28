@@ -8,6 +8,7 @@
 #include "LanControllerInfoHelper.h"
 #include "AppLogicCompiler.h"
 #include "SoftwareCfgGenerator.h"
+#include "AppDataServiceCfgGenerator.h"
 #include "BdfFile.h"
 
 namespace Builder
@@ -70,6 +71,7 @@ namespace Builder
 			&ApplicationLogicCompiler::writeOptoConnectionsXml,
 			&ApplicationLogicCompiler::writeOptoVhdFiles,
 			&ApplicationLogicCompiler::writeAppSignalSetFile,
+			&ApplicationLogicCompiler::writeCommonAppSignalsExtXmlFile,
 			&ApplicationLogicCompiler::writeComparatorSetFile,
 			&ApplicationLogicCompiler::writeSubsystemsXml,
 		};
@@ -1173,6 +1175,27 @@ namespace Builder
 		BuildFile* appSignalSetFile = buildResultWriter()->addFile(Directory::COMMON, File::APP_SIGNALS_ASGS, CfgFileId::APP_SIGNAL_SET, "", data, true);
 
 		return appSignalSetFile != nullptr;
+	}
+
+	bool ApplicationLogicCompiler::writeCommonAppSignalsExtXmlFile()
+	{
+		if (m_context->generateExtraDebugInfo() == false)
+		{
+			return true;
+		}
+
+		SignalSet* sgSet = signalSet();
+
+		if (sgSet == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		return AppDataServiceCfgGenerator::writeAppSignalsExtXml(dynamic_cast<AppSignalSet*>(sgSet),
+																 nullptr,
+																 buildResultWriter(),
+																 Directory::COMMON);
 	}
 
 	bool ApplicationLogicCompiler::writeComparatorSetFile()

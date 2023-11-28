@@ -104,12 +104,15 @@ namespace TestSuite
 
 		// Get file CfgFileId::TUNING_SIGNALS
 		//
-		if (bool result = getFileBlockedById(CfgFileId::TUNING_SIGNALS, &config.tuningSignalsFile, nullptr);
-			result == false)
+		if (config.tuningEnabled == true)
 		{
-			m_logFile.writeError("Failed to load tuning signal list file: TuningSignals.dat");
-			emit configrationError();
-			return false;
+			if (bool result = getFileBlockedById(CfgFileId::TUNING_SIGNALS, &config.tuningSignalsFile, nullptr);
+				result == false)
+			{
+				m_logFile.writeError("Failed to load tuning signal list file: TuningSignals.dat");
+				emit configrationError();
+				return false;
+			}
 		}
 
 		// Get file CfgFileId::REPORT_TEMPLATES

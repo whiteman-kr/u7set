@@ -397,35 +397,39 @@ bool AppSignalSetProvider::isCheckinableSignalForMe(const ObjectState& objState)
 				(objState.userId == m_currentUserID || m_currentUserIsAdmin == true);
 }
 
-bool AppSignalSetProvider::createNewSignals(const AppSignal& signalTemplate,
+bool AppSignalSetProvider::createNewSignals(const AppSignal& templateSignal,
 											int channelsCount,
 											int signalsCount,
 											std::vector<int>* addedSignalIDs)
 {
 	TEST_PTR_RETURN_FALSE(addedSignalIDs);
 
+	addedSignalIDs->clear();
+
 	bool uppercase = projectProperty_uppercaseAppSignalID();
 
-	std::vector<int> newIndexes;
+	channelsCount = std::clamp(channelsCount, MIN_CHANNEL_COUNT, MAX_CHANNEL_COUNT);
+
+	int newSignalIndex = -1;
 
 	for (int s = 0; s < signalsCount; s++)
 	{
 		std::vector<AppSignal> newSignalsVector;
 
-		for (int ch = 0; ch < channelsCount; ch++)
+		for (int ch = CHANNEL_1; ch < channelsCount; ch++)
 		{
-			AppSignal& newSignal = newSignalsVector.emplace_back(signalTemplate);
+			AppSignal& newSignal = newSignalsVector.emplace_back(templateSignal);
 
 			QString suffix;
 
 			if (signalsCount > 1)
 			{
-				suffix = QString("_SIG%1").arg(s, 3, 10, QChar('0'));
+				suffix = QString("_%1").arg(s, 3, 10, QChar('0'));
 			}
 
 			if (channelsCount > 1)
 			{
-				suffix += "_" + QString(QChar('A' + ch));
+				suffix += QString("_%1").arg(E::valueToString<E::Channel>(ch));
 			}
 
 			QString appSignalID = newSignal.appSignalID() + suffix;
@@ -434,20 +438,22 @@ bool AppSignalSetProvider::createNewSignals(const AppSignal& signalTemplate,
 			if (uppercase)
 			{
 				appSignalID = appSignalID.toUpper();
-				customAppSignalID = customAppSignalID.toUpper();
+				//customAppSignalID = customAppSignalID.toUpper();
 			}
 
 			newSignal.setAppSignalID(appSignalID);
 			newSignal.setCustomAppSignalID(customAppSignalID);
+			newSignal.setCaption("Signal " + customAppSignalID);
 		}
 
-		if (m_db->addSignals(signalTemplate.signalType(), &newSignalsVector, m_parentWidget) == true)
+		if (m_db->addSignals(templateSignal.signalType(), &newSignalsVector, m_parentWidget) == true)
 		{
 			for (const AppSignal& newSignal : newSignalsVector)
 			{
 				auto [s, index] = m_signalSet.append(newSignal);
+
 				addedSignalIDs->push_back(newSignal.ID());
-				newIndexes.push_back(index);
+				newSignalIndex = index;
 			}
 		}
 		else
@@ -457,7 +463,11 @@ bool AppSignalSetProvider::createNewSignals(const AppSignal& signalTemplate,
 		}
 	}
 
-	emit detectNewProperties(newIndexes);
+	// all signals of same type respectively have identical properties,
+	// so property checking of one signal is enough
+	//
+	emit detectNewProperties(std::vector<int>{newSignalIndex});
+
 	emit signalsCountChanged();
 
 	return true;
@@ -671,23 +681,61 @@ bool AppSignalSetProvider::checkoutSignalByIndex(int index, QString* message)
 	return checkoutSignal(s, message);
 }
 
-bool AppSignalSetProvider::checkoutSignal(const AppSignal* s, QString* message)
+bool AppSignalSetProvider::checkoutSignal(const AppSignal* s, QString* errMsg,
+										  std::vector<int>* checkedOutIDs)
+{
+	TEST_PTR_RETURN_FALSE(s);
+
+	return checkoutSignals(std::vector<int>{s->ID()}, errMsg, checkedOutIDs);
+}
+
+bool AppSignalSetProvider::checkoutSignals(const std::vector<AppSignal*>& appSignals, QString* errMsg,
+										   std::vector<int>* checkedOutIDs)
+{
+	std::vector<int> appSignalIDs;
+
+	appSignalIDs.reserve(appSignals.size());
+
+	for(const AppSignal* s : appSignals)
+	{
+		TEST_PTR_CONTINUE(s);
+
+		appSignalIDs.push_back(s->ID());
+	}
+
+	return checkoutSignals(appSignalIDs, errMsg, checkedOutIDs);
+}
+
+bool AppSignalSetProvider::checkoutSignals(const std::vector<int>& appSignalIDs, QString* errMsg,
+										   std::vector<int>* checkedOutIDs)
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
 
-	TEST_PTR_RETURN_FALSE(s);
+	if (checkedOutIDs != nullptr)
+	{
+		checkedOutIDs->clear();
+	}
 
-	std::vector<int> signalsIDs;
+	std::set<int> uniqueIDs;
+	std::vector<int> temp;
 
-	m_signalSet.getChannelSignalsID(s->ID(), &signalsIDs);
+	for(int id : appSignalIDs)
+	{
+		m_signalSet.getChannelSignalsID(id, &temp);
+		uniqueIDs.insert(temp.begin(), temp.end());
+	}
 
-	reloadSignals(signalsIDs, false);
+	reloadSignals(std::vector<int>(uniqueIDs.begin(), uniqueIDs.end()), false);
 
 	std::vector<int> signalsIDsToCheckout;
 
-	for(int id : signalsIDs)
+	// exclude signals already checked out by current user
+	//
+	for(int id : uniqueIDs)
 	{
-		AppSignal* rs = getSignalByID(id);
+		const AppSignal* rs = getSignalByID(id);
+
+		TEST_PTR_CONTINUE(rs);
 
 		if (rs->checkedOut() == true &&
 			(rs->userID() == m_currentUserID || m_currentUserIsAdmin))
@@ -704,24 +752,40 @@ bool AppSignalSetProvider::checkoutSignal(const AppSignal* s, QString* message)
 
 	RETURN_IF_FALSE(res);
 
-	if (message == nullptr)
+	if (checkedOutIDs != nullptr)
 	{
-		res = showErrors(objectStates);
+		checkedOutIDs->clear();
+		checkedOutIDs->reserve(objectStates.size());
 	}
-	else
+
+	for(const ObjectState& os : objectStates)
 	{
-		foreach (const ObjectState& objectState, objectStates)
+		if (os.errCode == ERR_SIGNAL_OK)
 		{
-			if (objectState.errCode != ERR_SIGNAL_OK &&
-				isCheckinableSignalForMe(objectState) == false)
+			if (checkedOutIDs != nullptr)
 			{
-				*message += errorMessage(objectState) + "\n";
-				res = false;
+				checkedOutIDs->push_back(os.id);
+			}
+		}
+		else
+		{
+			if (isCheckinableSignalForMe(os) == false)
+			{
+				if (errMsg != nullptr)
+				{
+					*errMsg += errorMessage(os) + "\n";
+					res = false;
+				}
 			}
 		}
 	}
 
-	reloadSignals(signalsIDs, true);
+	if (errMsg == nullptr)
+	{
+		res = showErrors(objectStates);
+	}
+
+	reloadSignals(signalsIDsToCheckout, true);
 
 	return res;
 }
@@ -731,7 +795,7 @@ bool AppSignalSetProvider::checkinSignals(const std::vector<int>& signalIDs,
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
 
-	std::set<int> chSignalsIDsSet;
+	std::set<int> uniqueSignalIDs;
 
 	for(int id : signalIDs)
 	{
@@ -739,16 +803,16 @@ bool AppSignalSetProvider::checkinSignals(const std::vector<int>& signalIDs,
 
 		m_signalSet.getChannelSignalsID(id, &chSignalsIDs);
 
-		chSignalsIDsSet.insert(chSignalsIDs.begin(), chSignalsIDs.end());
+		uniqueSignalIDs.insert(chSignalsIDs.begin(), chSignalsIDs.end());
 	}
 
-	std::vector<int> channelSignalsIDs(chSignalsIDsSet.begin(), chSignalsIDsSet.end());
+	std::vector<int> channelSignalsIDs(uniqueSignalIDs.begin(), uniqueSignalIDs.end());
 
 	std::vector<ObjectState> states;
 
 	bool result = m_db->checkinSignals(channelSignalsIDs, comment, &states, m_parentWidget);
 
-	showErrors(states);
+//	showErrors(states);
 
 	std::vector<int> updatedIDs;
 	std::vector<int> removedIDs;
@@ -789,7 +853,7 @@ bool AppSignalSetProvider::undoSignalsChanges(const std::vector<int>& signalIDs,
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
 
-	std::vector<int> ids;
+	std::set<int> uniqueIDs;
 
 	for(int id : signalIDs)
 	{
@@ -806,10 +870,10 @@ bool AppSignalSetProvider::undoSignalsChanges(const std::vector<int>& signalIDs,
 
 		m_signalSet.getChannelSignalsID(id, &channelIDs);
 
-		ids.insert(ids.end(), channelIDs.begin(), channelIDs.end());
+		uniqueIDs.insert(channelIDs.begin(), channelIDs.end());
 	}
 
-	if (ids.empty() == true)
+	if (uniqueIDs.empty() == true)
 	{
 		return true;
 	}
@@ -820,12 +884,11 @@ bool AppSignalSetProvider::undoSignalsChanges(const std::vector<int>& signalIDs,
 	}
 
 	std::vector<ObjectState> states;
+	std::vector<int> ids(uniqueIDs.begin(), uniqueIDs.end());
 
 	bool result = m_db->undoSignalsChanges(ids, &states, parentWidget);
 
 	RETURN_IF_FALSE(result);
-
-	result &= showErrors(states);
 
 	reloadSignals(ids, true);
 
@@ -1075,6 +1138,21 @@ void AppSignalSetProvider::deleteSignals(const std::vector<int>& signalIDs)
 	}
 }
 
+bool AppSignalSetProvider::getProjectProperties(DbProjectProperties* projectProps) const
+{
+	TEST_PTR_RETURN_FALSE(projectProps);
+
+	return m_db->getProjectProperties(projectProps, m_parentWidget);
+}
+
+bool AppSignalSetProvider::isSafetyProject() const
+{
+	DbProjectProperties projectProps;
+
+	getProjectProperties(&projectProps);
+
+	return projectProps.safetyProject();
+}
 
 void AppSignalSetProvider::loadUsers()
 {

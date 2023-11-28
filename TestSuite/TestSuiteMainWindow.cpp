@@ -85,6 +85,8 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 	connect(&m_testSuite, &TestSuite::TestSuite::finished, this, &TestSuiteMainWindow::onTestingFinished);
 	connect(&m_testSuite, &TestSuite::TestSuite::globalPermissionChanged, this, &TestSuiteMainWindow::onGlobalPermissionChanged);
 	connect(&m_testSuite, &TestSuite::TestSuite::scriptPermissionChanged, m_testListWidget, &TestListWidget::onScriptPermissionChanged);
+	connect(&m_testSuite, &TestSuite::TestSuite::noPermissionsExist, m_testListWidget, &TestListWidget::onNoPermissionsExist);
+
 
 	// Logs
 	//
@@ -130,7 +132,7 @@ void TestSuiteMainWindow::createDocks()
 	testsListDock->setFeatures(QDockWidget::NoDockWidgetFeatures);
 	testsListDock->setTitleBarWidget(new QWidget{});		// Hides title bar
 
-	m_testListWidget = new TestListWidget{m_appLog, m_configuration, m_testScriptsStorage, this};
+	m_testListWidget = new TestListWidget{m_testSuite, m_appLog, m_configuration, m_testScriptsStorage, this};
 	connect(m_testListWidget, &TestListWidget::testItemClicked, this, &TestSuiteMainWindow::onShowTestContents);
 	connect(m_testListWidget, &TestListWidget::testSelectionChanged, this, [this]() { updateActionsState(); });
 	testsListDock->setWidget(m_testListWidget);
@@ -774,7 +776,7 @@ void TestSuiteMainWindow::updateStatusIndicator()
 	QString styleSheet;
 
 	TestSuite::ControlStatus runStatus = m_testSuite.runStatus();
-	if (runStatus.m_state == TestSuite::ControlState::NoPermission)
+	if (m_testSuite.globalPermission() == false)
 	{
 		text = tr("No permission to start testing.\n");
 		styleSheet = "QLabel {color : #ff0000;}";

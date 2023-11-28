@@ -139,16 +139,17 @@ namespace VFrame30
 
 		virtual void drawHighlight(CDrawParam* drawParam) const override;
 
-		static QString getCoulumnText(const Context* context,
-									  DrawMode drawMode,
-									  const SchemaItem* schemaItem,
-									  const E::ColumnData& data,
-									  const AppSignalParam& signal,
-									  const AppSignalState& signalState,
-									  const AppSignalParam& impactSignal,
-									  const AppSignalState& impactSignalState,
-									  E::AnalogFormat analogFormat,
-									  int precision);
+		static QString getColumnText(const Context* context,
+									 DrawMode drawMode,
+									 const SchemaItem* schemaItem,
+									 const E::ColumnData& data,
+									 const AppSignalParam& signal,
+									 const AppSignalState& signalState,
+									 const AppSignalParam& impactSignal,
+									 const AppSignalState& impactSignalState,
+									 E::AnalogFormat analogFormat,
+									 int precision,
+									 bool* isInverted);
 
 	protected:
 		void drawFullLineIds(const Context* context, CDrawParam* drawParam) const;

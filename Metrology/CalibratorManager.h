@@ -54,6 +54,7 @@ public:
 
 	void			stepDown();
 	void			stepUp();
+	void			step(bool up);
 
 private:
 

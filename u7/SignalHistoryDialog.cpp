@@ -94,7 +94,7 @@ SignalHistoryDialog::SignalHistoryDialog(DbController* db, const AppSignal& s, Q
 		{
 			signalInstances.push_back(signalInstance[0]);
 
-			m_propManager->detectNewProperties(&signalInstance[0]);
+			m_propManager->detectNewProperties(signalInstance[0]);
 
 			signalInstance.clear();
 		}

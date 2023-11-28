@@ -83,7 +83,9 @@ public:
 	bool saveSignals(const std::vector<AppSignal*>& signalsVector, QWidget* parentWidget);
 
 	bool checkoutSignalByIndex(int index, QString* message);
-	bool checkoutSignal(const AppSignal* s, QString* message);
+	bool checkoutSignal(const AppSignal* s, QString* message, std::vector<int>* checkedOutIDs = nullptr);
+	bool checkoutSignals(const std::vector<AppSignal*>& appSignals, QString* message, std::vector<int>* checkedOutIDs = nullptr);
+	bool checkoutSignals(const std::vector<int>& appSignalIDs, QString* message, std::vector<int>* checkedOutIDs = nullptr);
 
 	bool checkinSignals(const std::vector<int>& signalIDs,
 						QString comment);
@@ -96,6 +98,9 @@ public:
 								QString* errMsg);
 
 	void deleteSignals(const std::vector<int>& signalIDs);
+
+	bool getProjectProperties(DbProjectProperties* projectProps) const;
+	bool isSafetyProject() const;
 
 signals:
 	void error(const QString& message);						// for throwing message boxes

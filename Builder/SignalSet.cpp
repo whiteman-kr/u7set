@@ -41,7 +41,7 @@ namespace Builder
 		return m_busses.writeReport(m_resultWriter.get());
 	}
 
-	bool SignalSet::checkSignals()
+	bool SignalSet::checkSignals(bool isSafetyProject)
 	{
 		if (count() == 0)
 		{
@@ -161,6 +161,14 @@ namespace Builder
 				assert(false);
 				LOG_INTERNAL_ERROR(m_log);
 				return false;
+			}
+
+			if (isSafetyProject == true && s.invertSignal() == true)
+			{
+				// Signal %1 inversion can't be used in safety project.
+				//
+				m_log->errALC5202(s.appSignalID());
+				result = false;
 			}
 
 			if (s.isSpecPropExists(AppSignalPropNames::OUTPUT_MODE) == true &&

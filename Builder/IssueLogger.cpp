@@ -7721,6 +7721,24 @@ namespace Builder
 				  QString(tr("Reserved signal %1 used on schema %2.").arg(appSignalID).arg(schemaID)));
 	}
 
+	/// IssueCode: ALC5202
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Signal %1 inversion can't be used in safety project.
+	///
+	/// Parameters:
+	///		%1 AppSignalID
+	///
+	/// Description:
+	///		Turn off InvertSignal property of specified signal.
+	///
+	void IssueLogger::errALC5202(QString appSignalID)
+	{
+		LOG_ERROR(IssueType::AlCompiler, 5202,
+				  QString(tr("Signal %1 inversion can't be used in safety project.").arg(appSignalID)));
+	}
+
 	/// IssueCode: ALC5800
 	///
 	/// IssueType: Warning
@@ -8742,6 +8760,27 @@ namespace Builder
 				  tr("Metrology connections contain a non-existent destination signal: %1")
 				  .arg(appSignalID)
 				  );
+	}
+
+	/// IssueCode: EQP6123
+	///
+	/// IssueType: Error
+	///
+	/// Title: Metrology parameters checking error of signal %1: %2
+	///
+	/// Parameters:
+	///		%1 AppSignalID
+	///		%2 checking issue
+	///
+	/// Description:
+	///		 Signal metrology parameters checking error.
+	///
+	void IssueLogger::errEQP6123(QString appSignalID, QString errMsg)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6123,
+				  QString(tr("Metrology parameters checking error of signal %1: %2.")).
+						arg(appSignalID).arg(errMsg));
 	}
 
 	/// IssueCode: EQP6200

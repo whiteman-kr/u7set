@@ -4,138 +4,167 @@
 #include "SignalPropertiesDialog.h"
 #include "Settings.h"
 
-SignalPropertiesDialog::SignalPropertiesDialog(const std::vector<AppSignal*>& signalVector,
-											   bool readOnly, bool tryCheckout, QWidget* parent) :
+SignalPropertiesDialog::SignalPropertiesDialog(const std::vector<AppSignal*>& signalsToEdit,
+											   bool readOnly, bool isExistSignals, QWidget* parent) :
 	QDialog(parent),
-	m_signalVector(signalVector),
-	m_tryCheckout(tryCheckout),
-	m_parent(parent)
+	m_signalsToEdit(signalsToEdit),
+	m_readOnly(readOnly),
+	m_isExistSignals(isExistSignals),
+	m_signalSetProvider(AppSignalSetProvider::getInstance()),
+	m_propManager(AppSignalPropertyManager::getInstance())
 {
-	m_signalSetProvider = AppSignalSetProvider::getInstance();
-	m_propManager = AppSignalPropertyManager::getInstance();
+	TEST_PTR_RETURN(m_signalSetProvider);
+	TEST_PTR_RETURN(m_propManager);
+
+	if (m_signalsToEdit.size() == 0 ||
+		CONTAINS_NULLPTR(m_signalsToEdit))
+	{
+		Q_ASSERT(false);
+		return;
+	}
 
 	m_uppercaseAppSignalID = m_signalSetProvider->projectProperty_uppercaseAppSignalID();
 
-	//
+	if (m_uppercaseAppSignalID == true && m_readOnly == false)
+	{
+		uppercaseAppSignalIDs();
+	}
+
+	createSignalsProps();
+
+	// Dialog controls creation
 
 	QVBoxLayout* vl = new QVBoxLayout;
 
 	m_propertyEditor = new IdePropertyEditor(this, m_signalSetProvider->dbController());
 
 	m_propertyEditor->setExpertMode(theSettings.isExpertMode());
-
-	connect(m_propertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &SignalPropertiesDialog::onSignalPropertyChanged);
-
-	for (AppSignal* s : signalVector)
-	{
-		TEST_PTR_CONTINUE(s);
-
-		AppSignal& appSignal = *s;
-
-		if (m_uppercaseAppSignalID)
-		{
-			QString upperAppSignalId = appSignal.appSignalID().toUpper();
-
-			if (appSignal.appSignalID() != upperAppSignalId)
-			{
-				QString message;
-
-				bool checkOutResult = m_tryCheckout ? checkoutSignal(appSignal, &message) : true;
-
-				if (readOnly == false && checkOutResult == false)
-				{
-					if (message.isEmpty() == false)
-					{
-						showError(message);
-					}
-
-					setWindowTitle("Signal properties (read only)");
-
-					readOnly = true;
-				}
-
-				if (readOnly == false)
-				{
-					appSignal.setAppSignalID(upperAppSignalId);
-					m_editedSignalsId.insert(appSignal.ID());
-				}
-			}
-		}
-
-		std::shared_ptr<AppSignalProperties> signalProperties = std::make_shared<AppSignalProperties>(appSignal, true);
-
-		if (readOnly == true)
-		{
-			for (auto property : signalProperties->properties())
-			{
-				property->setReadOnly(true);
-			}
-		}
-
-		int precision = appSignal.decimalPlaces();
-
-		m_propManager->detectNewProperties(&appSignal);
-
-		for (auto& property : signalProperties->properties())
-		{
-			if (property->isCategorized() == false)
-			{
-				continue;
-			}
-
-			int propertyIndex = m_propManager->propertyIndex(property->caption());
-
-			Q_ASSERT(propertyIndex != -1);
-
-			if (m_propManager->dependsOnPrecision(propertyIndex))
-			{
-				property->setPrecision(precision);
-			}
-
-			E::PropertyBehaviourType behaviour = m_propManager->getBehaviour(appSignal, propertyIndex);
-
-			if (m_propManager->isHidden(behaviour, theSettings.isExpertMode()))
-			{
-				property->setVisible(false);
-			}
-
-			if (behaviour == E::PropertyBehaviourType::Read)
-			{
-				property->setReadOnly(true);
-			}
-		}
-
-		m_objList.push_back(signalProperties);
-	}
-
-	m_propertyEditor->setObjects(m_objList);
+	m_propertyEditor->setObjects(m_signalsProps);
 	m_propertyEditor->autoAdjustSplitterPosition();
+
 	vl->addWidget(m_propertyEditor);
 
-	if (!readOnly)
+	m_buttonBox = new QDialogButtonBox(QDialogButtonBox::NoButton, this);
+
+	if (m_readOnly == true)
 	{
-		setWindowTitle("Signal properties editing");
-		m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
-		connect(m_buttonBox, &QDialogButtonBox::accepted, this, &SignalPropertiesDialog::checkAndSaveSignal);
+		setDialogReadOnly();
 	}
 	else
 	{
-		setWindowTitle("Signal properties (read only)");
-		m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Cancel, this);
-		connect(m_buttonBox, &QDialogButtonBox::accepted, this, &SignalPropertiesDialog::reject);
+		setDialogEditable();
 	}
-
-	connect(m_buttonBox, &QDialogButtonBox::rejected, this, &SignalPropertiesDialog::undoCheckouts);
-	connect(m_buttonBox, &QDialogButtonBox::rejected, this, &SignalPropertiesDialog::reject);
-	connect(this, &QDialog::rejected, this, &SignalPropertiesDialog::undoCheckouts);
-	connect(this, &SignalPropertiesDialog::finished, this, &SignalPropertiesDialog::saveDialogSettings);
 
 	vl->addWidget(m_buttonBox);
 	setLayout(vl);
 
+	//
+
+	connect(m_propertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &SignalPropertiesDialog::onSignalsPropChanged);
+
+	connect(m_buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
+	connect(m_buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
+
+	connect(this, &QDialog::accepted, this, &SignalPropertiesDialog::onOk);
+	connect(this, &QDialog::rejected, this, &SignalPropertiesDialog::onCancel);
+
 	setWindowPosition(this, "SignalPropertiesDialog");
 
 	m_isValid = true;
+}
+
+bool SignalPropertiesDialog::isEditedSignal(int id) const
+{
+	return m_editedSignalsId.contains(id);
+}
+
+bool SignalPropertiesDialog::hasEditedSignals() const
+{
+	return m_editedSignalsId.empty() == false;
+}
+
+bool SignalPropertiesDialog::isValid() const
+{
+	return m_isValid;
+}
+
+void SignalPropertiesDialog::initNewSignal(AppSignal& signal)
+{
+	AppSignalPropertyManager* propManager = AppSignalPropertyManager::getInstance();
+
+	auto setter = [&signal, &propManager](const QString& name, QVariant value)
+	{
+		int index = propManager->propertyIndex(name);
+		if (index == -1)
+		{
+			return;
+		}
+
+		if (propManager->getBehaviour(signal, index) == E::PropertyBehaviourType::Write)
+		{
+			propManager->setValue(&signal, index, value, theSettings.isExpertMode());
+		}
+	};
+
+	signal.initSpecificProperties();
+
+	switch (signal.signalType())
+	{
+	case E::SignalType::Analog:
+		signal.setDataSize(FLOAT32_SIZE);
+		signal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
+		setter(AppSignalPropNames::LOW_ENGINEERING_UNITS, 0.0);
+		setter(AppSignalPropNames::HIGH_ENGINEERING_UNITS, 100.0);
+		break;
+
+	case E::SignalType::Discrete:
+		signal.setDataSize(DISCRETE_SIZE);
+		break;
+
+	case E::SignalType::Bus:
+		break;
+
+	default:
+		Q_ASSERT(false);
+	}
+
+	QSettings settings;
+	QString propKeyPrefix = AppSignalProperties::lastEditedSignalPropsPrefix(signal);
+
+	for (int i = 0; i < propManager->count(); i++)
+	{
+		if (propManager->getBehaviour(signal, i) != E::PropertyBehaviourType::Write)
+		{
+			continue;
+		}
+
+		QString propName = propManager->name(i);
+
+		QVariant value = settings.value(propKeyPrefix + propName, QVariant());
+
+		if (value.isValid() == false)
+		{
+			continue;
+		}
+
+		QVariant propertyManagerValue = propManager->value(&signal, i, theSettings.isExpertMode());
+		QMetaType type = propertyManagerValue.metaType();
+
+		if (type.id() == QMetaType::QString && propertyManagerValue.toString().isEmpty() == false)
+		{
+			continue;
+		}
+
+		if (value.canConvert(type) && value.convert(type))
+		{
+			propManager->setValue(&signal, i, value, theSettings.isExpertMode());
+		}
+	}
+
+	signal.initTuningValues();
+
+	signal.setInOutType(E::SignalInOutType::Internal);
+	signal.setByteOrder(E::ByteOrder::BigEndian);
 }
 
 // Returns vector of pairs,
@@ -225,187 +254,131 @@ std::vector<std::pair<QString, QString>> SignalPropertiesDialog::editApplication
 	return result;
 }
 
-void SignalPropertiesDialog::initNewSignal(AppSignal& signal)
+
+void SignalPropertiesDialog::onOk()
 {
-	AppSignalPropertyManager* propManager = AppSignalPropertyManager::getInstance();
+	checkAndSaveSignal();
+	saveLastEditedSignalProperties();
 
-	auto setter = [&signal, &propManager](const QString& name, QVariant value) {
-		int index = propManager->propertyIndex(name);
-		if (index == -1)
-		{
-			return;
-		}
-
-		if (propManager->getBehaviour(signal, index) == E::PropertyBehaviourType::Write)
-		{
-			propManager->setValue(&signal, index, value, theSettings.isExpertMode());
-		}
-	};
-
-	signal.initSpecificProperties();
-
-	switch (signal.signalType())
-	{
-	case E::SignalType::Analog:
-	{
-		signal.setDataSize(FLOAT32_SIZE);
-		setter(AppSignalPropNames::LOW_ENGINEERING_UNITS, 0.0);
-		setter(AppSignalPropNames::HIGH_ENGINEERING_UNITS, 100.0);
-		break;
-	}
-
-	case E::SignalType::Discrete:
-	{
-		signal.setDataSize(DISCRETE_SIZE);
-		break;
-	}
-
-	case E::SignalType::Bus:
-	default:
-		break;
-	}
-
-	QSettings settings;
-	QString propKeyPrefix = AppSignalProperties::lastEditedSignalPropsPrefix(signal);
-
-	for (int i = 0; i < propManager->count(); i++)
-	{
-		if (propManager->getBehaviour(signal, i) != E::PropertyBehaviourType::Write)
-		{
-			continue;
-		}
-
-		QString propName = propManager->name(i);
-
-		QVariant value = settings.value(propKeyPrefix + propName, QVariant());
-
-		if (value.isValid() == false)
-		{
-			continue;
-		}
-
-		QVariant propertyManagerValue = propManager->value(&signal, i, theSettings.isExpertMode());
-		QMetaType type = propertyManagerValue.metaType();
-
-		if (type.id() == QMetaType::QString && propertyManagerValue.toString().isEmpty() == false)
-		{
-			continue;
-		}
-
-		if (value.canConvert(type) && value.convert(type))
-		{
-			propManager->setValue(&signal, i, value, theSettings.isExpertMode());
-		}
-	}
-
-	signal.initTuningValues();
-
-	signal.setInOutType(E::SignalInOutType::Internal);
-	signal.setByteOrder(E::ByteOrder::BigEndian);
+	saveDialogSettings();
 }
 
-void SignalPropertiesDialog::checkAndSaveSignal()
+void SignalPropertiesDialog::onCancel()
+{
+	undoCheckouts();
+
+	saveDialogSettings();
+}
+
+bool SignalPropertiesDialog::checkAndSaveSignal()
 {
 	// Check AppSignalID
 	//
-	for(auto object : m_objList)
+	bool res = true;
+
+	for(auto object : m_signalsProps)
 	{
-		auto signalProperties = dynamic_cast<AppSignalProperties*>(object.get());
+		auto signalProps = dynamic_cast<AppSignalProperties*>(object.get());
 
-		TEST_PTR_CONTINUE(signalProperties);
+		TEST_PTR_CONTINUE(signalProps);
 
-		AppSignal& signal = signalProperties->signal();
+		AppSignal& editedSignal = signalProps->signal();
 
-		if (signal.appSignalID().trimmed().isEmpty() == true)
+		editedSignal.trimTextFields();
+
+		if (editedSignal.appSignalID().isEmpty() ||
+			editedSignal.appSignalID() == QStringLiteral("#"))
 		{
-			QMessageBox::critical(this, "Error: Application signal ID is empty", "Fill Application signal ID");
-			return;
+			QMessageBox::critical(this, "Error", "AppSignalID is empty!");
+			res = false;
+			break;
 		}
 	}
 
-	connect(this, &SignalPropertiesDialog::signalChanged, AppSignalSetProvider::getInstance(), &AppSignalSetProvider::loadSignal, Qt::QueuedConnection);
+	RETURN_IF_FALSE(res);
 
-	// Save
+//	connect(this, &SignalPropertiesDialog::signalChanged, AppSignalSetProvider::getInstance(), &AppSignalSetProvider::loadSignal, Qt::QueuedConnection);
+
+	Q_ASSERT(m_signalsToEdit.size() == m_signalsProps.size());
+
+	// Save changes from propertyObjects array to m_signalsToEdit array
 	//
-	for (qsizetype i = m_signalVector.size() - 1; i >= 0; i--)
+	for (qsizetype i = 0; i < m_signalsProps.size(); i++)
 	{
-		AppSignal& signal = *m_signalVector[i];
+		AppSignalProperties* signalProps = dynamic_cast<AppSignalProperties*>(m_signalsProps[i].get());
 
-		AppSignalProperties* signalProperties = dynamic_cast<AppSignalProperties*>(m_objList[i].get());
+		TEST_PTR_CONTINUE(signalProps);
 
-		TEST_PTR_CONTINUE(signalProperties);
+		signalProps->updateSpecPropValues();
 
-		signalProperties->updateSpecPropValues();
+		AppSignal& editedSignal = signalProps->signal();
 
-		AppSignal& editedSignalCopy = signalProperties->signal();
+		bool edited = false;
 
-		signal.setTags(editedSignalCopy.tagsSet());
-		signal = editedSignalCopy;
+//		signal.setTags(editedSignal.tagsSet());
 
-		signal.setAppSignalID(signal.appSignalID().trimmed());
+		// here: editedSignal.appSignalID() is NOT empty and is NOT "#" only
 
-		if (signal.appSignalID().isEmpty() || signal.appSignalID()[0] != '#')
+		if (editedSignal.appSignalID()[0] != '#')
 		{
-			signal.setAppSignalID("#" + signal.appSignalID());
+			editedSignal.setAppSignalID("#" + editedSignal.appSignalID());
+			edited = true;
 		}
 
-		if (m_uppercaseAppSignalID)
+		if (m_uppercaseAppSignalID == true)
 		{
-			signal.setAppSignalID(signal.appSignalID().toUpper());
+			QString upper = editedSignal.appSignalID().toUpper();
+
+			if (editedSignal.appSignalID() != upper)
+			{
+				editedSignal.setAppSignalID(upper);
+				edited = true;
+			}
 		}
 
-		signal.setCustomAppSignalID(signal.customAppSignalID().trimmed());
-
-		if (signal.customAppSignalID().isEmpty())
+		if (editedSignal.customAppSignalID().isEmpty())
 		{
-			signal.setCustomAppSignalID(signal.appSignalID().mid(1));
+			editedSignal.setCustomAppSignalID(editedSignal.appSignalID().mid(1));
+			edited = true;
 		}
 
-		if (!signal.customAppSignalID().isEmpty() && signal.customAppSignalID()[0] == '#')
+		if (!editedSignal.customAppSignalID().isEmpty() &&
+			editedSignal.customAppSignalID()[0] == '#')
 		{
-			signal.setCustomAppSignalID(signal.customAppSignalID().mid(1));
+			editedSignal.setCustomAppSignalID(editedSignal.customAppSignalID().mid(1));
+			edited = true;
 		}
 
-		signal.setEquipmentID(signal.equipmentID().trimmed());
-
-		if (signal.caption().isEmpty())
+		if (editedSignal.caption().isEmpty())
 		{
-			signal.setCaption("Signal " + signal.customAppSignalID());
+			editedSignal.setCaption("Signal " + editedSignal.customAppSignalID());
+			edited = true;
 		}
 
-		if (isEditedSignal(signal.ID()) && m_tryCheckout)
+		if (edited == true)
 		{
-			emit signalChanged(signal.ID(), true);
+			m_editedSignalsId.emplace(editedSignal.ID());
 		}
+
+		if (isEditedSignal(editedSignal.ID()) && m_isExistSignals)
+		{
+			emit signalChanged(editedSignal.ID(), true);
+		}
+
+		*m_signalsToEdit[i] = editedSignal;
 	}
 
-	saveLastEditedSignalProperties();
-
-	accept();
+	return res;
 }
 
 void SignalPropertiesDialog::undoCheckouts()
 {
-	if (m_checkedOutSignalsId.empty())
+	if (m_checkedOutSignalsId.empty() || m_isExistSignals == false)
 	{
 		return;
 	}
 
-	std::vector<int> undoSignalIDs;
-
-	for (std::shared_ptr<PropertyObject>& object : m_objList)
-	{
-		AppSignalProperties* signalProperites = dynamic_cast<AppSignalProperties*>(object.get());
-
-		TEST_PTR_CONTINUE(signalProperites);
-
-		int id = signalProperites->signalID();
-
-		if (signalProperites->signalCheckedOut() && m_checkedOutSignalsId.contains(id))
-		{
-			undoSignalIDs.push_back(id);
-		}
-	}
+	std::vector<int> undoSignalIDs(m_checkedOutSignalsId.begin(), m_checkedOutSignalsId.end());
 
 	m_checkedOutSignalsId.clear();
 
@@ -417,69 +390,42 @@ void SignalPropertiesDialog::saveDialogSettings()
 	saveWindowPosition(this, "SignalPropertiesDialog");
 }
 
-void SignalPropertiesDialog::onSignalPropertyChanged(QList<std::shared_ptr<PropertyObject> > objects)
+void SignalPropertiesDialog::onSignalsPropChanged(QList<std::shared_ptr<PropertyObject>> objects)
 {
-	if (m_tryCheckout == true)
+	if (m_readOnly == false && m_isExistSignals == true && m_firstPropChange == true)
 	{
 		checkoutSignals(objects);
+		m_firstPropChange = false;
 	}
 
-	for (std::shared_ptr<PropertyObject> object : objects)
-	{
-		AppSignalProperties* signalProperties = dynamic_cast<AppSignalProperties*>(object.get());
-
-		if (signalProperties == nullptr)
-		{
-			continue;
-		}
-
-		//signalProperties->updateSpecPropValues();
-
-		int precision = signalProperties->getPrecision();
-
-		for (std::shared_ptr<Property> property : signalProperties->properties())
-		{
-			if (isPropertyDependentOnPrecision(property->caption()) == true)
-			{
-				property->setPrecision(precision);
-
-				if (m_propertyEditor->isPropertyExists(property->caption()) == true)
-				{
-					m_propertyEditor->updatePropertyValue(property->caption());
-				}
-			}
-		}
-	}
+	limitPropsPrecisionOnPropChanged(objects);
 }
 
 void SignalPropertiesDialog::checkoutSignals(QList<std::shared_ptr<PropertyObject>> objects)
 {
 	bool setReadOnly = false;
 
-	for (std::shared_ptr<PropertyObject> object : objects)
+	for (auto& object : objects)
 	{
-		AppSignalProperties* signalProperites = dynamic_cast<AppSignalProperties*>(object.get());
-		AppSignal& signal = signalProperites->signal();
-		int id = signal.ID();
+		AppSignalProperties* signalProps = dynamic_cast<AppSignalProperties*>(object.get());
+
+		TEST_PTR_CONTINUE(signalProps);
+
+		AppSignal& signal = signalProps->signal();
 
 		if (signal.checkedOut() == false)
 		{
-			QString message;
+			QString errMsg;
 
-			if (checkoutSignal(signal, &message) == false)
+			if (checkoutSignal(signal, &errMsg) == false)
 			{
-				if (message.isEmpty() == false)
+				if (errMsg.isEmpty() == false)
 				{
-					showError(message);
+					showError(errMsg);
 				}
 
 				setReadOnly = true;
-			}
-			else
-			{
-				// update signal state in properties
-				//
-				signal = *m_signalSetProvider->getLoadedSignalByID(signal.ID(), false);
+				break;
 			}
 		}
 		else
@@ -487,23 +433,22 @@ void SignalPropertiesDialog::checkoutSignals(QList<std::shared_ptr<PropertyObjec
 			if (m_signalSetProvider->isEditableSignal(&signal) == false)
 			{
 				setReadOnly = true;
+				break;
 			}
 		}
 
-		if (setReadOnly == true)
-		{
-			setWindowTitle("Signal properties (read only)");
-			m_buttonBox->setStandardButtons(QDialogButtonBox::Cancel);
-			return;
-		}
+		m_editedSignalsId.insert(signal.ID());
+	}
 
-		m_editedSignalsId.insert(id);
+	if (setReadOnly == true)
+	{
+		setDialogReadOnly();
 	}
 }
 
 void SignalPropertiesDialog::saveLastEditedSignalProperties()
 {
-	if (m_signalVector.size() < 1)
+	if (m_signalsToEdit.size() < 1)
 	{
 		return;
 	}
@@ -512,7 +457,7 @@ void SignalPropertiesDialog::saveLastEditedSignalProperties()
 
 	AppSignalPropertyManager& manager = *AppSignalPropertyManager::getInstance();
 
-	const AppSignal& signal = *m_signalVector[0];
+	const AppSignal& signal = *m_signalsToEdit[0];
 
 	QString propKeyPrefix = AppSignalProperties::lastEditedSignalPropsPrefix(signal);
 
@@ -529,41 +474,204 @@ void SignalPropertiesDialog::saveLastEditedSignalProperties()
 	}
 }
 
-void SignalPropertiesDialog::showError(const QString& errorString)
+void SignalPropertiesDialog::showError(const QString& errMsg)
 {
-	if (!errorString.isEmpty())
+	if (!errMsg.isEmpty())
 	{
-		QMessageBox::warning(this, "Error", errorString);
+		QMessageBox::warning(this, "Error", errMsg);
 	}
 }
 
-void SignalPropertiesDialog::closeEvent(QCloseEvent* event)
+void SignalPropertiesDialog::uppercaseAppSignalIDs()
 {
-	saveDialogSettings();
+	Q_ASSERT(m_uppercaseAppSignalID == true);
+	Q_ASSERT(m_readOnly == false);
 
-	QDialog::closeEvent(event);
+	QString errMsg;
 
+	std::vector<std::pair<AppSignal*, QString>> changedIDs;		// AppSignal* => previousAppSignalID
+
+	changedIDs.reserve(m_signalsToEdit.size());
+
+	for (AppSignal* s : m_signalsToEdit)
+	{
+		TEST_PTR_CONTINUE(s);
+
+		QString upperAppSignalId = s->appSignalID().toUpper();
+
+		if (s->appSignalID() == upperAppSignalId)
+		{
+			continue;
+		}
+
+		if (m_isExistSignals == true)
+		{
+			bool checkOutResult = checkoutSignal(*s, &errMsg);
+
+			if (checkOutResult == false)
+			{
+				showError(errMsg);
+				setDialogReadOnly();
+				break;
+			}
+		}
+
+		changedIDs.emplace_back(s, s->appSignalID());		// save previous AppSignalID
+
+		s->setAppSignalID(upperAppSignalId);
+
+		m_editedSignalsId.insert(s->ID());
+	}
+
+	if (m_readOnly == true)
+	{
+		// rollback changes
+		//
+		for(const auto& [s, prevAppSignalID] : changedIDs)
+		{
+			s->setAppSignalID(prevAppSignalID);
+			m_editedSignalsId.erase(s->ID());
+		}
+	}
 }
 
-bool SignalPropertiesDialog::checkoutSignal(const AppSignal& s, QString* message)
+void SignalPropertiesDialog::createSignalsProps()
 {
-	bool checkoutResult = m_signalSetProvider->checkoutSignal(&s, message);
+	bool expertMode = theSettings.isExpertMode();
+
+	for (AppSignal* s : m_signalsToEdit)
+	{
+		TEST_PTR_CONTINUE(s);
+
+		std::shared_ptr<AppSignalProperties> signalProps = std::make_shared<AppSignalProperties>(*s, true);
+
+		if (m_readOnly == true)
+		{
+			signalProps->setReadOnly(true);
+		}
+
+		m_propManager->detectNewProperties(*s);
+
+		for (auto& property : signalProps->properties())
+		{
+			if (property->isCategorized() == false)
+			{
+				continue;
+			}
+
+			int propertyIndex = m_propManager->propertyIndex(property->caption());
+
+			if (propertyIndex == -1)
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			if (m_propManager->dependsOnPrecision(propertyIndex))
+			{
+				m_propsWithPrecision.emplace(property->caption());
+
+				property->setPrecision(s->decimalPlaces());
+			}
+
+			E::PropertyBehaviourType behaviour = m_propManager->getBehaviour(*s, propertyIndex);
+
+			if (m_propManager->isHidden(behaviour, expertMode))
+			{
+				property->setVisible(false);
+			}
+
+			if (behaviour == E::PropertyBehaviourType::Read)
+			{
+				property->setReadOnly(true);
+			}
+		}
+
+		m_signalsProps.push_back(signalProps);
+	}
+}
+
+bool SignalPropertiesDialog::checkoutSignal(AppSignal& s, QString* message)
+{
+	if (m_checkedOutSignalsId.contains(s.ID()))
+	{
+		return true;
+	}
+
+	std::vector<int> checkedOutIds;
+
+	bool checkoutResult = m_signalSetProvider->checkoutSignal(&s, message, &checkedOutIds);
 
 	if (checkoutResult == true)
 	{
-		m_checkedOutSignalsId.insert(s.ID());
+		// update signal state in properties
+		//
+		s.setCheckedOut(true);
+
+		const AppSignal* chs = m_signalSetProvider->getSignalByID(s.ID());
+
+		if (chs != nullptr)
+		{
+			s.setUserID(chs->userID());
+		}
+
+		m_checkedOutSignalsId.insert(checkedOutIds.begin(), checkedOutIds.end());
 	}
 
 	return checkoutResult;
 }
 
-bool SignalPropertiesDialog::isPropertyDependentOnPrecision(const QString& propName) const
+void SignalPropertiesDialog::limitPropsPrecisionOnPropChanged(const QList<std::shared_ptr<PropertyObject>>& objects)
 {
-	return m_propertiesDependentOnPrecision.contains(propName);
+	for (std::shared_ptr<PropertyObject> object : objects)
+	{
+		AppSignalProperties* signalProps = dynamic_cast<AppSignalProperties*>(object.get());
+
+		TEST_PTR_CONTINUE(signalProps);
+
+		m_editedSignalsId.emplace(signalProps->signal().ID());
+
+		//signalProperties->updateSpecPropValues();
+
+		int precision = signalProps->getPrecision();
+
+		if (precision == -1)
+		{
+			continue;			// signal hasn't DecimalPlaces property
+		}
+
+		for (const QString& propWithPrecision : m_propsWithPrecision)
+		{
+			std::shared_ptr<Property> prop = signalProps->propertyByCaption(propWithPrecision);
+
+			if (prop == nullptr)
+			{
+				continue;					// is not an error, signal hasn't propWithPrecision
+			}
+
+			prop->setPrecision(precision);
+
+			if (m_propertyEditor->isPropertyExists(prop->caption()) == true)
+			{
+				m_propertyEditor->updatePropertyValue(prop->caption());
+			}
+		}
+	}
 }
 
-void SignalPropertiesDialog::addPropertyDependentOnPrecision(const QString& propName)
+void SignalPropertiesDialog::setDialogEditable()
 {
-	m_propertiesDependentOnPrecision.emplace(propName);
+	m_readOnly = false;
+
+	setWindowTitle(QStringLiteral("Signal properties (editing)"));
+	m_buttonBox->setStandardButtons(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+}
+
+void SignalPropertiesDialog::setDialogReadOnly()
+{
+	m_readOnly = true;
+
+	setWindowTitle(QStringLiteral("Signal properties (read only)"));
+	m_buttonBox->setStandardButtons(QDialogButtonBox::Cancel);
 }
 

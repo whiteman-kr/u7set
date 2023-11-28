@@ -128,6 +128,8 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 
 	centralWidget()->show();
 
+	m_visibleTimerId = startTimer(50);
+
 	return;
 }
 
@@ -191,11 +193,10 @@ void MainWindow::showEvent(QShowEvent*)
 //	m_taskBarButton = new QWinTaskbarButton(this);
 //	m_taskBarButton->setWindow(windowHandle());
 //#endif
-
 	return;
 }
 
-void MainWindow::timerEvent(QTimerEvent* /*event*/)
+void MainWindow::timerEvent(QTimerEvent* event)
 {
 //#ifdef Q_OS_WINDOWS
 //	if (m_buildTabPage->isBuildRunning() == true && m_taskBarButton != nullptr)
@@ -203,6 +204,16 @@ void MainWindow::timerEvent(QTimerEvent* /*event*/)
 //		m_taskBarButton->progress()->setValue(m_buildTabPage->progress());
 //	}
 //#endif
+
+	if (event->timerId() == m_visibleTimerId && isVisible() == true)
+	{
+		killTimer(m_visibleTimerId);
+		
+		// Refresh project list only once
+		//
+		Q_ASSERT(m_projectsTab);
+		m_projectsTab->refreshProjectList();
+	}
 }
 
 void MainWindow::saveWindowState()
