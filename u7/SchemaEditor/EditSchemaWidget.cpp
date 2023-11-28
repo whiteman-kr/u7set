@@ -80,30 +80,99 @@ const EditSchemaWidget::SizeActionToMouseCursor EditSchemaWidget::m_sizeActionTo
 QString EditSchemaWidget::m_lastUsedLoopbackId = "";
 
 
-void addSchemaItem(const QByteArray& itemData);
-
 namespace
 {
 	class ResizedDialog : public QDialog
 	{
 	public:
-		ResizedDialog(int width, int height, QWidget* parent, Qt::WindowFlags f = Qt::WindowFlags()) :
-			QDialog{parent, f},
-			m_width{width},
-			m_height{height}
+		ResizedDialog(QString title, QWidget* parent, Qt::WindowFlags f = Qt::WindowFlags()) :
+			QDialog{parent, f}
 		{
+			setObjectName("F2ResizeDialog");
+			setWindowTitle(title);
+
+			QPoint pos = QSettings{}.value(objectName() + "/pos").toPoint();
+			if (pos.isNull() == false)
+			{
+				move(pos);
+			}
+
+			QSize size = QSettings{}.value(objectName() + "/size").toSize();
+			if (size.isNull() == false)
+			{
+				resize(size);
+			}
+
+			ensureVisible();
+
+			return;
 		}
 
-	protected:
-		virtual QSize sizeHint() const override
+		virtual void closeEvent(QCloseEvent* event) override
 		{
-			return {m_width, m_height};
+			if (isMaximized() == false)
+			{
+				QSettings{}.setValue(objectName() + "/pos", pos());
+				QSettings{}.setValue(objectName() + "/size", size());
+			}
+
+			QDialog::closeEvent(event);
 		}
 
-		int m_width = 0;
-		int m_height = 0;
+		virtual void hideEvent(QHideEvent* event) override
+		{
+			if (isMaximized() == false)
+			{
+				QSettings{}.setValue(objectName() + "/pos", pos());
+				QSettings{}.setValue(objectName() + "/size", size());
+			}
+
+			QDialog::hideEvent(event);
+		}
+
+		void ensureVisible()
+		{
+			if (QScreen* screen = QGuiApplication::screenAt(geometry().center());
+				screen == nullptr)
+			{
+				QScreen* newScreen = QGuiApplication::screenAt(geometry().topLeft());
+				if (newScreen == nullptr)
+				{
+					newScreen = QGuiApplication::screenAt(geometry().topRight());
+				}
+				if (newScreen == nullptr)
+				{
+					newScreen = QGuiApplication::screenAt(geometry().bottomLeft());
+				}
+				if (newScreen == nullptr)
+				{
+					newScreen = QGuiApplication::screenAt(geometry().bottomRight());
+				}
+				if (newScreen == nullptr && parentWidget() != nullptr)
+				{
+					newScreen = QGuiApplication::screenAt(parentWidget()->geometry().center());
+				}
+				if (newScreen == nullptr)
+				{
+					newScreen = QGuiApplication::screens().at(0);
+				}
+
+				if (QScreen* parentScreen = parentWidget()->window()->windowHandle()->screen();
+					parentScreen != nullptr)
+				{
+					newScreen = parentScreen;
+				}
+
+				QRect screenGeometry = newScreen->geometry();
+
+				move(screenGeometry.left() + screenGeometry.width() / 2 - width() / 2,
+					 screenGeometry.top() + screenGeometry.height() / 2 - height() / 2);
+			}
+
+			return;
+		}
 	};
-}
+} // namespace
 
 
 //
@@ -5154,12 +5223,7 @@ void EditSchemaWidget::f2KeyForRect(SchemaItemPtr item)
 
 	// Show input dialog
 	//
-	int width = QSettings().value("f2KeyForRect\\width").toInt();
-	int height = QSettings().value("f2KeyForRect\\height").toInt();
-
-	ResizedDialog d(width, height, this);
-
-	d.setWindowTitle(tr("Set text"));
+	ResizedDialog d{tr("Set text"), this};
 	d.setWindowFlags((d.windowFlags() &
 					~Qt::WindowMinimizeButtonHint &
 					~Qt::WindowMaximizeButtonHint &
@@ -5229,9 +5293,6 @@ void EditSchemaWidget::f2KeyForRect(SchemaItemPtr item)
 		}
 	}
 
-	QSettings().setValue("f2KeyForRect\\width", d.width());
-	QSettings().setValue("f2KeyForRect\\height", d.height());
-
 	return;
 }
 
@@ -5277,12 +5338,7 @@ bool EditSchemaWidget::f2KeyForReceiver(SchemaItemPtr item, bool setViaEditEngin
 
 	// Show input dialog
 	//
-	int width = QSettings().value("f2KeyForReceiver\\width").toInt();
-	int height = QSettings().value("f2KeyForReceiver\\height").toInt();
-
-	ResizedDialog d(width, height, this);
-
-	d.setWindowTitle(tr("Set Receiver Params"));
+	ResizedDialog d{tr("Set Receiver Params"), this};
 	d.setWindowFlags((d.windowFlags() &
 					~Qt::WindowMinimizeButtonHint &
 					~Qt::WindowMaximizeButtonHint &
@@ -5348,9 +5404,6 @@ bool EditSchemaWidget::f2KeyForReceiver(SchemaItemPtr item, bool setViaEditEngin
 	// --
 	//
 	int result = d.exec();
-
-	QSettings().setValue("f2KeyForReceiver\\width", d.width());
-	QSettings().setValue("f2KeyForReceiver\\height", d.height());
 
 	if (result == QDialog::Accepted)
 	{
@@ -5427,12 +5480,8 @@ bool EditSchemaWidget::f2KeyForTransmitter(SchemaItemPtr item, bool setViaEditEn
 
 	// Show input dialog
 	//
-	int width = QSettings().value("f2KeyForTransmitter\\width").toInt();
-	int height = QSettings().value("f2KeyForTransmitter\\height").toInt();
+	ResizedDialog d(tr("Set Transmitter Params"), this);
 
-	ResizedDialog d(width, height, this);
-
-	d.setWindowTitle(tr("Set Transmitter Params"));
 	d.setWindowFlags((d.windowFlags() &
 					~Qt::WindowMinimizeButtonHint &
 					~Qt::WindowMaximizeButtonHint &
@@ -5474,9 +5523,6 @@ bool EditSchemaWidget::f2KeyForTransmitter(SchemaItemPtr item, bool setViaEditEn
 	// --
 	//
 	int result = d.exec();
-
-	QSettings().setValue("f2KeyForTransmitter\\width", d.width());
-	QSettings().setValue("f2KeyForTransmitter\\height", d.height());
 
 	if (result == QDialog::Accepted)
 	{
@@ -5524,12 +5570,8 @@ void EditSchemaWidget::f2KeyForConst(SchemaItemPtr item)
 
 	// Show input dialog
 	//
-	int width = QSettings().value("f2KeyForConst\\width").toInt();
-	int height = QSettings().value("f2KeyForConst\\height").toInt();
+	ResizedDialog d(tr("Set Const Params"), this);
 
-	ResizedDialog d(width, height, this);
-
-	d.setWindowTitle(tr("Set Const Params"));
 	d.setWindowFlags((d.windowFlags() &
 					~Qt::WindowMinimizeButtonHint &
 					~Qt::WindowMaximizeButtonHint &
@@ -5817,9 +5859,6 @@ void EditSchemaWidget::f2KeyForConst(SchemaItemPtr item)
 		editSchemaView()->update();
 	}
 
-	QSettings().setValue("f2KeyForConst\\width", d.width());
-	QSettings().setValue("f2KeyForConst\\height", d.height());
-
 	return;
 }
 
@@ -5843,12 +5882,8 @@ void EditSchemaWidget::f2KeyForSignal(SchemaItemPtr item)
 
 	// Show input dialog
 	//
-	int width = QSettings().value("f2KeyForSignal/width").toInt();
-	int height = QSettings().value("f2KeyForSignal/height").toInt();
+	ResizedDialog d(tr("SchemaItemSignal"), this);
 
-	ResizedDialog d(width, height, this);
-
-	d.setWindowTitle(tr("SchemaItemSignal"));
 	d.setWindowFlags((d.windowFlags() & ~Qt::WindowMinimizeButtonHint & ~Qt::WindowContextHelpButtonHint)
 					 | Qt::CustomizeWindowHint | Qt::WindowMaximizeButtonHint);
 
@@ -5900,10 +5935,7 @@ void EditSchemaWidget::f2KeyForSignal(SchemaItemPtr item)
 	connect(tagsEditorButton, &QPushButton::clicked,
 	[this, &d, tagsEdit]()
 	{
-		int width = QSettings().value("f2KeyForSignal/tagsSelectorDialog/width").toInt();
-		int height = QSettings().value("f2KeyForSignal/tagsSelectorDialog/height").toInt();
-
-		ResizedDialog tagsSelectorDialog{width, height, &d, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint};
+		ResizedDialog tagsSelectorDialog{tr("Tags"), &d, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint};
 
 		DbTagsEditor te{this->db(), &d};
 		te.setText(tagsEdit->text());
@@ -5919,9 +5951,6 @@ void EditSchemaWidget::f2KeyForSignal(SchemaItemPtr item)
 		{
 			tagsEdit->setText(te.text());
 		}
-
-		QSettings().setValue("f2KeyForSignal/tagsSelectorDialog/width", tagsSelectorDialog.width());
-		QSettings().setValue("f2KeyForSignal/tagsSelectorDialog/height", tagsSelectorDialog.height());
 	});
 
 	// --
@@ -5973,9 +6002,6 @@ void EditSchemaWidget::f2KeyForSignal(SchemaItemPtr item)
 			}
 		}
 	}
-
-	QSettings().setValue("f2KeyForSignal/width", d.width());
-	QSettings().setValue("f2KeyForSignal/height", d.height());
 
 	return;
 }
@@ -6056,31 +6082,43 @@ void EditSchemaWidget::f2KeyForValue(SchemaItemPtr item)
 
 	// Show input dialog
 	//
-	int width = QSettings().value("f2KeyForValue\\width").toInt();
-	int height = QSettings().value("f2KeyForValue\\height").toInt();
+	ResizedDialog d(tr("SchemaItemValue"), this);
 
-	ResizedDialog d(width, height, this);
-
-	d.setWindowTitle(tr("SchemaItemValue"));
 	d.setWindowFlags((d.windowFlags() & ~Qt::WindowMinimizeButtonHint & ~Qt::WindowContextHelpButtonHint)
 					 | Qt::CustomizeWindowHint | Qt::WindowMaximizeButtonHint);
-
+	
 	// AppSchemaIDs
 	//
 	QLabel* appSignalIdsLabel = new QLabel("AppSchemaIDs:", &d);
 
-	QTextEdit* appSignalIdsEdit = new QTextEdit(&d);
+	QPlainTextEdit* appSignalIdsEdit = new QPlainTextEdit(&d);
 	appSignalIdsEdit->setPlaceholderText("Enter AppSchemaIDs separated by lines");
 	appSignalIdsEdit->setPlainText(appSignalIds);
+
+	auto appSingalPad = new QWidget;
+	auto appSingalPadLayout = new QVBoxLayout;
+	appSingalPadLayout->setContentsMargins(0, 0, 0, 0);
+	appSingalPad->setLayout(appSingalPadLayout);
+
+	appSingalPadLayout->addWidget(appSignalIdsLabel);
+	appSingalPadLayout->addWidget(appSignalIdsEdit);
 
 	// Text
 	//
 	QLabel* textLabel = new QLabel("Text:", &d);
 
-	QLineEdit* textEdit = new QLineEdit(&d);
+	QPlainTextEdit* textEdit = new QPlainTextEdit(&d);
 	textEdit->setPlaceholderText(VFrame30::PropertyNames::textValuePropDescription);
 	textEdit->setToolTip(VFrame30::PropertyNames::textValuePropDescription);
-	textEdit->setText(text);
+	textEdit->setPlainText(text);
+
+	auto textPad = new QWidget;
+	auto textPadLayout = new QVBoxLayout;
+	textPadLayout->setContentsMargins(0, 0, 0, 0);
+	textPad->setLayout(textPadLayout);
+
+	textPadLayout->addWidget(textLabel);
+	textPadLayout->addWidget(textEdit);
 
 	// PreDrawScript
 	//
@@ -6099,29 +6137,48 @@ void EditSchemaWidget::f2KeyForValue(SchemaItemPtr item)
 
 	QPushButton* preDrawScriptTemplate = new QPushButton(tr("Paste PreDrawScript Template"), &d);
 
+	auto drawScriptPad = new QWidget;
+	auto drawScriptPadLayout = new QGridLayout;
+	drawScriptPadLayout->setContentsMargins(0, 0, 0, 0);
+	drawScriptPad->setLayout(drawScriptPadLayout);
+
+	drawScriptPadLayout->addWidget(preDrawScriptLabel, 4, 0, 1, 3);
+	drawScriptPadLayout->addWidget(preDrawScriptEdit, 5, 0, 1, 3);
+	drawScriptPadLayout->addWidget(preDrawScriptTemplate, 6, 0, 1, 1);
+
+	// Add horizontal splitter.
+	// Upper part is for appSignalIdsLabel, appSignalIdsEdit, textLabel, textLabel
+	// Lower part is for preDrawScriptLabel, preDrawScriptEdit, preDrawScriptTemplate
+	//
+	QSplitter* splitter = new QSplitter(Qt::Vertical, &d);
+	splitter->setChildrenCollapsible(false);
+
+	splitter->addWidget(appSingalPad);
+	splitter->addWidget(textPad);
+	splitter->addWidget(drawScriptPad);
+
 	// --
 	//
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &d);
 
+	// Set main layout
+	//
 	QGridLayout* layout = new QGridLayout(&d);
 
-	layout->addWidget(appSignalIdsLabel, 0, 0, 1, 3);
-	layout->addWidget(appSignalIdsEdit, 1, 0, 1, 3);
-
-	layout->addWidget(textLabel, 2, 0, 1, 3);
-	layout->addWidget(textEdit, 3, 0, 1, 3);
-
-	layout->addWidget(preDrawScriptLabel, 4, 0, 1, 3);
-	layout->addWidget(preDrawScriptEdit, 5, 0, 1, 3);
-	layout->addWidget(preDrawScriptTemplate, 6, 0, 1, 1);
-
+	layout->addWidget(splitter, 1, 0, 1, 3);
 	layout->addWidget(buttonBox, 7, 0, 1, 3);
-
-	layout->setRowStretch(5, 1);	// preDrawScriptEdit
 
 	d.setLayout(layout);
 
-	// RAW STRINg TEMPLATE FOR PreDrawScript
+	// Restore splitter state.
+	//
+	QByteArray splitterState = QSettings().value("f2KeyForValue\\splitterState").toByteArray();
+	if (splitterState.isEmpty() == false)
+	{
+		splitter->restoreState(splitterState);
+	}
+
+	// RAW STRING TEMPLATE FOR PreDrawScript
 	//
 	QString preDrawScriptTemplateString = R"((function(schemaItemValue)
 {
@@ -6157,7 +6214,7 @@ void EditSchemaWidget::f2KeyForValue(SchemaItemPtr item)
 	if (result == QDialog::Accepted)
 	{
 		QString newAppSignaIds = appSignalIdsEdit->toPlainText();
-		QString newText = textEdit->text();
+		QString newText = textEdit->toPlainText();
 		QString newPreDrawScript = preDrawScriptEdit->text();
 
 		if (newAppSignaIds != appSignalIds ||
@@ -6176,8 +6233,9 @@ void EditSchemaWidget::f2KeyForValue(SchemaItemPtr item)
 		}
 	}
 
-	QSettings().setValue("f2KeyForValue\\width", d.width());
-	QSettings().setValue("f2KeyForValue\\height", d.height());
+	// Save splitter state for next time.
+	//
+	QSettings().setValue("f2KeyForValue\\splitterState", splitter->saveState());
 
 	return;
 }
@@ -6203,12 +6261,8 @@ void EditSchemaWidget::f2KeyForImageValue(SchemaItemPtr item)
 
 	// Show input dialog
 	//
-	int width = QSettings().value("f2KeyForImageValue\\width").toInt();
-	int height = QSettings().value("f2KeyForImageValue\\height").toInt();
+	ResizedDialog d(tr("SchemaItemImageValue"), this);
 
-	ResizedDialog d(width, height, this);
-
-	d.setWindowTitle(tr("SchemaItemImageValue"));
 	d.setWindowFlags((d.windowFlags() & ~Qt::WindowMinimizeButtonHint & ~Qt::WindowContextHelpButtonHint)
 					 | Qt::CustomizeWindowHint | Qt::WindowMaximizeButtonHint);
 
@@ -6266,7 +6320,7 @@ void EditSchemaWidget::f2KeyForImageValue(SchemaItemPtr item)
 
 	d.setLayout(layout);
 
-	// RAW STRINg TEMPLATE FOR PreDrawScript
+	// RAW STRING TEMPLATE FOR PreDrawScript
 	//
 	QString preDrawScriptTemplateString = R"((function(schemaItemImageValue)
 {
@@ -6320,9 +6374,6 @@ void EditSchemaWidget::f2KeyForImageValue(SchemaItemPtr item)
 		}
 	}
 
-	QSettings().setValue("f2KeyForImageValue\\width", d.width());
-	QSettings().setValue("f2KeyForImageValue\\height", d.height());
-
 	return;
 }
 
@@ -6357,12 +6408,8 @@ void EditSchemaWidget::f2KeyForBus(SchemaItemPtr item)
 
 	// Show input dialog
 	//
-	int width = QSettings().value("f2KeyForBus\\width").toInt();
-	int height = QSettings().value("f2KeyForBus\\height").toInt();
+	ResizedDialog d(tr("Set BusType"), this);
 
-	ResizedDialog d(width, height, this);
-
-	d.setWindowTitle(tr("Set BusType"));
 	d.setWindowFlags((d.windowFlags() &
 					~Qt::WindowMinimizeButtonHint &
 					~Qt::WindowMaximizeButtonHint &
@@ -6433,9 +6480,6 @@ void EditSchemaWidget::f2KeyForBus(SchemaItemPtr item)
 
 		editSchemaView()->update();
 	}
-
-	QSettings().setValue("f2KeyForBus\\width", d.width());
-	QSettings().setValue("f2KeyForBus\\height", d.height());
 
 	return;
 }
