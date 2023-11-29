@@ -14037,7 +14037,7 @@
       </CommonScript>
     </AFB>
     
-    <AFB id="#packed_and_in_v1" Caption="packed_and_in" Version="1.1">
+    <AFB id="#packed_and_in_v1" Caption="packed_and_in" Version="1.3">
       <Properties>
         <Description>The input section of the packed logical AND item, transfers inputs to the counterpart packed_and_out item.</Description>
         <Category>Logic</Category>
@@ -14047,7 +14047,7 @@
         <PackedLogic Counterpart="packed_and_out" IdPrefix="AND_" />
       </Properties>
       <Inputs>
-        <Pin OpName="in" Caption="in" Type="Discrete" ByteOrder="BigEndian" OpIndex="-1" Size="1" />
+        <Pin OpName="in" Caption="in" Type="Discrete" ByteOrder="BigEndian" OpIndex="3" Size="1" />
       </Inputs>
       <Outputs />
       <Params />
@@ -14056,7 +14056,7 @@
         <AfterCreation />
       </CommonScript>
     </AFB>
-    <AFB id="#packed_and_out_v1" Caption="packed_and_out" Version="1.1">
+    <AFB id="#packed_and_out_v1" Caption="packed_and_out" Version="1.3">
       <Properties>
         <Description>The output part of the packed logical AND item, output signal resulting from the logical AND operation on input signals received from the input item packed_and_in.</Description>
         <Category>Logic</Category>
@@ -14065,18 +14065,25 @@
         <MinWidth>26</MinWidth>
         <PackedLogic Counterpart="packed_and_in" IdPrefix="AND_" MinInputCount="1" />
       </Properties>
-      <Inputs />
+      <Inputs>
+        <Pin OpName="i_1_oprd" Caption="in_1" Type="Discrete" ByteOrder="BigEndian" OpIndex="3" Size="1" />
+      </Inputs>
       <Outputs>
         <Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="20" Size="1" />
       </Outputs>
       <Params />
       <CommonScript>
         <Library />
-        <AfterCreation />
+        <AfterCreation>
+			(function(videoItemFblElement, afbElement)
+			{
+				videoItemFblElement.removeInputSignals();
+			})
+		</AfterCreation>
       </CommonScript>
     </AFB>
     
-    <AFB id="#packed_or_in_v1" Caption="packed_or_in" Version="1.1">
+    <AFB id="#packed_or_in_v1" Caption="packed_or_in" Version="1.3">
       <Properties>
         <Description>The input section of the packed logical OR item, transfers inputs to the counterpart packed_or_out item.</Description>
         <Category>Logic</Category>
@@ -14086,7 +14093,7 @@
         <PackedLogic Counterpart="packed_or_out" IdPrefix="OR_" />
       </Properties>
       <Inputs>
-        <Pin OpName="in" Caption="in" Type="Discrete" ByteOrder="BigEndian" OpIndex="-1" Size="1" />
+        <Pin OpName="in" Caption="in" Type="Discrete" ByteOrder="BigEndian" OpIndex="3" Size="1" />
       </Inputs>
       <Outputs />
       <Params />
@@ -14095,7 +14102,7 @@
         <AfterCreation />
       </CommonScript>
     </AFB>
-    <AFB id="#packed_or_out_v1" Caption="packed_or_out" Version="1.1">
+    <AFB id="#packed_or_out_v1" Caption="packed_or_out" Version="1.3">
       <Properties>
         <Description>The output part of the packed logical OR item, output signal resulting from the logical OR operation on input signals received from the input item packed_or_in.</Description>
         <Category>Logic</Category>
@@ -14104,14 +14111,21 @@
         <MinWidth>26</MinWidth>
         <PackedLogic Counterpart="packed_or_in" IdPrefix="OR_" MinInputCount="1" />
       </Properties>
-      <Inputs />
+      <Inputs>
+        <Pin OpName="i_1_oprd" Caption="in_1" Type="Discrete" ByteOrder="BigEndian" OpIndex="3" Size="1" />
+      </Inputs>
       <Outputs>
         <Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="20" Size="1" />
       </Outputs>
       <Params />
       <CommonScript>
         <Library />
-        <AfterCreation />
+        <AfterCreation>
+			(function(videoItemFblElement, afbElement)
+			{
+				videoItemFblElement.removeInputSignals();
+			})
+		</AfterCreation>
       </CommonScript>
     </AFB>
     
