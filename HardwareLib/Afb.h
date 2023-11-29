@@ -463,6 +463,9 @@ private:
 		bool isPackedLogic() const;
 		const PackedLogicData& packedLogic() const;
 
+		const QString& packedLogicId() const;
+		void setPackedLogicId(const QString& value);
+
 	private:
 		struct
 		{
@@ -474,10 +477,11 @@ private:
 			int opCode = -1;
 			std::optional<bool> hasRam;
 			bool internalUse = false;
-			int minWidth = 10;			// Min width in GridSize, so read minwidth is m_minWidth * GridSize
+			int minWidth = 10;     // Min width in GridSize, so read minwidth is m_minWidth * GridSize
 			int minHeight = 0;
 
 			PackedLogicData packedLogic;
+			QString packedLogicId; // If this item is packed, this is the ID of the packed item.
 
 			QString libraryScript;
 			QString afterCreationScript;

@@ -1846,6 +1846,8 @@ namespace Afb
 					m_data.packedLogic.counterpart = packedLogic.attribute(QLatin1String("Counterpart"));
 					m_data.packedLogic.idPrefix = packedLogic.attribute(QLatin1String("IdPrefix"));
 					m_data.packedLogic.minInputCount = packedLogic.attribute(QLatin1String("MinInputCount"), "99999").toInt();
+					
+					m_data.packedLogicId = packedLogic.attribute(QLatin1String("packedLogicId"));
 				}
 			}
 		}
@@ -2206,6 +2208,8 @@ namespace Afb
 				s.setAttribute(QLatin1String("Counterpart"), m_data.packedLogic.counterpart);
 				s.setAttribute(QLatin1String("IdPrefix"), m_data.packedLogic.idPrefix);
 				s.setAttribute(QLatin1String("MinInputCount"), m_data.packedLogic.minInputCount);
+
+				s.setAttribute(QLatin1String("packedLogicId"), m_data.packedLogicId);
 			}
 		}
 
@@ -2525,6 +2529,16 @@ namespace Afb
 	const AfbElement::PackedLogicData& AfbElement::packedLogic() const
 	{
 		return m_data.packedLogic;
+	}
+
+	const QString& AfbElement::packedLogicId() const
+	{
+		return m_data.packedLogicId;
+	}
+
+	void AfbElement::setPackedLogicId(const QString& value)
+	{
+		m_data.packedLogicId = value;
 	}
 
 	//
