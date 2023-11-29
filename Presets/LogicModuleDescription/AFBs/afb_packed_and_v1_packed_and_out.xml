@@ -1,4 +1,4 @@
-<AFB id="#packed_and_out_v1" Caption="packed_and_out" Version="1.1">
+<AFB id="#packed_and_out_v1" Caption="packed_and_out" Version="1.3">
 	<Properties>
 		<Description>The output part of the packed logical AND item, output signal resulting from the logical AND operation on input signals received from the input item packed_and_in.</Description>
 		<Category>Logic</Category>
@@ -7,13 +7,20 @@
 		<MinWidth>26</MinWidth>
 		<PackedLogic Counterpart="packed_and_in" IdPrefix="AND_" MinInputCount="1"/>
 	</Properties>
-	<Inputs/>
+	<Inputs>
+		<Pin OpName="i_1_oprd" Caption="in_1" Type="Discrete" ByteOrder="BigEndian" OpIndex="3" Size="1"/>
+	</Inputs>
 	<Outputs>
 		<Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="20" Size="1"/>
 	</Outputs>
 	<Params/>
 	<CommonScript>
 		<Library/>
-		<AfterCreation/>
+		<AfterCreation>
+			(function(videoItemFblElement, afbElement)
+			{
+				videoItemFblElement.removeInputSignals();
+			})
+		</AfterCreation>
 	</CommonScript>
 </AFB>
