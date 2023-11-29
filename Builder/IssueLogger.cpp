@@ -7767,6 +7767,34 @@ namespace Builder
 						arg(packedOrID).arg(item1).arg(schema1).arg(item2).arg(schema2));
 	}
 
+	/// IssueCode: ALC5204
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Permanent const 0 on output of packed_and %1 (item %2, schema %3) due to const 0 on input (item %4, schema %5).
+	///
+	/// Parameters:
+	///		%1 packed_or ID
+	///		%2 packed_or label
+	///		%3 packed_or schema
+	///		%4 const 0 signal label
+	///		%5 const 0 signal schema
+	///
+	/// Description:
+	///		Permanent const 0 on output of packed_and due to const 0 on input. Check UAL.
+	///
+	void IssueLogger::wrnALC5204(QString packedAndID, QString item1, QUuid item1Uuid, QString schema1,
+								  QString item2, QUuid item2Uuid, QString schema2)
+	{
+		addItemsIssues(OutputMessageLevel::Warning0, 5204, item1Uuid, schema1);
+		addItemsIssues(OutputMessageLevel::Warning0, 5204, item2Uuid, schema2);
+
+		LOG_WARNING0(IssueType::AlCompiler,
+				  5204,
+				  QString(tr("Permanent const 0 on output of packed_and %1 (item %2, schema %3) due to const 0 on input (item %4, schema %5).")).
+						arg(packedAndID).arg(item1).arg(schema1).arg(item2).arg(schema2));
+	}
+
 	/// IssueCode: ALC5800
 	///
 	/// IssueType: Warning

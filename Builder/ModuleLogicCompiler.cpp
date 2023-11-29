@@ -7448,7 +7448,7 @@ namespace Builder
 
 		assert(ualItem->isTransmitter() == true);
 
-		const LogicTransmitter& transmitter = ualItem->logicTransmitter();
+		const UalTransmitter& transmitter = ualItem->logicTransmitter();
 
 		bool result = true;
 
@@ -9242,7 +9242,7 @@ namespace Builder
 
 			//
 
-			if (ualAfb->isPackedProcessingAfb() == true)
+			if (ualAfb->isPackedLogic() == true)
 			{
 				Q_ASSERT(busProcessingStepsNumber == 1);
 
@@ -10035,7 +10035,7 @@ namespace Builder
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(afb, m_log);
 
-		Q_ASSERT(afb->isPackedProcessingAfb());
+		Q_ASSERT(afb->isPackedLogic());
 
 		if (isOutConnectedToTerminatorOnly(afb) == true)
 		{
@@ -10046,7 +10046,16 @@ namespace Builder
 
 		const std::vector<LogicPin>& inputs = afb->inputs();
 
-		std::vector<std::pair<const UalSignal*, Address16>> inSignals;	//  vector of pair<inputSignal, readAddr>
+		std::vector<std::pair<const UalSignal*, Address16>> inSignals;	// vector of pair<inputSignal, readAddr>
+		std::map<const UalSignal*, bool> uniqueInSignals;				// UalSignal* => processed flag
+
+		int packedAfbOpcode = afb->opcode();
+
+		int const0Count = 0;
+		int const1Count = 0;
+
+		// input signals checking
+		//
 
 		for(const LogicPin& inPin : inputs)
 		{
@@ -10061,6 +10070,48 @@ namespace Builder
 			}
 
 			Address16 readAddr;
+
+			if (inSignal->isConstDiscrete() == true)
+			{
+				if (inSignal->constDiscreteValue() == 0)
+				{
+					// const value 0 on input
+					//
+					if (packedAfbOpcode == Afb::PACKED_AND_OPCODE)
+					{
+						const UalItem* inItem = inSignal->ualItem();
+
+						TEST_PTR_LOG_RETURN_FALSE(inItem, m_log);
+
+						// Permanent const 0 on output of packed_and %1 (item %2, schema %3) due to const 0 on input (item %4, schema %5).
+						//
+						m_log->wrnALC5204(afb->packedLogicID(), afb->label(), afb->guid(), afb->schemaID(),
+										inItem->label(), inItem->guid(), inItem->schemaID());
+						const0Count++;
+					}
+				}
+				else
+				{
+					// const value 1 on input
+					//
+					if (packedAfbOpcode == Afb::PACKED_OR_OPCODE)
+					{
+						const UalItem* inItem = inSignal->ualItem();
+
+						TEST_PTR_LOG_RETURN_FALSE(inItem, m_log);
+
+						// Permanent const 1 on output of packed_or %1 (item %2, schema %3) due to const 1 on input (item %4, schema %5).
+						//
+						m_log->wrnALC5203(afb->packedLogicID(), afb->label(), afb->guid(), afb->schemaID(),
+										inItem->label(), inItem->guid(), inItem->schemaID());
+						const1Count++;
+					}
+				}
+
+				continue;
+			}
+
+			// non-const signals processing
 
 			if (inSignal->isDiscrete() == true)
 			{
@@ -10085,6 +10136,7 @@ namespace Builder
 			}
 
 			inSignals.emplace_back(inSignal, readAddr);
+			uniqueInSignals.emplace(inSignal, false);
 		}
 
 		RETURN_IF_FALSE(result);
@@ -10119,17 +10171,43 @@ namespace Builder
 		}
 
 		//
+		// optimized code generation
+		//
 
-		int opCode = afb->opcode();
+		std::optional<int> constOutValue;
 
-		switch(opCode)
+		switch(packedAfbOpcode)
 		{
-		case Afb::PACKED_OR_OPCODE:
-			result &= generatePackedOrAfbCode(code, afb, inSignals, outSignal, outWriteAddr);
+		case Afb::PACKED_AND_OPCODE:
+
+			if (const0Count > 0)
+			{
+				constOutValue = 0;
+			}
+			else
+			{
+				if (const1Count > 0 && nonConstSignalsCount == 0)
+				{
+					constOutValue = 1;
+				}
+			}
+
 			break;
 
-		case Afb::PACKED_AND_OPCODE:
-			result &= generatePackedAndAfbCode(code, afb, inSignals, outSignal, outWriteAddr);
+		case Afb::PACKED_OR_OPCODE:
+
+			if (const1Count > 0)
+			{
+				constOutValue = 1;
+			}
+			else
+			{
+				if (const0Count > 0 && nonConstSignalsCount == 0)
+				{
+					constOutValue = 0;
+				}
+			}
+
 			break;
 
 		default:
@@ -10137,6 +10215,21 @@ namespace Builder
 			LOG_INTERNAL_ERROR(m_log);
 			return false;
 		}
+
+		if (constOutValue.has_value() == true)
+		{
+			*code << CodeItem().movBitConst(outWriteAddr, constOutValue.value(), QString("%1 optimized processing").arg(afb->label()));
+			return true;
+		}
+
+		if (nonConstSignalsCount == 1)
+		{
+			*code << CodeItem().movBit(outWriteAddr, constOutValue.value(), QString("%1 optimized processing").arg(afb->label()));
+			return true;
+		}
+
+
+		Q_ASSERT(false);		// to do
 
 		return result;
 	}
@@ -10153,33 +10246,7 @@ namespace Builder
 
 		bool hasConst1 = false;
 
-		for(const auto& [inSignal, addr] : inSignals)
-		{
-			if (inSignal->isConstDiscrete() == false)
-			{
-				continue;
-			}
 
-			if (inSignal->constDiscreteValue() == 1)
-			{
-				const UalItem* inItem = inSignal->ualItem();
-
-				TEST_PTR_LOG_RETURN_FALSE(inItem, m_log);
-
-				// Permanent const 1 on output of packed_or %1 (item %2, schema %3) due to const 1 on input (item %4, schema %5).
-				//
-				m_log->wrnALC5203(afb->afbStrID(), afb->label(), afb->guid(), afb->schemaID(),
-								inItem->label(), inItem->guid(), inItem->schemaID());
-
-				hasConst1 = true;
-			}
-		}
-
-		if (hasConst1 == true)
-		{
-			*code << CodeItem().movBitConst(outWriteAddr, 1, QString("%1 optimized processing").arg(afb->label()));
-			return true;
-		}
 
 		return result;
 	}

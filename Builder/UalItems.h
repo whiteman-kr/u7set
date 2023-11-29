@@ -30,7 +30,7 @@ namespace Builder
 	typedef VFrame30::SchemaItemAfb LogicFb;
 	typedef VFrame30::SchemaItemConst UalConst;
 
-	typedef VFrame30::SchemaItemTransmitter LogicTransmitter;
+	typedef VFrame30::SchemaItemTransmitter UalTransmitter;
 	typedef VFrame30::SchemaItemReceiver UalReceiver;
 
 	typedef VFrame30::SchemaItemBusComposer UalBusComposer;
@@ -155,7 +155,7 @@ namespace Builder
 
 		const LogicFb& logicFb() const { return *m_appLogicItem.m_fblItem->toAfbElement(); }
 		const UalConst* ualConst() const { return m_appLogicItem.m_fblItem->toSchemaItemConst(); }
-		const LogicTransmitter& logicTransmitter() const { return *m_appLogicItem.m_fblItem->toTransmitterElement(); }
+		const UalTransmitter& logicTransmitter() const { return *m_appLogicItem.m_fblItem->toTransmitterElement(); }
 		const UalReceiver& logicReceiver() const { return *m_appLogicItem.m_fblItem->toReceiverElement(); }
 		const UalReceiver* ualReceiver() const { return m_appLogicItem.m_fblItem->toReceiverElement(); }
 		const UalLoopbackSource* ualLoopbackSource() const { return m_appLogicItem.m_fblItem->toLoopbackSourceElement(); }
@@ -295,7 +295,9 @@ namespace Builder
 		bool isDynamicComaparator() const;
 		bool isComparator() const;
 		bool isBusProcessing() const;
-		bool isPackedProcessingAfb() const;
+
+		bool isPackedLogic() const;
+		QString packedLogicID() const;
 
 		QString instantiatorID() const;
 

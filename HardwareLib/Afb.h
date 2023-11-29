@@ -457,7 +457,7 @@ private:
 		{
 			QString counterpart;	// AFB caption of the counterpart item.
 			QString idPrefix;		// PackedID prefix, is used for initial creation of the ID.
-			int minInputCount{};	// Minimum inputs count which resulting output must have, this is udes only for output part.
+			int minInputCount{};	// Minimum inputs count which resulting output must have, this is uses only for output part.
 		};
 
 		bool isPackedLogic() const;

@@ -47,7 +47,7 @@ namespace Builder
 
 		if (isSetFlagsItem() == true ||
 			afb().opCode() == Afb::AFB_NOT_ACC_OPCODE ||
-			isPackedProcessingAfb() == true)
+			isPackedLogic() == true)
 		{
 			return true;			// no parameters processing required
 		}

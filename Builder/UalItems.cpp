@@ -832,11 +832,29 @@ namespace Builder
 		return m_isBusProcessing;
 	}
 
-	bool UalAfb::isPackedProcessingAfb() const
+	bool UalAfb::isPackedLogic() const
 	{
-		quint16 oc = opcode();
+		return m_appLogicItem.m_fblItem->toAfbElement()->isPackedLogic();
+	}
 
-		return oc == Afb::PACKED_OR_OPCODE || oc == Afb::PACKED_AND_OPCODE;
+	QString UalAfb::packedLogicID() const
+	{
+		if (isPackedLogic() == false)
+		{
+			Q_ASSERT(false);
+			return QString();
+		}
+
+		std::shared_ptr<VFrame30::SchemaItemAfb> schemaItemPtr =
+				std::dynamic_pointer_cast<VFrame30::SchemaItemAfb>(m_appLogicItem.m_fblItem);
+
+		if (schemaItemPtr == nullptr)
+		{
+			Q_ASSERT(false);
+			return QString();
+		}
+
+		return schemaItemPtr->packedLogicId();
 	}
 
 	QString UalAfb::instantiatorID() const
