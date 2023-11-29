@@ -3092,6 +3092,7 @@ namespace Builder
 				const auto outputItem = packedLogic.output;
 				Q_ASSERT(outputItem != nullptr);
 
+				int outputItemInputIndex = 0;
 				for (const auto& inputItem : packedLogic.inputs)
 				{
 					Q_ASSERT(inputItem->m_fblItem->inputsCount() > 0);
@@ -3110,9 +3111,8 @@ namespace Builder
 
 						// Set new name to the added input.
 						//
-						outputItem->m_fblItem->inputs().back().setCaption(QString("%1_%2")
-																		  .arg(inputPin.caption())
-																		  .arg(outputItem->m_fblItem->inputsCount()));
+						outputItemInputIndex++;
+						outputItem->m_fblItem->inputs().back().setCaption(QString{"in_%1"}.arg(outputItemInputIndex));
 					}
 
 					// Remove input item.
