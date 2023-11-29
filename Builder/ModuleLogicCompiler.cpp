@@ -9242,6 +9242,17 @@ namespace Builder
 
 			//
 
+			if (ualAfb->isPackedProcessingAfb() == true)
+			{
+				Q_ASSERT(busProcessingStepsNumber == 1);
+
+				result &= generatePackedAfbCode(code, ualAfb);
+
+				continue;
+			}
+
+			//
+
 			bool bitAccCodeGenerated = false;
 
 			if (m_bitAccAvailable == true)
@@ -10019,6 +10030,167 @@ namespace Builder
 		return true;
 	}
 
+	bool ModuleLogicCompiler::generatePackedAfbCode(CodeSnippet* code, const UalAfb* afb)
+	{
+		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(afb, m_log);
+
+		Q_ASSERT(afb->isPackedProcessingAfb());
+
+		if (isOutConnectedToTerminatorOnly(afb) == true)
+		{
+			return true;			// no code generation required
+		}
+
+		bool result = true;
+
+		const std::vector<LogicPin>& inputs = afb->inputs();
+
+		std::vector<std::pair<const UalSignal*, Address16>> inSignals;	//  vector of pair<inputSignal, readAddr>
+
+		for(const LogicPin& inPin : inputs)
+		{
+			const UalSignal* inSignal = getUalSignalByPinCaption(afb, inPin.caption(), true);
+
+			if (inSignal == nullptr)
+			{
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal not found for '%1' pin of AFB %2 (schema %3)").
+													arg(inPin.caption()).arg(afb->label()).arg(afb->schemaID()));
+				result = false;
+				continue;
+			}
+
+			Address16 readAddr;
+
+			if (inSignal->isDiscrete() == true)
+			{
+				readAddr = m_ualSignals.getSignalReadAddress(*inSignal, true);
+
+				if(readAddr.isValid() == false)
+				{
+					// Undefined UAL address of signal %1 (Logic schema %2).
+					//
+					m_log->errALC5105(inSignal->appSignalID(), inSignal->ualItemGuid(), inSignal->ualItemSchemaID());
+					result = false;
+					continue;
+				}
+			}
+			else
+			{
+				// Uncompatible signals connection (Logic schema '%1').
+				//
+				m_log->errALC5117(afb->guid(), afb->label(), inSignal->ualItemGuid(), inSignal->ualItemLabel(), afb->schemaID());
+				result = false;
+				continue;
+			}
+
+			inSignals.emplace_back(inSignal, readAddr);
+		}
+
+		RETURN_IF_FALSE(result);
+
+		//
+
+		const UalSignal* outSignal = getUalSignalByPinCaption(afb, Afb::OUT_PIN_CAPTION, false);
+
+		if (outSignal == nullptr)
+		{
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal not found for 'out' pin of AFB %1 (schema %2)").
+												arg(afb->label()).arg(afb->schemaID()));
+			return false;
+		}
+
+		if (outSignal->isDiscrete() == false)
+		{
+			// Uncompatible signals connection (Logic schema '%1').
+			//
+			m_log->errALC5117(afb->guid(), afb->label(), outSignal->ualItemGuid(), outSignal->ualItemLabel(), afb->schemaID());
+			return false;
+		}
+
+		Address16 outWriteAddr = m_ualSignals.getSignalWriteAddress(*outSignal);
+
+		if(outWriteAddr.isValid() == false)
+		{
+			// Undefined UAL address of signal %1 (Logic schema %2).
+			//
+			m_log->errALC5105(outSignal->appSignalID(), outSignal->ualItemGuid(), outSignal->ualItemSchemaID());
+			return false;
+		}
+
+		//
+
+		int opCode = afb->opcode();
+
+		switch(opCode)
+		{
+		case Afb::PACKED_OR_OPCODE:
+			result &= generatePackedOrAfbCode(code, afb, inSignals, outSignal, outWriteAddr);
+			break;
+
+		case Afb::PACKED_AND_OPCODE:
+			result &= generatePackedAndAfbCode(code, afb, inSignals, outSignal, outWriteAddr);
+			break;
+
+		default:
+			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::generatePackedOrAfbCode(CodeSnippet* code, const UalAfb* afb,
+													const std::vector<std::pair<const UalSignal*, Address16>>& inSignals,
+													const UalSignal* outSignal, const Address16& outWriteAddr)
+	{
+		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(afb, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(outSignal, m_log);
+
+		bool result = true;
+
+		bool hasConst1 = false;
+
+		for(const auto& [inSignal, addr] : inSignals)
+		{
+			if (inSignal->isConstDiscrete() == false)
+			{
+				continue;
+			}
+
+			if (inSignal->constDiscreteValue() == 1)
+			{
+				const UalItem* inItem = inSignal->ualItem();
+
+				TEST_PTR_LOG_RETURN_FALSE(inItem, m_log);
+
+				// Permanent const 1 on output of packed_or %1 (item %2, schema %3) due to const 1 on input (item %4, schema %5).
+				//
+				m_log->wrnALC5203(afb->afbStrID(), afb->label(), afb->guid(), afb->schemaID(),
+								inItem->label(), inItem->guid(), inItem->schemaID());
+
+				hasConst1 = true;
+			}
+		}
+
+		if (hasConst1 == true)
+		{
+			*code << CodeItem().movBitConst(outWriteAddr, 1, QString("%1 optimized processing").arg(afb->label()));
+			return true;
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::generatePackedAndAfbCode(CodeSnippet* code, const UalAfb* afb,
+													const std::vector<std::pair<const UalSignal*, Address16>>& inSignals,
+													const UalSignal* outSignal, const Address16& outWriteAddr)
+	{
+		bool result = true;
+		return result;
+	}
 
 	bool ModuleLogicCompiler::generateAfbBitAccCode(CodeSnippet* code, const UalAfb* ualAfb,
 													const BusProcessingStepInfo& bpStepInfo, bool* result)

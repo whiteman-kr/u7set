@@ -582,6 +582,19 @@ namespace Builder
 												 const LogicAfbSignal& outAfbSignal, const UalSignal* outUalSignal,
 												 const BusProcessingStepInfo& bpStepInfo);
 
+		// Packed AFBs code generation
+
+		bool generatePackedAfbCode(CodeSnippet* code, const UalAfb* afb);
+
+		bool generatePackedOrAfbCode(CodeSnippet* code, const UalAfb* afb,
+									 const std::vector<std::pair<const UalSignal*, Address16>>& inSignals,
+									 const UalSignal* outSignal, const Address16& outWriteAddr);
+
+		bool generatePackedAndAfbCode(CodeSnippet* code, const UalAfb* afb,
+									 const std::vector<std::pair<const UalSignal *, Address16>>& inSignals,
+									 const UalSignal* outSignal, const Address16& outWriteAddr);
+		//
+
 		bool generateAfbBitAccCode(CodeSnippet* code, const UalAfb* ualAfb,
 									const BusProcessingStepInfo& bpStepInfo, bool* result);
 

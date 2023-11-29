@@ -7739,6 +7739,34 @@ namespace Builder
 				  QString(tr("Signal %1 inversion can't be used in safety project.").arg(appSignalID)));
 	}
 
+	/// IssueCode: ALC5203
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Permanent const 1 on output of packed_or %1 (item %2, schema %3) due to const 1 on input (item %4, schema %5).
+	///
+	/// Parameters:
+	///		%1 packed_or ID
+	///		%2 packed_or label
+	///		%3 packed_or schema
+	///		%4 const 1 signal label
+	///		%5 const 1 signal schema
+	///
+	/// Description:
+	///		Permanent const 1 on output of packed_or due to const 1 on input. Check UAL.
+	///
+	void IssueLogger::wrnALC5203(QString packedOrID, QString item1, QUuid item1Uuid, QString schema1,
+								 QString item2, QUuid item2Uuid, QString schema2)
+	{
+		addItemsIssues(OutputMessageLevel::Warning0, 5203, item1Uuid, schema1);
+		addItemsIssues(OutputMessageLevel::Warning0, 5203, item2Uuid, schema2);
+
+		LOG_WARNING0(IssueType::AlCompiler,
+				  5203,
+				  QString(tr("Permanent const 1 on output of packed_or %1 (item %2, schema %3) due to const 1 on input (item %4, schema %5).")).
+						arg(packedOrID).arg(item1).arg(schema1).arg(item2).arg(schema2));
+	}
+
 	/// IssueCode: ALC5800
 	///
 	/// IssueType: Warning

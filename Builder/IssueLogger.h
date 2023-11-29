@@ -499,6 +499,9 @@ namespace Builder
 		void errALC5200(QString afbCaption, QUuid itemUuid, QString schemaID);			// AFB '%1' parameters calculation result out of Float32 range (Schema %2).
 		void errALC5201(QString appSignalID, QUuid itemUuid, QString schemaID);			// Reserved signal %1 used on schema %2.
 		void errALC5202(QString appSignalID);											// Signal %1 inversion can't be used in safety project.
+		void wrnALC5203(QString packedOrID, QString item1, QUuid item1Uuid, QString schema1,
+						QString item2, QUuid item2Uuid, QString schema2);				// Permanent const 1 on output of packed_or %1 (item %2, schema %3) due to const 1 on input (item %4, schema %5).
+
 
 		// firmware writing errors
 

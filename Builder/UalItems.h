@@ -12,6 +12,7 @@
 #include "../VFrame30/FblItem.h"
 #include "../VFrame30/LogicSchema.h"
 #include "../CommonLib/HashedVector.h"
+#include "../HardwareLib/Afb.h"
 
 #include "Parser.h"
 #include "AppLogicCode.h"
@@ -294,6 +295,7 @@ namespace Builder
 		bool isDynamicComaparator() const;
 		bool isComparator() const;
 		bool isBusProcessing() const;
+		bool isPackedProcessingAfb() const;
 
 		QString instantiatorID() const;
 
@@ -305,8 +307,8 @@ namespace Builder
 
 		int getParamIntValueByOpName(const QString& opName, bool* ok) const;
 
+		bool getAfbSignalByPin(const LogicPin& pin, LogicAfbSignal* afbSignal) const;
 		bool getAfbSignalByIndex(int index, LogicAfbSignal* afbSignal) const;
-		bool getAfbSignalByPin(const LogicPin& pin, LogicAfbSignal* afbSignal) const { return getAfbSignalByIndex(pin.afbOperandIndex(), afbSignal); }
 		bool getAfbSignalByPinUuid(QUuid pinUuid, LogicAfbSignal* afbSignal) const;
 		bool getAfbSignalByCaption(const QString& caption, LogicAfbSignal* afbSignal) const;
 

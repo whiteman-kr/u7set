@@ -832,6 +832,13 @@ namespace Builder
 		return m_isBusProcessing;
 	}
 
+	bool UalAfb::isPackedProcessingAfb() const
+	{
+		quint16 oc = opcode();
+
+		return oc == Afb::PACKED_OR_OPCODE || oc == Afb::PACKED_AND_OPCODE;
+	}
+
 	QString UalAfb::instantiatorID() const
 	{
 		if (m_instantiatorID.isEmpty() == false)
@@ -936,6 +943,11 @@ namespace Builder
 		}
 
 		return paramValue;
+	}
+
+	bool UalAfb::getAfbSignalByPin(const LogicPin& pin, LogicAfbSignal* afbSignal) const
+	{
+		return getAfbSignalByIndex(pin.afbOperandIndex(), afbSignal);
 	}
 
 	bool UalAfb::getAfbSignalByIndex(int index, LogicAfbSignal* afbSignal) const

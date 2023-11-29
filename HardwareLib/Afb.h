@@ -183,6 +183,8 @@ namespace Afb
 	};
 
 	inline const int AFB_NOT_ACC_OPCODE = 254;		// bit ACC based NOT opcode
+	inline const int PACKED_OR_OPCODE = 253;
+	inline const int PACKED_AND_OPCODE = 252;
 
 	//
 	// AfbSignal
