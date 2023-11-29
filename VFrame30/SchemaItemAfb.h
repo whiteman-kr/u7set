@@ -104,7 +104,5 @@ namespace VFrame30
 	private:
 		int m_precision = 2;
 		Afb::AfbElement m_afbElement;
-
-		QString m_packedLogicId;	// If this item is packed, this is the ID of the packed item.
 	};
 }

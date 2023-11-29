@@ -456,8 +456,6 @@ namespace VFrame30
 		vifble->set_precision(m_precision);
 		m_afbElement.saveToXml(vifble->mutable_afbelement());
 
-		vifble->set_packedlogicid(m_packedLogicId.toStdString());
-
 		return true;
 	}
 
@@ -513,8 +511,6 @@ namespace VFrame30
 				return false;
 			}
 		}
-
-		m_packedLogicId = QString::fromStdString(vifble.packedlogicid());
 
 		// Add afb properties to class meta object
 		//
@@ -1269,14 +1265,14 @@ namespace VFrame30
 		return m_afbElement.isPackedLogic();
 	}
 
-	void SchemaItemAfb::setPackedLogicId(const QString& value)
-	{
-		m_packedLogicId = value;
-	}
-
 	const QString& SchemaItemAfb::packedLogicId() const
 	{
-		return m_packedLogicId;
+		return m_afbElement.packedLogicId();
+	}
+
+	void SchemaItemAfb::setPackedLogicId(const QString& value)
+	{
+		m_afbElement.setPackedLogicId(value);
 	}
 
 	Afb::AfbElement::PackedLogicData SchemaItemAfb::packedLogic() const
