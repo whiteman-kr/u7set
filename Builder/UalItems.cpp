@@ -6,103 +6,6 @@ namespace Builder
 {
 	// ---------------------------------------------------------------------------------------
 	//
-	// LogicAfb class implementation
-	//
-	// ---------------------------------------------------------------------------------------
-
-	Afbl::Afbl(std::shared_ptr<Afb::AfbElement> afb) :
-		m_afb(afb)
-	{
-		if (m_afb == nullptr)
-		{
-			assert(false);
-			return;
-		}
-	}
-
-	Afbl::~Afbl()
-	{
-	}
-
-	bool Afbl::isBusProcessingAfb() const
-	{
-		switch(m_isBusProcessingAfb)
-		{
-		case -1:
-			{
-				// isBusProcessingAfbChecking() is not previously called
-				bool isBusProcessingAfb = isBusProcessingAfbChecking();
-
-				m_isBusProcessingAfb = (isBusProcessingAfb == false ? 0 : 1);
-
-				return isBusProcessingAfb;
-			}
-
-		case 0:
-			return false;
-
-		case 1:
-			return true;
-
-		default:
-			assert(false);			// disallowed value of m_isBusProcessingAfb
-		}
-
-		return false;
-	}
-
-	bool Afbl::isBusProcessingAfbChecking() const
-	{
-		const std::vector<Afb::AfbSignal>& inputSignals = afb().inputSignals();
-
-		bool hasBusInputs = false;
-
-		for(const Afb::AfbSignal& afbInSignal : inputSignals)
-		{
-			if (afbInSignal.type() == E::SignalType::Bus)
-			{
-				hasBusInputs = true;
-				break;
-			}
-
-			// non-bus inputs bus processing afb - it is ok
-		}
-
-		const std::vector<Afb::AfbSignal>& outputSignals = afb().outputSignals();
-
-		bool hasBusOutputs = false;
-		bool hasNonBusOutputs = false;
-
-		for(const Afb::AfbSignal& afbOutSignal : outputSignals)
-		{
-			if (afbOutSignal.type() == E::SignalType::Bus)
-			{
-				hasBusOutputs = true;
-				continue;
-			}
-
-			hasNonBusOutputs = true;
-		}
-
-		if (hasBusInputs == true && hasBusOutputs == true)
-		{
-			if (hasNonBusOutputs == true)
-			{
-				// what should be doing with non-bus output???
-				//
-				assert(false);
-				return false;
-			}
-
-			return true;
-		}
-
-		return false;
-	}
-
-
-	// ---------------------------------------------------------------------------------------
-	//
 	// AfbElements class implementation
 	//
 	// ---------------------------------------------------------------------------------------
@@ -115,18 +18,45 @@ namespace Builder
 	{
 	}
 
-	void AfbElements::insert(AfbElementShared afbElement)
+	void AfbElements::insert(const AfbElementShared& afbElement)
 	{
 		TEST_PTR_RETURN(afbElement);
 
-		if (m_afbElements.contains(afbElement->strID()))
+		m_elements.emplace_back(afbElement);
+		m_afbInstances.emplace(afbElement->opCode(), -1);	// init by -1, but used instances values is beginning from 0
+
+		//
+
+		const std::vector<Afb::AfbSignal>& inputSignals = afbElement->inputSignals();
+
+		bool hasBusInputs = false;
+
+		for(const Afb::AfbSignal& afbInSignal : inputSignals)
 		{
-			Q_ASSERT(false);	// duplicate afbElement->strID()
-			return;
+			if (afbInSignal.type() == E::SignalType::Bus)
+			{
+				hasBusInputs = true;
+				break;
+			}
 		}
 
-		m_afbElements.emplace(afbl->strID(), afbElement);
-		m_afbInstances.emplace(afbElement->opCode(), -1);	// init by -1, but used instances values is beginning from 0
+		const std::vector<Afb::AfbSignal>& outputSignals = afbElement->outputSignals();
+
+		bool hasBusOutputs = false;
+
+		for(const Afb::AfbSignal& afbOutSignal : outputSignals)
+		{
+			if (afbOutSignal.type() == E::SignalType::Bus)
+			{
+				hasBusOutputs = true;
+				break;
+			}
+		}
+
+		if (hasBusInputs == true && hasBusOutputs == true)
+		{
+			m_busProcessingAfbElemets.insert(calcHash(afbElement->strID()));
+		}
 	}
 
 	bool AfbElements::addInstance(UalAfb* ualAfb, IssueLogger* log)
@@ -228,9 +158,34 @@ namespace Builder
 		return it->second + 1;
 	}
 
+	bool AfbElements::isBusProcessingAfb(const QString& afbElementStrID) const
+	{
+		return m_busProcessingAfbElemets.contains(calcHash(afbElementStrID));
+	}
+
+	std::vector<AfbElementShared>::iterator AfbElements::begin()
+	{
+		return m_elements.begin();
+	}
+
+	std::vector<AfbElementShared>::const_iterator AfbElements::begin() const
+	{
+		return m_elements.begin();
+	}
+
+	std::vector<AfbElementShared>::iterator AfbElements::end()
+	{
+		return m_elements.begin();
+	}
+
+	std::vector<AfbElementShared>::const_iterator AfbElements::end() const
+	{
+		return m_elements.begin();
+	}
+
 	// ---------------------------------------------------------------------------------------
 	//
-	// AppItem class implementation
+	// UalItem class implementation
 	//
 	// ---------------------------------------------------------------------------------------
 

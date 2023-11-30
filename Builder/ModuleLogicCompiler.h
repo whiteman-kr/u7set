@@ -621,8 +621,6 @@ namespace Builder
 		bool getPinsAndSignalsBusSizes(const UalAfb* ualAfb, const std::vector<LogicPin>& pins,
 									   std::vector<std::vector<int>>* pinsSizes, int* signalsSize, bool isInputs,
 									   bool* allBusInputsConnectedToDiscretes);
-		bool isBusProcessingAfb(const UalAfb* ualAfb, bool* isBusProcessing);
-
 		//
 
 		bool generateBusComposerCode(CodeSnippet* code, const UalItem* ualItem);
@@ -995,7 +993,7 @@ namespace Builder
 		int m_optimizationNo = 0;
 		std::map<CodeOptimizationType, OptimizationInfo> m_optimizationsInfo;
 
-		AfbElements m_afbls;
+		AfbElements m_afbElements;
 
 		UalSignalsMap m_ualSignals;
 		UalAfbsMap m_ualAfbs;

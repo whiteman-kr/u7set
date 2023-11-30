@@ -13,13 +13,11 @@
 
 namespace Builder
 {
-
 	// ---------------------------------------------------------------------------------
 	//
 	//	ModuleLogicCompiler::BusFilling class implementation
 	//
 	// ---------------------------------------------------------------------------------
-
 
 	ModuleLogicCompiler::BusFilling::BusFilling(BusShared bus)
 	{
@@ -143,9 +141,14 @@ namespace Builder
 
 		m_lmDescription = appLogicCompiler.lmDescriptions()->get(lm);
 
-		m_lmShared = getLmSharedPtr();
+		Q_ASSERT(m_lmDescription != nullptr);
 
-		assert(m_lmDescription != nullptr);
+		for(const AfbElementShared& afbElement : m_lmDescription->afbElements())
+		{
+			m_afbElements.insert(afbElement);
+		}
+
+		m_lmShared = getLmSharedPtr();
 
 		m_appLogicData = appLogicCompiler.appLogicData();
 		m_resultWriter = appLogicCompiler.buildResultWriter();
@@ -868,13 +871,6 @@ namespace Builder
 
 	bool ModuleLogicCompiler::createUalItemsMaps()
 	{
-		m_afbls.clear();
-
-		for(std::shared_ptr<Afb::AfbElement> afbl : m_lmDescription->afbElements())
-		{
-			m_afbls.insert(afbl);
-		}
-
 		m_ualItems.clear();
 		m_pinParent.clear();
 
@@ -1004,22 +1000,14 @@ namespace Builder
 		return result;
 	}
 
-	UalAfb* ModuleLogicCompiler::createUalAfb(const UalItem& appItem)
+	UalAfb* ModuleLogicCompiler::createUalAfb(const UalItem& ualItem)
 	{
-		if (appItem.isAfb() == false)
+		if (ualItem.isAfb() == false)
 		{
 			return nullptr;
 		}
 
-		Afbl* afbl = m_afbls.value(appItem.strID(), nullptr);
-
-		if (afbl == nullptr)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return nullptr;
-		}
-
-		UalAfb* ualAfb = new UalAfb(appItem, afbl->isBusProcessingAfb());
+		UalAfb* ualAfb = new UalAfb(ualItem, m_afbElements.isBusProcessingAfb(ualItem.strID()));
 
 		if (ualAfb->calculateFbParamValues(this) == false)
 		{
@@ -1029,7 +1017,7 @@ namespace Builder
 
 		// get Functional Block instance
 		//
-		bool result = m_afbls.addInstance(ualAfb, m_log);
+		bool result = m_afbElements.addInstance(ualAfb, m_log);
 
 		if (result == false)
 		{
@@ -1048,6 +1036,8 @@ namespace Builder
 		// ths instance will fully configured just before packed logic processing
 		// so this configuration is dummy
 		//
+		l,;welf,w; lf,w;ef, w;ef
+
 		return -1;
 	}
 
@@ -8566,15 +8556,15 @@ namespace Builder
 
 		std::set<QString> processedInstantiatorsID;
 
-		for(Afbl* afbl : m_afbls)
+		for(const AfbElementShared& afbElement : m_afbElements)
 		{
-			TEST_PTR_CONTINUE(afbl);
+			TEST_PTR_CONTINUE(afbElement);
 
 			for(UalAfb* ualAfb : m_ualAfbs)
 			{
 				TEST_PTR_CONTINUE(ualAfb);
 
-				if (ualAfb->afbStrID() != afbl->strID())
+				if (ualAfb->afbStrID() != afbElement->strID())
 				{
 					continue;
 				}
@@ -9224,11 +9214,7 @@ namespace Builder
 
 		bool result = true;
 
-		bool isBusProcAfb = false;
-
-		result = isBusProcessingAfb(ualAfb, &isBusProcAfb);
-
-		RETURN_IF_FALSE(result)
+		bool isBusProcAfb = m_afbElements.isBusProcessingAfb(ualAfb->strID());
 
 		std::vector<int> busProcessingStepsSizes;
 
@@ -11289,27 +11275,6 @@ namespace Builder
 		}
 
 		return result;
-	}
-
-	bool ModuleLogicCompiler::isBusProcessingAfb(const UalAfb* ualAfb, bool* isBusProcessing)
-	{
-		if (ualAfb == nullptr || isBusProcessing == nullptr)
-		{
-			LOG_NULLPTR_ERROR(m_log);
-			return false;
-		}
-
-		Afbl* afbl = m_afbls.value(ualAfb->strID(), nullptr);
-
-		if (afbl == nullptr)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		*isBusProcessing = afbl->isBusProcessingAfb();
-
-		return true;
 	}
 
 	bool ModuleLogicCompiler::generateBusComposerCode(CodeSnippet* code,  const UalItem* ualItem)
@@ -13475,27 +13440,17 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::getBusProcessingParams(const UalAfb* appFb, bool& isBusProcessingAfb, QString& busTypeID)
+	bool ModuleLogicCompiler::getBusProcessingParams(const UalAfb* ualAfb, bool& isBusProcessingAfb, QString& busTypeID)
 	{
-		if (appFb == nullptr)
+		if (ualAfb == nullptr)
 		{
 			LOG_NULLPTR_ERROR(m_log);
 			return false;
 		}
 
-		isBusProcessingAfb = false;
 		busTypeID.clear();
 
-		const Afbl* afbl = m_afbls.value(appFb->afbStrID(), nullptr);
-
-		if (afbl == nullptr)
-		{
-			assert(false);
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		isBusProcessingAfb = afbl->isBusProcessingAfb();
+		isBusProcessingAfb = m_afbElements.isBusProcessingAfb(ualAfb->afbStrID());
 
 		if (isBusProcessingAfb == false)
 		{
@@ -13508,11 +13463,11 @@ namespace Builder
 
 		QStringList busTypeIDs;
 
-		for(const LogicPin& inPin : appFb->inputs())
+		for(const LogicPin& inPin : ualAfb->inputs())
 		{
 			LogicAfbSignal pinSignal;
 
-			result = appFb->getAfbSignalByPin(inPin, &pinSignal);
+			result = ualAfb->getAfbSignalByPin(inPin, &pinSignal);
 
 			if (result == false)
 			{
@@ -13552,7 +13507,7 @@ namespace Builder
 		{
 			// Cannot identify AFB bus type (Logic schema %1).
 			//
-			m_log->errALC5108(appFb->guid(), appFb->schemaID());
+			m_log->errALC5108(ualAfb->guid(), ualAfb->schemaID());
 			return false;
 		}
 
@@ -13570,7 +13525,7 @@ namespace Builder
 			{
 				// Different bus types on AFB inputs (Logic schema %1).
 				//
-				m_log->errALC5109(appFb->guid(), appFb->schemaID());
+				m_log->errALC5109(ualAfb->guid(), ualAfb->schemaID());
 				return false;
 			}
 		}
@@ -17718,7 +17673,7 @@ namespace Builder
 			aui.maxInstances = component->maxInstCount();
 			aui.version = component->impVersion();
 
-			aui.usedInstances = m_afbls.getUsedInstances(componentOpCode);
+			aui.usedInstances = m_afbElements.getUsedInstances(componentOpCode);
 
 			if (aui.maxInstances != 0)
 			{

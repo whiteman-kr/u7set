@@ -47,37 +47,6 @@ namespace Builder
 	class UalItem;
 	class ModuleLogicCompiler;
 
-/*	class Afbl
-	{
-		// Functional Block Library element
-		//
-	public:
-		Afbl(std::shared_ptr<Afb::AfbElement> afb);
-		virtual ~Afbl();
-
-		int opCode() const	{ return m_afb->opCode(); }
-
-		const Afb::AfbElement& afb() const { return *m_afb; }
-
-		QString strID() const { return m_afb->strID(); }
-
-		bool isBusProcessingAfb() const;
-
-		int maxInstances() const { return m_afb->component()->maxInstCount(); }
-		int version() const { return m_afb->component()->impVersion(); }
-		QString componentCaption() const { return m_afb->component()->caption(); }
-
-	private:
-		bool isBusProcessingAfbChecking() const;
-
-	private:
-		std::shared_ptr<Afb::AfbElement> m_afb;
-
-		mutable int m_isBusProcessingAfb = -1;			// -1 - isBusProcessingAfb() is not previously called
-														//  0 - afb is not bus processing element
-														//  1 - afb is bus processing element
-	};*/
-
 	class UalAfb;
 
 	class AfbElements
@@ -86,16 +55,23 @@ namespace Builder
 		AfbElements();
 		virtual ~AfbElements();
 
-		void insert(AfbElementShared afbElement);
-		bool addInstance(UalAfb* ualAfb, IssueLogger *log);
+		void insert(const AfbElementShared& afbElement);
+		bool addInstance(UalAfb* ualAfb, IssueLogger* log);
 
 		int getUsedInstances(int opCode) const;
+		bool isBusProcessingAfb(const QString& afbElementStrID) const;
+
+		std::vector<AfbElementShared>::iterator begin();
+		std::vector<AfbElementShared>::const_iterator begin() const;
+
+		std::vector<AfbElementShared>::iterator end();
+		std::vector<AfbElementShared>::const_iterator end() const;
 
 	private:
-		std::map<QString, AfbElementShared> m_afbElements;
+		std::vector<AfbElementShared> m_elements;
 		std::map<int, int> m_afbInstances;					// AFB opCode => current instance
 		std::map<QString, int> m_nonRamAfbInstantiators;	// Non RAM AFB instantiatorID => instance
-		std::set<Hash> m_busProcessingAfbElemets;
+		std::set<Hash> m_busProcessingAfbElemets;			// set of calcHash(afbElement->strID())
 	};
 
 	class UalItem : public QObject
