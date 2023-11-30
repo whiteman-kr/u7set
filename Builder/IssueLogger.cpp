@@ -6106,23 +6106,24 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Unknown AFB type (opCode) (Logic schema %1, item %2).
+	/// Title:	   Unknown AFB type (opCode = %1) (item %2, schema %3).
 	///
 	/// Parameters:
-	///		%1 Logic schema ID
+	///		%1 AFB opCode
 	///		%2 Schema item label
+	///		%3 Logic schema ID
 	///
 	/// Description:
-	///		Unknown AFB type (opCode) (Logic schema %1, item %2). Contact to RPCT developers.
+	///		Unknown AFB type (opCode). Contact to RPCT developers.
 	///
-	void IssueLogger::errALC5129(QUuid ualItemUuid, QString itemLabel, QString schemaID)
+	void IssueLogger::errALC5129(int opCode, QUuid ualItemUuid, QString itemLabel, QString schemaID)
 	{
 		addItemsIssues(OutputMessageLevel::Error, 5129, ualItemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5129,
-				  QString(tr("Unknown AFB type (opCode) (Logic schema %1, item %2).")).
-						arg(schemaID).arg(itemLabel));
+				  QString(tr("Unknown AFB type (opCode = %1) (item %2, schema %3).")).
+						arg(opCode).arg(itemLabel).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5130

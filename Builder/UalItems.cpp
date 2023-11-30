@@ -103,16 +103,33 @@ namespace Builder
 
 	// ---------------------------------------------------------------------------------------
 	//
-	// AfbMap class implementation
+	// AfbElements class implementation
 	//
 	// ---------------------------------------------------------------------------------------
 
-	AfblsMap::~AfblsMap()
+	AfbElements::AfbElements()
 	{
-		clear();
 	}
 
-	bool AfblsMap::addInstance(UalAfb* ualAfb, IssueLogger* log)
+	AfbElements::~AfbElements()
+	{
+	}
+
+	void AfbElements::insert(AfbElementShared afbElement)
+	{
+		TEST_PTR_RETURN(afbElement);
+
+		if (m_afbElements.contains(afbElement->strID()))
+		{
+			Q_ASSERT(false);	// duplicate afbElement->strID()
+			return;
+		}
+
+		m_afbElements.emplace(afbl->strID(), afbElement);
+		m_afbInstances.emplace(afbElement->opCode(), -1);	// init by -1, but used instances values is beginning from 0
+	}
+
+	bool AfbElements::addInstance(UalAfb* ualAfb, IssueLogger* log)
 	{
 		TEST_PTR_RETURN_FALSE(log);
 
@@ -129,35 +146,36 @@ namespace Builder
 
 		int opCode = ualAfb->opcode();
 
-		if (m_fblInstance.contains(opCode) == false)
+		auto instanceIt = m_afbInstances.find(opCode);
+
+		if (instanceIt == m_afbInstances.end())
 		{
-			// Unknown AFB type (opCode) (Logic schema %1, item %2).
+			// Unknown AFB type (opCode = %1) (item %2, schema %3).
 			//
-			log->errALC5129(ualAfb->guid(), ualAfb->label(), ualAfb->schemaID());
+			log->errALC5129(opCode, ualAfb->guid(), ualAfb->label(), ualAfb->schemaID());
 			return false;
 		}
 
-		int instance = -1;
+		int instance = instanceIt->second;		//  instance <= current instance
+
 		int maxInstances = ualAfb->maxInstances();
 
 		QString instantiatorID = ualAfb->instantiatorID();
 
 		bool afbHasRam = ualAfb->hasRam();
 
-		bool instantiatorAlredyInMap = m_nonRamFblInstance.contains(instantiatorID);
+		auto instantiatorIt = m_nonRamAfbInstantiators.find(instantiatorID);
 
-		if (afbHasRam == false && instantiatorAlredyInMap == true)
+		if (afbHasRam == false && instantiatorIt != m_nonRamAfbInstantiators.end())
 		{
 			// ualAfb has no RAM and its instantiatorID already exists - existing instance would be used
 			//
-			instance = m_nonRamFblInstance.value(instantiatorID);
+			instance = instantiatorIt->second;
 		}
 		else
 		{
 			// ualAfb has RAM or ualAfb has no RAM and its instantiatorID is not exist - new instance would be created
-
-			instance = m_fblInstance[opCode];
-
+			//
 			if (maxInstances > 0)
 			{
 				instance++;
@@ -175,19 +193,20 @@ namespace Builder
 				instance = 0;
 			}
 
-			m_fblInstance[opCode] = instance;
+			m_afbInstances.emplace(opCode, instance);
 
 			if (afbHasRam == false)
 			{
-				// append new instantiatorID for non-RAM afb
+				// append new instantiatorID for non-RAM afb instantiators
 				//
-				m_nonRamFblInstance.insert(instantiatorID, instance);
+				m_nonRamAfbInstantiators.emplace(instantiatorID, instance);
 			}
 		}
 
 		if (instance < 0)
 		{
-			assert(false);				// invalid instance number
+			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR(log);
 			return false;
 		}
 
@@ -196,48 +215,17 @@ namespace Builder
 		return true;
 	}
 
-	void AfblsMap::insert(std::shared_ptr<Afb::AfbElement> logicAfb)
+	int AfbElements::getUsedInstances(int opCode) const
 	{
-		if (logicAfb == nullptr)
+		auto it = m_afbInstances.find(opCode);
+
+		if (it == m_afbInstances.end())
 		{
-			assert(false);
-			return;
+			Q_ASSERT(false);
+			return 0;
 		}
 
-		if (contains(logicAfb->strID()))
-		{
-			assert(false);	// 	repeated guid
-			return;
-		}
-
-		Afbl* afbl = new Afbl(logicAfb);
-
-		HashedVector<QString, Afbl*>::insert(afbl->strID(), afbl);
-
-		// initialize map Fbl opCode -> current instance
-		//
-		if (m_fblInstance.contains(logicAfb->opCode()) == false)
-		{
-			m_fblInstance.insert(logicAfb->opCode(), -1);			// init by -1, but used instances values is beginning from 0
-		}
-	}
-
-	void AfblsMap::clear()
-	{
-		for(Afbl* afbl : *this)
-		{
-			if (afbl != nullptr)
-			{
-				delete afbl;
-			}
-		}
-
-		HashedVector<QString, Afbl*>::clear();
-	}
-
-	int AfblsMap::getUsedInstances(int opCode) const
-	{
-		return m_fblInstance.value(opCode, -1) + 1;
+		return it->second + 1;
 	}
 
 	// ---------------------------------------------------------------------------------------

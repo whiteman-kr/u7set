@@ -42,10 +42,12 @@ namespace Builder
 	typedef Afb::AfbSignal LogicAfbSignal;
 	typedef Afb::AfbParam LogicAfbParam;
 
+	using AfbElementShared = std::shared_ptr<Afb::AfbElement>;
+
 	class UalItem;
 	class ModuleLogicCompiler;
 
-	class Afbl
+/*	class Afbl
 	{
 		// Functional Block Library element
 		//
@@ -74,27 +76,26 @@ namespace Builder
 		mutable int m_isBusProcessingAfb = -1;			// -1 - isBusProcessingAfb() is not previously called
 														//  0 - afb is not bus processing element
 														//  1 - afb is bus processing element
-	};
-
-	typedef QHash<int, int> FblInstanceMap;				// Key is OpCode
-	typedef QHash<QString, int> NonRamFblInstanceMap;
+	};*/
 
 	class UalAfb;
 
-	class AfblsMap : public HashedVector<QString, Afbl*>
+	class AfbElements
 	{
 	public:
-		virtual ~AfblsMap();
+		AfbElements();
+		virtual ~AfbElements();
 
+		void insert(AfbElementShared afbElement);
 		bool addInstance(UalAfb* ualAfb, IssueLogger *log);
-		void insert(std::shared_ptr<Afb::AfbElement> logicAfb);
-		void clear();
 
 		int getUsedInstances(int opCode) const;
 
 	private:
-		FblInstanceMap m_fblInstance;						// Fbl opCode -> current instance
-		NonRamFblInstanceMap m_nonRamFblInstance;			// Non RAM Fbl StrID -> instance
+		std::map<QString, AfbElementShared> m_afbElements;
+		std::map<int, int> m_afbInstances;					// AFB opCode => current instance
+		std::map<QString, int> m_nonRamAfbInstantiators;	// Non RAM AFB instantiatorID => instance
+		std::set<Hash> m_busProcessingAfbElemets;
 	};
 
 	class UalItem : public QObject

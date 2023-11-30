@@ -969,6 +969,8 @@ namespace Builder
 	{
 		bool result = true;
 
+		bool packedLogicExists = false;
+
 		for(UalItem* ualItem : m_ualItems)
 		{
 			if (ualItem->isAfb() == false)
@@ -981,13 +983,72 @@ namespace Builder
 			if (ualAfb == nullptr)
 			{
 				result = false;
+				continue;
 			}
+
+			packedLogicExists |= ualAfb->isPackedLogic();
+		}
+
+		RETURN_IF_FALSE(result);
+
+		if (packedLogicExists && m_lmDescription->isBitAccAvailable() == false)
+		{
+			m_packedLogicAfbInstance = reserveLogicInstanceForPackedLogicProcessing();
+
+			result &= m_packedLogicAfbInstance != -1;
 		}
 
 		findLogicAfbInstances(Afb::AFB_AND, 1, &m_afbAndInstances);
 		findLogicAfbInstances(Afb::AFB_OR, 2, &m_afbOrInstances);
 
 		return result;
+	}
+
+	UalAfb* ModuleLogicCompiler::createUalAfb(const UalItem& appItem)
+	{
+		if (appItem.isAfb() == false)
+		{
+			return nullptr;
+		}
+
+		Afbl* afbl = m_afbls.value(appItem.strID(), nullptr);
+
+		if (afbl == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return nullptr;
+		}
+
+		UalAfb* ualAfb = new UalAfb(appItem, afbl->isBusProcessingAfb());
+
+		if (ualAfb->calculateFbParamValues(this) == false)
+		{
+			delete ualAfb;
+			return nullptr;
+		}
+
+		// get Functional Block instance
+		//
+		bool result = m_afbls.addInstance(ualAfb, m_log);
+
+		if (result == false)
+		{
+			delete ualAfb;
+			return nullptr;
+		}
+
+		m_ualAfbs.insert(ualAfb);
+
+		return ualAfb;
+	}
+
+	int ModuleLogicCompiler::reserveLogicInstanceForPackedLogicProcessing()
+	{
+		// reserve one instance of AFB LOGIC to process Packed Logic items
+		// ths instance will fully configured just before packed logic processing
+		// so this configuration is dummy
+		//
+		return -1;
 	}
 
 	bool ModuleLogicCompiler::createUalSignals()
@@ -7250,44 +7311,6 @@ namespace Builder
 		return false;
 	}
 
-	UalAfb* ModuleLogicCompiler::createUalAfb(const UalItem& appItem)
-	{
-		if (appItem.isAfb() == false)
-		{
-			return nullptr;
-		}
-
-		Afbl* afbl = m_afbls.value(appItem.strID(), nullptr);
-
-		if (afbl == nullptr)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return nullptr;
-		}
-
-		UalAfb* ualAfb = new UalAfb(appItem, afbl->isBusProcessingAfb());
-
-		if (ualAfb->calculateFbParamValues(this) == false)
-		{
-			delete ualAfb;
-			return nullptr;
-		}
-
-		// get Functional Block instance
-		//
-		bool result = m_afbls.addInstance(ualAfb, m_log);
-
-		if (result == false)
-		{
-			delete ualAfb;
-			return nullptr;
-		}
-
-		m_ualAfbs.insert(ualAfb);
-
-		return ualAfb;
-	}
-
 	bool ModuleLogicCompiler::setOutputSignalsAsComputed()
 	{
 		if (m_moduleLogic == nullptr)
@@ -10046,8 +10069,8 @@ namespace Builder
 
 		const std::vector<LogicPin>& inputs = afb->inputs();
 
-		std::vector<std::pair<const UalSignal*, Address16>> inSignals;	// vector of pair<inputSignal, readAddr>
-		std::map<const UalSignal*, bool> uniqueInSignals;				// UalSignal* => processed flag
+		std::vector<std::pair<const UalSignal*, Address16>> nonConstInSignals;	// vector of pair<inputSignal, readAddr>
+		std::set<const UalSignal*> uniqueInSignals;
 
 		int packedAfbOpcode = afb->opcode();
 
@@ -10066,6 +10089,11 @@ namespace Builder
 				LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal not found for '%1' pin of AFB %2 (schema %3)").
 													arg(inPin.caption()).arg(afb->label()).arg(afb->schemaID()));
 				result = false;
+				continue;
+			}
+
+			if (uniqueInSignals.contains(inSignal) == true)
+			{
 				continue;
 			}
 
@@ -10135,8 +10163,8 @@ namespace Builder
 				continue;
 			}
 
-			inSignals.emplace_back(inSignal, readAddr);
-			uniqueInSignals.emplace(inSignal, false);
+			nonConstInSignals.emplace_back(inSignal, readAddr);
+			uniqueInSignals.insert(inSignal);
 		}
 
 		RETURN_IF_FALSE(result);
@@ -10186,7 +10214,7 @@ namespace Builder
 			}
 			else
 			{
-				if (const1Count > 0 && nonConstSignalsCount == 0)
+				if (const1Count > 0 && nonConstInSignals.size() == 0)
 				{
 					constOutValue = 1;
 				}
@@ -10202,7 +10230,7 @@ namespace Builder
 			}
 			else
 			{
-				if (const0Count > 0 && nonConstSignalsCount == 0)
+				if (const0Count > 0 && nonConstInSignals.size() == 0)
 				{
 					constOutValue = 0;
 				}
@@ -10218,15 +10246,24 @@ namespace Builder
 
 		if (constOutValue.has_value() == true)
 		{
-			*code << CodeItem().movBitConst(outWriteAddr, constOutValue.value(), QString("%1 optimized processing").arg(afb->label()));
+			*code << CodeItem().movBitConst(outWriteAddr, constOutValue.value(),
+											QString("%1 optimized processing: out <= const %2").
+													arg(afb->label()).arg(constOutValue.value()));
 			return true;
 		}
 
-		if (nonConstSignalsCount == 1)
+		if (nonConstInSignals.size() == 1)
 		{
-			*code << CodeItem().movBit(outWriteAddr, constOutValue.value(), QString("%1 optimized processing").arg(afb->label()));
+			const UalSignal* inSignal = nonConstInSignals[0].first;
+			Address16 readAddr = nonConstInSignals[0].second;
+
+			*code << CodeItem().movBit(outWriteAddr, readAddr,
+									   QString("%1 optimized processing: out <= %2").
+											arg(afb->label()).arg(inSignal->appSignalID()));
 			return true;
 		}
+
+		//
 
 
 		Q_ASSERT(false);		// to do

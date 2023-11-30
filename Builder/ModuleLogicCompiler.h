@@ -266,6 +266,8 @@ namespace Builder
 		QString getUalItemStrID(const AppLogicItem& appLogicItem) const;
 
 		bool createUalAfbsMap();
+		UalAfb* createUalAfb(const UalItem& appItem);
+		int reserveLogicInstanceForPackedLogicProcessing();
 
 		//
 
@@ -468,7 +470,6 @@ namespace Builder
 		bool createFbForAnalogOutputSignalConversion(const AppSignal& signal, UalItem* appItem, bool* needConversion);
 		bool isDeviceAndAppSignalsIsCompatible(const Hardware::DeviceAppSignal& deviceAppSignal, const AppSignal& appSignal);
 
-		UalAfb* createUalAfb(const UalItem& appItem);
 		bool setOutputSignalsAsComputed();
 
 		bool processTxSignals();
@@ -994,10 +995,11 @@ namespace Builder
 		int m_optimizationNo = 0;
 		std::map<CodeOptimizationType, OptimizationInfo> m_optimizationsInfo;
 
-		AfblsMap m_afbls;
+		AfbElements m_afbls;
 
 		UalSignalsMap m_ualSignals;
 		UalAfbsMap m_ualAfbs;
+		int m_packedLogicAfbInstance = -1;			// AFB LOGIC instance reserved for packed logic processing
 
 		std::map<int, int> m_afbOrInstances;		// instanceNo => operand count
 		std::map<int, int> m_afbAndInstances;		// instanceNo => operand count
