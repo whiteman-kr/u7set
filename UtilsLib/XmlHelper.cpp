@@ -720,3 +720,12 @@ bool XmlReadHelper::readQVariantAttribute(const QString& name, QVariant* qv)
 	return result;
 }
 
+bool XmlReadHelper::readEnumValueAttributeAsInt(const QString& name, int* value)
+{
+	TEST_PTR_RETURN_FALSE(value);
+
+	QString attrName = name + QString(XmlAttribute::ENUM_VALUE_SUFFIX);
+
+	return readIntAttribute(attrName, value);;
+}
+

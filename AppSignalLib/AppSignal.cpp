@@ -1676,8 +1676,42 @@ bool AppSignal::readFromXml(XmlReadHelper& xml)
 
 		QVariant qv = spv.value();			// to set Type of qv equal to Type of spv.value()
 
-		result &= xml.readQVariantAttribute(name, &qv);
-		spv.setValue(name, qv, spv.isEnum());
+		if (spv.isEnum() == false)
+		{
+			result &= xml.readQVariantAttribute(name, &qv);
+			spv.setValue(name, qv, false);
+		}
+		else
+		{
+			QString name = spv.name();
+
+			if (name == AppSignalPropNames::ELECTRIC_UNIT)
+			{
+				E::ElectricUnit e;
+				result &= xml.readEnumValueAttribute(name, &e);
+				spv.setValue(name, TO_INT(e), true);
+				continue;
+			}
+
+			if (name == AppSignalPropNames::SENSOR_TYPE)
+			{
+				E::SensorType e;
+				result &= xml.readEnumValueAttribute(name, &e);
+				spv.setValue(name, TO_INT(e), true);
+				continue;
+			}
+
+			if (name == AppSignalPropNames::OUTPUT_MODE)
+			{
+				E::OutputMode e;
+				result &= xml.readEnumValueAttribute(name, &e);
+				spv.setValue(name, TO_INT(e), true);
+				continue;
+			}
+
+			result &= xml.readQVariantAttribute(name, &qv);
+			spv.setValue(name, qv, true);
+		}
 	}
 
 	spvs.serializeValuesToArray(&m_protoSpecPropValues);
