@@ -44,14 +44,13 @@ void SchemasAlbumGenerator::createSchemasAlbums(DbController* db, const AppSigna
 		}
 	}
 
-	Builder::SchemasReportOptions options;
-	options.load(db);
-	options.setTags(schemaTags);
+	Builder::SchemasReportOptions options = Builder::SchemasReportOptions::optionsForSchemasAlbum(db);
+	options.setSchemaTags(schemaTags);
 
 	// Show dialog with report options
 	//
 	DialogSchemasReport d(path, schemaTypesParams,
-						  Builder::SchemasReportGenerator::defaultFileTypesParams(db), options, parent);
+						  Builder::SchemasReportGenerator::defaultFileTypesParams(db), options, db, parent);
 	if (d.exec() != QDialog::Accepted)
 	{
 		return;
@@ -60,10 +59,7 @@ void SchemasAlbumGenerator::createSchemasAlbums(DbController* db, const AppSigna
 
 	options = d.options();
 	path = d.path();
-	options.save(db);
 	QSettings{}.setValue("SchemaEditor/Export/AlbumPath", path);
-
-	options.footers = true;	// When loading and storing options, keep footers true!
 
 	SchemasReportGeneratorThread r(theSettings.serverHost(),
 								   theSettings.serverPort(),
@@ -135,7 +131,7 @@ void SchemasReportGeneratorThread::run(TaskType task,
 {
 	// Create View
 
-	std::shared_ptr<ReportSchemaView> schemaView = std::make_shared<ReportSchemaView>(m_options.itemsLabels);
+	std::shared_ptr<ReportSchemaView> schemaView = std::make_shared<ReportSchemaView>(m_options.itemsLabels());
 
 	schemaView->session().setProject(m_projectName);
 	schemaView->session().setUsername(m_userName);
@@ -171,18 +167,18 @@ void SchemasReportGeneratorThread::run(TaskType task,
 	{
 	case TaskType::ExportFilesToMultiplePdf:
 		{
-			QObject::connect(thread, &QThread::started, worker, &SchemasReportGenerator::exportFilesToMultiplePdf);
+			QObject::connect(thread, &QThread::started, worker, &SchemasReportGenerator::exportSchemasToMultiplePdf);
 		}
 		break;
 	case TaskType::ExportFilesToSinglePdf:
 		{
-			QObject::connect(thread, &QThread::started, worker, &SchemasReportGenerator::exportFilesToSinglePdf);
+			QObject::connect(thread, &QThread::started, worker, &SchemasReportGenerator::exportSchemasToSinglePdf);
 		}
 		break;
 	case TaskType::ExportAllSchemasToAlbum:
 		{
 			Q_ASSERT(files.empty() == true);	// No files should be here
-			QObject::connect(thread, &QThread::started, worker, &SchemasReportGenerator::exportAllSchemasToAlbums);
+			QObject::connect(thread, &QThread::started, worker, &SchemasReportGenerator::exportSchemasToAlbums);
 		}
 		break;
 	}

@@ -495,8 +495,16 @@ namespace VFrame30
 
 		// ---
 		//
-		QRectF pageRect(-0.1, -0.1, docWidth() + 0.1, docHeight() + 0.1);  // +/- some space to avoid single line not filled.
-		p->fillRect(pageRect, backgroundColor());
+		if (drawParam->pdfMode() == false)
+		{
+			QRectF pageRect(-0.1, -0.1, docWidth() + 0.1, docHeight() + 0.1); // +/- some space to avoid single line not filled.
+			p->fillRect(pageRect, backgroundColor());
+		}
+		else
+		{
+			QRectF pageRect(0, 0, docWidth(), docHeight());
+			p->fillRect(pageRect, backgroundColor());
+		}
 
 		// Draw items by layers which has Show flag
 		//

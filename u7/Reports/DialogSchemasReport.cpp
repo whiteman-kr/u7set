@@ -228,6 +228,98 @@ void DialogSchemasReportTypePageSetup::fillTree()
 }
 
 
+VariablesWidget::VariablesWidget(const std::map<QString, QString>& variables):
+	m_variables(variables)
+{
+	QVBoxLayout* variablesLayout = new QVBoxLayout(this);
+	m_variablesTree = new QTreeWidget();
+	m_variablesTree->setHeaderLabels(QStringList() << "Name"
+												   << "Value");
+
+	for (const auto& [name, value] : m_variables)
+	{
+		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << name << value);
+		item->setFlags(item->flags() | Qt::ItemIsEditable);
+		m_variablesTree->addTopLevelItem(item);
+	}
+	variablesLayout->addWidget(m_variablesTree);
+	m_variablesTree->resizeColumnToContents(0);
+	m_variablesTree->resizeColumnToContents(1);
+
+	QHBoxLayout* buttonLayout = new QHBoxLayout();
+	variablesLayout->addLayout(buttonLayout);
+
+	QPushButton* b = new QPushButton("Add");
+	connect(b, &QPushButton::clicked, this, &VariablesWidget::onAddVariableClicked);
+	buttonLayout->addWidget(b);
+
+	b = new QPushButton("Remove");
+	connect(b, &QPushButton::clicked, this, &VariablesWidget::onRemoveVariableClicked);
+	buttonLayout->addWidget(b);
+
+	buttonLayout->addStretch();
+
+	return;
+}
+
+std::map<QString, QString> VariablesWidget::getVariables() const
+{
+	std::map<QString, QString> variables;
+	for (int i = 0; i < m_variablesTree->topLevelItemCount(); i++)
+	{
+		QString name = m_variablesTree->topLevelItem(i)->text(0);
+		QString value = m_variablesTree->topLevelItem(i)->text(1);
+		if (name.isEmpty() == false)
+		{
+			variables[name] = value;
+		}
+	}
+	return variables;
+}
+
+
+void VariablesWidget::onAddVariableClicked()
+{
+	QStringList l;
+	for (int i = 0; i < m_variablesTree->topLevelItemCount(); i++)
+	{
+		l.push_back(m_variablesTree->topLevelItem(i)->text(0));
+	}
+
+	QString name;
+	int value = m_variablesTree->topLevelItemCount();
+	do
+	{
+		name = tr("Variable%1").arg(++value);
+	} while (l.contains(name) == true);
+
+
+	QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << name << tr("Value"));
+	item->setFlags(item->flags() | Qt::ItemIsEditable);
+	m_variablesTree->addTopLevelItem(item);
+	m_variablesTree->resizeColumnToContents(0);
+	m_variablesTree->resizeColumnToContents(1);
+}
+
+void VariablesWidget::onRemoveVariableClicked()
+{
+	const auto items = m_variablesTree->selectedItems();
+	for (const auto& item : items)
+	{
+		int index = m_variablesTree->indexOfTopLevelItem(item);
+		if (index == -1)
+		{
+			return;
+		}
+
+		QTreeWidgetItem* item = m_variablesTree->takeTopLevelItem(index);
+		if (item != nullptr)
+		{
+			delete item;
+		}
+	}
+}
+
 //
 // DialogSchemasReport
 //
@@ -235,90 +327,155 @@ DialogSchemasReport::DialogSchemasReport(const QString& path,
 										 const std::vector<Builder::SchemaTypesParams>& schemaTypesParams,
 										 const std::vector<Builder::SchemaTypesParams>& defaultFileTypeParams,
 										 const SchemasReportOptions& options,
-										 QWidget *parent):
+										 DbController* db,
+										 QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	m_reportPath(path),
 	m_schemaTypesParams(schemaTypesParams),
 	m_defaultFileTypeParams(defaultFileTypeParams),
-	m_options(options)
+	m_options(options),
+	m_db(db)
 {
 	setWindowTitle(tr("Create Schemas Album"));
 	setMinimumWidth(500);
 
-	// Report path
-	//
-	QLabel* label = new QLabel(tr("Album path:"));
-	m_editReportPath = new QLineEdit(m_reportPath);
+	QVBoxLayout* mainLayout = new QVBoxLayout();
 
-	QPushButton* browseButton = new QPushButton(tr("Browse..."));
-	connect(browseButton, &QPushButton::clicked, this, &DialogSchemasReport::browseClicked);
-
-	QHBoxLayout* reportPathLayout = new QHBoxLayout();
-	reportPathLayout->addWidget(label);
-	reportPathLayout->addWidget(m_editReportPath);
-	reportPathLayout->addWidget(browseButton);
-
-	// Schema types tree
-	//
-	m_schemaTypesTree = new QTreeWidget();
-	m_schemaTypesTree->setHeaderLabels({tr("Schema type")});
-	m_schemaTypesTree->setRootIsDecorated(false);
-	for (const auto& stp : schemaTypesParams)
 	{
-		QTreeWidgetItem* item = new QTreeWidgetItem({stp.caption()});
-		item->setCheckState(0, stp.selected() ? Qt::Checked : Qt::Unchecked);
-		m_schemaTypesTree->addTopLevelItem(item);
+		// Report path
+		//
+		QLabel* label = new QLabel(tr("Album path:"));
+		m_editReportPath = new QLineEdit(m_reportPath);
+
+		QPushButton* browseButton = new QPushButton(tr("Browse..."));
+		connect(browseButton, &QPushButton::clicked, this, &DialogSchemasReport::browseClicked);
+
+		QHBoxLayout* reportPathLayout = new QHBoxLayout();
+		reportPathLayout->addWidget(label);
+		reportPathLayout->addWidget(m_editReportPath);
+		reportPathLayout->addWidget(browseButton);
+		mainLayout->addLayout(reportPathLayout);
 	}
 
-	// Schema tags tree
+
+	// Tab widget
 	//
-	m_schemaTagsTree = new QTreeWidget();
-	m_schemaTagsTree->setHeaderLabels({tr("Schema tag")});
-	m_schemaTagsTree->setRootIsDecorated(false);
-	for (const auto& [tag, tagSelected] : options.schemaTags)
 	{
-		QTreeWidgetItem* item = new QTreeWidgetItem({tag});
-		item->setCheckState(0, tagSelected ? Qt::Checked : Qt::Unchecked);
-		m_schemaTagsTree->addTopLevelItem(item);
+		QTabWidget* tabWidget = new QTabWidget();
+
+		// Schemas tab
+		//
+		{
+			QWidget* schemasTab = new QWidget();
+
+			QVBoxLayout* schemasLayout = new QVBoxLayout(schemasTab);
+
+			// Schema types tree
+			//
+			m_schemaTypesTree = new QTreeWidget();
+			m_schemaTypesTree->setHeaderLabels({tr("Schema type")});
+			m_schemaTypesTree->setRootIsDecorated(false);
+			for (const auto& stp : schemaTypesParams)
+			{
+				QTreeWidgetItem* item = new QTreeWidgetItem({stp.caption()});
+				item->setCheckState(0, stp.selected() ? Qt::Checked : Qt::Unchecked);
+				m_schemaTypesTree->addTopLevelItem(item);
+			}
+			schemasLayout->addWidget(m_schemaTypesTree);
+
+			// Schema tags tree
+			//
+			m_schemaTagsTree = new QTreeWidget();
+			m_schemaTagsTree->setHeaderLabels({tr("Schema tag")});
+			m_schemaTagsTree->setRootIsDecorated(false);
+			for (const auto& [tag, tagSelected] : options.schemaTags())
+			{
+				QTreeWidgetItem* item = new QTreeWidgetItem({tag});
+				item->setCheckState(0, tagSelected ? Qt::Checked : Qt::Unchecked);
+				m_schemaTagsTree->addTopLevelItem(item);
+			}
+			schemasLayout->addWidget(m_schemaTagsTree);
+
+			tabWidget->addTab(schemasTab, tr("Schemas"));
+		}
+
+
+		// Options tab
+		//
+		{
+			QWidget* optionsTab = new QWidget();
+
+			QVBoxLayout* optionsLayout = new QVBoxLayout(optionsTab);
+
+			// Options buttons
+			//
+			m_checkAddTableOfContents = new QCheckBox(tr("Add table of contents"));
+			m_checkAddTableOfContents->setChecked(m_options.tableOfContents());
+			optionsLayout->addWidget(m_checkAddTableOfContents);
+
+			m_checkAddFolders = new QCheckBox(tr("Add folders names to table of contents"));
+			m_checkAddFolders->setChecked(m_options.folders());
+			optionsLayout->addWidget(m_checkAddFolders);
+
+			m_checkAddFooters = new QCheckBox(tr("Add pages footers"));
+			m_checkAddFooters->setChecked(m_options.footers());
+			optionsLayout->addWidget(m_checkAddFooters);
+
+			m_checkSignalsDetails = new QCheckBox(tr("Add schema signals pages"));
+			m_checkSignalsDetails->setChecked(m_options.signalsDetails());
+			optionsLayout->addWidget(m_checkSignalsDetails);
+
+			m_checkItemsLabels = new QCheckBox(tr("Show schema items labels"));
+			m_checkItemsLabels->setChecked(m_options.itemsLabels());
+			optionsLayout->addWidget(m_checkItemsLabels);
+
+			optionsLayout->addStretch();
+
+			{
+				QHBoxLayout* buttonLayout = new QHBoxLayout();
+				QPushButton* pageSetupButton = new QPushButton(tr("Page Setup..."));
+				connect(pageSetupButton, &QPushButton::clicked, this, &DialogSchemasReport::pageSetupClicked);
+				buttonLayout->addWidget(pageSetupButton);
+				buttonLayout->addStretch();
+				optionsLayout->addLayout(buttonLayout);
+			}
+
+			tabWidget->addTab(optionsTab, tr("Options"));
+		}
+
+		// Variables tab
+		//
+		{
+			m_userVariables = new VariablesWidget(m_options.userVariables());
+			tabWidget->addTab(m_userVariables, tr("User Variables"));
+
+			m_projectVariables = new VariablesWidget(m_options.projectVariables());
+			tabWidget->addTab(m_projectVariables, tr("Project Variables"));
+		}
+
+		mainLayout->addWidget(tabWidget);
 	}
-
-	// Options buttons
-	//
-	//m_checkAddPageNumbers = new QCheckBox(tr("Add schemas information and page numbers"));
-	//m_checkAddPageNumbers->setChecked(m_options.addPageNumbers);
-
-	m_checkSignalsDetails= new QCheckBox(tr("Schema signals details"));
-	m_checkSignalsDetails->setChecked(m_options.signalsDetails);
-
-	m_checkItemsLabels = new QCheckBox(tr("Schema items labels"));
-	m_checkItemsLabels->setChecked(m_options.itemsLabels);
 
 	// Buttons layout
 	//
-	QPushButton* okButton = new QPushButton(tr("OK"));
-	connect(okButton, &QPushButton::clicked, this, &DialogSchemasReport::okClicked);
+	{
+		QPushButton* applyButton = new QPushButton(tr("Apply"));
+		connect(applyButton, &QPushButton::clicked, this, &DialogSchemasReport::applyClicked);
 
-	QPushButton* cancelButton = new QPushButton(tr("Cancel"));
-	connect(cancelButton, &QPushButton::clicked, this, &QDialog::reject);
+		QPushButton* okButton = new QPushButton(tr("Generate"));
+		connect(okButton, &QPushButton::clicked, this, &DialogSchemasReport::okClicked);
 
-	QHBoxLayout* buttonsLayout = new QHBoxLayout();
+		QPushButton* cancelButton = new QPushButton(tr("Cancel"));
+		connect(cancelButton, &QPushButton::clicked, this, &QDialog::reject);
 
-	QPushButton* pageSetupButton = new QPushButton(tr("Page Setup..."));
-	connect(pageSetupButton, &QPushButton::clicked, this, &DialogSchemasReport::pageSetupClicked);
+		QHBoxLayout* buttonsLayout = new QHBoxLayout();
+		buttonsLayout->addWidget(applyButton);
+		buttonsLayout->addStretch();
+		buttonsLayout->addWidget(okButton);
+		buttonsLayout->addWidget(cancelButton);
+		mainLayout->addLayout(buttonsLayout);
+	}
 
-	buttonsLayout->addWidget(pageSetupButton);
-	buttonsLayout->addStretch();
-	buttonsLayout->addWidget(okButton);
-	buttonsLayout->addWidget(cancelButton);
-
-	//
-	QVBoxLayout* mainLayout = new QVBoxLayout();
-	mainLayout->addLayout(reportPathLayout);
-	mainLayout->addWidget(m_schemaTypesTree);
-	mainLayout->addWidget(m_schemaTagsTree);
-	mainLayout->addWidget(m_checkSignalsDetails);
-	mainLayout->addWidget(m_checkItemsLabels);
-	mainLayout->addLayout(buttonsLayout);
 	setLayout(mainLayout);
 }
 
@@ -337,6 +494,11 @@ QString DialogSchemasReport::path() const
 	return m_reportPath;
 }
 
+void DialogSchemasReport::applyClicked()
+{
+	applyOptions();
+}
+
 void DialogSchemasReport::okClicked()
 {
 	QString text = m_editReportPath->text();
@@ -348,46 +510,11 @@ void DialogSchemasReport::okClicked()
 	}
 	m_reportPath = text;
 
-	//m_options.addPageNumbers = m_checkAddPageNumbers->isChecked();
-	m_options.signalsDetails = m_checkSignalsDetails->isChecked();
-	m_options.itemsLabels = m_checkItemsLabels->isChecked();
-
-	int selectedTypesCount = 0;
-	for (int i = 0; i < m_schemaTypesTree->topLevelItemCount(); i++)
+	if (applyOptions() == false)
 	{
-		QTreeWidgetItem* item = m_schemaTypesTree->topLevelItem(i);
-		if (item->checkState(0) == Qt::Checked)
-		{
-			selectedTypesCount++;
-		}
-
-		m_schemaTypesParams[i].setSelected(item->checkState(0) == Qt::Checked);
-	}
-
-	if (selectedTypesCount == 0)
-	{
-		QMessageBox::critical(this, qAppName(), tr("Please choose at least one file type!"));
 		return;
 	}
-
-	int selectedTagsCount = 0;
-	for (int i = 0; i < m_schemaTagsTree->topLevelItemCount(); i++)
-	{
-		QTreeWidgetItem* item = m_schemaTagsTree->topLevelItem(i);
-		if (item->checkState(0) == Qt::Checked)
-		{
-			selectedTagsCount++;
-		}
-
-		m_options.schemaTags[item->text(0)] = item->checkState(0) == Qt::Checked;
-	}
-
-	if (selectedTagsCount == 0)
-	{
-		QMessageBox::critical(this, qAppName(), tr("Please choose at least one schema tag!"));
-		return;
-	}
-
+	
 	QDialog::accept();
 }
 
@@ -414,7 +541,63 @@ void DialogSchemasReport::pageSetupClicked()
 	return;
 }
 
-void DialogSchemasReport::optionsClicked()
+bool DialogSchemasReport::applyOptions()
 {
+	// Save selected types
+	//
+	int selectedTypesCount = 0;
+	for (int i = 0; i < m_schemaTypesTree->topLevelItemCount(); i++)
+	{
+		QTreeWidgetItem* item = m_schemaTypesTree->topLevelItem(i);
+		if (item->checkState(0) == Qt::Checked)
+		{
+			selectedTypesCount++;
+		}
+
+		m_schemaTypesParams[i].setSelected(item->checkState(0) == Qt::Checked);
+	}
+
+	if (selectedTypesCount == 0)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Please choose at least one file type!"));
+		return false;
+	}
+
+	// Save tags
+	//
+	int selectedTagsCount = 0;
+	for (int i = 0; i < m_schemaTagsTree->topLevelItemCount(); i++)
+	{
+		QTreeWidgetItem* item = m_schemaTagsTree->topLevelItem(i);
+		if (item->checkState(0) == Qt::Checked)
+		{
+			selectedTagsCount++;
+		}
+
+		m_options.schemaTags()[item->text(0)] = item->checkState(0) == Qt::Checked;
+	}
+
+	if (selectedTagsCount == 0)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Please choose at least one schema tag!"));
+		return false;
+	}
+
+	// Save options
+	//
+	m_options.setFolders(m_checkAddFolders->isChecked());
+	m_options.setFooters(m_checkAddFooters->isChecked());
+	m_options.setTableOfContents(m_checkAddTableOfContents->isChecked());
+	m_options.setSignalsDetails(m_checkSignalsDetails->isChecked());
+	m_options.setItemsLabels(m_checkItemsLabels->isChecked());
+
+	// Save variables
+	//
+	m_options.setUserVariables(m_userVariables->getVariables());
+	m_options.setProjectVariables(m_projectVariables->getVariables());
+
+	m_options.save(m_db);
+
+	return true;
 
 }

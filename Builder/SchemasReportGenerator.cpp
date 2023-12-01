@@ -5,6 +5,29 @@ namespace Builder
 {
 	using namespace ReportLib;
 
+
+	SchemasReportOptions SchemasReportOptions::optionsForSingleSchema()
+	{
+		SchemasReportOptions options;
+
+		// All options are cleared
+
+		return options;
+	}
+
+	SchemasReportOptions SchemasReportOptions::optionsForSchemasAlbum(DbController* db)
+	{
+		SchemasReportOptions options;
+
+		// Default options are set
+
+		options.setFooters(true);
+		options.setTableOfContents(true);
+
+		options.load(db);
+		return options;
+	}
+
 	//
 	// SchemasReportOptions
 	//
@@ -17,18 +40,41 @@ namespace Builder
 		}
 
 		QString value;
-		db->getUserProperty("SchemasReportOptions.footers", &value, "false", nullptr);
-		footers = (value == "true") ? true : false;
+		db->getUserProperty("SchemasReportOptions.footers", &value, QString(), nullptr);
+		if (value.isEmpty() == false)
+		{
+			m_footers = (value == "true") ? true : false;
+		}
 
-		db->getUserProperty("SchemasReportOptions.itemsLabels", &value, "false", nullptr);
-		itemsLabels = (value == "true") ? true : false;
+		db->getUserProperty("SchemasReportOptions.itemsLabels", &value, QString(), nullptr);
+		if (value.isEmpty() == false)
+		{
+			m_itemsLabels = (value == "true") ? true : false;
+		}
 
-		db->getUserProperty("SchemasReportOptions.signalsDetails", &value, "false", nullptr);
-		signalsDetails = (value == "true") ? true : false;
+		db->getUserProperty("SchemasReportOptions.folders", &value, QString(), nullptr);
+		if (value.isEmpty() == false)
+		{
+			m_folders = (value == "true") ? true : false;
+		}
 
-		db->getUserProperty("SchemasReportOptions.schemaTags", &value, "false", nullptr);
+		db->getUserProperty("SchemasReportOptions.tableOfContents", &value, QString(), nullptr);
+		if (value.isEmpty() == false)
+		{
+			m_tableOfContents = (value == "true") ? true : false;
+		}
+
+		db->getUserProperty("SchemasReportOptions.signalsDetails", &value, QString(), nullptr);
+		if (value.isEmpty() == false)
+		{
+			m_signalsDetails = (value == "true") ? true : false;
+		}
+
+		// Load schema tags
+		//
+		db->getUserProperty("SchemasReportOptions.schemaTags", &value, QString(), nullptr);
+		m_schemaTags.clear();
 		QStringList tagsStrings = value.split(";", Qt::SkipEmptyParts);
-		schemaTags.clear();
 		for (const QString& tagsString : tagsStrings)
 		{
 			QStringList ts = tagsString.split("=");
@@ -37,9 +83,52 @@ namespace Builder
 				Q_ASSERT(false);
 				continue;
 			}
-			schemaTags[ts[0]] = ts[1] == "1" ? true : false;
+			m_schemaTags[ts[0]] = ts[1] == "1" ? true : false;
 		}
 
+		// Load user variables
+		//
+		{
+			value.clear();
+			db->getUserProperty("SchemasReportOptions.userVariablesNames", &value, nullptr);
+			QStringList variablesNames = value.split("`", Qt::SkipEmptyParts);
+
+			value.clear();
+			db->getUserProperty("SchemasReportOptions.userVariablesValues", &value, nullptr);
+			QStringList variablesValues = value.split("`", Qt::SkipEmptyParts);
+
+			m_userVariables.clear();
+			if (variablesNames.size() == variablesValues.size())
+			{
+				int size = variablesNames.size();
+				for (int i = 0; i < size; i++)
+				{
+					m_userVariables[variablesNames[i]] = variablesValues[i];
+				}
+			}
+		}
+
+		// Load project variables
+		//
+		{
+			value.clear();
+			db->getProjectProperty("SchemasReportOptions.projectVariablesNames", &value, nullptr);
+			QStringList variablesNames = value.split("`", Qt::SkipEmptyParts);
+
+			value.clear();
+			db->getProjectProperty("SchemasReportOptions.projectVariablesValues", &value, nullptr);
+			QStringList variablesValues = value.split("`", Qt::SkipEmptyParts);
+
+			m_projectVariables.clear();
+			if (variablesNames.size() == variablesValues.size())
+			{
+				int size = variablesNames.size();
+				for (int i = 0; i < size; i++)
+				{
+					m_projectVariables[variablesNames[i]] = variablesValues[i];
+				}
+			}
+		}
 
 		return true;
 	}
@@ -52,30 +141,152 @@ namespace Builder
 			return false;
 		}
 
-		db->setUserProperty("SchemasReportOptions.footers", footers ? "true" : "false", nullptr);
-		db->setUserProperty("SchemasReportOptions.itemsLabels", itemsLabels ? "true" : "false", nullptr);
-		db->setUserProperty("SchemasReportOptions.signalsDetails", signalsDetails ? "true" : "false", nullptr);
+		db->setUserProperty("SchemasReportOptions.folders", folders() ? "true" : "false", nullptr);
+		db->setUserProperty("SchemasReportOptions.tableOfContents", tableOfContents() ? "true" : "false", nullptr);
+		db->setUserProperty("SchemasReportOptions.footers", footers() ? "true" : "false", nullptr);
+		db->setUserProperty("SchemasReportOptions.itemsLabels", itemsLabels() ? "true" : "false", nullptr);
+		db->setUserProperty("SchemasReportOptions.signalsDetails", signalsDetails() ? "true" : "false", nullptr);
 
+		// Save schema tags
+		//
 		QString tagsString;
-		for (const auto& it : schemaTags)
+		for (const auto& it : m_schemaTags)
 		{
 			tagsString.append(it.first + "=");
 			tagsString.append(it.second == true ? "1;" : "0;");
 		}
 		db->setUserProperty("SchemasReportOptions.schemaTags", tagsString, nullptr);
 
+		// Save user variables
+		//
+		{
+			QStringList variablesNames;
+			QStringList variablesValues;
+			for (const auto& [name, value] : m_userVariables)
+			{
+				variablesNames.push_back(name);
+				variablesValues.push_back(value);
+			}
+			db->setUserProperty("SchemasReportOptions.userVariablesNames", variablesNames.join('`'), nullptr);
+			db->setUserProperty("SchemasReportOptions.userVariablesValues", variablesValues.join('`'), nullptr);
+		}
+
+		// Save project variables
+		//
+		{
+			QStringList variablesNames;
+			QStringList variablesValues;
+			for (const auto& [name, value] : m_projectVariables)
+			{
+				variablesNames.push_back(name);
+				variablesValues.push_back(value);
+			}
+			db->setProjectProperty("SchemasReportOptions.projectVariablesNames", variablesNames.join('`'), nullptr);
+			db->setProjectProperty("SchemasReportOptions.projectVariablesValues", variablesValues.join('`'), nullptr);
+		}
+
 		return true;
 	}
 
-	void SchemasReportOptions::setTags(const std::set<QString>& tagsSet)
+		void SchemasReportOptions::setFooters(bool value)
+	{
+		m_footers = value;
+	}
+
+	bool SchemasReportOptions::footers() const
+	{
+		return m_footers;
+	}
+
+	void SchemasReportOptions::setItemsLabels(bool value)
+	{
+		m_itemsLabels = value;
+	}
+
+	bool SchemasReportOptions::itemsLabels() const
+	{
+		return m_itemsLabels;
+	}
+
+	void SchemasReportOptions::setFolders(bool value)
+	{
+		m_folders = value;
+	}
+
+	bool SchemasReportOptions::folders() const
+	{
+		return m_folders;
+	}
+
+	void SchemasReportOptions::setTableOfContents(bool value)
+	{
+		m_tableOfContents = value;
+	}
+
+	bool SchemasReportOptions::tableOfContents() const
+	{
+		return m_tableOfContents;
+	}
+
+	void SchemasReportOptions::setSignalsDetails(bool value)
+	{
+		m_signalsDetails = value;
+	}
+
+	bool SchemasReportOptions::signalsDetails() const
+	{
+		return m_signalsDetails;
+	}
+
+	void SchemasReportOptions::setSchemaTags(const std::set<QString>& tagsSet)
 	{
 		for (const QString& tag : tagsSet)
 		{
-			if (schemaTags.find(tag) == schemaTags.end())
+			if (m_schemaTags.find(tag) == m_schemaTags.end())
 			{
-				schemaTags[tag] = true;
+				m_schemaTags[tag] = true;
 			}
 		}
+	}
+
+	const std::map<QString, bool>& SchemasReportOptions::schemaTags() const
+	{
+		return m_schemaTags;
+	}
+
+	std::map<QString, bool>& SchemasReportOptions::schemaTags()
+	{
+		return m_schemaTags;
+	}
+
+	void SchemasReportOptions::setUserVariables(const std::map<QString, QString>& variables)
+	{
+		m_userVariables = variables;
+	}
+
+	const std::map<QString, QString>& SchemasReportOptions::userVariables() const
+	{
+		return m_userVariables;
+	}
+
+	std::map<QString, QString>& SchemasReportOptions::userVariables()
+	{
+		return m_userVariables;
+	}
+
+	void SchemasReportOptions::setProjectVariables(const std::map<QString, QString>& variables)
+	{
+		m_projectVariables = variables;
+	}
+
+	const std::map<QString, QString>& SchemasReportOptions::projectVariables() const
+	{
+		return m_projectVariables;
+	}
+
+	std::map<QString, QString>& SchemasReportOptions::projectVariables()
+	{
+		return m_projectVariables;
 	}
 
 	//
@@ -417,6 +628,21 @@ namespace Builder
 			return result;
 		}
 
+		result.push_back({db->systemFileId(DbDir::AppLogicDir),
+						  QObject::tr("Application Logic"),
+						  true,
+						  QPageLayout(QPageSize(QPageSize::A3),
+						  QPageLayout::Orientation::Landscape,
+						  QMarginsF(30, 20, 15, 20),
+						  QPageLayout::Unit::Millimeter)});
+
+		result.push_back({db->systemFileId(DbDir::DiagnosticsSchemasDir),
+						  QObject::tr("Diagnostics Schemas"),
+						  true, QPageLayout(QPageSize(QPageSize::A3),
+						  QPageLayout::Orientation::Landscape,
+						  QMarginsF(30, 20, 15, 20),
+						  QPageLayout::Unit::Millimeter)});
+
 		result.push_back({db->systemFileId(DbDir::MonitorSchemasDir),
 						  QObject::tr("Monitor Schemas"),
 						  true,
@@ -432,21 +658,6 @@ namespace Builder
 						  QMarginsF(30, 20, 15, 20),
 						  QPageLayout::Unit::Millimeter)});
 
-		result.push_back({db->systemFileId(DbDir::DiagnosticsSchemasDir),
-						  QObject::tr("Diagnostics Schemas"),
-						  true, QPageLayout(QPageSize(QPageSize::A3),
-						  QPageLayout::Orientation::Landscape,
-						  QMarginsF(30, 20, 15, 20),
-						  QPageLayout::Unit::Millimeter)});
-
-		result.push_back({db->systemFileId(DbDir::AppLogicDir),
-						  QObject::tr("Application Logic"),
-						  true,
-						  QPageLayout(QPageSize(QPageSize::A3),
-						  QPageLayout::Orientation::Landscape,
-						  QMarginsF(30, 20, 15, 20),
-						  QPageLayout::Unit::Millimeter)});
-
 		result.push_back({db->systemFileId(DbDir::UfblDir),
 						  QObject::tr("UFBL Descriptions"),
 						  true,
@@ -458,7 +669,7 @@ namespace Builder
 		return result;
 	}
 
-	void SchemasReportGenerator::exportFilesToMultiplePdf()
+	void SchemasReportGenerator::exportSchemasToMultiplePdf()
 	{
 		if (filePath().isEmpty() == true)
 		{
@@ -467,13 +678,13 @@ namespace Builder
 		}
 
 		VFrame30::SchemaDetailsSet detailsSet;
-		std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas;		// Key is schema ID - schemas to be exported
+		std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas;		// Key is schema full path - schemas to be exported
 
 		try
 		{
 			openProject();
 
-			loadSchemas(m_inputFiles, schemas, detailsSet);
+			loadSchemas({}, m_inputFiles, schemas, detailsSet);
 
 			closeProject();
 		}
@@ -512,7 +723,7 @@ namespace Builder
 			std::shared_ptr<Report> report = std::make_shared<Report>(m_projectName,
 																	  filePath() + QDir::separator() + schemaId + ".pdf");
 
-			if (m_options.footers == true)
+			if (m_options.footers() == true)
 			{
 				report->addMarginItem({tr("Project: %1").arg(m_projectName), -1, -1, {m_marginFont, Qt::AlignLeft | Qt::AlignTop}});
 				report->addMarginItem({tr("%PAGE%"), -1, -1, {m_marginFont, Qt::AlignRight | Qt::AlignBottom}});
@@ -541,7 +752,7 @@ namespace Builder
 		return;
 	}
 
-	void SchemasReportGenerator::exportFilesToSinglePdf()
+	void SchemasReportGenerator::exportSchemasToSinglePdf()
 	{
 		if (filePath().isEmpty() == true)
 		{
@@ -556,7 +767,7 @@ namespace Builder
 		{
 			openProject();
 
-			loadSchemas(m_inputFiles, schemas, detailsSet);
+			loadSchemas({}, m_inputFiles, schemas, detailsSet);
 
 			closeProject();
 		}
@@ -578,7 +789,7 @@ namespace Builder
 
 		// Init margins
 		//
-		if (m_options.footers == true)
+		if (m_options.footers() == true)
 		{
 			report->addMarginItem({tr("Project: %1").arg(m_projectName), -1, -1, {m_marginFont, Qt::AlignLeft | Qt::AlignTop}});
 			report->addMarginItem({tr("%PAGE%"), -1, -1, {m_marginFont, Qt::AlignRight | Qt::AlignBottom}});
@@ -624,7 +835,7 @@ namespace Builder
 		return;
 	}
 
-	void SchemasReportGenerator::exportAllSchemasToAlbums()
+	void SchemasReportGenerator::exportSchemasToAlbums()
 	{
 		try
 		{
@@ -683,7 +894,7 @@ namespace Builder
 					if (ok == true)
 					{
 						bool schemaTagFound = false;
-						for (const auto& [tag, tagEnabled] : m_options.schemaTags)
+						for (const auto& [tag, tagEnabled] : m_options.schemaTags())
 						{
 							if (tagEnabled == true && details.schemaTags().contains(tag) == true)
 							{
@@ -707,7 +918,7 @@ namespace Builder
 				std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas;		// Key is schema ID
 				VFrame30::SchemaDetailsSet detailsSet;
 
-				loadSchemas(schemasFiles, schemas, detailsSet);
+				loadSchemas(fileTree, schemasFiles, schemas, detailsSet);
 
 				if (schemas.empty() == true)
 				{
@@ -721,7 +932,7 @@ namespace Builder
 					break;
 				}
 
-				renderSchemas(schemas, detailsSet, stp.caption(), stp.pageLayout());
+				renderSchemasToAlbums(schemas, detailsSet, stp.caption(), stp.pageLayout());
 			}
 
 			closeProject();
@@ -940,7 +1151,8 @@ namespace Builder
 	}
 
 
-	void SchemasReportGenerator::loadSchemas(const std::vector<DbFileInfo>& files,
+	void SchemasReportGenerator::loadSchemas(const DbFileTree& foldersTree,
+											 const std::vector<DbFileInfo>& files,
 											 std::map<QString, std::shared_ptr<VFrame30::Schema>>& schemas,
 											 VFrame30::SchemaDetailsSet& detailsSet)
 	{
@@ -1033,10 +1245,24 @@ namespace Builder
 				m_statistics.m_schemaIndex++;
 				m_statistics.m_currentSchemaId = schema->schemaId();
 			}
+			
 
-			schemas[schema->schemaId()] = schema;
+			QString schemaKey;
+			if (m_options.folders() == true)
+			{
+				schemaKey = foldersTree.filePath(dbFile->fileId()) + "/" + schema->schemaId();
+				if (schemaKey.startsWith('/') == true)
+				{
+					schemaKey.removeFirst();
+				}
+			}
+			else
+			{
+				schemaKey = schema->schemaId();
+			}
+			schemas[schemaKey] = schema;
 
-			if (m_options.signalsDetails == true)
+			if (m_options.signalsDetails() == true)
 			{
 				detailsSet.add(schema->details("."));
 			}
@@ -1045,7 +1271,7 @@ namespace Builder
 		return;
 	}
 
-	void SchemasReportGenerator::renderSchemas(const std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas,
+	void SchemasReportGenerator::renderSchemasToAlbums(const std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas,
 											   const VFrame30::SchemaDetailsSet& detailsSet,
 											   const QString& groupName,
 											   const QPageLayout pageLayout)
@@ -1063,9 +1289,14 @@ namespace Builder
 		std::shared_ptr<Report> report = std::make_shared<Report>(m_projectName,
 																  tr("%1/%2_%3.pdf").arg(filePath()).arg(m_projectName).arg(groupName));
 
+		std::map<QString, QString> variables;
+		variables.insert(m_options.userVariables().begin(), m_options.userVariables().end());
+		variables.insert(m_options.projectVariables().begin(), m_options.projectVariables().end());
+		report->setVariables(variables);
+
 		// Init margins
 		//
-		if (m_options.footers == true)
+		if (m_options.footers() == true)
 		{
 			report->addMarginItem({tr("Project: %1").arg(m_projectName), -1, -1, {m_marginFont, Qt::AlignLeft | Qt::AlignTop}});
 			report->addMarginItem({tr("%PAGE%"), -1, -1, {m_marginFont, Qt::AlignRight | Qt::AlignBottom}});
@@ -1074,6 +1305,7 @@ namespace Builder
 
 		// Create table of contents
 		//
+		if (m_options.tableOfContents() == true)
 		{
 			auto contentsSection = report->addSection(ReportSection::create("Table of Contents", pageLayout));
 			contentsSection->setTag(groupName);
@@ -1129,7 +1361,7 @@ namespace Builder
 				schemaDrawingSection->setTag(tr("%1 - %2").arg(schema->schemaId()).arg(schema->caption()));
 				schemaDrawingSection->addSchema(reportSchema);
 
-				if (m_options.signalsDetails == true && schema->isLogicSchema() == true)
+				if (m_options.signalsDetails() == true && schema->isLogicSchema() == true)
 				{
 					createLogicSchemaSignalsDetails(report, pageLayout, schema, schemas, detailsSet);
 				}
@@ -1177,7 +1409,7 @@ namespace Builder
 
 	QPageLayout SchemasReportGenerator::getSchemaPageLayout(const std::shared_ptr<VFrame30::Schema>& schema) const
 	{
-		qreal marginSizeMM = m_options.footers ? 15 : 0;
+		qreal marginSizeMM = m_options.footers() ? 15 : 0;
 
 		// Initialize PDF page size
 		//

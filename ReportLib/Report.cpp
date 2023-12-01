@@ -203,5 +203,16 @@ namespace ReportLib
 	{
 		m_marginItems.clear();
 	}
+
+	const std::map<QString, QString>& Report::variables() const
+	{
+		return m_variables;
+	}
+
+	void Report::setVariables(const std::map<QString, QString>& variables)
+	{
+		m_variables = variables;
+	}
+
 }
 

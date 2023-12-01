@@ -113,12 +113,14 @@ namespace ReportLib
 	PrintSchema::PrintSchema(const std::shared_ptr<ReportSchemaView>& schemaView,
 							 const std::shared_ptr<VFrame30::Schema>& schema,
 							 const std::map<QUuid, ReportSchemaCompareAction>& compareActions,
+							 const std::map<QString, QString>& variables,
 							 int verticalOffset,
 							 bool newPageBefore,
 							 const QString& tag):
 		m_schemaView(schemaView),
 		m_schema(schema),
-		m_compareActions(compareActions)
+		m_compareActions(compareActions),
+		m_variables(variables)
 	{
 		m_type = Type::Schema;
 		m_verticalOffset = verticalOffset;
@@ -155,21 +157,13 @@ namespace ReportLib
 			}
 		}
 
-		if (m_verticalOffset == 0)
-		{
-			printer.printMarginItems(pdfWriter, painter, marginItems, tag());
-		}
-
 		// Calculate the upper schema offset
 		//
 		QRect pageRect = pdfWriter.pageLayout().paintRectPixels(pdfWriter.resolution());
 
 		// Set margins area as 1% of area height
 		//
-		int schemaMargin = pageRect.height() * 0.01;
-		pageRect = pageRect.marginsRemoved(QMargins(schemaMargin, schemaMargin, schemaMargin, schemaMargin));
-
-		int schemaTop = m_verticalOffset + (schemaMargin * 2);
+		int schemaTop = m_verticalOffset;
 		int schemaLeft = 0;
 
 		const int schemaMaxHeight = pageRect.height() - schemaTop;
@@ -206,6 +200,7 @@ namespace ReportLib
 		VFrame30::CDrawParam drawParam(&painter, m_schemaView.get(), m_schema->gridSize(), m_schema->pinGridStep(), m_schema->unit());
 		drawParam.setInfoMode(m_schemaView->infoMode());
 		drawParam.setPdfMode(true);
+		drawParam.setVariables(m_variables);
 
 		m_schemaView->setSchemaInternal(m_schema);
 		m_schemaView->adjust(&painter, schemaLeft, schemaTop, zoom * 100.0);		// Export 100% zoom
@@ -221,6 +216,14 @@ namespace ReportLib
 		}
 
 		painter.restore();
+
+		// Print footer
+		//
+		if (m_verticalOffset == 0)
+		{
+			printer.printMarginItems(pdfWriter, painter, marginItems, tag());
+		}
+
 
 		return;
 	}
@@ -324,16 +327,14 @@ namespace ReportLib
 
 		const QRect pageRect = pdfWriter.pageLayout().paintRectPixels(resolution);
 
-		//QMargins margins = pdfWriter.pageLayout().marginsPixels(resolution);
-
 		QRect topRect(pageRect.left(),
 					  fullPageRect.top(),
-					  pageRect.width()/* + (margins.left() + margins.right()) / 2*/,
+					  pageRect.width(),
 					  abs(pageRect.top() - fullPageRect.top()));
 
-		QRect bottomRect(pageRect.left()/* + margins.left() / 2*/,
+		QRect bottomRect(pageRect.left(),
 						 pageRect.bottom(),
-						 pageRect.width()/* + (margins.left() + margins.right()) / 2*/,
+						 pageRect.width(),
 						 abs(pageRect.bottom() - fullPageRect.bottom()));
 
 		painter.save();
@@ -533,6 +534,7 @@ namespace ReportLib
 						ps = std::make_shared<PrintSchema>(m_schemaView,
 														   rs->schema(),
 														   rs->compareActions(),
+														   report.variables(),
 														   lastDocumentTextPageHeight,
 														   lastObjectType == ReportObject::Type::Schema ||
 														   (firstObject == true && firstSection == false),

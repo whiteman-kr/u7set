@@ -1334,11 +1334,9 @@ namespace Builder
 
 	bool BuildWorkerThread::createSchemasAlbums()
 	{
-		SchemasReportOptions options;
-		options.load(&m_context->m_db);
-		options.footers = true;
+		SchemasReportOptions options = SchemasReportOptions::optionsForSchemasAlbum(&m_context->m_db);
 
-		std::shared_ptr<ReportLib::ReportSchemaView> schemaView = std::make_shared<ReportLib::ReportSchemaView>(options.itemsLabels);
+		std::shared_ptr<ReportLib::ReportSchemaView> schemaView = std::make_shared<ReportLib::ReportSchemaView>(options.itemsLabels());
 
 		const OnlineLib::BuildInfo& bi = m_context->m_buildResultWriter->buildInfo();
 		schemaView->session().setProject(bi.project);
@@ -1365,7 +1363,7 @@ namespace Builder
 
 		worker.moveToThread(thread);
 
-		QObject::connect(thread, &QThread::started, &worker, &SchemasReportGenerator::exportAllSchemasToAlbums);
+		QObject::connect(thread, &QThread::started, &worker, &SchemasReportGenerator::exportSchemasToAlbums);
 		QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);	// Schedule thread deleting
 
 		std::atomic<bool> threadComplete = false;

@@ -423,6 +423,16 @@ namespace VFrame30
 		return m_session;
 	}
 
+	const std::map<QString, QString>& CDrawParam::variables() const
+	{
+		return m_variables;
+	}
+
+	void CDrawParam::setVariables(const std::map<QString, QString>& variables)
+	{
+		m_variables = variables;
+	}
+
 	const MonitorBehavior& CDrawParam::monitorBehavior() const noexcept
 	{
 		Q_ASSERT(m_schemaView);

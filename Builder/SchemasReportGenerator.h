@@ -16,17 +16,62 @@ namespace Builder
 	// SchemasReportOptions
 	//
 
-	struct SchemasReportOptions
+	class SchemasReportOptions
 	{
+
+	public:
+		static SchemasReportOptions optionsForSingleSchema();	// Creates options for schema with all options set to false to produce clear schema "as is"
+		static SchemasReportOptions optionsForSchemasAlbum(DbController* db);
+
+	private:
+		SchemasReportOptions() = default;
+
 		bool load(DbController* db);
+
+	public:
 		bool save(DbController* db);
 
-		void setTags(const std::set<QString>& tagsSet);
+		// Generic schemas report options
+		//
+		void setFooters(bool value);
+		bool footers() const;
 
-		bool footers = false;
-		bool itemsLabels = false;
-		bool signalsDetails = false;
-		std::map<QString, bool> schemaTags;
+		void setItemsLabels(bool value);
+		bool itemsLabels() const;
+
+		// Options for schemas album
+		//
+		void setFolders(bool value);
+		bool folders() const;
+		
+		void setTableOfContents(bool value);
+		bool tableOfContents() const;
+		
+		void setSignalsDetails(bool value);
+		bool signalsDetails() const;
+		
+		void setSchemaTags(const std::set<QString>& tagsSet);
+		const std::map<QString, bool>& schemaTags() const;
+		std::map<QString, bool>& schemaTags();
+
+		void setUserVariables(const std::map<QString, QString>& variables);
+		const std::map<QString, QString>& userVariables() const;
+		std::map<QString, QString>& userVariables();
+
+		void setProjectVariables(const std::map<QString, QString>& variables);
+		const std::map<QString, QString>& projectVariables() const;
+		std::map<QString, QString>& projectVariables();
+
+	private:
+		bool m_footers = false;					// Generate footers in reports (top and bottom) with schema name, project info and page number
+		bool m_folders = false;					// Include schema folder to schema id in schemas album
+		bool m_tableOfContents = false;			// Generate table of contents in schemas album
+		bool m_itemsLabels = false;				// Generate items labels for debuging
+		bool m_signalsDetails = false;			// Generate extra pages in schemas album with signals sources and targets
+
+		std::map<QString, bool> m_schemaTags;   // Key is tag, value shows if this tag is set
+		std::map<QString, QString> m_projectVariables;	// Key is variable name, value is variable value
+		std::map<QString, QString> m_userVariables;		// Key is variable name, value is variable value
 	};
 
 	//
@@ -147,9 +192,9 @@ namespace Builder
 		static std::vector<SchemaTypesParams> defaultFileTypesParams(DbController* db);
 
 	public slots:
-		void exportFilesToMultiplePdf();
-		void exportFilesToSinglePdf();
-		void exportAllSchemasToAlbums();
+		void exportSchemasToMultiplePdf();
+		void exportSchemasToSinglePdf();
+		void exportSchemasToAlbums();
 
 		void stop();
 		void progressRequested();
@@ -195,14 +240,15 @@ namespace Builder
 		void openProject();
 		void closeProject();
 
-		void loadSchemas(const std::vector<DbFileInfo>& files,
+		void loadSchemas(const DbFileTree& foldersTree,
+						 const std::vector<DbFileInfo>& files,
 						 std::map<QString, std::shared_ptr<VFrame30::Schema>>& schemas,
 						 VFrame30::SchemaDetailsSet& detailsSet);
 
-		void renderSchemas(const std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas,
-						   const VFrame30::SchemaDetailsSet& detailsSet,
-						   const QString& groupName,
-						   const QPageLayout pageLayout);
+		void renderSchemasToAlbums(const std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas,
+								   const VFrame30::SchemaDetailsSet& detailsSet,
+								   const QString& groupName,
+								   const QPageLayout pageLayout);
 
 		[[nodiscard]] QPageLayout getSchemaPageLayout(const std::shared_ptr<VFrame30::Schema>& schema) const;
 

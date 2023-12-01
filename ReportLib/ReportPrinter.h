@@ -73,6 +73,7 @@ namespace ReportLib
 		PrintSchema(const std::shared_ptr<ReportSchemaView>& schemaView,
 					const std::shared_ptr<VFrame30::Schema>& schema,
 					const std::map<QUuid, ReportSchemaCompareAction>& compareActions,
+					const std::map<QString, QString>& variables,
 					int verticalOffset,
 					bool newPageBefore,
 					const QString& tag);
@@ -95,6 +96,7 @@ namespace ReportLib
 		std::shared_ptr<ReportSchemaView> m_schemaView;
 		std::shared_ptr<VFrame30::Schema> m_schema;
 		std::map<QUuid, ReportSchemaCompareAction> m_compareActions;
+		const std::map<QString, QString>& m_variables;
 	};
 
 	//

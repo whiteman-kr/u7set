@@ -94,6 +94,11 @@ namespace ReportLib
 		void addMarginItem(const ReportMarginItem& item);
 		void clearMarginItems();
 
+		// Variables functions
+		//
+		const std::map<QString, QString>& variables() const;
+		void setVariables(const std::map<QString, QString>& variables);
+
 	private:
 		// Page options
 		//
@@ -101,6 +106,7 @@ namespace ReportLib
 
 		std::vector<std::shared_ptr<ReportSection>> m_sections;
 		std::vector<ReportMarginItem> m_marginItems;
+		std::map<QString, QString> m_variables;	// Key is variable name, value is variable value
 
 		QString m_reportName;
 		QString m_path;
