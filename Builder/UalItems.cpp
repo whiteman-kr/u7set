@@ -10,56 +10,135 @@ namespace Builder
 	//
 	// ---------------------------------------------------------------------------------------
 
-	AfbElements::AfbElements()
+	bool AfbComponents::LogicInfo::isValid() const
+	{
+		return	opCode != -1 &&
+				confIndex != -1 &&
+				operandQuantityIndex != -1 &&
+				busWidthIndex != -1 &&
+				firstInIndex != -1 &&
+				resultIndex != -1 &&
+				confOr != -1 &&
+				confAnd != -1 &&
+				minOperandsCount != -1 &&
+				maxOperandsCount != -1;
+	}
+
+	AfbComponents::ComponentInfo::ComponentInfo(const QString& compCaption,
+												int compMaxInstCount,
+												bool compHasRam)
+	{
+		caption = compCaption;
+		maxInstCount = compMaxInstCount;
+		hasRam = compHasRam;
+	}
+
+	AfbComponents::AfbComponents()
 	{
 	}
 
-	AfbElements::~AfbElements()
+	AfbComponents::~AfbComponents()
 	{
 	}
 
-	void AfbElements::insert(const AfbElementShared& afbElement)
+	void AfbComponents::init(LmDescriptionConstShared lmDescription)
 	{
-		TEST_PTR_RETURN(afbElement);
+		TEST_PTR_RETURN(lmDescription);
 
-		m_elements.emplace_back(afbElement);
-		m_afbInstances.emplace(afbElement->opCode(), -1);	// init by -1, but used instances values is beginning from 0
-
-		//
-
-		const std::vector<Afb::AfbSignal>& inputSignals = afbElement->inputSignals();
-
-		bool hasBusInputs = false;
-
-		for(const Afb::AfbSignal& afbInSignal : inputSignals)
+		for(const auto& [opCode, afbComp] : lmDescription->afbComponents())
 		{
-			if (afbInSignal.type() == E::SignalType::Bus)
+			TEST_PTR_CONTINUE(afbComp);
+
+			Q_ASSERT(m_componentsInfo.contains(afbComp->opCode()) == false);
+
+			m_componentsInfo.emplace(afbComp->opCode(),
+								   ComponentInfo(afbComp->caption(), afbComp->maxInstCount(), afbComp->hasRam()));
+
+			if (afbComp->caption() == QStringLiteral("LOGIC"))
 			{
-				hasBusInputs = true;
-				break;
+				m_logicInfo.opCode = afbComp->opCode();
+				m_logicInfo.confIndex = afbComp->pinOpIndex(Afb::PARAM_I_CONF);
+				m_logicInfo.operandQuantityIndex = afbComp->pinOpIndex(Afb::PARAM_I_OPRD_QUANT);
+				m_logicInfo.busWidthIndex = afbComp->pinOpIndex(Afb::PARAM_I_BUS_WIDTH);
+				m_logicInfo.firstInIndex = afbComp->pinOpIndex(Afb::PIN_I_1_OPRD);
+				m_logicInfo.resultIndex = afbComp->pinOpIndex(Afb::PIN_O_RESULT);
 			}
 		}
 
-		const std::vector<Afb::AfbSignal>& outputSignals = afbElement->outputSignals();
-
-		bool hasBusOutputs = false;
-
-		for(const Afb::AfbSignal& afbOutSignal : outputSignals)
+		for(const AfbElementShared& afbElement : lmDescription->afbElements())
 		{
-			if (afbOutSignal.type() == E::SignalType::Bus)
+			TEST_PTR_CONTINUE(afbElement);
+
+			//
+
+			if (afbElement->caption() == Afb::AFB_OR)
 			{
-				hasBusOutputs = true;
-				break;
+				Afb::AfbParam param = afbElement->paramByOpName(Afb::PARAM_I_CONF);
+
+				if (param.isValid())
+				{
+					m_logicInfo.confOr = param.afbParamValue().value().toInt();
+				}
+
+				param = afbElement->paramByOpName(Afb::PARAM_I_OPRD_QUANT);
+
+				if (param.isValid())
+				{
+					m_logicInfo.minOperandsCount = param.lowLimit().toInt();
+					m_logicInfo.maxOperandsCount = param.highLimit().toInt();
+				}
+			}
+
+			//
+
+			if (afbElement->caption() == Afb::AFB_AND)
+			{
+				Afb::AfbParam param = afbElement->paramByOpName(Afb::PARAM_I_CONF);
+
+				if (param.isValid())
+				{
+					m_logicInfo.confAnd = param.afbParamValue().value().toInt();
+				}
+			}
+
+			// checking is this bus processing element
+			//
+			const std::vector<Afb::AfbSignal>& inputSignals = afbElement->inputSignals();
+
+			bool hasBusInputs = false;
+
+			for(const Afb::AfbSignal& afbInSignal : inputSignals)
+			{
+				if (afbInSignal.type() == E::SignalType::Bus)
+				{
+					hasBusInputs = true;
+					break;
+				}
+			}
+
+			const std::vector<Afb::AfbSignal>& outputSignals = afbElement->outputSignals();
+
+			bool hasBusOutputs = false;
+
+			for(const Afb::AfbSignal& afbOutSignal : outputSignals)
+			{
+				if (afbOutSignal.type() == E::SignalType::Bus)
+				{
+					hasBusOutputs = true;
+					break;
+				}
+			}
+
+			if (hasBusInputs == true && hasBusOutputs == true)
+			{
+				m_busProcessingAfbElemets.insert(calcHash(afbElement->strID()));
 			}
 		}
 
-		if (hasBusInputs == true && hasBusOutputs == true)
-		{
-			m_busProcessingAfbElemets.insert(calcHash(afbElement->strID()));
-		}
+		Q_ASSERT(m_logicInfo.isValid());
 	}
 
-	bool AfbElements::addInstance(UalAfb* ualAfb, IssueLogger* log)
+	bool AfbComponents::addInstance(UalAfb* ualAfb, IssueLogger* log)
 	{
 		TEST_PTR_RETURN_FALSE(log);
 
@@ -76,9 +155,9 @@ namespace Builder
 
 		int opCode = ualAfb->opcode();
 
-		auto instanceIt = m_afbInstances.find(opCode);
+		auto instanceIt = m_componentsInfo.find(opCode);
 
-		if (instanceIt == m_afbInstances.end())
+		if (instanceIt == m_componentsInfo.end())
 		{
 			// Unknown AFB type (opCode = %1) (item %2, schema %3).
 			//
@@ -86,101 +165,120 @@ namespace Builder
 			return false;
 		}
 
-		int instance = instanceIt->second;		//  instance <= current instance
+		ComponentInfo& ci = instanceIt->second;
 
-		int maxInstances = ualAfb->maxInstances();
+		bool useExistInstance = false;
 
-		QString instantiatorID = ualAfb->instantiatorID();
+		const QString& instantiatorID = ualAfb->instantiatorID();
 
-		bool afbHasRam = ualAfb->hasRam();
-
-		auto instantiatorIt = m_nonRamAfbInstantiators.find(instantiatorID);
-
-		if (afbHasRam == false && instantiatorIt != m_nonRamAfbInstantiators.end())
+		if (ci.hasRam == false)
 		{
-			// ualAfb has no RAM and its instantiatorID already exists - existing instance would be used
-			//
-			instance = instantiatorIt->second;
-		}
-		else
-		{
-			// ualAfb has RAM or ualAfb has no RAM and its instantiatorID is not exist - new instance would be created
-			//
-			if (maxInstances > 0)
+			auto instantiatorIt = ci.nonRamAfbInstantiators.find(instantiatorID);
+
+			if (instantiatorIt != ci.nonRamAfbInstantiators.end())
 			{
-				instance++;
+				// ualAfb has no RAM and its instantiatorID is already exists - compInfo.curInstance would be used
+				//
+				useExistInstance = true;
+			}
+		}
 
-				if (instance >= maxInstances)
+		if (useExistInstance == false)
+		{
+			// ualAfb has RAM or
+			// ualAfb hasn't RAM and its instantiatorID is not exist - new instance would be created
+			//
+			if (ci.maxInstCount > 0)
+			{
+				if (ci.curInstance + 1 >= ci.maxInstCount)
 				{
 					// Max instances (%1) of AFB component '%2' is used (Logic schema %3, item %4)
 					//
-					log->errALC5130(maxInstances, ualAfb->componentCaption(), ualAfb->guid(), ualAfb->schemaID(), ualAfb->label());
+					log->errALC5130(ci.maxInstCount, ci.caption, ualAfb->guid(), ualAfb->schemaID(), ualAfb->label());
 					return false;
 				}
+
+				ci.curInstance++;
 			}
 			else
 			{
-				instance = 0;
+				ci.curInstance = 0;
 			}
 
-			m_afbInstances.emplace(opCode, instance);
-
-			if (afbHasRam == false)
+			if (ci.hasRam == false)
 			{
 				// append new instantiatorID for non-RAM afb instantiators
 				//
-				m_nonRamAfbInstantiators.emplace(instantiatorID, instance);
+				ci.nonRamAfbInstantiators.emplace(instantiatorID, ci.curInstance);
 			}
 		}
 
-		if (instance < 0)
+		if (ci.curInstance < 0)
 		{
 			Q_ASSERT(false);
 			LOG_INTERNAL_ERROR(log);
 			return false;
 		}
 
-		ualAfb->setInstance(instance);
+		ualAfb->setInstance(ci.curInstance);
 
 		return true;
 	}
 
-	int AfbElements::getUsedInstances(int opCode) const
+	bool AfbComponents::addInstance(int afbOpcode, int* newInstance, IssueLogger* log)
 	{
-		auto it = m_afbInstances.find(opCode);
+		TEST_PTR_RETURN_FALSE(newInstance);
 
-		if (it == m_afbInstances.end())
+		auto it = m_componentsInfo.find(afbOpcode);
+
+		if (it == m_componentsInfo.end())
+		{
+			// Unknown AFB type (opCode = %1) (item %2, schema %3).
+			//
+			log->errALC5129(afbOpcode, QUuid(), "", "");
+			return false;
+		}
+
+		ComponentInfo& ci = it->second;
+
+		if (ci.curInstance + 1 >= ci.maxInstCount)
+		{
+			// Max instances (%1) of AFB component '%2' is used (Logic schema %3, item %4)
+			//
+			log->errALC5130(ci.maxInstCount, ci.caption, QUuid(), "", "");
+			return false;
+		}
+
+		ci.curInstance++;
+
+		*newInstance = ci.curInstance;
+
+		return true;
+	}
+
+	int AfbComponents::getUsedInstancesCount(int opCode) const
+	{
+		auto it = m_componentsInfo.find(opCode);
+
+		if (it == m_componentsInfo.end())
 		{
 			Q_ASSERT(false);
 			return 0;
 		}
 
-		return it->second + 1;
+		const ComponentInfo& ci = it->second;
+
+		return ci.curInstance + 1;
 	}
 
-	bool AfbElements::isBusProcessingAfb(const QString& afbElementStrID) const
+	bool AfbComponents::isBusProcessingAfb(const QString& afbElementStrID) const
 	{
 		return m_busProcessingAfbElemets.contains(calcHash(afbElementStrID));
 	}
 
-	std::vector<AfbElementShared>::iterator AfbElements::begin()
+	const AfbComponents::LogicInfo& AfbComponents::logicInfo() const
 	{
-		return m_elements.begin();
-	}
-
-	std::vector<AfbElementShared>::const_iterator AfbElements::begin() const
-	{
-		return m_elements.begin();
-	}
-
-	std::vector<AfbElementShared>::iterator AfbElements::end()
-	{
-		return m_elements.begin();
-	}
-
-	std::vector<AfbElementShared>::const_iterator AfbElements::end() const
-	{
-		return m_elements.begin();
+		return m_logicInfo;
 	}
 
 	// ---------------------------------------------------------------------------------------
@@ -318,6 +416,11 @@ namespace Builder
 		}
 
 		return m_appLogicItem.afbElement().caption().startsWith(MISMATCH_ITEM_CAPTION);
+	}
+
+	bool UalItem::isPackedLogic() const
+	{
+		return m_appLogicItem.afbElement().isPackedLogic();
 	}
 
     bool UalItem::assignFlags(IssueLogger* log) const
@@ -755,19 +858,20 @@ namespace Builder
 
 	bool UalAfb::isConstComaparator() const
 	{
-		return opcode() == CONST_COMPARATOR_OPCODE;
+		return opcode() == Afb::CONST_COMPARATOR_OPCODE;
 	}
 
 	bool UalAfb::isDynamicComaparator() const
 	{
-		return opcode() == DYNAMIC_COMPARATOR_OPCODE;
+		return opcode() == Afb::DYNAMIC_COMPARATOR_OPCODE;
 	}
 
 	bool UalAfb::isComparator() const
 	{
 		quint16 oc = opcode();
 
-		return oc ==  CONST_COMPARATOR_OPCODE || oc == DYNAMIC_COMPARATOR_OPCODE;
+		return	oc ==  Afb::CONST_COMPARATOR_OPCODE ||
+				oc == Afb::DYNAMIC_COMPARATOR_OPCODE;
 	}
 
 	bool UalAfb::isBusProcessing() const
@@ -777,30 +881,30 @@ namespace Builder
 
 	bool UalAfb::isPackedLogic() const
 	{
-		return m_appLogicItem.m_fblItem->toAfbElement()->isPackedLogic();
+		int oc = opcode();
+
+		return	oc == Afb::PACKED_AND_OPCODE ||
+				oc == Afb::PACKED_OR_OPCODE;
+	}
+
+	bool UalAfb::isPackedOrLogic() const
+	{
+		return opcode() == Afb::PACKED_OR_OPCODE;
+	}
+
+	bool UalAfb::isPackedAndLogic() const
+	{
+		return opcode() == Afb::PACKED_AND_OPCODE;
 	}
 
 	QString UalAfb::packedLogicID() const
 	{
-		if (isPackedLogic() == false)
-		{
-			Q_ASSERT(false);
-			return QString();
-		}
+		Q_ASSERT(isPackedLogic());
 
-		std::shared_ptr<VFrame30::SchemaItemAfb> schemaItemPtr =
-				std::dynamic_pointer_cast<VFrame30::SchemaItemAfb>(m_appLogicItem.m_fblItem);
-
-		if (schemaItemPtr == nullptr)
-		{
-			Q_ASSERT(false);
-			return QString();
-		}
-
-		return schemaItemPtr->packedLogicId();
+		return m_appLogicItem.afbElement().packedLogicId();
 	}
 
-	QString UalAfb::instantiatorID() const
+	const QString& UalAfb::instantiatorID() const
 	{
 		if (m_instantiatorID.isEmpty() == false)
 		{

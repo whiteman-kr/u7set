@@ -667,13 +667,13 @@ namespace Afb
 
 	inline const QString SCALE("SCALE");
 
-	inline const QString SCALE_PIN_CONF("i_conf");
+/*	inline const QString SCALE_PIN_CONF("i_conf");
 	inline const QString SCALE_PIN_K1("i_scal_k1_coef");
 	inline const QString SCALE_PIN_K2("i_scal_k2_coef");
 	inline const QString SCALE_PIN_X_UI("i_ui_data");
 	inline const QString SCALE_PIN_X_SI_FP("i_si_fp_data");
 	inline const QString SCALE_PIN_Y_UI("i_ui_data");
-	inline const QString SCALE_PIN_Y_SI_FP("i_si_fp_data");
+	inline const QString SCALE_PIN_Y_SI_FP("i_si_fp_data"); */
 
 	inline const QString SCALE_SI32_SI32("scale_si_si");
 	inline const QString SCALE_SI32_FP32("scale_si_fp");
@@ -760,6 +760,12 @@ namespace Afb
 	inline const QString PARAM_I_CONF("i_conf");
 	inline const QString PARAM_I_DATA_X1("i_data_x1");
 	inline const QString PARAM_I_DATA_X2("i_data_x2");
+
+	inline const QString PARAM_I_OPRD_QUANT("i_oprd_quant");
+	inline const QString PARAM_I_BUS_WIDTH("i_bus_width");
+
+	inline const QString PIN_I_1_OPRD("i_1_oprd");
+	inline const QString PIN_O_RESULT("o_result");
 
 	inline const QString AFB_NOT("not");
 	inline const QString AFB_BUS_NOT("bus_not");

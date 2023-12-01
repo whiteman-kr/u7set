@@ -13,6 +13,7 @@
 #include "../VFrame30/LogicSchema.h"
 #include "../CommonLib/HashedVector.h"
 #include "../HardwareLib/Afb.h"
+#include "../HardwareLib/LmDescription.h"
 
 #include "Parser.h"
 #include "AppLogicCode.h"
@@ -49,29 +50,63 @@ namespace Builder
 
 	class UalAfb;
 
-	class AfbElements
+	class AfbComponents
 	{
 	public:
-		AfbElements();
-		virtual ~AfbElements();
+		struct LogicInfo
+		{
+			bool isValid() const;
 
-		void insert(const AfbElementShared& afbElement);
+			int opCode = -1;
+
+			int confIndex = -1;
+			int operandQuantityIndex = -1;
+			int busWidthIndex = -1;
+			int firstInIndex = -1;
+			int resultIndex = -1;
+
+			int confOr = -1;
+			int confAnd = -1;
+
+			int minOperandsCount = -1;
+			int maxOperandsCount = -1;
+		};
+
+	public:
+		AfbComponents();
+		virtual ~AfbComponents();
+
+		void init(LmDescriptionConstShared lmDescription);
 		bool addInstance(UalAfb* ualAfb, IssueLogger* log);
+		bool addInstance(int afbOpcode, int* newInstance, IssueLogger* log);
 
-		int getUsedInstances(int opCode) const;
+		int getUsedInstancesCount(int opCode) const;
 		bool isBusProcessingAfb(const QString& afbElementStrID) const;
 
-		std::vector<AfbElementShared>::iterator begin();
-		std::vector<AfbElementShared>::const_iterator begin() const;
-
-		std::vector<AfbElementShared>::iterator end();
-		std::vector<AfbElementShared>::const_iterator end() const;
+		const LogicInfo& logicInfo() const;
 
 	private:
-		std::vector<AfbElementShared> m_elements;
-		std::map<int, int> m_afbInstances;					// AFB opCode => current instance
-		std::map<QString, int> m_nonRamAfbInstantiators;	// Non RAM AFB instantiatorID => instance
+		struct ComponentInfo
+		{
+			ComponentInfo(const QString& compCaption,
+						  int compMaxInstCount,
+						  bool compHasRam);
+
+			QString caption;
+			int curInstance = -1;		// valid instance number begins from 0
+			int maxInstCount = 0;
+			bool hasRam = false;
+
+			//
+
+			std::map<QString, int> nonRamAfbInstantiators;	// Non RAM AFB instantiatorID => AFB instance
+		};
+
+	private:
+		std::map<int, ComponentInfo> m_componentsInfo;		// AFB opCode => ComponentInfo
 		std::set<Hash> m_busProcessingAfbElemets;			// set of calcHash(afbElement->strID())
+
+		LogicInfo m_logicInfo;
 	};
 
 	class UalItem : public QObject
@@ -105,6 +140,7 @@ namespace Builder
 		bool isSetFlagsItem() const;
 		bool isSimLockItem() const;
 		bool isMismatchItem() const;
+		bool isPackedLogic() const;
 
         bool assignFlags(IssueLogger* log) const;
 
@@ -274,9 +310,11 @@ namespace Builder
 		bool isBusProcessing() const;
 
 		bool isPackedLogic() const;
+		bool isPackedOrLogic() const;
+		bool isPackedAndLogic() const;
 		QString packedLogicID() const;
 
-		QString instantiatorID() const;
+		const QString& instantiatorID() const;
 
 		void setInstance(int instance) { m_instance = instance; }
 		void setNumber(int number) { m_number = number; }
@@ -360,9 +398,6 @@ namespace Builder
 		IssueLogger* m_log = nullptr;
 
 		int m_runTime = 0;
-
-		const quint16 CONST_COMPARATOR_OPCODE = 10;
-		const quint16 DYNAMIC_COMPARATOR_OPCODE = 20;
 
 		static std::set<QString> m_lmsWithLessGreateEqMode;
 	};

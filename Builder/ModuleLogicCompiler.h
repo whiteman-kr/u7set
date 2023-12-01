@@ -237,6 +237,8 @@ namespace Builder
 						  const CodeSnippet& replacementCode);
 
 		int bitAccumulatorAddress() const;
+		Address16 bitAccumulatorAddress16() const;
+
 		int wordAccumulatorAddress() const;
 		Address16 wordAccumulatorAddress16() const;
 		int wordAccumulator2Address() const;
@@ -587,7 +589,7 @@ namespace Builder
 
 		bool generatePackedAfbCode(CodeSnippet* code, const UalAfb* afb);
 
-		bool generatePackedOrAfbCode(CodeSnippet* code, const UalAfb* afb,
+		bool generateAfbBasedPackedAfbCode(CodeSnippet* code, const UalAfb* afb,
 									 const std::vector<std::pair<const UalSignal*, Address16>>& inSignals,
 									 const UalSignal* outSignal, const Address16& outWriteAddr);
 
@@ -993,7 +995,7 @@ namespace Builder
 		int m_optimizationNo = 0;
 		std::map<CodeOptimizationType, OptimizationInfo> m_optimizationsInfo;
 
-		AfbElements m_afbElements;
+		AfbComponents m_afbComponents;
 
 		UalSignalsMap m_ualSignals;
 		UalAfbsMap m_ualAfbs;

@@ -185,6 +185,8 @@ namespace Afb
 	inline const int AFB_NOT_ACC_OPCODE = 254;		// bit ACC based NOT opcode
 	inline const int PACKED_OR_OPCODE = 253;
 	inline const int PACKED_AND_OPCODE = 252;
+	inline const int CONST_COMPARATOR_OPCODE = 10;
+	inline const int DYNAMIC_COMPARATOR_OPCODE = 20;
 
 	//
 	// AfbSignal
@@ -307,6 +309,7 @@ private:
 		[[nodiscard]] E::DataFormat dataFormat() const;
 		void setDataFormat(E::DataFormat dataFormat);
 
+		[[nodiscard]] bool isValid() const;
 		[[nodiscard]] bool isAnalog() const;
 		[[nodiscard]] bool isDiscrete() const;
 
@@ -440,6 +443,9 @@ private:
 
 		const std::vector<AfbParam>& params() const;
 		std::vector<AfbParam>& params();
+
+		AfbParam paramByCaption(const QString& caption) const;
+		AfbParam paramByOpName(const QString& opName) const;
 
 		int paramsCount() const;
 		void setParams(const std::vector<AfbParam>& params);

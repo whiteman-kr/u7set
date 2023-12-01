@@ -143,10 +143,7 @@ namespace Builder
 
 		Q_ASSERT(m_lmDescription != nullptr);
 
-		for(const AfbElementShared& afbElement : m_lmDescription->afbElements())
-		{
-			m_afbElements.insert(afbElement);
-		}
+		m_afbComponents.init(m_lmDescription);
 
 		m_lmShared = getLmSharedPtr();
 
@@ -543,6 +540,11 @@ namespace Builder
 	int ModuleLogicCompiler::bitAccumulatorAddress() const
 	{
 		return m_memoryMap.bitAccumulatorAddress();
+	}
+
+	Address16 ModuleLogicCompiler::bitAccumulatorAddress16() const
+	{
+		return Address16(m_memoryMap.bitAccumulatorAddress(), 0);
 	}
 
 	int ModuleLogicCompiler::wordAccumulatorAddress() const
@@ -974,6 +976,11 @@ namespace Builder
 				continue;
 			}
 
+			if (ualItem->isPackedLogic())
+			{
+				DEBUG_STOP;
+			}
+
 			UalAfb* ualAfb = createUalAfb(*ualItem);
 
 			if (ualAfb == nullptr)
@@ -989,9 +996,13 @@ namespace Builder
 
 		if (packedLogicExists && m_lmDescription->isBitAccAvailable() == false)
 		{
-			m_packedLogicAfbInstance = reserveLogicInstanceForPackedLogicProcessing();
+			// reserve one instance of AFB LOGIC to process Packed Logic items
+			// this instance will fully configured just before packed logic processing
+			//
 
-			result &= m_packedLogicAfbInstance != -1;
+			result &= m_afbComponents.addInstance(TO_INT(Afb::AfbType::LOGIC), &m_packedLogicAfbInstance, m_log);
+
+			Q_ASSERT(m_packedLogicAfbInstance >= 0);
 		}
 
 		findLogicAfbInstances(Afb::AFB_AND, 1, &m_afbAndInstances);
@@ -1007,7 +1018,7 @@ namespace Builder
 			return nullptr;
 		}
 
-		UalAfb* ualAfb = new UalAfb(ualItem, m_afbElements.isBusProcessingAfb(ualItem.strID()));
+		UalAfb* ualAfb = new UalAfb(ualItem, m_afbComponents.isBusProcessingAfb(ualItem.strID()));
 
 		if (ualAfb->calculateFbParamValues(this) == false)
 		{
@@ -1017,7 +1028,7 @@ namespace Builder
 
 		// get Functional Block instance
 		//
-		bool result = m_afbElements.addInstance(ualAfb, m_log);
+		bool result = m_afbComponents.addInstance(ualAfb, m_log);
 
 		if (result == false)
 		{
@@ -1032,11 +1043,9 @@ namespace Builder
 
 	int ModuleLogicCompiler::reserveLogicInstanceForPackedLogicProcessing()
 	{
-		// reserve one instance of AFB LOGIC to process Packed Logic items
-		// ths instance will fully configured just before packed logic processing
-		// so this configuration is dummy
-		//
-		l,;welf,w; lf,w;ef, w;ef
+
+
+
 
 		return -1;
 	}
@@ -8556,7 +8565,7 @@ namespace Builder
 
 		std::set<QString> processedInstantiatorsID;
 
-		for(const AfbElementShared& afbElement : m_afbElements)
+		for(const AfbElementShared& afbElement : m_lmDescription->afbElements())
 		{
 			TEST_PTR_CONTINUE(afbElement);
 
@@ -9214,7 +9223,7 @@ namespace Builder
 
 		bool result = true;
 
-		bool isBusProcAfb = m_afbElements.isBusProcessingAfb(ualAfb->strID());
+		bool isBusProcAfb = m_afbComponents.isBusProcessingAfb(ualAfb->strID());
 
 		std::vector<int> busProcessingStepsSizes;
 
@@ -10065,7 +10074,6 @@ namespace Builder
 
 		// input signals checking
 		//
-
 		for(const LogicPin& inPin : inputs)
 		{
 			const UalSignal* inSignal = getUalSignalByPinCaption(afb, inPin.caption(), true);
@@ -10089,10 +10097,10 @@ namespace Builder
 			{
 				if (inSignal->constDiscreteValue() == 0)
 				{
-					// const value 0 on input
-					//
 					if (packedAfbOpcode == Afb::PACKED_AND_OPCODE)
 					{
+						// const value 0 on input
+						//
 						const UalItem* inItem = inSignal->ualItem();
 
 						TEST_PTR_LOG_RETURN_FALSE(inItem, m_log);
@@ -10101,15 +10109,16 @@ namespace Builder
 						//
 						m_log->wrnALC5204(afb->packedLogicID(), afb->label(), afb->guid(), afb->schemaID(),
 										inItem->label(), inItem->guid(), inItem->schemaID());
-						const0Count++;
 					}
+
+					const0Count++;
 				}
 				else
 				{
-					// const value 1 on input
-					//
 					if (packedAfbOpcode == Afb::PACKED_OR_OPCODE)
 					{
+						// const value 1 on input
+						//
 						const UalItem* inItem = inSignal->ualItem();
 
 						TEST_PTR_LOG_RETURN_FALSE(inItem, m_log);
@@ -10118,8 +10127,8 @@ namespace Builder
 						//
 						m_log->wrnALC5203(afb->packedLogicID(), afb->label(), afb->guid(), afb->schemaID(),
 										inItem->label(), inItem->guid(), inItem->schemaID());
-						const1Count++;
 					}
+					const1Count++;
 				}
 
 				continue;
@@ -10251,13 +10260,20 @@ namespace Builder
 
 		//
 
-
-		Q_ASSERT(false);		// to do
+		if (m_lmDescription->isBitAccAvailable() == true)
+		{
+			Q_ASSERT(false);
+		}
+		else
+		{
+			result &= generateAfbBasedPackedAfbCode(code, afb, nonConstInSignals,
+													outSignal, outWriteAddr);
+		}
 
 		return result;
 	}
 
-	bool ModuleLogicCompiler::generatePackedOrAfbCode(CodeSnippet* code, const UalAfb* afb,
+	bool ModuleLogicCompiler::generateAfbBasedPackedAfbCode(CodeSnippet* code, const UalAfb* afb,
 													const std::vector<std::pair<const UalSignal*, Address16>>& inSignals,
 													const UalSignal* outSignal, const Address16& outWriteAddr)
 	{
@@ -10265,13 +10281,148 @@ namespace Builder
 		TEST_PTR_LOG_RETURN_FALSE(afb, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(outSignal, m_log);
 
-		bool result = true;
+		//
+		// inSignals - is unique non const input signals
+		//
 
-		bool hasConst1 = false;
+		if (m_packedLogicAfbInstance == -1)
+		{
+			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
 
+		const AfbComponents::LogicInfo& li = m_afbComponents.logicInfo();
 
+		if (li.isValid() == false)
+		{
+			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
 
-		return result;
+		QString afbCaption;
+		int confValue = -1;
+		int instance = m_packedLogicAfbInstance;
+
+		if (afb->isPackedAndLogic() == true)
+		{
+			afbCaption = Afb::AFB_AND;
+			confValue = li.confAnd;
+		}
+		else
+		{
+			if (afb->isPackedOrLogic() == true)
+			{
+				afbCaption = Afb::AFB_OR;
+				confValue = li.confOr;
+			}
+			else
+			{
+				Q_ASSERT(false);
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
+		}
+
+		code->comment_nl(QString("Packed_%1 %2 processing").arg(afbCaption).arg(afb->label()));
+
+		CodeItem cmd;
+
+		// set operation AND or OR
+		//
+		*code << cmd.writeFuncBlockConst(li.opCode, instance, li.confIndex, confValue, afbCaption);
+
+		// bus width set to 1
+		//
+		*code << cmd.writeFuncBlockConst(li.opCode, instance, li.busWidthIndex, 1, afbCaption);
+
+		//
+
+		int inSignalsCount = static_cast<int>(inSignals.size());
+		int inSignalIndex = 0;
+
+		int step = 0;
+		int prevOperandsCount = 0;
+
+		while(1)
+		{
+			int remainSignalsCount = inSignalsCount - inSignalIndex;
+
+			if (step > 0)
+			{
+				remainSignalsCount++;	//	take into consideration prev step result
+			}
+
+			remainSignalsCount = std::min(remainSignalsCount, li.maxOperandsCount);
+
+			Q_ASSERT(remainSignalsCount >= li.minOperandsCount);
+
+			if (prevOperandsCount != remainSignalsCount)
+			{
+				*code << cmd.writeFuncBlock(li.opCode,
+													instance,
+													li.operandQuantityIndex,
+													remainSignalsCount, afbCaption);
+				prevOperandsCount = remainSignalsCount;
+			}
+
+			int inputNo = 0;
+
+			if (step != 0)
+			{
+				// load prev step result from bit accumulator
+				//
+				*code << cmd.writeFuncBlockBit(li.opCode, instance, li.firstInIndex + inputNo,
+														bitAccumulatorAddress16(), afbCaption,
+														QString("%1.in_%2 <= prev step result").arg(afbCaption).
+															arg(inputNo + 1));
+
+				inputNo++;
+			}
+
+			while(inputNo < remainSignalsCount && inSignalIndex < inSignals.size())
+			{
+				const auto& [inSignal, readAddr] = inSignals[inSignalIndex];
+
+				inSignalIndex++;
+
+				// load next input signal
+				//
+				*code << cmd.writeFuncBlockBit(li.opCode, instance, li.firstInIndex + inputNo,
+														readAddr, afbCaption,
+														QString("%1.in_%2 <= %3").arg(afbCaption).
+																arg(inputNo + 1).arg(inSignal->appSignalID()));
+				inputNo++;
+
+				if (inSignalIndex >= inSignals.size())
+				{
+					break;
+				}
+			}
+
+			*code << CodeItem().startafb(li.opCode, instance, afbCaption, 2,
+											QString("compute @%1 step %2").arg(afb->label()).arg(step + 1));
+
+			if (inSignalIndex >= inSignals.size())
+			{
+				*code << cmd.readFuncBlockBit(outWriteAddr, li.opCode, instance,
+													 li.resultIndex, afbCaption,
+														QString(" %1 <= @%2.out (final result)").
+															arg(outSignal->appSignalID()).arg(afb->label()));
+				break;
+			}
+
+			// save intermediate result into bit accumulator
+			//
+			*code << cmd.readFuncBlockBit(bitAccumulatorAddress16(), li.opCode, instance,
+												 li.resultIndex, afbCaption,
+													QString(" bitAccumulator <= @%1.out (intermediate result)").
+														arg(afb->label()));
+			step++;
+		}
+
+		return true;
 	}
 
 	bool ModuleLogicCompiler::generatePackedAndAfbCode(CodeSnippet* code, const UalAfb* afb,
@@ -13450,7 +13601,7 @@ namespace Builder
 
 		busTypeID.clear();
 
-		isBusProcessingAfb = m_afbElements.isBusProcessingAfb(ualAfb->afbStrID());
+		isBusProcessingAfb = m_afbComponents.isBusProcessingAfb(ualAfb->afbStrID());
 
 		if (isBusProcessingAfb == false)
 		{
@@ -17673,7 +17824,7 @@ namespace Builder
 			aui.maxInstances = component->maxInstCount();
 			aui.version = component->impVersion();
 
-			aui.usedInstances = m_afbElements.getUsedInstances(componentOpCode);
+			aui.usedInstances = m_afbComponents.getUsedInstancesCount(componentOpCode);
 
 			if (aui.maxInstances != 0)
 			{

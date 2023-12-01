@@ -1515,6 +1515,13 @@ namespace Afb
 		m_afbParamValue.setDataFormat(dataFormat);
 	}
 
+	bool AfbParam::isValid() const
+	{
+		return	!m_caption.isEmpty() &&
+				!m_opName.isEmpty() &&
+				m_operandIndex >= 0;
+	}
+
 	bool AfbParam::isAnalog() const
 	{
 		return m_afbParamValue.type() == E::SignalType::Analog;
@@ -2480,6 +2487,32 @@ namespace Afb
 	std::vector<AfbParam>& AfbElement::params()
 	{
 		return m_data.params;
+	}
+
+	AfbParam AfbElement::paramByCaption(const QString& caption) const
+	{
+		for(const AfbParam& p : m_data.params)
+		{
+			if (p.caption() == caption)
+			{
+				return p;
+			}
+		}
+
+		return AfbParam();
+	}
+
+	AfbParam AfbElement::paramByOpName(const QString& opName) const
+	{
+		for(const AfbParam& p : m_data.params)
+		{
+			if (p.opName() == opName)
+			{
+				return p;
+			}
+		}
+
+		return AfbParam();
 	}
 
 	int AfbElement::paramsCount() const
