@@ -1485,7 +1485,7 @@ void MainWindow::onSignalColumnAction(QAction* action)
 
 void MainWindow::aboutApp()
 {
-	DialogAbout::show(this, tr(""), ":/Images/logo.png");
+	DialogAbout::show(this, tr(""), ":/Logo/RadiyLogo.png");
 	return;
 }
 

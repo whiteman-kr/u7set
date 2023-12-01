@@ -596,7 +596,7 @@ void ModuleConfigurator::aboutQtClicked()
 void ModuleConfigurator::aboutClicked()
 {
 	QString text = qApp->applicationName() + tr(" allows user to upload firmware to flash memory of logic modules.<br>");
-	DialogAbout::show(this, text, ":/Images/Images/Logo.png");
+	DialogAbout::show(this, text, ":/Logo/RadiyLogo.png");
 
 	return;
 }

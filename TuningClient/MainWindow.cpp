@@ -1269,7 +1269,7 @@ void MainWindow::showAboutQt()
 void MainWindow::showAbout()
 {
 	QString text = qApp->applicationName() + tr(" allows user to modify tuning values.");
-	DialogAbout::show(this, text, ":/Images/Images/logo.png");
+	DialogAbout::show(this, text, ":/Logo/RadiyLogo.png");
 }
 
 void MainWindow::showTuningUserManual()

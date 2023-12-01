@@ -52,7 +52,10 @@ add_executable(${TARGET} WIN32
 	TestSuiteLog.cpp
 	TestSuiteMainWindow.cpp
 	TestViewTabPage.cpp
+	
 	Resources.qrc
+	../Etc/Logo/RadiyLogo.qrc
+
 	${WINDOWS_RESOURCES}
 	${TC_FORMS}
 )

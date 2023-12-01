@@ -343,41 +343,17 @@ void MonitorMainWindow::showZoomControls()
 
 void MonitorMainWindow::showLogo()
 {
-	Q_ASSERT(m_logoLabel);
-
-	if (m_logoImage.isNull() == true)
+	if (m_toolBar == nullptr || m_toolBar->isVisible() == false || m_logoImage.isNull() == true)
 	{
 		m_logoLabel->clear();
-
+		m_logoLabel->setFixedSize(0, 0);
 		return;
 	}
 
 	static bool prevShowLogo = false;
-
 	if (prevShowLogo == MonitorAppSettings::instance().showLogo())
 	{
 		return;
-	}
-
-	QImage logo = m_logoImage;
-
-	// Get toolbar content height
-	//
-	int toolBarSpacing = 0;
-
-	if (QLayout* toolBarLayout = m_toolBar->layout();
-		toolBarLayout != nullptr)
-	{
-		toolBarSpacing = toolBarLayout->spacing();
-	}
-
-	int logoMaxHeight = m_toolBar->size().height() - toolBarSpacing * 2;
-
-	// Scale the logo image
-	//
-	if (logo.height() > logoMaxHeight)
-	{
-		logo = logo.scaledToHeight(logoMaxHeight, Qt::SmoothTransformation);
 	}
 
 	prevShowLogo = MonitorAppSettings::instance().showLogo();
@@ -386,18 +362,38 @@ void MonitorMainWindow::showLogo()
 	//
 	if (MonitorAppSettings::instance().showLogo() == true)
 	{
-		m_logoLabel->setPixmap(QPixmap::fromImage(logo));
+		// This is the only way to get height of the toolbar.
+		// Toolbar does not return correct margins, at least now (bug?)
+		//
+		auto fakeSeparator = m_toolBar->addSeparator();
+		auto fakeSeparatorWidget = m_toolBar->widgetForAction(fakeSeparator);
+		fakeSeparatorWidget->setVisible(true);
+		double toHeight = fakeSeparatorWidget->geometry().height();
+		delete fakeSeparator;
+
+		m_logoLabel->setPixmap(m_logoImage);
+		m_logoLabel->setScaledContents(true);
+
+		// Always scale logo to the toolbar height.
+		//
+		QSizeF logoSize = m_logoLabel->sizeHint().toSizeF();
+
+		double scale = toHeight / static_cast<double>(logoSize.height());
+		logoSize *= scale;
+
+		m_logoLabel->setFixedSize(logoSize.toSize());
 	}
 	else
 	{
+		// Hide logo.
+		//
 		m_logoLabel->clear();
+		m_logoLabel->setFixedSize(0, 0);
 	}
-
 
 	m_logoSeparator->setVisible(MonitorAppSettings::instance().showLogo() == true &&
 								m_configController.configuration().tuningEnabled == true &&
 								m_tuningUserManager.tuningLogin() == true);
-
 	return;
 }
 
@@ -704,11 +700,11 @@ void MonitorMainWindow::createToolBars()
 
 	// Create logo for toolbar
 	//
-	m_logoLabel = new QLabel(this);
+	m_logoLabel = new QLabel(m_toolBar);
 	m_toolBar->addWidget(m_logoLabel);
 	this->addToolBar(Qt::TopToolBarArea, m_toolBar);
 
-	int space = m_toolBar->sizeHint().height() / 10;
+	int space = m_toolBar->sizeHint().height() / 12;
 	m_toolBar->setStyleSheet(QString("QToolBar{ padding: %1; }").arg(space));
 
 	return;
@@ -1042,8 +1038,7 @@ void MonitorMainWindow::showAboutQt()
 void MonitorMainWindow::showAbout()
 {
 	QString text = qApp->applicationName() + tr(" allows user to view schemas and trends.<br>");
-	DialogAbout::show(this, text, ":/Images/Images/Logo.png");
-
+	DialogAbout::show(this, text, ":/Logo/RadiyLogo.png");
 	return;
 }
 

@@ -62,6 +62,7 @@ add_executable(${TARGET} WIN32
 	UalTesterServer.h
 
 	resources.qrc
+	../../Etc/Logo/RadiyLogo.qrc
 	${WINDOWS_RESOURCES}
 )
 

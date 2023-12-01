@@ -877,7 +877,17 @@ namespace TrendLib
 		QMessageBox msgBox(this);
 
 		msgBox.setWindowTitle(tr("About Trends"));
-		QPixmap image(":/TrendImages/Images/RadiyLogo.png");
+		QPixmap image(":/Logo/RadiyLogo.png");
+		
+		// Set logo size that it will be not too big.
+		//
+		QSize logoSize = image.size();
+		if (logoSize.width() > 200)
+		{
+			logoSize *= 200.0 / logoSize.width();
+			image = image.scaled(logoSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+		}
+
 		msgBox.setIconPixmap(image);
 
 		QStringList args = qApp->arguments();

@@ -122,6 +122,7 @@ set (MONITOR_SOURCES
 
 set (MONITOR_RESOURCES
 	Monitor.qrc
+	../Etc/Logo/RadiyLogo.qrc
 )
 
 # Add icon

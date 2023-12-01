@@ -315,6 +315,7 @@ set (U7_SOURCES
 
 set (U7_RESOURCES
 	Resources.qrc
+	../Etc/Logo/RadiyLogo.qrc
 	../DatabaseUpgrade/DatabaseUpgrade.qrc
 )
 

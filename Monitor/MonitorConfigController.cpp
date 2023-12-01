@@ -65,19 +65,18 @@ bool MonitorConfigController::updateConfiguration(const ClientLib::Configuration
 
 	// Get image file
 	//
-	auto getImageFunc = [this](const QString& fileId) -> QImage
+	auto getImageFunc = [this](const QString& fileId) -> QPixmap
 		{
+			QPixmap pixmap;
 			QByteArray ba;
 
 			if (bool ok = getFileBlockedById(fileId, &ba, nullptr);
 				ok == true)
 			{
-				return QImage::fromData(ba);
+				pixmap.loadFromData(ba);
 			}
-			else
-			{
-				return {};
-			}
+
+			return pixmap;
 		};
 
 	config.globalScript = getScriptFunc("/" + MonitorAppSettings::instance().equipmentId() + "/GlobalScript.js");

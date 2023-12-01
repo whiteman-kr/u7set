@@ -96,6 +96,7 @@ set (TC_SOURCES
 
 set (TC_RESOURCES
 	Resources.qrc
+	../Etc/Logo/RadiyLogo.qrc
 )
 
 set (TC_FORMS
