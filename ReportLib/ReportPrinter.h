@@ -24,11 +24,10 @@ namespace ReportLib
 
 		Type type() const {return m_type;}
 
-		virtual void print(ReportPrinter& printer,
+		virtual void print(const Report& report,
+						   ReportPrinter& printer,
 						   QPdfWriter& pdfWriter,
 						   QPainter& painter,
-						   const std::vector<ReportMarginItem>& marginItems,
-						   int pageCount,
 						   int& pageIndex,
 						   QMutex& pageCounterMutex) = 0;
 
@@ -52,11 +51,10 @@ namespace ReportLib
 
 		virtual QRect contentRect() const override;
 
-		virtual void print(ReportPrinter& printer,
+		virtual void print(const Report& report,
+						   ReportPrinter& printer,
 						   QPdfWriter& pdfWriter,
 						   QPainter& painter,
-						   const std::vector<ReportMarginItem>& marginItems,
-						   int pageCount,
 						   int& pageIndex,
 						   QMutex& pageCounterMutex) override;
 
@@ -80,11 +78,10 @@ namespace ReportLib
 
 		virtual QRect contentRect() const override;
 
-		virtual void print(ReportPrinter& printer,
+		virtual void print(const Report& report,
+						   ReportPrinter& printer,
 						   QPdfWriter& pdfWriter,
 						   QPainter& painter,
-						   const std::vector<ReportMarginItem>& marginItems,
-						   int pageCount,
 						   int& pageIndex,
 						   QMutex& pageCounterMutex) override;
 
@@ -190,9 +187,9 @@ namespace ReportLib
 
 		Statistics statistics() const;
 
-		void printMarginItems(QPdfWriter& pdfWriter,
+		void printMarginItems(const Report& report,
+							  QPdfWriter& pdfWriter,
 							  QPainter& painter,
-							  const std::vector<ReportMarginItem>& marginItems,
 							  const QString& tag) const;
 
 	private:

@@ -99,6 +99,9 @@ namespace ReportLib
 		const std::map<QString, QString>& variables() const;
 		void setVariables(const std::map<QString, QString>& variables);
 
+		int startPage() const;
+		void setStartPage(int value);
+
 	private:
 		// Page options
 		//
@@ -107,6 +110,7 @@ namespace ReportLib
 		std::vector<std::shared_ptr<ReportSection>> m_sections;
 		std::vector<ReportMarginItem> m_marginItems;
 		std::map<QString, QString> m_variables;	// Key is variable name, value is variable value
+		int m_startPage{1};						// Report start page number
 
 		QString m_reportName;
 		QString m_path;

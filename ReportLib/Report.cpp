@@ -214,5 +214,15 @@ namespace ReportLib
 		m_variables = variables;
 	}
 
+	int Report::startPage() const
+	{
+		return m_startPage;
+	}
+
+	void Report::setStartPage(int value)
+	{
+		m_startPage = value;
+	}
+
 }
 

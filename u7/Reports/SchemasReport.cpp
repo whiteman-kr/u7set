@@ -11,10 +11,10 @@ void SchemasAlbumGenerator::createSchemasAlbums(DbController* db, const AppSigna
 {
 	QString path = QSettings{}.value("SchemaEditor/Export/AlbumPath", QDir().toNativeSeparators(QDir::currentPath())).toString();
 
-	static std::vector<Builder::SchemaTypesParams> schemaTypesParams = {};
-	if (schemaTypesParams.empty() == true)
+	std::vector<Builder::SchemaTypesParams> schemaTypesParams = Builder::SchemasReportGenerator::defaultFileTypesParams(db);
+	for (auto& param : schemaTypesParams)
 	{
-		schemaTypesParams = Builder::SchemasReportGenerator::defaultFileTypesParams(db);
+		param.load(db);
 	}
 
 	// Get all schemas tags
@@ -49,18 +49,37 @@ void SchemasAlbumGenerator::createSchemasAlbums(DbController* db, const AppSigna
 
 	// Show dialog with report options
 	//
-	DialogSchemasReport d(path, schemaTypesParams,
-						  Builder::SchemasReportGenerator::defaultFileTypesParams(db), options, db, parent);
-	if (d.exec() != QDialog::Accepted)
+	DialogSchemasReport d(path,
+						  schemaTypesParams,
+						  options,
+						  db,
+						  parent);
+	
+	int result = d.exec();
+
+	if (d.optionsApplied() == true)
+	{
+		// Save options set in the dialog
+		//
+		schemaTypesParams = d.schemaTypesParams();
+		for (auto& param : schemaTypesParams)
+		{
+			param.save(db);
+		}
+		
+		options = d.options();
+		options.save(db);
+
+		path = d.path();
+		QSettings{}.setValue("SchemaEditor/Export/AlbumPath", path);
+
+	}
+
+	if (result != QDialog::Accepted)
 	{
 		return;
 	}
-	schemaTypesParams = d.schemaTypesParams();
-
-	options = d.options();
-	path = d.path();
-	QSettings{}.setValue("SchemaEditor/Export/AlbumPath", path);
-
+	
 	SchemasReportGeneratorThread r(theSettings.serverHost(),
 								   theSettings.serverPort(),
 								   theSettings.serverUsername(),

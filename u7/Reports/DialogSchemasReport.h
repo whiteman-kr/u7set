@@ -22,6 +22,7 @@ private slots:
 
 private:
 	void fillTree();
+	void accept() override;
 
 private:
 	DbController* m_db = nullptr;
@@ -57,7 +58,6 @@ class DialogSchemasReport : public QDialog
 public:
 	DialogSchemasReport(const QString& path,
 						const std::vector<Builder::SchemaTypesParams>& schemaTypesParams,
-						const std::vector<Builder::SchemaTypesParams>& defaultFileTypeParams,
 						const Builder::SchemasReportOptions& options,
 						DbController* db,
 						QWidget *parent);
@@ -66,6 +66,8 @@ public:
 	Builder::SchemasReportOptions options() const;
 	QString path() const;
 
+	bool optionsApplied() const;
+
 private slots:
 	void applyClicked();
 	void okClicked();
@@ -73,7 +75,7 @@ private slots:
 	void pageSetupClicked();
 
 private:
-	bool applyOptions();
+	[[nodiscard]] bool applyOptions();
 
 private:
 	QLineEdit* m_editReportPath = nullptr;
@@ -81,11 +83,18 @@ private:
 	QTreeWidget* m_schemaTypesTree = nullptr;
 	QTreeWidget* m_schemaTagsTree = nullptr;
 
+	//QCheckBox* m_checkSignleFile = nullptr;
+
 	QCheckBox* m_checkAddTableOfContents = nullptr;
 	QCheckBox* m_checkAddFolders = nullptr;
 	QCheckBox* m_checkAddFooters = nullptr;
 	QCheckBox* m_checkSignalsDetails = nullptr;
 	QCheckBox* m_checkItemsLabels = nullptr;
+
+	QLineEdit* m_editStartPageNumber = nullptr;
+	QLineEdit* m_editTableOfContentsFontSize = nullptr;
+	QLineEdit* m_editTableFontSize = nullptr;
+	QLineEdit* m_editNormalFontSize = nullptr;
 
 	VariablesWidget* m_userVariables = nullptr;
 	VariablesWidget* m_projectVariables = nullptr;
@@ -97,6 +106,8 @@ private:
 	DbController* m_db;
 
 	Builder::SchemasReportOptions m_options;
+
+	bool m_optionsApplied = false;
 
 };
 

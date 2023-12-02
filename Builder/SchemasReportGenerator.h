@@ -33,6 +33,9 @@ namespace Builder
 
 		// Generic schemas report options
 		//
+		void setSignleFile(bool value);
+		bool singleFile() const;
+
 		void setFooters(bool value);
 		bool footers() const;
 
@@ -50,6 +53,18 @@ namespace Builder
 		void setSignalsDetails(bool value);
 		bool signalsDetails() const;
 		
+		void setStartPageNumber(int value);
+		int startPageNumber() const;
+
+		void setTableOfContentsFontSize(int value);
+		int tableOfContentsFontSize() const;
+
+		void setTableFontSize(int value);
+		int tableFontSize() const;
+
+		void setNormalFontSize(int value);
+		int normalFontSize() const;
+
 		void setSchemaTags(const std::set<QString>& tagsSet);
 		const std::map<QString, bool>& schemaTags() const;
 		std::map<QString, bool>& schemaTags();
@@ -68,6 +83,13 @@ namespace Builder
 		bool m_tableOfContents = false;			// Generate table of contents in schemas album
 		bool m_itemsLabels = false;				// Generate items labels for debuging
 		bool m_signalsDetails = false;			// Generate extra pages in schemas album with signals sources and targets
+		
+		int m_startPageNumber = 1;              // Start page number
+		bool m_singleFile = false;				// Generare report to single file, do not split to schema types
+		
+		int m_tableOfContentsFontSize = 9;		// Table of contents font size
+		int m_tableFontSize = 9;				// Table font size
+		int m_normalFontSize = 9;				// Normal text font size
 
 		std::map<QString, bool> m_schemaTags;   // Key is tag, value shows if this tag is set
 		std::map<QString, QString> m_projectVariables;	// Key is variable name, value is variable value
@@ -86,16 +108,27 @@ namespace Builder
 		int fileId() const;
 		const QString& caption() const;
 
+		// Properties
+		//
 		bool selected() const;
 		void setSelected(bool value);
 
 		const QPageLayout& pageLayout() const;
 		void setPageLayout(const QPageLayout& layout);
 
+		bool noMargins() const;
+		void setNoMargins(bool value);
+
+		// Load/save
+		//
+		bool load(DbController* db);
+		bool save(DbController* db) const;
+
 	private:
 		int m_fileId = -1;
 		QString m_caption;
 		bool m_selected = false;
+		bool m_noMargins = false;
 
 		// Multiple-file report section page options
 		//
@@ -248,7 +281,7 @@ namespace Builder
 		void renderSchemasToAlbums(const std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas,
 								   const VFrame30::SchemaDetailsSet& detailsSet,
 								   const QString& groupName,
-								   const QPageLayout pageLayout);
+								   const QPageLayout& pageLayout);
 
 		[[nodiscard]] QPageLayout getSchemaPageLayout(const std::shared_ptr<VFrame30::Schema>& schema) const;
 
@@ -314,6 +347,7 @@ namespace Builder
 		QString m_userName;
 		QString m_userPassword;
 
+		ReportLib::ReportFont m_tableOfContentsFont;
 		ReportLib::ReportFont m_normalFont;
 		ReportLib::ReportFont m_tableFont;
 		ReportLib::ReportFont m_marginFont;

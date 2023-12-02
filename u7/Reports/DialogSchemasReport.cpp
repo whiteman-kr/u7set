@@ -27,6 +27,7 @@ DialogSchemasReportTypePageSetup::DialogSchemasReportTypePageSetup(const std::ve
 	l << tr("Page Size");
 	l << tr("Orientation");
 	l << tr("Margins, mm");
+	l << tr("No Margins (1:1)");
 	m_treeWidget->setHeaderLabels(l);
 	m_treeWidget->setSelectionMode(QAbstractItemView::SelectionMode::ExtendedSelection);
 	m_treeWidget->setRootIsDecorated(false);
@@ -217,6 +218,7 @@ void DialogSchemasReportTypePageSetup::fillTree()
 		item->setText(2, ft.pageLayout().orientation() == QPageLayout::Portrait ? tr("Portrait") : tr("Landscape"));
 		QMarginsF margins = ft.pageLayout().margins();
 		item->setText(3, tr("l%1 t%2 r%3 b%4").arg(margins.left()).arg(margins.top()).arg(margins.right()).arg(margins.bottom()));
+		item->setCheckState(4, ft.noMargins() ? Qt::Checked : Qt::Unchecked);
 	}
 
 	for (int i = 0; i < m_treeWidget->columnCount(); i++)
@@ -225,6 +227,18 @@ void DialogSchemasReportTypePageSetup::fillTree()
 	}
 
 	return;
+}
+
+void DialogSchemasReportTypePageSetup::accept()
+{
+	int count = m_treeWidget->topLevelItemCount();
+	for (int i = 0; i < count; i++)
+	{
+		SchemaTypesParams& ft = m_schemaTypesParams[i];
+		ft.setNoMargins(m_treeWidget->topLevelItem(i)->checkState(4) == Qt::Checked);
+	}
+
+	QDialog::accept();
 }
 
 
@@ -312,10 +326,10 @@ void VariablesWidget::onRemoveVariableClicked()
 			return;
 		}
 
-		QTreeWidgetItem* item = m_variablesTree->takeTopLevelItem(index);
-		if (item != nullptr)
+		QTreeWidgetItem* itemToDelete = m_variablesTree->takeTopLevelItem(index);
+		if (itemToDelete != nullptr)
 		{
-			delete item;
+			delete itemToDelete;
 		}
 	}
 }
@@ -325,14 +339,13 @@ void VariablesWidget::onRemoveVariableClicked()
 //
 DialogSchemasReport::DialogSchemasReport(const QString& path,
 										 const std::vector<Builder::SchemaTypesParams>& schemaTypesParams,
-										 const std::vector<Builder::SchemaTypesParams>& defaultFileTypeParams,
 										 const SchemasReportOptions& options,
 										 DbController* db,
 										 QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	m_reportPath(path),
 	m_schemaTypesParams(schemaTypesParams),
-	m_defaultFileTypeParams(defaultFileTypeParams),
+	m_defaultFileTypeParams(Builder::SchemasReportGenerator::defaultFileTypesParams(db)),
 	m_options(options),
 	m_db(db)
 {
@@ -405,39 +418,61 @@ DialogSchemasReport::DialogSchemasReport(const QString& path,
 		{
 			QWidget* optionsTab = new QWidget();
 
-			QVBoxLayout* optionsLayout = new QVBoxLayout(optionsTab);
+			QGridLayout* optionsLayout = new QGridLayout(optionsTab);
 
 			// Options buttons
 			//
-			m_checkAddTableOfContents = new QCheckBox(tr("Add table of contents"));
+			int row = 0;
+			int col = 0;
+		
+			/* m_checkSignleFile = new QCheckBox(tr("Generate single report file"));
+			m_checkSignleFile->setChecked(m_options.singleFile());
+			optionsLayout->addWidget(m_checkSignleFile, row++, col);*/
+
+			m_checkAddTableOfContents = new QCheckBox(tr("Generate table of contents"));
 			m_checkAddTableOfContents->setChecked(m_options.tableOfContents());
-			optionsLayout->addWidget(m_checkAddTableOfContents);
+			optionsLayout->addWidget(m_checkAddTableOfContents, row++, col);
 
 			m_checkAddFolders = new QCheckBox(tr("Add folders names to table of contents"));
 			m_checkAddFolders->setChecked(m_options.folders());
-			optionsLayout->addWidget(m_checkAddFolders);
+			optionsLayout->addWidget(m_checkAddFolders, row++, col);
 
-			m_checkAddFooters = new QCheckBox(tr("Add pages footers"));
+			m_checkAddFooters = new QCheckBox(tr("Add header and footer"));
 			m_checkAddFooters->setChecked(m_options.footers());
-			optionsLayout->addWidget(m_checkAddFooters);
+			optionsLayout->addWidget(m_checkAddFooters, row++, col);
 
 			m_checkSignalsDetails = new QCheckBox(tr("Add schema signals pages"));
 			m_checkSignalsDetails->setChecked(m_options.signalsDetails());
-			optionsLayout->addWidget(m_checkSignalsDetails);
+			optionsLayout->addWidget(m_checkSignalsDetails, row++, col);
 
 			m_checkItemsLabels = new QCheckBox(tr("Show schema items labels"));
 			m_checkItemsLabels->setChecked(m_options.itemsLabels());
-			optionsLayout->addWidget(m_checkItemsLabels);
+			optionsLayout->addWidget(m_checkItemsLabels, row++, col);
 
-			optionsLayout->addStretch();
+			optionsLayout->addWidget(new QLabel("Start page number"), row, col);
+			m_editStartPageNumber = new QLineEdit();
+			m_editStartPageNumber->setText(QString::number(m_options.startPageNumber()));
+			optionsLayout->addWidget(m_editStartPageNumber, row++, col + 1);
+
+			optionsLayout->addWidget(new QLabel("Table of contents font size"), row, col);
+			m_editTableOfContentsFontSize = new QLineEdit();
+			m_editTableOfContentsFontSize->setText(QString::number(m_options.tableOfContentsFontSize()));
+			optionsLayout->addWidget(m_editTableOfContentsFontSize, row++, col + 1);
+			
+			optionsLayout->addWidget(new QLabel("Tables font size"), row, col);
+			m_editTableFontSize = new QLineEdit();
+			m_editTableFontSize->setText(QString::number(m_options.tableFontSize()));
+			optionsLayout->addWidget(m_editTableFontSize, row++, col + 1);
+
+			optionsLayout->addWidget(new QLabel("Text font size"), row, col);
+			m_editNormalFontSize = new QLineEdit();
+			m_editNormalFontSize->setText(QString::number(m_options.normalFontSize()));
+			optionsLayout->addWidget(m_editNormalFontSize, row++, col + 1);
 
 			{
-				QHBoxLayout* buttonLayout = new QHBoxLayout();
 				QPushButton* pageSetupButton = new QPushButton(tr("Page Setup..."));
 				connect(pageSetupButton, &QPushButton::clicked, this, &DialogSchemasReport::pageSetupClicked);
-				buttonLayout->addWidget(pageSetupButton);
-				buttonLayout->addStretch();
-				optionsLayout->addLayout(buttonLayout);
+				optionsLayout->addWidget(pageSetupButton, row++, col);
 			}
 
 			tabWidget->addTab(optionsTab, tr("Options"));
@@ -446,11 +481,18 @@ DialogSchemasReport::DialogSchemasReport(const QString& path,
 		// Variables tab
 		//
 		{
-			m_userVariables = new VariablesWidget(m_options.userVariables());
-			tabWidget->addTab(m_userVariables, tr("User Variables"));
+			QWidget* variablesWidget = new QWidget();
+			QVBoxLayout* variablesLayout = new QVBoxLayout(variablesWidget);
 
+			variablesLayout->addWidget(new QLabel(tr("Project Variables")));
 			m_projectVariables = new VariablesWidget(m_options.projectVariables());
-			tabWidget->addTab(m_projectVariables, tr("Project Variables"));
+			variablesLayout->addWidget(m_projectVariables);
+
+			variablesLayout->addWidget(new QLabel(tr("User Variables")));
+			m_userVariables = new VariablesWidget(m_options.userVariables());
+			variablesLayout->addWidget(m_userVariables);
+		
+			tabWidget->addTab(variablesWidget, tr("Variables"));
 		}
 
 		mainLayout->addWidget(tabWidget);
@@ -494,23 +536,21 @@ QString DialogSchemasReport::path() const
 	return m_reportPath;
 }
 
+bool DialogSchemasReport::optionsApplied() const
+{
+	return m_optionsApplied;
+}
+
 void DialogSchemasReport::applyClicked()
 {
-	applyOptions();
+	m_optionsApplied = applyOptions();
 }
 
 void DialogSchemasReport::okClicked()
 {
-	QString text = m_editReportPath->text();
-	if (text.isEmpty() == true)
-	{
-		QMessageBox::critical(this, qAppName(), tr("Please enter the file name!"));
-		m_editReportPath->setFocus();
-		return;
-	}
-	m_reportPath = text;
+	m_optionsApplied = applyOptions();
 
-	if (applyOptions() == false)
+	if (m_optionsApplied == false)
 	{
 		return;
 	}
@@ -543,6 +583,17 @@ void DialogSchemasReport::pageSetupClicked()
 
 bool DialogSchemasReport::applyOptions()
 {
+	// Save path
+	//
+	QString text = m_editReportPath->text();
+	if (text.isEmpty() == true)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Please enter the file name!"));
+		m_editReportPath->setFocus();
+		return false;
+	}
+	m_reportPath = text;
+
 	// Save selected types
 	//
 	int selectedTypesCount = 0;
@@ -585,18 +636,51 @@ bool DialogSchemasReport::applyOptions()
 
 	// Save options
 	//
+	
+	//m_options.setSignleFile(m_checkSignleFile->isChecked());
 	m_options.setFolders(m_checkAddFolders->isChecked());
 	m_options.setFooters(m_checkAddFooters->isChecked());
 	m_options.setTableOfContents(m_checkAddTableOfContents->isChecked());
 	m_options.setSignalsDetails(m_checkSignalsDetails->isChecked());
 	m_options.setItemsLabels(m_checkItemsLabels->isChecked());
 
+	bool ok = false;
+	int value = m_editStartPageNumber->text().toInt(&ok);
+	if (ok == false)
+	{
+		m_editStartPageNumber->setFocus();
+		return false;
+	}
+	m_options.setStartPageNumber(value);
+
+	value = m_editTableOfContentsFontSize->text().toInt(&ok);
+	if (ok == false)
+	{
+		m_editTableOfContentsFontSize->setFocus();
+		return false;
+	}
+	m_options.setTableOfContentsFontSize(value);
+
+	value = m_editTableFontSize->text().toInt(&ok);
+	if (ok == false)
+	{
+		m_editTableFontSize->setFocus();
+		return false;
+	}
+	m_options.setTableFontSize(value);
+
+	value = m_editNormalFontSize->text().toInt(&ok);
+	if (ok == false)
+	{
+		m_editNormalFontSize->setFocus();
+		return false;
+	}
+	m_options.setNormalFontSize(value);
+
 	// Save variables
 	//
 	m_options.setUserVariables(m_userVariables->getVariables());
 	m_options.setProjectVariables(m_projectVariables->getVariables());
-
-	m_options.save(m_db);
 
 	return true;
 

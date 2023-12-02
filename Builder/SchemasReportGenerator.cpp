@@ -40,6 +40,12 @@ namespace Builder
 		}
 
 		QString value;
+		db->getUserProperty("SchemasReportOptions.singleFile", &value, QString(), nullptr);
+		if (value.isEmpty() == false)
+		{
+			m_singleFile = (value == "true") ? true : false;
+		}
+		
 		db->getUserProperty("SchemasReportOptions.footers", &value, QString(), nullptr);
 		if (value.isEmpty() == false)
 		{
@@ -68,6 +74,30 @@ namespace Builder
 		if (value.isEmpty() == false)
 		{
 			m_signalsDetails = (value == "true") ? true : false;
+		}
+
+		db->getUserProperty("SchemasReportOptions.startPageNumber", &value, QString(), nullptr);
+		if (value.isEmpty() == false)
+		{
+			setStartPageNumber(value.toInt());
+		}
+
+		db->getUserProperty("SchemasReportOptions.tableOfContentsFontSize", &value, QString(), nullptr);
+		if (value.isEmpty() == false)
+		{
+			setTableOfContentsFontSize(value.toInt());
+		}
+
+		db->getUserProperty("SchemasReportOptions.tableFontSize", &value, QString(), nullptr);
+		if (value.isEmpty() == false)
+		{
+			setTableFontSize(value.toInt());
+		}
+
+		db->getUserProperty("SchemasReportOptions.normalFontSize", &value, QString(), nullptr);
+		if (value.isEmpty() == false)
+		{
+			setNormalFontSize(value.toInt());
 		}
 
 		// Load schema tags
@@ -141,11 +171,16 @@ namespace Builder
 			return false;
 		}
 
+		db->setUserProperty("SchemasReportOptions.singleFile", singleFile() ? "true" : "false", nullptr);
 		db->setUserProperty("SchemasReportOptions.folders", folders() ? "true" : "false", nullptr);
 		db->setUserProperty("SchemasReportOptions.tableOfContents", tableOfContents() ? "true" : "false", nullptr);
 		db->setUserProperty("SchemasReportOptions.footers", footers() ? "true" : "false", nullptr);
 		db->setUserProperty("SchemasReportOptions.itemsLabels", itemsLabels() ? "true" : "false", nullptr);
 		db->setUserProperty("SchemasReportOptions.signalsDetails", signalsDetails() ? "true" : "false", nullptr);
+		db->setUserProperty("SchemasReportOptions.startPageNumber", QString::number(startPageNumber()), nullptr);
+		db->setUserProperty("SchemasReportOptions.tableOfContentsFontSize", QString::number(tableOfContentsFontSize()), nullptr);
+		db->setUserProperty("SchemasReportOptions.tableFontSize", QString::number(tableFontSize()), nullptr);
+		db->setUserProperty("SchemasReportOptions.normalFontSize", QString::number(normalFontSize()), nullptr);
 
 		// Save schema tags
 		//
@@ -188,7 +223,17 @@ namespace Builder
 		return true;
 	}
 
-		void SchemasReportOptions::setFooters(bool value)
+	void SchemasReportOptions::setSignleFile(bool value)
+	{
+		m_singleFile = value;
+	}
+
+	bool SchemasReportOptions::singleFile() const
+	{
+		return m_singleFile;
+	}
+			
+	void SchemasReportOptions::setFooters(bool value)
 	{
 		m_footers = value;
 	}
@@ -236,6 +281,46 @@ namespace Builder
 	bool SchemasReportOptions::signalsDetails() const
 	{
 		return m_signalsDetails;
+	}
+
+	void SchemasReportOptions::setStartPageNumber(int value)
+	{
+		m_startPageNumber = value;
+	}
+
+	int SchemasReportOptions::startPageNumber() const
+	{
+		return m_startPageNumber;
+	}
+
+	void SchemasReportOptions::setTableOfContentsFontSize(int value)
+	{
+		m_tableOfContentsFontSize = value;
+	}
+	
+	int SchemasReportOptions::tableOfContentsFontSize() const
+	{
+		return m_tableOfContentsFontSize;
+	}
+		
+	void SchemasReportOptions::setTableFontSize(int value)
+	{
+		m_tableFontSize = value;
+	}
+
+	int SchemasReportOptions::tableFontSize() const
+	{
+		return m_tableFontSize;
+	}
+
+	void SchemasReportOptions::setNormalFontSize(int value)
+	{
+		m_normalFontSize = value;
+	}
+
+	int SchemasReportOptions::normalFontSize() const
+	{
+		return m_normalFontSize;
 	}
 
 	void SchemasReportOptions::setSchemaTags(const std::set<QString>& tagsSet)
@@ -329,6 +414,96 @@ namespace Builder
 	{
 		m_pageLayout = layout;
 	}
+
+	bool SchemaTypesParams::noMargins() const
+	{
+		return m_noMargins;
+	}
+
+	void SchemaTypesParams::setNoMargins(bool value)
+	{
+		m_noMargins = value;
+	}
+
+	bool SchemaTypesParams::load(DbController* db)
+	{
+		QString value;
+		db->getUserProperty(QObject::tr("SchemaTypesParams.%1.selected").arg(caption()), &value, QString(), nullptr);
+		if (value.isEmpty() == false)
+		{
+			setSelected(value == "true" ? true : false);
+		}
+
+		db->getUserProperty(QObject::tr("SchemaTypesParams.%1.noMargins").arg(caption()), &value, QString(), nullptr);
+		if (value.isEmpty() == false)
+		{
+			setNoMargins(value == "true" ? true : false);
+		}
+
+		bool layoutOk = false;
+		bool orientationOk = false;
+		bool marginsOk = false;
+		QPageLayout l(pageLayout());
+
+		db->getUserProperty(QObject::tr("SchemaTypesParams.%1.pageLayout").arg(caption()), &value, QString(), nullptr);
+		if (value.isEmpty() == false)
+		{
+			bool ok = false;
+			int id = value.toInt(&ok);
+			if (ok == true)
+			{
+				l.setPageSize(QPageSize(static_cast<QPageSize::PageSizeId>(id)));
+				layoutOk = true;
+			}
+		}
+
+		db->getUserProperty(QObject::tr("SchemaTypesParams.%1.orientation").arg(caption()), &value, QString(), nullptr);
+		if (value.isEmpty() == false)
+		{
+			l.setOrientation(value == "portrait" ? QPageLayout::Portrait : QPageLayout::Landscape);
+			orientationOk = true;
+		}
+		
+		db->getUserProperty(QObject::tr("SchemaTypesParams.%1.margins").arg(caption()), &value, QString(), nullptr);
+		if (value.isEmpty() == false)
+		{
+			QStringList ms = value.split(";");
+			if (ms.size() == 4)
+			{
+				l.setMargins(QMarginsF(ms[0].toDouble(), ms[1].toDouble(), ms[2].toDouble(), ms[3].toDouble()));
+				marginsOk = true;
+			}
+		}
+
+		if (layoutOk == true && orientationOk == true && marginsOk == true)
+		{
+			setPageLayout(l);
+		}
+
+		return true;
+	}
+	
+	bool SchemaTypesParams::save(DbController* db) const
+	{
+		db->setUserProperty(QObject::tr("SchemaTypesParams.%1.selected").arg(caption()), selected() ? "true" : "false", nullptr);
+		db->setUserProperty(QObject::tr("SchemaTypesParams.%1.noMargins").arg(caption()), noMargins() ? "true" : "false", nullptr);
+		
+		QPageSize::PageSizeId id = QPageSize::id(pageLayout().pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
+		if (id == QPageSize::Custom)
+		{
+			id = QPageSize::A4;
+		}
+		db->setUserProperty(QObject::tr("SchemaTypesParams.%1.pageLayout").arg(caption()), QString::number(id), nullptr);
+		
+		db->setUserProperty(QObject::tr("SchemaTypesParams.%1.orientation").arg(caption()), pageLayout().orientation() == QPageLayout::Portrait ? "portrait" : "landscape", nullptr);
+
+		QMarginsF margins = pageLayout().margins();
+		QString marginsStr = QObject::tr("%1;%2;%3;%4").arg(margins.left()).arg(margins.top()).arg(margins.right()).arg(margins.bottom());
+		db->setUserProperty(QObject::tr("SchemaTypesParams.%1.margins").arg(caption()), marginsStr, nullptr);
+		
+		return true;
+	}
+
 
 	//
 	// SchemaSignalInfo
@@ -604,9 +779,10 @@ namespace Builder
 		m_projectName(projectName),
 		m_userName(userName),
 		m_userPassword(userPassword),
-		m_normalFont{"Arial", 9, QFont::Normal},
+		m_tableOfContentsFont{"Arial", options.tableOfContentsFontSize(), QFont::Normal},
+		m_normalFont{"Arial", options.normalFontSize(), QFont::Normal},
+		m_tableFont{"Arial", options.tableFontSize(), QFont::Normal},
 		m_marginFont{"Arial", 8, QFont::Normal},
-		m_tableFont{"Arial", 9, QFont::Normal},
 		m_options(options),
 		m_schemaTypesParams(schemaTypesParams)
 	{
@@ -632,39 +808,41 @@ namespace Builder
 						  QObject::tr("Application Logic"),
 						  true,
 						  QPageLayout(QPageSize(QPageSize::A3),
-						  QPageLayout::Orientation::Landscape,
-						  QMarginsF(30, 20, 15, 20),
-						  QPageLayout::Unit::Millimeter)});
+									  QPageLayout::Orientation::Landscape,
+									  QMarginsF(30, 20, 15, 20),
+									  QPageLayout::Unit::Millimeter)});
 
 		result.push_back({db->systemFileId(DbDir::DiagnosticsSchemasDir),
 						  QObject::tr("Diagnostics Schemas"),
-						  true, QPageLayout(QPageSize(QPageSize::A3),
-						  QPageLayout::Orientation::Landscape,
-						  QMarginsF(30, 20, 15, 20),
-						  QPageLayout::Unit::Millimeter)});
+						  true,
+						  QPageLayout(QPageSize(QPageSize::A3),
+									  QPageLayout::Orientation::Landscape,
+									  QMarginsF(30, 20, 15, 20),
+									  QPageLayout::Unit::Millimeter)});
 
 		result.push_back({db->systemFileId(DbDir::MonitorSchemasDir),
 						  QObject::tr("Monitor Schemas"),
 						  true,
 						  QPageLayout(QPageSize(QPageSize::A3),
-						  QPageLayout::Orientation::Landscape,
-						  QMarginsF(30, 20, 15, 20),
-						  QPageLayout::Unit::Millimeter)});
+									  QPageLayout::Orientation::Landscape,
+									  QMarginsF(30, 20, 15, 20),
+									  QPageLayout::Unit::Millimeter)});
 
 		result.push_back({db->systemFileId(DbDir::TuningSchemasDir),
 						  QObject::tr("Tuning Schemas"),
-						  true, QPageLayout(QPageSize(QPageSize::A3),
-						  QPageLayout::Orientation::Landscape,
-						  QMarginsF(30, 20, 15, 20),
-						  QPageLayout::Unit::Millimeter)});
+						  true,
+						  QPageLayout(QPageSize(QPageSize::A3),
+									  QPageLayout::Orientation::Landscape,
+									  QMarginsF(30, 20, 15, 20),
+									  QPageLayout::Unit::Millimeter)});
 
 		result.push_back({db->systemFileId(DbDir::UfblDir),
 						  QObject::tr("UFBL Descriptions"),
 						  true,
 						  QPageLayout(QPageSize(QPageSize::A3),
-						  QPageLayout::Orientation::Landscape,
-						  QMarginsF(30, 20, 15, 20),
-						  QPageLayout::Unit::Millimeter)});
+									  QPageLayout::Orientation::Landscape,
+									  QMarginsF(30, 20, 15, 20),
+									  QPageLayout::Unit::Millimeter)});
 
 		return result;
 	}
@@ -932,7 +1110,13 @@ namespace Builder
 					break;
 				}
 
-				renderSchemasToAlbums(schemas, detailsSet, stp.caption(), stp.pageLayout());
+
+				QPageLayout pl = stp.pageLayout();
+				if (stp.noMargins() == true)
+				{
+					pl.setMargins(QMarginsF(0, 0, 0, 0));
+				}
+				renderSchemasToAlbums(schemas, detailsSet, stp.caption(), pl);
 			}
 
 			closeProject();
@@ -1274,7 +1458,7 @@ namespace Builder
 	void SchemasReportGenerator::renderSchemasToAlbums(const std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas,
 											   const VFrame30::SchemaDetailsSet& detailsSet,
 											   const QString& groupName,
-											   const QPageLayout pageLayout)
+											   const QPageLayout& pageLayout)
 	{
 		// Render schemas
 		//
@@ -1289,10 +1473,14 @@ namespace Builder
 		std::shared_ptr<Report> report = std::make_shared<Report>(m_projectName,
 																  tr("%1/%2_%3.pdf").arg(filePath()).arg(m_projectName).arg(groupName));
 
+		// Set report options
+		//
 		std::map<QString, QString> variables;
-		variables.insert(m_options.userVariables().begin(), m_options.userVariables().end());
 		variables.insert(m_options.projectVariables().begin(), m_options.projectVariables().end());
+		variables.insert(m_options.userVariables().begin(), m_options.userVariables().end());
 		report->setVariables(variables);
+
+		report->setStartPage(m_options.startPageNumber());
 
 		// Init margins
 		//
@@ -1310,7 +1498,7 @@ namespace Builder
 			auto contentsSection = report->addSection(ReportSection::create("Table of Contents", pageLayout));
 			contentsSection->setTag(groupName);
 
-			contentsSection->addText(tr("Table of Contents"), {m_normalFont, Qt::AlignHCenter});
+			contentsSection->addText(tr("Table of Contents"), {m_tableOfContentsFont, Qt::AlignHCenter});
 
 			auto contentsTable = ReportTable::create({m_tableFont,
 													  {tr("Schema ID"), tr("Caption"), tr("Page")},
@@ -1508,10 +1696,9 @@ namespace Builder
 				const auto& otherSchemaIt = allSchemas.find(otherSchemaId);
 				if (otherSchemaIt == allSchemas.end())
 				{
-					Q_ASSERT(false);
+					// No such schema in current album
 					continue;
 				}
-
 				const std::shared_ptr<VFrame30::Schema>& otherSchema = otherSchemaIt->second;
 				if (otherSchema == nullptr)
 				{
@@ -1655,7 +1842,7 @@ namespace Builder
 				const auto& otherSchemaIt = allSchemas.find(otherSchemaId);
 				if (otherSchemaIt == allSchemas.end())
 				{
-					Q_ASSERT(false);
+					// No such schema in current album
 					continue;
 				}
 				const std::shared_ptr<VFrame30::Schema>& otherSchema = otherSchemaIt->second;
@@ -1755,7 +1942,7 @@ namespace Builder
 				const auto& otherSchemaIt = allSchemas.find(otherSchemaId);
 				if (otherSchemaIt == allSchemas.end())
 				{
-					Q_ASSERT(false);
+					// No such schema in current album
 					continue;
 				}
 				const std::shared_ptr<VFrame30::Schema>& otherSchema = otherSchemaIt->second;
