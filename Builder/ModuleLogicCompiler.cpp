@@ -976,7 +976,7 @@ namespace Builder
 				continue;
 			}
 
-			if (ualItem->isPackedLogic())
+			if (ualItem->label() == "PACKET_OR_AND_2554")
 			{
 				DEBUG_STOP;
 			}
@@ -10128,6 +10128,7 @@ namespace Builder
 						m_log->wrnALC5203(afb->packedLogicID(), afb->label(), afb->guid(), afb->schemaID(),
 										inItem->label(), inItem->guid(), inItem->schemaID());
 					}
+
 					const1Count++;
 				}
 
@@ -10242,7 +10243,7 @@ namespace Builder
 		if (constOutValue.has_value() == true)
 		{
 			*code << CodeItem().movBitConst(outWriteAddr, constOutValue.value(),
-											QString("%1 optimized processing: out <= const %2").
+											QString("@%1 optimized processing: out <= const %2").
 													arg(afb->label()).arg(constOutValue.value()));
 			return true;
 		}
@@ -10253,7 +10254,7 @@ namespace Builder
 			Address16 readAddr = nonConstInSignals[0].second;
 
 			*code << CodeItem().movBit(outWriteAddr, readAddr,
-									   QString("%1 optimized processing: out <= %2").
+									   QString("@%1 optimized processing: out <= %2").
 											arg(afb->label()).arg(inSignal->appSignalID()));
 			return true;
 		}
@@ -10331,11 +10332,15 @@ namespace Builder
 
 		// set operation AND or OR
 		//
-		*code << cmd.writeFuncBlockConst(li.opCode, instance, li.confIndex, confValue, afbCaption);
+		*code << cmd.writeFuncBlockConst(li.opCode, instance, li.confIndex, confValue, afbCaption,
+										 QString("%1.%2 <= %3").arg(afbCaption).
+										 arg(Afb::PARAM_I_CONF).arg(confValue));
 
 		// bus width set to 1
 		//
-		*code << cmd.writeFuncBlockConst(li.opCode, instance, li.busWidthIndex, 1, afbCaption);
+		*code << cmd.writeFuncBlockConst(li.opCode, instance, li.busWidthIndex, 1, afbCaption,
+										 QString("%1.%2 <= %3").arg(afbCaption).
+										 arg(Afb::PARAM_I_BUS_WIDTH).arg(1));
 
 		//
 
@@ -10360,10 +10365,11 @@ namespace Builder
 
 			if (prevOperandsCount != remainSignalsCount)
 			{
-				*code << cmd.writeFuncBlock(li.opCode,
-													instance,
-													li.operandQuantityIndex,
-													remainSignalsCount, afbCaption);
+				*code << cmd.writeFuncBlockConst(li.opCode, instance, li.operandQuantityIndex,
+												 remainSignalsCount, afbCaption,
+												 QString("%1.%2 <= %3").arg(afbCaption).
+												 arg(Afb::PARAM_I_OPRD_QUANT).arg(remainSignalsCount));
+
 				prevOperandsCount = remainSignalsCount;
 			}
 
@@ -10408,7 +10414,7 @@ namespace Builder
 			{
 				*code << cmd.readFuncBlockBit(outWriteAddr, li.opCode, instance,
 													 li.resultIndex, afbCaption,
-														QString(" %1 <= @%2.out (final result)").
+														QString("%1 <= @%2.out (final result)").
 															arg(outSignal->appSignalID()).arg(afb->label()));
 				break;
 			}
@@ -10417,7 +10423,7 @@ namespace Builder
 			//
 			*code << cmd.readFuncBlockBit(bitAccumulatorAddress16(), li.opCode, instance,
 												 li.resultIndex, afbCaption,
-													QString(" bitAccumulator <= @%1.out (intermediate result)").
+													QString("bitAccumulator <= @%1.out (intermediate result)").
 														arg(afb->label()));
 			step++;
 		}
