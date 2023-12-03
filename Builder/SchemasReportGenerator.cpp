@@ -354,22 +354,12 @@ namespace Builder
 		return m_userVariables;
 	}
 
-	std::map<QString, QString>& SchemasReportOptions::userVariables()
-	{
-		return m_userVariables;
-	}
-
 	void SchemasReportOptions::setProjectVariables(const std::map<QString, QString>& variables)
 	{
 		m_projectVariables = variables;
 	}
 
 	const std::map<QString, QString>& SchemasReportOptions::projectVariables() const
-	{
-		return m_projectVariables;
-	}
-
-	std::map<QString, QString>& SchemasReportOptions::projectVariables()
 	{
 		return m_projectVariables;
 	}
@@ -844,6 +834,14 @@ namespace Builder
 									  QMarginsF(30, 20, 15, 20),
 									  QPageLayout::Unit::Millimeter)});
 
+		result.push_back({db->systemFileId(DbDir::SchemasDir),
+						  QObject::tr("Single-File Report"),
+						  false,
+						  QPageLayout(QPageSize(QPageSize::A3),
+									  QPageLayout::Orientation::Landscape,
+									  QMarginsF(30, 20, 15, 20),
+									  QPageLayout::Unit::Millimeter)});
+
 		return result;
 	}
 
@@ -1019,6 +1017,21 @@ namespace Builder
 		{
 			openProject();
 
+			// This data is for single-file report
+			//
+			std::map<QString, std::shared_ptr<VFrame30::Schema>> allSchemas;		// Key is schema ID
+			VFrame30::SchemaDetailsSet allDetailsSet;
+			DbFileTree allFoldersTree;
+			if (m_options.singleFile() == true)
+			{
+				bool ok = db()->getFileListTree(&allFoldersTree, db()->systemFileId(DbDir::SchemasDir), true /*removeDeleted*/, nullptr);
+				if (ok == false)
+				{
+					throw(tr("DbController::getFileListTree failed on fileId = %1").arg(db()->systemFileId(DbDir::SchemasDir)));
+				}
+			}
+
+				
 			for (auto& stp : m_schemaTypesParams)
 			{
 				std::vector<DbFileInfo> schemasFiles;
@@ -1045,7 +1058,7 @@ namespace Builder
 				bool ok = db()->getFileListTree(&fileTree, stp.fileId(), true/*removeDeleted*/, nullptr);
 				if (ok == false)
 				{
-					throw(tr("DbController::getFileListTree failed on fileId = %1").arg(db()->systemFileId(DbDir::SchemasDir)));
+					throw(tr("DbController::getFileListTree failed on fileId = %1").arg(stp.fileId()));
 				}
 
 				const std::map<int, std::shared_ptr<DbFileInfo>>& files = fileTree.files();
@@ -1096,7 +1109,7 @@ namespace Builder
 				std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas;		// Key is schema ID
 				VFrame30::SchemaDetailsSet detailsSet;
 
-				loadSchemas(fileTree, schemasFiles, schemas, detailsSet);
+				loadSchemas(m_options.singleFile() ? allFoldersTree : fileTree,  schemasFiles, schemas, detailsSet);
 
 				if (schemas.empty() == true)
 				{
@@ -1110,13 +1123,51 @@ namespace Builder
 					break;
 				}
 
-
-				QPageLayout pl = stp.pageLayout();
-				if (stp.noMargins() == true)
+				if (m_options.singleFile() == true)
 				{
-					pl.setMargins(QMarginsF(0, 0, 0, 0));
+					// Single file mode - add all loaded data to global array
+					//
+					allSchemas.insert(schemas.begin(), schemas.end());
+					auto details = detailsSet.schemasDetails();
+					for (const auto& d : details)
+					{
+						allDetailsSet.add(d);
+					}
 				}
-				renderSchemasToAlbums(schemas, detailsSet, stp.caption(), pl);
+				else
+				{
+					// Multiple files - render them now
+					//
+					QPageLayout pl = stp.pageLayout();
+					if (stp.noMargins() == true)
+					{
+						pl.setMargins(QMarginsF(0, 0, 0, 0));
+					}
+
+					renderSchemasToAlbums(schemas, detailsSet, stp.caption(), pl);
+				}
+			}
+
+			// Single file - render it now
+			//
+			if (m_options.singleFile() == true)
+			{
+				QPageLayout layout;
+				for (const auto& stp : m_schemaTypesParams)
+				{
+					if (stp.fileId() == db()->systemFileId(DbDir::SchemasDir))
+					{
+						// This is global setting for single-file report
+						//
+						layout = stp.pageLayout();
+						if (stp.noMargins() == true)
+						{
+							layout.setMargins(QMarginsF(0, 0, 0, 0));
+						}
+						break;
+					}
+				}
+				renderSchemasToAlbums(allSchemas, allDetailsSet, tr("Schemas Album"), layout);
 			}
 
 			closeProject();
@@ -1407,7 +1458,6 @@ namespace Builder
 
 		// Load schemas from files
 		//
-		auto context = VFrame30::Context::create(&m_appSignalController, nullptr, nullptr, nullptr);
 
 		for (const std::shared_ptr<DbFile>& dbFile : out)
 		{
@@ -1422,8 +1472,6 @@ namespace Builder
 				throw(tr("Failed to load schema from '%1'!").arg(dbFile->fileName()));
 			}
 
-			schema->setContext(context);
-
 			{
 				QMutexLocker l(&m_statisticsMutex);
 				m_statistics.m_schemaIndex++;
@@ -1435,7 +1483,7 @@ namespace Builder
 			if (m_options.folders() == true)
 			{
 				schemaKey = foldersTree.filePath(dbFile->fileId()) + "/" + schema->schemaId();
-				if (schemaKey.startsWith('/') == true)
+				while (schemaKey.startsWith('/') == true)
 				{
 					schemaKey.removeFirst();
 				}
@@ -1478,7 +1526,7 @@ namespace Builder
 		std::map<QString, QString> variables;
 		variables.insert(m_options.projectVariables().begin(), m_options.projectVariables().end());
 		variables.insert(m_options.userVariables().begin(), m_options.userVariables().end());
-		report->setVariables(variables);
+		report->reportVariables().setVariables(variables);
 
 		report->setStartPage(m_options.startPageNumber());
 
@@ -1508,7 +1556,7 @@ namespace Builder
 			contentsSection->addTable(contentsTable);
 
 
-			for (const auto &[schemaId, schema] : schemas)
+			for (const auto &[id, schema] : schemas)
 			{
 				if (m_stop == true)
 				{
@@ -1516,11 +1564,11 @@ namespace Builder
 				}
 
 				QStringList l;
-				l.push_back(schemaId);
+				l.push_back(schema->schemaId());
 				l.push_back(schema->caption());
 				l.push_back(tr("%1(%2)")
 							.arg(ReportTagStorage::tagSectionStartPage)
-							.arg(schemaId));
+							.arg(schema->schemaId()));
 
 				contentsTable->insertRow(l);
 
@@ -1530,7 +1578,9 @@ namespace Builder
 		// Render schemas
 		//
 		{
-			for (const auto &[schemaId, schema] : schemas)
+			auto context = VFrame30::Context::create(&m_appSignalController, nullptr, &report->reportVariables(), nullptr);
+
+			for (const auto &[id, schema] : schemas)
 			{
 				if (m_stop == true)
 				{
@@ -1540,12 +1590,14 @@ namespace Builder
 				{
 					QMutexLocker l(&m_statisticsMutex);
 					m_statistics.m_schemaIndex++;
-					m_statistics.m_currentSchemaId = schemaId;
+					m_statistics.m_currentSchemaId = schema->schemaId();
 				}
 
-				auto reportSchema = ReportSchema::create(tr("Schema: %1").arg(schemaId), {}, schema, {});
+				schema->setContext(context);
 
-				auto schemaDrawingSection = report->addSection(ReportSection::create(schemaId, pageLayout));
+				auto reportSchema = ReportSchema::create(tr("Schema: %1").arg(schema->schemaId()), {}, schema, {});
+
+				auto schemaDrawingSection = report->addSection(ReportSection::create(schema->schemaId(), pageLayout));
 				schemaDrawingSection->setTag(tr("%1 - %2").arg(schema->schemaId()).arg(schema->caption()));
 				schemaDrawingSection->addSchema(reportSchema);
 
@@ -1569,12 +1621,20 @@ namespace Builder
 				return;
 			}
 
-			int page = 1;
+
+			int page = report->startPage();
 			for (const ReportLib::RenderedSection& rs : renderedSections)
 			{
 				rs.section()->setStartPage(page);
 				page += rs.pagesCount();
+
+				// Create variable with section name and its start page
+				//
+				report->reportVariables().setVariable("PDFPAGE_" + rs.section()->caption(), rs.section()->startPage());
 			}
+
+			report->reportVariables().setVariable("PDFPAGE_COUNT", page - 1);
+
 		}
 
 		// Print report to PDF

@@ -71,11 +71,9 @@ namespace Builder
 
 		void setUserVariables(const std::map<QString, QString>& variables);
 		const std::map<QString, QString>& userVariables() const;
-		std::map<QString, QString>& userVariables();
 
 		void setProjectVariables(const std::map<QString, QString>& variables);
 		const std::map<QString, QString>& projectVariables() const;
-		std::map<QString, QString>& projectVariables();
 
 	private:
 		bool m_footers = false;					// Generate footers in reports (top and bottom) with schema name, project info and page number

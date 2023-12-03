@@ -73,7 +73,39 @@ namespace ReportLib
         return m_columnsFormat;
     }
 
-    //
+	//
+	// ReportVariables
+	//
+	bool ReportVariables::variableExists(const QString& name) const
+	{
+		return m_variables.find(name) != m_variables.end();
+	}
+	
+	QVariant ReportVariables::variable(const QString& name) const
+	{
+		auto it = m_variables.find(name);
+		if (it == m_variables.end())
+		{
+			return "!" + name + "!";
+		}
+		return it->second;
+	}
+	
+	void ReportVariables::setVariable(const QString& name, const QVariant& value)
+	{
+		m_variables[name] = value.toString();
+	}
+
+	void ReportVariables::setVariables(const std::map<QString, QString>& variables)
+	{
+		for (const auto& [name, value] : variables)
+		{
+			m_variables[name] = value;
+		}
+	}	
+
+
+	//
 	// ReportMarginItem
 	//
 
@@ -116,6 +148,11 @@ namespace ReportLib
 				{
 					result.remove(pos, closePos - pos + 1);
 					result.insert(pos, QString::number(it->second->startPage()));
+				}
+				else
+				{
+					result.remove(pos, closePos - pos + 1);
+					result.insert(pos, "?");
 				}
 			}
 		}

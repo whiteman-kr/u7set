@@ -32,7 +32,7 @@ namespace ReportLib
 		return QRect(QPoint(0, 0), m_textDocument.size().toSize());
 	}
 
-	void PrintText::print(const Report& report,
+	void PrintText::print(Report& report,
 						  ReportPrinter& printer,
 						  QPdfWriter& pdfWriter,
 						  QPainter& painter,
@@ -46,6 +46,8 @@ namespace ReportLib
 			QMutexLocker l(&pageCounterMutex);
 			pageIndex++;
 		}
+
+		report.reportVariables().setVariable("PDFPAGE", pageIndex + report.startPage());
 
 		if (m_textDocument.isEmpty() == true)
 		{
@@ -95,6 +97,8 @@ namespace ReportLib
 					pageIndex++;
 				}
 
+				report.reportVariables().setVariable("PDFPAGE", pageIndex + report.startPage());
+
 				printer.printMarginItems(report, pdfWriter, painter, tag());
 			}
 		}
@@ -112,14 +116,12 @@ namespace ReportLib
 	PrintSchema::PrintSchema(const std::shared_ptr<ReportSchemaView>& schemaView,
 							 const std::shared_ptr<VFrame30::Schema>& schema,
 							 const std::map<QUuid, ReportSchemaCompareAction>& compareActions,
-							 const std::map<QString, QString>& variables,
 							 int verticalOffset,
 							 bool newPageBefore,
 							 const QString& tag):
 		m_schemaView(schemaView),
 		m_schema(schema),
-		m_compareActions(compareActions),
-		m_variables(variables)
+		m_compareActions(compareActions)
 	{
 		m_type = Type::Schema;
 		m_verticalOffset = verticalOffset;
@@ -132,7 +134,7 @@ namespace ReportLib
 		return QRect{0, 0, 0, 0};
 	}
 
-	void PrintSchema::print(const Report& report,
+	void PrintSchema::print(Report& report,
 							ReportPrinter& printer,
 							QPdfWriter& pdfWriter,
 							QPainter& painter,
@@ -154,6 +156,8 @@ namespace ReportLib
 				pageIndex++;
 			}
 		}
+
+		report.reportVariables().setVariable("PDFPAGE", pageIndex + report.startPage());
 
 		// Calculate the upper schema offset
 		//
@@ -198,7 +202,6 @@ namespace ReportLib
 		VFrame30::CDrawParam drawParam(&painter, m_schemaView.get(), m_schema->gridSize(), m_schema->pinGridStep(), m_schema->unit());
 		drawParam.setInfoMode(m_schemaView->infoMode());
 		drawParam.setPdfMode(true);
-		drawParam.setVariables(m_variables);
 
 		m_schemaView->setSchemaInternal(m_schema);
 		m_schemaView->adjust(&painter, schemaLeft, schemaTop, zoom * 100.0);		// Export 100% zoom
@@ -258,7 +261,7 @@ namespace ReportLib
 		return true;
 	}
 
-	bool ReportPrinter::print(const Report& report, const QString& fileName, std::atomic_bool& stop)
+	bool ReportPrinter::print(Report& report, const QString& fileName, std::atomic_bool& stop)
 	{
 		QBuffer buffer;
 
@@ -277,7 +280,7 @@ namespace ReportLib
 		return true;
 	}
 
-	bool ReportPrinter::print(const Report& report, QBuffer& buffer, std::atomic_bool& stop)
+	bool ReportPrinter::print(Report& report, QBuffer& buffer, std::atomic_bool& stop)
 	{
 		std::vector<RenderedSection> renderedSections;
 
@@ -530,7 +533,6 @@ namespace ReportLib
 						ps = std::make_shared<PrintSchema>(m_schemaView,
 														   rs->schema(),
 														   rs->compareActions(),
-														   report.variables(),
 														   lastDocumentTextPageHeight,
 														   lastObjectType == ReportObject::Type::Schema ||
 														   (firstObject == true && firstSection == false),
@@ -579,7 +581,7 @@ namespace ReportLib
 		return true;
 	}
 
-	bool ReportPrinter::printRenderedSections(const Report& report, const std::vector<RenderedSection>& renderedSections, QBuffer& buffer, std::atomic_bool& stop)
+	bool ReportPrinter::printRenderedSections(Report& report, const std::vector<RenderedSection>& renderedSections, QBuffer& buffer, std::atomic_bool& stop)
 	{
 		int pagesCount = 0;
 
@@ -653,7 +655,6 @@ namespace ReportLib
 				{
 					return true;
 				}
-
 
 				po->print(report, *this, pdfWriter, painter, m_statistics.pageIndex, m_statisticsMutex);
 			}

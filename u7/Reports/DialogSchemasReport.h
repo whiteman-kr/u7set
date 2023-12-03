@@ -37,7 +37,7 @@ class VariablesWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	VariablesWidget(const std::map<QString, QString>& variables);
+	VariablesWidget(const std::map<QString, QString>& variables, bool readOnly);
 	std::map<QString, QString> getVariables() const;
 
 private slots:
@@ -83,7 +83,7 @@ private:
 	QTreeWidget* m_schemaTypesTree = nullptr;
 	QTreeWidget* m_schemaTagsTree = nullptr;
 
-	//QCheckBox* m_checkSignleFile = nullptr;
+	QCheckBox* m_checkSignleFile = nullptr;
 
 	QCheckBox* m_checkAddTableOfContents = nullptr;
 	QCheckBox* m_checkAddFolders = nullptr;

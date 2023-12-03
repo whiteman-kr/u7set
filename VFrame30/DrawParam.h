@@ -103,9 +103,6 @@ namespace VFrame30
 		const Session& session() const noexcept;
 		Session& session();
 
-		const std::map<QString, QString>& variables() const;
-		void setVariables(const std::map<QString, QString>& variables);
-
 		const MonitorBehavior& monitorBehavior() const noexcept;
 		const TuningClientBehavior& tuningClientBehavior() const;
 
@@ -119,8 +116,6 @@ namespace VFrame30
 		Session m_session;
 
 		QStringList m_highlightIds;
-
-		std::map<QString, QString> m_variables;
 
 		SchemaUnit m_schemaUnit = SchemaUnit::Inch;
 		double m_controlBarSize = 0.0;

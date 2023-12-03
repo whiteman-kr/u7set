@@ -242,36 +242,43 @@ void DialogSchemasReportTypePageSetup::accept()
 }
 
 
-VariablesWidget::VariablesWidget(const std::map<QString, QString>& variables):
+VariablesWidget::VariablesWidget(const std::map<QString, QString>& variables, bool readOnly) :
 	m_variables(variables)
 {
 	QVBoxLayout* variablesLayout = new QVBoxLayout(this);
 	m_variablesTree = new QTreeWidget();
 	m_variablesTree->setHeaderLabels(QStringList() << "Name"
 												   << "Value");
+	m_variablesTree->setRootIsDecorated(false);
 
 	for (const auto& [name, value] : m_variables)
 	{
 		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << name << value);
-		item->setFlags(item->flags() | Qt::ItemIsEditable);
+		if (readOnly == false)
+		{
+			item->setFlags(item->flags() | Qt::ItemIsEditable);
+		}
 		m_variablesTree->addTopLevelItem(item);
 	}
 	variablesLayout->addWidget(m_variablesTree);
 	m_variablesTree->resizeColumnToContents(0);
 	m_variablesTree->resizeColumnToContents(1);
 
-	QHBoxLayout* buttonLayout = new QHBoxLayout();
-	variablesLayout->addLayout(buttonLayout);
+	if (readOnly == false)
+	{
+		QHBoxLayout* buttonLayout = new QHBoxLayout();
+		variablesLayout->addLayout(buttonLayout);
 
-	QPushButton* b = new QPushButton("Add");
-	connect(b, &QPushButton::clicked, this, &VariablesWidget::onAddVariableClicked);
-	buttonLayout->addWidget(b);
+		QPushButton* b = new QPushButton("Add");
+		connect(b, &QPushButton::clicked, this, &VariablesWidget::onAddVariableClicked);
+		buttonLayout->addWidget(b);
 
-	b = new QPushButton("Remove");
-	connect(b, &QPushButton::clicked, this, &VariablesWidget::onRemoveVariableClicked);
-	buttonLayout->addWidget(b);
+		b = new QPushButton("Remove");
+		connect(b, &QPushButton::clicked, this, &VariablesWidget::onRemoveVariableClicked);
+		buttonLayout->addWidget(b);
 
-	buttonLayout->addStretch();
+		buttonLayout->addStretch();
+	}
 
 	return;
 }
@@ -390,8 +397,15 @@ DialogSchemasReport::DialogSchemasReport(const QString& path,
 			m_schemaTypesTree->setRootIsDecorated(false);
 			for (const auto& stp : schemaTypesParams)
 			{
+				if (stp.fileId() == db->systemFileId(DbDir::SchemasDir))
+				{	
+					// This is global setting for single-file report
+					continue;
+				}
+
 				QTreeWidgetItem* item = new QTreeWidgetItem({stp.caption()});
 				item->setCheckState(0, stp.selected() ? Qt::Checked : Qt::Unchecked);
+				item->setData(0, Qt::UserRole, stp.fileId());
 				m_schemaTypesTree->addTopLevelItem(item);
 			}
 			schemasLayout->addWidget(m_schemaTypesTree);
@@ -425,9 +439,9 @@ DialogSchemasReport::DialogSchemasReport(const QString& path,
 			int row = 0;
 			int col = 0;
 		
-			/* m_checkSignleFile = new QCheckBox(tr("Generate single report file"));
+			m_checkSignleFile = new QCheckBox(tr("Generate single report file"));
 			m_checkSignleFile->setChecked(m_options.singleFile());
-			optionsLayout->addWidget(m_checkSignleFile, row++, col);*/
+			optionsLayout->addWidget(m_checkSignleFile, row++, col);
 
 			m_checkAddTableOfContents = new QCheckBox(tr("Generate table of contents"));
 			m_checkAddTableOfContents->setChecked(m_options.tableOfContents());
@@ -485,13 +499,21 @@ DialogSchemasReport::DialogSchemasReport(const QString& path,
 			QVBoxLayout* variablesLayout = new QVBoxLayout(variablesWidget);
 
 			variablesLayout->addWidget(new QLabel(tr("Project Variables")));
-			m_projectVariables = new VariablesWidget(m_options.projectVariables());
+			m_projectVariables = new VariablesWidget(m_options.projectVariables(), false /*readOnly*/);
 			variablesLayout->addWidget(m_projectVariables);
 
 			variablesLayout->addWidget(new QLabel(tr("User Variables")));
-			m_userVariables = new VariablesWidget(m_options.userVariables());
+			m_userVariables = new VariablesWidget(m_options.userVariables(), false /*readOnly*/);
 			variablesLayout->addWidget(m_userVariables);
-		
+
+			variablesLayout->addWidget(new QLabel(tr("Auto Variables")));
+			std::map<QString, QString> autoVariablesMap;
+			autoVariablesMap["PDFPAGE"] = "Current page";
+			autoVariablesMap["PDFPAGE_<SCHEMAID>"] = "Page number of each schema";
+			autoVariablesMap["PDFPAGE_COUNT"] = "Total number of pages";
+			VariablesWidget* autoVariables = new VariablesWidget(autoVariablesMap, true /*readOnly*/);
+			variablesLayout->addWidget(autoVariables);
+
 			tabWidget->addTab(variablesWidget, tr("Variables"));
 		}
 
@@ -605,7 +627,15 @@ bool DialogSchemasReport::applyOptions()
 			selectedTypesCount++;
 		}
 
-		m_schemaTypesParams[i].setSelected(item->checkState(0) == Qt::Checked);
+		int fileId = item->data(0, Qt::UserRole).toInt();
+
+		for (auto& stp : m_schemaTypesParams)
+		{
+			if (fileId == stp.fileId())
+			{
+				stp.setSelected(item->checkState(0) == Qt::Checked);
+			}
+		}
 	}
 
 	if (selectedTypesCount == 0)
@@ -637,7 +667,7 @@ bool DialogSchemasReport::applyOptions()
 	// Save options
 	//
 	
-	//m_options.setSignleFile(m_checkSignleFile->isChecked());
+	m_options.setSignleFile(m_checkSignleFile->isChecked());
 	m_options.setFolders(m_checkAddFolders->isChecked());
 	m_options.setFooters(m_checkAddFooters->isChecked());
 	m_options.setTableOfContents(m_checkAddTableOfContents->isChecked());
