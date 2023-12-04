@@ -269,7 +269,6 @@ namespace Builder
 
 		bool createUalAfbsMap();
 		UalAfb* createUalAfb(const UalItem& appItem);
-		int reserveLogicInstanceForPackedLogicProcessing();
 
 		//
 
@@ -924,7 +923,7 @@ namespace Builder
 
 		void getChassisSignalsWithEquipmentID(QString& equipmentID, std::vector<const AppSignal *>* resultSignalList);
 
-		void findLogicAfbInstances(const QString& afbCaption, int logicConf, std::map<int, int>* instancesMap);
+		void findLogicAfbsForBitAccReplacing(const QString& afbCaption, int logicConf, std::set<QUuid>* guidsMap);
 
 	public:
 		static const int MIN_AFB_OPCODE = 1;
@@ -1001,8 +1000,10 @@ namespace Builder
 		UalAfbsMap m_ualAfbs;
 		int m_packedLogicAfbInstance = -1;			// AFB LOGIC instance reserved for packed logic processing
 
-		std::map<int, int> m_afbOrInstances;		// instanceNo => operand count
-		std::map<int, int> m_afbAndInstances;		// instanceNo => operand count
+		// maps of OR and AND afbs guids which can be replaced by bit acc commands
+		//
+		std::set<QUuid> m_afbsOrForBitAccReplacing;
+		std::set<QUuid> m_afbsAndForBitAccReplacing;
 
 		// service maps
 		//

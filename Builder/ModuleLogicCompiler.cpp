@@ -994,19 +994,18 @@ namespace Builder
 
 		RETURN_IF_FALSE(result);
 
+		findLogicAfbsForBitAccReplacing(Afb::AFB_AND, 1, &m_afbsAndForBitAccReplacing);
+		findLogicAfbsForBitAccReplacing(Afb::AFB_OR, 2, &m_afbsOrForBitAccReplacing);
+
 		if (packedLogicExists && m_lmDescription->isBitAccAvailable() == false)
 		{
 			// reserve one instance of AFB LOGIC to process Packed Logic items
 			// this instance will fully configured just before packed logic processing
 			//
-
 			result &= m_afbComponents.addInstance(TO_INT(Afb::AfbType::LOGIC), &m_packedLogicAfbInstance, m_log);
 
 			Q_ASSERT(m_packedLogicAfbInstance >= 0);
 		}
-
-		findLogicAfbInstances(Afb::AFB_AND, 1, &m_afbAndInstances);
-		findLogicAfbInstances(Afb::AFB_OR, 2, &m_afbOrInstances);
 
 		return result;
 	}
@@ -1039,15 +1038,6 @@ namespace Builder
 		m_ualAfbs.insert(ualAfb);
 
 		return ualAfb;
-	}
-
-	int ModuleLogicCompiler::reserveLogicInstanceForPackedLogicProcessing()
-	{
-
-
-
-
-		return -1;
 	}
 
 	bool ModuleLogicCompiler::createUalSignals()
@@ -10472,12 +10462,12 @@ namespace Builder
 				return true;		// report like a "code generated"
 			}
 
-			if (m_afbOrInstances.contains(ualAfb->instance()))
+			if (m_afbsOrForBitAccReplacing.contains(ualAfb->guid()))
 			{
 				return generateAfbBitAccOrCode(code, ualAfb, result);
 			}
 
-			if (m_afbAndInstances.contains(ualAfb->instance()))
+			if (m_afbsAndForBitAccReplacing.contains(ualAfb->guid()))
 			{
 				return generateAfbBitAccAndCode(code, ualAfb, result);
 			}
@@ -10899,6 +10889,9 @@ namespace Builder
 		TEST_PTR_RETURN_FALSE(result);
 
 		*result = true;
+
+		// DEBUG_STOP
+		qDebug() << "instance" << ualAfb->instance();
 
 		std::vector<std::pair<const UalSignal*, Address16>> inSignals;	// pair<ualSignal, readAddress>
 
@@ -18998,13 +18991,27 @@ namespace Builder
 		}
 	}
 
-	void ModuleLogicCompiler::findLogicAfbInstances(const QString& afbCaption, int logicConfValue, std::map<int, int>* instancesMap)
+	void ModuleLogicCompiler::findLogicAfbsForBitAccReplacing(const QString& afbCaption,
+															  int logicConfValue, std::set<QUuid>* guidsMap)
 	{
-		TEST_PTR_RETURN(instancesMap);
+		TEST_PTR_RETURN(guidsMap);
+
+		if (m_lmDescription->isBitAccAvailable() == false)
+		{
+			return;
+		}
+
+		// DEBUG_STOP
+		qDebug() << "findLogicAfbInstances, confValue " << logicConfValue;
 
 		for(const UalAfb* ualAfb : m_ualAfbs)
 		{
 			TEST_PTR_CONTINUE(ualAfb);
+
+			if (ualAfb->label() == "TEST_LOGIC_INSTRUCTIONS_BUS_11377")
+			{
+				DEBUG_STOP;
+			}
 
 			if (ualAfb->caption() != afbCaption)
 			{
@@ -19019,7 +19026,7 @@ namespace Builder
 
 			bool ok = false;
 
-			int iConfValue = ualAfb->getParamIntValueByOpName("i_conf", &ok);
+			int iConfValue = ualAfb->getParamIntValueByOpName(Afb::PARAM_I_CONF, &ok);
 
 			if (ok == false )
 			{
@@ -19032,7 +19039,7 @@ namespace Builder
 				continue;
 			}
 
-			int operandCount = ualAfb->getParamIntValueByOpName("i_oprd_quant", &ok);
+/*			int operandCount = ualAfb->getParamIntValueByOpName(Afb::PARAM_I_OPRD_QUANT, &ok);
 
 			if (ok == false )
 			{
@@ -19040,7 +19047,13 @@ namespace Builder
 				continue;
 			}
 
-			instancesMap->insert({ualAfb->instance(), operandCount});
+			// DEBUG_STOP
+			qDebug() << C_STR(QString("insert afb %1 instance %2 operand count %3").
+						arg(ualAfb->label()).arg(ualAfb->instance()).arg(operandCount));*/
+
+			//labelsMap->insert({ualAfb->instance(), operandCount});
+
+			guidsMap->insert(ualAfb->guid());
 		}
 	}
 
