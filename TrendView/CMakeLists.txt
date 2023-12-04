@@ -57,6 +57,7 @@ qt_add_library(${TARGET} STATIC
 	DialogTrendSignalPoint.ui
 
 	TrendView.qrc
+	../Etc/Logo/RadiyLogo.qrc
 )
 
 #Add translations

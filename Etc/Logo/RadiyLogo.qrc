@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/Logo">
+        <file>RadiyLogo.png</file>
+        <file>RadiyLogoFull.png</file>
+    </qresource>
+</RCC>

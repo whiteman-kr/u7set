@@ -1156,7 +1156,7 @@ void TestSuiteMainWindow::showAboutQt()
 void TestSuiteMainWindow::showAbout()
 {
 	QString text = qApp->applicationName() + tr(" allows user to run application logic tests.");
-	DialogAbout::show(this, text, ":/Images/Images/logo.png");
+	DialogAbout::show(this, text, ":/Logo/RadiyLogo.png");
 }
 
 void TestSuiteMainWindow::onTestsScriptsReload()

@@ -124,6 +124,7 @@ set (METROLOGY_SOURCES
 
 set (METROLOGY_RESOURCES
 	Resources.qrc
+	../Etc/Logo/RadiyLogo.qrc
 )
 
 # Add icon

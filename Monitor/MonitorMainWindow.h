@@ -224,7 +224,7 @@ private:
 	// Logo
 	//
 	QLabel* m_logoLabel = nullptr;
-	QImage m_logoImage;
+	QPixmap m_logoImage;
 
 	QWidget* m_spacer = nullptr;
 

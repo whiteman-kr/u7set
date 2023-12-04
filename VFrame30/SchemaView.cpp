@@ -274,10 +274,8 @@ namespace VFrame30
 		for (QObject* childObject : childWidgets)
 		{
 			QWidget* childWidget = dynamic_cast<QWidget*>(childObject);
-
 			if (childWidget == nullptr)
 			{
-				assert(dynamic_cast<QWidget*>(childObject) != nullptr);
 				continue;
 			}
 

@@ -18,7 +18,7 @@ struct ConfigSettings
 
 	QString startSchemaId;
 	QString globalScript;
-	QImage logoImage;
+	QPixmap logoImage;
 	MonitorBehavior monitorBeahvior;
 
 	// Tuning settings

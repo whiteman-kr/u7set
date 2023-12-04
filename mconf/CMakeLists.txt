@@ -39,6 +39,8 @@ add_executable(${TARGET} WIN32
 	SettingsForm.cpp
 	SettingsForm.h
 
+	../Etc/Logo/RadiyLogo.qrc
+
 	diagtabpage.ui
 	${WINDOWS_RESOURCES}
 )

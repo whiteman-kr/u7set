@@ -4215,7 +4215,7 @@ bool EditSchemaWidget::loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbS
 
 		ufbs.push_back(u);
 
-		qDebug() << u->schemaId() << " " << u->version();
+		qDebug() << "EditSchemaWidget::loadUfbSchemas(): Ufb: " << u->schemaId() << ", UfbVersion " << u->version();
 	}
 
 	std::swap(ufbs, *out);

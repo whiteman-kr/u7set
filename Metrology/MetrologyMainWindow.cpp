@@ -2045,7 +2045,7 @@ void MainWindow::aboutConnection()
 
 void MainWindow::aboutApp()
 {
-	DialogAbout::show(this, QString(), ":/Images/logo.png");
+	DialogAbout::show(this, QString(), ":/Logo/RadiyLogo.png");
 }
 
 // -------------------------------------------------------------------------------------------------------------------

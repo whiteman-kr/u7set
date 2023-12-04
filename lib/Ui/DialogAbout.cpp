@@ -19,6 +19,16 @@ void DialogAbout::show(QWidget* parent, const QString& description, const QStrin
 
 	QLabel* logo = new QLabel(&aboutDialog);
 	logo->setPixmap(QPixmap(imagePath));
+	logo->setScaledContents(true);
+
+	// Set logo size that it will be not too big.
+	//
+	QSize logoSize = logo->sizeHint();
+	if (logoSize.width() > 200)
+	{
+		logoSize *= 200.0 / logoSize.width();
+		logo->setFixedSize(logoSize);
+	}
 
 	hl->addWidget(logo);
 
