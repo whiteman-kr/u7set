@@ -405,15 +405,26 @@ namespace Builder
 		m_pageLayout = layout;
 	}
 
-	bool SchemaTypesParams::noMargins() const
+	bool SchemaTypesParams::noSchemasMargins() const
 	{
-		return m_noMargins;
+		return m_noSchemasMargins;
+	}
+	
+	void SchemaTypesParams::setNoSchemasMargins(bool value)
+	{
+		m_noSchemasMargins = value;
 	}
 
-	void SchemaTypesParams::setNoMargins(bool value)
+	bool SchemaTypesParams::noTextMargins() const
 	{
-		m_noMargins = value;
+		return m_noTextMargins;
 	}
+
+	void SchemaTypesParams::setNoTextMargins(bool value)
+	{
+		m_noTextMargins = value;
+	}
+
 
 	bool SchemaTypesParams::load(DbController* db)
 	{
@@ -424,10 +435,16 @@ namespace Builder
 			setSelected(value == "true" ? true : false);
 		}
 
-		db->getUserProperty(QObject::tr("SchemaTypesParams.%1.noMargins").arg(caption()), &value, QString(), nullptr);
+		db->getUserProperty(QObject::tr("SchemaTypesParams.%1.noSchemasMargins").arg(caption()), &value, QString(), nullptr);
 		if (value.isEmpty() == false)
 		{
-			setNoMargins(value == "true" ? true : false);
+			setNoSchemasMargins(value == "true" ? true : false);
+		}
+
+		db->getUserProperty(QObject::tr("SchemaTypesParams.%1.noTextMargins").arg(caption()), &value, QString(), nullptr);
+		if (value.isEmpty() == false)
+		{
+			setNoTextMargins(value == "true" ? true : false);
 		}
 
 		bool layoutOk = false;
@@ -476,7 +493,8 @@ namespace Builder
 	bool SchemaTypesParams::save(DbController* db) const
 	{
 		db->setUserProperty(QObject::tr("SchemaTypesParams.%1.selected").arg(caption()), selected() ? "true" : "false", nullptr);
-		db->setUserProperty(QObject::tr("SchemaTypesParams.%1.noMargins").arg(caption()), noMargins() ? "true" : "false", nullptr);
+		db->setUserProperty(QObject::tr("SchemaTypesParams.%1.noSchemasMargins").arg(caption()), noSchemasMargins() ? "true" : "false", nullptr);
+		db->setUserProperty(QObject::tr("SchemaTypesParams.%1.noTextMargins").arg(caption()), noTextMargins() ? "true" : "false", nullptr);
 		
 		QPageSize::PageSizeId id = QPageSize::id(pageLayout().pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
 		if (id == QPageSize::Custom)
@@ -1138,13 +1156,19 @@ namespace Builder
 				{
 					// Multiple files - render them now
 					//
-					QPageLayout pl = stp.pageLayout();
-					if (stp.noMargins() == true)
+					QPageLayout schemasLayout = stp.pageLayout();
+					if (stp.noSchemasMargins() == true)
 					{
-						pl.setMargins(QMarginsF(0, 0, 0, 0));
+						schemasLayout.setMargins(QMarginsF(0, 0, 0, 0));
 					}
 
-					renderSchemasToAlbums(schemas, detailsSet, stp.caption(), pl);
+					QPageLayout textLayout = stp.pageLayout();
+					if (stp.noTextMargins() == true)
+					{
+						textLayout.setMargins(QMarginsF(0, 0, 0, 0));
+					}
+
+					renderSchemasToAlbums(schemas, detailsSet, stp.caption(), schemasLayout, textLayout);
 				}
 			}
 
@@ -1152,22 +1176,29 @@ namespace Builder
 			//
 			if (m_options.singleFile() == true)
 			{
-				QPageLayout layout;
+				QPageLayout schemasLayout;
+				QPageLayout textLayout;
 				for (const auto& stp : m_schemaTypesParams)
 				{
 					if (stp.fileId() == db()->systemFileId(DbDir::SchemasDir))
 					{
 						// This is global setting for single-file report
 						//
-						layout = stp.pageLayout();
-						if (stp.noMargins() == true)
+						textLayout = stp.pageLayout();
+						if (stp.noTextMargins() == true)
 						{
-							layout.setMargins(QMarginsF(0, 0, 0, 0));
+							textLayout.setMargins(QMarginsF(0, 0, 0, 0));
+						}
+
+						schemasLayout = stp.pageLayout();
+						if (stp.noSchemasMargins() == true)
+						{
+							schemasLayout.setMargins(QMarginsF(0, 0, 0, 0));
 						}
 						break;
 					}
 				}
-				renderSchemasToAlbums(allSchemas, allDetailsSet, tr("Schemas Album"), layout);
+				renderSchemasToAlbums(allSchemas, allDetailsSet, tr("Schemas Album"), schemasLayout, textLayout);
 			}
 
 			closeProject();
@@ -1504,9 +1535,10 @@ namespace Builder
 	}
 
 	void SchemasReportGenerator::renderSchemasToAlbums(const std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas,
-											   const VFrame30::SchemaDetailsSet& detailsSet,
-											   const QString& groupName,
-											   const QPageLayout& pageLayout)
+													   const VFrame30::SchemaDetailsSet& detailsSet,
+													   const QString& groupName,
+													   const QPageLayout& schemaPageLayout,
+													   const QPageLayout& textPageLayout)
 	{
 		// Render schemas
 		//
@@ -1543,7 +1575,7 @@ namespace Builder
 		//
 		if (m_options.tableOfContents() == true)
 		{
-			auto contentsSection = report->addSection(ReportSection::create("Table of Contents", pageLayout));
+			auto contentsSection = report->addSection(ReportSection::create("Table of Contents", textPageLayout));
 			contentsSection->setTag(groupName);
 
 			contentsSection->addText(tr("Table of Contents"), {m_tableOfContentsFont, Qt::AlignHCenter});
@@ -1597,13 +1629,13 @@ namespace Builder
 
 				auto reportSchema = ReportSchema::create(tr("Schema: %1").arg(schema->schemaId()), {}, schema, {});
 
-				auto schemaDrawingSection = report->addSection(ReportSection::create(schema->schemaId(), pageLayout));
+				auto schemaDrawingSection = report->addSection(ReportSection::create(schema->schemaId(), schemaPageLayout));
 				schemaDrawingSection->setTag(tr("%1 - %2").arg(schema->schemaId()).arg(schema->caption()));
 				schemaDrawingSection->addSchema(reportSchema);
 
 				if (m_options.signalsDetails() == true && schema->isLogicSchema() == true)
 				{
-					createLogicSchemaSignalsDetails(report, pageLayout, schema, schemas, detailsSet);
+					createLogicSchemaSignalsDetails(report, textPageLayout, schema, schemas, detailsSet);
 				}
 			}
 		}

@@ -18,7 +18,7 @@ DialogSchemasReportTypePageSetup::DialogSchemasReportTypePageSetup(const std::ve
 	m_defaultFileTypeParams(defaultFileTypeParams)
 {
 	setWindowTitle(tr("Report Sections Page Setup"));
-	setMinimumSize(540, 350);
+	setMinimumSize(540, 300);
 
 	m_treeWidget = new QTreeWidget();
 
@@ -27,7 +27,8 @@ DialogSchemasReportTypePageSetup::DialogSchemasReportTypePageSetup(const std::ve
 	l << tr("Page Size");
 	l << tr("Orientation");
 	l << tr("Margins, mm");
-	l << tr("No Margins (1:1)");
+	l << tr("*S 1:1");
+	l << tr("*T 1:1");
 	m_treeWidget->setHeaderLabels(l);
 	m_treeWidget->setSelectionMode(QAbstractItemView::SelectionMode::ExtendedSelection);
 	m_treeWidget->setRootIsDecorated(false);
@@ -56,6 +57,7 @@ DialogSchemasReportTypePageSetup::DialogSchemasReportTypePageSetup(const std::ve
 	topLayout->addLayout(pbLayout);
 
 	QHBoxLayout* buttonsLayout = new QHBoxLayout();
+	buttonsLayout->addWidget(new QLabel("* \"S 1:1\" means \"No Schemas Pages Margins (1:1)\",\n\"T 1:1\" means \"No Text Pages Margins (1:1)\""));
 	buttonsLayout->addStretch();
 
 	b = new QPushButton(tr("OK"));
@@ -218,7 +220,8 @@ void DialogSchemasReportTypePageSetup::fillTree()
 		item->setText(2, ft.pageLayout().orientation() == QPageLayout::Portrait ? tr("Portrait") : tr("Landscape"));
 		QMarginsF margins = ft.pageLayout().margins();
 		item->setText(3, tr("l%1 t%2 r%3 b%4").arg(margins.left()).arg(margins.top()).arg(margins.right()).arg(margins.bottom()));
-		item->setCheckState(4, ft.noMargins() ? Qt::Checked : Qt::Unchecked);
+		item->setCheckState(4, ft.noSchemasMargins() ? Qt::Checked : Qt::Unchecked);
+		item->setCheckState(5, ft.noTextMargins() ? Qt::Checked : Qt::Unchecked);
 	}
 
 	for (int i = 0; i < m_treeWidget->columnCount(); i++)
@@ -235,7 +238,8 @@ void DialogSchemasReportTypePageSetup::accept()
 	for (int i = 0; i < count; i++)
 	{
 		SchemaTypesParams& ft = m_schemaTypesParams[i];
-		ft.setNoMargins(m_treeWidget->topLevelItem(i)->checkState(4) == Qt::Checked);
+		ft.setNoSchemasMargins(m_treeWidget->topLevelItem(i)->checkState(4) == Qt::Checked);
+		ft.setNoTextMargins(m_treeWidget->topLevelItem(i)->checkState(5) == Qt::Checked);
 	}
 
 	QDialog::accept();
@@ -246,10 +250,13 @@ VariablesWidget::VariablesWidget(const std::map<QString, QString>& variables, bo
 	m_variables(variables)
 {
 	QVBoxLayout* variablesLayout = new QVBoxLayout(this);
+	variablesLayout->setContentsMargins(0, 0, 0, 0);
 	m_variablesTree = new QTreeWidget();
 	m_variablesTree->setHeaderLabels(QStringList() << "Name"
 												   << "Value");
 	m_variablesTree->setRootIsDecorated(false);
+	m_variablesTree->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(m_variablesTree, &QTreeWidget::customContextMenuRequested, this, &VariablesWidget::onCustomContextMenuRequested);
 
 	for (const auto& [name, value] : m_variables)
 	{
@@ -301,6 +308,8 @@ std::map<QString, QString> VariablesWidget::getVariables() const
 
 void VariablesWidget::onAddVariableClicked()
 {
+	// Create unique variable name
+	//
 	QStringList l;
 	for (int i = 0; i < m_variablesTree->topLevelItemCount(); i++)
 	{
@@ -314,12 +323,32 @@ void VariablesWidget::onAddVariableClicked()
 		name = tr("Variable%1").arg(++value);
 	} while (l.contains(name) == true);
 
+	// Add new item
+	//
+	bool wasEmpty = m_variablesTree->topLevelItemCount() == 0;
+
+	m_variablesTree->clearSelection();
 
 	QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << name << tr("Value"));
 	item->setFlags(item->flags() | Qt::ItemIsEditable);
 	m_variablesTree->addTopLevelItem(item);
-	m_variablesTree->resizeColumnToContents(0);
-	m_variablesTree->resizeColumnToContents(1);
+	item->setSelected(true);
+
+	if (wasEmpty == true)
+	{
+		m_variablesTree->resizeColumnToContents(0);
+		m_variablesTree->resizeColumnToContents(1);
+	}
+}
+
+void VariablesWidget::onEditVariableClicked()
+{
+	const auto items = m_variablesTree->selectedItems();
+	if (items.size() != 1)
+	{
+		return;
+	}
+	m_variablesTree->editItem(items[0], 1);
 }
 
 void VariablesWidget::onRemoveVariableClicked()
@@ -341,6 +370,29 @@ void VariablesWidget::onRemoveVariableClicked()
 	}
 }
 
+void VariablesWidget::onCustomContextMenuRequested(const QPoint& /*pos*/)
+{
+	const auto items = m_variablesTree->selectedItems();
+
+	QMenu menu(this);
+
+	QAction* a = new QAction(tr("Add"), &menu);
+	connect(a, &QAction::triggered, this, &VariablesWidget::onAddVariableClicked);
+	menu.addAction(a);
+
+	a = new QAction(tr("Edit"), &menu);
+	connect(a, &QAction::triggered, this, &VariablesWidget::onEditVariableClicked);
+	a->setEnabled(items.size() == 1);
+	menu.addAction(a);
+
+	a = new QAction(tr("Remove"), &menu);
+	a->setEnabled(items.size() == 1);
+	connect(a, &QAction::triggered, this, &VariablesWidget::onRemoveVariableClicked);
+	menu.addAction(a);
+
+	menu.exec(QCursor::pos());
+}
+
 //
 // DialogSchemasReport
 //
@@ -357,7 +409,7 @@ DialogSchemasReport::DialogSchemasReport(const QString& path,
 	m_db(db)
 {
 	setWindowTitle(tr("Create Schemas Album"));
-	setMinimumWidth(500);
+	setMinimumWidth(400);
 
 	QVBoxLayout* mainLayout = new QVBoxLayout();
 
@@ -386,9 +438,7 @@ DialogSchemasReport::DialogSchemasReport(const QString& path,
 		// Schemas tab
 		//
 		{
-			QWidget* schemasTab = new QWidget();
-
-			QVBoxLayout* schemasLayout = new QVBoxLayout(schemasTab);
+			m_schemasTabSplitter = new QSplitter(Qt::Vertical);
 
 			// Schema types tree
 			//
@@ -408,7 +458,7 @@ DialogSchemasReport::DialogSchemasReport(const QString& path,
 				item->setData(0, Qt::UserRole, stp.fileId());
 				m_schemaTypesTree->addTopLevelItem(item);
 			}
-			schemasLayout->addWidget(m_schemaTypesTree);
+			m_schemasTabSplitter->addWidget(m_schemaTypesTree);
 
 			// Schema tags tree
 			//
@@ -421,9 +471,14 @@ DialogSchemasReport::DialogSchemasReport(const QString& path,
 				item->setCheckState(0, tagSelected ? Qt::Checked : Qt::Unchecked);
 				m_schemaTagsTree->addTopLevelItem(item);
 			}
-			schemasLayout->addWidget(m_schemaTagsTree);
+			m_schemasTabSplitter->addWidget(m_schemaTagsTree);
 
-			tabWidget->addTab(schemasTab, tr("Schemas"));
+			QWidget* w = new QWidget();
+			QVBoxLayout* l = new QVBoxLayout(w);
+			l->addWidget(m_schemasTabSplitter);
+			tabWidget->addTab(w, tr("Schemas"));
+
+			m_schemasTabSplitter->restoreState(QSettings().value("DialogSchemasReport/schemasTabSplitterState", m_schemasTabSplitter->saveState()).toByteArray());
 		}
 
 
@@ -439,82 +494,120 @@ DialogSchemasReport::DialogSchemasReport(const QString& path,
 			int row = 0;
 			int col = 0;
 		
-			m_checkSignleFile = new QCheckBox(tr("Generate single report file"));
+			// Checkboxes
+			//
+			m_checkSignleFile = new QCheckBox(tr("Single file"));
 			m_checkSignleFile->setChecked(m_options.singleFile());
 			optionsLayout->addWidget(m_checkSignleFile, row++, col);
 
-			m_checkAddTableOfContents = new QCheckBox(tr("Generate table of contents"));
+			m_checkAddTableOfContents = new QCheckBox(tr("Table of contents"));
 			m_checkAddTableOfContents->setChecked(m_options.tableOfContents());
 			optionsLayout->addWidget(m_checkAddTableOfContents, row++, col);
 
-			m_checkAddFolders = new QCheckBox(tr("Add folders names to table of contents"));
+			m_checkAddFolders = new QCheckBox(tr("Folders to table of contents"));
 			m_checkAddFolders->setChecked(m_options.folders());
 			optionsLayout->addWidget(m_checkAddFolders, row++, col);
 
-			m_checkAddFooters = new QCheckBox(tr("Add header and footer"));
+			m_checkAddFooters = new QCheckBox(tr("Header and footer"));
 			m_checkAddFooters->setChecked(m_options.footers());
 			optionsLayout->addWidget(m_checkAddFooters, row++, col);
 
-			m_checkSignalsDetails = new QCheckBox(tr("Add schema signals pages"));
+			m_checkSignalsDetails = new QCheckBox(tr("Schema signals pages"));
 			m_checkSignalsDetails->setChecked(m_options.signalsDetails());
 			optionsLayout->addWidget(m_checkSignalsDetails, row++, col);
 
-			m_checkItemsLabels = new QCheckBox(tr("Show schema items labels"));
+			m_checkItemsLabels = new QCheckBox(tr("Schema items labels"));
 			m_checkItemsLabels->setChecked(m_options.itemsLabels());
 			optionsLayout->addWidget(m_checkItemsLabels, row++, col);
 
+			// Edit controls
+			//
 			optionsLayout->addWidget(new QLabel("Start page number"), row, col);
 			m_editStartPageNumber = new QLineEdit();
 			m_editStartPageNumber->setText(QString::number(m_options.startPageNumber()));
-			optionsLayout->addWidget(m_editStartPageNumber, row++, col + 1);
+			optionsLayout->addWidget(m_editStartPageNumber, row, col + 1);
+			optionsLayout->addWidget(new QWidget(), row++, col + 2);
 
 			optionsLayout->addWidget(new QLabel("Table of contents font size"), row, col);
 			m_editTableOfContentsFontSize = new QLineEdit();
 			m_editTableOfContentsFontSize->setText(QString::number(m_options.tableOfContentsFontSize()));
-			optionsLayout->addWidget(m_editTableOfContentsFontSize, row++, col + 1);
+			optionsLayout->addWidget(m_editTableOfContentsFontSize, row, col + 1);
+			optionsLayout->addWidget(new QWidget(), row++, col + 2);
 			
 			optionsLayout->addWidget(new QLabel("Tables font size"), row, col);
 			m_editTableFontSize = new QLineEdit();
 			m_editTableFontSize->setText(QString::number(m_options.tableFontSize()));
-			optionsLayout->addWidget(m_editTableFontSize, row++, col + 1);
+			optionsLayout->addWidget(m_editTableFontSize, row, col + 1);
+			optionsLayout->addWidget(new QWidget(), row++, col + 2);
 
 			optionsLayout->addWidget(new QLabel("Text font size"), row, col);
 			m_editNormalFontSize = new QLineEdit();
 			m_editNormalFontSize->setText(QString::number(m_options.normalFontSize()));
-			optionsLayout->addWidget(m_editNormalFontSize, row++, col + 1);
+			optionsLayout->addWidget(m_editNormalFontSize, row, col + 1);
+			optionsLayout->addWidget(new QWidget(), row++, col + 2);
+			
+			// Add spacer
+			//
+			optionsLayout->addWidget(new QWidget(), row, col);
+			optionsLayout->setRowStretch(row++, 10);
+			optionsLayout->setColumnStretch(2, 10);
 
+			// Page setup button
+			//
 			{
 				QPushButton* pageSetupButton = new QPushButton(tr("Page Setup..."));
 				connect(pageSetupButton, &QPushButton::clicked, this, &DialogSchemasReport::pageSetupClicked);
 				optionsLayout->addWidget(pageSetupButton, row++, col);
 			}
-
+			
 			tabWidget->addTab(optionsTab, tr("Options"));
 		}
 
 		// Variables tab
 		//
 		{
-			QWidget* variablesWidget = new QWidget();
-			QVBoxLayout* variablesLayout = new QVBoxLayout(variablesWidget);
+			m_variablesTabSplitter = new QSplitter(Qt::Vertical);
 
-			variablesLayout->addWidget(new QLabel(tr("Project Variables")));
-			m_projectVariables = new VariablesWidget(m_options.projectVariables(), false /*readOnly*/);
-			variablesLayout->addWidget(m_projectVariables);
+			{
+				QWidget* w = new QWidget();
+				QVBoxLayout* l = new QVBoxLayout(w);
+				l->setContentsMargins(0, 0, 0, 0);
+				l->addWidget(new QLabel(tr("Project Variables")));
+				m_projectVariables = new VariablesWidget(m_options.projectVariables(), false /*readOnly*/);
+				l->addWidget(m_projectVariables);
+				m_variablesTabSplitter->addWidget(w);
+			}
 
-			variablesLayout->addWidget(new QLabel(tr("User Variables")));
-			m_userVariables = new VariablesWidget(m_options.userVariables(), false /*readOnly*/);
-			variablesLayout->addWidget(m_userVariables);
+			{
+				QWidget* w = new QWidget();
+				QVBoxLayout* l = new QVBoxLayout(w);
+				l->setContentsMargins(0, 0, 0, 0);
+				l->addWidget(new QLabel(tr("User Variables")));
+				m_userVariables = new VariablesWidget(m_options.userVariables(), false /*readOnly*/);
+				l->addWidget(m_userVariables);
+				m_variablesTabSplitter->addWidget(w);
+			}
 
-			variablesLayout->addWidget(new QLabel(tr("Auto Variables")));
-			std::map<QString, QString> autoVariablesMap;
-			autoVariablesMap["PDFPAGE"] = "Current page";
-			autoVariablesMap["PDFPAGE_<SCHEMAID>"] = "Page number of each schema";
-			autoVariablesMap["PDFPAGE_COUNT"] = "Total number of pages";
-			VariablesWidget* autoVariables = new VariablesWidget(autoVariablesMap, true /*readOnly*/);
-			variablesLayout->addWidget(autoVariables);
+			{
+				QWidget* w = new QWidget();
+				QVBoxLayout* l = new QVBoxLayout(w);
+				l->setContentsMargins(0, 0, 0, 0);
+				l->addWidget(new QLabel(tr("Auto Variables")));
+				std::map<QString, QString> autoVariablesMap;
+				autoVariablesMap["PDFPAGE"] = "Current page";
+				autoVariablesMap["PDFPAGE_<SCHEMAID>"] = "Page number of each schema";
+				autoVariablesMap["PDFPAGE_COUNT"] = "Total number of pages";
+				VariablesWidget* autoVariables = new VariablesWidget(autoVariablesMap, true /*readOnly*/);
+				l->addWidget(autoVariables);
+				m_variablesTabSplitter->addWidget(w);
+			}
 
-			tabWidget->addTab(variablesWidget, tr("Variables"));
+			m_variablesTabSplitter->restoreState(QSettings().value("DialogSchemasReport/variablesTabSplitterState", m_variablesTabSplitter->saveState()).toByteArray());
+
+			QWidget* w = new QWidget();
+			QVBoxLayout* l = new QVBoxLayout(w);
+			l->addWidget(m_variablesTabSplitter);
+			tabWidget->addTab(w, tr("Variables"));
 		}
 
 		mainLayout->addWidget(tabWidget);
@@ -541,6 +634,28 @@ DialogSchemasReport::DialogSchemasReport(const QString& path,
 	}
 
 	setLayout(mainLayout);
+
+	// Restore size
+	//
+	QSettings settings;
+	QByteArray ba = settings.value("DialogSchemasReport/Geometry").toByteArray();
+	if (ba.isEmpty() == false)
+	{
+		restoreGeometry(ba);
+	}
+	else
+	{
+		resize(400, 600);
+	}
+}
+
+DialogSchemasReport::~DialogSchemasReport()
+{
+	QSettings settings;
+
+	settings.setValue("DialogSchemasReport/Geometry", saveGeometry());
+	settings.setValue("DialogSchemasReport/schemasTabSplitterState", m_schemasTabSplitter->saveState());
+	settings.setValue("DialogSchemasReport/variablesTabSplitterState", m_variablesTabSplitter->saveState());
 }
 
 std::vector<Builder::SchemaTypesParams> DialogSchemasReport::schemaTypesParams() const

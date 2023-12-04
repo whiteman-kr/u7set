@@ -42,7 +42,9 @@ public:
 
 private slots:
 	void onAddVariableClicked();
+	void onEditVariableClicked();
 	void onRemoveVariableClicked();
+	void onCustomContextMenuRequested(const QPoint &pos);
 
 private:
 	QTreeWidget* m_variablesTree = nullptr;
@@ -61,6 +63,7 @@ public:
 						const Builder::SchemasReportOptions& options,
 						DbController* db,
 						QWidget *parent);
+	virtual ~DialogSchemasReport();
 
 	std::vector<Builder::SchemaTypesParams> schemaTypesParams() const;
 	Builder::SchemasReportOptions options() const;
@@ -82,6 +85,7 @@ private:
 
 	QTreeWidget* m_schemaTypesTree = nullptr;
 	QTreeWidget* m_schemaTagsTree = nullptr;
+	QSplitter* m_schemasTabSplitter = nullptr;
 
 	QCheckBox* m_checkSignleFile = nullptr;
 
@@ -98,6 +102,7 @@ private:
 
 	VariablesWidget* m_userVariables = nullptr;
 	VariablesWidget* m_projectVariables = nullptr;
+	QSplitter* m_variablesTabSplitter = nullptr;
 
 	QString m_reportPath;
 	std::vector<Builder::SchemaTypesParams> m_schemaTypesParams;

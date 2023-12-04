@@ -114,8 +114,11 @@ namespace Builder
 		const QPageLayout& pageLayout() const;
 		void setPageLayout(const QPageLayout& layout);
 
-		bool noMargins() const;
-		void setNoMargins(bool value);
+		bool noSchemasMargins() const;
+		void setNoSchemasMargins(bool value);
+
+		bool noTextMargins() const;
+		void setNoTextMargins(bool value);
 
 		// Load/save
 		//
@@ -126,7 +129,8 @@ namespace Builder
 		int m_fileId = -1;
 		QString m_caption;
 		bool m_selected = false;
-		bool m_noMargins = false;
+		bool m_noSchemasMargins = false;
+		bool m_noTextMargins = false;
 
 		// Multiple-file report section page options
 		//
@@ -279,7 +283,8 @@ namespace Builder
 		void renderSchemasToAlbums(const std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas,
 								   const VFrame30::SchemaDetailsSet& detailsSet,
 								   const QString& groupName,
-								   const QPageLayout& pageLayout);
+								   const QPageLayout& schemaPageLayout,
+								   const QPageLayout& textPageLayout);
 
 		[[nodiscard]] QPageLayout getSchemaPageLayout(const std::shared_ptr<VFrame30::Schema>& schema) const;
 
