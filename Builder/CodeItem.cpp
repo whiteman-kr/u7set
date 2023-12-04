@@ -1887,7 +1887,7 @@ namespace Builder
 
 		generateBinCode(&binCode);
 
-		if (binCode.count() < (wordNo + 1) * WORD_SIZE_IN_BYTES)
+		if (binCode.size() < (wordNo + 1) * WORD_SIZE_IN_BYTES)
 		{
 			Q_ASSERT(false);
 			return str;

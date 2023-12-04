@@ -10345,18 +10345,25 @@ namespace Builder
 		//
 
 		int inSignalsCount = static_cast<int>(inSignals.size());
+
+		if (inSignalsCount < li.minOperandsCount)
+		{
+			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
 		int inSignalIndex = 0;
 
-		int step = 0;
-		int prevOperandsCount = 0;
+		int step = 1;
+		int prevOperandsCount = -1;
 
-		while(1)
+		while(inSignalIndex < inSignals.size())
 		{
 			int remainSignalsCount = inSignalsCount - inSignalIndex;
 
-			if (step > 0)
+			if (step > 1)
 			{
-				remainSignalsCount++;	//	take into consideration prev step result
+				remainSignalsCount++;	//	take into consideration prev step result saved in bit accumulator
 			}
 
 			remainSignalsCount = std::min(remainSignalsCount, li.maxOperandsCount);
@@ -10375,7 +10382,7 @@ namespace Builder
 
 			int inputNo = 0;
 
-			if (step != 0)
+			if (step > 1)
 			{
 				// load prev step result from bit accumulator
 				//
@@ -10383,7 +10390,6 @@ namespace Builder
 														bitAccumulatorAddress16(), afbCaption,
 														QString("%1.in_%2 <= prev step result").arg(afbCaption).
 															arg(inputNo + 1));
-
 				inputNo++;
 			}
 
@@ -10400,32 +10406,30 @@ namespace Builder
 														QString("%1.in_%2 <= %3").arg(afbCaption).
 																arg(inputNo + 1).arg(inSignal->appSignalID()));
 				inputNo++;
-
-				if (inSignalIndex >= inSignals.size())
-				{
-					break;
-				}
 			}
 
 			*code << CodeItem().startafb(li.opCode, instance, afbCaption, 2,
-											QString("compute @%1 step %2").arg(afb->label()).arg(step + 1));
+											QString("compute @%1 step %2").arg(afb->label()).arg(step));
 
-			if (inSignalIndex >= inSignals.size())
+			if (inSignalIndex < inSignals.size())
 			{
+				// save intermediate result into bit accumulator
+				//
+				*code << cmd.readFuncBlockBit(bitAccumulatorAddress16(), li.opCode, instance,
+													 li.resultIndex, afbCaption,
+														QString("bitAccumulator <= @%1.out (intermediate result)").
+															arg(afb->label()));
+				step++;			// go to next step
+			}
+			else
+			{
+				// finalize processing
+				//
 				*code << cmd.readFuncBlockBit(outWriteAddr, li.opCode, instance,
 													 li.resultIndex, afbCaption,
 														QString("%1 <= @%2.out (final result)").
 															arg(outSignal->appSignalID()).arg(afb->label()));
-				break;
 			}
-
-			// save intermediate result into bit accumulator
-			//
-			*code << cmd.readFuncBlockBit(bitAccumulatorAddress16(), li.opCode, instance,
-												 li.resultIndex, afbCaption,
-													QString("bitAccumulator <= @%1.out (intermediate result)").
-														arg(afb->label()));
-			step++;
 		}
 
 		return true;
