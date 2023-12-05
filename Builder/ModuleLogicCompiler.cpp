@@ -1047,7 +1047,7 @@ namespace Builder
 
 		bool result = true;
 
-		// result &= writeUalItemsFile();
+		result &= writeUalItemsFile();
 
 		result &= createUalItemSignalsList();
 
@@ -1167,17 +1167,65 @@ namespace Builder
 
 			itemStr = QString("%1, %2").arg(E::valueToString(itemType)).arg(ualItem->label());
 
-			if (itemType == E::UalItemType::Signal)
+			switch(itemType)
 			{
-				itemStr += QString(", %1").arg(ualItem->strID());
+			case E::UalItemType::Unknown:
+				break;
+
+			case E::UalItemType::Signal:
+				{
+					const LogicSignal& l = ualItem->signal();
+					itemStr += QString(", ids=%1").arg(l.appSignalIdList().join(","));
+				}
+				break;
+
+			case E::UalItemType::Afb:
+				{
+					const LogicAfb& l = ualItem->logicFb();
+					itemStr += QString(", %1, opcode=%2").arg(l.afbStrID()).arg(l.afbElement().opCode());
+				}
+				break;
+
+			case E::UalItemType::Const:
+				{
+					const UalConst* l = ualItem->ualConst();
+					itemStr += QString(", type=%1").
+									arg(E::valueToString(l->type()));
+
+					switch(l->type())
+					{
+					case VFrame30::SchemaItemConst::ConstType::IntegerType:
+							itemStr += QString(", val=%1").arg(l->signedInt32NativeValue());
+							break;
+					case VFrame30::SchemaItemConst::ConstType::FloatType:
+							itemStr += QString(", val=%1").arg(l->floatNativeValue());
+							break;
+					case VFrame30::SchemaItemConst::ConstType::Discrete:
+							itemStr += QString(", val=%1").arg(l->discreteNativeValue());
+							break;
+					}
+				}
+				break;
+
+			case E::UalItemType::Transmitter:
+			case E::UalItemType::Receiver:
+			case E::UalItemType::Terminator:
+			case E::UalItemType::BusComposer:
+			case E::UalItemType::BusExtractor:
+			case E::UalItemType::LoopbackSource:
+			case E::UalItemType::LoopbackTarget:
+				break;
+
+			default:
+				Q_ASSERT(false);
 			}
 
 			items.append(itemStr);
 		}
 
-		return m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID), lmEquipmentID() + ".uil", "", "", items, false);
+		return m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
+									   getInfoFileName("uil"), "", "", items, false);
 	}
-
 
 	bool ModuleLogicCompiler::loopbacksPreprocessing()
 	{

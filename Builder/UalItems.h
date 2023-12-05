@@ -28,7 +28,7 @@ namespace Builder
 	typedef VFrame30::AfbPin LogicPin;
 
 	typedef VFrame30::SchemaItemSignal LogicSignal;
-	typedef VFrame30::SchemaItemAfb LogicFb;
+	typedef VFrame30::SchemaItemAfb LogicAfb;
 	typedef VFrame30::SchemaItemConst UalConst;
 
 	typedef VFrame30::SchemaItemTransmitter UalTransmitter;
@@ -166,7 +166,7 @@ namespace Builder
 		const std::vector<Afb::AfbParam>& params() const { return m_appLogicItem.afbElement().params(); }
 		std::vector<Afb::AfbParam>& params() { return m_appLogicItem.afbElement().params(); }
 
-		const LogicFb& logicFb() const { return *m_appLogicItem.m_fblItem->toAfbElement(); }
+		const LogicAfb& logicFb() const { return *m_appLogicItem.m_fblItem->toAfbElement(); }
 		const UalConst* ualConst() const { return m_appLogicItem.m_fblItem->toSchemaItemConst(); }
 		const UalTransmitter& logicTransmitter() const { return *m_appLogicItem.m_fblItem->toTransmitterElement(); }
 		const UalReceiver& logicReceiver() const { return *m_appLogicItem.m_fblItem->toReceiverElement(); }

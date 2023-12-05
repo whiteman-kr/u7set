@@ -179,38 +179,38 @@ namespace Builder
 			{
 				// ualAfb has no RAM and its instantiatorID is already exists - compInfo.curInstance would be used
 				//
-				useExistInstance = true;
+				int existInstance = instantiatorIt->second;
+
+				ualAfb->setInstance(existInstance);
+				return true;
 			}
 		}
 
-		if (useExistInstance == false)
+		// ualAfb has RAM or
+		// ualAfb hasn't RAM and its instantiatorID is not exist - new instance would be created
+		//
+		if (ci.maxInstCount > 0)
 		{
-			// ualAfb has RAM or
-			// ualAfb hasn't RAM and its instantiatorID is not exist - new instance would be created
-			//
-			if (ci.maxInstCount > 0)
+			if (ci.curInstance + 1 >= ci.maxInstCount)
 			{
-				if (ci.curInstance + 1 >= ci.maxInstCount)
-				{
-					// Max instances (%1) of AFB component '%2' is used (Logic schema %3, item %4)
-					//
-					log->errALC5130(ci.maxInstCount, ci.caption, ualAfb->guid(), ualAfb->schemaID(), ualAfb->label());
-					return false;
-				}
-
-				ci.curInstance++;
-			}
-			else
-			{
-				ci.curInstance = 0;
-			}
-
-			if (ci.hasRam == false)
-			{
-				// append new instantiatorID for non-RAM afb instantiators
+				// Max instances (%1) of AFB component '%2' is used (Logic schema %3, item %4)
 				//
-				ci.nonRamAfbInstantiators.emplace(instantiatorID, ci.curInstance);
+				log->errALC5130(ci.maxInstCount, ci.caption, ualAfb->guid(), ualAfb->schemaID(), ualAfb->label());
+				return false;
 			}
+
+			ci.curInstance++;
+		}
+		else
+		{
+			ci.curInstance = 0;
+		}
+
+		if (ci.hasRam == false)
+		{
+			// append new instantiatorID for non-RAM afb instantiators
+			//
+			ci.nonRamAfbInstantiators.emplace(instantiatorID, ci.curInstance);
 		}
 
 		if (ci.curInstance < 0)
