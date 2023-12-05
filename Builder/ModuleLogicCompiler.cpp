@@ -976,11 +976,6 @@ namespace Builder
 				continue;
 			}
 
-			if (ualItem->label() == "PACKET_OR_AND_2554")
-			{
-				DEBUG_STOP;
-			}
-
 			UalAfb* ualAfb = createUalAfb(*ualItem);
 
 			if (ualAfb == nullptr)
@@ -10301,7 +10296,8 @@ namespace Builder
 
 		if (m_lmDescription->isBitAccAvailable() == true)
 		{
-			Q_ASSERT(false);
+			result &= generateBitAccBasedPackedAfbCode(code, afb, nonConstInSignals,
+																outSignal, outWriteAddr);
 		}
 		else
 		{
@@ -10312,6 +10308,139 @@ namespace Builder
 		return result;
 	}
 
+	bool ModuleLogicCompiler::generateBitAccBasedPackedAfbCode(CodeSnippet* code, const UalAfb* afb,
+													const std::vector<std::pair<const UalSignal*, Address16>>& inSignals,
+													const UalSignal* outSignal, const Address16& outWriteAddr)
+	{
+		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(afb, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(outSignal, m_log);
+
+		Q_ASSERT(m_lmDescription->isBitAccAvailable() == true);
+
+		//
+		// inSignals - is unique non const input signals
+		//
+
+		int instance = m_packedLogicAfbInstance;
+		bool isAndLogic = false;
+		QString afbCaption;
+
+		if (afb->isPackedAndLogic() == true)
+		{
+			isAndLogic = true;
+			afbCaption = Afb::AFB_AND;
+		}
+		else
+		{
+			if (afb->isPackedOrLogic() == true)
+			{
+				isAndLogic = false;
+				afbCaption = Afb::AFB_OR;
+			}
+			else
+			{
+				Q_ASSERT(false);
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
+		}
+
+		code->comment_nl(QString("Packed_%1 %2 processing").arg(afbCaption).arg(afb->label()));
+
+		CodeItem cmd;
+
+		int inSignalsCount = static_cast<int>(inSignals.size());
+
+		if (inSignalsCount < 2)
+		{
+			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		int inSignalIndex = 0;
+
+		int step = 1;
+
+		const int BIT_ACC_SIZE = SIZE_16BIT;
+
+		while(inSignalIndex < inSignals.size())
+		{
+			int remainSignalsCount = inSignalsCount - inSignalIndex;
+
+			if (step > 1)
+			{
+				remainSignalsCount++;	//	take into consideration prev step result saved in ACC[0]
+			}
+
+			remainSignalsCount = std::min(remainSignalsCount, BIT_ACC_SIZE);
+
+			if (remainSignalsCount < BIT_ACC_SIZE)
+			{
+				if (step > 1)
+				{
+					*code << cmd.movBitAddrAcc(bitAccumulatorAddress16());
+				}
+
+				// initialization of bits that will not used
+				//
+				if (isAndLogic)
+				{
+					*code << cmd.setAcc();
+				}
+				else
+				{
+					*code << cmd.resetAcc();
+				}
+
+				if (step > 1)
+				{
+					*code << cmd.movBitAccAddr(bitAccumulatorAddress16());
+				}
+			}
+
+			int bitNo = 0;
+
+			while(bitNo < remainSignalsCount && inSignalIndex < inSignals.size())
+			{
+				const auto& [inSignal, readAddr] = inSignals[inSignalIndex];
+
+				inSignalIndex++;
+
+				// load next input signal
+				//
+				*code << cmd.movBitAccAddr(readAddr, QString("ACC[0] <= %1").arg(inSignal->appSignalID()));
+
+				bitNo++;
+			}
+
+			if (isAndLogic)
+			{
+				*code << cmd.andAcc(QString("compute @%1 step %2").arg(afb->label()).arg(step));
+			}
+			else
+			{
+				*code << cmd.orAcc(QString("compute @%1 step %2").arg(afb->label()).arg(step));
+			}
+
+			step++;
+
+
+			if (inSignalIndex >= inSignals.size())
+			{
+				// finalize processing
+				//
+				*code << cmd.movBitAddrAcc(outWriteAddr, QString("%1 <= ACC[0] (final result)").
+															arg(outSignal->appSignalID()));
+			}
+		}
+
+
+
+		return true;
+	}
+
 	bool ModuleLogicCompiler::generateAfbBasedPackedAfbCode(CodeSnippet* code, const UalAfb* afb,
 													const std::vector<std::pair<const UalSignal*, Address16>>& inSignals,
 													const UalSignal* outSignal, const Address16& outWriteAddr)
@@ -10319,6 +10448,8 @@ namespace Builder
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(afb, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(outSignal, m_log);
+
+		Q_ASSERT(m_lmDescription->isBitAccAvailable() == false);
 
 		//
 		// inSignals - is unique non const input signals
@@ -10471,14 +10602,6 @@ namespace Builder
 		}
 
 		return true;
-	}
-
-	bool ModuleLogicCompiler::generatePackedAndAfbCode(CodeSnippet* code, const UalAfb* afb,
-													const std::vector<std::pair<const UalSignal*, Address16>>& inSignals,
-													const UalSignal* outSignal, const Address16& outWriteAddr)
-	{
-		bool result = true;
-		return result;
 	}
 
 	bool ModuleLogicCompiler::generateAfbBitAccCode(CodeSnippet* code, const UalAfb* ualAfb,
@@ -10937,9 +11060,6 @@ namespace Builder
 		TEST_PTR_RETURN_FALSE(result);
 
 		*result = true;
-
-		// DEBUG_STOP
-		qDebug() << "instance" << ualAfb->instance();
 
 		std::vector<std::pair<const UalSignal*, Address16>> inSignals;	// pair<ualSignal, readAddress>
 
@@ -19049,17 +19169,9 @@ namespace Builder
 			return;
 		}
 
-		// DEBUG_STOP
-		qDebug() << "findLogicAfbInstances, confValue " << logicConfValue;
-
 		for(const UalAfb* ualAfb : m_ualAfbs)
 		{
 			TEST_PTR_CONTINUE(ualAfb);
-
-			if (ualAfb->label() == "TEST_LOGIC_INSTRUCTIONS_BUS_11377")
-			{
-				DEBUG_STOP;
-			}
 
 			if (ualAfb->caption() != afbCaption)
 			{
@@ -19086,20 +19198,6 @@ namespace Builder
 			{
 				continue;
 			}
-
-/*			int operandCount = ualAfb->getParamIntValueByOpName(Afb::PARAM_I_OPRD_QUANT, &ok);
-
-			if (ok == false )
-			{
-				Q_ASSERT(false);
-				continue;
-			}
-
-			// DEBUG_STOP
-			qDebug() << C_STR(QString("insert afb %1 instance %2 operand count %3").
-						arg(ualAfb->label()).arg(ualAfb->instance()).arg(operandCount));*/
-
-			//labelsMap->insert({ualAfb->instance(), operandCount});
 
 			guidsMap->insert(ualAfb->guid());
 		}

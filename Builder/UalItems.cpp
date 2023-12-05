@@ -45,6 +45,12 @@ namespace Builder
 	{
 		TEST_PTR_RETURN(lmDescription);
 
+		if (lmDescription->afbComponents().size() == 0 ||
+			lmDescription->afbElements().size() == 0)
+		{
+			return;		// it is Ok, for example BVB15
+		}
+
 		for(const auto& [opCode, afbComp] : lmDescription->afbComponents())
 		{
 			TEST_PTR_CONTINUE(afbComp);

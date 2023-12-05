@@ -588,12 +588,12 @@ namespace Builder
 
 		bool generatePackedAfbCode(CodeSnippet* code, const UalAfb* afb);
 
+		bool generateBitAccBasedPackedAfbCode(CodeSnippet* code, const UalAfb* afb,
+											  const std::vector<std::pair<const UalSignal*, Address16>>& inSignals,
+											  const UalSignal* outSignal, const Address16& outWriteAddr);
+
 		bool generateAfbBasedPackedAfbCode(CodeSnippet* code, const UalAfb* afb,
 									 const std::vector<std::pair<const UalSignal*, Address16>>& inSignals,
-									 const UalSignal* outSignal, const Address16& outWriteAddr);
-
-		bool generatePackedAndAfbCode(CodeSnippet* code, const UalAfb* afb,
-									 const std::vector<std::pair<const UalSignal *, Address16>>& inSignals,
 									 const UalSignal* outSignal, const Address16& outWriteAddr);
 		//
 
