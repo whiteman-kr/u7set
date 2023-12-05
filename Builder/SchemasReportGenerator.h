@@ -56,14 +56,17 @@ namespace Builder
 		void setStartPageNumber(int value);
 		int startPageNumber() const;
 
-		void setTableOfContentsFontSize(int value);
-		int tableOfContentsFontSize() const;
+		void setContentsTextFontSize(int value);
+		int contentsTextFontSize() const;
+
+		void setContentsTableFontSize(int value);
+		int contentsTableFontSize() const;
+
+		void setTextFontSize(int value);
+		int textFontSize() const;
 
 		void setTableFontSize(int value);
 		int tableFontSize() const;
-
-		void setNormalFontSize(int value);
-		int normalFontSize() const;
 
 		void setSchemaTags(const std::set<QString>& tagsSet);
 		const std::map<QString, bool>& schemaTags() const;
@@ -85,9 +88,11 @@ namespace Builder
 		int m_startPageNumber = 1;              // Start page number
 		bool m_singleFile = false;				// Generare report to single file, do not split to schema types
 		
-		int m_tableOfContentsFontSize = 9;		// Table of contents font size
+		int m_contentsTextFontSize = 9;			// Table of contents text font size
+		int m_contentsTableFontSize = 9;		// Table of contents table font size
+
+		int m_textFontSize = 9;					// Normal text font size
 		int m_tableFontSize = 9;				// Table font size
-		int m_normalFontSize = 9;				// Normal text font size
 
 		std::map<QString, bool> m_schemaTags;   // Key is tag, value shows if this tag is set
 		std::map<QString, QString> m_projectVariables;	// Key is variable name, value is variable value
@@ -135,6 +140,24 @@ namespace Builder
 		// Multiple-file report section page options
 		//
 		QPageLayout m_pageLayout;
+	};
+
+	//
+	// SchemaInfo
+	//
+	struct SchemaInfo
+	{
+		SchemaInfo() = default;
+		SchemaInfo(const QString& fullFileName, const std::shared_ptr<VFrame30::Schema>& schema);
+
+		const QString& folder() const;
+		const QString& fileName() const;
+		const std::shared_ptr<VFrame30::Schema>& schema() const;
+
+	private:
+		QString m_folder;
+		QString m_fileName;
+		std::shared_ptr<VFrame30::Schema> m_schema;
 	};
 
 	//
@@ -277,36 +300,43 @@ namespace Builder
 
 		void loadSchemas(const DbFileTree& foldersTree,
 						 const std::vector<DbFileInfo>& files,
-						 std::map<QString, std::shared_ptr<VFrame30::Schema>>& schemas,
+						 std::vector<SchemaInfo>& schemas,
 						 VFrame30::SchemaDetailsSet& detailsSet);
 
-		void renderSchemasToAlbums(const std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas,
+		void sortSchemas(std::vector<SchemaInfo>& schemas);
+
+		bool renderSchemasToAlbums(const std::vector<SchemaInfo>& schemas,
 								   const VFrame30::SchemaDetailsSet& detailsSet,
 								   const QString& groupName,
 								   const QPageLayout& schemaPageLayout,
 								   const QPageLayout& textPageLayout);
 
-		[[nodiscard]] QPageLayout getSchemaPageLayout(const std::shared_ptr<VFrame30::Schema>& schema) const;
+		void createTableOfContents(const std::shared_ptr<ReportLib::Report> report,
+								   const QPageLayout& pageLayout,
+								   const std::vector<SchemaInfo>& schemas,
+								   const QString& caption);
+
+		[[nodiscard]] QPageLayout getSchemaPageLayout(const SchemaInfo& schemaInfo) const;
 
 		void createLogicSchemaSignalsDetails(const std::shared_ptr<ReportLib::Report> report,
-									  const QPageLayout& pageLayout,
-									  const std::shared_ptr<VFrame30::Schema>& schema,
-									  const std::map<QString, std::shared_ptr<VFrame30::Schema>>& allSchemas,
-									  const VFrame30::SchemaDetailsSet& detailsSet);
+											 const QPageLayout& pageLayout,
+											 const SchemaInfo& schemaInfo,
+											 const std::vector<SchemaInfo>& allSchemas,
+											 const VFrame30::SchemaDetailsSet& detailsSet);
 
 		void createLogicSchemaIOSignalsDetails(const std::shared_ptr<ReportLib::ReportSection> section,
 											   const VFrame30::LogicSchema* logicSchema,
-											   const std::map<QString, std::shared_ptr<VFrame30::Schema>>& allSchemas,
+											   const std::vector<SchemaInfo>& allSchemas,
 											   const VFrame30::SchemaDetailsSet& detailsSet);
 
 		void createLogicSchemaLoopbacksDetails(const std::shared_ptr<ReportLib::ReportSection> section,
 											   const VFrame30::LogicSchema* logicSchema,
-											   const std::map<QString, std::shared_ptr<VFrame30::Schema>>& allSchemas,
+											   const std::vector<SchemaInfo>& allSchemas,
 											   const VFrame30::SchemaDetailsSet& detailsSet);
 
 		void createLogicSchemaConnectionsDetails(const std::shared_ptr<ReportLib::ReportSection> section,
 												 const VFrame30::LogicSchema* logicSchema,
-												 const std::map<QString, std::shared_ptr<VFrame30::Schema>>& allSchemas,
+												 const std::vector<SchemaInfo>& allSchemas,
 												 const VFrame30::SchemaDetailsSet& detailsSet);
 
 	private:
@@ -350,9 +380,12 @@ namespace Builder
 		QString m_userName;
 		QString m_userPassword;
 
-		ReportLib::ReportFont m_tableOfContentsFont;
-		ReportLib::ReportFont m_normalFont;
+		ReportLib::ReportFont m_contentsTextFont;
+		ReportLib::ReportFont m_contentsTableFont;
+
+		ReportLib::ReportFont m_textFont;
 		ReportLib::ReportFont m_tableFont;
+
 		ReportLib::ReportFont m_marginFont;
 
 		mutable QMutex m_statisticsMutex;

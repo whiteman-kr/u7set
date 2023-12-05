@@ -41,6 +41,7 @@ public:
 	std::map<QString, QString> getVariables() const;
 
 private slots:
+	void onCopyVariableClicked();
 	void onAddVariableClicked();
 	void onEditVariableClicked();
 	void onRemoveVariableClicked();
@@ -48,8 +49,9 @@ private slots:
 
 private:
 	QTreeWidget* m_variablesTree = nullptr;
-
+	
 	const std::map<QString, QString>& m_variables;
+	bool m_readOnly = false;
 };
 
 
@@ -96,9 +98,12 @@ private:
 	QCheckBox* m_checkItemsLabels = nullptr;
 
 	QLineEdit* m_editStartPageNumber = nullptr;
-	QLineEdit* m_editTableOfContentsFontSize = nullptr;
+	
+	QLineEdit* m_editContentsTextFontSize = nullptr;
+	QLineEdit* m_editContentsTableFontSize = nullptr;
+	
+	QLineEdit* m_editTextFontSize = nullptr;
 	QLineEdit* m_editTableFontSize = nullptr;
-	QLineEdit* m_editNormalFontSize = nullptr;
 
 	VariablesWidget* m_userVariables = nullptr;
 	VariablesWidget* m_projectVariables = nullptr;

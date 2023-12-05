@@ -247,7 +247,8 @@ void DialogSchemasReportTypePageSetup::accept()
 
 
 VariablesWidget::VariablesWidget(const std::map<QString, QString>& variables, bool readOnly) :
-	m_variables(variables)
+	m_variables(variables),
+	m_readOnly(readOnly)
 {
 	QVBoxLayout* variablesLayout = new QVBoxLayout(this);
 	variablesLayout->setContentsMargins(0, 0, 0, 0);
@@ -305,6 +306,24 @@ std::map<QString, QString> VariablesWidget::getVariables() const
 	return variables;
 }
 
+void VariablesWidget::onCopyVariableClicked()
+{
+	const auto items = m_variablesTree->selectedItems();
+
+	QStringList text;
+	for (const QTreeWidgetItem* item : items)
+	{
+		text.push_back(tr("%1 - %2").arg(items[0]->text(0)).arg(items[0]->text(1)));
+	}
+
+	if (text.isEmpty() == true)
+	{
+		return;
+	}
+
+	QClipboard* clipboard = QApplication::clipboard();
+	clipboard->setText(text.join('\n'));
+}
 
 void VariablesWidget::onAddVariableClicked()
 {
@@ -325,20 +344,13 @@ void VariablesWidget::onAddVariableClicked()
 
 	// Add new item
 	//
-	bool wasEmpty = m_variablesTree->topLevelItemCount() == 0;
-
 	m_variablesTree->clearSelection();
 
 	QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << name << tr("Value"));
 	item->setFlags(item->flags() | Qt::ItemIsEditable);
 	m_variablesTree->addTopLevelItem(item);
+	m_variablesTree->scrollToItem(item);
 	item->setSelected(true);
-
-	if (wasEmpty == true)
-	{
-		m_variablesTree->resizeColumnToContents(0);
-		m_variablesTree->resizeColumnToContents(1);
-	}
 }
 
 void VariablesWidget::onEditVariableClicked()
@@ -376,19 +388,31 @@ void VariablesWidget::onCustomContextMenuRequested(const QPoint& /*pos*/)
 
 	QMenu menu(this);
 
-	QAction* a = new QAction(tr("Add"), &menu);
-	connect(a, &QAction::triggered, this, &VariablesWidget::onAddVariableClicked);
-	menu.addAction(a);
+	{
+		QAction* a = new QAction(tr("Copy"), &menu);
+		connect(a, &QAction::triggered, this, &VariablesWidget::onCopyVariableClicked);
+		a->setEnabled(items.size() > 0);
+		menu.addAction(a);
+	}
 
-	a = new QAction(tr("Edit"), &menu);
-	connect(a, &QAction::triggered, this, &VariablesWidget::onEditVariableClicked);
-	a->setEnabled(items.size() == 1);
-	menu.addAction(a);
+	if (m_readOnly == false)
+	{
+		menu.addSeparator();
 
-	a = new QAction(tr("Remove"), &menu);
-	a->setEnabled(items.size() == 1);
-	connect(a, &QAction::triggered, this, &VariablesWidget::onRemoveVariableClicked);
-	menu.addAction(a);
+		QAction* a = new QAction(tr("Add"), &menu);
+		connect(a, &QAction::triggered, this, &VariablesWidget::onAddVariableClicked);
+		menu.addAction(a);
+
+		a = new QAction(tr("Edit"), &menu);
+		connect(a, &QAction::triggered, this, &VariablesWidget::onEditVariableClicked);
+		a->setEnabled(items.size() == 1);
+		menu.addAction(a);
+
+		a = new QAction(tr("Remove"), &menu);
+		a->setEnabled(items.size() > 0);
+		connect(a, &QAction::triggered, this, &VariablesWidget::onRemoveVariableClicked);
+		menu.addAction(a);
+	}
 
 	menu.exec(QCursor::pos());
 }
@@ -479,6 +503,7 @@ DialogSchemasReport::DialogSchemasReport(const QString& path,
 			tabWidget->addTab(w, tr("Schemas"));
 
 			m_schemasTabSplitter->restoreState(QSettings().value("DialogSchemasReport/schemasTabSplitterState", m_schemasTabSplitter->saveState()).toByteArray());
+			m_schemasTabSplitter->setChildrenCollapsible(false);
 		}
 
 
@@ -528,24 +553,30 @@ DialogSchemasReport::DialogSchemasReport(const QString& path,
 			optionsLayout->addWidget(m_editStartPageNumber, row, col + 1);
 			optionsLayout->addWidget(new QWidget(), row++, col + 2);
 
-			optionsLayout->addWidget(new QLabel("Table of contents font size"), row, col);
-			m_editTableOfContentsFontSize = new QLineEdit();
-			m_editTableOfContentsFontSize->setText(QString::number(m_options.tableOfContentsFontSize()));
-			optionsLayout->addWidget(m_editTableOfContentsFontSize, row, col + 1);
+			optionsLayout->addWidget(new QLabel("Table of contents header font size"), row, col);
+			m_editContentsTextFontSize = new QLineEdit();
+			m_editContentsTextFontSize->setText(QString::number(m_options.contentsTextFontSize()));
+			optionsLayout->addWidget(m_editContentsTextFontSize, row, col + 1);
+			optionsLayout->addWidget(new QWidget(), row++, col + 2);
+
+			optionsLayout->addWidget(new QLabel("Table of contents table font size"), row, col);
+			m_editContentsTableFontSize = new QLineEdit();
+			m_editContentsTableFontSize->setText(QString::number(m_options.contentsTableFontSize()));
+			optionsLayout->addWidget(m_editContentsTableFontSize, row, col + 1);
 			optionsLayout->addWidget(new QWidget(), row++, col + 2);
 			
+			optionsLayout->addWidget(new QLabel("Text font size"), row, col);
+			m_editTextFontSize = new QLineEdit();
+			m_editTextFontSize->setText(QString::number(m_options.textFontSize()));
+			optionsLayout->addWidget(m_editTextFontSize, row, col + 1);
+			optionsLayout->addWidget(new QWidget(), row++, col + 2);
+
 			optionsLayout->addWidget(new QLabel("Tables font size"), row, col);
 			m_editTableFontSize = new QLineEdit();
 			m_editTableFontSize->setText(QString::number(m_options.tableFontSize()));
 			optionsLayout->addWidget(m_editTableFontSize, row, col + 1);
 			optionsLayout->addWidget(new QWidget(), row++, col + 2);
-
-			optionsLayout->addWidget(new QLabel("Text font size"), row, col);
-			m_editNormalFontSize = new QLineEdit();
-			m_editNormalFontSize->setText(QString::number(m_options.normalFontSize()));
-			optionsLayout->addWidget(m_editNormalFontSize, row, col + 1);
-			optionsLayout->addWidget(new QWidget(), row++, col + 2);
-			
+	
 			// Add spacer
 			//
 			optionsLayout->addWidget(new QWidget(), row, col);
@@ -594,15 +625,16 @@ DialogSchemasReport::DialogSchemasReport(const QString& path,
 				l->setContentsMargins(0, 0, 0, 0);
 				l->addWidget(new QLabel(tr("Auto Variables")));
 				std::map<QString, QString> autoVariablesMap;
-				autoVariablesMap["PDFPAGE"] = "Current page";
-				autoVariablesMap["PDFPAGE_<SCHEMAID>"] = "Page number of each schema";
-				autoVariablesMap["PDFPAGE_COUNT"] = "Total number of pages";
+				autoVariablesMap["REPORT_PAGE"] = "Current page";
+				autoVariablesMap["REPORT_PAGE_<SCHEMAID>"] = "Page number of each schema";
+				autoVariablesMap["REPORT_PAGE_COUNT"] = "Total number of pages";
 				VariablesWidget* autoVariables = new VariablesWidget(autoVariablesMap, true /*readOnly*/);
 				l->addWidget(autoVariables);
 				m_variablesTabSplitter->addWidget(w);
 			}
 
 			m_variablesTabSplitter->restoreState(QSettings().value("DialogSchemasReport/variablesTabSplitterState", m_variablesTabSplitter->saveState()).toByteArray());
+			m_variablesTabSplitter->setChildrenCollapsible(false);
 
 			QWidget* w = new QWidget();
 			QVBoxLayout* l = new QVBoxLayout(w);
@@ -798,13 +830,29 @@ bool DialogSchemasReport::applyOptions()
 	}
 	m_options.setStartPageNumber(value);
 
-	value = m_editTableOfContentsFontSize->text().toInt(&ok);
+	value = m_editContentsTextFontSize->text().toInt(&ok);
 	if (ok == false)
 	{
-		m_editTableOfContentsFontSize->setFocus();
+		m_editContentsTextFontSize->setFocus();
 		return false;
 	}
-	m_options.setTableOfContentsFontSize(value);
+	m_options.setContentsTextFontSize(value);
+
+	value = m_editContentsTableFontSize->text().toInt(&ok);
+	if (ok == false)
+	{
+		m_editContentsTableFontSize->setFocus();
+		return false;
+	}
+	m_options.setContentsTableFontSize(value);
+
+	value = m_editTextFontSize->text().toInt(&ok);
+	if (ok == false)
+	{
+		m_editTextFontSize->setFocus();
+		return false;
+	}
+	m_options.setTextFontSize(value);
 
 	value = m_editTableFontSize->text().toInt(&ok);
 	if (ok == false)
@@ -813,14 +861,6 @@ bool DialogSchemasReport::applyOptions()
 		return false;
 	}
 	m_options.setTableFontSize(value);
-
-	value = m_editNormalFontSize->text().toInt(&ok);
-	if (ok == false)
-	{
-		m_editNormalFontSize->setFocus();
-		return false;
-	}
-	m_options.setNormalFontSize(value);
 
 	// Save variables
 	//

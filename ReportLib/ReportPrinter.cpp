@@ -47,7 +47,7 @@ namespace ReportLib
 			pageIndex++;
 		}
 
-		report.reportVariables().setVariable("PDFPAGE", pageIndex + report.startPage());
+		report.reportVariables().setVariable("REPORT_PAGE", pageIndex + report.startPage());
 
 		if (m_textDocument.isEmpty() == true)
 		{
@@ -97,7 +97,7 @@ namespace ReportLib
 					pageIndex++;
 				}
 
-				report.reportVariables().setVariable("PDFPAGE", pageIndex + report.startPage());
+				report.reportVariables().setVariable("REPORT_PAGE", pageIndex + report.startPage());
 
 				printer.printMarginItems(report, pdfWriter, painter, tag());
 			}
@@ -157,7 +157,7 @@ namespace ReportLib
 			}
 		}
 
-		report.reportVariables().setVariable("PDFPAGE", pageIndex + report.startPage());
+		report.reportVariables().setVariable("REPORT_PAGE", pageIndex + report.startPage());
 
 		// Calculate the upper schema offset
 		//
