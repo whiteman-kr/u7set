@@ -106,29 +106,30 @@ namespace Builder
 	class SchemaTypesParams
 	{
 	public:
-		SchemaTypesParams(int fileId, const QString& caption, bool selected, QPageLayout pageLayout);
-
+		SchemaTypesParams(int fileId, const QString& caption, bool selected, const QPageLayout& initPageLayout, const QStringList& layoutNames);
 		
 		int fileId() const;
 		bool hasFileId() const;
 		const QString& caption() const;
 
-		QPageLayout schemaPageLayout() const;
-		QPageLayout textPageLayout() const;
+		QPageLayout pageLayoutWithMargins(int index) const;
 
 		// Properties
 		//
 		bool selected() const;
 		void setSelected(bool value);
 
-		const QPageLayout& pageLayout() const;
-		void setPageLayout(const QPageLayout& layout);
+		int pageLayoutCount() const;
 
-		bool noSchemasMargins() const;
-		void setNoSchemasMargins(bool value);
+		const QString& pageLayoutCaption(int index) const;
+		void setPageLayoutCaption(int index, const QString& value);
 
-		bool noTextMargins() const;
-		void setNoTextMargins(bool value);
+
+		const QPageLayout& pageLayout(int index) const;
+		void setPageLayout(int index, const QPageLayout& layout);
+
+		bool noMargins(int index) const;
+		void setNoMargins(int index, bool value);
 
 		// Load/save
 		//
@@ -140,10 +141,15 @@ namespace Builder
 		QString m_caption;
 
 		bool m_selected = false;
-		QPageLayout m_pageLayout;
 		
-		bool m_noSchemasMargins = false;
-		bool m_noTextMargins = false;
+		struct LayoutInfo
+		{
+			QString caption;
+			QPageLayout layout;
+			bool noMargins;
+		};
+
+		std::vector<LayoutInfo> m_pageLayouts;
 	};
 
 	//

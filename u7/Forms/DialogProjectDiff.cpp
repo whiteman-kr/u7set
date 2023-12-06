@@ -2,6 +2,7 @@
 #include "ui_DialogProjectDiff.h"
 #include "SelectChangesetDialog.h"
 #include "Reports/DialogSchemasReport.h"
+#include "Reports/DialogReportPageSetup.h"
 
 #include <QPageSetupDialog>
 #include <QPrinter>
@@ -62,8 +63,6 @@ DialogProjectDiff::DialogProjectDiff(DbController* db, QWidget *parent) :
 	ui->sourceDateEdit->setDateTime(s.value("ProjectDiffGenerator/sourceDateTime", QDateTime::currentDateTime()).toDateTime());
 	ui->targetDateEdit->setDateTime(s.value("ProjectDiffGenerator/targetDateTime", QDateTime::currentDateTime()).toDateTime());
 
-	updatePageSizeInfo();
-
 	versionTypeChanged();
 
 	// --
@@ -82,25 +81,22 @@ DialogProjectDiff::DialogProjectDiff(DbController* db, QWidget *parent) :
 	//
 	for (const Builder::SchemaTypesParams& ft : m_reportParams.schemaTypesParams)
 	{
+		if (ft.hasFileId() == false)
+		{
+			continue;
+		}
+
 		QListWidgetItem* item = new QListWidgetItem(tr("%1").arg(ft.caption()));
-
-		if (ft.selected() == true)
-		{
-			item->setCheckState(Qt::Checked);
-		}
-		else
-		{
-			item->setCheckState(Qt::Unchecked);
-		}
-
+		item->setCheckState(ft.selected() ? Qt::Checked : Qt::Unchecked);
+		item->setData(Qt::UserRole, ft.fileId());
 		ui->categoriesList->addItem(item);
 	}
 
-	m_reportParams.multipleFiles = s.value("ProjectDiffGenerator/multipleFiles", false).toBool();
-	ui->multipleFilesCheck->setChecked(m_reportParams.multipleFiles == true);
+	m_reportParams.singleFile = s.value("ProjectDiffGenerator/singleFile", true).toBool();
+	ui->singleFileReportsCheck->setChecked(m_reportParams.singleFile == true ? Qt::Checked : Qt::Unchecked);
 
 	m_reportParams.expertProperties = s.value("ProjectDiffGenerator/expertProperties", false).toBool();
-	ui->expertPropertiesCheck->setChecked(m_reportParams.expertProperties == true);
+	ui->expertPropertiesCheck->setChecked(m_reportParams.expertProperties == true ? Qt::Checked : Qt::Unchecked);
 
 	return;
 
@@ -138,7 +134,7 @@ DialogProjectDiff::~DialogProjectDiff()
 	QDateTime targetDateTime = ui->targetDateEdit->dateTime();
 	s.setValue("ProjectDiffGenerator/targetDateTime", targetDateTime);
 
-	s.setValue("ProjectDiffGenerator/multipleFiles", m_reportParams.multipleFiles);
+	s.setValue("ProjectDiffGenerator/singleFile", m_reportParams.singleFile);
 
 	s.setValue("ProjectDiffGenerator/expertProperties", m_reportParams.expertProperties);
 
@@ -258,21 +254,22 @@ void DialogProjectDiff::done(int r)
 
 	int selectedCount = 0;
 
-	if (ui->categoriesList->count() != m_reportParams.schemaTypesParams.size())
-	{
-		Q_ASSERT(false);
-		return;
-	}
-
 	for (int i = 0; i < ui->categoriesList->count(); i++)
 	{
 		QListWidgetItem* item = ui->categoriesList->item(i);
-
-		m_reportParams.schemaTypesParams[i].setSelected(item->checkState() == Qt::Checked);
-
-		if (m_reportParams.schemaTypesParams[i].selected() == true)
+		if (item->checkState() == Qt::Checked)
 		{
 			selectedCount++;
+		}
+
+		int fileId = item->data(Qt::UserRole).toInt();
+
+		for (auto& stp : m_reportParams.schemaTypesParams)
+		{
+			if (fileId == stp.fileId())
+			{
+				stp.setSelected(item->checkState() == Qt::Checked);
+			}
 		}
 	}
 
@@ -284,7 +281,7 @@ void DialogProjectDiff::done(int r)
 
 	// Save options
 
-	m_reportParams.multipleFiles = ui->multipleFilesCheck->isChecked() == true;
+	m_reportParams.singleFile = ui->singleFileReportsCheck->isChecked() == true;
 	m_reportParams.expertProperties = ui->expertPropertiesCheck->isChecked() == true;
 
 	QDialog::done(r);
@@ -437,73 +434,38 @@ void DialogProjectDiff::on_fileBrowseButton_clicked()
 	return;
 }
 
-void DialogProjectDiff::on_pageSetupButton_clicked()
-{
-	// Single-file report
-
-	QPrinter printer(QPrinter::HighResolution);
-
-	QPageSize::PageSizeId id = QPageSize::id(m_reportParams.singleFilePageLayout.pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
-	if (id == QPageSize::Custom)
-	{
-		id = QPageSize::A4;
-	}
-
-	printer.setFullPage(true);
-	printer.setPageSize(QPageSize(id));
-	printer.setPageOrientation(m_reportParams.singleFilePageLayout.orientation());
-	printer.setPageMargins(m_reportParams.singleFilePageLayout.margins(), QPageLayout::Unit::Millimeter);
-
-	QPageSetupDialog d(&printer, this);
-	if (d.exec() != QDialog::Accepted)
-	{
-		return;
-	}
-
-	id = QPageSize::id(d.printer()->pageLayout().pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
-
-	m_reportParams.singleFilePageLayout.setPageSize(QPageSize(id));
-	m_reportParams.singleFilePageLayout.setOrientation(d.printer()->pageLayout().orientation());
-	m_reportParams.singleFilePageLayout.setMargins(d.printer()->pageLayout().margins());
-
-	updatePageSizeInfo();
-
-	return;
-}
-
-void DialogProjectDiff::on_pageSetDefault_clicked()
-{
-	m_reportParams.singleFilePageLayout = QPageLayout(QPageSize(QPageSize::A3),
-											QPageLayout::Orientation::Portrait,
-											QMarginsF(30, 20, 15, 20),
-											QPageLayout::Unit::Millimeter);
-	updatePageSizeInfo();
-	return;
-}
-
 void DialogProjectDiff::on_multiFilepageSetupButton_clicked()
 {
-	DialogSchemasReportTypePageSetup d(m_reportParams.schemaTypesParams, ProjectDiffGenerator::defaultFileTypeParams(m_db), this);
+	std::vector<Builder::SchemaTypesParams> editSchemaTypesParams;
+
+	bool singleFile = ui->singleFileReportsCheck->isChecked();
+
+	for (const auto& params : m_reportParams.schemaTypesParams)
+	{
+		// Show single file param if single file option is set, otherwise show all others except single file
+		//
+		bool singleFileParam = params.hasFileId() == false;
+		if (singleFileParam == singleFile)
+		{
+			editSchemaTypesParams.push_back(params);
+		}
+	}
+
+	DialogReportPageSetup d(editSchemaTypesParams, ProjectDiffGenerator::defaultFileTypeParams(m_db), this);
 	if (d.exec() == QDialog::Accepted)
 	{
-		m_reportParams.schemaTypesParams = d.schemaTypesParams();
+		editSchemaTypesParams = d.schemaTypesParams();
+
+		for (auto& params : m_reportParams.schemaTypesParams)
+		{
+			for (const auto& editParams : editSchemaTypesParams)
+			{
+				if (params.fileId() == editParams.fileId())
+				{
+					params = editParams;
+				}
+			}
+		}
 	}
 }
 
-void DialogProjectDiff::updatePageSizeInfo()
-{
-	QPageSize::PageSizeId id = QPageSize::id(m_reportParams.singleFilePageLayout.pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
-	if (id == QPageSize::Custom)
-	{
-		id = QPageSize::A4;
-	}
-
-	ui->labelPageSize->setText(tr("Page Size: %1, %2").arg(QPageSize(id).name())
-							   .arg(m_reportParams.singleFilePageLayout.orientation() == QPageLayout::Portrait ? tr("Portrait") : tr("Landscape")));
-
-	QMarginsF margins = m_reportParams.singleFilePageLayout.margins();
-	ui->labelPageMargins->setText(tr("Page margins, mm: l%1 t%2 r%3 b%4").arg(margins.left()).arg(margins.top()).arg(margins.right()).arg(margins.bottom()));
-
-	return;
-
-}

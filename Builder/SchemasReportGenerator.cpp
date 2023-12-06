@@ -385,12 +385,17 @@ namespace Builder
 	//
 	// SchemasReportFileTypeParams
 	//
-	SchemaTypesParams::SchemaTypesParams(int fileId, const QString& caption, bool selected, QPageLayout pageLayout) :
+	SchemaTypesParams::SchemaTypesParams(int fileId, const QString& caption, bool selected, const QPageLayout& initPageLayout, const QStringList& layoutNames) :
 		m_fileId(fileId),
 		m_caption(caption),
-		m_selected(selected),
-		m_pageLayout(pageLayout)
+		m_selected(selected)
 	{
+		Q_ASSERT(layoutNames.size() == 1 || layoutNames.size() == 2);	// For text and schemas
+
+		for (const QString& layoutName : layoutNames)
+		{
+			m_pageLayouts.push_back({layoutName, initPageLayout, false});
+		}
 	}
 
 	int SchemaTypesParams::fileId() const
@@ -408,27 +413,17 @@ namespace Builder
 		return m_caption;
 	}
 
-	QPageLayout SchemaTypesParams::schemaPageLayout() const
+	QPageLayout SchemaTypesParams::pageLayoutWithMargins(int index) const
 	{
-		QPageLayout l = m_pageLayout;
-		if (m_noSchemasMargins == true)
+		QPageLayout l = pageLayout(index);
+		if (noMargins(index) == true)
 		{
 			l.setMargins(QMarginsF(0, 0, 0, 0));
 		}
 		return l;
 	}
 
-	QPageLayout SchemaTypesParams::textPageLayout() const
-	{
-		QPageLayout l = m_pageLayout;
-		if (m_noTextMargins == true)
-		{
-			l.setMargins(QMarginsF(0, 0, 0, 0));
-		}
-		return l;
-	}
-
-
+			
 	bool SchemaTypesParams::selected() const
 	{
 		return m_selected;
@@ -439,36 +434,72 @@ namespace Builder
 		m_selected = value;
 	}
 
-	const QPageLayout& SchemaTypesParams::pageLayout() const
+	int SchemaTypesParams::pageLayoutCount() const
 	{
-		return m_pageLayout;
+		return m_pageLayouts.size();
 	}
 
-	void SchemaTypesParams::setPageLayout(const QPageLayout& layout)
+	const QString& SchemaTypesParams::pageLayoutCaption(int index) const
 	{
-		m_pageLayout = layout;
+		static QString err;
+		if (index < 0 || index >= m_pageLayouts.size())
+		{
+			Q_ASSERT(false);
+			return err;
+		}
+		return m_pageLayouts[index].caption;
 	}
 
-	bool SchemaTypesParams::noSchemasMargins() const
+	void SchemaTypesParams::setPageLayoutCaption(int index, const QString& value)
 	{
-		return m_noSchemasMargins;
+		if (index < 0 || index >= m_pageLayouts.size())
+		{
+			Q_ASSERT(false);
+			return;
+		}
+		m_pageLayouts[index].caption = value;
 	}
 
-	void SchemaTypesParams::setNoSchemasMargins(bool value)
+	const QPageLayout& SchemaTypesParams::pageLayout(int index) const
 	{
-		m_noSchemasMargins = value;
+		static QPageLayout err;
+		if (index < 0 || index >= m_pageLayouts.size())
+		{
+			Q_ASSERT(false);
+			return err;
+		}
+		return m_pageLayouts[index].layout;
 	}
 
-	bool SchemaTypesParams::noTextMargins() const
+	void SchemaTypesParams::setPageLayout(int index, const QPageLayout& layout)
 	{
-		return m_noTextMargins;
+		if (index < 0 || index >= m_pageLayouts.size())
+		{
+			Q_ASSERT(false);
+			return;
+		}
+		m_pageLayouts[index].layout = layout;
 	}
 
-	void SchemaTypesParams::setNoTextMargins(bool value)
+	bool SchemaTypesParams::noMargins(int index) const
 	{
-		m_noTextMargins = value;
+		if (index < 0 || index >= m_pageLayouts.size())
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+		return m_pageLayouts[index].noMargins;	
 	}
 
+	void SchemaTypesParams::setNoMargins(int index, bool value)
+	{
+		if (index < 0 || index >= m_pageLayouts.size())
+		{
+			Q_ASSERT(false);
+			return;
+		}
+		m_pageLayouts[index].noMargins = value;
+	}
 
 	bool SchemaTypesParams::load(DbController* db)
 	{
@@ -479,56 +510,67 @@ namespace Builder
 			setSelected(value == "true" ? true : false);
 		}
 
-		db->getUserProperty(QObject::tr("SchemaTypesParams.%1.noSchemasMargins").arg(caption()), &value, QString(), nullptr);
+		int count = 0;
+		db->getUserProperty(QObject::tr("SchemaTypesParams.%1.count").arg(caption()), &value, QString(), nullptr);
 		if (value.isEmpty() == false)
 		{
-			setNoSchemasMargins(value == "true" ? true : false);
+			count = value.toInt();
 		}
 
-		db->getUserProperty(QObject::tr("SchemaTypesParams.%1.noTextMargins").arg(caption()), &value, QString(), nullptr);
-		if (value.isEmpty() == false)
+		if (count > m_pageLayouts.size())
 		{
-			setNoTextMargins(value == "true" ? true : false);
+			// Maybe some saved version has been changed
+			Q_ASSERT(false);
+			count = m_pageLayouts.size();
 		}
 
-		bool layoutOk = false;
-		bool orientationOk = false;
-		bool marginsOk = false;
-		QPageLayout l(m_pageLayout);
-
-		db->getUserProperty(QObject::tr("SchemaTypesParams.%1.pageLayout").arg(caption()), &value, QString(), nullptr);
-		if (value.isEmpty() == false)
+		for (int i = 0; i < count; i++)
 		{
-			bool ok = false;
-			int id = value.toInt(&ok);
-			if (ok == true)
+			db->getUserProperty(QObject::tr("SchemaTypesParams.%1.%2.noMargins").arg(i).arg(caption()), &value, QString(), nullptr);
+			if (value.isEmpty() == false)
 			{
-				l.setPageSize(QPageSize(static_cast<QPageSize::PageSizeId>(id)));
-				layoutOk = true;
+				setNoMargins(i, value == "true" ? true : false);
 			}
-		}
 
-		db->getUserProperty(QObject::tr("SchemaTypesParams.%1.orientation").arg(caption()), &value, QString(), nullptr);
-		if (value.isEmpty() == false)
-		{
-			l.setOrientation(value == "portrait" ? QPageLayout::Portrait : QPageLayout::Landscape);
-			orientationOk = true;
-		}
+			bool layoutOk = false;
+			bool orientationOk = false;
+			bool marginsOk = false;
+			QPageLayout l(m_pageLayouts[i].layout);
 
-		db->getUserProperty(QObject::tr("SchemaTypesParams.%1.margins").arg(caption()), &value, QString(), nullptr);
-		if (value.isEmpty() == false)
-		{
-			QStringList ms = value.split(";");
-			if (ms.size() == 4)
+			db->getUserProperty(QObject::tr("SchemaTypesParams.%1.%2.pageLayout").arg(i).arg(caption()), &value, QString(), nullptr);
+			if (value.isEmpty() == false)
 			{
-				l.setMargins(QMarginsF(ms[0].toDouble(), ms[1].toDouble(), ms[2].toDouble(), ms[3].toDouble()));
-				marginsOk = true;
+				bool ok = false;
+				int id = value.toInt(&ok);
+				if (ok == true)
+				{
+					l.setPageSize(QPageSize(static_cast<QPageSize::PageSizeId>(id)));
+					layoutOk = true;
+				}
 			}
-		}
 
-		if (layoutOk == true && orientationOk == true && marginsOk == true)
-		{
-			setPageLayout(l);
+			db->getUserProperty(QObject::tr("SchemaTypesParams.%1.%2.orientation").arg(i).arg(caption()), &value, QString(), nullptr);
+			if (value.isEmpty() == false)
+			{
+				l.setOrientation(value == "portrait" ? QPageLayout::Portrait : QPageLayout::Landscape);
+				orientationOk = true;
+			}
+
+			db->getUserProperty(QObject::tr("SchemaTypesParams.%1.%2.margins").arg(i).arg(caption()), &value, QString(), nullptr);
+			if (value.isEmpty() == false)
+			{
+				QStringList ms = value.split(";");
+				if (ms.size() == 4)
+				{
+					l.setMargins(QMarginsF(ms[0].toDouble(), ms[1].toDouble(), ms[2].toDouble(), ms[3].toDouble()));
+					marginsOk = true;
+				}
+			}
+
+			if (layoutOk == true && orientationOk == true && marginsOk == true)
+			{
+				setPageLayout(i, l);
+			}
 		}
 
 		return true;
@@ -537,21 +579,29 @@ namespace Builder
 	bool SchemaTypesParams::save(DbController* db) const
 	{
 		db->setUserProperty(QObject::tr("SchemaTypesParams.%1.selected").arg(caption()), selected() ? "true" : "false", nullptr);
-		db->setUserProperty(QObject::tr("SchemaTypesParams.%1.noSchemasMargins").arg(caption()), noSchemasMargins() ? "true" : "false", nullptr);
-		db->setUserProperty(QObject::tr("SchemaTypesParams.%1.noTextMargins").arg(caption()), noTextMargins() ? "true" : "false", nullptr);
+		db->setUserProperty(QObject::tr("SchemaTypesParams.%1.count").arg(caption()), QObject::tr("%1").arg(m_pageLayouts.size()), nullptr);
 
-		QPageSize::PageSizeId id = QPageSize::id(m_pageLayout.pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
-		if (id == QPageSize::Custom)
+		for (int i = 0; i < m_pageLayouts.size(); i++)
 		{
-			id = QPageSize::A4;
+			const QPageLayout& layout = m_pageLayouts[i].layout;
+			bool noMargins = m_pageLayouts[i].noMargins;
+
+			db->setUserProperty(QObject::tr("SchemaTypesParams.%1.%2.noMargins").arg(i).arg(caption()), noMargins ? "true" : "false", nullptr);
+
+
+			QPageSize::PageSizeId id = QPageSize::id(layout.pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
+			if (id == QPageSize::Custom)
+			{
+				id = QPageSize::A4;
+			}
+			db->setUserProperty(QObject::tr("SchemaTypesParams.%1.%2.pageLayout").arg(i).arg(caption()), QString::number(id), nullptr);
+
+			db->setUserProperty(QObject::tr("SchemaTypesParams.%1.%2.orientation").arg(i).arg(caption()), layout.orientation() == QPageLayout::Portrait ? "portrait" : "landscape", nullptr);
+
+			QMarginsF margins = layout.margins();
+			QString marginsStr = QObject::tr("%1;%2;%3;%4").arg(margins.left()).arg(margins.top()).arg(margins.right()).arg(margins.bottom());
+			db->setUserProperty(QObject::tr("SchemaTypesParams.%1.%2.margins").arg(i).arg(caption()), marginsStr, nullptr);
 		}
-		db->setUserProperty(QObject::tr("SchemaTypesParams.%1.pageLayout").arg(caption()), QString::number(id), nullptr);
-
-		db->setUserProperty(QObject::tr("SchemaTypesParams.%1.orientation").arg(caption()), m_pageLayout.orientation() == QPageLayout::Portrait ? "portrait" : "landscape", nullptr);
-
-		QMarginsF margins = m_pageLayout.margins();
-		QString marginsStr = QObject::tr("%1;%2;%3;%4").arg(margins.left()).arg(margins.top()).arg(margins.right()).arg(margins.bottom());
-		db->setUserProperty(QObject::tr("SchemaTypesParams.%1.margins").arg(caption()), marginsStr, nullptr);
 
 		return true;
 	}
@@ -888,13 +938,16 @@ namespace Builder
 			return result;
 		}
 
+		QStringList layoutNames{"Schemas Page Layout", "Text Page Layout"};
+
 		result.push_back({db->systemFileId(DbDir::AppLogicDir),
 						  QObject::tr("Application Logic"),
 						  true,
 						  QPageLayout(QPageSize(QPageSize::A3),
 									  QPageLayout::Orientation::Landscape,
 									  QMarginsF(30, 20, 15, 20),
-									  QPageLayout::Unit::Millimeter)});
+									  QPageLayout::Unit::Millimeter),
+						  layoutNames});
 
 		result.push_back({db->systemFileId(DbDir::DiagnosticsSchemasDir),
 						  QObject::tr("Diagnostics Schemas"),
@@ -902,7 +955,8 @@ namespace Builder
 						  QPageLayout(QPageSize(QPageSize::A3),
 									  QPageLayout::Orientation::Landscape,
 									  QMarginsF(30, 20, 15, 20),
-									  QPageLayout::Unit::Millimeter)});
+									  QPageLayout::Unit::Millimeter),
+						  layoutNames});
 
 		result.push_back({db->systemFileId(DbDir::MonitorSchemasDir),
 						  QObject::tr("Monitor Schemas"),
@@ -910,7 +964,8 @@ namespace Builder
 						  QPageLayout(QPageSize(QPageSize::A3),
 									  QPageLayout::Orientation::Landscape,
 									  QMarginsF(30, 20, 15, 20),
-									  QPageLayout::Unit::Millimeter)});
+									  QPageLayout::Unit::Millimeter),
+						  layoutNames});
 
 		result.push_back({db->systemFileId(DbDir::TuningSchemasDir),
 						  QObject::tr("Tuning Schemas"),
@@ -918,7 +973,9 @@ namespace Builder
 						  QPageLayout(QPageSize(QPageSize::A3),
 									  QPageLayout::Orientation::Landscape,
 									  QMarginsF(30, 20, 15, 20),
-									  QPageLayout::Unit::Millimeter)});
+									  QPageLayout::Unit::Millimeter),
+						  layoutNames});
+
 
 		result.push_back({db->systemFileId(DbDir::UfblDir),
 						  QObject::tr("UFBL Descriptions"),
@@ -926,7 +983,9 @@ namespace Builder
 						  QPageLayout(QPageSize(QPageSize::A3),
 									  QPageLayout::Orientation::Landscape,
 									  QMarginsF(30, 20, 15, 20),
-									  QPageLayout::Unit::Millimeter)});
+									  QPageLayout::Unit::Millimeter),
+						  layoutNames});
+
 
 		result.push_back({-1,
 						  QObject::tr("Single-File Report"),
@@ -934,7 +993,8 @@ namespace Builder
 						  QPageLayout(QPageSize(QPageSize::A3),
 									  QPageLayout::Orientation::Landscape,
 									  QMarginsF(30, 20, 15, 20),
-									  QPageLayout::Unit::Millimeter)});
+									  QPageLayout::Unit::Millimeter),
+						  layoutNames});
 
 		return result;
 	}
@@ -1119,6 +1179,10 @@ namespace Builder
 
 	void SchemasReportGenerator::exportSchemasToAlbums()
 	{
+
+		const int schemaPageLayoutIndex = 0;
+		const int textPageLayoutIndex = 1;
+
 		try
 		{
 			openProject();
@@ -1145,6 +1209,11 @@ namespace Builder
 				if (m_stop == true)
 				{
 					break;
+				}
+
+				if (stp.hasFileId() == false)
+				{
+					continue;
 				}
 
 				if (stp.selected() == false)
@@ -1246,7 +1315,8 @@ namespace Builder
 					// Multiple files - render them now
 					//
 					sortSchemas(schemas);
-					renderSchemasToAlbums(schemas, detailsSet, stp.caption(), stp.schemaPageLayout(), stp.textPageLayout());
+					renderSchemasToAlbums(schemas, detailsSet, stp.caption(), 
+						stp.pageLayoutWithMargins(schemaPageLayoutIndex), stp.pageLayoutWithMargins(textPageLayoutIndex));
 				}
 			}
 
@@ -1262,8 +1332,8 @@ namespace Builder
 					{
 						// This is global setting for single-file report
 						//
-						textLayout = stp.textPageLayout();
-						schemasLayout = stp.schemaPageLayout();
+						schemasLayout = stp.pageLayoutWithMargins(schemaPageLayoutIndex);
+						textLayout = stp.pageLayoutWithMargins(textPageLayoutIndex);
 						break;
 					}
 				}
