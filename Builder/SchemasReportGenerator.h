@@ -108,8 +108,13 @@ namespace Builder
 	public:
 		SchemaTypesParams(int fileId, const QString& caption, bool selected, QPageLayout pageLayout);
 
+		
 		int fileId() const;
+		bool hasFileId() const;
 		const QString& caption() const;
+
+		QPageLayout schemaPageLayout() const;
+		QPageLayout textPageLayout() const;
 
 		// Properties
 		//
@@ -133,13 +138,12 @@ namespace Builder
 	private:
 		int m_fileId = -1;
 		QString m_caption;
+
 		bool m_selected = false;
+		QPageLayout m_pageLayout;
+		
 		bool m_noSchemasMargins = false;
 		bool m_noTextMargins = false;
-
-		// Multiple-file report section page options
-		//
-		QPageLayout m_pageLayout;
 	};
 
 	//

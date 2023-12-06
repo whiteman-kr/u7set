@@ -10,9 +10,9 @@ using namespace ReportLib;
 // DialogSchemasReportTypeParams
 //
 
-DialogSchemasReportTypePageSetup::DialogSchemasReportTypePageSetup(const std::vector<SchemaTypesParams>& schemaTypesParams,
-													   std::vector<SchemaTypesParams> defaultFileTypeParams,
-													   QWidget *parent):
+DialogSchemasReportTypePageSetup::DialogSchemasReportTypePageSetup(const std::vector<Builder::SchemaTypesParams>& schemaTypesParams,
+																   const std::vector<Builder::SchemaTypesParams>& defaultFileTypeParams,
+																   QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	m_schemaTypesParams(schemaTypesParams),
 	m_defaultFileTypeParams(defaultFileTypeParams)
@@ -45,7 +45,7 @@ DialogSchemasReportTypePageSetup::DialogSchemasReportTypePageSetup(const std::ve
 	connect(b, &QPushButton::clicked, this, &DialogSchemasReportTypePageSetup::pageSetup);
 	pbLayout->addWidget(b);
 
-	b = new QPushButton(tr("Set to Default"));
+	b = new QPushButton(tr("Reset to Defaults"));
 	connect(b, &QPushButton::clicked, this, &DialogSchemasReportTypePageSetup::setToDefault);
 
 	pbLayout->addWidget(b);
@@ -306,23 +306,39 @@ std::map<QString, QString> VariablesWidget::getVariables() const
 	return variables;
 }
 
-void VariablesWidget::onCopyVariableClicked()
+void VariablesWidget::onCopyVariableClicked(int column)
 {
+	if (column < 0 || column >= m_variablesTree->columnCount())
+	{
+		return;
+	}
 	const auto items = m_variablesTree->selectedItems();
 
 	QStringList text;
 	for (const QTreeWidgetItem* item : items)
 	{
-		text.push_back(tr("%1 - %2").arg(items[0]->text(0)).arg(items[0]->text(1)));
+		text.push_back(item->text(column));
 	}
-
 	if (text.isEmpty() == true)
 	{
 		return;
 	}
 
-	QClipboard* clipboard = QApplication::clipboard();
-	clipboard->setText(text.join('\n'));
+	QApplication::clipboard()->setText(text.join('\n'));
+}
+
+void VariablesWidget::onEditVariableClicked(int column)
+{
+	if (column < 0 || column >= m_variablesTree->columnCount())
+	{
+		return;
+	}
+	const auto items = m_variablesTree->selectedItems();
+	if (items.size() != 1)
+	{
+		return;
+	}
+	m_variablesTree->editItem(items[0], column);
 }
 
 void VariablesWidget::onAddVariableClicked()
@@ -353,16 +369,6 @@ void VariablesWidget::onAddVariableClicked()
 	item->setSelected(true);
 }
 
-void VariablesWidget::onEditVariableClicked()
-{
-	const auto items = m_variablesTree->selectedItems();
-	if (items.size() != 1)
-	{
-		return;
-	}
-	m_variablesTree->editItem(items[0], 1);
-}
-
 void VariablesWidget::onRemoveVariableClicked()
 {
 	const auto items = m_variablesTree->selectedItems();
@@ -382,15 +388,21 @@ void VariablesWidget::onRemoveVariableClicked()
 	}
 }
 
-void VariablesWidget::onCustomContextMenuRequested(const QPoint& /*pos*/)
+void VariablesWidget::onCustomContextMenuRequested(const QPoint& pos)
 {
-	const auto items = m_variablesTree->selectedItems();
+		int column = m_variablesTree->columnAt(pos.x());
 
+		const auto items = m_variablesTree->selectedItems();
+	
 	QMenu menu(this);
 
 	{
 		QAction* a = new QAction(tr("Copy"), &menu);
-		connect(a, &QAction::triggered, this, &VariablesWidget::onCopyVariableClicked);
+		connect(a, &QAction::triggered, this, [this, column]()
+				{
+					onCopyVariableClicked(column);
+				});
+
 		a->setEnabled(items.size() > 0);
 		menu.addAction(a);
 	}
@@ -404,7 +416,10 @@ void VariablesWidget::onCustomContextMenuRequested(const QPoint& /*pos*/)
 		menu.addAction(a);
 
 		a = new QAction(tr("Edit"), &menu);
-		connect(a, &QAction::triggered, this, &VariablesWidget::onEditVariableClicked);
+		connect(a, &QAction::triggered, this, [this, column]()
+				{
+					onEditVariableClicked(column);
+				});
 		a->setEnabled(items.size() == 1);
 		menu.addAction(a);
 
@@ -471,7 +486,7 @@ DialogSchemasReport::DialogSchemasReport(const QString& path,
 			m_schemaTypesTree->setRootIsDecorated(false);
 			for (const auto& stp : schemaTypesParams)
 			{
-				if (stp.fileId() == db->systemFileId(DbDir::SchemasDir))
+				if (stp.hasFileId() == false)
 				{	
 					// This is global setting for single-file report
 					continue;
@@ -741,10 +756,36 @@ void DialogSchemasReport::browseClicked()
 
 void DialogSchemasReport::pageSetupClicked()
 {
-	DialogSchemasReportTypePageSetup d(m_schemaTypesParams, m_defaultFileTypeParams, this);
+	std::vector<Builder::SchemaTypesParams> editSchemaTypesParams;
+
+	bool singleFile = m_checkSignleFile->isChecked();
+
+	for (const auto& params : m_schemaTypesParams)
+	{
+		// Show single file param if single file option is set, otherwise show all others except single file
+		//
+		bool singleFileParam = params.hasFileId() == false;
+		if (singleFileParam == singleFile)
+		{
+			editSchemaTypesParams.push_back(params);
+		}
+	}
+
+	DialogSchemasReportTypePageSetup d(editSchemaTypesParams, m_defaultFileTypeParams, this);
 	if (d.exec() == QDialog::Accepted)
 	{
-		m_schemaTypesParams = d.schemaTypesParams();
+		editSchemaTypesParams = d.schemaTypesParams();
+
+		for (auto& params : m_schemaTypesParams)
+		{
+			for (const auto& editParams : editSchemaTypesParams)
+			{
+				if (params.fileId() == editParams.fileId())
+				{
+					params = editParams;
+				}
+			}
+		}
 	}
 
 	return;

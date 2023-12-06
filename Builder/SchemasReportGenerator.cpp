@@ -398,10 +398,36 @@ namespace Builder
 		return m_fileId;
 	}
 
+	bool SchemaTypesParams::hasFileId() const
+	{
+		return m_fileId != -1;
+	}
+	
 	const QString& SchemaTypesParams::caption() const
 	{
 		return m_caption;
 	}
+
+	QPageLayout SchemaTypesParams::schemaPageLayout() const
+	{
+		QPageLayout l = m_pageLayout;
+		if (m_noSchemasMargins == true)
+		{
+			l.setMargins(QMarginsF(0, 0, 0, 0));
+		}
+		return l;
+	}
+
+	QPageLayout SchemaTypesParams::textPageLayout() const
+	{
+		QPageLayout l = m_pageLayout;
+		if (m_noTextMargins == true)
+		{
+			l.setMargins(QMarginsF(0, 0, 0, 0));
+		}
+		return l;
+	}
+
 
 	bool SchemaTypesParams::selected() const
 	{
@@ -468,7 +494,7 @@ namespace Builder
 		bool layoutOk = false;
 		bool orientationOk = false;
 		bool marginsOk = false;
-		QPageLayout l(pageLayout());
+		QPageLayout l(m_pageLayout);
 
 		db->getUserProperty(QObject::tr("SchemaTypesParams.%1.pageLayout").arg(caption()), &value, QString(), nullptr);
 		if (value.isEmpty() == false)
@@ -514,16 +540,16 @@ namespace Builder
 		db->setUserProperty(QObject::tr("SchemaTypesParams.%1.noSchemasMargins").arg(caption()), noSchemasMargins() ? "true" : "false", nullptr);
 		db->setUserProperty(QObject::tr("SchemaTypesParams.%1.noTextMargins").arg(caption()), noTextMargins() ? "true" : "false", nullptr);
 
-		QPageSize::PageSizeId id = QPageSize::id(pageLayout().pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
+		QPageSize::PageSizeId id = QPageSize::id(m_pageLayout.pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
 		if (id == QPageSize::Custom)
 		{
 			id = QPageSize::A4;
 		}
 		db->setUserProperty(QObject::tr("SchemaTypesParams.%1.pageLayout").arg(caption()), QString::number(id), nullptr);
 
-		db->setUserProperty(QObject::tr("SchemaTypesParams.%1.orientation").arg(caption()), pageLayout().orientation() == QPageLayout::Portrait ? "portrait" : "landscape", nullptr);
+		db->setUserProperty(QObject::tr("SchemaTypesParams.%1.orientation").arg(caption()), m_pageLayout.orientation() == QPageLayout::Portrait ? "portrait" : "landscape", nullptr);
 
-		QMarginsF margins = pageLayout().margins();
+		QMarginsF margins = m_pageLayout.margins();
 		QString marginsStr = QObject::tr("%1;%2;%3;%4").arg(margins.left()).arg(margins.top()).arg(margins.right()).arg(margins.bottom());
 		db->setUserProperty(QObject::tr("SchemaTypesParams.%1.margins").arg(caption()), marginsStr, nullptr);
 
@@ -902,7 +928,7 @@ namespace Builder
 									  QMarginsF(30, 20, 15, 20),
 									  QPageLayout::Unit::Millimeter)});
 
-		result.push_back({db->systemFileId(DbDir::SchemasDir),
+		result.push_back({-1,
 						  QObject::tr("Single-File Report"),
 						  false,
 						  QPageLayout(QPageSize(QPageSize::A3),
@@ -1219,20 +1245,8 @@ namespace Builder
 				{
 					// Multiple files - render them now
 					//
-					QPageLayout schemasLayout = stp.pageLayout();
-					if (stp.noSchemasMargins() == true)
-					{
-						schemasLayout.setMargins(QMarginsF(0, 0, 0, 0));
-					}
-
-					QPageLayout textLayout = stp.pageLayout();
-					if (stp.noTextMargins() == true)
-					{
-						textLayout.setMargins(QMarginsF(0, 0, 0, 0));
-					}
-
 					sortSchemas(schemas);
-					renderSchemasToAlbums(schemas, detailsSet, stp.caption(), schemasLayout, textLayout);
+					renderSchemasToAlbums(schemas, detailsSet, stp.caption(), stp.schemaPageLayout(), stp.textPageLayout());
 				}
 			}
 
@@ -1244,21 +1258,12 @@ namespace Builder
 				QPageLayout textLayout;
 				for (const auto& stp : m_schemaTypesParams)
 				{
-					if (stp.fileId() == db()->systemFileId(DbDir::SchemasDir))
+					if (stp.hasFileId() == false)
 					{
 						// This is global setting for single-file report
 						//
-						textLayout = stp.pageLayout();
-						if (stp.noTextMargins() == true)
-						{
-							textLayout.setMargins(QMarginsF(0, 0, 0, 0));
-						}
-
-						schemasLayout = stp.pageLayout();
-						if (stp.noSchemasMargins() == true)
-						{
-							schemasLayout.setMargins(QMarginsF(0, 0, 0, 0));
-						}
+						textLayout = stp.textPageLayout();
+						schemasLayout = stp.schemaPageLayout();
 						break;
 					}
 				}
@@ -1934,11 +1939,15 @@ namespace Builder
 					Q_ASSERT(otherSchemaInfo.schema());
 					continue;
 				}
+				if (otherSchemaInfo.schema()->isLogicSchema() == false)
+				{
+					continue;
+				}
 				VFrame30::LogicSchema* otherLogicSchema = otherSchemaInfo.schema()->toLogicSchema();
 				if (otherLogicSchema == nullptr)
 				{
 					Q_ASSERT(false);
-					return;
+					continue;
 				}
 
 				// Item is SchemaItemSignal* element
@@ -2083,11 +2092,15 @@ namespace Builder
 					Q_ASSERT(otherSchemaInfo.schema());
 					continue;
 				}
+				if (otherSchemaInfo.schema()->isLogicSchema() == false)
+				{
+					continue;
+				}
 				VFrame30::LogicSchema* otherLogicSchema = otherSchemaInfo.schema()->toLogicSchema();
 				if (otherLogicSchema == nullptr)
 				{
 					Q_ASSERT(false);
-					return;
+					continue;
 				}
 
 				auto otherLoopbackSet = otherLogicSchema->getLoopbacksMap();
@@ -2186,11 +2199,15 @@ namespace Builder
 					Q_ASSERT(otherSchemaInfo.schema());
 					continue;
 				}
+				if (otherSchemaInfo.schema()->isLogicSchema() == false)
+				{
+					continue;
+				}
 				VFrame30::LogicSchema* otherLogicSchema = otherSchemaInfo.schema()->toLogicSchema();
 				if (otherLogicSchema == nullptr)
 				{
 					Q_ASSERT(false);
-					return;
+					continue;
 				}
 
 				auto otherReceiversMap = otherLogicSchema->getReceiversMap();
@@ -2250,11 +2267,15 @@ namespace Builder
 					Q_ASSERT(otherSchemaInfo.schema());
 					continue;
 				}
+				if (otherSchemaInfo.schema()->isLogicSchema() == false)
+				{
+					continue;
+				}
 				VFrame30::LogicSchema* otherLogicSchema = otherSchemaInfo.schema()->toLogicSchema();
 				if (otherLogicSchema == nullptr)
 				{
 					Q_ASSERT(false);
-					return;
+					continue;
 				}
 
 				auto otherTransmittersMap = otherLogicSchema->getTransmittersMap();

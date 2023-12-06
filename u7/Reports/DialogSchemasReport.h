@@ -11,8 +11,8 @@ class DialogSchemasReportTypePageSetup : public QDialog
 
 public:
 	explicit DialogSchemasReportTypePageSetup(const std::vector<Builder::SchemaTypesParams>& schemaTypesParams,
-										std::vector<Builder::SchemaTypesParams> defaultFileTypeParams,
-										QWidget *parent);
+											  const std::vector<Builder::SchemaTypesParams>& defaultFileTypeParams,
+											  QWidget* parent);
 
 	std::vector<Builder::SchemaTypesParams> schemaTypesParams() const;
 
@@ -40,10 +40,12 @@ public:
 	VariablesWidget(const std::map<QString, QString>& variables, bool readOnly);
 	std::map<QString, QString> getVariables() const;
 
+private:
+	void onCopyVariableClicked(int column);
+	void onEditVariableClicked(int column);
+
 private slots:
-	void onCopyVariableClicked();
 	void onAddVariableClicked();
-	void onEditVariableClicked();
 	void onRemoveVariableClicked();
 	void onCustomContextMenuRequested(const QPoint &pos);
 
