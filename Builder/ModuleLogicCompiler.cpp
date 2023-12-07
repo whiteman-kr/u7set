@@ -369,9 +369,9 @@ namespace Builder
 
 		bool result = true;
 
-		const std::vector<LogicPin>& outputs = item->outputs();
+		const std::vector<SchemaPin>& outputs = item->outputs();
 
-		for(const LogicPin& outPin : outputs)
+		for(const SchemaPin& outPin : outputs)
 		{
 			result &= getSignalsAndPinsLinkedToOutPin(item, outPin, linkedSignals, linkedItems, linkedPins);
 		}
@@ -433,7 +433,7 @@ namespace Builder
 		return getLmAssociatedOptoPortsAreas(optoTxAreas, false);
 	}
 
-	const UalAfbsMap& ModuleLogicCompiler::ualAfbs() const
+	const UalAfbs& ModuleLogicCompiler::ualAfbs() const
 	{
 		return m_ualAfbs;
 	}
@@ -911,7 +911,7 @@ namespace Builder
 
 			// add input pins
 			//
-			for(const LogicPin& input : appItem->inputs())
+			for(const SchemaPin& input : appItem->inputs())
 			{
 				UalItem* firstItem = getValueOrNullptr(m_pinParent, input.guid());
 				//UalItem* firstItem = m_pinParent.value(input.guid(), nullptr);
@@ -934,7 +934,7 @@ namespace Builder
 
 			// add output pins
 			//
-			for(const LogicPin& output : appItem->outputs())
+			for(const SchemaPin& output : appItem->outputs())
 			{
 				UalItem* firstItem = getValueOrNullptr(m_pinParent, output.guid());
 
@@ -1160,7 +1160,7 @@ namespace Builder
 
 			E::UalItemType itemType = ualItem->type();
 
-			itemStr = QString("%1, %2").arg(E::valueToString(itemType)).arg(ualItem->label());
+			itemStr = QString("%1, %2").arg(E::valueToString(itemType)).arg(ualItem->label().leftJustified(16));
 
 			switch(itemType)
 			{
@@ -1169,21 +1169,24 @@ namespace Builder
 
 			case E::UalItemType::Signal:
 				{
-					const LogicSignal& l = ualItem->signal();
-					itemStr += QString(", ids=%1").arg(l.appSignalIdList().join(","));
+					const SchemaSignal* l = ualItem->schemaSignal();
+					TEST_PTR_CONTINUE(l);
+					itemStr += QString(", ids=%1").arg(l->appSignalIdList().join(","));
 				}
 				break;
 
 			case E::UalItemType::Afb:
 				{
-					const LogicAfb& l = ualItem->logicFb();
-					itemStr += QString(", %1, opcode=%2").arg(l.afbStrID()).arg(l.afbElement().opCode());
+					const SchemaAfb* l = ualItem->schemaAfb();
+					TEST_PTR_CONTINUE(l);
+					itemStr += QString(", %1, opcode=%2").arg(l->afbStrID()).arg(l->afbElement().opCode());
 				}
 				break;
 
 			case E::UalItemType::Const:
 				{
-					const UalConst* l = ualItem->ualConst();
+					const SchemaConst* l = ualItem->schemaConst();
+					TEST_PTR_CONTINUE(l);
 					itemStr += QString(", type=%1").
 									arg(E::valueToString(l->type()));
 
@@ -1203,12 +1206,54 @@ namespace Builder
 				break;
 
 			case E::UalItemType::Transmitter:
+				{
+					const SchemaTransmitter* l = ualItem->schemaTransmitter();
+					TEST_PTR_CONTINUE(l);
+					itemStr += QString(", conn=%1").arg(l->connectionIdsAsList().join(", "));
+				}
+				break;
+
 			case E::UalItemType::Receiver:
+				{
+					const SchemaReceiver* l = ualItem->schemaReceiver();
+					TEST_PTR_CONTINUE(l);
+					itemStr += QString(", conn=%1").arg(l->connectionIdsAsList().join(", "));
+				}
+				break;
+
 			case E::UalItemType::Terminator:
+				break;
+
 			case E::UalItemType::BusComposer:
+				{
+					const SchemaBusComposer* l = ualItem->schemaBusComposer();
+					TEST_PTR_CONTINUE(l);
+					itemStr += QString(", busType=%1").arg(l->busTypeId());
+				}
+				break;
+
 			case E::UalItemType::BusExtractor:
+				{
+					const SchemaBusExtractor* l = ualItem->schemaBusExtractor();
+					TEST_PTR_CONTINUE(l);
+					itemStr += QString(", busType=%1").arg(l->busTypeId());
+				}
+				break;
+
 			case E::UalItemType::LoopbackSource:
+				{
+					const SchemaLoopbackSource* l = ualItem->schemaLoopbackSource();
+					TEST_PTR_CONTINUE(l);
+					itemStr += QString(", loopbackID=%1").arg(l->loopbackId());
+				}
+				break;
+
 			case E::UalItemType::LoopbackTarget:
+				{
+					const SchemaLoopbackTarget* l = ualItem->schemaLoopbackTarget();
+					TEST_PTR_CONTINUE(l);
+					itemStr += QString(", loopbackID=%1").arg(l->loopbackId());
+				}
 				break;
 
 			default:
@@ -1258,9 +1303,9 @@ namespace Builder
 				continue;
 			}
 
-			std::vector<LogicPin>& outputs = ualItem->outputs();
+			std::vector<SchemaPin>& outputs = ualItem->outputs();
 
-			for(LogicPin& output : outputs)
+			for(SchemaPin& output : outputs)
 			{
 				QVector<QUuid> connectedInputsGuids;
 
@@ -1288,7 +1333,7 @@ namespace Builder
 
 					// LoopbackSource creation
 					//
-					std::shared_ptr<UalLoopbackSource> loopbackSource = std::make_shared<UalLoopbackSource>();
+					std::shared_ptr<SchemaLoopbackSource> loopbackSource = std::make_shared<SchemaLoopbackSource>();
 					loopbackSource->setLoopbackId(autoLoopbackID);
 					loopbackSource->setLabel(autoLoopbackSourceLabel);
 
@@ -1316,7 +1361,7 @@ namespace Builder
 				//
 				for(const QUuid& inputGuid : connectedInputsGuids)
 				{
-					LogicPin& input = ualItem->input(inputGuid);
+					SchemaPin& input = ualItem->input(inputGuid);
 
 					// break output to input link
 					//
@@ -1325,7 +1370,7 @@ namespace Builder
 
 					// LoopbackTarget creation
 					//
-					std::shared_ptr<UalLoopbackTarget> loopbackTarget = std::make_shared<UalLoopbackTarget>();
+					std::shared_ptr<SchemaLoopbackTarget> loopbackTarget = std::make_shared<SchemaLoopbackTarget>();
 					loopbackTarget->setLoopbackId(autoLoopbackID);
 					loopbackTarget->setLabel(autoLoopbackTargetLabel);
 
@@ -1350,7 +1395,7 @@ namespace Builder
 	}
 
 	void ModuleLogicCompiler::getInputsDirectlyConnectedToOutput(const UalItem* ualItem,
-														 const LogicPin& output,
+														 const SchemaPin& output,
 														 QVector<QUuid>* connectedInputsGuids)
 	{
 		TEST_PTR_RETURN(ualItem);
@@ -1375,7 +1420,7 @@ namespace Builder
 		}
 	}
 
-	QString ModuleLogicCompiler::getConnectedLoopbackSourceID(const LogicPin& output)
+	QString ModuleLogicCompiler::getConnectedLoopbackSourceID(const SchemaPin& output)
 	{
 		const std::vector<QUuid>& associatedIOsGuids = output.associatedIOs();
 
@@ -1391,7 +1436,7 @@ namespace Builder
 
 			if (pinParent->isLoopbackSource() == true)
 			{
-				const UalLoopbackSource* src = pinParent->ualLoopbackSource();
+				const SchemaLoopbackSource* src = pinParent->schemaLoopbackSource();
 
 				if (src != nullptr)
 				{
@@ -1418,7 +1463,7 @@ namespace Builder
 				continue;
 			}
 
-			const UalLoopbackSource* source = ualItem->ualLoopbackSource();
+			const SchemaLoopbackSource* source = ualItem->schemaLoopbackSource();
 
 			if (source == nullptr)
 			{
@@ -1457,7 +1502,7 @@ namespace Builder
 				continue;
 			}
 
-			const UalLoopbackTarget* target = ualItem->ualLoopbackTarget();
+			const SchemaLoopbackTarget* target = ualItem->schemaLoopbackTarget();
 
 			if (target == nullptr)
 			{
@@ -1490,7 +1535,7 @@ namespace Builder
 	}
 
 	bool ModuleLogicCompiler::getSignalsAndPinsLinkedToOutPin(const UalItem* ualItem,
-															const LogicPin& outPin,
+															const SchemaPin& outPin,
 															std::set<QString>* linkedSignals,
 															std::set<const UalItem*>* linkedItems,
 															std::map<QUuid, const UalItem*>* linkedPins)
@@ -1598,7 +1643,11 @@ namespace Builder
 				continue;
 			}
 
-			QStringList appSignalIDs = ualItem->signal().appSignalIdList();
+			const SchemaSignal* s = ualItem->schemaSignal();
+
+			TEST_PTR_CONTINUE(s);
+
+			QStringList appSignalIDs = s->appSignalIdList();
 
 			for(const QString& id : appSignalIDs)
 			{
@@ -1687,7 +1736,7 @@ namespace Builder
 	{
 		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
 
-		const UalBusComposer* busComposer = ualItem->ualBusComposer();
+		const SchemaBusComposer* busComposer = ualItem->schemaBusComposer();
 
 		if (busComposer == nullptr)
 		{
@@ -1695,7 +1744,7 @@ namespace Builder
 			return false;
 		}
 
-		const std::vector<LogicPin>& outputs = busComposer->outputs();
+		const std::vector<SchemaPin>& outputs = busComposer->outputs();
 
 		if (outputs.size() != 1)
 		{
@@ -1703,7 +1752,7 @@ namespace Builder
 			return false;
 		}
 
-		const LogicPin& outPin = outputs[0];
+		const SchemaPin& outPin = outputs[0];
 
 		if (isConnectedToTerminatorOnly(outPin) == true)
 		{
@@ -1729,7 +1778,7 @@ namespace Builder
 		return result;
 	}
 
-	UalSignal* ModuleLogicCompiler::createBusParentSignal(UalItem* ualItem, const LogicPin& outPin, AppSignal* appBusSignal, const QString& busTypeID)
+	UalSignal* ModuleLogicCompiler::createBusParentSignal(UalItem* ualItem, const SchemaPin& outPin, AppSignal* appBusSignal, const QString& busTypeID)
 	{
 		BusShared bus = m_signals->getBus(busTypeID);
 
@@ -1762,7 +1811,7 @@ namespace Builder
 			return nullptr;
 		}
 
-		const UalBusExtractor* busExtractor = ualItem->ualBusExtractor();
+		const SchemaBusExtractor* busExtractor = ualItem->schemaBusExtractor();
 
 		if (busExtractor == nullptr)
 		{
@@ -1770,7 +1819,7 @@ namespace Builder
 			return nullptr;
 		}
 
-		const std::vector<LogicPin>& inputs = busExtractor->inputs();
+		const std::vector<SchemaPin>& inputs = busExtractor->inputs();
 
 		if (inputs.size() != 1)
 		{
@@ -1778,7 +1827,7 @@ namespace Builder
 			return nullptr;
 		}
 
-		const LogicPin& inPin = inputs[0];
+		const SchemaPin& inPin = inputs[0];
 
 		QString busTypeID = busExtractor->busTypeId();
 
@@ -1817,7 +1866,7 @@ namespace Builder
 	{
 		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
 
-		const UalReceiver* ualReceiver = ualItem->ualReceiver();
+		const SchemaReceiver* ualReceiver = ualItem->schemaReceiver();
 
 		if (ualReceiver == nullptr)
 		{
@@ -1844,7 +1893,7 @@ namespace Builder
 			return false;
 		}
 
-		const std::vector<LogicPin>& outputs = ualItem->outputs();
+		const std::vector<SchemaPin>& outputs = ualItem->outputs();
 
 		int outPinIndex = -1;
 		int validityPinIndex = -1;
@@ -1882,7 +1931,7 @@ namespace Builder
 
 		// UalSignal creation from receiver's output pin
 		//
-		const LogicPin& outPin = outputs[outPinIndex];
+		const SchemaPin& outPin = outputs[outPinIndex];
 
 		if (ualReceiver->appSignalIdsAsList().size() > 1)
 		{
@@ -1904,14 +1953,14 @@ namespace Builder
 			return result;						// receiver hasn't validity pin, it is ok
 		}
 
-		const LogicPin& validityPin = outputs[validityPinIndex];
+		const SchemaPin& validityPin = outputs[validityPinIndex];
 
 		result &= createUalSignalFromReceiverValidity(ualItem, validityPin, connection);
 
 		return result;
 	}
 
-	bool ModuleLogicCompiler::createUalSignalFromReceiverOutput(UalItem* ualItem, const LogicPin& outPin, const QString& receivedAppSignalID, bool isSinglePortConnection)
+	bool ModuleLogicCompiler::createUalSignalFromReceiverOutput(UalItem* ualItem, const SchemaPin& outPin, const QString& receivedAppSignalID, bool isSinglePortConnection)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
 
@@ -2015,7 +2064,7 @@ namespace Builder
 			return false;
 		}
 
-		ualSignal->setReceivedOptoAppSignalID(receivedAppSignalID, ualItem->ualReceiver());
+		ualSignal->setReceivedOptoAppSignalID(receivedAppSignalID, ualItem->schemaReceiver());
 
 		result &= linkConnectedItems(ualItem, outPin, ualSignal);
 
@@ -2023,7 +2072,7 @@ namespace Builder
 	}
 
 	bool ModuleLogicCompiler::createUalSignalFromReceiverValidity(UalItem* ualItem,
-																  const LogicPin& validityPin,
+																  const SchemaPin& validityPin,
 																  std::shared_ptr<Hardware::Connection> connection)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
@@ -2079,7 +2128,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::getReceiverConnectionID(const UalReceiver* receiver, QString* connectionID, const QString& schemaID)
+	bool ModuleLogicCompiler::getReceiverConnectionID(const SchemaReceiver* receiver, QString* connectionID, const QString& schemaID)
 	{
 		TEST_PTR_RETURN_FALSE(receiver);
 		TEST_PTR_RETURN_FALSE(connectionID);
@@ -2337,7 +2386,7 @@ namespace Builder
 			return false;
 		}
 
-		const std::vector<LogicPin>& outputs = ualItem->outputs();
+		const std::vector<SchemaPin>& outputs = ualItem->outputs();
 
 		if (outputs.size() != 1)
 		{
@@ -2346,7 +2395,7 @@ namespace Builder
 			return false;
 		}
 
-		const LogicPin& outPin = ualItem->outputs()[0];
+		const SchemaPin& outPin = ualItem->outputs()[0];
 
 		switch(appSignal->signalType())
 		{
@@ -2393,7 +2442,7 @@ namespace Builder
 	{
 		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
 
-		const UalConst* ualConst = ualItem->ualConst();
+		const SchemaConst* ualConst = ualItem->schemaConst();
 
 		if (ualConst == nullptr)
 		{
@@ -2401,7 +2450,7 @@ namespace Builder
 			return false;
 		}
 
-		const std::vector<LogicPin>& outputs = ualItem->outputs();
+		const std::vector<SchemaPin>& outputs = ualItem->outputs();
 
 		if (outputs.size() != 1)
 		{
@@ -2410,7 +2459,7 @@ namespace Builder
 			return false;
 		}
 
-		const LogicPin& outPin = ualItem->outputs()[0];
+		const SchemaPin& outPin = ualItem->outputs()[0];
 
 		E::SignalType constSignalType = E::SignalType::Discrete;
 		E::AnalogAppSignalFormat constAnalogFormat = E::AnalogAppSignalFormat::SignedInt32;
@@ -2486,12 +2535,11 @@ namespace Builder
 		return result;
 	}
 
-
 	bool ModuleLogicCompiler::createUalSignalsFromAfbOuts(UalItem* ualItem)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
 
-		UalAfb* ualAfb = m_ualAfbs.value(ualItem->guid(), nullptr);
+		UalAfb* ualAfb = m_ualAfbs.getAfb(ualItem->guid());
 
 		if (ualAfb == nullptr)
 		{
@@ -2532,11 +2580,11 @@ namespace Builder
 			}
 		}
 
-		const std::vector<LogicPin>& outputs = ualItem->outputs();
+		const std::vector<SchemaPin>& outputs = ualItem->outputs();
 
-		for(const LogicPin& outPin : outputs)
+		for(const SchemaPin& outPin : outputs)
 		{
-			LogicAfbSignal outAfbSignal;
+			AfbSignal outAfbSignal;
 
 			if (ualAfb->getAfbSignalByPin(outPin, &outAfbSignal) == false)
 			{
@@ -2606,9 +2654,9 @@ namespace Builder
 	{
 		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
 
-		const UalBusExtractor* extractor = ualItem->ualBusExtractor();
+		const SchemaBusExtractor* extractor = ualItem->schemaBusExtractor();
 
-		const std::vector<LogicPin>& inputs = extractor->inputs();
+		const std::vector<SchemaPin>& inputs = extractor->inputs();
 
 		if (inputs.size() != 1)
 		{
@@ -2644,11 +2692,11 @@ namespace Builder
 			return false;
 		}
 
-		const std::vector<LogicPin>& outputs = extractor->outputs();
+		const std::vector<SchemaPin>& outputs = extractor->outputs();
 
 		bool result = true;
 
-		for(const LogicPin& outPin : outputs)
+		for(const SchemaPin& outPin : outputs)
 		{
 			UalSignal* busChildSignal = busSignal->getBusChildSignal(outPin.caption());
 
@@ -2680,7 +2728,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::linkConnectedItems(UalItem* srcUalItem, const LogicPin& outPin, UalSignal* ualSignal)
+	bool ModuleLogicCompiler::linkConnectedItems(UalItem* srcUalItem, const SchemaPin& outPin, UalSignal* ualSignal)
 	{
 		if (srcUalItem == nullptr || ualSignal == nullptr)
 		{
@@ -2840,7 +2888,7 @@ namespace Builder
 
 		//
 
-		const std::vector<LogicPin>& outputs = signalItem->outputs();
+		const std::vector<SchemaPin>& outputs = signalItem->outputs();
 
 		if (outputs.size() > 1)
 		{
@@ -2850,7 +2898,7 @@ namespace Builder
 
 		if (outputs.size() == 1)
 		{
-			const LogicPin& output = outputs[0];
+			const SchemaPin& output = outputs[0];
 
 			m_ualSignals.appendRefPin(signalItem, output.guid(), srcUalSignal);
 
@@ -2876,7 +2924,7 @@ namespace Builder
 			return false;
 		}
 
-		UalAfb* ualAfb = m_ualAfbs.value(destItem->guid(), nullptr);
+		UalAfb* ualAfb = m_ualAfbs.getAfb(destItem->guid());
 
 		if (ualAfb == nullptr)
 		{
@@ -2884,7 +2932,7 @@ namespace Builder
 			return false;
 		}
 
-		LogicAfbSignal inSignal;
+		AfbSignal inSignal;
 
 		bool result = ualAfb->getAfbSignalByPinUuid(inPinUuid, &inSignal);
 
@@ -2926,13 +2974,13 @@ namespace Builder
 		//    Items connected to "out" also should be linked to "in"
 		//
 
-		UalAfb* ualAfb = m_ualAfbs.value(setFlagsItem->guid(), nullptr);
+		UalAfb* ualAfb = m_ualAfbs.getAfb(setFlagsItem->guid());
 
 		LOG_IF_NULLPTR_RETURN_FALSE(ualAfb, m_log);
 
 		LOG_INTERNAL_ERROR_IF_FALSE_RETURN_FALSE(ualAfb->isSetFlagsItem(), m_log);
 
-		const LogicPin* inPin = ualAfb->getPin(inPinUuid);
+		const SchemaPin* inPin = ualAfb->getPin(inPinUuid);
 
 		LOG_IF_NULLPTR_RETURN_FALSE(inPin, m_log);
 
@@ -2951,11 +2999,11 @@ namespace Builder
 
 		// linking items connected to "out"
 		//
-		const std::vector<LogicPin>& outputs = ualAfb->outputs();
+		const std::vector<SchemaPin>& outputs = ualAfb->outputs();
 
 		LOG_INTERNAL_ERROR_IF_FALSE_RETURN_FALSE(outputs.size() == 1, log());
 
-		const LogicPin& outPin = outputs[0];
+		const SchemaPin& outPin = outputs[0];
 
 		LOG_INTERNAL_ERROR_IF_FALSE_RETURN_FALSE(outPin.caption() == Afb::OUT_PIN_CAPTION, log());
 
@@ -2976,7 +3024,7 @@ namespace Builder
 			return false;
 		}
 
-		const UalBusComposer* busComposer = busComposerItem->ualBusComposer();
+		const SchemaBusComposer* busComposer = busComposerItem->schemaBusComposer();
 
 		if (busComposer == nullptr)
 		{
@@ -2996,7 +3044,7 @@ namespace Builder
 			return false;
 		}
 
-		const LogicPin& inPin = busComposer->input(inPinUuid);
+		const SchemaPin& inPin = busComposer->input(inPinUuid);
 
 		QString busSignalID = inPin.caption();
 
@@ -3029,7 +3077,7 @@ namespace Builder
 			return false;
 		}
 
-		const UalBusExtractor* busExtractor = busExtractorItem->ualBusExtractor();
+		const SchemaBusExtractor* busExtractor = busExtractorItem->schemaBusExtractor();
 
 		if (busExtractor == nullptr)
 		{
@@ -3128,7 +3176,7 @@ namespace Builder
 	{
 		TEST_PTR_LOG_RETURN_FALSE(loopbackTargetItem, m_log);
 
-		const UalLoopbackTarget* target = loopbackTargetItem->ualLoopbackTarget();
+		const SchemaLoopbackTarget* target = loopbackTargetItem->schemaLoopbackTarget();
 
 		if  (target == nullptr)
 		{
@@ -3151,7 +3199,7 @@ namespace Builder
 			return true;
 		}
 
-		const std::vector<LogicPin>& outputs = loopbackTargetItem->outputs();
+		const std::vector<SchemaPin>& outputs = loopbackTargetItem->outputs();
 
 		if (outputs.size() != 1)
 		{
@@ -3179,7 +3227,7 @@ namespace Builder
 				continue;
 			}
 
-			const UalAfb* afb = m_ualAfbs.value(ualItem->guid(), nullptr);
+			const UalAfb* afb = m_ualAfbs.getAfb(ualItem->guid());
 
 			TEST_PTR_LOG_RETURN_FALSE(afb, m_log);
 
@@ -3363,7 +3411,7 @@ namespace Builder
 				continue;
 			}
 
-			const UalReceiver* receiver = optoSignal->ualReceiver();
+			const SchemaReceiver* receiver = optoSignal->ualReceiver();
 
 			TEST_PTR_CONTINUE(receiver);
 
@@ -3402,7 +3450,7 @@ namespace Builder
 				continue;
 			}
 
-			UalAfb* simLockItem = m_ualAfbs.value(ualItem->guid(), nullptr);
+			UalAfb* simLockItem = m_ualAfbs.getAfb(ualItem->guid());
 
 			if (simLockItem == nullptr)
 			{
@@ -3413,7 +3461,7 @@ namespace Builder
 
 			Q_ASSERT(simLockItem->isSimLockItem() == true);
 
-			const LogicPin* outPin = simLockItem->getPin(Afb::OUT_PIN_CAPTION);
+			const SchemaPin* outPin = simLockItem->getPin(Afb::OUT_PIN_CAPTION);
 
 			if (outPin == nullptr)
 			{
@@ -3475,7 +3523,7 @@ namespace Builder
 				continue;
 			}
 
-			UalAfb* mismatchItem = m_ualAfbs.value(ualItem->guid(), nullptr);
+			UalAfb* mismatchItem = m_ualAfbs.getAfb(ualItem->guid());
 
 			if (mismatchItem == nullptr)
 			{
@@ -3493,7 +3541,7 @@ namespace Builder
 				const QString& inPinCaption = inPinCaptions[pinNo];
 				const QString& outPinCaption = outPinCaptions[pinNo];
 
-				const LogicPin* inPin = mismatchItem->getPin(inPinCaption);
+				const SchemaPin* inPin = mismatchItem->getPin(inPinCaption);
 
 				if (inPin == nullptr)
 				{
@@ -3537,7 +3585,7 @@ namespace Builder
 				continue;
 			}
 
-			UalAfb* setFlagsItem = m_ualAfbs.value(ualItem->guid(), nullptr);
+			UalAfb* setFlagsItem = m_ualAfbs.getAfb(ualItem->guid());
 
 			if (setFlagsItem == nullptr)
 			{
@@ -3548,7 +3596,7 @@ namespace Builder
 
 			Q_ASSERT(setFlagsItem->isSetFlagsItem() == true);
 
-			const LogicPin* outPin = setFlagsItem->getPin(Afb::OUT_PIN_CAPTION);
+			const SchemaPin* outPin = setFlagsItem->getPin(Afb::OUT_PIN_CAPTION);
 
 			if (outPin == nullptr)
 			{
@@ -3616,7 +3664,7 @@ namespace Builder
 
 		// flagIsSet can be == nullptr !
 
-		const LogicPin* pin = ualItem->getPin(pinCaption);
+		const SchemaPin* pin = ualItem->getPin(pinCaption);
 
 		if (pin == nullptr)
 		{
@@ -3873,7 +3921,7 @@ namespace Builder
 		return true;
 	}
 
-	AppSignal* ModuleLogicCompiler::getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal, const QString& busTypeID)
+	AppSignal* ModuleLogicCompiler::getCompatibleConnectedSignal(const SchemaPin& outPin, const AfbSignal& outAfbSignal, const QString& busTypeID)
 	{
 		const std::vector<QUuid>& connectedPinsUuids = outPin.associatedIOs();
 
@@ -3891,7 +3939,7 @@ namespace Builder
 
 			if (connectedItem->isLoopbackSource() == true)
 			{
-				const UalLoopbackSource* source = connectedItem->ualLoopbackSource();
+				const SchemaLoopbackSource* source = connectedItem->schemaLoopbackSource();
 
 				if (source == nullptr)
 				{
@@ -3909,7 +3957,7 @@ namespace Builder
 				// if 'outPin' is connected to 'in' pin of set_flags item
 				// items connected to 'out' pin of set_flags item should be checked
 
-				const LogicPin* inPin = connectedItem->getPin(inPinUuid);
+				const SchemaPin* inPin = connectedItem->getPin(inPinUuid);
 
 				if (inPin == nullptr)
 				{
@@ -3924,7 +3972,7 @@ namespace Builder
 
 				// yes, this is 'in' pin of set_flags item
 
-				const LogicPin* connectedItemOutPin = connectedItem->getPin(Afb::OUT_PIN_CAPTION);
+				const SchemaPin* connectedItemOutPin = connectedItem->getPin(Afb::OUT_PIN_CAPTION);
 
 				if (connectedItemOutPin == nullptr)
 				{
@@ -3987,14 +4035,14 @@ namespace Builder
 		return nullptr;
 	}
 
-	AppSignal* ModuleLogicCompiler::getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal)
+	AppSignal* ModuleLogicCompiler::getCompatibleConnectedSignal(const SchemaPin& outPin, const AfbSignal& outAfbSignal)
 	{
 		return getCompatibleConnectedSignal(outPin, outAfbSignal, EMPTY_STR);
 	}
 
-	AppSignal* ModuleLogicCompiler::getCompatibleConnectedSignal(const LogicPin& outPin, const AppSignal& s)
+	AppSignal* ModuleLogicCompiler::getCompatibleConnectedSignal(const SchemaPin& outPin, const AppSignal& s)
 	{
-		LogicAfbSignal dummySignal;
+		AfbSignal dummySignal;
 
 		dummySignal.setType(s.signalType());
 
@@ -4011,16 +4059,16 @@ namespace Builder
 		return getCompatibleConnectedSignal(outPin, dummySignal, busTypeID);
 	}
 
-	AppSignal* ModuleLogicCompiler::getCompatibleConnectedBusSignal(const LogicPin& outPin, const QString& busTypeID)
+	AppSignal* ModuleLogicCompiler::getCompatibleConnectedBusSignal(const SchemaPin& outPin, const QString& busTypeID)
 	{
-		LogicAfbSignal dummyBusSignal;
+		AfbSignal dummyBusSignal;
 
 		dummyBusSignal.setType(E::SignalType::Bus);
 
 		return getCompatibleConnectedSignal(outPin, dummyBusSignal, busTypeID);
 	}
 
-	bool ModuleLogicCompiler::isCompatible(const LogicAfbSignal& outAfbSignal, const QString& busTypeID, const AppSignal* s)
+	bool ModuleLogicCompiler::isCompatible(const AfbSignal& outAfbSignal, const QString& busTypeID, const AppSignal* s)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(s, m_log);
 
@@ -4045,7 +4093,7 @@ namespace Builder
 		return false;
 	}
 
-	bool ModuleLogicCompiler::isConnectedToTerminatorOnly(const LogicPin& outPin) const
+	bool ModuleLogicCompiler::isConnectedToTerminatorOnly(const SchemaPin& outPin) const
 	{
 		const std::vector<QUuid>& connectedPinsUuids = outPin.associatedIOs();
 
@@ -4079,7 +4127,7 @@ namespace Builder
 		return isConnectedToTerminatorOnly(outs[0]);
 	}
 
-	bool ModuleLogicCompiler::isConnectedToLoopback(const LogicPin& inPin, std::shared_ptr<Loopback>* loopback)
+	bool ModuleLogicCompiler::isConnectedToLoopback(const SchemaPin& inPin, std::shared_ptr<Loopback>* loopback)
 	{
 		TEST_PTR_RETURN_FALSE(loopback);
 
@@ -4118,9 +4166,9 @@ namespace Builder
 
 		bool result = true;
 
-		for(const LogicPin& inPin : ualAfb->inputs())
+		for(const SchemaPin& inPin : ualAfb->inputs())
 		{
-			LogicAfbSignal afbSignal;
+			AfbSignal afbSignal;
 
 			bool res = ualAfb->getAfbSignalByPin(inPin, &afbSignal);
 
@@ -4235,11 +4283,11 @@ namespace Builder
 	{
 		QStringList busTypes;
 
-		const std::vector<LogicPin> outputs = ualAfb->outputs();
+		const std::vector<SchemaPin> outputs = ualAfb->outputs();
 
-		for(const LogicPin& outPin : outputs)
+		for(const SchemaPin& outPin : outputs)
 		{
-			LogicAfbSignal afbSignal;
+			AfbSignal afbSignal;
 
 			bool res = ualAfb->getAfbSignalByPin(outPin, &afbSignal);
 
@@ -4340,7 +4388,7 @@ namespace Builder
 		return true;
 	}
 
-	std::optional<int> ModuleLogicCompiler::getOutPinExpectedReadCount(const LogicPin& outPin)
+	std::optional<int> ModuleLogicCompiler::getOutPinExpectedReadCount(const SchemaPin& outPin)
 	{
 		Q_ASSERT(outPin.IsOutput() == true);
 
@@ -4420,7 +4468,7 @@ namespace Builder
 
 		// this is set_flags AFB
 		//
-		const LogicPin* inPin = ualItem->getPin(inPinGuid);
+		const SchemaPin* inPin = ualItem->getPin(inPinGuid);
 
 		if (inPin == nullptr)
 		{
@@ -4438,7 +4486,7 @@ namespace Builder
 		// this is "in" pin of set_flags AFB
 		// calculation of all reads of pins connected to "out" pin is required
 		//
-		const std::vector<LogicPin>& outs = ualItem->outputs();
+		const std::vector<SchemaPin>& outs = ualItem->outputs();
 
 		if (outs.size() != 1)
 		{
@@ -4479,7 +4527,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::checkPinsConnectedToSignal(const std::vector<LogicPin>& pins, bool shouldConnectToSameSignal, UalSignal** sameSignalPtr)
+	bool ModuleLogicCompiler::checkPinsConnectedToSignal(const std::vector<SchemaPin>& pins, bool shouldConnectToSameSignal, UalSignal** sameSignalPtr)
 	{
 		if (sameSignalPtr == nullptr)
 		{
@@ -4487,7 +4535,7 @@ namespace Builder
 			return false;
 		}
 
-		for(const LogicPin& pin : pins)
+		for(const SchemaPin& pin : pins)
 		{
 			UalSignal* connectedSignal = m_ualSignals.get(pin.guid());
 
@@ -4521,7 +4569,7 @@ namespace Builder
 	{
 		bool result = true;
 
-		for(const LogicPin& inPin : ualItem->inputs())
+		for(const SchemaPin& inPin : ualItem->inputs())
 		{
 			UalSignal* existsSignal = m_ualSignals.get(inPin.guid());
 
@@ -4536,7 +4584,7 @@ namespace Builder
 			}
 		}
 
-		for(const LogicPin& outPin : ualItem->outputs())
+		for(const SchemaPin& outPin : ualItem->outputs())
 		{
 			UalSignal* existsSignal = m_ualSignals.get(outPin.guid());
 
@@ -4567,7 +4615,7 @@ namespace Builder
 		// 2) maxBusSize > BusTypeID.sizeW
 		// 3) same E::BusDataFormat
 		//
-		UalAfb* destAppFb = m_ualAfbs.value(destAppItem->guid(), nullptr);
+		UalAfb* destAppFb = m_ualAfbs.getAfb(destAppItem->guid());
 
 		if (destAppFb == nullptr)
 		{
@@ -4575,7 +4623,7 @@ namespace Builder
 			return false;
 		}
 
-		LogicAfbSignal destAfbSignal;
+		AfbSignal destAfbSignal;
 
 		if (destAppFb->getAfbSignalByPinUuid(destPinUuid, &destAfbSignal) == false)
 		{
@@ -4650,7 +4698,7 @@ namespace Builder
 			return false;
 		}
 
-		const UalBusExtractor* busExtractor = destAppItem->ualBusExtractor();
+		const SchemaBusExtractor* busExtractor = destAppItem->schemaBusExtractor();
 
 		if (busExtractor == nullptr)
 		{
@@ -7503,7 +7551,9 @@ namespace Builder
 
 		assert(ualItem->isTransmitter() == true);
 
-		const UalTransmitter& transmitter = ualItem->logicTransmitter();
+		const SchemaTransmitter* transmitter = ualItem->schemaTransmitter();
+
+		TEST_PTR_RETURN_FALSE(transmitter);
 
 		bool result = true;
 
@@ -7518,7 +7568,7 @@ namespace Builder
 
 		for(const QPair<QString, UalSignal*>& connectedSignal : connectedSignals)
 		{
-			const QStringList& connectionIDs = transmitter.connectionIdsAsList();
+			const QStringList& connectionIDs = transmitter->connectionIdsAsList();
 
 			if (connectionIDs.count() == 0)
 			{
@@ -7531,7 +7581,7 @@ namespace Builder
 
 			for(const QString& connectionID : connectionIDs)
 			{
-				result &= m_optoModuleStorage->appendTxSignal(ualItem->schemaID(), connectionID, transmitter.guid(),
+				result &= m_optoModuleStorage->appendTxSignal(ualItem->schemaID(), connectionID, transmitter->guid(),
 														   lmEquipmentID(),
 														   connectedSignal.first,
 														   connectedSignal.second,
@@ -7552,11 +7602,11 @@ namespace Builder
 
 		connectedSignals->clear();
 
-		const std::vector<LogicPin>& inPins = transmitterItem->inputs();
+		const std::vector<SchemaPin>& inPins = transmitterItem->inputs();
 
 		bool result = true;
 
-		for(const LogicPin& inPin : inPins)
+		for(const SchemaPin& inPin : inPins)
 		{
 			if (inPin.IsInput() == false)
 			{
@@ -7609,7 +7659,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::getDirectlyConnectedInSignalID(const LogicPin& inPin, QString* directlyConnectedInSignalID)
+	bool ModuleLogicCompiler::getDirectlyConnectedInSignalID(const SchemaPin& inPin, QString* directlyConnectedInSignalID)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(directlyConnectedInSignalID, log());
 
@@ -7636,7 +7686,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::getNearestInSignalIDs(const LogicPin& inPin, QStringList* nearestSignalIDs)
+	bool ModuleLogicCompiler::getNearestInSignalIDs(const SchemaPin& inPin, QStringList* nearestSignalIDs)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(nearestSignalIDs, log());
 
@@ -7688,7 +7738,7 @@ namespace Builder
 			return false;
 		}
 
-		const LogicPin* outPin = ualItem->getPin(outPinUuid);
+		const SchemaPin* outPin = ualItem->getPin(outPinUuid);
 
 		if (outPin == nullptr)
 		{
@@ -7717,7 +7767,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::getNearestInSignalID(const LogicPin& inPin, QString* nearestSignalID)
+	bool ModuleLogicCompiler::getNearestInSignalID(const SchemaPin& inPin, QString* nearestSignalID)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(nearestSignalID, log());
 
@@ -7735,7 +7785,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::getNearestOutSignalIDs(const LogicPin& outPin, QStringList* nearestSignalIDs)
+	bool ModuleLogicCompiler::getNearestOutSignalIDs(const SchemaPin& outPin, QStringList* nearestSignalIDs)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(nearestSignalIDs, log());
 		LOG_INTERNAL_ERROR_IF_FALSE_RETURN_FALSE(outPin.IsOutput(), log());
@@ -7759,7 +7809,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::getNearestOutSignalID(const LogicPin& outPin, QString* nearestSignalID)
+	bool ModuleLogicCompiler::getNearestOutSignalID(const SchemaPin& outPin, QString* nearestSignalID)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(nearestSignalID, log());
 
@@ -7777,7 +7827,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::getNearestSignalID(const LogicPin& inOutPin, QString* nearestSignalID)
+	bool ModuleLogicCompiler::getNearestSignalID(const SchemaPin& inOutPin, QString* nearestSignalID)
 	{
 		if (inOutPin.IsInput() == true)
 		{
@@ -7823,9 +7873,11 @@ namespace Builder
 			return true;				// item is not receiver, nothing to processing
 		}
 
-		const UalReceiver& receiver = item->logicReceiver();
+		const SchemaReceiver* receiver = item->schemaReceiver();
 
-		QString connectionID = receiver.connectionIds();
+		TEST_PTR_RETURN_FALSE(receiver);
+
+		QString connectionID = receiver->connectionIds();
 
 		std::shared_ptr<Hardware::Connection> connection = m_optoModuleStorage->getConnection(connectionID);
 
@@ -7842,12 +7894,12 @@ namespace Builder
 			return true;				// process Serial connections receivers only
 		}
 
-		if (receiver.appSignalIdsAsList().size() > 1)
+		if (receiver->appSignalIdsAsList().size() > 1)
 		{
 			m_log->errINT1001(QString("SchemaItemReceiver has more then one AppSignalID"), item->schemaID(), item->guid());
 		}
 
-		QString rxSignalID = receiver.appSignalIds();
+		QString rxSignalID = receiver->appSignalIds();
 
 		if (m_chassisSignals.contains(rxSignalID) == false)
 		{
@@ -7936,11 +7988,11 @@ namespace Builder
 	{
 		bool result = true;
 
-		for(UalAfb* ualAfb : m_ualAfbs)
+		for(UalAfb* afb : m_ualAfbs)
 		{
-			TEST_PTR_CONTINUE(ualAfb);
+			TEST_PTR_CONTINUE(afb);
 
-			result &= addToComparatorSet(ualAfb);
+			result &= addToComparatorSet(afb);
 		}
 
 		return result;
@@ -8037,7 +8089,7 @@ namespace Builder
 				continue;
 			}
 
-			const UalReceiver* ualReceiver = ualItem->ualReceiver();
+			const SchemaReceiver* ualReceiver = ualItem->schemaReceiver();
 
 			if (ualReceiver == nullptr)
 			{
@@ -8649,7 +8701,7 @@ namespace Builder
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 
-		const AppFbParamValuesArray& appFbParamValues = appFb.paramValuesArray();
+		const AfbParamValuesArray& appFbParamValues = appFb.paramValuesArray();
 
 		if (appFbParamValues.hasParamsToInitialization() == false)
 		{
@@ -8691,7 +8743,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::generateInitAppFbParamsCode(CodeSnippet* code, const UalAfb& appFb, bool instantiator)
 	{
-		const AppFbParamValuesArray& appFbParamValues = appFb.paramValuesArray();
+		const AfbParamValuesArray& appFbParamValues = appFb.paramValuesArray();
 
 		QString fbCaption = appFb.caption();
 		int fbOpcode = appFb.opcode();
@@ -8699,7 +8751,7 @@ namespace Builder
 
 		bool result = true;
 
-		for(const AppFbParamValue& paramValue : appFbParamValues)
+		for(const AfbParamValue& paramValue : appFbParamValues)
 		{
 			if (paramValue.isNoFbOperand() == true)
 			{
@@ -8792,9 +8844,9 @@ namespace Builder
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 
-		const AppFbParamValuesArray& appFbParamValues = appFb.paramValuesArray();
+		const AfbParamValuesArray& appFbParamValues = appFb.paramValuesArray();
 
-		for(const AppFbParamValue& paramValue : appFbParamValues)
+		for(const AfbParamValue& paramValue : appFbParamValues)
 		{
 			if (paramValue.isVisible() == false && paramValue.isNoFbOperand() == true)
 			{
@@ -9245,7 +9297,7 @@ namespace Builder
 			ASSERT_RETURN_FALSE
 		}
 
-		const UalAfb* ualAfb = m_ualAfbs.value(ualItem->guid(), nullptr);
+		const UalAfb* ualAfb = m_ualAfbs.getAfb(ualItem->guid());
 
 		if (ualAfb->isSetFlagsItem() == true)
 		{
@@ -9349,7 +9401,7 @@ namespace Builder
 
 		bool result = true;
 
-		for(const LogicPin& inPin : ualAfb->inputs())
+		for(const SchemaPin& inPin : ualAfb->inputs())
 		{
 			if (inPin.IsInput() == false)
 			{
@@ -9366,7 +9418,7 @@ namespace Builder
 				return false;
 			}
 
-			LogicAfbSignal inAfbSignal;
+			AfbSignal inAfbSignal;
 
 			bool res = ualAfb->getAfbSignalByPin(inPin, &inAfbSignal);
 
@@ -9385,7 +9437,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::generateSignalToAfbInputCode(CodeSnippet* code,
 														   const UalAfb* ualAfb,
-														   const LogicAfbSignal& inAfbSignal,
+														   const AfbSignal& inAfbSignal,
 														   const UalSignal* inUalSignal,
 														   const BusProcessingStepInfo& bpStepInfo,
 														   const Address16& readAddr,
@@ -9569,7 +9621,7 @@ namespace Builder
 	}
 
 	bool ModuleLogicCompiler::generateSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb,
-															  const LogicAfbSignal& inAfbSignal,
+															  const AfbSignal& inAfbSignal,
 															  const UalSignal* inUalSignal,
 															  const BusProcessingStepInfo& bpStepInfo)
 	{
@@ -9603,7 +9655,7 @@ namespace Builder
 	}
 
 	bool ModuleLogicCompiler::generateDiscreteSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb,
-																	  const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal,
+																	  const AfbSignal& inAfbSignal, const UalSignal* inUalSignal,
 																	  const BusProcessingStepInfo& bpStepInfo)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
@@ -9711,7 +9763,7 @@ namespace Builder
 	}
 
 	bool ModuleLogicCompiler::generateBusSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb,
-																 const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal,
+																 const AfbSignal& inAfbSignal, const UalSignal* inUalSignal,
 																 const BusProcessingStepInfo& bpStepInfo)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
@@ -9820,7 +9872,7 @@ namespace Builder
 
 		bool result = true;
 
-		for(const LogicPin& outPin : ualAfb->outputs())
+		for(const SchemaPin& outPin : ualAfb->outputs())
 		{
 			if (outPin.IsOutput() == false)
 			{
@@ -9842,7 +9894,7 @@ namespace Builder
 				return false;
 			}
 
-			LogicAfbSignal outAfbSignal;
+			AfbSignal outAfbSignal;
 
 			bool res = ualAfb->getAfbSignalByPin(outPin, &outAfbSignal);
 
@@ -9861,7 +9913,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::generateAfbOutputToSignalCode(CodeSnippet* code,
 															const UalAfb* ualAfb,
-															const LogicAfbSignal& outAfbSignal,
+															const AfbSignal& outAfbSignal,
 															const UalSignal* outUalSignal,
 															const BusProcessingStepInfo& bpStepInfo,
 															const Address16& writeAddr,
@@ -10017,7 +10069,7 @@ namespace Builder
 	}
 
 	bool ModuleLogicCompiler::generateAfbBusOutputToBusSignalCode(CodeSnippet* code, const UalAfb* ualAfb,
-																  const LogicAfbSignal& outAfbSignal, const UalSignal* outUalSignal,
+																  const AfbSignal& outAfbSignal, const UalSignal* outUalSignal,
 																  const BusProcessingStepInfo& bpStepInfo)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
@@ -10095,7 +10147,7 @@ namespace Builder
 
 		bool result = true;
 
-		const std::vector<LogicPin>& inputs = afb->inputs();
+		const std::vector<SchemaPin>& inputs = afb->inputs();
 
 		std::vector<std::pair<const UalSignal*, Address16>> nonConstInSignals;	// vector of pair<inputSignal, readAddr>
 		std::set<const UalSignal*> uniqueInSignals;
@@ -10107,7 +10159,7 @@ namespace Builder
 
 		// input signals checking
 		//
-		for(const LogicPin& inPin : inputs)
+		for(const SchemaPin& inPin : inputs)
 		{
 			const UalSignal* inSignal = getUalSignalByPinCaption(afb, inPin.caption(), true);
 
@@ -10322,7 +10374,11 @@ namespace Builder
 		// inSignals - is unique non const input signals
 		//
 
-		int instance = m_packedLogicAfbInstance;
+		if (afb->label() == "PACKED_AND_TESTS_BIT_ACC_1431")
+		{
+			DEBUG_STOP;
+		}
+
 		bool isAndLogic = false;
 		QString afbCaption;
 
@@ -10363,7 +10419,7 @@ namespace Builder
 
 		int step = 1;
 
-		const int BIT_ACC_SIZE = SIZE_16BIT;
+		int canProcessBits = SIZE_16BIT;
 
 		while(inSignalIndex < inSignals.size())
 		{
@@ -10371,12 +10427,12 @@ namespace Builder
 
 			if (step > 1)
 			{
-				remainSignalsCount++;	//	take into consideration prev step result saved in ACC[0]
+				canProcessBits = SIZE_16BIT - 1;	//	take into consideration prev step result saved in ACC[0]
 			}
 
-			remainSignalsCount = std::min(remainSignalsCount, BIT_ACC_SIZE);
+			remainSignalsCount = std::min(remainSignalsCount, canProcessBits);
 
-			if (remainSignalsCount < BIT_ACC_SIZE)
+			if (remainSignalsCount < canProcessBits)
 			{
 				if (step > 1)
 				{
@@ -10402,7 +10458,7 @@ namespace Builder
 
 			int bitNo = 0;
 
-			while(bitNo < remainSignalsCount && inSignalIndex < inSignals.size())
+			while(bitNo < canProcessBits && inSignalIndex < inSignals.size())
 			{
 				const auto& [inSignal, readAddr] = inSignals[inSignalIndex];
 
@@ -10435,8 +10491,6 @@ namespace Builder
 															arg(outSignal->appSignalID()));
 			}
 		}
-
-
 
 		return true;
 	}
@@ -10774,7 +10828,7 @@ namespace Builder
 			return false;
 		}
 
-		LogicAfbSignal logicInSignal;
+		AfbSignal logicInSignal;
 
 		if (ualAfb->getAfbSignalByCaption(Afb::IN_PIN_CAPTION, &logicInSignal) == false)
 		{
@@ -10797,7 +10851,7 @@ namespace Builder
 			return false;
 		}
 
-		LogicAfbSignal logicOutSignal;
+		AfbSignal logicOutSignal;
 
 		if (ualAfb->getAfbSignalByCaption(Afb::OUT_PIN_CAPTION, &logicOutSignal) == false)
 		{
@@ -10925,12 +10979,12 @@ namespace Builder
 
 		std::vector<std::pair<const UalSignal*, Address16>> inSignals;			// pair<ualSignal, readAddress>
 
-		const std::vector<LogicPin>& inputs = ualAfb->inputs();
+		const std::vector<SchemaPin>& inputs = ualAfb->inputs();
 
 		bool hasConst1 = false;
 		bool allInputsConst0 = true;
 
-		for(const LogicPin& inPin : inputs)
+		for(const SchemaPin& inPin : inputs)
 		{
 			UalSignal* inSignal = getUalSignalByPinCaption(ualAfb, inPin.caption(), true);
 
@@ -11063,12 +11117,12 @@ namespace Builder
 
 		std::vector<std::pair<const UalSignal*, Address16>> inSignals;	// pair<ualSignal, readAddress>
 
-		const std::vector<LogicPin>& inputs = ualAfb->inputs();
+		const std::vector<SchemaPin>& inputs = ualAfb->inputs();
 
 		bool hasConst0 = false;
 		bool allInputsConst1 = true;
 
-		for(const LogicPin& inPin : inputs)
+		for(const SchemaPin& inPin : inputs)
 		{
 			UalSignal* inSignal = getUalSignalByPinCaption(ualAfb, inPin.caption(), true);
 
@@ -11493,7 +11547,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::getPinsAndSignalsBusSizes(const UalAfb* ualAfb, const std::vector<LogicPin>& pins,
+	bool ModuleLogicCompiler::getPinsAndSignalsBusSizes(const UalAfb* ualAfb, const std::vector<SchemaPin>& pins,
 														std::vector<std::vector<int>>* pinsSizes, int* busSignalsSize, bool isInputs,
 														bool* allBusInputsConnectedToDiscretes)
 	{
@@ -11507,9 +11561,9 @@ namespace Builder
 		*busSignalsSize = -1;
 		*allBusInputsConnectedToDiscretes = true;
 
-		for(const LogicPin& pin : pins)
+		for(const SchemaPin& pin : pins)
 		{
-			LogicAfbSignal afbSignal;
+			AfbSignal afbSignal;
 
 			bool res = ualAfb->getAfbSignalByPin(pin, &afbSignal);
 
@@ -11759,7 +11813,7 @@ namespace Builder
 
 		*connectedToTedrminatorOnly = false;
 
-		const std::vector<LogicPin>& outputs = composerItem->outputs();
+		const std::vector<SchemaPin>& outputs = composerItem->outputs();
 
 		if (outputs.size() != 1)
 		{
@@ -11768,7 +11822,7 @@ namespace Builder
 			return nullptr;
 		}
 
-		const LogicPin& output = outputs[0];
+		const SchemaPin& output = outputs[0];
 
 		if (isConnectedToTerminatorOnly(output) == true)
 		{
@@ -12052,8 +12106,8 @@ namespace Builder
 		// No param initialization code required here.
 		// Params initialization code will be generated in generateInitAfbsCode.
 
-		LogicAfbSignal inSignal;
-		LogicAfbSignal outSignal;
+		AfbSignal inSignal;
+		AfbSignal outSignal;
 
 		result &= scale->getAfbSignalByCaption(Afb::IN_PIN_CAPTION, &inSignal);
 		result &= scale->getAfbSignalByCaption(Afb::OUT_PIN_CAPTION, &outSignal);
@@ -12252,8 +12306,8 @@ namespace Builder
 
 		bool result = true;
 
-		LogicAfbSignal inSignal;
-		LogicAfbSignal outSignal;
+		AfbSignal inSignal;
+		AfbSignal outSignal;
 
 		result &= tconv->getAfbSignalByCaption(Afb::IN_PIN_CAPTION, &inSignal);
 		result &= tconv->getAfbSignalByCaption(Afb::OUT_PIN_CAPTION, &outSignal);
@@ -12359,8 +12413,8 @@ namespace Builder
 
 		bool result = true;
 
-		LogicAfbSignal inSignal;
-		LogicAfbSignal outSignal;
+		AfbSignal inSignal;
+		AfbSignal outSignal;
 
 		result &= boTconv->getAfbSignalByCaption(Afb::IN_PIN_CAPTION, &inSignal);
 		result &= boTconv->getAfbSignalByCaption(Afb::OUT_PIN_CAPTION, &outSignal);
@@ -12711,7 +12765,7 @@ namespace Builder
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
 
-		const UalBusExtractor* busExtractor = ualItem->ualBusExtractor();
+		const SchemaBusExtractor* busExtractor = ualItem->schemaBusExtractor();
 
 		if (busExtractor == nullptr)
 		{
@@ -12719,7 +12773,7 @@ namespace Builder
 			return false;
 		}
 
-		const std::vector<LogicPin>& inputs = busExtractor->inputs();
+		const std::vector<SchemaPin>& inputs = busExtractor->inputs();
 
 		if (inputs.size() != 1)
 		{
@@ -12727,7 +12781,7 @@ namespace Builder
 			return false;
 		}
 
-		const LogicPin& inPin = inputs[0];
+		const SchemaPin& inPin = inputs[0];
 
 		const std::vector<QUuid>& associatedOutPins = inPin.associatedIOs();
 
@@ -12980,8 +13034,8 @@ namespace Builder
 
 		bool result = true;
 
-		LogicAfbSignal inSignal;
-		LogicAfbSignal outSignal;
+		AfbSignal inSignal;
+		AfbSignal outSignal;
 
 		result &= boTconv->getAfbSignalByCaption(Afb::IN_PIN_CAPTION, &inSignal);
 		result &= boTconv->getAfbSignalByCaption(Afb::OUT_PIN_CAPTION, &outSignal);
@@ -13140,10 +13194,10 @@ namespace Builder
 
 			UalAfb* swtch = createUalAfb(switchItem);
 
-			const LogicPin* select = swtch->getPin(Afb::SWITCH_SI_PIN_SELECT);
-			const LogicPin* x1 = swtch->getPin(Afb::SWITCH_SI_PIN_X1);
-			const LogicPin* x2 = swtch->getPin(Afb::SWITCH_SI_PIN_X2);
-			const LogicPin* output = swtch->getPin(Afb::SWITCH_SI_PIN_OUTPUT);
+			const SchemaPin* select = swtch->getPin(Afb::SWITCH_SI_PIN_SELECT);
+			const SchemaPin* x1 = swtch->getPin(Afb::SWITCH_SI_PIN_X1);
+			const SchemaPin* x2 = swtch->getPin(Afb::SWITCH_SI_PIN_X2);
+			const SchemaPin* output = swtch->getPin(Afb::SWITCH_SI_PIN_OUTPUT);
 
 			if (select == nullptr ||
 				x1 == nullptr ||
@@ -13277,8 +13331,8 @@ namespace Builder
 
 		bool result = true;
 
-		LogicAfbSignal inSignal;
-		LogicAfbSignal outSignal;
+		AfbSignal inSignal;
+		AfbSignal outSignal;
 
 		result &= tconv->getAfbSignalByCaption(Afb::IN_PIN_CAPTION, &inSignal);
 		result &= tconv->getAfbSignalByCaption(Afb::OUT_PIN_CAPTION, &outSignal);
@@ -13387,8 +13441,8 @@ namespace Builder
 		// No param initialization code required here.
 		// Params initialization code will be generated in generateInitAfbsCode.
 
-		LogicAfbSignal inSignal;
-		LogicAfbSignal outSignal;
+		AfbSignal inSignal;
+		AfbSignal outSignal;
 
 		result &= scale->getAfbSignalByCaption(Afb::IN_PIN_CAPTION, &inSignal);
 		result &= scale->getAfbSignalByCaption(Afb::OUT_PIN_CAPTION, &outSignal);
@@ -13423,7 +13477,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::generateDiscreteSignalToBusExtractorCode(CodeSnippet* code,
 																	   const UalItem* ualItem,
-																	   const LogicPin& inPin,
+																	   const SchemaPin& inPin,
 																	   const UalSignal* inputSignal)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
@@ -13588,11 +13642,11 @@ namespace Builder
 
 		UalItem* connectedItem = nullptr;
 
-		const std::vector<LogicPin>& inputs = currentItem->inputs();
+		const std::vector<SchemaPin>& inputs = currentItem->inputs();
 
 		bool pinFound = false;
 
-		for(const LogicPin& input : inputs)
+		for(const SchemaPin& input : inputs)
 		{
 			if (input.caption() != inPinCaption)
 			{
@@ -13634,7 +13688,7 @@ namespace Builder
 		return connectedItem;
 	}
 
-	UalItem* ModuleLogicCompiler::getAssociatedOutputPinParent(const LogicPin& inputPin, QUuid* connectedOutPinUuid) const
+	UalItem* ModuleLogicCompiler::getAssociatedOutputPinParent(const SchemaPin& inputPin, QUuid* connectedOutPinUuid) const
 	{
 		if (inputPin.IsInput() == false)
 		{
@@ -13671,7 +13725,7 @@ namespace Builder
 
 	const UalSignal* ModuleLogicCompiler::getExtractorBusSignal(const UalItem* appBusExtractor)
 	{
-		const UalBusExtractor* extractor = appBusExtractor->ualBusExtractor();
+		const SchemaBusExtractor* extractor = appBusExtractor->schemaBusExtractor();
 
 		if (extractor == nullptr)
 		{
@@ -13681,7 +13735,7 @@ namespace Builder
 
 		// getting extractor's input pin
 		//
-		const std::vector<LogicPin>& inputs = appBusExtractor->inputs();
+		const std::vector<SchemaPin>& inputs = appBusExtractor->inputs();
 
 		if (inputs.size() != 1)
 		{
@@ -13732,7 +13786,7 @@ namespace Builder
 		return srcSignal;
 	}
 
-	bool ModuleLogicCompiler::getConnectedAppItems(const LogicPin& pin, ConnectedAppItems* connectedAppItems)
+	bool ModuleLogicCompiler::getConnectedAppItems(const SchemaPin& pin, ConnectedAppItems* connectedAppItems)
 	{
 		if (connectedAppItems == nullptr)
 		{
@@ -13785,9 +13839,9 @@ namespace Builder
 
 		QStringList busTypeIDs;
 
-		for(const LogicPin& inPin : ualAfb->inputs())
+		for(const SchemaPin& inPin : ualAfb->inputs())
 		{
-			LogicAfbSignal pinSignal;
+			AfbSignal pinSignal;
 
 			result = ualAfb->getAfbSignalByPin(inPin, &pinSignal);
 
@@ -13857,7 +13911,7 @@ namespace Builder
 		return true;
 	}
 
-	UalSignal* ModuleLogicCompiler::getPinInputAppSignal(const LogicPin& inPin)
+	UalSignal* ModuleLogicCompiler::getPinInputAppSignal(const SchemaPin& inPin)
 	{
 		assert(inPin.IsInput());
 
@@ -13901,14 +13955,14 @@ namespace Builder
 			return nullptr;
 		}
 
-		const std::vector<LogicPin>* pins = &ualItem->inputs();
+		const std::vector<SchemaPin>* pins = &ualItem->inputs();
 
 		if (isInput == false)
 		{
 			pins = &ualItem->outputs();
 		}
 
-		for(const LogicPin& pin : *pins)
+		for(const SchemaPin& pin : *pins)
 		{
 			if (pin.caption() != pinCaption)
 			{
@@ -13935,23 +13989,23 @@ namespace Builder
 		return nullptr;
 	}
 
-	bool ModuleLogicCompiler::addToComparatorSet(const UalAfb* appFb)
+	bool ModuleLogicCompiler::addToComparatorSet(const UalAfb* afb)
 	{
-		if (appFb == nullptr)
+		if (afb == nullptr)
 		{
 			assert(false);
 			LOG_INTERNAL_ERROR(m_log);
 			return false;
 		}
 
-		if (appFb->isComparator() == false)
+		if (afb->isComparator() == false)
 		{
 			return true;
 		}
 
 		std::shared_ptr<Comparator> cmp = std::make_shared<Comparator>();
 
-		bool result = initComparator(cmp, appFb);
+		bool result = initComparator(cmp, afb);
 
 		RETURN_IF_FALSE(result);
 
@@ -13960,18 +14014,21 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::initComparator(std::shared_ptr<Comparator> cmp, const UalAfb* appFb)
+	bool ModuleLogicCompiler::initComparator(std::shared_ptr<Comparator> cmp, const UalAfb* afb)
 	{
-		TEST_PTR_LOG_RETURN_FALSE(appFb, log());
+		TEST_PTR_LOG_RETURN_FALSE(afb, log());
 
 		// set compare type of value
 		//
-		bool isConstComparator = appFb->isConstComaparator();
-		bool hysteresisIsConst = appFb->caption().contains("_dh_") == false;
+		bool isConstComparator = afb->isConstComaparator();
+		bool hysteresisIsConst = afb->caption().contains("_dh_") == false;
 
 		//	set comparator type, compare-value, hysteresis-value
 		//
-		for(Afb::AfbParam pv : appFb->logicFb().params())
+
+		const std::vector<Afb::AfbParam>& params = afb->params();
+
+		for(const AfbParam& pv : params)
 		{
 			if (pv.opName() == "i_conf") // set comparator type: =(1(SI)), > (2(SI)), < (3(SI)), != (4(SI)),= (5(FP)), > (6(FP)), < (7(FP)), != (8(FP)), >= (9 (SI)), <= (10 (SI)),  >= (11 (FP)),  <= (12 (FP))
 			{
@@ -13999,9 +14056,9 @@ namespace Builder
 			{
 				switch (pv.dataFormat())
 				{
-					case E::DataFormat::Float :			cmp->compare().setConstValue(pv.afbParamValue().value().toDouble());	break;
-					case E::DataFormat::SignedInt :		cmp->compare().setConstValue(pv.afbParamValue().value().toInt());		break;
-					case E::DataFormat::UnsignedInt :	cmp->compare().setConstValue(pv.afbParamValue().value().toInt());		break;
+					case E::DataFormat::Float:			cmp->compare().setConstValue(pv.afbParamValue().value().toDouble());	break;
+					case E::DataFormat::SignedInt:		cmp->compare().setConstValue(pv.afbParamValue().value().toInt());		break;
+					case E::DataFormat::UnsignedInt:	cmp->compare().setConstValue(pv.afbParamValue().value().toInt());		break;
 
 					default:
 						assert(0);
@@ -14012,9 +14069,9 @@ namespace Builder
 			{
 				switch (pv.dataFormat())
 				{
-					case E::DataFormat::Float :			cmp->hysteresis().setConstValue(pv.afbParamValue().value().toDouble());	break;
-					case E::DataFormat::SignedInt :		cmp->hysteresis().setConstValue(pv.afbParamValue().value().toInt());	break;
-					case E::DataFormat::UnsignedInt :	cmp->hysteresis().setConstValue(pv.afbParamValue().value().toInt());	break;
+					case E::DataFormat::Float:			cmp->hysteresis().setConstValue(pv.afbParamValue().value().toDouble());	break;
+					case E::DataFormat::SignedInt:		cmp->hysteresis().setConstValue(pv.afbParamValue().value().toInt());	break;
+					case E::DataFormat::UnsignedInt:	cmp->hysteresis().setConstValue(pv.afbParamValue().value().toInt());	break;
 
 					default:
 						assert(0);
@@ -14024,15 +14081,12 @@ namespace Builder
 
 		// set comparator signals
 		//
-		for(const LogicPin& pin : appFb->inputs())
+		for(const SchemaPin& pin : afb->inputs())
 		{
 
 			UalSignal* ualSignal = m_ualSignals.get(pin.guid());
 
-			if (ualSignal == nullptr)
-			{
-				continue;
-			}
+			TEST_PTR_CONTINUE(ualSignal);
 
 			if (ualSignal->isAnalog() == false)
 			{
@@ -14084,7 +14138,7 @@ namespace Builder
 			}
 		}
 
-		for(const LogicPin& pin : appFb->outputs())
+		for(const SchemaPin& pin : afb->outputs())
 		{
 			UalSignal* ualSignal = m_ualSignals.get(pin.guid());
 
@@ -14111,17 +14165,17 @@ namespace Builder
 
 		//
 		//
-		cmp->setLabel(appFb->label());
-		cmp->setPrecision(appFb->logicFb().precision());
-		cmp->setSchemaID(appFb->schemaID());
-		cmp->setSchemaItemUuid(appFb->guid());
+		cmp->setLabel(afb->label());
+		cmp->setPrecision(afb->precision());
+		cmp->setSchemaID(afb->schemaID());
+		cmp->setSchemaItemUuid(afb->guid());
 
 		// tests
 		//
 		if (cmp->input().appSignalID().isEmpty() == true)
 		{
 			assert(false);
-			QString strError = QString("Error of comparator: %1 , schema: %2 - Empty input signal").arg(appFb->caption()).arg(appFb->schemaID());
+			QString strError = QString("Error of comparator: %1 , schema: %2 - Empty input signal").arg(afb->caption()).arg(afb->schemaID());
 			LOG_INTERNAL_ERROR_MSG(m_log, strError);
 			qDebug() << strError;
 			return false;
@@ -14137,7 +14191,7 @@ namespace Builder
 
 		if (isConstComparator == false && cmp->compare().appSignalID().isEmpty() == true)
 		{
-			QString strError = QString("Error of comparator: %1 , schema: %2 - Empty cmp signal").arg(appFb->caption()).arg(appFb->schemaID());
+			QString strError = QString("Error of comparator: %1 , schema: %2 - Empty cmp signal").arg(afb->caption()).arg(afb->schemaID());
 			LOG_INTERNAL_ERROR_MSG(m_log, strError);
 			qDebug() << strError;
 			return false;
@@ -14145,7 +14199,7 @@ namespace Builder
 
 		if (hysteresisIsConst == false && cmp->hysteresis().appSignalID().isEmpty() == true)
 		{
-			QString strError = QString("Error of comparator: %1 , schema: %2 - Empty hysteresis signal").arg(appFb->caption()).arg(appFb->schemaID());
+			QString strError = QString("Error of comparator: %1 , schema: %2 - Empty hysteresis signal").arg(afb->caption()).arg(afb->schemaID());
 			LOG_INTERNAL_ERROR_MSG(m_log, strError);
 			qDebug() << strError;
 			return false;
@@ -14158,7 +14212,7 @@ namespace Builder
 			{
 				if (cmp->hysteresisIsConstSignal() == true && cmp->hysteresis().constValue() == 0.0)
 				{
-					log()->wrnALC5177(appFb->caption(), cmp->hysteresisPinCaption(), appFb->guid(), appFb->schemaID());
+					log()->wrnALC5177(afb->caption(), cmp->hysteresisPinCaption(), afb->guid(), afb->schemaID());
 				}
 			}
 		}
@@ -18078,7 +18132,7 @@ namespace Builder
 		return false;
 	}
 
-	bool ModuleLogicCompiler::checkLoopbackTargetSignalsCompatibility(const AppSignal& srcSignal, QUuid srcSignalUuid, const UalAfb& fb, const LogicAfbSignal& afbSignal)
+	bool ModuleLogicCompiler::checkLoopbackTargetSignalsCompatibility(const AppSignal& srcSignal, QUuid srcSignalUuid, const UalAfb& fb, const AfbSignal& afbSignal)
 	{
 		if (srcSignal.isDiscrete())
 		{

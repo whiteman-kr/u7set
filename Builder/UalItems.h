@@ -22,33 +22,33 @@
 
 namespace Builder
 {
-	// typedefs Logic* for types defined outside ModuleLogicCompiler
 	//
-	typedef std::shared_ptr<VFrame30::FblItemRect> LogicItem;
-	typedef VFrame30::AfbPin LogicPin;
+	// Shorter Schema* synonymouses for types incoming from Parser to ModuleLogicCompiler
+	//
+	using SchemaItem = std::shared_ptr<VFrame30::FblItemRect>;	// generic base class for different schema elements
+	using SchemaPin = VFrame30::AfbPin;
 
-	typedef VFrame30::SchemaItemSignal LogicSignal;
-	typedef VFrame30::SchemaItemAfb LogicAfb;
-	typedef VFrame30::SchemaItemConst UalConst;
+	using SchemaConst = VFrame30::SchemaItemConst ;
+	using SchemaSignal = VFrame30::SchemaItemSignal;
+	using SchemaAfb = VFrame30::SchemaItemAfb;
 
-	typedef VFrame30::SchemaItemTransmitter UalTransmitter;
-	typedef VFrame30::SchemaItemReceiver UalReceiver;
+	using SchemaTransmitter = VFrame30::SchemaItemTransmitter;
+	using SchemaReceiver = VFrame30::SchemaItemReceiver;
 
-	typedef VFrame30::SchemaItemBusComposer UalBusComposer;
-	typedef VFrame30::SchemaItemBusExtractor UalBusExtractor;
+	using SchemaBusComposer = VFrame30::SchemaItemBusComposer;
+	using SchemaBusExtractor = VFrame30::SchemaItemBusExtractor;
 
-	typedef VFrame30::SchemaItemLoopbackSource UalLoopbackSource;
-	typedef VFrame30::SchemaItemLoopbackTarget UalLoopbackTarget;
+	using SchemaLoopbackSource = VFrame30::SchemaItemLoopbackSource;
+	using SchemaLoopbackTarget =  VFrame30::SchemaItemLoopbackTarget;
 
-	typedef Afb::AfbSignal LogicAfbSignal;
-	typedef Afb::AfbParam LogicAfbParam;
+	using AfbSignal = Afb::AfbSignal;							// signal associated with AFB inputs/outputs
+	using AfbParam = Afb::AfbParam;
 
 	using AfbElementShared = std::shared_ptr<Afb::AfbElement>;
 
 	class UalItem;
-	class ModuleLogicCompiler;
-
 	class UalAfb;
+	class ModuleLogicCompiler;
 
 	class AfbComponents
 	{
@@ -151,36 +151,33 @@ namespace Builder
 		int version() const { return afbComponent()->impVersion(); }
 		QString componentCaption() const { return afbComponent()->caption(); }
 
-		const std::vector<LogicPin>& inputs() const { return m_appLogicItem.m_fblItem->inputs(); }
-		std::vector<LogicPin>& inputs() { return m_appLogicItem.m_fblItem->inputs(); }
+		const std::vector<SchemaPin>& inputs() const { return m_appLogicItem.m_fblItem->inputs(); }
+		std::vector<SchemaPin>& inputs() { return m_appLogicItem.m_fblItem->inputs(); }
 
-		const LogicPin& input(const QUuid& guid) const { return m_appLogicItem.m_fblItem->input(guid); }
-		LogicPin& input(const QUuid& guid) { return m_appLogicItem.m_fblItem->input(guid); }
+		const SchemaPin& input(const QUuid& guid) const { return m_appLogicItem.m_fblItem->input(guid); }
+		SchemaPin& input(const QUuid& guid) { return m_appLogicItem.m_fblItem->input(guid); }
 
-		const std::vector<LogicPin>& outputs() const { return m_appLogicItem.m_fblItem->outputs(); }
-		std::vector<LogicPin>& outputs() { return m_appLogicItem.m_fblItem->outputs(); }
+		const std::vector<SchemaPin>& outputs() const { return m_appLogicItem.m_fblItem->outputs(); }
+		std::vector<SchemaPin>& outputs() { return m_appLogicItem.m_fblItem->outputs(); }
 
-		const LogicPin& output(const QUuid& guid) const { return m_appLogicItem.m_fblItem->output(guid); }
+		const SchemaPin& output(const QUuid& guid) const { return m_appLogicItem.m_fblItem->output(guid); }
 		VFrame30::AfbPin& output(const QUuid& guid) { return m_appLogicItem.m_fblItem->output(guid); }
 
 		const std::vector<Afb::AfbParam>& params() const { return m_appLogicItem.afbElement().params(); }
 		std::vector<Afb::AfbParam>& params() { return m_appLogicItem.afbElement().params(); }
 
-		const LogicAfb& logicFb() const { return *m_appLogicItem.m_fblItem->toAfbElement(); }
-		const UalConst* ualConst() const { return m_appLogicItem.m_fblItem->toSchemaItemConst(); }
-		const UalTransmitter& logicTransmitter() const { return *m_appLogicItem.m_fblItem->toTransmitterElement(); }
-		const UalReceiver& logicReceiver() const { return *m_appLogicItem.m_fblItem->toReceiverElement(); }
-		const UalReceiver* ualReceiver() const { return m_appLogicItem.m_fblItem->toReceiverElement(); }
-		const UalLoopbackSource* ualLoopbackSource() const { return m_appLogicItem.m_fblItem->toLoopbackSourceElement(); }
-		const UalLoopbackTarget* ualLoopbackTarget() const { return m_appLogicItem.m_fblItem->toLoopbackTargetElement(); }
-
-		const UalBusComposer* ualBusComposer() const { return m_appLogicItem.m_fblItem->toBusComposerElement(); }
-		const UalBusExtractor* ualBusExtractor() const { return m_appLogicItem.m_fblItem->toBusExtractorElement(); }
+		const SchemaConst* schemaConst() const;
+		const SchemaSignal* schemaSignal() const;
+		const SchemaAfb* schemaAfb() const;
+		const SchemaTransmitter* schemaTransmitter() const;
+		const SchemaReceiver* schemaReceiver() const;
+		const SchemaBusComposer* schemaBusComposer() const;
+		const SchemaBusExtractor* schemaBusExtractor() const;
+		const SchemaLoopbackSource* schemaLoopbackSource() const;
+		const SchemaLoopbackTarget* schemaLoopbackTarget() const;
 
 		const Afb::AfbElement& afb() const { return m_appLogicItem.afbElement(); }
 		std::shared_ptr<Afb::AfbComponent> afbComponent() const { return m_appLogicItem.afbComponent(); }
-
-		std::shared_ptr<VFrame30::FblItemRect> itemRect() const { return m_appLogicItem.m_fblItem; }
 
 		QString schemaID() const;
 		std::shared_ptr<VFrame30::Schema> schema() { return m_appLogicItem.m_schema; }
@@ -188,10 +185,8 @@ namespace Builder
 		QString label() const { return m_appLogicItem.m_fblItem->label(); }
 		void setLabel(const QString& label) { m_appLogicItem.m_fblItem->setLabel(label); }
 
-		const LogicSignal& signal() const { return *(m_appLogicItem.m_fblItem->toSignalElement()); }
-
-		const LogicPin* getPin(QUuid pinUuid) const;
-		const LogicPin* getPin(const QString& pinCaption) const;
+		const SchemaPin* getPin(QUuid pinUuid) const;
+		const SchemaPin* getPin(const QString& pinCaption) const;
 
 		bool setParamValueByCaption(const QString& paramCaption, const QVariant& value);
 
@@ -202,22 +197,18 @@ namespace Builder
 		mutable E::UalItemType m_type = E::UalItemType::Unknown;
 
 		QHash<QString, int> m_opNameToIndexMap;
-
-		static const QString SET_FLAGS_ITEM_CAPTION;
-		static const QString SIM_LOCK_ITEM_CAPTION;
-		static const QString MISMATCH_ITEM_CAPTION;
 	};
 
 	typedef std::map<QUuid, UalItem*> ConnectedAppItems;		// connected pin Uuid => AppItem*
 
-	class AppFbParamValue
+	class AfbParamValue
 	{
 	public:
 		static const int NOT_FB_OPERAND_INDEX = -1;
 
 	public:
-		AppFbParamValue();
-		AppFbParamValue(const Afb::AfbParam& afbParam);
+		AfbParamValue();
+		AfbParamValue(const Afb::AfbParam& afbParam);
 
 		bool isUnsignedInt() const { return m_dataFormat == E::DataFormat::UnsignedInt; }
 		bool isUnsignedInt16() const { return m_dataFormat == E::DataFormat::UnsignedInt && m_dataSize == SIZE_16BIT; }
@@ -265,27 +256,25 @@ namespace Builder
 		double m_floatValue = 0;
 	};
 
-	class AppFbParamValuesArray : public std::vector<AppFbParamValue>
+	class AfbParamValuesArray : public std::vector<AfbParamValue>
 	{
 	public:
-		void insert(const QString& opName, const AppFbParamValue& value);
+		void insert(const QString& opName, const AfbParamValue& value);
 		bool contains(const QString& opName) const;
 		bool isEmpty() const;
 		bool hasParamsToInitialization() const;
 
-		AppFbParamValue& operator [] (const QString& opName);
-		const AppFbParamValue& operator [] (const QString& opName) const;
+		AfbParamValue& operator [] (const QString& opName);
+		const AfbParamValue& operator [] (const QString& opName) const;
 
 	private:
-		const AppFbParamValue& find(const QString& opName) const;
+		const AfbParamValue& find(const QString& opName) const;
 
 	private:
 		std::map<QString, size_t> m_opNameToIndex;			// opName -> index in vector
 
-		static AppFbParamValue m_nullValue;
+		static AfbParamValue m_nullValue;
 	};
-
-	class ModuleLogicCompiler;
 
 	class UalAfb : public UalItem
 	{
@@ -314,26 +303,28 @@ namespace Builder
 		bool isPackedAndLogic() const;
 		QString packedLogicID() const;
 
+		int precision() const;
+
 		const QString& instantiatorID() const;
 
 		void setInstance(int instance) { m_instance = instance; }
 		void setNumber(int number) { m_number = number; }
 
-		bool getAfbParamByIndex(int index, LogicAfbParam* afbParam) const;
-		const LogicAfbParam* getParamByOpName(const QString& opName) const;
+		bool getAfbParamByIndex(int index, AfbParam* afbParam) const;
+		const AfbParam* getParamByOpName(const QString& opName) const;
 
 		int getParamIntValueByOpName(const QString& opName, bool* ok) const;
 
-		bool getAfbSignalByPin(const LogicPin& pin, LogicAfbSignal* afbSignal) const;
-		bool getAfbSignalByIndex(int index, LogicAfbSignal* afbSignal) const;
-		bool getAfbSignalByPinUuid(QUuid pinUuid, LogicAfbSignal* afbSignal) const;
-		bool getAfbSignalByCaption(const QString& caption, LogicAfbSignal* afbSignal) const;
+		bool getAfbSignalByPin(const SchemaPin& pin, AfbSignal* afbSignal) const;
+		bool getAfbSignalByIndex(int index, AfbSignal* afbSignal) const;
+		bool getAfbSignalByPinUuid(QUuid pinUuid, AfbSignal* afbSignal) const;
+		bool getAfbSignalByCaption(const QString& caption, AfbSignal* afbSignal) const;
 
 		bool setParamValueByCaption(const QString& paramCaption, const QVariant& value);
 
 		bool calculateFbParamValues(ModuleLogicCompiler* compiler);			// implemented in file FbParamCalculation.cpp
 
-		const AppFbParamValuesArray& paramValuesArray() const { return m_paramValuesArray; }
+		const AfbParamValuesArray& paramValuesArray() const { return m_paramValuesArray; }
 
 		int runTime() const { return m_runTime; }
 
@@ -378,11 +369,11 @@ namespace Builder
 		bool checkRequiredParameters(const QStringList& requiredParams, bool displayError);
 		bool checkRequiredParameter(const QString& requiredParam, bool displayError);
 
-		bool checkUnsignedInt(const AppFbParamValue& paramValue);
-		bool checkUnsignedInt16(const AppFbParamValue& paramValue);
-		bool checkUnsignedInt32(const AppFbParamValue& paramValue);
-		bool checkSignedInt32(const AppFbParamValue& paramValue);
-		bool checkFloat32(const AppFbParamValue& paramValue);
+		bool checkUnsignedInt(const AfbParamValue& paramValue);
+		bool checkUnsignedInt16(const AfbParamValue& paramValue);
+		bool checkUnsignedInt32(const AfbParamValue& paramValue);
+		bool checkSignedInt32(const AfbParamValue& paramValue);
+		bool checkFloat32(const AfbParamValue& paramValue);
 
 		QString lmDescriptionName() const;
 
@@ -392,7 +383,7 @@ namespace Builder
 		bool m_isBusProcessing = false;
 		mutable QString m_instantiatorID;
 
-		AppFbParamValuesArray m_paramValuesArray;
+		AfbParamValuesArray m_paramValuesArray;
 
 		ModuleLogicCompiler* m_compiler = nullptr;
 		IssueLogger* m_log = nullptr;
@@ -402,15 +393,28 @@ namespace Builder
 		static std::set<QString> m_lmsWithLessGreateEqMode;
 	};
 
-	class UalAfbsMap: public HashedVector<QUuid, UalAfb*>
+	class UalAfbs
 	{
+		 // this class owns all created UalAfb
 	public:
-		virtual ~UalAfbsMap();
+		UalAfbs();
+		virtual ~UalAfbs();
 
-		UalAfb* insert(UalAfb* appFb);
 		void clear();
 
+		UalAfb* insert(UalAfb* appFb);
+		UalAfb* getAfb(const QUuid& afbGuid) const;
+		bool contains(const QUuid& afbGuid) const;
+
+		std::vector<UalAfb*>::iterator begin();
+		std::vector<UalAfb*>::const_iterator begin() const;
+
+		std::vector<UalAfb*>::iterator end();
+		std::vector<UalAfb*>::const_iterator end() const;
+
 	private:
+		std::vector<UalAfb*> m_afbs;
+		std::map<QUuid, UalAfb*> m_guidToAfb;
 		int m_fbNumber = 1;
 	};
 
@@ -418,8 +422,8 @@ namespace Builder
 
 	class UalSignal
 	{
-		// Application Signal
-		// represent all signal in application logic schemas, and signals, which createad in compiling time
+		// Class UalSignal represent all signal in application logic schemas,
+		// and signals, which createad in compiling time
 		//
 	public:
 		static const QString AUTO_CONST_SIGNAL_ID_PREFIX;
@@ -459,7 +463,7 @@ namespace Builder
 									std::shared_ptr<Hardware::DeviceModule> lm,
 									AppSignal** autoSignalPtr);
 
-		friend class UalSignalsMap;
+		friend class UalSignals;
 
 	public:
 		bool appendRefSignal(AppSignal* s, bool isOptoSignal);
@@ -521,7 +525,7 @@ namespace Builder
 		int refSignalsCount() const { return static_cast<int>(m_refSignals.count()); }
 
 		bool isCompatible(const AppSignal* s, IssueLogger* log) const;
-		bool isCanBeConnectedTo(const UalItem &ualItem, const LogicAfbSignal& afbSignal, IssueLogger* log) const;
+		bool isCanBeConnectedTo(const UalItem &ualItem, const AfbSignal& afbSignal, IssueLogger* log) const;
 		bool isCompatible(BusShared bus, const BusSignal& busSignal, IssueLogger* log) const;
 		bool isCompatible(const UalSignal* ualSignal, IssueLogger* log) const;
 		bool isCanBeConnectedTo(const UalSignal* destSignal, IssueLogger* log) const;
@@ -531,9 +535,9 @@ namespace Builder
 		bool isTunable() const { return m_isTunable; }
 
 		bool isOptoSignal() const { return m_isOptoSignal; }
-		void setReceivedOptoAppSignalID(const QString& recvAppSignalID, const UalReceiver* ualReceiver);
+		void setReceivedOptoAppSignalID(const QString& recvAppSignalID, const SchemaReceiver* ualReceiver);
 		QString receivedOptoAppSignalID() const { return m_receivedOptoAppSignalID; }
-		const UalReceiver* ualReceiver() const { return m_ualReceiver; }
+		const SchemaReceiver* ualReceiver() const { return m_ualReceiver; }
 
 		bool isSource() const { return m_isInput || m_isTunable || m_isOptoSignal || m_isConst; }
 
@@ -645,13 +649,13 @@ namespace Builder
 		bool m_isTunable = false;
 		bool m_isOptoSignal = false;
 		QString m_receivedOptoAppSignalID;
-		const UalReceiver* m_ualReceiver = nullptr;
+		const SchemaReceiver* m_ualReceiver = nullptr;
 
 		bool m_isOutput = false;
 		bool m_isAcquired = false;
 
-		UalSignal* m_parentBusSignal = nullptr;				// if not nullptr - this ual signal is bus child
-		bool m_frombusConversionRequired = false;			// set to corresponding value in bus extractor processing
+		UalSignal* m_parentBusSignal = nullptr;			// if not nullptr - this ual signal is bus child
+		bool m_frombusConversionRequired = false;		// set to corresponding value in bus extractor processing
 		bool m_frombusConversionCodeIsAlreadyGenerated = false;
 
 		bool m_computed = false;
@@ -661,20 +665,35 @@ namespace Builder
 		Address16 m_regBufAddr;							// address in RegBuf (absolute in LM's memory)
 		Address16 m_regValueAddr;						// relative address from beginning of RegBuf ()
 
-		friend class UalSignalsMap;
+		friend class UalSignals;
 	};
 
-	class UalSignalsMap: public QObject, private QHash<UalSignal*, UalSignal*>
+	class UalSignals: public QObject
 	{
 		Q_OBJECT
 	public:
-		UalSignalsMap(ModuleLogicCompiler& compiler, IssueLogger* log);
-		~UalSignalsMap();
+		UalSignals(ModuleLogicCompiler& compiler, IssueLogger* log);
+		~UalSignals();
 
-		QHash<UalSignal*, UalSignal*>::iterator begin() { return QHash<UalSignal*, UalSignal*>::begin(); }
-		QHash<UalSignal*, UalSignal*>::const_iterator begin() const { return QHash<UalSignal*, UalSignal*>::begin(); }
-		QHash<UalSignal*, UalSignal*>::iterator end() { return QHash<UalSignal*, UalSignal*>::end(); }
-		QHash<UalSignal*, UalSignal*>::const_iterator end() const { return QHash<UalSignal*, UalSignal*>::end(); }
+		void clear();
+
+		std::vector<UalSignal*>::iterator begin();
+		std::vector<UalSignal*>::const_iterator begin() const;
+
+		std::vector<UalSignal*>::iterator end();
+		std::vector<UalSignal*>::const_iterator end() const;
+
+		UalSignal* get(const QString& appSignalID) const;
+		bool contains(const QString& appSignalID) const;
+
+		UalSignal* get(const QUuid &pinUuid) const;
+		bool contains(QUuid pinUuid) const;
+
+		UalSignal* get(const AppSignal* appSignal) const;
+
+		bool contains(const UalSignal* ualSignal) const;
+
+		//
 
 		UalSignal* createSignal(AppSignal* appSignal);
 
@@ -686,7 +705,7 @@ namespace Builder
 									 QUuid outPinUuid);
 
 		UalSignal* createAutoSignal(const UalItem* ualItem, QUuid outPinUuid,
-									const LogicAfbSignal& templateOutAfbSignal,
+									const AfbSignal& templateOutAfbSignal,
 									std::optional<int> expectedReadCount);
 
 		UalSignal* createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const AppSignal& templateSignal);
@@ -696,14 +715,6 @@ namespace Builder
 
 		bool appendRefPin(const UalItem* ualItem, QUuid pinUuid, UalSignal* ualSignal);
 		bool appendRefSignal(AppSignal* s, UalSignal* ualSignal);
-
-		UalSignal* get(const QString& appSignalID) const { return m_idToSignalMap.value(appSignalID, nullptr); }
-		bool contains(const QString& appSignalID) const { return m_idToSignalMap.contains(appSignalID); }
-
-		UalSignal* get(QUuid pinUuid) const { return m_pinToSignalMap.value(pinUuid, nullptr); }
-		bool contains(QUuid pinUuid) const { return m_pinToSignalMap.contains(pinUuid); }
-
-		void clear();
 
 		bool getReport(QStringList& report) const;
 
@@ -739,11 +750,9 @@ namespace Builder
 		bool insertNew(QUuid pinUuid, UalSignal* newUalSignal);
 		void appendPinRefToSignal(QUuid pinUuid, UalSignal* ualSignal);
 
-		QString getAutoSignalID(const UalItem* appItem, const LogicPin& outputPin);
+		QString getAutoSignalID(const UalItem* ualItem, const SchemaPin& outputPin);
 
-		const UalSignal* value(const UalSignal* &key, const UalSignal* &defaultValue) const;
-
-		bool getAnalogFormat(const LogicAfbSignal& afbSignal, E::AnalogAppSignalFormat* analogFormat);
+		bool getAnalogFormat(const AfbSignal& afbSignal, E::AnalogAppSignalFormat* analogFormat);
 
 	private:
 		ModuleLogicCompiler& m_compiler;
@@ -751,13 +760,13 @@ namespace Builder
 
 		//
 
-		QHash<QString, UalSignal*> m_idToSignalMap;
-		QHash<QUuid, UalSignal*> m_pinToSignalMap;
-		QMultiHash<UalSignal*, QUuid> m_signalToPinsMap;
-		QHash<AppSignal*, UalSignal*> m_ptrToSignalMap;
+		std::vector<UalSignal*> m_signals;					// owns all created UalSignals
+		std::set<const UalSignal*> m_signalSet;
+		std::map<QString, UalSignal*> m_idToSignalMap;
+		std::map<QUuid, UalSignal*> m_pinToSignalMap;
+		std::map<const AppSignal*, UalSignal*> m_ptrToSignalMap;
 
 		SignalsHeap m_discreteSignalsHeap;
 		SignalsHeap m_analogAndBusSignalsHeap;				// for now: Analog and Bus signals
 	};
-
 }

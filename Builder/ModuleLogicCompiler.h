@@ -225,7 +225,7 @@ namespace Builder
 
 		const LmMemoryMap& lmMemoryMap() const { return m_memoryMap; }
 
-		const UalAfbsMap& ualAfbs() const;
+		const UalAfbs& ualAfbs() const;
 
 		QList<const UalSignal*> getLoopbacksUalSignals() const;
 
@@ -278,16 +278,16 @@ namespace Builder
 		bool loopbacksPreprocessing();
 		bool findAndProcessSingleItemLoopbacks();
 		void getInputsDirectlyConnectedToOutput(const UalItem* ualItem,
-										const LogicPin& output,
+										const SchemaPin& output,
 										QVector<QUuid>* connectedInputsGuids);
-		QString getConnectedLoopbackSourceID(const LogicPin& output);
+		QString getConnectedLoopbackSourceID(const SchemaPin& output);
 
 		bool findLoopbackSources();
 		bool findLoopbackTargets();
 		bool findSignalsAndPinsLinkedToLoopbackTargets();
 
 		bool getSignalsAndPinsLinkedToOutPin(	const UalItem* item,
-												const LogicPin& outPin,
+												const SchemaPin& outPin,
 												std::set<QString>* linkedSignals,
 												std::set<const UalItem*>* linkedItems,
 												std::map<QUuid, const UalItem*>* linkedPins);
@@ -298,23 +298,23 @@ namespace Builder
 
 		bool createUalSignalsFromBusComposers();
 		bool createUalSignalsFromBusComposer(UalItem* ualItem);
-		UalSignal* createBusParentSignal(UalItem* ualItem, const LogicPin& outPin, AppSignal* s, const QString& busTypeID);
+		UalSignal* createBusParentSignal(UalItem* ualItem, const SchemaPin& outPin, AppSignal* s, const QString& busTypeID);
 		UalSignal* createBusParentSignalFromBusExtractorConnectedToDiscreteSignal(UalItem* ualItem);
 
 		bool createUalSignalsFromOptoValidity();
 
 		bool createUalSignalsFromReceivers();
 		bool createUalSignalsFromReceiver(UalItem* ualItem);
-		bool createUalSignalFromReceiverOutput(UalItem* ualItem, const LogicPin& outPin, const QString& appSignalID, bool isSinglePortConnection);
-		bool createUalSignalFromReceiverValidity(UalItem* ualItem, const LogicPin& validityPin, std::shared_ptr<Hardware::Connection> connection);
-		bool getReceiverConnectionID(const UalReceiver* receiver, QString* connectionID, const QString& schemaID);
+		bool createUalSignalFromReceiverOutput(UalItem* ualItem, const SchemaPin& outPin, const QString& appSignalID, bool isSinglePortConnection);
+		bool createUalSignalFromReceiverValidity(UalItem* ualItem, const SchemaPin& validityPin, std::shared_ptr<Hardware::Connection> connection);
+		bool getReceiverConnectionID(const SchemaReceiver* receiver, QString* connectionID, const QString& schemaID);
 
 		bool createUalSignalFromSignal(UalItem* ualItem, int passNo);
 		bool createUalSignalFromConst(UalItem* ualItem);
 		bool createUalSignalsFromAfbOuts(UalItem* ualItem);
 		bool linkUalSignalsFromBusExtractor(UalItem* ualItem);
 
-		bool linkConnectedItems(UalItem* srcUalItem, const LogicPin& outPin, UalSignal* ualSignal);
+		bool linkConnectedItems(UalItem* srcUalItem, const SchemaPin& outPin, UalSignal* ualSignal);
 		bool linkSignal(UalItem* srcItem, UalItem* signalItem, QUuid inPinUuid, UalSignal* ualSignal);
 		bool linkAfbInput(UalItem* srcItem, UalItem* afbItem, QUuid inPinUuid, UalSignal* ualSignal);
 		bool linkSetFlagsItemInput(UalItem* srcItem, UalItem* setFlagsItem, QUuid inPinUuid, UalSignal* ualSignal);
@@ -355,24 +355,24 @@ namespace Builder
 
 		//
 
-		AppSignal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal, const QString& busTypeID);
-		AppSignal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal);
-		AppSignal* getCompatibleConnectedSignal(const LogicPin& outPin, const AppSignal& s);
-		AppSignal* getCompatibleConnectedBusSignal(const LogicPin& outPin, const QString& busTypeID);
-		bool isCompatible(const LogicAfbSignal& outAfbSignal, const QString& busTypeID, const AppSignal* s);
+		AppSignal* getCompatibleConnectedSignal(const SchemaPin& outPin, const AfbSignal& outAfbSignal, const QString& busTypeID);
+		AppSignal* getCompatibleConnectedSignal(const SchemaPin& outPin, const AfbSignal& outAfbSignal);
+		AppSignal* getCompatibleConnectedSignal(const SchemaPin& outPin, const AppSignal& s);
+		AppSignal* getCompatibleConnectedBusSignal(const SchemaPin& outPin, const QString& busTypeID);
+		bool isCompatible(const AfbSignal& outAfbSignal, const QString& busTypeID, const AppSignal* s);
 
-		bool isConnectedToTerminatorOnly(const LogicPin& outPin) const;
+		bool isConnectedToTerminatorOnly(const SchemaPin& outPin) const;
 		bool isOutConnectedToTerminatorOnly(const UalAfb* ualItem) const;
-		bool isConnectedToLoopback(const LogicPin& inPin, std::shared_ptr<Loopback>* loopback);
+		bool isConnectedToLoopback(const SchemaPin& inPin, std::shared_ptr<Loopback>* loopback);
 		bool determineOutBusTypeID(UalAfb* ualAfb, QString* outBusTypeID);
 		bool determineBusTypeByInputs(const UalAfb* ualAfb, QString* outBusTypeID);
 		bool determineBusTypeByOutput(const UalAfb* ualAfb, QString* outBusTypeID);
 		bool isBusTypesAreEqual(const QStringList& busTypes);
-		std::optional<int> getOutPinExpectedReadCount(const LogicPin& outPin);
+		std::optional<int> getOutPinExpectedReadCount(const SchemaPin& outPin);
 		int getAfbInPinExpectedReadCount(const UalItem* ualItem, const QUuid& inPinGuid);
 
 		bool checkInOutsConnectedToSignal(UalItem* ualItem, bool shouldConnectToSameSignal);
-		bool checkPinsConnectedToSignal(const std::vector<LogicPin>& pins, bool shouldConnectToSameSignal, UalSignal** sameSignal);
+		bool checkPinsConnectedToSignal(const std::vector<SchemaPin>& pins, bool shouldConnectToSameSignal, UalSignal** sameSignal);
 
 		bool appendRefPinToSignal(UalItem* ualItem, UalSignal* ualSignal);
 
@@ -480,12 +480,12 @@ namespace Builder
 		bool processTransmitter(const UalItem* ualItem);
 		bool getConnectedSignals(const UalItem* transmitterItem, QVector<QPair<QString, UalSignal *>>* connectedSignals);
 
-		bool getDirectlyConnectedInSignalID(const LogicPin& inPin, QString* directlyConnectedInSignalID);
-		bool getNearestInSignalIDs(const LogicPin& inPin, QStringList* nearestSignalIDs);
-		bool getNearestInSignalID(const LogicPin& inPin, QString* nearestSignalID);
-		bool getNearestOutSignalIDs(const LogicPin& outPin, QStringList* nearestSignalIDs);
-		bool getNearestOutSignalID(const LogicPin& outPin, QString* nearestSignalID);
-		bool getNearestSignalID(const LogicPin& inOutPin, QString* nearestSignalID);
+		bool getDirectlyConnectedInSignalID(const SchemaPin& inPin, QString* directlyConnectedInSignalID);
+		bool getNearestInSignalIDs(const SchemaPin& inPin, QStringList* nearestSignalIDs);
+		bool getNearestInSignalID(const SchemaPin& inPin, QString* nearestSignalID);
+		bool getNearestOutSignalIDs(const SchemaPin& outPin, QStringList* nearestSignalIDs);
+		bool getNearestOutSignalID(const SchemaPin& outPin, QString* nearestSignalID);
+		bool getNearestSignalID(const SchemaPin& inOutPin, QString* nearestSignalID);
 
 		bool processSinglePortReceivers();
 		bool processSinglePortReceiver(const UalItem* item);
@@ -548,24 +548,24 @@ namespace Builder
 											const BusProcessingStepInfo& bpStepInfo);
 
 		bool generateSignalToAfbInputCode(CodeSnippet* code, const UalAfb* ualAfb,
-										  const LogicAfbSignal& inAfbSignal,
+										  const AfbSignal& inAfbSignal,
 										  const UalSignal* inUalSignal,
 										  const BusProcessingStepInfo& bpStepInfo,
 										  const Address16& readAddr,
 										  bool ignoreTypeChecking);
 
 		bool generateSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb,
-											 const LogicAfbSignal& inAfbSignal,
+											 const AfbSignal& inAfbSignal,
 											 const UalSignal* inUalSignal,
 											 const BusProcessingStepInfo& bpStepInfo);
 
 		bool generateDiscreteSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb,
-													 const LogicAfbSignal& inAfbSignal,
+													 const AfbSignal& inAfbSignal,
 													 const UalSignal* inUalSignal,
 													 const BusProcessingStepInfo& bpStepInfo);
 
 		bool generateBusSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb,
-												const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal,
+												const AfbSignal& inAfbSignal, const UalSignal* inUalSignal,
 												const BusProcessingStepInfo& bpStepInfo);
 
 		bool startAfb(CodeSnippet* code, const UalAfb* ualAfb, const BusProcessingStepInfo& bpStepInfo);
@@ -574,14 +574,14 @@ namespace Builder
 											 const BusProcessingStepInfo& bpStepInfo);
 
 		bool generateAfbOutputToSignalCode(CodeSnippet* code, const UalAfb* ualAfb,
-										   const LogicAfbSignal& outAfbSignal,
+										   const AfbSignal& outAfbSignal,
 										   const UalSignal* outUalSignal,
 										   const BusProcessingStepInfo& bpStepInfo,
 										   const Address16& writeAddr,
 										   bool ignoreTypeChecking);
 
 		bool generateAfbBusOutputToBusSignalCode(CodeSnippet* code, const UalAfb* ualAfb,
-												 const LogicAfbSignal& outAfbSignal, const UalSignal* outUalSignal,
+												 const AfbSignal& outAfbSignal, const UalSignal* outUalSignal,
 												 const BusProcessingStepInfo& bpStepInfo);
 
 		// Packed AFBs code generation
@@ -619,7 +619,7 @@ namespace Builder
 											  const QString& comment);
 
 		bool calcBusProcessingSteps(const UalAfb* ualAfb, std::vector<int>* busProcessingStepsSizes);
-		bool getPinsAndSignalsBusSizes(const UalAfb* ualAfb, const std::vector<LogicPin>& pins,
+		bool getPinsAndSignalsBusSizes(const UalAfb* ualAfb, const std::vector<SchemaPin>& pins,
 									   std::vector<std::vector<int>>* pinsSizes, int* signalsSize, bool isInputs,
 									   bool* allBusInputsConnectedToDiscretes);
 		//
@@ -757,22 +757,22 @@ namespace Builder
 
 		bool generateDiscreteSignalToBusExtractorCode(CodeSnippet* code,
 													  const UalItem* ualItem,
-													  const LogicPin& inPin,
+													  const SchemaPin& inPin,
 													  const UalSignal* inputSignal);
 
 		bool generateMemCopyCode(Address16 toAddr, Address16 fromAddr, int sizeW, const QString& comment, CodeSnippet* code);
 
 		UalItem* getInputPinAssociatedOutputPinParent(QUuid appItemUuid, const QString& inPinCaption, QUuid* connectedOutPinUuid) const;
-		UalItem* getAssociatedOutputPinParent(const LogicPin& inputPin, QUuid* connectedOutPinUuid = nullptr) const;
+		UalItem* getAssociatedOutputPinParent(const SchemaPin& inputPin, QUuid* connectedOutPinUuid = nullptr) const;
 		const UalSignal* getExtractorBusSignal(const UalItem* appBusExtractor);
-		bool getConnectedAppItems(const LogicPin& pin, ConnectedAppItems* connectedAppItems);
+		bool getConnectedAppItems(const SchemaPin& pin, ConnectedAppItems* connectedAppItems);
 		bool getBusProcessingParams(const UalAfb* appFb, bool& isBusProcessingAfb, QString& busTypeID);
-		UalSignal* getPinInputAppSignal(const LogicPin& inPin);
+		UalSignal* getPinInputAppSignal(const SchemaPin& inPin);
 
 		UalSignal* getUalSignalByPinCaption(const UalItem* ualItem, const QString& pinCaption, bool isInput);
 
-		bool addToComparatorSet(const UalAfb *appFb);
-		bool initComparator(std::shared_ptr<Comparator> cmp, const UalAfb* appFb);
+		bool addToComparatorSet(const UalAfb* appFb);
+		bool initComparator(std::shared_ptr<Comparator> cmp, const UalAfb* afb);
 
 		bool copyAcquiredAnalogOptoSignalsInRegBuf(CodeSnippet* code);
 		bool copyAcquiredAnalogBusChildSignalsInRegBuf(CodeSnippet* code);
@@ -875,7 +875,7 @@ namespace Builder
 		void cleanup();
 
 		bool checkLoopbackTargetSignalsCompatibility(const AppSignal& srcSignal, QUuid srcSignalUuid, const AppSignal& destSignal, QUuid destSignalUuid);
-		bool checkLoopbackTargetSignalsCompatibility(const AppSignal& srcSignal, QUuid srcSignalUuid, const UalAfb& fb, const LogicAfbSignal& afbSignal);
+		bool checkLoopbackTargetSignalsCompatibility(const AppSignal& srcSignal, QUuid srcSignalUuid, const UalAfb& fb, const AfbSignal& afbSignal);
 
 		bool isUsedInUal(const AppSignal* s) const;
 		bool isUsedInUal(const QString& appSignalID) const;
@@ -911,7 +911,7 @@ namespace Builder
 		bool codeNotBit(CodeSnippet* code, const Address16& srcAddr, const QString& srcComment,
 						 const Address16& destAddr, const QString& destComment) const;
 
-		UalSignalsMap& ualSignals() { return m_ualSignals; }
+		UalSignals& ualSignals() { return m_ualSignals; }
 
 		QString getFormatStr(const Hardware::DeviceAppSignal& ds);
 		QString getFormatStr(const AppSignal& s);
@@ -996,8 +996,8 @@ namespace Builder
 
 		AfbComponents m_afbComponents;
 
-		UalSignalsMap m_ualSignals;
-		UalAfbsMap m_ualAfbs;
+		UalSignals m_ualSignals;
+		UalAfbs m_ualAfbs;
 		int m_packedLogicAfbInstance = -1;			// AFB LOGIC instance reserved for packed logic processing
 
 		// maps of OR and AND afbs guids which can be replaced by bit acc commands

@@ -212,6 +212,7 @@ public:
 	int dataSize() const { return m_dataSize; }
 	void setDataSize(int dataSize) { m_dataSize = dataSize; }
 	void setDataSizeW(int sizeW);
+	void setDataSizeByType(E::SignalType type, E::AnalogAppSignalFormat analogFormat);
 
 	int sizeW() const { return (m_dataSize / SIZE_16BIT + ((m_dataSize % SIZE_16BIT) ? 1 : 0)); }
 	int sizeBit() const { return m_dataSize; }

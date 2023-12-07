@@ -800,6 +800,40 @@ void AppSignal::setDataSizeW(int sizeW)
 	m_dataSize = sizeW * SIZE_16BIT;
 }
 
+void AppSignal::setDataSizeByType(E::SignalType type, E::AnalogAppSignalFormat analogFormat)
+{
+	switch(type)
+	{
+	case E::SignalType::Discrete:
+		m_dataSize = SIZE_1BIT;
+		break;
+
+	case E::SignalType::Analog:
+
+		switch(analogFormat)
+		{
+		case E::AnalogAppSignalFormat::Float32:
+			m_dataSize = FLOAT32_SIZE;
+			break;
+		case E::AnalogAppSignalFormat::SignedInt32:
+			m_dataSize = SIGNED_INT32_SIZE;
+			break;
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		break;
+
+	case E::SignalType::Bus:
+		m_dataSize = 0;					// size is defined by BusType
+		break;
+
+	default:
+		Q_ASSERT(false);
+	}
+}
+
 void AppSignal::setAnalogSignalFormat(E::AnalogAppSignalFormat dataFormat)
 {
 	m_analogSignalFormat = dataFormat;

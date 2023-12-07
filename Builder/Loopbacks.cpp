@@ -18,7 +18,7 @@ namespace Builder
 	{
 		TEST_PTR_RETURN(m_sourceItem);
 
-		const UalLoopbackSource* src = m_sourceItem->ualLoopbackSource();
+		const SchemaLoopbackSource* src = m_sourceItem->schemaLoopbackSource();
 
 		TEST_PTR_RETURN(src);
 
@@ -129,7 +129,7 @@ namespace Builder
 	{
 		TEST_PTR_RETURN_FALSE(sourceItem);
 
-		const UalLoopbackSource* src = sourceItem->ualLoopbackSource();
+		const SchemaLoopbackSource* src = sourceItem->schemaLoopbackSource();
 
 		TEST_PTR_RETURN_FALSE(src);
 
@@ -171,7 +171,7 @@ namespace Builder
 	{
 		TEST_PTR_RETURN_FALSE(ualSignal);
 
-		const UalLoopbackSource* source = loopbackSourceItem->ualLoopbackSource();
+		const SchemaLoopbackSource* source = loopbackSourceItem->schemaLoopbackSource();
 
 		if  (source == nullptr)
 		{

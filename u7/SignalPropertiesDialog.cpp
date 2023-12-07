@@ -90,6 +90,12 @@ bool SignalPropertiesDialog::isValid() const
 
 void SignalPropertiesDialog::initNewSignal(AppSignal& signal)
 {
+	signal.setInOutType(E::SignalInOutType::Internal);
+	signal.setByteOrder(E::ByteOrder::BigEndian);
+	signal.setDataSizeByType(signal.signalType(), signal.analogSignalFormat());
+	signal.setAnalogSignalFormat(signal.analogSignalFormat());
+	signal.initTuningValues();
+
 	AppSignalPropertyManager* propManager = AppSignalPropertyManager::getInstance();
 
 	auto setter = [&signal, &propManager](const QString& name, QVariant value)
@@ -111,16 +117,11 @@ void SignalPropertiesDialog::initNewSignal(AppSignal& signal)
 	switch (signal.signalType())
 	{
 	case E::SignalType::Analog:
-		signal.setDataSize(FLOAT32_SIZE);
-		signal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
 		setter(AppSignalPropNames::LOW_ENGINEERING_UNITS, 0.0);
 		setter(AppSignalPropNames::HIGH_ENGINEERING_UNITS, 100.0);
 		break;
 
 	case E::SignalType::Discrete:
-		signal.setDataSize(DISCRETE_SIZE);
-		break;
-
 	case E::SignalType::Bus:
 		break;
 
@@ -160,11 +161,6 @@ void SignalPropertiesDialog::initNewSignal(AppSignal& signal)
 			propManager->setValue(&signal, i, value, theSettings.isExpertMode());
 		}
 	}
-
-	signal.initTuningValues();
-
-	signal.setInOutType(E::SignalInOutType::Internal);
-	signal.setByteOrder(E::ByteOrder::BigEndian);
 }
 
 // Returns vector of pairs,

@@ -186,7 +186,7 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
+		AfbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
 
 		CHECK_UNSIGNED_INT(i_conf)
 
@@ -225,7 +225,7 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
+		AfbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
 
 		CHECK_UNSIGNED_INT(i_conf);
 
@@ -257,7 +257,7 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
+		AfbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
 
 		CHECK_UNSIGNED_INT(i_conf)
 
@@ -291,7 +291,7 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
+		AfbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
 
 		CHECK_UNSIGNED_INT(i_conf)
 
@@ -321,7 +321,7 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf_y = m_paramValuesArray["i_conf_y"];
+		AfbParamValue& i_conf_y = m_paramValuesArray["i_conf_y"];
 
 		CHECK_UNSIGNED_INT(i_conf_y)
 
@@ -366,10 +366,10 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams)
 
-		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
-		AppFbParamValue& sSettingParam = m_paramValuesArray["i_sp_s"];
-		AppFbParamValue& rSettingParam = m_paramValuesArray["i_sp_r"];
-		AppFbParamValue& hysteresisParam = m_paramValuesArray["hysteresis"];
+		AfbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
+		AfbParamValue& sSettingParam = m_paramValuesArray["i_sp_s"];
+		AfbParamValue& rSettingParam = m_paramValuesArray["i_sp_r"];
+		AfbParamValue& hysteresisParam = m_paramValuesArray["hysteresis"];
 
 		CHECK_UNSIGNED_INT(i_conf)
 
@@ -618,13 +618,13 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
+		AfbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
 
 		CHECK_UNSIGNED_INT(i_conf)
 
 		if (isConstDamper == true)
 		{
-			AppFbParamValue& i_del = m_paramValuesArray["i_del"];
+			AfbParamValue& i_del = m_paramValuesArray["i_del"];
 			CHECK_SIGNED_INT32(i_del)
 		}
 
@@ -662,8 +662,8 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
-		AppFbParamValue& i_count = m_paramValuesArray["i_count"];
+		AfbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
+		AfbParamValue& i_count = m_paramValuesArray["i_count"];
 
 		CHECK_UNSIGNED_INT(i_conf)
 		CHECK_UNSIGNED_INT(i_count)
@@ -728,7 +728,7 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
+		AfbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
 
 		CHECK_UNSIGNED_INT(i_conf)
 
@@ -774,13 +774,13 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams)
 
-		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
-		AppFbParamValue& k1Param = m_paramValuesArray["i_scal_k1_coef"];
-		AppFbParamValue& k2Param = m_paramValuesArray["i_scal_k2_coef"];
-		AppFbParamValue& x1Param = m_paramValuesArray["x1"];
-		AppFbParamValue& x2Param = m_paramValuesArray["x2"];
-		AppFbParamValue& y1Param = m_paramValuesArray["y1"];
-		AppFbParamValue& y2Param = m_paramValuesArray["y2"];
+		AfbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
+		AfbParamValue& k1Param = m_paramValuesArray["i_scal_k1_coef"];
+		AfbParamValue& k2Param = m_paramValuesArray["i_scal_k2_coef"];
+		AfbParamValue& x1Param = m_paramValuesArray["x1"];
+		AfbParamValue& x2Param = m_paramValuesArray["x2"];
+		AfbParamValue& y1Param = m_paramValuesArray["y1"];
+		AfbParamValue& y2Param = m_paramValuesArray["y2"];
 
 		CHECK_UNSIGNED_INT(i_conf)
 
@@ -1057,7 +1057,7 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams)
 
-		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
+		AfbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
 
 		CHECK_UNSIGNED_INT(i_conf)
 
@@ -1073,8 +1073,8 @@ namespace Builder
 
 			// get parameters that defined by user
 			//
-			AppFbParamValue* x[XY_POINT_COUNT];
-			AppFbParamValue* y[XY_POINT_COUNT];
+			AfbParamValue* x[XY_POINT_COUNT];
+			AfbParamValue* y[XY_POINT_COUNT];
 
 			for(int i = 0; i < XY_POINT_COUNT; i++)
 			{
@@ -1125,7 +1125,7 @@ namespace Builder
 
 			// get FB's parameters
 			//
-			AppFbParamValue* x_data[CHECK_POINT_COUNT];
+			AfbParamValue* x_data[CHECK_POINT_COUNT];
 
 			for(int i = 0; i < CHECK_POINT_COUNT; i++)
 			{
@@ -1134,8 +1134,8 @@ namespace Builder
 				CHECK_SIGNED_INT32(*x_data[i]);
 			}
 
-			AppFbParamValue* scal_k1[RANGE_COUNT];
-			AppFbParamValue* scal_k2[RANGE_COUNT];
+			AfbParamValue* scal_k1[RANGE_COUNT];
+			AfbParamValue* scal_k2[RANGE_COUNT];
 
 			for(int i = 0; i < RANGE_COUNT; i++)
 			{
@@ -1185,8 +1185,8 @@ namespace Builder
 
 			// get parameters that defined by user
 			//
-			AppFbParamValue* x[XY_POINT_COUNT];
-			AppFbParamValue* y[XY_POINT_COUNT];
+			AfbParamValue* x[XY_POINT_COUNT];
+			AfbParamValue* y[XY_POINT_COUNT];
 
 			for(int i = 0; i < XY_POINT_COUNT; i++)
 			{
@@ -1237,7 +1237,7 @@ namespace Builder
 
 			// get FB's parameters
 			//
-			AppFbParamValue* x_data[CHECK_POINT_COUNT];
+			AfbParamValue* x_data[CHECK_POINT_COUNT];
 
 			for(int i = 0; i < CHECK_POINT_COUNT; i++)
 			{
@@ -1246,8 +1246,8 @@ namespace Builder
 				CHECK_FLOAT32(*x_data[i]);
 			}
 
-			AppFbParamValue* scal_k1[RANGE_COUNT];
-			AppFbParamValue* scal_k2[RANGE_COUNT];
+			AfbParamValue* scal_k1[RANGE_COUNT];
+			AfbParamValue* scal_k2[RANGE_COUNT];
 
 			for(int i = 0; i < RANGE_COUNT; i++)
 			{
@@ -1302,7 +1302,7 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
+		AfbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
 
 		CHECK_UNSIGNED_INT(i_conf)
 
@@ -1378,8 +1378,8 @@ namespace Builder
 
 		if (isConstIntegrator == true)
 		{
-			AppFbParamValue* i_max = nullptr;
-			AppFbParamValue* i_min = nullptr;
+			AfbParamValue* i_max = nullptr;
+			AfbParamValue* i_min = nullptr;
 
 			CHECK_AND_GET_REQUIRED_PARAMETER("i_max", i_max);
 			CHECK_AND_GET_REQUIRED_PARAMETER("i_min", i_min);
@@ -1396,8 +1396,8 @@ namespace Builder
 				return false;
 			}
 
-			AppFbParamValue* i_ti = nullptr;
-			AppFbParamValue* i_ki = nullptr;
+			AfbParamValue* i_ti = nullptr;
+			AfbParamValue* i_ki = nullptr;
 
 			CHECK_AND_GET_REQUIRED_PARAMETER("i_ti", i_ti);
 			CHECK_AND_GET_REQUIRED_PARAMETER("i_ki", i_ki);
@@ -1445,7 +1445,7 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams)
 
-		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
+		AfbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
 
 		CHECK_UNSIGNED_INT(i_conf)
 
@@ -1481,7 +1481,7 @@ namespace Builder
 
 			if (hasHysteresisParam == true)
 			{
-				AppFbParamValue& hysteresisParam = m_paramValuesArray["hysteresis"];
+				AfbParamValue& hysteresisParam = m_paramValuesArray["hysteresis"];
 
 				// comparison of signed int values
 				//
@@ -1514,7 +1514,7 @@ namespace Builder
 
 			if (hasHysteresisParam == true)
 			{
-				AppFbParamValue& hysteresisParam = m_paramValuesArray["hysteresis"];
+				AfbParamValue& hysteresisParam = m_paramValuesArray["hysteresis"];
 
 				// comparison of floating point values
 				//
@@ -1565,7 +1565,7 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
+		AfbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
 
 		CHECK_UNSIGNED_INT(i_conf)
 
@@ -1605,7 +1605,7 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
+		AfbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
 
 		CHECK_UNSIGNED_INT(i_conf);
 
@@ -1618,8 +1618,8 @@ namespace Builder
 
 			if (isConstLimiter == true)
 			{
-				AppFbParamValue& i_lim_max = m_paramValuesArray["i_lim_max"];
-				AppFbParamValue& i_lim_min = m_paramValuesArray["i_lim_min"];
+				AfbParamValue& i_lim_max = m_paramValuesArray["i_lim_max"];
+				AfbParamValue& i_lim_min = m_paramValuesArray["i_lim_min"];
 
 				CHECK_SIGNED_INT32(i_lim_max);
 				CHECK_SIGNED_INT32(i_lim_min);
@@ -1641,8 +1641,8 @@ namespace Builder
 
 			if (isConstLimiter == true)
 			{
-				AppFbParamValue& i_lim_max = m_paramValuesArray["i_lim_max"];
-				AppFbParamValue& i_lim_min = m_paramValuesArray["i_lim_min"];
+				AfbParamValue& i_lim_max = m_paramValuesArray["i_lim_max"];
+				AfbParamValue& i_lim_min = m_paramValuesArray["i_lim_min"];
 
 				CHECK_FLOAT32(i_lim_max);
 				CHECK_FLOAT32(i_lim_min);
@@ -1689,8 +1689,8 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
-		AppFbParamValue& i_data_x = m_paramValuesArray["i_data_x"];
+		AfbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
+		AfbParamValue& i_data_x = m_paramValuesArray["i_data_x"];
 
 		CHECK_UNSIGNED_INT(i_conf);
 
@@ -1749,9 +1749,9 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
-		AppFbParamValue& i_data_x1 = m_paramValuesArray[Afb::PARAM_I_DATA_X1];
-		AppFbParamValue& i_data_x2 = m_paramValuesArray[Afb::PARAM_I_DATA_X2];
+		AfbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
+		AfbParamValue& i_data_x1 = m_paramValuesArray[Afb::PARAM_I_DATA_X1];
+		AfbParamValue& i_data_x2 = m_paramValuesArray[Afb::PARAM_I_DATA_X2];
 
 		CHECK_UNSIGNED_INT(i_conf);
 
@@ -1849,8 +1849,8 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
-		AppFbParamValue& i_data_x1 = m_paramValuesArray[Afb::PARAM_I_DATA_X1];
+		AfbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
+		AfbParamValue& i_data_x1 = m_paramValuesArray[Afb::PARAM_I_DATA_X1];
 
 		CHECK_UNSIGNED_INT(i_conf);
 
@@ -1881,7 +1881,7 @@ namespace Builder
 
 			if (i_conf.unsignedIntValue() == 2)
 			{
-				AppFbParamValue& i_data_x2 = m_paramValuesArray[Afb::PARAM_I_DATA_X2];
+				AfbParamValue& i_data_x2 = m_paramValuesArray[Afb::PARAM_I_DATA_X2];
 
 				CHECK_SIGNED_INT32(i_data_x2);
 
@@ -1921,7 +1921,7 @@ namespace Builder
 
 			if (i_conf.unsignedIntValue() == 4)
 			{
-				AppFbParamValue& i_data_x2 = m_paramValuesArray[Afb::PARAM_I_DATA_X2];
+				AfbParamValue& i_data_x2 = m_paramValuesArray[Afb::PARAM_I_DATA_X2];
 
 				CHECK_FLOAT32(i_data_x2);
 
@@ -1972,7 +1972,7 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
+		AfbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
 
 		CHECK_UNSIGNED_INT(i_conf);
 
@@ -1982,7 +1982,7 @@ namespace Builder
 
 		for(quint32 n = 1; n <= COEF_MAX_NUM; n++)
 		{
-			AppFbParamValue& i_N_oprd = m_paramValuesArray[QString("i_%1_oprd").arg(n)];
+			AfbParamValue& i_N_oprd = m_paramValuesArray[QString("i_%1_oprd").arg(n)];
 
 			CHECK_FLOAT32(i_N_oprd);
 
@@ -2013,8 +2013,8 @@ namespace Builder
 
 		if (isConstDerivative == true)
 		{
-			AppFbParamValue* i_max = nullptr;
-			AppFbParamValue* i_min = nullptr;
+			AfbParamValue* i_max = nullptr;
+			AfbParamValue* i_min = nullptr;
 
 			CHECK_AND_GET_REQUIRED_PARAMETER("i_max", i_max);
 			CHECK_AND_GET_REQUIRED_PARAMETER("i_min", i_min);
@@ -2031,8 +2031,8 @@ namespace Builder
 				return false;
 			}
 
-			AppFbParamValue* i_kd = nullptr;
-			AppFbParamValue* i_td = nullptr;
+			AfbParamValue* i_kd = nullptr;
+			AfbParamValue* i_td = nullptr;
 
 			CHECK_AND_GET_REQUIRED_PARAMETER("i_kd", i_kd);
 			CHECK_AND_GET_REQUIRED_PARAMETER("i_td", i_td);
@@ -2055,8 +2055,8 @@ namespace Builder
 
 	bool UalAfb::calculate_MISMATCH_paramValues()
 	{
-		AppFbParamValue* i_conf = nullptr;
-		AppFbParamValue* i_conf_n = nullptr;
+		AfbParamValue* i_conf = nullptr;
+		AfbParamValue* i_conf_n = nullptr;
 
 		CHECK_AND_GET_REQUIRED_PARAMETER(Afb::PARAM_I_CONF, i_conf);
 		CHECK_AND_GET_REQUIRED_PARAMETER("i_conf_n", i_conf_n);
@@ -2075,9 +2075,9 @@ namespace Builder
 
 		// optional parameters for mismatchWithRange == true
 		//
-		AppFbParamValue* i_lowlim = nullptr;
-		AppFbParamValue* i_highlim = nullptr;
-		AppFbParamValue* i_relvalue = nullptr;
+		AfbParamValue* i_lowlim = nullptr;
+		AfbParamValue* i_highlim = nullptr;
+		AfbParamValue* i_relvalue = nullptr;
 
 		if (mismatchWithRange == true)
 		{
@@ -2097,7 +2097,7 @@ namespace Builder
 
 		// optional parameter for mismatchDynamic == false
 		//
-		AppFbParamValue* i_ust = nullptr;
+		AfbParamValue* i_ust = nullptr;
 
 		if (mismatchDynamic == false)
 		{
@@ -2253,7 +2253,7 @@ namespace Builder
 
 		CHECK_REQUIRED_PARAMETERS(requiredParams);
 
-		AppFbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
+		AfbParamValue& i_conf = m_paramValuesArray[Afb::PARAM_I_CONF];
 
 		// i_conf must have value from 1 to 4
 		//
@@ -2286,7 +2286,7 @@ namespace Builder
 	{
 		m_runTime = 3 + 32;
 
-		AppFbParamValue* i_conf = nullptr;
+		AfbParamValue* i_conf = nullptr;
 
 		CHECK_AND_GET_REQUIRED_PARAMETER(Afb::PARAM_I_CONF, i_conf);
 
@@ -2313,9 +2313,9 @@ namespace Builder
 
 		m_runTime = 10 + 32;
 
-		AppFbParamValue* i_conf = nullptr;
-		AppFbParamValue* i_t_high = nullptr;
-		AppFbParamValue* i_t_low = nullptr;
+		AfbParamValue* i_conf = nullptr;
+		AfbParamValue* i_t_high = nullptr;
+		AfbParamValue* i_t_low = nullptr;
 
 		CHECK_AND_GET_REQUIRED_PARAMETER(Afb::PARAM_I_CONF, i_conf);
 		CHECK_AND_GET_REQUIRED_PARAMETER("i_t_high", i_t_high);

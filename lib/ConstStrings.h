@@ -771,6 +771,10 @@ namespace Afb
 	inline const QString AFB_BUS_NOT("bus_not");
 	inline const QString AFB_OR("or");
 	inline const QString AFB_AND("and");
+
+	inline const QString SET_FLAGS("set_flags");
+	inline const QString SIMLOCK("simlock");
+	inline const QString MISMATCH("mismatch");
 }
 
 namespace LmDescriptionName
