@@ -94,6 +94,12 @@ namespace ReportLib
 		void addMarginItem(const ReportMarginItem& item);
 		void clearMarginItems();
 
+		const ReportVariables& reportVariables() const;
+		ReportVariables& reportVariables();
+
+		int startPage() const;
+		void setStartPage(int value);
+
 	private:
 		// Page options
 		//
@@ -101,6 +107,8 @@ namespace ReportLib
 
 		std::vector<std::shared_ptr<ReportSection>> m_sections;
 		std::vector<ReportMarginItem> m_marginItems;
+		ReportVariables m_variables;
+		int m_startPage{1};						// Report start page number
 
 		QString m_reportName;
 		QString m_path;

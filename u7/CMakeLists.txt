@@ -205,6 +205,8 @@ set (U7_SOURCES
 	PasswordService.h
 	ProjectsTabPage.cpp
 	ProjectsTabPage.h
+	Reports/DialogReportPageSetup.cpp
+	Reports/DialogReportPageSetup.h
 	Reports/DialogSchemasReport.cpp
 	Reports/DialogSchemasReport.h
 	Reports/DialogSchemasExport.cpp

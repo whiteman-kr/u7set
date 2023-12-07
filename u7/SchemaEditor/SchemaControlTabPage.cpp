@@ -4361,7 +4361,7 @@ void SchemaControlTabPage::exportToPdf()
 	QString singleFileName;
 
 	QString pathName;
-	Builder::SchemasReportOptions options{false, false, false};
+	Builder::SchemasReportOptions options = Builder::SchemasReportOptions::optionsForSingleSchema();
 
 	if (files.size() == 1)
 	{
@@ -4387,8 +4387,7 @@ void SchemaControlTabPage::exportToPdf()
 	}
 	else
 	{
-		Builder::SchemasReportOptions storedOptions{options};
-		storedOptions.load(db());
+		Builder::SchemasReportOptions storedOptions = Builder::SchemasReportOptions::optionsForSchemasAlbum(db());
 
 		DialogSchemasExport d(storedOptions,
 							  QSettings{}.value("SchemaEditor/Export/SchemaPdfPath", QDir().toNativeSeparators(QDir::currentPath())).toString(),

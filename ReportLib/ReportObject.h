@@ -79,6 +79,25 @@ namespace ReportLib
 	};
 
 	//
+	// ReportVariables
+	//
+	class ReportVariables : public VFrame30::IViewVariables
+	{
+	public:
+		// IViewVariables implementation
+		//
+		[[nodiscard]] bool variableExists(const QString& name) const override;
+		[[nodiscard]] QVariant variable(const QString& name) const override;
+		void setVariable(const QString& name, const QVariant& value) override;
+
+		//
+		void setVariables(const std::map<QString, QString>& variables);
+
+	private:
+		std::map<QString, QString> m_variables;
+	};
+
+	//
 	// ReportMarginItem
 	//
 

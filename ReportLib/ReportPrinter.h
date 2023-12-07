@@ -24,11 +24,10 @@ namespace ReportLib
 
 		Type type() const {return m_type;}
 
-		virtual void print(ReportPrinter& printer,
+		virtual void print(Report& report,
+						   ReportPrinter& printer,
 						   QPdfWriter& pdfWriter,
 						   QPainter& painter,
-						   const std::vector<ReportMarginItem>& marginItems,
-						   int pageCount,
 						   int& pageIndex,
 						   QMutex& pageCounterMutex) = 0;
 
@@ -52,11 +51,10 @@ namespace ReportLib
 
 		virtual QRect contentRect() const override;
 
-		virtual void print(ReportPrinter& printer,
+		virtual void print(Report& report,
+						   ReportPrinter& printer,
 						   QPdfWriter& pdfWriter,
 						   QPainter& painter,
-						   const std::vector<ReportMarginItem>& marginItems,
-						   int pageCount,
 						   int& pageIndex,
 						   QMutex& pageCounterMutex) override;
 
@@ -79,11 +77,10 @@ namespace ReportLib
 
 		virtual QRect contentRect() const override;
 
-		virtual void print(ReportPrinter& printer,
+		virtual void print(Report& report,
+						   ReportPrinter& printer,
 						   QPdfWriter& pdfWriter,
 						   QPainter& painter,
-						   const std::vector<ReportMarginItem>& marginItems,
-						   int pageCount,
 						   int& pageIndex,
 						   QMutex& pageCounterMutex) override;
 
@@ -183,19 +180,19 @@ namespace ReportLib
 
 		bool preview(const Report& report, std::vector<RenderedSection>& renderedSections, std::atomic_bool& stop);
 
-		bool print(const Report& report, const QString& fileName, std::atomic_bool& stop);
-		bool print(const Report& report, QBuffer& buffer, std::atomic_bool& stop);
+		bool print(Report& report, const QString& fileName, std::atomic_bool& stop);
+		bool print(Report& report, QBuffer& buffer, std::atomic_bool& stop);
 
 		Statistics statistics() const;
 
-		void printMarginItems(QPdfWriter& pdfWriter,
+		void printMarginItems(const Report& report,
+							  QPdfWriter& pdfWriter,
 							  QPainter& painter,
-							  const std::vector<ReportMarginItem>& marginItems,
 							  const QString& tag) const;
 
 	private:
 		[[nodiscard]] bool createRenderedSections(const Report& report, std::vector<RenderedSection>& renderedSections, Statistics::Status status, std::atomic_bool& stop);
-		[[nodiscard]] bool printRenderedSections(const Report& report, const std::vector<RenderedSection>& renderedSections, QBuffer& buffer, std::atomic_bool& stop);
+		[[nodiscard]] bool printRenderedSections(Report& report, const std::vector<RenderedSection>& renderedSections, QBuffer& buffer, std::atomic_bool& stop);
 
 		mutable QMutex m_statisticsMutex;
 		mutable Statistics m_statistics;
