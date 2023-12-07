@@ -203,5 +203,26 @@ namespace ReportLib
 	{
 		m_marginItems.clear();
 	}
+
+	const ReportVariables& Report::reportVariables() const
+	{
+		return m_variables;
+	}
+
+	ReportVariables& Report::reportVariables()
+	{
+		return m_variables;
+	}
+
+	int Report::startPage() const
+	{
+		return m_startPage;
+	}
+
+	void Report::setStartPage(int value)
+	{
+		m_startPage = value;
+	}
+
 }
 

@@ -11,10 +11,10 @@ void SchemasAlbumGenerator::createSchemasAlbums(DbController* db, const AppSigna
 {
 	QString path = QSettings{}.value("SchemaEditor/Export/AlbumPath", QDir().toNativeSeparators(QDir::currentPath())).toString();
 
-	static std::vector<Builder::SchemaTypesParams> schemaTypesParams = {};
-	if (schemaTypesParams.empty() == true)
+	std::vector<Builder::SchemaTypesParams> schemaTypesParams = Builder::SchemasReportGenerator::defaultFileTypesParams(db);
+	for (auto& param : schemaTypesParams)
 	{
-		schemaTypesParams = Builder::SchemasReportGenerator::defaultFileTypesParams(db);
+		param.load(db);
 	}
 
 	// Get all schemas tags
@@ -44,27 +44,42 @@ void SchemasAlbumGenerator::createSchemasAlbums(DbController* db, const AppSigna
 		}
 	}
 
-	Builder::SchemasReportOptions options;
-	options.load(db);
-	options.setTags(schemaTags);
+	Builder::SchemasReportOptions options = Builder::SchemasReportOptions::optionsForSchemasAlbum(db);
+	options.setSchemaTags(schemaTags);
 
 	// Show dialog with report options
 	//
-	DialogSchemasReport d(path, schemaTypesParams,
-						  Builder::SchemasReportGenerator::defaultFileTypesParams(db), options, parent);
-	if (d.exec() != QDialog::Accepted)
+	DialogSchemasReport d(path,
+						  schemaTypesParams,
+						  options,
+						  db,
+						  parent);
+	
+	int result = d.exec();
+
+	if (d.optionsApplied() == true)
+	{
+		// Save options set in the dialog
+		//
+		schemaTypesParams = d.schemaTypesParams();
+		for (auto& param : schemaTypesParams)
+		{
+			param.save(db);
+		}
+		
+		options = d.options();
+		options.save(db);
+
+		path = d.path();
+		QSettings{}.setValue("SchemaEditor/Export/AlbumPath", path);
+
+	}
+
+	if (result != QDialog::Accepted)
 	{
 		return;
 	}
-	schemaTypesParams = d.schemaTypesParams();
-
-	options = d.options();
-	path = d.path();
-	options.save(db);
-	QSettings{}.setValue("SchemaEditor/Export/AlbumPath", path);
-
-	options.footers = true;	// When loading and storing options, keep footers true!
-
+	
 	SchemasReportGeneratorThread r(theSettings.serverHost(),
 								   theSettings.serverPort(),
 								   theSettings.serverUsername(),
@@ -135,7 +150,7 @@ void SchemasReportGeneratorThread::run(TaskType task,
 {
 	// Create View
 
-	std::shared_ptr<ReportSchemaView> schemaView = std::make_shared<ReportSchemaView>(m_options.itemsLabels);
+	std::shared_ptr<ReportSchemaView> schemaView = std::make_shared<ReportSchemaView>(m_options.itemsLabels());
 
 	schemaView->session().setProject(m_projectName);
 	schemaView->session().setUsername(m_userName);
@@ -171,18 +186,18 @@ void SchemasReportGeneratorThread::run(TaskType task,
 	{
 	case TaskType::ExportFilesToMultiplePdf:
 		{
-			QObject::connect(thread, &QThread::started, worker, &SchemasReportGenerator::exportFilesToMultiplePdf);
+			QObject::connect(thread, &QThread::started, worker, &SchemasReportGenerator::exportSchemasToMultiplePdf);
 		}
 		break;
 	case TaskType::ExportFilesToSinglePdf:
 		{
-			QObject::connect(thread, &QThread::started, worker, &SchemasReportGenerator::exportFilesToSinglePdf);
+			QObject::connect(thread, &QThread::started, worker, &SchemasReportGenerator::exportSchemasToSinglePdf);
 		}
 		break;
 	case TaskType::ExportAllSchemasToAlbum:
 		{
 			Q_ASSERT(files.empty() == true);	// No files should be here
-			QObject::connect(thread, &QThread::started, worker, &SchemasReportGenerator::exportAllSchemasToAlbums);
+			QObject::connect(thread, &QThread::started, worker, &SchemasReportGenerator::exportSchemasToAlbums);
 		}
 		break;
 	}

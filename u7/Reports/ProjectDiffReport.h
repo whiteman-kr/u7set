@@ -85,14 +85,9 @@ struct ProjectDiffReportParams
 	std::vector<Builder::SchemaTypesParams> schemaTypesParams;
 
 	bool expertProperties = false;
-	bool multipleFiles = false;
+	bool singleFile = true;
 
-	// Single-file report page options
-	//
-	QPageLayout singleFilePageLayout = QPageLayout(QPageSize(QPageSize::A3),
-										 QPageLayout::Orientation::Portrait,
-										 QMarginsF(30, 20, 15, 20),
-										 QPageLayout::Unit::Millimeter);
+	QPageLayout singleFilePageLayout() const;
 };
 
 class ProjectDiffGeneratorThread

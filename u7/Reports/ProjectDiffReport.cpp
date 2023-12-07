@@ -248,6 +248,26 @@ void FileDiff::alignResults(const std::vector<T>& source, const std::vector<T>& 
 
 
 //
+// ProjectDiffReportParams
+//
+QPageLayout ProjectDiffReportParams::singleFilePageLayout() const
+{
+	static QPageLayout lEmpty;
+
+	for (const auto& p : schemaTypesParams)
+	{
+		if (p.hasFileId() == false)
+		{
+			const int layoutIndex = 0;
+			return p.pageLayoutWithMargins(layoutIndex);
+		}
+	}
+
+	Q_ASSERT(false);
+	return lEmpty;
+}
+
+//
 // ProjectDiffThread
 //
 
@@ -313,7 +333,7 @@ void ProjectDiffGeneratorThread::run(const QString& fileName,
 
 	if (dialogProgress.hasErrorMessage() == false)
 	{
-		if (settings.multipleFiles == false)
+		if (settings.singleFile == true)
 		{
 			if (QMessageBox::question(parent, qAppName(), QObject::tr("Report generating has been finished.\n\nDo you with to open it?")) == QMessageBox::Yes)
 			{
@@ -424,57 +444,62 @@ std::vector<Builder::SchemaTypesParams> ProjectDiffGenerator::defaultFileTypePar
 	QMarginsF portatitMargins{30, 20, 15, 20};
 	QMarginsF langscapeMargins{20, 30, 20, 15};
 
+	QStringList layoutNames;
+	layoutNames << QString();
+
 	// Hardware and signals
 
 	result.push_back({db->systemFileId(DbDir::HardwareConfigurationDir), QObject::tr("Hardware Configuration"),	true,
-					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter)});
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter), layoutNames});
 
 	result.push_back({applicationSignalsTypeId(), QObject::tr("Application Signals"), true,
-					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter)});
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter), layoutNames});
 
 
 	//Schemas
 
 	result.push_back({db->systemFileId(DbDir::MonitorSchemasDir), QObject::tr("Monitor Schemas"), true,
-					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, langscapeMargins, QPageLayout::Unit::Millimeter)});
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, langscapeMargins, QPageLayout::Unit::Millimeter), layoutNames});
 
 	result.push_back({db->systemFileId(DbDir::TuningSchemasDir), QObject::tr("Tuning Schemas"),	true,
-					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, langscapeMargins, QPageLayout::Unit::Millimeter)});
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, langscapeMargins, QPageLayout::Unit::Millimeter), layoutNames});
 
 	result.push_back({db->systemFileId(DbDir::DiagnosticsSchemasDir), QObject::tr("Diagnostics Schemas"), true,
-					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, langscapeMargins, QPageLayout::Unit::Millimeter)});
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, langscapeMargins, QPageLayout::Unit::Millimeter), layoutNames});
 
 	result.push_back({db->systemFileId(DbDir::AppLogicDir), QObject::tr("Application Logic"), true,
-					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, langscapeMargins, QPageLayout::Unit::Millimeter)});
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, langscapeMargins, QPageLayout::Unit::Millimeter), layoutNames});
 
 	result.push_back({db->systemFileId(DbDir::UfblDir), QObject::tr("UFBL Descriptions"), true,
-					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, langscapeMargins, QPageLayout::Unit::Millimeter)});
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, langscapeMargins, QPageLayout::Unit::Millimeter), layoutNames});
 
 	// Other objects
 
 	result.push_back({db->systemFileId(DbDir::BusTypesDir),	QObject::tr("Busses"), true,
-					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter)});
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter), layoutNames});
 
 	result.push_back({db->systemFileId(DbDir::ConnectionsDir), QObject::tr("Connections"), true,
-					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter)});
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter), layoutNames});
 
 	result.push_back({db->systemFileId(DbDir::SimTestsDir),	QObject::tr("Simulator Tests"), true,
-					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter)});
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter), layoutNames});
 
 	result.push_back({db->systemFileId(DbDir::AfblDir),	QObject::tr("AFBL Descriptions"), false,
-					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter)});
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter), layoutNames});
 
 	result.push_back({db->systemFileId(DbDir::HardwarePresetsDir), QObject::tr("Hardware Presets"),	false,
-					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter)});
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter), layoutNames});
 
 	result.push_back({db->systemFileId(DbDir::ModuleConfigurationDir), QObject::tr("Module Configuration"), false,
-					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter)});
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter), layoutNames});
 
 	result.push_back({db->systemFileId(DbDir::EtcDir), QObject::tr("Other Files"), false,
-					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter)});
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter), layoutNames});
+
+	result.push_back({-1, QObject::tr("Single-File Report"), false,
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter), layoutNames});
 
 	return result;
-
 }
 
 void ProjectDiffGenerator::process()
@@ -491,9 +516,9 @@ void ProjectDiffGenerator::process()
 
 		// Generate generic report file with all report files description
 		//
-		if (m_reportParams.multipleFiles == true)
+		if (m_reportParams.singleFile == false)
 		{
-			generateSummaryReport(m_reportParams.singleFilePageLayout);
+			generateSummaryReport(m_reportParams.singleFilePageLayout());
 		}
 
 		{
@@ -741,14 +766,19 @@ void ProjectDiffGenerator::compareProject()
 
 	for (const Builder::SchemaTypesParams& ft : m_reportParams.schemaTypesParams)
 	{
-		if (ft.selected() == false)
+		if (m_stop == true)
+		{
+			break;
+		}
+
+		if (ft.hasFileId() == false)
 		{
 			continue;
 		}
 
-		if (m_stop == true)
+		if (ft.selected() == false)
 		{
-			return;
+			continue;
 		}
 
 		// Create report object and specify its filename
@@ -758,7 +788,7 @@ void ProjectDiffGenerator::compareProject()
 
 		// Create filename for multiple-files report
 		//
-		if (m_reportParams.multipleFiles == true)
+		if (m_reportParams.singleFile == false)
 		{
 			qsizetype pos = pdfFileName.lastIndexOf('.');
 			if (pos != -1)
@@ -773,11 +803,12 @@ void ProjectDiffGenerator::compareProject()
 			pdfFileName.replace(' ', '_');
 		}
 
-		QPageLayout pageLayout = m_reportParams.multipleFiles == true ? ft.pageLayout() : m_reportParams.singleFilePageLayout;
+		const int layoutIndex = 0;
+		QPageLayout pageLayout = (m_reportParams.singleFile == true) ? m_reportParams.singleFilePageLayout() : ft.pageLayoutWithMargins(layoutIndex);
 
 		// Create report
 		//
-		if (report == nullptr || m_reportParams.multipleFiles == true)
+		if (report == nullptr || m_reportParams.singleFile == false)
 		{
 			report = std::make_shared<Report>(ft.caption(), pdfFileName);
 			report->setResolution(m_resolution);
@@ -786,13 +817,13 @@ void ProjectDiffGenerator::compareProject()
 			// Create title page
 			//
 			auto titlePageSection = generateTitlePage(pageLayout, m_reportParams.compareData, m_projectName, m_userName,
-													  m_reportParams.multipleFiles == true ? ft.caption() : QString());
+													  m_reportParams.singleFile == false ? ft.caption() : QString());
 			report->insertSection(0, titlePageSection);
 
 			// Create margins
 			//
 			createMarginItems(*report, m_reportParams.compareData,
-							  m_reportParams.multipleFiles == true ? ft.caption() : QString());
+							  m_reportParams.singleFile == false ? ft.caption() : QString());
 		}
 
 		// Specify section name to statistics
@@ -2650,7 +2681,7 @@ void ProjectDiffGenerator::createMarginItems(Report& report, const CompareData& 
 
 	QString projectNameStr = tr("Project: ") + m_projectName;
 
-	if (m_reportParams.multipleFiles == true && subreportName.isEmpty() == false)
+	if (m_reportParams.singleFile == false && subreportName.isEmpty() == false)
 	{
 		projectNameStr += tr("; section: %1").arg(subreportName);
 	}

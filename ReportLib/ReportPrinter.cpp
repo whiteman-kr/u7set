@@ -32,11 +32,10 @@ namespace ReportLib
 		return QRect(QPoint(0, 0), m_textDocument.size().toSize());
 	}
 
-	void PrintText::print(ReportPrinter& printer,
+	void PrintText::print(Report& report,
+						  ReportPrinter& printer,
 						  QPdfWriter& pdfWriter,
 						  QPainter& painter,
-						  const std::vector<ReportMarginItem>& marginItems,
-						  int /*pageCount*/,
 						  int& pageIndex,
 						  QMutex& pageCounterMutex)
 	{
@@ -48,6 +47,8 @@ namespace ReportLib
 			pageIndex++;
 		}
 
+		report.reportVariables().setVariable("REPORT_PAGE", pageIndex + report.startPage());
+
 		if (m_textDocument.isEmpty() == true)
 		{
 			return;
@@ -55,7 +56,7 @@ namespace ReportLib
 
 		if (m_verticalOffset == 0)
 		{
-			printer.printMarginItems(pdfWriter, painter, marginItems, tag());
+			printer.printMarginItems(report, pdfWriter, painter, tag());
 		}
 
 		// Page contains text
@@ -96,7 +97,9 @@ namespace ReportLib
 					pageIndex++;
 				}
 
-				printer.printMarginItems(pdfWriter, painter, marginItems, tag());
+				report.reportVariables().setVariable("REPORT_PAGE", pageIndex + report.startPage());
+
+				printer.printMarginItems(report, pdfWriter, painter, tag());
 			}
 		}
 	}
@@ -131,11 +134,10 @@ namespace ReportLib
 		return QRect{0, 0, 0, 0};
 	}
 
-	void PrintSchema::print(ReportPrinter& printer,
+	void PrintSchema::print(Report& report,
+							ReportPrinter& printer,
 							QPdfWriter& pdfWriter,
 							QPainter& painter,
-							const std::vector<ReportMarginItem>& marginItems,
-							int /*pageCount*/,
 							int& pageIndex,
 							QMutex& pageCounterMutex)
 	{
@@ -155,10 +157,7 @@ namespace ReportLib
 			}
 		}
 
-		if (m_verticalOffset == 0)
-		{
-			printer.printMarginItems(pdfWriter, painter, marginItems, tag());
-		}
+		report.reportVariables().setVariable("REPORT_PAGE", pageIndex + report.startPage());
 
 		// Calculate the upper schema offset
 		//
@@ -166,10 +165,7 @@ namespace ReportLib
 
 		// Set margins area as 1% of area height
 		//
-		int schemaMargin = pageRect.height() * 0.01;
-		pageRect = pageRect.marginsRemoved(QMargins(schemaMargin, schemaMargin, schemaMargin, schemaMargin));
-
-		int schemaTop = m_verticalOffset + (schemaMargin * 2);
+		int schemaTop = m_verticalOffset;
 		int schemaLeft = 0;
 
 		const int schemaMaxHeight = pageRect.height() - schemaTop;
@@ -222,6 +218,14 @@ namespace ReportLib
 
 		painter.restore();
 
+		// Print footer
+		//
+		if (m_verticalOffset == 0)
+		{
+			printer.printMarginItems(report, pdfWriter, painter, tag());
+		}
+
+
 		return;
 	}
 
@@ -257,7 +261,7 @@ namespace ReportLib
 		return true;
 	}
 
-	bool ReportPrinter::print(const Report& report, const QString& fileName, std::atomic_bool& stop)
+	bool ReportPrinter::print(Report& report, const QString& fileName, std::atomic_bool& stop)
 	{
 		QBuffer buffer;
 
@@ -276,7 +280,7 @@ namespace ReportLib
 		return true;
 	}
 
-	bool ReportPrinter::print(const Report& report, QBuffer& buffer, std::atomic_bool& stop)
+	bool ReportPrinter::print(Report& report, QBuffer& buffer, std::atomic_bool& stop)
 	{
 		std::vector<RenderedSection> renderedSections;
 
@@ -304,9 +308,9 @@ namespace ReportLib
 		return m_statistics;
 	}
 
-	void ReportPrinter::printMarginItems(QPdfWriter& pdfWriter,
+	void ReportPrinter::printMarginItems(const Report& report,
+										 QPdfWriter& pdfWriter,
 										 QPainter& painter,
-										 const std::vector<ReportMarginItem>& marginItems,
 										 const QString& tag) const
 	{
 		int page = 0;
@@ -324,16 +328,14 @@ namespace ReportLib
 
 		const QRect pageRect = pdfWriter.pageLayout().paintRectPixels(resolution);
 
-		//QMargins margins = pdfWriter.pageLayout().marginsPixels(resolution);
-
 		QRect topRect(pageRect.left(),
 					  fullPageRect.top(),
-					  pageRect.width()/* + (margins.left() + margins.right()) / 2*/,
+					  pageRect.width(),
 					  abs(pageRect.top() - fullPageRect.top()));
 
-		QRect bottomRect(pageRect.left()/* + margins.left() / 2*/,
+		QRect bottomRect(pageRect.left(),
 						 pageRect.bottom(),
-						 pageRect.width()/* + (margins.left() + margins.right()) / 2*/,
+						 pageRect.width(),
 						 abs(pageRect.bottom() - fullPageRect.bottom()));
 
 		painter.save();
@@ -343,7 +345,7 @@ namespace ReportLib
 #ifdef DEBUG_PRINT_PAGE_RECT
 		bool first = true;
 #endif
-		for (const ReportMarginItem& item : marginItems)
+		for (const ReportMarginItem& item : report.marginItems())
 		{
 			if (item.pageFrom != -1 && item.pageFrom > page)
 			{
@@ -358,7 +360,7 @@ namespace ReportLib
 
 			if (text == "%PAGE%")
 			{
-				text = QObject::tr("Page %1 of %2").arg(page).arg(pagesCount);
+				text = QObject::tr("Page %1 of %2").arg(page + report.startPage()).arg(pagesCount + report.startPage() - 1);
 			}
 
 			if (text == "%TAG%")
@@ -429,8 +431,6 @@ namespace ReportLib
 			QMutexLocker l(&m_statisticsMutex);
 			m_statistics.sectionCount = static_cast<int>(report.sections().size());
 			m_statistics.sectionIndex = 0;
-			m_statistics.pagesCount = 0;
-			m_statistics.pageIndex = 0;
 			m_statistics.status = status;
 		}
 
@@ -581,7 +581,7 @@ namespace ReportLib
 		return true;
 	}
 
-	bool ReportPrinter::printRenderedSections(const Report& report, const std::vector<RenderedSection>& renderedSections, QBuffer& buffer, std::atomic_bool& stop)
+	bool ReportPrinter::printRenderedSections(Report& report, const std::vector<RenderedSection>& renderedSections, QBuffer& buffer, std::atomic_bool& stop)
 	{
 		int pagesCount = 0;
 
@@ -596,7 +596,7 @@ namespace ReportLib
 			QMutexLocker l(&m_statisticsMutex);
 			m_statistics.status = Statistics::Status::Printing;
 			m_statistics.pagesCount = pagesCount;
-			m_statistics.pageIndex = 1;
+			m_statistics.pageIndex = 0;
 		}
 
 		buffer.open(QIODevice::WriteOnly);
@@ -610,7 +610,6 @@ namespace ReportLib
 		pdfWriter.setResolution(report.resolution());
 
 		QPainter painter(&pdfWriter);
-
 
 		bool firstRenderedSection = true;
 
@@ -657,9 +656,7 @@ namespace ReportLib
 					return true;
 				}
 
-
-				po->print(*this, pdfWriter, painter, report.marginItems(),
-						  pagesCount, m_statistics.pageIndex, m_statisticsMutex);
+				po->print(report, *this, pdfWriter, painter, m_statistics.pageIndex, m_statisticsMutex);
 			}
 		}
 		return true;

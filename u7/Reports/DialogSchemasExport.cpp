@@ -13,8 +13,8 @@ DialogSchemasExport::DialogSchemasExport(const Builder::SchemasReportOptions& op
 {
 	ui->setupUi(this);
 
-	ui->checkFooters->setChecked(m_options.footers);
-	ui->checkItemsLabels->setChecked(m_options.itemsLabels);
+	ui->checkFooters->setChecked(m_options.footers());
+	ui->checkItemsLabels->setChecked(m_options.itemsLabels());
 
 	ui->filePathEdit->setText(m_pathName);
 	ui->fileNameEdit->setText(m_fileName);
@@ -53,8 +53,8 @@ void DialogSchemasExport::accept()
 	m_fileName = ui->fileNameEdit->text();
 	m_pathName = ui->filePathEdit->text();
 
-	m_options.footers = ui->checkFooters->isChecked() == true;
-	m_options.itemsLabels = ui->checkItemsLabels->isChecked() == true;
+	m_options.setFooters(ui->checkFooters->isChecked() == true);
+	m_options.setItemsLabels(ui->checkItemsLabels->isChecked() == true);
 
 	if (isSingleFile() == false)
 	{

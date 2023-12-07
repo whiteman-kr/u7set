@@ -112,14 +112,14 @@
      <item>
       <widget class="QCheckBox" name="checkFooters">
        <property name="text">
-        <string>Page Footers</string>
+        <string>Add pages footers</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QCheckBox" name="checkItemsLabels">
        <property name="text">
-        <string>Schemas Items Labels</string>
+        <string>Show schema items labels</string>
        </property>
       </widget>
      </item>
