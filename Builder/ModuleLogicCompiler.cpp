@@ -10157,6 +10157,34 @@ namespace Builder
 		int const0Count = 0;
 		int const1Count = 0;
 
+		auto it = m_context->m_packedLogicSources.find(afb->label());
+
+		if (it != m_context->m_packedLogicSources.end())
+		{
+#ifdef QT_DEBUG
+			const std::list<LmPackedLogicSources>& sources = it->second;
+
+			for(const LmPackedLogicSources& src : sources)
+			{
+				if (src.lmID == lmEquipmentID())
+				{
+					Q_ASSERT(false);
+					LOG_INTERNAL_ERROR(m_log);
+					return false;
+				}
+			}
+#endif
+		}
+		else
+		{
+			auto [newIt, b] = m_context->m_packedLogicSources.emplace(afb->label(), std::list<LmPackedLogicSources>{});
+			it = newIt;
+		}
+
+		LmPackedLogicSources& lmSources = it->second.emplace_back(LmPackedLogicSources{});
+
+		lmSources.lmID = lmEquipmentID();
+
 		// input signals checking
 		//
 		for(const SchemaPin& inPin : inputs)
@@ -10170,6 +10198,13 @@ namespace Builder
 				result = false;
 				continue;
 			}
+
+			PackedLogicSource src;
+
+			src.appSignalID = inSignal->appSignalID();
+			src.sourceItemLabelOut = inSignal->ualItemLabelOutPinCaption();
+
+			lmSources.sources.push_back(src);
 
 			Address16 readAddr;
 
@@ -10378,11 +10413,6 @@ namespace Builder
 		//
 		// inSignals - is unique non const input signals
 		//
-
-		if (afb->label() == "PACKED_AND_TESTS_BIT_ACC_1431")
-		{
-			DEBUG_STOP;
-		}
 
 		bool isAndLogic = false;
 		QString afbCaption;

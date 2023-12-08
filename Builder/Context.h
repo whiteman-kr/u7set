@@ -25,6 +25,18 @@ namespace Builder
 {
 	class AppLogicData;
 
+	struct PackedLogicSource
+	{
+		QString appSignalID;
+		QString sourceItemLabelOut;
+	};
+
+	struct LmPackedLogicSources
+	{
+		QString lmID;
+		std::list<PackedLogicSource> sources;
+	};
+
 	class Context
 	{
 	public:
@@ -81,6 +93,8 @@ namespace Builder
 		std::shared_ptr<ComparatorSet> m_comparatorSet;
 
 		std::unordered_set<QString> m_analogSignalsOnSchemas;
+
+		std::map<QString, std::list<LmPackedLogicSources>> m_packedLogicSources;	// Packed_Logic_ID => list of LmPacketLogicSources
 	};
 
 } // namespace Builder

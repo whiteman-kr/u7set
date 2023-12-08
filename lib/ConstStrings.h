@@ -507,6 +507,7 @@ namespace Separator
 	inline const QString SEMICOLON_SPACE("; ");
 	inline const QString SEMICOLON(";");
 	inline const QString MINUS("-");
+	inline const QString DOT(".");
 	inline const QString COMMA(",");
 	inline const QString COMMA_SPACE(", ");
 	inline const QString LINE("-------------------------------------------------------------------------------");

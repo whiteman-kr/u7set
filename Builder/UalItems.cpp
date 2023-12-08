@@ -1391,11 +1391,11 @@ namespace Builder
 		m_refSignals.clear();
 	}
 
-	bool UalSignal::createRegularSignal(const UalItem* ualItem, AppSignal* s)
+	bool UalSignal::createRegularSignal(const UalItem* ualItem, const QUuid& outPinGuid, AppSignal* s)
 	{
 		// ualItem can be == nullptr!!!
 		//
-		m_ualItem = ualItem;
+		setSourceUalItem(ualItem, outPinGuid);
 
 		if (s == nullptr )
 		{
@@ -1403,7 +1403,7 @@ namespace Builder
 			return false;
 		}
 
-		appendRefSignal(s, false);
+		appendRefAppSignal(s, false);
 
 		// input and tuning signals have already been computed
 		//
@@ -1425,9 +1425,17 @@ namespace Builder
 		TEST_PTR_RETURN_FALSE(ualItem);
 		TEST_PTR_RETURN_FALSE(autoSignalPtr);
 
-		m_ualItem = ualItem;
-
 		const SchemaConst* ualConst = ualItem->schemaConst();
+
+		const std::vector<SchemaPin>& outs = ualConst->outputs();
+
+		if (outs.size() != 1)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		setSourceUalItem(ualItem, outs[0].guid());
 
 		TEST_PTR_RETURN_FALSE(ualConst);
 
@@ -1462,7 +1470,7 @@ namespace Builder
 
 		autoSignal->setAcquire(false);
 
-		appendRefSignal(autoSignal, false);
+		appendRefAppSignal(autoSignal, false);
 
 		// set Const signal fields
 		//
@@ -1492,6 +1500,7 @@ namespace Builder
 
 	bool UalSignal::createAutoSignal(const QString& lmEquipmentID,
 									 const UalItem* ualItem,
+									 const QUuid& outPinGuid,
 									 const QString& signalID,
 									 E::SignalType signalType,
 									 E::AnalogAppSignalFormat analogFormat,
@@ -1500,7 +1509,7 @@ namespace Builder
 		TEST_PTR_RETURN_FALSE(ualItem);
 		TEST_PTR_RETURN_FALSE(autoSignalPtr);
 
-		m_ualItem = ualItem;
+		setSourceUalItem(ualItem, outPinGuid);
 
 		m_isAutoSignal = true;
 
@@ -1536,13 +1545,14 @@ namespace Builder
 
 		autoSignal->setAcquire(false);
 
-		appendRefSignal(autoSignal, false);
+		appendRefAppSignal(autoSignal, false);
 
 		return true;
 	}
 
-	bool UalSignal::createBusParentSignal(  const QString& lmEquipmentID,
+	bool UalSignal::createBusParentSignal(const QString& lmEquipmentID,
 											const UalItem* ualItem,
+											const QUuid& outPinGuid,
 											AppSignal* appBusSignal,
 											Builder::BusShared bus,
 											const QString& outPinCaption,
@@ -1560,7 +1570,8 @@ namespace Builder
 			return false;
 		}
 
-		m_ualItem = ualItem;
+		setSourceUalItem(ualItem, outPinGuid);
+
 		m_bus = bus;
 
 		if (appBusSignal == nullptr)
@@ -1605,12 +1616,12 @@ namespace Builder
 			assert(appBusSignal->busTypeID() == bus->busTypeID());
 		}
 
-		appendRefSignal(appBusSignal, false);
+		appendRefAppSignal(appBusSignal, false);
 
 		return true;
 	}
 
-	bool UalSignal::appendRefSignal(AppSignal* s, bool isOptoSignal)
+	bool UalSignal::appendRefAppSignal(AppSignal* s, bool isOptoSignal)
 	{
 		if (s == nullptr)
 		{
@@ -1719,7 +1730,7 @@ namespace Builder
 			return false;
 		}
 
-		return childSignal->appendRefSignal(s, false);
+		return childSignal->appendRefAppSignal(s, false);
 	}
 
 	Address16 UalSignal::ioBufAddr() const
@@ -2509,12 +2520,38 @@ namespace Builder
 		return ualReceiver->connectionIds();
 	}
 
-	void UalSignal::setUalItem(const UalItem* ualItem)
+	void UalSignal::setSourceUalItem(const UalItem* ualItem, const QUuid& outPinGuid)
 	{
-		if (m_ualItem == nullptr)
+		if (m_ualItem != nullptr)
 		{
-			m_ualItem = ualItem;
+			return;		// only one source ualItem.outPinGuid can be exist
 		}
+
+		if (ualItem == nullptr ||
+			outPinGuid.isNull())
+		{
+			return;
+		}
+
+		const SchemaPin* pin = ualItem->getPin(outPinGuid);
+
+		if (pin == nullptr)
+		{
+			return;
+		}
+
+		if (pin->IsOutput() == false)
+		{
+			return;
+		}
+
+		m_ualItem = ualItem;
+		m_outPinGuid = outPinGuid;
+	}
+
+	const UalItem* UalSignal::ualItem() const
+	{
+		return m_ualItem;
 	}
 
 	QUuid UalSignal::ualItemGuid() const
@@ -2545,6 +2582,29 @@ namespace Builder
 		}
 
 		return QString();
+	}
+
+	QString UalSignal::ualItemLabelOutPinCaption() const
+	{
+		QString caption;
+
+		if (m_ualItem != nullptr)
+		{
+			caption += m_ualItem->label();
+
+			if (m_outPinGuid.isNull() == false)
+			{
+				const SchemaPin* pin = m_ualItem->getPin(m_outPinGuid);
+
+				if (pin != nullptr && pin->caption().isEmpty() == false)
+				{
+					caption += Separator::DOT;
+					caption += pin->caption();
+				}
+			}
+		}
+
+		return caption;
 	}
 
 	bool UalSignal::appendBusChildSignal(const QString& busSignalID, UalSignal* ualSignal)
@@ -2807,7 +2867,7 @@ namespace Builder
 			//
 			assert(m_pinToSignalMap.contains(outPinUuid) == false);
 
-			ualSignal->setUalItem(ualItem);
+			ualSignal->setSourceUalItem(ualItem, outPinUuid);
 
 			appendPinRefToSignal(outPinUuid, ualSignal);
 
@@ -2818,7 +2878,7 @@ namespace Builder
 		//
 		ualSignal = new UalSignal;
 
-		bool result = ualSignal->createRegularSignal(ualItem, appSignal);
+		bool result = ualSignal->createRegularSignal(ualItem, outPinUuid, appSignal);
 
 		if (result == false)
 		{
@@ -3016,7 +3076,7 @@ namespace Builder
 
 		AppSignal* autoSignalPtr = nullptr;
 
-		bool result = busParentSignal->createBusParentSignal(m_compiler.lmEquipmentID(), ualItem,
+		bool result = busParentSignal->createBusParentSignal(m_compiler.lmEquipmentID(), ualItem, outPinUuid,
 															 appBusSignal, bus, outPinCaption,
 															 m_compiler.getLmSharedPtr(), &autoSignalPtr);
 
@@ -3101,7 +3161,7 @@ namespace Builder
 			return false;
 		}
 
-		ualSignal->setUalItem(ualItem);
+		ualSignal->setSourceUalItem(ualItem, pinUuid);
 
 		if (m_signalSet.contains(ualSignal) == false)
 		{
@@ -3178,7 +3238,7 @@ namespace Builder
 			return false;
 		}
 
-		bool result = ualSignal->appendRefSignal(s, false);
+		bool result = ualSignal->appendRefAppSignal(s, false);
 
 		if (result == false)
 		{
@@ -3493,7 +3553,7 @@ namespace Builder
 
 		AppSignal* autoSignalPtr = nullptr;
 
-		bool result = ualSignal->createAutoSignal(m_compiler.lmEquipmentID(), ualItem,
+		bool result = ualSignal->createAutoSignal(m_compiler.lmEquipmentID(), ualItem, outPinUuid,
 												  signalID, signalType, analogFormat, &autoSignalPtr);
 
 		if (result == false)

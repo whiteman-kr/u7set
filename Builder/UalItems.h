@@ -439,7 +439,7 @@ namespace Builder
 	private:
 		// private intializers can be used by UalSignalsMap only
 		//
-		bool createRegularSignal(const UalItem* ualItem, AppSignal* s);
+		bool createRegularSignal(const UalItem* ualItem, const QUuid& outPinGuid, AppSignal* s);
 
 		bool createConstSignal(	const QString& lmEquipmentID,
 								const UalItem* ualItem,
@@ -448,8 +448,9 @@ namespace Builder
 								E::AnalogAppSignalFormat constAnalogFormat,
 								AppSignal** autoSignalPtr);
 
-		bool createAutoSignal(	const QString& lmEquipmentID,
+		bool createAutoSignal(const QString& lmEquipmentID,
 								const UalItem* ualItem,
+								const QUuid& outPinGuid,
 								const QString& signalID,
 								E::SignalType signalType,
 								E::AnalogAppSignalFormat analogFormat,
@@ -457,6 +458,7 @@ namespace Builder
 
 		bool createBusParentSignal( const QString& lmEquipmentID,
 									const UalItem* ualItem,
+									const QUuid& outPinGuid,
 									AppSignal* busSignal,
 									BusShared bus,
 									const QString& outPinCaption,
@@ -466,7 +468,7 @@ namespace Builder
 		friend class UalSignals;
 
 	public:
-		bool appendRefSignal(AppSignal* s, bool isOptoSignal);
+		bool appendRefAppSignal(AppSignal* s, bool isOptoSignal);
 		bool appendBusChildRefSignals(const QString &busSignalID, AppSignal* s);
 
 		void setComputed() { m_computed = true; }
@@ -589,12 +591,13 @@ namespace Builder
 
 		QString optoConnectionID() const;
 
-		void setUalItem(const UalItem* ualItem);
+		void setSourceUalItem(const UalItem* ualItem, const QUuid& outPinGuid);
 
-		const UalItem* ualItem() const { return m_ualItem; }
+		const UalItem* ualItem() const;
 		QUuid ualItemGuid() const;
 		QString ualItemSchemaID() const;
 		QString ualItemLabel() const;
+		QString ualItemLabelOutPinCaption() const;
 
 		bool appendBusChildSignal(const QString& busSignalID, UalSignal* ualSignal);
 
@@ -620,6 +623,7 @@ namespace Builder
 		int m_expectedHeapReadsCount = 0;
 
 		const UalItem* m_ualItem = nullptr;
+		QUuid m_outPinGuid;
 
 		QVector<AppSignal*> m_refSignals;							// vector of pointers to signal in m_signalSet
 
