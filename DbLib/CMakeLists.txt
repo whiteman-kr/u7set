@@ -20,6 +20,8 @@ qt_add_library(${TARGET} STATIC
 	DbProgress.h
 	DbProgressDialog.cpp
 	DbProgressDialog.h
+	DbMatsUser.cpp
+	DbMatsUser.h
 	DbStruct.cpp
 	DbStruct.h
 	DbWorker.cpp

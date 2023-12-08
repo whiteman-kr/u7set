@@ -102,6 +102,8 @@ set (U7_SOURCES
 	DialogConnections.h
 	DialogFileEditor.cpp
 	DialogFileEditor.h
+	DialogMatsUsersEditor.cpp 
+	DialogMatsUsersEditor.h
 	DialogSettings.cpp
 	DialogSettings.h
 	DialogSettingsConfigurator.cpp

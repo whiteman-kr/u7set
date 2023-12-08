@@ -101,6 +101,8 @@ qt_add_library(${TARGET} STATIC
 	LogicModulesInfoWriter.h
 	Loopbacks.cpp
 	Loopbacks.h
+	MatsUserStorage.cpp
+	MatsUserStorage.h
 	MemWriteMap.cpp
 	MemWriteMap.h
 	MetrologyCfgGenerator.cpp
