@@ -8241,7 +8241,12 @@ namespace Builder
 
 	bool ModuleLogicCompiler::cleanupHeaps()
 	{
-		return m_ualSignals.finalizeHeaps();
+		bool result = true;
+
+		result &= m_ualSignals.finalizeHeaps();
+		result &= writeHeapsLog();
+
+		return result;
 	}
 
 	bool ModuleLogicCompiler::optimizeAppLogicCode()
@@ -10140,11 +10145,6 @@ namespace Builder
 
 		Q_ASSERT(afb->isPackedLogic());
 
-		if (isOutConnectedToTerminatorOnly(afb) == true)
-		{
-			return true;			// no code generation required
-		}
-
 		bool result = true;
 
 		const std::vector<SchemaPin>& inputs = afb->inputs();
@@ -10168,11 +10168,6 @@ namespace Builder
 				LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal not found for '%1' pin of AFB %2 (schema %3)").
 													arg(inPin.caption()).arg(afb->label()).arg(afb->schemaID()));
 				result = false;
-				continue;
-			}
-
-			if (uniqueInSignals.contains(inSignal) == true)
-			{
 				continue;
 			}
 
@@ -10244,11 +10239,21 @@ namespace Builder
 				continue;
 			}
 
+			if (uniqueInSignals.contains(inSignal) == true)
+			{
+				continue;
+			}
+
 			nonConstInSignals.emplace_back(inSignal, readAddr);
 			uniqueInSignals.insert(inSignal);
 		}
 
 		RETURN_IF_FALSE(result);
+
+		if (isOutConnectedToTerminatorOnly(afb) == true)
+		{
+			return true;			// no code generation required
+		}
 
 		//
 
@@ -16757,8 +16762,6 @@ namespace Builder
 		result &= writeOptoModulesReport();
 
 		result &= writeLoopbacksReport();
-
-		result &= writeHeapsLog();
 
 		return result;
 	}
