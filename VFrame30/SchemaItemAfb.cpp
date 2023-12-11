@@ -731,6 +731,8 @@ namespace VFrame30
 			return false;
 		}
 
+		QString packedLogicId = m_afbElement.packedLogicId();
+
 		// Update params, m_afbElement contains old parameters
 		//
 		std::vector<Afb::AfbParam> newParams = sourceAfb.params();
@@ -766,8 +768,15 @@ namespace VFrame30
 		//
 		m_afbElement = sourceAfb;
 
-		std::swap(params(), newParams); // The prev assignemnt (m_afbElement = sourceAfb) just reseted all paramas
+		std::swap(params(), newParams); // The prev assignment (m_afbElement = sourceAfb) just reset all params
 										// Set them to the actual values
+
+		// Restore packedLogicId, as it is stored in m_afbElement.
+		//
+		if (packedLogicId.isEmpty() == false)
+		{
+			setPackedLogicId(packedLogicId);
+		}
 
 		// Update in/out pins
 		//
@@ -786,7 +795,7 @@ namespace VFrame30
 			addOutput(s);
 		}
 
-		// Run afterCreationScript, lets assume we create allmost new itesm, as we deleted all inputs/outs and updated params
+		// Run afterCreationScript, lets assume we create almost new items, as we deleted all inputs/outs and updated params
 		//
 		QString afterCreationScript = m_afbElement.afterCreationScript();
 

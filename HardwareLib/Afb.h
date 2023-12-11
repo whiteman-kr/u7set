@@ -396,7 +396,7 @@ private:
 		Q_INVOKABLE QObject* getAfbSignalByOpIndex(int opIndex);
 		Q_INVOKABLE QObject* getAfbSignalByCaption(QString caption);
 
-		// Properties and Datas
+		// Properties and Data
 		//
 	public:
 		const QString& strID() const;

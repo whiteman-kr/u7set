@@ -1854,7 +1854,10 @@ namespace Afb
 					m_data.packedLogic.idPrefix = packedLogic.attribute(QLatin1String("IdPrefix"));
 					m_data.packedLogic.minInputCount = packedLogic.attribute(QLatin1String("MinInputCount"), "99999").toInt();
 					
-					m_data.packedLogicId = packedLogic.attribute(QLatin1String("packedLogicId"));
+					// Do not update item if attribute does not exist, this is update of the AFB ite, we need to keep value.
+					// Update: Actually value is preserved in SchemaItemAfb.
+					//
+					m_data.packedLogicId = packedLogic.attribute(QLatin1String("packedLogicId"), m_data.packedLogicId);
 				}
 			}
 		}

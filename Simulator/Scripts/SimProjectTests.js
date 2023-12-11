@@ -4684,3 +4684,619 @@ function testUfbParam2(sim)
 
 	return;
 }
+
+// Test for packed_or_in/out
+// Schema: TEST_PACKED_OR_AFB
+//
+function testPackedOrAfb(sim)
+{
+	// PackedLogicId: OR_1_INPUT
+	//
+	assert(sim.signalValue("#TPOR_AFB_RESUL1") === 0);
+	sim.overrideSignalValue("#TPOR_AFB_T1_IN1", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue("#TPOR_AFB_RESUL1") === 1);
+	sim.overridesReset();
+	sim.startForMs(5);
+	
+	// PackedLogicId: OR_2_INPUT
+	//
+	let outSignal = "#TPOR_AFB_RESUL2"
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPOR_AFB_T2_IN1", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);
+	
+	sim.overrideSignalValue("#TPOR_AFB_T2_IN1", 0);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPOR_AFB_T2_IN2", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);	
+	
+	sim.overridesReset();
+	sim.startForMs(5);	
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	// PackedLogicId: OR_3_INPUT
+	//
+	outSignal = "#TPOR_AFB_RESUL3"
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPOR_AFB_T3_IN1", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);
+	
+	sim.overrideSignalValue("#TPOR_AFB_T3_IN1", 0);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPOR_AFB_T3_IN2", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);	
+	
+	sim.overrideSignalValue("#TPOR_AFB_T3_IN2", 0);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPOR_AFB_T3_IN3", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);
+	
+	sim.overridesReset();
+	sim.startForMs(5);	
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	// PackedLogicId: OR_16_INPUT
+	//
+	outSignal = "#TPOR_AFB_RESUL4"
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPOR_AFB_T4_IN1", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);
+	
+	sim.overrideSignalValue("#TPOR_AFB_T4_IN1", 0);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPOR_AFB_T4_IN2", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);	
+	
+	sim.overrideSignalValue("#TPOR_AFB_T4_IN2", 0);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPOR_AFB_T4_IN3", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);
+	
+	sim.overrideSignalValue("#TPOR_AFB_T4_IN3", 0);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPOR_AFB_T4_IN4", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);	
+	
+	sim.overridesReset();
+	sim.startForMs(5);	
+	assert(sim.signalValue(outSignal) === 0);
+	
+	// PackedLogicId: OR_17_INPUT
+	//
+	outSignal = "#TPOR_AFB_RESUL5"
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPOR_AFB_T5_IN1", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);
+	
+	sim.overrideSignalValue("#TPOR_AFB_T5_IN1", 0);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPOR_AFB_T5_IN2", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);	
+	
+	sim.overrideSignalValue("#TPOR_AFB_T5_IN2", 0);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPOR_AFB_T5_IN16", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);				
+
+	sim.overrideSignalValue("#TPOR_AFB_T5_IN16", 0);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPOR_AFB_T5_IN17", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1)
+	
+	sim.overridesReset();
+	sim.startForMs(5);	
+	assert(sim.signalValue(outSignal) === 0);		
+}
+
+// Test for packed_or_in/out
+// Schema: TEST_PACKED_OR_ACC
+//
+function testPackedOrAcc(sim)
+{
+	// PackedLogicId: OR_1_INPUT
+	//
+	assert(sim.signalValue("#TPOR_ACC_RESUL1") === 0);
+	sim.overrideSignalValue("#TPOR_ACC_T1_IN1", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue("#TPOR_ACC_RESUL1") === 1);
+	sim.overridesReset();
+	sim.startForMs(5);
+	
+	// PackedLogicId: OR_2_INPUT
+	//
+	let outSignal = "#TPOR_ACC_RESUL2"
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPOR_ACC_T2_IN1", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);
+	
+	sim.overrideSignalValue("#TPOR_ACC_T2_IN1", 0);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPOR_ACC_T2_IN2", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);	
+	
+	sim.overridesReset();
+	sim.startForMs(5);	
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	// PackedLogicId: OR_3_INPUT
+	//
+	outSignal = "#TPOR_ACC_RESUL3"
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPOR_ACC_T3_IN1", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);
+	
+	sim.overrideSignalValue("#TPOR_ACC_T3_IN1", 0);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPOR_ACC_T3_IN2", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);	
+	
+	sim.overrideSignalValue("#TPOR_ACC_T3_IN2", 0);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPOR_ACC_T3_IN3", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);
+	
+	sim.overridesReset();
+	sim.startForMs(5);	
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	// PackedLogicId: OR_16_INPUT
+	//
+	outSignal = "#TPOR_ACC_RESUL4"
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPOR_ACC_T4_IN1", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);
+	
+	sim.overrideSignalValue("#TPOR_ACC_T4_IN1", 0);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPOR_ACC_T4_IN2", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);	
+	
+	sim.overrideSignalValue("#TPOR_ACC_T4_IN2", 0);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPOR_ACC_T4_IN3", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);
+	
+	sim.overrideSignalValue("#TPOR_ACC_T4_IN3", 0);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPOR_ACC_T4_IN4", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);	
+	
+	sim.overridesReset();
+	sim.startForMs(5);	
+	assert(sim.signalValue(outSignal) === 0);
+	
+	// PackedLogicId: OR_17_INPUT
+	//
+	outSignal = "#TPOR_ACC_RESUL5"
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPOR_ACC_T5_IN1", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);
+	
+	sim.overrideSignalValue("#TPOR_ACC_T5_IN1", 0);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPOR_ACC_T5_IN2", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);	
+	
+	sim.overrideSignalValue("#TPOR_ACC_T5_IN2", 0);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPOR_ACC_T5_IN16", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);				
+
+	sim.overrideSignalValue("#TPOR_ACC_T5_IN16", 0);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPOR_ACC_T5_IN17", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1)
+	
+	sim.overridesReset();
+	sim.startForMs(5);	
+	assert(sim.signalValue(outSignal) === 0);		
+}
+
+// Test for packed_and_in/out
+// Schema: TEST_PACKED_AND_AFB
+//
+function testPackedAndAfb(sim)
+{
+	// PackedLogicId: AND_1_INPUT
+	//
+	assert(sim.signalValue("#TPAND_AFB_RESUL1") === 0);
+	sim.overrideSignalValue("#TPAND_AFB_T1_IN1", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue("#TPAND_AFB_RESUL1") === 1);
+	sim.overridesReset();
+	sim.startForMs(5);
+	
+	// PackedLogicId: AND_2_INPUT
+	//
+	let outSignal = "#TPAND_AFB_RESUL2"
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPAND_AFB_T2_IN1", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPAND_AFB_T2_IN2", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);	
+	
+	sim.overridesReset();
+	sim.startForMs(5);	
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	// PackedLogicId: AND_3_INPUT
+	//
+	outSignal = "#TPAND_AFB_RESUL3"
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPAND_AFB_T3_IN1", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPAND_AFB_T3_IN2", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPAND_AFB_T3_IN3", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);
+	
+	sim.overrideSignalValue("#TPAND_AFB_T3_IN2", 0);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);		
+	
+	sim.overridesReset();
+	sim.startForMs(5);	
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	// PackedLogicId: AND_16_INPUT
+	//
+	outSignal = "#TPAND_AFB_RESUL4"
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPAND_AFB_T4_IN1", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPAND_AFB_T4_IN2", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+
+	sim.overrideSignalValue("#TPAND_AFB_T4_IN3", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPAND_AFB_T4_IN4", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);	
+	
+	sim.overrideSignalValue("#TPAND_AFB_T4_IN3", 0);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);		
+	
+	sim.overridesReset();
+	sim.startForMs(5);	
+	assert(sim.signalValue(outSignal) === 0);
+	
+	// PackedLogicId: AND_17_INPUT
+	//
+	outSignal = "#TPAND_AFB_RESUL5"
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPAND_AFB_T5_IN1", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPAND_AFB_T5_IN2", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);		
+	
+	sim.overrideSignalValue("#TPAND_AFB_T5_IN3", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPAND_AFB_T5_IN4", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPAND_AFB_T5_IN5", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPAND_AFB_T5_IN6", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPAND_AFB_T5_IN7", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPAND_AFB_T5_IN8", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPAND_AFB_T5_IN9", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPAND_AFB_T5_IN10", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPAND_AFB_T5_IN11", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPAND_AFB_T5_IN12", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPAND_AFB_T5_IN13", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPAND_AFB_T5_IN14", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPAND_AFB_T5_IN15", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPAND_AFB_T5_IN16", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPAND_AFB_T5_IN17", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);	
+	
+	sim.overrideSignalValue("#TPAND_AFB_T5_IN1", 0);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overridesReset();
+	sim.startForMs(5);	
+	assert(sim.signalValue(outSignal) === 0);
+}
+
+
+
+// Test for packed_and_in/out
+// Schema: TEST_PACKED_AND_ACC
+//
+function testPackedAndAcc(sim)
+{
+	// PackedLogicId: AND_1_INPUT
+	//
+	assert(sim.signalValue("#TPAND_ACC_RESUL1") === 0);
+	sim.overrideSignalValue("#TPAND_ACC_T1_IN1", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue("#TPAND_ACC_RESUL1") === 1);
+	sim.overridesReset();
+	sim.startForMs(5);
+	
+	// PackedLogicId: AND_2_INPUT
+	//
+	let outSignal = "#TPAND_ACC_RESUL2"
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPAND_ACC_T2_IN1", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPAND_ACC_T2_IN2", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);	
+	
+	sim.overridesReset();
+	sim.startForMs(5);	
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	// PackedLogicId: AND_3_INPUT
+	//
+	outSignal = "#TPAND_ACC_RESUL3"
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPAND_ACC_T3_IN1", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPAND_ACC_T3_IN2", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPAND_ACC_T3_IN3", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);
+	
+	sim.overrideSignalValue("#TPAND_ACC_T3_IN2", 0);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);		
+	
+	sim.overridesReset();
+	sim.startForMs(5);	
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	// PackedLogicId: AND_16_INPUT
+	//
+	outSignal = "#TPAND_ACC_RESUL4"
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPAND_ACC_T4_IN1", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPAND_ACC_T4_IN2", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+
+	sim.overrideSignalValue("#TPAND_ACC_T4_IN3", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPAND_ACC_T4_IN4", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);	
+	
+	sim.overrideSignalValue("#TPAND_ACC_T4_IN3", 0);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);		
+	
+	sim.overridesReset();
+	sim.startForMs(5);	
+	assert(sim.signalValue(outSignal) === 0);
+	
+	// PackedLogicId: AND_17_INPUT
+	//
+	outSignal = "#TPAND_ACC_RESUL5"
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPAND_ACC_T5_IN1", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);
+	
+	sim.overrideSignalValue("#TPAND_ACC_T5_IN2", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);		
+	
+	sim.overrideSignalValue("#TPAND_ACC_T5_IN3", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPAND_ACC_T5_IN4", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPAND_ACC_T5_IN5", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPAND_ACC_T5_IN6", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPAND_ACC_T5_IN7", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPAND_ACC_T5_IN8", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPAND_ACC_T5_IN9", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPAND_ACC_T5_IN10", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPAND_ACC_T5_IN11", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPAND_ACC_T5_IN12", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPAND_ACC_T5_IN13", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPAND_ACC_T5_IN14", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPAND_ACC_T5_IN15", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPAND_ACC_T5_IN16", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overrideSignalValue("#TPAND_ACC_T5_IN17", 1);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 1);	
+	
+	sim.overrideSignalValue("#TPAND_ACC_T5_IN1", 0);
+	sim.startForMs(5);
+	assert(sim.signalValue(outSignal) === 0);	
+	
+	sim.overridesReset();
+	sim.startForMs(5);	
+	assert(sim.signalValue(outSignal) === 0);
+}

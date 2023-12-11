@@ -1,8 +1,8 @@
 variables:
   GIT_DEPTH: "1"
   QT_VERSION: "6.5.3"
-  COMPILER_TESTS_PROJECT_NAME: "compiler_tests_v398"
-  SIMULATOR_PROJECT_NAME: "test_simulator_v398"
+  COMPILER_TESTS_PROJECT_NAME: "compiler_tests_v406"
+  SIMULATOR_PROJECT_NAME: "test_simulator_v406"
   PGPASSWORD: "P2ssw0rd"
   
 stages:
