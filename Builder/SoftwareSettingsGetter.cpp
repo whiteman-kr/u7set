@@ -106,9 +106,10 @@ bool SoftwareSettingsGetter::getSoftwareConnectionBySoftwareID(const Hardware::E
 		{
 			//  Property '%1.%2' is empty.
 			//
-			log->wrnCFG3016(thisSoftware->equipmentIdTemplate(), propConnectedSoftwareID);
-
-			connectedSoftwareIP->setAddressPort(defaultIP, defaultPort);
+			//	warning removed RPCT-3763
+			//
+			//	log->wrnCFG3016(thisSoftware->equipmentIdTemplate(), propConnectedSoftwareID);
+			//	connectedSoftwareIP->setAddressPort(defaultIP, defaultPort);
 
 			return true;
 		}
