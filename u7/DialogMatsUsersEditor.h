@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Builder/MatsUserStorage.h"
+#include "../Builder/DbMatsUsers.h"
 
 class MatsUsersEditorDelegate : public QItemDelegate
 {
@@ -42,7 +42,7 @@ private slots:
 	void onListItemChanged(QTreeWidgetItem* item, int column);
 
 public:
-	enum Columns
+	enum class Columns
 	{
 		Login,
 		Description,

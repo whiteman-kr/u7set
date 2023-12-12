@@ -12,7 +12,7 @@
 
 QWidget* MatsUsersEditorDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-    if(index.column() == DialogMatsUsersEditor::Login)
+    if (index.column() == static_cast<int>(DialogMatsUsersEditor::Columns::Login))
     {
         QLineEdit* edit = new QLineEdit(parent);
 
@@ -22,7 +22,8 @@ QWidget* MatsUsersEditorDelegate::createEditor(QWidget *parent, const QStyleOpti
         return edit;
     }
 
-	if(index.column() == DialogMatsUsersEditor::Description || index.column() == DialogMatsUsersEditor::TuningTags)
+	if(index.column() == static_cast<int>(DialogMatsUsersEditor::Columns::Description) ||
+		index.column() == static_cast<int>(DialogMatsUsersEditor::Columns::TuningTags))
 	{
 		return QItemDelegate::createEditor(parent, option, index);
 	}
@@ -32,9 +33,9 @@ QWidget* MatsUsersEditorDelegate::createEditor(QWidget *parent, const QStyleOpti
 
 void MatsUsersEditorDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
 {
-    if (index.column() == DialogMatsUsersEditor::Login || 
-		index.column() == DialogMatsUsersEditor::Description || 
-		index.column() == DialogMatsUsersEditor::TuningTags)
+    if (index.column() == static_cast<int>(DialogMatsUsersEditor::Columns::Login) || 
+		index.column() == static_cast<int>(DialogMatsUsersEditor::Columns::Description) || 
+		index.column() == static_cast<int>(DialogMatsUsersEditor::Columns::TuningTags))
 	{
         QString s = index.model()->data(index, Qt::EditRole).toString();
         QLineEdit *edit = qobject_cast<QLineEdit*>(editor);
@@ -48,9 +49,9 @@ void MatsUsersEditorDelegate::setEditorData(QWidget *editor, const QModelIndex &
 
 void MatsUsersEditorDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
 {
-    if (index.column() == DialogMatsUsersEditor::Login || 
-		index.column() == DialogMatsUsersEditor::Description || 
-		index.column() == DialogMatsUsersEditor::TuningTags)
+    if (index.column() == static_cast<int>(DialogMatsUsersEditor::Columns::Login) || 
+		index.column() == static_cast<int>(DialogMatsUsersEditor::Columns::Description) || 
+		index.column() == static_cast<int>(DialogMatsUsersEditor::Columns::TuningTags))
     {
         QLineEdit* edit = qobject_cast<QLineEdit*>(editor);
         model->setData(index, edit->text(), Qt::EditRole);
@@ -87,10 +88,10 @@ DialogMatsUsersEditor::DialogMatsUsersEditor(DbController *pDbController, QWidge
 	l << tr("Enabled");
 	l << tr("TuningTags");
 	m_list->setHeaderLabels(l);
-	m_list->setColumnWidth(0, 70);
-    m_list->setColumnWidth(1, 130);
-	m_list->setColumnWidth(2, 70);
-    m_list->setColumnWidth(3, 130);
+	m_list->setColumnWidth(static_cast<int>(DialogMatsUsersEditor::Columns::Login), 70);
+    m_list->setColumnWidth(static_cast<int>(DialogMatsUsersEditor::Columns::Description), 130);
+	m_list->setColumnWidth(static_cast<int>(DialogMatsUsersEditor::Columns::Enabled), 70);
+    m_list->setColumnWidth(static_cast<int>(DialogMatsUsersEditor::Columns::TuningTags), 130);
 	connect(m_list, &QTreeWidget::itemChanged, this, &DialogMatsUsersEditor::onListItemChanged);
 
 	m_editorDelegate = new MatsUsersEditorDelegate(this);
@@ -135,7 +136,7 @@ DialogMatsUsersEditor::DialogMatsUsersEditor(DbController *pDbController, QWidge
 	//
 	QString errorCode;
 
-	Builder::MatsUserStorage storage;
+	Builder::DbMatsUserStorage storage;
 
 	if (storage.load(db(), errorCode) == false)
 	{
@@ -150,9 +151,9 @@ DialogMatsUsersEditor::DialogMatsUsersEditor(DbController *pDbController, QWidge
 		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << user.login() <<
 													user.description() <<
 													QString() <<
-													user.tuningTags());
+													user.tuningTagsToString());
 		item->setFlags(item->flags() | Qt::ItemIsEditable);
-		item->setCheckState(Columns::Enabled, user.enabled() ? Qt::Checked : Qt::Unchecked);
+		item->setCheckState(static_cast<int>(DialogMatsUsersEditor::Columns::Enabled), user.enabled() ? Qt::Checked : Qt::Unchecked);
 		item->setData(0, Qt::UserRole, i);
 		m_list->insertTopLevelItem(i, item);
 	}
@@ -191,10 +192,10 @@ void DialogMatsUsersEditor::showEvent(QShowEvent*)
 	assert(m_list);
 	assert(m_list->columnCount() == 4);
 
-	m_list->setColumnWidth(0, static_cast<int>(m_list->width() * 0.15));
-	m_list->setColumnWidth(1, static_cast<int>(m_list->width() * 0.30));
-	m_list->setColumnWidth(2, static_cast<int>(m_list->width() * 0.15));
-	m_list->setColumnWidth(3, static_cast<int>(m_list->width() * 0.30));
+	m_list->setColumnWidth(static_cast<int>(DialogMatsUsersEditor::Columns::Login), static_cast<int>(m_list->width() * 0.15));
+	m_list->setColumnWidth(static_cast<int>(DialogMatsUsersEditor::Columns::Description), static_cast<int>(m_list->width() * 0.30));
+	m_list->setColumnWidth(static_cast<int>(DialogMatsUsersEditor::Columns::Enabled), static_cast<int>(m_list->width() * 0.15));
+	m_list->setColumnWidth(static_cast<int>(DialogMatsUsersEditor::Columns::TuningTags), static_cast<int>(m_list->width() * 0.30));
 
 	return;
 }
@@ -227,7 +228,7 @@ bool DialogMatsUsersEditor::askForSaveChanged()
 
 bool DialogMatsUsersEditor::saveChanges()
 {
-	Builder::MatsUserStorage storage;
+	Builder::DbMatsUserStorage storage;
 
 	for (int i = 0; i < m_list->topLevelItemCount(); i++)
 	{
@@ -238,7 +239,7 @@ bool DialogMatsUsersEditor::saveChanges()
 			return false;
 		}
 
-        QString login = item->text(Login);
+        QString login = item->text(static_cast<int>(DialogMatsUsersEditor::Columns::Login));
 
         int count = storage.count();
         for (int s = 0; s < count; s++)
@@ -252,9 +253,9 @@ bool DialogMatsUsersEditor::saveChanges()
             }
         }
 
-		DbMatsUser user{login, item->text(Description)};
-		user.setEnabled(item->checkState(Enabled) == Qt::Checked);
-		user.setTuningTags(item->text(TuningTags));
+		OnlineLib::MatsUser user{login, item->text(static_cast<int>(DialogMatsUsersEditor::Columns::Description))};
+		user.setEnabled(item->checkState(static_cast<int>(DialogMatsUsersEditor::Columns::Enabled)) == Qt::Checked);
+		user.setTuningTagsFromString(item->text(static_cast<int>(DialogMatsUsersEditor::Columns::TuningTags)));
 		storage.add(user);
 	}
 
@@ -322,7 +323,7 @@ void DialogMatsUsersEditor::onAddClicked()
 		QStringList existingLogins;
 		for (int i = 0; i < m_list->topLevelItemCount(); i++)
 		{
-			existingLogins.push_back(m_list->topLevelItem(i)->text(Login));
+			existingLogins.push_back(m_list->topLevelItem(i)->text(static_cast<int>(DialogMatsUsersEditor::Columns::Login)));
 		}
 		int userIndex = 1;
 		do
@@ -333,7 +334,7 @@ void DialogMatsUsersEditor::onAddClicked()
 
 	QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << login << tr("Description") << QString() << QString());
 	item->setFlags(item->flags() | Qt::ItemIsEditable);
-	item->setCheckState(Columns::Enabled, Qt::Checked);
+	item->setCheckState(static_cast<int>(DialogMatsUsersEditor::Columns::Enabled), Qt::Checked);
 	m_list->insertTopLevelItem(index, item);
 
 	// Renumber indexes

@@ -470,6 +470,7 @@ namespace File
 	inline const QString CONFIGURATION_XML("Configuration.xml");
 	inline const QString SOFTWARE_XML("Software.xml");
 	inline const QString SUBSYSTEMS_XML("Subsystems.xml");
+	inline const QString MATSUSERS_XML("MatsUsers.xml");
 
 	inline const QString METROLOGY_ITEMS_XML("MetrologyItems.xml");
 	inline const QString METROLOGY_SIGNAL_SET("MetrologySignal.set");
