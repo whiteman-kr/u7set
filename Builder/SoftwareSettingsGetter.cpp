@@ -109,7 +109,8 @@ bool SoftwareSettingsGetter::getSoftwareConnectionBySoftwareID(const Hardware::E
 			//	warning removed RPCT-3763
 			//
 			//	log->wrnCFG3016(thisSoftware->equipmentIdTemplate(), propConnectedSoftwareID);
-			//	connectedSoftwareIP->setAddressPort(defaultIP, defaultPort);
+
+			connectedSoftwareIP->setAddressPort(defaultIP, defaultPort);
 
 			return true;
 		}
