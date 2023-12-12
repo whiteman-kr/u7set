@@ -5131,8 +5131,6 @@ function testPackedAndAfb(sim)
 	assert(sim.signalValue(outSignal) === 0);
 }
 
-
-
 // Test for packed_and_in/out
 // Schema: TEST_PACKED_AND_ACC
 //
