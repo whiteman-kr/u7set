@@ -4688,7 +4688,6 @@ function testUfbParam2(sim)
 // Test for packed_or_in/out
 // Schema: TEST_PACKED_OR_AFB
 //
-/*
 function testPackedOrAfb(sim)
 {
 	// PackedLogicId: OR_1_INPUT
@@ -4824,12 +4823,10 @@ function testPackedOrAfb(sim)
 	sim.startForMs(5);	
 	assert(sim.signalValue(outSignal) === 0);		
 }
-*/
 
 // Test for packed_or_in/out
 // Schema: TEST_PACKED_OR_ACC
 //
-/*
 function testPackedOrAcc(sim)
 {
 	// PackedLogicId: OR_1_INPUT
@@ -4965,12 +4962,10 @@ function testPackedOrAcc(sim)
 	sim.startForMs(5);	
 	assert(sim.signalValue(outSignal) === 0);		
 }
-*/
 
 // Test for packed_and_in/out
 // Schema: TEST_PACKED_AND_AFB
 //
-/*
 function testPackedAndAfb(sim)
 {
 	// PackedLogicId: AND_1_INPUT
@@ -5135,13 +5130,10 @@ function testPackedAndAfb(sim)
 	sim.startForMs(5);	
 	assert(sim.signalValue(outSignal) === 0);
 }
-*/
-
 
 // Test for packed_and_in/out
 // Schema: TEST_PACKED_AND_ACC
 //
-/*
 function testPackedAndAcc(sim)
 {
 	// PackedLogicId: AND_1_INPUT
@@ -5306,4 +5298,3 @@ function testPackedAndAcc(sim)
 	sim.startForMs(5);	
 	assert(sim.signalValue(outSignal) === 0);
 }
-*/
