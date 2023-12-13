@@ -282,8 +282,8 @@ public:
 	E::ElectricUnit electricUnit(QString* err = nullptr) const;
 	void setElectricUnit(E::ElectricUnit electricUnit);
 
-	double rload_Ohm(QString* err = nullptr) const;
-	void setRload_Ohm(double rload_Ohm);
+	double rloadOhm(QString* err = nullptr) const;
+	void setRloadOhm(double rload_Ohm);
 
 	E::SensorType sensorType(QString* err = nullptr) const;
 	void setSensorType(E::SensorType sensorType);

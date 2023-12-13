@@ -1097,12 +1097,12 @@ void AppSignal::setElectricUnit(E::ElectricUnit electricUnit)
 	setSpecPropEnum(AppSignalPropNames::ELECTRIC_UNIT, static_cast<int>(electricUnit));
 }
 
-double AppSignal::rload_Ohm(QString* err) const
+double AppSignal::rloadOhm(QString* err) const
 {
 	return getSpecPropDouble(AppSignalPropNames::RLOAD_OHM, err);
 }
 
-void AppSignal::setRload_Ohm(double rload_Ohm)
+void AppSignal::setRloadOhm(double rload_Ohm)
 {
 	setSpecPropDouble(AppSignalPropNames::RLOAD_OHM, rload_Ohm);
 }

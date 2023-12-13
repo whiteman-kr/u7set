@@ -189,11 +189,17 @@ public:
 	Q_INVOKABLE double highEngineeringUnits() const { return m_signal.highEngineeringUnits(nullptr); }
 	Q_INVOKABLE double lowValidRange() const { return m_signal.lowValidRange(nullptr); }
 	Q_INVOKABLE double highValidRange() const { return m_signal.highValidRange(nullptr); }
-	Q_INVOKABLE double inputLowLimit() const { return m_signal.electricLowLimit(nullptr); }
-	Q_INVOKABLE double inputHighLimit() const { return m_signal.electricHighLimit(nullptr); }
-	Q_INVOKABLE int jsInputUnitID() const { return static_cast<int>(m_signal.electricUnit(nullptr));}
-	Q_INVOKABLE int jsInputSensorType() const { return static_cast<int>(m_signal.sensorType(nullptr));}
-	Q_INVOKABLE int jsOutputMode() const { return static_cast<int>(m_signal.outputMode(nullptr));}
+	Q_INVOKABLE double electricLowLimit() const { return m_signal.electricLowLimit(nullptr); }
+	Q_INVOKABLE double electricHighLimit() const { return m_signal.electricHighLimit(nullptr); }
+	Q_INVOKABLE double inputLowLimit() const { return electricLowLimit(); }
+	Q_INVOKABLE double inputHighLimit() const { return electricHighLimit(); }
+	Q_INVOKABLE int electricUnit() const { return static_cast<int>(m_signal.electricUnit(nullptr));}
+	Q_INVOKABLE int sensorType() const { return static_cast<int>(m_signal.sensorType(nullptr));}
+	Q_INVOKABLE int outputMode() const { return static_cast<int>(m_signal.outputMode(nullptr));}
+	Q_INVOKABLE int rloadOhm() const { return static_cast<int>(m_signal.rloadOhm(nullptr));}
+	Q_INVOKABLE int jsInputUnitID() const { return electricUnit();}
+	Q_INVOKABLE int jsInputSensorType() const { return sensorType();}
+	Q_INVOKABLE int jsOutputMode() const { return outputMode();}
 	Q_INVOKABLE bool acquire() const { return m_signal.acquire(); }
 	Q_INVOKABLE int decimalPlaces() const { return m_signal.decimalPlaces(); }
 	Q_INVOKABLE double aperture() const { return m_signal.coarseAperture(); }

@@ -552,7 +552,7 @@ namespace Builder
 		}
 		else
 		{
-			if (UnitsConverter::rloadIsValid(signal.rload_Ohm()) == false)
+			if (UnitsConverter::rloadIsValid(signal.rloadOhm()) == false)
 			{
 				// Signal %1 has wrong RLoad (mA).
 				//
@@ -569,8 +569,8 @@ namespace Builder
 			return false;
 		}
 
-		double lowLimit = electricLimit.lowLimit / signal.rload_Ohm() * UnitsConverter::RLOAD_OHM_HIGH_LIMIT;
-		double highLimit = electricLimit.highLimit / signal.rload_Ohm() * UnitsConverter::RLOAD_OHM_HIGH_LIMIT;
+		double lowLimit = electricLimit.lowLimit / signal.rloadOhm() * UnitsConverter::RLOAD_OHM_HIGH_LIMIT;
+		double highLimit = electricLimit.highLimit / signal.rloadOhm() * UnitsConverter::RLOAD_OHM_HIGH_LIMIT;
 
 		if (testElectricLimit(signal, lowLimit, highLimit) == false)
 		{
