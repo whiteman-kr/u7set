@@ -1022,6 +1022,26 @@ void AppSignal::setHighEngineeringUnits(double highEngineeringUnits)
 	setSpecPropDouble(AppSignalPropNames::HIGH_ENGINEERING_UNITS, highEngineeringUnits);
 }
 
+double AppSignal::lowPhysicalUnits(QString* err) const
+{
+	return getSpecPropDouble(AppSignalPropNames::LOW_PHYSICAL_UNITS, err);
+}
+
+void AppSignal::setLowPhysicalUnits(double lowPhUnits)
+{
+	setSpecPropDouble(AppSignalPropNames::LOW_PHYSICAL_UNITS, lowPhUnits);
+}
+
+double AppSignal::highPhysicalUnits(QString* err) const
+{
+	return getSpecPropDouble(AppSignalPropNames::HIGH_PHYSICAL_UNITS, err);
+}
+
+void AppSignal::setHighPhysicalUnits(double highPhUnits)
+{
+	setSpecPropDouble(AppSignalPropNames::HIGH_PHYSICAL_UNITS, highPhUnits);
+}
+
 bool AppSignal::isReverseEngineeringLimits() const
 {
 	return lowEngineeringUnits() > highEngineeringUnits();

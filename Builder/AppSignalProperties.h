@@ -187,6 +187,8 @@ public:
 	Q_INVOKABLE int highADC() const { return m_signal.highADC(nullptr); }
 	Q_INVOKABLE double lowEngineeringUnits() const { return m_signal.lowEngineeringUnits(nullptr); }
 	Q_INVOKABLE double highEngineeringUnits() const { return m_signal.highEngineeringUnits(nullptr); }
+	Q_INVOKABLE double lowPhysicalUnits() const { return m_signal.lowPhysicalUnits(nullptr); }
+	Q_INVOKABLE double highPhysicalUnits() const { return m_signal.highPhysicalUnits(nullptr); }
 	Q_INVOKABLE double lowValidRange() const { return m_signal.lowValidRange(nullptr); }
 	Q_INVOKABLE double highValidRange() const { return m_signal.highValidRange(nullptr); }
 	Q_INVOKABLE double electricLowLimit() const { return m_signal.electricLowLimit(nullptr); }

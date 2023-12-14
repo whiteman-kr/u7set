@@ -1,53 +1,16 @@
-// Generate configuration for module AIM4PH
+// Generate configuration for module AIM-4PH-SR
 //
 //
 function generate_aim4ph_sr(confFirmware, module, LMNumber, frame, log, signalSet, opticModuleStorage)
 {
-    // InputController object getting
-    //
-    let inControllerObject = module.childByEquipmentId(module.equipmentId + "_CTRLIN");
-
-    if (inControllerObject == null || inControllerObject.isController() == false)
-    {
-        log.errCFG3004(module.equipmentId + "_CTRLIN",module.equipmentId);
-        return false;
-    }
-
-    let inController = inControllerObject.toController();
-
-    // UnitsConverter object getting
-    //
-    let unitsConverter = confFirmware.jsGetUnitsConvertor();
-    if (unitsConverter == null)
-    {
-        log.errINT1001("confFirmware.jsGetUnitsConverter returned null");
-        return false;
-    }
-
-    // default values of calculating parameters
-    //
-    const TS_CONSTANT = 200 * 0.000001;
-    const DEFAULT_FILTERING_TIME = valToADC(0/*5000*/ * 0.000001 / TS_CONSTANT, 0, 65535, 0, 0xffff);
-    const DEFAULT_HIGH_VALID_RANGE = 5.0;
-    const DEFAULT_LOW_VALID_RANGE = 0.0;
-    const DEFAULT_k1 = 1.0;
-    const DEFAULT_K2 = 0.0;
-    const DEFAULT_SPREAD_TOLERANCE = Math.round((0xffff - 0) * 0.005);		// 2% = 328h
-    const DEFAULT_FLAGS = 0;
-
-    // enum IssueCompareMode values
-    //
-    const CMP_MODE_EQUAL = 0;
-    const CMP_MODE_LESS = 1;
-    const CMP_MODE_MORE = 2;
-
-    // properties names
+    // required properties names
     //
     const ELECTRIC_HIGH_LIMIT = "ElectricHighLimit";
     const ELECTRIC_LOW_LIMIT = "ElectricLowLimit";
     const ELECTRIC_UNIT = "ElectricUnit";
+    const HIGH_PHYSICAL_UNITS = "HighPhysicalUnits";
+    const LOW_PHYSICAL_UNITS = "LowPhysicalUnits";
     const SENSOR_TYPE = "SensorType";
-    const RLOAD_OHM = "Rload_Ohm";
     const HIGH_VALID_RANGE = "HighValidRange";
     const LOW_VALID_RANGE = "LowValidRange";
     const HIGH_ENG_UNITS = "HighEngineeringUnits";
@@ -55,14 +18,52 @@ function generate_aim4ph_sr(confFirmware, module, LMNumber, frame, log, signalSe
     const FILTERING_TIME = "FilteringTime";
     const SPREAD_TOLERANCE = "SpreadTolerance";
 
+    // electric range of measurement channel is 0..5.1V
+    //
+    const ELECTRIC_MEASUREMENT_HIGH_LIMIT = 5.1;    // may be 5.25
+    const ELECTRIC_MEASUREMENT_LOW_LIMIT = 0;
+
+    // default values of calculating parameters
+    //
+    const TS_CONSTANT = 200 * 0.000001;
+    const DEFAULT_FILTERING_TIME = valToADC(0/*5000*/ * 0.000001 / TS_CONSTANT, 0, 65535, 0, 0xffff);
+    const DEFAULT_k1 = 1.0;
+    const DEFAULT_K2 = 0.0;
+    const DEFAULT_SPREAD_TOLERANCE = Math.round((0xffff - 0) * 0.005);		// 2% = 328h
+    const DEFAULT_FLAGS = 0;
+
+    // Valid range should be is specified in Engineering units
+    // Here default values set not right (in Volts) but according to module documentation
+    //
+    const DEFAULT_HIGH_VALID_RANGE = 5.0;
+    const DEFAULT_LOW_VALID_RANGE = 0.0;
+
+    // Specified default Physical units 1..5V corresponds to
+    // input electric value 4..20 mA getting on resistor Rload = 250Ohm
+    //
+    const DEFAULT_HIGH_PHYSICAL_UNITS = 5;
+    const DEFAULT_LOW_PHYSICAL_UNITS = 1;
+
     //
 
-    const INPUTS_COUNT = 32;
+    const INPUTS_COUNT = 32;    // 32 * (A + B channels)
 
     //
 
     let result = true;
     let ptr = 0;
+
+    // InputController object getting
+    //
+    let inControllerObject = module.childByEquipmentId(module.equipmentId + "_CTRLIN");
+
+    if (inControllerObject === null || inControllerObject.isController() === false)
+    {
+        log.errCFG3004(module.equipmentId + "_CTRLIN",module.equipmentId);
+        return false;
+    }
+
+    let inController = inControllerObject.toController();
 
     // Generation of module AIM-4PH-SR configuration (640 bytes)
     //
@@ -94,35 +95,31 @@ function generate_aim4ph_sr(confFirmware, module, LMNumber, frame, log, signalSe
         let k2 = DEFAULT_K2;
         let spreadTolerance = DEFAULT_SPREAD_TOLERANCE;
         let flags = DEFAULT_FLAGS;
-
-        // this parameters will calculated only for NON default values
-        //
-        let highPhysicalRange = 0;
+        let highPhysicalRange = 5;
         let lowPhysicalRange = 0;
 
-        let defaultValues = true;
+        let res = true;
 
         //
         
-        if (signalA == null && signalB == null)
+        if (signalA === null && signalB === null)
         {
             // Generate default values, there is no signal on this place
             //
 			log.wrnCFG3007(signalStrIdA);
+            log.wrnCFG3007(signalStrIdB);
         }
         else
         {
-            defaultValues = false;
-
             // here signalA is not null OR signalB is not null
             //
-            if (signalA == null)
+            if (signalA === null)
             {
                 log.wrnCFG3007(signalStrIdA);
                 signalA = signalB;
             }
 
-            if (signalB == null)
+            if (signalB === null)
 			{
 				log.wrnCFG3007(signalStrIdB);
 				signalB = signalA;
@@ -137,8 +134,9 @@ function generate_aim4ph_sr(confFirmware, module, LMNumber, frame, log, signalSe
                 ELECTRIC_HIGH_LIMIT,
                 ELECTRIC_LOW_LIMIT,
                 ELECTRIC_UNIT,
+                HIGH_PHYSICAL_UNITS,
+                LOW_PHYSICAL_UNITS,
                 SENSOR_TYPE,
-                RLOAD_OHM,
                 HIGH_VALID_RANGE,
                 LOW_VALID_RANGE,
                 HIGH_ENG_UNITS,
@@ -147,45 +145,68 @@ function generate_aim4ph_sr(confFirmware, module, LMNumber, frame, log, signalSe
                 SPREAD_TOLERANCE
             ];
 
+            res = true;
+
             for(propName of propsToCheck)
             {
                 let propValueA = signalA.propertyValue(propName);
 
-                if (propValueA == undefined)
+                if (propValueA === undefined)
                 {
                     log.errCFG3000(propName, signalStrIdA);
-                    result = false;
+                    res = false;
                     continue;
                 }
 
                 let propValueB = signalB.propertyValue(propName);
 
-                if (propValueB == undefined)
+                if (propValueB === undefined)
                 {
                     log.errCFG3000(propName, signalStrIdA);
-                    result = false;
+                    res = false;
                     continue;
                 }
 
-                // Properties of signals A and B must be the same
+                // Properties of signals A and B must be same
 
-                if (propValueA != propValueB)
+                if (propValueA !== propValueB)
                 {
                     log.errCFG3028(signalStrIdA, signalStrIdB, module.equipmentId, propName);
+                    res = false;
                 }
             }
 
-            if (result == false)
+            if (res == false)
             {
-                return false;
+                result = false;
+                continue;
             }
 
+            // enum IssueCompareMode values
+            //
+            const CMP_MODE_EQUAL = 0;
+            const CMP_MODE_LESS = 1;
+            const CMP_MODE_MORE = 2;
+
             const propsToCompare = [
+
+                // HighElectricLimit must NOT be less or equal to LowElectricLimit
+                //
                 [ ELECTRIC_HIGH_LIMIT, CMP_MODE_LESS, ELECTRIC_LOW_LIMIT ],
                 [ ELECTRIC_HIGH_LIMIT, CMP_MODE_EQUAL, ELECTRIC_LOW_LIMIT ],
+
+                // HighPhysicalUnits must NOT be less or equal to LowPhysicalUnits
+                //
+                [ HIGH_PHYSICAL_UNITS, CMP_MODE_LESS, LOW_PHYSICAL_UNITS ],
+                [ HIGH_PHYSICAL_UNITS, CMP_MODE_EQUAL, LOW_PHYSICAL_UNITS ],
+
+                // EngUnits and ValidRage limits must NOT be equal
+                //
                 [ HIGH_ENG_UNITS, CMP_MODE_EQUAL, LOW_ENG_UNITS ],
                 [ HIGH_VALID_RANGE, CMP_MODE_EQUAL, LOW_VALID_RANGE ],
             ];
+
+            res = true;
 
             for(cmpParams of propsToCompare)
             {
@@ -207,124 +228,55 @@ function generate_aim4ph_sr(confFirmware, module, LMNumber, frame, log, signalSe
 
                 if (cmpResult == true)
                 {
-                    log.errCFG3013(prop1Name, prop1Value, cmpMode, prop2Name, prop2Value, 6, signalStrIdA);
-                    result = false;
+                    log.errCFG3013(prop1Name, prop1Value, cmpMode, prop2Name, prop2Value, 4, signalStrIdA);
+                    res = false;
                 }
             }
 
-            if (result == false)
+            if (res == false)
             {
-                return false;
+                result = false;
+                continue;
             }
 
-            if (signalA.highEngineeringUnits() > signalA.lowEngineeringUnits() && signalA.highValidRange() < signalA.lowValidRange())
+            res = true;
+
+            let straightRange = signalA.highEngineeringUnits() > signalA.lowEngineeringUnits();
+
+            // Relation of HighValidRange to LowValidRange must be same
+            // with relation of HighEngUnits to LowEngUnits in straight and reverse ranges.
+            //
+            if (straightRange === true &&
+                signalA.highValidRange() < signalA.lowValidRange())
             {
                 log.errCFG3013(HIGH_VALID_RANGE, signalA.highValidRange(), CMP_MODE_LESS,
                                LOW_VALID_RANGE, signalA.lowValidRange(), signalA.decimalPlaces(), signalStrIdA);
-                result = false;
+                res = false;
             }
-            if (signalA.highEngineeringUnits() < signalA.lowEngineeringUnits() && signalA.highValidRange() > signalA.lowValidRange())
+
+            if (straightRange === false &&
+                signalA.highValidRange() > signalA.lowValidRange())
             {
                 // error
                 log.errCFG3013(HIGH_VALID_RANGE, signalA.highValidRange(), CMP_MODE_MORE,
                                LOW_VALID_RANGE, signalA.lowValidRange(), signalA.decimalPlaces(), signalStrIdA);
-                result = false;
+                res = false;
             }
 
-            if (result == false)
+            if (res == false)
             {
-                return false;
+                result = false;
+                continue;
             }
 
             //
-
-            let electricHighLimit = signalA.electricHighLimit();
-            let electricLowLimit = signalA.electricLowLimit();
-            let electricUnit = signalA.electricUnit();
-
-            let sensorType = signalA.sensorType();
-            let rload = signalA.rloadOhm();
-
-            let highValidRange = signalA.highValidRange();
-            let lowValidRange = signalA.lowValidRange();
-
-            let highEngUnits = signalA.highEngineeringUnits();
-            let lowEngUnits = signalA.lowEngineeringUnits();
-
-			// Convert electric to physical
-			
-            let highPhysical = unitsConverter.electricToPhysical_Input(electricHighLimit, electricLowLimit, electricHighLimit, electricUnit, sensorType, rload);
-            let lowPhysical = unitsConverter.electricToPhysical_Input(electricLowLimit, electricLowLimit, electricHighLimit, electricUnit, sensorType, rload);
-			
-			if (highPhysical.ok == false)
-			{
-				switch (highPhysical.errorCode)
-				{
-					case UnitsConvertorErrorCode.ErrorGeneric:
-					{
-						log.errINT1001(highPhysical.errorMessage + ", module " + module.equipmentId + ", signal " + signalStrIdA);
-					}
-						break;
-					case UnitsConvertorErrorCode.LowLimitOutOfRange:
-					{
-						log.errCFG3010("ElectricLowLimit", electricLowLimit, highPhysical.expectedLowValidRange, highPhysical.expectedHighValidRange, 4, signalStrIdA);
-					}
-						break;
-					case UnitsConvertorErrorCode.HighLimitOutOfRange:
-					{
-						log.errCFG3010("ElectricHighLimit", electricHighLimit, highPhysical.expectedLowValidRange, highPhysical.expectedHighValidRange, 4, signalStrIdA);
-					}
-						break;
-					default:
-						log.errINT1001("unitsConvertor.electricToPhysical_Input() - unknown error code (" + highPhysical.errorCode + "), signal " + signalStrIdA);
-				}
-			}
-            else
-            {
-                highPhysicalRange = highPhysical.toDouble;
-            }
-
-			if (lowPhysical.ok == false)
-			{
-				switch (lowPhysical.errorCode)
-				{
-					case UnitsConvertorErrorCode.ErrorGeneric:
-					{
-						log.errINT1001(lowPhysical.errorMessage + ", module " + module.equipmentId + ", signal " + signalStrIdA);
-					}
-						break;
-					case UnitsConvertorErrorCode.LowLimitOutOfRange:
-					{
-						log.errCFG3010("ElectricLowLimit", electricLowLimit, lowPhysical.expectedLowValidRange, lowPhysical.expectedHighValidRange, 4, signalStrIdA);
-					}
-						break;
-					case UnitsConvertorErrorCode.HighLimitOutOfRange:
-					{
-						log.errCFG3010("ElectricHighLimit", electricHighLimit, lowPhysical.expectedLowValidRange, lowPhysical.expectedHighValidRange, 4, signalStrIdA);
-					}
-						break;
-					default:
-						log.errINT1001("unitsConvertor.electricToPhysical_Input() - unknown error code (" + lowPhysical.errorCode + "), signal " + signalStrIdA);
-				}
-			}
-            else
-            {
-                lowPhysicalRange = lowPhysical.toDouble;
-            }
-			
-            if (highPhysicalRange == lowPhysicalRange)
-			{
-				// error
-                log.errCFG3013("calculated HighPhysical", highPhysicalRange, CMP_MODE_EQUAL, "calculated LowPhysical", lowPhysicalRange, 0, signalStrIdA);
-			}
-
-			// end of convert electric to physical
 
 			let tf = signalA.filteringTime();
 			
             if (tf < 0 * TS_CONSTANT || tf > 65535 * TS_CONSTANT)
 			{
-                log.errCFG3010("FilteringTime", tf, 0 * TS_CONSTANT, 65535 * TS_CONSTANT, 6, signalStrIdA);
+                log.errCFG3010(FILTERING_TIME, tf, 0 * TS_CONSTANT, 65535 * TS_CONSTANT, 6, signalStrIdA);
+                result = false;
 			}
 			
             tf = tf / TS_CONSTANT;
@@ -333,16 +285,19 @@ function generate_aim4ph_sr(confFirmware, module, LMNumber, frame, log, signalSe
 	
             spreadTolerance = Math.round((signalA.spreadTolerance() * 0.01) * 65535);
 
-            let y1 = lowEngUnits;
-            let y2 = highEngUnits;
-			
-			let x1 = lowPhysical.toDouble;
-			let x2 = highPhysical.toDouble;
+            lowPhysicalRange = signalA.lowPhysicalUnits();
+            highPhysicalRange = signalA.highPhysicalUnits();
 
-			if (x1 == x2) // Prevent division by zero
-			{
-				x1 = 0;	
-				x2 = 1;
+            let y1 = signalA.lowEngineeringUnits();
+            let y2 = signalA.highEngineeringUnits();
+			
+            let x1 = lowPhysicalRange;
+            let x2 = highPhysicalRange;
+
+            if (x1 === x2)   // this check already done above, WTF?
+            {
+                log.errINT1001("division by 0 (x1 == x2)")
+                return false;
 			}
 
             k1 = (y2 - y1) / (x2 - x1);	// K
@@ -351,30 +306,44 @@ function generate_aim4ph_sr(confFirmware, module, LMNumber, frame, log, signalSe
 			let flags = 0;
 			
 			// Check valid ranges
-			
-			let decimalPlaces = signalA.propertyValue("DecimalPlaces");
+            //
+            highValidRange = signalA.highValidRange();
+            lowValidRange = signalA.lowValidRange();
 
-			let lowValidRangeMin = 0;
-			let highValidRangeMax = 5;
+            // max valid range distanse from engineering units range is -5%...+5%
+            //
+            let dist = (highPhysicalRange - lowPhysicalRange) * 0.05;
 
-			let lowValidRangeMinEngineering = lowValidRangeMin * k1 + k2;
-			let highValidRangeMaxEngineering = highValidRangeMax * k1 + k2;
-			
-			// Round this value to supplied decimal places
-			
-			lowValidRangeMinEngineering = parseFloat(lowValidRangeMinEngineering.toFixed(decimalPlaces));
-			highValidRangeMaxEngineering = parseFloat(highValidRangeMaxEngineering.toFixed(decimalPlaces));
-			
-			//
+            let lowestValidRange = (lowPhysicalRange - dist) * k1 + k2;
+            let highestValidRange = (highPhysicalRange + dist) * k1 + k2;
 
-			if (lowValidRange < lowValidRangeMinEngineering)
-			{
-				log.errCFG3010("LowValidRange", lowValidRange, lowValidRangeMinEngineering, highValidRangeMaxEngineering, decimalPlaces, signalStrIdA);
-			}
-			if (highValidRange > highValidRangeMaxEngineering)
-			{
-				log.errCFG3010("HighValidRange", highValidRange, lowValidRangeMinEngineering, highValidRangeMaxEngineering, decimalPlaces, signalStrIdA);
-			}
+            res = true;
+
+            if ((straightRange == true && lowValidRange < lowestValidRange) ||
+                (straightRange == false && lowValidRange > lowestValidRange))
+            {
+                // Property %1 has wrong value (%2), valid range is %3..%4 [precision %5](signal %6).
+                //
+                log.errCFG3010(LOW_VALID_RANGE, lowValidRange, lowestValidRange, highestValidRange,
+                               4, signalStrIdA);
+                res = false;
+            }
+
+            if ((straightRange == true && highValidRange > highestValidRange) ||
+                (straightRange == false && highValidRange < highestValidRange))
+            {
+                // Property %1 has wrong value (%2), valid range is %3..%4 [precision %5](signal %6).
+                //
+                log.errCFG3010(HIGH_VALID_RANGE, highValidRange, lowestValidRange, highestValidRange,
+                               4, signalStrIdA);
+                res = false;
+            }
+
+            if (res === false)
+            {
+                result = false;
+                continue;
+            }
         }
 
         //
@@ -385,11 +354,8 @@ function generate_aim4ph_sr(confFirmware, module, LMNumber, frame, log, signalSe
                     "; [" + frame + ":" + (ptr + 4) + "] K1 = " + k1 +
                     "; [" + frame + ":" + (ptr + 8) + "] K2 = " + k2;
 
-        if (defaultValues == false)
-        {
-            logStr +=   "; HighPhysicalRange = " + highPhysicalRange +
-                        "; LowPhysicalRange = " + lowPhysicalRange;
-        }
+        logStr +=   "; HighPhysicalRange = " + highPhysicalRange +
+                    "; LowPhysicalRange = " + lowPhysicalRange;
 
         logStr += "; [" + frame + ":" + (ptr + 12) + "] HighValidRange = " + highValidRange +
                   "; [" + frame + ":" + (ptr + 16) + "] LowValidRange = " + lowValidRange +
@@ -442,6 +408,11 @@ function generate_aim4ph_sr(confFirmware, module, LMNumber, frame, log, signalSe
             return false;
         }
         ptr += 2;
+    }
+
+    if (result == false)
+    {
+        return false;
     }
 
     ptr = 888;
