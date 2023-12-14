@@ -1,6 +1,8 @@
 #pragma once
 
 #include "FblItemRect.h"
+#include "IMatsSchemaItemAssociations.h"
+
 #include "../HardwareLib/Afb.h"
 
 
@@ -9,7 +11,8 @@ namespace VFrame30
 	//
 	// SchemaItemAfb
 	//
-	class SchemaItemAfb final : public FblItemRect
+	class SchemaItemAfb final : public FblItemRect,
+								public IMatsSchemaItemAssociations
 	{
 		Q_OBJECT
 
@@ -80,29 +83,45 @@ namespace VFrame30
 	private:
 		QString getAfbParamValueText(const Afb::AfbParam& param) const;
 
+		// IMatsSchemaItemAssociations implementation.
+		//
+	public:
+		virtual QStringList associatedAppSignalIds() const override;
+		virtual QStringList associatedImpactAppSignalIds() const override;
+		virtual QStringList associatedConnectionIds() const override;
+		virtual QStringList associatedLoopbackIds() const override;
+		virtual QStringList associatedSchemaItemLabels() const override;
+
 		// Properties and Data
 		//
 	public:
-		const QString& afbStrID() const;
+		[[nodiscard]] const QString& afbStrID() const;
 
-		Afb::AfbElement& afbElement();
+		[[nodiscard]] Afb::AfbElement& afbElement();
 		const Afb::AfbElement& afbElement() const;
 
-		std::vector<Afb::AfbParam>& params();
+		[[nodiscard]] std::vector<Afb::AfbParam>& params();
 		const std::vector<Afb::AfbParam>& params() const;
 
-		int precision() const;
+		[[nodiscard]] int precision() const;
 		void setPrecision(int value);
 
-		bool isPackedLogic() const;
+		[[nodiscard]] bool isPackedLogic() const;
 
-		const QString& packedLogicId() const;
+		[[nodiscard]] const QString& packedLogicId() const;
 		void setPackedLogicId(const QString& value);
 
-		Afb::AfbElement::PackedLogicData packedLogic() const;
+		[[nodiscard]] Afb::AfbElement::PackedLogicData packedLogic() const;
+
+		[[nodiscard]] QStringList packedLogicInputSignalIds() const;
+		void setPackedLogicInputSignalIds(const QStringList& value);
 
 	private:
 		int m_precision = 2;
 		Afb::AfbElement m_afbElement;
+
+		// Mats specific properties.
+		//
+		QStringList m_packedLogicInputSignalIds; // List of input signal ids for packed logic.
 	};
 }

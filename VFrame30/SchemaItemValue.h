@@ -3,6 +3,7 @@
 #include "PosRectImpl.h"
 #include "FontParam.h"
 #include "Session.h"
+#include "IMatsSchemaItemAssociations.h"
 
 class QPen;
 class QBrush;
@@ -97,7 +98,7 @@ namespace VFrame30
 		})
 		\endcode
 	*/
-	class SchemaItemValue final : public PosRectImpl
+	class SchemaItemValue final : public PosRectImpl, public IMatsSchemaItemAssociations
 	{
 		Q_OBJECT
 
@@ -204,6 +205,15 @@ namespace VFrame30
 		// Java Script invocables specific for SchemaItemValue
 		//
 	public:
+
+		// IMatsSchemaItemAssociations implementation.
+		//
+	public:
+		virtual QStringList associatedAppSignalIds() const override;
+		virtual QStringList associatedImpactAppSignalIds() const override;
+		virtual QStringList associatedConnectionIds() const override;
+		virtual QStringList associatedLoopbackIds() const override;
+		virtual QStringList associatedSchemaItemLabels() const override;
 
 		// Properties and Data
 		//

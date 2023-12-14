@@ -176,7 +176,7 @@ namespace VFrame30
 		// Layers
 		//
 	public:
-		// Do not change to value semantic, as iterator from this getter are used in algs
+		// Do not change to value semantic, as ITERATORS from this getter are used in algs
 		//
 		const std::vector<std::shared_ptr<SchemaLayer>>& layers() const;
 

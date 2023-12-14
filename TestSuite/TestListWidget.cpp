@@ -807,7 +807,17 @@ void TestListWidget::contextMenuRequested()
 			{
 				for (int i = 0; i < m_treeWidget->topLevelItemCount(); i++)
 				{
-					m_treeWidget->topLevelItem(i)->setCheckState(0, Qt::Checked);
+					TestTreeWidgetItem* parentItem = dynamic_cast<TestTreeWidgetItem*>(m_treeWidget->topLevelItem(i));
+					if (parentItem == nullptr)
+					{
+						Q_ASSERT(parentItem);
+						return;
+					}
+
+					if (parentItem->permission() == true)
+					{
+						parentItem->setCheckState(0, Qt::Checked);
+					}
 				}
 			});
 
