@@ -7,7 +7,7 @@
 #include "../VFrame30/IMatsSchemaItemAssociations.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/LogicSchema.h"
-#include "../VFrame30/Propertynames.h"
+#include "../VFrame30/PropertyNames.h"
 #include "../VFrame30/SchemaItemConnection.h"
 #include "../VFrame30/SchemaItemImageValue.h"
 #include "../VFrame30/SchemaItemIndicator.h"
