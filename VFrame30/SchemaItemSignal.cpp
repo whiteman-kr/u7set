@@ -1419,6 +1419,33 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		return item;
 	}
 
+	// IMatsSchemaItemAssociations implementation.
+	//
+	QStringList SchemaItemSignal::associatedAppSignalIds() const
+	{
+		return m_appSignalIds;
+	}
+
+	QStringList SchemaItemSignal::associatedImpactAppSignalIds() const
+	{
+		return m_impactAppSignalIds;
+	}
+
+	QStringList SchemaItemSignal::associatedConnectionIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemSignal::associatedLoopbackIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemSignal::associatedSchemaItemLabels() const
+	{
+		return {};
+	}
+
 	// AppSignalIDs
 	//
 	QString SchemaItemSignal::appSignalIds() const

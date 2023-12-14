@@ -75,6 +75,33 @@ namespace VFrame30
 		return;
 	}
 
+	// IMatsSchemaItemAssociations implementation.
+//
+	QStringList SchemaItemLoopback::associatedAppSignalIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemLoopback::associatedImpactAppSignalIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemLoopback::associatedConnectionIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemLoopback::associatedLoopbackIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemLoopback::associatedSchemaItemLabels() const
+	{
+		return {};
+	}
+
 	QString SchemaItemLoopback::loopbackId() const
 	{
 		return m_loobackId;

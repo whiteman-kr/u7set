@@ -6,6 +6,7 @@
 
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../VFrame30/SchemaLayer.h"
+#include "../VFrame30/PropertyNames.h"
 
 
 namespace Builder
@@ -306,6 +307,84 @@ namespace Builder
 				QThread::yieldCurrentThread();
 			}
 		} while (true);
+
+		// Add AppSignalIDs to packed logic output items.
+		//  
+		for (auto& [schemaId, fileSchema] : schemaMap)
+		{
+			std::shared_ptr<DbFile>& file = fileSchema.file;
+			std::shared_ptr<VFrame30::Schema>& schema = fileSchema.schema;
+
+			Q_ASSERT(file);
+			Q_ASSERT(schema);
+
+			bool schemaModified = false;
+
+			for (auto& layer : schema->layers())
+			{
+				for (auto& schemaItem : layer->items())
+				{
+					auto schemaItemAfb = schemaItem->toSchemaItemAfb();
+					if (schemaItemAfb == nullptr || schemaItemAfb->isPackedLogic() == false)
+					{
+						continue;
+					}
+
+					// This is a packed logic item, it is an output counterpart if it does not have any inputs 
+					// (on schema, in the parser and compiler they are added, but on schema not).
+					//
+					if (schemaItemAfb->inputsCount() != 0)
+					{
+						continue;
+					}
+
+					// This is a packed logic output item, add property AppSignalIDs to it.
+					//
+					auto packedLogicSourcesIt = context->m_packedLogicSources.find(schemaItemAfb->label());
+					if (packedLogicSourcesIt == context->m_packedLogicSources.end())
+					{
+						continue;
+					}
+
+					const std::list<LmPackedLogicSources>& packedLogicSources = packedLogicSourcesIt->second;
+
+					std::set<QString> appSignalIds;
+					for (const auto& src : packedLogicSources)
+					{
+						for (const auto& srcItem : src.sources)
+						{
+							QString someId = srcItem.appSignalID.isEmpty() == false ?
+												 srcItem.appSignalID :
+												 srcItem.sourceItemLabelOut;
+
+							appSignalIds.insert(someId);
+						}
+					}
+
+					// Join set to a string.
+					// 
+					QStringList appSignalIdsList;
+					for (const QString& appSignalId : appSignalIds)
+					{
+						appSignalIdsList << appSignalId;
+					}
+
+					if (appSignalIdsList.isEmpty() == false)
+					{
+						schemaModified = true;
+						schemaItemAfb->setPackedLogicInputSignalIds(appSignalIdsList);
+					}
+				}
+			}
+
+			if (schemaModified == true)
+			{
+				QByteArray ba;
+				schema->saveToByteArray(&ba);
+
+				file->setData(std::move(ba));
+			}
+		}
 
 		// All schemas are parsed and loaded to map schemas
 		// iterate them and join schemas to left/right/top/bottom

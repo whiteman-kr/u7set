@@ -282,6 +282,33 @@ namespace VFrame30
 		return nullptr;
 	}
 
+	// IMatsSchemaItemAssociations implementation.
+	//
+	QStringList SchemaItemImageValue::associatedAppSignalIds() const
+	{
+		return signalIds();
+	}
+
+	QStringList SchemaItemImageValue::associatedImpactAppSignalIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemImageValue::associatedConnectionIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemImageValue::associatedLoopbackIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemImageValue::associatedSchemaItemLabels() const
+	{
+		return {};
+	}
+
 	QString SchemaItemImageValue::signalIdsString() const
 	{
 		std::shared_ptr<Context> context = this->context();

@@ -1,17 +1,20 @@
 #include "SimSchemaWidget.h"
-#include "SimSchemaView.h"
-#include "SimSchemaManager.h"
 #include "SimIdeSimulator.h"
+#include "SimSchemaManager.h"
+#include "SimSchemaView.h"
 #include "SimWidget.h"
+
+#include "../VFrame30/IMatsSchemaItemAssociations.h"
+#include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/LogicSchema.h"
-#include "../VFrame30/SchemaItemSignal.h"
-#include "../VFrame30/SchemaItemValue.h"
+#include "../VFrame30/Propertynames.h"
+#include "../VFrame30/SchemaItemConnection.h"
 #include "../VFrame30/SchemaItemImageValue.h"
 #include "../VFrame30/SchemaItemIndicator.h"
-#include "../VFrame30/SchemaItemConnection.h"
-#include "../VFrame30/SchemaItemUfb.h"
 #include "../VFrame30/SchemaItemLoopback.h"
-#include "../VFrame30/AppSignalController.h"
+#include "../VFrame30/SchemaItemSignal.h"
+#include "../VFrame30/SchemaItemUfb.h"
+#include "../VFrame30/SchemaItemValue.h"
 
 
 namespace
@@ -57,8 +60,8 @@ namespace
 			else
 			{
 				AppSignalState state = m_signalManager ?
-					m_signalManager->signalState(m_signalParam.appSignalId(), nullptr) :
-					AppSignalState{};
+										   m_signalManager->signalState(m_signalParam.appSignalId(), nullptr) :
+										   AppSignalState{};
 
 				QString stateText;
 				if (state.isValid() == false)
@@ -70,16 +73,16 @@ namespace
 					// Print signal value.
 					//
 					int precision = (m_signalParam.isAnalog() && m_signalParam.analogSignalFormat() == E::AnalogAppSignalFormat::Float32) ?
-						m_signalParam.precision() :
-						0;
+										m_signalParam.precision() :
+										0;
 
 					stateText = QString{"%1"}.arg(state.value(), 8, 'f', precision);
 				}
 
 				str = QString{"%1 | %2 |%3"}
-					.arg(m_signalParam.customSignalId().leftJustified(m_maxIdSize))
-					.arg(m_signalParam.caption().leftJustified(m_maxCaptionSize))
-					.arg(stateText);
+						  .arg(m_signalParam.customSignalId().leftJustified(m_maxIdSize))
+						  .arg(m_signalParam.caption().leftJustified(m_maxCaptionSize))
+						  .arg(stateText);
 			}
 
 			return str;
@@ -102,19 +105,20 @@ namespace
 	class QSchemaMenu : public QMenu
 	{
 	public:
-		QSchemaMenu(QWidget* parent = nullptr) : QMenu{parent}
+		QSchemaMenu(QWidget* parent = nullptr) :
+			QMenu{parent}
 		{
 #ifdef Q_OS_WIN
 			QFont f;
 			f.setFamily("Consolas");
 			setFont(f);
 #else
-			//QFont f;
-			//f.setFamily("DejaVu Sans Mono");  // https://ianyepan.github.io/posts/system-default-monospace-fonts-pt1/
-			//f.setFamily("DejaVu Sans Mono Book");  // https://ianyepan.github.io/posts/system-default-monospace-fonts-pt1/
-			//setFont(f);
+			// QFont f;
+			// f.setFamily("DejaVu Sans Mono");  // https://ianyepan.github.io/posts/system-default-monospace-fonts-pt1/
+			// f.setFamily("DejaVu Sans Mono Book");  // https://ianyepan.github.io/posts/system-default-monospace-fonts-pt1/
+			// setFont(f);
 			setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
-#endif 
+#endif
 		}
 
 	protected:
@@ -191,7 +195,7 @@ namespace
 		AppSignalParam m_dragSignalParam;
 		QPoint m_dragStartPosition;
 	};
-}
+} // namespace
 
 
 //
@@ -202,9 +206,9 @@ namespace
 SimSchemaWidget::SimSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 								 SimSchemaManager* schemaManager,
 								 VFrame30::AppSignalController* appSignalController,
-                                 SimIdeSimulator* simulator,
-                                 QWidget* parent) :
-    VFrame30::ClientSchemaWidget(new SimSchemaView{schemaManager}, schema, schemaManager, parent),
+								 SimIdeSimulator* simulator,
+								 QWidget* parent) :
+	VFrame30::ClientSchemaWidget(new SimSchemaView{schemaManager}, schema, schemaManager, parent),
 	m_simulator(simulator),
 	m_logController(simulator->log().logInterface())
 {
@@ -316,65 +320,15 @@ void SimSchemaWidget::contextMenuRequested(const QPoint& pos)
 	{
 		for (const SchemaItemPtr& item : items)
 		{
-			if (VFrame30::SchemaItemSignal* schemaItemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
-				schemaItemSignal != nullptr)
+			auto schemaItemAssociations = dynamic_cast<const VFrame30::IMatsSchemaItemAssociations*>(item.get());
+			if (schemaItemAssociations == nullptr)
 			{
-				appSignals = schemaItemSignal->appSignalIdList();
-				impactSignals = schemaItemSignal->impactAppSignalIdList();
-				break;
+				continue;
 			}
 
-			if (VFrame30::SchemaItemValue* schemaItem = dynamic_cast<VFrame30::SchemaItemValue*>(item.get());
-				schemaItem != nullptr)
-			{
-				appSignals = schemaItem->signalIds(context.get());
-				break;
-			}
-
-			if (VFrame30::SchemaItemImageValue* schemaItem = dynamic_cast<VFrame30::SchemaItemImageValue*>(item.get());
-				schemaItem != nullptr)
-			{
-				appSignals = schemaItem->signalIds(context.get());
-				break;
-			}
-
-			if (VFrame30::SchemaItemIndicator* schemaItem = dynamic_cast<VFrame30::SchemaItemIndicator*>(item.get());
-				schemaItem != nullptr)
-			{
-				appSignals = schemaItem->signalIds(context.get());
-				break;
-			}
-
-			if (VFrame30::SchemaItemReceiver* schemaItemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
-				schemaItemReceiver != nullptr)
-			{
-				appSignals = schemaItemReceiver->appSignalIdsAsList();
-				break;
-			}
-
-			if (VFrame30::SchemaItemUfb* schemaItemUfb = dynamic_cast<VFrame30::SchemaItemUfb*>(item.get());
-				schemaItemUfb != nullptr)
-			{
-				std::vector<std::shared_ptr<Property>> props = static_cast<const PropertyObject*>(schemaItemUfb)->specificProperties();
-
-				for (auto p : props)
-				{
-					QString v = p->value().toString();
-					if (v.startsWith(QChar('#')) == true)
-					{
-						appSignals += v.split(QChar::LineFeed, Qt::SkipEmptyParts);
-					}
-				}
-
-				break;
-			}
-
-			if (VFrame30::SchemaItemLoopback* schemaItemLoopback = dynamic_cast<VFrame30::SchemaItemLoopback*>(item.get());
-				schemaItemLoopback != nullptr)
-			{
-				loopbackId = schemaItemLoopback->loopbackId();
-				break;
-			}
+			appSignals += schemaItemAssociations->associatedAppSignalIds();
+			impactSignals += schemaItemAssociations->associatedImpactAppSignalIds();
+			loopbackId += schemaItemAssociations->associatedLoopbackIds().join(", ");
 		}
 	}
 
@@ -460,9 +414,9 @@ void SimSchemaWidget::signalContextMenu(QStringList appSignals,
 		for (const QString& schemaId : signalsSchemasSet)
 		{
 			auto f = [schemaId, &appSignals, &impactSignals, loopbackId, thisSimWidget]() -> void
-					 {
-						thisSimWidget->openSchemaTabPage(schemaId, (appSignals + impactSignals) << loopbackId);
-					 };
+			{
+				thisSimWidget->openSchemaTabPage(schemaId, (appSignals + impactSignals) << loopbackId);
+			};
 
 			QAction* a = schemasSubMenu->addAction(schemaId);
 
@@ -479,9 +433,9 @@ void SimSchemaWidget::signalContextMenu(QStringList appSignals,
 		for (const QString& schemaId : impactSignalsSchemasSet)
 		{
 			auto f = [schemaId, &appSignals, &impactSignals, loopbackId, thisSimWidget]() -> void
-					 {
-						thisSimWidget->openSchemaTabPage(schemaId, (appSignals + impactSignals) << loopbackId);
-					 };
+			{
+				thisSimWidget->openSchemaTabPage(schemaId, (appSignals + impactSignals) << loopbackId);
+			};
 
 			QString actionCaption = (schema()->schemaId() == schemaId) ? QString("-> %1").arg(schemaId) : schemaId;
 
@@ -496,9 +450,9 @@ void SimSchemaWidget::signalContextMenu(QStringList appSignals,
 		for (const QString& schemaId : loopbackSchemas)
 		{
 			auto f = [schemaId, &appSignals, &impactSignals, loopbackId, thisSimWidget]() -> void
-					 {
-						thisSimWidget->openSchemaTabPage(schemaId, (appSignals + impactSignals) << loopbackId);
-					 };
+			{
+				thisSimWidget->openSchemaTabPage(schemaId, (appSignals + impactSignals) << loopbackId);
+			};
 
 			QString actionCaption = (schema()->schemaId() == schemaId) ? QString("-> %1").arg(schemaId) : schemaId;
 
@@ -580,9 +534,9 @@ void SimSchemaWidget::signalContextMenu(QStringList appSignals,
 			menu.addAction(signalAction);
 
 			auto f = [signal, thisSimWidget]() -> void
-					 {
-						thisSimWidget->signalInfo(signal.appSignalId());
-					 };
+			{
+				thisSimWidget->signalInfo(signal.appSignalId());
+			};
 
 			connect(signalAction, &QAction::triggered, this, f);
 		}
@@ -602,9 +556,9 @@ void SimSchemaWidget::signalContextMenu(QStringList appSignals,
 			menu.addAction(signalAction);
 
 			auto f = [signal, thisSimWidget]() -> void
-					 {
-						thisSimWidget->signalInfo(signal.appSignalId());
-					 };
+			{
+				thisSimWidget->signalInfo(signal.appSignalId());
+			};
 
 			connect(signalAction, &QAction::triggered, this, f);
 		}
@@ -625,12 +579,12 @@ void SimSchemaWidget::signalContextMenu(QStringList appSignals,
 			a->setChecked(m == simSchemaView()->monitorId());
 
 			auto f = [m, this]()
-					 {
-						QSettings s;
-						s.setValue("Simulator/" + m_simulator->projectName(), m);
+			{
+				QSettings s;
+				s.setValue("Simulator/" + m_simulator->projectName(), m);
 
-						simSchemaView()->setMonitorId(m, true);
-					 };
+				simSchemaView()->setMonitorId(m, true);
+			};
 
 			connect(a, &QAction::triggered, this, f);
 		}
@@ -661,7 +615,7 @@ void SimSchemaWidget::updateProject()
 		monitorId = monitors.front();
 	}
 
-	simSchemaView()->setMonitorId(monitorId, false);		// Do not emit update (false) as it will lead to recursion
+	simSchemaView()->setMonitorId(monitorId, false); // Do not emit update (false) as it will lead to recursion
 
 	// Update schema
 	//
@@ -701,5 +655,3 @@ const SimSchemaView* SimSchemaWidget::simSchemaView() const
 	assert(result);
 	return result;
 }
-
-

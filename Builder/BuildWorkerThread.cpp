@@ -1976,7 +1976,7 @@ namespace Builder
 		{
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
-				break;;
+				break;
 			}
 
 			Hardware::Software* software = p.second;

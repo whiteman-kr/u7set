@@ -12142,6 +12142,7 @@ class SchemaItemAfb PROTOBUF_FINAL :
 
   enum : int {
     kParamsFieldNumber = 2,
+    kPackedLogicInputsFieldNumber = 8,
     kDeprecatedLabelFieldNumber = 6,
     kAfbStridFieldNumber = 3,
     kDeprecatedAfbelementFieldNumber = 5,
@@ -12165,6 +12166,30 @@ class SchemaItemAfb PROTOBUF_FINAL :
   ::Proto::AfbParam* add_params();
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::AfbParam >&
       params() const;
+
+  // repeated string packedLogicInputs = 8;
+  int packedlogicinputs_size() const;
+  private:
+  int _internal_packedlogicinputs_size() const;
+  public:
+  void clear_packedlogicinputs();
+  const std::string& packedlogicinputs(int index) const;
+  std::string* mutable_packedlogicinputs(int index);
+  void set_packedlogicinputs(int index, const std::string& value);
+  void set_packedlogicinputs(int index, std::string&& value);
+  void set_packedlogicinputs(int index, const char* value);
+  void set_packedlogicinputs(int index, const char* value, size_t size);
+  std::string* add_packedlogicinputs();
+  void add_packedlogicinputs(const std::string& value);
+  void add_packedlogicinputs(std::string&& value);
+  void add_packedlogicinputs(const char* value);
+  void add_packedlogicinputs(const char* value, size_t size);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& packedlogicinputs() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_packedlogicinputs();
+  private:
+  const std::string& _internal_packedlogicinputs(int index) const;
+  std::string* _internal_add_packedlogicinputs();
+  public:
 
   // optional string deprecated_label = 6;
   bool has_deprecated_label() const;
@@ -12263,6 +12288,7 @@ class SchemaItemAfb PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::AfbParam > params_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> packedlogicinputs_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr deprecated_label_;
   ::Proto::wstring* afbstrid_;
   ::Proto::AfbElementXml* deprecated_afbelement_;
@@ -42950,6 +42976,80 @@ inline void SchemaItemAfb::set_allocated_afbelement(::Proto::AfbElementXml* afbe
   }
   afbelement_ = afbelement;
   // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItemAfb.afbelement)
+}
+
+// repeated string packedLogicInputs = 8;
+inline int SchemaItemAfb::_internal_packedlogicinputs_size() const {
+  return packedlogicinputs_.size();
+}
+inline int SchemaItemAfb::packedlogicinputs_size() const {
+  return _internal_packedlogicinputs_size();
+}
+inline void SchemaItemAfb::clear_packedlogicinputs() {
+  packedlogicinputs_.Clear();
+}
+inline std::string* SchemaItemAfb::add_packedlogicinputs() {
+  // @@protoc_insertion_point(field_add_mutable:Proto.SchemaItemAfb.packedLogicInputs)
+  return _internal_add_packedlogicinputs();
+}
+inline const std::string& SchemaItemAfb::_internal_packedlogicinputs(int index) const {
+  return packedlogicinputs_.Get(index);
+}
+inline const std::string& SchemaItemAfb::packedlogicinputs(int index) const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemAfb.packedLogicInputs)
+  return _internal_packedlogicinputs(index);
+}
+inline std::string* SchemaItemAfb::mutable_packedlogicinputs(int index) {
+  // @@protoc_insertion_point(field_mutable:Proto.SchemaItemAfb.packedLogicInputs)
+  return packedlogicinputs_.Mutable(index);
+}
+inline void SchemaItemAfb::set_packedlogicinputs(int index, const std::string& value) {
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemAfb.packedLogicInputs)
+  packedlogicinputs_.Mutable(index)->assign(value);
+}
+inline void SchemaItemAfb::set_packedlogicinputs(int index, std::string&& value) {
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemAfb.packedLogicInputs)
+  packedlogicinputs_.Mutable(index)->assign(std::move(value));
+}
+inline void SchemaItemAfb::set_packedlogicinputs(int index, const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  packedlogicinputs_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:Proto.SchemaItemAfb.packedLogicInputs)
+}
+inline void SchemaItemAfb::set_packedlogicinputs(int index, const char* value, size_t size) {
+  packedlogicinputs_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:Proto.SchemaItemAfb.packedLogicInputs)
+}
+inline std::string* SchemaItemAfb::_internal_add_packedlogicinputs() {
+  return packedlogicinputs_.Add();
+}
+inline void SchemaItemAfb::add_packedlogicinputs(const std::string& value) {
+  packedlogicinputs_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add:Proto.SchemaItemAfb.packedLogicInputs)
+}
+inline void SchemaItemAfb::add_packedlogicinputs(std::string&& value) {
+  packedlogicinputs_.Add(std::move(value));
+  // @@protoc_insertion_point(field_add:Proto.SchemaItemAfb.packedLogicInputs)
+}
+inline void SchemaItemAfb::add_packedlogicinputs(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  packedlogicinputs_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:Proto.SchemaItemAfb.packedLogicInputs)
+}
+inline void SchemaItemAfb::add_packedlogicinputs(const char* value, size_t size) {
+  packedlogicinputs_.Add()->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:Proto.SchemaItemAfb.packedLogicInputs)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>&
+SchemaItemAfb::packedlogicinputs() const {
+  // @@protoc_insertion_point(field_list:Proto.SchemaItemAfb.packedLogicInputs)
+  return packedlogicinputs_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
+SchemaItemAfb::mutable_packedlogicinputs() {
+  // @@protoc_insertion_point(field_mutable_list:Proto.SchemaItemAfb.packedLogicInputs)
+  return &packedlogicinputs_;
 }
 
 // -------------------------------------------------------------------

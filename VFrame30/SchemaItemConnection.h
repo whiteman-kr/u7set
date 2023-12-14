@@ -1,10 +1,10 @@
 #pragma once
 
 #include "FblItemRect.h"
+#include "IMatsSchemaItemAssociations.h"
 
 namespace VFrame30
 {
-
 	//
 	//
 	//		SchemaItemConnection
@@ -58,7 +58,7 @@ namespace VFrame30
 	//		SchemaItemTransmitter
 	//
 	//
-	class SchemaItemTransmitter final: public SchemaItemConnection
+	class SchemaItemTransmitter final : public SchemaItemConnection, public IMatsSchemaItemAssociations
 	{
 		Q_OBJECT
 
@@ -87,6 +87,15 @@ namespace VFrame30
 		virtual QString buildName() const override;
 		virtual QString toolTipText(double dpiX, double dpiY, double devicePixelRatio) const override;
 
+		// IMatsSchemaItemAssociations implementation.
+		//
+	public:
+		virtual QStringList associatedAppSignalIds() const override;
+		virtual QStringList associatedImpactAppSignalIds() const override;
+		virtual QStringList associatedConnectionIds() const override;
+		virtual QStringList associatedLoopbackIds() const override;
+		virtual QStringList associatedSchemaItemLabels() const override;
+
 		// Properties
 		//
 	public:
@@ -105,7 +114,7 @@ namespace VFrame30
 	//		SchemaItemReceiver
 	//
 	//
-	class SchemaItemReceiver final : public SchemaItemConnection
+	class SchemaItemReceiver final : public SchemaItemConnection, public IMatsSchemaItemAssociations
 	{
 		Q_OBJECT
 
@@ -136,6 +145,15 @@ namespace VFrame30
 		virtual QString buildName() const override;
 		virtual QString toolTipText(double dpiX, double dpiY, double devicePixelRatio) const override;
 
+		// IMatsSchemaItemAssociations implementation.
+		//
+	public:
+		virtual QStringList associatedAppSignalIds() const override;
+		virtual QStringList associatedImpactAppSignalIds() const override;
+		virtual QStringList associatedConnectionIds() const override;
+		virtual QStringList associatedLoopbackIds() const override;
+		virtual QStringList associatedSchemaItemLabels() const override;
+
 		// Properties
 		//
 	public:
@@ -148,8 +166,8 @@ namespace VFrame30
 		bool showValidity() const;
 		void setShowValidity(bool value);
 
-//		bool multiline() const;
-//		void setMultiline(bool value);
+		//		bool multiline() const;
+		//		void setMultiline(bool value);
 
 		bool isValidityPin(const QUuid& pin) const;
 		bool isOutputPin(const QUuid& pinGuid) const;
@@ -173,13 +191,13 @@ namespace VFrame30
 	private:
 		QStringList m_appSignalIds = {"#APPSIGNALID"};
 		bool m_showValidity = true;
-		//bool m_multiline = true;
+		// bool m_multiline = true;
 
-		E::ColumnData m_dataType = E::ColumnData::AppSignalID;	// Data for displaying
+		E::ColumnData m_dataType = E::ColumnData::AppSignalID; // Data for displaying
 
 		int m_precision = 2;
 		E::AnalogFormat m_analogFormat = E::AnalogFormat::f_9;
 		QString m_customText;
 	};
 
-}
+} // namespace VFrame30
