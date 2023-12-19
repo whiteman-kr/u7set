@@ -346,6 +346,18 @@ function generate_aim4ph_sr(confFirmware, module, LMNumber, frame, log, signalSe
             }
         }
 
+        // values of *ValigRange for writing in module configuration
+        // where cfgHighValidRange always must be greate than cfgLowValidRange
+        //
+        let cfgHighValidRange = highValidRange;
+        let cfgLowValidRange = lowValidRange;
+
+        if (cfgHighValidRange < cfgLowValidRange)
+        {
+            cfgHighValidRange = lowValidRange;
+            cfgLowValidRange = highValidRange;
+        }
+
         //
         // Write log and configuration data
         //
@@ -357,19 +369,19 @@ function generate_aim4ph_sr(confFirmware, module, LMNumber, frame, log, signalSe
         logStr +=   "; HighPhysicalRange = " + highPhysicalRange +
                     "; LowPhysicalRange = " + lowPhysicalRange;
 
-        logStr += "; [" + frame + ":" + (ptr + 12) + "] HighValidRange = " + highValidRange +
-                  "; [" + frame + ":" + (ptr + 16) + "] LowValidRange = " + lowValidRange +
+        logStr += "; [" + frame + ":" + (ptr + 12) + "] HighValidRange = " + cfgHighValidRange +
+                  "; [" + frame + ":" + (ptr + 16) + "] LowValidRange = " + cfgLowValidRange +
                   "; [" + frame + ":" + (ptr + 24) + "] WordOfFlags = " + flags + "\r\n";
 
         confFirmware.writeLog(logStr);
 
-        if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "FilteringTime", filteringTime) == false)          // InA Filtering time constant
+        if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, FILTERING_TIME, filteringTime) == false)          // InA Filtering time constant
         {
             return false;
         }
         ptr += 2;
 
-        if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "SpreadTolerance", spreadTolerance) == false)      // InA SpreadTolerance
+        if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, SPREAD_TOLERANCE, spreadTolerance) == false)      // InA SpreadTolerance
         {
             return false;
         }
@@ -389,13 +401,13 @@ function generate_aim4ph_sr(confFirmware, module, LMNumber, frame, log, signalSe
         ptr += 4;
 
 
-        if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "HighValidRange", highValidRange) == false)         // InA High bound
+        if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, HIGH_VALID_RANGE, cfgHighValidRange) == false)         // InA High bound
         {
             return false;
         }
         ptr += 4;
 
-        if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "LowValidRange", lowValidRange) == false)          // InA Low Bound
+        if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, LOW_VALID_RANGE, cfgLowValidRange) == false)          // InA Low Bound
         {
             return false;
         }

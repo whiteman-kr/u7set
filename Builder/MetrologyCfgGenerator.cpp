@@ -495,10 +495,20 @@ namespace Builder
 
 		// get current electric limit from current engineeringUnits and round to 4 digit after point
 		//
-		double lowElectricVal = floor(uc.conversion(signal.lowEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal) * 10000 + 0.5) / 10000;
-		double highElectricVal = floor(uc.conversion(signal.highEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal) * 10000 + 0.5) / 10000;
 
-		if ((std::nextafter(lowElectricVal, std::numeric_limits<double>::lowest()) <= signal.electricLowLimit() && std::nextafter(lowElectricVal, std::numeric_limits<double>::max()) >= signal.electricLowLimit()) == false)
+		double lowEngUnits = signal.lowEngineeringUnits();
+		double highEngUnits = signal.highEngineeringUnits();
+
+		if (lowEngUnits > highEngUnits)
+		{
+			std::swap(lowEngUnits, highEngUnits);
+		}
+
+		double lowElectricVal = floor(uc.conversion(lowEngUnits, UnitsConvertType::PhysicalToElectric, signal) * 10000 + 0.5) / 10000;
+		double highElectricVal = floor(uc.conversion(highEngUnits, UnitsConvertType::PhysicalToElectric, signal) * 10000 + 0.5) / 10000;
+
+		if ((std::nextafter(lowElectricVal, std::numeric_limits<double>::lowest()) <= signal.electricLowLimit() &&
+			 std::nextafter(lowElectricVal, std::numeric_limits<double>::max()) >= signal.electricLowLimit()) == false)
 		{
 			// Signal %1 - low engineering limit mismatch low electrical limit: %2 %4, set low electrical Limit: %3 %4.
 			//
@@ -507,7 +517,8 @@ namespace Builder
 			return false;
 		}
 
-		if ((std::nextafter(highElectricVal, std::numeric_limits<double>::lowest()) <= signal.electricHighLimit() && std::nextafter(highElectricVal, std::numeric_limits<double>::max()) >= signal.electricHighLimit()) == false)
+		if ((std::nextafter(highElectricVal, std::numeric_limits<double>::lowest()) <= signal.electricHighLimit() &&
+			 std::nextafter(highElectricVal, std::numeric_limits<double>::max()) >= signal.electricHighLimit()) == false)
 		{
 			// Signal %1 - high engineering limit mismatch high electrical limit: %2 %4, set high electrical Limit: %3 %4.
 			//
