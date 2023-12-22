@@ -836,6 +836,8 @@ bool TuningServiceSettingsGetter::readSettings(const Builder::Context* context,
 
 	result &= fillTuningClientsInfo(context, software, singleLmControl);
 
+	result &= fillMatsUsers(context);
+
 	if (context->m_projectProperties.safetyProject() == true && singleLmControl == false)
 	{
 		// TuningService (%1) cannot be used for multi LM control in Safety Project. Turn On option %1.SingleLmControl or override behaviour in menu Project->Project Properties...->Safety Project.
@@ -1053,6 +1055,14 @@ bool TuningServiceSettingsGetter::fillTuningClientsInfo(const Builder::Context* 
 	}
 
 	return result;
+}
+
+bool TuningServiceSettingsGetter::fillMatsUsers(const Builder::Context* context)
+{
+	TEST_PTR_RETURN_FALSE(context);
+	matsUsers = context->m_matsUsers.users();
+
+	return true;
 }
 
 // -------------------------------------------------------------------------------------

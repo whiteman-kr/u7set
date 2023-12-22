@@ -185,6 +185,8 @@ private:
 	bool fillTuningClientsInfo(const Builder::Context* context,
 							   const Hardware::Software* software,
 							   bool singleLmControlEnabled);
+
+	bool fillMatsUsers(const Builder::Context* context);
 };
 
 // -------------------------------------------------------------------------------------------

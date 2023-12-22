@@ -222,6 +222,9 @@ namespace XmlElement
 	inline const QString TUNING_CHANNEL_TEMPLATE("Channel%1");
 	inline const QString CHANNEL_COUNT("ChannelCount");
 
+	inline const QString MATS_USERS("MatsUsers");
+	inline const QString MATS_USER("MatsUser");
+
 	inline const QString DATA_SOURCES("DataSources");
 	inline const QString DATA_SOURCE("DataSource");
 	inline const QString ASSOCIATED_SIGNALS("AssociatedSignals");
@@ -337,6 +340,11 @@ namespace XmlAttribute
 	inline const QString DATA_TYPE("DataType");
 	inline const QString SEND_EVENTS("SendEvents");
 	inline const QString INCLUDE_APP_SIGNAL_ID("IncludeAppSignalID");
+
+	inline const QString LOGIN("Login");
+	inline const QString ENABLED("Enabled");
+	inline const QString DESCRIPTION("Description");
+	inline const QString TUNING_TAGS("TuningTags");
 }
 
 namespace Latin1Char

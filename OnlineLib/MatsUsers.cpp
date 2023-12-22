@@ -3,6 +3,7 @@
 #endif
 
 #include "MatsUsers.h"
+#include "../lib/ConstStrings.h"
 
 namespace OnlineLib
 {
@@ -15,40 +16,40 @@ namespace OnlineLib
 
 	bool MatsUser::save(QXmlStreamWriter& writer) const
 	{
-		writer.writeStartElement("User");
-		writer.writeAttribute("Login", login());
-		writer.writeAttribute("Description", description());
-		writer.writeAttribute("Enabled", enabled() ? "true" : "false");
-		writer.writeAttribute("TuningTags", tuningTagsToString());
+		writer.writeStartElement(XmlElement::MATS_USER);
+		writer.writeAttribute(XmlAttribute::LOGIN, login());
+		writer.writeAttribute(XmlAttribute::DESCRIPTION, description());
+		writer.writeAttribute(XmlAttribute::ENABLED, enabled() ? "true" : "false");
+		writer.writeAttribute(XmlAttribute::TUNING_TAGS, tuningTagsToString());
 		writer.writeEndElement();
 		return true;
 	}
 
 	bool MatsUser::load(QXmlStreamReader& reader)
 	{
-		if (reader.name() != QLatin1String("User"))
+		if (reader.name() != XmlElement::MATS_USER)
 		{
 			return false;
 		}
 
-		if (reader.attributes().hasAttribute(QLatin1String("Login")) == true)
+		if (reader.attributes().hasAttribute(XmlAttribute::LOGIN) == true)
 		{
-			setLogin(reader.attributes().value(QLatin1String("Login")).toString());
+			setLogin(reader.attributes().value(XmlAttribute::LOGIN).toString());
 		}
 
-		if (reader.attributes().hasAttribute(QLatin1String("Description")))
+		if (reader.attributes().hasAttribute(XmlAttribute::DESCRIPTION))
 		{
-			setDescription(reader.attributes().value(QLatin1String("Description")).toString());
+			setDescription(reader.attributes().value(XmlAttribute::DESCRIPTION).toString());
 		}
 
-		if (reader.attributes().hasAttribute(QLatin1String("Enabled")))
+		if (reader.attributes().hasAttribute(XmlAttribute::ENABLED))
 		{
-			setEnabled(reader.attributes().value(QLatin1String("Enabled")).toString() == "true" ? true : false);
+			setEnabled(reader.attributes().value(XmlAttribute::ENABLED).toString() == "true" ? true : false);
 		}
 
-		if (reader.attributes().hasAttribute(QLatin1String("TuningTags")))
+		if (reader.attributes().hasAttribute(XmlAttribute::TUNING_TAGS))
 		{
-			setTuningTagsFromString(reader.attributes().value(QLatin1String("TuningTags")).toString());
+			setTuningTagsFromString(reader.attributes().value(XmlAttribute::TUNING_TAGS).toString());
 		}
 
 		QXmlStreamReader::TokenType endToken = reader.readNext();
@@ -184,9 +185,8 @@ namespace OnlineLib
 
 	bool MatsUserStorage::load(const QByteArray& data, QString& errorCode)
 	{
-		// Load subsystems from XML
+		// Load MATS users from XML
 		//
-
 		QXmlStreamReader reader(data);
 
 		if (reader.readNextStartElement() == false)
@@ -196,18 +196,17 @@ namespace OnlineLib
 			return !reader.hasError();
 		}
 
-		if (reader.name() != QLatin1String("MatsUsers"))
+		if (reader.name() != XmlElement::MATS_USERS)
 		{
 			reader.raiseError(QObject::tr("The file is not an MatsUsers file."));
 			errorCode = reader.errorString();
 			return !reader.hasError();
 		}
 
-		// Read signals
-		//
 		while (reader.readNextStartElement())
 		{
 			MatsUser user;
+
 			if (user.load(reader) == true)
 			{
 				m_users.push_back(user);
@@ -229,11 +228,13 @@ namespace OnlineLib
 		writer.setAutoFormatting(true);
 		writer.writeStartDocument();
 
-		writer.writeStartElement("MatsUsers");
+		writer.writeStartElement(XmlElement::MATS_USERS);
+
 		for (const auto& s : m_users)
 		{
 			s.save(writer);
 		}
+
 		writer.writeEndElement();
 
 		writer.writeEndDocument();

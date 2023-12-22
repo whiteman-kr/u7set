@@ -4,7 +4,7 @@
 
 namespace Builder
 {
-	bool DbMatsUserStorage::load(DbController *db, QString& errorCode)
+	bool DbMatsUserStorage::load(DbController* db, QString& errorCode)
 	{
 		const QString& fileName = File::MATSUSERS_XML;
 
@@ -36,12 +36,12 @@ namespace Builder
 		QByteArray data;
 		file->swapData(data);
 
-		// Load subsystems from XML
+		// Load MATS users from XML
 		//
 		return OnlineLib::MatsUserStorage::load(data, errorCode);
 	}
 
-	bool DbMatsUserStorage::save(DbController *db, const QString& comment) const
+	bool DbMatsUserStorage::save(DbController* db, const QString& comment) const
 	{
 		const QString& fileName = File::MATSUSERS_XML;
 

@@ -13,9 +13,8 @@ namespace Builder
 	public:
 		DbMatsUserStorage() = default;
 
-		bool load(DbController* db, QString &errorCode);
-		bool save(DbController* db, const QString &comment) const;
-	
+		bool load(DbController* db, QString& errorCode);
+		bool save(DbController* db, const QString& comment) const;
 	};
 
 }
