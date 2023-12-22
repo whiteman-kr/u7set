@@ -193,12 +193,24 @@ function generate_aimsr(confFirmware, module, LMNumber, frame, log, signalSet, o
 			var k1 = (y2 - y1) / (x2 - x1);	// K
 			var k2 = y1 - k1 * x1;			// B
 
+            // values of *ValigRange for writing in module configuration
+            // where cfgHighValidRange always must be greate than cfgLowValidRange
+            //
+            let cfgHighValidRange = signal.highValidRange();
+            let cfgLowValidRange = signal.lowValidRange();
+
+            if (cfgHighValidRange < cfgLowValidRange)
+            {
+                cfgHighValidRange = signal.lowValidRange();
+                cfgLowValidRange = signal.highValidRange();
+            }
+
 			confFirmware.writeLog("    in" + (i + 1) + ": [" + frame + ":" + ptr + "] WordOfFlags = " + flags + 
 			"; [" + frame + ":" + (ptr + 2) + "] Tf = " + filteringTime +
 			"; [" + frame + ":" + (ptr + 6) + "] K1 = " + k1 +
 			"; [" + frame + ":" + (ptr + 10) + "] K2 = " + k2 +
-			"; [" + frame + ":" + (ptr + 14) + "] HighValidRange = " + signal.highValidRange() +
-			"; [" + frame + ":" + (ptr + 18) + "] LowValidRange = " + signal.lowValidRange() + "\r\n");
+            "; [" + frame + ":" + (ptr + 14) + "] HighValidRange = " + cfgHighValidRange +
+            "; [" + frame + ":" + (ptr + 18) + "] LowValidRange = " + cfgLowValidRange + "\r\n");
 
             if (setData16(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "WordOfFlags", flags) == false)      // InA WordOfFlags
 			{
@@ -226,13 +238,13 @@ function generate_aimsr(confFirmware, module, LMNumber, frame, log, signalSet, o
             ptr += 4;
 			
             
-			if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "HighValidRange", signal.highValidRange()) == false)         // InA High bound
+            if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "HighValidRange", cfgHighValidRange) == false)         // InA High bound
 			{
 				return false;
 			}
 			ptr += 4;
 				
-			if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "LowValidRange", signal.lowValidRange()) == false)          // InA Low Bound
+            if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "LowValidRange", cfgLowValidRange) == false)          // InA Low Bound
 			{
 				return false;
 			}

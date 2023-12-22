@@ -567,6 +567,8 @@ namespace AppSignalPropNames
 	inline const QString HIGH_DAC("HighDAC");
 	inline const QString LOW_ENGINEERING_UNITS("LowEngineeringUnits");
 	inline const QString HIGH_ENGINEERING_UNITS("HighEngineeringUnits");
+	inline const QString LOW_PHYSICAL_UNITS("LowPhysicalUnits");
+	inline const QString HIGH_PHYSICAL_UNITS("HighPhysicalUnits");
 	inline const QString UNIT("Unit");
 	inline const QString LOW_VALID_RANGE("LowValidRange");
 	inline const QString HIGH_VALID_RANGE("HighValidRange");

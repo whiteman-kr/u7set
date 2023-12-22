@@ -456,6 +456,11 @@ namespace VFrame30
 		vifble->set_precision(m_precision);
 		m_afbElement.saveToXml(vifble->mutable_afbelement());
 
+		for (const QString& pls : m_packedLogicInputSignalIds)
+		{
+			vifble->add_packedlogicinputs(pls.toStdString());
+		}
+
 		return true;
 	}
 
@@ -510,6 +515,12 @@ namespace VFrame30
 				qDebug() << "SchemaItemAfb::LoadData: Parsing AFB element error: " << errorMsg;
 				return false;
 			}
+		}
+
+		m_packedLogicInputSignalIds.clear();
+		for (const std::string& pls : vifble.packedlogicinputs())
+		{
+			m_packedLogicInputSignalIds.push_back(QString::fromStdString(pls));
 		}
 
 		// Add afb properties to class meta object
@@ -1205,6 +1216,42 @@ namespace VFrame30
 		return paramValue;
 	}
 
+	// IMatsSchemaItemAssociations implementation.
+	//
+	QStringList SchemaItemAfb::associatedAppSignalIds() const
+	{
+		QStringList result; 
+
+		if (isPackedLogic() == true)
+		{
+			result += packedLogicInputSignalIds();
+		}
+
+		return result;
+	}
+
+	QStringList SchemaItemAfb::associatedImpactAppSignalIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemAfb::associatedConnectionIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemAfb::associatedLoopbackIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemAfb::associatedSchemaItemLabels() const
+	{
+		return {};
+	}
+
+	// Properties
+	//	
 	const QString& SchemaItemAfb::afbStrID() const
 	{
 		return m_afbElement.strID();
@@ -1288,4 +1335,15 @@ namespace VFrame30
 	{
 		return m_afbElement.packedLogic();
 	}
+
+	QStringList SchemaItemAfb::packedLogicInputSignalIds() const
+	{
+		return m_packedLogicInputSignalIds;
+	}
+
+	void SchemaItemAfb::setPackedLogicInputSignalIds(const QStringList& value)
+	{
+		m_packedLogicInputSignalIds = value;
+	}
+
 } // namespace VFrame30

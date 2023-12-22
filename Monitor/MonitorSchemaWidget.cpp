@@ -1,18 +1,21 @@
-#include "MonitorMainWindow.h"
 #include "MonitorSchemaWidget.h"
-#include "MonitorSchemaView.h"
-#include "MonitorSchemaManager.h"
-#include "MonitorSignalInfo.h"
 #include "Globals.h"
-#include "../VFrame30/SchemaItemSignal.h"
-#include "../VFrame30/SchemaItemValue.h"
+#include "MonitorMainWindow.h"
+#include "MonitorSchemaManager.h"
+#include "MonitorSchemaView.h"
+#include "MonitorSignalInfo.h"
+
+#include "../VFrame30/IMatsSchemaItemAssociations.h"
+#include "../VFrame30/MacrosExpander.h"
+#include "../VFrame30/MonitorSchema.h"
+#include "../VFrame30/PropertyNames.h"
+#include "../VFrame30/SchemaItemConnection.h"
 #include "../VFrame30/SchemaItemImageValue.h"
 #include "../VFrame30/SchemaItemIndicator.h"
-#include "../VFrame30/SchemaItemConnection.h"
-#include "../VFrame30/SchemaItemUfb.h"
 #include "../VFrame30/SchemaItemLoopback.h"
-#include "../VFrame30/MonitorSchema.h"
-#include "../VFrame30/MacrosExpander.h"
+#include "../VFrame30/SchemaItemSignal.h"
+#include "../VFrame30/SchemaItemUfb.h"
+#include "../VFrame30/SchemaItemValue.h"
 
 namespace
 {
@@ -47,7 +50,7 @@ namespace
 		QString getActionText()
 		{
 			QString str;
-			
+
 			if (m_signalParam.customSignalId().isEmpty() == true)
 			{
 				// There is no such signal.
@@ -57,8 +60,8 @@ namespace
 			else
 			{
 				AppSignalState state = m_signalManager ?
-					m_signalManager->signalState(m_signalParam.appSignalId(), nullptr) :
-					AppSignalState{};
+										   m_signalManager->signalState(m_signalParam.appSignalId(), nullptr) :
+										   AppSignalState{};
 
 				QString stateText;
 				if (state.isValid() == false)
@@ -70,18 +73,18 @@ namespace
 					// Print signal value.
 					//
 					int precision = (m_signalParam.isAnalog() && m_signalParam.analogSignalFormat() == E::AnalogAppSignalFormat::Float32) ?
-						m_signalParam.precision() :
-						0;
+										m_signalParam.precision() :
+										0;
 
 					stateText = QString{"%1"}.arg(state.value(), 8, 'f', precision);
 				}
 
 				str = QString{"%1 | %2 |%3"}
-					.arg(m_signalParam.customSignalId().leftJustified(m_maxIdSize))
-					.arg(m_signalParam.caption().leftJustified(m_maxCaptionSize))
-					.arg(stateText);
+						  .arg(m_signalParam.customSignalId().leftJustified(m_maxIdSize))
+						  .arg(m_signalParam.caption().leftJustified(m_maxCaptionSize))
+						  .arg(stateText);
 			}
-			
+
 			return str;
 		}
 
@@ -102,19 +105,20 @@ namespace
 	class QSchemaMenu : public QMenu
 	{
 	public:
-		QSchemaMenu(QWidget* parent = nullptr) : QMenu{parent}
+		QSchemaMenu(QWidget* parent = nullptr) :
+			QMenu{parent}
 		{
 #ifdef Q_OS_WIN
 			QFont f;
 			f.setFamily("Consolas");
 			setFont(f);
 #else
-			//QFont f;
-			//f.setFamily("DejaVu Sans Mono");  // https://ianyepan.github.io/posts/system-default-monospace-fonts-pt1/
-			//f.setFamily("DejaVu Sans Mono Book");  // https://ianyepan.github.io/posts/system-default-monospace-fonts-pt1/
-			//setFont(f);
+			// QFont f;
+			// f.setFamily("DejaVu Sans Mono");  // https://ianyepan.github.io/posts/system-default-monospace-fonts-pt1/
+			// f.setFamily("DejaVu Sans Mono Book");  // https://ianyepan.github.io/posts/system-default-monospace-fonts-pt1/
+			// setFont(f);
 			setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
-#endif 
+#endif
 		}
 
 	protected:
@@ -191,7 +195,7 @@ namespace
 		AppSignalParam m_dragSignalParam;
 		QPoint m_dragStartPosition;
 	};
-}
+} // namespace
 
 
 //
@@ -253,76 +257,26 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 
 	for (const SchemaItemPtr& item : items)
 	{
-		if (VFrame30::SchemaItemSignal* schemaItemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
-			schemaItemSignal != nullptr)
+		auto schemaItemAssociations = dynamic_cast<const VFrame30::IMatsSchemaItemAssociations*>(item.get());
+		if (schemaItemAssociations == nullptr)
 		{
-			signalList.append(schemaItemSignal->appSignalIdList());
-			impactSignalList.append(schemaItemSignal->impactAppSignalIdList());
 			continue;
 		}
 
-		if (VFrame30::SchemaItemValue* schemaItem = dynamic_cast<VFrame30::SchemaItemValue*>(item.get());
-			schemaItem != nullptr)
-		{
-			signalList.append(schemaItem->signalIds(context.get()));
-			continue;
-		}
-
-		if (VFrame30::SchemaItemImageValue* schemaItem = dynamic_cast<VFrame30::SchemaItemImageValue*>(item.get());
-			schemaItem != nullptr)
-		{
-			signalList.append(schemaItem->signalIds(context.get()));
-			continue;
-		}
-
-		if (VFrame30::SchemaItemIndicator* schemaItem = dynamic_cast<VFrame30::SchemaItemIndicator*>(item.get());
-			schemaItem != nullptr)
-		{
-			signalList.append(schemaItem->signalIds(context.get()));
-			continue;
-		}
-
-		if (VFrame30::SchemaItemReceiver* schemaItemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
-			schemaItemReceiver != nullptr)
-		{
-			signalList.append(schemaItemReceiver->appSignalIdsAsList());
-			continue;
-		}
-
-		if (VFrame30::SchemaItemUfb* schemaItemUfb = dynamic_cast<VFrame30::SchemaItemUfb*>(item.get());
-			schemaItemUfb != nullptr)
-		{
-			std::vector<std::shared_ptr<Property>> props = static_cast<const PropertyObject*>(schemaItemUfb)->specificProperties();
-
-			for (const auto& p : props)
-			{
-				QString v = p->value().toString();
-				if (v.startsWith(QChar('#')) == true)
-				{
-					signalList += v.split(QChar::LineFeed, Qt::SkipEmptyParts);
-				}
-			}
-
-			continue;
-		}
-
-		if (VFrame30::SchemaItemLoopback* schemaItemLoopback = dynamic_cast<VFrame30::SchemaItemLoopback*>(item.get());
-			schemaItemLoopback != nullptr)
-		{
-			loopbacks.push_back(schemaItemLoopback->loopbackId());
-			continue;
-		}
+		signalList += schemaItemAssociations->associatedAppSignalIds();
+		impactSignalList += schemaItemAssociations->associatedImpactAppSignalIds();
+		loopbacks += schemaItemAssociations->associatedLoopbackIds();
 	}
 
 	if (signalList.isEmpty() == false || impactSignalList.isEmpty() == false || loopbacks.isEmpty() == false)
 	{
 		auto f = [this](QString& s)
+		{
+			if (s.startsWith('@') == true)
 			{
-				if (s.startsWith('@') == true)
-				{
-					s = signalManager()->equipmentToAppSignalId(s);
-				}
-			};
+				s = signalManager()->equipmentToAppSignalId(s);
+			}
+		};
 
 		std::ranges::for_each(signalList, f);
 		std::ranges::for_each(impactSignalList, f);
@@ -453,7 +407,6 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 			QAction* a = schemasSubMenu->addAction(actionCaption);
 			connect(a, &QAction::triggered, this, f);
 		}
-
 	}
 
 	// Custom menus
@@ -507,7 +460,7 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 		{
 			signal.setAppSignalId(s);
 			signal.setCustomSignalId({});
-			
+
 			maxIdSize = std::max(maxIdSize, signal.appSignalId().size());
 		}
 		else
@@ -550,9 +503,9 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 			menu.addAction(signalAction);
 
 			auto f = [this, signal]() -> void
-					 {
-						signalInfo(signal.appSignalId());
-					 };
+			{
+				signalInfo(signal.appSignalId());
+			};
 
 			connect(signalAction, &QAction::triggered, this, f);
 		}

@@ -397,7 +397,7 @@ namespace Metrology
 								{
 									if (signal.isSpecPropExists(AppSignalPropNames::RLOAD_OHM) == true)
 									{
-										m_electricRLoad = signal.rload_Ohm();
+										m_electricRLoad = signal.rloadOhm();
 									}
 								}
 
@@ -703,7 +703,7 @@ namespace Metrology
 			return;
 		}
 
-		AppSignal::setRload_Ohm(rload);
+		AppSignal::setRloadOhm(rload);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------

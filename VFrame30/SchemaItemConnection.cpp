@@ -285,6 +285,33 @@ namespace VFrame30
 		return str;
 	}
 
+	// IMatsSchemaItemAssociations implementation.
+	//
+	QStringList SchemaItemTransmitter::associatedAppSignalIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemTransmitter::associatedImpactAppSignalIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemTransmitter::associatedConnectionIds() const
+	{
+		return connectionIdsAsList();
+	}
+
+	QStringList SchemaItemTransmitter::associatedLoopbackIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemTransmitter::associatedSchemaItemLabels() const
+	{
+		return {};
+	}
+
 	int SchemaItemTransmitter::pinCount() const
 	{
 		return m_pinCount;
@@ -617,6 +644,33 @@ namespace VFrame30
 						.arg(appSignalIds());
 
 		return str;
+	}
+
+	// IMatsSchemaItemAssociations implementation.
+	//
+	QStringList SchemaItemReceiver::associatedAppSignalIds() const
+	{
+		return m_appSignalIds;
+	}
+
+	QStringList SchemaItemReceiver::associatedImpactAppSignalIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemReceiver::associatedConnectionIds() const
+	{
+		return connectionIdsAsList();
+	}
+
+	QStringList SchemaItemReceiver::associatedLoopbackIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemReceiver::associatedSchemaItemLabels() const
+	{
+		return {};
 	}
 
 	QString SchemaItemReceiver::appSignalIds() const

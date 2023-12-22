@@ -53,6 +53,7 @@ qt_add_library(${TARGET} STATIC
 	HorzVertLinks.h
 	ImageItem.cpp
 	ImageItem.h
+	IMatsSchemaItemAssociations.h
 	Indicator.cpp
 	Indicator.h
 	IndicatorArrowIndicator.cpp

@@ -1523,7 +1523,7 @@ void DialogSignalInfo::fillExtProperties()
 		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("InputHighLimit") << QString::number(signalExt.electricHighLimit(), 'f', signalExt.decimalPlaces())));
 		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("InputUnitID") << QString::number(signalExt.electricUnit())));
 
-		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("rload_Ohm") << QString::number(signalExt.rload_Ohm(), 'f', signalExt.decimalPlaces())));
+		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("rload_Ohm") << QString::number(signalExt.rloadOhm(), 'f', signalExt.decimalPlaces())));
 		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("r0_Ohm") << QString::number(signalExt.r0_Ohm(), 'f', signalExt.decimalPlaces())));
 
 		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("SensorType") << E::valueToString<E::SensorType>(signalExt.sensorType())));

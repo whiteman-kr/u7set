@@ -257,6 +257,12 @@ public:
 	double highEngineeringUnits(QString* err = nullptr) const;
 	void setHighEngineeringUnits(double highEngineeringUnits);
 
+	double lowPhysicalUnits(QString* err = nullptr) const;
+	void setLowPhysicalUnits(double lowPhUnits);
+
+	double highPhysicalUnits(QString* err = nullptr) const;
+	void setHighPhysicalUnits(double highPhUnits);
+
 	bool isReverseEngineeringLimits() const;
 
 	double lowValidRange(QString* err = nullptr) const;
@@ -282,8 +288,8 @@ public:
 	E::ElectricUnit electricUnit(QString* err = nullptr) const;
 	void setElectricUnit(E::ElectricUnit electricUnit);
 
-	double rload_Ohm(QString* err = nullptr) const;
-	void setRload_Ohm(double rload_Ohm);
+	double rloadOhm(QString* err = nullptr) const;
+	void setRloadOhm(double rload_Ohm);
 
 	E::SensorType sensorType(QString* err = nullptr) const;
 	void setSensorType(E::SensorType sensorType);

@@ -95,7 +95,7 @@ namespace Builder
 
 		std::unordered_set<QString> m_analogSignalsOnSchemas;
 
-		std::map<QString, std::list<LmPackedLogicSources>> m_packedLogicSources;	// Packed_Logic_ID => list of LmPacketLogicSources
+		std::map<QString, std::list<LmPackedLogicSources>> m_packedLogicSources;	// Key is label of packed_*_out schema item => list of LmPacketLogicSources
 
 		DbMatsUserStorage m_matsUsers;
 	};

@@ -542,6 +542,33 @@ namespace VFrame30
 		return gridSize;
 	}
 
+	// IMatsSchemaItemAssociations implementation.
+	//
+	QStringList SchemaItemValue::associatedAppSignalIds() const
+	{
+		return signalIds();
+	}
+	
+	QStringList SchemaItemValue::associatedImpactAppSignalIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemValue::associatedConnectionIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemValue::associatedLoopbackIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemValue::associatedSchemaItemLabels() const
+	{
+		return {};
+	}
+
 	// Properties and Data
 	//
 	IMPLEMENT_FONT_PROPERTIES(SchemaItemValue, Font, m_font);

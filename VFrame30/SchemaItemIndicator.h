@@ -1,8 +1,10 @@
 #pragma once
 
-#include "PosRectImpl.h"
 #include "FontParam.h"
+#include "IMatsSchemaItemAssociations.h"
 #include "Indicator.h"
+#include "PosRectImpl.h"
+
 #include "../TrendView/Trend.h"
 
 
@@ -18,7 +20,7 @@ namespace VFrame30
 	//
 	// SchemaItemIndicator
 	//
-	class SchemaItemIndicator : public PosRectImpl
+	class SchemaItemIndicator : public PosRectImpl, public IMatsSchemaItemAssociations
 	{
 		Q_OBJECT
 
@@ -49,6 +51,15 @@ namespace VFrame30
 		E::RtTrendsSamplePeriod trendSamplePeriod() const;
 		E::TimeType trendTimeType() const;
 		int trendDurationSeconds() const;
+
+		// IMatsSchemaItemAssociations implementation.
+		//
+	public:
+		virtual QStringList associatedAppSignalIds() const override;
+		virtual QStringList associatedImpactAppSignalIds() const override;
+		virtual QStringList associatedConnectionIds() const override;
+		virtual QStringList associatedLoopbackIds() const override;
+		virtual QStringList associatedSchemaItemLabels() const override;
 
 		// Properties and Data
 		//
@@ -85,14 +96,14 @@ namespace VFrame30
 		E::IndicatorType m_indicatorType = E::IndicatorType::HistogramVert;
 
 		// !!!
-		// Do not remove any items (even obsolete) from the next array, do not change its orded,
+		// Do not remove any items (even obsolete) from the next array, do not change its order,
 		// only add new items after adding them to E::IndicatorType
 		// !!!
 		std::array<IndicatorObjectPtr, E::IndicatorTypeCount> m_indicatorObjects;
 	};
 
 
-	template<typename IndicatorType/* = VFrame30::Indicator*/>
+	template<typename IndicatorType /* = VFrame30::Indicator*/>
 	IndicatorType* SchemaItemIndicator::indicatorObject()
 	{
 		size_t index = static_cast<size_t>(m_indicatorType);
@@ -106,7 +117,7 @@ namespace VFrame30
 		return dynamic_cast<IndicatorType*>(m_indicatorObjects[index].get());
 	}
 
-	template<typename IndicatorType/* = VFrame30::Indicator*/>
+	template<typename IndicatorType /* = VFrame30::Indicator*/>
 	const IndicatorType* SchemaItemIndicator::indicatorObject() const
 	{
 		size_t index = static_cast<size_t>(m_indicatorType);
@@ -120,6 +131,4 @@ namespace VFrame30
 		return dynamic_cast<const IndicatorType*>(m_indicatorObjects[index].get());
 	}
 
-}
-
-
+} // namespace VFrame30

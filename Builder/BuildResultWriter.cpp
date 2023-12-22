@@ -381,7 +381,15 @@ namespace Builder
 
 		m_xmlWriter.writeAttribute("Count", QString("%1").arg(m_linkedFiles.size()));
 
-		for(const BuildFile* buildFile : m_linkedFiles)
+		std::vector<BuildFile*> linkedFiles(m_linkedFiles.begin(), m_linkedFiles.end());
+
+		std::sort(linkedFiles.begin(), linkedFiles.end(),
+					[](BuildFile* a, BuildFile* b)
+					{
+						return a->pathFileName() < b->pathFileName();
+					});
+
+		for(const BuildFile* buildFile : linkedFiles)
 		{
 			TEST_PTR_CONTINUE(buildFile);
 			buildFile->getBuildFileInfo().writeToXml(m_xmlWriter);

@@ -5,4 +5,5 @@ AIM_SR
 	31.10.2023	Version: 4	AIM-SR_v4.u7devp		Property SensorRange renamed to InputRange, add new ElectricUnit values: mV=2,Ohm=3,V=4,Hz=6
 	07.11.2023	Version: 5	(preset isn't distributed)	Thermopairs sensors added to property SensorType (like in MPS-29 preset)
 	08.11.2023	Version: 5 	AIM-SR_v5.u7devp		Hz_* sensors added to to property SensorType.
+	20.12.2023	Version: 6 	AIM-SR_v6.u7devp		Configuration script improvements (HighValidRange always > LowValidRange in modue configuration)
 
