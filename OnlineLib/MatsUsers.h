@@ -29,17 +29,17 @@ namespace OnlineLib
 		[[nodiscard]] bool enabled() const;
 		void setEnabled(bool value);
 
-		[[nodiscard]] const std::set<QString>& tuningTags() const;
-		void setTuningTags(const std::set<QString>& value);
+		[[nodiscard]] const std::set<QString>& appSignalTags() const;
+		void setAppSignalTags(const std::set<QString>& tags);
 
-		QString tuningTagsToString() const;
-		void setTuningTagsFromString(QString value);
+		QString appSignalTagsToString() const;
+		void setAppSignalTagsFromString(QString value);
 
 	private:
 		QString m_login;
 		QString m_description;
 		bool m_enabled = true;
-		std::set<QString> m_tuningTags;
+		std::set<QString> m_appSignalTags;
 	};
 
 	//
@@ -56,7 +56,7 @@ namespace OnlineLib
 		void clear();
 
 		const std::vector<MatsUser>& users() const;
-		const std::set<QString>& tuningTags(const QString& login, bool* found = nullptr) const;
+		const std::set<QString>& appSignalTags(const QString& login, bool* found = nullptr) const;
 
 		bool load(const QByteArray& data, QString& errorCode);
 		bool save(QByteArray& data, const QString& comment) const;

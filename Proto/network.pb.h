@@ -12025,6 +12025,7 @@ class TuningSignalsWrite PROTOBUF_FINAL :
 
   enum : int {
     kCommandsFieldNumber = 3,
+    kMatsUserFieldNumber = 1,
     kAutoApplyFieldNumber = 2,
   };
   // repeated .Network.TuningWriteCommand commands = 3;
@@ -12044,6 +12045,26 @@ class TuningSignalsWrite PROTOBUF_FINAL :
   ::Network::TuningWriteCommand* add_commands();
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Network::TuningWriteCommand >&
       commands() const;
+
+  // optional string matsUser = 1;
+  bool has_matsuser() const;
+  private:
+  bool _internal_has_matsuser() const;
+  public:
+  void clear_matsuser();
+  const std::string& matsuser() const;
+  void set_matsuser(const std::string& value);
+  void set_matsuser(std::string&& value);
+  void set_matsuser(const char* value);
+  void set_matsuser(const char* value, size_t size);
+  std::string* mutable_matsuser();
+  std::string* release_matsuser();
+  void set_allocated_matsuser(std::string* matsuser);
+  private:
+  const std::string& _internal_matsuser() const;
+  void _internal_set_matsuser(const std::string& value);
+  std::string* _internal_mutable_matsuser();
+  public:
 
   // optional bool autoApply = 2 [default = false];
   bool has_autoapply() const;
@@ -12068,6 +12089,7 @@ class TuningSignalsWrite PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Network::TuningWriteCommand > commands_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr matsuser_;
   bool autoapply_;
   friend struct ::TableStruct_network_2eproto;
 };
@@ -26663,9 +26685,82 @@ inline void TuningWriteCommand::set_allocated_value(::Proto::TuningValue* value)
 
 // TuningSignalsWrite
 
+// optional string matsUser = 1;
+inline bool TuningSignalsWrite::_internal_has_matsuser() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool TuningSignalsWrite::has_matsuser() const {
+  return _internal_has_matsuser();
+}
+inline void TuningSignalsWrite::clear_matsuser() {
+  matsuser_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& TuningSignalsWrite::matsuser() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSignalsWrite.matsUser)
+  return _internal_matsuser();
+}
+inline void TuningSignalsWrite::set_matsuser(const std::string& value) {
+  _internal_set_matsuser(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSignalsWrite.matsUser)
+}
+inline std::string* TuningSignalsWrite::mutable_matsuser() {
+  // @@protoc_insertion_point(field_mutable:Network.TuningSignalsWrite.matsUser)
+  return _internal_mutable_matsuser();
+}
+inline const std::string& TuningSignalsWrite::_internal_matsuser() const {
+  return matsuser_.Get();
+}
+inline void TuningSignalsWrite::_internal_set_matsuser(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  matsuser_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void TuningSignalsWrite::set_matsuser(std::string&& value) {
+  _has_bits_[0] |= 0x00000001u;
+  matsuser_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Network.TuningSignalsWrite.matsUser)
+}
+inline void TuningSignalsWrite::set_matsuser(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000001u;
+  matsuser_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Network.TuningSignalsWrite.matsUser)
+}
+inline void TuningSignalsWrite::set_matsuser(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000001u;
+  matsuser_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Network.TuningSignalsWrite.matsUser)
+}
+inline std::string* TuningSignalsWrite::_internal_mutable_matsuser() {
+  _has_bits_[0] |= 0x00000001u;
+  return matsuser_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* TuningSignalsWrite::release_matsuser() {
+  // @@protoc_insertion_point(field_release:Network.TuningSignalsWrite.matsUser)
+  if (!_internal_has_matsuser()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return matsuser_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void TuningSignalsWrite::set_allocated_matsuser(std::string* matsuser) {
+  if (matsuser != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  matsuser_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), matsuser,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Network.TuningSignalsWrite.matsUser)
+}
+
 // optional bool autoApply = 2 [default = false];
 inline bool TuningSignalsWrite::_internal_has_autoapply() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
   return value;
 }
 inline bool TuningSignalsWrite::has_autoapply() const {
@@ -26673,7 +26768,7 @@ inline bool TuningSignalsWrite::has_autoapply() const {
 }
 inline void TuningSignalsWrite::clear_autoapply() {
   autoapply_ = false;
-  _has_bits_[0] &= ~0x00000001u;
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline bool TuningSignalsWrite::_internal_autoapply() const {
   return autoapply_;
@@ -26683,7 +26778,7 @@ inline bool TuningSignalsWrite::autoapply() const {
   return _internal_autoapply();
 }
 inline void TuningSignalsWrite::_internal_set_autoapply(bool value) {
-  _has_bits_[0] |= 0x00000001u;
+  _has_bits_[0] |= 0x00000002u;
   autoapply_ = value;
 }
 inline void TuningSignalsWrite::set_autoapply(bool value) {

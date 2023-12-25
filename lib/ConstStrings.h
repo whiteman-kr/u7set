@@ -344,7 +344,8 @@ namespace XmlAttribute
 	inline const QString LOGIN("Login");
 	inline const QString ENABLED("Enabled");
 	inline const QString DESCRIPTION("Description");
-	inline const QString TUNING_TAGS("TuningTags");
+	inline const QString APP_SIGNAL_TAGS("AppSignalTags");
+	inline const QString MATS_USERS("MatsUsers");
 }
 
 namespace Latin1Char

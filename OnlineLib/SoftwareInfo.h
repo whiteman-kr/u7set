@@ -51,7 +51,7 @@ public:
 	int commitNo() const { return m_commitNo; }
 	QString buildBranch() const { return m_buildBranch; }
 	QString commitSHA() const { return m_commitSHA; }
-	QString userName() const { return m_userName; }
+	QString osUsername() const { return m_osUsername; }
 	int buildNo() const { return m_buildNo; }
 	quint32 crc() const { return m_crc; }
 	QString hostname() const { return m_hostname; }
@@ -64,7 +64,7 @@ private:
 	int m_commitNo = 0;
 	QString m_buildBranch;
 	QString m_commitSHA;
-	QString m_userName;
+	QString m_osUsername;
 	int m_buildNo = UNDEFINED_BUILD_NO;
 	quint32 m_crc = 0;
 	QString m_hostname;

@@ -747,6 +747,9 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml) const
 	{
 		xml.writeStartElement(XmlElement::TUNING_CLIENT);
 		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tc.equipmentID);
+		xml.writeStringAttribute(EquipmentPropNames::SOFTWARE_TYPE, E::valueToString(tc.softwareType));
+		xml.writeBoolAttribute(EquipmentPropNames::TUNING_LOGIN, tc.tuningLogin);
+		xml.writeStringAttribute(XmlAttribute::MATS_USERS, tc.matsUsers);
 
 		writeTuningSourcesToXml(xml, tc.drivenSources);
 
@@ -849,6 +852,17 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 
 		result &= xml.findElement(XmlElement::TUNING_CLIENT);
 		result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &tc.equipmentID);
+
+		QString swTypeStr;
+		result &= xml.readStringAttribute(EquipmentPropNames::SOFTWARE_TYPE, &swTypeStr);
+
+		bool ok = false;
+		tc.softwareType = E::stringToValue<E::SoftwareType>(swTypeStr, &ok);
+
+		result &= ok;
+
+		result &= xml.readBoolAttribute(EquipmentPropNames::TUNING_LOGIN, &tc.tuningLogin);
+		result &= xml.readStringAttribute(XmlAttribute::MATS_USERS, &tc.matsUsers);
 
 		result &= readTuningSourcesFromXml(xml, &tc.drivenSources);
 

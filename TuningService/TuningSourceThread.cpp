@@ -1480,7 +1480,7 @@ namespace Tuning
 							arg(cmd.write.newTuningValue.toString()).
 							arg(m_state.setSOR == true ? 1 : 0).
 							arg(cmd.clientEquipmentID).
-							arg(cmd.user);
+							arg(cmd.matsUser);
 
 				*appSignalID = ts->appSignalID();
 			}
@@ -1494,7 +1494,7 @@ namespace Tuning
 								arg(m_portEquipmentID).
 								arg(m_state.setSOR == true ? 1 : 0).
 								arg(cmd.clientEquipmentID).
-								arg(cmd.user);
+								arg(cmd.matsUser);
 			break;
 
 		default:
@@ -1744,7 +1744,7 @@ namespace Tuning
 	}
 
 	E::NetworkError TuningSourceThreadWorker::writeSignalState(const QString& clientEquipmentID,
-														const QString& user,
+														const QString& matsUser,
 														Hash signalHash,
 														const TuningValue& newValue)
 	{
@@ -1780,7 +1780,7 @@ namespace Tuning
 		TuningCommand cmd;
 
 		cmd.clientEquipmentID = clientEquipmentID;
-		cmd.user = user;
+		cmd.matsUser = matsUser;
 
 		cmd.opCode = Fotip::OpCode::Write;
 		cmd.autoCommand = false;
@@ -1794,12 +1794,12 @@ namespace Tuning
 	}
 
 	E::NetworkError TuningSourceThreadWorker::applySignalStates(const QString& clientEquipmentID,
-														const QString& user)
+														const QString& matsUser)
 	{
 		TuningCommand cmd;
 
 		cmd.clientEquipmentID = clientEquipmentID;
-		cmd.user = user;
+		cmd.matsUser = matsUser;
 
 		cmd.opCode = Fotip::OpCode::Apply;
 		cmd.autoCommand = false;
@@ -2305,7 +2305,7 @@ namespace Tuning
 	}
 
 	E::NetworkError TuningSourceThread::writeSignalState(const QString& clientEquipmentID,
-														 const QString& user,
+														 const QString& matsUser,
 														 Hash signalHash,
 														 const TuningValue& newValue)
 	{
@@ -2315,7 +2315,7 @@ namespace Tuning
 			return E::NetworkError::InternalError;
 		}
 
-		return m_worker->writeSignalState(clientEquipmentID, user, signalHash, newValue);
+		return m_worker->writeSignalState(clientEquipmentID, matsUser, signalHash, newValue);
 	}
 
 	E::NetworkError TuningSourceThread::applySignalStates(	const QString& clientEquipmentID,

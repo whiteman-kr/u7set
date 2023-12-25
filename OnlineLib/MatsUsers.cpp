@@ -20,7 +20,7 @@ namespace OnlineLib
 		writer.writeAttribute(XmlAttribute::LOGIN, login());
 		writer.writeAttribute(XmlAttribute::DESCRIPTION, description());
 		writer.writeAttribute(XmlAttribute::ENABLED, enabled() ? "true" : "false");
-		writer.writeAttribute(XmlAttribute::TUNING_TAGS, tuningTagsToString());
+		writer.writeAttribute(XmlAttribute::APP_SIGNAL_TAGS, appSignalTagsToString());
 		writer.writeEndElement();
 		return true;
 	}
@@ -47,9 +47,9 @@ namespace OnlineLib
 			setEnabled(reader.attributes().value(XmlAttribute::ENABLED).toString() == "true" ? true : false);
 		}
 
-		if (reader.attributes().hasAttribute(XmlAttribute::TUNING_TAGS))
+		if (reader.attributes().hasAttribute(XmlAttribute::APP_SIGNAL_TAGS))
 		{
-			setTuningTagsFromString(reader.attributes().value(XmlAttribute::TUNING_TAGS).toString());
+			setAppSignalTagsFromString(reader.attributes().value(XmlAttribute::APP_SIGNAL_TAGS).toString());
 		}
 
 		QXmlStreamReader::TokenType endToken = reader.readNext();
@@ -88,29 +88,29 @@ namespace OnlineLib
 		m_enabled = value;
 	}
 
-	const std::set<QString>& MatsUser::tuningTags() const
+	const std::set<QString>& MatsUser::appSignalTags() const
 	{
-		return m_tuningTags;
+		return m_appSignalTags;
 	}
 
-	void MatsUser::setTuningTags(const std::set<QString>& value)
+	void MatsUser::setAppSignalTags(const std::set<QString>& tags)
 	{
-		m_tuningTags = value;
+		m_appSignalTags = tags;
 	}
 
-	QString MatsUser::tuningTagsToString() const
+	QString MatsUser::appSignalTagsToString() const
 	{
 		QStringList result;
-		for (const auto& tag : m_tuningTags)
+		for (const auto& tag : m_appSignalTags)
 		{
 			result.push_back(tag);
 		}
 		return result.join(';');
 	}
 
-	void MatsUser::setTuningTagsFromString(QString value)
+	void MatsUser::setAppSignalTagsFromString(QString value)
 	{
-		m_tuningTags.clear();
+		m_appSignalTags.clear();
 		value.remove('\r');
 		value.replace('\n', ';');
 		value.replace(',', ';');
@@ -118,7 +118,7 @@ namespace OnlineLib
 		auto list = value.split(';', Qt::SkipEmptyParts);
 		for (const QString& s : list)
 		{
-			m_tuningTags.insert(s.trimmed());
+			m_appSignalTags.insert(s.trimmed());
 		}
 	}
 
@@ -160,7 +160,7 @@ namespace OnlineLib
 		return m_users;
 	}
 
-	const std::set<QString>& MatsUserStorage::tuningTags(const QString& login, bool* found) const
+	const std::set<QString>& MatsUserStorage::appSignalTags(const QString& login, bool* found) const
 	{
 
 		auto it = std::find_if(m_users.begin(), m_users.end(), [&login](const MatsUser& user)
@@ -180,7 +180,7 @@ namespace OnlineLib
 		{
 			*found = true;
 		}
-		return it->tuningTags();
+		return it->appSignalTags();
 	}
 
 	bool MatsUserStorage::load(const QByteArray& data, QString& errorCode)
@@ -213,7 +213,7 @@ namespace OnlineLib
 			}
 			else
 			{
-				reader.raiseError(QObject::tr("Unknown tag: ") + reader.name().toString());
+				reader.raiseError(QObject::tr("Unknown XML tag: ") + reader.name().toString());
 				errorCode = reader.errorString();
 				reader.skipCurrentElement();
 			}

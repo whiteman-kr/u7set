@@ -592,6 +592,7 @@ message TuningWriteCommand
 
 message TuningSignalsWrite
 {
+	optional string matsUser = 1;
     optional bool autoApply = 2 [default = false];
     repeated TuningWriteCommand commands = 3;
 }
@@ -607,7 +608,6 @@ message TuningSignalsWriteReply
     optional int32 error = 1 [default = 0];
     repeated TuningSignalWriteResult writeResult = 2;
 }
-
 
 // Request to applying tuning signals values - TDS_TUNING_SIGNALS_APPLY
 //

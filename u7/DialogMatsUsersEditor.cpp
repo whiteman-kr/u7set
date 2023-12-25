@@ -151,7 +151,7 @@ DialogMatsUsersEditor::DialogMatsUsersEditor(DbController *pDbController, QWidge
 		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << user.login() <<
 													user.description() <<
 													QString() <<
-													user.tuningTagsToString());
+													user.appSignalTagsToString());
 		item->setFlags(item->flags() | Qt::ItemIsEditable);
 		item->setCheckState(static_cast<int>(DialogMatsUsersEditor::Columns::Enabled), user.enabled() ? Qt::Checked : Qt::Unchecked);
 		item->setData(0, Qt::UserRole, i);
@@ -255,7 +255,7 @@ bool DialogMatsUsersEditor::saveChanges()
 
 		OnlineLib::MatsUser user{login, item->text(static_cast<int>(DialogMatsUsersEditor::Columns::Description))};
 		user.setEnabled(item->checkState(static_cast<int>(DialogMatsUsersEditor::Columns::Enabled)) == Qt::Checked);
-		user.setTuningTagsFromString(item->text(static_cast<int>(DialogMatsUsersEditor::Columns::TuningTags)));
+		user.setAppSignalTagsFromString(item->text(static_cast<int>(DialogMatsUsersEditor::Columns::TuningTags)));
 		storage.add(user);
 	}
 

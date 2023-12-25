@@ -125,12 +125,43 @@ namespace Tuning
 	//
 	// ----------------------------------------------------------------------------------------------
 
-	TuningClientContext::TuningClientContext(const QString &clientID,
+	TuningClientContext::TuningClientContext(const QString& clientID,
+											 bool tuningLogin,
+											 const QString& matsUsersList,
+											 const std::vector<OnlineLib::MatsUser>& matsUsers,
 											 const QStringList& drivenSourcesIDs,
 											 const TuningSources& sources) :
 		m_clientID(clientID),
+		m_tuningLogin(tuningLogin),
 		m_tuningSources(sources)
 	{
+		QStringList users = matsUsersList.split(Separator::SEMICOLON, Qt::SkipEmptyParts);
+
+		for(const QString& userLogin : users)
+		{
+			for(const OnlineLib::MatsUser matsUser : matsUsers)
+			{
+				if (userLogin != matsUser.login())
+				{
+					continue;
+				}
+
+				if (matsUser.enabled() == false)
+				{
+					continue;
+				}
+
+				if (m_matsUsers.contains(userLogin) == true)
+				{
+					continue;
+				}
+
+				m_matsUsers.emplace(userLogin, matsUser.appSignalTags());
+			}
+		}
+
+		//
+
 		for(const QString& sourceID : drivenSourcesIDs)
 		{
 			if (m_sourceThreadMap.contains(sourceID) == true)
@@ -212,7 +243,7 @@ namespace Tuning
 	}
 
 	void TuningClientContext::writeSignalStates(const QString& clientEquipmentID,
-												const QString& user,
+												const QString& matsUser,
 												const Network::TuningSignalsWrite& request,
 												Network::TuningSignalsWriteReply* reply) const
 	{
@@ -256,7 +287,7 @@ namespace Tuning
 				continue;
 			}
 
-			E::NetworkError err = sourceThread->writeSignalState(clientEquipmentID, user, signalHash, TuningValue(writeCmd.value()));
+			E::NetworkError err = sourceThread->writeSignalState(clientEquipmentID, matsUser, signalHash, TuningValue(writeCmd.value()));
 
 			if (err != E::NetworkError::Success)
 			{
@@ -277,7 +308,7 @@ namespace Tuning
 			{
 				TEST_PTR_CONTINUE(srcThread);
 
-				E::NetworkError err = srcThread->applySignalStates(clientEquipmentID, user);
+				E::NetworkError err = srcThread->applySignalStates(clientEquipmentID, matsUser);
 
 				if (err != E::NetworkError::Success)
 				{
@@ -291,7 +322,7 @@ namespace Tuning
 		reply->set_error(TO_INT(result));
 	}
 
-	void TuningClientContext::applySignalStates(const QString& clientEquipmentID, const QString& user) const
+	void TuningClientContext::applySignalStates(const QString& clientEquipmentID, const QString& matsUser) const
 	{
 		for(auto& p : m_sourceThreadMap)
 		{
@@ -302,7 +333,7 @@ namespace Tuning
 				continue;		// it's Ok
 			}
 
-			srcThread->applySignalStates(clientEquipmentID, user);
+			srcThread->applySignalStates(clientEquipmentID, matsUser);
 		}
 	}
 
@@ -501,9 +532,12 @@ namespace Tuning
 
 	void TuningClientContextMap::init(const TuningServiceSettings& tss, const TuningSources& sources)
 	{
-		for(const auto& client : tss.clients)
+		for(const TuningServiceSettings::TuningClient& client : tss.clients)
 		{
 			TuningClientContext* clientContext = new TuningClientContext(client.equipmentID,
+																		 client.tuningLogin,
+																		 client.matsUsers,
+																		 tss.matsUsers,
 																		 client.uniqueSourcesIDs(),
 																		 sources);
 

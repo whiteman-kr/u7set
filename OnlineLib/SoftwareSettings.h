@@ -285,7 +285,10 @@ public:
 	struct TuningClient
 	{
 		QString equipmentID;
+		E::SoftwareType softwareType;
 		std::vector<TuningSource> drivenSources;
+		bool tuningLogin = false;
+		QString matsUsers;
 
 		QStringList uniqueSourcesIDs() const;
 
