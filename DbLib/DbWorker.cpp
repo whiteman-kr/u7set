@@ -430,6 +430,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0405.sql", "Upgrade to version 405, Update official logo"},
 	{":/DatabaseUpgrade/Upgrade0406.sql", "Upgrade to version 406, Added packed_logic items"},
 	{":/DatabaseUpgrade/Upgrade0407.sql", "Upgrade to version 407, TestSuite preset update (added default report template)"},
+	{":/DatabaseUpgrade/Upgrade0408.sql", "Upgrade to version 408, Remove from SR LMs outputs 1, 2 and their validity"},
 };
 
 int DbWorker::counter = 0;
