@@ -700,6 +700,7 @@ public:
 		ClientIsNotActive,
 		TuningNoReply,
 		TuningValueCorrupted,
+		TuningCommandDenied,						// for ex. tuning command Apply denied for TestSute client
 	};
 	Q_ENUM(NetworkError)
 

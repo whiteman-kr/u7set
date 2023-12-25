@@ -521,7 +521,24 @@ namespace Tuning
 
 		if (clientContext == nullptr)
 		{
-			m_tuningSignalsApplyReply.set_error(TO_INT(E::NetworkError::UnknownTuningClientID));
+			errCode = E::NetworkError::UnknownTuningClientID;
+
+			m_tuningSignalsApplyReply.set_error(TO_INT(errCode));
+
+			sendReply(m_tuningSignalsApplyReply);
+
+			DEBUG_LOG_ERR(m_logger, QString(tr("Send reply %1 on TDS_TUNING_SIGNALS_APPLY to %2")).
+						  arg(E::valueToString(errCode)).arg(peerAddr().addressStr()));
+			return;
+		}
+
+		E::SoftwareType swType = connectedSoftwareInfo().softwareType();
+
+		if (swType == E::SoftwareType::TestSuite)
+		{
+			errCode = E::NetworkError::TuningCommandDenied;
+
+			m_tuningSignalsApplyReply.set_error(TO_INT(errCode));
 
 			sendReply(m_tuningSignalsApplyReply);
 
