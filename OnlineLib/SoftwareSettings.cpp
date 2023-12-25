@@ -869,7 +869,7 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 
 	RETURN_IF_FALSE(result);
 
-	for(int i = 0; i < clientsCount; i++)
+	for(int i = 0; i < matsUsersCount; i++)
 	{
 		OnlineLib::MatsUser mu;
 
