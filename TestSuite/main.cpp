@@ -19,28 +19,6 @@ struct TestSuiteSharedData
 };
 #pragma pack()
 
-QTranslator m_translator; // contains the translations for this application
-
-void switchTranslator(QTranslator& translator, const QString& filename)
-{
-	// remove the old translator
-	qApp->removeTranslator(&translator);
-
-	// load the new translator
-	if(translator.load(filename))
-	{
-		qApp->installTranslator(&translator);
-	}
-}
-
-void loadLanguage(const QString& rLanguage)
-{
-	QLocale locale = QLocale(rLanguage);
-	QLocale::setDefault(locale);
-
-	switchTranslator(m_translator, QString(":/languages/TestSuite_%1.qm").arg(rLanguage));
-}
-
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
@@ -56,13 +34,43 @@ int main(int argc, char *argv[])
 
 	int result = 0;
 
-	theSettings.RestoreUser();
-	theSettings.RestoreSystem();
-
-	loadLanguage(theSettings.language());
-
 	// Parse the command line
 	//
+	{
+		QStringList arguments = a.arguments();
+
+		QString settingsFileName;
+		for (const QString& s : arguments)
+		{
+			if (s.contains(".ini") == true)
+			{
+				settingsFileName = s;
+				break;
+			}
+		}
+
+		if (settingsFileName.isEmpty() == false && QFile::exists(settingsFileName) == false)
+		{
+			QMessageBox::critical(nullptr, qAppName(), QObject::tr("Application settings file %1 is not exist.").arg(settingsFileName));
+			return 1;
+		}
+
+		// Read settings
+		//
+		if (settingsFileName.isEmpty() == true)
+		{
+			AppConfigSettings::instance().load();
+		}
+		else
+		{
+			bool loadSettingsOk = AppConfigSettings::instance().loadFromFile(settingsFileName);
+			if (loadSettingsOk == false)
+			{
+				QMessageBox::critical(nullptr, qAppName(), QObject::tr("Error loading application settings from file %1.").arg(settingsFileName));
+				return 1;
+			}
+		}
+	}
 
 	QCommandLineParser parser;
 
@@ -80,20 +88,19 @@ int main(int argc, char *argv[])
 
 	if (clientID.isEmpty() == false)
 	{
-		theSettings.librarySettings().setInstanceStrId(clientID);
+		AppConfigSettings().instance().data().m_librarySettings.setInstanceStrId(clientID);
 	}
 
 	//
 	//
 
-
 	SoftwareInfo softwareInfo;
 
-	softwareInfo.init(E::SoftwareType::TestSuite, theSettings.librarySettings().instanceStrId(), 0, 1);
+	softwareInfo.init(E::SoftwareType::TestSuite, AppConfigSettings().instance().librarySettings().instanceStrId(), 0, 1);
 
 	// Check to run the application in one instance
 	//
-	theSharedMemorySingleApp = new QSharedMemory(QString("TestSuite") + theSettings.librarySettings().instanceStrId());
+	theSharedMemorySingleApp = new QSharedMemory(QString("TestSuite") + AppConfigSettings().instance().librarySettings().instanceStrId());
 
 	if(theSharedMemorySingleApp->attach(QSharedMemory::ReadWrite) == false)
 	{
@@ -134,8 +141,6 @@ int main(int argc, char *argv[])
 
 			delete theMainWindow;
 			theMainWindow = nullptr;
-
-			theSettings.StoreUser();
 		}
 	}
 	else

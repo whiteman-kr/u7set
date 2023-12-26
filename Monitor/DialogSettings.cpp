@@ -25,7 +25,7 @@ DialogSettings::DialogSettings(const ClientLib::ClientTranslator& translator, QW
 
 	// Fill Languages List
 	//
-	fillLanguagesList(translator);
+	createLanguagesList(translator);
 
 	auto okButton = ui->buttonBox->button(QDialogButtonBox::Ok);
 	if (okButton != nullptr)
@@ -54,7 +54,11 @@ void DialogSettings::setSettings(const MonitorAppSettings::Data& value)
 {
 	m_settings = value;
 
-	ui->instanceStrId->setText(m_settings.equipmentId);
+	QString instanceHistoryString = QSettings().value("DialogSettings/equipmentIdHistory", QString()).toString();
+	QStringList equipmentIdHistory = instanceHistoryString.split(';', Qt::SkipEmptyParts);
+
+	ui->m_instanceCombo->addItems(equipmentIdHistory);
+	ui->m_instanceCombo->setCurrentText(m_settings.equipmentId.toUpper());
 
 	ui->editConfiguratorIpAddress1->setText(m_settings.cfgSrvIpAddress1);
 	ui->editConfiguratorPort1->setText(QString().setNum(m_settings.cfgSrvPort1));
@@ -101,7 +105,7 @@ void DialogSettings::showEvent(QShowEvent*)
 	return;
 }
 
-void DialogSettings::fillLanguagesList(const ClientLib::ClientTranslator& translator)
+void DialogSettings::createLanguagesList(const ClientLib::ClientTranslator& translator)
 {
 	QStringList languages = translator.languagesList();
 	if (languages.isEmpty() == true)
@@ -123,18 +127,34 @@ std::optional<MonitorAppSettings::Data> DialogSettings::parseData()
 {
 	// Check Instance StrID
 	//
-	QString instanceStrId = ui->instanceStrId->text();
+	QStringList equipmentIdHistory;
+	for (int i = 0; i < ui->m_instanceCombo->count(); i++)
+	{
+		equipmentIdHistory.push_back(ui->m_instanceCombo->itemText(i).toUpper());
 
-	if (instanceStrId.isEmpty() == true)
+		if (equipmentIdHistory.size() >= 10)
+		{
+			break;
+		}
+	}
+
+	QString equipmentId = ui->m_instanceCombo->currentText().toUpper();
+	if (equipmentId.isEmpty() == true)
 	{
 		QMessageBox mb(this);
 		mb.setText(tr("Instance StrID cannot be empty"));
 		mb.exec();
 
-		ui->instanceStrId->setFocus();
-		ui->instanceStrId->selectAll();
+		ui->m_instanceCombo->setFocus();
 		return {};
 	}
+
+	if (equipmentIdHistory.contains(equipmentId) == false)
+	{
+		equipmentIdHistory.push_front(equipmentId);
+	}
+
+	QSettings().setValue("DialogSettings/equipmentIdHistory", equipmentIdHistory.join(';'));
 
 	// Check ip address 1
 	//
@@ -207,7 +227,7 @@ std::optional<MonitorAppSettings::Data> DialogSettings::parseData()
 	//
 	MonitorAppSettings::Data data;
 
-	data.equipmentId = instanceStrId;
+	data.equipmentId = equipmentId;
 
 	data.cfgSrvIpAddress1 = configuratorIpAddress1;
 	data.cfgSrvPort1 = serverPort1;

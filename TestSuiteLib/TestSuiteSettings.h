@@ -10,10 +10,10 @@ namespace TestSuite
 	public:
 		TestSuiteSettings();
 
-		void restoreFromRegistry();
+		void restoreFromRegistry(const QSettings& s);
 		bool restoreFromFile(const QString& fileName, QString* errorMsg);
 
-		void saveToRegistry();
+		void saveToRegistry(QSettings& s) const;
 
 		static bool createTemplateSettingsFile(const QString& fileName);
 

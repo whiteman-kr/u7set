@@ -15,77 +15,54 @@ public:
 	AppConfigSettings();
 	AppConfigSettings(const AppConfigSettings& That);
 
-	void StoreUser();
-	void RestoreUser();
+public:
+	struct Data
+	{
+		// Settings set by operator
+		//
+		TestSuite::TestSuiteSettings m_librarySettings;
 
-	void StoreSystem();
-	void RestoreSystem();
+		bool m_useLocalScriptsPath = false;
+		QString m_localScriptsPath;
+
+		QString m_language{"en"};
+	};
+
+public:
+	static AppConfigSettings& instance();
+
+	void save() const;
+	void load();
+
+	bool saveToFile(QString fileName) const;
+	bool loadFromFile(QString fileName);
+
+	bool wasLoadedFromFile() const;
+
+private:
+	void saveSystem(QSettings& s) const;
+	void loadSystem(const QSettings& s);
+
+public:
+	QString localAppDataPath();
+
+	const Data& data() const;
+	Data& data();
+	void setData(const Data& src);
 
 	TestSuite::TestSuiteSettings& librarySettings();
 	const TestSuite::TestSuiteSettings& librarySettings() const;
 
-	QStringList instanceHistory() const;
-	void setInstanceHistory(const QStringList& value);
-
 	QString language() const;
-	void setLanguage(const QString& value);
 
 	bool useLocalScriptsPath() const;
-	void setUseLocalScriptsPath(bool value);
-
 	QString localScriptsPath() const;
-	void setLocalScriptsPath(const QString& path);
-
-	QString localAppDataPath();
-
-	//
-	const QStringList& outputSearchCompleter() const;
-	QStringList& outputSearchCompleter();
-
-	// MainWindow options
-
-	QPoint m_mainWindowPos;
-	QByteArray m_mainWindowGeometry;
-	QByteArray m_mainWindowState;		// Toolbars/dock's
 
 private:
-	QStringList m_outputSerachCompleter;
-
-private:
-
-	// System settings set by operator
-	//
-	TestSuite::TestSuiteSettings m_librarySettings;
-
-	bool m_useLocalScriptsPath = false;
-	QString m_localScriptsPath;
-
-	QString m_language = "en";
-
-	QStringList m_instanceHistory;
 
 	// Local settings
 	//
 	QString m_localAppDataPath;
-
-	mutable QMutex m;
-
-public:
-	AppConfigSettings& operator =(const AppConfigSettings& That)
-	{
-		m_librarySettings = That.m_librarySettings;
-
-		m_useLocalScriptsPath = That.m_useLocalScriptsPath;
-		m_localScriptsPath = That.m_localScriptsPath;
-
-		m_language = That.m_language;
-
-		m_instanceHistory = That.m_instanceHistory;
-
-		return *this;
-	};
-
+	Data m_data;
+	bool m_wasLoadedFromFile = false;
 };
-
-extern AppConfigSettings theSettings;
-

@@ -439,9 +439,9 @@ void TestListWidget::fillTestsTree()
 	m_treeWidget->resizeColumnToContents(Columns::Caption);
 
 	//
-	if (theSettings.useLocalScriptsPath() == true)
+	if (AppConfigSettings().instance().useLocalScriptsPath() == true)
 	{
-		QString path = theSettings.localScriptsPath();
+		QString path = AppConfigSettings().instance().localScriptsPath();
 		m_testsPathLabel->setText(tr("Test Scripts: <a href=\"%1\">%1</a>").arg(path));
 	}
 	else

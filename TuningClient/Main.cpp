@@ -168,11 +168,45 @@ int main(int argc, char* argv[])
 
 	VFrame30::init();
 
-	theSettings.RestoreUser();
-	theSettings.RestoreSystem();
+	TuningClientAppSettings::instance().loadUser();
 
 	// Parse the command line
 	//
+	{
+		QStringList arguments = a.arguments();
+
+		QString settingsFileName;
+		for (const QString& s : arguments)
+		{
+			if (s.contains(".ini") == true)
+			{
+				settingsFileName = s;
+				break;
+			}
+		}
+
+		if (settingsFileName.isEmpty() == false && QFile::exists(settingsFileName) == false)
+		{
+			QMessageBox::critical(nullptr, qAppName(), QObject::tr("Application settings file %1 is not exist.").arg(settingsFileName));
+			return 1;
+		}
+
+		// Read settings
+		//
+		if (settingsFileName.isEmpty() == true)
+		{
+			TuningClientAppSettings::instance().load();
+		}
+		else
+		{
+			bool loadSettingsOk = TuningClientAppSettings::instance().loadFromFile(settingsFileName);
+			if (loadSettingsOk == false)
+			{
+				QMessageBox::critical(nullptr, qAppName(), QObject::tr("Error loading application settings from file %1.").arg(settingsFileName));
+				return 1;
+			}
+		}
+	}
 
 	QCommandLineParser parser;
 
@@ -180,11 +214,9 @@ int main(int argc, char* argv[])
 	parser.addVersionOption();
 
 	// A string option with id (-id)
-
+	//
 	QCommandLineOption idOption("id", "Set the TuningClient ID.", "TuningClient ID");
 	parser.addOption(idOption);
-
-	// A boolean option with simulation (-simulate)
 
 	parser.process(*qApp);
 
@@ -192,7 +224,7 @@ int main(int argc, char* argv[])
 
 	if (clientID.isEmpty() == false)
 	{
-	    theSettings.setInstanceStrId(clientID);
+		TuningClientAppSettings::instance().system().m_instanceStrId = clientID;
 	}
 
 	//
@@ -200,11 +232,11 @@ int main(int argc, char* argv[])
 
 	SoftwareInfo softwareInfo;
 
-	softwareInfo.init(E::SoftwareType::TuningClient, theSettings.instanceStrId(), 0, 1);
+	softwareInfo.init(E::SoftwareType::TuningClient, TuningClientAppSettings::instance().instanceStrId(), 0, 1);
 
 	// Check to run the application in one instance
 	//
-	theSharedMemorySingleApp = new QSharedMemory(QString("TuningClient") + theSettings.instanceStrId());
+	theSharedMemorySingleApp = new QSharedMemory(QString("TuningClient") + TuningClientAppSettings::instance().instanceStrId());
 
 	if(theSharedMemorySingleApp->attach(QSharedMemory::ReadWrite) == false)
 	{
@@ -250,7 +282,7 @@ int main(int argc, char* argv[])
 				theApp.setMainWindow(nullptr);
 			}
 
-			theSettings.StoreUser();
+			TuningClientAppSettings::instance().saveUser();
 		}
 	}
 	else

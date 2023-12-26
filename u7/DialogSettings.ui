@@ -27,10 +27,48 @@
     <layout class="QHBoxLayout" name="commonLayout">
      <item>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="1" column="2">
-        <widget class="QLineEdit" name="editPort">
-         <property name="inputMask">
-          <string>00000</string>
+       <item row="4" column="0">
+        <widget class="QLabel" name="labelOutputPath">
+         <property name="text">
+          <string>Build Output Path</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="2">
+        <widget class="QLineEdit" name="editPassword">
+         <property name="maxLength">
+          <number>128</number>
+         </property>
+         <property name="echoMode">
+          <enum>QLineEdit::Password</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="labelPort">
+         <property name="text">
+          <string>Port</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="labelIpAddress">
+         <property name="text">
+          <string>Host or IP Address</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="labelUsername">
+         <property name="text">
+          <string>Username</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QLineEdit" name="editUsername">
+         <property name="maxLength">
+          <number>128</number>
          </property>
         </widget>
        </item>
@@ -62,27 +100,6 @@
          </item>
         </layout>
        </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="labelPassword">
-         <property name="text">
-          <string>Password</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="labelPort">
-         <property name="text">
-          <string>Port</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="labelOutputPath">
-         <property name="text">
-          <string>Build Output Path</string>
-         </property>
-        </widget>
-       </item>
        <item row="5" column="0">
         <widget class="QLabel" name="labelExpertMode">
          <property name="text">
@@ -90,10 +107,17 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="labelUsername">
+       <item row="1" column="2">
+        <widget class="QLineEdit" name="editPort">
+         <property name="inputMask">
+          <string>00000</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="labelPassword">
          <property name="text">
-          <string>Username</string>
+          <string>Password</string>
          </property>
         </widget>
        </item>
@@ -110,30 +134,10 @@
          </property>
         </spacer>
        </item>
-       <item row="3" column="2">
-        <widget class="QLineEdit" name="editPassword">
-         <property name="maxLength">
-          <number>128</number>
-         </property>
-         <property name="echoMode">
-          <enum>QLineEdit::Password</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="2">
-        <widget class="QLineEdit" name="editUsername">
-         <property name="maxLength">
-          <number>128</number>
-         </property>
-        </widget>
-       </item>
        <item row="0" column="2">
-        <widget class="QLineEdit" name="editHost"/>
-       </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="labelIpAddress">
-         <property name="text">
-          <string>Host or IP Address</string>
+        <widget class="QComboBox" name="comboHost">
+         <property name="editable">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -181,13 +185,13 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>editHost</tabstop>
+  <tabstop>comboHost</tabstop>
   <tabstop>editPort</tabstop>
   <tabstop>editUsername</tabstop>
   <tabstop>editPassword</tabstop>
   <tabstop>editOutputPath</tabstop>
-  <tabstop>browseOutputPath</tabstop>
   <tabstop>checkExpertMode</tabstop>
+  <tabstop>browseOutputPath</tabstop>
   <tabstop>ok</tabstop>
   <tabstop>cancel</tabstop>
  </tabstops>

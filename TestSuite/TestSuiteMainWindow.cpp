@@ -13,9 +13,11 @@
 
 TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
 	: QMainWindow(parent),
-	m_appLog(qAppName(), QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + theSettings.librarySettings().instanceStrId()),
-	m_configController(softwareInfo, theSettings.librarySettings().configuratorAddress1(), theSettings.librarySettings().configuratorAddress2(), &m_appLog),
-	m_testSuite(softwareInfo, theSettings.librarySettings(), &m_appLog, &m_testLogOutput),
+	m_appLog(qAppName(), QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + AppConfigSettings().instance().librarySettings().instanceStrId()),
+	m_configController(softwareInfo, 
+		AppConfigSettings().instance().librarySettings().configuratorAddress1(), 
+		AppConfigSettings().instance().librarySettings().configuratorAddress2(), &m_appLog),
+	m_testSuite(softwareInfo, AppConfigSettings().instance().librarySettings(), &m_appLog, &m_testLogOutput),
 	m_dialogAlert(this)
 
 {
@@ -35,7 +37,7 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 
 	{
 		QStringList failedTranslations;
-		if (m_translator.setLanguage(theSettings.language(), failedTranslations) == false)
+		if (m_translator.setLanguage(AppConfigSettings().instance().language(), failedTranslations) == false)
 		{
 			if (failedTranslations.isEmpty() == false)
 			{
@@ -43,7 +45,7 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 			}
 			else
 			{
-				m_appLog.writeError("Failed to set language: " + theSettings.language());
+				m_appLog.writeError("Failed to set language: " + AppConfigSettings().instance().language());
 			}
 		}
 	}
@@ -93,11 +95,17 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 	connect(&m_appLog, &Log::LogFile::alertArrived, &m_dialogAlert, &DialogAlert::onAlertArrived);
 	connect(&m_appLog, &Log::LogFile::writeFailure, &m_dialogAlert, &DialogAlert::onAlertArrived);
 
-	if (theSettings.m_mainWindowPos.x() != -1 && theSettings.m_mainWindowPos.y() != -1)
+	// MainWindow options
+	//
+	QPoint mainWindowPos = QSettings().value("MainWindow/pos", QPoint(-1, -1)).toPoint();
+	QByteArray mainWindowGeometry = QSettings().value("MainWindow/geometry").toByteArray();
+	QByteArray mainWindowState = QSettings().value("MainWindow/state").toByteArray();
+
+	if (mainWindowPos.x() != -1 && mainWindowPos.y() != -1)
 	{
-		move(theSettings.m_mainWindowPos);
-		restoreGeometry(theSettings.m_mainWindowGeometry);
-		restoreState(theSettings.m_mainWindowState);
+		move(mainWindowPos);
+		restoreGeometry(mainWindowGeometry);
+		restoreState(mainWindowState);
 	}
 	else
 	{
@@ -113,10 +121,9 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 
 TestSuiteMainWindow::~TestSuiteMainWindow()
 {
-	theSettings.m_mainWindowPos = pos();
-	theSettings.m_mainWindowGeometry = saveGeometry();
-	theSettings.m_mainWindowState = saveState();
-
+	QSettings().setValue("MainWindow/pos", pos());
+	QSettings().setValue("MainWindow/geometry", saveGeometry());
+	QSettings().setValue("MainWindow/state", saveState());
 }
 
 void TestSuiteMainWindow::createDocks()
@@ -236,7 +243,7 @@ void TestSuiteMainWindow::createActions()
 	connect(m_pExitAction, &QAction::triggered, this, &TestSuiteMainWindow::onExit);
 
 	m_reloadTestsScriptsAction = new QAction{QIcon(":/Images/Images/TestsRefresh.svg"), tr("Reload Tests Scripts"), this};
-	m_reloadTestsScriptsAction->setVisible(theSettings.useLocalScriptsPath() == true);
+	m_reloadTestsScriptsAction->setVisible(AppConfigSettings().instance().useLocalScriptsPath() == true);
 	connect(m_reloadTestsScriptsAction, &QAction::triggered, this, &TestSuiteMainWindow::onTestsScriptsReload);
 
 	// --
@@ -579,7 +586,7 @@ void TestSuiteMainWindow::loadScriptsFromConfiguration()
 	//
 	if (m_testSuite.hasRunControl() == false)
 	{
-		m_testSuite.executeRunControl(TestSuite::ControlParams{theSettings.useLocalScriptsPath() ? theSettings.localScriptsPath() : QString()});
+		m_testSuite.executeRunControl(TestSuite::ControlParams{AppConfigSettings().instance().useLocalScriptsPath() ? AppConfigSettings().instance().localScriptsPath() : QString()});
 	}
 	else
 	{
@@ -591,10 +598,10 @@ void TestSuiteMainWindow::loadScriptsFromConfiguration()
 void TestSuiteMainWindow::loadScriptsFromLocalPath()
 {
 	QString errorMsg;
-	bool ok = m_testScriptsStorage.loadFromPath(theSettings.localScriptsPath(), &errorMsg);
+	bool ok = m_testScriptsStorage.loadFromPath(AppConfigSettings().instance().localScriptsPath(), &errorMsg);
 	if (ok == false)
 	{
-		QMessageBox::critical(this, qAppName(), tr("Error loading scripts from path %1: %2.").arg(theSettings.localScriptsPath()).arg(errorMsg));
+		QMessageBox::critical(this, qAppName(), tr("Error loading scripts from path %1: %2.").arg(AppConfigSettings().instance().localScriptsPath()).arg(errorMsg));
 		return;
 	}
 
@@ -604,7 +611,7 @@ void TestSuiteMainWindow::loadScriptsFromLocalPath()
 	//
 	if (m_testSuite.hasRunControl() == false)
 	{
-		m_testSuite.executeRunControl(TestSuite::ControlParams{theSettings.useLocalScriptsPath() ? theSettings.localScriptsPath() : QString()});
+		m_testSuite.executeRunControl(TestSuite::ControlParams{AppConfigSettings().instance().useLocalScriptsPath() ? AppConfigSettings().instance().localScriptsPath() : QString()});
 	}
 	else
 	{
@@ -962,7 +969,7 @@ void TestSuiteMainWindow::on_m_run_clicked()
 	//
 	TestSuite::ControlParams controlParams{
 		selection.selectedFiles(),
-		theSettings.useLocalScriptsPath() ? theSettings.localScriptsPath() : QString(),	// Scripts path
+		AppConfigSettings().instance().useLocalScriptsPath() ? AppConfigSettings().instance().localScriptsPath() : QString(),	// Scripts path
 		{}, // Reports path
 		selection,
 		userName,
@@ -1046,7 +1053,7 @@ void TestSuiteMainWindow::onClearTestLog()
 void TestSuiteMainWindow::onSettings()
 {
 	TestSuiteDialogSettings d(m_translator, this);
-	d.setSettings(theSettings);
+	d.setSettings(AppConfigSettings::instance().data());
 
 	int result = d.exec();
 
@@ -1057,31 +1064,31 @@ void TestSuiteMainWindow::onSettings()
 		bool needReconnect = false;
 		bool needReloadScripts = false;
 
-		auto currentSettings = theSettings;
+		AppConfigSettings prevSettings = AppConfigSettings().instance();
 
-		if (currentSettings.librarySettings().instanceStrId() != d.settings().librarySettings().instanceStrId() ||
-			currentSettings.librarySettings().configuratorAddress1() != d.settings().librarySettings().configuratorAddress1() ||
-			currentSettings.librarySettings().configuratorAddress2() != d.settings().librarySettings().configuratorAddress2())
+		// --
+		//
+		AppConfigSettings::instance().setData(d.settings());
+		AppConfigSettings::instance().save();
+
+		const auto& newSettings = AppConfigSettings().instance();
+
+		if (prevSettings.librarySettings().instanceStrId() != newSettings.librarySettings().instanceStrId() ||
+			prevSettings.librarySettings().configuratorAddress1() != newSettings.librarySettings().configuratorAddress1() ||
+			prevSettings.librarySettings().configuratorAddress2() != newSettings.librarySettings().configuratorAddress2())
 		{
 			needReconnect = true;
 		}
 
-		if (currentSettings.localScriptsPath() != d.settings().localScriptsPath() ||
-			currentSettings.useLocalScriptsPath() != d.settings().useLocalScriptsPath())
+		if (prevSettings.localScriptsPath() != newSettings.localScriptsPath() ||
+			prevSettings.useLocalScriptsPath() != newSettings.useLocalScriptsPath())
 		{
 			needReloadScripts = true;
 		}
 
-
 		// --
 		//
-		theSettings = d.settings();
-		theSettings.StoreSystem();
-		theSettings.StoreUser();
-
-		// --
-		//
-		if (currentSettings.useLocalScriptsPath() == true && d.settings().useLocalScriptsPath() == false)
+		if (prevSettings.useLocalScriptsPath() == true && newSettings.useLocalScriptsPath() == false)
 		{
 			// Tests are NOT loaded from local folder now - clear them
 			//
@@ -1089,7 +1096,7 @@ void TestSuiteMainWindow::onSettings()
 		}
 		else
 		{
-			if (currentSettings.useLocalScriptsPath() == false && d.settings().useLocalScriptsPath() == true)
+			if (prevSettings.useLocalScriptsPath() == false && newSettings.useLocalScriptsPath() == true)
 			{
 				// Tests ARE loaded from local folder now - load them
 				//
@@ -1101,18 +1108,18 @@ void TestSuiteMainWindow::onSettings()
 		//
 		if (needReconnect == true)
 		{
-			m_configController.setConnectionParams(theSettings.librarySettings().instanceStrId(),
-															   theSettings.librarySettings().configuratorAddress1(),
-															   theSettings.librarySettings().configuratorAddress2());
+			m_configController.setConnectionParams(newSettings.librarySettings().instanceStrId(),
+															   newSettings.librarySettings().configuratorAddress1(),
+															   newSettings.librarySettings().configuratorAddress2());
 		}
 
 		if (needReconnect == true || needReloadScripts == true)
 		{
-			m_testSuite.updateSettings(theSettings.librarySettings(), 
-				TestSuite::ControlParams{theSettings.useLocalScriptsPath() ? theSettings.localScriptsPath() : QString()});
+			m_testSuite.updateSettings(newSettings.librarySettings(), 
+				TestSuite::ControlParams{newSettings.useLocalScriptsPath() ? newSettings.localScriptsPath() : QString()});
 		}
 
-		m_reloadTestsScriptsAction->setVisible(theSettings.useLocalScriptsPath() == true);
+		m_reloadTestsScriptsAction->setVisible(newSettings.useLocalScriptsPath() == true);
 
 		return;
 	}
@@ -1163,7 +1170,7 @@ void TestSuiteMainWindow::onTestsScriptsReload()
 {
 	// Reload scripts that displayed by the user interface. Actual executed scripts are loaded at testing start.
 	//
-	if (theSettings.useLocalScriptsPath() == true)
+	if (AppConfigSettings::instance().useLocalScriptsPath() == true)
 	{
 		loadScriptsFromLocalPath();
 	}
@@ -1276,7 +1283,7 @@ void TestSuiteMainWindow::onConfigurationArrived()
 	m_configuration = m_configController.configuration();
 	m_configData = m_configController.configData();
 
-	if (theSettings.useLocalScriptsPath() == false)
+	if (AppConfigSettings::instance().useLocalScriptsPath() == false)
 	{
 		loadScriptsFromConfiguration();
 	}
@@ -1287,8 +1294,8 @@ void TestSuiteMainWindow::onConfigurationArrived()
 
 	updateTestViewTabPages();
 
-	m_testSuite.updateSettings(theSettings.librarySettings(), 
-		TestSuite::ControlParams{theSettings.useLocalScriptsPath() ? theSettings.localScriptsPath() : QString()});
+	m_testSuite.updateSettings(AppConfigSettings::instance().librarySettings(), 
+		TestSuite::ControlParams{AppConfigSettings::instance().useLocalScriptsPath() ? AppConfigSettings::instance().localScriptsPath() : QString()});
 
     updateReportActions();
 

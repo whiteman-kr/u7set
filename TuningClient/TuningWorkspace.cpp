@@ -208,7 +208,7 @@ TuningWorkspace::TuningWorkspace(TuningConfigController& configController,
 
 		// Restore splitter size
 		//
-		m_hSplitter->restoreState(theSettings.m_tuningWorkspaceSplitterState);
+		m_hSplitter->restoreState(TuningClientAppSettings::instance().user().m_tuningWorkspaceSplitterState);
 
 		// Show/hide filter tree
 		//
@@ -241,7 +241,7 @@ TuningWorkspace::~TuningWorkspace()
 
 	if (m_hSplitter != nullptr)
 	{
-		theSettings.m_tuningWorkspaceSplitterState = m_hSplitter->saveState();
+		TuningClientAppSettings::instance().user().m_tuningWorkspaceSplitterState = m_hSplitter->saveState();
 	}
 }
 
