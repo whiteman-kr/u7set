@@ -1,13 +1,9 @@
-
-#include "main.h"
-#include "TestSuiteMainWindow.h"
 #include "AppConfigSettings.h"
+#include "TestSuiteMainWindow.h"
+#include "version.h"
 
 #include <QApplication>
 
-#if __has_include("../gitlabci_version.h")
-#	include "../gitlabci_version.h"
-#endif
 
 QSharedMemory* theSharedMemorySingleApp = nullptr;
 
@@ -26,11 +22,11 @@ int main(int argc, char *argv[])
 	a.setOrganizationName(Manufacturer::RADIY);
 	a.setOrganizationDomain(Manufacturer::SITE);
 
-#ifdef GITLAB_CI_BUILD
-	a.setApplicationVersion(QString("0.2.%1 (%2)").arg(CI_PIPELINE_ID).arg(CI_COMMIT_REF_SLUG));
-#else
-	a.setApplicationVersion(QString("0.2.LOCALBUILD"));
-#endif
+	a.setApplicationVersion(QString("%1.%2.%3 (%4)")
+							.arg(U7SET_MAJOR_VERSION)
+							.arg(U7SET_MINOR_VERSION)
+							.arg(U7SET_PATCH_VERSION)
+							.arg(U7SET_BRANCH_NAME));
 
 	int result = 0;
 
@@ -102,9 +98,9 @@ int main(int argc, char *argv[])
 	//
 	theSharedMemorySingleApp = new QSharedMemory(QString("TestSuite") + AppConfigSettings().instance().librarySettings().instanceStrId());
 
-	if(theSharedMemorySingleApp->attach(QSharedMemory::ReadWrite) == false)
+	if (theSharedMemorySingleApp->attach(QSharedMemory::ReadWrite) == false)
 	{
-		if(theSharedMemorySingleApp->create(sizeof(TestSuiteSharedData)) == false)
+		if (theSharedMemorySingleApp->create(sizeof(TestSuiteSharedData)) == false)
 		{
 			qDebug() << "Failed to create QSharedMemory object!";
 			assert(false);
@@ -177,7 +173,7 @@ int main(int argc, char *argv[])
 		theSharedMemorySingleApp = nullptr;
 	}
 
-	//VFrame30::shutdown();
+	// VFrame30::shutdown();
 	google::protobuf::ShutdownProtobufLibrary();
 
 	return result;

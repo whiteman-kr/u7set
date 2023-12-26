@@ -1,9 +1,6 @@
 #include "MetrologyMainWindow.h"
 #include "Options.h"
-
-#if __has_include("../gitlabci_version.h")
-#	include "../gitlabci_version.h"
-#endif
+#include "version.h"
 
 int main(int argc, char* argv[])
 {
@@ -13,11 +10,11 @@ int main(int argc, char* argv[])
     a.setOrganizationName(Manufacturer::RADIY);
     a.setOrganizationDomain(Manufacturer::SITE);
 
-#ifdef GITLAB_CI_BUILD
-	a.setApplicationVersion(QString("2.0.%1 (%2)").arg(CI_PIPELINE_ID).arg(CI_COMMIT_REF_SLUG));
-#else
-	a.setApplicationVersion(QString("2.0.LOCALBUILD"));
-#endif
+	a.setApplicationVersion(QString("%1.%2.%3 (%4)")
+							.arg(U7SET_MAJOR_VERSION)
+							.arg(U7SET_MINOR_VERSION)
+							.arg(U7SET_PATCH_VERSION)
+							.arg(U7SET_BRANCH_NAME));
 
 	theOptions.load();
 

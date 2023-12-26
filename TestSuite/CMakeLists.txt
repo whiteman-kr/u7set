@@ -76,6 +76,8 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QtTest>
 )
 
+target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
+
 #Add translations
 #
 add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
