@@ -2,17 +2,17 @@
 #define SETTINGSFORM_H
 
 #include <QWidget>
-#include "Settings.h"
+#include "MconfSettings.h"
 
 class SettingsForm : public QDialog
 {
 	Q_OBJECT
 
 public:
-	SettingsForm(const Settings& settings, QWidget *parent);
+	SettingsForm(const MconfSettings& settings, QWidget *parent);
 	~SettingsForm();
 
-	const Settings& settings() const;
+	const MconfSettings& settings() const;
 
 private slots:
 	void currentSerialPortChanged(const QString & text);
@@ -23,7 +23,7 @@ private slots:
 	virtual void accept() override;
 
 private:
-	Settings m_settings;
+	MconfSettings m_settings;
 
 	QComboBox* m_pSerialPort = nullptr;
 	QLabel* m_pSerialPortLabel = nullptr;

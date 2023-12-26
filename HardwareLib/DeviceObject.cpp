@@ -150,7 +150,7 @@ namespace Hardware
 
 		ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::place, true, DeviceObject::place, DeviceObject::setPlace);
 
-		auto specificProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::specificProperties, true, DeviceObject::specificProperties, DeviceObject::setSpecificProperties);
+		auto specificProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::specificProperties, true, DeviceObject::specificPropertiesStruct, DeviceObject::setSpecificPropertiesStruct);
 		specificProp->setExpert(true);
 		specificProp->setSpecificEditor(E::PropertySpecificEditor::SpecificPropertyStruct);
 
@@ -1273,12 +1273,12 @@ namespace Hardware
 		m_childRestriction = value;
 	}
 
-	QString DeviceObject::specificProperties() const
+	QString DeviceObject::specificPropertiesStruct() const
 	{
 		return m_specificPropertiesStruct;
 	}
 
-	void DeviceObject::setSpecificProperties(QString value)
+	void DeviceObject::setSpecificPropertiesStruct(QString value)
 	{
 		if (m_specificPropertiesStruct != value)
 		{
@@ -2962,7 +2962,7 @@ R"DELIM({
 						return;
 					}
 
-					deviceObject->setSpecificProperties(attr.value("SpecificProperties").toString());
+					deviceObject->setSpecificPropertiesStruct(attr.value("SpecificProperties").toString());
 
 					for (auto p : deviceObject->properties())
 					{

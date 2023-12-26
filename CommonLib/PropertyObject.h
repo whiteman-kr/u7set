@@ -1575,7 +1575,7 @@ public:
 	// if they were added via PropertyObject::addProperty and later removed by removeAllProperties
 	//
 	void addProperties(const std::vector<std::shared_ptr<Property>>& properties);
-	void addProperty(std::shared_ptr<Property>& property);
+	void addProperty(std::shared_ptr<Property> property);
 
 	// Get specific property by its caption,
 	// return Property* or nullptr if property is not found

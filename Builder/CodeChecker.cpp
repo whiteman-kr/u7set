@@ -928,16 +928,8 @@ namespace Builder
 		}
 		else
 		{
-			it--;
-
-			if (it == areas.end())
-			{
-				result = false;
-			}
-			else
-			{
-				result = it->second.addressInArea(addr, sizeW);
-			}
+			it = std::prev(it);
+			result = it->second.addressInArea(addr, sizeW);
 		}
 
 		if (result == false)

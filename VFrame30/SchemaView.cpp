@@ -464,7 +464,7 @@ namespace VFrame30
 		if (value == 0)
 		{
 			QWidget* viewportWidget = this->parentWidget(); // Viewport can be real from QAbstractScrollArea or just any widget
-			QAbstractScrollArea* abstractScrollArea = qobject_cast<QAbstractScrollArea*>(viewportWidget->parentWidget());
+			QAbstractScrollArea* abstractScrollArea = qobject_cast<QAbstractScrollArea*>(viewportWidget ? viewportWidget->parentWidget() : nullptr);
 
 			if (viewportWidget == nullptr)
 			{

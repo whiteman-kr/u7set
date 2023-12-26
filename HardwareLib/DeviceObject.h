@@ -297,8 +297,8 @@ namespace Hardware
 		[[nodiscard]] QString childRestriction() const;
 		void setChildRestriction(QString value);
 
-		[[nodiscard]] QString specificProperties() const;
-		void setSpecificProperties(QString value);
+		[[nodiscard]] QString specificPropertiesStruct() const;
+		void setSpecificPropertiesStruct(QString value);
 
 		[[nodiscard]] int place() const;
 		void setPlace(int value);

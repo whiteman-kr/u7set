@@ -22,8 +22,6 @@ public:
 		QDateTime date;
 		qint64 startTime = 0;
 		bool shortTerm = true;
-		ArchFileRecord firstRecord;
-		ArchFileRecord lastRecord;
 	};
 
 public:
