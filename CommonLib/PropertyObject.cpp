@@ -292,9 +292,9 @@ void PropertyObject::addProperties(const std::vector<std::shared_ptr<Property>>&
 	return;
 }
 
-void PropertyObject::addProperty(std::shared_ptr<Property>& property)
+void PropertyObject::addProperty(std::shared_ptr<Property> property)
 {
-	m_properties[property->caption()] = property;
+	m_properties[property->caption()] = std::move(property);
 
 	emit propertyListChanged();
 

@@ -995,11 +995,16 @@ void MainWindow::updateUfbsAfbsBusses()
 			//
 			std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(file->data());
 
-			if (schema == nullptr ||
-				(schema->isUfbSchema() == false && schema->isLogicSchema() == false))
+			if (schema == nullptr)
+			{
+				QMessageBox::critical(this, qAppName(), tr("Error parsing schema %1.").arg(file->fileName()));
+				break;
+			}
+
+			if (schema->isUfbSchema() == false && schema->isLogicSchema() == false)
 			{
 				assert(schema->isUfbSchema() == true || schema->isLogicSchema() == true);
-				QMessageBox::critical(this, qAppName(), tr("Error parsing schema %1.").arg(file->fileName()));
+				QMessageBox::critical(this, qAppName(), tr("File %1 must be AppLogic or UFB schema.").arg(file->fileName()));
 				break;
 			}
 

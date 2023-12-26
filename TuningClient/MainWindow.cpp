@@ -766,7 +766,7 @@ void MainWindow::updateStatusBar()
 			}
 		}
 
-		int labelIndex = 0;
+		size_t labelIndex = 0;
 
 		for (int i = 0; i < filtersCount; i++)
 		{
@@ -784,9 +784,9 @@ void MainWindow::updateStatusBar()
 
 			TuningCounters counters = f->counters();
 
-			if (static_cast<int>(m_statusDiscreteCount.size()) < labelIndex)
+			if (labelIndex >= m_statusDiscreteCount.size())
 			{
-				Q_ASSERT(false);
+				Q_ASSERT(labelIndex < m_statusDiscreteCount.size());
 				return;
 			}
 

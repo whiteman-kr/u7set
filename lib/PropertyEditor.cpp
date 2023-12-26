@@ -2307,7 +2307,7 @@ namespace ExtWidgets
 		PropertyEditCellWidget(parent),
 		m_property(p),
 		m_row(row),
-		m_userType(p->value().userType()),
+		m_userType(p ? p->value().userType() : 0),
 		m_readOnly(readOnly),
 		m_propertyEditorBase(propertyEditorBase)
 	{

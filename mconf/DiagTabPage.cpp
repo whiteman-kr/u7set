@@ -93,7 +93,7 @@ bool DiagTabPage::isFirmwareCrcValid() const
     QString text = ui.m_pFirwareCrc->text();
 
 	bool convertResult = false;
-	text.toUInt(&convertResult, 16);
+	std::ignore = text.toUInt(&convertResult, 16);
 
 	return convertResult;
 }

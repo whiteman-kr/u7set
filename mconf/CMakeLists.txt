@@ -32,10 +32,10 @@ add_executable(${TARGET} WIN32
 	Globals.cpp
 	Globals.h
 	main.cpp
+	MconfSettings.cpp
+	MconfSettings.h
 	ModuleConfigurator.cpp
 	ModuleConfigurator.h
-	Settings.cpp
-	Settings.h
 	SettingsForm.cpp
 	SettingsForm.h
 

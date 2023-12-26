@@ -266,6 +266,7 @@ namespace Builder
 						//
 						log->errCMN0010(fileLatestVersion->fileName());
 						returnResult = false;
+						return false;
 					}
 
 					if (schema->excludeFromBuild() == false)

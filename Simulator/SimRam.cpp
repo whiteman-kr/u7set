@@ -926,7 +926,7 @@ namespace Sim
 		auto ubit = areasMap->upper_bound(offsetW);
 		assert(ubit != areasMap->begin());
 
-		ubit--;
+		ubit = std::prev(ubit);
 
 		size_t index = ubit->second;
 		if (index >= m_memoryAreas.size())

@@ -53,7 +53,7 @@ QVariant SimCodeModel::data(const QModelIndex& index, int role /*= Qt::DisplayRo
 	int row = index.row();
 	int column = index.column();
 
-	if (row > m_commands.size())
+	if (row >= m_commands.size())
 	{
 		assert(row < m_commands.size());
 		return QVariant();
