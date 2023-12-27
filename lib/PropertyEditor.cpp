@@ -3581,6 +3581,14 @@ namespace ExtWidgets
 		return m_objects;
 	}
 
+	void PropertyEditor::setObject(std::shared_ptr<PropertyObject> object)
+	{
+		QList<std::shared_ptr<PropertyObject>> list;
+		list << object;
+
+		return setObjects(list);
+	}
+
 	void PropertyEditor::setObjects(const std::vector<std::shared_ptr<PropertyObject>>& objects)
 	{
 		QList<std::shared_ptr<PropertyObject>> list =

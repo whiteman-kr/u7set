@@ -5240,6 +5240,12 @@ void EditSchemaWidget::f2Key()
 		return;
 	}
 
+	if (item->isType<VFrame30::SchemaItemAfb>() == true)
+	{
+		f2KeyForAfb(item);
+		return;
+	}
+
 	return;
 }
 
@@ -6518,6 +6524,122 @@ void EditSchemaWidget::f2KeyForBus(SchemaItemPtr item)
 		m_editEngine->runSetObject(oldState, newState, item);
 
 		editSchemaView()->update();
+	}
+
+	return;
+}
+
+void EditSchemaWidget::f2KeyForAfb(SchemaItemPtr item)
+{
+	if (item->isSchemaItemAfb() == false)
+	{
+		assert(item->isSchemaItemAfb() == true);
+		return;
+	}
+
+	// Create a deep copy of the item, as it must not share Properties with the original one.
+	// 
+	QByteArray itemData;
+	item->saveToByteArray(&itemData);
+
+	auto itemCopy = VFrame30::SchemaItem::Create(itemData);
+	Q_ASSERT(itemCopy);
+	
+	// Only edit essential and category Parameters,
+	// remove all others.
+	//
+	auto properties = itemCopy->properties();
+
+	for (auto& property : properties)
+	{
+		if (property->essential() != true &&
+			property->category() != VFrame30::PropertyNames::parametersCategory)
+		{
+			itemCopy->removeProperty(property->caption());
+		}
+	}
+
+	properties = itemCopy->properties();
+
+	// Show input dialog.
+	//
+	ResizedDialog d(tr("Set AFB properties"), this);
+
+	d.setWindowFlags((d.windowFlags() &
+					  ~Qt::WindowMinimizeButtonHint &
+					  ~Qt::WindowMaximizeButtonHint &
+					  ~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+
+	auto label = new QLabel("AFB Item Properties:");
+
+	auto propertyEditor = new ExtWidgets::PropertyEditor{&d};
+	propertyEditor->setObject(itemCopy);
+
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+	QVBoxLayout* layout = new QVBoxLayout;
+	layout->addWidget(label);
+	layout->addWidget(propertyEditor);
+	layout->addWidget(buttonBox);
+	d.setLayout(layout);
+
+	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
+	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
+
+	propertyEditor->autoAdjustSplitterPosition();
+	propertyEditor->setReadOnly(readOnly());
+
+	// Show modal dialog.
+	//
+	if (int result = d.exec();
+		result != QDialog::Accepted)
+	{
+		return;
+	}
+
+	// Update only changed properties
+	//
+	bool batchWasStarted = false;
+
+	for (const auto& property : properties)
+	{
+		auto oldProperty = item->propertyByCaption(property->caption());
+		if (oldProperty == nullptr)
+		{
+			Q_ASSERT(oldProperty);
+			continue;
+		}
+
+		if (oldProperty->value() == property->value())
+		{
+			// Property value was not changed, skip it.
+			//
+			continue;
+		}
+
+		if (batchWasStarted == false)
+		{
+			// This is the first changed property, start batch.
+			//
+			batchWasStarted = m_editEngine->startBatch();
+			
+			if (batchWasStarted == false)
+			{
+				// Batch was not started, skip all changes.
+				// It is possible if the schema is read only.
+				//
+				break;
+			}
+		}
+
+		m_editEngine->runSetProperty(property->caption(), property->value(), item);
+	}
+
+	if (batchWasStarted == true)
+	{
+		// If batch was started, then at least one property has been changed. 
+		//
+		m_editEngine->endBatch();
 	}
 
 	return;

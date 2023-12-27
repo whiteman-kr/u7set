@@ -910,7 +910,7 @@ namespace VFrame30
 			prop->setPrecision(precision());
 		}
 
-		// Add or remoive special property for packed logic.
+		// Add or remove special property for packed logic.
 		//
 		if (m_afbElement.isPackedLogic() == true)
 		{

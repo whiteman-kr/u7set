@@ -198,6 +198,7 @@ protected slots:
 	void f2KeyForValue(SchemaItemPtr item);
 	void f2KeyForImageValue(SchemaItemPtr item);
 	void f2KeyForBus(SchemaItemPtr item);
+	void f2KeyForAfb(SchemaItemPtr item);
 
 	void deleteKey();
 

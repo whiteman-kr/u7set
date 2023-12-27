@@ -648,6 +648,7 @@ namespace ExtWidgets
 		void clear();
 
 		const QList<std::shared_ptr<PropertyObject>>& objects() const;
+		void setObject(std::shared_ptr<PropertyObject> object);
 		void setObjects(const std::vector<std::shared_ptr<PropertyObject>>& objects);
 		void setObjects(const QList<std::shared_ptr<PropertyObject>>& objects);
 
