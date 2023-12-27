@@ -1394,9 +1394,34 @@ namespace Log
         return emptyRecord;
     }
 
-    QBrush LogRecordModel::color(const QModelIndex& index) const
+    QBrush LogRecordModel::color(const QModelIndex& index, bool selected) const
     {
-        return data(index, Qt::ForegroundRole).value<QBrush>();
+		const LogFileRecord& rec = record(index.row());
+
+		switch (rec.type)
+		{
+		case MessageType::Error:
+		case MessageType::Alert:
+			if (selected == true)
+			{
+				return QBrush{qRgb(0xFF, 0x00, 0x00)};
+			}
+			else
+			{
+				return QBrush{qRgb(0xE0, 0x33, 0x33)};
+			}
+		case MessageType::Warning:
+			if (selected == true)
+			{
+				return QBrush{qRgb(0xD8, 0x52, 0x07)};
+			}
+			else
+			{
+				return QBrush{qRgb(0xF8, 0x72, 0x17)};
+			}
+		default:
+			return {};
+		}
     }
 
     int LogRecordModel::rowCount(const QModelIndex& parent) const
@@ -1480,21 +1505,6 @@ namespace Log
 			}
 		}
 
-		if (role == Qt::ForegroundRole)
-		{
-            switch (rec.type)
-			{
-			case MessageType::Error:
-				return QBrush{qRgb(0xE0, 0x33, 0x33)};
-			case MessageType::Alert:
-				return QBrush{qRgb(0xE0, 0x33, 0x33)};
-			case MessageType::Warning:
-				return QBrush{qRgb(0xF8, 0x72, 0x17)};
-			default:
-				return {};
-			}
-		}
-
 		if (role == Qt::ToolTipRole)
 		{
 			// Display tooltip only for text if it contains '\n'
@@ -1544,15 +1554,17 @@ namespace Log
 	void SelectionControlDelegate::initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const
 	{
 		QStyledItemDelegate::initStyleOption(option, index);
-
+		
 		bool active = option->state & QStyle::State_Active;
 		bool selected = option->state & QStyle::State_Selected;
 
-		// Set background color for selected item (by default it is displayed by white)
+		QBrush br = m_model->color(m_proxyModel->mapToSource(index), selected);
+		option->palette.setColor(QPalette::Text, br.color());
+		
+		// Set color for selected item (by default it is displayed by white)
 		//
 		if (selected == true)
 		{
-            QBrush br = m_model->color(m_proxyModel->mapToSource(index));
 			if (br.style() == Qt::NoBrush && active == true)
 			{
 				// Use white color on selected items if control is active
@@ -1563,6 +1575,18 @@ namespace Log
 			{
 				option->palette.setColor(QPalette::HighlightedText, br.color());
 			}
+			if (active == true)
+			{
+				option->palette.setColor(QPalette::Highlight, qRgb(0x90, 0xc8, 0xf6));
+			}
+			else
+			{
+				option->palette.setColor(QPalette::Highlight, qRgb(0xe0, 0xe0, 0xe0));
+			}
+		}
+		else
+		{
+			option->palette.setColor(QPalette::Base, Qt::white);
 		}
 	}
 
