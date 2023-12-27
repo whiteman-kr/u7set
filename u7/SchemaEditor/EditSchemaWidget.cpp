@@ -1,7 +1,6 @@
 #include "EditSchemaWidget.h"
+#include "./EditEngine/EditEngine.h"
 #include "DbTagsEditor.h"
-#include "EditEngine/EditEngine.h"
-#include "Forms/ComparePropertyObjectDialog.h"
 #include "GlobalMessanger.h"
 #include "SchemaItemPropertiesDialog.h"
 #include "SchemaLayersDialog.h"
@@ -11,6 +10,7 @@
 
 #include "./Forms/ChooseAfbDialog.h"
 #include "./Forms/ChooseUfbDialog.h"
+#include "./Forms/ComparePropertyObjectDialog.h"
 
 #include "../lib/CodeEditor.h"
 #include "../lib/QDoublevalidatorEx.h"
@@ -229,7 +229,7 @@ EditSchemaWidget::EditSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 	m_mouseLeftUpStateAction.emplace_back(MouseState::MovingVerticalEdge, std::bind(&EditSchemaWidget::mouseLeftUp_MovingEdgeOrVertex, this, std::placeholders::_1));
 	m_mouseLeftUpStateAction.emplace_back(MouseState::MovingConnectionLinePoint, std::bind(&EditSchemaWidget::mouseLeftUp_MovingEdgeOrVertex, this, std::placeholders::_1));
 
-	// Moouse Mov
+	// Mouse Move
 	//
 	m_mouseMoveStateAction.emplace_back(MouseState::Scrolling, std::bind(&EditSchemaWidget::mouseMove_Scrolling, this, std::placeholders::_1));
 	m_mouseMoveStateAction.emplace_back(MouseState::Selection, std::bind(&EditSchemaWidget::mouseMove_Selection, this, std::placeholders::_1));
@@ -1492,13 +1492,26 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 					[&possibleAction](const SizeActionToMouseCursor& item)
 					{
 						return item.action == possibleAction;
-					}
-					);
+					});
 
 				if (findResult != std::end(m_sizeActionToMouseCursor))
 				{
+					auto itemPosRotatable = dynamic_cast<const VFrame30::PosRectRotatable*>(selectedItem.get());
+					bool rotated = itemPosRotatable != nullptr && itemPosRotatable->angle() != 0;
 
 					docPoint = widgetPointToDocument(me->pos(), snapToGrid());
+					
+					if (rotated == true)
+					{
+						auto rotatePoint = itemPosRotatable->rotationPointInDocPt();
+
+						QTransform transform;
+						transform.translate(rotatePoint.x(), rotatePoint.y());
+						transform.rotate(-itemPosRotatable->angle());
+						transform.translate(-rotatePoint.x(), -rotatePoint.y());
+
+						docPoint = transform.map(docPoint);
+					}
 
 					editSchemaView()->m_editStartDocPt = docPoint;
 					editSchemaView()->m_editEndDocPt = docPoint;
@@ -2120,9 +2133,6 @@ void EditSchemaWidget::mouseLeftUp_SizingRect(QMouseEvent* event)
 		return;
 	}
 
-	QPointF mouseSizingStartPointDocPt = editSchemaView()->m_editStartDocPt;
-	QPointF mouseSizingEndPointDocPt = widgetPointToDocument(event->pos(), snapToGrid());
-
 	auto si = selectedItems().front();
 	VFrame30::IPosRect* itemPos = dynamic_cast<VFrame30::IPosRect*>(selectedItems().front().get());
 
@@ -2130,6 +2140,24 @@ void EditSchemaWidget::mouseLeftUp_SizingRect(QMouseEvent* event)
 	{
 		assert(itemPos != nullptr);
 		return;
+	}
+
+	QPointF mouseSizingStartPointDocPt = editSchemaView()->m_editStartDocPt;
+	QPointF mouseSizingEndPointDocPt = widgetPointToDocument(event->pos(), snapToGrid());
+
+	auto itemPosRotatable = dynamic_cast<const VFrame30::PosRectRotatable*>(si.get());
+	bool rotated = itemPosRotatable != nullptr && itemPosRotatable->angle() != 0;
+
+	if (rotated == true)
+	{
+		auto rotatePoint = itemPosRotatable->rotationPointInDocPt();
+
+		QTransform transform;
+		transform.translate(rotatePoint.x(), rotatePoint.y());
+		transform.rotate(-itemPosRotatable->angle());
+		transform.translate(-rotatePoint.x(), -rotatePoint.y());
+
+		mouseSizingEndPointDocPt = transform.map(mouseSizingEndPointDocPt);
 	}
 
 	double xdif = mouseSizingEndPointDocPt.x() - mouseSizingStartPointDocPt.x();
@@ -2701,18 +2729,29 @@ void EditSchemaWidget::mouseMove_SizingRect(QMouseEvent* me)
 		return;
 	}
 
+	auto itemPosRotatable = dynamic_cast<const VFrame30::PosRectRotatable*>(selectedItems().front().get());
+	bool rotated = itemPosRotatable != nullptr && itemPosRotatable->angle() != 0;
+
 	editSchemaView()->m_editEndDocPt = widgetPointToDocument(me->pos(), snapToGrid());
+	if (rotated == true)
+	{
+		auto rotatePoint = itemPosRotatable->rotationPointInDocPt();
+
+		QTransform transform;
+		transform.translate(rotatePoint.x(), rotatePoint.y());
+		transform.rotate(-itemPosRotatable->angle());
+		transform.translate(-rotatePoint.x(), -rotatePoint.y());
+
+		editSchemaView()->m_editEndDocPt = transform.map(editSchemaView()->m_editEndDocPt);
+	}
 
 	// Get possible links offset
 	//
 	double xdif = editSchemaView()->m_editEndDocPt.x() - editSchemaView()->m_editStartDocPt.x();
 	double ydif = editSchemaView()->m_editEndDocPt.y() - editSchemaView()->m_editStartDocPt.y();
 
-	QRectF currentRect(itemPos->leftDocPt(),
-						   itemPos->topDocPt(),
-						   itemPos->widthDocPt(),
-						   itemPos->heightDocPt());
-
+	QRectF currentRect(itemPos->leftDocPt(), itemPos->topDocPt(), itemPos->widthDocPt(), itemPos->heightDocPt());
+	
 	QRectF newRect = editSchemaView()->sizingRectItem(xdif, ydif, itemPos);
 
 	switch (mouseState())
