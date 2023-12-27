@@ -96,7 +96,7 @@ namespace VFrame30
 		//
 	public:
 		virtual void drawHighlight(CDrawParam* drawParam) const;
-		void drawHighlightRect(CDrawParam* drawParam, const QRectF& rect) const;
+		virtual void drawHighlightRect(CDrawParam* drawParam, const QRectF& rect) const;
 
 		virtual void drawOutline(CDrawParam* drawParam) const override;
 		virtual void drawIssue(CDrawParam* drawParam, OutputMessageLevel issue) const override;
@@ -123,6 +123,7 @@ namespace VFrame30
 
 		// Drawing resources
 		//
+	protected:
 		mutable std::shared_ptr<QPen> selectionPen;
 		mutable std::shared_ptr<QPen> outlinePen;
 

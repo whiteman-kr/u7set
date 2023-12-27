@@ -196,13 +196,11 @@ namespace VFrame30
 		return;
 	}
 
-	// ��������� �������� ��� ��� �������� ���������
-	//
 	void PosRectImpl::drawOutline(CDrawParam* drawParam) const
 	{
 		QPainter* p = drawParam->painter();
 
-		// Drwing resources initialization
+		// Drawing resources initialization
 		//
 		if (outlinePen.get() == nullptr)
 		{
@@ -212,22 +210,12 @@ namespace VFrame30
 
 		// --
 		//
-		QPainter::RenderHints oldrenderhints = p->renderHints();
+		QPainter::RenderHints oldRenderingHints = p->renderHints();
 		p->setRenderHint(QPainter::Antialiasing, false);
 
 		// --
 		//
-		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt()); 
-
-		if (std::abs(r.left() - r.right()) < 0.000001)
-		{
-			r.setRight(r.left() + 0.000001f);
-		}
-
-		if (std::abs(r.bottom() - r.top()) < 0.000001)
-		{
-			r.setBottom(r.top() + 0.000001f);
-		}
+		QRectF r = boundingRectInDocPt(drawParam); 
 
 		p->setPen(*outlinePen);
 		p->setBrush(Qt::NoBrush);
@@ -236,7 +224,7 @@ namespace VFrame30
 
 		// --
 		//
-		p->setRenderHints(oldrenderhints);
+		p->setRenderHints(oldRenderingHints);
 		return;
 	}
 
@@ -299,7 +287,7 @@ namespace VFrame30
 	{
 		QPainter* p = drawParam->painter();
 
-		// Drwing resources initialization
+		// Drawing resources initialization
 		//
 		if (selectionPen.get() == nullptr)
 		{
@@ -315,17 +303,7 @@ namespace VFrame30
 
 		// --
 		//
-		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt()); 
-
-		if (std::abs(r.left() - r.right()) < 0.000001)
-		{
-			r.setRight(r.left() + 0.000001f);
-		}
-
-		if (std::abs(r.bottom() - r.top()) < 0.000001)
-		{
-			r.setBottom(r.top() + 0.000001f);
-		}
+		QRectF r = boundingRectInDocPt(drawParam);
 
 		double cbs = drawParam->controlBarSize();
 
@@ -477,7 +455,7 @@ namespace VFrame30
 			return result;
 		}
 
-		return itemRect.intersects(detRect) | detRect.contains(itemRect.topLeft());	// contains for the empty rect (width or height is 0)
+		return itemRect.intersects(detRect) || detRect.contains(itemRect.topLeft());	// contains for the empty rect (width or height is 0)
 	}
 
 	QRectF PosRectImpl::boundingRectInDocPt(const CDrawParam* drawParam) const

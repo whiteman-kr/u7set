@@ -9,8 +9,8 @@ namespace VFrame30
 	SchemaItemAfb::SchemaItemAfb(void) :
 		SchemaItemAfb(SchemaUnit::Inch)
 	{
-		// This contructor can be called while serialization,
-		// Object will be created and serailizartion will initialize all the members
+		// This constructor can be called while serialization,
+		// Object will be created and serialization will initialize all the members.
 		//
 	}
 
