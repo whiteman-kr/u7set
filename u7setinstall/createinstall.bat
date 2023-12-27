@@ -1,4 +1,4 @@
-set RPCT_VERSION="0.9.%CI_PIPELINE_ID%"
+set RPCT_VERSION="%U7SET_FULL_VERSION%"
 echo Software Version is %RPCT_VERSION%
 
 powershell -Command "(gc config\config.in) -replace '<Version>1.0.0</Version>', '<Version>%RPCT_VERSION%</Version>' | Out-File -encoding ASCII config\config.xml"
@@ -66,6 +66,6 @@ xcopy ..\bin\release\TestSuite*.qm packages\u7set.tools.testsuite\data /sy
 
 echo --------------- Building the installer ------------------
 
-binarycreator.exe --offline-only -c config\config.xml -p packages ..\bin\u7setinstall_%RPCT_VERSION%_%CI_BUILD_REF_SLUG%_%CI_COMMIT_SHA%.exe
+binarycreator.exe --offline-only -c config\config.xml -p packages ..\bin\u7setinstall-%RPCT_VERSION%-PPID_%CI_PIPELINE_ID%-%CI_RELEASE_TYPE%-%CI_COMMIT_REF_SLUG%_%CI_COMMIT_SHA%.exe
 
 echo --------------- Done ------------------

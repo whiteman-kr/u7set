@@ -1,19 +1,16 @@
-#include <iostream>
-#include <QCoreApplication>
-#include <QTimer>
 #include "../Builder/Builder.h"
-#include "BuildTask.h"
-#include "../HardwareLib/DeviceObject.h"
 #include "../DbLib/DbController.h"
-#include "../VFrame30/VFrame30Library.h"
-#include <QFile>
-#include <QXmlStreamWriter>
-#include <QDomDocument>
+#include "../HardwareLib/DeviceObject.h"
 #include "../Protobuf/google/protobuf/message.h"
-
-#if __has_include("../gitlabci_version.h")
-#	include "../gitlabci_version.h"
-#endif
+#include "../VFrame30/VFrame30Library.h"
+#include "../version.h"
+#include "BuildTask.h"
+#include <QCoreApplication>
+#include <QDomDocument>
+#include <QFile>
+#include <QTimer>
+#include <QXmlStreamWriter>
+#include <iostream>
 
 static QtMessageHandler originalMessageHandler = 0;
 
@@ -332,11 +329,11 @@ int main(int argc, char *argv[])
 	a.setOrganizationName(Manufacturer::RADIY);
 	a.setOrganizationDomain(Manufacturer::SITE);
 
-#ifdef GITLAB_CI_BUILD
-	a.setApplicationVersion(QString("0.9.%1 (%2)").arg(CI_PIPELINE_ID).arg(CI_COMMIT_REF_SLUG));
-#else
-	a.setApplicationVersion(QString("0.9.LOCALBUILD"));
-#endif
+	a.setApplicationVersion(QString("%1.%2.%3 (%4)")
+							.arg(U7SET_MAJOR_VERSION)
+							.arg(U7SET_MINOR_VERSION)
+							.arg(U7SET_PATCH_VERSION)
+							.arg(U7SET_BRANCH_NAME));
 
 	QStringList args = a.arguments();
 

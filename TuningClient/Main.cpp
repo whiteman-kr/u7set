@@ -1,15 +1,12 @@
 #include "Main.h"
-#include <QCommandLineParser>
-#include "MainWindow.h"
-#include <QApplication>
-#include "Settings.h"
-#include "ScriptTuningClientApplication.h"
 #include "../ClientLib/TuningUserManager.h"
 #include "../VFrame30/VFrame30Library.h"
-
-#if __has_include("../gitlabci_version.h")
-#	include "../gitlabci_version.h"
-#endif
+#include "MainWindow.h"
+#include "ScriptTuningClientApplication.h"
+#include "Settings.h"
+#include "version.h"
+#include <QApplication>
+#include <QCommandLineParser>
 
 //// ---------------- Minidump generating functions -------------------
 ////
@@ -159,12 +156,11 @@ int main(int argc, char* argv[])
 	a.setOrganizationName(Manufacturer::RADIY);
 	a.setOrganizationDomain(Manufacturer::SITE);
 
-
-#ifdef GITLAB_CI_BUILD
-	a.setApplicationVersion(QString("0.9.%1 (%2)").arg(CI_PIPELINE_ID).arg(CI_COMMIT_REF_SLUG));
-#else
-	a.setApplicationVersion(QString("0.9.LOCALBUILD"));
-#endif
+	a.setApplicationVersion(QString("%1.%2.%3 (%4)")
+							.arg(U7SET_MAJOR_VERSION)
+							.arg(U7SET_MINOR_VERSION)
+							.arg(U7SET_PATCH_VERSION)
+							.arg(U7SET_BRANCH_NAME));
 
 	VFrame30::init();
 
