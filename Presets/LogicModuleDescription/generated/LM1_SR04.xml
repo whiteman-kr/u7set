@@ -11622,7 +11622,7 @@
       </CommonScript>
     </AFB>
     
-    <AFB id="#mismatch_d_fp_v1" Caption="mismatch_d_fp" Version="1.0007">
+    <AFB id="#mismatch_d_fp_v1" Caption="mismatch_d_fp" Version="3.8">
       <Properties>
         <Description>Analog mismatch block</Description>
         <Category>Other</Category>
@@ -11718,7 +11718,7 @@
 				</Changed>
           </Script>
         </Param>
-        <Param OpName="AssignFlags" Caption="AssignFlags" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+        <Param OpName="AssignFlags" Caption="AssignFlags" Visible="true" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
           <Value>1</Value>
           <Default>1</Default>
           <Script>
@@ -11831,7 +11831,7 @@
 		</AfterCreation>
       </CommonScript>
     </AFB>
-    <AFB id="#mismatch_d_si_v1" Caption="mismatch_d_si" Version="1.0005">
+    <AFB id="#mismatch_d_si_v1" Caption="mismatch_d_si" Version="3.6">
       <Properties>
         <Description>Analog mismatch block</Description>
         <Category>Other</Category>
@@ -11888,7 +11888,7 @@
 				</Changed>
           </Script>
         </Param>
-        <Param OpName="AssignFlags" Caption="AssignFlags" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+        <Param OpName="AssignFlags" Caption="AssignFlags" Visible="true" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
           <Value>1</Value>
           <Default>1</Default>
           <Script>
@@ -11998,7 +11998,7 @@
 		</AfterCreation>
       </CommonScript>
     </AFB>
-    <AFB id="#mismatch_fp_v1" Caption="mismatch_fp" Version="1.0015">
+    <AFB id="#mismatch_fp_v1" Caption="mismatch_fp" Version="3.16">
       <Properties>
         <Description>Analog mismatch block</Description>
         <Category>Other</Category>
@@ -12102,7 +12102,7 @@
 				</Changed>
           </Script>
         </Param>
-        <Param OpName="AssignFlags" Caption="AssignFlags" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+        <Param OpName="AssignFlags" Caption="AssignFlags" Visible="true" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
           <Value>1</Value>
           <Default>1</Default>
           <Script>
@@ -12212,7 +12212,7 @@
 		</AfterCreation>
       </CommonScript>
     </AFB>
-    <AFB id="#mismatch_r_fp_v1" Caption="mismatch_r_fp" Version="1.13">
+    <AFB id="#mismatch_r_fp_v1" Caption="mismatch_r_fp" Version="3.14">
       <Properties>
         <Description>Analog mismatch block with limits</Description>
         <Category>Other</Category>
@@ -12344,7 +12344,7 @@
 				</Changed>
           </Script>
         </Param>
-        <Param OpName="AssignFlags" Caption="AssignFlags" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+        <Param OpName="AssignFlags" Caption="AssignFlags" Visible="true" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
           <Value>1</Value>
           <Default>1</Default>
           <Script>
@@ -12454,7 +12454,7 @@
 		</AfterCreation>
       </CommonScript>
     </AFB>
-    <AFB id="#mismatch_r_si_v1" Caption="mismatch_r_si" Version="1.12">
+    <AFB id="#mismatch_r_si_v1" Caption="mismatch_r_si" Version="3.13">
       <Properties>
         <Description>Analog mismatch block with limits</Description>
         <Category>Other</Category>
@@ -12547,7 +12547,7 @@
 				</Changed>
           </Script>
         </Param>
-        <Param OpName="AssignFlags" Caption="AssignFlags" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+        <Param OpName="AssignFlags" Caption="AssignFlags" Visible="true" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
           <Value>1</Value>
           <Default>1</Default>
           <Script>
@@ -12653,7 +12653,7 @@
 		</AfterCreation>
       </CommonScript>
     </AFB>
-    <AFB id="#mismatch_si_v1" Caption="mismatch_si" Version="1.0014">
+    <AFB id="#mismatch_si_v1" Caption="mismatch_si" Version="3.15">
       <Properties>
         <Description>Analog mismatch block</Description>
         <Category>Other</Category>
@@ -12718,7 +12718,7 @@
 				</Changed>
           </Script>
         </Param>
-        <Param OpName="AssignFlags" Caption="AssignFlags" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+        <Param OpName="AssignFlags" Caption="AssignFlags" Visible="true" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
           <Value>1</Value>
           <Default>1</Default>
           <Script>
