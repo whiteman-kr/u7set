@@ -109,6 +109,8 @@ namespace Db
 		constexpr static const char* AppSignalSetFileExtension = "asgs";			// Application signals set file extention (::Proto::AppSignalSet message)
 
 		constexpr static const char* JavaScriptFileExtension = "js";				// JavaScript file extension
+
+		constexpr static const char* DiagSignalTypeFileExtension = "dsgt";			// Diagnostic Signal Type file extension
 	};
 }
 

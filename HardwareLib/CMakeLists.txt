@@ -15,18 +15,22 @@ qt_add_library(${TARGET} STATIC
 	Afb.h
 	Connection.cpp
 	Connection.h
-	ConnectionsInfo.h
 	ConnectionsInfo.cpp
+	ConnectionsInfo.h
 	DataProtocols.cpp
 	DataProtocols.h
 	DeviceObject.cpp
 	DeviceObject.h
+	DiagSignal.cpp
+	DiagSignal.h
+	DiagSignalType.cpp
+	DiagSignalType.h
+	LanControllerInfo.cpp
+	LanControllerInfo.h
 	LmDescription.cpp
 	LmDescription.h
 	LogicModulesInfo.cpp
 	LogicModulesInfo.h
-	LanControllerInfo.h
-	LanControllerInfo.cpp
 	ModuleFirmware.cpp
 	ModuleFirmware.h
 	ScriptDeviceObject.cpp

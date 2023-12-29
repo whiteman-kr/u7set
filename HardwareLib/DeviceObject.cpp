@@ -3,6 +3,7 @@
 #endif
 
 #include "DeviceObject.h"
+#include "DiagSignal.h"
 #include "ScriptDeviceObject.h"
 #include "../lib/ConstStrings.h"
 
@@ -10,30 +11,30 @@ namespace Hardware
 {
 	const std::array<QString, 10> DeviceObjectExtensions =
 		{
-			".hrt",			// Root
-			".hsm",			// System
-			".hrk",			// Rack
-			".hcs",			// Chassis
-			".hmd",			// Module
+			".hrt",			// DeviceRoot
+			".hsm",			// DeviceSystem
+			".hrk",			// DeviceRack
+			".hcs",			// DeviceChassis
+			".hmd",			// DeviceModule
 			".hws",			// Workstation
 			".hsw",			// Software
-			".hcr",			// Controller
-			".hds",			// AppSignal
-			".hdds",		// DiagSignal
+			".hcr",			// DeviceController
+			".hds",			// DeviceAppSignal
+			".hsd",			// DiagSignal
 		};
 
 	extern const std::array<QString, 10> DeviceTypeNames =
 		{
-			"Root",			// Root
-			"System",		// System
-			"Rack",			// Rack
-			"Chassis",		// Chassis
-			"Module",		// Module
+			"Root",			// DeviceRoot
+			"System",		// DeviceSystem
+			"Rack",			// DeviceRack
+			"Chassis",		// DeviceChassis
+			"Module",		// DeviceModule
 			"Workstation",	// Workstation
 			"Software",		// Software
-			"Controller",	// Controller
-			"AppSignal",	// Signal
-			"DiagSignal",	// Signal
+			"Controller",	// DeviceController
+			"AppSignal",	// DeviceAppSignal
+			"DiagSignal",	// DiagSignal
 		};
 
 	Factory<DeviceObject> DeviceObjectFactory;
@@ -62,9 +63,10 @@ namespace Hardware
 		Hardware::DeviceObjectFactory.Register<Hardware::DeviceModule>();
 		Hardware::DeviceObjectFactory.Register<Hardware::DeviceController>();
 		Hardware::DeviceObjectFactory.Register<Hardware::DeviceAppSignal>();
-		Hardware::DeviceObjectFactory.Register<Hardware::DeviceAppSignal>("DeviceSignal");		// DeviceAppSignal used to be DeviceSignal, so create fabrica for DeviceSignal too
+		Hardware::DeviceObjectFactory.Register<Hardware::DeviceAppSignal>("DeviceSignal");		// DeviceAppSignal used to be DeviceSignal, so create fabric for DeviceSignal too
 		Hardware::DeviceObjectFactory.Register<Hardware::Workstation>();
 		Hardware::DeviceObjectFactory.Register<Hardware::Software>();
+		Hardware::DeviceObjectFactory.Register<Hardware::DiagSignal>();
 
 		return;
 	}
@@ -115,14 +117,17 @@ namespace Hardware
 
 	const QString PropertyNames::valueOffset = "ValueOffset";
 	const QString PropertyNames::valueBit = "ValueBit";
-	const QString PropertyNames::validitySignalId = "ValiditySiganlID";
+	const QString PropertyNames::validitySignalId = "ValiditySignalID";
 	const QString PropertyNames::appSignalDataFormat = "AppAnalogSignalFormat";
 	const QString PropertyNames::appSignalBusTypeId = "BusTypeID";
 
 	const QString PropertyNames::hostname = "Hostname";
+	
+	const QString PropertyNames::diagSignalTypeId = "DiagSignalTypeID";
 
 	const QString PropertyNames::categoryCommon = "Common";
 	const QString PropertyNames::categoryAppSignal = "AppSignal";
+	const QString PropertyNames::categoryDiagSignal = "DiagSignal";
 
 	//
 	//
@@ -1041,12 +1046,20 @@ namespace Hardware
 
 		if (deviceType() == DeviceType::Software)
 		{
-			return childType == DeviceType::Controller;
+			return childType == DeviceType::Controller ||
+				   childType == DeviceType::DiagSignal;
 		}
 
 		if (deviceType() == DeviceType::Workstation)
 		{
-			return childType == DeviceType::Software;
+			return childType == DeviceType::Software ||
+				   childType == DeviceType::DiagSignal;
+		}
+
+		if (deviceType() == DeviceType::AppSignal &&
+			childType == DeviceType::DiagSignal)
+		{
+			return false;
 		}
 
 		if (deviceType() >= childType)
@@ -1060,10 +1073,9 @@ namespace Hardware
 			return false;
 		}
 
-		if ((childType == DeviceType::AppSignal || childType == DeviceType::DiagSignal) &&
-			parent() != nullptr && parent()->isSoftware() == true)
+		if (childType == DeviceType::AppSignal && parent() != nullptr && parent()->isSoftware() == true)
 		{
-			// Cannot add any signal to software or software\controller
+			// Cannot add app signal to software or software\controller
 			//
 			return false;
 		}
@@ -2540,7 +2552,7 @@ R"DELIM({
 	{
 		m_appSignalDataFormat = value;
 	}
-
+	 
 	QString DeviceAppSignal::appSignalBusTypeId() const
 	{
 		return m_appSignalBusTypeId;

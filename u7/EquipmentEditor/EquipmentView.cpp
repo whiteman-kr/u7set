@@ -1,14 +1,15 @@
 #include "EquipmentView.h"
-#include "EquipmentModel.h"
 #include "../../Builder/SubsystemStorage.h"
-#include "DialogChoosePreset.h"
-#include "../GlobalMessanger.h"
 #include "../DialogConnections.h"
-#include "../Forms/FileHistoryDialog.h"
 #include "../Forms/CompareDialog.h"
 #include "../Forms/DialogUpdateFromPreset.h"
+#include "../Forms/FileHistoryDialog.h"
+#include "../GlobalMessanger.h"
+#include "../HardwareLib/DiagSignal.h"
 #include "../SchemaEditor/CreateSignalDialog.h"
 #include "../SignalsTabPage.h"
+#include "DialogChoosePreset.h"
+#include "EquipmentModel.h"
 
 //
 //
@@ -306,7 +307,7 @@ void EquipmentView::addController()
 	return;
 }
 
-void EquipmentView::addSignal()
+void EquipmentView::addAppSignalPort()
 {
 	QModelIndex parentModelIndex;		// current is root
 
@@ -337,6 +338,38 @@ void EquipmentView::addSignal()
 	return;
 }
 
+void EquipmentView::addDiagSignal()
+{
+	QModelIndex parentModelIndex;		// current is root
+	QModelIndexList selected = selectionModel()->selectedRows();
+
+	if (selected.size() > 1)
+	{
+		// Don't know after which item insert new object
+		//
+		return;
+	}
+
+	if (selected.empty() == false)
+	{
+		parentModelIndex = selected[0];
+	}
+
+	// --
+	//
+	auto signal = std::make_shared<Hardware::DiagSignal>(isPresetMode());
+
+	signal->setEquipmentIdTemplate("$(PARENT)_DIAGSIGNAL");
+	signal->setCaption(tr("DiagSignal"));
+	signal->setSignalTypeId(tr("ST_ERR_DISCR"));
+
+	addDeviceObject(signal, parentModelIndex, true, true);
+
+	emit updateState();
+	return;
+}
+
+
 void EquipmentView::addWorkstation()
 {
 	QModelIndex parentModelIndex;		// current is root
@@ -345,7 +378,7 @@ void EquipmentView::addWorkstation()
 
 	if (selected.size() > 1)
 	{
-		// Don't know after which item insrt new object
+		// Don't know after which item insert new object
 		//
 		return;
 	}

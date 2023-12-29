@@ -93,6 +93,7 @@ protected slots:
 	void runConfigurator();
 	void runSubsystemListEditor();
     void runConnectionsEditor();
+	void runDiagSignalTypesEditor();
 	void runBusEditor();
 	void runTagsEditor();
 	void runSimulationProfilesEditor();
@@ -143,6 +144,7 @@ private:
 
 	QAction* m_subsystemListEditorAction = nullptr;
     QAction* m_connectionsEditorAction = nullptr;
+	QAction* m_diagSignalTypesEditorAction = nullptr;
 	QAction* m_busEditorAction = nullptr;
 	QAction* m_tagsEditorAction = nullptr;
 	QAction* m_simProfilesEditorAction = nullptr;

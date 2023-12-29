@@ -61,7 +61,7 @@ struct TableStruct_serialization_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[110]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[112]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -142,6 +142,9 @@ extern DeviceChassisDefaultTypeInternal _DeviceChassis_default_instance_;
 class DeviceController;
 struct DeviceControllerDefaultTypeInternal;
 extern DeviceControllerDefaultTypeInternal _DeviceController_default_instance_;
+class DeviceDiagSignal;
+struct DeviceDiagSignalDefaultTypeInternal;
+extern DeviceDiagSignalDefaultTypeInternal _DeviceDiagSignal_default_instance_;
 class DeviceModule;
 struct DeviceModuleDefaultTypeInternal;
 extern DeviceModuleDefaultTypeInternal _DeviceModule_default_instance_;
@@ -157,6 +160,9 @@ extern DeviceRootDefaultTypeInternal _DeviceRoot_default_instance_;
 class DeviceSystem;
 struct DeviceSystemDefaultTypeInternal;
 extern DeviceSystemDefaultTypeInternal _DeviceSystem_default_instance_;
+class DiagSignalType;
+struct DiagSignalTypeDefaultTypeInternal;
+extern DiagSignalTypeDefaultTypeInternal _DiagSignalType_default_instance_;
 class Envelope;
 struct EnvelopeDefaultTypeInternal;
 extern EnvelopeDefaultTypeInternal _Envelope_default_instance_;
@@ -426,11 +432,13 @@ template<> ::Proto::Connection* Arena::CreateMaybeMessage<::Proto::Connection>(A
 template<> ::Proto::DeviceAppSignal* Arena::CreateMaybeMessage<::Proto::DeviceAppSignal>(Arena*);
 template<> ::Proto::DeviceChassis* Arena::CreateMaybeMessage<::Proto::DeviceChassis>(Arena*);
 template<> ::Proto::DeviceController* Arena::CreateMaybeMessage<::Proto::DeviceController>(Arena*);
+template<> ::Proto::DeviceDiagSignal* Arena::CreateMaybeMessage<::Proto::DeviceDiagSignal>(Arena*);
 template<> ::Proto::DeviceModule* Arena::CreateMaybeMessage<::Proto::DeviceModule>(Arena*);
 template<> ::Proto::DeviceObject* Arena::CreateMaybeMessage<::Proto::DeviceObject>(Arena*);
 template<> ::Proto::DeviceRack* Arena::CreateMaybeMessage<::Proto::DeviceRack>(Arena*);
 template<> ::Proto::DeviceRoot* Arena::CreateMaybeMessage<::Proto::DeviceRoot>(Arena*);
 template<> ::Proto::DeviceSystem* Arena::CreateMaybeMessage<::Proto::DeviceSystem>(Arena*);
+template<> ::Proto::DiagSignalType* Arena::CreateMaybeMessage<::Proto::DiagSignalType>(Arena*);
 template<> ::Proto::Envelope* Arena::CreateMaybeMessage<::Proto::Envelope>(Arena*);
 template<> ::Proto::EnvelopeSet* Arena::CreateMaybeMessage<::Proto::EnvelopeSet>(Arena*);
 template<> ::Proto::EnvelopeSetShortDescription* Arena::CreateMaybeMessage<::Proto::EnvelopeSetShortDescription>(Arena*);
@@ -2142,6 +2150,7 @@ class Envelope PROTOBUF_FINAL :
     kCompressedObjectFieldNumber = 2,
     kSchemaitemFieldNumber = 6,
     kDeviceobjectFieldNumber = 7,
+    kDiagSignalTypeFieldNumber = 8,
     kSchemaFieldNumber = 100,
     kSchemalayerFieldNumber = 101,
     kFblelementFieldNumber = 102,
@@ -2206,6 +2215,24 @@ class Envelope PROTOBUF_FINAL :
   void unsafe_arena_set_allocated_deviceobject(
       ::Proto::DeviceObject* deviceobject);
   ::Proto::DeviceObject* unsafe_arena_release_deviceobject();
+
+  // optional .Proto.DiagSignalType diagSignalType = 8;
+  bool has_diagsignaltype() const;
+  private:
+  bool _internal_has_diagsignaltype() const;
+  public:
+  void clear_diagsignaltype();
+  const ::Proto::DiagSignalType& diagsignaltype() const;
+  ::Proto::DiagSignalType* release_diagsignaltype();
+  ::Proto::DiagSignalType* mutable_diagsignaltype();
+  void set_allocated_diagsignaltype(::Proto::DiagSignalType* diagsignaltype);
+  private:
+  const ::Proto::DiagSignalType& _internal_diagsignaltype() const;
+  ::Proto::DiagSignalType* _internal_mutable_diagsignaltype();
+  public:
+  void unsafe_arena_set_allocated_diagsignaltype(
+      ::Proto::DiagSignalType* diagsignaltype);
+  ::Proto::DiagSignalType* unsafe_arena_release_diagsignaltype();
 
   // optional .Proto.Schema schema = 100;
   bool has_schema() const;
@@ -2358,6 +2385,7 @@ class Envelope PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr compressedobject_;
   ::Proto::SchemaItem* schemaitem_;
   ::Proto::DeviceObject* deviceobject_;
+  ::Proto::DiagSignalType* diagsignaltype_;
   ::Proto::Schema* schema_;
   ::Proto::SchemaLayer* schemalayer_;
   ::Proto::FblElement* fblelement_;
@@ -16667,6 +16695,7 @@ class DeviceObject PROTOBUF_FINAL :
     kAppSignalFieldNumber = 106,
     kWorkstationFieldNumber = 107,
     kSoftwareFieldNumber = 108,
+    kDiagSignalFieldNumber = 109,
     kPlaceFieldNumber = 5,
     kPresetFieldNumber = 32,
     kPresetRootFieldNumber = 33,
@@ -17019,6 +17048,24 @@ class DeviceObject PROTOBUF_FINAL :
       ::Proto::Software* software);
   ::Proto::Software* unsafe_arena_release_software();
 
+  // optional .Proto.DeviceDiagSignal DiagSignal = 109;
+  bool has_diagsignal() const;
+  private:
+  bool _internal_has_diagsignal() const;
+  public:
+  void clear_diagsignal();
+  const ::Proto::DeviceDiagSignal& diagsignal() const;
+  ::Proto::DeviceDiagSignal* release_diagsignal();
+  ::Proto::DeviceDiagSignal* mutable_diagsignal();
+  void set_allocated_diagsignal(::Proto::DeviceDiagSignal* diagsignal);
+  private:
+  const ::Proto::DeviceDiagSignal& _internal_diagsignal() const;
+  ::Proto::DeviceDiagSignal* _internal_mutable_diagsignal();
+  public:
+  void unsafe_arena_set_allocated_diagsignal(
+      ::Proto::DeviceDiagSignal* diagsignal);
+  ::Proto::DeviceDiagSignal* unsafe_arena_release_diagsignal();
+
   // optional int32 place = 5 [default = 0];
   bool has_place() const;
   private:
@@ -17115,6 +17162,7 @@ class DeviceObject PROTOBUF_FINAL :
   ::Proto::DeviceAppSignal* appsignal_;
   ::Proto::Workstation* workstation_;
   ::Proto::Software* software_;
+  ::Proto::DeviceDiagSignal* diagsignal_;
   ::PROTOBUF_NAMESPACE_ID::int32 place_;
   bool preset_;
   bool presetroot_;
@@ -18445,6 +18493,214 @@ class DeviceAppSignal PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class DeviceDiagSignal PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.DeviceDiagSignal) */ {
+ public:
+  inline DeviceDiagSignal() : DeviceDiagSignal(nullptr) {}
+  virtual ~DeviceDiagSignal();
+  explicit constexpr DeviceDiagSignal(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  DeviceDiagSignal(const DeviceDiagSignal& from);
+  DeviceDiagSignal(DeviceDiagSignal&& from) noexcept
+    : DeviceDiagSignal() {
+    *this = ::std::move(from);
+  }
+
+  inline DeviceDiagSignal& operator=(const DeviceDiagSignal& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline DeviceDiagSignal& operator=(DeviceDiagSignal&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
+    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
+  }
+  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
+    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const DeviceDiagSignal& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const DeviceDiagSignal* internal_default_instance() {
+    return reinterpret_cast<const DeviceDiagSignal*>(
+               &_DeviceDiagSignal_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    74;
+
+  friend void swap(DeviceDiagSignal& a, DeviceDiagSignal& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(DeviceDiagSignal* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(DeviceDiagSignal* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline DeviceDiagSignal* New() const final {
+    return CreateMaybeMessage<DeviceDiagSignal>(nullptr);
+  }
+
+  DeviceDiagSignal* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<DeviceDiagSignal>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const DeviceDiagSignal& from);
+  void MergeFrom(const DeviceDiagSignal& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(DeviceDiagSignal* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Proto.DeviceDiagSignal";
+  }
+  protected:
+  explicit DeviceDiagSignal(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_serialization_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kSignalTypeIdFieldNumber = 4,
+    kValiditySignalIdFieldNumber = 10,
+    kValueOffsetFieldNumber = 5,
+    kValueBitFieldNumber = 6,
+  };
+  // optional string signalTypeId = 4;
+  bool has_signaltypeid() const;
+  private:
+  bool _internal_has_signaltypeid() const;
+  public:
+  void clear_signaltypeid();
+  const std::string& signaltypeid() const;
+  void set_signaltypeid(const std::string& value);
+  void set_signaltypeid(std::string&& value);
+  void set_signaltypeid(const char* value);
+  void set_signaltypeid(const char* value, size_t size);
+  std::string* mutable_signaltypeid();
+  std::string* release_signaltypeid();
+  void set_allocated_signaltypeid(std::string* signaltypeid);
+  private:
+  const std::string& _internal_signaltypeid() const;
+  void _internal_set_signaltypeid(const std::string& value);
+  std::string* _internal_mutable_signaltypeid();
+  public:
+
+  // optional string validitySignalId = 10;
+  bool has_validitysignalid() const;
+  private:
+  bool _internal_has_validitysignalid() const;
+  public:
+  void clear_validitysignalid();
+  const std::string& validitysignalid() const;
+  void set_validitysignalid(const std::string& value);
+  void set_validitysignalid(std::string&& value);
+  void set_validitysignalid(const char* value);
+  void set_validitysignalid(const char* value, size_t size);
+  std::string* mutable_validitysignalid();
+  std::string* release_validitysignalid();
+  void set_allocated_validitysignalid(std::string* validitysignalid);
+  private:
+  const std::string& _internal_validitysignalid() const;
+  void _internal_set_validitysignalid(const std::string& value);
+  std::string* _internal_mutable_validitysignalid();
+  public:
+
+  // optional int32 valueOffset = 5 [default = 0];
+  bool has_valueoffset() const;
+  private:
+  bool _internal_has_valueoffset() const;
+  public:
+  void clear_valueoffset();
+  ::PROTOBUF_NAMESPACE_ID::int32 valueoffset() const;
+  void set_valueoffset(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_valueoffset() const;
+  void _internal_set_valueoffset(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int32 valueBit = 6 [default = 0];
+  bool has_valuebit() const;
+  private:
+  bool _internal_has_valuebit() const;
+  public:
+  void clear_valuebit();
+  ::PROTOBUF_NAMESPACE_ID::int32 valuebit() const;
+  void set_valuebit(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_valuebit() const;
+  void _internal_set_valuebit(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:Proto.DeviceDiagSignal)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr signaltypeid_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr validitysignalid_;
+  ::PROTOBUF_NAMESPACE_ID::int32 valueoffset_;
+  ::PROTOBUF_NAMESPACE_ID::int32 valuebit_;
+  friend struct ::TableStruct_serialization_2eproto;
+};
+// -------------------------------------------------------------------
+
 class Workstation PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.Workstation) */ {
  public:
@@ -18495,7 +18751,7 @@ class Workstation PROTOBUF_FINAL :
                &_Workstation_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    74;
+    75;
 
   friend void swap(Workstation& a, Workstation& b) {
     a.Swap(&b);
@@ -18666,7 +18922,7 @@ class Software PROTOBUF_FINAL :
                &_Software_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    75;
+    76;
 
   friend void swap(Software& a, Software& b) {
     a.Swap(&b);
@@ -18765,6 +19021,182 @@ class Software PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class DiagSignalType PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.DiagSignalType) */ {
+ public:
+  inline DiagSignalType() : DiagSignalType(nullptr) {}
+  virtual ~DiagSignalType();
+  explicit constexpr DiagSignalType(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  DiagSignalType(const DiagSignalType& from);
+  DiagSignalType(DiagSignalType&& from) noexcept
+    : DiagSignalType() {
+    *this = ::std::move(from);
+  }
+
+  inline DiagSignalType& operator=(const DiagSignalType& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline DiagSignalType& operator=(DiagSignalType&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
+    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
+  }
+  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
+    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const DiagSignalType& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const DiagSignalType* internal_default_instance() {
+    return reinterpret_cast<const DiagSignalType*>(
+               &_DiagSignalType_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    77;
+
+  friend void swap(DiagSignalType& a, DiagSignalType& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(DiagSignalType* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(DiagSignalType* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline DiagSignalType* New() const final {
+    return CreateMaybeMessage<DiagSignalType>(nullptr);
+  }
+
+  DiagSignalType* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<DiagSignalType>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const DiagSignalType& from);
+  void MergeFrom(const DiagSignalType& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(DiagSignalType* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Proto.DiagSignalType";
+  }
+  protected:
+  explicit DiagSignalType(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_serialization_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kSignalTypeIdFieldNumber = 3,
+    kUuidFieldNumber = 4,
+  };
+  // optional string signalTypeId = 3;
+  bool has_signaltypeid() const;
+  private:
+  bool _internal_has_signaltypeid() const;
+  public:
+  void clear_signaltypeid();
+  const std::string& signaltypeid() const;
+  void set_signaltypeid(const std::string& value);
+  void set_signaltypeid(std::string&& value);
+  void set_signaltypeid(const char* value);
+  void set_signaltypeid(const char* value, size_t size);
+  std::string* mutable_signaltypeid();
+  std::string* release_signaltypeid();
+  void set_allocated_signaltypeid(std::string* signaltypeid);
+  private:
+  const std::string& _internal_signaltypeid() const;
+  void _internal_set_signaltypeid(const std::string& value);
+  std::string* _internal_mutable_signaltypeid();
+  public:
+
+  // optional .Proto.Uuid uuid = 4;
+  bool has_uuid() const;
+  private:
+  bool _internal_has_uuid() const;
+  public:
+  void clear_uuid();
+  const ::Proto::Uuid& uuid() const;
+  ::Proto::Uuid* release_uuid();
+  ::Proto::Uuid* mutable_uuid();
+  void set_allocated_uuid(::Proto::Uuid* uuid);
+  private:
+  const ::Proto::Uuid& _internal_uuid() const;
+  ::Proto::Uuid* _internal_mutable_uuid();
+  public:
+  void unsafe_arena_set_allocated_uuid(
+      ::Proto::Uuid* uuid);
+  ::Proto::Uuid* unsafe_arena_release_uuid();
+
+  // @@protoc_insertion_point(class_scope:Proto.DiagSignalType)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr signaltypeid_;
+  ::Proto::Uuid* uuid_;
+  friend struct ::TableStruct_serialization_2eproto;
+};
+// -------------------------------------------------------------------
+
 class ModuleConfiguration PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.ModuleConfiguration) */ {
  public:
@@ -18815,7 +19247,7 @@ class ModuleConfiguration PROTOBUF_FINAL :
                &_ModuleConfiguration_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    76;
+    78;
 
   friend void swap(ModuleConfiguration& a, ModuleConfiguration& b) {
     a.Swap(&b);
@@ -19013,7 +19445,7 @@ class ModuleConfigurationValue PROTOBUF_FINAL :
                &_ModuleConfigurationValue_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    77;
+    79;
 
   friend void swap(ModuleConfigurationValue& a, ModuleConfigurationValue& b) {
     a.Swap(&b);
@@ -19194,7 +19626,7 @@ class Property PROTOBUF_FINAL :
                &_Property_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    78;
+    80;
 
   friend void swap(Property& a, Property& b) {
     a.Swap(&b);
@@ -19375,7 +19807,7 @@ class SignalSpecPropValue PROTOBUF_FINAL :
                &_SignalSpecPropValue_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    79;
+    81;
 
   friend void swap(SignalSpecPropValue& a, SignalSpecPropValue& b) {
     a.Swap(&b);
@@ -19676,7 +20108,7 @@ class SignalSpecPropValues PROTOBUF_FINAL :
                &_SignalSpecPropValues_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    80;
+    82;
 
   friend void swap(SignalSpecPropValues& a, SignalSpecPropValues& b) {
     a.Swap(&b);
@@ -19829,7 +20261,7 @@ class Address16 PROTOBUF_FINAL :
                &_Address16_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    81;
+    83;
 
   friend void swap(Address16& a, Address16& b) {
     a.Swap(&b);
@@ -19996,7 +20428,7 @@ class Unit PROTOBUF_FINAL :
                &_Unit_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    82;
+    84;
 
   friend void swap(Unit& a, Unit& b) {
     a.Swap(&b);
@@ -20170,7 +20602,7 @@ class UnitSet PROTOBUF_FINAL :
                &_UnitSet_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    83;
+    85;
 
   friend void swap(UnitSet& a, UnitSet& b) {
     a.Swap(&b);
@@ -20323,7 +20755,7 @@ class TuningValue PROTOBUF_FINAL :
                &_TuningValue_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    84;
+    86;
 
   friend void swap(TuningValue& a, TuningValue& b) {
     a.Swap(&b);
@@ -20502,7 +20934,7 @@ class AppSignalDbField PROTOBUF_FINAL :
                &_AppSignalDbField_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    85;
+    87;
 
   friend void swap(AppSignalDbField& a, AppSignalDbField& b) {
     a.Swap(&b);
@@ -20786,7 +21218,7 @@ class StateFlagSignal PROTOBUF_FINAL :
                &_StateFlagSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    86;
+    88;
 
   friend void swap(StateFlagSignal& a, StateFlagSignal& b) {
     a.Swap(&b);
@@ -20957,7 +21389,7 @@ class AppSignalCalculatedParam PROTOBUF_FINAL :
                &_AppSignalCalculatedParam_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    87;
+    89;
 
   friend void swap(AppSignalCalculatedParam& a, AppSignalCalculatedParam& b) {
     a.Swap(&b);
@@ -21306,7 +21738,7 @@ class AppSignal PROTOBUF_FINAL :
                &_AppSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    88;
+    90;
 
   friend void swap(AppSignal& a, AppSignal& b) {
     a.Swap(&b);
@@ -22004,7 +22436,7 @@ class AppSignalSet PROTOBUF_FINAL :
                &_AppSignalSet_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    89;
+    91;
 
   friend void swap(AppSignalSet& a, AppSignalSet& b) {
     a.Swap(&b);
@@ -22157,7 +22589,7 @@ class ProtoAppSignalData PROTOBUF_FINAL :
                &_ProtoAppSignalData_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    90;
+    92;
 
   friend void swap(ProtoAppSignalData& a, ProtoAppSignalData& b) {
     a.Swap(&b);
@@ -22708,7 +23140,7 @@ class AppSignalState PROTOBUF_FINAL :
                &_AppSignalState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    91;
+    93;
 
   friend void swap(AppSignalState& a, AppSignalState& b) {
     a.Swap(&b);
@@ -22962,7 +23394,7 @@ class Connection PROTOBUF_FINAL :
                &_Connection_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    92;
+    94;
 
   friend void swap(Connection& a, Connection& b) {
     a.Swap(&b);
@@ -23511,7 +23943,7 @@ class SchemaDetailsSet PROTOBUF_FINAL :
                &_SchemaDetailsSet_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    93;
+    95;
 
   friend void swap(SchemaDetailsSet& a, SchemaDetailsSet& b) {
     a.Swap(&b);
@@ -23664,7 +24096,7 @@ class SchemaDetails_TrendIndicatorSchemaItems PROTOBUF_FINAL :
                &_SchemaDetails_TrendIndicatorSchemaItems_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    94;
+    96;
 
   friend void swap(SchemaDetails_TrendIndicatorSchemaItems& a, SchemaDetails_TrendIndicatorSchemaItems& b) {
     a.Swap(&b);
@@ -23889,7 +24321,7 @@ class SchemaDetails PROTOBUF_FINAL :
                &_SchemaDetails_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    95;
+    97;
 
   friend void swap(SchemaDetails& a, SchemaDetails& b) {
     a.Swap(&b);
@@ -24387,7 +24819,7 @@ class BuildInfo PROTOBUF_FINAL :
                &_BuildInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    96;
+    98;
 
   friend void swap(BuildInfo& a, BuildInfo& b) {
     a.Swap(&b);
@@ -24639,7 +25071,7 @@ class ArchSignal PROTOBUF_FINAL :
                &_ArchSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    97;
+    99;
 
   friend void swap(ArchSignal& a, ArchSignal& b) {
     a.Swap(&b);
@@ -24895,7 +25327,7 @@ class ArchInfo PROTOBUF_FINAL :
                &_ArchInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    98;
+    100;
 
   friend void swap(ArchInfo& a, ArchInfo& b) {
     a.Swap(&b);
@@ -25094,7 +25526,7 @@ class BusSignal PROTOBUF_FINAL :
                &_BusSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    99;
+    101;
 
   friend void swap(BusSignal& a, BusSignal& b) {
     a.Swap(&b);
@@ -25541,7 +25973,7 @@ class Bus PROTOBUF_FINAL :
                &_Bus_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    100;
+    102;
 
   friend void swap(Bus& a, Bus& b) {
     a.Swap(&b);
@@ -25797,7 +26229,7 @@ class ComparatorSignal PROTOBUF_FINAL :
                &_ComparatorSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    101;
+    103;
 
   friend void swap(ComparatorSignal& a, ComparatorSignal& b) {
     a.Swap(&b);
@@ -25998,7 +26430,7 @@ class Comparator PROTOBUF_FINAL :
                &_Comparator_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    102;
+    104;
 
   friend void swap(Comparator& a, Comparator& b) {
     a.Swap(&b);
@@ -26336,7 +26768,7 @@ class LmComparatorSet PROTOBUF_FINAL :
                &_LmComparatorSet_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    103;
+    105;
 
   friend void swap(LmComparatorSet& a, LmComparatorSet& b) {
     a.Swap(&b);
@@ -26512,7 +26944,7 @@ class ComparatorSet PROTOBUF_FINAL :
                &_ComparatorSet_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    104;
+    106;
 
   friend void swap(ComparatorSet& a, ComparatorSet& b) {
     a.Swap(&b);
@@ -26665,7 +27097,7 @@ class MetrologySignalLocation PROTOBUF_FINAL :
                &_MetrologySignalLocation_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    105;
+    107;
 
   friend void swap(MetrologySignalLocation& a, MetrologySignalLocation& b) {
     a.Swap(&b);
@@ -26969,7 +27401,7 @@ class MetrologySignal PROTOBUF_FINAL :
                &_MetrologySignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    106;
+    108;
 
   friend void swap(MetrologySignal& a, MetrologySignal& b) {
     a.Swap(&b);
@@ -27278,7 +27710,7 @@ class MetrologySignalSet PROTOBUF_FINAL :
                &_MetrologySignalSet_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    107;
+    109;
 
   friend void swap(MetrologySignalSet& a, MetrologySignalSet& b) {
     a.Swap(&b);
@@ -27431,7 +27863,7 @@ class SimOverrideSignal PROTOBUF_FINAL :
                &_SimOverrideSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    108;
+    110;
 
   friend void swap(SimOverrideSignal& a, SimOverrideSignal& b) {
     a.Swap(&b);
@@ -27674,7 +28106,7 @@ class SimOverrideSignalWorkspace PROTOBUF_FINAL :
                &_SimOverrideSignalWorkspace_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    109;
+    111;
 
   friend void swap(SimOverrideSignalWorkspace& a, SimOverrideSignalWorkspace& b) {
     a.Swap(&b);
@@ -28997,7 +29429,7 @@ inline void AfbParamValue::set_allocated_reference(std::string* reference) {
 
 // required uint32 classnamehash = 1;
 inline bool Envelope::_internal_has_classnamehash() const {
-  bool value = (_has_bits_[0] & 0x00000400u) != 0;
+  bool value = (_has_bits_[0] & 0x00000800u) != 0;
   return value;
 }
 inline bool Envelope::has_classnamehash() const {
@@ -29005,7 +29437,7 @@ inline bool Envelope::has_classnamehash() const {
 }
 inline void Envelope::clear_classnamehash() {
   classnamehash_ = 0u;
-  _has_bits_[0] &= ~0x00000400u;
+  _has_bits_[0] &= ~0x00000800u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint32 Envelope::_internal_classnamehash() const {
   return classnamehash_;
@@ -29015,7 +29447,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint32 Envelope::classnamehash() const {
   return _internal_classnamehash();
 }
 inline void Envelope::_internal_set_classnamehash(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[0] |= 0x00000400u;
+  _has_bits_[0] |= 0x00000800u;
   classnamehash_ = value;
 }
 inline void Envelope::set_classnamehash(::PROTOBUF_NAMESPACE_ID::uint32 value) {
@@ -29262,9 +29694,92 @@ inline void Envelope::set_allocated_deviceobject(::Proto::DeviceObject* deviceob
   // @@protoc_insertion_point(field_set_allocated:Proto.Envelope.deviceobject)
 }
 
+// optional .Proto.DiagSignalType diagSignalType = 8;
+inline bool Envelope::_internal_has_diagsignaltype() const {
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  PROTOBUF_ASSUME(!value || diagsignaltype_ != nullptr);
+  return value;
+}
+inline bool Envelope::has_diagsignaltype() const {
+  return _internal_has_diagsignaltype();
+}
+inline void Envelope::clear_diagsignaltype() {
+  if (diagsignaltype_ != nullptr) diagsignaltype_->Clear();
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline const ::Proto::DiagSignalType& Envelope::_internal_diagsignaltype() const {
+  const ::Proto::DiagSignalType* p = diagsignaltype_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Proto::DiagSignalType&>(
+      ::Proto::_DiagSignalType_default_instance_);
+}
+inline const ::Proto::DiagSignalType& Envelope::diagsignaltype() const {
+  // @@protoc_insertion_point(field_get:Proto.Envelope.diagSignalType)
+  return _internal_diagsignaltype();
+}
+inline void Envelope::unsafe_arena_set_allocated_diagsignaltype(
+    ::Proto::DiagSignalType* diagsignaltype) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(diagsignaltype_);
+  }
+  diagsignaltype_ = diagsignaltype;
+  if (diagsignaltype) {
+    _has_bits_[0] |= 0x00000008u;
+  } else {
+    _has_bits_[0] &= ~0x00000008u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.Envelope.diagSignalType)
+}
+inline ::Proto::DiagSignalType* Envelope::release_diagsignaltype() {
+  _has_bits_[0] &= ~0x00000008u;
+  ::Proto::DiagSignalType* temp = diagsignaltype_;
+  diagsignaltype_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::Proto::DiagSignalType* Envelope::unsafe_arena_release_diagsignaltype() {
+  // @@protoc_insertion_point(field_release:Proto.Envelope.diagSignalType)
+  _has_bits_[0] &= ~0x00000008u;
+  ::Proto::DiagSignalType* temp = diagsignaltype_;
+  diagsignaltype_ = nullptr;
+  return temp;
+}
+inline ::Proto::DiagSignalType* Envelope::_internal_mutable_diagsignaltype() {
+  _has_bits_[0] |= 0x00000008u;
+  if (diagsignaltype_ == nullptr) {
+    auto* p = CreateMaybeMessage<::Proto::DiagSignalType>(GetArena());
+    diagsignaltype_ = p;
+  }
+  return diagsignaltype_;
+}
+inline ::Proto::DiagSignalType* Envelope::mutable_diagsignaltype() {
+  // @@protoc_insertion_point(field_mutable:Proto.Envelope.diagSignalType)
+  return _internal_mutable_diagsignaltype();
+}
+inline void Envelope::set_allocated_diagsignaltype(::Proto::DiagSignalType* diagsignaltype) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete diagsignaltype_;
+  }
+  if (diagsignaltype) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(diagsignaltype);
+    if (message_arena != submessage_arena) {
+      diagsignaltype = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, diagsignaltype, submessage_arena);
+    }
+    _has_bits_[0] |= 0x00000008u;
+  } else {
+    _has_bits_[0] &= ~0x00000008u;
+  }
+  diagsignaltype_ = diagsignaltype;
+  // @@protoc_insertion_point(field_set_allocated:Proto.Envelope.diagSignalType)
+}
+
 // optional .Proto.Schema schema = 100;
 inline bool Envelope::_internal_has_schema() const {
-  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  bool value = (_has_bits_[0] & 0x00000010u) != 0;
   PROTOBUF_ASSUME(!value || schema_ != nullptr);
   return value;
 }
@@ -29273,7 +29788,7 @@ inline bool Envelope::has_schema() const {
 }
 inline void Envelope::clear_schema() {
   if (schema_ != nullptr) schema_->Clear();
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline const ::Proto::Schema& Envelope::_internal_schema() const {
   const ::Proto::Schema* p = schema_;
@@ -29291,14 +29806,14 @@ inline void Envelope::unsafe_arena_set_allocated_schema(
   }
   schema_ = schema;
   if (schema) {
-    _has_bits_[0] |= 0x00000008u;
+    _has_bits_[0] |= 0x00000010u;
   } else {
-    _has_bits_[0] &= ~0x00000008u;
+    _has_bits_[0] &= ~0x00000010u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.Envelope.schema)
 }
 inline ::Proto::Schema* Envelope::release_schema() {
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000010u;
   ::Proto::Schema* temp = schema_;
   schema_ = nullptr;
   if (GetArena() != nullptr) {
@@ -29308,13 +29823,13 @@ inline ::Proto::Schema* Envelope::release_schema() {
 }
 inline ::Proto::Schema* Envelope::unsafe_arena_release_schema() {
   // @@protoc_insertion_point(field_release:Proto.Envelope.schema)
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000010u;
   ::Proto::Schema* temp = schema_;
   schema_ = nullptr;
   return temp;
 }
 inline ::Proto::Schema* Envelope::_internal_mutable_schema() {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000010u;
   if (schema_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::Schema>(GetArena());
     schema_ = p;
@@ -29337,9 +29852,9 @@ inline void Envelope::set_allocated_schema(::Proto::Schema* schema) {
       schema = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, schema, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000008u;
+    _has_bits_[0] |= 0x00000010u;
   } else {
-    _has_bits_[0] &= ~0x00000008u;
+    _has_bits_[0] &= ~0x00000010u;
   }
   schema_ = schema;
   // @@protoc_insertion_point(field_set_allocated:Proto.Envelope.schema)
@@ -29347,7 +29862,7 @@ inline void Envelope::set_allocated_schema(::Proto::Schema* schema) {
 
 // optional .Proto.SchemaLayer schemalayer = 101;
 inline bool Envelope::_internal_has_schemalayer() const {
-  bool value = (_has_bits_[0] & 0x00000010u) != 0;
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
   PROTOBUF_ASSUME(!value || schemalayer_ != nullptr);
   return value;
 }
@@ -29356,7 +29871,7 @@ inline bool Envelope::has_schemalayer() const {
 }
 inline void Envelope::clear_schemalayer() {
   if (schemalayer_ != nullptr) schemalayer_->Clear();
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline const ::Proto::SchemaLayer& Envelope::_internal_schemalayer() const {
   const ::Proto::SchemaLayer* p = schemalayer_;
@@ -29374,14 +29889,14 @@ inline void Envelope::unsafe_arena_set_allocated_schemalayer(
   }
   schemalayer_ = schemalayer;
   if (schemalayer) {
-    _has_bits_[0] |= 0x00000010u;
+    _has_bits_[0] |= 0x00000020u;
   } else {
-    _has_bits_[0] &= ~0x00000010u;
+    _has_bits_[0] &= ~0x00000020u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.Envelope.schemalayer)
 }
 inline ::Proto::SchemaLayer* Envelope::release_schemalayer() {
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000020u;
   ::Proto::SchemaLayer* temp = schemalayer_;
   schemalayer_ = nullptr;
   if (GetArena() != nullptr) {
@@ -29391,13 +29906,13 @@ inline ::Proto::SchemaLayer* Envelope::release_schemalayer() {
 }
 inline ::Proto::SchemaLayer* Envelope::unsafe_arena_release_schemalayer() {
   // @@protoc_insertion_point(field_release:Proto.Envelope.schemalayer)
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000020u;
   ::Proto::SchemaLayer* temp = schemalayer_;
   schemalayer_ = nullptr;
   return temp;
 }
 inline ::Proto::SchemaLayer* Envelope::_internal_mutable_schemalayer() {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000020u;
   if (schemalayer_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::SchemaLayer>(GetArena());
     schemalayer_ = p;
@@ -29420,9 +29935,9 @@ inline void Envelope::set_allocated_schemalayer(::Proto::SchemaLayer* schemalaye
       schemalayer = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, schemalayer, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000010u;
+    _has_bits_[0] |= 0x00000020u;
   } else {
-    _has_bits_[0] &= ~0x00000010u;
+    _has_bits_[0] &= ~0x00000020u;
   }
   schemalayer_ = schemalayer;
   // @@protoc_insertion_point(field_set_allocated:Proto.Envelope.schemalayer)
@@ -29430,7 +29945,7 @@ inline void Envelope::set_allocated_schemalayer(::Proto::SchemaLayer* schemalaye
 
 // optional .Proto.FblElement fblelement = 102;
 inline bool Envelope::_internal_has_fblelement() const {
-  bool value = (_has_bits_[0] & 0x00000020u) != 0;
+  bool value = (_has_bits_[0] & 0x00000040u) != 0;
   PROTOBUF_ASSUME(!value || fblelement_ != nullptr);
   return value;
 }
@@ -29439,7 +29954,7 @@ inline bool Envelope::has_fblelement() const {
 }
 inline void Envelope::clear_fblelement() {
   if (fblelement_ != nullptr) fblelement_->Clear();
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000040u;
 }
 inline const ::Proto::FblElement& Envelope::_internal_fblelement() const {
   const ::Proto::FblElement* p = fblelement_;
@@ -29457,14 +29972,14 @@ inline void Envelope::unsafe_arena_set_allocated_fblelement(
   }
   fblelement_ = fblelement;
   if (fblelement) {
-    _has_bits_[0] |= 0x00000020u;
+    _has_bits_[0] |= 0x00000040u;
   } else {
-    _has_bits_[0] &= ~0x00000020u;
+    _has_bits_[0] &= ~0x00000040u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.Envelope.fblelement)
 }
 inline ::Proto::FblElement* Envelope::release_fblelement() {
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000040u;
   ::Proto::FblElement* temp = fblelement_;
   fblelement_ = nullptr;
   if (GetArena() != nullptr) {
@@ -29474,13 +29989,13 @@ inline ::Proto::FblElement* Envelope::release_fblelement() {
 }
 inline ::Proto::FblElement* Envelope::unsafe_arena_release_fblelement() {
   // @@protoc_insertion_point(field_release:Proto.Envelope.fblelement)
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000040u;
   ::Proto::FblElement* temp = fblelement_;
   fblelement_ = nullptr;
   return temp;
 }
 inline ::Proto::FblElement* Envelope::_internal_mutable_fblelement() {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000040u;
   if (fblelement_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::FblElement>(GetArena());
     fblelement_ = p;
@@ -29503,9 +30018,9 @@ inline void Envelope::set_allocated_fblelement(::Proto::FblElement* fblelement) 
       fblelement = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, fblelement, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000020u;
+    _has_bits_[0] |= 0x00000040u;
   } else {
-    _has_bits_[0] &= ~0x00000020u;
+    _has_bits_[0] &= ~0x00000040u;
   }
   fblelement_ = fblelement;
   // @@protoc_insertion_point(field_set_allocated:Proto.Envelope.fblelement)
@@ -29513,7 +30028,7 @@ inline void Envelope::set_allocated_fblelement(::Proto::FblElement* fblelement) 
 
 // optional .Proto.Configuration configuration = 103;
 inline bool Envelope::_internal_has_configuration() const {
-  bool value = (_has_bits_[0] & 0x00000040u) != 0;
+  bool value = (_has_bits_[0] & 0x00000080u) != 0;
   PROTOBUF_ASSUME(!value || configuration_ != nullptr);
   return value;
 }
@@ -29522,7 +30037,7 @@ inline bool Envelope::has_configuration() const {
 }
 inline void Envelope::clear_configuration() {
   if (configuration_ != nullptr) configuration_->Clear();
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000080u;
 }
 inline const ::Proto::Configuration& Envelope::_internal_configuration() const {
   const ::Proto::Configuration* p = configuration_;
@@ -29540,14 +30055,14 @@ inline void Envelope::unsafe_arena_set_allocated_configuration(
   }
   configuration_ = configuration;
   if (configuration) {
-    _has_bits_[0] |= 0x00000040u;
+    _has_bits_[0] |= 0x00000080u;
   } else {
-    _has_bits_[0] &= ~0x00000040u;
+    _has_bits_[0] &= ~0x00000080u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.Envelope.configuration)
 }
 inline ::Proto::Configuration* Envelope::release_configuration() {
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000080u;
   ::Proto::Configuration* temp = configuration_;
   configuration_ = nullptr;
   if (GetArena() != nullptr) {
@@ -29557,13 +30072,13 @@ inline ::Proto::Configuration* Envelope::release_configuration() {
 }
 inline ::Proto::Configuration* Envelope::unsafe_arena_release_configuration() {
   // @@protoc_insertion_point(field_release:Proto.Envelope.configuration)
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000080u;
   ::Proto::Configuration* temp = configuration_;
   configuration_ = nullptr;
   return temp;
 }
 inline ::Proto::Configuration* Envelope::_internal_mutable_configuration() {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000080u;
   if (configuration_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::Configuration>(GetArena());
     configuration_ = p;
@@ -29586,9 +30101,9 @@ inline void Envelope::set_allocated_configuration(::Proto::Configuration* config
       configuration = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, configuration, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000040u;
+    _has_bits_[0] |= 0x00000080u;
   } else {
-    _has_bits_[0] &= ~0x00000040u;
+    _has_bits_[0] &= ~0x00000080u;
   }
   configuration_ = configuration;
   // @@protoc_insertion_point(field_set_allocated:Proto.Envelope.configuration)
@@ -29596,7 +30111,7 @@ inline void Envelope::set_allocated_configuration(::Proto::Configuration* config
 
 // optional .Proto.Connection connection = 104;
 inline bool Envelope::_internal_has_connection() const {
-  bool value = (_has_bits_[0] & 0x00000080u) != 0;
+  bool value = (_has_bits_[0] & 0x00000100u) != 0;
   PROTOBUF_ASSUME(!value || connection_ != nullptr);
   return value;
 }
@@ -29605,7 +30120,7 @@ inline bool Envelope::has_connection() const {
 }
 inline void Envelope::clear_connection() {
   if (connection_ != nullptr) connection_->Clear();
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000100u;
 }
 inline const ::Proto::Connection& Envelope::_internal_connection() const {
   const ::Proto::Connection* p = connection_;
@@ -29623,14 +30138,14 @@ inline void Envelope::unsafe_arena_set_allocated_connection(
   }
   connection_ = connection;
   if (connection) {
-    _has_bits_[0] |= 0x00000080u;
+    _has_bits_[0] |= 0x00000100u;
   } else {
-    _has_bits_[0] &= ~0x00000080u;
+    _has_bits_[0] &= ~0x00000100u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.Envelope.connection)
 }
 inline ::Proto::Connection* Envelope::release_connection() {
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000100u;
   ::Proto::Connection* temp = connection_;
   connection_ = nullptr;
   if (GetArena() != nullptr) {
@@ -29640,13 +30155,13 @@ inline ::Proto::Connection* Envelope::release_connection() {
 }
 inline ::Proto::Connection* Envelope::unsafe_arena_release_connection() {
   // @@protoc_insertion_point(field_release:Proto.Envelope.connection)
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000100u;
   ::Proto::Connection* temp = connection_;
   connection_ = nullptr;
   return temp;
 }
 inline ::Proto::Connection* Envelope::_internal_mutable_connection() {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000100u;
   if (connection_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::Connection>(GetArena());
     connection_ = p;
@@ -29669,9 +30184,9 @@ inline void Envelope::set_allocated_connection(::Proto::Connection* connection) 
       connection = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, connection, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000080u;
+    _has_bits_[0] |= 0x00000100u;
   } else {
-    _has_bits_[0] &= ~0x00000080u;
+    _has_bits_[0] &= ~0x00000100u;
   }
   connection_ = connection;
   // @@protoc_insertion_point(field_set_allocated:Proto.Envelope.connection)
@@ -29679,7 +30194,7 @@ inline void Envelope::set_allocated_connection(::Proto::Connection* connection) 
 
 // optional .Proto.SchemaDetailsSet schemaDetailsSet = 105;
 inline bool Envelope::_internal_has_schemadetailsset() const {
-  bool value = (_has_bits_[0] & 0x00000100u) != 0;
+  bool value = (_has_bits_[0] & 0x00000200u) != 0;
   PROTOBUF_ASSUME(!value || schemadetailsset_ != nullptr);
   return value;
 }
@@ -29688,7 +30203,7 @@ inline bool Envelope::has_schemadetailsset() const {
 }
 inline void Envelope::clear_schemadetailsset() {
   if (schemadetailsset_ != nullptr) schemadetailsset_->Clear();
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000200u;
 }
 inline const ::Proto::SchemaDetailsSet& Envelope::_internal_schemadetailsset() const {
   const ::Proto::SchemaDetailsSet* p = schemadetailsset_;
@@ -29706,14 +30221,14 @@ inline void Envelope::unsafe_arena_set_allocated_schemadetailsset(
   }
   schemadetailsset_ = schemadetailsset;
   if (schemadetailsset) {
-    _has_bits_[0] |= 0x00000100u;
+    _has_bits_[0] |= 0x00000200u;
   } else {
-    _has_bits_[0] &= ~0x00000100u;
+    _has_bits_[0] &= ~0x00000200u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.Envelope.schemaDetailsSet)
 }
 inline ::Proto::SchemaDetailsSet* Envelope::release_schemadetailsset() {
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000200u;
   ::Proto::SchemaDetailsSet* temp = schemadetailsset_;
   schemadetailsset_ = nullptr;
   if (GetArena() != nullptr) {
@@ -29723,13 +30238,13 @@ inline ::Proto::SchemaDetailsSet* Envelope::release_schemadetailsset() {
 }
 inline ::Proto::SchemaDetailsSet* Envelope::unsafe_arena_release_schemadetailsset() {
   // @@protoc_insertion_point(field_release:Proto.Envelope.schemaDetailsSet)
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000200u;
   ::Proto::SchemaDetailsSet* temp = schemadetailsset_;
   schemadetailsset_ = nullptr;
   return temp;
 }
 inline ::Proto::SchemaDetailsSet* Envelope::_internal_mutable_schemadetailsset() {
-  _has_bits_[0] |= 0x00000100u;
+  _has_bits_[0] |= 0x00000200u;
   if (schemadetailsset_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::SchemaDetailsSet>(GetArena());
     schemadetailsset_ = p;
@@ -29752,9 +30267,9 @@ inline void Envelope::set_allocated_schemadetailsset(::Proto::SchemaDetailsSet* 
       schemadetailsset = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, schemadetailsset, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000100u;
+    _has_bits_[0] |= 0x00000200u;
   } else {
-    _has_bits_[0] &= ~0x00000100u;
+    _has_bits_[0] &= ~0x00000200u;
   }
   schemadetailsset_ = schemadetailsset;
   // @@protoc_insertion_point(field_set_allocated:Proto.Envelope.schemaDetailsSet)
@@ -29762,7 +30277,7 @@ inline void Envelope::set_allocated_schemadetailsset(::Proto::SchemaDetailsSet* 
 
 // optional .Proto.Bus bus = 200;
 inline bool Envelope::_internal_has_bus() const {
-  bool value = (_has_bits_[0] & 0x00000200u) != 0;
+  bool value = (_has_bits_[0] & 0x00000400u) != 0;
   PROTOBUF_ASSUME(!value || bus_ != nullptr);
   return value;
 }
@@ -29771,7 +30286,7 @@ inline bool Envelope::has_bus() const {
 }
 inline void Envelope::clear_bus() {
   if (bus_ != nullptr) bus_->Clear();
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000400u;
 }
 inline const ::Proto::Bus& Envelope::_internal_bus() const {
   const ::Proto::Bus* p = bus_;
@@ -29789,14 +30304,14 @@ inline void Envelope::unsafe_arena_set_allocated_bus(
   }
   bus_ = bus;
   if (bus) {
-    _has_bits_[0] |= 0x00000200u;
+    _has_bits_[0] |= 0x00000400u;
   } else {
-    _has_bits_[0] &= ~0x00000200u;
+    _has_bits_[0] &= ~0x00000400u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.Envelope.bus)
 }
 inline ::Proto::Bus* Envelope::release_bus() {
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000400u;
   ::Proto::Bus* temp = bus_;
   bus_ = nullptr;
   if (GetArena() != nullptr) {
@@ -29806,13 +30321,13 @@ inline ::Proto::Bus* Envelope::release_bus() {
 }
 inline ::Proto::Bus* Envelope::unsafe_arena_release_bus() {
   // @@protoc_insertion_point(field_release:Proto.Envelope.bus)
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000400u;
   ::Proto::Bus* temp = bus_;
   bus_ = nullptr;
   return temp;
 }
 inline ::Proto::Bus* Envelope::_internal_mutable_bus() {
-  _has_bits_[0] |= 0x00000200u;
+  _has_bits_[0] |= 0x00000400u;
   if (bus_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::Bus>(GetArena());
     bus_ = p;
@@ -29835,9 +30350,9 @@ inline void Envelope::set_allocated_bus(::Proto::Bus* bus) {
       bus = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, bus, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000200u;
+    _has_bits_[0] |= 0x00000400u;
   } else {
-    _has_bits_[0] &= ~0x00000200u;
+    _has_bits_[0] &= ~0x00000400u;
   }
   bus_ = bus;
   // @@protoc_insertion_point(field_set_allocated:Proto.Envelope.bus)
@@ -48042,7 +48557,7 @@ inline void DeviceObject::set_allocated_childrestriction(::Proto::wstring* child
 
 // optional int32 place = 5 [default = 0];
 inline bool DeviceObject::_internal_has_place() const {
-  bool value = (_has_bits_[0] & 0x00020000u) != 0;
+  bool value = (_has_bits_[0] & 0x00040000u) != 0;
   return value;
 }
 inline bool DeviceObject::has_place() const {
@@ -48050,7 +48565,7 @@ inline bool DeviceObject::has_place() const {
 }
 inline void DeviceObject::clear_place() {
   place_ = 0;
-  _has_bits_[0] &= ~0x00020000u;
+  _has_bits_[0] &= ~0x00040000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::_internal_place() const {
   return place_;
@@ -48060,7 +48575,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::place() const {
   return _internal_place();
 }
 inline void DeviceObject::_internal_set_place(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00020000u;
+  _has_bits_[0] |= 0x00040000u;
   place_ = value;
 }
 inline void DeviceObject::set_place(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -48182,7 +48697,7 @@ DeviceObject::properties() const {
 
 // optional bool preset = 32 [default = false];
 inline bool DeviceObject::_internal_has_preset() const {
-  bool value = (_has_bits_[0] & 0x00040000u) != 0;
+  bool value = (_has_bits_[0] & 0x00080000u) != 0;
   return value;
 }
 inline bool DeviceObject::has_preset() const {
@@ -48190,7 +48705,7 @@ inline bool DeviceObject::has_preset() const {
 }
 inline void DeviceObject::clear_preset() {
   preset_ = false;
-  _has_bits_[0] &= ~0x00040000u;
+  _has_bits_[0] &= ~0x00080000u;
 }
 inline bool DeviceObject::_internal_preset() const {
   return preset_;
@@ -48200,7 +48715,7 @@ inline bool DeviceObject::preset() const {
   return _internal_preset();
 }
 inline void DeviceObject::_internal_set_preset(bool value) {
-  _has_bits_[0] |= 0x00040000u;
+  _has_bits_[0] |= 0x00080000u;
   preset_ = value;
 }
 inline void DeviceObject::set_preset(bool value) {
@@ -48210,7 +48725,7 @@ inline void DeviceObject::set_preset(bool value) {
 
 // optional bool presetRoot = 33 [default = false];
 inline bool DeviceObject::_internal_has_presetroot() const {
-  bool value = (_has_bits_[0] & 0x00080000u) != 0;
+  bool value = (_has_bits_[0] & 0x00100000u) != 0;
   return value;
 }
 inline bool DeviceObject::has_presetroot() const {
@@ -48218,7 +48733,7 @@ inline bool DeviceObject::has_presetroot() const {
 }
 inline void DeviceObject::clear_presetroot() {
   presetroot_ = false;
-  _has_bits_[0] &= ~0x00080000u;
+  _has_bits_[0] &= ~0x00100000u;
 }
 inline bool DeviceObject::_internal_presetroot() const {
   return presetroot_;
@@ -48228,7 +48743,7 @@ inline bool DeviceObject::presetroot() const {
   return _internal_presetroot();
 }
 inline void DeviceObject::_internal_set_presetroot(bool value) {
-  _has_bits_[0] |= 0x00080000u;
+  _has_bits_[0] |= 0x00100000u;
   presetroot_ = value;
 }
 inline void DeviceObject::set_presetroot(bool value) {
@@ -48404,7 +48919,7 @@ inline void DeviceObject::set_allocated_presetobjectuuid(::Proto::Uuid* presetob
 
 // optional int32 childCountHint = 36 [default = 0];
 inline bool DeviceObject::_internal_has_childcounthint() const {
-  bool value = (_has_bits_[0] & 0x00100000u) != 0;
+  bool value = (_has_bits_[0] & 0x00200000u) != 0;
   return value;
 }
 inline bool DeviceObject::has_childcounthint() const {
@@ -48412,7 +48927,7 @@ inline bool DeviceObject::has_childcounthint() const {
 }
 inline void DeviceObject::clear_childcounthint() {
   childcounthint_ = 0;
-  _has_bits_[0] &= ~0x00100000u;
+  _has_bits_[0] &= ~0x00200000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::_internal_childcounthint() const {
   return childcounthint_;
@@ -48422,7 +48937,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::childcounthint() const {
   return _internal_childcounthint();
 }
 inline void DeviceObject::_internal_set_childcounthint(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00100000u;
+  _has_bits_[0] |= 0x00200000u;
   childcounthint_ = value;
 }
 inline void DeviceObject::set_childcounthint(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -48432,7 +48947,7 @@ inline void DeviceObject::set_childcounthint(::PROTOBUF_NAMESPACE_ID::int32 valu
 
 // optional int32 presetVersion = 37;
 inline bool DeviceObject::_internal_has_presetversion() const {
-  bool value = (_has_bits_[0] & 0x00200000u) != 0;
+  bool value = (_has_bits_[0] & 0x00400000u) != 0;
   return value;
 }
 inline bool DeviceObject::has_presetversion() const {
@@ -48440,7 +48955,7 @@ inline bool DeviceObject::has_presetversion() const {
 }
 inline void DeviceObject::clear_presetversion() {
   presetversion_ = 0;
-  _has_bits_[0] &= ~0x00200000u;
+  _has_bits_[0] &= ~0x00400000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::_internal_presetversion() const {
   return presetversion_;
@@ -48450,7 +48965,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::presetversion() const {
   return _internal_presetversion();
 }
 inline void DeviceObject::_internal_set_presetversion(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00200000u;
+  _has_bits_[0] |= 0x00400000u;
   presetversion_ = value;
 }
 inline void DeviceObject::set_presetversion(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -49110,6 +49625,89 @@ inline void DeviceObject::set_allocated_appsignal(::Proto::DeviceAppSignal* apps
   }
   appsignal_ = appsignal;
   // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.AppSignal)
+}
+
+// optional .Proto.DeviceDiagSignal DiagSignal = 109;
+inline bool DeviceObject::_internal_has_diagsignal() const {
+  bool value = (_has_bits_[0] & 0x00020000u) != 0;
+  PROTOBUF_ASSUME(!value || diagsignal_ != nullptr);
+  return value;
+}
+inline bool DeviceObject::has_diagsignal() const {
+  return _internal_has_diagsignal();
+}
+inline void DeviceObject::clear_diagsignal() {
+  if (diagsignal_ != nullptr) diagsignal_->Clear();
+  _has_bits_[0] &= ~0x00020000u;
+}
+inline const ::Proto::DeviceDiagSignal& DeviceObject::_internal_diagsignal() const {
+  const ::Proto::DeviceDiagSignal* p = diagsignal_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Proto::DeviceDiagSignal&>(
+      ::Proto::_DeviceDiagSignal_default_instance_);
+}
+inline const ::Proto::DeviceDiagSignal& DeviceObject::diagsignal() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.DiagSignal)
+  return _internal_diagsignal();
+}
+inline void DeviceObject::unsafe_arena_set_allocated_diagsignal(
+    ::Proto::DeviceDiagSignal* diagsignal) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(diagsignal_);
+  }
+  diagsignal_ = diagsignal;
+  if (diagsignal) {
+    _has_bits_[0] |= 0x00020000u;
+  } else {
+    _has_bits_[0] &= ~0x00020000u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.DiagSignal)
+}
+inline ::Proto::DeviceDiagSignal* DeviceObject::release_diagsignal() {
+  _has_bits_[0] &= ~0x00020000u;
+  ::Proto::DeviceDiagSignal* temp = diagsignal_;
+  diagsignal_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::Proto::DeviceDiagSignal* DeviceObject::unsafe_arena_release_diagsignal() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceObject.DiagSignal)
+  _has_bits_[0] &= ~0x00020000u;
+  ::Proto::DeviceDiagSignal* temp = diagsignal_;
+  diagsignal_ = nullptr;
+  return temp;
+}
+inline ::Proto::DeviceDiagSignal* DeviceObject::_internal_mutable_diagsignal() {
+  _has_bits_[0] |= 0x00020000u;
+  if (diagsignal_ == nullptr) {
+    auto* p = CreateMaybeMessage<::Proto::DeviceDiagSignal>(GetArena());
+    diagsignal_ = p;
+  }
+  return diagsignal_;
+}
+inline ::Proto::DeviceDiagSignal* DeviceObject::mutable_diagsignal() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject.DiagSignal)
+  return _internal_mutable_diagsignal();
+}
+inline void DeviceObject::set_allocated_diagsignal(::Proto::DeviceDiagSignal* diagsignal) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete diagsignal_;
+  }
+  if (diagsignal) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(diagsignal);
+    if (message_arena != submessage_arena) {
+      diagsignal = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, diagsignal, submessage_arena);
+    }
+    _has_bits_[0] |= 0x00020000u;
+  } else {
+    _has_bits_[0] &= ~0x00020000u;
+  }
+  diagsignal_ = diagsignal;
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.DiagSignal)
 }
 
 // optional .Proto.Workstation Workstation = 107;
@@ -50244,6 +50842,212 @@ inline void DeviceAppSignal::set_signalspecpropsstructwasfixed(bool value) {
 
 // -------------------------------------------------------------------
 
+// DeviceDiagSignal
+
+// optional string signalTypeId = 4;
+inline bool DeviceDiagSignal::_internal_has_signaltypeid() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool DeviceDiagSignal::has_signaltypeid() const {
+  return _internal_has_signaltypeid();
+}
+inline void DeviceDiagSignal::clear_signaltypeid() {
+  signaltypeid_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& DeviceDiagSignal::signaltypeid() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.signalTypeId)
+  return _internal_signaltypeid();
+}
+inline void DeviceDiagSignal::set_signaltypeid(const std::string& value) {
+  _internal_set_signaltypeid(value);
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.signalTypeId)
+}
+inline std::string* DeviceDiagSignal::mutable_signaltypeid() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceDiagSignal.signalTypeId)
+  return _internal_mutable_signaltypeid();
+}
+inline const std::string& DeviceDiagSignal::_internal_signaltypeid() const {
+  return signaltypeid_.Get();
+}
+inline void DeviceDiagSignal::_internal_set_signaltypeid(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  signaltypeid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void DeviceDiagSignal::set_signaltypeid(std::string&& value) {
+  _has_bits_[0] |= 0x00000001u;
+  signaltypeid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.DeviceDiagSignal.signalTypeId)
+}
+inline void DeviceDiagSignal::set_signaltypeid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000001u;
+  signaltypeid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.DeviceDiagSignal.signalTypeId)
+}
+inline void DeviceDiagSignal::set_signaltypeid(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000001u;
+  signaltypeid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.DeviceDiagSignal.signalTypeId)
+}
+inline std::string* DeviceDiagSignal::_internal_mutable_signaltypeid() {
+  _has_bits_[0] |= 0x00000001u;
+  return signaltypeid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* DeviceDiagSignal::release_signaltypeid() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceDiagSignal.signalTypeId)
+  if (!_internal_has_signaltypeid()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return signaltypeid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void DeviceDiagSignal::set_allocated_signaltypeid(std::string* signaltypeid) {
+  if (signaltypeid != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  signaltypeid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), signaltypeid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceDiagSignal.signalTypeId)
+}
+
+// optional int32 valueOffset = 5 [default = 0];
+inline bool DeviceDiagSignal::_internal_has_valueoffset() const {
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline bool DeviceDiagSignal::has_valueoffset() const {
+  return _internal_has_valueoffset();
+}
+inline void DeviceDiagSignal::clear_valueoffset() {
+  valueoffset_ = 0;
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::_internal_valueoffset() const {
+  return valueoffset_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::valueoffset() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.valueOffset)
+  return _internal_valueoffset();
+}
+inline void DeviceDiagSignal::_internal_set_valueoffset(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000004u;
+  valueoffset_ = value;
+}
+inline void DeviceDiagSignal::set_valueoffset(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_valueoffset(value);
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.valueOffset)
+}
+
+// optional int32 valueBit = 6 [default = 0];
+inline bool DeviceDiagSignal::_internal_has_valuebit() const {
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  return value;
+}
+inline bool DeviceDiagSignal::has_valuebit() const {
+  return _internal_has_valuebit();
+}
+inline void DeviceDiagSignal::clear_valuebit() {
+  valuebit_ = 0;
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::_internal_valuebit() const {
+  return valuebit_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::valuebit() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.valueBit)
+  return _internal_valuebit();
+}
+inline void DeviceDiagSignal::_internal_set_valuebit(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000008u;
+  valuebit_ = value;
+}
+inline void DeviceDiagSignal::set_valuebit(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_valuebit(value);
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.valueBit)
+}
+
+// optional string validitySignalId = 10;
+inline bool DeviceDiagSignal::_internal_has_validitysignalid() const {
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool DeviceDiagSignal::has_validitysignalid() const {
+  return _internal_has_validitysignalid();
+}
+inline void DeviceDiagSignal::clear_validitysignalid() {
+  validitysignalid_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline const std::string& DeviceDiagSignal::validitysignalid() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.validitySignalId)
+  return _internal_validitysignalid();
+}
+inline void DeviceDiagSignal::set_validitysignalid(const std::string& value) {
+  _internal_set_validitysignalid(value);
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.validitySignalId)
+}
+inline std::string* DeviceDiagSignal::mutable_validitysignalid() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceDiagSignal.validitySignalId)
+  return _internal_mutable_validitysignalid();
+}
+inline const std::string& DeviceDiagSignal::_internal_validitysignalid() const {
+  return validitysignalid_.Get();
+}
+inline void DeviceDiagSignal::_internal_set_validitysignalid(const std::string& value) {
+  _has_bits_[0] |= 0x00000002u;
+  validitysignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void DeviceDiagSignal::set_validitysignalid(std::string&& value) {
+  _has_bits_[0] |= 0x00000002u;
+  validitysignalid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.DeviceDiagSignal.validitySignalId)
+}
+inline void DeviceDiagSignal::set_validitysignalid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000002u;
+  validitysignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.DeviceDiagSignal.validitySignalId)
+}
+inline void DeviceDiagSignal::set_validitysignalid(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000002u;
+  validitysignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.DeviceDiagSignal.validitySignalId)
+}
+inline std::string* DeviceDiagSignal::_internal_mutable_validitysignalid() {
+  _has_bits_[0] |= 0x00000002u;
+  return validitysignalid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* DeviceDiagSignal::release_validitysignalid() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceDiagSignal.validitySignalId)
+  if (!_internal_has_validitysignalid()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000002u;
+  return validitysignalid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void DeviceDiagSignal::set_allocated_validitysignalid(std::string* validitysignalid) {
+  if (validitysignalid != nullptr) {
+    _has_bits_[0] |= 0x00000002u;
+  } else {
+    _has_bits_[0] &= ~0x00000002u;
+  }
+  validitysignalid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), validitysignalid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceDiagSignal.validitySignalId)
+}
+
+// -------------------------------------------------------------------
+
 // Workstation
 
 // optional int32 type = 1 [default = 0];
@@ -50377,6 +51181,166 @@ inline void Software::_internal_set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
 inline void Software::set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_type(value);
   // @@protoc_insertion_point(field_set:Proto.Software.type)
+}
+
+// -------------------------------------------------------------------
+
+// DiagSignalType
+
+// optional string signalTypeId = 3;
+inline bool DiagSignalType::_internal_has_signaltypeid() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool DiagSignalType::has_signaltypeid() const {
+  return _internal_has_signaltypeid();
+}
+inline void DiagSignalType::clear_signaltypeid() {
+  signaltypeid_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& DiagSignalType::signaltypeid() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.signalTypeId)
+  return _internal_signaltypeid();
+}
+inline void DiagSignalType::set_signaltypeid(const std::string& value) {
+  _internal_set_signaltypeid(value);
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.signalTypeId)
+}
+inline std::string* DiagSignalType::mutable_signaltypeid() {
+  // @@protoc_insertion_point(field_mutable:Proto.DiagSignalType.signalTypeId)
+  return _internal_mutable_signaltypeid();
+}
+inline const std::string& DiagSignalType::_internal_signaltypeid() const {
+  return signaltypeid_.Get();
+}
+inline void DiagSignalType::_internal_set_signaltypeid(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  signaltypeid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void DiagSignalType::set_signaltypeid(std::string&& value) {
+  _has_bits_[0] |= 0x00000001u;
+  signaltypeid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.DiagSignalType.signalTypeId)
+}
+inline void DiagSignalType::set_signaltypeid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000001u;
+  signaltypeid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.DiagSignalType.signalTypeId)
+}
+inline void DiagSignalType::set_signaltypeid(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000001u;
+  signaltypeid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.DiagSignalType.signalTypeId)
+}
+inline std::string* DiagSignalType::_internal_mutable_signaltypeid() {
+  _has_bits_[0] |= 0x00000001u;
+  return signaltypeid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* DiagSignalType::release_signaltypeid() {
+  // @@protoc_insertion_point(field_release:Proto.DiagSignalType.signalTypeId)
+  if (!_internal_has_signaltypeid()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return signaltypeid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void DiagSignalType::set_allocated_signaltypeid(std::string* signaltypeid) {
+  if (signaltypeid != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  signaltypeid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), signaltypeid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.DiagSignalType.signalTypeId)
+}
+
+// optional .Proto.Uuid uuid = 4;
+inline bool DiagSignalType::_internal_has_uuid() const {
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  PROTOBUF_ASSUME(!value || uuid_ != nullptr);
+  return value;
+}
+inline bool DiagSignalType::has_uuid() const {
+  return _internal_has_uuid();
+}
+inline void DiagSignalType::clear_uuid() {
+  if (uuid_ != nullptr) uuid_->Clear();
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline const ::Proto::Uuid& DiagSignalType::_internal_uuid() const {
+  const ::Proto::Uuid* p = uuid_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Proto::Uuid&>(
+      ::Proto::_Uuid_default_instance_);
+}
+inline const ::Proto::Uuid& DiagSignalType::uuid() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.uuid)
+  return _internal_uuid();
+}
+inline void DiagSignalType::unsafe_arena_set_allocated_uuid(
+    ::Proto::Uuid* uuid) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(uuid_);
+  }
+  uuid_ = uuid;
+  if (uuid) {
+    _has_bits_[0] |= 0x00000002u;
+  } else {
+    _has_bits_[0] &= ~0x00000002u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DiagSignalType.uuid)
+}
+inline ::Proto::Uuid* DiagSignalType::release_uuid() {
+  _has_bits_[0] &= ~0x00000002u;
+  ::Proto::Uuid* temp = uuid_;
+  uuid_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::Proto::Uuid* DiagSignalType::unsafe_arena_release_uuid() {
+  // @@protoc_insertion_point(field_release:Proto.DiagSignalType.uuid)
+  _has_bits_[0] &= ~0x00000002u;
+  ::Proto::Uuid* temp = uuid_;
+  uuid_ = nullptr;
+  return temp;
+}
+inline ::Proto::Uuid* DiagSignalType::_internal_mutable_uuid() {
+  _has_bits_[0] |= 0x00000002u;
+  if (uuid_ == nullptr) {
+    auto* p = CreateMaybeMessage<::Proto::Uuid>(GetArena());
+    uuid_ = p;
+  }
+  return uuid_;
+}
+inline ::Proto::Uuid* DiagSignalType::mutable_uuid() {
+  // @@protoc_insertion_point(field_mutable:Proto.DiagSignalType.uuid)
+  return _internal_mutable_uuid();
+}
+inline void DiagSignalType::set_allocated_uuid(::Proto::Uuid* uuid) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete uuid_;
+  }
+  if (uuid) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(uuid);
+    if (message_arena != submessage_arena) {
+      uuid = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, uuid, submessage_arena);
+    }
+    _has_bits_[0] |= 0x00000002u;
+  } else {
+    _has_bits_[0] &= ~0x00000002u;
+  }
+  uuid_ = uuid;
+  // @@protoc_insertion_point(field_set_allocated:Proto.DiagSignalType.uuid)
 }
 
 // -------------------------------------------------------------------
@@ -62098,6 +63062,10 @@ SimOverrideSignalWorkspace::overridesignals() const {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

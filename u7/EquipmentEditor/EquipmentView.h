@@ -36,7 +36,8 @@ public slots:
 	void addChassis();
 	void addModule();
 	void addController();
-	void addSignal();
+	void addAppSignalPort();
+	void addDiagSignal();
 	void addWorkstation();
 	void addSoftware();
 
