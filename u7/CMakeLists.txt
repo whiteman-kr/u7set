@@ -92,6 +92,8 @@ set (U7_SOURCES
 	CreateUserDialogDialog.h
 	DbTagsEditor.cpp
 	DbTagsEditor.h
+	DiagSignalTypesStorage.cpp 
+	DiagSignalTypesStorage.h
 	DialogAfbLibraryCheck.cpp
 	DialogAfbLibraryCheck.h
 	DialogBusEditor.cpp

@@ -395,7 +395,7 @@ void MainWindow::createActions()
 	m_diagSignalTypesEditorAction = new QAction(tr("Diagnostic Signal Types..."), this);
 	m_diagSignalTypesEditorAction->setStatusTip(tr("Run Diagnostic Signal Types Editor"));
 	m_diagSignalTypesEditorAction->setEnabled(false);
-	connect(m_diagSignalTypesEditorAction, &QAction::triggered, this, &MainWindow::runDiagSignalTypesEditor)ed
+	connect(m_diagSignalTypesEditorAction, &QAction::triggered, this, &MainWindow::runDiagSignalTypesEditor);
 
 	m_busEditorAction = new QAction(tr("Bus Types Editor..."), this);
 	m_busEditorAction->setStatusTip(tr("Run Bus Types Editor"));

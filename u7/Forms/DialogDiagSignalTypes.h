@@ -1,28 +1,8 @@
 #pragma once
 
-#include "../../HardwareLib/DiagSignalType.h"
-#include "../DbLib/DbController.h"
-#include "../DbLib/DbObjectStorage.h"
+#include "DiagSignalTypesStorage.h"
 #include "../lib/PropertyEditor.h"
 #include "../lib/PropertyEditorDialog.h"
-
-
-class DiagSignalTypesStorage : public DbObjectStorage<std::shared_ptr<Hardware::DiagSignalType>>
-{
-public:
-	explicit DiagSignalTypesStorage(DbController* db);
-	virtual ~DiagSignalTypesStorage();
-
-public:
-	using DbObjectStorage::get;
-
-	std::shared_ptr<Hardware::DiagSignalType> get(const QString& diagSignalTypeId) const;
-
-	// --
-	//
-	bool load(QString* errorMessage) override;
-	bool save(const QUuid& uuid, QString* errorMessage) override;
-};
 
 
 class DialogDiagSignalTypes : public QDialog
