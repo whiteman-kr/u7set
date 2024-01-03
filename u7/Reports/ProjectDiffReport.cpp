@@ -9,7 +9,7 @@
 #include "../VFrame30/Schema.h"
 #include "../VFrame30/SchemaLayer.h"
 #include "../VFrame30/SchemaItem.h"
-
+#include "../HardwareLib/DiagSignalType.h"
 #include "../lib/Ui/DialogProgress.h"
 
 #include "Settings.h"
@@ -481,7 +481,10 @@ std::vector<Builder::SchemaTypesParams> ProjectDiffGenerator::defaultFileTypePar
 	result.push_back({db->systemFileId(DbDir::ConnectionsDir), QObject::tr("Connections"), true,
 					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter), layoutNames});
 
-	result.push_back({db->systemFileId(DbDir::SimTestsDir),	QObject::tr("Simulator Tests"), true,
+	result.push_back({db->systemFileId(DbDir::DiagSignalTypesDir), QObject::tr("Diagnostics Signal Types"), true,
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter), layoutNames});
+
+	result.push_back({db->systemFileId(DbDir::SimTestsDir),	QObject::tr("Simulator Tests"), false,
 					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter), layoutNames});
 
 	result.push_back({db->systemFileId(DbDir::AfblDir),	QObject::tr("AFBL Descriptions"), false,
@@ -1177,6 +1180,12 @@ void ProjectDiffGenerator::compareFileContents(int rootFileId,
 		return;
 	}
 
+	if (isDiagSignalTypeFile(fileName) == true)
+	{
+		compareDiagSignalTypes(sourceFile, targetFile, section, headerTable);
+		return;
+	}
+
 	if (isBusTypeFile(fileName) == true)
 	{
 		compareBusTypes(sourceFile, targetFile, section, headerTable);
@@ -1849,6 +1858,70 @@ void ProjectDiffGenerator::compareConnections(const std::shared_ptr<DbFile>& sou
 	}
 }
 
+void ProjectDiffGenerator::compareDiagSignalTypes(const std::shared_ptr<DbFile>& sourceFile,
+							const std::shared_ptr<DbFile>& targetFile,
+							std::shared_ptr<ReportLib::ReportSection> section,
+							ReportLib::ReportTable& headerTable)
+{
+	// No Files
+	if (sourceFile == nullptr && targetFile == nullptr)
+	{
+		Q_ASSERT(sourceFile != nullptr || targetFile != nullptr);
+		return;
+	}
+
+	std::shared_ptr<Hardware::DiagSignalType> sourceType;
+	std::shared_ptr<Hardware::DiagSignalType> targetType;
+
+	if (sourceFile != nullptr)
+	{
+		sourceType = Hardware::DiagSignalType::Create(sourceFile->data());
+		if (sourceType == nullptr)
+		{
+			throw(tr("Failed to load source dianostics signal type from: '%1'").arg(sourceFile->fileName()));
+		}
+	}
+	if (targetFile != nullptr)
+	{
+		targetType = Hardware::DiagSignalType::Create(targetFile->data());
+		if (targetType == nullptr)
+		{
+			throw(tr("Failed to load target dianostics signal type from: '%1'").arg(targetFile->fileName()));
+		}
+	}
+
+	// Single object
+	//
+	if ((sourceFile != nullptr && targetFile == nullptr) ||
+			(sourceFile == nullptr && targetFile != nullptr))
+	{
+		const auto& singleFile = sourceFile != nullptr ? sourceFile : targetFile;
+		const auto& singleType = sourceFile != nullptr ? sourceType : targetType;
+		addHeaderTableItem(headerTable, singleType->signalTypeId(), tr("Added"), singleFile);
+		return;
+	}
+
+	// Both Files
+	//
+	std::vector<PropertyDiff> diffs;
+
+	comparePropertyObjects(*sourceType, *targetType, &diffs);
+
+	if (diffs.empty() == false)
+	{
+		section->addText(tr("Diagnostics signal type: %1, %2\n\n").arg(targetType->signalTypeId()).arg(changesetString(targetFile)), m_normalFormat);
+
+		addHeaderTableItem(headerTable, targetType->signalTypeId(), E::valueToString<E::VcsItemAction>(targetFile->action()), targetFile);
+
+        std::shared_ptr<ReportTable> diffTable = section->addTable({m_tableFont,
+                                                                    {tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
+                                                                    {15, 15, 35, 35},
+                                                                    Qt::AlignLeft});
+
+		fillDiffTable(*diffTable, diffs);
+	}
+}
+	
 void ProjectDiffGenerator::compareFilesData(const std::shared_ptr<DbFile>& sourceFile,
 											const std::shared_ptr<DbFile>& targetFile,
 											std::shared_ptr<ReportSection> section,
@@ -2467,7 +2540,7 @@ bool ProjectDiffGenerator::isHardwareFile(const QString& fileName) const
 
 bool ProjectDiffGenerator::isBusTypeFile(const QString& fileName) const
 {
-	if (fileName.endsWith(".bus_type") == true)
+	if (fileName.endsWith(Db::File::BusFileExtension) == true)
 	{
 		return true;
 	}
@@ -2477,7 +2550,17 @@ bool ProjectDiffGenerator::isBusTypeFile(const QString& fileName) const
 
 bool ProjectDiffGenerator::isConnectionFile(const QString& fileName) const
 {
-	if (fileName.endsWith(".ocl") == true)
+	if (fileName.endsWith(Db::File::OclFileExtension) == true)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+bool ProjectDiffGenerator::isDiagSignalTypeFile(const QString& fileName) const
+{
+	if (fileName.endsWith(Db::File::DiagSignalTypeSetFileExtension) == true)
 	{
 		return true;
 	}

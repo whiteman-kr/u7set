@@ -1,5 +1,7 @@
 #include "DialogDiagSignalTypes.h"
 #include "Settings.h"
+#include "../lib/StandardColors.h"
+#include "../UtilsLib/Ui/UiTools.h"
 
 //
 // DialogDiagSignalTypes
@@ -11,7 +13,7 @@ DialogDiagSignalTypes::DialogDiagSignalTypes(DbController* db, QWidget* parent) 
 {
 	Q_ASSERT(m_db);
 
-	setWindowTitle(tr("Diagnostic Signal Types Editor"));
+	setWindowTitle(tr("Diagnostics Signal Types Editor"));
 
 	setAttribute(Qt::WA_DeleteOnClose);
 
@@ -123,6 +125,9 @@ DialogDiagSignalTypes::DialogDiagSignalTypes(DbController* db, QWidget* parent) 
 	m_refreshAction = new QAction(tr("Refresh"), this);
 	m_refreshAction->setShortcut(QKeySequence::Refresh);
 
+	m_importAction = new QAction(tr("Import..."), this);
+	m_exportAction = new QAction(tr("Export..."), this);
+
 	connect(m_addAction, &QAction::triggered, this, &DialogDiagSignalTypes::onAdd);
 	connect(m_removeAction, &QAction::triggered, this, &DialogDiagSignalTypes::onRemove);
 	connect(m_copyAction, &QAction::triggered, this, &DialogDiagSignalTypes::onCopy);
@@ -131,6 +136,8 @@ DialogDiagSignalTypes::DialogDiagSignalTypes(DbController* db, QWidget* parent) 
 	connect(m_checkInAction, &QAction::triggered, this, &DialogDiagSignalTypes::onCheckIn);
 	connect(m_undoAction, &QAction::triggered, this, &DialogDiagSignalTypes::onUndo);
 	connect(m_refreshAction, &QAction::triggered, this, &DialogDiagSignalTypes::onRefresh);
+	connect(m_importAction, &QAction::triggered, this, &DialogDiagSignalTypes::onImport);
+	connect(m_exportAction, &QAction::triggered, this, &DialogDiagSignalTypes::onExport);
 
 	m_popupMenu = new QMenu(this);
 	m_popupMenu->addAction(m_addAction);
@@ -144,6 +151,9 @@ DialogDiagSignalTypes::DialogDiagSignalTypes(DbController* db, QWidget* parent) 
 	m_popupMenu->addAction(m_undoAction);
 	m_popupMenu->addSeparator();
 	m_popupMenu->addAction(m_refreshAction);
+	m_popupMenu->addSeparator();
+	m_popupMenu->addAction(m_importAction);
+	m_popupMenu->addAction(m_exportAction);
 
 	// Load connections
 	//
@@ -226,6 +236,7 @@ void DialogDiagSignalTypes::showDialog(DbController* db, QWidget* parent)
 	{
 		s_instance->activateWindow();
 	}
+	UiTools::adjustDialogPlacement(s_instance);
 
 	return;
 }
@@ -243,7 +254,7 @@ void DialogDiagSignalTypes::onPropertiesChanged(QList<std::shared_ptr<PropertyOb
 
 	// Check for duplicate signalTypeId
 	//
-	for (auto object : objects)
+	for (const auto& object : objects)
 	{
 		Hardware::DiagSignalType* dst = dynamic_cast<Hardware::DiagSignalType*>(object.get());
 		if (dst == nullptr)
@@ -286,7 +297,7 @@ void DialogDiagSignalTypes::onPropertiesChanged(QList<std::shared_ptr<PropertyOb
 
 	// Save modified objects
 	//
-	for (auto object : objects)
+	for (const auto& object : objects)
 	{
 		Hardware::DiagSignalType* dst = dynamic_cast<Hardware::DiagSignalType*>(object.get());
 		if (dst == nullptr)
@@ -493,8 +504,15 @@ void DialogDiagSignalTypes::onPaste()
 			continue;
 		}
 
+		QString newSignalTypeId = tr("%1 (Copy)").arg(dst->signalTypeId());
+		int copyNumber = 1;
+		while (m_diagSignalTypes.hasSignalTypeId(newSignalTypeId) == true)
+		{
+			newSignalTypeId = tr("%1 (Copy %2)").arg(dst->signalTypeId()).arg(copyNumber++);
+		}
+
 		dst->setUuid(QUuid::createUuid());
-		dst->setSignalTypeId(tr("%1 (Copy)").arg(dst->signalTypeId()));
+		dst->setSignalTypeId(newSignalTypeId);
 		pasteDiagSignalType(dst);
 	}
 
@@ -704,6 +722,156 @@ void DialogDiagSignalTypes::onRefresh()
 
 	fillDiagSignalTypesList();
 	updateButtonsEnableState();
+
+	return;
+}
+
+void DialogDiagSignalTypes::onExport()
+{
+	QList<QTreeWidgetItem*> selectedItems = m_diagSignalTypesTree->selectedItems();
+	if (selectedItems.isEmpty() == true)
+	{
+		return;
+	}
+
+	Proto::EnvelopeSet envelopeSet;
+
+	QString defaultFileName;
+	if (selectedItems.size() > 1)
+	{
+		defaultFileName = tr("DiagSignalTypes.%1").arg(Db::File::DiagSignalTypeSetFileExtension);
+	}
+
+	for (const auto& item : selectedItems)
+	{
+		QUuid uuid = item->data(static_cast<int>(Columns::SignalTypeId), Qt::UserRole).toUuid();
+
+		std::shared_ptr<Hardware::DiagSignalType> dst = m_diagSignalTypes.get(uuid);
+		if (dst == nullptr)
+		{
+			Q_ASSERT(dst);
+			return;
+		}
+
+		if (defaultFileName.isEmpty() == true)
+		{
+			defaultFileName = tr("%1.%2").arg(dst->signalTypeId()).arg(Db::File::DiagSignalTypeSetFileExtension);
+		}
+
+		Proto::Envelope* envelope = envelopeSet.add_items();
+		dst->Save(envelope);
+	}
+
+	QByteArray data;
+	data.resize(static_cast<int>(envelopeSet.ByteSizeLong()));
+
+	bool result = envelopeSet.SerializeToArray(data.data(), static_cast<int>(envelopeSet.ByteSizeLong()));
+	if (result == false)
+	{
+		Q_ASSERT(result);
+		return;
+	}
+
+	if (data.isEmpty() == true)
+	{
+		return;
+	}
+
+	static QString path{"."};
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Export"), path + QDir::separator() + defaultFileName, tr("Diagnostics Signal Types Set (*.%1)").arg(Db::File::DiagSignalTypeSetFileExtension));
+
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+	path = QFileInfo(fileName).path(); // store path for next time
+
+	QFile file(fileName);
+	if (file.open(QFile::WriteOnly | QFile::Truncate) == false)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Error opening file %1!").arg(QDir::toNativeSeparators(fileName)));
+		return;
+	}
+
+	if (file.write(data) != data.length())
+	{
+		QMessageBox::critical(this, qAppName(), tr("Error writing data to file %1!").arg(QDir::toNativeSeparators(fileName)));
+		return;
+	}
+
+	QMessageBox::information(this, qAppName(), tr("File %1 saved successfully.").arg(QDir::toNativeSeparators(fileName)));
+
+	return;
+}
+
+void DialogDiagSignalTypes::onImport()
+{
+	static QString path{"."};
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Import"), path + QDir::separator(), tr("Diagnostics Signal Types Set (*.%1)").arg(Db::File::DiagSignalTypeSetFileExtension));
+
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+	path = QFileInfo(fileName).path(); // store path for next time
+
+	QByteArray data;
+
+	QFile file(fileName);
+	if (file.open(QFile::ReadOnly) == false)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Error opening file %1!").arg(QDir::toNativeSeparators(fileName)));
+		return;
+	}
+
+	data = file.readAll();
+
+	Proto::EnvelopeSet envelopeSet;
+	if (data.isEmpty() == true || envelopeSet.ParseFromArray(data.constData(), data.size()) == false)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Error parsing file %1 contents!").arg(QDir::toNativeSeparators(fileName)));
+		return;
+	}
+
+	m_diagSignalTypesTree->clearSelection();
+
+	m_diagSignalTypesTree->blockSignals(true);
+
+	m_diagSignalTypesPropertyEditor->clear();
+
+	for (int i = 0; i < envelopeSet.items_size(); i++)
+	{
+		const Proto::Envelope& envelope = envelopeSet.items(i);
+
+		if (envelope.has_diagsignaltype() == false)
+		{
+			Q_ASSERT(false);
+			continue;
+		}
+
+		std::shared_ptr<Hardware::DiagSignalType> dst = Hardware::DiagSignalType::CreateObject(envelope);
+		if (dst == nullptr)
+		{
+			Q_ASSERT(false);
+			continue;
+		}
+
+		QString newSignalTypeId = tr("%1 (Import)").arg(dst->signalTypeId());
+		int copyNumber = 1;
+		while (m_diagSignalTypes.hasSignalTypeId(newSignalTypeId) == true)
+		{
+			newSignalTypeId = tr("%1 (Import %2)").arg(dst->signalTypeId()).arg(copyNumber++);
+		}
+
+		dst->setUuid(QUuid::createUuid());
+		dst->setSignalTypeId(newSignalTypeId);
+		pasteDiagSignalType(dst);
+	}
+
+	m_diagSignalTypesTree->blockSignals(false);
+
+	updateButtonsEnableState();
+	setPropertyEditorObjects();
 
 	return;
 }
@@ -981,9 +1149,10 @@ void DialogDiagSignalTypes::updateTreeItemText(QTreeWidgetItem* item)
 	}
 
 	item->setText(static_cast<int>(Columns::SignalTypeId), dst->signalTypeId());
-	// item->setText(c++, connection->manualSettings() ? tr("Manual") : tr("Auto"));
 
 	DbFileInfo fi = m_diagSignalTypes.fileInfo(dst->uuid());
+
+	QBrush b(StandardColors::VcsCheckedIn);
 
 	if (fi.state() == E::VcsState::CheckedOut)
 	{
@@ -991,11 +1160,29 @@ void DialogDiagSignalTypes::updateTreeItemText(QTreeWidgetItem* item)
 
 		int userId = fi.userId();
 		item->setText(static_cast<int>(Columns::UserId), m_db->username(userId));
+
+		switch (fi.action())
+		{
+		case E::VcsItemAction::Added:
+			b.setColor(StandardColors::VcsAdded);
+			break;
+		case E::VcsItemAction::Modified:
+			b.setColor(StandardColors::VcsModified);
+			break;
+		case E::VcsItemAction::Deleted:
+			b.setColor(StandardColors::VcsDeleted);
+			break;
+		}
 	}
 	else
 	{
 		item->setText(static_cast<int>(Columns::Action), "");
 		item->setText(static_cast<int>(Columns::UserId), "");
+	}
+
+	for (int i = 0; i < static_cast<int>(Columns::Count); i++)
+	{
+		item->setBackground(i, b);
 	}
 
 	return;
@@ -1045,6 +1232,8 @@ void DialogDiagSignalTypes::updateButtonsEnableState()
 
 	m_btnUndo->setEnabled(selectedCount > 0 && checkedOutCount > 0);
 	m_undoAction->setEnabled(selectedCount > 0 && checkedOutCount > 0);
+
+	m_exportAction->setEnabled(selectedCount > 0);
 
 	return;
 }

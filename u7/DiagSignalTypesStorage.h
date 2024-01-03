@@ -12,6 +12,7 @@ public:
 	using DbObjectStorage::get;
 
 	std::shared_ptr<Hardware::DiagSignalType> get(const QString& diagSignalTypeId) const;
+	bool hasSignalTypeId(const QString& diagSignalTypeId) const;
 
 	// --
 	//

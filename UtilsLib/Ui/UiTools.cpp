@@ -99,3 +99,40 @@ void UiTools::openPdf(const QString& file, QWidget* parent)
 	}
 }
 
+void UiTools::ensureVisible(QWidget* widget)
+{
+	if (widget == nullptr)
+	{
+		Q_ASSERT(widget);
+		return;
+	}
+
+	if (widget->isVisible() == false)
+	{
+		widget->setVisible(true); // Widget must be visible for correct work of QApplication::desktop()->screenGeometry
+	}
+
+	QRect screenRect  = widget->screen()->availableGeometry();
+	QRect intersectRect = screenRect.intersected(widget->frameGeometry());
+
+	if (widget->isMinimized() == true)
+	{
+		widget->showNormal();
+	}
+
+	if (widget->isMaximized() == false &&
+		(intersectRect.width() < widget->size().width() ||
+		 intersectRect.height() < widget->size().height()))
+	{
+		widget->move(screenRect.topLeft());
+	}
+
+	if (widget->isMaximized() == false &&
+		(widget->frameGeometry().width() > screenRect.width() ||
+		 widget->frameGeometry().height() > screenRect.height()))
+	{
+		widget->resize(static_cast<int>(screenRect.width() * 0.7),
+			   static_cast<int>(screenRect.height() * 0.7));
+	}
+}
+

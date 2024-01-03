@@ -28,6 +28,8 @@ private slots:
 	void onCheckIn();
 	void onUndo();
 	void onRefresh();
+	void onExport();
+	void onImport();
 
 	void onCopyShortcut();
 	void onPasteShortcut();
@@ -56,7 +58,8 @@ private:
 	{
 		SignalTypeId,
 		Action,
-		UserId
+		UserId,
+		Count
 	};
 
 	QPushButton* m_btnAdd = nullptr;
@@ -81,6 +84,8 @@ private:
 	QAction* m_checkInAction = nullptr;
 	QAction* m_undoAction = nullptr;
 	QAction* m_refreshAction = nullptr;
+	QAction* m_importAction = nullptr;
+	QAction* m_exportAction = nullptr;
 
 	// --
 	//

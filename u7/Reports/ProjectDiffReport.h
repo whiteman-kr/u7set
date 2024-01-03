@@ -219,6 +219,11 @@ private:
 							std::shared_ptr<ReportLib::ReportSection> section,
 							ReportLib::ReportTable& headerTable);
 
+	void compareDiagSignalTypes(const std::shared_ptr<DbFile>& sourceFile,
+							const std::shared_ptr<DbFile>& targetFile,
+							std::shared_ptr<ReportLib::ReportSection> section,
+							ReportLib::ReportTable& headerTable);
+
 	void compareFilesData(const std::shared_ptr<DbFile>& sourceFile,
 						  const std::shared_ptr<DbFile>& targetFile,
 						  std::shared_ptr<ReportLib::ReportSection> section,
@@ -240,6 +245,7 @@ private:
 	bool isHardwareFile(const QString& fileName) const;
 	bool isBusTypeFile(const QString& fileName) const;
 	bool isConnectionFile(const QString& fileName) const;
+	bool isDiagSignalTypeFile(const QString& fileName) const;
 	bool isTextFile(const QString& fileName) const;
 	bool isSchemaFile(const QString& fileName) const;
 

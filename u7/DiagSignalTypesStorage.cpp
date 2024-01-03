@@ -31,6 +31,15 @@ std::shared_ptr<Hardware::DiagSignalType> DiagSignalTypesStorage::get(const QStr
 	return std::shared_ptr<Hardware::DiagSignalType>();
 }
 
+bool DiagSignalTypesStorage::hasSignalTypeId(const QString& diagSignalTypeId) const
+{
+	return std::find_if(m_objectsVector.begin(), m_objectsVector.end(), [&diagSignalTypeId](const std::shared_ptr<Hardware::DiagSignalType>& dst) 
+		{
+							return dst != nullptr && dst->signalTypeId() == diagSignalTypeId;
+		}
+	) != m_objectsVector.end();
+}
+
 bool DiagSignalTypesStorage::load(QString* errorMessage)
 {
 	if (m_db == nullptr ||

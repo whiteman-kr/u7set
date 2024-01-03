@@ -110,7 +110,8 @@ namespace Db
 
 		constexpr static const char* JavaScriptFileExtension = "js";				// JavaScript file extension
 
-		constexpr static const char* DiagSignalTypeFileExtension = "dsgt";			// Diagnostic Signal Type file extension
+		constexpr static const char* DiagSignalTypeFileExtension = "dsgt";			// Diagnostics Signal Type file extension
+		constexpr static const char* DiagSignalTypeSetFileExtension = "dsgts";		// Diagnostics Signal Types set file extension
 	};
 }
 
