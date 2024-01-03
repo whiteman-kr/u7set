@@ -28,10 +28,14 @@ set (TC_FORMS
 add_executable(${TARGET} WIN32
 	../lib/CodeEditor.cpp
 	../lib/CodeEditor.h
+	../lib/Ui/AppDataSourcesWidget.cpp
+	../lib/Ui/AppDataSourcesWidget.h
 	../lib/Ui/DialogAbout.cpp
 	../lib/Ui/DialogAbout.h
 	../lib/Ui/DialogAlert.cpp
 	../lib/Ui/DialogAlert.h
+	../lib/Ui/DialogSourceInfo.cpp
+	../lib/Ui/DialogSourceInfo.h
 	../lib/Ui/DialogTcpStatistics.cpp
 	../lib/Ui/DialogTcpStatistics.h
 	../lib/Ui/TabWidgetEx.cpp
@@ -40,6 +44,8 @@ add_executable(${TARGET} WIN32
 	AppConfigSettings.h
 	AppLogOutputWidget.cpp
 	AppLogOutputWidget.h
+	DialogDataSources.cpp
+	DialogDataSources.h
 	DialogReport.cpp
 	DialogReport.h
 	main.cpp
@@ -52,6 +58,8 @@ add_executable(${TARGET} WIN32
 	TestSuiteLog.cpp
 	TestSuiteMainWindow.cpp
 	TestViewTabPage.cpp
+	../lib/Ui/TuningSourcesWidget.cpp
+	../lib/Ui/TuningSourcesWidget.h
 	
 	Resources.qrc
 	../Etc/Logo/RadiyLogo.qrc

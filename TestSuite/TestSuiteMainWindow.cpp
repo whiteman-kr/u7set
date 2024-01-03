@@ -10,6 +10,7 @@
 #include "DialogReport.h"
 #include "../ClientLib/TuningUserManager.h"
 #include "../ClientLib/ClientTranslator.h"
+#include "DialogDataSources.h"
 
 TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
 	: QMainWindow(parent),
@@ -275,12 +276,11 @@ void TestSuiteMainWindow::createActions()
 	//m_pSettingsAction->setIcon(QIcon(":/Images/Images/Settings.svg"));
 	m_pSettingsAction->setEnabled(true);
 	connect(m_pSettingsAction, &QAction::triggered, this, &TestSuiteMainWindow::onSettings);
-/*
-	m_pTuningSourcesAction = new QAction(tr("Tuning sources..."), this);
-	m_pTuningSourcesAction->setStatusTip(tr("View tuning sources"));
-	//m_pTuningSourcesAction->setIcon(QIcon(":/Images/Images/Settings.svg"));
-	m_pTuningSourcesAction->setEnabled(true);
-	connect(m_pTuningSourcesAction, &QAction::triggered, this, &MainWindow::showTuningSources);*/
+
+	m_pDataSourcesAction = new QAction(tr("Data Sources..."), this);
+	m_pDataSourcesAction->setStatusTip(tr("View Data Sources"));
+	m_pDataSourcesAction->setEnabled(true);
+	connect(m_pDataSourcesAction, &QAction::triggered, this, &TestSuiteMainWindow::showDataSources);
 
 	m_pStatisticsAction = new QAction(tr("Connection Statistics..."), this);
 	m_pStatisticsAction->setStatusTip(tr("View Connection Statistics"));
@@ -350,7 +350,7 @@ void TestSuiteMainWindow::createMenu()
 	//
 	QMenu* pHelpMenu = menuBar()->addMenu(tr("&?"));
 
-	//pHelpMenu->addAction(m_pTuningSourcesAction);
+	pHelpMenu->addAction(m_pDataSourcesAction);
 	pHelpMenu->addAction(m_pStatisticsAction);
 
 	pHelpMenu->addSeparator();
@@ -1147,6 +1147,14 @@ void TestSuiteMainWindow::showStatistics()
 	}
 
 	UiTools::adjustDialogPlacement(m_dialogStatistics);
+}
+
+void TestSuiteMainWindow::showDataSources()
+{
+	DialogDataSources::create(m_configController,
+							  //m_testSuite.,
+							  &m_appLog,
+							  this);
 }
 
 void TestSuiteMainWindow::showAppLog()
