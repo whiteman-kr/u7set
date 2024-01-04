@@ -701,6 +701,10 @@ public:
 		TuningNoReply,
 		TuningValueCorrupted,
 		TuningCommandDenied,						// for ex. tuning command Apply denied for TestSute client
+		UnknownMatsUser,
+		DisabledMatsUser,
+		NoSignalsAllowedToControl,
+		SignalIsNotAllowedToControl
 	};
 	Q_ENUM(NetworkError)
 

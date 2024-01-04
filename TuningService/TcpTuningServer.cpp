@@ -481,7 +481,6 @@ namespace Tuning
 
 		QString matsUser = QString::fromStdString(m_tuningSignalsWriteRequest.matsuser());
 
-
 		// m_tuningSignalsWriteReply.set_error(???) is set inside clientContext->ІwriteSignalStates()
 		//
 		clientContext->writeSignalStates(clientEquipmentID, matsUser, m_tuningSignalsWriteRequest, &m_tuningSignalsWriteReply);

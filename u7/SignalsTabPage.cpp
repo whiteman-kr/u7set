@@ -419,10 +419,6 @@ void SignalsDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, c
 	{
 		provider->saveSignal(&s, nullptr);
 	}
-	else
-	{
-		provider->undoSignal(s);
-	}
 
 	signalIdForUndoOnCancelEditing = AppSignalSet::BAD_ID;
 }

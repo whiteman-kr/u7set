@@ -55,9 +55,12 @@ namespace Tuning
 		int getStateChangesQueueSize() const;
 
 	private:
-		QString m_clientID;									// Tuning сlient EquipmentID
+		QString m_clientID;										// Tuning сlient EquipmentID
 		bool m_tuningLogin = false;
-		std::map<QString, std::set<QString>> m_matsUsers;	// MATS user login => MATS user set og AppSignalTags
+		std::map<QString, std::set<QString>> m_matsUsers;		// MATS user login => MATS user set of AppSignalTags
+		std::map<QString, std::set<Hash>> m_userAllowedSignals;	// MATS user login => set of allowed to control signal Hashes
+		std::set<QString> m_disabledUsers;
+
 		const TuningSources& m_tuningSources;
 
 		std::map<QString, TuningSourceThreadShared> m_sourceThreadMap;	// source EquipmentID => TuningSourceThreadShared
