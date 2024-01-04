@@ -323,6 +323,26 @@ void UploadTabPage::refreshProjectBuilds()
 		builds.push_back(std::make_pair(build, tm));
 	}
 
+	// Sort builds by time, latest build - first.
+	//
+	std::sort(builds.begin(), builds.end(), [](const auto& a, const auto& b)
+			  {
+				  const QString& build1 = a.first;
+				  const QString& build2 = b.first;
+					
+				  bool hasNumber1 = build1.contains('-');
+				  bool hasNumber2 = build2.contains('-');
+
+				  if (hasNumber1 == hasNumber2)
+				  {
+					  return build1 > build2;
+				  }
+				  else
+				  {
+					  return hasNumber1 < hasNumber2;
+				  }
+			  });
+
 	// Compare builds list with current and refresh is required (number of builds, their names or modification time is changed)
 
 	if (m_builds != builds)
@@ -333,7 +353,7 @@ void UploadTabPage::refreshProjectBuilds()
 
 		m_pBuildTree->clear();
 
-		for (const QString& buildName : buildList)
+		for (const auto& [buildName, time] : builds)
 		{
 			OnlineLib::BuildInfo buildInfo;
 			bool buildSuccess = false;

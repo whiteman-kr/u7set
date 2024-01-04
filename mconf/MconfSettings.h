@@ -1,10 +1,11 @@
 #pragma once
 
-class Settings
+
+class MconfSettings
 {
 public:
-	Settings(void);
-	virtual ~Settings(void);
+	MconfSettings(void);
+	virtual ~MconfSettings(void);
 
 public:
 	void save() const;
@@ -41,4 +42,3 @@ private:
 	QString m_serverUsername;
 	QString m_serverPassword;
 };
-

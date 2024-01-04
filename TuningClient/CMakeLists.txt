@@ -177,7 +177,9 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QtQml>
 )
 
-#Add translations
+target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
+
+# Add translations
 #
 add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
@@ -189,4 +191,3 @@ target_link_libraries(${TARGET} PRIVATE CommonLib UtilsLib AppSignalLib OnlineLi
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
 	 target_link_libraries(${TARGET} PRIVATE vld.lib)
 endif()
-

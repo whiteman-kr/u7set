@@ -20,8 +20,8 @@ struct SimpleAppSignalState
 	// light version of AppSignalState to use in queues and other AppDataService data structs
 	//
 	Hash hash = 0;					// == calcHash(AppSignalID)
-	Times time;
-	AppSignalStateFlags flags;
+	Times time{};
+	AppSignalStateFlags flags{};
 	double value = 0;
 	quint16 packetNo = 0;
 

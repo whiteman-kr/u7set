@@ -730,7 +730,7 @@ void OutputDockWidget::timerEvent(QTimerEvent* /*event*/)
 
 	if (m_errorCount != errorCount)
 	{
-		if (m_errorCount == 0)
+		if (errorCount > 0)
 		{
 			m_prevErrorButton->setEnabled(true);
 			m_nextErrorButton->setEnabled(true);
@@ -740,9 +740,9 @@ void OutputDockWidget::timerEvent(QTimerEvent* /*event*/)
 		m_errorLabel->setText(tr("E: %1").arg(QString::number(errorCount).rightJustified(4, '0')));
 	}
 
-	if (m_warningCount == 0 && warningCount > 0)
+	if (m_warningCount != warningCount)
 	{
-		if (m_warningCount == 0)
+		if (warningCount > 0)
 		{
 			m_prevWarningButton->setEnabled(true);
 			m_nextWarningButton->setEnabled(true);

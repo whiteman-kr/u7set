@@ -461,7 +461,7 @@ namespace EditEngine
 
 		m_hScrollBarCopy.setMaximum(m_hScrollBar->maximum());
 		m_hScrollBarCopy.setValue(m_hScrollBar->value());
-
+		 
 		m_vScrollBarCopy.setMaximum(m_vScrollBar->maximum());
 		m_vScrollBarCopy.setValue(m_vScrollBar->value());
 
@@ -474,7 +474,7 @@ namespace EditEngine
 		assert(m_hScrollBar != nullptr);
 		assert(m_vScrollBar != nullptr);
 
-		m_schemaView->setZoom(m_zoom);			// Первым должен восстанавливаться Zoom, т.к. он него зависят скролы
+		m_schemaView->setZoom(m_zoom);			// Zoom must be restored first as scrollbars depend on it.
 
 		m_hScrollBar->setValue(m_hScrollBarCopy.value());
 		m_vScrollBar->setValue(m_vScrollBarCopy.value());

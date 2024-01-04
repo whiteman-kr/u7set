@@ -8,7 +8,7 @@ ScriptTuningClientApplication::ScriptTuningClientApplication()
 
 QString ScriptTuningClientApplication::equipmentId() const
 {
-	return theSettings.instanceStrId();
+	return TuningClientAppSettings::instance().instanceStrId();
 }
 
 bool ScriptTuningClientApplication::start(QString program, QString arguments, QString workDir)

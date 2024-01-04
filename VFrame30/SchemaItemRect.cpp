@@ -72,7 +72,7 @@ namespace VFrame30
 	//
 	bool SchemaItemRect::SaveData(Proto::Envelope* message) const
 	{
-		bool result = PosRectImpl::SaveData(message);
+		bool result = PosRectRotatable::SaveData(message);
 		if (result == false || message->has_schemaitem() == false)
 		{
 			assert(result);
@@ -115,7 +115,7 @@ namespace VFrame30
 
 		// --
 		//
-		bool result = PosRectImpl::LoadData(message);
+		bool result = PosRectRotatable::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -148,13 +148,21 @@ namespace VFrame30
 		m_font.LoadData(rectMessage.font());
 
 		m_wordWrap = rectMessage.wordwrap();
-
+		
 		return true;
 	}
 
 	// Drawing Functions
 	//
 	void SchemaItemRect::draw(CDrawParam* drawParam) const
+	{
+		return drawRotated(drawParam, [drawParam, this]()
+						   {
+							   return drawPrivate(drawParam);
+						   });
+	}
+
+	void SchemaItemRect::drawPrivate(CDrawParam* drawParam) const
 	{
 		QPainter* painter = drawParam->painter();
 
@@ -179,7 +187,7 @@ namespace VFrame30
 		{
 			m_fillBrush->setColor(m_fillColor);
 		}
-						
+
 		// Calculate rectangle
 		//
 		QRectF boundingRect = boundingRectInDocPt(drawParam);
@@ -224,8 +232,8 @@ namespace VFrame30
 		}
 
 		bool textChanged = (text != m_cacheDrewText) ||
-						   (m_cachetextFormat != m_textFormat) ||
-						   (m_cachedFont != m_font);
+			(m_cachetextFormat != m_textFormat) ||
+			(m_cachedFont != m_font);
 
 		if (textChanged == true)
 		{
@@ -270,7 +278,7 @@ namespace VFrame30
 			//
 			const double zoom = m_drawParam->schemaView()->zoom() / 100.0;
 			const double imageWidth = widthDocPt() * zoom;
-			const double imageHeight = heightDocPt()  * zoom;
+			const double imageHeight = heightDocPt() * zoom;
 
 			QRect clipRectInt{0, 0, static_cast<int>(imageWidth), static_cast<int>(imageHeight)};
 

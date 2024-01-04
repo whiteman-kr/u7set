@@ -1,7 +1,6 @@
 #include "EditSchemaWidget.h"
+#include "./EditEngine/EditEngine.h"
 #include "DbTagsEditor.h"
-#include "EditEngine/EditEngine.h"
-#include "Forms/ComparePropertyObjectDialog.h"
 #include "GlobalMessanger.h"
 #include "SchemaItemPropertiesDialog.h"
 #include "SchemaLayersDialog.h"
@@ -11,6 +10,7 @@
 
 #include "./Forms/ChooseAfbDialog.h"
 #include "./Forms/ChooseUfbDialog.h"
+#include "./Forms/ComparePropertyObjectDialog.h"
 
 #include "../lib/CodeEditor.h"
 #include "../lib/QDoublevalidatorEx.h"
@@ -229,7 +229,7 @@ EditSchemaWidget::EditSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 	m_mouseLeftUpStateAction.emplace_back(MouseState::MovingVerticalEdge, std::bind(&EditSchemaWidget::mouseLeftUp_MovingEdgeOrVertex, this, std::placeholders::_1));
 	m_mouseLeftUpStateAction.emplace_back(MouseState::MovingConnectionLinePoint, std::bind(&EditSchemaWidget::mouseLeftUp_MovingEdgeOrVertex, this, std::placeholders::_1));
 
-	// Moouse Mov
+	// Mouse Move
 	//
 	m_mouseMoveStateAction.emplace_back(MouseState::Scrolling, std::bind(&EditSchemaWidget::mouseMove_Scrolling, this, std::placeholders::_1));
 	m_mouseMoveStateAction.emplace_back(MouseState::Selection, std::bind(&EditSchemaWidget::mouseMove_Selection, this, std::placeholders::_1));
@@ -1492,13 +1492,26 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 					[&possibleAction](const SizeActionToMouseCursor& item)
 					{
 						return item.action == possibleAction;
-					}
-					);
+					});
 
 				if (findResult != std::end(m_sizeActionToMouseCursor))
 				{
+					auto itemPosRotatable = dynamic_cast<const VFrame30::PosRectRotatable*>(selectedItem.get());
+					bool rotated = itemPosRotatable != nullptr && itemPosRotatable->angle() != 0;
 
 					docPoint = widgetPointToDocument(me->pos(), snapToGrid());
+					
+					if (rotated == true)
+					{
+						auto rotatePoint = itemPosRotatable->rotationPointInDocPt();
+
+						QTransform transform;
+						transform.translate(rotatePoint.x(), rotatePoint.y());
+						transform.rotate(-itemPosRotatable->angle());
+						transform.translate(-rotatePoint.x(), -rotatePoint.y());
+
+						docPoint = transform.map(docPoint);
+					}
 
 					editSchemaView()->m_editStartDocPt = docPoint;
 					editSchemaView()->m_editEndDocPt = docPoint;
@@ -2120,9 +2133,6 @@ void EditSchemaWidget::mouseLeftUp_SizingRect(QMouseEvent* event)
 		return;
 	}
 
-	QPointF mouseSizingStartPointDocPt = editSchemaView()->m_editStartDocPt;
-	QPointF mouseSizingEndPointDocPt = widgetPointToDocument(event->pos(), snapToGrid());
-
 	auto si = selectedItems().front();
 	VFrame30::IPosRect* itemPos = dynamic_cast<VFrame30::IPosRect*>(selectedItems().front().get());
 
@@ -2130,6 +2140,24 @@ void EditSchemaWidget::mouseLeftUp_SizingRect(QMouseEvent* event)
 	{
 		assert(itemPos != nullptr);
 		return;
+	}
+
+	QPointF mouseSizingStartPointDocPt = editSchemaView()->m_editStartDocPt;
+	QPointF mouseSizingEndPointDocPt = widgetPointToDocument(event->pos(), snapToGrid());
+
+	auto itemPosRotatable = dynamic_cast<const VFrame30::PosRectRotatable*>(si.get());
+	bool rotated = itemPosRotatable != nullptr && itemPosRotatable->angle() != 0;
+
+	if (rotated == true)
+	{
+		auto rotatePoint = itemPosRotatable->rotationPointInDocPt();
+
+		QTransform transform;
+		transform.translate(rotatePoint.x(), rotatePoint.y());
+		transform.rotate(-itemPosRotatable->angle());
+		transform.translate(-rotatePoint.x(), -rotatePoint.y());
+
+		mouseSizingEndPointDocPt = transform.map(mouseSizingEndPointDocPt);
 	}
 
 	double xdif = mouseSizingEndPointDocPt.x() - mouseSizingStartPointDocPt.x();
@@ -2701,18 +2729,29 @@ void EditSchemaWidget::mouseMove_SizingRect(QMouseEvent* me)
 		return;
 	}
 
+	auto itemPosRotatable = dynamic_cast<const VFrame30::PosRectRotatable*>(selectedItems().front().get());
+	bool rotated = itemPosRotatable != nullptr && itemPosRotatable->angle() != 0;
+
 	editSchemaView()->m_editEndDocPt = widgetPointToDocument(me->pos(), snapToGrid());
+	if (rotated == true)
+	{
+		auto rotatePoint = itemPosRotatable->rotationPointInDocPt();
+
+		QTransform transform;
+		transform.translate(rotatePoint.x(), rotatePoint.y());
+		transform.rotate(-itemPosRotatable->angle());
+		transform.translate(-rotatePoint.x(), -rotatePoint.y());
+
+		editSchemaView()->m_editEndDocPt = transform.map(editSchemaView()->m_editEndDocPt);
+	}
 
 	// Get possible links offset
 	//
 	double xdif = editSchemaView()->m_editEndDocPt.x() - editSchemaView()->m_editStartDocPt.x();
 	double ydif = editSchemaView()->m_editEndDocPt.y() - editSchemaView()->m_editStartDocPt.y();
 
-	QRectF currentRect(itemPos->leftDocPt(),
-						   itemPos->topDocPt(),
-						   itemPos->widthDocPt(),
-						   itemPos->heightDocPt());
-
+	QRectF currentRect(itemPos->leftDocPt(), itemPos->topDocPt(), itemPos->widthDocPt(), itemPos->heightDocPt());
+	
 	QRectF newRect = editSchemaView()->sizingRectItem(xdif, ydif, itemPos);
 
 	switch (mouseState())
@@ -5201,6 +5240,12 @@ void EditSchemaWidget::f2Key()
 		return;
 	}
 
+	if (item->isType<VFrame30::SchemaItemAfb>() == true)
+	{
+		f2KeyForAfb(item);
+		return;
+	}
+
 	return;
 }
 
@@ -6479,6 +6524,122 @@ void EditSchemaWidget::f2KeyForBus(SchemaItemPtr item)
 		m_editEngine->runSetObject(oldState, newState, item);
 
 		editSchemaView()->update();
+	}
+
+	return;
+}
+
+void EditSchemaWidget::f2KeyForAfb(SchemaItemPtr item)
+{
+	if (item->isSchemaItemAfb() == false)
+	{
+		assert(item->isSchemaItemAfb() == true);
+		return;
+	}
+
+	// Create a deep copy of the item, as it must not share Properties with the original one.
+	// 
+	QByteArray itemData;
+	item->saveToByteArray(&itemData);
+
+	auto itemCopy = VFrame30::SchemaItem::Create(itemData);
+	Q_ASSERT(itemCopy);
+	
+	// Only edit essential and category Parameters,
+	// remove all others.
+	//
+	auto properties = itemCopy->properties();
+
+	for (auto& property : properties)
+	{
+		if (property->essential() != true &&
+			property->category() != VFrame30::PropertyNames::parametersCategory)
+		{
+			itemCopy->removeProperty(property->caption());
+		}
+	}
+
+	properties = itemCopy->properties();
+
+	// Show input dialog.
+	//
+	ResizedDialog d(tr("Set AFB properties"), this);
+
+	d.setWindowFlags((d.windowFlags() &
+					  ~Qt::WindowMinimizeButtonHint &
+					  ~Qt::WindowMaximizeButtonHint &
+					  ~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+
+	auto label = new QLabel("AFB Item Properties:");
+
+	auto propertyEditor = new ExtWidgets::PropertyEditor{&d};
+	propertyEditor->setObject(itemCopy);
+
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+	QVBoxLayout* layout = new QVBoxLayout;
+	layout->addWidget(label);
+	layout->addWidget(propertyEditor);
+	layout->addWidget(buttonBox);
+	d.setLayout(layout);
+
+	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
+	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
+
+	propertyEditor->autoAdjustSplitterPosition();
+	propertyEditor->setReadOnly(readOnly());
+
+	// Show modal dialog.
+	//
+	if (int result = d.exec();
+		result != QDialog::Accepted)
+	{
+		return;
+	}
+
+	// Update only changed properties
+	//
+	bool batchWasStarted = false;
+
+	for (const auto& property : properties)
+	{
+		auto oldProperty = item->propertyByCaption(property->caption());
+		if (oldProperty == nullptr)
+		{
+			Q_ASSERT(oldProperty);
+			continue;
+		}
+
+		if (oldProperty->value() == property->value())
+		{
+			// Property value was not changed, skip it.
+			//
+			continue;
+		}
+
+		if (batchWasStarted == false)
+		{
+			// This is the first changed property, start batch.
+			//
+			batchWasStarted = m_editEngine->startBatch();
+			
+			if (batchWasStarted == false)
+			{
+				// Batch was not started, skip all changes.
+				// It is possible if the schema is read only.
+				//
+				break;
+			}
+		}
+
+		m_editEngine->runSetProperty(property->caption(), property->value(), item);
+	}
+
+	if (batchWasStarted == true)
+	{
+		// If batch was started, then at least one property has been changed. 
+		//
+		m_editEngine->endBatch();
 	}
 
 	return;

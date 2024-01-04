@@ -199,7 +199,7 @@ namespace Log
 
 	public:
         const LogFileRecord& record(int row) const;
-        QBrush color(const QModelIndex& index) const;
+        QBrush color(const QModelIndex& index, bool selected) const;
 
     protected:
         virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override;

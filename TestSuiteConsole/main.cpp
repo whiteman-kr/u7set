@@ -1,25 +1,22 @@
-#include <iostream>
-#include <QGuiApplication>
-#include <QTimer>
-#include <QStandardPaths>
-#include "../TestSuiteLib/TestSuiteSettings.h"
 #include "../TestSuiteLib/TestSuite.h"
+#include "../TestSuiteLib/TestSuiteSettings.h"
 #include "../UtilsLib/LogFile.h"
+#include "version.h"
+
+#include <QDomDocument>
+#include <QFile>
+#include <QGuiApplication>
+#include <QStandardPaths>
+#include <QTimer>
+#include <QXmlStreamWriter>
+#include <iostream>
 
 #ifdef Q_OS_WINDOWS
-#include <windows.h>
+	#include <windows.h>
 #endif
 
-#include <QFile>
-#include <QXmlStreamWriter>
-#include <QDomDocument>
-
-#if __has_include("../gitlabci_version.h")
-#	include "../gitlabci_version.h"
-#endif
-
-const int MajorVersion = 0;
-const int MinorVersion = 2;
+const int MajorVersion = U7SET_MAJOR_VERSION;
+const int MinorVersion = U7SET_MINOR_VERSION;
 
 
 void showHelp()
@@ -293,21 +290,14 @@ int main(int argc, char* argv[])
 	app.setOrganizationName(Manufacturer::RADIY);
 	app.setOrganizationDomain(Manufacturer::SITE);
 
-#ifdef GITLAB_CI_BUILD
-	const int buildNo = CI_PIPELINE_ID;
 
 	app.setApplicationVersion(QString("%1.%2.%3 (%4)")
-							.arg(MajorVersion)
-							.arg(MinorVersion)
-							.arg(buildNo)
-							.arg(CI_COMMIT_REF_SLUG));
-#else
-	const int buildNo = -1;
+								  .arg(U7SET_MAJOR_VERSION)
+								  .arg(U7SET_MINOR_VERSION)
+								  .arg(U7SET_PATCH_VERSION)
+								  .arg(U7SET_BRANCH_NAME));
 
-	app.setApplicationVersion(QString("%1.%2.LOCALBUILD")
-							  .arg(MajorVersion)
-							  .arg(MinorVersion));
-#endif
+	const int buildNo = U7SET_PATCH_VERSION;
 
 	// Parse command line arguments
 	//

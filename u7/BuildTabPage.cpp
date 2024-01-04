@@ -654,6 +654,7 @@ void BuildTabPage::getProjectBuildPath(QString* buildCurrentPath, QString* build
 	{
 		Q_ASSERT(buildCurrentPath);
 		Q_ASSERT(buildLastPath);
+		return;
 	}
 
 	buildCurrentPath->clear();

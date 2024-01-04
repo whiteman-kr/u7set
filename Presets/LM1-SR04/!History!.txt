@@ -1,0 +1,5 @@
+LM1-SR04
+	25.12.2023	Version: 1	LM1-SR04_v1.u7devp 	RPCT-3687: Remove from SR LMs outputs 1, 2 and their validity.
+
+
+

@@ -57,10 +57,10 @@ TreeFilterWidget::~TreeFilterWidget()
 		//
 		if (m_treeMaskCombo != nullptr)
 		{
-			theSettings.m_tuningWorkspaceMasks.clear();
+			TuningClientAppSettings::instance().user().m_tuningWorkspaceMasks.clear();
 			for (int i = 0; i < m_treeMaskCombo->count(); i++)
 			{
-				theSettings.m_tuningWorkspaceMasks.push_back(m_treeMaskCombo->itemText(i));
+				TuningClientAppSettings::instance().user().m_tuningWorkspaceMasks.push_back(m_treeMaskCombo->itemText(i));
 			}
 		}
 	}
@@ -384,7 +384,7 @@ void TreeFilterWidget::createFilterTree()
 
 	// Load masks
 	//
-	m_treeMaskCombo->addItems(theSettings.m_tuningWorkspaceMasks);
+	m_treeMaskCombo->addItems(TuningClientAppSettings::instance().user().m_tuningWorkspaceMasks);
 	m_treeMaskCombo->setEditText(QString());
 
 	QLineEdit* filterLineEdit = m_treeMaskCombo->lineEdit();

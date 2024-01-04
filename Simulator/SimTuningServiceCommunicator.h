@@ -293,7 +293,7 @@ namespace Sim
 		std::optional<qint64> m_waitingConfirmationID;
 		int m_receivedConfirmationsCount = 0;
 
-		RupFotip m_delayedReply;
+		RupFotip m_delayedReply{};
 
 		static FotipProcessingNumeratorsMap m_processingNumeratorsMap;	// one map for all TuningSourceHandlers
 																		// each entry in map according to one real LM

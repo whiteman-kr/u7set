@@ -2307,7 +2307,7 @@ namespace ExtWidgets
 		PropertyEditCellWidget(parent),
 		m_property(p),
 		m_row(row),
-		m_userType(p->value().userType()),
+		m_userType(p ? p->value().userType() : 0),
 		m_readOnly(readOnly),
 		m_propertyEditorBase(propertyEditorBase)
 	{
@@ -3579,6 +3579,14 @@ namespace ExtWidgets
 	const QList<std::shared_ptr<PropertyObject>>& PropertyEditor::objects() const
 	{
 		return m_objects;
+	}
+
+	void PropertyEditor::setObject(std::shared_ptr<PropertyObject> object)
+	{
+		QList<std::shared_ptr<PropertyObject>> list;
+		list << object;
+
+		return setObjects(list);
 	}
 
 	void PropertyEditor::setObjects(const std::vector<std::shared_ptr<PropertyObject>>& objects)

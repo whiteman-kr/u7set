@@ -50,7 +50,7 @@ SchemasWorkspace::~SchemasWorkspace()
 {
 	if (m_hSplitter != nullptr)
 	{
-		theSettings.m_schemasWorkspaceSplitterState = m_hSplitter->saveState();
+		TuningClientAppSettings::instance().user().m_schemasWorkspaceSplitterState = m_hSplitter->saveState();
 	}
 }
 
@@ -323,7 +323,7 @@ void SchemasWorkspace::createSchemasList()
 
 	mainLayout->addWidget(m_hSplitter);
 
-	m_hSplitter->restoreState(theSettings.m_schemasWorkspaceSplitterState);
+	m_hSplitter->restoreState(TuningClientAppSettings::instance().user().m_schemasWorkspaceSplitterState);
 }
 
 void SchemasWorkspace::createSchemasTabs()

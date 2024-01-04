@@ -23,6 +23,7 @@ qt_add_library(${TARGET} STATIC
 	../lib/ClientBehavior.h
 	../lib/ITimeStats.h
 	../lib/Tuning/ITuningConnection.h
+
 	AppSignalController.cpp
 	AppSignalController.h
 	BaseSchemaWidget.cpp
@@ -78,6 +79,8 @@ qt_add_library(${TARGET} STATIC
 	PosLineImpl.h
 	PosRectImpl.cpp
 	PosRectImpl.h
+	PosRectRotatable.cpp
+	PosRectRotatable.h
 	PropertyNames.cpp
 	PropertyNames.h
 	Schema.cpp
@@ -153,28 +156,29 @@ qt_add_library(${TARGET} STATIC
 )
 
 target_precompile_headers(${TARGET} PUBLIC
-	    <array>
-		<iostream>
+		<algorithm>
+		<array>
+		<cassert>
+		<cmath>
+		<chrono>
 		<fstream>
+		<functional>
+		<iostream>
+		<iterator>
 		<list>
-		<vector>
 		<map>
+		<memory>
+		<optional>
+		<optional>
+		<ranges>
+		<set>
+		<string>
+		<type_traits>
 		<unordered_map>
 		<unordered_set>
-		<set>
-		<cmath>
-		<cassert>
-		<memory>
 		<utility>
-		<string>
-		<optional>
 		<variant>
-		<algorithm>
-		<functional>
-		<optional>
-		<iterator>
-		<type_traits>
-		<ranges>
+		<vector>
 
 		<QAction>
 		<QApplication>
@@ -191,6 +195,7 @@ target_precompile_headers(${TARGET} PUBLIC
 		<QMouseEvent>
 		<QMutex>
 		<QPainter>
+		<QPainterPath>
 		<QPdfWriter>
 		<QPushButton>
 		<QQmlEngine>
@@ -202,6 +207,7 @@ target_precompile_headers(${TARGET} PUBLIC
 		<QStaticText>
 		<QStyleOptionButton>
 		<QSvgRenderer>
+		<QTextDocument>
 		<QUuid>
 		<QWheelEvent>
 		<QWindow>

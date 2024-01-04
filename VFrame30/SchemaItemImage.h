@@ -1,7 +1,7 @@
 #pragma once
 
-#include "PosRectImpl.h"
 #include "ImageItem.h"
+#include "PosRectRotatable.h"
 
 namespace VFrame30
 {
@@ -13,7 +13,7 @@ namespace VFrame30
 
 		<b>Event handlers</b>
 
-		To customize item's apperance and behaviour, event handler code is placed to following properties of the schema item using RPCT:
+		To customize item's appearance and behaviour, event handler code is placed to following properties of the schema item using RPCT:
 
 		- <b>ClickScript</b> contains mouse click event handler code.
 		Click event is generated each time when user clicks mouse button on the item and <b>AcceptClick</b> property is set to true;<br>
@@ -37,7 +37,7 @@ namespace VFrame30
 		\endcode
 	*/
 
-	class SchemaItemImage final : public PosRectImpl
+	class SchemaItemImage final : public PosRectRotatable
 	{
 		Q_OBJECT
 
@@ -72,10 +72,13 @@ namespace VFrame30
 		Q_PROPERTY(QString svg READ svgData WRITE setSvgData)
 		Q_PROPERTY(QString Svg READ svgData WRITE setSvgData)
 
+		/// \brief Angle of rotation
+		Q_PROPERTY(double angle READ angle WRITE setAngle)
+		Q_PROPERTY(double Angle READ angle WRITE setAngle)
+
 	public:
 		SchemaItemImage(void);
 		explicit SchemaItemImage(SchemaUnit unit);
-		virtual ~SchemaItemImage(void);
 
 		// Serialization
 		//
@@ -86,9 +89,8 @@ namespace VFrame30
 		// Draw Functions
 		//
 	public:
-
-		// Рисование элемента, выполняется в 100% масштабе.
-		// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
+		// Drawings are performed in the coordinate system of the document. In 100% zoom.
+		// Graphics must have a screen coordinate system (0, 0 - top left corner, down and right - positive coordinates).
 		//
 		virtual void draw(CDrawParam* drawParam) const override;
 
@@ -99,7 +101,7 @@ namespace VFrame30
 		// Properties and Data
 		//
 	public:
-		bool allowScale() const;		// Applied only to raster images
+		bool allowScale() const; // Applied only to raster images
 		void setAllowScale(bool value);
 
 		bool keepAspectRatio() const;
@@ -114,4 +116,4 @@ namespace VFrame30
 	private:
 		ImageItem m_image;
 	};
-}
+} // namespace VFrame30

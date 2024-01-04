@@ -556,6 +556,7 @@ namespace Sim
 				if (ramArea == nullptr)
 				{
 					SIM_FAULT(QString("setmem error, can't get memory area by handle %1").arg(memoryAreaHandle));
+					return false;
 				}
 
 				bool ok = ramArea->setMem(address, size, data);
@@ -589,6 +590,7 @@ namespace Sim
 		if (ramArea == nullptr)
 		{
 			SIM_FAULT(QString("Write RAM error, can't get memory area by handle %1").arg(memoryAreaHandle));
+			return false;
 		}
 
 		bool ok = ramArea->writeBit(offsetW, bitNo, data, E::ByteOrder::BigEndian);
@@ -681,6 +683,7 @@ namespace Sim
 		if (ramArea == nullptr)
 		{
 			SIM_FAULT(QString("Write RAM error, can't get memory area by handle %1").arg(memoryAreaHandle));
+			return false;
 		}
 
 		bool ok = ramArea->writeWord(offsetW, data, E::ByteOrder::BigEndian);
@@ -772,6 +775,7 @@ namespace Sim
 		if (ramArea == nullptr)
 		{
 			SIM_FAULT(QString("Write RAM error, can't get memory area by handle %1").arg(memoryAreaHandle));
+			return false;
 		}
 
 		bool ok = ramArea->writeDword(offsetW, data, E::ByteOrder::BigEndian);

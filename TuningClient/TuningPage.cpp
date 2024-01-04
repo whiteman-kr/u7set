@@ -121,31 +121,31 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 		if (state.controlIsEnabled() == false)
 		{
-			QColor color = theSettings.m_columnDisabledBackColor;
+			QColor color = TuningClientAppSettings::instance().user().m_columnDisabledBackColor;
 			return QBrush(color);
 		}
 
 		if (state.valid() == false)
 		{
-			QColor color = theSettings.m_columnErrorBackColor;
+			QColor color = TuningClientAppSettings::instance().user().m_columnErrorBackColor;
 			return QBrush(color);
 		}
 
 		if (state.writingIsEnabled() == false)
 		{
-			QColor color = theSettings.m_columnDisabledBackColor;
+			QColor color = TuningClientAppSettings::instance().user().m_columnDisabledBackColor;
 			return QBrush(color);
 		}
 
 		if (m_blink == true && m_tuningSignalManager.isUnapplied(hash) == true)
 		{
-			QColor color = theSettings.m_columnUnappliedBackColor;
+			QColor color = TuningClientAppSettings::instance().user().m_columnUnappliedBackColor;
 			return QBrush(color);
 		}
 
 		if (state.isTuningDefault() == false)
 		{
-			QColor color = theSettings.m_columnDefaultMismatchBackColor;
+			QColor color = TuningClientAppSettings::instance().user().m_columnDefaultMismatchBackColor;
 			return QBrush(color);
 		}
 	}
@@ -169,7 +169,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 			if (state.valid() == false)
 			{
-				color = theSettings.m_columnErrorBackColor;
+				color = TuningClientAppSettings::instance().user().m_columnErrorBackColor;
 				break;
 			}
 		}
@@ -182,7 +182,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 			if (state.limitsUnbalance(asp) == true)
 			{
-				color = theSettings.m_columnErrorBackColor;
+				color = TuningClientAppSettings::instance().user().m_columnErrorBackColor;
 				break;
 			}
 		}
@@ -193,7 +193,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 			if (state.outOfRange() == true)
 			{
-				color = theSettings.m_columnErrorBackColor;
+				color = TuningClientAppSettings::instance().user().m_columnErrorBackColor;
 				break;
 			}
 		}
@@ -206,7 +206,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 			if (defaultVal < asp.tuningLowBound() || defaultVal > asp.tuningHighBound())
 			{
-				color = theSettings.m_columnErrorBackColor;
+				color = TuningClientAppSettings::instance().user().m_columnErrorBackColor;
 				break;
 			}
 		}
@@ -254,25 +254,25 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 
 		if (state.controlIsEnabled() == false)
 		{
-			QColor color = theSettings.m_columnDisabledTextColor;
+			QColor color = TuningClientAppSettings::instance().user().m_columnDisabledTextColor;
 			return QBrush(color);
 		}
 
 		if (state.valid() == false)
 		{
-			QColor color = theSettings.m_columnErrorTextColor;
+			QColor color = TuningClientAppSettings::instance().user().m_columnErrorTextColor;
 			return QBrush(color);
 		}
 
 		if (state.writingIsEnabled() == false)
 		{
-			QColor color = theSettings.m_columnDisabledTextColor;
+			QColor color = TuningClientAppSettings::instance().user().m_columnDisabledTextColor;
 			return QBrush(color);
 		}
 
 		if (m_blink == true && m_tuningSignalManager.isUnapplied(hash) == true)
 		{
-			QColor color = theSettings.m_columnUnappliedTextColor;
+			QColor color = TuningClientAppSettings::instance().user().m_columnUnappliedTextColor;
 			return QBrush(color);
 		}
 	}
@@ -296,7 +296,7 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 
 			if (state.valid() == false)
 			{
-				color = theSettings.m_columnErrorTextColor;
+				color = TuningClientAppSettings::instance().user().m_columnErrorTextColor;
 				break;
 			}
 		}
@@ -309,7 +309,7 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 
 			if (state.limitsUnbalance(asp) == true)
 			{
-				color = theSettings.m_columnErrorTextColor;
+				color = TuningClientAppSettings::instance().user().m_columnErrorTextColor;
 				break;
 			}
 		}
@@ -320,7 +320,7 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 
 			if (state.outOfRange() == true)
 			{
-				color = theSettings.m_columnErrorTextColor;
+				color = TuningClientAppSettings::instance().user().m_columnErrorTextColor;
 				break;
 			}
 		}
@@ -2304,7 +2304,7 @@ void TuningPage::addSelectedSignalsToFilter(TuningFilter* filter)
 
     QString errorMsg;
 
-    if (m_tuningFilterStorage.saveUserFilters(theSettings.userFiltersFile(), &errorMsg) == false)
+    if (m_tuningFilterStorage.saveUserFilters(TuningClientAppSettings::instance().userFiltersFile(), &errorMsg) == false)
 	{
 		QMessageBox::critical(this, tr("Error"), errorMsg);
 	}

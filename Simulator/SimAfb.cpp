@@ -775,7 +775,7 @@ namespace Sim
 
 	bool AfbComponentInstance::paramExists(quint16 opIndex) const
 	{
-		if (opIndex > m_params_a.size())
+		if (opIndex >= m_params_a.size())
 		{
 			return false;
 		}

@@ -246,7 +246,7 @@ inline QString formatUptime(qint64 uptime)
 	return uptimeStr;
 }
 
-inline bool stringToBool(const QString str, bool* ok)
+inline bool stringToBool(const QString& str, bool* ok)
 {
 	QString boolStr = str.trimmed().toLower();
 

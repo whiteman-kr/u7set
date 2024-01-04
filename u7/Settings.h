@@ -3,6 +3,7 @@
 using maptype = QMap<QString, int>;
 Q_DECLARE_METATYPE(maptype)
 
+
 struct DatabaseConnectionParam
 {
 	QChar m_address[256];
@@ -22,6 +23,7 @@ struct DatabaseConnectionParam
 	QString password() const;
 	void setPassword(QString str);
 };
+
 
 class Settings
 {
@@ -189,7 +191,7 @@ public:
 	QByteArray m_dialogMetrologyConnectionGeometry;
 
 private:
-	DatabaseConnectionParam m_databaseConnection;
+	DatabaseConnectionParam m_databaseConnection{};
 	QString m_buildOutputPath;
 	bool m_expertMode = false;
 
