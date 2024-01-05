@@ -35,7 +35,7 @@ private slots:
 	void on_userComboBox_currentIndexChanged(int index);
 
 private:
-	Ui::FileHistoryDialog *ui;
+	Ui::FileHistoryDialog *ui = nullptr;
 	std::vector<DbChangeset> m_fileHistory;
 	DbController* m_db = nullptr;
 

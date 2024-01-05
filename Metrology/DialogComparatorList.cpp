@@ -162,39 +162,23 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Metrology
 		return QString();
 	}
 
-	// InputSignalID
 	//
-	bool visible = true;
 
-	if (row > 0)
-	{
-		std::shared_ptr<Metrology::ComparatorEx> prevComparatorEx = at(row - 1);
-		if (prevComparatorEx != nullptr)
-		{
-			if (prevComparatorEx->input().appSignalID() == param.appSignalID())
-			{
-				visible = false;
-			}
-		}
-	}
-
-	//
-	//
 	QString result;
 
 	switch (column)
 	{
-		case COMPARATOR_LIST_COLUMN_RACK:				result = param.location().rackCaption();										break;
-		case COMPARATOR_LIST_COLUMN_INPUT:				result = visible ? comparatorEx->inputSignalID(m_idType) : QString();			break;
-		case COMPARATOR_LIST_COLUMN_CMP_NO:				result = comparatorEx->indexStr();												break;
-		case COMPARATOR_LIST_COLUMN_SETPOINT:			result = comparatorEx->compareDefaultValueStr(m_idType);						break;
-		case COMPARATOR_LIST_COLUMN_HYSTERESIS:			result = qApp->translate("MetrologySignal", comparatorEx->hysteresisDefaultValueStr(m_idType).toUtf8());	break;
-		case COMPARATOR_LIST_COLUMN_TYPE:				result = param.signalTypeStr();													break;
-		case COMPARATOR_LIST_COLUMN_EL_RANGE:			result = param.electricRangeStr();												break;
-		case COMPARATOR_LIST_COLUMN_EL_SENSOR:			result = param.electricSensorTypeStr();											break;
-		case COMPARATOR_LIST_COLUMN_EN_RANGE:			result = param.engineeringRangeStr();											break;
-		case COMPARATOR_LIST_COLUMN_OUTPUT:				result = comparatorEx->outputSignalID(m_idType);								break;
-		case COMPARATOR_LIST_COLUMN_SCHEMA:				result = comparatorEx->schemaID();												break;
+		case COMPARATOR_LIST_COLUMN_RACK:				result = param.location().rackCaption();					break;
+		case COMPARATOR_LIST_COLUMN_INPUT:				result = comparatorEx->inputSignalID(m_idType);				break;
+		case COMPARATOR_LIST_COLUMN_CMP_NO:				result = comparatorEx->indexStr();							break;
+		case COMPARATOR_LIST_COLUMN_SETPOINT:			result = comparatorEx->compareDefaultValueStr(m_idType);	break;
+		case COMPARATOR_LIST_COLUMN_HYSTERESIS:			result = comparatorEx->hysteresisDefaultValueStr(m_idType);	break;
+		case COMPARATOR_LIST_COLUMN_TYPE:				result = param.signalTypeStr();								break;
+		case COMPARATOR_LIST_COLUMN_EL_RANGE:			result = param.electricRangeStr();							break;
+		case COMPARATOR_LIST_COLUMN_EL_SENSOR:			result = param.electricSensorTypeStr();						break;
+		case COMPARATOR_LIST_COLUMN_EN_RANGE:			result = param.engineeringRangeStr();						break;
+		case COMPARATOR_LIST_COLUMN_OUTPUT:				result = comparatorEx->outputSignalID(m_idType);			break;
+		case COMPARATOR_LIST_COLUMN_SCHEMA:				result = comparatorEx->schemaID();							break;
 
 		default:
 			assert(0);

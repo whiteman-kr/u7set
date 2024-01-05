@@ -1,11 +1,19 @@
 cmake_minimum_required(VERSION 3.16)
 
+# Creates variables:
+#	U7SET_MAJOR_VERSION, 
+#	U7SET_MINOR_VERSION, 
+#	U7SET_PATCH_VERSION, 
+#	U7SET_BRANCH_NAME,
+#	U7SET_RELEASE_TYPE
+#
+include(cmake/version.cmake)
+
 # Git based 
-# CI_PIPELINE_ID (2570) CI_COMMIT_SHA
 #
 project(
 	u7set
-	VERSION 00.00.00.0000
+	VERSION ${U7SET_MAJOR_VERSION}.${U7SET_MINOR_VERSION}.${U7SET_PATCH_VERSION}
 	DESCRIPTION "Radiy Platform Configuration Tools"
 	HOMEPAGE_URL "radiy.com")
 
@@ -52,7 +60,8 @@ option(UPDATE_TRANSLATIONS "Update Translations" OFF)
 
 message("-----------------------------------------")
 message(${PROJECT_NAME})
-message("Version: " ${CMAKE_PROJECT_VERSION})
+message("Version: ${CMAKE_PROJECT_VERSION} (${U7SET_BRANCH_NAME})")
+message("Release type: ${U7SET_RELEASE_TYPE}")
 if(CMAKE_CONFIGURATION_TYPES)
 	message("Build types: ${CMAKE_CONFIGURATION_TYPES}")
 	message(FATAL_ERROR "Multiple configuration is not supported.")
@@ -66,6 +75,8 @@ message("Update translations: " ${UPDATE_TRANSLATIONS})
 message("CMake executable:  ${CMAKE_COMMAND}")
 message("CMake version:  ${CMAKE_VERSION}")
 message("Current file path:  ${CMAKE_CURRENT_LIST_FILE}")
+message("User: ${U7SET_USER_NAME}")
+message("Host: ${U7SET_HOSTNAME}")
 message("-----------------------------------------")
 
 # Add projects.
@@ -126,5 +137,11 @@ add_subdirectory(./Test/u7databaseTests)
 add_subdirectory(./Test/MetrologyTests)
 #add_subdirectory(./Test/TestSuiteTest)
 
-
-
+# Create install target.
+# Just run /u7setinstall/createinstall.bat file.
+#
+add_custom_target(create_install
+	COMMAND ${CMAKE_COMMAND} -E env "U7SET_FULL_VERSION=${U7SET_FULL_VERSION}" "${CMAKE_CURRENT_SOURCE_DIR}/u7setinstall/createinstall.bat"
+	WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/u7setinstall"
+	COMMENT "Running createinstall.bat with U7SET_FULL_VERSION=${U7SET_FULL_VERSION}"
+)

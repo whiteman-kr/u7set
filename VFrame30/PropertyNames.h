@@ -35,6 +35,11 @@ namespace VFrame30
 
 		inline static const QString color{"Color"};
 
+		inline static const QString rotationPoint{"RotationPoint"};
+		inline static const QString rotationPointDescription{"The point around which the item is rotated."};
+		inline static const QString angle{"Angle"};
+		inline static const QString angleDescription{"Item rotation angle (rotates around RotationPoint)."};
+
 		inline static const QString type{"Type"};
 		inline static const QString value{"Value"};
 		inline static const QString valueInteger{"ValueInteger"};

@@ -273,7 +273,7 @@ public:
 
 private:
 
-	QSqlDatabase*		m_pDatabase;
+	QSqlDatabase*		m_pDatabase = nullptr;
 	SqlObjectInfo		m_info;
 	SqlFieldBase		m_fieldBase;
 };

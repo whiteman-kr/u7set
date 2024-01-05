@@ -421,6 +421,7 @@ message SchemaItem
 	// Inherited from SchmeItem
 	//
 	optional PosRectImpl PosRectImpl = 10;
+	optional PosRectRotatable PosRectRotatable = 20;
 	optional PosLineImpl PosLineImpl = 11;
 	optional PosConnectionImpl PosConnectionImpl = 12;
 
@@ -430,7 +431,7 @@ message SchemaItem
 	optional FblItemRect FblItemRect = 107;					// +PosRectImpl, FblItem
 	optional FblItemLine FblItemLine = 108;					// +PosConnectionImpl, FblItem
 
-	// Inherited from PosRectImpl, PosLineImpl, PosConnectionImpl
+	// Inherited from PosRectImpl, PosRectRotatable, PosLineImpl, PosConnectionImpl
 	//
 	optional SchemaItemRect Rect = 116;						// +PosRectImpl
 	optional SchemaItemLine Line = 117;						// +PosLineImpl
@@ -479,6 +480,15 @@ message PosRectImpl
 	required double heightDocPt = 4;
 }
 
+
+//
+// PosRectRotatable
+//
+message PosRectRotatable
+{
+	optional double angle = 2;
+	optional int32 rotationpoint = 3; // Reflected to enum VFrame30::RotationPoint
+}
 
 //
 // PosLineImpl
@@ -1040,6 +1050,7 @@ message DeviceObject
 	optional int32 place = 5 [default = 0];
 	optional string specific_properties_struct = 6;
 	repeated Property properties = 7;
+	repeated string tags = 8;
 
 	optional bool preset = 32 [default = false];
 	optional bool presetRoot = 33 [default = false];

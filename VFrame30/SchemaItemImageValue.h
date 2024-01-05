@@ -3,6 +3,7 @@
 #include "IMatsSchemaItemAssociations.h"
 #include "ImageItem.h"
 #include "PosRectImpl.h"
+#include "PosRectRotatable.h"
 
 class AppSignalState;
 class AppSignalParam;
@@ -136,7 +137,7 @@ namespace VFrame30
 		})
 		\endcode
 	*/
-	class SchemaItemImageValue : public PosRectImpl, public IMatsSchemaItemAssociations
+	class SchemaItemImageValue : public PosRectRotatable, public IMatsSchemaItemAssociations
 	{
 		Q_OBJECT
 
@@ -187,8 +188,10 @@ namespace VFrame30
 		//
 	public:
 		virtual void draw(CDrawParam* drawParam) const override;
+		void drawPrivate(CDrawParam* drawParam) const;
 
 		virtual void drawHighlight(CDrawParam* drawParam) const override;
+		void drawHighlightPrivate(CDrawParam* drawParam) const;
 
 	protected:
 		void initDrawingResources() const;

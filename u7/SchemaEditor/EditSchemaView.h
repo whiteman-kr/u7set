@@ -56,7 +56,7 @@ protected:
 protected:
 	SchemaItemAction getPossibleAction(VFrame30::SchemaItem* schemaItem, QPointF point, int* outMovingEdgePointIndex);
 
-	QRectF sizingRectItem(double xdif, double ydif, VFrame30::IPosRect* itemPos);
+	QRectF sizingRectItem(double xdif, double ydif, const VFrame30::IPosRect* itemPos);
 
 	// Signals
 signals:

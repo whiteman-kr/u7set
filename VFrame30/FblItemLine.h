@@ -1,11 +1,12 @@
 #pragma once
 
-#include "PosConnectionImpl.h"
 #include "FblItem.h"
+#include "PosConnectionImpl.h"
 
 namespace VFrame30
 {
-	class FblItemLine : public PosConnectionImpl, public FblItem
+	class FblItemLine : public PosConnectionImpl,
+						public FblItem
 	{
 		Q_OBJECT
 
@@ -13,10 +14,10 @@ namespace VFrame30
 		FblItemLine(void);
 		FblItemLine(SchemaUnit itemunit);
 		virtual ~FblItemLine(void);
-		
+
 	protected:
 		virtual void propertyDemand(const QString& prop) override;
-		
+
 		// Serialization
 		//
 	protected:
@@ -36,8 +37,8 @@ namespace VFrame30
 		void setLineStyle(E::LineStyle value);
 
 	protected:
-		double m_weight;					// Line weight, pixels/inchces depends on UnitDocPt
-		QColor m_lineColor;
+		double m_weight = 0; // Line weight, pixels/inches depends on UnitDocPt
+		QColor m_lineColor = qRgb(0x00, 0x00, 0xC0);
 		E::LineStyle m_lineStyle = E::SolidLine;
 	};
-}
+} // namespace VFrame30

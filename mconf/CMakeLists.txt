@@ -32,10 +32,10 @@ add_executable(${TARGET} WIN32
 	Globals.cpp
 	Globals.h
 	main.cpp
+	MconfSettings.cpp
+	MconfSettings.h
 	ModuleConfigurator.cpp
 	ModuleConfigurator.h
-	Settings.cpp
-	Settings.h
 	SettingsForm.cpp
 	SettingsForm.h
 
@@ -69,6 +69,8 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QSerialPort>
 	<QSerialPortInfo>
 )
+
+target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Sql Qt6::Network Qt6::Xml Qt6::Widgets Qt6::Gui Qt6::SerialPort Qt6::Qml)
 target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib HardwareLib)

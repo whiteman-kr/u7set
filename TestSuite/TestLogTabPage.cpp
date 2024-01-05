@@ -45,7 +45,9 @@ TestLogTabPage::TestLogTabPage(TestSuite::TestLog& testLog, TestSuiteTestLogOutp
 	m_findTextEdit->setPlaceholderText(tr("Find Text"));
 	m_findTextEdit->setMinimumWidth(300);
 
-	QCompleter* searchCompleter = new QCompleter(theSettings.outputSearchCompleter(), this);
+	QStringList outputSerachCompleter = QSettings().value("TestLogTabPage/m_buildSerachCompleter").toStringList();
+
+	QCompleter* searchCompleter = new QCompleter(outputSerachCompleter, this);
 	searchCompleter->setCaseSensitivity(Qt::CaseInsensitive);
 	m_findTextEdit->setCompleter(searchCompleter);
 
@@ -237,20 +239,22 @@ void TestLogTabPage::search()
 
 	// Update completer
 	//
+	QStringList outputSerachCompleter = QSettings().value("TestLogTabPage/m_buildSerachCompleter").toStringList();
 	
-	if (theSettings.outputSearchCompleter().contains(searchText, Qt::CaseInsensitive) == false)
+	if (outputSerachCompleter.contains(searchText, Qt::CaseInsensitive) == false)
 	{
-		theSettings.outputSearchCompleter() << searchText;
+		outputSerachCompleter << searchText;
 
 		QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_findTextEdit->completer()->model());
 		assert(completerModel);
 
 		if (completerModel != nullptr)
 		{
-			completerModel->setStringList(theSettings.outputSearchCompleter());
+			completerModel->setStringList(outputSerachCompleter);
 		}
+
+		QSettings().setValue("TestLogTabPage/m_buildSerachCompleter", outputSerachCompleter);
 	}
-	
 
 	// Find
 	//

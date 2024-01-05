@@ -112,6 +112,8 @@ target_precompile_headers(${TARGET} PUBLIC
 	"../Proto/network.pb.h"
 )
 
+target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
+
 target_link_libraries(${TARGET} PRIVATE Qt6::Network)
 target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib)
 

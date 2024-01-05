@@ -12,11 +12,12 @@ DialogProperties::DialogProperties(QWidget* parent)
 {
 	setWindowTitle(tr("Properties"));
 
-	if (theSettings.m_presetPropertiesWindowPos.x() != -1 && theSettings.m_presetPropertiesWindowPos.y() != -1)
+	if (TuningClientAppSettings::instance().user().m_presetPropertiesWindowPos.x() != -1 && 
+		TuningClientAppSettings::instance().user().m_presetPropertiesWindowPos.y() != -1)
 	{
-		setSplitterPosition(theSettings.m_presetPropertiesSplitterState);
-		move(theSettings.m_presetPropertiesWindowPos);
-		restoreGeometry(theSettings.m_presetPropertiesWindowGeometry);
+		setSplitterPosition(TuningClientAppSettings::instance().user().m_presetPropertiesSplitterState);
+		move(TuningClientAppSettings::instance().user().m_presetPropertiesWindowPos);
+		restoreGeometry(TuningClientAppSettings::instance().user().m_presetPropertiesWindowGeometry);
 	}
 }
 
@@ -39,7 +40,7 @@ void DialogProperties::done(int r)
 
 void DialogProperties::saveSettings()
 {
-	theSettings.m_presetPropertiesSplitterState = splitterPosition();
-	theSettings.m_presetPropertiesWindowPos = pos();
-	theSettings.m_presetPropertiesWindowGeometry = saveGeometry();
+	TuningClientAppSettings::instance().user().m_presetPropertiesSplitterState = splitterPosition();
+	TuningClientAppSettings::instance().user().m_presetPropertiesWindowPos = pos();
+	TuningClientAppSettings::instance().user().m_presetPropertiesWindowGeometry = saveGeometry();
 }

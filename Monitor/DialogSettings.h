@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QDialog>
 #include "MonitorAppSettings.h"
 #include "../ClientLib/ClientTranslator.h"
 
@@ -22,11 +23,10 @@ protected:
 	virtual void showEvent(QShowEvent* event) override;
 
 private:
-	void fillLanguagesList(const ClientLib::ClientTranslator& translator);
+	void createLanguagesList(const ClientLib::ClientTranslator& translator);
+	std::optional<MonitorAppSettings::Data> parseData();
 	
 private slots:
-	std::optional<MonitorAppSettings::Data> parseData();
-
 	void ok_clicked();
 	void cancel_clicked();
 	void saveAs_clicked();

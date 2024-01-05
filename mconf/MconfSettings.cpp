@@ -1,7 +1,7 @@
-#include "Settings.h"
+#include "MconfSettings.h"
 
 
-Settings::Settings(void) :
+MconfSettings::MconfSettings(void) :
 #ifdef Q_OS_LINUX
 	m_serialPort("ttyS0"),
 #endif
@@ -18,11 +18,11 @@ Settings::Settings(void) :
 }
 
 
-Settings::~Settings(void)
+MconfSettings::~MconfSettings(void)
 {
 }
 
-void Settings::save() const
+void MconfSettings::save() const
 {
 	QSettings s;
 
@@ -38,7 +38,7 @@ void Settings::save() const
 	return;
 }
 
-void Settings::load()
+void MconfSettings::load()
 {
 	QSettings s;
 
@@ -54,72 +54,72 @@ void Settings::load()
 	return;
 }
 
-QString Settings::serialPort() const
+QString MconfSettings::serialPort() const
 {
 	return m_serialPort;
 }
 
-void Settings::setSerialPort(const QString& value)
+void MconfSettings::setSerialPort(const QString& value)
 {
 	m_serialPort = value;
 }
 
-bool Settings::showDebugInfo() const
+bool MconfSettings::showDebugInfo() const
 {
 	return m_showDebugInfo;
 }
 
-void Settings::setShowDebugInfo(bool value)
+void MconfSettings::setShowDebugInfo(bool value)
 {
 	m_showDebugInfo = value;
 }
 
-bool Settings::verify() const
+bool MconfSettings::verify() const
 {
 	return m_verify;
 }
 
-void Settings::setVerify(bool value)
+void MconfSettings::setVerify(bool value)
 {
 	m_verify = value;
 }
 
-bool Settings::expertMode() const
+bool MconfSettings::expertMode() const
 {
 	return m_expertMode;
 }
 
-void Settings::setExpertMode(bool value)
+void MconfSettings::setExpertMode(bool value)
 {
 	m_expertMode = value;
 }
 
-QString Settings::server() const
+QString MconfSettings::server() const
 {
 	return m_server;
 }
 
-void Settings::setServer(const QString& value)
+void MconfSettings::setServer(const QString& value)
 {
 	m_server = value;
 }
 
-QString Settings::serverUsername() const
+QString MconfSettings::serverUsername() const
 {
 	return m_serverUsername;
 }
 
-void Settings::setServerUsername(const QString& value)
+void MconfSettings::setServerUsername(const QString& value)
 {
 	m_serverUsername = value;
 }
 
-QString Settings::serverPassword() const
+QString MconfSettings::serverPassword() const
 {
 	return m_serverPassword;
 }
 
-void Settings::setServerPassword(const QString& value)
+void MconfSettings::setServerPassword(const QString& value)
 {
 	m_serverPassword = value;
 }

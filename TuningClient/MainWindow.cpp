@@ -21,7 +21,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow(parent),
 	m_logFile("TuningClient", QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + softwareInfo.equipmentID()),
 	m_tuningLog(m_userManager, "TuningClientSignals", QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + softwareInfo.equipmentID()),
-	m_configController(softwareInfo, theSettings.configuratorAddress1(), theSettings.configuratorAddress2(), &m_logFile),
+	m_configController(softwareInfo, TuningClientAppSettings::instance().configuratorAddress1(), TuningClientAppSettings::instance().configuratorAddress2(), &m_logFile),
 	m_tuningSignalManager(softwareInfo.equipmentID(), &m_logFile),
 	m_tuningConnection{m_tuningSignalManager, m_tuningSignalManager, m_tuningSignalManager, &m_logFile, &m_tuningLog}
 
@@ -44,7 +44,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 
 	{
 		QStringList failedTranslations;
-		if (m_translator.setLanguage(theSettings.language(), failedTranslations) == false)
+		if (m_translator.setLanguage(TuningClientAppSettings::instance().language(), failedTranslations) == false)
 		{
 			if (failedTranslations.isEmpty() == false)
 			{
@@ -52,7 +52,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 			}
 			else
 			{
-				m_logFile.writeError("Failed to set language: " + theSettings.language());
+				m_logFile.writeError("Failed to set language: " + TuningClientAppSettings::instance().language());
 			}
 		}
 	}
@@ -60,11 +60,11 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	// -
 	m_sorTooltipText = QObject::tr("SOR counter (click for details)");
 
-	if (theSettings.m_mainWindowPos.x() != -1 && theSettings.m_mainWindowPos.y() != -1)
+	if (TuningClientAppSettings::instance().user().m_mainWindowPos.x() != -1 && TuningClientAppSettings::instance().user().m_mainWindowPos.y() != -1)
 	{
-		move(theSettings.m_mainWindowPos);
-		restoreGeometry(theSettings.m_mainWindowGeometry);
-		restoreState(theSettings.m_mainWindowState);
+		move(TuningClientAppSettings::instance().user().m_mainWindowPos);
+		restoreGeometry(TuningClientAppSettings::instance().user().m_mainWindowGeometry);
+		restoreState(TuningClientAppSettings::instance().user().m_mainWindowState);
 	}
 	else
 	{
@@ -78,7 +78,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	createMenu();
 	createStatusBar();
 
-	setWindowTitle(QString("TuningClient - ") + theSettings.instanceStrId());
+	setWindowTitle(QString("TuningClient - ") + TuningClientAppSettings::instance().instanceStrId());
 
 	setCentralWidget(new QLabel(tr("Waiting for configuration...")));
 
@@ -99,7 +99,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 
 	QString errorCode;
 
-	if (m_filterStorage.load(theSettings.userFiltersFile(), &errorCode) == false)
+	if (m_filterStorage.load(TuningClientAppSettings::instance().userFiltersFile(), &errorCode) == false)
 	{
 		QString msg = tr("Failed to load user filters: %1").arg(errorCode);
 
@@ -118,9 +118,9 @@ MainWindow::~MainWindow()
 {
 	deleteWorkspace();
 
-	theSettings.m_mainWindowPos = pos();
-	theSettings.m_mainWindowGeometry = saveGeometry();
-	theSettings.m_mainWindowState = saveState();
+	TuningClientAppSettings::instance().user().m_mainWindowPos = pos();
+	TuningClientAppSettings::instance().user().m_mainWindowGeometry = saveGeometry();
+	TuningClientAppSettings::instance().user().m_mainWindowState = saveState();
 }
 
 TuningSignalManager& MainWindow::tuningSignalManager()
@@ -430,7 +430,7 @@ void MainWindow::checkAndRemoveFilterSignals()
 	{
 		QString errorMsg;
 
-        if (m_filterStorage.saveUserFilters(theSettings.userFiltersFile(), &errorMsg) == false)
+        if (m_filterStorage.saveUserFilters(TuningClientAppSettings::instance().userFiltersFile(), &errorMsg) == false)
 		{
 			m_logFile.writeError(errorMsg);
 			QMessageBox::critical(this, tr("Error"), errorMsg);
@@ -766,7 +766,7 @@ void MainWindow::updateStatusBar()
 			}
 		}
 
-		int labelIndex = 0;
+		size_t labelIndex = 0;
 
 		for (int i = 0; i < filtersCount; i++)
 		{
@@ -784,9 +784,9 @@ void MainWindow::updateStatusBar()
 
 			TuningCounters counters = f->counters();
 
-			if (static_cast<int>(m_statusDiscreteCount.size()) < labelIndex)
+			if (labelIndex >= m_statusDiscreteCount.size())
 			{
-				Q_ASSERT(false);
+				Q_ASSERT(labelIndex < m_statusDiscreteCount.size());
 				return;
 			}
 
@@ -1188,7 +1188,7 @@ void MainWindow::runPresetEditor()
 
         QString errorMsg;
 
-        if (m_filterStorage.saveUserFilters(theSettings.userFiltersFile(), &errorMsg) == false)
+        if (m_filterStorage.saveUserFilters(TuningClientAppSettings::instance().userFiltersFile(), &errorMsg) == false)
 		{
 			m_logFile.writeError(errorMsg);
 			QMessageBox::critical(this, tr("Error"), errorMsg);
@@ -1200,8 +1200,15 @@ void MainWindow::runPresetEditor()
 
 void MainWindow::showSettings()
 {
-	DialogSettings d(m_translator);
-	d.exec();
+	DialogSettings d(m_translator, this);
+	d.setSettings(TuningClientAppSettings::instance().system());
+
+	if (d.exec() == QDialog::Accepted)
+	{
+
+		TuningClientAppSettings::instance().setSystem(d.settings());
+		TuningClientAppSettings::instance().save();
+	}
 }
 
 

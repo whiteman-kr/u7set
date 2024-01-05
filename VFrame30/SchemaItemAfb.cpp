@@ -9,8 +9,8 @@ namespace VFrame30
 	SchemaItemAfb::SchemaItemAfb(void) :
 		SchemaItemAfb(SchemaUnit::Inch)
 	{
-		// This contructor can be called while serialization,
-		// Object will be created and serailizartion will initialize all the members
+		// This constructor can be called while serialization,
+		// Object will be created and serialization will initialize all the members.
 		//
 	}
 
@@ -214,7 +214,7 @@ namespace VFrame30
 		p->scale(p->device()->physicalDpiX(), p->device()->physicalDpiY());
 
 		const double intend = 1.0 / 4.0;
-		const double pinWdith = 2.0 / 4.0;
+		const double pinWidth = 2.0 / 4.0;
 		const double pinHeight = static_cast<double>(p->fontInfo().pixelSize()) / p->device()->physicalDpiY() * 1.25;
 		const double typeWidth = 2.0 / 4.0;
 
@@ -229,9 +229,9 @@ namespace VFrame30
 		pen.setWidth(0);
 		p->setPen(pen);
 
-		QRectF itemRect(rect.left() + intend + pinWdith,
+		QRectF itemRect(rect.left() + intend + pinWidth,
 						rect.top() + intend,
-						rect.width() - (intend + pinWdith) * 2.0,
+						rect.width() - (intend + pinWidth) * 2.0,
 						pinHeight * qMax(inputsCount(), outputsCount()));
 
 		if (itemRect.width() < 1.5)
@@ -272,27 +272,42 @@ namespace VFrame30
 			//
 			QRectF pinTextRect(intend,
 							   pinY - pinHeight,
-							   pinWdith,
+							   pinWidth,
 							   pinHeight);
 
 			drawTextFunc(p, pinTextRect, input.caption() + " ", Qt::AlignRight | Qt::AlignBaseline | Qt::TextDontClip);
 
 			// Draw pin type
 			//
-			const std::vector<Afb::AfbSignal>& afbInputs = afb.inputSignals();
-			for (const Afb::AfbSignal& afbPin : afbInputs)
 			{
-				if (afbPin.caption() == input.caption())
-				{
-					QRectF pinTypeRect(itemRect.left(),
-									   pinY - pinHeight / 2.0,
-									   typeWidth,
-									   pinHeight);
+				QRectF pinTypeRect(itemRect.left(),
+								   pinY - pinHeight / 2.0,
+								   typeWidth,
+								   pinHeight);
 
-					QString str = pinTypeText(afbPin.type(), afbPin.dataFormat());
+				bool found = false;
+				const std::vector<Afb::AfbSignal>& afbInputs = afb.inputSignals();
+				for (const Afb::AfbSignal& afbPin : afbInputs)
+				{
+					if (afbPin.caption() == input.caption())
+					{
+						QString str = pinTypeText(afbPin.type(), afbPin.dataFormat());
+
+						drawTextFunc(p, pinTypeRect, str, Qt::AlignCenter | Qt::TextDontClip);
+
+						found = true;
+						break;
+					}
+				}
+
+				if (found == false)
+				{
+					// Draw type info from the pin.
+					// This is the fix for packed logic, these items do not have AfbSignals, just pins.
+					//
+					QString str = E::valueToString<E::SignalType>(input.signalType());
 
 					drawTextFunc(p, pinTypeRect, str, Qt::AlignCenter | Qt::TextDontClip);
-					break;
 				}
 			}
 
@@ -316,13 +331,13 @@ namespace VFrame30
 			// Drawing pin
 			//
 			p->drawLine(QPointF(itemRect.right(), pinY),
-						QPointF(itemRect.right() + pinWdith, pinY));
+						QPointF(itemRect.right() + pinWidth, pinY));
 
 			// Draw pin text
 			//
 			QRectF pinTextRect(itemRect.right(),
 							   pinY - pinHeight,
-							   pinWdith,
+							   pinWidth,
 							   pinHeight);
 
 			drawTextFunc(p, pinTextRect, " " + out.caption(), Qt::AlignLeft | Qt::AlignBaseline | Qt::TextDontClip);
@@ -910,7 +925,7 @@ namespace VFrame30
 			prop->setPrecision(precision());
 		}
 
-		// Add or remoive special property for packed logic.
+		// Add or remove special property for packed logic.
 		//
 		if (m_afbElement.isPackedLogic() == true)
 		{

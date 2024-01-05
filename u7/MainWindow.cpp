@@ -1,41 +1,37 @@
 #include "MainWindow.h"
-#include "CentralWidget.h"
-#include "Settings.h"
-#include "DialogSettings.h"
-#include "../lib/Ui/DialogAbout.h"
-#include "../lib/LogicModuleSet.h"
 #include "../UtilsLib/Ui/UiTools.h"
+#include "../lib/LogicModuleSet.h"
+#include "../lib/Ui/DialogAbout.h"
+#include "./EquipmentEditor/EquipmentTabPage.h"
+#include "./Forms/FileHistoryDialog.h"
+#include "./Forms/PendingChangesDialog.h"
+#include "./Forms/ProjectPropertiesForm.h"
+#include "./SchemaEditor/EditSchemaWidget.h"
+#include "./SchemaEditor/SchemasTabPage.h"
+#include "./Simulator/SimProfileEditor.h"
 #include "AppSignalSetProvider.h"
-#include "UserManagementDialog.h"
-#include "ProjectsTabPage.h"
-#include "FilesTabPage.h"
-#include "SignalsTabPage.h"
-#include "DialogSubsystemListEditor.h"
-#include "DialogConnections.h"
-#include "DialogBusEditor.h"
-#include "DialogTagsEditor.h"
-#include "DialogAfbLibraryCheck.h"
 #include "BuildTabPage.h"
-#include "UploadTabPage.h"
+#include "CentralWidget.h"
+#include "DialogAfbLibraryCheck.h"
+#include "DialogBusEditor.h"
+#include "DialogConnections.h"
+#include "DialogSettings.h"
+#include "DialogShortcuts.h"
+#include "DialogSubsystemListEditor.h"
+#include "DialogTagsEditor.h"
+#include "FilesTabPage.h"
+#include "Forms/DialogProjectDiff.h"
+#include "GlobalMessanger.h"
+#include "ProjectsTabPage.h"
+#include "Reports/DialogSchemasReport.h"
+#include "DialogMatsUsersEditor.h"
+#include "Reports/SchemasReport.h"
+#include "Settings.h"
+#include "SignalsTabPage.h"
 #include "SimulatorTabPage.h"
 #include "TestsTabPage.h"
-#include "GlobalMessanger.h"
-#include "Forms/DialogProjectDiff.h"
-#include "Reports/SchemasReport.h"
-#include "Reports/DialogSchemasReport.h"
-#include "DialogShortcuts.h"
-#include "./Forms/FileHistoryDialog.h"
-#include "./Forms/ProjectPropertiesForm.h"
-#include "./Forms/PendingChangesDialog.h"
-#include "./SchemaEditor/SchemasTabPage.h"
-#include "./SchemaEditor/EditSchemaWidget.h"
-#include "./EquipmentEditor/EquipmentTabPage.h"
-#include "./Simulator/SimProfileEditor.h"
-#include "DialogMatsUsersEditor.h"
-
-#if __has_include("../gitlabci_version.h")
-#	include "../gitlabci_version.h"
-#endif
+#include "UploadTabPage.h"
+#include "UserManagementDialog.h"
 
 MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	QMainWindow{parent},
@@ -1013,11 +1009,16 @@ void MainWindow::updateUfbsAfbsBusses()
 			//
 			std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(file->data());
 
-			if (schema == nullptr ||
-				(schema->isUfbSchema() == false && schema->isLogicSchema() == false))
+			if (schema == nullptr)
+			{
+				QMessageBox::critical(this, qAppName(), tr("Error parsing schema %1.").arg(file->fileName()));
+				break;
+			}
+
+			if (schema->isUfbSchema() == false && schema->isLogicSchema() == false)
 			{
 				assert(schema->isUfbSchema() == true || schema->isLogicSchema() == true);
-				QMessageBox::critical(this, qAppName(), tr("Error parsing schema %1.").arg(file->fileName()));
+				QMessageBox::critical(this, qAppName(), tr("File %1 must be AppLogic or UFB schema.").arg(file->fileName()));
 				break;
 			}
 

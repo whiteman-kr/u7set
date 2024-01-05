@@ -6,9 +6,17 @@ QColor redColor = QColor(192, 0, 0);
 // Settings
 //
 
-AppConfigSettings::AppConfigSettings():
-	m_language("en")
+AppConfigSettings::AppConfigSettings()
 {
+	// Determine the Local settings folder
+	//
+	m_localAppDataPath = QDir::toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
+
+	QDir dir(m_localAppDataPath);
+	if (dir.exists() == false)
+	{
+		dir.mkpath(m_localAppDataPath);
+	}
 }
 
 AppConfigSettings::AppConfigSettings(const AppConfigSettings& That):
@@ -17,129 +25,71 @@ AppConfigSettings::AppConfigSettings(const AppConfigSettings& That):
 	*this = That;
 }
 
-void AppConfigSettings::StoreSystem()
+AppConfigSettings& AppConfigSettings::instance()
+{
+	static AppConfigSettings theSettings;
+	return theSettings;
+}
+
+
+void AppConfigSettings::save() const
+{
+	QSettings s{qApp->organizationName(), qApp->applicationName()};	// Explicitly point app name, as it can be changed via settings.
+	saveSystem(s);
+	return;
+}
+
+void AppConfigSettings::load()
+{
+	QSettings s{qApp->organizationName(), qApp->applicationName()};	// Explicitly point app name, as it can be changed via settings.
+	loadSystem(s);
+	m_wasLoadedFromFile = false;
+	return;
+}
+
+bool AppConfigSettings::saveToFile(QString fileName) const
+{
+	QSettings s{fileName, QSettings::IniFormat};
+	saveSystem(s);
+	s.sync();
+	return s.status() == QSettings::Status::NoError;
+}
+
+bool AppConfigSettings::loadFromFile(QString fileName)
+{
+	QSettings s{fileName, QSettings::IniFormat};
+	loadSystem(s);
+	m_wasLoadedFromFile = true;
+	return s.status() == QSettings::Status::NoError;
+}
+
+bool AppConfigSettings::wasLoadedFromFile() const
+{
+	return m_wasLoadedFromFile;
+}
+
+void AppConfigSettings::saveSystem(QSettings& s) const
 {
 	// save system settings
 	//
-	m_librarySettings.saveToRegistry();
+	m_data.m_librarySettings.saveToRegistry(s);
 
-	QSettings s(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
+	s.setValue("AppConfigSettings/language", m_data.m_language);
 
-	QString instanceHistoryString = m_instanceHistory.join(';');
-	s.setValue("m_instanceHistory", instanceHistoryString);
+	s.setValue("AppConfigSettings/useLocalScriptsPath", m_data.m_useLocalScriptsPath);
+	s.setValue("AppConfigSettings/localScriptsPath", m_data.m_localScriptsPath);
 }
 
-void AppConfigSettings::RestoreSystem()
+void AppConfigSettings::loadSystem(const QSettings& s)
 {
 	// read system settings
 	//
-	m_librarySettings.restoreFromRegistry();
+	m_data.m_librarySettings.restoreFromRegistry(s);
 
-	QSettings s(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
+	m_data.m_language = s.value("AppConfigSettings/language", m_data.m_language).toString();
 
-	QString instanceHistoryString = s.value("m_instanceHistory", QString()).toString();
-	m_instanceHistory = instanceHistoryString.split(';', Qt::SkipEmptyParts);
-
-	// Determine the Local settings folder
-
-	m_localAppDataPath = QDir::toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
-
-	QDir dir(m_localAppDataPath);
-
-	if (dir.exists() == false)
-	{
-		dir.mkpath(m_localAppDataPath);
-	}
-}
-
-
-void AppConfigSettings::StoreUser()
-{
-	QSettings s(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
-
-	QMutexLocker l(&m);
-
-	s.setValue("MainWindow/pos", m_mainWindowPos);
-	s.setValue("MainWindow/geometry", m_mainWindowGeometry);
-	s.setValue("MainWindow/state", m_mainWindowState);
-
-	s.setValue("MainWindow/language", m_language);
-
-	s.setValue("Global/useLocalScriptsPath", m_useLocalScriptsPath);
-	s.setValue("Global/localScriptsPath", m_localScriptsPath);
-
-	s.setValue("TestLogTabPage/m_buildSerachCompleter", m_outputSerachCompleter);
-}
-
-void AppConfigSettings::RestoreUser()
-{
-	QSettings s(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
-
-	QMutexLocker l(&m);
-
-	m_mainWindowPos = s.value("MainWindow/pos", QPoint(-1, -1)).toPoint();
-	m_mainWindowGeometry = s.value("MainWindow/geometry").toByteArray();
-	m_mainWindowState = s.value("MainWindow/state").toByteArray();
-
-	m_language = s.value("MainWindow/language", m_language).toString();
-
-	m_useLocalScriptsPath = s.value("Global/useLocalScriptsPath", m_useLocalScriptsPath).toBool();
-	m_localScriptsPath = s.value("Global/localScriptsPath", m_localScriptsPath).toString();
-	m_outputSerachCompleter = s.value("TestLogTabPage/m_buildSerachCompleter").toStringList();
-
-}
-
-TestSuite::TestSuiteSettings& AppConfigSettings::librarySettings()
-{
-	return m_librarySettings;
-}
-
-const TestSuite::TestSuiteSettings& AppConfigSettings::librarySettings() const
-{
-	return m_librarySettings;
-}
-
-QStringList AppConfigSettings::instanceHistory() const
-{
-	QMutexLocker l(&m);
-	return m_instanceHistory;
-}
-
-void AppConfigSettings::setInstanceHistory(const QStringList& value)
-{
-	QMutexLocker l(&m);
-	m_instanceHistory = value;
-}
-
-
-QString AppConfigSettings::language() const
-{
-	return m_language;
-}
-
-void AppConfigSettings::setLanguage(const QString& value)
-{
-	m_language = value;
-}
-
-bool AppConfigSettings::useLocalScriptsPath() const
-{
-	return m_useLocalScriptsPath;
-}
-
-void AppConfigSettings::setUseLocalScriptsPath(bool value)
-{
-	m_useLocalScriptsPath = value;
-}
-
-QString AppConfigSettings::localScriptsPath() const
-{
-	return m_localScriptsPath;
-}
-
-void AppConfigSettings::setLocalScriptsPath(const QString& path)
-{
-	m_localScriptsPath = path;
+	m_data.m_useLocalScriptsPath = s.value("AppConfigSettings/useLocalScriptsPath", m_data.m_useLocalScriptsPath).toBool();
+	m_data.m_localScriptsPath = s.value("AppConfigSettings/localScriptsPath", m_data.m_localScriptsPath).toString();
 }
 
 QString AppConfigSettings::localAppDataPath()
@@ -147,16 +97,43 @@ QString AppConfigSettings::localAppDataPath()
 	return m_localAppDataPath;
 }
 
-const QStringList& AppConfigSettings::outputSearchCompleter() const
+const AppConfigSettings::Data& AppConfigSettings::data() const
 {
-	return m_outputSerachCompleter;
+	return m_data;
 }
 
-QStringList& AppConfigSettings::outputSearchCompleter()
+AppConfigSettings::Data& AppConfigSettings::data()
 {
-	return m_outputSerachCompleter;
+	return m_data;
 }
 
+void AppConfigSettings::setData(const AppConfigSettings::Data& src)
+{
+	m_data = src;
+}
 
-AppConfigSettings theSettings;
+TestSuite::TestSuiteSettings& AppConfigSettings::librarySettings()
+{
+	return m_data.m_librarySettings;
+}
+
+const TestSuite::TestSuiteSettings& AppConfigSettings::librarySettings() const
+{
+	return m_data.m_librarySettings;
+}
+
+QString AppConfigSettings::language() const
+{
+	return m_data.m_language;
+}
+
+bool AppConfigSettings::useLocalScriptsPath() const
+{
+	return m_data.m_useLocalScriptsPath;
+}
+
+QString AppConfigSettings::localScriptsPath() const
+{
+	return m_data.m_localScriptsPath;
+}
 

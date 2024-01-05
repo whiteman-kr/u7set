@@ -198,6 +198,7 @@ protected slots:
 	void f2KeyForValue(SchemaItemPtr item);
 	void f2KeyForImageValue(SchemaItemPtr item);
 	void f2KeyForBus(SchemaItemPtr item);
+	void f2KeyForAfb(SchemaItemPtr item);
 
 	void deleteKey();
 
@@ -369,11 +370,11 @@ private:
 	static const MouseStateCursor m_mouseStateCursor[];
 	static const SizeActionToMouseCursor m_sizeActionToMouseCursor[];
 
-	std::vector<MouseStateAction> m_mouseLeftDownStateAction;		// Initializend in constructor
-	std::vector<MouseStateAction> m_mouseLeftUpStateAction;			// Initializend in constructor
-	std::vector<MouseStateAction> m_mouseRightDownStateAction;		// Initializend in constructor
-	std::vector<MouseStateAction> m_mouseRightUpStateAction;		// Initializend in constructor
-	std::vector<MouseStateAction> m_mouseMoveStateAction;			// Initializend in constructor
+	std::vector<MouseStateAction> m_mouseLeftDownStateAction;		// Initialized in constructor
+	std::vector<MouseStateAction> m_mouseLeftUpStateAction;			// Initialized in constructor
+	std::vector<MouseStateAction> m_mouseRightDownStateAction;		// Initialized in constructor
+	std::vector<MouseStateAction> m_mouseRightUpStateAction;		// Initialized in constructor
+	std::vector<MouseStateAction> m_mouseMoveStateAction;			// Initialized in constructor
 
 	SchemaFindDialog* m_findDialog = nullptr;
 

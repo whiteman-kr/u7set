@@ -800,3 +800,9 @@ namespace LmDescriptionName
 
 	inline const QString LM11_SR90("LM11_SR90");
 }
+
+namespace BOM
+{
+	inline const QString UTF8("\xEF\xBB\xBF");
+}
+

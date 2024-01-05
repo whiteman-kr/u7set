@@ -6,6 +6,7 @@ Makefile*
 *.o
 build-*/**
 build/**
+u7set-cppcheck-build-dir/**
 out/**
 bin/**
 *embed.manifest
@@ -24,3 +25,4 @@ Tools/build-*/**
 Test/AfbTests/LM1_SF00/AFB_TESTS/UALTESTS/Reports/*
 Test/AfbTests/LM1_SF00/AFB_TESTS/UALTESTS/Archive/**
 enc_temp_folder/
+*.bak

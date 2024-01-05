@@ -2724,6 +2724,12 @@ void EquipmentView::updateFromPreset()
 			return;
 		}
 
+		if (device == nullptr)
+		{
+			Q_ASSERT(device);
+			return;
+		}
+
 		const DbFileInfo* deviceFileInfo = device->data();
 		Q_ASSERT(deviceFileInfo);
 

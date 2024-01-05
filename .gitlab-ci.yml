@@ -1,10 +1,20 @@
 variables:
   GIT_DEPTH: "1"
+
+  # Version. Set to the desired release type "Default" or "Stable"
+  #
+  CI_RELEASE_TYPE: "Default"    # Set to the desired release type "Default" or "Stable"
+  CI_MAJOR_VERSION: "9"         # Odd is for development, even is for release
+  CI_MINOR_VERSION: "0"
+  CI_PATCH_VERSION: "0"         # Path version for Default release is ignored and set to pipeline id.
+
+  # Build and test data
+  #
   QT_VERSION: "6.5.3"
   COMPILER_TESTS_PROJECT_NAME: "compiler_tests_v406"
   SIMULATOR_PROJECT_NAME: "test_simulator_v406"
   PGPASSWORD: "P2ssw0rd"
-  
+
 stages:
   - prepare
   - build
@@ -66,16 +76,6 @@ linux_build_job:
     - "cd $CI_PROJECT_DIR"
     - "git status"
     - "git log -1"
-#generation version file
-    - "echo '#pragma once' > gitlabci_version.h"
-    - "echo >> gitlabci_version.h"
-    - "echo '#define GITLAB_CI_BUILD' >> gitlabci_version.h"
-    - echo '#define CI_COMMIT_REF_SLUG' \"$CI_COMMIT_REF_SLUG\" >> gitlabci_version.h
-    - echo '#define CI_COMMIT_SHA' \"$CI_COMMIT_SHA\" >> gitlabci_version.h
-    - echo '#define GITLAB_USER_NAME' \"$GITLAB_USER_NAME\" >> gitlabci_version.h
-    - echo '#define CI_PIPELINE_ID' $CI_PIPELINE_ID >> gitlabci_version.h
-    - echo '#define COMPUTERNAME' \"$HOSTNAME\" >> gitlabci_version.h
-    - echo '#define BUILD_DATE' \"$(date)\" >> gitlabci_version.h
 
 #Build Project
     - "# ----------------------------------------------"
@@ -85,7 +85,7 @@ linux_build_job:
     - "cmake --build ./build"
 
   artifacts:
-    name: "u7set_linux_0.9.$CI_PIPELINE_ID $CI_COMMIT_REF_SLUG $CI_COMMIT_SHA"
+    name: "u7set-linux-x64-${CI_MAJOR_VERSION}.${CI_MINOR_VERSION}.${CI_PATCH_VERSION}-p${CI_PIPELINE_ID}-${CI_RELEASE_TYPE}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHA}"
     paths:
       - bin/release/*
     exclude:
@@ -112,16 +112,6 @@ windows_build_job:
     - "git log -1"
     - $Env:QT_BIN_DIR="C:\\Qt\\${Env:QT_VERSION}\\msvc2019_64"
     - $Env:BIN_OUT_DIR="$Env:CI_PROJECT_DIR/bin/release"
-#generation version file
-    - "'#pragma once' > gitlabci_version.h"
-    - "' ' >> gitlabci_version.h"
-    - "'#define GITLAB_CI_BUILD' >> gitlabci_version.h"
-    - "'#define CI_COMMIT_REF_SLUG \"' + $env:CI_COMMIT_REF_SLUG + '\"' >> gitlabci_version.h"
-    - "'#define CI_COMMIT_SHA \"' + $env:CI_COMMIT_SHA + '\"' >> gitlabci_version.h"
-    - "'#define GITLAB_USER_NAME \"' + $env:GITLAB_USER_NAME + '\"' >> gitlabci_version.h"
-    - "'#define CI_PIPELINE_ID ' + $env:CI_PIPELINE_ID + '' >> gitlabci_version.h"
-    - "$Env:timestamp = Get-Date -Format 'dd MMMM yyyy HH:mm (K)'"
-    - "'#define BUILD_DATE \"' + $Env:timestamp + '\"' >> gitlabci_version.h"
 #Build Project
     - "# ----------------------------------------------"
     - "#               Build Project"
@@ -187,14 +177,11 @@ windows_build_job:
     - "# ----------------------------------------------"
     - "#               Build Installer"
     - "# ----------------------------------------------"
-    - "pushd ."	
-    - "cd $Env:CI_PROJECT_DIR/u7setinstall"
-    - "&./createinstall.bat"
-    - "popd"	
+    - "cmake --build ./build --target create_install"	
 #    - "&$SIGNTOOL sign /v /a  /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD $Env:BIN_OUT_DIR\\..\\*.exe"
 
   artifacts:
-    name: "u7set_0.9.$CI_PIPELINE_ID $CI_COMMIT_REF_SLUG $CI_COMMIT_SHA"
+    name: "u7set-win-x64-${CI_MAJOR_VERSION}.${CI_MINOR_VERSION}.${CI_PATCH_VERSION}-p${CI_PIPELINE_ID}-${CI_RELEASE_TYPE}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHA}"
     paths:
       - bin/*.exe
       - bin/release/*.exe
@@ -427,7 +414,7 @@ linux_code_coverage_job:
 
   coverage: '/lines......: \d+\.\d+/'
   artifacts:
-    name: "coverage_report.$CI_PIPELINE_ID $CI_COMMIT_REF_SLUG $CI_COMMIT_SHA"
+    name: "coverage_report.$CI_PIPELINE_ID-$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHA"
     paths:
 #      - CodeCoverage/coverage.xml
       - CodeCoverage/Report/
