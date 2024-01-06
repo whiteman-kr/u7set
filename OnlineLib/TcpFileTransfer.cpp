@@ -381,7 +381,7 @@ namespace Tcp
 			return;
 		}
 
-		m_md5Generator.addData(m_reply->filepartdata().data(), static_cast<int>(m_reply->filepartdata().size()));
+		m_md5Generator.addData(QByteArrayView(m_reply->filepartdata().data(), m_reply->filepartdata().size()));
 
 		if (memcmp(m_md5Generator.result().constData(), m_reply->md5().data(), MD5_LEN) != 0)
 		{
@@ -596,7 +596,7 @@ namespace Tcp
 
 		m_reply->set_filepartdata(partDataPtr, size);
 
-		m_md5Generator.addData(partDataPtr, size);
+		m_md5Generator.addData(QByteArrayView(partDataPtr, size));
 
 		m_reply->set_md5(m_md5Generator.result().toStdString());
 
