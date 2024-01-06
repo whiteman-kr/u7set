@@ -1010,7 +1010,14 @@ bool TuningServiceSettingsGetter::fillTuningClientsInfo(const Builder::Context* 
 		}
 		else
 		{
-			tunClient.tuningLogin = false;
+			if (DeviceHelper::isPropertyExists(tuningClient, EquipmentPropNames::TESTING_LOGIN) == true)
+			{
+				result &= DeviceHelper::getBoolProperty(tuningClient, EquipmentPropNames::TESTING_LOGIN, &tunClient.tuningLogin, log);
+			}
+			else
+			{
+				tunClient.tuningLogin = false;
+			}
 		}
 
 		//
