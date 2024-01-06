@@ -33,7 +33,7 @@ void SoftwareInfo::init(E::SoftwareType softwareType,
 
 
 #ifdef Q_OS_LINUX
-	m_osUserName = getenv("USER");
+	m_osUsername = getenv("USER");
 #endif
 
 #ifdef Q_OS_WIN
