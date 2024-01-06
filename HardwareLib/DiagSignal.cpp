@@ -18,51 +18,62 @@ namespace Hardware
 	{
 		DeviceObject::propertyDemand(prop);
 
+		// Category DiagSignal
+		//
+		ADD_PROPERTY_GET_SET_CAT(E::DiagLevel, PropertyNames::level, PropertyNames::categoryDiagSignal, true, DiagSignal::level, DiagSignal::setLevel)
+			->setUpdateFromPreset(true)
+			.setViewOrder(100);
+
 		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::diagSignalTypeId, PropertyNames::categoryDiagSignal, true, DiagSignal::signalTypeId, DiagSignal::setSignalTypeId)
 			->setUpdateFromPreset(true)
-			.setExpert(isPreset());
-
-		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::valueOffset, PropertyNames::categoryDiagSignal, true, DiagSignal::valueOffset, DiagSignal::setValueOffset)
-			->setUpdateFromPreset(true)
-			.setExpert(isPreset());
-
-		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::valueBit, PropertyNames::categoryDiagSignal, true, DiagSignal::valueBit, DiagSignal::setValueBit)
-			->setUpdateFromPreset(true)
-			.setExpert(isPreset());
+			.setViewOrder(101);
 
 		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::validitySignalId, PropertyNames::categoryDiagSignal, true, DiagSignal::validitySignalId, DiagSignal::setValiditySignalId)
 			->setUpdateFromPreset(true)
-			.setExpert(isPreset());
+			.setViewOrder(102);
 
-		//		auto typeProp = addProperty<E::SignalType, DeviceAppSignal, &DeviceAppSignal::signalType, &DeviceAppSignal::setSignalType>(PropertyNames::type, QLatin1String(), true);
-		//		auto functionProp = addProperty<E::SignalFunction, DeviceAppSignal, &DeviceAppSignal::function, &DeviceAppSignal::setFunction>(PropertyNames::function, QLatin1String(), true);
-		//		auto byteOrderProp = addProperty<E::ByteOrder, DeviceAppSignal, &DeviceAppSignal::byteOrder, &DeviceAppSignal::setByteOrder>(PropertyNames::byteOrder, QLatin1String(), true);
-		//		auto formatProp = addProperty<E::DataFormat, DeviceAppSignal, &DeviceAppSignal::format, &DeviceAppSignal::setFormat>(PropertyNames::format, QLatin1String(), true);
-		//		auto memoryAreaProp = addProperty<E::MemoryArea, DeviceAppSignal, &DeviceAppSignal::memoryArea, &DeviceAppSignal::setMemoryArea>(PropertyNames::memoryArea, QLatin1String(), true);
-		//		auto sizeProp = addProperty<int, DeviceAppSignal, &DeviceAppSignal::size, &DeviceAppSignal::setSize>(PropertyNames::size, QLatin1String(), true);
-		//		auto signalSpecPropsStructProp = addProperty<QString, DeviceAppSignal, &DeviceAppSignal::signalSpecPropsStruct, &DeviceAppSignal::setSignalSpecPropsStruct>(PropertyNames::signalSpecificProperties, PropertyNames::categoryAppSignal, true);
+		// Category data
+		//
+		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::valueOffset, PropertyNames::categoryData, true, DiagSignal::valueOffset, DiagSignal::setValueOffset)
+			->setUpdateFromPreset(true)
+			.setViewOrder(200);
 
-		//		typeProp->setUpdateFromPreset(true);
-		//		typeProp->setExpert(m_preset);
+		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::valueBit, PropertyNames::categoryData, true, DiagSignal::valueBit, DiagSignal::setValueBit)
+			->setUpdateFromPreset(true)
+			.setViewOrder(201);
 
-		//		functionProp->setUpdateFromPreset(true);
-		//		functionProp->setExpert(m_preset);
+		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::valueBitSize, PropertyNames::categoryData, true, DiagSignal::valueBitSize, DiagSignal::setValueBitSize)
+			->setUpdateFromPreset(true)
+			.setDescription(PropertyNames::valueBitSizeDescription)
+			.setViewOrder(202);
 
-		//		byteOrderProp->setUpdateFromPreset(true);
-		//		byteOrderProp->setExpert(m_preset);
+		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::discreteContainerSize, PropertyNames::categoryData, true, DiagSignal::discreteContainerSize, DiagSignal::setDiscreteContainerSize)
+			->setUpdateFromPreset(true)
+			.setDescription(PropertyNames::discreteContainerSizeDescription)
+			.setViewOrder(203);
 
-		//		formatProp->setUpdateFromPreset(true);
-		//		formatProp->setExpert(m_preset);
+		// Category MATS
+		//
+		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::logChanges, PropertyNames::categoryMats, true, DiagSignal::logChanges, DiagSignal::setLogChanges)
+			->setViewOrder(300);
 
-		//		memoryAreaProp->setUpdateFromPreset(true);
-		//		memoryAreaProp->setExpert(m_preset);
+		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::archive, PropertyNames::categoryMats, true, DiagSignal::archive, DiagSignal::setArchive)
+			->setViewOrder(301);
 
-		//		sizeProp->setUpdateFromPreset(true);
-		//		sizeProp->setExpert(m_preset);
+		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::reserved, PropertyNames::categoryMats, true, DiagSignal::reserved, DiagSignal::setReserved)
+			->setViewOrder(302);
 
-		//		signalSpecPropsStructProp->setUpdateFromPreset(true);
-		//		signalSpecPropsStructProp->setExpert(m_preset);
-		//		signalSpecPropsStructProp->setSpecificEditor(E::PropertySpecificEditor::SpecificPropertyStruct);
+		ADD_PROPERTY_GET_SET_CAT(E::ApertureType, PropertyNames::apertureType, PropertyNames::categoryMats, true, DiagSignal::apertureType, DiagSignal::setApertureType)
+			->setViewOrder(400);
+
+		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::fineAperture, PropertyNames::categoryMats, true, DiagSignal::fineAperture, DiagSignal::setFineAperture)
+			->setViewOrder(401);
+
+		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::coarseAperture, PropertyNames::categoryMats, true, DiagSignal::coarseAperture, DiagSignal::setCoarseAperture)
+			->setViewOrder(402);
+
+		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::decimalPlaces, PropertyNames::categoryMats, true, DiagSignal::decimalPlaces, DiagSignal::setDecimalPlaces)
+			->setViewOrder(403);
 
 		return;
 	}
@@ -81,10 +92,24 @@ namespace Hardware
 		//
 		::Proto::DeviceDiagSignal* signalMessage = message->mutable_deviceobject()->mutable_diagsignal();
 
+		signalMessage->set_level(static_cast<int>(m_level));
 		signalMessage->set_signaltypeid(m_signalTypeId.toUtf8());
-		signalMessage->set_valueoffset(static_cast<int>(m_valueOffset));
-		signalMessage->set_valuebit(static_cast<int>(m_valueBit));
 		signalMessage->set_validitysignalid(m_validitySignalId.toUtf8());
+
+		signalMessage->set_valueoffset(m_valueOffset);
+		signalMessage->set_valuebit(m_valueBit);
+		signalMessage->set_valuebitsize(m_valueBitSize);
+		signalMessage->set_discretecontainersize(m_discreteContainerSize);
+
+		signalMessage->set_logchanges(m_logChanges);
+		signalMessage->set_archive(m_archive);
+		signalMessage->set_reserved(m_reserved);
+
+		signalMessage->set_coarseaperture(m_coarseAperture);
+		signalMessage->set_fineaperture(m_fineAperture);
+		signalMessage->set_aperturetype(static_cast<int>(m_apertureType));
+
+		signalMessage->set_decimalplaces(m_decimalPlaces);
 
 		return true;
 	}
@@ -113,18 +138,24 @@ namespace Hardware
 
 		const Proto::DeviceDiagSignal& signalMessage = message.deviceobject().diagsignal();
 
+		m_level = static_cast<E::DiagLevel>(signalMessage.level());
 		m_signalTypeId = QString::fromUtf8(signalMessage.signaltypeid().data());
-		m_valueOffset = signalMessage.valueoffset();
-		m_valueBit = signalMessage.valuebit();
 		m_validitySignalId = QString::fromUtf8(signalMessage.validitysignalid().data());
 
-		if (isPreset() == true)
-		{
-			setExpertToProperty(PropertyNames::diagSignalTypeId, true);
-			setExpertToProperty(PropertyNames::valueOffset, true);
-			setExpertToProperty(PropertyNames::valueBit, true);
-			setExpertToProperty(PropertyNames::validitySignalId, true);
-		}
+		m_valueOffset = signalMessage.valueoffset();
+		m_valueBit = signalMessage.valuebit();
+		m_valueBitSize = signalMessage.valuebitsize();
+		m_discreteContainerSize = signalMessage.discretecontainersize();
+
+		m_logChanges = signalMessage.logchanges();
+		m_archive = signalMessage.archive();
+		m_reserved = signalMessage.reserved();
+
+		m_coarseAperture = signalMessage.coarseaperture();
+		m_fineAperture = signalMessage.fineaperture();
+		m_apertureType = static_cast<E::ApertureType>(signalMessage.aperturetype());
+
+		m_decimalPlaces = signalMessage.decimalplaces();
 
 		return true;
 	}
@@ -145,6 +176,16 @@ namespace Hardware
 		return;
 	}
 
+	E::DiagLevel DiagSignal::level() const
+	{
+		return m_level;
+	}
+
+	void DiagSignal::setLevel(E::DiagLevel value)
+	{
+		m_level = value;
+	}
+
 	const QString& DiagSignal::signalTypeId() const
 	{
 		return m_signalTypeId;
@@ -153,6 +194,16 @@ namespace Hardware
 	void DiagSignal::setSignalTypeId(const QString& value)
 	{
 		m_signalTypeId = value;
+	}
+
+	const QString& DiagSignal::validitySignalId() const
+	{
+		return m_validitySignalId;
+	}
+
+	void DiagSignal::setValiditySignalId(const QString& value)
+	{
+		m_validitySignalId = value;
 	}
 
 	int DiagSignal::valueOffset() const
@@ -172,27 +223,126 @@ namespace Hardware
 
 	void DiagSignal::setValueBit(int value)
 	{
-		m_valueBit = value;
+		m_valueBit = std::clamp(value, 0, value);
 	}
 
-	const QString& DiagSignal::validitySignalId() const
+	int DiagSignal::valueBitSize() const
 	{
-		return m_validitySignalId;
+		return m_valueBitSize;
 	}
 
-	void DiagSignal::setValiditySignalId(const QString& value)
+	void DiagSignal::setValueBitSize(int value)
 	{
-		m_validitySignalId = value;
+		m_valueBitSize = std::clamp(value, 0, 256);
 	}
 
-	std::shared_ptr<Hardware::DiagSignalType> DiagSignal::diagSignalType() const
+	int DiagSignal::discreteContainerSize() const
+	{
+		return m_discreteContainerSize;
+	}
+
+	void DiagSignal::setDiscreteContainerSize(int value)
+	{
+		m_discreteContainerSize = std::clamp(value, 0, 1024);
+	}
+
+	bool DiagSignal::logChanges() const
+	{
+		return m_logChanges;
+	}
+
+	void DiagSignal::setLogChanges(bool value)
+	{
+		m_logChanges = value;
+	}
+
+	bool DiagSignal::archive() const
+	{
+		return m_archive;
+	}
+
+	void DiagSignal::setArchive(bool value)
+	{
+		m_archive = value;
+	}
+
+	bool DiagSignal::reserved() const
+	{
+		return m_reserved;
+	}
+
+	void DiagSignal::setReserved(bool value)
+	{
+		m_reserved = value;
+	}
+
+	double DiagSignal::coarseAperture() const
+	{
+		return m_coarseAperture;
+	}
+
+	void DiagSignal::setCoarseAperture(double value)
+	{
+		m_coarseAperture = value;
+	}
+
+	double DiagSignal::fineAperture() const
+	{
+		return m_fineAperture;
+	}
+
+	void DiagSignal::setFineAperture(double value)
+	{
+		m_fineAperture = value;
+	}
+
+	E::ApertureType DiagSignal::apertureType() const
+	{
+		return m_apertureType;
+	}
+
+	void DiagSignal::setApertureType(E::ApertureType value)
+	{
+		m_apertureType = value;
+	}
+
+	int DiagSignal::decimalPlaces() const
+	{
+		return m_decimalPlaces;
+	}
+
+	void DiagSignal::setDecimalPlaces(int value)
+	{
+		m_decimalPlaces = std::clamp(value, 0, 32);
+	}
+
+	const std::shared_ptr<Hardware::DiagSignalType>& DiagSignal::diagSignalType() const
 	{
 		return m_diagSignalType;
 	}
 
 	void DiagSignal::setDiagSignalType(std::shared_ptr<DiagSignalType> value)
 	{
-		Q_ASSERT(m_signalTypeId == value->signalTypeId());
-		m_diagSignalType = value;
+		if (value != nullptr)
+		{
+			Q_ASSERT(value->signalTypeId() == signalTypeId());
+		}
+
+		m_diagSignalType = std::move(value);
+	}
+
+	const std::shared_ptr<Hardware::DiagSignal>& DiagSignal::validitySignal() const
+	{
+		return m_validitySignal;
+	}
+
+	void DiagSignal::setValiditySignal(std::shared_ptr<DiagSignal> value)
+	{
+		if (value != nullptr)
+		{
+			Q_ASSERT(value->equipmentId() == validitySignalId());
+		}
+
+		m_validitySignal = std::move(value);
 	}
 } // namespace Hardware

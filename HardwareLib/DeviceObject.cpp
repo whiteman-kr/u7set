@@ -114,20 +114,57 @@ namespace Hardware
 	const QString PropertyNames::format = "Format";
 	const QString PropertyNames::memoryArea = "MemoryArea";
 	const QString PropertyNames::size = "Size";
+	const QString PropertyNames::units = "Units";
+	const QString PropertyNames::analogFormat = "AnalogFormat";
 
+	const QString PropertyNames::diagDataOffset = "DiagDataOffset";
+	const QString PropertyNames::inverseValue = "InverseValue";
+	const QString PropertyNames::normalState = "NormalState";
+	const QString PropertyNames::normalStateString0 = "NormalStateString0";
+	const QString PropertyNames::normalStateString1 = "NormalStateString1";
+	
+	const QString PropertyNames::adcHighLimit = "AdcHighLimit";
+	const QString PropertyNames::adcLowLimit = "AdcLowLimit";
+	const QString PropertyNames::valueHighLimit = "ValueHighLimit";
+	const QString PropertyNames::valueLowLimit = "ValueLowLimit";
+	const QString PropertyNames::valueMultiplier = "ValueMultiplier";
+	//const QString PropertyNames::valueOffset = "ValueOffset";
+	const QString PropertyNames::useLimits = "UseLimits";
+
+	const QString PropertyNames::level = "Level";
 	const QString PropertyNames::valueOffset = "ValueOffset";
 	const QString PropertyNames::valueBit = "ValueBit";
+	const QString PropertyNames::valueBitSize = "ValueBitSize";
+	const QString PropertyNames::valueBitSizeDescription = "Size of data in bits, usually 1, 16, 32...";
+	const QString PropertyNames::discreteContainerSize = "DiscreteContainerSize";
+	const QString PropertyNames::discreteContainerSizeDescription = "Container size of discrete signals, bytes";
 	const QString PropertyNames::validitySignalId = "ValiditySignalID";
 	const QString PropertyNames::appSignalDataFormat = "AppAnalogSignalFormat";
 	const QString PropertyNames::appSignalBusTypeId = "BusTypeID";
 
+	const QString PropertyNames::logChanges = "LogChanges";
+	const QString PropertyNames::archive = "Archive";
+	const QString PropertyNames::reserved = "Reserved";
+	const QString PropertyNames::coarseAperture = "CoarseAperture";
+	const QString PropertyNames::fineAperture = "FineAperture";
+	const QString PropertyNames::apertureType = "ApertureType";
+	const QString PropertyNames::decimalPlaces = "DecimalPlaces";
+
 	const QString PropertyNames::hostname = "Hostname";
 	
 	const QString PropertyNames::diagSignalTypeId = "DiagSignalTypeID";
+	
+	const QString PropertyNames::systemSignalType = "SystemSignalType";
+	const QString PropertyNames::systemSignalTypeDescription = "System signal types are predefined and cannot be changed or deleted.";
 
 	const QString PropertyNames::categoryCommon = "Common";
 	const QString PropertyNames::categoryAppSignal = "AppSignal";
 	const QString PropertyNames::categoryDiagSignal = "DiagSignal";
+	const QString PropertyNames::categoryDiscrete = "Type Discrete";
+	const QString PropertyNames::categoryAnalog = "Type Analog";
+	const QString PropertyNames::categoryData = "Data";
+	const QString PropertyNames::categoryMats = "MATS";
+	const QString PropertyNames::categoryDiagnostics = "Diagnostics";
 
 	//
 	//
@@ -635,6 +672,11 @@ namespace Hardware
 		return deviceType() == DeviceType::AppSignal;
 	}
 
+	bool DeviceObject::isDiagSignal() const noexcept
+	{
+		return deviceType() == DeviceType::DiagSignal;
+	}
+
 	std::shared_ptr<const DeviceRoot> DeviceObject::toRoot() const noexcept
 	{
 		Q_ASSERT(isRoot());
@@ -704,6 +746,16 @@ namespace Hardware
 	std::shared_ptr<DeviceAppSignal> DeviceObject::toAppSignal() noexcept
 	{
 		return toType<DeviceAppSignal>();
+	}
+
+	std::shared_ptr<const Hardware::DiagSignal> DeviceObject::toDiagSignal() const noexcept
+	{
+		return toType<const Hardware::DiagSignal>();
+	}
+
+	std::shared_ptr<Hardware::DiagSignal> DeviceObject::toDiagSignal() noexcept
+	{
+		return toType<Hardware::DiagSignal>();
 	}
 
 	std::shared_ptr<const Workstation> DeviceObject::toWorkstation() const noexcept
@@ -1971,6 +2023,10 @@ R"DELIM({
 	DeviceController::DeviceController(bool preset /*= false*/, QObject* parent /*= nullptr*/) :
 		DeviceObject(DeviceType::Controller, preset, parent)
 	{
+		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::diagDataOffset, PropertyNames::categoryDiagnostics, true, DeviceController::diagDataOffset, DeviceController::setDiagDataOffset)
+			->setUpdateFromPreset(true);
+
+		return;
 	}
 
 	bool DeviceController::SaveData(Proto::Envelope* message, bool saveTree) const
@@ -1987,9 +2043,7 @@ R"DELIM({
 		//
 		Proto::DeviceController* controllerMessage = message->mutable_deviceobject()->mutable_controller();
 
-		Q_UNUSED(controllerMessage);
-		//controllerMessage->set_startxdocpt(m_startXDocPt);
-		//controllerMessage->set_startydocpt(m_startYDocPt);
+		controllerMessage->set_diagdataoffset(m_diagDataOffset);
 
 		return true;
 	}
@@ -2018,11 +2072,19 @@ R"DELIM({
 
 		const Proto::DeviceController& controllerMessage = message.deviceobject().controller();
 
-		Q_UNUSED(controllerMessage);
-		//x = controllerMessage.startxdocpt();
-		//y = controllerMessage.startydocpt();
+		m_diagDataOffset = controllerMessage.diagdataoffset();
 
 		return true;
+	}
+
+	int DeviceController::diagDataOffset() const
+	{
+		return m_diagDataOffset;
+	}
+
+	void DeviceController::setDiagDataOffset(int value)
+	{
+		m_diagDataOffset = value;
 	}
 
 	//

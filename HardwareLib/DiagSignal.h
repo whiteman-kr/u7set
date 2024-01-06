@@ -35,39 +35,94 @@ namespace Hardware
 		// Properties
 		//
 	public:
+		// DiagSignal properties
+		//
+		[[nodiscard]] E::DiagLevel level() const;
+		void setLevel(E::DiagLevel value);
+
 		[[nodiscard]] const QString& signalTypeId() const;
 		void setSignalTypeId(const QString& value);
 
+		[[nodiscard]] const QString& validitySignalId() const;
+		void setValiditySignalId(const QString& value);
+
+		// Location properties
+		//
 		[[nodiscard]] int valueOffset() const;
 		void setValueOffset(int value);
 
 		[[nodiscard]] int valueBit() const;
 		void setValueBit(int value);
 
-		[[nodiscard]] const QString& validitySignalId() const;
-		void setValiditySignalId(const QString& value);
+		[[nodiscard]] int valueBitSize() const;
+		void setValueBitSize(int value);
 
-		// Data
+		[[nodiscard]] int discreteContainerSize() const;
+		void setDiscreteContainerSize(int value);
+
+		// MATS properties
 		//
-	private:
-		QString m_signalTypeId;
-		int m_valueOffset = 0;
-		int m_valueBit = 0;
+		[[nodiscard]] bool logChanges() const;
+		void setLogChanges(bool value);
 
-		QString m_validitySignalId;
+		[[nodiscard]] bool archive() const;
+		void setArchive(bool value);
+
+		[[nodiscard]] bool reserved() const;
+		void setReserved(bool value);
+
+		[[nodiscard]] double coarseAperture() const;
+		void setCoarseAperture(double value);
+
+		[[nodiscard]] double fineAperture() const;
+		void setFineAperture(double value);
+
+		[[nodiscard]] E::ApertureType apertureType() const;
+		void setApertureType(E::ApertureType value);
+
+		[[nodiscard]] int decimalPlaces() const;
+		void setDecimalPlaces(int value);
 
 		// Online properties
 		//
 	public:
-		std::shared_ptr<Hardware::DiagSignalType> diagSignalType() const;
+		const std::shared_ptr<Hardware::DiagSignalType>& diagSignalType() const;
 		void setDiagSignalType(std::shared_ptr<DiagSignalType> value);
 
+		const std::shared_ptr<Hardware::DiagSignal>& validitySignal() const;
+		void setValiditySignal(std::shared_ptr<DiagSignal> value);
 
-		// Data used only in "online" part, like DiagDataService, Disagnostics, etc (but not u7)
+		// Data
+		//
+	private:
+		E::DiagLevel m_level = E::DiagLevel::Message;
+		QString m_signalTypeId;
+		QString m_validitySignalId;
+
+		// Data properties
+		//
+		int m_valueOffset = 0;
+		int m_valueBit = 0;
+		int m_valueBitSize = 1;
+		int m_discreteContainerSize = 2;
+
+		// MATS properties
+		//
+		bool m_logChanges = false;
+		bool m_archive = true;
+		bool m_reserved = false;
+		
+		double m_coarseAperture = 1;
+		double m_fineAperture = 0.5;
+		E::ApertureType m_apertureType = E::ApertureType::RangePercent;
+
+		int m_decimalPlaces = 1;
+
+		// Data used only in "online" part, like DiagDataService, Diagnostics, etc (but not u7)
 		//
 	private:
 		std::shared_ptr<Hardware::DiagSignalType> m_diagSignalType; // Bind via m_signalTypeId
-		std::shared_ptr<Hardware::DiagSignal> m_validitySinal;      // Bind via m_signalTypeId
+		std::shared_ptr<Hardware::DiagSignal> m_validitySignal;     // Bind via m_validitySignalId
 	};
 
 } // namespace Hardware

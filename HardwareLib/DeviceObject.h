@@ -94,10 +94,39 @@ namespace Hardware
 		static const QString format;
 		static const QString memoryArea;
 		static const QString size;
+		static const QString units;
+		static const QString analogFormat;
+		
+		static const QString diagDataOffset;
+		static const QString inverseValue;
+		static const QString normalState;
+		static const QString normalStateString0;
+		static const QString normalStateString1;
 
+		static const QString adcHighLimit;
+		static const QString adcLowLimit;
+		static const QString valueHighLimit;
+		static const QString valueLowLimit;
+		static const QString valueMultiplier;
+		//static const QString valueOffset;
+		static const QString useLimits;
+
+		static const QString level;
 		static const QString valueOffset;
 		static const QString valueBit;
+		static const QString valueBitSize;
+		static const QString valueBitSizeDescription;
+		static const QString discreteContainerSize;
+		static const QString discreteContainerSizeDescription;
 		static const QString validitySignalId;
+		
+		static const QString logChanges;
+		static const QString archive;
+		static const QString reserved;
+		static const QString coarseAperture;
+		static const QString fineAperture;
+		static const QString apertureType;
+		static const QString decimalPlaces;
 
 		static const QString appSignalLowAdc;
 		static const QString appSignalHighAdc;
@@ -109,10 +138,18 @@ namespace Hardware
 		static const QString hostname;
 
 		static const QString diagSignalTypeId;
+		
+		static const QString systemSignalType;
+		static const QString systemSignalTypeDescription;
 
 		static const QString categoryCommon;
 		static const QString categoryAppSignal;
 		static const QString categoryDiagSignal;
+		static const QString categoryDiscrete;
+		static const QString categoryAnalog;
+		static const QString categoryData;
+		static const QString categoryMats;
+		static const QString categoryDiagnostics;
 	};
 
 	//
@@ -204,6 +241,7 @@ namespace Hardware
 		[[nodiscard]] bool isWorkstation() const noexcept;
 		[[nodiscard]] bool isSoftware() const noexcept;
 		[[nodiscard]] bool isAppSignal() const noexcept;
+		[[nodiscard]] bool isDiagSignal() const noexcept;
 
 		[[nodiscard]] std::shared_ptr<const Hardware::DeviceRoot> toRoot() const noexcept;
 		[[nodiscard]] std::shared_ptr<Hardware::DeviceRoot> toRoot() noexcept;
@@ -225,6 +263,9 @@ namespace Hardware
 
 		[[nodiscard]] std::shared_ptr<const Hardware::DeviceAppSignal> toAppSignal() const noexcept;
 		[[nodiscard]] std::shared_ptr<Hardware::DeviceAppSignal> toAppSignal() noexcept;
+
+		[[nodiscard]] std::shared_ptr<const Hardware::DiagSignal> toDiagSignal() const noexcept;
+		[[nodiscard]] std::shared_ptr<Hardware::DiagSignal> toDiagSignal() noexcept;
 
 		[[nodiscard]] std::shared_ptr<const Hardware::Workstation> toWorkstation() const noexcept;
 		[[nodiscard]] std::shared_ptr<Hardware::Workstation> toWorkstation() noexcept;
@@ -351,9 +392,11 @@ public:
 		QString m_caption;
 
 		QString m_childRestriction;			// Restriction script for child items
-		QString m_specificPropertiesStruct;	// Desctription of the Object's specific properties
+		QString m_specificPropertiesStruct;	// Description of the Object's specific properties
 
 		int m_place = -1;
+
+		std::unordered_map<Hash, QString> m_tags;	// Tags for this object, key is a tag hash, value is a tag value.
 
 	private:
 		// Preset Data
@@ -565,6 +608,17 @@ public:
 	protected:
 		virtual bool SaveData(Proto::Envelope* message, bool saveTree) const override;
 		virtual bool LoadData(const Proto::Envelope& message) override;
+
+		// Properties
+		//
+public:
+		[[nodiscard]] int diagDataOffset() const;
+		void setDiagDataOffset(int value);
+
+		// Data
+		//
+	private:
+		int m_diagDataOffset = 0;
 	};
 
 

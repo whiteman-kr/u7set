@@ -12,16 +12,60 @@ namespace Hardware
 	{
 		addProperty<QUuid, DiagSignalType, &DiagSignalType::uuid, &DiagSignalType::setUuid>(PropertyNames::uuid, {}, true)
 			->setReadOnly(true)
-			.setExpert(true);
+			.setExpert(true)
+			.setViewOrder(10);
 
-		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::diagSignalTypeId, PropertyNames::categoryDiagSignal, true, DiagSignalType::signalTypeId, DiagSignalType::setSignalTypeId);
+		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::diagSignalTypeId, PropertyNames::categoryDiagSignal, true, DiagSignalType::signalTypeId, DiagSignalType::setSignalTypeId)
+			->setEssential(true)
+			.setViewOrder(11);
+		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::systemSignalType, PropertyNames::categoryDiagSignal, true, DiagSignalType::systemSignalType, DiagSignalType::setSystemSignalType)
+			->setExpert(true)
+			.setDescription(QStringLiteral("System signal types are predefined and cannot be changed or deleted."))
+			.setViewOrder(12);
+		ADD_PROPERTY_GET_SET_CAT(E::DiagSignalType, PropertyNames::type, PropertyNames::categoryDiagSignal, true, DiagSignalType::type, DiagSignalType::setType)
+			->setEssential(true)
+			.setViewOrder(13);
+		ADD_PROPERTY_GET_SET_CAT(E::DiagByteOrder, PropertyNames::byteOrder, PropertyNames::categoryDiagSignal, true, DiagSignalType::byteOrder, DiagSignalType::setByteOrder)
+			->setViewOrder(14);
+
+		// categoryDiscrete
+		//
+		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::inverseValue, PropertyNames::categoryDiscrete, true, DiagSignalType::inverseValue, DiagSignalType::setInverseValue)
+			->setViewOrder(200);
+		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::normalState, PropertyNames::categoryDiscrete, true, DiagSignalType::normalState, DiagSignalType::setNormalState)
+			->setViewOrder(201);
+		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::normalStateString0, PropertyNames::categoryDiscrete, true, DiagSignalType::normalStateString0, DiagSignalType::setNormalStateString0)
+			->setViewOrder(202);
+		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::normalStateString1, PropertyNames::categoryDiscrete, true, DiagSignalType::normalStateString1, DiagSignalType::setNormalStateString1)
+			->setViewOrder(203);
+
+		// categoryAnalog
+		//
+		ADD_PROPERTY_GET_SET_CAT(E::DiagAnalogFormat, PropertyNames::analogFormat, PropertyNames::categoryAnalog, true, DiagSignalType::analogFormat, DiagSignalType::setAnalogFormat)
+			->setViewOrder(100);
+		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::adcHighLimit, PropertyNames::categoryAnalog, true, DiagSignalType::adcHighLimit, DiagSignalType::setAdcHighLimit)
+			->setViewOrder(101);
+		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::adcLowLimit, PropertyNames::categoryAnalog, true, DiagSignalType::adcLowLimit, DiagSignalType::setAdcLowLimit)
+			->setViewOrder(102);
+		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::valueHighLimit, PropertyNames::categoryAnalog, true, DiagSignalType::valueHighLimit, DiagSignalType::setValueHighLimit)
+			->setViewOrder(103);
+		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::valueLowLimit, PropertyNames::categoryAnalog, true, DiagSignalType::valueLowLimit, DiagSignalType::setValueLowLimit)
+			->setViewOrder(104);
+		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::valueMultiplier, PropertyNames::categoryAnalog, true, DiagSignalType::valueMultiplier, DiagSignalType::setValueMultiplier)
+			->setViewOrder(105);
+		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::valueOffset, PropertyNames::categoryAnalog, true, DiagSignalType::valueOffset, DiagSignalType::setValueOffset)
+			->setViewOrder(106);
+		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::useLimits, PropertyNames::categoryAnalog, true, DiagSignalType::useLimits, DiagSignalType::setUseLimits)
+			->setViewOrder(107);
+		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::units, PropertyNames::categoryAnalog, true, DiagSignalType::units, DiagSignalType::setUnits)
+			->setViewOrder(108);
 
 		return;
 	}
 
 	std::shared_ptr<DiagSignalType> DiagSignalType::CreateObject(QObject* parent)
 	{
-		return std::shared_ptr<DiagSignalType>(new DiagSignalType{parent}); // cannot use make_shared as constructor is proteced ((
+		return std::shared_ptr<DiagSignalType>(new DiagSignalType{parent}); // cannot use make_shared as constructor is protected ((
 	}
 
 	std::shared_ptr<DiagSignalType> DiagSignalType::CreateObject(const Proto::Envelope& message)
@@ -42,14 +86,33 @@ namespace Hardware
 		}
 
 		const std::string& className = this->metaObject()->className();
-		quint32 classnamehash = ::ClassNameHashCode(className);
+		quint32 classnameHash = ::ClassNameHashCode(className);
 
-		message->set_classnamehash(classnamehash);
+		message->set_classnamehash(classnameHash);
 
 		Proto::DiagSignalType* m = message->mutable_diagsignaltype();
 
 		Proto::Write(m->mutable_uuid(), m_uuid);
-		m->set_signaltypeid(m_siganlTypeId.toStdString());
+
+		m->set_signaltypeid(m_signalTypeId.toStdString());
+		m->set_systemsignaltype(m_systemSignalType);
+		m->set_type(static_cast<int>(m_type));
+		m->set_byteorder(static_cast<int>(m_byteOrder));
+
+		m->set_inversevalue(m_inverseValue);
+		m->set_normalstate(m_normalState);
+		m->set_normalstatestring0(m_normalStateString0.toStdString());
+		m->set_normalstatestring1(m_normalStateString1.toStdString());
+
+		m->set_analogformat(static_cast<int>(m_analogFormat));
+		m->set_adchighlimit(m_adcHighLimit);
+		m->set_adclowlimit(m_adcLowLimit);
+		m->set_valuehighlimit(m_valueHighLimit);
+		m->set_valuelowlimit(m_valueLowLimit);
+		m->set_valuemultiplier(m_valueMultiplier);
+		m->set_valueoffset(m_valueOffset);
+		m->set_uselimits(m_useLimits);
+		m->set_units(m_units.toStdString());
 
 		return true;
 	}
@@ -67,7 +130,25 @@ namespace Hardware
 		m_uuid = Proto::Read(m.uuid());
 		Q_ASSERT(m_uuid.isNull() == false);
 
-		m_siganlTypeId = QString::fromStdString(m.signaltypeid());
+		m_signalTypeId = QString::fromStdString(m.signaltypeid());
+		m_systemSignalType = m.systemsignaltype();
+		m_type = static_cast<E::DiagSignalType>(m.type());
+		m_byteOrder = static_cast<E::DiagByteOrder>(m.byteorder());
+
+		m_inverseValue = m.inversevalue();
+		m_normalState = m.normalstate();
+		m_normalStateString0 = QString::fromStdString(m.normalstatestring0());
+		m_normalStateString1 = QString::fromStdString(m.normalstatestring1());
+
+		m_analogFormat = static_cast<E::DiagAnalogFormat>(m.analogformat());
+		m_adcHighLimit = m.adchighlimit();
+		m_adcLowLimit = m.adclowlimit();
+		m_valueHighLimit = m.valuehighlimit();
+		m_valueLowLimit = m.valuelowlimit();
+		m_valueMultiplier = m.valuemultiplier();
+		m_valueOffset = m.valueoffset();
+		m_useLimits = m.uselimits();
+		m_units = QString::fromStdString(m.units());
 
 		return true;
 	}
@@ -82,14 +163,179 @@ namespace Hardware
 		m_uuid = uuid;
 	}
 
+	bool DiagSignalType::isSystemSignalType() const
+	{
+		return systemSignalType();
+	}
+
+	bool DiagSignalType::systemSignalType() const
+	{
+		return m_systemSignalType;
+	}
+
+	void DiagSignalType::setSystemSignalType(bool value)
+	{
+		m_systemSignalType = value;
+	}
+
 	const QString& DiagSignalType::signalTypeId() const
 	{
-		return m_siganlTypeId;
+		return m_signalTypeId;
 	}
 
 	void DiagSignalType::setSignalTypeId(const QString& value)
 	{
-		m_siganlTypeId = value;
+		m_signalTypeId = value;
+	}
+
+	E::DiagSignalType DiagSignalType::type() const
+	{
+		return m_type;
+	}
+
+	void DiagSignalType::setType(E::DiagSignalType value)
+	{
+		m_type = value;
+	}
+
+	E::DiagByteOrder DiagSignalType::byteOrder() const
+	{
+		return m_byteOrder;
+	}
+
+	void DiagSignalType::setByteOrder(E::DiagByteOrder value)
+	{
+		m_byteOrder = value;
+	}
+
+	bool DiagSignalType::inverseValue() const
+	{
+		return m_inverseValue;
+	}
+
+	void DiagSignalType::setInverseValue(bool value)
+	{
+		m_inverseValue = value;
+	}
+
+	int DiagSignalType::normalState() const
+	{
+		return m_normalState;
+	}
+
+	void DiagSignalType::setNormalState(int value)
+	{
+		m_normalState = value;
+	}
+
+	const QString& DiagSignalType::normalStateString0() const
+	{
+		return m_normalStateString0;
+	}
+
+	void DiagSignalType::setNormalStateString0(const QString& value)
+	{
+		m_normalStateString0 = value;
+	}
+
+	const QString& DiagSignalType::normalStateString1() const
+	{
+		return m_normalStateString1;
+	}
+
+	void DiagSignalType::setNormalStateString1(const QString& value)
+	{
+		m_normalStateString1 = value;
+	}
+
+	E::DiagAnalogFormat DiagSignalType::analogFormat() const
+	{
+		return m_analogFormat;
+	}
+
+	void DiagSignalType::setAnalogFormat(E::DiagAnalogFormat value)
+	{
+		m_analogFormat = value;
+	}
+
+	double DiagSignalType::adcHighLimit() const
+	{
+		return m_adcHighLimit;
+	}
+
+	void DiagSignalType::setAdcHighLimit(double value)
+	{
+		m_adcHighLimit = value;
+	}
+
+	double DiagSignalType::adcLowLimit() const
+	{
+		return m_adcLowLimit;
+	}
+
+	void DiagSignalType::setAdcLowLimit(double value)
+	{
+		m_adcLowLimit = value;
+	}
+
+	double DiagSignalType::valueHighLimit() const
+	{
+		return m_valueHighLimit;
+	}
+
+	void DiagSignalType::setValueHighLimit(double value)
+	{
+		m_valueHighLimit = value;
+	}
+
+	double DiagSignalType::valueLowLimit() const
+	{
+		return m_valueLowLimit;
+	}
+
+	void DiagSignalType::setValueLowLimit(double value)
+	{
+		m_valueLowLimit = value;
+	}
+
+	double DiagSignalType::valueMultiplier() const
+	{
+		return m_valueMultiplier;
+	}
+
+	void DiagSignalType::setValueMultiplier(double value)
+	{
+		m_valueMultiplier = value;
+	}
+
+	double DiagSignalType::valueOffset() const
+	{
+		return m_valueOffset;
+	}
+
+	void DiagSignalType::setValueOffset(double value)
+	{
+		m_valueOffset = value;
+	}
+
+	bool DiagSignalType::useLimits() const
+	{
+		return m_useLimits;
+	}
+
+	void DiagSignalType::setUseLimits(bool value)
+	{
+		m_useLimits = value;
+	}
+
+	const QString& DiagSignalType::units() const
+	{
+		return m_units;
+	}
+
+	void DiagSignalType::setUnits(const QString& value)
+	{
+		m_units = value;
 	}
 
 } // namespace Hardware
