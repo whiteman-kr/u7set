@@ -12,6 +12,7 @@
 #include "LogicModulesInfoWriter.h"
 #include "MetrologyCfgGenerator.h"
 #include "MonitorCfgGenerator.h"
+#include "DiagnosticsCfgGenerator.h"
 #include "Parser.h"
 #include "SchemasReportGenerator.h"
 #include "ScriptChecker.h"
@@ -2035,6 +2036,10 @@ namespace Builder
 
 			case E::SoftwareType::GatewayService:
 				swCfgGen = std::make_shared<GatewayServiceCfgGenerator>(context, software);
+				break;
+
+			case E::SoftwareType::Diagnostics:
+				swCfgGen = std::make_shared<DiagnosticsCfgGenerator>(context, software);
 				break;
 
 			default:

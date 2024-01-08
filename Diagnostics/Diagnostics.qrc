@@ -1,0 +1,27 @@
+<RCC>
+    <qresource prefix="/Images">
+        <file>Images/NewSchema.svg</file>
+        <file>Images/Backward.svg</file>
+        <file>Images/Forward.svg</file>
+        <file>Images/ZoomIn.svg</file>
+        <file>Images/ZoomOut.svg</file>
+        <file>Images/Settings.svg</file>
+        <file>Images/Close.svg</file>
+        <file>Images/About.svg</file>
+        <file>Images/FindSignal.svg</file>
+        <file>Images/Trends.svg</file>
+        <file>Images/Archive.svg</file>
+        <file>Images/Log.svg</file>
+        <file>Images/AppDataSources.svg</file>
+        <file>Images/NetworkConnections.svg</file>
+        <file>Images/dragndrop.png</file>
+        <file>Images/Snapshot.svg</file>
+        <file>Images/ZoomFitToScreen.svg</file>
+        <file>Images/CloseButtonBlack.svg</file>
+        <file>Images/CloseButtonGray.svg</file>
+        <file>Images/SchemaList.svg</file>
+        <file>Images/SchemaFolder.svg</file>
+        <file>Images/KeyOff.svg</file>
+        <file>Images/KeyOn.svg</file>
+    </qresource>
+</RCC>

@@ -9014,7 +9014,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: The specified schema %1 in property %2.StartSchemaID (profile %3) does not exist. Check that Monitor and schema have common tags.
+	/// Title: The specified schema %1 in property %2.StartSchemaID (profile %3) does not exist. Check that Monitor/Diagnostics and schema have common tags.
 	///
 	/// Parameters:
 	///		%1 Value of the property StartSchemaID
@@ -9022,13 +9022,13 @@ namespace Builder
 	///		%3 Profile
 	///
 	/// Description:
-	///		The specified schema in Monitor, property StartSchemaID does not exist.
+	///		The specified schema in Monitor/Diagnostics, property StartSchemaID does not exist.
 	///
 	void IssueLogger::errEQP6211(QString monitorId, QString startSchemaId, QString profile)
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6211,
-				  tr("The specified schema %1 in property %2.StartSchemaID (profile %3) does not exist. Check that Monitor and schema have common tags.")
+				  tr("The specified schema %1 in property %2.StartSchemaID (profile %3) does not exist. Check that Monitor/Diagnostics and schema have common tags.")
 					.arg(startSchemaId)
 					.arg(monitorId)
 					.arg(profile));

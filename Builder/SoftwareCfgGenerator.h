@@ -156,6 +156,8 @@ namespace Builder
 			return t;
 		}
 
+		bool saveScriptProperties(QString scriptProperty, QString fileName);
+
 	protected:
 		Context* m_context = nullptr;
 		Hardware::Software* m_software = nullptr;

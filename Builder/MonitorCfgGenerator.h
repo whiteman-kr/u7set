@@ -21,8 +21,6 @@ namespace Builder
 		bool initSchemaTags();
 		bool initTuningSources();
 
-		bool saveScriptProperties(QString scriptProperty, QString fileName);
-
 		bool writeSchemasByTags();
 
 		// Generate tuning signals file

@@ -25,6 +25,8 @@ qt_add_library(${TARGET} STATIC
 	DiagSignal.h
 	DiagSignalType.cpp
 	DiagSignalType.h
+	HardwareLibrary.cpp
+	HardwareLibrary.h
 	LanControllerInfo.cpp
 	LanControllerInfo.h
 	LmDescription.cpp

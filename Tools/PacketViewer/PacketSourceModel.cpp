@@ -12,6 +12,7 @@
 #include <QDirIterator>
 #include <QMessageBox>
 #include "../HardwareLib/DataProtocols.h"
+#include "../HardwareLib/HardwareLibrary.h"
 #include "../lib/DataSource.h"
 #include <QTimer>
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "../../HardwareLib/DeviceObject.h"
 #include "../../HardwareLib/DiagSignal.h"
+#include "../../HardwareLib/HardwareLibrary.h"
 
 class DeviceObjectTests : public QObject
 {

@@ -1,11 +1,13 @@
-#include "../VFrame30/VFrame30Library.h"
 #include "Globals.h"
 #include "MonitorAppSettings.h"
 #include "MonitorMainWindow.h"
 #include "version.h"
 
+#include "../HardwareLib/HardwareLibrary.h"
+#include "../VFrame30/VFrame30Library.h"
 
-int main(int argc, char *argv[])
+
+int main(int argc, char* argv[])
 {
 	QApplication a(argc, argv);
 
@@ -16,10 +18,10 @@ int main(int argc, char *argv[])
 	a.setOrganizationDomain(Manufacturer::SITE);
 
 	a.setApplicationVersion(QString("%1.%2.%3 (%4)")
-							.arg(U7SET_MAJOR_VERSION)
-							.arg(U7SET_MINOR_VERSION)
-							.arg(U7SET_PATCH_VERSION)
-							.arg(U7SET_BRANCH_NAME));
+								.arg(U7SET_MAJOR_VERSION)
+								.arg(U7SET_MINOR_VERSION)
+								.arg(U7SET_PATCH_VERSION)
+								.arg(U7SET_BRANCH_NAME));
 
 	// --
 	//
@@ -72,10 +74,10 @@ int main(int argc, char *argv[])
 	// --
 	//
 	VFrame30::init();
-	//Hardware::Init();
+	Hardware::init();
 
 	SoftwareInfo softwareInfo;
-	softwareInfo.init(E::SoftwareType::Monitor, MonitorAppSettings::instance().equipmentId(), 0, 1);
+	softwareInfo.init(E::SoftwareType::Monitor, MonitorAppSettings::instance().equipmentId(), U7SET_MAJOR_VERSION, U7SET_MINOR_VERSION);
 
 	// --
 	//
@@ -111,7 +113,7 @@ int main(int argc, char *argv[])
 	//
 
 	VFrame30::shutdown();
-	//Hardware::Shutdown();
+	Hardware::shutdown();
 	google::protobuf::ShutdownProtobufLibrary();
 
 	return result;

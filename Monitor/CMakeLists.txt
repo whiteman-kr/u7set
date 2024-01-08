@@ -81,8 +81,6 @@ set (MONITOR_SOURCES
 	DialogSettings.h
 	Globals.cpp
 	Globals.h
-	InstanceResolver.cpp
-	InstanceResolver.h
 	main.cpp
 	MonitorAppSettings.cpp
 	MonitorAppSettings.h

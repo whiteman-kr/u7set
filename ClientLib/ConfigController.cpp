@@ -135,6 +135,14 @@ namespace ClientLib
 		return false;
 	}
 
+	bool ConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& /*conf*/, const DiagnosticsSettings& /*settings*/, const BuildFileInfoArray& /*files*/)
+	{
+		// Reimplement in the derviced class
+		//
+		Q_ASSERT(false);
+		return false;
+	}
+
 	bool ConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& /*conf*/, const TuningClientSettings& /*settings*/, const BuildFileInfoArray& /*files*/)
 	{
 		// Reimplement in the derviced class

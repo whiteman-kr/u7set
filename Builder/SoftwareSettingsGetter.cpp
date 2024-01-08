@@ -1701,6 +1701,90 @@ bool MonitorSettingsGetter::readTuningServiceSettings(const Builder::Context* co
 
 // -------------------------------------------------------------------------------------
 //
+// DiagnosticsSettingsGetter class implementation
+//
+// -------------------------------------------------------------------------------------
+
+bool DiagnosticsSettingsGetter::readSettings(const Builder::Context* context,
+											 const Hardware::Software* software)
+{
+	clear();
+
+	TEST_PTR_RETURN_FALSE(context);
+
+	Builder::IssueLogger* log = context->m_log;
+
+	TEST_PTR_RETURN_FALSE(log);
+	TEST_PTR_LOG_RETURN_FALSE(software, log);
+
+	const Hardware::EquipmentSet* equipment = context->m_equipmentSet.get();
+
+	TEST_PTR_LOG_RETURN_FALSE(equipment, log);
+
+	bool result = true;
+
+	result &= getCfgServiceConnection(equipment, software,
+									  &configService1.equipmentId, &configService1.address,
+									  &configService2.equipmentId, &configService2.address,
+									  log);
+
+	// StartSchemaID
+	//
+	result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::START_SCHEMA_ID, &startSchemaId, log);
+
+	RETURN_IF_FALSE(result);
+
+	startSchemaId = startSchemaId.trimmed();
+
+	// SchemaTags
+	//
+	result = DeviceHelper::getStrProperty(software, EquipmentPropNames::SCHEMA_TAGS, &schemaTags, log);
+
+	RETURN_IF_FALSE(result);
+
+	QStringList schemaTagList = schemaTags.split(QRegularExpression("\\W+"), Qt::SkipEmptyParts);
+
+	for (QString& tag : schemaTagList)
+	{
+		tag = tag.toLower();
+	}
+
+	schemaTags = schemaTagList.join(Separator::SEMICOLON);
+
+	// TODO: readDiagDataServiceAndArchiveSettings, readAppDataService
+	//
+	int TODO_readDiagDataServiceAndArchiveSettings = 0;
+	int TODO_readAppDataService = 0;
+
+	//result = readAppDataServiceAndArchiveSettings(context, software);
+
+	//RETURN_IF_FALSE(result);
+
+	//result = readTuningServiceSettings(context, software);
+
+	//RETURN_IF_FALSE(result);
+
+	return result;
+}
+
+bool DiagnosticsSettingsGetter::readDiagDataServiceAndArchiveSettings(const Builder::Context* context,
+																	  const Hardware::Software* software)
+{
+	int TODO_readDiagDataServiceAndArchiveSettings = 0;
+	Q_ASSERT(false);
+	return false;
+}
+
+bool DiagnosticsSettingsGetter::readAppDataService(const Builder::Context* context,
+												   const Hardware::Software* software)
+{
+	int TODO_readAppDataService = 0;
+	Q_ASSERT(false);
+	return false;
+}
+
+// -------------------------------------------------------------------------------------
+//
 // TuningClientSettingsGetter class implementation
 //
 // -------------------------------------------------------------------------------------

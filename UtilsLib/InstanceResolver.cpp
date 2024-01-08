@@ -1,4 +1,11 @@
+#ifndef UTILS_LIB_DOMAIN
+#error Do not include this file in the project! Link UtilsLib instead.
+#endif
+
 #include "InstanceResolver.h"
+
+#include <QSharedMemory>
+
 
 bool InstanceResolver::init(QString instanceId, bool singleInstance)
 {

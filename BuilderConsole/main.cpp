@@ -1,6 +1,7 @@
 #include "../Builder/Builder.h"
 #include "../DbLib/DbController.h"
 #include "../HardwareLib/DeviceObject.h"
+#include "../HardwareLib/HardwareLibrary.h"
 #include "../Protobuf/google/protobuf/message.h"
 #include "../VFrame30/VFrame30Library.h"
 #include "../version.h"
@@ -56,7 +57,7 @@ void createTemplateFile(const QString& fileName)
 	writer.writeComment("Build result path, default current directory");
 	writer.writeTextElement("BuildOutputPath", "");
 
-	writer.writeEndElement();	// ConsoleBuilderArguments
+	writer.writeEndElement(); // ConsoleBuilderArguments
 	writer.writeEndDocument();
 
 	QFile f(fileName);
@@ -80,7 +81,8 @@ void showHelp()
 	// Show help
 	//
 	std::cout << "BuilderConsole is a command-line tool that builds RPCT projects." << std::endl;
-	std::cout << std::endl << "Command line parameters:" << std::endl;
+	std::cout << std::endl
+			  << "Command line parameters:" << std::endl;
 	std::cout << "\tBuilderConsole <FileName.xml> - run build task with arguments taken from <FileName.xml> file" << std::endl;
 	std::cout << "or" << std::endl;
 	std::cout << "\tBuilderConsole [/create <FileName.xml>] - create arguments template in <FileName.xml> file" << std::endl;
@@ -148,7 +150,7 @@ int startBuild(QString buildArgsFileName)
 		return 1;
 	}
 
-    if (static_cast<bool>(doc.setContent(&file)) == false)
+	if (static_cast<bool>(doc.setContent(&file)) == false)
 	{
 		QString errorMsg = QObject::tr("Failed to load contents of the file %1.").arg(buildArgsFileName);
 		std::cout << errorMsg.toStdString() << std::endl;
@@ -317,7 +319,7 @@ int startBuild(QString buildArgsFileName)
 	return result;
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
 	originalMessageHandler = qInstallMessageHandler(messageOutputHandler);
 
@@ -330,10 +332,10 @@ int main(int argc, char *argv[])
 	a.setOrganizationDomain(Manufacturer::SITE);
 
 	a.setApplicationVersion(QString("%1.%2.%3 (%4)")
-							.arg(U7SET_MAJOR_VERSION)
-							.arg(U7SET_MINOR_VERSION)
-							.arg(U7SET_PATCH_VERSION)
-							.arg(U7SET_BRANCH_NAME));
+								.arg(U7SET_MAJOR_VERSION)
+								.arg(U7SET_MINOR_VERSION)
+								.arg(U7SET_PATCH_VERSION)
+								.arg(U7SET_BRANCH_NAME));
 
 	QStringList args = a.arguments();
 

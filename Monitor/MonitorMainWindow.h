@@ -1,19 +1,18 @@
 #pragma once
 
-
 #include "MonitorConfigController.h"
 #include "MonitorSignalManager.h"
-#include "SelectSchemaWidget.h"
-#include "InstanceResolver.h"
 #include "SchemaDrawStatistics.h"
-//#include "../VFrame30/ClientSchemaView.h"
-#include "../ClientLib/ClientTranslator.h"
+#include "SelectSchemaWidget.h"
+
 #include "../ClientLib/AdsConnection.h"
+#include "../ClientLib/ClientTranslator.h"
+#include "../ClientLib/TuningLog.h"
 #include "../ClientLib/TuningTcpClient.h"
 #include "../ClientLib/TuningUserManager.h"
-#include "../ClientLib/TuningLog.h"
-#include "../VFrame30/AppSignalController.h"
+#include "../UtilsLib/InstanceResolver.h"
 #include "../UtilsLib/LogFile.h"
+#include "../VFrame30/AppSignalController.h"
 #include "../lib/Ui/DialogAlert.h"
 #include "../lib/Ui/DialogTcpStatistics.h"
 
@@ -42,8 +41,6 @@ protected:
 	// Public methods
 	//
 public:
-	static QString getInstanceKey();
-
 	void showTrends(const std::vector<AppSignalParam>& appSignals);
 
 	// Protected methods
@@ -111,7 +108,6 @@ public slots:
 	void slot_configurationArrived(ConfigSettings configuration);
 	void slot_configurationError(QString error);
 
-	//void checkMonitorSingleInstance();
 	void activateRequested();
 
 	void toggleSchemaTree();

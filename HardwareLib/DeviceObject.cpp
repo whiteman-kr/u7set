@@ -39,48 +39,6 @@ namespace Hardware
 
 	Factory<DeviceObject> DeviceObjectFactory;
 
-	void init()
-	{
-		qDebug() << "Hardware::init";
-
-		// --
-		//
-		static bool firstRun = false;
-		if (firstRun)
-		{
-			Q_ASSERT(false);
-			Hardware::DeviceObjectFactory.clear();
-		}
-
-		firstRun = true;
-
-		//--
-		//
-		Hardware::DeviceObjectFactory.Register<Hardware::DeviceRoot>();
-		Hardware::DeviceObjectFactory.Register<Hardware::DeviceSystem>();
-		Hardware::DeviceObjectFactory.Register<Hardware::DeviceRack>();
-		Hardware::DeviceObjectFactory.Register<Hardware::DeviceChassis>();
-		Hardware::DeviceObjectFactory.Register<Hardware::DeviceModule>();
-		Hardware::DeviceObjectFactory.Register<Hardware::DeviceController>();
-		Hardware::DeviceObjectFactory.Register<Hardware::DeviceAppSignal>();
-		Hardware::DeviceObjectFactory.Register<Hardware::DeviceAppSignal>("DeviceSignal");		// DeviceAppSignal used to be DeviceSignal, so create fabric for DeviceSignal too
-		Hardware::DeviceObjectFactory.Register<Hardware::Workstation>();
-		Hardware::DeviceObjectFactory.Register<Hardware::Software>();
-		Hardware::DeviceObjectFactory.Register<Hardware::DiagSignal>();
-
-		return;
-	}
-
-
-	void shutdown()
-	{
-		qDebug() << "Hardware::Shutdown";
-
-		DeviceObject::PrintRefCounter();
-
-		return;
-	}
-
 	//
 	//
 	// PropertyNames

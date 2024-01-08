@@ -117,6 +117,7 @@ if(NOT CODE_COVERAGE)
 
 	add_subdirectory(Monitor)
 	add_subdirectory(TuningClient)
+	add_subdirectory(Diagnostics)
 
 	add_subdirectory(Metrology)
 	add_subdirectory(mconf)	
