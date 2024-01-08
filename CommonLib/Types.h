@@ -531,6 +531,8 @@ public:
 		LoadFileDialog,
 		Svg,
 		Tags,
+		MatsUsers,
+		TagsAndMatsUsers,
         Report,
 		ChooseFileDialog,
 		ChooseDirectoryDialog

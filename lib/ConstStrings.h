@@ -374,6 +374,7 @@ namespace CfgFileId
 	inline const QString TUNING_GLOBALSCRIPT("TUNING_GLOBALSCRIPT");
 
 	inline const QString CLIENT_BEHAVIOR("CLIENT_BEHAVIOR");
+	inline const QString MATSUSERS("MATSUSERS_XML");
 	inline const QString LOGO("LOGO");
 
 	inline const QString METROLOGY_ITEMS("METROLOGY_ITEMS");

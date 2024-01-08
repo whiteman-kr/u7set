@@ -2,6 +2,7 @@
 #include <QWidget>
 #include <QLayout>
 #include <QPushButton>
+#include "../OnlineLib/MatsUsers.h"
 
 
 class ChooseTagsWidget : public QWidget
@@ -10,7 +11,10 @@ class ChooseTagsWidget : public QWidget
 
 public:
     ChooseTagsWidget(const QStringList &tags, QWidget* parent);
-    ChooseTagsWidget(const std::vector<std::pair<QString, QString>>& tags, QWidget* parent);
+    
+    ChooseTagsWidget(const std::vector<std::pair<QString, QString>>& tags,
+					 const std::vector<OnlineLib::MatsUser>& users,
+					 QWidget* parent);
 
     virtual ~ChooseTagsWidget();
 
@@ -41,7 +45,7 @@ private:
     QWidget* m_parent = nullptr;
     QLineEdit* m_textEdit = nullptr;
     QLineEdit* m_filterEdit = nullptr;
-    QTreeWidget* m_tagsList = nullptr;
+    QTreeWidget* m_list = nullptr;
 
     QPushButton* m_okButton = nullptr;
     QPushButton* m_cancelButton = nullptr;
@@ -49,5 +53,8 @@ private:
     static QString m_filterText;
 
     std::vector<std::pair<QString, QString>> m_tags;
-};
+    std::vector<OnlineLib::MatsUser> m_users;
 
+    QString m_objectName = "Tag";
+    QString m_objectNames = "tags";
+};

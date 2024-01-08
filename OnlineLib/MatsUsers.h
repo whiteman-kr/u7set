@@ -58,8 +58,8 @@ namespace OnlineLib
 		const std::vector<MatsUser>& users() const;
 		const std::set<QString>& appSignalTags(const QString& login, bool* found = nullptr) const;
 
-		bool load(const QByteArray& data, QString& errorCode);
-		bool save(QByteArray& data, const QString& comment) const;
+		bool loadFromByteArray(const QByteArray& data, QString& errorCode);
+		bool saveToByteArray(QByteArray& data) const;
 
 	private:
 		std::vector<MatsUser> m_users;

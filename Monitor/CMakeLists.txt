@@ -34,8 +34,8 @@ set (MONITOR_SOURCES
 	../lib/Ui/DialogAbout.h
 	../lib/Ui/DialogAlert.cpp
 	../lib/Ui/DialogAlert.h
-	../lib/Ui/DialogChooseTags.cpp
-	../lib/Ui/DialogChooseTags.h
+	../lib/Ui/ChooseTagsWidget.cpp
+	../lib/Ui/ChooseTagsWidget.h
 	../lib/Ui/DialogSignalInfo.cpp
 	../lib/Ui/DialogSignalInfo.h
 	../lib/Ui/DialogSignalSearch.cpp

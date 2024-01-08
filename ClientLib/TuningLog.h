@@ -10,7 +10,7 @@ namespace ClientLib
 	class TuningLog : public ITuningLog
 	{
 	public:
-		TuningLog(ClientLib::TuningUserManager& userManager, const QString& logName, const QString& path = QString(), int maxFileSize = 1048576, int maxFilesCount = 10);
+		TuningLog(ITuningAuthorization& m_tuningAuthorization, const QString& logName, const QString& path = QString(), int maxFileSize = 1048576, int maxFilesCount = 10);
 
 		virtual bool write(const AppSignalParam& asp, const TuningValue& oldValue, const TuningValue& newValue) override;
 		virtual bool write(const QString& message) override;
@@ -19,6 +19,6 @@ namespace ClientLib
 
 	private:
 		Log::LogFile m_logFile;
-		TuningUserManager& m_userManager;
+		ITuningAuthorization& m_tuningAuthorization;
 	};
 }

@@ -5,6 +5,7 @@
 #include <QComboBox>
 #include <QLineEdit>
 #include "../lib/Tuning/ITuningAuthorization.h"
+#include "../OnlineLib/MatsUsers.h"
 
 #ifdef Q_OS_LINUX
 #include <security/pam_appl.h>
@@ -21,39 +22,40 @@ namespace ClientLib
 	public:
 		TuningUserManager() = default;
 
-		// Operations
-		//
-		void setConfiguration(bool tuningLogin, const QStringList& tuningUserAccounts, bool loginPerOperation, int tuningSessionTimeout);
+	public:
+		static bool checkPassword(const QString& userName, const QString& password);
 
-		bool login(QWidget* parent);
-		void logout();
-		void reLogin(QWidget* parent);
+		void setConfiguration(bool tuningLogin,
+							  const QStringList& tuningUserAccounts,
+							  bool loginPerOperation,
+							  int tuningSessionTimeout,
+							  const std::vector<OnlineLib::MatsUser>& matsUsers);
 
 		// Properties
 		//
-		bool tuningLogin() const;
+		bool tuningLogin() const override;
 		const QStringList& tuningUserAccounts() const;
 		bool loginPerOperation() const;
 		int tuningSessionTimeout() const;
+		const std::vector<OnlineLib::MatsUser>& matsUsers() const;
+
+		// Operations
+		//
+		bool login(QWidget* parent) override;
+		bool login(const QString& userName, const QString& password);
+		void logout();
+		void reLogin(QWidget* parent);
 
 		// State
 		//
 		bool isLoggedIn() const override;
-		QString loggedInUser() const;
-
+		QString loggedInUser() const override;
+		QString loggedInPassword() const;
 		int logoutPendingSeconds() const;
 
 	signals:
 		void loggedIn();
 		void loggedOut();
-
-	protected:
-		virtual bool askForPassword(QString* userName, QString* password, QWidget* parent);
-		virtual bool checkPassword(const QString& userName, const QString& password);
-
-		// ITuningAuthorization imlementation
-		//
-		bool checkTuningAccess(QWidget* parent) override;
 
 	private:
 		bool requestPassword(QWidget* parent);
@@ -63,9 +65,11 @@ namespace ClientLib
 		QStringList m_tuningUserAccounts;
 		int m_tuningSessionTimeout = 120;
 		bool m_loginPerOperation = false;
+		std::vector<OnlineLib::MatsUser> m_matsUsers;
 
 		bool m_loggedIn = false;
 		QString m_loggedInUser;
+		QString m_loggedInPassword;
 
 		qint64 m_logoutSecsSinceEpoch = 0;
 

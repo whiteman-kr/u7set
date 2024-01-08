@@ -1535,9 +1535,10 @@ void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
 	// Refresh TuningUserManager configuration
 	//
 	m_tuningUserManager.setConfiguration(configuration.tuningLogin,
-                                         configuration.tuningUserAccounts,
-										 false/*loginPerOperation*/,
-										 configuration.tuningSessionTimeout);
+										 configuration.tuningUserAccounts,
+										 false /*loginPerOperation*/,
+										 configuration.tuningSessionTimeout,
+										 m_configController.configuration().matsUsers.users());
 
 	showTuningLoginControls();
 

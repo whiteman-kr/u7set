@@ -3,12 +3,6 @@
 #include "../lib/Tuning/ITuningConnection.h"
 #include "../lib/Tuning/ITuningAuthorization.h"
 
-class TuningAuthorizationStub : public ITuningAuthorization
-{
-	virtual bool isLoggedIn() const override;
-	virtual bool checkTuningAccess(QWidget* parent) override;
-};
-
 class TuningConnectionStub : public ITuningConnection
 {
 public:

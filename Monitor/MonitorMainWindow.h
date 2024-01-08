@@ -171,7 +171,7 @@ private:
 	std::unique_ptr<VFrame30::LogController> m_logController;
 
 	ClientLib::AdsConnection m_adsConnection{m_signalManager, &m_signalManager, &m_LogFile};
-	ClientLib::TuningConnection m_tuningConnection{m_tuningSignalManager, m_tuningSignalManager, m_tuningSignalManager, &m_LogFile, &m_tuningLogFile};
+	ClientLib::TuningConnection m_tuningConnection{m_tuningSignalManager, m_tuningSignalManager, m_tuningSignalManager, m_tuningUserManager, &m_LogFile, &m_tuningLogFile};
 
 	DialogAlert m_dialogAlert;
 

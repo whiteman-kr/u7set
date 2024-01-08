@@ -9,16 +9,17 @@
 namespace ClientLib
 {
 
-TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
-										 const SoftwareEndpoint::TuningService& tuns,
-										 bool autoApply,
-										 TuningClientSettings::LmStatusFlagMode lmStatusFlagMode,
-										 ITuningSignalUpdater& signalUpdater,
-										 IRecentAppSignals& recentTuningSignals,
-										 ILogFile* logFile,
-										 ITuningLog* tuningLog)
+	TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
+											 const SoftwareEndpoint::TuningService& tuns,
+											 bool autoApply,
+											 TuningClientSettings::LmStatusFlagMode lmStatusFlagMode,
+											 ITuningSignalUpdater& signalUpdater,
+											 IRecentAppSignals& recentTuningSignals,
+											 ITuningAuthorization& tuningAuthorization,
+											 ILogFile* logFile,
+											 ITuningLog* tuningLog)
 	{
-		tcpTuningClient = new TuningTcpClient{softwareInfo, tuns, signalUpdater, recentTuningSignals, logFile, tuningLog};
+		tcpTuningClient = new TuningTcpClient{softwareInfo, tuns, signalUpdater, recentTuningSignals, tuningAuthorization, logFile, tuningLog};
 		tcpTuningClient->setServers(tuns.clientRequestAddress, tuns.clientRequestAddress, true);
 		tcpTuningClient->setAutoApply(autoApply);
 		tcpTuningClient->setLmStatusFlagMode(lmStatusFlagMode);
@@ -63,11 +64,13 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 	TuningConnection::TuningConnection(ITuningSignalManager& tuningSignalManager,
 									   ITuningSignalUpdater& tuningSignalUpdater,
 									   IRecentAppSignals& recentTuningSignals,
+									   ITuningAuthorization& tuningAuthorization,
 									   ILogFile* logFile,
 									   ITuningLog* tuningLog) :
 		m_tuningSignalManager{tuningSignalManager},
 		m_tuningSignalUpdater{tuningSignalUpdater},
 		m_recentTuningSignals(recentTuningSignals),
+		m_tuningAuthorization(tuningAuthorization),
 		m_logFile{logFile, "TuningConnection"},
 		m_tuningLog(tuningLog)
 	{
@@ -97,7 +100,7 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 				continue;
 			}
 
-			m_conns.emplace_back(softwareInfo, tuns, autoApply, lmStatusFlagMode, m_tuningSignalUpdater, m_recentTuningSignals,
+			m_conns.emplace_back(softwareInfo, tuns, autoApply, lmStatusFlagMode, m_tuningSignalUpdater, m_recentTuningSignals, m_tuningAuthorization,
 								 m_logFile.logFile(), m_tuningLog);
 		}
 

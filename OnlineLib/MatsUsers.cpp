@@ -183,8 +183,10 @@ namespace OnlineLib
 		return it->appSignalTags();
 	}
 
-	bool MatsUserStorage::load(const QByteArray& data, QString& errorCode)
+	bool MatsUserStorage::loadFromByteArray(const QByteArray& data, QString& errorCode)
 	{
+		clear();
+
 		// Load MATS users from XML
 		//
 		QXmlStreamReader reader(data);
@@ -221,7 +223,7 @@ namespace OnlineLib
 		return !reader.hasError();
 	}
 
-	bool MatsUserStorage::save(QByteArray& data, const QString& comment) const
+	bool MatsUserStorage::saveToByteArray(QByteArray& data) const
 	{
 		QXmlStreamWriter writer(&data);
 

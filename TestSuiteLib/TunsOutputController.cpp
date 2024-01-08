@@ -2,14 +2,17 @@
 
 namespace TestSuite
 {
+
 	TunsOutputController::TunsOutputController(const SoftwareInfo& softwareInfo,
 											   const std::vector<SoftwareEndpoint::TuningService>& tuningServices,
+											   const QString& userName,
 											   const QByteArray& signalsFile,
 											   TuningClientSettings::LmStatusFlagMode lmStatusFlagMode,
 											   ILogFile* logFile):
 		m_signalManager{softwareInfo.equipmentID(), logFile},
 		m_appLog{logFile, "TunsOutputController"},
-		m_connection{m_signalManager, m_signalManager, m_signalManager, logFile, &m_tuningLogStub}
+		m_authorization{userName},
+		m_connection{m_signalManager, m_signalManager, m_signalManager, m_authorization, logFile, &m_tuningLogStub}
 	{
 		m_signalManager.load(signalsFile);
 

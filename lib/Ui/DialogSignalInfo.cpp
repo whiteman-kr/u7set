@@ -544,7 +544,8 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 	m_signal(signal),
 	m_appSignalManager(appSignalManager),
 	m_signalDataServer(signalDataServer),	// it can be nullptr
-	m_appDataServices(appDataServices),		// it can be emptu
+	m_appDataServices(appDataServices),		// it can be emptu,
+	m_tuningAuthorization(tuningAuthorization),
 	m_tuningController(tuningSignalManager, tuningConnection, tuningAuthorization, this),
 	m_tuningEnabled(tuningEnabled)
 {
@@ -2034,6 +2035,13 @@ void DialogSignalInfo::updateTuningSignalState()
 	bool controlEnabled = tuningSignalState.valid() == true &&
 						  tuningSignalState.controlIsEnabled() == true;// &&
 						  //tuningSignalState.writingIsEnabled() == true;	// This flag is not always used! ???
+	
+	if (m_tuningAuthorization.tuningLogin() == true)
+	{
+		// User is logged in and is allowed to tune this signal
+		//
+		controlEnabled &= (m_tuningAuthorization.isLoggedIn() == true && m_signal.tags().contains(m_tuningAuthorization.loggedInUser()) == true);
+	}
 
 	if (ui->pushButtonSetOne->isEnabled() != controlEnabled)
 	{

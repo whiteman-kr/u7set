@@ -8,11 +8,33 @@
 
 namespace TestSuite
 {
+
+	// OutputControllerAuthorization is a ITuningAuthorization implementation which is always logged in and just returns user name
+	//
+	class OutputControllerAuthorization : public ITuningAuthorization
+	{
+	public:
+		OutputControllerAuthorization(const QString& userName) :
+			m_userName(userName)
+		{
+		}
+
+	private:
+		virtual bool tuningLogin() const { return m_userName.isEmpty() == false; }
+		bool login(QWidget* parent) { return true; }
+		bool isLoggedIn() const { return true; }
+		QString loggedInUser() const { return m_userName; }
+
+	private:
+		QString m_userName;
+	};
+
 	class TunsOutputController : public IOutputController
 	{
 	public:
 		TunsOutputController(const SoftwareInfo& softwareInfo,
 							 const std::vector<SoftwareEndpoint::TuningService>& tuningServices,
+							 const QString& userName,
 							 const QByteArray& signalsFile,
 							 TuningClientSettings::LmStatusFlagMode lmStatusFlagMode,
 							 ILogFile* logFile);
@@ -27,6 +49,7 @@ namespace TestSuite
 		TuningSignalManager m_signalManager;
 		mutable HasLogFile m_appLog;
 
+		OutputControllerAuthorization m_authorization;
 		ClientLib::TuningLogStub m_tuningLogStub;
 		ClientLib::TuningConnection m_connection;
 	};

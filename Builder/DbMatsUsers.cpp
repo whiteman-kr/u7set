@@ -38,7 +38,7 @@ namespace Builder
 
 		// Load MATS users from XML
 		//
-		return OnlineLib::MatsUserStorage::load(data, errorCode);
+		return loadFromByteArray(data, errorCode);
 	}
 
 	bool DbMatsUserStorage::save(DbController* db, const QString& comment) const
@@ -54,7 +54,7 @@ namespace Builder
 
 		QByteArray data;
 
-		bool ok = OnlineLib::MatsUserStorage::save(data, comment);
+		bool ok = saveToByteArray(data);
 		if (ok == false)
 		{
 			return false;

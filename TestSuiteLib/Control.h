@@ -15,19 +15,6 @@
 
 namespace TestSuite
 {
-	class TestSuiteUserManager : public ClientLib::TuningUserManager
-	{
-	public:
-		TestSuiteUserManager(const QString& userName, const QString& password);
-
-	private:
-		virtual bool askForPassword(QString* userName, QString* password, QWidget* parent) override;
-
-	private:
-		QString m_userName;
-		QString m_password;
-	};
-
 	struct ControlParams
 	{
 

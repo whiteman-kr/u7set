@@ -15,14 +15,75 @@ namespace ClientLib
 	// TuningUserManager
 	//
 
-	void TuningUserManager::setConfiguration(bool tuningLogin, const QStringList& tuningUserAccounts, bool loginPerOperation, int tuningSessionTimeout)
+	bool TuningUserManager::checkPassword(const QString& userName, const QString& password)
+	{
+		bool result = false;
+
+#ifdef Q_OS_WIN
+			HANDLE phToken=NULL;
+
+			if (LogonUser(reinterpret_cast<LPCWSTR>(userName.data()),
+						  0,
+						  reinterpret_cast<LPCWSTR>(password.data()),
+						  LOGON32_LOGON_INTERACTIVE,
+						  LOGON32_PROVIDER_DEFAULT,
+						  &phToken) == TRUE)
+			{
+				result = true;
+			}
+
+			if (phToken != nullptr)
+			{
+				CloseHandle (phToken);
+			}
+#endif
+
+#ifdef Q_OS_LINUX
+			QString command = QString("echo %1 | /bin/su - %2 >/dev/null 2>/dev/null").arg(password).arg(userName);
+			result = system(command.toLocal8Bit()) == 0;
+#endif
+
+		return result;
+	}
+
+	void TuningUserManager::setConfiguration(bool tuningLogin,
+											 const QStringList& tuningUserAccounts,
+											 bool loginPerOperation,
+											 int tuningSessionTimeout,
+											 const std::vector<OnlineLib::MatsUser>& matsUsers)
 	{
 		m_tuningLogin = tuningLogin;
 		m_tuningUserAccounts = tuningUserAccounts;
 		m_loginPerOperation = loginPerOperation;
 		m_tuningSessionTimeout = tuningSessionTimeout;
+		m_matsUsers = matsUsers;
 
 		m_loggedIn = false;
+	}
+
+	bool TuningUserManager::tuningLogin() const
+	{
+		return m_tuningLogin;
+	}
+
+	const QStringList& TuningUserManager::tuningUserAccounts() const
+	{
+		return m_tuningUserAccounts;
+	}
+
+	bool TuningUserManager::loginPerOperation() const
+	{
+		return m_loginPerOperation;
+	}
+
+	int TuningUserManager::tuningSessionTimeout() const
+	{
+		return m_tuningSessionTimeout;
+	}
+
+	const std::vector<OnlineLib::MatsUser>& TuningUserManager::matsUsers() const
+	{
+		return m_matsUsers;
 	}
 
 	bool TuningUserManager::login(QWidget* parent)
@@ -59,8 +120,48 @@ namespace ClientLib
 		return true;
 	}
 
+	bool TuningUserManager::login(const QString& userName, const QString& password)
+	{
+		if (m_tuningLogin == false)
+		{
+			return true;
+		}
+
+		if (m_tuningUserAccounts.empty() == true)
+		{
+			return true;
+		}
+
+		if (m_loggedIn == false)
+		{
+			if (checkPassword(userName, password) == false)
+			{
+				return false;
+			}
+		}
+
+		// Refresh pending time
+		//
+		m_logoutSecsSinceEpoch = QDateTime::currentSecsSinceEpoch() + m_tuningSessionTimeout;
+
+		if (m_loggedIn == false)
+		{
+			emit loggedIn();
+		}
+
+		if (m_loginPerOperation == false)
+		{
+			m_loggedIn = true;
+		}
+
+		return true;
+	}
+
 	void TuningUserManager::logout()
 	{
+		m_loggedInUser.clear();
+		m_loggedInPassword.clear();
+
 		m_loggedIn = false;
 
 		emit loggedOut();
@@ -77,29 +178,9 @@ namespace ClientLib
 		}
 	}
 
-	bool TuningUserManager::tuningLogin() const
-	{
-		return m_tuningLogin;
-	}
-
-	const QStringList& TuningUserManager::tuningUserAccounts() const
-	{
-		return m_tuningUserAccounts;
-	}
-
-	bool TuningUserManager::loginPerOperation() const
-	{
-		return m_loginPerOperation;
-	}
-
-	int TuningUserManager::tuningSessionTimeout() const
-	{
-		return m_tuningSessionTimeout;
-	}
-
 	bool TuningUserManager::isLoggedIn() const
 	{
-		if (m_tuningLogin == false)
+		if (m_tuningLogin == false || m_tuningUserAccounts.empty() == true)
 		{
 			return true;
 		}
@@ -112,93 +193,38 @@ namespace ClientLib
 		return m_loggedInUser;
 	}
 
+	QString TuningUserManager::loggedInPassword() const
+	{
+		return m_loggedInPassword;
+	}
+
 	int TuningUserManager::logoutPendingSeconds() const
 	{
 		return static_cast<int>(m_logoutSecsSinceEpoch - QDateTime::currentSecsSinceEpoch());
 	}
 
-	bool TuningUserManager::checkPassword(const QString& userName, const QString& password)
-	{
-		bool result = false;
-
-#ifdef Q_OS_WIN
-			HANDLE phToken=NULL;
-
-			if (LogonUser(reinterpret_cast<LPCWSTR>(userName.data()),
-						  0,
-						  reinterpret_cast<LPCWSTR>(password.data()),
-						  LOGON32_LOGON_INTERACTIVE,
-						  LOGON32_PROVIDER_DEFAULT,
-						  &phToken) == TRUE)
-			{
-				result = true;
-			}
-
-			if (phToken != nullptr)
-			{
-				CloseHandle (phToken);
-			}
-#endif
-
-#ifdef Q_OS_LINUX
-			QString command = QString("echo %1 | /bin/su - %2 >/dev/null 2>/dev/null").arg(password).arg(userName);
-			result = system(command.toLocal8Bit()) == 0;
-#endif
-
-		return result;
-	}
-
-	bool TuningUserManager::askForPassword(QString* userName, QString* password, QWidget* parent)
-	{
-		if (userName == nullptr || password == nullptr)
-		{
-			Q_ASSERT(userName);
-			Q_ASSERT(password);
-			return false;
-		}
-
-		ClientLib::DialogTuningPassword d(*this, parent);
-		if (d.exec() != QDialog::Accepted)
-		{
-			return false;
-		}
-
-		*userName = d.userName();
-		*password = d.password();
-
-		return true;
-	}
-
-	bool TuningUserManager::checkTuningAccess(QWidget* parent)
-	{
-		if (login(parent) == false)
-		{
-			return false;
-		}
-
-		return true;
-	}
-
 	bool TuningUserManager::requestPassword(QWidget* parent)
 	{
-		if (m_tuningUserAccounts.empty() == true)
+		if (m_tuningLogin == false || m_tuningUserAccounts.empty() == true)
 		{
 			return true;
 		}
 
 		bool result = false;
 
+		m_loggedInUser.clear();
+		m_loggedInPassword.clear();
+
 		for (int i = 0; i < 3; i++)
 		{
-			QString userName;
-			QString password;
-
-			result = askForPassword(&userName, &password, parent);
-
-			if (result == false)
+			ClientLib::DialogTuningPassword d(*this, parent);
+			if (d.exec() != QDialog::Accepted)
 			{
 				break;
 			}
+
+			QString userName = d.userName();
+			QString password = d.password();
 
 			result = checkPassword(userName, password);
 
@@ -208,11 +234,16 @@ namespace ClientLib
                 {
 					break;
                 }
-				QMessageBox::critical(parent, qAppName(), QObject::tr("Wrong password!"));
+
+				if (i < 2)
+				{
+					QMessageBox::critical(parent, qAppName(), tr("Wrong password! Please try again."));
+				}
 			}
 			else
 			{
 				m_loggedInUser = userName;
+				m_loggedInPassword = password;
 				break;
 			}
 		}
@@ -271,6 +302,21 @@ namespace ClientLib
 
 		for (const QString& user : m_tuningUserManager.tuningUserAccounts())
 		{
+
+			bool userIsEnabled = true;
+			for (const auto& matsUser : m_tuningUserManager.matsUsers())
+			{
+				if (matsUser.login() == user)
+				{
+					userIsEnabled = matsUser.enabled();
+					break;
+				}
+			}
+			if (userIsEnabled == false)
+			{
+				continue;
+			}
+
 			m_userCombo->addItem(user, i);
 
 			if (user == m_lastUser)
