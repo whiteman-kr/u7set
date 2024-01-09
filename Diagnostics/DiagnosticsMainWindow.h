@@ -1,12 +1,12 @@
 #pragma once
 
-
+#include "DiagnosticsCentralWidget.h"
 #include "DiagConfigController.h"
 #include "DiagnosticsSchemaManager.h"
 //#include "MonitorSignalManager.h"
 //#include "SelectSchemaWidget.h"
 #include "../UtilsLib/InstanceResolver.h"
-//#include "SchemaDrawStatistics.h"
+#include "../SchemaClientLib/SchemaDrawStatistics.h"
 //#include "../VFrame30/ClientSchemaView.h"
 #include "../ClientLib/ClientTranslator.h"
 //#include "../ClientLib/AdsConnection.h"
@@ -21,7 +21,6 @@
 
 #include "../OnlineLib/SoftwareInfo.h"
 
-class DiagnosticsCentralWidget;
 class DiagnosticsToolBar;
 
 namespace VFrame30
@@ -58,7 +57,6 @@ protected:
 	void saveWindowState();
 	void restoreWindowState();
 
-	//void showTuningLoginControls();
 	void showLogo();
 	void showZoomControls();
 
@@ -71,8 +69,8 @@ private:
 	void createStatusBar();
 
 public:
-	//DiagnosticsCentralWidget* centralWidget();
-	//const DiagnosticsCentralWidget* centralWidget() const;
+	DiagnosticsCentralWidget* centralWidget();
+	const DiagnosticsCentralWidget* centralWidget() const;
 
 private:
 	void updateStatusBar();
@@ -87,7 +85,6 @@ protected slots:
 //	void schemaTreeListToggled(bool checked);
 //
 	void showLog();
-//    void showTuningLog();
 //	void showDataSources();
 	void showSettings();
 	void showStatistics();
@@ -112,17 +109,17 @@ public slots:
 //	void slot_signalSnapshotByTag(QStringList tags);
 //
 //	void slot_findSignal();
-//	void slot_historyChanged(bool enableBack, bool enableForward);
+	void slot_historyChanged(bool enableBack, bool enableForward);
 	void slot_updateActions(bool schemaWidgetSelected);
-//
-//	void slot_configurationArrived(ConfigSettings configuration);
-//	void slot_configurationError(QString error);
-//
+
+	void slot_configurationArrived(DiagConfigSettings configuration);
+	void slot_configurationError(QString error);
+
 	void activateRequested();
 //
 //	void toggleSchemaTree();
 //	void setVisibleSchemaTree(bool visible);
-//	void setVisibleTabBar(bool visible);
+	void setVisibleTabBar(bool visible);
 	void setVisibleToolBar(bool visible);
 	void setVisibleStatusBar(bool visible);
 	void setVisibleMenu(bool visible);
@@ -179,11 +176,11 @@ private:
 
 	DialogAlert m_dialogAlert;
 
-	//SchemaDrawStatistics m_schemaStats;
+	SchemaClientLib::SchemaDrawStatistics m_schemaStats;
 
 	// File menu
 	//
-	//QAction* m_pExportAction = nullptr;
+	QAction* m_pExportAction = nullptr;
 	QAction* m_pExitAction = nullptr;
 
 	//// Tools menu
@@ -203,8 +200,8 @@ private:
 	//QAction* m_manualMatsAction = nullptr;
 
 	//QAction* m_schemaListAction = nullptr;
-	//QAction* m_newTabAction = nullptr;
-	//QAction* m_closeTabAction = nullptr;
+	QAction* m_newTabAction = nullptr;
+	QAction* m_closeTabAction = nullptr;
 
 	QAction* m_zoomToolBarSeparator = nullptr;
 	QAction* m_zoomInAction = nullptr;
@@ -212,8 +209,8 @@ private:
 	QAction* m_zoom100Action = nullptr;
 	QAction* m_zoomToFitAction = nullptr;
 
-	//QAction* m_historyBack = nullptr;
-	//QAction* m_historyForward = nullptr;
+	QAction* m_historyBack = nullptr;
+	QAction* m_historyForward = nullptr;
 
 	//QAction* m_archiveAction = nullptr;
 	//QAction* m_trendsAction = nullptr;

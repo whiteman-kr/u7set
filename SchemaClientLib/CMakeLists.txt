@@ -17,12 +17,20 @@ qt_add_library(${TARGET} STATIC
 	ClientSchemaManager.h
 	SchemaClientConfigController.cpp
 	SchemaClientConfigController.h
+	SchemaTabWidget.cpp
+	SchemaTabWidget.h
+	SchemaDrawStatistics.cpp
+	SchemaDrawStatistics.h
+
+	../lib/Ui/TabWidgetEx.cpp  # Note that is usend in other projects without this library
+	../lib/Ui/TabWidgetEx.h
 )
 
 target_precompile_headers(${TARGET} PUBLIC
 	<algorithm>
 	<cassert>
 	<chrono>
+	<concepts>
 	<cstdint>
 	<functional>
 	<list>

@@ -1,5 +1,6 @@
 #include "MonitorSignalSnapshot.h"
 #include "MonitorConfigController.h"
+#include "MonitorSignalManager.h"
 
 MonitorDialogSignalSnapshot* MonitorDialogSignalSnapshot::createDialog(MonitorConfigController *configController,
 											 MonitorSignalManager* monitorSignalManager,

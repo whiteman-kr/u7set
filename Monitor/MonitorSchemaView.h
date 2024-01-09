@@ -28,9 +28,6 @@ public:
 	virtual ~MonitorSchemaView() = default;
 
 public:
-	bool saveSchemaToPdf(const QString& fileName);	// Export schema to PDF or PNG
-	bool saveSchemaToPng(const QString& fileName);	// Export schema to PDF or PNG
-
 	virtual VFrame30::DrawMode drawMode() const override;
 
 protected:

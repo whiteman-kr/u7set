@@ -4,18 +4,10 @@
 #include "MonitorSchemaManager.h"
 #include "MonitorSchemaView.h"
 #include "MonitorSignalInfo.h"
+#include "MonitorSignalManager.h"
 
 #include "../VFrame30/IMatsSchemaItemAssociations.h"
-#include "../VFrame30/MacrosExpander.h"
-#include "../VFrame30/MonitorSchema.h"
-#include "../VFrame30/PropertyNames.h"
-#include "../VFrame30/SchemaItemConnection.h"
-#include "../VFrame30/SchemaItemImageValue.h"
-#include "../VFrame30/SchemaItemIndicator.h"
-#include "../VFrame30/SchemaItemLoopback.h"
-#include "../VFrame30/SchemaItemSignal.h"
-#include "../VFrame30/SchemaItemUfb.h"
-#include "../VFrame30/SchemaItemValue.h"
+
 
 namespace
 {

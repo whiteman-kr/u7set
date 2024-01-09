@@ -50,15 +50,12 @@ set (MONITOR_SOURCES
 	../lib/Ui/DragDropHelper.h
 	../lib/Ui/SchemaListWidget.cpp
 	../lib/Ui/SchemaListWidget.h
-	../lib/Ui/TabWidgetEx.cpp
-	../lib/Ui/TabWidgetEx.h
 	../lib/Ui/TagSelectorWidget.cpp
 	../lib/Ui/TagSelectorWidget.h
 	../lib/Ui/TuningSourcesWidget.cpp
 	../lib/Ui/TuningSourcesWidget.h
 	../lib/Ui/DialogWriteValues.cpp
 	../lib/Ui/DialogWriteValues.h
-	../UtilsLib/ILogFile.h
 	Archive/ArchiveConnection.cpp
 	Archive/ArchiveConnection.h
 	Archive/ArchiveData.cpp
@@ -84,7 +81,6 @@ set (MONITOR_SOURCES
 	main.cpp
 	MonitorAppSettings.cpp
 	MonitorAppSettings.h
-	MonitorCentralWidget.cpp
 	MonitorCentralWidget.h
 	MonitorConfigController.cpp
 	MonitorConfigController.h
@@ -102,8 +98,6 @@ set (MONITOR_SOURCES
 	MonitorSignalManager.h
 	MonitorSignalSnapshot.cpp
 	MonitorSignalSnapshot.h
-	SchemaDrawStatistics.cpp
-	SchemaDrawStatistics.h
 	ScriptMonitorApplication.cpp
 	ScriptMonitorApplication.h
 	SelectSchemaWidget.cpp

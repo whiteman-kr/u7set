@@ -1,6 +1,6 @@
 #include "DiagnosticsMainWindow.h"
 #include "DiagnosticsAppSettings.h"
-//#include "DiagnosticsCentralWidget.h"
+#include "DiagnosticsCentralWidget.h"
 #include "DialogSettings.h"
 //#include "MonitorSchemaWidget.h"
 //#include "MonitorSchemaView.h"
@@ -30,6 +30,7 @@ DiagnosticsMainWindow::DiagnosticsMainWindow(InstanceResolver& instanceResolver,
 	m_translator.addLanguage("uk", "Ukrainian");
 
 	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/Diagnostics_uk.qm");
+	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/SchemaClientLib_uk.qm");
 	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/ClientLib_uk.qm");
 	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/TrendView_uk.qm");
 	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/UtilsLib_uk.qm");
@@ -58,9 +59,8 @@ DiagnosticsMainWindow::DiagnosticsMainWindow(InstanceResolver& instanceResolver,
 	//
 	qApp->setApplicationName(DiagnosticsAppSettings::instance().windowCaption());
 
-	//connect(&m_configController, &MonitorConfigController::configurationArrived, this, &MonitorMainWindow::slot_configurationArrived);
-	//connect(&m_configController, &MonitorConfigController::tuningSignalsArrived, this, &MonitorMainWindow::slot_tuningSignalsArrived);
-	//connect(&m_configController, &MonitorConfigController::error, this, &MonitorMainWindow::slot_configurationError);
+	connect(&m_configController, &DiagConfigController::configurationArrived, this, &DiagnosticsMainWindow::slot_configurationArrived);
+	connect(&m_configController, &DiagConfigController::error, this, &DiagnosticsMainWindow::slot_configurationError);
 
 	// DialogAlert
 	//
@@ -74,12 +74,19 @@ DiagnosticsMainWindow::DiagnosticsMainWindow(InstanceResolver& instanceResolver,
 
 	//// --
 	////
-	//MonitorCentralWidget* monitorCentralWidget = new MonitorCentralWidget(&m_schemaManager,
-	//																	  m_appSignalController.get(),
-	//																	  m_logController.get(),
-	//																	  &m_schemaStats,
-	//																	  this);
-	//setCentralWidget(monitorCentralWidget);
+	auto createSchemaWidgetFunc = [this](std::shared_ptr<VFrame30::Schema> schema, QWidget* parentWidget)
+	{
+		return new DiagSchemaWidget(schema,
+									&m_schemaManager,
+									// m_appSignalController.get(),
+									m_logController.get(),
+									&m_schemaStats,
+									parentWidget);
+	};
+
+	auto diagnosticsCentralWidget = new DiagnosticsCentralWidget(&m_schemaManager, std::move(createSchemaWidgetFunc), this);
+
+	setCentralWidget(diagnosticsCentralWidget);
 
 	// Create Menus, ToolBars, StatusBar
 	//
@@ -96,24 +103,29 @@ DiagnosticsMainWindow::DiagnosticsMainWindow(InstanceResolver& instanceResolver,
 	setMinimumSize(500, 300);
 	restoreWindowState();
 
-	//// --
-	////
-	//connect(monitorCentralWidget, &MonitorCentralWidget::signal_actionCloseTabUpdated, this,
-	//		[this](bool allowed)
-	//{
-	//	Q_ASSERT(m_closeTabAction);
-	//	m_closeTabAction->setEnabled(MonitorAppSettings::instance().showSchemasTabBar() && allowed);
-	//});
+	// --
+	//
+	connect(diagnosticsCentralWidget, &DiagnosticsCentralWidget::signal_actionCloseTabUpdated, this,
+			[this](bool allowed)
+	{
+		Q_ASSERT(m_closeTabAction);
+		m_closeTabAction->setEnabled(DiagnosticsAppSettings::instance().showSchemasTabBar() && allowed);
+	});
 
-	//connect(monitorCentralWidget, &MonitorCentralWidget::signal_historyChanged, this, &MonitorMainWindow::slot_historyChanged);
-	//connect(monitorCentralWidget, &MonitorCentralWidget::signal_tabPageChanged, this, &MonitorMainWindow::slot_updateActions);
+	connect(diagnosticsCentralWidget, &DiagnosticsCentralWidget::signal_historyChanged, this, &DiagnosticsMainWindow::slot_historyChanged);
+	connect(diagnosticsCentralWidget, &DiagnosticsCentralWidget::signal_tabPageChanged, this, &DiagnosticsMainWindow::slot_updateActions);
 
 	//connect(m_selectSchemaWidget, &SelectSchemaWidget::selectionChanged, monitorCentralWidget, &MonitorCentralWidget::slot_selectSchemaForCurrentTab);
 
-	//// --
-	////
-	//centralWidget()->show();
+	// --
+	//
+	diagnosticsCentralWidget->setVisibleTabBar(DiagnosticsAppSettings::instance().showSchemasTabBar());
+	diagnosticsCentralWidget->setZoomMode(DiagnosticsAppSettings::instance().zoomMode());
 
+	centralWidget()->show();
+
+	// --
+	//
 	m_configController.start();
 
 	m_updateStatusBarTimerId = startTimer(200);
@@ -250,56 +262,6 @@ void DiagnosticsMainWindow::restoreWindowState()
 	return;
 }
 
-//void MonitorMainWindow::showTuningLoginControls()
-//{
-//	// Show/hide login controls
-//	//
-//	if (m_configController.configuration().tuningEnabled == true && m_tuningUserManager.tuningLogin() == true)
-//	{
-//		m_loginAction->setVisible(true);
-//		m_loginUserTimeoutAction->setVisible(true);
-//
-//		if (m_tuningUserManager.tuningSessionTimeout() > 0)
-//		{
-//			m_loginUserTimeoutAction->setText(QString(tr("Logged Out\n00:00:00")));
-//			m_loginUserTimeoutAction->setToolTip(tr("Click to re-login with current user"));
-//		}
-//		else
-//		{
-//			m_loginUserTimeoutAction->setText(QString(tr("Logged Out")));
-//			m_loginUserTimeoutAction->setToolTip(tr("Click to log out current user"));
-//		}
-//
-//		// Adjust m_loginUserNameLabel width to have place for all usernames
-//		//
-//		if (QWidget* loginUserTimeoutActionWidget = m_toolBar->widgetForAction(m_loginUserTimeoutAction);
-//			loginUserTimeoutActionWidget == nullptr)
-//		{
-//			Q_ASSERT(loginUserTimeoutActionWidget);
-//		}
-//		else
-//		{
-//			int maxUsernameSpace = loginUserTimeoutActionWidget->fontMetrics().horizontalAdvance(m_loginUserTimeoutAction->text());
-//
-//			for (const QString& userName : m_tuningUserManager.tuningUserAccounts())
-//			{
-//				int space = loginUserTimeoutActionWidget->fontMetrics().horizontalAdvance(userName);
-//				if (space > maxUsernameSpace)
-//				{
-//					maxUsernameSpace = space;
-//				}
-//			}
-//
-//			loginUserTimeoutActionWidget->setFixedWidth(maxUsernameSpace + 5);
-//		}
-//	}
-//	else
-//	{
-//		m_loginAction->setVisible(false);
-//		m_loginUserTimeoutAction->setVisible(false);
-//	}
-//}
-
 void DiagnosticsMainWindow::showZoomControls()
 {
 	auto zoomMode = DiagnosticsAppSettings::instance().zoomMode();
@@ -374,12 +336,12 @@ void DiagnosticsMainWindow::showLogo()
 
 void DiagnosticsMainWindow::createActions()
 {
-//	m_pExportAction = new QAction(tr("Export Schema..."), this);
-//	m_pExportAction->setStatusTip(tr("Export current schema to a file"));
-//	m_pExportAction->setEnabled(true);
-//	m_pExportAction->setShortcuts(QList<QKeySequence>{}
-//									 <<  QKeySequence{Qt::CTRL | Qt::Key_S});
-//	connect(m_pExportAction, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_export);
+	m_pExportAction = new QAction(tr("Export Schema..."), this);
+	m_pExportAction->setStatusTip(tr("Export current schema to a file"));
+	m_pExportAction->setEnabled(true);
+	m_pExportAction->setShortcuts(QList<QKeySequence>{}
+									 <<  QKeySequence{Qt::CTRL | Qt::Key_S});
+	connect(m_pExportAction, &QAction::triggered, centralWidget(), &DiagnosticsCentralWidget::slot_export);
 
 	m_pExitAction = new QAction(tr("Exit"), this);
 	m_pExitAction->setStatusTip(tr("Quit the application"));
@@ -451,67 +413,67 @@ void DiagnosticsMainWindow::createActions()
 //									 <<  QKeySequence{Qt::CTRL | Qt::Key_QuoteLeft}
 //									 <<  QKeySequence{Qt::CTRL | Qt::Key_AsciiTilde});
 //	connect(m_schemaListAction, &QAction::toggled, this, &MonitorMainWindow::schemaTreeListToggled);
-//
-//	m_newTabAction = new QAction(tr("New Tab"), this);
-//	m_newTabAction->setStatusTip(tr("Open current schema in new tab page"));
-//	m_newTabAction->setIcon(QIcon(":/Images/Images/NewSchema.svg"));
-//	m_newTabAction->setEnabled(MonitorAppSettings::instance().showSchemasTabBar());
-//	m_newTabAction->setVisible(MonitorAppSettings::instance().showSchemasTabBar());
-//	QList<QKeySequence> newTabShortcuts;
-//	newTabShortcuts << QKeySequence::AddTab;
-//	newTabShortcuts << QKeySequence::New;
-//	m_newTabAction->setShortcuts(newTabShortcuts);
-//	connect(m_newTabAction, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_newTab);
-//
-//	m_closeTabAction = new QAction(tr("Close Tab"), this);
-//	m_closeTabAction->setStatusTip(tr("Close current tab page"));
-//	m_closeTabAction->setIcon(QIcon(":/Images/Images/Close.svg"));
-//	m_closeTabAction->setEnabled(MonitorAppSettings::instance().showSchemasTabBar() && monitorCentralWidget()->count() > 1);
-//	m_closeTabAction->setVisible(MonitorAppSettings::instance().showSchemasTabBar());
-//	m_closeTabAction->setShortcuts(QKeySequence::Close);
-//	connect(m_closeTabAction, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_closeCurrentTab);
-//
+
+	m_newTabAction = new QAction(tr("New Tab"), this);
+	m_newTabAction->setStatusTip(tr("Open current schema in new tab page"));
+	m_newTabAction->setIcon(QIcon(":/Images/Images/NewSchema.svg"));
+	m_newTabAction->setEnabled(DiagnosticsAppSettings::instance().showSchemasTabBar());
+	m_newTabAction->setVisible(DiagnosticsAppSettings::instance().showSchemasTabBar());
+	QList<QKeySequence> newTabShortcuts;
+	newTabShortcuts << QKeySequence::AddTab;
+	newTabShortcuts << QKeySequence::New;
+	m_newTabAction->setShortcuts(newTabShortcuts);
+	connect(m_newTabAction, &QAction::triggered, centralWidget(), &DiagnosticsCentralWidget::slot_newTab);
+
+	m_closeTabAction = new QAction(tr("Close Tab"), this);
+	m_closeTabAction->setStatusTip(tr("Close current tab page"));
+	m_closeTabAction->setIcon(QIcon(":/Images/Images/Close.svg"));
+	m_closeTabAction->setEnabled(DiagnosticsAppSettings::instance().showSchemasTabBar() && centralWidget()->count() > 1);
+	m_closeTabAction->setVisible(DiagnosticsAppSettings::instance().showSchemasTabBar());
+	m_closeTabAction->setShortcuts(QKeySequence::Close);
+	connect(m_closeTabAction, &QAction::triggered, centralWidget(), &DiagnosticsCentralWidget::slot_closeCurrentTab);
+
 	m_zoomInAction = new QAction(tr("Zoom In"), this);
 	m_zoomInAction->setStatusTip(tr("Zoom in schema view"));
 	m_zoomInAction->setIcon(QIcon(":/Images/Images/ZoomIn.svg"));
 	m_zoomInAction->setEnabled(true);
 	m_zoomInAction->setShortcut(QKeySequence::ZoomIn);
-//	connect(m_zoomInAction, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_zoomIn);
-//
+	connect(m_zoomInAction, &QAction::triggered, centralWidget(), &DiagnosticsCentralWidget::slot_zoomIn);
+
 	m_zoomOutAction = new QAction(tr("Zoom Out"), this);
 	m_zoomOutAction->setStatusTip(tr("Zoom out schema view"));
 	m_zoomOutAction->setIcon(QIcon(":/Images/Images/ZoomOut.svg"));
 	m_zoomOutAction->setEnabled(true);
 	m_zoomOutAction->setShortcut(QKeySequence::ZoomOut);
-//	connect(m_zoomOutAction, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_zoomOut);
-//
+	connect(m_zoomOutAction, &QAction::triggered, centralWidget(), &DiagnosticsCentralWidget::slot_zoomOut);
+
 	m_zoom100Action = new QAction(tr("Zoom 100%"), this);
 	m_zoom100Action->setStatusTip(tr("Set zoom to 100%"));
 	m_zoom100Action->setEnabled(true);
 	m_zoom100Action->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Asterisk));
-//	connect(m_zoom100Action, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_zoom100);
-//
+	connect(m_zoom100Action, &QAction::triggered, centralWidget(), &DiagnosticsCentralWidget::slot_zoom100);
+
 	m_zoomToFitAction = new QAction(tr("Fit to Screen"), this);
 	m_zoomToFitAction->setStatusTip(tr("Set zoom to fit screen"));
 	m_zoomToFitAction->setIcon(QIcon(":/Images/Images/ZoomFitToScreen.svg"));
 	m_zoomToFitAction->setEnabled(true);
 	m_zoomToFitAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Slash));
-//	connect(m_zoomToFitAction, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_zoomToFit);
-//
-//	m_historyBack = new QAction(tr("Go Back"), this);
-//	m_historyBack->setStatusTip(tr("Click to go back"));
-//	m_historyBack->setIcon(QIcon(":/Images/Images/Backward.svg"));
-//	m_historyBack->setEnabled(false);
-//	m_historyBack->setShortcut(QKeySequence::Back);
-//	connect(m_historyBack, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_historyBack);
-//
-//	m_historyForward = new QAction(tr("Go Forward"), this);
-//	m_historyForward->setStatusTip(tr("Click to go forward"));
-//	m_historyForward->setIcon(QIcon(":/Images/Images/Forward.svg"));
-//	m_historyForward->setEnabled(false);
-//	m_historyForward->setShortcut(QKeySequence::Forward);
-//	connect(m_historyForward, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_historyForward);
-//
+	connect(m_zoomToFitAction, &QAction::triggered, centralWidget(), &DiagnosticsCentralWidget::slot_zoomToFit);
+
+	m_historyBack = new QAction(tr("Go Back"), this);
+	m_historyBack->setStatusTip(tr("Click to go back"));
+	m_historyBack->setIcon(QIcon(":/Images/Images/Backward.svg"));
+	m_historyBack->setEnabled(false);
+	m_historyBack->setShortcut(QKeySequence::Back);
+	connect(m_historyBack, &QAction::triggered, centralWidget(), &DiagnosticsCentralWidget::slot_historyBack);
+
+	m_historyForward = new QAction(tr("Go Forward"), this);
+	m_historyForward->setStatusTip(tr("Click to go forward"));
+	m_historyForward->setIcon(QIcon(":/Images/Images/Forward.svg"));
+	m_historyForward->setEnabled(false);
+	m_historyForward->setShortcut(QKeySequence::Forward);
+	connect(m_historyForward, &QAction::triggered, centralWidget(), &DiagnosticsCentralWidget::slot_historyForward);
+
 //	m_archiveAction = new QAction(tr("Archive"), this);
 //	m_archiveAction->setIcon(QIcon(":/Images/Images/Archive.svg"));
 //	m_archiveAction->setEnabled(true);
@@ -556,8 +518,8 @@ void DiagnosticsMainWindow::createMenus()
 	//
 	QMenu* pFileMenu = menuBar()->addMenu(tr("&File"));
 
-//	pFileMenu->addAction(m_pExportAction);
-//	pFileMenu->addSeparator();
+	pFileMenu->addAction(m_pExportAction);
+	pFileMenu->addSeparator();
 	pFileMenu->addAction(m_pExitAction);
 
 	// Schema
@@ -565,9 +527,9 @@ void DiagnosticsMainWindow::createMenus()
 	QMenu* schemaMenu = menuBar()->addMenu(tr("&Schema"));
 
 //	schemaMenu->addAction(m_schemaListAction);
-//	schemaMenu->addAction(m_newTabAction);
-//	schemaMenu->addAction(m_closeTabAction);
-//
+	schemaMenu->addAction(m_newTabAction);
+	schemaMenu->addAction(m_closeTabAction);
+
 	// View
 	//
 	QMenu* viewMenu = menuBar()->addMenu(tr("&View"));
@@ -577,11 +539,10 @@ void DiagnosticsMainWindow::createMenus()
 	viewMenu->addAction(m_zoom100Action);
 	viewMenu->addAction(m_zoomToFitAction);
 	viewMenu->addSeparator();
-//
-//	viewMenu->addAction(m_historyForward);
-//	viewMenu->addAction(m_historyBack );
-//
-//
+
+	viewMenu->addAction(m_historyForward);
+	viewMenu->addAction(m_historyBack );
+
 	// Tools
 	//
 	QMenu* toolsMenu = menuBar()->addMenu(tr("&Tools"));
@@ -630,8 +591,8 @@ void DiagnosticsMainWindow::createToolBars()
 	m_toolBar->setObjectName("DiagnosticsMainToolBar");
 
 //	m_toolBar->addAction(m_schemaListAction);
-//	m_toolBar->addAction(m_newTabAction);
-//
+	m_toolBar->addAction(m_newTabAction);
+
 	m_zoomToolBarSeparator = m_toolBar->addSeparator();
 	m_toolBar->addAction(m_zoomInAction);
 	m_toolBar->addAction(m_zoomOutAction);
@@ -643,11 +604,11 @@ void DiagnosticsMainWindow::createToolBars()
 //	m_selectSchemaWidget->setMaximumWidth(1280);
 //	m_toolBar->addWidget(m_selectSchemaWidget);
 //
-//	m_toolBar->addSeparator();
-//	m_toolBar->addAction(m_historyBack);
-//	m_toolBar->addAction(m_historyForward);
-//
-//
+	m_toolBar->addSeparator();
+	m_toolBar->addAction(m_historyBack);
+	m_toolBar->addAction(m_historyForward);
+
+
 //	m_toolBar->addSeparator();
 //	m_toolBar->addAction(m_signalSnapshotAction);
 //	m_toolBar->addAction(m_findSignalAction);
@@ -725,21 +686,19 @@ void DiagnosticsMainWindow::createStatusBar()
 	return;
 }
 
-//DiagnosticsCentralWidget* DiagnosticsMainWindow::centralWidget()
-//{
-//	DiagnosticsCentralWidget* centralWidget = dynamic_cast<DiagnosticsCentralWidget*>(QMainWindow::centralWidget());
-//	Q_ASSERT(centralWidget != nullptr);
-//
-//	return centralWidget;
-//}
-//
-//const DiagnosticsCentralWidget* DiagnosticsMainWindow::centralWidget() const
-//{
-//	const DiagnosticsCentralWidget* centralWidget = dynamic_cast<const DiagnosticsCentralWidget*>(QMainWindow::centralWidget());
-//	Q_ASSERT(centralWidget != nullptr);
-//
-//	return centralWidget;
-//}
+DiagnosticsCentralWidget* DiagnosticsMainWindow::centralWidget()
+{
+	auto cw = dynamic_cast<DiagnosticsCentralWidget*>(QMainWindow::centralWidget());
+	Q_ASSERT(cw != nullptr);
+	return cw;
+}
+
+const DiagnosticsCentralWidget* DiagnosticsMainWindow::centralWidget() const
+{
+	auto cw = dynamic_cast<const DiagnosticsCentralWidget*>(QMainWindow::centralWidget());
+	Q_ASSERT(cw != nullptr);
+	return cw;
+}
 
 void DiagnosticsMainWindow::updateStatusBar()
 {
@@ -958,8 +917,8 @@ void DiagnosticsMainWindow::showSettings()
 		//
 		showLogo();
 		showZoomControls();
-//		setVisibleTabBar(DiagnosticsAppSettings::instance().showSchemasTabBar());
-//		monitorCentralWidget()->applyZoomMode(DiagnosticsAppSettings::instance().zoomMode());
+		setVisibleTabBar(DiagnosticsAppSettings::instance().showSchemasTabBar());
+		centralWidget()->setZoomMode(DiagnosticsAppSettings::instance().zoomMode());
 
 		// Reconnect
 		//
@@ -1074,46 +1033,6 @@ void DiagnosticsMainWindow::showAbout()
 void DiagnosticsMainWindow::debug()
 {
 #ifdef QT_DEBUG
-//	std::vector<AppSignalParam> appSignals;
-
-//	appSignals.push_back(m_signalManager.signalParam("#TEST1_000035", nullptr));
-//	appSignals.push_back(m_signalManager.signalParam("#SYSTEMID_SRT3_CH01_MD00_CTRLIN_INH02A", nullptr));
-
-//	QDateTime start = QDateTime{QDate{2023, 2, 1}, QTime{0, 0, 0, 0}};
-//	QDateTime now = QDateTime::currentDateTime();
-
-//	MonitorArchive::requestArchiveWithNewWidget(&m_signalManager, &m_configController, appSignals, start, now, E::TimeType::Local, this);
-
-	// --
-	//
-//	QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
-//													"./",
-//													tr("Monitor schemas (*.mvs);; All files (*.*)"));
-
-//	if (fileName.isNull() == true)
-//	{
-//		return;
-//	}
-
-//	QFileInfo fileInfo(fileName);
-
-//	// Load schema
-//	//
-//	std::shared_ptr<VFrame30::Schema> schema = std::shared_ptr<VFrame30::Schema>(VFrame30::Schema::Create(fileName.toStdWString().c_str()));
-
-//	if (schema == nullptr)
-//	{
-//		QMessageBox::critical(this, "Monitor", "Cannot load file");
-//		return;
-//	}
-
-	// Create tab
-	//
-	//	QTabWidget* tabWidget = monitorCentralWidget();
-
-	//	MonitorSchemaWidget* schemaWidget = new MonitorSchemaWidget(schema);
-	//	tabWidget->addTab(schemaWidget, "Debug tab: " + fileInfo.fileName());
-
 #endif	// QT_DEBUG
 }
 //
@@ -1464,87 +1383,68 @@ void DiagnosticsMainWindow::debug()
 //
 //	return;
 //}
-//
-//void MonitorMainWindow::slot_historyChanged(bool enableBack, bool enableForward)
-//{
-//	if (m_historyBack == nullptr ||
-//		m_historyForward == nullptr)
-//	{
-//		Q_ASSERT(m_historyBack);
-//		Q_ASSERT(m_historyForward);
-//		return;
-//	}
-//
-//	m_historyBack->setEnabled(enableBack);
-//	m_historyForward->setEnabled(enableForward);
-//
-//	return;
-//}
-//
+
+void DiagnosticsMainWindow::slot_historyChanged(bool enableBack, bool enableForward)
+{
+	if (m_historyBack == nullptr ||
+		m_historyForward == nullptr)
+	{
+		Q_ASSERT(m_historyBack);
+		Q_ASSERT(m_historyForward);
+		return;
+	}
+
+	m_historyBack->setEnabled(enableBack);
+	m_historyForward->setEnabled(enableForward);
+
+	return;
+}
+
 void DiagnosticsMainWindow::slot_updateActions(bool schemaWidgetSelected)
 {
 	m_zoomInAction->setEnabled(schemaWidgetSelected);
 	m_zoomOutAction->setEnabled(schemaWidgetSelected);
 	m_zoom100Action->setEnabled(schemaWidgetSelected);
 	m_zoomToFitAction->setEnabled(schemaWidgetSelected);
-//
-//	m_historyBack->setEnabled(schemaWidgetSelected);
-//	m_historyForward->setEnabled(schemaWidgetSelected);
-//
+
+	m_historyBack->setEnabled(schemaWidgetSelected);
+	m_historyForward->setEnabled(schemaWidgetSelected);
+
 //	m_selectSchemaWidget->setEnabled(schemaWidgetSelected);
 
 	return;
 }
-//
-//void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
-//{
-//	// Update AppSignalManager with specific data
-//	//
-//	m_adsConnection.updateConnections(m_configController.softwareInfo(), configuration.appDataServices);
-//
-//	m_tuningConnection.updateConnections(m_configController.softwareInfo(),
-//										 configuration.tuningServices,
-//										 true/*autoApply*/,
-//										 TuningClientSettings::LmStatusFlagMode::None);
-//
-//	m_signalManager.setSetpoints(m_configController.setpoints());
-//
-//	// Log out from tuning
-//	//
-//	if (m_tuningUserManager.isLoggedIn() == true)
-//	{
-//		m_tuningUserManager.logout();
-//	}
-//
-//	// Refresh TuningUserManager configuration
-//	//
-//	m_tuningUserManager.setConfiguration(configuration.tuningLogin,
-//                                         configuration.tuningUserAccounts,
-//										 false/*loginPerOperation*/,
-//										 configuration.tuningSessionTimeout);
-//
-//	showTuningLoginControls();
-//
-//    m_pTuningLogAction->setVisible(configuration.tuningEnabled == true);
-//
-//	m_statusBarTuningConnection->setVisible(configuration.tuningEnabled == true);
-//
-//	m_logoImage = configuration.logoImage;
-//
-//	showLogo();
-//
-//	return;
-//}
 
-//void MonitorMainWindow::slot_configurationError(QString error)
-//{
-//	QMessageBox::critical(this,
-//						  qAppName(),
-//						  tr("Configuration error: %1")
-//						  .arg(error));
-//	return;
-//}
-//
+void DiagnosticsMainWindow::slot_configurationArrived(DiagConfigSettings configuration)
+{
+	// Update AppSignalManager with specific data
+	//
+	//m_adsConnection.updateConnections(m_configController.softwareInfo(), configuration.appDataServices);
+
+	//m_tuningConnection.updateConnections(m_configController.softwareInfo(),
+	//									 configuration.tuningServices,
+	//									 true/*autoApply*/,
+	//									 TuningClientSettings::LmStatusFlagMode::None);
+
+	//m_signalManager.setSetpoints(m_configController.setpoints());
+
+
+	m_logoImage = configuration.logoImage;
+
+	showLogo();
+
+	return;
+}
+
+void DiagnosticsMainWindow::slot_configurationError(QString error)
+{
+	QMessageBox::critical(this,
+						  qAppName(),
+						  tr("Configuration error: %1")
+							  .arg(error));
+	return;
+}
+
 void DiagnosticsMainWindow::activateRequested()
 {
 	// To move window to top, add WindowStaysOnTopHint flag. In linux X11Bypass tag required
@@ -1604,24 +1504,25 @@ void DiagnosticsMainWindow::activateRequested()
 //	return;
 //}
 //
-//void MonitorMainWindow::setVisibleTabBar(bool visible)
-//{
-//	MonitorCentralWidget* m = monitorCentralWidget();
-//	Q_ASSERT(m);
-//
-//	if (m != nullptr)
-//	{
-//		m->tabBar()->setVisible(visible);
-//	}
-//
-//	m_newTabAction->setVisible(visible);
-//	m_newTabAction->setEnabled(visible);
-//
-//	m_closeTabAction->setEnabled(visible);
-//	m_closeTabAction->setVisible(visible);
-//
-//	return;
-//}
+
+void DiagnosticsMainWindow::setVisibleTabBar(bool visible)
+{
+	auto m = centralWidget();
+	Q_ASSERT(m);
+
+	if (m != nullptr)
+	{
+		m->tabBar()->setVisible(visible);
+	}
+
+	m_newTabAction->setVisible(visible);
+	m_newTabAction->setEnabled(visible);
+
+	m_closeTabAction->setEnabled(visible);
+	m_closeTabAction->setVisible(visible);
+
+	return;
+}
 
 void DiagnosticsMainWindow::setVisibleToolBar(bool visible)
 {

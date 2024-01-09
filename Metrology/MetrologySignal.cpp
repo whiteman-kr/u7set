@@ -1458,7 +1458,6 @@ namespace Metrology
 		}
 		else
 		{
-
 			value = hysteresisSignalID(idType);
 
 			switch (cmpType())

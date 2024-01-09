@@ -53,6 +53,9 @@ namespace Hardware
 	const QString PropertyNames::place = "Place";
 	const QString PropertyNames::specificProperties = "SpecificProperties";
 	const QString PropertyNames::signalSpecificProperties = "SignalSpecificProperties";
+	const QString PropertyNames::tags = "Tags";
+	const QString PropertyNames::tagsDescription = "Space separated object's tags";
+	
 	const QString PropertyNames::preset = "Preset";
 	const QString PropertyNames::presetRoot = "PresetRoot";
 	const QString PropertyNames::presetName = "PresetName";
@@ -153,6 +156,10 @@ namespace Hardware
 		auto specificProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::specificProperties, true, DeviceObject::specificPropertiesStruct, DeviceObject::setSpecificPropertiesStruct);
 		specificProp->setExpert(true);
 		specificProp->setSpecificEditor(E::PropertySpecificEditor::SpecificPropertyStruct);
+
+		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::tags, true, DeviceObject::tagsAsString, DeviceObject::setTags)
+			->setDescription(PropertyNames::tagsDescription)
+			.setSpecificEditor(E::PropertySpecificEditor::Tags);
 
 		auto presetProp = ADD_PROPERTY_GETTER(bool, PropertyNames::preset, true, DeviceObject::isPreset);
 		presetProp->setExpert(true);
@@ -281,6 +288,13 @@ namespace Hardware
 			}
 		}
 
+		// Save tags.
+		//
+		for (const auto& tag : m_tags)
+		{
+			mutableDeviceObject->add_tags(tag.second.toStdString());
+		}
+
 		// --
 		//
 		if (m_preset == true)
@@ -345,6 +359,20 @@ namespace Hardware
 
 		m_specificPropertiesStruct = QString::fromStdString(deviceobject.specific_properties_struct());
 		parseSpecificPropertiesStruct(m_specificPropertiesStruct);
+
+		// Load tags.
+		//
+		{
+			QStringList tags;
+			tags.reserve(deviceobject.tags_size());
+
+			for (const std::string& tag : deviceobject.tags())
+			{
+				tags.push_back(QString::fromStdString(tag));
+			}
+
+			setTags(tags);
+		}
 
 		// Load specific properties' values. They are already exists after calling parseSpecificPropertiesStruct()
 		//
@@ -1318,6 +1346,56 @@ namespace Hardware
 	{
 		m_place = value;
 	}
+
+	bool DeviceObject::hasTag(const QString& tag) const
+	{
+		return hasTag(::calcHash(tag));
+	}
+
+	bool DeviceObject::hasTag(Hash tagHash) const
+	{
+		return m_tags.contains(tagHash);
+	}
+
+	QStringList DeviceObject::tags() const
+	{
+		QStringList result;
+		result.reserve(m_tags.size());
+
+		for (const auto& pair : m_tags)
+		{
+			result.push_back(pair.second);
+		}
+
+		result.sort();
+
+		return result;
+	}
+
+	QString DeviceObject::tagsAsString() const
+	{
+		return tags().join(" ");
+	}
+	
+	void DeviceObject::setTags(const QStringList& tags)
+	{
+		m_tags.clear();
+		m_tags.reserve(tags.size());
+
+		for (const QString& tag : tags)
+		{
+			m_tags[::calcHash(tag)] = tag;
+		};
+
+		return;
+	}
+
+	void DeviceObject::setTags(const QString& tags)
+	{
+		auto list = tags.split(QRegularExpression("\\W+"), Qt::SkipEmptyParts);
+		return setTags(list);
+	}
+
 
 	// JSON short description, uuid, equipmentId, caption, place, etc
 	//

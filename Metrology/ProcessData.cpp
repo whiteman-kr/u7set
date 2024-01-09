@@ -752,11 +752,15 @@ bool ExportData::saveCsvFile(const QString &fileName)
 	m_exportCancel = false;
 
 	QFile file;
+
 	file.setFileName(fileName);
+
 	if (file.open(QIODevice::WriteOnly) == false)
 	{
 		return false;
 	}
+
+	file.write(BOM::UTF8.toUtf8());
 
 	int columnCount = m_pView->model()->columnCount();
 	for(int column = 0; column < columnCount; column++)
