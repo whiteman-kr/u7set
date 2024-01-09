@@ -14,7 +14,7 @@ class TuningPageHelper
 {
 public:
 	TuningPageHelper(const ClientLib::TuningUserManager& userManager);
-	bool writingIsEnabled(const AppSignalParam asp, const TuningSignalState& state) const;
+	bool writingIsEnabled(const AppSignalParam& asp, const TuningSignalState& state) const;
 
 private:
 	const ClientLib::TuningUserManager& m_userManager;

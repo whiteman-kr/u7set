@@ -25,7 +25,7 @@ namespace ClientLib
 	public:
 		static bool checkPassword(const QString& userName, const QString& password);
 
-		void setConfiguration(bool tuningLogin,
+		void setConfiguration(bool enabled,
 							  const QStringList& tuningUserAccounts,
 							  bool loginPerOperation,
 							  int tuningSessionTimeout,
@@ -33,11 +33,11 @@ namespace ClientLib
 
 		// Properties
 		//
-		bool tuningLogin() const override;
+		bool enabled() const override;
 		const QStringList& tuningUserAccounts() const;
 		bool loginPerOperation() const;
 		int tuningSessionTimeout() const;
-		const std::vector<OnlineLib::MatsUser>& matsUsers() const;
+		std::vector<OnlineLib::MatsUser> matsUsers() const;
 
 		// Operations
 		//
@@ -49,8 +49,11 @@ namespace ClientLib
 		// State
 		//
 		bool isLoggedIn() const override;
-		QString loggedInUser() const override;
-		QString loggedInPassword() const;
+		
+		QString userName() const override;
+		QStringList userTags() const override;
+		
+		QString password() const;
 		int logoutPendingSeconds() const;
 
 	signals:
@@ -60,22 +63,33 @@ namespace ClientLib
 	private:
 		bool requestPassword(QWidget* parent);
 
+	public:
+		struct Config
+		{
+			bool enabled = false;
+			
+			QStringList tuningUserAccounts;
+			bool loginPerOperation = false;
+			int tuningSessionTimeout = 120;
+			
+			std::vector<OnlineLib::MatsUser> matsUsers;
+		};
+
+		struct State
+		{
+			bool loggedIn = false;
+			
+			QString loggedInUser;
+			QString loggedInPassword;
+			
+			QStringList userTags;
+			qint64 logoutSecsSinceEpoch = 0;
+		};
+
 	private:
-		bool m_tuningLogin = false;
-		QStringList m_tuningUserAccounts;
-		int m_tuningSessionTimeout = 120;
-		bool m_loginPerOperation = false;
-		std::vector<OnlineLib::MatsUser> m_matsUsers;
-
-		bool m_loggedIn = false;
-		QString m_loggedInUser;
-		QString m_loggedInPassword;
-
-		qint64 m_logoutSecsSinceEpoch = 0;
-
-#ifdef Q_OS_LINUX
-		QString conversePassword;
-#endif
+		mutable QMutex m_mutex;
+		Config m_config;
+		State m_state;
 	};
 
 	//

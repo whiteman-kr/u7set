@@ -11,7 +11,6 @@ class DbTagsEditor : public ExtWidgets::PropertyTextEditor
 public:
 	static DbTagsEditor* tagsEditor(DbController* dbController, QWidget* parent);
     static DbTagsEditor* matsUsersEditor(DbController* dbController, QWidget* parent);
-    static DbTagsEditor* tagsAndMatsUsersEditor(DbController* dbController, QWidget* parent);
 
 private:
     DbTagsEditor(DbController* dbController, bool showTags, bool showUsers, QWidget* parent);

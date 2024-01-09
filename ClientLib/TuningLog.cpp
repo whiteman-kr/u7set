@@ -16,7 +16,7 @@ namespace ClientLib
 	{
 		QStringList l;
 
-		QString userName = m_tuningAuthorization.loggedInUser();
+		QString userName = m_tuningAuthorization.userName();
 
 		if (userName.isEmpty() == true)
 		{
@@ -39,7 +39,7 @@ namespace ClientLib
 	{
 		QStringList l;
 
-		QString userName = m_tuningAuthorization.loggedInUser();
+		QString userName = m_tuningAuthorization.userName();
 
 		if (userName.isEmpty() == true)
 		{

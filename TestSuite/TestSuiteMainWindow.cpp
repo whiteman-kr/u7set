@@ -923,8 +923,8 @@ void TestSuiteMainWindow::on_m_run_clicked()
 			return;
 		}
 
-		userName = userManager.loggedInUser();
-		password = userManager.loggedInPassword();
+		userName = userManager.userName();
+		password = userManager.password();
 	}
 
 	// Create a list of tests user has selected to run

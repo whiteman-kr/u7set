@@ -164,7 +164,7 @@ namespace VFrame30
 
 	bool TuningController::tuningLogin() const
 	{
-		return m_tuningAuthorization.tuningLogin();
+		return m_tuningAuthorization.enabled();
 	}
 
 	bool TuningController::isLoggedIn() const
@@ -172,8 +172,13 @@ namespace VFrame30
 		return m_tuningAuthorization.isLoggedIn();
 	}
 
-	QString TuningController::loggedInUser() const
+	QString TuningController::userName() const
 	{
-		return m_tuningAuthorization.loggedInUser();
+		return m_tuningAuthorization.userName();
+	}
+
+	QStringList TuningController::userTags() const
+	{
+		return m_tuningAuthorization.userTags();
 	}
 }

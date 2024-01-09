@@ -664,7 +664,7 @@ void AppSignalProperties::initProperties(bool savePropertyDescription)
 	auto propTags = ADD_SIGNAL_PROPERTY_GETTER_SETTER(QString, AppSignalPropNames::TAGS,
 													  true, AppSignal::tagsStr, AppSignal::setTagsStr, m_signal);
 	propTags->setCategory(categoryOnlineMonitoringSystem);
-	propTags->setSpecificEditor(E::PropertySpecificEditor::TagsAndMatsUsers);
+	propTags->setSpecificEditor(E::PropertySpecificEditor::Tags);
 	propTags->setViewOrder(70);
 
 	// 7 Tuning

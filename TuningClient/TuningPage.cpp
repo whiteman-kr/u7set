@@ -21,15 +21,35 @@ TuningPageHelper::TuningPageHelper(const ClientLib::TuningUserManager& userManag
 {
 }
 
-bool TuningPageHelper::writingIsEnabled(const AppSignalParam asp, const TuningSignalState& state) const
+bool TuningPageHelper::writingIsEnabled(const AppSignalParam& asp, const TuningSignalState& state) const
 {
-	bool writingIsEnabled = state.writingIsEnabled();
+	bool controlEnabled = state.valid() == true && state.writingIsEnabled() == true;
 
-	if (m_userManager.tuningLogin() == true)
+	if (m_userManager.enabled() == true)
 	{
-		writingIsEnabled &= (m_userManager.isLoggedIn() == true && asp.tags().contains(m_userManager.loggedInUser()) == true);
+		// User is logged in and is allowed to tune this signal
+		//
+		controlEnabled &= (m_userManager.isLoggedIn() == true);
+
+		if (controlEnabled == true)
+		{
+			bool tagFound = false;
+
+			std::set<QString> signalTags = asp.tags();
+			QStringList userTags = m_userManager.userTags();
+			for (const QString& t : userTags)
+			{
+				if (signalTags.contains(t) == true)
+				{
+					tagFound = true;
+					break;
+				}
+			}
+
+			controlEnabled &= tagFound;
+		}
 	}
-	return writingIsEnabled;
+	return controlEnabled;
 }
 	
 class SelectionControlDelegate : public QStyledItemDelegate
@@ -1028,6 +1048,7 @@ TuningPage::TuningPage(TuningConfigController& configController,
 	//
 
 	connect(theApp.mainWindow(), &MainWindow::timerTick500, this, &TuningPage::onTimer);
+	connect(&m_userManager, &ClientLib::TuningUserManager::loggedOut, this, &TuningPage::slot_undo);
 
 }
 

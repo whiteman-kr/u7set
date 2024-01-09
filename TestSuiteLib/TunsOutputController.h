@@ -20,10 +20,11 @@ namespace TestSuite
 		}
 
 	private:
-		virtual bool tuningLogin() const { return m_userName.isEmpty() == false; }
+		bool enabled() const  override { return false; }
 		bool login(QWidget* parent) { return true; }
 		bool isLoggedIn() const { return true; }
-		QString loggedInUser() const { return m_userName; }
+		QString userName() const override { return m_userName; }
+		QStringList userTags() const override { return {}; }
 
 	private:
 		QString m_userName;

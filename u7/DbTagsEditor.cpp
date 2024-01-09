@@ -14,11 +14,6 @@ DbTagsEditor* DbTagsEditor::matsUsersEditor(DbController* dbController, QWidget*
 	return new DbTagsEditor(dbController, false, true, parent);
 }
 
-DbTagsEditor* DbTagsEditor::tagsAndMatsUsersEditor(DbController* dbController, QWidget* parent)
-{
-	return new DbTagsEditor(dbController, true, true, parent);
-}
-
 DbTagsEditor::DbTagsEditor(DbController* dbController, bool showTags, bool showUsers, QWidget* parent) :
 	PropertyTextEditor(parent)
 {

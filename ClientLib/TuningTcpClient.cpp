@@ -1033,7 +1033,7 @@ namespace ClientLib
 		//
 		m_writeTuningSignals.Clear();
 
-		m_writeTuningSignals.set_matsuser(m_tuningAuthorization.loggedInUser().toStdString());
+		m_writeTuningSignals.set_matsuser(m_tuningAuthorization.userTags().join(';').toStdString());
 		m_writeTuningSignals.set_autoapply(m_autoApply);
 		m_writeTuningSignals.mutable_commands()->Reserve(static_cast<int>(writeQueue.size()));
 

@@ -537,7 +537,7 @@ void MainWindow::createWorkspace()
 
 	// Create login workspace
 
-	if (m_userManager.tuningLogin() == true && m_userManager.loginPerOperation() == false && m_userManager.tuningUserAccounts().empty() == false)
+	if (m_userManager.enabled() == true && m_userManager.loginPerOperation() == false)
 	{
 		m_logonWidget->setVisible(true);
 	}

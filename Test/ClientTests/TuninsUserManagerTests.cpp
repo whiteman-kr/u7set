@@ -38,7 +38,7 @@ TEST_F(TuningUserManagerTests, loginTests)
 
 	// Check properties
 
-	EXPECT_EQ(tum.tuningLogin(), tuningLogin);
+	EXPECT_EQ(tum.enabled(), tuningLogin);
 	EXPECT_EQ(tum.tuningUserAccounts(), tuningUserAccounts);
 	EXPECT_FALSE(tum.loginPerOperation());
 	EXPECT_EQ(tum.tuningSessionTimeout(), tuningSessionTimeout);
@@ -47,7 +47,7 @@ TEST_F(TuningUserManagerTests, loginTests)
 
 	EXPECT_TRUE(tum.login("user", "P2ssw0rd"));
 	EXPECT_TRUE(tum.isLoggedIn());
-	EXPECT_TRUE(tum.loggedInUser() == "user");
+	EXPECT_TRUE(tum.userName() == "user");
 
 	EXPECT_TRUE(tum.logoutPendingSeconds() == tuningSessionTimeout);
 

@@ -532,7 +532,6 @@ public:
 		Svg,
 		Tags,
 		MatsUsers,
-		TagsAndMatsUsers,
         Report,
 		ChooseFileDialog,
 		ChooseDirectoryDialog

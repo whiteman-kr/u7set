@@ -76,20 +76,6 @@ ExtWidgets::PropertyTextEditor* IdePropertyEditorHelper::createPropertyTextEdito
 		return editor;
 	}
 
-	if (propertyPtr->specificEditor() == E::PropertySpecificEditor::TagsAndMatsUsers)
-	{
-		// This is MatsUsers
-		//
-		if (dbController == nullptr)
-		{
-			Q_ASSERT(dbController);
-			return new ExtWidgets::PropertyPlainTextEditor(parent);
-		}
-
-		DbTagsEditor* editor = DbTagsEditor::tagsAndMatsUsersEditor(dbController, parent);
-		return editor;
-	}
-
     if (propertyPtr->isScript() == true)
 	{
 		// This is Script

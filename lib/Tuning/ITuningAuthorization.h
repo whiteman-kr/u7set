@@ -5,20 +5,24 @@ class ITuningAuthorization
 public:
 	virtual ~ITuningAuthorization() = default;
 
-	virtual bool tuningLogin() const = 0;
+	virtual bool enabled() const = 0;
+	
 	virtual bool login(QWidget* parent) = 0;
-
 	virtual bool isLoggedIn() const = 0;
-	virtual QString loggedInUser() const = 0;
+	
+	virtual QString userName() const = 0;
+	virtual QStringList userTags() const = 0;
 };
 
 class TuningAuthorizationStub : public ITuningAuthorization
 {
-	bool tuningLogin() const override { return false; }
-	virtual bool login(QWidget* /*parent*/) override { return true; }
+	bool enabled() const  override { return false; }
 
-	virtual bool isLoggedIn() const override { return true; }
-	virtual QString loggedInUser() const override { return {}; }
+	bool login(QWidget* /*parent*/) override { return true; }
+	bool isLoggedIn() const override { return true; }
+
+	QString userName() const override { return {}; }
+	QStringList userTags() const override { return {}; }
 };
 
 

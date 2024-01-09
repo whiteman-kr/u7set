@@ -148,7 +148,10 @@ namespace VFrame30
 		bool isLoggedIn() const;
 
 		/// \brief Returns name of authorized tuning user. If tuning authorization is disabled or user is not logged in, returns empty string.
-		QString loggedInUser() const;
+		QString userName() const;
+
+		/// \brief Returns tags of authorized tuning user. If tuning authorization is disabled or user is not logged in, returns empty string.
+		QStringList userTags() const;
 
 	private:
 		QWidget* m_parent{nullptr};
