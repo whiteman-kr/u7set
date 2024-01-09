@@ -1,10 +1,6 @@
 #pragma once
 
-#include <QObject>
-#include <QXmlStreamReader>
-#include <QXmlStreamWriter>
-#include <memory>
-#include <vector>
+#include "../lib/ConstStrings.h"
 
 namespace OnlineLib
 {
@@ -32,7 +28,7 @@ namespace OnlineLib
 		[[nodiscard]] const std::set<QString>& appSignalTags() const;
 		void setAppSignalTags(const std::set<QString>& tags);
 
-		QString appSignalTagsToString() const;
+		QString appSignalTagsToString(QChar separator = ';') const;
 		void setAppSignalTagsFromString(QString value);
 
 	private:

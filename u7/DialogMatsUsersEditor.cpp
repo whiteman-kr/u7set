@@ -147,10 +147,7 @@ DialogMatsUsersEditor::DialogMatsUsersEditor(DbController *pDbController, QWidge
 	{
 		const auto& user = storage.get(i);
 
-		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << user.login() <<
-													user.description() <<
-													QString() <<
-													user.appSignalTagsToString());
+		QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << user.login() << user.description() << QString() << user.appSignalTagsToString(' '));
 		item->setFlags(item->flags() | Qt::ItemIsEditable);
 		item->setCheckState(static_cast<int>(DialogMatsUsersEditor::Columns::Enabled), user.enabled() ? Qt::Checked : Qt::Unchecked);
 		item->setData(0, Qt::UserRole, i);
@@ -449,7 +446,7 @@ void DialogMatsUsersEditor::onListItemDoubleClicked(QTreeWidgetItem* item, int c
 	
 	QDialog tagsSelectorDialog{this, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint};
 
-	ChooseTagsWidget te{tags, {}, this, ';'};
+	ChooseTagsWidget te{tags, {}, this};
 	te.setText(item->text(static_cast<int>(DialogMatsUsersEditor::Columns::TuningTags)));
 
 	connect(&te, &ChooseTagsWidget::okPressed, &tagsSelectorDialog, &QDialog::accept);

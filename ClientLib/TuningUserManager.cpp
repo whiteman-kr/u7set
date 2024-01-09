@@ -208,20 +208,20 @@ namespace ClientLib
 
 	void TuningUserManager::logout()
 	{
-		QMutexLocker l(&m_mutex);
-		m_state.loggedIn = false;
-		m_state.loggedInUser.clear();
-		m_state.loggedInPassword.clear();
-		m_state.userTags.clear();
+		{
+			QMutexLocker l(&m_mutex);
+			m_state.loggedIn = false;
+			m_state.loggedInUser.clear();
+			m_state.loggedInPassword.clear();
+			m_state.userTags.clear();
+		}
 
 		emit loggedOut();
 	}
 
 	void TuningUserManager::reLogin(QWidget* parent)
 	{
-		QMutexLocker l(&m_mutex);
 		bool wasLoggedIn = false;
-
 		{
 			QMutexLocker l(&m_mutex);
 			wasLoggedIn = m_state.loggedIn;

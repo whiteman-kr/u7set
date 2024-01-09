@@ -98,14 +98,14 @@ namespace OnlineLib
 		m_appSignalTags = tags;
 	}
 
-	QString MatsUser::appSignalTagsToString() const
+	QString MatsUser::appSignalTagsToString(QChar separator) const
 	{
 		QStringList result;
 		for (const auto& tag : m_appSignalTags)
 		{
 			result.push_back(tag);
 		}
-		return result.join(';');
+		return result.join(separator);
 	}
 
 	void MatsUser::setAppSignalTagsFromString(QString value)
