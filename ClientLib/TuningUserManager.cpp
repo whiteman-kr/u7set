@@ -176,6 +176,9 @@ namespace ClientLib
 		{
 			QMutexLocker l(&m_mutex);
 
+			m_state.loggedInUser = userName;
+			m_state.loggedInPassword = password;
+
 			// Refresh pending time
 			//
 			m_state.logoutSecsSinceEpoch = QDateTime::currentSecsSinceEpoch() + m_config.tuningSessionTimeout;
@@ -229,10 +232,18 @@ namespace ClientLib
 
 		if (wasLoggedIn == true)
 		{
-			if (requestPassword(parent) == true)
+			if (parent == nullptr)
 			{
 				QMutexLocker l(&m_mutex);
 				m_state.logoutSecsSinceEpoch = QDateTime::currentSecsSinceEpoch() + m_config.tuningSessionTimeout;
+			}
+			else
+			{
+				if (requestPassword(parent) == true)
+				{
+					QMutexLocker l(&m_mutex);
+					m_state.logoutSecsSinceEpoch = QDateTime::currentSecsSinceEpoch() + m_config.tuningSessionTimeout;
+				}
 			}
 		}
 	}
