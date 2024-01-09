@@ -1,0 +1,85 @@
+#pragma once
+
+//#include "MonitorSchemaWidget.h"
+#include "DiagnosticsSchemaManager.h"
+#include "../lib/Ui/TabWidgetEx.h"
+#include "../lib/ITimeStats.h"
+//#include "../VFrame30/AppSignalController.h"
+
+
+class DiagnosticsCentralWidget : public TabWidgetEx
+{
+	Q_OBJECT
+
+public:
+	DiagnosticsCentralWidget(MonitorSchemaManager* schemaManager,
+						 VFrame30::AppSignalController* appSignalController,
+						 VFrame30::LogController* logController,
+						 ITimeStats* timeStats,
+						 QWidget* parent);
+	~DiagnosticsCentralWidget();
+
+public:
+	void applyZoomMode(VFrame30::ZoomMode zoomMode);
+
+	MonitorSchemaWidget* currentTab();
+
+protected:
+	virtual void timerEvent(QTimerEvent* event) override;
+	int addSchemaTabPage(const QString& schemaId, const QVariantHash& variables);
+
+	// Signals
+signals:
+	void signal_tabPageChanged(bool schemaWidgetSelected);		// Emitted to enable/disable QActions depend on current tab (schema/schemaList).
+	void signal_actionCloseTabUpdated(bool allowed);
+	void signal_schemaChanged(QString strId);
+	void signal_historyChanged(bool enableBack, bool enableForward);
+
+	// Slots
+	//
+public slots:
+	void slot_newSchemaTab(QString schemaId);
+	void slot_newTab();
+	void slot_closeCurrentTab();
+
+	void slot_zoomIn();
+	void slot_zoomOut();
+	void slot_zoom100();
+	void slot_zoomToFit();
+
+	void slot_historyBack();
+	void slot_historyForward();
+
+	void slot_selectSchemaForCurrentTab(QString schemaId);
+
+	void slot_signalContextMenu(const QStringList signalList, const QList<QMenu*>& customMenu);
+	void slot_signalInfo(QString signalId);
+
+	void slot_export();
+
+protected slots:
+	void slot_tabCloseRequested(int index);
+	void slot_resetSchema();
+
+	void slot_newSameTab(MonitorSchemaWidget* tabWidget);
+	void slot_closeTab(QWidget* tabWidget);
+
+	void slot_schemaChanged(VFrame30::ClientSchemaWidget* tabWidget, VFrame30::Schema* schema);
+
+	void slot_tabPageChanged(int index);
+
+	// Data
+	//
+private:
+	MonitorSchemaManager* m_schemaManager = nullptr;
+
+	VFrame30::AppSignalController* m_appSignalController = nullptr;
+
+	VFrame30::LogController* m_logController = nullptr;
+
+	ITimeStats* m_timeStats = nullptr;
+
+	int m_eventLoopTimerId = 0;				// We need to catch event loop. Start timer, as we enter event loop timerEvent comes.
+	int m_eventLoopTimerCounter = 0;		// We need to catch event loop. Start timer, as we enter event loop timerEvent comes.
+};
+

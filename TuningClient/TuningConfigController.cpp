@@ -8,76 +8,17 @@
 //
 
 TuningConfigController::TuningConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2, ILogFile* logFile) :
-	ClientLib::ConfigController{softwareInfo, address1, address2, logFile}
+	SchemaClientLib::SchemaClientConfigController{softwareInfo, address1, address2, logFile}
 {
-	qRegisterMetaType<ConfigSettings>("ConfigSettings");
-
+	qRegisterMetaType<TuningClientConfigSettings>("TuningClientConfigSettings");
 	return;
-}
-
-int TuningConfigController::schemaCount() const
-{
-	QReadLocker l(&m_lock);
-	return m_schemaDetailsSet.schemaCount();
-}
-
-QString TuningConfigController::schemaCaptionById(const QString& schemaId) const
-{
-	QReadLocker l(&m_lock);
-	return m_schemaDetailsSet.schemaCaptionById(schemaId);
-}
-
-QString TuningConfigController::schemaCaptionByIndex(int schemaIndex) const
-{
-	QReadLocker l(&m_lock);
-	return m_schemaDetailsSet.schemaCaptionByIndex(schemaIndex);
-}
-
-QString TuningConfigController::schemaIdByIndex(int schemaIndex) const
-{
-	QReadLocker l(&m_lock);
-	return m_schemaDetailsSet.schemaIdByIndex(schemaIndex);
-}
-
-std::set<QString> TuningConfigController::schemaTagsByIndex(int schemaIndex) const
-{
-	QReadLocker l(&m_lock);
-	auto details = m_schemaDetailsSet.schemaDetails(schemaIndex);
-	if (details == nullptr)
-	{
-		Q_ASSERT(details);
-		return {};
-	}
-	return details->schemaTags();
-}
-
-
-bool TuningConfigController::schemaHasTags(int schemaIndex, const QStringList& tags) const
-{
-	QReadLocker l(&m_lock);
-	auto details = m_schemaDetailsSet.schemaDetails(schemaIndex);
-	if (details == nullptr)
-	{
-		Q_ASSERT(details);
-		return false;
-	}
-
-	const std::set<QString>& detailsTags = details->schemaTags();
-	for (const QString& tag : tags)
-	{
-		if (detailsTags.find(tag.trimmed().toLower()) != detailsTags.end())
-		{
-			return true;
-		}
-	}
-	return false;
 }
 
 bool TuningConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& conf, const TuningClientSettings& settings, const BuildFileInfoArray& files)
 {
 	// Copy old settings to new settings, EXCEPT schemas information!
 	//
-	ConfigSettings readConfig = configuration();
+	TuningClientConfigSettings readConfig = configuration();
 	readConfig.configurationId = s_configurationIdCounter ++;
 	readConfig.configInfo = conf;
 
@@ -86,24 +27,9 @@ bool TuningConfigController::updateConfiguration(const ClientLib::ConfigurationI
 
 	readConfig.clientSettings = settings;
 
-	// Get all schema details
+	// Get all schema details (SchemaDetails.pbuf)
 	//
-	{
-		// Get SchemaDetails.pbuf file
-		//
-		QByteArray ba;
-		QString fileName = "/" + m_softwareInfo.equipmentID() + QStringLiteral("/SchemaDetails.pbuf");
-
-		bool ok = getFileBlocked(fileName, &ba, nullptr);
-
-		QWriteLocker locker(&m_lock);
-		m_schemaDetailsSet.clear();
-
-		if (ok == true)
-		{
-			m_schemaDetailsSet.Load(ba);
-		}
-	}
+	getSchemasDetails();
 
 	// Get file TUNING_FILTERS
 	//
@@ -155,7 +81,7 @@ bool TuningConfigController::updateConfiguration(const ClientLib::ConfigurationI
 		}
 	}
 
-	// Update Configuratione
+	// Update Configuration
 	{
 		QWriteLocker locker(&m_lock);
 		m_configuration = readConfig;
@@ -176,7 +102,7 @@ bool TuningConfigController::updateConfiguration(const ClientLib::ConfigurationI
 	return true;
 }
 
-void TuningConfigController::dump(const ConfigSettings& conf) const
+void TuningConfigController::dump(const TuningClientConfigSettings& conf) const
 {
 	for (const SoftwareEndpoint::TuningService& ts : conf.clientSettings.tuningServices)
 	{
@@ -186,7 +112,7 @@ void TuningConfigController::dump(const ConfigSettings& conf) const
 	return;
 }
 
-ConfigSettings TuningConfigController::configuration() const
+TuningClientConfigSettings TuningConfigController::configuration() const
 {
 	QReadLocker locker(&m_lock);
 	return m_configuration;

@@ -69,10 +69,6 @@ DialogTcpStatistics::DialogTcpStatistics(QWidget* parent) :
 	return;
 }
 
-DialogTcpStatistics::~DialogTcpStatistics()
-{
-}
-
 void DialogTcpStatistics::prepareContextMenu(const QPoint& pos)
 {
 	Q_UNUSED(pos);

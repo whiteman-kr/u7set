@@ -26,7 +26,7 @@ private:
 	virtual ~DialogDataSources();
 
 private slots:
-	void slot_configurationArrived(ConfigSettings configuration);
+	void slot_configurationArrived(MonitorConfigSettings configuration);
 	void detailsClicked();
 
 private:

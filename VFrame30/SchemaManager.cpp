@@ -108,7 +108,7 @@ namespace VFrame30
 
 	// Load schema, must be overriden to perform loading schema appropriate to client.
 	//
-	std::shared_ptr<VFrame30::Schema> SchemaManager::loadSchema(QString schemaId)
+	std::shared_ptr<VFrame30::Schema> SchemaManager::loadSchema(const QString& schemaId)
 	{
 		Q_UNUSED(schemaId);
 		Q_ASSERT(false);

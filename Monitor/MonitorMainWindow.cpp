@@ -1512,7 +1512,7 @@ void MonitorMainWindow::slot_updateActions(bool schemaWidgetSelected)
 	return;
 }
 
-void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
+void MonitorMainWindow::slot_configurationArrived(MonitorConfigSettings configuration)
 {
 	// Update AppSignalManager with specific data
 	//

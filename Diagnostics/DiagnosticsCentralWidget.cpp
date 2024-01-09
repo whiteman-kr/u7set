@@ -40,7 +40,7 @@ MonitorCentralWidget::MonitorCentralWidget(MonitorSchemaManager* schemaManager,
 	return;
 }
 
-MonitorCentralWidget::~MonitorCentralWidget()
+DiagnosticsCentralWidget::~DiagnosticsCentralWidget()
 {
 	qDebug() << Q_FUNC_INFO;
 }
@@ -104,7 +104,7 @@ int MonitorCentralWidget::addSchemaTabPage(const QString& schemaId, const QVaria
 	}
 	else
 	{
-		QString startSchemaId = m_schemaManager->configController().configurationStartSchemaId();
+		QString startSchemaId = m_schemaManager->monitorConfigController().configurationStartSchemaId();
 
 		if (m_schemaManager->hasSchema(startSchemaId) == true)
 		{
@@ -194,7 +194,7 @@ void MonitorCentralWidget::slot_newTab()
 		// If Current tab not schema widget,
 		// then create new empty or start schema widget
 		//
-		QString schemaId = m_schemaManager->configController().configurationStartSchemaId();
+		QString schemaId = m_schemaManager->monitorConfigController().configurationStartSchemaId();
 
 		int tabIndex = addSchemaTabPage(schemaId, {});
 
@@ -473,7 +473,7 @@ void MonitorCentralWidget::slot_resetSchema()
 		}
 		else
 		{
-			QString startSchemaId = m_schemaManager->configController().configurationStartSchemaId();
+			QString startSchemaId = m_schemaManager->monitorConfigController().configurationStartSchemaId();
 			if (m_schemaManager->hasSchema(startSchemaId) == true)
 			{
 				schemaToLoad = startSchemaId;

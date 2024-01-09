@@ -10,7 +10,7 @@ SimSchemaManager::SimSchemaManager(SimIdeSimulator* simulator, QObject* parent) 
 	return;
 }
 
-std::shared_ptr<VFrame30::Schema> SimSchemaManager::loadSchema(QString schemaId)
+std::shared_ptr<VFrame30::Schema> SimSchemaManager::loadSchema(const QString& schemaId)
 {
 	QString buildPath = QDir::fromNativeSeparators(m_simulator->buildPath());
 	if (buildPath.isEmpty() == true)

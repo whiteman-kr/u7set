@@ -411,6 +411,10 @@ namespace ClientLib
 			callUpdateFunc(dynamic_cast<const MonitorSettings*>(curSettingsProfile.get()));
 			return;
 
+		case E::SoftwareType::Diagnostics:
+			callUpdateFunc(dynamic_cast<const DiagnosticsSettings*>(curSettingsProfile.get()));
+			return;
+
 		case E::SoftwareType::TuningClient:
 			callUpdateFunc(dynamic_cast<const TuningClientSettings*>(curSettingsProfile.get()));
 			return;

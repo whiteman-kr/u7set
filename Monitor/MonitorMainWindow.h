@@ -105,7 +105,7 @@ public slots:
 	void slot_historyChanged(bool enableBack, bool enableForward);
 	void slot_updateActions(bool schemaWidgetSelected);
 
-	void slot_configurationArrived(ConfigSettings configuration);
+	void slot_configurationArrived(MonitorConfigSettings configuration);
 	void slot_configurationError(QString error);
 
 	void activateRequested();

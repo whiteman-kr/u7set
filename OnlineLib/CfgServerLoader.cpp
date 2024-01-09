@@ -205,9 +205,11 @@ CfgLoader::CfgLoader(const SoftwareInfo& softwareInfo,
 						bool enableDownloadCfg,
 						std::shared_ptr<CircularLogger> logger) :
 	Tcp::FileClient(softwareInfo, "", serverAddressPort1, serverAddressPort2, "CfgLoader"),
+	TcpClientStatistics(this),
 	m_enableDownloadConfiguration(enableDownloadCfg),
 	m_timer(this)
 {
+	setObjectName("CfgLoader");
 	setLogger(logger);
 	changeApp(softwareInfo.equipmentID(), appInstance);
 }

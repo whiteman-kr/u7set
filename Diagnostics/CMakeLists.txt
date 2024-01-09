@@ -84,14 +84,14 @@ set (DIAGNOSTICS_SOURCES
 	main.cpp
 	DiagnosticsAppSettings.cpp
 	DiagnosticsAppSettings.h
-#	MonitorCentralWidget.cpp
-#	MonitorCentralWidget.h
+#	DiagnosticsCentralWidget.cpp
+#	DiagnosticsCentralWidget.h
 	DiagConfigController.cpp
 	DiagConfigController.h
 	DiagnosticsMainWindow.cpp
 	DiagnosticsMainWindow.h
-#	MonitorSchemaManager.cpp
-#	MonitorSchemaManager.h
+	DiagnosticsSchemaManager.cpp
+	DiagnosticsSchemaManager.h
 #	MonitorSchemaView.cpp
 #	MonitorSchemaView.h
 #	MonitorSchemaWidget.cpp
@@ -191,7 +191,7 @@ target_precompile_headers(${TARGET} PRIVATE
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network Qt6::Qml Qt6::Xml Qt6::Svg Qt6::PrintSupport)
-target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib OnlineLib TrendView VFrame30 ClientLib)
+target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib OnlineLib TrendView VFrame30 ClientLib SchemaClientLib)
 
 # Link Visaul Leak Detector
 #

@@ -644,7 +644,7 @@ void MonitorTrendsWidget::slot_trendModeChanged()
 	return;
 }
 
-void MonitorTrendsWidget::slot_configurationArrived(ConfigSettings /*configuration*/)
+void MonitorTrendsWidget::slot_configurationArrived(MonitorConfigSettings /*configuration*/)
 {
 	if (trendMode() == E::TrendMode::Archive)
 	{

@@ -2,14 +2,13 @@
 
 #include <map>
 #include <set>
-#include "../VFrame30/Schema.h"
-#include "../ClientLib/ConfigController.h"
+#include "../SchemaClientLib/SchemaClientConfigController.h"
 #include "../ClientLib/TuningTcpClient.h"
 
 //
 // ConfigSettings
 //
-struct ConfigSettings
+struct TuningClientConfigSettings
 {
 	int configurationId = -1;
 
@@ -26,30 +25,21 @@ struct ConfigSettings
 };
 
 
-class TuningConfigController : public ClientLib::ConfigController
+class TuningConfigController : public SchemaClientLib::SchemaClientConfigController
 {
 	Q_OBJECT
 
 public:
-	TuningConfigController() = delete;
-
 	TuningConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2, ILogFile* logFile);
-	virtual ~TuningConfigController() = default;
 
 	// Methods
 	//
 public:
-	int schemaCount() const;
-	QString schemaCaptionById(const QString& schemaId) const;
-	QString schemaCaptionByIndex(int schemaIndex) const;
-	QString schemaIdByIndex(int schemaIndex) const;
-	std::set<QString> schemaTagsByIndex(int schemaIndex) const;
-	bool schemaHasTags(int schemaIndex, const QStringList& tags) const;
 
 protected:
 	virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const TuningClientSettings& settings, const BuildFileInfoArray& files) override;
 
-	void dump(const ConfigSettings& conf) const;
+	void dump(const TuningClientConfigSettings& conf) const;
 
 	// Signals
 	//
@@ -57,12 +47,12 @@ signals:
 	void signalsArrived(QByteArray data);
 	void filtersArrived(QByteArray data);
 
-	void configurationArrived(ConfigSettings configuration);
+	void configurationArrived(TuningClientConfigSettings configuration);
 
 	// Public properties
 	//
 public:
-	ConfigSettings configuration() const;
+	TuningClientConfigSettings configuration() const;
 	ClientLib::ConfigurationInfo configInfo() const;
 
 	QString startSchemaId() const;
@@ -78,7 +68,7 @@ private:
 	std::map<QString, QString> m_filesMD5Map;	// Key is full file path, value is file MD5
 
 	mutable QReadWriteLock m_lock;
-	ConfigSettings m_configuration;
+	TuningClientConfigSettings m_configuration;
 	VFrame30::SchemaDetailsSet m_schemaDetailsSet;
 
 	inline static int s_configurationIdCounter = 0;

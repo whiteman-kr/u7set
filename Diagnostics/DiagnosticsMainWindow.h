@@ -2,6 +2,7 @@
 
 
 #include "DiagConfigController.h"
+#include "DiagnosticsSchemaManager.h"
 //#include "MonitorSignalManager.h"
 //#include "SelectSchemaWidget.h"
 #include "../UtilsLib/InstanceResolver.h"
@@ -69,9 +70,10 @@ private:
 	void createToolBars();
 	void createStatusBar();
 
-//public:
-//	MonitorCentralWidget* monitorCentralWidget();
-//
+public:
+	//DiagnosticsCentralWidget* centralWidget();
+	//const DiagnosticsCentralWidget* centralWidget() const;
+
 private:
 	void updateStatusBar();
 	void showSoftwareConnection(const QString& caption,
@@ -162,20 +164,18 @@ public:
 	//
 private:
 	Log::LogFile m_LogFile;						// Must be initialized first
-	//ClientLib::TuningLog m_tuningLogFile;
 	InstanceResolver& m_instanceResolver;
 
 	DiagConfigController m_configController;
 	//MonitorSignalManager m_signalManager;
-	//TuningSignalManager m_tuningSignalManager;
 
-	//MonitorSchemaManager m_schemaManager;
+	SignalDataServerStub m_signalDataServerStub; // REMOVE IT AFTER IMPLEMENTING REAL ISignalDataServer
+	DiagnosticsSchemaManager m_schemaManager;
 
 	//std::unique_ptr<VFrame30::AppSignalController> m_appSignalController;
 	std::unique_ptr<VFrame30::LogController> m_logController;
 
 	//ClientLib::AdsConnection m_adsConnection{m_signalManager, &m_signalManager, &m_LogFile};
-	//ClientLib::TuningConnection m_tuningConnection{m_tuningSignalManager, m_tuningSignalManager, m_tuningSignalManager, &m_LogFile, &m_tuningLogFile};
 
 	DialogAlert m_dialogAlert;
 
@@ -259,11 +259,9 @@ private:
 	//
 	ClientLib::ClientTranslator m_translator;
 
-	//// --
-	////
+	// --
+	//
 	DialogTcpStatistics* m_dialogStatistics = nullptr;
-
-	//ClientLib::TuningUserManager m_tuningUserManager;
 };
 
 

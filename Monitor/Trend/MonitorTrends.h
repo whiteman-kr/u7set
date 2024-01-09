@@ -65,7 +65,7 @@ protected slots:
 								   TrendLib::TrendStateItem maxState);
 	void slot_trendModeChanged();
 
-	void slot_configurationArrived(ConfigSettings configuration);
+	void slot_configurationArrived(MonitorConfigSettings configuration);
 
 	// Data
 	//

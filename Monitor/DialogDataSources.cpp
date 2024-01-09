@@ -110,7 +110,7 @@ DialogDataSources::~DialogDataSources()
 
 }
 
-void DialogDataSources::slot_configurationArrived(ConfigSettings configuration)
+void DialogDataSources::slot_configurationArrived(MonitorConfigSettings configuration)
 {
 	m_tcpSignalClientCtrl.updateConnections(m_configController.softwareInfo(),
 											configuration.appDataServices);

@@ -68,7 +68,7 @@ void TuningSchemaView::updateScriptGlobalVars(QJSEngine& engine)
 	return;
 }
 
-void TuningSchemaView::configurationArrived(ConfigSettings configuration)
+void TuningSchemaView::configurationArrived(TuningClientConfigSettings configuration)
 {
 	m_configurationId = configuration.configurationId;
 

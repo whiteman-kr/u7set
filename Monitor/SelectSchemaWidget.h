@@ -34,7 +34,7 @@ signals:
 	void selectionChanged(QString schemaId);
 
 protected slots:
-	void slot_configurationArrived(ConfigSettings);
+	void slot_configurationArrived(MonitorConfigSettings);
 	void slot_schemaChanged(QString schemaId);
 
 	void slot_buttonClicked();

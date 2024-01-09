@@ -349,6 +349,9 @@ std::shared_ptr<SoftwareSettings> SoftwareSettingsSet::createAppropriateSettings
 	case E::SoftwareType::GatewayService:
 		return std::make_shared<GatewayServiceSettings>();
 
+	case E::SoftwareType::Diagnostics:
+		return std::make_shared<DiagnosticsSettings>();
+
 	case E::SoftwareType::ServiceControlManager:
 	case E::SoftwareType::Unknown:
 	case E::SoftwareType::BaseService:
@@ -1715,7 +1718,7 @@ bool DiagnosticsSettings::readFromXml(XmlReadHelper& xml)
 	SoftwareSettings::setShortId<SoftwareEndpoint::DiagDataService>(&diagDataServices);
 	//SoftwareSettings::setShortId<SoftwareEndpoint::ArchiveService>(&archiveServices);
 
-	result &= (diagDataServices.empty() == false);
+	//result &= (diagDataServices.empty() == false);
 
 	return result;
 }

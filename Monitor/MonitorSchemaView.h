@@ -38,7 +38,7 @@ protected:
 	virtual void updateScriptGlobalVars(QJSEngine& engine) override;
 
 public slots:
-	void configurationArrived(ConfigSettings configuration);
+	void configurationArrived(MonitorConfigSettings configuration);
 
 	MonitorSchemaManager* monitorSchemaManager();
 	const MonitorSchemaManager* monitorSchemaManager() const;

@@ -3,6 +3,7 @@
 #include <QWaitCondition>
 
 #include "TcpFileTransfer.h"
+#include "TcpClientStatistics.h"
 #include "SoftwareSettings.h"
 #include "../CommonLib/HashedVector.h"
 #include "../OnlineLib/BuildInfo.h"
@@ -83,7 +84,7 @@ private:
 //
 // -------------------------------------------------------------------------------------
 
-class CfgLoader : public Tcp::FileClient, public CfgServerLoaderBase
+class CfgLoader : public Tcp::FileClient, public CfgServerLoaderBase, protected TcpClientStatistics
 {
 	Q_OBJECT
 

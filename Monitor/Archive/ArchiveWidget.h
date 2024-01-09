@@ -54,7 +54,7 @@ protected slots:
 	void showSignalInfo(QString appSignalId);							// Slot to ArchiveView::requestToShowSignalInfo
 	void removeSignal(QString appSignalId, QString archiveServiceId);	// Slot to ArchiveView::requestToRemoveSignal
 
-	void slot_configurationArrived(ConfigSettings configuration);
+	void slot_configurationArrived(MonitorConfigSettings configuration);
 
 	void dataReceived(std::shared_ptr<ArchiveRequestResult> chunk);
 	void requestError(QString errorMessage);

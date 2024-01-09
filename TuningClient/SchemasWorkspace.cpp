@@ -230,16 +230,18 @@ void SchemasWorkspace::createSchemasList()
 
 	for (int i = 0; i < m_configController.schemaCount(); i++)
 	{
+		QString schemaId = m_configController.schemaIdByIndex(i);
+
 		if (m_schemasTags.empty() == false)
 		{
-			if (m_configController.schemaHasTags(i, m_schemasTags) == false)
+			if (m_configController.schemaHasTags(schemaId, m_schemasTags) == false)
 			{
 				continue;
 			}
 		}
 
 		QStringList l;
-		l << m_configController.schemaIdByIndex(i);
+		l << schemaId;
 		l << m_configController.schemaCaptionByIndex(i);
 
 		QTreeWidgetItem* item = new QTreeWidgetItem(l);
@@ -333,7 +335,7 @@ void SchemasWorkspace::createSchemasTabs()
 	// Create widgets sorted by id map
 
 	// Create a dummy context, later it will be changed to the normal one inside TuningSchemaWidget
-	// constructor, as TuningSchemaView is cretaed inside TuningSchemaWidget().
+	// constructor, as TuningSchemaView is created inside TuningSchemaWidget().
 	//
 	auto dummyContext = VFrame30::Context::create(nullptr, nullptr, nullptr, nullptr);
 
@@ -341,12 +343,12 @@ void SchemasWorkspace::createSchemasTabs()
 
 	for (int i = 0; i < m_configController.schemaCount(); i++)
 	{
-		if (m_schemasTags.empty() == false && m_configController.schemaHasTags(i, m_schemasTags) == false)
+		QString schemaId = m_configController.schemaIdByIndex(i);
+
+		if (m_schemasTags.empty() == false && m_configController.schemaHasTags(schemaId, m_schemasTags) == false)
 		{
 			continue;
 		}
-
-		QString schemaId = m_configController.schemaIdByIndex(i);
 
 		std::shared_ptr<VFrame30::Schema> schema = m_schemaManager.schema(schemaId, dummyContext);
 
@@ -399,12 +401,13 @@ void SchemasWorkspace::createSchemasView()
 
 	for (int i = 0; i < m_configController.schemaCount(); i++)
 	{
-		if (m_schemasTags.empty() == false && m_configController.schemaHasTags(i, m_schemasTags) == false)
+		QString schemaId = m_configController.schemaIdByIndex(i);
+
+		if (m_schemasTags.empty() == false && m_configController.schemaHasTags(schemaId, m_schemasTags) == false)
 		{
 			continue;
 		}
 
-		QString schemaId = m_configController.schemaIdByIndex(i);
 		if (schemaId == m_startSchemaId)
 		{
 			startSchemaID = schemaId;
@@ -417,12 +420,13 @@ void SchemasWorkspace::createSchemasView()
 
 		for (int i = 0; i < m_configController.schemaCount(); i++)
 		{
-			if (m_schemasTags.empty() == false && m_configController.schemaHasTags(i, m_schemasTags) == false)
+			startSchemaID = m_configController.schemaIdByIndex(i);
+
+			if (m_schemasTags.empty() == false && m_configController.schemaHasTags(startSchemaID, m_schemasTags) == false)
 			{
 				continue;
 			}
 
-			startSchemaID = m_configController.schemaIdByIndex(i);
 			break;
 		}
 	}

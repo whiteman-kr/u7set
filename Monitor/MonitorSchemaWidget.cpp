@@ -312,7 +312,7 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 	std::set<QString> signalsSchemasSet;
 	for (const QString& s : appSignals)
 	{
-		QStringList schemaIds = schemaManager()->monitorConfigController().schemasByAppSignalId(s);
+		QStringList schemaIds = schemaManager()->configController().schemasByAppSignalId(s);
 
 		for (const QString& schemaId : schemaIds)
 		{
@@ -323,7 +323,7 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 	std::set<QString> impactSignalsSchemasSet;
 	for (const QString& s : impactSignals)
 	{
-		QStringList schemaIds = schemaManager()->monitorConfigController().schemasByAppSignalId(s);
+		QStringList schemaIds = schemaManager()->configController().schemasByAppSignalId(s);
 
 		for (const QString& schemaId : schemaIds)
 		{
@@ -334,7 +334,7 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 	std::set<QString> loopbackSchemas;
 	for (const QString& l : loopbacks)
 	{
-		QStringList schemaIds = schemaManager()->monitorConfigController().schemasByLoopbackId(l);
+		QStringList schemaIds = schemaManager()->configController().schemasByLoopbackId(l);
 
 		for (const QString& schemaId : schemaIds)
 		{

@@ -1,6 +1,6 @@
 #include "DiagnosticsMainWindow.h"
 #include "DiagnosticsAppSettings.h"
-//#include "MonitorCentralWidget.h"
+//#include "DiagnosticsCentralWidget.h"
 #include "DialogSettings.h"
 //#include "MonitorSchemaWidget.h"
 //#include "MonitorSchemaView.h"
@@ -18,12 +18,10 @@
 DiagnosticsMainWindow::DiagnosticsMainWindow(InstanceResolver& instanceResolver, const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow{parent},
 	m_LogFile{qAppName(), QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + softwareInfo.equipmentID()},
-//	m_tuningLogFile{m_tuningUserManager, qAppName() + "Tuning", QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + softwareInfo.equipmentID()},
 	m_instanceResolver{instanceResolver},
 	m_configController{softwareInfo, DiagnosticsAppSettings::instance().configuratorAddress1(), DiagnosticsAppSettings::instance().configuratorAddress2(), &m_LogFile},
 //	m_signalManager{&m_LogFile},
-//	m_tuningSignalManager{softwareInfo.equipmentID(), &m_LogFile},
-//	m_schemaManager{m_configController, m_signalManager},
+	m_schemaManager{m_configController, m_signalDataServerStub},
 	m_dialogAlert(this)
 {
 	// Init translator
@@ -727,9 +725,17 @@ void DiagnosticsMainWindow::createStatusBar()
 	return;
 }
 
-//MonitorCentralWidget* MonitorMainWindow::monitorCentralWidget()
+//DiagnosticsCentralWidget* DiagnosticsMainWindow::centralWidget()
 //{
-//	MonitorCentralWidget* centralWidget = dynamic_cast<MonitorCentralWidget*>(QMainWindow::centralWidget());
+//	DiagnosticsCentralWidget* centralWidget = dynamic_cast<DiagnosticsCentralWidget*>(QMainWindow::centralWidget());
+//	Q_ASSERT(centralWidget != nullptr);
+//
+//	return centralWidget;
+//}
+//
+//const DiagnosticsCentralWidget* DiagnosticsMainWindow::centralWidget() const
+//{
+//	const DiagnosticsCentralWidget* centralWidget = dynamic_cast<const DiagnosticsCentralWidget*>(QMainWindow::centralWidget());
 //	Q_ASSERT(centralWidget != nullptr);
 //
 //	return centralWidget;

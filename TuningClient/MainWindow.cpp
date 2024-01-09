@@ -1008,7 +1008,7 @@ void MainWindow::showSoftwareConnection(const QString& caption,
 }
 
 
-void MainWindow::slot_configurationArrived(ConfigSettings configuration)
+void MainWindow::slot_configurationArrived(TuningClientConfigSettings configuration)
 {
 	// Modify logon mode
 	//

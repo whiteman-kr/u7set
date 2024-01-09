@@ -76,7 +76,7 @@ const QString& SelectSchemaWidget::currentSchemaId() const
 	return m_currentSchemaId;
 }
 
-void SelectSchemaWidget::slot_configurationArrived(ConfigSettings)
+void SelectSchemaWidget::slot_configurationArrived(MonitorConfigSettings)
 {
 	Q_ASSERT(m_button);
 	Q_ASSERT(m_configController);

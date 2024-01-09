@@ -708,7 +708,7 @@ void ArchiveWidget::removeSignal(QString appSignalId, QString archiveServiceId)
 }
 
 
-void ArchiveWidget::slot_configurationArrived(ConfigSettings configuration)
+void ArchiveWidget::slot_configurationArrived(MonitorConfigSettings configuration)
 {
 	m_archiveServices = std::move(configuration.archiveServices);
 	m_projectName = configuration.configInfo.project;

@@ -7,7 +7,7 @@ class DialogTcpStatistics : public QDialog
 
 public:
 	explicit DialogTcpStatistics(QWidget* parent);
-	virtual ~DialogTcpStatistics();
+	virtual ~DialogTcpStatistics() = default;
 
 public slots:
 	void prepareContextMenu(const QPoint& pos);
