@@ -1374,12 +1374,37 @@ void SignalsTabPage::undoSignalChanges()
 
 void SignalsTabPage::checkIn()
 {
-	const QItemSelection& proxySelection = m_signalsView->selectionModel()->selection();
-	const QItemSelection& sourceSelection = m_signalsProxyModel->mapSelectionToSource(proxySelection);
-
 	m_signalSetProvider->enforceAllSignalsLoading();
 
-	CheckinSignalsDialog dlg(m_signalsModel, m_signalsColumnVisibilityController, sourceSelection.indexes(), this);
+	const QItemSelection proxySelection = m_signalsView->selectionModel()->selection();
+
+	int selCount = 0;
+
+	for(const QItemSelectionRange& proxySelRange : proxySelection)
+	{
+		selCount += proxySelRange.height();
+	}
+
+	std::vector<int> selSignalIndexes;
+
+	selSignalIndexes.reserve(selCount);
+
+	for(const QItemSelectionRange& proxySelRange : proxySelection)
+	{
+		int startRow = proxySelRange.top();
+		int endRow = proxySelRange.bottom();
+
+		for(int proxyRow = startRow; proxyRow <= endRow; proxyRow++)
+		{
+			QModelIndex srcIndex = m_signalsProxyModel->mapToSource(
+										m_signalsProxyModel->index(proxyRow, 0));
+			selSignalIndexes.emplace_back(srcIndex.row());
+		}
+	}
+
+	CheckinSignalsDialog dlg(selSignalIndexes,
+							 *m_signalsModel,
+							 *m_signalsColumnVisibilityController, this);
 
 	if (dlg.exec() == QDialog::Rejected)
 	{
@@ -2039,21 +2064,28 @@ void SignalsProxyModel::applyNewFilter()
 	invalidateFilter();
 }
 
+// ------------------------------------------------------------------------------------------
+//
+//	CheckedoutSignalsModel class implementation
+//
+// ------------------------------------------------------------------------------------------
+
 CheckedoutSignalsModel::CheckedoutSignalsModel(SignalsModel* sourceModel, QTableView* view, QObject* parent) :
 	QSortFilterProxyModel(parent),
 	m_sourceModel(sourceModel),
 	m_view(view)
 {
 	setSourceModel(sourceModel);
-	states.resize(rowCount());
+	m_checkStates.resize(rowCount());
 }
 
 QVariant CheckedoutSignalsModel::data(const QModelIndex& index, int role) const
 {
 	if (index.column() == 0 && role == Qt::CheckStateRole)
 	{
-		return states[index.row()];
+		return m_checkStates[index.row()];
 	}
+
 	return QSortFilterProxyModel::data(index, role);
 }
 
@@ -2061,10 +2093,11 @@ bool CheckedoutSignalsModel::setData(const QModelIndex& index, const QVariant& v
 {
 	if (index.column() == 0 && role == Qt::CheckStateRole)
 	{
-		QModelIndexList list = m_view->selectionModel()->selectedRows(0);
-		for (int i = 0; i < list.count(); i++)
+		QModelIndexList selIndexes = m_view->selectionModel()->selectedRows(0);
+
+		for (const QModelIndex& selIndex : selIndexes)
 		{
-			setCheckState(list[i].row(), Qt::CheckState(value.toInt()));
+			setCheckState(-1, selIndex.row(), Qt::CheckState(value.toInt()));
 		}
 		return true;
 	}
@@ -2074,11 +2107,14 @@ bool CheckedoutSignalsModel::setData(const QModelIndex& index, const QVariant& v
 Qt::ItemFlags CheckedoutSignalsModel::flags(const QModelIndex& index) const
 {
 	Qt::ItemFlags flags = QSortFilterProxyModel::flags(index);
+
 	flags &= ~Qt::ItemIsEditable;
+
 	if (index.column() == 0)
 	{
 		flags |= Qt::ItemIsUserCheckable;
 	}
+
 	return flags;
 }
 
@@ -2092,32 +2128,49 @@ void CheckedoutSignalsModel::initCheckStates(const QModelIndexList& list, bool f
 	for (int i = 0; i < list.count(); i++)
 	{
 		QModelIndex proxyIndex = fromSourceModel ? mapFromSource(list[i]) : list[i];
+
 		if (proxyIndex.isValid())
 		{
-			setCheckState(proxyIndex.row(), Qt::Checked);
+			setCheckState(-1, proxyIndex.row(), Qt::Checked);
+		}
+	}
+}
+
+void CheckedoutSignalsModel::initCheckStates(const std::vector<int>& signalIndexes)
+{
+	for (int signalIndex : signalIndexes)
+	{
+		QModelIndex proxyIndex = mapFromSource(m_sourceModel->index(signalIndex, 0));
+
+		if (proxyIndex.isValid())
+		{
+			setCheckState(signalIndex, proxyIndex.row(), Qt::Checked);
 		}
 	}
 }
 
 void CheckedoutSignalsModel::setAllCheckStates(bool state)
 {
-	for (int i = 0; i < states.count(); i++)
+	for (int i = 0; i < m_checkStates.count(); i++)
 	{
-		states[i] = state ? Qt::Checked : Qt::Unchecked;
+		m_checkStates[i] = state ? Qt::Checked : Qt::Unchecked;
 	}
 
-	emit dataChanged(index(0, 0), index(static_cast<int>(states.count()) - 1, 0), QVector<int>() << Qt::CheckStateRole);
+	emit dataChanged(index(0, 0), index(static_cast<int>(m_checkStates.count()) - 1, 0), QVector<int>() << Qt::CheckStateRole);
 }
 
-void CheckedoutSignalsModel::setCheckState(int row, Qt::CheckState state)
+void CheckedoutSignalsModel::setCheckState(int signalIndex, int proxyRow, Qt::CheckState state)
 {
 	std::vector<int> sourceRows;
 
-	int signalIndex = mapToSource(index(row, 0)).row();
+	if (signalIndex == -1)
+	{
+		signalIndex = mapToSource(index(proxyRow, 0)).row();
+	}
 
 	AppSignalSetProvider::getInstance()->getSameChannelSignalsIndexes(signalIndex, &sourceRows);
 
-	foreach (const int sourceRow, sourceRows)
+	for(int sourceRow : sourceRows)
 	{
 		QModelIndex changedIndex = mapFromSource(m_sourceModel->index(sourceRow, 0));
 
@@ -2126,9 +2179,9 @@ void CheckedoutSignalsModel::setCheckState(int row, Qt::CheckState state)
 			continue;
 		}
 
-		states[changedIndex.row()] = state;
+		m_checkStates[changedIndex.row()] = state;
 
-		emit dataChanged(changedIndex, changedIndex, QVector<int>() << Qt::CheckStateRole);
+		emit dataChanged(changedIndex, changedIndex, QVector<int>{Qt::CheckStateRole});
 	}
 }
 

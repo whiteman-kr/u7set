@@ -294,14 +294,15 @@ public:
 
 	bool filterAcceptsRow(int source_row, const QModelIndex&) const override;
 
-	void initCheckStates(const QModelIndexList& list, bool fromSourceModel = true);
+	void initCheckStates(const QModelIndexList& list, bool fromSourceModel);
+	void initCheckStates(const std::vector<int>& signalIndexes);
 	void setAllCheckStates(bool state);
-	void setCheckState(int row, Qt::CheckState state);
+	void setCheckState(int signalIndex, int proxyRow, Qt::CheckState state);
 
 private:
 	SignalsModel* m_sourceModel;
 	QTableView* m_view;
-	QVector<Qt::CheckState> states;
+	QVector<Qt::CheckState> m_checkStates;			// referred by proxy model indexes
 };
 
 

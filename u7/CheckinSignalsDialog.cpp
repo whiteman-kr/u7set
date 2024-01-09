@@ -4,7 +4,10 @@
 #include "SignalsTabPage.h"
 #include "AppSignalSetProvider.h"
 
-CheckinSignalsDialog::CheckinSignalsDialog(SignalsModel* sourceModel, TableDataVisibilityController* columnManager, QModelIndexList selection, QWidget* parent) :
+CheckinSignalsDialog::CheckinSignalsDialog(	const std::vector<int>& selSignalsIndexes,
+											SignalsModel& sourceModel,
+											const TableDataVisibilityController& columnManager,
+											QWidget* parent) :
 	QDialog(parent),
 	m_sourceModel(sourceModel)
 {
@@ -18,14 +21,18 @@ CheckinSignalsDialog::CheckinSignalsDialog(SignalsModel* sourceModel, TableDataV
 	vl2->setContentsMargins(0, 0, 0, 0);
 
 	m_signalsView = new QTableView(this);
-	m_proxyModel = new CheckedoutSignalsModel(sourceModel, m_signalsView, this);
+	m_checkedOutModel = new CheckedoutSignalsModel(&sourceModel, m_signalsView, this);
 
 	QCheckBox* selectAll = new QCheckBox(tr("Select all"), this);
-	connect(selectAll, &QCheckBox::toggled, m_proxyModel, &CheckedoutSignalsModel::setAllCheckStates);
+	connect(selectAll, &QCheckBox::toggled, m_checkedOutModel, &CheckedoutSignalsModel::setAllCheckStates);
 
-	if (selection.count() != 0)
+	if (selSignalsIndexes.size() != 0)
 	{
-		m_proxyModel->initCheckStates(selection);
+		QElapsedTimer ts;
+		ts.start();
+		m_checkedOutModel->initCheckStates(selSignalsIndexes);
+		qDebug() << "time elapsed" << ts.elapsed();
+		DEBUG_STOP;
 	}
 	else
 	{
@@ -36,7 +43,7 @@ CheckinSignalsDialog::CheckinSignalsDialog(SignalsModel* sourceModel, TableDataV
 
 	vl2->addWidget(selectAll);
 
-	m_signalsView->setModel(m_proxyModel);
+	m_signalsView->setModel(m_checkedOutModel);
 	m_signalsView->verticalHeader()->setDefaultAlignment(Qt::AlignRight);
 	m_signalsView->setContextMenuPolicy(Qt::ActionsContextMenu);
 	m_signalsView->setStyleSheet("QTableView::item:focus{background-color:darkcyan}");
@@ -50,16 +57,16 @@ CheckinSignalsDialog::CheckinSignalsDialog(SignalsModel* sourceModel, TableDataV
 
 	QSettings settings;
 
-	m_signalsView->setColumnWidth(0, columnManager->getColumnWidth(0) + 30);	// basic column width + checkbox size
+	m_signalsView->setColumnWidth(0, columnManager.getColumnWidth(0) + 30);	// basic column width + checkbox size
 
 	for (int i = 1; i < signalPropertyCount; i++)
 	{
-		bool visible = columnManager->getColumnVisibility(i);
+		bool visible = columnManager.getColumnVisibility(i);
 		m_signalsView->setColumnHidden(i, !visible);
 
 		if (visible)
 		{
-			m_signalsView->setColumnWidth(i, columnManager->getColumnWidth(i));
+			m_signalsView->setColumnWidth(i, columnManager.getColumnWidth(i));
 		}
 	}
 
@@ -110,7 +117,7 @@ void CheckinSignalsDialog::checkinSelected()
 
 	if (commentText.isEmpty())
 	{
-		QMessageBox::warning(m_sourceModel->parentWindow(), tr("Warning"), tr("Checkin comment is empty"));
+		QMessageBox::warning(m_sourceModel.parentWindow(), tr("Warning"), tr("Checkin comment is empty"));
 		return;
 	}
 
@@ -118,23 +125,23 @@ void CheckinSignalsDialog::checkinSelected()
 
 	AppSignalSetProvider* signalSetProvider = AppSignalSetProvider::getInstance();
 
-	for (int i = 0; i < m_proxyModel->rowCount(); i++)
+	for (int i = 0; i < m_checkedOutModel->rowCount(); i++)
 	{
-		QModelIndex proxyIndex = m_proxyModel->index(i, 0);
+		QModelIndex proxyIndex = m_checkedOutModel->index(i, 0);
 
-		if (m_proxyModel->data(proxyIndex, Qt::CheckStateRole) != Qt::Checked)
+		if (m_checkedOutModel->data(proxyIndex, Qt::CheckStateRole) != Qt::Checked)
 		{
 			continue;
 		}
 
-		int sourceRow = m_proxyModel->mapToSource(proxyIndex).row();
+		int sourceRow = m_checkedOutModel->mapToSource(proxyIndex).row();
 
 		IDs.push_back(signalSetProvider->signalID(sourceRow));
 	}
 
 	if (IDs.size() == 0)
 	{
-		QMessageBox::warning(m_sourceModel->parentWindow(), tr("Warning"), tr("No one signal was selected!"));
+		QMessageBox::warning(m_sourceModel.parentWindow(), tr("Warning"), tr("No one signal was selected!"));
 		return;
 	}
 

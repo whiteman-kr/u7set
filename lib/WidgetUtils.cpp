@@ -235,25 +235,34 @@ void TableDataVisibilityController::saveColumnPosition(int index, int position)
 	settings.setValue((m_settingBranchName + "/ColumnPosition/%1").arg(m_columnNameList[index].replace("/", "|")).replace("\n", " "), position);
 }
 
-bool TableDataVisibilityController::getColumnVisibility(int index)
+bool TableDataVisibilityController::getColumnVisibility(int index) const
 {
 	QSettings settings;
 	bool visible = m_tableView->horizontalHeader()->isSectionHidden(index);
-	return settings.value((m_settingBranchName + "/ColumnVisibility/%1").arg(m_columnNameList[index].replace("/", "|")).replace("\n", " "), visible).toBool();
+
+	QString colName = m_columnNameList[index];
+
+	return settings.value((m_settingBranchName + "/ColumnVisibility/%1").arg(colName.replace("/", "|")).replace("\n", " "), visible).toBool();
 }
 
-int TableDataVisibilityController::getColumnPosition(int index)
+int TableDataVisibilityController::getColumnPosition(int index) const
 {
 	QSettings settings;
 	int position = m_tableView->horizontalHeader()->visualIndex(index);
-	return settings.value((m_settingBranchName + "/ColumnPosition/%1").arg(m_columnNameList[index].replace("/", "|")).replace("\n", " "), position).toInt();
+
+	QString colName = m_columnNameList[index];
+
+	return settings.value((m_settingBranchName + "/ColumnPosition/%1").arg(colName.replace("/", "|")).replace("\n", " "), position).toInt();
 }
 
-int TableDataVisibilityController::getColumnWidth(int index)
+int TableDataVisibilityController::getColumnWidth(int index) const
 {
 	QSettings settings;
 	int width = m_tableView->columnWidth(index);
-	return settings.value((m_settingBranchName + "/ColumnWidth/%1").arg(m_columnNameList[index].replace("/", "|")).replace("\n", " "), width).toInt();
+
+	QString colName = m_columnNameList[index];
+
+	return settings.value((m_settingBranchName + "/ColumnWidth/%1").arg(colName.replace("/", "|")).replace("\n", " "), width).toInt();
 }
 
 void TableDataVisibilityController::showColumn(int index, bool visible)

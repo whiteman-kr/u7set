@@ -24,9 +24,9 @@ public:
 	void saveColumnVisibility(int index, bool visible);
 	void saveColumnPosition(int index, int position);
 
-	bool getColumnVisibility(int index);
-	int getColumnPosition(int index);
-	int getColumnWidth(int index);
+	bool getColumnVisibility(int index) const;
+	int getColumnPosition(int index) const;
+	int getColumnWidth(int index) const;
 
 	void showColumn(int index, bool visible = true);
 	void relocateAllColumns();
