@@ -1,5 +1,5 @@
 #include "DialogMatsUsersEditor.h"
-
+#include "../lib/Ui/ChooseTagsWidget.h"
 //
 //
 // MatsUsersEditorDelegate
@@ -22,8 +22,7 @@ QWidget* MatsUsersEditorDelegate::createEditor(QWidget *parent, const QStyleOpti
         return edit;
     }
 
-	if(index.column() == static_cast<int>(DialogMatsUsersEditor::Columns::Description) ||
-		index.column() == static_cast<int>(DialogMatsUsersEditor::Columns::TuningTags))
+	if(index.column() == static_cast<int>(DialogMatsUsersEditor::Columns::Description))
 	{
 		return QItemDelegate::createEditor(parent, option, index);
 	}
@@ -34,8 +33,7 @@ QWidget* MatsUsersEditorDelegate::createEditor(QWidget *parent, const QStyleOpti
 void MatsUsersEditorDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
 {
     if (index.column() == static_cast<int>(DialogMatsUsersEditor::Columns::Login) || 
-		index.column() == static_cast<int>(DialogMatsUsersEditor::Columns::Description) || 
-		index.column() == static_cast<int>(DialogMatsUsersEditor::Columns::TuningTags))
+		index.column() == static_cast<int>(DialogMatsUsersEditor::Columns::Description))
 	{
         QString s = index.model()->data(index, Qt::EditRole).toString();
         QLineEdit *edit = qobject_cast<QLineEdit*>(editor);
@@ -50,8 +48,7 @@ void MatsUsersEditorDelegate::setEditorData(QWidget *editor, const QModelIndex &
 void MatsUsersEditorDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
 {
     if (index.column() == static_cast<int>(DialogMatsUsersEditor::Columns::Login) || 
-		index.column() == static_cast<int>(DialogMatsUsersEditor::Columns::Description) || 
-		index.column() == static_cast<int>(DialogMatsUsersEditor::Columns::TuningTags))
+		index.column() == static_cast<int>(DialogMatsUsersEditor::Columns::Description))
     {
         QLineEdit* edit = qobject_cast<QLineEdit*>(editor);
         model->setData(index, edit->text(), Qt::EditRole);
@@ -96,6 +93,8 @@ DialogMatsUsersEditor::DialogMatsUsersEditor(DbController *pDbController, QWidge
 
 	m_editorDelegate = new MatsUsersEditorDelegate(this);
 	m_list->setItemDelegate(m_editorDelegate);
+
+	connect(m_list, &QTreeWidget::itemDoubleClicked, this, &DialogMatsUsersEditor::onListItemDoubleClicked);
 
 	QVBoxLayout* addRemoveLayout = new QVBoxLayout();
 	addRemoveLayout->setContentsMargins(0, 0, 0, 0);
@@ -288,6 +287,11 @@ bool DialogMatsUsersEditor::saveChanges()
 	return true;
 }
 
+DbController* DialogMatsUsersEditor::db()
+{
+	return m_dbController;
+}
+
 void DialogMatsUsersEditor::closeEvent(QCloseEvent* e)
 {
 	if (askForSaveChanged() == true)
@@ -416,7 +420,49 @@ void DialogMatsUsersEditor::onListItemChanged(QTreeWidgetItem *item, int column)
 	m_modified = true;
 }
 
-DbController* DialogMatsUsersEditor::db()
+void DialogMatsUsersEditor::onListItemDoubleClicked(QTreeWidgetItem* item, int column)
 {
-	return m_dbController;
+	if (item == nullptr || column != static_cast<int>(DialogMatsUsersEditor::Columns::TuningTags))
+	{
+		return;
+	}
+
+	if (m_dbController == nullptr)
+	{
+		Q_ASSERT(m_dbController);
+		return;
+	}
+
+    std::vector<std::pair<QString, QString>> tags;
+	{
+		std::vector<DbTag> dbTags;
+		bool ok = m_dbController->getTags(&dbTags);
+		if (ok == true)
+		{
+			tags.reserve(dbTags.size());
+			for (const DbTag& dbt : dbTags)
+			{
+				tags.push_back({dbt.tag, dbt.description});
+			}
+		}
+	}
+	
+	QDialog tagsSelectorDialog{this, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint};
+
+	ChooseTagsWidget te{tags, {}, this, ';'};
+	te.setText(item->text(static_cast<int>(DialogMatsUsersEditor::Columns::TuningTags)));
+
+	connect(&te, &ChooseTagsWidget::okPressed, &tagsSelectorDialog, &QDialog::accept);
+	connect(&te, &ChooseTagsWidget::cancelPressed, &tagsSelectorDialog, &QDialog::reject);
+
+	QHBoxLayout l;
+	l.addWidget(&te);
+	tagsSelectorDialog.setLayout(&l);
+
+	if (tagsSelectorDialog.exec() == QDialog::Accepted)
+	{
+		item->setText(static_cast<int>(DialogMatsUsersEditor::Columns::TuningTags), te.text());
+		m_modified = true;
+	}
 }
+

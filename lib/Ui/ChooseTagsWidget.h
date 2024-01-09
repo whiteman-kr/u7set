@@ -14,7 +14,8 @@ public:
     
     ChooseTagsWidget(const std::vector<std::pair<QString, QString>>& tags,
 					 const std::vector<OnlineLib::MatsUser>& users,
-					 QWidget* parent);
+					 QWidget* parent,
+					 QChar separator = QChar::Null);
 
     virtual ~ChooseTagsWidget();
 
@@ -57,4 +58,5 @@ private:
 
     QString m_objectName = "Tag";
     QString m_objectNames = "tags";
+	QChar m_separator{QChar::Null};
 };

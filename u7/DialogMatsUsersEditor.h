@@ -30,6 +30,7 @@ protected:
 private:
 	bool askForSaveChanged();
 	bool saveChanges();
+	DbController* db();
 
 protected:
 	virtual void closeEvent(QCloseEvent* e) override;
@@ -40,6 +41,7 @@ private slots:
 	void onOkClicked();
 	void onCancelClicked();
 	void onListItemChanged(QTreeWidgetItem* item, int column);
+	void onListItemDoubleClicked(QTreeWidgetItem* item, int column);
 
 public:
 	enum class Columns
@@ -56,7 +58,6 @@ private:
 
 	bool m_modified = false;
 
-	DbController* db();
 	DbController* m_dbController;
 };
 
