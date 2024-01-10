@@ -4,15 +4,17 @@
 
 class SignalsModel;
 class TableDataVisibilityController;
-class CheckedoutSignalsModel;
+class CheckedOutSignalsModel;
 
 class UndoSignalsDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	UndoSignalsDialog(SignalsModel* sourceModel, TableDataVisibilityController* columnManager, QWidget *parent = nullptr);
+	UndoSignalsDialog(const QModelIndexList& selectionSrcIndexes,
+					  SignalsModel* signalsModel,
+					  const TableDataVisibilityController& columnManager,
+					  QWidget* parent = nullptr);
 
-	void setCheckStates(QModelIndexList selection, bool fromSourceModel);
 	void saveDialogGeometry();
 
 	const std::vector<int>& undoedSignalsIDs() const { return m_undoedSignalsIDs; }
@@ -24,8 +26,8 @@ protected:
 	void closeEvent(QCloseEvent* event);
 
 private:
-	SignalsModel* m_sourceModel = nullptr;
-	CheckedoutSignalsModel* m_proxyModel = nullptr;
+	SignalsModel* m_signalsModel = nullptr;
+	CheckedOutSignalsModel* m_checkedOutModel = nullptr;
 
 	std::vector<int> m_undoedSignalsIDs;
 };

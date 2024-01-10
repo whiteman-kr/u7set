@@ -251,6 +251,8 @@ set (U7_SOURCES
 	SignalHistoryDialog.h
 	SignalPropertiesDialog.cpp
 	SignalPropertiesDialog.h
+	SignalsModels.cpp
+	SignalsModels.h
 	SignalsTabPage.cpp
 	SignalsTabPage.h
 	Simulator/ScriptSimApplication.cpp

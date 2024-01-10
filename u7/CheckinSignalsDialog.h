@@ -5,14 +5,14 @@
 class SignalsModel;
 class SignalsProxyModel;
 class TableDataVisibilityController;
-class CheckedoutSignalsModel;
+class CheckedOutSignalsModel;
 
 class CheckinSignalsDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	CheckinSignalsDialog(const std::vector<int>& selSignalsIndexes,
-						 SignalsModel& sourceModel,
+	CheckinSignalsDialog(const QModelIndexList& selectionSrcIndexes,
+						 SignalsModel* signalsModel,
 						 const TableDataVisibilityController& columnManager,
 						 QWidget* parent = nullptr);
 
@@ -24,11 +24,12 @@ protected:
 	void closeEvent(QCloseEvent* event);
 
 private:
+	void checkSelection(const QItemSelection);
 	void saveDialogGeometry();
 
 private:
-	SignalsModel& m_sourceModel;
-	CheckedoutSignalsModel* m_checkedOutModel = nullptr;		// Checked Out Signals Model
+	SignalsModel* m_signalsModel = nullptr;
+	CheckedOutSignalsModel* m_checkedOutModel = nullptr;		// Checked Out Signals Model
 
 	QTableView* m_signalsView = nullptr;
 	QPlainTextEdit* m_commentEdit = nullptr;

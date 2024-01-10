@@ -4,12 +4,12 @@
 #include "SignalsTabPage.h"
 #include "AppSignalSetProvider.h"
 
-CheckinSignalsDialog::CheckinSignalsDialog(	const std::vector<int>& selSignalsIndexes,
-											SignalsModel& sourceModel,
+CheckinSignalsDialog::CheckinSignalsDialog(const QModelIndexList& selectionSrcIndexes,
+											SignalsModel* signalsModel,
 											const TableDataVisibilityController& columnManager,
 											QWidget* parent) :
 	QDialog(parent),
-	m_sourceModel(sourceModel)
+	m_signalsModel(signalsModel)
 {
 	setWindowTitle("Check In Signal(s)");
 
@@ -21,18 +21,15 @@ CheckinSignalsDialog::CheckinSignalsDialog(	const std::vector<int>& selSignalsIn
 	vl2->setContentsMargins(0, 0, 0, 0);
 
 	m_signalsView = new QTableView(this);
-	m_checkedOutModel = new CheckedoutSignalsModel(&sourceModel, m_signalsView, this);
+	m_checkedOutModel = new CheckedOutSignalsModel(signalsModel, m_signalsView, this);
 
 	QCheckBox* selectAll = new QCheckBox(tr("Select all"), this);
-	connect(selectAll, &QCheckBox::toggled, m_checkedOutModel, &CheckedoutSignalsModel::setAllCheckStates);
+	connect(selectAll, &QCheckBox::toggled, m_checkedOutModel, &CheckedOutSignalsModel::setAllCheckStates);
 
-	if (selSignalsIndexes.size() != 0)
+
+	if (selectionSrcIndexes.isEmpty() == false)
 	{
-		QElapsedTimer ts;
-		ts.start();
-		m_checkedOutModel->initCheckStates(selSignalsIndexes);
-		qDebug() << "time elapsed" << ts.elapsed();
-		DEBUG_STOP;
+		m_checkedOutModel->initCheckStates(selectionSrcIndexes);
 	}
 	else
 	{
@@ -117,7 +114,7 @@ void CheckinSignalsDialog::checkinSelected()
 
 	if (commentText.isEmpty())
 	{
-		QMessageBox::warning(m_sourceModel.parentWindow(), tr("Warning"), tr("Checkin comment is empty"));
+		QMessageBox::warning(m_signalsModel->parentWidget(), tr("Warning"), tr("Checkin comment is empty"));
 		return;
 	}
 
@@ -141,7 +138,7 @@ void CheckinSignalsDialog::checkinSelected()
 
 	if (IDs.size() == 0)
 	{
-		QMessageBox::warning(m_sourceModel.parentWindow(), tr("Warning"), tr("No one signal was selected!"));
+		QMessageBox::warning(m_signalsModel->parentWidget(), tr("Warning"), tr("No one signal was selected!"));
 		return;
 	}
 
