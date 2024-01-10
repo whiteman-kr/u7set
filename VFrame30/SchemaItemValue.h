@@ -1,9 +1,9 @@
 #pragma once
 
 #include "FontParam.h"
+#include "IMatsSchemaItemAssociations.h"
 #include "PosRectRotatable.h"
 #include "Session.h"
-#include "IMatsSchemaItemAssociations.h"
 
 class QPen;
 class QBrush;
@@ -11,6 +11,7 @@ class QBrush;
 class AppSignalState;
 class AppSignalParam;
 class TuningSignalState;
+
 
 namespace VFrame30
 {
@@ -98,7 +99,8 @@ namespace VFrame30
 		})
 		\endcode
 	*/
-	class SchemaItemValue final : public PosRectRotatable, public IMatsSchemaItemAssociations
+	class SchemaItemValue final : public PosRectRotatable,
+								  public IMatsSchemaItemAssociations
 	{
 		Q_OBJECT
 

@@ -72,6 +72,7 @@ private slots:
 
 	void onSettings();
 	void showStatistics();
+	void showDataSources();
 	void showAppLog();
 	void showAboutQt();
 	void showAbout();
@@ -98,6 +99,7 @@ private:
 
 	QAction* m_pExitAction = nullptr;
 	QAction* m_pSettingsAction = nullptr;
+	QAction* m_pDataSourcesAction = nullptr;
 	QAction* m_pStatisticsAction = nullptr;
 	QAction* m_pAppLogAction = nullptr;
 	QAction* m_aboutQtAction = nullptr;

@@ -70,6 +70,9 @@ namespace Hardware
 		static const QString place;
 		static const QString specificProperties;
 		static const QString signalSpecificProperties;
+		static const QString tags;
+		static const QString tagsDescription;
+
 		static const QString preset;
 		static const QString presetRoot;
 		static const QString presetName;
@@ -343,6 +346,15 @@ namespace Hardware
 
 		[[nodiscard]] int place() const;
 		void setPlace(int value);
+
+		[[nodiscard]] bool hasTag(const QString& tag) const;
+		[[nodiscard]] bool hasTag(Hash tagHash) const;
+
+		[[nodiscard]] QStringList tags() const;
+		[[nodiscard]] QString tagsAsString() const;
+
+		void setTags(const QStringList& tags);
+		void setTags(const QString& tags);
 
 		[[nodiscard]] QString details() const;		// JSON short description, uuid, equipmentId, caption, place, etc
 

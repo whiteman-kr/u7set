@@ -16677,6 +16677,7 @@ class DeviceObject PROTOBUF_FINAL :
 
   enum : int {
     kPropertiesFieldNumber = 7,
+    kTagsFieldNumber = 8,
     kChildrenFieldNumber = 200,
     kSpecificPropertiesStructFieldNumber = 6,
     kPresetProtectedPropertiesFieldNumber = 38,
@@ -16719,6 +16720,30 @@ class DeviceObject PROTOBUF_FINAL :
   ::Proto::Property* add_properties();
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::Property >&
       properties() const;
+
+  // repeated string tags = 8;
+  int tags_size() const;
+  private:
+  int _internal_tags_size() const;
+  public:
+  void clear_tags();
+  const std::string& tags(int index) const;
+  std::string* mutable_tags(int index);
+  void set_tags(int index, const std::string& value);
+  void set_tags(int index, std::string&& value);
+  void set_tags(int index, const char* value);
+  void set_tags(int index, const char* value, size_t size);
+  std::string* add_tags();
+  void add_tags(const std::string& value);
+  void add_tags(std::string&& value);
+  void add_tags(const char* value);
+  void add_tags(const char* value, size_t size);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& tags() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_tags();
+  private:
+  const std::string& _internal_tags(int index) const;
+  std::string* _internal_add_tags();
+  public:
 
   // repeated .Proto.Envelope children = 200;
   int children_size() const;
@@ -17144,6 +17169,7 @@ class DeviceObject PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::Property > properties_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> tags_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::Envelope > children_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr specific_properties_struct_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr presetprotectedproperties_;
@@ -49122,6 +49148,80 @@ inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::Property >&
 DeviceObject::properties() const {
   // @@protoc_insertion_point(field_list:Proto.DeviceObject.properties)
   return properties_;
+}
+
+// repeated string tags = 8;
+inline int DeviceObject::_internal_tags_size() const {
+  return tags_.size();
+}
+inline int DeviceObject::tags_size() const {
+  return _internal_tags_size();
+}
+inline void DeviceObject::clear_tags() {
+  tags_.Clear();
+}
+inline std::string* DeviceObject::add_tags() {
+  // @@protoc_insertion_point(field_add_mutable:Proto.DeviceObject.tags)
+  return _internal_add_tags();
+}
+inline const std::string& DeviceObject::_internal_tags(int index) const {
+  return tags_.Get(index);
+}
+inline const std::string& DeviceObject::tags(int index) const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.tags)
+  return _internal_tags(index);
+}
+inline std::string* DeviceObject::mutable_tags(int index) {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject.tags)
+  return tags_.Mutable(index);
+}
+inline void DeviceObject::set_tags(int index, const std::string& value) {
+  // @@protoc_insertion_point(field_set:Proto.DeviceObject.tags)
+  tags_.Mutable(index)->assign(value);
+}
+inline void DeviceObject::set_tags(int index, std::string&& value) {
+  // @@protoc_insertion_point(field_set:Proto.DeviceObject.tags)
+  tags_.Mutable(index)->assign(std::move(value));
+}
+inline void DeviceObject::set_tags(int index, const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  tags_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:Proto.DeviceObject.tags)
+}
+inline void DeviceObject::set_tags(int index, const char* value, size_t size) {
+  tags_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:Proto.DeviceObject.tags)
+}
+inline std::string* DeviceObject::_internal_add_tags() {
+  return tags_.Add();
+}
+inline void DeviceObject::add_tags(const std::string& value) {
+  tags_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add:Proto.DeviceObject.tags)
+}
+inline void DeviceObject::add_tags(std::string&& value) {
+  tags_.Add(std::move(value));
+  // @@protoc_insertion_point(field_add:Proto.DeviceObject.tags)
+}
+inline void DeviceObject::add_tags(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  tags_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:Proto.DeviceObject.tags)
+}
+inline void DeviceObject::add_tags(const char* value, size_t size) {
+  tags_.Add()->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:Proto.DeviceObject.tags)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>&
+DeviceObject::tags() const {
+  // @@protoc_insertion_point(field_list:Proto.DeviceObject.tags)
+  return tags_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
+DeviceObject::mutable_tags() {
+  // @@protoc_insertion_point(field_mutable_list:Proto.DeviceObject.tags)
+  return &tags_;
 }
 
 // optional bool preset = 32 [default = false];
