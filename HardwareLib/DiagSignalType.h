@@ -1,6 +1,7 @@
 #pragma once
 
 #include "DeviceObject.h"
+#include "../UtilsLib/XmlHelper.h"
 
 namespace Hardware
 {
@@ -20,6 +21,9 @@ namespace Hardware
 
 	public:
 		virtual ~DiagSignalType() = default;
+
+		void writeToXml(XmlWriteHelper& xml) const;
+		bool readFromXml(XmlReadHelper& xml);
 
 		// Serialization
 		//

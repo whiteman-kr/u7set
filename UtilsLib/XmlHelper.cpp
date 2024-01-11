@@ -183,6 +183,11 @@ void XmlWriteHelper::writeQHostAddressAttribute(const QString& name, const QHost
 	writeStringAttribute(name, addr.toString());
 }
 
+void XmlWriteHelper::writeUuidAttribute(const QString& name, const QUuid& guid)
+{
+	writeStringAttribute(XmlAttribute::UUID, guid.toString(QUuid::WithBraces));
+}
+
 void XmlWriteHelper::writeString(const QString& str)
 {
 	m_xmlWriter->writeCharacters(str);
@@ -497,6 +502,21 @@ bool XmlReadHelper::readQHostAddressAttribute(const QString& name, QHostAddress*
 	RETURN_IF_FALSE(result);
 
 	return addr->setAddress(addrStr);
+}
+
+bool XmlReadHelper::readUuidAttribute(const QString& name, QUuid* guid)
+{
+	TEST_PTR_RETURN_FALSE(guid);
+
+	QString uuidStr;
+
+	bool result = readStringAttribute(name, &uuidStr);
+
+	RETURN_IF_FALSE(result);
+
+	*guid = QUuid::fromString(uuidStr);
+
+	return !guid->isNull();
 }
 
 bool XmlReadHelper::readStringElement(const QString& elementName, QString* value, bool find)

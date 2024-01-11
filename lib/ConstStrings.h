@@ -258,6 +258,9 @@ namespace XmlElement
 	inline const QString SIGNAL_LISTS("SignalLists");
 	inline const QString SIGNAL_LIST("SignalList");
 	inline const QString ID("ID");
+
+	inline const QString DIAG_SIGNAL_TYPE("DiagSignalType");
+	inline const QString DIAG_SIGNAL_TYPES("DiagSignalTypes");
 }
 
 namespace XmlAttribute
@@ -337,6 +340,27 @@ namespace XmlAttribute
 	inline const QString DATA_TYPE("DataType");
 	inline const QString SEND_EVENTS("SendEvents");
 	inline const QString INCLUDE_APP_SIGNAL_ID("IncludeAppSignalID");
+
+	inline const QString SIGNAL_TYPE_ID("SignalTypeID");
+	inline const QString SYSTEM_SIGNAL_TYPE("SystemSignalType");
+	inline const QString DIAG_SIGNAL_TYPE("DiagSignalType");
+	inline const QString DIAG_BYTE_ORDER("DiagByteOrder");
+	inline const QString UNITS("Units");
+
+	inline const QString INVERSE_VALUE("InverseValue");
+	inline const QString NORMAL_STATE("NormalState");
+	inline const QString NORMAL_STATE_STR0("NormalStateStr0");
+	inline const QString NORMAL_STATE_STR1("NormalStateStr1");
+
+	inline const QString DIAG_ANALOG_FORMAT("DiagAnalogFormat");
+	inline const QString USE_LIMITS("UseLimits");
+	inline const QString ADC_HIGH_LIMIT("AdcHighLimit");
+	inline const QString ADC_LOW_LIMIT("AdcLowLimit");
+	inline const QString VALUE_HIGH_LIMIT("ValueHighLimit");
+	inline const QString VALUE_LOW_LIMIT("ValueLowLimit");
+	inline const QString VALUE_MULTIPLIER("ValueMultiplier");
+	inline const QString VALUE_OFFSET("ValueOffset");
+	inline const QString UUID("Uuid");
 }
 
 namespace Latin1Char

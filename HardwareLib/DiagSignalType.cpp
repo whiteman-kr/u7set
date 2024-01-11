@@ -63,6 +63,106 @@ namespace Hardware
 		return;
 	}
 
+	void DiagSignalType::writeToXml(XmlWriteHelper& xml) const
+	{
+		xml.writeStartElement(XmlElement::DIAG_SIGNAL_TYPE);
+
+		xml.writeStringAttribute(XmlAttribute::SIGNAL_TYPE_ID, m_signalTypeId);
+		xml.writeBoolAttribute(XmlAttribute::SYSTEM_SIGNAL_TYPE, m_systemSignalType);
+
+		xml.writeEnumKeyAttribute(XmlAttribute::DIAG_SIGNAL_TYPE, m_type);
+		xml.writeEnumKeyAttribute(XmlAttribute::DIAG_BYTE_ORDER, m_byteOrder);
+
+		xml.writeStringAttribute(XmlAttribute::UNITS, m_units);
+
+		xml.writeUuidAttribute(XmlAttribute::UUID, m_uuid);
+
+		switch(m_type)
+		{
+		case E::DiagSignalType::Discrete:
+			xml.writeBoolAttribute(XmlAttribute::INVERSE_VALUE, m_inverseValue);
+
+			xml.writeIntAttribute(XmlAttribute::NORMAL_STATE, m_normalState);
+
+			xml.writeStringAttribute(XmlAttribute::NORMAL_STATE_STR0, m_normalStateString0);
+			xml.writeStringAttribute(XmlAttribute::NORMAL_STATE_STR1, m_normalStateString1);
+			break;
+
+		case E::DiagSignalType::Analog:
+			xml.writeEnumKeyAttribute(XmlAttribute::DIAG_ANALOG_FORMAT, m_analogFormat);
+
+			xml.writeBoolAttribute(XmlAttribute::USE_LIMITS, m_useLimits);
+
+			xml.writeDoubleAttribute(XmlAttribute::ADC_HIGH_LIMIT, m_adcHighLimit);
+			xml.writeDoubleAttribute(XmlAttribute::ADC_LOW_LIMIT, m_adcLowLimit);
+
+			xml.writeDoubleAttribute(XmlAttribute::VALUE_HIGH_LIMIT, m_valueHighLimit);
+			xml.writeDoubleAttribute(XmlAttribute::VALUE_LOW_LIMIT, m_valueLowLimit);
+
+			xml.writeDoubleAttribute(XmlAttribute::VALUE_MULTIPLIER, m_valueMultiplier);
+			xml.writeDoubleAttribute(XmlAttribute::VALUE_OFFSET, m_valueOffset);
+			break;
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		xml.writeEndElement();		// XmlElement::DIAG_SIGNAL_TYPE
+	}
+
+	bool DiagSignalType::readFromXml(XmlReadHelper& xml)
+	{
+		bool result = true;
+
+		result &= xml.findElement(XmlElement::DIAG_SIGNAL_TYPE);
+
+		RETURN_IF_FALSE(result);
+
+		result &= xml.readStringAttribute(XmlAttribute::SIGNAL_TYPE_ID, &m_signalTypeId);
+		result &= xml.readBoolAttribute(XmlAttribute::SYSTEM_SIGNAL_TYPE, &m_systemSignalType);
+
+		result &= xml.readEnumKeyAttribute(XmlAttribute::DIAG_SIGNAL_TYPE, &m_type);
+		result &= xml.readEnumKeyAttribute(XmlAttribute::DIAG_BYTE_ORDER, &m_byteOrder);
+
+		result &= xml.readStringAttribute(XmlAttribute::UNITS, &m_units);
+
+		result &= xml.readUuidAttribute(XmlAttribute::UUID, &m_uuid);
+
+		RETURN_IF_FALSE(result);
+
+		switch(m_type)
+		{
+		case E::DiagSignalType::Discrete:
+			result &= xml.readBoolAttribute(XmlAttribute::INVERSE_VALUE, &m_inverseValue);
+
+			result &= xml.readIntAttribute(XmlAttribute::NORMAL_STATE, &m_normalState);
+
+			result &= xml.readStringAttribute(XmlAttribute::NORMAL_STATE_STR0, &m_normalStateString0);
+			result &= xml.readStringAttribute(XmlAttribute::NORMAL_STATE_STR1, &m_normalStateString1);
+			break;
+
+		case E::DiagSignalType::Analog:
+			result &= xml.readEnumKeyAttribute(XmlAttribute::DIAG_ANALOG_FORMAT, &m_analogFormat);
+
+			result &= xml.readBoolAttribute(XmlAttribute::USE_LIMITS, &m_useLimits);
+
+			result &= xml.readDoubleAttribute(XmlAttribute::ADC_HIGH_LIMIT, &m_adcHighLimit);
+			result &= xml.readDoubleAttribute(XmlAttribute::ADC_LOW_LIMIT, &m_adcLowLimit);
+
+			result &= xml.readDoubleAttribute(XmlAttribute::VALUE_HIGH_LIMIT, &m_valueHighLimit);
+			result &= xml.readDoubleAttribute(XmlAttribute::VALUE_LOW_LIMIT, &m_valueLowLimit);
+
+			result &= xml.readDoubleAttribute(XmlAttribute::VALUE_MULTIPLIER, &m_valueMultiplier);
+			result &= xml.readDoubleAttribute(XmlAttribute::VALUE_OFFSET, &m_valueOffset);
+			break;
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		return result;
+	}
+
 	std::shared_ptr<DiagSignalType> DiagSignalType::CreateObject(QObject* parent)
 	{
 		return std::shared_ptr<DiagSignalType>(new DiagSignalType{parent}); // cannot use make_shared as constructor is protected ((

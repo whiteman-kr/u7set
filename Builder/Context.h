@@ -12,6 +12,7 @@
 #include "../VFrame30/Bus.h"
 #include "../VFrame30/LogicSchema.h"
 #include "../lib/TuningDataStorage.h"
+#include "../u7/DiagSignalTypesStorage.h"
 
 #include "BuildResultWriter.h"
 #include "ConnectionStorage.h"
@@ -95,6 +96,8 @@ namespace Builder
 		std::unordered_set<QString> m_analogSignalsOnSchemas;
 
 		std::map<QString, std::list<LmPackedLogicSources>> m_packedLogicSources;	// Key is label of packed_*_out schema item => list of LmPacketLogicSources
+
+		DiagSignalTypesStorage m_diagSignalTypes;
 	};
 
 } // namespace Builder

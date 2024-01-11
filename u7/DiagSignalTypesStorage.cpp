@@ -6,6 +6,11 @@
 //
 //
 
+DiagSignalTypesStorage::DiagSignalTypesStorage() :
+	DbObjectStorage(nullptr, 0)
+{
+}
+
 DiagSignalTypesStorage::DiagSignalTypesStorage(DbController* db) :
 	DbObjectStorage(db, db->systemFileId(DbDir::DiagSignalTypesDir))
 {
@@ -184,3 +189,47 @@ bool DiagSignalTypesStorage::save(const QUuid& uuid, QString* errorMessage)
 
 	return true;
 }
+
+void DiagSignalTypesStorage::writeToXml(XmlWriteHelper& xml) const
+{
+	std::map<QString, std::shared_ptr<Hardware::DiagSignalType>> sortedTypes;	// DiagSignalTypeID => DiagSignalType
+
+	for (const auto& diagSignalType : m_objectsVector)
+	{
+		TEST_PTR_CONTINUE(diagSignalType);
+
+		sortedTypes.emplace(diagSignalType->signalTypeId(), diagSignalType);
+	}
+
+	xml.writeStartElement(XmlElement::DIAG_SIGNAL_TYPES);
+	xml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(sortedTypes.size()));
+
+	for(const auto& [id, diagSignalType] : sortedTypes)
+	{
+		diagSignalType->writeToXml(xml);
+	}
+
+	xml.writeEndElement();		//	XmlElement::DIAG_SIGNAL_TYPES
+}
+
+bool DiagSignalTypesStorage::readFromXml(XmlReadHelper& xml)
+{
+	m_objectsVector.clear();
+
+	bool result = true;
+
+	result &= xml.findElement(XmlElement::DIAG_SIGNAL_TYPES);
+
+	RETURN_IF_FALSE(result);
+
+	int count = 0;
+
+	result &= xml.readIntAttribute(XmlAttribute::COUNT, &count);
+
+	for(int i = 0; i < count; i++)
+	{
+
+	}
+
+}
+
