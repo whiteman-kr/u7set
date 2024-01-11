@@ -2519,15 +2519,7 @@ bool AppSignal::setSpecPropValue(const QString& name, const QVariant& qv, bool i
 
 QStringList AppSignal::tags() const
 {
-	QStringList list;
-	list.reserve(m_tags.size());
-
-	for(const QString& tag : m_tags)
-	{
-		list.append(tag);
-	}
-
-	return list;
+	return QStringList(m_tags.begin(), m_tags.end());
 }
 
 void AppSignal::setTags(const QStringList& tags)

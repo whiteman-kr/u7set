@@ -1,12 +1,12 @@
 #ifndef CLIENT_LIB_DOMAIN
-#error Do not include this file in the project! Link ClientLib instead.
+	#error Do not include this file in the project! Link ClientLib instead.
 #endif
 
 #include "TuningUserManager.h"
 
 #ifdef Q_OS_WIN
 #include <windows.h>
-#include <lm.h>
+	#include <lm.h>
 #endif
 
 namespace ClientLib
@@ -15,108 +15,6 @@ namespace ClientLib
 	// TuningUserManager
 	//
 
-	void TuningUserManager::setConfiguration(bool tuningLogin, const QStringList& tuningUserAccounts, bool loginPerOperation, int tuningSessionTimeout)
-	{
-		m_tuningLogin = tuningLogin;
-		m_tuningUserAccounts = tuningUserAccounts;
-		m_loginPerOperation = loginPerOperation;
-		m_tuningSessionTimeout = tuningSessionTimeout;
-
-		m_loggedIn = false;
-	}
-
-	bool TuningUserManager::login(QWidget* parent)
-	{
-		if (m_tuningLogin == false)
-		{
-			return true;
-		}
-
-		if (m_loggedIn == false)
-		{
-			// Ask the password
-			//
-			if (requestPassword(parent) == false)
-			{
-				return false;
-			}
-		}
-
-		// Refresh pending time
-		//
-		m_logoutSecsSinceEpoch = QDateTime::currentSecsSinceEpoch() + m_tuningSessionTimeout;
-
-		if (m_loggedIn == false)
-		{
-			emit loggedIn();
-		}
-
-		if (m_loginPerOperation == false)
-		{
-			m_loggedIn = true;
-		}
-
-		return true;
-	}
-
-	void TuningUserManager::logout()
-	{
-		m_loggedIn = false;
-
-		emit loggedOut();
-	}
-
-	void TuningUserManager::reLogin(QWidget* parent)
-	{
-		if (m_loggedIn == true)
-		{
-			if (requestPassword(parent) == true)
-			{
-				m_logoutSecsSinceEpoch = QDateTime::currentSecsSinceEpoch() + m_tuningSessionTimeout;
-			}
-		}
-	}
-
-	bool TuningUserManager::tuningLogin() const
-	{
-		return m_tuningLogin;
-	}
-
-	const QStringList& TuningUserManager::tuningUserAccounts() const
-	{
-		return m_tuningUserAccounts;
-	}
-
-	bool TuningUserManager::loginPerOperation() const
-	{
-		return m_loginPerOperation;
-	}
-
-	int TuningUserManager::tuningSessionTimeout() const
-	{
-		return m_tuningSessionTimeout;
-	}
-
-	bool TuningUserManager::isLoggedIn() const
-	{
-		if (m_tuningLogin == false)
-		{
-			return true;
-		}
-
-		return m_loggedIn;
-	}
-
-	QString TuningUserManager::loggedInUser() const
-	{
-		return m_loggedInUser;
-	}
-
-	int TuningUserManager::logoutPendingSeconds() const
-	{
-		return static_cast<int>(m_logoutSecsSinceEpoch - QDateTime::currentSecsSinceEpoch());
-	}
-
 	bool TuningUserManager::checkPassword(const QString& userName, const QString& password)
 	{
 		bool result = false;
@@ -124,95 +22,309 @@ namespace ClientLib
 #ifdef Q_OS_WIN
 			HANDLE phToken=NULL;
 
-			if (LogonUser(reinterpret_cast<LPCWSTR>(userName.data()),
-						  0,
-						  reinterpret_cast<LPCWSTR>(password.data()),
-						  LOGON32_LOGON_INTERACTIVE,
-						  LOGON32_PROVIDER_DEFAULT,
-						  &phToken) == TRUE)
-			{
-				result = true;
-			}
+		if (LogonUser(reinterpret_cast<LPCWSTR>(userName.data()),
+					  0,
+					  reinterpret_cast<LPCWSTR>(password.data()),
+					  LOGON32_LOGON_INTERACTIVE,
+					  LOGON32_PROVIDER_DEFAULT,
+					  &phToken) == TRUE)
+		{
+			result = true;
+		}
 
-			if (phToken != nullptr)
-			{
+		if (phToken != nullptr)
+		{
 				CloseHandle (phToken);
-			}
+		}
 #endif
 
 #ifdef Q_OS_LINUX
-			QString command = QString("echo %1 | /bin/su - %2 >/dev/null 2>/dev/null").arg(password).arg(userName);
-			result = system(command.toLocal8Bit()) == 0;
+		QString command = QString("echo %1 | /bin/su - %2 >/dev/null 2>/dev/null").arg(password).arg(userName);
+		result = system(command.toLocal8Bit()) == 0;
 #endif
 
 		return result;
 	}
 
-	bool TuningUserManager::askForPassword(QString* userName, QString* password, QWidget* parent)
+	void TuningUserManager::setConfiguration(bool enabled,
+											 const QStringList& tuningUserAccounts,
+											 bool loginPerOperation,
+											 int tuningSessionTimeout,
+											 const std::vector<OnlineLib::MatsUser>& matsUsers)
 	{
-		if (userName == nullptr || password == nullptr)
-		{
-			Q_ASSERT(userName);
-			Q_ASSERT(password);
-			return false;
-		}
-
-		ClientLib::DialogTuningPassword d(*this, parent);
-		if (d.exec() != QDialog::Accepted)
-		{
-			return false;
-		}
-
-		*userName = d.userName();
-		*password = d.password();
-
-		return true;
+		QMutexLocker l(&m_mutex);
+		m_config.enabled = enabled;
+		m_config.tuningUserAccounts = tuningUserAccounts;
+		m_config.loginPerOperation = loginPerOperation;
+		m_config.tuningSessionTimeout = tuningSessionTimeout;
+		m_config.matsUsers = matsUsers;
 	}
 
-	bool TuningUserManager::checkTuningAccess(QWidget* parent)
+	bool TuningUserManager::enabled() const
 	{
-		if (login(parent) == false)
-		{
-			return false;
-		}
-
-		return true;
+		QMutexLocker l(&m_mutex);
+		return m_config.enabled == true && m_config.tuningUserAccounts.empty() == false;
 	}
 
-	bool TuningUserManager::requestPassword(QWidget* parent)
+	const QStringList& TuningUserManager::tuningUserAccounts() const
 	{
-		if (m_tuningUserAccounts.empty() == true)
+		QMutexLocker l(&m_mutex);
+		return m_config.tuningUserAccounts;
+	}
+
+	bool TuningUserManager::loginPerOperation() const
+	{
+		QMutexLocker l(&m_mutex);
+		return m_config.loginPerOperation;
+	}
+
+	int TuningUserManager::tuningSessionTimeout() const
+	{
+		QMutexLocker l(&m_mutex);
+		return m_config.tuningSessionTimeout;
+	}
+
+	std::vector<OnlineLib::MatsUser> TuningUserManager::matsUsers() const
+	{
+		QMutexLocker l(&m_mutex);
+		return m_config.matsUsers;
+	}
+
+	bool TuningUserManager::login(QWidget* parent)
+	{
+		if (enabled() == false)
 		{
 			return true;
 		}
 
+		bool wasLoggedIn = false;
+
+		{
+			QMutexLocker l(&m_mutex);
+			wasLoggedIn = m_state.loggedIn;
+		}
+
+		if (wasLoggedIn == false)
+		{
+			// Ask the password
+			//
+			if (requestPassword(parent) == false)
+			{
+				return false;
+			}
+
+			emit loggedIn();
+		}
+
+		{
+			QMutexLocker l(&m_mutex);
+
+			// Refresh pending time
+			//
+			m_state.logoutSecsSinceEpoch = QDateTime::currentSecsSinceEpoch() + m_config.tuningSessionTimeout;
+
+			// Refresh tags
+			//
+			for (const OnlineLib::MatsUser& user : m_config.matsUsers)
+			{
+				if (user.login() == m_state.loggedInUser)
+				{
+					m_state.userTags.clear();
+					for (const QString& t : user.appSignalTags())
+					{
+						m_state.userTags.push_back(t);
+					}
+					break;
+				}
+			}
+
+			// Refresh status
+			//
+			if (m_config.loginPerOperation == false)
+			{
+				m_state.loggedIn = true;
+			}
+		}
+
+		return true;
+	}
+
+	bool TuningUserManager::login(const QString& userName, const QString& password)
+	{
+		if (enabled() == false)
+		{
+			return true;
+		}
+
+		bool wasLoggedIn = false;
+
+		{
+			QMutexLocker l(&m_mutex);
+			wasLoggedIn = m_state.loggedIn;
+		}
+
+		if (wasLoggedIn == false)
+		{
+			if (checkPassword(userName, password) == false)
+			{
+				return false;
+			}
+
+			emit loggedIn();
+		}
+
+		{
+			QMutexLocker l(&m_mutex);
+
+			m_state.loggedInUser = userName;
+			m_state.loggedInPassword = password;
+
+			// Refresh pending time
+			//
+			m_state.logoutSecsSinceEpoch = QDateTime::currentSecsSinceEpoch() + m_config.tuningSessionTimeout;
+
+			// Refresh tags
+			//
+			for (const OnlineLib::MatsUser& user : m_config.matsUsers)
+			{
+				if (user.login() == m_state.loggedInUser)
+				{
+					m_state.userTags.clear();
+					for (const QString& t : user.appSignalTags())
+					{
+						m_state.userTags.push_back(t);
+					}
+					break;
+				}
+			}
+
+			// Refresh status
+			//
+			if (m_config.loginPerOperation == false)
+			{
+				m_state.loggedIn = true;
+			}
+		}
+
+		return true;
+	}
+
+	void TuningUserManager::logout()
+	{
+		bool wasLoggedIn = false;
+
+		{
+			QMutexLocker l(&m_mutex);
+			wasLoggedIn = m_state.loggedIn;
+			m_state.loggedIn = false;
+			m_state.loggedInUser.clear();
+			m_state.loggedInPassword.clear();
+			m_state.userTags.clear();
+		}
+
+		if (wasLoggedIn == true)
+		{
+			emit loggedOut();
+		}
+	}
+
+	void TuningUserManager::reLogin(QWidget* parent)
+	{
+		if (enabled() == false)
+		{
+			return;
+		}
+
+		{
+			QMutexLocker l(&m_mutex);
+			if (m_state.loggedIn == false)
+			{
+				return;
+			}
+		}
+
+		// Re-request password
+		//
+		if (parent != nullptr && requestPassword(parent) == false)
+		{
+			return;
+		}
+
+		QMutexLocker l(&m_mutex);
+		m_state.logoutSecsSinceEpoch = QDateTime::currentSecsSinceEpoch() + m_config.tuningSessionTimeout;
+	}
+
+	bool TuningUserManager::isLoggedIn() const
+	{
+		QMutexLocker l(&m_mutex);
+		return m_state.loggedIn;
+	}
+
+	QString TuningUserManager::userName() const
+	{
+		QMutexLocker l(&m_mutex);
+		return m_state.loggedInUser;
+	}
+
+	QStringList TuningUserManager::userTags() const
+	{
+		QMutexLocker l(&m_mutex);
+		return m_state.userTags;
+	}
+
+	QString TuningUserManager::password() const
+	{
+		QMutexLocker l(&m_mutex);
+		return m_state.loggedInPassword;
+	}
+
+	int TuningUserManager::logoutPendingSeconds() const
+	{
+		QMutexLocker l(&m_mutex);
+		return static_cast<int>(m_state.logoutSecsSinceEpoch - QDateTime::currentSecsSinceEpoch());
+	}
+
+	bool TuningUserManager::requestPassword(QWidget* parent)
+	{
 		bool result = false;
+
+		{
+			QMutexLocker l(&m_mutex);
+			m_state.loggedInUser.clear();
+			m_state.loggedInPassword.clear();
+			m_state.userTags.clear();
+		}
 
 		for (int i = 0; i < 3; i++)
 		{
-			QString userName;
-			QString password;
-
-			result = askForPassword(&userName, &password, parent);
-
-			if (result == false)
+			ClientLib::DialogTuningPassword d(*this, parent);
+			if (d.exec() != QDialog::Accepted)
 			{
 				break;
 			}
+
+			QString userName = d.userName();
+			QString password = d.password();
 
 			result = checkPassword(userName, password);
 
 			if (result == false)
 			{
 				if (parent == nullptr)
-                {
+				{
 					break;
-                }
-				QMessageBox::critical(parent, qAppName(), QObject::tr("Wrong password!"));
+				}
+
+				if (i < 2)
+				{
+					QMessageBox::critical(parent, qAppName(), tr("Wrong password! Please try again."));
+				}
 			}
 			else
 			{
-				m_loggedInUser = userName;
+				QMutexLocker l(&m_mutex);
+				m_state.loggedInUser = userName;
+				m_state.loggedInPassword = password;
 				break;
 			}
 		}
@@ -271,6 +383,21 @@ namespace ClientLib
 
 		for (const QString& user : m_tuningUserManager.tuningUserAccounts())
 		{
+
+			bool userIsEnabled = true;
+			for (const auto& matsUser : m_tuningUserManager.matsUsers())
+			{
+				if (matsUser.login() == user)
+				{
+					userIsEnabled = matsUser.enabled();
+					break;
+				}
+			}
+			if (userIsEnabled == false)
+			{
+				continue;
+			}
+
 			m_userCombo->addItem(user, i);
 
 			if (user == m_lastUser)

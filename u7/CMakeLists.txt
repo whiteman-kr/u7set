@@ -44,8 +44,8 @@ set (U7_SOURCES
 	../lib/Ui/ClickableLabel.h
 	../lib/Ui/DialogAbout.cpp
 	../lib/Ui/DialogAbout.h
-	../lib/Ui/DialogChooseTags.cpp
-	../lib/Ui/DialogChooseTags.h
+	../lib/Ui/ChooseTagsWidget.cpp
+	../lib/Ui/ChooseTagsWidget.h
 	../lib/Ui/DialogProgress.cpp
 	../lib/Ui/DialogProgress.h
 	../lib/Ui/DialogSignalInfo.cpp
@@ -104,6 +104,8 @@ set (U7_SOURCES
 	DialogConnections.h
 	DialogFileEditor.cpp
 	DialogFileEditor.h
+	DialogMatsUsersEditor.cpp 
+	DialogMatsUsersEditor.h
 	DialogSettings.cpp
 	DialogSettings.h
 	DialogSettingsConfigurator.cpp
@@ -255,6 +257,8 @@ set (U7_SOURCES
 	SignalHistoryDialog.h
 	SignalPropertiesDialog.cpp
 	SignalPropertiesDialog.h
+	SignalsModels.cpp
+	SignalsModels.h
 	SignalsTabPage.cpp
 	SignalsTabPage.h
 	Simulator/ScriptSimApplication.cpp

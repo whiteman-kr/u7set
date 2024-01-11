@@ -8,6 +8,7 @@
 #include "../ClientLib/TuningConnection.h"
 #include "../TestSuiteLib/TestSuiteConfigController.h"
 #include "../ClientLib/IRecentAppSignals.h"
+#include "../lib/Tuning/ITuningAuthorization.h"
 
 class DialogDataSources : public QDialog
 {
@@ -46,12 +47,14 @@ private:
 	// --
 	//
 	TuningSignalManager m_emptySignals{QString(), m_logFile};
+	TuningAuthorizationStub m_authorization;
 	ClientLib::TuningLogStub m_tuningLogStub;
 
 	ClientLib::AdsSourceStateConnection m_tcpSignalClientCtrl{m_logFile};
 	ClientLib::TuningConnection m_tcpTuningCtrl{m_emptySignals,
 												m_emptySignals,
 												m_emptySignals,
+												m_authorization,
 												m_logFile,
 												&m_tuningLogStub};
 };

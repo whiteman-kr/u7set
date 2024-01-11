@@ -4,9 +4,12 @@
 #include "SignalsTabPage.h"
 #include "AppSignalSetProvider.h"
 
-UndoSignalsDialog::UndoSignalsDialog(SignalsModel* sourceModel, TableDataVisibilityController* columnManager, QWidget* parent) :
+UndoSignalsDialog::UndoSignalsDialog(const QModelIndexList& selectionSrcIndexes,
+									 SignalsModel* signalsModel,
+									 const TableDataVisibilityController& columnManager,
+									 QWidget* parent) :
 	QDialog(parent),
-	m_sourceModel(sourceModel)
+	m_signalsModel(signalsModel)
 {
 	setWindowTitle(tr("Undo signal changes"));
 
@@ -15,13 +18,22 @@ UndoSignalsDialog::UndoSignalsDialog(SignalsModel* sourceModel, TableDataVisibil
 	QVBoxLayout* vl = new QVBoxLayout;
 
 	QTableView* signalsView = new QTableView(this);
-	m_proxyModel = new CheckedoutSignalsModel(sourceModel, signalsView, this);
+	m_checkedOutModel = new CheckedOutSignalsModel(signalsModel, signalsView, this);
 
 	QCheckBox* selectAll = new QCheckBox(tr("Select all"), this);
-	connect(selectAll, &QCheckBox::toggled, m_proxyModel, &CheckedoutSignalsModel::setAllCheckStates);
+	connect(selectAll, &QCheckBox::toggled, m_checkedOutModel, &CheckedOutSignalsModel::setAllCheckStates);
 	vl->addWidget(selectAll);
 
-	signalsView->setModel(m_proxyModel);
+	if (selectionSrcIndexes.isEmpty() == false)
+	{
+		m_checkedOutModel->initCheckStates(selectionSrcIndexes);
+	}
+	else
+	{
+		selectAll->setChecked(true);
+	}
+
+	signalsView->setModel(m_checkedOutModel);
 	signalsView->verticalHeader()->setDefaultAlignment(Qt::AlignRight);
 	signalsView->setStyleSheet("QTableView::item:focus{background-color:darkcyan}");
 
@@ -29,17 +41,16 @@ UndoSignalsDialog::UndoSignalsDialog(SignalsModel* sourceModel, TableDataVisibil
 
 	const auto& propertyManager = *AppSignalPropertyManager::getInstance();
 
-	QSettings settings;
-	signalsView->setColumnWidth(0, columnManager->getColumnWidth(0) + 30);	// basic column width + checkbox size
+	signalsView->setColumnWidth(0, columnManager.getColumnWidth(0) + 30);	// basic column width + checkbox size
 
 	for (int i = 1; i < propertyManager.count(); i++)
 	{
-		bool visible = columnManager->getColumnVisibility(i);
+		bool visible = columnManager.getColumnVisibility(i);
 		signalsView->setColumnHidden(i, !visible);
 
 		if (visible)
 		{
-			signalsView->setColumnWidth(i, columnManager->getColumnWidth(i));
+			signalsView->setColumnWidth(i, columnManager.getColumnWidth(i));
 		}
 	}
 
@@ -57,14 +68,6 @@ UndoSignalsDialog::UndoSignalsDialog(SignalsModel* sourceModel, TableDataVisibil
 	setLayout(vl);
 }
 
-void UndoSignalsDialog::setCheckStates(QModelIndexList selection, bool fromSourceModel)
-{
-	if (!selection.isEmpty())
-	{
-		m_proxyModel->initCheckStates(selection, fromSourceModel);
-	}
-}
-
 void UndoSignalsDialog::saveDialogGeometry()
 {
 	saveWindowPosition(this, "UndoSignalsDialog");
@@ -78,22 +81,22 @@ void UndoSignalsDialog::undoSelected()
 
 	m_undoedSignalsIDs.clear();
 
-	for (int i = 0; i < m_proxyModel->rowCount(); i++)
+	for (int i = 0; i < m_checkedOutModel->rowCount(); i++)
 	{
-		QModelIndex proxyIndex = m_proxyModel->index(i, 0);
+		QModelIndex proxyIndex = m_checkedOutModel->index(i, 0);
 
-		if (m_proxyModel->data(proxyIndex, Qt::CheckStateRole) != Qt::Checked)
+		if (m_checkedOutModel->data(proxyIndex, Qt::CheckStateRole) != Qt::Checked)
 		{
 			continue;
 		}
-		int sourceRow = m_proxyModel->mapToSource(proxyIndex).row();
+		int sourceRow = m_checkedOutModel->mapToSource(proxyIndex).row();
 
 		m_undoedSignalsIDs.push_back(signalSetProvider->signalID(sourceRow));
 	}
 
 	if (m_undoedSignalsIDs.empty())
 	{
-		QMessageBox::warning(m_sourceModel->parentWindow(), tr("Warning"), tr("No one signal was selected!"));
+		QMessageBox::warning(m_signalsModel->parentWidget(), tr("Warning"), tr("No one signal was selected!"));
 		return;
 	}
 

@@ -24,7 +24,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	m_tuningLog(m_userManager, "TuningClientSignals", QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + softwareInfo.equipmentID()),
 	m_configController(softwareInfo, TuningClientAppSettings::instance().configuratorAddress1(), TuningClientAppSettings::instance().configuratorAddress2(), &m_logFile),
 	m_tuningSignalManager(softwareInfo.equipmentID(), &m_logFile),
-	m_tuningConnection{m_tuningSignalManager, m_tuningSignalManager, m_tuningSignalManager, &m_logFile, &m_tuningLog}
+	m_tuningConnection{m_tuningSignalManager, m_tuningSignalManager, m_tuningSignalManager, m_userManager, &m_logFile, &m_tuningLog}
 
 {
 	// Init translator
@@ -539,7 +539,7 @@ void MainWindow::createWorkspace()
 
 	// Create login workspace
 
-	if (m_userManager.tuningLogin() == true && m_userManager.loginPerOperation() == false && m_userManager.tuningUserAccounts().empty() == false)
+	if (m_userManager.enabled() == true && m_userManager.loginPerOperation() == false)
 	{
 		m_logonWidget->setVisible(true);
 	}
@@ -1020,9 +1020,10 @@ void MainWindow::slot_configurationArrived(TuningClientConfigSettings configurat
 	}
 
 	m_userManager.setConfiguration(configuration.clientSettings.tuningLogin,
-									configuration.clientSettings.getUsersAccounts(),
-									configuration.clientSettings.loginPerOperation,
-									configuration.clientSettings.tuningSessionTimeout);
+								   configuration.clientSettings.getUsersAccounts(),
+								   configuration.clientSettings.loginPerOperation,
+								   configuration.clientSettings.tuningSessionTimeout,
+								   configuration.matsUsers.users());
 
 	// --
 	//

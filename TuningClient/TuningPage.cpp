@@ -15,6 +15,43 @@
 #include <QInputDialog>
 #include <QFileDialog>
 
+
+TuningPageHelper::TuningPageHelper(const ClientLib::TuningUserManager& userManager):
+	m_userManager(userManager)
+{
+}
+
+bool TuningPageHelper::writingIsEnabled(const AppSignalParam& asp, const TuningSignalState& state) const
+{
+	bool controlEnabled = state.valid() == true && state.writingIsEnabled() == true;
+
+	if (m_userManager.enabled() == true && m_userManager.loginPerOperation() == false)
+	{
+		// User is logged in and is allowed to tune this signal
+		//
+		controlEnabled &= (m_userManager.isLoggedIn() == true);
+
+		if (controlEnabled == true)
+		{
+			bool tagFound = false;
+
+			std::set<QString> signalTags = asp.tags();
+			QStringList userTags = m_userManager.userTags();
+			for (const QString& t : userTags)
+			{
+				if (signalTags.contains(t) == true)
+				{
+					tagFound = true;
+					break;
+				}
+			}
+
+			controlEnabled &= tagFound;
+		}
+	}
+	return controlEnabled;
+}
+	
 class SelectionControlDelegate : public QStyledItemDelegate
 {
 public:
@@ -62,8 +99,10 @@ void SelectionControlDelegate::initStyleOption(QStyleOptionViewItem* option, con
 //
 // TuningItemModelMain
 //
-TuningModelClient::TuningModelClient(TuningSignalManager& tuningSignalManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent):
-	TuningModel(tuningSignalManager, valueColumnsAppSignalIdSuffixes, parent)
+TuningModelClient::TuningModelClient(TuningSignalManager& tuningSignalManager, const ClientLib::TuningUserManager& userManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent):
+	TuningModel(tuningSignalManager, valueColumnsAppSignalIdSuffixes, parent),
+	m_userManager(userManager),
+	m_helper(m_userManager)
 {
 }
 
@@ -379,7 +418,7 @@ Qt::ItemFlags TuningModelClient::flags(const QModelIndex& index) const
 		{
 			if (asp.isAnalog() == false)
 			{
-				if (state.writingIsEnabled() == false)
+				if (m_helper.writingIsEnabled(asp, state) == false)
 				{
 					f &= ~Qt::ItemIsEnabled;
 				}
@@ -390,7 +429,7 @@ Qt::ItemFlags TuningModelClient::flags(const QModelIndex& index) const
 			}
 			else
 			{
-				if (state.writingIsEnabled() == false)
+				if (m_helper.writingIsEnabled(asp, state) == false)
 				{
 					f &= ~Qt::ItemIsEnabled;
 				}
@@ -502,7 +541,7 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 		if (role == Qt::EditRole &&
 				state.valid() == true &&
 				state.controlIsEnabled() == true &&
-				state.writingIsEnabled() == true)
+				m_helper.writingIsEnabled(asp, state) == true)
 		{
 			ok = false;
 			double v = value.toDouble(&ok);
@@ -518,7 +557,7 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 		if (role == Qt::CheckStateRole &&
 				state.valid() == true &&
 				state.controlIsEnabled() == true &&
-				state.writingIsEnabled() == true)
+				m_helper.writingIsEnabled(asp, state) == true)
 		{
 			if ((Qt::CheckState)value.toInt() == Qt::Checked)
 			{
@@ -541,8 +580,9 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 // TuningTableView
 //
 
-TuningTableView::TuningTableView():
-	QTableView()
+TuningTableView::TuningTableView(const ClientLib::TuningUserManager& userManager):
+	QTableView(),
+	m_helper(userManager)
 {
 
 }
@@ -589,7 +629,7 @@ bool TuningTableView::edit(const QModelIndex&  index, EditTrigger trigger, QEven
 
 			TuningSignalState state = m_model->tuningSignalManager().queuedState(hash, &ok);
 
-			if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
+			if (state.valid() == false || state.controlIsEnabled() == false || m_helper.writingIsEnabled(asp, state) == false)
 			{
 				return false;
 			}
@@ -739,7 +779,8 @@ TuningPage::TuningPage(TuningConfigController& configController,
 	m_userManager(userManager),
 	m_tuningConnection(tuningConnection),
 	m_treeFilter(treeFilter),
-	m_pageFilter(pageFilter)
+	m_pageFilter(pageFilter),
+	m_helper(userManager)
 {
 	//qDebug() << "TuningPage::TuningPage m_instanceCounter = " << m_instanceCounter;
 
@@ -756,7 +797,7 @@ TuningPage::TuningPage(TuningConfigController& configController,
 
 	// Object List
 	//
-	m_objectList = new TuningTableView();
+	m_objectList = new TuningTableView(m_userManager);
 	m_objectList->setWordWrap(false);
 
 	// Models and data
@@ -784,7 +825,7 @@ TuningPage::TuningPage(TuningConfigController& configController,
 
 	std::vector<QString> valueColumnsAppSignalIdSuffixes = tabFilter->valueColumnsAppSignalIdSuffixes();
 
-	m_model = new TuningModelClient(m_tuningSignalManager, valueColumnsAppSignalIdSuffixes, this);
+	m_model = new TuningModelClient(m_tuningSignalManager, m_userManager, valueColumnsAppSignalIdSuffixes, this);
 	m_objectList->setItemDelegate(new SelectionControlDelegate(this, m_model));
 
 	QFont f = m_objectList->font();
@@ -1007,6 +1048,7 @@ TuningPage::TuningPage(TuningConfigController& configController,
 	//
 
 	connect(theApp.mainWindow(), &MainWindow::timerTick500, this, &TuningPage::onTimer);
+	connect(&m_userManager, &ClientLib::TuningUserManager::loggedOut, this, &TuningPage::slot_undo);
 
 }
 
@@ -1397,9 +1439,11 @@ bool TuningPage::write()
 
 		bool ok = false;
 
+		AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
+
 		TuningSignalState state = m_tuningSignalManager.queuedState(hash, &ok);
 
-		if (ok == false || state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
+		if (ok == false || state.valid() == false || state.controlIsEnabled() == false || m_helper.writingIsEnabled(asp, state) == false)
 		{
 			continue;
 		}
@@ -1539,9 +1583,11 @@ void TuningPage::apply()
 	{
 		bool ok = false;
 
+		AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
+		
 		TuningSignalState state = m_tuningSignalManager.queuedState(hash, &ok);
 
-		if (ok == false || state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
+		if (ok == false || state.valid() == false || state.controlIsEnabled() == false || m_helper.writingIsEnabled(asp, state) == false)
 		{
 			continue;
 		}
@@ -1657,7 +1703,7 @@ void TuningPage::slot_setValue()
 
 			TuningSignalState state = m_tuningSignalManager.queuedState(hash, &ok);
 
-			if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
+			if (state.valid() == false || state.controlIsEnabled() == false || m_helper.writingIsEnabled(asp, state) == false)
 			{
 				continue;
 			}
@@ -2199,7 +2245,7 @@ void TuningPage::invertValue()
 
 			TuningSignalState state = m_tuningSignalManager.queuedState(hash, &ok);
 
-			if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
+			if (state.valid() == false || state.controlIsEnabled() == false || m_helper.writingIsEnabled(asp, state) == false)
 			{
 				continue;
 			}
@@ -2355,7 +2401,9 @@ void TuningPage::restoreSignalsFromFilter(TuningFilter* filter)
 					continue;
 				}
 
-				if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
+				AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &found);
+
+				if (state.valid() == false || state.controlIsEnabled() == false || m_helper.writingIsEnabled(asp, state) == false)
 				{
 					continue;
 				}
@@ -2396,9 +2444,10 @@ void TuningPage::setActionButtonsState()
 
 	for (Hash hash : hashes)
 	{
+		AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
+
 		if (autoApply == false)
 		{
-			AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
 			sourceHashes.insert(::calcHash(asp.lmEquipmentId()));
 		}
 
@@ -2407,7 +2456,7 @@ void TuningPage::setActionButtonsState()
 		if (ok == false ||
 				state.valid() == false ||
 				state.controlIsEnabled() == false ||
-				state.writingIsEnabled() == false)
+				m_helper.writingIsEnabled(asp, state) == false)
 		{
 			continue;
 		}
@@ -2440,12 +2489,15 @@ void TuningPage::setActionButtonsState()
 				{
 					continue;
 				}
+				
+				AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
 
 				TuningSignalState state = m_tuningSignalManager.queuedState(hash, &ok);
+				
 				if (ok == true &&
 						state.valid() == true &&
 						state.controlIsEnabled() == true &&
-						state.writingIsEnabled() == true)
+						m_helper.writingIsEnabled(asp, state) == true)
 				{
 					setValueEnabled = true;
 					break;
@@ -2574,7 +2626,7 @@ void TuningPage::slot_setAll()
 
 			TuningSignalState state = m_tuningSignalManager.queuedState(hash, &ok);
 
-			if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
+			if (state.valid() == false || state.controlIsEnabled() == false || m_helper.writingIsEnabled(asp, state) == false)
 			{
 				continue;
 			}
@@ -2605,7 +2657,7 @@ void TuningPage::slot_setAll()
 
 			TuningSignalState state = m_tuningSignalManager.queuedState(hash, &ok);
 
-			if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
+			if (state.valid() == false || state.controlIsEnabled() == false || m_helper.writingIsEnabled(asp, state) == false)
 			{
 				continue;
 			}
@@ -2636,7 +2688,7 @@ void TuningPage::slot_setAll()
 
 			TuningSignalState state = m_tuningSignalManager.queuedState(hash, &ok);
 
-			if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
+			if (state.valid() == false || state.controlIsEnabled() == false || m_helper.writingIsEnabled(asp, state) == false)
 			{
 				continue;
 			}
@@ -2668,7 +2720,7 @@ void TuningPage::slot_setAll()
 
 			TuningSignalState state = m_tuningSignalManager.queuedState(hash, &ok);
 
-			if (state.valid() == false || state.controlIsEnabled() == false || state.writingIsEnabled() == false)
+			if (state.valid() == false || state.controlIsEnabled() == false || m_helper.writingIsEnabled(asp, state) == false)
 			{
 				continue;
 			}

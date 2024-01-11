@@ -222,6 +222,9 @@ namespace XmlElement
 	inline const QString TUNING_CHANNEL_TEMPLATE("Channel%1");
 	inline const QString CHANNEL_COUNT("ChannelCount");
 
+	inline const QString MATS_USERS("MatsUsers");
+	inline const QString MATS_USER("MatsUser");
+
 	inline const QString DATA_SOURCES("DataSources");
 	inline const QString DATA_SOURCE("DataSource");
 	inline const QString ASSOCIATED_SIGNALS("AssociatedSignals");
@@ -337,6 +340,12 @@ namespace XmlAttribute
 	inline const QString DATA_TYPE("DataType");
 	inline const QString SEND_EVENTS("SendEvents");
 	inline const QString INCLUDE_APP_SIGNAL_ID("IncludeAppSignalID");
+
+	inline const QString LOGIN("Login");
+	inline const QString ENABLED("Enabled");
+	inline const QString DESCRIPTION("Description");
+	inline const QString APP_SIGNAL_TAGS("AppSignalTags");
+	inline const QString MATS_USERS("MatsUsers");
 }
 
 namespace Latin1Char
@@ -365,6 +374,7 @@ namespace CfgFileId
 	inline const QString TUNING_GLOBALSCRIPT("TUNING_GLOBALSCRIPT");
 
 	inline const QString CLIENT_BEHAVIOR("CLIENT_BEHAVIOR");
+	inline const QString MATSUSERS("MATSUSERS_XML");
 	inline const QString LOGO("LOGO");
 
 	inline const QString METROLOGY_ITEMS("METROLOGY_ITEMS");
@@ -470,6 +480,7 @@ namespace File
 	inline const QString CONFIGURATION_XML("Configuration.xml");
 	inline const QString SOFTWARE_XML("Software.xml");
 	inline const QString SUBSYSTEMS_XML("Subsystems.xml");
+	inline const QString MATSUSERS_XML("MatsUsers.xml");
 
 	inline const QString METROLOGY_ITEMS_XML("MetrologyItems.xml");
 	inline const QString METROLOGY_SIGNAL_SET("MetrologySignal.set");

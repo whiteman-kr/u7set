@@ -66,7 +66,7 @@ void LogonWidget::onUserManagerLogin()
 	m_loginButton->setText(logoutString);
 
 	m_loginUserName->setStyleSheet("QLabel {background-color:blue; color: white;}");
-	m_loginUserName->setText(m_userManager.loggedInUser());
+	m_loginUserName->setText(m_userManager.userName());
 }
 
 void LogonWidget::onUserManagerLogout()

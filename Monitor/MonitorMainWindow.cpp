@@ -193,7 +193,7 @@ void MonitorMainWindow::timerEvent(QTimerEvent* event)
 			QTime logoutTime(0, 0, 0);
 			logoutTime = logoutTime.addSecs(s);
 
-			m_loginUserTimeoutAction->setText(m_tuningUserManager.loggedInUser() + "\n" + logoutTime.toString("hh:mm:ss"));
+			m_loginUserTimeoutAction->setText(m_tuningUserManager.userName() + "\n" + logoutTime.toString("hh:mm:ss"));
 
 			if (s <= 0)
 			{
@@ -287,7 +287,7 @@ void MonitorMainWindow::showTuningLoginControls()
 {
 	// Show/hide login controls
 	//
-	if (m_configController.configuration().tuningEnabled == true && m_tuningUserManager.tuningLogin() == true)
+	if (m_tuningUserManager.enabled() == true)
 	{
 		m_loginAction->setVisible(true);
 		m_loginUserTimeoutAction->setVisible(true);
@@ -403,8 +403,7 @@ void MonitorMainWindow::showLogo()
 	}
 
 	m_logoSeparator->setVisible(MonitorAppSettings::instance().showLogo() == true &&
-								m_configController.configuration().tuningEnabled == true &&
-								m_tuningUserManager.tuningLogin() == true);
+								m_tuningUserManager.enabled() == true);
 	return;
 }
 
@@ -1549,9 +1548,10 @@ void MonitorMainWindow::slot_configurationArrived(MonitorConfigSettings configur
 	// Refresh TuningUserManager configuration
 	//
 	m_tuningUserManager.setConfiguration(configuration.tuningLogin,
-                                         configuration.tuningUserAccounts,
-										 false/*loginPerOperation*/,
-										 configuration.tuningSessionTimeout);
+										 configuration.tuningUserAccounts,
+										 false /*loginPerOperation*/,
+										 configuration.tuningSessionTimeout,
+										 m_configController.configuration().matsUsers.users());
 
 	showTuningLoginControls();
 
@@ -1716,11 +1716,11 @@ void MonitorMainWindow::slot_loggedIn()
 {
 	m_loginAction->setIcon(QIcon(":/Images/Images/KeyOn.svg"));
 
-	m_LogFile.writeMessage(tr("Tuning logged in, username: %1.").arg(m_tuningUserManager.loggedInUser()));
+	m_LogFile.writeMessage(tr("Tuning logged in, username: %1.").arg(m_tuningUserManager.userName()));
 
 	if (m_tuningUserManager.tuningSessionTimeout() == 0)
 	{
-		m_loginUserTimeoutAction->setText(m_tuningUserManager.loggedInUser());
+		m_loginUserTimeoutAction->setText(m_tuningUserManager.userName());
 	}
 
 	m_loginUserTimeoutAction->setEnabled(true);

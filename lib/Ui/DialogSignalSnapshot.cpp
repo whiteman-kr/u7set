@@ -1,5 +1,5 @@
 #include "DialogSignalSnapshot.h"
-#include "../lib/Ui/DialogChooseTags.h"
+#include "../lib/Ui/ChooseTagsWidget.h"
 
 //
 // SnapshotExportPrint

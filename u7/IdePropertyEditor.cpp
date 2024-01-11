@@ -58,11 +58,25 @@ ExtWidgets::PropertyTextEditor* IdePropertyEditorHelper::createPropertyTextEdito
 			return new ExtWidgets::PropertyPlainTextEditor(parent);
 		}
 
-		DbTagsEditor* editor = new DbTagsEditor(dbController, parent);
+		DbTagsEditor* editor = DbTagsEditor::tagsEditor(dbController, parent);
 		return editor;
 	}
 
-	if (propertyPtr->isScript() == true)
+	if (propertyPtr->specificEditor() == E::PropertySpecificEditor::MatsUsers)
+	{
+		// This is MatsUsers
+		//
+		if (dbController == nullptr)
+		{
+			Q_ASSERT(dbController);
+			return new ExtWidgets::PropertyPlainTextEditor(parent);
+		}
+
+		DbTagsEditor* editor = DbTagsEditor::matsUsersEditor(dbController, parent);
+		return editor;
+	}
+
+    if (propertyPtr->isScript() == true)
 	{
 		// This is Script
 		//
@@ -88,7 +102,8 @@ bool IdePropertyEditorHelper::restorePropertyTextEditorSize(std::shared_ptr<Prop
 		return false;
 	}
 
-	if (propertyPtr->specificEditor() == E::PropertySpecificEditor::Tags)
+	if (propertyPtr->specificEditor() == E::PropertySpecificEditor::Tags || 
+        propertyPtr->specificEditor() == E::PropertySpecificEditor::MatsUsers)
 	{
 		// Resize depends on monitor size, DPI, resolution
 		//
@@ -113,7 +128,8 @@ bool IdePropertyEditorHelper::storePropertyTextEditorSize(std::shared_ptr<Proper
 		return false;
 	}
 
-	if (propertyPtr->specificEditor() == E::PropertySpecificEditor::Tags)
+	if (propertyPtr->specificEditor() == E::PropertySpecificEditor::Tags || 
+        propertyPtr->specificEditor() == E::PropertySpecificEditor::MatsUsers)
 	{
 		return true;	// Do not save Tags editor size
 	}

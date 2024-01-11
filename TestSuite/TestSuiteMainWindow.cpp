@@ -915,38 +915,16 @@ void TestSuiteMainWindow::on_m_run_clicked()
 	if (m_configuration.login == true)
 	{
 		ClientLib::TuningUserManager userManager;
-		userManager.setConfiguration(true, m_configuration.userAccounts, true, 120);
+		userManager.setConfiguration(true, m_configuration.userAccounts, true, 120, m_configuration.matsUsers.users());
 
-		bool loggedIn = false;
-
-		for (int i = 0; i < 3; i++)
-		{
-			ClientLib::DialogTuningPassword d(userManager, this);
-			if (d.exec() != QDialog::Accepted)
-			{
-				return;
-			}
-			userName = d.userName();
-			password = d.password();
-
-			TestSuite::TestSuiteUserManager checkPasswordUserManager(d.userName(), d.password());
-			checkPasswordUserManager.setConfiguration(true, m_configuration.userAccounts, true, 120);
-
-			if (checkPasswordUserManager.login(nullptr) == true)
-			{
-				loggedIn = true;
-				break;
-			}
-			if (i < 2)
-			{
-				QMessageBox::critical(this, qAppName(), tr("Wrong password! Please try again."));
-			}
-		}
-		if (loggedIn == false)
+		if (userManager.login(this) == false)
 		{
 			QMessageBox::critical(this, qAppName(), tr("Tests execution failed: authorization failed!"));
 			return;
 		}
+
+		userName = userManager.userName();
+		password = userManager.password();
 	}
 
 	// Create a list of tests user has selected to run

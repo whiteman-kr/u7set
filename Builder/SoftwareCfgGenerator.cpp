@@ -1198,6 +1198,54 @@ namespace Builder
 		return profile + "_" + m_software->equipmentIdTemplate().toLower() + "." + extention;
 	}
 
+	bool SoftwareCfgGenerator::writeMatsUsers(const QString& propertyName, bool tuningEnabled, const QStringList& tuningUserAccounts)
+	{
+		if (tuningEnabled == false)
+		{
+			return true;
+		}
+
+		Builder::DbMatsUserStorage storage;
+
+		QString errorCode;
+		if (storage.load(m_dbController, errorCode) == false)
+		{
+			m_log->errCMN0010(File::MATSUSERS_XML);
+			return false;
+		}
+
+		// Check if TuningUserAccounts exist in MATS users storage
+		//
+		for (const QString& user : tuningUserAccounts)
+		{
+			if (std::find_if(storage.users().begin(), storage.users().end(), [&user](const OnlineLib::MatsUser& matsUser)
+							 {
+								 return matsUser.login() == user;
+							 }) == storage.users().end())
+			{
+				m_log->errEQP6212(propertyName, user, m_software->equipmentIdTemplate());
+				return false;
+			}
+		}
+
+		// Save MATS users to XML
+		//
+		QByteArray data;
+		storage.saveToByteArray(data);
+
+		// Write file
+		//
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), File::MATSUSERS_XML, CfgFileId::MATSUSERS, "", data);
+		if (buildFile == nullptr)
+		{
+			m_log->errCMN0012(File::MATSUSERS_XML);
+			return false;
+		}
+
+		bool ok = m_cfgXml->addLinkToFile(buildFile);
+		return ok;
+	}
+
 	bool SoftwareCfgGenerator::saveScriptProperties(QString scriptProperty, QString fileName)
 	{
 		bool result = true;

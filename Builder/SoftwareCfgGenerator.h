@@ -91,6 +91,8 @@ namespace Builder
 
 		QString softwareCfgSubdir() const { return m_software->equipmentIdTemplate(); }
 
+		bool writeMatsUsers(const QString& propertyName, bool tuningEnabled, const QStringList& tuningUserAccounts);
+
 		template <typename TYPE>
 		TYPE getObjectProperty(QString strId, QString property, bool* ok)
 		{

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "DiagnosticsSchemaManager.h"
-#include "MonitorSignalManager.h"
+//#include "MonitorSignalManager.h"
 #include "../VFrame30/ClientSchemaWidget.h"
 // -- #include "../VFrame30/AppSignalController.h"
 #include "../lib/ITimeStats.h"

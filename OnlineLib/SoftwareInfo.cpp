@@ -33,7 +33,7 @@ void SoftwareInfo::init(E::SoftwareType softwareType,
 
 
 #ifdef Q_OS_LINUX
-	m_userName = getenv("USER");
+	m_osUsername = getenv("USER");
 #endif
 
 #ifdef Q_OS_WIN
@@ -52,7 +52,7 @@ void SoftwareInfo::init(E::SoftwareType softwareType,
 
 	if (err == 0)
 	{
-		m_userName = QString::fromWCharArray(buf, -1);
+		m_osUsername = QString::fromWCharArray(buf, -1);
 	}
 
 	if (buf != nullptr)
@@ -74,7 +74,7 @@ void SoftwareInfo::clear()
 	m_commitNo = 0;
 	m_buildBranch.clear();
 	m_commitSHA.clear();
-	m_userName.clear();
+	m_osUsername.clear();
 	m_buildNo = UNDEFINED_BUILD_NO;
 	m_crc = 0;
 }
@@ -102,7 +102,7 @@ void SoftwareInfo::serializeTo(Network::SoftwareInfo* info) const
 	info->set_commitno(m_commitNo);
 	info->set_buildbranch(m_buildBranch.toStdString());
 	info->set_commitsha(m_commitSHA.toStdString());
-	info->set_username(m_userName.toStdString());
+	info->set_username(m_osUsername.toStdString());
 	info->set_buildno(m_buildNo);
 	info->set_crc(m_crc);
 	info->set_hostname(m_hostname.toStdString());
@@ -117,7 +117,7 @@ void SoftwareInfo::serializeFrom(const Network::SoftwareInfo& info)
 	m_commitNo = info.commitno();
 	m_buildBranch = QString::fromStdString(info.buildbranch());
 	m_commitSHA = QString::fromStdString(info.commitsha());
-	m_userName = QString::fromStdString(info.username());
+	m_osUsername = QString::fromStdString(info.username());
 	m_buildNo = info.buildno();
 	m_crc = info.crc();
 	m_hostname = QString::fromStdString(info.hostname());

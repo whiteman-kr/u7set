@@ -10,6 +10,7 @@
 #include "../OnlineLib/SoftwareSettings.h"
 #include "TuningSourceState.h"
 #include "ITuningLog.h"
+#include "../lib/Tuning/ITuningAuthorization.h"
 
 //
 //		  OnConnection
@@ -138,6 +139,7 @@ namespace ClientLib
 						const SoftwareEndpoint::TuningService& tunsInfo,
 						ITuningSignalUpdater& signalUpdater,
 						IRecentAppSignals& recentTuningSignals,
+						ITuningAuthorization& tuningAuthorization,
 						ILogFile* log,
 						ITuningLog* tuningLog);
 
@@ -271,6 +273,8 @@ namespace ClientLib
 
 		ITuningSignalUpdater& m_signalUpdater;
 		IRecentAppSignals& m_recentTuningSignals;
+		
+		ITuningAuthorization& m_tuningAuthorization;
 
 		// Write processing
 		//
