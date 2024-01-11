@@ -20,6 +20,7 @@
 #include "OptoModule.h"
 #include "SignalSet.h"
 #include "SubsystemStorage.h"
+#include "DbMatsUsers.h"
 
 namespace Builder
 {
@@ -95,6 +96,8 @@ namespace Builder
 		std::unordered_set<QString> m_analogSignalsOnSchemas;
 
 		std::map<QString, std::list<LmPackedLogicSources>> m_packedLogicSources;	// Key is label of packed_*_out schema item => list of LmPacketLogicSources
+
+		DbMatsUserStorage m_matsUsers;
 	};
 
 } // namespace Builder

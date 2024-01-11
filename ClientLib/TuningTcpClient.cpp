@@ -23,6 +23,7 @@ namespace ClientLib
 									 const SoftwareEndpoint::TuningService& tunsInfo,
 									 ITuningSignalUpdater& signalUpdater,
 									 IRecentAppSignals& recentTuningSignals,
+									 ITuningAuthorization& tuningAuthorization,
 									 ILogFile* log,
 									 ITuningLog* tuningLog) :
 		Tcp::Client(softwareInfo,
@@ -34,7 +35,8 @@ namespace ClientLib
 		m_tuningLog(tuningLog),
 		m_tuningServiceHash(::calcHash(tunsInfo.equipmentId)),
 		m_signalUpdater(signalUpdater),
-		m_recentTuningSignals(recentTuningSignals)
+		m_recentTuningSignals(recentTuningSignals),
+		m_tuningAuthorization(tuningAuthorization)
 	{
 		setObjectName("TuningTcpClient " + tunsInfo.shortenId);
 
@@ -1031,6 +1033,7 @@ namespace ClientLib
 		//
 		m_writeTuningSignals.Clear();
 
+		m_writeTuningSignals.set_matsuser(m_tuningAuthorization.userName().toStdString());
 		m_writeTuningSignals.set_autoapply(m_autoApply);
 		m_writeTuningSignals.mutable_commands()->Reserve(static_cast<int>(writeQueue.size()));
 

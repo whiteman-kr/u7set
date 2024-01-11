@@ -127,7 +127,7 @@ namespace VFrame30
 
 	bool TuningController::writeValue(QString appSignalId, QVariant value)
 	{
-		if (m_tuningAuthorization.checkTuningAccess(m_parent) == false)
+		if (m_tuningAuthorization.login(m_parent) == false)
 		{
 			return false;
 		}
@@ -150,20 +150,40 @@ namespace VFrame30
 		return writeValue(appSignalId, value);
 	}
 
-	void TuningController::apply()
+	bool TuningController::apply()
 	{
-		if (m_tuningAuthorization.checkTuningAccess(m_parent) == false)
+		if (m_tuningAuthorization.login(m_parent) == false)
 		{
-			return;	// Access is denied, this is not an error
+			return false;
 		}
 
 		m_tuningConnection.applyTuningSignals();
 
-		return;
+		return true;
+	}
+
+	bool TuningController::tuningLogin() const
+	{
+		return m_tuningAuthorization.enabled();
 	}
 
 	bool TuningController::isLoggedIn() const
 	{
-		return m_tuningAuthorization.isLoggedIn();
+		if (m_tuningAuthorization.enabled() == true)
+		{
+			return m_tuningAuthorization.isLoggedIn();
+		}
+
+		return true;
+	}
+
+	QString TuningController::userName() const
+	{
+		return m_tuningAuthorization.userName();
+	}
+
+	QStringList TuningController::userTags() const
+	{
+		return m_tuningAuthorization.userTags();
 	}
 }

@@ -5,6 +5,7 @@
 #include <QComboBox>
 #include <QLineEdit>
 #include "../lib/Tuning/ITuningAuthorization.h"
+#include "../OnlineLib/MatsUsers.h"
 
 #ifdef Q_OS_LINUX
 #include <security/pam_appl.h>
@@ -21,57 +22,74 @@ namespace ClientLib
 	public:
 		TuningUserManager() = default;
 
-		// Operations
-		//
-		void setConfiguration(bool tuningLogin, const QStringList& tuningUserAccounts, bool loginPerOperation, int tuningSessionTimeout);
+	public:
+		static bool checkPassword(const QString& userName, const QString& password);
 
-		bool login(QWidget* parent);
-		void logout();
-		void reLogin(QWidget* parent);
+		void setConfiguration(bool enabled,
+							  const QStringList& tuningUserAccounts,
+							  bool loginPerOperation,
+							  int tuningSessionTimeout,
+							  const std::vector<OnlineLib::MatsUser>& matsUsers);
 
 		// Properties
 		//
-		bool tuningLogin() const;
+		bool enabled() const override;
 		const QStringList& tuningUserAccounts() const;
 		bool loginPerOperation() const;
 		int tuningSessionTimeout() const;
+		std::vector<OnlineLib::MatsUser> matsUsers() const;
+
+		// Operations
+		//
+		bool login(QWidget* parent) override;
+		bool login(const QString& userName, const QString& password);
+		void logout();
+		void reLogin(QWidget* parent);
 
 		// State
 		//
 		bool isLoggedIn() const override;
-		QString loggedInUser() const;
-
+		
+		QString userName() const override;
+		QStringList userTags() const override;
+		
+		QString password() const;
 		int logoutPendingSeconds() const;
 
 	signals:
 		void loggedIn();
 		void loggedOut();
 
-	protected:
-		virtual bool askForPassword(QString* userName, QString* password, QWidget* parent);
-		virtual bool checkPassword(const QString& userName, const QString& password);
-
-		// ITuningAuthorization imlementation
-		//
-		bool checkTuningAccess(QWidget* parent) override;
-
 	private:
 		bool requestPassword(QWidget* parent);
 
+	public:
+		struct Config
+		{
+			bool enabled = false;
+			
+			QStringList tuningUserAccounts;
+			bool loginPerOperation = false;
+			int tuningSessionTimeout = 120;
+			
+			std::vector<OnlineLib::MatsUser> matsUsers;
+		};
+
+		struct State
+		{
+			bool loggedIn = false;
+			
+			QString loggedInUser;
+			QString loggedInPassword;
+			
+			QStringList userTags;
+			qint64 logoutSecsSinceEpoch = 0;
+		};
+
 	private:
-		bool m_tuningLogin = false;
-		QStringList m_tuningUserAccounts;
-		int m_tuningSessionTimeout = 120;
-		bool m_loginPerOperation = false;
-
-		bool m_loggedIn = false;
-		QString m_loggedInUser;
-
-		qint64 m_logoutSecsSinceEpoch = 0;
-
-#ifdef Q_OS_LINUX
-		QString conversePassword;
-#endif
+		mutable QMutex m_mutex;
+		Config m_config;
+		State m_state;
 	};
 
 	//

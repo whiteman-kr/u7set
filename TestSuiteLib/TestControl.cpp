@@ -77,10 +77,7 @@ namespace TestSuite
 				throw 1;
 			}
 
-			TestSuiteUserManager userManager(m_controlParams.userName, m_controlParams.password);
-			userManager.setConfiguration(true, m_configuration.userAccounts, true, 120);
-
-			if (userManager.login(nullptr) == false)
+			if (ClientLib::TuningUserManager::checkPassword(m_controlParams.userName, m_controlParams.password) == false)
 			{
 				m_appLog.writeError(tr("Tests execution failed: authorization failed!"));
 				throw 1;

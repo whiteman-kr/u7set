@@ -17,6 +17,8 @@ qt_add_library(${TARGET} STATIC
 	CfgServerLoader.h
 	CircularLogger.cpp
 	CircularLogger.h
+	MatsUsers.cpp
+	MatsUsers.h
 	SocketIO.cpp
 	SocketIO.h
 	SoftwareInfo.cpp

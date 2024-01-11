@@ -544,7 +544,8 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 	m_signal(signal),
 	m_appSignalManager(appSignalManager),
 	m_signalDataServer(signalDataServer),	// it can be nullptr
-	m_appDataServices(appDataServices),		// it can be emptu
+	m_appDataServices(appDataServices),		// it can be emptu,
+	m_tuningAuthorization(tuningAuthorization),
 	m_tuningController(tuningSignalManager, tuningConnection, tuningAuthorization, this),
 	m_tuningEnabled(tuningEnabled)
 {
@@ -2034,6 +2035,31 @@ void DialogSignalInfo::updateTuningSignalState()
 	bool controlEnabled = tuningSignalState.valid() == true &&
 						  tuningSignalState.controlIsEnabled() == true;// &&
 						  //tuningSignalState.writingIsEnabled() == true;	// This flag is not always used! ???
+	
+	if (m_tuningAuthorization.enabled() == true)
+	{
+		// User is logged in and is allowed to tune this signal
+		//
+		controlEnabled &= (m_tuningAuthorization.isLoggedIn() == true);
+
+		if (controlEnabled == true)
+		{
+			bool tagFound = false;
+
+			std::set<QString> signalTags = m_signal.tags();
+			QStringList userTags = m_tuningAuthorization.userTags();
+			for (const QString& t : userTags)
+			{
+				if (signalTags.contains(t) == true)
+				{
+					tagFound = true;
+					break;
+				}
+			}
+
+			controlEnabled &= tagFound;
+		}
+	}
 
 	if (ui->pushButtonSetOne->isEnabled() != controlEnabled)
 	{

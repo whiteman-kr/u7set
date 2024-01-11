@@ -217,7 +217,7 @@ bool DialogSubsystemListEditor::saveChanges()
                 strId == "build.xml"
                 )
         {
-            QMessageBox::warning(this, "Subsystem List Editor", tr("Subsystem ID '%2' is a reserved word!").arg(strId));
+            QMessageBox::warning(this, "Subsystem List Editor", tr("Subsystem ID '%1' is a reserved word!").arg(strId));
             return false;
         }
 
@@ -228,7 +228,7 @@ bool DialogSubsystemListEditor::saveChanges()
 
             if (subsystemPtr->subsystemId() == strId)
             {
-                QMessageBox::warning(this, "Subsystem List Editor", tr("Subsystem ID '%2' already exists!").arg(strId));
+                QMessageBox::warning(this, "Subsystem List Editor", tr("Subsystem ID '%1' already exists!").arg(strId));
                 return false;
             }
 

@@ -24,6 +24,7 @@
 #include "GlobalMessanger.h"
 #include "ProjectsTabPage.h"
 #include "Reports/DialogSchemasReport.h"
+#include "DialogMatsUsersEditor.h"
 #include "Reports/SchemasReport.h"
 #include "Settings.h"
 #include "SignalsTabPage.h"
@@ -31,7 +32,6 @@
 #include "TestsTabPage.h"
 #include "UploadTabPage.h"
 #include "UserManagementDialog.h"
-
 
 MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	QMainWindow{parent},
@@ -401,6 +401,11 @@ void MainWindow::createActions()
 	m_tagsEditorAction->setEnabled(false);
 	connect(m_tagsEditorAction, &QAction::triggered, this, &MainWindow::runTagsEditor);
 
+	m_matsUsersEditorAction = new QAction(tr("MATS Users Editor..."), this);
+	m_matsUsersEditorAction->setStatusTip(tr("Run MATS Users Editor"));
+	m_matsUsersEditorAction->setEnabled(false);
+	connect(m_matsUsersEditorAction, &QAction::triggered, this, &MainWindow::runMatsUserEditor);
+
 	m_simProfilesEditorAction = new QAction(tr("Simulator Profiles Editor..."), this);
 	m_simProfilesEditorAction->setStatusTip(tr("Run Simulator Profiles Editor"));
 	m_simProfilesEditorAction->setEnabled(false);
@@ -552,6 +557,7 @@ void MainWindow::createMenus()
 	pToolsMenu->addAction(m_connectionsEditorAction);
 	pToolsMenu->addAction(m_busEditorAction);
 	pToolsMenu->addAction(m_tagsEditorAction);
+	pToolsMenu->addAction(m_matsUsersEditorAction);
 	pToolsMenu->addAction(m_simProfilesEditorAction);
 
 	pToolsMenu->addSeparator();
@@ -859,6 +865,17 @@ void MainWindow::runSimulationProfilesEditor()
 	}
 
 	SimProfileEditor::run(dbController(), this);
+}
+
+void MainWindow::runMatsUserEditor()
+{
+	if (dbController()->isProjectOpened() == false)
+	{
+		return;
+	}
+
+	DialogMatsUsersEditor d(dbController(), this);
+	d.exec();
 }
 
 void MainWindow::updateUfbsAfbsBusses()
@@ -1348,6 +1365,7 @@ void MainWindow::projectOpened(DbProject project)
     m_connectionsEditorAction->setEnabled(true);
 	m_busEditorAction->setEnabled(true);
 	m_tagsEditorAction->setEnabled(true);
+	m_matsUsersEditorAction->setEnabled(true);
 	m_simProfilesEditorAction->setEnabled(true);
 	m_updateUfbsAfbs->setEnabled(true);
 	m_AfbLibraryCheck->setEnabled(true);
@@ -1381,6 +1399,7 @@ void MainWindow::projectClosed()
     m_connectionsEditorAction->setEnabled(false);
 	m_busEditorAction->setEnabled(false);
 	m_tagsEditorAction->setEnabled(false);
+	m_matsUsersEditorAction->setEnabled(false);
 	m_simProfilesEditorAction->setEnabled(false);
 	m_updateUfbsAfbs->setEnabled(false);
 	m_AfbLibraryCheck->setEnabled(false);
