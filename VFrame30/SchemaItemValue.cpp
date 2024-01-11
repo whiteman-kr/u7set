@@ -1,11 +1,12 @@
 #include "SchemaItemValue.h"
-#include "../AppSignalLib/TuningSignalState.h"
 #include "AppSignalController.h"
 #include "DrawParam.h"
 #include "MacrosExpander.h"
 #include "PropertyNames.h"
 #include "SchemaView.h"
 #include "TuningController.h"
+
+#include "../AppSignalLib/TuningSignalState.h"
 
 
 namespace VFrame30
@@ -208,7 +209,7 @@ namespace VFrame30
 		//
 		drawText(drawParam, context.get(), r);
 
-		// Remove brush to draw non-filled rects
+		// Remove brush to draw non-filled rectangle
 		//
 		painter->setBrush(Qt::NoBrush);
 
@@ -280,44 +281,45 @@ namespace VFrame30
 		QPainter* painter = drawParam->painter();
 		QString text;
 
-		if (drawParam->drawMode() == DrawMode::Editor)
+		if (m_text.contains(QLatin1String("$(")) == true)
 		{
-			text = m_text;
+			// m_text contains some variables, which need to be parsed
+			//
+
+			// Get signal description and state
+			//
+			AppSignalParam signalParam;
+			AppSignalState signalState;
+			TuningSignalState tuningSignalState;
+
+			QString signalId;
+
+			if (auto signalIdList = signalIds(context);
+				signalIdList.empty() == false)
+			{
+				signalId = signalIdList.front();
+
+				signalParam.setAppSignalId(signalId);
+				signalParam.setCustomSignalId(signalId);
+			}
+
+			bool ok = getSignalState(signalId, context, &signalParam, &signalState, &tuningSignalState);
+			if (ok == false)
+			{
+				// Display signalId in case of error.
+				//
+				signalParam.setAppSignalId(signalId);
+				signalParam.setCustomSignalId(signalId);
+				signalParam.setCaption(signalId);
+			}
+
+			text = parseText(m_text, context, drawParam->session(), signalParam, signalState);
 		}
 		else
 		{
-			if (m_text.contains(QLatin1String("$(")) == true)
-			{
-				// m_text contains some variables, which need to be parsed
-				//
-
-				// Get signal description and state
-				//
-				AppSignalParam signalParam;
-				AppSignalState signalState;
-				TuningSignalState tuningSignalState;
-
-				QString signalId;
-
-				if (auto signalIdList = signalIds(context);
-					signalIdList.empty() == false)
-				{
-					signalId = signalIdList.front();
-
-					signalParam.setAppSignalId(signalId);
-					signalParam.setCustomSignalId(signalId);
-				}
-
-				getSignalState(signalId, context, &signalParam, &signalState, &tuningSignalState);
-
-				text = parseText(m_text, context, drawParam->session(), signalParam, signalState);
-			}
-			else
-			{
-				// Most likely text was set in PreDrawScript, or it is just text
-				//
-				text = m_text;
-			}
+			// Most likely text was set in PreDrawScript, or it is just text
+			//
+			text = m_text;
 		}
 
 		if (text.isEmpty() == true)
@@ -563,7 +565,7 @@ namespace VFrame30
 	{
 		return signalIds();
 	}
-	
+
 	QStringList SchemaItemValue::associatedImpactAppSignalIds() const
 	{
 		return {};
@@ -735,7 +737,7 @@ namespace VFrame30
 		m_textColor = color;
 	}
 
-	// Align propertis
+	// Align properties
 	//
 	E::HorzAlign SchemaItemValue::horzAlign() const
 	{

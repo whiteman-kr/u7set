@@ -32,10 +32,10 @@ namespace VFrame30
 
 		// Add tags for scripting
 		//
-		addTag("ufb");
+		addTag("afb");
 		addTag(fblElement.caption());
 
-		// Create input output signals in VFrame30::FblEtem
+		// Create input output signals in VFrame30::FblItem
 		//
 		updateAfbElement(fblElement, errorMsg);
 

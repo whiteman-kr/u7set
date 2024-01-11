@@ -16,7 +16,10 @@ class TableDataVisibilityController : public QObject
 {
 	Q_OBJECT
 public:
-	TableDataVisibilityController(QTableView* parent, const QString& settingsBranchName, const QVector<int>& defaultVisibleColumnSet, bool showAllDefaultColumns = false);
+	TableDataVisibilityController(QTableView* parent,
+								  const QString& settingsBranchName,
+								  const QVector<int>& defaultVisibleColumnSet,
+								  bool showAllDefaultColumns = false);
 	virtual ~TableDataVisibilityController();
 
 	void editColumnsVisibilityAndOrder();
@@ -24,9 +27,9 @@ public:
 	void saveColumnVisibility(int index, bool visible);
 	void saveColumnPosition(int index, int position);
 
-	bool getColumnVisibility(int index);
-	int getColumnPosition(int index);
-	int getColumnWidth(int index);
+	bool getColumnVisibility(int index) const;
+	int getColumnPosition(int index) const;
+	int getColumnWidth(int index) const;
 
 	void showColumn(int index, bool visible = true);
 	void relocateAllColumns();
@@ -35,6 +38,9 @@ public slots:
 	void saveColumnWidth(int index);
 	void saveAllHeaderGeomery();
 	void checkNewColumns();
+
+private:
+	QString escape(const QString& colName) const;
 
 private:
 	QTableView* m_tableView = nullptr;
