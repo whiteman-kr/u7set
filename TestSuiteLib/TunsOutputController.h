@@ -21,8 +21,10 @@ namespace TestSuite
 
 	private:
 		bool enabled() const  override { return false; }
+		
 		bool login(QWidget* parent) { return true; }
 		bool isLoggedIn() const { return true; }
+		
 		QString userName() const override { return m_userName; }
 		QStringList userTags() const override { return {}; }
 

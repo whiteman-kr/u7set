@@ -25,7 +25,7 @@ bool TuningPageHelper::writingIsEnabled(const AppSignalParam& asp, const TuningS
 {
 	bool controlEnabled = state.valid() == true && state.writingIsEnabled() == true;
 
-	if (m_userManager.enabled() == true)
+	if (m_userManager.enabled() == true && m_userManager.loginPerOperation() == false)
 	{
 		// User is logged in and is allowed to tune this signal
 		//

@@ -275,7 +275,7 @@ void MonitorMainWindow::showTuningLoginControls()
 {
 	// Show/hide login controls
 	//
-	if (m_configController.configuration().tuningEnabled == true && m_tuningUserManager.enabled() == true)
+	if (m_tuningUserManager.enabled() == true)
 	{
 		m_loginAction->setVisible(true);
 		m_loginUserTimeoutAction->setVisible(true);
@@ -391,7 +391,6 @@ void MonitorMainWindow::showLogo()
 	}
 
 	m_logoSeparator->setVisible(MonitorAppSettings::instance().showLogo() == true &&
-								m_configController.configuration().tuningEnabled == true &&
 								m_tuningUserManager.enabled() == true);
 	return;
 }

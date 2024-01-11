@@ -1,12 +1,12 @@
 #ifndef CLIENT_LIB_DOMAIN
-#error Do not include this file in the project! Link ClientLib instead.
+	#error Do not include this file in the project! Link ClientLib instead.
 #endif
 
 #include "TuningUserManager.h"
 
 #ifdef Q_OS_WIN
 #include <windows.h>
-#include <lm.h>
+	#include <lm.h>
 #endif
 
 namespace ClientLib
@@ -22,25 +22,25 @@ namespace ClientLib
 #ifdef Q_OS_WIN
 			HANDLE phToken=NULL;
 
-			if (LogonUser(reinterpret_cast<LPCWSTR>(userName.data()),
-						  0,
-						  reinterpret_cast<LPCWSTR>(password.data()),
-						  LOGON32_LOGON_INTERACTIVE,
-						  LOGON32_PROVIDER_DEFAULT,
-						  &phToken) == TRUE)
-			{
-				result = true;
-			}
+		if (LogonUser(reinterpret_cast<LPCWSTR>(userName.data()),
+					  0,
+					  reinterpret_cast<LPCWSTR>(password.data()),
+					  LOGON32_LOGON_INTERACTIVE,
+					  LOGON32_PROVIDER_DEFAULT,
+					  &phToken) == TRUE)
+		{
+			result = true;
+		}
 
-			if (phToken != nullptr)
-			{
+		if (phToken != nullptr)
+		{
 				CloseHandle (phToken);
-			}
+		}
 #endif
 
 #ifdef Q_OS_LINUX
-			QString command = QString("echo %1 | /bin/su - %2 >/dev/null 2>/dev/null").arg(password).arg(userName);
-			result = system(command.toLocal8Bit()) == 0;
+		QString command = QString("echo %1 | /bin/su - %2 >/dev/null 2>/dev/null").arg(password).arg(userName);
+		result = system(command.toLocal8Bit()) == 0;
 #endif
 
 		return result;
@@ -118,7 +118,7 @@ namespace ClientLib
 
 		{
 			QMutexLocker l(&m_mutex);
-		
+
 			// Refresh pending time
 			//
 			m_state.logoutSecsSinceEpoch = QDateTime::currentSecsSinceEpoch() + m_config.tuningSessionTimeout;
@@ -211,50 +211,51 @@ namespace ClientLib
 
 	void TuningUserManager::logout()
 	{
+		bool wasLoggedIn = false;
+
 		{
 			QMutexLocker l(&m_mutex);
+			wasLoggedIn = m_state.loggedIn;
 			m_state.loggedIn = false;
 			m_state.loggedInUser.clear();
 			m_state.loggedInPassword.clear();
 			m_state.userTags.clear();
 		}
 
-		emit loggedOut();
+		if (wasLoggedIn == true)
+		{
+			emit loggedOut();
+		}
 	}
 
 	void TuningUserManager::reLogin(QWidget* parent)
 	{
-		bool wasLoggedIn = false;
+		if (enabled() == false)
 		{
-			QMutexLocker l(&m_mutex);
-			wasLoggedIn = m_state.loggedIn;
+			return;
 		}
 
-		if (wasLoggedIn == true)
 		{
-			if (parent == nullptr)
+			QMutexLocker l(&m_mutex);
+			if (m_state.loggedIn == false)
 			{
-				QMutexLocker l(&m_mutex);
-				m_state.logoutSecsSinceEpoch = QDateTime::currentSecsSinceEpoch() + m_config.tuningSessionTimeout;
-			}
-			else
-			{
-				if (requestPassword(parent) == true)
-				{
-					QMutexLocker l(&m_mutex);
-					m_state.logoutSecsSinceEpoch = QDateTime::currentSecsSinceEpoch() + m_config.tuningSessionTimeout;
-				}
+				return;
 			}
 		}
+
+		// Re-request password
+		//
+		if (parent != nullptr && requestPassword(parent) == false)
+		{
+			return;
+		}
+
+		QMutexLocker l(&m_mutex);
+		m_state.logoutSecsSinceEpoch = QDateTime::currentSecsSinceEpoch() + m_config.tuningSessionTimeout;
 	}
 
 	bool TuningUserManager::isLoggedIn() const
 	{
-		if (enabled() == false)
-		{
-			return true;
-		}
-
 		QMutexLocker l(&m_mutex);
 		return m_state.loggedIn;
 	}
@@ -285,11 +286,6 @@ namespace ClientLib
 
 	bool TuningUserManager::requestPassword(QWidget* parent)
 	{
-		if (enabled() == false)
-		{
-			return true;
-		}
-
 		bool result = false;
 
 		{
@@ -315,9 +311,9 @@ namespace ClientLib
 			if (result == false)
 			{
 				if (parent == nullptr)
-                {
+				{
 					break;
-                }
+				}
 
 				if (i < 2)
 				{

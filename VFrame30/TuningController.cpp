@@ -169,7 +169,12 @@ namespace VFrame30
 
 	bool TuningController::isLoggedIn() const
 	{
-		return m_tuningAuthorization.isLoggedIn();
+		if (m_tuningAuthorization.enabled() == true)
+		{
+			return m_tuningAuthorization.isLoggedIn();
+		}
+
+		return true;
 	}
 
 	QString TuningController::userName() const
