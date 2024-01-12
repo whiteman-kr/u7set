@@ -91,10 +91,16 @@ int ServiceStarter::exec()
 
 int ServiceStarter::privateRun()
 {
-	QString swInfo = m_serviceWorker.getSoftwareInfoStr();
+	QStringList swInfo = m_serviceWorker.getSoftwareInfo();
 
+	DEBUG_LOG_MSG(m_logger, QString());
 	DEBUG_LOG_MSG(m_logger, Separator::LINE);
-	DEBUG_LOG_MSG(m_logger, swInfo);
+	DEBUG_LOG_MSG(m_logger, QString());
+	for(const QString& str : swInfo)
+	{
+		DEBUG_LOG_MSG(m_logger, str);
+	}
+	DEBUG_LOG_MSG(m_logger, QString());
 	DEBUG_LOG_MSG(m_logger, Separator::LINE);
 	DEBUG_LOG_MSG(m_logger, QString());
 
@@ -178,10 +184,7 @@ bool ServiceStarter::processCommonCmdLineArgs(bool& startAsRegularApp)
 	//
 	if (m_serviceWorker.cmdLineArgIsSet(CmdLineArg::VERSION) == true)
 	{
-		QString swInfo = m_serviceWorker.getSoftwareInfoStr();
-
-		DEBUG_LOG_MSG(m_logger, swInfo);
-
+		// service version info already printed
 		return false;
 	}
 

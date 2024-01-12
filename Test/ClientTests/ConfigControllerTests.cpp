@@ -65,8 +65,8 @@ namespace
 
 TEST(ConfigControllerTests, monitorToConfigControllerConnection)
 {
-	SoftwareInfo softwareInfo;
-	softwareInfo.init(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR", 0, 0);
+	SoftwareInfo softwareInfo(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR");
+
 	HostAddressPort host1{"127.0.0.1", g_connectionPorts.cfgService1.clientRequestPort};		// valid address, where cfgservice is expected to run.
 	HostAddressPort host2{"192.168.99.103", g_connectionPorts.cfgService2.clientRequestPort};	// some unreachable address
 	ILogFileStub log;
@@ -192,8 +192,8 @@ TEST(ConfigControllerTests, monitorToConfigControllerConnection)
 TEST(ConfigControllerTests, wrongCliendId)
 {
 	ILogFileStub log;
-	SoftwareInfo softwareInfo;
-	softwareInfo.init(E::SoftwareType::Monitor, "WRONG_SYSTEMID_CLIENTTEST_WS03_MONITOR", 0, 0);
+	SoftwareInfo softwareInfo(E::SoftwareType::Monitor, "WRONG_SYSTEMID_CLIENTTEST_WS03_MONITOR");
+
 	HostAddressPort host{"127.0.0.1", g_connectionPorts.cfgService1.clientRequestPort};
 
 	// Set bad client EquipmentID, error is expected
@@ -227,8 +227,7 @@ TEST(ConfigControllerTests, wrongCliendId)
 TEST(ConfigControllerTests, setConnectionParams)
 {
 	ILogFileStub log;
-	SoftwareInfo softwareInfo;
-	softwareInfo.init(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR", 0, 0);
+	SoftwareInfo softwareInfo(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR");
 	HostAddressPort goodHost{"127.0.0.1", g_connectionPorts.cfgService1.clientRequestPort};
 	HostAddressPort wrongHost{"192.168.99.103", g_connectionPorts.cfgService2.clientRequestPort};
 
@@ -277,8 +276,7 @@ TEST(ConfigControllerTests, setConnectionParams)
 TEST(ConfigControllerTests, twoClientsOnSameComputer)
 {
 	ILogFileStub log;
-	SoftwareInfo softwareInfo;
-	softwareInfo.init(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR", 0, 0);
+	SoftwareInfo softwareInfo(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR");
 	HostAddressPort host{"127.0.0.1", g_connectionPorts.cfgService1.clientRequestPort};
 
 	MonitorConfigControllerStub configController1{softwareInfo, host, &log};

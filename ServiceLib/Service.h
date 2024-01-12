@@ -119,7 +119,7 @@ public:
 	QString getSettingValue(const QString& settingName);
 	bool getBoolSettingValue(const QString& settingName);
 
-	QString getSoftwareInfoStr() const;
+	QStringList getSoftwareInfo() const;
 
 	SoftwareSettingsSet& softwareSettingsSet() { return m_softwareSettingsSet; }
 	const SoftwareSettingsSet& softwareSettingsSet() const { return m_softwareSettingsSet; }

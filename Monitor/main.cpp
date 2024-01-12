@@ -74,8 +74,7 @@ int main(int argc, char *argv[])
 	VFrame30::init();
 	//Hardware::Init();
 
-	SoftwareInfo softwareInfo;
-	softwareInfo.init(E::SoftwareType::Monitor, MonitorAppSettings::instance().equipmentId(), 0, 1);
+	SoftwareInfo softwareInfo(E::SoftwareType::Monitor, MonitorAppSettings::instance().equipmentId());
 
 	// --
 	//

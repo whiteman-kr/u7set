@@ -452,7 +452,7 @@ void CircularLogger::composeAndWriteRecord(RecordType type, const QString& messa
 		return;
 	}
 
-	QString msg = message.simplified();
+	QString msg = message;
 
 	msg.replace("&nbsp;", " ");
 

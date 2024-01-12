@@ -77,8 +77,7 @@ TEST_F(AdsConnectionTests, connectToAds)
 	Hash dataServerHash1 = ::calcHash(ads1);
 	Hash dataServerHash2 = ::calcHash(ads2);
 
-	SoftwareInfo softwareInfo;
-	softwareInfo.init(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR", 0, 0);
+	SoftwareInfo softwareInfo(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR");
 
 	// MockAppSignalUpdater
 	//
@@ -169,8 +168,7 @@ TEST_F(AdsConnectionTests, adsNoConnection)
 	ILogFileStub log;
 	MockAppSignalUpdater signalUpdater;
 
-	SoftwareInfo softwareInfo;
-	softwareInfo.init(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR", 0, 0);
+	SoftwareInfo softwareInfo(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR");
 
 	// MockAppSignalUpdater
 	//
@@ -232,8 +230,7 @@ TEST_F(AdsConnectionTests, receivesState)
 	//
 	ILogFileStub log;
 	ClientLib::AppSignalManager signalManager{&log};
-	SoftwareInfo softwareInfo;
-	softwareInfo.init(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR", 0, 0);
+	SoftwareInfo softwareInfo(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR");
 
 	// Start
 	//

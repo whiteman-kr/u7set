@@ -365,7 +365,7 @@ int main(int argc, char* argv[])
 	ConsoleLogFile appLog{qAppName(), QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + settings.instanceStrId()};
 	ConsoleTestLog testLog;
 
-	SoftwareInfo softwareInfo{E::SoftwareType::TestSuite, settings.instanceStrId(), MajorVersion, MinorVersion, buildNo};
+	SoftwareInfo softwareInfo(E::SoftwareType::TestSuite, settings.instanceStrId());
 
 	TestSuite::TestSuite testSuite{softwareInfo, settings, &appLog, &testLog};
 

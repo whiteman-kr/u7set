@@ -272,16 +272,21 @@ message SoftwareInfo
 {
     required int32 softwareType = 1 [default = 8000];		// E::SoftwareType::Unknown = 8000
     required string equipmentId = 2;
+
     required int32 majorVersion = 3 [default = 0];
     required int32 minorVersion = 4 [default = 0];
-    required int32 commitNo = 5 [default = 0];
-    required string buildBranch = 6;
-    required string commitSHA = 7;
-    required string userName = 8;
-    required int32 buildNo = 9 [default = 0];
-    required uint32 crc = 10 [default = 0];
-	optional string clientDescription = 11;
-	optional string hostname = 12;
+	required int32 patchVersion = 5 [default = 0];
+
+	required string releaseType = 6;
+
+	optional string branchName = 7;
+	optional string commitHash = 8;
+	optional string userName = 9;
+	optional string buildDate = 10;
+	optional string hostname = 11;
+	optional int32 pipelineID = 12 [default = 0];
+
+	//optional string description = 13;
 }
 
 message SecurityLevelReply

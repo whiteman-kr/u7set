@@ -90,9 +90,7 @@ int main(int argc, char *argv[])
 	//
 	//
 
-	SoftwareInfo softwareInfo;
-
-	softwareInfo.init(E::SoftwareType::TestSuite, AppConfigSettings().instance().librarySettings().instanceStrId(), 0, 1);
+	SoftwareInfo softwareInfo(E::SoftwareType::TestSuite, AppConfigSettings().instance().librarySettings().instanceStrId());
 
 	// Check to run the application in one instance
 	//

@@ -111,9 +111,9 @@ protected:
 		}
 	};
 
-	inline static const SoftwareInfo s_softwareInfo = {E::SoftwareType::TuningClient, "SYSTEMID_CLIENTTEST_WS03_TUN", 1, 2, 3};
-	inline static const SoftwareInfo s_safeSoftwareInfoA = {E::SoftwareType::TuningClient, "SYSTEMID_CLIENTTEST_WS04_TUNA", 1, 2, 3};
-	inline static const SoftwareInfo s_safeSoftwareInfoB = {E::SoftwareType::TuningClient, "SYSTEMID_CLIENTTEST_WS04_TUNB", 1, 2, 3};
+	inline static const SoftwareInfo s_softwareInfo = {E::SoftwareType::TuningClient, "SYSTEMID_CLIENTTEST_WS03_TUN"};
+	inline static const SoftwareInfo s_safeSoftwareInfoA = {E::SoftwareType::TuningClient, "SYSTEMID_CLIENTTEST_WS04_TUNA"};
+	inline static const SoftwareInfo s_safeSoftwareInfoB = {E::SoftwareType::TuningClient, "SYSTEMID_CLIENTTEST_WS04_TUNB"};
 };
 
 

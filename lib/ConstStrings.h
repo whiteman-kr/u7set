@@ -652,6 +652,15 @@ namespace Manufacturer
 	inline const QString RADIY("RadiyQt6");		// Radiy -> RadiyQt6, thus settings can be stored (for sw with Qt5 and Qt6)
 												// in different registry locations as Qt5 and Qt6 have distinct settings format (for UI)
 	inline const QString SITE("radiy.com");
+
+	inline const QString CONFIGURATION_SERVICE("Configuration Service");
+	inline const QString APPLICATION_DATA_SERVICE("Application Data Service");
+	inline const QString DIAGNOSTIC_DATA_SERVICE("Diagnostic Data Service");
+	inline const QString ARCHIVING_SERVICE("Archiving Service");
+	inline const QString TUNING_SERVICE("Tuning Service");
+	inline const QString GATEWAY_SERVICE("Gateway Service");
+	inline const QString SERVICE_CONTROL_MANAGER("Service Control Manager");
+	inline const QString METROLOGY("Metrology");
 }
 
 namespace Busses
@@ -669,14 +678,6 @@ namespace Afb
 	//
 
 	inline const QString SCALE("SCALE");
-
-/*	inline const QString SCALE_PIN_CONF("i_conf");
-	inline const QString SCALE_PIN_K1("i_scal_k1_coef");
-	inline const QString SCALE_PIN_K2("i_scal_k2_coef");
-	inline const QString SCALE_PIN_X_UI("i_ui_data");
-	inline const QString SCALE_PIN_X_SI_FP("i_si_fp_data");
-	inline const QString SCALE_PIN_Y_UI("i_ui_data");
-	inline const QString SCALE_PIN_Y_SI_FP("i_si_fp_data"); */
 
 	inline const QString SCALE_SI32_SI32("scale_si_si");
 	inline const QString SCALE_SI32_FP32("scale_si_fp");

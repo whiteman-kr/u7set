@@ -226,9 +226,7 @@ int main(int argc, char* argv[])
 	//
 	//
 
-	SoftwareInfo softwareInfo;
-
-	softwareInfo.init(E::SoftwareType::TuningClient, TuningClientAppSettings::instance().instanceStrId(), 0, 1);
+	SoftwareInfo softwareInfo(E::SoftwareType::TuningClient, TuningClientAppSettings::instance().instanceStrId());
 
 	// Check to run the application in one instance
 	//

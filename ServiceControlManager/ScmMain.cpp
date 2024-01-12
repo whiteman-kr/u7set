@@ -10,6 +10,7 @@
 #include "../OnlineLib/SocketIO.h"
 #include "../OnlineLib/Tcp.h"
 #include "../lib/ConstStrings.h"
+#include "version.h"
 
 const char* const semaphoreString = "ServiceControlManagerSemaphore";
 const char* const sharedMemoryString = "ServiceControlManagerSharedMemory";
@@ -17,7 +18,17 @@ const char* const sharedMemoryString = "ServiceControlManagerSharedMemory";
 
 int main(int argc, char *argv[])
 {
-	QApplication a(argc, argv);
+	QApplication app(argc, argv);
+
+	app.setApplicationName(Manufacturer::SERVICE_CONTROL_MANAGER);
+	app.setOrganizationName(Manufacturer::RADIY);
+	app.setOrganizationDomain(Manufacturer::SITE);
+
+	app.setApplicationVersion(QString("%1.%2.%3 (%4)").
+									arg(U7SET_MAJOR_VERSION).
+									arg(U7SET_MINOR_VERSION).
+									arg(U7SET_PATCH_VERSION).
+									arg(U7SET_BRANCH_NAME));
 
 	QSystemSemaphore semaphore(semaphoreString, 1);
 	bool isAlreadyRunning = false;
@@ -59,14 +70,12 @@ int main(int argc, char *argv[])
         }
     }
 
-    QCoreApplication::setOrganizationName(Manufacturer::RADIY);
-	QCoreApplication::setOrganizationDomain(Manufacturer::SITE);
-    QCoreApplication::setApplicationName("ServiceControlManager");
     if (closeToTray)
     {
-        a.setQuitOnLastWindowClosed(false);
+		app.setQuitOnLastWindowClosed(false);
     }
-    a.setWindowIcon(QIcon(":/images/SearchComputer.png"));
+
+	app.setWindowIcon(QIcon(":/images/SearchComputer.png"));
 
     QSettings settings;
 
@@ -95,9 +104,7 @@ int main(int argc, char *argv[])
 		Q_UNUSED(loadResult);
     }
 
-	SoftwareInfo si;
-
-	si.init(E::SoftwareType::ServiceControlManager, "SCM", 1, 0);
+	SoftwareInfo si(E::SoftwareType::ServiceControlManager, "SCM");
 
 	MainWindow* mainWindow = new MainWindow(si);
 
@@ -105,7 +112,7 @@ int main(int argc, char *argv[])
 
 	atexit(google::protobuf::ShutdownProtobufLibrary);
 
-	int result = a.exec();
+	int result = app.exec();
 
 	delete mainWindow;
 

@@ -137,8 +137,7 @@ bool PacketSourceCore::runUalTesterServerThread()
 		return false;
 	}
 
-	SoftwareInfo si;
-	si.init(E::SoftwareType::TestClient, "TEST_SERVER_ID", 1, 0);
+	SoftwareInfo si(E::SoftwareType::TestClient, "TEST_SERVER_ID");
 
 	m_ualTesterSever = new UalTesterServer(si, E::SecurityLevel::Basic, &m_sourceBase, &m_signalBase);
 	if (m_ualTesterSever == nullptr)

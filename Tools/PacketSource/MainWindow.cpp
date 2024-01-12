@@ -468,10 +468,9 @@ void MainWindow::runConfigSocket()
 {
 	// init SoftwareInfo
 	//
-	SoftwareInfo si;
-
 	QString equipmentID = m_options.build().cfgSrvEquipmentID();
-	si.init(E::SoftwareType::TestClient, equipmentID, 1, 0);
+
+	SoftwareInfo si(E::SoftwareType::TestClient, equipmentID);
 
 	// create config socket thread
 	//
