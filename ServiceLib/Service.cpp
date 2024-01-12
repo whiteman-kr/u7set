@@ -165,7 +165,11 @@ QStringList ServiceWorker::getSoftwareInfo() const
 			arg(si.patchVersion()).
 			arg(si.branchName());
 	res << QString();
-	res << QString(" Release type: %1").arg(si.releaseType());
+#ifdef QT_DEBUG
+	res << QString(" Build:        %1 Debug").arg(si.releaseType());
+#else
+	res << QString(" Build:        %1 Release").arg(si.releaseType());
+#endif
 	res << QString(" Branch name:  %1").arg(si.branchName());
 	res << QString(" Commit SHA:   %1").arg(si.commitHash());
 	res << QString(" Build date:   %1").arg(si.buildDate());
