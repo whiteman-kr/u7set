@@ -4,6 +4,7 @@
 #include "../ClientLib/ConfigController.h"
 #include "../lib/ClientBehavior.h"
 #include "../VFrame30/Schema.h"
+#include "../OnlineLib/MatsUsers.h"
 
 
 struct ConfigSettings
@@ -25,6 +26,7 @@ struct ConfigSettings
 	//
 	bool tuningEnabled = false;
 	std::vector<SoftwareEndpoint::TuningService> tuningServices;
+	OnlineLib::MatsUserStorage matsUsers;
 
 	bool tuningLogin = false;
 	QStringList tuningUserAccounts;

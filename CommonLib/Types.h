@@ -531,6 +531,7 @@ public:
 		LoadFileDialog,
 		Svg,
 		Tags,
+		MatsUsers,
         Report,
 		ChooseFileDialog,
 		ChooseDirectoryDialog
@@ -700,6 +701,11 @@ public:
 		ClientIsNotActive,
 		TuningNoReply,
 		TuningValueCorrupted,
+		TuningCommandDenied,						// for ex. tuning command Apply denied for TestSute client
+		UnknownMatsUser,
+		DisabledMatsUser,
+		NoSignalsAllowedToControl,
+		SignalIsNotAllowedToControl
 	};
 	Q_ENUM(NetworkError)
 

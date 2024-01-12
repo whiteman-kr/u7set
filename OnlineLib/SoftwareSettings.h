@@ -3,6 +3,7 @@
 #include "../CommonLib/Types.h"
 #include "../CommonLib/HostAddressPort.h"
 #include "../lib/ConstStrings.h"
+#include "../OnlineLib/MatsUsers.h"
 
 class XmlWriteHelper;
 class XmlReadHelper;
@@ -284,7 +285,10 @@ public:
 	struct TuningClient
 	{
 		QString equipmentID;
+		E::SoftwareType softwareType;
 		std::vector<TuningSource> drivenSources;
+		bool tuningLogin = false;
+		QString matsUsers;
 
 		QStringList uniqueSourcesIDs() const;
 
@@ -332,6 +336,8 @@ public:
 	std::vector<TuningClient> clients;
 
 	ChannelSettings channelSettings[CHANNELS_COUNT];
+
+	std::vector<OnlineLib::MatsUser> matsUsers;
 
 	bool isSourceExists(const QString& moduleEquipmentID) const;
 

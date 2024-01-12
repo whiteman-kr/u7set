@@ -136,7 +136,7 @@ namespace Tuning
 		TuningCommand();
 
 		QString clientEquipmentID;
-		QString user;
+		QString matsUser;
 
 		Fotip::OpCode opCode = Fotip::OpCode::Read;
 		bool autoCommand = false;
@@ -377,12 +377,12 @@ namespace Tuning
 		void readSignalState(Network::TuningSignalState* tss) const;
 
 		E::NetworkError writeSignalState(const QString& clientEquipmentID,
-										const QString& user,
+										const QString& matsUser,
 										Hash signalHash,
 										const TuningValue& newValue);
 
-		E::NetworkError applySignalStates(	const QString& clientEquipmentID,
-										const QString& user);
+		E::NetworkError applySignalStates(const QString& clientEquipmentID,
+										const QString& matsUser);
 
 		QString sourceEquipmentID() const;
 
@@ -488,7 +488,7 @@ namespace Tuning
 		void readSignalState(Network::TuningSignalState* tss) const;
 
 		E::NetworkError writeSignalState(const QString& clientEquipmentID,
-										const QString& user,
+										const QString& matsUser,
 										Hash signalHash,
 										const TuningValue& newValue);
 

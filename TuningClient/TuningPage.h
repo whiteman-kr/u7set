@@ -9,11 +9,22 @@
 #include "TuningConfigController.h"
 #include "TuningClientFilterStorage.h"
 
+
+class TuningPageHelper
+{
+public:
+	TuningPageHelper(const ClientLib::TuningUserManager& userManager);
+	bool writingIsEnabled(const AppSignalParam& asp, const TuningSignalState& state) const;
+
+private:
+	const ClientLib::TuningUserManager& m_userManager;
+};
+
 class TuningModelClient : public TuningModel
 {
 	Q_OBJECT
 public:
-	TuningModelClient(TuningSignalManager& tuningSignalManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent);
+	TuningModelClient(TuningSignalManager& tuningSignalManager, const ClientLib::TuningUserManager& userManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent);
 
 	void blink();
 
@@ -30,7 +41,8 @@ protected:
 
 private:
 	bool m_blink = false;
-
+	const ClientLib::TuningUserManager& m_userManager;
+	TuningPageHelper m_helper;
 };
 
 class TuningTableView : public QTableView
@@ -39,7 +51,7 @@ class TuningTableView : public QTableView
 	Q_OBJECT
 
 public:
-	TuningTableView();
+	TuningTableView(const ClientLib::TuningUserManager& userManager);
 	bool editorActive();
 
 protected:
@@ -53,7 +65,7 @@ protected slots:
 private:
 
 	bool m_editorActive = false;
-
+	TuningPageHelper m_helper;
 };
 
 
@@ -185,6 +197,8 @@ private:
 	ClientLib::TuningUserManager& m_userManager;
 
 	ClientLib::TuningConnection& m_tuningConnection;
+
+	TuningPageHelper m_helper;
 
 	TuningTableView* m_objectList = nullptr;
 

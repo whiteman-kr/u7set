@@ -581,6 +581,8 @@ namespace Builder
 		void errEQP6210(QString behaviorId, QString softwareObjectStrId);			// Client behavior (%1) specified in %2.BehaviorID does not exist.
 		void errEQP6211(QString monitorId, QString startSchemaId, QString profile);	// The specified schema %1 in property %2.StartSchemaID (profile %3) does not exist.
 
+		void errEQP6212(QString userAccountsProperty, QString login, QString softwareEquipmentId);	// Property %1 in (%3) software contains login (%2) which is not present in MATS users storage.
+
 		// Script evaluations
 		//
 		void errEQP6300(QString fileName, int lineNumber, QString message);                                                       // Script file evaluation error.

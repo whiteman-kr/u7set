@@ -35,6 +35,8 @@ public:
 	QString hostname() const { return m_hostname; }
 	int pipelineID() const { return m_pipelineID; }
 
+	QString osUsername() const { return m_osUsername; }
+
 private:
 	E::SoftwareType m_softwareType = E::SoftwareType::Unknown;
 	QString m_equipmentID;
@@ -53,4 +55,6 @@ private:
 	QString m_buildDate;
 	QString m_hostname;
 	int m_pipelineID = 0;
+
+	QString m_osUsername;
 };

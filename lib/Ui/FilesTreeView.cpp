@@ -2424,8 +2424,6 @@ void FileTreeView::runFileEditor(bool viewOnly)
 	}
 }
 
-
-
 void FileTreeView::setWorkcopy()
 {
 	QModelIndexList selectedIndexList = selectedSourceRows();

@@ -119,6 +119,10 @@ namespace Builder
 
 		result &= writeTuningClientBehavior();
 
+		result &= writeMatsUsers(EquipmentPropNames::TUNING_USER_ACCOUNTS,
+			settings->tuningLogin, 
+			settings->tuningUserAccounts.split(Separator::SEMICOLON, Qt::SkipEmptyParts));
+
 		return result;
 	}
 

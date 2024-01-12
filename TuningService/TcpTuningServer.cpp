@@ -40,7 +40,6 @@ namespace Tuning
 		Tcp::Server::onConnection();
 
 		m_clientEquipmentID = connectedSoftwareInfo().equipmentID();
-
 		m_service.registerSignalsStateChangesQueue(m_clientEquipmentID, m_tcpConnectionID);
 	}
 
@@ -453,6 +452,14 @@ namespace Tuning
 			return;
 		}
 
+		E::SoftwareType swType = connectedSoftwareInfo().softwareType();
+
+		if (swType == E::SoftwareType::TestSuite && m_tuningSignalsWriteRequest.autoapply() == true)
+		{
+			DEBUG_LOG_WRN(m_logger, QString(tr("Autoapply ignored (set to FALSE)")));
+			m_tuningSignalsWriteRequest.set_autoapply(false);
+		}
+
 		if (m_service.singleLmControl() == true)
 		{
 			QString activeClientID = m_service.activeClientID();
@@ -472,11 +479,11 @@ namespace Tuning
 			}
 		}
 
-		QString user = connectedSoftwareInfo().userName();
+		QString matsUser = QString::fromStdString(m_tuningSignalsWriteRequest.matsuser());
 
-		// m_tuningSignalsWriteReply.set_error(???) is set inside clientContext->writeSignalStates()
+		// m_tuningSignalsWriteReply.set_error(???) is set inside clientContext->ІwriteSignalStates()
 		//
-		clientContext->writeSignalStates(clientEquipmentID, user, m_tuningSignalsWriteRequest, &m_tuningSignalsWriteReply);
+		clientContext->writeSignalStates(clientEquipmentID, matsUser, m_tuningSignalsWriteRequest, &m_tuningSignalsWriteReply);
 
 		sendReply(m_tuningSignalsWriteReply);
 
@@ -521,7 +528,24 @@ namespace Tuning
 
 		if (clientContext == nullptr)
 		{
-			m_tuningSignalsApplyReply.set_error(TO_INT(E::NetworkError::UnknownTuningClientID));
+			errCode = E::NetworkError::UnknownTuningClientID;
+
+			m_tuningSignalsApplyReply.set_error(TO_INT(errCode));
+
+			sendReply(m_tuningSignalsApplyReply);
+
+			DEBUG_LOG_ERR(m_logger, QString(tr("Send reply %1 on TDS_TUNING_SIGNALS_APPLY to %2")).
+						  arg(E::valueToString(errCode)).arg(peerAddr().addressStr()));
+			return;
+		}
+
+		E::SoftwareType swType = connectedSoftwareInfo().softwareType();
+
+		if (swType == E::SoftwareType::TestSuite)
+		{
+			errCode = E::NetworkError::TuningCommandDenied;
+
+			m_tuningSignalsApplyReply.set_error(TO_INT(errCode));
 
 			sendReply(m_tuningSignalsApplyReply);
 
@@ -549,7 +573,7 @@ namespace Tuning
 			}
 		}
 
-		QString user = connectedSoftwareInfo().userName();
+		QString user = connectedSoftwareInfo().osUsername();
 
 		clientContext->applySignalStates(clientEquipmentID, user);
 

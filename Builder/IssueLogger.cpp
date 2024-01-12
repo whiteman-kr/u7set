@@ -9034,6 +9034,30 @@ namespace Builder
 					.arg(profile));
 	}
 
+	/// IssueCode: EQP6212
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property %1 in (%3) software contains login (%2) which is not present in MATS users storage.
+	///
+	/// Parameters:
+	///		%1 Tuning User Accounts Property
+	///		%2 Tuning Login
+	///		%3 Software EquipmentID
+	///
+	/// Description:
+	///		Specified tuning user login is not found in MATS users database
+	///
+	void IssueLogger::errEQP6212(QString userAccountsProperty, QString login, QString softwareEquipmentId)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6212,
+				  tr("Property %1 in (%3) software contains login (%2) which is not present in MATS users storage.")
+					.arg(userAccountsProperty)
+					.arg(login)
+					.arg(softwareEquipmentId));
+	}
+	
 	/// IssueCode: EQP6300
 	///
 	/// IssueType: Error

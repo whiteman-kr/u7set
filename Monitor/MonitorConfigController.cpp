@@ -175,6 +175,22 @@ bool MonitorConfigController::updateConfiguration(const ClientLib::Configuration
 		}
 	}
 
+	// Get file MATS_USERS
+	//
+	if (config.tuningEnabled == true)
+	{
+		QByteArray matsUsersData;
+		getFileBlockedById(CfgFileId::MATSUSERS, &matsUsersData, nullptr);
+		
+		QString errorString;
+		bool ok = config.matsUsers.loadFromByteArray(matsUsersData, errorString);
+		if (ok == false)
+		{
+			m_logFile.writeError(tr("MATS users storage loading failed."));
+			config.matsUsers.clear();
+		}
+	}
+
 	// Trace received params
 	//
 	qDebug() << "New configuration arrived.";

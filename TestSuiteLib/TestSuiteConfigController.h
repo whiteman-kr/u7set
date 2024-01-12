@@ -2,6 +2,7 @@
 #include <QReadWriteLock>
 #include "../ClientLib/ConfigController.h"
 #include "../OnlineLib/SocketIO.h"
+#include "../OnlineLib/MatsUsers.h"
 #include "../UtilsLib/ILogFile.h"
 #include "TestScriptsStorage.h"
 #include "TestReport.h"
@@ -37,6 +38,7 @@ namespace TestSuite
 		//
 		bool login = false;
 		QStringList userAccounts;
+		OnlineLib::MatsUserStorage matsUsers;
 
 		// Scripts list
 		//

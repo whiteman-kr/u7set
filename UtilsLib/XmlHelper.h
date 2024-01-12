@@ -112,6 +112,8 @@ public:
 	XmlReadHelper(const QString& xmlString);
 	~XmlReadHelper();
 
+	QXmlStreamReader* xmlStreamReader() const;
+
 	bool readNextStartElement();
 	void skipCurrentElement();
 

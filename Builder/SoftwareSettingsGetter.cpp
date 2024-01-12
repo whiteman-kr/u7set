@@ -834,6 +834,7 @@ bool TuningServiceSettingsGetter::readSettings(const Builder::Context* context,
 		result &= fillTuningSourcesInfo(context, channel);
 	}
 
+	result &= fillMatsUsers(context);
 	result &= fillTuningClientsInfo(context, software, singleLmControl);
 
 	if (context->m_projectProperties.safetyProject() == true && singleLmControl == false)
@@ -933,17 +934,22 @@ bool TuningServiceSettingsGetter::fillTuningClientsInfo(const Builder::Context* 
 
 	QString thisTuningServiceID = equipmentID;
 
+	static const std::set<E::SoftwareType> knownClientSoftwareTypes =
+	{
+		E::SoftwareType::TuningClient,
+		E::SoftwareType::Metrology,
+		E::SoftwareType::Monitor,
+		E::SoftwareType::TestClient,
+		E::SoftwareType::TestSuite
+	};
+
 	for(const auto& p : context->m_software)
 	{
 		const Hardware::Software* tuningClient = p.second;
 
 		TEST_PTR_CONTINUE(tuningClient);
 
-		if (tuningClient->softwareType() != E::SoftwareType::TuningClient &&
-				tuningClient->softwareType() != E::SoftwareType::Metrology &&
-				tuningClient->softwareType() != E::SoftwareType::Monitor &&
-				tuningClient->softwareType() != E::SoftwareType::TestClient &&
-				tuningClient->softwareType() != E::SoftwareType::TestSuite)
+		if (knownClientSoftwareTypes.contains(tuningClient->softwareType()) == false)
 		{
 			continue;
 		}
@@ -994,6 +1000,69 @@ bool TuningServiceSettingsGetter::fillTuningClientsInfo(const Builder::Context* 
 		TuningClient tunClient;
 
 		tunClient.equipmentID = tuningClient->equipmentIdTemplate();
+		tunClient.softwareType = tuningClient->softwareType();
+
+		//
+
+		if (DeviceHelper::isPropertyExists(tuningClient, EquipmentPropNames::TUNING_LOGIN) == true)
+		{
+			result &= DeviceHelper::getBoolProperty(tuningClient, EquipmentPropNames::TUNING_LOGIN, &tunClient.tuningLogin, log);
+		}
+		else
+		{
+			if (DeviceHelper::isPropertyExists(tuningClient, EquipmentPropNames::TESTING_LOGIN) == true)
+			{
+				result &= DeviceHelper::getBoolProperty(tuningClient, EquipmentPropNames::TESTING_LOGIN, &tunClient.tuningLogin, log);
+			}
+			else
+			{
+				tunClient.tuningLogin = false;
+			}
+		}
+
+		//
+
+		QString matsUserAccountsPropName;
+
+		switch(tunClient.softwareType)
+		{
+		case E::SoftwareType::Monitor:
+		case E::SoftwareType::TuningClient:
+			matsUserAccountsPropName = EquipmentPropNames::TUNING_USER_ACCOUNTS;
+			break;
+
+		case E::SoftwareType::TestSuite:
+			matsUserAccountsPropName = EquipmentPropNames::TESTING_USER_ACCOUNTS;
+			break;
+
+		case E::SoftwareType::Metrology:
+		case E::SoftwareType::TestClient:
+			break;
+
+		default:
+			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR_MSG(log, QString("Unknown software type %1 (%2)").
+											arg(E::valueToString(tuningClient->softwareType())).
+											arg(TO_INT(tuningClient->softwareType())));
+			result = false;
+		}
+
+		if (matsUserAccountsPropName.isEmpty() == false)
+		{
+			if (DeviceHelper::isPropertyExists(tuningClient, matsUserAccountsPropName) == true)
+			{
+				result &= DeviceHelper::getStrListPropertyAsString(tuningClient, matsUserAccountsPropName, &tunClient.matsUsers, log);
+			}
+			else
+			{
+				// Property %1.%2 is not found.
+				//
+				log->errCFG3020(tuningClient->equipmentIdTemplate(), matsUserAccountsPropName);
+				result = false;
+			}
+		}
+
+		//
 
 		QStringList sourcesIDs;
 
@@ -1053,6 +1122,15 @@ bool TuningServiceSettingsGetter::fillTuningClientsInfo(const Builder::Context* 
 	}
 
 	return result;
+}
+
+bool TuningServiceSettingsGetter::fillMatsUsers(const Builder::Context* context)
+{
+	TEST_PTR_RETURN_FALSE(context);
+
+	matsUsers = context->m_matsUsers.users();
+
+	return true;
 }
 
 // -------------------------------------------------------------------------------------

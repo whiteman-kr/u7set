@@ -20,6 +20,33 @@ SoftwareInfo::SoftwareInfo(E::SoftwareType softwareType,
 	m_hostname(U7SET_HOSTNAME),
 	m_pipelineID(U7SET_PIPELINE_ID)
 {
+#ifdef Q_OS_LINUX
+	m_osUsername = getenv("USER");
+#endif
+
+#ifdef Q_OS_WIN
+	QString qUsername("USERNAME");
+	wchar_t username[16];
+	qsizetype ln = qUsername.toWCharArray(username);
+	username[ln] = '\0';
+
+	wchar_t* buf = nullptr;
+	size_t len = 0;
+
+	errno_t err = _wdupenv_s(&buf, &len, username);
+
+	Q_ASSERT(err == 0);
+
+	if (err == 0)
+	{
+		m_osUsername = QString::fromWCharArray(buf, -1);
+	}
+
+	if (buf != nullptr)
+	{
+		free(buf);
+	}
+#endif
 }
 
 void SoftwareInfo::clear()
@@ -39,6 +66,8 @@ void SoftwareInfo::clear()
 	m_buildDate.clear();
 	m_hostname.clear();
 	m_pipelineID = 0;
+
+	m_osUsername.clear();
 }
 
 void SoftwareInfo::serializeTo(Network::SoftwareInfo* info) const
@@ -64,6 +93,7 @@ void SoftwareInfo::serializeTo(Network::SoftwareInfo* info) const
 	info->set_builddate(m_buildDate.toStdString());
 	info->set_hostname(m_hostname.toStdString());
 	info->set_pipelineid(m_pipelineID);
+	info->set_osusername(m_osUsername.toStdString());
 }
 
 void SoftwareInfo::serializeFrom(const Network::SoftwareInfo& info)
@@ -83,4 +113,5 @@ void SoftwareInfo::serializeFrom(const Network::SoftwareInfo& info)
 	m_buildDate = QString::fromStdString(info.builddate());
 	m_hostname = QString::fromStdString(info.hostname());
 	m_pipelineID = info.pipelineid();
+	m_osUsername = QString::fromStdString(info.osusername());
 }

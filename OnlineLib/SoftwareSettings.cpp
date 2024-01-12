@@ -747,6 +747,9 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml) const
 	{
 		xml.writeStartElement(XmlElement::TUNING_CLIENT);
 		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tc.equipmentID);
+		xml.writeStringAttribute(EquipmentPropNames::SOFTWARE_TYPE, E::valueToString(tc.softwareType));
+		xml.writeBoolAttribute(EquipmentPropNames::TUNING_LOGIN, tc.tuningLogin);
+		xml.writeStringAttribute(XmlAttribute::MATS_USERS, tc.matsUsers);
 
 		writeTuningSourcesToXml(xml, tc.drivenSources);
 
@@ -755,6 +758,20 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml) const
 
 	xml.writeEndElement();			// TUNING_CLIENTS
 
+	// write MATS users info
+	//
+	xml.writeStartElement(XmlElement::MATS_USERS);
+	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(matsUsers.size()));
+
+	for(const auto& matsUser : matsUsers)
+	{
+		matsUser.save(*xml.xmlStreamWriter());
+	}
+
+	xml.writeEndElement();			// MATS_USERS
+
+	// write channels info
+	//
 	for(int channel = CHANNEL_1; channel < channelCount; channel++)
 	{
 		const ChannelSettings& ch = channelSettings[channel];
@@ -836,11 +853,57 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 		result &= xml.findElement(XmlElement::TUNING_CLIENT);
 		result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &tc.equipmentID);
 
+		QString swTypeStr;
+		result &= xml.readStringAttribute(EquipmentPropNames::SOFTWARE_TYPE, &swTypeStr);
+
+		bool ok = false;
+		tc.softwareType = E::stringToValue<E::SoftwareType>(swTypeStr, &ok);
+
+		result &= ok;
+
+		result &= xml.readBoolAttribute(EquipmentPropNames::TUNING_LOGIN, &tc.tuningLogin);
+		result &= xml.readStringAttribute(XmlAttribute::MATS_USERS, &tc.matsUsers);
+
 		result &= readTuningSourcesFromXml(xml, &tc.drivenSources);
 
 		clients.push_back(tc);
 	}
 
+	// read MATS users info
+	//
+	matsUsers.clear();
+
+	result = xml.findElement(XmlElement::MATS_USERS);
+
+	RETURN_IF_FALSE(result);
+
+	int matsUsersCount = 0;
+
+	result = xml.readIntAttribute(XmlAttribute::COUNT, &matsUsersCount);
+
+	RETURN_IF_FALSE(result);
+
+	for(int i = 0; i < matsUsersCount; i++)
+	{
+		OnlineLib::MatsUser mu;
+
+		bool res = xml.findElement(XmlElement::MATS_USER);
+
+		if (res == false)
+		{
+			result = false;
+			break;
+		}
+
+		result &= mu.load(*xml.xmlStreamReader());
+
+		matsUsers.emplace_back(mu);
+	}
+
+	RETURN_IF_FALSE(result);
+
+	// read channels info
+	//
 	for(int channel = CHANNEL_1; channel < channelCount; channel++)
 	{
 		result &= xml.findElement(XmlElement::TUNING_CHANNEL_TEMPLATE.arg(channel + 1));

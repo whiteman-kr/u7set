@@ -5,6 +5,7 @@
 #include "../VFrame30/Schema.h"
 #include "../ClientLib/ConfigController.h"
 #include "../ClientLib/TuningTcpClient.h"
+#include "../OnlineLib/MatsUsers.h"
 
 //
 // ConfigSettings
@@ -18,6 +19,8 @@ struct ConfigSettings
 	TuningClientSettings clientSettings;	//BuildInfo buildInfo;
 
 	QString scriptGlobal;
+
+	OnlineLib::MatsUserStorage matsUsers;
 
 	TuningClientSettings::LmStatusFlagMode lmStatusFlagMode() const
 	{

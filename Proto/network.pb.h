@@ -5662,6 +5662,7 @@ class SoftwareInfo PROTOBUF_FINAL :
     kUserNameFieldNumber = 9,
     kBuildDateFieldNumber = 10,
     kHostnameFieldNumber = 11,
+    kOsUsernameFieldNumber = 13,
     kMajorVersionFieldNumber = 3,
     kMinorVersionFieldNumber = 4,
     kPatchVersionFieldNumber = 5,
@@ -5808,6 +5809,26 @@ class SoftwareInfo PROTOBUF_FINAL :
   std::string* _internal_mutable_hostname();
   public:
 
+  // optional string osUsername = 13;
+  bool has_osusername() const;
+  private:
+  bool _internal_has_osusername() const;
+  public:
+  void clear_osusername();
+  const std::string& osusername() const;
+  void set_osusername(const std::string& value);
+  void set_osusername(std::string&& value);
+  void set_osusername(const char* value);
+  void set_osusername(const char* value, size_t size);
+  std::string* mutable_osusername();
+  std::string* release_osusername();
+  void set_allocated_osusername(std::string* osusername);
+  private:
+  const std::string& _internal_osusername() const;
+  void _internal_set_osusername(const std::string& value);
+  std::string* _internal_mutable_osusername();
+  public:
+
   // required int32 majorVersion = 3 [default = 0];
   bool has_majorversion() const;
   private:
@@ -5892,6 +5913,7 @@ class SoftwareInfo PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr username_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr builddate_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr hostname_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr osusername_;
   ::PROTOBUF_NAMESPACE_ID::int32 majorversion_;
   ::PROTOBUF_NAMESPACE_ID::int32 minorversion_;
   ::PROTOBUF_NAMESPACE_ID::int32 patchversion_;
@@ -12032,6 +12054,7 @@ class TuningSignalsWrite PROTOBUF_FINAL :
 
   enum : int {
     kCommandsFieldNumber = 3,
+    kMatsUserFieldNumber = 1,
     kAutoApplyFieldNumber = 2,
   };
   // repeated .Network.TuningWriteCommand commands = 3;
@@ -12051,6 +12074,26 @@ class TuningSignalsWrite PROTOBUF_FINAL :
   ::Network::TuningWriteCommand* add_commands();
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Network::TuningWriteCommand >&
       commands() const;
+
+  // optional string matsUser = 1;
+  bool has_matsuser() const;
+  private:
+  bool _internal_has_matsuser() const;
+  public:
+  void clear_matsuser();
+  const std::string& matsuser() const;
+  void set_matsuser(const std::string& value);
+  void set_matsuser(std::string&& value);
+  void set_matsuser(const char* value);
+  void set_matsuser(const char* value, size_t size);
+  std::string* mutable_matsuser();
+  std::string* release_matsuser();
+  void set_allocated_matsuser(std::string* matsuser);
+  private:
+  const std::string& _internal_matsuser() const;
+  void _internal_set_matsuser(const std::string& value);
+  std::string* _internal_mutable_matsuser();
+  public:
 
   // optional bool autoApply = 2 [default = false];
   bool has_autoapply() const;
@@ -12075,6 +12118,7 @@ class TuningSignalsWrite PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Network::TuningWriteCommand > commands_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr matsuser_;
   bool autoapply_;
   friend struct ::TableStruct_network_2eproto;
 };
@@ -20660,7 +20704,7 @@ inline void AppDataServiceState::set_allocated_appdatareceivestate(::Network::Ap
 
 // required int32 softwareType = 1 [default = 8000];
 inline bool SoftwareInfo::_internal_has_softwaretype() const {
-  bool value = (_has_bits_[0] & 0x00000800u) != 0;
+  bool value = (_has_bits_[0] & 0x00001000u) != 0;
   return value;
 }
 inline bool SoftwareInfo::has_softwaretype() const {
@@ -20668,7 +20712,7 @@ inline bool SoftwareInfo::has_softwaretype() const {
 }
 inline void SoftwareInfo::clear_softwaretype() {
   softwaretype_ = 8000;
-  _has_bits_[0] &= ~0x00000800u;
+  _has_bits_[0] &= ~0x00001000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 SoftwareInfo::_internal_softwaretype() const {
   return softwaretype_;
@@ -20678,7 +20722,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 SoftwareInfo::softwaretype() const {
   return _internal_softwaretype();
 }
 inline void SoftwareInfo::_internal_set_softwaretype(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000800u;
+  _has_bits_[0] |= 0x00001000u;
   softwaretype_ = value;
 }
 inline void SoftwareInfo::set_softwaretype(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -20761,7 +20805,7 @@ inline void SoftwareInfo::set_allocated_equipmentid(std::string* equipmentid) {
 
 // required int32 majorVersion = 3 [default = 0];
 inline bool SoftwareInfo::_internal_has_majorversion() const {
-  bool value = (_has_bits_[0] & 0x00000080u) != 0;
+  bool value = (_has_bits_[0] & 0x00000100u) != 0;
   return value;
 }
 inline bool SoftwareInfo::has_majorversion() const {
@@ -20769,7 +20813,7 @@ inline bool SoftwareInfo::has_majorversion() const {
 }
 inline void SoftwareInfo::clear_majorversion() {
   majorversion_ = 0;
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000100u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 SoftwareInfo::_internal_majorversion() const {
   return majorversion_;
@@ -20779,7 +20823,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 SoftwareInfo::majorversion() const {
   return _internal_majorversion();
 }
 inline void SoftwareInfo::_internal_set_majorversion(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000100u;
   majorversion_ = value;
 }
 inline void SoftwareInfo::set_majorversion(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -20789,7 +20833,7 @@ inline void SoftwareInfo::set_majorversion(::PROTOBUF_NAMESPACE_ID::int32 value)
 
 // required int32 minorVersion = 4 [default = 0];
 inline bool SoftwareInfo::_internal_has_minorversion() const {
-  bool value = (_has_bits_[0] & 0x00000100u) != 0;
+  bool value = (_has_bits_[0] & 0x00000200u) != 0;
   return value;
 }
 inline bool SoftwareInfo::has_minorversion() const {
@@ -20797,7 +20841,7 @@ inline bool SoftwareInfo::has_minorversion() const {
 }
 inline void SoftwareInfo::clear_minorversion() {
   minorversion_ = 0;
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000200u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 SoftwareInfo::_internal_minorversion() const {
   return minorversion_;
@@ -20807,7 +20851,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 SoftwareInfo::minorversion() const {
   return _internal_minorversion();
 }
 inline void SoftwareInfo::_internal_set_minorversion(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000100u;
+  _has_bits_[0] |= 0x00000200u;
   minorversion_ = value;
 }
 inline void SoftwareInfo::set_minorversion(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -20817,7 +20861,7 @@ inline void SoftwareInfo::set_minorversion(::PROTOBUF_NAMESPACE_ID::int32 value)
 
 // required int32 patchVersion = 5 [default = 0];
 inline bool SoftwareInfo::_internal_has_patchversion() const {
-  bool value = (_has_bits_[0] & 0x00000200u) != 0;
+  bool value = (_has_bits_[0] & 0x00000400u) != 0;
   return value;
 }
 inline bool SoftwareInfo::has_patchversion() const {
@@ -20825,7 +20869,7 @@ inline bool SoftwareInfo::has_patchversion() const {
 }
 inline void SoftwareInfo::clear_patchversion() {
   patchversion_ = 0;
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000400u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 SoftwareInfo::_internal_patchversion() const {
   return patchversion_;
@@ -20835,7 +20879,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 SoftwareInfo::patchversion() const {
   return _internal_patchversion();
 }
 inline void SoftwareInfo::_internal_set_patchversion(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000200u;
+  _has_bits_[0] |= 0x00000400u;
   patchversion_ = value;
 }
 inline void SoftwareInfo::set_patchversion(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -21283,7 +21327,7 @@ inline void SoftwareInfo::set_allocated_hostname(std::string* hostname) {
 
 // optional int32 pipelineID = 12 [default = 0];
 inline bool SoftwareInfo::_internal_has_pipelineid() const {
-  bool value = (_has_bits_[0] & 0x00000400u) != 0;
+  bool value = (_has_bits_[0] & 0x00000800u) != 0;
   return value;
 }
 inline bool SoftwareInfo::has_pipelineid() const {
@@ -21291,7 +21335,7 @@ inline bool SoftwareInfo::has_pipelineid() const {
 }
 inline void SoftwareInfo::clear_pipelineid() {
   pipelineid_ = 0;
-  _has_bits_[0] &= ~0x00000400u;
+  _has_bits_[0] &= ~0x00000800u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 SoftwareInfo::_internal_pipelineid() const {
   return pipelineid_;
@@ -21301,12 +21345,85 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 SoftwareInfo::pipelineid() const {
   return _internal_pipelineid();
 }
 inline void SoftwareInfo::_internal_set_pipelineid(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000400u;
+  _has_bits_[0] |= 0x00000800u;
   pipelineid_ = value;
 }
 inline void SoftwareInfo::set_pipelineid(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_pipelineid(value);
   // @@protoc_insertion_point(field_set:Network.SoftwareInfo.pipelineID)
+}
+
+// optional string osUsername = 13;
+inline bool SoftwareInfo::_internal_has_osusername() const {
+  bool value = (_has_bits_[0] & 0x00000080u) != 0;
+  return value;
+}
+inline bool SoftwareInfo::has_osusername() const {
+  return _internal_has_osusername();
+}
+inline void SoftwareInfo::clear_osusername() {
+  osusername_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline const std::string& SoftwareInfo::osusername() const {
+  // @@protoc_insertion_point(field_get:Network.SoftwareInfo.osUsername)
+  return _internal_osusername();
+}
+inline void SoftwareInfo::set_osusername(const std::string& value) {
+  _internal_set_osusername(value);
+  // @@protoc_insertion_point(field_set:Network.SoftwareInfo.osUsername)
+}
+inline std::string* SoftwareInfo::mutable_osusername() {
+  // @@protoc_insertion_point(field_mutable:Network.SoftwareInfo.osUsername)
+  return _internal_mutable_osusername();
+}
+inline const std::string& SoftwareInfo::_internal_osusername() const {
+  return osusername_.Get();
+}
+inline void SoftwareInfo::_internal_set_osusername(const std::string& value) {
+  _has_bits_[0] |= 0x00000080u;
+  osusername_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void SoftwareInfo::set_osusername(std::string&& value) {
+  _has_bits_[0] |= 0x00000080u;
+  osusername_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Network.SoftwareInfo.osUsername)
+}
+inline void SoftwareInfo::set_osusername(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000080u;
+  osusername_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Network.SoftwareInfo.osUsername)
+}
+inline void SoftwareInfo::set_osusername(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000080u;
+  osusername_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Network.SoftwareInfo.osUsername)
+}
+inline std::string* SoftwareInfo::_internal_mutable_osusername() {
+  _has_bits_[0] |= 0x00000080u;
+  return osusername_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* SoftwareInfo::release_osusername() {
+  // @@protoc_insertion_point(field_release:Network.SoftwareInfo.osUsername)
+  if (!_internal_has_osusername()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000080u;
+  return osusername_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SoftwareInfo::set_allocated_osusername(std::string* osusername) {
+  if (osusername != nullptr) {
+    _has_bits_[0] |= 0x00000080u;
+  } else {
+    _has_bits_[0] &= ~0x00000080u;
+  }
+  osusername_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), osusername,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Network.SoftwareInfo.osUsername)
 }
 
 // -------------------------------------------------------------------
@@ -26715,9 +26832,82 @@ inline void TuningWriteCommand::set_allocated_value(::Proto::TuningValue* value)
 
 // TuningSignalsWrite
 
+// optional string matsUser = 1;
+inline bool TuningSignalsWrite::_internal_has_matsuser() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool TuningSignalsWrite::has_matsuser() const {
+  return _internal_has_matsuser();
+}
+inline void TuningSignalsWrite::clear_matsuser() {
+  matsuser_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& TuningSignalsWrite::matsuser() const {
+  // @@protoc_insertion_point(field_get:Network.TuningSignalsWrite.matsUser)
+  return _internal_matsuser();
+}
+inline void TuningSignalsWrite::set_matsuser(const std::string& value) {
+  _internal_set_matsuser(value);
+  // @@protoc_insertion_point(field_set:Network.TuningSignalsWrite.matsUser)
+}
+inline std::string* TuningSignalsWrite::mutable_matsuser() {
+  // @@protoc_insertion_point(field_mutable:Network.TuningSignalsWrite.matsUser)
+  return _internal_mutable_matsuser();
+}
+inline const std::string& TuningSignalsWrite::_internal_matsuser() const {
+  return matsuser_.Get();
+}
+inline void TuningSignalsWrite::_internal_set_matsuser(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  matsuser_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void TuningSignalsWrite::set_matsuser(std::string&& value) {
+  _has_bits_[0] |= 0x00000001u;
+  matsuser_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Network.TuningSignalsWrite.matsUser)
+}
+inline void TuningSignalsWrite::set_matsuser(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000001u;
+  matsuser_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Network.TuningSignalsWrite.matsUser)
+}
+inline void TuningSignalsWrite::set_matsuser(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000001u;
+  matsuser_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Network.TuningSignalsWrite.matsUser)
+}
+inline std::string* TuningSignalsWrite::_internal_mutable_matsuser() {
+  _has_bits_[0] |= 0x00000001u;
+  return matsuser_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* TuningSignalsWrite::release_matsuser() {
+  // @@protoc_insertion_point(field_release:Network.TuningSignalsWrite.matsUser)
+  if (!_internal_has_matsuser()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return matsuser_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void TuningSignalsWrite::set_allocated_matsuser(std::string* matsuser) {
+  if (matsuser != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  matsuser_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), matsuser,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Network.TuningSignalsWrite.matsUser)
+}
+
 // optional bool autoApply = 2 [default = false];
 inline bool TuningSignalsWrite::_internal_has_autoapply() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
   return value;
 }
 inline bool TuningSignalsWrite::has_autoapply() const {
@@ -26725,7 +26915,7 @@ inline bool TuningSignalsWrite::has_autoapply() const {
 }
 inline void TuningSignalsWrite::clear_autoapply() {
   autoapply_ = false;
-  _has_bits_[0] &= ~0x00000001u;
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline bool TuningSignalsWrite::_internal_autoapply() const {
   return autoapply_;
@@ -26735,7 +26925,7 @@ inline bool TuningSignalsWrite::autoapply() const {
   return _internal_autoapply();
 }
 inline void TuningSignalsWrite::_internal_set_autoapply(bool value) {
-  _has_bits_[0] |= 0x00000001u;
+  _has_bits_[0] |= 0x00000002u;
   autoapply_ = value;
 }
 inline void TuningSignalsWrite::set_autoapply(bool value) {
