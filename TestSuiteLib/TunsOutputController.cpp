@@ -179,4 +179,44 @@ namespace TestSuite
 		timeElapsedMs = timeoutMs;
 		return false;
 	}
-}
+
+	bool TunsOutputController::tuningSourceIsActive(QString lmEquipmentId) const
+	{
+		Hash sourceHash = ::calcHash(lmEquipmentId);
+		int sourceStatesCount = m_connection.tuningSourceStatesCount(sourceHash);
+		int activeStatesCount = m_connection.activatedTuningSourceStatesCount(sourceHash);
+
+		bool active = sourceStatesCount > 0 && sourceStatesCount == activeStatesCount;
+		return active;
+	}
+
+	bool TunsOutputController::tuningSourceIsInactive(QString lmEquipmentId) const
+	{
+		Hash sourceHash = ::calcHash(lmEquipmentId);
+		int sourceStatesCount = m_connection.tuningSourceStatesCount(sourceHash);
+		int activeStatesCount = m_connection.activatedTuningSourceStatesCount(sourceHash);
+
+		bool inactive = sourceStatesCount > 0 && activeStatesCount == 0;
+		return inactive;
+	}
+
+	bool TunsOutputController::activateTuningSource(QString lmEquipmentId, bool activate)
+	{
+		Hash sourceHash = ::calcHash(lmEquipmentId);
+		if (m_connection.activateTuningSource(sourceHash, activate) == false)
+		{
+			return false;
+		}
+
+		for (int i = 0; i < 50; i++)
+		{
+			if ((activate == true && tuningSourceIsActive(lmEquipmentId) == true) ||
+				(activate == false && tuningSourceIsInactive(lmEquipmentId) == true))
+			{
+				return true;
+			}
+			QThread::msleep(100);
+		}
+		return false;
+	}
+} // namespace TestSuite
