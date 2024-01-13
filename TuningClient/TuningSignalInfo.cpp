@@ -5,6 +5,7 @@
 #include "../AppSignalLib/TuningSignalManager.h"
 #include "../lib/Tuning/TuningFilter.h"
 #include "Settings.h"
+#include <QActionGroup>
 
 TuningSignalInfo::TuningSignalInfo(TuningConfigController& configController,
 								   const TuningSignalManager& signalManager,
@@ -24,21 +25,28 @@ TuningSignalInfo::TuningSignalInfo(TuningConfigController& configController,
 {
 	ui->setupUi(this);
 
-	ui->m_textEdit->setReadOnly(true);
-
 	setAttribute(Qt::WA_DeleteOnClose);
 
 	bool found = false;
-	AppSignalParam asp = m_signalManager.signalParam(m_appSignalHash, &found);
+	m_asp = m_signalManager.signalParam(m_appSignalHash, &found);
 
-	ui->m_lineAppSignalId->setText(asp.appSignalId());
-	ui->m_lineCustomAppSignalId->setText(asp.customSignalId());
-	ui->m_lineCaption->setText(asp.caption());
-	ui->m_lineTags->setText(asp.tagStringList().join(' '));
-	ui->m_lineEquipmentId->setText(asp.equipmentId());
-	ui->m_lineLmEquipmentId->setText(asp.lmEquipmentId());
+	m_precision = m_asp.precision();
 
-	setWindowTitle(tr("%1 - %2").arg(asp.customSignalId()).arg(asp.caption()));
+	ui->m_lineAppSignalId->setText(m_asp.appSignalId());
+	ui->m_lineCustomAppSignalId->setText(m_asp.customSignalId());
+	ui->m_lineCaption->setText(m_asp.caption());
+	ui->m_lineTags->setText(m_asp.tagStringList().join(' '));
+	ui->m_lineEquipmentId->setText(m_asp.equipmentId());
+	ui->m_lineLmEquipmentId->setText(m_asp.lmEquipmentId());
+
+	ui->editValue->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(ui->editValue, &QLineEdit::customContextMenuRequested,  this, &TuningSignalInfo::onValueContextMenu);
+
+	ui->treeProperties->setHeaderLabels(QStringList() << tr("Property") << tr("Value"));
+	ui->treeProperties->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(ui->treeProperties, &QTreeWidget::customContextMenuRequested,  this, &TuningSignalInfo::onPropertiesContextMenu);
+
+	setWindowTitle(tr("%1 - %2").arg(m_asp.customSignalId()).arg(m_asp.caption()));
 
 	updateInfo();
 
@@ -123,7 +131,6 @@ void TuningSignalInfo::updateInfo()
 		writeRequestTimes.push_back(clientState.writeRequestTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
 		successfulWriteTimes.push_back(clientState.successfulWriteTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
 		unsuccessfulWriteTimes.push_back(clientState.unsuccessfulWriteTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
-
 	}
 
 
@@ -165,41 +172,76 @@ void TuningSignalInfo::updateInfo()
 	//
 
 	AppSignalParam asp = m_signalManager.signalParam(m_appSignalHash, &found);
-
-	QString text;
-
-	if (managerState.controlIsEnabled() == false)
 	{
-		text = tr("Disabled");
-	}
-	else
-	{
-		if (managerState.valid() == false)
+		QString text;
+
+		if (managerState.controlIsEnabled() == false)
 		{
-			text = tr("?");
+			text = tr("Disabled");
 		}
 		else
 		{
-			if (asp.isAnalog() == true)
+			if (managerState.valid() == false)
 			{
-				text = managerState.value().toString(m_analogFormat, asp.precision()) + " " + asp.unit();
+				text = tr("?");
 			}
 			else
 			{
-				text = managerState.value().toString();
+				if (asp.isAnalog() == true)
+				{
+					text = managerState.value().toString(m_analogFormat, m_precision) + " " + asp.unit();
+				}
+				else
+				{
+					text = managerState.value().toString();
+				}
 			}
+		}
+
+		if (ui->editValue->text() != text)
+		{
+			ui->editValue->setText(text);
 		}
 	}
 
-	ui->m_labelValue->setText(text);
+	if (ui->treeProperties->topLevelItemCount() == 0)
+	{
+		QStringList propertiesNames;
+		propertiesNames << tr("New Value:");
+		propertiesNames << tr("Source:");
+		propertiesNames << tr("Valid:");
+		propertiesNames << tr("OutOfRange:");
+		propertiesNames << tr("WriteInProgress:");
+		propertiesNames << tr("ControlIsEnabled:");
+		propertiesNames << tr("TuningDefault:");
+		if (m_lmStatusFlagMode == TuningClientSettings::LmStatusFlagMode::AccessKey)
+		{
+			propertiesNames << tr("WritingIsEnabled:");
+		}
+		propertiesNames << tr("WriteClientHash:");
+		propertiesNames << tr("WriteErrorCode:");
+		propertiesNames << tr("LM Time:");
 
-	// New value
+		propertiesNames << tr("SuccessfulReadTime:");
+		propertiesNames << tr("WriteRequestTime:");
+		propertiesNames << tr("SuccessfulWriteTime:");
+		propertiesNames << tr("UnsuccessfulWriteTime:");
+
+		for (const QString& p : propertiesNames)
+		{
+			ui->treeProperties->addTopLevelItem(new QTreeWidgetItem(QStringList() << p));
+		}
+		ui->treeProperties->resizeColumnToContents(0);
+
+	}
+
+	// Properties
 	//
-	text.clear();
+	QStringList propertiesValues;
 
 	if (managerState.controlIsEnabled() == false)
 	{
-		text += tr("NewValue:\t\tDisabled\n");
+		propertiesValues.push_back(tr("Disabled"));
 	}
 	else
 	{
@@ -212,53 +254,187 @@ void TuningSignalInfo::updateInfo()
 				precision = asp.precision();
 			}
 
-			text += tr("NewValue:\t\t%1\n").arg(m_signalManager.unappliedValue(m_appSignalHash).toString(m_analogFormat, precision));
+			propertiesValues.push_back(m_signalManager.unappliedValue(m_appSignalHash).toString(m_analogFormat, precision));
 		}
 		else
 		{
-			text += tr("NewValue:\t\t-\n");
+			propertiesValues.push_back("-");
 		}
 	}
 
-	text += "\n";
+	propertiesValues.push_back(stateServices.join(" / "));	// Sources
 
-	text += tr("Source:\t\t%1\n").arg(stateServices.join(" / "));
-
-	text += "\n";
-
-	text += tr("Valid:\t\t%1\n").arg(validStrings.join(" / "));
-	text += tr("OutOfRange:\t\t%1\n").arg(outOfRangeStrings.join(" / "));
-	text += tr("WriteInProgress:\t%1\n").arg(writeInProgressStrings.join(" / "));
-	text += tr("ControlIsEnabled:\t%1\n").arg(controlIsEnabledStrings.join(" / "));
-	text += tr("TuningDefault:\t\t%1\n").arg(isTuningDefaultStrings.join(" / "));
-
-	text += "\n";
+	propertiesValues.push_back(validStrings.join(" / "));
+	propertiesValues.push_back(outOfRangeStrings.join(" / "));
+	propertiesValues.push_back(writeInProgressStrings.join(" / "));
+	propertiesValues.push_back(controlIsEnabledStrings.join(" / "));
+	propertiesValues.push_back(isTuningDefaultStrings.join(" / "));
 
 	if (m_lmStatusFlagMode == TuningClientSettings::LmStatusFlagMode::AccessKey)
 	{
-		text += tr("WritingIsEnabled:\t%1\n").arg(writingIsEnabledStrings.join(" / "));
+		propertiesValues.push_back(writingIsEnabledStrings.join(" / "));
 	}
 
-	text += tr("WriteClientHash:\t%1\n").arg(writeClientHashes.join(" / "));
-	text += tr("WriteErrorCode:\t%1\n").arg(writeErrorCodes.join(" / "));
+	propertiesValues.push_back(writeClientHashes.join(" / "));
+	propertiesValues.push_back(writeErrorCodes.join(" / "));
+	propertiesValues.push_back(lmTimes.join(" / "));
 
-	text += "\n";
+	propertiesValues.push_back(successfulReadTimes.join(" / "));
+	propertiesValues.push_back(writeRequestTimes.join(" / "));
+	propertiesValues.push_back(successfulWriteTimes.join(" / "));
+	propertiesValues.push_back(unsuccessfulWriteTimes.join(" / "));
 
-	text += tr("LM Time:\t\t%1\n").arg(lmTimes.join(" / "));
-
-	text += "\n";
-
-	text += tr("SuccessfulReadTime:\t%1\n").arg(successfulReadTimes.join(" / "));
-	text += tr("WriteRequestTime:\t%1\n").arg(writeRequestTimes.join(" / "));
-	text += tr("SuccessfulWriteTime:\t%1\n").arg(successfulWriteTimes.join(" / "));
-	text += tr("UnsuccessfulWriteTime:\t%1\n").arg(unsuccessfulWriteTimes.join(" / "));
-
-	if (m_textEditText != text)
+	int i = 0;
+	for (const QString& p : propertiesValues)
 	{
-		m_textEditText = text;
-
-		ui->m_textEdit->setPlainText(text);
+		QTreeWidgetItem* item = ui->treeProperties->topLevelItem(i++);
+		if (item == nullptr)
+		{
+			Q_ASSERT(item);
+			return;
+		}
+		item->setText(1, p);
 	}
 
 	return;
+}
+
+
+void TuningSignalInfo::onValueContextMenu()
+{
+	QMenu menu;
+
+	// Precision
+	//
+	if (m_asp.isAnalog() == true)
+	{
+		QMenu* submenuV = menu.addMenu(tr("Precision"));
+		QString strPrecision = ".";
+
+		QActionGroup* precisionGroup = new QActionGroup(this);
+		precisionGroup->setExclusive(true);
+
+		for (int i = 0; i < 10; i++)
+		{
+			QAction* a = new QAction(strPrecision, &menu);
+
+			auto f = [this, i]() -> void
+			{
+				m_precision = i;
+
+				if (m_analogFormat == E::AnalogFormat::g_9_or_9e || m_analogFormat == E::AnalogFormat::G_9_or_9E)
+				{
+					m_analogFormat = E::AnalogFormat::f_9;
+				}
+			};
+
+			connect(a, &QAction::triggered, this, f);
+
+			a->setCheckable(true);
+
+			if (i == m_precision)
+			{
+				a->setChecked(true);
+			}
+
+			precisionGroup->addAction(a);
+
+			strPrecision += "0";
+		}
+
+		submenuV->addActions(precisionGroup->actions());
+	}
+
+	// Format
+	//
+	if (m_asp.isAnalog() == true)
+	{
+		QMenu* submenuV = menu.addMenu(tr("Format"));
+
+		QAction* a = new QAction(tr("Auto-select"), &menu);
+		a->setCheckable(true);
+		a->setChecked(m_analogFormat == E::AnalogFormat::g_9_or_9e || m_analogFormat == E::AnalogFormat::G_9_or_9E);
+		connect(a, &QAction::triggered, this, [this]()
+				{
+					m_analogFormat = E::AnalogFormat::g_9_or_9e;
+				});
+		submenuV->addAction(a);
+
+		a = new QAction(tr("Decimal (as [-]9.9)"), &menu);
+		a->setCheckable(true);
+		a->setChecked(m_analogFormat == E::AnalogFormat::f_9);
+		connect(a, &QAction::triggered, this, [this]()
+				{
+					m_analogFormat = E::AnalogFormat::f_9;
+				});
+		submenuV->addAction(a);
+
+		a = new QAction(tr("Exponential (as [-]9.9e[+|-]999)"), &menu);
+		a->setCheckable(true);
+		a->setChecked(m_analogFormat == E::AnalogFormat::e_9e || m_analogFormat == E::AnalogFormat::E_9E);
+		connect(a, &QAction::triggered, this, [this]()
+				{
+					m_analogFormat = E::AnalogFormat::e_9e;
+				});
+		submenuV->addAction(a);
+	}
+
+	//
+	if (menu.isEmpty() == false)
+	{
+		QAction* separator2 = new QAction(&menu);
+		separator2->setSeparator(true);
+		menu.addAction(separator2);
+	}
+
+	// Copy
+	//
+	QAction* actionCopy = new QAction(tr("Copy"), &menu);
+
+	auto f = [this]() -> void
+			 {
+				QClipboard *clipboard = QApplication::clipboard();
+				clipboard->setText(ui->editValue->text());
+			};
+
+	connect(actionCopy, &QAction::triggered, this, f);
+
+	menu.addAction(actionCopy);
+
+	// --
+	//
+	menu.exec(QCursor::pos());
+}
+
+
+void TuningSignalInfo::onPropertiesContextMenu()
+{
+	QMenu menu(this);
+
+	QTreeWidgetItem* item = ui->treeProperties->currentItem();
+	if (item == nullptr)
+	{
+		return;
+	}
+
+	// Copy
+	QAction* actionCopy = new QAction(tr("Copy"), &menu);
+
+	auto f = [this]() -> void
+			 {
+				QClipboard *clipboard = QApplication::clipboard();
+				QTreeWidgetItem* item = ui->treeProperties->currentItem();
+				if (item == nullptr)
+				{
+					return;
+				}
+				clipboard->setText(item->text(1));
+			};
+
+	connect(actionCopy, &QAction::triggered, this, f);
+
+	menu.addAction(actionCopy);
+
+	//
+	menu.exec(QCursor::pos());
 }

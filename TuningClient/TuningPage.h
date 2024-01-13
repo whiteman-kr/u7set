@@ -35,19 +35,21 @@ public:
 
 protected:
 	virtual Qt::ItemFlags flags(const QModelIndex& index) const override;
-
 	virtual	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 	bool setData(const QModelIndex& index, const QVariant& value, int role) override;
+
+private:
+	QIcon drawCheckBox(int state, bool enabled) const;
 
 private:
 	bool m_blink = false;
 	const ClientLib::TuningUserManager& m_userManager;
 	TuningPageHelper m_helper;
+	QWidget* m_parentWidget{nullptr};
 };
 
 class TuningTableView : public QTableView
 {
-
 	Q_OBJECT
 
 public:
@@ -55,15 +57,16 @@ public:
 	bool editorActive();
 
 protected:
-
 	virtual bool edit(const QModelIndex&  index, EditTrigger trigger, QEvent*  event);
+	virtual void mousePressEvent(QMouseEvent *event) override;
 
 protected slots:
-
 	virtual void closeEditor(QWidget*  editor, QAbstractItemDelegate::EndEditHint hint);
 
-private:
+signals:
+	void checkBoxClicked(const QModelIndex& index);
 
+private:
 	bool m_editorActive = false;
 	TuningPageHelper m_helper;
 };
@@ -71,7 +74,6 @@ private:
 
 class TuningPageColumnsWidth
 {
-
 public:
 
 	TuningPageColumnsWidth();
@@ -88,7 +90,6 @@ private:
 
 	std::map<TuningModelColumns, int> m_widthMap;
 	std::map<TuningModelColumns, int> m_defaultWidthMap;
-
 };
 
 
@@ -144,6 +145,8 @@ private slots:
 
 	void slot_setAnalogFormat(E::AnalogFormat analogFormat);
 
+	void slot_tableCheckboxClicked(const QModelIndex& index);
+
 public slots:
 
 	void slot_treeFilterChanged(std::shared_ptr<TuningFilter> filter);
@@ -178,12 +181,12 @@ private:
 	void invertValue();
 	void addSelectedSignalsToFilter(TuningFilter* filter);
 	void restoreSignalsFromFilter(TuningFilter* filter);
+	void setToDefaults(const std::vector<Hash>& hashes);
 
 	void setActionButtonsState();
 	void updateVisibleItems();
 
 private slots:
-
 	void onTimer();
 	void slot_setAll();
 	void slot_undo();
