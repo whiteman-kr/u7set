@@ -1198,13 +1198,8 @@ namespace Builder
 		return profile + "_" + m_software->equipmentIdTemplate().toLower() + "." + extention;
 	}
 
-	bool SoftwareCfgGenerator::writeMatsUsers(const QString& propertyName, bool tuningEnabled, const QStringList& tuningUserAccounts)
+	bool SoftwareCfgGenerator::writeMatsUsers(const QString& propertyName, const QStringList& tuningUserAccounts)
 	{
-		if (tuningEnabled == false)
-		{
-			return true;
-		}
-
 		Builder::DbMatsUserStorage storage;
 
 		QString errorCode;

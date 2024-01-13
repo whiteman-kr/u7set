@@ -177,7 +177,7 @@ bool MonitorConfigController::updateConfiguration(const ClientLib::Configuration
 
 	// Get file MATS_USERS
 	//
-	if (config.tuningEnabled == true)
+	if (config.tuningEnabled == true && config.tuningLogin == true)
 	{
 		QByteArray matsUsersData;
 		getFileBlockedById(CfgFileId::MATSUSERS, &matsUsersData, nullptr);

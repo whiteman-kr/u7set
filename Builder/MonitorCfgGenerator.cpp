@@ -78,9 +78,11 @@ namespace Builder
 
 			// Write MATS users
 			//
-			result &= writeMatsUsers(EquipmentPropNames::TUNING_USER_ACCOUNTS,
-									 settings->tuningLogin,
-									 settings->tuningUserAccounts.split(Separator::SEMICOLON, Qt::SkipEmptyParts));
+			if (settings->tuningLogin == true)
+			{
+				result &= writeMatsUsers(EquipmentPropNames::TUNING_USER_ACCOUNTS,
+										 settings->tuningUserAccounts.split(Separator::SEMICOLON, Qt::SkipEmptyParts));
+			}
 		}
 
 		// Generate behavior
