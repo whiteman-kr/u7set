@@ -6,7 +6,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Network)
+find_package(Qt6 REQUIRED COMPONENTS Xml Concurrent Qml)
 
 set(TARGET DiagStateLib)
 
@@ -58,7 +58,7 @@ target_precompile_headers(${TARGET} PUBLIC
 	"../CommonLib/Types.h"
 )
 
-target_link_libraries(${TARGET} PUBLIC Qt6::Network)
+target_link_libraries(${TARGET} PUBLIC Qt6::Core Qt6::Xml Qt6::Concurrent Qt6::Qml)
 target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf HardwareLib UtilsLib)
 
 target_compile_definitions(${TARGET} PRIVATE DIAG_STATE_LIB_DOMAIN)
