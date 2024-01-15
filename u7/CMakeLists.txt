@@ -21,6 +21,8 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Sql Network Qml Svg Serial
 qt_standard_project_setup()
 
 set (U7_SOURCES
+	../Builder/DiagSignalTypesStorage.cpp
+	../Builder/DiagSignalTypesStorage.h
 	../lib/CodeEditor.cpp
 	../lib/CodeEditor.h
 	../lib/Configurator.cpp
@@ -92,8 +94,6 @@ set (U7_SOURCES
 	CreateUserDialogDialog.h
 	DbTagsEditor.cpp
 	DbTagsEditor.h
-	DiagSignalTypesStorage.cpp 
-	DiagSignalTypesStorage.h
 	DialogAfbLibraryCheck.cpp
 	DialogAfbLibraryCheck.h
 	DialogBusEditor.cpp

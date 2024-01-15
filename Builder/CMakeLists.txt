@@ -88,6 +88,8 @@ qt_add_library(${TARGET} STATIC
 	DiagDataServiceCfgGenerator.h
 	DiagnosticsCfgGenerator.cpp
 	DiagnosticsCfgGenerator.h
+	DiagSignalTypesStorage.cpp
+	DiagSignalTypesStorage.h
 	FbParamCalculation.cpp
 	GatewayServiceCfgGenerator.cpp
 	GatewayServiceCfgGenerator.h

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DiagSignalTypesStorage.h"
+#include "../../Builder/DiagSignalTypesStorage.h"
 #include "../lib/PropertyEditor.h"
 #include "../lib/PropertyEditorDialog.h"
 

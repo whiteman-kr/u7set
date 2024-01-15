@@ -6,11 +6,6 @@
 //
 //
 
-DiagSignalTypesStorage::DiagSignalTypesStorage() :
-	DbObjectStorage(nullptr, 0)
-{
-}
-
 DiagSignalTypesStorage::DiagSignalTypesStorage(DbController* db) :
 	DbObjectStorage(db, db->systemFileId(DbDir::DiagSignalTypesDir))
 {
