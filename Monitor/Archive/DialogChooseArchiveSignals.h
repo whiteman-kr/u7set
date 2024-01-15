@@ -3,7 +3,12 @@
 #include "ArchiveData.h"
 #include "../../OnlineLib/SoftwareSettings.h"
 
-class MonitorSignalManager;
+
+namespace ClientLib
+{
+	class AppSignalManager;
+}
+
 
 namespace Ui {
 	class DialogChooseArchiveSignals;
@@ -14,7 +19,7 @@ class DialogChooseArchiveSignals : public QDialog
 	Q_OBJECT
 
 public:
-	DialogChooseArchiveSignals(const MonitorSignalManager* signalManager,
+	DialogChooseArchiveSignals(const ClientLib::AppSignalManager& signalManager,
 							   const std::vector<SoftwareEndpoint::ArchiveService>& archiveServices,
 							   const ArchiveSource& init,
 							   QWidget* parent);

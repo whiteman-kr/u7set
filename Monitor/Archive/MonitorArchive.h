@@ -2,8 +2,12 @@
 #include "../../AppSignalLib/AppSignalParam.h"
 
 class ArchiveWidget;
-class MonitorSignalManager;
 class MonitorConfigController;
+
+namespace ClientLib
+{
+	class AppSignalManager;
+}
 
 
 class MonitorArchive
@@ -15,12 +19,12 @@ public:
 	static std::vector<QString> getArchiveList();
 	static bool activateWindow(QString archiveName);
 
-	static bool startNewWidget(MonitorSignalManager* signalManager,
+	static bool startNewWidget(ClientLib::AppSignalManager& signalManager,
 							   MonitorConfigController* configController,
 							   const std::vector<AppSignalParam>& appSignals,
 							   QWidget* parent);
 
-	static bool requestArchiveWithNewWidget(MonitorSignalManager* signalManager,
+	static bool requestArchiveWithNewWidget(ClientLib::AppSignalManager& signalManager,
 											MonitorConfigController* configController,
 											const std::vector<AppSignalParam>& appSignals,
 											QDateTime startTime,

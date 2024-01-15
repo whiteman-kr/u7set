@@ -511,6 +511,7 @@ public:
 	SoftwareEndpoint::ConfigService configService1;
 	SoftwareEndpoint::ConfigService configService2;
 
+	std::vector<SoftwareEndpoint::AppDataService> appDataServices;
 	std::vector<SoftwareEndpoint::DiagDataService> diagDataServices;
 	//std::vector<SoftwareEndpoint::ArchiveService> archiveServices;
 

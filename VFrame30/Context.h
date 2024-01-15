@@ -48,7 +48,7 @@ namespace VFrame30
 
 	private:
 		const VFrame30::AppSignalController* m_appSignalController = nullptr;
-		const  VFrame30::TuningController* m_tuningController = nullptr;
+		const VFrame30::TuningController* m_tuningController = nullptr;
 		IViewVariables* m_viewVariables = nullptr;
 		ILogFile* m_log = nullptr;
 	};

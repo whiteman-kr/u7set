@@ -40,6 +40,8 @@ qt_add_library(${TARGET} STATIC
 	Context.h
 	DiagSchema.cpp
 	DiagSchema.h
+	DiagStateController.cpp
+	DiagStateController.h
 	DrawParam.cpp
 	DrawParam.h
 	FblItem.cpp
@@ -222,7 +224,7 @@ target_precompile_headers(${TARGET} PUBLIC
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Widgets Qt6::Qml Qt6::Xml Qt6::Svg)
-target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib AppSignalLib HardwareLib TrendView)
+target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib AppSignalLib HardwareLib DiagStateLib TrendView)
 
 target_compile_definitions(${TARGET} PRIVATE VFRAME30_LIBRARY)
 #target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

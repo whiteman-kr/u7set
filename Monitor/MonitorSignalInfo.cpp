@@ -1,27 +1,25 @@
 #include "MonitorSignalInfo.h"
 #include "../UtilsLib/Ui/UiTools.h"
 #include "MonitorConfigController.h"
-#include "MonitorSignalManager.h"
+#include "../ClientLib/AppSignalManager.h" 
 #include "ui_DialogSignalInfo.h"
 
-class MonitorSignalManager;
 
 bool MonitorSignalInfo::showDialog(QString appSignalId,
-								   MonitorSignalManager* appSignalManager,
+								   ClientLib::AppSignalManager& appSignalManager,
 								   ITuningSignalManager& tuningSignalManager,
 								   ITuningConnection& tuningConnection,
 								   ITuningAuthorization& tuningAuthorization,
 								   MonitorConfigController* configController,
 								   MonitorCentralWidget* centralWidget)
 {
-	Q_ASSERT(appSignalManager);
 	Q_ASSERT(configController);
 	Q_ASSERT(centralWidget);
 
 	if (appSignalId.startsWith('@') == true)
 	{
 		bool ok = true;
-		AppSignalParam s = appSignalManager->signalParamByEquipemntId(appSignalId, &ok);
+		AppSignalParam s = appSignalManager.signalParamByEquipemntId(appSignalId, &ok);
 
 		if (ok == true)
 		{
@@ -41,7 +39,7 @@ bool MonitorSignalInfo::showDialog(QString appSignalId,
 	else
 	{
 		bool ok = false;
-		AppSignalParam signal = appSignalManager->signalParam(appSignalId, &ok);
+		AppSignalParam signal = appSignalManager.signalParam(appSignalId, &ok);
 
 		if (ok == true)
 		{
@@ -50,14 +48,14 @@ bool MonitorSignalInfo::showDialog(QString appSignalId,
 			MonitorSignalInfo* msi = new MonitorSignalInfo(signal,
 														   configController,
 														   appSignalManager,
-														   appSignalManager,
+														   &appSignalManager,
 														   tuningSignalManager,
 														   tuningConnection,
 														   tuningAuthorization,
 														   tuningEnabled,
 														   centralWidget);
 
-			connect(appSignalManager, &MonitorSignalManager::signalParamsUpdated, msi, &MonitorSignalInfo::onSignalParamAndUnitsArrived);
+			connect(&appSignalManager, &ClientLib::AppSignalManager::signalParamsUpdated, msi, &MonitorSignalInfo::onSignalParamAndUnitsArrived);
 
 			msi->show();
 			msi->raise();
@@ -77,7 +75,7 @@ bool MonitorSignalInfo::showDialog(QString appSignalId,
 
 MonitorSignalInfo::MonitorSignalInfo(const AppSignalParam& signal,
 									 MonitorConfigController* configController,
-									 IAppSignalManager* appSignalManager,
+									 IAppSignalManager& appSignalManager,
 									 ISignalDataServer* signalDataServer,
 									 ITuningSignalManager& tuningSignalManager,
 									 ITuningConnection& tuningConnection,
@@ -85,7 +83,7 @@ MonitorSignalInfo::MonitorSignalInfo(const AppSignalParam& signal,
 									 bool tuningEnabled,
 									 MonitorCentralWidget* centralWidget):
 	DialogSignalInfo(signal,
-					 appSignalManager,
+					 &appSignalManager,
 					 signalDataServer,
 					 configController->configuration().appDataServices,
 					 tuningSignalManager,

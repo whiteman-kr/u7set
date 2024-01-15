@@ -3,10 +3,10 @@
 #include "MonitorCentralWidget.h"
 #include "MonitorConfigController.h"
 #include "MonitorSchemaManager.h"
-#include "MonitorSignalManager.h"
 #include "SelectSchemaWidget.h"
 
 #include "../ClientLib/AdsConnection.h"
+#include "../ClientLib/AppSignalManager.h"
 #include "../ClientLib/ClientTranslator.h"
 #include "../ClientLib/TuningConnection.h"
 #include "../ClientLib/TuningLog.h"
@@ -135,8 +135,8 @@ public:
 	MonitorConfigController& configController();
 	const MonitorConfigController& configController() const;
 
-	MonitorSignalManager& signalManager();
-	const MonitorSignalManager& signalManager() const;
+	ClientLib::AppSignalManager& signalManager();
+	const ClientLib::AppSignalManager& signalManager() const;
 
 	ClientLib::TuningUserManager& userManager();
 	const ClientLib::TuningUserManager& userManager() const;
@@ -160,7 +160,7 @@ private:
 	InstanceResolver& m_instanceResolver;
 
 	MonitorConfigController m_configController;
-	MonitorSignalManager m_signalManager;
+	ClientLib::AppSignalManager m_signalManager;
 	TuningSignalManager m_tuningSignalManager;
 
 	MonitorSchemaManager m_schemaManager;

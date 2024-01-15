@@ -4,8 +4,7 @@
 #include "DiagnosticsAppSettings.h"
 #include "DiagnosticsSchemaManager.h"
 #include "Globals.h"
-// -- #include "../VFrame30/AppSignalController.h"
-// --  #include "../VFrame30/TuningController.h"
+#include "../VFrame30/AppSignalController.h"
 #include "DiagnosticsMainWindow.h"
 
 //
@@ -13,7 +12,7 @@
 //
 DiagSchemaView::DiagSchemaView(DiagnosticsSchemaManager* schemaManager,
 							   VFrame30::ISchemaViewHistory* schemaViewHistory,
-							   // -- VFrame30::AppSignalController* appSignalController,
+							   VFrame30::AppSignalController* appSignalController,
 							   VFrame30::LogController* logController,
 							   ITimeStats* timeStats,
 							   QWidget* parent) :
@@ -21,10 +20,7 @@ DiagSchemaView::DiagSchemaView(DiagnosticsSchemaManager* schemaManager,
 {
 	m_app.setMainWindow(theApp.mainWindow());
 
-	// -- setAppSignalController(appSignalController);
-	// -- setTuningController(theApp.mainWindow()->tuningSignalManager(),
-	//					theApp.mainWindow()->tuningConnection(),
-	//					theApp.mainWindow()->tuningAuthorization());
+	setAppSignalController(appSignalController);
 	setLogController(logController);
 
 	Q_ASSERT(schemaManager);

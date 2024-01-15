@@ -902,7 +902,7 @@ namespace Builder
 		m_schemaView(schemaView),
 		m_printer(schemaView),
 		m_appSignalProvider(signalSet),
-		m_appSignalController(&m_appSignalProvider, nullptr),
+		m_appSignalController(m_appSignalProvider, nullptr),
 		m_inputFiles(files),
 		m_filePath(filePath),
 		m_serverIp(serverIp),

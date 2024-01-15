@@ -1,17 +1,17 @@
 #include "MonitorMainWindow.h"
-#include "DialogSettings.h"
-#include "MonitorSchemaWidget.h"
-#include "MonitorSchemaView.h"
-#include "MonitorSignalSnapshot.h"
-#include "./Archive/MonitorArchive.h"
-#include "DialogDataSources.h"
-#include "Globals.h"
-#include "./Trend/MonitorTrends.h"
-#include "../VFrame30/Schema.h"
-#include "../lib/Ui/DialogSignalSearch.h"
 #include "../UtilsLib/Ui/UiTools.h"
+#include "../VFrame30/Schema.h"
 #include "../lib/Ui/DialogAbout.h"
+#include "../lib/Ui/DialogSignalSearch.h"
 #include "../lib/Ui/SchemaListWidget.h"
+#include "./Archive/MonitorArchive.h"
+#include "./Trend/MonitorTrends.h"
+#include "DialogDataSources.h"
+#include "DialogSettings.h"
+#include "Globals.h"
+#include "MonitorSchemaView.h"
+#include "MonitorSchemaWidget.h"
+#include "MonitorSignalSnapshot.h"
 
 MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow{parent},
@@ -70,7 +70,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 
 	// Creating signals controllers for VFrame30
 	//
-	m_appSignalController = std::make_unique<VFrame30::AppSignalController>(&m_signalManager);
+	m_appSignalController = std::make_unique<VFrame30::AppSignalController>(m_signalManager);
 	m_logController = std::make_unique<VFrame30::LogController>(&m_LogFile);
 
 	// --
@@ -1211,7 +1211,7 @@ void MonitorMainWindow::slot_archive()
 	if (archiveWindowToActivate.isEmpty() == true)
 	{
 		std::vector<AppSignalParam> appSignals;
-		MonitorArchive::startNewWidget(&m_signalManager, &m_configController, appSignals, this);
+		MonitorArchive::startNewWidget(m_signalManager, &m_configController, appSignals, this);
 	}
 	else
 	{
@@ -1291,7 +1291,7 @@ void MonitorMainWindow::slot_archive(QStringList signalsList, QDateTime startTim
 		return;
 	}
 
-	MonitorArchive::requestArchiveWithNewWidget(&m_signalManager, &configController(), appSignals, startTime, endTime, static_cast<E::TimeType>(timeType), this);
+	MonitorArchive::requestArchiveWithNewWidget(m_signalManager, &configController(), appSignals, startTime, endTime, static_cast<E::TimeType>(timeType), this);
 	return;
 }
 
@@ -1482,7 +1482,7 @@ void MonitorMainWindow::slot_findSignal()
 
 	DialogSignalSearch* dsi = new DialogSignalSearch(this, &m_signalManager);
 
-	connect(&m_signalManager, &MonitorSignalManager::signalParamsUpdated, dsi, &DialogSignalSearch::signalsUpdated);
+	connect(&m_signalManager, &ClientLib::AppSignalManager::signalParamsUpdated, dsi, &DialogSignalSearch::signalsUpdated);
 
 	connect(dsi, &DialogSignalSearch::signalContextMenu, cw, &MonitorCentralWidget::slot_signalContextMenu);
 	connect(dsi, &DialogSignalSearch::signalInfo, cw, &MonitorCentralWidget::slot_signalInfo);
@@ -1763,12 +1763,12 @@ const MonitorConfigController& MonitorMainWindow::configController() const
 	return m_configController;
 }
 
-MonitorSignalManager& MonitorMainWindow::signalManager()
+ClientLib::AppSignalManager& MonitorMainWindow::signalManager()
 {
 	return m_signalManager;
 }
 
-const MonitorSignalManager& MonitorMainWindow::signalManager() const
+const ClientLib::AppSignalManager& MonitorMainWindow::signalManager() const
 {
 	return m_signalManager;
 }
@@ -2008,7 +2008,7 @@ void MonitorToolBar::dropEvent(QDropEvent* event)
 
 		if (appSignals.empty() == false)
 		{
-			MonitorArchive::startNewWidget(&mainWindow->signalManager(), &mainWindow->configController(), appSignals, mainWindow);
+			MonitorArchive::startNewWidget(mainWindow->signalManager(), &mainWindow->configController(), appSignals, mainWindow);
 		}
 	}
 

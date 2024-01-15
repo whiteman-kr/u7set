@@ -22,7 +22,7 @@ EditSchemaView::EditSchemaView(AppSignalSetProvider* signalSetProvider, QWidget*
 	m_mouseState(MouseState::None),
 	m_appSignalProvider(signalSetProvider),
 	m_tuningSignalProvider(signalSetProvider),
-	m_appSignalController(&m_appSignalProvider, nullptr)
+	m_appSignalController(m_appSignalProvider, nullptr)
 {
 	Q_ASSERT(signalSetProvider);
 
@@ -37,7 +37,7 @@ EditSchemaView::EditSchemaView(AppSignalSetProvider* signalSetProvider, std::sha
 	m_mouseState(MouseState::None),
 	m_appSignalProvider(signalSetProvider),
 	m_tuningSignalProvider(signalSetProvider),
-	m_appSignalController(&m_appSignalProvider, nullptr)
+	m_appSignalController(m_appSignalProvider, nullptr)
 {
 	Q_ASSERT(signalSetProvider);
 

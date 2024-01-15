@@ -30,12 +30,12 @@ set (MONITOR_SOURCES
 	../lib/ISignalDataServer.h
 	../lib/Ui/AppDataSourcesWidget.cpp
 	../lib/Ui/AppDataSourcesWidget.h
+	../lib/Ui/ChooseTagsWidget.cpp
+	../lib/Ui/ChooseTagsWidget.h
 	../lib/Ui/DialogAbout.cpp
 	../lib/Ui/DialogAbout.h
 	../lib/Ui/DialogAlert.cpp
 	../lib/Ui/DialogAlert.h
-	../lib/Ui/ChooseTagsWidget.cpp
-	../lib/Ui/ChooseTagsWidget.h
 	../lib/Ui/DialogSignalInfo.cpp
 	../lib/Ui/DialogSignalInfo.h
 	../lib/Ui/DialogSignalSearch.cpp
@@ -46,6 +46,8 @@ set (MONITOR_SOURCES
 	../lib/Ui/DialogSourceInfo.h
 	../lib/Ui/DialogTcpStatistics.cpp
 	../lib/Ui/DialogTcpStatistics.h
+	../lib/Ui/DialogWriteValues.cpp
+	../lib/Ui/DialogWriteValues.h
 	../lib/Ui/DragDropHelper.cpp
 	../lib/Ui/DragDropHelper.h
 	../lib/Ui/SchemaListWidget.cpp
@@ -54,8 +56,6 @@ set (MONITOR_SOURCES
 	../lib/Ui/TagSelectorWidget.h
 	../lib/Ui/TuningSourcesWidget.cpp
 	../lib/Ui/TuningSourcesWidget.h
-	../lib/Ui/DialogWriteValues.cpp
-	../lib/Ui/DialogWriteValues.h
 	Archive/ArchiveConnection.cpp
 	Archive/ArchiveConnection.h
 	Archive/ArchiveData.cpp
@@ -94,8 +94,6 @@ set (MONITOR_SOURCES
 	MonitorSchemaWidget.h
 	MonitorSignalInfo.cpp
 	MonitorSignalInfo.h
-	MonitorSignalManager.cpp
-	MonitorSignalManager.h
 	MonitorSignalSnapshot.cpp
 	MonitorSignalSnapshot.h
 	ScriptMonitorApplication.cpp

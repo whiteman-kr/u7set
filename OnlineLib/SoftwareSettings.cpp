@@ -1630,6 +1630,23 @@ bool DiagnosticsSettings::writeToXml(XmlWriteHelper& xml) const
 	xml.writeStringElement(EquipmentPropNames::START_SCHEMA_ID, startSchemaId);
 	xml.writeStringElement(EquipmentPropNames::SCHEMA_TAGS, schemaTags);
 
+	// AppDataServices
+	//
+	for (const SoftwareEndpoint::AppDataService& ads : appDataServices)
+	{
+		xml.writeStartElement(XmlElement::APP_DATA_SERVICE);
+
+		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, ads.equipmentId);
+
+		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, ads.address.addressStr());
+		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, ads.address.port());
+
+		xml.writeStringAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_IP, ads.realtimeAddress.addressStr());
+		xml.writeIntAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_PORT, ads.realtimeAddress.port());
+
+		xml.writeEndElement();			// </AppDataService>
+	}
+
 	// DiagDataServices
 	//
 	for (const SoftwareEndpoint::DiagDataService& dds : diagDataServices)
@@ -1724,6 +1741,29 @@ bool DiagnosticsSettings::readFromXml(XmlReadHelper& xml)
 		if (xml.name() == EquipmentPropNames::SCHEMA_TAGS)
 		{
 			schemaTags = xml.elementText();
+			continue;
+		}
+
+		if (xml.name() == XmlElement::APP_DATA_SERVICE)
+		{
+			SoftwareEndpoint::AppDataService ads;
+			QString clientIp;
+			int clientPort = 0;
+			QString rtIp;
+			int rtPort = 0;
+
+			result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &ads.equipmentId);
+			result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &clientIp);
+			result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &clientPort);
+			result &= xml.readStringAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_IP, &rtIp);
+			result &= xml.readIntAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_PORT, &rtPort);
+
+			ads.address.setAddressPort(clientIp, clientPort);
+			ads.realtimeAddress.setAddressPort(rtIp, rtPort);
+
+			appDataServices.push_back(ads);
+
+			xml.skipCurrentElement();
 			continue;
 		}
 

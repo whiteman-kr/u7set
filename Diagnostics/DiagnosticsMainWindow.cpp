@@ -20,7 +20,7 @@ DiagnosticsMainWindow::DiagnosticsMainWindow(InstanceResolver& instanceResolver,
 	m_LogFile{qAppName(), QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + softwareInfo.equipmentID()},
 	m_instanceResolver{instanceResolver},
 	m_configController{softwareInfo, DiagnosticsAppSettings::instance().configuratorAddress1(), DiagnosticsAppSettings::instance().configuratorAddress2(), &m_LogFile},
-//	m_signalManager{&m_LogFile},
+	m_appSignalManager{&m_LogFile},
 	m_schemaManager{m_configController, m_signalDataServerStub},
 	m_dialogAlert(this)
 {
@@ -67,18 +67,18 @@ DiagnosticsMainWindow::DiagnosticsMainWindow(InstanceResolver& instanceResolver,
 	connect(&m_LogFile, &Log::LogFile::alertArrived, &m_dialogAlert, &DialogAlert::onAlertArrived);
 	connect(&m_LogFile, &Log::LogFile::writeFailure, &m_dialogAlert, &DialogAlert::onAlertArrived);
 
-	//// Creating signals controllers for VFrame30
-	////
-	//m_appSignalController = std::make_unique<VFrame30::AppSignalController>(&m_signalManager);
+	// Creating signals controllers for VFrame30
+	//
+	m_appSignalController = std::make_unique<VFrame30::AppSignalController>(m_appSignalManager);
 	m_logController = std::make_unique<VFrame30::LogController>(&m_LogFile);
 
-	//// --
-	////
+	// --
+	//
 	auto createSchemaWidgetFunc = [this](std::shared_ptr<VFrame30::Schema> schema, QWidget* parentWidget)
 	{
 		return new DiagSchemaWidget(schema,
 									&m_schemaManager,
-									// m_appSignalController.get(),
+									m_appSignalController.get(),
 									m_logController.get(),
 									&m_schemaStats,
 									parentWidget);
@@ -95,11 +95,8 @@ DiagnosticsMainWindow::DiagnosticsMainWindow(InstanceResolver& instanceResolver,
 	createToolBars();
 	createStatusBar();
 
-	//connect(&m_tuningUserManager, &ClientLib::TuningUserManager::loggedIn, this, &MonitorMainWindow::slot_loggedIn);
-	//connect(&m_tuningUserManager, &ClientLib::TuningUserManager::loggedOut, this, &MonitorMainWindow::slot_loggedOut);
-
-	//// --
-	////
+	// --
+	//
 	setMinimumSize(500, 300);
 	restoreWindowState();
 
@@ -205,7 +202,7 @@ bool DiagnosticsMainWindow::eventFilter(QObject *object, QEvent *event)
 
 //void MonitorMainWindow::showTrends(const std::vector<AppSignalParam>& appSignals)
 //{
-//	MonitorTrends::startTrendApp(m_signalManager, m_configController, appSignals, this);
+//	MonitorTrends::startTrendApp(m_appSignalManager, m_configController, appSignals, this);
 //}
 
 void DiagnosticsMainWindow::saveWindowState()
@@ -656,10 +653,10 @@ void DiagnosticsMainWindow::createStatusBar()
 	m_statusBarConfigConnection->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
 	m_statusBarConfigConnection->setMinimumWidth(100);
 
-//	m_statusBarAppDataConnection = new QLabel();
-//	m_statusBarAppDataConnection->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
-//	m_statusBarAppDataConnection->setMinimumWidth(100);
-//
+	m_statusBarAppDataConnection = new QLabel();
+	m_statusBarAppDataConnection->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
+	m_statusBarAppDataConnection->setMinimumWidth(100);
+
 //	m_statusBarTuningConnection = new QLabel();
 //	m_statusBarTuningConnection->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
 //	m_statusBarTuningConnection->setMinimumWidth(100);
@@ -678,7 +675,7 @@ void DiagnosticsMainWindow::createStatusBar()
 	//
 	statusBar()->addWidget(m_statusBarInfo, 1);
 	statusBar()->addPermanentWidget(m_statusBarConfigConnection, 0);
-//	statusBar()->addPermanentWidget(m_statusBarAppDataConnection, 0);
+	statusBar()->addPermanentWidget(m_statusBarAppDataConnection, 0);
 //	statusBar()->addPermanentWidget(m_statusBarTuningConnection, 0);
 	statusBar()->addPermanentWidget(m_statusBarProjectInfo, 0);
 	statusBar()->addPermanentWidget(m_statusBarLogAlerts, 0);
@@ -705,7 +702,7 @@ void DiagnosticsMainWindow::updateStatusBar()
 	// Update status bar
 	//
 	Q_ASSERT(m_statusBarConfigConnection);
-//	Q_ASSERT(m_statusBarAppDataConnection);
+	Q_ASSERT(m_statusBarAppDataConnection);
 //	Q_ASSERT(m_statusBarTuningConnection);
 
 	// ConfigService connection
@@ -717,14 +714,14 @@ void DiagnosticsMainWindow::updateStatusBar()
 							   confiConnState,
 							   m_statusBarConfigConnection);
 	}
-//
-//	// AppDataService connection
-//	//
-//	{
-//		showSoftwareConnection(tr("AppDataService"),
-//							   m_adsConnection.tcpSignalConnStates(),
-//							   m_statusBarAppDataConnection);
-//	}
+
+	// AppDataService connection
+	//
+	{
+		showSoftwareConnection(tr("AppDataService"),
+							   m_adsConnection.tcpSignalConnStates(),
+							   m_statusBarAppDataConnection);
+	}
 //
 //	// TuningService connection
 //	//
@@ -1103,7 +1100,7 @@ void DiagnosticsMainWindow::debug()
 //	if (archiveWindowToActivate.isEmpty() == true)
 //	{
 //		std::vector<AppSignalParam> appSignals;
-//		MonitorArchive::startNewWidget(&m_signalManager, &m_configController, appSignals, this);
+//		MonitorArchive::startNewWidget(&m_appSignalManager, &m_configController, appSignals, this);
 //	}
 //	else
 //	{
@@ -1118,7 +1115,7 @@ void DiagnosticsMainWindow::debug()
 //	std::vector<AppSignalParam> appSignals;
 //	QStringList notFoundSignals;
 //
-//	if (m_signalManager.signalsCount() == 0)
+//	if (m_appSignalManager.signalsCount() == 0)
 //	{
 //		QMessageBox::critical(this, qAppName(), tr("Signals database is not loaded!"));
 //		return;
@@ -1127,7 +1124,7 @@ void DiagnosticsMainWindow::debug()
 //	for (const QString& s : signalsList)
 //	{
 //		bool ok = false;
-//		AppSignalParam asp = m_signalManager.signalParam(s, &ok);
+//		AppSignalParam asp = m_appSignalManager.signalParam(s, &ok);
 //
 //		if (ok == true)
 //		{
@@ -1183,7 +1180,7 @@ void DiagnosticsMainWindow::debug()
 //		return;
 //	}
 //
-//	MonitorArchive::requestArchiveWithNewWidget(&m_signalManager, &configController(), appSignals, startTime, endTime, static_cast<E::TimeType>(timeType), this);
+//	MonitorArchive::requestArchiveWithNewWidget(&m_appSignalManager, &configController(), appSignals, startTime, endTime, static_cast<E::TimeType>(timeType), this);
 //	return;
 //}
 
@@ -1252,7 +1249,7 @@ void DiagnosticsMainWindow::debug()
 //	if (trendToActivate == nullptr)
 //	{
 //		std::vector<AppSignalParam> appSignals;
-//		MonitorTrends::startTrendApp(m_signalManager, m_configController, appSignals, this);
+//		MonitorTrends::startTrendApp(m_appSignalManager, m_configController, appSignals, this);
 //	}
 //	else
 //	{
@@ -1265,7 +1262,7 @@ void DiagnosticsMainWindow::debug()
 //void MonitorMainWindow::slot_signalSnapshot()
 //{
 //	MonitorDialogSignalSnapshot* d = MonitorDialogSignalSnapshot::createDialog(&m_configController,
-//																			   &m_signalManager,
+//																			   &m_appSignalManager,
 //																			   monitorCentralWidget());
 //	d->show();
 //
@@ -1276,7 +1273,7 @@ void DiagnosticsMainWindow::debug()
 //{
 //	MonitorDialogSignalSnapshot* d = MonitorDialogSignalSnapshot::createDialog(
 //										 &configController(),
-//										 &m_signalManager,
+//										 &m_appSignalManager,
 //										 monitorCentralWidget());
 //
 //	std::vector<AppSignalParam> specialSignals;
@@ -1287,7 +1284,7 @@ void DiagnosticsMainWindow::debug()
 //	{
 //		bool found = false;
 //
-//		AppSignalParam asp = m_signalManager.signalParam(appSignalId, &found);
+//		AppSignalParam asp = m_appSignalManager.signalParam(appSignalId, &found);
 //		if (found == true)
 //		{
 //			specialSignals.push_back(asp);
@@ -1340,7 +1337,7 @@ void DiagnosticsMainWindow::debug()
 //void MonitorMainWindow::slot_signalSnapshotByMask(QStringList masks)
 //{
 //	auto d = MonitorDialogSignalSnapshot::createDialog(&configController(),
-//													   &m_signalManager,
+//													   &m_appSignalManager,
 //													   monitorCentralWidget());
 //
 //	d->resetSignalsType();
@@ -1353,7 +1350,7 @@ void DiagnosticsMainWindow::debug()
 //void MonitorMainWindow::slot_signalSnapshotByTag(QStringList tags)
 //{
 //	auto d = MonitorDialogSignalSnapshot::createDialog(&configController(),
-//													   &m_signalManager,
+//													   &m_appSignalManager,
 //													   monitorCentralWidget());
 //
 //	d->resetSignalsType();
@@ -1372,9 +1369,9 @@ void DiagnosticsMainWindow::debug()
 //		return;
 //	}
 //
-//	DialogSignalSearch* dsi = new DialogSignalSearch(this, &m_signalManager);
+//	DialogSignalSearch* dsi = new DialogSignalSearch(this, &m_appSignalManager);
 //
-//	connect(&m_signalManager, &MonitorSignalManager::signalParamsUpdated, dsi, &DialogSignalSearch::signalsUpdated);
+//	connect(&m_appSignalManager, &MonitorAppSignalManager::signalParamsUpdated, dsi, &DialogSignalSearch::signalsUpdated);
 //
 //	connect(dsi, &DialogSignalSearch::signalContextMenu, cw, &MonitorCentralWidget::slot_signalContextMenu);
 //	connect(dsi, &DialogSignalSearch::signalInfo, cw, &MonitorCentralWidget::slot_signalInfo);
@@ -1419,14 +1416,9 @@ void DiagnosticsMainWindow::slot_configurationArrived(DiagConfigSettings configu
 {
 	// Update AppSignalManager with specific data
 	//
-	//m_adsConnection.updateConnections(m_configController.softwareInfo(), configuration.appDataServices);
+	m_adsConnection.updateConnections(m_configController.softwareInfo(), configuration.appDataServices);
 
-	//m_tuningConnection.updateConnections(m_configController.softwareInfo(),
-	//									 configuration.tuningServices,
-	//									 true/*autoApply*/,
-	//									 TuningClientSettings::LmStatusFlagMode::None);
-
-	//m_signalManager.setSetpoints(m_configController.setpoints());
+	//m_appSignalManager.setSetpoints(m_configController.setpoints());
 
 
 	m_logoImage = configuration.logoImage;
@@ -1573,59 +1565,6 @@ void DiagnosticsMainWindow::setFullScreen(bool value)
 	return;
 }
 
-//void MonitorMainWindow::slot_reLogin()
-//{
-//	if (m_tuningUserManager.tuningSessionTimeout() > 0 && m_tuningUserManager.isLoggedIn() == true)
-//	{
-//		m_tuningUserManager.reLogin(this);
-//	}
-//	else
-//	{
-//		slot_login();
-//	}
-//}
-//
-//void MonitorMainWindow::slot_loggedIn()
-//{
-//	m_loginAction->setIcon(QIcon(":/Images/Images/KeyOn.svg"));
-//
-//	m_LogFile.writeMessage(tr("Tuning logged in, username: %1.").arg(m_tuningUserManager.loggedInUser()));
-//
-//	if (m_tuningUserManager.tuningSessionTimeout() == 0)
-//	{
-//		m_loginUserTimeoutAction->setText(m_tuningUserManager.loggedInUser());
-//	}
-//
-//	m_loginUserTimeoutAction->setEnabled(true);
-//}
-//
-//void MonitorMainWindow::slot_loggedOut()
-//{
-//	m_loginAction->setIcon(QIcon(":/Images/Images/KeyOff.svg"));
-//
-//	m_LogFile.writeMessage(tr("Tuning logged out."));
-//
-//	if (m_tuningUserManager.tuningSessionTimeout() > 0)
-//	{
-//		m_loginUserTimeoutAction->setText(QString(tr("Logged Out\n00:00:00")));
-//	}
-//	else
-//	{
-//		m_loginUserTimeoutAction->setText(QString(tr("Logged Out")));
-//	}
-//
-//	m_loginUserTimeoutAction->setEnabled(false);
-//}
-//
-//void MonitorMainWindow::slot_tuningSignalsArrived(QByteArray data)
-//{
-//	if (m_tuningSignalManager.load(data) == false)
-//	{
-//		QString completeErrorMessage = QObject::tr("Tuning signals file loading error.");
-//		m_LogFile.writeError(completeErrorMessage);
-//	}
-//}
-//
 DiagConfigController& DiagnosticsMainWindow::configController()
 {
 	return m_configController;
@@ -1635,57 +1574,17 @@ const DiagConfigController& DiagnosticsMainWindow::configController() const
 {
 	return m_configController;
 }
-//
-//MonitorSignalManager& MonitorMainWindow::signalManager()
-//{
-//	return m_signalManager;
-//}
-//
-//const MonitorSignalManager& MonitorMainWindow::signalManager() const
-//{
-//	return m_signalManager;
-//}
-//
-//ClientLib::TuningUserManager& MonitorMainWindow::userManager()
-//{
-//	return m_tuningUserManager;
-//}
-//
-//TuningSignalManager& MonitorMainWindow::tuningSignalManager()
-//{
-//	return m_tuningSignalManager;
-//}
-//
-//const TuningSignalManager& MonitorMainWindow::tuningSignalManager() const
-//{
-//	return m_tuningSignalManager;
-//}
-//
-//ClientLib::TuningConnection& MonitorMainWindow::tuningConnection()
-//{
-//	return m_tuningConnection;
-//}
-//
-//const ClientLib::TuningConnection& MonitorMainWindow::tuningConnection() const
-//{
-//	return m_tuningConnection;
-//}
-//
-//ITuningAuthorization& MonitorMainWindow::tuningAuthorization()
-//{
-//	return m_tuningUserManager;
-//}
-//
-//const ITuningAuthorization& MonitorMainWindow::tuningAuthorization() const
-//{
-//	return m_tuningUserManager;
-//}
-//
-//const ClientLib::TuningUserManager& MonitorMainWindow::userManager() const
-//{
-//	return m_tuningUserManager;
-//}
-//
+
+ClientLib::AppSignalManager& DiagnosticsMainWindow::appSignalManager()
+{
+	return m_appSignalManager;
+}
+
+const ClientLib::AppSignalManager& DiagnosticsMainWindow::appSignalManager() const
+{
+	return m_appSignalManager;
+}
+
 DiagnosticsToolBar::DiagnosticsToolBar(const QString& tittle, QWidget* parent) :
 	QToolBar(tittle, parent)
 {

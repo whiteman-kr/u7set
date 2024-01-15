@@ -9,7 +9,7 @@ bool SimDialogSignalSnapshot::showDialog(SimIdeSimulator* simuator,
 {
 
 	SimDialogSignalSnapshot* dss = new SimDialogSignalSnapshot(simuator,
-															   appSignalController->appSignalManager(),
+															   &appSignalController->appSignalManager(),
 															   simuator->projectName(),
 															   tr("Simulator"),
 															   lmEquipmentId,

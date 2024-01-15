@@ -197,11 +197,11 @@ namespace
 //
 DiagSchemaWidget::DiagSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 										 DiagnosticsSchemaManager* schemaManager,
-										 // -- VFrame30::AppSignalController* appSignalController,
+										 VFrame30::AppSignalController* appSignalController,
 										 VFrame30::LogController* logController,
 										 ITimeStats* timeStats,
 										 QWidget* parent) :
-	VFrame30::ClientSchemaWidget(new DiagSchemaView(schemaManager, this, /*appSignalController, */logController, timeStats),
+	VFrame30::ClientSchemaWidget(new DiagSchemaView(schemaManager, this, appSignalController, logController, timeStats),
 								 schema,
 								 schemaManager,
 								 parent),
@@ -514,7 +514,7 @@ void DiagSchemaWidget::signalInfo(QString appSignalId)
 {
 	// TODO: DiagSignalInfo::showDialog
 	//MonitorSignalInfo::showDialog(appSignalId,
-	//							  monitorSignalManager(),
+	//							  monitorAppSignalManager(),
 	//							  theApp.mainWindow()->tuningSignalManager(),
 	//							  theApp.mainWindow()->tuningConnection(),
 	//							  theApp.mainWindow()->tuningAuthorization(),
@@ -547,21 +547,21 @@ const DiagSchemaView* DiagSchemaWidget::diagSchemaView() const
 //	return monitorSchemaView()->appSignalController()->appSignalManager();
 //}
 //
-//MonitorSignalManager* MonitorSchemaWidget::monitorSignalManager()
+//ClientLib::AppSignalManager* MonitorSchemaWidget::monitorAppSignalManager()
 //{
 //	IAppSignalManager* sm = signalManager();
 //
-//	MonitorSignalManager* msm = dynamic_cast<MonitorSignalManager*>(sm);
+//	ClientLib::AppSignalManager* msm = dynamic_cast<MonitorAppSignalManager*>(sm);
 //	Q_ASSERT(msm);
 //
 //	return msm;
 //}
 //
-//const MonitorSignalManager* MonitorSchemaWidget::monitorSignalManager() const
+//const ClientLib::AppSignalManager* MonitorSchemaWidget::monitorAppSignalManager() const
 //{
 //	const IAppSignalManager* sm = signalManager();
 //
-//	const MonitorSignalManager* msm = dynamic_cast<const MonitorSignalManager*>(sm);
+//	const ClientLib::AppSignalManager* msm = dynamic_cast<const MonitorAppSignalManager*>(sm);
 //	Q_ASSERT(msm);
 //
 //	return msm;

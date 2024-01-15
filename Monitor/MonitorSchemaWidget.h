@@ -5,10 +5,14 @@
 #include "../lib/ITimeStats.h"
 
 
-class MonitorSignalManager;
 class MonitorSchemaView;
 class MonitorSchemaManager;
 struct SchemaHistoryItem;
+
+namespace ClientLib
+{
+	class AppSignalManager;
+}
 
 //
 //
@@ -51,11 +55,11 @@ public slots:
 	// Properties
 	//
 public:
-	IAppSignalManager* signalManager();
-	const IAppSignalManager* signalManager() const;
+	IAppSignalManager& appSignalManager();
+	const IAppSignalManager& appSignalManager() const;
 
-	MonitorSignalManager* monitorSignalManager();
-	const MonitorSignalManager* monitorSignalManager() const;
+	ClientLib::AppSignalManager& clientAppSignalManager();
+	const ClientLib::AppSignalManager& clientAppSignalManager() const;
 
 	MonitorSchemaView* monitorSchemaView();
 	const MonitorSchemaView* monitorSchemaView() const;

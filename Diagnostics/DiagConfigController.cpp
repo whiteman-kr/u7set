@@ -20,6 +20,7 @@ bool DiagConfigController::updateConfiguration(const ClientLib::ConfigurationInf
 
 	config.startSchemaId = settings.startSchemaId;
 
+	config.appDataServices = settings.appDataServices;
 	config.diagDataServices = settings.diagDataServices;
 	//config.diagDataRealTimeServices = settings.diagDataServices;
 	//config.archiveServices = settings.archiveServices;

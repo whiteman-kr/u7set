@@ -1,9 +1,8 @@
 #pragma once
 
 #include "DiagnosticsSchemaManager.h"
-//#include "MonitorSignalManager.h"
 #include "../VFrame30/ClientSchemaWidget.h"
-// -- #include "../VFrame30/AppSignalController.h"
+#include "../VFrame30/AppSignalController.h"
 #include "../lib/ITimeStats.h"
 
 
@@ -22,7 +21,7 @@ class DiagSchemaWidget : public VFrame30::ClientSchemaWidget
 public:
 	DiagSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 					 DiagnosticsSchemaManager* schemaManager,
-						// -- VFrame30::AppSignalController* appSignalController,
+						VFrame30::AppSignalController* appSignalController,
 						VFrame30::LogController* logController,
 						ITimeStats* timeStats,
 						QWidget* parent);
@@ -51,8 +50,8 @@ public:
 	// -- IAppSignalManager* signalManager();
 	// -- const IAppSignalManager* signalManager() const;
 
-	// -- MonitorSignalManager* monitorSignalManager();
-	// -- const MonitorSignalManager* monitorSignalManager() const;
+	// -- ClientLib::AppSignalManager* monitorAppSignalManager();
+	// -- const ClientLib::AppSignalManager* monitorAppSignalManager() const;
 
 	DiagSchemaView* diagSchemaView();
 	const DiagSchemaView* diagSchemaView() const;

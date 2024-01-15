@@ -3,17 +3,17 @@
 #include "DiagnosticsCentralWidget.h"
 #include "DiagConfigController.h"
 #include "DiagnosticsSchemaManager.h"
-//#include "MonitorSignalManager.h"
+#include "../ClientLib/AppSignalManager.h"
 //#include "SelectSchemaWidget.h"
 #include "../UtilsLib/InstanceResolver.h"
 #include "../SchemaClientLib/SchemaDrawStatistics.h"
 //#include "../VFrame30/ClientSchemaView.h"
 #include "../ClientLib/ClientTranslator.h"
-//#include "../ClientLib/AdsConnection.h"
+#include "../ClientLib/AdsConnection.h"
 //#include "../ClientLib/TuningTcpClient.h"
 //#include "../ClientLib/TuningUserManager.h"
 //#include "../ClientLib/TuningLog.h"
-//#include "../VFrame30/AppSignalController.h"
+#include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/LogController.h"
 #include "../UtilsLib/LogFile.h"
 #include "../lib/Ui/DialogAlert.h"
@@ -139,23 +139,11 @@ public slots:
 public:
 	DiagConfigController& configController();
 	const DiagConfigController& configController() const;
-//
-//	MonitorSignalManager& signalManager();
-//	const MonitorSignalManager& signalManager() const;
-//
-//	ClientLib::TuningUserManager& userManager();
-//	const ClientLib::TuningUserManager& userManager() const;
-//
-//	TuningSignalManager& tuningSignalManager();
-//	const TuningSignalManager& tuningSignalManager() const;
-//
-//	ClientLib::TuningConnection& tuningConnection();
-//	const ClientLib::TuningConnection& tuningConnection() const;
-//
-//	ITuningAuthorization& tuningAuthorization();
-//	const ITuningAuthorization& tuningAuthorization() const;
-//
-//protected:
+
+	ClientLib::AppSignalManager& appSignalManager();
+	const ClientLib::AppSignalManager& appSignalManager() const;
+
+protected:
 
 	// Data
 	//
@@ -164,15 +152,15 @@ private:
 	InstanceResolver& m_instanceResolver;
 
 	DiagConfigController m_configController;
-	//MonitorSignalManager m_signalManager;
+	ClientLib::AppSignalManager m_appSignalManager;
 
 	SignalDataServerStub m_signalDataServerStub; // REMOVE IT AFTER IMPLEMENTING REAL ISignalDataServer
 	DiagnosticsSchemaManager m_schemaManager;
 
-	//std::unique_ptr<VFrame30::AppSignalController> m_appSignalController;
+	std::unique_ptr<VFrame30::AppSignalController> m_appSignalController;
 	std::unique_ptr<VFrame30::LogController> m_logController;
 
-	//ClientLib::AdsConnection m_adsConnection{m_signalManager, &m_signalManager, &m_LogFile};
+	ClientLib::AdsConnection m_adsConnection{m_appSignalManager, &m_appSignalManager, &m_LogFile};
 
 	DialogAlert m_dialogAlert;
 
@@ -241,7 +229,7 @@ private:
 	QLabel* m_statusBarInfo = nullptr;
 
 	QLabel* m_statusBarConfigConnection	= nullptr;
-	//QLabel* m_statusBarAppDataConnection = nullptr;
+	QLabel* m_statusBarAppDataConnection = nullptr;
 	//QLabel* m_statusBarTuningConnection = nullptr;
 
 	QLabel* m_statusBarProjectInfo = nullptr;

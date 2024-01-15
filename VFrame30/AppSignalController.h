@@ -14,7 +14,7 @@ namespace VFrame30
 
 	public:
 		AppSignalController() = delete;
-		explicit AppSignalController(IAppSignalManager* appSignalManager, QObject* parent = nullptr);
+		explicit AppSignalController(IAppSignalManager& appSignalManager, QObject* parent = nullptr);
 
 	public:
 		// App Signals
@@ -42,11 +42,11 @@ namespace VFrame30
 		[[nodiscard]] std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const;
 
 	public:
-		[[nodiscard]] IAppSignalManager* appSignalManager();
-		[[nodiscard]] const IAppSignalManager* appSignalManager() const;
+		[[nodiscard]] IAppSignalManager& appSignalManager();
+		[[nodiscard]] const IAppSignalManager& appSignalManager() const;
 
 	private:
-		IAppSignalManager* m_appSignalManager = nullptr;
+		IAppSignalManager& m_appSignalManager;
 	};
 
 	// This class used for scripts, it is created to separate AppSignalController from ugly
@@ -120,7 +120,7 @@ namespace VFrame30
 		Q_OBJECT
 
 	public:
-		explicit ScriptAppSignalController(const IAppSignalManager* appSignalManager, QObject* parent = nullptr);
+		explicit ScriptAppSignalController(const IAppSignalManager& appSignalManager, QObject* parent = nullptr);
 		virtual ~ScriptAppSignalController();
 
 		// Script Interface
@@ -167,7 +167,7 @@ namespace VFrame30
 		// Data
 		//
 	private:
-		const IAppSignalManager* m_appSignalManager = nullptr;
+		const IAppSignalManager& m_appSignalManager;
 	};
 
 }

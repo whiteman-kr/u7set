@@ -118,15 +118,13 @@ namespace
 //	MonitorArchiveWidget
 //
 //
-ArchiveWidget::ArchiveWidget(MonitorSignalManager* signalManager,
+ArchiveWidget::ArchiveWidget(ClientLib::AppSignalManager& signalManager,
 							 MonitorConfigController* configController,
 							 QWidget* parent) :
 	QMainWindow(parent, Qt::WindowSystemMenuHint | Qt::WindowMaximizeButtonHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	m_signalManager(signalManager),
 	m_archiveConnection(*configController, configController->logFile(), this)
 {
-	Q_ASSERT(m_signalManager);
-
 	static int no = 1;
 	QString name = tr("Monitor Archive %1").arg(no++);
 	MonitorArchive::registerWindow(name, this);
@@ -340,9 +338,9 @@ bool ArchiveWidget::setSignals(const std::vector<AppSignalParam>& appSignals)
 	for (const AppSignalParam& signalParam : appSignals)
 	{
 		auto sit = std::find_if(m_archiveServices.begin(), m_archiveServices.end(),
-					[&signalParam, signalManager = m_signalManager](const SoftwareEndpoint::ArchiveService& archiveService)
+					[&signalParam, &signalManager = m_signalManager](const SoftwareEndpoint::ArchiveService& archiveService)
 					{
-						return signalManager->dataServiceHasSignal(archiveService.appDataServiceId, signalParam.appSignalId());
+						return signalManager.dataServiceHasSignal(archiveService.appDataServiceId, signalParam.appSignalId());
 					});
 
 		if (sit != m_archiveServices.end())
@@ -495,9 +493,9 @@ void ArchiveWidget::dropEvent(QDropEvent* event)
 		// Find an archive service for the signal and add it to the signal list
 		//
 		auto sit = std::find_if(m_archiveServices.begin(), m_archiveServices.end(),
-						[&signalParam, signalManager = m_signalManager](const SoftwareEndpoint::ArchiveService& archiveService)
+						[&signalParam, &signalManager = m_signalManager](const SoftwareEndpoint::ArchiveService& archiveService)
 						{
-							return signalManager->dataServiceHasSignal(archiveService.appDataServiceId, signalParam.appSignalId());
+							return signalManager.dataServiceHasSignal(archiveService.appDataServiceId, signalParam.appSignalId());
 						});
 
 		if (sit != m_archiveServices.end())

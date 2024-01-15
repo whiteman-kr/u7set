@@ -7,7 +7,11 @@
 
 
 class MonitorConfigController;
-class MonitorSignalManager;
+
+namespace ClientLib
+{
+	class AppSignalManager;
+}
 
 
 class MonitorSignalInfo : public DialogSignalInfo
@@ -16,7 +20,7 @@ class MonitorSignalInfo : public DialogSignalInfo
 
 public:
 	static bool showDialog(QString appSignalId,
-						   MonitorSignalManager* appSignalManager,
+						   ClientLib::AppSignalManager& appSignalManager,
 						   ITuningSignalManager& tuningSignalManager,
 						   ITuningConnection& tuningConnection,
 						   ITuningAuthorization& tuningAuthorization,
@@ -26,7 +30,7 @@ public:
 private:
 	MonitorSignalInfo(const AppSignalParam& signal,
 					  MonitorConfigController* configController,
-					  IAppSignalManager* appSignalManager,
+					  IAppSignalManager& appSignalManager,
 					  ISignalDataServer* signalDataServer,
 					  ITuningSignalManager& tuningSignalManager,
 					  ITuningConnection& tuningConnection,

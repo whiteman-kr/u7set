@@ -4,7 +4,7 @@
 #include "MonitorSchemaManager.h"
 #include "MonitorSchemaView.h"
 #include "MonitorSignalInfo.h"
-#include "MonitorSignalManager.h"
+#include "../ClientLib/AppSignalManager.h" 
 
 #include "../VFrame30/IMatsSchemaItemAssociations.h"
 
@@ -266,7 +266,7 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 		{
 			if (s.startsWith('@') == true)
 			{
-				s = signalManager()->equipmentToAppSignalId(s);
+				s = appSignalManager().equipmentToAppSignalId(s);
 			}
 		};
 
@@ -425,7 +425,7 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 	for (const QString& s : appSignals)
 	{
 		bool ok = false;
-		AppSignalParam signal = signalManager()->signalParam(s, &ok);
+		AppSignalParam signal = appSignalManager().signalParam(s, &ok);
 
 		if (ok == false)
 		{
@@ -446,7 +446,7 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 	for (const QString& s : impactSignals)
 	{
 		bool ok = false;
-		AppSignalParam signal = signalManager()->signalParam(s, &ok);
+		AppSignalParam signal = appSignalManager().signalParam(s, &ok);
 
 		if (ok == false)
 		{
@@ -468,7 +468,7 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 	//
 	for (const auto& signal : appSignalParams)
 	{
-		auto signalAction = new QSignalUpdateAction{signal, signalManager(), maxIdSize, maxCaptionSize, &menu};
+		auto signalAction = new QSignalUpdateAction{signal, &appSignalManager(), maxIdSize, maxCaptionSize, &menu};
 		menu.addAction(signalAction);
 
 		auto f = [this, signal]() -> void
@@ -491,7 +491,7 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 
 		for (const auto& signal : impactSignalsParams)
 		{
-			auto signalAction = new QSignalUpdateAction{signal, signalManager(), maxIdSize, maxCaptionSize, &menu};
+			auto signalAction = new QSignalUpdateAction{signal, &appSignalManager(), maxIdSize, maxCaptionSize, &menu};
 			menu.addAction(signalAction);
 
 			auto f = [this, signal]() -> void
@@ -513,7 +513,7 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 void MonitorSchemaWidget::signalInfo(QString appSignalId)
 {
 	MonitorSignalInfo::showDialog(appSignalId,
-								  monitorSignalManager(),
+								  clientAppSignalManager(),
 								  theApp.mainWindow()->tuningSignalManager(),
 								  theApp.mainWindow()->tuningConnection(),
 								  theApp.mainWindow()->tuningAuthorization(),
@@ -536,34 +536,40 @@ const MonitorSchemaView* MonitorSchemaWidget::monitorSchemaView() const
 	return result;
 }
 
-IAppSignalManager* MonitorSchemaWidget::signalManager()
+IAppSignalManager& MonitorSchemaWidget::appSignalManager()
 {
 	return monitorSchemaView()->appSignalController()->appSignalManager();
 }
 
-const IAppSignalManager* MonitorSchemaWidget::signalManager() const
+const IAppSignalManager& MonitorSchemaWidget::appSignalManager() const
 {
 	return monitorSchemaView()->appSignalController()->appSignalManager();
 }
 
-MonitorSignalManager* MonitorSchemaWidget::monitorSignalManager()
+ClientLib::AppSignalManager& MonitorSchemaWidget::clientAppSignalManager()
 {
-	IAppSignalManager* sm = signalManager();
-
-	MonitorSignalManager* msm = dynamic_cast<MonitorSignalManager*>(sm);
-	Q_ASSERT(msm);
-
-	return msm;
+	try
+	{
+		return dynamic_cast<ClientLib::AppSignalManager&>(appSignalManager());
+	}
+	catch (std::bad_cast& e)
+	{
+		m_logController->writeAlert(tr("ClientLib::AppSignalManager is not available: %1. Terminate.").arg(e.what()));
+		std::terminate();
+	}
 }
 
-const MonitorSignalManager* MonitorSchemaWidget::monitorSignalManager() const
+const ClientLib::AppSignalManager& MonitorSchemaWidget::clientAppSignalManager() const
 {
-	const IAppSignalManager* sm = signalManager();
-
-	const MonitorSignalManager* msm = dynamic_cast<const MonitorSignalManager*>(sm);
-	Q_ASSERT(msm);
-
-	return msm;
+	try
+	{
+		return dynamic_cast<const ClientLib::AppSignalManager&>(appSignalManager());
+	}
+	catch (std::bad_cast& e)
+	{
+		m_logController->writeAlert(tr("ClientLib::AppSignalManager is not available: %1. Terminate.").arg(e.what()));
+		std::terminate();
+	}
 }
 
 MonitorSchemaManager* MonitorSchemaWidget::schemaManager()

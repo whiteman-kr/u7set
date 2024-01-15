@@ -5,7 +5,6 @@
 
 
 class MonitorConfigController;
-class MonitorSignalManager;
 
 
 class MonitorDialogSignalSnapshot : public DialogSignalSnapshot
@@ -14,7 +13,7 @@ class MonitorDialogSignalSnapshot : public DialogSignalSnapshot
 
 public:
 	static MonitorDialogSignalSnapshot* createDialog(MonitorConfigController* configController,
-													 MonitorSignalManager* monitorSignalManager,
+													 ClientLib::AppSignalManager* monitorAppSignalManager,
 													 MonitorCentralWidget* centralWidget);
 
 private:
