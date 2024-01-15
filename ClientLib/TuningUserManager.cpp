@@ -412,6 +412,11 @@ namespace ClientLib
 		{
 			m_userCombo->setCurrentIndex(selectedIndex);
 		}
+
+		if (m_tuningUserManager.isLoggedIn() == true)
+		{
+			m_userCombo->setEnabled(false);
+		}
 	}
 
 	QString DialogTuningPassword::userName() const

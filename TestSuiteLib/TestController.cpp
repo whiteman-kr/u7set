@@ -253,6 +253,21 @@ namespace TestSuite
 		return result;
 	}
 
+	bool TestController::tuningSourceIsActive(QString lmEquipmentId)
+	{
+		return m_outputController.tuningSourceIsActive(lmEquipmentId);
+	}
+
+	bool TestController::tuningSourceIsInactive(QString lmEquipmentId)
+	{
+		return m_outputController.tuningSourceIsInactive(lmEquipmentId);
+	}
+
+	bool TestController::activateTuningSource(QString lmEquipmentId, bool activate)
+	{
+		return m_outputController.activateTuningSource(lmEquipmentId, activate);
+	}
+
 	QString TestController::projectName() const
 	{
 		return m_configuration.configInfo.project;

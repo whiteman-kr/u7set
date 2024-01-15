@@ -117,6 +117,7 @@ bool TuningConfigController::updateConfiguration(const ClientLib::ConfigurationI
 
 	// Get file MATS_USERS
 	//
+	if (readConfig.clientSettings.tuningLogin == true)
 	{
 		QByteArray matsUsersData;
 		getFileBlockedById(CfgFileId::MATSUSERS, &matsUsersData, nullptr);

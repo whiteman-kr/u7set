@@ -5,56 +5,67 @@
     <name>DialogChooseTrendSignals</name>
     <message>
         <location filename="../DialogChooseTrendSignals.ui" line="20"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="191"/>
         <source>Trend Signals</source>
         <translation>Сигнали графіку</translation>
     </message>
     <message>
         <location filename="../DialogChooseTrendSignals.ui" line="139"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="197"/>
         <source>&lt;&lt;</source>
         <translation></translation>
     </message>
     <message>
         <location filename="../DialogChooseTrendSignals.ui" line="122"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="195"/>
         <source>Start typing SignalID</source>
         <translation>Почніть друк ІД сигналу</translation>
     </message>
     <message>
         <location filename="../DialogChooseTrendSignals.ui" line="153"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="199"/>
         <source>Filter</source>
         <translation>Фільтр</translation>
     </message>
     <message>
         <location filename="../DialogChooseTrendSignals.ui" line="67"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="192"/>
         <source>&lt;</source>
         <translation></translation>
     </message>
     <message>
         <location filename="../DialogChooseTrendSignals.ui" line="132"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="196"/>
         <source>&gt;</source>
         <translation></translation>
     </message>
     <message>
         <location filename="../DialogChooseTrendSignals.ui" line="160"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="200"/>
         <source>Down</source>
         <translation>Вниз</translation>
     </message>
     <message>
         <location filename="../DialogChooseTrendSignals.ui" line="170"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="201"/>
         <source>Signals Tags</source>
         <translation>Теги</translation>
     </message>
     <message>
         <location filename="../DialogChooseTrendSignals.ui" line="177"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="202"/>
         <source>Up</source>
         <translation>Вгору</translation>
     </message>
     <message>
         <location filename="../DialogChooseTrendSignals.ui" line="112"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="194"/>
         <source>Signal tags space separated</source>
         <translation>Теги, розділені пробілом</translation>
     </message>
     <message>
         <location filename="../DialogChooseTrendSignals.ui" line="146"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="198"/>
         <source>Archive Server</source>
         <translation>Сервер архіву</translation>
     </message>
@@ -63,31 +74,37 @@
     <name>DialogTrendSignalPoint</name>
     <message>
         <location filename="../DialogTrendSignalPoint.ui" line="14"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogTrendSignalPoint.h" line="120"/>
         <source>Dialog</source>
         <translation></translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalPoint.ui" line="45"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogTrendSignalPoint.h" line="121"/>
         <source>dd.MM.yyyy H:mm:ss:zzz</source>
         <translation></translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalPoint.ui" line="52"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogTrendSignalPoint.h" line="122"/>
         <source>Valid:</source>
         <translation>Валідний:</translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalPoint.ui" line="59"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogTrendSignalPoint.h" line="123"/>
         <source>Value:</source>
         <translation>Значення:</translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalPoint.ui" line="66"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogTrendSignalPoint.h" line="124"/>
         <source>Time:</source>
         <translation>Час:</translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalPoint.ui" line="86"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogTrendSignalPoint.h" line="125"/>
         <source>Realtime:</source>
         <translation>Реалтайм:</translation>
     </message>
@@ -101,21 +118,25 @@
     <name>DialogTrendSignalPoints</name>
     <message>
         <location filename="../DialogTrendSignalPoints.ui" line="14"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogTrendSignalPoints.h" line="98"/>
         <source>Dialog</source>
         <translation></translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalPoints.ui" line="25"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogTrendSignalPoints.h" line="99"/>
         <source>Add...</source>
         <translation>Додати...</translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalPoints.ui" line="32"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogTrendSignalPoints.h" line="100"/>
         <source>Edit...</source>
         <translation>Редагувати...</translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalPoints.ui" line="39"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogTrendSignalPoints.h" line="101"/>
         <source>Remove</source>
         <translation>Видалити</translation>
     </message>
@@ -144,76 +165,91 @@
     <name>DialogTrendSignalProperties</name>
     <message>
         <location filename="../DialogTrendSignalProperties.ui" line="14"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogTrendSignalProperties.h" line="244"/>
         <source>Dialog</source>
         <translation></translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalProperties.ui" line="22"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogTrendSignalProperties.h" line="245"/>
         <source>Precision</source>
         <translation>Точність</translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalProperties.ui" line="29"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogTrendSignalProperties.h" line="246"/>
         <source>Limits</source>
         <translation>Діапазон</translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalProperties.ui" line="36"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogTrendSignalProperties.h" line="247"/>
         <source>View High</source>
         <translation>Верх. вид</translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalProperties.ui" line="43"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogTrendSignalProperties.h" line="248"/>
         <source>Color</source>
         <translation>Колір</translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalProperties.ui" line="50"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogTrendSignalProperties.h" line="249"/>
         <source>Line Weight</source>
         <translation>Товщина</translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalProperties.ui" line="91"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogTrendSignalProperties.h" line="250"/>
         <source>View Low</source>
         <translation>Ниж. вид</translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalProperties.ui" line="112"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogTrendSignalProperties.h" line="251"/>
         <source>Signal ID</source>
         <translation>ID</translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalProperties.ui" line="126"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogTrendSignalProperties.h" line="252"/>
         <source>Color Widget</source>
         <translation></translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalProperties.ui" line="147"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogTrendSignalProperties.h" line="253"/>
         <source>Type</source>
         <translation>Тип</translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalProperties.ui" line="154"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogTrendSignalProperties.h" line="254"/>
         <source>Units</source>
         <translation>Од. вим</translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalProperties.ui" line="161"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogTrendSignalProperties.h" line="255"/>
         <source>Caption</source>
         <translation>Найменування</translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalProperties.ui" line="175"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogTrendSignalProperties.h" line="256"/>
         <source>Format</source>
         <translation>Формат</translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalProperties.ui" line="189"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogTrendSignalProperties.h" line="257"/>
         <source>Points...</source>
         <translation>Точки...</translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalProperties.ui" line="209"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_DialogTrendSignalProperties.h" line="258"/>
         <source>Apply</source>
         <translation>Застосувати</translation>
     </message>
@@ -270,8 +306,8 @@
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../Trend.cpp" line="484"/>
-        <location filename="../Trend.cpp" line="543"/>
+        <location filename="../Trend.cpp" line="490"/>
+        <location filename="../Trend.cpp" line="549"/>
         <source> [can&apos;t render the trend, scale is not valid for current mode]</source>
         <translation></translation>
     </message>
@@ -572,132 +608,132 @@
         <translation>Про графіки</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="887"/>
+        <location filename="../TrendMainWindow.cpp" line="897"/>
         <source>&lt;b&gt;JSC Radiy&lt;/b&gt;&lt;br&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="888"/>
+        <location filename="../TrendMainWindow.cpp" line="898"/>
         <source>&lt;b&gt;Trends&lt;/b&gt;&lt;br&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="890"/>
+        <location filename="../TrendMainWindow.cpp" line="900"/>
         <source>Version: %1 (Debug)&lt;br&gt;</source>
         <translation>Версія: %1 (Debug)&lt;br&gt;</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="892"/>
+        <location filename="../TrendMainWindow.cpp" line="902"/>
         <source>Version: %1 (Release)&lt;br&gt;</source>
         <translation>Версія: %1 (Release)&lt;br&gt;</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="894"/>
+        <location filename="../TrendMainWindow.cpp" line="904"/>
         <source>Build architecture: %1&lt;br&gt;</source>
         <translation>Архітектура: %1&lt;br&gt;</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="896"/>
+        <location filename="../TrendMainWindow.cpp" line="906"/>
         <source>&lt;br&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="897"/>
+        <location filename="../TrendMainWindow.cpp" line="907"/>
         <source>ProcessID: %1&lt;br&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="898"/>
+        <location filename="../TrendMainWindow.cpp" line="908"/>
         <source>Executable: %1&lt;br&gt;</source>
         <translation>Файл ПЗ: %1&lt;br&gt;</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="899"/>
+        <location filename="../TrendMainWindow.cpp" line="909"/>
         <source>Arguments: %1&lt;br&gt;</source>
         <translation>Аргументи: %1&lt;br&gt;</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="1096"/>
+        <location filename="../TrendMainWindow.cpp" line="1105"/>
         <source>Ruler Properties</source>
         <translation>Властивості мітки</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="1105"/>
+        <location filename="../TrendMainWindow.cpp" line="1114"/>
         <source>Date:</source>
         <translation>Дата:</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="1106"/>
+        <location filename="../TrendMainWindow.cpp" line="1115"/>
         <source>Time:</source>
         <translation>Час:</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="1164"/>
-        <location filename="../TrendMainWindow.cpp" line="1271"/>
-        <location filename="../TrendMainWindow.cpp" line="1273"/>
-        <location filename="../TrendMainWindow.cpp" line="1275"/>
+        <location filename="../TrendMainWindow.cpp" line="1173"/>
+        <location filename="../TrendMainWindow.cpp" line="1280"/>
+        <location filename="../TrendMainWindow.cpp" line="1282"/>
+        <location filename="../TrendMainWindow.cpp" line="1284"/>
         <source>Custom</source>
         <translation>Власний</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="1300"/>
+        <location filename="../TrendMainWindow.cpp" line="1309"/>
         <source>Line Weight 1</source>
         <translation>Товщина лінії: 1</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="1309"/>
+        <location filename="../TrendMainWindow.cpp" line="1318"/>
         <source>Line Weight 2</source>
         <translation>Товщина лінії: 2</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="1318"/>
+        <location filename="../TrendMainWindow.cpp" line="1327"/>
         <source>Line Weight 3</source>
         <translation>Товщина лінії: 3</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="1327"/>
+        <location filename="../TrendMainWindow.cpp" line="1336"/>
         <source>Scale to Fit</source>
         <translation>Масштабувати за розміром</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="1330"/>
+        <location filename="../TrendMainWindow.cpp" line="1339"/>
         <source>Remove</source>
         <translation>Видалити</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="1337"/>
+        <location filename="../TrendMainWindow.cpp" line="1346"/>
         <source>Properties...</source>
         <translation>Властивості...</translation>
     </message>
     <message>
         <location filename="../TrendMainWindow.cpp" line="408"/>
-        <location filename="../TrendMainWindow.cpp" line="1343"/>
-        <location filename="../TrendMainWindow.cpp" line="1449"/>
+        <location filename="../TrendMainWindow.cpp" line="1352"/>
+        <location filename="../TrendMainWindow.cpp" line="1458"/>
         <source>Signals...</source>
         <translation>Сигнали...</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="1392"/>
+        <location filename="../TrendMainWindow.cpp" line="1401"/>
         <source>Add Ruler</source>
         <translation>Додати мітку</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="1398"/>
+        <location filename="../TrendMainWindow.cpp" line="1407"/>
         <source>Delete Ruler</source>
         <translation>Видалити мітку</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="1405"/>
+        <location filename="../TrendMainWindow.cpp" line="1414"/>
         <source>Ruler Properties...</source>
         <translation>Властивості мітки...</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="1413"/>
+        <location filename="../TrendMainWindow.cpp" line="1422"/>
         <source>Select View...</source>
         <translation>Обрати вид...</translation>
     </message>
     <message>
-        <location filename="../TrendMainWindow.cpp" line="1428"/>
+        <location filename="../TrendMainWindow.cpp" line="1437"/>
         <source>Signals Properties</source>
         <translation>Властивості сигнала</translation>
     </message>
@@ -799,66 +835,79 @@
     <name>TrendsMainWindow</name>
     <message>
         <location filename="../TrendsMainWindow.ui" line="14"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_TrendsMainWindow.h" line="100"/>
         <source>Trends</source>
         <translation>Графіки</translation>
     </message>
     <message>
         <location filename="../TrendsMainWindow.ui" line="28"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_TrendsMainWindow.h" line="119"/>
         <source>&amp;File</source>
         <translation>&amp;Файл</translation>
     </message>
     <message>
         <location filename="../TrendsMainWindow.ui" line="38"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_TrendsMainWindow.h" line="120"/>
         <source>?</source>
         <translation></translation>
     </message>
     <message>
         <location filename="../TrendsMainWindow.ui" line="52"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_TrendsMainWindow.h" line="101"/>
         <source>&amp;Open</source>
         <translation>&amp;Відкрити</translation>
     </message>
     <message>
         <location filename="../TrendsMainWindow.ui" line="55"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_TrendsMainWindow.h" line="103"/>
         <source>Ctrl+O</source>
         <translation></translation>
     </message>
     <message>
         <location filename="../TrendsMainWindow.ui" line="64"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_TrendsMainWindow.h" line="105"/>
         <source>&amp;Save</source>
         <translation>&amp;Зберегти</translation>
     </message>
     <message>
         <location filename="../TrendsMainWindow.ui" line="67"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_TrendsMainWindow.h" line="107"/>
         <source>Ctrl+S</source>
         <translation></translation>
     </message>
     <message>
         <location filename="../TrendsMainWindow.ui" line="72"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_TrendsMainWindow.h" line="109"/>
         <source>E&amp;xit</source>
         <translation>В&amp;ихід</translation>
     </message>
     <message>
         <location filename="../TrendsMainWindow.ui" line="77"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_TrendsMainWindow.h" line="110"/>
         <source>&amp;About</source>
         <translation>&amp;Про програму</translation>
     </message>
     <message>
         <location filename="../TrendsMainWindow.ui" line="89"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_TrendsMainWindow.h" line="111"/>
         <source>&amp;Print</source>
         <translation>&amp;Друк</translation>
     </message>
     <message>
         <location filename="../TrendsMainWindow.ui" line="92"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_TrendsMainWindow.h" line="113"/>
         <source>Ctrl+P</source>
         <translation></translation>
     </message>
     <message>
         <location filename="../TrendsMainWindow.ui" line="104"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_TrendsMainWindow.h" line="115"/>
         <source>AutoScale</source>
         <translation>Автомасштаб</translation>
     </message>
     <message>
         <location filename="../TrendsMainWindow.ui" line="107"/>
+        <location filename="../../../build-u7set-vc-Debug/TrendView/TrendView_autogen/include/ui_TrendsMainWindow.h" line="117"/>
         <source>Autoscale signal trend to visible area</source>
         <translation>Автомасштаб графіка</translation>
     </message>

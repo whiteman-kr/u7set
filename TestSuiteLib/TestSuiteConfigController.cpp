@@ -128,7 +128,7 @@ namespace TestSuite
 
 		// Get file MATS_USERS
 		//
-		if (config.tuningEnabled == true)
+		if (config.tuningEnabled == true && config.login == true)
 		{
 			QByteArray matsUsersData;
 			getFileBlockedById(CfgFileId::MATSUSERS, &matsUsersData, nullptr);

@@ -69,9 +69,11 @@ namespace Builder
 			
 			// Write MATS users
 			//
-			result &= writeMatsUsers(EquipmentPropNames::TESTING_USER_ACCOUNTS,
-				settings->login,
-				settings->userAccounts.split(Separator::SEMICOLON, Qt::SkipEmptyParts));
+			if (settings->login == true)
+			{
+				result &= writeMatsUsers(EquipmentPropNames::TESTING_USER_ACCOUNTS,
+										 settings->userAccounts.split(Separator::SEMICOLON, Qt::SkipEmptyParts));
+			}
 		}
 
 		result &= writeTestScripts();

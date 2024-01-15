@@ -48,6 +48,11 @@ namespace TestSuite
 
 		virtual bool waitForAllSignalsWritten(qint64 timeoutMs, quint64& timeElapsedMs) const override;
 
+		bool tuningSourceIsActive(QString lmEquipmentId) const override;
+		bool tuningSourceIsInactive(QString lmEquipmentId) const override;
+		bool activateTuningSource(QString lmEquipmentId, bool activate) override;
+
+
 	private:
 		TuningSignalManager m_signalManager;
 		mutable HasLogFile m_appLog;

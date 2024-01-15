@@ -23,7 +23,7 @@ TuningPageHelper::TuningPageHelper(const ClientLib::TuningUserManager& userManag
 
 bool TuningPageHelper::writingIsEnabled(const AppSignalParam& asp, const TuningSignalState& state) const
 {
-	bool controlEnabled = state.valid() == true && state.writingIsEnabled() == true;
+	bool controlEnabled = state.valid() == true && state.controlIsEnabled() == true && state.writingIsEnabled() == true;
 
 	if (m_userManager.enabled() == true && m_userManager.loginPerOperation() == false)
 	{
@@ -102,7 +102,8 @@ void SelectionControlDelegate::initStyleOption(QStyleOptionViewItem* option, con
 TuningModelClient::TuningModelClient(TuningSignalManager& tuningSignalManager, const ClientLib::TuningUserManager& userManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent):
 	TuningModel(tuningSignalManager, valueColumnsAppSignalIdSuffixes, parent),
 	m_userManager(userManager),
-	m_helper(m_userManager)
+	m_helper(m_userManager),
+	m_parentWidget(parent)
 {
 }
 
@@ -156,9 +157,10 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 			return QBrush();
 		}
 
+		AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
 		TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
 
-		if (state.controlIsEnabled() == false)
+		if (m_helper.writingIsEnabled(asp, state) == false)
 		{
 			QColor color = TuningClientAppSettings::instance().user().m_columnDisabledBackColor;
 			return QBrush(color);
@@ -167,12 +169,6 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 		if (state.valid() == false)
 		{
 			QColor color = TuningClientAppSettings::instance().user().m_columnErrorBackColor;
-			return QBrush(color);
-		}
-
-		if (state.writingIsEnabled() == false)
-		{
-			QColor color = TuningClientAppSettings::instance().user().m_columnDisabledBackColor;
 			return QBrush(color);
 		}
 
@@ -289,9 +285,10 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 			return QBrush();
 		}
 
+		AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
 		TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
 
-		if (state.controlIsEnabled() == false)
+		if (m_helper.writingIsEnabled(asp, state) == false)
 		{
 			QColor color = TuningClientAppSettings::instance().user().m_columnDisabledTextColor;
 			return QBrush(color);
@@ -300,12 +297,6 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 		if (state.valid() == false)
 		{
 			QColor color = TuningClientAppSettings::instance().user().m_columnErrorTextColor;
-			return QBrush(color);
-		}
-
-		if (state.writingIsEnabled() == false)
-		{
-			QColor color = TuningClientAppSettings::instance().user().m_columnDisabledTextColor;
 			return QBrush(color);
 		}
 
@@ -387,56 +378,40 @@ Qt::ItemFlags TuningModelClient::flags(const QModelIndex& index) const
 		return f;
 	}
 
-	if (columnType >= static_cast<int>(TuningModelColumns::ValueFirst) && columnType <= static_cast<int>(TuningModelColumns::ValueLast))
+	int valueColumn = 0;
+
+	if (valueColumnsCount() > 1)
 	{
-		int valueColumn = columnType - static_cast<int>(TuningModelColumns::ValueFirst);
-		if (valueColumn < 0 || valueColumn >= MAX_VALUES_COLUMN_COUNT)
+		if (columnType >= static_cast<int>(TuningModelColumns::ValueFirst) && columnType <= static_cast<int>(TuningModelColumns::ValueLast))
 		{
-			assert(false);
-			return f;
+			valueColumn = columnType - static_cast<int>(TuningModelColumns::ValueFirst);
 		}
+	}
 
-		Hash hash = hashByIndex(row, valueColumn);
+	if (valueColumn < 0 || valueColumn >= MAX_VALUES_COLUMN_COUNT)
+	{
+		assert(false);
+		return f;
+	}
 
-		if (hash == UNDEFINED_HASH)
+
+	Hash hash = hashByIndex(row, valueColumn);
+	if (hash == UNDEFINED_HASH)
+	{
+		return f;
+	}
+
+	bool ok = false;
+	AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
+	TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
+
+	if (state.valid() == true)
+	{
+		if (m_helper.writingIsEnabled(asp, state) == true)
 		{
-			return f;
-		}
-
-		if (m_tuningSignalManager.isUnapplied(hash) == true)
-		{
-			f &= ~Qt::ItemIsSelectable;
-		}
-
-		bool ok = false;
-
-		AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
-
-		TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
-
-		if (state.valid() == true)
-		{
-			if (asp.isAnalog() == false)
+			if (asp.isAnalog() == true)
 			{
-				if (m_helper.writingIsEnabled(asp, state) == false)
-				{
-					f &= ~Qt::ItemIsEnabled;
-				}
-				else
-				{
-					f |= Qt::ItemIsUserCheckable;
-				}
-			}
-			else
-			{
-				if (m_helper.writingIsEnabled(asp, state) == false)
-				{
-					f &= ~Qt::ItemIsEnabled;
-				}
-				else
-				{
-					f |= Qt::ItemIsEditable;
-				}
+				f |= Qt::ItemIsEditable;
 			}
 		}
 	}
@@ -456,7 +431,8 @@ QVariant TuningModelClient::data(const QModelIndex& index, int role) const
 		return QVariant();
 	}
 
-	if (role == Qt::CheckStateRole && columnType >= static_cast<int>(TuningModelColumns::ValueFirst) && columnType <= static_cast<int>(TuningModelColumns::ValueLast))
+	if (role == Qt::DecorationRole && 
+		columnType >= static_cast<int>(TuningModelColumns::ValueFirst) && columnType <= static_cast<int>(TuningModelColumns::ValueLast))
 	{
 		int valueColumn = columnType - static_cast<int>(TuningModelColumns::ValueFirst);
 		if (valueColumn < 0 || valueColumn >= MAX_VALUES_COLUMN_COUNT)
@@ -491,8 +467,61 @@ QVariant TuningModelClient::data(const QModelIndex& index, int role) const
 				discreteValue = state.value().discreteValue();
 			}
 
-			return (discreteValue == 0 ? Qt::Unchecked : Qt::Checked);
+			return drawCheckBox(discreteValue == 0 ? Qt::Unchecked : Qt::Checked, m_helper.writingIsEnabled(asp, state) == true);
 		}
+	}
+
+	if (role == Qt::ToolTipRole &&
+		columnType >= static_cast<int>(TuningModelColumns::ValueFirst) && columnType <= static_cast<int>(TuningModelColumns::ValueLast))
+	{
+		int valueColumn = columnType - static_cast<int>(TuningModelColumns::ValueFirst);
+		if (valueColumn < 0 || valueColumn >= MAX_VALUES_COLUMN_COUNT)
+		{
+			assert(false);
+			return QVariant();
+		}
+
+		Hash hash = hashByIndex(index.row(), valueColumn);
+
+		if (hash == UNDEFINED_HASH)
+		{
+			return QVariant();
+		}
+
+		bool ok = false;
+
+		TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
+
+		if (state.valid() == true)
+		{
+			if (state.controlIsEnabled() == false)
+			{
+				return tr("Control is disabled - tuning source is not active.");
+			}
+			if (state.writingIsEnabled() == false)
+			{
+				return tr("Writing is disabled - no access key is set.");
+			}
+			if (state.writingIsEnabled() == false)
+			{
+				return tr("Writing is disabled - no access key is set.");
+			}
+
+			if (m_userManager.enabled() == true && m_userManager.loginPerOperation() == false)
+			{
+				if (m_userManager.isLoggedIn() == false)
+				{
+					return tr("Writing is disabled - user is not logged in.");
+				}
+				
+				AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
+
+				if (m_helper.writingIsEnabled(asp, state) == false)
+				{
+					return tr("Writing is disabled - current user is not allowed to tune this signal.");
+				}
+			}
+		}		
 	}
 
 	return TuningModel::data(index, role);
@@ -547,32 +576,64 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 			double v = value.toDouble(&ok);
 			if (ok == false)
 			{
+				QMessageBox::critical(m_parentWidget, qAppName(), tr("Value has invalid format!"));
+				return false;
+			}
+
+			if (v < asp.tuningLowBound().toDouble() || v > asp.tuningHighBound().toDouble())
+			{
+				QMessageBox::critical(m_parentWidget, qAppName(), tr("Value is out of range!"));
 				return false;
 			}
 
 			m_tuningSignalManager.setUnappliedValue(asp.hash(), TuningValue(asp.tuningType(), v));
 			return true;
 		}
-
-		if (role == Qt::CheckStateRole &&
-				state.valid() == true &&
-				state.controlIsEnabled() == true &&
-				m_helper.writingIsEnabled(asp, state) == true)
-		{
-			if ((Qt::CheckState)value.toInt() == Qt::Checked)
-			{
-				m_tuningSignalManager.setUnappliedValue(asp.hash(), TuningValue(asp.tuningType(), 1));
-				return true;
-			}
-			else
-			{
-				m_tuningSignalManager.setUnappliedValue(asp.hash(), TuningValue(asp.tuningType(), 0));
-				return true;
-			}
-		}
 	}
 
 	return false;
+}
+
+QIcon TuningModelClient::drawCheckBox(int state, bool enabled) const
+{
+	QStyleOptionButton opt;
+	switch (state)
+	{
+	case Qt::Checked:
+		opt.state |= QStyle::State_On;
+		break;
+	case Qt::Unchecked:
+		opt.state |= QStyle::State_Off;
+		break;
+	case Qt::PartiallyChecked:
+		opt.state |= QStyle::State_NoChange;
+		break;
+	default:
+		Q_ASSERT(false);
+	}
+
+	if (enabled == false)
+	{
+		opt.state |= QStyle::State_ReadOnly;
+	}
+	else
+	{
+		opt.state |= QStyle::State_Enabled;
+	}
+
+	const QStyle* style = QApplication::style();
+
+	const int indicatorWidth = style->pixelMetric(QStyle::PM_IndicatorWidth, &opt);
+	const int indicatorHeight = style->pixelMetric(QStyle::PM_IndicatorHeight, &opt);
+
+	opt.rect = QRect(0, 0, indicatorWidth, indicatorHeight);
+	QPixmap pixmap = QPixmap(indicatorWidth, indicatorHeight);
+	pixmap.fill(Qt::transparent);
+	{
+		QPainter painter(&pixmap);
+		style->drawPrimitive(QStyle::PE_IndicatorCheckBox, &opt, &painter);
+	}
+	return QIcon(pixmap);
 }
 
 
@@ -594,54 +655,103 @@ bool TuningTableView::editorActive()
 
 bool TuningTableView::edit(const QModelIndex&  index, EditTrigger trigger, QEvent* event)
 {
-
-	if (trigger == QAbstractItemView::EditKeyPressed)
+	if ((trigger & QAbstractItemView::EditKeyPressed) == 0)
 	{
-		TuningModel* m_model = dynamic_cast<TuningModel*>(model());
-		if (m_model == nullptr)
-		{
-			assert(m_model);
-			return false;
-		}
-
-		int columnType = static_cast<int>(m_model->columnType(index.column()));
-
-		int row = index.row();
-		if (row >= m_model->rowCount())
-		{
-			assert(false);
-			return false;
-		}
-
-		int valueColumn = columnType - static_cast<int>(TuningModelColumns::ValueFirst);
-		if (valueColumn < 0 || valueColumn >= MAX_VALUES_COLUMN_COUNT)
-		{
-			return false;
-		}
-
-		Hash hash = m_model->hashByIndex(row, valueColumn);
-
-		bool ok = false;
-
-		if (row >= 0)
-		{
-			AppSignalParam asp = m_model->tuningSignalManager().signalParam(hash, &ok);
-
-			TuningSignalState state = m_model->tuningSignalManager().queuedState(hash, &ok);
-
-			if (state.valid() == false || state.controlIsEnabled() == false || m_helper.writingIsEnabled(asp, state) == false)
-			{
-				return false;
-			}
-
-			if (asp.isAnalog() == true)
-			{
-				m_editorActive = true;
-			}
-		}
+		return false;
+	}
+	
+	TuningModel* m_model = dynamic_cast<TuningModel*>(model());
+	if (m_model == nullptr)
+	{
+		assert(m_model);
+		return false;
 	}
 
-	return QTableView::edit(index, trigger, event);
+	int row = index.row();
+	if (row < 0 || row >= m_model->rowCount())
+	{
+		assert(false);
+		return false;
+	}
+
+	int columnIndex = 0;
+
+	if (m_model->valueColumnsCount() == 1)
+	{
+		// For single-column, find value column index and edit it
+		//
+		for (int i = 0; i < m_model->columnCount(); i++)
+		{
+			if (m_model->columnType(i) == TuningModelColumns::ValueFirst)
+			{
+				break;
+			}
+			columnIndex++;
+		}
+	}
+	else
+	{
+		// For multiple-columns, edit exactly selected column
+		//
+		columnIndex = index.column();
+	}
+
+	int	columnType = static_cast<int>(m_model->columnType(columnIndex));
+
+	int valueColumn = columnType - static_cast<int>(TuningModelColumns::ValueFirst);
+	if (valueColumn < 0 || valueColumn >= MAX_VALUES_COLUMN_COUNT)
+	{
+		return false;
+	}
+
+	Hash hash = m_model->hashByIndex(row, valueColumn);
+
+	bool ok = false;
+	AppSignalParam asp = m_model->tuningSignalManager().signalParam(hash, &ok);
+	if (ok == false || asp.isAnalog() == false)
+	{
+		return false;
+	}
+
+	TuningSignalState state = m_model->tuningSignalManager().queuedState(hash, &ok);
+	if (ok == false || m_helper.writingIsEnabled(asp, state) == false)
+	{
+		return false;
+	}
+
+	m_editorActive = true;
+
+	return QTableView::edit(m_model->index(index.row(), columnIndex), trigger, event);
+}
+
+void TuningTableView::mousePressEvent(QMouseEvent* event)
+{
+	QTableView::mousePressEvent(event);
+
+	if (event->button() == Qt::MouseButton::LeftButton)
+	{
+		QPoint pos = event->pos();
+
+		QModelIndex mi = indexAt(pos);
+
+		QRect vr = visualRect(mi);
+
+		QStyleOption option;
+		option.initFrom(this);
+		QRect iconRect = QApplication::style()->subElementRect(QStyle::SubElement::SE_CheckBoxIndicator, &option, this);
+
+		const int iconOffset = (vr.height() - iconRect.height()) / 2;
+
+		QRect iconRectangle;
+		iconRectangle.setTopLeft(vr.topLeft() + QPoint(2, iconOffset));
+		iconRectangle.setWidth(iconRect.width());
+		iconRectangle.setHeight(iconRect.height());
+
+		if (iconRectangle.contains(pos))
+		{
+			emit checkBoxClicked(mi);
+		}
+	}
 }
 
 void TuningTableView::closeEditor(QWidget* editor, QAbstractItemDelegate::EndEditHint hint)
@@ -720,7 +830,7 @@ bool TuningPageColumnsWidth::save() const
 
 	QString value;
 
-	for (auto it : m_widthMap)
+	for (const auto& it : m_widthMap)
 	{
 		TuningModelColumns column = it.first;
 		int width = it.second;
@@ -799,6 +909,7 @@ TuningPage::TuningPage(TuningConfigController& configController,
 	//
 	m_objectList = new TuningTableView(m_userManager);
 	m_objectList->setWordWrap(false);
+	m_objectList->horizontalHeader()->setHighlightSections(false);
 
 	// Models and data
 	//
@@ -1014,6 +1125,8 @@ TuningPage::TuningPage(TuningConfigController& configController,
 	connect(m_objectList->horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &TuningPage::sortIndicatorChanged);
 
 	connect(m_objectList, &QTableView::doubleClicked, this, &TuningPage::slot_tableDoubleClicked);
+
+	connect(m_objectList, &TuningTableView::checkBoxClicked, this, &TuningPage::slot_tableCheckboxClicked);
 
 	m_objectList->installEventFilter(this);
 
@@ -1663,7 +1776,7 @@ void TuningPage::slot_setValue()
 
 	std::vector<int> selectedRows;
 
-	for (const QModelIndex i : selection)
+	for (const QModelIndex& i : selection)
 	{
 		selectedRows.push_back(i.row());
 	}
@@ -1824,75 +1937,136 @@ void TuningPage::slot_listContextMenuRequested(const QPoint& pos)
 
 	QModelIndexList mi = m_objectList->selectionModel()->selectedRows();
 
-	QMenu menu(this);
-
-	int menuSignalCount = 0;
-
+	std::vector<Hash> selectedHashes;
 	for (const QModelIndex& index : mi)
 	{
 		if (index.isValid() == false)
 		{
+			Q_ASSERT(index.isValid());
 			return;
 		}
-
 		const TuningModelHashSet& hashes = m_model->hashSetByIndex(index.row());
-
-		for (int i = 0; i < m_model->valueColumnsCount(); i++)
+		for (int i = 0; i < hashes.hashCount(); i++)
 		{
-			Hash hash = hashes.hash[i];
-
-			if (hash == UNDEFINED_HASH)
-			{
-				continue;
-			}
-
-			bool found = false;
-
-			AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &found);
-
-			if (found == false)
-			{
-				assert(false);
-				return;
-			}
-
-			QAction* a = new QAction(tr("%1 - %2").arg(asp.customSignalId()).arg(asp.caption()), &menu);
-
-			auto f = [this, hash]() -> void
-			{
-				TuningSignalInfo* d = new TuningSignalInfo(m_configController,
-														   m_tuningSignalManager,
-														   m_tuningConnection,
-														   hash,
-														   m_model->analogFormat(),
-														   this);
-				d->show();
-			};
-
-			connect(a, &QAction::triggered, this, f);
-
-			menu.addAction(a);
-
-			menuSignalCount++;
-
-			if (menuSignalCount > 16)
-			{
-				a = new QAction(tr("..."), &menu);
-				a->setEnabled(false);
-				menu.addAction(a);
-				break;
-			}
+			selectedHashes.push_back(hashes.hash[i]);
 		}
+	}
 
-		if (menuSignalCount > 16)
+	bool writeEnabled = true;
+	for (Hash hash : selectedHashes)
+	{
+		bool found = false;
+		AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &found);
+		TuningSignalState state = m_tuningSignalManager.state(hash, &found);
+
+		if (m_helper.writingIsEnabled(asp, state) == false)
 		{
+			writeEnabled = false;
 			break;
 		}
 	}
 
-	if (menuSignalCount == 0)
+	QMenu menu(this);
+
+	// Set Value
+	//
 	{
-		return;
+		QAction* a = new QAction(tr("Set Value..."), &menu);
+		auto f = [this]() -> void
+		{
+			slot_setValue();
+		};
+		connect(a, &QAction::triggered, this, f);
+		a->setEnabled(writeEnabled && selectedHashes.empty() == false);
+		menu.addAction(a);
+	}
+
+	// Set defaults
+	//
+	{
+		QAction* a = new QAction(tr("Set to Defaults"), &menu);
+		auto f = [this, selectedHashes]() -> void
+		{
+			setToDefaults(selectedHashes);
+		};
+		connect(a, &QAction::triggered, this, f);
+		a->setEnabled(writeEnabled && selectedHashes.empty() == false);
+		menu.addAction(a);
+	}
+
+	menu.addSeparator();
+
+	// Signal actions
+	//
+	{
+		int menuSignalCount = 0;
+
+		for (const QModelIndex& index : mi)
+		{
+			if (index.isValid() == false)
+			{
+				return;
+			}
+
+			const TuningModelHashSet& hashes = m_model->hashSetByIndex(index.row());
+
+			for (int i = 0; i < m_model->valueColumnsCount(); i++)
+			{
+				Hash hash = hashes.hash[i];
+
+				if (hash == UNDEFINED_HASH)
+				{
+					continue;
+				}
+
+				bool found = false;
+
+				AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &found);
+
+				if (found == false)
+				{
+					assert(false);
+					return;
+				}
+
+				QAction* a = new QAction(tr("%1 - %2").arg(asp.customSignalId()).arg(asp.caption()), &menu);
+
+				auto f = [this, hash]() -> void
+				{
+					TuningSignalInfo* d = new TuningSignalInfo(m_configController,
+															   m_tuningSignalManager,
+															   m_tuningConnection,
+															   hash,
+															   m_model->analogFormat(),
+															   this);
+					d->show();
+				};
+
+				connect(a, &QAction::triggered, this, f);
+
+				menu.addAction(a);
+
+				menuSignalCount++;
+
+				if (menuSignalCount > 16)
+				{
+					a = new QAction(tr("..."), &menu);
+					a->setEnabled(false);
+					menu.addAction(a);
+					break;
+				}
+			}
+
+			if (menuSignalCount > 16)
+			{
+				break;
+			}
+		}
+
+		if (menuSignalCount == 0)
+		{
+			return;
+		}
 	}
 
 	// Add additional commands
@@ -1900,64 +2074,75 @@ void TuningPage::slot_listContextMenuRequested(const QPoint& pos)
 	menu.addSeparator();
 
 	// View
+	{
+		QMenu* submenuV = menu.addMenu(tr("Format"));
 
-	QMenu* submenuV = menu.addMenu(tr("Format"));
+		QAction* a = new QAction(tr("Auto-select"), &menu);
+		a->setCheckable(true);
+		a->setChecked(m_model->analogFormat() == E::AnalogFormat::g_9_or_9e || m_model->analogFormat() == E::AnalogFormat::G_9_or_9E);
+		connect(a, &QAction::triggered, this, [this]()
+				{
+					slot_setAnalogFormat(E::AnalogFormat::g_9_or_9e);
+				});
+		submenuV->addAction(a);
 
-	QAction* a = new QAction(tr("Auto-select"), &menu);
-	a->setCheckable(true);
-	a->setChecked(m_model->analogFormat() == E::AnalogFormat::g_9_or_9e || m_model->analogFormat() == E::AnalogFormat::G_9_or_9E);
-	connect(a, &QAction::triggered, this, [this]() { slot_setAnalogFormat(E::AnalogFormat::g_9_or_9e); });
-	submenuV->addAction(a);
+		a = new QAction(tr("Decimal (as [-]9.9)"), &menu);
+		a->setCheckable(true);
+		a->setChecked(m_model->analogFormat() == E::AnalogFormat::f_9);
+		connect(a, &QAction::triggered, this, [this]()
+				{
+					slot_setAnalogFormat(E::AnalogFormat::f_9);
+				});
+		submenuV->addAction(a);
 
-	a = new QAction(tr("Decimal (as [-]9.9)"), &menu);
-	a->setCheckable(true);
-	a->setChecked(m_model->analogFormat() == E::AnalogFormat::f_9);
-	connect(a, &QAction::triggered, this, [this]() { slot_setAnalogFormat(E::AnalogFormat::f_9); });
-	submenuV->addAction(a);
-
-	a = new QAction(tr("Exponential (as [-]9.9e[+|-]999)"), &menu);
-	a->setCheckable(true);
-	a->setChecked(m_model->analogFormat() == E::AnalogFormat::e_9e || m_model->analogFormat() == E::AnalogFormat::E_9E);
-	connect(a, &QAction::triggered, this, [this]() { slot_setAnalogFormat(E::AnalogFormat::e_9e); });
-	submenuV->addAction(a);
+		a = new QAction(tr("Exponential (as [-]9.9e[+|-]999)"), &menu);
+		a->setCheckable(true);
+		a->setChecked(m_model->analogFormat() == E::AnalogFormat::e_9e || m_model->analogFormat() == E::AnalogFormat::E_9E);
+		connect(a, &QAction::triggered, this, [this]()
+				{
+					slot_setAnalogFormat(E::AnalogFormat::e_9e);
+				});
+		submenuV->addAction(a);
+	}
 
 	// More
-
-	QMenu* submenuA = menu.addMenu(tr("More"));
-
-	a = new QAction(tr("Add To New Filter..."), &menu);
-	connect(a, &QAction::triggered, this, &TuningPage::slot_saveSignalsToNewFilter);
-	submenuA->addAction(a);
-
-	a = new QAction(tr("Add To Existing Filter..."), &menu);
-	connect(a, &QAction::triggered, this, &TuningPage::slot_saveSignalsToExistingFilter);
-	submenuA->addAction(a);
-
-	// If AutoFilter filter exists, add Restore command
-
-	std::shared_ptr<TuningFilter> root = m_tuningFilterStorage.root();
-
-	if (root == nullptr)
 	{
-		assert(root);
-		return;
-	}
+		QMenu* submenuA = menu.addMenu(tr("More"));
 
-	std::shared_ptr<TuningFilter> autoCreatedFilter = root->childFilter(m_autoFilterCaption);
-	if (autoCreatedFilter != nullptr)
-	{
+		QAction* a = new QAction(tr("Add To New Filter..."), &menu);
+		connect(a, &QAction::triggered, this, &TuningPage::slot_saveSignalsToNewFilter);
+		submenuA->addAction(a);
+
+		a = new QAction(tr("Add To Existing Filter..."), &menu);
+		connect(a, &QAction::triggered, this, &TuningPage::slot_saveSignalsToExistingFilter);
+		submenuA->addAction(a);
+
+		// If AutoFilter filter exists, add Restore command
+
+		std::shared_ptr<TuningFilter> root = m_tuningFilterStorage.root();
+
+		if (root == nullptr)
+		{
+			assert(root);
+			return;
+		}
+
+		std::shared_ptr<TuningFilter> autoCreatedFilter = root->childFilter(m_autoFilterCaption);
+		if (autoCreatedFilter != nullptr)
+		{
+			submenuA->addSeparator();
+
+			a = new QAction(tr("Restore Values From Filter..."), &menu);
+			connect(a, &QAction::triggered, this, &TuningPage::slot_restoreValuesFromExistingFilter);
+			submenuA->addAction(a);
+		}
+
 		submenuA->addSeparator();
 
-		a = new QAction(tr("Restore Values From Filter..."), &menu);
-		connect(a, &QAction::triggered, this, &TuningPage::slot_restoreValuesFromExistingFilter);
+		a = new QAction(tr("Export Current View to CSV..."), &menu);
+		connect(a, &QAction::triggered, this, &TuningPage::slot_exportContentsToCSV);
 		submenuA->addAction(a);
 	}
-
-	submenuA->addSeparator();
-
-	a = new QAction(tr("Export Current View to CSV..."), &menu);
-	connect(a, &QAction::triggered, this, &TuningPage::slot_exportContentsToCSV);
-	submenuA->addAction(a);
 
 	menu.exec(QCursor::pos());
 
@@ -2149,6 +2334,24 @@ void TuningPage::slot_setAnalogFormat(E::AnalogFormat analogFormat)
 	m_objectList->update();
 }
 
+void TuningPage::slot_tableCheckboxClicked(const QModelIndex& index)
+{
+	int col = index.column();
+	int columnType = static_cast<int>(m_model->columnType(col));
+
+	int row = index.row();
+	if (row >= m_model->rowCount())
+	{
+		assert(false);
+		return;
+	}
+
+	if (columnType >= static_cast<int>(TuningModelColumns::ValueFirst) && columnType <= static_cast<int>(TuningModelColumns::ValueLast))
+	{
+		invertValue();
+	}
+}
+
 void TuningPage::slot_ApplyFilter()
 {
 	if (m_filterTextCombo->currentText().isEmpty() == false)
@@ -2216,7 +2419,7 @@ void TuningPage::invertValue()
 
 	std::vector<int> selectedRows;
 
-	for (const QModelIndex i : selection)
+	for (const QModelIndex& i : selection)
 	{
 		selectedRows.push_back(i.row());
 	}
@@ -2256,11 +2459,20 @@ void TuningPage::invertValue()
 
 				tv.setType(TuningValueType::Discrete);
 
-				tv.setDiscreteValue(0);
+				tv.setDiscreteValue(state.value().discreteValue());
 
-				if (m_tuningSignalManager.unappliedValue(hash).discreteValue() == 0)
+				if (m_tuningSignalManager.isUnapplied(hash) == true)
+				{
+					tv = m_tuningSignalManager.unappliedValue(hash);
+				}
+
+				if (tv.discreteValue() == 0)
 				{
 					tv.setDiscreteValue(1);
+				}
+				else
+				{
+					tv.setDiscreteValue(0);
 				}
 
 				m_tuningSignalManager.setUnappliedValue(hash, tv);
@@ -2424,6 +2636,43 @@ void TuningPage::restoreSignalsFromFilter(TuningFilter* filter)
 	else
 	{
 		QMessageBox::warning(this, qAppName(), tr("%1 values were restored from the filter. Check them and apply the changes.").arg(restoredCount));
+	}
+}
+
+void TuningPage::setToDefaults(const std::vector<Hash>& hashes)
+{
+	bool ok = false;
+
+	for (Hash hash : hashes)
+	{
+		AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
+
+		TuningSignalState state = m_tuningSignalManager.queuedState(hash, &ok);
+
+		if (state.valid() == false || state.controlIsEnabled() == false || m_helper.writingIsEnabled(asp, state) == false)
+		{
+			continue;
+		}
+
+		// If signal is not in default OR default value was overloaded then set it
+
+		if ((state.isTuningDefault() == false || m_model->defaultValue(asp) != asp.tuningDefaultValue()) && ok == true)
+		{
+			TuningValue tvDefault = m_model->defaultValue(asp);
+
+			if (tvDefault < asp.tuningLowBound() || tvDefault > asp.tuningHighBound())
+			{
+				QString message = tr("Invalid default value '%1' in signal %2 [%3]")
+									  .arg(tvDefault.toString(m_model->analogFormat(), asp.precision()))
+									  .arg(asp.appSignalId())
+									  .arg(asp.caption());
+				QMessageBox::critical(this, qAppName(), message);
+			}
+			else
+			{
+				m_tuningSignalManager.setUnappliedValue(hash, tvDefault);
+			}
+		}
 	}
 }
 
@@ -2707,48 +2956,9 @@ void TuningPage::slot_setAll()
 
 	// Set All To Defaults
 	QAction* actionAllToDefault = new QAction(tr("Set All To Defaults"), &menu);
-
-	auto fAllToDefault = [this]() -> void
-	{
-		std::vector<Hash> hashes = m_model->allHashes();
-
-		bool ok = false;
-
-		for (Hash hash : hashes)
-		{
-			AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
-
-			TuningSignalState state = m_tuningSignalManager.queuedState(hash, &ok);
-
-			if (state.valid() == false || state.controlIsEnabled() == false || m_helper.writingIsEnabled(asp, state) == false)
-			{
-				continue;
-			}
-
-			// If signal is not in default OR default value was overloaded then set it
-
-			if ((state.isTuningDefault() == false || m_model->defaultValue(asp) != asp.tuningDefaultValue())
-					&& ok == true)
-			{
-				TuningValue tvDefault = m_model->defaultValue(asp);
-
-				if(tvDefault < asp.tuningLowBound() || tvDefault > asp.tuningHighBound())
-				{
-					QString message = tr("Invalid default value '%1' in signal %2 [%3]")
-							.arg(tvDefault.toString(m_model->analogFormat(), asp.precision()))
-							.arg(asp.appSignalId())
-							.arg(asp.caption());
-					QMessageBox::critical(this, qAppName(), message);
-				}
-				else
-				{
-					m_tuningSignalManager.setUnappliedValue(hash, tvDefault);
-				}
-			}
-		}
-	};
-
-	connect(actionAllToDefault, &QAction::triggered, this, fAllToDefault);
+	connect(actionAllToDefault, &QAction::triggered, this, [this]() {
+				setToDefaults(m_model->allHashes());
+		});
 
 	// Run the menu
 

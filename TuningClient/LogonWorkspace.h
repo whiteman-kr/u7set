@@ -10,6 +10,7 @@ public:
 
 private slots:
 	void onButtonLogin();
+	void onButtonRelogin();
 
 	void onUserManagerLogin();
 	void onUserManagerLogout();
@@ -20,7 +21,7 @@ public slots:
 private:
 	QPushButton* m_loginButton = nullptr;
 	QLabel* m_loginUserName = nullptr;
-	QLabel* m_logoutPendingTime = nullptr;
+	QPushButton* m_logoutPendingTime = nullptr;
 
 	ClientLib::TuningUserManager& m_userManager;
 
