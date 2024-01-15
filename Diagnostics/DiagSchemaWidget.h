@@ -1,35 +1,32 @@
 #pragma once
 
+#include "DiagnosticsSchemaManager.h"
+//#include "MonitorSignalManager.h"
 #include "../VFrame30/ClientSchemaWidget.h"
-#include "../VFrame30/AppSignalController.h"
+// -- #include "../VFrame30/AppSignalController.h"
 #include "../lib/ITimeStats.h"
 
 
-class MonitorSignalManager;
-class MonitorSchemaView;
-class MonitorSchemaManager;
+class DiagSchemaView;
 struct SchemaHistoryItem;
 
 //
 //
-// MonitorSchemaWidget
+// DiagSchemaWidget
 //
 //
-class MonitorSchemaWidget : public VFrame30::ClientSchemaWidget
+class DiagSchemaWidget : public VFrame30::ClientSchemaWidget
 {
 	Q_OBJECT
 
-private:
-	MonitorSchemaWidget() = delete;
-
 public:
-	MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
-						MonitorSchemaManager* schemaManager,
-						VFrame30::AppSignalController* appSignalController,
+	DiagSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
+					 DiagnosticsSchemaManager* schemaManager,
+						// -- VFrame30::AppSignalController* appSignalController,
 						VFrame30::LogController* logController,
 						ITimeStats* timeStats,
 						QWidget* parent);
-	virtual ~MonitorSchemaWidget();
+	virtual ~DiagSchemaWidget();
 
 protected:
 	void createActions();
@@ -51,17 +48,17 @@ public slots:
 	// Properties
 	//
 public:
-	IAppSignalManager* signalManager();
-	const IAppSignalManager* signalManager() const;
+	// -- IAppSignalManager* signalManager();
+	// -- const IAppSignalManager* signalManager() const;
 
-	MonitorSignalManager* monitorSignalManager();
-	const MonitorSignalManager* monitorSignalManager() const;
+	// -- MonitorSignalManager* monitorSignalManager();
+	// -- const MonitorSignalManager* monitorSignalManager() const;
 
-	MonitorSchemaView* monitorSchemaView();
-	const MonitorSchemaView* monitorSchemaView() const;
+	DiagSchemaView* diagSchemaView();
+	const DiagSchemaView* diagSchemaView() const;
 
-	MonitorSchemaManager* schemaManager();
-	const MonitorSchemaManager* schemaManager() const;
+	DiagnosticsSchemaManager* schemaManager();
+	const DiagnosticsSchemaManager* schemaManager() const;
 
 	// Data
 	//
@@ -73,8 +70,8 @@ private:
 	QAction* m_closeTabAction = nullptr;
 
 	// Data access
+	//
 	VFrame30::LogController* m_logController = nullptr;
 	ITimeStats* m_timeStats = nullptr;
-
 };
 

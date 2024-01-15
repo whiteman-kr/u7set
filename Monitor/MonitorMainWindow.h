@@ -1,22 +1,24 @@
 #pragma once
 
+#include "MonitorCentralWidget.h"
 #include "MonitorConfigController.h"
+#include "MonitorSchemaManager.h"
 #include "MonitorSignalManager.h"
-#include "SchemaDrawStatistics.h"
 #include "SelectSchemaWidget.h"
 
 #include "../ClientLib/AdsConnection.h"
 #include "../ClientLib/ClientTranslator.h"
+#include "../ClientLib/TuningConnection.h"
 #include "../ClientLib/TuningLog.h"
 #include "../ClientLib/TuningTcpClient.h"
 #include "../ClientLib/TuningUserManager.h"
+#include "../SchemaClientLib/SchemaDrawStatistics.h"
 #include "../UtilsLib/InstanceResolver.h"
 #include "../UtilsLib/LogFile.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../lib/Ui/DialogAlert.h"
 #include "../lib/Ui/DialogTcpStatistics.h"
 
-class MonitorCentralWidget;
 class MonitorToolBar;
 class QLabel;
 class QComboBox;
@@ -171,7 +173,7 @@ private:
 
 	DialogAlert m_dialogAlert;
 
-	SchemaDrawStatistics m_schemaStats;
+	SchemaClientLib::SchemaDrawStatistics m_schemaStats;
 
 	// File menu
 	//

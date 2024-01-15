@@ -321,6 +321,10 @@ namespace VFrame30
 		void setSchema(QString schemaId);
 		void setSchema(QString schemaId, const QStringList& highlightAppSignalIds);
 
+	public:
+		bool saveSchemaToPdf(const QString& fileName);	// Export schema to PDF or PNG
+		bool saveSchemaToPng(const QString& fileName);	// Export schema to PDF or PNG
+
 	  protected:
 		virtual void paintEvent(QPaintEvent* event) override;
 		virtual void timerEvent(QTimerEvent* event) override;

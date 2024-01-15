@@ -50,15 +50,12 @@ set (DIAGNOSTICS_SOURCES
 #	../lib/Ui/DragDropHelper.h
 #	../lib/Ui/SchemaListWidget.cpp
 #	../lib/Ui/SchemaListWidget.h
-#	../lib/Ui/TabWidgetEx.cpp
-#	../lib/Ui/TabWidgetEx.h
 #	../lib/Ui/TagSelectorWidget.cpp
 #	../lib/Ui/TagSelectorWidget.h
 #	../lib/Ui/TuningSourcesWidget.cpp
 #	../lib/Ui/TuningSourcesWidget.h
 #	../lib/Ui/DialogWriteValues.cpp
 #	../lib/Ui/DialogWriteValues.h
-#	../UtilsLib/ILogFile.h
 #	Archive/ArchiveConnection.cpp
 #	Archive/ArchiveConnection.h
 #	Archive/ArchiveData.cpp
@@ -84,26 +81,23 @@ set (DIAGNOSTICS_SOURCES
 	main.cpp
 	DiagnosticsAppSettings.cpp
 	DiagnosticsAppSettings.h
-#	DiagnosticsCentralWidget.cpp
-#	DiagnosticsCentralWidget.h
+	DiagnosticsCentralWidget.h
 	DiagConfigController.cpp
 	DiagConfigController.h
 	DiagnosticsMainWindow.cpp
 	DiagnosticsMainWindow.h
 	DiagnosticsSchemaManager.cpp
 	DiagnosticsSchemaManager.h
-#	MonitorSchemaView.cpp
-#	MonitorSchemaView.h
-#	MonitorSchemaWidget.cpp
-#	MonitorSchemaWidget.h
+	DiagSchemaView.cpp
+	DiagSchemaView.h
+	DiagSchemaWidget.cpp
+	DiagSchemaWidget.h
 #	MonitorSignalInfo.cpp
 #	MonitorSignalInfo.h
 #	MonitorSignalManager.cpp
 #	MonitorSignalManager.h
 #	MonitorSignalSnapshot.cpp
 #	MonitorSignalSnapshot.h
-#	SchemaDrawStatistics.cpp
-#	SchemaDrawStatistics.h
 	ScriptDiagnosticsApplication.cpp
 	ScriptDiagnosticsApplication.h
 #	SelectSchemaWidget.cpp

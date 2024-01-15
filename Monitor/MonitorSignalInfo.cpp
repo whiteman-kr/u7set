@@ -1,6 +1,7 @@
 #include "MonitorSignalInfo.h"
-#include "MonitorCentralWidget.h"
 #include "../UtilsLib/Ui/UiTools.h"
+#include "MonitorConfigController.h"
+#include "MonitorSignalManager.h"
 #include "ui_DialogSignalInfo.h"
 
 class MonitorSignalManager;

@@ -1,5 +1,4 @@
 #include "MonitorMainWindow.h"
-#include "MonitorCentralWidget.h"
 #include "DialogSettings.h"
 #include "MonitorSchemaWidget.h"
 #include "MonitorSchemaView.h"
@@ -32,6 +31,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 
 	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/Monitor_uk.qm");
 	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/ClientLib_uk.qm");
+	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/SchemaClientLib_uk.qm");
 	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/TrendView_uk.qm");
 	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/UtilsLib_uk.qm");
 	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/qt_uk.qm");
@@ -75,11 +75,18 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 
 	// --
 	//
-	MonitorCentralWidget* monitorCentralWidget = new MonitorCentralWidget(&m_schemaManager,
-																		  m_appSignalController.get(),
-																		  m_logController.get(),
-																		  &m_schemaStats,
-																		  this);
+	auto createSchemaWidgetFunc = [this](std::shared_ptr<VFrame30::Schema> schema, QWidget* parentWidget)
+	{
+		return new MonitorSchemaWidget(schema,
+									   &m_schemaManager,
+									   m_appSignalController.get(),
+									   m_logController.get(),
+									   &m_schemaStats,
+									   parentWidget);
+	};
+
+	auto monitorCentralWidget = new MonitorCentralWidget(&m_schemaManager, std::move(createSchemaWidgetFunc), this);
+	
 	setCentralWidget(monitorCentralWidget);
 
 	// Create Menus, ToolBars, StatusBar
@@ -113,8 +120,13 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 
 	// --
 	//
+	monitorCentralWidget->setVisibleTabBar(MonitorAppSettings::instance().showSchemasTabBar());
+	monitorCentralWidget->setZoomMode(MonitorAppSettings::instance().zoomMode());
+
 	centralWidget()->show();
 
+	// --
+	//
 	m_configController.start();
 
 	m_updateStatusBarTimerId = startTimer(200);
@@ -974,7 +986,7 @@ void MonitorMainWindow::showSettings()
 		showLogo();
 		showZoomControls();
 		setVisibleTabBar(MonitorAppSettings::instance().showSchemasTabBar());
-		monitorCentralWidget()->applyZoomMode(MonitorAppSettings::instance().zoomMode());
+		monitorCentralWidget()->setZoomMode(MonitorAppSettings::instance().zoomMode());
 
 		// Reconnect
 		//
@@ -1513,6 +1525,8 @@ void MonitorMainWindow::slot_updateActions(bool schemaWidgetSelected)
 
 void MonitorMainWindow::slot_configurationArrived(MonitorConfigSettings configuration)
 {
+	monitorCentralWidget()->setStartSchemaId(configuration.startSchemaId);
+
 	// Update AppSignalManager with specific data
 	//
 	m_adsConnection.updateConnections(m_configController.softwareInfo(), configuration.appDataServices);
@@ -1622,12 +1636,10 @@ void MonitorMainWindow::setVisibleSchemaTree(bool visible)
 
 void MonitorMainWindow::setVisibleTabBar(bool visible)
 {
-	MonitorCentralWidget* m = monitorCentralWidget();
-	Q_ASSERT(m);
-
-	if (m != nullptr)
+	if (MonitorCentralWidget* m = monitorCentralWidget();
+		m != nullptr)
 	{
-		m->tabBar()->setVisible(visible);
+		m->setVisibleTabBar(visible);
 	}
 
 	m_newTabAction->setVisible(visible);

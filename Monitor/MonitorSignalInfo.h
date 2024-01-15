@@ -1,16 +1,19 @@
 #ifndef MONITORSIGNALINFO_H
 #define MONITORSIGNALINFO_H
 
-#include "MonitorSignalManager.h"
-#include "../lib/Ui/DialogSignalInfo.h"
 #include "../lib/ISignalDataServer.h"
+#include "../lib/Ui/DialogSignalInfo.h"
+#include "MonitorCentralWidget.h"
 
-class MonitorCentralWidget;
+
 class MonitorConfigController;
+class MonitorSignalManager;
+
 
 class MonitorSignalInfo : public DialogSignalInfo
 {
 	Q_OBJECT
+
 public:
 	static bool showDialog(QString appSignalId,
 						   MonitorSignalManager* appSignalManager,
