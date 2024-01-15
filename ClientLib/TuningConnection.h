@@ -7,6 +7,7 @@
 #include "../UtilsLib/ILogFile.h"
 #include "../UtilsLib/SimpleThread.h"
 #include "../lib/Tuning/ITuningConnection.h"
+#include "../lib/Tuning/ITuningAuthorization.h"
 #include "TuningTcpClient.h"
 
 class SimpleThread;
@@ -29,6 +30,7 @@ namespace ClientLib
 					   TuningClientSettings::LmStatusFlagMode lmStatusFlagMode,
 					   ITuningSignalUpdater& signalUpdater,
 					   IRecentAppSignals& recentTuningSignals,
+					   ITuningAuthorization& tuningAuthorization,
 					   ILogFile* logFile,
 					   ITuningLog* tuningLog);
 			Connection(const Connection&) = delete;
@@ -53,6 +55,7 @@ namespace ClientLib
 		explicit TuningConnection(ITuningSignalManager& tuningSignalManager,
 								  ITuningSignalUpdater& tuningSignalUpdater,
 								  IRecentAppSignals& recentTuningSignals,
+								  ITuningAuthorization& tuningAuthorization,
 								  ILogFile* logFile,
 								  ITuningLog* tuningLog);
 
@@ -123,6 +126,7 @@ namespace ClientLib
 		IRecentAppSignals& m_recentTuningSignals;
 
 		HasLogFile m_logFile;
+		ITuningAuthorization& m_tuningAuthorization;
 		ITuningLog* m_tuningLog = nullptr;
 	};
 }

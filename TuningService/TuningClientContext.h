@@ -15,6 +15,9 @@ namespace Tuning
 	{
 	public:
 		TuningClientContext(const QString& clientID,
+							bool tuningLogin,
+							const QString& matsUsersList,
+							const std::vector<OnlineLib::MatsUser>& matsUsers,
 							const QStringList& drivenSourcesIDs,
 							const TuningSources& sources);
 		~TuningClientContext();
@@ -22,12 +25,12 @@ namespace Tuning
 		void readSignalStates(const Network::TuningSignalsRead& request, Network::TuningSignalsReadReply* reply) const;
 
 		void writeSignalStates(const QString& clientEquipmentID,
-							   const QString &user,
+							   const QString& matsUser,
 							   const Network::TuningSignalsWrite& request,
 							   Network::TuningSignalsWriteReply* reply) const;
 
 		void applySignalStates(const QString& clientEquipmentID,
-							   const QString &user) const;
+							   const QString& matsUser) const;
 
 		void setSourceThread(TuningSourceThreadShared srcThread);
 		void removeSourceThread(const QString& tuningSourceID);
@@ -52,7 +55,12 @@ namespace Tuning
 		int getStateChangesQueueSize() const;
 
 	private:
-		QString m_clientID;			// TuningClient equipmentID
+		QString m_clientID;										// Tuning сlient EquipmentID
+		bool m_tuningLogin = false;
+		std::map<QString, std::set<QString>> m_matsUsers;		// MATS user login => MATS user set of AppSignalTags
+		std::map<QString, std::set<Hash>> m_userAllowedSignals;	// MATS user login => set of allowed to control signal Hashes
+		std::set<QString> m_disabledUsers;
+
 		const TuningSources& m_tuningSources;
 
 		std::map<QString, TuningSourceThreadShared> m_sourceThreadMap;	// source EquipmentID => TuningSourceThreadShared
@@ -63,7 +71,6 @@ namespace Tuning
 		SimpleMutex m_queueMapMutex;
 		std::map<qint64, TuningSignalsChangesQueue*> m_stateChangesQueueMap;		// client tcpConnectionID => state changes queue
 	};
-
 
 	// ----------------------------------------------------------------------------------------------
 	//

@@ -76,8 +76,7 @@ int main(int argc, char* argv[])
 	VFrame30::init();
 	Hardware::init();
 
-	SoftwareInfo softwareInfo;
-	softwareInfo.init(E::SoftwareType::Monitor, MonitorAppSettings::instance().equipmentId(), U7SET_MAJOR_VERSION, U7SET_MINOR_VERSION);
+	SoftwareInfo softwareInfo(E::SoftwareType::Monitor, MonitorAppSettings::instance().equipmentId());
 
 	// --
 	//

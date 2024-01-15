@@ -4,6 +4,7 @@
 #include <set>
 #include "../SchemaClientLib/SchemaClientConfigController.h"
 #include "../ClientLib/TuningTcpClient.h"
+#include "../OnlineLib/MatsUsers.h"
 
 //
 // ConfigSettings
@@ -17,6 +18,8 @@ struct TuningClientConfigSettings
 	TuningClientSettings clientSettings;	//BuildInfo buildInfo;
 
 	QString scriptGlobal;
+
+	OnlineLib::MatsUserStorage matsUsers;
 
 	TuningClientSettings::LmStatusFlagMode lmStatusFlagMode() const
 	{

@@ -226,5 +226,6 @@ bool DiagSignalTypesStorage::readFromXml(XmlReadHelper& xml)
 
 	}
 
+	return result;
 }
 

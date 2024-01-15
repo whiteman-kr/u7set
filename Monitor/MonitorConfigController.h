@@ -4,6 +4,7 @@
 #include "../SchemaClientLib/SchemaClientConfigController.h"
 #include "../lib/ClientBehavior.h"
 #include "../VFrame30/Schema.h"
+#include "../OnlineLib/MatsUsers.h"
 
 
 struct MonitorConfigSettings
@@ -25,6 +26,7 @@ struct MonitorConfigSettings
 	//
 	bool tuningEnabled = false;
 	std::vector<SoftwareEndpoint::TuningService> tuningServices;
+	OnlineLib::MatsUserStorage matsUsers;
 
 	bool tuningLogin = false;
 	QStringList tuningUserAccounts;

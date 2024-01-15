@@ -97,6 +97,7 @@ protected slots:
 	void runBusEditor();
 	void runTagsEditor();
 	void runSimulationProfilesEditor();
+	void runMatsUserEditor();
 	void updateUfbsAfbsBusses();
 	void afbLibraryCheck();
     void showAbout();
@@ -147,6 +148,7 @@ private:
 	QAction* m_diagSignalTypesEditorAction = nullptr;
 	QAction* m_busEditorAction = nullptr;
 	QAction* m_tagsEditorAction = nullptr;
+	QAction* m_matsUsersEditorAction = nullptr;
 	QAction* m_simProfilesEditorAction = nullptr;
 	QAction* m_updateUfbsAfbs = nullptr;
 	QAction* m_AfbLibraryCheck = nullptr;

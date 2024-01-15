@@ -2,14 +2,17 @@
 
 namespace TestSuite
 {
+
 	TunsOutputController::TunsOutputController(const SoftwareInfo& softwareInfo,
 											   const std::vector<SoftwareEndpoint::TuningService>& tuningServices,
+											   const QString& userName,
 											   const QByteArray& signalsFile,
 											   TuningClientSettings::LmStatusFlagMode lmStatusFlagMode,
 											   ILogFile* logFile):
 		m_signalManager{softwareInfo.equipmentID(), logFile},
 		m_appLog{logFile, "TunsOutputController"},
-		m_connection{m_signalManager, m_signalManager, m_signalManager, logFile, &m_tuningLogStub}
+		m_authorization{userName},
+		m_connection{m_signalManager, m_signalManager, m_signalManager, m_authorization, logFile, &m_tuningLogStub}
 	{
 		m_signalManager.load(signalsFile);
 
@@ -176,4 +179,44 @@ namespace TestSuite
 		timeElapsedMs = timeoutMs;
 		return false;
 	}
-}
+
+	bool TunsOutputController::tuningSourceIsActive(QString lmEquipmentId) const
+	{
+		Hash sourceHash = ::calcHash(lmEquipmentId);
+		int sourceStatesCount = m_connection.tuningSourceStatesCount(sourceHash);
+		int activeStatesCount = m_connection.activatedTuningSourceStatesCount(sourceHash);
+
+		bool active = sourceStatesCount > 0 && sourceStatesCount == activeStatesCount;
+		return active;
+	}
+
+	bool TunsOutputController::tuningSourceIsInactive(QString lmEquipmentId) const
+	{
+		Hash sourceHash = ::calcHash(lmEquipmentId);
+		int sourceStatesCount = m_connection.tuningSourceStatesCount(sourceHash);
+		int activeStatesCount = m_connection.activatedTuningSourceStatesCount(sourceHash);
+
+		bool inactive = sourceStatesCount > 0 && activeStatesCount == 0;
+		return inactive;
+	}
+
+	bool TunsOutputController::activateTuningSource(QString lmEquipmentId, bool activate)
+	{
+		Hash sourceHash = ::calcHash(lmEquipmentId);
+		if (m_connection.activateTuningSource(sourceHash, activate) == false)
+		{
+			return false;
+		}
+
+		for (int i = 0; i < 50; i++)
+		{
+			if ((activate == true && tuningSourceIsActive(lmEquipmentId) == true) ||
+				(activate == false && tuningSourceIsInactive(lmEquipmentId) == true))
+			{
+				return true;
+			}
+			QThread::msleep(100);
+		}
+		return false;
+	}
+} // namespace TestSuite

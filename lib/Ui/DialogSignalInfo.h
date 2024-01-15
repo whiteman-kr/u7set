@@ -235,6 +235,7 @@ private:
 	ISignalDataServer* m_signalDataServer = nullptr;
 	std::vector<SoftwareEndpoint::AppDataService> m_appDataServices;
 
+	ITuningAuthorization& m_tuningAuthorization;
 	VFrame30::TuningController m_tuningController;
 	bool m_tuningEnabled = false;
 	QWidget* m_tuningTabWidget = nullptr;

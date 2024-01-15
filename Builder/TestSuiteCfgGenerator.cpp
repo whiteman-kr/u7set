@@ -66,6 +66,14 @@ namespace Builder
 				m_log->errEQP6202(EquipmentPropNames::TESTING_USER_ACCOUNTS, EquipmentPropNames::TESTING_LOGIN, m_software->equipmentIdTemplate());
 				return false;
 			}
+			
+			// Write MATS users
+			//
+			if (settings->login == true)
+			{
+				result &= writeMatsUsers(EquipmentPropNames::TESTING_USER_ACCOUNTS,
+										 settings->userAccounts.split(Separator::SEMICOLON, Qt::SkipEmptyParts));
+			}
 		}
 
 		result &= writeTestScripts();

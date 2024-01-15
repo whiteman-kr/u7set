@@ -1,4 +1,8 @@
-#include "DialogChooseTags.h"
+#include "ChooseTagsWidget.h"
+
+//
+// ChooseTagsWidget
+//
 
 QString ChooseTagsWidget::m_filterText = QString();
 
@@ -17,10 +21,19 @@ ChooseTagsWidget::ChooseTagsWidget(const QStringList &tags, QWidget* parent):
     return;
 }
 
-ChooseTagsWidget::ChooseTagsWidget(const std::vector<std::pair<QString, QString>>& tags, QWidget* parent):
+ChooseTagsWidget::ChooseTagsWidget(const std::vector<std::pair<QString, QString>>& tags,
+								   const std::vector<OnlineLib::MatsUser>& users,
+								   QWidget* parent) :
     QWidget(parent),
-    m_tags(tags)
+    m_tags(tags),
+	m_users(users)
 {
+    if (m_tags.empty() == true && m_users.empty() == false)
+	{
+        m_objectName = "User";
+        m_objectNames = "users";
+	}
+
     setupUi(true/*hasDescriptions*/);
 
     fillTags();
@@ -116,20 +129,20 @@ void ChooseTagsWidget::setupUi(bool hasDescriptions)
 
     // Tags list
     //
-    m_tagsList = new QTreeWidget();
-    m_tagsList->setRootIsDecorated(false);
+    m_list = new QTreeWidget();
+    m_list->setRootIsDecorated(false);
 
     QStringList l;
-    l << tr("Tag");
+    l << m_objectName;
     l << tr("Description");
-    m_tagsList->setHeaderLabels(l);
-    m_tagsList->setColumnCount(static_cast<int>(l.size()));
+    m_list->setHeaderLabels(l);
+    m_list->setColumnCount(static_cast<int>(l.size()));
 
-    m_tagsList->setHeaderHidden(hasDescriptions == false);
-    m_tagsList->setColumnHidden(1, hasDescriptions == false);
+    m_list->setHeaderHidden(hasDescriptions == false);
+    m_list->setColumnHidden(1, hasDescriptions == false);
 
-    connect(m_tagsList, &QTreeWidget::itemChanged, this, &ChooseTagsWidget::tagsListItemChanged);
-    connect(m_tagsList, &QTreeWidget::itemPressed, this, &ChooseTagsWidget::tagsListItemPressed);
+    connect(m_list, &QTreeWidget::itemChanged, this, &ChooseTagsWidget::tagsListItemChanged);
+    connect(m_list, &QTreeWidget::itemPressed, this, &ChooseTagsWidget::tagsListItemPressed);
 
     // Buttons and Filter Layout
     //
@@ -138,7 +151,7 @@ void ChooseTagsWidget::setupUi(bool hasDescriptions)
     m_filterEdit = new QLineEdit();
     m_filterEdit->setClearButtonEnabled(true);
     m_filterEdit->setPlaceholderText(tr("Filter"));
-    m_filterEdit->setToolTip(tr("Start typing to filter tags"));
+    m_filterEdit->setToolTip(tr("Start typing to filter %1").arg(m_objectNames));
     m_filterEdit->setText(m_filterText);
     connect(m_filterEdit, &QLineEdit::textEdited, this, &ChooseTagsWidget::filterTextChanged);
     buttonsLayout->addWidget(m_filterEdit);
@@ -159,8 +172,8 @@ void ChooseTagsWidget::setupUi(bool hasDescriptions)
     //
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->addWidget(m_textEdit);
-	mainLayout->addWidget(new QLabel(tr("Predefined tags:")));
-    mainLayout->addWidget(m_tagsList);
+	mainLayout->addWidget(new QLabel(tr("Predefined %1:").arg(m_objectNames)));
+    mainLayout->addWidget(m_list);
     mainLayout->addLayout(buttonsLayout);
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
@@ -171,7 +184,7 @@ void ChooseTagsWidget::fillTags()
 {
     QString filterText = m_filterEdit->text();
 
-    m_tagsList->clear();
+    m_list->clear();
 
     for (const std::pair<QString, QString>& tagPair :  m_tags)
     {
@@ -189,10 +202,29 @@ void ChooseTagsWidget::fillTags()
         item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
         item->setCheckState(0, Qt::Unchecked);
 
-        m_tagsList->addTopLevelItem(item);
+        m_list->addTopLevelItem(item);
     }
 
-    m_tagsList->resizeColumnToContents(0);
+    for (const OnlineLib::MatsUser& user: m_users)
+    {
+        if (filterText.isEmpty() == false)
+        {
+			if (user.login().contains(filterText, Qt::CaseInsensitive) == false)
+            {
+                continue;
+            }
+        }
+
+        QTreeWidgetItem* item = new QTreeWidgetItem();
+        item->setText(0, user.login());
+        item->setText(1, user.description());
+        item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+        item->setCheckState(0, Qt::Unchecked);
+
+        m_list->addTopLevelItem(item);
+    }
+
+    m_list->resizeColumnToContents(0);
 
     updateChecks(m_textEdit->text());
 
@@ -211,12 +243,12 @@ void ChooseTagsWidget::updateChecks(const QString& text)
 
     // Check existing tags in list
 
-    m_tagsList->blockSignals(true);
+    m_list->blockSignals(true);
 
-    int count = m_tagsList->topLevelItemCount();
+    int count = m_list->topLevelItemCount();
     for (int i = 0; i < count; i++)
     {
-        QTreeWidgetItem* item = m_tagsList->topLevelItem(i);
+        QTreeWidgetItem* item = m_list->topLevelItem(i);
 
         if (textTags.contains(item->text(0)) == true)
         {
@@ -228,7 +260,7 @@ void ChooseTagsWidget::updateChecks(const QString& text)
         }
     }
 
-    m_tagsList->blockSignals(false);
+    m_list->blockSignals(false);
 
     return;
 }
@@ -249,10 +281,10 @@ void ChooseTagsWidget::updateTags()
 
     std::map<QString, bool> tagsListState;
 
-    int count = m_tagsList->topLevelItemCount();
+    int count = m_list->topLevelItemCount();
     for (int i = 0; i < count; i++)
     {
-        QTreeWidgetItem* item = m_tagsList->topLevelItem(i);
+        QTreeWidgetItem* item = m_list->topLevelItem(i);
         if (item == nullptr)
         {
             Q_ASSERT(item);

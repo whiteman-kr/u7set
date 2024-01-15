@@ -289,6 +289,11 @@ XmlReadHelper::~XmlReadHelper()
 	}
 }
 
+QXmlStreamReader* XmlReadHelper::xmlStreamReader() const
+{
+	return m_xmlReader;
+}
+
 bool XmlReadHelper::readNextStartElement()
 {
 	return m_xmlReader->readNextStartElement();

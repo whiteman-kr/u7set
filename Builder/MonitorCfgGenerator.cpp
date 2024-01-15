@@ -75,6 +75,14 @@ namespace Builder
 			// Generate tuning signals file
 			//
 			result &= writeTuningSignals();
+
+			// Write MATS users
+			//
+			if (settings->tuningLogin == true)
+			{
+				result &= writeMatsUsers(EquipmentPropNames::TUNING_USER_ACCOUNTS,
+										 settings->tuningUserAccounts.split(Separator::SEMICOLON, Qt::SkipEmptyParts));
+			}
 		}
 
 		// Generate behavior

@@ -151,18 +151,33 @@ bool ServiceWorker::getBoolSettingValue(const QString& settingName)
 	return result;
 }
 
-QString ServiceWorker::getSoftwareInfoStr() const
+QStringList ServiceWorker::getSoftwareInfo() const
 {
-	QString swInfo =
-		QString("%1 %2.%3.%4 (%5) SHA: %6").
-			arg(m_serviceName).
-			arg(m_softwareInfo.majorVersion()).
-			arg(m_softwareInfo.minorVersion()).
-			arg(m_softwareInfo.commitNo()).
-			arg(m_softwareInfo.buildBranch()).
-			arg(m_softwareInfo.commitSHA());
+	const SoftwareInfo& si = m_softwareInfo;
 
-	return swInfo;
+	QStringList res;
+
+
+	res << QString(" %1 v%2.%3.%4 (%5)").
+			arg(m_serviceName).
+			arg(si.majorVersion()).
+			arg(si.minorVersion()).
+			arg(si.patchVersion()).
+			arg(si.branchName());
+	res << QString();
+#ifdef QT_DEBUG
+	res << QString(" Build:        %1 Debug").arg(si.releaseType());
+#else
+	res << QString(" Build:        %1 Release").arg(si.releaseType());
+#endif
+	res << QString(" Branch name:  %1").arg(si.branchName());
+	res << QString(" Commit SHA:   %1").arg(si.commitHash());
+	res << QString(" Build date:   %1").arg(si.buildDate());
+	res << QString(" User name:    %1").arg(si.userName());
+	res << QString(" Hostname:     %1").arg(si.hostname());
+	res << QString(" Pipeline ID:  %1").arg(si.pipelineID());
+
+	return res;
 }
 
 void ServiceWorker::setSessionParams(const SessionParams& sp)

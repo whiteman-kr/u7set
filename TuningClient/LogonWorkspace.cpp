@@ -15,10 +15,12 @@ LogonWidget::LogonWidget(ClientLib::TuningUserManager& userManager, QWidget* par
 
 	m_loginButton = new QPushButton(loginString);
 	connect(m_loginButton, &QPushButton::clicked, this, &LogonWidget::onButtonLogin);
+	m_loginButton->setToolTip(tr("Click to login/logout"));
 	l->addWidget(m_loginButton);
 
 	m_loginUserName = new QLabel(loggedOutString);
 	m_loginUserName->setAlignment(Qt::AlignCenter);
+	m_loginUserName->setToolTip(tr("Current user name"));
 	l->addWidget(m_loginUserName);
 
 	// Adjust m_loginUserName width to have place for all usernames
@@ -38,7 +40,11 @@ LogonWidget::LogonWidget(ClientLib::TuningUserManager& userManager, QWidget* par
 	}
 	m_loginUserName->setFixedWidth(maxUsernameSpace + 5);
 
-	m_logoutPendingTime = new QLabel(zeroTimeString);
+	m_logoutPendingTime = new QPushButton(zeroTimeString);
+	m_logoutPendingTime->setEnabled(false);
+	m_logoutPendingTime->setToolTip(tr("Time to logout, click to re-login"));
+	connect(m_logoutPendingTime, &QPushButton::clicked, this, &LogonWidget::onButtonRelogin);
+
 	l->addWidget(m_logoutPendingTime);
 
 	QMargins m = l->contentsMargins();
@@ -61,17 +67,31 @@ void LogonWidget::onButtonLogin()
 	}
 }
 
+void LogonWidget::onButtonRelogin()
+{
+	if (m_userManager.tuningSessionTimeout() > 0 && m_userManager.isLoggedIn() == true)
+	{
+		m_userManager.reLogin(this);
+	}
+	else
+	{
+		onButtonLogin();
+	}
+}
+
 void LogonWidget::onUserManagerLogin()
 {
 	m_loginButton->setText(logoutString);
+	m_logoutPendingTime->setEnabled(true);
 
 	m_loginUserName->setStyleSheet("QLabel {background-color:blue; color: white;}");
-	m_loginUserName->setText(m_userManager.loggedInUser());
+	m_loginUserName->setText(m_userManager.userName());
 }
 
 void LogonWidget::onUserManagerLogout()
 {
 	m_loginButton->setText(loginString);
+	m_logoutPendingTime->setEnabled(false);
 
 	m_loginUserName->setStyleSheet(QString());
 	m_loginUserName->setText(loggedOutString);

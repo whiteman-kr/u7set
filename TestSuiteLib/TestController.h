@@ -102,6 +102,22 @@ namespace TestSuite
 		/// \brief Get signal description, if a signal is not found then exception is thrown.
 		AppSignalParam signalParam(QString appSignalId);
 
+		/// \brief Get activation status of tuning source (LM) in Single-LM control mode.
+		///
+		/// Returns true if all connections from Tuning Service(s) to LM are active. Otherwise, returns false.
+		bool tuningSourceIsActive(QString lmEquipmentId);
+
+		/// \brief Get activation status of tuning source (LM) in Single-LM control mode.
+		///
+		/// Returns true if all connections from Tuning Service(s) to LM are inactive. Otherwise, returns false.
+		bool tuningSourceIsInactive(QString lmEquipmentId);
+
+		/// \brief Activates or deactivates tuning source (LM) in  Single-LM control mode. Returns true on success, false on error.
+		///
+		/// \param lmEquipmentId specifies LM equipment id.
+		/// \param activate specifies the operation type: true - activate, false - deactivate.
+		bool activateTuningSource(QString lmEquipmentId, bool activate);
+
 	public:
 		QString projectName() const;
 		int buildNo() const;

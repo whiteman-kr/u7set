@@ -116,6 +116,8 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../Proto/network.pb.h"
 )
 
+target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
+
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Network Qt6::Qml Qt6::Xml Qt6::Widgets)
 target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib HardwareLib ServiceLib OnlineLib ClientLib)
 

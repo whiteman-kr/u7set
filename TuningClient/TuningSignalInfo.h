@@ -32,12 +32,18 @@ private:
 
 	void updateInfo();
 
+private slots:
+	void onValueContextMenu();
+	void onPropertiesContextMenu();
+
 private:
 
 	TuningConfigController& m_configController;
 
 	Hash m_appSignalHash = UNDEFINED_HASH;
 	E::AnalogFormat m_analogFormat = E::AnalogFormat::f_9;
+	AppSignalParam m_asp;
+	int m_precision = 0;
 
 	const TuningSignalManager& m_signalManager;
 	const ClientLib::TuningConnection& m_tuningConnection;

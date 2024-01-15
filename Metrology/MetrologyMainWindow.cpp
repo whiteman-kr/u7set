@@ -73,7 +73,7 @@ MainWindow::~MainWindow()
 
 bool MainWindow::createInterface()
 {
-	setWindowTitle(tr("Metrology"));
+	setWindowTitle(Manufacturer::METROLOGY);
 	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
 
 	createActions();

@@ -242,6 +242,7 @@ void TreeFilterWidget::createFilterTree()
 
 	connect(m_filterTree, &QTreeWidget::itemSelectionChanged, this, &TreeFilterWidget::slot_treeSelectionChanged);
 	connect(m_filterTree, &QWidget::customContextMenuRequested, this, &TreeFilterWidget::slot_treeContextMenuRequested);
+	connect(m_filterTree, &QTreeWidget::itemDoubleClicked, this, &TreeFilterWidget::slot_treeItemDoubleClicked);
 
 	int columnIndex = m_columnNameIndex;
 
@@ -1101,6 +1102,45 @@ void TreeFilterWidget::slot_treeContextMenuRequested(const QPoint& pos)
 	{
 		menu.exec(QCursor::pos());
 	}
+}
+
+void TreeFilterWidget::slot_treeItemDoubleClicked(QTreeWidgetItem *item, int column)
+{
+	if (item == nullptr)
+	{
+		return;
+	}
+
+	std::shared_ptr<TuningFilter> filter = item->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
+	if (filter == nullptr)
+	{
+		assert(filter);
+		return;
+	}
+
+	if (filter->isEmpty() == true)
+	{
+		return;
+	}
+
+	if (filter->isSourceEquipment() == false)
+	{
+		return;
+	}
+
+	Hash sourceHash = ::calcHash(filter->caption());
+
+	int sourceStatesCount = m_tuningConnection.tuningSourceStatesCount(sourceHash);
+	int activeStatesCount = m_tuningConnection.activatedTuningSourceStatesCount(sourceHash);
+	bool activateEnabled = activeStatesCount < sourceStatesCount;
+	bool deactivateEnabled = activeStatesCount != 0 && activeStatesCount == sourceStatesCount;
+
+	if (activateEnabled == deactivateEnabled)
+	{
+		return;
+	}
+
+	activateControl(filter->caption(), activateEnabled == true);
 }
 
 void TreeFilterWidget::slot_maskReturnPressed()

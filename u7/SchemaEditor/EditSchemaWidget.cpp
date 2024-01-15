@@ -5982,19 +5982,19 @@ void EditSchemaWidget::f2KeyForSignal(SchemaItemPtr item)
 	{
 		ResizedDialog tagsSelectorDialog{tr("Tags"), &d, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint};
 
-		DbTagsEditor te{this->db(), &d};
-		te.setText(tagsEdit->text());
+		std::unique_ptr<DbTagsEditor> te(DbTagsEditor::tagsEditor(this->db(), &d));
+		te->setText(tagsEdit->text());
 
-		connect(&te, &DbTagsEditor::okPressed, &tagsSelectorDialog, &QDialog::accept);
-		connect(&te, &DbTagsEditor::cancelPressed, &tagsSelectorDialog, &QDialog::reject);
+		connect(te.get(), &DbTagsEditor::okPressed, &tagsSelectorDialog, &QDialog::accept);
+		connect(te.get(), &DbTagsEditor::cancelPressed, &tagsSelectorDialog, &QDialog::reject);
 
 		QHBoxLayout l;
-		l.addWidget(&te);
+		l.addWidget(te.get());
 		tagsSelectorDialog.setLayout(&l);
 
 		if (tagsSelectorDialog.exec() == QDialog::Accepted)
 		{
-			tagsEdit->setText(te.text());
+			tagsEdit->setText(te->text());
 		}
 	});
 

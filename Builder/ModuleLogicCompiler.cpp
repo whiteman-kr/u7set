@@ -4118,13 +4118,15 @@ namespace Builder
 
 		const auto& outs = ualItem->outputs();
 
-		if (outs.size() != 1)
+		for(const SchemaPin& out : outs)
 		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
+			if (isConnectedToTerminatorOnly(out) == false)
+			{
+				return false;
+			}
 		}
 
-		return isConnectedToTerminatorOnly(outs[0]);
+		return true;
 	}
 
 	bool ModuleLogicCompiler::isConnectedToLoopback(const SchemaPin& inPin, std::shared_ptr<Loopback>* loopback)
@@ -10705,23 +10707,11 @@ namespace Builder
 			ualAfb->caption() == Afb::AFB_BUS_NOT) &&
 			ualAfb->opcode() == Afb::AFB_NOT_ACC_OPCODE)
 		{
-			if (isOutConnectedToTerminatorOnly(ualAfb) == true)
-			{
-				*result = true;
-				return true;		// report like a "code generated"
-			}
-
 			return generateAfbBitAccNotCode(code, ualAfb, bpStepInfo, result);
 		}
 
 		if (ualAfb->opcode() == TO_INT(Afb::AfbType::LOGIC))
 		{
-			if (isOutConnectedToTerminatorOnly(ualAfb) == true)
-			{
-				*result = true;
-				return true;		// report like a "code generated"
-			}
-
 			if (m_afbsOrForBitAccReplacing.contains(ualAfb->guid()))
 			{
 				return generateAfbBitAccOrCode(code, ualAfb, result);
@@ -10829,6 +10819,12 @@ namespace Builder
 			return false;
 		}
 
+		if (isOutConnectedToTerminatorOnly(ualAfb) == true)
+		{
+			*result = true;
+			return true;		// report like a "code generated"
+		}
+
 		Address16 writeAddr = m_ualSignals.getSignalWriteAddress(*outSignal);
 
 		if(writeAddr.isValid() == false)
@@ -10934,6 +10930,12 @@ namespace Builder
 				m_log->errALC5105(inSignal->appSignalID(), inSignal->ualItemGuid(), inSignal->ualItemSchemaID());
 				*result = false;
 				return false;
+			}
+
+			if (isOutConnectedToTerminatorOnly(ualAfb) == true)
+			{
+				*result = true;
+				return true;		// report like a "code generated"
 			}
 
 			Address16 writeAddr = m_ualSignals.getSignalWriteAddress(*outSignal);
@@ -11065,6 +11067,12 @@ namespace Builder
 			m_log->errALC5117(ualAfb->guid(), ualAfb->label(), inSignal->ualItemGuid(), inSignal->ualItemLabel(), ualAfb->schemaID());
 			*result = false;
 			return false;
+		}
+
+		if (isOutConnectedToTerminatorOnly(ualAfb) == true)
+		{
+			*result = true;
+			return true;		// report like a "code generated"
 		}
 
 		UalSignal* outSignal = getUalSignalByPinCaption(ualAfb, Afb::OUT_PIN_CAPTION, false);
@@ -11203,6 +11211,12 @@ namespace Builder
 			m_log->errALC5117(ualAfb->guid(), ualAfb->label(), inSignal->ualItemGuid(), inSignal->ualItemLabel(), ualAfb->schemaID());
 			*result = false;
 			return false;
+		}
+
+		if (isOutConnectedToTerminatorOnly(ualAfb) == true)
+		{
+			*result = true;
+			return true;		// report like a "code generated"
 		}
 
 		UalSignal* outSignal = getUalSignalByPinCaption(ualAfb, Afb::OUT_PIN_CAPTION, false);

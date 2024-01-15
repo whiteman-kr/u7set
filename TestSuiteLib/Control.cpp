@@ -11,22 +11,6 @@ namespace
 namespace TestSuite
 {
 	//
-	// TestSuiteUserManager
-	//
-	TestSuiteUserManager::TestSuiteUserManager(const QString& userName, const QString& password) :
-		m_userName(userName),
-		m_password(password)
-	{
-	}
-
-	bool TestSuiteUserManager::askForPassword(QString* userName, QString* password, QWidget* /*parent*/)
-	{
-		*userName = m_userName;
-		*password = m_password;
-		return true;
-	}
-
-	//
 	// ControlThread
 	//
 
@@ -205,6 +189,7 @@ namespace TestSuite
 		{
 			auto controller = std::make_unique<TunsOutputController>(m_softwareInfo,
 																	 m_configuration.tuningServices,
+																	 m_controlParams.userName,
 																	 m_configuration.tuningSignalsFile,
 																	 TuningClientSettings::LmStatusFlagMode::None, // Access key?
 																	 m_appLog.logFile());

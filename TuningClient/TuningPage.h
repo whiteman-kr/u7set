@@ -9,11 +9,22 @@
 #include "TuningConfigController.h"
 #include "TuningClientFilterStorage.h"
 
+
+class TuningPageHelper
+{
+public:
+	TuningPageHelper(const ClientLib::TuningUserManager& userManager);
+	bool writingIsEnabled(const AppSignalParam& asp, const TuningSignalState& state) const;
+
+private:
+	const ClientLib::TuningUserManager& m_userManager;
+};
+
 class TuningModelClient : public TuningModel
 {
 	Q_OBJECT
 public:
-	TuningModelClient(TuningSignalManager& tuningSignalManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent);
+	TuningModelClient(TuningSignalManager& tuningSignalManager, const ClientLib::TuningUserManager& userManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent);
 
 	void blink();
 
@@ -24,42 +35,45 @@ public:
 
 protected:
 	virtual Qt::ItemFlags flags(const QModelIndex& index) const override;
-
 	virtual	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 	bool setData(const QModelIndex& index, const QVariant& value, int role) override;
 
 private:
-	bool m_blink = false;
+	QIcon drawCheckBox(int state, bool enabled) const;
 
+private:
+	bool m_blink = false;
+	const ClientLib::TuningUserManager& m_userManager;
+	TuningPageHelper m_helper;
+	QWidget* m_parentWidget{nullptr};
 };
 
 class TuningTableView : public QTableView
 {
-
 	Q_OBJECT
 
 public:
-	TuningTableView();
+	TuningTableView(const ClientLib::TuningUserManager& userManager);
 	bool editorActive();
 
 protected:
-
 	virtual bool edit(const QModelIndex&  index, EditTrigger trigger, QEvent*  event);
+	virtual void mousePressEvent(QMouseEvent *event) override;
 
 protected slots:
-
 	virtual void closeEditor(QWidget*  editor, QAbstractItemDelegate::EndEditHint hint);
 
+signals:
+	void checkBoxClicked(const QModelIndex& index);
+
 private:
-
 	bool m_editorActive = false;
-
+	TuningPageHelper m_helper;
 };
 
 
 class TuningPageColumnsWidth
 {
-
 public:
 
 	TuningPageColumnsWidth();
@@ -76,7 +90,6 @@ private:
 
 	std::map<TuningModelColumns, int> m_widthMap;
 	std::map<TuningModelColumns, int> m_defaultWidthMap;
-
 };
 
 
@@ -132,6 +145,8 @@ private slots:
 
 	void slot_setAnalogFormat(E::AnalogFormat analogFormat);
 
+	void slot_tableCheckboxClicked(const QModelIndex& index);
+
 public slots:
 
 	void slot_treeFilterChanged(std::shared_ptr<TuningFilter> filter);
@@ -166,12 +181,12 @@ private:
 	void invertValue();
 	void addSelectedSignalsToFilter(TuningFilter* filter);
 	void restoreSignalsFromFilter(TuningFilter* filter);
+	void setToDefaults(const std::vector<Hash>& hashes);
 
 	void setActionButtonsState();
 	void updateVisibleItems();
 
 private slots:
-
 	void onTimer();
 	void slot_setAll();
 	void slot_undo();
@@ -185,6 +200,8 @@ private:
 	ClientLib::TuningUserManager& m_userManager;
 
 	ClientLib::TuningConnection& m_tuningConnection;
+
+	TuningPageHelper m_helper;
 
 	TuningTableView* m_objectList = nullptr;
 

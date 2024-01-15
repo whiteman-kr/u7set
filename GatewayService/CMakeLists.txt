@@ -99,6 +99,8 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../Proto/network.pb.h"
 )
 
+target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
+
 target_include_directories(${TARGET} PRIVATE ./../asio/include)
 target_compile_definitions(${TARGET} PRIVATE ASIO_STANDALONE=1)
 

@@ -907,6 +907,30 @@ namespace Builder
 		return res;
 	}
 
+	bool BuildWorkerThread::taskLoadMatsUsers()
+	{
+		QString errMsg;
+
+		bool result = m_context->m_matsUsers.load(&m_context->m_db, errMsg);
+
+		if (result == false)
+		{
+			LOG_INTERNAL_ERROR_MSG(m_log, tr("Error loading MATS users: %1").arg(errMsg));
+			return false;
+		}
+
+		if (m_context->m_matsUsers.count() > 0)
+		{
+			LOG_MESSAGE(m_log, tr("Loaded %1 MATS user(s)").arg(m_context->m_matsUsers.count()));
+		}
+		else
+		{
+			LOG_MESSAGE(m_log, tr("No MATS users loaded"));
+		}
+
+		return result;
+	}
+
 	// Check that all files (and from that theirs SchemaIds) in $root$/Schema are unique
 	//
 	bool BuildWorkerThread::taskCheckSchemaIds()

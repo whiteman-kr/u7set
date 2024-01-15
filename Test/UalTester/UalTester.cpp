@@ -168,7 +168,7 @@ void UalTester::slot_runTestFile()
 
 void UalTester::runCfgLoaderThread()
 {
-	m_softwareInfo.init(E::SoftwareType::TestClient, m_cmdLineParam.equipmentID(), 1, 0);
+	m_softwareInfo = SoftwareInfo(E::SoftwareType::TestClient, m_cmdLineParam.equipmentID());
 
 	m_cfgLoaderThread = new CfgLoaderThread(m_softwareInfo,
 											1,

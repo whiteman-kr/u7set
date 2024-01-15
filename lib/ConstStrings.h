@@ -222,6 +222,9 @@ namespace XmlElement
 	inline const QString TUNING_CHANNEL_TEMPLATE("Channel%1");
 	inline const QString CHANNEL_COUNT("ChannelCount");
 
+	inline const QString MATS_USERS("MatsUsers");
+	inline const QString MATS_USER("MatsUser");
+
 	inline const QString DATA_SOURCES("DataSources");
 	inline const QString DATA_SOURCE("DataSource");
 	inline const QString ASSOCIATED_SIGNALS("AssociatedSignals");
@@ -361,6 +364,12 @@ namespace XmlAttribute
 	inline const QString VALUE_MULTIPLIER("ValueMultiplier");
 	inline const QString VALUE_OFFSET("ValueOffset");
 	inline const QString UUID("Uuid");
+
+	inline const QString LOGIN("Login");
+	inline const QString ENABLED("Enabled");
+	inline const QString DESCRIPTION("Description");
+	inline const QString APP_SIGNAL_TAGS("AppSignalTags");
+	inline const QString MATS_USERS("MatsUsers");
 }
 
 namespace Latin1Char
@@ -389,6 +398,7 @@ namespace CfgFileId
 	inline const QString TUNING_GLOBALSCRIPT("TUNING_GLOBALSCRIPT");
 
 	inline const QString CLIENT_BEHAVIOR("CLIENT_BEHAVIOR");
+	inline const QString MATSUSERS("MATSUSERS_XML");
 	inline const QString LOGO("LOGO");
 
 	inline const QString METROLOGY_ITEMS("METROLOGY_ITEMS");
@@ -494,6 +504,7 @@ namespace File
 	inline const QString CONFIGURATION_XML("Configuration.xml");
 	inline const QString SOFTWARE_XML("Software.xml");
 	inline const QString SUBSYSTEMS_XML("Subsystems.xml");
+	inline const QString MATSUSERS_XML("MatsUsers.xml");
 
 	inline const QString METROLOGY_ITEMS_XML("MetrologyItems.xml");
 	inline const QString METROLOGY_SIGNAL_SET("MetrologySignal.set");
@@ -676,6 +687,15 @@ namespace Manufacturer
 	inline const QString RADIY("RadiyQt6");		// Radiy -> RadiyQt6, thus settings can be stored (for sw with Qt5 and Qt6)
 												// in different registry locations as Qt5 and Qt6 have distinct settings format (for UI)
 	inline const QString SITE("radiy.com");
+
+	inline const QString CONFIGURATION_SERVICE("Configuration Service");
+	inline const QString APPLICATION_DATA_SERVICE("Application Data Service");
+	inline const QString DIAGNOSTIC_DATA_SERVICE("Diagnostic Data Service");
+	inline const QString ARCHIVING_SERVICE("Archiving Service");
+	inline const QString TUNING_SERVICE("Tuning Service");
+	inline const QString GATEWAY_SERVICE("Gateway Service");
+	inline const QString SERVICE_CONTROL_MANAGER("Service Control Manager");
+	inline const QString METROLOGY("Metrology");
 }
 
 namespace Busses
@@ -693,14 +713,6 @@ namespace Afb
 	//
 
 	inline const QString SCALE("SCALE");
-
-/*	inline const QString SCALE_PIN_CONF("i_conf");
-	inline const QString SCALE_PIN_K1("i_scal_k1_coef");
-	inline const QString SCALE_PIN_K2("i_scal_k2_coef");
-	inline const QString SCALE_PIN_X_UI("i_ui_data");
-	inline const QString SCALE_PIN_X_SI_FP("i_si_fp_data");
-	inline const QString SCALE_PIN_Y_UI("i_ui_data");
-	inline const QString SCALE_PIN_Y_SI_FP("i_si_fp_data"); */
 
 	inline const QString SCALE_SI32_SI32("scale_si_si");
 	inline const QString SCALE_SI32_FP32("scale_si_fp");

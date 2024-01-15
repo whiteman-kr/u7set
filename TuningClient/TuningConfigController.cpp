@@ -41,6 +41,22 @@ bool TuningConfigController::updateConfiguration(const ClientLib::ConfigurationI
 	QByteArray signalData;
 	getFileBlockedById(CfgFileId::TUNING_SIGNALS, &signalData, nullptr);
 
+	// Get file MATS_USERS
+	//
+	if (readConfig.clientSettings.tuningLogin == true)
+	{
+		QByteArray matsUsersData;
+		getFileBlockedById(CfgFileId::MATSUSERS, &matsUsersData, nullptr);
+		
+		QString errorString;
+		bool ok = readConfig.matsUsers.loadFromByteArray(matsUsersData, errorString);
+		if (ok == false)
+		{
+			m_logFile.writeError(tr("MATS users storage loading failed."));
+			readConfig.matsUsers.clear();
+		}
+	}
+
 	// Get file TUNING_GLOBALSCRIPT
 	//
 	{

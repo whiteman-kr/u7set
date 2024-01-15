@@ -34,6 +34,7 @@ private:
 private slots:
 	void slot_treeSelectionChanged();
 	void slot_treeContextMenuRequested(const QPoint& pos);
+	void slot_treeItemDoubleClicked(QTreeWidgetItem* item, int column);
 
 	void slot_maskReturnPressed();
 	void slot_maskApply();
