@@ -169,6 +169,8 @@ namespace Sim
 
 		void cancelTuningSourceHandlersOperations();
 
+		void logWarningThinned(int codeLine, const QString& warning);
+
 	private:
 		struct WriteConfirmation
 		{
