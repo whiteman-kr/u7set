@@ -4,6 +4,7 @@
 #include "../lib/ITimeStats.h"
 
 #include "AppSignalController.h"
+#include "DiagStateController.h"
 #include "ISchemaViewHistory.h"
 #include "IViewVariables.h"
 #include "LogController.h"
@@ -25,7 +26,7 @@ namespace VFrame30
 		inline static const QString OnConfigurationArrived{"OnConfigurationArrived"};
 		inline static const QString OnTimerEvent{"OnTimerEvent"};
 	};
-	
+
 	// Proxy class for using in scripts
 	//
 	/*! \class ScriptSchemaView
@@ -142,7 +143,7 @@ namespace VFrame30
 		Q_PROPERTY(double zoomFactor READ zoomFactor)
 		Q_PROPERTY(double ZoomFactor READ zoomFactor)
 
-	  public:
+	public:
 		explicit ScriptSchemaView(ClientSchemaView* clientSchemaView,
 								  ISchemaViewHistory* schemaViewHistory,
 								  QObject* parent = nullptr);
@@ -150,7 +151,7 @@ namespace VFrame30
 
 		// Public slots which are part of Script API
 		//
-	  public slots:
+	public slots:
 		void debugOutput(QString str); // Debug output to qDebug
 
 		/// \brief Sets the active schema specified in schemaId parameter.
@@ -285,7 +286,7 @@ namespace VFrame30
 		//
 		QString schemaIdByIndex(int schemaIndex) const;
 
-	  private:
+	private:
 		QString schemaId() const;
 		QString schemaCaption() const;
 
@@ -296,7 +297,7 @@ namespace VFrame30
 
 		// Data
 		//
-	  private:
+	private:
 		ClientSchemaView* m_clientSchemaView = nullptr;
 		ISchemaViewHistory* m_schemaViewHistory = nullptr;
 	};
@@ -310,22 +311,22 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
-	  public:
+	public:
 		explicit ClientSchemaView(VFrame30::SchemaManager* schemaManager,
 								  ISchemaViewHistory* schemaViewHistory,
 								  ITimeStats* timeStats,
 								  QWidget* parent = nullptr);
 		virtual ~ClientSchemaView();
 
-	  public:
+	public:
 		void setSchema(QString schemaId);
 		void setSchema(QString schemaId, const QStringList& highlightAppSignalIds);
 
 	public:
-		bool saveSchemaToPdf(const QString& fileName);	// Export schema to PDF or PNG
-		bool saveSchemaToPng(const QString& fileName);	// Export schema to PDF or PNG
+		bool saveSchemaToPdf(const QString& fileName); // Export schema to PDF or PNG
+		bool saveSchemaToPng(const QString& fileName); // Export schema to PDF or PNG
 
-	  protected:
+	protected:
 		virtual void paintEvent(QPaintEvent* event) override;
 		virtual void timerEvent(QTimerEvent* event) override;
 		virtual void mouseMoveEvent(QMouseEvent* event) override;
@@ -334,15 +335,15 @@ namespace VFrame30
 
 		virtual void updateScriptGlobalVars(QJSEngine& engine);
 
-	  protected slots:
+	protected slots:
 		void startRepaintTimer();
 
-	  signals:
+	signals:
 		void signal_setSchema(QString schemaId, QStringList highlightIds);
 
 		// Properties
 		//
-	  public:
+	public:
 		VFrame30::SchemaManager* schemaManager();
 		const VFrame30::SchemaManager* schemaManager() const;
 
@@ -362,6 +363,12 @@ namespace VFrame30
 		void setTuningController(ITuningSignalManager& signalManager,
 								 ITuningConnection& tuningConnection,
 								 ITuningAuthorization& tuningAuthorization);
+
+		// DiagStateController
+		//
+		DiagStateController* diagStateController();
+		const DiagStateController* diagStateController() const;
+		void setDiagStateController(DiagStateController* value);
 
 		//  AppSignalController
 		//
@@ -389,14 +396,15 @@ namespace VFrame30
 		bool runScript(QJSValue& evaluatedJs, QString where, bool reportError);
 
 		bool runGlobalScriptEvent(const QString& functionName, const QJSValueList& arguments, bool funcIsOptional);
+
 	private:
 		bool privateRunGlobalScriptEvent(QJSEngine& engine, const QString& functionName, const QJSValueList& arguments, bool funcIsOptional);
 
-	  private:
+	private:
 		bool reEvaluateGlobalScript();
 		bool execOnConfigurationArrived();
 
-	  public:
+	public:
 		QJSValue evaluateScript(QString script, QString where, bool reportError);
 		[[nodiscard]] QString formatScriptError(const QJSValue& scriptValue) const;
 		void reportScriptError(const QJSValue& scriptValue, QString where);
@@ -435,17 +443,22 @@ namespace VFrame30
 		void setTuningClientBehavior(const TuningClientBehavior& src);
 		void setTuningClientBehavior(TuningClientBehavior&& src);
 
-	  private:
+	private:
 		VFrame30::SchemaManager* m_schemaManager = nullptr;
 		VFrame30::ISchemaViewHistory* m_schemaViewHistory = nullptr; // Can be nullptr if widget does not support history navigation
 
-	  protected:
+	protected:
 		std::unique_ptr<TuningController> m_tuningController;
+		
+		DiagStateController* m_diagStateController = nullptr;
+		std::unique_ptr<ScriptDiagStateController> m_scriptDiagStateController;
+
 		AppSignalController* m_appSignalController = nullptr;
 		std::unique_ptr<ScriptAppSignalController> m_scriptAppSignalController;
+		
 		LogController* m_logController = nullptr;
 
-	  private:
+	private:
 		bool m_periodicUpdate = true; // Update widget every 250 ms
 		bool m_infoMode = false;      // Show some additional info like labels
 
@@ -458,7 +471,7 @@ namespace VFrame30
 
 		QJSEngine m_jsEngine;
 
-		bool m_allowScriptMessageBox = false; // Allow or disable using message box in scripts
+		bool m_allowScriptMessageBox = false;            // Allow or disable using message box in scripts
 
 		QString m_globalScript;
 

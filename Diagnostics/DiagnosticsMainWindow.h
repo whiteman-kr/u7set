@@ -10,9 +10,6 @@
 //#include "../VFrame30/ClientSchemaView.h"
 #include "../ClientLib/ClientTranslator.h"
 #include "../ClientLib/AdsConnection.h"
-//#include "../ClientLib/TuningTcpClient.h"
-//#include "../ClientLib/TuningUserManager.h"
-//#include "../ClientLib/TuningLog.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/LogController.h"
 #include "../UtilsLib/LogFile.h"
@@ -152,6 +149,8 @@ private:
 	InstanceResolver& m_instanceResolver;
 
 	DiagConfigController m_configController;
+
+	//ClientLib::DiagStateManager m_diagStateManager;
 	ClientLib::AppSignalManager m_appSignalManager;
 
 	SignalDataServerStub m_signalDataServerStub; // REMOVE IT AFTER IMPLEMENTING REAL ISignalDataServer

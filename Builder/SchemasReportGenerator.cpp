@@ -901,6 +901,8 @@ namespace Builder
 												   const std::vector<SchemaTypesParams>& schemaTypesParams) :
 		m_schemaView(schemaView),
 		m_printer(schemaView),
+		m_diagStateProvider(),
+		m_diagStateController(m_diagStateProvider, nullptr),
 		m_appSignalProvider(signalSet),
 		m_appSignalController(m_appSignalProvider, nullptr),
 		m_inputFiles(files),
@@ -1736,7 +1738,7 @@ namespace Builder
 		// Render schemas
 		//
 		{
-			auto context = VFrame30::Context::create(&m_appSignalController, nullptr, &report->reportVariables(), nullptr);
+			auto context = VFrame30::Context::create(&m_diagStateController, &m_appSignalController, nullptr, &report->reportVariables(), nullptr);
 
 			for (const auto& schemaInfo : schemas)
 			{

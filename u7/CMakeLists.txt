@@ -21,8 +21,6 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Sql Network Qml Svg Serial
 qt_standard_project_setup()
 
 set (U7_SOURCES
-	../Builder/DiagSignalTypesStorage.cpp
-	../Builder/DiagSignalTypesStorage.h
 	../lib/CodeEditor.cpp
 	../lib/CodeEditor.h
 	../lib/Configurator.cpp
@@ -43,11 +41,11 @@ set (U7_SOURCES
 	../lib/Tuning/TuningFilterEditor.h
 	../lib/Tuning/TuningModel.cpp
 	../lib/Tuning/TuningModel.h
+	../lib/Ui/ChooseTagsWidget.cpp
+	../lib/Ui/ChooseTagsWidget.h
 	../lib/Ui/ClickableLabel.h
 	../lib/Ui/DialogAbout.cpp
 	../lib/Ui/DialogAbout.h
-	../lib/Ui/ChooseTagsWidget.cpp
-	../lib/Ui/ChooseTagsWidget.h
 	../lib/Ui/DialogProgress.cpp
 	../lib/Ui/DialogProgress.h
 	../lib/Ui/DialogSignalInfo.cpp
@@ -231,6 +229,8 @@ set (U7_SOURCES
 	SchemaEditor/CreateSignalDialog.h
 	SchemaEditor/EditConnectionLine.cpp
 	SchemaEditor/EditConnectionLine.h
+	SchemaEditor/EditSchemaDiagStateProvider.cpp
+	SchemaEditor/EditSchemaDiagStateProvider.h
 	SchemaEditor/EditSchemaSignalProvider.cpp
 	SchemaEditor/EditSchemaSignalProvider.h
 	SchemaEditor/EditSchemaTabPage.cpp
