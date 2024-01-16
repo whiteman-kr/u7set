@@ -4,6 +4,7 @@
 #include "DiagConfigController.h"
 #include "DiagnosticsSchemaManager.h"
 #include "../ClientLib/AppSignalManager.h"
+#include "../DiagClientLib/DiagStateManager.h"
 //#include "SelectSchemaWidget.h"
 #include "../UtilsLib/InstanceResolver.h"
 #include "../SchemaClientLib/SchemaDrawStatistics.h"
@@ -150,7 +151,7 @@ private:
 
 	DiagConfigController m_configController;
 
-	//ClientLib::DiagStateManager m_diagStateManager;
+	DiagClientLib::DiagStateManager m_diagStateManager;
 	ClientLib::AppSignalManager m_appSignalManager;
 
 	SignalDataServerStub m_signalDataServerStub; // REMOVE IT AFTER IMPLEMENTING REAL ISignalDataServer
