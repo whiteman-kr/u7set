@@ -4,6 +4,7 @@
 #include "../CommonLib/HostAddressPort.h"
 #include "../lib/ConstStrings.h"
 #include "../OnlineLib/MatsUsers.h"
+#include "../HardwareLib/DiagSignalType.h"
 
 class XmlWriteHelper;
 class XmlReadHelper;
@@ -270,6 +271,8 @@ public:
 	HostAddressPort clientRequestIP;
 	QHostAddress clientRequestNetmask;
 	E::SecurityLevel securityLevel = E::SecurityLevel::Basic;
+
+	std::vector<Hardware::DiagSignalType> diagSignalTypes;
 
 private:
 	// this methods should be call by SoftwareSettingsSet only

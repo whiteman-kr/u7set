@@ -14,12 +14,12 @@ public:
 	std::shared_ptr<Hardware::DiagSignalType> get(const QString& diagSignalTypeId) const;
 	bool hasSignalTypeId(const QString& diagSignalTypeId) const;
 
+	void getDiagSignalTypes(std::vector<Hardware::DiagSignalType>* types) const;
+	int count() const;
+
 	// --
 	//
 	bool load(QString* errorMessage) override;
 	bool save(const QUuid& uuid, QString* errorMessage) override;
-
-	void writeToXml(XmlWriteHelper& xml) const;
-	bool readFromXml(XmlReadHelper& xml);
 };
 

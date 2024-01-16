@@ -40,6 +40,24 @@ bool DiagSignalTypesStorage::hasSignalTypeId(const QString& diagSignalTypeId) co
 	) != m_objectsVector.end();
 }
 
+void DiagSignalTypesStorage::getDiagSignalTypes(std::vector<Hardware::DiagSignalType>* types) const
+{
+	TEST_PTR_RETURN(types);
+
+	types->clear();
+	types->reserve(count());
+
+	for(const auto& diagSignalType : m_objectsVector)
+	{
+		types->emplace_back(*diagSignalType.get());
+	}
+}
+
+int DiagSignalTypesStorage::count() const
+{
+	return static_cast<int>(m_objectsVector.size());
+}
+
 bool DiagSignalTypesStorage::load(QString* errorMessage)
 {
 	if (m_db == nullptr ||
@@ -184,48 +202,3 @@ bool DiagSignalTypesStorage::save(const QUuid& uuid, QString* errorMessage)
 
 	return true;
 }
-
-void DiagSignalTypesStorage::writeToXml(XmlWriteHelper& xml) const
-{
-	std::map<QString, std::shared_ptr<Hardware::DiagSignalType>> sortedTypes;	// DiagSignalTypeID => DiagSignalType
-
-	for (const auto& diagSignalType : m_objectsVector)
-	{
-		TEST_PTR_CONTINUE(diagSignalType);
-
-		sortedTypes.emplace(diagSignalType->signalTypeId(), diagSignalType);
-	}
-
-	xml.writeStartElement(XmlElement::DIAG_SIGNAL_TYPES);
-	xml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(sortedTypes.size()));
-
-	for(const auto& [id, diagSignalType] : sortedTypes)
-	{
-		diagSignalType->writeToXml(xml);
-	}
-
-	xml.writeEndElement();		//	XmlElement::DIAG_SIGNAL_TYPES
-}
-
-bool DiagSignalTypesStorage::readFromXml(XmlReadHelper& xml)
-{
-	m_objectsVector.clear();
-
-	bool result = true;
-
-	result &= xml.findElement(XmlElement::DIAG_SIGNAL_TYPES);
-
-	RETURN_IF_FALSE(result);
-
-	int count = 0;
-
-	result &= xml.readIntAttribute(XmlAttribute::COUNT, &count);
-
-	for(int i = 0; i < count; i++)
-	{
-
-	}
-
-	return result;
-}
-

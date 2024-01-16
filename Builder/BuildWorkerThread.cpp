@@ -931,6 +931,32 @@ namespace Builder
 		return result;
 	}
 
+	bool BuildWorkerThread::taskLoadDiagSignalTypes()
+	{
+		std::shared_ptr<DiagSignalTypesStorage> storage = std::make_shared<DiagSignalTypesStorage>(&m_context->m_db);
+
+		m_context->m_diagSignalTypes = storage;
+
+		QString errMsg;
+
+		bool result = storage->load(errMsg);
+
+		if (result == false)
+		{
+			LOG_INTERNAL_ERROR_MSG(m_log, tr("Error loading DiagSignalTypes: %1").arg(errMsg));
+			return false;
+		}
+
+		if (storage.count() > 0)
+		{
+			LOG_MESSAGE(m_log, tr("Loaded %1 DiagSignalTypes").arg(m_context->m_matsUsers.count()));
+		}
+		else
+		{
+			LOG_MESSAGE(m_log, tr("No DiagSignalTypes loaded"));
+		}
+	}
+
 	// Check that all files (and from that theirs SchemaIds) in $root$/Schema are unique
 	//
 	bool BuildWorkerThread::taskCheckSchemaIds()

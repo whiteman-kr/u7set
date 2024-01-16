@@ -195,7 +195,7 @@ namespace Builder
 
 					connectedAdaptersCount++;
 
-					result &= findAppDataSourceAcquiredSignals(ds);	// inside fills m_associatedAppSignals also
+					result &= findAppDataSourceAcquiredSignals(ds);	// inside fills m_acquiredAppSignals also
 
 					dataSources.append(ds);
 				}

@@ -475,6 +475,9 @@ namespace CmdLineArg
 
 	inline const QString READ_ONLY("readonly");
 	inline const QString CLIENT_IP("clientip");
+
+	inline const QString PTC("ptc");
+	inline const QString RECVIP("recvip");
 }
 
 namespace Directory
