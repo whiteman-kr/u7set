@@ -256,7 +256,7 @@ void DialogDiagSignalTypes::onPropertiesChanged(QList<std::shared_ptr<PropertyOb
 	//
 	for (const auto& object : objects)
 	{
-		Hardware::DiagSignalType* dst = dynamic_cast<Hardware::DiagSignalType*>(object.get());
+		Hardware::DiagSignalTypeObject* dst = dynamic_cast<Hardware::DiagSignalTypeObject*>(object.get());
 		if (dst == nullptr)
 		{
 			Q_ASSERT(dst);
@@ -265,7 +265,7 @@ void DialogDiagSignalTypes::onPropertiesChanged(QList<std::shared_ptr<PropertyOb
 
 		for (int i = 0; i < m_diagSignalTypes.count(); i++)
 		{
-			std::shared_ptr<Hardware::DiagSignalType> otherObject = m_diagSignalTypes.get(i);
+			auto otherObject = m_diagSignalTypes.get(i);
 			if (otherObject == nullptr)
 			{
 				Q_ASSERT(otherObject);
@@ -299,7 +299,7 @@ void DialogDiagSignalTypes::onPropertiesChanged(QList<std::shared_ptr<PropertyOb
 	//
 	for (const auto& object : objects)
 	{
-		Hardware::DiagSignalType* dst = dynamic_cast<Hardware::DiagSignalType*>(object.get());
+		Hardware::DiagSignalTypeObject* dst = dynamic_cast<Hardware::DiagSignalTypeObject*>(object.get());
 		if (dst == nullptr)
 		{
 			Q_ASSERT(dst);
@@ -329,7 +329,7 @@ void DialogDiagSignalTypes::onPropertiesChanged(QList<std::shared_ptr<PropertyOb
 
 void DialogDiagSignalTypes::onAdd()
 {
-	std::shared_ptr<Hardware::DiagSignalType> dst = Hardware::DiagSignalType::CreateObject();
+	std::shared_ptr<Hardware::DiagSignalTypeObject> dst = Hardware::DiagSignalTypeObject::CreateObject();
 	if (dst == nullptr)
 	{
 		Q_ASSERT(dst);
@@ -423,7 +423,7 @@ void DialogDiagSignalTypes::onCopy()
 	{
 		QUuid uuid = item->data(static_cast<int>(Columns::SignalTypeId), Qt::UserRole).toUuid();
 
-		std::shared_ptr<Hardware::DiagSignalType> dst = m_diagSignalTypes.get(uuid);
+		std::shared_ptr<Hardware::DiagSignalTypeObject> dst = m_diagSignalTypes.get(uuid);
 		if (dst == nullptr)
 		{
 			Q_ASSERT(dst);
@@ -448,7 +448,7 @@ void DialogDiagSignalTypes::onCopy()
 	if (data.isEmpty() == false)
 	{
 		QMimeData* mime = new QMimeData();
-		mime->setData(Hardware::DiagSignalType::mimeType, data);
+		mime->setData(Hardware::DiagSignalTypeObject::mimeType, data);
 
 		QClipboard* clipboard = QApplication::clipboard();
 		clipboard->clear();
@@ -464,12 +464,12 @@ void DialogDiagSignalTypes::onPaste()
 	QClipboard* clipboard = QApplication::clipboard();
 
 	const QMimeData* mimeData = clipboard->mimeData();
-	if (mimeData->hasFormat(Hardware::DiagSignalType::mimeType) == false)
+	if (mimeData->hasFormat(Hardware::DiagSignalTypeObject::mimeType) == false)
 	{
 		return;
 	}
 
-	QByteArray data = mimeData->data(Hardware::DiagSignalType::mimeType);
+	QByteArray data = mimeData->data(Hardware::DiagSignalTypeObject::mimeType);
 	if (data.isEmpty() == true)
 	{
 		return;
@@ -497,7 +497,7 @@ void DialogDiagSignalTypes::onPaste()
 			continue;
 		}
 
-		std::shared_ptr<Hardware::DiagSignalType> dst = Hardware::DiagSignalType::CreateObject(envelope);
+		std::shared_ptr<Hardware::DiagSignalTypeObject> dst = Hardware::DiagSignalTypeObject::CreateObject(envelope);
 		if (dst == nullptr)
 		{
 			Q_ASSERT(false);
@@ -692,7 +692,7 @@ void DialogDiagSignalTypes::onUndo()
 				QByteArray data;
 				file->swapData(data);
 
-				std::shared_ptr<Hardware::DiagSignalType> dst = m_diagSignalTypes.get(uuid);
+				std::shared_ptr<Hardware::DiagSignalTypeObject> dst = m_diagSignalTypes.get(uuid);
 
 				if (dst != nullptr && dst->Load(data) == true)
 				{
@@ -746,7 +746,7 @@ void DialogDiagSignalTypes::onExport()
 	{
 		QUuid uuid = item->data(static_cast<int>(Columns::SignalTypeId), Qt::UserRole).toUuid();
 
-		std::shared_ptr<Hardware::DiagSignalType> dst = m_diagSignalTypes.get(uuid);
+		std::shared_ptr<Hardware::DiagSignalTypeObject> dst = m_diagSignalTypes.get(uuid);
 		if (dst == nullptr)
 		{
 			Q_ASSERT(dst);
@@ -849,7 +849,7 @@ void DialogDiagSignalTypes::onImport()
 			continue;
 		}
 
-		std::shared_ptr<Hardware::DiagSignalType> dst = Hardware::DiagSignalType::CreateObject(envelope);
+		std::shared_ptr<Hardware::DiagSignalTypeObject> dst = Hardware::DiagSignalTypeObject::CreateObject(envelope);
 		if (dst == nullptr)
 		{
 			Q_ASSERT(false);
@@ -913,7 +913,7 @@ void DialogDiagSignalTypes::onCustomContextMenuRequested(const QPoint& pos)
 	m_popupMenu->exec(this->cursor().pos());
 }
 
-bool DialogDiagSignalTypes::addDiagSignalType(std::shared_ptr<Hardware::DiagSignalType> dst)
+bool DialogDiagSignalTypes::addDiagSignalType(std::shared_ptr<Hardware::DiagSignalTypeObject> dst)
 {
 	if (dst == nullptr)
 	{
@@ -959,7 +959,7 @@ bool DialogDiagSignalTypes::addDiagSignalType(std::shared_ptr<Hardware::DiagSign
 	return true;
 }
 
-bool DialogDiagSignalTypes::pasteDiagSignalType(std::shared_ptr<Hardware::DiagSignalType> dst)
+bool DialogDiagSignalTypes::pasteDiagSignalType(std::shared_ptr<Hardware::DiagSignalTypeObject> dst)
 {
 	if (dst == nullptr)
 	{
@@ -1022,7 +1022,7 @@ void DialogDiagSignalTypes::fillDiagSignalTypesList()
 	int count = m_diagSignalTypes.count();
 	for (int i = 0; i < count; i++)
 	{
-		std::shared_ptr<Hardware::DiagSignalType> dst = m_diagSignalTypes.get(i);
+		std::shared_ptr<Hardware::DiagSignalTypeObject> dst = m_diagSignalTypes.get(i);
 		if (dst == nullptr)
 		{
 			Q_ASSERT(dst);
@@ -1062,7 +1062,7 @@ void DialogDiagSignalTypes::setPropertyEditorObjects()
 	{
 		QUuid uuid = item->data(static_cast<int>(Columns::SignalTypeId), Qt::UserRole).toUuid();
 
-		std::shared_ptr<Hardware::DiagSignalType> dst = m_diagSignalTypes.get(uuid);
+		std::shared_ptr<Hardware::DiagSignalTypeObject> dst = m_diagSignalTypes.get(uuid);
 		if (dst == nullptr)
 		{
 			Q_ASSERT(dst);
@@ -1091,11 +1091,11 @@ bool DialogDiagSignalTypes::continueWithDuplicateCaptions()
 
 	for (int i = 0; i < m_diagSignalTypes.count(); i++)
 	{
-		Hardware::DiagSignalType* c = m_diagSignalTypes.get(i).get();
+		Hardware::DiagSignalTypeObject* c = m_diagSignalTypes.get(i).get();
 
 		for (int j = 0; j < m_diagSignalTypes.count(); j++)
 		{
-			Hardware::DiagSignalType* e = m_diagSignalTypes.get(j).get();
+			Hardware::DiagSignalTypeObject* e = m_diagSignalTypes.get(j).get();
 			Q_ASSERT(e);
 
 			if (i == j)
@@ -1141,7 +1141,7 @@ void DialogDiagSignalTypes::updateTreeItemText(QTreeWidgetItem* item)
 
 	QUuid uuid = item->data(static_cast<int>(Columns::SignalTypeId), Qt::UserRole).toUuid();
 
-	std::shared_ptr<Hardware::DiagSignalType> dst = m_diagSignalTypes.get(uuid);
+	std::shared_ptr<Hardware::DiagSignalTypeObject> dst = m_diagSignalTypes.get(uuid);
 	if (dst == nullptr)
 	{
 		Q_ASSERT(dst);
@@ -1202,7 +1202,7 @@ void DialogDiagSignalTypes::updateButtonsEnableState()
 	{
 		QUuid uuid = item->data(static_cast<int>(Columns::SignalTypeId), Qt::UserRole).toUuid();
 
-		std::shared_ptr<Hardware::DiagSignalType> dst = m_diagSignalTypes.get(uuid);
+		std::shared_ptr<Hardware::DiagSignalTypeObject> dst = m_diagSignalTypes.get(uuid);
 		if (dst == nullptr)
 		{
 			Q_ASSERT(dst);

@@ -1870,12 +1870,12 @@ void ProjectDiffGenerator::compareDiagSignalTypes(const std::shared_ptr<DbFile>&
 		return;
 	}
 
-	std::shared_ptr<Hardware::DiagSignalType> sourceType;
-	std::shared_ptr<Hardware::DiagSignalType> targetType;
+	std::shared_ptr<Hardware::DiagSignalTypeObject> sourceType;
+	std::shared_ptr<Hardware::DiagSignalTypeObject> targetType;
 
 	if (sourceFile != nullptr)
 	{
-		sourceType = Hardware::DiagSignalType::Create(sourceFile->data());
+		sourceType = Hardware::DiagSignalTypeObject::Create(sourceFile->data());
 		if (sourceType == nullptr)
 		{
 			throw(tr("Failed to load source dianostics signal type from: '%1'").arg(sourceFile->fileName()));
@@ -1883,7 +1883,7 @@ void ProjectDiffGenerator::compareDiagSignalTypes(const std::shared_ptr<DbFile>&
 	}
 	if (targetFile != nullptr)
 	{
-		targetType = Hardware::DiagSignalType::Create(targetFile->data());
+		targetType = Hardware::DiagSignalTypeObject::Create(targetFile->data());
 		if (targetType == nullptr)
 		{
 			throw(tr("Failed to load target dianostics signal type from: '%1'").arg(targetFile->fileName()));

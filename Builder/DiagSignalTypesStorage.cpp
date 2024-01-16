@@ -15,9 +15,9 @@ DiagSignalTypesStorage::~DiagSignalTypesStorage()
 {
 }
 
-std::shared_ptr<Hardware::DiagSignalType> DiagSignalTypesStorage::get(const QString& diagSignalTypeId) const
+std::shared_ptr<Hardware::DiagSignalTypeObject> DiagSignalTypesStorage::get(const QString& diagSignalTypeId) const
 {
-	for (const std::shared_ptr<Hardware::DiagSignalType>& dst : m_objectsVector)
+	for (const std::shared_ptr<Hardware::DiagSignalTypeObject>& dst : m_objectsVector)
 	{
 		Q_ASSERT(dst);
 
@@ -28,16 +28,15 @@ std::shared_ptr<Hardware::DiagSignalType> DiagSignalTypesStorage::get(const QStr
 		}
 	}
 
-	return std::shared_ptr<Hardware::DiagSignalType>();
+	return std::shared_ptr<Hardware::DiagSignalTypeObject>();
 }
 
 bool DiagSignalTypesStorage::hasSignalTypeId(const QString& diagSignalTypeId) const
 {
-	return std::find_if(m_objectsVector.begin(), m_objectsVector.end(), [&diagSignalTypeId](const std::shared_ptr<Hardware::DiagSignalType>& dst) 
-		{
+	return std::find_if(m_objectsVector.begin(), m_objectsVector.end(), [&diagSignalTypeId](const auto& dst)
+						{
 							return dst != nullptr && dst->signalTypeId() == diagSignalTypeId;
-		}
-	) != m_objectsVector.end();
+						}) != m_objectsVector.end();
 }
 
 bool DiagSignalTypesStorage::load(QString* errorMessage)
@@ -79,7 +78,7 @@ bool DiagSignalTypesStorage::load(QString* errorMessage)
 
 	for (const auto& f : files)
 	{
-		std::shared_ptr<Hardware::DiagSignalType> diagSignalType = Hardware::DiagSignalType::Create(f->data());
+		auto diagSignalType = Hardware::DiagSignalTypeObject::Create(f->data());
 
 		setFileInfo(diagSignalType->uuid(), *f);
 		add(diagSignalType->uuid(), diagSignalType);
@@ -98,7 +97,7 @@ bool DiagSignalTypesStorage::save(const QUuid& uuid, QString* errorMessage)
 		return false;
 	}
 
-	std::shared_ptr<Hardware::DiagSignalType> dst = get(uuid);
+	auto dst = get(uuid);
 	if (dst == nullptr)
 	{
 		Q_ASSERT(dst);
@@ -184,48 +183,3 @@ bool DiagSignalTypesStorage::save(const QUuid& uuid, QString* errorMessage)
 
 	return true;
 }
-
-void DiagSignalTypesStorage::writeToXml(XmlWriteHelper& xml) const
-{
-	std::map<QString, std::shared_ptr<Hardware::DiagSignalType>> sortedTypes;	// DiagSignalTypeID => DiagSignalType
-
-	for (const auto& diagSignalType : m_objectsVector)
-	{
-		TEST_PTR_CONTINUE(diagSignalType);
-
-		sortedTypes.emplace(diagSignalType->signalTypeId(), diagSignalType);
-	}
-
-	xml.writeStartElement(XmlElement::DIAG_SIGNAL_TYPES);
-	xml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(sortedTypes.size()));
-
-	for(const auto& [id, diagSignalType] : sortedTypes)
-	{
-		diagSignalType->writeToXml(xml);
-	}
-
-	xml.writeEndElement();		//	XmlElement::DIAG_SIGNAL_TYPES
-}
-
-bool DiagSignalTypesStorage::readFromXml(XmlReadHelper& xml)
-{
-	m_objectsVector.clear();
-
-	bool result = true;
-
-	result &= xml.findElement(XmlElement::DIAG_SIGNAL_TYPES);
-
-	RETURN_IF_FALSE(result);
-
-	int count = 0;
-
-	result &= xml.readIntAttribute(XmlAttribute::COUNT, &count);
-
-	for(int i = 0; i < count; i++)
-	{
-
-	}
-
-	return result;
-}
-

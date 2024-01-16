@@ -28,7 +28,7 @@ namespace Hardware
 	class Software;
 	class DeviceAppSignal;
 	class DiagSignal;
-	class DiagSignalType;
+	class DiagSignalTypeObject;
 
 
 	// Device type, for defining hierarchy, don't save these data to file, can be changed (new level) later
