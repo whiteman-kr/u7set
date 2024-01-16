@@ -10,29 +10,74 @@ namespace Hardware
 	// DiagSignalType
 	//
 	//
-	class DiagSignalType final : public PropertyObject,
-								 public Proto::ObjectSerialization<DiagSignalType>,
-								 public std::enable_shared_from_this<DiagSignalType>
+	struct DiagSignalType
+	{
+		void writeToXml(XmlWriteHelper& xml) const;
+		bool readFromXml(XmlReadHelper& xml);
+
+		void save(Proto::DiagSignalType* message) const;
+		bool load(const Proto::DiagSignalType& message);
+		
+		// Data
+		//
+		QUuid uuid;
+
+		bool systemSignalType = false; // Means that it can't be changed or deleted.
+		QString signalTypeId;
+		E::DiagSignalType type = E::DiagSignalType::Analog;
+		E::DiagByteOrder byteOrder = E::DiagByteOrder::LittleEndian;
+
+		QString units;
+
+		// Discrete specific
+		//
+		bool inverseValue = false;
+		int normalState = 0;
+		QString normalStateString0 = QStringLiteral("0");
+		QString normalStateString1 = QStringLiteral("1");
+
+		// Analog conversion
+		//
+		E::DiagAnalogFormat analogFormat = E::DiagAnalogFormat::UnsignedInt;
+
+		double adcHighLimit = 0.0;
+		double adcLowLimit = 255.0;
+
+		double valueHighLimit = 0.0;
+		double valueLowLimit = 255.0;
+
+		double valueMultiplier = 1.0; // y = mx + b, m = valueMultiplier
+		double valueOffset = 0;       // b = valueOffset
+
+		bool useLimits = false;       // Use adcLimits and valueLimits for analog value.
+	};
+
+
+	//
+	//
+	// DiagSignalTypeObject
+	//
+	//
+	class DiagSignalTypeObject final : public PropertyObject,
+								 public Proto::ObjectSerialization<DiagSignalTypeObject>,
+								 public std::enable_shared_from_this<DiagSignalTypeObject>
 	{
 		Q_OBJECT
 
 	protected:
-		explicit DiagSignalType(QObject* parent = nullptr);
+		explicit DiagSignalTypeObject(QObject* parent = nullptr);
 
 	public:
-		virtual ~DiagSignalType() = default;
-
-		void writeToXml(XmlWriteHelper& xml) const;
-		bool readFromXml(XmlReadHelper& xml);
+		virtual ~DiagSignalTypeObject() = default;
 
 		// Serialization
 		//
 	protected:
-		friend Proto::ObjectSerialization<DiagSignalType>; // for call CreateObject from Proto::ObjectSerialization
+		friend Proto::ObjectSerialization<DiagSignalTypeObject>; // for call CreateObject from Proto::ObjectSerialization
 
 	public:
-		[[nodiscard]] static std::shared_ptr<DiagSignalType> CreateObject(QObject* parent = nullptr);
-		[[nodiscard]] static std::shared_ptr<DiagSignalType> CreateObject(const Proto::Envelope& message);
+		[[nodiscard]] static std::shared_ptr<DiagSignalTypeObject> CreateObject(QObject* parent = nullptr);
+		[[nodiscard]] static std::shared_ptr<DiagSignalTypeObject> CreateObject(const Proto::Envelope& message);
 
 	protected:
 		virtual bool SaveData(Proto::Envelope* message) const final;
@@ -103,36 +148,8 @@ namespace Hardware
 		// Data
 		//
 	private:
-		QUuid m_uuid;
+		DiagSignalType m_data;
 
-		bool m_systemSignalType = false; // Means that it can't be changed or deleted.
-		QString m_signalTypeId;
-		E::DiagSignalType m_type = E::DiagSignalType::Analog;
-		E::DiagByteOrder m_byteOrder = E::DiagByteOrder::LittleEndian;
-
-		QString m_units;
-
-		// Discrete specific
-		//
-		bool m_inverseValue = false;
-		int m_normalState = 0;
-		QString m_normalStateString0 = QStringLiteral("0");
-		QString m_normalStateString1 = QStringLiteral("1");
-
-		// Analog conversion
-		//
-		E::DiagAnalogFormat m_analogFormat = E::DiagAnalogFormat::UnsignedInt;
-
-		double m_adcHighLimit = 0.0;
-		double m_adcLowLimit = 255.0;
-
-		double m_valueHighLimit = 0.0;
-		double m_valueLowLimit = 255.0;
-
-		double m_valueMultiplier = 1.0; // y = mx + b, m = m_valueMultiplier
-		double m_valueOffset = 0;       // b = m_valueOffset
-
-		bool m_useLimits = false;       // Use adcLimits and valueLimits for analog value.
 
 	public:
 		static const char* mimeType;    // = "application/x-radiydiagsignaltype";

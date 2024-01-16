@@ -2,7 +2,7 @@
 #include "../DbLib/DbObjectStorage.h"
 #include "../HardwareLib/DiagSignalType.h"
 
-class DiagSignalTypesStorage : public DbObjectStorage<std::shared_ptr<Hardware::DiagSignalType>>
+class DiagSignalTypesStorage : public DbObjectStorage<std::shared_ptr<Hardware::DiagSignalTypeObject>>
 {
 public:
 	explicit DiagSignalTypesStorage(DbController* db);
@@ -11,7 +11,7 @@ public:
 public:
 	using DbObjectStorage::get;
 
-	std::shared_ptr<Hardware::DiagSignalType> get(const QString& diagSignalTypeId) const;
+	std::shared_ptr<Hardware::DiagSignalTypeObject> get(const QString& diagSignalTypeId) const;
 	bool hasSignalTypeId(const QString& diagSignalTypeId) const;
 
 	void getDiagSignalTypes(std::vector<Hardware::DiagSignalType>* types) const;

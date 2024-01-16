@@ -316,12 +316,12 @@ namespace Hardware
 		m_decimalPlaces = std::clamp(value, 0, 32);
 	}
 
-	const std::shared_ptr<Hardware::DiagSignalType>& DiagSignal::diagSignalType() const
+	const std::shared_ptr<Hardware::DiagSignalTypeObject>& DiagSignal::diagSignalType() const
 	{
 		return m_diagSignalType;
 	}
 
-	void DiagSignal::setDiagSignalType(std::shared_ptr<DiagSignalType> value)
+	void DiagSignal::setDiagSignalType(std::shared_ptr<DiagSignalTypeObject> value)
 	{
 		if (value != nullptr)
 		{

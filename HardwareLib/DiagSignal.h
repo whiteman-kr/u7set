@@ -86,8 +86,8 @@ namespace Hardware
 		// Online properties
 		//
 	public:
-		const std::shared_ptr<Hardware::DiagSignalType>& diagSignalType() const;
-		void setDiagSignalType(std::shared_ptr<DiagSignalType> value);
+		const std::shared_ptr<Hardware::DiagSignalTypeObject>& diagSignalType() const;
+		void setDiagSignalType(std::shared_ptr<DiagSignalTypeObject> value);
 
 		const std::shared_ptr<Hardware::DiagSignal>& validitySignal() const;
 		void setValiditySignal(std::shared_ptr<DiagSignal> value);
@@ -121,7 +121,7 @@ namespace Hardware
 		// Data used only in "online" part, like DiagDataService, Diagnostics, etc (but not u7)
 		//
 	private:
-		std::shared_ptr<Hardware::DiagSignalType> m_diagSignalType; // Bind via m_signalTypeId
+		std::shared_ptr<Hardware::DiagSignalTypeObject> m_diagSignalType; // Bind via m_signalTypeId
 		std::shared_ptr<Hardware::DiagSignal> m_validitySignal;     // Bind via m_validitySignalId
 	};
 

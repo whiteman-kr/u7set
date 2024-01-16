@@ -130,7 +130,7 @@ message Envelope
 	//
 	optional SchemaItem schemaitem = 6;				// VFrame30::SchemaItem
 	optional DeviceObject deviceobject = 7;			// Hardware::DeviceObject
-	optional DiagSignalType diagSignalType = 8;		// Hardware::DiagSignalType
+	optional DiagSignalType diagSignalType = 8;		// Hardware::DiagSignalTypeObject
 	optional Schema schema = 100;					// VFrame30::Schema
 	optional SchemaLayer schemalayer = 101;			// VFrame30::SchemaLayer
 	optional FblElement fblelement = 102;			// Fbl::FblElement

@@ -15,9 +15,9 @@ DiagSignalTypesStorage::~DiagSignalTypesStorage()
 {
 }
 
-std::shared_ptr<Hardware::DiagSignalType> DiagSignalTypesStorage::get(const QString& diagSignalTypeId) const
+std::shared_ptr<Hardware::DiagSignalTypeObject> DiagSignalTypesStorage::get(const QString& diagSignalTypeId) const
 {
-	for (const std::shared_ptr<Hardware::DiagSignalType>& dst : m_objectsVector)
+	for (const std::shared_ptr<Hardware::DiagSignalTypeObject>& dst : m_objectsVector)
 	{
 		Q_ASSERT(dst);
 
@@ -28,16 +28,15 @@ std::shared_ptr<Hardware::DiagSignalType> DiagSignalTypesStorage::get(const QStr
 		}
 	}
 
-	return std::shared_ptr<Hardware::DiagSignalType>();
+	return std::shared_ptr<Hardware::DiagSignalTypeObject>();
 }
 
 bool DiagSignalTypesStorage::hasSignalTypeId(const QString& diagSignalTypeId) const
 {
-	return std::find_if(m_objectsVector.begin(), m_objectsVector.end(), [&diagSignalTypeId](const std::shared_ptr<Hardware::DiagSignalType>& dst) 
-		{
+	return std::find_if(m_objectsVector.begin(), m_objectsVector.end(), [&diagSignalTypeId](const auto& dst)
+						{
 							return dst != nullptr && dst->signalTypeId() == diagSignalTypeId;
-		}
-	) != m_objectsVector.end();
+						}) != m_objectsVector.end();
 }
 
 void DiagSignalTypesStorage::getDiagSignalTypes(std::vector<Hardware::DiagSignalType>* types) const
@@ -97,7 +96,7 @@ bool DiagSignalTypesStorage::load(QString* errorMessage)
 
 	for (const auto& f : files)
 	{
-		std::shared_ptr<Hardware::DiagSignalType> diagSignalType = Hardware::DiagSignalType::Create(f->data());
+		auto diagSignalType = Hardware::DiagSignalTypeObject::Create(f->data());
 
 		setFileInfo(diagSignalType->uuid(), *f);
 		add(diagSignalType->uuid(), diagSignalType);
@@ -116,7 +115,7 @@ bool DiagSignalTypesStorage::save(const QUuid& uuid, QString* errorMessage)
 		return false;
 	}
 
-	std::shared_ptr<Hardware::DiagSignalType> dst = get(uuid);
+	auto dst = get(uuid);
 	if (dst == nullptr)
 	{
 		Q_ASSERT(dst);

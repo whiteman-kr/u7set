@@ -38,8 +38,8 @@ private slots:
 	void onCustomContextMenuRequested(const QPoint& pos);
 
 private:
-	bool addDiagSignalType(std::shared_ptr<Hardware::DiagSignalType> dst);
-	bool pasteDiagSignalType(std::shared_ptr<Hardware::DiagSignalType> dst);
+	bool addDiagSignalType(std::shared_ptr<Hardware::DiagSignalTypeObject> dst);
+	bool pasteDiagSignalType(std::shared_ptr<Hardware::DiagSignalTypeObject> dst);
 
 	QString signalTypeIdFromItem(const QUuid& uuid) const;
 
