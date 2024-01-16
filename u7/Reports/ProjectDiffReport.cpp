@@ -409,6 +409,8 @@ ProjectDiffGenerator::ProjectDiffGenerator(const QString& fileName,
 										   const QString& userPassword):
 	m_schemaView(schemaView),
 	m_reportPrinter(m_schemaView),
+	m_diagStateProvider(/*signalSet*/),
+	m_diagStateController(m_diagStateProvider, nullptr),
 	m_appSignalProvider(signalSet),
 	m_appSignalController(m_appSignalProvider, nullptr),
 	m_reportParams(settings),
@@ -1534,7 +1536,7 @@ void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 										  std::shared_ptr<ReportSection> section,
 										  ReportTable& headerTable)
 {
-	auto context = VFrame30::Context::create(&m_appSignalController, nullptr, nullptr, nullptr);
+	auto context = VFrame30::Context::create(&m_diagStateController, &m_appSignalController, nullptr, nullptr, nullptr);
 
 	// No Files
 	if (sourceFile == nullptr && targetFile == nullptr)

@@ -237,7 +237,7 @@ namespace SchemaClientLib
 		// Create a dummy context, later it will be changed to the normal one inside ClientSchemaWidgetType
 		// constructor, as MonitorSchemaView is created inside MonitorSchemaView().
 		//
-		auto dummyContext = VFrame30::Context::create(nullptr, nullptr, nullptr, nullptr);
+		auto dummyContext = VFrame30::Context::create(nullptr, nullptr, nullptr, nullptr, nullptr);
 
 		std::shared_ptr<VFrame30::Schema> tabSchema;
 

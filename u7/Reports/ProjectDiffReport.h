@@ -1,13 +1,14 @@
 #pragma once
 
-#include "../ReportLib/Report.h"
-
-#include "GlobalMessanger.h"
-#include "../HardwareLib/DeviceObject.h"
-
-#include "../ReportLib/ReportAppSignalProvider.h"
-#include "../ReportLib/ReportPrinter.h"
 #include "../Builder/SchemasReportGenerator.h"
+#include "../HardwareLib/DeviceObject.h"
+#include "../ReportLib/Report.h"
+#include "../ReportLib/ReportAppSignalProvider.h"
+#include "../ReportLib/ReportDiagStateProvider.h"
+#include "../ReportLib/ReportPrinter.h"
+#include "../VFrame30/AppSignalController.h"
+#include "../VFrame30/DiagStateController.h"
+#include "GlobalMessanger.h"
 
 //
 // FileDiff
@@ -273,6 +274,9 @@ private:
 	const std::shared_ptr<ReportLib::ReportSchemaView> m_schemaView;
 	ReportLib::ReportPrinter m_reportPrinter;
 
+	ReportLib::ReportDiagStateProvider m_diagStateProvider;
+	VFrame30::DiagStateController m_diagStateController;
+
 	ReportLib::ReportAppSignalProvider m_appSignalProvider;
 	VFrame30::AppSignalController m_appSignalController;
 
@@ -304,5 +308,4 @@ private:
 	std::atomic_bool m_stop = false;	// Stop processing flag, set by stop()
 
 	static inline const QString titlePageName{"TitlePage"};
-
 };

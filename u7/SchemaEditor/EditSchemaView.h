@@ -1,15 +1,16 @@
 #pragma once
-#include "../AppSignalSetProvider.h"
+#include "../../Builder/IssueLogger.h"
+#include "../../VFrame30/AppSignalController.h"
+#include "../../VFrame30/PosRectImpl.h"
 #include "../../VFrame30/Schema.h"
 #include "../../VFrame30/SchemaView.h"
-#include "../../VFrame30/PosRectImpl.h"
-#include "../../VFrame30/AppSignalController.h"
 #include "../../VFrame30/TuningController.h"
-#include "../../Builder/IssueLogger.h"
+#include "../AppSignalSetProvider.h"
 #include "AutoFblItemConnection.h"
-#include "EditSchemaTypes.h"
 #include "EditConnectionLine.h"
+#include "EditSchemaDiagStateProvider.h"
 #include "EditSchemaSignalProvider.h"
+#include "EditSchemaTypes.h"
 
 class EditSchemaWidget;
 
@@ -97,9 +98,11 @@ private:
 	int m_activeLayer;
 	MouseState m_mouseState;
 
+	EditSchemaDiagStateProvider m_diagStateProvider;
 	EditSchemaAppSignalProvider m_appSignalProvider;
 	EditSchemaTuningSignalProvider m_tuningSignalProvider;
 
+	VFrame30::DiagStateController m_diagStateController;
 	VFrame30::AppSignalController m_appSignalController;
 
 private:

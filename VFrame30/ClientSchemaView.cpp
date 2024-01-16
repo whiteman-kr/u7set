@@ -912,6 +912,25 @@ namespace VFrame30
 		return;
 	}
 
+	DiagStateController* ClientSchemaView::diagStateController()
+	{
+		return m_diagStateController;
+	}
+
+	const DiagStateController* ClientSchemaView::diagStateController() const
+	{
+		return m_diagStateController;
+	}
+
+	void ClientSchemaView::setDiagStateController(DiagStateController* value)
+	{
+		m_diagStateController = value;
+		m_scriptDiagStateController = std::make_unique<ScriptDiagStateController>(m_diagStateController->diagStateManager());
+		m_jsEngineGlobalsWereCreated = false; // it will make jsEngine() to initialize global script vars again
+
+		return;
+	}
+
 	AppSignalController* ClientSchemaView::appSignalController()
 	{
 		return m_appSignalController;

@@ -258,7 +258,7 @@ void SchemasWorkspace::createSchemasList()
 	// Create a dummy context, later it will be changed to the normal one inside TuningSchemaWidget
 	// constructor, as TuningSchemaView is cretaed inside TuningSchemaWidget().
 	//
-	auto dummyContext = VFrame30::Context::create(nullptr, nullptr, nullptr, nullptr);
+	auto dummyContext = VFrame30::Context::create(nullptr, nullptr, nullptr, nullptr, nullptr);
 
 	QTreeWidgetItem* startSchemaItem = nullptr;
 
@@ -337,7 +337,7 @@ void SchemasWorkspace::createSchemasTabs()
 	// Create a dummy context, later it will be changed to the normal one inside TuningSchemaWidget
 	// constructor, as TuningSchemaView is created inside TuningSchemaWidget().
 	//
-	auto dummyContext = VFrame30::Context::create(nullptr, nullptr, nullptr, nullptr);
+	auto dummyContext = VFrame30::Context::create(nullptr, nullptr, nullptr, nullptr, nullptr);
 
 	std::map<QString, TuningSchemaWidget*> widgets;
 
@@ -444,7 +444,7 @@ void SchemasWorkspace::createSchemasView()
 	// Create a dummy context, later it will be changed to the normal one inside TuningSchemaWidget
 	// constructor, as TuningSchemaView is cretaed inside TuningSchemaWidget().
 	//
-	auto dummyContext = VFrame30::Context::create(nullptr, nullptr, nullptr, nullptr);
+	auto dummyContext = VFrame30::Context::create(nullptr, nullptr, nullptr, nullptr, nullptr);
 	std::shared_ptr<VFrame30::Schema> schema = m_schemaManager.schema(startSchemaID, dummyContext);
 
 	m_schemaWidget = new TuningSchemaWidget(m_configController,
