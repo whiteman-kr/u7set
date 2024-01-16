@@ -939,7 +939,7 @@ namespace Builder
 
 		QString errMsg;
 
-		bool result = storage->load(errMsg);
+		bool result = storage->load(&errMsg);
 
 		if (result == false)
 		{
@@ -947,7 +947,7 @@ namespace Builder
 			return false;
 		}
 
-		if (storage.count() > 0)
+		if (storage->count() > 0)
 		{
 			LOG_MESSAGE(m_log, tr("Loaded %1 DiagSignalTypes").arg(m_context->m_matsUsers.count()));
 		}

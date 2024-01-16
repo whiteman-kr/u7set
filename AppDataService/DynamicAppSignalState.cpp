@@ -853,6 +853,12 @@ bool DynamicAppSignalState::hasGatewaySendReasone(AppSignalStateFlags flags) con
 	return false;
 }
 
+// -------------------------------------------------------------------------------
+//
+// DynamicAppSignalStates class implementation
+//
+// -------------------------------------------------------------------------------
+
 DynamicAppSignalStates::~DynamicAppSignalStates()
 {
 	clear();
@@ -862,11 +868,7 @@ void DynamicAppSignalStates::clear()
 {
 	m_hash2State.clear();
 
-	if (m_appSignalState != nullptr)
-	{
-		delete [] m_appSignalState;
-		m_appSignalState = nullptr;
-	}
+	DELETE_IF_NOT_NULL(m_appSignalState);
 
 	m_size = 0;
 }

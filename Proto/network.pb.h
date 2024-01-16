@@ -61,7 +61,7 @@ struct TableStruct_network_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[74]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[75]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -103,6 +103,9 @@ extern DataSourceWriteDefaultTypeInternal _DataSourceWrite_default_instance_;
 class DataSourceWriteReply;
 struct DataSourceWriteReplyDefaultTypeInternal;
 extern DataSourceWriteReplyDefaultTypeInternal _DataSourceWriteReply_default_instance_;
+class DiagDataSourceState;
+struct DiagDataSourceStateDefaultTypeInternal;
+extern DiagDataSourceStateDefaultTypeInternal _DiagDataSourceState_default_instance_;
 class GatewayAppSignalState;
 struct GatewayAppSignalStateDefaultTypeInternal;
 extern GatewayAppSignalStateDefaultTypeInternal _GatewayAppSignalState_default_instance_;
@@ -305,6 +308,7 @@ template<> ::Network::ConfigurationServiceState* Arena::CreateMaybeMessage<::Net
 template<> ::Network::DataSourceInfo* Arena::CreateMaybeMessage<::Network::DataSourceInfo>(Arena*);
 template<> ::Network::DataSourceWrite* Arena::CreateMaybeMessage<::Network::DataSourceWrite>(Arena*);
 template<> ::Network::DataSourceWriteReply* Arena::CreateMaybeMessage<::Network::DataSourceWriteReply>(Arena*);
+template<> ::Network::DiagDataSourceState* Arena::CreateMaybeMessage<::Network::DiagDataSourceState>(Arena*);
 template<> ::Network::GatewayAppSignalState* Arena::CreateMaybeMessage<::Network::GatewayAppSignalState>(Arena*);
 template<> ::Network::GatewayGetAppSignalStateChangesReply* Arena::CreateMaybeMessage<::Network::GatewayGetAppSignalStateChangesReply>(Arena*);
 template<> ::Network::GatewayGetAppSignalStateChangesRequest* Arena::CreateMaybeMessage<::Network::GatewayGetAppSignalStateChangesRequest>(Arena*);
@@ -5119,6 +5123,492 @@ class AppDataSourceState PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class DiagDataSourceState PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Network.DiagDataSourceState) */ {
+ public:
+  inline DiagDataSourceState() : DiagDataSourceState(nullptr) {}
+  virtual ~DiagDataSourceState();
+  explicit constexpr DiagDataSourceState(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  DiagDataSourceState(const DiagDataSourceState& from);
+  DiagDataSourceState(DiagDataSourceState&& from) noexcept
+    : DiagDataSourceState() {
+    *this = ::std::move(from);
+  }
+
+  inline DiagDataSourceState& operator=(const DiagDataSourceState& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline DiagDataSourceState& operator=(DiagDataSourceState&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
+    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
+  }
+  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
+    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const DiagDataSourceState& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const DiagDataSourceState* internal_default_instance() {
+    return reinterpret_cast<const DiagDataSourceState*>(
+               &_DiagDataSourceState_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    21;
+
+  friend void swap(DiagDataSourceState& a, DiagDataSourceState& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(DiagDataSourceState* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(DiagDataSourceState* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline DiagDataSourceState* New() const final {
+    return CreateMaybeMessage<DiagDataSourceState>(nullptr);
+  }
+
+  DiagDataSourceState* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<DiagDataSourceState>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const DiagDataSourceState& from);
+  void MergeFrom(const DiagDataSourceState& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(DiagDataSourceState* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Network.DiagDataSourceState";
+  }
+  protected:
+  explicit DiagDataSourceState(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_network_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kLmEquipmentIDFieldNumber = 2,
+    kIdFieldNumber = 1,
+    kDataProcessingEnabledFieldNumber = 3,
+    kReceivesDataFieldNumber = 4,
+    kReceivedDataIDFieldNumber = 6,
+    kUptimeFieldNumber = 5,
+    kLmTimeFieldNumber = 7,
+    kDataReceivingSpeedFieldNumber = 9,
+    kReceivedDataSizeFieldNumber = 10,
+    kReceivedFramesCountFieldNumber = 11,
+    kRupFrameNumeratorFieldNumber = 8,
+    kSignalStatesQueueCurSizeFieldNumber = 14,
+    kReceivedPacketCountFieldNumber = 12,
+    kLostPacketCountFieldNumber = 13,
+    kErrorProtocolVersionFieldNumber = 16,
+    kErrorFramesQuantityFieldNumber = 17,
+    kErrorFrameNoFieldNumber = 18,
+    kErrorFrameCRCFieldNumber = 19,
+    kErrorDataIDFieldNumber = 20,
+    kErrorDuplicatePlantTimeFieldNumber = 21,
+    kErrorNonmonotonicPlantTimeFieldNumber = 22,
+    kErrorPlantTimeFormatFieldNumber = 23,
+    kSignalStatesQueueCurMaxSizeFieldNumber = 15,
+  };
+  // optional string lmEquipmentID = 2;
+  bool has_lmequipmentid() const;
+  private:
+  bool _internal_has_lmequipmentid() const;
+  public:
+  void clear_lmequipmentid();
+  const std::string& lmequipmentid() const;
+  void set_lmequipmentid(const std::string& value);
+  void set_lmequipmentid(std::string&& value);
+  void set_lmequipmentid(const char* value);
+  void set_lmequipmentid(const char* value, size_t size);
+  std::string* mutable_lmequipmentid();
+  std::string* release_lmequipmentid();
+  void set_allocated_lmequipmentid(std::string* lmequipmentid);
+  private:
+  const std::string& _internal_lmequipmentid() const;
+  void _internal_set_lmequipmentid(const std::string& value);
+  std::string* _internal_mutable_lmequipmentid();
+  public:
+
+  // optional uint64 id = 1 [default = 0];
+  bool has_id() const;
+  private:
+  bool _internal_has_id() const;
+  public:
+  void clear_id();
+  ::PROTOBUF_NAMESPACE_ID::uint64 id() const;
+  void set_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_id() const;
+  void _internal_set_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // optional bool dataProcessingEnabled = 3 [default = false];
+  bool has_dataprocessingenabled() const;
+  private:
+  bool _internal_has_dataprocessingenabled() const;
+  public:
+  void clear_dataprocessingenabled();
+  bool dataprocessingenabled() const;
+  void set_dataprocessingenabled(bool value);
+  private:
+  bool _internal_dataprocessingenabled() const;
+  void _internal_set_dataprocessingenabled(bool value);
+  public:
+
+  // optional bool receivesData = 4 [default = false];
+  bool has_receivesdata() const;
+  private:
+  bool _internal_has_receivesdata() const;
+  public:
+  void clear_receivesdata();
+  bool receivesdata() const;
+  void set_receivesdata(bool value);
+  private:
+  bool _internal_receivesdata() const;
+  void _internal_set_receivesdata(bool value);
+  public:
+
+  // optional uint32 receivedDataID = 6 [default = 0];
+  bool has_receiveddataid() const;
+  private:
+  bool _internal_has_receiveddataid() const;
+  public:
+  void clear_receiveddataid();
+  ::PROTOBUF_NAMESPACE_ID::uint32 receiveddataid() const;
+  void set_receiveddataid(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_receiveddataid() const;
+  void _internal_set_receiveddataid(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // optional int64 uptime = 5 [default = 0];
+  bool has_uptime() const;
+  private:
+  bool _internal_has_uptime() const;
+  public:
+  void clear_uptime();
+  ::PROTOBUF_NAMESPACE_ID::int64 uptime() const;
+  void set_uptime(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_uptime() const;
+  void _internal_set_uptime(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 lmTime = 7 [default = 0];
+  bool has_lmtime() const;
+  private:
+  bool _internal_has_lmtime() const;
+  public:
+  void clear_lmtime();
+  ::PROTOBUF_NAMESPACE_ID::int64 lmtime() const;
+  void set_lmtime(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_lmtime() const;
+  void _internal_set_lmtime(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional double dataReceivingSpeed = 9 [default = 0];
+  bool has_datareceivingspeed() const;
+  private:
+  bool _internal_has_datareceivingspeed() const;
+  public:
+  void clear_datareceivingspeed();
+  double datareceivingspeed() const;
+  void set_datareceivingspeed(double value);
+  private:
+  double _internal_datareceivingspeed() const;
+  void _internal_set_datareceivingspeed(double value);
+  public:
+
+  // optional int64 receivedDataSize = 10 [default = 0];
+  bool has_receiveddatasize() const;
+  private:
+  bool _internal_has_receiveddatasize() const;
+  public:
+  void clear_receiveddatasize();
+  ::PROTOBUF_NAMESPACE_ID::int64 receiveddatasize() const;
+  void set_receiveddatasize(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_receiveddatasize() const;
+  void _internal_set_receiveddatasize(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 receivedFramesCount = 11 [default = 0];
+  bool has_receivedframescount() const;
+  private:
+  bool _internal_has_receivedframescount() const;
+  public:
+  void clear_receivedframescount();
+  ::PROTOBUF_NAMESPACE_ID::int64 receivedframescount() const;
+  void set_receivedframescount(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_receivedframescount() const;
+  void _internal_set_receivedframescount(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional uint32 rupFrameNumerator = 8 [default = 0];
+  bool has_rupframenumerator() const;
+  private:
+  bool _internal_has_rupframenumerator() const;
+  public:
+  void clear_rupframenumerator();
+  ::PROTOBUF_NAMESPACE_ID::uint32 rupframenumerator() const;
+  void set_rupframenumerator(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_rupframenumerator() const;
+  void _internal_set_rupframenumerator(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // optional int32 signalStatesQueueCurSize = 14 [default = 0];
+  bool has_signalstatesqueuecursize() const;
+  private:
+  bool _internal_has_signalstatesqueuecursize() const;
+  public:
+  void clear_signalstatesqueuecursize();
+  ::PROTOBUF_NAMESPACE_ID::int32 signalstatesqueuecursize() const;
+  void set_signalstatesqueuecursize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_signalstatesqueuecursize() const;
+  void _internal_set_signalstatesqueuecursize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int64 receivedPacketCount = 12 [default = 0];
+  bool has_receivedpacketcount() const;
+  private:
+  bool _internal_has_receivedpacketcount() const;
+  public:
+  void clear_receivedpacketcount();
+  ::PROTOBUF_NAMESPACE_ID::int64 receivedpacketcount() const;
+  void set_receivedpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_receivedpacketcount() const;
+  void _internal_set_receivedpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 lostPacketCount = 13 [default = 0];
+  bool has_lostpacketcount() const;
+  private:
+  bool _internal_has_lostpacketcount() const;
+  public:
+  void clear_lostpacketcount();
+  ::PROTOBUF_NAMESPACE_ID::int64 lostpacketcount() const;
+  void set_lostpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_lostpacketcount() const;
+  void _internal_set_lostpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errorProtocolVersion = 16 [default = 0];
+  bool has_errorprotocolversion() const;
+  private:
+  bool _internal_has_errorprotocolversion() const;
+  public:
+  void clear_errorprotocolversion();
+  ::PROTOBUF_NAMESPACE_ID::int64 errorprotocolversion() const;
+  void set_errorprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errorprotocolversion() const;
+  void _internal_set_errorprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errorFramesQuantity = 17 [default = 0];
+  bool has_errorframesquantity() const;
+  private:
+  bool _internal_has_errorframesquantity() const;
+  public:
+  void clear_errorframesquantity();
+  ::PROTOBUF_NAMESPACE_ID::int64 errorframesquantity() const;
+  void set_errorframesquantity(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errorframesquantity() const;
+  void _internal_set_errorframesquantity(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errorFrameNo = 18 [default = 0];
+  bool has_errorframeno() const;
+  private:
+  bool _internal_has_errorframeno() const;
+  public:
+  void clear_errorframeno();
+  ::PROTOBUF_NAMESPACE_ID::int64 errorframeno() const;
+  void set_errorframeno(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errorframeno() const;
+  void _internal_set_errorframeno(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errorFrameCRC = 19 [default = 0];
+  bool has_errorframecrc() const;
+  private:
+  bool _internal_has_errorframecrc() const;
+  public:
+  void clear_errorframecrc();
+  ::PROTOBUF_NAMESPACE_ID::int64 errorframecrc() const;
+  void set_errorframecrc(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errorframecrc() const;
+  void _internal_set_errorframecrc(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errorDataID = 20 [default = 0];
+  bool has_errordataid() const;
+  private:
+  bool _internal_has_errordataid() const;
+  public:
+  void clear_errordataid();
+  ::PROTOBUF_NAMESPACE_ID::int64 errordataid() const;
+  void set_errordataid(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errordataid() const;
+  void _internal_set_errordataid(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errorDuplicatePlantTime = 21 [default = 0];
+  bool has_errorduplicateplanttime() const;
+  private:
+  bool _internal_has_errorduplicateplanttime() const;
+  public:
+  void clear_errorduplicateplanttime();
+  ::PROTOBUF_NAMESPACE_ID::int64 errorduplicateplanttime() const;
+  void set_errorduplicateplanttime(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errorduplicateplanttime() const;
+  void _internal_set_errorduplicateplanttime(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errorNonmonotonicPlantTime = 22 [default = 0];
+  bool has_errornonmonotonicplanttime() const;
+  private:
+  bool _internal_has_errornonmonotonicplanttime() const;
+  public:
+  void clear_errornonmonotonicplanttime();
+  ::PROTOBUF_NAMESPACE_ID::int64 errornonmonotonicplanttime() const;
+  void set_errornonmonotonicplanttime(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errornonmonotonicplanttime() const;
+  void _internal_set_errornonmonotonicplanttime(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errorPlantTimeFormat = 23 [default = 0];
+  bool has_errorplanttimeformat() const;
+  private:
+  bool _internal_has_errorplanttimeformat() const;
+  public:
+  void clear_errorplanttimeformat();
+  ::PROTOBUF_NAMESPACE_ID::int64 errorplanttimeformat() const;
+  void set_errorplanttimeformat(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errorplanttimeformat() const;
+  void _internal_set_errorplanttimeformat(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int32 signalStatesQueueCurMaxSize = 15 [default = 0];
+  bool has_signalstatesqueuecurmaxsize() const;
+  private:
+  bool _internal_has_signalstatesqueuecurmaxsize() const;
+  public:
+  void clear_signalstatesqueuecurmaxsize();
+  ::PROTOBUF_NAMESPACE_ID::int32 signalstatesqueuecurmaxsize() const;
+  void set_signalstatesqueuecurmaxsize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_signalstatesqueuecurmaxsize() const;
+  void _internal_set_signalstatesqueuecurmaxsize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:Network.DiagDataSourceState)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr lmequipmentid_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 id_;
+  bool dataprocessingenabled_;
+  bool receivesdata_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 receiveddataid_;
+  ::PROTOBUF_NAMESPACE_ID::int64 uptime_;
+  ::PROTOBUF_NAMESPACE_ID::int64 lmtime_;
+  double datareceivingspeed_;
+  ::PROTOBUF_NAMESPACE_ID::int64 receiveddatasize_;
+  ::PROTOBUF_NAMESPACE_ID::int64 receivedframescount_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 rupframenumerator_;
+  ::PROTOBUF_NAMESPACE_ID::int32 signalstatesqueuecursize_;
+  ::PROTOBUF_NAMESPACE_ID::int64 receivedpacketcount_;
+  ::PROTOBUF_NAMESPACE_ID::int64 lostpacketcount_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errorprotocolversion_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errorframesquantity_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errorframeno_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errorframecrc_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errordataid_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errorduplicateplanttime_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errornonmonotonicplanttime_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errorplanttimeformat_;
+  ::PROTOBUF_NAMESPACE_ID::int32 signalstatesqueuecurmaxsize_;
+  friend struct ::TableStruct_network_2eproto;
+};
+// -------------------------------------------------------------------
+
 class GetAppDataSourcesStatesReply PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Network.GetAppDataSourcesStatesReply) */ {
  public:
@@ -5169,7 +5659,7 @@ class GetAppDataSourcesStatesReply PROTOBUF_FINAL :
                &_GetAppDataSourcesStatesReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    21;
+    22;
 
   friend void swap(GetAppDataSourcesStatesReply& a, GetAppDataSourcesStatesReply& b) {
     a.Swap(&b);
@@ -5338,7 +5828,7 @@ class AppDataServiceState PROTOBUF_FINAL :
                &_AppDataServiceState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    22;
+    23;
 
   friend void swap(AppDataServiceState& a, AppDataServiceState& b) {
     a.Swap(&b);
@@ -5585,7 +6075,7 @@ class SoftwareInfo PROTOBUF_FINAL :
                &_SoftwareInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    23;
+    24;
 
   friend void swap(SoftwareInfo& a, SoftwareInfo& b) {
     a.Swap(&b);
@@ -5973,7 +6463,7 @@ class SecurityLevelReply PROTOBUF_FINAL :
                &_SecurityLevelReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    24;
+    25;
 
   friend void swap(SecurityLevelReply& a, SecurityLevelReply& b) {
     a.Swap(&b);
@@ -6140,7 +6630,7 @@ class IntroduceMyselfRequest PROTOBUF_FINAL :
                &_IntroduceMyselfRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    25;
+    26;
 
   friend void swap(IntroduceMyselfRequest& a, IntroduceMyselfRequest& b) {
     a.Swap(&b);
@@ -6294,7 +6784,7 @@ class IntroduceMyselfReply PROTOBUF_FINAL :
                &_IntroduceMyselfReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    26;
+    27;
 
   friend void swap(IntroduceMyselfReply& a, IntroduceMyselfReply& b) {
     a.Swap(&b);
@@ -6488,7 +6978,7 @@ class GetServiceInfoRequest PROTOBUF_FINAL :
                &_GetServiceInfoRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    27;
+    28;
 
   friend void swap(GetServiceInfoRequest& a, GetServiceInfoRequest& b) {
     a.Swap(&b);
@@ -6619,7 +7109,7 @@ class SessionParams PROTOBUF_FINAL :
                &_SessionParams_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    28;
+    29;
 
   friend void swap(SessionParams& a, SessionParams& b) {
     a.Swap(&b);
@@ -6790,7 +7280,7 @@ class ServiceInfo PROTOBUF_FINAL :
                &_ServiceInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    29;
+    30;
 
   friend void swap(ServiceInfo& a, ServiceInfo& b) {
     a.Swap(&b);
@@ -7031,7 +7521,7 @@ class GetServiceInfoReply PROTOBUF_FINAL :
                &_GetServiceInfoReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    30;
+    31;
 
   friend void swap(GetServiceInfoReply& a, GetServiceInfoReply& b) {
     a.Swap(&b);
@@ -7203,7 +7693,7 @@ class ConfigurationServiceState PROTOBUF_FINAL :
                &_ConfigurationServiceState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    31;
+    32;
 
   friend void swap(ConfigurationServiceState& a, ConfigurationServiceState& b) {
     a.Swap(&b);
@@ -7392,7 +7882,7 @@ class ServiceClientInfo PROTOBUF_FINAL :
                &_ServiceClientInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    32;
+    33;
 
   friend void swap(ServiceClientInfo& a, ServiceClientInfo& b) {
     a.Swap(&b);
@@ -7609,7 +8099,7 @@ class ServiceClients PROTOBUF_FINAL :
                &_ServiceClients_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    33;
+    34;
 
   friend void swap(ServiceClients& a, ServiceClients& b) {
     a.Swap(&b);
@@ -7762,7 +8252,7 @@ class BuildInfo PROTOBUF_FINAL :
                &_BuildInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    34;
+    35;
 
   friend void swap(BuildInfo& a, BuildInfo& b) {
     a.Swap(&b);
@@ -8010,7 +8500,7 @@ class ConfigurationServiceSettings PROTOBUF_FINAL :
                &_ConfigurationServiceSettings_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    35;
+    36;
 
   friend void swap(ConfigurationServiceSettings& a, ConfigurationServiceSettings& b) {
     a.Swap(&b);
@@ -8213,7 +8703,7 @@ class ServiceSettings PROTOBUF_FINAL :
                &_ServiceSettings_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    36;
+    37;
 
   friend void swap(ServiceSettings& a, ServiceSettings& b) {
     a.Swap(&b);
@@ -8416,7 +8906,7 @@ class GetTuningSourcesInfo PROTOBUF_FINAL :
                &_GetTuningSourcesInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    37;
+    38;
 
   friend void swap(GetTuningSourcesInfo& a, GetTuningSourcesInfo& b) {
     a.Swap(&b);
@@ -8547,7 +9037,7 @@ class GetTuningSourcesInfoReply PROTOBUF_FINAL :
                &_GetTuningSourcesInfoReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    38;
+    39;
 
   friend void swap(GetTuningSourcesInfoReply& a, GetTuningSourcesInfoReply& b) {
     a.Swap(&b);
@@ -8775,7 +9265,7 @@ class GetTuningSourcesStates PROTOBUF_FINAL :
                &_GetTuningSourcesStates_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    39;
+    40;
 
   friend void swap(GetTuningSourcesStates& a, GetTuningSourcesStates& b) {
     a.Swap(&b);
@@ -8906,7 +9396,7 @@ class SignalsAssociatedToTuningSource PROTOBUF_FINAL :
                &_SignalsAssociatedToTuningSource_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    40;
+    41;
 
   friend void swap(SignalsAssociatedToTuningSource& a, SignalsAssociatedToTuningSource& b) {
     a.Swap(&b);
@@ -9079,7 +9569,7 @@ class TuningSourceFilling PROTOBUF_FINAL :
                &_TuningSourceFilling_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    41;
+    42;
 
   friend void swap(TuningSourceFilling& a, TuningSourceFilling& b) {
     a.Swap(&b);
@@ -9248,7 +9738,7 @@ class TuningSourceState PROTOBUF_FINAL :
                &_TuningSourceState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    42;
+    43;
 
   friend void swap(TuningSourceState& a, TuningSourceState& b) {
     a.Swap(&b);
@@ -10139,7 +10629,7 @@ class GetTuningSourcesStatesReply PROTOBUF_FINAL :
                &_GetTuningSourcesStatesReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    43;
+    44;
 
   friend void swap(GetTuningSourcesStatesReply& a, GetTuningSourcesStatesReply& b) {
     a.Swap(&b);
@@ -10367,7 +10857,7 @@ class ChangeConrolledTuningSourceRequest PROTOBUF_FINAL :
                &_ChangeConrolledTuningSourceRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    44;
+    45;
 
   friend void swap(ChangeConrolledTuningSourceRequest& a, ChangeConrolledTuningSourceRequest& b) {
     a.Swap(&b);
@@ -10553,7 +11043,7 @@ class ChangeConrolledTuningSourceReply PROTOBUF_FINAL :
                &_ChangeConrolledTuningSourceReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    45;
+    46;
 
   friend void swap(ChangeConrolledTuningSourceReply& a, ChangeConrolledTuningSourceReply& b) {
     a.Swap(&b);
@@ -10739,7 +11229,7 @@ class TuningSignalsRead PROTOBUF_FINAL :
                &_TuningSignalsRead_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    46;
+    47;
 
   friend void swap(TuningSignalsRead& a, TuningSignalsRead& b) {
     a.Swap(&b);
@@ -10896,7 +11386,7 @@ class TuningSignalState PROTOBUF_FINAL :
                &_TuningSignalState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    47;
+    48;
 
   friend void swap(TuningSignalState& a, TuningSignalState& b) {
     a.Swap(&b);
@@ -11315,7 +11805,7 @@ class TuningSignalsReadReply PROTOBUF_FINAL :
                &_TuningSignalsReadReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    48;
+    49;
 
   friend void swap(TuningSignalsReadReply& a, TuningSignalsReadReply& b) {
     a.Swap(&b);
@@ -11499,7 +11989,7 @@ class GetTuningSignalsStateChangesRequest PROTOBUF_FINAL :
                &_GetTuningSignalsStateChangesRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    49;
+    50;
 
   friend void swap(GetTuningSignalsStateChangesRequest& a, GetTuningSignalsStateChangesRequest& b) {
     a.Swap(&b);
@@ -11630,7 +12120,7 @@ class GetTuningSignalsStateChangesReply PROTOBUF_FINAL :
                &_GetTuningSignalsStateChangesReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    50;
+    51;
 
   friend void swap(GetTuningSignalsStateChangesReply& a, GetTuningSignalsStateChangesReply& b) {
     a.Swap(&b);
@@ -11814,7 +12304,7 @@ class TuningWriteCommand PROTOBUF_FINAL :
                &_TuningWriteCommand_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    51;
+    52;
 
   friend void swap(TuningWriteCommand& a, TuningWriteCommand& b) {
     a.Swap(&b);
@@ -11983,7 +12473,7 @@ class TuningSignalsWrite PROTOBUF_FINAL :
                &_TuningSignalsWrite_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    52;
+    53;
 
   friend void swap(TuningSignalsWrite& a, TuningSignalsWrite& b) {
     a.Swap(&b);
@@ -12174,7 +12664,7 @@ class TuningSignalWriteResult PROTOBUF_FINAL :
                &_TuningSignalWriteResult_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    53;
+    54;
 
   friend void swap(TuningSignalWriteResult& a, TuningSignalWriteResult& b) {
     a.Swap(&b);
@@ -12338,7 +12828,7 @@ class TuningSignalsWriteReply PROTOBUF_FINAL :
                &_TuningSignalsWriteReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    54;
+    55;
 
   friend void swap(TuningSignalsWriteReply& a, TuningSignalsWriteReply& b) {
     a.Swap(&b);
@@ -12507,7 +12997,7 @@ class TuningSignalsApply PROTOBUF_FINAL :
                &_TuningSignalsApply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    55;
+    56;
 
   friend void swap(TuningSignalsApply& a, TuningSignalsApply& b) {
     a.Swap(&b);
@@ -12638,7 +13128,7 @@ class TuningSignalsApplyReply PROTOBUF_FINAL :
                &_TuningSignalsApplyReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    56;
+    57;
 
   friend void swap(TuningSignalsApplyReply& a, TuningSignalsApplyReply& b) {
     a.Swap(&b);
@@ -12787,7 +13277,7 @@ class DataSourceWrite PROTOBUF_FINAL :
                &_DataSourceWrite_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    57;
+    58;
 
   friend void swap(DataSourceWrite& a, DataSourceWrite& b) {
     a.Swap(&b);
@@ -12958,7 +13448,7 @@ class DataSourceWriteReply PROTOBUF_FINAL :
                &_DataSourceWriteReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    58;
+    59;
 
   friend void swap(DataSourceWriteReply& a, DataSourceWriteReply& b) {
     a.Swap(&b);
@@ -13107,7 +13597,7 @@ class PacketSourceExit PROTOBUF_FINAL :
                &_PacketSourceExit_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    59;
+    60;
 
   friend void swap(PacketSourceExit& a, PacketSourceExit& b) {
     a.Swap(&b);
@@ -13238,7 +13728,7 @@ class PacketSourceExitReply PROTOBUF_FINAL :
                &_PacketSourceExitReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    60;
+    61;
 
   friend void swap(PacketSourceExitReply& a, PacketSourceExitReply& b) {
     a.Swap(&b);
@@ -13387,7 +13877,7 @@ class SaveAppSignalsStatesToArchiveRequest PROTOBUF_FINAL :
                &_SaveAppSignalsStatesToArchiveRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    61;
+    62;
 
   friend void swap(SaveAppSignalsStatesToArchiveRequest& a, SaveAppSignalsStatesToArchiveRequest& b) {
     a.Swap(&b);
@@ -13563,7 +14053,7 @@ class SaveAppSignalsStatesToArchiveReply PROTOBUF_FINAL :
                &_SaveAppSignalsStatesToArchiveReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    62;
+    63;
 
   friend void swap(SaveAppSignalsStatesToArchiveReply& a, SaveAppSignalsStatesToArchiveReply& b) {
     a.Swap(&b);
@@ -13727,7 +14217,7 @@ class GetAppSignalStatesFromArchiveStartRequest PROTOBUF_FINAL :
                &_GetAppSignalStatesFromArchiveStartRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    63;
+    64;
 
   friend void swap(GetAppSignalStatesFromArchiveStartRequest& a, GetAppSignalStatesFromArchiveStartRequest& b) {
     a.Swap(&b);
@@ -13967,7 +14457,7 @@ class GetAppSignalStatesFromArchiveStartReply PROTOBUF_FINAL :
                &_GetAppSignalStatesFromArchiveStartReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    64;
+    65;
 
   friend void swap(GetAppSignalStatesFromArchiveStartReply& a, GetAppSignalStatesFromArchiveStartReply& b) {
     a.Swap(&b);
@@ -14168,7 +14658,7 @@ class GetAppSignalStatesFromArchiveNextRequest PROTOBUF_FINAL :
                &_GetAppSignalStatesFromArchiveNextRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    65;
+    66;
 
   friend void swap(GetAppSignalStatesFromArchiveNextRequest& a, GetAppSignalStatesFromArchiveNextRequest& b) {
     a.Swap(&b);
@@ -14317,7 +14807,7 @@ class GetAppSignalStatesFromArchiveNextReply PROTOBUF_FINAL :
                &_GetAppSignalStatesFromArchiveNextReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    66;
+    67;
 
   friend void swap(GetAppSignalStatesFromArchiveNextReply& a, GetAppSignalStatesFromArchiveNextReply& b) {
     a.Swap(&b);
@@ -14613,7 +15103,7 @@ class GetAppSignalStatesFromArchiveCancelRequest PROTOBUF_FINAL :
                &_GetAppSignalStatesFromArchiveCancelRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    67;
+    68;
 
   friend void swap(GetAppSignalStatesFromArchiveCancelRequest& a, GetAppSignalStatesFromArchiveCancelRequest& b) {
     a.Swap(&b);
@@ -14762,7 +15252,7 @@ class GetAppSignalStatesFromArchiveCancelReply PROTOBUF_FINAL :
                &_GetAppSignalStatesFromArchiveCancelReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    68;
+    69;
 
   friend void swap(GetAppSignalStatesFromArchiveCancelReply& a, GetAppSignalStatesFromArchiveCancelReply& b) {
     a.Swap(&b);
@@ -14948,7 +15438,7 @@ class RtTrendsManagementRequest PROTOBUF_FINAL :
                &_RtTrendsManagementRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    69;
+    70;
 
   friend void swap(RtTrendsManagementRequest& a, RtTrendsManagementRequest& b) {
     a.Swap(&b);
@@ -15167,7 +15657,7 @@ class RtTrendsManagementReply PROTOBUF_FINAL :
                &_RtTrendsManagementReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    70;
+    71;
 
   friend void swap(RtTrendsManagementReply& a, RtTrendsManagementReply& b) {
     a.Swap(&b);
@@ -15377,7 +15867,7 @@ class RtTrendsGetStateChangesRequest PROTOBUF_FINAL :
                &_RtTrendsGetStateChangesRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    71;
+    72;
 
   friend void swap(RtTrendsGetStateChangesRequest& a, RtTrendsGetStateChangesRequest& b) {
     a.Swap(&b);
@@ -15508,7 +15998,7 @@ class RtTrendsGetStateChangesReply PROTOBUF_FINAL :
                &_RtTrendsGetStateChangesReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    72;
+    73;
 
   friend void swap(RtTrendsGetStateChangesReply& a, RtTrendsGetStateChangesReply& b) {
     a.Swap(&b);
@@ -15699,7 +16189,7 @@ class GetFileReply PROTOBUF_FINAL :
                &_GetFileReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    73;
+    74;
 
   friend void swap(GetFileReply& a, GetFileReply& b) {
     a.Swap(&b);
@@ -20370,6 +20860,699 @@ inline void AppDataSourceState::_internal_set_errorplanttimeformat(::PROTOBUF_NA
 inline void AppDataSourceState::set_errorplanttimeformat(::PROTOBUF_NAMESPACE_ID::int64 value) {
   _internal_set_errorplanttimeformat(value);
   // @@protoc_insertion_point(field_set:Network.AppDataSourceState.errorPlantTimeFormat)
+}
+
+// -------------------------------------------------------------------
+
+// DiagDataSourceState
+
+// optional uint64 id = 1 [default = 0];
+inline bool DiagDataSourceState::_internal_has_id() const {
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_id() const {
+  return _internal_has_id();
+}
+inline void DiagDataSourceState::clear_id() {
+  id_ = PROTOBUF_ULONGLONG(0);
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 DiagDataSourceState::_internal_id() const {
+  return id_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 DiagDataSourceState::id() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.id)
+  return _internal_id();
+}
+inline void DiagDataSourceState::_internal_set_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _has_bits_[0] |= 0x00000002u;
+  id_ = value;
+}
+inline void DiagDataSourceState::set_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_id(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.id)
+}
+
+// optional string lmEquipmentID = 2;
+inline bool DiagDataSourceState::_internal_has_lmequipmentid() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_lmequipmentid() const {
+  return _internal_has_lmequipmentid();
+}
+inline void DiagDataSourceState::clear_lmequipmentid() {
+  lmequipmentid_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& DiagDataSourceState::lmequipmentid() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.lmEquipmentID)
+  return _internal_lmequipmentid();
+}
+inline void DiagDataSourceState::set_lmequipmentid(const std::string& value) {
+  _internal_set_lmequipmentid(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.lmEquipmentID)
+}
+inline std::string* DiagDataSourceState::mutable_lmequipmentid() {
+  // @@protoc_insertion_point(field_mutable:Network.DiagDataSourceState.lmEquipmentID)
+  return _internal_mutable_lmequipmentid();
+}
+inline const std::string& DiagDataSourceState::_internal_lmequipmentid() const {
+  return lmequipmentid_.Get();
+}
+inline void DiagDataSourceState::_internal_set_lmequipmentid(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  lmequipmentid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void DiagDataSourceState::set_lmequipmentid(std::string&& value) {
+  _has_bits_[0] |= 0x00000001u;
+  lmequipmentid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Network.DiagDataSourceState.lmEquipmentID)
+}
+inline void DiagDataSourceState::set_lmequipmentid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000001u;
+  lmequipmentid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Network.DiagDataSourceState.lmEquipmentID)
+}
+inline void DiagDataSourceState::set_lmequipmentid(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000001u;
+  lmequipmentid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Network.DiagDataSourceState.lmEquipmentID)
+}
+inline std::string* DiagDataSourceState::_internal_mutable_lmequipmentid() {
+  _has_bits_[0] |= 0x00000001u;
+  return lmequipmentid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* DiagDataSourceState::release_lmequipmentid() {
+  // @@protoc_insertion_point(field_release:Network.DiagDataSourceState.lmEquipmentID)
+  if (!_internal_has_lmequipmentid()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return lmequipmentid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void DiagDataSourceState::set_allocated_lmequipmentid(std::string* lmequipmentid) {
+  if (lmequipmentid != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  lmequipmentid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), lmequipmentid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Network.DiagDataSourceState.lmEquipmentID)
+}
+
+// optional bool dataProcessingEnabled = 3 [default = false];
+inline bool DiagDataSourceState::_internal_has_dataprocessingenabled() const {
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_dataprocessingenabled() const {
+  return _internal_has_dataprocessingenabled();
+}
+inline void DiagDataSourceState::clear_dataprocessingenabled() {
+  dataprocessingenabled_ = false;
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline bool DiagDataSourceState::_internal_dataprocessingenabled() const {
+  return dataprocessingenabled_;
+}
+inline bool DiagDataSourceState::dataprocessingenabled() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.dataProcessingEnabled)
+  return _internal_dataprocessingenabled();
+}
+inline void DiagDataSourceState::_internal_set_dataprocessingenabled(bool value) {
+  _has_bits_[0] |= 0x00000004u;
+  dataprocessingenabled_ = value;
+}
+inline void DiagDataSourceState::set_dataprocessingenabled(bool value) {
+  _internal_set_dataprocessingenabled(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.dataProcessingEnabled)
+}
+
+// optional bool receivesData = 4 [default = false];
+inline bool DiagDataSourceState::_internal_has_receivesdata() const {
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_receivesdata() const {
+  return _internal_has_receivesdata();
+}
+inline void DiagDataSourceState::clear_receivesdata() {
+  receivesdata_ = false;
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline bool DiagDataSourceState::_internal_receivesdata() const {
+  return receivesdata_;
+}
+inline bool DiagDataSourceState::receivesdata() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.receivesData)
+  return _internal_receivesdata();
+}
+inline void DiagDataSourceState::_internal_set_receivesdata(bool value) {
+  _has_bits_[0] |= 0x00000008u;
+  receivesdata_ = value;
+}
+inline void DiagDataSourceState::set_receivesdata(bool value) {
+  _internal_set_receivesdata(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.receivesData)
+}
+
+// optional int64 uptime = 5 [default = 0];
+inline bool DiagDataSourceState::_internal_has_uptime() const {
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_uptime() const {
+  return _internal_has_uptime();
+}
+inline void DiagDataSourceState::clear_uptime() {
+  uptime_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::_internal_uptime() const {
+  return uptime_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::uptime() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.uptime)
+  return _internal_uptime();
+}
+inline void DiagDataSourceState::_internal_set_uptime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00000020u;
+  uptime_ = value;
+}
+inline void DiagDataSourceState::set_uptime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_uptime(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.uptime)
+}
+
+// optional uint32 receivedDataID = 6 [default = 0];
+inline bool DiagDataSourceState::_internal_has_receiveddataid() const {
+  bool value = (_has_bits_[0] & 0x00000010u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_receiveddataid() const {
+  return _internal_has_receiveddataid();
+}
+inline void DiagDataSourceState::clear_receiveddataid() {
+  receiveddataid_ = 0u;
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 DiagDataSourceState::_internal_receiveddataid() const {
+  return receiveddataid_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 DiagDataSourceState::receiveddataid() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.receivedDataID)
+  return _internal_receiveddataid();
+}
+inline void DiagDataSourceState::_internal_set_receiveddataid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _has_bits_[0] |= 0x00000010u;
+  receiveddataid_ = value;
+}
+inline void DiagDataSourceState::set_receiveddataid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_receiveddataid(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.receivedDataID)
+}
+
+// optional int64 lmTime = 7 [default = 0];
+inline bool DiagDataSourceState::_internal_has_lmtime() const {
+  bool value = (_has_bits_[0] & 0x00000040u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_lmtime() const {
+  return _internal_has_lmtime();
+}
+inline void DiagDataSourceState::clear_lmtime() {
+  lmtime_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::_internal_lmtime() const {
+  return lmtime_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::lmtime() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.lmTime)
+  return _internal_lmtime();
+}
+inline void DiagDataSourceState::_internal_set_lmtime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00000040u;
+  lmtime_ = value;
+}
+inline void DiagDataSourceState::set_lmtime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_lmtime(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.lmTime)
+}
+
+// optional uint32 rupFrameNumerator = 8 [default = 0];
+inline bool DiagDataSourceState::_internal_has_rupframenumerator() const {
+  bool value = (_has_bits_[0] & 0x00000400u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_rupframenumerator() const {
+  return _internal_has_rupframenumerator();
+}
+inline void DiagDataSourceState::clear_rupframenumerator() {
+  rupframenumerator_ = 0u;
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 DiagDataSourceState::_internal_rupframenumerator() const {
+  return rupframenumerator_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 DiagDataSourceState::rupframenumerator() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.rupFrameNumerator)
+  return _internal_rupframenumerator();
+}
+inline void DiagDataSourceState::_internal_set_rupframenumerator(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _has_bits_[0] |= 0x00000400u;
+  rupframenumerator_ = value;
+}
+inline void DiagDataSourceState::set_rupframenumerator(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_rupframenumerator(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.rupFrameNumerator)
+}
+
+// optional double dataReceivingSpeed = 9 [default = 0];
+inline bool DiagDataSourceState::_internal_has_datareceivingspeed() const {
+  bool value = (_has_bits_[0] & 0x00000080u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_datareceivingspeed() const {
+  return _internal_has_datareceivingspeed();
+}
+inline void DiagDataSourceState::clear_datareceivingspeed() {
+  datareceivingspeed_ = 0;
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline double DiagDataSourceState::_internal_datareceivingspeed() const {
+  return datareceivingspeed_;
+}
+inline double DiagDataSourceState::datareceivingspeed() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.dataReceivingSpeed)
+  return _internal_datareceivingspeed();
+}
+inline void DiagDataSourceState::_internal_set_datareceivingspeed(double value) {
+  _has_bits_[0] |= 0x00000080u;
+  datareceivingspeed_ = value;
+}
+inline void DiagDataSourceState::set_datareceivingspeed(double value) {
+  _internal_set_datareceivingspeed(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.dataReceivingSpeed)
+}
+
+// optional int64 receivedDataSize = 10 [default = 0];
+inline bool DiagDataSourceState::_internal_has_receiveddatasize() const {
+  bool value = (_has_bits_[0] & 0x00000100u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_receiveddatasize() const {
+  return _internal_has_receiveddatasize();
+}
+inline void DiagDataSourceState::clear_receiveddatasize() {
+  receiveddatasize_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::_internal_receiveddatasize() const {
+  return receiveddatasize_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::receiveddatasize() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.receivedDataSize)
+  return _internal_receiveddatasize();
+}
+inline void DiagDataSourceState::_internal_set_receiveddatasize(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00000100u;
+  receiveddatasize_ = value;
+}
+inline void DiagDataSourceState::set_receiveddatasize(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_receiveddatasize(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.receivedDataSize)
+}
+
+// optional int64 receivedFramesCount = 11 [default = 0];
+inline bool DiagDataSourceState::_internal_has_receivedframescount() const {
+  bool value = (_has_bits_[0] & 0x00000200u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_receivedframescount() const {
+  return _internal_has_receivedframescount();
+}
+inline void DiagDataSourceState::clear_receivedframescount() {
+  receivedframescount_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::_internal_receivedframescount() const {
+  return receivedframescount_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::receivedframescount() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.receivedFramesCount)
+  return _internal_receivedframescount();
+}
+inline void DiagDataSourceState::_internal_set_receivedframescount(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00000200u;
+  receivedframescount_ = value;
+}
+inline void DiagDataSourceState::set_receivedframescount(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_receivedframescount(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.receivedFramesCount)
+}
+
+// optional int64 receivedPacketCount = 12 [default = 0];
+inline bool DiagDataSourceState::_internal_has_receivedpacketcount() const {
+  bool value = (_has_bits_[0] & 0x00001000u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_receivedpacketcount() const {
+  return _internal_has_receivedpacketcount();
+}
+inline void DiagDataSourceState::clear_receivedpacketcount() {
+  receivedpacketcount_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00001000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::_internal_receivedpacketcount() const {
+  return receivedpacketcount_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::receivedpacketcount() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.receivedPacketCount)
+  return _internal_receivedpacketcount();
+}
+inline void DiagDataSourceState::_internal_set_receivedpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00001000u;
+  receivedpacketcount_ = value;
+}
+inline void DiagDataSourceState::set_receivedpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_receivedpacketcount(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.receivedPacketCount)
+}
+
+// optional int64 lostPacketCount = 13 [default = 0];
+inline bool DiagDataSourceState::_internal_has_lostpacketcount() const {
+  bool value = (_has_bits_[0] & 0x00002000u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_lostpacketcount() const {
+  return _internal_has_lostpacketcount();
+}
+inline void DiagDataSourceState::clear_lostpacketcount() {
+  lostpacketcount_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00002000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::_internal_lostpacketcount() const {
+  return lostpacketcount_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::lostpacketcount() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.lostPacketCount)
+  return _internal_lostpacketcount();
+}
+inline void DiagDataSourceState::_internal_set_lostpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00002000u;
+  lostpacketcount_ = value;
+}
+inline void DiagDataSourceState::set_lostpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_lostpacketcount(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.lostPacketCount)
+}
+
+// optional int32 signalStatesQueueCurSize = 14 [default = 0];
+inline bool DiagDataSourceState::_internal_has_signalstatesqueuecursize() const {
+  bool value = (_has_bits_[0] & 0x00000800u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_signalstatesqueuecursize() const {
+  return _internal_has_signalstatesqueuecursize();
+}
+inline void DiagDataSourceState::clear_signalstatesqueuecursize() {
+  signalstatesqueuecursize_ = 0;
+  _has_bits_[0] &= ~0x00000800u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DiagDataSourceState::_internal_signalstatesqueuecursize() const {
+  return signalstatesqueuecursize_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DiagDataSourceState::signalstatesqueuecursize() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.signalStatesQueueCurSize)
+  return _internal_signalstatesqueuecursize();
+}
+inline void DiagDataSourceState::_internal_set_signalstatesqueuecursize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000800u;
+  signalstatesqueuecursize_ = value;
+}
+inline void DiagDataSourceState::set_signalstatesqueuecursize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_signalstatesqueuecursize(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.signalStatesQueueCurSize)
+}
+
+// optional int32 signalStatesQueueCurMaxSize = 15 [default = 0];
+inline bool DiagDataSourceState::_internal_has_signalstatesqueuecurmaxsize() const {
+  bool value = (_has_bits_[0] & 0x00400000u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_signalstatesqueuecurmaxsize() const {
+  return _internal_has_signalstatesqueuecurmaxsize();
+}
+inline void DiagDataSourceState::clear_signalstatesqueuecurmaxsize() {
+  signalstatesqueuecurmaxsize_ = 0;
+  _has_bits_[0] &= ~0x00400000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DiagDataSourceState::_internal_signalstatesqueuecurmaxsize() const {
+  return signalstatesqueuecurmaxsize_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DiagDataSourceState::signalstatesqueuecurmaxsize() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.signalStatesQueueCurMaxSize)
+  return _internal_signalstatesqueuecurmaxsize();
+}
+inline void DiagDataSourceState::_internal_set_signalstatesqueuecurmaxsize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00400000u;
+  signalstatesqueuecurmaxsize_ = value;
+}
+inline void DiagDataSourceState::set_signalstatesqueuecurmaxsize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_signalstatesqueuecurmaxsize(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.signalStatesQueueCurMaxSize)
+}
+
+// optional int64 errorProtocolVersion = 16 [default = 0];
+inline bool DiagDataSourceState::_internal_has_errorprotocolversion() const {
+  bool value = (_has_bits_[0] & 0x00004000u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_errorprotocolversion() const {
+  return _internal_has_errorprotocolversion();
+}
+inline void DiagDataSourceState::clear_errorprotocolversion() {
+  errorprotocolversion_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00004000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::_internal_errorprotocolversion() const {
+  return errorprotocolversion_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::errorprotocolversion() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.errorProtocolVersion)
+  return _internal_errorprotocolversion();
+}
+inline void DiagDataSourceState::_internal_set_errorprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00004000u;
+  errorprotocolversion_ = value;
+}
+inline void DiagDataSourceState::set_errorprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errorprotocolversion(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.errorProtocolVersion)
+}
+
+// optional int64 errorFramesQuantity = 17 [default = 0];
+inline bool DiagDataSourceState::_internal_has_errorframesquantity() const {
+  bool value = (_has_bits_[0] & 0x00008000u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_errorframesquantity() const {
+  return _internal_has_errorframesquantity();
+}
+inline void DiagDataSourceState::clear_errorframesquantity() {
+  errorframesquantity_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00008000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::_internal_errorframesquantity() const {
+  return errorframesquantity_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::errorframesquantity() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.errorFramesQuantity)
+  return _internal_errorframesquantity();
+}
+inline void DiagDataSourceState::_internal_set_errorframesquantity(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00008000u;
+  errorframesquantity_ = value;
+}
+inline void DiagDataSourceState::set_errorframesquantity(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errorframesquantity(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.errorFramesQuantity)
+}
+
+// optional int64 errorFrameNo = 18 [default = 0];
+inline bool DiagDataSourceState::_internal_has_errorframeno() const {
+  bool value = (_has_bits_[0] & 0x00010000u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_errorframeno() const {
+  return _internal_has_errorframeno();
+}
+inline void DiagDataSourceState::clear_errorframeno() {
+  errorframeno_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00010000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::_internal_errorframeno() const {
+  return errorframeno_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::errorframeno() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.errorFrameNo)
+  return _internal_errorframeno();
+}
+inline void DiagDataSourceState::_internal_set_errorframeno(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00010000u;
+  errorframeno_ = value;
+}
+inline void DiagDataSourceState::set_errorframeno(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errorframeno(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.errorFrameNo)
+}
+
+// optional int64 errorFrameCRC = 19 [default = 0];
+inline bool DiagDataSourceState::_internal_has_errorframecrc() const {
+  bool value = (_has_bits_[0] & 0x00020000u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_errorframecrc() const {
+  return _internal_has_errorframecrc();
+}
+inline void DiagDataSourceState::clear_errorframecrc() {
+  errorframecrc_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00020000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::_internal_errorframecrc() const {
+  return errorframecrc_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::errorframecrc() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.errorFrameCRC)
+  return _internal_errorframecrc();
+}
+inline void DiagDataSourceState::_internal_set_errorframecrc(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00020000u;
+  errorframecrc_ = value;
+}
+inline void DiagDataSourceState::set_errorframecrc(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errorframecrc(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.errorFrameCRC)
+}
+
+// optional int64 errorDataID = 20 [default = 0];
+inline bool DiagDataSourceState::_internal_has_errordataid() const {
+  bool value = (_has_bits_[0] & 0x00040000u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_errordataid() const {
+  return _internal_has_errordataid();
+}
+inline void DiagDataSourceState::clear_errordataid() {
+  errordataid_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00040000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::_internal_errordataid() const {
+  return errordataid_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::errordataid() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.errorDataID)
+  return _internal_errordataid();
+}
+inline void DiagDataSourceState::_internal_set_errordataid(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00040000u;
+  errordataid_ = value;
+}
+inline void DiagDataSourceState::set_errordataid(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errordataid(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.errorDataID)
+}
+
+// optional int64 errorDuplicatePlantTime = 21 [default = 0];
+inline bool DiagDataSourceState::_internal_has_errorduplicateplanttime() const {
+  bool value = (_has_bits_[0] & 0x00080000u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_errorduplicateplanttime() const {
+  return _internal_has_errorduplicateplanttime();
+}
+inline void DiagDataSourceState::clear_errorduplicateplanttime() {
+  errorduplicateplanttime_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00080000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::_internal_errorduplicateplanttime() const {
+  return errorduplicateplanttime_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::errorduplicateplanttime() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.errorDuplicatePlantTime)
+  return _internal_errorduplicateplanttime();
+}
+inline void DiagDataSourceState::_internal_set_errorduplicateplanttime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00080000u;
+  errorduplicateplanttime_ = value;
+}
+inline void DiagDataSourceState::set_errorduplicateplanttime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errorduplicateplanttime(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.errorDuplicatePlantTime)
+}
+
+// optional int64 errorNonmonotonicPlantTime = 22 [default = 0];
+inline bool DiagDataSourceState::_internal_has_errornonmonotonicplanttime() const {
+  bool value = (_has_bits_[0] & 0x00100000u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_errornonmonotonicplanttime() const {
+  return _internal_has_errornonmonotonicplanttime();
+}
+inline void DiagDataSourceState::clear_errornonmonotonicplanttime() {
+  errornonmonotonicplanttime_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00100000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::_internal_errornonmonotonicplanttime() const {
+  return errornonmonotonicplanttime_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::errornonmonotonicplanttime() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.errorNonmonotonicPlantTime)
+  return _internal_errornonmonotonicplanttime();
+}
+inline void DiagDataSourceState::_internal_set_errornonmonotonicplanttime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00100000u;
+  errornonmonotonicplanttime_ = value;
+}
+inline void DiagDataSourceState::set_errornonmonotonicplanttime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errornonmonotonicplanttime(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.errorNonmonotonicPlantTime)
+}
+
+// optional int64 errorPlantTimeFormat = 23 [default = 0];
+inline bool DiagDataSourceState::_internal_has_errorplanttimeformat() const {
+  bool value = (_has_bits_[0] & 0x00200000u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_errorplanttimeformat() const {
+  return _internal_has_errorplanttimeformat();
+}
+inline void DiagDataSourceState::clear_errorplanttimeformat() {
+  errorplanttimeformat_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00200000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::_internal_errorplanttimeformat() const {
+  return errorplanttimeformat_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::errorplanttimeformat() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.errorPlantTimeFormat)
+  return _internal_errorplanttimeformat();
+}
+inline void DiagDataSourceState::_internal_set_errorplanttimeformat(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00200000u;
+  errorplanttimeformat_ = value;
+}
+inline void DiagDataSourceState::set_errorplanttimeformat(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errorplanttimeformat(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.errorPlantTimeFormat)
 }
 
 // -------------------------------------------------------------------
@@ -29233,6 +30416,8 @@ inline void GetFileReply::set_allocated_filepartdata(std::string* filepartdata) 
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

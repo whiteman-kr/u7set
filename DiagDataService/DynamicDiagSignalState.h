@@ -1,8 +1,7 @@
 #pragma once
 
-#include "../AppSignalLib/AppSignalParam.h"
-#include "../AppSignalLib/TuningValue.h"
-#include "../AppSignalLib/SimpleAppSignalState.h"
+#include "../CommonLib/Hash.h"
+#include "../CommonLib/Times.h"
 #include "../UtilsLib/Address16.h"
 
 namespace RtTrends
@@ -13,7 +12,7 @@ namespace RtTrends
 class AppSignalState;
 class AppSignals;
 
-struct DynamicAppSignalState
+struct DynamicDiagSignalState
 {
 public:
 	static const int NO_INDEX = -1;
@@ -44,12 +43,12 @@ private:
 	}
 
 public:
-	DynamicAppSignalState();
+	DynamicDiagSignalState();
 
-	void setSignalParams(const AppSignal* signal, const AppSignals& appSignals);
+//	void setSignalParams(const AppSignal* signal, const AppSignals& appSignals);
 
-	void setQueues(SimpleAppSignalStatesArchiveFlagQueue* signalStatesQueue,
-				   GatewayAppSignalStatesQueue* gatewaySignalStatesQueue);
+//	void setQueues(SimpleAppSignalStatesArchiveFlagQueue* signalStatesQueue,
+//				   GatewayAppSignalStatesQueue* gatewaySignalStatesQueue);
 
 	int setState(const Times& time,
 				  bool isSimPacket,
@@ -59,19 +58,19 @@ public:
 				  int autoArchivingGroup,
 				  const QThread* thread);
 
-	int setUnavailable(const Times& time,
+/*	int setUnavailable(const Times& time,
 				  SimpleAppSignalStatesArchiveFlagQueue& statesQueue,
-				  const QThread* thread);
+				  const QThread* thread);*/
 
 	Hash hash() const;
 
 	bool archive() const { return m_archive; }
 
-	QString appSignalID() const;
+//	QString appSignalID() const;
 
 	friend class DynamicAppSignalStates;
 
-	const SimpleAppSignalState& current() const { return m_current[m_curStateIndex.load()]; }
+//	const SimpleAppSignalState& current() const { return m_current[m_curStateIndex.load()]; }
 
 	int autoArchivingGroup() const { return m_autoArchivingGroup; }
 	void setAutoArchivingGroup(int archivingGroup);
@@ -81,45 +80,45 @@ public:
 
 	// Real time trends support
 	//
-	void appendRtSession(Hash signalHash,
-						const QThread* rtProcessingOwner,
-						std::shared_ptr<RtTrends::Session> newSession,
-						int samplePeriodCounter);
+//	void appendRtSession(Hash signalHash,
+//						const QThread* rtProcessingOwner,
+//						std::shared_ptr<RtTrends::Session> newSession,
+//						int samplePeriodCounter);
 
-	void removeRtSession(Hash signalHash,
-						const QThread* rtProcessingOwner,
-						std::shared_ptr<RtTrends::Session> sessionToRemove);
+//	void removeRtSession(Hash signalHash,
+//						const QThread* rtProcessingOwner,
+//						std::shared_ptr<RtTrends::Session> sessionToRemove);
 
-	void setRtSessionSamplePeriodCounter(Hash signalHash,
-						const QThread* rtProcessingOwner,
-						int sessionID,
-						int newSamplePeriodCounter);
+//	void setRtSessionSamplePeriodCounter(Hash signalHash,
+//						const QThread* rtProcessingOwner,
+//						int sessionID,
+//						int newSamplePeriodCounter);
 
-	void rtSessionsProcessing(const SimpleAppSignalState& state, bool pushAnyway, const QThread* thread);
+//	void rtSessionsProcessing(const SimpleAppSignalState& state, bool pushAnyway, const QThread* thread);
 
-	const AppSignal* signal() const { return m_signal; }
+//	const AppSignal* signal() const { return m_signal; }
 
 private:
 	bool getValue(const char* rupData, int rupDataSize, double& value);
 	bool getBit(const char* rupData, int rupDataSize, const Address16& addr, quint32& bit);
 
-	void setNewCurState(const SimpleAppSignalState& newCurState);
-	void logState(const SimpleAppSignalState& state);
+//	void setNewCurState(const SimpleAppSignalState& newCurState);
+//	void logState(const SimpleAppSignalState& state);
 
-	inline bool hasGatewaySendReasone(AppSignalStateFlags flags) const;
+//	inline bool hasGatewaySendReasone(AppSignalStateFlags flags) const;
 
 	// Real time trends support
 	//
 	void takeRtProcessingOwnership(const QThread* newProcessingOwner);
 	void releaseRtProcessingOwnership(const QThread* currentProcessingOwner);
 
-	void sendAppSignalStateChangeToGateway(const SimpleAppSignalState& prevState,
-										   const SimpleAppSignalState& newState,
-										   const QThread* thread);
+//	void sendAppSignalStateChangeToGateway(const SimpleAppSignalState& prevState,
+//										   const SimpleAppSignalState& newState,
+//										   const QThread* thread);
 
 private:
-	SimpleAppSignalStatesArchiveFlagQueue* m_statesQueue = nullptr;
-	GatewayAppSignalStatesQueue* m_gwStatesQueue = nullptr;
+//	SimpleAppSignalStatesArchiveFlagQueue* m_statesQueue = nullptr;
+//	GatewayAppSignalStatesQueue* m_gwStatesQueue = nullptr;
 
 	struct FlagSignalParceInfo
 	{
@@ -140,7 +139,7 @@ private:
 	};
 
 private:
-	const AppSignal* m_signal = nullptr;
+//	const AppSignal* m_signal = nullptr;
 	Hash m_signalHash;
 
 	// parsing parameters
@@ -169,9 +168,6 @@ private:
 	double m_absCoarseAperture = 0;
 	double m_absFineAperture = 0;
 
-	bool m_enableTuning = false;
-	TuningValue m_tuningDefaultValue;
-
 	std::vector<FlagSignalParceInfo> m_flagsSignalsParceInfo;		// except  Validity flag signal
 
 	// paramters needed to update state
@@ -183,7 +179,7 @@ private:
 
 	//
 
-	SimpleAppSignalState m_current[2];
+//	SimpleAppSignalState m_current[2];
 	std::atomic<int> m_curStateIndex = {0};
 
 	int m_autoArchivingGroup = NOT_INITIALIZED_AUTOARCHIVING_GROUP;
@@ -200,10 +196,10 @@ private:
 	quint32 m_gatewayQueueMask = 0;
 };
 
-class DynamicAppSignalStates
+class DynamicDiagSignalStates
 {
 public:
-	~DynamicAppSignalStates();
+	~DynamicDiagSignalStates();
 
 	void clear();
 
@@ -211,13 +207,13 @@ public:
 
 	int size() const { return m_size; }
 
-	DynamicAppSignalState* operator [] (int index);
+	DynamicDiagSignalState* operator [] (int index);
 
-	const DynamicAppSignalState* getStateByHash(Hash signalHash) const;
-	DynamicAppSignalState* getStateByHash(Hash signalHash);
+	const DynamicDiagSignalState* getStateByHash(Hash signalHash) const;
+	DynamicDiagSignalState* getStateByHash(Hash signalHash);
 
-	const DynamicAppSignalState* getStateByID(const QString& signalID) const;
-	DynamicAppSignalState* getStateByID(const QString& signalID);
+	const DynamicDiagSignalState* getStateByID(const QString& signalID) const;
+	DynamicDiagSignalState* getStateByID(const QString& signalID);
 
 	void buidlHash2State();
 
@@ -230,8 +226,8 @@ public:
 	void resetGatewayQueueMask(const std::set<Hash>& hashes, quint32 mask);
 
 private:
-	DynamicAppSignalState* m_appSignalState = nullptr;
+	DynamicDiagSignalState* m_diagSignalState = nullptr;
 	int m_size = 0;
 
-	QHash<Hash, DynamicAppSignalState*> m_hash2State;
+	QHash<Hash, DynamicDiagSignalState*> m_hash2State;
 };

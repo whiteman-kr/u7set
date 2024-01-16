@@ -600,18 +600,6 @@ bool DiagDataServiceSettings::writeToXml(XmlWriteHelper& xml) const
 
 	xml.writeEnumKeyElement<E::SecurityLevel>(EquipmentPropNames::SECURITY_LEVEL, securityLevel);
 
-	//
-
-	xml.writeStartElement(XmlElement::DIAG_SIGNAL_TYPES);
-	xml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(diagSignalTypes.size()));
-
-	for(const auto& dst : diagSignalTypes)
-	{
-		dst.writeToXml(xml);
-	}
-
-	xml.writeEndElement();		//	XmlElement::DIAG_SIGNAL_TYPES
-
 	writeEndSettings(xml);	// </Settings>
 
 	return true;
@@ -646,23 +634,6 @@ bool DiagDataServiceSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
 
 	result &= xml.readEnumKeyElement<E::SecurityLevel>(EquipmentPropNames::SECURITY_LEVEL, &securityLevel, true);
-
-	//
-
-	result &= xml.findElement(XmlElement::DIAG_SIGNAL_TYPES);
-
-	RETURN_IF_FALSE(result);
-
-	int count = 0;
-	result &= xml.readIntAttribute(XmlAttribute::COUNT, &count);
-
-	diagSignalTypes.clear();
-	diagSignalTypes.resize(count);
-
-	for(int i = 0; i < count; i++)
-	{
-		result &= diagSignalTypes[i].readFromXml(xml);
-	}
 
 	return result;
 }

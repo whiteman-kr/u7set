@@ -249,6 +249,38 @@ message AppDataSourceState
 	optional int64 errorPlantTimeFormat = 23 [default = 0];
 }
 
+// Getting Diagnostic Data Sources states
+//
+message DiagDataSourceState
+{
+	optional uint64 id = 1 [default = 0];				// unique id
+	optional string lmEquipmentID = 2;
+
+	optional bool dataProcessingEnabled = 3 [default = false];
+	optional bool receivesData = 4 [default = false];
+	optional int64 uptime = 5 [default = 0];					// time from start of data receiving
+	optional uint32 receivedDataID = 6 [default = 0];
+	optional int64 lmTime = 7 [default = 0];
+	optional uint32 rupFrameNumerator = 8 [default = 0];
+
+	optional double dataReceivingSpeed = 9 [default = 0];	    // bytes/sec
+	optional int64 receivedDataSize = 10 [default = 0];
+	optional int64 receivedFramesCount = 11 [default = 0];
+	optional int64 receivedPacketCount = 12 [default = 0];
+	optional int64 lostPacketCount = 13 [default = 0];
+	optional int32 signalStatesQueueCurSize = 14 [default = 0];
+	optional int32 signalStatesQueueCurMaxSize = 15 [default = 0];
+
+	optional int64 errorProtocolVersion = 16 [default = 0];
+	optional int64 errorFramesQuantity = 17 [default = 0];
+	optional int64 errorFrameNo = 18 [default = 0];
+	optional int64 errorFrameCRC = 19 [default = 0];
+	optional int64 errorDataID = 20 [default = 0];
+	optional int64 errorDuplicatePlantTime = 21 [default = 0];
+	optional int64 errorNonmonotonicPlantTime = 22 [default = 0];
+	optional int64 errorPlantTimeFormat = 23 [default = 0];
+}
+
 message GetAppDataSourcesStatesReply
 {
     optional int32 error = 1 [default = 0];

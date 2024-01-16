@@ -439,7 +439,6 @@ bool AppDataServiceWorker::readAppDataSources(const QByteArray& fileData, const 
 	return result;
 }
 
-
 bool AppDataServiceWorker::readAppSignals(const QByteArray& fileData)
 {
 	::Proto::AppSignalSet signalSet;
@@ -462,7 +461,6 @@ bool AppDataServiceWorker::readAppSignals(const QByteArray& fileData)
 
 	return true;
 }
-
 
 void AppDataServiceWorker::createTimeErrLog()
 {

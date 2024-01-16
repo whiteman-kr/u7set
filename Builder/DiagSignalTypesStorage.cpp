@@ -15,6 +15,19 @@ DiagSignalTypesStorage::~DiagSignalTypesStorage()
 {
 }
 
+void DiagSignalTypesStorage::get(std::vector<Hardware::DiagSignalType>* types) const
+{
+	TEST_PTR_RETURN(types);
+
+	types->clear();
+	types->reserve(count());
+
+	for(const auto& object : m_objectsVector)
+	{
+		types->emplace_back(object->diagSignalType());
+	}
+}
+
 std::shared_ptr<Hardware::DiagSignalTypeObject> DiagSignalTypesStorage::get(const QString& diagSignalTypeId) const
 {
 	for (const std::shared_ptr<Hardware::DiagSignalTypeObject>& dst : m_objectsVector)
@@ -37,19 +50,6 @@ bool DiagSignalTypesStorage::hasSignalTypeId(const QString& diagSignalTypeId) co
 						{
 							return dst != nullptr && dst->signalTypeId() == diagSignalTypeId;
 						}) != m_objectsVector.end();
-}
-
-void DiagSignalTypesStorage::getDiagSignalTypes(std::vector<Hardware::DiagSignalType>* types) const
-{
-	TEST_PTR_RETURN(types);
-
-	types->clear();
-	types->reserve(count());
-
-	for(const auto& diagSignalType : m_objectsVector)
-	{
-		types->emplace_back(*diagSignalType.get());
-	}
 }
 
 int DiagSignalTypesStorage::count() const

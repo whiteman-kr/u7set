@@ -37,7 +37,8 @@ namespace Builder
 
 		do
 		{
-			if (writeDiagDataSourcesXml() == false) break;
+			if (writeDiagSignalTypesXml() == false) break;
+//			if (writeDiagDataSourcesXml() == false) break;
 //			if (writeAppSignalsXml() == false) break;				// AppSignals.xml for AZPZ
 //			if (writeAppSignalsExtXml() == false) break;			// AppSignalsExt.xml as extra debug info
 //			if (writeAcquiredAppSignalsFile() == false) break;
@@ -79,7 +80,7 @@ namespace Builder
 	{
 		bool result = true;
 
-		m_acquiredDiagSignals.clear();
+//		m_acquiredDiagSignals.clear();
 
 		QVector<DataSource> dataSources;
 
@@ -92,9 +93,9 @@ namespace Builder
 
 			TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
 
-			quint32 receivingNetmask = settings->appDataReceivingNetmask.toIPv4Address();
+			quint32 receivingNetmask = settings->diagDataReceivingNetmask.toIPv4Address();
 
-			quint32 receivingSubnet = settings->appDataReceivingIP.address32() & receivingNetmask;
+			quint32 receivingSubnet = settings->diagDataReceivingIP.address32() & receivingNetmask;
 
 			for(Hardware::DeviceModule* lm : m_context->m_lmModules)
 			{
@@ -136,9 +137,9 @@ namespace Builder
 					{
 						// Different subnet address in data source IP %1 (%2) and data receiving IP %3 (%4).
 						//
-						m_log->errCFG3043(lan.appDataIP,
+						m_log->errCFG3043(lan.diagDataIP,
 										  lan.equipmentID,
-										  settings->appDataReceivingIP.addressStr(),
+										  settings->diagDataReceivingIP.addressStr(),
 										  equipmentID());
 						result = false;
 						continue;
@@ -146,7 +147,7 @@ namespace Builder
 
 					connectedAdaptersCount++;
 
-					result &= findAppDataSourceAcquiredSignals(ds);	// inside fills m_associatedAppSignals also
+					//result &= findAppDataSourceAcquiredSignals(ds);	// inside fills m_associatedAppSignals also
 
 					dataSources.append(ds);
 				}
@@ -176,5 +177,30 @@ namespace Builder
 		return result;
 	}
 
+	bool DiagDataServiceCfgGenerator::writeDiagSignalTypesXml()
+	{
+		TEST_PTR_RETURN_FALSE(m_context);
+		TEST_PTR_RETURN_FALSE(m_context->m_diagSignalTypes);
 
+		Hardware::DiagSignalTypes dsts;
+
+		m_context->m_diagSignalTypes->get(dsts.mutableDiagSignalTypes());
+
+		QByteArray fileData;
+		XmlWriteHelper xml(&fileData);
+
+		xml.setAutoFormatting(true);
+
+		dsts.writeToXml(xml);
+
+		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(), File::DIAG_SIGNAL_TYPES_XML,
+															CfgFileId::DIAG_SIGNAL_TYPES, "", fileData);
+
+		if (buildFile == nullptr)
+		{
+			return false;
+		}
+
+		return m_cfgXml->addLinkToFile(buildFile);
+	}
 }

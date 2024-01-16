@@ -16,9 +16,19 @@ qt_standard_project_setup()
 set(TARGET DiagDataSrv)
 
 add_executable(${TARGET}
+	../lib/DataSource.cpp
+	../lib/DataSource.h
+	DiagDataReceiver.cpp
+	DiagDataReceiver.h
 	DiagDataService.cpp
 	DiagDataService.h
 	DiagDataServiceMain.cpp
+	DiagDataSource.cpp
+	DiagDataSource.h
+	DynamicDiagSignalState.cpp
+	DynamicDiagSignalState.h
+	SignalStatesProcessingThread.cpp
+	SignalStatesProcessingThread.h
 )
 
 target_precompile_headers(${TARGET} PRIVATE

@@ -10,18 +10,23 @@ namespace Builder
 	class AcquiredDiagSignal
 	{
 	public:
+		// deviceType == Hardware::DeviceType::DiagSignal;
+		//
+		QString equipmentID;
+		int place = -1;
+
+		QString diagSignalTypeID;
 	};
 
-	class AcquiredDiagObject
+	/*class AcquiredDiagObject
 	{
 	public:
 		Hardware::DeviceType deviceType;
-		int place = -1;
 		QString equipmentID;
+		int place = -1;
 
 		AcquiredDiagObject children;		// ordered by place ascending
-	};
-
+	};*/
 
 	class DiagDataServiceCfgGenerator : public SoftwareCfgGenerator
 	{
@@ -37,6 +42,7 @@ namespace Builder
 	private:
 		bool writeRunScriptFile(const QString& profile, const DiagDataServiceSettings& settings, E::OS os);
 
+		bool writeDiagSignalTypesXml();
 		bool writeDiagDataSourcesXml();
 
 	private:

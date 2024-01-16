@@ -25,8 +25,8 @@ int main(int argc, char *argv[])
 	SoftwareInfo si(E::SoftwareType::DiagDataService, "");
 
 	DiagDataServiceWorker diagDataServiceWorker(si,
-												Service::getServiceInstanceName(Manufacturer::DIAGNOSTIC_DATA_SERVICE, argc, argv),
-												argc, argv, logger);
+								Service::getServiceInstanceName(Manufacturer::DIAGNOSTIC_DATA_SERVICE, argc, argv),
+								argc, argv, logger);
 
 	ServiceStarter serviceStarter(app, diagDataServiceWorker, logger);
 

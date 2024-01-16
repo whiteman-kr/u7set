@@ -1,23 +1,23 @@
 #include "../UtilsLib/WUtils.h"
+#include "DiagDataSource.h"
 
-#include "AppDataSource.h"
-#include "RtTrendsServer.h"
 
 // -------------------------------------------------------------------------------
 //
-// AppDataSource class implementation
+// DiagDataSource class implementation
 //
 // -------------------------------------------------------------------------------
 
-AppDataSource::AppDataSource(const DataSource& dataSource) :
-	m_signalStatesQueue(3),
-	m_gatewaySignalStatesQueue(3)
+DiagDataSource::DiagDataSource(const DataSource& dataSource)
+//	:
+//	m_signalStatesQueue(3),
+//	m_gatewaySignalStatesQueue(3)
 {
 	// copy DataSource properties to THIS object
 	//
 	*static_cast<DataSource*>(this) = dataSource;
 
-	m_cachedAppDataUID = appDataUID();
+	m_cachedDiagDataUID = diagDataUID();
 
 	initParsingBuffers(appDataFramesQuantity());
 
@@ -27,90 +27,94 @@ AppDataSource::AppDataSource(const DataSource& dataSource) :
 }
 
 // Contructor for object NOT really used for packet receiving.
-// This object used in SCM for AppDataSource state data displaying only.
+// This object used in SCM for DiagDataSource state data displaying only.
 //
-AppDataSource::AppDataSource(const Network::DataSourceInfo& proto) :
+DiagDataSource::DiagDataSource(const Network::DataSourceInfo& proto)
+/*	:
 	m_signalStatesQueue(3),
-	m_gatewaySignalStatesQueue(3)
+	m_gatewaySignalStatesQueue(3)*/
 {
 	loadFromProto(proto);
 }
 
-AppDataSource::~AppDataSource()
+DiagDataSource::~DiagDataSource()
 {
 }
 
-void AppDataSource::prepare(const AppSignals& appSignals,
-							DynamicAppSignalStates* signalStates,
+void DiagDataSource::prepare(const AppSignals& appSignals,
+							DynamicDiagSignalStates* signalStates,
 							int autoArchivingGroupsCount,
 							CircularLoggerShared timeErrLog)
 {
-	if (signalStates == nullptr)
-	{
-		assert(false);
-		return;
-	}
+	Q_ASSERT(false);			// check!
+	return;
 
-	setTimeErrLog(timeErrLog);
+//	if (signalStates == nullptr)
+//	{
+//		assert(false);
+//		return;
+//	}
 
-	m_autoArchivingGroupsCount = autoArchivingGroupsCount;
+//	setTimeErrLog(timeErrLog);
 
-	const QStringList& sourceAssociatedSignals = associatedSignals(E::LanControllerType::AppData);
+//	m_autoArchivingGroupsCount = autoArchivingGroupsCount;
 
-	m_signalStates.clear();
+//	const QStringList& sourceAssociatedSignals = associatedSignals(E::LanControllerType::AppData);
 
-	for(const QString& signalID : sourceAssociatedSignals)
-	{
-		if (appSignals.containsID(signalID) == false)
-		{
-			assert(false);
-			continue;
-		}
+//	m_signalStates.clear();
 
-		const AppSignal* signal = appSignals.getSignalByID(signalID);
+//	for(const QString& signalID : sourceAssociatedSignals)
+//	{
+//		if (appSignals.containsID(signalID) == false)
+//		{
+//			assert(false);
+//			continue;
+//		}
 
-		TEST_PTR_CONTINUE(signal);
+//		const AppSignal* signal = appSignals.getSignalByID(signalID);
 
-		if (signal->regValueAddr().isValid() == false)
-		{
-			continue;
-		}
+//		TEST_PTR_CONTINUE(signal);
 
-		if (signal->isBus() == true)
-		{
-			continue;
-		}
+//		if (signal->regValueAddr().isValid() == false)
+//		{
+//			continue;
+//		}
 
-		DynamicAppSignalState* dynState = signalStates->getStateByID(signal->appSignalID());
+//		if (signal->isBus() == true)
+//		{
+//			continue;
+//		}
 
-		dynState->setQueues(&m_signalStatesQueue, &m_gatewaySignalStatesQueue);
+//		DynamicAppSignalState* dynState = signalStates->getStateByID(signal->appSignalID());
 
-		TEST_PTR_CONTINUE(dynState);
+//		dynState->setQueues(&m_signalStatesQueue, &m_gatewaySignalStatesQueue);
 
-		m_signalStates.append(dynState);
-	}
+//		TEST_PTR_CONTINUE(dynState);
 
-	m_acquiredSignalsCount = static_cast<int>(m_signalStates.count());
+//		m_signalStates.append(dynState);
+//	}
 
-	int queueSize = std::max(m_acquiredSignalsCount * 3, 200);
+//	m_acquiredSignalsCount = static_cast<int>(m_signalStates.count());
 
-	m_signalStatesQueue.resize(queueSize);
+//	int queueSize = std::max(m_acquiredSignalsCount * 3, 200);
 
-	queueSize = std::max(m_acquiredSignalsCount / 2, 1000);
+//	m_signalStatesQueue.resize(queueSize);
 
-	m_gatewaySignalStatesQueue.resize(queueSize);
+//	queueSize = std::max(m_acquiredSignalsCount / 2, 1000);
+
+//	m_gatewaySignalStatesQueue.resize(queueSize);
 }
 
-void AppDataSource::setStatesProcessingThreadWakeupParams(std::mutex* statesProcessigRequiredMutex,
+void DiagDataSource::setStatesProcessingThreadWakeupParams(std::mutex* statesProcessigRequiredMutex,
 										  std::condition_variable* statesProcessingRequiredCondition,
-										  std::queue<AppDataSource*>* statesProcessingRequired)
+										  std::queue<DiagDataSource*>* statesProcessingRequired)
 {
 	m_statesProcessigRequiredMutex = statesProcessigRequiredMutex;
 	m_statesProcessingRequiredCondition = statesProcessingRequiredCondition;
 	m_statesProcessingRequired = statesProcessingRequired;
 }
 
-bool AppDataSource::getState(Network::AppDataSourceState* proto) const
+bool DiagDataSource::getState(Network::DiagDataSourceState* proto) const
 {
 	TEST_PTR_RETURN_FALSE(proto);
 
@@ -145,7 +149,7 @@ bool AppDataSource::getState(Network::AppDataSourceState* proto) const
 	return true;
 }
 
-void AppDataSource::setState(const Network::AppDataSourceState& proto)
+void DiagDataSource::setState(const Network::DiagDataSourceState& proto)
 {
 	m_id = proto.id();
 	m_dataProcessingEnabled = proto.dataprocessingenabled();
@@ -173,37 +177,38 @@ void AppDataSource::setState(const Network::AppDataSourceState& proto)
 	m_errorPlantTimeFormat = proto.errorplanttimeformat();
 }
 
-bool AppDataSource::getSignalState(SimpleAppSignalStateArchiveFlag* state, const QThread* thread)
-{
-	TEST_PTR_RETURN_FALSE(state);
+//bool DiagDataSource::getSignalState(SimpleAppSignalStateArchiveFlag* state, const QThread* thread)
+//{
+//	TEST_PTR_RETURN_FALSE(state);
 
-	bool result = m_signalStatesQueue.pop(state, thread);
+//	bool result = m_signalStatesQueue.pop(state, thread);
 
-	m_signalStatesQueueCurSize = m_signalStatesQueue.size(thread);
+//	m_signalStatesQueueCurSize = m_signalStatesQueue.size(thread);
 
-	return result;
-}
+//	return result;
+//}
 
-bool AppDataSource::getGatewaySignalState(GatewayAppSignalStateQueueMask* gwState, const QThread* thread)
-{
-	TEST_PTR_RETURN_FALSE(gwState);
+//bool DiagDataSource::getGatewaySignalState(GatewayAppSignalStateQueueMask* gwState, const QThread* thread)
+//{
+//	TEST_PTR_RETURN_FALSE(gwState);
 
-	bool result = m_gatewaySignalStatesQueue.pop(gwState, thread);
+//	bool result = m_gatewaySignalStatesQueue.pop(gwState, thread);
 
-	m_gatewaySignalStatesQueueCurSize = m_gatewaySignalStatesQueue.size(thread);
+//	m_gatewaySignalStatesQueueCurSize = m_gatewaySignalStatesQueue.size(thread);
 
-	return result;
-}
+//	return result;
+//}
 
-void AppDataSource::invalidateSignals(const QThread* thread)
+void DiagDataSource::invalidateSignals(const QThread* thread)
 {
 	int pushedStatesCount = 0;
 
-	for(DynamicAppSignalState* signalState : m_signalStates)
+	for(DynamicDiagSignalState* signalState : m_signalStates)
 	{
 		TEST_PTR_CONTINUE(signalState);
 
-		pushedStatesCount += signalState->setUnavailable(m_rupTimes, m_signalStatesQueue, thread);
+		Q_ASSERT(false);	// check!
+		//pushedStatesCount += signalState->setUnavailable(m_rupTimes, m_signalStatesQueue, thread);
 
 		if (pushedStatesCount >= 20)
 		{
@@ -217,12 +222,14 @@ void AppDataSource::invalidateSignals(const QThread* thread)
 	qDebug() << "Invalidate";
 }
 
-bool AppDataSource::statesQueueIsEmpty(QThread* thread) const
+bool DiagDataSource::statesQueueIsEmpty(QThread* thread) const
 {
-	return m_signalStatesQueue.isEmpty(thread);
+//	return m_signalStatesQueue.isEmpty(thread);
+	Q_ASSERT(false);
+	return true;
 }
 
-bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread)
+bool DiagDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread)
 {
 	if (readBuffer.readyToParsing == false)
 	{
@@ -329,12 +336,14 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 
 	int pushedStatesCtr = 0;
 
-	for(DynamicAppSignalState* signalState : m_signalStates)
+	for(DynamicDiagSignalState* signalState : m_signalStates)
 	{
 		TEST_PTR_CONTINUE(signalState);
 
-		pushedStatesCtr += signalState->setState(m_rupTimes, isSimPacket, packetNo, rupData, rupDataSize,
-												autoArchivingGroup, thread);
+		Q_ASSERT(false);	// check!
+
+//		pushedStatesCtr += signalState->setState(m_rupTimes, isSimPacket, packetNo, rupData, rupDataSize,
+//												autoArchivingGroup, thread);
 
 		if (pushedStatesCtr > 20)
 		{
@@ -348,14 +357,15 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 		wakeupStatesProcessingThread();
 	}
 
-	m_signalStatesQueue.getSizes(&m_signalStatesQueueCurSize, &m_signalStatesQueueCurMaxSize, &m_signalStatesQueueSize, thread);
+	Q_ASSERT(false);	// check!
+//	m_signalStatesQueue.getSizes(&m_signalStatesQueueCurSize, &m_signalStatesQueueCurMaxSize, &m_signalStatesQueueSize, thread);
 
 	readBuffer.prepareToWriting();
 
 	return true;
 }
 
-void AppDataSource::wakeupStatesProcessingThread()
+void DiagDataSource::wakeupStatesProcessingThread()
 {
 	Q_ASSERT(m_statesProcessigRequiredMutex != nullptr);
 	Q_ASSERT(m_statesProcessingRequired != nullptr);
@@ -368,56 +378,58 @@ void AppDataSource::wakeupStatesProcessingThread()
 	Q_UNUSED(lg);
 }
 
-int AppDataSource::getAutoArchivingGroup(qint64 currentSysTime)
+int DiagDataSource::getAutoArchivingGroup(qint64 currentSysTime)
 {
-	if (m_autoArchivingGroupsCount <= 0)
-	{
-		return DynamicAppSignalState::NO_AUTOARCHIVING_GROUP;
-	}
+	Q_ASSERT(false);	// check!
+	return -1;
+//	if (m_autoArchivingGroupsCount <= 0)
+//	{
+//		return DynamicDiagSignalState::NO_AUTOARCHIVING_GROUP;
+//	}
 
-	if (m_lastAutoArchivingTime == 0)
-	{
-		m_lastAutoArchivingTime = (currentSysTime / TIME_1S) * TIME_1S;		// rounds time to seconds
-		m_lastAutoArchivingGroup = 0;
+//	if (m_lastAutoArchivingTime == 0)
+//	{
+//		m_lastAutoArchivingTime = (currentSysTime / TIME_1S) * TIME_1S;		// rounds time to seconds
+//		m_lastAutoArchivingGroup = 0;
 
-		return DynamicAppSignalState::NO_AUTOARCHIVING_GROUP;
-	}
+//		return DynamicAppSignalState::NO_AUTOARCHIVING_GROUP;
+//	}
 
-	if (abs(currentSysTime - m_lastAutoArchivingTime) < TIME_1S)
-	{
-		return DynamicAppSignalState::NO_AUTOARCHIVING_GROUP;
-	}
+//	if (abs(currentSysTime - m_lastAutoArchivingTime) < TIME_1S)
+//	{
+//		return DynamicAppSignalState::NO_AUTOARCHIVING_GROUP;
+//	}
 
-	m_lastAutoArchivingTime = (currentSysTime / TIME_1S) * TIME_1S;		// rounds time to seconds
+//	m_lastAutoArchivingTime = (currentSysTime / TIME_1S) * TIME_1S;		// rounds time to seconds
 
-	int retGroup = m_lastAutoArchivingGroup;
+//	int retGroup = m_lastAutoArchivingGroup;
 
-	m_lastAutoArchivingGroup++;
+//	m_lastAutoArchivingGroup++;
 
-	if (m_lastAutoArchivingGroup >= m_autoArchivingGroupsCount)
-	{
-		m_lastAutoArchivingGroup = 0;
-	}
+//	if (m_lastAutoArchivingGroup >= m_autoArchivingGroupsCount)
+//	{
+//		m_lastAutoArchivingGroup = 0;
+//	}
 
-	return retGroup;
+//	return retGroup;
 }
 
 // -------------------------------------------------------------------------------
 //
-// AppDataSources class implementation
+// DiagDataSources class implementation
 //
 // -------------------------------------------------------------------------------
 
-AppDataSources::AppDataSources()
+DiagDataSources::DiagDataSources()
 {
 }
 
-AppDataSources::~AppDataSources()
+DiagDataSources::~DiagDataSources()
 {
 	clear();
 }
 
-bool AppDataSources::init(const QString& profile,
+bool DiagDataSources::init(const QString& profile,
 						  const QVector<DataSource>& dataSources,
 						  CircularLoggerShared logger)
 {
@@ -434,7 +446,7 @@ bool AppDataSources::init(const QString& profile,
 			continue;
 		}
 
-		AppDataSource* appDataSource = nullptr;
+		DiagDataSource* diagDataSource = nullptr;
 
 		for(const LanControllerInfo& lci : dataSource.lanControllersInfo()())
 		{
@@ -446,7 +458,7 @@ bool AppDataSources::init(const QString& profile,
 
 			if (m_lanControllerToSource.contains(lci.equipmentID) == true)
 			{
-				DEBUG_LOG_ERR(logger, QString("Duplicate AppDataSource adapter EquipmentID %1").
+				DEBUG_LOG_ERR(logger, QString("Duplicate DiagDataSource adapter EquipmentID %1").
 												arg(lci.equipmentID));
 				result = false;
 				continue;
@@ -454,20 +466,20 @@ bool AppDataSources::init(const QString& profile,
 
 			if (m_ipToSource.contains(lci.appDataIP32()) == true)
 			{
-				DEBUG_LOG_ERR(logger, QString("Duplicate AppDataSource IP-address %1").
+				DEBUG_LOG_ERR(logger, QString("Duplicate DiagDataSource IP-address %1").
 											arg(lci.appDataIP));
 				continue;
 			}
 
-			if (appDataSource == nullptr)
+			if (diagDataSource == nullptr)
 			{
-				appDataSource = new AppDataSource(dataSource);
+				diagDataSource = new DiagDataSource(dataSource);
 
-				m_sources.push_back(appDataSource);
+				m_sources.push_back(diagDataSource);
 
-				m_moduleToSource.insert({appDataSource->moduleEquipmentID(), appDataSource});
+				m_moduleToSource.insert({diagDataSource->moduleEquipmentID(), diagDataSource});
 
-				const QStringList& sourceSignals = appDataSource->associatedSignals(E::LanControllerType::AppData);
+				const QStringList& sourceSignals = diagDataSource->associatedSignals(E::LanControllerType::AppData);
 
 				for(const QString& signalID : sourceSignals)
 				{
@@ -475,19 +487,19 @@ bool AppDataSources::init(const QString& profile,
 
 					Q_ASSERT(m_signalToSource.contains(signalHash) == false);
 
-					m_signalToSource.insert({signalHash, appDataSource});
+					m_signalToSource.insert({signalHash, diagDataSource});
 				}
 			}
 
-			m_lanControllerToSource.insert({lci.equipmentID, appDataSource});
-			m_ipToSource.insert({lci.appDataIP32(), appDataSource});
+			m_lanControllerToSource.insert({lci.equipmentID, diagDataSource});
+			m_ipToSource.insert({lci.appDataIP32(), diagDataSource});
 		}
 	}
 
 	return result;
 }
 
-void AppDataSources::clear()
+void DiagDataSources::clear()
 {
 	m_lanControllerToSource.clear();
 	m_ipToSource.clear();
@@ -502,7 +514,7 @@ void AppDataSources::clear()
 	m_sources.clear();
 }
 
-AppDataSource* AppDataSources::getSourceByIP(quint32 ip)
+DiagDataSource* DiagDataSources::getSourceByIP(quint32 ip)
 {
 	auto it = m_ipToSource.find(ip);
 
@@ -514,12 +526,12 @@ AppDataSource* AppDataSources::getSourceByIP(quint32 ip)
 	return it->second;
 }
 
-AppDataSource* AppDataSources::getSignalSource(const QString& signalID)
+DiagDataSource* DiagDataSources::getSignalSource(const QString& signalID)
 {
 	return getSignalSource(calcHash(signalID));
 }
 
-AppDataSource* AppDataSources::getSignalSource(Hash signalHash)
+DiagDataSource* DiagDataSources::getSignalSource(Hash signalHash)
 {
 	auto it = m_signalToSource.find(signalHash);
 
@@ -531,22 +543,22 @@ AppDataSource* AppDataSources::getSignalSource(Hash signalHash)
 	return it->second;
 }
 
-std::vector<AppDataSource*>::iterator AppDataSources::begin()
+std::vector<DiagDataSource*>::iterator DiagDataSources::begin()
 {
 	return m_sources.begin();
 }
 
-std::vector<AppDataSource*>::const_iterator AppDataSources::begin() const
+std::vector<DiagDataSource*>::const_iterator DiagDataSources::begin() const
 {
 	return m_sources.begin();
 }
 
-std::vector<AppDataSource*>::iterator AppDataSources::end()
+std::vector<DiagDataSource*>::iterator DiagDataSources::end()
 {
 	return m_sources.end();
 }
 
-std::vector<AppDataSource*>::const_iterator AppDataSources::end() const
+std::vector<DiagDataSource*>::const_iterator DiagDataSources::end() const
 {
 	return m_sources.end();
 }

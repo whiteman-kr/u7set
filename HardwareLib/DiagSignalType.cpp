@@ -160,6 +160,59 @@ namespace Hardware
 	}
 
 	//
+	// DiagSignalTypes
+	//
+	void DiagSignalTypes::clear()
+	{
+		m_types.clear();
+	}
+
+	std::vector<DiagSignalType>* DiagSignalTypes::mutableDiagSignalTypes()
+	{
+		return &m_types;
+	}
+
+	void DiagSignalTypes::writeToXml(XmlWriteHelper& xml) const
+	{
+		xml.writeStartDocument();
+
+		xml.writeStartElement(XmlElement::DIAG_SIGNAL_TYPES);
+		xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(m_types.size()));
+
+		for(const auto& dst : m_types)
+		{
+			dst.writeToXml(xml);
+		}
+
+		xml.writeEndElement();		//	XmlElement::DIAG_SIGNAL_TYPES
+
+		xml.writeEndDocument();
+	}
+
+	bool DiagSignalTypes::readFromXml(XmlReadHelper& xml)
+	{
+		m_types.clear();
+
+		bool result = true;
+
+		result &= xml.findElement(XmlElement::DIAG_SIGNAL_TYPES);
+
+		RETURN_IF_FALSE(result);
+
+		int count = 0;
+		result &= xml.readIntAttribute(XmlAttribute::COUNT, &count);
+
+		m_types.resize(count);
+
+		for(int i = 0; i < count; i++)
+		{
+			result &= m_types[i].readFromXml(xml);
+		}
+
+		return result;
+	}
+
+	//
 	// DiagSignalType
 	//
 	const char* DiagSignalTypeObject::mimeType = "application/x-radiydiagsignaltype";
@@ -446,6 +499,11 @@ namespace Hardware
 	void DiagSignalTypeObject::setUnits(const QString& value)
 	{
 		m_data.units = value;
+	}
+
+	const DiagSignalType DiagSignalTypeObject::diagSignalType() const
+	{
+		return m_data;
 	}
 
 } // namespace Hardware

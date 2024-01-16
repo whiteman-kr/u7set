@@ -52,6 +52,20 @@ namespace Hardware
 		bool useLimits = false;       // Use adcLimits and valueLimits for analog value.
 	};
 
+	class DiagSignalTypes
+	{
+	public:
+		void clear();
+
+		std::vector<DiagSignalType>* mutableDiagSignalTypes();
+
+		void writeToXml(XmlWriteHelper& xml) const;
+		bool readFromXml(XmlReadHelper& xml);
+
+	private:
+		std::vector<DiagSignalType> m_types;
+	};
+
 
 	//
 	//
@@ -144,6 +158,8 @@ namespace Hardware
 
 		[[nodiscard]] const QString& units() const;
 		void setUnits(const QString& value);
+
+		const DiagSignalType diagSignalType() const;
 
 		// Data
 		//

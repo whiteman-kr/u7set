@@ -272,8 +272,6 @@ public:
 	QHostAddress clientRequestNetmask;
 	E::SecurityLevel securityLevel = E::SecurityLevel::Basic;
 
-	std::vector<Hardware::DiagSignalType> diagSignalTypes;
-
 private:
 	// this methods should be call by SoftwareSettingsSet only
 	//

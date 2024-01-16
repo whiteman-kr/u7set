@@ -391,6 +391,10 @@ namespace CfgFileId
 	inline const QString COMPARATOR_SET("COMPARATOR_SET");
 	inline const QString UNIT_SET("UNIT_SET");
 
+	inline const QString DIAG_DATA_SOURCES("DIAG_DATA_SOURCES");
+	inline const QString DIAG_SIGNAL_TYPES("DIAG_SIGNAL_TYPES");
+	inline const QString ACQUIRED_DIAG_SIGNALS("ACQUIRED_DIAG_SIGNALS");
+
 	inline const QString TUNING_SOURCES("TUNING_SOURCES");
 	inline const QString TUNING_SIGNALS("TUNING_SIGNALS");
 	inline const QString TUNING_SCHEMAS_DETAILS("TUNING_SCHEMAS_DETAILS");
@@ -436,6 +440,7 @@ namespace SoftwareSetting
 
 	inline const QString PROCESSING_THREADS_COUNT("ProcessingThreadsCount");
 	inline const QString OVERRIDE_APP_DATA_RECEIVING_IP("OverrideAppDataReceivingIP");
+	inline const QString OVERRIDE_DIAG_DATA_RECEIVING_IP("OverrideDiagDataReceivingIP");
 
 	inline const QString GATEWAY_DESCRIPTION_FILE("GatewayDescriptionFile");
 	inline const QString LOG_GATEWAY_PACKETS("LogGatewayPackets");
@@ -508,6 +513,8 @@ namespace File
 	inline const QString SOFTWARE_XML("Software.xml");
 	inline const QString SUBSYSTEMS_XML("Subsystems.xml");
 	inline const QString MATSUSERS_XML("MatsUsers.xml");
+
+	inline const QString DIAG_SIGNAL_TYPES_XML("DiagSignalTypes.xml");
 
 	inline const QString METROLOGY_ITEMS_XML("MetrologyItems.xml");
 	inline const QString METROLOGY_SIGNAL_SET("MetrologySignal.set");

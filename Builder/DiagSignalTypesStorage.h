@@ -11,10 +11,10 @@ public:
 public:
 	using DbObjectStorage::get;
 
+	void get(std::vector<Hardware::DiagSignalType>* types) const;
 	std::shared_ptr<Hardware::DiagSignalTypeObject> get(const QString& diagSignalTypeId) const;
 	bool hasSignalTypeId(const QString& diagSignalTypeId) const;
 
-	void getDiagSignalTypes(std::vector<Hardware::DiagSignalType>* types) const;
 	int count() const;
 
 	// --
