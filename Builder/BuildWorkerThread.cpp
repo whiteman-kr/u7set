@@ -955,6 +955,8 @@ namespace Builder
 		{
 			LOG_MESSAGE(m_log, tr("No DiagSignalTypes loaded"));
 		}
+
+		return result;
 	}
 
 	// Check that all files (and from that theirs SchemaIds) in $root$/Schema are unique
