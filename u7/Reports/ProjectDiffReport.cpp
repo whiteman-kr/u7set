@@ -466,7 +466,7 @@ std::vector<Builder::SchemaTypesParams> ProjectDiffGenerator::defaultFileTypePar
 	result.push_back({db->systemFileId(DbDir::TuningSchemasDir), QObject::tr("Tuning Schemas"),	true,
 					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, langscapeMargins, QPageLayout::Unit::Millimeter), layoutNames});
 
-	result.push_back({db->systemFileId(DbDir::DiagnosticsSchemasDir), QObject::tr("Diagnostics Schemas"), true,
+	result.push_back({db->systemFileId(DbDir::DiagSchemasDir), QObject::tr("Diagnostics Schemas"), true,
 					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, langscapeMargins, QPageLayout::Unit::Millimeter), layoutNames});
 
 	result.push_back({db->systemFileId(DbDir::AppLogicDir), QObject::tr("Application Logic"), true,

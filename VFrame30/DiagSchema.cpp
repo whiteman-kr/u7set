@@ -5,10 +5,10 @@ namespace VFrame30
 {
 	DiagSchema::DiagSchema(void)
 	{
-		setUnit(SchemaUnit::Display);
+		setUnit(SchemaUnit::Inch);
 
-		setDocWidth(1000);
-		setDocHeight(750);
+		setDocWidth(420);
+		setDocHeight(297);
 
 		addLayer(std::make_shared<SchemaLayer>(this, "Drawing", true));
 		addLayer(std::make_shared<SchemaLayer>(this, "Notes", false));

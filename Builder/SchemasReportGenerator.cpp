@@ -951,7 +951,7 @@ namespace Builder
 									  QPageLayout::Unit::Millimeter),
 						  layoutNames});
 
-		result.push_back({db->systemFileId(DbDir::DiagnosticsSchemasDir),
+		result.push_back({db->systemFileId(DbDir::DiagSchemasDir),
 						  QObject::tr("Diagnostics Schemas"),
 						  true,
 						  QPageLayout(QPageSize(QPageSize::A3),

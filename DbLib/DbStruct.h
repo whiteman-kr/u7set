@@ -21,7 +21,7 @@ enum class DbDir
 	AppLogicDir,				// $root$/Schemas/ApplicationLogic
 	MonitorSchemasDir,			// $root$/Schemas/Monitor
 	TuningSchemasDir,			// $root$/Schemas/Tuning
-	DiagnosticsSchemasDir,		// $root$/Schemas/Diagnostics
+	DiagSchemasDir,				// $root$/Schemas/Diagnostics
 	HardwareConfigurationDir,	// $root$/HC
 	HardwarePresetsDir,			// $root$/HP
 	ModuleConfigurationDir,		// $root$/MC
@@ -68,7 +68,7 @@ namespace Db
 				{DbDir::AppLogicDir, QStringLiteral("$root$/Schemas/ApplicationLogic")},		// Application Logic Schemas
 				{DbDir::MonitorSchemasDir, QStringLiteral("$root$/Schemas/Monitor")},			// Monitor Video Schemas
 				{DbDir::TuningSchemasDir, QStringLiteral("$root$/Schemas/Tuning")},				// TuningClient Schemas
-				{DbDir::DiagnosticsSchemasDir, QStringLiteral("$root$/Schemas/Diagnostics")},	// Diagnostics Schemas
+				{DbDir::DiagSchemasDir, QStringLiteral("$root$/Schemas/Diagnostics")},			// Diagnostics Schemas
 				{DbDir::HardwareConfigurationDir, QStringLiteral("$root$/HC")},					// Hardware Configuratiun
 				{DbDir::HardwarePresetsDir, QStringLiteral("$root$/HP")},						// Hardware Presets
 				{DbDir::ModuleConfigurationDir, QStringLiteral("$root$/MC")},					// Module Configuration

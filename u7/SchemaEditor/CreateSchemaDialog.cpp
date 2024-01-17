@@ -116,7 +116,20 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 	if (isDiagSchema() == true)
 	{
 		idLabel = "DiagSchemaID";
-		assert(false);	// to do
+
+		tempateParentFileId = db->systemFileId(DbDir::DiagSchemasDir);
+		templateFileExtension = Db::File::DvsTemplExtension;
+
+		if (VFrame30::Settings::regionalUnit() == SchemaUnit::Inch)
+		{
+			units.push_back(inUnits);
+			units.push_back(pxUnits);
+		}
+		else
+		{
+			units.push_back(mmUnits);
+			units.push_back(pxUnits);
+		}
 	}
 
 	assert(tempateParentFileId != -1);
