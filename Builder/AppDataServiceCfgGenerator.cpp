@@ -213,7 +213,9 @@ namespace Builder
 
 		//
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(), File::APP_DATA_SOURCES_XML, CfgFileId::APP_DATA_SOURCES, "", fileData);
+		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(),
+															File::APP_DATA_SOURCES_XML,
+															CfgFileId::APP_DATA_SOURCES, "", fileData);
 
 		if (buildFile == nullptr)
 		{

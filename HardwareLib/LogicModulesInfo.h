@@ -27,13 +27,13 @@ public:
 
 	bool appDataEnable = false;
 	int appDataSizeBytes = 0;
-	quint32 appDataUID = 0;
+	quint32 rupAppDataUID = 0;
 
-	quint64 tuningDataUID = 0;
+//	quint64 tunDataUID = 0;
 
 	bool diagDataEnable = false;
 	int diagDataSizeBytes = 0;
-	quint32 diagDataUID = 0;
+	quint32 rupDiagDataUID = 0;
 
 	LanControllersInfo lanControllers;
 

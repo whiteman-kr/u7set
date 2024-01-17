@@ -4,19 +4,6 @@
 #include "../lib/ConstStrings.h"
 #include <QHostAddress>
 
-
-const char* DeviceHelper::LM_PLATFORM_INTERFACE_CONTROLLER_SUFFUX = "_PI";
-
-void DeviceHelper::init()
-{
-//	assert(m_modulesRawDataDescription.count() == 0);
-}
-
-
-void DeviceHelper::shutdown()
-{
-}
-
 bool DeviceHelper::getIntProperty(const Hardware::DeviceObject* device, const QString& name, qint32* value, Builder::IssueLogger *log)
 {
 	if (device == nullptr ||
@@ -515,7 +502,7 @@ Hardware::DeviceController* DeviceHelper::getPlatformInterfaceController(const H
 		return nullptr;
 	}
 
-	return getChildControllerBySuffix(module, LM_PLATFORM_INTERFACE_CONTROLLER_SUFFUX, log);
+	return getChildControllerBySuffix(module, EquipmentPropNames::LM_PLATFORM_INTERFACE_CONTROLLER_SUFFIX, log);
 }
 
 const Hardware::DeviceModule *DeviceHelper::getModuleOnPlace(const Hardware::DeviceModule* lm, int place)
@@ -754,6 +741,40 @@ QStringList DeviceHelper::getSoftwareControllersIDs(const Hardware::Software* so
 	return controllersIDs;
 }
 
+void DeviceHelper::getChildDiagSignals(std::shared_ptr<const Hardware::DeviceObject> parent,
+									  std::vector<std::shared_ptr<const Hardware::DiagSignal>>* diagSignals)
+{
+	TEST_PTR_RETURN(parent);
+	TEST_PTR_RETURN(diagSignals);
+
+	const std::vector<std::shared_ptr<Hardware::DeviceObject>>& children = parent->children();
+
+	for(const std::shared_ptr<Hardware::DeviceObject>& device : children)
+	{
+		TEST_PTR_CONTINUE(device);
+
+		if (device->deviceType() == Hardware::DeviceType::DiagSignal)
+		{
+			std::shared_ptr<const Hardware::DiagSignal> diagSignal = device->toDiagSignal();
+
+			if (diagSignal == nullptr)
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			diagSignals->push_back(diagSignal);
+			continue;
+		}
+
+		if (device->deviceType() == Hardware::DeviceType::AppSignal)
+		{
+			continue;
+		}
+
+		getChildDiagSignals(device, diagSignals);
+	}
+}
 
 bool DeviceHelper::isTwoChannelSoftware(const Hardware::DeviceObject* swObject, QStringList* channelsCntrollersIds)
 {

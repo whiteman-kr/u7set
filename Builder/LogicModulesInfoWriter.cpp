@@ -139,12 +139,12 @@ bool LogicModulesInfoWriter::fill(const Hardware::DeviceModule* lmModule, LogicM
 
 			lmInfo->appDataSizeBytes = lci.appDataSizeBytes;
 
-			if (lmInfo->appDataUID != 0)
+			if (lmInfo->rupAppDataUID != 0)
 			{
-				Q_ASSERT(lmInfo->appDataUID == lci.appDataUID);
+				Q_ASSERT(lmInfo->rupAppDataUID == lci.rupAppDataUID);
 			}
 
-			lmInfo->appDataUID = lci.appDataUID;
+			lmInfo->rupAppDataUID = lci.rupAppDataUID;
 		}
 
 		if (lci.isDiagDataEnabled() == true)
@@ -158,12 +158,12 @@ bool LogicModulesInfoWriter::fill(const Hardware::DeviceModule* lmModule, LogicM
 
 			lmInfo->diagDataSizeBytes = lci.diagDataSizeBytes;
 
-			if (lmInfo->diagDataUID != 0)
+			if (lmInfo->rupDiagDataUID != 0)
 			{
-				Q_ASSERT(lmInfo->diagDataUID == lci.diagDataUID);
+				Q_ASSERT(lmInfo->rupDiagDataUID == lci.rupDiagDataUID);
 			}
 
-			lmInfo->diagDataUID = lci.diagDataUID;
+			lmInfo->rupDiagDataUID = lci.rupDiagDataUID;
 		}
 	}
 
@@ -186,11 +186,11 @@ bool LogicModulesInfoWriter::save(const LogicModuleInfo& lmInfo, XmlWriteHelper&
 
 	xml.writeBoolAttribute(EquipmentPropNames::APP_DATA_ENABLE, lmInfo.appDataEnable);
 	xml.writeIntAttribute(EquipmentPropNames::APP_DATA_SIZE_BYTES, lmInfo.appDataSizeBytes);
-	xml.writeUInt32Attribute(EquipmentPropNames::APP_DATA_UID, lmInfo.appDataUID, true);
+	xml.writeUInt32Attribute(EquipmentPropNames::RUP_APP_DATA_UID, lmInfo.rupAppDataUID, true);
 
 	xml.writeBoolAttribute(EquipmentPropNames::DIAG_DATA_ENABLE, lmInfo.diagDataEnable);
 	xml.writeIntAttribute(EquipmentPropNames::DIAG_DATA_SIZE_BYTES, lmInfo.diagDataSizeBytes);
-	xml.writeUInt32Attribute(EquipmentPropNames::DIAG_DATA_UID, lmInfo.diagDataUID, true);
+	xml.writeUInt32Attribute(EquipmentPropNames::RUP_DIAG_DATA_UID, lmInfo.rupDiagDataUID, true);
 
 	xml.writeStringAttribute(EquipmentPropNames::MODULE_FAMILY, lmInfo.moduleFamily);
 	xml.writeIntAttribute(EquipmentPropNames::MODULE_FAMILY_ID, lmInfo.moduleFamilyID, true);

@@ -1372,7 +1372,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Several ethernet adapters of LM %1 are connected to same AppDataService %2.
+	/// Title: Several ethernet adapters of LM %1 are connected to AppDataService %2.
 	///
 	/// Parameters:
 	///			%1 LM equipmentID
@@ -1385,7 +1385,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3030,
-				  tr("Several ethernet adapters of LM %1 are connected to same AppDataService %2.").
+				  tr("Several ethernet adapters of LM %1 are connected to AppDataService %2.").
 						arg(lmID).arg(appDataServiceID));
 	}
 
@@ -1702,6 +1702,27 @@ namespace Builder
 					3052,
 					QString(tr("Gateway description parsing warning: %1")).
 								arg(gwParserWarning));
+	}
+
+	/// IssueCode: CFG3053
+	///
+	/// IssueType: Error
+	///
+	/// Title: Several ethernet adapters of LM %1 are connected to DiagDataService %2.
+	///
+	/// Parameters:
+	///			%1 LM equipmentID
+	///         %2 DiagDataService equipmentID
+	///
+	/// Description:
+	///			Two LM's ethernet adapters can't be connected to same DiagDataService. Check LM's ethernet adapters settings.
+	///
+	void IssueLogger::errCFG3053(QString lmID, QString diagDataServiceID)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3053,
+				  tr("Several ethernet adapters of LM %1 are connected to DiagDataService %2.").
+						arg(lmID).arg(diagDataServiceID));
 	}
 
 	/// IssueCode: CFG3060

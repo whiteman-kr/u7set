@@ -68,7 +68,7 @@ DialogAppDataSourceInfo::DialogAppDataSourceInfo(const ClientLib::AdsSourceState
 		createDataItem(infoItem, "LmModuleType");
 		createDataItem(infoItem, "LmAdapterID");
 		createDataItem(infoItem, "LmDataEnable");
-		createDataItem(infoItem, "LmDataID");
+		createDataItem(infoItem, "RupAppDataUID");
 		createDataItem(infoItem, "ReceivesData");
 
 		m_treeWidget->addTopLevelItem(infoItem);
@@ -181,9 +181,9 @@ void DialogAppDataSourceInfo::updateData()
 	setDataItemText("LmModuleType", tr("%1 (%2h)").arg(QString::number(adsState->info.moduletype())).arg(QString::number(adsState->info.moduletype(), 16)));
 	setDataItemText("LmAdapterID", QString::fromStdString(adsState->info.lancontrollerinfo()[0].equipmentid()));
 	setDataItemNumber("LmDataEnable", adsState->info.lancontrollerinfo()[0].appdataenable());
-	setDataItemText("LmDataID", tr("%1 (%2h)").
-						arg(QString::number(adsState->info.lancontrollerinfo()[0].appdatauid())).
-						arg(QString::number(adsState->info.lancontrollerinfo()[0].appdatauid(), 16)));
+	setDataItemText("RupAppDataUID", tr("%1 (%2h)").
+						arg(QString::number(adsState->info.lancontrollerinfo()[0].rupappdatauid())).
+						arg(QString::number(adsState->info.lancontrollerinfo()[0].rupappdatauid(), 16)));
 	setDataItemNumber("AcquiredSignalsCount", adsState->info.acquiredsignalscount());
 
 	{

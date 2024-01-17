@@ -38,7 +38,7 @@ namespace Builder
 		do
 		{
 			if (writeDiagSignalTypesXml() == false) break;
-//			if (writeDiagDataSourcesXml() == false) break;
+			if (writeDiagDataSourcesXml() == false) break;
 //			if (writeAppSignalsXml() == false) break;				// AppSignals.xml for AZPZ
 //			if (writeAppSignalsExtXml() == false) break;			// AppSignalsExt.xml as extra debug info
 //			if (writeAcquiredAppSignalsFile() == false) break;
@@ -126,14 +126,14 @@ namespace Builder
 
 					if (connectedAdaptersCount > 0)
 					{
-						// Several ethernet adapters of LM %1 are connected to same AppDataService %2.
+						// Several ethernet adapters of LM %1 are connected to DiagDataService %2.
 						//
-						m_log->errCFG3030(lm->equipmentIdTemplate(), m_software->equipmentIdTemplate());
+						m_log->errCFG3053(lm->equipmentIdTemplate(), m_software->equipmentIdTemplate());
 						result = false;
 						continue;
 					}
 
-					if ((QHostAddress(lan.appDataIP).toIPv4Address() & receivingNetmask) != receivingSubnet)
+					if ((QHostAddress(lan.diagDataIP).toIPv4Address() & receivingNetmask) != receivingSubnet)
 					{
 						// Different subnet address in data source IP %1 (%2) and data receiving IP %3 (%4).
 						//
@@ -165,7 +165,9 @@ namespace Builder
 
 		//
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(), File::APP_DATA_SOURCES_XML, CfgFileId::APP_DATA_SOURCES, "", fileData);
+		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(),
+															File::DIAG_DATA_SOURCES_XML,
+															CfgFileId::DIAG_DATA_SOURCES, "", fileData);
 
 		if (buildFile == nullptr)
 		{

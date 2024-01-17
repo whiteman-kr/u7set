@@ -112,7 +112,7 @@ namespace Sim
 
 					adspi.equipmentID = lci.equipmentID;
 
-					adspi.appDataUID = lmi.appDataUID;
+					adspi.appDataUID = lmi.rupAppDataUID;
 					adspi.appDataSizeBytes = lmi.appDataSizeBytes;
 
 					adspi.moduleType = lmi.moduleType();

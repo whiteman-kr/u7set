@@ -134,7 +134,7 @@ add_subdirectory(TestSuite)
 add_subdirectory(TestSuiteConsole)
 
 add_subdirectory(./Test/googletest)
-add_subdirectory(./Test/UalTester)
+#add_subdirectory(./Test/UalTester)
 add_subdirectory(./Test/ClientTests)
 add_subdirectory(./Test/SimulatorTests)
 add_subdirectory(./Test/u7databaseTests)

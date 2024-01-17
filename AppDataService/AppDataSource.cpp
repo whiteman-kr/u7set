@@ -17,7 +17,7 @@ AppDataSource::AppDataSource(const DataSource& dataSource) :
 	//
 	*static_cast<DataSource*>(this) = dataSource;
 
-	m_cachedAppDataUID = appDataUID();
+	m_cachedAppDataUID = rupAppDataUID();
 
 	initParsingBuffers(appDataFramesQuantity());
 

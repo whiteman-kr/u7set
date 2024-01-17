@@ -109,8 +109,8 @@ void LanControllerInfo::writeToXml(XmlWriteHelper& xml) const
 		xml.writeStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_NETMASK, appDataServiceNetmask);
 
 		xml.writeIntAttribute(EquipmentPropNames::APP_DATA_SIZE_BYTES, appDataSizeBytes);
-		xml.writeUInt32Attribute(EquipmentPropNames::APP_DATA_UID, appDataUID, false);
-		xml.writeUInt32Attribute(EquipmentPropNames::HEX_APP_DATA_UID, appDataUID, true);
+		xml.writeUInt32Attribute(EquipmentPropNames::RUP_APP_DATA_UID, rupAppDataUID, false);
+		xml.writeUInt32Attribute(EquipmentPropNames::HEX_RUP_APP_DATA_UID, rupAppDataUID, true);
 		xml.writeIntAttribute(EquipmentPropNames::APP_DATA_FRAMES_QUANTITY, appDataFramesQuantity);
 		xml.writeIntAttribute(EquipmentPropNames::OVERRIDE_APP_DATA_WORD_COUNT, overrideAppDataWordCount);
 	}
@@ -131,8 +131,11 @@ void LanControllerInfo::writeToXml(XmlWriteHelper& xml) const
 		xml.writeIntAttribute(EquipmentPropNames::TUNING_SERVICE_PORT, tuningServicePort);
 		xml.writeStringAttribute(EquipmentPropNames::TUNING_SERVICE_NETMASK, tuningServiceNetmask);
 
-		xml.writeUInt64Attribute(EquipmentPropNames::TUNING_DATA_UID, tuningDataUID);
-		xml.writeUInt64Attribute(EquipmentPropNames::HEX_TUNING_DATA_UID, tuningDataUID, true);
+		xml.writeUInt32Attribute(EquipmentPropNames::RUP_TUNING_DATA_UID, rupTuningDataUID, false);
+		xml.writeUInt32Attribute(EquipmentPropNames::HEX_RUP_TUNING_DATA_UID, rupTuningDataUID, true);
+
+		xml.writeUInt64Attribute(EquipmentPropNames::FOTIP_TUNING_DATA_UID, fotipTuningDataUID);
+		xml.writeUInt64Attribute(EquipmentPropNames::HEX_FOTIP_TUNING_DATA_UID, fotipTuningDataUID, true);
 	}
 
 	xml.writeEndElement();	//	/XmlElement::TUNING_PARAMS
@@ -152,8 +155,8 @@ void LanControllerInfo::writeToXml(XmlWriteHelper& xml) const
 		xml.writeStringAttribute(EquipmentPropNames::DIAG_DATA_SERVICE_NETMASK, diagDataServiceNetmask);
 
 		xml.writeIntAttribute(EquipmentPropNames::DIAG_DATA_SIZE_BYTES, diagDataSizeBytes);
-		xml.writeUInt32Attribute(EquipmentPropNames::DIAG_DATA_UID, diagDataUID, false);
-		xml.writeUInt32Attribute(EquipmentPropNames::HEX_DIAG_DATA_UID, diagDataUID, true);
+		xml.writeUInt32Attribute(EquipmentPropNames::RUP_DIAG_DATA_UID, rupDiagDataUID, false);
+		xml.writeUInt32Attribute(EquipmentPropNames::HEX_RUP_DIAG_DATA_UID, rupDiagDataUID, true);
 		xml.writeIntAttribute(EquipmentPropNames::DIAG_DATA_FRAMES_QUANTITY, diagDataFramesQuantity);
 		xml.writeIntAttribute(EquipmentPropNames::OVERRIDE_DIAG_DATA_WORD_COUNT, overrideDiagDataWordCount);
 	}
@@ -196,7 +199,7 @@ bool LanControllerInfo::readFromXml(XmlReadHelper& xml)
 		result &= xml.readStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_NETMASK, &appDataServiceNetmask);
 
 		result &= xml.readIntAttribute(EquipmentPropNames::APP_DATA_SIZE_BYTES, &appDataSizeBytes);
-		result &= xml.readUInt32Attribute(EquipmentPropNames::APP_DATA_UID, &appDataUID);
+		result &= xml.readUInt32Attribute(EquipmentPropNames::RUP_APP_DATA_UID, &rupAppDataUID);
 		result &= xml.readIntAttribute(EquipmentPropNames::APP_DATA_FRAMES_QUANTITY, &appDataFramesQuantity);
 		result &= xml.readIntAttribute(EquipmentPropNames::OVERRIDE_APP_DATA_WORD_COUNT, &overrideAppDataWordCount);
 
@@ -220,7 +223,8 @@ bool LanControllerInfo::readFromXml(XmlReadHelper& xml)
 		result &= xml.readIntAttribute(EquipmentPropNames::TUNING_SERVICE_PORT, &tuningServicePort);
 		result &= xml.readStringAttribute(EquipmentPropNames::TUNING_SERVICE_NETMASK, &tuningServiceNetmask);
 
-		result &= xml.readUInt64Attribute(EquipmentPropNames::TUNING_DATA_UID, &tuningDataUID);
+		result &= xml.readUInt32Attribute(EquipmentPropNames::RUP_TUNING_DATA_UID, &rupTuningDataUID);
+		result &= xml.readUInt64Attribute(EquipmentPropNames::FOTIP_TUNING_DATA_UID, &fotipTuningDataUID);
 
 		RETURN_IF_FALSE(result);
 	}
@@ -243,7 +247,7 @@ bool LanControllerInfo::readFromXml(XmlReadHelper& xml)
 		result &= xml.readStringAttribute(EquipmentPropNames::DIAG_DATA_SERVICE_NETMASK, &diagDataServiceNetmask);
 
 		result &= xml.readIntAttribute(EquipmentPropNames::DIAG_DATA_SIZE_BYTES, &diagDataSizeBytes);
-		result &= xml.readUInt32Attribute(EquipmentPropNames::DIAG_DATA_UID, &diagDataUID);
+		result &= xml.readUInt32Attribute(EquipmentPropNames::RUP_DIAG_DATA_UID, &rupDiagDataUID);
 		result &= xml.readIntAttribute(EquipmentPropNames::DIAG_DATA_FRAMES_QUANTITY, &diagDataFramesQuantity);
 		result &= xml.readIntAttribute(EquipmentPropNames::OVERRIDE_DIAG_DATA_WORD_COUNT, &overrideDiagDataWordCount);
 	}
@@ -304,7 +308,7 @@ bool LanControllerInfo::readFromXml(const QDomNode& lanControllerNode, QString* 
 		result &= DomXmlHelper::getStringAttribute(appDataElem, EquipmentPropNames::APP_DATA_SERVICE_NETMASK, &appDataServiceNetmask, errMsg);
 
 		result &= DomXmlHelper::getIntAttribute(appDataElem, EquipmentPropNames::APP_DATA_SIZE_BYTES, &appDataSizeBytes, errMsg);
-		result &= DomXmlHelper::getUInt32Attribute(appDataElem, EquipmentPropNames::APP_DATA_UID, &appDataUID, errMsg);
+		result &= DomXmlHelper::getUInt32Attribute(appDataElem, EquipmentPropNames::RUP_APP_DATA_UID, &rupAppDataUID, errMsg);
 		result &= DomXmlHelper::getIntAttribute(appDataElem, EquipmentPropNames::APP_DATA_FRAMES_QUANTITY, &appDataFramesQuantity, errMsg);
 		result &= DomXmlHelper::getIntAttribute(appDataElem, EquipmentPropNames::OVERRIDE_APP_DATA_WORD_COUNT, &overrideAppDataWordCount, errMsg);
 
@@ -329,7 +333,8 @@ bool LanControllerInfo::readFromXml(const QDomNode& lanControllerNode, QString* 
 		result &= DomXmlHelper::getIntAttribute(tuningElem, EquipmentPropNames::TUNING_SERVICE_PORT, &tuningServicePort, errMsg);
 		result &= DomXmlHelper::getStringAttribute(tuningElem, EquipmentPropNames::TUNING_SERVICE_NETMASK, &tuningServiceNetmask, errMsg);
 
-		result &= DomXmlHelper::getUInt64Attribute(tuningElem, EquipmentPropNames::TUNING_DATA_UID, &tuningDataUID, errMsg);
+		result &= DomXmlHelper::getUInt32Attribute(tuningElem, EquipmentPropNames::RUP_TUNING_DATA_UID, &rupTuningDataUID, errMsg);
+		result &= DomXmlHelper::getUInt64Attribute(tuningElem, EquipmentPropNames::FOTIP_TUNING_DATA_UID, &fotipTuningDataUID, errMsg);
 
 		RETURN_IF_FALSE(result);
 	}
@@ -353,7 +358,7 @@ bool LanControllerInfo::readFromXml(const QDomNode& lanControllerNode, QString* 
 		result &= DomXmlHelper::getStringAttribute(diagDataElem, EquipmentPropNames::DIAG_DATA_SERVICE_NETMASK, &diagDataServiceNetmask, errMsg);
 
 		result &= DomXmlHelper::getIntAttribute(diagDataElem, EquipmentPropNames::DIAG_DATA_SIZE_BYTES, &diagDataSizeBytes, errMsg);
-		result &= DomXmlHelper::getUInt32Attribute(diagDataElem, EquipmentPropNames::DIAG_DATA_UID, &diagDataUID, errMsg);
+		result &= DomXmlHelper::getUInt32Attribute(diagDataElem, EquipmentPropNames::RUP_DIAG_DATA_UID, &rupDiagDataUID, errMsg);
 		result &= DomXmlHelper::getIntAttribute(diagDataElem, EquipmentPropNames::DIAG_DATA_FRAMES_QUANTITY, &diagDataFramesQuantity, errMsg);
 		result &= DomXmlHelper::getIntAttribute(diagDataElem, EquipmentPropNames::OVERRIDE_DIAG_DATA_WORD_COUNT, &overrideDiagDataWordCount, errMsg);
 
@@ -380,7 +385,8 @@ void LanControllerInfo::saveToProto(Network::LanControllerInfo* proto) const
 	proto->set_tuningserviceip(tuningServiceIP.toStdString());
 	proto->set_tuningserviceport(tuningServicePort);
 	proto->set_tuningservicenetmask(tuningServiceNetmask.toStdString());
-	proto->set_tuningdatauid(tuningDataUID);
+	proto->set_ruptuningdatauid(rupTuningDataUID);
+	proto->set_fotiptuningdatauid(fotipTuningDataUID);
 
 	//
 
@@ -391,7 +397,7 @@ void LanControllerInfo::saveToProto(Network::LanControllerInfo* proto) const
 	proto->set_appdataserviceip(appDataServiceIP.toStdString());
 	proto->set_appdataserviceport(appDataServicePort);
 	proto->set_appdataservicenetmask(appDataServiceNetmask.toStdString());
-	proto->set_appdatauid(appDataUID);
+	proto->set_rupappdatauid(rupAppDataUID);
 	proto->set_appdatasizebytes(appDataSizeBytes);
 	proto->set_appdataframesquantity(appDataFramesQuantity);
 	proto->set_overrideappdatawordcount(overrideAppDataWordCount);
@@ -405,8 +411,7 @@ void LanControllerInfo::saveToProto(Network::LanControllerInfo* proto) const
 	proto->set_diagdataserviceip(diagDataServiceIP.toStdString());
 	proto->set_diagdataserviceport(diagDataServicePort);
 	proto->set_diagdataservicenetmask(diagDataServiceNetmask.toStdString());
-
-	proto->set_diagdatauid(diagDataUID);
+	proto->set_rupdiagdatauid(rupDiagDataUID);
 	proto->set_diagdatasizebytes(diagDataSizeBytes);
 	proto->set_diagdataframesquantity(diagDataFramesQuantity);
 	proto->set_overridediagdatawordcount(overrideDiagDataWordCount);
@@ -427,7 +432,8 @@ void LanControllerInfo::loadFromProto(const Network::LanControllerInfo& proto)
 	tuningServiceIP = QString::fromStdString(proto.tuningserviceip());
 	tuningServicePort = proto.tuningserviceport();
 	tuningServiceNetmask = QString::fromStdString(proto.tuningservicenetmask());
-	tuningDataUID = proto.tuningdatauid();
+	rupTuningDataUID = proto.ruptuningdatauid();
+	fotipTuningDataUID = proto.fotiptuningdatauid();
 
 	//
 
@@ -438,7 +444,7 @@ void LanControllerInfo::loadFromProto(const Network::LanControllerInfo& proto)
 	appDataServiceIP = QString::fromStdString(proto.appdataserviceip());
 	appDataServicePort = proto.appdataserviceport();
 	appDataServiceNetmask = QString::fromStdString(proto.appdataservicenetmask());
-	appDataUID = proto.appdatauid();
+	rupAppDataUID = proto.rupappdatauid();
 	appDataSizeBytes = proto.appdatasizebytes();
 	appDataFramesQuantity = proto.appdataframesquantity();
 	overrideAppDataWordCount = proto.overrideappdatawordcount();
@@ -452,7 +458,7 @@ void LanControllerInfo::loadFromProto(const Network::LanControllerInfo& proto)
 	diagDataServiceIP = QString::fromStdString(proto.diagdataserviceip());
 	diagDataServicePort = proto.diagdataserviceport();
 	diagDataServiceNetmask = QString::fromStdString(proto.diagdataservicenetmask());
-	diagDataUID = proto.diagdatauid();
+	rupDiagDataUID = proto.rupdiagdatauid();
 	diagDataSizeBytes = proto.diagdatasizebytes();
 	diagDataFramesQuantity = proto.diagdataframesquantity();
 	overrideDiagDataWordCount = proto.overridediagdatawordcount();

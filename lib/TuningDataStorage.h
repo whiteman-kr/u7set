@@ -42,8 +42,10 @@ namespace Tuning
 		virtual void buildTuningData();
 		virtual void getTuningData(QByteArray* tuningData) const;
 
-		quint64 generateUniqueID(const QString& lmEquipmentID);
-		quint64 uniqueID() const { return m_uniqueID; }
+		void calcTuningDataUID(const QString& lmEquipmentID);
+
+		quint32 rupTuningDataUID() const { return m_rupTuningDataUID; }
+		quint64 fotipTuningDataUID() const { return m_fotipTuningDataUID; }
 
 		int tuningFlashFrameCount() const { return m_tuningFlashFrameCount; }
 		int tuningFlashFramePayloadB() const { return m_tuningFlashFramePayloadB; }
@@ -92,6 +94,8 @@ namespace Tuning
 		void writeBigEndianUint32Bit(quint8* dataPtr, int bitNo, quint32 bitValue);
 		void sortSignalsByAcquiredProperty(QVector<AppSignal *>& tuningSignals);
 		void sortByAppSignalID(QVector<AppSignal *>& signalList);
+		int signalValueSizeBits(int type);
+		int getSignalType(const AppSignal* signal);
 
 	protected:
 		QString m_lmEquipmentID;
@@ -114,7 +118,9 @@ namespace Tuning
 
 		//
 
-		quint64 m_uniqueID = 0;
+		quint32 m_rupTuningDataUID = 0;			// 32-bit UID placed in RUP frame header (like a AppDataUID and DiagDataUID)
+		quint64 m_fotipTuningDataUID = 0;		// 64-bit UID placed in FOTIP frame header
+
 		int m_tuningDataUsedFramesCount = 0;
 
 		static const int TRIPLE_FRAMES = 3;
@@ -133,38 +139,16 @@ namespace Tuning
 
 		bool m_deleteSignals = false;
 
-		// XML serialization string constants
-		//
-		static const char* TUNING_DATA_ELEMENT;
-		static const char* LM_ID;
-		static const char* UNIQUE_ID;
-
-		static const char* TUNING_FLASH;
-		static const char* TUNING_FLASH_FRAME_COUNT;
-		static const char* TUNING_FLASH_FRAME_PAYLOAD_B;
-		static const char* TUNING_FLASH_FRAME_SIZE_B;
-
-		static const char* TUNING_DATA;
-		static const char* TUNING_DATA_OFFSET_W;
-		static const char* TUNING_DATA_SIZE_W;
-		static const char* TUNING_DATA_FRAME_COUNT;
-		static const char* TUNING_DATA_FRAME_PAYLOAD_W;
-		static const char* TUNING_DATA_FRAME_SIZE_W;
-		static const char* TUNING_DATA_USED_FRAMES_COUNT;
-
-		static const char* TUNING_ALL_SIGNALS_COUNT;
-		static const char* TUNING_ANALOG_FLOAT_SIGNALS;
-		static const char* TUNING_ANALOG_INT32_SIGNALS;
-		static const char* TUNING_DISCRETE_SIGNALS;
-		static const char* TUNING_SIGNALS_COUNT;
-
-		int signalValueSizeBits(int type);
-		int getSignalType(const AppSignal* signal);
+		inline static const std::vector<QString> m_signalTypeXmlElement =
+		{
+			XmlElement::ANALOG_FLOAT_SIGNALS,
+			XmlElement::ANALOG_INT32_SIGNALS,
+			XmlElement::DISCRETE_SIGNALS
+		};
 	};
 
-	typedef std::shared_ptr<TuningData> TuningDataShared;
-	typedef std::shared_ptr<const TuningData> TuningDataSharedConst;
-
+	using TuningDataShared = std::shared_ptr<TuningData>;
+	using TuningDataSharedConst = std::shared_ptr<const TuningData>;
 
 	// -------------------------------------------------------------------------------------
 	//

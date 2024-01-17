@@ -14,8 +14,10 @@ namespace EquipmentPropNames
 	inline const QString TUNING_SERVICE_IP("TuningServiceIP");
 	inline const QString TUNING_SERVICE_PORT("TuningServicePort");
 	inline const QString TUNING_SERVICE_NETMASK("TuningServiceNetmask");
-	inline const QString TUNING_DATA_UID("TuningDataUID");
-	inline const QString HEX_TUNING_DATA_UID("HexTuningDataUID");
+	inline const QString RUP_TUNING_DATA_UID("RupTuningDataUID");
+	inline const QString HEX_RUP_TUNING_DATA_UID("HexRupTuningDataUID");
+	inline const QString FOTIP_TUNING_DATA_UID("FotipTuningDataUID");
+	inline const QString HEX_FOTIP_TUNING_DATA_UID("HexFotipTuningDataUID");
 	inline const QString TUNING_SOURCE_EQUIPMENT_ID("TuningSourceEquipmentID");
 
 	inline const QString APP_DATA_ENABLE("AppDataEnable");
@@ -27,8 +29,8 @@ namespace EquipmentPropNames
 	inline const QString APP_DATA_SERVICE_PORT("AppDataServicePort");
 	inline const QString APP_DATA_SERVICE_NETMASK("AppDataServiceNetmask");
 	inline const QString APP_DATA_SIZE_BYTES("AppDataSizeBytes");
-	inline const QString APP_DATA_UID("AppDataUID");
-	inline const QString HEX_APP_DATA_UID("HexAppDataUID");
+	inline const QString RUP_APP_DATA_UID("RupAppDataUID");
+	inline const QString HEX_RUP_APP_DATA_UID("HexRupAppDataUID");
 	inline const QString APP_DATA_FRAMES_QUANTITY("AppDataFramesQuantity");
 	inline const QString OVERRIDE_APP_DATA_WORD_COUNT("OverrideAppDataWordCount");
 
@@ -40,18 +42,20 @@ namespace EquipmentPropNames
 	inline const QString DIAG_DATA_SERVICE_PORT("DiagDataServicePort");
 	inline const QString DIAG_DATA_SERVICE_NETMASK("DiagDataServiceNetmask");
 	inline const QString DIAG_DATA_SIZE_BYTES("DiagDataSizeBytes");
-	inline const QString DIAG_DATA_UID("DiagDataUID");
-	inline const QString HEX_DIAG_DATA_UID("HexDiagDataUID");
+	inline const QString RUP_DIAG_DATA_UID("RupDiagDataUID");
+	inline const QString HEX_RUP_DIAG_DATA_UID("HexRupDiagDataUID");
 	inline const QString DIAG_DATA_FRAMES_QUANTITY("DiagDataFramesQuantity");
 	inline const QString OVERRIDE_DIAG_DATA_WORD_COUNT("OverrideDiagDataWordCount");
 
 	// LM properties
 	//
-	inline const QString LM_APP_LAN_DATA_UID("AppLANDataUID");
-	inline const QString LM_APP_LAN_DATA_SIZE("AppLANDataSize");
+	inline const QString APP_LAN_DATA_UID("AppLANDataUID");
+	inline const QString APP_LAN_DATA_SIZE("AppLANDataSize");
 
-	inline const QString LM_DIAG_LAN_DATA_UID("DiagLANDataUID");
-	inline const QString LM_DIAG_LAN_DATA_SIZE("DiagLANDataSize");
+	inline const QString DIAG_LAN_DATA_UID("DiagLANDataUID");
+	inline const QString DIAG_LAN_DATA_SIZE("DiagLANDataSize");
+
+	inline const QString TUNING_LAN_DATA_UID("TuningLANDataUID");
 
 	inline const QString EQUIPMENT_ID("EquipmentID");
 	inline const QString CAPTION("Caption");
@@ -70,6 +74,20 @@ namespace EquipmentPropNames
 
 	inline const QString PRESET_NAME("PresetName");
 	inline const QString LM_DESCRIPTION_FILE("LmDescriptionFile");
+
+	inline const QString LM_PLATFORM_INTERFACE_CONTROLLER_SUFFIX = "_PI";
+
+	// I/O Modules properties
+	//
+	inline const QString TX_DATA_SIZE("TxDataSize");
+	inline const QString TX_DIAG_DATA_OFFSET("TxDiagDataOffset");
+	inline const QString TX_DIAG_DATA_SIZE("TxDiagDataSize");
+	inline const QString TX_APP_DATA_OFFSET("TxAppDataOffset");
+	inline const QString TX_APP_DATA_SIZE("TxAppDataSize");
+
+	inline const QString RX_DATA_SIZE("RxDataSize");
+	inline const QString RX_APP_DATA_OFFSET("RxAppDataOffset");
+	inline const QString RX_APP_DATA_SIZE("RxAppDataSize");
 
 	// CfgService properties
 	//
@@ -264,6 +282,13 @@ namespace XmlElement
 
 	inline const QString DIAG_SIGNAL_TYPE("DiagSignalType");
 	inline const QString DIAG_SIGNAL_TYPES("DiagSignalTypes");
+
+	inline const QString TUNING_DATA("TuningData");
+	inline const QString TUNING_FLASH_MEMORY("TuningFlashMemory");
+	inline const QString TUNING_DATA_MEMORY("TuningDataMemory");
+	inline const QString ANALOG_FLOAT_SIGNALS("AnalogFloatSignals");
+	inline const QString ANALOG_INT32_SIGNALS("AnalogInt32Signals");
+	inline const QString DISCRETE_SIGNALS("DiscreteSignals");
 }
 
 namespace XmlAttribute
@@ -284,6 +309,7 @@ namespace XmlAttribute
 	inline const QString DATA_SIZE("DataSize");
 	inline const QString SOFTWARE_CONTROLLERS("SoftwareControllers");
 	inline const QString WORKSTATION_EQUIPMENT_ID("WorkstationEquipmentID");
+	inline const QString LM_EQUIPMENT_ID("LmEquipmentID");
 
 	inline const QString DATA_ID("DataID");
 	inline const QString HEX_DATA_ID("HexDataID");
@@ -370,6 +396,18 @@ namespace XmlAttribute
 	inline const QString DESCRIPTION("Description");
 	inline const QString APP_SIGNAL_TAGS("AppSignalTags");
 	inline const QString MATS_USERS("MatsUsers");
+
+	inline const QString FRAME_COUNT("FrameCount");
+	inline const QString FRAME_PAYLOAD_B("FramePayloadB");
+	inline const QString FRAME_SIZE_B("FrameSizeB");
+
+	inline const QString DATA_OFFSET_W("DataOffsetW");
+	inline const QString DATA_SIZE_W("DataSizeW");
+	inline const QString FRAME_PAYLOAD_W("FramePayloadW");
+	inline const QString FRAME_SIZE_W("FrameSizeW");
+	inline const QString USED_FRAMES_COUNT("UsedFramesCount");
+	inline const QString SIGNALS_COUNT("SignalsCount");
+	inline const QString FOTIP_TUNING_DATA_UID("FotipTuningDataUID");
 }
 
 namespace Latin1Char
@@ -515,6 +553,7 @@ namespace File
 	inline const QString MATSUSERS_XML("MatsUsers.xml");
 
 	inline const QString DIAG_SIGNAL_TYPES_XML("DiagSignalTypes.xml");
+	inline const QString DIAG_DATA_SOURCES_XML("DiagDataSources.xml");
 
 	inline const QString METROLOGY_ITEMS_XML("MetrologyItems.xml");
 	inline const QString METROLOGY_SIGNAL_SET("MetrologySignal.set");

@@ -111,7 +111,8 @@ namespace Builder
 			QByteArray data;
 
 			tuningData->getTuningData(&data);
-			quint64 uniqueID = tuningData->uniqueID();
+
+			quint64 uniqueID = tuningData->fotipTuningDataUID();
 
 			int metadataFieldsVersion = 0;
 

@@ -55,8 +55,6 @@ namespace Builder
 			return false;
 		}
 
-		DeviceHelper::init();
-
 		signalSet()->resetAddresses();
 
 		ApplicationLogicCompilerProc appLogicCompilerProcs[] =
@@ -97,8 +95,6 @@ namespace Builder
 		}
 
 		clear();
-
-		DeviceHelper::shutdown();
 
 		return result;
 	}

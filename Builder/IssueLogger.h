@@ -164,7 +164,7 @@ namespace Builder
 		void errCFG3027(QString objectID, QString propertyName);							// Ethernet port number property %1.%2 should be in range 0..65535.
 		void errCFG3028(QString signalID1, QString signalID2, QString module, QString propertyName);
 		void errCFG3029(QString softwareID);												// Software %1 is not linked to ConfigurationService.
-		void errCFG3030(QString lmID, QString appDataServiceID);							// Ethernet adapters 2 and 3 of LM %1 are connected to same AppDataService %2.		
+		void errCFG3030(QString lmID, QString appDataServiceID);							// Several ethernet adapters of LM %1 are connected to AppDataService %2.
 		void wrnCFG3031(QString objectID, QString propertyName);							// Property %1.%2 should be set to the valid writable catalog of workstation.
 
 		void errCFG3040(QString monitorId, QString tuningServiceId);						// Mode SingleLmControl is not supported by Monitor. Set TuningServiceID.SingleLmControl to false. Monitor EquipmentID %1, TuningServiceID %2.
@@ -186,21 +186,12 @@ namespace Builder
 		void errCFG3047(QString objectID, QString propertyName, QString controillersList);	// Property %1.%2 should refer to one of software controllers: %3
 		void errCFG3048(QString objectID, QString propertyName);				// Property %1.%2 should refer to Software or Software child controller object.
 		void errCFG3049(QString cfgServiceID, QString workstationID);			// %1.CheckHostname is set True but hostname of workstation %2 isn't set.
-
-		// Property %1.%2 contains more than %3 software identifier(s).
-		//
-		void errCFG3050(QString objectID, QString propertyName, int maxIDs);
-
-		// Gateway description parsing error: %1
-		//
-		void errCFG3051(QString gwParserError);
-
-		// Gateway description parsing warning: %1
-		//
-		void wrnCFG3052(QString gwParserWarning);
+		void errCFG3050(QString objectID, QString propertyName, int maxIDs);	// Property %1.%2 contains more than %3 software identifier(s).
+		void errCFG3051(QString gwParserError);									// Gateway description parsing error: %1
+		void wrnCFG3052(QString gwParserWarning);								// Gateway description parsing warning: %1
+		void errCFG3053(QString lmID, QString diagDataServiceID);				// Several ethernet adapters of LM %1 are connected to DiagDataService %2.
 
 		void errCFG3060(QString subSysID, int value, int max, int min);	// Subsystem %1 key has wrong value (%2), valid range is %3..%4.
-
 
 		void errCFG3100(QString equipmentId, int devicePresetVersion, QString presetName, int presetVersion);		// Device %1 has preset version mismatch (%1.PresetVersion = %2, %3.PresetVersion = %4). For updating presets select 'Update from Preset' in Equipment Editor.
 		void wrnCFG3101(QString equipmentId, int devicePresetVersion, QString presetName, int presetVersion);		// Device %1 has preset version mismatch (%1.PresetVersion = %2, %3.PresetVersion = %4). For updating presets select 'Update from Preset' in Equipment Editor.

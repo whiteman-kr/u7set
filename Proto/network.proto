@@ -134,7 +134,8 @@ message LanControllerInfo
 	optional string tuningServiceIP = 14;
 	optional int32 tuningServicePort = 15 [default = 0];
 	optional string tuningServiceNetmask = 16;
-	optional uint64 tuningdatauid = 17;
+	optional uint32 rupTuningDataUID = 17  [default = 0];
+	optional uint64 fotipTuningDataUID = 18  [default = 0];
 
 	// app data parameters
 
@@ -145,7 +146,7 @@ message LanControllerInfo
 	optional string appDataServiceIP = 24;
 	optional int32 appDataServicePort = 25 [default = 0];
 	optional string appDataServiceNetmask = 26;
-	optional uint32 appDataUID = 27 [default = 0];
+	optional uint32 rupAppDataUID = 27 [default = 0];
 	optional int32 appDataSizeBytes = 28 [default = 0];
 	optional int32 appDataFramesQuantity = 29 [default = 0];
 	optional int32 overrideAppDataWordCount = 30 [default = -1];
@@ -159,7 +160,7 @@ message LanControllerInfo
 	optional string diagDataServiceIP = 44;
 	optional int32 diagDataServicePort = 45 [default = 0];
 	optional string diagDataServiceNetmask = 46;
-	optional uint32 diagDataUID = 47 [default = 0];
+	optional uint32 rupDiagDataUID = 47 [default = 0];
 	optional int32 diagDataSizeBytes = 48 [default = 0];
 	optional int32 diagDataFramesQuantity = 49 [default = 0];
 	optional int32 overrideDiagDataWordCount = 50 [default = -1];

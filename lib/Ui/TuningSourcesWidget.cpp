@@ -47,7 +47,8 @@ DialogTuningSourceInfo::DialogTuningSourceInfo(ClientLib::TuningConnection& conn
 	createDataItem(infoItem, "LmModuleType");
 	createDataItem(infoItem, "LmAdapterID");
 	createDataItem(infoItem, "LmDataEnable");
-	createDataItem(infoItem, "LmDataID");
+	createDataItem(infoItem, "RupTuningDataUID");
+	createDataItem(infoItem, "FotipTuningDataUID");
 
 	m_treeWidget->addTopLevelItem(infoItem);
 
@@ -216,10 +217,12 @@ void DialogTuningSourceInfo::updateInfo(const ClientLib::TuningSource& ts)
 			setDataItemText("LmModuleType", tr("%1 (%2h)").arg(QString::number(info.moduletype())).arg(QString::number(info.moduletype(), 16)));
 			setDataItemText("LmAdapterID", info.lancontrollerinfo()[i].equipmentid().c_str());
 			setDataItemNumber("LmDataEnable", info.lancontrollerinfo()[i].tuningenable());
-			setDataItemText("LmDataID", tr("%1 (%2h)").
-							arg(QString::number(info.lancontrollerinfo()[i].tuningdatauid())).
-							arg(QString::number(info.lancontrollerinfo()[i].tuningdatauid(), 16)));
-
+			setDataItemText("RupTuningDataUID", tr("%1 (%2h)").
+							arg(QString::number(info.lancontrollerinfo()[i].ruptuningdatauid())).
+							arg(QString::number(info.lancontrollerinfo()[i].ruptuningdatauid(), 16)));
+			setDataItemText("FotipTuningDataUID", tr("%1 (%2h)").
+							arg(QString::number(info.lancontrollerinfo()[i].fotiptuningdatauid())).
+							arg(QString::number(info.lancontrollerinfo()[i].fotiptuningdatauid(), 16)));
 			break;
 		}
 	}

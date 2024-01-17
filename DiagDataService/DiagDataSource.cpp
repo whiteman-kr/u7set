@@ -17,7 +17,7 @@ DiagDataSource::DiagDataSource(const DataSource& dataSource)
 	//
 	*static_cast<DataSource*>(this) = dataSource;
 
-	m_cachedDiagDataUID = diagDataUID();
+	m_cachedDiagDataUID = rupDiagDataUID();
 
 	initParsingBuffers(appDataFramesQuantity());
 
