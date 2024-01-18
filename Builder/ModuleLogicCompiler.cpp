@@ -6,6 +6,7 @@
 #include "LanControllerInfoHelper.h"
 #include "DeviceHelper.h"
 #include "SoftwareCfgGenerator.h"
+#include "DiagDataServiceCfgGenerator.h"
 #include "Parser.h"
 #include "LmDescriptionSet.h"
 
@@ -280,7 +281,7 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::detectUsedReservedSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::fillAnalogSignalsOnSchemas),
 
-			PROC_TO_CALL(ModuleLogicCompiler::prepareDiagInfo),
+			PROC_TO_CALL(ModuleLogicCompiler::prepareDiagData),
 
 			PROC_TO_CALL(ModuleLogicCompiler::calcAppDataUID),
 			PROC_TO_CALL(ModuleLogicCompiler::calcDiagDataUID),
@@ -17408,7 +17409,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::prepareDiagInfo()
+	bool ModuleLogicCompiler::prepareDiagData()
 	{
 		bool result = true;
 
@@ -17421,11 +17422,6 @@ namespace Builder
 	{
 		bool result = true;
 
-		if (m_lm->equipmentIdTemplate() == "SYSTEMID_RACK01_CH04_MD00")
-		{
-			DEBUG_STOP;
-		}
-
 		std::vector<std::shared_ptr<const Hardware::DiagSignal>> diagSignals;
 
 		for(const auto& p : m_modules)
@@ -17435,6 +17431,19 @@ namespace Builder
 
 			DeviceHelper::getChildDiagSignals(module, &diagSignals);
 		}
+
+		std::vector<AcquiredDiagSignal> acquiredDiagSignals;
+
+		acquiredDiagSignals.reserve(diagSignals.size());
+
+		for(const auto& diagSignal : diagSignals)
+		{
+			AcquiredDiagSignal& ads = acquiredDiagSignals.push_back({});
+
+			ads.equipmentID = diagSignal->equipmentIdTemplate();
+		}
+
+		//
 
 		return result;
 	}
@@ -17529,77 +17538,11 @@ namespace Builder
 
 	bool ModuleLogicCompiler::calcDiagDataUID()
 	{
-/*		QVector<UalSignal*> acquiredSignals;
-
-		acquiredSignals.append(m_acquiredDiscreteInputSignals);
-		acquiredSignals.append(m_acquiredDiscreteStrictOutputSignals);
-		acquiredSignals.append(m_acquiredDiscreteInternalSignals);
-		acquiredSignals.append(m_acquiredDiscreteTuningSignals);
-		acquiredSignals.append(m_acquiredDiscreteConstSignals);
-		acquiredSignals.append(m_acquiredDiscreteOptoSignals);
-		acquiredSignals.append(m_acquiredDiscreteBusChildSignals);
-		acquiredSignals.append(m_acquiredAnalogInputSignals);
-		acquiredSignals.append(m_acquiredAnalogStrictOutputSignals);
-		acquiredSignals.append(m_acquiredAnalogInternalSignals);
-		acquiredSignals.append(m_acquiredAnalogOptoSignals);
-		acquiredSignals.append(m_acquiredAnalogBusChildSignals);
-		acquiredSignals.append(m_acquiredAnalogTuningSignals);
-		acquiredSignals.append(m_acquiredInputBuses);
-		acquiredSignals.append(m_acquiredOutputBuses);
-		acquiredSignals.append(m_acquiredInternalBuses);
-		acquiredSignals.append(m_acquiredBusChildBuses);
-		acquiredSignals.append(m_acquiredOptoBuses);
-
-		QStringList constSignalsIDs;
-
-		for(const UalSignal* constIntSignal : m_acquiredAnalogConstIntSignals)
-		{
-			constSignalsIDs.append(constIntSignal->appSignalID());
-		}
-
-		for(const UalSignal* constFloatSignal : m_acquiredAnalogConstFloatSignals)
-		{
-			constSignalsIDs.append(constFloatSignal->appSignalID());
-		}
-
-		constSignalsIDs.sort();
-
-		for(const QString& constSignalID : constSignalsIDs)
-		{
-			UalSignal* constUalSignal = m_ualSignals.get(constSignalID);
-
-			if (constUalSignal == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			acquiredSignals.append(constUalSignal);
-		}*/
-
-		//
-
 		Crc64 crc;
 
 		crc.add(m_lm->equipmentIdTemplate());
 
-		// add signals to UID
 		//
-/*		for(UalSignal* ualSignal: acquiredSignals)
-		{
-			TEST_PTR_CONTINUE(ualSignal);
-
-			appDataUID.add(ualSignal->appSignalID());
-
-			if (ualSignal->regBufAddr().isValid() == true)
-			{
-				appDataUID.add(ualSignal->regBufAddr().bitAddress());
-			}
-			else
-			{
-				assert(false);
-			}
-		}*/
 
 		m_rupDiagDataUID = crc.result32();
 

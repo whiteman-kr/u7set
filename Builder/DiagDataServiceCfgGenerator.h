@@ -7,26 +7,23 @@
 
 namespace Builder
 {
-	class AcquiredDiagSignal
+	class AcquiredDiagObject
 	{
 	public:
-		// deviceType == Hardware::DeviceType::DiagSignal;
-		//
+		Hardware::DeviceType deviceType = Hardware::DeviceType::DeviceTypeCount;	// means - not initialized
 		QString equipmentID;
-		int place = -1;
-
-		QString diagSignalTypeID;
+		Hash parent = 0;					// calcHash(parent.equipmentID)
 	};
 
-	/*class AcquiredDiagObject
+	class AcquiredDiagSignal : public AcquiredDiagObject
 	{
 	public:
-		Hardware::DeviceType deviceType;
-		QString equipmentID;
-		int place = -1;
+		AcquiredDiagSignal() : deviceType(Hardware::DeviceType::DiagSignal) {}
 
-		AcquiredDiagObject children;		// ordered by place ascending
-	};*/
+		QString diagSignalTypeID;
+		Address16 absAddr;					// signal data address from beginning of module diag data offset in RUP diag packet
+											// calculate as controller.DiagDataOffset + diagSignal.DataOffset
+	};
 
 	class DiagDataServiceCfgGenerator : public SoftwareCfgGenerator
 	{
