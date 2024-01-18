@@ -37,7 +37,11 @@ public slots:
 	void addModule();
 	void addController();
 	void addAppSignalPort();
+
 	void addDiagSignal();
+	void addDiagSignalReflection();
+	void addDiagSignalImpl(bool isReflection);
+
 	void addWorkstation();
 	void addSoftware();
 

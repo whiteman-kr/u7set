@@ -136,7 +136,7 @@ namespace VFrame30
 		//
 		if (message.schemaitem().has_value() == false)
 		{
-			assert(message.schemaitem().has_value());
+			assert(message.schemaitem().has_diagvalue());
 			return false;
 		}
 

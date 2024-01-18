@@ -340,6 +340,16 @@ void EquipmentView::addAppSignalPort()
 
 void EquipmentView::addDiagSignal()
 {
+	return addDiagSignalImpl(false);
+}
+
+void EquipmentView::addDiagSignalReflection()
+{
+	return addDiagSignalImpl(true);
+}
+
+void EquipmentView::addDiagSignalImpl(bool isReflection)
+{
 	QModelIndex parentModelIndex;		// current is root
 	QModelIndexList selected = selectionModel()->selectedRows();
 
@@ -360,15 +370,17 @@ void EquipmentView::addDiagSignal()
 	auto signal = std::make_shared<Hardware::DiagSignal>(isPresetMode());
 
 	signal->setEquipmentIdTemplate("$(PARENT)_DIAGSIGNAL");
-	signal->setCaption(tr("DiagSignal"));
+	signal->setCaption(isReflection ? QString{"DiagSignalReflection"} : QString{"DiagSignal"});
 	signal->setSignalTypeId(tr("ST_ERR_DISCR"));
+
+	signal->setIsReflection(isReflection);
+	signal->setReflectedSignalId(isReflection ? QString{"SET_ID_TO_REFLECTED_SIGNAL"} : QString{""});
 
 	addDeviceObject(signal, parentModelIndex, true, true);
 
 	emit updateState();
 	return;
 }
-
 
 void EquipmentView::addWorkstation()
 {

@@ -109,6 +109,8 @@ namespace Hardware
 		//static const QString valueOffset;
 		static const QString useLimits;
 
+		static const QString isReflection;
+		static const QString reflectedSignalId;
 		static const QString level;
 		static const QString valueOffset;
 		static const QString valueBit;

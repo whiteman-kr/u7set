@@ -1,5 +1,6 @@
 #include "DiagSignal.h"
 #include "DiagSignalType.h"
+#include <ranges>
 
 
 namespace Hardware
@@ -20,37 +21,52 @@ namespace Hardware
 
 		// Category DiagSignal
 		//
-		ADD_PROPERTY_GET_SET_CAT(E::DiagLevel, PropertyNames::level, PropertyNames::categoryDiagSignal, true, DiagSignal::level, DiagSignal::setLevel)
+		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::isReflection, PropertyNames::categoryDiagSignal, true, DiagSignal::isReflection)
 			->setUpdateFromPreset(true)
+			.setReadOnly(true)
 			.setViewOrder(100);
 
-		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::diagSignalTypeId, PropertyNames::categoryDiagSignal, true, DiagSignal::signalTypeId, DiagSignal::setSignalTypeId)
-			->setUpdateFromPreset(true)
-			.setViewOrder(101);
+		if (isReflection() == true)
+		{
+			ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::reflectedSignalId, PropertyNames::categoryDiagSignal, true, DiagSignal::reflectedSignalId, DiagSignal::setReflectedSignalId)
+				->setUpdateFromPreset(true)
+				.setViewOrder(101);
+		}
 
-		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::validitySignalId, PropertyNames::categoryDiagSignal, true, DiagSignal::validitySignalId, DiagSignal::setValiditySignalId)
+		ADD_PROPERTY_GET_SET_CAT(E::DiagLevel, PropertyNames::level, PropertyNames::categoryDiagSignal, true, DiagSignal::level, DiagSignal::setLevel)
 			->setUpdateFromPreset(true)
 			.setViewOrder(102);
 
-		// Category data
-		//
-		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::valueOffset, PropertyNames::categoryData, true, DiagSignal::valueOffset, DiagSignal::setValueOffset)
-			->setUpdateFromPreset(true)
-			.setViewOrder(200);
+		if (isReflection() == false)
+		{
+			ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::diagSignalTypeId, PropertyNames::categoryDiagSignal, true, DiagSignal::signalTypeId, DiagSignal::setSignalTypeId)
+				->setUpdateFromPreset(true)
+				.setViewOrder(103);
 
-		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::valueBit, PropertyNames::categoryData, true, DiagSignal::valueBit, DiagSignal::setValueBit)
-			->setUpdateFromPreset(true)
-			.setViewOrder(201);
+			ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::validitySignalId, PropertyNames::categoryDiagSignal, true, DiagSignal::validitySignalId, DiagSignal::setValiditySignalId)
+				->setUpdateFromPreset(true)
+				.setViewOrder(104);
 
-		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::valueBitSize, PropertyNames::categoryData, true, DiagSignal::valueBitSize, DiagSignal::setValueBitSize)
-			->setUpdateFromPreset(true)
-			.setDescription(PropertyNames::valueBitSizeDescription)
-			.setViewOrder(202);
+			// Category data
+			//
+			ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::valueOffset, PropertyNames::categoryData, true, DiagSignal::valueOffset, DiagSignal::setValueOffset)
+				->setUpdateFromPreset(true)
+				.setViewOrder(200);
 
-		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::discreteContainerSize, PropertyNames::categoryData, true, DiagSignal::discreteContainerSize, DiagSignal::setDiscreteContainerSize)
-			->setUpdateFromPreset(true)
-			.setDescription(PropertyNames::discreteContainerSizeDescription)
-			.setViewOrder(203);
+			ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::valueBit, PropertyNames::categoryData, true, DiagSignal::valueBit, DiagSignal::setValueBit)
+				->setUpdateFromPreset(true)
+				.setViewOrder(201);
+
+			ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::valueBitSize, PropertyNames::categoryData, true, DiagSignal::valueBitSize, DiagSignal::setValueBitSize)
+				->setUpdateFromPreset(true)
+				.setDescription(PropertyNames::valueBitSizeDescription)
+				.setViewOrder(202);
+
+			ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::discreteContainerSize, PropertyNames::categoryData, true, DiagSignal::discreteContainerSize, DiagSignal::setDiscreteContainerSize)
+				->setUpdateFromPreset(true)
+				.setDescription(PropertyNames::discreteContainerSizeDescription)
+				.setViewOrder(203);
+		}
 
 		// Category MATS
 		//
@@ -92,9 +108,12 @@ namespace Hardware
 		//
 		::Proto::DeviceDiagSignal* signalMessage = message->mutable_deviceobject()->mutable_diagsignal();
 
+		signalMessage->set_isrefelection(m_isReflection);
+		signalMessage->set_reflectedsignalid(m_reflectedSignalId.toStdString());
+
 		signalMessage->set_level(static_cast<int>(m_level));
 		signalMessage->set_signaltypeid(m_signalTypeId.toUtf8());
-		signalMessage->set_validitysignalid(m_validitySignalId.toUtf8());
+		signalMessage->set_validitysignalid(m_validitySignalId.toStdString());
 
 		signalMessage->set_valueoffset(m_valueOffset);
 		signalMessage->set_valuebit(m_valueBit);
@@ -138,6 +157,9 @@ namespace Hardware
 
 		const Proto::DeviceDiagSignal& signalMessage = message.deviceobject().diagsignal();
 
+		m_isReflection = signalMessage.isrefelection();
+		m_reflectedSignalId = QString::fromStdString(signalMessage.reflectedsignalid());
+
 		m_level = static_cast<E::DiagLevel>(signalMessage.level());
 		m_signalTypeId = QString::fromUtf8(signalMessage.signaltypeid().data());
 		m_validitySignalId = QString::fromUtf8(signalMessage.validitysignalid().data());
@@ -174,6 +196,26 @@ namespace Hardware
 
 		DeviceObject::expandEquipmentId();
 		return;
+	}
+
+	bool DiagSignal::isReflection() const
+	{
+		return m_isReflection;
+	}
+
+	void DiagSignal::setIsReflection(bool value)
+	{
+		m_isReflection = value;
+	}
+
+	const QString& DiagSignal::reflectedSignalId() const
+	{
+		return m_reflectedSignalId;
+	}
+
+	void DiagSignal::setReflectedSignalId(const QString& value)
+	{
+		m_reflectedSignalId = value;
 	}
 
 	E::DiagLevel DiagSignal::level() const

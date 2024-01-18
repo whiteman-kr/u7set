@@ -1168,6 +1168,8 @@ message DeviceDiagSignal
 	optional int32 level = 3;			// E::DiagLevel
 	optional string signalTypeId = 4;
 	optional string validitySignalId = 5;
+	optional bool isRefelection = 6;
+	optional string reflectedSignalId = 7;
 
 	optional int32 valueOffset = 10;
 	optional int32 valueBit = 11;

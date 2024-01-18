@@ -19016,11 +19016,13 @@ class DeviceDiagSignal PROTOBUF_FINAL :
   enum : int {
     kSignalTypeIdFieldNumber = 4,
     kValiditySignalIdFieldNumber = 5,
+    kReflectedSignalIdFieldNumber = 7,
     kLevelFieldNumber = 3,
     kValueOffsetFieldNumber = 10,
     kValueBitFieldNumber = 11,
     kValueBitSizeFieldNumber = 12,
     kDiscreteContainerSizeFieldNumber = 13,
+    kIsRefelectionFieldNumber = 6,
     kLogChangesFieldNumber = 16,
     kArchiveFieldNumber = 17,
     kReservedFieldNumber = 18,
@@ -19067,6 +19069,26 @@ class DeviceDiagSignal PROTOBUF_FINAL :
   const std::string& _internal_validitysignalid() const;
   void _internal_set_validitysignalid(const std::string& value);
   std::string* _internal_mutable_validitysignalid();
+  public:
+
+  // optional string reflectedSignalId = 7;
+  bool has_reflectedsignalid() const;
+  private:
+  bool _internal_has_reflectedsignalid() const;
+  public:
+  void clear_reflectedsignalid();
+  const std::string& reflectedsignalid() const;
+  void set_reflectedsignalid(const std::string& value);
+  void set_reflectedsignalid(std::string&& value);
+  void set_reflectedsignalid(const char* value);
+  void set_reflectedsignalid(const char* value, size_t size);
+  std::string* mutable_reflectedsignalid();
+  std::string* release_reflectedsignalid();
+  void set_allocated_reflectedsignalid(std::string* reflectedsignalid);
+  private:
+  const std::string& _internal_reflectedsignalid() const;
+  void _internal_set_reflectedsignalid(const std::string& value);
+  std::string* _internal_mutable_reflectedsignalid();
   public:
 
   // optional int32 level = 3;
@@ -19132,6 +19154,19 @@ class DeviceDiagSignal PROTOBUF_FINAL :
   private:
   ::PROTOBUF_NAMESPACE_ID::int32 _internal_discretecontainersize() const;
   void _internal_set_discretecontainersize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional bool isRefelection = 6;
+  bool has_isrefelection() const;
+  private:
+  bool _internal_has_isrefelection() const;
+  public:
+  void clear_isrefelection();
+  bool isrefelection() const;
+  void set_isrefelection(bool value);
+  private:
+  bool _internal_isrefelection() const;
+  void _internal_set_isrefelection(bool value);
   public:
 
   // optional bool logChanges = 16;
@@ -19236,11 +19271,13 @@ class DeviceDiagSignal PROTOBUF_FINAL :
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr signaltypeid_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr validitysignalid_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr reflectedsignalid_;
   ::PROTOBUF_NAMESPACE_ID::int32 level_;
   ::PROTOBUF_NAMESPACE_ID::int32 valueoffset_;
   ::PROTOBUF_NAMESPACE_ID::int32 valuebit_;
   ::PROTOBUF_NAMESPACE_ID::int32 valuebitsize_;
   ::PROTOBUF_NAMESPACE_ID::int32 discretecontainersize_;
+  bool isrefelection_;
   bool logchanges_;
   bool archive_;
   bool reserved_;
@@ -52328,7 +52365,7 @@ inline void DeviceAppSignal::set_signalspecpropsstructwasfixed(bool value) {
 
 // optional int32 level = 3;
 inline bool DeviceDiagSignal::_internal_has_level() const {
-  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
   return value;
 }
 inline bool DeviceDiagSignal::has_level() const {
@@ -52336,7 +52373,7 @@ inline bool DeviceDiagSignal::has_level() const {
 }
 inline void DeviceDiagSignal::clear_level() {
   level_ = 0;
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::_internal_level() const {
   return level_;
@@ -52346,7 +52383,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::level() const {
   return _internal_level();
 }
 inline void DeviceDiagSignal::_internal_set_level(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000008u;
   level_ = value;
 }
 inline void DeviceDiagSignal::set_level(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -52500,9 +52537,110 @@ inline void DeviceDiagSignal::set_allocated_validitysignalid(std::string* validi
   // @@protoc_insertion_point(field_set_allocated:Proto.DeviceDiagSignal.validitySignalId)
 }
 
+// optional bool isRefelection = 6;
+inline bool DeviceDiagSignal::_internal_has_isrefelection() const {
+  bool value = (_has_bits_[0] & 0x00000100u) != 0;
+  return value;
+}
+inline bool DeviceDiagSignal::has_isrefelection() const {
+  return _internal_has_isrefelection();
+}
+inline void DeviceDiagSignal::clear_isrefelection() {
+  isrefelection_ = false;
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline bool DeviceDiagSignal::_internal_isrefelection() const {
+  return isrefelection_;
+}
+inline bool DeviceDiagSignal::isrefelection() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.isRefelection)
+  return _internal_isrefelection();
+}
+inline void DeviceDiagSignal::_internal_set_isrefelection(bool value) {
+  _has_bits_[0] |= 0x00000100u;
+  isrefelection_ = value;
+}
+inline void DeviceDiagSignal::set_isrefelection(bool value) {
+  _internal_set_isrefelection(value);
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.isRefelection)
+}
+
+// optional string reflectedSignalId = 7;
+inline bool DeviceDiagSignal::_internal_has_reflectedsignalid() const {
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline bool DeviceDiagSignal::has_reflectedsignalid() const {
+  return _internal_has_reflectedsignalid();
+}
+inline void DeviceDiagSignal::clear_reflectedsignalid() {
+  reflectedsignalid_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline const std::string& DeviceDiagSignal::reflectedsignalid() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.reflectedSignalId)
+  return _internal_reflectedsignalid();
+}
+inline void DeviceDiagSignal::set_reflectedsignalid(const std::string& value) {
+  _internal_set_reflectedsignalid(value);
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.reflectedSignalId)
+}
+inline std::string* DeviceDiagSignal::mutable_reflectedsignalid() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceDiagSignal.reflectedSignalId)
+  return _internal_mutable_reflectedsignalid();
+}
+inline const std::string& DeviceDiagSignal::_internal_reflectedsignalid() const {
+  return reflectedsignalid_.Get();
+}
+inline void DeviceDiagSignal::_internal_set_reflectedsignalid(const std::string& value) {
+  _has_bits_[0] |= 0x00000004u;
+  reflectedsignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void DeviceDiagSignal::set_reflectedsignalid(std::string&& value) {
+  _has_bits_[0] |= 0x00000004u;
+  reflectedsignalid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.DeviceDiagSignal.reflectedSignalId)
+}
+inline void DeviceDiagSignal::set_reflectedsignalid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000004u;
+  reflectedsignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.DeviceDiagSignal.reflectedSignalId)
+}
+inline void DeviceDiagSignal::set_reflectedsignalid(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000004u;
+  reflectedsignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.DeviceDiagSignal.reflectedSignalId)
+}
+inline std::string* DeviceDiagSignal::_internal_mutable_reflectedsignalid() {
+  _has_bits_[0] |= 0x00000004u;
+  return reflectedsignalid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* DeviceDiagSignal::release_reflectedsignalid() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceDiagSignal.reflectedSignalId)
+  if (!_internal_has_reflectedsignalid()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000004u;
+  return reflectedsignalid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void DeviceDiagSignal::set_allocated_reflectedsignalid(std::string* reflectedsignalid) {
+  if (reflectedsignalid != nullptr) {
+    _has_bits_[0] |= 0x00000004u;
+  } else {
+    _has_bits_[0] &= ~0x00000004u;
+  }
+  reflectedsignalid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), reflectedsignalid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceDiagSignal.reflectedSignalId)
+}
+
 // optional int32 valueOffset = 10;
 inline bool DeviceDiagSignal::_internal_has_valueoffset() const {
-  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  bool value = (_has_bits_[0] & 0x00000010u) != 0;
   return value;
 }
 inline bool DeviceDiagSignal::has_valueoffset() const {
@@ -52510,7 +52648,7 @@ inline bool DeviceDiagSignal::has_valueoffset() const {
 }
 inline void DeviceDiagSignal::clear_valueoffset() {
   valueoffset_ = 0;
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::_internal_valueoffset() const {
   return valueoffset_;
@@ -52520,7 +52658,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::valueoffset() const {
   return _internal_valueoffset();
 }
 inline void DeviceDiagSignal::_internal_set_valueoffset(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000010u;
   valueoffset_ = value;
 }
 inline void DeviceDiagSignal::set_valueoffset(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -52530,7 +52668,7 @@ inline void DeviceDiagSignal::set_valueoffset(::PROTOBUF_NAMESPACE_ID::int32 val
 
 // optional int32 valueBit = 11;
 inline bool DeviceDiagSignal::_internal_has_valuebit() const {
-  bool value = (_has_bits_[0] & 0x00000010u) != 0;
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
   return value;
 }
 inline bool DeviceDiagSignal::has_valuebit() const {
@@ -52538,7 +52676,7 @@ inline bool DeviceDiagSignal::has_valuebit() const {
 }
 inline void DeviceDiagSignal::clear_valuebit() {
   valuebit_ = 0;
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::_internal_valuebit() const {
   return valuebit_;
@@ -52548,7 +52686,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::valuebit() const {
   return _internal_valuebit();
 }
 inline void DeviceDiagSignal::_internal_set_valuebit(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000020u;
   valuebit_ = value;
 }
 inline void DeviceDiagSignal::set_valuebit(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -52558,7 +52696,7 @@ inline void DeviceDiagSignal::set_valuebit(::PROTOBUF_NAMESPACE_ID::int32 value)
 
 // optional int32 valueBitSize = 12;
 inline bool DeviceDiagSignal::_internal_has_valuebitsize() const {
-  bool value = (_has_bits_[0] & 0x00000020u) != 0;
+  bool value = (_has_bits_[0] & 0x00000040u) != 0;
   return value;
 }
 inline bool DeviceDiagSignal::has_valuebitsize() const {
@@ -52566,7 +52704,7 @@ inline bool DeviceDiagSignal::has_valuebitsize() const {
 }
 inline void DeviceDiagSignal::clear_valuebitsize() {
   valuebitsize_ = 0;
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000040u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::_internal_valuebitsize() const {
   return valuebitsize_;
@@ -52576,7 +52714,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::valuebitsize() const {
   return _internal_valuebitsize();
 }
 inline void DeviceDiagSignal::_internal_set_valuebitsize(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000040u;
   valuebitsize_ = value;
 }
 inline void DeviceDiagSignal::set_valuebitsize(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -52586,7 +52724,7 @@ inline void DeviceDiagSignal::set_valuebitsize(::PROTOBUF_NAMESPACE_ID::int32 va
 
 // optional int32 discreteContainerSize = 13;
 inline bool DeviceDiagSignal::_internal_has_discretecontainersize() const {
-  bool value = (_has_bits_[0] & 0x00000040u) != 0;
+  bool value = (_has_bits_[0] & 0x00000080u) != 0;
   return value;
 }
 inline bool DeviceDiagSignal::has_discretecontainersize() const {
@@ -52594,7 +52732,7 @@ inline bool DeviceDiagSignal::has_discretecontainersize() const {
 }
 inline void DeviceDiagSignal::clear_discretecontainersize() {
   discretecontainersize_ = 0;
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000080u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::_internal_discretecontainersize() const {
   return discretecontainersize_;
@@ -52604,7 +52742,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::discretecontainersize() 
   return _internal_discretecontainersize();
 }
 inline void DeviceDiagSignal::_internal_set_discretecontainersize(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000080u;
   discretecontainersize_ = value;
 }
 inline void DeviceDiagSignal::set_discretecontainersize(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -52614,7 +52752,7 @@ inline void DeviceDiagSignal::set_discretecontainersize(::PROTOBUF_NAMESPACE_ID:
 
 // optional bool logChanges = 16;
 inline bool DeviceDiagSignal::_internal_has_logchanges() const {
-  bool value = (_has_bits_[0] & 0x00000080u) != 0;
+  bool value = (_has_bits_[0] & 0x00000200u) != 0;
   return value;
 }
 inline bool DeviceDiagSignal::has_logchanges() const {
@@ -52622,7 +52760,7 @@ inline bool DeviceDiagSignal::has_logchanges() const {
 }
 inline void DeviceDiagSignal::clear_logchanges() {
   logchanges_ = false;
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000200u;
 }
 inline bool DeviceDiagSignal::_internal_logchanges() const {
   return logchanges_;
@@ -52632,7 +52770,7 @@ inline bool DeviceDiagSignal::logchanges() const {
   return _internal_logchanges();
 }
 inline void DeviceDiagSignal::_internal_set_logchanges(bool value) {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000200u;
   logchanges_ = value;
 }
 inline void DeviceDiagSignal::set_logchanges(bool value) {
@@ -52642,7 +52780,7 @@ inline void DeviceDiagSignal::set_logchanges(bool value) {
 
 // optional bool archive = 17;
 inline bool DeviceDiagSignal::_internal_has_archive() const {
-  bool value = (_has_bits_[0] & 0x00000100u) != 0;
+  bool value = (_has_bits_[0] & 0x00000400u) != 0;
   return value;
 }
 inline bool DeviceDiagSignal::has_archive() const {
@@ -52650,7 +52788,7 @@ inline bool DeviceDiagSignal::has_archive() const {
 }
 inline void DeviceDiagSignal::clear_archive() {
   archive_ = false;
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000400u;
 }
 inline bool DeviceDiagSignal::_internal_archive() const {
   return archive_;
@@ -52660,7 +52798,7 @@ inline bool DeviceDiagSignal::archive() const {
   return _internal_archive();
 }
 inline void DeviceDiagSignal::_internal_set_archive(bool value) {
-  _has_bits_[0] |= 0x00000100u;
+  _has_bits_[0] |= 0x00000400u;
   archive_ = value;
 }
 inline void DeviceDiagSignal::set_archive(bool value) {
@@ -52670,7 +52808,7 @@ inline void DeviceDiagSignal::set_archive(bool value) {
 
 // optional bool reserved = 18;
 inline bool DeviceDiagSignal::_internal_has_reserved() const {
-  bool value = (_has_bits_[0] & 0x00000200u) != 0;
+  bool value = (_has_bits_[0] & 0x00000800u) != 0;
   return value;
 }
 inline bool DeviceDiagSignal::has_reserved() const {
@@ -52678,7 +52816,7 @@ inline bool DeviceDiagSignal::has_reserved() const {
 }
 inline void DeviceDiagSignal::clear_reserved() {
   reserved_ = false;
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000800u;
 }
 inline bool DeviceDiagSignal::_internal_reserved() const {
   return reserved_;
@@ -52688,7 +52826,7 @@ inline bool DeviceDiagSignal::reserved() const {
   return _internal_reserved();
 }
 inline void DeviceDiagSignal::_internal_set_reserved(bool value) {
-  _has_bits_[0] |= 0x00000200u;
+  _has_bits_[0] |= 0x00000800u;
   reserved_ = value;
 }
 inline void DeviceDiagSignal::set_reserved(bool value) {
@@ -52698,7 +52836,7 @@ inline void DeviceDiagSignal::set_reserved(bool value) {
 
 // optional double coarseAperture = 22;
 inline bool DeviceDiagSignal::_internal_has_coarseaperture() const {
-  bool value = (_has_bits_[0] & 0x00000400u) != 0;
+  bool value = (_has_bits_[0] & 0x00001000u) != 0;
   return value;
 }
 inline bool DeviceDiagSignal::has_coarseaperture() const {
@@ -52706,7 +52844,7 @@ inline bool DeviceDiagSignal::has_coarseaperture() const {
 }
 inline void DeviceDiagSignal::clear_coarseaperture() {
   coarseaperture_ = 0;
-  _has_bits_[0] &= ~0x00000400u;
+  _has_bits_[0] &= ~0x00001000u;
 }
 inline double DeviceDiagSignal::_internal_coarseaperture() const {
   return coarseaperture_;
@@ -52716,7 +52854,7 @@ inline double DeviceDiagSignal::coarseaperture() const {
   return _internal_coarseaperture();
 }
 inline void DeviceDiagSignal::_internal_set_coarseaperture(double value) {
-  _has_bits_[0] |= 0x00000400u;
+  _has_bits_[0] |= 0x00001000u;
   coarseaperture_ = value;
 }
 inline void DeviceDiagSignal::set_coarseaperture(double value) {
@@ -52726,7 +52864,7 @@ inline void DeviceDiagSignal::set_coarseaperture(double value) {
 
 // optional double fineAperture = 23;
 inline bool DeviceDiagSignal::_internal_has_fineaperture() const {
-  bool value = (_has_bits_[0] & 0x00000800u) != 0;
+  bool value = (_has_bits_[0] & 0x00002000u) != 0;
   return value;
 }
 inline bool DeviceDiagSignal::has_fineaperture() const {
@@ -52734,7 +52872,7 @@ inline bool DeviceDiagSignal::has_fineaperture() const {
 }
 inline void DeviceDiagSignal::clear_fineaperture() {
   fineaperture_ = 0;
-  _has_bits_[0] &= ~0x00000800u;
+  _has_bits_[0] &= ~0x00002000u;
 }
 inline double DeviceDiagSignal::_internal_fineaperture() const {
   return fineaperture_;
@@ -52744,7 +52882,7 @@ inline double DeviceDiagSignal::fineaperture() const {
   return _internal_fineaperture();
 }
 inline void DeviceDiagSignal::_internal_set_fineaperture(double value) {
-  _has_bits_[0] |= 0x00000800u;
+  _has_bits_[0] |= 0x00002000u;
   fineaperture_ = value;
 }
 inline void DeviceDiagSignal::set_fineaperture(double value) {
@@ -52754,7 +52892,7 @@ inline void DeviceDiagSignal::set_fineaperture(double value) {
 
 // optional int32 apertureType = 24;
 inline bool DeviceDiagSignal::_internal_has_aperturetype() const {
-  bool value = (_has_bits_[0] & 0x00001000u) != 0;
+  bool value = (_has_bits_[0] & 0x00004000u) != 0;
   return value;
 }
 inline bool DeviceDiagSignal::has_aperturetype() const {
@@ -52762,7 +52900,7 @@ inline bool DeviceDiagSignal::has_aperturetype() const {
 }
 inline void DeviceDiagSignal::clear_aperturetype() {
   aperturetype_ = 0;
-  _has_bits_[0] &= ~0x00001000u;
+  _has_bits_[0] &= ~0x00004000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::_internal_aperturetype() const {
   return aperturetype_;
@@ -52772,7 +52910,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::aperturetype() const {
   return _internal_aperturetype();
 }
 inline void DeviceDiagSignal::_internal_set_aperturetype(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00001000u;
+  _has_bits_[0] |= 0x00004000u;
   aperturetype_ = value;
 }
 inline void DeviceDiagSignal::set_aperturetype(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -52782,7 +52920,7 @@ inline void DeviceDiagSignal::set_aperturetype(::PROTOBUF_NAMESPACE_ID::int32 va
 
 // optional int32 decimalPlaces = 30;
 inline bool DeviceDiagSignal::_internal_has_decimalplaces() const {
-  bool value = (_has_bits_[0] & 0x00002000u) != 0;
+  bool value = (_has_bits_[0] & 0x00008000u) != 0;
   return value;
 }
 inline bool DeviceDiagSignal::has_decimalplaces() const {
@@ -52790,7 +52928,7 @@ inline bool DeviceDiagSignal::has_decimalplaces() const {
 }
 inline void DeviceDiagSignal::clear_decimalplaces() {
   decimalplaces_ = 0;
-  _has_bits_[0] &= ~0x00002000u;
+  _has_bits_[0] &= ~0x00008000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::_internal_decimalplaces() const {
   return decimalplaces_;
@@ -52800,7 +52938,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::decimalplaces() const {
   return _internal_decimalplaces();
 }
 inline void DeviceDiagSignal::_internal_set_decimalplaces(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00002000u;
+  _has_bits_[0] |= 0x00008000u;
   decimalplaces_ = value;
 }
 inline void DeviceDiagSignal::set_decimalplaces(::PROTOBUF_NAMESPACE_ID::int32 value) {
