@@ -30,11 +30,12 @@ public:
 
 	QString branchName() const { return m_branchName; }
 	QString commitHash() const { return m_commitHash; }
-	QString userName() const { return m_userName; }
+	QString buildUserName() const { return m_buildUserName; }
 	QString buildDate() const { return m_buildDate; }
-	QString hostname() const { return m_hostname; }
+	QString buildHostname() const { return m_buildHostname; }
 	int pipelineID() const { return m_pipelineID; }
 
+	QString hostname() const { return m_hostname; }
 	QString osUsername() const { return m_osUsername; }
 
 private:
@@ -51,10 +52,11 @@ private:
 
 	QString m_branchName;
 	QString m_commitHash;
-	QString m_userName;
+	QString m_buildUserName;
 	QString m_buildDate;
-	QString m_hostname;
+	QString m_buildHostname;
 	int m_pipelineID = 0;
 
-	QString m_osUsername;
+	QString m_hostname;			// Hostname on which software running
+	QString m_osUsername;		// OS logged in user
 };

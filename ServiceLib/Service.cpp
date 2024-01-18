@@ -166,16 +166,16 @@ QStringList ServiceWorker::getSoftwareInfo() const
 			arg(si.branchName());
 	res << QString();
 #ifdef QT_DEBUG
-	res << QString(" Build:        %1 Debug").arg(si.releaseType());
+	res << QString(" Build:          %1 Debug").arg(si.releaseType());
 #else
-	res << QString(" Build:        %1 Release").arg(si.releaseType());
+	res << QString(" Build:          %1 Release").arg(si.releaseType());
 #endif
-	res << QString(" Branch name:  %1").arg(si.branchName());
-	res << QString(" Commit SHA:   %1").arg(si.commitHash());
-	res << QString(" Build date:   %1").arg(si.buildDate());
-	res << QString(" User name:    %1").arg(si.userName());
-	res << QString(" Hostname:     %1").arg(si.hostname());
-	res << QString(" Pipeline ID:  %1").arg(si.pipelineID());
+	res << QString(" Branch name:    %1").arg(si.branchName());
+	res << QString(" Commit SHA:     %1").arg(si.commitHash());
+	res << QString(" Build date:     %1").arg(si.buildDate());
+	res << QString(" Build username: %1").arg(si.buildUserName());
+	res << QString(" Build hostname: %1").arg(si.buildHostname());
+	res << QString(" Pipeline ID:    %1").arg(si.pipelineID());
 
 	return res;
 }

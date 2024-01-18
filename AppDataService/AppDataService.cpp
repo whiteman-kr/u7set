@@ -20,8 +20,7 @@ AppDataServiceWorker::AppDataServiceWorker(const SoftwareInfo& softwareInfo,
 										   int argc,
 										   char** argv,
 										   CircularLoggerShared logger) :
-	ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
-	m_timer(this)
+	ServiceWorker(softwareInfo, serviceName, argc, argv, logger)
 {
 }
 
@@ -266,32 +265,16 @@ void AppDataServiceWorker::stopRtTrendsServerThread()
 	}
 }
 
-void AppDataServiceWorker::runTimer()
-{
-	connect(&m_timer, &QTimer::timeout, this, &AppDataServiceWorker::onTimer);
-
-	m_timer.setInterval(1000);
-	m_timer.start();
-}
-
-void AppDataServiceWorker::stopTimer()
-{
-	m_timer.stop();
-}
-
 void AppDataServiceWorker::initialize()
 {
 	DEBUG_LOG_MSG(logger(), "AppDataServiceWorker is started");
 
 	runCfgLoaderThread();
-	runTimer();
 }
 
 void AppDataServiceWorker::shutdown()
 {
 	clearConfiguration();
-
-	stopTimer();
 
 	stopTcpAppDataServer();
 	stopCfgLoaderThread();
@@ -407,10 +390,6 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 	{
 		applyNewConfiguration();
 	}
-}
-
-void AppDataServiceWorker::onTimer()
-{
 }
 
 bool AppDataServiceWorker::readAppDataSources(const QByteArray& fileData, const QString& profile)
