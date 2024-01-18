@@ -93,7 +93,7 @@ namespace Hardware
 	const QString PropertyNames::useLimits = "UseLimits";
 
 	const QString PropertyNames::isReflection = "IsReflection";
-	const QString PropertyNames::reflectedSignalId = "ReflectedSignalId";
+	const QString PropertyNames::reflectedSignalId = "ReflectedSignalID";
 	const QString PropertyNames::level = "Level";
 	const QString PropertyNames::valueOffset = "ValueOffset";
 	const QString PropertyNames::valueBit = "ValueBit";

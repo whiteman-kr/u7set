@@ -21,7 +21,7 @@ namespace Hardware
 
 		// Category DiagSignal
 		//
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::isReflection, PropertyNames::categoryDiagSignal, true, DiagSignal::isReflection)
+		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::isReflection, PropertyNames::categoryDiagSignal, true, DiagSignal::isReflection, DiagSignal::setIsReflection)
 			->setUpdateFromPreset(true)
 			.setReadOnly(true)
 			.setViewOrder(100);
