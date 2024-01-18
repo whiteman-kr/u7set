@@ -287,7 +287,7 @@ void BaseServiceStateWidget::updateClientsModel(const Network::ServiceClients& s
 
 		m_clientsTabModel->setData(m_clientsTabModel->index(i, 2), QString::fromStdString(si.equipmentid()));
 
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 3), QString::fromStdString(si.username()));
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 3), QString::fromStdString(si.osusername()));
 
 		m_clientsTabModel->setData(m_clientsTabModel->index(i, 4), QHostAddress(ci.ip()).toString());
 

@@ -109,9 +109,6 @@ private:
 	void runRtTrendsServerThread();
 	void stopRtTrendsServerThread();
 
-	void runTimer();
-	void stopTimer();
-
 	void onGetDataSourcesIDs(UdpRequest& request);
 	void onGetDataSourcesInfo(UdpRequest& request);
 	void onGetDataSourcesState(UdpRequest& request);
@@ -149,7 +146,5 @@ private:
 	TcpArchiveClientThread* m_tcpArchiveClientThread = nullptr;
 
 	RtTrends::ServerThread* m_rtTrendsServerThread = nullptr;
-
-	QTimer m_timer;
 };
 

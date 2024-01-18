@@ -674,13 +674,13 @@ namespace Tcp
 		{
 			if (m_ignoredSslErrors.contains(err.error()))
 			{
-				logWarning(QString("ignored SSL error - (%1) %2.").
+				logWarning(QString("SSL warning - (%1) %2.").
 							arg(static_cast<int>(err.error())).
 							arg(err.errorString()));
 			}
 			else
 			{
-				logError(QString("critical SSL error - (%1) %2.").
+				logError(QString("SSL critical error - (%1) %2.").
 							arg(static_cast<int>(err.error())).
 							arg(err.errorString()));
 				result = false;

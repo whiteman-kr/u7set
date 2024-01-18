@@ -4,6 +4,7 @@
 
 #include "SoftwareInfo.h"
 #include "version.h"
+#include <QHostInfo>
 
 SoftwareInfo::SoftwareInfo(E::SoftwareType softwareType,
 						   const QString& equipmentID) :
@@ -15,11 +16,13 @@ SoftwareInfo::SoftwareInfo(E::SoftwareType softwareType,
 	m_releaseType(U7SET_RELEASE_TYPE),
 	m_branchName(U7SET_BRANCH_NAME),
 	m_commitHash(U7SET_COMMIT_HASH),
-	m_userName(U7SET_USER_NAME),
+	m_buildUserName(U7SET_USER_NAME),
 	m_buildDate(U7SET_BUILD_DATE),
-	m_hostname(U7SET_HOSTNAME),
+	m_buildHostname(U7SET_HOSTNAME),
 	m_pipelineID(U7SET_PIPELINE_ID)
 {
+	m_hostname = QHostInfo::localHostName();
+
 #ifdef Q_OS_LINUX
 	m_osUsername = getenv("USER");
 #endif
@@ -62,11 +65,12 @@ void SoftwareInfo::clear()
 
 	m_branchName.clear();
 	m_commitHash.clear();
-	m_userName.clear();
+	m_buildUserName.clear();
 	m_buildDate.clear();
-	m_hostname.clear();
+	m_buildHostname.clear();
 	m_pipelineID = 0;
 
+	m_hostname.clear();
 	m_osUsername.clear();
 }
 
@@ -89,10 +93,12 @@ void SoftwareInfo::serializeTo(Network::SoftwareInfo* info) const
 
 	info->set_branchname(m_branchName.toStdString());
 	info->set_commithash(m_commitHash.toStdString());
-	info->set_username(m_userName.toStdString());
+	info->set_buildusername(m_buildUserName.toStdString());
 	info->set_builddate(m_buildDate.toStdString());
-	info->set_hostname(m_hostname.toStdString());
+	info->set_buildhostname(m_buildHostname.toStdString());
 	info->set_pipelineid(m_pipelineID);
+
+	info->set_hostname(m_hostname.toStdString());
 	info->set_osusername(m_osUsername.toStdString());
 }
 
@@ -109,9 +115,11 @@ void SoftwareInfo::serializeFrom(const Network::SoftwareInfo& info)
 
 	m_branchName = QString::fromStdString(info.branchname());
 	m_commitHash = QString::fromStdString(info.commithash());
-	m_userName = QString::fromStdString(info.username());
+	m_buildUserName = QString::fromStdString(info.buildusername());
 	m_buildDate = QString::fromStdString(info.builddate());
-	m_hostname = QString::fromStdString(info.hostname());
+	m_buildHostname = QString::fromStdString(info.buildhostname());
 	m_pipelineID = info.pipelineid();
+
+	m_hostname = QString::fromStdString(info.hostname());
 	m_osUsername = QString::fromStdString(info.osusername());
 }
