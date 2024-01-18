@@ -434,10 +434,10 @@ message SchemaItem
 
 	// Inherited from PosRectImpl, PosRectRotatable, PosLineImpl, PosConnectionImpl
 	//
-	optional SchemaItemRect Rect = 116;						// +PosRectImpl
+	optional SchemaItemRect Rect = 116;						// +PosRectImpl, PosRectRotatable
 	optional SchemaItemLine Line = 117;						// +PosLineImpl
 	optional SchemaItemPath Path = 118;						// +PosConnectionImpl
-	optional SchemaItemImage Image = 119;					// +PosRectImpl
+	optional SchemaItemImage Image = 119;					// +PosRectImpl, PosRectRotatable
 	optional SchemaItemFrame Frame = 120;					// +PosRectImpl
 	optional SchemaItemIndicator Indicator = 121;			// +PosRectImpl
 
@@ -453,8 +453,10 @@ message SchemaItem
 	optional SchemaItemInOut InOutSignal = 133;				// +Signal
 	optional SchemaItemUfb ufb = 134;						// +FblItemRect
 	optional SchemaItemTerminator terminator = 135;			// +FblItemRect
-	optional SchemaItemValue Value = 136;					// +PosRectImpl
-	optional SchemaItemImageValue ImageValue = 137;			// +PosRectImpl
+	optional SchemaItemValue Value = 136;					// +PosRectImpl, PosRectRotatable
+	optional SchemaItemImageValue ImageValue = 137;			// +PosRectImpl, PosRectRotatable
+
+	optional SchemaItemDiagValue DiagValue = 138;			// +PosRectImpl, PosRectRotatable
 
     optional SchemaItemBus BusItem = 150;					// +FblItemRect
 	optional SchemaItemBusComposer BusComposer = 151;		// +SchemaItemBus, FblItemRect
@@ -911,6 +913,27 @@ message SchemaItemImageValue
 	optional bool fillRect = 10 [default = false];
 
     repeated ImageItem images = 14;
+}
+
+//
+// SchemaItemDiagValue
+//
+message SchemaItemDiagValue
+{
+    optional string signalIds = 1;
+
+    optional double lineWeight = 4;
+	optional uint32 lineColor = 5;
+	optional uint32 fillColor = 6;
+	optional uint32 textColor = 7;
+	optional string text = 8;
+	optional FontParam font = 9;
+	optional bool drawRect = 10 [default = true];
+	optional int32 horzAlign = 11  [default = 4];		// Qt::AlignHCenter 0x0004 Centers horizontally in the available space.
+	optional int32 vertAlign = 12  [default = 128];		// Qt::AlignVCenter 0x0080 Centers vertically in the available space.
+
+    optional int32 precision = 13 [default = -1];		// -1: Take precision value from signal description
+	optional int32 analogFormat = 14 [default = 102];	// Default 102 (charcode for 'f') is AnalogFormat::f (format as [-]9.9)
 }
 
 //

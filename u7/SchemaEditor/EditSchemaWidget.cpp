@@ -23,6 +23,7 @@
 #include "../VFrame30/Bus.h"
 #include "../VFrame30/SchemaItemAfb.h"
 #include "../VFrame30/SchemaItemConst.h"
+#include "../VFrame30/SchemaItemDiagValue.h"
 #include "../VFrame30/SchemaItemFrame.h"
 #include "../VFrame30/SchemaItemImage.h"
 #include "../VFrame30/SchemaItemImageValue.h"
@@ -653,6 +654,18 @@ void EditSchemaWidget::createActions()
 		addItem(item);
 	});
 
+	// ----------------------------------------
+
+	m_addDiagSignalAction = new QAction(tr("DiagValue"), this);
+	m_addDiagSignalAction->setEnabled(true);
+	m_addDiagSignalAction->setIcon(QIcon(":/Images/Images/SchemaItemDiagValue.svg"));
+	connect(m_addDiagSignalAction, &QAction::triggered,
+			[this](bool)
+			{
+				auto item = std::make_shared<VFrame30::SchemaItemDiagValue>(schema()->unit());
+				addItem(item);
+			});
+
 	//
 	// Edit
 	//
@@ -1116,6 +1129,11 @@ void EditSchemaWidget::createActions()
 			m_addSubMenu->addAction(m_addPushButtonAction);
 			m_addSubMenu->addAction(m_addLineEditAction);
 			m_addSubMenu->addAction(m_addSliderAction);
+		}
+
+		if (isDiagSchema() == true)
+		{
+			m_addSubMenu->addAction(m_addDiagSignalAction);
 		}
 
 	m_editSubMenu = new QMenu(tr("Edit"), this);
@@ -3196,6 +3214,11 @@ bool EditSchemaWidget::isMonitorSchema() const
 bool EditSchemaWidget::isTuningSchema() const
 {
 	return schema()->isTuningSchema();
+}
+
+bool EditSchemaWidget::isDiagSchema() const
+{
+	return schema()->isDiagSchema();
 }
 
 std::shared_ptr<VFrame30::LogicSchema> EditSchemaWidget::logicSchema()

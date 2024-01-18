@@ -13,9 +13,14 @@ class AppSignalParam;
 class TuningSignalState;
 
 
+namespace HardwareLib
+{
+	class DiagSignal;
+}
+
 namespace VFrame30
 {
-	/*! \class SchemaItemValue
+	/*! \class SchemaItemDiagValue
 		\ingroup dynamicSchemaItems
 		\brief This item is used to display signal values
 
@@ -43,24 +48,24 @@ namespace VFrame30
 		\endcode
 
 		Parameters:<br>
-		<i>schemaItem</i> - a handle to schema item, type: SchemaItemValue.<br>
+		<i>schemaItem</i> - a handle to schema item, type: SchemaItemDiagValue.<br>
 
 		<b>PreDrawScript example:</b>
 
 		\code
-		(function(schemaItemValue)
+		(function(schemaItemDiagValue)
 		{
 			// Check for signals number
 			//
-			if (schemaItemValue.SignalIDs.length != 1)
+			if (schemaItemDiagValue.SignalIDs.length != 1)
 			{
-				schemaItemValue.Text = "No Signals!";
+				schemaItemDiagValue.Text = "No Signals!";
 				return;
 			}
 
 			// Take first signal identifier
 			//
-			let appSignalId = schemaItemValue.SignalIDs[0];
+			let appSignalId = schemaItemDiagValue.SignalIDs[0];
 
 			// Get data from TuningService
 			//
@@ -71,7 +76,7 @@ namespace VFrame30
 			{
 				// Signal was not found
 				//
-				schemaItemValue.Text = appSignalId;
+				schemaItemDiagValue.Text = appSignalId;
 			}
 			else
 			{
@@ -81,36 +86,32 @@ namespace VFrame30
 				{
 					// Signal state is valid
 					//
-					schemaItemValue.Text = signalState.Value;
-					schemaItemValue.TextColor = "black";
-					schemaItemValue.FillColor = "white";
-					schemaItemValue.LineColor = "#000000";
+					schemaItemDiagValue.Text = signalState.Value;
+					schemaItemDiagValue.TextColor = "black";
+					schemaItemDiagValue.FillColor = "white";
+					schemaItemDiagValue.LineColor = "#000000";
 				}
 				else
 				{
 					// Signal state is not valid
 					//
-					schemaItemValue.Text = "?";
-					schemaItemValue.TextColor = schemaItemValue.BlinkPhase ? "white" : "black";
-					schemaItemValue.FillColor = schemaItemValue.BlinkPhase ? "black" : "#A00000";
-					schemaItemValue.LineColor = "#A00000";
+					schemaItemDiagValue.Text = "?";
+					schemaItemDiagValue.TextColor = schemaItemDiagValue.BlinkPhase ? "white" : "black";
+					schemaItemDiagValue.FillColor = schemaItemDiagValue.BlinkPhase ? "black" : "#A00000";
+					schemaItemDiagValue.LineColor = "#A00000";
 				}
 			}
 		})
 		\endcode
 	*/
-	class SchemaItemValue final : public PosRectRotatable,
-								  public IMatsSchemaItemAssociations
+	class SchemaItemDiagValue final : public PosRectRotatable,
+									  public IMatsSchemaItemAssociations
 	{
 		Q_OBJECT
 
-		/// \brief Application signal identifiers array. Use <b>appSignalIDs.length</b> to get number of identifiers
-		Q_PROPERTY(QStringList signalIDs READ signalIds WRITE setSignalIds)
-		Q_PROPERTY(QStringList SignalIDs READ signalIds WRITE setSignalIds)
-
-		/// \brief Application signal identifiers array. Use <b>appSignalIDs.length</b> to get number of identifiers
-		Q_PROPERTY(QStringList appSignalIDs READ signalIds WRITE setSignalIds)
-		Q_PROPERTY(QStringList AppSignalIDs READ signalIds WRITE setSignalIds)
+		/// \brief Diagnostics signal identifiers array. Use <b>diagSignalIDs.length</b> to get number of identifiers.
+		Q_PROPERTY(QStringList diagSignalIDs READ diagSignalIds WRITE setDiagSignalIds)
+		Q_PROPERTY(QStringList DiagSignalIDs READ diagSignalIds WRITE setDiagSignalIds)
 
 		// Appearance
 		//
@@ -171,9 +172,9 @@ namespace VFrame30
 		Q_PROPERTY(int Precision READ precision WRITE setPrecision)
 
 	public:
-		SchemaItemValue(void);
-		explicit SchemaItemValue(SchemaUnit unit);
-		virtual ~SchemaItemValue(void) = default;
+		SchemaItemDiagValue(void);
+		explicit SchemaItemDiagValue(SchemaUnit unit);
+		virtual ~SchemaItemDiagValue(void) = default;
 
 	protected:
 		virtual void propertyDemand(const QString& prop) override;
@@ -194,19 +195,18 @@ namespace VFrame30
 		void drawHighlightPrivate(CDrawParam* drawParam) const;
 
 	protected:
-		void initDrawingResources() const;
 		void drawText(CDrawParam* drawParam, const Context* context, const QRectF& rect) const;
 
-		bool getSignalState(QString appSignalId, const Context* context, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const;
+		QString parseText(QString text, const Context* context, const Session& session, const HardwareLib::DiagSignal& signal/*, const AppSignalState& signalState*/) const;
+		QString formatNumber(double value, const HardwareLib::DiagSignal& signal) const;
 
-		QString parseText(QString text, const Context* context, const Session& session, const AppSignalParam& signal, const AppSignalState& signalState) const;
-		QString formatNumber(double value, const AppSignalParam& signal) const;
+		bool getSignalState(QString diagSignalObjectId, const Context* context, HardwareLib::DiagSignal* signalParam/*, AppSignalState* appSignalState*/) const;
 
 	protected:
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
 
-		// Java Script invocable specific for SchemaItemValue
+		// Java Script invocable specific for SchemaItemDiagValue
 		//
 	public:
 
@@ -223,16 +223,13 @@ namespace VFrame30
 		// Properties and Data
 		//
 	public:
-		QString signalIdsString() const;
-		QString signalIdsString(const Context* context) const;
-		void setSignalIdsString(const QString& value);
+		QString diagSignalIdsString() const;
+		QString diagSignalIdsString(const Context* context) const;
+		void setDiagSignalIdsString(const QString& value);
 
-		QStringList signalIds() const;
-		QStringList signalIds(const Context* context) const;
-		void setSignalIds(const QStringList& value);
-
-		E::SignalSource signalSource() const;
-		void setSignalSource(E::SignalSource value);
+		QStringList diagSignalIds() const;
+		QStringList diagSignalIds(const Context* context) const;
+		void setDiagSignalIds(const QStringList& value);
 
 		double lineWeight() const;
 		void setLineWeight(double lineWeight);
@@ -267,13 +264,12 @@ namespace VFrame30
 		void setAnalogFormat(E::AnalogFormat value);
 
 	private:
-		QStringList m_signalIds = {"#APPSIGNALID"};
-		E::SignalSource m_signalSource = E::SignalSource::AppDataService;
+		QStringList m_diagSignalIds = {"USB3_SDSA_CHASSIS01_MD00_SIGNALID"};
 
 		double m_lineWeight = 0.0;
 
 		QColor m_lineColor = {qRgb(0x00, 0x00, 0x00)};
-		QColor m_fillColor = {qRgb(0x00, 0x00, 0xC0)};
+		QColor m_fillColor = {qRgb(0x00, 0x64, 0x00)};
 		QColor m_textColor = {qRgb(0xF0, 0xF0, 0xF0)};
 
 		E::HorzAlign m_horzAlign = E::HorzAlign::AlignHCenter;
@@ -292,10 +288,5 @@ namespace VFrame30
 
 		int m_precision = -1;          // decimal places, -1 means take value from Signal
 		E::AnalogFormat m_analogFormat = E::AnalogFormat::f_9;
-
-		// Drawing resources
-		//
-		mutable std::unique_ptr<QPen> m_rectPen;
-		mutable std::unique_ptr<QBrush> m_fillBrush;
 	};
 } // namespace VFrame30
