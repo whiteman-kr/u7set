@@ -20,7 +20,17 @@ namespace Builder
 	public:
 		AcquiredDiagSignal() : deviceType(Hardware::DeviceType::DiagSignal) {}
 
+		E::DiagLevel diagLevel = E::DiagLevel::Message;
 		QString diagSignalTypeID;
+		QString validitySignalID;
+		int valueSizeBit = 0;
+		int discreteContainerSize = 0;
+		bool logChanges = false;
+		bool archive = false;
+		bool reserved = false;
+		E::ApertureType apertureType = E::ApertureType::AbsValue;
+		double coarseAperture = 0;
+		double fineAperture = 0;
 		Address16 absAddr;					// signal data address from beginning of module diag data offset in RUP diag packet
 											// calculate as controller.DiagDataOffset + diagSignal.DataOffset
 	};

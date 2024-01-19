@@ -17441,6 +17441,7 @@ namespace Builder
 			AcquiredDiagSignal& ads = acquiredDiagSignals.push_back({});
 
 			ads.equipmentID = diagSignal->equipmentIdTemplate();
+			ads.diagSignalTypeID = diagSignal->
 		}
 
 		//
