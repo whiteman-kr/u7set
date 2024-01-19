@@ -185,8 +185,9 @@ namespace VFrame30
 		inline static const QString textValuePropDescription{"$(value) Signal value\n"
 															 "$(caption) Signal caption\n"
 															 "$(signalid) SignalID (CustomSignalID)\n"
-															 "$(appsignalid) AppSignalID (#APPSIGANLID)\n"
-															 "$(equipmentid) Signal EquipmentID (LM for internal signals, input/output equipment port for IO signals)\n"};
+															 "$(appsignalid) AppSignalID (#APPSIGNALID)\n"
+															 "$(equipmentid) Signal EquipmentID (LM for internal signals, input/output equipment port for IO signals)\n"
+															 "$(units) Signal units\n"};
 		//"$(highlimit) High limit\n"
 		//"$(lowlimit) Low limit"};
 
