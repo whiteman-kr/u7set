@@ -37,6 +37,12 @@ namespace Hardware
 	public:
 		// DiagSignal properties
 		//
+		[[nodiscard]] bool isReflection() const;
+		void setIsReflection(bool value);
+
+		[[nodiscard]] const QString& reflectedSignalId() const;
+		void setReflectedSignalId(const QString& value);
+
 		[[nodiscard]] E::DiagLevel level() const;
 		void setLevel(E::DiagLevel value);
 
@@ -95,7 +101,11 @@ namespace Hardware
 		// Data
 		//
 	private:
+		bool m_isReflection = false;	// The signal is a reflected valued of another signal
+		QString m_reflectedSignalId;	// The reflected signal id if m_isReflection is true
+
 		E::DiagLevel m_level = E::DiagLevel::Message;
+		
 		QString m_signalTypeId;
 		QString m_validitySignalId;
 
@@ -111,7 +121,7 @@ namespace Hardware
 		bool m_logChanges = false;
 		bool m_archive = true;
 		bool m_reserved = false;
-		
+
 		double m_coarseAperture = 1;
 		double m_fineAperture = 0.5;
 		E::ApertureType m_apertureType = E::ApertureType::RangePercent;
@@ -122,7 +132,7 @@ namespace Hardware
 		//
 	private:
 		std::shared_ptr<Hardware::DiagSignalTypeObject> m_diagSignalType; // Bind via m_signalTypeId
-		std::shared_ptr<Hardware::DiagSignal> m_validitySignal;     // Bind via m_validitySignalId
+		std::shared_ptr<Hardware::DiagSignal> m_validitySignal;           // Bind via m_validitySignalId
 	};
 
 } // namespace Hardware

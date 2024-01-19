@@ -561,6 +561,11 @@ namespace VFrame30
 
 	// IMatsSchemaItemAssociations implementation.
 	//
+	QStringList SchemaItemValue::associatedDiagObjectIds() const
+	{
+		return {};
+	}
+
 	QStringList SchemaItemValue::associatedAppSignalIds() const
 	{
 		return signalIds();

@@ -99,6 +99,8 @@ qt_add_library(${TARGET} STATIC
 	SchemaItemConst.h
 	SchemaItemControl.cpp
 	SchemaItemControl.h
+	SchemaItemDiagValue.cpp
+	SchemaItemDiagValue.h
 	SchemaItemFrame.cpp
 	SchemaItemFrame.h
 	SchemaItemImage.cpp

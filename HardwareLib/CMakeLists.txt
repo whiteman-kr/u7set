@@ -59,6 +59,7 @@ target_precompile_headers(${TARGET} PUBLIC
 	<map>
 	<memory>
 	<optional>
+	<ranges>
 	<queue>
 	<set>
 	<type_traits>

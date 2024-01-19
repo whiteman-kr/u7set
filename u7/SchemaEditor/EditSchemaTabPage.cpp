@@ -96,7 +96,7 @@ EditSchemaTabPage::EditSchemaTabPage(QTabWidget* tabWidget,
 		m_toolBar->addAction(m_schemaWidget->m_addBusExtractor);
 	}
 
-	if (schema->isUfbSchema())
+	if (schema->isUfbSchema() == true)
 	{
 		m_toolBar->addSeparator();
 		m_toolBar->addAction(m_schemaWidget->m_addLinkAction);
@@ -117,7 +117,7 @@ EditSchemaTabPage::EditSchemaTabPage(QTabWidget* tabWidget,
 		m_toolBar->addAction(m_schemaWidget->m_addBusExtractor);
 	}
 
-	if (schema->isMonitorSchema())
+	if (schema->isMonitorSchema() == true)
 	{
 		m_toolBar->addSeparator();
 		m_toolBar->addAction(m_schemaWidget->m_addValueAction);
@@ -128,7 +128,7 @@ EditSchemaTabPage::EditSchemaTabPage(QTabWidget* tabWidget,
 		m_toolBar->addAction(m_schemaWidget->m_addIndicatorAction);
 	}
 
-	if (schema->isTuningSchema())
+	if (schema->isTuningSchema() == true)
 	{
 		m_toolBar->addSeparator();
 		m_toolBar->addAction(m_schemaWidget->m_addValueAction);
@@ -136,6 +136,12 @@ EditSchemaTabPage::EditSchemaTabPage(QTabWidget* tabWidget,
 		m_toolBar->addAction(m_schemaWidget->m_addPushButtonAction);
 		m_toolBar->addAction(m_schemaWidget->m_addLineEditAction);
 		m_toolBar->addAction(m_schemaWidget->m_addSliderAction);
+	}
+
+	if (schema->isDiagSchema() == true)
+	{
+		m_toolBar->addSeparator();
+		m_toolBar->addAction(m_schemaWidget->m_addDiagSignalAction);
 	}
 
 	m_toolBar->addSeparator();

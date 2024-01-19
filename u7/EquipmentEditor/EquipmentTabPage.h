@@ -90,6 +90,7 @@ private:
 	QAction* m_addControllerAction = nullptr;
 	QAction* m_addAppSignalAction = nullptr;
 	QAction* m_addDiagSignalAction = nullptr;
+	QAction* m_addDiagSignalReflectionAction = nullptr;
 	QAction* m_addWorkstationAction = nullptr;
 	QAction* m_addSoftwareAction = nullptr;
 

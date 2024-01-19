@@ -50,6 +50,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	m_addObjectMenu->addAction(m_addControllerAction);
 	m_addObjectMenu->addAction(m_addAppSignalAction);
 	m_addObjectMenu->addAction(m_addDiagSignalAction);
+	m_addObjectMenu->addAction(m_addDiagSignalReflectionAction);
 	m_addObjectMenu->addAction(m_addWorkstationAction);
 	m_addObjectMenu->addAction(m_addSoftwareAction);
 
@@ -258,6 +259,11 @@ void EquipmentTabPage::CreateActions()
 	m_addDiagSignalAction->setStatusTip(tr("Add diagnostics signal to the configuration..."));
 	m_addDiagSignalAction->setEnabled(false);
 	connect(m_addDiagSignalAction, &QAction::triggered, m_equipmentView, &EquipmentView::addDiagSignal);
+
+	m_addDiagSignalReflectionAction = new QAction(tr("DiagSignal Reflection"), this);
+	m_addDiagSignalReflectionAction->setStatusTip(tr("Add reflection to diagnostics signal to the configuration..."));
+	m_addDiagSignalReflectionAction->setEnabled(false);
+	connect(m_addDiagSignalReflectionAction, &QAction::triggered, m_equipmentView, &EquipmentView::addDiagSignalReflection);
 
 	m_addWorkstationAction = new QAction(tr("Workstation"), this);
 	m_addWorkstationAction->setStatusTip(tr("Add workstation to the configuration..."));
@@ -558,6 +564,7 @@ void EquipmentTabPage::setActionState()
 	assert(m_addControllerAction);
 	assert(m_addAppSignalAction);
 	assert(m_addDiagSignalAction);
+	assert(m_addDiagSignalReflectionAction);
 	assert(m_addWorkstationAction);
 	assert(m_addSoftwareAction);
 	assert(m_copyObjectAction);
@@ -616,6 +623,7 @@ void EquipmentTabPage::setActionState()
 	m_addControllerAction->setEnabled(false);
 	m_addAppSignalAction->setEnabled(false);
 	m_addDiagSignalAction->setEnabled(false);
+	m_addDiagSignalReflectionAction->setEnabled(false);
 
 	m_addWorkstationAction->setEnabled(false);
 	m_addSoftwareAction->setEnabled(false);
@@ -985,6 +993,7 @@ void EquipmentTabPage::setActionState()
 			m_addControllerAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::Controller));
 			m_addAppSignalAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::AppSignal));
 			m_addDiagSignalAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::DiagSignal));
+			m_addDiagSignalReflectionAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::DiagSignal));
 
 			m_addPresetRackAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::Rack));
 			m_addPresetChassisAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::Chassis));
