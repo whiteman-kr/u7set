@@ -5746,7 +5746,7 @@ void DbWorker::slot_checkinSignals(const std::vector<int>& signalIDs, QString co
 
 	addLogRecord(db, logMessage);
 
-	request.append(QString(",'%1')").arg(comment));
+	request.append(QString(",'%1')").arg(DbWorker::toSqlStr(comment)));
 
 	QSqlQuery q(db);
 
