@@ -1737,7 +1737,7 @@ bool AppSignal::readFromXml(XmlReadHelper& xml)
 		}
 		else
 		{
-			QString name = spv.name();
+			name = spv.name();
 
 			if (name == AppSignalPropNames::ELECTRIC_UNIT)
 			{
@@ -3077,7 +3077,7 @@ const AppSignal* AppSignalSet::privateGetSignal(const QString& appSignalID) cons
 
 	qsizetype index = it->second;
 
-	Q_ASSERT(index >= 0 && index < m_signals.size());
+	Q_ASSERT(index >= 0 && index < std::ssize(m_signals));
 
 	return m_signals[index];
 }
@@ -3093,7 +3093,7 @@ const AppSignal* AppSignalSet::privateGetSignalByID(int signalID) const
 
 	qsizetype index = it->second;
 
-	Q_ASSERT(index >= 0 && index < m_signals.size());
+	Q_ASSERT(index >= 0 && index < std::ssize(m_signals));
 
 	return m_signals[index];
 }
@@ -3109,7 +3109,7 @@ const AppSignal* AppSignalSet::privateGetSignalByHash(Hash appSignalIDHash) cons
 
 	qsizetype index = it->second;
 
-	Q_ASSERT(index >= 0 && index < m_signals.size());
+	Q_ASSERT(index >= 0 && index < std::ssize(m_signals));
 
 	return m_signals[index];
 }

@@ -21,6 +21,14 @@ message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+if(MSVC)
+	add_compile_options(/W4)
+    add_compile_options(/wd4201) # nonstandard extension used: nameless struct/union
+    add_compile_options(/wd4458) # declaration of 'identifier' hides class member
+endif()
+
 
 # Add LTO for Release and Windows only. 
 # It is diasbale for Unix to speed up CI bulid.
