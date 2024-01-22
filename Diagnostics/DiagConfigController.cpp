@@ -20,10 +20,9 @@ bool DiagConfigController::updateConfiguration(const ClientLib::ConfigurationInf
 
 	config.startSchemaId = settings.startSchemaId;
 
-	config.appDataServices = settings.appDataServices;
 	config.diagDataServices = settings.diagDataServices;
-	//config.diagDataRealTimeServices = settings.diagDataServices;
-	//config.archiveServices = settings.archiveServices;
+	config.diagDataRealTimeServices = settings.diagDataServices;
+	config.archiveServices = settings.archiveServices;
 
 	//--
 	//
@@ -113,38 +112,24 @@ void DiagConfigController::dump(const DiagConfigSettings& config) const
 
 	// --
 	//
-	//m_logFile.writeMessage(tr("DiagDataRealTimeService(s): %1.").arg(config.diagDataRealTimeServices.size()));
-	//qDebug() << "DiagDataRealTimeService(s):";
+	m_logFile.writeMessage(tr("DiagDataRealTimeService(s): %1.").arg(config.diagDataRealTimeServices.size()));
+	qDebug() << "DiagDataRealTimeService(s):";
 
-	//for (const auto& service : config.diagDataRealTimeServices)
-	//{
-	//	qDebug() << "Service: id, address: " << service.equipmentId << ", " << service.address.addressPortStr();
-	//	m_logFile.writeMessage(tr("Service: id, address: %1, %2.").arg(service.equipmentId).arg(service.address.addressPortStr()));
-	//}
-
-	// --
-	//
-	//m_logFile.writeMessage(tr("ArchiveService(s): %1.").arg(config.archiveServices.size()));
-	//qDebug() << "ArchiveService(s):";
-	//for (const auto& service : config.archiveServices)
-	//{
-	//	qDebug() << "Service: id, address: " << service.equipmentId << ", " << service.address.addressPortStr();
-	//	m_logFile.writeMessage(tr("Service: id, address: %1, %2.").arg(service.equipmentId).arg(service.address.addressPortStr()));
-	//}
+	for (const auto& service : config.diagDataRealTimeServices)
+	{
+		qDebug() << "Service: id, address: " << service.equipmentId << ", " << service.address.addressPortStr();
+		m_logFile.writeMessage(tr("Service: id, address: %1, %2.").arg(service.equipmentId).arg(service.address.addressPortStr()));
+	}
 
 	// --
 	//
-	//m_logFile.writeMessage(QString("TuningEnabled = %1").arg(config.tuningEnabled));
-	//if (config.tuningEnabled == true)
-	//{
-	//	for (const auto& ts : config.tuningServices)
-	//	{
-	//		m_logFile.writeMessage(tr("TuningService (id, address): %1, %2.").arg(ts.shortenId).arg(ts.clientRequestAddress.toString()));
-	//		m_logFile.writeMessage(tr("TuningSources: %1.").arg(ts.drivenSources.join(", ")));
-	//	}
-	//	m_logFile.writeMessage(tr("TuningUserAccounts: %1.").arg(config.tuningUserAccounts.join(", ")));
-	//	m_logFile.writeMessage(tr("TuningSessionTimeout: %1.").arg(config.tuningSessionTimeout));
-	//}
+	m_logFile.writeMessage(tr("ArchiveService(s): %1.").arg(config.archiveServices.size()));
+	qDebug() << "ArchiveService(s):";
+	for (const auto& service : config.archiveServices)
+	{
+		qDebug() << "Service: id, address: " << service.equipmentId << ", " << service.address.addressPortStr();
+		m_logFile.writeMessage(tr("Service: id, address: %1, %2.").arg(service.equipmentId).arg(service.address.addressPortStr()));
+	}
 
 	return;
 }

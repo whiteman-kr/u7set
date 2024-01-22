@@ -272,6 +272,8 @@ public:
 	QHostAddress clientRequestNetmask;
 	E::SecurityLevel securityLevel = E::SecurityLevel::Basic;
 
+	HostAddressPort rtTrendsRequestIP;
+
 private:
 	// this methods should be call by SoftwareSettingsSet only
 	//
@@ -512,9 +514,8 @@ public:
 	SoftwareEndpoint::ConfigService configService1;
 	SoftwareEndpoint::ConfigService configService2;
 
-	std::vector<SoftwareEndpoint::AppDataService> appDataServices;
 	std::vector<SoftwareEndpoint::DiagDataService> diagDataServices;
-	//std::vector<SoftwareEndpoint::ArchiveService> archiveServices;
+	std::vector<SoftwareEndpoint::ArchiveService> archiveServices;
 
 	QString startSchemaId;
 	QString schemaTags;

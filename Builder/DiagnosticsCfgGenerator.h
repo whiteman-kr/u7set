@@ -19,18 +19,12 @@ namespace Builder
 
 	protected:
 		bool initSchemaTags();
-		//bool initTuningSources();
-
 		bool writeSchemasByTags();
-
-		// Generate tuning signals file
-		//
-		//bool writeTuningSignals();
+		bool writeAppSignals();
+		bool writeBehaviorFile();
 		bool writeDiagnosticsLogo();
 
 	private:
-		//QStringList m_tuningSources;
-
 		VFrame30::SchemaDetailsSet m_detailsSet;
 		QStringList m_schemaTagList;		// Generated in writeDiagnosticsSettings
 	};

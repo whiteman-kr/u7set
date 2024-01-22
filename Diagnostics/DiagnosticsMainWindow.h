@@ -160,7 +160,7 @@ private:
 	std::unique_ptr<VFrame30::AppSignalController> m_appSignalController;
 	std::unique_ptr<VFrame30::LogController> m_logController;
 
-	ClientLib::AdsConnection m_adsConnection{m_appSignalManager, &m_appSignalManager, &m_LogFile};
+	//ClientLib::AdsConnection m_adsConnection{m_appSignalManager, &m_appSignalManager, &m_LogFile};
 
 	DialogAlert m_dialogAlert;
 

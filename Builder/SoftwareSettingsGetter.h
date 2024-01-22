@@ -245,9 +245,6 @@ private:
 
 	bool readDiagDataServiceAndArchiveSettings(const Builder::Context* context,
 											   const Hardware::Software* software);
-
-	bool readAppDataService(const Builder::Context* context,
-							const Hardware::Software* software);
 };
 
 // -------------------------------------------------------------------------------------------
