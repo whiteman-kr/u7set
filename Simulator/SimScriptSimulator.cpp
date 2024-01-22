@@ -558,6 +558,10 @@ namespace Sim
 
 	bool ScriptSimulator::waitForSignalOverrides(qint64 timeoutMs)
 	{
+		Q_UNUSED(timeoutMs);
+
+		// Always wait for one workcycle, it is a simulation, it is enough.
+		//
 		return startForMs(1);
 	}
 

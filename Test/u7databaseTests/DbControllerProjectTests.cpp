@@ -94,7 +94,7 @@ void DbControllerProjectTests::getProjectListTest()
 		db.setPassword(m_databaseUserPassword);
 		db.setDatabaseName("postgres");
 
-		bool ok = db.open();
+		ok = db.open();
 		QVERIFY2(ok == true, qPrintable("Error: Can not connect to postgres database! " + db.lastError().databaseText()));
 
 		QSqlQuery query(db);

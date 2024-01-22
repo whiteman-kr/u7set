@@ -152,6 +152,8 @@ namespace VFrame30
 
 	void SchemaItemSlider::drawSliderControl(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
 	{
+		Q_UNUSED(layer);
+
 		QPainter* painter = drawParam->painter();
 		const QStyle* style = QApplication::style();
 		QRectF r = boundingRectInDocPt(drawParam);
@@ -444,6 +446,7 @@ namespace VFrame30
 
 	void SchemaItemSlider::valueChanged(int value)
 	{
+		Q_UNUSED(value);
 		return runEventScript("ValueChanged", m_scriptValueChanged, m_jsValueChanged, dynamic_cast<QSlider*>(sender()));
 	}
 

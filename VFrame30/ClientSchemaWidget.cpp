@@ -497,6 +497,8 @@ namespace VFrame30
 	
 	void ClientSchemaWidget::setZoomMode(VFrame30::ZoomMode zoomMode, bool repaint)
 	{
+		Q_UNUSED(repaint);
+
 		m_zoomMode = zoomMode;
 
 		if (m_zoomMode != ZoomMode::Manual)

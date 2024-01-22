@@ -117,6 +117,8 @@ namespace VFrame30
 
 	void SchemaItemControl::updateWidgetProperties(QWidget* widget, bool editMode) const
 	{
+		Q_UNUSED(editMode);
+
 		if (widget == nullptr)
 		{
 			assert(widget);
