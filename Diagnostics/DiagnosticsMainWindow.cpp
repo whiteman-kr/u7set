@@ -715,22 +715,14 @@ void DiagnosticsMainWindow::updateStatusBar()
 							   m_statusBarConfigConnection);
 	}
 
-	// AppDataService connection
-	//
-	{
-		showSoftwareConnection(tr("AppDataService"),
-							   m_adsConnection.tcpSignalConnStates(),
-							   m_statusBarAppDataConnection);
-	}
-//
-//	// TuningService connection
-//	//
-//	{
-//		showSoftwareConnection(tr("TuningService"),
-//							   m_tuningConnection.tcpTuningConnStates(),
-//							   m_statusBarTuningConnection);
-//	}
-//
+	//// AppDataService connection
+	////
+	//{
+	//	showSoftwareConnection(tr("AppDataService"),
+	//						   m_adsConnection.tcpSignalConnStates(),
+	//						   m_statusBarAppDataConnection);
+	//}
+
 	// BuildNo
 	//
 	{
@@ -1416,10 +1408,9 @@ void DiagnosticsMainWindow::slot_configurationArrived(DiagConfigSettings configu
 {
 	// Update AppSignalManager with specific data
 	//
-	m_adsConnection.updateConnections(m_configController.softwareInfo(), configuration.appDataServices);
-
+	
+	//m_adsConnection.updateConnections(m_configController.softwareInfo(), configuration.appDataServices);
 	//m_appSignalManager.setSetpoints(m_configController.setpoints());
-
 
 	m_logoImage = configuration.logoImage;
 

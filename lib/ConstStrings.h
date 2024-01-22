@@ -38,6 +38,7 @@ namespace EquipmentPropNames
 	inline const QString DIAG_DATA_IP("DiagDataIP");
 	inline const QString DIAG_DATA_PORT("DiagDataPort");
 	inline const QString DIAG_DATA_SERVICE_ID("DiagDataServiceID");
+	inline const QString DIAG_DATA_SERVICE_IDS("DiagDataServiceIDs");
 	inline const QString DIAG_DATA_SERVICE_IP("DiagDataServiceIP");
 	inline const QString DIAG_DATA_SERVICE_PORT("DiagDataServicePort");
 	inline const QString DIAG_DATA_SERVICE_NETMASK("DiagDataServiceNetmask");

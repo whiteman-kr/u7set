@@ -10,10 +10,9 @@ struct DiagConfigSettings
 
 	ClientLib::ConfigurationInfo configInfo;
 
-	std::vector<SoftwareEndpoint::AppDataService> appDataServices;
 	std::vector<SoftwareEndpoint::DiagDataService> diagDataServices;
-	//std::vector<SoftwareEndpoint::DiagDataService> diagDataRealTimeServices;
-	//std::vector<SoftwareEndpoint::ArchiveService> archiveServices;
+	std::vector<SoftwareEndpoint::DiagDataService> diagDataRealTimeServices;
+	std::vector<SoftwareEndpoint::ArchiveService> archiveServices;
 
 	QString startSchemaId;
 	QString globalScript;

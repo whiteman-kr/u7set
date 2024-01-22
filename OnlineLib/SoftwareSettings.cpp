@@ -598,6 +598,9 @@ bool DiagDataServiceSettings::writeToXml(XmlWriteHelper& xml) const
 							 EquipmentPropNames::CLIENT_REQUEST_PORT, clientRequestIP);
 	xml.writeHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, clientRequestNetmask);
 
+	xml.writeHostAddressPort(EquipmentPropNames::RT_TRENDS_REQUEST_IP,
+							 EquipmentPropNames::RT_TRENDS_REQUEST_PORT, rtTrendsRequestIP);
+
 	xml.writeEnumKeyElement<E::SecurityLevel>(EquipmentPropNames::SECURITY_LEVEL, securityLevel);
 
 	writeEndSettings(xml);	// </Settings>
@@ -632,6 +635,9 @@ bool DiagDataServiceSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
 									  EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestIP);
 	result &= xml.readHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
+
+	result &= xml.readHostAddressPort(EquipmentPropNames::RT_TRENDS_REQUEST_IP,
+									  EquipmentPropNames::RT_TRENDS_REQUEST_PORT, &rtTrendsRequestIP);
 
 	result &= xml.readEnumKeyElement<E::SecurityLevel>(EquipmentPropNames::SECURITY_LEVEL, &securityLevel, true);
 
@@ -1630,23 +1636,6 @@ bool DiagnosticsSettings::writeToXml(XmlWriteHelper& xml) const
 	xml.writeStringElement(EquipmentPropNames::START_SCHEMA_ID, startSchemaId);
 	xml.writeStringElement(EquipmentPropNames::SCHEMA_TAGS, schemaTags);
 
-	// AppDataServices
-	//
-	for (const SoftwareEndpoint::AppDataService& ads : appDataServices)
-	{
-		xml.writeStartElement(XmlElement::APP_DATA_SERVICE);
-
-		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, ads.equipmentId);
-
-		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, ads.address.addressStr());
-		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, ads.address.port());
-
-		xml.writeStringAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_IP, ads.realtimeAddress.addressStr());
-		xml.writeIntAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_PORT, ads.realtimeAddress.port());
-
-		xml.writeEndElement();			// </AppDataService>
-	}
-
 	// DiagDataServices
 	//
 	for (const SoftwareEndpoint::DiagDataService& dds : diagDataServices)
@@ -1666,18 +1655,18 @@ bool DiagnosticsSettings::writeToXml(XmlWriteHelper& xml) const
 
 	// ArchiveServices
 	//
-	//for (const SoftwareEndpoint::ArchiveService& as : archiveServices)
-	//{
-	//	xml.writeStartElement(XmlElement::ARCHIVE_SERVICE);
+	for (const SoftwareEndpoint::ArchiveService& as : archiveServices)
+	{
+		xml.writeStartElement(XmlElement::ARCHIVE_SERVICE);
 
-	//	xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, as.equipmentId);
-	//	xml.writeStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_ID, as.appDataServiceId);
+		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, as.equipmentId);
+		xml.writeStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_ID, as.appDataServiceId);
 
-	//	xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, as.address.addressStr());
-	//	xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, as.address.port());
+		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, as.address.addressStr());
+		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, as.address.port());
 
-	//	xml.writeEndElement();			// </ArchiveService>
-	//}
+		xml.writeEndElement();			// </ArchiveService>
+	}
 
 	// --
 	//
@@ -1744,29 +1733,6 @@ bool DiagnosticsSettings::readFromXml(XmlReadHelper& xml)
 			continue;
 		}
 
-		if (xml.name() == XmlElement::APP_DATA_SERVICE)
-		{
-			SoftwareEndpoint::AppDataService ads;
-			QString clientIp;
-			int clientPort = 0;
-			QString rtIp;
-			int rtPort = 0;
-
-			result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &ads.equipmentId);
-			result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &clientIp);
-			result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &clientPort);
-			result &= xml.readStringAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_IP, &rtIp);
-			result &= xml.readIntAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_PORT, &rtPort);
-
-			ads.address.setAddressPort(clientIp, clientPort);
-			ads.realtimeAddress.setAddressPort(rtIp, rtPort);
-
-			appDataServices.push_back(ads);
-
-			xml.skipCurrentElement();
-			continue;
-		}
-
 		if (xml.name() == XmlElement::DIAG_DATA_SERVICE)
 		{
 			SoftwareEndpoint::DiagDataService dds;
@@ -1790,27 +1756,27 @@ bool DiagnosticsSettings::readFromXml(XmlReadHelper& xml)
 			continue;
 		}
 
-		//if (xml.name() == XmlElement::ARCHIVE_SERVICE)
-		//{
-		//	SoftwareEndpoint::ArchiveService archiveService;
+		if (xml.name() == XmlElement::ARCHIVE_SERVICE)
+		{
+			SoftwareEndpoint::ArchiveService archiveService;
 
-		//	QString clientRequestIp;
-		//	int clientRequestPort = 0;
+			QString clientRequestIp;
+			int clientRequestPort = 0;
 
 
-		//	result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &archiveService.equipmentId);
-		//	result &= xml.readStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_ID, &archiveService.appDataServiceId);
+			result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &archiveService.equipmentId);
+			result &= xml.readStringAttribute(EquipmentPropNames::APP_DATA_SERVICE_ID, &archiveService.appDataServiceId);
 
-		//	result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &clientRequestIp);
-		//	result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestPort);
+			result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &clientRequestIp);
+			result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestPort);
 
-		//	archiveService.address.setAddressPort(clientRequestIp, clientRequestPort);
+			archiveService.address.setAddressPort(clientRequestIp, clientRequestPort);
 
-		//	archiveServices.push_back(archiveService);
+			archiveServices.push_back(archiveService);
 
-		//	xml.skipCurrentElement();
-		//	continue;
-		//}
+			xml.skipCurrentElement();
+			continue;
+		}
 
 		// Unknown element
 		//
@@ -1819,9 +1785,9 @@ bool DiagnosticsSettings::readFromXml(XmlReadHelper& xml)
 	}
 
 	SoftwareSettings::setShortId<SoftwareEndpoint::DiagDataService>(&diagDataServices);
-	//SoftwareSettings::setShortId<SoftwareEndpoint::ArchiveService>(&archiveServices);
+	SoftwareSettings::setShortId<SoftwareEndpoint::ArchiveService>(&archiveServices);
 
-	//result &= (diagDataServices.empty() == false);
+	result &= (diagDataServices.empty() == false);
 
 	return result;
 }

@@ -601,7 +601,7 @@ bool AppDataServiceSettingsGetter::readSettings(const Builder::Context* context,
 
 // -------------------------------------------------------------------------------------
 //
-// DiagDataServiceSettingsGettter class implementation
+// DiagDataServiceSettingsGetter class implementation
 //
 // -------------------------------------------------------------------------------------
 
@@ -635,6 +635,14 @@ bool DiagDataServiceSettingsGetter::readSettings(const Builder::Context* context
 											  EquipmentPropNames::CLIENT_REQUEST_PORT,
 											  &clientRequestIP,
 											  false, "", 0, log);
+
+	int rtTrendsRequestPort = 0;
+
+	result &= DeviceHelper::getPortProperty(software, EquipmentPropNames::RT_TRENDS_REQUEST_PORT,
+											&rtTrendsRequestPort, true, PORT_DIAG_DATA_SERVICE_RT_TRENDS_REQUEST, log);
+
+	rtTrendsRequestIP.setAddressPort(clientRequestIP.addressStr(), rtTrendsRequestPort);
+
 
 	result &= DeviceHelper::getIPv4Property(software, EquipmentPropNames::CLIENT_REQUEST_NETMASK,
 											&clientRequestNetmask, false, "", log);
@@ -1526,16 +1534,13 @@ bool MonitorSettingsGetter::readSettings(const Builder::Context* context,
 	TEST_PTR_RETURN_FALSE(context);
 
 	Builder::IssueLogger* log = context->m_log;
-
 	TEST_PTR_RETURN_FALSE(log);
 	TEST_PTR_LOG_RETURN_FALSE(software, log);
 
 	const Hardware::EquipmentSet* equipment = context->m_equipmentSet.get();
-
 	TEST_PTR_LOG_RETURN_FALSE(equipment, log);
 
 	bool result = true;
-
 	result &= getCfgServiceConnection(equipment, software,
 									  &configService1.equipmentId, &configService1.address,
 									  &configService2.equipmentId, &configService2.address,
@@ -1544,7 +1549,6 @@ bool MonitorSettingsGetter::readSettings(const Builder::Context* context,
 	// StartSchemaID
 	//
 	result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::START_SCHEMA_ID, &startSchemaId, log);
-
 	RETURN_IF_FALSE(result);
 
 	startSchemaId = startSchemaId.trimmed();
@@ -1552,7 +1556,6 @@ bool MonitorSettingsGetter::readSettings(const Builder::Context* context,
 	// SchemaTags
 	//
 	result = DeviceHelper::getStrProperty(software, EquipmentPropNames::SCHEMA_TAGS, &schemaTags, log);
-
 	RETURN_IF_FALSE(result);
 
 	QStringList schemaTagList = schemaTags.split(QRegularExpression("\\W+"), Qt::SkipEmptyParts);
@@ -1564,12 +1567,12 @@ bool MonitorSettingsGetter::readSettings(const Builder::Context* context,
 
 	schemaTags = schemaTagList.join(Separator::SEMICOLON);
 
+	// --
+	//
 	result = readAppDataServiceAndArchiveSettings(context, software);
-
 	RETURN_IF_FALSE(result);
 
 	result = readTuningServiceSettings(context, software);
-
 	RETURN_IF_FALSE(result);
 
 	return result;
@@ -1791,16 +1794,13 @@ bool DiagnosticsSettingsGetter::readSettings(const Builder::Context* context,
 	TEST_PTR_RETURN_FALSE(context);
 
 	Builder::IssueLogger* log = context->m_log;
-
 	TEST_PTR_RETURN_FALSE(log);
 	TEST_PTR_LOG_RETURN_FALSE(software, log);
 
 	const Hardware::EquipmentSet* equipment = context->m_equipmentSet.get();
-
 	TEST_PTR_LOG_RETURN_FALSE(equipment, log);
 
 	bool result = true;
-
 	result &= getCfgServiceConnection(equipment, software,
 									  &configService1.equipmentId, &configService1.address,
 									  &configService2.equipmentId, &configService2.address,
@@ -1809,7 +1809,6 @@ bool DiagnosticsSettingsGetter::readSettings(const Builder::Context* context,
 	// StartSchemaID
 	//
 	result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::START_SCHEMA_ID, &startSchemaId, log);
-
 	RETURN_IF_FALSE(result);
 
 	startSchemaId = startSchemaId.trimmed();
@@ -1817,7 +1816,6 @@ bool DiagnosticsSettingsGetter::readSettings(const Builder::Context* context,
 	// SchemaTags
 	//
 	result = DeviceHelper::getStrProperty(software, EquipmentPropNames::SCHEMA_TAGS, &schemaTags, log);
-
 	RETURN_IF_FALSE(result);
 
 	QStringList schemaTagList = schemaTags.split(QRegularExpression("\\W+"), Qt::SkipEmptyParts);
@@ -1829,18 +1827,10 @@ bool DiagnosticsSettingsGetter::readSettings(const Builder::Context* context,
 
 	schemaTags = schemaTagList.join(Separator::SEMICOLON);
 
-	// TODO: readDiagDataServiceAndArchiveSettings, readAppDataService
+	// --
 	//
-	int TODO_readDiagDataServiceAndArchiveSettings = 0;
-	int TODO_readAppDataService = 0;
-
-	//result = readAppDataServiceAndArchiveSettings(context, software);
-
-	//RETURN_IF_FALSE(result);
-
-	//result = readTuningServiceSettings(context, software);
-
-	//RETURN_IF_FALSE(result);
+	result = readDiagDataServiceAndArchiveSettings(context, software);
+	RETURN_IF_FALSE(result);
 
 	return result;
 }
@@ -1848,18 +1838,131 @@ bool DiagnosticsSettingsGetter::readSettings(const Builder::Context* context,
 bool DiagnosticsSettingsGetter::readDiagDataServiceAndArchiveSettings(const Builder::Context* context,
 																	  const Hardware::Software* software)
 {
-	int TODO_readDiagDataServiceAndArchiveSettings = 0;
-	Q_ASSERT(false);
-	return false;
+	Builder::IssueLogger* log = context->m_log;
+	const Hardware::EquipmentSet* equipment = context->m_equipmentSet.get();
+
+	bool result = true;
+
+	// DiagDataService settings reading
+	//
+	QStringList diagDataServiceIds;
+	result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::DIAG_DATA_SERVICE_IDS, &diagDataServiceIds, log);
+
+	if (diagDataServiceIds.isEmpty() == true)
+	{
+		log->errCFG3022(software->equipmentIdTemplate(), EquipmentPropNames::DIAG_DATA_SERVICE_IDS);
+		return false;
+	}
+
+	// Get all DiagDataServices
+	//
+	std::map<QString, const Hardware::Software*> diagDataServices;
+
+	for (const QString& diagDataServiceId : diagDataServiceIds)
+	{
+		// DDS->ClientRequestIP, ClientRequestPort
+		//
+		if (auto diagDataServiceDevice = equipment->deviceObject(diagDataServiceId);
+			diagDataServiceDevice == nullptr)
+		{
+			// Property %1.%2 is linked to undefined software ID %3.
+			//
+			log->errCFG3021(software->equipmentIdTemplate(), EquipmentPropNames::DIAG_DATA_SERVICE_IDS, diagDataServiceId);
+			result = false;
+		}
+		else
+		{
+			const Hardware::Software* diagDataService = diagDataService = diagDataServiceDevice->toSoftware().get();
+
+			if (diagDataService == nullptr)
+			{
+				// Property %1.%2 is linked to undefined software ID %3.
+				//
+				log->errCFG3021(software->equipmentIdTemplate(), EquipmentPropNames::DIAG_DATA_SERVICE_IDS, diagDataServiceId);
+				result = false;
+			}
+			else
+			{
+				if (diagDataService->softwareType() != E::SoftwareType::DiagDataService)
+				{
+					// Property %1.%2 is linked to not compatible software %3.
+					//
+					log->errCFG3017(software->equipmentIdTemplate(), EquipmentPropNames::DIAG_DATA_SERVICE_IDS, diagDataServiceId);
+					result = false;
+				}
+				else
+				{
+					diagDataServices[diagDataServiceId] = diagDataService;
+				}
+			}
+		}
+	}
+
+	if (result == false || diagDataServices.empty() == true)
+	{
+		return false;
+	}
+
+	// Reading DiagDataService Settings
+	//
+	for (const auto& [diagDataServiceId, diagDataService] : diagDataServices)
+	{
+		// Get DiagDataService connection settings
+		//
+		DiagDataServiceSettingsGetter ddsSettings;
+
+		result &= ddsSettings.readSoftwareSettings(context, diagDataService);
+		if (result == false)
+		{
+			return false;
+		}
+
+		SoftwareEndpoint::DiagDataService dds;
+		dds.equipmentId = diagDataServiceId;
+		dds.address = ddsSettings.clientRequestIP;
+		dds.realtimeAddress = ddsSettings.rtTrendsRequestIP;
+
+		this->diagDataServices.push_back(dds);
+
+		// Get ArchiveService connection settings
+		//
+		QString archiveServiceId;
+		HostAddressPort archClientRequestAddress;
+
+		result &= getSoftwareConnection(equipment,
+										diagDataService,
+										EquipmentPropNames::ARCH_SERVICE_ID,
+										EquipmentPropNames::CLIENT_REQUEST_IP,
+										EquipmentPropNames::CLIENT_REQUEST_PORT,
+										&archiveServiceId,
+										&archClientRequestAddress,
+										true,
+										Socket::IP_NULL,
+										PORT_ARCHIVING_SERVICE_CLIENT_REQUEST,
+										E::SoftwareType::ArchiveService,
+										log);
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		if (archiveServiceId.isEmpty() == true)
+		{
+			continue;
+		}
+
+		SoftwareEndpoint::ArchiveService as;
+		as.equipmentId = archiveServiceId;
+		as.appDataServiceId = diagDataServiceId;
+		as.address = archClientRequestAddress;
+
+		this->archiveServices.push_back(as);
+	}
+
+	return result;
 }
 
-bool DiagnosticsSettingsGetter::readAppDataService(const Builder::Context* context,
-												   const Hardware::Software* software)
-{
-	int TODO_readAppDataService = 0;
-	Q_ASSERT(false);
-	return false;
-}
 
 // -------------------------------------------------------------------------------------
 //
