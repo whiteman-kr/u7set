@@ -281,8 +281,6 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::detectUsedReservedSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::fillAnalogSignalsOnSchemas),
 
-			PROC_TO_CALL(ModuleLogicCompiler::prepareDiagData),
-
 			PROC_TO_CALL(ModuleLogicCompiler::calcAppDataUID),
 			PROC_TO_CALL(ModuleLogicCompiler::calcDiagDataUID),
 
@@ -17406,46 +17404,6 @@ namespace Builder
 												 binCode,
 												 metadata,
 												 log());
-		return result;
-	}
-
-	bool ModuleLogicCompiler::prepareDiagData()
-	{
-		bool result = true;
-
-		result = findDiagSignals();
-
-		return result;
-	}
-
-	bool ModuleLogicCompiler::findDiagSignals()
-	{
-		bool result = true;
-
-		std::vector<std::shared_ptr<const Hardware::DiagSignal>> diagSignals;
-
-		for(const auto& p : m_modules)
-		{
-			const Module& m = p.second;
-			std::shared_ptr<const Hardware::DeviceModule> module = m.device;
-
-			DeviceHelper::getChildDiagSignals(module, &diagSignals);
-		}
-
-		std::vector<AcquiredDiagSignal> acquiredDiagSignals;
-
-		acquiredDiagSignals.reserve(diagSignals.size());
-
-		for(const auto& diagSignal : diagSignals)
-		{
-			AcquiredDiagSignal& ads = acquiredDiagSignals.push_back({});
-
-			ads.equipmentID = diagSignal->equipmentIdTemplate();
-			ads.diagSignalTypeID = diagSignal->
-		}
-
-		//
-
 		return result;
 	}
 

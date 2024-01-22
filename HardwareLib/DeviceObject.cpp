@@ -881,6 +881,29 @@ namespace Hardware
 		return nullptr;
 	}
 
+	std::shared_ptr<const Hardware::DeviceChassis> DeviceObject::getParentChassisShared() const
+	{
+		std::shared_ptr<const Hardware::DeviceObject> deviceObject = parent();
+
+		do
+		{
+			if (deviceObject == nullptr)
+			{
+				break;
+			}
+
+			if (deviceObject->isChassis())
+			{
+				return deviceObject->toChassis();
+			}
+
+			deviceObject = deviceObject->parent();
+		}
+		while(deviceObject != nullptr);
+
+		return nullptr;
+	}
+
 	const Hardware::DeviceRack* DeviceObject::getParentRack() const
 	{
 		const Hardware::DeviceObject* deviceObject = this;

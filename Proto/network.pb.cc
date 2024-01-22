@@ -1210,8 +1210,61 @@ struct GetFileReplyDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT GetFileReplyDefaultTypeInternal _GetFileReply_default_instance_;
+constexpr AcquiredDiagObject::AcquiredDiagObject(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : equipmentid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , parenthash_(PROTOBUF_ULONGLONG(0))
+  , devicetype_(0){}
+struct AcquiredDiagObjectDefaultTypeInternal {
+  constexpr AcquiredDiagObjectDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~AcquiredDiagObjectDefaultTypeInternal() {}
+  union {
+    AcquiredDiagObject _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT AcquiredDiagObjectDefaultTypeInternal _AcquiredDiagObject_default_instance_;
+constexpr AcquiredDiagSignal::AcquiredDiagSignal(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : diagsignaltypeid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , reflectedsignalid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , validitysignalid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , diagobject_(nullptr)
+  , diaglevel_(0)
+  , valuesizebit_(0)
+  , discretecontainersize_(0)
+  , isreflection_(false)
+  , logchanges_(false)
+  , archive_(false)
+  , reserved_(false)
+  , coarseaperture_(0)
+  , aperturetype_(0)
+  , absaddrbit_(0)
+  , fineaperture_(0){}
+struct AcquiredDiagSignalDefaultTypeInternal {
+  constexpr AcquiredDiagSignalDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~AcquiredDiagSignalDefaultTypeInternal() {}
+  union {
+    AcquiredDiagSignal _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT AcquiredDiagSignalDefaultTypeInternal _AcquiredDiagSignal_default_instance_;
+constexpr AcquiredDiagSignals::AcquiredDiagSignals(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : diagsignals_()
+  , diagobjects_(){}
+struct AcquiredDiagSignalsDefaultTypeInternal {
+  constexpr AcquiredDiagSignalsDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~AcquiredDiagSignalsDefaultTypeInternal() {}
+  union {
+    AcquiredDiagSignals _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT AcquiredDiagSignalsDefaultTypeInternal _AcquiredDiagSignals_default_instance_;
 }  // namespace Network
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_network_2eproto[75];
+static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_network_2eproto[78];
 static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_network_2eproto = nullptr;
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_network_2eproto = nullptr;
 
@@ -2293,6 +2346,59 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_network_2eproto::offsets[] PRO
   6,
   0,
   1,
+  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagObject, _has_bits_),
+  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagObject, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagObject, devicetype_),
+  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagObject, equipmentid_),
+  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagObject, parenthash_),
+  2,
+  0,
+  1,
+  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, _has_bits_),
+  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, diagobject_),
+  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, diaglevel_),
+  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, diagsignaltypeid_),
+  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, isreflection_),
+  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, reflectedsignalid_),
+  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, validitysignalid_),
+  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, valuesizebit_),
+  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, discretecontainersize_),
+  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, logchanges_),
+  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, archive_),
+  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, reserved_),
+  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, aperturetype_),
+  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, coarseaperture_),
+  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, fineaperture_),
+  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, absaddrbit_),
+  3,
+  4,
+  0,
+  7,
+  1,
+  2,
+  5,
+  6,
+  8,
+  9,
+  10,
+  12,
+  11,
+  14,
+  13,
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignals, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignals, diagsignals_),
+  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignals, diagobjects_),
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, sizeof(::Network::GetSignalListStartRequest)},
@@ -2370,6 +2476,9 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 1042, -1, sizeof(::Network::RtTrendsGetStateChangesRequest)},
   { 1047, 1055, sizeof(::Network::RtTrendsGetStateChangesReply)},
   { 1058, 1070, sizeof(::Network::GetFileReply)},
+  { 1077, 1085, sizeof(::Network::AcquiredDiagObject)},
+  { 1088, 1108, sizeof(::Network::AcquiredDiagSignal)},
+  { 1123, -1, sizeof(::Network::AcquiredDiagSignals)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -2448,6 +2557,9 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Network::_RtTrendsGetStateChangesRequest_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Network::_RtTrendsGetStateChangesReply_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Network::_GetFileReply_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Network::_AcquiredDiagObject_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Network::_AcquiredDiagSignal_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Network::_AcquiredDiagSignals_default_instance_),
 };
 
 const char descriptor_table_protodef_network_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
@@ -2754,15 +2866,31 @@ const char descriptor_table_protodef_network_2eproto[] PROTOBUF_SECTION_VARIABLE
   "\0010\022\023\n\010fileSize\030\002 \001(\003:\0010\022\025\n\ntotalParts\030\003 "
   "\001(\005:\0010\022\026\n\013currentPart\030\004 \001(\005:\0010\022\032\n\017curren"
   "tPartSize\030\005 \001(\005:\0010\022\013\n\003md5\030\006 \001(\014\022\024\n\014fileP"
-  "artData\030\n \001(\014"
+  "artData\030\n \001(\014\"W\n\022AcquiredDiagObject\022\025\n\nd"
+  "eviceType\030\001 \002(\005:\0010\022\023\n\013equipmentID\030\002 \002(\t\022"
+  "\025\n\nparentHash\030\003 \002(\004:\0010\"\262\003\n\022AcquiredDiagS"
+  "ignal\022/\n\ndiagObject\030\001 \002(\0132\033.Network.Acqu"
+  "iredDiagObject\022\024\n\tdiagLevel\030\002 \002(\005:\0010\022\030\n\020"
+  "diagSignalTypeID\030\003 \002(\t\022\033\n\014isReflection\030\004"
+  " \001(\010:\005false\022\031\n\021reflectedSignalID\030\005 \001(\t\022\030"
+  "\n\020validitySignalID\030\006 \001(\t\022\027\n\014valueSizeBit"
+  "\030\007 \001(\005:\0010\022 \n\025discreteContainerSize\030\010 \001(\005"
+  ":\0010\022\031\n\nlogChanges\030\t \001(\010:\005false\022\026\n\007archiv"
+  "e\030\n \001(\010:\005false\022\027\n\010reserved\030\013 \001(\010:\005false\022"
+  "\027\n\014apertureType\030\014 \001(\005:\0010\022\031\n\016coarseApertu"
+  "re\030\r \001(\001:\0010\022\027\n\014fineAperture\030\016 \001(\001:\0010\022\025\n\n"
+  "absAddrBit\030\017 \001(\005:\0010\"y\n\023AcquiredDiagSigna"
+  "ls\0220\n\013diagSignals\030\001 \003(\0132\033.Network.Acquir"
+  "edDiagSignal\0220\n\013diagObjects\030\002 \003(\0132\033.Netw"
+  "ork.AcquiredDiagObject"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_network_2eproto_deps[1] = {
   &::descriptor_table_serialization_2eproto,
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_network_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_network_2eproto = {
-  false, false, 12133, descriptor_table_protodef_network_2eproto, "network.proto", 
-  &descriptor_table_network_2eproto_once, descriptor_table_network_2eproto_deps, 1, 75,
+  false, false, 12782, descriptor_table_protodef_network_2eproto, "network.proto", 
+  &descriptor_table_network_2eproto_once, descriptor_table_network_2eproto_deps, 1, 78,
   schemas, file_default_instances, TableStruct_network_2eproto::offsets,
   file_level_metadata_network_2eproto, file_level_enum_descriptors_network_2eproto, file_level_service_descriptors_network_2eproto,
 };
@@ -27921,6 +28049,1258 @@ void GetFileReply::InternalSwap(GetFileReply* other) {
 }
 
 
+// ===================================================================
+
+class AcquiredDiagObject::_Internal {
+ public:
+  using HasBits = decltype(std::declval<AcquiredDiagObject>()._has_bits_);
+  static void set_has_devicetype(HasBits* has_bits) {
+    (*has_bits)[0] |= 4u;
+  }
+  static void set_has_equipmentid(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
+  static void set_has_parenthash(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
+  static bool MissingRequiredFields(const HasBits& has_bits) {
+    return ((has_bits[0] & 0x00000007) ^ 0x00000007) != 0;
+  }
+};
+
+AcquiredDiagObject::AcquiredDiagObject(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:Network.AcquiredDiagObject)
+}
+AcquiredDiagObject::AcquiredDiagObject(const AcquiredDiagObject& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message(),
+      _has_bits_(from._has_bits_) {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  equipmentid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_equipmentid()) {
+    equipmentid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_equipmentid(), 
+      GetArena());
+  }
+  ::memcpy(&parenthash_, &from.parenthash_,
+    static_cast<size_t>(reinterpret_cast<char*>(&devicetype_) -
+    reinterpret_cast<char*>(&parenthash_)) + sizeof(devicetype_));
+  // @@protoc_insertion_point(copy_constructor:Network.AcquiredDiagObject)
+}
+
+void AcquiredDiagObject::SharedCtor() {
+equipmentid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&parenthash_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&devicetype_) -
+    reinterpret_cast<char*>(&parenthash_)) + sizeof(devicetype_));
+}
+
+AcquiredDiagObject::~AcquiredDiagObject() {
+  // @@protoc_insertion_point(destructor:Network.AcquiredDiagObject)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void AcquiredDiagObject::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  equipmentid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+}
+
+void AcquiredDiagObject::ArenaDtor(void* object) {
+  AcquiredDiagObject* _this = reinterpret_cast< AcquiredDiagObject* >(object);
+  (void)_this;
+}
+void AcquiredDiagObject::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void AcquiredDiagObject::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void AcquiredDiagObject::Clear() {
+// @@protoc_insertion_point(message_clear_start:Network.AcquiredDiagObject)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x00000001u) {
+    equipmentid_.ClearNonDefaultToEmpty();
+  }
+  if (cached_has_bits & 0x00000006u) {
+    ::memset(&parenthash_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&devicetype_) -
+        reinterpret_cast<char*>(&parenthash_)) + sizeof(devicetype_));
+  }
+  _has_bits_.Clear();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* AcquiredDiagObject::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  _Internal::HasBits has_bits{};
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // required int32 deviceType = 1 [default = 0];
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
+          _Internal::set_has_devicetype(&has_bits);
+          devicetype_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // required string equipmentID = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+          auto str = _internal_mutable_equipmentid();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Network.AcquiredDiagObject.equipmentID");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // required uint64 parentHash = 3 [default = 0];
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
+          _Internal::set_has_parenthash(&has_bits);
+          parenthash_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  _has_bits_.Or(has_bits);
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* AcquiredDiagObject::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:Network.AcquiredDiagObject)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  cached_has_bits = _has_bits_[0];
+  // required int32 deviceType = 1 [default = 0];
+  if (cached_has_bits & 0x00000004u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(1, this->_internal_devicetype(), target);
+  }
+
+  // required string equipmentID = 2;
+  if (cached_has_bits & 0x00000001u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_equipmentid().data(), static_cast<int>(this->_internal_equipmentid().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Network.AcquiredDiagObject.equipmentID");
+    target = stream->WriteStringMaybeAliased(
+        2, this->_internal_equipmentid(), target);
+  }
+
+  // required uint64 parentHash = 3 [default = 0];
+  if (cached_has_bits & 0x00000002u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(3, this->_internal_parenthash(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:Network.AcquiredDiagObject)
+  return target;
+}
+
+size_t AcquiredDiagObject::RequiredFieldsByteSizeFallback() const {
+// @@protoc_insertion_point(required_fields_byte_size_fallback_start:Network.AcquiredDiagObject)
+  size_t total_size = 0;
+
+  if (_internal_has_equipmentid()) {
+    // required string equipmentID = 2;
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_equipmentid());
+  }
+
+  if (_internal_has_parenthash()) {
+    // required uint64 parentHash = 3 [default = 0];
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_parenthash());
+  }
+
+  if (_internal_has_devicetype()) {
+    // required int32 deviceType = 1 [default = 0];
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+        this->_internal_devicetype());
+  }
+
+  return total_size;
+}
+size_t AcquiredDiagObject::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:Network.AcquiredDiagObject)
+  size_t total_size = 0;
+
+  if (((_has_bits_[0] & 0x00000007) ^ 0x00000007) == 0) {  // All required fields are present.
+    // required string equipmentID = 2;
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_equipmentid());
+
+    // required uint64 parentHash = 3 [default = 0];
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_parenthash());
+
+    // required int32 deviceType = 1 [default = 0];
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+        this->_internal_devicetype());
+
+  } else {
+    total_size += RequiredFieldsByteSizeFallback();
+  }
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void AcquiredDiagObject::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:Network.AcquiredDiagObject)
+  GOOGLE_DCHECK_NE(&from, this);
+  const AcquiredDiagObject* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<AcquiredDiagObject>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Network.AcquiredDiagObject)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:Network.AcquiredDiagObject)
+    MergeFrom(*source);
+  }
+}
+
+void AcquiredDiagObject::MergeFrom(const AcquiredDiagObject& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:Network.AcquiredDiagObject)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  cached_has_bits = from._has_bits_[0];
+  if (cached_has_bits & 0x00000007u) {
+    if (cached_has_bits & 0x00000001u) {
+      _internal_set_equipmentid(from._internal_equipmentid());
+    }
+    if (cached_has_bits & 0x00000002u) {
+      parenthash_ = from.parenthash_;
+    }
+    if (cached_has_bits & 0x00000004u) {
+      devicetype_ = from.devicetype_;
+    }
+    _has_bits_[0] |= cached_has_bits;
+  }
+}
+
+void AcquiredDiagObject::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:Network.AcquiredDiagObject)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void AcquiredDiagObject::CopyFrom(const AcquiredDiagObject& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:Network.AcquiredDiagObject)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool AcquiredDiagObject::IsInitialized() const {
+  if (_Internal::MissingRequiredFields(_has_bits_)) return false;
+  return true;
+}
+
+void AcquiredDiagObject::InternalSwap(AcquiredDiagObject* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  swap(_has_bits_[0], other->_has_bits_[0]);
+  equipmentid_.Swap(&other->equipmentid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(AcquiredDiagObject, devicetype_)
+      + sizeof(AcquiredDiagObject::devicetype_)
+      - PROTOBUF_FIELD_OFFSET(AcquiredDiagObject, parenthash_)>(
+          reinterpret_cast<char*>(&parenthash_),
+          reinterpret_cast<char*>(&other->parenthash_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata AcquiredDiagObject::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
+class AcquiredDiagSignal::_Internal {
+ public:
+  using HasBits = decltype(std::declval<AcquiredDiagSignal>()._has_bits_);
+  static const ::Network::AcquiredDiagObject& diagobject(const AcquiredDiagSignal* msg);
+  static void set_has_diagobject(HasBits* has_bits) {
+    (*has_bits)[0] |= 8u;
+  }
+  static void set_has_diaglevel(HasBits* has_bits) {
+    (*has_bits)[0] |= 16u;
+  }
+  static void set_has_diagsignaltypeid(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
+  static void set_has_isreflection(HasBits* has_bits) {
+    (*has_bits)[0] |= 128u;
+  }
+  static void set_has_reflectedsignalid(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
+  static void set_has_validitysignalid(HasBits* has_bits) {
+    (*has_bits)[0] |= 4u;
+  }
+  static void set_has_valuesizebit(HasBits* has_bits) {
+    (*has_bits)[0] |= 32u;
+  }
+  static void set_has_discretecontainersize(HasBits* has_bits) {
+    (*has_bits)[0] |= 64u;
+  }
+  static void set_has_logchanges(HasBits* has_bits) {
+    (*has_bits)[0] |= 256u;
+  }
+  static void set_has_archive(HasBits* has_bits) {
+    (*has_bits)[0] |= 512u;
+  }
+  static void set_has_reserved(HasBits* has_bits) {
+    (*has_bits)[0] |= 1024u;
+  }
+  static void set_has_aperturetype(HasBits* has_bits) {
+    (*has_bits)[0] |= 4096u;
+  }
+  static void set_has_coarseaperture(HasBits* has_bits) {
+    (*has_bits)[0] |= 2048u;
+  }
+  static void set_has_fineaperture(HasBits* has_bits) {
+    (*has_bits)[0] |= 16384u;
+  }
+  static void set_has_absaddrbit(HasBits* has_bits) {
+    (*has_bits)[0] |= 8192u;
+  }
+  static bool MissingRequiredFields(const HasBits& has_bits) {
+    return ((has_bits[0] & 0x00000019) ^ 0x00000019) != 0;
+  }
+};
+
+const ::Network::AcquiredDiagObject&
+AcquiredDiagSignal::_Internal::diagobject(const AcquiredDiagSignal* msg) {
+  return *msg->diagobject_;
+}
+AcquiredDiagSignal::AcquiredDiagSignal(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:Network.AcquiredDiagSignal)
+}
+AcquiredDiagSignal::AcquiredDiagSignal(const AcquiredDiagSignal& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message(),
+      _has_bits_(from._has_bits_) {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  diagsignaltypeid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_diagsignaltypeid()) {
+    diagsignaltypeid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_diagsignaltypeid(), 
+      GetArena());
+  }
+  reflectedsignalid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_reflectedsignalid()) {
+    reflectedsignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_reflectedsignalid(), 
+      GetArena());
+  }
+  validitysignalid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_validitysignalid()) {
+    validitysignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_validitysignalid(), 
+      GetArena());
+  }
+  if (from._internal_has_diagobject()) {
+    diagobject_ = new ::Network::AcquiredDiagObject(*from.diagobject_);
+  } else {
+    diagobject_ = nullptr;
+  }
+  ::memcpy(&diaglevel_, &from.diaglevel_,
+    static_cast<size_t>(reinterpret_cast<char*>(&fineaperture_) -
+    reinterpret_cast<char*>(&diaglevel_)) + sizeof(fineaperture_));
+  // @@protoc_insertion_point(copy_constructor:Network.AcquiredDiagSignal)
+}
+
+void AcquiredDiagSignal::SharedCtor() {
+diagsignaltypeid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+reflectedsignalid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+validitysignalid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&diagobject_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&fineaperture_) -
+    reinterpret_cast<char*>(&diagobject_)) + sizeof(fineaperture_));
+}
+
+AcquiredDiagSignal::~AcquiredDiagSignal() {
+  // @@protoc_insertion_point(destructor:Network.AcquiredDiagSignal)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void AcquiredDiagSignal::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  diagsignaltypeid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  reflectedsignalid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  validitysignalid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (this != internal_default_instance()) delete diagobject_;
+}
+
+void AcquiredDiagSignal::ArenaDtor(void* object) {
+  AcquiredDiagSignal* _this = reinterpret_cast< AcquiredDiagSignal* >(object);
+  (void)_this;
+}
+void AcquiredDiagSignal::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void AcquiredDiagSignal::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void AcquiredDiagSignal::Clear() {
+// @@protoc_insertion_point(message_clear_start:Network.AcquiredDiagSignal)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x0000000fu) {
+    if (cached_has_bits & 0x00000001u) {
+      diagsignaltypeid_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000002u) {
+      reflectedsignalid_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000004u) {
+      validitysignalid_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000008u) {
+      GOOGLE_DCHECK(diagobject_ != nullptr);
+      diagobject_->Clear();
+    }
+  }
+  if (cached_has_bits & 0x000000f0u) {
+    ::memset(&diaglevel_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&isreflection_) -
+        reinterpret_cast<char*>(&diaglevel_)) + sizeof(isreflection_));
+  }
+  if (cached_has_bits & 0x00007f00u) {
+    ::memset(&logchanges_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&fineaperture_) -
+        reinterpret_cast<char*>(&logchanges_)) + sizeof(fineaperture_));
+  }
+  _has_bits_.Clear();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* AcquiredDiagSignal::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  _Internal::HasBits has_bits{};
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // required .Network.AcquiredDiagObject diagObject = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          ptr = ctx->ParseMessage(_internal_mutable_diagobject(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // required int32 diagLevel = 2 [default = 0];
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
+          _Internal::set_has_diaglevel(&has_bits);
+          diaglevel_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // required string diagSignalTypeID = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+          auto str = _internal_mutable_diagsignaltypeid();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Network.AcquiredDiagSignal.diagSignalTypeID");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional bool isReflection = 4 [default = false];
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
+          _Internal::set_has_isreflection(&has_bits);
+          isreflection_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional string reflectedSignalID = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 42)) {
+          auto str = _internal_mutable_reflectedsignalid();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Network.AcquiredDiagSignal.reflectedSignalID");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional string validitySignalID = 6;
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 50)) {
+          auto str = _internal_mutable_validitysignalid();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Network.AcquiredDiagSignal.validitySignalID");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int32 valueSizeBit = 7 [default = 0];
+      case 7:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 56)) {
+          _Internal::set_has_valuesizebit(&has_bits);
+          valuesizebit_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int32 discreteContainerSize = 8 [default = 0];
+      case 8:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 64)) {
+          _Internal::set_has_discretecontainersize(&has_bits);
+          discretecontainersize_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional bool logChanges = 9 [default = false];
+      case 9:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 72)) {
+          _Internal::set_has_logchanges(&has_bits);
+          logchanges_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional bool archive = 10 [default = false];
+      case 10:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 80)) {
+          _Internal::set_has_archive(&has_bits);
+          archive_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional bool reserved = 11 [default = false];
+      case 11:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 88)) {
+          _Internal::set_has_reserved(&has_bits);
+          reserved_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int32 apertureType = 12 [default = 0];
+      case 12:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 96)) {
+          _Internal::set_has_aperturetype(&has_bits);
+          aperturetype_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional double coarseAperture = 13 [default = 0];
+      case 13:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 105)) {
+          _Internal::set_has_coarseaperture(&has_bits);
+          coarseaperture_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
+          ptr += sizeof(double);
+        } else goto handle_unusual;
+        continue;
+      // optional double fineAperture = 14 [default = 0];
+      case 14:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 113)) {
+          _Internal::set_has_fineaperture(&has_bits);
+          fineaperture_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
+          ptr += sizeof(double);
+        } else goto handle_unusual;
+        continue;
+      // optional int32 absAddrBit = 15 [default = 0];
+      case 15:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 120)) {
+          _Internal::set_has_absaddrbit(&has_bits);
+          absaddrbit_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  _has_bits_.Or(has_bits);
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* AcquiredDiagSignal::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:Network.AcquiredDiagSignal)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  cached_has_bits = _has_bits_[0];
+  // required .Network.AcquiredDiagObject diagObject = 1;
+  if (cached_has_bits & 0x00000008u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        1, _Internal::diagobject(this), target, stream);
+  }
+
+  // required int32 diagLevel = 2 [default = 0];
+  if (cached_has_bits & 0x00000010u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(2, this->_internal_diaglevel(), target);
+  }
+
+  // required string diagSignalTypeID = 3;
+  if (cached_has_bits & 0x00000001u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_diagsignaltypeid().data(), static_cast<int>(this->_internal_diagsignaltypeid().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Network.AcquiredDiagSignal.diagSignalTypeID");
+    target = stream->WriteStringMaybeAliased(
+        3, this->_internal_diagsignaltypeid(), target);
+  }
+
+  // optional bool isReflection = 4 [default = false];
+  if (cached_has_bits & 0x00000080u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(4, this->_internal_isreflection(), target);
+  }
+
+  // optional string reflectedSignalID = 5;
+  if (cached_has_bits & 0x00000002u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_reflectedsignalid().data(), static_cast<int>(this->_internal_reflectedsignalid().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Network.AcquiredDiagSignal.reflectedSignalID");
+    target = stream->WriteStringMaybeAliased(
+        5, this->_internal_reflectedsignalid(), target);
+  }
+
+  // optional string validitySignalID = 6;
+  if (cached_has_bits & 0x00000004u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_validitysignalid().data(), static_cast<int>(this->_internal_validitysignalid().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Network.AcquiredDiagSignal.validitySignalID");
+    target = stream->WriteStringMaybeAliased(
+        6, this->_internal_validitysignalid(), target);
+  }
+
+  // optional int32 valueSizeBit = 7 [default = 0];
+  if (cached_has_bits & 0x00000020u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(7, this->_internal_valuesizebit(), target);
+  }
+
+  // optional int32 discreteContainerSize = 8 [default = 0];
+  if (cached_has_bits & 0x00000040u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(8, this->_internal_discretecontainersize(), target);
+  }
+
+  // optional bool logChanges = 9 [default = false];
+  if (cached_has_bits & 0x00000100u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(9, this->_internal_logchanges(), target);
+  }
+
+  // optional bool archive = 10 [default = false];
+  if (cached_has_bits & 0x00000200u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(10, this->_internal_archive(), target);
+  }
+
+  // optional bool reserved = 11 [default = false];
+  if (cached_has_bits & 0x00000400u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(11, this->_internal_reserved(), target);
+  }
+
+  // optional int32 apertureType = 12 [default = 0];
+  if (cached_has_bits & 0x00001000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(12, this->_internal_aperturetype(), target);
+  }
+
+  // optional double coarseAperture = 13 [default = 0];
+  if (cached_has_bits & 0x00000800u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(13, this->_internal_coarseaperture(), target);
+  }
+
+  // optional double fineAperture = 14 [default = 0];
+  if (cached_has_bits & 0x00004000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(14, this->_internal_fineaperture(), target);
+  }
+
+  // optional int32 absAddrBit = 15 [default = 0];
+  if (cached_has_bits & 0x00002000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(15, this->_internal_absaddrbit(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:Network.AcquiredDiagSignal)
+  return target;
+}
+
+size_t AcquiredDiagSignal::RequiredFieldsByteSizeFallback() const {
+// @@protoc_insertion_point(required_fields_byte_size_fallback_start:Network.AcquiredDiagSignal)
+  size_t total_size = 0;
+
+  if (_internal_has_diagsignaltypeid()) {
+    // required string diagSignalTypeID = 3;
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_diagsignaltypeid());
+  }
+
+  if (_internal_has_diagobject()) {
+    // required .Network.AcquiredDiagObject diagObject = 1;
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *diagobject_);
+  }
+
+  if (_internal_has_diaglevel()) {
+    // required int32 diagLevel = 2 [default = 0];
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+        this->_internal_diaglevel());
+  }
+
+  return total_size;
+}
+size_t AcquiredDiagSignal::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:Network.AcquiredDiagSignal)
+  size_t total_size = 0;
+
+  if (((_has_bits_[0] & 0x00000019) ^ 0x00000019) == 0) {  // All required fields are present.
+    // required string diagSignalTypeID = 3;
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_diagsignaltypeid());
+
+    // required .Network.AcquiredDiagObject diagObject = 1;
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *diagobject_);
+
+    // required int32 diagLevel = 2 [default = 0];
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+        this->_internal_diaglevel());
+
+  } else {
+    total_size += RequiredFieldsByteSizeFallback();
+  }
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x00000006u) {
+    // optional string reflectedSignalID = 5;
+    if (cached_has_bits & 0x00000002u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_reflectedsignalid());
+    }
+
+    // optional string validitySignalID = 6;
+    if (cached_has_bits & 0x00000004u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_validitysignalid());
+    }
+
+  }
+  if (cached_has_bits & 0x000000e0u) {
+    // optional int32 valueSizeBit = 7 [default = 0];
+    if (cached_has_bits & 0x00000020u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_valuesizebit());
+    }
+
+    // optional int32 discreteContainerSize = 8 [default = 0];
+    if (cached_has_bits & 0x00000040u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_discretecontainersize());
+    }
+
+    // optional bool isReflection = 4 [default = false];
+    if (cached_has_bits & 0x00000080u) {
+      total_size += 1 + 1;
+    }
+
+  }
+  if (cached_has_bits & 0x00007f00u) {
+    // optional bool logChanges = 9 [default = false];
+    if (cached_has_bits & 0x00000100u) {
+      total_size += 1 + 1;
+    }
+
+    // optional bool archive = 10 [default = false];
+    if (cached_has_bits & 0x00000200u) {
+      total_size += 1 + 1;
+    }
+
+    // optional bool reserved = 11 [default = false];
+    if (cached_has_bits & 0x00000400u) {
+      total_size += 1 + 1;
+    }
+
+    // optional double coarseAperture = 13 [default = 0];
+    if (cached_has_bits & 0x00000800u) {
+      total_size += 1 + 8;
+    }
+
+    // optional int32 apertureType = 12 [default = 0];
+    if (cached_has_bits & 0x00001000u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_aperturetype());
+    }
+
+    // optional int32 absAddrBit = 15 [default = 0];
+    if (cached_has_bits & 0x00002000u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_absaddrbit());
+    }
+
+    // optional double fineAperture = 14 [default = 0];
+    if (cached_has_bits & 0x00004000u) {
+      total_size += 1 + 8;
+    }
+
+  }
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void AcquiredDiagSignal::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:Network.AcquiredDiagSignal)
+  GOOGLE_DCHECK_NE(&from, this);
+  const AcquiredDiagSignal* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<AcquiredDiagSignal>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Network.AcquiredDiagSignal)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:Network.AcquiredDiagSignal)
+    MergeFrom(*source);
+  }
+}
+
+void AcquiredDiagSignal::MergeFrom(const AcquiredDiagSignal& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:Network.AcquiredDiagSignal)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  cached_has_bits = from._has_bits_[0];
+  if (cached_has_bits & 0x000000ffu) {
+    if (cached_has_bits & 0x00000001u) {
+      _internal_set_diagsignaltypeid(from._internal_diagsignaltypeid());
+    }
+    if (cached_has_bits & 0x00000002u) {
+      _internal_set_reflectedsignalid(from._internal_reflectedsignalid());
+    }
+    if (cached_has_bits & 0x00000004u) {
+      _internal_set_validitysignalid(from._internal_validitysignalid());
+    }
+    if (cached_has_bits & 0x00000008u) {
+      _internal_mutable_diagobject()->::Network::AcquiredDiagObject::MergeFrom(from._internal_diagobject());
+    }
+    if (cached_has_bits & 0x00000010u) {
+      diaglevel_ = from.diaglevel_;
+    }
+    if (cached_has_bits & 0x00000020u) {
+      valuesizebit_ = from.valuesizebit_;
+    }
+    if (cached_has_bits & 0x00000040u) {
+      discretecontainersize_ = from.discretecontainersize_;
+    }
+    if (cached_has_bits & 0x00000080u) {
+      isreflection_ = from.isreflection_;
+    }
+    _has_bits_[0] |= cached_has_bits;
+  }
+  if (cached_has_bits & 0x00007f00u) {
+    if (cached_has_bits & 0x00000100u) {
+      logchanges_ = from.logchanges_;
+    }
+    if (cached_has_bits & 0x00000200u) {
+      archive_ = from.archive_;
+    }
+    if (cached_has_bits & 0x00000400u) {
+      reserved_ = from.reserved_;
+    }
+    if (cached_has_bits & 0x00000800u) {
+      coarseaperture_ = from.coarseaperture_;
+    }
+    if (cached_has_bits & 0x00001000u) {
+      aperturetype_ = from.aperturetype_;
+    }
+    if (cached_has_bits & 0x00002000u) {
+      absaddrbit_ = from.absaddrbit_;
+    }
+    if (cached_has_bits & 0x00004000u) {
+      fineaperture_ = from.fineaperture_;
+    }
+    _has_bits_[0] |= cached_has_bits;
+  }
+}
+
+void AcquiredDiagSignal::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:Network.AcquiredDiagSignal)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void AcquiredDiagSignal::CopyFrom(const AcquiredDiagSignal& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:Network.AcquiredDiagSignal)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool AcquiredDiagSignal::IsInitialized() const {
+  if (_Internal::MissingRequiredFields(_has_bits_)) return false;
+  if (_internal_has_diagobject()) {
+    if (!diagobject_->IsInitialized()) return false;
+  }
+  return true;
+}
+
+void AcquiredDiagSignal::InternalSwap(AcquiredDiagSignal* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  swap(_has_bits_[0], other->_has_bits_[0]);
+  diagsignaltypeid_.Swap(&other->diagsignaltypeid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  reflectedsignalid_.Swap(&other->reflectedsignalid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  validitysignalid_.Swap(&other->validitysignalid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(AcquiredDiagSignal, fineaperture_)
+      + sizeof(AcquiredDiagSignal::fineaperture_)
+      - PROTOBUF_FIELD_OFFSET(AcquiredDiagSignal, diagobject_)>(
+          reinterpret_cast<char*>(&diagobject_),
+          reinterpret_cast<char*>(&other->diagobject_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata AcquiredDiagSignal::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
+class AcquiredDiagSignals::_Internal {
+ public:
+};
+
+AcquiredDiagSignals::AcquiredDiagSignals(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena),
+  diagsignals_(arena),
+  diagobjects_(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:Network.AcquiredDiagSignals)
+}
+AcquiredDiagSignals::AcquiredDiagSignals(const AcquiredDiagSignals& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message(),
+      diagsignals_(from.diagsignals_),
+      diagobjects_(from.diagobjects_) {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  // @@protoc_insertion_point(copy_constructor:Network.AcquiredDiagSignals)
+}
+
+void AcquiredDiagSignals::SharedCtor() {
+}
+
+AcquiredDiagSignals::~AcquiredDiagSignals() {
+  // @@protoc_insertion_point(destructor:Network.AcquiredDiagSignals)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void AcquiredDiagSignals::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+}
+
+void AcquiredDiagSignals::ArenaDtor(void* object) {
+  AcquiredDiagSignals* _this = reinterpret_cast< AcquiredDiagSignals* >(object);
+  (void)_this;
+}
+void AcquiredDiagSignals::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void AcquiredDiagSignals::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void AcquiredDiagSignals::Clear() {
+// @@protoc_insertion_point(message_clear_start:Network.AcquiredDiagSignals)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  diagsignals_.Clear();
+  diagobjects_.Clear();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* AcquiredDiagSignals::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // repeated .Network.AcquiredDiagSignal diagSignals = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          ptr -= 1;
+          do {
+            ptr += 1;
+            ptr = ctx->ParseMessage(_internal_add_diagsignals(), ptr);
+            CHK_(ptr);
+            if (!ctx->DataAvailable(ptr)) break;
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<10>(ptr));
+        } else goto handle_unusual;
+        continue;
+      // repeated .Network.AcquiredDiagObject diagObjects = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+          ptr -= 1;
+          do {
+            ptr += 1;
+            ptr = ctx->ParseMessage(_internal_add_diagobjects(), ptr);
+            CHK_(ptr);
+            if (!ctx->DataAvailable(ptr)) break;
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<18>(ptr));
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* AcquiredDiagSignals::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:Network.AcquiredDiagSignals)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // repeated .Network.AcquiredDiagSignal diagSignals = 1;
+  for (unsigned int i = 0,
+      n = static_cast<unsigned int>(this->_internal_diagsignals_size()); i < n; i++) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(1, this->_internal_diagsignals(i), target, stream);
+  }
+
+  // repeated .Network.AcquiredDiagObject diagObjects = 2;
+  for (unsigned int i = 0,
+      n = static_cast<unsigned int>(this->_internal_diagobjects_size()); i < n; i++) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(2, this->_internal_diagobjects(i), target, stream);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:Network.AcquiredDiagSignals)
+  return target;
+}
+
+size_t AcquiredDiagSignals::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:Network.AcquiredDiagSignals)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // repeated .Network.AcquiredDiagSignal diagSignals = 1;
+  total_size += 1UL * this->_internal_diagsignals_size();
+  for (const auto& msg : this->diagsignals_) {
+    total_size +=
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
+  }
+
+  // repeated .Network.AcquiredDiagObject diagObjects = 2;
+  total_size += 1UL * this->_internal_diagobjects_size();
+  for (const auto& msg : this->diagobjects_) {
+    total_size +=
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void AcquiredDiagSignals::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:Network.AcquiredDiagSignals)
+  GOOGLE_DCHECK_NE(&from, this);
+  const AcquiredDiagSignals* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<AcquiredDiagSignals>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Network.AcquiredDiagSignals)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:Network.AcquiredDiagSignals)
+    MergeFrom(*source);
+  }
+}
+
+void AcquiredDiagSignals::MergeFrom(const AcquiredDiagSignals& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:Network.AcquiredDiagSignals)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  diagsignals_.MergeFrom(from.diagsignals_);
+  diagobjects_.MergeFrom(from.diagobjects_);
+}
+
+void AcquiredDiagSignals::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:Network.AcquiredDiagSignals)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void AcquiredDiagSignals::CopyFrom(const AcquiredDiagSignals& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:Network.AcquiredDiagSignals)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool AcquiredDiagSignals::IsInitialized() const {
+  if (!::PROTOBUF_NAMESPACE_ID::internal::AllAreInitialized(diagsignals_)) return false;
+  if (!::PROTOBUF_NAMESPACE_ID::internal::AllAreInitialized(diagobjects_)) return false;
+  return true;
+}
+
+void AcquiredDiagSignals::InternalSwap(AcquiredDiagSignals* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  diagsignals_.InternalSwap(&other->diagsignals_);
+  diagobjects_.InternalSwap(&other->diagobjects_);
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata AcquiredDiagSignals::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace Network
 PROTOBUF_NAMESPACE_OPEN
@@ -28148,6 +29528,15 @@ template<> PROTOBUF_NOINLINE ::Network::RtTrendsGetStateChangesReply* Arena::Cre
 }
 template<> PROTOBUF_NOINLINE ::Network::GetFileReply* Arena::CreateMaybeMessage< ::Network::GetFileReply >(Arena* arena) {
   return Arena::CreateMessageInternal< ::Network::GetFileReply >(arena);
+}
+template<> PROTOBUF_NOINLINE ::Network::AcquiredDiagObject* Arena::CreateMaybeMessage< ::Network::AcquiredDiagObject >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::Network::AcquiredDiagObject >(arena);
+}
+template<> PROTOBUF_NOINLINE ::Network::AcquiredDiagSignal* Arena::CreateMaybeMessage< ::Network::AcquiredDiagSignal >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::Network::AcquiredDiagSignal >(arena);
+}
+template<> PROTOBUF_NOINLINE ::Network::AcquiredDiagSignals* Arena::CreateMaybeMessage< ::Network::AcquiredDiagSignals >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::Network::AcquiredDiagSignals >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
 

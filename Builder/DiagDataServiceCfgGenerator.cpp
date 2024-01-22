@@ -2,9 +2,44 @@
 #include "SoftwareSettingsGetter.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../lib/DataSource.h"
+#include "../HardwareLib/DiagSignal.h"
 
 namespace Builder
 {
+	AcquiredDiagObject::AcquiredDiagObject(std::shared_ptr<const Hardware::DeviceObject> dev,
+										   Hardware::DeviceType devType,
+											const QString& equipID) :
+		device(dev),
+		deviceType(devType),
+		equipmentID(equipID)
+	{
+	}
+
+	AcquiredDiagSignal::AcquiredDiagSignal(std::shared_ptr<const Hardware::DiagSignal> ds) :
+		AcquiredDiagObject(ds, ds->deviceType(), ds->equipmentIdTemplate())
+	{
+		TEST_PTR_RETURN(ds);
+
+		diagLevel = ds->level();
+		diagSignalTypeID = ds->signalTypeId();
+		isReflection = ds->isReflection();
+		reflectedSignalID = ds->reflectedSignalId();
+		validitySignalID = ds->validitySignalId();
+		valueSizeBit = ds->valueBitSize();
+		discreteContainerSize = ds->discreteContainerSize();
+		logChanges = ds->logChanges();
+		archive = ds->archive();
+		reserved = ds->reserved();
+		apertureType = ds->apertureType();
+		coarseAperture = ds->coarseAperture();
+		fineAperture = ds->fineAperture();
+
+		// signal data address from beginning of module diag data offset in RUP diag packet
+		// includes DiagDataOffset or parent controllers
+		//
+		absAddr = Address16(ds->valueOffset(), ds->valueBit());
+	}
+
 	DiagDataServiceCfgGenerator::DiagDataServiceCfgGenerator(Context* context, Hardware::Software* software) :
 		SoftwareCfgGenerator(context, software)
 	{
@@ -76,11 +111,38 @@ namespace Builder
 		return true;
 	}
 
+	bool DiagDataServiceCfgGenerator::writeDiagSignalTypesXml()
+	{
+		TEST_PTR_RETURN_FALSE(m_context);
+		TEST_PTR_RETURN_FALSE(m_context->m_diagSignalTypes);
+
+		Hardware::DiagSignalTypes dsts;
+
+		m_context->m_diagSignalTypes->get(dsts.mutableDiagSignalTypes());
+
+		QByteArray fileData;
+		XmlWriteHelper xml(&fileData);
+
+		xml.setAutoFormatting(true);
+
+		dsts.writeToXml(xml);
+
+		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(), File::DIAG_SIGNAL_TYPES_XML,
+															CfgFileId::DIAG_SIGNAL_TYPES, "", fileData);
+
+		if (buildFile == nullptr)
+		{
+			return false;
+		}
+
+		return m_cfgXml->addLinkToFile(buildFile);
+	}
+
 	bool DiagDataServiceCfgGenerator::writeDiagDataSourcesXml()
 	{
 		bool result = true;
 
-//		m_acquiredDiagSignals.clear();
+		m_acquiredDiagSignals.clear();
 
 		QVector<DataSource> dataSources;
 
@@ -97,7 +159,7 @@ namespace Builder
 
 			quint32 receivingSubnet = settings->diagDataReceivingIP.address32() & receivingNetmask;
 
-			for(Hardware::DeviceModule* lm : m_context->m_lmModules)
+			for(const Hardware::DeviceModule* lm : m_context->m_lmModules)
 			{
 				if (lm == nullptr)
 				{
@@ -147,12 +209,14 @@ namespace Builder
 
 					connectedAdaptersCount++;
 
-					//result &= findAppDataSourceAcquiredSignals(ds);	// inside fills m_associatedAppSignals also
-
 					dataSources.append(ds);
 				}
+
+				result &= findAcquiredDiagSignals(lm);
 			}
 		}
+
+		result &= findAcquiredParentObjects();
 
 		RETURN_IF_FALSE(result)
 
@@ -179,30 +243,66 @@ namespace Builder
 		return result;
 	}
 
-	bool DiagDataServiceCfgGenerator::writeDiagSignalTypesXml()
+	bool DiagDataServiceCfgGenerator::findAcquiredDiagSignals(const Hardware::DeviceModule* lm)
 	{
-		TEST_PTR_RETURN_FALSE(m_context);
-		TEST_PTR_RETURN_FALSE(m_context->m_diagSignalTypes);
+		bool result = true;
 
-		Hardware::DiagSignalTypes dsts;
+		std::shared_ptr<const Hardware::DeviceChassis> chassis = lm->getParentChassisShared();
 
-		m_context->m_diagSignalTypes->get(dsts.mutableDiagSignalTypes());
-
-		QByteArray fileData;
-		XmlWriteHelper xml(&fileData);
-
-		xml.setAutoFormatting(true);
-
-		dsts.writeToXml(xml);
-
-		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(), File::DIAG_SIGNAL_TYPES_XML,
-															CfgFileId::DIAG_SIGNAL_TYPES, "", fileData);
-
-		if (buildFile == nullptr)
+		if (chassis == nullptr)
 		{
+			LOG_INTERNAL_ERROR(m_log);
 			return false;
 		}
 
-		return m_cfgXml->addLinkToFile(buildFile);
+		DeviceHelper::getChildDiagSignals(chassis, &m_acquiredDiagSignals);
+
+		return result;
+	}
+
+	bool DiagDataServiceCfgGenerator::findAcquiredParentObjects()
+	{
+		bool result = true;
+
+		for(const auto& diagSignal : m_acquiredDiagSignals)
+		{
+			std::shared_ptr<Hardware::DeviceObject> parent = diagSignal->parent();
+
+			while(parent != nullptr)
+			{
+				if (parent->isController())
+				{
+					std::shared_ptr<const Hardware::DeviceController> controller = parent->toController();
+
+					if (controller == nullptr)
+					{
+						LOG_INTERNAL_ERROR(m_log);
+						result = false;
+						continue;
+					}
+
+					ads.absAddr.addWord(controller->diagDataOffset());
+				}
+
+				Hash parentHash = calcHash(parent->equipmentIdTemplate());
+
+				prevAquiredObject->parentHash = parentHash;
+
+				const auto [it, b] = m_acquiredDiagObjects.emplace(parentHash,
+																   AcquiredDiagObject(parent, parent->deviceType(),
+																					  parent->equipmentIdTemplate()));
+
+				if (b == false)
+				{
+					break;			// parent and uppper objects already in m_acquiredDiagObjects
+				}
+
+				prevAquiredObject = &it->second;
+
+				parent = parent->parent();
+			}
+		}
+
+		return result;
 	}
 }

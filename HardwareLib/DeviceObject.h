@@ -294,6 +294,7 @@ namespace Hardware
 		[[nodiscard]] const Hardware::Software* getParentSoftware() const;
 		[[nodiscard]] const Hardware::Workstation* getParentWorkstation() const;
 		[[nodiscard]] const Hardware::DeviceChassis* getParentChassis() const;
+		[[nodiscard]] std::shared_ptr<const Hardware::DeviceChassis> getParentChassisShared() const;
 		[[nodiscard]] const Hardware::DeviceRack* getParentRack() const;
 		[[nodiscard]] const Hardware::DeviceSystem* getParentSystem() const;
 		[[nodiscard]] const Hardware::DeviceRoot* getParentRoot() const;

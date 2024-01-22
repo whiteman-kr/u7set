@@ -10,18 +10,25 @@ namespace Builder
 	class AcquiredDiagObject
 	{
 	public:
+		AcquiredDiagObject(std::shared_ptr<const Hardware::DeviceObject> dev,
+						   Hardware::DeviceType devType,
+						   const QString& equipID);
+		std::shared_ptr<const Hardware::DeviceObject> device;
+
 		Hardware::DeviceType deviceType = Hardware::DeviceType::DeviceTypeCount;	// means - not initialized
 		QString equipmentID;
-		Hash parent = 0;					// calcHash(parent.equipmentID)
+		Hash parentHash = 0;					// calcHash(parent.equipmentID)
 	};
 
-	class AcquiredDiagSignal : public AcquiredDiagObject
+	class AcquiredDiagSignal: public AcquiredDiagObject
 	{
 	public:
-		AcquiredDiagSignal() : deviceType(Hardware::DeviceType::DiagSignal) {}
+		AcquiredDiagSignal(std::shared_ptr<const Hardware::DiagSignal> ds);
 
 		E::DiagLevel diagLevel = E::DiagLevel::Message;
 		QString diagSignalTypeID;
+		bool isReflection = false;
+		QString reflectedSignalID;
 		QString validitySignalID;
 		int valueSizeBit = 0;
 		int discreteContainerSize = 0;
@@ -52,7 +59,12 @@ namespace Builder
 		bool writeDiagSignalTypesXml();
 		bool writeDiagDataSourcesXml();
 
+		bool findAcquiredDiagSignals(const Hardware::DeviceModule* lm);
+		bool findAcquiredParentObjects();
+
 	private:
+		std::vector<std::shared_ptr<const Hardware::DiagSignal>> m_acquiredDiagSignals;
+		std::map<Hash, AcquiredDiagObject> m_acquiredDiagObjects;	// calcHash(diagObject->equipmentID) => acquiredDiagObject
 
 	};
 }

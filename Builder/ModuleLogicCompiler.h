@@ -851,9 +851,6 @@ namespace Builder
 		bool writeLoopbacksReport();
 		bool writeHeapsLog();
 
-		bool prepareDiagData();
-		bool findDiagSignals();
-
 		bool calcAppDataUID();
 		bool calcDiagDataUID();
 

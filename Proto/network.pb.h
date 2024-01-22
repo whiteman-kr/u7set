@@ -61,7 +61,7 @@ struct TableStruct_network_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[75]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[78]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -70,6 +70,15 @@ struct TableStruct_network_2eproto {
 extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_network_2eproto;
 ::PROTOBUF_NAMESPACE_ID::Metadata descriptor_table_network_2eproto_metadata_getter(int index);
 namespace Network {
+class AcquiredDiagObject;
+struct AcquiredDiagObjectDefaultTypeInternal;
+extern AcquiredDiagObjectDefaultTypeInternal _AcquiredDiagObject_default_instance_;
+class AcquiredDiagSignal;
+struct AcquiredDiagSignalDefaultTypeInternal;
+extern AcquiredDiagSignalDefaultTypeInternal _AcquiredDiagSignal_default_instance_;
+class AcquiredDiagSignals;
+struct AcquiredDiagSignalsDefaultTypeInternal;
+extern AcquiredDiagSignalsDefaultTypeInternal _AcquiredDiagSignals_default_instance_;
 class AppDataReceiveState;
 struct AppDataReceiveStateDefaultTypeInternal;
 extern AppDataReceiveStateDefaultTypeInternal _AppDataReceiveState_default_instance_;
@@ -297,6 +306,9 @@ struct TuningWriteCommandDefaultTypeInternal;
 extern TuningWriteCommandDefaultTypeInternal _TuningWriteCommand_default_instance_;
 }  // namespace Network
 PROTOBUF_NAMESPACE_OPEN
+template<> ::Network::AcquiredDiagObject* Arena::CreateMaybeMessage<::Network::AcquiredDiagObject>(Arena*);
+template<> ::Network::AcquiredDiagSignal* Arena::CreateMaybeMessage<::Network::AcquiredDiagSignal>(Arena*);
+template<> ::Network::AcquiredDiagSignals* Arena::CreateMaybeMessage<::Network::AcquiredDiagSignals>(Arena*);
 template<> ::Network::AppDataReceiveState* Arena::CreateMaybeMessage<::Network::AppDataReceiveState>(Arena*);
 template<> ::Network::AppDataServiceState* Arena::CreateMaybeMessage<::Network::AppDataServiceState>(Arena*);
 template<> ::Network::AppDataSourceState* Arena::CreateMaybeMessage<::Network::AppDataSourceState>(Arena*);
@@ -16427,6 +16439,756 @@ class GetFileReply PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::int32 currentpartsize_;
   friend struct ::TableStruct_network_2eproto;
 };
+// -------------------------------------------------------------------
+
+class AcquiredDiagObject PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Network.AcquiredDiagObject) */ {
+ public:
+  inline AcquiredDiagObject() : AcquiredDiagObject(nullptr) {}
+  virtual ~AcquiredDiagObject();
+  explicit constexpr AcquiredDiagObject(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  AcquiredDiagObject(const AcquiredDiagObject& from);
+  AcquiredDiagObject(AcquiredDiagObject&& from) noexcept
+    : AcquiredDiagObject() {
+    *this = ::std::move(from);
+  }
+
+  inline AcquiredDiagObject& operator=(const AcquiredDiagObject& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline AcquiredDiagObject& operator=(AcquiredDiagObject&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
+    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
+  }
+  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
+    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const AcquiredDiagObject& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const AcquiredDiagObject* internal_default_instance() {
+    return reinterpret_cast<const AcquiredDiagObject*>(
+               &_AcquiredDiagObject_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    75;
+
+  friend void swap(AcquiredDiagObject& a, AcquiredDiagObject& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(AcquiredDiagObject* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(AcquiredDiagObject* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline AcquiredDiagObject* New() const final {
+    return CreateMaybeMessage<AcquiredDiagObject>(nullptr);
+  }
+
+  AcquiredDiagObject* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<AcquiredDiagObject>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const AcquiredDiagObject& from);
+  void MergeFrom(const AcquiredDiagObject& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(AcquiredDiagObject* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Network.AcquiredDiagObject";
+  }
+  protected:
+  explicit AcquiredDiagObject(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_network_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kEquipmentIDFieldNumber = 2,
+    kParentHashFieldNumber = 3,
+    kDeviceTypeFieldNumber = 1,
+  };
+  // required string equipmentID = 2;
+  bool has_equipmentid() const;
+  private:
+  bool _internal_has_equipmentid() const;
+  public:
+  void clear_equipmentid();
+  const std::string& equipmentid() const;
+  void set_equipmentid(const std::string& value);
+  void set_equipmentid(std::string&& value);
+  void set_equipmentid(const char* value);
+  void set_equipmentid(const char* value, size_t size);
+  std::string* mutable_equipmentid();
+  std::string* release_equipmentid();
+  void set_allocated_equipmentid(std::string* equipmentid);
+  private:
+  const std::string& _internal_equipmentid() const;
+  void _internal_set_equipmentid(const std::string& value);
+  std::string* _internal_mutable_equipmentid();
+  public:
+
+  // required uint64 parentHash = 3 [default = 0];
+  bool has_parenthash() const;
+  private:
+  bool _internal_has_parenthash() const;
+  public:
+  void clear_parenthash();
+  ::PROTOBUF_NAMESPACE_ID::uint64 parenthash() const;
+  void set_parenthash(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_parenthash() const;
+  void _internal_set_parenthash(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // required int32 deviceType = 1 [default = 0];
+  bool has_devicetype() const;
+  private:
+  bool _internal_has_devicetype() const;
+  public:
+  void clear_devicetype();
+  ::PROTOBUF_NAMESPACE_ID::int32 devicetype() const;
+  void set_devicetype(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_devicetype() const;
+  void _internal_set_devicetype(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:Network.AcquiredDiagObject)
+ private:
+  class _Internal;
+
+  // helper for ByteSizeLong()
+  size_t RequiredFieldsByteSizeFallback() const;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr equipmentid_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 parenthash_;
+  ::PROTOBUF_NAMESPACE_ID::int32 devicetype_;
+  friend struct ::TableStruct_network_2eproto;
+};
+// -------------------------------------------------------------------
+
+class AcquiredDiagSignal PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Network.AcquiredDiagSignal) */ {
+ public:
+  inline AcquiredDiagSignal() : AcquiredDiagSignal(nullptr) {}
+  virtual ~AcquiredDiagSignal();
+  explicit constexpr AcquiredDiagSignal(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  AcquiredDiagSignal(const AcquiredDiagSignal& from);
+  AcquiredDiagSignal(AcquiredDiagSignal&& from) noexcept
+    : AcquiredDiagSignal() {
+    *this = ::std::move(from);
+  }
+
+  inline AcquiredDiagSignal& operator=(const AcquiredDiagSignal& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline AcquiredDiagSignal& operator=(AcquiredDiagSignal&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
+    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
+  }
+  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
+    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const AcquiredDiagSignal& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const AcquiredDiagSignal* internal_default_instance() {
+    return reinterpret_cast<const AcquiredDiagSignal*>(
+               &_AcquiredDiagSignal_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    76;
+
+  friend void swap(AcquiredDiagSignal& a, AcquiredDiagSignal& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(AcquiredDiagSignal* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(AcquiredDiagSignal* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline AcquiredDiagSignal* New() const final {
+    return CreateMaybeMessage<AcquiredDiagSignal>(nullptr);
+  }
+
+  AcquiredDiagSignal* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<AcquiredDiagSignal>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const AcquiredDiagSignal& from);
+  void MergeFrom(const AcquiredDiagSignal& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(AcquiredDiagSignal* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Network.AcquiredDiagSignal";
+  }
+  protected:
+  explicit AcquiredDiagSignal(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_network_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kDiagSignalTypeIDFieldNumber = 3,
+    kReflectedSignalIDFieldNumber = 5,
+    kValiditySignalIDFieldNumber = 6,
+    kDiagObjectFieldNumber = 1,
+    kDiagLevelFieldNumber = 2,
+    kValueSizeBitFieldNumber = 7,
+    kDiscreteContainerSizeFieldNumber = 8,
+    kIsReflectionFieldNumber = 4,
+    kLogChangesFieldNumber = 9,
+    kArchiveFieldNumber = 10,
+    kReservedFieldNumber = 11,
+    kCoarseApertureFieldNumber = 13,
+    kApertureTypeFieldNumber = 12,
+    kAbsAddrBitFieldNumber = 15,
+    kFineApertureFieldNumber = 14,
+  };
+  // required string diagSignalTypeID = 3;
+  bool has_diagsignaltypeid() const;
+  private:
+  bool _internal_has_diagsignaltypeid() const;
+  public:
+  void clear_diagsignaltypeid();
+  const std::string& diagsignaltypeid() const;
+  void set_diagsignaltypeid(const std::string& value);
+  void set_diagsignaltypeid(std::string&& value);
+  void set_diagsignaltypeid(const char* value);
+  void set_diagsignaltypeid(const char* value, size_t size);
+  std::string* mutable_diagsignaltypeid();
+  std::string* release_diagsignaltypeid();
+  void set_allocated_diagsignaltypeid(std::string* diagsignaltypeid);
+  private:
+  const std::string& _internal_diagsignaltypeid() const;
+  void _internal_set_diagsignaltypeid(const std::string& value);
+  std::string* _internal_mutable_diagsignaltypeid();
+  public:
+
+  // optional string reflectedSignalID = 5;
+  bool has_reflectedsignalid() const;
+  private:
+  bool _internal_has_reflectedsignalid() const;
+  public:
+  void clear_reflectedsignalid();
+  const std::string& reflectedsignalid() const;
+  void set_reflectedsignalid(const std::string& value);
+  void set_reflectedsignalid(std::string&& value);
+  void set_reflectedsignalid(const char* value);
+  void set_reflectedsignalid(const char* value, size_t size);
+  std::string* mutable_reflectedsignalid();
+  std::string* release_reflectedsignalid();
+  void set_allocated_reflectedsignalid(std::string* reflectedsignalid);
+  private:
+  const std::string& _internal_reflectedsignalid() const;
+  void _internal_set_reflectedsignalid(const std::string& value);
+  std::string* _internal_mutable_reflectedsignalid();
+  public:
+
+  // optional string validitySignalID = 6;
+  bool has_validitysignalid() const;
+  private:
+  bool _internal_has_validitysignalid() const;
+  public:
+  void clear_validitysignalid();
+  const std::string& validitysignalid() const;
+  void set_validitysignalid(const std::string& value);
+  void set_validitysignalid(std::string&& value);
+  void set_validitysignalid(const char* value);
+  void set_validitysignalid(const char* value, size_t size);
+  std::string* mutable_validitysignalid();
+  std::string* release_validitysignalid();
+  void set_allocated_validitysignalid(std::string* validitysignalid);
+  private:
+  const std::string& _internal_validitysignalid() const;
+  void _internal_set_validitysignalid(const std::string& value);
+  std::string* _internal_mutable_validitysignalid();
+  public:
+
+  // required .Network.AcquiredDiagObject diagObject = 1;
+  bool has_diagobject() const;
+  private:
+  bool _internal_has_diagobject() const;
+  public:
+  void clear_diagobject();
+  const ::Network::AcquiredDiagObject& diagobject() const;
+  ::Network::AcquiredDiagObject* release_diagobject();
+  ::Network::AcquiredDiagObject* mutable_diagobject();
+  void set_allocated_diagobject(::Network::AcquiredDiagObject* diagobject);
+  private:
+  const ::Network::AcquiredDiagObject& _internal_diagobject() const;
+  ::Network::AcquiredDiagObject* _internal_mutable_diagobject();
+  public:
+  void unsafe_arena_set_allocated_diagobject(
+      ::Network::AcquiredDiagObject* diagobject);
+  ::Network::AcquiredDiagObject* unsafe_arena_release_diagobject();
+
+  // required int32 diagLevel = 2 [default = 0];
+  bool has_diaglevel() const;
+  private:
+  bool _internal_has_diaglevel() const;
+  public:
+  void clear_diaglevel();
+  ::PROTOBUF_NAMESPACE_ID::int32 diaglevel() const;
+  void set_diaglevel(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_diaglevel() const;
+  void _internal_set_diaglevel(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int32 valueSizeBit = 7 [default = 0];
+  bool has_valuesizebit() const;
+  private:
+  bool _internal_has_valuesizebit() const;
+  public:
+  void clear_valuesizebit();
+  ::PROTOBUF_NAMESPACE_ID::int32 valuesizebit() const;
+  void set_valuesizebit(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_valuesizebit() const;
+  void _internal_set_valuesizebit(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int32 discreteContainerSize = 8 [default = 0];
+  bool has_discretecontainersize() const;
+  private:
+  bool _internal_has_discretecontainersize() const;
+  public:
+  void clear_discretecontainersize();
+  ::PROTOBUF_NAMESPACE_ID::int32 discretecontainersize() const;
+  void set_discretecontainersize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_discretecontainersize() const;
+  void _internal_set_discretecontainersize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional bool isReflection = 4 [default = false];
+  bool has_isreflection() const;
+  private:
+  bool _internal_has_isreflection() const;
+  public:
+  void clear_isreflection();
+  bool isreflection() const;
+  void set_isreflection(bool value);
+  private:
+  bool _internal_isreflection() const;
+  void _internal_set_isreflection(bool value);
+  public:
+
+  // optional bool logChanges = 9 [default = false];
+  bool has_logchanges() const;
+  private:
+  bool _internal_has_logchanges() const;
+  public:
+  void clear_logchanges();
+  bool logchanges() const;
+  void set_logchanges(bool value);
+  private:
+  bool _internal_logchanges() const;
+  void _internal_set_logchanges(bool value);
+  public:
+
+  // optional bool archive = 10 [default = false];
+  bool has_archive() const;
+  private:
+  bool _internal_has_archive() const;
+  public:
+  void clear_archive();
+  bool archive() const;
+  void set_archive(bool value);
+  private:
+  bool _internal_archive() const;
+  void _internal_set_archive(bool value);
+  public:
+
+  // optional bool reserved = 11 [default = false];
+  bool has_reserved() const;
+  private:
+  bool _internal_has_reserved() const;
+  public:
+  void clear_reserved();
+  bool reserved() const;
+  void set_reserved(bool value);
+  private:
+  bool _internal_reserved() const;
+  void _internal_set_reserved(bool value);
+  public:
+
+  // optional double coarseAperture = 13 [default = 0];
+  bool has_coarseaperture() const;
+  private:
+  bool _internal_has_coarseaperture() const;
+  public:
+  void clear_coarseaperture();
+  double coarseaperture() const;
+  void set_coarseaperture(double value);
+  private:
+  double _internal_coarseaperture() const;
+  void _internal_set_coarseaperture(double value);
+  public:
+
+  // optional int32 apertureType = 12 [default = 0];
+  bool has_aperturetype() const;
+  private:
+  bool _internal_has_aperturetype() const;
+  public:
+  void clear_aperturetype();
+  ::PROTOBUF_NAMESPACE_ID::int32 aperturetype() const;
+  void set_aperturetype(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_aperturetype() const;
+  void _internal_set_aperturetype(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int32 absAddrBit = 15 [default = 0];
+  bool has_absaddrbit() const;
+  private:
+  bool _internal_has_absaddrbit() const;
+  public:
+  void clear_absaddrbit();
+  ::PROTOBUF_NAMESPACE_ID::int32 absaddrbit() const;
+  void set_absaddrbit(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_absaddrbit() const;
+  void _internal_set_absaddrbit(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional double fineAperture = 14 [default = 0];
+  bool has_fineaperture() const;
+  private:
+  bool _internal_has_fineaperture() const;
+  public:
+  void clear_fineaperture();
+  double fineaperture() const;
+  void set_fineaperture(double value);
+  private:
+  double _internal_fineaperture() const;
+  void _internal_set_fineaperture(double value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:Network.AcquiredDiagSignal)
+ private:
+  class _Internal;
+
+  // helper for ByteSizeLong()
+  size_t RequiredFieldsByteSizeFallback() const;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr diagsignaltypeid_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr reflectedsignalid_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr validitysignalid_;
+  ::Network::AcquiredDiagObject* diagobject_;
+  ::PROTOBUF_NAMESPACE_ID::int32 diaglevel_;
+  ::PROTOBUF_NAMESPACE_ID::int32 valuesizebit_;
+  ::PROTOBUF_NAMESPACE_ID::int32 discretecontainersize_;
+  bool isreflection_;
+  bool logchanges_;
+  bool archive_;
+  bool reserved_;
+  double coarseaperture_;
+  ::PROTOBUF_NAMESPACE_ID::int32 aperturetype_;
+  ::PROTOBUF_NAMESPACE_ID::int32 absaddrbit_;
+  double fineaperture_;
+  friend struct ::TableStruct_network_2eproto;
+};
+// -------------------------------------------------------------------
+
+class AcquiredDiagSignals PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Network.AcquiredDiagSignals) */ {
+ public:
+  inline AcquiredDiagSignals() : AcquiredDiagSignals(nullptr) {}
+  virtual ~AcquiredDiagSignals();
+  explicit constexpr AcquiredDiagSignals(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  AcquiredDiagSignals(const AcquiredDiagSignals& from);
+  AcquiredDiagSignals(AcquiredDiagSignals&& from) noexcept
+    : AcquiredDiagSignals() {
+    *this = ::std::move(from);
+  }
+
+  inline AcquiredDiagSignals& operator=(const AcquiredDiagSignals& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline AcquiredDiagSignals& operator=(AcquiredDiagSignals&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
+    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
+  }
+  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
+    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const AcquiredDiagSignals& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const AcquiredDiagSignals* internal_default_instance() {
+    return reinterpret_cast<const AcquiredDiagSignals*>(
+               &_AcquiredDiagSignals_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    77;
+
+  friend void swap(AcquiredDiagSignals& a, AcquiredDiagSignals& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(AcquiredDiagSignals* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(AcquiredDiagSignals* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline AcquiredDiagSignals* New() const final {
+    return CreateMaybeMessage<AcquiredDiagSignals>(nullptr);
+  }
+
+  AcquiredDiagSignals* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<AcquiredDiagSignals>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const AcquiredDiagSignals& from);
+  void MergeFrom(const AcquiredDiagSignals& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(AcquiredDiagSignals* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Network.AcquiredDiagSignals";
+  }
+  protected:
+  explicit AcquiredDiagSignals(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_network_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kDiagSignalsFieldNumber = 1,
+    kDiagObjectsFieldNumber = 2,
+  };
+  // repeated .Network.AcquiredDiagSignal diagSignals = 1;
+  int diagsignals_size() const;
+  private:
+  int _internal_diagsignals_size() const;
+  public:
+  void clear_diagsignals();
+  ::Network::AcquiredDiagSignal* mutable_diagsignals(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Network::AcquiredDiagSignal >*
+      mutable_diagsignals();
+  private:
+  const ::Network::AcquiredDiagSignal& _internal_diagsignals(int index) const;
+  ::Network::AcquiredDiagSignal* _internal_add_diagsignals();
+  public:
+  const ::Network::AcquiredDiagSignal& diagsignals(int index) const;
+  ::Network::AcquiredDiagSignal* add_diagsignals();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Network::AcquiredDiagSignal >&
+      diagsignals() const;
+
+  // repeated .Network.AcquiredDiagObject diagObjects = 2;
+  int diagobjects_size() const;
+  private:
+  int _internal_diagobjects_size() const;
+  public:
+  void clear_diagobjects();
+  ::Network::AcquiredDiagObject* mutable_diagobjects(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Network::AcquiredDiagObject >*
+      mutable_diagobjects();
+  private:
+  const ::Network::AcquiredDiagObject& _internal_diagobjects(int index) const;
+  ::Network::AcquiredDiagObject* _internal_add_diagobjects();
+  public:
+  const ::Network::AcquiredDiagObject& diagobjects(int index) const;
+  ::Network::AcquiredDiagObject* add_diagobjects();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Network::AcquiredDiagObject >&
+      diagobjects() const;
+
+  // @@protoc_insertion_point(class_scope:Network.AcquiredDiagSignals)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Network::AcquiredDiagSignal > diagsignals_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Network::AcquiredDiagObject > diagobjects_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_network_2eproto;
+};
 // ===================================================================
 
 
@@ -30551,9 +31313,844 @@ inline void GetFileReply::set_allocated_filepartdata(std::string* filepartdata) 
   // @@protoc_insertion_point(field_set_allocated:Network.GetFileReply.filePartData)
 }
 
+// -------------------------------------------------------------------
+
+// AcquiredDiagObject
+
+// required int32 deviceType = 1 [default = 0];
+inline bool AcquiredDiagObject::_internal_has_devicetype() const {
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline bool AcquiredDiagObject::has_devicetype() const {
+  return _internal_has_devicetype();
+}
+inline void AcquiredDiagObject::clear_devicetype() {
+  devicetype_ = 0;
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 AcquiredDiagObject::_internal_devicetype() const {
+  return devicetype_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 AcquiredDiagObject::devicetype() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagObject.deviceType)
+  return _internal_devicetype();
+}
+inline void AcquiredDiagObject::_internal_set_devicetype(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000004u;
+  devicetype_ = value;
+}
+inline void AcquiredDiagObject::set_devicetype(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_devicetype(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagObject.deviceType)
+}
+
+// required string equipmentID = 2;
+inline bool AcquiredDiagObject::_internal_has_equipmentid() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool AcquiredDiagObject::has_equipmentid() const {
+  return _internal_has_equipmentid();
+}
+inline void AcquiredDiagObject::clear_equipmentid() {
+  equipmentid_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& AcquiredDiagObject::equipmentid() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagObject.equipmentID)
+  return _internal_equipmentid();
+}
+inline void AcquiredDiagObject::set_equipmentid(const std::string& value) {
+  _internal_set_equipmentid(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagObject.equipmentID)
+}
+inline std::string* AcquiredDiagObject::mutable_equipmentid() {
+  // @@protoc_insertion_point(field_mutable:Network.AcquiredDiagObject.equipmentID)
+  return _internal_mutable_equipmentid();
+}
+inline const std::string& AcquiredDiagObject::_internal_equipmentid() const {
+  return equipmentid_.Get();
+}
+inline void AcquiredDiagObject::_internal_set_equipmentid(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  equipmentid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void AcquiredDiagObject::set_equipmentid(std::string&& value) {
+  _has_bits_[0] |= 0x00000001u;
+  equipmentid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Network.AcquiredDiagObject.equipmentID)
+}
+inline void AcquiredDiagObject::set_equipmentid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000001u;
+  equipmentid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Network.AcquiredDiagObject.equipmentID)
+}
+inline void AcquiredDiagObject::set_equipmentid(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000001u;
+  equipmentid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Network.AcquiredDiagObject.equipmentID)
+}
+inline std::string* AcquiredDiagObject::_internal_mutable_equipmentid() {
+  _has_bits_[0] |= 0x00000001u;
+  return equipmentid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* AcquiredDiagObject::release_equipmentid() {
+  // @@protoc_insertion_point(field_release:Network.AcquiredDiagObject.equipmentID)
+  if (!_internal_has_equipmentid()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return equipmentid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void AcquiredDiagObject::set_allocated_equipmentid(std::string* equipmentid) {
+  if (equipmentid != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  equipmentid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), equipmentid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Network.AcquiredDiagObject.equipmentID)
+}
+
+// required uint64 parentHash = 3 [default = 0];
+inline bool AcquiredDiagObject::_internal_has_parenthash() const {
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool AcquiredDiagObject::has_parenthash() const {
+  return _internal_has_parenthash();
+}
+inline void AcquiredDiagObject::clear_parenthash() {
+  parenthash_ = PROTOBUF_ULONGLONG(0);
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 AcquiredDiagObject::_internal_parenthash() const {
+  return parenthash_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 AcquiredDiagObject::parenthash() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagObject.parentHash)
+  return _internal_parenthash();
+}
+inline void AcquiredDiagObject::_internal_set_parenthash(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _has_bits_[0] |= 0x00000002u;
+  parenthash_ = value;
+}
+inline void AcquiredDiagObject::set_parenthash(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_parenthash(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagObject.parentHash)
+}
+
+// -------------------------------------------------------------------
+
+// AcquiredDiagSignal
+
+// required .Network.AcquiredDiagObject diagObject = 1;
+inline bool AcquiredDiagSignal::_internal_has_diagobject() const {
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  PROTOBUF_ASSUME(!value || diagobject_ != nullptr);
+  return value;
+}
+inline bool AcquiredDiagSignal::has_diagobject() const {
+  return _internal_has_diagobject();
+}
+inline void AcquiredDiagSignal::clear_diagobject() {
+  if (diagobject_ != nullptr) diagobject_->Clear();
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline const ::Network::AcquiredDiagObject& AcquiredDiagSignal::_internal_diagobject() const {
+  const ::Network::AcquiredDiagObject* p = diagobject_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Network::AcquiredDiagObject&>(
+      ::Network::_AcquiredDiagObject_default_instance_);
+}
+inline const ::Network::AcquiredDiagObject& AcquiredDiagSignal::diagobject() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignal.diagObject)
+  return _internal_diagobject();
+}
+inline void AcquiredDiagSignal::unsafe_arena_set_allocated_diagobject(
+    ::Network::AcquiredDiagObject* diagobject) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(diagobject_);
+  }
+  diagobject_ = diagobject;
+  if (diagobject) {
+    _has_bits_[0] |= 0x00000008u;
+  } else {
+    _has_bits_[0] &= ~0x00000008u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Network.AcquiredDiagSignal.diagObject)
+}
+inline ::Network::AcquiredDiagObject* AcquiredDiagSignal::release_diagobject() {
+  _has_bits_[0] &= ~0x00000008u;
+  ::Network::AcquiredDiagObject* temp = diagobject_;
+  diagobject_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::Network::AcquiredDiagObject* AcquiredDiagSignal::unsafe_arena_release_diagobject() {
+  // @@protoc_insertion_point(field_release:Network.AcquiredDiagSignal.diagObject)
+  _has_bits_[0] &= ~0x00000008u;
+  ::Network::AcquiredDiagObject* temp = diagobject_;
+  diagobject_ = nullptr;
+  return temp;
+}
+inline ::Network::AcquiredDiagObject* AcquiredDiagSignal::_internal_mutable_diagobject() {
+  _has_bits_[0] |= 0x00000008u;
+  if (diagobject_ == nullptr) {
+    auto* p = CreateMaybeMessage<::Network::AcquiredDiagObject>(GetArena());
+    diagobject_ = p;
+  }
+  return diagobject_;
+}
+inline ::Network::AcquiredDiagObject* AcquiredDiagSignal::mutable_diagobject() {
+  // @@protoc_insertion_point(field_mutable:Network.AcquiredDiagSignal.diagObject)
+  return _internal_mutable_diagobject();
+}
+inline void AcquiredDiagSignal::set_allocated_diagobject(::Network::AcquiredDiagObject* diagobject) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete diagobject_;
+  }
+  if (diagobject) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(diagobject);
+    if (message_arena != submessage_arena) {
+      diagobject = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, diagobject, submessage_arena);
+    }
+    _has_bits_[0] |= 0x00000008u;
+  } else {
+    _has_bits_[0] &= ~0x00000008u;
+  }
+  diagobject_ = diagobject;
+  // @@protoc_insertion_point(field_set_allocated:Network.AcquiredDiagSignal.diagObject)
+}
+
+// required int32 diagLevel = 2 [default = 0];
+inline bool AcquiredDiagSignal::_internal_has_diaglevel() const {
+  bool value = (_has_bits_[0] & 0x00000010u) != 0;
+  return value;
+}
+inline bool AcquiredDiagSignal::has_diaglevel() const {
+  return _internal_has_diaglevel();
+}
+inline void AcquiredDiagSignal::clear_diaglevel() {
+  diaglevel_ = 0;
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 AcquiredDiagSignal::_internal_diaglevel() const {
+  return diaglevel_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 AcquiredDiagSignal::diaglevel() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignal.diagLevel)
+  return _internal_diaglevel();
+}
+inline void AcquiredDiagSignal::_internal_set_diaglevel(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000010u;
+  diaglevel_ = value;
+}
+inline void AcquiredDiagSignal::set_diaglevel(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_diaglevel(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagSignal.diagLevel)
+}
+
+// required string diagSignalTypeID = 3;
+inline bool AcquiredDiagSignal::_internal_has_diagsignaltypeid() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool AcquiredDiagSignal::has_diagsignaltypeid() const {
+  return _internal_has_diagsignaltypeid();
+}
+inline void AcquiredDiagSignal::clear_diagsignaltypeid() {
+  diagsignaltypeid_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& AcquiredDiagSignal::diagsignaltypeid() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignal.diagSignalTypeID)
+  return _internal_diagsignaltypeid();
+}
+inline void AcquiredDiagSignal::set_diagsignaltypeid(const std::string& value) {
+  _internal_set_diagsignaltypeid(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagSignal.diagSignalTypeID)
+}
+inline std::string* AcquiredDiagSignal::mutable_diagsignaltypeid() {
+  // @@protoc_insertion_point(field_mutable:Network.AcquiredDiagSignal.diagSignalTypeID)
+  return _internal_mutable_diagsignaltypeid();
+}
+inline const std::string& AcquiredDiagSignal::_internal_diagsignaltypeid() const {
+  return diagsignaltypeid_.Get();
+}
+inline void AcquiredDiagSignal::_internal_set_diagsignaltypeid(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  diagsignaltypeid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void AcquiredDiagSignal::set_diagsignaltypeid(std::string&& value) {
+  _has_bits_[0] |= 0x00000001u;
+  diagsignaltypeid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Network.AcquiredDiagSignal.diagSignalTypeID)
+}
+inline void AcquiredDiagSignal::set_diagsignaltypeid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000001u;
+  diagsignaltypeid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Network.AcquiredDiagSignal.diagSignalTypeID)
+}
+inline void AcquiredDiagSignal::set_diagsignaltypeid(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000001u;
+  diagsignaltypeid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Network.AcquiredDiagSignal.diagSignalTypeID)
+}
+inline std::string* AcquiredDiagSignal::_internal_mutable_diagsignaltypeid() {
+  _has_bits_[0] |= 0x00000001u;
+  return diagsignaltypeid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* AcquiredDiagSignal::release_diagsignaltypeid() {
+  // @@protoc_insertion_point(field_release:Network.AcquiredDiagSignal.diagSignalTypeID)
+  if (!_internal_has_diagsignaltypeid()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return diagsignaltypeid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void AcquiredDiagSignal::set_allocated_diagsignaltypeid(std::string* diagsignaltypeid) {
+  if (diagsignaltypeid != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  diagsignaltypeid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), diagsignaltypeid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Network.AcquiredDiagSignal.diagSignalTypeID)
+}
+
+// optional bool isReflection = 4 [default = false];
+inline bool AcquiredDiagSignal::_internal_has_isreflection() const {
+  bool value = (_has_bits_[0] & 0x00000080u) != 0;
+  return value;
+}
+inline bool AcquiredDiagSignal::has_isreflection() const {
+  return _internal_has_isreflection();
+}
+inline void AcquiredDiagSignal::clear_isreflection() {
+  isreflection_ = false;
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline bool AcquiredDiagSignal::_internal_isreflection() const {
+  return isreflection_;
+}
+inline bool AcquiredDiagSignal::isreflection() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignal.isReflection)
+  return _internal_isreflection();
+}
+inline void AcquiredDiagSignal::_internal_set_isreflection(bool value) {
+  _has_bits_[0] |= 0x00000080u;
+  isreflection_ = value;
+}
+inline void AcquiredDiagSignal::set_isreflection(bool value) {
+  _internal_set_isreflection(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagSignal.isReflection)
+}
+
+// optional string reflectedSignalID = 5;
+inline bool AcquiredDiagSignal::_internal_has_reflectedsignalid() const {
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool AcquiredDiagSignal::has_reflectedsignalid() const {
+  return _internal_has_reflectedsignalid();
+}
+inline void AcquiredDiagSignal::clear_reflectedsignalid() {
+  reflectedsignalid_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline const std::string& AcquiredDiagSignal::reflectedsignalid() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignal.reflectedSignalID)
+  return _internal_reflectedsignalid();
+}
+inline void AcquiredDiagSignal::set_reflectedsignalid(const std::string& value) {
+  _internal_set_reflectedsignalid(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagSignal.reflectedSignalID)
+}
+inline std::string* AcquiredDiagSignal::mutable_reflectedsignalid() {
+  // @@protoc_insertion_point(field_mutable:Network.AcquiredDiagSignal.reflectedSignalID)
+  return _internal_mutable_reflectedsignalid();
+}
+inline const std::string& AcquiredDiagSignal::_internal_reflectedsignalid() const {
+  return reflectedsignalid_.Get();
+}
+inline void AcquiredDiagSignal::_internal_set_reflectedsignalid(const std::string& value) {
+  _has_bits_[0] |= 0x00000002u;
+  reflectedsignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void AcquiredDiagSignal::set_reflectedsignalid(std::string&& value) {
+  _has_bits_[0] |= 0x00000002u;
+  reflectedsignalid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Network.AcquiredDiagSignal.reflectedSignalID)
+}
+inline void AcquiredDiagSignal::set_reflectedsignalid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000002u;
+  reflectedsignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Network.AcquiredDiagSignal.reflectedSignalID)
+}
+inline void AcquiredDiagSignal::set_reflectedsignalid(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000002u;
+  reflectedsignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Network.AcquiredDiagSignal.reflectedSignalID)
+}
+inline std::string* AcquiredDiagSignal::_internal_mutable_reflectedsignalid() {
+  _has_bits_[0] |= 0x00000002u;
+  return reflectedsignalid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* AcquiredDiagSignal::release_reflectedsignalid() {
+  // @@protoc_insertion_point(field_release:Network.AcquiredDiagSignal.reflectedSignalID)
+  if (!_internal_has_reflectedsignalid()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000002u;
+  return reflectedsignalid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void AcquiredDiagSignal::set_allocated_reflectedsignalid(std::string* reflectedsignalid) {
+  if (reflectedsignalid != nullptr) {
+    _has_bits_[0] |= 0x00000002u;
+  } else {
+    _has_bits_[0] &= ~0x00000002u;
+  }
+  reflectedsignalid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), reflectedsignalid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Network.AcquiredDiagSignal.reflectedSignalID)
+}
+
+// optional string validitySignalID = 6;
+inline bool AcquiredDiagSignal::_internal_has_validitysignalid() const {
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline bool AcquiredDiagSignal::has_validitysignalid() const {
+  return _internal_has_validitysignalid();
+}
+inline void AcquiredDiagSignal::clear_validitysignalid() {
+  validitysignalid_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline const std::string& AcquiredDiagSignal::validitysignalid() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignal.validitySignalID)
+  return _internal_validitysignalid();
+}
+inline void AcquiredDiagSignal::set_validitysignalid(const std::string& value) {
+  _internal_set_validitysignalid(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagSignal.validitySignalID)
+}
+inline std::string* AcquiredDiagSignal::mutable_validitysignalid() {
+  // @@protoc_insertion_point(field_mutable:Network.AcquiredDiagSignal.validitySignalID)
+  return _internal_mutable_validitysignalid();
+}
+inline const std::string& AcquiredDiagSignal::_internal_validitysignalid() const {
+  return validitysignalid_.Get();
+}
+inline void AcquiredDiagSignal::_internal_set_validitysignalid(const std::string& value) {
+  _has_bits_[0] |= 0x00000004u;
+  validitysignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void AcquiredDiagSignal::set_validitysignalid(std::string&& value) {
+  _has_bits_[0] |= 0x00000004u;
+  validitysignalid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Network.AcquiredDiagSignal.validitySignalID)
+}
+inline void AcquiredDiagSignal::set_validitysignalid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000004u;
+  validitysignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Network.AcquiredDiagSignal.validitySignalID)
+}
+inline void AcquiredDiagSignal::set_validitysignalid(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000004u;
+  validitysignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Network.AcquiredDiagSignal.validitySignalID)
+}
+inline std::string* AcquiredDiagSignal::_internal_mutable_validitysignalid() {
+  _has_bits_[0] |= 0x00000004u;
+  return validitysignalid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* AcquiredDiagSignal::release_validitysignalid() {
+  // @@protoc_insertion_point(field_release:Network.AcquiredDiagSignal.validitySignalID)
+  if (!_internal_has_validitysignalid()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000004u;
+  return validitysignalid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void AcquiredDiagSignal::set_allocated_validitysignalid(std::string* validitysignalid) {
+  if (validitysignalid != nullptr) {
+    _has_bits_[0] |= 0x00000004u;
+  } else {
+    _has_bits_[0] &= ~0x00000004u;
+  }
+  validitysignalid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), validitysignalid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Network.AcquiredDiagSignal.validitySignalID)
+}
+
+// optional int32 valueSizeBit = 7 [default = 0];
+inline bool AcquiredDiagSignal::_internal_has_valuesizebit() const {
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
+  return value;
+}
+inline bool AcquiredDiagSignal::has_valuesizebit() const {
+  return _internal_has_valuesizebit();
+}
+inline void AcquiredDiagSignal::clear_valuesizebit() {
+  valuesizebit_ = 0;
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 AcquiredDiagSignal::_internal_valuesizebit() const {
+  return valuesizebit_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 AcquiredDiagSignal::valuesizebit() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignal.valueSizeBit)
+  return _internal_valuesizebit();
+}
+inline void AcquiredDiagSignal::_internal_set_valuesizebit(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000020u;
+  valuesizebit_ = value;
+}
+inline void AcquiredDiagSignal::set_valuesizebit(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_valuesizebit(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagSignal.valueSizeBit)
+}
+
+// optional int32 discreteContainerSize = 8 [default = 0];
+inline bool AcquiredDiagSignal::_internal_has_discretecontainersize() const {
+  bool value = (_has_bits_[0] & 0x00000040u) != 0;
+  return value;
+}
+inline bool AcquiredDiagSignal::has_discretecontainersize() const {
+  return _internal_has_discretecontainersize();
+}
+inline void AcquiredDiagSignal::clear_discretecontainersize() {
+  discretecontainersize_ = 0;
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 AcquiredDiagSignal::_internal_discretecontainersize() const {
+  return discretecontainersize_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 AcquiredDiagSignal::discretecontainersize() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignal.discreteContainerSize)
+  return _internal_discretecontainersize();
+}
+inline void AcquiredDiagSignal::_internal_set_discretecontainersize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000040u;
+  discretecontainersize_ = value;
+}
+inline void AcquiredDiagSignal::set_discretecontainersize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_discretecontainersize(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagSignal.discreteContainerSize)
+}
+
+// optional bool logChanges = 9 [default = false];
+inline bool AcquiredDiagSignal::_internal_has_logchanges() const {
+  bool value = (_has_bits_[0] & 0x00000100u) != 0;
+  return value;
+}
+inline bool AcquiredDiagSignal::has_logchanges() const {
+  return _internal_has_logchanges();
+}
+inline void AcquiredDiagSignal::clear_logchanges() {
+  logchanges_ = false;
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline bool AcquiredDiagSignal::_internal_logchanges() const {
+  return logchanges_;
+}
+inline bool AcquiredDiagSignal::logchanges() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignal.logChanges)
+  return _internal_logchanges();
+}
+inline void AcquiredDiagSignal::_internal_set_logchanges(bool value) {
+  _has_bits_[0] |= 0x00000100u;
+  logchanges_ = value;
+}
+inline void AcquiredDiagSignal::set_logchanges(bool value) {
+  _internal_set_logchanges(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagSignal.logChanges)
+}
+
+// optional bool archive = 10 [default = false];
+inline bool AcquiredDiagSignal::_internal_has_archive() const {
+  bool value = (_has_bits_[0] & 0x00000200u) != 0;
+  return value;
+}
+inline bool AcquiredDiagSignal::has_archive() const {
+  return _internal_has_archive();
+}
+inline void AcquiredDiagSignal::clear_archive() {
+  archive_ = false;
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline bool AcquiredDiagSignal::_internal_archive() const {
+  return archive_;
+}
+inline bool AcquiredDiagSignal::archive() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignal.archive)
+  return _internal_archive();
+}
+inline void AcquiredDiagSignal::_internal_set_archive(bool value) {
+  _has_bits_[0] |= 0x00000200u;
+  archive_ = value;
+}
+inline void AcquiredDiagSignal::set_archive(bool value) {
+  _internal_set_archive(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagSignal.archive)
+}
+
+// optional bool reserved = 11 [default = false];
+inline bool AcquiredDiagSignal::_internal_has_reserved() const {
+  bool value = (_has_bits_[0] & 0x00000400u) != 0;
+  return value;
+}
+inline bool AcquiredDiagSignal::has_reserved() const {
+  return _internal_has_reserved();
+}
+inline void AcquiredDiagSignal::clear_reserved() {
+  reserved_ = false;
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline bool AcquiredDiagSignal::_internal_reserved() const {
+  return reserved_;
+}
+inline bool AcquiredDiagSignal::reserved() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignal.reserved)
+  return _internal_reserved();
+}
+inline void AcquiredDiagSignal::_internal_set_reserved(bool value) {
+  _has_bits_[0] |= 0x00000400u;
+  reserved_ = value;
+}
+inline void AcquiredDiagSignal::set_reserved(bool value) {
+  _internal_set_reserved(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagSignal.reserved)
+}
+
+// optional int32 apertureType = 12 [default = 0];
+inline bool AcquiredDiagSignal::_internal_has_aperturetype() const {
+  bool value = (_has_bits_[0] & 0x00001000u) != 0;
+  return value;
+}
+inline bool AcquiredDiagSignal::has_aperturetype() const {
+  return _internal_has_aperturetype();
+}
+inline void AcquiredDiagSignal::clear_aperturetype() {
+  aperturetype_ = 0;
+  _has_bits_[0] &= ~0x00001000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 AcquiredDiagSignal::_internal_aperturetype() const {
+  return aperturetype_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 AcquiredDiagSignal::aperturetype() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignal.apertureType)
+  return _internal_aperturetype();
+}
+inline void AcquiredDiagSignal::_internal_set_aperturetype(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00001000u;
+  aperturetype_ = value;
+}
+inline void AcquiredDiagSignal::set_aperturetype(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_aperturetype(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagSignal.apertureType)
+}
+
+// optional double coarseAperture = 13 [default = 0];
+inline bool AcquiredDiagSignal::_internal_has_coarseaperture() const {
+  bool value = (_has_bits_[0] & 0x00000800u) != 0;
+  return value;
+}
+inline bool AcquiredDiagSignal::has_coarseaperture() const {
+  return _internal_has_coarseaperture();
+}
+inline void AcquiredDiagSignal::clear_coarseaperture() {
+  coarseaperture_ = 0;
+  _has_bits_[0] &= ~0x00000800u;
+}
+inline double AcquiredDiagSignal::_internal_coarseaperture() const {
+  return coarseaperture_;
+}
+inline double AcquiredDiagSignal::coarseaperture() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignal.coarseAperture)
+  return _internal_coarseaperture();
+}
+inline void AcquiredDiagSignal::_internal_set_coarseaperture(double value) {
+  _has_bits_[0] |= 0x00000800u;
+  coarseaperture_ = value;
+}
+inline void AcquiredDiagSignal::set_coarseaperture(double value) {
+  _internal_set_coarseaperture(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagSignal.coarseAperture)
+}
+
+// optional double fineAperture = 14 [default = 0];
+inline bool AcquiredDiagSignal::_internal_has_fineaperture() const {
+  bool value = (_has_bits_[0] & 0x00004000u) != 0;
+  return value;
+}
+inline bool AcquiredDiagSignal::has_fineaperture() const {
+  return _internal_has_fineaperture();
+}
+inline void AcquiredDiagSignal::clear_fineaperture() {
+  fineaperture_ = 0;
+  _has_bits_[0] &= ~0x00004000u;
+}
+inline double AcquiredDiagSignal::_internal_fineaperture() const {
+  return fineaperture_;
+}
+inline double AcquiredDiagSignal::fineaperture() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignal.fineAperture)
+  return _internal_fineaperture();
+}
+inline void AcquiredDiagSignal::_internal_set_fineaperture(double value) {
+  _has_bits_[0] |= 0x00004000u;
+  fineaperture_ = value;
+}
+inline void AcquiredDiagSignal::set_fineaperture(double value) {
+  _internal_set_fineaperture(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagSignal.fineAperture)
+}
+
+// optional int32 absAddrBit = 15 [default = 0];
+inline bool AcquiredDiagSignal::_internal_has_absaddrbit() const {
+  bool value = (_has_bits_[0] & 0x00002000u) != 0;
+  return value;
+}
+inline bool AcquiredDiagSignal::has_absaddrbit() const {
+  return _internal_has_absaddrbit();
+}
+inline void AcquiredDiagSignal::clear_absaddrbit() {
+  absaddrbit_ = 0;
+  _has_bits_[0] &= ~0x00002000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 AcquiredDiagSignal::_internal_absaddrbit() const {
+  return absaddrbit_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 AcquiredDiagSignal::absaddrbit() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignal.absAddrBit)
+  return _internal_absaddrbit();
+}
+inline void AcquiredDiagSignal::_internal_set_absaddrbit(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00002000u;
+  absaddrbit_ = value;
+}
+inline void AcquiredDiagSignal::set_absaddrbit(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_absaddrbit(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagSignal.absAddrBit)
+}
+
+// -------------------------------------------------------------------
+
+// AcquiredDiagSignals
+
+// repeated .Network.AcquiredDiagSignal diagSignals = 1;
+inline int AcquiredDiagSignals::_internal_diagsignals_size() const {
+  return diagsignals_.size();
+}
+inline int AcquiredDiagSignals::diagsignals_size() const {
+  return _internal_diagsignals_size();
+}
+inline void AcquiredDiagSignals::clear_diagsignals() {
+  diagsignals_.Clear();
+}
+inline ::Network::AcquiredDiagSignal* AcquiredDiagSignals::mutable_diagsignals(int index) {
+  // @@protoc_insertion_point(field_mutable:Network.AcquiredDiagSignals.diagSignals)
+  return diagsignals_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Network::AcquiredDiagSignal >*
+AcquiredDiagSignals::mutable_diagsignals() {
+  // @@protoc_insertion_point(field_mutable_list:Network.AcquiredDiagSignals.diagSignals)
+  return &diagsignals_;
+}
+inline const ::Network::AcquiredDiagSignal& AcquiredDiagSignals::_internal_diagsignals(int index) const {
+  return diagsignals_.Get(index);
+}
+inline const ::Network::AcquiredDiagSignal& AcquiredDiagSignals::diagsignals(int index) const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignals.diagSignals)
+  return _internal_diagsignals(index);
+}
+inline ::Network::AcquiredDiagSignal* AcquiredDiagSignals::_internal_add_diagsignals() {
+  return diagsignals_.Add();
+}
+inline ::Network::AcquiredDiagSignal* AcquiredDiagSignals::add_diagsignals() {
+  // @@protoc_insertion_point(field_add:Network.AcquiredDiagSignals.diagSignals)
+  return _internal_add_diagsignals();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Network::AcquiredDiagSignal >&
+AcquiredDiagSignals::diagsignals() const {
+  // @@protoc_insertion_point(field_list:Network.AcquiredDiagSignals.diagSignals)
+  return diagsignals_;
+}
+
+// repeated .Network.AcquiredDiagObject diagObjects = 2;
+inline int AcquiredDiagSignals::_internal_diagobjects_size() const {
+  return diagobjects_.size();
+}
+inline int AcquiredDiagSignals::diagobjects_size() const {
+  return _internal_diagobjects_size();
+}
+inline void AcquiredDiagSignals::clear_diagobjects() {
+  diagobjects_.Clear();
+}
+inline ::Network::AcquiredDiagObject* AcquiredDiagSignals::mutable_diagobjects(int index) {
+  // @@protoc_insertion_point(field_mutable:Network.AcquiredDiagSignals.diagObjects)
+  return diagobjects_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Network::AcquiredDiagObject >*
+AcquiredDiagSignals::mutable_diagobjects() {
+  // @@protoc_insertion_point(field_mutable_list:Network.AcquiredDiagSignals.diagObjects)
+  return &diagobjects_;
+}
+inline const ::Network::AcquiredDiagObject& AcquiredDiagSignals::_internal_diagobjects(int index) const {
+  return diagobjects_.Get(index);
+}
+inline const ::Network::AcquiredDiagObject& AcquiredDiagSignals::diagobjects(int index) const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignals.diagObjects)
+  return _internal_diagobjects(index);
+}
+inline ::Network::AcquiredDiagObject* AcquiredDiagSignals::_internal_add_diagobjects() {
+  return diagobjects_.Add();
+}
+inline ::Network::AcquiredDiagObject* AcquiredDiagSignals::add_diagobjects() {
+  // @@protoc_insertion_point(field_add:Network.AcquiredDiagSignals.diagObjects)
+  return _internal_add_diagobjects();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Network::AcquiredDiagObject >&
+AcquiredDiagSignals::diagobjects() const {
+  // @@protoc_insertion_point(field_list:Network.AcquiredDiagSignals.diagObjects)
+  return diagobjects_;
+}
+
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
