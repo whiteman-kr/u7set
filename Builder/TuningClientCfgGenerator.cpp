@@ -345,9 +345,9 @@ namespace Builder
 			for (const std::shared_ptr<VFrame30::LogicSchema>& schema : m_context->m_appLogicSchemas)
 			{
 				std::shared_ptr<TuningFilter> ofTs = std::make_shared<TuningFilter>(TuningFilter::InterfaceType::Tree);
-
-				const std::set<QString> schemaSignals = schema->getSignalSet();
-				for (const QString& schemaSignal : schemaSignals)
+				
+				for (const auto schemaSignals = schema->getSignalList();
+					 const QString& schemaSignal : schemaSignals)
 				{
 					Hash hash = ::calcHash(schemaSignal);
 
