@@ -1253,14 +1253,14 @@ void DbControllerSignalTests::dbcTest_addSignal()
 
 	for(int i = 0; i < 4; i++)
 	{
-		AppSignal s;
+		AppSignal appSignal;
 
-		s.setID(-1);
-		s.setAppSignalID(QString("#DBC_ADD_SIGNAL_TEST_S%1").arg(i));
-		s.setCustomAppSignalID(QString("DBC_ADD_SIGNAL_TEST_S%1").arg(i));
-		s.setCaption(QString("Caption DBC_ADD_SIGNAL_TEST_S%1").arg(i));
+		appSignal.setID(-1);
+		appSignal.setAppSignalID(QString("#DBC_ADD_SIGNAL_TEST_S%1").arg(i));
+		appSignal.setCustomAppSignalID(QString("DBC_ADD_SIGNAL_TEST_S%1").arg(i));
+		appSignal.setCaption(QString("Caption DBC_ADD_SIGNAL_TEST_S%1").arg(i));
 
-		newSignals.push_back(s);
+		newSignals.push_back(appSignal);
 	}
 
 	QVERIFY(m_dbcAdmin->addSignals(E::SignalType::Analog, &newSignals, nullptr) == true);
@@ -1280,14 +1280,13 @@ void DbControllerSignalTests::dbcTest_addSignal()
 
 	for(int i = 0; i < 5; i++)
 	{
-		AppSignal s;
+		AppSignal appSignal;
 
-		s.setID(-1);
-		s.setAppSignalID(QString("#DBC_ADD_SIGNAL_TEST_SS%1").arg(i));
-		s.setCustomAppSignalID(QString("DBC_ADD_SIGNAL_TEST_SS%1").arg(i));
-		s.setCaption(QString("Caption DBC_ADD_SIGNAL_TEST_SS%1").arg(i));
+		appSignal.setAppSignalID(QString("#DBC_ADD_SIGNAL_TEST_SS%1").arg(i));
+		appSignal.setCustomAppSignalID(QString("DBC_ADD_SIGNAL_TEST_SS%1").arg(i));
+		appSignal.setCaption(QString("Caption DBC_ADD_SIGNAL_TEST_SS%1").arg(i));
 
-		newSignals.push_back(s);
+		newSignals.push_back(appSignal);
 	}
 
 	QVERIFY(m_dbcAdmin->addSignals(E::SignalType::Analog, &newSignals, nullptr) == false);
@@ -1299,14 +1298,14 @@ void DbControllerSignalTests::dbcTest_addSignal()
 
 	for(int i = 0; i < 3; i++)
 	{
-		AppSignal s;
+		AppSignal appSignal;
 
-		s.setID(-1);
-		s.setAppSignalID(QString("#DBC_ADD_SIGNAL_TEST_ANOTHER_S%1").arg(i));
-		s.setCustomAppSignalID(QString("DBC_ADD_SIGNAL_TEST_ANOTHER_S%1").arg(i));
-		s.setCaption(QString("Caption DBC_ADD_SIGNAL_TEST_ANOTHER_S%1").arg(i));
+		appSignal.setID(-1);
+		appSignal.setAppSignalID(QString("#DBC_ADD_SIGNAL_TEST_ANOTHER_S%1").arg(i));
+		appSignal.setCustomAppSignalID(QString("DBC_ADD_SIGNAL_TEST_ANOTHER_S%1").arg(i));
+		appSignal.setCaption(QString("Caption DBC_ADD_SIGNAL_TEST_ANOTHER_S%1").arg(i));
 
-		newSignals.push_back(s);
+		newSignals.push_back(appSignal);
 	}
 
 	QVERIFY(m_dbcUser3->addSignals(E::SignalType::Discrete, &newSignals, nullptr) == true);

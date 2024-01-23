@@ -612,7 +612,7 @@ void DynamicAppSignalState::removeRtSession(Hash signalHash,
 
 	takeRtProcessingOwnership(rtProcessingOwner);
 
-	int removedCount = m_rtSessions.erase(sessionToRemoveID);
+	auto removedCount = m_rtSessions.erase(sessionToRemoveID);
 
 	Q_ASSERT(removedCount == 1);
 

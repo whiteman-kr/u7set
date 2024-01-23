@@ -21,6 +21,12 @@ message("${PROJECT_NAME}, Version: ${CMAKE_PROJECT_VERSION}")
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# Set warnings level and exclusions.
+#
+include(cmake/warnings.cmake)
+set_warnings()
 
 # Add LTO for Release and Windows only. 
 # It is diasbale for Unix to speed up CI bulid.

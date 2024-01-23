@@ -125,10 +125,10 @@ namespace VFrame30
 
 		if (drawSizeBar == true && isLocked() == false)
 		{
-			double fx = r.left();
-			double fy = r.top();
-			double width = r.width();
-			double height = r.height();
+			//double fx = r.left();
+			//double fy = r.top();
+			//double width = r.width();
+			//double height = r.height();
 
 			// For tilted item draw only three control bars, right, bottom and bottom right.
 			// The first in pair is a flag to draw the control bar if angle != 0.

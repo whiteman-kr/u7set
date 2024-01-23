@@ -1598,8 +1598,8 @@ namespace VFrame30
 
 						QRectF textRect{barRect.right() + mainGridWidth, drawParam->gridToDpiY(y), 0, 0};
 
-						QPen pen{QColor{ds.indicatorSetpoint.textColor}, lineWeightDraw() == 0.0 ? drawParam->cosmeticPenWidth() : lineWeightDraw()};
-						p->setPen(pen);
+						QPen setpointValuePen{QColor{ds.indicatorSetpoint.textColor}, lineWeightDraw() == 0.0 ? drawParam->cosmeticPenWidth() : lineWeightDraw()};
+						p->setPen(setpointValuePen);
 
 						DrawHelper::drawText(p, font(), schemaItem->itemUnit(), valueString, textRect, Qt::AlignLeft | Qt::AlignVCenter | Qt::TextDontClip | Qt::TextSingleLine);
 					}

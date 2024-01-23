@@ -1022,9 +1022,44 @@ namespace VFrame30
 
 	QStringList Schema::getSignalList() const
 	{
-		// Do nothing, override to get signal list
+		std::set<QString> signalMap;	// signal ids can be duplicated, std::set removes duplicates.
+
+		for (const auto& layer : layers())
+		{
+			// Get all signals
+			//
+			for (const auto& item : layer->items())
+			{
+				IMatsSchemaItemAssociations* itemAssociations = item->toType<IMatsSchemaItemAssociations>();
+				if (itemAssociations == nullptr)
+				{
+					continue;
+				}
+
+				for (auto appSignals = itemAssociations->associatedAppSignalIds();
+					 const QString & id : appSignals)
+				{
+					signalMap.insert(id);
+				}
+
+				for (auto appSignals = itemAssociations->associatedImpactAppSignalIds();
+					 const QString & id : appSignals)
+				{
+					signalMap.insert(id);
+				}
+			}
+		}
+
+		// Move set to list
 		//
 		QStringList result;
+		result.reserve(static_cast<qsizetype>(signalMap.size()));
+
+		for (const QString& id : signalMap)
+		{
+			result.append(id);
+		}
+
 		return result;
 	}
 

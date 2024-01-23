@@ -436,7 +436,7 @@ namespace Builder
 
 	int SchemaTypesParams::pageLayoutCount() const
 	{
-		return m_pageLayouts.size();
+		return std::ssize(m_pageLayouts);
 	}
 
 	const QString& SchemaTypesParams::pageLayoutCaption(int index) const
@@ -521,7 +521,7 @@ namespace Builder
 		{
 			// Maybe some saved version has been changed
 			Q_ASSERT(false);
-			count = m_pageLayouts.size();
+			count = std::ssize(m_pageLayouts);
 		}
 
 		for (int i = 0; i < count; i++)
@@ -1258,7 +1258,7 @@ namespace Builder
 					// Filter files by schema tags
 					//
 					VFrame30::SchemaDetails details;
-					bool ok = details.parseDetails(fi->details());
+					ok = details.parseDetails(fi->details());
 					if (ok == true)
 					{
 						bool schemaTagFound = false;
@@ -2051,7 +2051,7 @@ namespace Builder
 				if (const VFrame30::SchemaItemReceiver* receiverElement = item->toReceiverElement();
 					receiverElement != nullptr)
 				{
-					auto otherItemSignalSet = otherLogicSchema->getSignalSet();
+					const auto otherItemSignalSet = otherLogicSchema->getSignalList();
 					auto r = std::find_if(otherItemSignalSet.begin(), otherItemSignalSet.end(), [signalId](const auto& it)
 										  {
 											  // Find an item on other schema with this signal

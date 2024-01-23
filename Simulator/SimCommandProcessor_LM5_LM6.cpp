@@ -357,6 +357,8 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_reset(const DeviceCommand& command)
 	{
+		Q_UNUSED(command);
+
 		m_device->setAcc(0);
 	}
 
@@ -372,6 +374,8 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_set(const DeviceCommand& command)
 	{
+		Q_UNUSED(command);
+
 		m_device->setAcc(0xFFFF);
 	}
 
@@ -387,6 +391,8 @@ namespace Sim
 	
 	void CommandProcessor_LM5_LM6::command_or(const DeviceCommand& command)
 	{
+		Q_UNUSED(command);
+
 		auto acc = m_device->acc();
 		m_device->setAcc(acc == 0 ? 0x0000 : 0x0001);
 	}
@@ -403,6 +409,8 @@ namespace Sim
 	
 	void CommandProcessor_LM5_LM6::command_and(const DeviceCommand& command)
 	{
+		Q_UNUSED(command);
+
 		auto acc = m_device->acc();
 		m_device->setAcc(acc == 0xFFFF ? 0x0001 : 0x0000);
 	}
@@ -419,6 +427,8 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::command_not(const DeviceCommand& command)
 	{
+		Q_UNUSED(command);
+
 		auto acc = m_device->acc();
 		acc = ~acc;
 
@@ -437,6 +447,8 @@ namespace Sim
 	
 	void CommandProcessor_LM5_LM6::command_lshift0(const DeviceCommand& command)
 	{
+		Q_UNUSED(command);
+
 		auto acc = m_device->acc();
 		acc <<= 1;
 
@@ -455,6 +467,8 @@ namespace Sim
 	
 	void CommandProcessor_LM5_LM6::command_lshift1(const DeviceCommand& command)
 	{
+		Q_UNUSED(command);
+
 		auto acc = m_device->acc();
 		acc <<= 1;
 		acc |= 1;

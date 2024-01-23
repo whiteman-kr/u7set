@@ -275,8 +275,8 @@ namespace TestSuite
 		{
 			// Check script running permission
 			//
-			bool allowGlobal = true;
-			bool allowLocal = true;
+			allowGlobal = true;
+			allowLocal = true;
 			if (queryPermission(allowGlobal, allowLocal) == false)
 			{
 				m_scriptTestLog.writeError(m_scriptInfo.fileName + ": queryPermission() failed, test terminated.");
@@ -507,10 +507,10 @@ namespace TestSuite
 			QString captionVariable = "caption" + testFunc;
 			captionVariable.replace("captiontest", "caption", Qt::CaseSensitive);
 			 
-			auto it = captionValues.find(captionVariable);
-			if (it != captionValues.end())
+			auto cit = captionValues.find(captionVariable);
+			if (cit != captionValues.end())
 			{
-				scriptInfo.testsCaptions[testFunc] = it->second;
+				scriptInfo.testsCaptions[testFunc] = cit->second;
 			}
 		}
 
@@ -518,13 +518,12 @@ namespace TestSuite
 		//
 		scriptInfo.scriptCaption = script.fileName();
 		{
-			QFileInfo fi(scriptInfo.scriptCaption);
-			QString scriptCaption = fi.baseName(); // Get the filename without path and extension
+			QString scriptCaption = QFileInfo(scriptInfo.scriptCaption).baseName(); // Get the filename without path and extension
 
-			auto it = captionValues.find("caption" + scriptCaption);
-			if (it != captionValues.end())
+			auto cit = captionValues.find("caption" + scriptCaption);
+			if (cit != captionValues.end())
 			{
-				scriptInfo.scriptCaption = it->second;
+				scriptInfo.scriptCaption = cit->second;
 			}
 		}
 

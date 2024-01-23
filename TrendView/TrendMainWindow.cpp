@@ -1426,7 +1426,7 @@ namespace TrendLib
 			Q_ASSERT(m_refreshAction);
 			if (m_refreshAction->isVisible() == true)
 			{
-				menu.addAction(m_refreshAction->text(), this, &TrendMainWindow::actionRefreshTriggered, QKeySequence::Refresh);
+				menu.addAction(m_refreshAction->text(), QKeySequence::Refresh, this, &TrendMainWindow::actionRefreshTriggered);
 			}
 
 			menu.addSeparator();

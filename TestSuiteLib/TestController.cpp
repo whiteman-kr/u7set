@@ -172,7 +172,7 @@ namespace TestSuite
 
 	bool TestController::waitForSignalOverrides(qint64 timeoutMs)
 	{
-		quint64 elapsedMs = 0;
+		qint64 elapsedMs = 0;
 		return m_outputController.waitForAllSignalsWritten(timeoutMs, elapsedMs);
 	}
 
@@ -180,7 +180,7 @@ namespace TestSuite
 	{
 		// Before expecting any values, wait for all writing processes are finished
 		//
-		quint64 elapsedMs = 0;
+		qint64 elapsedMs = 0;
 		bool allWritten = m_outputController.waitForAllSignalsWritten(timeoutMs, elapsedMs);
 		if (allWritten == false)
 		{
@@ -295,7 +295,7 @@ namespace TestSuite
 
 	void TestController::setDebugMessagesEnabled(bool value)
 	{
-		m_debugMessagesEnabled = true;
+		m_debugMessagesEnabled = value;
 	}
 
 } // namespace TestSuite

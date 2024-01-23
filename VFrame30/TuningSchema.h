@@ -18,9 +18,6 @@ namespace VFrame30
 	protected:
 		virtual bool SaveData(Proto::Envelope* message) const override;
 		virtual bool LoadData(const Proto::Envelope& message) override;
-
-	public:
-		virtual QStringList getSignalList() const override;
 	};
 }
 

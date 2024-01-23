@@ -451,6 +451,12 @@ namespace VFrame30
 				//					replaceText = formatNumber(signal.lowValidRange(), signal);
 				//					break;
 				//				}
+
+				if (macro.compare(QLatin1String("units"), Qt::CaseInsensitive) == 0)
+				{
+					replaceText = signal.unit();
+					break;
+				}
 			} while (false);
 
 			// Replace text in result

@@ -433,6 +433,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0408.sql", "Upgrade to version 408, Remove from SR LMs outputs 1, 2 and their validity"},
 	{":/DatabaseUpgrade/Upgrade0409.sql", "Upgrade to version 409, Show on schema param AssignFlags for AFBs mismatch_*"},
 	{":/DatabaseUpgrade/Upgrade0410.sql", "Upgrade to version 410, Update tuning logins editor for Monitor, TuningClient and TestSuite"},
+	{":/DatabaseUpgrade/Upgrade0411.sql", "Upgrade to version 411, Create folder $root$/Schemas/VDU"},
 };
 
 int DbWorker::counter = 0;
@@ -5746,7 +5747,7 @@ void DbWorker::slot_checkinSignals(const std::vector<int>& signalIDs, QString co
 
 	addLogRecord(db, logMessage);
 
-	request.append(QString(",'%1')").arg(comment));
+	request.append(QString(",'%1')").arg(DbWorker::toSqlStr(comment)));
 
 	QSqlQuery q(db);
 
