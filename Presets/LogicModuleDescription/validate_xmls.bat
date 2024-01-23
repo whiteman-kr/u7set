@@ -1,4 +1,5 @@
 @echo off
+
 for %%F in (*.xml) do (
     echo checking file %%F...
 	rem ..\..\Tools\xmlstarlet-1.6.1-win32\xml.exe val -e %%F 

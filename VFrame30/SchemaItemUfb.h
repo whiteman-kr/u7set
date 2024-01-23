@@ -1,18 +1,22 @@
 #pragma once
 
 #include "FblItemRect.h"
+#include "IMatsSchemaItemAssociations.h"
+
 
 namespace VFrame30
 {
 	class UfbSchema;
 }
 
+
 namespace VFrame30
 {
 	//
 	// SchemaItemUfb
 	//
-	class SchemaItemUfb final : public FblItemRect
+	class SchemaItemUfb final : public FblItemRect,
+								public IMatsSchemaItemAssociations
 	{
 		Q_OBJECT
 
@@ -43,6 +47,15 @@ namespace VFrame30
 
 		bool updateUfbElement(const UfbSchema* ufbSchema, QString* errorMsg);
 
+		// IMatsSchemaItemAssociations implementation.
+		//
+	public:
+		virtual QStringList associatedAppSignalIds() const override;
+		virtual QStringList associatedImpactAppSignalIds() const override;
+		virtual QStringList associatedConnectionIds() const override;
+		virtual QStringList associatedLoopbackIds() const override;
+		virtual QStringList associatedSchemaItemLabels() const override;
+
 		// Properties and Data
 		//
 	public:
@@ -51,6 +64,7 @@ namespace VFrame30
 		[[nodiscard]] int ufbSchemaVersion() const;
 
 		[[nodiscard]] QString specificProperties() const;
+
 	private:
 		void setSpecificProperties(QString value);
 
@@ -59,6 +73,6 @@ namespace VFrame30
 		QString m_ufbCaption;
 		int m_ufbVersion = -1;
 
-		QString m_specificPropertiesStruct;		// Description of the UFB's specific properties
+		QString m_specificPropertiesStruct; // Description of the UFB's specific properties
 	};
-}
+} // namespace VFrame30

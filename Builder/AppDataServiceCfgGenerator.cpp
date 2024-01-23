@@ -1,10 +1,10 @@
 #include "AppDataServiceCfgGenerator.h"
 #include "Builder.h"
 #include "SoftwareSettingsGetter.h"
+#include "DeviceHelper.h"
 
 #include "../UtilsLib/XmlHelper.h"
 #include "../UtilsLib/WUtils.h"
-#include "../lib/DeviceHelper.h"
 #include "../lib/DataSource.h"
 
 class DataSource;
@@ -46,8 +46,9 @@ namespace Builder
 		do
 		{
 			if (writeAppDataSourcesXml() == false) break;
-			if (writeAppSignalsXml() == false) break;
-			if (addLinkToAppSignalsFile() == false) break;
+			if (writeAppSignalsXml() == false) break;				// AppSignals.xml for AZPZ
+			if (writeAppSignalsExtXml() == false) break;			// AppSignalsExt.xml as extra debug info
+			if (writeAcquiredAppSignalsFile() == false) break;
 
 			result = true;
 		}
@@ -56,11 +57,78 @@ namespace Builder
 		return result;
 	}
 
+	bool AppDataServiceCfgGenerator::writeAppSignalsExtXml(const AppSignalSet* signalSet,
+															const std::set<Hash>* limitedSet,
+															BuildResultWriter* resultWriter,
+															const QString& subDir)
+	{
+		TEST_PTR_RETURN_FALSE(signalSet);
+		// limitedSet may be nullptr
+		TEST_PTR_RETURN_FALSE(resultWriter);
+
+		QByteArray extData;
+		XmlWriteHelper extXml(&extData);
+
+		extXml.setAutoFormatting(true);
+		extXml.writeStartDocument();
+		extXml.writeStartElement(XmlElement::APP_SIGNALS);
+		extXml.writeIntAttribute(XmlAttribute::BUILD_ID, resultWriter->buildInfo().id);
+		extXml.writeStartElement(XmlElement::SIGNALS);
+
+		int signalCount = 0;
+
+		if (limitedSet != nullptr)
+		{
+			signalCount = static_cast<int>(limitedSet->size());
+		}
+		else
+		{
+			signalCount = static_cast<int>(signalSet->size());
+		}
+
+		extXml.writeIntAttribute(XmlAttribute::COUNT, signalCount);
+
+		int writtenSignalsCount = 0;
+
+		for(const AppSignal* signal : *signalSet)
+		{
+			if (limitedSet != nullptr &&
+				limitedSet->contains(calcHash(signal->appSignalID())) == false)
+			{
+				continue;
+			}
+
+			signal->writeToXml(extXml);
+
+			writtenSignalsCount++;
+		}
+
+		if (writtenSignalsCount != signalCount)
+		{
+			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR(resultWriter->log());
+		}
+
+		extXml.writeEndElement();	// </Signals>
+		extXml.writeEndElement();	// </AppSignals>
+		extXml.writeEndDocument();
+
+		BuildFile* buildFile = resultWriter->addFile(subDir,
+													File::APP_SIGNALS_EXT_XML,
+													CfgFileId::APP_SIGNALS_EXT, "", extData);
+		if (buildFile == nullptr)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
 	bool AppDataServiceCfgGenerator::writeAppDataSourcesXml()
 	{
 		bool result = true;
 
-		m_associatedAppSignals.clear();
+		m_acquiredAppSignals.clear();
 
 		QVector<DataSource> dataSources;
 
@@ -127,7 +195,7 @@ namespace Builder
 
 					connectedAdaptersCount++;
 
-					result &= findAppDataSourceAssociatedSignals(ds);	// inside fills m_associatedAppSignals also
+					result &= findAppDataSourceAcquiredSignals(ds);	// inside fills m_associatedAppSignals also
 
 					dataSources.append(ds);
 				}
@@ -172,37 +240,23 @@ namespace Builder
 		azpzXml.writeStartElement(XmlElement::APP_SIGNALS);
 		azpzXml.writeIntAttribute(XmlAttribute::BUILD_ID, m_buildResultWriter->buildInfo().id);
 		azpzXml.writeStartElement(XmlElement::SIGNALS);
-		azpzXml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(m_associatedAppSignals.size()));
+		azpzXml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(m_acquiredAppSignals.size()));
 
-		QByteArray extData;
-		XmlWriteHelper extXml(&extData);
-
-		extXml.setAutoFormatting(true);
-		extXml.writeStartDocument();
-		extXml.writeStartElement(XmlElement::APP_SIGNALS);
-		extXml.writeIntAttribute(XmlAttribute::BUILD_ID, m_buildResultWriter->buildInfo().id);
-		extXml.writeStartElement(XmlElement::SIGNALS);
-		extXml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(m_associatedAppSignals.size()));
-
-		qsizetype signalCount = m_signalSet->count();
 		int writtenSignalsCount = 0;
 
-		for(qsizetype i = 0; i < signalCount; i++)
+		for(const AppSignal* signal : *m_signalSet)
 		{
-			AppSignal& signal = (*m_signalSet)[i];
-
-			if (m_associatedAppSignals.contains(signal.appSignalID()) == false)
+			if (m_acquiredAppSignals.contains(calcHash(signal->appSignalID())) == false)
 			{
 				continue;
 			}
 
-			signal.writeToAzpzXml(azpzXml);
-			signal.writeToXml(extXml);
+			signal->writeToAzpzXml(azpzXml);
 
 			writtenSignalsCount++;
 		}
 
-		if (writtenSignalsCount != m_associatedAppSignals.size())
+		if (writtenSignalsCount != m_acquiredAppSignals.size())
 		{
 			Q_ASSERT(false);
 			LOG_INTERNAL_ERROR(m_log);
@@ -212,23 +266,9 @@ namespace Builder
 		azpzXml.writeEndElement();	// </AppSignals>
 		azpzXml.writeEndDocument();
 
-		extXml.writeEndElement();	// </Signals>
-		extXml.writeEndElement();	// </AppSignals>
-		extXml.writeEndDocument();
-
 		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(),
 															File::APP_SIGNALS_XML,
 															CfgFileId::APP_SIGNALS, "", azpzData);
-
-		if (buildFile == nullptr)
-		{
-			return false;
-		}
-
-		buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(),
-													File::APP_SIGNALS_EXT_XML,
-													CfgFileId::APP_SIGNALS_EXT, "", extData);
-
 		if (buildFile == nullptr)
 		{
 			return false;
@@ -237,21 +277,47 @@ namespace Builder
 		return true;
 	}
 
-	bool AppDataServiceCfgGenerator::addLinkToAppSignalsFile()
+	bool AppDataServiceCfgGenerator::writeAppSignalsExtXml()
 	{
-		// add link to signals set file
-		//
-		// After task RPCT-2170 resolving (separate signalset files for each AppDataService)
-		// this link should be removed !!!
+		return writeAppSignalsExtXml(dynamic_cast<AppSignalSet*>(m_signalSet),
+									&m_acquiredAppSignals,
+									m_buildResultWriter,
+									softwareCfgSubdir());
+	}
 
-		BuildFile* buildFile = m_buildResultWriter->getBuildFileByID(Directory::COMMON, CfgFileId::APP_SIGNAL_SET);
+	bool AppDataServiceCfgGenerator::writeAcquiredAppSignalsFile()
+	{
+		TEST_PTR_RETURN_FALSE(m_signalSet);
+		TEST_PTR_RETURN_FALSE(m_buildResultWriter);
 
-		if (buildFile == nullptr)
+		::Proto::AppSignalSet protoAppSignalSet;
+
+		for(const Hash hash : m_acquiredAppSignals)
 		{
-			return false;
+			AppSignal* appSignal = m_signalSet->getSignalByHash(hash);
+
+			TEST_PTR_CONTINUE(appSignal);
+
+			::Proto::AppSignal* protoAppSignal = protoAppSignalSet.add_appsignal();
+
+			appSignal->saveToProto(protoAppSignal);
 		}
 
-		m_cfgXml->addLinkToFile(buildFile);
+		int dataSize = static_cast<int>(protoAppSignalSet.ByteSizeLong());
+
+		QByteArray data;
+
+		data.resize(dataSize);
+
+		protoAppSignalSet.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(data.data()));
+
+		BuildFile* acquiredAppSignalsFile = m_buildResultWriter->addFile(softwareCfgSubdir(),
+																		 File::ACQUIRED_APP_SIGNALS_ASGS,
+																		 CfgFileId::ACQUIRED_APP_SIGNALS, "",
+																		 data, true);
+		TEST_PTR_RETURN_FALSE(acquiredAppSignalsFile);
+
+		m_cfgXml->addLinkToFile(acquiredAppSignalsFile);
 
 		return true;
 	}
@@ -281,7 +347,7 @@ namespace Builder
 		return true;
 	}
 
-	bool AppDataServiceCfgGenerator::findAppDataSourceAssociatedSignals(DataSource& appDataSource)
+	bool AppDataServiceCfgGenerator::findAppDataSourceAcquiredSignals(DataSource& appDataSource)
 	{
 		Hardware::DeviceObject* lm = m_equipment->deviceObject(appDataSource.moduleEquipmentID()).get();
 
@@ -293,13 +359,11 @@ namespace Builder
 
 		const Hardware::DeviceChassis* dataSourceChassis = lm->getParentChassis();
 
-		qsizetype signalCount = m_signalSet->count();
-
-		for(qsizetype i = 0; i < signalCount; i++)
+		for(const AppSignal* appSignal : *m_signalSet)
 		{
-			const AppSignal& appSignal =  (*m_signalSet)[i];
+			CONTINUE_IF_FALSE(appSignal->isAcquired());
 
-			QString appSignalEquipmentID = appSignal.equipmentID();
+			QString appSignalEquipmentID = appSignal->equipmentID();
 
 			if (appSignalEquipmentID.isEmpty())
 			{
@@ -311,7 +375,7 @@ namespace Builder
 			if (device == nullptr)
 			{
 				LOG_WARNING_OBSOLETE(m_log, IssuePrefix::NotDefined, QString("Signal '%1' bound with an unknown device '%2'").
-					arg(appSignal.appSignalID()).arg(appSignalEquipmentID));
+					arg(appSignal->appSignalID()).arg(appSignalEquipmentID));
 				continue;
 			}
 
@@ -319,9 +383,9 @@ namespace Builder
 
 			if (chassis == dataSourceChassis)
 			{
-				appDataSource.appendAssociatedSignal(E::LanControllerType::AppData, appSignal.appSignalID());
+				appDataSource.appendAssociatedSignal(E::LanControllerType::AppData, appSignal->appSignalID());
 
-				m_associatedAppSignals.insert(appSignal.appSignalID());
+				m_acquiredAppSignals.insert(calcHash(appSignal->appSignalID()));
 			}
 		}
 

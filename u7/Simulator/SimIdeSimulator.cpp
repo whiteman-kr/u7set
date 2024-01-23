@@ -11,6 +11,12 @@ SimIdeSimulator::~SimIdeSimulator()
 
 bool SimIdeSimulator::load(QString buildPath)
 {
+	// Save current state of ArminKey, TuningKey. It is convenient feature, so user must not switch on/off tuning options on number of LMs again.
+	//
+	auto oldLogicModules = logicModules();
+
+	// --
+	//
 	m_schemaDetails.clear();
 
 	bool ok = true;
@@ -18,6 +24,30 @@ bool SimIdeSimulator::load(QString buildPath)
 	ok &= loadSchemaDetails(buildPath);
 	ok &= Sim::Simulator::load(buildPath);
 
+	// Restore state of ArminKey, TuningKey.
+	//
+	for (auto lms = logicModules();
+		 auto lm : lms)
+	{
+		auto it = std::find_if(oldLogicModules.begin(), oldLogicModules.end(), [&lm](const auto& oldLm)
+							   {
+								   return lm->equipmentId() == oldLm->equipmentId();
+							   });
+
+		if (it != oldLogicModules.end())
+		{
+			auto oldLm = *it;
+
+			lm->setArmingKey(oldLm->armingKey());
+			lm->setTuningKey(oldLm->tuningKey());
+
+			lm->setSorSetSwitch1(oldLm->sorSetSwitch1());
+			lm->setSorSetSwitch2(oldLm->sorSetSwitch2());
+			lm->setSorSetSwitch3(oldLm->sorSetSwitch3());
+		}
+	}
+
+	emit projectUpdated();
 	return ok;
 }
 
@@ -55,7 +85,7 @@ bool SimIdeSimulator::loadSchemaDetails(QString buildPath)
 
 	if (QFile::exists(fileName) == false)
 	{
-		// File not exists, can happen if project does not cotaine any schemas
+		// File not exists, can happen if project does not contain any schemas.
 		//
 		log().writeWarning(tr("Project build does not contain any schemas, file %1 not exist.").arg(fileName));
 
@@ -104,4 +134,3 @@ QStringList SimIdeSimulator::schemasByLoopbackId(const QString& loopbackId) cons
 {
 	return m_schemaDetails.schemasByLoopbackId(loopbackId);
 }
-

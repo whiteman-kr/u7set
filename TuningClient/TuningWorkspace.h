@@ -1,10 +1,10 @@
-#ifndef TUNINGWORKSPACE_H
-#define TUNINGWORKSPACE_H
+#pragma once
 
 #include "../ClientLib/TuningConnection.h"
 #include "TuningClientFilterStorage.h"
 #include "TuningConfigController.h"
 #include "TuningPage.h"
+#include "TreeFilterWidget.h"
 #include "SwitchFiltersPage.h"
 
 class FilterButton : public QPushButton
@@ -16,7 +16,6 @@ public:
 	std::shared_ptr<TuningFilter> filter();
 
 	int counter() const;
-
 	void update(int discreteCounter);
 
 private:
@@ -42,99 +41,61 @@ public:
 							 ClientLib::TuningConnection& tuningConnection,
 							 std::shared_ptr<TuningFilter> treeFilter,
 							 std::shared_ptr<TuningFilter> workspaceFilter,
+							 bool hasFilterTree,
 							 QWidget* parent);
 
 	virtual ~TuningWorkspace();
 
 	bool hasPendingChanges();
-
 	bool askForSavePendingChanges();
+	void updateFilters();
 
+private slots:
 	void onTimer();
 
-	void updateFilters(std::shared_ptr<TuningFilter> rootFilter);
-
 private:
-
-	// Tree update
-
-	void updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter);
-
 	// Initialization
 
 	void createButtons();
-
 	void createTabPages();
 
 	QWidget* createTuningPageOrWorkspace(std::shared_ptr<TuningFilter> childWorkspaceFilter);
 
 	// Tree items operation
 
-	void addChildTreeObjects(const std::shared_ptr<TuningFilter> filter, QTreeWidgetItem* parent, const QString& mask);
-
 	void updateTabsButtonsCounters();
-
-	void updateTreeItemStatus(QTreeWidgetItem* treeItem = nullptr);
-
-	void updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, TuningFilter* filter);
-
-	void updateTreeItemCounters(QTreeWidgetItem* treeItem, TuningFilter* filter);
-
-	void activateControl(const QString& equipmentId, bool enable);
-
-	QTreeWidgetItem* findFilterWidget(const QString& id, QTreeWidgetItem* treeItem);
 
 protected:
 
 	virtual bool eventFilter(QObject *object, QEvent *event) override;
 
 private:
-
 	// Data
 
 	TuningConfigController& m_configController;
 	TuningSignalManager& m_tuningSignalManager;
 	TuningClientFilterStorage& m_tuningFilterStorage;
 	ClientLib::TuningUserManager& m_userManager;
-
 	ClientLib::TuningConnection& m_tuningConnection;
 
 	std::shared_ptr<TuningFilter> m_workspaceFilter;
 
 	// Interface parts
 
-	QWidget* m_treeLayoutWidget = nullptr;
-
+	TreeFilterWidget* m_treeLayoutWidget = nullptr;
 	QVBoxLayout* m_rightLayout = nullptr;
-
 	QHBoxLayout* m_buttonsLayout = nullptr;
-
 	QSplitter* m_hSplitter = nullptr;
-
-	QTreeWidget* m_filterTree = nullptr;
-
-	QComboBox* m_treeMaskCombo = nullptr;
-
-	QPushButton* m_treeMaskApply = nullptr;
-
 	QTabWidget* m_tab = nullptr;
-
-	const int m_columnNameIndex = 0;
-	int m_columnAccessIndex = -1;
-	std::vector<int> m_columnDiscreteCountIndexes;
-	int m_columnStatusIndex = -1;
-	int m_columnSorIndex = -1;
 
 	// Filters containters
 
 	std::vector<FilterButton*> m_filterButtons;
-
 	std::vector<std::shared_ptr<TuningFilter>> m_tabsFilters;
 
 	//
 
 	std::shared_ptr<TuningFilter> m_treeFilter;				// Currently pressed tree filter
-
 	std::shared_ptr<TuningFilter> m_currentbuttonFilter;	// Currently pressed button filter
 
 	// Tuning controls
@@ -149,22 +110,12 @@ private:
 static int m_instanceCounter;
 
 private slots:
-
-	void slot_treeSelectionChanged();
-	void slot_treeContextMenuRequested(const QPoint& pos);
-
-
-	void slot_maskReturnPressed();
-	void slot_maskApply();
-
-	void slot_parentTreeFilterChanged(std::shared_ptr<TuningFilter> filter);
+	void slot_parentWorkspaceTreeFilterChanged(std::shared_ptr<TuningFilter> filter);
 	void slot_filterButtonClicked(std::shared_ptr<TuningFilter> filter);
 
 signals:
-	void treeFilterSelectionChanged(std::shared_ptr<TuningFilter> filter);
+	void treeFilterChanged(std::shared_ptr<TuningFilter> filter);
 	void buttonFilterSelectionChanged(std::shared_ptr<TuningFilter> filter);
 
 
 };
-
-#endif // TUNINGWORKSPACE_H

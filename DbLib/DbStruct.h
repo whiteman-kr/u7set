@@ -30,7 +30,7 @@ enum class DbDir
 	EtcDir,						// $root$/ETC
 	TestsDir,					// $root$/Tests
 	SimTestsDir,				// $root$/Tests/SimTests
-	HardwareTestsDir,			// $root$/Tests/HadrwareTestsDir
+	HardwareTestsDir,			// $root$/Tests/HardwareTestsDir
 	DiagSignalTypesDir			// $root$/DiagSignalTypes
 };
 
@@ -132,7 +132,6 @@ struct ObjectState
 	int userId;
 	int errCode;
 };
-
 
 //
 //
@@ -334,7 +333,7 @@ public:
 	[[nodiscard]] int size() const;
 	[[nodiscard]] bool empty() const;
 
-	[[nodiscard]] bool isDbFile() const;		// true if contains DbFile whith data or tree is empty
+	[[nodiscard]] bool isDbFile() const;		// true if contains DbFile with data or tree is empty
 	[[nodiscard]] bool isDbFileInfo() const;	// true if contains DbFileInfo or tree is empty
 
 	[[nodiscard]] bool isRoot(int fileId) const;
@@ -391,17 +390,17 @@ public:
 private:
 	struct FileChildren
 	{
-		int m_fileId;
+		int m_fileId = -1;
 		std::vector<std::shared_ptr<DbFileInfo>> m_children;
 	};
 
 private:
-	// WARNING, assigment move is present, adding new member, modify operator=(DbFileTree&&)!!!
+	// WARNING, assignment move is present, adding new member, modify operator=(DbFileTree&&)!!!
 	//
-	std::map<int, FileChildren> m_fileIdToChildren;				// Key is fileid, values are its' children
+	std::map<int, FileChildren> m_fileIdToChildren;				// Key is fileId, values are its' children
 	std::map<int, std::shared_ptr<DbFileInfo>> m_files;			// Key if fileId, value is DbFile(Info) object
 	int m_rootFileId = -1;
-	// WARNING, assigment move is present, adding new member, modify operator=(DbFileTree&&)!!!
+	// WARNING, assignment move is present, adding new member, modify operator=(DbFileTree&&)!!!
 	//
 };
 
@@ -605,7 +604,7 @@ private:
 	int m_userId = -1;
 	QString m_username;
 	QString m_comment;
-	E::VcsItemAction m_action;
+	E::VcsItemAction m_action = E::VcsItemAction::Unknown;
 };
 
 //
@@ -706,7 +705,7 @@ Q_DECLARE_METATYPE(DbProject)
 Q_DECLARE_METATYPE(std::vector<DbProject>)
 Q_DECLARE_METATYPE(std::vector<DbFileInfo>)
 Q_DECLARE_METATYPE(std::vector<std::shared_ptr<DbFile>>)
-Q_DECLARE_METATYPE(std::vector<int>)
+//Q_DECLARE_METATYPE(std::vector<int>)
 Q_DECLARE_METATYPE(std::vector<DbChangeset>)
 Q_DECLARE_METATYPE(std::vector<DbChangesetDetails>)
 

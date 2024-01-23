@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QSerialPort>
 #include "../HardwareLib/ModuleFirmware.h"
-#include "../lib/OutputLog.h"
+#include "../UtilsLib/OutputLog.h"
 
 #include <optional>
 

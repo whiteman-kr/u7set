@@ -1,5 +1,7 @@
 #include "../lib/ConstStrings.h"
 
+#include <QDirIterator>
+
 #include "ArchFile.h"
 #include "ArchWriterThread.h"
 #include "BinSearch.h"
@@ -456,23 +458,16 @@ const double ArchFile::QUEUE_EXPAND_LIMIT = 0.8;		// 80%
 const double ArchFile::QUEUE_REDUCTION_LIMIT = 0.2;		// 20%
 
 
-ArchFile::ArchFile(const Proto::ArchSignal& protoArchSignal, CircularLoggerShared log) :
+ArchFile::ArchFile(const Proto::ArchSignal& protoArchSignal, const QString& archFullPath, CircularLoggerShared log) :
 	m_log(log),
-	m_queue(protoArchSignal.isanalog() == true ? QUEUE_MIN_SIZE * 16 : QUEUE_MIN_SIZE)
+	m_queue(static_cast<E::SignalType>(protoArchSignal.signaltype()) == E::SignalType::Analog ?
+																QUEUE_MIN_SIZE * 16 : QUEUE_MIN_SIZE)
 {
-	m_hash = protoArchSignal.hash();
 	m_appSignalID = QString::fromStdString(protoArchSignal.appsignalid());
-	m_isAnalog = protoArchSignal.isanalog();
-
+	m_hash = calcHash(m_appSignalID);
+	m_isAnalog = static_cast<E::SignalType>(protoArchSignal.signaltype()) == E::SignalType::Analog;
 	m_lastRecord.state.flags.valid = 0;
-}
 
-ArchFile::~ArchFile()
-{
-}
-
-void ArchFile::setArchFullPath(const QString& archFullPath)
-{
 	QString lastByteOfHash = (QString("%1").arg(static_cast<int>(m_hash & 0xFF), 2, 16, Latin1Char::ZERO)).toUpper();
 
 	m_path = QString("%1/%2/%3").
@@ -481,6 +476,10 @@ void ArchFile::setArchFullPath(const QString& archFullPath)
 					arg(m_appSignalID.remove(QRegularExpression("[^0-9A-Za-z_]")));
 
 	m_writablePartition.init(m_path, true);
+}
+
+ArchFile::~ArchFile()
+{
 }
 
 bool ArchFile::pushState(const SimpleAppSignalState& state)

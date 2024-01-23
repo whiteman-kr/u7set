@@ -32,6 +32,10 @@ namespace TrendLib
 		bool addSignals(const std::vector<TrendSignalParam>& trendSignals, bool redraw);
 		bool addSignal(const TrendSignalParam& trendSignal, bool redraw);
 
+		/// Add, remove or reorder signals.
+		///
+		void updateSignals(const std::vector<TrendSignalParam>& trendsignals);
+
 	protected:
 		void createToolBar();
 
@@ -63,7 +67,7 @@ namespace TrendLib
 		void actionExitTriggered();
 		void actionAboutTriggered();
 		void actionRefreshTriggered();
-		void actionAutoSclaeTriggered();
+		void actionAutoScaleTriggered();
 
 		void actionAddRuler(QPoint mousePos);
 		void actionDeleteRuler(int rulerIndex);
@@ -84,7 +88,7 @@ namespace TrendLib
 
 		void contextMenuRequested(const QPoint& pos);
 
-		// Proprties
+		// Properties
 		//
 	public:
 		[[nodiscard]] TrendLib::TrendSignalSet& signalSet();
@@ -110,11 +114,11 @@ namespace TrendLib
 
 		QPushButton* m_realtimeModeButton = nullptr;
 		QPushButton* m_realtimeAutoShiftButton = nullptr;
-		QAction* m_realtimeActionForButton = nullptr;	// Watch the following commnet for m_refreshActionForButton!
+		QAction* m_realtimeActionForButton = nullptr;	// Watch the following comment for m_refreshActionForButton!
 
 		QPushButton* m_refreshButton = nullptr;
 		QAction* m_refreshActionForButton = nullptr;	// When m_refreshButton is added to ToolBar m_refreshActionForButton is returned value.
-														// Action is used for hiding Button from ToolBar, as hiding QWidged does not work
+														// Action is used for hiding Button from ToolBar, as hiding QWidget does not work
 														// Qt Help for QToolBar::addWidget says:
 														// Note: You should use QAction::setVisible() to change the visibility of the widget.
 														// Using QWidget::setVisible(), QWidget::show() and QWidget::hide() does not work.

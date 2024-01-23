@@ -12,13 +12,13 @@ namespace VFrame30
 
 	class SchemaView : public std::enable_shared_from_this<SchemaView>
 	{
-	protected:
+	  protected:
 		SchemaView();
 		explicit SchemaView(std::shared_ptr<Schema> schema);
 
 		// Methods
 		//
-	public:
+	  public:
 		static void Ajust(QPainter* painter, SchemaUnit units, double startX, double startY, double zoom);
 		static void Ajust(QPainter* painter, int dpiX, int dpiY, double devicePixelRatioF, SchemaUnit units, double startX, double startY, double zoom);
 
@@ -28,7 +28,7 @@ namespace VFrame30
 		[[nodiscard]] double realDpiY(const QPaintDevice* device) const;
 
 		virtual void setSchema(std::shared_ptr<Schema> schema, bool repaint);
-		void setSchemaInternal(std::shared_ptr<Schema> schema);	// Use this when yoo dont need to update zoom, sliders, etc
+		void setSchemaInternal(std::shared_ptr<Schema> schema); // Use this when yoo do not need to update zoom, sliders, etc
 
 		VFrame30::Schema* schema();
 		const VFrame30::Schema* schema() const;
@@ -38,7 +38,7 @@ namespace VFrame30
 
 		// Properties
 		//
-	public:
+	  public:
 		double zoom() const;
 
 		const Session& session() const;
@@ -46,7 +46,7 @@ namespace VFrame30
 
 		// Data
 		//
-	protected:
+	  protected:
 		std::shared_ptr<VFrame30::Schema> m_schema;
 
 		double m_zoom = 100.0;
@@ -55,15 +55,16 @@ namespace VFrame30
 	};
 
 
-	class SchemaViewWidget : public QWidget, public SchemaView
+	class SchemaViewWidget : public QWidget,
+							 public SchemaView
 	{
 		Q_OBJECT
 
-	public:
+	  public:
 		explicit SchemaViewWidget(QWidget* parent = nullptr);
 		explicit SchemaViewWidget(std::shared_ptr<Schema> schema, QWidget* parent = nullptr);
 
-	public:
+	  public:
 		void updateControlWidgets(bool editMode);
 		void deleteControlWidgets();
 
@@ -75,24 +76,22 @@ namespace VFrame30
 		//
 		void draw(CDrawParam& drawParam, const QRectF& clipRect);
 
-	protected:
+	  protected:
 		virtual void paintEvent(QPaintEvent*) override;
 
 		// Events
 		//
-	protected:
+	  protected:
 		virtual void mouseMoveEvent(QMouseEvent* event) override;
 
-	public:
+	  public:
 		// Properties
 		//
 		double setZoom(double value, bool repaint = true);
 
 		// Signals
 		//
-	signals:
+	  signals:
 		void signal_schemaChanged(VFrame30::Schema* schema);
 	};
-}
-
-
+} // namespace VFrame30

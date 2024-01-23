@@ -15,10 +15,10 @@ namespace VFrame30
 	{
 		Property* p = nullptr;
 
-		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::styleSheet, PropertyNames::controlCategory, true, SchemaItemControl::styleSheet, SchemaItemControl::setStyleSheet);
+		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::styleSheet, PropertyNames::appearanceCategory, true, SchemaItemControl::styleSheet, SchemaItemControl::setStyleSheet);
 		p->setDescription(PropertyNames::widgetPropStyleSheet);
 
-		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::toolTip, PropertyNames::controlCategory, true, SchemaItemControl::toolTip, SchemaItemControl::setToolTip);
+		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::toolTip, PropertyNames::commonCategory, true, SchemaItemControl::toolTip, SchemaItemControl::setToolTip);
 		p->setDescription(PropertyNames::widgetPropToolTip);
 
 		// --
@@ -115,8 +115,10 @@ namespace VFrame30
 		return afterCreateImpl(control);
 	}
 
-	void SchemaItemControl::updateWidgetProperties(QWidget* widget) const
+	void SchemaItemControl::updateWidgetProperties(QWidget* widget, bool editMode) const
 	{
+		Q_UNUSED(editMode);
+
 		if (widget == nullptr)
 		{
 			assert(widget);
@@ -188,7 +190,7 @@ namespace VFrame30
 		return;
 	}
 
-	void SchemaItemControl::updateWdgetPosAndSize(QWidget* widget, double zoom)
+	void SchemaItemControl::updateWidgetPosAndSize(QWidget* widget, double zoom)
 	{
 		if (widget == nullptr)
 		{
@@ -254,7 +256,7 @@ namespace VFrame30
 		}
 	}
 
-	QJSValue SchemaItemControl::evaluateScript(QWidget* controlWidget, QString script)
+	QJSValue SchemaItemControl::evaluateScript(QString scriptName, QWidget* controlWidget, QString script)
 	{
 		if (controlWidget == nullptr)
 		{
@@ -274,7 +276,7 @@ namespace VFrame30
 		QJSEngine* engine = schemaView->jsEngine();
 		assert(engine);
 
-		QJSValue result = SchemaItem::evaluateScript(script, engine, schemaView);
+		QJSValue result = SchemaItem::evaluateScript(scriptName, script, engine, schemaView);
 		return result;
 	}
 

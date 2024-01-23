@@ -1,10 +1,8 @@
 #pragma once
 
-#include "../DbLib/DbController.h"
 #include "../../Simulator/SimConsoleLogFile.h"
 #include "SimIdeSimulator.h"
 #include "SimSchemaManager.h"
-#include "SimTuningConnection.h"
 #include "../../VFrame30/AppSignalController.h"
 #include "../../VFrame30/TuningController.h"
 
@@ -112,9 +110,6 @@ private:
 	SimSchemaManager m_schemaManager;
 
 	VFrame30::AppSignalController* m_appSignalController = nullptr;
-
-	SimTuningConnection m_tuningConnection;
-	VFrame30::TuningController* m_tuningController = nullptr;
 
 	// Actions
 	//

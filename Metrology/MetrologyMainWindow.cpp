@@ -1,16 +1,5 @@
 #include "MetrologyMainWindow.h"
 
-#include <QApplication>
-#include <QSettings>
-#include <QMessageBox>
-#include <QMenuBar>
-#include <QToolBar>
-#include <QStatusBar>
-#include <QTabWidget>
-#include <QTableView>
-#include <QDockWidget>
-#include <QCloseEvent>
-
 #include "../lib/Ui/DialogAbout.h"
 #include "../lib/ConstStrings.h"
 #include "../UtilsLib/Ui/UiTools.h"
@@ -84,7 +73,7 @@ MainWindow::~MainWindow()
 
 bool MainWindow::createInterface()
 {
-	setWindowTitle(tr("Metrology"));
+	setWindowTitle(Manufacturer::METROLOGY);
 	move(QGuiApplication::primaryScreen()->availableGeometry().center() - rect().center());
 
 	createActions();
@@ -393,9 +382,9 @@ bool MainWindow::createToolBars()
 		pMeasureTimeoutList->setEditable(true);
 		pMeasureTimeoutList->setValidator(validator);
 
-		for(int t = 0; t < Measure::TIMEOUT_COUNT; t++)
+		for(int t : Measure::Timeout)
 		{
-			pMeasureTimeoutList->addItem(QString::number(Measure::Timeout[t], 'f', 1));
+			pMeasureTimeoutList->addItem(QString::number(t, 'f', 1));
 		}
 
 		m_measureTimeout = theOptions.toolBar().measureTimeout();
@@ -2034,7 +2023,7 @@ void MainWindow::showOptions()
 
 void MainWindow::showUserManual()
 {
-	UiTools::openHelp(QApplication::applicationDirPath() + "/docs/Metrology_User_Manual.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath() + "/docs/Metrology_User_Manual.pdf", this);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2056,7 +2045,7 @@ void MainWindow::aboutConnection()
 
 void MainWindow::aboutApp()
 {
-	DialogAbout::show(this, QString(), ":/Images/logo.png");
+	DialogAbout::show(this, QString(), ":/Logo/RadiyLogo.png");
 }
 
 // -------------------------------------------------------------------------------------------------------------------

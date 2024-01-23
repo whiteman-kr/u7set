@@ -1,8 +1,20 @@
+#include "../ServiceLib/ServiceStarter.h"
 #include "TuningService.h"
+#include "version.h"
 
 int main(int argc, char *argv[])
 {
 	QCoreApplication app(argc, argv);
+
+	app.setApplicationName(Manufacturer::TUNING_SERVICE);
+	app.setOrganizationName(Manufacturer::RADIY);
+	app.setOrganizationDomain(Manufacturer::SITE);
+
+	app.setApplicationVersion(QString("%1.%2.%3 (%4)").
+									arg(U7SET_MAJOR_VERSION).
+									arg(U7SET_MINOR_VERSION).
+									arg(U7SET_PATCH_VERSION).
+									arg(U7SET_BRANCH_NAME));
 
 	CircularLoggerShared logger = std::make_shared<CircularLogger>();
 
@@ -16,14 +28,11 @@ int main(int argc, char *argv[])
 
 	tuningLog->setLogCodeInfo(false);
 
-	SoftwareInfo si;
-
-	si.init(E::SoftwareType::TuningService, "", 1, 0);
+	SoftwareInfo si(E::SoftwareType::TuningService, "");
 
 	Tuning::TuningServiceWorker tuningServiceWorker(si,
-													Service::getServiceInstanceName("Tuning Service", argc, argv),
+													Service::getServiceInstanceName(Manufacturer::TUNING_SERVICE, argc, argv),
 													argc, argv, logger,
-													E::ServiceRunMode::ConsoleApp,	// run mode will be refined after cmd line processing
 													tuningLog);
 
 	ServiceStarter serviceStarter(app, tuningServiceWorker, logger);

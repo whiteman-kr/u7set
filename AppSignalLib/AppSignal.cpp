@@ -1,11 +1,9 @@
 #ifndef APP_SIGNAL_LIB_DOMAIN
-#error Don't include this file in the project! Link AppSignalLib instead.
+#error Do not include this file in the project! Link AppSignalLib instead.
 #endif
 
 #include "AppSignal.h"
 #include "../UtilsLib/XmlHelper.h"
-
-#include "../Proto/serialization.pb.h"
 
 template<typename ENUM_TYPE>
 void writeEnumValueStrSpecPropAttribute(XmlWriteHelper& xml, const AppSignal& s,
@@ -54,7 +52,7 @@ bool AppSignalSpecPropValue::create(const QString& name, const QVariant& value, 
 	m_value = value;
 	m_isEnum = isEnum;
 
-	return true;
+    return true;
 }
 
 bool AppSignalSpecPropValue::setValue(const QString& name, const QVariant& value, bool isEnum)
@@ -254,7 +252,7 @@ bool AppSignalSpecPropValues::createFromSpecPropStruct(const QString& specPropSt
 
 	if (buildNamesMap == true)
 	{
-		buildPropNamesMap();
+		rebuildPropNamesMap();
 	}
 
 	return true;
@@ -271,9 +269,9 @@ bool AppSignalSpecPropValues::updateFromSpecPropStruct(const QString& specPropSt
 		return false;
 	}
 
-	buildPropNamesMap();
+	rebuildPropNamesMap();
 
-	QStringList namesToDelete;
+	std::set<QString> namesToDelete;
 	QHash<QString, std::shared_ptr<Property>> namesToCreate;
 
 	std::vector<std::shared_ptr<Property>> properties = pob.properties();
@@ -285,72 +283,67 @@ bool AppSignalSpecPropValues::updateFromSpecPropStruct(const QString& specPropSt
 		if (isExists(propName) == false)
 		{
 			namesToCreate.insert(propName, property);
+			continue;
+		}
+
+		// value of property is exists
+		//
+		QVariant value;
+		bool isEnum = false;
+
+		getValue(propName, &value, &isEnum);
+
+		// checking that property end value types are equal
+		//
+		if (property->value().metaType() == value.metaType() && property->isEnum() == isEnum)
+		{
+			// equal, update existing value if nessesery
+			//
+			if (property->updateFromPreset() == true)
+			{
+				setValue(propName, property->value(), property->isEnum());
+			}
 		}
 		else
 		{
-			// value of property is exists
+			// property type has been changed, recreate value
 			//
-			QVariant value;
-			bool isEnum = false;
-
-			getValue(propName, &value, &isEnum);
-
-			// checking that property end value types are equal
-			//
-			if (property->value().metaType() == value.metaType() && property->isEnum() == isEnum)
-			{
-				// equal, update existing value if nessesery
-				//
-				if (property->updateFromPreset() == true)
-				{
-					setValue(propName, property->value(), property->isEnum());
-				}
-			}
-			else
-			{
-				// property type has been changed, recreate value
-				//
-				namesToDelete.append(propName);
-				namesToCreate.insert(propName, property);
-			}
+			namesToDelete.insert(propName);
+			namesToCreate.insert(propName, property);
 		}
 	}
-
-	buildPropNamesMap();
 
 	for(const AppSignalSpecPropValue& specPropValue : m_specPropValues)
 	{
 		if (pob.propertyByCaption(specPropValue.name()) == nullptr)
 		{
-			namesToDelete.append(specPropValue.name());
+			namesToDelete.insert(specPropValue.name());
 		}
 	}
 
-	for(const QString& nameToDelete : namesToDelete)
-	{
-		int index = getPropertyIndex(nameToDelete);
+	QVector<AppSignalSpecPropValue> newSpecPropValues;
 
-		if (index != -1)
+	for(const auto& propVal : m_specPropValues)
+	{
+		if (namesToDelete.contains(propVal.name()) == false)
 		{
-			m_specPropValues.removeAt(index);
-			buildPropNamesMap();
-		}
-		else
-		{
-			assert(false);
+			newSpecPropValues.emplace_back(propVal);
 		}
 	}
 
 	// create new property value, set to default
 	//
+	AppSignalSpecPropValue specPropValue;
+
 	for(const std::shared_ptr<Property>& property : namesToCreate)
 	{
-		AppSignalSpecPropValue specPropValue;
-
 		specPropValue.create(property);
-
-		m_specPropValues.append(specPropValue);
+		newSpecPropValues.emplace_back(specPropValue);
 	}
+
+	m_specPropValues.swap(newSpecPropValues);
+
+	rebuildPropNamesMap();
 
 	return true;
 }
@@ -423,7 +416,7 @@ bool AppSignalSpecPropValues::getValue(const QString& name, QVariant* qv, bool* 
 	return true;
 }
 
-bool AppSignalSpecPropValues::	serializeValuesToArray(QByteArray* protoData) const
+bool AppSignalSpecPropValues::serializeValuesToArray(QByteArray* protoData) const
 {
 	TEST_PTR_RETURN_FALSE(protoData);
 
@@ -466,14 +459,37 @@ bool AppSignalSpecPropValues::parseValuesFromArray(const QByteArray& protoData)
 		m_specPropValues.append(specPropValue);
 	}
 
-	buildPropNamesMap();
+	rebuildPropNamesMap();
 
 	return true;
 }
 
 void AppSignalSpecPropValues::append(const AppSignalSpecPropValue& value)
 {
+	Q_ASSERT(m_propNamesMap.contains(value.name()) == false);
+
+	int index = m_specPropValues.size();
+
 	m_specPropValues.append(value);
+	m_propNamesMap.emplace(value.name(), index);
+}
+
+bool AppSignalSpecPropValues::removeValue(const QString& propName)
+{
+	auto it = m_propNamesMap.find(propName);
+
+	if (it == m_propNamesMap.end())
+	{
+		return false;
+	}
+
+	int index = it->second;
+
+	m_specPropValues.erase(m_specPropValues.begin() + index);
+
+	rebuildPropNamesMap();
+
+	return true;
 }
 
 bool AppSignalSpecPropValues::replaceName(const QString& oldName, const QString& newName)
@@ -493,11 +509,9 @@ bool AppSignalSpecPropValues::replaceName(const QString& oldName, const QString&
 	return replacingIsOccured;
 }
 
-void AppSignalSpecPropValues::buildPropNamesMap()
+void AppSignalSpecPropValues::rebuildPropNamesMap()
 {
 	m_propNamesMap.clear();
-
-	m_propNamesMap.reserve(static_cast<int>(m_specPropValues.size() * 1.2));
 
 	int index = 0;
 
@@ -505,7 +519,7 @@ void AppSignalSpecPropValues::buildPropNamesMap()
 	{
 		if (m_propNamesMap.contains(specPropValue.name()) == false)
 		{
-			m_propNamesMap.insert(specPropValue.name(), index);
+			m_propNamesMap.emplace(specPropValue.name(), index);
 		}
 		else
 		{
@@ -530,9 +544,16 @@ bool AppSignalSpecPropValues::setValue(const QString& name, const QVariant& valu
 
 int AppSignalSpecPropValues::getPropertyIndex(const QString& name) const
 {
-	if (m_propNamesMap.isEmpty() == false)
+	if (m_propNamesMap.empty() == false)
 	{
-		return m_propNamesMap.value(name, -1);
+		auto it = m_propNamesMap.find(name);
+
+		if (it == m_propNamesMap.end())
+		{
+			return -1;
+		}
+
+		return it->second;
 	}
 
 	int index = 0;
@@ -575,7 +596,7 @@ AppSignal::AppSignal(const ID_AppSignalID& ids)
 	m_signalGroupID = ids.signalGroupID;
 	m_appSignalID = ids.appSignalID;
 
-	m_isLoaded = false;
+	m_loaded = false;
 }
 
 AppSignal::~AppSignal()
@@ -609,19 +630,30 @@ QString AppSignal::initFromDeviceSignal(const QString& deviceSignalEquipmentID,
 	switch(m_signalType)
 	{
 	case E::SignalType::Analog:
-		if (m_analogSignalFormat != E::AnalogAppSignalFormat::Float32 &&
-			m_analogSignalFormat != E::AnalogAppSignalFormat::SignedInt32)
-		{
-			Q_ASSERT(false);
 
+		switch(m_analogSignalFormat)
+		{
+		case E::AnalogAppSignalFormat::Float32:
+			m_dataSize = FLOAT32_SIZE;
+			break;
+
+		case E::AnalogAppSignalFormat::SignedInt32:
+			m_dataSize = SIGNED_INT32_SIZE;
+			break;
+
+		default:
+			Q_ASSERT(false);
 			return QString("Unknown E::AnalogAppSignalFormat");
 		}
 
-		// no break, it is Ok!
+		initTuningValues();
+
+		break;
 
 	case E::SignalType::Discrete:
 
-		setDataSize(m_signalType, m_analogSignalFormat);
+		m_dataSize = DISCRETE_SIZE;
+
 		initTuningValues();
 
 		break;
@@ -734,7 +766,10 @@ void AppSignal::initSpecificProperties()
 		}
 
 		break;
+
 	case E::SignalType::Discrete:
+		break;
+
 	case E::SignalType::Bus:
 		break;
 
@@ -760,46 +795,43 @@ void AppSignal::setSignalType(E::SignalType type)
 	updateTuningValuesType();
 }
 
-void AppSignal::setDataSize(E::SignalType signalType, E::AnalogAppSignalFormat dataFormat)
+void AppSignal::setDataSizeW(int sizeW)
 {
-	switch(signalType)
+	m_dataSize = sizeW * SIZE_16BIT;
+}
+
+void AppSignal::setDataSizeByType(E::SignalType type, E::AnalogAppSignalFormat analogFormat)
+{
+	switch(type)
 	{
 	case E::SignalType::Discrete:
-		m_dataSize = DISCRETE_SIZE;
+		m_dataSize = SIZE_1BIT;
 		break;
 
 	case E::SignalType::Analog:
 
-		switch(dataFormat)
+		switch(analogFormat)
 		{
 		case E::AnalogAppSignalFormat::Float32:
 			m_dataSize = FLOAT32_SIZE;
 			break;
-
 		case E::AnalogAppSignalFormat::SignedInt32:
 			m_dataSize = SIGNED_INT32_SIZE;
 			break;
 
 		default:
-			assert(false);		// unknown data format
+			Q_ASSERT(false);
 		}
 
 		break;
 
 	case E::SignalType::Bus:
-
-		assert(false);						// function setDataSize should not be call for Bus signals
-											// data size of bus signals is defined by BusTypeID
+		m_dataSize = 0;					// size is defined by BusType
 		break;
 
 	default:
-		assert(false);		// unknown signal type
+		Q_ASSERT(false);
 	}
-}
-
-void AppSignal::setDataSizeW(int sizeW)
-{
-	m_dataSize = sizeW * SIZE_16BIT;
 }
 
 void AppSignal::setAnalogSignalFormat(E::AnalogAppSignalFormat dataFormat)
@@ -910,6 +942,26 @@ bool AppSignal::isCompatibleFormat(E::SignalType signalType, const QString& busT
 									 busTypeID);
 }
 
+bool AppSignal::invertSignal() const
+{
+	return m_invertSignal;
+}
+
+void AppSignal::setInvertSignal(bool invert)
+{
+	m_invertSignal = invert;
+}
+
+bool AppSignal::reserved() const
+{
+	return m_reserved;
+}
+
+void AppSignal::setReserved(bool reserved)
+{
+	m_reserved = reserved;
+}
+
 int AppSignal::lowADC(QString* err) const
 {
 	return static_cast<int>(getSpecPropUInt(AppSignalPropNames::LOW_ADC, err));
@@ -968,6 +1020,31 @@ double AppSignal::highEngineeringUnits(QString* err) const
 void AppSignal::setHighEngineeringUnits(double highEngineeringUnits)
 {
 	setSpecPropDouble(AppSignalPropNames::HIGH_ENGINEERING_UNITS, highEngineeringUnits);
+}
+
+double AppSignal::lowPhysicalUnits(QString* err) const
+{
+	return getSpecPropDouble(AppSignalPropNames::LOW_PHYSICAL_UNITS, err);
+}
+
+void AppSignal::setLowPhysicalUnits(double lowPhUnits)
+{
+	setSpecPropDouble(AppSignalPropNames::LOW_PHYSICAL_UNITS, lowPhUnits);
+}
+
+double AppSignal::highPhysicalUnits(QString* err) const
+{
+	return getSpecPropDouble(AppSignalPropNames::HIGH_PHYSICAL_UNITS, err);
+}
+
+void AppSignal::setHighPhysicalUnits(double highPhUnits)
+{
+	setSpecPropDouble(AppSignalPropNames::HIGH_PHYSICAL_UNITS, highPhUnits);
+}
+
+bool AppSignal::isReverseEngineeringLimits() const
+{
+	return lowEngineeringUnits() > highEngineeringUnits();
 }
 
 double AppSignal::lowValidRange(QString* err) const
@@ -1040,12 +1117,12 @@ void AppSignal::setElectricUnit(E::ElectricUnit electricUnit)
 	setSpecPropEnum(AppSignalPropNames::ELECTRIC_UNIT, static_cast<int>(electricUnit));
 }
 
-double AppSignal::rload_Ohm(QString* err) const
+double AppSignal::rloadOhm(QString* err) const
 {
 	return getSpecPropDouble(AppSignalPropNames::RLOAD_OHM, err);
 }
 
-void AppSignal::setRload_Ohm(double rload_Ohm)
+void AppSignal::setRloadOhm(double rload_Ohm)
 {
 	setSpecPropDouble(AppSignalPropNames::RLOAD_OHM, rload_Ohm);
 }
@@ -1080,6 +1157,22 @@ void AppSignal::setR0_Ohm(double r0_Ohm)
 	setSpecPropDouble(AppSignalPropNames::R0_OHM, r0_Ohm);
 }
 
+void AppSignal::setSpecPropStruct(const QString& specPropsStruct)
+{
+	m_specPropStruct = specPropsStruct;
+	m_specPropStructHash = calcHash(m_specPropStruct);
+}
+
+Hash AppSignal::specPropStructHash() const
+{
+	if (m_specPropStructHash == 0)
+	{
+		m_specPropStructHash = calcHash(m_specPropStruct);
+	}
+
+	return m_specPropStructHash;
+}
+
 bool AppSignal::createSpecPropValues()
 {
 	PropertyObject propObject;
@@ -1110,7 +1203,7 @@ bool AppSignal::createSpecPropValues()
 	return true;
 }
 
-void AppSignal::cacheSpecPropValues()
+void AppSignal::cacheSpecPropValues() const
 {
 	if (m_cachedSpecPropValues == nullptr)
 	{
@@ -1141,12 +1234,13 @@ void AppSignal::saveProtoData(Proto::ProtoAppSignalData* protoData) const
 
 	protoData->set_bustypeid(m_busTypeID.toStdString());
 	protoData->set_caption(m_caption.toStdString());
-	protoData->set_channel(static_cast<int>(m_channel));
+	protoData->set_channel(TO_INT(m_channel));
 	protoData->set_excludefrombuild(m_excludeFromBuild);
 
 	protoData->set_datasize(m_dataSize);
-	protoData->set_byteorder(static_cast<int>(m_byteOrder));
-	protoData->set_analogsignalformat(static_cast<int>(m_analogSignalFormat));
+	protoData->set_byteorder(TO_INT(m_byteOrder));
+
+	protoData->set_analogsignalformat(TO_INT(m_analogSignalFormat));
 	protoData->set_unit(m_unit.toStdString());
 
 	protoData->set_enabletuning(m_enableTuning);
@@ -1159,27 +1253,29 @@ void AppSignal::saveProtoData(Proto::ProtoAppSignalData* protoData) const
 	protoData->set_decimalplaces(m_decimalPlaces);
 	protoData->set_coarseaperture(m_coarseAperture);
 	protoData->set_fineaperture(m_fineAperture);
-	protoData->set_adaptiveaperture(m_adaptiveAperture);
+	protoData->set_aperturetype(TO_INT(m_apertureType));
+	protoData->set_invertsignal(m_invertSignal);
+	protoData->set_reserved(m_reserved);
 
 	//
 
 	protoData->set_tags(tagsStr().toStdString());
 }
 
-void AppSignal::loadProtoData(const QByteArray& protoDataArray)
+void AppSignal::loadProtoData(const char* protoDataPtr, int protoDataSize)
 {
 	Proto::ProtoAppSignalData protoData;
 
-	bool res = protoData.ParseFromArray(protoDataArray.constData(), static_cast<int>(protoDataArray.size()));
+	bool res = protoData.ParseFromArray(protoDataPtr, protoDataSize);
 
-	assert(res == true);
-	Q_UNUSED(res)
+	if (res == false)
+	{
+		Q_ASSERT(false);
+		return;
+	}
 
-	loadProtoData(protoData);
-}
+	//
 
-void AppSignal::loadProtoData(const Proto::ProtoAppSignalData& protoData)
-{
 	m_busTypeID = QString::fromStdString(protoData.bustypeid());
 	m_caption = QString::fromStdString(protoData.caption());
 	m_channel = static_cast<E::Channel>(protoData.channel());
@@ -1216,11 +1312,18 @@ void AppSignal::loadProtoData(const Proto::ProtoAppSignalData& protoData)
 	m_decimalPlaces = protoData.decimalplaces();
 	m_coarseAperture = protoData.coarseaperture();
 	m_fineAperture = protoData.fineaperture();
-	m_adaptiveAperture = protoData.adaptiveaperture();
+	m_apertureType = static_cast<E::ApertureType>(protoData.aperturetype());
+	m_invertSignal = protoData.invertsignal();
+	m_reserved = protoData.reserved();
 
 	//
 
 	setTagsStr(QString::fromStdString(protoData.tags()));
+}
+
+void AppSignal::loadProtoData(const QByteArray& protoDataArray)
+{
+	loadProtoData(protoDataArray.constData(), static_cast<int>(protoDataArray.size()));
 }
 
 QDateTime AppSignal::created() const
@@ -1284,7 +1387,7 @@ QString AppSignal::regValueAddrStr() const
 }
 
 
-void AppSignal::writeToAzpzXml(XmlWriteHelper& xml)
+void AppSignal::writeToAzpzXml(XmlWriteHelper& xml) const
 {
 	//
 	// Writing AppSignals.xml for old AZPZ software
@@ -1340,7 +1443,7 @@ void AppSignal::writeToAzpzXml(XmlWriteHelper& xml)
 	xml.writeStringAttribute("TuningHighBound", tuningHighBound().toString());
 
 	xml.writeStringAttribute("BusTypeID", busTypeID());
-	xml.writeBoolAttribute("AdaptiveAperture", adaptiveAperture());
+	xml.writeBoolAttribute("AdaptiveAperture", (apertureType() == E::ApertureType::ValuePercent));
 
 	xml.writeIntAttribute("RamAddrOffset", ualAddr().offset());
 	xml.writeIntAttribute("RamAddrBit", ualAddr().bit());
@@ -1360,51 +1463,90 @@ void AppSignal::writeToAzpzXml(XmlWriteHelper& xml)
 	xml.writeEndElement();				// </Signal>
 }
 
+void AppSignal::writeDoubleSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName) const
+{
+	QVariant v;
+	bool isEnum = false;
+	bool res = getSpecPropValue(propName, &v, &isEnum, nullptr);
 
-void AppSignal::writeToXml(XmlWriteHelper& xml)
+	if (res == true)
+	{
+		xml.writeDoubleAttribute(attributeName.isEmpty() == true ? propName : attributeName, v.toDouble());
+	}
+	else
+	{
+		xml.writeStringAttribute(attributeName.isEmpty() == true ? propName : attributeName, QString());
+	}
+}
+
+void AppSignal::writeIntSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName) const
+{
+	QVariant v;
+	bool isEnum = false;
+	bool res = getSpecPropValue(propName, &v, &isEnum, nullptr);
+
+	if (res == true)
+	{
+		xml.writeIntAttribute(attributeName.isEmpty() == true ? propName : attributeName, v.toInt());
+	}
+	else
+	{
+		xml.writeStringAttribute(attributeName.isEmpty() == true ? propName : attributeName, QString());
+	}
+}
+
+void AppSignal::writeToXml(XmlWriteHelper& xml) const
 {
 	xml.writeStartElement(XmlElement::SIGNAL_ELEM);	// <Signal>
 
+	// Identification
+	//
 	xml.writeIntAttribute(AppSignalPropNames::ID, m_ID);
 
 	xml.writeStringAttribute(AppSignalPropNames::APP_SIGNAL_ID, m_appSignalID);
 	xml.writeStringAttribute(AppSignalPropNames::CUSTOM_APP_SIGNAL_ID, m_customAppSignalID);
 	xml.writeStringAttribute(AppSignalPropNames::CAPTION, m_caption);
 	xml.writeStringAttribute(AppSignalPropNames::EQUIPMENT_ID, m_equipmentID);
+	xml.writeEnumKeyValueAttribute(AppSignalPropNames::CHANNEL, m_channel);
 
 	xml.writeIntAttribute(AppSignalPropNames::SIGNAL_GROUP_ID, m_signalGroupID);
 	xml.writeIntAttribute(AppSignalPropNames::SIGNAL_INSTANCE_ID, m_signalInstanceID);
 
+	// Type
+	//
 	xml.writeEnumKeyValueAttribute(AppSignalPropNames::TYPE, m_signalType);
 	xml.writeEnumKeyValueAttribute(AppSignalPropNames::IN_OUT_TYPE, m_inOutType);
+
+	// Data format
+	//
 	xml.writeEnumKeyValueAttribute(AppSignalPropNames::BYTE_ORDER_PROP, m_byteOrder);
-	xml.writeEnumKeyValueAttribute(AppSignalPropNames::ANALOG_SIGNAL_FORMAT, m_analogSignalFormat);
 	xml.writeIntAttribute(AppSignalPropNames::DATA_SIZE, m_dataSize);
-	xml.writeEnumKeyValueAttribute(AppSignalPropNames::CHANNEL, m_channel);
-
+	xml.writeEnumKeyValueAttribute(AppSignalPropNames::ANALOG_SIGNAL_FORMAT, m_analogSignalFormat);
 	xml.writeStringAttribute(AppSignalPropNames::BUS_TYPE_ID, m_busTypeID);
-	xml.writeStringAttribute(AppSignalPropNames::UNIT, m_unit);
 
-	xml.writeAddress16Attribute(AppSignalPropNames::UAL_ADDR, m_ualAddr);
-
+	// MATS and processing props
+	//
+	xml.writeBoolAttribute(AppSignalPropNames::INVERT_SIGNAL, m_invertSignal);
 	xml.writeBoolAttribute(AppSignalPropNames::ACQUIRE, m_acquire);
-
-	if (m_acquire == true)
-	{
-		xml.writeAddress16Attribute(AppSignalPropNames::REG_VALUE_ADDR, m_regValueAddr);
-		xml.writeAddress16Attribute(AppSignalPropNames::REG_VALIDITY_ADDR, m_regValidityAddr);
-	}
-
 	xml.writeBoolAttribute(AppSignalPropNames::ARCHIVE, m_archive);
+	xml.writeBoolAttribute(AppSignalPropNames::RESERVED, m_reserved);
 
-	if (isAnalog() == true)
-	{
-		xml.writeBoolAttribute(AppSignalPropNames::ADAPTIVE_APERTURE, m_adaptiveAperture);
-		xml.writeDoubleAttribute(AppSignalPropNames::FINE_APERTURE, m_fineAperture);
-		xml.writeDoubleAttribute(AppSignalPropNames::COARSE_APERTURE, m_coarseAperture);
-		xml.writeIntAttribute(AppSignalPropNames::DECIMAL_PLACES, m_decimalPlaces);
-	}
+	xml.writeEnumKeyValueAttribute(AppSignalPropNames::APERTURE_TYPE, m_apertureType);
+	xml.writeDoubleAttribute(AppSignalPropNames::FINE_APERTURE, m_fineAperture);
+	xml.writeDoubleAttribute(AppSignalPropNames::COARSE_APERTURE, m_coarseAperture);
 
+	xml.writeStringAttribute(AppSignalPropNames::UNIT, m_unit);
+	xml.writeIntAttribute(AppSignalPropNames::DECIMAL_PLACES, m_decimalPlaces);
+	xml.writeStringAttribute(AppSignalPropNames::TAGS, tags().join(Separator::COMMA));
+
+	// Addresses
+	//
+	xml.writeAddress16Attribute(AppSignalPropNames::UAL_ADDR, m_ualAddr);
+	xml.writeAddress16Attribute(AppSignalPropNames::REG_VALUE_ADDR, m_regValueAddr);
+	xml.writeAddress16Attribute(AppSignalPropNames::REG_VALIDITY_ADDR, m_regValidityAddr);
+
+	// Tuning
+	//
 	xml.writeBoolAttribute(AppSignalPropNames::ENABLE_TUNING, m_enableTuning);
 
 	if (m_enableTuning == true)
@@ -1420,7 +1562,7 @@ void AppSignal::writeToXml(XmlWriteHelper& xml)
 		xml.writeAddress16Attribute(AppSignalPropNames::TUNING_ABS_ADDR, m_tuningAddr);
 	}
 
-	// write spec properties
+	// Specific properties
 	//
 	xml.writeStringAttribute(AppSignalPropNames::SPEC_PROP_STRUCT, m_specPropStruct);
 
@@ -1457,50 +1599,11 @@ void AppSignal::writeToXml(XmlWriteHelper& xml)
 				continue;
 			}
 
-            if (name == AppSignalPropNames::INPUT_RANGE)
-            {
-                continue;
-            }
-
-			Q_ASSERT(false);		// unknown E::* enum type!
+			xml.writeQVariantAttribute(spv.name(), spv.value());
 		}
 	}
 
-	xml.writeStringAttribute(AppSignalPropNames::TAGS, tags().join(Separator::COMMA));
-
 	xml.writeEndElement();				// </Signal>
-}
-
-void AppSignal::writeDoubleSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName)
-{
-	QVariant v;
-	bool isEnum = false;
-	bool res = getSpecPropValue(propName, &v, &isEnum, nullptr);
-
-	if (res == true)
-	{
-		xml.writeDoubleAttribute(attributeName.isEmpty() == true ? propName : attributeName, v.toDouble());
-	}
-	else
-	{
-		xml.writeStringAttribute(attributeName.isEmpty() == true ? propName : attributeName, QString());
-	}
-}
-
-void AppSignal::writeIntSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName)
-{
-	QVariant v;
-	bool isEnum = false;
-	bool res = getSpecPropValue(propName, &v, &isEnum, nullptr);
-
-	if (res == true)
-	{
-		xml.writeIntAttribute(attributeName.isEmpty() == true ? propName : attributeName, v.toInt());
-	}
-	else
-	{
-		xml.writeStringAttribute(attributeName.isEmpty() == true ? propName : attributeName, QString());
-	}
 }
 
 bool AppSignal::readFromXml(XmlReadHelper& xml)
@@ -1512,58 +1615,67 @@ bool AppSignal::readFromXml(XmlReadHelper& xml)
 		return false;
 	}
 
+	resetAddresses();
+
+	// Identification
+	//
 	result &= xml.readIntAttribute(AppSignalPropNames::ID, &m_ID);
 
 	result &= xml.readStringAttribute(AppSignalPropNames::APP_SIGNAL_ID, &m_appSignalID);
 	result &= xml.readStringAttribute(AppSignalPropNames::CUSTOM_APP_SIGNAL_ID, &m_customAppSignalID);
 	result &= xml.readStringAttribute(AppSignalPropNames::CAPTION, &m_caption);
 	result &= xml.readStringAttribute(AppSignalPropNames::EQUIPMENT_ID, &m_equipmentID);
+	result &= xml.readEnumValueAttribute(AppSignalPropNames::CHANNEL, &m_channel);
 
 	result &= xml.readIntAttribute(AppSignalPropNames::SIGNAL_GROUP_ID, &m_signalGroupID);
 	result &= xml.readIntAttribute(AppSignalPropNames::SIGNAL_INSTANCE_ID, &m_signalInstanceID);
 
+	// Type
+	//
 	result &= xml.readEnumValueAttribute(AppSignalPropNames::TYPE, &m_signalType);
 	result &= xml.readEnumValueAttribute(AppSignalPropNames::IN_OUT_TYPE, &m_inOutType);
+
+	// Data format
+	//
 	result &= xml.readEnumValueAttribute(AppSignalPropNames::BYTE_ORDER_PROP, &m_byteOrder);
-	result &= xml.readEnumValueAttribute(AppSignalPropNames::ANALOG_SIGNAL_FORMAT, &m_analogSignalFormat);
 	result &= xml.readIntAttribute(AppSignalPropNames::DATA_SIZE, &m_dataSize);
-	result &= xml.readEnumValueAttribute(AppSignalPropNames::CHANNEL, &m_channel);
-
+	result &= xml.readEnumValueAttribute(AppSignalPropNames::ANALOG_SIGNAL_FORMAT, &m_analogSignalFormat);
 	result &= xml.readStringAttribute(AppSignalPropNames::BUS_TYPE_ID, &m_busTypeID);
-	result &= xml.readStringAttribute(AppSignalPropNames::UNIT, &m_unit);
 
-	result &= xml.readAddress16Attribute(AppSignalPropNames::UAL_ADDR, &m_ualAddr);
-
+	// MATS and processing props
+	//
+	result &= xml.readBoolAttribute(AppSignalPropNames::INVERT_SIGNAL, &m_invertSignal);
 	result &= xml.readBoolAttribute(AppSignalPropNames::ACQUIRE, &m_acquire);
-
-	if (m_acquire == true)
-	{
-		result &= xml.readAddress16Attribute(AppSignalPropNames::REG_VALUE_ADDR, &m_regValueAddr);
-		result &= xml.readAddress16Attribute(AppSignalPropNames::REG_VALIDITY_ADDR, &m_regValidityAddr);
-	}
-	else
-	{
-		m_regValueAddr.reset();
-		m_regValidityAddr.reset();
-	}
-
 	result &= xml.readBoolAttribute(AppSignalPropNames::ARCHIVE, &m_archive);
+	result &= xml.readBoolAttribute(AppSignalPropNames::RESERVED, &m_reserved);
 
-	if (isAnalog() == true)
-	{
-		result &= xml.readBoolAttribute(AppSignalPropNames::ADAPTIVE_APERTURE, &m_adaptiveAperture);
-		result &= xml.readDoubleAttribute(AppSignalPropNames::FINE_APERTURE, &m_fineAperture);
-		result &= xml.readDoubleAttribute(AppSignalPropNames::COARSE_APERTURE, &m_coarseAperture);
-		result &= xml.readIntAttribute(AppSignalPropNames::DECIMAL_PLACES, &m_decimalPlaces);
-	}
-	else
-	{
-		m_adaptiveAperture = false;
-		m_fineAperture = 0;
-		m_coarseAperture = 0;
-		m_decimalPlaces = 0;
-	}
+	m_apertureType = E::ApertureType::RangePercent;
+	m_fineAperture = 0;
+	m_coarseAperture = 0;
+	m_decimalPlaces = 0;
+	m_unit.clear();
 
+	result &= xml.readEnumValueAttribute(AppSignalPropNames::APERTURE_TYPE, &m_apertureType);
+	result &= xml.readDoubleAttribute(AppSignalPropNames::FINE_APERTURE, &m_fineAperture);
+	result &= xml.readDoubleAttribute(AppSignalPropNames::COARSE_APERTURE, &m_coarseAperture);
+
+	result &= xml.readStringAttribute(AppSignalPropNames::UNIT, &m_unit);
+	result &= xml.readIntAttribute(AppSignalPropNames::DECIMAL_PLACES, &m_decimalPlaces);
+
+	QString tagsStr;
+
+	result &= xml.readStringAttribute(AppSignalPropNames::TAGS, &tagsStr);
+
+	setTags(tagsStr.split(Separator::COMMA, Qt::SkipEmptyParts));
+
+	// Addresses
+	//
+	result &= xml.readAddress16Attribute(AppSignalPropNames::UAL_ADDR, &m_ualAddr);
+	result &= xml.readAddress16Attribute(AppSignalPropNames::REG_VALUE_ADDR, &m_regValueAddr);
+	result &= xml.readAddress16Attribute(AppSignalPropNames::REG_VALIDITY_ADDR, &m_regValidityAddr);
+
+	// Tuning
+	//
 	result &= xml.readBoolAttribute(AppSignalPropNames::ENABLE_TUNING, &m_enableTuning);
 
 	if (m_enableTuning == true)
@@ -1596,6 +1708,8 @@ bool AppSignal::readFromXml(XmlReadHelper& xml)
 		result &= xml.readAddress16Attribute(AppSignalPropNames::TUNING_ABS_ADDR, &m_tuningAbsAddr);
 	}
 
+	// Specific properties
+	//
 	result &= xml.readStringAttribute(AppSignalPropNames::SPEC_PROP_STRUCT, &m_specPropStruct);
 
 	AppSignalSpecPropValues spvs;
@@ -1614,27 +1728,47 @@ bool AppSignal::readFromXml(XmlReadHelper& xml)
 			continue;
 		}
 
+		QVariant qv = spv.value();			// to set Type of qv equal to Type of spv.value()
+
 		if (spv.isEnum() == false)
 		{
-			QVariant qv = spv.value();			// to set Type of qv equal to Type of spv.value()
 			result &= xml.readQVariantAttribute(name, &qv);
 			spv.setValue(name, qv, false);
 		}
 		else
 		{
-			int iv = 0;
-			result &= xml.readIntAttribute(name, &iv);
-			spv.setValue(name, QVariant(iv), true);
+			name = spv.name();
+
+			if (name == AppSignalPropNames::ELECTRIC_UNIT)
+			{
+				E::ElectricUnit e;
+				result &= xml.readEnumValueAttribute(name, &e);
+				spv.setValue(name, TO_INT(e), true);
+				continue;
+			}
+
+			if (name == AppSignalPropNames::SENSOR_TYPE)
+			{
+				E::SensorType e;
+				result &= xml.readEnumValueAttribute(name, &e);
+				spv.setValue(name, TO_INT(e), true);
+				continue;
+			}
+
+			if (name == AppSignalPropNames::OUTPUT_MODE)
+			{
+				E::OutputMode e;
+				result &= xml.readEnumValueAttribute(name, &e);
+				spv.setValue(name, TO_INT(e), true);
+				continue;
+			}
+
+			result &= xml.readQVariantAttribute(name, &qv);
+			spv.setValue(name, qv, true);
 		}
 	}
 
 	spvs.serializeValuesToArray(&m_protoSpecPropValues);
-
-	QString tagsStr;
-
-	result &= xml.readStringAttribute(AppSignalPropNames::TAGS, &tagsStr);
-
-	setTags(tagsStr.split(Separator::COMMA, Qt::SkipEmptyParts));
 
 	return result;
 }
@@ -1657,6 +1791,9 @@ void AppSignal::saveToProto(Proto::AppSignal* s) const
 	s->set_bustypeid(m_busTypeID.toStdString());
 	s->set_channel(TO_INT(m_channel));
 	s->set_excludefrombuild(m_excludeFromBuild);
+
+	s->set_invertsignal(m_invertSignal);
+	s->set_reserved(m_reserved);
 
 	// Signal type
 
@@ -1692,7 +1829,8 @@ void AppSignal::saveToProto(Proto::AppSignal* s) const
 	s->set_decimalplaces(m_decimalPlaces);
 	s->set_coarseaperture(m_coarseAperture);
 	s->set_fineaperture(m_fineAperture);
-	s->set_adaptiveaperture(m_adaptiveAperture);
+	s->set_aperturetype(TO_INT(m_apertureType));
+	s->set_acquire(m_acquire);
 
 	// Signal fields from database
 
@@ -1878,6 +2016,9 @@ void AppSignal::loadFromProto(const Proto::AppSignal& s)
 	m_channel = static_cast<E::Channel>(s.channel());
 	m_excludeFromBuild = s.excludefrombuild();
 
+	m_invertSignal = s.invertsignal();
+	m_reserved = s.reserved();
+
 	// Signal type
 
 	m_signalType = static_cast<E::SignalType>(s.signaltype());
@@ -1912,7 +2053,7 @@ void AppSignal::loadFromProto(const Proto::AppSignal& s)
 	m_decimalPlaces = s.decimalplaces();
 	m_coarseAperture = s.coarseaperture();
 	m_fineAperture = s.fineaperture();
-	m_adaptiveAperture = s.adaptiveaperture();
+	m_apertureType = static_cast<E::ApertureType>(s.aperturetype());
 
 	// Signal fields from database
 
@@ -2064,6 +2205,25 @@ QString AppSignal::removeNumberSign(const QString& appSignalID)
 	return appSignalID;
 }
 
+void AppSignal::trimTextFields()
+{
+	m_appSignalID = m_appSignalID.trimmed();
+	m_customAppSignalID = m_customAppSignalID.trimmed();
+	m_equipmentID = m_equipmentID.trimmed();
+	m_lmEquipmentID = m_lmEquipmentID.trimmed();
+	m_busTypeID = m_busTypeID.trimmed();
+	m_caption = m_caption.trimmed();
+	m_unit = m_unit.trimmed();
+}
+
+void AppSignal::uppercaseAppSignalID(bool uppercase)
+{
+	if (uppercase)
+	{
+		m_appSignalID = m_appSignalID.toUpper();
+	}
+}
+
 void AppSignal::initCreatedDates()
 {
 	m_createdMcs = QDateTime::currentDateTime().toMSecsSinceEpoch() * 1000;
@@ -2122,6 +2282,28 @@ void AppSignal::updateTuningValuesType()
 QString AppSignal::specPropNotExistErr(const QString& propName) const
 {
 	return QString("Specific property %1 is not exists in signal %2").arg(m_appSignalID).arg(propName);
+}
+
+bool AppSignal::getSpecPropBool(const QString& name, QString* err) const
+{
+	QVariant qv;
+	bool isEnum = false;
+
+	bool result = getSpecPropValue(name, &qv, &isEnum, err);
+
+	if (result == false)
+	{
+		if (err != nullptr)
+		{
+			*err = specPropNotExistErr(name);
+		}
+
+		return 0;
+	}
+
+	assert(qv.metaType().id() == QMetaType::Bool && isEnum == false);
+
+	return qv.toBool();
 }
 
 double AppSignal::getSpecPropDouble(const QString& name, QString* err) const
@@ -2268,6 +2450,13 @@ bool AppSignal::isSpecPropExists(const QString& name) const
 	return spv.isExists(name);
 }
 
+bool AppSignal::setSpecPropBool(const QString& name, bool value)
+{
+	QVariant qv(value);
+
+	return setSpecPropValue(name, qv, false);
+}
+
 bool AppSignal::setSpecPropDouble(const QString& name, double value)
 {
 	QVariant qv(value);
@@ -2330,15 +2519,7 @@ bool AppSignal::setSpecPropValue(const QString& name, const QVariant& qv, bool i
 
 QStringList AppSignal::tags() const
 {
-	QStringList list;
-	list.reserve(m_tags.size());
-
-	for(const QString& tag : m_tags)
-	{
-		list.append(tag);
-	}
-
-	return list;
+	return QStringList(m_tags.begin(), m_tags.end());
 }
 
 void AppSignal::setTags(const QStringList& tags)
@@ -2400,6 +2581,11 @@ void AppSignal::clearTags()
 //
 // --------------------------------------------------------------------------------------------------------
 
+void AppSignalSet::SignalsGroups::swap(SignalsGroups& signalGroups)
+{
+	m_groups.swap(signalGroups.m_groups);
+}
+
 void AppSignalSet::SignalsGroups::clear()
 {
 	m_groups.clear();
@@ -2411,7 +2597,7 @@ void AppSignalSet::SignalsGroups::insert(const AppSignal* appSignal)
 
 	int groupID = appSignal->signalGroupID();
 
-	if (groupID == 0)
+	if (groupID == SINGLE_CHANNEL)
 	{
 		return;
 	}
@@ -2422,17 +2608,17 @@ void AppSignalSet::SignalsGroups::insert(const AppSignal* appSignal)
 
 	if (it == m_groups.end())
 	{
-		m_groups.emplace(groupID, std::set<int>({ signalID }));
+		m_groups.emplace(groupID, std::vector<int>{ signalID });
 	}
 	else
 	{
-		it->second.insert(signalID);
+		it->second.push_back(signalID);
 	}
 }
 
-void AppSignalSet::SignalsGroups::remove(const AppSignal& appSignal)
+void AppSignalSet::SignalsGroups::remove(const AppSignal* appSignal)
 {
-	remove(appSignal.signalGroupID(), appSignal.ID());
+	remove(appSignal->signalGroupID(), appSignal->ID());
 }
 
 void AppSignalSet::SignalsGroups::remove(int groupID, int signalID)
@@ -2449,31 +2635,40 @@ void AppSignalSet::SignalsGroups::remove(int groupID, int signalID)
 		return;
 	}
 
-	it->second.erase(signalID);
+	std::vector<int>& ids = it->second;
+
+	auto it2 = ids.begin();
+
+	while(it2 != ids.end())
+	{
+		if (*it2 == signalID)
+		{
+			ids.erase(it2);
+			break;
+		}
+	}
 }
 
-void AppSignalSet::SignalsGroups::getGroupSignalsIDs(int groupID, QList<int>& signalsIDs) const
+bool AppSignalSet::SignalsGroups::getGroupSignalIDs(int signalID, int groupID, std::vector<int>* signalsIDs) const
 {
-	signalsIDs.clear();
+	TEST_PTR_RETURN_FALSE(signalsIDs);
 
-	if (groupID == 0)
+	if (groupID == SINGLE_CHANNEL)
 	{
-		return;
+		signalsIDs->clear();
+		signalsIDs->push_back(signalID);
+		return false;
 	}
 
 	auto it = m_groups.find(groupID);
 
-	if (it == m_groups.end())
+	if (it != m_groups.end())
 	{
-		return;
+		*signalsIDs = it->second;
+		return true;
 	}
 
-	const std::set<int>& ids = it->second;
-
-	for(int id : ids)
-	{
-		signalsIDs.append(id);
-	}
+	return false;
 }
 
 // --------------------------------------------------------------------------------------------------------
@@ -2491,186 +2686,342 @@ AppSignalSet::~AppSignalSet()
 	clear();
 }
 
+void AppSignalSet::swap(AppSignalSet& appSignalSet)
+{
+	m_signals.swap(appSignalSet.m_signals);
+	m_idToIndex.swap(appSignalSet.m_idToIndex);
+	m_hashToIndex.swap(appSignalSet.m_hashToIndex);
+	m_groups.swap(appSignalSet.m_groups);
+}
+
 void AppSignalSet::clear()
 {
-	SignalPtrOrderedHash::clear();
+	for(AppSignal* s : m_signals)
+	{
+		if (s != nullptr)
+		{
+			delete s;
+		}
+	}
 
+	m_signals.clear();
+	m_idToIndex.clear();
+	m_hashToIndex.clear();
 	m_groups.clear();
-	m_strID2IndexMap.clear();
 }
 
 void AppSignalSet::reserve(int n)
 {
-	SignalPtrOrderedHash::reserve(n);
+	Q_ASSERT(m_signals.size() == 0);
+	m_signals.reserve(n);
 }
 
-void AppSignalSet::buildID2IndexMap()
+std::pair<AppSignal*, int> AppSignalSet::append(AppSignal* newSignal)
 {
-	m_strID2IndexMap.clear();
+	TEST_PTR_RETURN_VALUE(newSignal, (std::pair<AppSignal*, int>{nullptr, BAD_INDEX}));
 
-	qsizetype signalCount = count();
+	int signalID = newSignal->ID();
 
-	if (signalCount == 0)
+	if (signalID == 0)
 	{
-		return;
-	}
-
-	m_strID2IndexMap.reserve(static_cast<int>(signalCount * 1.3));
-
-	for(qsizetype i = 0; i < signalCount; i++)
-	{
-		AppSignal& s = (*this)[i];
-
-		if (m_strID2IndexMap.contains(s.appSignalID()) == true)
+		if (m_enableIdGeneration == true)
 		{
-			assert(false && "There are at least two signals with same AppSignalID");
+			signalID = m_idToIndex.empty() == true ? 1 : m_idToIndex.rbegin()->first + 1;
+			newSignal->setID(signalID);
 		}
 		else
 		{
-			updateID2IndexInMap(s.appSignalID(), static_cast<int>(i));
+			Q_ASSERT(false);				// assing signal->ID() before
+											// or enable ID generation
+			return {nullptr, BAD_INDEX};
 		}
 	}
+
+	Hash hash = calcHash(newSignal->appSignalID());
+
+	qsizetype index = m_signals.size();
+
+	m_signals.push_back(newSignal);
+
+	auto [it, inserted] = m_idToIndex.emplace(signalID, index);
+
+	Q_ASSERT(inserted == true);
+
+	auto [it2, inserted2] = m_hashToIndex.emplace(hash, index);
+
+	Q_ASSERT(inserted2 == true);
+
+	m_groups.insert(newSignal);
+
+	return {newSignal, index};
 }
 
-void AppSignalSet::updateID2IndexInMap(const QString& appSignalId, int index)
+std::pair<AppSignal*, int> AppSignalSet::append(const AppSignal& signal)
 {
-	m_strID2IndexMap.insert(appSignalId, index);
+	auto newSignal = new AppSignal(signal);
+	return append(newSignal);
 }
 
-void AppSignalSet::updateID2IndexInMap(const AppSignal* appSignal)
+std::pair<AppSignal*, int> AppSignalSet::append(const ID_AppSignalID& id)
 {
-	TEST_PTR_RETURN(appSignal);
-
-	int index = static_cast<int>(keyIndex(appSignal->ID()));
-
-	updateID2IndexInMap(appSignal->appSignalID(), index);
+	auto newSignal = new AppSignal(id);
+	return append(newSignal);
 }
 
-bool AppSignalSet::ID2IndexMapIsEmpty()
+void AppSignalSet::removeSignals(const std::vector<int> &signalToRemoveIDs)
 {
-	return m_strID2IndexMap.isEmpty();
+	int removedCount = 0;
+
+	for(int id : signalToRemoveIDs)
+	{
+		auto it = m_idToIndex.find(id);
+
+		if (it == m_idToIndex.end())
+		{
+			Q_ASSERT(false);
+			continue;
+		}
+
+		qsizetype index = it->second;
+
+		AppSignal* s = m_signals[index];
+
+		TEST_PTR_CONTINUE(s);
+
+		m_groups.remove(s);
+		delete s;
+		m_signals[index] = nullptr;
+		removedCount++;
+	}
+
+	std::vector<AppSignal*> tempSignals;
+
+	tempSignals.reserve(m_signals.size() - removedCount);
+
+	m_idToIndex.clear();
+	m_hashToIndex.clear();
+
+	qsizetype index = 0;
+
+	for(AppSignal* s : m_signals)
+	{
+		if (s == nullptr)
+		{
+			continue;
+		}
+
+		m_idToIndex.emplace(s->ID(), index);
+		m_hashToIndex.emplace(calcHash(s->appSignalID()), index);
+		tempSignals.push_back(s);
+
+		index++;
+	}
+
+	m_signals.swap(tempSignals);
 }
 
 bool AppSignalSet::contains(const QString& appSignalID) const
 {
-	if (count() > 0 && m_strID2IndexMap.isEmpty() == true)
-	{
-		assert(false);		//call buildStrID2IndexMap() before
-		return false;
-	}
+	return m_hashToIndex.contains(calcHash(appSignalID.trimmed()));
+}
 
-	return m_strID2IndexMap.contains(appSignalID.trimmed());
+int AppSignalSet::count() const
+{
+	return static_cast<int>(m_signals.size());
+}
+
+int AppSignalSet::size() const
+{
+	return static_cast<int>(m_signals.size());
+}
+
+bool AppSignalSet::isEmpty() const
+{
+	return m_signals.empty();
+}
+
+void AppSignalSet::enableIdGeneration()
+{
+	m_enableIdGeneration = true;
+}
+
+const std::vector<AppSignal*>& AppSignalSet::signalsVector() const
+{
+	return m_signals;
+}
+
+std::vector<AppSignal*>::iterator AppSignalSet::begin()
+{
+	return m_signals.begin();
+}
+
+std::vector<AppSignal*>::const_iterator AppSignalSet::begin() const
+{
+	return m_signals.cbegin();
+}
+
+std::vector<AppSignal*>::iterator AppSignalSet::end()
+{
+	return m_signals.end();
+}
+
+std::vector<AppSignal*>::const_iterator AppSignalSet::end() const
+{
+	return m_signals.cend();
 }
 
 AppSignal* AppSignalSet::getSignal(const QString& appSignalID)
 {
-	if (count() > 0 && m_strID2IndexMap.isEmpty() == true)
-	{
-		assert(false);		//	call buildStrID2IndexMap() before
-		return nullptr;
-	}
-
-	int index = m_strID2IndexMap.value(appSignalID.trimmed(), -1);
-
-	if (index == -1)
-	{
-		return nullptr;
-	}
-
-	return &(*this)[index];
+	return const_cast<AppSignal*>(privateGetSignal(appSignalID));
 }
 
 const AppSignal* AppSignalSet::getSignal(const QString& appSignalID) const
 {
-	if (count() > 0 && m_strID2IndexMap.isEmpty() == true)
-	{
-		assert(false);		//	call buildStrID2IndexMap() before
-		return nullptr;
-	}
-
-	int index = m_strID2IndexMap.value(appSignalID.trimmed(), -1);
-
-	if (index == -1)
-	{
-		return nullptr;
-	}
-
-	return &(*this)[index];
+	return privateGetSignal(appSignalID);
 }
 
-void AppSignalSet::append(const int& signalID, AppSignal* signal)
+AppSignal* AppSignalSet::getSignal(int signalID)
 {
-	if (signalID > m_maxID)
-	{
-		m_maxID = signalID;
-	}
-
-	SignalPtrOrderedHash::append(signalID, signal);
-
-	int groupID = signal->signalGroupID();
-
-	if (groupID != 0)
-	{
-		m_groups.insert(signal);
-	}
+	return const_cast<AppSignal*>(privateGetSignalByID(signalID));
 }
 
-void AppSignalSet::append(AppSignal* signal)
+const AppSignal* AppSignalSet::getSignal(int signalID) const
 {
-	int newID = getMaxID() + 1;
-
-	append(newID, signal);
+	return privateGetSignalByID(signalID);
 }
 
-void AppSignalSet::remove(const int& signalID)
+AppSignal* AppSignalSet::getSignalByHash(Hash appSignalIDHash)
 {
-	AppSignal signal = value(signalID);
-
-	SignalPtrOrderedHash::remove(signalID);
-
-	m_groups.remove(signal);
+	return const_cast<AppSignal*>(privateGetSignalByHash(appSignalIDHash));
 }
 
-void AppSignalSet::removeAt(const qsizetype index)
+const AppSignal* AppSignalSet::getSignalByHash(Hash appSignalIDHash) const
 {
-	const AppSignal& signal = SignalPtrOrderedHash::operator [](index);
-
-	int signalGroupID = signal.signalGroupID();
-	int signalID = signal.ID();
-
-	SignalPtrOrderedHash::removeAt(index);
-
-	m_groups.remove(signalGroupID, signalID);
+	return privateGetSignalByHash(appSignalIDHash);
 }
 
-QVector<int> AppSignalSet::getChannelSignalsID(const AppSignal& signal) const
+AppSignal* AppSignalSet::at(int index)
 {
-	return getChannelSignalsID(signal.signalGroupID());
+	return const_cast<AppSignal*>(privateAt(index));
 }
 
-QVector<int> AppSignalSet::getChannelSignalsID(int signalGroupID) const
+const AppSignal* AppSignalSet::at(int index) const
 {
-	if (signalGroupID == 0)
+	return privateAt(index);
+}
+
+int AppSignalSet::signalIndex(int signalID) const
+{
+	auto it = m_idToIndex.find(signalID);
+
+	if (it == m_idToIndex.end())
 	{
 		Q_ASSERT(false);
-		return QList<int>();
+		return BAD_INDEX;
 	}
 
-	QList<int> signalsIDs;
-
-	m_groups.getGroupSignalsIDs(signalGroupID, signalsIDs);
-
-	return signalsIDs;
+	return it->second;
 }
 
-void AppSignalSet::resetAddresses()
+bool AppSignalSet::getChannelSignalsID(int signalID, std::vector<int>* channelSignalIDs) const
 {
-	qsizetype signalCount = count();
+	const AppSignal* s = getSignal(signalID);
 
-	for(qsizetype i = 0; i < signalCount; i++)
+	TEST_PTR_RETURN_FALSE(s);
+
+	return m_groups.getGroupSignalIDs(s->ID(), s->signalGroupID(), channelSignalIDs);
+}
+
+bool AppSignalSet::getChannelSignalsID(const AppSignal& signal, std::vector<int>* channelSignalIDs) const
+{
+	return m_groups.getGroupSignalIDs(signal.ID(), signal.signalGroupID(), channelSignalIDs);
+}
+
+bool AppSignalSet::getChannelSignalsID(int signalID, int groupID, std::vector<int>* channelSignalIDs) const
+{
+	return m_groups.getGroupSignalIDs(signalID, groupID, channelSignalIDs);
+}
+
+void AppSignalSet::appSignalIdsListSorted(bool removeNumberSign, QStringList* list) const
+{
+	TEST_PTR_RETURN(list);
+
+	std::set<QString> ids;
+
+	for (AppSignal* s : m_signals)
 	{
-		(*this)[i].resetAddresses();
+		TEST_PTR_CONTINUE(s);
+
+		QString appSignalId = s->appSignalID();
+
+		if (removeNumberSign == true &&
+			appSignalId.isEmpty() == false &&
+			appSignalId.at(0) == QChar('#'))
+		{
+			ids.emplace(appSignalId.remove(0, 1));
+		}
+		else
+		{
+			ids.emplace(appSignalId);
+		}
 	}
+
+	list->clear();
+	list->resize(ids.size());
+
+	for(const QString& id : ids)
+	{
+		list->append(id);
+	}
+}
+
+std::pair<AppSignal*, int> AppSignalSet::updateSignal(const AppSignal& s)
+{
+	int signalID = s.ID();
+
+	auto it = m_idToIndex.find(signalID);
+
+	if (it == m_idToIndex.end())
+	{
+		return {nullptr, BAD_INDEX};
+	}
+
+	int signalIndex = it->second;
+
+	AppSignal* existSignal = m_signals[signalIndex];
+
+	QString oldAppSignalID = existSignal->appSignalID();
+
+	*existSignal = s;
+
+	if (oldAppSignalID != s.appSignalID())
+	{
+		auto oldHashIt = m_hashToIndex.find(calcHash(oldAppSignalID));
+
+		if (oldHashIt == m_hashToIndex.end())
+		{
+			Q_ASSERT(false);
+			return {nullptr, BAD_INDEX};
+		}
+
+		Q_ASSERT(oldHashIt->second == signalIndex);
+
+		Hash newHash = calcHash(s.appSignalID());
+
+		auto newHashIt = m_hashToIndex.find(newHash);
+
+		if (newHashIt != m_hashToIndex.end())
+		{
+			Q_ASSERT(false);
+			return {nullptr, BAD_INDEX};
+		}
+
+		m_hashToIndex.erase(oldHashIt);
+
+		m_hashToIndex.emplace(newHash, signalIndex);
+	}
+
+	return {existSignal, signalIndex};
 }
 
 bool AppSignalSet::serializeFromProtoFile(const QString& filePath)
@@ -2697,7 +3048,7 @@ bool AppSignalSet::serializeFromProtoFile(const QString& filePath)
 
 	int signalCount = protoAppSignalSet.appsignal_size();
 
-	reserve(static_cast<int>(signalCount * 1.3));
+	reserve(signalCount);
 
 	for(int i = 0; i < signalCount; i++)
 	{
@@ -2707,83 +3058,70 @@ bool AppSignalSet::serializeFromProtoFile(const QString& filePath)
 
 		newSignal->loadFromProto(protoAppSignal);
 
-		append(newSignal->ID(), newSignal);
+		append(newSignal);
 	}
-
-	buildID2IndexMap();
 
 	return true;
 }
 
-int AppSignalSet::getMaxID()
+const AppSignal* AppSignalSet::privateGetSignal(const QString& appSignalID) const
 {
-	if (m_maxID >= 0)
+	Hash hash = calcHash(appSignalID);
+
+	auto it = m_hashToIndex.find(hash);
+
+	if (it == m_hashToIndex.end())
 	{
-		return m_maxID;
+		return nullptr;
 	}
 
-	qsizetype count = SignalPtrOrderedHash::count();
+	qsizetype index = it->second;
 
-	m_maxID = -1;
+	Q_ASSERT(index >= 0 && index < std::ssize(m_signals));
 
-	for(qsizetype i = 0; i < count; i++)
-	{
-		int keyI = key(i);
-
-		if (keyI > m_maxID)
-		{
-			m_maxID = keyI;
-		}
-	}
-
-	return m_maxID;
+	return m_signals[index];
 }
 
-QStringList AppSignalSet::appSignalIdsList(bool removeNumberSign, bool sort) const
+const AppSignal* AppSignalSet::privateGetSignalByID(int signalID) const
 {
-	QStringList result;
-	result.reserve(count());
+	auto it = m_idToIndex.find(signalID);
 
-	for (qsizetype i = 0; i < count(); i++)
+	if (it == m_idToIndex.end())
 	{
-		const AppSignal& signal = operator[](i);
-		const QString& appSignalId = signal.appSignalID();
-
-		if (removeNumberSign == false ||
-			appSignalId.isEmpty() == true ||
-			appSignalId.at(0) != QChar('#'))
-		{
-			result.push_back(appSignalId);
-		}
-		else
-		{
-			QString chooped = appSignalId;
-			result.push_back(chooped.remove(0, 1));
-		}
+		return nullptr;
 	}
 
-	if (sort == true)
-	{
-		std::sort(result.begin(), result.end());
-	}
+	qsizetype index = it->second;
 
-	return result;
+	Q_ASSERT(index >= 0 && index < std::ssize(m_signals));
+
+	return m_signals[index];
 }
 
-void AppSignalSet::replaceOrAppendIfNotExists(int signalID, const AppSignal& s)
+const AppSignal* AppSignalSet::privateGetSignalByHash(Hash appSignalIDHash) const
 {
-	AppSignal* existsSignal = valuePtr(signalID);
+	auto it = m_hashToIndex.find(appSignalIDHash);
 
-	if (existsSignal != nullptr)
+	if (it == m_hashToIndex.end())
 	{
-		*existsSignal = s;
-	}
-	else
-	{
-		append(signalID, new AppSignal(s));
+		return nullptr;
 	}
 
-	m_strID2IndexMap.insert(s.appSignalID(), static_cast<int>(keyIndex(signalID)));
+	qsizetype index = it->second;
+
+	Q_ASSERT(index >= 0 && index < std::ssize(m_signals));
+
+	return m_signals[index];
+}
+
+const AppSignal* AppSignalSet::privateAt(int index) const
+{
+	if (index < 0 || index >= m_signals.size())
+	{
+		return nullptr;
+	}
+
+	return m_signals[index];
 }
 
 // -------------------------------------------------------------------------------
@@ -2800,7 +3138,6 @@ AppSignals::~AppSignals()
 void AppSignals::clear()
 {
 	m_hashToSignal.clear();
-	m_idToSignal.clear();
 
 	for(AppSignal* s : m_signals)
 	{
@@ -2835,13 +3172,12 @@ void AppSignals::insert(const ::Proto::AppSignal& protoAppSignal)
 	s->loadFromProto(protoAppSignal);
 
 	m_signals.push_back(s);
-	m_idToSignal.insert({appSignalID, s});
 	m_hashToSignal.insert({hash, s});
 }
 
 bool AppSignals::containsID(const QString& appSignalID) const
 {
-	return m_idToSignal.contains(appSignalID);
+	return m_hashToSignal.contains(calcHash(appSignalID));
 }
 
 bool AppSignals::containsHash(Hash hash) const
@@ -2851,9 +3187,9 @@ bool AppSignals::containsHash(Hash hash) const
 
 const AppSignal* AppSignals::getSignalByID(const QString& appSignalID) const
 {
-	auto it = m_idToSignal.find(appSignalID);
+	auto it = m_hashToSignal.find(calcHash(appSignalID));
 
-	if (it == m_idToSignal.end())
+	if (it == m_hashToSignal.end())
 	{
 		return nullptr;
 	}
@@ -2875,16 +3211,14 @@ const AppSignal* AppSignals::getSignalByHash(Hash hash) const
 
 bool AppSignals::isEmpty() const
 {
-	Q_ASSERT(m_signals.size() == m_idToSignal.size() &&
-			 m_signals.size() == m_hashToSignal.size());
+	Q_ASSERT(m_signals.size() == m_hashToSignal.size());
 
 	return m_signals.empty();
 }
 
 size_t AppSignals::count() const
 {
-	Q_ASSERT(m_signals.size() == m_idToSignal.size() &&
-			 m_signals.size() == m_hashToSignal.size());
+	Q_ASSERT(m_signals.size() == m_hashToSignal.size());
 
 	return m_signals.size();
 }
@@ -2896,7 +3230,7 @@ std::vector<AppSignal*>::iterator AppSignals::begin()
 
 std::vector<AppSignal*>::const_iterator AppSignals::begin() const
 {
-	return m_signals.begin();
+	return m_signals.cbegin();
 }
 
 std::vector<AppSignal*>::iterator AppSignals::end()
@@ -2906,6 +3240,5 @@ std::vector<AppSignal*>::iterator AppSignals::end()
 
 std::vector<AppSignal*>::const_iterator AppSignals::end() const
 {
-	return m_signals.end();
+	return m_signals.cend();
 }
-

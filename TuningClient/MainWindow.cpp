@@ -21,37 +21,50 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow(parent),
 	m_logFile("TuningClient", QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + softwareInfo.equipmentID()),
 	m_tuningLog(m_userManager, "TuningClientSignals", QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + softwareInfo.equipmentID()),
-	m_configController(softwareInfo, theSettings.configuratorAddress1(), theSettings.configuratorAddress2(), &m_logFile),
+	m_configController(softwareInfo, TuningClientAppSettings::instance().configuratorAddress1(), TuningClientAppSettings::instance().configuratorAddress2(), &m_logFile),
 	m_tuningSignalManager(softwareInfo.equipmentID(), &m_logFile),
-	m_tuningConnection{m_tuningSignalManager, m_tuningSignalManager, &m_logFile, &m_tuningLog}
+	m_tuningConnection{m_tuningSignalManager, m_tuningSignalManager, m_tuningSignalManager, m_userManager, &m_logFile, &m_tuningLog}
 
 {
 	// Init translator
 	//
 	m_translator.addLanguage("en", "English");
-	m_translator.addLanguage("ru", "Russian/Русский");
-	m_translator.addLanguage("ua", "Ukrainian/Українська");
+	m_translator.addLanguage("ru", "Russian");
+	m_translator.addLanguage("uk", "Ukrainian");
 
-	m_translator.addTranslationFile("ru", ":/languages/TuningClient_ru.qm");
-	m_translator.addTranslationFile("ru", ":/languages/qtbase_ru.qm");
-	m_translator.addTranslationFile("ru", ":/ClientLib/languages/ClientLib_ru.qm");
-	m_translator.addTranslationFile("ru", ":/UtilsLib/languages/UtilsLib_ru.qm");
+	m_translator.addTranslationFile("ru", qApp->applicationDirPath() + "/translations/TuningClient_ru.qm");
+	m_translator.addTranslationFile("ru", qApp->applicationDirPath() + "/translations/ClientLib_ru.qm");
+	m_translator.addTranslationFile("ru", qApp->applicationDirPath() + "/translations/UtilsLib_ru.qm");
+	m_translator.addTranslationFile("ru", qApp->applicationDirPath() + "/translations/qt_ru.qm");
 
-	m_translator.addTranslationFile("ua", ":/languages/TuningClient_ua.qm");
-	m_translator.addTranslationFile("ua", ":/languages/qtbase_uk.qm");
-	m_translator.addTranslationFile("ua", ":/ClientLib/languages/ClientLib_ua.qm");
-	m_translator.addTranslationFile("ua", ":/UtilsLib/languages/UtilsLib_ua.qm");
+	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/TuningClient_uk.qm");
+	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/ClientLib_uk.qm");
+	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/UtilsLib_uk.qm");
+	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/qt_uk.qm");
 
-	m_translator.setLanguage(theSettings.language());
+	{
+		QStringList failedTranslations;
+		if (m_translator.setLanguage(TuningClientAppSettings::instance().language(), failedTranslations) == false)
+		{
+			if (failedTranslations.isEmpty() == false)
+			{
+				m_logFile.writeError("Failed to load translation files:\n" + failedTranslations.join('\n'));
+			}
+			else
+			{
+				m_logFile.writeError("Failed to set language: " + TuningClientAppSettings::instance().language());
+			}
+		}
+	}
 
 	// -
 	m_sorTooltipText = QObject::tr("SOR counter (click for details)");
 
-	if (theSettings.m_mainWindowPos.x() != -1 && theSettings.m_mainWindowPos.y() != -1)
+	if (TuningClientAppSettings::instance().user().m_mainWindowPos.x() != -1 && TuningClientAppSettings::instance().user().m_mainWindowPos.y() != -1)
 	{
-		move(theSettings.m_mainWindowPos);
-		restoreGeometry(theSettings.m_mainWindowGeometry);
-		restoreState(theSettings.m_mainWindowState);
+		move(TuningClientAppSettings::instance().user().m_mainWindowPos);
+		restoreGeometry(TuningClientAppSettings::instance().user().m_mainWindowGeometry);
+		restoreState(TuningClientAppSettings::instance().user().m_mainWindowState);
 	}
 	else
 	{
@@ -65,7 +78,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	createMenu();
 	createStatusBar();
 
-	setWindowTitle(QString("TuningClient - ") + theSettings.instanceStrId());
+	setWindowTitle(QString("TuningClient - ") + TuningClientAppSettings::instance().instanceStrId());
 
 	setCentralWidget(new QLabel(tr("Waiting for configuration...")));
 
@@ -86,7 +99,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 
 	QString errorCode;
 
-	if (m_filterStorage.load(theSettings.userFiltersFile(), &errorCode) == false)
+	if (m_filterStorage.load(TuningClientAppSettings::instance().userFiltersFile(), &errorCode) == false)
 	{
 		QString msg = tr("Failed to load user filters: %1").arg(errorCode);
 
@@ -95,8 +108,6 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	}
 
 	//
-
-	m_mainWindowTimerId_250ms = startTimer(250);
 
 	m_mainWindowTimerId_500ms = startTimer(500);
 
@@ -107,10 +118,41 @@ MainWindow::~MainWindow()
 {
 	deleteWorkspace();
 
-	theSettings.m_mainWindowPos = pos();
-	theSettings.m_mainWindowGeometry = saveGeometry();
-	theSettings.m_mainWindowState = saveState();
+	TuningClientAppSettings::instance().user().m_mainWindowPos = pos();
+	TuningClientAppSettings::instance().user().m_mainWindowGeometry = saveGeometry();
+	TuningClientAppSettings::instance().user().m_mainWindowState = saveState();
 }
+
+TuningSignalManager& MainWindow::tuningSignalManager()
+{
+	return m_tuningSignalManager;
+}
+
+const TuningSignalManager& MainWindow::tuningSignalManager() const
+{
+	return m_tuningSignalManager;
+}
+
+ClientLib::TuningConnection& MainWindow::tuningConnection()
+{
+	return m_tuningConnection;
+}
+
+const ClientLib::TuningConnection& MainWindow::tuningConnection() const
+{
+	return m_tuningConnection;
+}
+
+ITuningAuthorization& MainWindow::tuningAuthorization()
+{
+	return m_userManager;
+}
+
+const ITuningAuthorization& MainWindow::tuningAuthorization() const
+{
+	return m_userManager;
+}
+
 
 void MainWindow::createActions()
 {
@@ -208,6 +250,9 @@ void MainWindow::createMenu()
 	pHelpMenu->addAction(m_aboutQtAction);
 	pHelpMenu->addAction(m_pAboutAction);
 
+	m_logonWidget = new LogonWidget(m_userManager, this);
+	connect(this, &MainWindow::timerTick500, m_logonWidget, &LogonWidget::onTimer);
+	menuBar()->setCornerWidget(m_logonWidget, Qt::TopRightCorner);
 }
 
 void MainWindow::createStatusBar()
@@ -315,9 +360,7 @@ void MainWindow::timerEvent(QTimerEvent* event)
 {
 	assert(event);
 
-	// Update status bar
-	//
-	if  (event->timerId() == m_mainWindowTimerId_250ms)
+	if  (event->timerId() == m_mainWindowTimerId_500ms)
 	{
 		if (theSharedMemorySingleApp != nullptr)
 		{
@@ -350,21 +393,19 @@ void MainWindow::timerEvent(QTimerEvent* event)
 			}
 		}
 
-		updateStatusBar();
-
+		// Update filter counters every 1 second
 		//
-
-		if (m_tuningWorkspace != nullptr)
+		static int updateCountersCounter = 0;
+		if (updateCountersCounter++ == 0)
 		{
-			m_tuningWorkspace->onTimer();
+			std::vector<ClientLib::TuningSource> sourcesInfo = m_tuningConnection.tuningSourcesInfo();
+			m_filterStorage.updateCounters(m_tuningSignalManager, m_tuningConnection, sourcesInfo, m_configController.configuration().lmStatusFlagMode(), nullptr);
 		}
-	}
+		updateCountersCounter %= 2;
 
-	if  (event->timerId() == m_mainWindowTimerId_500ms)
-	{
-		std::vector<ClientLib::TuningSource> sourcesInfo = m_tuningConnection.tuningSourcesInfo();
-
-		m_filterStorage.updateCounters(m_tuningSignalManager, m_tuningConnection, sourcesInfo, m_configController.configuration().lmStatusFlagMode(), nullptr);
+		// Update user interface
+		//
+		updateStatusBar();
 
 		emit timerTick500();
 	}
@@ -389,7 +430,7 @@ void MainWindow::checkAndRemoveFilterSignals()
 	{
 		QString errorMsg;
 
-        if (m_filterStorage.saveUserFilters(theSettings.userFiltersFile(), &errorMsg) == false)
+        if (m_filterStorage.saveUserFilters(TuningClientAppSettings::instance().userFiltersFile(), &errorMsg) == false)
 		{
 			m_logFile.writeError(errorMsg);
 			QMessageBox::critical(this, tr("Error"), errorMsg);
@@ -402,13 +443,11 @@ void MainWindow::createWorkspace()
 	// Check if previous workspace is deleted
 
 	if (m_noWorkspaceLabel != nullptr ||
-		m_logonWorkspace != nullptr ||
 		m_tuningWorkspace != nullptr ||
 		m_schemasWorkspaces.empty() == false ||
 		m_tabWidget != nullptr)
 	{
 		Q_ASSERT(m_noWorkspaceLabel == nullptr);
-		Q_ASSERT(m_logonWorkspace == nullptr);
 		Q_ASSERT(m_tuningWorkspace == nullptr);
 		Q_ASSERT(m_schemasWorkspaces.empty() == true);
 		Q_ASSERT(m_tabWidget == nullptr);
@@ -461,7 +500,7 @@ void MainWindow::createWorkspace()
 			{
 				schemaFiltersFound = true;
 
-				SchemasWorkspace* sw = new SchemasWorkspace(m_configController, m_tuningSignalManager, m_userManager, m_tuningConnection,
+				SchemasWorkspace* sw = new SchemasWorkspace(m_configController,
 															childFilter->caption(),
 															childFilter->tagsList(),
 															childFilter->startSchemaId(),
@@ -473,7 +512,7 @@ void MainWindow::createWorkspace()
 
 		if (schemaFiltersFound == false)
 		{
-			SchemasWorkspace* sw = new SchemasWorkspace(m_configController, m_tuningSignalManager, m_userManager, m_tuningConnection,
+			SchemasWorkspace* sw = new SchemasWorkspace(m_configController,
 														tr("Schemas"),
 														{},
 														m_configController.startSchemaId(),
@@ -492,18 +531,19 @@ void MainWindow::createWorkspace()
 												m_tuningConnection,
 												nullptr,
 												m_filterStorage.root(),
+												true/*hasFilterTree*/,
 												this);
 	}
 
 	// Create login workspace
 
-	if (m_userManager.loginPerOperation() == false && m_userManager.tuningUserAccounts().empty() == false)
+	if (m_userManager.enabled() == true && m_userManager.loginPerOperation() == false)
 	{
-		m_logonWorkspace = new LogonWorkspace(m_userManager, this);
-
-		connect(this, &MainWindow::timerTick500, m_logonWorkspace, &LogonWorkspace::onTimer);
-
-		m_mainLayout->addWidget(m_logonWorkspace);
+		m_logonWidget->setVisible(true);
+	}
+	else
+	{
+		m_logonWidget->setVisible(false);
 	}
 
 	// Now choose, what workspace to display. If both exists, create a tab page.
@@ -559,12 +599,6 @@ void MainWindow::deleteWorkspace()
 	{
 		delete m_noWorkspaceLabel;
 		m_noWorkspaceLabel = nullptr;
-	}
-
-	if (m_logonWorkspace != nullptr)
-	{
-		delete m_logonWorkspace;
-		m_logonWorkspace = nullptr;
 	}
 
 	if (m_tuningWorkspace != nullptr)
@@ -732,7 +766,7 @@ void MainWindow::updateStatusBar()
 			}
 		}
 
-		int labelIndex = 0;
+		size_t labelIndex = 0;
 
 		for (int i = 0; i < filtersCount; i++)
 		{
@@ -750,9 +784,9 @@ void MainWindow::updateStatusBar()
 
 			TuningCounters counters = f->counters();
 
-			if (static_cast<int>(m_statusDiscreteCount.size()) < labelIndex)
+			if (labelIndex >= m_statusDiscreteCount.size())
 			{
-				Q_ASSERT(false);
+				Q_ASSERT(labelIndex < m_statusDiscreteCount.size());
 				return;
 			}
 
@@ -984,9 +1018,10 @@ void MainWindow::slot_configurationArrived(ConfigSettings configuration)
 	}
 
 	m_userManager.setConfiguration(configuration.clientSettings.tuningLogin,
-									configuration.clientSettings.getUsersAccounts(),
-									configuration.clientSettings.loginPerOperation,
-									configuration.clientSettings.tuningSessionTimeout);
+								   configuration.clientSettings.getUsersAccounts(),
+								   configuration.clientSettings.loginPerOperation,
+								   configuration.clientSettings.tuningSessionTimeout,
+								   configuration.matsUsers.users());
 
 	// --
 	//
@@ -1084,10 +1119,6 @@ void MainWindow::slot_projectFiltersUpdated(QByteArray data)
 		QString completeErrorMessage = QObject::tr("Object Filters file loading error: %1").arg(errorStr);
 		m_logFile.writeError(completeErrorMessage);
 	}
-
-	m_filterStorage.createSchemaCounterFilters();
-
-
 }
 
 void MainWindow::slot_signalsUpdated(QByteArray data)
@@ -1158,7 +1189,7 @@ void MainWindow::runPresetEditor()
 
         QString errorMsg;
 
-        if (m_filterStorage.saveUserFilters(theSettings.userFiltersFile(), &errorMsg) == false)
+        if (m_filterStorage.saveUserFilters(TuningClientAppSettings::instance().userFiltersFile(), &errorMsg) == false)
 		{
 			m_logFile.writeError(errorMsg);
 			QMessageBox::critical(this, tr("Error"), errorMsg);
@@ -1170,8 +1201,15 @@ void MainWindow::runPresetEditor()
 
 void MainWindow::showSettings()
 {
-	DialogSettings d(m_translator);
-	d.exec();
+	DialogSettings d(m_translator, this);
+	d.setSettings(TuningClientAppSettings::instance().system());
+
+	if (d.exec() == QDialog::Accepted)
+	{
+
+		TuningClientAppSettings::instance().setSystem(d.settings());
+		TuningClientAppSettings::instance().save();
+	}
 }
 
 
@@ -1239,12 +1277,12 @@ void MainWindow::showAboutQt()
 void MainWindow::showAbout()
 {
 	QString text = qApp->applicationName() + tr(" allows user to modify tuning values.");
-	DialogAbout::show(this, text, ":/Images/Images/logo.png");
+	DialogAbout::show(this, text, ":/Logo/RadiyLogo.png");
 }
 
 void MainWindow::showTuningUserManual()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/D11.9_FSC_Tuning_User_Manual.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.9_FSC_Tuning_User_Manual.pdf", this);
 }
 
 void MainWindow::slot_userFiltersChanged()
@@ -1253,10 +1291,7 @@ void MainWindow::slot_userFiltersChanged()
 
 	if (m_tuningWorkspace != nullptr)
 	{
-		m_tuningWorkspace->updateFilters(m_filterStorage.root());
+		m_tuningWorkspace->updateFilters();
 	}
 
 }
-
-MainWindow* theMainWindow = nullptr;
-

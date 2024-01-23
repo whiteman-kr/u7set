@@ -4,6 +4,30 @@
 #include "DrawParam.h"
 #include <QStyleOptionButton>
 
+namespace
+{
+	// Subclass control to filter mouse input events for schema editor.
+	//
+	class QEditorPushButton : public QPushButton
+	{
+	public:
+		QEditorPushButton(QString text, QWidget* parent, bool editMode) :
+			QPushButton{text, parent},
+			m_editMode(editMode)
+		{
+			if (m_editMode == true)
+			{
+				setMouseTracking(false);
+				setAttribute(Qt::WA_TransparentForMouseEvents);
+			}
+		}
+
+	public:
+		bool m_editMode = true;
+	};
+} // namespace
+
+
 namespace VFrame30
 {
 	SchemaItemPushButton::SchemaItemPushButton(void) :
@@ -157,10 +181,10 @@ namespace VFrame30
 			return nullptr;
 		}
 
-		QPushButton* control = new QPushButton(m_text, parent);
+		QPushButton* control = new QEditorPushButton(m_text, parent, editMode);
 		control->setObjectName(guid().toString());
 
-		updateWidgetProperties(control);
+		updateWidgetProperties(control, editMode);
 
 		control->setChecked(checkedDefault());
 
@@ -193,7 +217,7 @@ namespace VFrame30
 			}
 		}
 
-		updateWdgetPosAndSize(control, zoom);
+		updateWidgetPosAndSize(control, zoom);
 
 		control->setVisible(true);
 		control->update();
@@ -203,7 +227,7 @@ namespace VFrame30
 
 	// Update widget properties
 	//
-	void SchemaItemPushButton::updateWidgetProperties(QWidget* widget) const
+	void SchemaItemPushButton::updateWidgetProperties(QWidget* widget, bool editMode) const
 	{
 		QPushButton* control = dynamic_cast<QPushButton*>(widget);
 
@@ -213,7 +237,7 @@ namespace VFrame30
 			return;
 		}
 
-		SchemaItemControl::updateWidgetProperties(widget);
+		SchemaItemControl::updateWidgetProperties(widget, editMode);
 
 		bool updateRequired = false;
 
@@ -263,7 +287,7 @@ namespace VFrame30
 		//
 		if (m_jsAfterCreate.isUndefined() == true)
 		{
-			m_jsAfterCreate = evaluateScript(pushButtonWidget, m_scriptAfterCreate);
+			m_jsAfterCreate = evaluateScript("AfterCreate", pushButtonWidget, m_scriptAfterCreate);
 
 			if (m_jsAfterCreate.isError() == true ||
 				m_jsAfterCreate.isNull() == true)
@@ -274,7 +298,7 @@ namespace VFrame30
 
 		// Run script
 		//
-		runEventScript(m_jsAfterCreate, pushButtonWidget, false);
+		runEventScript("AfterCreate", m_jsAfterCreate, pushButtonWidget, false);
 
 		return;
 	}
@@ -298,7 +322,7 @@ namespace VFrame30
 		//
 		if (m_jsClicked.isUndefined() == true)
 		{
-			m_jsClicked = evaluateScript(senderWidget, m_scriptClicked);
+			m_jsClicked = evaluateScript("Clicked", senderWidget, m_scriptClicked);
 
 			if (m_jsClicked.isError() == true ||
 				m_jsClicked.isNull() == true)
@@ -309,7 +333,7 @@ namespace VFrame30
 
 		// Run script
 		//
-		runEventScript(m_jsClicked, senderWidget, true);
+		runEventScript("Clicked", m_jsClicked, senderWidget, true);
 
 		return;
 	}
@@ -333,7 +357,7 @@ namespace VFrame30
 		//
 		if (m_jsPressed.isUndefined() == true)
 		{
-			m_jsPressed = evaluateScript(senderWidget, m_scriptPressed);
+			m_jsPressed = evaluateScript("Pressed", senderWidget, m_scriptPressed);
 
 			if (m_jsPressed.isError() == true ||
 				m_jsPressed.isNull() == true)
@@ -344,7 +368,7 @@ namespace VFrame30
 
 		// Run script
 		//
-		runEventScript(m_jsPressed, senderWidget, true);
+		runEventScript("Pressed", m_jsPressed, senderWidget, true);
 
 		return;
 	}
@@ -368,7 +392,7 @@ namespace VFrame30
 		//
 		if (m_jsReleased.isUndefined() == true)
 		{
-			m_jsReleased = evaluateScript(senderWidget, m_scriptReleased);
+			m_jsReleased = evaluateScript("Released", senderWidget, m_scriptReleased);
 
 			if (m_jsReleased.isError() == true ||
 				m_jsReleased.isNull() == true)
@@ -379,7 +403,7 @@ namespace VFrame30
 
 		// Run script
 		//
-		runEventScript(m_jsReleased, senderWidget, true);
+		runEventScript("Released", m_jsReleased, senderWidget, true);
 
 		return;
 	}
@@ -403,7 +427,7 @@ namespace VFrame30
 		//
 		if (m_jsToggled.isUndefined() == true)
 		{
-			m_jsToggled = evaluateScript(senderWidget, m_scriptToggled);
+			m_jsToggled = evaluateScript("Toggled", senderWidget, m_scriptToggled);
 
 			if (m_jsToggled.isError() == true ||
 				m_jsToggled.isNull() == true)
@@ -414,61 +438,14 @@ namespace VFrame30
 
 		// Run script
 		//
-		runEventScript(m_jsToggled, senderWidget, true);
+		runEventScript("Toggled", m_jsToggled, senderWidget, true);
 
 		return;
 	}
 
-	void SchemaItemPushButton::runEventScript(QJSValue& evaluatedJs, QPushButton* buttonWidget, bool allowMessageBox)
+	void SchemaItemPushButton::runEventScript(QString scriptName, QJSValue& evaluatedJs, QPushButton* buttonWidget, bool allowMessageBox)
 	{
-		if (evaluatedJs.isError() == true ||
-			evaluatedJs.isNull() == true)
-		{
-			return;
-		}
-
-		// Suppose that parent of sender is ClientSchemaView, if not, then this is EditMode?
-		//
-		ClientSchemaView* schemaView = dynamic_cast<ClientSchemaView*>(buttonWidget->parentWidget());
-		if (schemaView == nullptr)
-		{
-			assert(schemaView);
-			return;
-		}
-
-		bool prevAllowMessageBoxState = schemaView->setScriptMessageBoxAllowed(allowMessageBox);
-
-		QJSEngine* engine = schemaView->jsEngine();
-		assert(engine);
-
-		// Set argument list
-		//
-		QJSValue jsSchemaItem = engine->newQObject(this);
-		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
-
-		QJSValue jsWidget = engine->newQObject(buttonWidget);
-		QQmlEngine::setObjectOwnership(buttonWidget, QQmlEngine::CppOwnership);
-
-		QJSValueList args;
-
-		args << jsSchemaItem;
-		args << jsWidget;
-		args << buttonWidget->isChecked();
-
-		// Run script
-		//
-		QJSValue jsResult = evaluatedJs.call(args);
-
-		schemaView->setScriptMessageBoxAllowed(prevAllowMessageBoxState);
-
-		if (jsResult.isError() == true)
-		{
-			reportScriptError(jsResult, schemaView->logFile());
-			return;
-		}
-
-		engine->collectGarbage();
-		return;
+		return SchemaItemControl::runEventScript<QPushButton>(evaluatedJs, allowMessageBox, scriptName, buttonWidget, buttonWidget->isChecked());
 	}
 
 	// Properties and Data

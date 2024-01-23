@@ -1,8 +1,6 @@
 #include "DialogAfbLibraryCheck.h"
-#include "../lib/LmDescription.h"
+#include "../HardwareLib/LmDescription.h"
 #include "Settings.h"
-
-#include <QSplitter>
 
 DialogAfbLibraryCheck* theDialogAfbLibraryCheck = nullptr;
 

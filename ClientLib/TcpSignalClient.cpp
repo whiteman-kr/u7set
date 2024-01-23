@@ -1,5 +1,5 @@
 #ifndef CLIENT_LIB_DOMAIN
-#error Don't include this file in the project! Link ClientLib instead.
+#error Do not include this file in the project! Link ClientLib instead.
 #endif
 
 #include "TcpSignalClient.h"
@@ -59,6 +59,10 @@ namespace ClientLib
 		writeMessage("TcpSignalClient::onConnection()");
 
 		Q_ASSERT(isClearToSendRequest() == true);
+
+		// Reset the date when the time discrepancy was checked.
+		//
+		m_timeDiscrepancyCheckDate = {};
 
 		resetToGetSignalList();
 
@@ -126,10 +130,9 @@ namespace ClientLib
 
 	void TcpSignalClient::resetToGetSignalList()
 	{
-		QThread::msleep(RequestTimeInterval);
+		QThread::msleep(RequestTimeIntervalMs);
 
-		m_signalList.clear();
-		m_signalParamsLoaded.store(false);
+		reset();
 
 		m_lastSignalParamStartIndex = 0;
 		m_lastSignalStateStartIndex = 0;
@@ -140,7 +143,7 @@ namespace ClientLib
 
 	void TcpSignalClient::resetToGetState(bool resetStateIndex)
 	{
-		QThread::msleep(RequestTimeInterval);
+		QThread::msleep(RequestTimeIntervalMs);
 
 		if (resetStateIndex == true)
 		{
@@ -153,7 +156,7 @@ namespace ClientLib
 		}
 		else
 		{
-			// There is no signals stae to request list again
+			// There is no signals state to request list again.
 			//
 			resetToGetSignalList();
 		}
@@ -188,7 +191,7 @@ namespace ClientLib
 			return;
 		}
 
-		qDebug() << "----------------- processSignalListStart -----------------"  << this->serverAddressPort1().addressPortStr();;
+		qDebug() << "----------------- processSignalListStart -----------------" << this->serverAddressPort1().addressPortStr();;
 		qDebug() << "error: " << m_getSignalListStartReply.error();
 		qDebug() << "totalItemCount: " << m_getSignalListStartReply.totalitemcount();
 		qDebug() << "partCount: " << m_getSignalListStartReply.partcount();
@@ -215,8 +218,7 @@ namespace ClientLib
 			Q_ASSERT(m_getSignalListStartReply.totalitemcount() == 0);
 			Q_ASSERT(m_getSignalListStartReply.partcount() == 0);
 
-			m_signalList.clear();
-			m_signalParamsLoaded.store(false);
+			reset();
 
 			// request params
 			//
@@ -224,9 +226,8 @@ namespace ClientLib
 			return;
 		}
 
-		m_signalList.clear();
+		reset();
 		m_signalList.reserve(m_getSignalListStartReply.totalitemcount());
-		m_signalParamsLoaded.store(false);
 
 		requestSignalListNext(0);
 
@@ -327,7 +328,7 @@ namespace ClientLib
 
 		if (startIndex == 0)
 		{
-			//theSignals.reset();	no need to reset signal list, signals will be just updates,
+			// theSignals.reset();	no need to reset signal list, signals will be just updates,
 			// if new configuration arrives (ONLY than signal list can be changed) then all signals will be reset in
 			// AdsConnection::configurationArrived
 			//
@@ -340,6 +341,15 @@ namespace ClientLib
 			// Set flag that all signal params were loaded
 			//
 			m_signalParamsLoaded.store(true);
+
+			// Clear bus signals hashes from total hashes list
+			//
+			for (const Hash& busHash : m_busSignalHashes)
+			{
+				std::erase_if(m_signalList, [busHash](Hash hash) {
+								   return hash == busHash;
+					});
+			}
 
 			resetToGetState(true);	// END OF RECEIVING SIGNALS PARAMS,
 			// Here the new loop starts!!!
@@ -397,6 +407,12 @@ namespace ClientLib
 				Q_ASSERT(s.appSignalId().isEmpty() == false);
 
 				appSignals.pop_back();
+				continue;
+			}
+
+			if (s.isBus() == true)
+			{
+				m_busSignalHashes.insert(s.hash());
 			}
 		}
 
@@ -428,12 +444,6 @@ namespace ClientLib
 			return;
 		}
 
-		//	optional int32 error = 1 [default = 0];
-		//	optional int64 serverTimeUtc = 2;
-		//	optional int64 serverTimeLocal = 3;
-		//	optional int32 pendingStatesCount = 4 [default = 0];
-		//	repeated Proto.AppSignalState appSignalStates = 5;		// Limited to ADS_GET_APP_SIGNAL_STATE_MAX (2000)
-
 		if (m_getSignalStateChangesReply.error() != 0)
 		{
 			qDebug() << "TcpSignalClient::processSignalStateChanges, error received: " << m_getSignalStateChangesReply.error();
@@ -444,22 +454,50 @@ namespace ClientLib
 			return;
 		}
 
+		// Check that the server and client time is the same.
+		//
+		if (m_timeDiscrepancyCheckDate.isNull() == true || m_timeDiscrepancyCheckDate != QDate::currentDate())
+		{
+			const qint64 serverUtcTimeMs = m_getSignalStateChangesReply.servertimeutc();
+			const qint64 serverLocalTimeMs = m_getSignalStateChangesReply.servertimelocal();
+
+			checkTimeDiscrepancy(serverUtcTimeMs, serverLocalTimeMs);
+
+			// Set flag that time was checked for this connection.
+			//
+			m_timeDiscrepancyCheckDate = QDate::currentDate();
+		}
+
+		// --
+		//
 		int signalStateCount = m_getSignalStateChangesReply.appsignalstates_size();
 
-		std::vector<AppSignalState> states;
+		thread_local std::vector<AppSignalState> states;
+
+		states.clear();
 		states.reserve(signalStateCount);
 
 		for (int i = 0; i < signalStateCount; i++)
 		{
 			const AppSignalState& state = states.emplace_back(m_getSignalStateChangesReply.appsignalstates(i));
 			Q_ASSERT(state.hash() != 0);
+
+			if (m_signalStatesSet.contains(state.hash()) == false)
+			{
+				m_signalStatesSet.insert(state.hash());	// Mark signal as received at least once
+				
+				if (m_signalStatesSet.size() == m_signalList.size())
+				{
+					m_signalStatesLoaded.store(true);	// Notify that states of all signals are received
+				}
+			}
 		}
 
-		m_signalUpdater.setState(states, QThread::currentThreadId());
+		m_signalUpdater.setState(states, ::calcHash(m_serverSettings.equipmentId), QThread::currentThreadId());
 
 		if (m_getSignalStateChangesReply.pendingstatescount() >= ADS_GET_APP_SIGNAL_STATE_MAX)
 		{
-			// A lot of signals are in teh event queue, request one more time
+			// A lot of signals are in the event queue, request one more time.
 			//
 			requestSignalStateChanges();
 		}
@@ -467,7 +505,7 @@ namespace ClientLib
 		{
 			// Update all signals
 			//
-			requestSignalState(m_lastSignalStateStartIndex + ADS_GET_APP_SIGNAL_STATE_MAX);
+			requestSignalState(m_lastSignalStateStartIndex + MaxStateRequestCount);
 		}
 
 		return;
@@ -487,9 +525,9 @@ namespace ClientLib
 		m_lastSignalStateStartIndex = startIndex;
 
 		m_getSignalStateRequest.mutable_signalhashes()->Clear();
-		m_getSignalStateRequest.mutable_signalhashes()->Reserve(ADS_GET_APP_SIGNAL_STATE_MAX);
+		m_getSignalStateRequest.mutable_signalhashes()->Reserve(MaxStateRequestCount);
 
-		for (int i = startIndex; i < startIndex + ADS_GET_APP_SIGNAL_STATE_MAX && i < std::ssize(m_signalList); i++)
+		for (int i = startIndex; i < startIndex + MaxStateRequestCount && i < std::ssize(m_signalList); i++)
 		{
 			Hash signalHash = m_signalList[i];
 			m_getSignalStateRequest.add_signalhashes(signalHash);
@@ -529,9 +567,19 @@ namespace ClientLib
 		{
 			const AppSignalState& state = states.emplace_back(m_getSignalStateReply.appsignalstates(i));
 			Q_ASSERT(state.m_hash != 0);
+
+			if (m_signalStatesSet.contains(state.hash()) == false)
+			{
+				m_signalStatesSet.insert(state.hash());	// Mark signal as received at least once
+				
+				if (m_signalStatesSet.size() == m_signalList.size())
+				{
+					m_signalStatesLoaded.store(true);	// Notify that states of all signals are received
+				}
+			}
 		}
 
-		m_signalUpdater.setState(states, QThread::currentThreadId());
+		m_signalUpdater.setState(states, ::calcHash(m_serverSettings.equipmentId), QThread::currentThreadId());
 
 		resetToGetState(false);
 		return;
@@ -540,6 +588,80 @@ namespace ClientLib
 	bool TcpSignalClient::signalParamsLoaded() const
 	{
 		return m_signalParamsLoaded.load();
+	}
+
+	bool TcpSignalClient::signalStatesLoaded() const
+	{
+		return m_signalStatesLoaded.load();
+	}
+
+	void TcpSignalClient::reset()
+	{
+		m_signalList.clear();
+		m_busSignalHashes.clear();
+		m_signalStatesSet.clear();
+
+		m_signalParamsLoaded.store(false);
+		m_signalStatesLoaded.store(false);
+	}
+
+	void TcpSignalClient::checkTimeDiscrepancy(qint64 serverUtcTimeMs, qint64 serverLocalTimeMs)
+	{
+		const qint64 serverTimeZoneDiff = serverLocalTimeMs - serverUtcTimeMs;
+
+		qDebug() << "TcpSignalClient::checkTimeDiscrepancy";
+		qDebug() << "\tserverUtcTime, Ms: " << serverUtcTimeMs;
+		qDebug() << "\tserverLocalTime, Ms: " << serverLocalTimeMs;
+		qDebug() << "\tserver time zone shift (seconds): " << serverTimeZoneDiff / 1000;
+
+		// 1. UTC time is different?
+		//
+		{
+			const qint64 limitMs = static_cast<qint64>(3 * 1'000) * 60;  // 3 minutes.
+			const qint64 utcTimeDiscrepancy = std::abs(serverUtcTimeMs - QDateTime::currentDateTime().toMSecsSinceEpoch());
+
+			qDebug() << "\tutcTimeDiscrepancy, ms: " << utcTimeDiscrepancy;
+
+			if (utcTimeDiscrepancy > limitMs)
+			{
+				auto clientUtcDateTime = QDateTime::fromMSecsSinceEpoch(QDateTime::currentDateTime().toMSecsSinceEpoch(), QTimeZone::UTC);
+				auto serverUtcDateTime = QDateTime::fromMSecsSinceEpoch(serverUtcTimeMs, QTimeZone::UTC);
+
+				writeWarning(QString("UTC time discrepancy detected (%1 seconds). Client UTC time %2, server UTC time %3.")
+							 .arg(utcTimeDiscrepancy / 1000)
+							 .arg(clientUtcDateTime.toString("dd MMM yyyy hh:mm:ss.zzz"))
+							 .arg(serverUtcDateTime.toString("dd MMM yyyy hh:mm:ss.zzz")));
+			}
+			else
+			{
+				writeMessage(QString("UTC Time discrepancy is about %1 ms.").arg(utcTimeDiscrepancy));
+			}
+		}
+
+		// 2. Time zone is different?
+		//
+		{
+			QDateTime clientCurrentTimeLocal = QDateTime::currentDateTime();
+			const qint64 clientUtcMs = clientCurrentTimeLocal.toMSecsSinceEpoch();
+			clientCurrentTimeLocal.setTimeZone(QTimeZone::UTC);
+			const qint64 clientLocalMs = clientCurrentTimeLocal.toMSecsSinceEpoch();
+			
+			const qint64 clientTimeZoneDiff = clientLocalMs - clientUtcMs;
+
+			qint64 timeZoneDiff = std::abs(serverTimeZoneDiff - clientTimeZoneDiff);
+
+			if (timeZoneDiff != 0)
+			{
+				auto clientLocalDateTime = clientCurrentTimeLocal;
+				auto serverLocalDateTime = QDateTime::fromMSecsSinceEpoch(serverLocalTimeMs, QTimeZone::UTC);
+
+				writeWarning(QString("TimeZone discrepancy detected. Client local time %1, server local time %2.")
+							 .arg(clientLocalDateTime.toString("dd MMM yyyy hh:mm:ss.zzz"))
+							 .arg(serverLocalDateTime.toString("dd MMM yyyy hh:mm:ss.zzz")));
+			}
+		}
+
+		return;
 	}
 
 }

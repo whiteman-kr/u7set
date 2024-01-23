@@ -124,6 +124,7 @@ EditSchemaTabPage::EditSchemaTabPage(QTabWidget* tabWidget,
 		m_toolBar->addAction(m_schemaWidget->m_addImageValueAction);
 		m_toolBar->addAction(m_schemaWidget->m_addPushButtonAction);
 		m_toolBar->addAction(m_schemaWidget->m_addLineEditAction);
+		m_toolBar->addAction(m_schemaWidget->m_addSliderAction);
 		m_toolBar->addAction(m_schemaWidget->m_addIndicatorAction);
 	}
 
@@ -134,6 +135,7 @@ EditSchemaTabPage::EditSchemaTabPage(QTabWidget* tabWidget,
 		m_toolBar->addAction(m_schemaWidget->m_addImageValueAction);
 		m_toolBar->addAction(m_schemaWidget->m_addPushButtonAction);
 		m_toolBar->addAction(m_schemaWidget->m_addLineEditAction);
+		m_toolBar->addAction(m_schemaWidget->m_addSliderAction);
 	}
 
 	m_toolBar->addSeparator();
@@ -761,11 +763,13 @@ void EditSchemaTabPage::setCurrentWorkcopy()
 
 	// Select file
 	//
-	QString fileName = QFileDialog::getOpenFileName(this, tr("Select File"));
+	static QString path{"."};
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Select File"), path);
 	if (fileName.isEmpty() == true)
 	{
 		return;
 	}
+	path = QFileInfo(fileName).path(); // store path for next time
 
 	// Load file
 	//

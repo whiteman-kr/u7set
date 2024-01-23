@@ -6,16 +6,23 @@
 #include <QRegularExpression>
 #include <utility>
 #include <set>
+#include <vector>
 
 #include "../UtilsLib/Address16.h"
 #include "../UtilsLib/WUtils.h"
 #include "../lib/ConstStrings.h"
 #include "../CommonLib/Hash.h"
 #include "../CommonLib/Types.h"
-#include "../CommonLib/OrderedHash.h"
 #include "../CommonLib/PropertyObject.h"
 
 #include "TuningValue.h"
+
+namespace Proto
+{
+	class SignalSpecPropValue;
+	class ProtoAppSignalData;
+	class AppSignal;
+}
 
 class XmlWriteHelper;
 class XmlReadHelper;
@@ -88,17 +95,16 @@ public:
 	bool serializeValuesToArray(QByteArray* protoData) const;
 	bool parseValuesFromArray(const QByteArray& protoData);
 
-	//bool save(Proto::SignalSpecPropValues* protoValues) const;
-
 	const QVector<AppSignalSpecPropValue>& values() const { return m_specPropValues; }
 	QVector<AppSignalSpecPropValue>& values() { return m_specPropValues; }
 
 	void append(const AppSignalSpecPropValue& value);
+	bool removeValue(const QString& propName);
 
 	bool replaceName(const QString& oldName, const QString& newName);			// returns true if replacing is occured
 
 private:
-	void buildPropNamesMap();
+	void rebuildPropNamesMap();
 
 	bool setValue(const QString& name, const QVariant& value, bool isEnum);
 
@@ -106,7 +112,7 @@ private:
 
 private:
 	QVector<AppSignalSpecPropValue> m_specPropValues;
-	QHash<QString, int> m_propNamesMap;									// prop name => index in m_propSpecValues
+	std::map<QString, int> m_propNamesMap;									// prop name => index in m_propSpecValues
 };
 
 template<typename ENUM_TYPE>
@@ -120,6 +126,7 @@ class AppSignal
 {
 	friend class DbWorker;
 	friend class AppSignalSet;
+	friend class AppSignalSetProvider;
 	friend class SignalTests;
 	friend class DbControllerSignalTests;
 
@@ -151,8 +158,8 @@ public:
 
 	void initSpecificProperties();
 
-	bool isLoaded() const { return m_isLoaded; }
-	void setIsLoaded(bool isLoaded) { m_isLoaded = isLoaded; }
+	bool isLoaded() const { return m_loaded; }
+	void setLoaded(bool loaded) { m_loaded = loaded; }
 
 	// Signal identificators
 
@@ -204,8 +211,8 @@ public:
 
 	int dataSize() const { return m_dataSize; }
 	void setDataSize(int dataSize) { m_dataSize = dataSize; }
-	void setDataSize(E::SignalType signalType, E::AnalogAppSignalFormat dataFormat);
 	void setDataSizeW(int sizeW);
+	void setDataSizeByType(E::SignalType type, E::AnalogAppSignalFormat analogFormat);
 
 	int sizeW() const { return (m_dataSize / SIZE_16BIT + ((m_dataSize % SIZE_16BIT) ? 1 : 0)); }
 	int sizeBit() const { return m_dataSize; }
@@ -223,6 +230,12 @@ public:
 	bool isCompatibleFormat(const SignalAddress16& sa16) const;
 	bool isCompatibleFormat(const AppSignal& s) const;
 	bool isCompatibleFormat(E::SignalType signalType, const QString& busTypeID) const;
+
+	bool invertSignal() const;
+	void setInvertSignal(bool invert);
+
+	bool reserved() const;
+	void setReserved(bool reserved);
 
 	// Analog signal properties
 
@@ -243,6 +256,14 @@ public:
 
 	double highEngineeringUnits(QString* err = nullptr) const;
 	void setHighEngineeringUnits(double highEngineeringUnits);
+
+	double lowPhysicalUnits(QString* err = nullptr) const;
+	void setLowPhysicalUnits(double lowPhUnits);
+
+	double highPhysicalUnits(QString* err = nullptr) const;
+	void setHighPhysicalUnits(double highPhUnits);
+
+	bool isReverseEngineeringLimits() const;
 
 	double lowValidRange(QString* err = nullptr) const;
 	void setLowValidRange(double lowValidRange);
@@ -267,8 +288,8 @@ public:
 	E::ElectricUnit electricUnit(QString* err = nullptr) const;
 	void setElectricUnit(E::ElectricUnit electricUnit);
 
-	double rload_Ohm(QString* err = nullptr) const;
-	void setRload_Ohm(double rload_Ohm);
+	double rloadOhm(QString* err = nullptr) const;
+	void setRloadOhm(double rload_Ohm);
 
 	E::SensorType sensorType(QString* err = nullptr) const;
 	void setSensorType(E::SensorType sensorType);
@@ -315,21 +336,23 @@ public:
 	double fineAperture() const { return m_fineAperture; }
 	void setFineAperture(double aperture) { m_fineAperture = aperture; }
 
-	bool adaptiveAperture() const { return m_adaptiveAperture; }
-	void setAdaptiveAperture(bool adaptive) { m_adaptiveAperture = adaptive; }
+	E::ApertureType apertureType() const { return m_apertureType; }
+	void setApertureType(E::ApertureType type) { m_apertureType = type; }
 
 	// Specific properties
 
 	QString specPropStruct() const { return m_specPropStruct; }
-	void setSpecPropStruct(const QString& specPropsStruct) { m_specPropStruct = specPropsStruct; }
+	void setSpecPropStruct(const QString& specPropsStruct);
+	Hash specPropStructHash() const;
 
 	bool createSpecPropValues();
 
 	void setProtoSpecPropValues(const QByteArray& protoSpecPropValues) { m_protoSpecPropValues = protoSpecPropValues; }
 	const QByteArray& protoSpecPropValues() const { return m_protoSpecPropValues; }
 
-	void cacheSpecPropValues();
+	void cacheSpecPropValues() const;
 
+	bool getSpecPropBool(const QString& name, QString* err) const;
 	double getSpecPropDouble(const QString& name, QString* err) const;
 	int getSpecPropInt(const QString& name, QString* err) const;
 	unsigned int getSpecPropUInt(const QString& name, QString* err) const;
@@ -337,6 +360,7 @@ public:
 	bool getSpecPropValue(const QString& name, QVariant* qv, bool* isEnum, QString* err) const;
 	bool isSpecPropExists(const QString& name) const;
 
+	bool setSpecPropBool(const QString& name, bool value);
 	bool setSpecPropDouble(const QString& name, double value);
 	bool setSpecPropInt(const QString& name, int value);
 	bool setSpecPropUInt(const QString& name, unsigned int value);
@@ -373,8 +397,8 @@ public:
 	void saveProtoData(QByteArray* protoDataArray) const;
 	void saveProtoData(Proto::ProtoAppSignalData* protoData) const;
 
+	void loadProtoData(const char* protoDataPtr, int protoDataSize);
 	void loadProtoData(const QByteArray& protoDataArray);
-	void loadProtoData(const Proto::ProtoAppSignalData& protoData);
 
 	// Signal fields from database
 
@@ -447,12 +471,12 @@ public:
 
 	//
 
-	void writeToAzpzXml(XmlWriteHelper& xml);
+	void writeToAzpzXml(XmlWriteHelper& xml) const;
 
-	void writeToXml(XmlWriteHelper& xml);
-	void writeDoubleSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName = QString());
-	void writeIntSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName = QString());
+	void writeDoubleSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName = QString()) const;
+	void writeIntSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName = QString()) const;
 
+	void writeToXml(XmlWriteHelper& xml) const;
 	bool readFromXml(XmlReadHelper& xml);
 	bool readTuningValuesFromXml(XmlReadHelper& xml);
 
@@ -478,10 +502,15 @@ public:
 
 	static QString removeNumberSign(const QString& appSignalID);
 
+	void trimTextFields();
+	void uppercaseAppSignalID(bool uppercase);
+
 private:
 	// Private setters for fields, wich can't be changed outside DB engine
 	// Should be used only by friends
 	//
+	friend class SignalPropertiesDialog;
+
 	void setID(int signalID) { m_ID = signalID; }
 	void setSignalGroupID(int signalGroupID) { m_signalGroupID = signalGroupID; }
 	void setSignalInstanceID(int signalInstanceID) { m_signalInstanceID = signalInstanceID; }
@@ -500,6 +529,13 @@ private:
 	void setInstanceAction(E::VcsItemAction action) { m_instanceAction = action; }
 	void initCreatedDates();
 
+	QString* appSignalIDPtr() { return &m_appSignalID; }
+	QString* customAppSignalIDPtr() { return &m_customAppSignalID; }
+	QString* equipmentIDPtr() { return &m_equipmentID; }
+	QString* specPropStructPtr() { return &m_specPropStruct; }
+
+	QByteArray* protoSpecPropValuesPtr() { return &m_protoSpecPropValues; }
+
 	bool isCompatibleFormatPrivate(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder, const QString& busTypeID) const;
 
 	void updateTuningValuesType();
@@ -507,7 +543,7 @@ private:
 	QString specPropNotExistErr(const QString &propName) const;
 
 private:
-	bool m_isLoaded = false;										// == false - only m_ID and m_appSignalID fields is initialized from database
+	bool m_loaded = false;										// == false - only m_ID and m_appSignalID fields is initialized from database
 																	// == true - all Signal fields is initialized from database
 
 	// Signal identificators
@@ -518,6 +554,7 @@ private:
 	QString m_equipmentID;											// should be transformed to portEquipmentID
 	QString m_lmEquipmentID;										// now fills in compile time only
 	QString m_busTypeID;											// only for: m_signalType == E::SignalType::Bus
+
 	E::Channel m_channel = E::Channel::A;
 	bool m_excludeFromBuild = false;
 
@@ -553,14 +590,17 @@ private:
 	int m_decimalPlaces = 2;
 	double m_coarseAperture = 1;
 	double m_fineAperture = 0.5;
-	bool m_adaptiveAperture = false;
+	E::ApertureType m_apertureType = E::ApertureType::RangePercent;
+	bool m_invertSignal = false;
+	bool m_reserved  = false;
 
 	// Signal specific properties
 	//
 	QString m_specPropStruct;
+	mutable Hash m_specPropStructHash = 0;				// cached value, used only in signal editing
 	QByteArray m_protoSpecPropValues;					// serialized protobuf message Proto::PropertyValues
 
-	std::shared_ptr<AppSignalSpecPropValues> m_cachedSpecPropValues;
+	mutable std::shared_ptr<AppSignalSpecPropValues> m_cachedSpecPropValues;
 
 	std::set<QString> m_tags;
 
@@ -574,8 +614,8 @@ private:
 	int m_userID = 0;
 	bool m_deleted = false;
 
-	qint64 m_createdMcs;					// in microseconds, as in database
-	qint64 m_instanceCreatedMcs;			// in microseconds, as in database
+	qint64 m_createdMcs = 0;				// in microseconds, as in database
+	qint64 m_instanceCreatedMcs = 0;		// in microseconds, as in database
 
 	E::VcsItemAction m_instanceAction = E::VcsItemAction::Added;
 
@@ -615,69 +655,101 @@ private:
 	bool m_needConversion = false;
 };
 
-typedef std::shared_ptr<AppSignal> AppSignalShared;
-
-typedef PtrOrderedHash<int, AppSignal> SignalPtrOrderedHash;
-
-class AppSignalSet : public SignalPtrOrderedHash
+class AppSignalSet
 {
 private:
+
+	static const int SINGLE_CHANNEL = 0;
+
 	class SignalsGroups
 	{
 	public:
+		void swap(SignalsGroups& signalGroups);
 		void clear();
 		void insert(const AppSignal* appSignal);
-		void remove(const AppSignal& appSignal);
+		void remove(const AppSignal* appSignal);
 		void remove(int groupID, int signalID);
-		void getGroupSignalsIDs(int groupID, QList<int>& signalsIDs) const;
+
+		bool getGroupSignalIDs(int signalID, int groupID, std::vector<int>* signalsIDs) const;
 
 	private:
-		std::map<int, std::set<int>> m_groups;		// signalGroupID => set of signalIDs
-													// signalGroupID == 0 is NOT placed in this map!
+		std::map<int, std::vector<int>> m_groups;		// signalGroupID => set of signalIDs
+														// signalGroupID == SINGLE_CHANNEL is NOT placed in this map!
 	};
 
 public:
 	AppSignalSet();
 	virtual ~AppSignalSet();
 
-	virtual void clear() override;
+	void swap(AppSignalSet& appSignalSet);
 
+	void clear();
 	void reserve(int n);
 
-	void buildID2IndexMap();
-	void updateID2IndexInMap(const QString& appSignalId, int index);
-	void updateID2IndexInMap(const AppSignal* appSignal);
-	void clearID2IndexMap() { m_strID2IndexMap.clear(); }
-	bool ID2IndexMapIsEmpty();
+	// return pair is <newAppSignalPtr, newAppSignalIndex>
+	//
+	std::pair<AppSignal*, int> append(AppSignal* newSignal);		// takes ownership on "newSignal"
+	std::pair<AppSignal*, int> append(const AppSignal& signal);		// appends new AppSignal(signal) (make copy)
+	std::pair<AppSignal*, int> append(const ID_AppSignalID& id);
+
+	void removeSignals(const std::vector<int>& signalToRemoveIDs);
 
 	bool contains(const QString& appSignalID) const;
+	int count() const;
+	int size() const;
+	bool isEmpty() const;
+
+	void enableIdGeneration();
+
+	const std::vector<AppSignal*>& signalsVector() const;
+
+	std::vector<AppSignal*>::iterator begin();
+	std::vector<AppSignal*>::const_iterator begin() const;
+
+	std::vector<AppSignal*>::iterator end();
+	std::vector<AppSignal*>::const_iterator end() const;
 
 	AppSignal* getSignal(const QString& appSignalID);
 	const AppSignal* getSignal(const QString& appSignalID) const;
 
-	virtual void append(const int& signalID, AppSignal* signal) override;
-	void append(AppSignal* signal);
+	AppSignal* getSignal(int signalID);
+	const AppSignal* getSignal(int signalID) const;
 
-	virtual void remove(const int& signalID) override;
-	virtual void removeAt(const qsizetype index) override;
+	AppSignal* getSignalByHash(Hash appSignalIDHash);
+	const AppSignal* getSignalByHash(Hash appSignalIDHash) const;
 
-	QVector<int> getChannelSignalsID(const AppSignal& signal) const;
-	QVector<int> getChannelSignalsID(int signalGroupID) const;
+	AppSignal* at(int index);
+	const AppSignal* at(int index) const;
 
-	void resetAddresses();
+	int signalIndex(int signalID) const;
+
+	bool getChannelSignalsID(int signalID, std::vector<int>* channelSignalIDs) const;
+	bool getChannelSignalsID(const AppSignal& signal, std::vector<int>* channelSignalIDs) const;
+	bool getChannelSignalsID(int signalID, int groupID, std::vector<int>* channelSignalIDs) const;
+
+	void appSignalIdsListSorted(bool removeNumberSign, QStringList* list) const;
+
+	std::pair<AppSignal*, int> updateSignal(const AppSignal& s);
 
 	bool serializeFromProtoFile(const QString& filePath);
 
-	int getMaxID();
-	QStringList appSignalIdsList(bool removeNumberSign, bool sort) const;
-
-	void replaceOrAppendIfNotExists(int signalID, const AppSignal& s);
+	inline static const int BAD_INDEX = -1;
+	inline static const int BAD_ID = -1;
 
 private:
-	SignalsGroups m_groups;
-	QHash<QString, int> m_strID2IndexMap;
+	const AppSignal* privateGetSignal(const QString& appSignalID) const;
+	const AppSignal* privateGetSignalByID(int signalID) const;
+	const AppSignal* privateGetSignalByHash(Hash appSignalIDHash) const;
+	const AppSignal* privateAt(int index) const;
 
-	int m_maxID = -1;
+private:
+	std::vector<AppSignal*> m_signals;
+	std::map<int, qsizetype> m_idToIndex;			// signal.ID => Index in m_signals
+	std::map<Hash, qsizetype> m_hashToIndex;		// Hash(AppSignalID) => Index in m_signals
+
+	SignalsGroups m_groups;
+
+	bool m_enableIdGeneration = false;
 };
 
 class AppSignals
@@ -693,7 +765,6 @@ public:
 	bool containsHash(Hash hash) const;
 
 	const AppSignal* getSignalByID(const QString& appSignalID) const;		// rename => getByAppSignalID
-	// add getByCustomAppSignalID
 
 	const AppSignal* getSignalByHash(Hash hash) const;
 
@@ -708,12 +779,6 @@ public:
 
 private:
 	std::vector<AppSignal*> m_signals;				// dynamic AppSignal object owner
-
-	// remove this map!!!
-	std::map<QString, AppSignal*> m_idToSignal;		// appSignalID => appSignal
-	// remove this map!!!
-
-	// add hashes from customAppSignalID also
 	std::map<Hash, AppSignal*> m_hashToSignal;		// Hash => appSignal
 };
 

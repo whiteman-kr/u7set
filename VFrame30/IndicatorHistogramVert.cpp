@@ -1,13 +1,13 @@
 #include "IndicatorHistogramVert.h"
-#include "SchemaItemIndicator.h"
-#include "PropertyNames.h"
-#include "DrawParam.h"
-#include "../AppSignalLib/AppSignalParam.h"
-#include "../AppSignalLib/ComparatorSet.h"
-#include "Schema.h"
-#include "TuningController.h"
 #include "AppSignalController.h"
+#include "DrawParam.h"
+#include "PropertyNames.h"
+#include "Schema.h"
+#include "SchemaItemIndicator.h"
 #include "Settings.h"
+#include "TuningController.h"
+
+#include "../AppSignalLib/ComparatorSet.h"
 
 
 namespace VFrame30
@@ -101,7 +101,7 @@ namespace VFrame30
 			m_font.setSize(12.0, itemUnit);
 			break;
 		case SchemaUnit::Inch:
-			m_font.setSize(1.0 / 8.0, itemUnit);		// 1/8"
+			m_font.setSize(1.0 / 8.0, itemUnit); // 1/8"
 			break;
 		case SchemaUnit::Millimeter:
 			m_font.setSize(mm2in(3), itemUnit);
@@ -142,14 +142,14 @@ namespace VFrame30
 												 IndicatorHistogramVert::setSignalSource);
 
 		propertyObject->ADD_PROPERTY_GETTER_SETTER(E::AnalogFormat, PropertyNames::analogFormat, true, IndicatorHistogramVert::analogFormat, IndicatorHistogramVert::setAnalogFormat)
-				->setCategory(PropertyNames::indicatorSettings);
+			->setCategory(PropertyNames::indicatorSettings);
 		propertyObject->ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::precision, true, IndicatorHistogramVert::precision, IndicatorHistogramVert::setPrecision)
-				->setCategory(PropertyNames::indicatorSettings);
+			->setCategory(PropertyNames::indicatorSettings);
 
 		propertyObject->ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::fontName, PropertyNames::indicatorSettings, true, IndicatorHistogramVert::getFontName, IndicatorHistogramVert::setFontName);
 		propertyObject->ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::fontSize, PropertyNames::indicatorSettings, true, IndicatorHistogramVert::getFontSize, IndicatorHistogramVert::setFontSize);
 		propertyObject->ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontBold, PropertyNames::indicatorSettings, true, IndicatorHistogramVert::getFontBold, IndicatorHistogramVert::setFontBold);
-		propertyObject->ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontItalic, PropertyNames::indicatorSettings, true,  IndicatorHistogramVert::getFontItalic, IndicatorHistogramVert::setFontItalic);
+		propertyObject->ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontItalic, PropertyNames::indicatorSettings, true, IndicatorHistogramVert::getFontItalic, IndicatorHistogramVert::setFontItalic);
 
 		propertyObject->ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::drawRect, PropertyNames::indicatorSettings, true, IndicatorHistogramVert::drawRect, IndicatorHistogramVert::setDrawRect);
 
@@ -167,49 +167,84 @@ namespace VFrame30
 											 PropertyNames::indicatorSettings,
 											 true,
 											 m_endValue)
-				->setViewOrder(0);
+			->setViewOrder(0);
 
 		propertyObject->ADD_PROPERTY_CAT_VAR(double,
 											 PropertyNames::indicatorStartValue,
 											 PropertyNames::indicatorSettings,
 											 true,
 											 m_startValue)
-				->setViewOrder(1);
+			->setViewOrder(1);
 
-		propertyObject->addProperty<double>(PropertyNames::indicatorBarWidth,
-											PropertyNames::indicatorSettings,
-											true,
-											[this](){ return regionalGetter(m_barWidth);},
-		[this](const auto& value){ return regionalSetter(value, &m_barWidth);})
-				->setViewOrder(2);
+		propertyObject->addProperty<double>(
+						  PropertyNames::indicatorBarWidth,
+						  PropertyNames::indicatorSettings,
+						  true,
+						  [this]()
+						  {
+							  return regionalGetter(m_barWidth);
+						  },
+						  [this](const auto& value)
+						  {
+							  return regionalSetter(value, &m_barWidth);
+						  })
+			->setViewOrder(2);
 
-		propertyObject->addProperty<double>(PropertyNames::indicatorMargingLeft,
-											PropertyNames::indicatorSettings,
-											true,
-											[this](){ return regionalGetter(m_leftMargin);},
-		[this](const auto& value){ return regionalSetter(value, &m_leftMargin);})
-				->setViewOrder(10);
+		propertyObject->addProperty<double>(
+						  PropertyNames::indicatorMargingLeft,
+						  PropertyNames::indicatorSettings,
+						  true,
+						  [this]()
+						  {
+							  return regionalGetter(m_leftMargin);
+						  },
+						  [this](const auto& value)
+						  {
+							  return regionalSetter(value, &m_leftMargin);
+						  })
+			->setViewOrder(10);
 
-		propertyObject->addProperty<double>(PropertyNames::indicatorMargingTop,
-											PropertyNames::indicatorSettings,
-											true,
-											[this](){ return regionalGetter(m_topMargin);},
-		[this](const auto& value){ return regionalSetter(value, &m_topMargin);})
-				->setViewOrder(11);
+		propertyObject->addProperty<double>(
+						  PropertyNames::indicatorMargingTop,
+						  PropertyNames::indicatorSettings,
+						  true,
+						  [this]()
+						  {
+							  return regionalGetter(m_topMargin);
+						  },
+						  [this](const auto& value)
+						  {
+							  return regionalSetter(value, &m_topMargin);
+						  })
+			->setViewOrder(11);
 
-		propertyObject->addProperty<double>(PropertyNames::indicatorMargingRight,				// 1
-											PropertyNames::indicatorSettings,
-											true,
-											[this](){ return regionalGetter(m_rightMargin);},	// 2
-		[this](const auto& value){ return regionalSetter(value, &m_rightMargin);})				// 3
-				->setViewOrder(12);																// 4
+		propertyObject->addProperty<double>(
+						  PropertyNames::indicatorMargingRight,  // 1
+						  PropertyNames::indicatorSettings,
+						  true,
+						  [this]()
+						  {
+							  return regionalGetter(m_rightMargin);
+						  },                                     // 2
+						  [this](const auto& value)
+						  {
+							  return regionalSetter(value, &m_rightMargin);
+						  })                                     // 3
+			->setViewOrder(12);                                  // 4
 
-		propertyObject->addProperty<double>(PropertyNames::indicatorMargingBottom,				// 1
-											PropertyNames::indicatorSettings,
-											true,
-											[this](){ return regionalGetter(m_bottomMargin);},	// 2
-		[this](const auto& value){ return regionalSetter(value, &m_bottomMargin);})				// 3
-				->setViewOrder(13);																// 4
+		propertyObject->addProperty<double>(
+						  PropertyNames::indicatorMargingBottom, // 1
+						  PropertyNames::indicatorSettings,
+						  true,
+						  [this]()
+						  {
+							  return regionalGetter(m_bottomMargin);
+						  },                                     // 2
+						  [this](const auto& value)
+						  {
+							  return regionalSetter(value, &m_bottomMargin);
+						  })                                     // 3
+			->setViewOrder(13);                                  // 4
 
 		propertyObject->ADD_PROPERTY_CAT_VAR(bool,
 											 PropertyNames::indicatorDrawBarRect,
@@ -230,35 +265,35 @@ namespace VFrame30
 											 PropertyNames::indicatorSettings,
 											 true,
 											 m_drawGrid)
-				->setDescription(QStringLiteral("Draw grids"));
+			->setDescription(QStringLiteral("Draw grids"));
 
 		propertyObject->ADD_PROPERTY_CAT_VAR(bool,
 											 PropertyNames::drawGridForAllBars,
 											 PropertyNames::indicatorSettings,
 											 true,
 											 m_drawGridForAllBars)
-				->setDescription(QStringLiteral("Draw grids for all bars (if DrawGrid == true)"));
+			->setDescription(QStringLiteral("Draw grids for all bars (if DrawGrid == true)"));
 
 		propertyObject->ADD_PROPERTY_CAT_VAR(bool,
 											 PropertyNames::drawGridValues,
 											 PropertyNames::indicatorSettings,
 											 true,
 											 m_drawGridValues)
-				->setDescription(QStringLiteral("Draw values for grid (only if DrawGrid == true)"));
+			->setDescription(QStringLiteral("Draw values for grid (only if DrawGrid == true)"));
 
 		propertyObject->ADD_PROPERTY_CAT_VAR(bool,
 											 PropertyNames::drawGridValueForAllBars,
 											 PropertyNames::indicatorSettings,
 											 true,
 											 m_drawGridValueForAllBars)
-				->setDescription(QStringLiteral("Draw values for grid for all bars (true) or just for the first one (false) (only if drawGrid == true && drawGridValues == true)"));
+			->setDescription(QStringLiteral("Draw values for grid for all bars (true) or just for the first one (false) (only if drawGrid == true && drawGridValues == true)"));
 
 		propertyObject->ADD_PROPERTY_CAT_VAR(bool,
 											 PropertyNames::drawGridValueUnits,
 											 PropertyNames::indicatorSettings,
 											 true,
 											 m_drawGridValueUnits)
-				->setDescription(QStringLiteral("Draw units for limits values (only if DrawGrid == true && DrawGridValues == true)"));
+			->setDescription(QStringLiteral("Draw units for limits values (only if DrawGrid == true && DrawGridValues == true)"));
 
 		if (m_scaleType == E::IndicatorScaleType::Linear)
 		{
@@ -267,14 +302,14 @@ namespace VFrame30
 												 PropertyNames::indicatorSettings,
 												 true,
 												 m_linearGridMainStep)
-					->setDescription(QStringLiteral("Step for main linear grids (only if DrawGrid == true)"));
+				->setDescription(QStringLiteral("Step for main linear grids (only if DrawGrid == true)"));
 
 			propertyObject->ADD_PROPERTY_CAT_VAR(double,
 												 PropertyNames::linearGridSmallStep,
 												 PropertyNames::indicatorSettings,
 												 true,
 												 m_linearGridSmallStep)
-					->setDescription(QStringLiteral("Step for small linear grids (only if DrawGrid == true)"));
+				->setDescription(QStringLiteral("Step for small linear grids (only if DrawGrid == true)"));
 		}
 
 		if (m_scaleType == E::IndicatorScaleType::Logarithmic)
@@ -284,14 +319,14 @@ namespace VFrame30
 												 PropertyNames::indicatorSettings,
 												 true,
 												 m_logarithmicGridMainStep)
-					->setDescription(QStringLiteral("Step for main logarighmic grids (only if DrawGrid == true)"));
+				->setDescription(QStringLiteral("Step for main logarithmic grids (only if DrawGrid == true)"));
 
 			propertyObject->ADD_PROPERTY_CAT_VAR(double,
 												 PropertyNames::logarithmicGridSmallStep,
 												 PropertyNames::indicatorSettings,
 												 true,
 												 m_logarithmicGridSmallStep)
-					->setDescription(QStringLiteral("Step for small logarighmic grids (only if DrawGrid == true)"));
+				->setDescription(QStringLiteral("Step for small logarithmic grids (only if DrawGrid == true)"));
 		}
 
 		propertyObject->ADD_PROPERTY_GETTER_SETTER(E::IndicatorScaleType,
@@ -299,7 +334,7 @@ namespace VFrame30
 												   true,
 												   IndicatorHistogramVert::scaleType,
 												   IndicatorHistogramVert::setScaleType)
-				->setCategory(PropertyNames::indicatorSettings);
+			->setCategory(PropertyNames::indicatorSettings);
 
 		// bool m_drawAutoSetpoints = true;						// Draw all auto generated setpoints
 		// bool m_drawCustomSetpoints = true;					// Draw custom setpoints
@@ -316,7 +351,7 @@ namespace VFrame30
 											 PropertyNames::indicatorSettings,
 											 true,
 											 m_customSetPoints)
-				->setDescription(QStringLiteral("CustomSetPoints if DrawSetpoints is set to CustomSetpoints"));
+			->setDescription(QStringLiteral("CustomSetPoints if DrawSetpoints is set to CustomSetpoints"));
 
 		return;
 	}
@@ -329,7 +364,7 @@ namespace VFrame30
 			return false;
 		}
 
-		auto m = message->mutable_indicatorhistogramvert();				// Line to change 1
+		auto m = message->mutable_indicatorhistogramvert(); // Line to change 1
 
 		m->set_signalsource(static_cast<int32_t>(m_signalSource));
 
@@ -391,14 +426,14 @@ namespace VFrame30
 	{
 		m_itemUnit = unit;
 
-		if (message.has_indicatorhistogramvert() == false)				// Line to change 1
+		if (message.has_indicatorhistogramvert() == false) // Line to change 1
 		{
 			// It can be just added new item, default values are taken
 			//
 			return true;
 		}
 
-		const auto& m = message.indicatorhistogramvert();	// Line to change 2
+		const auto& m = message.indicatorhistogramvert(); // Line to change 2
 
 		m_signalSource = static_cast<E::SignalSource>(m.signalsource());
 
@@ -510,6 +545,8 @@ namespace VFrame30
 			rectPen.setJoinStyle(Qt::MiterJoin);
 
 			p->setPen(rectPen);
+			p->setBrush(Qt::NoBrush);
+
 			p->drawRect(rect);
 		}
 
@@ -622,7 +659,7 @@ namespace VFrame30
 		double lowLimit = pointToScaleValue(m_startValue);
 		double highLimit = pointToScaleValue(m_endValue);
 
-		double valueDiff = highLimit - lowLimit;	// if valueDiff is negative, then draw bar upside down
+		double valueDiff = highLimit - lowLimit; // if valueDiff is negative, then draw bar upside down
 
 		if (std::abs(valueDiff) <= std::numeric_limits<double>::epsilon())
 		{
@@ -662,19 +699,19 @@ namespace VFrame30
 
 			switch (signalSource())
 			{
-				case E::SignalSource::AppDataService:
-					valid = appSignalState.isValid();
-					mismatch = appSignalState.isMismatch();
-					currentValue = pointToScaleValue(appSignalState.value());
-					break;
+			case E::SignalSource::AppDataService:
+				valid = appSignalState.isValid();
+				mismatch = appSignalState.isMismatch();
+				currentValue = pointToScaleValue(appSignalState.value());
+				break;
 
-				case E::SignalSource::TuningService:
-					valid = tuningSignalState.valid();
-					currentValue = pointToScaleValue(tuningSignalState.toDouble());
-					break;
+			case E::SignalSource::TuningService:
+				valid = tuningSignalState.valid();
+				currentValue = pointToScaleValue(tuningSignalState.toDouble());
+				break;
 
-				default:
-					Q_ASSERT(false);
+			default:
+				Q_ASSERT(false);
 			}
 
 			if (valid == true)
@@ -737,6 +774,8 @@ namespace VFrame30
 			rectPen.setJoinStyle(Qt::MiterJoin);
 
 			p->setPen(rectPen);
+			p->setBrush(Qt::NoBrush);
+
 			p->drawRect(barRect);
 		}
 
@@ -821,7 +860,7 @@ namespace VFrame30
 						text = QString("%1 ").arg(gridValue, 0, static_cast<char>(analogFormat()), precision());
 					}
 
-					double vertPos = barRect.bottom() - (value -  lowLimit) * factor;
+					double vertPos = barRect.bottom() - (value - lowLimit) * factor;
 
 					grids.emplace_back(DrawGridStruct{vertPos, gridWidth, text});
 				};
@@ -833,7 +872,7 @@ namespace VFrame30
 					double prevCurrentValue = 0;
 					double currentValue = lowLimit;
 
-					for (int i = 0; i < 1000; i++)	// Loop is for safety
+					for (int i = 0; i < 1000; i++) // Loop is for safety
 					{
 						if (valueDiff > 0)
 						{
@@ -857,7 +896,7 @@ namespace VFrame30
 							//
 							if (step > std::fabs(currentValue * 2))
 							{
-								addGridPoint(0, gridWidth, drawValue);	// Draw zero point if necessary
+								addGridPoint(0, gridWidth, drawValue); // Draw zero point if necessary
 							}
 
 							currentValue = -prevCurrentValue;
@@ -945,7 +984,6 @@ namespace VFrame30
 						result.insert(t);
 					}
 				}
-
 			}
 			break;
 
@@ -1157,7 +1195,7 @@ namespace VFrame30
 						continue;
 					}
 
-					result.push_back({sp, SetpointSource::AutoGenerated, {}, {}, {}, qRgb(0x00, 0x00, 0xC0)});
+					result.push_back(IndicatorSetpoint{sp, SetpointSource::AutoGenerated, {}, {}, {}, qRgb(0x00, 0x00, 0xC0), qRgb(0x00, 0x00, 0xC0)});
 				}
 			}
 			break;
@@ -1187,7 +1225,7 @@ namespace VFrame30
 						{
 							// Setpoint is found
 							//
-							result.push_back({sp, SetpointSource::Custom, csp, {}, {}, qRgb(0x00, 0x00, 0xC0)});
+							result.push_back(IndicatorSetpoint{sp, SetpointSource::Custom, csp, {}, {}, qRgb(0x00, 0x00, 0xC0), qRgb(0x00, 0x00, 0xC0)});
 							break;
 						}
 					}
@@ -1207,9 +1245,11 @@ namespace VFrame30
 			std::optional<double> comparatorValue;
 			std::optional<double> alertedValue;
 			std::optional<bool> alerted;
+			
 			QRgb foundColor{qRgb(0x00, 0x00, 0xC0)};
+			QRgb foundTextColor{qRgb(0x00, 0x00, 0xC0)};
 
-			if (const ComparatorSignal& valueSignal = sp.comparator->compare();		// This signal contains value for setpoint
+			if (const ComparatorSignal& valueSignal = sp.comparator->compare(); // This signal contains value for setpoint
 				valueSignal.isConst() == true)
 			{
 				comparatorValue = valueSignal.constValue();
@@ -1223,8 +1263,8 @@ namespace VFrame30
 			{
 				// Getting setpoint state
 				//
-				const ComparatorSignal& stateSignal = sp.comparator->output();	// This signal contains value for setpoint result
-				//Q_ASSERT(stateSignal.isConst() == false);
+				const ComparatorSignal& stateSignal = sp.comparator->output(); // This signal contains value for setpoint result
+				// Q_ASSERT(stateSignal.isConst() == false);
 
 				if (stateSignal.isAcquired() == true)
 				{
@@ -1234,7 +1274,7 @@ namespace VFrame30
 				// if setting outputs state is not valid it is also indicated as alerted
 				//
 				alerted = (alertedValue.has_value() == true && alertedValue.value() != 0) ||
-								 alertedValue.has_value() == false;
+						  alertedValue.has_value() == false;
 
 				// Get color by output signal tags and behavior
 				//
@@ -1249,9 +1289,9 @@ namespace VFrame30
 					Q_ASSERT(sp.customSetpointData);
 					if (sp.customSetpointData != nullptr)
 					{
-						overrideColor = (sp.customSetpointData->colorSource() == E::IndicatorColorSource::StaticColorFromStruct)
-										? std::optional<QRgb>(sp.customSetpointData->color().rgb())
-										: std::optional<QRgb>();
+						overrideColor = (sp.customSetpointData->colorSource() == E::IndicatorColorSource::StaticColorFromStruct) ?
+											std::optional<QRgb>(sp.customSetpointData->color().rgb()) :
+											std::optional<QRgb>();
 					}
 					break;
 				}
@@ -1260,18 +1300,20 @@ namespace VFrame30
 				{
 					QStringList setpointSignalTags = context->appSignalController()->signalTags(stateSignal.appSignalID());
 
-					const MonitorBehavior& monitorBehavior = drawParam->monitorBehavor();
+					const MonitorBehavior& monitorBehavior = drawParam->monitorBehavior();
 
 					std::optional<std::pair<QRgb, QRgb>> color = monitorBehavior.tagToColors(setpointSignalTags);
 
 					if (color.has_value() == true)
 					{
 						foundColor = drawParam->blinkPhase() ? color.value().first : color.value().second;
+						foundTextColor = color.value().first;
 					}
 				}
 				else
 				{
 					foundColor = overrideColor.value();
+					foundTextColor = overrideColor.value();
 				}
 			}
 
@@ -1280,6 +1322,7 @@ namespace VFrame30
 			sp.value = comparatorValue;
 			sp.alerted = alerted;
 			sp.setpointColor = foundColor;
+			sp.textColor = foundTextColor;
 		}
 
 		return result;
@@ -1308,19 +1351,19 @@ namespace VFrame30
 
 		switch (signalSource())
 		{
-			case E::SignalSource::AppDataService:
-				blocked = appSignalState.isBlocked();
-				simulated = appSignalState.isSimulated();
-				mismatch = appSignalState.isMismatch();
-				outOfLimits = appSignalState.isOutOfLimits();
-				break;
+		case E::SignalSource::AppDataService:
+			blocked = appSignalState.isBlocked();
+			simulated = appSignalState.isSimulated();
+			mismatch = appSignalState.isMismatch();
+			outOfLimits = appSignalState.isOutOfLimits();
+			break;
 
-			case E::SignalSource::TuningService:
-				outOfLimits = tuningSignalState.outOfRange();
-				break;
+		case E::SignalSource::TuningService:
+			outOfLimits = tuningSignalState.outOfRange();
+			break;
 
-			default:
-				Q_ASSERT(false);
+		default:
+			Q_ASSERT(false);
 		}
 
 		Qt::BrushStyle brushStyle = mismatch ? Qt::Dense4Pattern : Qt::SolidPattern;
@@ -1331,19 +1374,19 @@ namespace VFrame30
 		//
 		if (outOfLimits == true)
 		{
-			flagColor = drawParam->monitorBehavor().tagToColors(MonitorBehavior::outOfLimitsTag);
+			flagColor = drawParam->monitorBehavior().tagToColors(MonitorBehavior::outOfLimitsTag);
 		}
 		else
 		{
 			if (blocked == true)
 			{
-				flagColor = drawParam->monitorBehavor().tagToColors(MonitorBehavior::blockedTag);
+				flagColor = drawParam->monitorBehavior().tagToColors(MonitorBehavior::blockedTag);
 			}
 			else
 			{
 				if (simulated == true)
 				{
-					flagColor = drawParam->monitorBehavor().tagToColors(MonitorBehavior::simulatedTag);
+					flagColor = drawParam->monitorBehavior().tagToColors(MonitorBehavior::simulatedTag);
 				}
 			}
 		}
@@ -1392,7 +1435,7 @@ namespace VFrame30
 			}
 		}
 
-		std::optional<std::pair<QRgb, QRgb>> color = drawParam->monitorBehavor().tagToColors(alertedTags);
+		std::optional<std::pair<QRgb, QRgb>> color = drawParam->monitorBehavior().tagToColors(alertedTags);
 
 		if (color.has_value() == true)
 		{
@@ -1417,7 +1460,7 @@ namespace VFrame30
 		std::vector<DrawSetpointStruct> drawSetpoints;
 		drawSetpoints.reserve(16);
 
-		// Convert setpoints to DrawSetpointStruct whick is convinirnt for drawing
+		// Convert setpoints to DrawSetpointStruct which is convenient for drawing
 		//
 		const QStringList appSignalIds = schemaItem->signalIds();
 
@@ -1455,7 +1498,7 @@ namespace VFrame30
 		double lowLimit = pointToScaleValue(m_startValue);
 		double highLimit = pointToScaleValue(m_endValue);
 
-		double valueDiff = highLimit - lowLimit;	// if valueDiff is negative, then draw bar upside down
+		double valueDiff = highLimit - lowLimit; // if valueDiff is negative, then draw bar upside down
 		if (std::abs(valueDiff) <= std::numeric_limits<double>::epsilon())
 		{
 			return;
@@ -1464,25 +1507,43 @@ namespace VFrame30
 		double mainGridWidth = font().drawSize() / 1.8;
 		QString valueString;
 
+		auto maxIt = std::max_element(setpoints.begin(), setpoints.end(), [](const auto& a, const auto& b) { return a.signalIndex < b.signalIndex; });
+		int maxSignalIndex = (maxIt == setpoints.end()) ? -1 : maxIt->signalIndex;
+
 		for (const DrawSetpointStruct& ds : setpoints)
 		{
+			if (ds.indicatorSetpoint.value.has_value() == false)
+			{
+				continue;
+			}
+
+			double value = ds.indicatorSetpoint.value.value();
+			
+			if (valueDiff >= 0 && (value < lowLimit || value > highLimit))
+			{
+				continue;
+			}
+
+			if (valueDiff < 0 && (value > lowLimit || value < highLimit))
+			{
+				continue;
+			}
+
 			const QRectF& barRect = ds.barRect;
 			bool alerted = ds.indicatorSetpoint.alerted.value_or(true);
 
 			const double factor = barRect.height() / valueDiff;
-			double value = ds.indicatorSetpoint.value.value_or(lowLimit);
+			
 			double scaleValue = pointToScaleValue(value);
 			double y = barRect.bottom() - (scaleValue - lowLimit) * factor;
 
 			QRgb color{ds.indicatorSetpoint.setpointColor};
-//			if (alerted == true)
-//			{
-//				color = drawParam->blinkPhase() ? ds.color : 0xF0F0F0;	// What second color can be!?
-//			}
+			//			if (alerted == true)
+			//			{
+			//				color = drawParam->blinkPhase() ? ds.color : 0xF0F0F0;	// What second color can be!?
+			//			}
 
-			QBrush brush{color};
-
-			QPen pen(brush, lineWeightDraw() == 0.0 ? drawParam->cosmeticPenWidth() : lineWeightDraw());
+			QPen pen{QColor{color}, lineWeightDraw() == 0.0 ? drawParam->cosmeticPenWidth() : lineWeightDraw()};
 			p->setPen(pen);
 
 			// Draw horz line
@@ -1490,33 +1551,58 @@ namespace VFrame30
 			p->drawLine(QPointF{barRect.left() - mainGridWidth, drawParam->gridToDpiY(y)},
 						QPointF{barRect.right() + mainGridWidth, drawParam->gridToDpiY(y)});
 
-			// Draw setpoint value
+			// Draw setpoint text for all columns if m_drawGridValueForAllBars or
+			// if it is the last column.
 			//
-			QChar cmpSymbol;
-			switch (ds.indicatorSetpoint.comparator->cmpType())
+			if (m_drawGridValueForAllBars == true || ds.signalIndex == maxSignalIndex)
 			{
-			case E::CmpType::Equal:		cmpSymbol = QChar('=');		break;
-			case E::CmpType::Greate:	cmpSymbol = QChar(0x25B2);	break;
-			case E::CmpType::Less:		cmpSymbol = QChar(0x25BC);	break;
-			case E::CmpType::NotEqual:	cmpSymbol = QChar(0x2260);	break;
-			case E::CmpType::GreateEqual:	cmpSymbol = QChar(0x2265);	break;
-			case E::CmpType::LessEqual:	cmpSymbol = QChar(0x2264);	break;
-			default:
-				Q_ASSERT(false);
-			}
-
-			if (ds.indicatorSetpoint.value.has_value() == true)
-			{
-				if (alerted == false ||
-					(alerted == true && drawParam->blinkPhase() == true))
+				// Draw setpoint value
+				//
+				QChar cmpSymbol;
+				switch (ds.indicatorSetpoint.comparator->cmpType())
 				{
-					valueString = QString(" %1 %2")
-									.arg(value, 0, static_cast<char>(analogFormat()), precision())
-									.arg(cmpSymbol);
+				case E::CmpType::Equal:
+					cmpSymbol = QChar('=');
+					break;
+				case E::CmpType::Greate:
+					cmpSymbol = valueDiff > 0 ? QChar{0x25B2} : QChar('>'); // For upside-down histogram draw symbol >, as up triangle can confuse the user.
+					break;
+				case E::CmpType::Less:
+					cmpSymbol = valueDiff > 0 ? QChar{0x25BC} : QChar('<'); // For upside-down histogram draw symbol <, as down triangle can confuse the user.
+					break;
+				case E::CmpType::NotEqual:
+					cmpSymbol = QChar(0x2260);
+					break;
+				case E::CmpType::GreateEqual:
+					cmpSymbol = QChar(0x2265);
+					break;
+				case E::CmpType::LessEqual:
+					cmpSymbol = QChar(0x2264);
+					break;
+				default:
+					Q_ASSERT(false);
+				}
 
-					QRectF textRect{barRect.right() + mainGridWidth, drawParam->gridToDpiY(y), 0, 0};
+				if (ds.indicatorSetpoint.value.has_value() == true)
+				{
+					// Do not take value from earlier defined variable 'value', as that one is
+					// for drawing horizontal line, and it is bound to [lowLimit - highLimit]
+					//
+					double setpointValue = ds.indicatorSetpoint.value.value();
 
-					DrawHelper::drawText(p, font(), schemaItem->itemUnit(), valueString, textRect, Qt::AlignLeft | Qt::AlignVCenter | Qt::TextDontClip | Qt::TextSingleLine);
+					if (alerted == false || (alerted == true && drawParam->blinkPhase() == true))
+					{
+						valueString = QString(" %1%2")
+							.arg(setpointValue, 0, static_cast<char>(analogFormat()), precision())
+							.arg(cmpSymbol);
+
+						QRectF textRect{barRect.right() + mainGridWidth, drawParam->gridToDpiY(y), 0, 0};
+
+						QPen setpointValuePen{QColor{ds.indicatorSetpoint.textColor}, lineWeightDraw() == 0.0 ? drawParam->cosmeticPenWidth() : lineWeightDraw()};
+						p->setPen(setpointValuePen);
+
+						DrawHelper::drawText(p, font(), schemaItem->itemUnit(), valueString, textRect, Qt::AlignLeft | Qt::AlignVCenter | Qt::TextDontClip | Qt::TextSingleLine);
+					}
 				}
 			}
 		}
@@ -1552,8 +1638,8 @@ namespace VFrame30
 	double IndicatorHistogramVert::indicatorPow10(double value) const
 	{
 		// Power calculation, reverse function for indicatorLog10.
-		// Input value is shifted down by std::numeric_limits<double>::max_exponent10() and power is calculated from its absoulte value.
-		// The sign of the result depened on input value sign.
+		// Input value is shifted down by std::numeric_limits<double>::max_exponent10() and power is calculated from its absolute value.
+		// The sign of the result depends on input value sign.
 		//
 		double result = std::fabs(value);
 		result -= std::numeric_limits<double>::max_exponent10;
@@ -1719,7 +1805,7 @@ namespace VFrame30
 	void IndicatorHistogramVert::setSignalColors(const QVector<QColor>& value)
 	{
 		m_signalColors = value;
-		//m_signalColors.resize(12);
+		// m_signalColors.resize(12);
 	}
 
-}
+} // namespace VFrame30

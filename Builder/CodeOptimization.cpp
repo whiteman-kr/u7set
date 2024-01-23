@@ -1,5 +1,6 @@
 #include "CodeOptimization.h"
 #include "ModuleLogicCompiler.h"
+#include "../HardwareLib/LmDescription.h"
 
 namespace Builder
 {
@@ -10,25 +11,25 @@ namespace Builder
 		{
 		case CodeOptimizationType::None:
 			Q_ASSERT(false);
-			return "None";
+			return QStringLiteral("None");
 
 		case CodeOptimizationType::SequentialMoves:
-			return "SequentialMoves";
+			return QStringLiteral("SequentialMoves");
 
 		case CodeOptimizationType::SequentialConstMoves:
-			return "SequentialConstMoves";
+			return QStringLiteral("SequentialConstMoves");
 
 		case CodeOptimizationType::SequentialBitMoves:
-			return "SequentialBitMoves";
+			return QStringLiteral("SequentialBitMoves");
 
 		case CodeOptimizationType::BitFilling:
-			return "BitFilling";
+			return QStringLiteral("BitFilling");
 
 		default:
 			Q_ASSERT(false);
 		}
 
-		return QString();
+		return QStringLiteral("");
 	}
 
 	// ---------------------------------------------------------------------------------------
@@ -48,6 +49,11 @@ namespace Builder
 
 	bool SequenceOptimization::optimize()
 	{
+		if (isOptimizationPossible() == false)
+		{
+			return true;
+		}
+
 		int commandsInSequence = 0;
 
 		CodeSnippetConstIterator firstSequenceCmd;
@@ -74,12 +80,15 @@ namespace Builder
 								{
 									if (commandsInSequence > 1)
 									{
-										if (canOptimize() == true)
+										CodeSnippet replacementCode;
+
+										if (canOptimize() == true &&
+											getReplacementCode(replacementCode) == true &&
+											replacementCode.codeSizeW(m_compiler.getLmDescription()) <
+														m_srcCode.codeSizeW(m_compiler.getLmDescription(),
+																			firstSequenceCmd,
+																			lastSequenceCmd))
 										{
-											CodeSnippet replacementCode;
-
-											getReplacementCode(replacementCode);
-
 											m_compiler.optimizeCode(m_optimizationType,
 																	m_srcCode,
 																	firstSequenceCmd,
@@ -199,6 +208,19 @@ namespace Builder
 		return m_compiler;
 	}
 
+	bool SequenceOptimization::hasRequiredCommands(const std::vector<LmCommandCode>& requiredCmdCodes) const
+	{
+		for(const LmCommandCode cmd : requiredCmdCodes)
+		{
+			if (m_compiler.getLmDescription()->commandPtr(cmd) == nullptr)
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	// ---------------------------------------------------------------------------------------
 	//
 	// SequentialMovesOptimization class implementation
@@ -211,6 +233,11 @@ namespace Builder
 		SequenceOptimization(CodeOptimizationType::SequentialMoves, compiler, srcCode),
 		m_memoryMap(memoryMap)
 	{
+	}
+
+	bool SequentialMovesOptimization::isOptimizationPossible() const
+	{
+		return true;
 	}
 
 	void SequentialMovesOptimization::reinitVars()
@@ -269,9 +296,13 @@ namespace Builder
 		return inSequence();
 	}
 
-	void SequentialMovesOptimization::getReplacementCode(CodeSnippet& code)
+	bool SequentialMovesOptimization::getReplacementCode(CodeSnippet& code)
 	{
-		Q_ASSERT(m_sequenceMoveSizeW > 1);
+		if (m_sequenceMoveSizeW <= 1)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
 
 		code.clear();
 
@@ -286,6 +317,8 @@ namespace Builder
 									 m_sequenceStartSrcAddr,
 									 m_sequenceMoveSizeW);
 		}
+
+		return true;
 	}
 
 	bool SequentialMovesOptimization::isAppropriateMoveCmd(const CodeItem& cmd) const
@@ -312,6 +345,11 @@ namespace Builder
 		SequenceOptimization(CodeOptimizationType::SequentialConstMoves, compiler, srcCode),
 		m_memoryMap(memoryMap)
 	{
+	}
+
+	bool SequentialConstMovesOptimization::isOptimizationPossible() const
+	{
+		return true;
 	}
 
 	void SequentialConstMovesOptimization::reinitVars()
@@ -401,9 +439,13 @@ namespace Builder
 		return inSequence();
 	}
 
-	void SequentialConstMovesOptimization::getReplacementCode(CodeSnippet& code)
+	bool SequentialConstMovesOptimization::getReplacementCode(CodeSnippet& code)
 	{
-		Q_ASSERT(m_sequenceMoveSizeW > 1);
+		if (m_sequenceMoveSizeW <= 1)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
 
 		code.clear();
 
@@ -418,6 +460,8 @@ namespace Builder
 									  static_cast<int>(m_moveConst),
 									  m_sequenceMoveSizeW);
 		}
+
+		return true;
 	}
 
 	bool SequentialConstMovesOptimization::isAppropriateMoveCmd(const CodeItem& cmd) const
@@ -443,6 +487,11 @@ namespace Builder
 		SequenceOptimization(CodeOptimizationType::SequentialBitMoves, compiler, srcCode),
 		m_bitAccAddr(compiler.bitAccumulatorAddress())
 	{
+	}
+
+	bool SequentialBitMovesOptimization::isOptimizationPossible() const
+	{
+		return true;
 	}
 
 	void SequentialBitMovesOptimization::reinitVars()
@@ -519,7 +568,7 @@ namespace Builder
 		return m_bitCount == 16 && m_bitField == 0xFFFF;
 	}
 
-	void SequentialBitMovesOptimization::getReplacementCode(CodeSnippet& code)
+	bool SequentialBitMovesOptimization::getReplacementCode(CodeSnippet& code)
 	{
 		if (m_directMoveDestAddr != BAD_ADDRESS)
 		{
@@ -529,6 +578,8 @@ namespace Builder
 		{
 			code << CodeItem().mov(m_destAddr, m_srcAddr);
 		}
+
+		return true;
 	}
 
 	bool SequentialBitMovesOptimization::setBit(int bitNo)
@@ -569,6 +620,11 @@ namespace Builder
 		SequenceOptimization(CodeOptimizationType::BitFilling, compiler, srcCode),
 		m_bitAccAddr(compiler.bitAccumulatorAddress())
 	{
+	}
+
+	bool BitFillingOptimization::isOptimizationPossible() const
+	{
+		return true;
 	}
 
 	void BitFillingOptimization::reinitVars()
@@ -632,16 +688,18 @@ namespace Builder
 		return m_bitCount == 16 && m_bitField == 0xFFFF;
 	}
 
-	void BitFillingOptimization::getReplacementCode(CodeSnippet& code)
+	bool BitFillingOptimization::getReplacementCode(CodeSnippet& code)
 	{
 		if (m_directMoveDestAddr != BAD_ADDRESS)
 		{
-			code << CodeItem().fill(Address16(m_directMoveDestAddr, 0), m_srcBitAddr);
+			code << CodeItem().fillb(Address16(m_directMoveDestAddr, 0), m_srcBitAddr);
 		}
 		else
 		{
-			code << CodeItem().fill(Address16(m_destAddr, 0), m_srcBitAddr);
+			code << CodeItem().fillb(Address16(m_destAddr, 0), m_srcBitAddr);
 		}
+
+		return true;
 	}
 
 	bool BitFillingOptimization::setBit(int bitNo)
@@ -670,5 +728,4 @@ namespace Builder
 	{
 		return m_bitField != 0;
 	}
-
 }

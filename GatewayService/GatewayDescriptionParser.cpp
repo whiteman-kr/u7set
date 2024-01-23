@@ -734,44 +734,20 @@ namespace Gateway
 	{
 		TEST_PTR_RETURN_FALSE(plr);
 
-		QString valStr = valueStr.trimmed().toLower();
+		bool ok = false;
 
-		static const std::set<QString> trueStr =
+		bool boolVal = stringToBool(valueStr, &ok);
+
+		if (ok == true)
 		{
-			QString("1"),
-			QString("true"),
-			QString("yes"),
-			QString("on"),
-		};
-
-		static const std::set<QString> falseStr =
-		{
-			QString("0"),
-			QString("false"),
-			QString("no"),
-			QString("off"),
-		};
-
-		bool result = true;
-
-		if (trueStr.contains(valStr) == true)
-		{
-			plr->value = QVariant(true);
+			plr->value = QVariant(boolVal);
 		}
 		else
 		{
-			if (falseStr.contains(valStr) == true)
-			{
-				plr->value = QVariant(false);
-			}
-			else
-			{
-				plr->setError("setting value is not boolean (use 1/0, on/off, yes/no, true/false)");
-				result = false;
-			}
+			plr->setError("setting value is not boolean (use 1/0, on/off, yes/no, true/false)");
 		}
 
-		return result;
+		return ok;
 	}
 
 	bool Parser::parseIpPortValueStr(const QString& valueStr, ParseLineResult* plr)

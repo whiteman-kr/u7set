@@ -1,205 +1,98 @@
 #include "SchemasReport.h"
 #include "../../lib/Ui/DialogProgress.h"
-#include <QPageSetupDialog>
-#include <QPrinter>
-#include "DialogReportFileTypeParams.h"
+#include "DialogSchemasReport.h"
 #include "../UtilsLib/Ui/UiTools.h"
+#include "Settings.h"
 
-//
-// SchemasReportDialog
-//
+using namespace ReportLib;
+using namespace Builder;
 
-bool SchemasReportDialog::getReportFileName(QString* fileName,
-						 QPageLayout* pageLayout,
-						 QWidget *parent)
+void SchemasAlbumGenerator::createSchemasAlbums(DbController* db, const AppSignalSet* signalSet, QWidget* parent)
 {
-	if (fileName == nullptr || pageLayout == nullptr)
+	QString path = QSettings{}.value("SchemaEditor/Export/AlbumPath", QDir().toNativeSeparators(QDir::currentPath())).toString();
+
+	std::vector<Builder::SchemaTypesParams> schemaTypesParams = Builder::SchemasReportGenerator::defaultFileTypesParams(db);
+	for (auto& param : schemaTypesParams)
 	{
-		Q_ASSERT(fileName);
-		Q_ASSERT(pageLayout);
-		return false;
+		param.load(db);
 	}
 
-	SchemasReportDialog d(fileName, pageLayout, parent);
-	if (d.exec() == QDialog::Accepted)
+	// Get all schemas tags
+	//
+	std::set<QString> schemaTags;
+
 	{
-		return true;
+		// Approach 2 - parse all files and get ALL tags from details, slower
+		DbFileTree tree;
+		if (db->getFileListTree(&tree, db->systemFileId(DbDir::SchemasDir), true, parent) == false)
+		{
+			return;
+		}
+		auto filePointers = tree.toVectorOfSharedPointers(true);
+
+		VFrame30::SchemaDetails details;
+		for (const auto& file : filePointers)
+		{
+			bool ok = details.parseDetails(file->details());
+			if (ok == true)
+			{
+				for (const QString& tag : details.schemaTags())
+				{
+					schemaTags.insert(tag);
+				}
+			}
+		}
 	}
-	return false;
-}
 
-bool SchemasReportDialog::getReportFilesPath(QString* path,
-						 std::vector<ReportFileTypeParams>* reportFileTypeParams,
-						 const std::vector<ReportFileTypeParams>& defaultFileTypeParams,
-						 QWidget *parent)
-{
-	if (path == nullptr || reportFileTypeParams == nullptr)
+	Builder::SchemasReportOptions options = Builder::SchemasReportOptions::optionsForSchemasAlbum(db);
+	options.setSchemaTags(schemaTags);
+
+	// Show dialog with report options
+	//
+	DialogSchemasReport d(path,
+						  schemaTypesParams,
+						  options,
+						  db,
+						  parent);
+	
+	int result = d.exec();
+
+	if (d.optionsApplied() == true)
 	{
-		Q_ASSERT(path);
-		Q_ASSERT(reportFileTypeParams);
-		return false;
+		// Save options set in the dialog
+		//
+		schemaTypesParams = d.schemaTypesParams();
+		for (auto& param : schemaTypesParams)
+		{
+			param.save(db);
+		}
+		
+		options = d.options();
+		options.save(db);
+
+		path = d.path();
+		QSettings{}.setValue("SchemaEditor/Export/AlbumPath", path);
+
 	}
 
-	SchemasReportDialog d(path, reportFileTypeParams, defaultFileTypeParams, parent);
-	if (d.exec() == QDialog::Accepted)
+	if (result != QDialog::Accepted)
 	{
-		return true;
-	}
-	return false;
-}
-
-SchemasReportDialog::SchemasReportDialog(Type type, QString* path, QWidget *parent):
-	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
-	m_type(type),
-	m_reportPath(path)
-{
-	setWindowTitle(tr("Export Schemas to Album"));
-	setMinimumWidth(500);
-
-	QLabel* label = new QLabel(m_type == Type::SelectFile ? tr("Report file:") : tr("Report path:"));
-	m_editReportPath = new QLineEdit(*path);
-
-	QPushButton* browseButton = new QPushButton(tr("Browse..."));
-	connect(browseButton, &QPushButton::clicked, this, &SchemasReportDialog::browseClicked);
-
-	QHBoxLayout* reportPathLayout = new QHBoxLayout();
-	reportPathLayout->addWidget(label);
-	reportPathLayout->addWidget(m_editReportPath);
-	reportPathLayout->addWidget(browseButton);
-
-	QPushButton* okButton = new QPushButton(tr("OK"));
-	connect(okButton, &QPushButton::clicked, this, &SchemasReportDialog::okClicked);
-
-	QPushButton* cancelButton = new QPushButton(tr("Cancel"));
-	connect(cancelButton, &QPushButton::clicked, this, &QDialog::reject);
-
-	QPushButton* pageSetupButton = new QPushButton(tr("Page Setup..."));
-	connect(pageSetupButton, &QPushButton::clicked, this, &SchemasReportDialog::pageSetupClicked);
-
-	QHBoxLayout* buttonsLayout = new QHBoxLayout();
-	buttonsLayout->addWidget(pageSetupButton);
-	buttonsLayout->addStretch();
-	buttonsLayout->addWidget(okButton);
-	buttonsLayout->addWidget(cancelButton);
-
-	QVBoxLayout* mainLayout = new QVBoxLayout();
-	mainLayout->addLayout(reportPathLayout);
-	mainLayout->addLayout(buttonsLayout);
-	setLayout(mainLayout);
-}
-
-SchemasReportDialog::SchemasReportDialog(QString* path, std::vector<ReportFileTypeParams>* reportFileTypeParams, const std::vector<ReportFileTypeParams>& defaultFileTypeParams, QWidget *parent):
-	SchemasReportDialog(Type::SelectPath, path, parent)
-{
-	m_reportFileTypeParams = reportFileTypeParams;
-	m_defaultFileTypeParams = defaultFileTypeParams;
-
-	return;
-}
-
-SchemasReportDialog::SchemasReportDialog(QString* fileName, QPageLayout* pageLayout, QWidget *parent):
-	SchemasReportDialog(Type::SelectFile, fileName,  parent)
-{
-	m_pageLayout = pageLayout;
-
-	return;
-}
-
-void SchemasReportDialog::okClicked()
-{
-	QString text = m_editReportPath->text();
-
-	if (text.isEmpty() == true)
-	{
-		QMessageBox::critical(this, qAppName(), tr("Please enter the file name!"));
-		m_editReportPath->setFocus();
 		return;
 	}
+	
+	SchemasReportGeneratorThread r(theSettings.serverHost(),
+								   theSettings.serverPort(),
+								   theSettings.serverUsername(),
+								   theSettings.serverPassword(),
+								   db->currentProject().projectName(),
+								   db->currentUser().username(),
+								   db->currentUser().password(),
+								   signalSet,
+								   parent,
+								   options,
+								   schemaTypesParams);
 
-	*m_reportPath = text;
-
-	QDialog::accept();
-}
-
-void SchemasReportDialog::browseClicked()
-{
-	if (m_type == Type::SelectFile)
-	{
-		QString path = QFileDialog::getSaveFileName(this, qAppName(), "./", QObject::tr("PDF documents (*.pdf)"));
-
-		if (path.isNull() == true || path.isEmpty() == true)
-		{
-			return;
-		}
-
-		m_editReportPath->setText(QDir::toNativeSeparators(path));
-	}
-	else
-	{
-		QString dir = QFileDialog::getExistingDirectory(this, tr("Select Directory"), QString(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-		if (dir.isEmpty() == true)
-		{
-			return;
-		}
-
-		m_editReportPath->setText(QDir::toNativeSeparators(dir));
-	}
-
-	return;
-}
-
-void SchemasReportDialog::pageSetupClicked()
-{
-	if (m_type == Type::SelectFile)
-	{
-		if (m_pageLayout == nullptr)
-		{
-			Q_ASSERT(m_pageLayout);
-			return;
-		}
-
-		// Ask for page format
-
-		QPageSize::PageSizeId id = QPageSize::id(m_pageLayout->pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
-		if (id == QPageSize::Custom)
-		{
-			id = QPageSize::A3;
-		}
-
-		QPrinter printer(QPrinter::HighResolution);
-		printer.setFullPage(true);
-		printer.setPageSize(QPageSize(id));
-		printer.setPageOrientation(m_pageLayout->orientation());
-		printer.setPageMargins(m_pageLayout->margins(), QPageLayout::Unit::Millimeter);
-
-		QPageSetupDialog d(&printer, this);
-		if (d.exec() != QDialog::Accepted)
-		{
-			return;
-		}
-
-		id = QPageSize::id(d.printer()->pageLayout().pageSize().sizePoints(), QPageSize::FuzzyOrientationMatch);
-
-		m_pageLayout->setPageSize(QPageSize(id));
-		m_pageLayout->setOrientation(d.printer()->pageLayout().orientation());
-		m_pageLayout->setMargins(d.printer()->pageLayout().margins());
-	}
-	else
-	{
-		if (m_reportFileTypeParams == nullptr)
-		{
-			Q_ASSERT(m_reportFileTypeParams);
-			return;
-		}
-
-		DialogReportFileTypeParams d(*m_reportFileTypeParams, m_defaultFileTypeParams, this);
-		if (d.exec() == QDialog::Accepted)
-		{
-			*m_reportFileTypeParams = d.fileTypeParams();
-		}
-	}
-
-	return;
+	r.exportAllSchemasToAlbum(path);
 }
 
 //
@@ -214,7 +107,9 @@ SchemasReportGeneratorThread::SchemasReportGeneratorThread(const QString& server
 														   const QString& userName,
 														   const QString& userPassword,
 														   const AppSignalSet *signalSet,
-														   QWidget *parent):
+														   QWidget *parent,
+														   const Builder::SchemasReportOptions& options,
+														   const std::vector<SchemaTypesParams>& schemaTypesParams):
 	m_serverIp(serverIp),
 	m_serverPort(serverPort),
 	m_serverUserName(serverUserName),
@@ -223,35 +118,39 @@ SchemasReportGeneratorThread::SchemasReportGeneratorThread(const QString& server
 	m_userName(userName),
 	m_userPassword(userPassword),
 	m_signalSet(signalSet),
-	m_parent(parent)
+	m_parent(parent),
+	m_options(options),
+	m_schemaTypesParams(schemaTypesParams)
 {
 
 }
 
-void SchemasReportGeneratorThread::exportSchemasToPdf(const QString& pdfPath, const std::vector<DbFileInfo>& files)
+void SchemasReportGeneratorThread::exportSchemasToMultiplePdf(const QString& pdfPath, const std::vector<DbFileInfo>& files)
 {
-	run(TaskType::ExportFilesToPdf, pdfPath, files, QPageLayout(), {});
+	QDir().mkpath(pdfPath);
+	run(TaskType::ExportFilesToMultiplePdf, pdfPath, files);
 }
 
-void SchemasReportGeneratorThread::exportSchemasToAlbum(const QString& albumPath, const std::vector<DbFileInfo>& files, const QPageLayout& pageLayout)
+void SchemasReportGeneratorThread::exportSchemasToSinglePdf(const QString& fileName, const std::vector<DbFileInfo>& files)
 {
-	run(TaskType::ExportFilesToAlbum, albumPath, files, pageLayout, {});
+	QString pdfPath = QFileInfo(fileName).absolutePath();
+	QDir().mkpath(pdfPath);
+	run(TaskType::ExportFilesToSinglePdf, fileName, files);
 }
 
-void SchemasReportGeneratorThread::exportAllSchemasToAlbum(const QString& albumPath, const std::vector<ReportFileTypeParams>& reportFileTypeParams)
+void SchemasReportGeneratorThread::exportAllSchemasToAlbum(const QString& pdfPath)
 {
-	run(TaskType::ExportAllSchemasToAlbum, albumPath, {}, QPageLayout(), reportFileTypeParams);
+	QDir().mkpath(pdfPath);
+	run(TaskType::ExportAllSchemasToAlbum, pdfPath, {});
 }
 
 void SchemasReportGeneratorThread::run(TaskType task,
 									   const QString& filePath,
-									   const std::vector<DbFileInfo>& files,
-									   const QPageLayout& albumPageLayout,	// Used in ExportFilesToAlbum
-									   const std::vector<ReportFileTypeParams>& albumsFileTypeParams)// Used in ExportAllSchemasToAlbum
+									   const std::vector<DbFileInfo>& files)
 {
 	// Create View
 
-	std::shared_ptr<ReportSchemaView> schemaView = std::make_shared<ReportSchemaView>();
+	std::shared_ptr<ReportSchemaView> schemaView = std::make_shared<ReportSchemaView>(m_options.itemsLabels());
 
 	schemaView->session().setProject(m_projectName);
 	schemaView->session().setUsername(m_userName);
@@ -269,16 +168,9 @@ void SchemasReportGeneratorThread::run(TaskType task,
 																m_userName,
 																m_userPassword,
 																files,
-																filePath);
-
-	if (task == TaskType::ExportFilesToAlbum)
-	{
-		worker->setPageLayout(albumPageLayout);
-	}
-	if (task == TaskType::ExportAllSchemasToAlbum)
-	{
-		worker->setReportFileTypeParams(albumsFileTypeParams);
-	}
+																filePath,
+																m_options,
+																m_schemaTypesParams);
 
 	// Create Progress Dialog
 
@@ -292,20 +184,20 @@ void SchemasReportGeneratorThread::run(TaskType task,
 
 	switch(task)
 	{
-	case TaskType::ExportFilesToPdf:
+	case TaskType::ExportFilesToMultiplePdf:
 		{
-			QObject::connect(thread, &QThread::started, worker, &SchemasReportGenerator::exportFilesToPdf);
+			QObject::connect(thread, &QThread::started, worker, &SchemasReportGenerator::exportSchemasToMultiplePdf);
 		}
 		break;
-	case TaskType::ExportFilesToAlbum:
+	case TaskType::ExportFilesToSinglePdf:
 		{
-			QObject::connect(thread, &QThread::started, worker, &SchemasReportGenerator::exportFilesToAlbum);
+			QObject::connect(thread, &QThread::started, worker, &SchemasReportGenerator::exportSchemasToSinglePdf);
 		}
 		break;
 	case TaskType::ExportAllSchemasToAlbum:
 		{
 			Q_ASSERT(files.empty() == true);	// No files should be here
-			QObject::connect(thread, &QThread::started, worker, &SchemasReportGenerator::exportAllSchemasToAlbums);
+			QObject::connect(thread, &QThread::started, worker, &SchemasReportGenerator::exportSchemasToAlbums);
 		}
 		break;
 	}
@@ -341,16 +233,16 @@ void SchemasReportGeneratorThread::run(TaskType task,
 
 	if (dialogProgress.hasErrorMessage() == false)
 	{
-		if (task == TaskType::ExportFilesToAlbum)
+		if (task == TaskType::ExportFilesToSinglePdf)
 		{
 			if (QMessageBox::question(m_parent, qAppName(), QObject::tr("Album generating has been finished.\n\nDo you with to open it?")) == QMessageBox::Yes)
 			{
-				UiTools::openHelp(filePath, m_parent);
+				UiTools::openPdf(filePath, m_parent);
 			}
 		}
 		else
 		{
-			if (task == TaskType::ExportFilesToPdf || task == TaskType::ExportAllSchemasToAlbum)
+			if (task == TaskType::ExportFilesToMultiplePdf || task == TaskType::ExportAllSchemasToAlbum)
 			{
 				if (QMessageBox::question(m_parent, qAppName(), QObject::tr("Album generating has been finished.\n\nDo you with to open the containing folder?")) == QMessageBox::Yes)
 				{

@@ -7,6 +7,7 @@
 #include "../UtilsLib/ILogFile.h"
 #include "../UtilsLib/SimpleThread.h"
 #include "../lib/Tuning/ITuningConnection.h"
+#include "../lib/Tuning/ITuningAuthorization.h"
 #include "TuningTcpClient.h"
 
 class SimpleThread;
@@ -28,6 +29,8 @@ namespace ClientLib
 					   bool autoApply,
 					   TuningClientSettings::LmStatusFlagMode lmStatusFlagMode,
 					   ITuningSignalUpdater& signalUpdater,
+					   IRecentAppSignals& recentTuningSignals,
+					   ITuningAuthorization& tuningAuthorization,
 					   ILogFile* logFile,
 					   ITuningLog* tuningLog);
 			Connection(const Connection&) = delete;
@@ -40,6 +43,8 @@ namespace ClientLib
 			void stopAndDestroy();
 			HostAddressPort address() const;
 
+			bool signalStatesLoaded() const;
+
 			// --
 			//
 			ClientLib::TuningTcpClient* tcpTuningClient = nullptr;
@@ -49,6 +54,8 @@ namespace ClientLib
 	public:
 		explicit TuningConnection(ITuningSignalManager& tuningSignalManager,
 								  ITuningSignalUpdater& tuningSignalUpdater,
+								  IRecentAppSignals& recentTuningSignals,
+								  ITuningAuthorization& tuningAuthorization,
 								  ILogFile* logFile,
 								  ITuningLog* tuningLog);
 
@@ -101,6 +108,8 @@ namespace ClientLib
 		virtual bool writeTuningSignal(const QString& appSignalId, const TuningValue& tuningValue) override;
 		virtual bool writeTuningSignal(const QString& appSignalId, QVariant value) override;
 
+		bool signalStatesLoaded() const;
+
 		/// Apply functions
 		///
 		void applyTuningSignals(const std::vector<Hash>& signalHashes);
@@ -114,8 +123,10 @@ namespace ClientLib
 	private:
 		ITuningSignalManager& m_tuningSignalManager;
 		ITuningSignalUpdater& m_tuningSignalUpdater;
+		IRecentAppSignals& m_recentTuningSignals;
 
 		HasLogFile m_logFile;
+		ITuningAuthorization& m_tuningAuthorization;
 		ITuningLog* m_tuningLog = nullptr;
 	};
 }

@@ -1,43 +1,48 @@
-#include "EditEngine/EditEngine.h"
 #include "EditSchemaWidget.h"
-#include "SchemaPropertiesDialog.h"
-#include "SchemaLayersDialog.h"
-#include "SchemaItemPropertiesDialog.h"
+#include "./EditEngine/EditEngine.h"
 #include "DbTagsEditor.h"
+#include "GlobalMessanger.h"
+#include "SchemaItemPropertiesDialog.h"
+#include "SchemaLayersDialog.h"
+#include "SchemaPropertiesDialog.h"
+#include "Settings.h"
+#include "SignalPropertiesDialog.h"
+
 #include "./Forms/ChooseAfbDialog.h"
 #include "./Forms/ChooseUfbDialog.h"
-#include "SignalPropertiesDialog.h"
-#include "GlobalMessanger.h"
+#include "./Forms/ComparePropertyObjectDialog.h"
+
+#include "../lib/CodeEditor.h"
+#include "../lib/QDoublevalidatorEx.h"
+#include "../lib/Ui/TextEditCompleter.h"
+
+#include "../AppSignalSetProvider.h"
 #include "../Builder/ConnectionStorage.h"
-#include "../VFrame30/SchemaLayer.h"
-#include "../VFrame30/UfbSchema.h"
-#include "../VFrame30/SchemaItemLine.h"
-#include "../VFrame30/SchemaItemRect.h"
+#include "../HardwareLib/LmDescription.h"
+
+#include "../VFrame30/Bus.h"
+#include "../VFrame30/SchemaItemAfb.h"
+#include "../VFrame30/SchemaItemConst.h"
 #include "../VFrame30/SchemaItemFrame.h"
 #include "../VFrame30/SchemaItemImage.h"
-#include "../VFrame30/SchemaItemPath.h"
-#include "../VFrame30/SchemaItemSignal.h"
-#include "../VFrame30/SchemaItemAfb.h"
-#include "../VFrame30/SchemaItemLink.h"
-#include "../VFrame30/SchemaItemConst.h"
-#include "../VFrame30/SchemaItemUfb.h"
-#include "../VFrame30/SchemaItemTerminator.h"
-#include "../VFrame30/SchemaItemValue.h"
 #include "../VFrame30/SchemaItemImageValue.h"
-#include "../VFrame30/SchemaItemPushButton.h"
-#include "../VFrame30/SchemaItemLineEdit.h"
 #include "../VFrame30/SchemaItemIndicator.h"
+#include "../VFrame30/SchemaItemLine.h"
+#include "../VFrame30/SchemaItemLineEdit.h"
+#include "../VFrame30/SchemaItemLink.h"
 #include "../VFrame30/SchemaItemLoopback.h"
+#include "../VFrame30/SchemaItemPath.h"
+#include "../VFrame30/SchemaItemPushButton.h"
+#include "../VFrame30/SchemaItemRect.h"
+#include "../VFrame30/SchemaItemSignal.h"
+#include "../VFrame30/SchemaItemSlider.h"
+#include "../VFrame30/SchemaItemTerminator.h"
+#include "../VFrame30/SchemaItemUfb.h"
+#include "../VFrame30/SchemaItemValue.h"
+#include "../VFrame30/SchemaLayer.h"
 #include "../VFrame30/Session.h"
-#include "../VFrame30/Bus.h"
-#include "../lib/LmDescription.h"
-#include "../AppSignalSetProvider.h"
-#include "Forms/ComparePropertyObjectDialog.h"
-#include "Settings.h"
-#include "../lib/Ui/TextEditCompleter.h"
-#include "../lib/QDoublevalidatorEx.h"
-#include <cfloat>
-#include "../lib/CodeEditor.h"
+#include "../VFrame30/UfbSchema.h"
+
 
 const EditSchemaWidget::MouseStateCursor EditSchemaWidget::m_mouseStateCursor[] =
 	{
@@ -75,30 +80,99 @@ const EditSchemaWidget::SizeActionToMouseCursor EditSchemaWidget::m_sizeActionTo
 QString EditSchemaWidget::m_lastUsedLoopbackId = "";
 
 
-void addSchemaItem(const QByteArray& itemData);
-
 namespace
 {
 	class ResizedDialog : public QDialog
 	{
 	public:
-		ResizedDialog(int width, int height, QWidget* parent, Qt::WindowFlags f = Qt::WindowFlags()) :
-			QDialog{parent, f},
-			m_width{width},
-			m_height{height}
+		ResizedDialog(QString title, QWidget* parent, Qt::WindowFlags f = Qt::WindowFlags()) :
+			QDialog{parent, f}
 		{
+			setObjectName("F2ResizeDialog");
+			setWindowTitle(title);
+
+			QPoint pos = QSettings{}.value(objectName() + "/pos").toPoint();
+			if (pos.isNull() == false)
+			{
+				move(pos);
+			}
+
+			QSize size = QSettings{}.value(objectName() + "/size").toSize();
+			if (size.isNull() == false)
+			{
+				resize(size);
+			}
+
+			ensureVisible();
+
+			return;
 		}
 
-	protected:
-		virtual QSize sizeHint() const override
+		virtual void closeEvent(QCloseEvent* event) override
 		{
-			return {m_width, m_height};
+			if (isMaximized() == false)
+			{
+				QSettings{}.setValue(objectName() + "/pos", pos());
+				QSettings{}.setValue(objectName() + "/size", size());
+			}
+
+			QDialog::closeEvent(event);
 		}
 
-		int m_width = 0;
-		int m_height = 0;
+		virtual void hideEvent(QHideEvent* event) override
+		{
+			if (isMaximized() == false)
+			{
+				QSettings{}.setValue(objectName() + "/pos", pos());
+				QSettings{}.setValue(objectName() + "/size", size());
+			}
+
+			QDialog::hideEvent(event);
+		}
+
+		void ensureVisible()
+		{
+			if (QScreen* screen = QGuiApplication::screenAt(geometry().center());
+				screen == nullptr)
+			{
+				QScreen* newScreen = QGuiApplication::screenAt(geometry().topLeft());
+				if (newScreen == nullptr)
+				{
+					newScreen = QGuiApplication::screenAt(geometry().topRight());
+				}
+				if (newScreen == nullptr)
+				{
+					newScreen = QGuiApplication::screenAt(geometry().bottomLeft());
+				}
+				if (newScreen == nullptr)
+				{
+					newScreen = QGuiApplication::screenAt(geometry().bottomRight());
+				}
+				if (newScreen == nullptr && parentWidget() != nullptr)
+				{
+					newScreen = QGuiApplication::screenAt(parentWidget()->geometry().center());
+				}
+				if (newScreen == nullptr)
+				{
+					newScreen = QGuiApplication::screens().at(0);
+				}
+
+				if (QScreen* parentScreen = parentWidget()->window()->windowHandle()->screen();
+					parentScreen != nullptr)
+				{
+					newScreen = parentScreen;
+				}
+
+				QRect screenGeometry = newScreen->geometry();
+
+				move(screenGeometry.left() + screenGeometry.width() / 2 - width() / 2,
+					 screenGeometry.top() + screenGeometry.height() / 2 - height() / 2);
+			}
+
+			return;
+		}
 	};
-}
+} // namespace
 
 
 //
@@ -155,7 +229,7 @@ EditSchemaWidget::EditSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 	m_mouseLeftUpStateAction.emplace_back(MouseState::MovingVerticalEdge, std::bind(&EditSchemaWidget::mouseLeftUp_MovingEdgeOrVertex, this, std::placeholders::_1));
 	m_mouseLeftUpStateAction.emplace_back(MouseState::MovingConnectionLinePoint, std::bind(&EditSchemaWidget::mouseLeftUp_MovingEdgeOrVertex, this, std::placeholders::_1));
 
-	// Moouse Mov
+	// Mouse Move
 	//
 	m_mouseMoveStateAction.emplace_back(MouseState::Scrolling, std::bind(&EditSchemaWidget::mouseMove_Scrolling, this, std::placeholders::_1));
 	m_mouseMoveStateAction.emplace_back(MouseState::Selection, std::bind(&EditSchemaWidget::mouseMove_Selection, this, std::placeholders::_1));
@@ -556,6 +630,16 @@ void EditSchemaWidget::createActions()
 			[this](bool)
 			{
 				auto item = std::make_shared<VFrame30::SchemaItemLineEdit>(schema()->unit());
+				addItem(item);
+			});
+
+	m_addSliderAction = new QAction(tr("Slider"), this);
+	m_addSliderAction->setEnabled(true);
+	m_addSliderAction->setIcon(QIcon(":/Images/Images/SchemaItemSlider.svg"));
+	connect(m_addSliderAction, &QAction::triggered,
+			[this](bool)
+			{
+				auto item = std::make_shared<VFrame30::SchemaItemSlider>(schema()->unit());
 				addItem(item);
 			});
 
@@ -1021,6 +1105,7 @@ void EditSchemaWidget::createActions()
 			m_addSubMenu->addAction(m_addImageValueAction);
 			m_addSubMenu->addAction(m_addPushButtonAction);
 			m_addSubMenu->addAction(m_addLineEditAction);
+			m_addSubMenu->addAction(m_addSliderAction);
 			m_addSubMenu->addAction(m_addIndicatorAction);
 		}
 
@@ -1030,6 +1115,7 @@ void EditSchemaWidget::createActions()
 			m_addSubMenu->addAction(m_addImageValueAction);
 			m_addSubMenu->addAction(m_addPushButtonAction);
 			m_addSubMenu->addAction(m_addLineEditAction);
+			m_addSubMenu->addAction(m_addSliderAction);
 		}
 
 	m_editSubMenu = new QMenu(tr("Edit"), this);
@@ -1406,13 +1492,26 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 					[&possibleAction](const SizeActionToMouseCursor& item)
 					{
 						return item.action == possibleAction;
-					}
-					);
+					});
 
 				if (findResult != std::end(m_sizeActionToMouseCursor))
 				{
+					auto itemPosRotatable = dynamic_cast<const VFrame30::PosRectRotatable*>(selectedItem.get());
+					bool rotated = itemPosRotatable != nullptr && itemPosRotatable->angle() != 0;
 
 					docPoint = widgetPointToDocument(me->pos(), snapToGrid());
+					
+					if (rotated == true)
+					{
+						auto rotatePoint = itemPosRotatable->rotationPointInDocPt();
+
+						QTransform transform;
+						transform.translate(rotatePoint.x(), rotatePoint.y());
+						transform.rotate(-itemPosRotatable->angle());
+						transform.translate(-rotatePoint.x(), -rotatePoint.y());
+
+						docPoint = transform.map(docPoint);
+					}
 
 					editSchemaView()->m_editStartDocPt = docPoint;
 					editSchemaView()->m_editEndDocPt = docPoint;
@@ -1522,6 +1621,29 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 			}
 		}
 
+		// Create proposed connection for FblItem pins.
+		//
+		for (auto lines = editSchemaView()->m_autoFblItemConnection.getPropositions();
+			 const auto& line : lines)
+		{
+			if (line.addButtonRect.contains(docPoint) == true)
+			{
+				// Save selection for mo convenient control.
+				// We don't want to select just created link, we want to keep selection so we can create other 
+				// links in the next mouse click.
+				//
+				auto selection = selectedItems();
+
+				createProposedAfbLink(std::vector{line});
+
+				editSchemaView()->setSelectedItems(selection);
+				editSchemaView()->update();
+				return;
+			}
+		}
+
+		// --
+		//
 		for (auto si : selectedItems())
 		{
 			int movingEdgePointIndex = 0;
@@ -1554,7 +1676,7 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 			}
 		}
 
-		// If mouse is over pin, star drawing SchmeItemLink
+		// If mouse is over pin, start drawing SchemaItemLink.
 		//
 		{
 			std::vector<VFrame30::AfbPin> itemPins;
@@ -1603,7 +1725,7 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 			}
 		}
 
-		// --
+		// Start moving.
 		//
 		auto itemUnderPoint = editSchemaView()->activeLayer()->getItemUnderPoint(docPoint);
 
@@ -2011,9 +2133,6 @@ void EditSchemaWidget::mouseLeftUp_SizingRect(QMouseEvent* event)
 		return;
 	}
 
-	QPointF mouseSizingStartPointDocPt = editSchemaView()->m_editStartDocPt;
-	QPointF mouseSizingEndPointDocPt = widgetPointToDocument(event->pos(), snapToGrid());
-
 	auto si = selectedItems().front();
 	VFrame30::IPosRect* itemPos = dynamic_cast<VFrame30::IPosRect*>(selectedItems().front().get());
 
@@ -2021,6 +2140,24 @@ void EditSchemaWidget::mouseLeftUp_SizingRect(QMouseEvent* event)
 	{
 		assert(itemPos != nullptr);
 		return;
+	}
+
+	QPointF mouseSizingStartPointDocPt = editSchemaView()->m_editStartDocPt;
+	QPointF mouseSizingEndPointDocPt = widgetPointToDocument(event->pos(), snapToGrid());
+
+	auto itemPosRotatable = dynamic_cast<const VFrame30::PosRectRotatable*>(si.get());
+	bool rotated = itemPosRotatable != nullptr && itemPosRotatable->angle() != 0;
+
+	if (rotated == true)
+	{
+		auto rotatePoint = itemPosRotatable->rotationPointInDocPt();
+
+		QTransform transform;
+		transform.translate(rotatePoint.x(), rotatePoint.y());
+		transform.rotate(-itemPosRotatable->angle());
+		transform.translate(-rotatePoint.x(), -rotatePoint.y());
+
+		mouseSizingEndPointDocPt = transform.map(mouseSizingEndPointDocPt);
 	}
 
 	double xdif = mouseSizingEndPointDocPt.x() - mouseSizingStartPointDocPt.x();
@@ -2592,18 +2729,29 @@ void EditSchemaWidget::mouseMove_SizingRect(QMouseEvent* me)
 		return;
 	}
 
+	auto itemPosRotatable = dynamic_cast<const VFrame30::PosRectRotatable*>(selectedItems().front().get());
+	bool rotated = itemPosRotatable != nullptr && itemPosRotatable->angle() != 0;
+
 	editSchemaView()->m_editEndDocPt = widgetPointToDocument(me->pos(), snapToGrid());
+	if (rotated == true)
+	{
+		auto rotatePoint = itemPosRotatable->rotationPointInDocPt();
+
+		QTransform transform;
+		transform.translate(rotatePoint.x(), rotatePoint.y());
+		transform.rotate(-itemPosRotatable->angle());
+		transform.translate(-rotatePoint.x(), -rotatePoint.y());
+
+		editSchemaView()->m_editEndDocPt = transform.map(editSchemaView()->m_editEndDocPt);
+	}
 
 	// Get possible links offset
 	//
 	double xdif = editSchemaView()->m_editEndDocPt.x() - editSchemaView()->m_editStartDocPt.x();
 	double ydif = editSchemaView()->m_editEndDocPt.y() - editSchemaView()->m_editStartDocPt.y();
 
-	QRectF currentRect(itemPos->leftDocPt(),
-						   itemPos->topDocPt(),
-						   itemPos->widthDocPt(),
-						   itemPos->heightDocPt());
-
+	QRectF currentRect(itemPos->leftDocPt(), itemPos->topDocPt(), itemPos->widthDocPt(), itemPos->heightDocPt());
+	
 	QRectF newRect = editSchemaView()->sizingRectItem(xdif, ydif, itemPos);
 
 	switch (mouseState())
@@ -2950,6 +3098,22 @@ void EditSchemaWidget::mouseRightDown_MovingEdgesOrVertex(QMouseEvent* event)
 void EditSchemaWidget::mouseRightUp_None(QMouseEvent* event)
 {
 	QPointF docPoint = widgetPointToDocument(event->pos(), false);
+
+	// Proposed links.
+	//
+	{
+		auto proposedLinks = editSchemaView()->m_autoFblItemConnection.getPropositions();
+
+		bool clickOnAddRectArea = std::any_of(proposedLinks.begin(), proposedLinks.end(),
+											  [&docPoint](const auto& link)
+											  {
+												  return link.addButtonRect.contains(docPoint);
+											  });
+		if (clickOnAddRectArea == true)
+		{
+			return;
+		}
+	}
 
 	// Selected one item, check if we hit in it, on item, control bars, etc
 	//
@@ -3311,6 +3475,23 @@ void EditSchemaWidget::setMouseCursor(QPoint mousePos)
 		//
 		QPointF docPos = widgetPointToDocument(mousePos, false);
 
+		// Create proposed connections for FblItem pins.
+		//
+		auto proposedLinks = editSchemaView()->m_autoFblItemConnection.getPropositions();
+		
+		bool inRect = std::any_of(proposedLinks.begin(), proposedLinks.end(),
+								  [&docPos](const auto& link)
+								  {
+									  return link.addButtonRect.contains(docPos);
+								  });
+		if (inRect == true)
+		{
+			setCursor(Qt::PointingHandCursor);
+			return;
+		}
+
+		// --
+		//
 		if (selectedItems().empty() == true)
 		{
 			SchemaItemPtr itemUnderPoint = editSchemaView()->activeLayer()->getItemUnderPoint(docPos);
@@ -3399,6 +3580,8 @@ void EditSchemaWidget::setMouseCursor(QPoint mousePos)
 			}
 		}
 
+		// --
+		//
 		setCursor(Qt::ArrowCursor);
 		return;
 	}
@@ -3563,7 +3746,7 @@ void EditSchemaWidget::initMoveAfbsConnectionLinks(MouseState mouseState)
 	editSchemaView()->m_editConnectionLines.clear();
 	editSchemaView()->m_doNotMoveConnectionLines = false;
 
-	// Go over all selected itmes pins, and add data to m_editConnectionLines
+	// Go over all selected items pins, and add data to m_editConnectionLines
 	//
 	std::vector<SchemaItemPtr> selected = selectedNonLockedItems();
 	std::multiset<std::shared_ptr<VFrame30::SchemaItemLink>> commonLinks;
@@ -3664,7 +3847,7 @@ void EditSchemaWidget::initMoveAfbsConnectionLinks(MouseState mouseState)
 		}
 	}
 
-	// Ckeck if there is EditConnectionLine which is going to be moved from both sides
+	// Check if there is EditConnectionLine which is going to be moved from both sides
 	// If [SIGNAL1] and [SIGNAL2] are selected, the select their common links, and remove it from editSchemaView()->m_editConnectionLines
 	//
 	// [SIGNAL1]-+---------------+-[SIGNAL2]
@@ -3686,7 +3869,7 @@ void EditSchemaWidget::initMoveAfbsConnectionLinks(MouseState mouseState)
 			{
 				it->moveToPin_setMoveWholeLink();
 
-				// Remmove all other occurances of Link in m_editConnectionLines
+				// Remove all other occurrences of Link in m_editConnectionLines
 				//
 				auto removeIt = std::remove_if(++it, editSchemaView()->m_editConnectionLines.end(),
 												[cl](const EditConnectionLine& ecl)
@@ -3846,6 +4029,48 @@ void EditSchemaWidget::finishMoveAfbsConnectionLinks()
 
 		editSchemaView()->m_editConnectionLines.clear();
 	}
+
+	return;
+}
+
+void EditSchemaWidget::createProposedAfbLink(const std::vector<AutoFblConnectionProposition>& links)
+{
+	std::list<SchemaItemPtr> addItems;
+
+	for (const auto& link : links)
+	{
+		VFrame30::SchemaPoint from = link.from;
+		VFrame30::SchemaPoint to = link.to;
+
+		if (std::abs(from.X - to.X) < 0.000001 && std::abs(from.Y - to.Y) < 0.000001)
+		{
+			continue;
+		}
+
+		std::shared_ptr<VFrame30::SchemaItemLink> linkItem = std::make_shared<VFrame30::SchemaItemLink>(schema()->unit());
+		linkItem->AddPoint(from.X, from.Y);
+		linkItem->AddPoint(from.X, from.Y);
+
+		EditConnectionLine ecl{linkItem, EditConnectionLine::AddToEnd};
+
+		ecl.addExtensionPoint(to);
+		ecl.moveEndPointPos(activeLayer(), to, EditConnectionLine::Auto, schema()->gridSize());
+		ecl.moveExtensionPointsToBasePoints();
+
+		ecl.setPointToItem(linkItem);
+		linkItem->RemoveSamePoints();
+
+		if (auto pl = linkItem->GetPointList();
+			pl.size() < 1)
+		{
+			Q_ASSERT(pl.size() > 2);
+			continue;
+		}
+
+		addItems.push_back(linkItem);
+	}
+
+	m_editEngine->runAddItem(addItems, activeLayer());
 
 	return;
 }
@@ -4029,7 +4254,7 @@ bool EditSchemaWidget::loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbS
 
 		ufbs.push_back(u);
 
-		qDebug() << u->schemaId() << " " << u->version();
+		qDebug() << "EditSchemaWidget::loadUfbSchemas(): Ufb: " << u->schemaId() << ", UfbVersion " << u->version();
 	}
 
 	std::swap(ufbs, *out);
@@ -4166,12 +4391,24 @@ void EditSchemaWidget::layers()
 
 void EditSchemaWidget::setActiveLayer(QString name)
 {
+	if (schema() == nullptr)
+	{
+		return;
+	}
+
+	if (activeLayer() != nullptr && activeLayer()->name() == name)
+	{
+		return;
+	}
+
 	for (auto layers = schema()->layers();
 		 auto layer : layers)
 	{
 		if (layer->name() == name)
 		{
 			editSchemaView()->setActiveLayer(layer);
+			editSchemaView()->clearSelection();
+			editSchemaView()->update();
 			break;
 		}
 	}
@@ -4199,6 +4436,33 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 		return;
 	}
 
+	// Context menu for proposed link.
+	//
+	const QPointF docPoint = widgetPointToDocument(pos, false);
+
+	{
+		auto proposedLinks = editSchemaView()->m_autoFblItemConnection.getPropositions();
+
+		bool clickOnAddRectArea = std::any_of(proposedLinks.begin(), proposedLinks.end(),
+											  [&docPoint](const auto& link)
+											  {
+												  return link.addButtonRect.contains(docPoint);
+											  });
+		if (clickOnAddRectArea == true)
+		{
+			QAction action{proposedLinks.size() == 1 ? tr("Add") : tr("Add all %1").arg(proposedLinks.size())};
+			QList<QAction*> al{&action};
+
+			auto menuResult = QMenu::exec(al, mapToGlobal(pos));
+			if (menuResult != nullptr)
+			{
+				createProposedAfbLink(proposedLinks);
+			}
+
+			return;
+		}
+	}
+
 	// All selected are signals?
 	//
 	bool allSelectedAreSignals = selectedItems().empty() == true ? false : true;
@@ -4218,7 +4482,6 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 	bool possibleDeleteVertexOnConnLine = false;
 
 	int movingEdgePointIndex = 0;
-	QPointF docPoint = widgetPointToDocument(pos, false);
 
 	if (selectedOneConnectionLine == true)
 	{
@@ -4394,7 +4657,7 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 	//
 	if (isLogicSchema() == true)
 	{
-		QSet<QString> signalStrIds;		// QSet for unique strIds
+		std::set<QString> signalStrIds;		// QSet for unique strIds
 
 		if (selectedItems().empty() == false)
 		{
@@ -4413,7 +4676,7 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 					{
 						if (s.isEmpty() == false)
 						{
-							signalStrIds << s;
+							signalStrIds.insert(s);
 						}
 					}
 				}
@@ -4427,7 +4690,7 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 					{
 						if (appSignal.isEmpty() == false)
 						{
-							signalStrIds << appSignal;
+							signalStrIds.insert(appSignal);
 						}
 					}
 				}
@@ -4442,7 +4705,7 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 				for (QString s : signalStrIds)
 				{
 					QAction* signalAction = new QAction(s, &menu);
-					if (signalStrIds.size() == 1)	// If not 1, then this shorcut will be added to "All Signals %1 Properties..."
+					if (signalStrIds.size() == 1)	// If not 1, then this shortcut will be added to "All Signals %1 Properties..."
 					{
 						signalAction->setShortcut(Qt::ALT | Qt::Key_S);
 						signalAction->setShortcutVisibleInContextMenu(true);
@@ -4553,13 +4816,15 @@ void EditSchemaWidget::exportToPdf()
 {
 	assert(schema());
 
+	static QString path{"."};
 	QString fileName = QFileDialog::getSaveFileName(
-		this, "Export schema to PDF", schema()->schemaId() + ".pdf", "PDF (*.pdf);;All files (*.*)");
+		this, "Export schema to PDF", path + QDir::separator() + schema()->schemaId() + ".pdf", "PDF (*.pdf);;All files (*.*)");
 
 	if (fileName.isEmpty())
 	{
 		return;
 	}
+	path = QFileInfo(fileName).path(); // store path for next time
 
 	qDebug() << "Export schema " << schema()->caption() << " " << schema()->schemaId() << " to PDF, " << fileName;
 
@@ -4637,7 +4902,7 @@ void EditSchemaWidget::appSignalsProperties(QStringList strIds)
 	//		first: previous AppSignalID
 	//		second: new AppSignalID
 	//
-	std::vector<std::pair<QString, QString>> result = ::editApplicationSignals(strIds, db(), this);
+	std::vector<std::pair<QString, QString>> result = SignalPropertiesDialog::editApplicationSignals(strIds, db(), this);
 
 	if (result.empty() == true)
 	{
@@ -4975,6 +5240,12 @@ void EditSchemaWidget::f2Key()
 		return;
 	}
 
+	if (item->isType<VFrame30::SchemaItemAfb>() == true)
+	{
+		f2KeyForAfb(item);
+		return;
+	}
+
 	return;
 }
 
@@ -4997,12 +5268,7 @@ void EditSchemaWidget::f2KeyForRect(SchemaItemPtr item)
 
 	// Show input dialog
 	//
-	int width = QSettings().value("f2KeyForRect\\width").toInt();
-	int height = QSettings().value("f2KeyForRect\\height").toInt();
-
-	ResizedDialog d(width, height, this);
-
-	d.setWindowTitle(tr("Set text"));
+	ResizedDialog d{tr("Set text"), this};
 	d.setWindowFlags((d.windowFlags() &
 					~Qt::WindowMinimizeButtonHint &
 					~Qt::WindowMaximizeButtonHint &
@@ -5072,9 +5338,6 @@ void EditSchemaWidget::f2KeyForRect(SchemaItemPtr item)
 		}
 	}
 
-	QSettings().setValue("f2KeyForRect\\width", d.width());
-	QSettings().setValue("f2KeyForRect\\height", d.height());
-
 	return;
 }
 
@@ -5120,12 +5383,7 @@ bool EditSchemaWidget::f2KeyForReceiver(SchemaItemPtr item, bool setViaEditEngin
 
 	// Show input dialog
 	//
-	int width = QSettings().value("f2KeyForReceiver\\width").toInt();
-	int height = QSettings().value("f2KeyForReceiver\\height").toInt();
-
-	ResizedDialog d(width, height, this);
-
-	d.setWindowTitle(tr("Set Receiver Params"));
+	ResizedDialog d{tr("Set Receiver Params"), this};
 	d.setWindowFlags((d.windowFlags() &
 					~Qt::WindowMinimizeButtonHint &
 					~Qt::WindowMaximizeButtonHint &
@@ -5148,7 +5406,8 @@ bool EditSchemaWidget::f2KeyForReceiver(SchemaItemPtr item, bool setViaEditEngin
 	AppSignalSetProvider* signalSetProvider = AppSignalSetProvider::getInstance();
 	Q_ASSERT(signalSetProvider);
 
-	QStringList appSignalIdsCompleterList = signalSetProvider->signalSet().appSignalIdsList(true, true);
+	QStringList appSignalIdsCompleterList;
+	signalSetProvider->signalSet().appSignalIdsListSorted(true, &appSignalIdsCompleterList);
 
 	QCompleter* appSignalsCompleter = new QCompleter(appSignalIdsCompleterList, &d);
 	appSignalsCompleter->setFilterMode(Qt::MatchContains);
@@ -5190,9 +5449,6 @@ bool EditSchemaWidget::f2KeyForReceiver(SchemaItemPtr item, bool setViaEditEngin
 	// --
 	//
 	int result = d.exec();
-
-	QSettings().setValue("f2KeyForReceiver\\width", d.width());
-	QSettings().setValue("f2KeyForReceiver\\height", d.height());
 
 	if (result == QDialog::Accepted)
 	{
@@ -5269,12 +5525,8 @@ bool EditSchemaWidget::f2KeyForTransmitter(SchemaItemPtr item, bool setViaEditEn
 
 	// Show input dialog
 	//
-	int width = QSettings().value("f2KeyForTransmitter\\width").toInt();
-	int height = QSettings().value("f2KeyForTransmitter\\height").toInt();
+	ResizedDialog d(tr("Set Transmitter Params"), this);
 
-	ResizedDialog d(width, height, this);
-
-	d.setWindowTitle(tr("Set Transmitter Params"));
 	d.setWindowFlags((d.windowFlags() &
 					~Qt::WindowMinimizeButtonHint &
 					~Qt::WindowMaximizeButtonHint &
@@ -5316,9 +5568,6 @@ bool EditSchemaWidget::f2KeyForTransmitter(SchemaItemPtr item, bool setViaEditEn
 	// --
 	//
 	int result = d.exec();
-
-	QSettings().setValue("f2KeyForTransmitter\\width", d.width());
-	QSettings().setValue("f2KeyForTransmitter\\height", d.height());
 
 	if (result == QDialog::Accepted)
 	{
@@ -5366,12 +5615,8 @@ void EditSchemaWidget::f2KeyForConst(SchemaItemPtr item)
 
 	// Show input dialog
 	//
-	int width = QSettings().value("f2KeyForConst\\width").toInt();
-	int height = QSettings().value("f2KeyForConst\\height").toInt();
+	ResizedDialog d(tr("Set Const Params"), this);
 
-	ResizedDialog d(width, height, this);
-
-	d.setWindowTitle(tr("Set Const Params"));
 	d.setWindowFlags((d.windowFlags() &
 					~Qt::WindowMinimizeButtonHint &
 					~Qt::WindowMaximizeButtonHint &
@@ -5659,9 +5904,6 @@ void EditSchemaWidget::f2KeyForConst(SchemaItemPtr item)
 		editSchemaView()->update();
 	}
 
-	QSettings().setValue("f2KeyForConst\\width", d.width());
-	QSettings().setValue("f2KeyForConst\\height", d.height());
-
 	return;
 }
 
@@ -5685,12 +5927,8 @@ void EditSchemaWidget::f2KeyForSignal(SchemaItemPtr item)
 
 	// Show input dialog
 	//
-	int width = QSettings().value("f2KeyForSignal/width").toInt();
-	int height = QSettings().value("f2KeyForSignal/height").toInt();
+	ResizedDialog d(tr("SchemaItemSignal"), this);
 
-	ResizedDialog d(width, height, this);
-
-	d.setWindowTitle(tr("SchemaItemSignal"));
 	d.setWindowFlags((d.windowFlags() & ~Qt::WindowMinimizeButtonHint & ~Qt::WindowContextHelpButtonHint)
 					 | Qt::CustomizeWindowHint | Qt::WindowMaximizeButtonHint);
 
@@ -5699,7 +5937,8 @@ void EditSchemaWidget::f2KeyForSignal(SchemaItemPtr item)
 	AppSignalSetProvider* signalSetProvider = AppSignalSetProvider::getInstance();
 	Q_ASSERT(signalSetProvider);
 
-	QStringList appSignalIdsCompleterList = signalSetProvider->signalSet().appSignalIdsList(true, true);
+	QStringList appSignalIdsCompleterList;
+	signalSetProvider->signalSet().appSignalIdsListSorted(true, &appSignalIdsCompleterList);
 
 	QCompleter* completer = new QCompleter(appSignalIdsCompleterList, &d);
 	completer->setFilterMode(Qt::MatchContains);
@@ -5741,28 +5980,22 @@ void EditSchemaWidget::f2KeyForSignal(SchemaItemPtr item)
 	connect(tagsEditorButton, &QPushButton::clicked,
 	[this, &d, tagsEdit]()
 	{
-		int width = QSettings().value("f2KeyForSignal/tagsSelectorDialog/width").toInt();
-		int height = QSettings().value("f2KeyForSignal/tagsSelectorDialog/height").toInt();
+		ResizedDialog tagsSelectorDialog{tr("Tags"), &d, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint};
 
-		ResizedDialog tagsSelectorDialog{width, height, &d, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint};
+		std::unique_ptr<DbTagsEditor> te(DbTagsEditor::tagsEditor(this->db(), &d));
+		te->setText(tagsEdit->text());
 
-		DbTagsEditor te{this->db(), &d};
-		te.setText(tagsEdit->text());
-
-		connect(&te, &DbTagsEditor::okPressed, &tagsSelectorDialog, &QDialog::accept);
-		connect(&te, &DbTagsEditor::cancelPressed, &tagsSelectorDialog, &QDialog::reject);
+		connect(te.get(), &DbTagsEditor::okPressed, &tagsSelectorDialog, &QDialog::accept);
+		connect(te.get(), &DbTagsEditor::cancelPressed, &tagsSelectorDialog, &QDialog::reject);
 
 		QHBoxLayout l;
-		l.addWidget(&te);
+		l.addWidget(te.get());
 		tagsSelectorDialog.setLayout(&l);
 
 		if (tagsSelectorDialog.exec() == QDialog::Accepted)
 		{
-			tagsEdit->setText(te.text());
+			tagsEdit->setText(te->text());
 		}
-
-		QSettings().setValue("f2KeyForSignal/tagsSelectorDialog/width", tagsSelectorDialog.width());
-		QSettings().setValue("f2KeyForSignal/tagsSelectorDialog/height", tagsSelectorDialog.height());
 	});
 
 	// --
@@ -5814,9 +6047,6 @@ void EditSchemaWidget::f2KeyForSignal(SchemaItemPtr item)
 			}
 		}
 	}
-
-	QSettings().setValue("f2KeyForSignal/width", d.width());
-	QSettings().setValue("f2KeyForSignal/height", d.height());
 
 	return;
 }
@@ -5897,31 +6127,43 @@ void EditSchemaWidget::f2KeyForValue(SchemaItemPtr item)
 
 	// Show input dialog
 	//
-	int width = QSettings().value("f2KeyForValue\\width").toInt();
-	int height = QSettings().value("f2KeyForValue\\height").toInt();
+	ResizedDialog d(tr("SchemaItemValue"), this);
 
-	ResizedDialog d(width, height, this);
-
-	d.setWindowTitle(tr("SchemaItemValue"));
 	d.setWindowFlags((d.windowFlags() & ~Qt::WindowMinimizeButtonHint & ~Qt::WindowContextHelpButtonHint)
 					 | Qt::CustomizeWindowHint | Qt::WindowMaximizeButtonHint);
-
+	
 	// AppSchemaIDs
 	//
 	QLabel* appSignalIdsLabel = new QLabel("AppSchemaIDs:", &d);
 
-	QTextEdit* appSignalIdsEdit = new QTextEdit(&d);
+	QPlainTextEdit* appSignalIdsEdit = new QPlainTextEdit(&d);
 	appSignalIdsEdit->setPlaceholderText("Enter AppSchemaIDs separated by lines");
 	appSignalIdsEdit->setPlainText(appSignalIds);
+
+	auto appSingalPad = new QWidget;
+	auto appSingalPadLayout = new QVBoxLayout;
+	appSingalPadLayout->setContentsMargins(0, 0, 0, 0);
+	appSingalPad->setLayout(appSingalPadLayout);
+
+	appSingalPadLayout->addWidget(appSignalIdsLabel);
+	appSingalPadLayout->addWidget(appSignalIdsEdit);
 
 	// Text
 	//
 	QLabel* textLabel = new QLabel("Text:", &d);
 
-	QLineEdit* textEdit = new QLineEdit(&d);
+	QPlainTextEdit* textEdit = new QPlainTextEdit(&d);
 	textEdit->setPlaceholderText(VFrame30::PropertyNames::textValuePropDescription);
 	textEdit->setToolTip(VFrame30::PropertyNames::textValuePropDescription);
-	textEdit->setText(text);
+	textEdit->setPlainText(text);
+
+	auto textPad = new QWidget;
+	auto textPadLayout = new QVBoxLayout;
+	textPadLayout->setContentsMargins(0, 0, 0, 0);
+	textPad->setLayout(textPadLayout);
+
+	textPadLayout->addWidget(textLabel);
+	textPadLayout->addWidget(textEdit);
 
 	// PreDrawScript
 	//
@@ -5940,29 +6182,48 @@ void EditSchemaWidget::f2KeyForValue(SchemaItemPtr item)
 
 	QPushButton* preDrawScriptTemplate = new QPushButton(tr("Paste PreDrawScript Template"), &d);
 
+	auto drawScriptPad = new QWidget;
+	auto drawScriptPadLayout = new QGridLayout;
+	drawScriptPadLayout->setContentsMargins(0, 0, 0, 0);
+	drawScriptPad->setLayout(drawScriptPadLayout);
+
+	drawScriptPadLayout->addWidget(preDrawScriptLabel, 4, 0, 1, 3);
+	drawScriptPadLayout->addWidget(preDrawScriptEdit, 5, 0, 1, 3);
+	drawScriptPadLayout->addWidget(preDrawScriptTemplate, 6, 0, 1, 1);
+
+	// Add horizontal splitter.
+	// Upper part is for appSignalIdsLabel, appSignalIdsEdit, textLabel, textLabel
+	// Lower part is for preDrawScriptLabel, preDrawScriptEdit, preDrawScriptTemplate
+	//
+	QSplitter* splitter = new QSplitter(Qt::Vertical, &d);
+	splitter->setChildrenCollapsible(false);
+
+	splitter->addWidget(appSingalPad);
+	splitter->addWidget(textPad);
+	splitter->addWidget(drawScriptPad);
+
 	// --
 	//
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &d);
 
+	// Set main layout
+	//
 	QGridLayout* layout = new QGridLayout(&d);
 
-	layout->addWidget(appSignalIdsLabel, 0, 0, 1, 3);
-	layout->addWidget(appSignalIdsEdit, 1, 0, 1, 3);
-
-	layout->addWidget(textLabel, 2, 0, 1, 3);
-	layout->addWidget(textEdit, 3, 0, 1, 3);
-
-	layout->addWidget(preDrawScriptLabel, 4, 0, 1, 3);
-	layout->addWidget(preDrawScriptEdit, 5, 0, 1, 3);
-	layout->addWidget(preDrawScriptTemplate, 6, 0, 1, 1);
-
+	layout->addWidget(splitter, 1, 0, 1, 3);
 	layout->addWidget(buttonBox, 7, 0, 1, 3);
-
-	layout->setRowStretch(5, 1);	// preDrawScriptEdit
 
 	d.setLayout(layout);
 
-	// RAW STRINg TEMPLATE FOR PreDrawScript
+	// Restore splitter state.
+	//
+	QByteArray splitterState = QSettings().value("f2KeyForValue\\splitterState").toByteArray();
+	if (splitterState.isEmpty() == false)
+	{
+		splitter->restoreState(splitterState);
+	}
+
+	// RAW STRING TEMPLATE FOR PreDrawScript
 	//
 	QString preDrawScriptTemplateString = R"((function(schemaItemValue)
 {
@@ -5998,7 +6259,7 @@ void EditSchemaWidget::f2KeyForValue(SchemaItemPtr item)
 	if (result == QDialog::Accepted)
 	{
 		QString newAppSignaIds = appSignalIdsEdit->toPlainText();
-		QString newText = textEdit->text();
+		QString newText = textEdit->toPlainText();
 		QString newPreDrawScript = preDrawScriptEdit->text();
 
 		if (newAppSignaIds != appSignalIds ||
@@ -6017,8 +6278,9 @@ void EditSchemaWidget::f2KeyForValue(SchemaItemPtr item)
 		}
 	}
 
-	QSettings().setValue("f2KeyForValue\\width", d.width());
-	QSettings().setValue("f2KeyForValue\\height", d.height());
+	// Save splitter state for next time.
+	//
+	QSettings().setValue("f2KeyForValue\\splitterState", splitter->saveState());
 
 	return;
 }
@@ -6044,12 +6306,8 @@ void EditSchemaWidget::f2KeyForImageValue(SchemaItemPtr item)
 
 	// Show input dialog
 	//
-	int width = QSettings().value("f2KeyForImageValue\\width").toInt();
-	int height = QSettings().value("f2KeyForImageValue\\height").toInt();
+	ResizedDialog d(tr("SchemaItemImageValue"), this);
 
-	ResizedDialog d(width, height, this);
-
-	d.setWindowTitle(tr("SchemaItemImageValue"));
 	d.setWindowFlags((d.windowFlags() & ~Qt::WindowMinimizeButtonHint & ~Qt::WindowContextHelpButtonHint)
 					 | Qt::CustomizeWindowHint | Qt::WindowMaximizeButtonHint);
 
@@ -6107,7 +6365,7 @@ void EditSchemaWidget::f2KeyForImageValue(SchemaItemPtr item)
 
 	d.setLayout(layout);
 
-	// RAW STRINg TEMPLATE FOR PreDrawScript
+	// RAW STRING TEMPLATE FOR PreDrawScript
 	//
 	QString preDrawScriptTemplateString = R"((function(schemaItemImageValue)
 {
@@ -6161,9 +6419,6 @@ void EditSchemaWidget::f2KeyForImageValue(SchemaItemPtr item)
 		}
 	}
 
-	QSettings().setValue("f2KeyForImageValue\\width", d.width());
-	QSettings().setValue("f2KeyForImageValue\\height", d.height());
-
 	return;
 }
 
@@ -6198,12 +6453,8 @@ void EditSchemaWidget::f2KeyForBus(SchemaItemPtr item)
 
 	// Show input dialog
 	//
-	int width = QSettings().value("f2KeyForBus\\width").toInt();
-	int height = QSettings().value("f2KeyForBus\\height").toInt();
+	ResizedDialog d(tr("Set BusType"), this);
 
-	ResizedDialog d(width, height, this);
-
-	d.setWindowTitle(tr("Set BusType"));
 	d.setWindowFlags((d.windowFlags() &
 					~Qt::WindowMinimizeButtonHint &
 					~Qt::WindowMaximizeButtonHint &
@@ -6275,8 +6526,121 @@ void EditSchemaWidget::f2KeyForBus(SchemaItemPtr item)
 		editSchemaView()->update();
 	}
 
-	QSettings().setValue("f2KeyForBus\\width", d.width());
-	QSettings().setValue("f2KeyForBus\\height", d.height());
+	return;
+}
+
+void EditSchemaWidget::f2KeyForAfb(SchemaItemPtr item)
+{
+	if (item->isSchemaItemAfb() == false)
+	{
+		assert(item->isSchemaItemAfb() == true);
+		return;
+	}
+
+	// Create a deep copy of the item, as it must not share Properties with the original one.
+	// 
+	QByteArray itemData;
+	item->saveToByteArray(&itemData);
+
+	auto itemCopy = VFrame30::SchemaItem::Create(itemData);
+	Q_ASSERT(itemCopy);
+	
+	// Only edit essential and category Parameters,
+	// remove all others.
+	//
+	auto properties = itemCopy->properties();
+
+	for (auto& property : properties)
+	{
+		if (property->essential() != true &&
+			property->category() != VFrame30::PropertyNames::parametersCategory)
+		{
+			itemCopy->removeProperty(property->caption());
+		}
+	}
+
+	properties = itemCopy->properties();
+
+	// Show input dialog.
+	//
+	ResizedDialog d(tr("Set AFB properties"), this);
+
+	d.setWindowFlags((d.windowFlags() &
+					  ~Qt::WindowMinimizeButtonHint &
+					  ~Qt::WindowMaximizeButtonHint &
+					  ~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+
+	auto label = new QLabel("AFB Item Properties:");
+
+	auto propertyEditor = new ExtWidgets::PropertyEditor{&d};
+	propertyEditor->setObject(itemCopy);
+
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+	QVBoxLayout* layout = new QVBoxLayout;
+	layout->addWidget(label);
+	layout->addWidget(propertyEditor);
+	layout->addWidget(buttonBox);
+	d.setLayout(layout);
+
+	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
+	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
+
+	propertyEditor->autoAdjustSplitterPosition();
+	propertyEditor->setReadOnly(readOnly());
+
+	// Show modal dialog.
+	//
+	if (int result = d.exec();
+		result != QDialog::Accepted)
+	{
+		return;
+	}
+
+	// Update only changed properties
+	//
+	bool batchWasStarted = false;
+
+	for (const auto& property : properties)
+	{
+		auto oldProperty = item->propertyByCaption(property->caption());
+		if (oldProperty == nullptr)
+		{
+			Q_ASSERT(oldProperty);
+			continue;
+		}
+
+		if (oldProperty->value() == property->value())
+		{
+			// Property value was not changed, skip it.
+			//
+			continue;
+		}
+
+		if (batchWasStarted == false)
+		{
+			// This is the first changed property, start batch.
+			//
+			batchWasStarted = m_editEngine->startBatch();
+			
+			if (batchWasStarted == false)
+			{
+				// Batch was not started, skip all changes.
+				// It is possible if the schema is read only.
+				//
+				break;
+			}
+		}
+
+		m_editEngine->runSetProperty(property->caption(), property->value(), item);
+	}
+
+	if (batchWasStarted == true)
+	{
+		// If batch was started, then at least one property has been changed. 
+		//
+		m_editEngine->endBatch();
+	}
 
 	return;
 }
@@ -7539,12 +7903,25 @@ void EditSchemaWidget::addAfbElement()
 		std::shared_ptr<Afb::AfbElement> afb = afbs[index];
 
 		QString errorMsg;
-		addItem(std::make_shared<VFrame30::SchemaItemAfb>(schema()->unit(), *(afb.get()), &errorMsg));
+		auto newSchemaItem = std::make_shared<VFrame30::SchemaItemAfb>(schema()->unit(), *(afb.get()), &errorMsg);
 
 		if (errorMsg.isEmpty() == false)
 		{
 			QMessageBox::critical(this, QObject::tr("Error"), errorMsg);
+			return;
 		}
+
+		if (newSchemaItem->isPackedLogic() == true)
+		{
+			// Assign new PackedLogicId
+			//
+			QString packedLogicId = QString("%1%2")
+										.arg(newSchemaItem->packedLogic().idPrefix)
+										.arg(db()->nextCounterValue());
+			newSchemaItem->setPackedLogicId(packedLogicId);
+		}
+
+		addItem(newSchemaItem);
 	}
 
 	return;
@@ -10131,7 +10508,7 @@ SchemaFindDialog::SchemaFindDialog(bool replaceEnabled, QWidget* parent) :
 	m_findCompleter = new QCompleter(completerStringList, this);
 	m_findCompleter->setCaseSensitivity(Qt::CaseInsensitive);
 	m_findTextEdit->setCompleter(m_findCompleter);
-	connect(m_findTextEdit, &QLineEdit::textEdited, this, [=](){m_findCompleter->complete();});
+    connect(m_findTextEdit, &QLineEdit::textEdited, this, [this](){m_findCompleter->complete();});
 	connect(m_findCompleter, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_findTextEdit, &QLineEdit::setText);
 
 	if (replaceEnabled == true)
@@ -10142,7 +10519,7 @@ SchemaFindDialog::SchemaFindDialog(bool replaceEnabled, QWidget* parent) :
 		m_replaceCompleter = new QCompleter(completerStringList, this);
 		m_replaceCompleter->setCaseSensitivity(Qt::CaseInsensitive);
 		m_replaceTextEdit->setCompleter(m_replaceCompleter);
-		connect(m_replaceTextEdit, &QLineEdit::textEdited, this, [=](){m_replaceCompleter->complete();});
+        connect(m_replaceTextEdit, &QLineEdit::textEdited, this, [this](){m_replaceCompleter->complete();});
 		connect(m_replaceCompleter, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_replaceTextEdit, &QLineEdit::setText);
 	}
 

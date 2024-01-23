@@ -6,7 +6,6 @@
 
 namespace Builder
 {
-
 	class MetrologyCfgGenerator : public SoftwareCfgGenerator
 	{
 	public:
@@ -26,14 +25,20 @@ namespace Builder
 		bool testElectricLimit(const AppSignal& signal, double lowLimit, double highLimit);
 		bool testEngineeringLimit(const AppSignal& signal, double lowLimit, double highLimit);
 
-		bool testElectricLimit_Input_mA(const AppSignal& signal);
-		bool testElectricLimit_Input_mV(const AppSignal& signal);
-		bool testElectricLimit_Input_Ohm(const AppSignal& signal);
-		bool testElectricLimit_Input_V(const AppSignal& signal);
-		bool testElectricLimit_Input_uA(const AppSignal& signal);
-		bool testElectricLimit_Input_Hz(const AppSignal& signal);
+		bool testElectricLimit_Input_mA(const AppSignal& signal, QString* err);
+		bool testElectricLimit_Input_mV(const AppSignal& signal, QString* err);
+		bool testElectricLimit_Input_Ohm(const AppSignal& signal, QString* err);
+		bool testElectricLimit_Input_V(const AppSignal& signal, QString* err);
+		bool testElectricLimit_Input_uA(const AppSignal& signal, QString* err);
+		bool testElectricLimit_Input_Hz(const AppSignal& signal, QString* err);
+
+		bool checkRequiredProperties(const AppSignal& signal, const QStringList& propNames) const;
 
 	private:
+		static const QString ERR_WRONG_ELECTRIC_UNIT_SENSOR_TYPE_COMBINATION;
+		static const QString ERR_WRONG_ELECTRIC_LIMITS;
+		static const QString ERR_WRONG_ENGINEERING_LIMITS;
+
 		SubsystemStorage* m_subsystems = nullptr;
 		std::unordered_set<QString> m_analogSignalsOnSchemas;
 	};

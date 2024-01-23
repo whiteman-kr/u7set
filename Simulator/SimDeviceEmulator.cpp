@@ -382,6 +382,16 @@ namespace Sim
 		m_logicUnit.flags.cmp = value;
 	}
 
+	quint16 DeviceEmulator::acc() const
+	{
+		return m_logicUnit.acc;
+	}
+	
+	void DeviceEmulator::setAcc(quint16 value)
+	{
+		m_logicUnit.acc = value;
+	}
+
 	Sim::AfbComponent DeviceEmulator::afbComponent(int opCode) const
 	{
 		return AfbComponent{m_lmDescription.component(opCode)};
@@ -546,6 +556,7 @@ namespace Sim
 				if (ramArea == nullptr)
 				{
 					SIM_FAULT(QString("setmem error, can't get memory area by handle %1").arg(memoryAreaHandle));
+					return false;
 				}
 
 				bool ok = ramArea->setMem(address, size, data);
@@ -579,6 +590,7 @@ namespace Sim
 		if (ramArea == nullptr)
 		{
 			SIM_FAULT(QString("Write RAM error, can't get memory area by handle %1").arg(memoryAreaHandle));
+			return false;
 		}
 
 		bool ok = ramArea->writeBit(offsetW, bitNo, data, E::ByteOrder::BigEndian);
@@ -628,7 +640,7 @@ namespace Sim
 		bool ok = m_ram.writeBit(offsetW, bitNo, data, E::ByteOrder::BigEndian, access);
 		if (ok == false)
 		{
-			SIM_FAULT(QString("Write RAM error, offsetW %1, bitNo %2, acess %3")
+			SIM_FAULT(QString("Write RAM error, offsetW %1, bitNo %2, access %3")
 					  .arg(offsetW)
 					  .arg(bitNo)
 					  .arg(E::valueToString<E::LogicModuleRamAccess>(access)));
@@ -671,6 +683,7 @@ namespace Sim
 		if (ramArea == nullptr)
 		{
 			SIM_FAULT(QString("Write RAM error, can't get memory area by handle %1").arg(memoryAreaHandle));
+			return false;
 		}
 
 		bool ok = ramArea->writeWord(offsetW, data, E::ByteOrder::BigEndian);
@@ -762,6 +775,7 @@ namespace Sim
 		if (ramArea == nullptr)
 		{
 			SIM_FAULT(QString("Write RAM error, can't get memory area by handle %1").arg(memoryAreaHandle));
+			return false;
 		}
 
 		bool ok = ramArea->writeDword(offsetW, data, E::ByteOrder::BigEndian);
@@ -1340,7 +1354,7 @@ namespace Sim
 		// COMMENTED as for now there is no need to zero IO modules memory
 		// as there is no control of reading uninitialized memory.
 		//
-		//m_ram.clearMemoryAreasOnStartCycle();				// Reset to 0 some meory areas before start work cylce (like memory area for write i/o modules)
+		//m_ram.clearMemoryAreasOnStartCycle();				// Reset to 0 some memory areas before start work cycle (like memory area for write i/o modules)
 
 		// Get data from fiber optic channels (LM, OCM)
 		// !!! receiveConnectionsData !!! was moved to Sim::Control,
@@ -1352,7 +1366,7 @@ namespace Sim
 		//			return false;
 		//		}
 
-		// Run work cylce
+		// Run work cycle
 		//
 		while (m_logicUnit.programCounter < m_plainAppLogic.size() &&
 			  (m_logicUnit.phase == CyclePhase::IdrPhase || m_logicUnit.phase == CyclePhase::AlpPhase))
@@ -1390,7 +1404,7 @@ namespace Sim
 			}
 
 			// If ProgramCounter was not changed in runCommand (can be changed by APPSTART command), then
-			// incerement ProgramCounter to coommand size
+			// increment ProgramCounter to command size
 			//
 			if (m_logicUnit.programCounter == command.m_offset)
 			{
@@ -1424,7 +1438,7 @@ namespace Sim
 						.arg(m_logicUnit.programCounter)
 						.arg(m_logicUnit.programCounter, 4, 16, QChar('0'))
 						.arg(func);
-		QString str3 = QString("\tReasone: %1")
+		QString str3 = QString("\tReason: %1")
 						.arg(reasone);
 
 		m_log.writeError(str1);

@@ -36,9 +36,9 @@ namespace Log
 
 	struct LogFileRecord
 	{
-		quint64 sessionHash;
-		qint64 time;			// msecs from 1970-01-01
-		MessageType type;
+		quint64 sessionHash{};
+		qint64 time{};			// msecs from 1970-01-01
+		MessageType type = MessageType::Error;
 		std::string text;
 
 		QString toString(const QString& sessionHashString) const;
@@ -199,7 +199,7 @@ namespace Log
 
 	public:
         const LogFileRecord& record(int row) const;
-        QBrush color(const QModelIndex& index) const;
+        QBrush color(const QModelIndex& index, bool selected) const;
 
     protected:
         virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -350,11 +350,11 @@ namespace Log
 		LogFile(const QString& logName, const QString& path = QString(), int maxFileSize = 1048576, int maxFilesCount = 64, bool addAppInfoOnStart = true);
 		virtual ~LogFile();
 
-		virtual bool writeMessage(const QString& text) override;
-		virtual bool writeAlert(const QString& text) override;
-		virtual bool writeError(const QString& text) override;
-		virtual bool writeWarning(const QString& text) override;
-		virtual bool writeText(const QString& text) override;
+		virtual bool writeMessage(const QString& text, const QString& tag = {}) override;
+		virtual bool writeAlert(const QString& text, const QString& tag = {}) override;
+		virtual bool writeError(const QString& text, const QString& tag = {}) override;
+		virtual bool writeWarning(const QString& text, const QString& tag = {}) override;
+		virtual bool writeText(const QString& text, const QString& tag = {}) override;
 
 		bool writeArray(const QStringList& textArray);
 		bool write(MessageType type, const QString& text);

@@ -1,10 +1,9 @@
-
-#include "main.h"
-#include "TestSuiteMainWindow.h"
-
 #include "AppConfigSettings.h"
+#include "TestSuiteMainWindow.h"
+#include "version.h"
 
 #include <QApplication>
+
 
 QSharedMemory* theSharedMemorySingleApp = nullptr;
 
@@ -16,28 +15,6 @@ struct TestSuiteSharedData
 };
 #pragma pack()
 
-QTranslator m_translator; // contains the translations for this application
-
-void switchTranslator(QTranslator& translator, const QString& filename)
-{
-	// remove the old translator
-	qApp->removeTranslator(&translator);
-
-	// load the new translator
-	if(translator.load(filename))
-	{
-		qApp->installTranslator(&translator);
-	}
-}
-
-void loadLanguage(const QString& rLanguage)
-{
-	QLocale locale = QLocale(rLanguage);
-	QLocale::setDefault(locale);
-
-	switchTranslator(m_translator, QString(":/languages/TestSuite_%1.qm").arg(rLanguage));
-}
-
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
@@ -45,21 +22,51 @@ int main(int argc, char *argv[])
 	a.setOrganizationName(Manufacturer::RADIY);
 	a.setOrganizationDomain(Manufacturer::SITE);
 
-#ifdef GITLAB_CI_BUILD
-	a.setApplicationVersion(QString("0.9.%1 (%2)").arg(CI_PIPELINE_ID).arg(CI_BUILD_REF_SLUG));
-#else
-	a.setApplicationVersion(QString("0.9.LOCALBUILD"));
-#endif
+	a.setApplicationVersion(QString("%1.%2.%3 (%4)")
+							.arg(U7SET_MAJOR_VERSION)
+							.arg(U7SET_MINOR_VERSION)
+							.arg(U7SET_PATCH_VERSION)
+							.arg(U7SET_BRANCH_NAME));
 
 	int result = 0;
 
-	theSettings.RestoreUser();
-	theSettings.RestoreSystem();
-
-	loadLanguage(theSettings.language());
-
 	// Parse the command line
 	//
+	{
+		QStringList arguments = a.arguments();
+
+		QString settingsFileName;
+		for (const QString& s : arguments)
+		{
+			if (s.contains(".ini") == true)
+			{
+				settingsFileName = s;
+				break;
+			}
+		}
+
+		if (settingsFileName.isEmpty() == false && QFile::exists(settingsFileName) == false)
+		{
+			QMessageBox::critical(nullptr, qAppName(), QObject::tr("Application settings file %1 is not exist.").arg(settingsFileName));
+			return 1;
+		}
+
+		// Read settings
+		//
+		if (settingsFileName.isEmpty() == true)
+		{
+			AppConfigSettings::instance().load();
+		}
+		else
+		{
+			bool loadSettingsOk = AppConfigSettings::instance().loadFromFile(settingsFileName);
+			if (loadSettingsOk == false)
+			{
+				QMessageBox::critical(nullptr, qAppName(), QObject::tr("Error loading application settings from file %1.").arg(settingsFileName));
+				return 1;
+			}
+		}
+	}
 
 	QCommandLineParser parser;
 
@@ -71,32 +78,27 @@ int main(int argc, char *argv[])
 	QCommandLineOption idOption("id", "Set the TestSuite ID.", "TestSuite ID");
 	parser.addOption(idOption);
 
-	// A boolean option with simulation (-simulate)
-
 	parser.process(*qApp);
 
 	QString clientID = parser.value(idOption);
 
 	if (clientID.isEmpty() == false)
 	{
-		theSettings.librarySettings().setInstanceStrId(clientID);
+		AppConfigSettings().instance().data().m_librarySettings.setInstanceStrId(clientID);
 	}
 
 	//
 	//
 
-
-	SoftwareInfo softwareInfo;
-
-	softwareInfo.init(E::SoftwareType::TestSuite, theSettings.librarySettings().instanceStrId(), 0, 1);
+	SoftwareInfo softwareInfo(E::SoftwareType::TestSuite, AppConfigSettings().instance().librarySettings().instanceStrId());
 
 	// Check to run the application in one instance
 	//
-	theSharedMemorySingleApp = new QSharedMemory(QString("TestSuite") + theSettings.librarySettings().instanceStrId());
+	theSharedMemorySingleApp = new QSharedMemory(QString("TestSuite") + AppConfigSettings().instance().librarySettings().instanceStrId());
 
-	if(theSharedMemorySingleApp->attach(QSharedMemory::ReadWrite) == false)
+	if (theSharedMemorySingleApp->attach(QSharedMemory::ReadWrite) == false)
 	{
-		if(theSharedMemorySingleApp->create(sizeof(TestSuiteSharedData)) == false)
+		if (theSharedMemorySingleApp->create(sizeof(TestSuiteSharedData)) == false)
 		{
 			qDebug() << "Failed to create QSharedMemory object!";
 			assert(false);
@@ -133,8 +135,6 @@ int main(int argc, char *argv[])
 
 			delete theMainWindow;
 			theMainWindow = nullptr;
-
-			theSettings.StoreUser();
 		}
 	}
 	else
@@ -171,7 +171,7 @@ int main(int argc, char *argv[])
 		theSharedMemorySingleApp = nullptr;
 	}
 
-	//VFrame30::shutdown();
+	// VFrame30::shutdown();
 	google::protobuf::ShutdownProtobufLibrary();
 
 	return result;

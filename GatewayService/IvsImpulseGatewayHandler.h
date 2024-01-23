@@ -41,7 +41,8 @@ namespace Gateway
 						  const GatewayServiceSettings& settings,
 						  IvsImpulseGatewayShared gateway,
 						  const AppSignals& appSignals,
-						  CircularLoggerShared log);
+						  CircularLoggerShared log,
+						  bool logGatewayPackets);
 
 		~IvsImpulseHandler();
 

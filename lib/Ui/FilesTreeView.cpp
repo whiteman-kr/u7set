@@ -225,56 +225,43 @@ bool FileTreeProxyModel::lessThan(const QModelIndex &left, const QModelIndex &ri
 	switch (static_cast<FileTreeModel::Columns>(column))
 	{
 	case FileTreeModel::Columns::FileIdColumn:
+		if (f1->fileId() != f2->fileId())
 		{
-			if (f1->fileId() != f2->fileId())
-			{
-				return f1->fileId() < f2->fileId();
-			}
-			Q_ASSERT(false);
+			return f1->fileId() < f2->fileId();
 		}
-		//break;
+		Q_ASSERT(false);
+		[[fallthrough]];
 	case FileTreeModel::Columns::FileAttributesColumn:
+		if (f1->attributes() != f2->attributes())
 		{
-			if (f1->attributes() != f2->attributes())
-			{
-				return f1->attributes() < f2->attributes();
-			}
+			return f1->attributes() < f2->attributes();
 		}
-		//break;
+		[[fallthrough]];
 	case FileTreeModel::Columns::FileSizeColumn:
+		if (f1->size() != f2->size())
 		{
-			if (f1->size() != f2->size())
-			{
-				return f1->size() < f2->size();
-			}
+			return f1->size() < f2->size();
 		}
-		//break;
+		[[fallthrough]];
 	case FileTreeModel::Columns::FileUserColumn:
+		if ( m_sourceModel->db()->username(f1->userId()) !=  m_sourceModel->db()->username(f2->userId()))
 		{
-			if ( m_sourceModel->db()->username(f1->userId()) !=  m_sourceModel->db()->username(f2->userId()))
-			{
-				return m_sourceModel->db()->username(f1->userId()) < m_sourceModel->db()->username(f2->userId());
-			}
+			return m_sourceModel->db()->username(f1->userId()) < m_sourceModel->db()->username(f2->userId());
 		}
-		//break;
+		[[fallthrough]];
 	case FileTreeModel::Columns::FileStateColumn:
+		if (f1->state() != f2->state())
 		{
-			if (f1->state() != f2->state())
-			{
-				return f1->state() < f2->state();
-			}
+			return f1->state() < f2->state();
+		}
 
-			if (f1->action() != f2->action())
-			{
-				return static_cast<int>(f1->action()) < static_cast<int>(f2->action());
-			}
-		}
-		//break;
-	case FileTreeModel::Columns::FileNameColumn:
+		if (f1->action() != f2->action())
 		{
-			return f1->fileName() < f2->fileName();
+			return static_cast<int>(f1->action()) < static_cast<int>(f2->action());
 		}
-		break;
+		[[fallthrough]];
+	case FileTreeModel::Columns::FileNameColumn:
+		return f1->fileName() < f2->fileName();
 	}
 
 	// Custom column
@@ -990,13 +977,17 @@ void FileTreeModel::updateFile(QModelIndex index, const DbFileInfo& file)
 		return;
 	}
 
+	FileTreeModelItem* parentFile = nullptr;
+
 	QModelIndex parentIndex = index.parent();
 	if (parentIndex.isValid() == false)
 	{
-		return;
+		parentFile = m_root.get();
 	}
-
-	FileTreeModelItem* parentFile = fileItem(parentIndex);
+	else
+	{
+		parentFile = fileItem(parentIndex);
+	}
 	if (parentFile == nullptr)
 	{
 		assert(parentFile);
@@ -1004,7 +995,6 @@ void FileTreeModel::updateFile(QModelIndex index, const DbFileInfo& file)
 	}
 
 	FileTreeModelItem* childFile = parentFile->childByFileId(file.fileId());
-
 	if (childFile == nullptr)
 	{
 		assert(childFile);
@@ -2104,15 +2094,15 @@ void FileTreeView::checkOutFiles(QModelIndexList indexList)
 
 	for (QModelIndex& mi : indexList)
 	{
-		if (mi.parent().isValid() == false)
+		FileTreeModelItem* f = m_model->fileItem(mi);
+		assert(f);
+
+		if (mi.parent().isValid() == false && f->isFolder() == true)
 		{
 			// Forbid to check out root "folders"
 			//
 			continue;
 		}
-
-		FileTreeModelItem* f = m_model->fileItem(mi);
-		assert(f);
 
 		if (f->state() == E::VcsState::CheckedOut)
 		{
@@ -2168,15 +2158,15 @@ void FileTreeView::checkInFiles(QModelIndexList indexList)
 
 	for (QModelIndex& mi : indexList)
 	{
-		if (mi.parent().isValid() == false)
+		FileTreeModelItem* f = m_model->fileItem(mi);
+		assert(f);
+
+		if (mi.parent().isValid() == false && f->isFolder() == true)
 		{
 			// Forbid to check in root "folders"
 			//
 			continue;
 		}
-
-		FileTreeModelItem* f = m_model->fileItem(mi);
-		assert(f);
 
 		if (f->state() == E::VcsState::CheckedOut &&
 			(db()->currentUser().isAdminstrator() == true || db()->currentUser().userId() == f->userId()))
@@ -2243,15 +2233,15 @@ bool FileTreeView::undoChangesFiles(QModelIndexList indexList)
 
 	for (QModelIndex& mi : indexList)
 	{
-		if (mi.parent().isValid() == false)
+		FileTreeModelItem* f = m_model->fileItem(mi);
+		assert(f);
+
+		if (mi.parent().isValid() == false && f->isFolder() == true)
 		{
-			// Forbid any actions to root items
+			// Forbid to undo root "folders"
 			//
 			continue;
 		}
-
-		FileTreeModelItem* f = m_model->fileItem(mi);
-		assert(f);
 
 		if (f->state() == E::VcsState::CheckedOut &&
 			(db()->currentUser().isAdminstrator() == true || db()->currentUser().userId() == f->userId()))
@@ -2434,8 +2424,6 @@ void FileTreeView::runFileEditor(bool viewOnly)
 	}
 }
 
-
-
 void FileTreeView::setWorkcopy()
 {
 	QModelIndexList selectedIndexList = selectedSourceRows();
@@ -2478,11 +2466,14 @@ void FileTreeView::setWorkcopy()
 
 	// Select file
 	//
-	QString fileName = QFileDialog::getOpenFileName(this, tr("Select File"));
+	static QString path{"."};
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Select File"), path);
 	if (fileName.isEmpty() == true)
 	{
 		return;
 	}
+	path = QFileInfo(fileName).path(); // store path for next time
+
 
 	std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
 	static_cast<DbFileInfo*>(file.get())->operator=(fileInfo);

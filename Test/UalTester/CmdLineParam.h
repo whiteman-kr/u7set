@@ -91,7 +91,7 @@ public:
 	QString reportFileName() const { return m_reportFileName; }
 	QString presetLM() const { return m_presetLM; }
 
-	void getParams(int& argc, char** argv);
+	void getParams(int argc, char** argv);
 	bool parse();
 
 	bool printToReportFile(const QStringList& msgList);							// print results to report file

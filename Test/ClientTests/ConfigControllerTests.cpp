@@ -2,7 +2,8 @@
 // ConfigurationService must be ranning on localhost and default port
 //
 #include "../../ClientLib/ConfigController.h"
-#include "../../lib/BuildInfo.h"
+#include "../../OnlineLib/BuildInfo.h"
+#include "ConnectionPorts.h"
 
 namespace
 {
@@ -27,11 +28,8 @@ namespace
 			QByteArray ba;
 			bool ok;
 
-			ok = getFileBlocked("/" + softwareInfo().equipmentID() + "/GlobalScript.js", &ba, &parsingError);
-			rf.emplace_back("GlobalScript.js", ok, ba);
-
-			ok = getFileBlocked("/" + softwareInfo().equipmentID() + "/OnConfigurationArrived.js", &ba, &parsingError);
-			rf.emplace_back(QString{"OnConfigurationArrived.js"}, ok, ba);
+			ok = getFileBlocked("/" + softwareInfo().equipmentID() + "/" + File::GLOBAL_SCRIPT, &ba, &parsingError);
+			rf.emplace_back(File::GLOBAL_SCRIPT, ok, ba);
 
 			ok = getFileBlockedById(CfgFileId::LOGO, &ba, &parsingError);
 			rf.emplace_back(std::make_tuple("CfgFileId::LOGO", ok, ba));
@@ -67,8 +65,8 @@ namespace
 
 TEST(ConfigControllerTests, monitorToConfigControllerConnection)
 {
-	SoftwareInfo softwareInfo;
-	softwareInfo.init(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR", 0, 0);
+	SoftwareInfo softwareInfo(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR");
+
 	HostAddressPort host1{"127.0.0.1", g_connectionPorts.cfgService1.clientRequestPort};		// valid address, where cfgservice is expected to run.
 	HostAddressPort host2{"192.168.99.103", g_connectionPorts.cfgService2.clientRequestPort};	// some unreachable address
 	ILogFileStub log;
@@ -149,7 +147,7 @@ TEST(ConfigControllerTests, monitorToConfigControllerConnection)
 	bool SchemaDetailsPbuf = false;
 	bool TuningSignalsDat = false;
 
-	for (const Builder::BuildFileInfo& file : configController.receivedFiles)
+	for (const OnlineLib::BuildFileInfo& file : configController.receivedFiles)
 	{
 		if (file.pathFileName == "/SYSTEMID_CLIENTTEST_WS03_MONITOR/Configuration.xml")
 		{
@@ -194,8 +192,8 @@ TEST(ConfigControllerTests, monitorToConfigControllerConnection)
 TEST(ConfigControllerTests, wrongCliendId)
 {
 	ILogFileStub log;
-	SoftwareInfo softwareInfo;
-	softwareInfo.init(E::SoftwareType::Monitor, "WRONG_SYSTEMID_CLIENTTEST_WS03_MONITOR", 0, 0);
+	SoftwareInfo softwareInfo(E::SoftwareType::Monitor, "WRONG_SYSTEMID_CLIENTTEST_WS03_MONITOR");
+
 	HostAddressPort host{"127.0.0.1", g_connectionPorts.cfgService1.clientRequestPort};
 
 	// Set bad client EquipmentID, error is expected
@@ -229,8 +227,7 @@ TEST(ConfigControllerTests, wrongCliendId)
 TEST(ConfigControllerTests, setConnectionParams)
 {
 	ILogFileStub log;
-	SoftwareInfo softwareInfo;
-	softwareInfo.init(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR", 0, 0);
+	SoftwareInfo softwareInfo(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR");
 	HostAddressPort goodHost{"127.0.0.1", g_connectionPorts.cfgService1.clientRequestPort};
 	HostAddressPort wrongHost{"192.168.99.103", g_connectionPorts.cfgService2.clientRequestPort};
 
@@ -279,13 +276,16 @@ TEST(ConfigControllerTests, setConnectionParams)
 TEST(ConfigControllerTests, twoClientsOnSameComputer)
 {
 	ILogFileStub log;
-	SoftwareInfo softwareInfo;
-	softwareInfo.init(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR", 0, 0);
+	SoftwareInfo softwareInfo(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR");
 	HostAddressPort host{"127.0.0.1", g_connectionPorts.cfgService1.clientRequestPort};
 
 	MonitorConfigControllerStub configController1{softwareInfo, host, &log};
 	MonitorConfigControllerStub configController2{softwareInfo, host, &log};
 	MonitorConfigControllerStub configController3{softwareInfo, host, &log};
+
+	configController1.start();
+	configController2.start();
+	configController3.start();
 
 	EXPECT_NE(configController1.appInstanceNo(), configController2.appInstanceNo());
 	EXPECT_NE(configController1.appInstanceNo(), configController3.appInstanceNo());

@@ -1,6 +1,6 @@
 #pragma once
-#include "SchemaItem.h"
 #include "../CommonLib/Types.h"
+#include "SchemaItem.h"
 
 class QPainter;
 
@@ -8,13 +8,13 @@ namespace Afb
 {
 	class AfbPin;
 	class AfbSignal;
-}
+} // namespace Afb
 
 namespace Proto
 {
 	class FblConnectionPoint;
 	class Envelope;
-}
+} // namespace Proto
 
 namespace VFrame30
 {
@@ -88,24 +88,27 @@ namespace VFrame30
 		int afbOperandIndex() const;
 		void setAfbOperandIndex(int value);
 
-		E::SignalType signalType() const;			// Here we care ONLY about is it BUS or its regular signal, keep in mind that a lot of code does not care about analog/discrete pin
+		E::SignalType signalType() const; // Here we care ONLY about is it BUS or its regular signal, keep in mind that a lot of code does not care about analog/discrete pin
 		void setSignalType(E::SignalType value);
 
 		QString caption() const;
 		void setCaption(QString caption);
 
-		// Data
+										  // Data
 		//
 	private:
 		QUuid m_guid;
-		SchemaPoint m_point;				// Don't remove position!!!
+		SchemaPoint m_point;                                // Don't remove position!!!
 		ConnectionDirrection m_dirrection = ConnectionDirrection::Input;
 		int m_afbOperandIndex = 0;
-		E::SignalType m_signalType;			// Here we care ONLY about is it BUS or its regular signal, keep in mind that a lot of code does not care about analog/discrete pin
+		E::SignalType m_signalType = E::SignalType::Analog; // The nex comment is not correct anymore, we export xml file
+															// with the description of all items on the build and it is nice to have types there.
+															// Here we care ONLY about is it BUS or its regular signal,
+															//  keep in mind that a lot of code does not care about analog/discrete pin
 
-		std::vector<QUuid> m_associatedIOs;	// if connection is an output, the list contains GUID associated inputs
-		
-		QString m_caption;					// Pin caption
+		std::vector<QUuid> m_associatedIOs;                 // if connection is an output, the list contains GUID associated inputs
+
+		QString m_caption;                                  // Pin caption
 	};
 
 	// CFblItem
@@ -117,7 +120,7 @@ namespace VFrame30
 
 	public:
 		virtual ~FblItem(void);
-		
+
 	public:
 		// Serialization
 		//
@@ -175,7 +178,7 @@ namespace VFrame30
 		bool hasInput(const QUuid& guid) const;
 		bool hasOutput(const QUuid& guid) const;
 
-		void setNewGuid();					// FblItem is not derived from SchemaIte, so this func cannot be virtual
+		void setNewGuid(); // FblItem is not derived from SchemaIte, so this func cannot be virtual
 
 		bool searchText(const QString& text) const;
 
@@ -196,6 +199,4 @@ namespace VFrame30
 		std::vector<VFrame30::AfbPin> m_inputPoints;
 		std::vector<VFrame30::AfbPin> m_outputPoints;
 	};
-}
-
-
+} // namespace VFrame30

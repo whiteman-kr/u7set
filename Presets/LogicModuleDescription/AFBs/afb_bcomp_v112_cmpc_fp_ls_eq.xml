@@ -1,0 +1,140 @@
+<AFB id="#cmpc_fp_ls_eq_v1" Caption="cmpc_fp_ls_eq" Version="1.1">
+	<Properties>
+		<Description>Comparator Block, less or equal to single-precision floating-point comparison with constant value</Description>
+		<Category>Compare</Category>
+		<OpCode>10</OpCode>
+		<InternalUse>false</InternalUse>
+		<MinWidth>26</MinWidth>
+	</Properties>
+	<Inputs>
+		<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="6" Size="32"/>
+		<Pin OpName="i_sync_in" Caption="s_in" Type="Discrete" ByteOrder="BigEndian" OpIndex="5" Size="1"/>
+	</Inputs>
+	<Outputs>
+		<Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="9" Size="1"/>
+		<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="10" Size="1"/>
+		<Pin OpName="o_sync_out" Caption="s_out" Type="Discrete" ByteOrder="BigEndian" OpIndex="9" Size="1"/>
+	</Outputs>
+	<Params>
+		<Param OpName="i_sp_s" Caption="SetPoint" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
+			<Value>0</Value>
+			<Default>0</Default>
+			<LowLimit>-3.40282e+38</LowLimit>
+			<HighLimit>3.40282e+38</HighLimit>
+			<Script>
+				<Changed/>
+			</Script>
+		</Param>
+		<Param OpName="i_sp_r" Caption="ValueR" Visible="false" OpIndex="3" Size="32" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
+			<Value>0</Value>
+			<Default>0</Default>
+			<LowLimit>-3.40282e+38</LowLimit>
+			<HighLimit>3.40282e+38</HighLimit>
+			<Script>
+				<Changed/>
+			</Script>
+		</Param>
+		<Param OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="-1" Size="32" Instantiator="false" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="Float">
+			<Value>0</Value>
+			<Default>0</Default>
+			<LowLimit>0</LowLimit>
+			<HighLimit>3.40282e+38</HighLimit>
+			<Script>
+				<Changed/>
+			</Script>
+		</Param>
+		<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+			<Value>12</Value>
+			<Default>12</Default>
+			<LowLimit>1</LowLimit>
+			<HighLimit>12</HighLimit>
+			<Script>
+				<Changed/>
+			</Script>
+		</Param>
+		<Param OpName="OutNaN" Caption="OutNaN" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+			<Value>1</Value>
+			<Default>1</Default>
+			<Script>
+				<Changed>
+					(function(videoItemFblElement, afbElement)
+					{
+						createSyncSignals(videoItemFblElement, afbElement);
+						createOutputSignals(videoItemFblElement, afbElement);
+					})
+				</Changed>
+			</Script>
+		</Param>
+		<Param OpName="SyncStatePins" Caption="SyncStatePins" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+			<Value>0</Value>
+			<Default>0</Default>
+			<Script>
+				<Changed>
+					(function(videoItemFblElement, afbElement)
+					{
+						createSyncSignals(videoItemFblElement, afbElement);
+						createOutputSignals(videoItemFblElement, afbElement);
+					})
+				</Changed>
+			</Script>
+		</Param>
+	</Params>
+	<CommonScript>
+		<Library>
+			function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
+			{
+				var show = videoItemFblElement.getParamBoolValue(paramName);
+				if (show == true)
+				{
+					var s = afbElement.getAfbSignalByCaption(signalCaption);
+					if (s != null)
+					{
+						videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+					}
+				}
+			}
+
+			function createOutputSignals(videoItemFblElement, afbElement)
+			{
+				videoItemFblElement.removeOutputSignals();
+
+				var out = afbElement.getAfbSignalByCaption("out");
+				if (out != null)
+				{
+					videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
+				}
+
+				createOutput(videoItemFblElement, afbElement, "SyncStatePins", "s_out");
+				createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
+
+				videoItemFblElement.adjustHeight();
+				return true;
+			}
+
+			function createSyncSignals(videoItemFblElement, afbElement)
+			{
+				videoItemFblElement.removeInputSignal("s_in");
+
+				var show = videoItemFblElement.getParamBoolValue("SyncStatePins");
+				if (show == true)
+				{
+					var s = afbElement.getAfbSignalByCaption("s_in");
+					if (s != null)
+					{
+						videoItemFblElement.addInputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+					}
+				}
+
+				videoItemFblElement.adjustHeight();
+				return true;
+			}
+		</Library>
+		<AfterCreation>
+			(function(videoItemFblElement, afbElement)
+			{
+				createSyncSignals(videoItemFblElement, afbElement);
+				createOutputSignals(videoItemFblElement, afbElement);
+			})
+		</AfterCreation>
+	</CommonScript>
+</AFB>

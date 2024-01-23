@@ -1,5 +1,8 @@
 @startuml
 
+!include ./CommonLib.puml
+
 [Protobuf]
+Protobuf -up-> CommonLib
 
 @enduml

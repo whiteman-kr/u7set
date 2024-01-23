@@ -1,0 +1,18 @@
+<Command 
+	Caption="pmov"
+	Code="0640"
+	CodeMask="07c0"	
+	SimulationFunc="command_pmov"
+	ParseFunc="parse_pmov"
+	Description="Copy 16-bit word from memory to memory written in prior cycle"
+
+	CodeSize="3" 
+	ReadTime="11" 
+	WaitFbExecution="false"
+
+	WriteToBitMemRuntime="69"
+	WriteToWordMemRuntime="10"
+
+	CheckFunc="check_pmov"
+	GetMnemoFunc="mnemo_pmov"
+	CalcExecTimeFunc="exectime_write_bit_or_word_mem"/>

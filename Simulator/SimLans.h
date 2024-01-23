@@ -1,7 +1,7 @@
 #pragma once
 #include <queue>
 #include "../CommonLib/Times.h"
-#include "../lib/LogicModulesInfo.h"
+#include "../HardwareLib/LogicModulesInfo.h"
 #include "SimScopedLog.h"
 #include "SimRam.h"
 #include "SimTuningRecord.h"

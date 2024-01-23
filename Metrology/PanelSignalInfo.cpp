@@ -1,12 +1,6 @@
 #include "PanelSignalInfo.h"
 
-#include <QApplication>
-#include <QIcon>
-#include <QHeaderView>
-#include <QVBoxLayout>
-#include <QKeyEvent>
-
-#include "UnitsConvertor.h"
+#include "UnitsConverter.h"
 #include "ProcessData.h"
 #include "DialogObjectProperties.h"
 
@@ -229,7 +223,7 @@ QString SignalInfoTable::signalStateStr(const Metrology::SignalParam& param, con
 	{
 		if (param.isInput() == true || param.isOutput() == true)
 		{
-			UnitsConvertor uc;
+			UnitsConverter uc;
 			double electric = uc.conversion(state.value(), UnitsConvertType::PhysicalToElectric, param);
 
 			stateStr.append(" = " + QString::number(electric, 'f', param.electricPrecision()));

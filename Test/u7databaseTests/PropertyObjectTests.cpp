@@ -118,7 +118,7 @@ void PropertyObjectTests::testMethods()
 		p.setIntStatProp(val);
 		QVariant result = p.propertyValue("IntStatProp");
 
-		QVERIFY2(result.type() == QVariant::Int, "PropertyObject::propertyValue() const failed, type mismatch");
+        QVERIFY2(result.typeId() == qMetaTypeId<int>(), "PropertyObject::propertyValue() const failed, type mismatch");
 		QVERIFY2(result.toInt() == val, "PropertyObject::propertyValue() const failed, wrong value");
 	}
 
@@ -373,8 +373,8 @@ void PropertyObjectTests::testDynamicProperties()
 
 		QVariant value = p.propertyValue("DynamicInt");
 
-		QVERIFY2(value.isValid() == true, "DynamicProperties setValue failed");
-		QVERIFY2(value.type() == QVariant::Int, "DynamicProperties setValue failed, wrong type");
+        QVERIFY2(value.isValid() == true, "DynamicProperties setValue failed");
+        QVERIFY2(value.typeId() == qMetaTypeId<int>(), "DynamicProperties setValue failed, wrong type");
 		QVERIFY2(value.toInt() == ival, "DynamicProperties setValue failed, wrong type");
 	}
 

@@ -1,8 +1,8 @@
 #include "../UtilsLib/WUtils.h"
 
 #include "ArchRequest.h"
-#include "ArchWriterThread.h"
-#include "FileArchReader.h"
+#include "Archive.h"
+#include "../OnlineLib/SocketIO.h"
 
 // ----------------------------------------------------------------------------------------------------------------------
 //

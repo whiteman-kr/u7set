@@ -85,6 +85,7 @@ private:
 		LmNumber,
 
 		State,
+		LmTime,
 		IsActive,
 		HasUnappliedParams,
 		RequestCount,

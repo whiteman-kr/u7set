@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>SimProfiles.txt</file>
-        <file alias="LM1_SF40.xml">../../Presets/LogicModuleDescription/LM1_SF40.xml</file>
+        <file alias="LM1_SR05.xml">../../Presets/LogicModuleDescription/generated/LM1_SR05.xml</file>
     </qresource>
 </RCC>

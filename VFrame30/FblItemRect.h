@@ -17,8 +17,10 @@ namespace VFrame30
 	class SchemaItemReceiver;
 	class SchemaItemTransmitter;
 	class SchemaItemTerminator;
+	class SchemaItemBus;
 	class SchemaItemBusComposer;
 	class SchemaItemBusExtractor;
+	class SchemaItemLoopback;
 	class SchemaItemLoopbackSource;
 	class SchemaItemLoopbackTarget;
 }
@@ -50,7 +52,7 @@ namespace VFrame30
 	public:
 
 		// Рисование элемента, выполняется в 100% масштабе.
-		// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
+		// Graphics должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 		//
 		virtual void draw(CDrawParam* drawParam) const override;
 
@@ -174,7 +176,7 @@ namespace VFrame30
 		// We need these variables in case we call functions and do not have schema pointer.
 		// This is not good, it is subject to change.
 		//
-		mutable double m_cachedGridSize = -1;			// -1 means it is not iniotialized
+		mutable double m_cachedGridSize = -1;			// -1 means it is not initialized
 		mutable int m_cachedPinGridStep = 0;
 
 		double m_weight;								// Line weight, is kept in pixels or inches depends on UnitDocPt

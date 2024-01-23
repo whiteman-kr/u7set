@@ -75,6 +75,33 @@ namespace VFrame30
 		return;
 	}
 
+	// IMatsSchemaItemAssociations implementation.
+//
+	QStringList SchemaItemLoopback::associatedAppSignalIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemLoopback::associatedImpactAppSignalIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemLoopback::associatedConnectionIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemLoopback::associatedLoopbackIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemLoopback::associatedSchemaItemLabels() const
+	{
+		return {};
+	}
+
 	QString SchemaItemLoopback::loopbackId() const
 	{
 		return m_loobackId;
@@ -190,7 +217,7 @@ namespace VFrame30
 
 	void SchemaItemLoopbackSource::drawHighlight(CDrawParam* drawParam) const
 	{
-		if (drawParam->hightlightIds().contains(loopbackId()) == true)
+		if (drawParam->highlightIds().contains(loopbackId()) == true)
 		{
 			QRectF highlightRect = boundingRectInDocPt(drawParam);
 			drawHighlightRect(drawParam, highlightRect);
@@ -326,7 +353,7 @@ namespace VFrame30
 	{
 		// Draw highlights
 		//
-		if (drawParam->hightlightIds().contains(loopbackId()) == true)
+		if (drawParam->highlightIds().contains(loopbackId()) == true)
 		{
 			QRectF highlightRect = boundingRectInDocPt(drawParam);
 			drawHighlightRect(drawParam, highlightRect);

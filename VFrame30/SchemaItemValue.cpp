@@ -1,11 +1,11 @@
 #include "SchemaItemValue.h"
+#include "AppSignalController.h"
+#include "DrawParam.h"
 #include "MacrosExpander.h"
 #include "PropertyNames.h"
-#include "DrawParam.h"
-#include "TuningController.h"
-#include "AppSignalController.h"
 #include "SchemaView.h"
-#include "../AppSignalLib/AppSignalParam.h"
+#include "TuningController.h"
+
 #include "../AppSignalLib/TuningSignalState.h"
 
 
@@ -29,7 +29,7 @@ namespace VFrame30
 			break;
 		case SchemaUnit::Inch:
 			m_font.setSize(mm2in(4), unit);
-			//m_font.setSize(1.0 / 8.0, unit);		// 1/8"
+			// m_font.setSize(1.0 / 8.0, unit);		// 1/8"
 			break;
 		case SchemaUnit::Millimeter:
 			m_font.setSize(mm2in(4), unit);
@@ -44,7 +44,7 @@ namespace VFrame30
 
 	void SchemaItemValue::propertyDemand(const QString& prop)
 	{
-		PosRectImpl::propertyDemand(prop);
+		PosRectRotatable::propertyDemand(prop);
 
 		// Functional
 		//
@@ -69,7 +69,7 @@ namespace VFrame30
 		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::fontName, PropertyNames::textCategory, true, SchemaItemValue::getFontName, SchemaItemValue::setFontName);
 		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::fontSize, PropertyNames::textCategory, true, SchemaItemValue::getFontSize, SchemaItemValue::setFontSize);
 		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontBold, PropertyNames::textCategory, true, SchemaItemValue::getFontBold, SchemaItemValue::setFontBold);
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontItalic, PropertyNames::textCategory, true,  SchemaItemValue::getFontItalic, SchemaItemValue::setFontItalic);
+		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontItalic, PropertyNames::textCategory, true, SchemaItemValue::getFontItalic, SchemaItemValue::setFontItalic);
 
 		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::text, PropertyNames::functionalCategory, true, SchemaItemValue::text, SchemaItemValue::setText)
 			->setDescription(PropertyNames::textValuePropDescription);
@@ -84,7 +84,7 @@ namespace VFrame30
 	//
 	bool SchemaItemValue::SaveData(Proto::Envelope* message) const
 	{
-		bool result = PosRectImpl::SaveData(message);
+		bool result = PosRectRotatable::SaveData(message);
 		if (result == false ||
 			message->has_schemaitem() == false)
 		{
@@ -92,12 +92,12 @@ namespace VFrame30
 			assert(message->has_schemaitem());
 			return false;
 		}
-		
+
 		// --
 		//
 		Proto::SchemaItemValue* valueMessage = message->mutable_schemaitem()->mutable_value();
 
-		valueMessage->set_signalids(signalIdsString(nullptr).toStdString());	// Set context to nullptr so ids WILL NOT be expanded
+		valueMessage->set_signalids(signalIdsString(nullptr).toStdString()); // Set context to nullptr so ids WILL NOT be expanded
 		valueMessage->set_signalsource(static_cast<int32_t>(m_signalSource));
 
 		valueMessage->set_lineweight(m_lineWeight);
@@ -131,7 +131,7 @@ namespace VFrame30
 
 		// --
 		//
-		bool result = PosRectImpl::LoadData(message);
+		bool result = PosRectRotatable::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -175,6 +175,14 @@ namespace VFrame30
 	//
 	void SchemaItemValue::draw(CDrawParam* drawParam) const
 	{
+		return drawRotated(drawParam, [drawParam, this]()
+						   {
+							   return drawPrivate(drawParam);
+						   });
+	}
+
+	void SchemaItemValue::drawPrivate(CDrawParam* drawParam) const
+	{
 		QPainter* painter = drawParam->painter();
 
 		const std::shared_ptr<Context> context = this->context();
@@ -187,7 +195,7 @@ namespace VFrame30
 		// Initialization drawing resources
 		//
 		initDrawingResources();
-						
+
 		// Calculate rectangle
 		//
 		QRectF r = boundingRectInDocPt(drawParam);
@@ -201,7 +209,7 @@ namespace VFrame30
 		//
 		drawText(drawParam, context.get(), r);
 
-		// Remove brush to draw non-filled rects
+		// Remove brush to draw non-filled rectangle
 		//
 		painter->setBrush(Qt::NoBrush);
 
@@ -220,11 +228,19 @@ namespace VFrame30
 
 	void SchemaItemValue::drawHighlight(CDrawParam* drawParam) const
 	{
+		return drawRotated(drawParam, [drawParam, this]()
+						   {
+							   return drawHighlightPrivate(drawParam);
+						   });
+	}
+
+	void SchemaItemValue::drawHighlightPrivate(CDrawParam* drawParam) const
+	{
 		// Draw highlights for m_appSignalIds
 		//
 		for (const QString& appSignalId : m_signalIds)
 		{
-			if (drawParam->hightlightIds().contains(appSignalId) == true)
+			if (drawParam->highlightIds().contains(appSignalId) == true)
 			{
 				QRectF highlightRect = boundingRectInDocPt(drawParam);
 				drawHighlightRect(drawParam, highlightRect);
@@ -265,44 +281,45 @@ namespace VFrame30
 		QPainter* painter = drawParam->painter();
 		QString text;
 
-		if (drawParam->drawMode() == DrawMode::Editor)
+		if (m_text.contains(QLatin1String("$(")) == true)
 		{
-			text = m_text;
+			// m_text contains some variables, which need to be parsed
+			//
+
+			// Get signal description and state
+			//
+			AppSignalParam signalParam;
+			AppSignalState signalState;
+			TuningSignalState tuningSignalState;
+
+			QString signalId;
+
+			if (auto signalIdList = signalIds(context);
+				signalIdList.empty() == false)
+			{
+				signalId = signalIdList.front();
+
+				signalParam.setAppSignalId(signalId);
+				signalParam.setCustomSignalId(signalId);
+			}
+
+			bool ok = getSignalState(signalId, context, &signalParam, &signalState, &tuningSignalState);
+			if (ok == false)
+			{
+				// Display signalId in case of error.
+				//
+				signalParam.setAppSignalId(signalId);
+				signalParam.setCustomSignalId(signalId);
+				signalParam.setCaption(signalId);
+			}
+
+			text = parseText(m_text, context, drawParam->session(), signalParam, signalState);
 		}
 		else
 		{
-			if (m_text.contains(QLatin1String("$(")) == true)
-			{
-				// m_text contains some variables, which need to be parsed
-				//
-
-				// Get signal description and state
-				//
-				AppSignalParam signalParam;
-				AppSignalState signalState;
-				TuningSignalState tuningSignalState;
-
-				QString signalId;
-
-				if (auto signalIdList = signalIds(context);
-					signalIdList.empty() == false)
-				{
-					signalId = signalIdList.front();
-
-					signalParam.setAppSignalId(signalId);
-					signalParam.setCustomSignalId(signalId);
-				}
-
-				getSignalState(signalId, context, &signalParam, &signalState, &tuningSignalState);
-
-				text = parseText(m_text, context, drawParam->session(), signalParam, signalState);
-			}
-			else
-			{
-				// Most likely text was set in PreDrawScript, or it is just text
-				//
-				text = m_text;
-			}
+			// Most likely text was set in PreDrawScript, or it is just text
+			//
+			text = m_text;
 		}
 
 		if (text.isEmpty() == true)
@@ -358,7 +375,7 @@ namespace VFrame30
 			return result;
 		}
 
-		QRegularExpression reStartIndex("\\$\\([a-zA-Z0-9]+");	// Search for $([SomeText])
+		QRegularExpression reStartIndex("\\$\\([a-zA-Z0-9]+"); // Search for $([SomeText])
 
 		qsizetype index = 0;
 		while (index < result.size())
@@ -379,7 +396,7 @@ namespace VFrame30
 
 			// Extract macro string
 			//
-			QString macro = result.mid(startIndexOfMacro + 2, endIndexOfMacro - startIndexOfMacro - 2);		// +2 is $(, -2 is $()
+			QString macro = result.mid(startIndexOfMacro + 2, endIndexOfMacro - startIndexOfMacro - 2); // +2 is $(, -2 is $()
 
 			// Get value string
 			//
@@ -423,19 +440,24 @@ namespace VFrame30
 					break;
 				}
 
-//				if (macro.compare(QLatin1String("highlimit"), Qt::CaseInsensitive) == 0)
-//				{
-//					replaceText = formatNumber(signal.highValidRange(), signal);
-//					break;
-//				}
+				//				if (macro.compare(QLatin1String("highlimit"), Qt::CaseInsensitive) == 0)
+				//				{
+				//					replaceText = formatNumber(signal.highValidRange(), signal);
+				//					break;
+				//				}
 
-//				if (macro.compare(QLatin1String("lowlimit"), Qt::CaseInsensitive) == 0)
-//				{
-//					replaceText = formatNumber(signal.lowValidRange(), signal);
-//					break;
-//				}
-			}
-			while (false);
+				//				if (macro.compare(QLatin1String("lowlimit"), Qt::CaseInsensitive) == 0)
+				//				{
+				//					replaceText = formatNumber(signal.lowValidRange(), signal);
+				//					break;
+				//				}
+
+				if (macro.compare(QLatin1String("units"), Qt::CaseInsensitive) == 0)
+				{
+					replaceText = signal.unit();
+					break;
+				}
+			} while (false);
 
 			// Replace text in result
 			//
@@ -502,7 +524,7 @@ namespace VFrame30
 			{
 				if (appSignalId.startsWith('@') == true)
 				{
-					appSignalId = appSignalController->appSignalManager()->equipmentToAppSiganlId(appSignalId);
+					appSignalId = appSignalController->appSignalManager()->equipmentToAppSignalId(appSignalId);
 				}
 
 				*signalParam = context->appSignalController()->signalParam(appSignalId, &ok);
@@ -543,6 +565,33 @@ namespace VFrame30
 		return gridSize;
 	}
 
+	// IMatsSchemaItemAssociations implementation.
+	//
+	QStringList SchemaItemValue::associatedAppSignalIds() const
+	{
+		return signalIds();
+	}
+
+	QStringList SchemaItemValue::associatedImpactAppSignalIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemValue::associatedConnectionIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemValue::associatedLoopbackIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemValue::associatedSchemaItemLabels() const
+	{
+		return {};
+	}
+
 	// Properties and Data
 	//
 	IMPLEMENT_FONT_PROPERTIES(SchemaItemValue, Font, m_font);
@@ -569,7 +618,7 @@ namespace VFrame30
 			{
 				if (s.startsWith('@') == true)
 				{
-					s = context->appSignalController()->appSignalManager()->equipmentToAppSiganlId(s);
+					s = context->appSignalController()->appSignalManager()->equipmentToAppSignalId(s);
 				}
 			}
 		}
@@ -604,7 +653,7 @@ namespace VFrame30
 			{
 				if (s.startsWith('@') == true)
 				{
-					s = context->appSignalController()->appSignalManager()->equipmentToAppSiganlId(s);
+					s = context->appSignalController()->appSignalManager()->equipmentToAppSignalId(s);
 				}
 			}
 		}
@@ -694,7 +743,7 @@ namespace VFrame30
 		m_textColor = color;
 	}
 
-	// Align propertis
+	// Align properties
 	//
 	E::HorzAlign SchemaItemValue::horzAlign() const
 	{
@@ -753,5 +802,4 @@ namespace VFrame30
 	{
 		m_analogFormat = value;
 	}
-}
-
+} // namespace VFrame30

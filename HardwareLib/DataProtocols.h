@@ -1,0 +1,258 @@
+#pragma once
+
+#pragma pack(push, 1)
+
+// ----------------------------------------------------------------------------
+//
+// RUP Radiy UDP-based protocol description
+//
+// ----------------------------------------------------------------------------
+
+
+namespace Rup
+{
+	inline const int V5 = 5;		// basic implementation of RUP protocol
+
+	union Flags
+	{
+		struct
+		{
+			quint16 appData : 1;
+			quint16 diagData : 1;
+			quint16 tuningData : 1;
+			quint16 test : 1;
+		};
+
+		quint16 all;
+	};
+
+	struct TimeStamp
+	{
+		quint16 hour;				// 0..23
+		quint16 minute;				// 0..59
+		quint16 second;				// 0..59
+		quint16 millisecond;		// 0..999
+
+		quint16 day;				// 1..31
+		quint16 month;				// 1..12
+		quint16 year;				// 1970..65535
+
+		void reverseBytes();
+
+		void setDateTime(const QDateTime& dateTime);
+
+		QDateTime toDateTime(bool reverseBytes, bool* ok) const;
+		qint64 toInt64(bool reverseBytes, bool* ok) const;
+		bool isValid(bool reverseBytes) const;
+
+		QString rawToString(bool reverseBytes) const;
+	};
+
+	struct Header
+	{
+		quint16 frameSize;			// frame size including header, bytes
+		quint16 protocolVersion;
+
+		Rup::Flags flags;
+
+		quint32 dataId;
+		quint16 moduleType;			// module ID
+		quint16 numerator;
+		quint16 framesQuantity;		// >=1
+		quint16 frameNumber;		// 0..(frameQuantity-1)
+
+		Rup::TimeStamp timeStamp;
+
+		void reverseBytes();
+	};
+
+	const int ENTIRE_UDP_SIZE = 1472;
+
+	const int FRAME_DATA_SIZE = ENTIRE_UDP_SIZE - sizeof(Rup::Header) - sizeof(quint64 /*CRC64*/ );
+	const int MAX_FRAME_COUNT = 10;
+	const int BUFFER_SIZE = MAX_FRAME_COUNT * FRAME_DATA_SIZE;
+
+	typedef quint8 Data[FRAME_DATA_SIZE];
+
+	struct Frame
+	{
+		Rup::Header header;
+
+		Rup::Data data;
+
+		quint64 CRC64;				// = 1 + x + x^3 + x^4 + x^64
+
+		void calcCRC64();
+		bool checkCRC64();
+
+		void dumpData();
+	};
+
+	struct SimFrame
+	{
+		Rup::Frame rupFrame;
+
+		quint16 simVersion;			// == 1
+		quint32 sourceIP;
+	};
+}
+
+// ----------------------------------------------------------------------------
+//
+// FOTIP - Fiber Optic Tuning Interface data protocol V3 description
+//
+// ----------------------------------------------------------------------------
+
+namespace Fotip
+{
+	inline const int V2 = 2;		// basic implementation of FOTIP protocol
+
+	inline const int V3 = 3;		// field Fotip::Header::requestNumerator added
+									// in area of Fotip::Header::reserv
+
+	union HeaderFlags
+	{
+		struct
+		{
+			quint16 successfulCheck : 1;
+			quint16 successfulWrite : 1;
+			quint16 dataTypeError : 1;
+			quint16 operationCodeError : 1;
+			quint16 startAddressError : 1;
+			quint16 romSizeError : 1;
+			quint16 romFrameSizeError : 1;
+			quint16 frameSizeError : 1;
+			quint16 versionError : 1;
+			quint16 subsystemKeyError : 1;
+			quint16 idError : 1;
+			quint16 offsetError : 1;
+			quint16 succesfulApply : 1;
+			quint16 setSOR : 1;				// for non-platform modules 1 in this flag means "WritingDisabled"
+		};
+
+		quint16 all;
+	};
+
+	union SubsystemKey
+	{
+		struct
+		{
+			quint16 lmNumber : 6;
+			quint16 subsystemCode : 6;
+
+			quint16 crc : 4;				// CRC of previous twelve bits. CRC-4-ITU = x^4 + x + 1
+		};
+
+		quint16 wordVaue;
+	};
+
+	enum class OpCode
+	{
+		Read = 1200,
+		Write = 1400,
+		Apply = 1600
+	};
+
+	enum class DataType
+	{
+		AnalogSignedInt = 1300,
+		AnalogFloat = 1500,
+		Discrete = 1700
+	};
+
+	union AnalogComparisonErrors
+	{
+		struct
+		{
+			quint16	lowBoundCheckError : 1;
+			quint16	highBoundCheckError : 1;
+		};
+
+		quint16 all;
+	};
+
+	const int HEADER_RESERVE_SIZE = 78;
+
+	struct Header
+	{
+		quint16 protocolVersion;					// == 3
+		quint64 uniqueId;
+
+		Fotip::SubsystemKey subsystemKey;
+
+		quint16 operationCode;						// enum Fotip::OpCode values
+
+		Fotip::HeaderFlags flags;
+
+		quint32 startAddressW;
+		quint16 fotipFrameSizeB;
+		quint32 romSizeB;
+		quint16 romFrameSizeB;
+		quint16 dataType;							// enum Fotip::DataType values
+		quint32 offsetInFrameW;
+		quint64 requestNumerator;					// from v3
+		quint64 fotipProcessingNumerator;			// from v3
+
+		quint8 reserv[HEADER_RESERVE_SIZE];
+
+		void reverseBytes();
+	};
+
+	const int TX_RX_DATA_SIZE = 1016;
+	const int DATA_RESERV_SIZE = 286;
+
+	struct Frame
+	{
+		Fotip::Header header;
+
+		union
+		{
+			struct
+			{
+				union
+				{
+					float analogFloatValue;
+					qint32 analogSignedIntValue;
+					quint32 discreteValue;
+				};
+
+				quint32 bitMask;
+			} write;
+
+			quint8 data[TX_RX_DATA_SIZE];
+		};
+
+		AnalogComparisonErrors analogCmpErrors;
+
+		quint8 reserv[DATA_RESERV_SIZE];
+
+		// helper functions
+
+		QString valueStr(bool reverseValue);
+
+		bool isDiscreteData();
+	};
+}
+
+struct RupFotip
+{
+	Rup::Header rupHeader;
+
+	Fotip::Frame fotipFrame;
+
+	quint64 CRC64;			// = 1 + x + x^3 + x^4 + x^64
+
+	void calcCRC64();
+	bool checkCRC64();
+};
+
+struct SimRupFotip
+{
+	RupFotip rupFotip;
+
+	quint16 simVersion;		// == 1
+	quint32 tuningSourceIP;
+};
+
+
+#pragma pack(pop)

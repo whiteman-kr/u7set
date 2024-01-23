@@ -4,8 +4,8 @@
 #include <QtWidgets/QMainWindow>
 #include "ui_moduleconfigurator.h"
 #include "../HardwareLib/ModuleFirmware.h"
-#include "../lib/OutputLog.h"
-#include "Settings.h"
+#include "../UtilsLib/OutputLog.h"
+#include "MconfSettings.h"
 
 #include <optional>
 
@@ -63,7 +63,7 @@ signals:
 	
 private:
 	Ui::ModuleConfiguratorClass ui;
-	Settings m_settings;
+	MconfSettings m_settings;
 
 	QSplitter* m_pSplitter = nullptr;
 

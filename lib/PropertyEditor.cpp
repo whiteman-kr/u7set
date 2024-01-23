@@ -1,5 +1,3 @@
-#include "Stable.h"
-
 #include "../lib/PropertyEditor.h"
 #include "../UtilsLib/Ui/UiTools.h"
 #include "../AppSignalLib/TuningValue.h"
@@ -2179,7 +2177,7 @@ namespace ExtWidgets
 
 			connect(scriptHelpButton, &QPushButton::clicked, [this] ()
 			{
-				UiTools::openHelp(m_propertyEditorBase->scriptHelpFile(), this);
+				UiTools::openPdf(m_propertyEditorBase->scriptHelpFile(), this);
 			});
 
 			connect(this, &QDialog::finished, [this] (int)
@@ -2309,7 +2307,7 @@ namespace ExtWidgets
 		PropertyEditCellWidget(parent),
 		m_property(p),
 		m_row(row),
-		m_userType(p->value().userType()),
+		m_userType(p ? p->value().userType() : 0),
 		m_readOnly(readOnly),
 		m_propertyEditorBase(propertyEditorBase)
 	{
@@ -2436,11 +2434,13 @@ namespace ExtWidgets
 
 		if (m_property->specificEditor() == E::PropertySpecificEditor::LoadFileDialog)
 		{
-			QString fileName = QFileDialog::getOpenFileName(this->parentWidget(), tr("Select File"), QString(), m_property->validator());
+			static QString path{"."};
+			QString fileName = QFileDialog::getOpenFileName(this->parentWidget(), tr("Select File"), path, m_property->validator());
 			if (fileName.isEmpty() == true)
 			{
 				return;
 			}
+			path = QFileInfo(fileName).path(); // store path for next time
 
 			QFile f(fileName);
 			if (f.open(QFile::ReadOnly) == false)
@@ -3579,6 +3579,14 @@ namespace ExtWidgets
 	const QList<std::shared_ptr<PropertyObject>>& PropertyEditor::objects() const
 	{
 		return m_objects;
+	}
+
+	void PropertyEditor::setObject(std::shared_ptr<PropertyObject> object)
+	{
+		QList<std::shared_ptr<PropertyObject>> list;
+		list << object;
+
+		return setObjects(list);
 	}
 
 	void PropertyEditor::setObjects(const std::vector<std::shared_ptr<PropertyObject>>& objects)

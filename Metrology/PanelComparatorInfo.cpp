@@ -1,11 +1,5 @@
 #include "PanelComparatorInfo.h"
 
-#include <QApplication>
-#include <QIcon>
-#include <QHeaderView>
-#include <QVBoxLayout>
-#include <QKeyEvent>
-
 #include "ProcessData.h"
 #include "DialogObjectProperties.h"
 

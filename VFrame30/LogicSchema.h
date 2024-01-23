@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Schema.h"
+#include "SchemaItemSignal.h"
+#include "SchemaItemLoopback.h"
 
 namespace VFrame30
 {
@@ -24,7 +26,14 @@ namespace VFrame30
 	public:
 		virtual void Draw(CDrawParam* drawParam, const QRectF& clipRect) override;
 
-		std::set<QString> getSignalMap() const;
+	public:
+		std::map<QString, SchemaItemSignal*> getSignalItemsMap() const;       // Get the map of SchemaItemSignal* items, key is signal ID
+		std::map<QString, SchemaItemReceiver*> getSignalReceiversMap() const; // Get the map of SchemaItemReceiver* items, key is signal ID
+		std::map<QString, SchemaItemLoopback*> getLoopbacksMap() const;       // Get the map of SchemaItemLoopback* items, key is loopback ID
+		std::map<QString, SchemaItemTransmitter*> getTransmittersMap() const; // Get the map of SchemaItemTransmitter* items, key is Connection ID
+		std::map<QString, SchemaItemReceiver*> getReceiversMap() const;       // Get the map of SchemaItemReceiver* items, key is Connection ID
+
+		std::set<QString> getSignalSet() const;
 		virtual QStringList getSignalList() const override;
 
 		// Properties
@@ -52,5 +61,4 @@ namespace VFrame30
 		int m_counter = 0;										// Count is used to generate new uniques StrIDs for App Siagnals
 		QString m_lmDescriptionFile = "LogicModule0000.xml";	// LogicModule Description
 	};
-
 }

@@ -1,0 +1,18 @@
+<Command 
+	Caption="movb"
+	Code="03c0"
+	CodeMask="07f0"	
+	SimulationFunc="command_movb"
+	ParseFunc="parse_movb"
+	Description="Copy 1-bit from memory to memory"
+
+	CodeSize="4" 
+	ReadTime="14" 
+	WaitFbExecution="false"
+
+	WriteToBitMemRuntime="10"
+	WriteToWordMemRuntime="17"
+
+	CheckFunc="check_movb"
+	GetMnemoFunc="mnemo_movb"
+	CalcExecTimeFunc="exectime_write_bit_or_word_mem"/>

@@ -106,6 +106,8 @@ namespace Builder
 		bool isOverlaped(const BusSignal& bs);
 
 		bool isValid() const;
+
+		int inbusOffset() const;
 	};
 
 	class Bus

@@ -1,9 +1,7 @@
 #include "SimOverrideSignals.h"
 #include "Simulator.h"
 #include "SimRam.h"
-#include "../Proto/ProtoSerialization.h"
-#include <QJSEngine>
-#include <fstream>
+
 
 namespace Sim
 {
@@ -457,6 +455,12 @@ namespace Sim
 		return;
 	}
 
+	bool OverrideSignalParam::sameType(const OverrideSignalParam& another) const
+	{
+		return (signalType() == E::SignalType::Discrete && another.signalType() == E::SignalType::Discrete) ||
+			   (signalType() == E::SignalType::Analog && another.signalType() == E::SignalType::Analog && dataFormat() == another.dataFormat());
+	}
+
 	bool OverrideSignalParam::enabled() const
 	{
 		return m_enabled;
@@ -683,13 +687,22 @@ namespace Sim
 		return true;
 	}
 
-	void OverrideSignals::removeSignal(QString appSignalId)
+	void OverrideSignals::removeSignal(const QString& appSignalId)
+	{
+		return removeSignals({appSignalId});
+	}
+
+	void OverrideSignals::removeSignals(const QStringList& appSignalIds)
 	{
 		{
 			QWriteLocker locker(&m_lock);
-			m_changesCounter ++;
+			m_changesCounter++;
 
-			m_signals.erase(appSignalId);
+			std::erase_if(m_signals, [&appSignalIds](const auto& item)
+						  {
+							  auto const& [key, value] = item;
+							  return appSignalIds.contains(key) == true;
+						  });
 		}
 
 		emit signalsChanged({});
@@ -728,23 +741,38 @@ namespace Sim
 
 	void OverrideSignals::setValue(QString appSignalId, OverrideSignalMethod method, const QVariant& value)
 	{
+		std::vector<SetValueData> v;
+		v.emplace_back(appSignalId, method, value);
+
+		return setValues(v);
+	}
+
+	void OverrideSignals::setValues(const std::vector<SetValueData>& overrideData)
+	{
+		QStringList appSignalIds;
+		appSignalIds.reserve(overrideData.size());
+
 		{
 			QWriteLocker locker(&m_lock);
-			m_changesCounter ++;
+			m_changesCounter++;
 
-			auto it = m_signals.find(appSignalId);
-
-			if (it == m_signals.end())
+			for (const auto& d : overrideData)
 			{
-				m_log.writeError(tr("Can't set new value for %1, signal not found").arg(appSignalId));
-				return;
-			}
+				auto it = m_signals.find(d.appSignalId);
+				if (it == m_signals.end())
+				{
+					m_log.writeError(tr("Can't set new value for %1, signal not found").arg(d.appSignalId));
+					continue;
+				}
 
-			OverrideSignalParam& osp = it->second;
-			osp.setValue(value, method, true);
+				OverrideSignalParam& osp = it->second;
+				osp.setValue(d.value, d.method, true);
+
+				appSignalIds.push_back(d.appSignalId);
+			}
 		}
 
-		emit stateChanged(QStringList{} << appSignalId);
+		emit stateChanged(appSignalIds);
 		return;
 	}
 
@@ -990,7 +1018,7 @@ namespace Sim
 		if (int cs = changesCounter();
 			ram.overrideSignalsLastCounter(cs) == cs)
 		{
-			// Data has not been changesd since last update
+			// Data has not been changed since last update
 			//
 			return;
 		}

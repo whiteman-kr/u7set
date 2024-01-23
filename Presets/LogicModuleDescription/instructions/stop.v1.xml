@@ -1,0 +1,17 @@
+<Command 
+	Caption="stop" 
+	Code="00c0" 
+	CodeMask="07c0" 
+	SimulationFunc="command_stop" 
+	ParseFunc="parse_stop" 
+	Description="Stop phase (IDR or ALP)"
+
+	CodeSize="1" 
+	ReadTime="5" 
+	WaitFbExecution="false"
+
+	ConstRuntime="1"
+
+	CheckFunc="check_nothing"
+	GetMnemoFunc="mnemo_stop"
+	CalcExecTimeFunc="exectime_const"/>

@@ -183,7 +183,7 @@ namespace Sim
 		// Start of access only with mutex
 		// \/ \/ \/ \/ \/
 		mutable std::recursive_mutex m_controlDataMutex;
-		mutable std::condition_variable_any m_controlDataConditionVariable;		// nofify_one every time m_controlData is changed
+		mutable std::condition_variable_any m_controlDataConditionVariable;		// notify_one every time m_controlData is changed
 
 		ControlData m_controlData;
 		// /\ /\ /\ /\ /\

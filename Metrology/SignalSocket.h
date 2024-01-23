@@ -6,8 +6,6 @@
 #include "../AppSignalLib/AppSignalParam.h"
 #include "../CommonLib/Hash.h"
 
-#include "../Proto/network.pb.h"
-
 // ==============================================================================================
 
 const int			SIGNAL_SOCKET_TIMEOUT_STATE	= 50;  // 50 ms

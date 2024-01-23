@@ -83,7 +83,7 @@ module Signal {
 		signalParam(signalId: string): AppSignalParam;
 		signalParam(signalHash: number): AppSignalParam;
 
-		equipmentToAppSiganlId(equipmentId: string): string;
+		equipmentToAppSignalId(equipmentId: string): string;
 
 		signalState(signalId: string): AppSignalState;
 		signalState(signalHash: number): AppSignalState;
@@ -117,5 +117,7 @@ module Signal {
 
 		writeValue(appSignalId: string, value: number): boolean;
 		apply(): void;
+		
+		isLoggedIn(): boolean;
 	}
 }

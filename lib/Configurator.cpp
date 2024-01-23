@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "../lib/Configurator.h"
 #include "../UtilsLib/Crc.h"
 #include <QtEndian>

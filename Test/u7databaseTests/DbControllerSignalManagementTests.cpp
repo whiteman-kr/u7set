@@ -1,6 +1,11 @@
 #include "DbControllerSignalManagementTests.h"
 #include "Settings.h"
 
+//#ifdef Q_CC_MSVC
+//	#pragma warning(push)
+//	#pragma warning(disable : 4834)		//	TS_EXEC_QUERY(...) generates a lot warning: C4834: discarding return value of function with 'nodiscard' attribute"
+//#endif
+
 DbControllerSignalTests::DbControllerSignalTests(const QString& projectName):
 	m_projectName(projectName),
 	m_databaseHost(theSettings.databaseHost()),
@@ -425,17 +430,18 @@ void DbControllerSignalTests::test_deleteSignal()
 	QVERIFY(obState.errCode == ERR_SIGNAL_OK);
 
 	QSqlQuery q;
+	QString err;
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalid=%1").arg(id1));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalid=%1").arg(id1));
 	QVERIFY2(q.size() == 0, "SignalInstance record is not deleted");
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM Signal WHERE signalid=%1").arg(id1));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM Signal WHERE signalid=%1").arg(id1));
 	QVERIFY2(q.size() == 0, "Signal record is not deleted");
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM CheckOut WHERE signalid=%1").arg(id1));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM CheckOut WHERE signalid=%1").arg(id1));
 	QVERIFY2(q.size() == 0, "CheckOut record is not deleted");
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalGroup WHERE signalgroupid=%1").arg(signalGroupID1));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM SignalGroup WHERE signalgroupid=%1").arg(signalGroupID1));
 	QVERIFY2(q.size() == 1, "SignalGroup record is deleted");
 
 	// try delete second channel of signal
@@ -443,16 +449,16 @@ void DbControllerSignalTests::test_deleteSignal()
 	TS_VERIFY(deleteSignal(USER2_ID, id2, &obState));
 	QVERIFY(obState.errCode == ERR_SIGNAL_OK);
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalid=%1").arg(id2));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalid=%1").arg(id2));
 	QVERIFY2(q.size() == 0, "SignalInstance record is not deleted");
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM Signal WHERE signalid=%1").arg(id2));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM Signal WHERE signalid=%1").arg(id2));
 	QVERIFY2(q.size() == 0, "Signal record is not deleted");
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM CheckOut WHERE signalid=%1").arg(id2));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM CheckOut WHERE signalid=%1").arg(id2));
 	QVERIFY2(q.size() == 0, "CheckOut record is not deleted");
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalGroup WHERE signalgroupid=%1").arg(signalGroupID1));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM SignalGroup WHERE signalgroupid=%1").arg(signalGroupID1));
 	QVERIFY2(q.size() == 0, "SignalGroup record is not deleted");
 
 	// add THREE channel signal
@@ -492,16 +498,16 @@ void DbControllerSignalTests::test_deleteSignal()
 	TS_VERIFY(deleteSignal(USER3_ID, sid2, &obState));
 	QVERIFY(obState.errCode == ERR_SIGNAL_OK);
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM Signal WHERE signalid=%1").arg(sid2));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM Signal WHERE signalid=%1").arg(sid2));
 	QVERIFY(q.first() == true);
 
 	int chInInstanceID = q.value("checkedininstanceid").toInt();
 	int chOutInstanceID = q.value("checkedoutinstanceid").toInt();
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalinstanceid=%1").arg(chInInstanceID));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalinstanceid=%1").arg(chInInstanceID));
 	QVERIFY(q.first() == true);
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalinstanceid=%1").arg(chOutInstanceID));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalinstanceid=%1").arg(chOutInstanceID));
 	QVERIFY(q.first() == true);
 	QVERIFY(q.value("action").toInt() == static_cast<int>(E::VcsItemAction::Deleted));
 
@@ -1219,7 +1225,7 @@ void DbControllerSignalTests::dbcTest_addSignal()
 	//
 	OPEN_DATABASE();
 
-	QVector<AppSignal> newSignals;
+	std::vector<AppSignal> newSignals;
 
 	AppSignal s;
 
@@ -1228,17 +1234,17 @@ void DbControllerSignalTests::dbcTest_addSignal()
 	s.setCustomAppSignalID("DBC_ADD_SIGNAL_TEST_1");
 	s.setCaption("Caption DBC_ADD_SIGNAL_TEST_1");
 
-	newSignals.append(s);
+	newSignals.push_back(s);
 
-	QVERIFY(m_dbcAdmin->addSignal(E::SignalType::Discrete, &newSignals, nullptr) == true);
+	QVERIFY(m_dbcAdmin->addSignals(E::SignalType::Discrete, &newSignals, nullptr) == true);
 	TS_VERIFY(check_signalIsExist(ADMIN_ID, newSignals[0].ID(), E::SignalType::Discrete, 0, 0, true));
 
 	// try add another one signal with same IDs
 	//
 	newSignals.clear();
-	newSignals.append(s);
+	newSignals.push_back(s);
 
-	QVERIFY(m_dbcAdmin->addSignal(E::SignalType::Discrete, &newSignals, nullptr) == false);
+	QVERIFY(m_dbcAdmin->addSignals(E::SignalType::Discrete, &newSignals, nullptr) == false);
 	QVERIFY(m_dbcAdmin->lastError().contains("already exists"));
 
 	// try add multichannel signal
@@ -1247,17 +1253,17 @@ void DbControllerSignalTests::dbcTest_addSignal()
 
 	for(int i = 0; i < 4; i++)
 	{
-		AppSignal s;
+		AppSignal appSignal;
 
-		s.setID(-1);
-		s.setAppSignalID(QString("#DBC_ADD_SIGNAL_TEST_S%1").arg(i));
-		s.setCustomAppSignalID(QString("DBC_ADD_SIGNAL_TEST_S%1").arg(i));
-		s.setCaption(QString("Caption DBC_ADD_SIGNAL_TEST_S%1").arg(i));
+		appSignal.setID(-1);
+		appSignal.setAppSignalID(QString("#DBC_ADD_SIGNAL_TEST_S%1").arg(i));
+		appSignal.setCustomAppSignalID(QString("DBC_ADD_SIGNAL_TEST_S%1").arg(i));
+		appSignal.setCaption(QString("Caption DBC_ADD_SIGNAL_TEST_S%1").arg(i));
 
-		newSignals.append(s);
+		newSignals.push_back(appSignal);
 	}
 
-	QVERIFY(m_dbcAdmin->addSignal(E::SignalType::Analog, &newSignals, nullptr) == true);
+	QVERIFY(m_dbcAdmin->addSignals(E::SignalType::Analog, &newSignals, nullptr) == true);
 
 	int sg1 = 0;
 
@@ -1274,17 +1280,16 @@ void DbControllerSignalTests::dbcTest_addSignal()
 
 	for(int i = 0; i < 5; i++)
 	{
-		AppSignal s;
+		AppSignal appSignal;
 
-		s.setID(-1);
-		s.setAppSignalID(QString("#DBC_ADD_SIGNAL_TEST_SS%1").arg(i));
-		s.setCustomAppSignalID(QString("DBC_ADD_SIGNAL_TEST_SS%1").arg(i));
-		s.setCaption(QString("Caption DBC_ADD_SIGNAL_TEST_SS%1").arg(i));
+		appSignal.setAppSignalID(QString("#DBC_ADD_SIGNAL_TEST_SS%1").arg(i));
+		appSignal.setCustomAppSignalID(QString("DBC_ADD_SIGNAL_TEST_SS%1").arg(i));
+		appSignal.setCaption(QString("Caption DBC_ADD_SIGNAL_TEST_SS%1").arg(i));
 
-		newSignals.append(s);
+		newSignals.push_back(appSignal);
 	}
 
-	QVERIFY(m_dbcAdmin->addSignal(E::SignalType::Analog, &newSignals, nullptr) == false);
+	QVERIFY(m_dbcAdmin->addSignals(E::SignalType::Analog, &newSignals, nullptr) == false);
 	QVERIFY(m_dbcAdmin->lastError().contains("channelCount"));
 
 	// try add multichannel signal by another User2
@@ -1293,17 +1298,17 @@ void DbControllerSignalTests::dbcTest_addSignal()
 
 	for(int i = 0; i < 3; i++)
 	{
-		AppSignal s;
+		AppSignal appSignal;
 
-		s.setID(-1);
-		s.setAppSignalID(QString("#DBC_ADD_SIGNAL_TEST_ANOTHER_S%1").arg(i));
-		s.setCustomAppSignalID(QString("DBC_ADD_SIGNAL_TEST_ANOTHER_S%1").arg(i));
-		s.setCaption(QString("Caption DBC_ADD_SIGNAL_TEST_ANOTHER_S%1").arg(i));
+		appSignal.setID(-1);
+		appSignal.setAppSignalID(QString("#DBC_ADD_SIGNAL_TEST_ANOTHER_S%1").arg(i));
+		appSignal.setCustomAppSignalID(QString("DBC_ADD_SIGNAL_TEST_ANOTHER_S%1").arg(i));
+		appSignal.setCaption(QString("Caption DBC_ADD_SIGNAL_TEST_ANOTHER_S%1").arg(i));
 
-		newSignals.append(s);
+		newSignals.push_back(appSignal);
 	}
 
-	QVERIFY(m_dbcUser3->addSignal(E::SignalType::Discrete, &newSignals, nullptr) == true);
+	QVERIFY(m_dbcUser3->addSignals(E::SignalType::Discrete, &newSignals, nullptr) == true);
 
 	sg1 = 0;
 
@@ -1319,19 +1324,18 @@ void DbControllerSignalTests::dbcTest_addSignal()
 
 void DbControllerSignalTests::dbcTest_checkinSignals()
 {
-	QVector<ObjectState> obStates;
-	std::vector<ObjectState> stdObStates;
+	std::vector<ObjectState> obStates;
 	ObjectState obState;
 
 	// try check in unknown signal
 	//
-	QVector<int> ids({100500});
+	std::vector<int> ids({100500});
 
-	QVERIFY(m_dbcAdmin->checkinSignals(&ids, "comment", &obStates, nullptr) == true);
+	QVERIFY(m_dbcAdmin->checkinSignals(ids, "comment", &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_IS_NOT_CHECKED_OUT);
 
-	QVERIFY(m_dbcUser2->checkinSignals(&ids, "comment", &obStates, nullptr) == true);
+	QVERIFY(m_dbcUser2->checkinSignals(ids, "comment", &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_IS_NOT_CHECKED_OUT);
 
@@ -1339,36 +1343,32 @@ void DbControllerSignalTests::dbcTest_checkinSignals()
 
 	//	add signal by Admin
 	//
-	std::vector<int> stdAdminSignals;
+	std::vector<int> adminSignals;
 
-	TS_VERIFY(dbc_addSignal(m_dbcAdmin, E::SignalType::Analog, 1, &stdAdminSignals));
-
-	QVector<int> adminSignals = toQVector(stdAdminSignals);
+	TS_VERIFY(dbc_addSignal(m_dbcAdmin, E::SignalType::Analog, 1, &adminSignals));
 
 	// try checkin by User3
 	//
-	QVERIFY(m_dbcUser3->checkinSignals(&adminSignals, "comment user3", &obStates, nullptr) == true);
+	QVERIFY(m_dbcUser3->checkinSignals(adminSignals, "comment user3", &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER);
 
 	// try checkin by Admin
 	//
-	QVERIFY(m_dbcAdmin->checkinSignals(&adminSignals, "comment admin", &obStates, nullptr) == true);
+	QVERIFY(m_dbcAdmin->checkinSignals(adminSignals, "comment admin", &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_OK);
 	TS_VERIFY(check_signalIsCheckedIn(adminSignals[0]));
 
 	// add signal by User3
 	//
-	std::vector<int> stdUser3Signals;
+	std::vector<int> user3Signals;
 
-	TS_VERIFY(dbc_addSignal(m_dbcUser3, E::SignalType::Bus, 2, &stdUser3Signals));
-
-	QVector<int> user3Signals = toQVector(stdUser3Signals);
+	TS_VERIFY(dbc_addSignal(m_dbcUser3, E::SignalType::Bus, 2, &user3Signals));
 
 	// try checkin by User2
 	//
-	QVERIFY(m_dbcUser2->checkinSignals(&user3Signals, "comment user2", &obStates, nullptr) == true);
+	QVERIFY(m_dbcUser2->checkinSignals(user3Signals, "comment user2", &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 2);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER);
 	QVERIFY(obStates[1].errCode == ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER);
@@ -1381,29 +1381,29 @@ void DbControllerSignalTests::dbcTest_checkinSignals()
 	// try checkin first channel by Admin
 	//
 	ids.clear();
-	ids.append(ch1ID);
+	ids.push_back(ch1ID);
 
-	QVERIFY(m_dbcAdmin->checkinSignals(&ids, "comment admin", &obStates, nullptr) == true);
+	QVERIFY(m_dbcAdmin->checkinSignals(ids, "comment admin", &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_OK);
 	TS_VERIFY(check_signalIsCheckedIn(ids[0]));
 
 	// try checkin already checkedin signal
 	//
-	QVERIFY(m_dbcUser3->checkinSignals(&ids, "comment user3", &obStates, nullptr) == true);
+	QVERIFY(m_dbcUser3->checkinSignals(ids, "comment user3", &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_IS_NOT_CHECKED_OUT);
 
 	// delete signal ch1ID
 	//
 	TS_VERIFY(deleteSignal(USER3_ID, ch1ID, nullptr));		// signal is auto checkedout here
-	QVERIFY(m_dbcUser3->checkinSignals(&ids, "comment user3", &obStates, nullptr) == true);
+	QVERIFY(m_dbcUser3->checkinSignals(ids, "comment user3", &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_OK);
 
 	// try checkin deleted signal that has checkedin instance
 	//
-	QVERIFY(m_dbcUser3->checkinSignals(&ids, "comment user3", &obStates, nullptr) == true);
+	QVERIFY(m_dbcUser3->checkinSignals(ids, "comment user3", &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_IS_NOT_CHECKED_OUT);
 
@@ -1415,51 +1415,48 @@ void DbControllerSignalTests::dbcTest_checkinSignals()
 	// try checkin deleted signal that has no checkedin instance
 	//
 	ids.clear();
-	ids.append(ch2ID);
+	ids.push_back(ch2ID);
 
-	QVERIFY(m_dbcUser3->checkinSignals(&ids, "comment user3", &obStates, nullptr) == true);
+	QVERIFY(m_dbcUser3->checkinSignals(ids, "comment user3", &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_IS_NOT_CHECKED_OUT);
 }
 
 void DbControllerSignalTests::dbcTest_checkoutSignals()
 {
-	QVector<ObjectState> obStates;
-	std::vector<ObjectState> stdObStates;
+	std::vector<ObjectState> obStates;
 	ObjectState obState;
 
 	// add signal and checkin it
 	//
-	std::vector<int> stdAdminSignals;
+	std::vector<int> adminSignals;
 
-	TS_VERIFY(dbc_addSignal(m_dbcAdmin, E::SignalType::Discrete, 2, &stdAdminSignals));
-	QVERIFY(stdAdminSignals.size() == 2);
+	TS_VERIFY(dbc_addSignal(m_dbcAdmin, E::SignalType::Discrete, 2, &adminSignals));
+	QVERIFY(adminSignals.size() == 2);
 
-	int id1 = stdAdminSignals[0];
-	int id2 = stdAdminSignals[1];
+	int id1 = adminSignals[0];
+	int id2 = adminSignals[1];
 
-	QVector adminSignals = toQVector<int>(stdAdminSignals);
-
-	QVERIFY(m_dbcAdmin->checkinSignals(&adminSignals, "checkout", &obStates, nullptr));
+	QVERIFY(m_dbcAdmin->checkinSignals(adminSignals, "checkout", &obStates, nullptr));
 	QVERIFY(obStates.size() == 2);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_OK);
 	QVERIFY(obStates[1].errCode == ERR_SIGNAL_OK);
 
 	// try checkout NOT exist signal
 	//
-	QVector<int> ids;
-	ids.append(id1 + 100500);
+	std::vector<int> ids;
+	ids.push_back(id1 + 100500);
 
-	QVERIFY(m_dbcAdmin->checkoutSignals(&ids, &obStates, nullptr) == true);
+	QVERIFY(m_dbcAdmin->checkoutSignals(ids, &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_NOT_FOUND);
 
 	ids.clear();
-	ids.append(id1);
+	ids.push_back(id1);
 
 	// try checkout signal by Admin
 	//
-	QVERIFY(m_dbcAdmin->checkoutSignals(&ids, &obStates, nullptr) == true);
+	QVERIFY(m_dbcAdmin->checkoutSignals(ids, &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_OK);
 
@@ -1470,9 +1467,9 @@ void DbControllerSignalTests::dbcTest_checkoutSignals()
 	// try checkout by User2
 	//
 	ids.clear();
-	ids.append(id2);
+	ids.push_back(id2);
 
-	QVERIFY(m_dbcUser2->checkoutSignals(&ids, &obStates, nullptr) == true);
+	QVERIFY(m_dbcUser2->checkoutSignals(ids, &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_OK);
 
@@ -1481,7 +1478,7 @@ void DbControllerSignalTests::dbcTest_checkoutSignals()
 
 	// try checkout by Admin
 	//
-	QVERIFY(m_dbcAdmin->checkoutSignals(&ids, &obStates, nullptr) == true);
+	QVERIFY(m_dbcAdmin->checkoutSignals(ids, &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER);
 
@@ -1490,15 +1487,15 @@ void DbControllerSignalTests::dbcTest_checkoutSignals()
 	TS_VERIFY(deleteSignal(USER2_ID, id2, &obState));
 	QVERIFY(obState.errCode == ERR_SIGNAL_OK);
 
-	TS_VERIFY(checkinSignals(USER2_ID, std::vector<int>({id2}), "Checkin signal", &stdObStates));
-	QVERIFY(stdObStates.size() == 1);
-	QVERIFY(stdObStates[0].errCode == ERR_SIGNAL_OK);
+	TS_VERIFY(checkinSignals(USER2_ID, std::vector<int>({id2}), "Checkin signal", &obStates));
+	QVERIFY(obStates.size() == 1);
+	QVERIFY(obStates[0].errCode == ERR_SIGNAL_OK);
 
-	QVERIFY(m_dbcAdmin->checkoutSignals(&ids, &obStates, nullptr) == true);
+	QVERIFY(m_dbcAdmin->checkoutSignals(ids, &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_DELETED);
 
-	QVERIFY(m_dbcUser3->checkoutSignals(&ids, &obStates, nullptr) == true);
+	QVERIFY(m_dbcUser3->checkoutSignals(ids, &obStates, nullptr) == true);
 	QVERIFY(obStates.size() == 1);
 	QVERIFY(obStates[0].errCode == ERR_SIGNAL_DELETED);
 }
@@ -1535,17 +1532,18 @@ void DbControllerSignalTests::dbcTest_deleteSignal()
 	QVERIFY(obState.errCode == ERR_SIGNAL_OK);
 
 	QSqlQuery q;
+	QString err;
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalid=%1").arg(id1));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalid=%1").arg(id1));
 	QVERIFY2(q.size() == 0, "SignalInstance record is not deleted");
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM Signal WHERE signalid=%1").arg(id1));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM Signal WHERE signalid=%1").arg(id1));
 	QVERIFY2(q.size() == 0, "Signal record is not deleted");
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM CheckOut WHERE signalid=%1").arg(id1));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM CheckOut WHERE signalid=%1").arg(id1));
 	QVERIFY2(q.size() == 0, "CheckOut record is not deleted");
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalGroup WHERE signalgroupid=%1").arg(signalGroupID1));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM SignalGroup WHERE signalgroupid=%1").arg(signalGroupID1));
 	QVERIFY2(q.size() == 1, "SignalGroup record is deleted");
 
 	// try delete second channel of signal
@@ -1553,16 +1551,16 @@ void DbControllerSignalTests::dbcTest_deleteSignal()
 	QVERIFY(m_dbcAdmin->deleteSignal(id2, &obState, nullptr) == true);
 	QVERIFY(obState.errCode == ERR_SIGNAL_OK);
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalid=%1").arg(id2));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalid=%1").arg(id2));
 	QVERIFY2(q.size() == 0, "SignalInstance record is not deleted");
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM Signal WHERE signalid=%1").arg(id2));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM Signal WHERE signalid=%1").arg(id2));
 	QVERIFY2(q.size() == 0, "Signal record is not deleted");
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM CheckOut WHERE signalid=%1").arg(id2));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM CheckOut WHERE signalid=%1").arg(id2));
 	QVERIFY2(q.size() == 0, "CheckOut record is not deleted");
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalGroup WHERE signalgroupid=%1").arg(signalGroupID1));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM SignalGroup WHERE signalgroupid=%1").arg(signalGroupID1));
 	QVERIFY2(q.size() == 0, "SignalGroup record is not deleted");
 
 	// add THREE channel signal
@@ -1600,16 +1598,16 @@ void DbControllerSignalTests::dbcTest_deleteSignal()
 	QVERIFY(m_dbcUser3->deleteSignal(sid2, &obState, nullptr) == true);
 	QVERIFY(obState.errCode == ERR_SIGNAL_OK);
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM Signal WHERE signalid=%1").arg(sid2));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM Signal WHERE signalid=%1").arg(sid2));
 	QVERIFY(q.first() == true);
 
 	int chInInstanceID = q.value("checkedininstanceid").toInt();
 	int chOutInstanceID = q.value("checkedoutinstanceid").toInt();
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalinstanceid=%1").arg(chInInstanceID));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalinstanceid=%1").arg(chInInstanceID));
 	QVERIFY(q.first() == true);
 
-	TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalinstanceid=%1").arg(chOutInstanceID));
+	err = TS_EXEC_QUERY(q, QString("SELECT * FROM SignalInstance WHERE signalinstanceid=%1").arg(chOutInstanceID));
 	QVERIFY(q.first() == true);
 	QVERIFY(q.value("action").toInt() == static_cast<int>(E::VcsItemAction::Deleted));
 
@@ -1806,7 +1804,7 @@ void DbControllerSignalTests::dbcTest_getSignalsIDs()
 	QVERIFY(sets_intersect<int>(stdAdminSignalsIDs, stdUser3SignalsIDs) == false);
 	QVERIFY(sets_intersect<int>(stdUser2SignalsIDs, stdUser3SignalsIDs) == false);
 
-	QVector<int> ids;
+	std::vector<int> ids;
 	std::vector<int> stdIds;
 
 	// request IDs under Admin
@@ -1814,7 +1812,7 @@ void DbControllerSignalTests::dbcTest_getSignalsIDs()
 	//
 	QVERIFY(m_dbcAdmin->getSignalsIDs(&ids, nullptr) == true);
 
-	stdIds = sets_difference<int>(toStdVector<int>(ids), initialIDs);
+	stdIds = sets_difference<int>(ids, initialIDs);
 
 	QVERIFY(sets_equal(stdIds, sets_union(stdAdminSignalsIDs, sets_union(stdUser2SignalsIDs, stdUser3SignalsIDs))) == true);
 
@@ -1823,7 +1821,7 @@ void DbControllerSignalTests::dbcTest_getSignalsIDs()
 	//
 	QVERIFY(m_dbcUser2->getSignalsIDs(&ids, nullptr) == true);
 
-	stdIds = sets_difference<int>(toStdVector(ids), initialIDs);
+	stdIds = sets_difference<int>(ids, initialIDs);
 
 	QVERIFY(sets_equal(stdIds, stdUser2SignalsIDs) == true);
 
@@ -1836,7 +1834,7 @@ void DbControllerSignalTests::dbcTest_getSignalsIDs()
 	//
 	QVERIFY(m_dbcUser3->getSignalsIDs(&ids, nullptr) == true);
 
-	stdIds = sets_difference<int>(toStdVector<int>(ids), initialIDs);
+	stdIds = sets_difference<int>(ids, initialIDs);
 
 	QVERIFY(sets_equal(stdIds, sets_union(stdUser2SignalsIDs, stdUser3SignalsIDs)));
 
@@ -1845,7 +1843,7 @@ void DbControllerSignalTests::dbcTest_getSignalsIDs()
 	//
 	QVERIFY(m_dbcAdmin->getSignalsIDs(&ids, nullptr) == true);
 
-	stdIds = sets_difference<int>(toStdVector(ids), initialIDs);
+	stdIds = sets_difference<int>(ids, initialIDs);
 
 	QVERIFY(sets_equal(stdIds, sets_union(stdAdminSignalsIDs, sets_union(stdUser2SignalsIDs, stdUser3SignalsIDs))) == true);
 
@@ -1859,7 +1857,7 @@ void DbControllerSignalTests::dbcTest_getSignalsIDs()
 	//
 	QVERIFY(m_dbcUser2->getSignalsIDs(&ids, nullptr) == true);
 
-	stdIds = sets_difference<int>(toStdVector(ids), initialIDs);
+	stdIds = sets_difference<int>(ids, initialIDs);
 
 	QVERIFY(sets_equal(stdIds, sets_union(stdAdminSignalsIDs, sets_union(stdUser2SignalsIDs, stdUser3SignalsIDs))) == true);
 
@@ -1873,7 +1871,7 @@ void DbControllerSignalTests::dbcTest_getSignalsIDs()
 	//
 	QVERIFY(m_dbcUser3->getSignalsIDs(&ids, nullptr) == true);
 
-	stdIds = sets_difference<int>(toStdVector(ids), initialIDs);
+	stdIds = sets_difference<int>(ids, initialIDs);
 
 	QVERIFY(sets_equal(stdIds, sets_union(stdAdminSignalsIDs, stdUser3SignalsIDs)) == true);
 
@@ -1896,13 +1894,11 @@ void DbControllerSignalTests::dbcTest_getSignalsIDAppSignalID()
 
 	TS_VERIFY(addTestSignals(USER2_ID, E::SignalType::Analog, 1, 5 + rand0to(2), &stdUser2SignalsIDs));
 
-	QVector<ID_AppSignalID> qvResult;
 	std::vector<ID_AppSignalID> result;
 
 	// Admin should see all signals
 	//
-	QVERIFY(m_dbcAdmin->getSignalsIDAppSignalID(&qvResult, nullptr));
-	result = toPairsVector(qvResult);
+	QVERIFY(m_dbcAdmin->getSignalsIDAppSignalID(&result, false, nullptr));
 
 	TS_VERIFY(removePairsWithID(&result, initialIDs));
 
@@ -1911,8 +1907,7 @@ void DbControllerSignalTests::dbcTest_getSignalsIDAppSignalID()
 
 	// User2 should see only their signals
 	//
-	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
-	result = toPairsVector(qvResult);
+	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&result, false, nullptr) == true);
 
 	TS_VERIFY(removePairsWithID(&result, initialIDs));
 
@@ -1925,8 +1920,7 @@ void DbControllerSignalTests::dbcTest_getSignalsIDAppSignalID()
 
 	// User2 should see their signals and Admin's signals
 	//
-	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
-	result = toPairsVector(qvResult);
+	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&result, false, nullptr) == true);
 
 	TS_VERIFY(removePairsWithID(&result, initialIDs));
 
@@ -1941,8 +1935,7 @@ void DbControllerSignalTests::dbcTest_getSignalsIDAppSignalID()
 	// DbController::getSignalsIDAppSignalID() always return withDeleted == false,
 	// User2 should see only their signals
 	//
-	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
-	result = toPairsVector(qvResult);
+	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&result, false, nullptr) == true);
 
 	TS_VERIFY(removePairsWithID(&result, initialIDs));
 
@@ -1959,7 +1952,7 @@ void DbControllerSignalTests::dbcTest_getSignalsIDAppSignalID()
 
 	TS_VERIFY(checkinSignals(USER2_ID, std::vector<int>({id}), "checkin user2 signal", nullptr));
 
-	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
+	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&result, false, nullptr) == true);
 
 	QVERIFY(findPairWithID(id, result, &p) == true);
 	QVERIFY(p.appSignalID == OLD_APP_SIGNAL_ID);
@@ -1981,23 +1974,19 @@ void DbControllerSignalTests::dbcTest_getSignalsIDAppSignalID()
 
 	// under User2, should see OLD_APP_SIGNAL_ID
 	//
-	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
-	result = toPairsVector(qvResult);
+	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&result, false, nullptr) == true);
 
 	QVERIFY(findPairWithID(id, result, &p) == true);
 	QVERIFY(p.appSignalID == OLD_APP_SIGNAL_ID);
 
 	// under Admin and User3, should see NEW_APP_SIGNAL_ID
 	//
-	QVERIFY(m_dbcAdmin->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
-	result = toPairsVector(qvResult);
+	QVERIFY(m_dbcAdmin->getSignalsIDAppSignalID(&result, false, nullptr) == true);
 
 	QVERIFY(findPairWithID(id, result, &p) == true);
 	QVERIFY(p.appSignalID == NEW_APP_SIGNAL_ID);
 
-	QVERIFY(m_dbcUser3->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
-
-	result = toPairsVector(qvResult);
+	QVERIFY(m_dbcUser3->getSignalsIDAppSignalID(&result, false, nullptr) == true);
 
 	QVERIFY(findPairWithID(id, result, &p) == true);
 	QVERIFY(p.appSignalID == NEW_APP_SIGNAL_ID);
@@ -2006,18 +1995,18 @@ void DbControllerSignalTests::dbcTest_getSignalsIDAppSignalID()
 
 	// All should see NEW_APP_SIGNAL_ID
 	//
-	QVERIFY(m_dbcAdmin->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
-	result = toPairsVector(qvResult);
+	QVERIFY(m_dbcAdmin->getSignalsIDAppSignalID(&result, false, nullptr) == true);
+
 	QVERIFY(findPairWithID(id, result, &p) == true);
 	QVERIFY(p.appSignalID == NEW_APP_SIGNAL_ID);
 
-	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
-	result = toPairsVector(qvResult);
+	QVERIFY(m_dbcUser2->getSignalsIDAppSignalID(&result, false, nullptr) == true);
+
 	QVERIFY(findPairWithID(id, result, &p) == true);
 	QVERIFY(p.appSignalID == NEW_APP_SIGNAL_ID);
 
-	QVERIFY(m_dbcUser3->getSignalsIDAppSignalID(&qvResult, nullptr) == true);
-	result = toPairsVector(qvResult);
+	QVERIFY(m_dbcUser3->getSignalsIDAppSignalID(&result, false, nullptr) == true);
+
 	QVERIFY(findPairWithID(id, result, &p) == true);
 	QVERIFY(p.appSignalID == NEW_APP_SIGNAL_ID);
 
@@ -2123,7 +2112,7 @@ QString DbControllerSignalTests::dbc_addSignal(DbController* dbc,
 		addedIDs->clear();
 	}
 
-	QVector<AppSignal> newSignals;
+	std::vector<AppSignal> newSignals;
 
 	for(QString appSignalID : appSignalIDs)
 	{
@@ -2135,10 +2124,10 @@ QString DbControllerSignalTests::dbc_addSignal(DbController* dbc,
 		s.setCustomAppSignalID(appSignalID.replace("#", ""));
 		s.setCustomAppSignalID(QString("Caption ") + s.customAppSignalID());
 
-		newSignals.append(s);
+		newSignals.emplace_back(s);
 	}
 
-	TS_VERIFY_RETURN_ERR(dbc->addSignal(type, &newSignals, nullptr) == true, dbc->lastError());
+	TS_VERIFY_RETURN_ERR(dbc->addSignals(type, &newSignals, nullptr) == true, dbc->lastError());
 
 	if (addedIDs != nullptr)
 	{
@@ -2715,4 +2704,6 @@ int DbControllerSignalTests::rand0to(int upRange) const
 	return std::rand() % (upRange + 1);
 }
 
-
+//#ifdef Q_CC_MSVC
+//	#pragma warning(pop)
+//#endif

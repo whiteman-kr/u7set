@@ -3,6 +3,7 @@
 #include "../CommonLib/Types.h"
 #include "../CommonLib/HostAddressPort.h"
 #include "../lib/ConstStrings.h"
+#include "../OnlineLib/MatsUsers.h"
 
 class XmlWriteHelper;
 class XmlReadHelper;
@@ -184,7 +185,7 @@ public:
 	struct ClientInfo
 	{
 		QString equipmentID;
-		E::SoftwareType softwareType;
+		E::SoftwareType softwareType = E::SoftwareType::Unknown;
 		QString hostname;
 	};
 
@@ -284,7 +285,10 @@ public:
 	struct TuningClient
 	{
 		QString equipmentID;
+		E::SoftwareType softwareType;
 		std::vector<TuningSource> drivenSources;
+		bool tuningLogin = false;
+		QString matsUsers;
 
 		QStringList uniqueSourcesIDs() const;
 
@@ -332,6 +336,8 @@ public:
 	std::vector<TuningClient> clients;
 
 	ChannelSettings channelSettings[CHANNELS_COUNT];
+
+	std::vector<OnlineLib::MatsUser> matsUsers;
 
 	bool isSourceExists(const QString& moduleEquipmentID) const;
 
@@ -556,7 +562,20 @@ public:
 	std::vector<SoftwareEndpoint::AppDataService> appDataServices;
 	bool tuningEnabled = false;
 
+	bool login = false;
+	QString userAccounts;
+
 	std::vector<SoftwareEndpoint::TuningService> tuningServices;
+
+	// Report Settings
+	//
+	QString plant;
+	QString unit;
+	QString system;
+
+	// Script tags
+	//
+	QString scriptTags;
 
 private:
 	// this methods should be call by SoftwareSettingsSet only
@@ -568,6 +587,7 @@ private:
 
 public:
 	void clear();
+	QStringList getUsersAccounts() const;
 };
 
 class GatewayServiceSettings : virtual public SoftwareSettings

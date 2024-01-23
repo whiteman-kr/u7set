@@ -1,5 +1,5 @@
 #ifndef CLIENT_LIB_DOMAIN
-#error Don't include this file in the project! Link ClientLib instead.
+#error Do not include this file in the project! Link ClientLib instead.
 #endif
 
 #include "TcpSignalRecents.h"
@@ -185,7 +185,7 @@ namespace ClientLib
 			states.emplace_back(protoState);
 		}
 
-		m_signalUpdater.setState(states, QThread::currentThreadId());
+		m_signalUpdater.setState(states, ::calcHash(m_serverSettings.equipmentId), QThread::currentThreadId());
 
 		//qDebug() << "Priority updates state count  "  << states.size();
 

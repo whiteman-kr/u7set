@@ -1,107 +1,109 @@
 <RCC>
     <qresource prefix="/Images">
-        <file>Images/cross.png</file>
-        <file>Images/lock.png</file>
-        <file>Images/pencil.png</file>
-        <file>Images/plus.png</file>
-        <file>Images/update.png</file>
-        <file>Images/undo.png</file>
+        <file>Images/AddPreset.svg</file>
         <file>Images/changes.png</file>
         <file>Images/checkin.png</file>
-        <file>Images/copy.png</file>
-        <file>Images/SchemaLine.svg</file>
-        <file>Images/SchemaIconDevelop.html</file>
-        <file>Images/SchemaRect.svg</file>
-        <file>Images/SchemaPath.svg</file>
-        <file>Images/SchemaInputSignal.svg</file>
-        <file>Images/SchemaOutputSignal.svg</file>
-        <file>Images/SchemaConstant.svg</file>
-        <file>Images/SchemaFblElement.svg</file>
-        <file>Images/SchemaLink.svg</file>
-        <file>Images/logo.png</file>
-        <file>Images/SchemaReceiver.svg</file>
-        <file>Images/SchemaTransmitter.svg</file>
-        <file>Images/SchemaInOutSignal.svg</file>
-        <file>Images/SchemaText.svg</file>
-        <file>Images/SchemaUfbElement.svg</file>
-        <file>Images/SchemaTerminator.svg</file>
-        <file>Images/SchemaItemPushButton.svg</file>
-        <file>Images/SchemaItemLineEdit.svg</file>
-        <file>Images/SchemaItemValue.svg</file>
-        <file>Images/SchemaBusComposer.svg</file>
-        <file>Images/SchemaBusExtractor.svg</file>
-        <file>Images/SchemaLoopbackSource.svg</file>
-        <file>Images/SchemaLoopbackTarget.svg</file>
-        <file>Images/SimOpen.svg</file>
-        <file>Images/SimClose.svg</file>
-        <file>Images/SimRefresh.svg</file>
-        <file>Images/SimAddWindow.svg</file>
-        <file>Images/SimPause.svg</file>
-        <file>Images/SimRun.svg</file>
-        <file>Images/SimStop.svg</file>
-        <file>Images/SchemaAddFile.svg</file>
-        <file>Images/SchemaClone.svg</file>
-        <file>Images/SchemaAddFolder.svg</file>
-        <file>Images/SchemaDelete.svg</file>
-        <file>Images/SchemaOpen.svg</file>
-        <file>Images/SchemaView.svg</file>
-        <file>Images/SchemaCheckOut.svg</file>
-        <file>Images/SchemaCheckIn.svg</file>
-        <file>Images/SchemaUndo.svg</file>
-        <file>Images/SchemaHistory.svg</file>
-        <file>Images/SchemaDownload.svg</file>
-        <file>Images/SchemaUpload.svg</file>
-        <file>Images/SchemaRefresh.svg</file>
-        <file>Images/SchemaProperties.svg</file>
-        <file>Images/SchemaAddFolder2.svg</file>
-        <file>Images/SchemaFolder.svg</file>
-        <file>Images/SchemaItemImage.svg</file>
-        <file>Images/SchemaItemImageValue.svg</file>
-        <file>Images/SchemaItemFrame.svg</file>
-        <file>Images/SchemaItemIndicator.svg</file>
-        <file>Images/Find.svg</file>
-        <file>Images/SchemaBehavior.svg</file>
-        <file>Images/SimTrends.svg</file>
+        <file>Images/ClearLog.svg</file>
         <file>Images/CloseButtonBlack.svg</file>
         <file>Images/CloseButtonGray.svg</file>
-        <file>Images/SimSnapshot.svg</file>
-        <file>Images/SimFindSignal.svg</file>
-        <file>Images/SimLogicModuleIcon.svg</file>
-        <file>Images/SimConnectionIcon.svg</file>
-        <file>Images/SimAppLogicSchemas.svg</file>
-        <file>Images/dragndrop.png</file>
         <file>Images/CloseButtonWhite.svg</file>
         <file>Images/ComboDownArrow.svg</file>
+        <file>Images/copy.png</file>
+        <file>Images/Copy.svg</file>
+        <file>Images/cross.png</file>
+        <file>Images/dragndrop.png</file>
+        <file>Images/EquipEditorReplace.svg</file>
+        <file>Images/ExportPreset.svg</file>
+        <file>Images/Find.svg</file>
+        <file>Images/ImportPreset.svg</file>
+        <file>Images/LocatorFind.svg</file>
+        <file>Images/lock.png</file>
+        <file>Images/MetrologyConnection.svg</file>
+        <file>Images/NextIssue.svg</file>
+        <file>Images/pencil.png</file>
+        <file>Images/plus.png</file>
+        <file>Images/PreviousIssue.svg</file>
+        <file>Images/SchemaAddFile.svg</file>
+        <file>Images/SchemaAddFolder.svg</file>
+        <file>Images/SchemaAddFolder2.svg</file>
+        <file>Images/SchemaBehavior.svg</file>
+        <file>Images/SchemaBusComposer.svg</file>
+        <file>Images/SchemaBusExtractor.svg</file>
+        <file>Images/SchemaCheckIn.svg</file>
+        <file>Images/SchemaCheckOut.svg</file>
+        <file>Images/SchemaClone.svg</file>
+        <file>Images/SchemaConstant.svg</file>
+        <file>Images/SchemaDelete.svg</file>
+        <file>Images/SchemaDownload.svg</file>
+        <file>Images/SchemaFblElement.svg</file>
+        <file>Images/SchemaFolder.svg</file>
+        <file>Images/SchemaHistory.svg</file>
+        <file>Images/SchemaIconDevelop.html</file>
+        <file>Images/SchemaInOutSignal.svg</file>
+        <file>Images/SchemaInputSignal.svg</file>
+        <file>Images/SchemaItemFrame.svg</file>
+        <file>Images/SchemaItemImage.svg</file>
+        <file>Images/SchemaItemImageValue.svg</file>
+        <file>Images/SchemaItemIndicator.svg</file>
+        <file>Images/SchemaItemLineEdit.svg</file>
+        <file>Images/SchemaItemPushButton.svg</file>
+		<file>Images/SchemaItemSlider.svg</file>
+        <file>Images/SchemaItemValue.svg</file>
+        <file>Images/SchemaLine.svg</file>
+        <file>Images/SchemaLink.svg</file>
+        <file>Images/SchemaList.svg</file>
+        <file>Images/SchemaLoopbackSource.svg</file>
+        <file>Images/SchemaLoopbackTarget.svg</file>
         <file>Images/SchemaNewFile.svg</file>
+        <file>Images/SchemaOpen.svg</file>
+        <file>Images/SchemaOutputSignal.svg</file>
+        <file>Images/SchemaPath.svg</file>
+        <file>Images/SchemaProperties.svg</file>
+        <file>Images/SchemaReceiver.svg</file>
+        <file>Images/SchemaRect.svg</file>
+        <file>Images/SchemaRefresh.svg</file>
+        <file>Images/SchemaTerminator.svg</file>
+        <file>Images/SchemaText.svg</file>
+        <file>Images/SchemaToAlbum.svg</file>
+        <file>Images/SchemaToPdf.svg</file>
+        <file>Images/SchemaTransmitter.svg</file>
+        <file>Images/SchemaUfbElement.svg</file>
+        <file>Images/SchemaUndo.svg</file>
+        <file>Images/SchemaUpload.svg</file>
+        <file>Images/SchemaView.svg</file>
+        <file>Images/SelectAll.svg</file>
+        <file>Images/SimAddWindow.svg</file>
         <file>Images/SimAllowRegData.svg</file>
+        <file>Images/SimAppLogicSchemas.svg</file>
+        <file>Images/SimClose.svg</file>
+        <file>Images/SimConnectionIcon.svg</file>
+        <file>Images/SimFindSignal.svg</file>
+        <file>Images/SimLogicModuleIcon.svg</file>
+        <file>Images/SimOpen.svg</file>
+        <file>Images/SimPause.svg</file>
+        <file>Images/SimProfileEditor.svg</file>
+        <file>Images/SimRefresh.svg</file>
+        <file>Images/SimRun.svg</file>
+        <file>Images/SimSnapshot.svg</file>
+        <file>Images/SimStop.svg</file>
+        <file>Images/SimTrends.svg</file>
         <file>Images/TestsRunAll.svg</file>
         <file>Images/TestsRunSelected.svg</file>
-        <file>Images/NextIssue.svg</file>
-        <file>Images/PreviousIssue.svg</file>
-        <file>Images/ClearLog.svg</file>
-        <file>Images/SimProfileEditor.svg</file>
-        <file>Images/Copy.svg</file>
-        <file>Images/MetrologyConnection.svg</file>
-        <file>Images/SelectAll.svg</file>
-        <file>Images/ExportPreset.svg</file>
-        <file>Images/ImportPreset.svg</file>
-        <file>Images/AddPreset.svg</file>
-        <file>Images/EquipEditorReplace.svg</file>
+        <file>Images/undo.png</file>
+        <file>Images/update.png</file>
         <file>Images/ZoomFitToScreen.svg</file>
         <file>Images/ZoomIn.svg</file>
         <file>Images/ZoomOut.svg</file>
-        <file>Images/SchemaList.svg</file>
-        <file>Images/LocatorFind.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>ScriptHelp/scripthelp.html</file>
+        <file>Simulator/ScriptSample.js</file>
+        <file>Simulator/Templates/DiscreteSeries.js</file>
+        <file>Simulator/Templates/DiscreteSquare.js</file>
+        <file>Simulator/Templates/SawtoothBack.js</file>
+        <file>Simulator/Templates/SawtoothFront.js</file>
         <file>Simulator/Templates/Sine.js</file>
         <file>Simulator/Templates/Square.js</file>
         <file>Simulator/Templates/Triangle.js</file>
-        <file>Simulator/Templates/SawtoothFront.js</file>
-        <file>Simulator/Templates/SawtoothBack.js</file>
-        <file>Simulator/Templates/DiscreteSquare.js</file>
-        <file>Simulator/Templates/DiscreteSeries.js</file>
-        <file>Simulator/ScriptSample.js</file>
     </qresource>
 </RCC>

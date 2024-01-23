@@ -4,6 +4,11 @@ version.h
 gitlab_version.h
 Makefile*
 *.o
+build-*/**
+build/**
+u7set-cppcheck-build-dir/**
+out/**
+bin/**
 *embed.manifest
 GetGitProjectVersion.exe
 GetGitProjectVersion
@@ -13,8 +18,11 @@ GetGitProjectVersion
 .vs
 Scripts/out
 Test/build-*/**
+*.aps
 Test/bin/**
 Metrology/Metrology.db
 Tools/build-*/**
 Test/AfbTests/LM1_SF00/AFB_TESTS/UALTESTS/Reports/*
 Test/AfbTests/LM1_SF00/AFB_TESTS/UALTESTS/Archive/**
+enc_temp_folder/
+*.bak

@@ -1,0 +1,111 @@
+﻿# clang-format version 16.xx
+
+---
+Language: Proto
+DisableFormat: true
+
+---
+Language: Cpp
+BasedOnStyle: Microsoft
+
+# Ok
+AlignAfterOpenBracket: Align	
+
+# Ok
+AlignConsecutiveAssignments: None
+# Ok
+
+AlignConsecutiveDeclarations: None
+
+AlignEscapedNewlines: DontAlign
+
+AlignOperands: Align
+
+UseTab: ForContinuationAndIndentation
+ColumnLimit: '0'
+IndentWidth: '4'
+TabWidth: '4'
+
+#IndentAccessModifiers: false
+AccessModifierOffset: '-4'
+
+# Ok
+AlignTrailingComments:
+  Kind: Always
+  OverEmptyLines: 5
+
+# Ok - Always break before braces.
+BreakBeforeBraces: Allman
+
+
+# Ok
+PackConstructorInitializers: Never
+
+AllowAllArgumentsOnNextLine: 'false'
+
+AllowAllConstructorInitializersOnNextLine: 'false'
+AllowAllParametersOfDeclarationOnNextLine: 'false'
+
+# Ok
+AllowShortFunctionsOnASingleLine: Inline
+
+AllowShortLambdasOnASingleLine: Empty
+
+AllowShortLoopsOnASingleLine: 'false'
+AlwaysBreakAfterReturnType: None
+AlwaysBreakBeforeMultilineStrings: 'false'
+AlwaysBreakTemplateDeclarations: 'Yes'
+
+AllowShortBlocksOnASingleLine: 'true'
+
+BinPackArguments: 'false'
+BinPackParameters: 'false'
+
+BreakBeforeBinaryOperators: None
+
+BreakBeforeTernaryOperators: 'false'
+
+BreakConstructorInitializers: AfterColon # Approved
+BreakStringLiterals: 'true'
+BreakInheritanceList: AfterComma
+
+CompactNamespaces: 'false'
+ContinuationIndentWidth: '4'
+Cpp11BracedListStyle: 'true'
+DerivePointerAlignment: 'false'
+
+IndentCaseLabels: 'false'
+IndentCaseBlocks: 'true'
+AllowShortCaseLabelsOnASingleLine: 'false'
+
+IndentPPDirectives: BeforeHash
+
+MaxEmptyLinesToKeep: '2'
+NamespaceIndentation: All
+PointerAlignment: Left
+
+# Include - sort
+SortIncludes: CaseSensitive
+# Sort each #include block separately.
+IncludeBlocks: Preserve
+
+
+
+SortUsingDeclarations: 'false'
+SpaceAfterLogicalNot: 'false'
+SpaceAfterTemplateKeyword: 'false'
+SpaceBeforeAssignmentOperators: 'true'
+SpaceBeforeCpp11BracedList: 'false'
+SpaceBeforeCtorInitializerColon: 'true'
+SpaceBeforeInheritanceColon: 'true'
+SpaceBeforeParens: ControlStatements
+SpaceBeforeRangeBasedForLoopColon: 'true'
+SpaceInEmptyParentheses: 'false'
+SpacesInAngles: 'false'
+SpacesInCStyleCastParentheses: 'false'
+SpacesInContainerLiterals: 'false'
+SpacesInParentheses: 'false'
+SpacesInSquareBrackets: 'false'
+UseTab: ForContinuationAndIndentation
+
+...

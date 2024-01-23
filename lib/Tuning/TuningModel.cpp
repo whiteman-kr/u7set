@@ -74,12 +74,12 @@ bool TuningModelSorter::sortFunction(const TuningModelHashSet& set1, const Tunin
 
 	if (ok1 == true && set1.hash[valueColumnIndex] != UNDEFINED_HASH)
 	{
-		tss1 = m_tuningSignalManager.state(set1.hash[valueColumnIndex], &ok1);
+		tss1 = m_tuningSignalManager.queuedState(set1.hash[valueColumnIndex], &ok1);
 	}
 
 	if (ok2 == true && set2.hash[valueColumnIndex] != UNDEFINED_HASH)
 	{
-		tss2 = m_tuningSignalManager.state(set2.hash[valueColumnIndex], &ok2);
+		tss2 = m_tuningSignalManager.queuedState(set2.hash[valueColumnIndex], &ok2);
 	}
 
 	//
@@ -1085,7 +1085,8 @@ QVariant TuningModel::headerData(int section, Qt::Orientation orientation, int r
 // DialogInputTuningValue
 //
 
-DialogInputTuningValue::DialogInputTuningValue(TuningValue value, TuningValue defaultValue, bool sameValue, TuningValue lowLimit, TuningValue highLimit, E::AnalogFormat analogFormat, int decimalPlaces, QWidget* parent) :
+DialogInputTuningValue::DialogInputTuningValue(TuningValue value, TuningValue defaultValue, bool sameValue, bool sameDefaultValue,
+	TuningValue lowLimit, TuningValue highLimit, E::AnalogFormat analogFormat, int decimalPlaces, QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	m_value(value),
 	m_defaultValue(defaultValue),
@@ -1170,6 +1171,12 @@ DialogInputTuningValue::DialogInputTuningValue(TuningValue value, TuningValue de
 		}
 
 		m_buttonDefault->setText(tr("Default: ") + m_defaultValue.toString(analogFormat, m_decimalPlaces));
+	}
+
+	if (sameDefaultValue == false)
+	{
+		m_buttonDefault->setText(tr("Default: ") + "...");
+		m_buttonDefault->setEnabled(false);
 	}
 }
 

@@ -1,19 +1,18 @@
 #include "MonitorCentralWidget.h"
 #include "MonitorSchemaManager.h"
 #include "MonitorAppSettings.h"
+#include "MonitorSchemaView.h"
 #include "../VFrame30/MonitorSchema.h"
 
 
 MonitorCentralWidget::MonitorCentralWidget(MonitorSchemaManager* schemaManager,
 										   VFrame30::AppSignalController* appSignalController,
-										   VFrame30::TuningController* tuningController,
-                                           VFrame30::LogController* logController,
+										   VFrame30::LogController* logController,
 										   ITimeStats* timeStats,
 										   QWidget* parent) :
 	TabWidgetEx(parent),
 	m_schemaManager(schemaManager),
 	m_appSignalController(appSignalController),
-    m_tuningController(tuningController),
 	m_logController(logController),
 	m_timeStats(timeStats)
 {
@@ -46,14 +45,24 @@ MonitorCentralWidget::~MonitorCentralWidget()
 	qDebug() << Q_FUNC_INFO;
 }
 
+void MonitorCentralWidget::applyZoomMode(VFrame30::ZoomMode zoomMode)
+{
+	for (int tabIndex = 0; tabIndex < count(); tabIndex++)
+	{
+		auto tabWidget = dynamic_cast<MonitorSchemaWidget*>(widget(tabIndex));
+
+		if (tabWidget != nullptr)
+		{
+			tabWidget->setZoomMode(zoomMode, true);
+		}
+	}
+
+	return;
+}
+
 MonitorSchemaWidget* MonitorCentralWidget::currentTab()
 {
 	return dynamic_cast<MonitorSchemaWidget*>(currentWidget());
-}
-
-VFrame30::TuningController* MonitorCentralWidget::tuningController()
-{
-	return m_tuningController;
 }
 
 void MonitorCentralWidget::timerEvent(QTimerEvent* event)
@@ -117,11 +126,11 @@ int MonitorCentralWidget::addSchemaTabPage(const QString& schemaId, const QVaria
 	MonitorSchemaWidget* schemaWidget = new MonitorSchemaWidget(tabSchema,
 																m_schemaManager,
 																m_appSignalController,
-																m_tuningController,
-	                                                            m_logController,
+																m_logController,
 																m_timeStats,
 																this);
 
+	schemaWidget->setZoomMode(MonitorAppSettings::instance().zoomMode(), false);
 	schemaWidget->clientSchemaView()->setVariables(variables);
 
 	connect(schemaWidget, &MonitorSchemaWidget::signal_schemaChanged, this, &MonitorCentralWidget::slot_schemaChanged);
@@ -135,7 +144,7 @@ int MonitorCentralWidget::addSchemaTabPage(const QString& schemaId, const QVaria
 		setMovable(true);
 	}
 
-	//  clientSchemaView->setVariables() (line 125) may override already created variables in scripts,
+	// clientSchemaView->setVariables() (line 125) may override already created variables in scripts,
 	// so run onShowScript here, after setting view variables(!). Also onShowScript triggers
 	// running onConfigurationArrivedScript
 	//
@@ -162,7 +171,12 @@ void MonitorCentralWidget::slot_newSchemaTab(QString schemaId)
 		MonitorSchemaWidget* newTab = currentTab();
 		Q_ASSERT(newTab);
 
-		newTab->clientSchemaView()->setZoom(0, false);
+		if (MonitorAppSettings::instance().zoomMode() == VFrame30::ZoomMode::Manual)
+		{
+			// Initially set zoom to "fit to screen".
+			//
+			newTab->setZoom(0, false);
+		}
 
 		emit signal_schemaChanged(newTab->schemaId());		// Different schema could be set, it can happen if schema does not exist
 		newTab->emitHistoryChanged();
@@ -209,7 +223,16 @@ void MonitorCentralWidget::slot_newTab()
 	if (auto newTabWidget = dynamic_cast<MonitorSchemaWidget*>(currentWidget());
 		newTabWidget != nullptr)
 	{
-		newTabWidget->clientSchemaView()->setZoom(0);
+		if (MonitorAppSettings::instance().zoomMode() == VFrame30::ZoomMode::Manual ||
+			 MonitorAppSettings::instance().zoomMode() == VFrame30::ZoomMode::FitToScreen)
+		{
+			newTabWidget->clientSchemaView()->setZoom(0);
+		}
+
+		if (MonitorAppSettings::instance().zoomMode() == VFrame30::ZoomMode::Always100Percent)
+		{
+			newTabWidget->clientSchemaView()->setZoom(100);
+		}
 	}
 
 	return;
@@ -326,7 +349,7 @@ void MonitorCentralWidget::slot_selectSchemaForCurrentTab(QString schemaId)
 		return;
 	}
 
-	tab->setSchema(schemaId, QStringList{});
+	tab->setSchema(schemaId, QStringList{}, false);
 
 	tab->emitHistoryChanged();
 
@@ -341,6 +364,50 @@ void MonitorCentralWidget::slot_signalContextMenu(const QStringList signalList, 
 void MonitorCentralWidget::slot_signalInfo(QString signalId)
 {
 	currentTab()->signalInfo(signalId);
+}
+
+void MonitorCentralWidget::slot_export()
+{
+	auto schema = currentTab()->monitorSchemaView()->schema();
+	if (schema == nullptr)
+	{
+		Q_ASSERT(schema);
+		return;
+	}
+	static QString path{"."};
+	QString fileName = QFileDialog::getSaveFileName(this,
+													tr("Export Schema"),
+													path + QDir::separator() + schema->schemaId() + ".pdf",
+													tr("PDF Files (*.pdf);;PNG Files (*.png)"));
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+	path = QFileInfo(fileName).path(); // store path for next time
+
+	bool ok = false;
+
+	if (fileName.endsWith(".pdf", Qt::CaseInsensitive) == true)
+	{
+		ok = currentTab()->monitorSchemaView()->saveSchemaToPdf(fileName);
+	}
+	else
+	{
+		if (fileName.endsWith(".png", Qt::CaseInsensitive) == true)
+		{
+			ok = currentTab()->monitorSchemaView()->saveSchemaToPng(fileName);
+		}
+		else
+		{
+			QMessageBox::critical(this, qAppName(), tr("Wrong file '%1' format, expected '.png' or '.pdf'!").arg(fileName));
+			return;
+		}
+	}
+
+	if (ok == false)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Failed to save file '%1'!").arg(fileName));
+	}
 }
 
 void MonitorCentralWidget::slot_tabCloseRequested(int index)
@@ -419,16 +486,9 @@ void MonitorCentralWidget::slot_resetSchema()
 			}
 		}
 
-		// Reload schema in widget
+		// Set schema for client widget. Force schema update, as we are reloading all schemas and onSomeEvent should be called.
 		//
-		auto context = VFrame30::Context::create(tabPage->clientSchemaView());
-
-		std::shared_ptr<VFrame30::Schema> schema = m_schemaManager->schema(schemaToLoad, std::move(context));
-		static_cast<VFrame30::BaseSchemaWidget*>(tabPage)->setSchema(schema, false);		// cast to BaseSchemaWidget as this function is hidden in ClientSchemaWidget
-
-		// Set schema for client widget
-		//
-		tabPage->setSchema(schemaToLoad, QStringList{});
+		tabPage->setSchema(schemaToLoad, tabPage->clientSchemaView()->highlightIds(), true);
 
 		tabPage->clientSchemaView()->deleteControlWidgets();		// deleteControlWidgets after loading new schema, as it will delete old widgets and later they will be created
 		tabPage->clientSchemaView()->updateControlWidgets(false);

@@ -1,12 +1,16 @@
 #pragma once
+
 #include "FblItemRect.h"
+#include "IMatsSchemaItemAssociations.h"
+
 
 namespace VFrame30
 {
 	//
 	//		SchemaItemLoopback
 	//
-	class SchemaItemLoopback : public FblItemRect
+	class SchemaItemLoopback : public FblItemRect,
+							   public IMatsSchemaItemAssociations
 	{
 		Q_OBJECT
 
@@ -31,6 +35,16 @@ namespace VFrame30
 		// Methods
 		//
 	public:
+
+		// IMatsSchemaItemAssociations implementation.
+		//
+	public:
+		virtual QStringList associatedAppSignalIds() const override;
+		virtual QStringList associatedImpactAppSignalIds() const override;
+		virtual QStringList associatedConnectionIds() const override;
+		virtual QStringList associatedLoopbackIds() const override;
+		virtual QStringList associatedSchemaItemLabels() const override;
+
 		// Properties
 		//
 	public:
@@ -82,7 +96,6 @@ namespace VFrame30
 		// Properties
 		//
 	public:
-
 		// Data
 		//
 	private:
@@ -127,10 +140,9 @@ namespace VFrame30
 		// Properties
 		//
 	public:
-
 		// Data
 		//
 	private:
 	};
 
-}
+} // namespace VFrame30

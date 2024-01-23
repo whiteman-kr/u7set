@@ -1,0 +1,17 @@
+<Command 
+	Caption="not"
+	Code="0068"
+	CodeMask="07f8"	
+	SimulationFunc="command_not"
+	ParseFunc="parse_not"
+	Description="Invert ACC[0] bit"
+
+	CodeSize="1" 
+	ReadTime="5" 
+	WaitFbExecution="false"
+
+	ConstRuntime="2"
+
+	CheckFunc="check_nothing"
+	GetMnemoFunc="mnemo_acc"
+	CalcExecTimeFunc="exectime_const"/>

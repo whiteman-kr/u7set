@@ -5,6 +5,8 @@
 #include "../../VFrame30/PosRectImpl.h"
 #include "../../VFrame30/AppSignalController.h"
 #include "../../VFrame30/TuningController.h"
+#include "../../Builder/IssueLogger.h"
+#include "AutoFblItemConnection.h"
 #include "EditSchemaTypes.h"
 #include "EditConnectionLine.h"
 #include "EditSchemaSignalProvider.h"
@@ -45,6 +47,7 @@ protected:
 	void drawMovingLinePoint(VFrame30::CDrawParam* drawParam);
 	void drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam* drawParam);
 	void drawCompareOutlines(VFrame30::CDrawParam* drawParam, const QRectF& clipRect);
+	void drawAutoFblItemConnection(VFrame30::CDrawParam& drawParam);
 
 	void drawGrid(QPainter* p, const QRectF& clipRect);
 
@@ -53,7 +56,7 @@ protected:
 protected:
 	SchemaItemAction getPossibleAction(VFrame30::SchemaItem* schemaItem, QPointF point, int* outMovingEdgePointIndex);
 
-	QRectF sizingRectItem(double xdif, double ydif, VFrame30::IPosRect* itemPos);
+	QRectF sizingRectItem(double xdif, double ydif, const VFrame30::IPosRect* itemPos);
 
 	// Signals
 signals:
@@ -98,14 +101,14 @@ private:
 	EditSchemaTuningSignalProvider m_tuningSignalProvider;
 
 	VFrame30::AppSignalController m_appSignalController;
-	VFrame30::TuningController m_tuningController;
 
-	// Temporary data can be changed in EditSchemaWidget
-	//
-protected:
+private:
 	SchemaItemPtr m_newItem;
 	std::vector<SchemaItemPtr> m_selectedItems;
 
+// Temporary data can be changed in EditSchemaWidget
+//
+protected:
 	std::map<QUuid, CompareAction> m_itemsActions;
 	bool m_compareWidget = false;
 	std::shared_ptr<VFrame30::Schema> m_compareSourceSchema;
@@ -122,7 +125,7 @@ protected:
 	// Variables for performing some actions on object (moving, resizing, etc)
 	//
 	QPointF m_editStartDocPt;					// Start Point on some actions (moving, etc)
-	QPointF m_editEndDocPt;						// End Poin on some actions
+	QPointF m_editEndDocPt;						// End Point on some actions
 	QPointF m_addRectStartPoint;
 	QPointF m_addRectEndPoint;
 
@@ -135,6 +138,10 @@ protected:
 	//
 	int m_updateDuringBuildTimer = -1;
 	::Builder::BuildIssues::Counter m_lastSchemaIssues = {-1, -1};
+
+	// Automatically create fbl item connection.
+	//
+	AutoFblItemConnection m_autoFblItemConnection;
 
 	// Temporary data can be changed in EditSchemaWidget
 	//

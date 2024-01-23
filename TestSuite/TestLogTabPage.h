@@ -6,10 +6,11 @@
 
 class TestLogTabPage : public QWidget
 {
+	Q_OBJECT
 public:
-	TestLogTabPage(TestSuiteTestLogOutput& testLogOutput, QWidget* parent);
+	TestLogTabPage(TestSuite::TestLog& testLog, TestSuiteTestLogOutput& testLogOutput, QWidget* parent);
 
-	void clearOutputLog();
+	void clearOutputWidget();
 
 protected slots:
 	void testingWasStarted();
@@ -20,13 +21,17 @@ private slots:
 	void nextIssue();
 
 	void search();
+	void slot_typeChanged(int index);
 
 private:
 	void createActions();
 	void timerEvent(QTimerEvent* event) override;
+	void appendLogMessages(const std::vector<TestSuite::TestLogItem>& messages);
 
 private:
 	QTextBrowser* m_outputWidget = nullptr;
+
+	QComboBox* m_typeCombo = nullptr;
 
 	QPushButton* m_prevIssueButton = nullptr;
 	QPushButton* m_nextIssueButton = nullptr;
@@ -49,6 +54,7 @@ private:
 
 	//
 
+	TestSuite::TestLog& m_testLog;
 	TestSuiteTestLogOutput& m_testLogOutput;
 
 	int m_logTimerId = -1;

@@ -4,6 +4,7 @@
 #include <QElapsedTimer>
 #include <QDebug>
 #include <cmath>
+#include <set>
 
 #define ASSERT_RESULT_FALSE_BREAK	Q_ASSERT(false); \
 									result = false; \
@@ -23,6 +24,13 @@
 										Q_ASSERT(false);	\
 										continue; \
 									}
+
+#define TEST_PTR_BREAK(ptr)		if (ptr == nullptr) \
+									{	\
+										Q_ASSERT(false);	\
+										break; \
+									}
+
 
 #define TEST_PTR_RETURN(ptr)		if (ptr == nullptr) \
 									{	\
@@ -95,6 +103,12 @@
 										return false; \
 									}
 
+#define ASSERT_RETURN_IF_FALSE(result)		if ((result) == false) \
+											{ \
+												Q_ASSERT(false); \
+												return false; \
+											}
+
 #define RETURN_VALUE_IF_FALSE(result, value)		if ((result) == false) \
 													{ \
 														return value; \
@@ -113,6 +127,8 @@
 #define AUTO_LOCK(mutex) QMutexLocker _locker_##mutex(&mutex);
 
 #define C_STR(qstring) qstring.toStdString().c_str()
+
+#define CONTAINS_NULLPTR(vector_of_set)	(std::find(vector_of_set.begin(), vector_of_set.end(), nullptr) != vector_of_set.end())
 
 
 inline void swapBytes(const char* src, char* dest, int size)
@@ -146,6 +162,7 @@ inline qint32 reverseInt32(qint32 val)	  { return reverseBytes<qint32>(val);  }
 inline qint64 reverseInt64(qint64 val)	  { return reverseBytes<qint64>(val);  }
 
 inline float reverseFloat(float val)	  { return reverseBytes<float>(val);   }
+inline double reverseDouble(double val)	  { return reverseBytes<double>(val);  }
 
 // Format time to string:  2022.12.31 06:24:59.239
 //
@@ -227,4 +244,87 @@ inline QString formatUptime(qint64 uptime)
 						arg(s, 2, 10, QChar('0'));
 
 	return uptimeStr;
+}
+
+inline bool stringToBool(const QString& str, bool* ok)
+{
+	QString boolStr = str.trimmed().toLower();
+
+	static const std::set<QString> trueStr =
+	{
+		QString("1"),
+		QString("true"),
+		QString("yes"),
+		QString("on"),
+	};
+
+	static const std::set<QString> falseStr =
+	{
+		QString("0"),
+		QString("false"),
+		QString("no"),
+		QString("off"),
+	};
+
+	bool _ok = true;
+	bool result = false;
+
+	if (trueStr.contains(boolStr) == true)
+	{
+		result = true;
+	}
+	else
+	{
+		if (falseStr.contains(boolStr) == true)
+		{
+			result = false;
+		}
+		else
+		{
+			_ok = false;
+		}
+	}
+
+	if (ok != nullptr)
+	{
+		*ok = _ok;
+	}
+
+	return result;
+}
+
+inline QString boolToString(bool value)
+{
+	return QString(value ? "true" : "false");
+}
+
+inline bool checkInt32Range(qint64 value)
+{
+	return	value <= std::numeric_limits<qint32>::max() &&
+			value >= std::numeric_limits<qint32>::lowest();
+}
+
+inline bool checkFloat32Range(double value)
+{
+	return	value <= std::numeric_limits<float>::max() &&
+			value >= std::numeric_limits<float>::lowest();
+}
+
+template <typename KEY, typename VALUE>
+VALUE getValueOrDefault(const std::map<KEY, VALUE>& map, const KEY& key, const VALUE& def)
+{
+	auto it = map.find(key);
+
+	if (it == map.end())
+	{
+		return def;
+	}
+
+	return it->second;
+}
+
+template <typename KEY, typename VALUE>
+VALUE getValueOrNullptr(const std::map<KEY, VALUE>& map, const KEY& key)
+{
+	return getValueOrDefault<KEY, VALUE>(map, key, nullptr);
 }

@@ -1,8 +1,9 @@
+#include "../CommonLib/Times.h"
+
 #include "ClientSchemaView.h"
-#include "SchemaLayer.h"
 #include "DrawParam.h"
 #include "PropertyNames.h"
-#include "../CommonLib/Times.h"
+#include "SchemaLayer.h"
 
 namespace VFrame30
 {
@@ -93,8 +94,9 @@ namespace VFrame30
 		QWidget* widget = m_clientSchemaView->findChild<QWidget*>(schemaItem->guid().toString());
 		if (widget == nullptr)
 		{
-			qDebug() << "Can't find widget with UUID = " << schemaItem->guid().toString();
-			assert(widget);
+			// It can happen if the schema was changed in scripts, but this is still the same cycle of draw items.
+			//
+			qDebug() << "Can't find widget with objectName " << objectName << ", UUID = " << schemaItem->guid().toString();
 			return nullptr;
 		}
 
@@ -112,6 +114,36 @@ namespace VFrame30
 
 		m_clientSchemaView->update();
 		return;
+	}
+
+	void ScriptSchemaView::startTimer(int intervalMs, QString timerId)
+	{
+		if (m_clientSchemaView == nullptr)
+		{
+			return;
+		}
+
+		return m_clientSchemaView->scriptStartTimer(intervalMs, timerId);
+	}
+
+	void ScriptSchemaView::killTimer(QString timerId)
+	{
+		if (m_clientSchemaView == nullptr)
+		{
+			return;
+		}
+
+		return m_clientSchemaView->scriptKillTimer(timerId);
+	}
+
+	void ScriptSchemaView::killAllTimers()
+	{
+		if (m_clientSchemaView == nullptr)
+		{
+			return;
+		}
+
+		return m_clientSchemaView->scriptKillAllTimers();
 	}
 
 	bool ScriptSchemaView::canBackHistory() const
@@ -148,8 +180,7 @@ namespace VFrame30
 	{
 		if (m_clientSchemaView->scriptMessageBoxAllowed() == true)
 		{
-			QMessageBox msgBox;
-			msgBox.setParent(m_clientSchemaView);
+			QMessageBox msgBox{m_clientSchemaView};
 			msgBox.setText(text);
 			if (details.isEmpty() == false)
 			{
@@ -172,8 +203,7 @@ namespace VFrame30
 	{
 		if (m_clientSchemaView->scriptMessageBoxAllowed() == true)
 		{
-			QMessageBox msgBox;
-			msgBox.setParent(m_clientSchemaView);
+			QMessageBox msgBox{m_clientSchemaView};
 			msgBox.setText(text);
 			if (details.isEmpty() == false)
 			{
@@ -196,8 +226,7 @@ namespace VFrame30
 	{
 		if (m_clientSchemaView->scriptMessageBoxAllowed() == true)
 		{
-			QMessageBox msgBox;
-			msgBox.setParent(m_clientSchemaView);
+			QMessageBox msgBox{m_clientSchemaView};
 			msgBox.setText(text);
 			if (details.isEmpty() == false)
 			{
@@ -220,8 +249,7 @@ namespace VFrame30
 	{
 		if (m_clientSchemaView->scriptMessageBoxAllowed() == true)
 		{
-			QMessageBox msgBox;
-			msgBox.setParent(m_clientSchemaView);
+			QMessageBox msgBox{m_clientSchemaView};
 			msgBox.setText(text);
 			if (details.isEmpty() == false)
 			{
@@ -237,6 +265,29 @@ namespace VFrame30
 			auto l = m_clientSchemaView->logController();
 			l->writeWarning(tr("MessageBox is not allowed at current script. Text: ") + text);
 			return false;
+		}
+	}
+
+	int ScriptSchemaView::messageBox(QString text, QMessageBox::StandardButtons buttons, QMessageBox::StandardButton defaultButton, QMessageBox::Icon icon, QString details)
+	{
+		if (m_clientSchemaView->scriptMessageBoxAllowed() == true)
+		{
+			QMessageBox msgBox{m_clientSchemaView};
+			msgBox.setText(text);
+			if (details.isEmpty() == false)
+			{
+				msgBox.setDetailedText(details);
+			}
+			msgBox.setStandardButtons(buttons);
+			msgBox.setDefaultButton(defaultButton);
+			msgBox.setIcon(icon);
+			return msgBox.exec();
+		}
+		else
+		{
+			auto l = m_clientSchemaView->logController();
+			l->writeWarning(tr("MessageBox is not allowed at current script. Text: ") + text);
+			return QMessageBox::No;
 		}
 	}
 
@@ -310,6 +361,11 @@ namespace VFrame30
 		return m_clientSchemaView->schemaManager()->schemaCount();
 	}
 
+	double ScriptSchemaView::zoomFactor() const
+	{
+		return m_clientSchemaView->zoom() / 100.0;
+	}
+
 
 	//
 	// ClientSchemaView
@@ -327,8 +383,8 @@ namespace VFrame30
 
 		m_jsEngine.installExtensions(QJSEngine::ConsoleExtension);
 
-		startRepaintTimer();	// This is a main repaint timer, it fires on the edge of 250ms
-		startTimer(1000);		// This is a guard timer
+		startRepaintTimer(); // This is a main repaint timer, it fires on the edge of 250ms
+		startTimer(1000);    // This is a guard timer
 
 		return;
 	}
@@ -351,10 +407,10 @@ namespace VFrame30
 		//
 		QRectF clipRect(0, 0, schema()->docWidth(), schema()->docHeight());
 
-		if (schema() != nullptr && m_infoMode  == false)
+		if (schema() != nullptr && m_infoMode == false)
 		{
 			QRect updateRect = paintEvent->rect();
-			updateRect.adjust(-logicalDpiX(), -logicalDpiY() / 4, logicalDpiX(), logicalDpiY() / 4);	// some space to draw pin names
+			updateRect.adjust(-logicalDpiX(), -logicalDpiY() / 4, logicalDpiX(), logicalDpiY() / 4); // some space to draw pin names
 
 			QPointF cls;
 			QPointF clf;
@@ -377,11 +433,11 @@ namespace VFrame30
 
 		VFrame30::CDrawParam drawParam(&p, this, schema()->gridSize(), schema()->pinGridStep(), schema()->unit());
 
-		drawParam.setControlBarSize(CONTROL_BAR(schema()->unit(), p.device()->devicePixelRatioF(), zoom()));		// Is required for drawing highlights on items
-		drawParam.setBlinkPhase(static_cast<bool>((QTime::currentTime().msec() / 250) % 2));	// 0-249 : false, 250-499 : true, 500-749 : false, 750-999 : true
+		drawParam.setControlBarSize(CONTROL_BAR(schema()->unit(), p.device()->devicePixelRatioF(), zoom())); // Is required for drawing highlights on items
+		drawParam.setBlinkPhase(static_cast<bool>((QTime::currentTime().msec() / 250) % 2));                 // 0-249 : false, 250-499 : true, 500-749 : false, 750-999 : true
 		drawParam.setInfoMode(m_infoMode);
 
-		drawParam.setHightlightIds(hightlightIds());
+		drawParam.setHighlightIds(highlightIds());
 
 		// Draw schema
 		//
@@ -404,8 +460,19 @@ namespace VFrame30
 		return;
 	}
 
-	void ClientSchemaView::timerEvent(QTimerEvent*)
+	void ClientSchemaView::timerEvent(QTimerEvent* event)
 	{
+		// Is this a script timer event?
+		//
+		if (auto timerIt = m_scriptTimers.find(event->timerId());
+			timerIt != m_scriptTimers.end())
+		{
+			const auto& [qtTimerId, scriptTimerId] = *timerIt;
+
+			runGlobalScriptEvent(GlobalScriptEvents::OnTimerEvent, QJSValueList{} << scriptTimerId, false);
+			return;
+		}
+
 		// Guard timer in case if the main repaint timer has stopped
 		//
 		if (QDateTime::currentMSecsSinceEpoch() - m_lastRepaintEventFired.toMSecsSinceEpoch() > 500_ms)
@@ -413,6 +480,7 @@ namespace VFrame30
 			// Something wrong with timer, start it again
 			//
 			startRepaintTimer();
+			return;
 		}
 
 		return;
@@ -446,7 +514,7 @@ namespace VFrame30
 		}
 		else
 		{
-			VFrame30::SchemaViewWidget::mouseMoveEvent(event);	// This will set mouse cursor
+			VFrame30::SchemaViewWidget::mouseMoveEvent(event); // This will set mouse cursor
 		}
 
 		return;
@@ -464,9 +532,9 @@ namespace VFrame30
 
 		if (event->buttons().testFlag(Qt::MiddleButton) == true)
 		{
-			// It is scrolling by midbutton, let scroll view process it
+			// It is scrolling by middle button, let scroll view process it
 			//
-			VFrame30::SchemaViewWidget::mouseMoveEvent(event);	// This will set mouse cursor
+			VFrame30::SchemaViewWidget::mouseMoveEvent(event); // This will set mouse cursor
 			VFrame30::SchemaViewWidget::mousePressEvent(event);
 			return;
 		}
@@ -494,10 +562,10 @@ namespace VFrame30
 				continue;
 			}
 
-			for (const auto& item: layer->items() | std::views::reverse)
+			for (const auto& item : layer->items() | std::views::reverse)
 			{
 				if (item->acceptClick() == true &&
-				    item->isIntersectPoint(x, y) == true &&
+					item->isIntersectPoint(x, y) == true &&
 					item->clickScript().isEmpty() == false)
 				{
 					// Remember this item
@@ -519,9 +587,9 @@ namespace VFrame30
 	{
 		if (event->button() == Qt::MiddleButton)
 		{
-			// It is scrolling by midbutton, let scroll view process it
+			// It is scrolling by middle button, let scroll view process it
 			//
-			VFrame30::SchemaViewWidget::mouseMoveEvent(event);	// This will set mouse cursor
+			VFrame30::SchemaViewWidget::mouseMoveEvent(event); // This will set mouse cursor
 			VFrame30::SchemaViewWidget::mouseReleaseEvent(event);
 			return;
 		}
@@ -553,7 +621,7 @@ namespace VFrame30
 				{
 					if (item == m_leftClickOverItem &&
 						item->acceptClick() == true &&
-					    item->isIntersectPoint(x, y) == true &&
+						item->isIntersectPoint(x, y) == true &&
 						item->clickScript().isEmpty() == false)
 					{
 						// Run script
@@ -577,11 +645,11 @@ namespace VFrame30
 
 						// --
 						//
-						update();		// Repaint screen
+						update();                                          // Repaint screen
 						m_leftClickOverItem.reset();
 						event->accept();
 
-						VFrame30::SchemaViewWidget::mouseMoveEvent(event);	// This will set mouse cursor
+						VFrame30::SchemaViewWidget::mouseMoveEvent(event); // This will set mouse cursor
 						return;
 					}
 				}
@@ -590,7 +658,7 @@ namespace VFrame30
 			m_leftClickOverItem.reset();
 		}
 
-		VFrame30::SchemaViewWidget::mouseMoveEvent(event);	// This will set mouse cursor
+		VFrame30::SchemaViewWidget::mouseMoveEvent(event); // This will set mouse cursor
 
 		return;
 	}
@@ -683,7 +751,7 @@ namespace VFrame30
 		m_infoMode = value;
 	}
 
-	const QStringList& ClientSchemaView::hightlightIds() const
+	const QStringList& ClientSchemaView::highlightIds() const
 	{
 		return m_highlightIds;
 	}
@@ -695,18 +763,20 @@ namespace VFrame30
 
 	TuningController* ClientSchemaView::tuningController()
 	{
-		return m_tuningController;
+		return m_tuningController.get();
 	}
 
 	const TuningController* ClientSchemaView::tuningController() const
 	{
-		return m_tuningController;
+		return m_tuningController.get();
 	}
 
-	void ClientSchemaView::setTuningController(TuningController* value)
+	void ClientSchemaView::setTuningController(ITuningSignalManager& signalManager,
+											   ITuningConnection& tuningConnection,
+											   ITuningAuthorization& tuningAuthorization)
 	{
-		m_tuningController = value;
-		m_jsEngineGlobalsWereCreated = false;	// it will make jsEngine() to initialize global script vars again
+		m_tuningController = std::make_unique<TuningController>(signalManager, tuningConnection, tuningAuthorization, this);
+		m_jsEngineGlobalsWereCreated = false; // it will make jsEngine() to initialize global script vars again
 
 		return;
 	}
@@ -725,7 +795,7 @@ namespace VFrame30
 	{
 		m_appSignalController = value;
 		m_scriptAppSignalController = std::make_unique<ScriptAppSignalController>(m_appSignalController->appSignalManager());
-		m_jsEngineGlobalsWereCreated = false;	// it will make jsEngine() to initialize global script vars again
+		m_jsEngineGlobalsWereCreated = false; // it will make jsEngine() to initialize global script vars again
 
 		return;
 	}
@@ -767,19 +837,17 @@ namespace VFrame30
 	void ClientSchemaView::setLogController(LogController* value)
 	{
 		m_logController = value;
-		m_jsEngineGlobalsWereCreated = false;	// it will make jsEngine() to initialize global script vars again
+		m_jsEngineGlobalsWereCreated = false; // it will make jsEngine() to initialize global script vars again
 	}
 
 	void ClientSchemaView::setGlobalScript(QString value)
 	{
 		m_globalScript = value + QChar::LineFeed;
-		m_jsEngineGlobalsWereCreated = false;
-	}
+		m_jsEngineGlobalsWereCreated = false; // it will make jsEngine() to initialize global script vars again.
 
-	void ClientSchemaView::setOnConfigurationArrivedScript(QString value)
-	{
-		m_onConfigurationArrivedScript = std::move(value);
-		m_jsEngineGlobalsWereCreated = false;
+		std::ignore = jsEngine(); // jsEngine() prepares global script and calls execOnConfigurationArrived.
+
+		return;
 	}
 
 	QJSEngine* ClientSchemaView::jsEngine()
@@ -817,7 +885,7 @@ namespace VFrame30
 
 		if (schema() != nullptr)
 		{
-			// Context must have already been set, it sould be done after creation of the schema.
+			// Context must have already been set, it should be done after creation of the schema.
 			//
 			Q_ASSERT(schema()->context());
 		}
@@ -838,13 +906,130 @@ namespace VFrame30
 		return true;
 	}
 
+	bool ClientSchemaView::runGlobalScriptEvent(const QString& functionName, const QJSValueList& arguments, bool funcIsOptional)
+	{
+		// functionName - Function and event name
+		// arguments - arguments to pass to that script function
+		// funcIsOptional - function may not be present, do not emit error if it was not found in script.
+		//
+
+		if (schema() != nullptr)
+		{
+			// Context must have already been set, it should be done after creation of the schema.
+			//
+			Q_ASSERT(schema()->context());
+		}
+
+		QJSEngine* engine = jsEngine(); // jsEngine() prepares global script.
+
+		if (engine == nullptr)
+		{
+			LogController* log = logController();
+			if (log != nullptr)
+			{
+				if (funcIsOptional == true)
+				{
+					log->writeMessage(tr("Script event %1 occurred but QJSEngine is not available").arg(functionName));
+				}
+				else
+				{
+					log->writeWarning(tr("Script event %1 occurred but QJSEngine is not available").arg(functionName));
+				}
+			}
+
+			return false;
+		}
+
+		return privateRunGlobalScriptEvent(*engine, functionName, arguments, funcIsOptional);
+	}
+
+	bool ClientSchemaView::privateRunGlobalScriptEvent(QJSEngine& engine, const QString& functionName, const QJSValueList& arguments, bool funcIsOptional)
+	{
+		LogController* log = logController();
+
+		QJSValue globalObject = engine.globalObject();
+		if (globalObject.isNull() == true || globalObject.isUndefined() == true)
+		{
+			if (log != nullptr)
+			{
+				if (funcIsOptional == true)
+				{
+					log->writeMessage(tr("Script event %1 occurred but engine->globalObject() is not available").arg(functionName));
+				}
+				else
+				{
+					log->writeWarning(tr("Script event %1 occurred but engine->globalObject() is not available").arg(functionName));
+				}
+			}
+
+			return false;
+		}
+
+		QJSValue onTimerEvent = globalObject.property(functionName);
+		if (onTimerEvent.isUndefined() == true)
+		{
+			if (log != nullptr)
+			{
+				if (funcIsOptional == true)
+				{
+					log->writeMessage(tr("Script event %1 occurred but global script function %1 is not defined").arg(functionName));
+				}
+				else
+				{
+					log->writeWarning(tr("Script event %1 occurred but global script function %1 is not defined").arg(functionName));
+				}
+			}
+
+			return false;
+		}
+
+		if (onTimerEvent.isCallable() == false)
+		{
+			if (log != nullptr)
+			{
+				log->writeError(tr("Script event %1 occurred but %1 is not callable").arg(functionName));
+			}
+
+			return false;
+		}
+
+		// Run script function
+		//
+		QJSValue result = onTimerEvent.call(arguments);
+		if (engine.isInterrupted())
+		{
+			if (log != nullptr)
+			{
+				log->writeWarning(tr("Script event %1 was interrupted").arg(functionName));
+			}
+
+			return false;
+		}
+
+		// Log errors and exit
+		//
+		if (result.isError() == true)
+		{
+			bool prev = setScriptMessageBoxAllowed(false);
+
+			reportScriptError(result, QString("GlobalScript.") + functionName);
+
+			setScriptMessageBoxAllowed(prev);
+			return false;
+		}
+
+		return true;
+	}
+
 	bool ClientSchemaView::reEvaluateGlobalScript()
 	{
+		qDebug() << "ClientSchemaView::reEvaluateGlobalScript()";
+
 		QJSValue result = m_jsEngine.evaluate(m_globalScript);
 
 		if (result.isError())
 		{
-			QString err = formatScriptError(result);	// it will trace error, must not use any messageboxes here, it lead to exception on paint device
+			QString err = formatScriptError(result); // it will trace error, must not use any message boxes here, it lead to exception on paint device
 			logController()->writeError(tr("Evaluating GlobalScript error:") + err);
 		}
 
@@ -853,20 +1038,7 @@ namespace VFrame30
 
 	bool ClientSchemaView::execOnConfigurationArrived()
 	{
-		QJSValue scriptValue = m_jsEngine.evaluate(m_onConfigurationArrivedScript);
-
-		if (scriptValue.isError() == true)
-		{
-			reportScriptError(scriptValue, "ClientSchemaView::execOnConfigurationArrived()");
-			return false;
-		}
-
-		if (scriptValue.isUndefined() == true)
-		{
-			return false;
-		}
-
-		return runScript(scriptValue, "run onConfigurationArrivedScript", true);
+		return privateRunGlobalScriptEvent(m_jsEngine, GlobalScriptEvents::OnConfigurationArrived, {}, true);
 	}
 
 	QJSValue ClientSchemaView::evaluateScript(QString script, QString where, bool reportError)
@@ -891,10 +1063,10 @@ namespace VFrame30
 		QString stack = scriptValue.property("stack").toString();
 
 		QString str = QString("Script running uncaught exception at line [%1], Class: [%2], Stack: [%3], Message: [%4]")
-					  .arg(scriptValue.property("lineNumber").toInt())
-					  .arg(metaObject()->className())
-					  .arg(stack)
-					  .arg(scriptValue.toString());
+						  .arg(scriptValue.property("lineNumber").toInt())
+						  .arg(metaObject()->className())
+						  .arg(stack)
+						  .arg(scriptValue.toString());
 
 		return str;
 	}
@@ -907,16 +1079,16 @@ namespace VFrame30
 		qDebug() << "\tMessage: " << scriptValue.toString();
 
 		QString message = tr("Script (%1) uncaught exception at line %2:\n%3")
-						  .arg(where)
-						  .arg(scriptValue.property("lineNumber").toInt())
-						  .arg(scriptValue.toString());
+							  .arg(where)
+							  .arg(scriptValue.property("lineNumber").toInt())
+							  .arg(scriptValue.toString());
 
 		if (logController() != nullptr)
 		{
 			logController()->writeError(message);
 		}
 
-		if (m_alloScriptMessageBox == true)
+		if (m_allowScriptMessageBox == true)
 		{
 			QMessageBox::critical(this, QApplication::applicationDisplayName(), message);
 		}
@@ -926,15 +1098,53 @@ namespace VFrame30
 
 	bool ClientSchemaView::scriptMessageBoxAllowed() const
 	{
-		return m_alloScriptMessageBox;
+		return m_allowScriptMessageBox;
 	}
 
 	bool ClientSchemaView::setScriptMessageBoxAllowed(bool enable)
 	{
-		bool prevState = m_alloScriptMessageBox;
-		m_alloScriptMessageBox = enable;
+		bool prevState = m_allowScriptMessageBox;
+		m_allowScriptMessageBox = enable;
 
 		return prevState;
+	}
+
+	void ClientSchemaView::scriptStartTimer(int intervalMs, QString timerId)
+	{
+		scriptKillTimer(timerId);
+
+		int qtTimerId = startTimer(intervalMs);
+		m_scriptTimers[qtTimerId] = timerId;
+		return;
+	}
+
+	void ClientSchemaView::scriptKillTimer(QString timerId)
+	{
+		for (auto it = m_scriptTimers.begin(); it != m_scriptTimers.end(); ++it)
+		{
+			const auto& [qtTimerId, scriptTimerId] = *it;
+
+			if (scriptTimerId == timerId)
+			{
+				killTimer(qtTimerId);
+				m_scriptTimers.erase(it);
+				return;
+			}
+		}
+
+		return;
+	}
+
+	void ClientSchemaView::scriptKillAllTimers()
+	{
+		for (const auto& [qtTimerId, scriptTimerId] : m_scriptTimers)
+		{
+			Q_UNUSED(scriptTimerId);
+			killTimer(qtTimerId);
+		}
+
+		m_scriptTimers.clear();
+		return;
 	}
 
 	bool ClientSchemaView::variableExists(const QString& name) const
@@ -972,7 +1182,7 @@ namespace VFrame30
 		return m_timeStats;
 	}
 
-	const MonitorBehavior& ClientSchemaView::monitorBehavor() const noexcept
+	const MonitorBehavior& ClientSchemaView::monitorBehavior() const noexcept
 	{
 		return m_monitorBehavior;
 	}
@@ -1001,4 +1211,4 @@ namespace VFrame30
 	{
 		m_tuningClientBehavior = std::move(src);
 	}
-}
+} // namespace VFrame30

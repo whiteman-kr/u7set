@@ -51,35 +51,67 @@ namespace Builder
 	{
 		TEST_PTR_RETURN_FALSE(m_signalSet);
 		TEST_PTR_RETURN_FALSE(m_software);
+		TEST_PTR_RETURN_FALSE(m_buildResultWriter);
 
-		Proto::ArchSignals msg;
+		Proto::ArchInfo archInfo;
 
-		int count = static_cast<int>(m_signalSet->count());
+		m_buildResultWriter->buildInfo().saveToProto(archInfo.mutable_buildinfo());
 
-		for(int i = 0; i < count; i++)
+		archInfo.set_archiveserviceid(m_software->equipmentIdTemplate().toStdString());
+
+		for(const AppSignal* s : *m_signalSet)
 		{
-			AppSignal& s = (*m_signalSet)[i];
-
-			if (s.isAnalog() == true || s.isDiscrete() == true)
+			if (s->acquire() == false)
 			{
-				Proto::ArchSignal* archSignal = msg.add_archsignals();
+				continue;
+			}
 
-				TEST_PTR_CONTINUE(archSignal);
+			switch(s->signalType())
+			{
+			case E::SignalType::Discrete:
+				{
+					Proto::ArchSignal* archSignal = archInfo.add_archsignal();
 
-				archSignal->set_hash(calcHash(s.appSignalID()));
-				archSignal->set_isanalog(s.isAnalog());
-				archSignal->set_appsignalid(s.appSignalID().toStdString());
+					TEST_PTR_BREAK(archSignal);
+
+					archSignal->set_appsignalid(s->appSignalID().toStdString());
+					archSignal->set_signaltype(TO_INT(s->signalType()));
+				}
+				break;
+
+			case E::SignalType::Analog:
+				{
+					Proto::ArchSignal* archSignal = archInfo.add_archsignal();
+
+					TEST_PTR_BREAK(archSignal);
+
+					archSignal->set_appsignalid(s->appSignalID().toStdString());
+					archSignal->set_signaltype(TO_INT(s->signalType()));
+					archSignal->set_lowlimit(s->lowEngineeringUnits());
+					archSignal->set_highlimit(s->highEngineeringUnits());
+					archSignal->set_unit(s->unit().toStdString());
+					archSignal->set_fineaperture(s->fineAperture());
+					archSignal->set_coarseaperture(s->coarseAperture());
+				}
+				break;
+
+			case E::SignalType::Bus:
+				break;
+
+			default:
+				Q_ASSERT(false);
 			}
 		}
 
-		int size = static_cast<int>(msg.ByteSizeLong());
+		int size = static_cast<int>(archInfo.ByteSizeLong());
 
 		char* ptr = new char[size];
 
-		msg.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(ptr));
+		archInfo.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(ptr));
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "ArchSignals.proto", QByteArray::fromRawData(ptr, size), true);
-
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(),
+															File::ARCH_INFO_PROTO,
+															QByteArray::fromRawData(ptr, size), true);
 		delete [] ptr;
 
 		TEST_PTR_RETURN_FALSE(buildFile);

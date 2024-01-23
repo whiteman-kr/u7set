@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <QFile>
 
-#include "../../OnlineLib/DataProtocols.h"
+#include "../../HardwareLib/DataProtocols.h"
 #include "../../UtilsLib/WUtils.h"
 #include "../../UtilsLib/XmlHelper.h"
 #include "../../lib/ConstStrings.h"

@@ -19,8 +19,8 @@ DialogFilterEditor::DialogFilterEditor(TuningSignalManager& tuningSignalManager,
 												  false,		/*typeCounterEnabled*/
 												  false,		/*typeSchemasTabsEnabled*/
 												  TuningFilter::Source::User,
-												  theSettings.m_dialogFiltersEditorSplitterPosition,
-												  theSettings.m_dialogFiltersEditorPropertyEditorSplitterPosition
+												  TuningClientAppSettings::instance().user().m_dialogFiltersEditorSplitterPosition,
+												  TuningClientAppSettings::instance().user().m_dialogFiltersEditorPropertyEditorSplitterPosition
 												  );
 
 	connect(m_tuningFilterEditor, &TuningFilterEditor::getCurrentSignalValue, this, &DialogFilterEditor::onGetCurrentSignalValue, Qt::DirectConnection);
@@ -40,10 +40,10 @@ DialogFilterEditor::DialogFilterEditor(TuningSignalManager& tuningSignalManager,
     l->addWidget(m_tuningFilterEditor);
     l->addLayout(okCancelButtonsLayout);
 
-	if (theSettings.m_dialogFiltersEditorPos.x() != -1 && theSettings.m_dialogFiltersEditorPos.y() != -1)
+	if (TuningClientAppSettings::instance().user().m_dialogFiltersEditorPos.x() != -1 && TuningClientAppSettings::instance().user().m_dialogFiltersEditorPos.y() != -1)
     {
-		move(theSettings.m_dialogFiltersEditorPos);
-		restoreGeometry(theSettings.m_dialogFiltersEditorGeometry);
+		move(TuningClientAppSettings::instance().user().m_dialogFiltersEditorPos);
+		restoreGeometry(TuningClientAppSettings::instance().user().m_dialogFiltersEditorGeometry);
     }
     else
     {
@@ -53,10 +53,10 @@ DialogFilterEditor::DialogFilterEditor(TuningSignalManager& tuningSignalManager,
 
 DialogFilterEditor::~DialogFilterEditor()
 {
-	theSettings.m_dialogFiltersEditorPos = pos();
-	theSettings.m_dialogFiltersEditorGeometry = saveGeometry();
+	TuningClientAppSettings::instance().user().m_dialogFiltersEditorPos = pos();
+	TuningClientAppSettings::instance().user().m_dialogFiltersEditorGeometry = saveGeometry();
 
-	m_tuningFilterEditor->saveUserInterfaceSettings(&theSettings.m_dialogFiltersEditorSplitterPosition, &theSettings.m_dialogFiltersEditorPropertyEditorSplitterPosition);
+	m_tuningFilterEditor->saveUserInterfaceSettings(&TuningClientAppSettings::instance().user().m_dialogFiltersEditorSplitterPosition, &TuningClientAppSettings::instance().user().m_dialogFiltersEditorPropertyEditorSplitterPosition);
 
 }
 
@@ -64,7 +64,7 @@ void DialogFilterEditor::onGetCurrentSignalValue(Hash appSignalHash, TuningValue
 {
     *ok = true;
 
-	TuningSignalState tss = m_tuningSignalManager.state(appSignalHash, ok);
+	TuningSignalState tss = m_tuningSignalManager.queuedState(appSignalHash, ok);
 
 	if (*ok == false)
 	{

@@ -3,41 +3,6 @@
 #include "MonitorSignalManager.h"
 #include "../OnlineLib/SocketIO.h"
 
-
-namespace	// Anonymous namespace, as this class is used just in this translation unit
-{
-	class FilteredArchiveSignalsModel : public QAbstractTableModel
-	{
-		// Q_OBJECT
-
-	public:
-		FilteredArchiveSignalsModel(std::vector<ArchiveSignal>&& signalss, QObject* parent);
-
-	public:
-		int rowCount(const QModelIndex& parent = QModelIndex{}) const override;
-		int columnCount(const QModelIndex& parent = QModelIndex{}) const override;
-		QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-		QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
-
-		void filterSignals(QString server, DialogChooseArchiveSignals::ArchiveSignalType signalType, QString signalIdFilter);
-
-		[[nodiscard]] ArchiveSignal signalByRow(int row) const;		// can throw std::out_of_range()
-
-	private:
-		std::vector<size_t> m_signalIndexes;
-		std::vector<ArchiveSignal> m_signals;
-		std::map<QString, std::vector<size_t>> m_startWithArrays;	// Key is startWith, in lowercase. Values is indexes in m_signals for startWith
-
-		enum class ColumnType
-		{
-			SignalId,
-			Type,
-			Caption,
-			Server
-		};
-	};
-}
-
 //
 //
 //	DialogChooseArchiveSignals
@@ -46,6 +11,7 @@ namespace	// Anonymous namespace, as this class is used just in this translation
 DialogChooseArchiveSignals::ArchiveSignalType DialogChooseArchiveSignals::s_lastSignalType = DialogChooseArchiveSignals::ArchiveSignalType::AllSignals;
 QString DialogChooseArchiveSignals::s_lastServer;
 
+using namespace MonitorInternal;
 
 DialogChooseArchiveSignals::DialogChooseArchiveSignals(const MonitorSignalManager* signalManager,
 													   const std::vector<SoftwareEndpoint::ArchiveService>& archiveServices,
@@ -53,7 +19,8 @@ DialogChooseArchiveSignals::DialogChooseArchiveSignals(const MonitorSignalManage
 													   QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::DialogChooseArchiveSignals),
-	m_archiveServices(archiveServices)
+	m_archiveServices(archiveServices),
+	s_allServers(tr("All Servers"))
 {
 	Q_ASSERT(signalManager);
 
@@ -125,10 +92,10 @@ DialogChooseArchiveSignals::DialogChooseArchiveSignals(const MonitorSignalManage
 	// --
 	//
 	QStringList headerLabels;
-	headerLabels << "SignalID";
-	headerLabels << "Type";
-	headerLabels << "Caption";
-	headerLabels << "Server";
+	headerLabels << tr("SignalID");
+	headerLabels << tr("Type");
+	headerLabels << tr("Caption");
+	headerLabels << tr("Server");
 
 	ui->archiveSignals->setHeaderLabels(headerLabels);
 
@@ -656,16 +623,16 @@ QVariant FilteredArchiveSignalsModel::headerData(int section, Qt::Orientation or
 			switch (static_cast<ColumnType>(section))
 			{
 			case ColumnType::SignalId:
-				return QString{"SignalID"};
+				return tr("SignalID");
 
 			case ColumnType::Type:
-				return QString{"Type"};
+				return tr("Type");
 
 			case ColumnType::Caption:
-				return QString{"Caption"};
+				return tr("Caption");
 
 			case ColumnType::Server:
-				return QString{"Server"};
+				return tr("Server");
 			}
 
 			Q_ASSERT(false);

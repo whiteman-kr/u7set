@@ -65,38 +65,6 @@ namespace Builder
 	//
 	// ----------------------------------------------------------------------------------
 
-	CheckFuncPtr CodeChecker::m_checkFunc[LM_COMMANDS_COUNT] =
-	{
-		&CodeChecker::checkNoCommand,
-		&CodeChecker::checkNop,
-		&CodeChecker::checkStart,
-		&CodeChecker::checkStop,
-		&CodeChecker::checkMov,
-		&CodeChecker::checkMovMem,
-		&CodeChecker::checkMovConst,
-		&CodeChecker::checkMovBitConst,
-		&CodeChecker::checkWriteFuncBlock,
-		&CodeChecker::checkReadFuncBlock,
-		&CodeChecker::checkWriteFuncBlockConst,
-		&CodeChecker::checkWriteFuncBlockBit,
-		&CodeChecker::checkReadFuncBlockBit,
-		&CodeChecker::checkReadFuncBlockTest,
-		&CodeChecker::checkSetMem,
-		&CodeChecker::checkMovBit,
-		&CodeChecker::checkNstart,
-		&CodeChecker::checkAppStart,
-		&CodeChecker::checkMov32,
-		&CodeChecker::checkMovConst32,
-		&CodeChecker::checkWriteFuncBlock32,
-		&CodeChecker::checkReadFuncBlock32,
-		&CodeChecker::checkWriteFuncBlockConst32,
-		&CodeChecker::checkReadFuncBlockTest32,
-		&CodeChecker::checkMovCompareFlag,
-		&CodeChecker::checkPrevMov,
-		&CodeChecker::checkPrevMov32,
-		&CodeChecker::checkFill
-	};
-
 	CodeChecker::CodeChecker(const ModuleLogicCompiler& compiler) :
 		m_compiler(compiler)
 	{
@@ -104,7 +72,7 @@ namespace Builder
 
 	CodeChecker::~CodeChecker()
 	{
-		DELETE_IF_NOT_NULL(m_mem);
+		DELETE_ARRAY_IF_NOT_NULL(m_mem);
 	}
 
 	bool CodeChecker::check(const AppLogicCode& appLogicCode)
@@ -113,11 +81,21 @@ namespace Builder
 
 		bool result = init();
 
-		RETURN_IF_FALSE(result);
+		if (result == false)
+		{
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("CodeChecker init error!"));
+		}
 
 		for(const CodeItem& ci : appLogicCode.code())
 		{
-			result &= check(ci);
+			bool res = check(ci);
+
+			if (res == false)
+			{
+				logError(ci, "check error");
+			}
+
+			result &= res;
 		}
 
 		return result;
@@ -125,20 +103,26 @@ namespace Builder
 
 	bool CodeChecker::init()
 	{
-		auto lmDesc = m_compiler.getLmDescription();
+		m_lmDesc = m_compiler.getLmDescription();
 
-		TEST_PTR_RETURN_FALSE(lmDesc);
+		TEST_PTR_RETURN_FALSE(m_lmDesc);
 
-		m_lmDesc = lmDesc.get();
+		m_lmCommands = &m_lmDesc->commands();
 
 		m_log = m_compiler.log();
 
 		TEST_PTR_RETURN_FALSE(m_log);
 
-		m_memSizeW = lmDesc->memory().m_appMemorySize;
+		m_memSizeW = m_lmDesc->memory().m_appMemorySize;
 		m_mem = new quint16 [m_memSizeW];
 
 		std::memset(m_mem, 0, m_memSizeW * sizeof(quint16));
+
+		m_bitMemArea.setStartAddr(m_lmDesc->memory().m_appLogicBitDataOffset);
+		m_bitMemArea.setSizeW(m_lmDesc->memory().m_appLogicBitDataSize);
+
+		m_appWordMemArea.setStartAddr(m_lmDesc->memory().m_appLogicWordDataOffset);
+		m_appWordMemArea.setSizeW(m_lmDesc->memory().m_appLogicWordDataSize);
 
 		bool result = true;
 
@@ -468,7 +452,7 @@ namespace Builder
 	{
 		TEST_PTR_RETURN(m_log);
 
-		LOG_INTERNAL_ERROR_MSG(m_log, QString("%1, command: %2").arg(err).arg(cmd.getAsmCode(false)));
+		LOG_INTERNAL_ERROR_MSG(m_log, QString("%1, command: %2").arg(err).arg(cmd.getAsmCode(m_lmDesc, false, false)));
 	}
 
 	bool CodeChecker::check(const CodeItem& cmd)
@@ -477,6 +461,8 @@ namespace Builder
 		{
 			return true;
 		}
+
+		TEST_PTR_RETURN_FALSE(m_lmCommands);
 
 		// Command address checking
 		//
@@ -491,43 +477,41 @@ namespace Builder
 
 		// Command parameters checking
 		//
-		int funcIndex = static_cast<int>(cmd.getOpcode());
+		LmCommandCode cmdCode = cmd.lmCommandCode();
 
-		if (funcIndex < 0 && funcIndex >= LM_COMMANDS_COUNT)
+		auto it = m_lmCommands->find(cmdCode);
+
+		if (it == m_lmCommands->end())
 		{
-			logError(cmd, "Invalid command OpCode");
+			logError(cmd, QString("Unknown command code %1").arg(cmdCode));
 			return false;
 		}
 
-		CheckFuncPtr checkFuncPtr = m_checkFunc[funcIndex];
+		auto it2 = m_checkFuncMap.find(it->second.checkFunc);
+
+		if (it2 == m_checkFuncMap.end())
+		{
+			logError(cmd, QString("Unknown command check function '%1'").arg(it->second.checkFunc));
+			return false;
+		}
+
+		CheckFuncPtr checkFuncPtr = it2->second;
 
 		return (this->*checkFuncPtr)(cmd);
 	}
 
-	bool CodeChecker::checkNoCommand(const CodeItem& cmd)
+	bool CodeChecker::check_nothing(const CodeItem& cmd)
 	{
 		Q_UNUSED(cmd);
 		return true;
 	}
 
-	bool CodeChecker::checkNop(const CodeItem& cmd)
-	{
-		Q_UNUSED(cmd);
-		return true;
-	}
-
-	bool CodeChecker::checkStart(const CodeItem& cmd)
+	bool CodeChecker::check_startafb(const CodeItem& cmd)
 	{
 		return checkFbTypeAndInstance(cmd);
 	}
 
-	bool CodeChecker::checkStop(const CodeItem& cmd)
-	{
-		Q_UNUSED(cmd);
-		return true;
-	}
-
-	bool CodeChecker::checkMov(const CodeItem& cmd)
+	bool CodeChecker::check_mov(const CodeItem& cmd)
 	{
 		quint32 readAddr = cmd.getWord3();
 		quint32 writeAddr = cmd.getWord2();
@@ -536,24 +520,40 @@ namespace Builder
 			   checkCanWrite16(cmd, writeAddr);
 	}
 
-	bool CodeChecker::checkMovMem(const CodeItem& cmd)
+	bool CodeChecker::check_mov_addr_acc(const CodeItem& cmd)
+	{
+		quint32 writeAddr = cmd.getWord2();
+
+		return checkCanWrite16(cmd, writeAddr) &&
+			   addrNotInBitMemArea(writeAddr, 1);
+	}
+
+	bool CodeChecker::check_mov_acc_addr(const CodeItem& cmd)
+	{
+		quint32 readAddr = cmd.getWord2();
+
+		return checkCanRead16(cmd, readAddr);
+	}
+
+	bool CodeChecker::check_movmem(const CodeItem& cmd)
 	{
 		quint32 readAddr = cmd.getWord3();
 		quint32 writeAddr = cmd.getWord2();
 		quint32 n = cmd.getWord4();
 
 		return checkCanRead(cmd, readAddr, n) &&
-			   checkCanWrite(cmd, writeAddr, n);
+			   checkCanWrite(cmd, writeAddr, n) &&
+			   addrNotInBitMemArea(writeAddr, n);
 	}
 
-	bool CodeChecker::checkMovConst(const CodeItem& cmd)
+	bool CodeChecker::check_movc(const CodeItem& cmd)
 	{
 		quint32 writeAddr = cmd.getWord2();
 
 		return checkCanWrite16(cmd, writeAddr);
 	}
 
-	bool CodeChecker::checkMovBitConst(const CodeItem& cmd)
+	bool CodeChecker::check_movbc(const CodeItem& cmd)
 	{
 		quint32 writeAddr = cmd.getWord2();
 		quint32 bitNo = cmd.getWord4();
@@ -561,7 +561,7 @@ namespace Builder
 		return checkCanWriteBit(cmd, writeAddr, bitNo);
 	}
 
-	bool CodeChecker::checkWriteFuncBlock(const CodeItem& cmd)
+	bool CodeChecker::check_wrfb(const CodeItem& cmd)
 	{
 		quint32 readAddr = cmd.getWord3();
 
@@ -569,7 +569,7 @@ namespace Builder
 				checkFbTypeAndInstance(cmd);
 	}
 
-	bool CodeChecker::checkReadFuncBlock(const CodeItem& cmd)
+	bool CodeChecker::check_rdfb(const CodeItem& cmd)
 	{
 		quint32 writeAddr = cmd.getWord3();
 
@@ -577,12 +577,12 @@ namespace Builder
 				checkCanWrite16(cmd, writeAddr);
 	}
 
-	bool CodeChecker::checkWriteFuncBlockConst(const CodeItem& cmd)
+	bool CodeChecker::check_wrfbc(const CodeItem& cmd)
 	{
 		return checkFbTypeAndInstance(cmd);
 	}
 
-	bool CodeChecker::checkWriteFuncBlockBit(const CodeItem& cmd)
+	bool CodeChecker::check_wrfbb(const CodeItem& cmd)
 	{
 		quint32 readAddr = cmd.getWord3();
 		quint32 bitNo = cmd.getWord4();
@@ -591,29 +591,31 @@ namespace Builder
 				checkFbTypeAndInstance(cmd);
 	}
 
-	bool CodeChecker::checkReadFuncBlockBit(const CodeItem& cmd)
+	bool CodeChecker::check_rdfbb(const CodeItem& cmd)
 	{
 		quint32 writeAddr = cmd.getWord3();
 		quint32 bitNo = cmd.getWord4();
 
 		return  checkFbTypeAndInstance(cmd) &&
-				checkCanWriteBit(cmd, writeAddr,  bitNo);
+				checkCanWriteBit(cmd, writeAddr,  bitNo) &&
+				addrInBitMemArea(writeAddr, 1);
 	}
 
-	bool CodeChecker::checkReadFuncBlockTest(const CodeItem& cmd)
+	bool CodeChecker::check_rdfbcmp(const CodeItem& cmd)
 	{
 		return checkFbTypeAndInstance(cmd);
 	}
 
-	bool CodeChecker::checkSetMem(const CodeItem& cmd)
+	bool CodeChecker::check_setmem(const CodeItem& cmd)
 	{
 		quint32 writeAddr = cmd.getWord2();
 		quint32 sizeW = cmd.getWord4();
 
-		return checkCanWrite(cmd, writeAddr, sizeW);
+		return checkCanWrite(cmd, writeAddr, sizeW) &&
+			   addrNotInBitMemArea(writeAddr, sizeW);
 	}
 
-	bool CodeChecker::checkMovBit(const CodeItem& cmd)
+	bool CodeChecker::check_movb(const CodeItem& cmd)
 	{
 		quint32 readAddr = cmd.getWord3();
 		quint32 readBitNo = cmd.getBitNo1();
@@ -625,35 +627,45 @@ namespace Builder
 				checkCanWriteBit(cmd, writeAddr, writeBitNo);
 	}
 
-	bool CodeChecker::checkNstart(const CodeItem& cmd)
+	bool CodeChecker::check_movb_acc_addr(const CodeItem& cmd)
+	{
+		Address16 readAddr = cmd.srcBitAddr();
+
+		return  checkCanReadBit(cmd, readAddr.offset(), readAddr.bit());
+	}
+
+	bool CodeChecker::check_movb_addr_acc(const CodeItem& cmd)
+	{
+		Address16 writeAddr = cmd.destBitAddr();
+
+		return  checkCanWriteBit(cmd, writeAddr.offset(), writeAddr.bit());
+	}
+
+	bool CodeChecker::check_nstart(const CodeItem& cmd)
 	{
 		checkFbTypeAndInstance(cmd);
 		return true;
 	}
 
-	bool CodeChecker::checkAppStart(const CodeItem& cmd)
-	{
-		Q_UNUSED(cmd);
-		return true;
-	}
-
-	bool CodeChecker::checkMov32(const CodeItem& cmd)
+	bool CodeChecker::check_mov32(const CodeItem& cmd)
 	{
 		quint32 readAddr = cmd.getWord3();
 		quint32 writeAddr = cmd.getWord2();
 
 		return checkCanRead32(cmd, readAddr) &&
-			   checkCanWrite32(cmd, writeAddr);
+			   checkCanWrite32(cmd, writeAddr) &&
+			   addrNotInBitMemArea(writeAddr, 2);
 	}
 
-	bool CodeChecker::checkMovConst32(const CodeItem& cmd)
+	bool CodeChecker::check_movc32(const CodeItem& cmd)
 	{
 		quint32 writeAddr = cmd.getWord2();
 
-		return checkCanWrite32(cmd, writeAddr);
+		return checkCanWrite32(cmd, writeAddr) &&
+			   addrNotInBitMemArea(writeAddr, 2);
 	}
 
-	bool CodeChecker::checkWriteFuncBlock32(const CodeItem& cmd)
+	bool CodeChecker::check_wrfb32(const CodeItem& cmd)
 	{
 		quint32 readAddr = cmd.getWord3();
 
@@ -661,7 +673,7 @@ namespace Builder
 				checkFbTypeAndInstance(cmd);
 	}
 
-	bool CodeChecker::checkReadFuncBlock32(const CodeItem& cmd)
+	bool CodeChecker::check_rdfb32(const CodeItem& cmd)
 	{
 		quint32 writeAddr = cmd.getWord3();
 
@@ -669,17 +681,17 @@ namespace Builder
 				checkCanWrite32(cmd, writeAddr);
 	}
 
-	bool CodeChecker::checkWriteFuncBlockConst32(const CodeItem& cmd)
+	bool CodeChecker::check_wrfbc32(const CodeItem& cmd)
 	{
 		return checkFbTypeAndInstance(cmd);
 	}
 
-	bool CodeChecker::checkReadFuncBlockTest32(const CodeItem& cmd)
+	bool CodeChecker::check_rdfbcmp32(const CodeItem& cmd)
 	{
 		return checkFbTypeAndInstance(cmd);
 	}
 
-	bool CodeChecker::checkMovCompareFlag(const CodeItem& cmd)
+	bool CodeChecker::check_movcmpf(const CodeItem& cmd)
 	{
 		quint32 writeAddr = cmd.getWord2();
 		quint32 bitNo = cmd.getWord3();
@@ -687,7 +699,7 @@ namespace Builder
 		return checkCanWriteBit(cmd, writeAddr, bitNo);
 	}
 
-	bool CodeChecker::checkPrevMov(const CodeItem& cmd)
+	bool CodeChecker::check_pmov(const CodeItem& cmd)
 	{
 		quint32 readAddr = cmd.getWord3();
 		quint32 writeAddr = cmd.getWord2();
@@ -696,7 +708,7 @@ namespace Builder
 			   checkCanWrite16(cmd, writeAddr);
 	}
 
-	bool CodeChecker::checkPrevMov32(const CodeItem& cmd)
+	bool CodeChecker::check_pmov32(const CodeItem& cmd)
 	{
 		quint32 readAddr = cmd.getWord3();
 		quint32 writeAddr = cmd.getWord2();
@@ -705,7 +717,7 @@ namespace Builder
 			   checkCanWrite32(cmd, writeAddr);
 	}
 
-	bool CodeChecker::checkFill(const CodeItem& cmd)
+	bool CodeChecker::check_fillb(const CodeItem& cmd)
 	{
 		quint32 readAddr = cmd.getWord3();
 		quint32 readBitNo = cmd.getWord4();
@@ -858,6 +870,13 @@ namespace Builder
 
 	bool CodeChecker::checkCanWriteBit(const CodeItem& cmd, quint32 writeAddr, quint32 bitNo) const
 	{
+		if (m_bitMemArea.addressInArea(writeAddr, 1) == false &&
+			m_appWordMemArea.addressInArea(writeAddr, 1) == false)
+		{
+			logError(cmd, QString("Can't write address %1[%2]").arg(writeAddr).arg(bitNo));
+			return false;
+		}
+
 		const MemArea& areaToWrite = findMemAreaToWrite(writeAddr, 1);
 
 		if (areaToWrite.isValid() == false)
@@ -909,16 +928,8 @@ namespace Builder
 		}
 		else
 		{
-			it--;
-
-			if (it == areas.end())
-			{
-				result = false;
-			}
-			else
-			{
-				result = it->second.addressInArea(addr, sizeW);
-			}
+			it = std::prev(it);
+			result = it->second.addressInArea(addr, sizeW);
 		}
 
 		if (result == false)
@@ -928,4 +939,16 @@ namespace Builder
 
 		return it->second;
 	}
+
+	bool CodeChecker::addrInBitMemArea(quint32 addr, quint32 sizeW) const
+	{
+		return m_bitMemArea.addressInArea(addr, sizeW);
+	}
+
+	bool CodeChecker::addrNotInBitMemArea(quint32 addr, quint32 sizeW) const
+	{
+		return m_bitMemArea.addressInArea(addr, 1) == false &&
+			   m_bitMemArea.addressInArea(addr + sizeW - 1, 1) == false;
+	}
+
 }

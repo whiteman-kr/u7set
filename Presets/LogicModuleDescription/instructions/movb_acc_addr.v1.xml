@@ -1,0 +1,17 @@
+<Command 
+	Caption="movb"
+	Code="03e0"
+	CodeMask="07f0"	
+	SimulationFunc="command_movb_acc_addr"
+	ParseFunc="parse_movb_acc_addr"
+	Description="Shift left ACC and copy 1-bit from memory to ACC[0]"
+
+	CodeSize="2" 
+	ReadTime="8" 
+	WaitFbExecution="false"
+
+	ConstRuntime="7"
+
+	CheckFunc="check_movb_acc_addr"
+	GetMnemoFunc="mnemo_movb_acc_addr"
+	CalcExecTimeFunc="exectime_const"/>

@@ -1,0 +1,122 @@
+<AFB id="#cmp_dh_fp_eq_v1" Caption="cmp_dh_fp_eq" Version="1.0007">
+	<Properties>
+		<Description>Comparator Block, equal single-precision floating-point comparison (dynamic deadband)</Description>
+		<Category>Compare</Category>
+		<OpCode>20</OpCode>
+		<InternalUse>false</InternalUse>
+		<MinWidth>28</MinWidth>
+	</Properties>
+	<Inputs>
+		<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="4" Size="32"/>
+		<Pin OpName="i_sp_in" Caption="set" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="6" Size="32"/>
+		<Pin OpName="hysteresis" Caption="db" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="1" Size="32"/>
+	</Inputs>
+	<Outputs>
+		<Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="9" Size="1"/>
+		<Pin OpName="o_overflow" Caption="overflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="10" Size="1"/>
+		<Pin OpName="o_underflow" Caption="underflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="11" Size="1"/>
+		<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="13" Size="1"/>
+		<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="14" Size="1"/>
+	</Outputs>
+	<Params>
+		<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+			<Value>5</Value>
+			<Default>5</Default>
+			<LowLimit>1</LowLimit>
+			<HighLimit>8</HighLimit>
+			<Script>
+				<Changed/>
+			</Script>
+		</Param>
+		<Param OpName="OutOverflow" Caption="OutOverflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+			<Value>1</Value>
+			<Default>1</Default>
+			<Script>
+				<Changed>
+					(function(videoItemFblElement, afbElement)
+					{
+						return createOutputSignals(videoItemFblElement, afbElement);
+					})
+				</Changed>
+			</Script>
+		</Param>
+		<Param OpName="OutUnderflow" Caption="OutUnderflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+			<Value>1</Value>
+			<Default>1</Default>
+			<Script>
+				<Changed>
+					(function(videoItemFblElement, afbElement)
+					{
+						return createOutputSignals(videoItemFblElement, afbElement);
+					})
+				</Changed>
+			</Script>
+		</Param>
+		<Param OpName="OutNaN" Caption="OutNaN" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+			<Value>1</Value>
+			<Default>1</Default>
+			<Script>
+				<Changed>
+					(function(videoItemFblElement, afbElement)
+					{
+						return createOutputSignals(videoItemFblElement, afbElement);
+					})
+				</Changed>
+			</Script>
+		</Param>
+		<Param OpName="OutParamErr" Caption="OutParamErr" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+			<Value>1</Value>
+			<Default>1</Default>
+			<Script>
+				<Changed>
+					(function(videoItemFblElement, afbElement)
+					{
+						return createOutputSignals(videoItemFblElement, afbElement);
+					})
+				</Changed>
+			</Script>
+		</Param>
+	</Params>
+	<CommonScript>
+		<Library>
+			function createOutput(videoItemFblElement, afbElement, paramName, signalCaption)
+			{
+				var show = videoItemFblElement.getParamBoolValue(paramName);
+				if (show == true)
+				{
+					var s = afbElement.getAfbSignalByCaption(signalCaption);
+					if (s != null)
+					{
+						videoItemFblElement.addOutputSignal(s.jsCaption(), s.jsType(), s.operandIndex(), s.size());
+					}	
+				}
+			}
+
+			function createOutputSignals(videoItemFblElement, afbElement)
+			{
+				videoItemFblElement.removeOutputSignals();
+				
+				var out = afbElement.getAfbSignalByCaption("out");
+				if (out != null)
+				{
+					videoItemFblElement.addOutputSignal(out.jsCaption(), out.jsType(), out.operandIndex(), out.size());
+				}
+				
+				createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
+				createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
+				createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
+				createOutput(videoItemFblElement, afbElement, "OutParamErr", "param_err");
+
+				videoItemFblElement.adjustHeight();
+
+				return true;
+			}
+		</Library>
+		<AfterCreation>
+			(function(videoItemFblElement, afbElement)
+			{
+				return createOutputSignals(videoItemFblElement, afbElement);
+			})
+		</AfterCreation>
+	</CommonScript>
+</AFB>	

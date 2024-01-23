@@ -228,7 +228,7 @@ message AppDataSourceState
 	optional bool receivesData = 4 [default = false];
 	optional int64 uptime = 5 [default = 0];					// time from start of data receiving
 	optional uint32 receivedDataID = 6 [default = 0];
-	optional int64 rupFramePlantTime = 7 [default = 0];
+	optional int64 lmTime = 7 [default = 0];
 	optional uint32 rupFrameNumerator = 8 [default = 0];
 
 	optional double dataReceivingSpeed = 9 [default = 0];	    // bytes/sec
@@ -272,16 +272,22 @@ message SoftwareInfo
 {
     required int32 softwareType = 1 [default = 8000];		// E::SoftwareType::Unknown = 8000
     required string equipmentId = 2;
+
     required int32 majorVersion = 3 [default = 0];
     required int32 minorVersion = 4 [default = 0];
-    required int32 commitNo = 5 [default = 0];
-    required string buildBranch = 6;
-    required string commitSHA = 7;
-    required string userName = 8;
-    required int32 buildNo = 9 [default = 0];
-    required uint32 crc = 10 [default = 0];
-	optional string clientDescription = 11;
-	optional string hostname = 12;
+	required int32 patchVersion = 5 [default = 0];
+
+	required string releaseType = 6;
+
+	optional string branchName = 7;
+	optional string commitHash = 8;
+	optional string buildUserName = 9;
+	optional string buildDate = 10;
+	optional string buildHostname = 11;
+	optional int32 pipelineID = 12 [default = 0];
+
+	optional string hostname = 13;
+	optional string osUsername = 14;
 }
 
 message SecurityLevelReply
@@ -487,6 +493,8 @@ message TuningSourceState
 	optional int64 errReplySize = 73 [default = 0];
 	optional int64 errNoReply = 74 [default = 0];
 	optional int64 errTuningFrameUpdate = 75 [default = 0];
+
+	optional int64 lmTime = 76 [ default = 0];
 }
 
 message GetTuningSourcesStatesReply
@@ -555,7 +563,6 @@ message TuningSignalState
 	optional bool writingDisabled = 15 [default = false];
 
 	optional bool tuningDefault = 16 [default = false];			// flag, sets to 1 if current tunable signal value is equal to tuning default value,
-																// else sets to 0
 
 	optional sfixed64 lmTime = 17 [default = 0];
 	optional fixed64 fotipProcessingNumerator = 18 [default = 0];
@@ -565,6 +572,20 @@ message TuningSignalsReadReply
 {
     optional int32 error = 1 [default = 0];
     repeated TuningSignalState tuningSignalState = 2;
+	optional int32 pendingSignalsStateChanges = 3 [default = 0];
+}
+
+// Get tuning signals state changes request - TDS_GET_SIGNALS_STATE_CHANGES
+//
+message GetTuningSignalsStateChangesRequest
+{
+}
+
+message GetTuningSignalsStateChangesReply
+{
+	optional int32 error = 1 [default = 0];
+	repeated TuningSignalState tuningSignalState = 2;
+	optional int32 pendingSignalsStateChanges = 3 [default = 0];
 }
 
 // Write tuning signals request - TDS_TUNING_SIGNALS_WRITE
@@ -577,6 +598,7 @@ message TuningWriteCommand
 
 message TuningSignalsWrite
 {
+	optional string matsUser = 1;
     optional bool autoApply = 2 [default = false];
     repeated TuningWriteCommand commands = 3;
 }
@@ -592,7 +614,6 @@ message TuningSignalsWriteReply
     optional int32 error = 1 [default = 0];
     repeated TuningSignalWriteResult writeResult = 2;
 }
-
 
 // Request to applying tuning signals values - TDS_TUNING_SIGNALS_APPLY
 //

@@ -1,41 +1,37 @@
-#include "Stable.h"
 #include "MainWindow.h"
-#include "CentralWidget.h"
-#include "Settings.h"
-#include "DialogSettings.h"
-#include "../DbLib/DbController.h"
-#include "../lib/Ui/DialogAbout.h"
-#include "../lib/LogicModuleSet.h"
 #include "../UtilsLib/Ui/UiTools.h"
+#include "../lib/LogicModuleSet.h"
+#include "../lib/Ui/DialogAbout.h"
+#include "./EquipmentEditor/EquipmentTabPage.h"
+#include "./Forms/FileHistoryDialog.h"
+#include "./Forms/PendingChangesDialog.h"
+#include "./Forms/ProjectPropertiesForm.h"
+#include "./SchemaEditor/EditSchemaWidget.h"
+#include "./SchemaEditor/SchemasTabPage.h"
+#include "./Simulator/SimProfileEditor.h"
 #include "AppSignalSetProvider.h"
-#include "UserManagementDialog.h"
-#include "ProjectsTabPage.h"
-#include "FilesTabPage.h"
-#include "SignalsTabPage.h"
-#include "DialogSubsystemListEditor.h"
-#include "DialogConnections.h"
-#include "DialogBusEditor.h"
-#include "DialogTagsEditor.h"
-#include "DialogAfbLibraryCheck.h"
 #include "BuildTabPage.h"
-#include "UploadTabPage.h"
+#include "CentralWidget.h"
+#include "DialogAfbLibraryCheck.h"
+#include "DialogBusEditor.h"
+#include "DialogConnections.h"
+#include "DialogSettings.h"
+#include "DialogShortcuts.h"
+#include "DialogSubsystemListEditor.h"
+#include "DialogTagsEditor.h"
+#include "FilesTabPage.h"
+#include "Forms/DialogProjectDiff.h"
+#include "GlobalMessanger.h"
+#include "ProjectsTabPage.h"
+#include "Reports/DialogSchemasReport.h"
+#include "DialogMatsUsersEditor.h"
+#include "Reports/SchemasReport.h"
+#include "Settings.h"
+#include "SignalsTabPage.h"
 #include "SimulatorTabPage.h"
 #include "TestsTabPage.h"
-#include "GlobalMessanger.h"
-#include "Forms/DialogProjectDiff.h"
-#include "Reports/SchemasReport.h"
-#include "DialogShortcuts.h"
-#include "./Forms/FileHistoryDialog.h"
-#include "./Forms/ProjectPropertiesForm.h"
-#include "./Forms/PendingChangesDialog.h"
-#include "./SchemaEditor/SchemasTabPage.h"
-#include "./SchemaEditor/EditSchemaWidget.h"
-#include "./EquipmentEditor/EquipmentTabPage.h"
-#include "./Simulator/SimProfileEditor.h"
-
-#if __has_include("../gitlabci_version.h")
-#	include "../gitlabci_version.h"
-#endif
+#include "UploadTabPage.h"
+#include "UserManagementDialog.h"
 
 MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	QMainWindow{parent},
@@ -76,7 +72,9 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 					nullptr};
 
 	m_equipmentTab = new EquipmentTabPage(dbController(), nullptr);
-	m_signalsTab = new SignalsTabPage(m_signalSetProvider, dbController(), nullptr);
+	m_signalsTab = new SignalsTabPage(AppSignalSetProvider::getInstance(),
+									  AppSignalPropertyManager::getInstance(),
+									  dbController(), nullptr);
 
 	m_filesTabPage = new FilesTabPage(dbController(), nullptr);
 	m_filesTabPage->setWindowTitle(tr("Files"));
@@ -126,6 +124,8 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	restoreWindowState();
 
 	centralWidget()->show();
+
+	m_visibleTimerId = startTimer(50);
 
 	return;
 }
@@ -190,11 +190,10 @@ void MainWindow::showEvent(QShowEvent*)
 //	m_taskBarButton = new QWinTaskbarButton(this);
 //	m_taskBarButton->setWindow(windowHandle());
 //#endif
-
 	return;
 }
 
-void MainWindow::timerEvent(QTimerEvent* /*event*/)
+void MainWindow::timerEvent(QTimerEvent* event)
 {
 //#ifdef Q_OS_WINDOWS
 //	if (m_buildTabPage->isBuildRunning() == true && m_taskBarButton != nullptr)
@@ -202,6 +201,16 @@ void MainWindow::timerEvent(QTimerEvent* /*event*/)
 //		m_taskBarButton->progress()->setValue(m_buildTabPage->progress());
 //	}
 //#endif
+
+	if (event->timerId() == m_visibleTimerId && isVisible() == true)
+	{
+		killTimer(m_visibleTimerId);
+		
+		// Refresh project list only once
+		//
+		Q_ASSERT(m_projectsTab);
+		m_projectsTab->refreshProjectList();
+	}
 }
 
 void MainWindow::saveWindowState()
@@ -347,10 +356,6 @@ void MainWindow::createActions()
 	m_manualRpctAppendixBAction->setStatusTip(tr("Show Appendix B - Build Directory and Output Bitstream File"));
 	connect(m_manualRpctAppendixBAction, &QAction::triggered, this, &MainWindow::showRpctUserManualAppendixB);
 
-	m_manualRpctAppendixCAction = new QAction(tr("Appendix C - JavaScript Manual"), this);
-	m_manualRpctAppendixCAction->setStatusTip(tr("Show Appendix C - JavaScript Manual"));
-	connect(m_manualRpctAppendixCAction, &QAction::triggered, this, &MainWindow::showRpctUserManualAppendixC);
-
 	m_manualAfblAction = new QAction(tr("AFB Library Reference"), this);
 	m_manualAfblAction->setStatusTip(tr("Show AFB Library Reference"));
 	connect(m_manualAfblAction, &QAction::triggered, this, &MainWindow::showAfblReference);
@@ -395,6 +400,11 @@ void MainWindow::createActions()
 	m_tagsEditorAction->setStatusTip(tr("Run Tags Editor"));
 	m_tagsEditorAction->setEnabled(false);
 	connect(m_tagsEditorAction, &QAction::triggered, this, &MainWindow::runTagsEditor);
+
+	m_matsUsersEditorAction = new QAction(tr("MATS Users Editor..."), this);
+	m_matsUsersEditorAction->setStatusTip(tr("Run MATS Users Editor"));
+	m_matsUsersEditorAction->setEnabled(false);
+	connect(m_matsUsersEditorAction, &QAction::triggered, this, &MainWindow::runMatsUserEditor);
 
 	m_simProfilesEditorAction = new QAction(tr("Simulator Profiles Editor..."), this);
 	m_simProfilesEditorAction->setStatusTip(tr("Run Simulator Profiles Editor"));
@@ -547,6 +557,7 @@ void MainWindow::createMenus()
 	pToolsMenu->addAction(m_connectionsEditorAction);
 	pToolsMenu->addAction(m_busEditorAction);
 	pToolsMenu->addAction(m_tagsEditorAction);
+	pToolsMenu->addAction(m_matsUsersEditorAction);
 	pToolsMenu->addAction(m_simProfilesEditorAction);
 
 	pToolsMenu->addSeparator();
@@ -571,7 +582,6 @@ void MainWindow::createMenus()
 	QMenu* pRpctAppendixesMenu = pHelpMenu->addMenu(tr("RPCT User Manual Appendixes"));
 	pRpctAppendixesMenu->addAction(m_manualRpctAppendixAAction);
 	pRpctAppendixesMenu->addAction(m_manualRpctAppendixBAction);
-	pRpctAppendixesMenu->addAction(m_manualRpctAppendixCAction);
 
 	pHelpMenu->addSeparator();
 
@@ -740,52 +750,47 @@ void MainWindow::showShortcuts()
 
 void MainWindow::showRpctUserManual()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/D11.6_RPCT-UM.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.6_RPCT-UM.pdf", this);
 }
 
 void MainWindow::showRpctInstallManual()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/Installing and configuring RPCT.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/Installing and configuring RPCT.pdf", this);
 }
 
 void MainWindow::showRpctQuickStart()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/RPCT Quick Start Guide.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/RPCT Quick Start Guide.pdf", this);
 }
 
 void MainWindow::showRpctUserManualAppendixA()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/Appendixes/D11.6 RPCT User Manual Appendix A Warnings and Errors List.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/Appendixes/D11.6 RPCT User Manual Appendix A Warnings and Errors List.pdf", this);
 }
 
 void MainWindow::showRpctUserManualAppendixB()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/Appendixes/D11.6 RPCT User Manual Appendix B Build Directory and Output Bitstream File Description.pdf", this);
-}
-
-void MainWindow::showRpctUserManualAppendixC()
-{
-	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/Appendixes/D11.6 RPCT User Manual Appendix C JavaScript Manual.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/Appendixes/D11.6 RPCT User Manual Appendix B Build Directory and Output Bitstream File Description.pdf", this);
 }
 
 void MainWindow::showAfblReference()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/D11.5_AFBL_RM.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.5_AFBL_RM.pdf", this);
 }
 
 void MainWindow::showScriptHelp()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/scripthelp/index.html", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/scripthelp/index.html", this);
 }
 
 void MainWindow::showMatsUserManual()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/D11.8_FSC_MATS_User_Manual.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.8_FSC_MATS_User_Manual.pdf", this);
 }
 
 void MainWindow::showTuningUserManual()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/D11.9_FSC_Tuning_User_Manual.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.9_FSC_Tuning_User_Manual.pdf", this);
 }
 
 
@@ -860,6 +865,17 @@ void MainWindow::runSimulationProfilesEditor()
 	}
 
 	SimProfileEditor::run(dbController(), this);
+}
+
+void MainWindow::runMatsUserEditor()
+{
+	if (dbController()->isProjectOpened() == false)
+	{
+		return;
+	}
+
+	DialogMatsUsersEditor d(dbController(), this);
+	d.exec();
 }
 
 void MainWindow::updateUfbsAfbsBusses()
@@ -993,11 +1009,16 @@ void MainWindow::updateUfbsAfbsBusses()
 			//
 			std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(file->data());
 
-			if (schema == nullptr ||
-				(schema->isUfbSchema() == false && schema->isLogicSchema() == false))
+			if (schema == nullptr)
+			{
+				QMessageBox::critical(this, qAppName(), tr("Error parsing schema %1.").arg(file->fileName()));
+				break;
+			}
+
+			if (schema->isUfbSchema() == false && schema->isLogicSchema() == false)
 			{
 				assert(schema->isUfbSchema() == true || schema->isLogicSchema() == true);
-				QMessageBox::critical(this, qAppName(), tr("Error parsing schema %1.").arg(file->fileName()));
+				QMessageBox::critical(this, qAppName(), tr("File %1 must be AppLogic or UFB schema.").arg(file->fileName()));
 				break;
 			}
 
@@ -1197,7 +1218,7 @@ void MainWindow::showAbout()
 	QString text = "Supported project database version: " + QString::number(DbController::databaseVersion()) + "<br><br>";
 	text += qApp->applicationName() + " provides offline tools for FSC chassis configuration, application logic design and its compilation, visualization design and MATS software configuration.<br>";
 
-	DialogAbout::show(this, text, ":/Images/Images/logo.png");
+	DialogAbout::show(this, text, ":/Logo/RadiyLogo.png");
 
 	return;
 }
@@ -1315,32 +1336,7 @@ void MainWindow::projectDifference()
 
 void MainWindow::createSchemasAlbums()
 {
-	QString albumPath = QSettings{}.value("MainWindow/Export/AlbumPath").toString();
-
-	static std::vector<ReportFileTypeParams> albumFileTypeParams = {};
-	if (albumFileTypeParams.empty() == true)
-	{
-		albumFileTypeParams = SchemasReportGenerator::defaultFileTypeParams(db());
-	}
-
-	if (SchemasReportDialog::getReportFilesPath(&albumPath, &albumFileTypeParams, SchemasReportGenerator::defaultFileTypeParams(db()), this) == false)
-	{
-		return;
-	}
-
-	QSettings{}.setValue("MainWindow/Export/AlbumPath", albumPath);
-
-	SchemasReportGeneratorThread r(theSettings.serverHost(),
-								   theSettings.serverPort(),
-								   theSettings.serverUsername(),
-								   theSettings.serverPassword(),
-								   db()->currentProject().projectName(),
-								   db()->currentUser().username(),
-								   db()->currentUser().password(),
-								   &m_signalSetProvider->signalSet(),
-								   this);
-
-	r.exportAllSchemasToAlbum(albumPath, albumFileTypeParams);
+	SchemasAlbumGenerator::createSchemasAlbums(db(), &m_signalSetProvider->signalSet(), this);
 	return;
 }
 
@@ -1369,6 +1365,7 @@ void MainWindow::projectOpened(DbProject project)
     m_connectionsEditorAction->setEnabled(true);
 	m_busEditorAction->setEnabled(true);
 	m_tagsEditorAction->setEnabled(true);
+	m_matsUsersEditorAction->setEnabled(true);
 	m_simProfilesEditorAction->setEnabled(true);
 	m_updateUfbsAfbs->setEnabled(true);
 	m_AfbLibraryCheck->setEnabled(true);
@@ -1402,6 +1399,7 @@ void MainWindow::projectClosed()
     m_connectionsEditorAction->setEnabled(false);
 	m_busEditorAction->setEnabled(false);
 	m_tagsEditorAction->setEnabled(false);
+	m_matsUsersEditorAction->setEnabled(false);
 	m_simProfilesEditorAction->setEnabled(false);
 	m_updateUfbsAfbs->setEnabled(false);
 	m_AfbLibraryCheck->setEnabled(false);

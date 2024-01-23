@@ -1,7 +1,7 @@
 #include "TuningWorkspace.h"
 #include "Settings.h"
+#include "Main.h"
 #include "MainWindow.h"
-#include "TuningSourcesHelper.h"
 
 #include <QButtonGroup>
 #include <QTreeWidget>
@@ -144,6 +144,7 @@ TuningWorkspace::TuningWorkspace(TuningConfigController& configController,
 								 ClientLib::TuningConnection& tuningConnection,
 								 std::shared_ptr<TuningFilter> treeFilter,
 								 std::shared_ptr<TuningFilter> workspaceFilter,
+								 bool hasFilterTree,
 								 QWidget* parent) :
 	m_configController(configController),
 	m_tuningSignalManager(tuningSignalManager),
@@ -171,10 +172,6 @@ TuningWorkspace::TuningWorkspace(TuningConfigController& configController,
 
 	//
 
-	updateFiltersTree(m_workspaceFilter);
-
-	//
-
 	createButtons();
 
 	if (m_buttonsLayout != nullptr)
@@ -186,24 +183,36 @@ TuningWorkspace::TuningWorkspace(TuningConfigController& configController,
 
 	createTabPages();
 
+	// Create filters tree
 	//
-
-	if (m_treeLayoutWidget != nullptr)
+	if (hasFilterTree == true)
 	{
+		m_treeLayoutWidget = new TreeFilterWidget(m_configController,
+												  m_tuningFilterStorage,
+												  m_userManager,
+												  m_tuningConnection,
+												  this);
+		m_treeLayoutWidget->fillFiltersTree(m_workspaceFilter);
+
+		connect(m_treeLayoutWidget, &TreeFilterWidget::treeFilterSelectionChanged, [this](std::shared_ptr<TuningFilter> filter){
+			m_treeFilter = filter;
+			emit treeFilterChanged(filter);
+		});
+
 		// Create splitter control
 		//
 		m_hSplitter = new QSplitter();
-
 		m_hSplitter->addWidget(m_treeLayoutWidget);
-
 		m_hSplitter->addWidget(rightWidget);
-
 		mainLayout->addWidget(m_hSplitter);
 
 		// Restore splitter size
 		//
+		m_hSplitter->restoreState(TuningClientAppSettings::instance().user().m_tuningWorkspaceSplitterState);
 
-		m_hSplitter->restoreState(theSettings.m_tuningWorkspaceSplitterState);
+		// Show/hide filter tree
+		//
+		m_treeLayoutWidget->setVisible(m_treeLayoutWidget->isEmpty() == false);
 	}
 	else
 	{
@@ -221,6 +230,8 @@ TuningWorkspace::TuningWorkspace(TuningConfigController& configController,
 		setPalette(Pal);
 		show();
 	}
+
+	connect(theApp.mainWindow(), &MainWindow::timerTick500, this, &TuningWorkspace::onTimer);
 }
 
 TuningWorkspace::~TuningWorkspace()
@@ -228,63 +239,15 @@ TuningWorkspace::~TuningWorkspace()
 	m_instanceCounter--;
 	//qDebug() << "TuningWorkspace::~TuningWorkspace m_instanceCounter = " << m_instanceCounter;
 
-	if (m_filterTree != nullptr)
-	{
-		QSettings settings(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
-
-		if (m_columnNameIndex != -1)
-		{
-			int width = m_filterTree->columnWidth(m_columnNameIndex);
-			settings.setValue("TuningWorkspace/FilterTreeColumnIndex", width);
-
-		}
-		if (m_columnAccessIndex != -1)
-		{
-			int width = m_filterTree->columnWidth(m_columnAccessIndex);
-			settings.setValue("TuningWorkspace/FilterTreeColumnsAccess", width);
-		}
-
-		for (int i = 0; i < static_cast<int>(m_columnDiscreteCountIndexes.size()); i++)
-		{
-			int width = m_filterTree->columnWidth(m_columnDiscreteCountIndexes[i]);
-			settings.setValue(tr("TuningWorkspace/FilterTreeColumnCounter%1").arg(i), width);
-		}
-
-		if (m_columnSorIndex != -1)
-		{
-			int width = m_filterTree->columnWidth(m_columnSorIndex);
-			settings.setValue("TuningWorkspace/FilterTreeColumnSor", width);
-		}
-
-
-		if (m_columnStatusIndex != -1)
-		{
-			int width = m_filterTree->columnWidth(m_columnStatusIndex);
-			settings.setValue("TuningWorkspace/FilterTreeColumnStatus", width);
-		}
-
-
-		// Save masks
-		//
-		if (m_treeMaskCombo != nullptr)
-		{
-			theSettings.m_tuningWorkspaceMasks.clear();
-			for (int i = 0; i < m_treeMaskCombo->count(); i++)
-			{
-				theSettings.m_tuningWorkspaceMasks.push_back(m_treeMaskCombo->itemText(i));
-			}
-		}
-	}
-
 	if (m_hSplitter != nullptr)
 	{
-		theSettings.m_tuningWorkspaceSplitterState = m_hSplitter->saveState();
+		TuningClientAppSettings::instance().user().m_tuningWorkspaceSplitterState = m_hSplitter->saveState();
 	}
 }
 
 bool TuningWorkspace::hasPendingChanges()
 {
-	for (auto it : m_tuningPagesMap)
+	for (auto& it : m_tuningPagesMap)
 	{
 		TuningPage* tp = it.second;
 
@@ -294,7 +257,7 @@ bool TuningWorkspace::hasPendingChanges()
 		}
 	}
 
-	for (auto it : m_tuningWorkspacesMap)
+	for (auto& it : m_tuningWorkspacesMap)
 	{
 		TuningWorkspace* tw = it.second;
 
@@ -309,7 +272,7 @@ bool TuningWorkspace::hasPendingChanges()
 
 bool TuningWorkspace::askForSavePendingChanges()
 {
-	for (auto it : m_tuningPagesMap)
+	for (auto& it : m_tuningPagesMap)
 	{
 		TuningPage* tp = it.second;
 
@@ -319,7 +282,7 @@ bool TuningWorkspace::askForSavePendingChanges()
 		}
 	}
 
-	for (auto it : m_tuningWorkspacesMap)
+	for (auto& it : m_tuningWorkspacesMap)
 	{
 		TuningWorkspace* tw = it.second;
 
@@ -332,29 +295,16 @@ bool TuningWorkspace::askForSavePendingChanges()
 	return true;
 }
 
-void TuningWorkspace::onTimer()
+void TuningWorkspace::updateFilters()
 {
-	updateTabsButtonsCounters();
-
-	updateTreeItemStatus();
-
-	for (auto it : m_tuningWorkspacesMap)
+	if (m_treeLayoutWidget != nullptr)
 	{
-		TuningWorkspace* tw = it.second;
+		m_treeLayoutWidget->fillFiltersTree(m_workspaceFilter);
 
-		static int dp = 0;
-
-		dp++;
-
-		tw->onTimer();
-
-		dp--;
+		// Show/hide filter tree
+		//
+		m_treeLayoutWidget->setVisible(m_treeLayoutWidget->isEmpty() == false);
 	}
-}
-
-void TuningWorkspace::updateFilters(std::shared_ptr<TuningFilter> rootFilter)
-{
-	updateFiltersTree(rootFilter);
 
 	for (auto swp : m_switchPresetPages)
 	{
@@ -364,320 +314,17 @@ void TuningWorkspace::updateFilters(std::shared_ptr<TuningFilter> rootFilter)
 			return;
 		}
 
-		swp->createControls(rootFilter);
+		swp->createControls(m_workspaceFilter);
 	}
 }
 
-void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter)
+void TuningWorkspace::onTimer()
 {
-	// Fill the filter tree
-	//
-	if (rootFilter == nullptr)
+	updateTabsButtonsCounters();
+
+	if (m_treeLayoutWidget != nullptr)
 	{
-		assert(rootFilter);
-		return;
-	}
-
-	QString mask;
-	if (m_treeMaskCombo != nullptr)
-	{
-		mask = m_treeMaskCombo->currentText();
-		if (mask.isEmpty() == false)
-		{
-			if (m_treeMaskCombo->findText(mask) == -1)
-			{
-				m_treeMaskCombo->addItem(mask);
-			}
-			while (m_treeMaskCombo->count() > 10)
-			{
-				m_treeMaskCombo->removeItem(0);
-			}
-			m_treeMaskCombo->setCurrentText(mask);
-		}
-	}
-
-	QStringList l;
-	l << rootFilter->caption();
-
-	QTreeWidgetItem* rootItem = new QTreeWidgetItem(l);
-	rootItem->setData(0, Qt::UserRole, QVariant::fromValue(rootFilter));
-
-	addChildTreeObjects(rootFilter, rootItem, mask);
-
-	if (rootItem->childCount() == 0)
-	{
-		delete rootItem;
-		return;
-	}
-
-	// Create tree control
-	//
-	if (m_filterTree == nullptr)
-	{
-		m_filterTree = new QTreeWidget();
-		m_filterTree->setSortingEnabled(true);
-		m_filterTree->setObjectName("FilterTreeWidget");
-
-		m_filterTree->viewport()->installEventFilter(this);
-		m_filterTree->installEventFilter(this);
-
-		m_filterTree->setContextMenuPolicy(Qt::CustomContextMenu);
-
-		connect(m_filterTree, &QTreeWidget::itemSelectionChanged, this, &TuningWorkspace::slot_treeSelectionChanged);
-		connect(m_filterTree, &QWidget::customContextMenuRequested, this, &TuningWorkspace::slot_treeContextMenuRequested);
-
-		int columnIndex = m_columnNameIndex;
-
-		QStringList headerLabels;
-
-		headerLabels << tr("Caption");
-		columnIndex++;
-
-		// Access (?)
-
-		if (m_configController.configuration().lmStatusFlagMode() == TuningClientSettings::LmStatusFlagMode::AccessKey)
-		{
-			headerLabels << tr("Access");
-			m_columnAccessIndex = columnIndex;
-			columnIndex++;
-		}
-
-		// SOR (?)
-
-		if (m_configController.configuration().lmStatusFlagMode() == TuningClientSettings::LmStatusFlagMode::SOR)
-		{
-			headerLabels << tr("SOR");
-			m_columnSorIndex = columnIndex;
-			columnIndex++;
-		}
-
-		// Counters ()
-
-		int counerColumnsCount = m_tuningFilterStorage.schemaCounterFiltersCount();
-		const QStringList& schemaCounterFiltersNames = m_tuningFilterStorage.schemaCounterFiltersNames();
-
-		if (static_cast<int>(schemaCounterFiltersNames.size()) != counerColumnsCount)
-		{
-			Q_ASSERT(false);
-			return;
-		}
-
-		for (int i = 0; i < counerColumnsCount; i++)
-		{
-			headerLabels << schemaCounterFiltersNames.at(i);
-			m_columnDiscreteCountIndexes.push_back(columnIndex++);
-		}
-
-		// Status
-
-		headerLabels << tr("Status");
-		m_columnStatusIndex = columnIndex;
-		columnIndex++;
-
-		//
-
-		headerLabels << tr("");
-
-		m_filterTree->setColumnCount(static_cast<int>(headerLabels.size()));
-		m_filterTree->setHeaderLabels(headerLabels);
-
-		// Set column width
-
-		const int columnMaxWidth = 500;
-
-		QSettings settings(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
-
-		if (m_columnNameIndex != -1)
-		{
-			const int defaultWidth = 200;
-
-			int width = settings.value("TuningWorkspace/FilterTreeColumnIndex", defaultWidth).toInt();
-			if (width < defaultWidth || width > columnMaxWidth)
-			{
-				width = defaultWidth;
-			}
-
-			m_filterTree->setColumnWidth(m_columnNameIndex, width);
-		}
-
-		if (m_columnAccessIndex != -1)
-		{
-			const int defaultWidth = 50;
-
-			int width = settings.value("TuningWorkspace/FilterTreeColumnsAccess", defaultWidth).toInt();
-			if (width < defaultWidth || width > columnMaxWidth)
-			{
-				width = defaultWidth;
-			}
-
-			m_filterTree->setColumnWidth(m_columnAccessIndex, width);
-
-		}
-
-		if (m_columnSorIndex != -1)
-		{
-			const int defaultWidth = 80;
-
-			int width = settings.value("TuningWorkspace/FilterTreeColumnSor", defaultWidth).toInt();
-			if (width < defaultWidth || width > columnMaxWidth)
-			{
-				width = defaultWidth;
-			}
-
-			m_filterTree->setColumnWidth(m_columnSorIndex, width);
-		}
-
-		for (int i = 0; i < counerColumnsCount; i++)
-		{
-			const int defaultWidth = 40;
-
-			int width = settings.value(QString("TuningWorkspace/FilterTreeColumnCounter%1").arg(i), defaultWidth).toInt();
-			if (width < defaultWidth || width > columnMaxWidth)
-			{
-				width = defaultWidth;
-			}
-
-			m_filterTree->setColumnWidth(m_columnDiscreteCountIndexes[i], width);
-		}
-
-
-		if (m_columnStatusIndex != -1)
-		{
-			const int defaultWidth = 80;
-
-			int width = settings.value("TuningWorkspace/FilterTreeColumnStatus", defaultWidth).toInt();
-			if (width < defaultWidth || width > columnMaxWidth)
-			{
-				width = defaultWidth;
-			}
-
-			m_filterTree->setColumnWidth(m_columnStatusIndex, width);
-		}
-
-
-		//
-
-		m_treeMaskCombo = new QComboBox();
-		m_treeMaskCombo->setEditable(true);
-		m_treeMaskCombo->setInsertPolicy(QComboBox::NoInsert);
-
-		// Load masks
-		//
-		m_treeMaskCombo->addItems(theSettings.m_tuningWorkspaceMasks);
-		m_treeMaskCombo->setEditText(QString());
-
-		QLineEdit* filterLineEdit = m_treeMaskCombo->lineEdit();
-		if (filterLineEdit == nullptr)
-		{
-			Q_ASSERT(filterLineEdit);
-		}
-		else
-		{
-			connect(filterLineEdit, &QLineEdit::returnPressed, this, &TuningWorkspace::slot_maskApply);
-		}
-
-		// Mask Apply
-
-		m_treeMaskApply = new QPushButton(tr("Filter"));
-		connect(m_treeMaskApply, &QPushButton::clicked, this, &TuningWorkspace::slot_maskApply);
-
-		QHBoxLayout* searchLayout = new QHBoxLayout();
-		searchLayout->addWidget(m_treeMaskCombo, 3);
-		searchLayout->addWidget(m_treeMaskApply, 1);
-
-		m_treeLayoutWidget = new QWidget();
-
-		QVBoxLayout* treeLayout = new QVBoxLayout(m_treeLayoutWidget);
-
-		treeLayout->addWidget(m_filterTree);
-		treeLayout->addLayout(searchLayout);
-	}
-	else
-	{
-		m_filterTree->clear();
-	}
-
-	// Fill filters control
-	//
-
-	m_filterTree->addTopLevelItem(rootItem);
-
-	// Restore selection
-
-	if (m_treeFilter == nullptr)
-	{
-		rootItem->setSelected(true);
-	}
-	else
-	{
-		// Find a pointer to previously selected tree filter (remember we are working with shared_ptrs)
-
-		m_treeFilter = rootFilter->findFilterById(m_treeFilter->ID());
-
-		if (m_treeFilter == nullptr)
-		{
-			// No such filter - select root
-
-			rootItem->setSelected(true);
-		}
-		else
-		{
-			// Find a tree item for restored selected filter and select it
-
-			QTreeWidgetItem* treeFilterWidgetItem = findFilterWidget(m_treeFilter->ID(), rootItem);
-
-			if (treeFilterWidgetItem == nullptr)
-			{
-				// No such filter - select root
-
-				rootItem->setSelected(true);
-			}
-			else
-			{
-				treeFilterWidgetItem->setSelected(true);
-
-				// Expand all parents
-
-				QTreeWidgetItem* parent = treeFilterWidgetItem->parent();
-				while (parent != nullptr && parent != rootItem)
-				{
-					parent->setExpanded(true);
-					parent = parent->parent();
-				}
-			}
-		}
-	}
-
-	// Expand root item
-
-	rootItem->setExpanded(true);
-
-	// Expand "Equipment" item
-
-	for (int i = 0; i < rootItem->childCount(); i++)
-	{
-		QTreeWidgetItem* rootChildItem = rootItem->child(i);
-
-		std::shared_ptr<TuningFilter> filter = rootChildItem->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
-		if (filter == nullptr)
-		{
-			assert(filter);
-			return;
-		}
-
-		if (filter->isEmpty() == true && filter->isSourceEquipment())
-		{
-			rootChildItem->setExpanded(true);
-			break;
-		}
-
-	}
-
-	m_filterTree->sortItems(0, Qt::AscendingOrder);
-
-	if (mask.isEmpty() == false)
-	{
-		m_filterTree->expandAll();
+		m_treeLayoutWidget->updateFiltersTree();
 	}
 }
 
@@ -834,7 +481,7 @@ void TuningWorkspace::createTabPages()
 			m_singleTuningPage->setVisible(false);
 		}
 
-		for (auto t : tuningPages)
+		for (const auto& t : tuningPages)
 		{
 			QWidget* w = new QWidget();
 
@@ -946,11 +593,12 @@ QWidget* TuningWorkspace::createTuningPageOrWorkspace(std::shared_ptr<TuningFilt
 													  m_tuningConnection,
 													  m_treeFilter,
 													  childWorkspaceFilter,
+													  false/*hasFilterTree*/,
 													  this/*parent*/);
 
 			m_tuningWorkspacesMap[childWorkspaceFilterId] = tw;
 
-			connect(this, &TuningWorkspace::treeFilterSelectionChanged, tw, &TuningWorkspace::slot_parentTreeFilterChanged);
+			connect(this, &TuningWorkspace::treeFilterChanged, tw, &TuningWorkspace::slot_parentWorkspaceTreeFilterChanged);
 
 			return tw;
 		}
@@ -980,7 +628,7 @@ QWidget* TuningWorkspace::createTuningPageOrWorkspace(std::shared_ptr<TuningFilt
 
 				m_tuningPagesMap[childWorkspaceFilterId] = tp;
 
-				connect(this, &TuningWorkspace::treeFilterSelectionChanged, tp, &TuningPage::slot_treeFilterSelectionChanged);
+				connect(this, &TuningWorkspace::treeFilterChanged, tp, &TuningPage::slot_treeFilterChanged);
 
 				if (childWorkspaceFilter->isButton() == true)
 				{
@@ -996,83 +644,6 @@ QWidget* TuningWorkspace::createTuningPageOrWorkspace(std::shared_ptr<TuningFilt
 				return it->second;
 			}
 		}
-	}
-}
-
-void TuningWorkspace::addChildTreeObjects(const std::shared_ptr<TuningFilter> filter, QTreeWidgetItem* parent, const QString& mask)
-{
-	if (filter == nullptr)
-	{
-		assert(filter);
-		return;
-	}
-
-	if (parent == nullptr)
-	{
-		assert(parent);
-		return;
-	}
-
-	for (int i = 0; i < filter->childFiltersCount(); i++)
-	{
-		std::shared_ptr<TuningFilter> f = filter->childFilter(i);
-		if (f == nullptr)
-		{
-			assert(f);
-			continue;
-		}
-
-		if (f->isTree() == false)
-		{
-			continue;
-		}
-
-		QString caption = f->caption();
-
-		if (mask.isEmpty() == false)
-		{
-            // Check if filter has child filters EXCEPT counters
-            //
-            bool hasChildFilters = false;
-
-            int childFiltersCount = f->childFiltersCount();
-			for (int j = 0; j < childFiltersCount; j++)
-            {
-				TuningFilter* const cf = f->childFilter(j).get();
-                if (cf->isCounter() == false)
-                {
-                    hasChildFilters = true;
-                    break;
-                }
-            }
-
-            if (hasChildFilters == false &&
-                caption.contains(mask, Qt::CaseInsensitive) == false)
-			{
-				continue;
-			}
-		}
-
-
-		//if (f->isSourceSchema() == true || f->isSourceEquipment() == true)
-		//{
-		//caption += QString(" [+%1 DEBUG counters]").arg(f->childFiltersCount());
-		//}
-
-		static QString equipmentString = tr("Equipment");
-		static QString schemasString = tr("Schemas");
-		Q_UNUSED(equipmentString);
-		Q_UNUSED(schemasString);
-
-		QStringList l;
-		l << tr(caption.toUtf8().data());	// Try to translate filter name!
-
-		QTreeWidgetItem* item = new QTreeWidgetItem(l);
-		item->setData(0, Qt::UserRole, QVariant::fromValue(f));
-
-		parent->addChild(item);
-
-		addChildTreeObjects(f, item, mask);
 	}
 }
 
@@ -1184,520 +755,6 @@ void TuningWorkspace::updateTabsButtonsCounters()
 	}
 }
 
-void TuningWorkspace::updateTreeItemStatus(QTreeWidgetItem* treeItem)
-{
-	if (m_filterTree == nullptr)
-	{
-		return;
-	}
-
-	if (treeItem == nullptr)
-	{
-		if (m_filterTree->topLevelItemCount() == 0)
-		{
-			return;
-		}
-
-		treeItem = m_filterTree->topLevelItem(0);
-	}
-
-	std::shared_ptr<TuningFilter> filter = treeItem->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
-	if (filter == nullptr)
-	{
-		assert(filter);
-		return;
-	}
-
-	if (filter->isEmpty() == false)
-	{
-		updateTreeItemCounters(treeItem, filter.get());
-
-		// Counters column
-
-		TuningCounters counters = filter->counters();
-
-		// Status column
-
-		if (filter->isSourceEquipment() == true)
-		{
-			updateTuningSourceTreeItem(treeItem, filter.get());
-		}
-		else
-		{
-			assert(m_columnStatusIndex != -1);
-
-			QColor backColor;
-			QColor textColor;
-			QString text;
-
-			if (counters.errorCounter == 0)
-			{
-				backColor = Qt::white;
-				textColor = Qt::black;
-			}
-			else
-			{
-				text = QString("E: %1").arg(counters.errorCounter);
-				backColor = redColor;
-				textColor = Qt::white;
-			}
-
-			if (treeItem->text(m_columnStatusIndex) != text)
-			{
-				treeItem->setText(m_columnStatusIndex, text);
-			}
-
-			if (treeItem->background(m_columnStatusIndex) != backColor)
-			{
-				treeItem->setBackground(m_columnStatusIndex, backColor);
-			}
-
-			if (treeItem->foreground(m_columnStatusIndex) != textColor)
-			{
-				treeItem->setForeground(m_columnStatusIndex, textColor);
-			}
-		}
-
-		// SOR Column
-
-		if (m_columnSorIndex != -1 && m_configController.configuration().lmStatusFlagMode() == TuningClientSettings::LmStatusFlagMode::SOR)
-		{
-			QColor backColor;
-			QColor textColor;
-			QString text;
-
-			if (counters.sorActive == false)
-			{
-				// Inactive
-				backColor = Qt::white;
-				textColor = Qt::black;
-			}
-			else
-			{
-				if (counters.sorValid == false)
-				{
-					text = "?";
-					backColor = redColor;
-					textColor = Qt::white;
-				}
-				else
-				{
-					if (counters.sorCounter == 0)
-					{
-						// Sor NO
-						backColor = Qt::white;
-						textColor = Qt::black;
-					}
-					else
-					{
-						if (counters.sorCounter == 1)
-						{
-							text = QString("SOR");
-						}
-						else
-						{
-							text = QString("SOR [%1]").arg(counters.sorCounter);
-						}
-						backColor = redColor;
-						textColor = Qt::white;
-					}
-				}
-			}
-
-			if (treeItem->text(m_columnSorIndex) != text)
-			{
-				treeItem->setText(m_columnSorIndex, text);
-			}
-
-			if (treeItem->background(m_columnSorIndex) != backColor)
-			{
-				treeItem->setBackground(m_columnSorIndex, backColor);
-			}
-
-			if (treeItem->foreground(m_columnSorIndex) != textColor)
-			{
-				treeItem->setForeground(m_columnSorIndex, textColor);
-			}
-		}
-	}
-
-	int count = treeItem->childCount();
-	for (int i = 0; i < count; i++)
-	{
-		updateTreeItemStatus(treeItem->child(i));
-	}
-}
-
-void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, TuningFilter* filter)
-{
-	if (filter == nullptr)
-	{
-		assert(filter);
-		return;
-	}
-
-	std::vector<Hash> equipmentHashes = filter->equipmentHashes();
-
-	if (equipmentHashes.size() != 1)
-	{
-		Q_ASSERT(filter);
-		return;
-	}
-
-	Hash hash = equipmentHashes[0];
-
-	assert(m_columnStatusIndex != -1);
-
-	int errorCounter = filter->counters().errorCounter;
-
-	QStringList statusStrings;
-
-	int validCount = 0;
-	int controlIsEnabledCount = 0;
-	int isReplyCount = 0;
-	int hasUnappliedParamsCount = 0;
-
-	QStringList replyCounts;
-
-	int statesCount = 0;
-	int accessCount = 0;
-
-	std::vector<ClientLib::TuningSource> sourceInfo = m_tuningConnection.tuningSourceInfo(hash);
-
-	if (sourceInfo.empty() == true)
-	{
-		statesCount++;
-		statusStrings.push_back(tr("Unknown"));
-	}
-
-	for (const ClientLib::TuningSource& ts : sourceInfo)
-	{
-		QString sourceStatus;
-
-		if (ts.valid() == false)
-		{
-			statesCount++;
-			sourceStatus = tr("Non-Valid");
-
-			if (statusStrings.empty() == true || statusStrings.last() != sourceStatus)
-			{
-				statusStrings.push_back(sourceStatus);
-			}
-		}
-		else
-		{
-			for (int c = 0; c < ts.statesCount(); c++)
-			{
-				statesCount++;
-
-				const ::Network::TuningSourceState& state = ts.state(c);
-
-				if (state.controlisactive() == false)
-				{
-					sourceStatus = tr("Inactive");
-
-					if (statusStrings.empty() == true || statusStrings.last() != sourceStatus)
-					{
-						statusStrings.push_back(sourceStatus);
-					}
-				}
-				else
-				{
-					if (state.isreply() == false)
-					{
-						sourceStatus = tr("No Reply");
-
-						if (statusStrings.empty() == true || statusStrings.last() != sourceStatus)
-						{
-							statusStrings.push_back(sourceStatus);
-						}
-					}
-					else
-					{
-						if (state.hasunappliedparams() == true)
-						{
-							statusStrings.push_back(tr("Unapplied [%1]").arg(state.replycount()));
-						}
-						else
-						{
-							statusStrings.push_back(tr("Active [%1]").arg(state.replycount()));
-						}
-
-						replyCounts.push_back(tr("%1").arg(static_cast<int>(state.replycount())));
-					}
-				}
-
-				// Increment counters
-				//
-				if (ts.valid() == true) validCount++;
-				if (state.controlisactive() == true) controlIsEnabledCount++;
-				if (state.isreply() == true) isReplyCount++;
-				if (state.hasunappliedparams() == true) hasUnappliedParamsCount++;
-
-				if (m_configController.configuration().lmStatusFlagMode() == TuningClientSettings::LmStatusFlagMode::AccessKey &&
-					ts.valid() == true &&
-					state.controlisactive() == true &&
-					state.isreply() == true)
-				{
-					if (state.writingdisabled() == false) accessCount++;
-				}
-			}
-		}
-	}	// Loop through states
-
-	QString statusText = statusStrings.join(" / ");
-
-	if (statusText.isEmpty() == true)
-	{
-		statusText = tr("Unknown");
-	}
-
-	if (statesCount > 0 && validCount == statesCount)
-	{
-		if (hasUnappliedParamsCount > 0)
-		{
-			// All are unappplied
-			//
-			statusText = tr("Unapplied [%1]").arg(replyCounts.join(" / "));
-		}
-		else
-		{
-			if (isReplyCount == statesCount)
-			{
-				// All are active
-				//
-				statusText = tr("Active [%1]").arg(replyCounts.join(" / "));
-			}
-		}
-	}
-
-	if (errorCounter > 0)
-	{
-		statusText += tr(", E: %1").arg(errorCounter);
-	}
-
-	// Access column
-	//
-	if (m_columnAccessIndex != -1)
-	{
-		QColor accessBackColor = Qt::white;
-		QColor accessTextColor = Qt::black;
-
-		if (accessCount > 0)
-		{
-			accessBackColor = QColor(0, 128, 0);
-			accessTextColor = Qt::white;
-		}
-
-		QString accessText;
-
-		if (accessCount == 0)
-		{
-			accessText = tr("No");
-		}
-		else
-		{
-			accessText = accessCount == statesCount ? tr("Yes") : tr("Yes (%1/%2)").arg(statesCount - accessCount).arg(statesCount);
-		}
-
-		if (treeItem->text(m_columnAccessIndex) != accessText)
-		{
-			treeItem->setText(m_columnAccessIndex, accessText);
-		}
-
-		if (treeItem->background(m_columnAccessIndex) != accessBackColor)
-		{
-			treeItem->setBackground(m_columnAccessIndex, accessBackColor);
-		}
-
-		if (treeItem->foreground(m_columnAccessIndex) != accessTextColor)
-		{
-			treeItem->setForeground(m_columnAccessIndex, accessTextColor);
-		}
-
-	}
-
-	// Status column text and color
-	//
-	if (treeItem->text(m_columnStatusIndex) != statusText)
-	{
-		treeItem->setText(m_columnStatusIndex, statusText);
-	}
-
-	QColor stateBackColor = Qt::white;
-	QColor stateTextColor = Qt::black;
-
-	if (validCount == 0)
-	{
-		// All are non-valid
-		//
-		stateBackColor = redColor;
-		stateTextColor = Qt::white;
-	}
-	else
-	{
-		if (controlIsEnabledCount == 0)
-		{
-			// Control is not enabled for all
-			//
-			stateBackColor = Qt::gray;
-			stateTextColor = Qt::white;
-		}
-		else
-		{
-			if (isReplyCount == 0 || errorCounter > 0)
-			{
-				// All are No Reply or some errors present
-				//
-				stateBackColor = redColor;
-				stateTextColor = Qt::white;
-			}
-			else
-			{
-				if ((validCount < statesCount) || (isReplyCount < statesCount) || (controlIsEnabledCount < statesCount))
-				{
-					// Some are non-valid no-reply or control is not enabled
-					//
-					stateBackColor = QColor(0xF87217);
-					stateTextColor = Qt::white;
-				}
-				else
-				{
-					// Unapplied params present
-					//
-					if (hasUnappliedParamsCount > 0)
-					{
-						stateBackColor = Qt::yellow;
-						stateTextColor = Qt::black;
-					}
-				}
-			}
-		}
-	}
-
-
-	if (treeItem->background(m_columnStatusIndex) != stateBackColor)
-	{
-		treeItem->setBackground(m_columnStatusIndex, stateBackColor);
-	}
-
-	if (treeItem->foreground(m_columnStatusIndex) != stateTextColor)
-	{
-		treeItem->setForeground(m_columnStatusIndex, stateTextColor);
-	}
-}
-
-void TuningWorkspace::updateTreeItemCounters(QTreeWidgetItem* treeItem, TuningFilter* filter)
-{
-	if (filter == nullptr)
-	{
-		Q_ASSERT(filter);
-		return;
-	}
-
-	int childCount = filter->childFiltersCount();
-
-	int counterIndex = 0;
-
-	for (int i = 0; i < childCount; i++)
-	{
-		TuningFilter* childFilter = filter->childFilter(i).get();
-		if (childFilter == nullptr)
-		{
-			Q_ASSERT(childFilter);
-			return;
-		}
-
-		if (childFilter->isCounter() == false || childFilter->counterType() != TuningFilter::CounterType::FilterTree)
-		{
-			continue;
-		}
-
-		// Set column text and color
-
-		if (counterIndex >= static_cast<int>(m_columnDiscreteCountIndexes.size()))
-		{
-			Q_ASSERT(false);
-			return;
-		}
-
-		int columnIndex = m_columnDiscreteCountIndexes[counterIndex];
-
-		TuningCounters tc = childFilter->counters();
-
-		QColor backColor = tc.discreteCounter == 0 ? Qt::white : childFilter->backAlertedColor();
-		QColor textColor = tc.discreteCounter == 0 ? Qt::black : childFilter->textAlertedColor();
-
-		//QString text = QString("%1 %2").arg(childFilter->caption()) .arg(tc.discreteCounter);
-		QString text = QString("%1").arg(tc.discreteCounter);
-
-		if (treeItem->text(columnIndex) != text)
-		{
-			treeItem->setText(columnIndex, text);
-		}
-
-		if (treeItem->background(columnIndex) != backColor)
-		{
-			treeItem->setBackground(columnIndex, backColor);
-		}
-
-		if (treeItem->foreground(columnIndex) != textColor)
-		{
-			treeItem->setForeground(columnIndex, textColor);
-		}
-
-		//
-
-		counterIndex++;
-	}
-}
-
-void TuningWorkspace::activateControl(const QString& equipmentId, bool enable)
-{
-	if (m_userManager.login(this) == false)
-	{
-		return;
-	}
-
-	ClientLib::TuningSourcesHelper::activateTuningSource(m_tuningConnection, equipmentId, enable, this);
-}
-
-QTreeWidgetItem* TuningWorkspace::findFilterWidget(const QString& id, QTreeWidgetItem* treeItem)
-{
-	for (int i = 0; i < treeItem->childCount(); i++)
-	{
-		QTreeWidgetItem* childItem = treeItem->child(i);
-		if (childItem == nullptr)
-		{
-			assert(childItem);
-			return nullptr;
-		}
-
-		std::shared_ptr<TuningFilter> filter = childItem->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
-		if (filter == nullptr)
-		{
-			assert(filter);
-			return nullptr;
-		}
-
-		if (filter->ID() == id)
-		{
-			return childItem;
-		}
-
-		// Recursive search
-
-		QTreeWidgetItem* result = findFilterWidget(id, childItem);
-
-		if (result != nullptr)
-		{
-			return result;
-		}
-	}
-
-	return nullptr;
-}
-
 bool TuningWorkspace::eventFilter(QObject *object, QEvent *event)
 {
 	bool navigationKey = false;
@@ -1731,7 +788,8 @@ bool TuningWorkspace::eventFilter(QObject *object, QEvent *event)
 		}
 	}
 
-	if (m_filterTree != nullptr && (object == m_filterTree || object == m_filterTree->viewport()) &&
+	if (m_treeLayoutWidget != nullptr &&
+			(object == m_treeLayoutWidget->treeWidget() || object == m_treeLayoutWidget->treeWidget()->viewport()) &&
 		(event->type() == QEvent::MouseButtonPress ||
 		 event->type() == QEvent::MouseButtonRelease ||
 		 event->type() == QEvent::MouseButtonDblClick ||
@@ -1761,137 +819,12 @@ bool TuningWorkspace::eventFilter(QObject *object, QEvent *event)
 	return QWidget::eventFilter(object, event);
 }
 
-void TuningWorkspace::slot_treeSelectionChanged()
+void TuningWorkspace::slot_parentWorkspaceTreeFilterChanged(std::shared_ptr<TuningFilter> filter)
 {
-	QList <QTreeWidgetItem*> selectedItems = m_filterTree->selectedItems();
-	if (selectedItems.size() != 1)
-	{
-		return;
-	}
-
-	QTreeWidgetItem* selected = selectedItems[0];
-	if (selected == nullptr)
-	{
-		return;
-	}
-
-	m_treeFilter = selected->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
-
-	emit treeFilterSelectionChanged(m_treeFilter);
-}
-
-void TuningWorkspace::slot_treeContextMenuRequested(const QPoint& pos)
-{
-	QTreeWidgetItem* item = m_filterTree->itemAt(pos);
-	if (item == nullptr)
-	{
-		return;
-	}
-
-	std::shared_ptr<TuningFilter> filter = item->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
-	if (filter == nullptr)
-	{
-		assert(filter);
-		return;
-	}
-
-	if (filter->isEmpty() == true)
-	{
-		return;
-	}
-
-	if (filter->isSourceEquipment() == false)
-	{
-		return;
-	}
-
-	Hash sourceHash = ::calcHash(filter->caption());
-
-	int sourceStatesCount = m_tuningConnection.tuningSourceStatesCount(sourceHash);
-	int activeStatesCount = m_tuningConnection.activatedTuningSourceStatesCount(sourceHash);
-	bool activateEnabled = activeStatesCount < sourceStatesCount;
-	bool deactivateEnabled = activeStatesCount != 0 && activeStatesCount == sourceStatesCount;
-
-	QMenu menu(this);
-
-	// EnableControl
-
-	QAction* actionEnable = new QAction(tr("Activate Control"), &menu);
-
-	auto fEnableControl = [this, filter]() -> void
-	{
-		activateControl(filter->caption(), true);
-	};
-	actionEnable->setEnabled(activateEnabled);
-	connect(actionEnable, &QAction::triggered, this, fEnableControl);
-
-	menu.addAction(actionEnable);
-
-	// Disable Control
-
-	QAction* actionDisable = new QAction(tr("Deactivate Control"), &menu);
-
-	auto fDisableControl = [this, filter]() -> void
-	{
-		activateControl(filter->caption(), false);
-	};
-	actionDisable->setEnabled(deactivateEnabled);
-	connect(actionDisable, &QAction::triggered, this, fDisableControl);
-
-	menu.addAction(actionDisable);
-
-	// Run the menu
-
-	if (actionEnable->isEnabled() == true || actionDisable->isEnabled() == true)
-	{
-		menu.exec(QCursor::pos());
-	}
-}
-
-void TuningWorkspace::slot_maskReturnPressed()
-{
-	slot_maskApply();
-}
-
-void TuningWorkspace::slot_maskApply()
-{
-	if (m_filterTree->topLevelItemCount() != 1)
-	{
-		return;
-	}
-
-	QTreeWidgetItem* rootItem = m_filterTree->topLevelItem(0);
-	if (rootItem == nullptr)
-	{
-		assert(false);
-		return;
-	}
-
-	std::shared_ptr<TuningFilter> rootFilter = rootItem->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
-	if (rootFilter == nullptr)
-	{
-		assert(rootFilter);
-		return;
-	}
-
-	if (m_treeMaskCombo->currentText().isEmpty() == false)
-	{
-		m_treeMaskCombo->setStyleSheet("QComboBox { color: red }");
-		m_treeMaskApply->setStyleSheet("QPushButton { color: red }");
-	}
-	else
-	{
-		m_treeMaskCombo->setStyleSheet(QString());
-		m_treeMaskApply->setStyleSheet(QString());
-	}
-
-	updateFiltersTree(rootFilter);
-}
-
-void TuningWorkspace::slot_parentTreeFilterChanged(std::shared_ptr<TuningFilter> filter)
-{
+	// This slot is called only for nested workspaces!
+	//
 	m_treeFilter = filter;
-	emit treeFilterSelectionChanged(m_treeFilter);
+	emit treeFilterChanged(m_treeFilter);
 }
 
 void TuningWorkspace::slot_filterButtonClicked(std::shared_ptr<TuningFilter> filter)

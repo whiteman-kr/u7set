@@ -1,5 +1,4 @@
-#ifndef DIALOGCALCULATOR_H
-#define DIALOGCALCULATOR_H
+#pragma once
 
 #include <QObject>
 #include <QDialog>
@@ -13,7 +12,7 @@
 
 #include "../CommonLib/Types.h"
 
-#include "UnitsConvertor.h"
+#include "UnitsConverter.h"
 
 // ==============================================================================================
 
@@ -107,7 +106,7 @@ private:
 
 	QFont*			m_digitFont = nullptr;
 
-	UnitsConvertor	m_uc;
+	UnitsConverter	m_uc;
 
 	void			conversionLin();
 	void			conversionTr();
@@ -116,8 +115,6 @@ private:
 	void			conversionDr();
 
 private slots:
-
-
 	void			onLinRadio() { conversionLin(); }
 	void			onLinValue(QString) { conversionLin(); }
 
@@ -135,7 +132,3 @@ private slots:
 	void			onDrRadio() { conversionDr(); }
 	void			onDrValue(QString) { conversionDr(); }
 };
-
-// ==============================================================================================
-
-#endif // DIALOGCALCULATOR_H

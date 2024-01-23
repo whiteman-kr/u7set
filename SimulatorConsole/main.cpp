@@ -1,9 +1,14 @@
+#include <atomic>
+
 #include <QCoreApplication>
 #include <QDebug>
+#include <QFloat16>
+#include <QVector>
 
-#include "../Simulator/Simulator.h"
-#include "../Simulator/SimConsoleLogFile.h"
 #include "../Protobuf/google/protobuf/message_lite.h"
+#include "../Simulator/SimConsoleLogFile.h"
+#include "../Simulator/Simulator.h"
+#include "../lib/ConstStrings.h"
 
 static QtMessageHandler originalMessageHandler = 0;
 
@@ -30,7 +35,7 @@ void messageOutputHandler(QtMsgType type, const QMessageLogContext& context, con
 			fprintf(stderr, "wrn: %s\n", localMsg.constData());
 			break;
 		case QtCriticalMsg:
-            fprintf(stderr, "err: %s\n", localMsg.constData());
+			fprintf(stderr, "err: %s\n", localMsg.constData());
 			break;
 		case QtFatalMsg:
 			fprintf(stderr, "fatal: %s (%s:%d, %s)\n", localMsg.constData(), context.file, context.line, context.function);
@@ -45,12 +50,12 @@ void messageOutputHandler(QtMsgType type, const QMessageLogContext& context, con
 	return;
 }
 
-void showProgrammUsageHint()
+void showProgramUsageHint()
 {
-	std::cout << "Programm usage:\n";
-	std::cout << "  SimulatorConsole [-build=build_dir] [-script=script_file] [-profile=profile_name] [-speed_factor=x0.1|x0.25|x0.5|x1|x2|x4|FF] [-verbose] [-enable_lan]\n";
+	std::cout << "Program usage:\n";
+	std::cout << "  SimulatorConsole [-build=build_dir] [-script=file] [-global_script=file] [-profile=profile_name] [-speed_factor=x0.1|x0.25|x0.5|x1|x2|x4|FF] [-verbose] [-enable_lan]\n";
 	std::cout << "\n";
-	std::cout << "Create template simualtion script:\n";
+	std::cout << "Create template simulation script:\n";
 	std::cout << "  SimulatorConsole [-create=file_name]\n";
 	return;
 }
@@ -79,23 +84,67 @@ bool generateScript(QString fileName)
 	return true;
 }
 
-bool runScript(QString scriptFileName, qint64 timeout, Sim::Simulator* simulator)
+bool runScript(QString scriptFileName, QString globalScriptFileName, qint64 timeout, Sim::Simulator* simulator)
 {
 	assert(simulator);
 
 	// Script must be run
 	//
-	QFile file{scriptFileName};
+	QFile scriptFile{scriptFileName};
 
-	if (file.open(QIODevice::ReadOnly) == false)
+	if (scriptFile.open(QIODevice::ReadOnly) == false)
 	{
-		qDebug() << file.errorString();
+		std::cout << "Cannot open file: " << scriptFile.fileName().toStdString() << "\n";
+		std::cout << scriptFile.errorString().toStdString() << "\n";
 		return false;
 	}
 
-	QString script = file.readAll();
+	Sim::SimScriptItem script{scriptFile.readAll(), QFileInfo(scriptFile).baseName()};
 
-	bool ok = simulator->runScript({script, QFileInfo(file).baseName()}, timeout);
+	// Attempt to Load global script.
+	//
+	Sim::SimScriptItem globalScript{};
+
+	if (globalScriptFileName.isEmpty() == false)
+	{
+		// There is a global script file from arguments.
+		//
+		QFile globalScriptFile{globalScriptFileName};
+		if (globalScriptFile.open(QIODevice::ReadOnly) == false)
+		{
+			std::cout << "Cannot open file: " << globalScriptFile.fileName().toStdString() << "\n";
+			std::cout << globalScriptFile.errorString().toStdString() << "\n";
+			return false;
+		}
+
+		globalScript = {globalScriptFile.readAll(), QFileInfo(globalScriptFile).baseName()};
+	}
+	else
+	{
+		// Global script was not passed as argument, try to load it from the same folder as script.
+		//
+		QFileInfo globalScriptFileInfo{QFileInfo{scriptFile}.absolutePath(), File::GLOBAL_SCRIPT};
+
+		if (globalScriptFileInfo.exists() == true)
+		{
+			QFile globalScriptFile{globalScriptFileInfo.absoluteFilePath()};
+
+			if (globalScriptFile.open(QIODevice::ReadOnly) == false)
+			{
+				std::cout << "Cannot open file: " << globalScriptFile.fileName().toStdString() << "\n";
+				std::cout << globalScriptFile.errorString().toStdString() << "\n";
+				return false;
+			}
+
+			globalScript = {globalScriptFile.readAll(), QFileInfo(globalScriptFile).baseName()};
+		}
+		else
+		{
+			std::cout << "WARNING: File " << File::GLOBAL_SCRIPT.toStdString() << " is not loaded." << "\n";
+		}
+	}
+
+	bool ok = simulator->runScript(script, globalScript, timeout);
 	if (ok == false)
 	{
 		return false;
@@ -120,7 +169,7 @@ public:
 	}
 };
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
 	ProtobufLibShutdowner pbLibShutdowner;
 	Q_UNUSED(pbLibShutdowner);
@@ -130,19 +179,18 @@ int main(int argc, char *argv[])
 	QCoreApplication app(argc, argv);
 
 	// Parse arguments
-	// SimulatorConsole.exe [-build=build_dir] [-script=script_file] [-profile=profile_name] [-speed_factor=x0.1|x0.25|x0.5|x1|x2|x4|FF] [-verbose] [-enable_lan] [-no_exit]
-	// SimulatorConsole.exe [-create=file_name]
 	//
 	QStringList args = QCoreApplication::arguments();
 
 	if (args.size() < 2)
 	{
-		showProgrammUsageHint();
+		showProgramUsageHint();
 		return EXIT_FAILURE;
 	}
 
 	QString buildPath;
 	QString scriptFile;
+	QString globalScriptFile;
 	QString profileName;
 	QString speedFactorStr;
 	bool unlockTimer = false;
@@ -168,6 +216,13 @@ int main(int argc, char *argv[])
 		{
 			scriptFile = args[argIndex];
 			scriptFile.replace("-script=", "", Qt::CaseInsensitive);
+			continue;
+		}
+
+		if (args[argIndex].startsWith("-global_script=", Qt::CaseInsensitive) == true)
+		{
+			globalScriptFile = args[argIndex];
+			globalScriptFile.replace("-global_script=", "", Qt::CaseInsensitive);
 			continue;
 		}
 
@@ -213,7 +268,7 @@ int main(int argc, char *argv[])
 		//
 		std::cout << "Unknown argument: " << args[argIndex].toStdString() << "\n\n";
 
-		showProgrammUsageHint();
+		showProgramUsageHint();
 		return EXIT_FAILURE;
 	}
 
@@ -238,8 +293,7 @@ int main(int argc, char *argv[])
 			{"8", 8.0},
 			{"10", 10.0},
 			{"16", 16.0},
-			{"FF", 256.0}
-		};
+			{"FF", 256.0}};
 
 		speedFactorStr.remove("x", Qt::CaseInsensitive);
 		if (speedFactorStr.startsWith("0.", Qt::CaseInsensitive) == true)
@@ -269,7 +323,7 @@ int main(int argc, char *argv[])
 	// --
 	//
 	Sim::ConsoleLogFile consoleLog;
-	Sim::Simulator simulator{&consoleLog, g_verbose, nullptr};		// Log to console
+	Sim::Simulator simulator{&consoleLog, g_verbose, nullptr}; // Log to console
 
 	if (bool ok = simulator.load(buildPath);
 		ok == false)
@@ -279,15 +333,15 @@ int main(int argc, char *argv[])
 
 	simulator.setCurrentProfile(profileName);
 	simulator.control().setSpeedFactor(speedFactor);
-	simulator.control().setRunList({});		// Add all modules to simulation
+	simulator.control().setRunList({}); // Add all modules to simulation
 	simulator.software().setEnabled(enableLan);
 
 	bool ok = true;
 
 	if (scriptFile.isEmpty() == false)
 	{
-		const qint64 timeout = 3600 * 1000;	// 1 hour, -1 means no time limit
-		ok &= runScript(scriptFile, timeout, &simulator);
+		const qint64 timeout = 3600 * 1000; // 1 hour, -1 means no time limit
+		ok &= runScript(scriptFile, globalScriptFile, timeout, &simulator);
 	}
 	else
 	{
@@ -319,7 +373,7 @@ int main(int argc, char *argv[])
 	{
 		if (lm->deviceState() == Sim::DeviceState::Fault)
 		{
-			QString message = QString("Simulation afterrun check: LogicModule %1 is in FAULT mode").arg(lm->equipmentId());
+			QString message = QString("Simulation after-run check: LogicModule %1 is in FAULT mode").arg(lm->equipmentId());
 			std::cout << message.toStdString() << "\n";
 			ok = false;
 		}

@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../VFrame30/SchemaItemAfb.h"
 #include "RunOrder.h"
+
+#include "../VFrame30/SchemaItemAfb.h"
 
 class DbController;
 
@@ -9,7 +10,8 @@ namespace Hardware
 {
 	class EquipmentSet;
 	class OptoModuleStorage;
-}
+	class DeviceModule;
+} // namespace Hardware
 
 namespace VFrame30
 {
@@ -17,11 +19,12 @@ namespace VFrame30
 	class LogicSchema;
 	class SchemaItemAfb;
 	class BusSet;
-}
+} // namespace VFrame30
 
 namespace Builder
 {
 	class Context;
+	class BuildResultWriter;
 	class IssueLogger;
 	class SignalSet;
 	class LmDescriptionSet;
@@ -52,24 +55,24 @@ namespace Builder
 
 	struct Bush
 	{
-		QUuid outputPin;						// Output pin for this branch, can be the only
-		std::set<QUuid> inputPins;				// Input pins for this branch
-		std::map<QUuid, Link> links;			// Links for this branch
+		QUuid outputPin;             // Output pin for this branch, can be the only
+		std::set<QUuid> inputPins;   // Input pins for this branch
+		std::map<QUuid, Link> links; // Links for this branch
 		std::map<QUuid, std::shared_ptr<VFrame30::FblItemRect>> fblItems;
 
 		VFrame30::FblItemRect* itemByPinGuid(QUuid pinId) const;
 		VFrame30::FblItemRect* itemByGuid(QUuid uuid) const;
 		VFrame30::AfbPin pinByGuid(QUuid pinId);
 
-		std::vector<QUuid> getAllUuid() const;					// Used for IssueLogger
-		std::vector<QUuid> getLinksUuids() const;				// Used for IssueLogger
+		std::vector<QUuid> getAllUuid() const;    // Used for IssueLogger
+		std::vector<QUuid> getLinksUuids() const; // Used for IssueLogger
 
 		std::vector<VFrame30::AfbPin> getInputPinsForItem(QUuid fblItemUuid) const;
 
 		bool hasCommonFbls(const Bush& bush) const;
 
-		//bool hasInputOrOutput(const QUuid& uuid) const;
-		//bool hasJoinedInOuts(Bush& bush) const;
+		// bool hasInputOrOutput(const QUuid& uuid) const;
+		// bool hasJoinedInOuts(Bush& bush) const;
 
 		void debugInfo() const;
 	};
@@ -100,8 +103,8 @@ namespace Builder
 		std::shared_ptr<VFrame30::FblItemRect> m_fblItem;
 		std::shared_ptr<VFrame30::Schema> m_schema;
 
-		QUuid m_groupId;								// ShchemaItemUfb is expanded to the group of items, all these expanded items have the same m_groupId
-														// This id is empty if item is not in group
+		QUuid m_groupId; // ShchemaItemUfb is expanded to the group of items, all these expanded items have the same m_groupId
+						 // This id is empty if item is not in group
 
 		// Methods
 		//
@@ -118,8 +121,23 @@ namespace Builder
 
 		// Items can be kept in set, it is just comparing m_fblItem pointres
 		//
-		bool operator < (const AppLogicItem& li) const;
-		bool operator == (const AppLogicItem& li) const;
+		bool operator<(const AppLogicItem& li) const;
+		bool operator==(const AppLogicItem& li) const;
+
+		// Write fully parsed AppLogicItem to the output for further analysis by third-party tools.
+		//
+		static void writeXml(QXmlStreamWriter& writer, const VFrame30::FblItemRect& fblItem);
+
+		static void writeXml(QXmlStreamWriter& writer, const VFrame30::SchemaItemAfb& item);
+		static void writeXml(QXmlStreamWriter& writer, const VFrame30::SchemaItemTerminator& item);
+		static void writeXml(QXmlStreamWriter& writer, const VFrame30::SchemaItemSignal& item);
+		static void writeXml(QXmlStreamWriter& writer, const VFrame30::SchemaItemConst& item);
+		static void writeXml(QXmlStreamWriter& writer, const VFrame30::SchemaItemTransmitter& item);
+		static void writeXml(QXmlStreamWriter& writer, const VFrame30::SchemaItemReceiver& item);
+		static void writeXml(QXmlStreamWriter& writer, const VFrame30::SchemaItemLoopback& item);
+		static void writeXml(QXmlStreamWriter& writer, const VFrame30::SchemaItemBus& item);
+
+		static void writeXml(QXmlStreamWriter& writer, const Afb::AfbElement& afbElement);
 	};
 
 
@@ -155,6 +173,7 @@ namespace Builder
 		bool removeInOutItemKeepAssoc(const QUuid& itemGuid);
 
 		void dump() const;
+		[[nodiscard]] QByteArray writeParsedXml() const;
 
 	private:
 		bool setItemsOrder(IssueLogger* log,
@@ -184,10 +203,10 @@ namespace Builder
 		void setFblItemsAcc(std::map<QUuid, AppLogicItem> v);
 
 	private:
-		QString m_equipmentId;							// EuqipmentId or UFB SchemaID
-		QString m_lmDescriptionFile;					// LogicModule description filename
-		std::list<AppLogicItem> m_items;				// Ordered items
-		std::map<QUuid, AppLogicItem> m_fblItemsAcc;	// Temporary buffer, filled in addBranch, cleared in orderItems
+		QString m_equipmentId;                       // EuqipmentId or UFB SchemaID
+		QString m_lmDescriptionFile;                 // LogicModule description filename
+		std::list<AppLogicItem> m_items;             // Ordered items
+		std::map<QUuid, AppLogicItem> m_fblItemsAcc; // Temporary buffer, filled in addBranch, cleared in orderItems
 
 		//
 		QHash<QString, bool> m_signaledItems;
@@ -226,6 +245,11 @@ namespace Builder
 		static bool bindTwoPins(VFrame30::AfbPin& outPin, VFrame30::AfbPin& inputPin);
 
 		bool setAfbComponents(const LmDescriptionSet* lmDescriptionSet, IssueLogger* log);
+
+		bool resolvePackedLogicAfbs(IssueLogger* log);
+
+		/// @brief Write fully parsed AppLogicData to the output for further analysis by third-party tools.
+		bool writeToOutput(QString buildPath, BuildResultWriter& buildResultWriter, const std::vector<Hardware::DeviceModule*>& fscModules);
 
 		// Properties
 		//
@@ -295,7 +319,7 @@ namespace Builder
 		bool loadSchemaFiles(DbController* db, std::vector<std::shared_ptr<SchemaType>>* out, int parentFileId, QString filter);
 
 		template<typename SchemaType>
-		bool checkSameLabelsAndGuids(const std::vector<std::shared_ptr<SchemaType> >& schemas) const;
+		bool checkSameLabelsAndGuids(const std::vector<std::shared_ptr<SchemaType>>& schemas) const;
 
 		bool checkSameInputsAndOutputs(const std::vector<std::shared_ptr<VFrame30::UfbSchema>>& schemas) const;
 		bool checkParamsReferencesFormat(const std::vector<std::shared_ptr<VFrame30::UfbSchema>>& schemas) const;
@@ -320,7 +344,8 @@ namespace Builder
 		bool parseAppLogicSchema(std::shared_ptr<VFrame30::LogicSchema> logicSchema, ReadyParseDataContainer* readyParseDataContainer, bool* interruptProcess);
 
 		bool parseAppLogicLayer(std::shared_ptr<VFrame30::LogicSchema> logicSchema,
-								std::shared_ptr<VFrame30::SchemaLayer> layer, ReadyParseDataContainer* readyParseDataContainer);
+								std::shared_ptr<VFrame30::SchemaLayer> layer,
+								ReadyParseDataContainer* readyParseDataContainer);
 
 		bool multichannelProcessing(std::shared_ptr<VFrame30::LogicSchema> schema,
 									std::shared_ptr<VFrame30::SchemaLayer> layer,
@@ -366,5 +391,4 @@ namespace Builder
 		RunOrder m_runOrder;
 	};
 
-}
-
+} // namespace Builder

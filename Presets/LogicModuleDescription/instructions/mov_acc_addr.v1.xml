@@ -1,0 +1,17 @@
+<Command 
+	Caption="mov" 
+	Code="0110" 
+	CodeMask="07f0" 
+	SimulationFunc="command_mov_acc_addr" 
+	ParseFunc="parse_mov_acc_addr" 
+	Description="Copy 16-bit word from memory to ACC"
+
+	CodeSize="2" 
+	ReadTime="8" 
+	WaitFbExecution="false"
+
+	ConstRuntime="2"
+
+	CheckFunc="check_mov_acc_addr"
+	GetMnemoFunc="mnemo_mov_acc_addr"
+	CalcExecTimeFunc="exectime_const"/>

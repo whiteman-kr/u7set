@@ -1,21 +1,21 @@
 #pragma once
 
-#include <memory>
-#include <map>
-#include <vector>
+#include "../HardwareLib/LmDescription.h"
 #include "../HardwareLib/ModuleFirmware.h"
-#include "../lib/LmDescription.h"
 #include "../UtilsLib/ILogFile.h"
-#include "SimSubsystem.h"
-#include "SimControl.h"
 #include "SimAppSignalManager.h"
-#include "SimTuningSignalManager.h"
-#include "SimOverrideSignals.h"
 #include "SimConnections.h"
-#include "SimScriptSimulator.h"
-#include "SimSoftware.h"
+#include "SimControl.h"
+#include "SimOverrideSignals.h"
 #include "SimProfiles.h"
 #include "SimScopedLog.h"
+#include "SimScriptSimulator.h"
+#include "SimSoftware.h"
+#include "SimSubsystem.h"
+#include "SimTuningSignalManager.h"
+#include <map>
+#include <memory>
+#include <vector>
 
 class QTextStream;
 
@@ -29,7 +29,7 @@ namespace Sim
 		Q_OBJECT
 
 	public:
-		explicit Simulator(ILogFile* log, bool allowDebugMessages, QObject* parent);		// if log is nullptr then log to console
+		explicit Simulator(ILogFile* log, bool allowDebugMessages, QObject* parent); // if log is nullptr then log to console
 		virtual ~Simulator();
 
 	public:
@@ -44,10 +44,23 @@ namespace Sim
 
 		// Script Tests
 		//
-		bool runScript(const SimScriptItem& script, qint64 timeout);				// Starts one script in separate thread and returns immediately
-		bool runScripts(const std::vector<SimScriptItem>& scripts, qint64 timeout);	// Starts a pack of scripts in separate thread and returns immediately
-		bool stopScript();															// Stops script if it is running
-		bool waitScript(unsigned long msecs = ULONG_MAX);							// Wait script to stop
+
+		/// @brief Starts one script in separate thread and returns immediately.
+		///
+		bool runScript(const SimScriptItem& script, const SimScriptItem& globalScript, qint64 timeout);
+
+		/// @brief Starts a pack of scripts in separate thread and returns immediately.
+		///
+		bool runScripts(const std::vector<SimScriptItem>& scripts, const SimScriptItem& globalScript, qint64 timeout);
+
+		/// @brief Stops script if it is running.
+		///
+		bool stopScript();
+
+		/// @brief Wait script to stop.
+		///
+		bool waitScript(unsigned long msecs = ULONG_MAX);
+
 		bool scriptResult();
 
 		bool checkSkipOnBuildConst() const;
@@ -62,7 +75,7 @@ namespace Sim
 		bool loadAppSignals(QString buildPath);
 
 	signals:
-		void projectUpdated();				// Project was loaded or cleared
+		void projectUpdated(); // Project was loaded or cleared
 
 		void scriptStarted();
 		void scriptFinished();
@@ -109,12 +122,12 @@ namespace Sim
 		mutable ScopedLog m_log;
 
 		QString m_buildPath;
-		Hardware::ModuleFirmwareStorage m_firmwares;						// Loaded bts file
+		Hardware::ModuleFirmwareStorage m_firmwares;                        // Loaded bts file
 
 		Sim::Connections m_connections;
 
-		std::map<QString, std::shared_ptr<LmDescription>> m_lmDescriptions;	// Key is filename
-		std::map<QString, std::shared_ptr<Subsystem>> m_subsystems;			// Key is SubsystemID
+		std::map<QString, std::shared_ptr<LmDescription>> m_lmDescriptions; // Key is filename
+		std::map<QString, std::shared_ptr<Subsystem>> m_subsystems;         // Key is SubsystemID
 
 		// Signals Management
 		//
@@ -142,6 +155,4 @@ namespace Sim
 		//
 		ScriptSimulator m_scriptSimulator;
 	};
-}
-
-
+} // namespace Sim

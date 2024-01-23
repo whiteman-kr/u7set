@@ -180,6 +180,8 @@ void SchemaItemPropertyEditor::valueChanged(QString propertyName, QVariant value
 	for (auto i : objectsList)
 	{
 		SchemaItemPtr vi = std::dynamic_pointer_cast<VFrame30::SchemaItem>(i);
+		Q_ASSERT(vi);
+
 		items.push_back(vi);
 	}
 

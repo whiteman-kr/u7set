@@ -1,27 +1,7 @@
 #pragma once
 
-#include <QDebug>
-#include <QScreen>
-#include <QDialog>
-#include <QMenu>
-#include <QMenuBar>
-#include <QToolBar>
-#include <QAction>
-#include <QLabel>
-#include <QLineEdit>
-#include <QVBoxLayout>
-#include <QHeaderView>
-#include <QTableView>
-#include <QTableWidget>
-#include <QPlainTextEdit>
-#include <QGroupBox>
-#include <QComboBox>
-#include <QCheckBox>
-#include <QPushButton>
-#include <QDialogButtonBox>
-
 #include "AppSignalSetProvider.h"
-#include "DbMetrologyConnection.h"
+#include "../Builder/DbMetrologyConnection.h"
 
 // ==============================================================================================
 
@@ -136,7 +116,9 @@ class DialogMetrologyConnection : public QDialog
 
 public:
 
-	DialogMetrologyConnection(AppSignalSetProvider* signalSetProvider, QWidget* parent = nullptr);
+	DialogMetrologyConnection(AppSignalSetProvider* signalSetProvider,
+							  DbController* dbController,
+							  QWidget* parent = nullptr);
 	virtual ~DialogMetrologyConnection() override;
 
 public:
@@ -158,6 +140,7 @@ public:
 	void findSignal_in_signalSet();
 
 private:
+	DbController* m_db = nullptr;
 
 	Metrology::DbConnectionBase m_connectionBase;
 	bool m_isModified = false;

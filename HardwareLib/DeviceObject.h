@@ -34,7 +34,7 @@ namespace Hardware
 	class DeviceDiagSignal;
 
 
-	// Device type, for defining hierrarche, don't save these data to file, can be changed (new level) later
+	// Device type, for defining hierarchy, don't save these data to file, can be changed (new level) later
 	// If you add or change order in this enum, DO NOT FORGET TO CHANGE !!!!DeviceObjectExtensions!!!!
 	//
 	enum class DeviceType
@@ -73,11 +73,16 @@ namespace Hardware
 		static const QString place;
 		static const QString specificProperties;
 		static const QString signalSpecificProperties;
+		static const QString tags;
+		static const QString tagsDescription;
+
 		static const QString preset;
 		static const QString presetRoot;
 		static const QString presetName;
 		static const QString presetVersion;
 		static const QString presetObjectUuid;
+		static const QString presetProtectedProperties;
+		static const QString presetProtectedPropertiesDescription;
 
 		static const QString lmDescriptionFile;
 		static const QString lmNumber;
@@ -295,11 +300,20 @@ namespace Hardware
 		[[nodiscard]] QString childRestriction() const;
 		void setChildRestriction(QString value);
 
-		[[nodiscard]] QString specificProperties() const;
-		void setSpecificProperties(QString value);
+		[[nodiscard]] QString specificPropertiesStruct() const;
+		void setSpecificPropertiesStruct(QString value);
 
 		[[nodiscard]] int place() const;
 		void setPlace(int value);
+
+		[[nodiscard]] bool hasTag(const QString& tag) const;
+		[[nodiscard]] bool hasTag(Hash tagHash) const;
+
+		[[nodiscard]] QStringList tags() const;
+		[[nodiscard]] QString tagsAsString() const;
+
+		void setTags(const QStringList& tags);
+		void setTags(const QString& tags);
 
 		[[nodiscard]] QString details() const;		// JSON short description, uuid, equipmentId, caption, place, etc
 
@@ -321,6 +335,12 @@ public:
 		[[nodiscard]] QUuid presetObjectUuid() const;
 		void setPresetObjectUuid(QUuid value);
 
+		[[nodiscard]] QString presetProtectedPropertiesStr() const;
+		void setPresetProtectedPropertiesStr(const QString& value);
+
+		[[nodiscard]] const QStringList& presetProtectedProperties() const;
+		void setPresetProtectedProperties(const QStringList& value);
+
 		[[nodiscard]] DbFileInfo* data();
 		[[nodiscard]] const DbFileInfo* data() const;
 		void setData(std::shared_ptr<DbFileInfo> data);
@@ -338,9 +358,11 @@ public:
 		QString m_caption;
 
 		QString m_childRestriction;			// Restriction script for child items
-		QString m_specificPropertiesStruct;	// Desctription of the Object's specific properties
+		QString m_specificPropertiesStruct;	// Description of the Object's specific properties
 
 		int m_place = -1;
+
+		std::unordered_map<Hash, QString> m_tags;	// Tags for this object, key is a hash of the tag name
 
 	private:
 		// Preset Data
@@ -351,6 +373,7 @@ public:
 		QString m_presetName;				// PresetName, if it is preset
 		QUuid m_presetObjectUuid;			// In configuration this field has uuid of the PRESET object from which it was constructed
 											// In preset edit mode this field has the same value with m_uuid
+		QStringList m_presetProtectedProperties; // Properties that cannot be update from preset
 
 		std::shared_ptr<DbFileInfo> m_data;	// Application-specific value associated with the specified item (DbFileInfo)
 	};

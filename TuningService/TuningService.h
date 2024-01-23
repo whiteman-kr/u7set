@@ -19,15 +19,19 @@ namespace Tuning
 	public:
 		TuningServiceWorker(const SoftwareInfo& softwareInfo,
 							const QString &serviceInstanceName,
-							int &argc,
-							char **argv,
+							int argc,
+							char** argv,
 							CircularLoggerShared logger,
-							E::ServiceRunMode runMode,
 							CircularLoggerShared tuningLog);
+
+		TuningServiceWorker(const TuningServiceWorker* worker);
+
 		~TuningServiceWorker();
 
 		virtual ServiceWorker* createInstance() const override;
 		virtual void getServiceSpecificInfo(Network::ServiceInfo& servicesInfo) const override;
+
+		CircularLoggerShared tuningLog() const { return m_tuningLog; }
 
 		const TuningClientContext* getClientContext(QString clientID) const;
 		const TuningClientContext* getClientContext(const std::string& clientID) const;
@@ -53,7 +57,7 @@ namespace Tuning
 		QString activeClientID() const;
 		QString activeClientIP() const;
 
-		const TuningServiceSettings& tuningServiceSettings() const { return m_settings; }
+		const TuningServiceSettings& tuningServiceSettings() const { return m_serviceSettings; }
 
 		bool isControlled(const QString& lmEquipmentID, const QString& lanEquipmentID) const;
 
@@ -61,13 +65,16 @@ namespace Tuning
 
 		E::SecurityLevel securityLevel() const;
 
-	signals:
+		void registerSignalsStateChangesQueue(const QString& clientEquipmentID, qint64 tcpConnectionID);
+		void unregisterSignalsStateChangesQueue(const QString& clientEquipmentID, qint64 tcpConnectionID);
 
-	public slots:
+		void pushSignalStateChange(const TuningSignal::State& state, QThread* thread);
+
+		TuningSignalsChangesQueue* getSignalChangesQueue(const QString& clientEquipmentID, qint64 tcpConnectionID);
 
 	private:
-		virtual void initCmdLineParser() override;
-		virtual void loadSettings() override;
+		virtual void initServiceSpecificCmdLineArgs() override;
+		virtual void loadServiceSpecificSettings() override;
 
 		void clear();
 
@@ -115,11 +122,10 @@ namespace Tuning
 								  SessionParams sessionParams,
 								  std::shared_ptr<const SoftwareSettings> curSettingsProfile);
 	private:
-		CircularLoggerShared m_logger;
 		CircularLoggerShared m_tuningLog;
 		CircularLoggerShared m_tuningPacketLog;
 
-		TuningServiceSettings m_settings;
+		TuningServiceSettings m_serviceSettings;
 
 		std::map<QString, TuningSourceThreadShared> m_sourceThreads;	// module EquipmentID => TuningSourceThreadShared
 		std::map<quint32, TuningSourceThreadShared> m_ip2sourceThread;	// TuningSource LANs ipV4 => TuningSourceThreadShared

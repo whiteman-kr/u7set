@@ -1,15 +1,5 @@
 #include "PanelFindMeasure.h"
 
-#include <QApplication>
-#include <QSettings>
-#include <QIcon>
-#include <QHeaderView>
-#include <QVBoxLayout>
-#include <QStatusBar>
-#include <QTableWidget>
-#include <QMessageBox>
-#include <QCompleter>
-
 #include "ProcessData.h"
 #include "Delegate.h"
 #include "Options.h"
@@ -388,9 +378,9 @@ void PanelFindMeasure::find()
 				continue;
 			}
 
-			int len = static_cast<int>(m_findText.count());
+            int len = static_cast<int>(m_findText.size());
 
-			findItemList.push_back(FindItem(row, column, text, pos, pos + len));
+            findItemList.emplace_back(row, column, text, pos, pos + len);
 		}
 	}
 

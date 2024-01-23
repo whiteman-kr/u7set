@@ -3,6 +3,7 @@
 #include "../Builder/AppSignalProperties.h"
 #include "../lib/PropertyEditor.h"
 #include "../HardwareLib/Connection.h"
+#include "../ReportLib/ReportPrinter.h"
 #include "../UtilsLib/Ui/UiTools.h"
 #include "../VFrame30/Bus.h"
 #include "../VFrame30/Schema.h"
@@ -12,6 +13,9 @@
 #include "../lib/Ui/DialogProgress.h"
 
 #include "Settings.h"
+
+using namespace Builder;
+using namespace ReportLib;
 
 //
 // FileDiff
@@ -244,6 +248,26 @@ void FileDiff::alignResults(const std::vector<T>& source, const std::vector<T>& 
 
 
 //
+// ProjectDiffReportParams
+//
+QPageLayout ProjectDiffReportParams::singleFilePageLayout() const
+{
+	static QPageLayout lEmpty;
+
+	for (const auto& p : schemaTypesParams)
+	{
+		if (p.hasFileId() == false)
+		{
+			const int layoutIndex = 0;
+			return p.pageLayoutWithMargins(layoutIndex);
+		}
+	}
+
+	Q_ASSERT(false);
+	return lEmpty;
+}
+
+//
 // ProjectDiffThread
 //
 
@@ -257,7 +281,7 @@ void ProjectDiffGeneratorThread::run(const QString& fileName,
 {
 	// Create schema view
 
-	std::shared_ptr<ReportSchemaView> schemaView = std::make_shared<ReportSchemaView>();
+	std::shared_ptr<ReportSchemaView> schemaView = std::make_shared<ReportSchemaView>(false/*infoMode*/);
 
 	schemaView->session().setProject(projectName);
 	schemaView->session().setUsername(userName);
@@ -309,11 +333,11 @@ void ProjectDiffGeneratorThread::run(const QString& fileName,
 
 	if (dialogProgress.hasErrorMessage() == false)
 	{
-		if (settings.multipleFiles == false)
+		if (settings.singleFile == true)
 		{
 			if (QMessageBox::question(parent, qAppName(), QObject::tr("Report generating has been finished.\n\nDo you with to open it?")) == QMessageBox::Yes)
 			{
-				UiTools::openHelp(fileName, parent);
+				UiTools::openPdf(fileName, parent);
 			}
 		}
 		else
@@ -336,6 +360,43 @@ void ProjectDiffGeneratorThread::run(const QString& fileName,
 }
 
 //
+// lineFontSize
+//
+
+static int lineFontSize(const QPageLayout& pageLayout, const QString& fontName, int desiredLinesPerPage)
+{
+	// Function calculates approximal font size in points
+	// for given page layout, font name and desired number of lines in page
+
+	QRect rect = pageLayout.paintRectPoints();
+
+	int lineHeightPoints = rect.height() / desiredLinesPerPage;
+
+	int fontSize = lineHeightPoints;
+
+	QFontMetrics fm{QFont(fontName, fontSize)};
+
+	double fontCoef = fontSize / static_cast<double>(fm.height());
+
+	return static_cast<int>(fontSize * fontCoef);
+
+	/*qDebug() << "Height = " << fm.height();
+	qDebug() << "fontDpi = " << fm.fontDpi();
+	qDebug() << "ascent = " << fm.ascent();
+	qDebug() << "descent = " << fm.descent();
+	qDebug() << "leading = " << fm.leading();
+
+
+	ReportObjectFormat rf{f, Qt::AlignLeft};
+	qDebug() << "lineHeight = " << rf.blockFormat().lineHeight();
+
+	for (int i = 0; i < linesPerPage + 10; i++)
+	{
+		rs->addText(tr("Line: %1\n").arg(i + 1), {fontName, fontSize * fontScaling, Qt::AlignHCenter});
+	}*/
+}
+
+//
 // ProjectDiffWorker
 //
 
@@ -346,20 +407,22 @@ ProjectDiffGenerator::ProjectDiffGenerator(const QString& fileName,
 										   const QString& projectName,
 										   const QString& userName,
 										   const QString& userPassword):
-	ReportGenerator(schemaView, signalSet),
+	m_schemaView(schemaView),
+	m_reportPrinter(m_schemaView),
+	m_appSignalProvider(signalSet),
+	m_appSignalController(&m_appSignalProvider, nullptr),
 	m_reportParams(settings),
 	m_filePath(fileName),
 	m_projectName(projectName),
 	m_userName(userName),
-	m_userPassword(userPassword)
+	m_userPassword(userPassword),
+	m_headerFont{"Arial", 12, QFont::Bold},
+	m_normalFont{"Arial", 9, QFont::Normal},
+	m_tableFont{"Arial", 9, QFont::Normal},
+	m_marginFont{"Arial", 9, QFont::Normal},
+	m_headerFormat{m_headerFont, Qt::AlignHCenter},
+	m_normalFormat{m_normalFont, Qt::AlignLeft}
 {
-	// Init fonts
-
-	m_headerFont = QFont("Arial", 36, QFont::Bold);
-	m_normalFont = QFont("Arial", 24);
-	m_tableFont = QFont("Arial", 24);
-	m_marginFont = QFont("Arial", 8);
-
 	return;
 }
 
@@ -368,9 +431,9 @@ ProjectDiffGenerator::~ProjectDiffGenerator()
 	qDebug() << "ProjectDiffGenerator deleted";
 }
 
-std::vector<ReportFileTypeParams> ProjectDiffGenerator::defaultFileTypeParams(DbController* db)
+std::vector<Builder::SchemaTypesParams> ProjectDiffGenerator::defaultFileTypeParams(DbController* db)
 {
-	std::vector<ReportFileTypeParams> result;
+	std::vector<Builder::SchemaTypesParams> result;
 
 	if (db == nullptr || db->isProjectOpened() == false)
 	{
@@ -378,41 +441,118 @@ std::vector<ReportFileTypeParams> ProjectDiffGenerator::defaultFileTypeParams(Db
 		return result;
 	}
 
-	result.push_back({db->systemFileId(DbDir::HardwareConfigurationDir), QObject::tr("Hardware Configuration"),	true});
+	QMarginsF portatitMargins{30, 20, 15, 20};
+	QMarginsF langscapeMargins{20, 30, 20, 15};
 
-	result.push_back({applicationSignalsTypeId(), QObject::tr("Application Signals"), true});
+	QStringList layoutNames;
+	layoutNames << QString();
+
+	// Hardware and signals
+
+	result.push_back({db->systemFileId(DbDir::HardwareConfigurationDir), QObject::tr("Hardware Configuration"),	true,
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter), layoutNames});
+
+	result.push_back({applicationSignalsTypeId(), QObject::tr("Application Signals"), true,
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter), layoutNames});
 
 
 	//Schemas
-	result.push_back({db->systemFileId(DbDir::MonitorSchemasDir), QObject::tr("Monitor Schemas"), true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
-	result.push_back({db->systemFileId(DbDir::TuningSchemasDir), QObject::tr("Tuning Schemas"),	true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
-	result.push_back({db->systemFileId(DbDir::DiagnosticsSchemasDir), QObject::tr("Diagnostics Schemas"), true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
-	result.push_back({db->systemFileId(DbDir::AppLogicDir), QObject::tr("Application Logic"), true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
-	result.push_back({db->systemFileId(DbDir::UfblDir), QObject::tr("UFBL Descriptions"), true, QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, QMarginsF(15, 15, 15, 15))});
 
-	result.push_back({db->systemFileId(DbDir::BusTypesDir),	QObject::tr("Busses"), true});
-	result.push_back({db->systemFileId(DbDir::ConnectionsDir), QObject::tr("Connections"), true});
+	result.push_back({db->systemFileId(DbDir::MonitorSchemasDir), QObject::tr("Monitor Schemas"), true,
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, langscapeMargins, QPageLayout::Unit::Millimeter), layoutNames});
 
-	result.push_back({db->systemFileId(DbDir::SimTestsDir),	QObject::tr("Simulator Tests"), true});
+	result.push_back({db->systemFileId(DbDir::TuningSchemasDir), QObject::tr("Tuning Schemas"),	true,
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, langscapeMargins, QPageLayout::Unit::Millimeter), layoutNames});
 
-	result.push_back({db->systemFileId(DbDir::AfblDir),	QObject::tr("AFBL Descriptions"), false});
-	result.push_back({db->systemFileId(DbDir::HardwarePresetsDir), QObject::tr("Hardware Presets"),	false});
-	result.push_back({db->systemFileId(DbDir::ModuleConfigurationDir), QObject::tr("Module Configuration"), false});
-	result.push_back({db->systemFileId(DbDir::EtcDir), QObject::tr("Other Files"), false});
+	result.push_back({db->systemFileId(DbDir::DiagnosticsSchemasDir), QObject::tr("Diagnostics Schemas"), true,
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, langscapeMargins, QPageLayout::Unit::Millimeter), layoutNames});
+
+	result.push_back({db->systemFileId(DbDir::AppLogicDir), QObject::tr("Application Logic"), true,
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, langscapeMargins, QPageLayout::Unit::Millimeter), layoutNames});
+
+	result.push_back({db->systemFileId(DbDir::UfblDir), QObject::tr("UFBL Descriptions"), true,
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, langscapeMargins, QPageLayout::Unit::Millimeter), layoutNames});
+
+	// Other objects
+
+	result.push_back({db->systemFileId(DbDir::BusTypesDir),	QObject::tr("Busses"), true,
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter), layoutNames});
+
+	result.push_back({db->systemFileId(DbDir::ConnectionsDir), QObject::tr("Connections"), true,
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter), layoutNames});
+
+	result.push_back({db->systemFileId(DbDir::SimTestsDir),	QObject::tr("Simulator Tests"), true,
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter), layoutNames});
+
+	result.push_back({db->systemFileId(DbDir::AfblDir),	QObject::tr("AFBL Descriptions"), false,
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter), layoutNames});
+
+	result.push_back({db->systemFileId(DbDir::HardwarePresetsDir), QObject::tr("Hardware Presets"),	false,
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter), layoutNames});
+
+	result.push_back({db->systemFileId(DbDir::ModuleConfigurationDir), QObject::tr("Module Configuration"), false,
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter), layoutNames});
+
+	result.push_back({db->systemFileId(DbDir::EtcDir), QObject::tr("Other Files"), false,
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter), layoutNames});
+
+	result.push_back({-1, QObject::tr("Single-File Report"), false,
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Portrait, portatitMargins, QPageLayout::Unit::Millimeter), layoutNames});
 
 	return result;
-
 }
 
 void ProjectDiffGenerator::process()
 {
-	std::map<int, std::vector<std::shared_ptr<ReportSection>>> reportContents;
-
 	try
 	{
-		compareProject(reportContents);
+		{
+			QMutexLocker l(&m_statisticsMutex);
+			m_statistics = {};
+			m_statistics.m_state = WorkerStatus::Comparing;
+		}
 
-		renderReport(reportContents);
+		compareProject();
+
+		// Generate generic report file with all report files description
+		//
+		if (m_reportParams.singleFile == false)
+		{
+			generateSummaryReport(m_reportParams.singleFilePageLayout());
+		}
+
+		{
+			QMutexLocker l(&m_statisticsMutex);
+			m_statistics.m_state = WorkerStatus::Printing;
+		}
+
+		// Save reports
+		//
+		for (auto& report : m_generatedReports)
+		{
+			// Don't print report if it has only one title page
+			//
+			if (report->sectionsCount() == 1 && report->section(0)->caption() == titlePageName)
+			{
+				continue;
+			}
+
+			// Print report
+			//
+			{
+				QMutexLocker l(&m_statisticsMutex);
+				m_statistics.m_printingReportName  = report->path();
+			}
+
+			m_reportPrinter.print(*report, report->path(), m_stop);
+		}
+
+		//
+
+		{
+			QMutexLocker l(&m_statisticsMutex);
+			m_statistics.m_state = WorkerStatus::Idle;
+		}
 
 		emit finished(QString());
 	}
@@ -437,11 +577,9 @@ void ProjectDiffGenerator::progressRequested()
 	int progress = 0;
 	int progressMax = 0;
 
-	QMutexLocker l(&m_statisticsMutex);
+	ProjectDiffGenerator::Statistics stat = statistics();
 
-	ProjectDiffGenerator::WorkerStatus status = currentStatus();
-
-	switch (status)
+	switch (stat.m_state)
 	{
 	case ProjectDiffGenerator::WorkerStatus::Idle:
 		{
@@ -453,15 +591,15 @@ void ProjectDiffGenerator::progressRequested()
 			progressText.push_back(tr("Requesting Application Signals..."));
 		}
 		break;
-	case ProjectDiffGenerator::WorkerStatus::Analyzing:
+	case ProjectDiffGenerator::WorkerStatus::Comparing:
 		{
-			progressText.push_back(tr("Analyzing: %1").arg(currentSection()));
+			progressText.push_back(tr("Comparing: %1").arg(stat.m_currentSectionName));
 
 			progressText.push_back(tr("Signals: %1 / %2, Files: %3 / %4")
-								   .arg(signalIndex()).arg(signalsCount())
-								   .arg(fileIndex()).arg(filesCount()));
+								   .arg(stat.m_signalIndex).arg(stat.m_signalsCount)
+								   .arg(stat.m_fileIndex).arg(stat.m_filesCount));
 
-			QString objectName = currentObjectName();
+			QString objectName = stat.m_currentObjectName;
 			if (objectName.length() > 48)
 			{
 				objectName = "..." + objectName.right(48);
@@ -469,47 +607,60 @@ void ProjectDiffGenerator::progressRequested()
 
 			progressText.push_back(tr("Current: %1").arg(objectName));
 
-			progress = fileIndex() + signalIndex();
-			progressMax = filesCount() + signalsCount();
-		}
-		break;
-	case ProjectDiffGenerator::WorkerStatus::Rendering:
-		{
-			if (renderingReportName().isEmpty() == false)
-			{
-				progressText.push_back(tr("Creating the report '%1'...").arg(renderingReportName()));
-			}
-			else
-			{
-				progressText.push_back(tr("Creating a report..."));
-			}
-
-			progressText.push_back(tr("Section: %1 / %2").arg(sectionIndex()).arg(sectionCount()));
-
-			progress = sectionIndex();
-			progressMax = sectionCount();
+			progress = stat.m_fileIndex + stat.m_signalIndex;
+			progressMax = stat.m_filesCount + stat.m_signalsCount;
 		}
 		break;
 	case ProjectDiffGenerator::WorkerStatus::Printing:
 		{
-			if (renderingReportName().isEmpty() == false)
+			ReportPrinter::Statistics printStatus = m_reportPrinter.statistics();
+
+			if (printStatus.status == ReportPrinter::Statistics::Preview || printStatus.status == ReportPrinter::Statistics::Rendering)
 			{
-				progressText.push_back(tr("Saving the report '%1'...").arg(renderingReportName()));
+				if (stat.m_printingReportName.isEmpty() == false)
+				{
+					progressText.push_back(tr("Creating the report '%1'...").arg(stat.m_printingReportName));
+				}
+				else
+				{
+					progressText.push_back(tr("Creating a report..."));
+				}
+
+				progressText.push_back(tr("Section: %1 / %2").arg(printStatus.sectionIndex).arg(printStatus.sectionCount));
+
+				progress = printStatus.sectionIndex;
+				progressMax = printStatus.sectionCount;
 			}
 			else
 			{
-				progressText.push_back(tr("Saving the report..."));
+				if (printStatus.status == ReportPrinter::Statistics::Printing)
+				{
+					if (stat.m_printingReportName.isEmpty() == false)
+					{
+						progressText.push_back(tr("Saving the report '%1'...").arg(stat.m_printingReportName));
+					}
+					else
+					{
+						progressText.push_back(tr("Saving a report..."));
+					}
+
+					progressText.push_back(tr("Page: %1 / %2").arg(printStatus.pageIndex).arg(printStatus.pagesCount));
+
+					progress = printStatus.pageIndex;
+					progressMax = printStatus.pagesCount;
+				}
+				else
+				{
+					progressText.push_back(tr("Printer is idle ..."));
+					progress = 0;
+					progressMax = 0;
+				}
 			}
-
-			progressText.push_back(tr("Page: %1 / %2").arg(pageIndex()).arg(pagesCount()));
-
-			progress = pageIndex();
-			progressMax = pagesCount();
 		}
 		break;
+	default:
+		Q_ASSERT(false);
 	}
-
-	l.unlock();
 
 	emit progressChanged(progress, 0, progressMax, progressText);
 
@@ -521,64 +672,10 @@ const QString& ProjectDiffGenerator::filePath() const
 	return m_filePath;
 }
 
-ProjectDiffGenerator::WorkerStatus ProjectDiffGenerator::currentStatus() const
+ProjectDiffGenerator::Statistics ProjectDiffGenerator::statistics() const
 {
-	return m_currentStatus;
-}
-
-int ProjectDiffGenerator::signalsCount() const
-{
-	return m_signalsCount;
-}
-
-int ProjectDiffGenerator::signalIndex() const
-{
-	return m_signalIndex;
-}
-
-int ProjectDiffGenerator::filesCount() const
-{
-	return m_filesCount;
-}
-
-int ProjectDiffGenerator::fileIndex() const
-{
-	return m_fileIndex;
-}
-
-int ProjectDiffGenerator::sectionCount() const
-{
-	return m_sectionCount;
-}
-
-int ProjectDiffGenerator::sectionIndex() const
-{
-	return m_sectionIndex;
-}
-
-int ProjectDiffGenerator::pagesCount() const
-{
-	return m_pagesCount;
-}
-
-int ProjectDiffGenerator::pageIndex() const
-{
-	return m_pageIndex;
-}
-
-QString ProjectDiffGenerator::renderingReportName() const
-{
-	return m_currentReportName;
-}
-
-QString ProjectDiffGenerator::currentSection() const
-{
-	return m_currentSectionName;
-}
-
-QString ProjectDiffGenerator::currentObjectName() const
-{
-	return m_currentObjectName;
+	QMutexLocker l(&m_statisticsMutex);
+	return m_statistics;
 }
 
 DbController* ProjectDiffGenerator::db()
@@ -586,17 +683,8 @@ DbController* ProjectDiffGenerator::db()
 	return &m_db;
 }
 
-void ProjectDiffGenerator::compareProject(std::map<int, std::vector<std::shared_ptr<ReportSection>>>& reportContents)
+void ProjectDiffGenerator::compareProject()
 {
-	{
-		QMutexLocker l(&m_statisticsMutex);
-		m_currentStatus = WorkerStatus::Analyzing;
-		m_filesCount = 0;
-		m_signalsCount = 0;
-		m_currentSectionName.clear();
-		m_currentObjectName.clear();
-	}
-
 	db()->disableProgress();
 
 	db()->setHost(theSettings.serverHost());
@@ -612,14 +700,14 @@ void ProjectDiffGenerator::compareProject(std::map<int, std::vector<std::shared_
 
 	// Place signals to front
 	//
-	for (size_t i = 0; i < m_reportParams.fileTypeParams.size(); i++)
+	for (size_t i = 0; i < m_reportParams.schemaTypesParams.size(); i++)
 	{
-		ReportFileTypeParams ft = m_reportParams.fileTypeParams[i];
+		Builder::SchemaTypesParams ft = m_reportParams.schemaTypesParams[i];
 
-		if (ft.fileId == applicationSignalsTypeId() && ft.selected == true && i != 0)
+		if (ft.fileId() == applicationSignalsTypeId() && ft.selected() == true && i != 0)
 		{
-			m_reportParams.fileTypeParams.erase(m_reportParams.fileTypeParams.begin() + i);
-			m_reportParams.fileTypeParams.insert(m_reportParams.fileTypeParams.begin(), ft);
+			m_reportParams.schemaTypesParams.erase(m_reportParams.schemaTypesParams.begin() + i);
+			m_reportParams.schemaTypesParams.insert(m_reportParams.schemaTypesParams.begin(), ft);
 			break;
 		}
 	}
@@ -633,14 +721,14 @@ void ProjectDiffGenerator::compareProject(std::map<int, std::vector<std::shared_
 
 	std::vector<DbFileTree> filesTrees;
 
-	for (const ReportFileTypeParams& ft : m_reportParams.fileTypeParams)
+	for (const Builder::SchemaTypesParams& ft : m_reportParams.schemaTypesParams)
 	{
-		if (ft.selected == false)
+		if (ft.selected() == false)
 		{
 			continue;
 		}
 
-		if (ft.fileId == applicationSignalsTypeId())
+		if (ft.fileId() == applicationSignalsTypeId())
 		{
 			// This is not a file
 			continue;
@@ -648,17 +736,17 @@ void ProjectDiffGenerator::compareProject(std::map<int, std::vector<std::shared_
 
 		{
 			QMutexLocker l(&m_statisticsMutex);
-			m_currentSectionName = ft.caption;
+			m_statistics.m_currentSectionName = ft.caption();
 		}
 
 		filesTrees.push_back({});
 
 		DbFileTree* filesTree = &filesTrees[filesTrees.size() - 1];
 
-		ok = db()->getFileListTree(filesTree, ft.fileId, false/*removeDeleted*/, nullptr);
+		ok = db()->getFileListTree(filesTree, ft.fileId(), false/*removeDeleted*/, nullptr);
 		if (ok == false)
 		{
-			throw(tr("DbController::getFileListTree failed on fileId = %1").arg(ft.fileId));
+			throw(tr("DbController::getFileListTree failed on fileId = %1").arg(ft.fileId()));
 		}
 
 		filesCount += static_cast<int>(filesTree->files().size());
@@ -667,72 +755,116 @@ void ProjectDiffGenerator::compareProject(std::map<int, std::vector<std::shared_
 
 	{
 		QMutexLocker l(&m_statisticsMutex);
-		m_filesCount = filesCount;
+		m_statistics.m_filesCount = filesCount;
 	}
 
 	// Process Files
 
 	int fileTreeIndex = 0;
 
-	for (const ReportFileTypeParams& ft : m_reportParams.fileTypeParams)
+	std::shared_ptr<Report> report;
+
+	for (const Builder::SchemaTypesParams& ft : m_reportParams.schemaTypesParams)
 	{
-		if (ft.selected == false)
+		if (m_stop == true)
+		{
+			break;
+		}
+
+		if (ft.hasFileId() == false)
 		{
 			continue;
 		}
 
-		if (m_stop == true)
+		if (ft.selected() == false)
 		{
-			return;
+			continue;
 		}
 
-		std::vector<std::shared_ptr<ReportSection>> fileTypeSections;
+		// Create report object and specify its filename
+		//
 
-		// Print section name
+		QString pdfFileName = filePath();
 
+		// Create filename for multiple-files report
+		//
+		if (m_reportParams.singleFile == false)
+		{
+			qsizetype pos = pdfFileName.lastIndexOf('.');
+			if (pos != -1)
+			{
+				pdfFileName.insert(pos, tr("_%1").arg(ft.caption()));
+			}
+			else
+			{
+				pdfFileName += tr("_%1.pdf").arg(ft.caption());
+			}
+
+			pdfFileName.replace(' ', '_');
+		}
+
+		const int layoutIndex = 0;
+		QPageLayout pageLayout = (m_reportParams.singleFile == true) ? m_reportParams.singleFilePageLayout() : ft.pageLayoutWithMargins(layoutIndex);
+
+		// Create report
+		//
+		if (report == nullptr || m_reportParams.singleFile == false)
+		{
+			report = std::make_shared<Report>(ft.caption(), pdfFileName);
+			report->setResolution(m_resolution);
+			m_generatedReports.push_back(report);
+
+			// Create title page
+			//
+			auto titlePageSection = generateTitlePage(pageLayout, m_reportParams.compareData, m_projectName, m_userName,
+													  m_reportParams.singleFile == false ? ft.caption() : QString());
+			report->insertSection(0, titlePageSection);
+
+			// Create margins
+			//
+			createMarginItems(*report, m_reportParams.compareData,
+							  m_reportParams.singleFile == false ? ft.caption() : QString());
+		}
+
+		// Specify section name to statistics
 		{
 			QMutexLocker l(&m_statisticsMutex);
-			m_currentSectionName = ft.caption;
+			m_statistics.m_currentSectionName = ft.caption();
 		}
 
-		std::shared_ptr<ReportSection> headerSection = std::make_shared<ReportSection>(QString());
+		std::shared_ptr<ReportSection> fileTypeSummarySection = ReportSection::create(ft.caption(), pageLayout);
+		fileTypeSummarySection->addText(tr("%1\n\n").arg(ft.caption()), m_headerFormat);
 
-		setFont(m_normalFont);
-
-		saveFormat();
-		setTextAlignment(Qt::AlignHCenter);
-		setFont(m_headerFont);
-		headerSection->addText(tr("%1\n\n").arg(ft.caption), currentCharFormat(), currentBlockFormat());
-		restoreFormat();
+		std::shared_ptr<ReportSection> fileTypeSection = ReportSection::create(ft.caption(), pageLayout);
 
 		std::shared_ptr<ReportTable> headerTable;
 
-		if (ft.fileId == ProjectDiffGenerator::applicationSignalsTypeId())
+		if (ft.fileId() == ProjectDiffGenerator::applicationSignalsTypeId())
 		{
 			// This is application signals
 
 			{
 				QMutexLocker l(&m_statisticsMutex);
-				m_currentObjectName.clear();
+				m_statistics.m_currentObjectName.clear();
 			}
 
-			saveFormat();
-			setFont(m_tableFont);
-			headerTable = headerSection->addTable({tr("Signal"), tr("Status"), tr("Changeset"), tr("User"), tr("Date")},
-												  {45, 10, 10, 15, 20},
-												  currentCharFormat());
-			restoreFormat();
+            headerTable = ReportTable::create({m_tableFont,
+                                              {tr("Signal"), tr("Status"), tr("Changeset"), tr("User"), tr("Date")},
+											  {45, 10, 10, 15, 20},
+                                              Qt::AlignLeft});
 
-			compareSignals(m_reportParams.compareData, headerTable.get(), &fileTypeSections);
+			fileTypeSummarySection->addTable(headerTable);
+
+			compareSignals(m_reportParams.compareData, fileTypeSection, *headerTable);
 		}
 		else
 		{
-			saveFormat();
-			setFont(m_tableFont);
-			headerTable = headerSection->addTable({tr("Object"), tr("Status"), tr("Changeset"), tr("User"), tr("Date")},
-												  {45, 10, 10, 15, 20},
-												  currentCharFormat());
-			restoreFormat();
+            headerTable = ReportTable::create({m_tableFont,
+                                              {tr("Object"), tr("Status"), tr("Changeset"), tr("User"), tr("Date")},
+                                              {45, 10, 10, 15, 20},
+                                              Qt::AlignLeft});
+
+			fileTypeSummarySection->addTable(headerTable);
 
 			// Compare files
 
@@ -742,7 +874,7 @@ void ProjectDiffGenerator::compareProject(std::map<int, std::vector<std::shared_
 
 			for (const auto& child : children)
 			{
-				compareFilesRecursive(ft.fileId, filesTree, child, m_reportParams.compareData, headerTable.get(), &fileTypeSections);
+				compareFilesRecursive(ft.fileId(), filesTree, child, m_reportParams.compareData, fileTypeSection, *headerTable);
 			}
 		}
 
@@ -752,32 +884,12 @@ void ProjectDiffGenerator::compareProject(std::map<int, std::vector<std::shared_
 		{
 			headerTable->sortByColumn(0);
 
-			std::sort(fileTypeSections.begin(), fileTypeSections.end(), [](const std::shared_ptr<ReportSection>& a, const std::shared_ptr<ReportSection>& b)
-			{
+			report->addSection(fileTypeSummarySection);
+		}
 
-				bool aSchema = a->schema() != nullptr;
-				bool bSchema = b->schema() != nullptr;
-
-				if (aSchema != bSchema)
-				{
-					return aSchema > bSchema;
-				}
-
-				return a->caption() < b->caption();
-			});
-
-			fileTypeSections.insert(fileTypeSections.begin(), headerSection);
-
-			if (m_reportParams.multipleFiles == false)
-			{
-				std::vector<std::shared_ptr<ReportSection>>& all = reportContents[0];
-
-				all.insert(all.end(), fileTypeSections.begin(), fileTypeSections.end());
-			}
-			else
-			{
-				reportContents[ft.fileId] = fileTypeSections;
-			}
+		if (fileTypeSection->objectCount() > 0)
+		{
+			report->addSection(fileTypeSection);
 		}
 	}
 
@@ -787,20 +899,14 @@ void ProjectDiffGenerator::compareProject(std::map<int, std::vector<std::shared_
 }
 
 void ProjectDiffGenerator::compareFilesRecursive(int rootFileId,
-											  const DbFileTree& filesTree,
-											  const std::shared_ptr<DbFileInfo>& fi,
-											  const CompareData& compareData,
-											  ReportTable* const headerTable,
-											  std::vector<std::shared_ptr<ReportSection>>* sectionsArray)
+												 const DbFileTree& filesTree,
+												 const std::shared_ptr<DbFileInfo>& fi,
+												 const CompareData& compareData,
+												 std::shared_ptr<ReportSection> section,
+												 ReportTable& headerTable)
 {
 	if (m_stop == true)
 	{
-		return;
-	}
-
-	if (headerTable == nullptr)
-	{
-		Q_ASSERT(headerTable);
 		return;
 	}
 
@@ -811,7 +917,7 @@ void ProjectDiffGenerator::compareFilesRecursive(int rootFileId,
 	}
 
 
-	compareFile(rootFileId, filesTree, fi, compareData, headerTable, sectionsArray);
+	compareFile(rootFileId, filesTree, fi, compareData, section, headerTable);
 
 	// Process children
 	//
@@ -827,18 +933,18 @@ void ProjectDiffGenerator::compareFilesRecursive(int rootFileId,
 			return;
 		}
 
-		compareFilesRecursive(rootFileId, filesTree, fiChild, compareData, headerTable, sectionsArray);
+		compareFilesRecursive(rootFileId, filesTree, fiChild, compareData, section, headerTable);
 	}
 
 	return;
 }
 
 void ProjectDiffGenerator::compareFile(int rootFileId,
-									const DbFileTree& filesTree,
-									const std::shared_ptr<DbFileInfo>& fi,
-									const CompareData& compareData,
-									ReportTable* const headerTable,
-									std::vector<std::shared_ptr<ReportSection>>* sectionsArray)
+									   const DbFileTree& filesTree,
+									   const std::shared_ptr<DbFileInfo>& fi,
+									   const CompareData& compareData,
+									   std::shared_ptr<ReportSection> section,
+									   ReportTable& headerTable)
 {
 	// Print file name
 	//
@@ -861,8 +967,8 @@ void ProjectDiffGenerator::compareFile(int rootFileId,
 
 	{
 		QMutexLocker l(&m_statisticsMutex);
-		m_currentObjectName = fileName;
-		m_fileIndex++;
+		m_statistics.m_currentObjectName = fileName;
+		m_statistics.m_fileIndex++;
 	}
 
 	// Get source file
@@ -955,24 +1061,18 @@ void ProjectDiffGenerator::compareFile(int rootFileId,
 
 	// Compare files
 
-	compareFileContents(rootFileId, sourceFile, targetFile, fileName, headerTable, sectionsArray);
+	compareFileContents(rootFileId, sourceFile, targetFile, fileName, section, headerTable);
 
 	return;
 }
 
 void ProjectDiffGenerator::compareFileContents(int rootFileId,
-											const std::shared_ptr<DbFile>& sourceFile,
-											const std::shared_ptr<DbFile>& targetFile,
-											const QString& fileName,
-											ReportTable* const headerTable,
-											std::vector<std::shared_ptr<ReportSection>>* sectionsArray)
+											   const std::shared_ptr<DbFile>& sourceFile,
+											   const std::shared_ptr<DbFile>& targetFile,
+											   const QString& fileName,
+											   std::shared_ptr<ReportSection> section,
+											   ReportTable& headerTable)
 {
-	if (headerTable == nullptr)
-	{
-		Q_ASSERT(headerTable);
-		return;
-	}
-
 	// No files at all
 	//
 	if (sourceFile == nullptr && targetFile == nullptr)
@@ -1011,8 +1111,8 @@ void ProjectDiffGenerator::compareFileContents(int rootFileId,
 	// Same changeset
 	//
 	if (sourceFile != nullptr &&
-		targetFile != nullptr &&
-		sourceFile->changeset() == targetFile->changeset())
+			targetFile != nullptr &&
+			sourceFile->changeset() == targetFile->changeset())
 	{
 		return;
 	}
@@ -1067,29 +1167,29 @@ void ProjectDiffGenerator::compareFileContents(int rootFileId,
 	//
 	if (hardwareObject == true)
 	{
-		compareDeviceObjects(sourceFile, targetFile, sourceObject, targetObject, headerTable, sectionsArray, fileTypeIsPreset);
+		compareDeviceObjects(sourceFile, targetFile, sourceObject, targetObject, section, headerTable, fileTypeIsPreset);
 		return;
 	}
 
 	if (isConnectionFile(fileName) == true)
 	{
-		compareConnections(sourceFile, targetFile, headerTable, sectionsArray);
+		compareConnections(sourceFile, targetFile, section, headerTable);
 		return;
 	}
 
 	if (isBusTypeFile(fileName) == true)
 	{
-		compareBusTypes(sourceFile, targetFile, headerTable, sectionsArray);
+		compareBusTypes(sourceFile, targetFile, section, headerTable);
 		return;
 	}
 
 	if (isSchemaFile(fileName) == true)
 	{
-		compareSchemas(fileName, sourceFile, targetFile, headerTable, sectionsArray);
+		compareSchemas(fileName, sourceFile, targetFile, section, headerTable);
 		return;
 	}
 
-	compareFilesData(sourceFile, targetFile, headerTable, sectionsArray);
+	compareFilesData(sourceFile, targetFile, section, headerTable);
 	return;
 }
 
@@ -1143,20 +1243,13 @@ std::shared_ptr<Hardware::DeviceObject> ProjectDiffGenerator::loadDeviceObject(c
 }
 
 void ProjectDiffGenerator::compareDeviceObjects(const std::shared_ptr<DbFile>& sourceFile,
-											 const std::shared_ptr<DbFile>& targetFile,
-											 const std::shared_ptr<Hardware::DeviceObject>& sourceObject,
-											 const std::shared_ptr<Hardware::DeviceObject>& targetObject,
-											 ReportTable* const headerTable,
-											 std::vector<std::shared_ptr<ReportSection>>* sectionsArray,
-											 bool fileTypeIsPreset)
+												const std::shared_ptr<DbFile>& targetFile,
+												const std::shared_ptr<Hardware::DeviceObject>& sourceObject,
+												const std::shared_ptr<Hardware::DeviceObject>& targetObject,
+												std::shared_ptr<ReportSection> section,
+												ReportTable& headerTable,
+												bool fileTypeIsPreset)
 {
-	if (headerTable == nullptr || sectionsArray == nullptr)
-	{
-		Q_ASSERT(headerTable);
-		Q_ASSERT(sectionsArray);
-		return;
-	}
-
 	// No Files
 	//
 	if (sourceFile == nullptr && targetFile == nullptr)
@@ -1238,36 +1331,24 @@ void ProjectDiffGenerator::compareDeviceObjects(const std::shared_ptr<DbFile>& s
 			sectionName = tr("%1: %2").arg(equipmentType).arg(targetObject->equipmentId());
 		}
 
-		std::shared_ptr<ReportSection> deviceDiffSection = std::make_shared<ReportSection>(sectionName);
-		sectionsArray->push_back(deviceDiffSection);
+		section->addText(tr("%1, %2\n\n").arg(sectionName).arg(changesetString(targetFile)), m_normalFormat);
 
-		deviceDiffSection->addText(tr("%1, %2\n\n").arg(sectionName).arg(changesetString(targetFile)), currentCharFormat(), currentBlockFormat());
+        auto diffTable = section->addTable({m_tableFont,
+                                           {tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
+                                           {15, 15, 35, 35},
+                                           Qt::AlignLeft});
 
-		saveFormat();
-		setFont(m_tableFont);
-		std::shared_ptr<ReportTable> diffTable = deviceDiffSection->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
-																			 {15, 15, 35, 35},
-																			 currentCharFormat());
-		restoreFormat();
-
-		fillDiffTable(diffTable.get(), diffs);
+		fillDiffTable(*diffTable, diffs);
 	}
 
 	return;
 }
 
 void ProjectDiffGenerator::compareBusTypes(const std::shared_ptr<DbFile>& sourceFile,
-										const std::shared_ptr<DbFile>& targetFile,
-										ReportTable* const headerTable,
-										std::vector<std::shared_ptr<ReportSection>>* sectionsArray)
+										   const std::shared_ptr<DbFile>& targetFile,
+										   std::shared_ptr<ReportSection> section,
+										   ReportTable& headerTable)
 {
-	if (headerTable == nullptr || sectionsArray == nullptr)
-	{
-		Q_ASSERT(headerTable);
-		Q_ASSERT(sectionsArray);
-		return;
-	}
-
 	// No Files
 	if (sourceFile == nullptr && targetFile == nullptr)
 	{
@@ -1301,7 +1382,7 @@ void ProjectDiffGenerator::compareBusTypes(const std::shared_ptr<DbFile>& source
 	// Single object
 	//
 	if ((sourceFile != nullptr && targetFile == nullptr) ||
-		(sourceFile == nullptr && targetFile != nullptr))
+			(sourceFile == nullptr && targetFile != nullptr))
 	{
 		auto singleFile = sourceFile != nullptr ? sourceFile : targetFile;
 		auto* singleBus= sourceFile != nullptr ? &sourceBus : &targetBus;
@@ -1313,19 +1394,15 @@ void ProjectDiffGenerator::compareBusTypes(const std::shared_ptr<DbFile>& source
 	//
 	// Create tables
 
-	saveFormat();
-	setFont(m_tableFont);
-	std::shared_ptr<ReportTable> busDiffTable = ReportSection::createTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
-																		   {15, 15, 35, 35},
-																		   currentCharFormat());
-	restoreFormat();
+    std::shared_ptr<ReportTable> busDiffTable = ReportTable::create({m_tableFont,
+                                                                     {tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
+                                                                     {15, 15, 35, 35},
+                                                                     Qt::AlignLeft});
 
-	saveFormat();
-	setFont(m_tableFont);
-	std::shared_ptr<ReportTable> busSignalsDiffTable = ReportSection::createTable({tr("SignalID"), tr("Caption"), tr("Status")},
-																				  {35, 15, 50},
-																				  currentCharFormat());
-	restoreFormat();
+    std::shared_ptr<ReportTable> busSignalsDiffTable = ReportTable::create({m_tableFont,
+                                                                            {tr("SignalID"), tr("Caption"), tr("Status")},
+                                                                            {35, 15, 50},
+                                                                            Qt::AlignLeft});
 
 	std::vector<PropertyDiff> busDiffs;
 
@@ -1335,7 +1412,7 @@ void ProjectDiffGenerator::compareBusTypes(const std::shared_ptr<DbFile>& source
 
 	if (busDiffs.empty() == false)
 	{
-		fillDiffTable(busDiffTable.get(), busDiffs);
+		fillDiffTable(*busDiffTable, busDiffs);
 	}
 
 	std::map<QString, std::shared_ptr<ReportTable>> busSignalsPropertiesTables;
@@ -1356,16 +1433,14 @@ void ProjectDiffGenerator::compareBusTypes(const std::shared_ptr<DbFile>& source
 
 				if (busSignalDiffs.empty() == false)
 				{
-					saveFormat();
-					setFont(m_tableFont);
-					std::shared_ptr<ReportTable> busSignalsPropertiesDiffTable = ReportSection::createTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
-																											{15, 15, 35, 35},
-																											currentCharFormat());
-					restoreFormat();
+                    std::shared_ptr<ReportTable> busSignalsPropertiesDiffTable = ReportTable::create({m_tableFont,
+                                                                                                      {tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
+                                                                                                      {15, 15, 35, 35},
+                                                                                                      Qt::AlignLeft});
 
 					busSignalsPropertiesTables[targetBusSignal.signalId()] = busSignalsPropertiesDiffTable;
 
-					fillDiffTable(busSignalsPropertiesDiffTable.get(), busSignalDiffs);
+					fillDiffTable(*busSignalsPropertiesDiffTable, busSignalDiffs);
 
 					busSignalsDiffTable->insertRow({targetBusSignal.signalId(), targetBusSignal.caption(), tr("Modified")});
 				}
@@ -1410,24 +1485,23 @@ void ProjectDiffGenerator::compareBusTypes(const std::shared_ptr<DbFile>& source
 
 		// Add tables to section
 
-		std::shared_ptr<ReportSection> busDiffSection = std::make_shared<ReportSection>(tr("Bus: ") + targetBus.busTypeId());
-		sectionsArray->push_back(busDiffSection);
-
-		busDiffSection->addText(tr("Bus: %1, %2\n\n").arg(targetBus.busTypeId()).arg(changesetString(targetFile)), currentCharFormat(), currentBlockFormat());
+		section->addText(tr("Bus: %1, %2\n\n").arg(targetBus.busTypeId()).arg(changesetString(targetFile)),
+						 m_normalFormat);
 
 		if (busDiffTable->rowCount() != 0)
 		{
-			busDiffSection->addTable(busDiffTable);
-			busDiffSection->addText("\n", currentCharFormat(), currentBlockFormat());
+			section->addTable(busDiffTable);
+			section->addText("\n", m_normalFormat);
 		}
 
 		if (busSignalsDiffTable->rowCount() != 0)
 		{
 			busSignalsDiffTable->sortByColumn(0);
 
-			busDiffSection->addText(tr("Bus %1 signals:\n\n").arg(targetBus.busTypeId()), currentCharFormat(), currentBlockFormat());
-			busDiffSection->addTable(busSignalsDiffTable);
-			busDiffSection->addText("\n", currentCharFormat(), currentBlockFormat());
+			section->addText(tr("Bus %1 signals:\n\n").arg(targetBus.busTypeId()),
+							 m_normalFormat);
+			section->addTable(busSignalsDiffTable);
+			section->addText("\n", m_normalFormat);
 		}
 
 		for (auto it : busSignalsPropertiesTables)
@@ -1435,8 +1509,9 @@ void ProjectDiffGenerator::compareBusTypes(const std::shared_ptr<DbFile>& source
 			const QString& signalId = it.first;
 			const std::shared_ptr<ReportTable>& itemDiffTable = it.second;
 
-			busDiffSection->addText(tr("Bus: %1, signal: %2\n\n").arg(targetBus.busTypeId()).arg(signalId), currentCharFormat(), currentBlockFormat());
-			busDiffSection->addTable(itemDiffTable);
+			section->addText(tr("Bus: %1, signal: %2\n\n").arg(targetBus.busTypeId()).arg(signalId),
+							 m_normalFormat);
+			section->addTable(itemDiffTable);
 		}
 	}
 
@@ -1445,17 +1520,12 @@ void ProjectDiffGenerator::compareBusTypes(const std::shared_ptr<DbFile>& source
 
 
 void ProjectDiffGenerator::compareSchemas(const QString& fileName,
-									   const std::shared_ptr<DbFile>& sourceFile,
-									   const std::shared_ptr<DbFile>& targetFile,
-									   ReportTable* const headerTable,
-									   std::vector<std::shared_ptr<ReportSection>>* sectionsArray)
+										  const std::shared_ptr<DbFile>& sourceFile,
+										  const std::shared_ptr<DbFile>& targetFile,
+										  std::shared_ptr<ReportSection> section,
+										  ReportTable& headerTable)
 {
-	if (headerTable == nullptr || sectionsArray == nullptr)
-	{
-		Q_ASSERT(headerTable);
-		Q_ASSERT(sectionsArray);
-		return;
-	}
+	auto context = VFrame30::Context::create(&m_appSignalController, nullptr, nullptr, nullptr);
 
 	// No Files
 	if (sourceFile == nullptr && targetFile == nullptr)
@@ -1467,7 +1537,7 @@ void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 	// Single File
 	//
 	if ((sourceFile != nullptr && targetFile == nullptr) ||
-		(sourceFile == nullptr && targetFile != nullptr))
+			(sourceFile == nullptr && targetFile != nullptr))
 	{
 		// Schema was added - just draw it
 
@@ -1480,13 +1550,18 @@ void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 			throw(tr("Failed to load schema from: '%1'").arg(singleFile->fileName()));
 		}
 
+		singleSchema->setContext(context);
+
 		// Add schema drawing
 
-		std::shared_ptr<ReportSection> schemaDrawingSection = std::make_shared<ReportSection>(tr("Schema: ") + fileName);
-		sectionsArray->push_back(schemaDrawingSection);
+		auto reportSchema = ReportSchema::create(
+					tr("Schema: %1, %2\n").arg(singleSchema->schemaId()).arg(changesetString(singleFile)),
+                    {},
+					singleSchema,
+					{});
 
-		schemaDrawingSection->addText(tr("Schema: %1, %2\n").arg(singleSchema->schemaId()).arg(changesetString(singleFile)), currentCharFormat(), currentBlockFormat());
-		schemaDrawingSection->setSchema(singleSchema);
+		section->addSchema(reportSchema);
+		section->setTag(singleSchema->caption());
 
 		return;
 	}
@@ -1498,35 +1573,33 @@ void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 	{
 		throw(tr("Failed to load source schema from: '%1'").arg(sourceFile->fileName()));
 	}
+	sourceSchema->setContext(context);
 
 	std::shared_ptr<VFrame30::Schema> targetSchema = VFrame30::Schema::Create(targetFile->data());
 	if (targetSchema == nullptr)
 	{
 		throw(tr("Failed to load target schema from: '%1'").arg(targetFile->fileName()));
 	}
+	targetSchema->setContext(context);
 
 	// Create tables
 
-	saveFormat();
-	setFont(m_tableFont);
-	std::shared_ptr<ReportTable> schemaDiffTable = ReportSection::createTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
-																			  {15, 15, 35, 35},
-																			  currentCharFormat());
-	restoreFormat();
+    std::shared_ptr<ReportTable> schemaDiffTable = ReportTable::create({m_tableFont,
+                                                                        {tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
+                                                                        {15, 15, 35, 35},
+                                                                        Qt::AlignLeft});
 
-	saveFormat();
-	setFont(m_tableFont);
-	std::shared_ptr<ReportTable> schemaItemsDiffTable = ReportSection::createTable({tr("Type"), tr("Label"), tr("Layer"), tr("Status")},
-																				   {25, 35, 25, 15},
-																				   currentCharFormat());
-	restoreFormat();
+    std::shared_ptr<ReportTable> schemaItemsDiffTable = ReportTable::create({m_tableFont,
+                                                                             {tr("Type"), tr("Label"), tr("Layer"), tr("Status")},
+                                                                             {25, 35, 25, 15},
+                                                                             Qt::AlignLeft});
 
 	// Compare schemas properties
 
 	std::vector<PropertyDiff> schemaDiffs;
 	comparePropertyObjects(*sourceSchema, *targetSchema, &schemaDiffs);
 
-	fillDiffTable(schemaDiffTable.get(), schemaDiffs);
+	fillDiffTable(*schemaDiffTable, schemaDiffs);
 
 	// Compare schemas items properties
 
@@ -1583,14 +1656,12 @@ void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 
 					schemaItemsDiffTable->insertRow({tr("%1").arg(className), targetItem->label(), targetLayer->name(), tr("Modified")});
 
-					saveFormat();
-					setFont(m_tableFont);
-					std::shared_ptr<ReportTable> itemDiffTable = ReportSection::createTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
-																							{15, 15, 35, 35},
-																							currentCharFormat());
-					restoreFormat();
+                    std::shared_ptr<ReportTable> itemDiffTable = ReportTable::create({m_tableFont,
+                                                                                      {tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
+                                                                                      {15, 15, 35, 35},
+                                                                                      Qt::AlignLeft});
 
-					fillDiffTable(itemDiffTable.get(), itemDiffs);
+					fillDiffTable(*itemDiffTable, itemDiffs);
 
 					itemsTables[targetItem] = itemDiffTable;
 				}
@@ -1657,39 +1728,42 @@ void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 	{
 		addHeaderTableItem(headerTable, fileName, E::valueToString<E::VcsItemAction>(targetFile->action()), targetFile);
 
-		// Add schema differences drawing
+		section->addText(tr("Schema: %1\n").arg(targetSchema->schemaId()), m_normalFormat);
 
-		std::shared_ptr<ReportSection> schemaDrawingSection = std::make_shared<ReportSection>(tr("Schema: ") + fileName);
-		sectionsArray->push_back(schemaDrawingSection);
+		// Add schema differences drawing
 
 		QString schemaId = targetSchema->schemaId();
 
-		schemaDrawingSection->addText(tr("Schema: %1, %2\n").arg(schemaId).arg(changesetString(targetFile)), currentCharFormat(), currentBlockFormat());
-		schemaDrawingSection->setSchema(targetSchema);
-		schemaDrawingSection->setCompareItemActions(itemsActions);
+		auto reportSchema = ReportSchema::create(
+					tr("Schema: %1, %2\n")
+					.arg(schemaId)
+					.arg(changesetString(targetFile)),
+                    {},
+					targetSchema,
+					itemsActions);
+
+		section->addSchema(reportSchema);
+		section->setTag(targetSchema->caption());
 
 		// Add schema differences tables
 
-		std::shared_ptr<ReportSection> schemaDiffSection = std::make_shared<ReportSection>(tr("Schema: ") + fileName);
-		sectionsArray->push_back(schemaDiffSection);
-
 		if (schemaDiffTable->rowCount() != 0)
 		{
-			schemaDiffSection->addText(tr("Schema %1 properties:\n\n").arg(schemaId), currentCharFormat(), currentBlockFormat());
-			schemaDiffSection->addTable(schemaDiffTable);
-			schemaDiffSection->addText("\n", currentCharFormat(), currentBlockFormat());
+			section->addText(tr("Schema %1 properties:\n\n").arg(schemaId), m_normalFormat);
+			section->addTable(schemaDiffTable);
+			section->addText("\n", m_normalFormat);
 		}
 
 		if (schemaItemsDiffTable->rowCount() != 0)
 		{
 			schemaItemsDiffTable->sortByColumn(1);
 
-			schemaDiffSection->addText(tr("Schema %1 items:\n\n").arg(schemaId), currentCharFormat(), currentBlockFormat());
-			schemaDiffSection->addTable(schemaItemsDiffTable);
-			schemaDiffSection->addText("\n", currentCharFormat(), currentBlockFormat());
+			section->addText(tr("Schema %1 items:\n\n").arg(schemaId), m_normalFormat);
+			section->addTable(schemaItemsDiffTable);
+			section->addText("\n", m_normalFormat);
 		}
 
-		for (auto it : itemsTables)
+		for (const auto& it : itemsTables)
 		{
 			const std::shared_ptr<VFrame30::SchemaItem>& item = it.first;
 			const std::shared_ptr<ReportTable>& itemDiffTable = it.second;
@@ -1699,30 +1773,23 @@ void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 
 			if (item->label().isEmpty() == true)
 			{
-				schemaDiffSection->addText(tr("%1 (no label):\n\n").arg(className), currentCharFormat(), currentBlockFormat());
+				section->addText(tr("%1 (no label):\n\n").arg(className), m_normalFormat);
 			}
 			else
 			{
-				schemaDiffSection->addText(tr("%1 %2:\n\n").arg(className).arg(item->label()), currentCharFormat(), currentBlockFormat());
+				section->addText(tr("%1 %2:\n\n").arg(className).arg(item->label()), m_normalFormat);
 			}
-			schemaDiffSection->addTable(itemDiffTable);
-			schemaDiffSection->addText(tr("\n"), currentCharFormat(), currentBlockFormat());
+			section->addTable(itemDiffTable);
+			section->addText(tr("\n"), m_normalFormat);
 		}
 	}
 }
 
 void ProjectDiffGenerator::compareConnections(const std::shared_ptr<DbFile>& sourceFile,
-										   const std::shared_ptr<DbFile>& targetFile,
-										   ReportTable* const headerTable,
-										   std::vector<std::shared_ptr<ReportSection>>* sectionsArray)
+											  const std::shared_ptr<DbFile>& targetFile,
+											  std::shared_ptr<ReportSection> section,
+											  ReportTable& headerTable)
 {
-	if (headerTable == nullptr || sectionsArray == nullptr)
-	{
-		Q_ASSERT(headerTable);
-		Q_ASSERT(sectionsArray);
-		return;
-	}
-
 	// No Files
 	if (sourceFile == nullptr && targetFile == nullptr)
 	{
@@ -1753,7 +1820,7 @@ void ProjectDiffGenerator::compareConnections(const std::shared_ptr<DbFile>& sou
 	// Single object
 	//
 	if ((sourceFile != nullptr && targetFile == nullptr) ||
-		(sourceFile == nullptr && targetFile != nullptr))
+			(sourceFile == nullptr && targetFile != nullptr))
 	{
 		auto singleFile = sourceFile != nullptr ? sourceFile : targetFile;
 		auto* singleConnection = sourceFile != nullptr ? &sourceConnection : &targetConnection;
@@ -1769,36 +1836,24 @@ void ProjectDiffGenerator::compareConnections(const std::shared_ptr<DbFile>& sou
 
 	if (diffs.empty() == false)
 	{
-		std::shared_ptr<ReportSection> connectionDiffSection = std::make_shared<ReportSection>(tr("Connection: ") + targetConnection.connectionID());
-		sectionsArray->push_back(connectionDiffSection);
-
-		connectionDiffSection->addText(tr("Connection: %1, %2\n\n").arg(targetConnection.connectionID()).arg(changesetString(targetFile)), currentCharFormat(), currentBlockFormat());
+		section->addText(tr("Connection: %1, %2\n\n").arg(targetConnection.connectionID()).arg(changesetString(targetFile)), m_normalFormat);
 
 		addHeaderTableItem(headerTable, targetConnection.connectionID(), E::valueToString<E::VcsItemAction>(targetFile->action()), targetFile);
 
-		saveFormat();
-		setFont(m_tableFont);
-		std::shared_ptr<ReportTable> diffTable = connectionDiffSection->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
-																				 {15, 15, 35, 35},
-																				 currentCharFormat());
-		restoreFormat();
+        std::shared_ptr<ReportTable> diffTable = section->addTable({m_tableFont,
+                                                                    {tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
+                                                                    {15, 15, 35, 35},
+                                                                    Qt::AlignLeft});
 
-		fillDiffTable(diffTable.get(), diffs);
+		fillDiffTable(*diffTable, diffs);
 	}
 }
 
 void ProjectDiffGenerator::compareFilesData(const std::shared_ptr<DbFile>& sourceFile,
-										 const std::shared_ptr<DbFile>& targetFile,
-										 ReportTable* const headerTable,
-										 std::vector<std::shared_ptr<ReportSection>>* sectionsArray)
+											const std::shared_ptr<DbFile>& targetFile,
+											std::shared_ptr<ReportSection> section,
+											ReportTable& headerTable)
 {
-	if (headerTable == nullptr || sectionsArray == nullptr)
-	{
-		Q_ASSERT(headerTable);
-		Q_ASSERT(sectionsArray);
-		return;
-	}
-
 	// No Files
 	if (sourceFile == nullptr && targetFile == nullptr)
 	{
@@ -1809,7 +1864,7 @@ void ProjectDiffGenerator::compareFilesData(const std::shared_ptr<DbFile>& sourc
 	// Single File
 	//
 	if ((sourceFile != nullptr && targetFile == nullptr) ||
-		(sourceFile == nullptr && targetFile != nullptr))
+			(sourceFile == nullptr && targetFile != nullptr))
 	{
 		auto singleFile = sourceFile != nullptr ? sourceFile : targetFile;
 		addHeaderTableItem(headerTable, singleFile->fileName(), tr("Added"), singleFile);
@@ -1823,30 +1878,15 @@ void ProjectDiffGenerator::compareFilesData(const std::shared_ptr<DbFile>& sourc
 
 	addHeaderTableItem(headerTable, targetFile->fileName(), E::valueToString<E::VcsItemAction>(targetFile->action()), targetFile);
 
-	std::shared_ptr<ReportSection> fileDiffSection = std::make_shared<ReportSection>(tr("File: ") + targetFile->fileName());
-	sectionsArray->push_back(fileDiffSection);
-
 	// Both Files
 	//
 	if (isTextFile(targetFile->fileName()) == true)
 	{
-		fileDiffSection->addText(tr("File: %1, %2\n\n").arg(targetFile->fileName()).arg(changesetString(targetFile)), currentCharFormat(), currentBlockFormat());
+		section->addText(tr("File: %1, %2\n\n").arg(targetFile->fileName()).arg(changesetString(targetFile)), m_normalFormat);
 
 		std::vector<FileDiff::FileLine> fileLinesSource;
 		std::vector<FileDiff::FileLine> fileLinesTarget;
 		std::vector<FileDiff::FileLine> fileLinesCommon;
-
-		/*
-		{
-			QFile f1("d:\\Source" + targetFile->fileName());
-			f1.open(QFile::WriteOnly);
-			f1.write(sourceFile->data());
-
-			QFile f2("d:\\Target" + targetFile->fileName());
-			f2.open(QFile::WriteOnly);
-			f2.write(targetFile->data());
-		}
-		*/
 
 		FileDiff::loadFileData(sourceFile->data(), &fileLinesSource);
 		FileDiff::loadFileData(targetFile->data(), &fileLinesTarget);
@@ -1855,12 +1895,10 @@ void ProjectDiffGenerator::compareFilesData(const std::shared_ptr<DbFile>& sourc
 
 		FileDiff::calculateLcs(fileLinesSource, fileLinesTarget, &fileLinesCommon);
 
-		saveFormat();
-		setFont(m_tableFont);
-		std::shared_ptr<ReportTable> diffTable = fileDiffSection->addTable({tr("Line"), tr("Source"), tr("Line"), tr("Target")},
-																		   {10, 40, 10, 40},
-																		   currentCharFormat());
-		restoreFormat();
+        std::shared_ptr<ReportTable> diffTable = section->addTable({m_tableFont,
+                                                                   {tr("Line"), tr("Source"), tr("Line"), tr("Target")},
+																   {10, 40, 10, 40},
+                                                                   Qt::AlignLeft});
 
 		std::vector<FileDiff::FileLine> fileLinesSourceAligned;
 		std::vector<FileDiff::FileLine> fileLinesTargetAligned;
@@ -1922,25 +1960,19 @@ void ProjectDiffGenerator::compareFilesData(const std::shared_ptr<DbFile>& sourc
 			str += tr(" Size changed: %1 -> %2 bytes.").arg(sourceFile->data().size()).arg(targetFile->data().size());
 		}
 
-		fileDiffSection->addText(str + "\n", currentCharFormat(), currentBlockFormat());
+		section->addText(str + "\n", m_normalFormat);
 	}
 }
 
 void ProjectDiffGenerator::compareSignals(const CompareData& compareData,
-									   ReportTable* const headerTable,
-									   std::vector<std::shared_ptr<ReportSection> >* sectionsArray)
+										  std::shared_ptr<ReportSection> section,
+										  ReportTable& headerTable)
 {
-	if (headerTable == nullptr)
-	{
-		Q_ASSERT(headerTable);
-		return;
-	}
-
 	bool ok = false;
 
 	{
 		QMutexLocker l(&m_statisticsMutex);
-		m_currentStatus = WorkerStatus::RequestingSignals;
+		m_statistics.m_state = WorkerStatus::RequestingSignals;
 	}
 
 	// Get source signals
@@ -2058,8 +2090,8 @@ void ProjectDiffGenerator::compareSignals(const CompareData& compareData,
 
 	{
 		QMutexLocker l(&m_statisticsMutex);
-		m_currentStatus = WorkerStatus::Analyzing;
-		m_signalsCount = static_cast<int>(allHashesMap.size());
+		m_statistics.m_state = WorkerStatus::Comparing;
+		m_statistics.m_signalsCount = static_cast<int>(allHashesMap.size());
 	}
 
 	for (auto it = targetSignals.begin(); it != targetSignals.end(); it++)
@@ -2090,8 +2122,8 @@ void ProjectDiffGenerator::compareSignals(const CompareData& compareData,
 
 		{
 			QMutexLocker l(&m_statisticsMutex);
-			m_signalIndex++;
-			m_currentObjectName = appSignalID;
+			m_statistics.m_signalIndex++;
+			m_statistics.m_currentObjectName = appSignalID;
 		}
 
 		// Only target signal exists
@@ -2148,7 +2180,7 @@ void ProjectDiffGenerator::compareSignals(const CompareData& compareData,
 						std::swap(sourceSignal, targetSignal);
 					}
 
-					compareSignalContents(*sourceSignal, *targetSignal, headerTable, sectionsArray);
+					compareSignalContents(*sourceSignal, *targetSignal, section, headerTable);
 				}
 			}
 		}
@@ -2179,8 +2211,8 @@ void ProjectDiffGenerator::compareSignals(const CompareData& compareData,
 
 			{
 				QMutexLocker l(&m_statisticsMutex);
-				m_signalIndex++;
-				m_currentObjectName = appSignalID;
+				m_statistics.m_signalIndex++;
+				m_statistics.m_currentObjectName = appSignalID;
 			}
 
 			addHeaderTableItem(headerTable, appSignalID, tr("Deleted"), *sourceSignal);
@@ -2191,17 +2223,10 @@ void ProjectDiffGenerator::compareSignals(const CompareData& compareData,
 }
 
 void ProjectDiffGenerator::compareSignalContents(const AppSignal& sourceSignal,
-											  const AppSignal& targetSignal,
-											  ReportTable* const headerTable,
-											  std::vector<std::shared_ptr<ReportSection>>* sectionsArray)
+												 const AppSignal& targetSignal,
+												 std::shared_ptr<ReportSection> section,
+												 ReportTable& headerTable)
 {
-	if (headerTable == nullptr || sectionsArray == nullptr)
-	{
-		Q_ASSERT(headerTable);
-		Q_ASSERT(sectionsArray);
-		return;
-	}
-
 	AppSignalProperties sourceProperties(sourceSignal);
 	AppSignalProperties targetProperties(targetSignal);
 
@@ -2253,21 +2278,16 @@ void ProjectDiffGenerator::compareSignalContents(const AppSignal& sourceSignal,
 
 	if (diffs.empty() == false)
 	{
-		std::shared_ptr<ReportSection> signalDiffSection = std::make_shared<ReportSection>(tr("Signal: ") + targetSignal.appSignalID());
-		sectionsArray->push_back(signalDiffSection);
-
-		signalDiffSection->addText(tr("Signal: %1, %2\n\n").arg(targetSignal.appSignalID()).arg(changesetString(targetSignal)), currentCharFormat(), currentBlockFormat());
+		section->addText(tr("Signal: %1, %2\n\n").arg(targetSignal.appSignalID()).arg(changesetString(targetSignal)), m_normalFormat);
 
 		addHeaderTableItem(headerTable, targetSignal.appSignalID(), E::valueToString<E::VcsItemAction>(targetSignal.instanceAction()), targetSignal);
 
-		saveFormat();
-		setFont(m_tableFont);
-		std::shared_ptr<ReportTable> diffTable = signalDiffSection->addTable({tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
-																			 {15, 15, 35, 35},
-																			 currentCharFormat());
-		restoreFormat();
+        std::shared_ptr<ReportTable> diffTable = section->addTable({m_tableFont,
+                                                                   {tr("Property"), tr("Status"), tr("Old Value"), tr("New Value")},
+																   {15, 15, 35, 35},
+                                                                    Qt::AlignLeft});
 
-		fillDiffTable(diffTable.get(), diffs);
+		fillDiffTable(*diffTable, diffs);
 	}
 }
 
@@ -2514,281 +2534,161 @@ bool ProjectDiffGenerator::isSchemaFile(const QString& fileName) const
 	return false;
 }
 
-void ProjectDiffGenerator::generateTitlePage(QTextDocument* textDocument,
-											 const CompareData& compareData,
-											 const QString& projectName,
-											 const QString& userName,
-											 const QString& subreportName) const
+std::shared_ptr<ReportSection> ProjectDiffGenerator::generateTitlePage(const QPageLayout& pageLayout,
+																	   const CompareData& compareData,
+																	   const QString& projectName,
+																	   const QString& userName,
+																	   const QString& subreportName) const
 {
-	if (textDocument == nullptr)
+	auto rs = ReportSection::create(titlePageName, pageLayout);
+
+	// Initialize font
+
+	QString fontName{"Arial"};
+
+	int titleFontSize = lineFontSize(pageLayout, fontName, 25);
+	int regularFontSize = lineFontSize(pageLayout, fontName, 50);
+
+	ReportLib::ReportFont titleFont{fontName, titleFontSize, QFont::Normal};
+	ReportLib::ReportFont regularFont{fontName, regularFontSize, QFont::Normal};
+
+	// Report info
+
+	if (pageLayout.orientation() == QPageLayout::Orientation::Portrait)
 	{
-		Q_ASSERT(textDocument);
-		return;
+		rs->addText(tr("\n\n\n"), {titleFont, Qt::AlignHCenter});
 	}
 
-	const double fontScaling = QApplication::screens()[0]->logicalDotsPerInch() / 96.0;
+	rs->addText(tr("\n\n\n\n\n\n\nProject: %1\n\n\n\n").arg(projectName), {titleFont, Qt::AlignHCenter});
 
-	int emptyLinesCount = 0;
-
-	for (int loop = 0; loop < 2; loop++)
+	if (subreportName.isEmpty() == true)
 	{
-		const bool testLoop = loop == 0;
-
-		QTextCursor textCursor(textDocument);
-
-		QTextBlockFormat blockCenterFormat = textCursor.blockFormat();
-		blockCenterFormat.setAlignment(Qt::AlignHCenter);
-
-		QTextBlockFormat blockLeftFormat = textCursor.blockFormat();
-		blockLeftFormat.setAlignment(Qt::AlignLeft);
-
-		QTextCharFormat charHeaderFormat = textCursor.charFormat();
-		charHeaderFormat.setFont(QFont("Arial"));
-		charHeaderFormat.setFontPointSize(72.0 / fontScaling);
-
-		QTextCharFormat charRegularFormat = textCursor.charFormat();
-		charRegularFormat.setFont(QFont("Arial"));
-		charRegularFormat.setFontPointSize(36.0 / fontScaling);
-
-		textCursor.setBlockFormat(blockLeftFormat);
-		textCursor.setCharFormat(charRegularFormat);
-
-		if (testLoop == false)
-		{
-			// Space 1
-
-			for (int i = 0; i < static_cast<int>(emptyLinesCount * 0.5); i++)
-			{
-				textCursor.insertText("\n");
-			}
-		}
-
-		// Report Title
-
-		textCursor.setBlockFormat(blockCenterFormat);
-		textCursor.setCharFormat(charHeaderFormat);
-
-		textCursor.insertText(QObject::tr("Differences Report\n\n"));
-
-		textCursor.insertText(QObject::tr("Project: %1\n\n").arg(projectName));
-
-		if (subreportName.isEmpty() == false)
-		{
-			textCursor.insertText(QObject::tr("%1\n").arg(subreportName));
-		}
-		else
-		{
-			textCursor.insertText("\n");
-		}
-
-		textCursor.setBlockFormat(blockLeftFormat);
-		textCursor.setCharFormat(charRegularFormat);
-
-		if (testLoop == false)
-		{
-			// Space 2
-
-			for (int i = 0; i < static_cast<int>(emptyLinesCount * 0.15); i++)
-			{
-				textCursor.insertText("\n");
-			}
-		}
-
-		// User name
-
-		textCursor.insertText(QObject::tr("User Name: %1\n\n").arg(userName));
-
-		// Changeset
-
-		QString changesetStr;
-
-		switch(compareData.sourceVersionType)
-		{
-		case CompareVersionType::LatestVersion: changesetStr = tr("Source: Latest Version"); break;
-		case CompareVersionType::Changeset: changesetStr = tr("Source Changeset: #%1").arg(compareData.sourceChangeset); break;
-		case CompareVersionType::Date: changesetStr = tr("Source Date: %1").arg(compareData.sourceDate.toString("dd/MM/yyyy HH:mm:ss")); break;
-		}
-
-		textCursor.insertText(tr("%1\n\n").arg(changesetStr));
-
-		switch(compareData.targetVersionType)
-		{
-		case CompareVersionType::LatestVersion: changesetStr = tr("Target: Latest Version"); break;
-		case CompareVersionType::Changeset: changesetStr = tr("Target Changeset: #%1").arg(compareData.targetChangeset); break;
-		case CompareVersionType::Date: changesetStr = tr("Target Date: %1").arg(compareData.targetDate.toString("dd/MM/yyyy HH:mm:ss")); break;
-		}
-		textCursor.insertText(tr("%1\n\n").arg(changesetStr));
-
-		if (testLoop == false)
-		{
-			// Space 3
-
-			for (int i = 0; i < static_cast<int>(emptyLinesCount * 0.15); i++)
-			{
-				textCursor.insertText("\n");
-			}
-		}
-
-		// RPCT Version
-
-		textCursor.setBlockFormat(blockCenterFormat);
-
-		textCursor.insertText(tr("Generated: %1\n\n").arg(QDateTime::currentDateTime().toString("dd/MM/yyyy  HH:mm:ss")));
-
-		textCursor.insertText(tr("%1 version %2\n\n").arg(qApp->applicationName()).arg(qApp->applicationVersion()));
-
-		// Space 4 is 0.15 of total space
-
-		// Calculate empty lines count on test loop
-
-		if (testLoop == true)
-		{
-			do
-			{
-				textCursor.insertText("\n");
-
-				if (textDocument->pageCount() > 1)
-				{
-					break;
-				}
-
-				emptyLinesCount++;
-
-				if (emptyLinesCount > 500)
-				{
-					Q_ASSERT(false);
-					emptyLinesCount = 0;
-					break;
-				}
-
-			}while (true);
-
-			textDocument->clear();
-		}
+		rs->addText(tr("Differences Report\n\n\n\n\n\n"), {titleFont, Qt::AlignHCenter});
+	}
+	else
+	{
+		rs->addText(tr("Differences Report\n\n"), {titleFont, Qt::AlignHCenter});
+		rs->addText(QObject::tr("%1\n\n\n\n\n").arg(subreportName), {regularFont, Qt::AlignHCenter});
 	}
 
-	return;
+	// User name
+
+	rs->addText(tr("User Name: %1\n\n\n").arg(userName), {regularFont, Qt::AlignLeft});
+
+	// Changeset
+
+	QString changesetStr;
+
+	switch(compareData.sourceVersionType)
+	{
+	case CompareVersionType::LatestVersion: changesetStr = tr("Source: Latest Version"); break;
+	case CompareVersionType::Changeset: changesetStr = tr("Source Changeset: #%1").arg(compareData.sourceChangeset); break;
+	case CompareVersionType::Date: changesetStr = tr("Source Date: %1").arg(compareData.sourceDate.toString("dd/MM/yyyy HH:mm:ss")); break;
+	}
+
+	rs->addText(tr("%1\n\n").arg(changesetStr), {regularFont, Qt::AlignLeft});
+
+	switch(compareData.targetVersionType)
+	{
+	case CompareVersionType::LatestVersion: changesetStr = tr("Target: Latest Version"); break;
+	case CompareVersionType::Changeset: changesetStr = tr("Target Changeset: #%1").arg(compareData.targetChangeset); break;
+	case CompareVersionType::Date: changesetStr = tr("Target Date: %1").arg(compareData.targetDate.toString("dd/MM/yyyy HH:mm:ss")); break;
+	}
+
+	rs->addText(tr("%1\n\n").arg(changesetStr), {regularFont, Qt::AlignLeft});
+
+	// Generation time
+
+	rs->addText(tr("Generated: %1\n\n").arg(QDateTime::currentDateTime().toString("dd/MM/yyyy HH:mm:ss")),
+				{regularFont, Qt::AlignRight});
+
+	// RPCT Version
+
+	rs->addText(tr("by %1 version %2\n\n").arg(qApp->applicationName()).arg(qApp->applicationVersion()),
+				{regularFont, Qt::AlignRight});
+
+	return rs;
 }
 
-void ProjectDiffGenerator::generateReportFilesPage(QTextDocument* textDocument, const QStringList& subreportFiles)
+void ProjectDiffGenerator::generateSummaryReport(const QPageLayout& pageLayout)
 {
-	if (textDocument == nullptr)
+	// Create report
+	//
+	auto summaryReport = std::make_shared<Report>(m_projectName, filePath());
+	summaryReport->setResolution(m_resolution);
+
+	// Create title page
+	//
+	auto titlePageSection = generateTitlePage(pageLayout, m_reportParams.compareData, m_projectName, m_userName, QString());
+	summaryReport->insertSection(0, titlePageSection);
+
+
+	// Create files list page
+	//
+	QStringList generatedReportFiles;
+	for (const auto& r : m_generatedReports)
 	{
-		Q_ASSERT(textDocument);
-		return;
+		generatedReportFiles.push_back(r->path());
 	}
 
-	const double fontScaling = QApplication::screens()[0]->logicalDotsPerInch() / 96.0;
-
-	int emptyLinesCount = 0;
-
-	for (int loop = 0; loop < 2; loop++)
 	{
-		const bool testLoop = loop == 0;
-
-		QTextCursor textCursor(textDocument);
-
-		QTextBlockFormat blockCenterFormat = textCursor.blockFormat();
-		blockCenterFormat.setAlignment(Qt::AlignHCenter);
-
-		QTextBlockFormat blockLeftFormat = textCursor.blockFormat();
-		blockLeftFormat.setAlignment(Qt::AlignLeft);
-
-		QTextCharFormat charRegularFormat = textCursor.charFormat();
-		charRegularFormat.setFont(QFont("Times"));
-		charRegularFormat.setFontPointSize(36.0 / fontScaling);
-
-		textCursor.setBlockFormat(blockCenterFormat);
-		textCursor.setCharFormat(charRegularFormat);
-
-		if (testLoop == false)
-		{
-			// Space 1
-
-			for (int i = 0; i < static_cast<int>(emptyLinesCount * 0.25); i++)
-			{
-				textCursor.insertText("\n");
-			}
-		}
-
-		// Report Title
-
-		textCursor.insertText(QObject::tr("Content of this report is stored in the following files:\n"));
-
-		if (testLoop == false)
-		{
-			// Space 2
-
-			for (int i = 0; i < static_cast<int>(emptyLinesCount * 0.15); i++)
-			{
-				textCursor.insertText("\n");
-			}
-		}
-
-		textCursor.setBlockFormat(blockLeftFormat);
-
-		for (QString fileName: subreportFiles)
-		{
-			fileName = QDir::toNativeSeparators(fileName);
-
-			qsizetype pos = fileName.lastIndexOf(QDir::separator());
-			if (pos != -1)
-			{
-				fileName = fileName.right(fileName.length() - pos - 1);
-			}
-
-			textCursor.insertText(QObject::tr("%1\n").arg(fileName));
-
-			textCursor.insertText("\n");
-		}
-
-		// Calculate empty lines count on test loop
-
-		if (testLoop == true)
-		{
-			do
-			{
-				textCursor.insertText("\n");
-
-				if (textDocument->pageCount() > 1)
-				{
-					break;
-				}
-
-				emptyLinesCount++;
-
-				if (emptyLinesCount > 500)
-				{
-					Q_ASSERT(false);
-					emptyLinesCount = 0;
-					break;
-				}
-
-			}while (true);
-
-			textDocument->clear();
-		}
+		auto section = generateSummaryReportFilesPage(pageLayout, generatedReportFiles);
+		summaryReport->addSection(section);
 	}
 
-	return;
+	m_generatedReports.push_back(summaryReport);
 }
 
-void ProjectDiffGenerator::createMarginItems(const CompareData& compareData, const QString& subreportName)
+std::shared_ptr<ReportSection> ProjectDiffGenerator::generateSummaryReportFilesPage(const QPageLayout& pageLayout,
+																					const QStringList& subreportFiles)
 {
-	clearMarginItems();
+	auto rs = ReportSection::create("SummaryFiles", pageLayout);
+
+	// Init font
+
+	QString fontName{"Arial"};
+	int fontSize = lineFontSize(pageLayout, fontName, 50);
+
+	ReportLib::ReportFont font{fontName, fontSize, QFont::Normal};
+
+	// Create report
+
+	rs->addText(tr("\n\n\n\nContent of this report is stored in the following files:\n\n"),
+				{font, Qt::AlignHCenter});
+
+	for (QString fileName: subreportFiles)
+	{
+		fileName = QDir::toNativeSeparators(fileName);
+
+		qsizetype pos = fileName.lastIndexOf(QDir::separator());
+		if (pos != -1)
+		{
+			fileName = fileName.right(fileName.length() - pos - 1);
+		}
+
+		rs->addText(tr("%1\n").arg(fileName),
+					{font, Qt::AlignLeft});
+	}
+
+	return rs;
+}
+
+void ProjectDiffGenerator::createMarginItems(Report& report, const CompareData& compareData, const QString& subreportName)
+{
+	report.clearMarginItems();
 
 	// Create headers/footers
 
 	QString projectNameStr = tr("Project: ") + m_projectName;
 
-	if (m_reportParams.multipleFiles == true && subreportName.isEmpty() == false)
+	if (m_reportParams.singleFile == false && subreportName.isEmpty() == false)
 	{
 		projectNameStr += tr("; section: %1").arg(subreportName);
 	}
 
-	addMarginItem({projectNameStr, 2, -1, m_marginFont, Qt::AlignLeft | Qt::AlignTop});
+	report.addMarginItem({projectNameStr, 2, -1, {m_marginFont, Qt::AlignLeft | Qt::AlignTop}});
 
-	addMarginItem({tr("%OBJECT%"), 2, -1, m_marginFont, Qt::AlignRight | Qt::AlignTop});
+	report.addMarginItem({tr("%TAG%"), 2, -1, {m_marginFont, Qt::AlignRight | Qt::AlignTop}});
 
 	QString changesetStr;
 
@@ -2806,20 +2706,14 @@ void ProjectDiffGenerator::createMarginItems(const CompareData& compareData, con
 	case CompareVersionType::Date: changesetStr += tr("; Target Date: %1").arg(compareData.targetDate.toString("dd/MM/yyyy HH:mm:ss")); break;
 	}
 
-	addMarginItem({changesetStr, 2, -1, m_marginFont, Qt::AlignLeft | Qt::AlignBottom});
+	report.addMarginItem({changesetStr, 2, -1, {m_marginFont, Qt::AlignLeft | Qt::AlignBottom}});
 
-	addMarginItem({tr("%PAGE%"), 2, -1, m_marginFont, Qt::AlignRight | Qt::AlignBottom});
+	report.addMarginItem({tr("%PAGE%"), 2, -1, {m_marginFont, Qt::AlignRight | Qt::AlignBottom}});
 
 }
 
-void ProjectDiffGenerator::fillDiffTable(ReportTable* diffTable, const std::vector<PropertyDiff>& diffs)
+void ProjectDiffGenerator::fillDiffTable(ReportTable& diffTable, const std::vector<PropertyDiff>& diffs)
 {
-	if (diffTable == nullptr)
-	{
-		Q_ASSERT(diffTable);
-		return;
-	}
-
 	for (const PropertyDiff& diff : diffs)
 	{
 		switch (diff.action)
@@ -2829,24 +2723,24 @@ void ProjectDiffGenerator::fillDiffTable(ReportTable* diffTable, const std::vect
 			{
 				if (diff.newValueText.length() > 256)
 				{
-					diffTable->insertRow({diff.caption, tr("Added"), QString(), tr("<Long Data Array>")});
+					diffTable.insertRow({diff.caption, tr("Added"), QString(), tr("<Long Data Array>")});
 				}
 				else
 				{
-					diffTable->insertRow({diff.caption, tr("Added"), QString(), diff.newValueText});
+					diffTable.insertRow({diff.caption, tr("Added"), QString(), diff.newValueText});
 				}
 			}
 			break;
 		case PropertyDiff::Action::Removed:
 			{
-				diffTable->insertRow({diff.caption, tr("Removed"), QString(), QString()});
+				diffTable.insertRow({diff.caption, tr("Removed"), QString(), QString()});
 			}
 			break;
 		case PropertyDiff::Action::Modified:
 			{
 				if (diff.oldValueText.length() > 256 || diff.newValueText.length() > 256)
 				{
-					diffTable->insertRow({diff.caption, tr("Modified"), tr("<Long Data Array>"), tr("<Long Data Array>")});
+					diffTable.insertRow({diff.caption, tr("Modified"), tr("<Long Data Array>"), tr("<Long Data Array>")});
 					/*
 					QStringList sourceText;
 					QStringList targetText;
@@ -2915,49 +2809,36 @@ void ProjectDiffGenerator::fillDiffTable(ReportTable* diffTable, const std::vect
 				}
 				else
 				{
-					diffTable->insertRow({diff.caption, tr("Modified"), diff.oldValueText, diff.newValueText});
+					diffTable.insertRow({diff.caption, tr("Modified"), diff.oldValueText, diff.newValueText});
 				}
 			}
 			break;
 		}
 	}
 
-	diffTable->sortByColumn(0);
+	diffTable.sortByColumn(0);
 
 	return;
 }
 
-void ProjectDiffGenerator::addHeaderTableItem(ReportTable* const headerTable, const QString& caption, const QString& action, std::shared_ptr<DbFile> file)
+void ProjectDiffGenerator::addHeaderTableItem(ReportTable& headerTable, const QString& caption, const QString& action, std::shared_ptr<DbFile> file)
 {
 	QString changesetStr = file->changeset() == 0 ? tr("Checked Out") : tr("%1").arg(file->changeset());
 
-	if (headerTable == nullptr || file == nullptr)
-	{
-		Q_ASSERT(headerTable);
-		Q_ASSERT(file);
-		return;
-	}
+	Q_ASSERT(headerTable.columnCount() == 5);
 
-	Q_ASSERT(headerTable->columnCount() == 5);
-
-	headerTable->insertRow({caption, action, changesetStr, db()->username(file->userId()), file->lastCheckIn().toString("dd/MM/yyyy HH:mm:ss")});
+	headerTable.insertRow({caption, action, changesetStr, db()->username(file->userId()), file->lastCheckIn().toString("dd/MM/yyyy HH:mm:ss")});
 
 	return;
 }
 
-void ProjectDiffGenerator::addHeaderTableItem(ReportTable* const headerTable, const QString& caption, const QString& action, const AppSignal& signal)
+void ProjectDiffGenerator::addHeaderTableItem(ReportTable& headerTable, const QString& caption, const QString& action, const AppSignal& signal)
 {
 	QString changesetStr = signal.changesetID() == 0 ? tr("Checked Out") : tr("%1").arg(signal.changesetID());
 
-	if (headerTable == nullptr)
-	{
-		Q_ASSERT(headerTable);
-		return;
-	}
+	Q_ASSERT(headerTable.columnCount() == 5);
 
-	Q_ASSERT(headerTable->columnCount() == 5);
-
-	headerTable->insertRow({caption, action, changesetStr, db()->username(signal.userID()), signal.instanceCreated().toString("dd/MM/yyyy HH:mm:ss")});
+	headerTable.insertRow({caption, action, changesetStr, db()->username(signal.userID()), signal.instanceCreated().toString("dd/MM/yyyy HH:mm:ss")});
 
 	return;
 }
@@ -2986,220 +2867,3 @@ QString ProjectDiffGenerator::changesetString(const AppSignal& signal)
 	}
 }
 
-void ProjectDiffGenerator::renderReport(std::map<int, std::vector<std::shared_ptr<ReportSection>>> reportContents)
-{
-	QStringList generatedReportFiles;
-
-	for (auto it = reportContents.begin(); it != reportContents.end(); it++)
-	{
-		const std::vector<std::shared_ptr<ReportSection>>& sections = it->second;
-
-		// Render all objects to documents
-
-		int sectionsPagesCount = 0;
-
-		{
-			QMutexLocker l(&m_statisticsMutex);
-			m_currentStatus = WorkerStatus::Rendering;
-
-			m_sectionCount = static_cast<int>(sections.size());
-			m_sectionIndex = 0;
-		}
-
-		// Init PDF file parameters
-
-		QString subreportName;
-
-		QString pdfFileName = filePath();
-
-		if (m_reportParams.multipleFiles == true)
-		{
-			int subreportFileType = it->first;
-
-			for (const ReportFileTypeParams& ft : m_reportParams.fileTypeParams)
-			{
-				if (ft.fileId == subreportFileType)
-				{
-					subreportName = ft.caption;
-					break;
-				}
-			}
-
-			if (subreportName.isEmpty() == true)
-			{
-				Q_ASSERT(false);
-				subreportName = tr("NoName");
-			}
-
-			qsizetype pos = pdfFileName.lastIndexOf('.');
-			if (pos != -1)
-			{
-				pdfFileName.insert(pos, tr("_%1").arg(subreportName));
-			}
-			else
-			{
-				pdfFileName += tr("_%1.pdf").arg(subreportName);
-			}
-
-			pdfFileName.replace(' ', '_');
-
-			QMutexLocker l(&m_statisticsMutex);
-			m_currentReportName = subreportName;
-
-			// Set subreport page size
-			//
-			bool pageLayoutFound = false;
-			for (const ReportFileTypeParams& ft : m_reportParams.fileTypeParams)
-			{
-				if (ft.fileId == subreportFileType)
-				{
-					setPageLayout(ft.pageLayout);
-					pageLayoutFound = true;
-					break;
-				}
-			}
-			if (pageLayoutFound == false)
-			{
-				Q_ASSERT(false);
-			}
-		}
-		else
-		{
-			// Set full report page size
-			//
-			setPageLayout(m_reportParams.m_albumPageLayout);
-		}
-
-		generatedReportFiles.push_back(pdfFileName);
-
-		// Create PDF writer
-
-		QPdfWriter pdfWriter(pdfFileName);
-		pdfWriter.setTitle(m_projectName);
-		pdfWriter.setPageLayout(pageLayout());
-		pdfWriter.setResolution(resolution());
-
-		QRect pageRectPixels = pdfWriter.pageLayout().paintRectPixels(pdfWriter.resolution());
-
-		QPainter painter(&pdfWriter);
-
-		// Create title page and margins
-		//
-		{
-			QTextDocument titleTextDocument;
-
-			titleTextDocument.setPageSize(QSizeF(pageRectPixels.width(), pageRectPixels.height()));
-
-			generateTitlePage(&titleTextDocument, m_reportParams.compareData, m_projectName, m_userName, subreportName);
-
-			createMarginItems(m_reportParams.compareData, subreportName);
-
-			printDocument(&pdfWriter, &titleTextDocument, &painter, QString(), nullptr, nullptr, 0);
-		}
-
-		// Render sections pages
-		//
-		for (std::shared_ptr<ReportSection> section : sections)
-		{
-			if (m_stop == true)
-			{
-				return;
-			}
-
-			{
-				QMutexLocker l(&m_statisticsMutex);
-				m_sectionIndex++;
-			}
-
-			section->render(QSizeF(pageRectPixels.width(), pageRectPixels.height()));
-
-			sectionsPagesCount += section->pageCount();
-		}
-
-		// Print PDF
-
-		{
-			QMutexLocker l(&m_statisticsMutex);
-			m_currentStatus = WorkerStatus::Printing;
-
-			m_pagesCount = 1/*title page*/ + sectionsPagesCount;
-			m_pageIndex = 1;
-		}
-
-		for (std::shared_ptr<ReportSection> section : sections)
-		{
-			if (m_stop == true)
-			{
-				return;
-			}
-
-			// Print Text Document
-
-			pdfWriter.newPage();
-
-			{
-				QMutexLocker l(&m_statisticsMutex);
-				m_pageIndex++;
-			}
-
-			printDocument(&pdfWriter, section->textDocument(), &painter, section->caption(), &m_pageIndex, &m_statisticsMutex, m_pagesCount);
-
-			// Print Schemas
-
-			std::shared_ptr<VFrame30::Schema> schema = section->schema();
-			if (schema != nullptr)
-			{
-				printSchema(&pdfWriter, &painter, schema, section->textDocument(), &section->compareItemActions());
-			}
-
-			// Clear text document
-
-			section->textDocument()->clear();
-		}
-	}
-
-	if (m_reportParams.multipleFiles == true)
-	{
-		clearMarginItems();
-
-		// Generate generic report file with all report files description
-
-		setPageLayout(m_reportParams.m_albumPageLayout);
-
-		QPdfWriter pdfWriter(filePath());
-
-		pdfWriter.setTitle(m_projectName);
-		pdfWriter.setPageLayout(pageLayout());
-		pdfWriter.setResolution(resolution());
-
-		QRect pageRectPixels = pdfWriter.pageLayout().paintRectPixels(pdfWriter.resolution());
-
-		QPainter painter(&pdfWriter);
-
-		{
-
-			QTextDocument titleTextDocument;
-
-			titleTextDocument.setPageSize(QSizeF(pageRectPixels.width(), pageRectPixels.height()));
-
-			generateTitlePage(&titleTextDocument, m_reportParams.compareData, m_projectName, m_userName, QString());
-
-			printDocument(&pdfWriter, &titleTextDocument, &painter, QString(), nullptr, nullptr, 0);
-
-		}
-
-		pdfWriter.newPage();
-
-		{
-
-			QTextDocument titleTextDocument;
-
-			titleTextDocument.setPageSize(QSizeF(pageRectPixels.width(), pageRectPixels.height()));
-
-			generateReportFilesPage(&titleTextDocument, generatedReportFiles);
-
-			printDocument(&pdfWriter, &titleTextDocument, &painter, QString(), nullptr, nullptr, 0);
-
-		}
-	}
-}

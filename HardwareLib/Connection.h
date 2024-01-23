@@ -2,6 +2,7 @@
 
 #include "../Proto/ProtoSerialization.h"
 #include "../CommonLib/PropertyObject.h"
+#include <QXmlStreamReader>
 
 
 namespace Hardware

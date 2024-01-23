@@ -1,5 +1,6 @@
 #pragma once
-#include <QtCore>
+#include <QObject>
+#include <QMutex>
 #include <type_traits>
 #include <cassert>
 #include <atomic>

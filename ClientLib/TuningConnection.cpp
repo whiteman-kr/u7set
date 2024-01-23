@@ -1,5 +1,5 @@
 #ifndef CLIENT_LIB_DOMAIN
-#error Don't include this file in the project! Link ClientLib instead.
+#error Do not include this file in the project! Link ClientLib instead.
 #endif
 
 #include "../AppSignalLib/TuningSignalManager.h"
@@ -9,15 +9,17 @@
 namespace ClientLib
 {
 
-TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
-										 const SoftwareEndpoint::TuningService& tuns,
-										 bool autoApply,
-										 TuningClientSettings::LmStatusFlagMode lmStatusFlagMode,
-										 ITuningSignalUpdater& signalUpdater,
-										 ILogFile* logFile,
-										 ITuningLog* tuningLog)
+	TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
+											 const SoftwareEndpoint::TuningService& tuns,
+											 bool autoApply,
+											 TuningClientSettings::LmStatusFlagMode lmStatusFlagMode,
+											 ITuningSignalUpdater& signalUpdater,
+											 IRecentAppSignals& recentTuningSignals,
+											 ITuningAuthorization& tuningAuthorization,
+											 ILogFile* logFile,
+											 ITuningLog* tuningLog)
 	{
-		tcpTuningClient = new TuningTcpClient{softwareInfo, tuns, signalUpdater, logFile, tuningLog};
+		tcpTuningClient = new TuningTcpClient{softwareInfo, tuns, signalUpdater, recentTuningSignals, tuningAuthorization, logFile, tuningLog};
 		tcpTuningClient->setServers(tuns.clientRequestAddress, tuns.clientRequestAddress, true);
 		tcpTuningClient->setAutoApply(autoApply);
 		tcpTuningClient->setLmStatusFlagMode(lmStatusFlagMode);
@@ -53,12 +55,22 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 		return tcpTuningClient->serverAddressPort1();
 	}
 
+	bool TuningConnection::Connection::signalStatesLoaded() const
+	{
+		Q_ASSERT(tcpTuningClient);
+		return tcpTuningClient->signalStatesLoaded();
+	}
+
 	TuningConnection::TuningConnection(ITuningSignalManager& tuningSignalManager,
 									   ITuningSignalUpdater& tuningSignalUpdater,
+									   IRecentAppSignals& recentTuningSignals,
+									   ITuningAuthorization& tuningAuthorization,
 									   ILogFile* logFile,
 									   ITuningLog* tuningLog) :
 		m_tuningSignalManager{tuningSignalManager},
 		m_tuningSignalUpdater{tuningSignalUpdater},
+		m_recentTuningSignals(recentTuningSignals),
+		m_tuningAuthorization(tuningAuthorization),
 		m_logFile{logFile, "TuningConnection"},
 		m_tuningLog(tuningLog)
 	{
@@ -88,7 +100,8 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 				continue;
 			}
 
-			m_conns.emplace_back(softwareInfo, tuns, autoApply, lmStatusFlagMode, m_tuningSignalUpdater, m_logFile.logFile(), m_tuningLog);
+			m_conns.emplace_back(softwareInfo, tuns, autoApply, lmStatusFlagMode, m_tuningSignalUpdater, m_recentTuningSignals, m_tuningAuthorization,
+								 m_logFile.logFile(), m_tuningLog);
 		}
 
 		return;
@@ -390,10 +403,6 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 
 				if (valueType == QMetaType::Double)
 				{
-					m_logFile.writeWarning(tr("writeTuningSignal(%1, %2) - casting double to SignedInt32 can result in loss of precision.")
-										 .arg(appSignalId)
-										 .arg(value.toString()));
-
 					if (double valueDouble = value.toDouble();
 						valueDouble < std::numeric_limits<qint32>::min() || valueDouble > std::numeric_limits<qint32>::max())
 					{
@@ -473,6 +482,11 @@ TuningConnection::Connection::Connection(const SoftwareInfo& softwareInfo,
 		return writeTuningSignal(appSignalId, tuningValue);
 	}
 
+	bool TuningConnection::signalStatesLoaded() const
+	{
+		return std::all_of(m_conns.begin(), m_conns.end(), [](const Connection& c) { return c.signalStatesLoaded(); });
+	}
+	
 	void TuningConnection::applyTuningSignals(const std::vector<Hash>& signalHashes)
 	{
 		for (const Connection& c : m_conns)

@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <list>
-#include "../AppSignalLib/AppSignalParam.h"
+#include "../AppSignalLib/AppSignalState.h"
 
 namespace Proto
 {
@@ -39,8 +39,7 @@ namespace TrendLib
 		[[nodiscard]] bool isValid() const
 		{
 			return (flags & 0x00000002);	// AppSignalStateFlags::stateAvailable, it is a real non valid
-											// validity bit 0 is a combination of stateAvailable and coupled valididty signal
-											// So
+											// validity bit 0 is a combination of stateAvailable and coupled validity signal
 		}
 
 		void setValid(bool valid)

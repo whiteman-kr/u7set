@@ -188,9 +188,9 @@ public:
 	//
 	enum SignalType
 	{
-		Analog,
-		Discrete,
-		Bus
+		Analog,			//	0
+		Discrete,		//	1
+		Bus				//  2
 	};
 	Q_ENUM(SignalType)
 
@@ -246,6 +246,17 @@ public:
 		Float32 = static_cast<int>(E::DataFormat::Float)
 	};
 	Q_ENUM(AnalogAppSignalFormat)
+
+	// Types of aperture calculations. Stores in DB!
+	//
+	enum class ApertureType
+	{
+		RangePercent,			// Aperture is a percent of range from LowEngineeringUnits to HihgEngineeringUnits
+		ValuePercent,			// Aperture is a percent of current signal value,
+								// corresponds to obsolete property AdaptiveAperture == true
+		AbsValue,				// Aperture is an absolute value in engineering units
+	};
+	Q_ENUM(ApertureType)
 
 	// MemoryArea
 	//
@@ -327,7 +338,7 @@ public:
 		uA = 5,
 		Hz = 6,
 
-		// oder version
+		// older version
 		// NoInputUnit = 1,
 		// mA = 15,
 		// mV = 11,
@@ -395,6 +406,8 @@ public:
 		mV_Type_L = 36,
 		mV_Type_M = 37,
 		mV_Raw_m1200_p1200 = 38,
+
+		Hz_0_60000 = 39
 	};
 	Q_ENUM(SensorType)
 
@@ -491,6 +504,13 @@ public:
 	};
 	Q_ENUM(TrendMode)
 
+	enum class TrendViewMode
+	{
+		Separated,
+		Overlapped
+	};
+	Q_ENUM(TrendViewMode)
+
 	enum class TrendScaleType
 	{
 		Linear,
@@ -511,6 +531,8 @@ public:
 		LoadFileDialog,
 		Svg,
 		Tags,
+		MatsUsers,
+        Report,
 		ChooseFileDialog,
 		ChooseDirectoryDialog
 	};
@@ -679,6 +701,11 @@ public:
 		ClientIsNotActive,
 		TuningNoReply,
 		TuningValueCorrupted,
+		TuningCommandDenied,						// for ex. tuning command Apply denied for TestSute client
+		UnknownMatsUser,
+		DisabledMatsUser,
+		NoSignalsAllowedToControl,
+		SignalIsNotAllowedToControl
 	};
 	Q_ENUM(NetworkError)
 
@@ -798,6 +825,28 @@ public:
 
 		return result;
 	}
+
+	// Get map of enum values and assigned String
+	//
+	template <typename ENUM_TYPE>
+	static std::map<int, QString> enumValuesMap()
+	{
+		static_assert(std::is_enum<ENUM_TYPE>::value);
+
+		static QMetaEnum me = metaEnum<ENUM_TYPE>();
+
+		std::map<int, QString> result;
+
+		int keyCount = me.keyCount();
+
+		for (int i = 0; i < keyCount; i++)
+		{
+			result.emplace(me.value(i), QString::fromLocal8Bit(me.key(i)));
+		}
+
+		return result;
+	}
+
 
 	// Get list of enum keys converted to QString
 	//
@@ -929,6 +978,10 @@ const int	SIZE_2WORD = 2;
 const int	CHANNEL_1 = 0;
 const int	CHANNEL_2 = 1;
 const int	CHANNEL_3 = 2;
+const int	CHANNEL_4 = 3;
+
+const int	MIN_CHANNEL_COUNT = 1;
+const int	MAX_CHANNEL_COUNT = static_cast<int>(E::values<E::Channel>().size());
 
 // SchemaUnit
 //
@@ -941,6 +994,7 @@ enum class SchemaUnit
 
 Q_DECLARE_METATYPE(SchemaUnit)
 
+Q_DECLARE_METATYPE(E::TrendViewMode)
 Q_DECLARE_METATYPE(E::ColumnData)
 Q_DECLARE_METATYPE(E::SignalType)
 Q_DECLARE_METATYPE(E::AnalogAppSignalFormat)

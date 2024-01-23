@@ -1,7 +1,8 @@
 #pragma once
 
-#include "PosRectImpl.h"
 #include "FontParam.h"
+#include "IMatsSchemaItemAssociations.h"
+#include "PosRectRotatable.h"
 #include "Session.h"
 
 class QPen;
@@ -10,6 +11,7 @@ class QBrush;
 class AppSignalState;
 class AppSignalParam;
 class TuningSignalState;
+
 
 namespace VFrame30
 {
@@ -22,13 +24,13 @@ namespace VFrame30
 		Information displayed by this item is fully customizable by scripts. Script code can receive signal parameters and states from data services,
 		set text, colors, font size to any values depending on customers requirements.
 
-		Signal identidiers set to the schema item are stored in <b>SignalIDs</b> array property.
+		Signal identifiers set to the schema item are stored in <b>SignalIDs</b> array property.
 
 		To modify contents of the item, set <b>Text</b>, <b>TextColor</b>, <b>FillColor</b>, <b>LineColor</b> properties etc.
 
 		<b>Event handlers</b>
 
-		To customize item's apperance and behavior, event handler code is placed to following properties of the schema item using RPCT:
+		To customize item's appearance and behavior, event handler code is placed to following properties of the schema item using RPCT:
 
 		- <b>ClickScript</b> contains mouse click event handler code.
 		Click event is generated each time when user clicks mouse button on the item and <b>AcceptClick</b> property is set to true;<br>
@@ -97,7 +99,8 @@ namespace VFrame30
 		})
 		\endcode
 	*/
-	class SchemaItemValue final : public PosRectImpl
+	class SchemaItemValue final : public PosRectRotatable,
+								  public IMatsSchemaItemAssociations
 	{
 		Q_OBJECT
 
@@ -185,8 +188,10 @@ namespace VFrame30
 		//
 	public:
 		virtual void draw(CDrawParam* drawParam) const override;
+		void drawPrivate(CDrawParam* drawParam) const;
 
 		virtual void drawHighlight(CDrawParam* drawParam) const override;
+		void drawHighlightPrivate(CDrawParam* drawParam) const;
 
 	protected:
 		void initDrawingResources() const;
@@ -201,9 +206,18 @@ namespace VFrame30
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
 
-		// Java Script invocables specific for SchemaItemValue
+		// Java Script invocable specific for SchemaItemValue
 		//
 	public:
+
+		// IMatsSchemaItemAssociations implementation.
+		//
+	public:
+		virtual QStringList associatedAppSignalIds() const override;
+		virtual QStringList associatedImpactAppSignalIds() const override;
+		virtual QStringList associatedConnectionIds() const override;
+		virtual QStringList associatedLoopbackIds() const override;
+		virtual QStringList associatedSchemaItemLabels() const override;
 
 		// Properties and Data
 		//
@@ -264,18 +278,18 @@ namespace VFrame30
 		E::HorzAlign m_horzAlign = E::HorzAlign::AlignHCenter;
 		E::VertAlign m_vertAlign = E::VertAlign::AlignVCenter;
 		FontParam m_font;
-		bool m_drawRect = false;		// Rect is visible, thikness 0 is possible
+		bool m_drawRect = false;       // Rect is visible, thickness 0 is possible
 
-		QString m_text = {"$(value)"};	// $(value)			: signal value
-										// $(caption)		: caption
-										// $(signalid)		: SignalID (CustomSignalID)
-										// $(appsignalid)	: AppSignalID (#APPSIGANLID)
-										// $(equipmentid)	: Signal EquipmentID (LM for internal signals, input/output equipment port for IO signals)
-										// $(highlimit)		: High limit
-										// $(lowlimit)		: Low limit
-										// $(units)			: Signal units
+		QString m_text = {"$(value)"}; // $(value)			: signal value
+									   // $(caption)		: caption
+									   // $(signalid)		: SignalID (CustomSignalID)
+									   // $(appsignalid)	: AppSignalID (#APPSIGANLID)
+									   // $(equipmentid)	: Signal EquipmentID (LM for internal signals, input/output equipment port for IO signals)
+									   // $(highlimit)		: High limit
+									   // $(lowlimit)		: Low limit
+									   // $(units)			: Signal units
 
-		int m_precision = -1;			// decimal places, -1 means take value from Signal
+		int m_precision = -1;          // decimal places, -1 means take value from Signal
 		E::AnalogFormat m_analogFormat = E::AnalogFormat::f_9;
 
 		// Drawing resources
@@ -283,4 +297,4 @@ namespace VFrame30
 		mutable std::unique_ptr<QPen> m_rectPen;
 		mutable std::unique_ptr<QBrush> m_fillBrush;
 	};
-}
+} // namespace VFrame30

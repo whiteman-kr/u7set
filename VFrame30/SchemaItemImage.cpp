@@ -1,7 +1,7 @@
 #include "SchemaItemImage.h"
+#include "DrawParam.h"
 #include "MacrosExpander.h"
 #include "PropertyNames.h"
-#include "DrawParam.h"
 #include "QPainter"
 
 
@@ -10,8 +10,8 @@ namespace VFrame30
 	SchemaItemImage::SchemaItemImage(void) :
 		SchemaItemImage(SchemaUnit::Inch)
 	{
-		// Вызов этого конструктора возможен при сериализации объектов такого типа.
-		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
+		// This constructor can be called only from SchemaItemImage(SchemaUnit unit) constructor.
+		// After this call all properties are initialized and can be used.
 		//
 	}
 
@@ -37,25 +37,20 @@ namespace VFrame30
 		return;
 	}
 
-	SchemaItemImage::~SchemaItemImage(void)
-	{
-	}
-
 	// Serialization
 	//
 	bool SchemaItemImage::SaveData(Proto::Envelope* message) const
 	{
-		bool result = PosRectImpl::SaveData(message);
+		bool result = PosRectRotatable::SaveData(message);
 		if (result == false || message->has_schemaitem() == false)
 		{
 			assert(result);
 			assert(message->has_schemaitem());
 			return false;
 		}
-		
+
 		// --
 		//
-
 		Proto::SchemaItemImage* imageMessage = message->mutable_schemaitem()->mutable_image();
 
 		bool ok = m_image.save(imageMessage->mutable_image());
@@ -72,7 +67,7 @@ namespace VFrame30
 
 		// --
 		//
-		bool result = PosRectImpl::LoadData(message);
+		bool result = PosRectRotatable::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -97,19 +92,28 @@ namespace VFrame30
 	//
 	void SchemaItemImage::draw(CDrawParam* drawParam) const
 	{
-		QRectF rect = boundingRectInDocPt(drawParam);
-
-		if (m_image.hasAnyImage() == false)
+		auto drawPrivate = [this](CDrawParam* drawParam)
 		{
-			// Image not set, draw rect and information text
-			//
-			m_image.drawError(drawParam, rect, QStringLiteral("No Image"));
-			return;
-		}
+			QRectF rect = boundingRectInDocPt(drawParam);
 
-		// Draw Image
-		//
-		m_image.drawImage(drawParam, rect);
+			if (m_image.hasAnyImage() == false)
+			{
+				// Image not set, draw rect and information text
+				//
+				m_image.drawError(drawParam, rect, QStringLiteral("No Image"));
+				return;
+			}
+
+			// Draw Image
+			//
+			m_image.drawImage(drawParam, rect);
+			return;
+		};
+
+		return drawRotated(drawParam, [drawParam, this, &drawPrivate]()
+						   {
+							   return drawPrivate(drawParam);
+						   });
 
 		return;
 	}
@@ -175,5 +179,4 @@ namespace VFrame30
 	{
 		m_image.setSvgData(data);
 	}
-}
-
+} // namespace VFrame30

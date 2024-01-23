@@ -1,5 +1,4 @@
 #include "TuningSourceWidget.h"
-#include "../Proto/network.pb.h"
 #include <functional>
 #include <QTableView>
 #include <QStandardItemModel>

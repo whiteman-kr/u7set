@@ -1,0 +1,17 @@
+<Command 
+	Caption="movc32"
+	Code="04c0"
+	CodeMask="07c0"
+	SimulationFunc="command_movc32"
+	ParseFunc="parse_movc32"
+	Description="Write 32-bit constant to memory"
+
+	CodeSize="4" 
+	ReadTime="14" 
+	WaitFbExecution="false"
+
+	ConstRuntime="10"
+
+	CheckFunc="check_movc32"
+	GetMnemoFunc="mnemo_movc32"
+	CalcExecTimeFunc="exectime_const"/>

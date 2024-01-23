@@ -41,56 +41,21 @@ namespace Builder
 		return m_busses.writeReport(m_resultWriter.get());
 	}
 
-	bool SignalSet::checkSignals()
+	bool SignalSet::checkSignals(bool isSafetyProject)
 	{
-		bool result = true;
-
-		qsizetype signalCount = count();
-
-		if (signalCount == 0)
+		if (count() == 0)
 		{
 			return true;
 		}
 
+		bool result = true;
+
 		LOG_EMPTY_LINE(m_log);
 		LOG_MESSAGE(m_log, QString(tr("Checking application signals...")));
 
-		QHash<QString, qsizetype> appSignalIDs;
-		QHash<QString, qsizetype> customAppSignalIDs;
-
-		appSignalIDs.reserve(static_cast<qsizetype>(signalCount * 1.3));
-
-		m_busSignals.clear();
-
-		for(qsizetype i = 0; i < signalCount; i++)
+		for(AppSignal* sg : *this)
 		{
-			AppSignal& s = (*this)[i];
-
-			// check AppSignalID
-			//
-			if (appSignalIDs.contains(s.appSignalID()) == true)
-			{
-				// Application signal identifier '%1' is not unique.
-				//
-				m_log->errALC5016(s.appSignalID());
-				result = false;
-				continue;
-			}
-
-			appSignalIDs.insert(s.appSignalID(), i);
-
-			// check CustomAppSignalID
-			//
-			if (customAppSignalIDs.contains(s.customAppSignalID()) == true)
-			{
-				// Custom application signal identifier '%1' is not unique.
-				//
-				m_log->errALC5017(s.customAppSignalID());
-				result = false;
-				continue;
-			}
-
-			customAppSignalIDs.insert(s.customAppSignalID(), i);
+			AppSignal& s = *sg;
 
 			// check other signal properties
 			//
@@ -114,38 +79,63 @@ namespace Builder
 				break;
 
 			case E::SignalType::Analog:
-				if (s.dataSize() != 32)
 				{
-					// Analog signal '%1' must have DataSize equal to 32.
-					//
-					m_log->errALC5015(s.appSignalID());
-					result = false;
-				}
+					if (s.dataSize() != 32)
+					{
+						// Analog signal '%1' must have DataSize equal to 32.
+						//
+						m_log->errALC5015(s.appSignalID());
+						result = false;
+					}
 
-				if (s.coarseAperture() <= 0 || s.fineAperture() <= 0)
-				{
-					// Analog signal '%1' aperture should be greate then 0.
-					//
-					m_log->errALC5090(s.appSignalID());
-					result = false;
-				}
+					if (s.coarseAperture() < s.fineAperture())
+					{
+						// Coarse aperture of signal '%1' less then fine aperture.
+						//
+						m_log->wrnALC5093(s.appSignalID());
+					}
 
-				if (s.coarseAperture() < s.fineAperture())
-				{
-					// Coarse aperture of signal '%1' less then fine aperture.
-					//
-					m_log->wrnALC5093(s.appSignalID());
-				}
+					double coarseAperture = s.coarseAperture();
+					double fineAperture = s.fineAperture();
 
-				if (s.coarseAperture() >= 100 ||
-					s.fineAperture() >= 100)
-				{
-					// Aperture of signal %1 should be less then 100.
-					//
-					m_log->errALC5157(s.appSignalID());
-				}
+					switch(s.apertureType())
+					{
+					case E::ApertureType::AbsValue:
+						if (s.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) &&
+							s.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS))
+						{
+							double low = s.lowEngineeringUnits();
+							double high = s.highEngineeringUnits();
 
-				result &= checkSignalPropertiesRanges(s);
+							if (abs(coarseAperture) > abs(high - low) ||
+								abs(fineAperture) > abs(high - low))
+							{
+								// Analog signal %1 aperture should be less then abs(HowEngineeringUnits - lowEngineeringUnits).
+								//
+								m_log->errALC5157(s.appSignalID());
+								result = false;
+							}
+						}
+						break;
+
+					case E::ApertureType::RangePercent:
+					case E::ApertureType::ValuePercent:
+						if (coarseAperture < 0 || coarseAperture > 100 ||
+							fineAperture < 0 || fineAperture > 100)
+						{
+							// Analog signal %1 aperture should be in range 0 to 100%.
+							//
+							m_log->errALC5090(s.appSignalID());
+							result = false;
+						}
+						break;
+
+					default:
+						Q_ASSERT(false);
+					}
+
+					result &= checkSignalPropertiesRanges(s);
+				}
 
 				break;
 
@@ -162,8 +152,6 @@ namespace Builder
 					}
 					else
 					{
-						m_busSignals.insert(i, s.appSignalID());
-
 						s.setDataSize(bus->sizeW() * SIZE_16BIT);
 					}
 				}
@@ -173,6 +161,14 @@ namespace Builder
 				assert(false);
 				LOG_INTERNAL_ERROR(m_log);
 				return false;
+			}
+
+			if (isSafetyProject == true && s.invertSignal() == true)
+			{
+				// Signal %1 inversion can't be used in safety project.
+				//
+				m_log->errALC5202(s.appSignalID());
+				result = false;
 			}
 
 			if (s.isSpecPropExists(AppSignalPropNames::OUTPUT_MODE) == true &&
@@ -234,19 +230,94 @@ namespace Builder
 		return result;
 	}
 
+	bool SignalSet::checkSignalsIDsAndHashes()
+	{
+		if (count() == 0)
+		{
+			return true;
+		}
+
+		bool result = true;
+
+		LOG_EMPTY_LINE(m_log);
+		LOG_MESSAGE(m_log, QString(tr("Checking application signals IDs and hashes...")));
+
+		std::map<Hash, int> appSignalIDs;		// calcHash(signal.appSignalID) => signal.ID
+		std::set<Hash> customAppSignalIDs;		// set of calcHash(signal.customAppSignalID)
+
+		for(AppSignal* sg : *this)
+		{
+			AppSignal& s = *sg;
+
+			// check AppSignalID
+			//
+
+			Hash h = calcHash(s.appSignalID());
+
+			auto it = appSignalIDs.find(h);
+
+			if (it != appSignalIDs.end())
+			{
+				AppSignal* s2 = getSignal(it->second);
+
+				if (s2 == nullptr)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					result = false;
+					continue;
+				}
+
+				if (s.appSignalID() == s2->appSignalID())
+				{
+					// Application signal identifier '%1' is not unique.
+					//
+					m_log->errALC5016(s.appSignalID());
+					result = false;
+					continue;
+				}
+				else
+				{
+					// Signals %1 and %2 have equal hash (%3) of AppSignalIDs.
+					//
+					m_log->errALC5198(s2->appSignalID(), s.appSignalID(), h);
+
+					result = false;
+					continue;
+				}
+			}
+
+			appSignalIDs.emplace(h, s.ID());
+
+			// check CustomAppSignalID
+			//
+			h = calcHash(s.customAppSignalID());
+
+			if (customAppSignalIDs.contains(h) == true)
+			{
+				// Custom application signal identifier '%1' is not unique.
+				//
+				m_log->errALC5017(s.customAppSignalID());
+				result = false;
+				continue;
+			}
+
+			customAppSignalIDs.insert(h);
+		}
+
+		return result;
+	}
+
 	bool SignalSet::bindSignalsToLMs(Hardware::EquipmentSet* equipment)
 	{
 		TEST_PTR_RETURN_FALSE(equipment);
-
-		qsizetype signalCount = count();
 
 		bool result = true;
 
 		m_signalToLm.clear();
 
-		for(qsizetype i = 0; i < signalCount; i++)
+		for(AppSignal* sg : *this)
 		{
-			AppSignal& s = (*this)[i];
+			AppSignal& s = *sg;
 
 			// check EquipmentID
 			//
@@ -277,7 +348,7 @@ namespace Builder
 
 					if (module != nullptr && (module->isLogicModule() == true || module->isBvb() == true))
 					{
-						linkSignalToLm(&s, module);
+						linkSignalToLm(sg, module);
 					}
 					else
 					{
@@ -339,25 +410,17 @@ namespace Builder
 
 	void SignalSet::initCalculatedSignalsProperties()
 	{
-		qsizetype signalsCount = count();
-
-		for(qsizetype i = 0; i < signalsCount; i++)
+		for(AppSignal* s : *this)
 		{
-			AppSignal& s = (*this)[i];
-
-			s.initCalculatedProperties();
+			s->initCalculatedProperties();
 		}
 	}
 
 	void SignalSet::cacheSpecPropValues()
 	{
-		qsizetype signalsCount = count();
-
-		for(qsizetype i = 0; i < signalsCount; i++)
+		for(AppSignal* s : *this)
 		{
-			AppSignal& s = (*this)[i];
-
-			s.cacheSpecPropValues();
+			s->cacheSpecPropValues();
 		}
 	}
 
@@ -370,87 +433,85 @@ namespace Builder
 			return true;
 		}
 
-		QHash<QString, AppSignal*> expandedCustomAppSignalIDs;
-
-		expandedCustomAppSignalIDs.reserve(signalCount);
+		std::map<QString, AppSignal*> expandedCustomAppSignalIDs;
 
 		bool result = true;
 
-		for(qsizetype i = 0; i < signalCount; i++)
+		for(AppSignal* s : *this)
 		{
-			AppSignal& s = (*this)[i];
-
-			if (s.customAppSignalIDContainsMacro() == false &&
-					s.captionContainsMacro() == false)
+			if (s->customAppSignalIDContainsMacro() == false &&
+					s->captionContainsMacro() == false)
 			{
 				continue;
 			}
 
-			const Hardware::DeviceObject* deviceObject = equipment->deviceObject(s.equipmentID()).get();
+			const Hardware::DeviceObject* deviceObject = equipment->deviceObject(s->equipmentID()).get();
 
 			if (deviceObject == nullptr)
 			{
 				// Application signal %1 is bound to unknown device object %2.
 				//
-				m_log->errALC5013(s.appSignalID(), s.equipmentID());
+				m_log->errALC5013(s->appSignalID(), s->equipmentID());
 				result = false;
 				continue;
 			}
 
-			if (s.customAppSignalIDContainsMacro() == true)
+			if (s->customAppSignalIDContainsMacro() == true)
 			{
 				QString errMsg;
 
-				QString expandedCustomID = Hardware::expandDeviceSignalTemplate(*deviceObject, s.customAppSignalID(), &errMsg);
+				QString expandedCustomID = Hardware::expandDeviceSignalTemplate(*deviceObject, s->customAppSignalID(), &errMsg);
 
 				if (errMsg.isEmpty() == false)
 				{
 					// App signal %1 macro expanding error: %2
 					//
-					m_log->errALC5182(s.appSignalID(), errMsg);
+					m_log->errALC5182(s->appSignalID(), errMsg);
 					result = false;
 					continue;
 				}
 
-				AppSignal* existsSignal = expandedCustomAppSignalIDs.value(expandedCustomID, nullptr);
+				auto it = expandedCustomAppSignalIDs.find(expandedCustomID);
 
-				if (existsSignal != nullptr)
+				if (it != expandedCustomAppSignalIDs.end())
 				{
+					AppSignal* existsSignal = it->second;
+
 					// Non unique CustomAppSignalID after macro expansion in signals %1 and %2
 					//
-					m_log->errALC5183(existsSignal->appSignalID(), s.appSignalID());
+					m_log->errALC5183(existsSignal->appSignalID(), s->appSignalID());
 					result = false;
 					continue;
 				}
 
-				s.setCustomAppSignalID(expandedCustomID);
+				s->setCustomAppSignalID(expandedCustomID);
 
-				expandedCustomAppSignalIDs.insert(expandedCustomID, &s);
+				expandedCustomAppSignalIDs.emplace(expandedCustomID, s);
 			}
 
-			if (s.captionContainsMacro() == true)
+			if (s->captionContainsMacro() == true)
 			{
 				QString errMsg;
 
-				QString expandedCaption = Hardware::expandDeviceSignalTemplate(*deviceObject, s.caption(), &errMsg);
+				QString expandedCaption = Hardware::expandDeviceSignalTemplate(*deviceObject, s->caption(), &errMsg);
 
 				if (errMsg.isEmpty() == false)
 				{
 					// App signal %1 macro expanding error: %2
 					//
-					m_log->errALC5182(s.appSignalID(), errMsg);
+					m_log->errALC5182(s->appSignalID(), errMsg);
 					result = false;
 					continue;
 				}
 
-				s.setCaption(expandedCaption);
+				s->setCaption(expandedCaption);
 			}
 		}
 
 		if (result == true)
 		{
 			LOG_MESSAGE(m_log, QString("App signal macrosses are successfully expanded - %1").
-							arg(expandedCustomAppSignalIDs.count()));
+							arg(expandedCustomAppSignalIDs.size()));
 		}
 
 		return result;
@@ -528,35 +589,28 @@ namespace Builder
 		newSignal->setDecimalPlaces(2);				// !!!
 		newSignal->setCoarseAperture(1);
 		newSignal->setFineAperture(0.5);
-		newSignal->setAdaptiveAperture(false);
+		newSignal->setApertureType(E::ApertureType::RangePercent);
 
 		return newSignal;
 	}
 
 	void SignalSet::findAndRemoveExcludedFromBuildSignals()
 	{
-		QVector<int> excludedFromBuidSignalsIDs;
+		std::vector<int> excludedFromBuidSignalsIDs;
 
-		qsizetype signalCount = count();
-
-		for(qsizetype i = 0; i < signalCount; i++)
+		for(const AppSignal* s : *this)
 		{
-			const AppSignal& s = (*this)[i];
-
-			if (s.excludeFromBuild() == true)
+			if (s->excludeFromBuild() == true)
 			{
-				excludedFromBuidSignalsIDs.append(s.ID());
+				excludedFromBuidSignalsIDs.push_back(s->ID());
 
 				// Signal %1 is excluded from build.
 				//
-				m_log->wrnALC5167(s.appSignalID());											// Signal %1 is excluded from build.
+				m_log->wrnALC5167(s->appSignalID());											// Signal %1 is excluded from build.
 			}
 		}
 
-		for(int id : excludedFromBuidSignalsIDs)
-		{
-			remove(id);
-		}
+		removeSignals(excludedFromBuidSignalsIDs);
 	}
 
 	void SignalSet::linkSignalToLm(AppSignal* appSignal, DeviceModuleShared lm)
@@ -627,6 +681,14 @@ namespace Builder
 	bool SignalSet::isSignalExists(const QString& appSignalID) const
 	{
 		return (getSignal(appSignalID) != nullptr);
+	}
+
+	void SignalSet::resetAddresses()
+	{
+		for(AppSignal* s : *this)
+		{
+			s->resetAddresses();
+		}
 	}
 
 	bool SignalSet::checkSignalPropertiesRanges(const AppSignal& s)

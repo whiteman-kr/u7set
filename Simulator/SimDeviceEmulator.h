@@ -11,8 +11,8 @@
 #include <QObject>
 #include <QMutex>
 #include <QTimerEvent>
-#include "../lib/LmDescription.h"
-#include "../lib/LogicModulesInfo.h"
+#include "../HardwareLib/LmDescription.h"
+#include "../HardwareLib/LogicModulesInfo.h"
 #include "../HardwareLib/ModuleFirmware.h"
 #include "SimEeprom.h"
 #include "SimRam.h"
@@ -84,7 +84,7 @@ namespace Sim
 
 	struct LogicUnitData
 	{
-		int programCounter = 0;					// current offeset of program memory, in words
+		int programCounter = 0;					// current offset of program memory, in words
 		CyclePhase phase = CyclePhase::IdrPhase;
 		quint16 appStartAddress = 0xFFFF;
 
@@ -97,6 +97,8 @@ namespace Sim
 
 			quint32 value = 0;
 		} flags;
+
+		quint16 acc{};							// Device accumulator
 	};
 
 	enum class DeviceError
@@ -192,17 +194,20 @@ namespace Sim
 	public:
 		DeviceCommand* command(int index);
 
-		quint16 appStartAddress() const;
+		[[nodiscard]] quint16 appStartAddress() const;
 		void setAppStartAddress(quint16 value);
 
-		Sim::CyclePhase phase() const;
+		[[nodiscard]] Sim::CyclePhase phase() const;
 		void setPhase(Sim::CyclePhase value);
 
-		quint32 programCounter() const;
+		[[nodiscard]] quint32 programCounter() const;
 		void setProgramCounter(quint32 value);
 
-		quint32 flagCmp() const;
+		[[nodiscard]] quint32 flagCmp() const;
 		void setFlagCmp(quint32 value);
+
+		[[nodiscard]] quint16 acc() const;
+		void setAcc(quint16 value);
 
 		Sim::AfbComponent afbComponent(int opCode) const;
 		Sim::AfbComponentInstance* afbComponentInstance(int opCode, int instanceNo);
@@ -370,7 +375,6 @@ namespace Sim
 																	// powerOff can be called while simulation is running
 																	// reset can be called to restart module after powerOff
 
-
 		Ram m_ram;
 		LogicUnitData m_logicUnit;
 		std::vector<ConnectionPtr> m_connections;
@@ -378,7 +382,7 @@ namespace Sim
 		std::vector<DeviceCommand> m_commands;
 		std::vector<int> m_offsetToCommand;				// index: command offset, value: index in m_commands
 														// empty offsets is -1
-														// Programm memory is not so big, max
+														// Program memory is not so big, max
 		AfbComponentSet m_afbComponents;
 
 		Lans m_lans{this, m_simulator};					// Device LAN Interfaces, based on m_logicModuleExtraInfo

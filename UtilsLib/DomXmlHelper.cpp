@@ -1,8 +1,9 @@
 #ifndef UTILS_LIB_DOMAIN
-#error Don't include this file in the project! Link UtilsLib instead.
+#error Do not include this file in the project! Link UtilsLib instead.
 #endif
 
 #include "DomXmlHelper.h"
+#include "WUtils.h"
 
 QString DomXmlHelper::errElementNotFound(const QString& elemName)
 {
@@ -58,7 +59,75 @@ bool DomXmlHelper::getSingleChildElement(const QDomElement& parentElement, const
 	return true;
 }
 
-bool DomXmlHelper::getIntAttribute(const QDomElement& elem, const QString& attrName, int* value, QString* errMsg)
+//
+
+bool DomXmlHelper::getIntAttribute(const QDomElement& elem, const QString& attrName, int* value, QString* errMsg, int base)
+{
+	return privateGetIntAttribute(true, elem, attrName, 0, value, errMsg, base);
+}
+
+bool DomXmlHelper::getStringAttribute(const QDomElement& elem, const QString& attrName, QString* value, QString* errMsg)
+{
+	return privateGetStringAttribute(true, elem, attrName, QStringLiteral(""), value, errMsg);
+}
+
+bool DomXmlHelper::getBoolAttribute(const QDomElement& elem, const QString& attrName, bool* value, QString* errMsg)
+{
+	return privateGetBoolAttribute(true, elem, attrName, false, value, errMsg);
+}
+
+bool DomXmlHelper::getAddress16Attribute(const QDomElement& elem, const QString& attrName, Address16* value, QString* errMsg)
+{
+	return privateGetAddress16Attribute(true, elem, attrName, Address16(), value, errMsg);
+}
+
+bool DomXmlHelper::getUInt32Attribute(const QDomElement& elem, const QString& attrName, quint32* value, QString* errMsg)
+{
+	return privateGetUInt32Attribute(true, elem, attrName, 0, value, errMsg);
+}
+
+bool DomXmlHelper::getUInt64Attribute(const QDomElement& elem, const QString& attrName, quint64* value, QString* errMsg)
+{
+	return privateGetUInt64Attribute(true, elem, attrName, 0, value, errMsg);
+}
+
+//
+
+bool DomXmlHelper::getIntAttributeIfExists(const QDomElement& elem, const QString& attrName, int defaultValue, int* value, QString* errMsg, int base)
+{
+	return privateGetIntAttribute(false, elem, attrName, defaultValue, value, errMsg, base);
+}
+
+bool DomXmlHelper::getStringAttributeIfExists(const QDomElement& elem, const QString& attrName, const QString& defaultValue, QString* value, QString* errMsg)
+{
+	return privateGetStringAttribute(false, elem, attrName, defaultValue, value, errMsg);
+}
+
+bool DomXmlHelper::getBoolAttributeIfExists(const QDomElement& elem, const QString& attrName, bool defaultValue, bool* value, QString* errMsg)
+{
+	return privateGetBoolAttribute(false, elem, attrName, defaultValue, value, errMsg);
+}
+
+bool DomXmlHelper::getAddress16AttributeIfExists(const QDomElement& elem, const QString& attrName, const Address16& defaultValue, Address16* value, QString* errMsg)
+{
+	return privateGetAddress16Attribute(false, elem, attrName, defaultValue, value, errMsg);
+}
+
+bool DomXmlHelper::getUInt32AttributeIfExists(const QDomElement& elem, const QString& attrName, quint32 defaultValue, quint32* value, QString* errMsg)
+{
+	return privateGetUInt32Attribute(false, elem, attrName, defaultValue, value, errMsg);
+}
+
+bool DomXmlHelper::getUInt64AttributeIfExists(const QDomElement& elem, const QString& attrName, quint64 defaultValue, quint64* value, QString* errMsg)
+{
+	return privateGetUInt64Attribute(false, elem, attrName, defaultValue, value, errMsg);
+}
+
+//
+
+bool DomXmlHelper::privateGetIntAttribute(bool required, const QDomElement& elem,
+										  const QString& attrName, int defaultValue,
+										  int* value, QString* errMsg, int base)
 {
 	if (value == nullptr)
 	{
@@ -69,15 +138,21 @@ bool DomXmlHelper::getIntAttribute(const QDomElement& elem, const QString& attrN
 
 	if (elem.hasAttribute(attrName) == false)
 	{
-		*errMsg = errAttributeNotFound(elem, attrName);
-		return false;
+		if (required == true)
+		{
+			*errMsg = errAttributeNotFound(elem, attrName);
+			return false;
+		}
+
+		*value = defaultValue;
+		return true;
 	}
 
 	QString attrValue = elem.attribute(attrName);
 
 	bool ok = false;
 
-	*value = attrValue.toInt(&ok);
+	*value = attrValue.toInt(&ok, base);
 
 	if (ok == false)
 	{
@@ -88,7 +163,9 @@ bool DomXmlHelper::getIntAttribute(const QDomElement& elem, const QString& attrN
 	return true;
 }
 
-bool DomXmlHelper::getStringAttribute(const QDomElement& elem, const QString& attrName, QString* value, QString* errMsg)
+bool DomXmlHelper::privateGetStringAttribute(bool required, const QDomElement& elem,
+											 const QString& attrName, const QString& defaultValue,
+											 QString* value, QString* errMsg)
 {
 	if (value == nullptr)
 	{
@@ -99,8 +176,14 @@ bool DomXmlHelper::getStringAttribute(const QDomElement& elem, const QString& at
 
 	if (elem.hasAttribute(attrName) == false)
 	{
-		*errMsg = errAttributeNotFound(elem, attrName);
-		return false;
+		if (required == true)
+		{
+			*errMsg = errAttributeNotFound(elem, attrName);
+			return false;
+		}
+
+		*value = defaultValue;
+		return true;
 	}
 
 	*value = elem.attribute(attrName);
@@ -108,7 +191,9 @@ bool DomXmlHelper::getStringAttribute(const QDomElement& elem, const QString& at
 	return true;
 }
 
-bool DomXmlHelper::getBoolAttribute(const QDomElement& elem, const QString& attrName, bool* value, QString* errMsg)
+bool DomXmlHelper::privateGetBoolAttribute(bool required, const QDomElement& elem,
+										   const QString& attrName, bool defaultValue,
+										   bool* value, QString* errMsg)
 {
 	if (value == nullptr)
 	{
@@ -119,29 +204,34 @@ bool DomXmlHelper::getBoolAttribute(const QDomElement& elem, const QString& attr
 
 	if (elem.hasAttribute(attrName) == false)
 	{
-		*errMsg = errAttributeNotFound(elem, attrName);
-		return false;
+		if (required == true)
+		{
+			*errMsg = errAttributeNotFound(elem, attrName);
+			return false;
+		}
+
+		*value = defaultValue;
+		return true;
 	}
 
 	QString attrValue = elem.attribute(attrName);
 
-	if (attrValue == "true")
+	bool ok = false;
+
+	*value = stringToBool(attrValue, &ok);
+
+	if (ok == false)
 	{
-		*value = true;
-		return true;
+		*errMsg = errAttributeParsing(elem, attrName);
+		return false;
 	}
 
-	if (attrValue == "false")
-	{
-		*value = false;
-		return true;
-	}
-
-	*errMsg = errAttributeParsing(elem, attrName);
-	return false;
+	return true;
 }
 
-bool DomXmlHelper::getAddress16Attribute(const QDomElement& elem, const QString& attrName, Address16* value, QString* errMsg)
+bool DomXmlHelper::privateGetAddress16Attribute(bool required, const QDomElement& elem,
+												const QString& attrName, const Address16& defaultValue,
+												Address16* value, QString* errMsg)
 {
 	if (value == nullptr)
 	{
@@ -152,8 +242,14 @@ bool DomXmlHelper::getAddress16Attribute(const QDomElement& elem, const QString&
 
 	if (elem.hasAttribute(attrName) == false)
 	{
-		*errMsg = errAttributeNotFound(elem, attrName);
-		return false;
+		if (required == true)
+		{
+			*errMsg = errAttributeNotFound(elem, attrName);
+			return false;
+		}
+
+		*value = defaultValue;
+		return true;
 	}
 
 	QString attrValue = elem.attribute(attrName);
@@ -171,7 +267,9 @@ bool DomXmlHelper::getAddress16Attribute(const QDomElement& elem, const QString&
 	return true;
 }
 
-bool DomXmlHelper::getUInt32Attribute(const QDomElement& elem, const QString& attrName, quint32* value, QString* errMsg)
+bool DomXmlHelper::privateGetUInt32Attribute(bool required, const QDomElement& elem,
+											 const QString& attrName, quint32 defaultValue,
+											 quint32* value, QString* errMsg)
 {
 	if (value == nullptr)
 	{
@@ -182,8 +280,14 @@ bool DomXmlHelper::getUInt32Attribute(const QDomElement& elem, const QString& at
 
 	if (elem.hasAttribute(attrName) == false)
 	{
-		*errMsg = errAttributeNotFound(elem, attrName);
-		return false;
+		if (required == true)
+		{
+			*errMsg = errAttributeNotFound(elem, attrName);
+			return false;
+		}
+
+		*value = defaultValue;
+		return true;
 	}
 
 	QString attrValue = elem.attribute(attrName);
@@ -201,7 +305,9 @@ bool DomXmlHelper::getUInt32Attribute(const QDomElement& elem, const QString& at
 	return true;
 }
 
-bool DomXmlHelper::getUInt64Attribute(const QDomElement& elem, const QString& attrName, quint64* value, QString* errMsg)
+bool DomXmlHelper::privateGetUInt64Attribute(bool required, const QDomElement& elem,
+											 const QString& attrName, quint64 defaultValue,
+											 quint64* value, QString* errMsg)
 {
 	if (value == nullptr)
 	{
@@ -212,8 +318,14 @@ bool DomXmlHelper::getUInt64Attribute(const QDomElement& elem, const QString& at
 
 	if (elem.hasAttribute(attrName) == false)
 	{
-		*errMsg = errAttributeNotFound(elem, attrName);
-		return false;
+		if (required == true)
+		{
+			*errMsg = errAttributeNotFound(elem, attrName);
+			return false;
+		}
+
+		*value = defaultValue;
+		return true;
 	}
 
 	QString attrValue = elem.attribute(attrName);

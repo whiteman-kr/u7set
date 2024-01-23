@@ -1,0 +1,18 @@
+<Command 
+	Caption="movc"
+	Code="0180"
+	CodeMask="07f0"
+	SimulationFunc="command_movc"
+	ParseFunc="parse_movc"
+	Description="Write 16-bit word constant to memory"
+
+	CodeSize="3" 
+	ReadTime="11" 
+	WaitFbExecution="false"	
+
+	WriteToBitMemRuntime="67"
+	WriteToWordMemRuntime="6"
+
+	CheckFunc="check_movc"
+	GetMnemoFunc="mnemo_movc"
+	CalcExecTimeFunc="exectime_write_bit_or_word_mem"/>

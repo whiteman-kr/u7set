@@ -1,6 +1,5 @@
 #include "AppSignalLocatorProvider.h"
 #include "../AppSignalSetProvider.h"
-#include <ranges>
 
 namespace Locator
 {
@@ -23,8 +22,7 @@ namespace Locator
 
 		// Blocking search.
 		//
-		const AppSignalSet& signalSet = m_signalProvider->signalSet();
-		const auto& allSignals = signalSet.toVector();
+		const auto& allSignals = m_signalProvider->signalsVector();
 
 		// Filter signals.
 		//

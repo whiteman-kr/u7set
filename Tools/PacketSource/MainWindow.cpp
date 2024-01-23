@@ -468,10 +468,9 @@ void MainWindow::runConfigSocket()
 {
 	// init SoftwareInfo
 	//
-	SoftwareInfo si;
-
 	QString equipmentID = m_options.build().cfgSrvEquipmentID();
-	si.init(E::SoftwareType::TestClient, equipmentID, 1, 0);
+
+	SoftwareInfo si(E::SoftwareType::TestClient, equipmentID);
 
 	// create config socket thread
 	//
@@ -1485,7 +1484,7 @@ void MainWindow::onSignalColumnAction(QAction* action)
 
 void MainWindow::aboutApp()
 {
-	DialogAbout::show(this, tr(""), ":/Images/logo.png");
+	DialogAbout::show(this, tr(""), ":/Logo/RadiyLogo.png");
 	return;
 }
 

@@ -21,7 +21,6 @@ include(../warnings.pri)
 
 SOURCES +=\
     ../lib/Address16.cpp \
-    ../lib/LanControllerInfoHelper.cpp \
 	../lib/MemLeaksDetection.cpp \
     ../lib/ScriptDeviceObject.cpp \
 	TuningMainWindow.cpp \
@@ -29,7 +28,6 @@ SOURCES +=\
 	../lib/DeviceHelper.cpp \
 	../lib/XmlHelper.cpp \
 	../lib/DeviceObject.cpp \
-	../lib/OutputLog.cpp \
 	../lib/DbStruct.cpp \
 	../lib/Types.cpp \
 	../lib/Service.cpp \
@@ -69,8 +67,6 @@ SOURCES +=\
 
 HEADERS  += TuningMainWindow.h \
     ../lib/Address16.h \
-    ../lib/LanControllerInfo.h \
-    ../lib/LanControllerInfoHelper.h \
 	../lib/MemLeaksDetection.h \
     ../lib/ScriptDeviceObject.h \
 	../lib/SoftwareSettings.h \
@@ -78,7 +74,6 @@ HEADERS  += TuningMainWindow.h \
 	../lib/XmlHelper.h \
 	../lib/DeviceObject.h \
 	../lib/PropertyObject.h \
-	../lib/OutputLog.h \
 	../lib/DbStruct.h \
 	../lib/Types.h \
 	../lib/Service.h \

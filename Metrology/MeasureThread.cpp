@@ -1,9 +1,5 @@
 #include "MeasureThread.h"
-
-#include <cassert>
-#include <QTime>
-
-#include "UnitsConvertor.h"
+#include "UnitsConverter.h"
 #include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -512,7 +508,7 @@ void MeasureThread::measureLinearity()
 		return;
 	}
 
-	UnitsConvertor uc;
+	UnitsConverter uc;
 
 	saveStateTunSignals();
 
@@ -649,7 +645,7 @@ void MeasureThread::measureLinearity()
 
 void MeasureThread::measureCompratorsInSeries()
 {
-	UnitsConvertor uc;
+	UnitsConverter uc;
 
 	for(IoSignalParam& ioParam : m_activeIoParamList)
 	{
@@ -682,10 +678,13 @@ void MeasureThread::measureCompratorsInSeries()
 		}
 
 		comparatorCount = param.comparatorCount();
+
 		if (comparatorCount == 0)
 		{
 			continue;
 		}
+
+		bool reverseEngineeringLimits = param.isReverseEngineeringLimits();
 
 		// starting from startComparatorIndex
 		//
@@ -760,11 +759,6 @@ void MeasureThread::measureCompratorsInSeries()
 						double compareVal = comparatorEx->compareOnlineValue(cmpValueType);		// get compare value
 						double hysteresisVal = comparatorEx->hysteresisOnlineValue();			// get hysteresis value
 
-						// calc start value for comaprator by engineering range
-						//
-						double startValueForComapre = ((param.highEngineeringUnits() - param.lowEngineeringUnits()) *
-													   m_comparatorOption.startValueForCompare()) / 100.0;
-
 						// calc delta value
 						//
 						double deltaVal = 0;
@@ -791,7 +785,15 @@ void MeasureThread::measureCompratorsInSeries()
 							//
 							case MEASURE_THREAD_CMP_PREAPRE_2:
 
-								deltaVal = startValueForComapre;
+								// calc start value for comaprator by engineering range
+								//
+								deltaVal = ((param.highEngineeringUnits() - param.lowEngineeringUnits()) *
+											m_comparatorOption.startValueForCompare()) / 100.0;
+
+								if (reverseEngineeringLimits == true)
+								{
+									deltaVal = -deltaVal;
+								}
 
 								break;
 
@@ -1008,18 +1010,28 @@ void MeasureThread::measureCompratorsInSeries()
 					//
 					if (comparatorEx->outputState() == activeDiscreteOutputState)
 					{
+						bool stepUp = false;
+
 						switch (cmpValueType)
 						{
 							case Metrology::CmpValueType::SetPoint:
 
 								switch (comparatorEx->cmpType())
 								{
-									case E::CmpType::Greate:	ioParam.isNegativeRange() == false ? pCalibratorManager->stepUp()	:
-																									 pCalibratorManager->stepDown();
+									case E::CmpType::Greate:
+
+										stepUp = !(reverseEngineeringLimits ^ ioParam.isNegativeRange());
+
+										/*ioParam.isNegativeRange() == false ? pCalibratorManager->stepUp()	:
+																		pCalibratorManager->stepDown();*/
 										break;
 
-									case E::CmpType::Less:		ioParam.isNegativeRange() == false ? pCalibratorManager->stepDown() :
-																									 pCalibratorManager->stepUp();
+									case E::CmpType::Less:
+
+										stepUp = reverseEngineeringLimits ^ ioParam.isNegativeRange();
+
+										/*ioParam.isNegativeRange() == false ? pCalibratorManager->stepDown() :
+																		 pCalibratorManager->stepUp();*/
 										break;
 
 									default:
@@ -1032,12 +1044,20 @@ void MeasureThread::measureCompratorsInSeries()
 
 								switch (comparatorEx->cmpType())
 								{
-									case E::CmpType::Greate:	ioParam.isNegativeRange() == false ? pCalibratorManager->stepDown()	:
-																									 pCalibratorManager->stepUp();
+									case E::CmpType::Greate:
+
+										stepUp = reverseEngineeringLimits ^ ioParam.isNegativeRange();
+
+										/*ioParam.isNegativeRange() == false ? pCalibratorManager->stepDown()	:
+																		pCalibratorManager->stepUp();*/
 										break;
 
-									case E::CmpType::Less:		ioParam.isNegativeRange() == false ? pCalibratorManager->stepUp() :
-																									 pCalibratorManager->stepDown();
+									case E::CmpType::Less:
+
+										stepUp = !(reverseEngineeringLimits ^ ioParam.isNegativeRange());
+
+										/*ioParam.isNegativeRange() == false ? pCalibratorManager->stepUp() :
+																		 pCalibratorManager->stepDown();*/
 										break;
 
 									default:
@@ -1050,14 +1070,16 @@ void MeasureThread::measureCompratorsInSeries()
 								break;
 						}
 
+						pCalibratorManager->step(stepUp);
+
 						// red string in the StatusBar reduce error >= limit of error
 						//
 						const Metrology::SignalParam& inParam = ioParam.param(Metrology::ConnectionIoType::Source);
 						if (inParam.isValid() == true)
 						{
-							double comporatorEtalonVal = comparatorEx->compareOnlineValue(cmpValueType);		// get compare or hyst value
+							double comparatorEtalonVal = comparatorEx->compareOnlineValue(cmpValueType);		// get compare or hyst value
 
-							double engineeringEtalonCalcVal = conversionByConnection(comporatorEtalonVal, ioParam, ConversionDirection::Inversion);
+							double engineeringEtalonCalcVal = conversionByConnection(comparatorEtalonVal, ioParam, ConversionDirection::Inversion);
 
 							double electricEtalonVal = uc.conversion(engineeringEtalonCalcVal, UnitsConvertType::PhysicalToElectric, inParam);
 
@@ -1176,7 +1198,7 @@ void MeasureThread::measureCompratorsInParallel()
 		return;
 	}
 
-	UnitsConvertor uc;
+	UnitsConverter uc;
 
 	// starting from startComparatorIndex
 	//
@@ -1268,6 +1290,8 @@ void MeasureThread::measureCompratorsInParallel()
 							continue;
 						}
 
+						bool reverseEngineeringLimits = param.isReverseEngineeringLimits();
+
 						std::shared_ptr<Metrology::ComparatorEx> comparatorEx = param.comparator(cmp);
 						if (comparatorEx == nullptr || comparatorEx->signalsIsValid() == false)
 						{
@@ -1283,11 +1307,6 @@ void MeasureThread::measureCompratorsInParallel()
 						//
 						double compareVal = comparatorEx->compareOnlineValue(cmpValueType);		// get compare value
 						double hysteresisVal = comparatorEx->hysteresisOnlineValue();			// get hysteresis value
-
-						// calc start value for comaprator
-						//
-						double startValueForComapre = ((param.highEngineeringUnits() - param.lowEngineeringUnits()) *
-													   m_comparatorOption.startValueForCompare()) / 100.0;
 
 						//
 						//
@@ -1310,7 +1329,15 @@ void MeasureThread::measureCompratorsInParallel()
 
 							case MEASURE_THREAD_CMP_PREAPRE_2:		// 2 - set the starting value, which will be as close as possible to the state of logical 1, but not reach it in a few steps
 
-								deltaVal = startValueForComapre;
+								// calc start value for comaprator by engineering range
+								//
+								deltaVal = ((param.highEngineeringUnits() - param.lowEngineeringUnits()) *
+											m_comparatorOption.startValueForCompare()) / 100.0;
+
+								if (reverseEngineeringLimits == true)
+								{
+									deltaVal = -deltaVal;
+								}
 
 								break;
 
@@ -1348,7 +1375,6 @@ void MeasureThread::measureCompratorsInParallel()
 
 								break;
 						}
-
 
 						double engineeringCalcVal = conversionByConnection(	engineeringVal,
 																			m_activeIoParamList[ch],
@@ -1633,6 +1659,8 @@ void MeasureThread::measureCompratorsInParallel()
 						continue;
 					}
 
+					bool reverseEngineeringLimits = param.isReverseEngineeringLimits();
+
 					std::shared_ptr<Metrology::ComparatorEx> comparatorEx = param.comparator(cmp);
 					if (comparatorEx == nullptr || comparatorEx->signalsIsValid() == false)
 					{
@@ -1651,6 +1679,8 @@ void MeasureThread::measureCompratorsInParallel()
 					//
 					if (comparatorEx->outputState() == activeDiscreteOutputState)
 					{
+						bool stepUp = false;
+
 						switch (cmpValueType)
 						{
 							case Metrology::CmpValueType::SetPoint:
@@ -1658,13 +1688,19 @@ void MeasureThread::measureCompratorsInParallel()
 								switch (comparatorEx->cmpType())
 								{
 									case E::CmpType::Greate:
-										m_activeIoParamList[ch].isNegativeRange() == false ? pCalibratorManager->stepUp()	:
-																							 pCalibratorManager->stepDown();
+
+										stepUp = !(reverseEngineeringLimits ^ m_activeIoParamList[ch].isNegativeRange());
+
+										/*m_activeIoParamList[ch].isNegativeRange() == false ? pCalibratorManager->stepUp()	:
+																							 pCalibratorManager->stepDown();*/
 										break;
 
 									case E::CmpType::Less:
-										m_activeIoParamList[ch].isNegativeRange() == false ? pCalibratorManager->stepDown() :
-																							 pCalibratorManager->stepUp();
+
+										stepUp = reverseEngineeringLimits ^ m_activeIoParamList[ch].isNegativeRange();
+
+										/*m_activeIoParamList[ch].isNegativeRange() == false ? pCalibratorManager->stepDown() :
+																							 pCalibratorManager->stepUp();*/
 										break;
 
 									default:
@@ -1678,13 +1714,19 @@ void MeasureThread::measureCompratorsInParallel()
 								switch (comparatorEx->cmpType())
 								{
 									case E::CmpType::Greate:
-										m_activeIoParamList[ch].isNegativeRange() == false ? pCalibratorManager->stepDown()	:
-																							 pCalibratorManager->stepUp();
+
+										stepUp = reverseEngineeringLimits ^ m_activeIoParamList[ch].isNegativeRange();
+
+										/*m_activeIoParamList[ch].isNegativeRange() == false ? pCalibratorManager->stepDown()	:
+																							 pCalibratorManager->stepUp();*/
 										break;
 
 									case E::CmpType::Less:
-										m_activeIoParamList[ch].isNegativeRange() == false ? pCalibratorManager->stepUp() :
-																							 pCalibratorManager->stepDown();
+
+										stepUp = !(reverseEngineeringLimits ^ m_activeIoParamList[ch].isNegativeRange());
+
+										/*m_activeIoParamList[ch].isNegativeRange() == false ? pCalibratorManager->stepUp() :
+																							 pCalibratorManager->stepDown();*/
 										break;
 
 									default:
@@ -1694,14 +1736,16 @@ void MeasureThread::measureCompratorsInParallel()
 								break;
 						}
 
+						pCalibratorManager->step(stepUp);
+
 						// red string in the StatusBar reduce error >= limit of error
 						//
 						const Metrology::SignalParam& inParam = m_activeIoParamList[ch].param(Metrology::ConnectionIoType::Source);
 						if (inParam.isValid() == true)
 						{
-							double comporatorEtalonVal = comparatorEx->compareOnlineValue(cmpValueType);	// get compare or hyst value
+							double comparatorEtalonVal = comparatorEx->compareOnlineValue(cmpValueType);	// get compare or hyst value
 
-							double engineeringEtalonCalcVal = conversionByConnection(	comporatorEtalonVal,
+							double engineeringEtalonCalcVal = conversionByConnection(	comparatorEtalonVal,
 																						m_activeIoParamList[ch],
 																						ConversionDirection::Inversion);
 

@@ -1,7 +1,6 @@
 #include "PendingChangesDialog.h"
-#include <QGridLayout>
-#include <QSplitter>
 #include "GlobalMessanger.h"
+#include "AppSignalSetProvider.h"
 
 //
 // PendingChangesModel
@@ -425,7 +424,7 @@ void PendingChangesDialog::checkIn()
 	std::vector<DbFileInfo> checkInFiles;
 	checkInFiles.reserve(objects.size());
 
-	QVector<int> checkInSignals;
+	std::vector<int> checkInSignals;
 	checkInSignals.reserve(static_cast<int>(objects.size()));
 
 	for (const PendingChangesObject& o : objects)
@@ -462,8 +461,7 @@ void PendingChangesDialog::checkIn()
 	//
 	if (checkInSignals.empty() == false)
 	{
-		QVector<ObjectState> signalObjectState;
-		db()->checkinSignals(&checkInSignals, comment, &signalObjectState, this);
+		AppSignalSetProvider::getInstance()->checkinSignals(checkInSignals, comment);
 	}
 
 	// --
@@ -488,7 +486,7 @@ void PendingChangesDialog::undoChanges()
 	std::vector<DbFileInfo> undoFilesFiles;
 	undoFilesFiles.reserve(objects.size());
 
-	QVector<int> undoSignals;
+	std::vector<int> undoSignals;
 	undoSignals.reserve(static_cast<int>(objects.size()));
 
 	for (const PendingChangesObject& o : objects)
@@ -525,8 +523,7 @@ void PendingChangesDialog::undoChanges()
 	//
 	if (undoSignals.empty() == false)
 	{
-		QVector<ObjectState> signalObjectState;
-		db()->undoSignalsChanges(undoSignals, &signalObjectState, this);
+		AppSignalSetProvider::getInstance()->undoSignalsChanges(undoSignals, this);
 	}
 
 	// --
@@ -535,7 +532,6 @@ void PendingChangesDialog::undoChanges()
 
 	return;
 }
-
 
 void PendingChangesDialog::updateData()
 {
@@ -569,13 +565,13 @@ void PendingChangesDialog::updateData()
 
 	// Get checked out signals
 	//
-	QVector<int> checkedOutSignalsIds;
+	std::vector<int> checkedOutSignalsIds;
+
 	db()->getCheckedOutSignalsIDs(&checkedOutSignalsIds, this);
 
 	if (checkedOutSignalsIds.empty() == false)
 	{
-		QVector<AppSignal> checkedOutSignals;
-		checkedOutSignals.reserve(checkedOutSignalsIds.size());
+		std::vector<AppSignal> checkedOutSignals;
 
 		if (bool ok = db()->getLatestSignals(checkedOutSignalsIds, &checkedOutSignals, this);
 			ok == true)

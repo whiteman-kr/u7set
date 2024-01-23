@@ -35,7 +35,14 @@ namespace Gateway
 
 		void sendPacket(const char* packet, qint64 packetSize, bool eventsPacket);
 
-		void logEventPacket(const char* packet);
+		void logEventsPacket(const char* packet);
+		void logPeriodicPacket(const char* packet);
+
+		void checkLogTime();
+
+		qint64 convertTimeToUTC(quint64 time, ::E::TimeType timeType) const;
+
+		QString formatTime(quint32 seconds);
 
 		int writeStatesToPacket(IvsImpulseStatesPacket* packet,
 								E::SignalListDataType dataType,
@@ -118,6 +125,11 @@ namespace Gateway
 		std::vector<qint64> m_eventsTimes;
 
 		char m_sendBuffer[IVS_IMPULSE_PACKET_MAX_SIZE + 100];
+
+		bool m_logGatewayPackets = false;
+		CircularLoggerShared m_packetsLog;
+		qint64 m_logStartTime = 0;
+		int m_checkLogTimeCtr = 0;
 
 		//
 

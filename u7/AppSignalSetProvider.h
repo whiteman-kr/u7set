@@ -1,131 +1,9 @@
 #pragma once
-#include "../Builder/SignalSet.h"
-#include "AppSignalProperties.h"
+
+#include "../DbLib/DbController.h"
 #include "../AppSignalLib/AppSignalParam.h"
-#include "../DbLib/DbStruct.h"
 
-#define SIGNAL_TYPE_COUNT (QMetaEnum::fromType<E::SignalType>().keyCount())
-#define IN_OUT_TYPE_COUNT (QMetaEnum::fromType<E::SignalInOutType>().keyCount())
-#define TOTAL_SIGNAL_TYPE_COUNT (SIGNAL_TYPE_COUNT * IN_OUT_TYPE_COUNT)
-
-class DbController;
-
-class AppSignalPropertyManager : public QObject
-{
-	Q_OBJECT
-public:
-	struct PropertyBehaviourDescription
-	{
-		QString name;
-		bool dependsOnPrecision = false;
-		std::vector<E::PropertyBehaviourType> behaviourType = std::vector<E::PropertyBehaviourType>(
-					static_cast<size_t>(TOTAL_SIGNAL_TYPE_COUNT),
-					E::PropertyBehaviourType::Write);
-	};
-
-	static const E::PropertyBehaviourType defaultBehaviour = E::PropertyBehaviourType::Write;
-
-signals:
-	void propertyCountWillIncrease(int newPropertyCount);
-	void propertyCountWillDecrease(int newPropertyCount);
-	void propertyCountIncreased();
-	void propertyCountDecreased();
-
-public:
-	AppSignalPropertyManager(DbController* dbController, QWidget* parentWidget);
-
-	static AppSignalPropertyManager* getInstance();
-
-	// Data for models
-	//
-
-	int count() const;
-
-	int index(const QString& name);
-	QString caption(int propertyIndex) const;
-	QString name(int propertyIndex);
-
-	QVariant value(const AppSignal* signal, int propertyIndex, bool isExpert) const;
-	const std::vector<std::pair<int, QString>> values(int propertyIndex) const;
-
-	void setValue(AppSignal* signal, int propertyIndex, const QVariant& value, bool isExpert);
-
-	QMetaType::Type type(const int propertyIndex) const;
-	E::PropertyBehaviourType getBehaviour(const AppSignal& signal, const int propertyIndex) const;
-	E::PropertyBehaviourType getBehaviour(E::SignalType type, E::SignalInOutType directionType, const int propertyIndex) const;
-	bool dependsOnPrecision(const int propertyIndex) const;
-	bool isHiddenFor(E::SignalType type, const int propertyIndex, bool isExpert) const;
-	bool isHidden(E::PropertyBehaviourType behaviour, bool isExpert) const;
-	bool isReadOnly(E::PropertyBehaviourType behaviour, bool isExpert) const;
-
-	void loadNotSpecificProperties();
-	void reloadPropertyBehaviour();
-	void clear();
-	void init();
-
-public slots:
-	void detectNewProperties(const AppSignal& signal);
-
-private:
-	bool isNotCorrect(int propertyIndex) const;
-	QString typeName(E::SignalType type, E::SignalInOutType inOutType);
-	QString typeName(int typeIndex, int inOutTypeIndex);
-
-	static TuningValue variant2TuningValue(const QVariant& variant, TuningValueType type);
-
-	void addNewProperty(const AppSignalPropertyDescription& newProperty);
-
-	static void trimm(QStringList& stringList);
-
-	std::vector<PropertyBehaviourDescription> m_propertyBehaviorDescription;
-	QHash<QString, int> m_propertyName2IndexMap;
-	QHash<int, int> m_propertyIndex2BehaviourIndexMap;
-
-	DbController* m_dbController;
-	QWidget* m_parentWidget;
-	static AppSignalPropertyManager* m_instance;
-
-	// is initialized by non specific properties
-	//
-	std::vector<AppSignalPropertyDescription> m_basicPropertyDescription = {
-		{ AppSignalPropNames::APP_SIGNAL_ID,
-		  AppSignalPropNames::APP_SIGNAL_ID,
-		  QMetaType::QString, {},
-		  [](const AppSignal* s){ return s->appSignalID(); },
-		  [](AppSignal* s, QVariant v){ s->setAppSignalID(v.toString()); }, },
-
-		{ AppSignalPropNames::CUSTOM_APP_SIGNAL_ID,
-		  AppSignalPropNames::CUSTOM_APP_SIGNAL_ID,
-		  QMetaType::QString, {},
-		  [](const AppSignal* s){ return s->customAppSignalID(); },
-		  [](AppSignal* s, QVariant v){ s->setCustomAppSignalID(v.toString()); }, },
-
-		{ AppSignalPropNames::EQUIPMENT_ID,
-		  AppSignalPropNames::EQUIPMENT_ID,
-		  QMetaType::QString, {},
-		  [](const AppSignal* s){ return s->equipmentID(); },
-		  [](AppSignal* s, QVariant v){ s->setEquipmentID(v.toString()); }, },
-
-		{ AppSignalPropNames::BUS_TYPE_ID,
-		  AppSignalPropNames::BUS_TYPE_ID,
-		  QMetaType::QString, {},
-		  [](const AppSignal* s){ return s->busTypeID(); },
-		  [](AppSignal* s, QVariant v){ s->setBusTypeID(v.toString()); }, },
-
-		{ AppSignalPropNames::TYPE,
-		  "A/D/B",
-		  QMetaType::QString, {},
-		  [](const AppSignal* s){ return E::valueToString<E::SignalType>(s->signalType()).left(1); },
-		  nullptr },
-
-		{ AppSignalPropNames::IN_OUT_TYPE,
-		  "Input-output type",
-		  QMetaType::Int, E::enumValues<E::SignalInOutType>(),
-		  [](const AppSignal* s){ return TO_INT(s->inOutType()); },
-		  [](AppSignal* s, QVariant v){ s->setInOutType(IntToEnum<E::SignalInOutType>(v.toInt())); }, },
-	};
-	std::vector<AppSignalPropertyDescription> m_propertyDescription;
-};
+#include "AppSignalPropertyManager.h"
 
 class AppSignalSetProvider : public QObject
 {
@@ -136,80 +14,157 @@ public:
 	virtual ~AppSignalSetProvider();
 
 	static AppSignalSetProvider* getInstance();
-	AppSignalPropertyManager& signalPropertyManager() { return m_propertyManager; }
+
+	DbController* dbController();
+
+	const AppSignalSet& signalSet() const;
+	int signalCount() const;
+
+	AppSignalPropertyManager& signalPropertyManager();
+
+	void onProjectOpened();
+	void onProjectClosed();
+
+	bool projectProperty_uppercaseAppSignalID() const;
+
+	int currentUserID() const;
+	bool currentUserIsAdmin() const;
+	QString getUserName(int userId);
+
+	void reloadAllSignals();
+	void reloadSignals(const std::vector<int>& signalIds, bool updateViews);
+	void enforceAllSignalsLoading();
+	const AppSignal* loadSignal(int signalId, bool updateViews);
 
 	void setMiddleVisibleSignalIndex(int signalIndex);
 
-	void clearSignals();
+	AppSignal* getSignal(const QString& appSignalID);
+	const AppSignal* getSignal(const QString& appSignalID) const;
 
-	const AppSignalSet& signalSet() const	{ return m_signalSet; }
-	static void trimSignalTextFields(AppSignal& signal);
+	AppSignal* getSignalByID(int signalID);
 
-	int signalCount() { return static_cast<int>(m_signalSet.count()); }
-	AppSignal getSignalByID(int signalID) { return m_signalSet.value(signalID); }			// for debug purposes
-	AppSignal* getSignalByStrID(const QString signalStrID);
-	QVector<int> getChannelSignalsID(int signalGroupID) { return m_signalSet.getChannelSignalsID(signalGroupID); }
-	int key(int index) const { return m_signalSet.key(index); }
-	int keyIndex(int key) { return static_cast<int>(m_signalSet.keyIndex(key)); }
-	QVector<int> getSameChannelSignals(int index);
+	AppSignal* getSignalByIndex(int index);
+	const AppSignal* getSignalByIndex(int index) const;
 
-	const AppSignal& getLoadedSignal(int index);
+	bool signalExists(const QString& appSignalID) const;
 
-	AppSignalParam getAppSignalParam(int index);
-	AppSignalParam getAppSignalParam(QString appSignalId);
+	const std::vector<AppSignal*>& signalsVector() const;
 
-	bool isEditableSignal(int index) const { return isEditableSignal(m_signalSet[index]); }
-	bool isEditableSignal(const AppSignal& signal) const;
-	bool isCheckinableSignalForMe(int index) const{ return isCheckinableSignalForMe(m_signalSet[index]); }
-	bool isCheckinableSignalForMe(const AppSignal& signal) const;
+	int signalIndex(int signalID) const;
+	int signalID(int index) const;
 
-	QString getUserStr(int userId) const;
+	void getSameChannelSignalsIndexes(int signalIndex, std::vector<int>* sameChannelIndexes);
 
-	DbController* dbController() { return m_dbController; }
-	const DbController* dbController() const { return m_dbController; }
+	AppSignal* getLoadedSignal(AppSignal* s, bool updateViews);
+	AppSignal* getLoadedSignalByID(int signalID, bool updateViews);
+	AppSignal* getLoadedSignalByIndex(int index, bool updateViews);
 
-	bool checkoutSignal(int index);
-	bool checkoutSignal(int index, QString& message);
+	bool isEditableSignal(int index) const;
+	bool isEditableSignal(const AppSignal* signal) const;
+
+	bool isCheckinableSignalForMe(int index) const;
+	bool isCheckinableSignalForMe(const AppSignal* signal) const;
+	bool isCheckinableSignalForMe(const ObjectState& objState) const;
+
+	// Signal set modifications DbController calls
+	//
+	bool createNewSignals(const AppSignal& signalTemplate,
+						  int channelsCount, int signalsCount,
+						  std::vector<int>* addedSignalIDs);
+
+	bool addSignals(E::SignalType signalType, std::vector<AppSignal>* newSignals, QWidget* parentWidget = nullptr);
+
+	bool autoAddSignals(const std::vector<const Hardware::DeviceAppSignal*>& deviceSignals,
+						std::vector<AppSignal>* addedSignals, QWidget* parentWidget = nullptr);
+
+	std::vector<int> cloneSignals(const std::vector<int>& signalIDsToClone);
+
+	bool saveSignal(AppSignal* signal, QWidget* parentWidget);
+	bool saveSignals(const std::vector<AppSignal*>& signalsVector, QWidget* parentWidget);
+
+	bool checkoutSignalByIndex(int index, QString* message);
+	bool checkoutSignal(const AppSignal* s, QString* message, std::vector<int>* checkedOutIDs = nullptr);
+	bool checkoutSignals(const std::vector<AppSignal*>& appSignals, QString* message, std::vector<int>* checkedOutIDs = nullptr);
+	bool checkoutSignals(const std::vector<int>& appSignalIDs, QString* message, std::vector<int>* checkedOutIDs = nullptr);
+
+	bool checkinSignals(const std::vector<int>& signalIDs,
+						QString comment);
+
+	bool undoSignalsChanges(const std::vector<int>& signalIDs, QWidget* parentWidget = nullptr);
 	bool undoSignal(int id);
+	bool undoSignal(const AppSignal& s);
 
-	void deleteSignalGroups(const QSet<int>& signalGroupIDs);
-	void deleteSignals(const QSet<int>& signalIDs);
-	void deleteSignal(int signalID);
+	bool updateSignalsSpecProps(const std::vector<const Hardware::DeviceAppSignal*>& deviceSignalsToUpdate,
+								QString* errMsg);
 
-	void addSignal(AppSignal& signal);
-	void saveSignal(AppSignal& signal);
-	void saveSignals(QVector<AppSignal*> signalVector);
-	QVector<int> cloneSignals(const QSet<int>& signalIDs);
+	void deleteSignals(const std::vector<int>& signalIDs);
 
-	void showError(const ObjectState& state);
-	void showErrors(const QVector<ObjectState>& states);
+	bool getProjectProperties(DbProjectProperties* projectProps) const;
+	bool isSafetyProject() const;
 
 signals:
 	void error(const QString& message);						// for throwing message boxes
-	void signalCountChanged();								// for reloading entire signal model content
-	void signalUpdated(int signalIndex);					// for updating row in signal view (throwing models DataChanged signal)
-	void signalPropertiesChanged(const AppSignal& signal);	// for updating property list if new properties exist in signal
 
-public slots:
-	void initLazyLoadSignals();
-	void finishLoadingSignals();
-	void stopLoadingSignals();
-	void loadNextSignalsPortion();
-	void loadUsers();
-	void loadSignals();
-	void loadSignalSet(QVector<int> keys);
-	void loadSignal(int signalId);
+	// for reloading entire signal model content or any signal count changes
+	//
+	void signalsCountChanged();
+
+	// for updating row in signal view (throwing models DataChanged signal)
+	// also update known properties in AppSignalPropertyManager
+	//
+	void signalsUpdated(const std::vector<int>& indexes);
+
+	// only update known properties in AppSignalPropertyManager
+	//
+	void detectNewProperties(const std::vector<int>& indexes);
 
 private:
+	void loadUsers();
+	void reloadPropertiesBehaviour();
+
+	void startSignalsLoading();
+	void terminateSignalsLoading();
+
+	void loadIdAppSignalId();
+
+	void appendSignalsAndUpdateViews(const std::vector<AppSignal>& newSignals);
+
+	void onSignalsLoadTimer();
+
+	void emitSignalsUpdated(const std::vector<int>& indexes);
+
+	//
+
 	QString errorMessage(const ObjectState& state);	// Converts ObjectState to human readable text
 
-	static AppSignalSetProvider* m_instance;
+	// if no errors returns TRUE
+	// returns FALSE if errors presents
+	//
+	bool showError(const ObjectState& state);
+	bool showErrors(const std::vector<ObjectState>& states);
 
-	DbController* m_dbController = nullptr;
-	AppSignalPropertyManager m_propertyManager;
-	QTimer* m_lazyLoadSignalsTimer = nullptr;
-	int m_middleVisibleSignalIndex = 0;
+private:
+	static AppSignalSetProvider* m_instance;
+	static QThread* m_thread;
+
+	static const int BAD_INDEX = -1;
+
+	DbController* m_db = nullptr;
+	QWidget* m_parentWidget = nullptr;
+
+	int m_currentUserID = -1;
+	bool m_currentUserIsAdmin = false;
+
+	std::map<int, QString> m_users;				// userID => userName
+
 	AppSignalSet m_signalSet;
-	QMap<int, QString> m_usernameMap;
-	bool m_partialLoading = false;
+
+	AppSignalPropertyManager m_propertyManager;
+
+	//
+
+	QTimer m_signalsLoadTimer;
+	int m_middleVisibleSignalIndex = 0;
+	bool m_signalsLoading = false;				// true - signals loading in progress
 };
+

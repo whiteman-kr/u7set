@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "LoginDialog.h"
 #include "ui_LoginDialog.h"
 #include "Settings.h"

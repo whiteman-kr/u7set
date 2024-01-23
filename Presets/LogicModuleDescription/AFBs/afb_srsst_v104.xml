@@ -1,0 +1,7 @@
+<AFBComponent Caption="SRSST" OpCode="7" HasRam="false" ImpVersion="104" VersionOpIndex="5" MaxInstCount="0" SimulationFunc="afb_srsst_v104">
+    <Pin OpName="i_data"	OpIndex ="0"	PinType = "Input"/>
+    <Pin OpName="i_set"		OpIndex ="1"	PinType = "Input"/>
+    <Pin OpName="i_reset"	OpIndex ="2"	PinType = "Input"/>
+    <Pin OpName="o_result"	OpIndex ="4"	PinType = "Output"/>
+    <Pin OpName="o_version"	OpIndex ="5"	PinType = "Output"/>
+</AFBComponent>

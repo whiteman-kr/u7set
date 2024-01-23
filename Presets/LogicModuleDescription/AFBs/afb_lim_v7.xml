@@ -1,0 +1,13 @@
+<AFBComponent Caption="LIM" OpCode="23" HasRam="false" ImpVersion="7" VersionOpIndex="14" MaxInstCount="0" SimulationFunc="afb_lim_v7">
+    <Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
+    <Pin OpName="i_lim_max"		OpIndex ="1"	PinType = "Param"/>
+    <Pin OpName="i_lim_min"		OpIndex ="3"	PinType = "Param"/>
+    <Pin OpName="i_data"		OpIndex ="5"	PinType = "Input"/>
+    <Pin OpName="o_result"		OpIndex ="8"	PinType = "Output"/>
+    <Pin OpName="o_lim_edi"		OpIndex ="10"	PinType = "Output"/>
+    <Pin OpName="o_nan"		    OpIndex ="11"	PinType = "Output"/>
+    <Pin OpName="o_max"		    OpIndex ="12"	PinType = "Output"/>
+    <Pin OpName="o_min"		    OpIndex ="13"	PinType = "Output"/>
+    <Pin OpName="o_version"		OpIndex ="14"	PinType = "Output"/>
+    <Pin OpName="o_param_err"	OpIndex ="15"	PinType = "Output"/>
+</AFBComponent>

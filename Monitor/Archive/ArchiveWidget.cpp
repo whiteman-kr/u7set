@@ -128,7 +128,7 @@ ArchiveWidget::ArchiveWidget(MonitorSignalManager* signalManager,
 	Q_ASSERT(m_signalManager);
 
 	static int no = 1;
-	QString name = QString("Monitor Archive %1").arg(no++);
+	QString name = tr("Monitor Archive %1").arg(no++);
 	MonitorArchive::registerWindow(name, this);
 
 	setAttribute(Qt::WA_DeleteOnClose);
@@ -176,11 +176,13 @@ ArchiveWidget::ArchiveWidget(MonitorSignalManager* signalManager,
 	m_startDateTimeEdit->setTimeSpec(Qt::UTC);
 	m_startDateTimeEdit->setCalendarPopup(true);
 	m_startDateTimeEdit->setDisplayFormat("dd/MM/yyyy  HH:mm:ss");
+	m_startDateTimeEdit->setMinimumWidth(QFontMetrics(m_startDateTimeEdit->font()).horizontalAdvance("dd/MM/yyyy  HH:mm:ss") + 20);
 
 	m_endDateTimeEdit = new QDateTimeEdit(m_source.requestEndTime.toDateTime(), this);
 	m_endDateTimeEdit->setTimeSpec(Qt::UTC);
 	m_endDateTimeEdit->setCalendarPopup(true);
 	m_endDateTimeEdit->setDisplayFormat("dd/MM/yyyy  HH:mm:ss");
+	m_endDateTimeEdit->setMinimumWidth(QFontMetrics(m_endDateTimeEdit->font()).horizontalAdvance("dd/MM/yyyy  HH:mm:ss") + 20);
 
 	m_toolBar->addWidget(new QLabel(tr(" Start Time: ")));
 	m_toolBar->addWidget(m_startDateTimeEdit);
@@ -584,15 +586,16 @@ void ArchiveWidget::exportButton()
 		return;
 	}
 
+	static QString path{"."};
 	QString fileName = QFileDialog::getSaveFileName(this,
 													tr("Save File"),
-													"untitled.pdf",
+													path + QDir::separator() + "untitled.pdf",
 													tr("Portable Documnet Format (*.pdf);;CSV Files, semicolon separated (*.csv);;Plaintext (*.txt);;HTML (*.html)"));
-
 	if (fileName.isEmpty() == true)
 	{
 		return;
 	}
+	path = QFileInfo(fileName).path(); // store path for next time
 
 	QFileInfo fileInfo(fileName);
 	QString extension = fileInfo.completeSuffix();
@@ -624,7 +627,7 @@ void ArchiveWidget::printButton()
 
 void ArchiveWidget::updateOrCancelButton()
 {
-	if (m_updateButton->text() == "Update")
+	if (m_updateButton->text() == tr("Update"))
 	{
 		if (m_source.acceptedSignals.empty() == true)
 		{
@@ -683,7 +686,10 @@ void ArchiveWidget::showSignalInfo(QString appSignalId)
 {
 	MonitorSignalInfo::showDialog(appSignalId,
 								  m_signalManager,
-								  &(theApp.mainWindow()->configController()),
+								  theApp.mainWindow()->tuningSignalManager(),
+								  theApp.mainWindow()->tuningConnection(),
+								  theApp.mainWindow()->tuningAuthorization(),
+								  &theApp.mainWindow()->configController(),
 								  theApp.mainWindow()->monitorCentralWidget());
 }
 
@@ -737,9 +743,9 @@ void ArchiveWidget::requestStatus(QString serverStatus, int requests, int replie
 	Q_ASSERT(m_statusBar);
 
 	m_statusBarTextLabel->setText(serverStatus);
-	m_statusBarStatesReceivedLabel->setText(QString("States received: %1").arg(states));
+	m_statusBarStatesReceivedLabel->setText(tr("States received: %1").arg(states));
 
-	m_statusBarNetworkRequestsLabel->setText(QString(" Network requests/replies: %1 / %2 ").arg(requests).arg(replies));
+	m_statusBarNetworkRequestsLabel->setText(tr(" Network requests/replies: %1 / %2 ").arg(requests).arg(replies));
 
 	updateUiState();
 	return;

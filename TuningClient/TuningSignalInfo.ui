@@ -21,14 +21,14 @@
        <item row="1" column="2">
         <widget class="QLabel" name="label_5">
          <property name="text">
-          <string>LmEquipmentId</string>
+          <string>LmEquipmentID</string>
          </property>
         </widget>
        </item>
        <item row="1" column="0">
         <widget class="QLabel" name="label">
          <property name="text">
-          <string>CustomAppSignalId</string>
+          <string>CustomAppSignalID</string>
          </property>
         </widget>
        </item>
@@ -56,7 +56,7 @@
        <item row="2" column="2">
         <widget class="QLabel" name="label_3">
          <property name="text">
-          <string>EquipmentId</string>
+          <string>EquipmentID</string>
          </property>
         </widget>
        </item>
@@ -80,7 +80,7 @@
        <item row="0" column="0">
         <widget class="QLabel" name="label_4">
          <property name="text">
-          <string>AppSignalId</string>
+          <string>AppSignalID</string>
          </property>
         </widget>
        </item>
@@ -111,32 +111,46 @@
       </layout>
      </item>
      <item>
-      <widget class="QLabel" name="m_labelValue">
+      <widget class="QLineEdit" name="editValue">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
        <property name="minimumSize">
         <size>
          <width>0</width>
          <height>50</height>
         </size>
        </property>
-       <property name="styleSheet">
-        <string notr="true">font: 14pt &quot;MS Shell Dlg 2&quot;;</string>
+       <property name="font">
+        <font>
+         <pointsize>22</pointsize>
+        </font>
        </property>
-       <property name="frameShape">
-        <enum>QFrame::Box</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Sunken</enum>
-       </property>
-       <property name="text">
-        <string>TextLabel</string>
+       <property name="autoFillBackground">
+        <bool>false</bool>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
        </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
      <item>
-      <widget class="QTextEdit" name="m_textEdit"/>
+      <widget class="QTreeWidget" name="treeProperties">
+       <property name="rootIsDecorated">
+        <bool>false</bool>
+       </property>
+       <attribute name="headerHighlightSections">
+        <bool>false</bool>
+       </attribute>
+       <column>
+        <property name="text">
+         <string notr="true">1</string>
+        </property>
+       </column>
+      </widget>
      </item>
     </layout>
    </item>

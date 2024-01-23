@@ -1,6 +1,5 @@
 #pragma once
 #include "../../HardwareLib/DeviceObject.h"
-#include "../../DbLib/DbController.h"
 
 class EquipmentModel;
 
@@ -104,7 +103,7 @@ public slots:
 								std::vector<std::shared_ptr<Hardware::DeviceObject>>* updateDeviceList,
 								std::vector<Hardware::DeviceObject*>* deleteDeviceList,
 								std::vector<std::pair<int, int>>* addDeviceList,
-								QVector<Hardware::DeviceAppSignal*>* deviceSignalsToUpdateAppSignals);
+								std::vector<const Hardware::DeviceAppSignal*>* deviceSignalsToUpdateAppSignals);
 
 	// Events
 	//

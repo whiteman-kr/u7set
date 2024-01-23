@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LogicModule Name="LM1_SR03" DescriptionNumber="3" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.8" xmlns:xi="http://www.w3.org/2001/XInclude">
+	<FlashMemory>
+		<AppLogicFrameCount>256</AppLogicFrameCount>
+		<AppLogicFramePayload>1016</AppLogicFramePayload>
+		<AppLogicFrameSize>1024</AppLogicFrameSize>
+		<AppLogicUartID>257</AppLogicUartID>
+		<AppLogicWriteBitstream>true</AppLogicWriteBitstream>
+		<ConfigFrameCount>256</ConfigFrameCount>
+		<ConfigFramePayload>1016</ConfigFramePayload>
+		<ConfigFrameSize>1016</ConfigFrameSize>
+		<ConfigUartID>258</ConfigUartID>
+		<ConfigWriteBitstream>true</ConfigWriteBitstream>
+		<TuningFrameCount>256</TuningFrameCount>
+		<TuningFramePayload>1016</TuningFramePayload>
+		<TuningFrameSize>1024</TuningFrameSize>
+		<TuningUartID>260</TuningUartID>
+		<TuningWriteBitstream>true</TuningWriteBitstream>
+		<MaxConfigurationCount>12</MaxConfigurationCount>
+	</FlashMemory>
+	<Memory>
+		<CodeMemorySize>65536</CodeMemorySize>
+		<AppMemorySize>65536</AppMemorySize>
+		<AppDataOffset>57782</AppDataOffset>
+		<AppDataSize>256</AppDataSize>
+		<AppLogicBitDataOffset>46080</AppLogicBitDataOffset>
+		<AppLogicBitDataSize>256</AppLogicBitDataSize>
+		<AppLogicWordDataOffset>53956</AppLogicWordDataOffset>
+		<AppLogicWordDataSize>3570</AppLogicWordDataSize>
+		<ModuleDataOffset>0</ModuleDataOffset>
+		<ModuleDataSize>2560</ModuleDataSize>
+		<ModuleCount>14</ModuleCount>
+		<TuningDataOffset>46336</TuningDataOffset>
+		<TuningDataSize>7620</TuningDataSize>	<!--TuningDataFrameCount * TuningDataFramePayload-->
+		<TuningDataFrameCount>15</TuningDataFrameCount>
+		<TuningDataFramePayload>508</TuningDataFramePayload>
+		<TuningDataFrameSize>512</TuningDataFrameSize>
+		<TxDiagDataOffset>57526</TxDiagDataOffset>
+		<TxDiagDataSize>188</TxDiagDataSize>
+	</Memory>
+	<LogicUnit>
+		<ClockFrequency>96000000</ClockFrequency>
+		<CycleDuration>5000</CycleDuration>
+		<IDRPhaseTime>500</IDRPhaseTime>
+		<ALPPhaseTime>3500</ALPPhaseTime>
+	</LogicUnit>
+	<OptoInterface>
+		<OptoPortCount>3</OptoPortCount>
+		<OptoPortAppDataOffset>0</OptoPortAppDataOffset>
+		<OptoPortAppDataSize>2560</OptoPortAppDataSize>
+		<OptoInterfaceDataOffset>35840</OptoInterfaceDataOffset>
+		<OptoPortDataSize>2560</OptoPortDataSize>
+		<SharedBuffer>false</SharedBuffer>
+	</OptoInterface>
+	<Lan RupVersion="5" FotipVersion="2">
+		<LanController>
+			<Type>Tuning</Type>
+			<Place>1</Place>
+		</LanController>
+		<LanController>
+			<Type>AppAndDiagData</Type>
+			<Place>2</Place>
+		</LanController>
+		<LanController>
+			<Type>AppAndDiagData</Type>
+			<Place>3</Place>
+		</LanController>
+	</Lan>
+	<Other>
+		<OcmTxDataSizeLimit>2000</OcmTxDataSizeLimit>
+		<OcmRxDataSizeLimit>1850</OcmRxDataSizeLimit>
+	</Other>
+	<LogicUnitCommnads Version="2">
+		<xi:include href="./instructions/nop.v1.xml" parse="xml"/>
+		<xi:include href="./instructions/startafb.v1.xml" parse="xml"/>
+		<xi:include href="./instructions/stop.v1.xml" parse="xml"/>
+		<xi:include href="./instructions/mov.v1.xml" parse="xml"/>
+		<xi:include href="./instructions/movmem.v1.xml" parse="xml"/>
+		<xi:include href="./instructions/movc.v1.xml" parse="xml"/>
+		<xi:include href="./instructions/movbc.v1.xml" parse="xml"/>
+		<xi:include href="./instructions/wrfb.v1.xml" parse="xml"/>
+		<xi:include href="./instructions/rdfb.v1.xml" parse="xml"/>
+		<xi:include href="./instructions/wrfbc.v1.xml" parse="xml"/>
+		<xi:include href="./instructions/wrfbb.v1.xml" parse="xml"/>
+		<xi:include href="./instructions/rdfbb.v1.xml" parse="xml"/>
+		<xi:include href="./instructions/rdfbcmp.v1.xml" parse="xml"/>
+		<xi:include href="./instructions/setmem.v1.xml" parse="xml"/>
+		<xi:include href="./instructions/movb.v1.xml" parse="xml"/>
+		<xi:include href="./instructions/nstart.v1.xml" parse="xml"/>
+		<xi:include href="./instructions/appstart.v1.xml" parse="xml"/>
+		<xi:include href="./instructions/mov32.v1.xml" parse="xml"/>
+		<xi:include href="./instructions/movc32.v1.xml" parse="xml"/>
+		<xi:include href="./instructions/wrfb32.v1.xml" parse="xml"/>
+		<xi:include href="./instructions/rdfb32.v1.xml" parse="xml"/>
+		<xi:include href="./instructions/wrfbc32.v1.xml" parse="xml"/>
+		<xi:include href="./instructions/rdfbcmp32.v1.xml" parse="xml"/>
+		<xi:include href="./instructions/movcmpf.v1.xml" parse="xml"/>
+		<xi:include href="./instructions/pmov.v1.xml" parse="xml"/>
+		<xi:include href="./instructions/pmov32.v1.xml" parse="xml"/>
+		<xi:include href="./instructions/fillb.v1.xml" parse="xml"/>
+	</LogicUnitCommnads>
+	<AFBImplementation CheckAfbVersions="true" CheckAfbVersionsOffset="2">
+		<xi:include href="./afbs/afb_logic_v207.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_not_v103.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_tct_v209.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_flipflop_v106.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_ctud_v106.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_maj_v107.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_srsst_v104.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_bcod_v103.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_bdec_v103.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_bcomp_v111.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_damper_v112.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_mem_v7.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_math_v104.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_scale_v108.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_func_v3.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_dpcomp_v4.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_mux_v1.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_latch_v4.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_pol_v3.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_mismatch_v3.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_tconv_v0.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_indication_v1.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_pulse_gen_v0.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_packed_and_v1.xml" parse="xml" />
+		<xi:include href="./afbs/afb_packed_or_v1.xml" parse="xml" />
+		<xi:include href="./afbs/afb_set_flags.xml" parse="xml"/>
+	</AFBImplementation>
+	<AFBL>
+		<!-- afb_logic_v207, opcode 1 -->
+		<xi:include href="./afbs/afb_logic_v207_and.xml" parse="xml" />
+		<xi:include href="./afbs/afb_logic_v207_bus_and.xml" parse="xml" />
+		<xi:include href="./afbs/afb_logic_v207_bus_or.xml" parse="xml" />
+		<xi:include href="./afbs/afb_logic_v207_bus_xor.xml" parse="xml" />
+		<xi:include href="./afbs/afb_logic_v207_or.xml" parse="xml" />
+		<xi:include href="./afbs/afb_logic_v207_xor.xml" parse="xml" />
+
+		<!-- afb_not_v103, opcode 2 -->
+		<xi:include href="./afbs/afb_not_v103_bus_not.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_not_v103_not.xml" parse="xml"/>
+
+		<!-- afb_tct_v209, opcode 3 -->
+		<xi:include href="./afbs/afb_tct_v209_tct_filter.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_tct_v209_tct_off.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_tct_v209_tct_on.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_tct_v209_tct_rcfilter.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_tct_v209_tct_rsv.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_tct_v209_tct_vibr.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_tct_v209_tctc_filter.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_tct_v209_tctc_off.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_tct_v209_tctc_on.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_tct_v209_tctc_rcfilter.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_tct_v209_tctc_rsv.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_tct_v209_tctc_vibr.xml" parse="xml"/>
+
+		<!-- afb_flipflop_v106, opcode 4 -->
+		<xi:include href="./afbs/afb_flipflop_v106_ff_d_decay.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_flipflop_v106_ff_d_front.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_flipflop_v106_ff_rs.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_flipflop_v106_ff_sr.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_flipflop_v106_ff_t_decay.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_flipflop_v106_ff_t_front.xml" parse="xml"/>
+
+		<!-- afb_ctud_v106, opcode 5 -->
+		<xi:include href="./afbs/afb_ctud_v106_cnt_dn.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_ctud_v106_cnt_up.xml" parse="xml"/>
+
+		<!-- afb_maj_v107, opcode 6 -->
+		<xi:include href="./afbs/afb_maj_v107_bus_voter.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_maj_v107_voter.xml" parse="xml"/>
+
+		<!-- afb_srsst_v104, opcode 7 -->
+		<xi:include href="./afbs/afb_srsst_v104_bus_simlock.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_srsst_v104_simlock.xml" parse="xml"/>
+
+		<!-- afb_bcod_v103, opcode 8 -->
+		<xi:include href="./afbs/afb_bcod_v103_cod_num.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_bcod_v103_cod.xml" parse="xml"/>
+
+		<!-- afb_bdec_v103, opcode 9 -->
+		<xi:include href="./afbs/afb_bdec_v103_dec_num.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_bdec_v103_dec.xml" parse="xml"/>
+
+		<!-- afb_bcomp_v111, opcode 10 -->
+		<xi:include href="./afbs/afb_bcomp_v111_cmpc_fp_eq.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_bcomp_v111_cmpc_fp_gr.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_bcomp_v111_cmpc_fp_ls.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_bcomp_v111_cmpc_fp_ne.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_bcomp_v111_cmpc_si_eq.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_bcomp_v111_cmpc_si_gr.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_bcomp_v111_cmpc_si_ls.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_bcomp_v111_cmpc_si_ne.xml" parse="xml"/>
+
+		<!-- afb_damper_v112, opcode 11 -->
+		<xi:include href="./afbs/afb_damper_v112_damp_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_damper_v112_damp_si.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_damper_v112_dampc_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_damper_v112_dampc_si.xml" parse="xml"/>
+
+		<!-- afb_mem_v7, opcode 12 -->
+		<xi:include href="./afbs/afb_mem_v7_median_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_mem_v7_median_si.xml" parse="xml"/>
+		
+		<!-- afb_math_v104, opcode 13 -->
+		<xi:include href="./afbs/afb_math_v104_add_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_math_v104_add_si.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_math_v104_div_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_math_v104_div_si.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_math_v104_mul_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_math_v104_mul_si.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_math_v104_sub_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_math_v104_sub_si.xml" parse="xml"/>
+		
+		<!-- afb_scale_v108, opcode 14 -->
+		<xi:include href="./afbs/afb_scale_v108_scale_16ui_16ui.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_scale_v108_scale_16ui_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_scale_v108_scale_16ui_si.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_scale_v108_scale_fp_16ui.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_scale_v108_scale_fp_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_scale_v108_scale_fp_si.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_scale_v108_scale_si_16ui.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_scale_v108_scale_si_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_scale_v108_scale_si_si.xml" parse="xml"/>
+		
+		<!-- afb_func_v3, opcode 16 -->
+		<xi:include href="./afbs/afb_func_v3_math_abs_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_func_v3_math_abs_si.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_func_v3_math_inv_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_func_v3_math_sqrt_fp.xml" parse="xml"/>
+		
+		<!-- afb_dpcomp_v4, opcode 20 -->
+		<xi:include href="./afbs/afb_dpcomp_v4_cmp_dh_fp_eq.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_dpcomp_v4_cmp_dh_fp_gr.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_dpcomp_v4_cmp_dh_fp_ls.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_dpcomp_v4_cmp_dh_fp_ne.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_dpcomp_v4_cmp_fp_eq.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_dpcomp_v4_cmp_fp_gr.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_dpcomp_v4_cmp_fp_ls.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_dpcomp_v4_cmp_fp_ne.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_dpcomp_v4_cmp_si_eq.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_dpcomp_v4_cmp_si_gr.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_dpcomp_v4_cmp_si_ls.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_dpcomp_v4_cmp_si_ne.xml" parse="xml"/>
+		
+		<!-- afb_mux_v1, opcode 21 -->
+		<xi:include href="./afbs/afb_mux_v1_bus_switch.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_mux_v1_mux.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_mux_v1_switch_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_mux_v1_switch_si.xml" parse="xml"/>
+		
+		<!-- afb_latch_v4, opcode 22 -->
+		<xi:include href="./afbs/afb_latch_v4_latch_decay_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_latch_v4_latch_decay_si.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_latch_v4_latch_front_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_latch_v4_latch_front_si.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_latch_v4_latch_state_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_latch_v4_latch_state_si.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_latch_v4_latch_tm1_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_latch_v4_latch_tm1_si.xml" parse="xml"/>
+	
+		<!-- afb_pol_v3, opcode 25 -->
+		<xi:include href="./afbs/afb_pol_v3_poly.xml" parse="xml"/>
+		
+		<!-- afb_mismatch_v3, opcode 27 -->
+		<xi:include href="./afbs/afb_mismatch_v3_mismatch_d_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_mismatch_v3_mismatch_d_si.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_mismatch_v3_mismatch_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_mismatch_v3_mismatch_r_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_mismatch_v3_mismatch_r_si.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_mismatch_v3_mismatch_si.xml" parse="xml"/>
+		
+		<!-- afb_tconv_v0, opcode 28 -->
+		<xi:include href="./afbs/afb_tconv_v0_be_to_le_16ui.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_tconv_v0_be_to_le_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_tconv_v0_be_to_le_si.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_tconv_v0_le_to_be_16ui.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_tconv_v0_le_to_be_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_tconv_v0_le_to_be_si.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_tconv_v0_tconv_bo_16.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_tconv_v0_tconv_bo_32.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_tconv_v0_tconv_fp_si.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_tconv_v0_tconv_si_fp.xml" parse="xml"/>
+		
+		<!-- afb_indication_v1, opcode 29 -->
+		<xi:include href="./afbs/afb_indication_v1_bus_indic_latch.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_indication_v1_bus_indic_stless.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_indication_v1_indic_latch.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_indication_v1_indic_stless.xml" parse="xml"/>
+	
+		<!-- afb_pulse_gen_v0, opcode 30 -->
+		<xi:include href="./afbs/afb_pulse_gen_v0_pulse_gen.xml" parse="xml"/>
+
+		<!-- afb_packed_and, opcode 252 -->
+		<xi:include href="./afbs/afb_packed_and_v1_packed_and_in.xml" parse="xml" />
+		<xi:include href="./afbs/afb_packed_and_v1_packed_and_out.xml" parse="xml" />
+
+		<!-- afb_packed_or, opcode 253 -->
+		<xi:include href="./afbs/afb_packed_or_v1_packed_or_in.xml" parse="xml" />
+		<xi:include href="./afbs/afb_packed_or_v1_packed_or_out.xml" parse="xml" />
+		
+		<!-- afb_set_flags, opcode 255 -->
+		<xi:include href="./afbs/afb_set_flags_set_flags.xml" parse="xml"/>
+	</AFBL>
+</LogicModule>

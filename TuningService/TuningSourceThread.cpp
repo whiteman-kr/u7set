@@ -3,7 +3,7 @@
 #include "../UtilsLib/WUtils.h"
 #include "../UtilsLib/Crc.h"
 #include "../OnlineLib/CircularLogger.h"
-#include "../OnlineLib/DataProtocols.h"
+#include "../HardwareLib/DataProtocols.h"
 
 #include "TuningSourceThread.h"
 #include "TuningService.h"
@@ -84,6 +84,10 @@ namespace Tuning
 		tss->set_errreplysize(errReplySize);
 		tss->set_errnoreply(errNoReply);
 		tss->set_errtuningframeupdate(errTuningFrameUpdate);
+
+		//
+
+		tss->set_lmtime(lmTime);
 	}
 
 	// ----------------------------------------------------------------------------------
@@ -105,7 +109,7 @@ namespace Tuning
 		m_mutex.unlock();
 	}
 
-	SafeTuningValue& SafeTuningValue::operator =(const TuningValue& tv)
+	SafeTuningValue& SafeTuningValue::operator = (const TuningValue& tv)
 	{
 		m_mutex.lock();
 
@@ -177,170 +181,6 @@ namespace Tuning
 		return tv;
 	}
 
-	// ----------------------------------------------------------------------------------
-	//
-	// TuningSignal class implementation
-	//
-	// ----------------------------------------------------------------------------------
-
-	void TuningSignal::init(const AppSignal* s, int index, int tuningDataFrameSizeW)
-	{
-		TEST_PTR_RETURN(s);
-
-		m_appSignalID = s->appSignalID();
-
-		m_signalType = s->signalType();
-		m_analogFormat = s->analogSignalFormat();
-
-		m_signalHash = ::calcHash(m_appSignalID);
-
-		m_index = index;
-
-		m_offset = s->tuningAddr().offset();
-		m_bit = s->tuningAddr().bit();
-		m_frameNo = s->tuningAddr().offset() / tuningDataFrameSizeW;
-
-		updateTuningValuesType(s->signalType(), s->analogSignalFormat());
-
-		m_lowBound = s->tuningLowBound();
-		m_highBound = s->tuningHighBound();
-		m_defaultValue = s->tuningDefaultValue();
-
-		m_valid = false;
-	}
-
-	QString TuningSignal::tuningValueTypeStr() const
-	{
-		TuningValue tv(m_tuningValueType);
-
-		return tv.typeStr();
-	}
-
-	void TuningSignal::setCurrentValue(bool valid, const TuningValue& value,
-									   qint64 readTime, qint64 lmTime,
-									   quint64 fotipProcessingNumerator)
-	{
-		m_valid = valid;
-
-		if (m_valid == true)
-		{
-			m_fotipProcessingNumerator = fotipProcessingNumerator;
-
-			m_successfulReadTime = readTime;
-			m_lmTime = lmTime;
-
-			Q_ASSERT(m_currentValue.type() == value.type());
-			Q_ASSERT(m_defaultValue.type() == value.type());
-
-			m_currentValue = value;
-			m_tuningDefaultFlag = (m_currentValue == m_defaultValue ? 1 : 0);
-		}
-		else
-		{
-			m_lmTime = 0;
-			m_fotipProcessingNumerator = 0;
-			m_tuningDefaultFlag = false;
-		}
-	}
-
-	void TuningSignal::setReadLowBound(const TuningValue& value)
-	{
-		assert(m_readLowBound.type() == value.type());
-
-		m_readLowBound = value;
-	}
-
-	void TuningSignal::setReadHighBound(const TuningValue& value)
-	{
-		assert(m_readHighBound.type() == value.type());
-
-		m_readHighBound = value;
-	}
-
-	void TuningSignal::invalidate()
-	{
-		setCurrentValue(false,
-						// next params isn't matter
-						TuningValue(), 0, 0, 0);
-	}
-
-	void TuningSignal::initWriting(quint64 writeCommandID)
-	{
-		Q_ASSERT(writeCommandID != 0);
-
-		m_writeStateMutex.lock();
-
-		m_writeCommandID = writeCommandID;
-		m_writeErrorCode = E::NetworkError::Success;
-
-		m_writeStateMutex.unlock();
-	}
-
-	void TuningSignal::finalizeWriting(quint64 writeCommandID, E::NetworkError errCode)
-	{
-		m_writeStateMutex.lock();
-
-		if (writeCommandID == m_writeCommandID)
-		{
-			if (errCode == E::NetworkError::Success)
-			{
-				m_writeErrorCode = E::NetworkError::Success;
-				m_writeCommandID = 0;
-			}
-			else
-			{
-				m_writeErrorCode = errCode;
-			}
-		}
-
-		m_writeStateMutex.unlock();
-	}
-
-	bool TuningSignal::writeInProgress() const
-	{
-		bool inProgress = false;
-
-		m_writeStateMutex.lock();
-
-		inProgress = (m_writeCommandID != 0);
-
-		m_writeStateMutex.unlock();
-
-		return inProgress;
-	}
-
-	Fotip::DataType TuningSignal::fotipDataType() const
-	{
-		switch(m_tuningValueType)
-		{
-		case TuningValueType::Discrete:
-			return Fotip::DataType::Discrete;
-
-		case TuningValueType::Float:
-			return Fotip::DataType::AnalogFloat;
-
-		case TuningValueType::SignedInt32:
-			return Fotip::DataType::AnalogSignedInt;
-
-		default:
-			assert(false);
-		}
-
-		return Fotip::DataType::Discrete;
-	}
-
-	void TuningSignal::updateTuningValuesType(E::SignalType signalType, E::AnalogAppSignalFormat analogFormat)
-	{
-		m_tuningValueType = TuningValue::getTuningValueType(signalType, analogFormat);
-
-		m_lowBound.setType(m_tuningValueType);
-		m_highBound.setType(m_tuningValueType);
-		m_defaultValue.setType(m_tuningValueType);
-
-		m_currentValue.setType(m_tuningValueType);
-		m_readLowBound.setType(m_tuningValueType);
-		m_readHighBound.setType(m_tuningValueType);
-	}
 
 	// ----------------------------------------------------------------------------------
 	//
@@ -631,6 +471,16 @@ namespace Tuning
 
 			//
 
+			Rup::TimeStamp rts = m_reply.rupHeader.timeStamp;
+
+			rts.reverseBytes();
+
+			m_state.lmTime = QDateTime(	QDate(rts.year, rts.month, rts.day),
+										QTime(rts.hour, rts.minute, rts.second, rts.millisecond),
+										Qt::UTC).toMSecsSinceEpoch();
+
+			//
+
 			auto it = m_alreadyProcessedCommands.find(m_lastProcessedCommand.commandID());
 
 			if (it == m_alreadyProcessedCommands.end())
@@ -697,6 +547,7 @@ namespace Tuning
 
 		m_state.isReply = false;
 		m_waitReply = false;
+		m_state.lmTime = 0;
 		m_lastReplyTime = QDateTime::currentMSecsSinceEpoch();
 
 		return true;				// reply isn't recived but TRUE returned to run other processings
@@ -1117,9 +968,9 @@ namespace Tuning
 					assert(false);
 				}
 
-				ts->setWriteRequestTime(QDateTime::currentMSecsSinceEpoch());
-				ts->setWriteClient(tuningCmd.clientEquipmentID);
-				ts->initWriting(tuningCmd.commandID());
+				ts->initWriting(tuningCmd.commandID(),
+								tuningCmd.clientEquipmentID,
+								QDateTime::currentMSecsSinceEpoch());
 			}
 			break;
 
@@ -1301,7 +1152,7 @@ namespace Tuning
 
 		if (ts != nullptr)
 		{
-			TuningValue currentValue = ts->currentValue();
+			TuningValue currentValue = ts->currentTuningValueUnsafe();
 
 			if (newTuningValue != currentValue)
 			{
@@ -1371,20 +1222,7 @@ namespace Tuning
 
 		TEST_PTR_RETURN(ts);
 
-		qint64 time = QDateTime::currentMSecsSinceEpoch();
-
-		if (errCode == E::NetworkError::Success)
-		{
-			ts->setSuccessfulWriteTime(time);
-			ts->setUnsuccessfulWriteTime(0);
-		}
-		else
-		{
-			ts->setSuccessfulWriteTime(0);
-			ts->setUnsuccessfulWriteTime(time);
-		}
-
-		ts->finalizeWriting(m_lastProcessedCommand.commandID(), errCode);
+		ts->finalizeWriting(m_lastProcessedCommand.commandID(), errCode, QDateTime::currentMSecsSinceEpoch());
 	}
 
 	bool TuningChannelHandler::checkRupHeader(const Rup::Header& rupHeader)
@@ -1638,11 +1476,11 @@ namespace Tuning
 							arg(m_portEquipmentID).
 							arg(ts->appSignalID()).
 							arg(cmd.write.newTuningValue.typeStr()).
-							arg(ts->currentValue().toString()).
+							arg(ts->currentTuningValueUnsafe().toString()).
 							arg(cmd.write.newTuningValue.toString()).
 							arg(m_state.setSOR == true ? 1 : 0).
 							arg(cmd.clientEquipmentID).
-							arg(cmd.user);
+							arg(cmd.matsUser);
 
 				*appSignalID = ts->appSignalID();
 			}
@@ -1656,7 +1494,7 @@ namespace Tuning
 								arg(m_portEquipmentID).
 								arg(m_state.setSOR == true ? 1 : 0).
 								arg(cmd.clientEquipmentID).
-								arg(cmd.user);
+								arg(cmd.matsUser);
 			break;
 
 		default:
@@ -1709,7 +1547,7 @@ namespace Tuning
 							arg(toHex(reply.rupHeader.numerator)).
 							arg(m_portEquipmentID).
 							arg(ts->appSignalID()).
-							arg(ts->currentValue().toString()).
+							arg(ts->currentTuningValueUnsafe().toString()).
 							arg(checkResultStr).
 							arg(reply.fotipFrame.header.flags.setSOR);
 			}
@@ -1807,6 +1645,8 @@ namespace Tuning
 
 	void TuningSourceThreadWorker::onThreadStarted()
 	{
+		m_thread = QThread::currentThread();
+
 		initTuningSignals();
 		initHandlers();
 		initTimer();
@@ -1884,6 +1724,8 @@ namespace Tuning
 
 	void TuningSourceThreadWorker::readSignalState(Network::TuningSignalState* tss) const
 	{
+		// this function called from another thread!!
+
 		TEST_PTR_RETURN(tss);
 
 		// tss->signalhash() is already filled
@@ -1898,43 +1740,11 @@ namespace Tuning
 			return;
 		}
 
-		tss->set_valid(ts->valid());
-
-		bool result = true;
-
-		result &= ts->currentValue().save(tss->mutable_value());
-		result &= ts->readLowBound().save(tss->mutable_readlowbound());
-		result &= ts->readHighBound().save(tss->mutable_readhighbound());
-
-		tss->set_tuningdefault(ts->isTuningDefault());
-
-		if (result == false)
-		{
-			tss->set_valid(false);
-			tss->set_error(TO_INT(E::NetworkError::InternalError));
-			return;
-		}
-
-		tss->set_writeinprogress(ts->writeInProgress());
-
-		tss->set_successfulreadtime(ts->successfulReadTime());
-		tss->set_writerequesttime(ts->writeRequestTime());
-		tss->set_successfulwritetime(ts->successfulWriteTime());
-		tss->set_unsuccessfulwritetime(ts->unsuccessfulWriteTime());
-		tss->set_lmtime(ts->lmTime());
-		tss->set_fotipprocessingnumerator(ts->fotipProcessingNumerator());
-
-		tss->set_writeclient(ts->writeClient());
-		tss->set_writeerrorcode(TO_INT(ts->writeErrorCode()));
-
-		tss->set_setsor(m_setSOR);
-		tss->set_writingdisabled(m_writingDisabled);
-
-		tss->set_error(TO_INT(E::NetworkError::Success));
+		ts->saveToProto(tss, m_setSOR, m_writingDisabled, QThread::currentThread());
 	}
 
 	E::NetworkError TuningSourceThreadWorker::writeSignalState(const QString& clientEquipmentID,
-														const QString& user,
+														const QString& matsUser,
 														Hash signalHash,
 														const TuningValue& newValue)
 	{
@@ -1970,7 +1780,7 @@ namespace Tuning
 		TuningCommand cmd;
 
 		cmd.clientEquipmentID = clientEquipmentID;
-		cmd.user = user;
+		cmd.matsUser = matsUser;
 
 		cmd.opCode = Fotip::OpCode::Write;
 		cmd.autoCommand = false;
@@ -1984,12 +1794,12 @@ namespace Tuning
 	}
 
 	E::NetworkError TuningSourceThreadWorker::applySignalStates(const QString& clientEquipmentID,
-														const QString& user)
+														const QString& matsUser)
 	{
 		TuningCommand cmd;
 
 		cmd.clientEquipmentID = clientEquipmentID;
-		cmd.user = user;
+		cmd.matsUser = matsUser;
 
 		cmd.opCode = Fotip::OpCode::Apply;
 		cmd.autoCommand = false;
@@ -2152,15 +1962,24 @@ namespace Tuning
 			switch(frameNo % 3)
 			{
 			case 0:
-				ts.setCurrentValue(true, tuningValue, updateTime, lmTime, m_fotipProcessingNumerator);
+				{
+					bool stateChanged = ts.setCurrentState(true, tuningValue, updateTime,
+														  lmTime, m_fotipProcessingNumerator,
+														  m_setSOR, m_writingDisabled);
+
+					if (stateChanged == true)
+					{
+						m_service.pushSignalStateChange(ts.currentStateUnsafe(), m_thread);
+					}
+				}
 				break;
 
 			case 1:
-				ts.setReadLowBound(tuningValue);
+				ts.setReadLowBound(tuningValue, m_setSOR, m_writingDisabled);
 				break;
 
 			case 2:
-				ts.setReadHighBound(tuningValue);
+				ts.setReadHighBound(tuningValue, m_setSOR, m_writingDisabled);
 				break;
 
 			default:
@@ -2222,7 +2041,7 @@ namespace Tuning
 
 			TuningSignal& ts = *m_tuningSignals[i].get();
 
-			ts.init(signal, i, td->tuningDataFramePayloadW());
+			ts.init(signal, i, td->tuningDataFramePayloadW(), m_thread);
 
 			int arrayIndex = ts.frameNo() / 3;
 
@@ -2336,9 +2155,18 @@ namespace Tuning
 
 	void TuningSourceThreadWorker::invalidateAllSignals()
 	{
+		Q_ASSERT(QThread::currentThread() == m_thread);
+
+		bool stateChanged = false;
+
 		for(TuningSignalShared& s : m_tuningSignals)
 		{
-			s->invalidate();
+			stateChanged = s->invalidate();
+
+			if (stateChanged == true)
+			{
+				m_service.pushSignalStateChange(s->currentStateUnsafe(), m_thread);
+			}
 		}
 	}
 
@@ -2477,7 +2305,7 @@ namespace Tuning
 	}
 
 	E::NetworkError TuningSourceThread::writeSignalState(const QString& clientEquipmentID,
-														 const QString& user,
+														 const QString& matsUser,
 														 Hash signalHash,
 														 const TuningValue& newValue)
 	{
@@ -2487,7 +2315,7 @@ namespace Tuning
 			return E::NetworkError::InternalError;
 		}
 
-		return m_worker->writeSignalState(clientEquipmentID, user, signalHash, newValue);
+		return m_worker->writeSignalState(clientEquipmentID, matsUser, signalHash, newValue);
 	}
 
 	E::NetworkError TuningSourceThread::applySignalStates(	const QString& clientEquipmentID,

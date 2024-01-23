@@ -1,4 +1,4 @@
-	Connections with security level Basic require 2 files: 
+	Connections with security level Encoded require 2 files: 
 		1) self-signed certificate ss_server.crt 
 		2) private key ss_server_private.key 
 

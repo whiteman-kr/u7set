@@ -3,6 +3,7 @@
 #include "../AppSignalLib/AppSignalParam.h"
 #include "../AppSignalLib/TuningValue.h"
 #include "../AppSignalLib/SimpleAppSignalState.h"
+#include "../UtilsLib/Address16.h"
 
 namespace RtTrends
 {
@@ -18,6 +19,29 @@ public:
 	static const int NO_INDEX = -1;
 	static const int NO_AUTOARCHIVING_GROUP = -1;
 	static const int NOT_INITIALIZED_AUTOARCHIVING_GROUP = -2;
+
+private:
+	enum class AnalogValueStatus
+	{
+		Normal,
+		Nan,
+		Inf
+	};
+
+	inline AnalogValueStatus analogValueStatus(double value)
+	{
+		if (std::isnan(value))
+		{
+			return AnalogValueStatus::Nan;
+		}
+
+		if (std::isinf(value))
+		{
+			return AnalogValueStatus::Inf;
+		}
+
+		return AnalogValueStatus::Normal;
+	}
 
 public:
 	DynamicAppSignalState();
@@ -127,33 +151,32 @@ private:
 	E::SignalType m_signalType = E::SignalType::Discrete;
 	E::AnalogAppSignalFormat m_analogSignalFormat = E::AnalogAppSignalFormat::Float32;
 	E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
+	int m_dataSize = 1;
+
+	bool m_archive = false;
+
+	double m_lowLimit = 0;
+	double m_highLimit = 0;
+	bool m_reverseLimits = false;
+
+	E::ApertureType m_apertureType = E::ApertureType::RangePercent;
+
+	// for E::ApertureType::RangePercent and E::ApertureType::AbsValue
+	// m_absCoarseAperture and m_absFineAperture stored in abs EngineeringUnits
+	//
+	// for E::ApertureType::ValuePercent m_absCoarseAperture and m_absFineAperture stored in Percents
+	//
+	double m_absCoarseAperture = 0;
+	double m_absFineAperture = 0;
 
 	bool m_enableTuning = false;
 	TuningValue m_tuningDefaultValue;
 
-	double m_absCoarseAperture = 0;
-	double m_absFineAperture = 0;
-
-	int m_dataSize = 1;
-
-	QVector<FlagSignalParceInfo> m_flagsSignalsParceInfo;		// except  Validity flag signal
-
-
-	void init(const AppSignal& s, const AppSignals& appSignals);
+	std::vector<FlagSignalParceInfo> m_flagsSignalsParceInfo;		// except  Validity flag signal
 
 	// paramters needed to update state
 	//
 	bool m_prevStateIsStored = false;
-
-	bool m_archive = false;
-
-	bool m_adaptiveAperture = false;
-
-	double m_coarseAperture = 0;
-	double m_fineAperture = 0;
-
-	double m_lowLimit = 0;
-	double m_highLimit = 0;
 
 	double m_coarseStoredValue;
 	double m_fineStoredValue;
@@ -162,7 +185,6 @@ private:
 
 	SimpleAppSignalState m_current[2];
 	std::atomic<int> m_curStateIndex = {0};
-
 
 	int m_autoArchivingGroup = NOT_INITIALIZED_AUTOARCHIVING_GROUP;
 
@@ -173,7 +195,7 @@ private:
 
 	std::atomic<const QThread*> m_rtProcessingOwner = { nullptr };
 
-	QHash<int, RtSession> m_rtSessions;
+	std::map<int, RtSession> m_rtSessions;	// RtSession.ID => RtSession
 
 	quint32 m_gatewayQueueMask = 0;
 };

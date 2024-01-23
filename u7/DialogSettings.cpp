@@ -30,7 +30,11 @@ void DialogSettings::setSettings(const Settings& value)
 {
 	m_settings = value;
 
-	ui->editHost->setText(m_settings.serverHost());
+	QString hostHistoryString = QSettings().value("DialogSettings/hostHistory", QString()).toString();
+	QStringList hostHistory = hostHistoryString.split(';', Qt::SkipEmptyParts);
+
+	ui->comboHost->addItems(hostHistory);
+	ui->comboHost->setCurrentText(m_settings.serverHost());
 	ui->editPort->setText(QString().setNum(m_settings.serverPort()));
 	ui->editUsername->setText(m_settings.serverUsername());
 	ui->editPassword->setText(m_settings.serverPassword());
@@ -56,18 +60,36 @@ void DialogSettings::on_ok_clicked()
 {
 	// Check ip address
 	//
-	QString serverHost = ui->editHost->text();
-
+	QString serverHost = ui->comboHost->currentText().toUpper();
 	if (serverHost.isEmpty() == true)
 	{
 		QMessageBox mb(this);
 		mb.setText(tr("Incorrect server IP Address."));
 		mb.exec();
 
-		ui->editHost->setFocus();
-		ui->editHost->selectAll();
+		ui->comboHost->setFocus();
 		return;
 	}
+
+	// Check Instance StrID
+	//
+	QStringList hostHistory;
+	for (int i = 0; i < ui->comboHost->count(); i++)
+	{
+		hostHistory.push_back(ui->comboHost->itemText(i));
+
+		if (hostHistory.size() >= 10)
+		{
+			break;
+		}
+	}
+
+	if (hostHistory.contains(serverHost) == false)
+	{
+		hostHistory.push_front(serverHost);
+	}
+
+	QSettings().setValue("DialogSettings/hostHistory", hostHistory.join(';'));
 
 	// Check port num
 	//

@@ -2,7 +2,7 @@
 #define MONITORTRENDS_H
 
 #include "../ClientLib/RtDataProvider.h"
-#include "TrendMainWindow.h"
+#include "../TrendView/TrendMainWindow.h"
 #include "MonitorConfigController.h"
 #include "MonitorSignalManager.h"
 #include "MonitorTrendArchiveConnections.h"
@@ -14,23 +14,25 @@ class QLabel;
 class MonitorTrends
 {
 public:
-	static std::vector<QString> getTrendsList();
-	static bool activateTrendWindow(QString trendName);
+	static std::vector<MonitorTrendsWidget*> getTrendsList();
+	static bool activateTrendWindow(MonitorTrendsWidget* trendWidget);
 	static bool startTrendApp(const MonitorSignalManager& signalManager,
 							  const MonitorConfigController& configController,
 							  const std::vector<AppSignalParam>& appSignals,
 							  QWidget* parent);
 
-	static void registerTrendWindow(QString name, MonitorTrendsWidget* window);
-	static void unregisterTrendWindow(QString name);
+	static void registerTrendWindow(MonitorTrendsWidget* window);
+	static void unregisterTrendWindow(const MonitorTrendsWidget* window);
 
 private:
-	static std::map<QString, MonitorTrendsWidget*> m_trendsList;
+	static std::list<MonitorTrendsWidget*> s_trendsList;
 };
 
 
 class MonitorTrendsWidget : public TrendLib::TrendMainWindow
 {
+	Q_OBJECT
+
 public:
 	MonitorTrendsWidget(const MonitorSignalManager& signalManager,
 						const MonitorConfigController& configController,
@@ -86,6 +88,8 @@ private:
 	QLabel* m_statusBarQueueSizeLabel = nullptr;
 	QLabel* m_statusBarNetworkRequestsLabel = nullptr;
 	QLabel* m_statusBarConnectionStateLabel = nullptr;
+
+	QElapsedTimer m_realtimeUpdateTimer;
 };
 
 #endif // MONITORTRENDS_H

@@ -423,10 +423,10 @@ namespace VFrame30
 		return m_session;
 	}
 
-	const MonitorBehavior& CDrawParam::monitorBehavor() const noexcept
+	const MonitorBehavior& CDrawParam::monitorBehavior() const noexcept
 	{
 		Q_ASSERT(m_schemaView);
-		return clientSchemaView()->monitorBehavor();
+		return clientSchemaView()->monitorBehavior();
 	}
 
 	const TuningClientBehavior& CDrawParam::tuningClientBehavior() const
@@ -435,12 +435,12 @@ namespace VFrame30
 		return clientSchemaView()->tuningClientBehavior();
 	}
 
-	const QStringList& CDrawParam::hightlightIds() const
+	const QStringList& CDrawParam::highlightIds() const
 	{
 		return m_highlightIds;
 	}
 
-	void CDrawParam::setHightlightIds(const QStringList& value)
+	void CDrawParam::setHighlightIds(const QStringList& value)
 	{
 		m_highlightIds = value;
 	}
@@ -498,7 +498,7 @@ namespace VFrame30
 								   int flags,
 								   double zoom)
 	{
-		if (painter == nullptr || str.isEmpty())
+		if (painter == nullptr || str.isEmpty() || rect.isEmpty() == true)
 		{
 			Q_ASSERT(painter);
 			return;
@@ -656,12 +656,13 @@ thread_local QCache<Hash, DrawTextCacheItem> cache{50'000'000};			// 50Mb of ima
 										rect.height() * dpiY * zoomFactor :
 										rect.height() * zoomFactor;
 
-		QSize imageSize{std::lround(imageWidth) + extraSizePx, std::lround(imageHeight) + extraSizePx};
+		QSize imageSize{static_cast<int>(std::lround(imageWidth)) + extraSizePx,
+						static_cast<int>(std::lround(imageHeight)) + extraSizePx};
 
 		Hash cacheItemHash = DrawSvgCacheItem::getHash(unit, svg, imageSize, dpiX, dpiY, zoom);
 		bool newCacheItem = false;
 
-thread_local QCache<Hash, DrawSvgCacheItem> cache{20'000'000};			// 20Mb of images.
+thread_local QCache<Hash, DrawSvgCacheItem> cache{60'000'000};			// 60Mb of images.
 
 		DrawSvgCacheItem* cacheItem = cache.object(cacheItemHash);
 		if (cacheItem == nullptr)
@@ -677,6 +678,7 @@ thread_local QCache<Hash, DrawSvgCacheItem> cache{20'000'000};			// 20Mb of imag
 			// Create image and draw text to it.
 			//
 			cacheItem->image = QImage{imageSize, QImage::Format_ARGB32_Premultiplied};
+			Q_ASSERT(cacheItem->image.isNull() == false);
 
 			if (unit == SchemaUnit::Inch)
 			{
@@ -693,7 +695,7 @@ thread_local QCache<Hash, DrawSvgCacheItem> cache{20'000'000};			// 20Mb of imag
 
 			QPainter cacheImagePainter{&cacheItem->image};
 
-			// Ajust painter for the image, note that extraSizePx is taken and
+			// Adjust painter for the image, note that extraSizePx is taken and
 			// (-0.5) / devicePixelRatioF used to neglect half pixel align.
 			//
 			SchemaView::Ajust(&cacheImagePainter,
@@ -760,7 +762,7 @@ thread_local QCache<Hash, DrawSvgCacheItem> cache{20'000'000};			// 20Mb of imag
 
 		// Add to cache new item, cache only images not greater then specified size.
 		//
-		if (newCacheItem == true && cacheItem->image.sizeInBytes() < 5'000'000)
+		if (newCacheItem == true && cacheItem->image.sizeInBytes() < 37'000'000)
 		{
 			cache.insert(cacheItemHash, cacheItem, cacheItem->image.sizeInBytes());
 		}

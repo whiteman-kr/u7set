@@ -18,7 +18,7 @@ namespace Builder
 	{
 		TEST_PTR_RETURN(m_sourceItem);
 
-		const UalLoopbackSource* src = m_sourceItem->ualLoopbackSource();
+		const SchemaLoopbackSource* src = m_sourceItem->schemaLoopbackSource();
 
 		TEST_PTR_RETURN(src);
 
@@ -129,7 +129,7 @@ namespace Builder
 	{
 		TEST_PTR_RETURN_FALSE(sourceItem);
 
-		const UalLoopbackSource* src = sourceItem->ualLoopbackSource();
+		const SchemaLoopbackSource* src = sourceItem->schemaLoopbackSource();
 
 		TEST_PTR_RETURN_FALSE(src);
 
@@ -171,7 +171,7 @@ namespace Builder
 	{
 		TEST_PTR_RETURN_FALSE(ualSignal);
 
-		const UalLoopbackSource* source = loopbackSourceItem->ualLoopbackSource();
+		const SchemaLoopbackSource* source = loopbackSourceItem->schemaLoopbackSource();
 
 		if  (source == nullptr)
 		{
@@ -192,8 +192,15 @@ namespace Builder
 		if (loopback->ualSignal() == nullptr)
 		{
 			loopback->setUalSignal(ualSignal);
-			ualSignal->setLoopback(loopback);
-		}
+            bool res = ualSignal->setLoopback(loopback);
+
+			if (res == false)
+            {
+				LOG_INTERNAL_ERROR_MSG(m_compiler.log(), QString("Loopback %1 is twice assigned to signal %2").
+																arg(loopback->loopbackID()).
+																arg(ualSignal->appSignalID()));
+			}
+        }
 		else
 		{
 			if (loopback->ualSignal() != ualSignal)
@@ -332,7 +339,7 @@ namespace Builder
 				continue;
 			}
 
-			for(const std::pair<QUuid, const UalItem*>& pr : linkedPins)
+            for(const auto& pr : linkedPins)
 			{
 				QUuid linkedPin = pr.first;
 

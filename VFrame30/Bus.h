@@ -132,7 +132,7 @@ namespace VFrame30
 		Bus(const Bus& src);
 		Bus& operator= (const Bus& src);
 
-		// Serializatin implementation of Proto::ObjectSerialization<>
+		// Serialization implementation of Proto::ObjectSerialization<>
 		//
 		friend Proto::ObjectSerialization<Bus>;
 

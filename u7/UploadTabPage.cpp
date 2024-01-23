@@ -2,7 +2,6 @@
 #include "Settings.h"
 #include "GlobalMessanger.h"
 #include "DialogSettingsConfigurator.h"
-#include "../DbLib/DbController.h"
 
 //
 //
@@ -324,6 +323,26 @@ void UploadTabPage::refreshProjectBuilds()
 		builds.push_back(std::make_pair(build, tm));
 	}
 
+	// Sort builds by time, latest build - first.
+	//
+	std::sort(builds.begin(), builds.end(), [](const auto& a, const auto& b)
+			  {
+				  const QString& build1 = a.first;
+				  const QString& build2 = b.first;
+					
+				  bool hasNumber1 = build1.contains('-');
+				  bool hasNumber2 = build2.contains('-');
+
+				  if (hasNumber1 == hasNumber2)
+				  {
+					  return build1 > build2;
+				  }
+				  else
+				  {
+					  return hasNumber1 < hasNumber2;
+				  }
+			  });
+
 	// Compare builds list with current and refresh is required (number of builds, their names or modification time is changed)
 
 	if (m_builds != builds)
@@ -334,9 +353,9 @@ void UploadTabPage::refreshProjectBuilds()
 
 		m_pBuildTree->clear();
 
-		for (const QString& buildName : buildList)
+		for (const auto& [buildName, time] : builds)
 		{
-			Builder::BuildInfo buildInfo;
+			OnlineLib::BuildInfo buildInfo;
 			bool buildSuccess = false;
 
 			QString buildPath = QString("%1/%2").arg(m_buildSearchPath).arg(buildName);
@@ -476,12 +495,14 @@ void UploadTabPage::read()
 
 	try
 	{
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"));
+		static QString path{"."};
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), path + QDir::separator());
 
 		if (fileName.isEmpty() == true)
 		{
 			return;
 		}
+		path = QFileInfo(fileName).path(); // store path for next time
 
 		m_outputLog.writeMessage("");
 		m_outputLog.writeMessage(tr("Reading firmware to file %1...").arg(fileName));
@@ -790,7 +811,7 @@ void UploadTabPage::refreshBinaryFile()
 	emit loadBinaryFile(m_currentFilePath, &m_firmware);
 }
 
-bool UploadTabPage::readBuildInfo(const QString& buildPath, Builder::BuildInfo* buildInfo, bool* buildSuccess)
+bool UploadTabPage::readBuildInfo(const QString& buildPath, OnlineLib::BuildInfo* buildInfo, bool* buildSuccess)
 {
 	if (buildInfo == nullptr || buildSuccess == nullptr)
 	{

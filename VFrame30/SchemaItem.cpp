@@ -233,7 +233,7 @@ namespace VFrame30
 		//
 		if (m_jsClickScript.isUndefined() == true)
 		{
-			m_jsClickScript = evaluateScript(m_clickScript, engine, parentWidget);
+			m_jsClickScript = evaluateScript("clickScript", m_clickScript, engine, parentWidget);
 		}
 
 		if (m_jsClickScript.isError() == true ||
@@ -242,7 +242,7 @@ namespace VFrame30
 			return;
 		}
 
-		runScript(m_jsClickScript, engine);
+		runScript("ClickScript", m_jsClickScript, engine);
 
 		return;
 	}
@@ -264,7 +264,7 @@ namespace VFrame30
 		//
 		if (m_jsPreDrawScript.isUndefined() == true)
 		{
-			m_jsPreDrawScript = evaluateScript(m_preDrawScript, engine, nullptr);
+			m_jsPreDrawScript = evaluateScript("preDrawScript", m_preDrawScript, engine, nullptr);
 		}
 
 		if (m_jsPreDrawScript.isError() == true ||
@@ -273,12 +273,12 @@ namespace VFrame30
 			return false;
 		}
 
-		bool result = runScript(m_jsPreDrawScript, engine);
+		bool result = runScript("PreDrawScript", m_jsPreDrawScript, engine);
 
 		return result;
 	}
 
-	bool SchemaItem::runScript(QJSValue& evaluatedJs, QJSEngine* engine)
+	bool SchemaItem::runScript(QString scriptName, QJSValue& evaluatedJs, QJSEngine* engine)
 	{
 		if (evaluatedJs.isUndefined() == true ||
 			evaluatedJs.isError() == true ||
@@ -301,7 +301,7 @@ namespace VFrame30
 		QJSValue jsResult = evaluatedJs.call(args);
 		if (jsResult.isError() == true)
 		{
-			m_lastScriptError = formatScriptError(jsResult);
+			m_lastScriptError = formatScriptError(scriptName, jsResult);
 			return false;
 		}
 		else
@@ -312,7 +312,7 @@ namespace VFrame30
 		return true;
 	}
 
-	QJSValue SchemaItem::evaluateScript(const QString& script, QJSEngine* engine, QWidget* parentWidget) const
+	QJSValue SchemaItem::evaluateScript(QString scriptName, const QString& script, QJSEngine* engine, QWidget* parentWidget) const
 	{
 		if (engine == nullptr)
 		{
@@ -325,7 +325,7 @@ namespace VFrame30
 
 		if (result.isError() == true)
 		{
-			m_lastScriptError = formatScriptError(result);
+			m_lastScriptError = formatScriptError(scriptName, result);
 
 			if (parentWidget != nullptr)
 			{
@@ -336,28 +336,32 @@ namespace VFrame30
 		return result;
 	}
 
-	QString SchemaItem::formatScriptError(const QJSValue& scriptValue) const
+	QString SchemaItem::formatScriptError(QString scriptName, const QJSValue& scriptValue) const
 	{
 		qDebug() << "Script running uncaught exception at line " << scriptValue.property("lineNumber").toInt();
+		qDebug() << "\tScript Name: " << scriptName;
 		qDebug() << "\tItem: " << guid().toString() << " " << metaObject()->className();
 		qDebug() << "\tStack: " << scriptValue.property("stack").toString();
 		qDebug() << "\tMessage: " << scriptValue.toString();
 
 		QString str = QString("Script running uncaught exception at line %1\n"
-							  "\tItem: %2 %3\n"
-							  "\tStack: %4\n"
-							  "\tMessage: %5")
-					  .arg(scriptValue.property("lineNumber").toInt())
-					  .arg(guid().toString()).arg(metaObject()->className())
-					  .arg(scriptValue.property("stack").toString())
-					  .arg(scriptValue.toString());
+							  "\tScriptName: %2\n"
+							  "\tItem: %3 %4\n"
+							  "\tStack: %5\n"
+							  "\tMessage: %6")
+						  .arg(scriptValue.property("lineNumber").toInt())
+						  .arg(scriptName)
+						  .arg(guid().toString())
+						  .arg(metaObject()->className())
+						  .arg(scriptValue.property("stack").toString())
+						  .arg(scriptValue.toString());
 
 		return str;
 	}
 
-	void SchemaItem::reportScriptError(const QJSValue& scriptValue, ILogFile* logFile) const
+	void SchemaItem::reportScriptError(QString scriptName, const QJSValue& scriptValue, ILogFile* logFile) const
 	{
-		QString error = formatScriptError(scriptValue);
+		QString error = formatScriptError(scriptName, scriptValue);
 
 		if (logFile != nullptr)
 		{

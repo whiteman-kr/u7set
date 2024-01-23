@@ -1,4 +1,6 @@
 #include "MonitorAppSettings.h"
+
+#include "../lib/ConstStrings.h"
 #include "../OnlineLib/SocketIO.h"
 
 MonitorAppSettings& MonitorAppSettings::instance()
@@ -9,15 +11,16 @@ MonitorAppSettings& MonitorAppSettings::instance()
 
 void MonitorAppSettings::save() const
 {
-	QSettings s{};
+	QSettings s{Manufacturer::RADIY, "Monitor3"};	// Explicitly point app name, as it can be changed via settings.
 	save(s);
 	return;
 }
 
 void MonitorAppSettings::restore()
 {
-	QSettings s{};
+	QSettings s{Manufacturer::RADIY, "Monitor3"};	// Explicitly point app name, as it can be changed via settings.
 	load(s);
+	m_wasLoadedFromFile = false;
 	return;
 }
 
@@ -33,7 +36,13 @@ bool MonitorAppSettings::loadFromFile(QString fileName)
 {
 	QSettings s{fileName, QSettings::IniFormat};
 	load(s);
+	m_wasLoadedFromFile = true;
 	return s.status() == QSettings::Status::NoError;
+}
+
+bool MonitorAppSettings::wasLoadedFromFile() const
+{
+	return m_wasLoadedFromFile;
 }
 
 void MonitorAppSettings::save(QSettings& settings) const
@@ -54,6 +63,7 @@ void MonitorAppSettings::save(QSettings& settings) const
 	settings.setValue("MonitorAppSettings/showLogo", data.showLogo);
 	settings.setValue("MonitorAppSettings/showItemsLabels", data.showItemsLabels);
 	settings.setValue("MonitorAppSettings/singleInstance", data.singleInstance);
+	settings.setValue("MonitorAppSettings/zoomMode", static_cast<int>(data.zoomMode));
 
 	return;
 }
@@ -76,6 +86,9 @@ void MonitorAppSettings::load(const QSettings& settings)
 	data.showLogo = settings.value("MonitorAppSettings/showLogo", true).toBool();
 	data.showItemsLabels = settings.value("MonitorAppSettings/showItemsLabels", false).toBool();
 	data.singleInstance = settings.value("MonitorAppSettings/singleInstance", false).toBool();
+
+	data.zoomMode = static_cast<VFrame30::ZoomMode>(settings.value("MonitorAppSettings/zoomMode", 
+																		 static_cast<int>(VFrame30::ZoomMode::Manual)).toInt());
 
 	set(data);
 }
@@ -171,6 +184,12 @@ bool MonitorAppSettings::showItemsLabels() const
 {
 	QMutexLocker l(&m_mutex);
 	return m_data.showItemsLabels;
+}
+
+VFrame30::ZoomMode MonitorAppSettings::zoomMode() const
+{
+	QMutexLocker l(&m_mutex);
+	return m_data.zoomMode;
 }
 
 bool MonitorAppSettings::singleInstance() const

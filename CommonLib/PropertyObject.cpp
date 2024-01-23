@@ -1,5 +1,5 @@
 #ifndef COMMON_LIB_DOMAIN
-#error Don't include this file in the project! Link DbLib instead.
+#error Do not include this file in the project! Link DbLib instead.
 #endif
 
 #include "PropertyObject.h"
@@ -72,43 +72,6 @@ PropertyValueNoGetterSetter* PropertyObject::addProperty(const QString& caption,
 	property->setCategory(category);
 	property->setVisible(visible);
 	property->setValue(value);
-
-	m_properties[caption] = property;
-
-	emit propertyListChanged();
-
-	return property.get();
-}
-
-PropertyValue<OrderedHash<int, QString>>* PropertyObject::addDynamicEnumProperty(
-		const QString& caption,
-		const std::shared_ptr<OrderedHash<int, QString>>& enumValues,
-		bool visible /*= false*/,
-		const std::function<int(void)>& getter /*= std::function<int(void)>()*/,
-		const std::function<void(int)>& setter /*= std::function<void(int)>()*/)
-{
-	if (enumValues.get() == nullptr)
-	{
-		Q_ASSERT(enumValues);
-		return nullptr;
-	}
-
-	std::shared_ptr<PropertyValue<OrderedHash<int, QString>>> property = std::make_shared<PropertyValue<OrderedHash<int, QString>>>(enumValues);
-
-	property->setCaption(caption);
-	property->setVisible(visible);
-	property->setGetter(getter);
-	property->setSetter(setter);
-
-	if (!getter)
-	{
-		property->setValue(QVariant::fromValue(int()));
-	}
-
-	if (!setter)
-	{
-		property->setReadOnly(true);
-	}
 
 	m_properties[caption] = property;
 
@@ -311,7 +274,7 @@ void PropertyObject::showCategoryProperties(const QString& category)
 // Add properties
 // 1. If properties have getter or setter they must be added via PropertyObject::addProperty
 // because getter and setter are binded to this
-// 2. It is posible to use addProperties with getter and setter properties
+// 2. It is possible to use addProperties with getter and setter properties
 // if they were added via PropertyObject::addProperty and later removed by removeAllProperties
 //
 void PropertyObject::addProperties(const std::vector<std::shared_ptr<Property>>& properties)
@@ -329,9 +292,9 @@ void PropertyObject::addProperties(const std::vector<std::shared_ptr<Property>>&
 	return;
 }
 
-void PropertyObject::addProperty(std::shared_ptr<Property>& property)
+void PropertyObject::addProperty(std::shared_ptr<Property> property)
 {
-	m_properties[property->caption()] = property;
+	m_properties[property->caption()] = std::move(property);
 
 	emit propertyListChanged();
 

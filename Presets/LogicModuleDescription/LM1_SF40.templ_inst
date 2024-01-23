@@ -1,0 +1,25 @@
+<root>
+	<inst_count id="LOGIC" MaxInstCount="256" />
+	<inst_count id="NOT" MaxInstCount="256" />
+	<inst_count id="TCT" MaxInstCount="256" />
+	<inst_count id="FLIP_FLOP" MaxInstCount="256" />
+	<inst_count id="CTUD" MaxInstCount="256" />	
+	<inst_count id="MAJ" MaxInstCount="256" />
+	<inst_count id="SRSST" MaxInstCount="256" />
+	<inst_count id="BCOD" MaxInstCount="256" />
+	<inst_count id="BDEC" MaxInstCount="256" />
+	<inst_count id="BCOMP" MaxInstCount="256" />
+	<inst_count id="DAMPER" MaxInstCount="256" />
+	<inst_count id="MATH" MaxInstCount="256" />
+	<inst_count id="SCALE" MaxInstCount="256" />
+	<inst_count id="FUNC" MaxInstCount="256" />
+	<inst_count id="INT" MaxInstCount="256" />
+	<inst_count id="DPCOMP" MaxInstCount="256" />
+	<inst_count id="MUX" MaxInstCount="256" />
+	<inst_count id="LATCH" MaxInstCount="256" />
+	<inst_count id="LIM" MaxInstCount="256" />
+	<inst_count id="POL" MaxInstCount="256" />
+	<inst_count id="DER" MaxInstCount="256" />
+	<inst_count id="MISMATCH" MaxInstCount="256" />
+	<inst_count id="TCONV" MaxInstCount="256" />
+</root>

@@ -140,7 +140,7 @@ namespace VFrame30
 		//
 		auto drawPin = [&](SchemaPoint pt)
 			{
-				int connectionCount = layer->GetPinPosConnectinCount(pt, itemUnit());
+				int connectionCount = layer->GetPinPosConnectinCount(pt);
 
 				if (connectionCount > 1)
 				{

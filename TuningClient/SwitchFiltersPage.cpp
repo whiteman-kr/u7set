@@ -9,6 +9,7 @@
 #include <QMessageBox>
 
 #include "SwitchFiltersPageOptions.h"
+#include "Main.h"
 #include "MainWindow.h"
 #include "Settings.h"
 
@@ -119,7 +120,7 @@ SwitchFiltersPage::SwitchFiltersPage(TuningConfigController& configController,
 
 	createControls(m_tuningFilterStorage.root());
 
-	connect(theMainWindow, &MainWindow::timerTick500, this, &SwitchFiltersPage::onTimerTick500);
+	connect(theApp.mainWindow(), &MainWindow::timerTick500, this, &SwitchFiltersPage::onTimer);
 
 	setLayout(m_mainLayout);
 }
@@ -235,13 +236,15 @@ void SwitchFiltersPage::createControls(std::shared_ptr<TuningFilter> root)
 
 		createButtons();
 
+		const auto& s = TuningClientAppSettings::instance().user();
+
 		if (m_prevButton != nullptr)
 		{
-			m_prevButton->setVisible(m_buttonFilters.size() > theSettings.m_switchPresetsPageColCount * theSettings.m_switchPresetsPageRowCount);
+			m_prevButton->setVisible(m_buttonFilters.size() > s.m_switchPresetsPageColCount * s.m_switchPresetsPageRowCount);
 		}
 		if (m_nextButton != nullptr)
 		{
-			m_nextButton->setVisible(m_buttonFilters.size() > theSettings.m_switchPresetsPageColCount * theSettings.m_switchPresetsPageRowCount);
+			m_nextButton->setVisible(m_buttonFilters.size() > s.m_switchPresetsPageColCount * s.m_switchPresetsPageRowCount);
 		}
 
 		// Main layout
@@ -292,18 +295,20 @@ void SwitchFiltersPage::createControls(std::shared_ptr<TuningFilter> root)
 	//
 	if (m_filterButtonsWidget != nullptr && m_filterTableWidget != nullptr)
 	{
+		auto& s = TuningClientAppSettings::instance().user();
+
 		m_vSplitter	= new QSplitter(Qt::Vertical);
 		m_vSplitter->addWidget(m_filterButtonsWidget);
 		m_vSplitter->addWidget(m_filterTableWidget);
-		connect(m_vSplitter, &QSplitter::splitterMoved, [this](int pos, int index)
+		connect(m_vSplitter, &QSplitter::splitterMoved, [this, &s](int pos, int index)
 		{
 			Q_UNUSED(pos);
 			Q_UNUSED(index);
-			theSettings.m_switchPresetsPageSplitterPosition = m_vSplitter->saveState();
+			s.m_switchPresetsPageSplitterPosition = m_vSplitter->saveState();
 		});
-		if (theSettings.m_switchPresetsPageSplitterPosition.isEmpty() == false)
+		if (s.m_switchPresetsPageSplitterPosition.isEmpty() == false)
 		{
-			m_vSplitter->restoreState(theSettings.m_switchPresetsPageSplitterPosition);
+			m_vSplitter->restoreState(s.m_switchPresetsPageSplitterPosition);
 		}
 		m_mainLayout->addWidget(m_vSplitter);
 	}
@@ -423,15 +428,17 @@ void SwitchFiltersPage::createButtons()
 
 		connect(b, &FilterPushButton::clicked, this, &SwitchFiltersPage::onFilterButtonClicked);
 
-		b->setFixedSize(theSettings.m_switchPresetsPageButtonsWidth, theSettings.m_switchPresetsPageButtonsHeight);
+		const auto& s = TuningClientAppSettings::instance().user();
+
+		b->setFixedSize(s.m_switchPresetsPageButtonsWidth, s.m_switchPresetsPageButtonsHeight);
 
 		m_buttonsLayout->addWidget(b, row, col);
 
-		if (col++ >= theSettings.m_switchPresetsPageColCount - 1)
+		if (col++ >= TuningClientAppSettings::instance().user().m_switchPresetsPageColCount - 1)
 		{
 			col = 0;
 
-			if (row++ >= theSettings.m_switchPresetsPageRowCount - 1)
+			if (row++ >= TuningClientAppSettings::instance().user().m_switchPresetsPageRowCount - 1)
 			{
 				break;
 			}
@@ -685,7 +692,7 @@ int SwitchFiltersPage::countDiscretes(TuningFilter* filter)
 
 	std::vector <TuningFilterSignal> filterSignals = filter->getFilterSignals();
 
-	for (auto tfs : filterSignals)
+	for (const auto& tfs : filterSignals)
 	{
 		bool ok = false;
 
@@ -716,7 +723,7 @@ int SwitchFiltersPage::countWritingEnabled(TuningFilter* filter)
 
 	std::vector <TuningFilterSignal> filterSignals = filter->getFilterSignals();
 
-	for (auto tfs : filterSignals)
+	for (const auto& tfs : filterSignals)
 	{
 		bool ok = false;
 
@@ -749,54 +756,60 @@ void SwitchFiltersPage::showEvent(QShowEvent *ev)
 {
 	Q_UNUSED(ev);
 
-	onTimerTick500();
+	onTimer();
 }
 
 void SwitchFiltersPage::onOptions()
 {
+	auto& s = TuningClientAppSettings::instance().user();
+
 	SwitchFiltersPageOptions d(this,
-							   theSettings.m_switchPresetsPageColCount,
-							   theSettings.m_switchPresetsPageRowCount,
-							   theSettings.m_switchPresetsPageButtonsWidth,
-							   theSettings.m_switchPresetsPageButtonsHeight);
+							   s.m_switchPresetsPageColCount,
+							   s.m_switchPresetsPageRowCount,
+							   s.m_switchPresetsPageButtonsWidth,
+							   s.m_switchPresetsPageButtonsHeight);
 	if (d.exec() == QDialog::Accepted)
 	{
-		theSettings.m_switchPresetsPageColCount = d.buttonsColCount();
-		theSettings.m_switchPresetsPageRowCount = d.buttonsRowCount();
-		theSettings.m_switchPresetsPageButtonsWidth = d.buttonsWidth();
-		theSettings.m_switchPresetsPageButtonsHeight = d.buttonsHeight();
+		s.m_switchPresetsPageColCount = d.buttonsColCount();
+		s.m_switchPresetsPageRowCount = d.buttonsRowCount();
+		s.m_switchPresetsPageButtonsWidth = d.buttonsWidth();
+		s.m_switchPresetsPageButtonsHeight = d.buttonsHeight();
 
 		m_buttonStartIndex = 0;
 
 		createButtons();
 
-		m_prevButton->setVisible(m_buttonFilters.size() > theSettings.m_switchPresetsPageColCount * theSettings.m_switchPresetsPageRowCount);
-		m_nextButton->setVisible(m_buttonFilters.size() > theSettings.m_switchPresetsPageColCount * theSettings.m_switchPresetsPageRowCount);
+		m_prevButton->setVisible(m_buttonFilters.size() > s.m_switchPresetsPageColCount * s.m_switchPresetsPageRowCount);
+		m_nextButton->setVisible(m_buttonFilters.size() > s.m_switchPresetsPageColCount * s.m_switchPresetsPageRowCount);
 
-		onTimerTick500();
+		onTimer();
 	}
 }
 
 void SwitchFiltersPage::onPrev()
 {
-	if (m_buttonStartIndex >= theSettings.m_switchPresetsPageColCount * theSettings.m_switchPresetsPageRowCount)
+	auto& s = TuningClientAppSettings::instance().user();
+
+	if (m_buttonStartIndex >= s.m_switchPresetsPageColCount * s.m_switchPresetsPageRowCount)
 	{
-		m_buttonStartIndex -= theSettings.m_switchPresetsPageColCount * theSettings.m_switchPresetsPageRowCount;
+		m_buttonStartIndex -= s.m_switchPresetsPageColCount * s.m_switchPresetsPageRowCount;
 
 		createButtons();
 
-		onTimerTick500();
+		onTimer();
 	}
 }
 void SwitchFiltersPage::onNext()
 {
-	if (m_buttonStartIndex < m_buttonFilters.size() - theSettings.m_switchPresetsPageColCount * theSettings.m_switchPresetsPageRowCount)
+	auto& s = TuningClientAppSettings::instance().user();
+
+	if (m_buttonStartIndex < m_buttonFilters.size() - s.m_switchPresetsPageColCount * s.m_switchPresetsPageRowCount)
 	{
-		m_buttonStartIndex += theSettings.m_switchPresetsPageColCount * theSettings.m_switchPresetsPageRowCount;
+		m_buttonStartIndex += s.m_switchPresetsPageColCount * s.m_switchPresetsPageRowCount;
 
 		createButtons();
 
-		onTimerTick500();
+		onTimer();
 	}
 }
 
@@ -805,7 +818,7 @@ void SwitchFiltersPage::onApply()
 	apply();
 }
 
-void SwitchFiltersPage::onTimerTick500()
+void SwitchFiltersPage::onTimer()
 {
 	if  (isVisible() == false)
 	{

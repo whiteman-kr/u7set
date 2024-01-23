@@ -80,7 +80,7 @@ namespace ClientLib
 			int requestQueueSize = 0;
 			int requestCount = 0;
 			int replyCount = 0;
-			int isConnected = 0;		// It must be int for summing up statistcics for several connections
+			int isConnected = 0;		// It must be int for summing up statistics for several connections.
 		};
 
 		Stat stat() const;
@@ -100,7 +100,7 @@ namespace ClientLib
 
 		mutable QMutex m_dataMutex;
 
-		E::RtTrendsSamplePeriod m_samplePeriod;
+		E::RtTrendsSamplePeriod m_samplePeriod = E::RtTrendsSamplePeriod::sp_1s;
 		std::set<QString> m_signalSet;
 
 	private:

@@ -1,18 +1,12 @@
 @startuml
 
-!include ./CommonLib.puml
-!include ./UtilsLib.puml
 !include ./OnlineLib.puml
-!include ./Protobuf.puml
 !include ./ServiceLib.puml
 !include ./AppSignalLib.puml
 !include ./HardwareLib.puml
 
 [DiagDataService]
-DiagDataService -up-> [CommonLib]
-DiagDataService -up-> [UtilsLib]
 DiagDataService -up-> [OnlineLib]
-DiagDataService -up-> [Protobuf]
 DiagDataService -up-> [ServiceLib]
 DiagDataService -up-> [AppSignalLib]
 DiagDataService -up-> [HardwareLib]

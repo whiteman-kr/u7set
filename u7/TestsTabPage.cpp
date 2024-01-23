@@ -2,6 +2,7 @@
 #include "GlobalMessanger.h"
 #include "Forms/ComparePropertyObjectDialog.h"
 #include "Simulator/SimSelectBuildDialog.h"
+#include "../lib/ConstStrings.h"
 
 
 #ifdef QT_DEBUG
@@ -110,31 +111,31 @@ void OutputDockLog::swapData(QStringList* data, int* errorCount, int* warningCou
 	return;
 }
 
-bool OutputDockLog::writeAlert(const QString& text)
+bool OutputDockLog::writeAlert(const QString& text, const QString& /*tag = {}*/)
 {
 	write(QtMsgType::QtCriticalMsg, text);
 	return true;
 }
 
-bool OutputDockLog::writeError(const QString& text)
+bool OutputDockLog::writeError(const QString& text, const QString& /*tag = {}*/)
 {
 	write(QtMsgType::QtCriticalMsg, text);
 	return true;
 }
 
-bool OutputDockLog::writeWarning(const QString& text)
+bool OutputDockLog::writeWarning(const QString& text, const QString& /*tag = {}*/)
 {
 	write(QtMsgType::QtWarningMsg, text);
 	return true;
 }
 
-bool OutputDockLog::writeMessage(const QString& text)
+bool OutputDockLog::writeMessage(const QString& text, const QString& /*tag = {}*/)
 {
 	write(QtMsgType::QtInfoMsg, text);
 	return true;
 }
 
-bool OutputDockLog::writeText(const QString& text)
+bool OutputDockLog::writeText(const QString& text, const QString& /*tag = {}*/)
 {
 	write(QtMsgType::QtInfoMsg, text);
 	return true;
@@ -166,7 +167,7 @@ void OutputDockLog::write(QtMsgType type, const QString& msg)
 				   .arg(time)
 				   .arg(color)
 				   .arg(prefix)
-				   .arg(msg);
+				   .arg(msg.toHtmlEscaped());
 
 	QMutexLocker l(&m_mutex);
 	m_data.push_back(html);
@@ -729,7 +730,7 @@ void OutputDockWidget::timerEvent(QTimerEvent* /*event*/)
 
 	if (m_errorCount != errorCount)
 	{
-		if (m_errorCount == 0)
+		if (errorCount > 0)
 		{
 			m_prevErrorButton->setEnabled(true);
 			m_nextErrorButton->setEnabled(true);
@@ -739,9 +740,9 @@ void OutputDockWidget::timerEvent(QTimerEvent* /*event*/)
 		m_errorLabel->setText(tr("E: %1").arg(QString::number(errorCount).rightJustified(4, '0')));
 	}
 
-	if (m_warningCount == 0 && warningCount > 0)
+	if (m_warningCount != warningCount)
 	{
-		if (m_warningCount == 0)
+		if (warningCount > 0)
 		{
 			m_prevWarningButton->setEnabled(true);
 			m_nextWarningButton->setEnabled(true);
@@ -1198,6 +1199,34 @@ void TestsWidget::newFile()
 	else
 	{
 		templateScript = rcFile.readAll();
+	}
+
+	/* If hadrware(TestSuite) test is created, replace
+	 * var ScriptTags = ["simtest"];
+	 * string to
+	 * var ScriptTags = ["hwtest"];
+	 */
+	{
+		QModelIndexList selectedRows = m_testsTreeView->selectedSourceRows(); // Indexes from source model
+		if (selectedRows.size() != 1)
+		{
+			assert(selectedRows.size() == 1);
+			return;
+		}
+		QString newFilePath;
+		FileTreeModelItem* item = m_testsTreeModel->fileItem(selectedRows[0]);
+		while (item != nullptr)
+		{
+			newFilePath = item->fileName() + '/' + newFilePath;
+			item = item->parent();
+		}
+
+		if (newFilePath.contains("HardwareTests", Qt::CaseInsensitive) == true)
+		{
+			QString tempScript = QString::fromStdString(templateScript.toStdString());
+			tempScript.replace("var ScriptTags = [\"simtest\"];", "var ScriptTags = [\"hwtest\"];");
+			templateScript = tempScript.toUtf8();
+		}
 	}
 
 	// Create file and open it
@@ -1721,7 +1750,8 @@ void TestsWidget::runAllTestFiles()
 
 	std::vector<DbFileInfo> testsFiles = testsTree.toVectorIf([this](const DbFileInfo& f)
 	{
-		return isEditableExtension(f.fileName());
+		bool checkedOutAndDeleted = f.state() == E::VcsState::CheckedOut && f.action() == E::VcsItemAction::Deleted;
+		return isEditableExtension(f.fileName()) && f.deleted() == false && checkedOutAndDeleted == false;
 	});
 
 	if (testsFiles.empty() == true)
@@ -1895,6 +1925,17 @@ void TestsWidget::runTestCurrentFile()
 
 	std::vector<int> fileIds;
 	fileIds.push_back(m_currentFileId);
+
+	{
+		DbFileInfo globalScriptFileInfo;
+		bool ok = dbc()->getFileInfo(File::GLOBAL_SCRIPT_FULL_PATH, &globalScriptFileInfo, this);
+
+		if (ok == true && globalScriptFileInfo.isNull() == false && globalScriptFileInfo.deleted() == false)
+		{
+			fileIds.push_back(globalScriptFileInfo.fileId());
+		}
+	}
+
 	runTests(fileIds);
 	return;
 }
@@ -2830,25 +2871,38 @@ void TestsWidget::runSimTests(const QString& buildPath, const std::vector<DbFile
 
 	if (ok == false)
 	{
-		QMessageBox::critical(this, qAppName(), tr("Cannot open project for simultaion. For details see Output window."));
+		QMessageBox::critical(this, qAppName(), tr("Cannot open project for simulation. For details see Output window."));
 		return;
 	}
 
-	// Run simualtion for all LogicModule(s)
+	// Run simulation for all LogicModule(s)
 	//
 	m_simulator.control().setRunList({});
 
 	// Start tests
 	//
+	Sim::SimScriptItem globalScript;
 	std::vector<Sim::SimScriptItem> scripts;
 	scripts.reserve(latestFiles.size());
 
 	for (const std::shared_ptr<DbFile>& file : latestFiles)
 	{
-		scripts.emplace_back(Sim::SimScriptItem{file->data(), file->fileName()});
+		if (file->fileName() == File::GLOBAL_SCRIPT)
+		{
+			globalScript = {file->data(), file->fileName()};
+		}
+		else
+		{
+			scripts.emplace_back(file->data(), file->fileName());
+		}
 	}
 
-	m_simulator.runScripts(scripts, projectProperties.simTestsTimeout());
+	if (scripts.empty() == true)
+	{
+		return;
+	}
+
+	m_simulator.runScripts(scripts, globalScript, projectProperties.simTestsTimeout());
 
 	return;
 }
@@ -3398,22 +3452,20 @@ void TestsWidget::setTestsTreeActionsState()
 	bool canAnyBeCheckedIn = false;
 	bool canAnyBeCheckedOut = false;
 
+	bool rootItemSelected = false;
+
 	for (const QModelIndex& mi : selectedIndexList)
 	{
-		if (mi.parent().isValid() == false)
-		{
-			// Forbid root folders processing
-			//
-			folderSelected = true;
-
-			continue;
-		}
-
 		const FileTreeModelItem* file = m_testsTreeModel->fileItem(mi);
 		if (file == nullptr)
 		{
 			assert(file);
 			return;
+		}
+
+		if (mi.parent().isValid() == false)
+		{
+			rootItemSelected = true;
 		}
 
 		if (file->isFolder() == true)
@@ -3436,17 +3488,24 @@ void TestsWidget::setTestsTreeActionsState()
 		{
 			canAnyBeCheckedOut = true;
 		}
-
 	}
 
-	// Enable Actions
+	bool fileSelected = !folderSelected;
+
+	// Enable only when file is selected
 	//
-	m_openFileAction->setEnabled(selectedIndexList.size() == 1 && editableExtension == true);
-	m_newFileAction->setEnabled(selectedIndexList.size() == 1);
-	m_newFolderAction->setEnabled(selectedIndexList.size() == 1);
-	m_addFileAction->setEnabled(selectedIndexList.size() == 1);
-	m_renameFileAction->setEnabled(selectedIndexList.size() == 1 && canAnyBeCheckedIn);
-	m_moveFileAction->setEnabled(canAnyBeCheckedIn && folderSelected == false);
+	m_openFileAction->setEnabled(folderSelected == false && selectedIndexList.size() == 1 && editableExtension == true);
+	
+	// Enable when folder is selected only
+	//
+	m_newFileAction->setEnabled(folderSelected == true && selectedIndexList.size() == 1);
+	m_newFolderAction->setEnabled(folderSelected == true && selectedIndexList.size() == 1);
+	m_addFileAction->setEnabled(folderSelected == true && selectedIndexList.size() == 1);
+
+	// Enable only when non-root file is selected
+	//
+	m_renameFileAction->setEnabled(folderSelected == false && rootItemSelected == false && selectedIndexList.size() == 1 && canAnyBeCheckedIn);
+	m_moveFileAction->setEnabled(folderSelected == false && rootItemSelected == false && canAnyBeCheckedIn);
 
 	// Delete Items action
 	//
@@ -3480,9 +3539,14 @@ void TestsWidget::setTestsTreeActionsState()
 		}
 	}
 
-	m_checkInAction->setEnabled(canAnyBeCheckedIn);
-	m_checkOutAction->setEnabled(canAnyBeCheckedOut);
-	m_undoChangesAction->setEnabled(canAnyBeCheckedIn);
+	// Process only non-root folders or files
+	//
+	m_checkInAction->setEnabled((fileSelected == true || (folderSelected == true && rootItemSelected == false)) && canAnyBeCheckedIn);
+	m_checkOutAction->setEnabled((fileSelected == true || (folderSelected == true && rootItemSelected == false)) && canAnyBeCheckedOut);
+	m_undoChangesAction->setEnabled((fileSelected == true || (folderSelected == true && rootItemSelected == false)) && canAnyBeCheckedIn);
+
+	// Enable only when file is selected
+	//
 	m_historyAction->setEnabled(selectedIndexList.size() == 1 && folderSelected == false);
 	m_compareAction->setEnabled(selectedIndexList.size() == 1 && folderSelected == false);
 

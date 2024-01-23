@@ -1,0 +1,17 @@
+<Command 
+	Caption="mov32"		
+	Code="0480"	
+	CodeMask="07c0"	
+	SimulationFunc="command_mov32"		
+	ParseFunc="parse_mov32"		
+	Description="Copy 32-bit data from memory to memory"
+
+	CodeSize="3" 
+	ReadTime="11" 
+	WaitFbExecution="false"
+
+	ConstRuntime="20"
+
+	CheckFunc="check_mov32"
+	GetMnemoFunc="mnemo_mov32"
+	CalcExecTimeFunc="exectime_const"/>

@@ -1,23 +1,20 @@
 #include "../Builder/ModuleFirmwareWriter.h"
-#include "../UtilsLib/CsvFile.h"
 #include "../UtilsLib/Crc.h"
+#include "../UtilsLib/CsvFile.h"
 #include "../UtilsLib/WUtils.h"
+#include "../version.h"
 
-#include <qqml.h>
-#include <QJsonObject>
-#include <QJsonArray>
 #include <QDebug>
+#include <QJsonArray>
 #include <QJsonDocument>
-#include <QtEndian>
+#include <QJsonObject>
 #include <QQmlEngine>
+#include <QtEndian>
+#include <qqml.h>
 
-#if __has_include("../gitlabci_version.h")
-#	include "../gitlabci_version.h"
-#endif
 
 namespace Hardware
 {
-
 	//
 	// ModuleFirmwareWriter
 	//
@@ -559,12 +556,7 @@ namespace Hardware
 		m_buildSoftware += ", debug";
 #endif
 
-#ifdef GITLAB_CI_BUILD
-		m_buildSoftware += ", commit SHA1: " CI_COMMIT_SHA;
-#else
-		m_buildSoftware += ", commit SHA1: LOCALBUILD";
-#endif
-
+		m_buildSoftware += ", commit SHA1: " U7SET_COMMIT_HASH;
 
 		QString m_buildTime = QDateTime().currentDateTime().toString("dd.MM.yyyy hh:mm:ss");
 
@@ -1012,7 +1004,7 @@ namespace Hardware
 
 	}
 
-	UnitsConvertor* ModuleFirmwareWriter::jsGetUnitsConvertor()
+	UnitsConverter* ModuleFirmwareWriter::jsGetUnitsConvertor()
 	{
 		QQmlEngine::setObjectOwnership(&m_unitsConvertor, QQmlEngine::ObjectOwnership::CppOwnership);
 		return &m_unitsConvertor;

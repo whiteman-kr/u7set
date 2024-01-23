@@ -888,6 +888,16 @@ static const AppSignalParam dummy;
 		return signalState(::calcHash(appSignalId), found);
 	}
 
+	AppSignalState AppSignalManager::signalState(Hash signalHash, Hash /*dataServerHash*/, bool* found) const
+	{
+		return signalState(signalHash, found, true);
+	}
+
+	AppSignalState AppSignalManager::signalState(const QString& appSignalId, const QString& /*dataServerId*/, bool* found) const
+	{
+		return signalState(::calcHash(appSignalId), found);
+	}
+
 	void AppSignalManager::signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const
 	{
 		// This function must be optimized, signalState every times locks/unlocks/locks/unlock...
@@ -933,6 +943,16 @@ static const AppSignalParam dummy;
 		}
 
 		return signalState(appSignalHashes, result, found);
+	}
+
+	void AppSignalManager::signalState(const std::vector<Hash>& appSignalHashes, Hash /*dataServerHash*/, std::vector<AppSignalState>* result, int* found) const
+	{
+		return signalState(appSignalHashes, result, found);
+	}
+
+	void AppSignalManager::signalState(const std::vector<QString>& appSignalIds, const QString& /*dataServerId*/, std::vector<AppSignalState>* result, int* found) const
+	{
+		return signalState(appSignalIds, result, found);
 	}
 
 	QStringList AppSignalManager::signalTags(Hash /*signalHash*/) const
@@ -985,7 +1005,7 @@ static const AppSignalParam dummy;
 		return signalType(::calcHash(appSignalId), found);
 	}
 
-	QString AppSignalManager::equipmentToAppSiganlId(const QString& /*equipmentId*/) const
+	QString AppSignalManager::equipmentToAppSignalId(const QString& /*equipmentId*/) const
 	{
 		Q_ASSERT(false);	// to do
 		return {};

@@ -73,16 +73,16 @@ namespace VFrame30
 		/// \brief Return true if is Diag schema.
 		bool isDiagSchema() const;
 
-		/// \brief Get schema layer by index.
+		/// \brief Get schema layer by index. Returned value has type ScriptSchemaLayer or undefined if layer is not found.
 		QJSValue layer(int index);
 
-		/// \brief Get schema layer by caption.
+		/// \brief Get schema layer by caption. Returned value has type ScriptSchemaLayer or undefined if layer is not found.
 		QJSValue layer(QString caption);
 
 		/// \brief Get schema items with specified tag.
 		QVariantList itemsByTag(QString tag);
 
-		/// \brief Finds schema item by its name (ObjectName property). Returned value has SchemaItem type or undefined if item is not found.
+		/// \brief Finds schema item by its name (ObjectName property). Returned value has type SchemaItem or undefined if item is not found.
 		QJSValue findSchemaItem(QString objectName);
 
 	private:
@@ -176,7 +176,7 @@ namespace VFrame30
 		// Layers
 		//
 	public:
-		// Do not change to value semantic, as iterator from this getter are used in algs
+		// Do not change to value semantic, as ITERATORS from this getter are used in algs
 		//
 		const std::vector<std::shared_ptr<SchemaLayer>>& layers() const;
 
@@ -189,7 +189,7 @@ namespace VFrame30
 		void clearLayers();
 		void addLayer(std::shared_ptr<SchemaLayer> layer);
 
-		// Properties and Datas
+		// Properties and Data
 		//
 	public:
 		[[nodiscard]] QUuid guid() const;
@@ -323,7 +323,7 @@ namespace VFrame30
 	};
 
 
-	// SchemaDaetails is a class to parse to/from JSON doc
+	// SchemaDetails is a class to parse to/from JSON doc
 	// Format:
 	//		Version : 1
 	//		SchemaID : "SCHMEAID"
@@ -337,10 +337,10 @@ namespace VFrame30
 		SchemaDetails() noexcept = default;
 		SchemaDetails(const SchemaDetails&) = default;
 		SchemaDetails(SchemaDetails&&) = default;
-		SchemaDetails(const QString& details) noexcept;
-
 		SchemaDetails& operator=(const SchemaDetails&) = default;
 		SchemaDetails& operator=(SchemaDetails&&) noexcept = default;
+
+		SchemaDetails(const QString& details) noexcept;
 
 		bool operator<(const SchemaDetails& b) const noexcept;
 
@@ -378,6 +378,7 @@ namespace VFrame30
 		std::set<QString> m_loopbacks;
 		std::set<QString> m_schemaTags;		// All tags are kept in lowercase
 		std::set<QString> m_itemTags;		// All tags are kept in lowercase
+		std::set<QString> m_packedLogicIds;
 		std::set<QUuid> m_guids;
 
 		// SchemaItemIndicator, type trend
@@ -417,7 +418,7 @@ namespace VFrame30
 		SchemaDetailsSet& operator=(const SchemaDetailsSet&) = default;
 		SchemaDetailsSet& operator=(SchemaDetailsSet&&) noexcept = default;
 
-		// Serializatin implementation of Proto::ObjectSerialization<>
+		// Serialization implementation of Proto::ObjectSerialization<>
 		//
 		friend Proto::ObjectSerialization<SchemaDetailsSet>;
 
@@ -445,6 +446,7 @@ namespace VFrame30
 		std::shared_ptr<SchemaDetails> schemaDetails(int index) const;
 
 		QStringList schemasByAppSignalId(const QString& appSignalId) const;
+		QStringList schemasByConnectionId(const QString& connectionId) const;
 		QStringList schemasByLoopbackId(const QString& loopbackId) const;
 
 		int schemaCount() const;
@@ -458,6 +460,6 @@ namespace VFrame30
 		std::map<QString, std::shared_ptr<SchemaDetails>> m_details;	// Key is schemaId
 	};
 
-}
+} // namespace VFrame30
 
 

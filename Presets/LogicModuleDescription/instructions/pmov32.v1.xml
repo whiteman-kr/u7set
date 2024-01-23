@@ -1,0 +1,17 @@
+<Command 
+	Caption="pmov32"
+	Code="0680"
+	CodeMask="07c0"
+	SimulationFunc="command_pmov32"
+	ParseFunc="parse_pmov32"
+	Description="Copy 32-bit data from memory to memory written in prior cycle"
+
+	CodeSize="3" 
+	ReadTime="11" 
+	WaitFbExecution="false"
+
+	ConstRuntime="18"
+
+	CheckFunc="check_pmov32"
+	GetMnemoFunc="mnemo_pmov32"
+	CalcExecTimeFunc="exectime_const"/>

@@ -225,7 +225,7 @@ namespace VFrame30
 		return engine->toScriptValue(s);
 	}
 
-	QString ScriptAppSignalController::equipmentToAppSiganlId(QString equipmentId) const
+	QString ScriptAppSignalController::equipmentToAppSignalId(QString equipmentId) const
 	{
 		if (m_appSignalManager == nullptr)
 		{
@@ -233,7 +233,12 @@ namespace VFrame30
 			return {};
 		}
 
-		return m_appSignalManager->equipmentToAppSiganlId(equipmentId);
+		return m_appSignalManager->equipmentToAppSignalId(equipmentId);
+	}
+
+	QString ScriptAppSignalController::equipmentToAppSiganlId(QString equipmentId) const
+	{
+		return equipmentToAppSignalId(equipmentId);
 	}
 
 	QJSValue ScriptAppSignalController::signalState(QString signalId) const

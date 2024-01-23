@@ -65,24 +65,22 @@ bool MonitorConfigController::updateConfiguration(const ClientLib::Configuration
 
 	// Get image file
 	//
-	auto getImageFunc = [this](const QString& fileId) -> QImage
+	auto getImageFunc = [this](const QString& fileId) -> QPixmap
 		{
+			QPixmap pixmap;
 			QByteArray ba;
 
 			if (bool ok = getFileBlockedById(fileId, &ba, nullptr);
 				ok == true)
 			{
-				return QImage::fromData(ba);
+				pixmap.loadFromData(ba);
 			}
-			else
-			{
-				return {};
-			}
+
+			return pixmap;
 		};
 
 	config.globalScript = getScriptFunc("/" + MonitorAppSettings::instance().equipmentId() + "/GlobalScript.js");
 	config.logoImage = getImageFunc(CfgFileId::LOGO);
-	config.onConfigurationArrivedScript = getScriptFunc("/" + MonitorAppSettings::instance().equipmentId() + "/OnConfigurationArrived.js");
 
 	// Get tuning signal files
 	//
@@ -177,6 +175,22 @@ bool MonitorConfigController::updateConfiguration(const ClientLib::Configuration
 		}
 	}
 
+	// Get file MATS_USERS
+	//
+	if (config.tuningEnabled == true && config.tuningLogin == true)
+	{
+		QByteArray matsUsersData;
+		getFileBlockedById(CfgFileId::MATSUSERS, &matsUsersData, nullptr);
+		
+		QString errorString;
+		bool ok = config.matsUsers.loadFromByteArray(matsUsersData, errorString);
+		if (ok == false)
+		{
+			m_logFile.writeError(tr("MATS users storage loading failed."));
+			config.matsUsers.clear();
+		}
+	}
+
 	// Trace received params
 	//
 	qDebug() << "New configuration arrived.";
@@ -238,7 +252,7 @@ void MonitorConfigController::dump(const ConfigSettings& config) const
 
 	// --
 	//
-	m_logFile.writeMessage(QString("TuningEnabled = %.1").arg(config.tuningEnabled));
+	m_logFile.writeMessage(QString("TuningEnabled = %1").arg(config.tuningEnabled));
 	if (config.tuningEnabled == true)
 	{
 		for (const auto& ts : config.tuningServices)

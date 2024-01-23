@@ -1680,7 +1680,7 @@ class diff_match_patch {
 
     int bin_min, bin_mid;
     int bin_max = pattern.length() + text.length();
-    int *rd;
+    int *rd = NULL;
     int *last_rd = NULL;
     for (int d = 0; d < (int)pattern.length(); d++) {
       // Scan for the best match; each iteration allows for one more error.

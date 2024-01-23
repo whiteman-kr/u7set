@@ -122,7 +122,7 @@ public:
     Q_DECLARE_FLAGS(ServiceFlags, ServiceFlag)
 
 	QtServiceBase(int argc,
-				  char **argv,
+				  const char** argv,
 				  const QString& serviceName,
 				  std::shared_ptr<CircularLogger> logger);
 
@@ -194,7 +194,7 @@ public:
 
 public:
 	QtService(int argc,
-			  char** argv,
+			  const char** argv,
 			  QCoreApplication* app,
 			  const QString& serviceName,
 			  std::shared_ptr<CircularLogger> logger);

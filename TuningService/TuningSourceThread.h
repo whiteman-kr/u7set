@@ -11,6 +11,7 @@
 
 #include "TuningSource.h"
 #include "TuningMemory.h"
+#include "TuningSignal.h"
 
 namespace Tuning
 {
@@ -41,6 +42,7 @@ namespace Tuning
 		std::atomic<bool> setSOR = false;
 		std::atomic<bool> writingDisabled = false;
 		std::atomic<bool> hasUnappliedParams = false;
+		std::atomic<qint64> lmTime = 0;
 
 		// flags reported by LM in reply FotipHeader.flags
 		//
@@ -125,128 +127,6 @@ namespace Tuning
 
 	// ----------------------------------------------------------------------------------
 	//
-	// TuningSignal class declaration
-	//
-	// ----------------------------------------------------------------------------------
-
-	class TuningSignal
-	{
-	public:
-		void init(const AppSignal* s, int index, int tuningDataFrameSizeW);
-
-		QString appSignalID() const { return m_appSignalID; }
-
-		bool valid() const { return m_valid; }
-
-		E::SignalType signalType() const { return m_signalType; }
-
-		TuningValueType tuningValueType() const { return m_tuningValueType; }
-		QString tuningValueTypeStr() const;
-
-		TuningValue currentValue() const { return m_currentValue.tuningValue(); }
-		TuningValue readLowBound() const { return m_readLowBound.tuningValue(); }
-		TuningValue readHighBound() const { return m_readHighBound.tuningValue(); }
-		bool isTuningDefault() const { return m_tuningDefaultFlag; }
-
-		TuningValue defaultValue() const { return m_defaultValue; }
-		TuningValue lowBound() const { return m_lowBound; }
-		TuningValue highBound() const { return m_highBound; }
-
-		int offset() const { return m_offset; }
-		int bit() const { return m_bit; }
-		int frameNo() const { return m_frameNo; }
-
-		void setCurrentValue(bool valid, const TuningValue& value,
-							 qint64 readTime, qint64 lmTime,
-							 quint64 fotipProcessingNumerator);
-
-		void setReadLowBound(const TuningValue& value);
-		void setReadHighBound(const TuningValue& value);
-		void invalidate();
-
-		void initWriting(quint64 writeCommandID);
-		void finalizeWriting(quint64 writeCommandID, E::NetworkError errCode);
-
-		bool writeInProgress() const;
-
-		void setWriteClient(const QString& clientEquipmentID) { m_writeClient = calcHash(clientEquipmentID); }
-		void setWriteRequestTime(qint64 writeRequestTime) { m_writeRequestTime = writeRequestTime; }
-		void setSuccessfulWriteTime(qint64 writeTime) { m_successfulWriteTime = writeTime; }
-		void setUnsuccessfulWriteTime(qint64 writeTime) { m_unsuccessfulWriteTime = writeTime; }
-
-		qint64 successfulReadTime() const { return m_successfulReadTime; }
-		qint64 writeRequestTime() const { return m_writeRequestTime; }
-		qint64 successfulWriteTime() const { return m_successfulWriteTime; }
-		qint64 unsuccessfulWriteTime() const { return m_unsuccessfulWriteTime; }
-		qint64 lmTime() const { return m_lmTime; }
-		quint64 fotipProcessingNumerator() const { return m_fotipProcessingNumerator; }
-
-		Hash writeClient() const { return m_writeClient; }
-
-		E::NetworkError writeErrorCode() const { return m_writeErrorCode; }
-
-		Fotip::DataType fotipDataType() const;
-
-	private:
-		void updateTuningValuesType(E::SignalType signalType, E::AnalogAppSignalFormat analogFormat);
-
-	private:
-		QString m_appSignalID;
-		Hash m_signalHash = 0;
-		E::SignalType m_signalType = E::SignalType::Discrete;
-		E::AnalogAppSignalFormat m_analogFormat = E::AnalogAppSignalFormat::SignedInt32;
-
-		int m_index = -1;
-
-		int m_offset = -1;
-		int m_bit = -1;
-		int m_frameNo = -1;
-
-		TuningValueType m_tuningValueType = TuningValueType::Discrete;
-
-		// signal properties from RPCT Database
-		//
-		TuningValue m_lowBound;
-		TuningValue m_highBound;
-		TuningValue m_defaultValue;
-
-		// signal state read from LM
-		//
-		std::atomic<bool> m_valid = false;
-
-		SafeTuningValue m_currentValue;
-		SafeTuningValue m_readLowBound;
-		SafeTuningValue m_readHighBound;
-
-		std::atomic<bool> m_tuningDefaultFlag = false;
-
-		//
-
-		mutable SimpleMutex m_writeStateMutex;
-
-		quint64 m_writeCommandID = 0;							// if != 0 - writing in progress
-																// if == 0 - no writing in progress (or writing is already finished)
-		E::NetworkError m_writeErrorCode = E::NetworkError::Success;	// last write error code, NetworkError:  Success, TuningValueOutOfRange, TuningNoReply
-
-		//
-
-		std::atomic<qint64> m_successfulReadTime = 0;		// time of last succesfull signal reading (UTC), in normal should be permanently update
-		std::atomic<qint64> m_writeRequestTime = 0;			// time of last write request (UTC)
-		std::atomic<qint64> m_successfulWriteTime = 0;		// time of last succesfull signal writing (UTC), usually should be near m_writeRequestTime
-		std::atomic<qint64> m_unsuccessfulWriteTime = 0;		// time of last unsuccesfull signal writing (UTC), usually should be near m_writeRequestTime
-		std::atomic<qint64> m_lmTime = 0;
-		std::atomic<quint64> m_fotipProcessingNumerator = 0;
-
-		//
-
-		std::atomic<Hash> m_writeClient = 0;									// last write client's EquipmentID hash
-	};
-
-	using TuningSignalShared = std::shared_ptr<TuningSignal>;
-	using TuningSignalConstShared = std::shared_ptr<const TuningSignal>;
-
-	// ----------------------------------------------------------------------------------
-	//
 	// TuningCommand struct declaration
 	//
 	// ----------------------------------------------------------------------------------
@@ -256,7 +136,7 @@ namespace Tuning
 		TuningCommand();
 
 		QString clientEquipmentID;
-		QString user;
+		QString matsUser;
 
 		Fotip::OpCode opCode = Fotip::OpCode::Read;
 		bool autoCommand = false;
@@ -497,12 +377,12 @@ namespace Tuning
 		void readSignalState(Network::TuningSignalState* tss) const;
 
 		E::NetworkError writeSignalState(const QString& clientEquipmentID,
-										const QString& user,
+										const QString& matsUser,
 										Hash signalHash,
 										const TuningValue& newValue);
 
-		E::NetworkError applySignalStates(	const QString& clientEquipmentID,
-										const QString& user);
+		E::NetworkError applySignalStates(const QString& clientEquipmentID,
+										const QString& matsUser);
 
 		QString sourceEquipmentID() const;
 
@@ -563,6 +443,8 @@ namespace Tuning
 		int m_tuningDataFramePayloadW = 0;
 		int m_tuningDataFrameCount = 0;
 
+		QThread* m_thread = nullptr;
+
 		//
 
 		QBasicTimer* m_timer = nullptr;
@@ -606,7 +488,7 @@ namespace Tuning
 		void readSignalState(Network::TuningSignalState* tss) const;
 
 		E::NetworkError writeSignalState(const QString& clientEquipmentID,
-										const QString& user,
+										const QString& matsUser,
 										Hash signalHash,
 										const TuningValue& newValue);
 

@@ -1,0 +1,73 @@
+<AFB id="#packed_or_in_v1" Caption="packed_or_in" Version="1.5">
+	<Properties>
+		<Description>The input section of the packed logical OR item, transfers inputs to the counterpart packed_or_out item.</Description>
+		<Category>Logic</Category>
+		<OpCode>253</OpCode>
+		<InternalUse>false</InternalUse>
+		<MinWidth>26</MinWidth>
+		<PackedLogic Counterpart="packed_or_out" IdPrefix="OR_"/>
+	</Properties>
+	<Inputs>
+		<Pin OpName="in" Caption="in" Type="Discrete" ByteOrder="BigEndian" OpIndex="3" Size="1"/>
+	</Inputs>
+	<Outputs/>
+	<Params>
+		<Param OpName="i_oprd_quant" Caption="OperandCount" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+			<Value>1</Value>
+			<Default>1</Default>
+			<LowLimit>1</LowLimit>
+			<HighLimit>16</HighLimit>
+			<Script>
+				<Changed>
+					(function(videoItemFblElement, afbElement)
+					{
+						return createInputSignals(videoItemFblElement, afbElement);
+					})
+				</Changed>
+			</Script>
+		</Param>
+	</Params>
+	<CommonScript>
+		<Library>
+			function createInputSignals(videoItemFblElement, afbElement)
+			{
+				videoItemFblElement.removeInputSignals();
+
+				var count = videoItemFblElement.getParamIntValue("OperandCount");
+				if (count == -1)
+				{
+					return false;
+				}
+
+				count = count &lt; 1 ? 1 : count;
+				count = count &gt; 16 ? 16 : count;
+
+				var opIndex = 3;
+				var afbInputSignal = afbElement.getAfbSignalByOpIndex(opIndex);
+				if (afbInputSignal == null)
+				{
+					return false;
+				}
+
+				var caption = afbInputSignal.jsCaption();
+				var type = afbInputSignal.jsType();
+				var operandIndex = afbInputSignal.operandIndex();
+				var size = afbInputSignal.size();
+
+				for (var i = 1; i &lt;= count; i++)
+				{
+					videoItemFblElement.addInputSignal(caption + "_" + i, type, operandIndex, size);
+				}
+
+				videoItemFblElement.adjustHeight();
+				return true;
+			}
+		</Library>
+		<AfterCreation>
+			(function(videoItemFblElement, afbElement)
+			{
+				return createInputSignals(videoItemFblElement, afbElement);
+			})
+		</AfterCreation>
+	</CommonScript>
+</AFB>

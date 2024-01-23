@@ -149,7 +149,7 @@ namespace EditEngine
 		QScrollBar* m_hScrollBar = nullptr;
 		QScrollBar* m_vScrollBar = nullptr;
 
-		double m_zoom;
+		double m_zoom{100.0};
 
 		QScrollBar m_hScrollBarCopy;
 		QScrollBar m_vScrollBarCopy;

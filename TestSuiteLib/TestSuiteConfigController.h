@@ -1,12 +1,21 @@
 #pragma once
-
+#include <QReadWriteLock>
 #include "../ClientLib/ConfigController.h"
 #include "../OnlineLib/SocketIO.h"
+#include "../OnlineLib/MatsUsers.h"
 #include "../UtilsLib/ILogFile.h"
 #include "TestScriptsStorage.h"
+#include "TestReport.h"
 
 namespace TestSuite
 {
+	struct ConfigData
+	{
+		std::vector<TestScript> scripts;
+		ReportLib::ReportTemplateStorage reportTemplates;
+	};
+
+
 	struct ConfigSettings
 	{
 		int configurationId = -1;
@@ -14,10 +23,6 @@ namespace TestSuite
 		bool isValid() { return configurationId != -1; }
 
 		ClientLib::ConfigurationInfo configInfo;
-
-		int buildNo = -1;
-		QString softwareEquipmentId;
-		QString project;
 
 		// AppData settings
 		//
@@ -29,9 +34,22 @@ namespace TestSuite
 		std::vector<SoftwareEndpoint::TuningService> tuningServices;
 		QByteArray tuningSignalsFile;
 
+		// Security
+		//
+		bool login = false;
+		QStringList userAccounts;
+		OnlineLib::MatsUserStorage matsUsers;
+
 		// Scripts list
 		//
 		QStringList scriptFiles;
+		QString scriptTags;
+
+		// Reports settings
+		//
+		QString plant;
+		QString unit;
+		QString system;
 	};
 
 
@@ -61,7 +79,7 @@ namespace TestSuite
 		ConfigSettings configuration() const;
 		ClientLib::ConfigurationInfo configInfo() const;
 
-		std::vector<TestSuite::TestScript> scripts() const;
+		ConfigData configData() const;
 
 		// Data section
 		//
@@ -71,6 +89,6 @@ namespace TestSuite
 		mutable QReadWriteLock m_confugurationLock;		// for access to m_configuration and m_scripts
 		ConfigSettings m_configuration;
 
-		std::vector<TestScript> m_scripts;
+		ConfigData m_configData;
 	};
 }

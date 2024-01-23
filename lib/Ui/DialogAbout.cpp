@@ -1,15 +1,12 @@
 #include "DialogAbout.h"
+#include "version.h"
 #include <QApplication>
+#include <QClipboard>
 #include <QDialog>
+#include <QDialogButtonBox>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
-#include <QDialogButtonBox>
-#include <QClipboard>
-
-#if __has_include("../../gitlabci_version.h")
-#	include "../../gitlabci_version.h"
-#endif
 
 void DialogAbout::show(QWidget* parent, const QString& description, const QString& imagePath)
 {
@@ -19,31 +16,35 @@ void DialogAbout::show(QWidget* parent, const QString& description, const QStrin
 
 	QLabel* logo = new QLabel(&aboutDialog);
 	logo->setPixmap(QPixmap(imagePath));
+	logo->setScaledContents(true);
+
+	// Set logo size that it will be not too big.
+	//
+	QSize logoSize = logo->sizeHint();
+	if (logoSize.width() > 200)
+	{
+		logoSize *= 200.0 / logoSize.width();
+		logo->setFixedSize(logoSize);
+	}
 
 	hl->addWidget(logo);
 
 	QVBoxLayout* vl = new QVBoxLayout;
 	hl->addLayout(vl);
 
-	QString text = "<h3>" + qApp->applicationName() +" v" + qApp->applicationVersion() + "</h3>";
+	QString text = "<h3>" + qApp->applicationName() + " v" + qApp->applicationVersion() + "</h3>";
 
 #ifndef QT_DEBUG
-	text += "Build: Release";
+	text += tr("Build: %1 Release").arg(U7SET_RELEASE_TYPE);
 #else
-	text += "Build: Debug";
+	text += tr("Build: %1 Debug").arg(U7SET_RELEASE_TYPE);
 #endif
 
-#ifdef GITLAB_CI_BUILD
-	text += "<br>Commit SHA: "	CI_COMMIT_SHA;
-	text += "<br>Branch: "		CI_BUILD_REF_SLUG;
-	text += "<br>Build Date: "	BUILD_DATE;
-	text += "<br>Build Host: "	COMPUTERNAME;
-#else
-	text += "<br>Commit SHA1: No data";
-	text += "<br>Branch: No data";
-	text += "<br>Date: No data";
-	text += "<br>Host: No data";
-#endif
+	text += tr("<br>PipelineID: %1").arg(U7SET_PIPELINE_ID);
+
+	text += tr("<br>Commit SHA: %1").arg(U7SET_COMMIT_HASH);
+	text += tr("<br>Branch: %1").arg(U7SET_BRANCH_NAME);
+	text += tr("<br>Build Date: %1").arg(U7SET_BUILD_DATE);
 
 	QLabel* label = new QLabel(text, &aboutDialog);
 	label->setIndent(10);
@@ -57,12 +58,11 @@ void DialogAbout::show(QWidget* parent, const QString& description, const QStrin
 	label->setWordWrap(true);
 	vl->addWidget(label);
 
-	QPushButton* copyCommitSHA1Button = new QPushButton("Copy commit SHA1");
-	connect(copyCommitSHA1Button, &QPushButton::clicked, [](bool){
-#ifdef CI_PIPELINE_ID
-		qApp->clipboard()->setText(CI_COMMIT_SHA);
-#endif
-	});
+	QPushButton* copyCommitSHA1Button = new QPushButton(tr("Copy commit SHA1"));
+	connect(copyCommitSHA1Button, &QPushButton::clicked, [](bool)
+			{
+				qApp->clipboard()->setText(U7SET_COMMIT_HASH);
+			});
 
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(Qt::Horizontal);
 	buttonBox->addButton(copyCommitSHA1Button, QDialogButtonBox::ActionRole);

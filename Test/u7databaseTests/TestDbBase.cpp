@@ -56,8 +56,8 @@ bool TestDbBase::createProjectDb()
 		{
 			qDebug() << "Cannot upgrade project database. Error: " << dbc.lastError();
 
-			if (bool ok = dbc.deleteProject(m_projectName, m_projectAdministratorPassword, true, nullptr);
-				ok == false)
+			ok = dbc.deleteProject(m_projectName, m_projectAdministratorPassword, true, nullptr);
+			if (ok == false)
 			{
 				qDebug() << "Cannot delete database project. Error: " << dbc.lastError();
 			}
@@ -238,8 +238,8 @@ bool TestDbBase::dropProjectDb(QString projectName/*= QString()*/)
 
 			if (query.next() == true)
 			{
-				if (bool ok = query.exec(QString("DROP DATABASE %1").arg(QString("u7_") + m_projectName));
-					ok == false)
+				ok = query.exec(QString("DROP DATABASE %1").arg(QString("u7_") + m_projectName));
+				if (ok == false)
 				{
 					qDebug() << "FAIL: " << query.lastError().databaseText();
 					throw false;;

@@ -267,7 +267,7 @@ namespace VFrame30
 		//
 		for (const QString& appSignalId : m_appSignalIds)
 		{
-			if (drawParam->hightlightIds().contains(appSignalId) == true)
+			if (drawParam->highlightIds().contains(appSignalId) == true)
 			{
 				QRectF highlightRect = itemRectPinIndent(drawParam);
 				drawHighlightRect(drawParam, highlightRect);
@@ -277,7 +277,7 @@ namespace VFrame30
 
 		for (const QString& appSignalId : m_impactAppSignalIds)
 		{
-			if (drawParam->hightlightIds().contains(appSignalId) == true)
+			if (drawParam->highlightIds().contains(appSignalId) == true)
 			{
 				QRectF highlightRect = itemRectPinIndent(drawParam);
 				drawHighlightRect(drawParam, highlightRect);
@@ -288,18 +288,34 @@ namespace VFrame30
 		return;
 	}
 
-	QString SchemaItemSignal::getCoulumnText(const Context* context,
-											 DrawMode drawMode,
-											 const SchemaItem* schemaItem,
-											 const E::ColumnData& data,
-											 const AppSignalParam& signal,
-											 const AppSignalState& signalState,
-											 const AppSignalParam& impactSignal,
-											 const AppSignalState& impactSignalState,
-											 E::AnalogFormat analogFormat,
-											 int precision)
+	QString SchemaItemSignal::getColumnText(const Context* context,
+											DrawMode drawMode,
+											const SchemaItem* schemaItem,
+											const E::ColumnData& data,
+											const AppSignalParam& signal,
+											const AppSignalState& signalState,
+											const AppSignalParam& impactSignal,
+											const AppSignalState& impactSignalState,
+											E::AnalogFormat analogFormat,
+											int precision,
+											bool* isInverted)
 	{
 		QString text;
+		
+		if (isInverted != nullptr)
+		{
+			*isInverted = false;
+
+			if (signal.isInverted() == true && data == E::ColumnData::State)
+			{
+				*isInverted = true;
+			}
+
+			if (impactSignal.isInverted() == true && data == E::ColumnData::ImpactState)
+			{
+				*isInverted = true;
+			}
+		}
 
 		if (context == nullptr)
 		{
@@ -671,6 +687,8 @@ namespace VFrame30
 		//
 		struct CellDrawParam
 		{
+			CellDrawParam() = delete;
+
 			CellDrawParam(int cellRow,
 						  int cellColumn,
 						  const QRectF& cellRect,
@@ -678,7 +696,8 @@ namespace VFrame30
 						  const QColor& cellFillColor,
 						  const QColor& cellTextColor,
 						  int cellTextDrawFlags,
-						  double cellTextIndent) :
+						  double cellTextIndent,
+						  bool inverted) :
 				row(cellRow),
 				column(cellColumn),
 				rect(cellRect),
@@ -686,18 +705,20 @@ namespace VFrame30
 				fillColor(cellFillColor),
 				textColor(cellTextColor),
 				textDrawFlags(cellTextDrawFlags),
-				textIndent(cellTextIndent)
+				textIndent(cellTextIndent),
+				inverted(inverted)
 			{
 			}
 
-			int row;
-			int column;
+			int row{};
+			int column{};
 			QRectF rect;
 			QString text;
 			QColor fillColor;
 			QColor textColor;
-			int textDrawFlags;
-			double textIndent;
+			int textDrawFlags{};
+			double textIndent{};
+			bool inverted{};
 		};
 
 		std::vector<CellDrawParam> cells;
@@ -742,6 +763,7 @@ namespace VFrame30
 						for (int f = 0; f < signalIds.size(); f++)
 						{
 							QString text;
+							bool signalIsInverted = false;
 
 							if (QString overridenText = cellText(row, cellColumnIndex);
 								overridenText.isNull() == false)
@@ -750,16 +772,17 @@ namespace VFrame30
 							}
 							else
 							{
-								text = getCoulumnText(context,
-													  drawParam->drawMode(),
-													  this,
-													  column.data,
-													  appSignals[f],
-													  appSignalStates[f],
-													  AppSignalParam{},
-													  AppSignalState{},
-													  m_analogFormat,
-													  m_precision);
+								text = getColumnText(context,
+													 drawParam->drawMode(),
+													 this,
+													 column.data,
+													 appSignals[f],
+													 appSignalStates[f],
+													 AppSignalParam{},
+													 AppSignalState{},
+													 m_analogFormat,
+													 m_precision,
+													 &signalIsInverted);
 							}
 
 							cells.emplace_back(row,
@@ -769,7 +792,8 @@ namespace VFrame30
 											   cellFillColor(row, cellColumnIndex),
 											   cellTextColor(row, cellColumnIndex),
 											   static_cast<int>(column.horzAlign) | static_cast<int>(Qt::AlignVCenter),
-											   m_font.drawSize() / 8.0);
+											   m_font.drawSize() / 8.0,
+											   signalIsInverted);
 
 							cellColumnIndex ++;
 						}
@@ -783,6 +807,7 @@ namespace VFrame30
 						for (int f = 0; f < impactSignalIds.size(); f++)
 						{
 							QString text;
+							bool signalIsInverted = false;
 
 							if (QString overridenText = cellText(row, cellColumnIndex);
 								overridenText.isNull() == false)
@@ -791,16 +816,17 @@ namespace VFrame30
 							}
 							else
 							{
-								text = getCoulumnText(context,
-													  drawParam->drawMode(),
-													  this,
-													  column.data,
-													  AppSignalParam{},
-													  AppSignalState{},
-													  impactAppSignals[f],
-													  impactAppSignalStates[f],
-													  m_analogFormat,
-													  m_precision);
+								text = getColumnText(context,
+													 drawParam->drawMode(),
+													 this,
+													 column.data,
+													 AppSignalParam{},
+													 AppSignalState{},
+													 impactAppSignals[f],
+													 impactAppSignalStates[f],
+													 m_analogFormat,
+													 m_precision,
+													 &signalIsInverted);
 							}
 
 							cells.emplace_back(row,
@@ -809,8 +835,9 @@ namespace VFrame30
 											   text,
 											   cellFillColor(row, cellColumnIndex),
 											   cellTextColor(row, cellColumnIndex),
-											   static_cast<int>(column.horzAlign | Qt::AlignVCenter),
-											   m_font.drawSize() / 8.0);
+											   static_cast<int>(column.horzAlign) | static_cast<int>(Qt::AlignVCenter),
+											   m_font.drawSize() / 8.0,
+											   signalIsInverted);
 
 							cellColumnIndex ++;
 						}
@@ -821,6 +848,7 @@ namespace VFrame30
 					// Multiline == true
 					//
 					QString text;
+					bool signalIsInverted = false;
 
 					if (QString overridenText = cellText(row, cellColumnIndex);
 						overridenText.isNull() == false)
@@ -829,16 +857,17 @@ namespace VFrame30
 					}
 					else
 					{
-						text = getCoulumnText(context,
-											  drawParam->drawMode(),
-											  this,
-											  column.data,
-											  appSignals[row],
-											  appSignalStates[row],
-											  impactAppSignals[row],
-											  impactAppSignalStates[row],
-											  m_analogFormat,
-											  m_precision);
+						text = getColumnText(context,
+											 drawParam->drawMode(),
+											 this,
+											 column.data,
+											 appSignals[row],
+											 appSignalStates[row],
+											 impactAppSignals[row],
+											 impactAppSignalStates[row],
+											 m_analogFormat,
+											 m_precision,
+											 &signalIsInverted);
 					}
 
 					cells.emplace_back(row,
@@ -847,8 +876,9 @@ namespace VFrame30
 									   text,
 									   cellFillColor(row, cellColumnIndex),
 									   cellTextColor(row, cellColumnIndex),
-									   column.horzAlign | Qt::AlignVCenter,
-									   m_font.drawSize() / 4.0);
+									   static_cast<int>(column.horzAlign) | static_cast<int>(Qt::AlignVCenter),
+									   m_font.drawSize() / 4.0,
+									   signalIsInverted);
 
 					cellColumnIndex ++;
 				}
@@ -880,6 +910,8 @@ namespace VFrame30
 
 		// Draw Text
 		//
+		auto font = m_font;
+
 		for (const CellDrawParam& cell : cells)
 		{
 			if (cell.text.isEmpty() == true)
@@ -896,18 +928,19 @@ namespace VFrame30
 				painter->setPen(cell.textColor.isValid() ? cell.textColor : textColor());
 
 				QRectF boundingRect = rect.intersected(textRect);
+				font.setUnderline(cell.inverted);
 
 #ifdef VFRAME30_CACHE_DRAW_TEXT
 				if (drawParam->pdfMode() == true)
 				{
-					DrawHelper::drawText(painter, m_font, itemUnit(), cell.text, boundingRect, cell.textDrawFlags);
+					DrawHelper::drawText(painter, font, itemUnit(), cell.text, boundingRect, cell.textDrawFlags);
 				}
 				else
 				{
-					DrawHelper::drawTextCahed(painter, m_font, itemUnit(), cell.text, boundingRect, cell.textDrawFlags, drawParam->schemaView()->zoom());
+					DrawHelper::drawTextCahed(painter, font, itemUnit(), cell.text, boundingRect, cell.textDrawFlags, drawParam->schemaView()->zoom());
 				}
 #else
-				DrawHelper::drawText(painter, m_font, itemUnit(), cell.text, boundingRect, cell.textDrawFlags);
+				DrawHelper::drawText(painter, font, itemUnit(), cell.text, boundingRect, cell.textDrawFlags);
 #endif
 			}
 		}
@@ -1060,7 +1093,7 @@ namespace VFrame30
 				if (signalFound == false)
 				{
 					signal.setAppSignalId(appSignalId);			// At least show AppSignalID
-					signal.setCustomSignalId(appSignalId);		// At least show AppSignalID
+					signal.setCustomSignalId(appSignalId);		// At least show CustomSignalID
 				}
 			}
 		}
@@ -1098,12 +1131,12 @@ namespace VFrame30
 
 		for (size_t columnIndex = 0; columnIndex < m_columns.size(); columnIndex++)
 		{
-			const Column& c = m_columns[columnIndex];
+			const Column& column = m_columns[columnIndex];
 
-			double width = rect.width() * (c.width / 100.0);
+			double width = rect.width() * (column.width / 100.0);
 			if (columnIndex == m_columns.size() - 1)
 			{
-				width = rect.width() - startOffset; // if this is the last column, give all rest width to it
+				width = rect.width() - startOffset; // if this is the last column, give all rest width to it.
 			}
 
 			QRectF& cellRect = cells.emplace_back(rect.left() + startOffset, rect.top(), width, rect.height());
@@ -1120,7 +1153,7 @@ namespace VFrame30
 			}
 		}
 
-		// Fill cells and draw vertical line devider from othe columns
+		// Fill cells and draw vertical line devider from the other columns.
 		//
 		bool someCellsAreFilled = false;
 
@@ -1139,11 +1172,14 @@ namespace VFrame30
 
 		// Draw text
 		//
+		auto font = m_font;
+
 		for (size_t columnIndex = 0; columnIndex < cells.size(); columnIndex++)
 		{
-			const Column& c = m_columns[columnIndex];
+			const Column& column = m_columns[columnIndex];
 
 			QString text;
+			bool signalIsInverted = false;
 
 			if (QString overridenText = cellText(0, static_cast<int>(columnIndex));
 				overridenText.isNull() == false)
@@ -1152,39 +1188,42 @@ namespace VFrame30
 			}
 			else
 			{
-				text = getCoulumnText(context,
-									  drawParam->drawMode(),
-									  this,
-									  c.data,
-									  signal,
-									  signalState,
-									  impactSignal,
-									  impactSignalState,
-									  m_analogFormat,
-									  m_precision);
+				text = getColumnText(context,
+									 drawParam->drawMode(),
+									 this,
+									 column.data,
+									 signal,
+									 signalState,
+									 impactSignal,
+									 impactSignalState,
+									 m_analogFormat,
+									 m_precision,
+									 &signalIsInverted);
 			}
 
 			QRectF textRect = cells[columnIndex];
 
-			textRect.setLeft(textRect.left() + m_font.drawSize() / 4.0);
-			textRect.setRight(textRect.right() - m_font.drawSize() / 4.0);
+			textRect.setLeft(textRect.left() + font.drawSize() / 4.0);
+			textRect.setRight(textRect.right() - font.drawSize() / 4.0);
 
 			if (textRect.width() > 0)
 			{
 				QColor tc = cellTextColor(row, static_cast<int>(columnIndex));
 				painter->setPen(tc.isValid() ? tc : textColor());
 
+				font.setUnderline(signalIsInverted);
+
 #ifdef VFRAME30_CACHE_DRAW_TEXT
 				if (drawParam->pdfMode() == true)
 				{
-					DrawHelper::drawText(painter, m_font, itemUnit(), text, textRect, c.horzAlign | Qt::AlignTop);
+					DrawHelper::drawText(painter, font, itemUnit(), text, textRect, column.horzAlign | static_cast<int>(Qt::AlignTop));
 				}
 				else
 				{
-					DrawHelper::drawTextCahed(painter, m_font, itemUnit(), text, textRect, c.horzAlign | Qt::AlignTop, drawParam->schemaView()->zoom());
+					DrawHelper::drawTextCahed(painter, font, itemUnit(), text, textRect, column.horzAlign | static_cast<int>(Qt::AlignTop), drawParam->schemaView()->zoom());
 				}
 #else
-				DrawHelper::drawText(painter, m_font, itemUnit(), text, textRect, c.horzAlign | Qt::AlignTop);
+				DrawHelper::drawText(painter, font, itemUnit(), text, textRect, static_cast<int>(c.horzAlign) | static_cast<int>(Qt::AlignTop));
 #endif
 			}
 		}
@@ -1378,6 +1417,33 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		}
 
 		return item;
+	}
+
+	// IMatsSchemaItemAssociations implementation.
+	//
+	QStringList SchemaItemSignal::associatedAppSignalIds() const
+	{
+		return m_appSignalIds;
+	}
+
+	QStringList SchemaItemSignal::associatedImpactAppSignalIds() const
+	{
+		return m_impactAppSignalIds;
+	}
+
+	QStringList SchemaItemSignal::associatedConnectionIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemSignal::associatedLoopbackIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemSignal::associatedSchemaItemLabels() const
+	{
+		return {};
 	}
 
 	// AppSignalIDs

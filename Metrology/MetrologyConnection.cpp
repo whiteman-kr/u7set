@@ -112,10 +112,13 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	bool Connection::signalIsOk(const ::AppSignal& signal)
+	bool Connection::signalIsOk(const ::AppSignal& signal, QString* err)
 	{
+		TEST_PTR_RETURN_FALSE(err);
+
 		if (signal.isAnalog() == false)
 		{
+			*err = QString("Signal %1 is not Analog").arg(signal.appSignalID());
 			return false;
 		}
 
@@ -123,11 +126,13 @@ namespace Metrology
 		//
 		if (signal.isSpecPropExists(AppSignalPropNames::LOW_ENGINEERING_UNITS) == false || signal.isSpecPropExists(AppSignalPropNames::HIGH_ENGINEERING_UNITS) == false)
 		{
+			*err = QString("Signal %1 does not have Engineering Units").arg(signal.appSignalID());
 			return false;
 		}
 
 		if (signal.lowEngineeringUnits() == 0.0 && signal.highEngineeringUnits() == 0.0)
 		{
+			*err = QString("Signal %1 Engineering Units are 0").arg(signal.appSignalID());
 			return false;
 		}
 
@@ -137,21 +142,25 @@ namespace Metrology
 		{
 			if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_LOW_LIMIT) == false || signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_HIGH_LIMIT) == false)
 			{
+				*err = QString("Signal %1 does not have Electric Units").arg(signal.appSignalID());
 				return false;
 			}
 
 			if (signal.electricLowLimit() == 0.0 && signal.electricHighLimit() == 0.0)
 			{
+				*err = QString("Signal %1 Electric Units are 0").arg(signal.appSignalID());
 				return false;
 			}
 
 			if (signal.isSpecPropExists(AppSignalPropNames::ELECTRIC_UNIT) == false)
 			{
+				*err = QString("Signal %1 does not have ElectricUnit property").arg(signal.appSignalID());
 				return false;
 			}
 
 			if (signal.electricUnit() == E::ElectricUnit::NoUnit)
 			{
+				*err = QString("Signal %1 ElectricUnit property is NoUnit").arg(signal.appSignalID());
 				return false;
 			}
 		}
@@ -169,6 +178,7 @@ namespace Metrology
 
 				if (signal.sensorType() == E::SensorType::NoSensor)
 				{
+					*err = QString("Signal %1 SensorType property is NoSensor").arg(signal.appSignalID());
 					return false;
 				}
 
@@ -178,6 +188,7 @@ namespace Metrology
 
 				if (signal.isSpecPropExists(AppSignalPropNames::OUTPUT_MODE) == false)
 				{
+					*err = QString("Signal %1 does not have OutputMode property").arg(signal.appSignalID());
 					return false;
 				}
 
@@ -252,23 +263,27 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void Connection::setSignal(int ioType, ::AppSignal* pSignal)
+	bool Connection::setSignal(int ioType, ::AppSignal* pSignal, QString* err)
 	{
+		TEST_PTR_RETURN_FALSE(pSignal);
+		TEST_PTR_RETURN_FALSE(err);
+
 		if (ERR_METROLOGY_CONNECTION_IO_TYPE(ioType) == true)
 		{
-			return;
+			*err = QString("Signal %1 has wrong ConnectionIoType").arg(pSignal->appSignalID());
+			return false;
 		}
 
 		m_connectionSignal[ioType].clear();
 
-		TEST_PTR_RETURN(pSignal);
-
-		if (signalIsOk(*pSignal) == false)
+		if (signalIsOk(*pSignal, err) == false)
 		{
-			return;
+			return false;
 		}
 
 		m_connectionSignal[ioType].set(pSignal);
+
+		return true;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -703,7 +718,7 @@ namespace Metrology
 		}
 
 		qint64 writtenBytes = file.write(data);
-		if (writtenBytes != data.count())
+        if (writtenBytes != data.size())
 		{
 			return false;
 		}

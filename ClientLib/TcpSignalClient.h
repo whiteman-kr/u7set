@@ -13,8 +13,15 @@
 
 namespace ClientLib
 {
-	inline static const int RequestTimeInterval = 20;  // ms
-
+	inline static const int RequestTimeIntervalMs = 20;
+	
+	// Number of signals requested by ADS_GET_APP_SIGNAL_STATE.
+	// Assume RequestTimeIntervalMs is 20ms, then we have about 50 requests per second, 
+	// for 100K signals with 250 signals per request, full update will take approximately 8 seconds.
+	// 250 signals * (1'000ms / RequestTimeIntervalMs) rps = 12500 signals per seconds.
+	// 100'000 / 12500 = 8 signals per second.
+	//
+	inline static const int MaxStateRequestCount = ADS_GET_APP_SIGNAL_STATE_MAX / 8;  // 250 signals per ADS_GET_APP_SIGNAL_STATE
 
 	//
 	//		ADS_GET_APP_SIGNAL_LIST_START
@@ -23,12 +30,14 @@ namespace ClientLib
 	//				|
 	//		ADS_GET_APP_SIGNAL_PARAM
 	//				|
-	//		ADS_GET_APP_SIGNAL_STATE_CHANGES <----+
+	//		ADS_GET_APP_SIGNAL_STATE_CHANGES <----+	
 	//              |                             |
-	//		ADS_GET_APP_SIGNAL_STATE              |
+	//              ?---------------------------->|
+	//              | pending states?             |
+	//              |                             |
+	//		ADS_GET_APP_SIGNAL_STATE              |				Request MaxStateRequestCount (250) signals.
 	//				|						      |
 	//				+-----------------------------+
-	//
 	//
 	class TcpSignalClient : public Tcp::Client, public TcpClientStatistics, public HasLogFile
 	{
@@ -73,22 +82,30 @@ namespace ClientLib
 
 	public:
 		bool signalParamsLoaded() const;
+		bool signalStatesLoaded() const;
+
+	private:
+		void reset();
+		void checkTimeDiscrepancy(qint64 serverUtcTimeMs, qint64 serverLocalTimeMs);
 
 	private:
 		SoftwareEndpoint::AppDataService m_serverSettings;
 		IAppSignalUpdater& m_signalUpdater;
 
-		// Cache protobuf messages
-		//
 	private:
 		std::atomic<bool> m_signalParamsLoaded{false};
-
+		std::atomic<bool> m_signalStatesLoaded{false};
+		
+		// Cache protobuf messages
+		//
 		::Network::GetSignalListStartReply m_getSignalListStartReply;
 
 		::Network::GetSignalListNextRequest m_getSignalListNextRequest;
 		::Network::GetSignalListNextReply m_getSignalListNextReply;
 
 		std::vector<Hash> m_signalList;
+		std::set<Hash> m_busSignalHashes;		// Bus signal hash set. These hashes are later removed from m_signalList
+		std::set<Hash> m_signalStatesSet;		// Signal hash is added here when signal state is received
 
 		::Network::GetAppSignalParamRequest m_getSignalParamRequest;
 		::Network::GetAppSignalParamReply m_getSignalParamReply;
@@ -100,6 +117,10 @@ namespace ClientLib
 		::Network::GetAppSignalStateRequest m_getSignalStateRequest;
 		::Network::GetAppSignalStateReply m_getSignalStateReply;
 		int m_lastSignalStateStartIndex = 0;
+
+		// Check that the server and client time is the same.
+		//
+		QDate m_timeDiscrepancyCheckDate;  // When was the last time the time discrepancy was checked?
 	};
 
 }

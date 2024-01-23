@@ -3,8 +3,8 @@
 #include "../CommonLib/Times.h"
 #include "../UtilsLib/SimpleThread.h"
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../OnlineLib/DataProtocols.h"
-#include "../lib/LogicModulesInfo.h"
+#include "../HardwareLib/DataProtocols.h"
+#include "../HardwareLib/LogicModulesInfo.h"
 #include "SimRam.h"
 #include "SimTuningRecord.h"
 
@@ -169,12 +169,14 @@ namespace Sim
 
 		void cancelTuningSourceHandlersOperations();
 
+		void logWarningThinned(int codeLine, const QString& warning);
+
 	private:
 		struct WriteConfirmation
 		{
 			QString lmEquipmentID;
 			QString portEquipmentID;
-			qint64 confirmedRecordID;
+			qint64 confirmedRecordID{};
 
 			WriteConfirmation()
 			{
@@ -293,7 +295,7 @@ namespace Sim
 		std::optional<qint64> m_waitingConfirmationID;
 		int m_receivedConfirmationsCount = 0;
 
-		RupFotip m_delayedReply;
+		RupFotip m_delayedReply{};
 
 		static FotipProcessingNumeratorsMap m_processingNumeratorsMap;	// one map for all TuningSourceHandlers
 																		// each entry in map according to one real LM

@@ -14,11 +14,16 @@
 
 GatewayServiceWorker::GatewayServiceWorker(const SoftwareInfo& softwareInfo,
 										   const QString& serviceName,
-										   int& argc,
+										   int argc,
 										   char** argv,
-										   CircularLoggerShared logger,
-										   E::ServiceRunMode runMode) :
-	ServiceWorker(softwareInfo, serviceName, argc, argv, logger, runMode),
+										   CircularLoggerShared logger) :
+	ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
+	m_timer(this)
+{
+}
+
+GatewayServiceWorker::GatewayServiceWorker(const GatewayServiceWorker* worker) :
+	ServiceWorker(worker),
 	m_timer(this)
 {
 }
@@ -29,13 +34,7 @@ GatewayServiceWorker::~GatewayServiceWorker()
 
 ServiceWorker* GatewayServiceWorker::createInstance() const
 {
-	GatewayServiceWorker* newInstance = new GatewayServiceWorker(softwareInfo(),
-																 serviceName(),
-																 argc(), argv(),
-																 logger(),
-																 serviceRunMode());
-	newInstance->init();
-
+	GatewayServiceWorker* newInstance = new GatewayServiceWorker(this);
 	return newInstance;
 }
 
@@ -66,45 +65,42 @@ bool GatewayServiceWorker::isConnectedToConfigurationService(quint32& ip, quint1
 	return false;
 }
 
-void GatewayServiceWorker::initCmdLineParser()
+void GatewayServiceWorker::initServiceSpecificCmdLineArgs()
 {
-	CommandLineParser& cp = cmdLineParser();
+	addValueCmdLineArg(CmdLineArg::ID, SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
+	addValueCmdLineArg(CmdLineArg::CFG_IP1, SoftwareSetting::CFG_SERVICE_IP1, "IP address of first Configuration Service.", "IPv4:Port");
+	addValueCmdLineArg(CmdLineArg::CFG_IP2, SoftwareSetting::CFG_SERVICE_IP2, "IP address of second Configuration Service.", "IPv4:Port");
+	addSimpleNoWritableCmdLineArg(CmdLineArg::LOG_GATEWAY_PACKETS, "Turn On 2 hours gateway packet logging.");
 
-	cp.addSingleValueOption(CmdLineOption::ID, SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
-	cp.addSingleValueOption(CmdLineOption::CFG_IP1, SoftwareSetting::CFG_SERVICE_IP1, "IP address of first Configuration Service.", "IPv4:Port");
-	cp.addSingleValueOption(CmdLineOption::CFG_IP2, SoftwareSetting::CFG_SERVICE_IP2, "IP address of second Configuration Service.", "IPv4:Port");
+//	cp.addSimpleOption(CmdLineOption::CFG_PARSE, "Parse gateway description file.");
 
-	cp.addSimpleOption(CmdLineOption::CFG_PARSE, "Parse gateway description file.");
-
-	cp.addSingleValueOption(CmdLineOption::CFG_FILE,
-							SoftwareSetting::GATEWAY_DESCRIPTION_FILE, "Gateway description file name.", "file");
+//	cp.addSingleValueOption(CmdLineOption::CFG_FILE,
+	//						SoftwareSetting::GATEWAY_DESCRIPTION_FILE, "Gateway description file name.", "file");
 }
 
-void GatewayServiceWorker::loadSettings()
+void GatewayServiceWorker::loadServiceSpecificSettings()
 {
-/*	m_appDataProcessingThreadCount = QString(getStrSetting(SoftwareSetting::PROCESSING_THREADS_COUNT)).toInt();
+	m_logGatewayPackets = cmdLineArgIsSet(CmdLineArg::LOG_GATEWAY_PACKETS);
 
-	m_strCmdLineAppDataReceivingIP = getStrSetting(SoftwareSetting::OVERRIDE_APP_DATA_RECEIVING_IP);
-	m_cmdLineAppDataReceivingIP.setAddressPortStr(m_strCmdLineAppDataReceivingIP, PORT_APP_DATA_SERVICE_DATA);
-
-	m_logRupTimeErrors = cmdLineParser().optionIsSet(CmdLineOption::LOG_RUP_TIME_ERR);*/
-
-	DEBUG_LOG_MSG(logger(), QString(tr("Settings from command line or registry:")));
+	DEBUG_LOG_MSG(logger(), "");
+	DEBUG_LOG_MSG(logger(), QString(tr("Service settings:")));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::EQUIPMENT_ID).arg(equipmentID()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStrIfSet()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStrIfSet()));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::LOG_GATEWAY_PACKETS).arg(m_logGatewayPackets));
+	DEBUG_LOG_MSG(logger(), "");
 }
 
-bool GatewayServiceWorker::processCustomCmdLineSettings()
+bool GatewayServiceWorker::processServiceSpecificCmdLineArgs()
 {
-	const CommandLineParser& clp = cmdLineParser();
+/*	const CommandLineParser& clp = cmdLineParser();
 
-	if (clp.optionIsSet(CmdLineOption::CFG_PARSE) == false)
+	if (clp.optionIsSetFromCmdLine(CmdLineOption::CFG_PARSE) == false)
 	{
 		return true;
 	}
 
-	if (clp.optionIsSet(CmdLineOption::CFG_FILE) == false)
+	if (clp.optionIsSetFromCmdLine(CmdLineOption::CFG_FILE) == false)
 	{
 		DEBUG_LOG_ERR(logger(), "To parse gateway description file cmd line option -f=fileName should be set!");
 		return false;
@@ -120,9 +116,9 @@ bool GatewayServiceWorker::processCustomCmdLineSettings()
 		return false;
 	}
 
-	parseGatewayDescription(fileName, file.readAll());
+	parseGatewayDescription(fileName, file.readAll());*/
 
-	return false;
+	return true;
 }
 
 void GatewayServiceWorker::initialize()
@@ -290,54 +286,6 @@ bool GatewayServiceWorker::readGatewayDescription(const QByteArray& fileData)
 	return result;
 }
 
-void GatewayServiceWorker::createAndInitSignalStates()
-{/*
-//	m_appSignalStates.clear();
-
-	if (m_appSignals.isEmpty())
-	{
-		return;
-	}
-
-	int signalCount = 0;
-
-	for(AppSignal* signal : m_appSignals)
-	{
-		TEST_PTR_CONTINUE(signal);
-
-		if (signal->isBus() == true)
-		{
-			continue;
-		}
-
-		signalCount++;
-	}
-
-	//m_appSignalStates.setSize(signalCount);
-
-	int index = 0;
-
-	for(AppSignal* signal : m_appSignals)
-	{
-		TEST_PTR_CONTINUE(signal);
-
-		if (signal->isBus() == true)
-		{
-			continue;
-		}
-
-		DynamicAppSignalState* signalState = m_appSignalStates[index];
-
-		signalState->setSignalParams(signal, m_appSignals);
-
-		index++;
-	}
-
-	m_appSignalStates.buidlHash2State();
-
-	m_appSignalStates.setAutoArchivingGroups(m_autoArchivingGroupsCount);*/
-}
-
 void GatewayServiceWorker::applyNewConfiguration()
 {
 	DEBUG_LOG_MSG(logger(), QString("Applying new configuration..."));
@@ -349,8 +297,8 @@ void GatewayServiceWorker::applyNewConfiguration()
 
 	bool result = true;
 
-	result &= m_handlers.init(m_gateways, softwareInfo(), m_curSettingsProfile, m_appSignals, logger());
-
+	result &= m_handlers.init(m_gateways, softwareInfo(), m_curSettingsProfile, m_appSignals,
+							  logger(), m_logGatewayPackets);
 	if (result == false)
 	{
 		DEBUG_LOG_ERR(logger(), QString("Handlers initialization ERROR!"));

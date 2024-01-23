@@ -2,14 +2,20 @@
 #define DBTAGSEDITOR_H
 
 #include "../lib/PropertyEditor.h"
-#include "../DbLib/DbController.h"
-#include "../lib/Ui/DialogChooseTags.h"
+#include "../lib/Ui/ChooseTagsWidget.h"
 
 class DbTagsEditor : public ExtWidgets::PropertyTextEditor
 {
 	Q_OBJECT
+
 public:
-    explicit DbTagsEditor(DbController* dbController, QWidget* parent);
+	static DbTagsEditor* tagsEditor(DbController* dbController, QWidget* parent);
+    static DbTagsEditor* matsUsersEditor(DbController* dbController, QWidget* parent);
+
+private:
+    DbTagsEditor(DbController* dbController, bool showTags, bool showUsers, QWidget* parent);
+
+public:
     virtual ~DbTagsEditor();
 
     QString text() const override;
@@ -25,7 +31,8 @@ private:
 	bool isModified() const override;
 
 private:
-     ChooseTagsWidget* m_cw = nullptr;
+     ChooseTagsWidget* m_tagsWidget = nullptr;
 };
+
 
 #endif // DBTAGSEDITOR_H

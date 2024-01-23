@@ -179,6 +179,17 @@ namespace EquipmentPropNames
 	inline const QString TUNING_SESSION_TIMEOUT("TuningSessionTimeout");
 	inline const QString LOGIN_PER_OPERATION("LoginPerOperation");
 
+	inline const QString TESTING_LOGIN("TestingLogin");
+	inline const QString TESTING_USER_ACCOUNTS("TestingUserAccounts");
+
+	// Testing Reports properties
+	//
+
+	inline const QString TESTING_SCRIPTTAGS("ScriptTags");
+	inline const QString TESTING_PLANT("Plant");
+	inline const QString TESTING_UNIT("Unit");
+	inline const QString TESTING_SYSTEM("System");
+
 	// Opto modules properties
 	//
 	inline const QString ALLOW_INCHASSIS_OPTO_CONNECTIONS("AllowInchassisOptoConnections");
@@ -211,6 +222,9 @@ namespace XmlElement
 	inline const QString TUNING_CHANNEL_TEMPLATE("Channel%1");
 	inline const QString CHANNEL_COUNT("ChannelCount");
 
+	inline const QString MATS_USERS("MatsUsers");
+	inline const QString MATS_USER("MatsUser");
+
 	inline const QString DATA_SOURCES("DataSources");
 	inline const QString DATA_SOURCE("DataSource");
 	inline const QString ASSOCIATED_SIGNALS("AssociatedSignals");
@@ -220,6 +234,10 @@ namespace XmlElement
 	inline const QString APP_DATA_SERVICES("AppDataServices");
 
 	inline const QString TUNING_SECURITY("TuningSecurity");
+	
+	inline const QString TESTING_SETTINGS("TestingSettings");
+	inline const QString TESTING_SECURITY("TestingSecurity");
+	inline const QString TESTING_REPORTS("TestingReports");
 
 	inline const QString LOGIC_MODULES("LogicModules");
 	inline const QString LOGIC_MODULE("LogicModule");
@@ -322,6 +340,12 @@ namespace XmlAttribute
 	inline const QString DATA_TYPE("DataType");
 	inline const QString SEND_EVENTS("SendEvents");
 	inline const QString INCLUDE_APP_SIGNAL_ID("IncludeAppSignalID");
+
+	inline const QString LOGIN("Login");
+	inline const QString ENABLED("Enabled");
+	inline const QString DESCRIPTION("Description");
+	inline const QString APP_SIGNAL_TAGS("AppSignalTags");
+	inline const QString MATS_USERS("MatsUsers");
 }
 
 namespace Latin1Char
@@ -336,8 +360,10 @@ namespace CfgFileId
 
 	inline const QString APP_DATA_SOURCES("APP_DATA_SOURCES");
 	inline const QString APP_SIGNALS("APP_SIGNALS");
+	inline const QString ACQUIRED_APP_SIGNALS("ACQUIRED_APP_SIGNALS");
 	inline const QString APP_SIGNALS_EXT("APP_SIGNALS_EXT");
 	inline const QString APP_SIGNAL_SET("APP_SIGNAL_SET");
+	inline const QString APP_SIGNALS_XML("APP_SIGNALS_XML");
 	inline const QString COMPARATOR_SET("COMPARATOR_SET");
 	inline const QString UNIT_SET("UNIT_SET");
 
@@ -346,15 +372,16 @@ namespace CfgFileId
 	inline const QString TUNING_SCHEMAS_DETAILS("TUNING_SCHEMAS_DETAILS");
 	inline const QString TUNING_FILTERS("TUNING_FILTERS");
 	inline const QString TUNING_GLOBALSCRIPT("TUNING_GLOBALSCRIPT");
-	inline const QString TUNING_CONFIGARRIVEDSCRIPT("TUNING_CONFIGARRIVEDSCRIPT");
 
 	inline const QString CLIENT_BEHAVIOR("CLIENT_BEHAVIOR");
+	inline const QString MATSUSERS("MATSUSERS_XML");
 	inline const QString LOGO("LOGO");
 
 	inline const QString METROLOGY_ITEMS("METROLOGY_ITEMS");
 	inline const QString METROLOGY_SIGNAL_SET("METROLOGY_SIGNAL_SET");
 
 	inline const QString TESTSUITE_TESTSCRIPT("TESTSUITE_TESTSCRIPT");
+	inline const QString TESTSUITE_REPORTTEMPLATES("TESTSUITE_REPORTTEMPLATES");
 
 	inline const QString GATEWAY_DESCRIPTION("GATEWAY_DESCRIPTION");
 }
@@ -387,16 +414,43 @@ namespace SoftwareSetting
 	inline const QString OVERRIDE_APP_DATA_RECEIVING_IP("OverrideAppDataReceivingIP");
 
 	inline const QString GATEWAY_DESCRIPTION_FILE("GatewayDescriptionFile");
+	inline const QString LOG_GATEWAY_PACKETS("LogGatewayPackets");
+
+	inline const QString LOG_RUP_TIME_ERRORS("LogRupTimeErrors");
+
+	inline const QString READ_ONLY_ARCHIVE_PATH("ReadOnlyArchivePath");
 }
 
-namespace CmdLineOption
+namespace CmdLineArg
 {
+	inline const QString HELP("h");
+	inline const QString VERSION("v");
+	inline const QString EXEC_AS_APP("e");
+	inline const QString INSTALL("i");
+	inline const QString UNINSTALL("u");
+	inline const QString TERMINATE("t");
+	inline const QString INSTANCE("inst");
+	inline const QString CLEAR("clr");
+
 	inline const QString ID("id");
+	inline const QString IP("ip");
 	inline const QString CFG_IP1("cfgip1");
 	inline const QString CFG_IP2("cfgip2");
+
 	inline const QString CFG_FILE("f");
 	inline const QString CFG_PARSE("parse");
+
+	inline const QString CHECKHOSTNAME("checkhostname");
+	inline const QString PROFILE("profile");
+	inline const QString MODE("mode");
+	inline const QString WORK_DIRECTORY("w");
+	inline const QString BUILD_PATH("b");
+
+	inline const QString LOG_GATEWAY_PACKETS("logGwPackets");
 	inline const QString LOG_RUP_TIME_ERR("logRupTimeErr");
+
+	inline const QString READ_ONLY("readonly");
+	inline const QString CLIENT_IP("clientip");
 }
 
 namespace Directory
@@ -417,6 +471,7 @@ namespace Directory
 namespace File
 {
 	inline const QString APP_SIGNALS_ASGS("AppSignals.asgs");
+	inline const QString ACQUIRED_APP_SIGNALS_ASGS("AcquiredAppSignals.asgs");
 	inline const QString APP_SIGNALS_XML("AppSignals.xml");
 	inline const QString APP_SIGNALS_EXT_XML("AppSignalsExt.xml");
 	inline const QString COMPARATORS_SET("Comparators.set");
@@ -425,6 +480,7 @@ namespace File
 	inline const QString CONFIGURATION_XML("Configuration.xml");
 	inline const QString SOFTWARE_XML("Software.xml");
 	inline const QString SUBSYSTEMS_XML("Subsystems.xml");
+	inline const QString MATSUSERS_XML("MatsUsers.xml");
 
 	inline const QString METROLOGY_ITEMS_XML("MetrologyItems.xml");
 	inline const QString METROLOGY_SIGNAL_SET("MetrologySignal.set");
@@ -447,12 +503,22 @@ namespace File
 
 	inline const QString CRYPTO_CA_CLIENT_CERTIFICATE = "/Crypto/ca_client.crt";
 	inline const QString CRYPTO_CA_CLIENT_PRIVATE_KEY = "/Crypto/ca_client_private.key";
+
+	inline const QString ARCH_INFO_PROTO = "ArchInfo.proto";
+	inline const QString ARCH_INFO_PROTO_BAK = "ArchInfo.proto.bak";
+
+	inline const QString READONLY = "readonly";
+
+	inline static const QString GLOBAL_SCRIPT = "GlobalScript.js";
+	inline static const QString GLOBAL_SCRIPT_FULL_PATH = "$root$/Tests/GlobalScript.js";
 }
 
 namespace Separator
 {
 	inline const QString SEMICOLON_SPACE("; ");
 	inline const QString SEMICOLON(";");
+	inline const QString MINUS("-");
+	inline const QString DOT(".");
 	inline const QString COMMA(",");
 	inline const QString COMMA_SPACE(", ");
 	inline const QString LINE("-------------------------------------------------------------------------------");
@@ -482,8 +548,10 @@ namespace AppSignalPropNames
 	inline const QString CHANGESET_ID("ChangesetID");
 	inline const QString CHECKED_OUT("CheckedOut");
 	inline const QString USER_ID("UserID");
+	inline const QString CHECKOUT_BY_USER("CheckoutByUser");
 	inline const QString CHANNEL("Channel");
 	inline const QString EXCLUDE_FROM_BUILD("ExcludeFromBuild");
+	inline const QString INVERT_SIGNAL("InvertSignal");
 	inline const QString CREATED("Created");
 	inline const QString DELETED("Deleted");
 	inline const QString INSTANCE_CREATED("InstanceCreated");
@@ -501,6 +569,8 @@ namespace AppSignalPropNames
 	inline const QString HIGH_DAC("HighDAC");
 	inline const QString LOW_ENGINEERING_UNITS("LowEngineeringUnits");
 	inline const QString HIGH_ENGINEERING_UNITS("HighEngineeringUnits");
+	inline const QString LOW_PHYSICAL_UNITS("LowPhysicalUnits");
+	inline const QString HIGH_PHYSICAL_UNITS("HighPhysicalUnits");
 	inline const QString UNIT("Unit");
 	inline const QString LOW_VALID_RANGE("LowValidRange");
 	inline const QString HIGH_VALID_RANGE("HighValidRange");
@@ -517,10 +587,12 @@ namespace AppSignalPropNames
     inline const QString INPUT_RANGE("InputRange");
 	inline const QString ACQUIRE("Acquire");
 	inline const QString ARCHIVE("Archive");
+	inline const QString RESERVED("Reserved");
 	inline const QString DECIMAL_PLACES("DecimalPlaces");
 	inline const QString COARSE_APERTURE("CoarseAperture");
 	inline const QString FINE_APERTURE("FineAperture");
-	inline const QString ADAPTIVE_APERTURE("AdaptiveAperture");
+	inline const QString OBSOLETE_ADAPTIVE_APERTURE("AdaptiveAperture");
+	inline const QString APERTURE_TYPE("ApertureType");
 	inline const QString FILTERING_TIME("FilteringTime");
 	inline const QString SPREAD_TOLERANCE("SpreadTolerance");
 	inline const QString BYTE_ORDER_PROP("ByteOrder");
@@ -573,7 +645,6 @@ namespace AppSignalDefaultSpecPropStruct
 		"4;LowEngineeringUnits;4 Signal processing;double;;;0;10;false;false;Low engineering units;true;None\n"
 		"4;OutputMode;5 Electric parameters;DynamicEnum [Plus0_Plus5_V=0,Plus4_Plus20_mA=1,Minus10_Plus10_V=2,Plus0_Plus5_mA=3];;;Plus0_Plus5_V;0;false;false;;true;None\n");
 
-
 	inline const QString INTERNAL_ANALOG(
 		"4;HighEngineeringUnits;4 Signal processing;double;;;100;10;false;false;High engineering units;true;None\n"
 		"4;LowEngineeringUnits;4 Signal processing;double;;;0;10;false;false;Low engineering units;true;None\n");
@@ -592,6 +663,15 @@ namespace Manufacturer
 	inline const QString RADIY("RadiyQt6");		// Radiy -> RadiyQt6, thus settings can be stored (for sw with Qt5 and Qt6)
 												// in different registry locations as Qt5 and Qt6 have distinct settings format (for UI)
 	inline const QString SITE("radiy.com");
+
+	inline const QString CONFIGURATION_SERVICE("Configuration Service");
+	inline const QString APPLICATION_DATA_SERVICE("Application Data Service");
+	inline const QString DIAGNOSTIC_DATA_SERVICE("Diagnostic Data Service");
+	inline const QString ARCHIVING_SERVICE("Archiving Service");
+	inline const QString TUNING_SERVICE("Tuning Service");
+	inline const QString GATEWAY_SERVICE("Gateway Service");
+	inline const QString SERVICE_CONTROL_MANAGER("Service Control Manager");
+	inline const QString METROLOGY("Metrology");
 }
 
 namespace Busses
@@ -609,14 +689,6 @@ namespace Afb
 	//
 
 	inline const QString SCALE("SCALE");
-
-	inline const QString SCALE_PIN_CONF("i_conf");
-	inline const QString SCALE_PIN_K1("i_scal_k1_coef");
-	inline const QString SCALE_PIN_K2("i_scal_k2_coef");
-	inline const QString SCALE_PIN_X_UI("i_ui_data");
-	inline const QString SCALE_PIN_X_SI_FP("i_si_fp_data");
-	inline const QString SCALE_PIN_Y_UI("i_ui_data");
-	inline const QString SCALE_PIN_Y_SI_FP("i_si_fp_data");
 
 	inline const QString SCALE_SI32_SI32("scale_si_si");
 	inline const QString SCALE_SI32_FP32("scale_si_fp");
@@ -703,6 +775,21 @@ namespace Afb
 	inline const QString PARAM_I_CONF("i_conf");
 	inline const QString PARAM_I_DATA_X1("i_data_x1");
 	inline const QString PARAM_I_DATA_X2("i_data_x2");
+
+	inline const QString PARAM_I_OPRD_QUANT("i_oprd_quant");
+	inline const QString PARAM_I_BUS_WIDTH("i_bus_width");
+
+	inline const QString PIN_I_1_OPRD("i_1_oprd");
+	inline const QString PIN_O_RESULT("o_result");
+
+	inline const QString AFB_NOT("not");
+	inline const QString AFB_BUS_NOT("bus_not");
+	inline const QString AFB_OR("or");
+	inline const QString AFB_AND("and");
+
+	inline const QString SET_FLAGS("set_flags");
+	inline const QString SIMLOCK("simlock");
+	inline const QString MISMATCH("mismatch");
 }
 
 namespace LmDescriptionName
@@ -715,3 +802,9 @@ namespace LmDescriptionName
 
 	inline const QString LM11_SR90("LM11_SR90");
 }
+
+namespace BOM
+{
+	inline const QString UTF8("\xEF\xBB\xBF");
+}
+

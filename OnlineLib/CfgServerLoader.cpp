@@ -1,13 +1,11 @@
 #ifndef ONLINE_LIB_DOMAIN
-#error Don't include this file in the project! Link OnlineLib instead.
+#error Do not include this file in the project! Link OnlineLib instead.
 #endif
 
 #include "CfgServerLoader.h"
 #include "CircularLogger.h"
 #include "../lib/ConstStrings.h"
 
-#include <QXmlStreamReader>
-#include <QStandardPaths>
 
 // -------------------------------------------------------------------------------------
 //
@@ -133,11 +131,11 @@ void CfgServer::readBuildXml()
 			continue;
 		}
 
-		Builder::BuildFileInfo bfi;
+		OnlineLib::BuildFileInfo bfi;
 
 		bfi.readFromXml(xmlReader);
 
-		m_buildFileInfo.insert(bfi.pathFileName, bfi);
+		m_buildFileInfo.emplace(bfi.pathFileName, bfi);
 	}
 
 	logMessage(QString("file %1 has been read").arg(m_buildXmlPathFileName));
@@ -340,7 +338,7 @@ bool CfgLoader::hasFileID(QString fileID) const
 	return m_fileIDPathMap.contains(fileID);
 }
 
-Builder::BuildInfo CfgLoader::buildInfo()
+OnlineLib::BuildInfo CfgLoader::buildInfo()
 {
 	AUTO_LOCK(m_mutex);
 
@@ -432,10 +430,12 @@ void CfgLoader::slot_getFile(QString fileName, QByteArray* fileData)
 		return;
 	}
 
-	if (readCfgFileIfExists(fileName, fileData, m_cfgFilesInfo[fileName].md5, m_cfgFilesInfo[fileName].compressed) == true)
+	const CfgFileInfo& cfgFileInfo = m_cfgFilesInfo.value(fileName);
+
+	if (readCfgFileIfExists(fileName, fileData, cfgFileInfo.md5, cfgFileInfo.compressed) == true)
 	{
 		logMessage(QString("file %1 already exists, md5 = %2").
-					arg(fileName).arg(m_cfgFilesInfo[fileName].md5));
+					arg(fileName).arg(cfgFileInfo.md5));
 
 		m_lastError = Tcp::FileTransferResult::Ok;
 		emitFileReady();
@@ -451,8 +451,8 @@ void CfgLoader::slot_getFile(QString fileName, QByteArray* fileData)
 	fdr.isAutoRequest = false;			// manual request
 	fdr.fileData = fileData;
 	fdr.errorCode = &m_lastError;
-	fdr.etalonMD5 = m_cfgFilesInfo[fileName].md5;
-	fdr.needUncompress = m_cfgFilesInfo[fileName].compressed;
+	fdr.etalonMD5 = cfgFileInfo.md5;
+	fdr.needUncompress = cfgFileInfo.compressed;
 
 	m_downloadQueue.append(fdr);
 
@@ -658,9 +658,9 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 
 				for(const CfgFileInfo& cfi : m_cfgFilesInfo)
 				{
-					Builder::BuildFileInfo bfi = cfi;
+					const OnlineLib::BuildFileInfo& bfi = cfi;
 
-					bfiArray.append(bfi);
+					bfiArray.emplace_back(bfi);
 				}
 
 				std::shared_ptr<const SoftwareSettings> curSettingsProfile = getCurrentSettingsProfile<SoftwareSettings>();
@@ -1094,7 +1094,7 @@ bool CfgLoaderThread::hasFileID(QString fileID) const
 	return m_cfgLoader->hasFileID(fileID);
 }
 
-Builder::BuildInfo CfgLoaderThread::buildInfo()
+OnlineLib::BuildInfo CfgLoaderThread::buildInfo()
 {
 	AUTO_LOCK(m_mutex);
 

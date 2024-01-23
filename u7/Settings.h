@@ -1,12 +1,8 @@
 #pragma once
 
-#include <QSize>
-#include <QPoint>
-#include <QMap>
-#include <QString>
-
 using maptype = QMap<QString, int>;
 Q_DECLARE_METATYPE(maptype)
+
 
 struct DatabaseConnectionParam
 {
@@ -27,6 +23,7 @@ struct DatabaseConnectionParam
 	QString password() const;
 	void setPassword(QString str);
 };
+
 
 class Settings
 {
@@ -194,7 +191,7 @@ public:
 	QByteArray m_dialogMetrologyConnectionGeometry;
 
 private:
-	DatabaseConnectionParam m_databaseConnection;
+	DatabaseConnectionParam m_databaseConnection{};
 	QString m_buildOutputPath;
 	bool m_expertMode = false;
 

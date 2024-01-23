@@ -1,28 +1,22 @@
 @startuml
 
 !include ./CommonLib.puml
-!include ./UtilsLib.puml
 !include ./Protobuf.puml
-!include ./OnlineLib.puml
+!include ./UtilsLib.puml
 !include ./AppSignalLib.puml
 !include ./HardwareLib.puml
-
-'!include ./Builder.puml
-'!include ./VFrame30.puml
-'!include ./TrendView.puml
+!include ./OnlineLib.puml
+!include ./ClientLib.puml
+!include ./TrendView.puml
 
 [Simulator]
 Simulator -up-> [CommonLib]
-Simulator -up-> [UtilsLib]
 Simulator -up-> [Protobuf]
-Simulator -up-> [OnlineLib]
+Simulator -up-> [UtilsLib]
 Simulator -up-> [AppSignalLib]
 Simulator -up-> [HardwareLib]
-
-'Simulator -up-> [Builder]	No, it doees not depend on Builder
-'Simulator <-up- [Builder] : SimTests
-
-Simulator -up-> [VFrame30]
+Simulator -up-> [OnlineLib]
+Simulator -up-> [ClientLib]
 Simulator -up-> [TrendView]
 
 @enduml

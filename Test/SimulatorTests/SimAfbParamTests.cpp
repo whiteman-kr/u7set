@@ -1,10 +1,11 @@
-#include "SimAfbParamTests.h"
-#include "../../Simulator/SimAfb.h"
-#include "../../Simulator/SimException.h"
 #include <memory>
 #include <limits>
 #include <cmath>
 #include <numbers>
+#include <QTest>
+#include "SimAfbParamTests.h"
+#include <SimAfb.h>
+#include <SimException.h>
 
 void SimAfbParamTests::initTestCase()
 {
@@ -146,8 +147,8 @@ void SimAfbParamTests::mulFloatingPointTest()
 
 	// inf
 	{
-		const float value1 = std::numeric_limits<float>::max();
-		const float value2 = 3;
+		constexpr float value1 = std::numeric_limits<float>::max();
+		constexpr float value2 = 3;
 
 		p1.setFloatValue(value1);
 		p1.mulFloatingPoint(value2);
@@ -164,8 +165,8 @@ void SimAfbParamTests::mulFloatingPointTest()
 	// -inf
 	//
 	{
-		const float value1 = std::numeric_limits<float>::max();
-		const float value2 = -3;
+		constexpr float value1 = std::numeric_limits<float>::max();
+		constexpr float value2 = -3;
 
 		p1.setFloatValue(value1);
 		p1.mulFloatingPoint(value2);
@@ -182,8 +183,8 @@ void SimAfbParamTests::mulFloatingPointTest()
 
 	// nan
 	{
-		const float value1 = std::numeric_limits<float>::quiet_NaN();
-		const float value2 = 3;
+		constexpr float value1 = std::numeric_limits<float>::quiet_NaN();
+		constexpr float value2 = 3;
 
 		p1.setFloatValue(value1);
 		p1.mulFloatingPoint(value2);
@@ -199,8 +200,8 @@ void SimAfbParamTests::mulFloatingPointTest()
 
 	// underflow
 	{
-		const float value1 = std::numeric_limits<float>::min();
-		const float value2 = std::numeric_limits<float>::min();
+		constexpr float value1 = std::numeric_limits<float>::min();
+		constexpr float value2 = std::numeric_limits<float>::min();
 
 		p1.setFloatValue(value1);
 		p1.mulFloatingPoint(value2);
@@ -224,8 +225,8 @@ void SimAfbParamTests::divFloatingPointTest()
 	// Regular
 	//
 	{
-		const float value1 = 2.0;
-		const float value2 = 3.0;
+		constexpr float value1 = 2.0;
+		constexpr float value2 = 3.0;
 
 		p1.setFloatValue(value1);
 		p1.divFloatingPoint(value2);
@@ -242,8 +243,8 @@ void SimAfbParamTests::divFloatingPointTest()
 	// div by zero
 	//
 	{
-		const float value1 = 2.0;
-		const float value2 = 0;
+		constexpr float value1 = 2.0;
+		constexpr float value2 = 0;
 
 		p1.setFloatValue(value1);
 		p1.divFloatingPoint(value2);
@@ -260,8 +261,8 @@ void SimAfbParamTests::divFloatingPointTest()
 	// 0 / normal
 	//
 	{
-		const float value1 = 0;
-		const float value2 = 2;
+		constexpr float value1 = 0;
+		constexpr float value2 = 2;
 
 		p1.setFloatValue(value1);
 		p1.divFloatingPoint(value2);
@@ -278,8 +279,8 @@ void SimAfbParamTests::divFloatingPointTest()
 	// nan
 	//
 	{
-		const float value1 = std::numeric_limits<float>::quiet_NaN();
-		const float value2 = 0;
+		constexpr float value1 = std::numeric_limits<float>::quiet_NaN();
+		constexpr float value2 = 0;
 
 		p1.setFloatValue(value1);
 		p1.divFloatingPoint(value2);
@@ -303,8 +304,8 @@ void SimAfbParamTests::addFloatingPointTest()
 	// Test regular +
 	//
 	{
-		const float value1 = 100;
-		const float value2 = -200;
+		constexpr float value1 = 100;
+		constexpr float value2 = -200;
 
 		p1.setFloatValue(value1);
 		p1.addFloatingPoint(value2);
@@ -321,8 +322,8 @@ void SimAfbParamTests::addFloatingPointTest()
 	// Test regular + with 0 result
 	//
 	{
-		const float value1 = 200;
-		const float value2 = -200;
+		constexpr float value1 = 200;
+		constexpr float value2 = -200;
 
 		p1.setFloatValue(value1);
 		p1.addFloatingPoint(value2);
@@ -339,8 +340,8 @@ void SimAfbParamTests::addFloatingPointTest()
 	// Test regular + with overflow
 	//
 	{
-		const float value1 = std::numeric_limits<float>::max();
-		const float value2 = std::numeric_limits<float>::max();
+		constexpr float value1 = std::numeric_limits<float>::max();
+		constexpr float value2 = std::numeric_limits<float>::max();
 
 		p1.setFloatValue(value1);
 		p1.addFloatingPoint(value2);
@@ -357,8 +358,8 @@ void SimAfbParamTests::addFloatingPointTest()
 	// -overflow
 	//
 	{
-		const float value1 = std::numeric_limits<float>::lowest();
-		const float value2 = std::numeric_limits<float>::lowest();
+		constexpr float value1 = std::numeric_limits<float>::lowest();
+		constexpr float value2 = std::numeric_limits<float>::lowest();
 
 		p1.setFloatValue(value1);
 		p1.addFloatingPoint(value2);
@@ -375,8 +376,8 @@ void SimAfbParamTests::addFloatingPointTest()
 	// NaN
 	//
 	{
-		const float value1 = std::numeric_limits<float>::quiet_NaN();
-		const float value2 = 10;
+		constexpr float value1 = std::numeric_limits<float>::quiet_NaN();
+		constexpr float value2 = 10;
 
 		p1.setFloatValue(value1);
 		p1.addFloatingPoint(value2);
@@ -393,8 +394,8 @@ void SimAfbParamTests::addFloatingPointTest()
 	// +inf
 	//
 	{
-		const float value1 = std::numeric_limits<float>::infinity();
-		const float value2 = 1;
+		constexpr float value1 = std::numeric_limits<float>::infinity();
+		constexpr float value2 = 1;
 
 		p1.setFloatValue(value1);
 		p1.addFloatingPoint(value2);
@@ -418,8 +419,8 @@ void SimAfbParamTests::subFloatingPointTest()
 	// Test regular -
 	//
 	{
-		const float value1 = 100;
-		const float value2 = -200;
+		constexpr float value1 = 100;
+		constexpr float value2 = -200;
 
 		p1.setFloatValue(value1);
 		p1.subFloatingPoint(value2);
@@ -436,8 +437,8 @@ void SimAfbParamTests::subFloatingPointTest()
 	// Test regular - with 0 result
 	//
 	{
-		const float value1 = 200;
-		const float value2 = 200;
+		constexpr float value1 = 200;
+		constexpr float value2 = 200;
 
 		p1.setFloatValue(value1);
 		p1.subFloatingPoint(value2);
@@ -454,8 +455,8 @@ void SimAfbParamTests::subFloatingPointTest()
 	// Test regular - with overflow
 	//
 	{
-		const float value1 = std::numeric_limits<float>::lowest();
-		const float value2 = std::numeric_limits<float>::max();
+		constexpr float value1 = std::numeric_limits<float>::lowest();
+		constexpr float value2 = std::numeric_limits<float>::max();
 
 		p1.setFloatValue(value1);
 		p1.subFloatingPoint(value2);
@@ -472,8 +473,8 @@ void SimAfbParamTests::subFloatingPointTest()
 	// -overflow
 	//
 	{
-		const float value1 = std::numeric_limits<float>::lowest();
-		const float value2 = std::numeric_limits<float>::max();
+		constexpr float value1 = std::numeric_limits<float>::lowest();
+		constexpr float value2 = std::numeric_limits<float>::max();
 
 		p1.setFloatValue(value1);
 		p1.subFloatingPoint(value2);
@@ -490,8 +491,8 @@ void SimAfbParamTests::subFloatingPointTest()
 	// NaN
 	//
 	{
-		const float value1 = std::numeric_limits<float>::quiet_NaN();
-		const float value2 = 10;
+		constexpr float value1 = std::numeric_limits<float>::quiet_NaN();
+		constexpr float value2 = 10;
 
 		p1.setFloatValue(value1);
 		p1.subFloatingPoint(value2);
@@ -508,8 +509,8 @@ void SimAfbParamTests::subFloatingPointTest()
 	// +inf
 	//
 	{
-		const float value1 = std::numeric_limits<float>::infinity();
-		const float value2 = 1;
+		constexpr float value1 = std::numeric_limits<float>::infinity();
+		constexpr float value2 = 1;
 
 		p1.setFloatValue(value1);
 		p1.subFloatingPoint(value2);
@@ -564,8 +565,8 @@ void SimAfbParamTests::addSignedIntegerTest()
 	// Test regular + with overflow
 	//
 	{
-		const qint32 value1 = std::numeric_limits<qint32>::max() - 1;
-		const qint32 value2 = 2;
+		constexpr qint32 value1 = std::numeric_limits<qint32>::max() - 1;
+		constexpr qint32 value2 = 2;
 
 		p1.setSignedIntValue(value1);
 
@@ -580,8 +581,8 @@ void SimAfbParamTests::addSignedIntegerTest()
 	// Test regular + with -overflow
 	//
 	{
-		const qint32 value1 = std::numeric_limits<qint32>::lowest();
-		const qint32 value2 = -1;
+		constexpr qint32 value1 = std::numeric_limits<qint32>::lowest();
+		constexpr qint32 value2 = -1;
 
 		p1.setSignedIntValue(value1);
 
@@ -635,8 +636,8 @@ void SimAfbParamTests::subSignedIntegerTest()
 	// Test regular + with overflow
 	//
 	{
-		const qint32 value1 = std::numeric_limits<qint32>::max() - 1;
-		const qint32 value2 = -2;
+		constexpr qint32 value1 = std::numeric_limits<qint32>::max() - 1;
+		constexpr qint32 value2 = -2;
 
 		p1.setSignedIntValue(value1);
 		p1.subSignedInteger(value2);
@@ -651,8 +652,8 @@ void SimAfbParamTests::subSignedIntegerTest()
 	// Test regular + with -overflow
 	//
 	{
-		const qint32 value1 = std::numeric_limits<qint32>::lowest();
-		const qint32 value2 = 1;
+		constexpr qint32 value1 = std::numeric_limits<qint32>::lowest();
+		constexpr qint32 value2 = 1;
 
 		p1.setSignedIntValue(value1);
 		p1.subSignedInteger(value2);
@@ -706,8 +707,8 @@ void SimAfbParamTests::mulSignedIntegerTest()
 	// Test regular + with overflow
 	//
 	{
-		const qint32 value1 = std::numeric_limits<qint32>::max()  / 2;
-		const qint32 value2 = 3;
+		constexpr qint32 value1 = std::numeric_limits<qint32>::max()  / 2;
+		constexpr qint32 value2 = 3;
 
 		p1.setSignedIntValue(value1);
 		p1.mulSignedInteger(value2);
@@ -722,8 +723,8 @@ void SimAfbParamTests::mulSignedIntegerTest()
 	// Test regular + with -overflow
 	//
 	{
-		const qint32 value1 = std::numeric_limits<qint32>::lowest() / 2;
-		const qint32 value2 = 3;
+		constexpr qint32 value1 = std::numeric_limits<qint32>::lowest() / 2;
+		constexpr qint32 value2 = 3;
 
 		p1.setSignedIntValue(value1);
 		p1.mulSignedInteger(value2);
@@ -1177,7 +1178,7 @@ void SimAfbParamTests::afbComponentInstanceConstruct()
 		QCOMPARE(afbInst.paramExists(6), true);
 		QCOMPARE(afbInst.paramExists(7), true);
 		QCOMPARE(afbInst.paramExists(8), false);
-		QCOMPARE(afbInst.paramExists(10), false);	// not does not exsit, will apear as versionOpIndex() later
+		QCOMPARE(afbInst.paramExists(10), false);	// not does not exist, will appear as versionOpIndex() later
 		QCOMPARE(afbInst.paramExists(18), true);
 		QCOMPARE(afbInst.paramExists(9999), false);
 
@@ -1200,8 +1201,8 @@ void SimAfbParamTests::afbComponentInstanceConstruct()
 
 		verifyFunc(afbInst, 0, true);
 		verifyFunc(afbInst, 1, true);
-		verifyFunc(afbInst, 10, true);		// vresion should be created implicitly
-		verifyFunc(afbInst, 18, true);		// vresion should be created implicitly
+		verifyFunc(afbInst, 10, true);		// version should be created implicitly
+		verifyFunc(afbInst, 18, true);		// version should be created implicitly
 
 		// --
 		//
@@ -1210,7 +1211,7 @@ void SimAfbParamTests::afbComponentInstanceConstruct()
 		{
 			[[maybe_unused]] const Sim::AfbComponentParam* param = afbInst.param(3);
 
-			QFAIL("Exception was excpeced but was not thrown");
+			QFAIL("Exception was expected but was not thrown");
 		}
 		catch (Sim::SimException&)
 		{
@@ -1293,7 +1294,7 @@ void SimAfbParamTests::afbComponentSet()
 {
 	// --
 	//
-	QFile lmDescritptionFile(":/LM1_SF40.xml");
+	QFile lmDescritptionFile(":/LM1_SR05.xml");
 	if (lmDescritptionFile.open(QIODevice::ReadOnly | QIODevice::Text) == false)
 	{
 		QFAIL(lmDescritptionFile.errorString().toStdString().data());
@@ -1316,10 +1317,10 @@ void SimAfbParamTests::afbComponentSet()
 	ok = set.init(lmd);
 	QCOMPARE(ok, true);
 
-	Sim::AfbComponentInstance* afbNot = set.componentInstance(2, 0);	// Afb Component NOT
-	QVERIFY(afbNot);
+	Sim::AfbComponentInstance* afbLogic = set.componentInstance(1, 0);	// Afb Component LOGIC
+	QVERIFY(afbLogic);
 
-	Sim::AfbComponentInstance* afbTct = set.componentInstance(3, 22);	// Afb Component NOT
+	Sim::AfbComponentInstance* afbTct = set.componentInstance(3, 22);	// Afb Component TCT
 	QVERIFY(afbTct);
 
 	Sim::AfbComponentParam param2{2, 0x1122};

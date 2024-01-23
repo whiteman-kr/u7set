@@ -1,15 +1,6 @@
 #include "ProcessData.h"
 
-#include <QApplication>
-#include <QFileDialog>
-#include <QFile>
-#include <QMessageBox>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QStringListModel>
 #include <QClipboard>
-#include <QSettings>
-#include <QtConcurrent>
 
 #include "ExcelHelper.h"
 #include "Options.h"
@@ -659,7 +650,7 @@ void ExportData::startExportThread(ExportData* pThis, const QString& fileName)
 		return;
 	}
 
-	QString fileExt = fileName.right(fileName.count() - fileName.lastIndexOf(".") - 1);
+    QString fileExt = fileName.right(fileName.size() - fileName.lastIndexOf(".") - 1);
 	if (fileExt.isEmpty() == true)
 	{
 		return;
@@ -761,11 +752,15 @@ bool ExportData::saveCsvFile(const QString &fileName)
 	m_exportCancel = false;
 
 	QFile file;
+
 	file.setFileName(fileName);
+
 	if (file.open(QIODevice::WriteOnly) == false)
 	{
 		return false;
 	}
+
+	file.write(BOM::UTF8.toUtf8());
 
 	int columnCount = m_pView->model()->columnCount();
 	for(int column = 0; column < columnCount; column++)

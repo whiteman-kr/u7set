@@ -6,6 +6,7 @@
 !include ./Protobuf.puml
 !include ./ServiceLib.puml
 !include ./AppSignalLib.puml
+!include ./HardwareLib.puml
 !include ./AppDataService.puml
 !include ./ClientLib.puml
 
@@ -16,6 +17,7 @@ ServiceControlManager -up-> [OnlineLib]
 ServiceControlManager -up-> [Protobuf]
 ServiceControlManager -up-> [ServiceLib]
 ServiceControlManager -up-> [AppSignalLib]
+ServiceControlManager -up-> [HardwareLib]
 ServiceControlManager -up-> [AppDataService]
 ServiceControlManager -up-> [ClientLib]
 

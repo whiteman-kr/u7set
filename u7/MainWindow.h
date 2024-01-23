@@ -85,7 +85,6 @@ protected slots:
 	void showRpctQuickStart();
 	void showRpctUserManualAppendixA();
 	void showRpctUserManualAppendixB();
-	void showRpctUserManualAppendixC();
 	void showAfblReference();
 	void showScriptHelp();
 	void showMatsUserManual();
@@ -97,6 +96,7 @@ protected slots:
 	void runBusEditor();
 	void runTagsEditor();
 	void runSimulationProfilesEditor();
+	void runMatsUserEditor();
 	void updateUfbsAfbsBusses();
 	void afbLibraryCheck();
     void showAbout();
@@ -137,7 +137,6 @@ private:
 	QAction* m_rpctQuickStartAction = nullptr;
 	QAction* m_manualRpctAppendixAAction = nullptr;
 	QAction* m_manualRpctAppendixBAction = nullptr;
-	QAction* m_manualRpctAppendixCAction = nullptr;
 	QAction* m_manualAfblAction = nullptr;
 	QAction* m_scriptHelpAction = nullptr;
 	QAction* m_manualMatsAction = nullptr;
@@ -147,6 +146,7 @@ private:
     QAction* m_connectionsEditorAction = nullptr;
 	QAction* m_busEditorAction = nullptr;
 	QAction* m_tagsEditorAction = nullptr;
+	QAction* m_matsUsersEditorAction = nullptr;
 	QAction* m_simProfilesEditorAction = nullptr;
 	QAction* m_updateUfbsAfbs = nullptr;
 	QAction* m_AfbLibraryCheck = nullptr;
@@ -196,5 +196,7 @@ private:
 //	QWinTaskbarButton* m_taskBarButton = nullptr;
 //	int m_timerId = -1;
 //#endif
+
+	int m_visibleTimerId = -1;
 };
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../ServiceLib/Service.h"
+#include "../ServiceLib/ServiceStarter.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "CfgControlServer.h"
 
@@ -17,10 +17,11 @@ class ConfigurationServiceWorker : public ServiceWorker
 public:
 	ConfigurationServiceWorker(const SoftwareInfo& softwareInfo,
 							   const QString& serviceInstanceName,
-							   int& argc,
+							   int argc,
 							   char** argv,
-							   std::shared_ptr<CircularLogger> logger,
-							   E::ServiceRunMode runMode);
+							   std::shared_ptr<CircularLogger> logger);
+
+	ConfigurationServiceWorker(const ConfigurationServiceWorker* worker);
 
 	virtual ServiceWorker* createInstance() const override;
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& servicesInfo) const;
@@ -32,8 +33,8 @@ signals:
 	void renameWorkBuildToBackupExcept(QString workDirectoryToLeave);
 
 private:
-	virtual void initCmdLineParser() override;
-	virtual void loadSettings() override;
+	virtual void initServiceSpecificCmdLineArgs() override;
+	virtual void loadServiceSpecificSettings() override;
 
 	bool loadCfgServiceSettings(const QString& buildPath);
 
@@ -52,7 +53,6 @@ private:
 	E::SoftwareRunMode getSoftwareRunMode(QString runModeStr);
 
 private:
-	std::shared_ptr<CircularLogger> m_logger;
 	UdpSocketThread* m_infoSocketThread = nullptr;
 	Tcp::ServerThread* m_cfgServerThread = nullptr;
 
@@ -64,7 +64,7 @@ private:
 	QString m_autoloadBuildPath;
 	QString m_clientIPStr;
 	QString m_workDirectory;
-	OptionalBool m_checkHostname;
+	bool m_checkHostname = false;
 
 	HostAddressPort m_clientIP;
 

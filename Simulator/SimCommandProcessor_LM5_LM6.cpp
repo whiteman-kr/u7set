@@ -1,7 +1,3 @@
-#include <array>
-#include <cfenv>
-#include <cmath>
-#include <chrono>
 #include "../CommonLib/Times.h"
 #include "SimCommandProcessor_LM5_LM6.h"
 #include "SimException.h"
@@ -13,6 +9,7 @@ namespace Sim
 	CommandProcessor_LM5_LM6::CommandProcessor_LM5_LM6(DeviceEmulator* device) :
 		CommandProcessor(device)
 	{
+		static_assert(std::is_unsigned_v<decltype(m_device->acc())>);
 	}
 
 	void CommandProcessor_LM5_LM6::beforeAppLogicParse()
@@ -61,7 +58,7 @@ namespace Sim
 	{
 		using namespace std::chrono;
 
-		// Blink signal, addr 57682[2] = 0xE152[2] -- read memry
+		// Blink signal, addr 57682[2] = 0xE152[2] -- read memory
 		//
 		if ((m_blinkCounter % (1000 / m_cycleDurationMs / 2)) == 0)
 		{
@@ -331,7 +328,7 @@ namespace Sim
 	}
 
 	// Command: nop
-	// Code: 1
+	// Code: 1 - ext: 0b000000
 	// Description: No operation
 	//
 	void CommandProcessor_LM5_LM6::parse_nop(DeviceCommand* command)
@@ -348,6 +345,137 @@ namespace Sim
 		//
 	}
 
+	// Command: reset
+	// Code: 1 - ext: 0b100000
+	// Description: Reset ACC to 0
+	//
+	void CommandProcessor_LM5_LM6::parse_reset(DeviceCommand* command)
+	{
+		command->m_size = 1;
+		command->m_string = strCommand(command->caption()) + strAcc();
+	}
+
+	void CommandProcessor_LM5_LM6::command_reset(const DeviceCommand& command)
+	{
+		Q_UNUSED(command);
+
+		m_device->setAcc(0);
+	}
+
+	// Command: set
+	// Code: 1 - ext: 0b010000
+	// Description: Set ACC to 0xFFFF
+	//
+	void CommandProcessor_LM5_LM6::parse_set(DeviceCommand* command)
+	{
+		command->m_size = 1;
+		command->m_string = strCommand(command->caption()) + strAcc();
+	}
+
+	void CommandProcessor_LM5_LM6::command_set(const DeviceCommand& command)
+	{
+		Q_UNUSED(command);
+
+		m_device->setAcc(0xFFFF);
+	}
+
+	// Command: or
+	// Code: 1 - ext: 0b110000
+	// Description: OR all ACC bits to ACC[0]
+	//
+	void CommandProcessor_LM5_LM6::parse_or(DeviceCommand* command)
+	{
+		command->m_size = 1;
+		command->m_string = strCommand(command->caption()) + strAcc();
+	}
+	
+	void CommandProcessor_LM5_LM6::command_or(const DeviceCommand& command)
+	{
+		Q_UNUSED(command);
+
+		auto acc = m_device->acc();
+		m_device->setAcc(acc == 0 ? 0x0000 : 0x0001);
+	}
+
+	// Command: and
+	// Code: 1 - ext: 0b001000
+	// Description: AND all ACC bits to ACC[0]
+	//
+	void CommandProcessor_LM5_LM6::parse_and(DeviceCommand* command)
+	{
+		command->m_size = 1;
+		command->m_string = strCommand(command->caption()) + strAcc();
+	}
+	
+	void CommandProcessor_LM5_LM6::command_and(const DeviceCommand& command)
+	{
+		Q_UNUSED(command);
+
+		auto acc = m_device->acc();
+		m_device->setAcc(acc == 0xFFFF ? 0x0001 : 0x0000);
+	}
+
+	// Command: not
+	// Code: 1 - ext: 0b101000
+	// Description: Invert ACC[0] bit
+	//
+	void CommandProcessor_LM5_LM6::parse_not(DeviceCommand* command)
+	{
+		command->m_size = 1;
+		command->m_string = strCommand(command->caption()) + strAcc();
+	}
+
+	void CommandProcessor_LM5_LM6::command_not(const DeviceCommand& command)
+	{
+		Q_UNUSED(command);
+
+		auto acc = m_device->acc();
+		acc = ~acc;
+
+		m_device->setAcc(acc);
+	}
+
+	// Command: lshift0
+	// Code: 1 - ext: 0b011000
+	// Description: Shift ACC left and load 0 in ACC[0]
+	//
+	void CommandProcessor_LM5_LM6::parse_lshift0(DeviceCommand* command)
+	{
+		command->m_size = 1;
+		command->m_string = strCommand(command->caption()) + strAcc();
+	}
+	
+	void CommandProcessor_LM5_LM6::command_lshift0(const DeviceCommand& command)
+	{
+		Q_UNUSED(command);
+
+		auto acc = m_device->acc();
+		acc <<= 1;
+
+		m_device->setAcc(acc);
+	}
+
+	// Command: lshift1
+	// Code: 1 - ext: 0b111000
+	// Description: Shift ACC left and load 1 in ACC[0]
+	//
+	void CommandProcessor_LM5_LM6::parse_lshift1(DeviceCommand* command)
+	{
+		command->m_size = 1;
+		command->m_string = strCommand(command->caption()) + strAcc();
+	}
+	
+	void CommandProcessor_LM5_LM6::command_lshift1(const DeviceCommand& command)
+	{
+		Q_UNUSED(command);
+
+		auto acc = m_device->acc();
+		acc <<= 1;
+		acc |= 1;
+
+		m_device->setAcc(acc);
+	}
+
 	// Command: startafb
 	// Code: 2
 	// Description: Execute AFB
@@ -362,7 +490,7 @@ namespace Sim
 		AfbComponent afb = checkAfb(command->m_afbOpCode, command->m_afbInstance);
 		if (afb.simulationFunc().isEmpty() == true)
 		{
-			SimException::raise(QStringLiteral("Simultaion function for AFB %1 is not found")
+			SimException::raise(QStringLiteral("Simulation function for AFB %1 is not found")
 									.arg(afb.caption()),
 								Q_FUNC_INFO);
 		}
@@ -450,7 +578,7 @@ namespace Sim
 	}
 
 	// Command: mov
-	// Code: 4
+	// Code: 4 - ext: 0b000000
 	// Description: Move word from RAM to RAM
 	//
 	void CommandProcessor_LM5_LM6::parse_mov(DeviceCommand* command)
@@ -460,8 +588,8 @@ namespace Sim
 		quint16 dstAddress = m_device->getWord(command->m_offset + 1);
 		quint16 srcAddress = m_device->getWord(command->m_offset + 2);
 
-		command->m_word0 = dstAddress;		// word0 - adderess2 - destionation
-		command->m_word1 = srcAddress;		// word1 - adderess1 - source
+		command->m_word0 = dstAddress;		// word0 - address2 - destination
+		command->m_word1 = srcAddress;		// word1 - address1 - source
 
 		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, srcAddress);
 		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, dstAddress);
@@ -470,7 +598,7 @@ namespace Sim
 		                    strAddr(dstAddress) + ", " +
 		                    strAddr(srcAddress);
 
-		// Cheks
+		// Checks
 		//
 		sanitizerCheck(srcAddress, 1);
 		sanitizerWrite(dstAddress, 1);
@@ -489,6 +617,70 @@ namespace Sim
 		return;
 	}
 
+	// Command: mov - mov_addr_acc
+	// Code: 4 - ext: 0b100000
+	// Description: Copy 16-bit word from ACC to memory
+	//
+	void CommandProcessor_LM5_LM6::parse_mov_addr_acc(DeviceCommand* command)
+	{
+		command->m_size = 2;
+
+		quint16 dstAddress = m_device->getWord(command->m_offset + 1);
+		command->m_word0 = dstAddress;
+
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, dstAddress);
+
+		command->m_string = strCommand(command->caption()) + strAddr(dstAddress) + ", " + strAcc();
+
+		// Checks
+		//
+		sanitizerWrite(dstAddress, 1);
+
+		return;
+	}
+	
+	void CommandProcessor_LM5_LM6::command_mov_addr_acc(const DeviceCommand& command)
+	{
+		const auto& dst = command.m_word0;
+		quint16 data = m_device->acc();
+
+		m_device->writeRamWord(command.m_memoryAreaTo, dst, data);
+
+		return;
+	}
+
+	// Command: mov - mov_acc_addr
+	// Code: 4 - ext: 0b010000
+	// Description: Copy 16-bit word from memory to ACC
+	//
+	void CommandProcessor_LM5_LM6::parse_mov_acc_addr(DeviceCommand* command)
+	{
+		command->m_size = 2;
+
+		quint16 srcAddress = m_device->getWord(command->m_offset + 1);
+		command->m_word0 = srcAddress;
+
+		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, srcAddress);
+
+		command->m_string = strCommand(command->caption()) + strAcc() + ", " + strAddr(srcAddress);
+
+		// Checks
+		//
+		sanitizerCheck(srcAddress, 1);
+
+		return;
+	}
+
+	void CommandProcessor_LM5_LM6::command_mov_acc_addr(const DeviceCommand& command)
+	{
+		const auto& src = command.m_word0;
+		quint16 data = m_device->readRamWord(command.m_memoryAreaFrom, src);
+
+		m_device->setAcc(data);
+
+		return;
+	}
+
 	// Command: movmem
 	// Code: 5
 	// Description: Move N words from RAM to RAM
@@ -501,8 +693,8 @@ namespace Sim
 		quint16 src = m_device->getWord(command->m_offset + 2);
 		quint16 count = m_device->getWord(command->m_offset + 3);
 
-		command->m_word0 = dst;		// word0 - adderess2 - dst
-		command->m_word1 = src;		// word1 - adderess1 - src
+		command->m_word0 = dst;		// word0 - address2 - dst
+		command->m_word1 = src;		// word1 - address1 - src
 		command->m_word2 = count;	// word2 - words to move
 
 		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, src);
@@ -568,7 +760,7 @@ namespace Sim
 	}
 
 	// Command: movc
-	// Code: 6
+	// Code: 6 - ext: 0xb000000
 	// Description: Write word const to RAM
 	//
 	void CommandProcessor_LM5_LM6::parse_movc(DeviceCommand* command)
@@ -599,6 +791,30 @@ namespace Sim
 	void CommandProcessor_LM5_LM6::command_movc(const DeviceCommand& command)
 	{
 		m_device->writeRamWord(command.m_memoryAreaTo, command.m_word0, command.m_word1);
+		return;
+	}
+
+	// Command: movc - mov_acc
+	// Code: 6 - ext: 0xb100000
+	// Description: Write 16-bit constant to ACC
+	//
+	void CommandProcessor_LM5_LM6::parse_movc_acc(DeviceCommand* command)
+	{
+		command->m_size = 2;
+
+		quint16 data = m_device->getWord(command->m_offset + 1);
+		command->m_word0 = data;
+
+		// movc     Acc, #0
+		//
+		command->m_string = strCommand(command->caption()) + strAcc() + ", " + strWordConst(data);
+
+		return;
+	}
+
+	void CommandProcessor_LM5_LM6::command_movc_acc(const DeviceCommand& command)
+	{
+		m_device->setAcc(command.m_word0);
 		return;
 	}
 
@@ -959,7 +1175,7 @@ namespace Sim
 		quint16 data = m_device->getWord(command->m_offset + 2);
 		quint16 count = m_device->getWord(command->m_offset + 3);
 
-		command->m_word0 = dst;		// word0 - adderess
+		command->m_word0 = dst;			// word0 - address
 		command->m_word1 = data;		// word1 - data
 		command->m_word2 = count;		// word2 - words to move
 
@@ -1012,7 +1228,7 @@ namespace Sim
 	}
 
 	// Command: movb
-	// Code: 15
+	// Code: 15 - ext: 0xb000000
 	// Description: Move bit from RAM to RAM
 	//
 	void CommandProcessor_LM5_LM6::parse_movb(DeviceCommand* command)
@@ -1022,13 +1238,13 @@ namespace Sim
 		quint16 src = m_device->getWord(command->m_offset + 2);							// source address (ADR1)
 		quint16 srcBitNo = m_device->getWord(command->m_offset + 3) & 0b1111;
 
-		quint16 dst = m_device->getWord(command->m_offset + 1);							// destionation address	(ADR2)
+		quint16 dst = m_device->getWord(command->m_offset + 1);							// destination address	(ADR2)
 		quint16 dstBitNo = (m_device->getWord(command->m_offset + 3) >> 8) & 0b1111;
 
 		command->m_word0 = src;					// source address (ADR1)
 		command->m_bitNo0 = srcBitNo;
 
-		command->m_word1 = dst;					// destionation address	(ADR2)
+		command->m_word1 = dst;					// destination address	(ADR2)
 		command->m_bitNo1 = dstBitNo;
 
 		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, src);
@@ -1036,9 +1252,8 @@ namespace Sim
 
 		// String representation
 		//
-		command->m_string =	strCommand(command->caption()) +
-		                    strBitAddr(src, srcBitNo) + ", " +
-		                    strBitAddr(dst, dstBitNo);
+		command->m_string =
+			strCommand(command->caption()) + strBitAddr(dst, dstBitNo) + ", " + strBitAddr(src, srcBitNo);
 
 		// This command can write only to:
 		//		bit memory (AppLogicBitDataOffset/AppLogicBitDataSize)
@@ -1065,6 +1280,94 @@ namespace Sim
 	{
 		quint16 data = m_device->readRamBit(command.m_memoryAreaFrom, command.m_word0, command.m_bitNo0);
 		m_device->writeRamBit(command.m_memoryAreaTo, command.m_word1, command.m_bitNo1, data);
+
+		return;
+	}
+
+	// Command: movb - movb_acc_addr
+	// Code: 15 - 0b10xxxx
+	// Description: Shift left ACC and copy 1-bit from memory to ACC[0]
+	//
+	void CommandProcessor_LM5_LM6::parse_movb_acc_addr(DeviceCommand* command)
+	{
+		command->m_size = 2;
+
+		quint16 src = m_device->getWord(command->m_offset + 1);
+		quint16 srcBitNo = m_device->getWord(command->m_offset + 0) & 0b1111;
+
+		command->m_word0 = src;
+		command->m_bitNo0 = srcBitNo;
+
+		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, src);
+
+		// String representation: movb Acc(<<), 042D[2]
+		//
+		QString acc = strAcc() + "(<<)";
+		command->m_string = strCommand(command->caption()) + acc + ", " + strBitAddr(src, srcBitNo);
+
+		return;
+	}
+
+	void CommandProcessor_LM5_LM6::command_movb_acc_addr(const DeviceCommand& command)
+	{
+		quint16 data = m_device->readRamBit(command.m_memoryAreaFrom, command.m_word0, command.m_bitNo0);
+		data &= 1;
+
+		auto acc = (m_device->acc() << 1) | data;
+
+		m_device->setAcc(acc);
+
+		return;
+	}
+
+	// Command: movb - movb_addr_acc
+	// Code: 15 - 0b01xxxx
+	// Description: Copy 1-bit from ACC[0] to memory and shift right ACC
+	//
+	void CommandProcessor_LM5_LM6::parse_movb_addr_acc(DeviceCommand* command)
+	{
+		command->m_size = 2;
+
+		quint16 dst = m_device->getWord(command->m_offset + 1);
+		quint16 dstBitNo = m_device->getWord(command->m_offset + 0) & 0b1111;
+
+		command->m_word0 = dst;
+		command->m_bitNo0 = dstBitNo;
+
+		command->m_memoryAreaTo = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Write, dst);
+
+		// String representation: movb 042D[2], Acc(>>)
+		//
+		QString acc = strAcc() + "(>>)";
+		command->m_string = strCommand(command->caption()) + strBitAddr(dst, dstBitNo) + ", " + acc;
+
+		// This command can write only to:
+		//		bit memory (AppLogicBitDataOffset/AppLogicBitDataSize)
+		//		word memory	(AppLogicWordDataOffset/AppLogicWordDataSize)
+		//
+		if (const LmDescription::Memory& memory = m_device->lmDescription().memory();
+			memory.isAppLogicBitData(dst) == false &&
+			memory.isAppLogicWordData(dst) == false)
+		{
+			QString message = QString("Command '%1' allowed to write only to AppLogicBit area (%2 - %3) and AppLogicWord (%4 - %5) memory areas")
+				.arg(command->m_string)
+				.arg(strAddr(memory.m_appLogicBitDataOffset))
+				.arg(strAddr(memory.m_appLogicBitDataOffset + memory.m_appLogicBitDataSize))
+				.arg(strAddr(memory.m_appLogicWordDataOffset))
+				.arg(strAddr(memory.m_appLogicWordDataOffset + memory.m_appLogicWordDataSize));
+
+			SimException::raise(message);
+		}
+
+		return;
+	}
+
+	void CommandProcessor_LM5_LM6::command_movb_addr_acc(const DeviceCommand& command)
+	{
+		auto acc = m_device->acc();
+
+		m_device->writeRamBit(command.m_memoryAreaTo, command.m_word0, command.m_bitNo0, acc & 1);
+		m_device->setAcc(acc >> 1);
 
 		return;
 	}
@@ -1100,10 +1403,10 @@ namespace Sim
 	{
 		command->m_size = 3;
 
-		quint16 dst = m_device->getWord(command->m_offset + 1);		// word0 - address2 - destionation
+		quint16 dst = m_device->getWord(command->m_offset + 1);		// word0 - address2 - destination
 		quint16 src = m_device->getWord(command->m_offset + 2);		// word1 - address1 - source
 
-		command->m_word0 = dst;		// word0 - address2 - destionation
+		command->m_word0 = dst;		// word0 - address2 - destination
 		command->m_word1 = src;		// word1 - address1 - source
 
 		command->m_memoryAreaFrom = m_device->ram().memoryAreaHandle(E::LogicModuleRamAccess::Read, src);
@@ -1841,7 +2144,7 @@ namespace Sim
 				// In AFBL RM shown another diagram, what is wrong
 				// De facto this RC filter is implemented
 
-				// FILTER (tctc_filter) - defacto is RC FILTER, on next AFBL version 209 it is fixed, and this implementation move to conf 6
+				// FILTER (tctc_filter) - de facto is RC FILTER, on next AFBL version 209 it is fixed, and this implementation move to conf 6
 				//
 
 				// VHDL
@@ -3133,7 +3436,7 @@ namespace Sim
 					if (prevResult == 0)
 					{
 						instance->addParamWord(o_result, 0);
-						instance->addParamWord(i_prev_result, 0);	 // can be commneted as it's already 0
+						instance->addParamWord(i_prev_result, 0);	 // can be commented as it's already 0
 						break;
 					}
 					else
@@ -3142,8 +3445,8 @@ namespace Sim
 						//
 						if (inputValue > resetValue)
 						{
-							instance->addParamWord(o_result, 1);		// can be commneted as it's already 1
-							instance->addParamWord(i_prev_result, 1);	// can be commneted as it's already 1
+							instance->addParamWord(o_result, 1);		// can be commented as it's already 1
+							instance->addParamWord(i_prev_result, 1);	// can be commented as it's already 1
 						}
 						else
 						{
@@ -3176,7 +3479,7 @@ namespace Sim
 					if (prevResult == 0)
 					{
 						instance->addParamWord(o_result, 0);
-						instance->addParamWord(i_prev_result, 0);	 // can be commneted as it's already 0
+						instance->addParamWord(i_prev_result, 0);	 // can be commented as it's already 0
 						break;
 					}
 					else
@@ -3185,8 +3488,8 @@ namespace Sim
 						//
 						if (inputValue < resetValue)
 						{
-							instance->addParamWord(o_result, 1);		// can be commneted as it's already 1
-							instance->addParamWord(i_prev_result, 1);	// can be commneted as it's already 1
+							instance->addParamWord(o_result, 1);		// can be commented as it's already 1
+							instance->addParamWord(i_prev_result, 1);	// can be commented as it's already 1
 						}
 						else
 						{
@@ -3230,7 +3533,7 @@ namespace Sim
 					if (prevResult == 0)
 					{
 						instance->addParamWord(o_result, 0);
-						instance->addParamWord(i_prev_result, 0);	 // can be commneted as it's already 0
+						instance->addParamWord(i_prev_result, 0);	 // can be commented as it's already 0
 						break;
 					}
 					else
@@ -3239,8 +3542,8 @@ namespace Sim
 						//
 						if (inputValue > resetValue)
 						{
-							instance->addParamWord(o_result, 1);		// can be commneted as it's already 1
-							instance->addParamWord(i_prev_result, 1);	// can be commneted as it's already 1
+							instance->addParamWord(o_result, 1);		// can be commented as it's already 1
+							instance->addParamWord(i_prev_result, 1);	// can be commented as it's already 1
 						}
 						else
 						{
@@ -3273,7 +3576,7 @@ namespace Sim
 					if (prevResult == 0)
 					{
 						instance->addParamWord(o_result, 0);
-						instance->addParamWord(i_prev_result, 0);	 // can be commneted as it's already 0
+						instance->addParamWord(i_prev_result, 0);	 // can be commented as it's already 0
 						break;
 					}
 					else
@@ -3282,8 +3585,8 @@ namespace Sim
 						//
 						if (inputValue < resetValue)
 						{
-							instance->addParamWord(o_result, 1);		// can be commneted as it's already 1
-							instance->addParamWord(i_prev_result, 1);	// can be commneted as it's already 1
+							instance->addParamWord(o_result, 1);		// can be commented as it's already 1
+							instance->addParamWord(i_prev_result, 1);	// can be commented as it's already 1
 						}
 						else
 						{
@@ -3359,7 +3662,7 @@ namespace Sim
 						if (prevResult == 0)
 						{
 							instance->addParamWord(o_result, 0);
-							instance->addParamWord(i_prev_result, 0);	 // can be commneted as it's already 0
+							instance->addParamWord(i_prev_result, 0);	 // can be commented as it's already 0
 							break;
 						}
 						else
@@ -3368,8 +3671,8 @@ namespace Sim
 							//
 							if (inputValue > resetValue)
 							{
-								instance->addParamWord(o_result, 1);		// can be commneted as it's already 1
-								instance->addParamWord(i_prev_result, 1);	// can be commneted as it's already 1
+								instance->addParamWord(o_result, 1);		// can be commented as it's already 1
+								instance->addParamWord(i_prev_result, 1);	// can be commented as it's already 1
 							}
 							else
 							{
@@ -3409,7 +3712,7 @@ namespace Sim
 					if (prevResult == 0)
 					{
 						instance->addParamWord(o_result, 0);
-						instance->addParamWord(i_prev_result, 0);	 // can be commneted as it's already 0
+						instance->addParamWord(i_prev_result, 0);	 // can be commented as it's already 0
 						break;
 					}
 					else
@@ -3418,8 +3721,8 @@ namespace Sim
 						//
 						if (inputValue < resetValue)
 						{
-							instance->addParamWord(o_result, 1);		// can be commneted as it's already 1
-							instance->addParamWord(i_prev_result, 1);	// can be commneted as it's already 1
+							instance->addParamWord(o_result, 1);		// can be commented as it's already 1
+							instance->addParamWord(i_prev_result, 1);	// can be commented as it's already 1
 						}
 						else
 						{
@@ -3476,7 +3779,7 @@ namespace Sim
 						if (prevResult == 0)
 						{
 							instance->addParamWord(o_result, 0);
-							instance->addParamWord(i_prev_result, 0);	 // can be commneted as it's already 0
+							instance->addParamWord(i_prev_result, 0);	 // can be commented as it's already 0
 							break;
 						}
 						else
@@ -3485,8 +3788,8 @@ namespace Sim
 							//
 							if (inputValue > resetValue)
 							{
-								instance->addParamWord(o_result, 1);		// can be commneted as it's already 1
-								instance->addParamWord(i_prev_result, 1);	// can be commneted as it's already 1
+								instance->addParamWord(o_result, 1);		// can be commented as it's already 1
+								instance->addParamWord(i_prev_result, 1);	// can be commented as it's already 1
 							}
 							else
 							{
@@ -3525,7 +3828,7 @@ namespace Sim
 					if (prevResult == 0)
 					{
 						instance->addParamWord(o_result, 0);
-						instance->addParamWord(i_prev_result, 0);	 // can be commneted as it's already 0
+						instance->addParamWord(i_prev_result, 0);	 // can be commented as it's already 0
 						break;
 					}
 					else
@@ -3534,8 +3837,8 @@ namespace Sim
 						//
 						if (inputValue < resetValue)
 						{
-							instance->addParamWord(o_result, 1);		// can be commneted as it's already 1
-							instance->addParamWord(i_prev_result, 1);	// can be commneted as it's already 1
+							instance->addParamWord(o_result, 1);		// can be commented as it's already 1
+							instance->addParamWord(i_prev_result, 1);	// can be commented as it's already 1
 						}
 						else
 						{
@@ -3761,6 +4064,21 @@ namespace Sim
 		return afb_mem_private(instance, conf, count, 8);
 	}
 
+	void CommandProcessor_LM5_LM6::afb_mem_v9(AfbComponentInstance* instance)
+	{
+		const int i_count = 0;			// Input count
+		const int i_conf = 1;			// SI/FP
+		const int maxInputCount = 8;
+
+		quint16 count = instance->param(i_count)->wordValue();
+		quint16 conf = instance->param(i_conf)->wordValue();
+
+		checkParamRange(count, 3, maxInputCount, QStringLiteral("i_count"));
+		checkParamRange(conf, 1, 2, QStringLiteral("i_conf"));
+
+		return afb_mem_private(instance, conf, count, 8);
+	}
+
 	void CommandProcessor_LM5_LM6::afb_mem_private(AfbComponentInstance* instance, int conf, int count, int version)
 	{
 		const int i_enable_1 = 2;		// up to 8 - opcodes: 2, 3, 4, 5, 6, 7, 8, 9
@@ -3787,7 +4105,7 @@ namespace Sim
 		//instance->addParamWord(o_med_index, 0);
 		//instance->addParamWord(o_max_index, 0);
 		//instance->addParamWord(o_min_index, 0);
-		//instance->addParamWord(o_dev_by_zero, 0);	// There is impossible div by zero, version 7. In version 8, 41st outpust is o_validity
+		//instance->addParamWord(o_dev_by_zero, 0);	// There is impossible div by zero, version 7. In version 9, 41st outpust is o_validity
 
 		if (conf == 1)		// SI - SignedInteger
 		{
@@ -3889,7 +4207,7 @@ namespace Sim
 
 		if (conf == 2)
 		{
-			// Floting Point
+			// Floating Point
 			//
 			struct Operand
 			{

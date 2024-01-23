@@ -6,6 +6,7 @@
 !include ./Protobuf.puml
 !include ./UtilsLib.puml
 !include ./OnlineLib.puml
+!include ./TrendView.puml
 
 [ClientLib]
 ClientLib -up-> [Protobuf]
@@ -13,5 +14,6 @@ ClientLib -up-> [CommonLib]
 ClientLib -up-> [UtilsLib]
 ClientLib -up-> [AppSignalLib]
 ClientLib -up-> [OnlineLib]
+ClientLib -up-> [TrendView]
 
 @enduml

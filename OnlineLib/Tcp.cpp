@@ -1,11 +1,9 @@
 #ifndef ONLINE_LIB_DOMAIN
-#error Don't include this file in the project! Link OnlineLib instead.
+#error Do not include this file in the project! Link OnlineLib instead.
 #endif
 
 #include "Tcp.h"
 #include "../lib/ConstStrings.h"
-#include "../Proto/network.pb.h"
-#include <cstdlib>
 
 namespace Tcp
 {
@@ -676,13 +674,13 @@ namespace Tcp
 		{
 			if (m_ignoredSslErrors.contains(err.error()))
 			{
-				logWarning(QString("ignored SSL error - (%1) %2.").
+				logWarning(QString("SSL warning - (%1) %2.").
 							arg(static_cast<int>(err.error())).
 							arg(err.errorString()));
 			}
 			else
 			{
-				logError(QString("critical SSL error - (%1) %2.").
+				logError(QString("SSL critical error - (%1) %2.").
 							arg(static_cast<int>(err.error())).
 							arg(err.errorString()));
 				result = false;

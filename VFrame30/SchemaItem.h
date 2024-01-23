@@ -83,11 +83,11 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
-		/// \brief Object name
+		/// \brief Object name.
 		Q_PROPERTY(QString objectName READ objectName)
 		Q_PROPERTY(QString ObjectName READ objectName)
 
-		/*! \brief Turns <b>ClickScript</b> script call when user clicks mouse button on schema item
+		/*! \brief Turns on <b>ClickScript</b> script call when user clicks mouse button on schema item
 
 		  When this property is set to true, <b>ClickScript</b> event handler is called when user clicks left mouse button on a schema item.
 
@@ -99,7 +99,7 @@ namespace VFrame30
 		/// \brief A script to run before each schema redraw event.
 		Q_PROPERTY(QString preDrawScript READ preDrawScript WRITE setPreDrawScript)
 
-		/*! \brief Blinking phase. Value of this property is inverted approximately each 250 milliseconds
+		/*! \brief Blinking phase. Value of this property is inverted approximately each 250 milliseconds.
 
 		Blinking phase.	Value of this property is inverted (switched from true to false or vice versa) approximately each 250 milliseconds.
 		Used to implement schema items blinking. For example, script code can paint an item with one color when value is set to true and
@@ -114,7 +114,7 @@ namespace VFrame30
 		Q_PROPERTY(bool blinkPhase READ blinkPhase)
 		Q_PROPERTY(bool BlinkPhase READ blinkPhase)
 
-		/// \brief Show or hide schema item in client Software (Monitor, TuningClient, etc)
+		/// \brief Show or hide schema item in client Software (Monitor, TuningClient, etc).
 		Q_PROPERTY(bool visible READ visible WRITE setVisible)
 		Q_PROPERTY(bool Visible READ visible WRITE setVisible)
 
@@ -122,8 +122,11 @@ namespace VFrame30
 		Q_PROPERTY(QStringList tags READ tagsAsList)
 		Q_PROPERTY(QStringList Tags READ tagsAsList)
 
-		/// \brief Item's type as a string, e.g. SchemaItemInput, SchemaItemUfb, SchemaItemAfb, SchemaItemLine, etc..
+		/// \brief Item's type as a string, e.g. SchemaItemInput, SchemaItemUfb, SchemaItemAfb, SchemaItemLine, etc...
 		Q_PROPERTY(QString type  READ type)
+
+		/// \brief Automatically generated unique label associated with SchemaItem.
+		Q_PROPERTY(QString label READ label)
 
 	protected:
 		SchemaItem();
@@ -168,10 +171,10 @@ namespace VFrame30
 		virtual bool preDrawEvent(QJSEngine* engine);
 
 	protected:
-		bool runScript(QJSValue& evaluatedJs, QJSEngine* engine);
-		QJSValue evaluateScript(const QString& script, QJSEngine* engine, QWidget* parentWidget) const;
-		QString formatScriptError(const QJSValue& scriptValue) const;
-		void reportScriptError(const QJSValue& scriptValue, ILogFile* logFile) const;
+		bool runScript(QString scriptName, QJSValue& evaluatedJs, QJSEngine* engine);
+		QJSValue evaluateScript(QString scriptName, const QString& script, QJSEngine* engine, QWidget* parentWidget) const;
+		QString formatScriptError(QString scriptName, const QJSValue& scriptValue) const;
+		void reportScriptError(QString scriptName, const QJSValue& scriptValue, ILogFile* logFile) const;
 
 		// Text search/replace
 		//

@@ -61,6 +61,8 @@ namespace TestSuite
 
 		// Wait that AdsConnection loads all signal params.
 		//
+		m_appLog.writeMessage("Waiting for all AppSignalParams to load...");
+
 		timer.restart();
 
 		while (timer.hasExpired(30'000) == false && m_connection.signalParamsLoaded() == false)
@@ -75,11 +77,36 @@ namespace TestSuite
 
 		if (m_connection.signalParamsLoaded() == false)
 		{
-			m_appLog.writeError("Loading AppSignalParams timeout");
+			m_appLog.writeError("Loading AppSignalParams timeout!");
 			return false;
 		}
 
-		m_appLog.writeMessage("All AppSignalParams are loaded");
+		m_appLog.writeMessage("All AppSignalParams are loaded.");
+
+		// Wait that AdsConnection requests all signal states at least once.
+		//
+		m_appLog.writeMessage("Waiting for all AppSignalStates to be requested...");
+
+		timer.restart();
+
+		while (timer.hasExpired(30'000) == false && m_connection.signalStatesLoaded() == false)
+		{
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				return false;
+			}
+
+			QThread::msleep(200);
+		}
+
+		if (m_connection.signalStatesLoaded() == false)
+		{
+			m_appLog.writeError("Loading AppSignalStates timeout!");
+			return false;
+		}
+
+		m_appLog.writeMessage("All AppSignalStates are requested.");
+
 		return true;
 	}
 
@@ -98,7 +125,7 @@ namespace TestSuite
 		return m_signalManager.signalState(appSignalId, found);
 	}
 
-	bool AdsInputController::expectSignalValue(QString appSignalId, double value, qint64 timeoutMs) const
+	bool AdsInputController::expectSignalValue(QString appSignalId, qint64 timeoutMs, double value, double tolerance) const
 	{
 		QElapsedTimer timer;
 		timer.start();
@@ -116,7 +143,17 @@ namespace TestSuite
 				return false;
 			}
 
-			if (fabs(state.value() - value) < std::numeric_limits<double>::epsilon())
+			if (std::isnan(value) == true && std::isnan(state.value()) == true)
+			{
+				return true;
+			}
+
+			if (std::isinf(value) == true && std::isinf(state.value()) == true && std::signbit(value) == std::signbit(state.value()))
+			{
+				return true;
+			}
+
+			if (std::abs(state.value() - value) <= tolerance)
 			{
 				return true;
 			}

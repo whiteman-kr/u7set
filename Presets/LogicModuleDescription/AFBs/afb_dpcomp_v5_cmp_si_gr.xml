@@ -1,0 +1,40 @@
+<AFB id="#cmp_si_gr_v1" Caption="cmp_si_gr" Version="1.8">
+	<Properties>
+		<Description>Comparator Block, greater than 32-bit signed integer comparison</Description>
+		<Category>Compare</Category>
+		<OpCode>20</OpCode>
+		<InternalUse>false</InternalUse>
+		<MinWidth>24</MinWidth>
+	</Properties>
+	<Inputs>
+		<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="4" Size="32"/>
+		<Pin OpName="i_sp_in" Caption="set" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="6" Size="32"/>
+	</Inputs>
+	<Outputs>
+		<Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="9" Size="1"/>
+	</Outputs>
+	<Params>
+		<Param OpName="hysteresis" Caption="Hysteresis" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt">
+			<Value>0</Value>
+			<Default>0</Default>
+			<LowLimit>0</LowLimit>
+			<HighLimit>2147483647</HighLimit>
+			<Script>
+				<Changed/>
+			</Script>
+		</Param>
+		<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+			<Value>2</Value>
+			<Default>2</Default>
+			<LowLimit>1</LowLimit>
+			<HighLimit>8</HighLimit>
+			<Script>
+				<Changed/>
+			</Script>
+		</Param>
+	</Params>
+	<CommonScript>
+		<Library/>
+		<AfterCreation/>
+	</CommonScript>
+</AFB>	

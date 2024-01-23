@@ -32,7 +32,7 @@ namespace  Sim
 		//
 		bool sendAppData(const QString& lmEquipmentId, const QString& portEquipmentId, const QByteArray& data, TimeStamp timeStamp);
 
-		// TuningService Communatation
+		// TuningService Communization
 		//
 		std::shared_ptr<Sim::TuningServiceCommunicator> tuningService(QString equipmentId) const;
 
@@ -58,7 +58,7 @@ namespace  Sim
 		//
 		Sim::AppDataTransmitter m_appDataTransmitter;
 
-		// TunningService Communicators, each instance works with its own TuningService
+		// TuningService Communicators, each instance works with its own TuningService
 		// Key is TuningService equipmentId
 		//
 		std::map<QString, std::shared_ptr<Sim::TuningServiceCommunicator>> m_tuningServiceCommunicators;
@@ -95,11 +95,9 @@ namespace  Sim
 
 	public:
 		QString globalScript() const;
-		QString onConfigurationArrivedScript() const;
 
 	private:
 		QString m_globalScript;
-		QString m_onConfigurationArrivedScript;
 	};
 
 

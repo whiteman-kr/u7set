@@ -11,14 +11,15 @@ namespace TestSuite
 		Q_OBJECT
 
 	public:
-		ScriptTestLog(ITestLog& testLog);
+		ScriptTestLog(ILogFile& testLog);
 
 	public slots:
-		void writeError(const QString& message);
-		void writeWarning(const QString& message);
-		void writeMessage(const QString& message);
+		void writeError(QString message, QString tag = QString());
+		void writeWarning(QString message, QString tag = QString());
+		void writeMessage(QString message, QString tag = QString());
+		void writeText(QString message, QString tag = QString());
 
 	private:
-		ITestLog& m_testLog;
+		ILogFile& m_testLog;
 	};
 }

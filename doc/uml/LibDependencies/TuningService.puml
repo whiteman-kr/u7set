@@ -6,6 +6,7 @@
 !include ./Protobuf.puml
 !include ./ServiceLib.puml
 !include ./AppSignalLib.puml
+!include ./HardwareLib.puml
 
 [TuningService]
 TuningService -up-> [CommonLib]
@@ -14,5 +15,6 @@ TuningService -up-> [OnlineLib]
 TuningService -up-> [Protobuf]
 TuningService -up-> [ServiceLib]
 TuningService -up-> [AppSignalLib]
+TuningService -up-> [HardwareLib]
 
 @enduml

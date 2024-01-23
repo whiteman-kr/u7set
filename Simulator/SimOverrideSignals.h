@@ -26,6 +26,7 @@ namespace Sim
 		Script,			// Script is used to define override value
 	};
 
+
 	class OverrideSignalParam
 	{
 	public:
@@ -48,6 +49,8 @@ namespace Sim
 		void setSignedIntvalue(qint32 value);
 		void setFloatValue(float value);
 		void setDoubleValue(double value);
+
+		bool sameType(const OverrideSignalParam& another) const;
 
 		// Properties
 		//
@@ -148,11 +151,20 @@ R"+++((function(lastOverrideValue, workcycle)
 		int addSignals(const QStringList& appSignalIds);
 		bool addSignal(QString appSignalId, bool enabled, int index, OverrideSignalMethod method, QVariant value, QString script);
 
-		void removeSignal(QString appSignalId);
+		void removeSignal(const QString& appSignalId);
+		void removeSignals(const QStringList& appSignalIds);
 		bool isSignalInOverrideList(QString appSignalId) const;
 
 		void setEnable(QString appSignalId, bool enable);
+		
+		struct SetValueData
+		{
+			QString appSignalId;
+			OverrideSignalMethod method;
+			QVariant value;
+		};
 		void setValue(QString appSignalId, OverrideSignalMethod method, const QVariant& value);
+		void setValues(const std::vector<SetValueData>& overrideData);
 
 		void updateSignals();								// Update signal descriptions, type, offsets, etc...
 
@@ -186,9 +198,8 @@ R"+++((function(lastOverrideValue, workcycle)
 
 		mutable QReadWriteLock m_lock;
 		std::map<QString, OverrideSignalParam> m_signals;	// Key is AppSignalID
-		int m_changesCounter = 0;							// This variable is inceremented every time m_signals has
-															// any changes, so if it is changeed then RAM requests update
-															//
+		int m_changesCounter = 0;							// This variable is incremented every time m_signals has
+															// any changes, so if it is changed then RAM requests update
 	};
 
 }

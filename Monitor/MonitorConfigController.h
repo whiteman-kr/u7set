@@ -4,11 +4,12 @@
 #include "../ClientLib/ConfigController.h"
 #include "../lib/ClientBehavior.h"
 #include "../VFrame30/Schema.h"
+#include "../OnlineLib/MatsUsers.h"
 
 
 struct ConfigSettings
 {
-	int configurationId = -1;		// Counter to detect that configuartion was updated
+	int configurationId = -1;		// Counter to detect that configuration was updated
 
 	ClientLib::ConfigurationInfo configInfo;
 
@@ -18,14 +19,14 @@ struct ConfigSettings
 
 	QString startSchemaId;
 	QString globalScript;
-	QString onConfigurationArrivedScript;
-	QImage logoImage;
+	QPixmap logoImage;
 	MonitorBehavior monitorBeahvior;
 
 	// Tuning settings
 	//
 	bool tuningEnabled = false;
 	std::vector<SoftwareEndpoint::TuningService> tuningServices;
+	OnlineLib::MatsUserStorage matsUsers;
 
 	bool tuningLogin = false;
 	QStringList tuningUserAccounts;

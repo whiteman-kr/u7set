@@ -1,16 +1,18 @@
 #pragma once
-#include "../lib/ISignalDataServer.h"
 #include "../OnlineLib/SoftwareSettings.h"
+#include "../lib/ISignalDataServer.h"
+
 #include "RtTrendTcpClient.h"
 
 namespace ClientLib
 {
 	//
-	// Signle connection to AppDataService for providing real time data for trends
+	// Single connection to AppDataService for providing real time data for trends
 	//
 	class RtConnection : public QObject
 	{
 		Q_OBJECT
+
 	public:
 		RtConnection() = delete;
 		RtConnection(const RtConnection&) = delete;
@@ -42,7 +44,7 @@ namespace ClientLib
 
 		SoftwareEndpoint::AppDataService m_server;
 
-		RtTrendTcpClient* m_rtTcpClient = nullptr;			// This object deleted by m_rtTcpClientThread
+		RtTrendTcpClient* m_rtTcpClient = nullptr; // This object deleted by m_rtTcpClientThread
 		std::unique_ptr<SimpleThread> m_rtTcpClientThread;
 	};
 
@@ -77,6 +79,8 @@ namespace ClientLib
 		[[nodiscard]] size_t size() const;
 		[[nodiscard]] RtTrendTcpClient::Stat statistics() const;
 
+		[[nodiscard]] bool allConnected(std::chrono::milliseconds timeout) const;
+
 	signals:
 		void dataReady(QString sourceEquipmentId, std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState);
 		void requestError(QString text);
@@ -94,4 +98,4 @@ namespace ClientLib
 		//
 		std::vector<SoftwareEndpoint::AppDataService> m_createdConnectionsServers;
 	};
-}
+} // namespace ClientLib

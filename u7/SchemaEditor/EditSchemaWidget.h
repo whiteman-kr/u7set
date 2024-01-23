@@ -6,7 +6,6 @@
 #include "../VFrame30/UfbSchema.h"
 #include "../VFrame30/SchemaItemConnection.h"
 #include "../VFrame30/SchemaItemBus.h"
-#include "../DbLib/DbController.h"
 #include "./EditEngine/EditEngine.h"
 #include "SignalsTabPage.h"
 #include "CreateSignalDialog.h"
@@ -140,6 +139,10 @@ protected:
 	void moveAfbsConnectionLinks(QPointF offset, MouseState mouseState);
 	void finishMoveAfbsConnectionLinks();
 
+	// Create proposed FblItem Link
+	//
+	void createProposedAfbLink(const std::vector<AutoFblConnectionProposition>& links);
+
 	// --
 	//
 	bool loadAfbsDescriptions(std::vector<std::shared_ptr<Afb::AfbElement>>* out);
@@ -195,6 +198,7 @@ protected slots:
 	void f2KeyForValue(SchemaItemPtr item);
 	void f2KeyForImageValue(SchemaItemPtr item);
 	void f2KeyForBus(SchemaItemPtr item);
+	void f2KeyForAfb(SchemaItemPtr item);
 
 	void deleteKey();
 
@@ -245,6 +249,7 @@ protected:
 	void selectNextUpItem();
 	void selectNextDownItem();
 
+protected:
 	void sameWidth();
 	void sameHeight();
 	void sameSize();
@@ -365,11 +370,11 @@ private:
 	static const MouseStateCursor m_mouseStateCursor[];
 	static const SizeActionToMouseCursor m_sizeActionToMouseCursor[];
 
-	std::vector<MouseStateAction> m_mouseLeftDownStateAction;		// Initializend in constructor
-	std::vector<MouseStateAction> m_mouseLeftUpStateAction;			// Initializend in constructor
-	std::vector<MouseStateAction> m_mouseRightDownStateAction;		// Initializend in constructor
-	std::vector<MouseStateAction> m_mouseRightUpStateAction;		// Initializend in constructor
-	std::vector<MouseStateAction> m_mouseMoveStateAction;			// Initializend in constructor
+	std::vector<MouseStateAction> m_mouseLeftDownStateAction;		// Initialized in constructor
+	std::vector<MouseStateAction> m_mouseLeftUpStateAction;			// Initialized in constructor
+	std::vector<MouseStateAction> m_mouseRightDownStateAction;		// Initialized in constructor
+	std::vector<MouseStateAction> m_mouseRightUpStateAction;		// Initialized in constructor
+	std::vector<MouseStateAction> m_mouseMoveStateAction;			// Initialized in constructor
 
 	SchemaFindDialog* m_findDialog = nullptr;
 
@@ -459,6 +464,7 @@ private:
 		QAction* m_addLabelAction = nullptr;
 		QAction* m_addPushButtonAction = nullptr;
 		QAction* m_addLineEditAction = nullptr;
+		QAction* m_addSliderAction = nullptr;
 		QAction* m_addIndicatorAction = nullptr;
 
 	// Edit

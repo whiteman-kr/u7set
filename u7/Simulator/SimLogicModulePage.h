@@ -1,7 +1,8 @@
 #pragma once
 
 #include "SimBasePage.h"
-#include "SimLogicModule.h"
+
+#include "../../Simulator/SimLogicModule.h"
 #include "../../VFrame30/AppSignalController.h"
 
 class SimLogicModulePage : public SimBasePage
@@ -16,6 +17,7 @@ public:
 	virtual ~SimLogicModulePage();
 
 protected:
+	void simulatorStateChanged(Sim::SimControlState state);
 	void updateLogicModuleInfoInfo();
 	void fillSchemaList();
 
@@ -114,4 +116,3 @@ private:
 	QString m_lmEquipmentId;
 	VFrame30::AppSignalController* m_appSignalController = nullptr;
 };
-

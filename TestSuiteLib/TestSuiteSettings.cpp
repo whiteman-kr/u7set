@@ -10,20 +10,18 @@ namespace TestSuite
 	{
 	}
 
-	void TestSuiteSettings::restoreFromRegistry()
+	void TestSuiteSettings::restoreFromRegistry(const QSettings& s)
 	{
 		// read system settings
 		//
-		QSettings s;
+		m_instanceStrId = s.value("TestSuiteSettings/m_instanceStrId", m_instanceStrId).toString();
 
-		m_instanceStrId = s.value("m_instanceStrId", m_instanceStrId).toString();
-
-		QString configuratorIpAddress1 = s.value("m_configuratorIpAddress1", "127.0.0.1").toString();
-		int configuratorPort1 = s.value("m_configuratorPort1", PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST).toInt();
+		QString configuratorIpAddress1 = s.value("TestSuiteSettings/m_configuratorIpAddress1", "127.0.0.1").toString();
+		int configuratorPort1 = s.value("TestSuiteSettings/m_configuratorPort1", PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST).toInt();
 		m_cfgServiceAddress1 = {configuratorIpAddress1, configuratorPort1};
 
-		QString configuratorIpAddress2 = s.value("m_configuratorIpAddress2", "127.0.0.1").toString();
-		int configuratorPort2 = s.value("m_configuratorPort2", PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST).toInt();
+		QString configuratorIpAddress2 = s.value("TestSuiteSettings/m_configuratorIpAddress2", "127.0.0.1").toString();
+		int configuratorPort2 = s.value("TestSuiteSettings/m_configuratorPort2", PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST).toInt();
 		m_cfgServiceAddress2 = {configuratorIpAddress2, configuratorPort2};
 
 		return;
@@ -142,17 +140,15 @@ namespace TestSuite
 		return true;
 	}
 
-	void TestSuiteSettings::saveToRegistry()
+	void TestSuiteSettings::saveToRegistry(QSettings& s) const
 	{
-		QSettings s(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
+		s.setValue("TestSuiteSettings/m_instanceStrId", m_instanceStrId);
 
-		s.setValue("m_instanceStrId", m_instanceStrId);
+		s.setValue("TestSuiteSettings/m_configuratorIpAddress1", m_cfgServiceAddress1.addressStr());
+		s.setValue("TestSuiteSettings/m_configuratorPort1", m_cfgServiceAddress1.port());
 
-		s.setValue("m_configuratorIpAddress1", m_cfgServiceAddress1.addressStr());
-		s.setValue("m_configuratorPort1", m_cfgServiceAddress1.port());
-
-		s.setValue("m_configuratorIpAddress2", m_cfgServiceAddress2.addressStr());
-		s.setValue("m_configuratorPort2", m_cfgServiceAddress2.port());
+		s.setValue("TestSuiteSettings/m_configuratorIpAddress2", m_cfgServiceAddress2.addressStr());
+		s.setValue("TestSuiteSettings/m_configuratorPort2", m_cfgServiceAddress2.port());
 
 		return;
 	}

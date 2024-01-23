@@ -151,7 +151,7 @@ public slots:
 	/// \brief Show or hide main menu bar.
 	void setVisibleMenu(bool visible);
 
-	/// \brief Set or rest fuill screen mode.
+	/// \brief Set or rest full screen mode.
 	void setFullScreen(bool fullScreen);
 
 	/// \brief Starts the program 'program' with the arguments 'arguments' in 'workingDir' directory in a new process.
@@ -183,4 +183,5 @@ public:
 private:
 	MonitorMainWindow* m_mainWindow = nullptr;
 };
+
 

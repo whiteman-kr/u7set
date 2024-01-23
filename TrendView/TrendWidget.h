@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QThread>
 #include "Trend.h"
 #include "TrendRuler.h"
 #include "ITrendDataProvider.h"
@@ -127,8 +128,8 @@ namespace TrendLib
 		TrendLib::Trend& trend();
 		const TrendLib::Trend& trend() const;
 
-		TrendViewMode viewMode() const;
-		void setViewMode(TrendViewMode value);
+		E::TrendViewMode viewMode() const;
+		void setViewMode(E::TrendViewMode value);
 
 		E::TrendScaleType scaleType() const;
 		void setScaleType(E::TrendScaleType value);

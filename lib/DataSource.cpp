@@ -666,7 +666,7 @@ QString DataSourceOnline::stateStr() const
 
 QString DataSourceOnline::rupFramePlantTimeStr() const
 {
-	return getTimeStr(m_rupFramePlantTime);
+	return getTimeStr(m_lmTime);
 }
 
 QString DataSourceOnline::getTimeStr(qint64 timeMs)
@@ -707,7 +707,7 @@ void DataSourceOnline::clearStatistics()
 	m_uptime = 0;										// in seconds!
 	m_receivedDataID = 0;
 
-	m_rupFramePlantTime = 0;
+	m_lmTime = 0;
 	m_rupFrameNumerator = -1;			// qint64 is Ok!
 
 	m_dataReceivingSpeed = 0;

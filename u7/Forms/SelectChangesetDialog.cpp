@@ -2,10 +2,6 @@
 #include "ui_SelectChangesetDialog.h"
 #include "CompareDialog.h"
 
-SelectChangesetDialog::SelectChangesetDialog()
-{
-	assert(false);
-}
 
 SelectChangesetDialog::SelectChangesetDialog(QString title, DbController* db, const std::vector<DbChangeset>& history, QWidget* parent) :
 	QDialog(parent),
@@ -141,6 +137,7 @@ int SelectChangesetDialog::getSignalChangeset(DbController* db, DbChangesetObjec
 	// Get signal history
 	//
 	std::vector<DbChangeset> signalHistory;
+
 	db->getSignalHistory(signal.id(), &signalHistory, parent);
 
 	SelectChangesetDialog cd("Select Changeset - " + signal.name(), db, signalHistory, parent);

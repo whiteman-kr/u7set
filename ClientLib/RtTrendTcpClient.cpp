@@ -1,4 +1,3 @@
-#include <ranges>
 #include "RtTrendTcpClient.h"
 
 namespace ClientLib

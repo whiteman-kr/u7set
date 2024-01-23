@@ -1,5 +1,5 @@
 #ifndef CLIENT_LIB_DOMAIN
-#error Don't include this file in the project! Link ClientLib instead.
+#error Do not include this file in the project! Link ClientLib instead.
 #endif
 
 #include "AdsConnection.h"
@@ -71,6 +71,12 @@ namespace ClientLib
 	{
 		Q_ASSERT(tcpSignalClient);
 		return tcpSignalClient->signalParamsLoaded();
+	}
+
+	bool AdsConnection::Connection::signalStatesLoaded() const
+	{
+		Q_ASSERT(tcpSignalClient);
+		return tcpSignalClient->signalStatesLoaded();
 	}
 
 	AdsConnection::AdsConnection(IAppSignalUpdater& signalUpdater,
@@ -153,6 +159,11 @@ namespace ClientLib
 	bool AdsConnection::signalParamsLoaded() const
 	{
 		return std::all_of(m_conns.begin(), m_conns.end(), [](const Connection& c) { return c.signalParamsLoaded(); });
+	}
+
+	bool AdsConnection::signalStatesLoaded() const
+	{
+		return std::all_of(m_conns.begin(), m_conns.end(), [](const Connection& c) { return c.signalStatesLoaded(); });
 	}
 
 }	// namespace

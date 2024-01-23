@@ -1,0 +1,158 @@
+<AFB id="#set_flags_v1" Caption="set_flags" Version="1.0005">
+	<Properties>
+		<Description>Set flag(s) to input signals. Flags accessible only in MATS.</Description>
+		<Category>Flags</Category>
+		<OpCode>255</OpCode>
+		<InternalUse>false</InternalUse>
+		<MinWidth>19</MinWidth>
+	</Properties>
+	<Inputs>
+		<Pin OpName="i_in" Caption="in" Type="Discrete" ByteOrder="BigEndian" OpIndex="0" Size="1"/>
+		<Pin OpName="i_validity" Caption="validity" Type="Discrete" ByteOrder="BigEndian" OpIndex="1" Size="1"/>
+		<Pin OpName="i_simulated" Caption="simulated" Type="Discrete" ByteOrder="BigEndian" OpIndex="2" Size="1"/>
+		<Pin OpName="i_blocked" Caption="blocked" Type="Discrete" ByteOrder="BigEndian" OpIndex="3" Size="1"/>
+		<Pin OpName="i_mismatch" Caption="mismatch" Type="Discrete" ByteOrder="BigEndian" OpIndex="4" Size="1"/>
+		<Pin OpName="i_highlimit" Caption="high_limit" Type="Discrete" ByteOrder="BigEndian" OpIndex="5" Size="1"/>
+		<Pin OpName="i_lowlimit" Caption="low_limit" Type="Discrete" ByteOrder="BigEndian" OpIndex="6" Size="1"/>
+	</Inputs>
+	<Outputs>
+		<Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="20" Size="1"/>
+	</Outputs>
+	<Params>
+		<Param OpName="ShowValidity" Caption="ShowValidity" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+			<Value>1</Value>
+			<Default>1</Default>
+			<Script>
+				<Changed>
+					(function(videoItemFblElement, afbElement)
+					{
+						return createInputSignals(videoItemFblElement, afbElement);
+					})
+				</Changed>
+			</Script>
+		</Param>
+		<Param OpName="ShowSimulated" Caption="ShowSimulated" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+			<Value>1</Value>
+			<Default>1</Default>
+			<Script>
+				<Changed>
+					(function(videoItemFblElement, afbElement)
+					{
+						return createInputSignals(videoItemFblElement, afbElement);
+					})
+				</Changed>
+			</Script>
+		</Param>
+		<Param OpName="ShowBlocked" Caption="ShowBlocked" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+			<Value>1</Value>
+			<Default>1</Default>
+			<Script>
+				<Changed>
+					(function(videoItemFblElement, afbElement)
+					{
+						return createInputSignals(videoItemFblElement, afbElement);
+					})
+				</Changed>
+			</Script>
+		</Param>
+		<Param OpName="ShowMismatch" Caption="ShowMismatch" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+			<Value>1</Value>
+			<Default>1</Default>
+			<Script>
+				<Changed>
+					(function(videoItemFblElement, afbElement)
+					{
+						return createInputSignals(videoItemFblElement, afbElement);
+					})
+				</Changed>
+			</Script>
+		</Param>
+		<Param OpName="ShowHighLimit" Caption="ShowHighLimit" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+			<Value>1</Value>
+			<Default>1</Default>
+			<Script>
+				<Changed>
+					(function(videoItemFblElement, afbElement)
+					{
+						return createInputSignals(videoItemFblElement, afbElement);
+					})
+				</Changed>
+			</Script>
+		</Param>
+		<Param OpName="ShowLowLimit" Caption="ShowLowLimit" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+			<Value>1</Value>
+			<Default>1</Default>
+			<Script>
+				<Changed>
+					(function(videoItemFblElement, afbElement)
+					{
+						return createInputSignals(videoItemFblElement, afbElement);
+					})
+				</Changed>
+			</Script>
+		</Param>
+	</Params>
+	<CommonScript>
+		<Library>
+			function createInputSignals(schemaItem, afbElement)
+			{
+				schemaItem.removeInputSignals();
+
+				var showValidity = schemaItem.getParamBoolValue("ShowValidity");
+				var showSimulated = schemaItem.getParamBoolValue("ShowSimulated");
+				var showBlocked = schemaItem.getParamBoolValue("ShowBlocked");
+				var showMismatch = schemaItem.getParamBoolValue("ShowMismatch");
+				var showHighLimit = schemaItem.getParamBoolValue("ShowHighLimit");
+				var showLowLimit = schemaItem.getParamBoolValue("ShowLowLimit");
+
+				var addSignal = function(schemaItem, signalCaption)
+					{
+						var signal = afbElement.getAfbSignalByCaption(signalCaption);
+						schemaItem.addInputSignal(signal.caption(), signal.jsType(), signal.operandIndex(), signal.size());
+					};
+
+				addSignal(schemaItem, "in");
+
+				if (showValidity == true)
+				{
+					addSignal(schemaItem, "validity");
+				}
+
+				if (showSimulated == true)
+				{
+					addSignal(schemaItem, "simulated");
+				}
+
+				if (showBlocked == true)
+				{
+					addSignal(schemaItem, "blocked");
+				}
+
+				if (showMismatch == true)
+				{
+					addSignal(schemaItem, "mismatch");
+				}
+
+				if (showHighLimit == true)
+				{
+					addSignal(schemaItem, "high_limit");
+				}
+
+				if (showLowLimit == true)
+				{
+					addSignal(schemaItem, "low_limit");
+				}
+
+				schemaItem.adjustHeight();
+
+				return true;
+			}
+		</Library>
+		<AfterCreation>
+			(function(videoItemFblElement, afbElement)
+			{
+				return createInputSignals(videoItemFblElement, afbElement);
+			})
+		</AfterCreation>
+	</CommonScript>
+</AFB>

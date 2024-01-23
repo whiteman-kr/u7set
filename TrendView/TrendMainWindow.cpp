@@ -1,18 +1,24 @@
-#include "TrendMainWindow.h"
-#include "ui_TrendsMainWindow.h"
-#include "TrendSettings.h"
-#include "TrendWidget.h"
-#include "TrendSignal.h"
-#include "TrendScale.h"
-#include "DialogTrendSignalProperties.h"
-#include "../Proto/serialization.pb.h"
+#include <QActionGroup>
+#include <QDialogButtonBox>
+#include <QPrintDialog>
+#include <QPrinter>
+#include <QPushButton>
+#include <QToolBar>
+
 #include "../CommonLib/Types.h"
+#include "DialogTrendSignalProperties.h"
+#include "TrendMainWindow.h"
+#include "TrendScale.h"
+#include "TrendSettings.h"
+#include "TrendSignal.h"
+#include "TrendWidget.h"
+#include "ui_TrendsMainWindow.h"
 
 namespace TrendLib
 {
 
 	TrendMainWindow::TrendMainWindow(QWidget* parent) :
-		QMainWindow(parent, Qt::WindowSystemMenuHint | Qt::WindowMaximizeButtonHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
+		QMainWindow(parent, Qt::WindowSystemMenuHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 		ui(new Ui::TrendsMainWindow)
 	{
 		ui->setupUi(this);
@@ -39,7 +45,7 @@ namespace TrendLib
 		m_trendWidget = new TrendLib::TrendWidget(this);
 		layout->addWidget(m_trendWidget, 0, 0);
 
-		m_trendWidget->setViewMode(static_cast<TrendLib::TrendViewMode>(theSettings.m_viewType));
+		m_trendWidget->setViewMode(static_cast<E::TrendViewMode>(theSettings.m_viewType));
 		m_trendWidget->setTimeType(static_cast<E::TimeType>(theSettings.m_timeType));
 		m_trendWidget->setLaneCount(theSettings.m_laneCount);
 
@@ -64,15 +70,15 @@ namespace TrendLib
 		connect(ui->actionPrint, &QAction::triggered, this, &TrendMainWindow::actionPrintTriggered);
 		connect(ui->actionExit, &QAction::triggered, this, &TrendMainWindow::actionExitTriggered);
 		connect(ui->actionAbout, &QAction::triggered, this, &TrendMainWindow::actionAboutTriggered);
-		connect(ui->actionAutoScale, &QAction::triggered, this, &TrendMainWindow::actionAutoSclaeTriggered);
+		connect(ui->actionAutoScale, &QAction::triggered, this, &TrendMainWindow::actionAutoScaleTriggered);
 
 		createToolBar();
 
-		connect(m_timeCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::timeComboCurrentIndexChanged);
-		connect(m_viewCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::viewComboCurrentIndexChanged);
-		connect(m_scaleTypeCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::scaleTypeComboCurrentIndexChanged);
-		connect(m_lanesCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::laneCountComboCurrentIndexChanged);
-		connect(m_timeTypeCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::timeTypeComboCurrentIndexChanged);
+		connect(m_timeCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::timeComboCurrentIndexChanged);
+		connect(m_viewCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::viewComboCurrentIndexChanged);
+		connect(m_scaleTypeCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::scaleTypeComboCurrentIndexChanged);
+		connect(m_lanesCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::laneCountComboCurrentIndexChanged);
+		connect(m_timeTypeCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TrendMainWindow::timeTypeComboCurrentIndexChanged);
 		connect(m_realtimeModeButton, &QPushButton::toggled, this, &TrendMainWindow::realtimeModeToggled);
 		connect(m_realtimeAutoShiftButton, &QPushButton::toggled, this, &TrendMainWindow::realtimeAutoShiftClicked);
 
@@ -124,7 +130,7 @@ namespace TrendLib
 
 	void TrendMainWindow::ensureVisible()
 	{
-		setVisible(true);	// Widget must be visible for correct work of QApplication::desktop()->screenGeometry
+		setVisible(true); // Widget must be visible for correct work of QApplication::desktop()->screenGeometry
 
 		if (isMinimized() == true)
 		{
@@ -176,17 +182,15 @@ namespace TrendLib
 			return false;
 		}
 
-		auto dit = std::find_if(discreteSignals.begin(), discreteSignals.end(),
-				[&trendSignal](const TrendLib::TrendSignalParam& t)
-				{
-					return t.appSignalId() == trendSignal.appSignalId() && t.archiveServerId() == trendSignal.archiveServerId();
-				});
+		auto dit = std::find_if(discreteSignals.begin(), discreteSignals.end(), [&trendSignal](const TrendLib::TrendSignalParam& t)
+								{
+									return t.appSignalId() == trendSignal.appSignalId() && t.archiveServerId() == trendSignal.archiveServerId();
+								});
 
-		auto ait = std::find_if(analogSignals.begin(), analogSignals.end(),
-				[&trendSignal](const TrendLib::TrendSignalParam& t)
-				{
-					return t.appSignalId() == trendSignal.appSignalId()  && t.archiveServerId() == trendSignal.archiveServerId();
-				});
+		auto ait = std::find_if(analogSignals.begin(), analogSignals.end(), [&trendSignal](const TrendLib::TrendSignalParam& t)
+								{
+									return t.appSignalId() == trendSignal.appSignalId() && t.archiveServerId() == trendSignal.archiveServerId();
+								});
 
 		if (dit != discreteSignals.end() ||
 			ait != analogSignals.end())
@@ -194,8 +198,7 @@ namespace TrendLib
 			return false;
 		}
 
-		static const QRgb StdColors[] = { qRgb(0x80, 0x00, 0x00), qRgb(0x00, 0x80, 0x00), qRgb(0x00, 0x00, 0x80), qRgb(0x00, 0x80, 0x80),
-										  qRgb(0x80, 0x00, 0x80), qRgb(0xFF, 0x00, 0x00), qRgb(0x00, 0x00, 0xFF), qRgb(0x00, 0x00, 0x00) };
+		static const QRgb StdColors[] = {qRgb(0x80, 0x00, 0x00), qRgb(0x00, 0x80, 0x00), qRgb(0x00, 0x00, 0x80), qRgb(0x00, 0x80, 0x80), qRgb(0x80, 0x00, 0x80), qRgb(0xFF, 0x00, 0x00), qRgb(0x00, 0x00, 0xFF), qRgb(0x00, 0x00, 0x00)};
 		static size_t stdColorIndex = 0;
 
 		TrendLib::TrendSignalParam tsp(trendSignal);
@@ -205,7 +208,7 @@ namespace TrendLib
 
 		// --
 		//
-		stdColorIndex ++;
+		stdColorIndex++;
 		if (stdColorIndex >= sizeof(StdColors) / sizeof(StdColors[0]))
 		{
 			stdColorIndex = 0;
@@ -217,6 +220,55 @@ namespace TrendLib
 		}
 
 		return true;
+	}
+
+	void TrendMainWindow::updateSignals(const std::vector<TrendSignalParam>& trendsignals)
+	{
+		// Remove signals
+		//
+		std::vector<TrendLib::TrendSignalParam> discreteSignals = signalSet().discreteSignals();
+		std::vector<TrendLib::TrendSignalParam> analogSignals = signalSet().analogSignals();
+
+		for (const TrendLib::TrendSignalParam& ds : discreteSignals)
+		{
+			auto it = std::find_if(trendsignals.begin(), trendsignals.end(), [&ds](const auto& trendSignal)
+								   {
+									   return trendSignal.appSignalId() == ds.appSignalId() &&
+											  trendSignal.archiveServerShortId() == ds.archiveServerShortId();
+								   });
+
+			if (it == trendsignals.end())
+			{
+				signalSet().removeSignal(ds);
+			}
+		}
+
+		for (const TrendLib::TrendSignalParam& as : analogSignals)
+		{
+			auto it = std::find_if(trendsignals.begin(), trendsignals.end(), [&as](const auto& trendSignal)
+								   {
+									   return trendSignal.appSignalId() == as.appSignalId() &&
+											  trendSignal.archiveServerShortId() == as.archiveServerShortId();
+								   });
+
+			if (it == trendsignals.end())
+			{
+				signalSet().removeSignal(as);
+			}
+		}
+
+		// Add new signals.
+		//
+		for (const auto& signal : trendsignals)
+		{
+			addSignal(signal, false);
+		}
+
+		// Make the same order as in trendsignals.
+		//
+		signalSet().reorderSignals(trendsignals);
+
+		return;
 	}
 
 	void TrendMainWindow::createToolBar()
@@ -235,7 +287,7 @@ namespace TrendLib
 
 		// Time ComboBox
 		//
-		QLabel* intervalLabel = new QLabel("  Interval: ");
+		QLabel* intervalLabel = new QLabel(tr("  Interval: "));
 		intervalLabel->setAlignment(Qt::AlignCenter);
 		m_toolBar->addWidget(intervalLabel);
 
@@ -266,7 +318,7 @@ namespace TrendLib
 
 		// Lane Count
 		//
-		QLabel* lanesLabel = new QLabel("  Lanes: ");
+		QLabel* lanesLabel = new QLabel(tr("  Lanes: "));
 		lanesLabel->setAlignment(Qt::AlignCenter);
 		m_toolBar->addWidget(lanesLabel);
 
@@ -282,20 +334,20 @@ namespace TrendLib
 
 		// View Type
 		//
-		QLabel* viewLabel = new QLabel("  View: ");
+		QLabel* viewLabel = new QLabel(tr("  View: "));
 		viewLabel->setAlignment(Qt::AlignCenter);
 		m_toolBar->addWidget(viewLabel);
 
 		m_viewCombo = new QComboBox(m_toolBar);
-		m_viewCombo->addItem(tr("Separated"), QVariant::fromValue(TrendLib::TrendViewMode::Separated));
-		m_viewCombo->addItem(tr("Overlapped"), QVariant::fromValue(TrendLib::TrendViewMode::Overlapped));
+		m_viewCombo->addItem(tr("Separated"), QVariant::fromValue(E::TrendViewMode::Separated));
+		m_viewCombo->addItem(tr("Overlapped"), QVariant::fromValue(E::TrendViewMode::Overlapped));
 		m_toolBar->addWidget(m_viewCombo);
 
 		this->addToolBar(Qt::TopToolBarArea, m_toolBar);
 
 		// Scale Type
 		//
-		QLabel* scaleTypeLabel = new QLabel("  Scale: ");
+		QLabel* scaleTypeLabel = new QLabel(tr("  Scale: "));
 		scaleTypeLabel->setAlignment(Qt::AlignCenter);
 		m_toolBar->addWidget(scaleTypeLabel);
 
@@ -309,7 +361,7 @@ namespace TrendLib
 
 		// Time Type
 		//
-		QLabel* timeTypeLabel = new QLabel("  Time Type: ");
+		QLabel* timeTypeLabel = new QLabel(tr("  Time Type: "));
 		timeTypeLabel->setAlignment(Qt::AlignCenter);
 		m_toolBar->addWidget(timeTypeLabel);
 
@@ -335,7 +387,7 @@ namespace TrendLib
 		m_realtimeAutoShiftButton = new QPushButton(tr(">>>"));
 		m_realtimeAutoShiftButton->setEnabled(false);
 		m_realtimeAutoShiftButton->setCheckable(true);
-		//m_realtimeAutoShiftButton->(QSizePolicy::Fixed, QSizePolicy::Minimum);
+		// m_realtimeAutoShiftButton->(QSizePolicy::Fixed, QSizePolicy::Minimum);
 		m_toolBar->addWidget(m_realtimeAutoShiftButton);
 
 		m_toolBar->addSeparator();
@@ -343,7 +395,7 @@ namespace TrendLib
 		// Add stretecher
 		//
 		QWidget* empty = new QWidget();
-		empty->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+		empty->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 		m_toolBar->addWidget(empty);
 
 		// Signals
@@ -453,19 +505,19 @@ namespace TrendLib
 				if (tag == QStringLiteral("view_linear"))
 				{
 					defaultScaleType = E::TrendScaleType::Linear;
-					defaultScaleTypeFound = true;	// break the outer loop
+					defaultScaleTypeFound = true; // break the outer loop
 					break;
 				}
 				if (tag == QStringLiteral("view_log10"))
 				{
 					defaultScaleType = E::TrendScaleType::Log10;
-					defaultScaleTypeFound = true;	// break the outer loop
+					defaultScaleTypeFound = true; // break the outer loop
 					break;
 				}
 				if (tag == QStringLiteral("view_period"))
 				{
 					defaultScaleType = E::TrendScaleType::Period;
-					defaultScaleTypeFound = true;	// break the outer loop
+					defaultScaleTypeFound = true; // break the outer loop
 					break;
 				}
 			}
@@ -486,7 +538,7 @@ namespace TrendLib
 			}
 			m_scaleTypeCombo->setCurrentIndex(index);
 
-			m_autoSelectedScaleType = true;	// This means that combo was changed automatically. scaleTypeComboCurrentIndexChanged() slot had reset this flag
+			m_autoSelectedScaleType = true; // This means that combo was changed automatically. scaleTypeComboCurrentIndexChanged() slot had reset this flag
 		}
 
 		return;
@@ -527,14 +579,14 @@ namespace TrendLib
 
 	void TrendMainWindow::signalProperties(QString appSignalId, QString archiveServerId)
 	{
-		qDebug() << "Show signal " << appSignalId << ", archiev server "<< archiveServerId << " properties";
+		qDebug() << "Show signal " << appSignalId << ", archiev server " << archiveServerId << " properties";
 
 		bool ok = false;
 		TrendLib::TrendSignalParam signal = signalSet().signalParam(appSignalId, archiveServerId, &ok);
 
 		if (ok == false)
 		{
-			Q_ASSERT(ok);		// Signal must be in signal set
+			Q_ASSERT(ok); // Signal must be in signal set
 			return;
 		}
 
@@ -544,16 +596,15 @@ namespace TrendLib
 									  m_trendWidget->scaleType(),
 									  m_trendWidget->trendMode(),
 									  this);
-//#pragma warning( push )
-//#pragma warning (disable: 6326)
-		connect(&d, &DialogTrendSignalProperties::signalPropertiesChanged, this,
-				[&d, this]()
-		{
-			bool ok = signalSet().setSignalParam(d.trendSignal());
-			Q_ASSERT(ok);
-			this->updateWidget();
-		});
-//#pragma warning( pop )
+		// #pragma warning( push )
+		// #pragma warning (disable: 6326)
+		connect(&d, &DialogTrendSignalProperties::signalPropertiesChanged, this, [&d, this]()
+				{
+					bool ok = signalSet().setSignalParam(d.trendSignal());
+					Q_ASSERT(ok);
+					this->updateWidget();
+				});
+		// #pragma warning( pop )
 
 		d.exec();
 
@@ -562,14 +613,19 @@ namespace TrendLib
 
 	void TrendMainWindow::actionOpenTriggered()
 	{
+		static QString path{"."};
 		QString fileName = QFileDialog::getOpenFileName(this,
 														tr("Open Trend File"),
-														".",
+														path,
 														tr("Trend (*.u7trend);;All Files (*.*)"));
 		if (fileName.isEmpty() == true)
 		{
 			return;
 		}
+
+		setWindowTitle(QFileInfo(fileName).baseName());
+
+		path = QFileInfo(fileName).path(); // store path for next time
 
 		Q_ASSERT(m_trendWidget);
 
@@ -632,9 +688,10 @@ namespace TrendLib
 
 	void TrendMainWindow::actionSaveTriggered()
 	{
+		static QString path{"."};
 		QString fileName = QFileDialog::getSaveFileName(this,
 														tr("Save File"),
-														"untitled.u7trend",
+														path + QDir::separator() + "untitled.u7trend",
 														tr("Trend (*.u7trend);;Images (*.png *.bmp *.jpg);;PDF files (*.pdf)"));
 
 		if (fileName.isEmpty() == true)
@@ -642,8 +699,12 @@ namespace TrendLib
 			return;
 		}
 
+		path = QFileInfo(fileName).path(); // store path for next time
+
 		QFileInfo fileInfo(fileName);
 		QString extension = fileInfo.completeSuffix();
+
+		setWindowTitle(fileInfo.baseName());
 
 		if (extension.compare(QLatin1String("u7trend"), Qt::CaseInsensitive) == 0)
 		{
@@ -699,34 +760,35 @@ namespace TrendLib
 			d.setWindowFlags((d.windowFlags() &
 							  ~Qt::WindowMinimizeButtonHint &
 							  ~Qt::WindowMaximizeButtonHint &
-							  ~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+							  ~Qt::WindowContextHelpButtonHint) |
+							 Qt::CustomizeWindowHint);
 
-			QLabel* pageSizeLabel = new  QLabel(tr("Page Size"));
+			QLabel* pageSizeLabel = new QLabel(tr("Page Size"));
 
 			QComboBox* pageSizeCombo = new QComboBox;
-			pageSizeCombo->addItem(QLatin1String("A0"),  QVariant::fromValue(QPageSize::A0));
-			pageSizeCombo->addItem(QLatin1String("A1"),  QVariant::fromValue(QPageSize::A1));
-			pageSizeCombo->addItem(QLatin1String("A2"),  QVariant::fromValue(QPageSize::A2));
-			pageSizeCombo->addItem(QLatin1String("A3"),  QVariant::fromValue(QPageSize::A3));
-			pageSizeCombo->addItem(QLatin1String("A4"),  QVariant::fromValue(QPageSize::A4));
-			pageSizeCombo->addItem(QLatin1String("A5"),  QVariant::fromValue(QPageSize::A5));
-			pageSizeCombo->addItem(QLatin1String("Letter"),  QVariant::fromValue(QPageSize::Letter));
-			pageSizeCombo->addItem(QLatin1String("AnsiA"),  QVariant::fromValue(QPageSize::AnsiA));
-			pageSizeCombo->addItem(QLatin1String("AnsiB"),  QVariant::fromValue(QPageSize::AnsiB));
-			pageSizeCombo->addItem(QLatin1String("AnsiC"),  QVariant::fromValue(QPageSize::AnsiC));
-			pageSizeCombo->addItem(QLatin1String("AnsiD"),  QVariant::fromValue(QPageSize::AnsiD));
-			pageSizeCombo->addItem(QLatin1String("AnsiE"),  QVariant::fromValue(QPageSize::AnsiE));
+			pageSizeCombo->addItem(QLatin1String("A0"), QVariant::fromValue(QPageSize::A0));
+			pageSizeCombo->addItem(QLatin1String("A1"), QVariant::fromValue(QPageSize::A1));
+			pageSizeCombo->addItem(QLatin1String("A2"), QVariant::fromValue(QPageSize::A2));
+			pageSizeCombo->addItem(QLatin1String("A3"), QVariant::fromValue(QPageSize::A3));
+			pageSizeCombo->addItem(QLatin1String("A4"), QVariant::fromValue(QPageSize::A4));
+			pageSizeCombo->addItem(QLatin1String("A5"), QVariant::fromValue(QPageSize::A5));
+			pageSizeCombo->addItem(QLatin1String("Letter"), QVariant::fromValue(QPageSize::Letter));
+			pageSizeCombo->addItem(QLatin1String("AnsiA"), QVariant::fromValue(QPageSize::AnsiA));
+			pageSizeCombo->addItem(QLatin1String("AnsiB"), QVariant::fromValue(QPageSize::AnsiB));
+			pageSizeCombo->addItem(QLatin1String("AnsiC"), QVariant::fromValue(QPageSize::AnsiC));
+			pageSizeCombo->addItem(QLatin1String("AnsiD"), QVariant::fromValue(QPageSize::AnsiD));
+			pageSizeCombo->addItem(QLatin1String("AnsiE"), QVariant::fromValue(QPageSize::AnsiE));
 			int psi = pageSizeCombo->findData(QVariant::fromValue(m_defaultPageSize));
 			if (psi != -1)
 			{
 				pageSizeCombo->setCurrentIndex(psi);
 			}
 
-			QLabel* orientationLabel = new  QLabel(tr("Orientation"));
+			QLabel* orientationLabel = new QLabel(tr("Orientation"));
 
 			QComboBox* orientationCombo = new QComboBox;
-			orientationCombo->addItem(tr("Portrait"),  QVariant::fromValue(QPageLayout::Portrait));
-			orientationCombo->addItem(tr("Lanscape"),  QVariant::fromValue(QPageLayout::Landscape));
+			orientationCombo->addItem(tr("Portrait"), QVariant::fromValue(QPageLayout::Portrait));
+			orientationCombo->addItem(tr("Lanscape"), QVariant::fromValue(QPageLayout::Landscape));
 			int poi = orientationCombo->findData(QVariant::fromValue(m_defaultPageOrientation));
 			if (poi != -1)
 			{
@@ -815,7 +877,17 @@ namespace TrendLib
 		QMessageBox msgBox(this);
 
 		msgBox.setWindowTitle(tr("About Trends"));
-		QPixmap image(":/TrendImages/Images/RadiyLogo.png");
+		QPixmap image(":/Logo/RadiyLogo.png");
+		
+		// Set logo size that it will be not too big.
+		//
+		QSize logoSize = image.size();
+		if (logoSize.width() > 200)
+		{
+			logoSize *= 200.0 / logoSize.width();
+			image = image.scaled(logoSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+		}
+
 		msgBox.setIconPixmap(image);
 
 		QStringList args = qApp->arguments();
@@ -853,7 +925,7 @@ namespace TrendLib
 		return;
 	}
 
-	void TrendMainWindow::actionAutoSclaeTriggered()
+	void TrendMainWindow::actionAutoScaleTriggered()
 	{
 		qDebug() << "Autoscale trend";
 
@@ -901,10 +973,9 @@ namespace TrendLib
 						}
 
 						bool ok = false;
-
 						double value = TrendScale::valueToScaleValue(state.value, m_trendWidget->scaleType(), &ok);
 
-						if (ok == false)
+						if (ok == false || std::isinf(value) == true || std::isnan(value) == true)
 						{
 							continue;
 						}
@@ -920,7 +991,7 @@ namespace TrendLib
 
 						minValue = qMin(minValue, value);
 						maxValue = qMax(maxValue, value);
-					}	// for (const TrendStateItem& state : record.states)
+					} // for (const TrendStateItem& state : record.states)
 				}
 			}
 
@@ -1035,7 +1106,8 @@ namespace TrendLib
 		d.setWindowFlags((d.windowFlags() &
 						  ~Qt::WindowMinimizeButtonHint &
 						  ~Qt::WindowMaximizeButtonHint &
-						  ~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+						  ~Qt::WindowContextHelpButtonHint) |
+						 Qt::CustomizeWindowHint);
 
 		QGridLayout* layout = new QGridLayout(&d);
 
@@ -1067,7 +1139,7 @@ namespace TrendLib
 		//
 		int dialogResult = d.exec();
 
-		if (dialogResult ==  QDialog::Accepted)
+		if (dialogResult == QDialog::Accepted)
 		{
 			QDateTime newDateTime;
 			newDateTime.setDate(dateEdit->date());
@@ -1109,7 +1181,7 @@ namespace TrendLib
 
 	void TrendMainWindow::viewComboCurrentIndexChanged(int index)
 	{
-		TrendLib::TrendViewMode view = m_viewCombo->itemData(index).value<TrendLib::TrendViewMode>();
+		E::TrendViewMode view = m_viewCombo->itemData(index).value<E::TrendViewMode>();
 		m_trendWidget->setViewMode(view);
 
 		m_trendWidget->updateWidget();
@@ -1124,7 +1196,7 @@ namespace TrendLib
 
 		m_trendWidget->updateWidget();
 
-		m_autoSelectedScaleType = false;	// This means that combo could be changed by user. autoSelectScaleType() function sets this flag again
+		m_autoSelectedScaleType = false; // This means that combo could be changed by user. autoSelectScaleType() function sets this flag again
 
 		return;
 	}
@@ -1166,7 +1238,7 @@ namespace TrendLib
 
 	void TrendMainWindow::realtimeAutoShiftClicked(bool /*state*/)
 	{
-		//E::TrendMode tm = m_trendWidget->trendMode();
+		// E::TrendMode tm = m_trendWidget->trendMode();
 		return;
 	}
 
@@ -1203,11 +1275,11 @@ namespace TrendLib
 		m_trendSlider->setSingleStep(value / singleStepSliderDivider);
 		m_trendSlider->setPageStep(value);
 
-		m_timeCombo->blockSignals(true);		// Block changes, as tr("Custom") is deleting there
+		m_timeCombo->blockSignals(true);        // Block changes, as tr("Custom") is deleting there
 
 		if (m_timeCombo->findText(tr("Custom")) == -1)
 		{
-			m_timeCombo->addItem(tr("Custom"));		// Duplicates are disabled
+			m_timeCombo->addItem(tr("Custom")); // Duplicates are disabled
 		}
 		m_timeCombo->setCurrentText(tr("Custom"));
 
@@ -1236,51 +1308,46 @@ namespace TrendLib
 
 			QAction* lineWeight1 = menu.addAction(tr("Line Weight 1"));
 			lineWeight1->setCheckable(true);
-			connect(lineWeight1, &QAction::triggered, this,
-					[this, &outSignal]()
-			{
-				outSignal.setLineWeight(1);
-				this->signalSet().setSignalParam(outSignal);
-				this->updateWidget();
-			});
+			connect(lineWeight1, &QAction::triggered, this, [this, &outSignal]()
+					{
+						outSignal.setLineWeight(1);
+						this->signalSet().setSignalParam(outSignal);
+						this->updateWidget();
+					});
 
 			QAction* lineWeight2 = menu.addAction(tr("Line Weight 2"));
 			lineWeight2->setCheckable(true);
-			connect(lineWeight2, &QAction::triggered, this,
-					[this, &outSignal]()
-			{
-				outSignal.setLineWeight(2);
-				this->signalSet().setSignalParam(outSignal);
-				this->updateWidget();
-			});
+			connect(lineWeight2, &QAction::triggered, this, [this, &outSignal]()
+					{
+						outSignal.setLineWeight(2);
+						this->signalSet().setSignalParam(outSignal);
+						this->updateWidget();
+					});
 
 			QAction* lineWeight3 = menu.addAction(tr("Line Weight 3"));
 			lineWeight3->setCheckable(true);
-			connect(lineWeight3, &QAction::triggered, this,
-					[this, &outSignal]()
-			{
-				outSignal.setLineWeight(3);
-				this->signalSet().setSignalParam(outSignal);
-				this->updateWidget();
-			});
+			connect(lineWeight3, &QAction::triggered, this, [this, &outSignal]()
+					{
+						outSignal.setLineWeight(3);
+						this->signalSet().setSignalParam(outSignal);
+						this->updateWidget();
+					});
 
 			QAction* autoscale = menu.addAction(tr("Scale to Fit"));
-			connect(autoscale, &QAction::triggered, this, &TrendMainWindow::actionAutoSclaeTriggered);
+			connect(autoscale, &QAction::triggered, this, &TrendMainWindow::actionAutoScaleTriggered);
 
 			QAction* remove = menu.addAction(tr("Remove"));
-			connect(remove, &QAction::triggered, this,
-					[this, &outSignal]()
-			{
-				this->signalSet().removeSignal(outSignal);
-				this->updateWidget();
-			});
+			connect(remove, &QAction::triggered, this, [this, &outSignal]()
+					{
+						this->signalSet().removeSignal(outSignal);
+						this->updateWidget();
+					});
 
 			QAction* properties = menu.addAction(tr("Properties..."));
-			connect(properties, &QAction::triggered, this,
-					[this, &outSignal]()
-			{
-				signalProperties(outSignal.appSignalId(), outSignal.archiveServerId());
-			});
+			connect(properties, &QAction::triggered, this, [this, &outSignal]()
+					{
+						signalProperties(outSignal.appSignalId(), outSignal.archiveServerId());
+					});
 
 			QAction* signalAction = menu.addAction(tr("Signals..."));
 			connect(signalAction, &QAction::triggered, this, &TrendMainWindow::signalsButton);
@@ -1294,10 +1361,18 @@ namespace TrendLib
 
 			switch (static_cast<int>(outSignal.lineWeight()))
 			{
-			case 0:	lineWeight1->setChecked(true);	break;
-			case 1:	lineWeight1->setChecked(true);	break;
-			case 2:	lineWeight2->setChecked(true);	break;
-			case 3:	lineWeight3->setChecked(true);	break;
+			case 0:
+				lineWeight1->setChecked(true);
+				break;
+			case 1:
+				lineWeight1->setChecked(true);
+				break;
+			case 2:
+				lineWeight2->setChecked(true);
+				break;
+			case 3:
+				lineWeight3->setChecked(true);
+				break;
 			}
 
 			menu.addAction(lineWeight1);
@@ -1324,27 +1399,24 @@ namespace TrendLib
 			QMenu menu(this);
 
 			QAction* addRulerAction = menu.addAction(tr("Add Ruler"));
-			connect(addRulerAction, &QAction::triggered, this,
-					[&pos, this]()
-			{
-				this->TrendMainWindow::actionAddRuler(pos);
-			});
+			connect(addRulerAction, &QAction::triggered, this, [&pos, this]()
+					{
+						this->TrendMainWindow::actionAddRuler(pos);
+					});
 
 			QAction* deleteRulerAction = menu.addAction(tr("Delete Ruler"));
 			deleteRulerAction->setEnabled(mouseOn == Trend::MouseOn::OnRuler);
-			connect(deleteRulerAction, &QAction::triggered, this,
-					[rulerIndex, this]()
-			{
-				this->TrendMainWindow::actionDeleteRuler(rulerIndex);
-			});
+			connect(deleteRulerAction, &QAction::triggered, this, [rulerIndex, this]()
+					{
+						this->TrendMainWindow::actionDeleteRuler(rulerIndex);
+					});
 
 			QAction* rulerPropertiesAction = menu.addAction(tr("Ruler Properties..."));
 			rulerPropertiesAction->setEnabled(mouseOn == Trend::MouseOn::OnRuler);
-			connect(rulerPropertiesAction, &QAction::triggered, this,
-					[rulerIndex, this]()
-			{
-				this->TrendMainWindow::actionRulerProperties(rulerIndex);
-			});
+			connect(rulerPropertiesAction, &QAction::triggered, this, [rulerIndex, this]()
+					{
+						this->TrendMainWindow::actionRulerProperties(rulerIndex);
+					});
 
 			menu.addSeparator();
 			QAction* chooseView = menu.addAction(tr("Select View..."));
@@ -1354,7 +1426,7 @@ namespace TrendLib
 			Q_ASSERT(m_refreshAction);
 			if (m_refreshAction->isVisible() == true)
 			{
-				menu.addAction(m_refreshAction->text(), this, &TrendMainWindow::actionRefreshTriggered, QKeySequence::Refresh);
+				menu.addAction(m_refreshAction->text(), QKeySequence::Refresh, this, &TrendMainWindow::actionRefreshTriggered);
 			}
 
 			menu.addSeparator();
@@ -1368,21 +1440,19 @@ namespace TrendLib
 			for (const TrendLib::TrendSignalParam& s : discrets)
 			{
 				QAction* signalPropertiesAction = signalPropsMenu->addAction(s.signalId() + " - " + s.caption());
-				connect(signalPropertiesAction, &QAction::triggered, this,
-						[this, s]()
-				{
-					signalProperties(s.appSignalId(), s.archiveServerId());
-				});
+				connect(signalPropertiesAction, &QAction::triggered, this, [this, s]()
+						{
+							signalProperties(s.appSignalId(), s.archiveServerId());
+						});
 			}
 
 			for (const TrendLib::TrendSignalParam& s : analogs)
 			{
 				QAction* signalPropertiesAction = signalPropsMenu->addAction(s.signalId() + " - " + s.caption());
-				connect(signalPropertiesAction, &QAction::triggered, this,
-						[this, s]()
-				{
-					signalProperties(s.appSignalId(), s.archiveServerId());
-				});
+				connect(signalPropertiesAction, &QAction::triggered, this, [this, s]()
+						{
+							signalProperties(s.appSignalId(), s.archiveServerId());
+						});
 			}
 
 			QAction* signalAction = menu.addAction(tr("Signals..."));
@@ -1432,4 +1502,4 @@ namespace TrendLib
 		return m_realtimeAutoShiftButton->isChecked();
 	}
 
-}
+} // namespace TrendLib

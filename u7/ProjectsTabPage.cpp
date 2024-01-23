@@ -1,5 +1,4 @@
 #include "ProjectsTabPage.h"
-#include "../DbLib/DbController.h"
 #include "CreateProjectDialog.h"
 #include "LoginDialog.h"
 #include "Settings.h"
@@ -129,8 +128,6 @@ ProjectsTabPage::ProjectsTabPage(DbController* dbcontroller,
 	connect(dbController(), &DbController::projectOpened, this, &ProjectsTabPage::projectOpened);
 	connect(dbController(), &DbController::projectClosed, this, &ProjectsTabPage::projectClosed);
 
-	refreshProjectList();
-
 	return;
 }
 
@@ -189,6 +186,62 @@ void ProjectsTabPage::projectClosed()
 	m_deleteProjectAction->setEnabled(true);
 
 	GlobalMessanger::instance().fireProjectClosed();
+	return;
+}
+
+void ProjectsTabPage::refreshProjectList()
+{
+	assert(m_projectTable != nullptr);
+
+	// Save current selection
+	//
+	QString selectedProject;
+	QList<QTableWidgetItem*> selectedItems = m_projectTable->selectedItems();
+
+	if (selectedItems.size() != 0 && selectedItems[0]->column() == 0)
+	{
+		selectedProject = selectedItems[0]->text();
+	}
+
+	// clear all records
+	//
+	m_projectTable->setRowCount(0);
+
+	// Get project list from database (synchronous call)
+	//
+	std::vector<DbProject> projects;
+	bool result = dbController()->getProjectList(&projects, this);
+
+	if (result == false)
+	{
+		return;
+	}
+
+	// Fill the project list with the received values
+	//
+	m_projectTable->setRowCount(static_cast<int>(projects.size()));
+
+	m_projectTable->setSortingEnabled(false);
+
+	for (unsigned int i = 0; i < projects.size(); i++)
+	{
+		const DbProject& p = projects[i];
+
+		m_projectTable->setItem(i, 0, new QTableWidgetItem(p.projectName()));
+		m_projectTable->setItem(i, 1, new QTableWidgetItem(p.description()));
+
+		QTableWidgetItem* itemVersion = new QTableWidgetItem(QString::number(p.version()));
+		itemVersion->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+		m_projectTable->setItem(i, 2, itemVersion);
+	}
+
+	// Sort projects
+	//
+	m_projectTable->setSortingEnabled(true);
+	m_projectTable->sortByColumn(theSettings.m_projectsSortColumn, theSettings.m_projectsSortOrder);
+
+	selectProject(selectedProject);
+
 	return;
 }
 
@@ -297,7 +350,9 @@ void ProjectsTabPage::openProject()
 		QMessageBox mb(this);
 
 		mb.setText(tr("You cannot open this project."));
-		mb.setInformativeText(tr("The project database version is higher than the program version. Please update software."));
+		mb.setInformativeText(tr("The project database version (%1) is higher than the supported project version %2.\n\nPlease update software.")
+							  .arg(projectVersion)
+							  .arg(DbController::databaseVersion()));
 		mb.setFixedSize(mb.minimumSizeHint());
 		mb.exec();
 		return;
@@ -305,21 +360,28 @@ void ProjectsTabPage::openProject()
 
 	if (projectVersion < DbController::databaseVersion())
 	{
-		QMessageBox mb(this);
-
-		mb.setText(tr("You cannot open this project."));
-		mb.setInformativeText(tr("The project database version is lower than the program version. Do you want to upgrade the project to the appropriate version?"));
+		QMessageBox mb{this};
+		
+		mb.setTextFormat(Qt::RichText);
+		mb.setText(tr("<font color='red'>Do you want to upgrade the project to the version %1?</font>").arg(DbController::databaseVersion()));
+		mb.setInformativeText(tr("The project database version (%1) is lower than the supported version %2.")
+			.arg(projectVersion)
+			.arg(DbController::databaseVersion()));
+		mb.setDetailedText(tr("During the upgrade to a newer version a project database backup will be created, it will have a name like u7upgrade%1_%2_[date_and_time_of_upgrade].\n\nThe database administrator can restore the backup by renaming it to u7_[new_name].")
+			.arg(projectVersion)
+			.arg(projectName));
+		
+		mb.setIcon(QMessageBox::Warning);
 		mb.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-		mb.setDefaultButton(QMessageBox::Ok);
-		mb.setFixedSize(mb.minimumSizeHint());
+		mb.setDefaultButton(QMessageBox::Cancel);
 
-		int result = mb.exec();
-		if (result == QMessageBox::Cancel)
+		if (int result = mb.exec();
+			result == QMessageBox::Cancel)
 		{
 			return;
 		}
 
-		// Ask for Administartor's password
+		// Ask for Administrator's password
 		//
 		bool ok = false;
 
@@ -518,62 +580,6 @@ void ProjectsTabPage::deleteProject()
 	dbController()->deleteProject(projectName, password, false, this);
 
 	refreshProjectList();
-	return;
-}
-
-void ProjectsTabPage::refreshProjectList()
-{
-	assert(m_projectTable != nullptr);
-
-	// Save current selection
-	//
-	QString selectedProject;
-	QList<QTableWidgetItem*> selectedItems = m_projectTable->selectedItems();
-
-	if (selectedItems.size() != 0 && selectedItems[0]->column() == 0)
-	{
-		selectedProject = selectedItems[0]->text();
-	}
-
-	// clear all records
-	//
-	m_projectTable->setRowCount(0);
-
-	// Get project list from database (synchronous call)
-	//
-	std::vector<DbProject> projects;
-	bool result = dbController()->getProjectList(&projects, this);
-
-	if (result == false)
-	{
-		return;
-	}
-
-	// Fill the project list with the received values
-	//
-	m_projectTable->setRowCount(static_cast<int>(projects.size()));
-
-	m_projectTable->setSortingEnabled(false);
-
-	for (unsigned int i = 0; i < projects.size(); i++)
-	{
-		const DbProject& p = projects[i];
-
-		m_projectTable->setItem(i, 0, new QTableWidgetItem(p.projectName()));
-		m_projectTable->setItem(i, 1, new QTableWidgetItem(p.description()));
-
-		QTableWidgetItem* itemVersion = new QTableWidgetItem(QString::number(p.version()));
-		itemVersion->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-		m_projectTable->setItem(i, 2, itemVersion);
-	}
-
-	// Sort projects
-	//
-	m_projectTable->setSortingEnabled(true);
-	m_projectTable->sortByColumn(theSettings.m_projectsSortColumn, theSettings.m_projectsSortOrder);
-
-	selectProject(selectedProject);
-
 	return;
 }
 

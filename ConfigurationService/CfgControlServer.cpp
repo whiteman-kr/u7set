@@ -105,7 +105,7 @@ void CfgControlServer::sendLoadedBuildInfo()
 {
 	Network::BuildInfo message;
 
-	const Builder::BuildInfo& b = buildInfo();
+	const OnlineLib::BuildInfo& b = buildInfo();
 
 	message.set_project(b.project.toStdString());
 	message.set_id(b.id);

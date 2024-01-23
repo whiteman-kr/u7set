@@ -2,23 +2,28 @@
 
 namespace TestSuite
 {
-	ScriptTestLog::ScriptTestLog(ITestLog& testLog):
+	ScriptTestLog::ScriptTestLog(ILogFile& testLog):
 		m_testLog(testLog)
 	{
 	}
 
-	void ScriptTestLog::writeError(const QString& message)
+	void ScriptTestLog::writeError(QString message, QString tag)
 	{
-		m_testLog.writeError(message);
+		m_testLog.writeError(message, tag);
 	}
 
-	void ScriptTestLog::writeWarning(const QString& message)
+	void ScriptTestLog::writeWarning(QString message, QString tag)
 	{
-		m_testLog.writeWarning(message);
+		m_testLog.writeWarning(message, tag);
 	}
 
-	void ScriptTestLog::writeMessage(const QString& message)
+	void ScriptTestLog::writeMessage(QString message, QString tag)
 	{
-		m_testLog.writeMessage(message);
+		m_testLog.writeMessage(message, tag);
+	}
+
+	void ScriptTestLog::writeText(QString message, QString tag)
+	{
+		m_testLog.writeText(message, tag);
 	}
 }

@@ -1,27 +1,42 @@
 #pragma once
 
 #include <memory>
-#include <QJSEngine>
 #include <unordered_set>
+
+#include <QJSEngine>
 
 #include "../AppSignalLib/ComparatorSet.h"
 #include "../DbLib/DbController.h"
 #include "../HardwareLib/Connection.h"
+#include "../Simulator/SimProfiles.h"
 #include "../VFrame30/Bus.h"
 #include "../VFrame30/LogicSchema.h"
-#include "../Simulator/SimProfiles.h"
 #include "../lib/TuningDataStorage.h"
-#include "SignalSet.h"
-#include "ConnectionStorage.h"
-#include "SubsystemStorage.h"
-#include "IssueLogger.h"
+
 #include "BuildResultWriter.h"
+#include "ConnectionStorage.h"
+#include "IssueLogger.h"
 #include "LmDescriptionSet.h"
 #include "OptoModule.h"
+#include "SignalSet.h"
+#include "SubsystemStorage.h"
+#include "DbMatsUsers.h"
 
 namespace Builder
 {
 	class AppLogicData;
+
+	struct PackedLogicSource
+	{
+		QString appSignalID;
+		QString sourceItemLabelOut;
+	};
+
+	struct LmPackedLogicSources
+	{
+		QString lmID;
+		std::list<PackedLogicSource> sources;
+	};
 
 	class Context
 	{
@@ -33,7 +48,7 @@ namespace Builder
 		Context& operator=(Context&&) = delete;
 
 		bool generateAppSignalsXml() const;
-		bool generateExtraDebugInfo()const;
+		bool generateExtraDebugInfo() const;
 
 	public:
 		mutable IssueLogger* m_log = nullptr;
@@ -61,6 +76,7 @@ namespace Builder
 		std::shared_ptr<LmDescriptionSet> m_lmDescriptions;
 
 		std::vector<Hardware::DeviceModule*> m_lmModules;
+
 		std::vector<Hardware::DeviceModule*> m_fscModules;		// includes LM and BVB modules
 		std::vector<Hardware::DeviceModule*> m_vduModules;		// includes VDU modules
 
@@ -80,8 +96,10 @@ namespace Builder
 		std::shared_ptr<ComparatorSet> m_comparatorSet;
 
 		std::unordered_set<QString> m_analogSignalsOnSchemas;
+
+		std::map<QString, std::list<LmPackedLogicSources>> m_packedLogicSources;	// Key is label of packed_*_out schema item => list of LmPacketLogicSources
+
+		DbMatsUserStorage m_matsUsers;
 	};
 
-}
-
-
+} // namespace Builder

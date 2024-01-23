@@ -1,14 +1,12 @@
-#include "Stable.h"
-#include "ModuleConfigurator.h"
 #include "../lib/Configurator.h"
-#include "SettingsForm.h"
-#include "DiagTabPage.h"
-#include "ApplicationTabPage.h"
 #include "../lib/Ui/DialogAbout.h"
 
-#if __has_include("../gitlabci_version.h")
-#	include "../gitlabci_version.h"
-#endif
+#include "ApplicationTabPage.h"
+#include "DiagTabPage.h"
+#include "Globals.h"
+#include "ModuleConfigurator.h"
+#include "SettingsForm.h"
+#include "version.h"
 
 ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	: QMainWindow(parent)
@@ -223,11 +221,10 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	theLog.writeMessage(tr("Programm is started"));
 	theLog.writeMessage(tr("Version %1").arg(qApp->applicationVersion()));
 
-#ifdef GITLAB_CI_BUILD
-	theLog.writeMessage(tr("Commit SHA: %1").arg(CI_COMMIT_SHA));
-	theLog.writeMessage(tr("Branch: %1").arg(CI_BUILD_REF_SLUG));
-	theLog.writeMessage(tr("Build Date: %1").arg(BUILD_DATE));
-	theLog.writeMessage(tr("Build Host: %1").arg(COMPUTERNAME));
+#ifdef U7SET_COMMIT_HASH
+	theLog.writeMessage(tr("Commit SHA: %1").arg(U7SET_COMMIT_HASH));
+	theLog.writeMessage(tr("Branch: %1").arg(U7SET_BRANCH_NAME));
+	theLog.writeMessage(tr("Build Date: %1").arg(U7SET_BUILD_DATE));
 #else
 #endif
 
@@ -468,12 +465,14 @@ void ModuleConfigurator::readClicked()
 		{
 			ApplicationTabPage* page = dynamic_cast<ApplicationTabPage*>(m_tabWidget->currentWidget());
 
-			QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"));
+			static QString path{"."};
+			QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), path + QDir::separator());
 
 			if (fileName.isEmpty() == true)
 			{
 				return;
 			}
+			path = QFileInfo(fileName).path(); // store path for next time
 
 			std::optional<std::vector<int>> selectedUarts = page->selectedUarts();
 
@@ -594,7 +593,7 @@ void ModuleConfigurator::aboutQtClicked()
 void ModuleConfigurator::aboutClicked()
 {
 	QString text = qApp->applicationName() + tr(" allows user to upload firmware to flash memory of logic modules.<br>");
-	DialogAbout::show(this, text, ":/Images/Images/Logo.png");
+	DialogAbout::show(this, text, ":/Logo/RadiyLogo.png");
 
 	return;
 }

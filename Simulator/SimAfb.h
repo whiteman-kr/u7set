@@ -7,8 +7,8 @@
 #include <optional>
 #include <concepts>
 #include <QObject>
-#include "../lib/LmDescription.h"
-#include "../VFrame30/Afb.h"
+#include "../HardwareLib/LmDescription.h"
+
 
 class SimAfbParamTests;
 
@@ -215,7 +215,7 @@ namespace Sim
 		constexpr static quint16 FLAG_NAN = 0x0008;
 		constexpr static quint16 FLAG_DIVBYZERO = 0x0010;
 
-		std::array<char, 8> m_data;
+		std::array<char, 8> m_data{};
 		quint16 m_mathFlags = 0;
 		quint16 m_paramOpIndex = 0xFFFF;
 	};

@@ -1,11 +1,12 @@
 #pragma once
 
-#include "MainTabPage.h"
-#include <QToolBar>
-#include "IdePropertyEditor.h"
-#include "GlobalMessanger.h"
-#include "../lib/Ui/FilesTreeView.h"
 #include "../Simulator/Simulator.h"
+#include "../lib/Ui/FilesTreeView.h"
+
+#include "GlobalMessanger.h"
+#include "IdePropertyEditor.h"
+#include "MainTabPage.h"
+
 
 class TestsFileTreeModel : public FileTreeModel
 {
@@ -17,7 +18,6 @@ public:
 private:
 	QString customColumnText(Columns column, const FileTreeModelItem* item) const override;
 	QString customColumnName(Columns column) const override;
-
 };
 
 class TestTabPageDocument
@@ -62,11 +62,11 @@ public:
 private:
 	// ILogFile implementation
 	//
-	bool writeAlert(const QString& text) override;
-	bool writeError(const QString& text)  override;
-	bool writeWarning(const QString& text) override;
-	bool writeMessage(const QString& text)  override;
-	bool writeText(const QString& text)  override;
+	bool writeAlert(const QString& text, const QString& tag = {}) override;
+	bool writeError(const QString& text, const QString& tag = {}) override;
+	bool writeWarning(const QString& text, const QString& tag = {}) override;
+	bool writeMessage(const QString& text, const QString& tag = {}) override;
+	bool writeText(const QString& text, const QString& tag = {}) override;
 
 	void write(QtMsgType type, const QString& msg);
 
@@ -96,24 +96,25 @@ private:
 //
 // OutputDockWidget
 //
-
 class OutputDockWidgetTitleButton : public QAbstractButton
 {
 	Q_OBJECT
 
 public:
-	OutputDockWidgetTitleButton(QDockWidget *dockWidget, bool drawActualIconSizeOnWindows);
+	OutputDockWidgetTitleButton(QDockWidget* dockWidget, bool drawActualIconSizeOnWindows);
 
 	QSize sizeHint() const override;
 	QSize minimumSizeHint() const override
-	{ return sizeHint(); }
+	{
+		return sizeHint();
+	}
 
 	void enterEvent(QEnterEvent* event) override;
-	void leaveEvent(QEvent *event) override;
-	void paintEvent(QPaintEvent *event) override;
+	void leaveEvent(QEvent* event) override;
+	void paintEvent(QPaintEvent* event) override;
 
 protected:
-	bool event(QEvent *event) override;
+	bool event(QEvent* event) override;
 
 private:
 	QSize dockButtonIconSize() const;
@@ -131,7 +132,7 @@ public:
 
 	void clear();
 
-	void setWidget(QWidget *widget);
+	void setWidget(QWidget* widget);
 
 private slots:
 	void floatingChanged(bool floating);
@@ -143,7 +144,7 @@ private slots:
 	void findKeyEvent(const QString& selectedText);
 
 private:
-	virtual void paintEvent(QPaintEvent *event) override;
+	virtual void paintEvent(QPaintEvent* event) override;
 	virtual void timerEvent(QTimerEvent* event) override;
 
 	void createToolbar();
@@ -209,7 +210,8 @@ private:
 // TestsWidget
 //
 
-class TestsWidget : public QMainWindow, HasDbController
+class TestsWidget : public QMainWindow,
+					HasDbController
 {
 	Q_OBJECT
 
@@ -234,9 +236,9 @@ private slots:
 	void testsTreeSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 	void testsTreeModelDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles = QVector<int>());
 	void testsTreeModelReset();
-	void testsTreeDoubleClicked(const QModelIndex &index);
+	void testsTreeDoubleClicked(const QModelIndex& index);
 
-	void openFilesClicked(const QModelIndex &index);
+	void openFilesClicked(const QModelIndex& index);
 
 	// Tests file tree slots
 	//
@@ -270,7 +272,7 @@ private slots:
 
 	// Open Files slots
 	//
-	void openFilesMenuRequested(const QPoint &pos);
+	void openFilesMenuRequested(const QPoint& pos);
 
 	void checkInOpenFile();
 	void checkOutOpenFile();
@@ -437,7 +439,5 @@ private:
 
 	bool m_scriptIsRunning = false;
 
-	Sim::Simulator m_simulator{&m_log, false, nullptr};	// log to OutputLog, no parent
+	Sim::Simulator m_simulator{&m_log, false, nullptr}; // log to OutputLog, no parent
 };
-
-

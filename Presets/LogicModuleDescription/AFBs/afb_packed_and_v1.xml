@@ -1,0 +1,24 @@
+<AFBComponent Caption="PACKED_AND" OpCode="252" HasRam="false" ImpVersion="1" VersionOpIndex="-1" MaxInstCount="-1" SimulationFunc="afb_no_simulation">
+    <Pin OpName="i_oprd_quant"	OpIndex ="0"	PinType = "Param"/>
+    <Pin OpName="i_bus_width"	OpIndex ="1"	PinType = "Param"/>
+    <Pin OpName="i_conf"		OpIndex ="2"	PinType = "Param"/>
+    <Pin OpName="i_1_oprd"		OpIndex ="3"	PinType = "Input"/>
+    <Pin OpName="i_2_oprd"		OpIndex ="4"	PinType = "Input"/>
+    <Pin OpName="i_3_oprd"		OpIndex ="5"	PinType = "Input"/>
+    <Pin OpName="i_4_oprd"		OpIndex ="6"	PinType = "Input"/>
+    <Pin OpName="i_5_oprd"		OpIndex ="7"	PinType = "Input"/>
+    <Pin OpName="i_6_oprd"		OpIndex ="8"	PinType = "Input"/>
+    <Pin OpName="i_7_oprd"		OpIndex ="9"	PinType = "Input"/>
+    <Pin OpName="i_8_oprd"		OpIndex ="10"	PinType = "Input"/>
+    <Pin OpName="i_9_oprd"		OpIndex ="11"	PinType = "Input"/>
+    <Pin OpName="i_10_oprd"		OpIndex ="12"	PinType = "Input"/>
+    <Pin OpName="i_11_oprd"		OpIndex ="13"	PinType = "Input"/>
+    <Pin OpName="i_12_oprd"		OpIndex ="14"	PinType = "Input"/>
+    <Pin OpName="i_13_oprd"		OpIndex ="15"	PinType = "Input"/>
+    <Pin OpName="i_14_oprd"		OpIndex ="16"	PinType = "Input"/>
+    <Pin OpName="i_15_oprd"		OpIndex ="17"	PinType = "Input"/>
+    <Pin OpName="i_16_oprd"		OpIndex ="18"	PinType = "Input"/>
+    <Pin OpName="o_result"		OpIndex ="20"	PinType = "Output"/>
+    <Pin OpName="o_logic_edi"	OpIndex ="21"	PinType = "Output"/>
+    <Pin OpName="o_version"		OpIndex ="22"	PinType = "Output"/>
+</AFBComponent>

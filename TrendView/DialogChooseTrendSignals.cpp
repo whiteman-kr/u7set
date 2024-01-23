@@ -1,34 +1,14 @@
+#include <QSettings>
+#include <QResizeEvent>
+#include <QMessageBox>
+#include <QStringListModel>
+#include <QClipboard>
+#include <QMenu>
 #include "DialogChooseTrendSignals.h"
 #include "ui_DialogChooseTrendSignals.h"
 
-
-namespace
+namespace TrendLibInternal
 {
-	class FilteredTrendSignalsModel : public QAbstractTableModel
-	{
-	public:
-		FilteredTrendSignalsModel(const ISignalHasTag* signalHasTag,
-								  const std::vector<TrendLib::TrendSignalParam>& signalss,
-								  QObject* parent);
-
-	public:
-		int rowCount(const QModelIndex& parent = QModelIndex()) const override;
-		int columnCount(const QModelIndex& parent = QModelIndex()) const override;
-		QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-		QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
-
-		void filterSignals(QString server, QString filter, QStringList tagList);
-
-		const TrendLib::TrendSignalParam& signalByRow(int row) const;
-
-	private:
-		const ISignalHasTag* m_signalHasTag = nullptr;
-		std::vector<size_t> m_signalIndexes;
-		std::vector<TrendLib::TrendSignalParam> m_signals;
-		std::map<QString, std::vector<size_t>> m_startWithArrays;	// Key is startWith, in lowercase. Values are indexes in m_signals for stratWith
-	};
-
-
 	//
 	//		FilteredTrendSignalsModel
 	//
@@ -108,13 +88,13 @@ namespace
 				switch (section)
 				{
 				case 0:
-					return QString("SignalID");
+					return tr("SignalID");
 				case 1:
-					return QString("Type");
+					return tr("Type");
 				case 2:
-					return QString("Caption");
+					return tr("Caption");
 				case 3:
-					return QString("Server");
+					return tr("Server");
 				}
 			}
 		}
@@ -322,15 +302,29 @@ namespace
 
 namespace TrendLib
 {
+	using namespace TrendLibInternal;
 
 	DialogChooseTrendSignals::DialogChooseTrendSignals(const ISignalHasTag* signalHasTag,
 													   std::vector<TrendLib::TrendSignalParam> trendSignals,
 													   const std::vector<TrendLib::TrendSignalParam>& acceptedSignals,
 													   const std::vector<TrendLib::ArchiveServer>& archiveServers,
 													   QWidget* parent) :
-		QDialog(parent)
+		QDialog(parent),
+		s_allServers(tr("All Servers"))
 	{
 		init(signalHasTag, std::move(trendSignals), acceptedSignals, archiveServers);
+
+		QObject::connect(ui->trendSignals, &QTreeWidget::itemSelectionChanged, [this]()
+			{
+				QList<QTreeWidgetItem*> selectedItems = ui->trendSignals->selectedItems();
+				if (selectedItems.isEmpty() == false)
+				{
+					QTreeWidgetItem* selectedItem = selectedItems.first();
+					ui->trendSignals->setCurrentItem(selectedItem);
+				}
+			});
+
+		return;
 	}
 
 
@@ -383,10 +377,10 @@ namespace TrendLib
 		// --
 		//
 		QStringList headerLabels;
-		headerLabels << "SignalID";
-		headerLabels << "Type";
-		headerLabels << "Caption";
-		headerLabels << "Server";
+		headerLabels << tr("SignalID");
+		headerLabels << tr("Type");
+		headerLabels << tr("Caption");
+		headerLabels << tr("Server");
 
 		ui->trendSignals->setHeaderLabels(headerLabels);
 
@@ -590,6 +584,9 @@ namespace TrendLib
 		bool enableRemoveButton = true;
 		bool enableRemoveAll = true;
 
+		bool enableMoveUp = false;
+		bool enableMoveDown = false;
+
 		// Add Signal Button
 		//
 		{
@@ -628,12 +625,26 @@ namespace TrendLib
 			enableRemoveAll = ui->trendSignals->topLevelItemCount() > 0;
 		}
 
+		// Move up/down.
+		//
+		{
+			QModelIndex index = ui->trendSignals->currentIndex();
+
+			if (index.isValid() == true)
+			{
+				enableMoveUp = index.row() > 0;
+				enableMoveDown = (index.row() + 1) < ui->trendSignals->topLevelItemCount();
+			}
+		}
 
 		// --
 		//
 		ui->addSignalButton->setEnabled(enableAddButton);
 		ui->removeSignalButton->setEnabled(enableRemoveButton);
 		ui->removeAllSignalsButton->setEnabled(enableRemoveAll);
+
+		ui->upSignalButton->setEnabled(enableMoveUp);
+		ui->downSignalButton->setEnabled(enableMoveDown);
 
 		return;
 	}
@@ -844,6 +855,52 @@ namespace TrendLib
 		menu.insertAction(nullptr, &action);
 		menu.exec(ui->trendSignals->mapToGlobal(pos));
 
+		return;
+	}
+
+
+	void DialogChooseTrendSignals::on_upSignalButton_clicked()
+	{
+		Q_ASSERT(ui->trendSignals);
+
+		QModelIndex currentIndex = ui->trendSignals->currentIndex();
+
+		if (currentIndex.isValid() == true && currentIndex.row() > 0)
+		{
+			// Reorder item.
+			//
+			QTreeWidgetItem* itemToMove = ui->trendSignals->takeTopLevelItem(currentIndex.row());
+			ui->trendSignals->insertTopLevelItem(currentIndex.row() - 1, itemToMove);
+
+			// Select moved item.
+			//
+			ui->trendSignals->setCurrentItem(itemToMove);
+		}
+
+		disableControls();
+		return;
+	}
+
+
+	void DialogChooseTrendSignals::on_downSignalButton_clicked()
+	{
+		Q_ASSERT(ui->trendSignals);
+
+		QModelIndex currentIndex = ui->trendSignals->currentIndex();
+
+		if (currentIndex.isValid() == true && (currentIndex.row() + 1) < ui->trendSignals->topLevelItemCount())
+		{
+			// Reorder item.
+			//
+			QTreeWidgetItem* itemToMove = ui->trendSignals->takeTopLevelItem(currentIndex.row());
+			ui->trendSignals->insertTopLevelItem(currentIndex.row() + 1, itemToMove);
+
+			// Select moved item.
+			//
+			ui->trendSignals->setCurrentItem(itemToMove);
+		}
+
+		disableControls();
 		return;
 	}
 

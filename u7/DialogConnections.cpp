@@ -125,7 +125,7 @@ DialogConnections::DialogConnections(DbController* db, QWidget* parent)
 	m_completer->setCaseSensitivity(Qt::CaseInsensitive);
 	m_mask->setCompleter(m_completer);
 
-	connect(m_mask, &QLineEdit::textEdited, [=](){m_completer->complete();});
+    connect(m_mask, &QLineEdit::textEdited, [this](){m_completer->complete();});
 	connect(m_completer, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_mask, &QLineEdit::setText);
 
 	// Popup menu
@@ -1029,14 +1029,16 @@ void DialogConnections::reject()
 
 void DialogConnections::onReport()
 {
+	static QString path{"."};
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Export"),
-													"./",
+													path + QDir::separator(),
 													tr("Text files (*.txt);; All files (*.*)"));
 
 	if (fileName.isNull() == true)
 	{
 		return;
 	}
+	path = QFileInfo(fileName).path(); // store path for next time
 
 	QFile file(fileName);
 

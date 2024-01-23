@@ -112,6 +112,8 @@ public:
 	XmlReadHelper(const QString& xmlString);
 	~XmlReadHelper();
 
+	QXmlStreamReader* xmlStreamReader() const;
+
 	bool readNextStartElement();
 	void skipCurrentElement();
 
@@ -159,6 +161,8 @@ public:
 
 	template<typename ENUM_TYPE>
 	bool readEnumValueAttribute(const QString& name, ENUM_TYPE* value);
+
+	bool readEnumValueAttributeAsInt(const QString& name, int* value);
 
 private:
 	QXmlStreamReader* m_xmlReader = nullptr;
@@ -215,23 +219,13 @@ bool XmlReadHelper::readEnumValueAttribute(const QString& name, ENUM_TYPE* value
 {
 	static_assert(std::is_enum<ENUM_TYPE>::value == true);
 
-	if(value == nullptr)
-	{
-		assert(false);
-		return false;
-	}
-
-	QString attrName = name + QString(XmlAttribute::ENUM_VALUE_SUFFIX);
-
 	int intVal = 0;
+
 	bool result = false;
 
-	result = readIntAttribute(attrName, &intVal);
+	result = readEnumValueAttributeAsInt(name, &intVal);
 
-	if (result == false)
-	{
-		return false;
-	}
+	RETURN_IF_FALSE(result);
 
 	if (E::contains<ENUM_TYPE>(intVal) == false)
 	{

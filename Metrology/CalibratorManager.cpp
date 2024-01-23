@@ -1,14 +1,4 @@
 #include "CalibratorManager.h"
-
-#include <QSettings>
-#include <QTime>
-#include <QTimer>
-#include <QMessageBox>
-#include <QFont>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QGroupBox>
-
 #include "MetrologySignal.h"
 #include "Options.h"
 
@@ -774,6 +764,18 @@ void CalibratorManager::stepUp()
 	setReadyForManage(false);
 
 	emit calibratorStepUp();
+}
+
+void CalibratorManager::step(bool up)
+{
+	if (up)
+	{
+		stepUp();
+	}
+	else
+	{
+		stepDown();
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------

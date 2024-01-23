@@ -55,6 +55,11 @@ namespace TrendLib
 							  const std::vector<TrendSignalParam>& discretes,
 							  const std::vector<TrendSignalParam>& analogs) const;
 
+		void drawSignalsDecorRealtimeValue(QPainter* painter,
+										   const QRectF& signalRect,
+										   const TrendParam& drawParam,
+										   const TrendSignalParam& signalParam) const;
+
 		void drawAnalogSignalsGridSeparateMode(QPainter* painter,
 											   const QRectF& laneRect,
 											   const TrendParam& drawParam,
@@ -74,7 +79,7 @@ namespace TrendLib
 
 		static void adjustPainter(QPainter* painter, const TrendParam& trendParam);
 
-		void drawPolyline(QPainter* painter, const QVector<QPointF>& lines, const QRectF& rect) const;
+		void drawPolyline(QPainter* painter, const std::vector<QPointF>& lines, const QRectF& rect) const;
 
 	public:
 		static void calcSignalRects(const QRectF& insideRect,
@@ -98,7 +103,7 @@ namespace TrendLib
 	public:
 		enum class MouseOn
 		{
-			Outside,			// Outside any posible rect
+			Outside,			// Outside any possible rect
 			OutsideTrendArea,	// Outside lane but in the rect
 			InsideTrendArea,	// Inside lane rectangle
 			OnSignalDescription,// Over Signal Description (id + caption)

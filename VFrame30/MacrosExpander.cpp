@@ -72,14 +72,12 @@ namespace VFrame30
 	{
 		QString result = str;
 
-		QRegularExpression reStartIndex(R"(\$\([a-zA-Z0-9]+[\.]?[a-zA-Z0-9]*)");	// Search for $(SomeText[.][SomeText])
-
 		qsizetype index = 0;
 		while (index < result.size())
 		{
-			// Find macro bounds
+			// Find macro bounds, $(SomeText[.][SomeText])
 			//
-			qsizetype startIndexOfMacro = result.indexOf(reStartIndex, index);
+			qsizetype startIndexOfMacro = result.indexOf("$(", index);
 			if (startIndexOfMacro == -1)
 			{
 				break;
@@ -100,7 +98,7 @@ namespace VFrame30
 			const PropertyObject* object = nullptr;
 			QString propName;
 
-			do
+			do  // while (false);
 			{
 				// Look for property assigned to object
 				//
@@ -130,7 +128,7 @@ namespace VFrame30
 
 			QString replaceText;
 
-			do
+			do  // while (false);
 			{
 				if (object != nullptr &&
 					propName.isEmpty() == false)
@@ -145,9 +143,9 @@ namespace VFrame30
 					{
 						replaceText = QString("[unk_prop: %1]").arg(macro);
 					}
+
 					break;
 				}
-
 
 				// Look for variables
 				//
@@ -160,6 +158,31 @@ namespace VFrame30
 						replaceText = var.toString();
 						break;
 					}
+				}
+
+				// Look for environment variables.
+				//
+				{
+#ifdef Q_OS_WIN32
+					// Windows specific code, use qEnvironmentVariable.
+					//
+					if (QString envVar = qEnvironmentVariable(macro.toUtf8());
+						envVar.isEmpty() == false)
+					{
+						replaceText = envVar;
+						break;
+					}
+#endif // Q_OS_WIN32
+#ifdef Q_OS_LINUX
+					// Linux specific code, use qgetenv().
+					//
+					if (QByteArray envVar = qgetenv(macro.toUtf8());
+						envVar.isEmpty() == false)
+					{
+						replaceText = QString::fromLocal8Bit(envVar);
+						break;
+					}
+#endif // Q_OS_UNIX	
 				}
 
 				// Total else

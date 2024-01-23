@@ -1,7 +1,6 @@
 #pragma once
 #include "../../Simulator/Simulator.h"
 #include "../../Simulator/SimOverrideSignals.h"
-#include "../../DbLib/DbController.h"
 #include "../../lib/QDoublevalidatorEx.h"
 #include "../lib/CodeEditor.h"
 
@@ -44,28 +43,29 @@ namespace SimOverrideUI
 		Q_OBJECT
 
 	public:
-		explicit OverrideMethodWidget(const Sim::OverrideSignalParam& signal,
-									  Sim::Simulator* simulator,
+		explicit OverrideMethodWidget(const std::vector<Sim::OverrideSignalParam>& signalss,
+									  Sim::Simulator& simulator,
 									  DbController* dbc,
 									  QWidget* parent);
 
 	public:
-		const Sim::OverrideSignalParam& signal() const;
-		Sim::OverrideSignalParam& signal();
-		void setSignal(const Sim::OverrideSignalParam& signal);
+		const std::vector<Sim::OverrideSignalParam>& signalss() const;
+		std::vector<Sim::OverrideSignalParam>& signalss();
+		void setSignals(const std::vector<Sim::OverrideSignalParam>& signalss);
 
 		virtual void setViewOptions(int base, E::AnalogFormat analogFormat, int precision);
 
 		void setValue(Sim::OverrideSignalMethod method, QVariant value);
 
 	protected:
-		Sim::OverrideSignalParam m_signal;
-		Sim::Simulator* m_simulator = nullptr;
+		std::vector<Sim::OverrideSignalParam> m_signals;
+		Sim::Simulator& m_simulator;
 
 		int m_currentBase = 10;											// Base for integer signals: 10, 16
 		E::AnalogFormat m_analogFormat = E::AnalogFormat::g_9_or_9e;	// Current format for floating point signals
 		int m_precision = -1;											// Current procision for floating point signals
 	};
+
 
 	//
 	// ValueMethodWidget
@@ -75,8 +75,8 @@ namespace SimOverrideUI
 		Q_OBJECT
 
 	public:
-		ValueMethodWidget(const Sim::OverrideSignalParam& signal,
-						  Sim::Simulator* simulator,
+		ValueMethodWidget(const std::vector<Sim::OverrideSignalParam>& signalss,
+						  Sim::Simulator& simulator,
 						  DbController* dbc,
 						  QWidget* parent);
 
@@ -114,8 +114,8 @@ namespace SimOverrideUI
 		Q_OBJECT
 
 	public:
-		ScriptMethodWidget(const Sim::OverrideSignalParam& signal,
-						   Sim::Simulator* simulator,
+		ScriptMethodWidget(const std::vector<Sim::OverrideSignalParam>& signalss,
+						   Sim::Simulator& simulator,
 						   DbController* dbc,
 						   QWidget* parent);
 
@@ -156,23 +156,23 @@ namespace SimOverrideUI
 	};
 
 
-	// OverrideValueWidget
+	// OverrideDialog
 	// The Main Windows for override, has some signal info and tab control
 	//
-	class OverrideValueWidget : public QDialog, protected HasDbController
+	class OverrideDialog : public QDialog, protected HasDbController
 	{
 		Q_OBJECT
 
 	private:
-		explicit OverrideValueWidget(const Sim::OverrideSignalParam& signal,
-									 Sim::Simulator* simulator,
-									 DbController* dbc,
-									 QWidget* parent);
-		virtual ~OverrideValueWidget();
+		explicit OverrideDialog(const std::vector<Sim::OverrideSignalParam>& overrideSignals,
+								Sim::Simulator& simulator,
+								DbController* dbc,
+								QWidget* parent);
+		virtual ~OverrideDialog();
 
 	public:
-		static bool showDialog(const Sim::OverrideSignalParam& signal, Sim::Simulator* simulator, DbController* dbc, QWidget* parent);
-		static void setViewOptions(QString appSignalId, int base, E::AnalogFormat analogFormat, int precision);
+		static bool showDialog(std::vector<Sim::OverrideSignalParam> overrideSignals, Sim::Simulator& simulator, DbController* dbc, QWidget* parent);
+		static void setViewOptions(const QStringList& appSignalIds, int base, E::AnalogFormat analogFormat, int precision);
 
 	protected:
 		virtual void resizeEvent(QResizeEvent* event) override;
@@ -184,8 +184,7 @@ namespace SimOverrideUI
 		void updateSignalsUi();
 
 	public:
-		QString appSignalId() const;
-		const Sim::OverrideSignalParam& signal() const;
+		QStringList appSignalIds() const;
 
 		Sim::Simulator* simulator();
 		const Sim::Simulator* simulator() const;
@@ -194,8 +193,11 @@ namespace SimOverrideUI
 		const Sim::OverrideSignals& overrideSignals() const;
 
 	private:
-		Sim::OverrideSignalParam m_signal;
-		Sim::Simulator* m_simulator = nullptr;
+		// All signals in m_overrideSignals must have the same type and data format.
+		//
+		std::vector<Sim::OverrideSignalParam> m_overrideSignals;
+
+		Sim::Simulator& m_simulator;
 
 		// UI
 		//
@@ -211,10 +213,10 @@ namespace SimOverrideUI
 
 		// --
 		//
-		QSize m_prevVisibleSize;		// On show shit happens, if widget has layout it recalculates it, so we need to keep last size
-		// and restore it before showing widget (setVisible(true) itself calls resize)
+		QSize m_prevVisibleSize;	// On show shit happens, if widget has layout it recalculates it, so we need to keep last size
+									// and restore it before showing widget (setVisible(true) itself calls resize)
 
-		static std::map<QString, OverrideValueWidget*> m_openedDialogs;	// key is AppSignalID
+		static std::map<QString, OverrideDialog*> s_openedDialogs;	// key is AppSignalID
 	};
 
 }

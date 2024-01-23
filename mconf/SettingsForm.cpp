@@ -1,7 +1,6 @@
-#include "Stable.h"
 #include "SettingsForm.h"
 
-SettingsForm::SettingsForm(const Settings& settings, QWidget* parent)
+SettingsForm::SettingsForm(const MconfSettings& settings, QWidget* parent)
 	: QDialog(parent),
 	m_settings(settings)
 {
@@ -226,7 +225,7 @@ SettingsForm::~SettingsForm()
 
 }
 
-const Settings& SettingsForm::settings() const
+const MconfSettings& SettingsForm::settings() const
 {
 	return m_settings;
 }

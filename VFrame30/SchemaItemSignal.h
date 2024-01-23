@@ -1,8 +1,11 @@
 #pragma once
 
-#include "FblItemRect.h"
 #include "DrawParam.h"
+#include "FblItemRect.h"
+#include "IMatsSchemaItemAssociations.h"
+
 #include "../AppSignalLib/AppSignalParam.h"
+#include "../AppSignalLib/AppSignalState.h"
 
 namespace VFrame30
 {
@@ -37,7 +40,7 @@ namespace VFrame30
 		})
 		\endcode
 	*/
-	class SchemaItemSignal : public FblItemRect
+	class SchemaItemSignal : public FblItemRect, public IMatsSchemaItemAssociations
 	{
 		Q_OBJECT
 
@@ -76,15 +79,15 @@ namespace VFrame30
 
 		/** \brief Cell column count. May differ from <b>columnCount</b> as column can have several cells.
 		To get cell data type use function \ref cellData, returns \ref E::ColumnData "ColumnData".
-		To get AppSignaID associated with cell use function \ref cellAppSignalId.
+		To get AppSignaID associated with cell use function \ref cellAppSignalID.
 		*/
-		Q_PROPERTY(int cellColumnCount READ cellColumnCount )
+		Q_PROPERTY(int cellColumnCount READ cellColumnCount)
 
 		/** \brief Cell row count. Always the same as \ref columnCount.
 		To get cell data type use function \ref cellData, returns \ref E::ColumnData "ColumnData".
 		To get AppSignaID associated with cell use function \ref cellAppSignalID.
 		*/
-		Q_PROPERTY(int cellRowCount READ cellColumnCount )
+		Q_PROPERTY(int cellRowCount READ cellColumnCount)
 
 	protected:
 		SchemaItemSignal(void);
@@ -115,11 +118,14 @@ namespace VFrame30
 				quint64 id;
 			};
 
-			Cell(qint32 r, qint32 c, Qt::ItemDataRole rr) : row(static_cast<qint16>(r)), column(static_cast<qint16>(c)), role(rr)
+			Cell(qint32 r, qint32 c, Qt::ItemDataRole rr) :
+				row(static_cast<qint16>(r)),
+				column(static_cast<qint16>(c)),
+				role(rr)
 			{
 			}
 
-			bool operator < (const Cell& that) const
+			bool operator<(const Cell& that) const
 			{
 				return this->id < that.id;
 			}
@@ -138,16 +144,17 @@ namespace VFrame30
 
 		virtual void drawHighlight(CDrawParam* drawParam) const override;
 
-		static QString getCoulumnText(const Context* context,
-									  DrawMode drawMode,
-									  const SchemaItem* schemaItem,
-									  const E::ColumnData& data,
-									  const AppSignalParam& signal,
-									  const AppSignalState& signalState,
-									  const AppSignalParam& impactSignal,
-									  const AppSignalState& impactSignalState,
-									  E::AnalogFormat analogFormat,
-									  int precision);
+		static QString getColumnText(const Context* context,
+									 DrawMode drawMode,
+									 const SchemaItem* schemaItem,
+									 const E::ColumnData& data,
+									 const AppSignalParam& signal,
+									 const AppSignalState& signalState,
+									 const AppSignalParam& impactSignal,
+									 const AppSignalState& impactSignalState,
+									 E::AnalogFormat analogFormat,
+									 int precision,
+									 bool* isInverted);
 
 	protected:
 		void drawFullLineIds(const Context* context, CDrawParam* drawParam) const;
@@ -169,8 +176,17 @@ namespace VFrame30
 		SchemaItemPtr transformIntoInOut();
 		SchemaItemPtr transformIntoOutput();
 
-		template <typename TYPE>
+		template<typename TYPE>
 		SchemaItemPtr transformIntoType();
+
+		// IMatsSchemaItemAssociations implementation.
+		//
+	public:
+		virtual QStringList associatedAppSignalIds() const override;
+		virtual QStringList associatedImpactAppSignalIds() const override;
+		virtual QStringList associatedConnectionIds() const override;
+		virtual QStringList associatedLoopbackIds() const override;
+		virtual QStringList associatedSchemaItemLabels() const override;
 
 		// Properties
 		//
@@ -211,10 +227,10 @@ namespace VFrame30
 		void setColumnCount(int value);
 
 	public slots:
-		/// \brief Returns column width in percents for column specified by <b>columnIndex</b>
+		/// \brief Returns column width in percent for column specified by <b>columnIndex</b>
 		double columnWidth(int columnIndex) const;
 
-		/// \brief Sets column width in percents for column specified by <b>columnIndex</b>
+		/// \brief Sets column width in percent for column specified by <b>columnIndex</b>
 		void setColumnWidth(double value, int columnIndex);
 
 		/// \brief Returns data type for column specified by <b>columnIndex</b>, returns \ref E::ColumnData "ColumnData"
@@ -236,7 +252,7 @@ namespace VFrame30
 		int cellColumnCount() const;
 
 	public slots:
-		/// \brief Resets all previously set atrributes to cell.
+		/// \brief Resets all previously set attributes to cell.
 		void resetCell(int row, int column);
 
 		/// \brief Resets previously set text to cell.
@@ -257,7 +273,7 @@ namespace VFrame30
 		/// \brief Returns overriden (set with setCellText) cell text.
 		QString cellText(int row, int column) const;
 
-		/// \brief Overrides cell text, to reset value to default pass undefines as argumnet.
+		/// \brief Overrides cell text, to reset value to default pass undefines as argument.
 		void setCellText(int row, int column, QString text);
 
 		/// \brief Returns background color for specified cell.
@@ -266,7 +282,7 @@ namespace VFrame30
 		/// \brief Sets background color for specified cell.
 		void setCellFillColor(int row, int column, QColor color);
 
-		/// \brief Returns text color for specified cell, to reset value to default pass "" as argumnet.
+		/// \brief Returns text color for specified cell, to reset value to default pass "" as argument.
 		QColor cellTextColor(int row, int column) const;
 
 		/// \brief Sets text color for specified cell.
@@ -278,7 +294,7 @@ namespace VFrame30
 		QStringList m_appSignalIds;
 		QStringList m_impactAppSignalIds;
 
-		bool m_multiLine = true;		// Show multichannel signlas in multi/single line
+		bool m_multiLine = true; // Show multichannel signals in multi/single line
 
 		int m_precision = 2;
 		E::AnalogFormat m_analogFormat = E::AnalogFormat::f_9;
@@ -287,15 +303,15 @@ namespace VFrame30
 
 		// Monitor mode settings
 		//
-		// Columns: width, data (StrID, Value, Validity, Imitation, Simultaion, FlagCombination?)
-		// Anaolog: format (0.00, 15E-12, ...), precision,
+		// Columns: width, data (StrID, Value, Validity, Imitation, Simulation, FlagCombination?)
+		// Analog: format (0.00, 15E-12, ...), precision,
 		// Discrete: 0/1, No/Yes
 
 		// Width, %		Format
 		// 80;
 		std::vector<Column> m_columns;
 
-		std::map<Cell, QVariant> m_runtimeCellMod;		// Cells, can be assigned by script in runtime only
+		std::map<Cell, QVariant> m_runtimeCellMod; // Cells, can be assigned by script in runtime only
 	};
 
 
@@ -384,4 +400,4 @@ namespace VFrame30
 	private:
 	};
 
-}
+} // namespace VFrame30

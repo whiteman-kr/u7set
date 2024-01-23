@@ -39,15 +39,26 @@ namespace VFrame30
 
 		// --
 		//
-		connect(clientSchemaView(), &VFrame30::ClientSchemaView::signal_setSchema, this, &VFrame30::ClientSchemaWidget::setSchema);
+		connect(clientSchemaView(), &VFrame30::ClientSchemaView::signal_setSchema, this, [this](QString schemaId, QStringList highlightIds)
+				{
+					setSchema(schemaId, highlightIds, false);
+				});
 
 		// Init history
 		//
 		m_backHistory.push_back(currentHistoryState());
 	}
 
-	ClientSchemaWidget::~ClientSchemaWidget()
+	void ClientSchemaWidget::resizeEvent(QResizeEvent* event)
 	{
+		if (m_zoomMode == ZoomMode::Always100Percent || m_zoomMode == ZoomMode::FitToScreen)
+		{
+			// Argument zoom() can be any in this case, as set zoom will scale to 100% or to FitToScreen.
+			//
+			setZoom(zoom(), false, -1 , -1);
+		}
+
+		BaseSchemaWidget::resizeEvent(event);
 	}
 
 	void ClientSchemaWidget::mousePressEvent(QMouseEvent* event)
@@ -363,8 +374,10 @@ namespace VFrame30
 		return;
 	}
 
-	void ClientSchemaWidget::setSchema(QString schemaId, QStringList highlightIds)
+	void ClientSchemaWidget::setSchema(QString schemaId, QStringList highlightIds, bool forceSchemaUpdate)
 	{
+		// forceSchemaUpdate is required only once, when the new configuration arrived and we need to update schema and call onShowScript.
+		//
 		if (schemaManager() == nullptr)
 		{
 			Q_ASSERT(schemaManager());
@@ -375,7 +388,7 @@ namespace VFrame30
 		//
 		clientSchemaView()->setHighlightIds(highlightIds);
 
-		if (schemaId == this->schemaId())
+		if (forceSchemaUpdate == false && schemaId == this->schemaId())
 		{
 			// Highlighted signals already set
 			//
@@ -407,8 +420,13 @@ namespace VFrame30
 		// --
 		//
 		BaseSchemaWidget::setSchema(schema, false);
-
-		setZoom(0, true);		// Zoom value 0 means adjust schema zoom to fit screen
+		
+		if (zoomMode() == VFrame30::ZoomMode::Manual || zoomMode() == VFrame30::ZoomMode::FitToScreen)
+		{
+			// Initially set zoom to "fit to screen".
+			//
+			setZoom(0, true);  // Zoom value 0 means adjust schema zoom to fit screen
+		}
 
 		// --
 		//
@@ -425,6 +443,24 @@ namespace VFrame30
 		// --
 		//
 		emitHistoryChanged();
+
+		return;
+	}
+
+	void ClientSchemaWidget::setZoom(double zoom, bool repaint, int horzScrollValue, int vertScrollValue)
+	{
+		switch (m_zoomMode)
+		{
+		case ZoomMode::Manual:
+			BaseSchemaWidget::setZoom(zoom, repaint, horzScrollValue, vertScrollValue);
+			break;
+		case ZoomMode::Always100Percent:
+			BaseSchemaWidget::setZoom(100.0, repaint, horzScrollValue, vertScrollValue);
+			return;
+		case ZoomMode::FitToScreen:
+			BaseSchemaWidget::setZoom(0, repaint, -1, -1);
+			return;
+		}
 
 		return;
 	}
@@ -452,6 +488,25 @@ namespace VFrame30
 	VFrame30::SchemaManager* ClientSchemaWidget::schemaManager()
 	{
 		return m_schemaManager;
+	}
+
+	VFrame30::ZoomMode ClientSchemaWidget::zoomMode() const
+	{
+		return m_zoomMode;
+	}
+	
+	void ClientSchemaWidget::setZoomMode(VFrame30::ZoomMode zoomMode, bool repaint)
+	{
+		Q_UNUSED(repaint);
+
+		m_zoomMode = zoomMode;
+
+		if (m_zoomMode != ZoomMode::Manual)
+		{
+			setZoom(zoom(), false, -1, -1);
+		}
+
+		return;
 	}
 
 	ClientSchemaView* ClientSchemaWidget::clientSchemaView()

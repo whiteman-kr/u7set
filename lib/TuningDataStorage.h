@@ -1,7 +1,8 @@
 #pragma once
 
-#include <QtCore>
+#include <QObject>
 #include <QList>
+#include <QVector>
 
 #include "../CommonLib/Types.h"
 #include "../AppSignalLib/AppSignal.h"
@@ -110,6 +111,8 @@ namespace Tuning
 		int m_tuningDataFrameCount = 0;
 		int m_tuningDataFramePayloadW = 0;
 		int m_tuningDataFrameSizeW = 0;
+
+		//
 
 		quint64 m_uniqueID = 0;
 		int m_tuningDataUsedFramesCount = 0;

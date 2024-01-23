@@ -1,0 +1,20 @@
+<Command 
+	Caption="rdfbb"
+	Code="0300"
+	CodeMask="07c0"
+	SimulationFunc="command_rdfbb"
+	ParseFunc="parse_rdfbb"
+	Description="Read 1-bit from AFB output and write to memory"
+
+	CodeSize="4" 
+	ReadTime="14" 
+	WaitFbExecution="true"	
+
+	PreFbReadWordTime="6"
+	PostFbReadWordTime="8"
+	PreFbReadBitTime="4"
+	PostFbReadBitTime="7"
+
+	CheckFunc="check_rdfbb"
+	GetMnemoFunc="mnemo_rdfbb"
+	CalcExecTimeFunc="exectime_rdfb_bit"/>

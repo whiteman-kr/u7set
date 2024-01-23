@@ -1,0 +1,7 @@
+--- Hardware implementation version 8
+
+median_fp:
+1.0020 - removed output o_validity (RPCT-3553)
+
+median_si:
+1.0020 - removed output o_validity (RPCT-3553)

@@ -9,8 +9,6 @@ MonitorSchemaManager::MonitorSchemaManager(MonitorConfigController& configContro
 	m_rtTrendSchemas(configController, signalDataServer)
 {
 
-	connect(&m_configController, &MonitorConfigController::configurationArrived, this, &MonitorSchemaManager::slot_configurationArrived);
-
 	return;
 }
 
@@ -29,7 +27,6 @@ std::shared_ptr<VFrame30::Schema> MonitorSchemaManager::loadSchema(QString schem
 {
 	QByteArray data;
 	QString errorString;
-	std::shared_ptr<VFrame30::Schema> schema;
 
 	bool result = m_configController.getFileBlockedById(schemaId, &data, &errorString);
 	if (result == false)
@@ -95,7 +92,7 @@ TimeStamp MonitorSchemaManager::maxTimeStamp(QUuid trendUuid, E::TimeType /*time
 	return m_rtTrendSchemas.maxTimeStamp(trendUuid);
 }
 
-void MonitorSchemaManager::slot_configurationArrived(ConfigSettings /*configuration*/)
+void MonitorSchemaManager::updateConfiguration(const ConfigSettings& /*configuration*/)
 {
 	clear();
 

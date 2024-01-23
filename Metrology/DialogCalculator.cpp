@@ -500,7 +500,8 @@ void DialogCalculator::conversionTr()
 	double electricVal = m_pTrElectricEdit->text().toDouble();
 
 	double r0 = m_pTrR0Edit->text().toDouble();
-	if (r0 < R0_OHM_LOW_LIMIT || r0 > R0_OHM_HIGH_LIMIT)
+
+	if (UnitsConverter::r0_OhmIsValid(r0) == false)
 	{
 		r0 = 100.0;
 	}

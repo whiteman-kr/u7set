@@ -4,7 +4,8 @@
 #include "../OnlineLib/SoftwareInfo.h"
 #include "TestSuiteSettings.h"
 #include "TestSuiteConfigController.h"
-#include "Control.h"
+#include "RunControl.h"
+#include "TestControl.h"
 #include "TestLog.h"
 
 //#include "InputController.h"
@@ -24,38 +25,35 @@ namespace TestSuite
 
 	public:
 		TestSuite(const SoftwareInfo& softwareInfo, const TestSuiteSettings& settings, ILogFile* appLog, ITestLogOutput* testOutput);
-		~TestSuite() = default;
+		virtual ~TestSuite();
 
 	public:
-//		TestSuiteConfigController& configController();
-//		const TestSuiteConfigController& configController() const;
+		bool executeRunControl(const ControlParams& controlParams);
+		bool hasRunControl();
+		void resetRunControl();
+		void stopRunControl();
 
-//		TestScriptsStorage& testScriptsStorage();
-//		const TestScriptsStorage& testScriptsStorage() const;
-
-//		const TestLog& testResultLog() const;
-
-		//void setAppSignalTcpClients(std::vector<TcpSignalClient*> tcpClients);
-		//void setTuningTcpClients(std::vector<TuningTcpClient*> tcpClients);
-
-		bool execute(const QStringList& executionTests,		// List of tests for execution, if empty then exec all.
-					 const QString& scriptsPath);			// Load scripts from disk, path to dir for *.js files.);
+		bool execute(const ControlParams& controlParams);
 		void stop();
-
 		bool isRunning() const;
 
+		void updateSettings(const TestSuiteSettings& settings, const ControlParams& controlParams);
+
+		TestLog& testLog();
+		ControlStatus testStatus() const;
+		ControlStatus runStatus() const;
+
+		bool scriptPermission(const QString& fileName) const;
+		bool globalPermission() const;
+
 	signals:
+		void testStarted(QString scriptFileName, QString testFunction);
+		void testFinished(QString scriptFileName, QString testFunction, bool result);
 		void finished(int result);
+		void scriptPermissionChanged(QString scriptFileName, bool result);
+		void globalPermissionChanged(bool result);
+		void noPermissionsExist();
 
-//	private:
-//		bool loadTestsFromPath();
-//		bool loadTestsFromConfiguration();
-//		void runTests();
-//		void stopTests();
-
-//	private slots:
-//		void onConfigurationArrived();
-//		void onTestingFinished(int errorCode);
 
 	private:
 		HasLogFile m_appLog;
@@ -66,19 +64,11 @@ namespace TestSuite
 
 		// Test runtime
 		//
-		Control m_control;
+		TestControl m_testControl;
 
-		//InputController* m_inputController = nullptr;
-		//OutputController* m_outputController = nullptr;
-
-		//TestController m_testController;
-		//ScriptTestLog m_scriptTestLog;
-
-//		TestWorkerThread* m_testWorkerThread = nullptr;	// Main test worker thread
-
-//		TestScriptsStorage m_testScriptsStorage;
-
-//		TestLibraryState m_state = TestLibraryState::Idle;
+		// Run runtime
+		//
+		RunControl m_runControl;
 	};
 }
 

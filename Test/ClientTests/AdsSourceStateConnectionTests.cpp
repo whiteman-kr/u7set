@@ -1,4 +1,5 @@
 #include "../../ClientLib/AdsSourceStateConnection.h"
+#include "ConnectionPorts.h"
 
 
 class AdsSourceStateConnectionTests : public ::testing::Test
@@ -38,8 +39,7 @@ TEST_F(AdsSourceStateConnectionTests, connectToAds)
 {
 	ILogFileStub log;
 
-	SoftwareInfo softwareInfo;
-	softwareInfo.init(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR", 0, 0);
+	SoftwareInfo softwareInfo(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR");
 
 	// Start
 	//
@@ -81,8 +81,7 @@ TEST_F(AdsSourceStateConnectionTests, adsNoConnection)
 {
 	ILogFileStub log;
 
-	SoftwareInfo softwareInfo;
-	softwareInfo.init(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR", 0, 0);
+	SoftwareInfo softwareInfo(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR");
 
 	// Start
 	//
@@ -126,8 +125,7 @@ TEST_F(AdsSourceStateConnectionTests, receiveSourceStates)
 {
 	ILogFileStub log;
 
-	SoftwareInfo softwareInfo;
-	softwareInfo.init(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR", 0, 0);
+	SoftwareInfo softwareInfo(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR");
 
 	// Start
 	//

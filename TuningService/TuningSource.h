@@ -23,6 +23,8 @@ namespace Tuning
 
 		const QStringList& getEnabledLansProvidedTuning() const;
 
+		int getSignalsCount() const;
+
 	private:
 		TuningDataShared m_tuningData;
 
@@ -39,6 +41,8 @@ namespace Tuning
 
 		const TuningSource* getSourceByID(const QString& sourceID) const;
 		QStringList getAllSourcesIDs() const;
+
+		int getSignalsCount() const;
 
 	private:
 		QHash<QString, int> m_id2Source;

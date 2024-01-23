@@ -599,51 +599,55 @@ void processPackets(AppDataReceiver& receiver, int threadNumber)
 
 	std::unique_lock ul(waitConditionMutex, std::defer_lock);
 
-	while(receiver.isQuitRequested() == false)
+	while(true)
 	{
 		ul.lock();
 
-		waitCondition.wait_for(ul, std::chrono::milliseconds(20));
+		waitCondition.wait(ul, [&receiver, &requireProcessing]() -> bool
+								{
+									return	receiver.isQuitRequested() ||
+											!requireProcessing.empty();
+								});
 
 		// here ul is LOCKED!
 
-		while(true)
+		if (receiver.isQuitRequested() == true)
 		{
-			auto it = requireProcessing.begin();
-
-			if (it == requireProcessing.end() ||
-				receiver.isQuitRequested() == true)
-			{
-				ul.unlock();
-				break;
-			}
-
-			AppDataSource* source = it->first;;
-			bool requireBufferProcessing = it->second;
-
-			requireProcessing.erase(it);
-
 			ul.unlock();
+			break;
+		}
 
-			if (source->takeProcessingOwnership(thisThread) == true)
+		auto it = requireProcessing.begin();
+
+		if (it == requireProcessing.end())
+		{
+			ul.unlock();
+			continue;
+		}
+
+		AppDataSource* source = it->first;;
+		bool requireBufferProcessing = it->second;
+
+		requireProcessing.erase(it);
+
+		ul.unlock();
+
+		if (source->takeProcessingOwnership(thisThread) == true)
+		{
+			if (requireBufferProcessing == true)
 			{
-				if (requireBufferProcessing == true)
-				{
-					source->parseNextBuffer(thisThread);
-				}
-				else
-				{
-					source->invalidateSignals(thisThread);
-				}
-
-				source->releaseProcessingOwnership(thisThread);
+				source->parseNextBuffer(thisThread);
 			}
 			else
 			{
-				// another thread already processing this source
+				source->invalidateSignals(thisThread);
 			}
 
-			ul.lock();
+			source->releaseProcessingOwnership(thisThread);
+		}
+		else
+		{
+			// another thread already processing this source
 		}
 	}
 

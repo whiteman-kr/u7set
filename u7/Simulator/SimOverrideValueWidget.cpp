@@ -5,7 +5,7 @@ namespace SimOverrideUI
 {
 
 	DiscreteSpinBox::DiscreteSpinBox(int value, QWidget* parent) :
-		QSpinBox(parent)
+		QSpinBox{parent}
 	{
 		setAccelerated(false);
 		setRange(0, 1);
@@ -78,31 +78,37 @@ namespace SimOverrideUI
 	//
 	// OverrideMethodWidget
 	//
-	OverrideMethodWidget::OverrideMethodWidget(const Sim::OverrideSignalParam& signal,
-											   Sim::Simulator* simulator,
+	OverrideMethodWidget::OverrideMethodWidget(const std::vector<Sim::OverrideSignalParam>& signalss,
+											   Sim::Simulator& simulator,
 											   DbController* dbc,
 											   QWidget* parent) :
 		QWidget(parent),
 		HasDbController(dbc),
-		m_signal(signal),
+		m_signals(signalss),
 		m_simulator(simulator)
 	{
-		assert(m_simulator);
+		if (m_signals.empty() == true)
+		{
+			Q_ASSERT(m_signals.empty() == false);
+			return;
+		}
+
+		return;
 	}
 
-	const Sim::OverrideSignalParam& OverrideMethodWidget::signal() const
+	const std::vector<Sim::OverrideSignalParam>& OverrideMethodWidget::signalss() const
 	{
-		return m_signal;
+		return m_signals;
 	}
 
-	Sim::OverrideSignalParam& OverrideMethodWidget::signal()
+	std::vector<Sim::OverrideSignalParam>& OverrideMethodWidget::signalss()
 	{
-		return m_signal;
+		return m_signals;
 	}
 
-	void OverrideMethodWidget::setSignal(const Sim::OverrideSignalParam& signal)
+	void OverrideMethodWidget::setSignals(const std::vector<Sim::OverrideSignalParam>& signalss)
 	{
-		m_signal = signal;
+		m_signals = signalss;
 	}
 
 	void OverrideMethodWidget::setViewOptions(int base, E::AnalogFormat analogFormat, int precision)
@@ -116,42 +122,54 @@ namespace SimOverrideUI
 
 	void OverrideMethodWidget::setValue(Sim::OverrideSignalMethod method, QVariant value)
 	{
-		assert(m_simulator);
-
-		m_simulator->overrideSignals().setValue(m_signal.appSignalId(), method, value);
-
-		// Save script to user settings
-		//
-		if (db()->isProjectOpened() == true)	// Project can be closed
+		if (m_signals.empty() == true)
 		{
-			switch (method)
-			{
-			case Sim::OverrideSignalMethod::Value:
-				db()->setUserProperty(QString("Sim::OverrideMethod::%1").arg(m_signal.appSignalId()), "Value", this);
-				break;
-			case Sim::OverrideSignalMethod::Script:
-				db()->setUserProperty(QString("Sim::OverrideMethod::%1").arg(m_signal.appSignalId()), "Script", this);
-				db()->setUserProperty(QString("Sim::OverrideScript::%1").arg(m_signal.appSignalId()), value.toString(), this);
-				break;
-			}
+			Q_ASSERT(m_signals.empty() == false);
+			return;
 		}
-		else
+
+		std::vector<Sim::OverrideSignals::SetValueData> overrideData;
+		overrideData.reserve(m_signals.size());
+
+		for (const auto& signal : m_signals)
 		{
-			// Project is closed, save to regular QSettings
+			overrideData.emplace_back(signal.appSignalId(), method, value);
+
+			// Save script to user settings
 			//
-			QString key = QString("OverrideMethodWidget/%1/%2/").arg(m_simulator->projectName(), m_signal.appSignalId());
-
-			switch (method)
+			if (db()->isProjectOpened() == true)	// Project can be closed
 			{
-			case Sim::OverrideSignalMethod::Value:
-				QSettings{}.setValue(key + "OverrideMethod", "Value");
-				break;
-			case Sim::OverrideSignalMethod::Script:
-				QSettings{}.setValue(key + "OverrideMethod", "Script");
-				QSettings{}.setValue(key + "OverrideScript", value.toString());
-				break;
+				switch (method)
+				{
+				case Sim::OverrideSignalMethod::Value:
+					db()->setUserProperty(QString("Sim::OverrideMethod::%1").arg(signal.appSignalId()), "Value", this);
+					break;
+				case Sim::OverrideSignalMethod::Script:
+					db()->setUserProperty(QString("Sim::OverrideMethod::%1").arg(signal.appSignalId()), "Script", this);
+					db()->setUserProperty(QString("Sim::OverrideScript::%1").arg(signal.appSignalId()), value.toString(), this);
+					break;
+				}
+			}
+			else
+			{
+				// Project is closed, save to regular QSettings
+				//
+				QString key = QString("OverrideMethodWidget/%1/%2/").arg(m_simulator.projectName(), signal.appSignalId());
+
+				switch (method)
+				{
+				case Sim::OverrideSignalMethod::Value:
+					QSettings{}.setValue(key + "OverrideMethod", "Value");
+					break;
+				case Sim::OverrideSignalMethod::Script:
+					QSettings{}.setValue(key + "OverrideMethod", "Script");
+					QSettings{}.setValue(key + "OverrideScript", value.toString());
+					break;
+				}
 			}
 		}
+
+		m_simulator.overrideSignals().setValues(overrideData);
 
 		return;
 	}
@@ -159,22 +177,29 @@ namespace SimOverrideUI
 	//
 	// ValueMethodWidget
 	//
-	ValueMethodWidget::ValueMethodWidget(const Sim::OverrideSignalParam& signal,
-										 Sim::Simulator* simulator,
+	ValueMethodWidget::ValueMethodWidget(const std::vector<Sim::OverrideSignalParam>& signalss,
+										 Sim::Simulator& simulator,
 										 DbController* dbc,
 										 QWidget* parent) :
-		OverrideMethodWidget(signal, simulator, dbc, parent)
+		OverrideMethodWidget(signalss, simulator, dbc, parent)
 	{
+		if (m_signals.empty() == true)
+		{
+			Q_ASSERT(m_signals.empty() == false);
+			return;
+		}
 
-		switch (signal.signalType())
+		const auto& firstSignal = m_signals.front();
+
+		switch (firstSignal.signalType())
 		{
 		case E::SignalType::Analog:
 			{
-				switch (signal.dataFormat())
+				switch (firstSignal.dataFormat())
 				{
 				case E::AnalogAppSignalFormat::SignedInt32:
 					{
-						m_intSpinBox = new SInt32SpinBox{signal.value().toInt(), this};
+						m_intSpinBox = new SInt32SpinBox{firstSignal.value().toInt(), this};
 						m_edit = m_intSpinBox;
 
 						m_intSpinBox->setDisplayIntegerBase(m_currentBase);
@@ -183,7 +208,7 @@ namespace SimOverrideUI
 						connect(m_intSpinBox, &SInt32SpinBox::returnPressed,
 								[this]()
 								{
-									this->valueEntered(this->m_intSpinBox->value());
+									valueEntered(m_intSpinBox->value());
 								});
 					}
 					break;
@@ -191,7 +216,7 @@ namespace SimOverrideUI
 					{
 						m_floatEdit = new QLineEdit{this};
 						m_floatEdit->setAlignment(Qt::AlignRight);
-						m_floatEdit->setText(signal.valueString(m_currentBase, m_analogFormat, m_precision));
+						m_floatEdit->setText(firstSignal.valueString(m_currentBase, m_analogFormat, m_precision));
 
 						m_floatEditValidator = new QDoubleValidatorEx{false, this};
 						m_floatEditValidator->setDecimals(m_precision);
@@ -224,13 +249,13 @@ namespace SimOverrideUI
 
 		case E::SignalType::Discrete:
 			{
-				m_discreteSpinBox = new DiscreteSpinBox{signal.value().toInt(), this};
+				m_discreteSpinBox = new DiscreteSpinBox{firstSignal.value().toInt(), this};
 				m_edit = m_discreteSpinBox;
 
 				connect(m_discreteSpinBox, QOverload<int>::of(&QSpinBox::valueChanged),
 						[this, dsp = m_discreteSpinBox](int value)
 						{
-							this->valueEntered(value);
+							valueEntered(value);
 							dsp->setValue(value);
 							dsp->selectAll();
 						});
@@ -331,23 +356,26 @@ namespace SimOverrideUI
 
 	void ValueMethodWidget::valueEntered(double value)
 	{
+		if (m_signals.empty() == true)
+		{
+			Q_ASSERT(m_signals.empty() == false);
+			return;
+		}
+
+		const auto& firstSignal = m_signals.front();
+
 		// Set this value to override signals
 		//
 		QVariant newValue;
 
-		switch (m_signal.signalType())
+		switch (firstSignal.signalType())
 		{
 		case E::SignalType::Discrete:
-			{
-				int intValue = static_cast<int>(value);
-				newValue = std::clamp(intValue, 0, 1);
-			}
+			newValue = std::clamp(static_cast<int>(value), 0, 1);
 			break;
 
 		case E::SignalType::Analog:
-			{
-				newValue = value;
-			}
+			newValue = value;
 			break;
 
 		default:
@@ -371,12 +399,20 @@ namespace SimOverrideUI
 	//
 	// ScriptMethodWidget
 	//
-	ScriptMethodWidget::ScriptMethodWidget(const Sim::OverrideSignalParam& signal,
-										   Sim::Simulator* simulator,
+	ScriptMethodWidget::ScriptMethodWidget(const std::vector<Sim::OverrideSignalParam>& signalss,
+										   Sim::Simulator& simulator,
 										   DbController* dbc,
 										   QWidget* parent) :
-		OverrideMethodWidget(signal, simulator, dbc, parent)
+		OverrideMethodWidget(signalss, simulator, dbc, parent)
 	{
+		if (m_signals.empty() == true)
+		{
+			Q_ASSERT(m_signals.empty() == false);
+			return;
+		}
+
+		const auto& firstSignal = m_signals.front();
+
 		m_scriptLabel = new QLabel(tr("Override Value Script:"));
 
         m_scriptEdit = new CodeEditor(this);
@@ -392,11 +428,11 @@ namespace SimOverrideUI
 		QString lastScript;
 		if (db()->isProjectOpened() == true)
 		{
-			db()->getUserProperty(QString("Sim::OverrideScript::%1").arg(m_signal.appSignalId()), &lastScript, this);
+			db()->getUserProperty(QString("Sim::OverrideScript::%1").arg(firstSignal.appSignalId()), &lastScript, this);
 		}
 		else
 		{
-			QString key = QString("OverrideMethodWidget/%1/%2/").arg(m_simulator->projectName(), m_signal.appSignalId());
+			QString key = QString("OverrideMethodWidget/%1/%2/").arg(m_simulator.projectName(), firstSignal.appSignalId());
 			lastScript = QSettings{}.value(key + "OverrideScript").toString();
 		}
 
@@ -406,7 +442,7 @@ namespace SimOverrideUI
 		}
 		else
 		{
-			m_scriptEdit->setText(signal.script());
+			m_scriptEdit->setText(firstSignal.script());
 		}
 
 		// Apply button
@@ -493,11 +529,19 @@ namespace SimOverrideUI
 
 	void ScriptMethodWidget::showTemplates()
 	{
+		if (m_signals.empty() == true)
+		{
+			Q_ASSERT(m_signals.empty() == false);
+			return;
+		}
+
+		const auto& firstSignal = m_signals.front();
+
 		QMenu m(tr("Script Templates:"));
 
 		const std::map<QString, QString>* templates = nullptr;
 
-		switch (m_signal.signalType())
+		switch (firstSignal.signalType())
 		{
 		case E::SignalType::Analog:
 			templates = &m_templatesAnalog;
@@ -626,11 +670,13 @@ namespace SimOverrideUI
 		m.addAction(tr("Load from File..."),
 					[this]()
 					{
-						QString fileName = QFileDialog::getOpenFileName(this, "", "", tr("Scripts (*.js *.script);;All Files(*.*)"));
+						static QString path{"."};
+						QString fileName = QFileDialog::getOpenFileName(this, "", path, tr("Scripts (*.js *.script);;All Files(*.*)"));
 						if (fileName.isEmpty() == true)
 						{
 							return;
 						}
+						path = QFileInfo(fileName).path(); // store path for next time
 
 						int r = QMessageBox::question(this,
 													  qAppName(),
@@ -755,9 +801,11 @@ namespace SimOverrideUI
 		m.addAction(tr("Save to File..."),
 					[this]()
 					{
-						QString fileName = QFileDialog::getSaveFileName(this, "", "", tr("Scripts (*.js *.script);;All Files(*.*)"));
+						static QString path{"."};
+						QString fileName = QFileDialog::getSaveFileName(this, "", path + QDir::separator(), tr("Scripts (*.js *.script);;All Files(*.*)"));
 						if (fileName.isEmpty() == false)
 						{
+							path = QFileInfo(fileName).path(); // store path for next time
 							QFile file(fileName);
 							if (file.open(QIODevice::WriteOnly | QIODevice::Text) == false)
 							{
@@ -778,26 +826,60 @@ namespace SimOverrideUI
 	//
 	// OverrideValueWidget
 	//
-	std::map<QString, OverrideValueWidget*> OverrideValueWidget::m_openedDialogs;
+	std::map<QString, OverrideDialog*> OverrideDialog::s_openedDialogs;
 
-	OverrideValueWidget::OverrideValueWidget(const Sim::OverrideSignalParam& signal,
-											 Sim::Simulator* simulator,
-											 DbController* dbc,
-											 QWidget* parent) :
+
+	OverrideDialog::OverrideDialog(const std::vector<Sim::OverrideSignalParam>& overrideSignals,
+								   Sim::Simulator& simulator,
+								   DbController* dbc,
+								   QWidget* parent) :
 		QDialog(parent),
 		HasDbController(dbc),
-		m_signal(signal),
+		m_overrideSignals(overrideSignals),
 		m_simulator(simulator)
 	{
-		assert(m_simulator);
-
-		// --
-		//
-		setWindowTitle(tr("Override %1").arg(m_signal.appSignalId()));
-
+		setAttribute(Qt::WA_DeleteOnClose);
 		setWindowFlag(Qt::WindowContextHelpButtonHint, false);
 		setWindowFlag(Qt::WindowMinimizeButtonHint, false);
 		setWindowFlag(Qt::WindowMaximizeButtonHint, false);
+
+		// --
+		//
+		if (m_overrideSignals.empty() == true)
+		{
+			Q_ASSERT(m_overrideSignals.empty() == false);
+			return;
+		}
+
+		// --
+		//
+		if (m_overrideSignals.size() == 1)
+		{
+			setWindowTitle(tr("Override %1").arg(m_overrideSignals.front().appSignalId()));
+		}
+		else
+		{
+			setWindowTitle(tr("Override %1, ... %2 more signal(s)")
+						   .arg(m_overrideSignals.front().appSignalId())
+						   .arg(m_overrideSignals.size() - 1));
+		}
+
+		// Check that all signals have the same type and data format.
+		//
+		const auto& firstSignal = m_overrideSignals.front();
+
+		for (const auto& signal : m_overrideSignals)
+		{
+			if (firstSignal.sameType(signal) == false)
+			{
+				Q_ASSERT(firstSignal.sameType(signal));
+				return;
+			}
+		}
+
+		// --
+		//
+
 
 		// CustomSignalID/AppSignalID
 		//
@@ -825,9 +907,8 @@ namespace SimOverrideUI
 
 		// Tab Widget
 		//
-		m_valueTabWidget = new ValueMethodWidget{m_signal, m_simulator, dbc, nullptr};
-		m_scriptTabWidget = new ScriptMethodWidget{m_signal, m_simulator, dbc, nullptr};
-
+		m_valueTabWidget = new ValueMethodWidget{m_overrideSignals, m_simulator, dbc, nullptr};
+		m_scriptTabWidget = new ScriptMethodWidget{m_overrideSignals, m_simulator, dbc, nullptr};
 
 		m_tabWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
@@ -853,25 +934,28 @@ namespace SimOverrideUI
 
 		layout->addWidget(m_tabWidget, 4, 0, 1, 2);
 
-
 		// --
 		//
-		connect(m_simulator, &Sim::Simulator::projectUpdated, this, &OverrideValueWidget::projectUpdated);
-		connect(&m_simulator->overrideSignals(), &Sim::OverrideSignals::signalsChanged, this, &OverrideValueWidget::overrideSignalsChaged);
+		connect(&m_simulator, &Sim::Simulator::projectUpdated, this, &OverrideDialog::projectUpdated);
+		connect(&m_simulator.overrideSignals(), &Sim::OverrideSignals::signalsChanged, this, &OverrideDialog::overrideSignalsChaged);
 
-		m_openedDialogs[m_signal.appSignalId()] = this;
+		for (const auto& signal : m_overrideSignals)
+		{
+			s_openedDialogs[signal.appSignalId()] = this;
+		}
 
 		// Select last selected method
 		//
 		QString lastMethod;
+		QString firstSignalId = m_overrideSignals.front().appSignalId();
 
 		if (db()->isProjectOpened() == true)
 		{
-			db()->getUserProperty(QString("Sim::OverrideMethod::%1").arg(m_signal.appSignalId()), &lastMethod, this);
+			db()->getUserProperty(QString("Sim::OverrideMethod::%1").arg(firstSignalId), &lastMethod, this);
 		}
 		else
 		{
-			QString key = QString("OverrideMethodWidget/%1/%2/").arg(m_simulator->projectName(), m_signal.appSignalId());
+			QString key = QString("OverrideMethodWidget/%1/%2/").arg(m_simulator.projectName(), firstSignalId);
 			lastMethod = QSettings{}.value(key + "OverrideMethod", "Value").toString();
 		}
 
@@ -888,65 +972,106 @@ namespace SimOverrideUI
 		return;
 	}
 
-	OverrideValueWidget::~OverrideValueWidget()
+	OverrideDialog::~OverrideDialog()
 	{
-		m_openedDialogs.erase(m_signal.appSignalId());
+		std::erase_if(s_openedDialogs, [this](const auto& pair)
+		{
+			return pair.second == this;
+		});
+
+		return;
 	}
 
-
-	bool OverrideValueWidget::showDialog(const Sim::OverrideSignalParam& signal,
-										 Sim::Simulator* simulator,
+	bool OverrideDialog::showDialog(std::vector<Sim::OverrideSignalParam> overrideSignals,
+										 Sim::Simulator& simulator,
 										 DbController* dbc,
 										 QWidget* parent)
 	{
-		OverrideValueWidget* w = nullptr;
-
-		auto it = m_openedDialogs.find(signal.appSignalId());
-		if (it == m_openedDialogs.end())
+		if (overrideSignals.empty() == true)
 		{
-			w = new OverrideValueWidget{signal, simulator, dbc, parent};
-			w->show();	// show as modalless dialog
+			return false;
+		}
+
+		if (overrideSignals.size() == 1)
+		{
+			QString signalId = overrideSignals.front().appSignalId();
+			OverrideDialog* w = nullptr;
+
+			auto it = s_openedDialogs.find(signalId);
+			if (it == s_openedDialogs.end())
+			{
+				w = new OverrideDialog{overrideSignals, simulator, dbc, parent};
+				w->show();	// show as modalless dialog
+				w->layout()->update();
+			}
+			else
+			{
+				w = it->second;
+			}
+
+			assert(w);
+			if (w->isHidden() == true)
+			{
+				w->setVisible(true);
+			}
+
+			if (w->isActiveWindow() == false)
+			{
+				w->activateWindow();
+			}
+
+			w->raise();
+
+			return true;
+		}
+
+		// overrideSignals.size() > 1
+		//
+
+		// Check that all signals have the same type and data format.
+		//
+		const auto& firstSignal = overrideSignals.front();
+		for (const auto& signal : overrideSignals)
+		{
+			if (firstSignal.sameType(signal) == false)
+			{
+				return false;
+			}
+		}
+
+		{
+			// Create a windows for multiple signals.
+			//
+
+			OverrideDialog* w = new OverrideDialog{overrideSignals, simulator, dbc, parent};
+			w->show();					// show as modalless dialog
 			w->layout()->update();
 		}
-		else
-		{
-			w = it->second;
-		}
-
-		assert(w);
-		if (w->isHidden() == true)
-		{
-			w->setVisible(true);
-		}
-
-		if (w->isActiveWindow() == false)
-		{
-			w->activateWindow();
-		}
-
-		w->raise();
 
 		return true;
 	}
 
-	void OverrideValueWidget::setViewOptions(QString appSignalId, int base, E::AnalogFormat analogFormat, int precision)
+	void OverrideDialog::setViewOptions(const QStringList& appSignalIds, int base, E::AnalogFormat analogFormat, int precision)
 	{
-		auto it = m_openedDialogs.find(appSignalId);
-		if (it != m_openedDialogs.end())
+		for (const auto& appSignalId : appSignalIds)
 		{
-			OverrideValueWidget* w = it->second;
+			auto it = s_openedDialogs.find(appSignalId);
+			if (it != s_openedDialogs.end())
+			{
+				OverrideDialog* w = it->second;
 
-			assert(w->m_valueTabWidget);
-			w->m_valueTabWidget->setViewOptions(base, analogFormat, precision);
+				assert(w->m_valueTabWidget);
+				w->m_valueTabWidget->setViewOptions(base, analogFormat, precision);
 
-			assert(w->m_scriptTabWidget);
-			w->m_scriptTabWidget->setViewOptions(base, analogFormat, precision);
+				assert(w->m_scriptTabWidget);
+				w->m_scriptTabWidget->setViewOptions(base, analogFormat, precision);
+			}
 		}
 
 		return;
 	}
 
-	void OverrideValueWidget::resizeEvent(QResizeEvent* event)
+	void OverrideDialog::resizeEvent(QResizeEvent* event)
 	{
 		if (isVisible() == true)
 		{
@@ -963,16 +1088,30 @@ namespace SimOverrideUI
 		return;
 	}
 
-	void OverrideValueWidget::projectUpdated()
+	void OverrideDialog::projectUpdated()
 	{
-		if (m_simulator->isLoaded() == true)
+		if (m_simulator.isLoaded() == false)
 		{
-			std::optional<Sim::OverrideSignalParam> s = m_simulator->overrideSignals().overrideSignal(appSignalId());
+			return;
+		}
+
+		QStringList signalIds = appSignalIds();
+
+		for (const QString& signalId : signalIds)
+		{
+			std::optional<Sim::OverrideSignalParam> s = m_simulator.overrideSignals().overrideSignal(signalId);
 
 			if (s.has_value() == true)
 			{
-				m_signal = s.value();
-				updateSignalsUi();
+				auto findPredicat = [&signalId](const auto& os) { return os.appSignalId() == signalId; };
+
+				auto sit = std::find_if(m_overrideSignals.begin(), m_overrideSignals.end(), findPredicat);
+				Q_ASSERT(sit != m_overrideSignals.end());
+
+				if (sit != m_overrideSignals.end())
+				{
+					*sit = s.value();
+				}
 			}
 			else
 			{
@@ -980,24 +1119,36 @@ namespace SimOverrideUI
 				//
 				setAttribute(Qt::WA_DeleteOnClose, true);
 				close();
+
+				return;
 			}
 		}
 
+		updateSignalsUi();
 		return;
 	}
 
-	void OverrideValueWidget::overrideSignalsChaged(QStringList /*appSignalIds*/)	// Added or deleted signal
+	void OverrideDialog::overrideSignalsChaged(QStringList /*appSignalIds*/)	// Added or deleted signal
 	{
-		if (m_simulator->isLoaded() == true)
+		if (m_simulator.isLoaded() == false)
 		{
-			std::optional<Sim::OverrideSignalParam> s = m_simulator->overrideSignals().overrideSignal(appSignalId());
+			return;
+		}
+
+		QStringList signalIds = appSignalIds();
+
+		for (const QString& signalId : signalIds)
+		{
+			std::optional<Sim::OverrideSignalParam> s = m_simulator.overrideSignals().overrideSignal(signalId);
 
 			if (s.has_value() == false)
 			{
-				// Signal has been removed
+				// At least one signal was removed, close this dialog.
 				//
 				setAttribute(Qt::WA_DeleteOnClose, true);
 				close();
+
+				break;
 			}
 		}
 
@@ -1005,31 +1156,51 @@ namespace SimOverrideUI
 	}
 
 
-	void OverrideValueWidget::updateSignalsUi()
+	void OverrideDialog::updateSignalsUi()
 	{
-		m_customSiganIdLabel->setText(m_signal.customSignalId());
-		m_appSiganIdLabel->setText(m_signal.appSignalId());
-		m_captionLabel->setText(m_signal.caption());
+		size_t signalCount = m_overrideSignals.size();
+		if (signalCount < 1)
+		{
+			Q_ASSERT(signalCount > 0);
+			return;
+		}
+
+		// All signals must have the same type, we can take types and data formats form the first signal.
+		//
+		const auto& firstSignal = m_overrideSignals.front();
+
+		if (signalCount == 1)
+		{
+			m_customSiganIdLabel->setText(firstSignal.customSignalId());
+			m_appSiganIdLabel->setText(firstSignal.appSignalId());
+			m_captionLabel->setText(firstSignal.caption());
+		}
+		else
+		{
+			m_customSiganIdLabel->setText(firstSignal.customSignalId() + QString{", ... + %1 signal(s)"}.arg(signalCount - 1));
+			m_appSiganIdLabel->setText(firstSignal.appSignalId() + QString{", ... + %1 signal(s)"}.arg(signalCount - 1));
+			m_captionLabel->setText(firstSignal.caption() + QString{", ... + %1 signal(s)"}.arg(signalCount - 1));
+		}
 
 		// Type/Format
 		//
 		QString text;
-		if (m_signal.signalType() == E::SignalType::Discrete)
+		if (firstSignal.signalType() == E::SignalType::Discrete)
 		{
-			text = E::valueToString<E::SignalType>(m_signal.signalType());
+			text = E::valueToString<E::SignalType>(firstSignal.signalType());
 		}
 
-		if (m_signal.signalType() == E::SignalType::Analog)
+		if (firstSignal.signalType() == E::SignalType::Analog)
 		{
 			text = QString("%1 (%2)")
-				   .arg(E::valueToString<E::SignalType>(m_signal.signalType()))
-				   .arg(E::valueToString<E::AnalogAppSignalFormat>(m_signal.dataFormat()));
+				   .arg(E::valueToString<E::SignalType>(firstSignal.signalType()))
+				   .arg(E::valueToString<E::AnalogAppSignalFormat>(firstSignal.dataFormat()));
 		}
 
-		if (m_signal.signalType() == E::SignalType::Bus)
+		if (firstSignal.signalType() == E::SignalType::Bus)
 		{
 			text = QString("%1")
-				   .arg(E::valueToString<E::SignalType>(m_signal.signalType()));
+				   .arg(E::valueToString<E::SignalType>(firstSignal.signalType()));
 		}
 
 		m_typeLabel->setText(text);
@@ -1037,34 +1208,37 @@ namespace SimOverrideUI
 		return;
 	}
 
-	QString OverrideValueWidget::appSignalId() const
+	QStringList OverrideDialog::appSignalIds() const
 	{
-		return m_signal.appSignalId();
+		QStringList result;
+		result.reserve(m_overrideSignals.size());
+
+		for (const auto& signal : m_overrideSignals)
+		{
+			result.push_back(signal.appSignalId());
+		}
+
+		return result;
 	}
 
-	const Sim::OverrideSignalParam& OverrideValueWidget::signal() const
+	Sim::Simulator* OverrideDialog::simulator()
 	{
-		return m_signal;
+		return &m_simulator;
 	}
 
-	Sim::Simulator* OverrideValueWidget::simulator()
+	const Sim::Simulator* OverrideDialog::simulator() const
 	{
-		return m_simulator;
+		return &m_simulator;
 	}
 
-	const Sim::Simulator* OverrideValueWidget::simulator() const
+	Sim::OverrideSignals& OverrideDialog::overrideSignals()
 	{
-		return m_simulator;
+		return m_simulator.overrideSignals();
 	}
 
-	Sim::OverrideSignals& OverrideValueWidget::overrideSignals()
+	const Sim::OverrideSignals& OverrideDialog::overrideSignals() const
 	{
-		return m_simulator->overrideSignals();
-	}
-
-	const Sim::OverrideSignals& OverrideValueWidget::overrideSignals() const
-	{
-		return m_simulator->overrideSignals();
+		return m_simulator.overrideSignals();
 	}
 
 }

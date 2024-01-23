@@ -1,11 +1,11 @@
 #pragma once
 
-#include "SimBasePage.h"
-#include "SimLogicModule.h"
-#include "SimSchemaWidget.h"
+#include "../../Simulator/SimLogicModule.h"
 #include "../../VFrame30/Schema.h"
 #include "../../VFrame30/AppSignalController.h"
 #include "../../VFrame30/TuningController.h"
+#include "SimBasePage.h"
+#include "SimSchemaWidget.h"
 
 class SimSchemaPage : public SimBasePage
 {
@@ -16,13 +16,12 @@ public:
 				  SimIdeSimulator* simulator,
 				  SimSchemaManager* schemaManager,
 				  VFrame30::AppSignalController* appSignalController,
-				  VFrame30::TuningController* tuningController,
 				  QWidget* parent = nullptr);
 
 public:
 	QString schemaId() const;
 
-	const QStringList& hightlightIds() const;
+	const QStringList& highlightIds() const;
 	void setHighlightIds(const QStringList& value);
 
 protected slots:

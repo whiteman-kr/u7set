@@ -6,9 +6,9 @@ namespace ClientLib
 	// TuningLog
 	//
 
-	TuningLog::TuningLog(ClientLib::TuningUserManager& userManager, const QString& logName, const QString& path, int maxFileSize, int maxFilesCount)
+	TuningLog::TuningLog(ITuningAuthorization& tuningAuthorization, const QString& logName, const QString& path, int maxFileSize, int maxFilesCount)
 		: m_logFile(logName, path, maxFileSize, maxFilesCount, false/*addAppInfoOnStart*/),
-		  m_userManager(userManager)
+		  m_tuningAuthorization(tuningAuthorization)
 	{
 	}
 
@@ -16,7 +16,7 @@ namespace ClientLib
 	{
 		QStringList l;
 
-		QString userName = m_userManager.loggedInUser();
+		QString userName = m_tuningAuthorization.userName();
 
 		if (userName.isEmpty() == true)
 		{
@@ -39,7 +39,7 @@ namespace ClientLib
 	{
 		QStringList l;
 
-		QString userName = m_userManager.loggedInUser();
+		QString userName = m_tuningAuthorization.userName();
 
 		if (userName.isEmpty() == true)
 		{

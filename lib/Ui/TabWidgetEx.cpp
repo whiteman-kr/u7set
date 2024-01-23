@@ -28,39 +28,106 @@ void TabBarEx::paintEvent(QPaintEvent* pe)
 {
 	QTabBar::paintEvent(pe);
 
-	if (drawTopLine() == false)
+	QPainter painter(this);
+	painter.setRenderHint(QPainter::RenderHint::Antialiasing, true);
+
+	int dpiY = painter.device()->logicalDpiY();
+	int dpiX = painter.device()->logicalDpiX();
+	int currentTabIndex = currentIndex();
+
+	switch (m_style)
 	{
-		return;
-	}
+	case Style::Default:
+		break;
+	case Style::TopLineActive:
+		{
+			if (currentTabIndex != -1)
+			{
+				QRect tabrect = tabRect(currentTabIndex);
 
-	QPainter p(this);
+				qreal lineWeight = (dpiY > 100) ? 2 : 1;
 
-	int dpiY = p.device()->logicalDpiY();
-	int lineWeight = (dpiY > 100) ? 2 : 1;
+				QPen pen{QBrush{topLineColor()}, lineWeight};
+				painter.setPen(pen);
 
-	int index = currentIndex();
+				painter.drawLine(tabrect.left(), tabrect.top() + lineWeight, tabrect.right(), tabrect.top() + lineWeight);
+			}
+		}
+		break;
+	case Style::TopLineRoundedAlways:
+		{
+			qreal lineWeight = dpiY / 36; // from inch
+			double margin = dpiX / 16;
+			
+			QPen pen{QBrush{topLineColor()}, lineWeight};
+			pen.setCapStyle(Qt::PenCapStyle::RoundCap);
+			painter.setPen(pen);
 
-	if (index != -1)
-	{
-		QRect tabrect = tabRect(index);
+			for (int i = 0; i < count(); i++)
+			{
+				auto colorIt = m_tabTextToLineColor.find(tabText(i));
+				if (colorIt != m_tabTextToLineColor.end())
+				{
+					QColor c = colorIt->second;
+					c.setAlpha(qAlpha(colorIt->second));
 
-		p.setPen(QPen(QBrush{topLineColor()}, lineWeight));
+					if (i != currentTabIndex)
+					{
+						// Dim not active tab page.
+						//
+						c.setAlpha(80);
+					}
 
-		p.drawLine(tabrect.left(), tabrect.top() + lineWeight,
-				   tabrect.right(), tabrect.top() + lineWeight);
+					pen.setColor(c);
+				}
+				else
+				{
+					pen.setColor(Qt::transparent);
+				}
+
+				QRectF tabrect = tabRect(i).toRectF();
+
+				painter.setPen(pen);
+				
+				if (i == currentTabIndex)
+				{
+					std::array<QPointF, 4> points = {
+						QPointF{tabrect.left(), tabrect.bottom() - lineWeight},
+						QPointF{tabrect.left(), tabrect.top() + lineWeight},
+						QPointF{tabrect.right(), tabrect.top() + lineWeight},
+						QPointF{tabrect.right(), tabrect.bottom() - lineWeight},
+					};
+
+					if (i == count() - 1)
+					{
+						// The last tab needs to dbe corrected (move the right line slightly right).
+						//
+						points[2].rx() -= lineWeight;
+						points[3].rx() -= lineWeight;
+					}
+
+					painter.drawPolyline(points.data(), std::ssize(points));
+				}
+				else
+				{
+					painter.drawLine(tabrect.left() + margin, tabrect.top() + lineWeight, tabrect.right() - margin, tabrect.top() + lineWeight);
+				}
+			}
+		}
+		break;
 	}
 
 	return;
 }
 
-bool TabBarEx::drawTopLine() const
+TabBarEx::Style TabBarEx::topStyle() const
 {
-	return m_drawTopLine;
+	return m_style;
 }
 
-void TabBarEx::setDrawTopLine(bool value)
+void TabBarEx::setTopStyle(TabBarEx::Style value)
 {
-	m_drawTopLine = value;
+	m_style = value;
 }
 
 QRgb TabBarEx::topLineColor() const
@@ -73,6 +140,10 @@ void TabBarEx::setTopLineColor(QRgb value)
 	m_topLineColor = value;
 }
 
+void TabBarEx::setTabColors(std::map<QString, QRgb> tabTextToLineColor)
+{
+	m_tabTextToLineColor = std::move(tabTextToLineColor);
+}
 
 TabWidgetEx::TabWidgetEx(QWidget* parent) :
 	QTabWidget(parent)

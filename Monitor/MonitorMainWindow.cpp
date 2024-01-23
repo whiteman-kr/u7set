@@ -2,6 +2,7 @@
 #include "MonitorCentralWidget.h"
 #include "DialogSettings.h"
 #include "MonitorSchemaWidget.h"
+#include "MonitorSchemaView.h"
 #include "MonitorSignalSnapshot.h"
 #include "./Archive/MonitorArchive.h"
 #include "DialogDataSources.h"
@@ -27,19 +28,36 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	// Init translator
 	//
 	m_translator.addLanguage("en", "English");
-	m_translator.addLanguage("ua", "Ukrainian/Українська");
+	m_translator.addLanguage("uk", "Ukrainian");
 
-	m_translator.addTranslationFile("ua", ":/languages/Monitor_ua.qm");
-	m_translator.addTranslationFile("ua", ":/languages/qtbase_uk.qm");
-	m_translator.addTranslationFile("ua", ":/ClientLib/languages/ClientLib_ua.qm");
-	m_translator.addTranslationFile("ua", ":/TrendView/languages/TrendView_ua.qm");
-	m_translator.addTranslationFile("ua", ":/UtilsLib/languages/UtilsLib_ua.qm");
+	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/Monitor_uk.qm");
+	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/ClientLib_uk.qm");
+	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/TrendView_uk.qm");
+	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/UtilsLib_uk.qm");
+	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/qt_uk.qm");
 
-	m_translator.setLanguage(MonitorAppSettings::instance().language());
+	{
+		QStringList failedTranslations;
+		if (m_translator.setLanguage(MonitorAppSettings::instance().language(), failedTranslations) == false)
+		{
+			if (failedTranslations.isEmpty() == false)
+			{
+				m_LogFile.writeError("Failed to load translation files:\n" + failedTranslations.join('\n'));
+			}
+			else
+			{
+				m_LogFile.writeError("Failed to set language: " + MonitorAppSettings::instance().language());
+			}
+		}
+	}
 
 	// -
 	//
 	setWindowTitle(MonitorAppSettings::instance().windowCaption());
+
+	// Set application name so all message boxes will have correct caption.
+	//
+	qApp->setApplicationName(MonitorAppSettings::instance().windowCaption());
 
 	connect(&m_configController, &MonitorConfigController::configurationArrived, this, &MonitorMainWindow::slot_configurationArrived);
 	connect(&m_configController, &MonitorConfigController::tuningSignalsArrived, this, &MonitorMainWindow::slot_tuningSignalsArrived);
@@ -53,14 +71,12 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	// Creating signals controllers for VFrame30
 	//
 	m_appSignalController = std::make_unique<VFrame30::AppSignalController>(&m_signalManager);
-	m_tuningController = std::make_unique<MonitorTuningController>(&m_tuningSignalManager, &m_tuningConnection, &m_tuningUserManager);
 	m_logController = std::make_unique<VFrame30::LogController>(&m_LogFile);
 
 	// --
 	//
 	MonitorCentralWidget* monitorCentralWidget = new MonitorCentralWidget(&m_schemaManager,
 																		  m_appSignalController.get(),
-																		  m_tuningController.get(),
 																		  m_logController.get(),
 																		  &m_schemaStats,
 																		  this);
@@ -87,7 +103,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 			[this](bool allowed)
 	{
 		Q_ASSERT(m_closeTabAction);
-		m_closeTabAction->setEnabled(allowed);
+		m_closeTabAction->setEnabled(MonitorAppSettings::instance().showSchemasTabBar() && allowed);
 	});
 
 	connect(monitorCentralWidget, &MonitorCentralWidget::signal_historyChanged, this, &MonitorMainWindow::slot_historyChanged);
@@ -101,11 +117,11 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 
 	m_configController.start();
 
-	m_updateStatusBarTimerId = startTimer(100);
+	m_updateStatusBarTimerId = startTimer(200);
 
 	// Create SchemaList dock widget
 	//
-	m_schemaListDock = new QDockWidget{"Schemas List", this};
+	m_schemaListDock = new QDockWidget{tr("Schemas List"), this};
 	m_schemaListDock->setObjectName("SchemaList");
 	m_schemaListDock->setFeatures(QDockWidget::DockWidgetVerticalTitleBar);
 	m_schemaListDock->setTitleBarWidget(new QWidget{});		// Hides title bar
@@ -165,7 +181,7 @@ void MonitorMainWindow::timerEvent(QTimerEvent* event)
 			QTime logoutTime(0, 0, 0);
 			logoutTime = logoutTime.addSecs(s);
 
-			m_loginUserTimeoutAction->setText(m_tuningUserManager.loggedInUser() + "\n" + logoutTime.toString("hh:mm:ss"));
+			m_loginUserTimeoutAction->setText(m_tuningUserManager.userName() + "\n" + logoutTime.toString("hh:mm:ss"));
 
 			if (s <= 0)
 			{
@@ -180,6 +196,7 @@ void MonitorMainWindow::timerEvent(QTimerEvent* event)
 void MonitorMainWindow::showEvent(QShowEvent*)
 {
 	showLogo();
+	showZoomControls();
 	return;
 }
 
@@ -256,11 +273,9 @@ void MonitorMainWindow::restoreWindowState()
 
 void MonitorMainWindow::showTuningLoginControls()
 {
-
-
 	// Show/hide login controls
 	//
-	if (m_configController.configuration().tuningEnabled == true && m_tuningUserManager.tuningLogin() == true)
+	if (m_tuningUserManager.enabled() == true)
 	{
 		m_loginAction->setVisible(true);
 		m_loginUserTimeoutAction->setVisible(true);
@@ -278,15 +293,15 @@ void MonitorMainWindow::showTuningLoginControls()
 
 		// Adjust m_loginUserNameLabel width to have place for all usernames
 		//
-		int maxUsernameSpace = -1;
-
-		QWidget* loginUserTimeoutActionWidget = m_toolBar->widgetForAction(m_loginUserTimeoutAction);
-		if (loginUserTimeoutActionWidget == nullptr)
+		if (QWidget* loginUserTimeoutActionWidget = m_toolBar->widgetForAction(m_loginUserTimeoutAction);
+			loginUserTimeoutActionWidget == nullptr)
 		{
 			Q_ASSERT(loginUserTimeoutActionWidget);
 		}
 		else
 		{
+			int maxUsernameSpace = loginUserTimeoutActionWidget->fontMetrics().horizontalAdvance(m_loginUserTimeoutAction->text());
+
 			for (const QString& userName : m_tuningUserManager.tuningUserAccounts())
 			{
 				int space = loginUserTimeoutActionWidget->fontMetrics().horizontalAdvance(userName);
@@ -306,43 +321,38 @@ void MonitorMainWindow::showTuningLoginControls()
 	}
 }
 
+void MonitorMainWindow::showZoomControls()
+{
+	auto zoomMode = MonitorAppSettings::instance().zoomMode();
+
+	bool visible = zoomMode == VFrame30::ZoomMode::Manual;
+
+	if (m_zoomToolBarSeparator != nullptr)
+	{
+		m_zoomToolBarSeparator->setVisible(visible);
+	}
+
+	m_zoomInAction->setVisible(visible);
+	m_zoomOutAction->setVisible(visible);
+	m_zoom100Action->setVisible(visible);
+	m_zoomToFitAction->setVisible(visible);
+
+	return;
+}
+
 void MonitorMainWindow::showLogo()
 {
-	Q_ASSERT(m_logoLabel);
-
-	if (m_logoImage.isNull() == true)
+	if (m_toolBar == nullptr || m_toolBar->isVisible() == false || m_logoImage.isNull() == true)
 	{
 		m_logoLabel->clear();
-
+		m_logoLabel->setFixedSize(0, 0);
 		return;
 	}
 
 	static bool prevShowLogo = false;
-
 	if (prevShowLogo == MonitorAppSettings::instance().showLogo())
 	{
 		return;
-	}
-
-	QImage logo = m_logoImage;
-
-	// Get toolbar content height
-	//
-	int toolBarSpacing = 0;
-
-	if (QLayout* toolBarLayout = m_toolBar->layout();
-		toolBarLayout != nullptr)
-	{
-		toolBarSpacing = toolBarLayout->spacing();
-	}
-
-	int logoMaxHeight = m_toolBar->size().height() - toolBarSpacing * 2;
-
-	// Scale the logo image
-	//
-	if (logo.height() > logoMaxHeight)
-	{
-		logo = logo.scaledToHeight(logoMaxHeight, Qt::SmoothTransformation);
 	}
 
 	prevShowLogo = MonitorAppSettings::instance().showLogo();
@@ -351,23 +361,49 @@ void MonitorMainWindow::showLogo()
 	//
 	if (MonitorAppSettings::instance().showLogo() == true)
 	{
-		m_logoLabel->setPixmap(QPixmap::fromImage(logo));
+		// This is the only way to get height of the toolbar.
+		// Toolbar does not return correct margins, at least now (bug?)
+		//
+		auto fakeSeparator = m_toolBar->addSeparator();
+		auto fakeSeparatorWidget = m_toolBar->widgetForAction(fakeSeparator);
+		fakeSeparatorWidget->setVisible(true);
+		double toHeight = fakeSeparatorWidget->geometry().height();
+		delete fakeSeparator;
+
+		m_logoLabel->setPixmap(m_logoImage);
+		m_logoLabel->setScaledContents(true);
+
+		// Always scale logo to the toolbar height.
+		//
+		QSizeF logoSize = m_logoLabel->sizeHint().toSizeF();
+
+		double scale = toHeight / static_cast<double>(logoSize.height());
+		logoSize *= scale;
+
+		m_logoLabel->setFixedSize(logoSize.toSize());
 	}
 	else
 	{
+		// Hide logo.
+		//
 		m_logoLabel->clear();
+		m_logoLabel->setFixedSize(0, 0);
 	}
 
-
 	m_logoSeparator->setVisible(MonitorAppSettings::instance().showLogo() == true &&
-								m_configController.configuration().tuningEnabled == true &&
-								m_tuningUserManager.tuningLogin() == true);
-
+								m_tuningUserManager.enabled() == true);
 	return;
 }
 
 void MonitorMainWindow::createActions()
 {
+	m_pExportAction = new QAction(tr("Export Schema..."), this);
+	m_pExportAction->setStatusTip(tr("Export current schema to a file"));
+	m_pExportAction->setEnabled(true);
+	m_pExportAction->setShortcuts(QList<QKeySequence>{}
+									 <<  QKeySequence{Qt::CTRL | Qt::Key_S});
+	connect(m_pExportAction, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_export);
+
 	m_pExitAction = new QAction(tr("Exit"), this);
 	m_pExitAction->setStatusTip(tr("Quit the application"));
 	m_pExitAction->setIcon(QIcon(":/Images/Images/Close.svg"));
@@ -442,7 +478,8 @@ void MonitorMainWindow::createActions()
 	m_newTabAction = new QAction(tr("New Tab"), this);
 	m_newTabAction->setStatusTip(tr("Open current schema in new tab page"));
 	m_newTabAction->setIcon(QIcon(":/Images/Images/NewSchema.svg"));
-	m_newTabAction->setEnabled(true);
+	m_newTabAction->setEnabled(MonitorAppSettings::instance().showSchemasTabBar());
+	m_newTabAction->setVisible(MonitorAppSettings::instance().showSchemasTabBar());
 	QList<QKeySequence> newTabShortcuts;
 	newTabShortcuts << QKeySequence::AddTab;
 	newTabShortcuts << QKeySequence::New;
@@ -452,9 +489,9 @@ void MonitorMainWindow::createActions()
 	m_closeTabAction = new QAction(tr("Close Tab"), this);
 	m_closeTabAction->setStatusTip(tr("Close current tab page"));
 	m_closeTabAction->setIcon(QIcon(":/Images/Images/Close.svg"));
-	m_closeTabAction->setEnabled(true);
+	m_closeTabAction->setEnabled(MonitorAppSettings::instance().showSchemasTabBar() && monitorCentralWidget()->count() > 1);
+	m_closeTabAction->setVisible(MonitorAppSettings::instance().showSchemasTabBar());
 	m_closeTabAction->setShortcuts(QKeySequence::Close);
-	m_closeTabAction->setEnabled(monitorCentralWidget()->count() > 1);
 	connect(m_closeTabAction, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_closeCurrentTab);
 
 	m_zoomInAction = new QAction(tr("Zoom In"), this);
@@ -542,6 +579,8 @@ void MonitorMainWindow::createMenus()
 	//
 	QMenu* pFileMenu = menuBar()->addMenu(tr("&File"));
 
+	pFileMenu->addAction(m_pExportAction);
+	pFileMenu->addSeparator();
 	pFileMenu->addAction(m_pExitAction);
 
 	// Schema
@@ -610,13 +649,13 @@ void MonitorMainWindow::createMenus()
 
 void MonitorMainWindow::createToolBars()
 {
-	m_toolBar = new MonitorToolBar("ToolBar", this);
+	m_toolBar = new MonitorToolBar(tr("ToolBar"), this);
 	m_toolBar->setObjectName("MonitorMainToolBar");
 
 	m_toolBar->addAction(m_schemaListAction);
 	m_toolBar->addAction(m_newTabAction);
 
-	m_toolBar->addSeparator();
+	m_zoomToolBarSeparator = m_toolBar->addSeparator();
 	m_toolBar->addAction(m_zoomInAction);
 	m_toolBar->addAction(m_zoomOutAction);
 	m_toolBar->addAction(m_zoomToFitAction);
@@ -659,11 +698,11 @@ void MonitorMainWindow::createToolBars()
 
 	// Create logo for toolbar
 	//
-	m_logoLabel = new QLabel(this);
+	m_logoLabel = new QLabel(m_toolBar);
 	m_toolBar->addWidget(m_logoLabel);
 	this->addToolBar(Qt::TopToolBarArea, m_toolBar);
 
-	int space = m_toolBar->sizeHint().height() / 10;
+	int space = m_toolBar->sizeHint().height() / 12;
 	m_toolBar->setStyleSheet(QString("QToolBar{ padding: %1; }").arg(space));
 
 	return;
@@ -738,7 +777,7 @@ void MonitorMainWindow::updateStatusBar()
 	// AppDataService connection
 	//
 	{
-		showSoftwareConnection("AppDataService",
+		showSoftwareConnection(tr("AppDataService"),
 							   m_adsConnection.tcpSignalConnStates(),
 							   m_statusBarAppDataConnection);
 	}
@@ -746,7 +785,7 @@ void MonitorMainWindow::updateStatusBar()
 	// TuningService connection
 	//
 	{
-		showSoftwareConnection("TuningService",
+		showSoftwareConnection(tr("TuningService"),
 							   m_tuningConnection.tcpTuningConnStates(),
 							   m_statusBarTuningConnection);
 	}
@@ -933,7 +972,9 @@ void MonitorMainWindow::showSettings()
 		// Apply settings here
 		//
 		showLogo();
+		showZoomControls();
 		setVisibleTabBar(MonitorAppSettings::instance().showSchemasTabBar());
+		monitorCentralWidget()->applyZoomMode(MonitorAppSettings::instance().zoomMode());
 
 		// Reconnect
 		//
@@ -952,6 +993,10 @@ void MonitorMainWindow::showSettings()
 		}
 
 		setWindowTitle(MonitorAppSettings::instance().windowCaption());
+
+		// Set application name so all message boxes will have correct caption.
+		//
+		qApp->setApplicationName(MonitorAppSettings::instance().windowCaption());
 
 		return;
 	}
@@ -991,14 +1036,13 @@ void MonitorMainWindow::showAboutQt()
 void MonitorMainWindow::showAbout()
 {
 	QString text = qApp->applicationName() + tr(" allows user to view schemas and trends.<br>");
-	DialogAbout::show(this, text, ":/Images/Images/Logo.png");
-
+	DialogAbout::show(this, text, ":/Logo/RadiyLogo.png");
 	return;
 }
 
 void MonitorMainWindow::showMatsUserManual()
 {
-	UiTools::openHelp(QApplication::applicationDirPath()+"/docs/D11.8_FSC_MATS_User_Manual.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.8_FSC_MATS_User_Manual.pdf", this);
 }
 
 void MonitorMainWindow::devTools()
@@ -1244,15 +1288,15 @@ void MonitorMainWindow::slot_trends()
 {
 	// Get Trends list
 	//
-	std::vector<QString> trends = MonitorTrends::getTrendsList();
+	std::vector<MonitorTrendsWidget*> trends = MonitorTrends::getTrendsList();
 
 	// Choose trend
 	//
-	QString trendToActivate;
+	MonitorTrendsWidget* trendToActivate = nullptr;
 
 	if (trends.empty() == true)
 	{
-		trendToActivate.clear();	// if trendToActivate is empty, then create new trend
+		trendToActivate = nullptr;	// if trendToActivate is nullptr, then create a new trend.
 	}
 	else
 	{
@@ -1265,7 +1309,7 @@ void MonitorMainWindow::slot_trends()
 
 		for (size_t i = 0; i < trends.size(); i++)
 		{
-			QAction* a = menu.addAction(trends[i]);
+			QAction* a = menu.addAction(trends[i]->windowTitle());
 			Q_ASSERT(a);
 
 			a->setData(QVariant::fromValue<int>(static_cast<int>(i)));		// Data is index in trend vector
@@ -1284,7 +1328,7 @@ void MonitorMainWindow::slot_trends()
 
 		if (trendIndex == -1)
 		{
-			trendToActivate.clear();	// if trendToActivate is empty, then create new trend
+			trendToActivate = nullptr;	// if trendToActivate is nullptr, then create a new trend.
 		}
 		else
 		{
@@ -1301,7 +1345,7 @@ void MonitorMainWindow::slot_trends()
 
 	// Start new trend or activate chosen one
 	//
-	if (trendToActivate.isEmpty() == true)
+	if (trendToActivate == nullptr)
 	{
 		std::vector<AppSignalParam> appSignals;
 		MonitorTrends::startTrendApp(m_signalManager, m_configController, appSignals, this);
@@ -1490,9 +1534,10 @@ void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
 	// Refresh TuningUserManager configuration
 	//
 	m_tuningUserManager.setConfiguration(configuration.tuningLogin,
-                                         configuration.tuningUserAccounts,
-										 false/*loginPerOperation*/,
-										 configuration.tuningSessionTimeout);
+										 configuration.tuningUserAccounts,
+										 false /*loginPerOperation*/,
+										 configuration.tuningSessionTimeout,
+										 m_configController.configuration().matsUsers.users());
 
 	showTuningLoginControls();
 
@@ -1585,6 +1630,12 @@ void MonitorMainWindow::setVisibleTabBar(bool visible)
 		m->tabBar()->setVisible(visible);
 	}
 
+	m_newTabAction->setVisible(visible);
+	m_newTabAction->setEnabled(visible);
+
+	m_closeTabAction->setEnabled(visible);
+	m_closeTabAction->setVisible(visible);
+
 	return;
 }
 
@@ -1653,11 +1704,11 @@ void MonitorMainWindow::slot_loggedIn()
 {
 	m_loginAction->setIcon(QIcon(":/Images/Images/KeyOn.svg"));
 
-	m_LogFile.writeMessage(tr("Tuning logged in, username: %1.").arg(m_tuningUserManager.loggedInUser()));
+	m_LogFile.writeMessage(tr("Tuning logged in, username: %1.").arg(m_tuningUserManager.userName()));
 
 	if (m_tuningUserManager.tuningSessionTimeout() == 0)
 	{
-		m_loginUserTimeoutAction->setText(m_tuningUserManager.loggedInUser());
+		m_loginUserTimeoutAction->setText(m_tuningUserManager.userName());
 	}
 
 	m_loginUserTimeoutAction->setEnabled(true);
@@ -1711,6 +1762,36 @@ const MonitorSignalManager& MonitorMainWindow::signalManager() const
 }
 
 ClientLib::TuningUserManager& MonitorMainWindow::userManager()
+{
+	return m_tuningUserManager;
+}
+
+TuningSignalManager& MonitorMainWindow::tuningSignalManager()
+{
+	return m_tuningSignalManager;
+}
+
+const TuningSignalManager& MonitorMainWindow::tuningSignalManager() const
+{
+	return m_tuningSignalManager;
+}
+
+ClientLib::TuningConnection& MonitorMainWindow::tuningConnection()
+{
+	return m_tuningConnection;
+}
+
+const ClientLib::TuningConnection& MonitorMainWindow::tuningConnection() const
+{
+	return m_tuningConnection;
+}
+
+ITuningAuthorization& MonitorMainWindow::tuningAuthorization()
+{
+	return m_tuningUserManager;
+}
+
+const ITuningAuthorization& MonitorMainWindow::tuningAuthorization() const
 {
 	return m_tuningUserManager;
 }

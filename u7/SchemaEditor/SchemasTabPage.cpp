@@ -390,7 +390,7 @@ void SchemasTabPage::tabCloseRequested(int index)
 
 void SchemasTabPage::currentTabChanged(int index)
 {
-	// Show/hide close burron for inactive tab bar
+	// Show/hide close button for inactive tab bar.
 	//
 	QTabBar::ButtonPosition closeSide = (QTabBar::ButtonPosition)style()->styleHint(QStyle::SH_TabBar_CloseButtonPosition, 0, m_tabWidget->tabBar());
 

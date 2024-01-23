@@ -161,7 +161,7 @@ void filterCmdLineArgs(int argc, char *argv[], QStringList* cmdLineArgs, QString
 		if (arg.startsWith(CONFIG_FILE_PARAM, Qt::CaseInsensitive) == true)
 		{
 			*configFileName = arg;
-			configFileName->remove(CONFIG_FILE_PARAM).trimmed();
+			*configFileName = configFileName->remove(CONFIG_FILE_PARAM).trimmed();
 			configFileName->remove('\"');
 			configFileName->remove('\'');
 			continue;

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../../Simulator/SimProfiles.h"
-#include "../DbLib/DbController.h"
 #include "../lib/CodeEditor.h"
 
 class SimProfileEditor : public QDialog

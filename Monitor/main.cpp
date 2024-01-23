@@ -2,10 +2,7 @@
 #include "Globals.h"
 #include "MonitorAppSettings.h"
 #include "MonitorMainWindow.h"
-
-#if __has_include("../gitlabci_version.h")
-#include "../gitlabci_version.h"
-#endif
+#include "version.h"
 
 
 int main(int argc, char *argv[])
@@ -18,11 +15,11 @@ int main(int argc, char *argv[])
 	a.setOrganizationName(Manufacturer::RADIY);
 	a.setOrganizationDomain(Manufacturer::SITE);
 
-#ifdef GITLAB_CI_BUILD
-	a.setApplicationVersion(QString("3.8.%1 (%2)").arg(CI_PIPELINE_ID).arg(CI_BUILD_REF_SLUG));
-#else
-	a.setApplicationVersion(QString("3.8.LOCALBUILD"));
-#endif
+	a.setApplicationVersion(QString("%1.%2.%3 (%4)")
+							.arg(U7SET_MAJOR_VERSION)
+							.arg(U7SET_MINOR_VERSION)
+							.arg(U7SET_PATCH_VERSION)
+							.arg(U7SET_BRANCH_NAME));
 
 	// --
 	//
@@ -33,12 +30,12 @@ int main(int argc, char *argv[])
 
 	// Parse command line
 	//
-	QStringList aruments = a.arguments();
+	QStringList arguments = a.arguments();
 	QString settingsFileName;
 
-	if (aruments.size() > 1)
+	if (arguments.size() > 1)
 	{
-		settingsFileName = aruments[1];
+		settingsFileName = arguments[1];
 	}
 
 	if (settingsFileName.isEmpty() == false && QFile::exists(settingsFileName) == false)
@@ -63,6 +60,11 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	// Set application name again, as new app caption could be assign via settings.
+	// Set application name so all message boxes will have correct caption.
+	//
+	a.setApplicationName(MonitorAppSettings::instance().windowCaption());
+
 	// Init TrendLib resources
 	//
 	Q_INIT_RESOURCE(TrendView);
@@ -72,16 +74,15 @@ int main(int argc, char *argv[])
 	VFrame30::init();
 	//Hardware::Init();
 
-	SoftwareInfo softwareInfo;
-	softwareInfo.init(E::SoftwareType::Monitor, MonitorAppSettings::instance().equipmentId(), 0, 1);
+	SoftwareInfo softwareInfo(E::SoftwareType::Monitor, MonitorAppSettings::instance().equipmentId());
 
 	// --
 	//
 	auto settings = MonitorAppSettings::instance().get();
 
-	InstanceResolver instanceResover;
+	InstanceResolver instanceResolver;
 
-	if (bool ok = instanceResover.init(settings.equipmentId, settings.singleInstance);
+	if (bool ok = instanceResolver.init(settings.equipmentId, settings.singleInstance);
 		ok == false)
 	{
 		qDebug() << "Another instance is active";
@@ -92,7 +93,7 @@ int main(int argc, char *argv[])
 	//
 	int result = 0;
 	{
-		MonitorMainWindow mainWindow(instanceResover, softwareInfo);
+		MonitorMainWindow mainWindow(instanceResolver, softwareInfo);
 
 		theApp.setMainWindow(&mainWindow);
 
@@ -109,7 +110,7 @@ int main(int argc, char *argv[])
 	//
 
 	VFrame30::shutdown();
-	//Hardware::Shutdwon();
+	//Hardware::Shutdown();
 	google::protobuf::ShutdownProtobufLibrary();
 
 	return result;

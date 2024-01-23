@@ -63,22 +63,45 @@ bool RtSchemaTrendDataProvider::trendData(const QString& appSignalId, std::list<
 
 TimeStamp RtSchemaTrendDataProvider::maxTimeStamp() const
 {
+	qint64 maxTimeStamp = 0;
+
 	QMutexLocker locker(&m_signalMutex);
 
-	TimeStamp result{};
-
-	switch (m_timeType)
+	// Go through all signals and get maximum time state.
+	//
+	for (const auto& [signalHash, rtSignal] : m_trendSignals)
 	{
-	case E::TimeType::Local:		result = m_maxState.local;		break;
-	case E::TimeType::System:		result = m_maxState.system;		break;
-	case E::TimeType::Plant:		result = m_maxState.plant;		break;
-	case E::TimeType::ArchiveId:	result = m_maxState.local;		break;
-	default:
-		Q_ASSERT(false);
-		return {};
+		Q_UNUSED(signalHash);
+
+		const TrendLib::TrendArchive& archive = rtSignal.archive();
+
+		if (archive.m_hours.empty() == true)
+		{
+			continue;
+		}
+
+		const std::shared_ptr<TrendLib::OneHourData>& lastHourData = archive.m_hours.crbegin()->second;
+		const std::vector<TrendLib::TrendStateRecord>& lastHourRecords = lastHourData->data;
+
+		if (lastHourRecords.empty() == true || lastHourRecords.back().states.empty() == true)
+		{
+			continue;
+		}
+
+		const TrendLib::TrendStateItem& lastState = lastHourRecords.back().states.back();
+
+		switch (m_timeType)
+		{
+		case E::TimeType::Local:		maxTimeStamp = std::max(maxTimeStamp, lastState.local);		break;
+		case E::TimeType::System:		maxTimeStamp = std::max(maxTimeStamp, lastState.system);		break;
+		case E::TimeType::Plant:		maxTimeStamp = std::max(maxTimeStamp, lastState.plant);		break;
+		case E::TimeType::ArchiveId:	maxTimeStamp = std::max(maxTimeStamp, lastState.local);		break;
+		default:
+			Q_ASSERT(false);
+		}
 	}
 
-	return result;
+	return maxTimeStamp;
 }
 
 void RtSchemaTrendDataProvider::setParams(E::RtTrendsSamplePeriod samplePeriod, E::TimeType timeType, int durationSeconds)
@@ -127,12 +150,8 @@ void RtSchemaTrendDataProvider::slot_realtimeDataReceived(QString sourceEquipmen
 														  TrendLib::TrendStateItem minState,
 														  TrendLib::TrendStateItem maxState)
 {
-	{
-		QMutexLocker locker(&m_signalMutex);
-
-		m_minState = minState;
-		m_maxState = maxState;
-	}
+	Q_UNUSED(minState);
+	Q_UNUSED(maxState);
 
 	for (const TrendLib::RealtimeDataChunk& chunk : data->signalData)
 	{
@@ -376,13 +395,13 @@ RtSchemaTrend::~RtSchemaTrend()
 	return;
 }
 
-// Updates m_rtConnections from SchemaDetaisSet
+// Updates m_rtConnections from SchemaDetailsSet
 //
 void RtSchemaTrend::updateRealtimeConnections()
 {
 	Q_ASSERT(QThread::currentThreadId() == this->thread()->currentThreadId());
 
-	// We could make this function slot and connecte it to MonitorConfigController::configurationArrived
+	// We could make this function slot and connect it to MonitorConfigController::configurationArrived
 	// But we need to be sure that
 	//
 	auto softwareInfo = m_configController.softwareInfo();

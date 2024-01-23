@@ -1,5 +1,7 @@
 #pragma once
 #include <map>
+#include <span>
+#include <QMutex>
 #include "TrendArchiveServer.h"
 #include "TrendSignal.h"
 #include "TrendSignalState.h"
@@ -80,6 +82,8 @@ namespace TrendLib
 		void removeSignal(const TrendLib::TrendSignalParam& signal);
 		void removeAllSignals();
 
+		void reorderSignals(std::span<const TrendSignalParam> targetOrder);
+
 		[[nodiscard]] TrendLib::TrendSignalParam signalParam(const QString& appSignalId, const QString& archiveServerId, bool* ok) const;
 		bool setSignalParam(const TrendLib::TrendSignalParam& signalParam);		// Update data
 
@@ -95,6 +99,7 @@ namespace TrendLib
 
 		bool getFullExistingTrendData(const TrendSignalParam& trendSignal, E::TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const;
 		bool getExistingTrendData(const TrendSignalParam& trendSignal, QDateTime from, QDateTime to, E::TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const;
+		std::optional<TrendStateItem> lastRealtimeState(Hash signalHash, E::TimeType timeType) const;
 
 		// ITrendDataProvider implementation
 		//
@@ -115,7 +120,7 @@ namespace TrendLib
 
 		void clear(E::TimeType timeType);
 
-		/// Clear all rahive data where request was not processed yet or there is not data.
+		/// Clear all archive data where request was not processed yet or there is not data.
 		/// This function is used when the new configuration is arriving, so the request can be sent again
 		///
 		void clearArchiveWithouthRecord();
@@ -158,6 +163,11 @@ namespace TrendLib
 		mutable std::map<TrendSignalPlusServerId, TrendArchive> m_archiveLocalTime;		// Key is "AppSignalID@ArchiveServerID", Example: #ABC01@USB_SHK_WS00_ARCHSRV
 		mutable std::map<TrendSignalPlusServerId, TrendArchive> m_archiveSystemTime;
 		mutable std::map<TrendSignalPlusServerId, TrendArchive> m_archivePlantTime;
+
+		mutable QMutex m_lastRealtimePointsMutex;
+		std::map<Hash, TrendStateItem> m_lastRealtimePointsLocalTime;	// Key is hash form signal id, the value is last received realtime state.
+		std::map<Hash, TrendStateItem> m_lastRealtimePointsSystemTime;	// Key is hash form signal id, the value is last received realtime state.
+		std::map<Hash, TrendStateItem> m_lastRealtimePointsPlantTime;	// Key is hash form signal id, the value is last received realtime state.
 	};
 }
 

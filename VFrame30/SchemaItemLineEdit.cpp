@@ -4,6 +4,34 @@
 #include "DrawParam.h"
 #include <QStyleOptionFrame>
 
+
+namespace
+{
+	// Subclass control to filter mouse input events for schema editor.
+	//
+	class QEditorLineEdit : public QLineEdit
+	{
+	public:
+		QEditorLineEdit(QString text, QWidget* parent, bool editMode) :
+			QLineEdit{text, parent},
+			m_editMode(editMode)
+		{
+			// Focus does not appear in the Monitor initial Tab key is pressed, I did not dig deep enough to understand
+			// the nature of this behavior. Just forbad focus.
+			//
+			if (m_editMode == true)
+			{
+				setMouseTracking(false);
+				setAttribute(Qt::WA_TransparentForMouseEvents);
+			}
+		}
+
+	public:
+		bool m_editMode = true;
+	};
+} // namespace
+
+
 namespace VFrame30
 {
 	SchemaItemLineEdit::SchemaItemLineEdit(void) :
@@ -152,10 +180,10 @@ namespace VFrame30
 			return nullptr;
 		}
 
-		QLineEdit* control = new QLineEdit(m_text, parent);
+		QLineEdit* control = new QEditorLineEdit(m_text, parent, editMode);
 		control->setObjectName(guid().toString());
 
-		updateWidgetProperties(control);
+		updateWidgetProperties(control, editMode);
 
 		control->setText(text());
 
@@ -182,7 +210,7 @@ namespace VFrame30
 			}
 		}
 
-		updateWdgetPosAndSize(control, zoom);
+		updateWidgetPosAndSize(control, zoom);
 
 		control->setVisible(true);
 		control->update();
@@ -192,7 +220,7 @@ namespace VFrame30
 
 	// Update widget properties
 	//
-	void SchemaItemLineEdit::updateWidgetProperties(QWidget* widget) const
+	void SchemaItemLineEdit::updateWidgetProperties(QWidget* widget, bool editMode) const
 	{
 		QLineEdit* control = dynamic_cast<QLineEdit*>(widget);
 
@@ -202,13 +230,13 @@ namespace VFrame30
 			return;
 		}
 
-		SchemaItemControl::updateWidgetProperties(widget);
+		SchemaItemControl::updateWidgetProperties(widget, editMode);
 
 		bool updateRequired = false;
 
 		if (control->text() != text() ||
 			control->placeholderText() != placeholderText() ||
-			static_cast<int>(control->alignment()) != (m_horzAlign | m_vertAlign) ||
+			static_cast<int>(control->alignment()) != (static_cast<int>(m_horzAlign) | static_cast<int>(m_vertAlign)) ||
 			control->maxLength() != maxLength() ||
 			control->isReadOnly() != readOnly())
 		{
@@ -221,7 +249,7 @@ namespace VFrame30
 
 			control->setText(text());
 			control->setPlaceholderText(placeholderText());
-			control->setAlignment(static_cast<Qt::Alignment>(m_horzAlign | m_vertAlign));
+			control->setAlignment(static_cast<Qt::Alignment>(static_cast<int>(m_horzAlign) | static_cast<int>(m_vertAlign)));
 			control->setMaxLength(maxLength());
 			control->setReadOnly(readOnly());
 
@@ -251,7 +279,7 @@ namespace VFrame30
 		//
 		if (m_jsAfterCreate.isUndefined() == true)
 		{
-			m_jsAfterCreate = evaluateScript(lineEditWidget, m_scriptAfterCreate);
+			m_jsAfterCreate = evaluateScript("AfterCreate", lineEditWidget, m_scriptAfterCreate);
 
 			if (m_jsAfterCreate.isError() == true ||
 				m_jsAfterCreate.isNull() == true)
@@ -262,7 +290,7 @@ namespace VFrame30
 
 		// Run script
 		//
-		runEventScript(m_jsAfterCreate, lineEditWidget, false);
+		runEventScript("AfterCreate", m_jsAfterCreate, lineEditWidget, false);
 
 		return;
 	}
@@ -288,7 +316,7 @@ namespace VFrame30
 		//
 		if (m_jsEditingFinished.isUndefined() == true)
 		{
-			m_jsEditingFinished = evaluateScript(senderWidget, m_scriptEditingFinished);
+			m_jsEditingFinished = evaluateScript("EditingFinished", senderWidget, m_scriptEditingFinished);
 
 			if (m_jsEditingFinished.isError() == true ||
 				m_jsEditingFinished.isNull() == true)
@@ -299,7 +327,7 @@ namespace VFrame30
 
 		// Run script
 		//
-		runEventScript(m_jsEditingFinished, senderWidget, true);
+		runEventScript("EditingFinished", m_jsEditingFinished, senderWidget, true);
 
 		return;
 	}
@@ -325,7 +353,7 @@ namespace VFrame30
 		//
 		if (m_jsReturnPressed.isUndefined() == true)
 		{
-			m_jsReturnPressed = evaluateScript(senderWidget, m_scriptReturnPressed);
+			m_jsReturnPressed = evaluateScript("ReturnPressed", senderWidget, m_scriptReturnPressed);
 
 			if (m_jsReturnPressed.isError() == true ||
 				m_jsReturnPressed.isNull() == true)
@@ -336,7 +364,7 @@ namespace VFrame30
 
 		// Run script
 		//
-		runEventScript(m_jsReturnPressed, senderWidget, true);
+		runEventScript("ReturnPressed", m_jsReturnPressed, senderWidget, true);
 
 		return;
 	}
@@ -362,7 +390,7 @@ namespace VFrame30
 		//
 		if (m_jsTextChanged.isUndefined() == true)
 		{
-			m_jsTextChanged = evaluateScript(senderWidget, m_scriptTextChanged);
+			m_jsTextChanged = evaluateScript("TextChanged", senderWidget, m_scriptTextChanged);
 
 			if (m_jsTextChanged.isError() == true ||
 				m_jsTextChanged.isNull() == true)
@@ -373,61 +401,14 @@ namespace VFrame30
 
 		// Run script
 		//
-		runEventScript(m_jsTextChanged, senderWidget, true);
+		runEventScript("TextChanged", m_jsTextChanged, senderWidget, true);
 
 		return;
 	}
 
-	void SchemaItemLineEdit::runEventScript(QJSValue& evaluatedJs, QLineEdit* controlWidget, bool allowMessageBox)
+	void SchemaItemLineEdit::runEventScript(QString scriptName, QJSValue& evaluatedJs, QLineEdit* controlWidget, bool allowMessageBox)
 	{
-		if (evaluatedJs.isError() == true ||
-			evaluatedJs.isNull() == true)
-		{
-			return;
-		}
-
-		// Suppose that parent of sender is SchemaView
-		//
-		ClientSchemaView* schemaView = dynamic_cast<ClientSchemaView*>(controlWidget->parentWidget());
-		if (schemaView == nullptr)
-		{
-			assert(schemaView);
-			return;
-		}
-
-		bool prevAllowMessageBoxState = schemaView->setScriptMessageBoxAllowed(allowMessageBox);
-
-		QJSEngine* engine = schemaView->jsEngine();
-		assert(engine);
-
-		// Set argument list
-		//
-		QJSValue jsSchemaItem = engine->newQObject(this);
-		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
-
-		QJSValue jsWidget = engine->newQObject(controlWidget);
-		QQmlEngine::setObjectOwnership(controlWidget, QQmlEngine::CppOwnership);
-
-		QJSValueList args;
-
-		args << jsSchemaItem;
-		args << jsWidget;
-		args << controlWidget->text();
-
-		// Run script
-		//
-		QJSValue jsResult = evaluatedJs.call(args);
-
-		schemaView->setScriptMessageBoxAllowed(prevAllowMessageBoxState);
-
-		if (jsResult.isError() == true)
-		{
-			reportScriptError(jsResult, schemaView->logFile());
-			return;
-		}
-
-		engine->collectGarbage();
-		return;
+		return SchemaItemControl::runEventScript<QLineEdit>(evaluatedJs, allowMessageBox, scriptName, controlWidget, controlWidget->text());
 	}
 
 	// Properties and Data

@@ -145,7 +145,7 @@ void EditConnectionLine::moveEndPointPos(std::shared_ptr<VFrame30::SchemaLayer> 
 	QPointF ptBase = lastBasePoint();
 
 	// Cases:
-	//	PreferedMovePointWay::HorzWay --  If docPoint ouside of horzline, add to main part 3 pointx
+	//	PreferedMovePointWay::HorzWay --  If docPoint outside of horzline, add to main part 3 pointx
 	//	------------+(1)
 	//              |
 	//           (2)+--------+(3)
@@ -1105,7 +1105,6 @@ std::vector<VFrame30::SchemaPoint> EditConnectionLine::removeUnwantedPoints(cons
 
 			// Keep horzCount and vertCount as prev point does matter
 			//
-
 			currentPointIndex  --;		// Process same point index one more time
 			continue;
 		}

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QObject>
 #include "../UtilsLib/ILogFile.h"
 
 namespace VFrame30
@@ -59,7 +60,6 @@ namespace VFrame30
 5314966085873379440  	23.09.2020 14:57:35.892		MSG	New configuration: file '/SYSTEMID_RACKID_WS00_TUN/TuningSignals.dat' updated
 5314966085873379440  	23.09.2020 14:57:35.892		MSG	New configuration: file '/SYSTEMID_RACKID_WS00_TUN/ObjectFilters.xml' updated
 5314966085873379440  	23.09.2020 14:57:35.892		MSG	New configuration: file '/SYSTEMID_RACKID_WS00_TUN/GlobalScript.js' updated
-5314966085873379440  	23.09.2020 14:57:35.892		MSG	New configuration: file '/SYSTEMID_RACKID_WS00_TUN/OnConfigurationArrivedScript.js' updated
 5314966085873379440  	23.09.2020 14:57:35.892		MSG	New configuration: file '/SYSTEMID_RACKID_WS00_TUN/TuningClientBehavior.xml' updated
 5314966085873379440  	23.09.2020 14:57:35.892		MSG	New configuration: appearance updated
 5314966085873379440  	23.09.2020 14:57:35.892		MSG	New configuration: servers updated
@@ -97,6 +97,5 @@ namespace VFrame30
 
 	private:
 		ILogFile* m_logFile = nullptr;
-
 	};
 }

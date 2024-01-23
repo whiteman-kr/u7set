@@ -124,7 +124,7 @@ int Settings::loadConfigurationFile(const QString& fileName)
 		return 1;
 	}
 
-	if (doc.setContent(&file) == false)
+    if (static_cast<bool>(doc.setContent(&file)) == false)
 	{
 		QString errorMsg = QObject::tr("Failed to load contents of the file %1.").arg(fileName);
 		std::cout << errorMsg.toStdString() << std::endl;

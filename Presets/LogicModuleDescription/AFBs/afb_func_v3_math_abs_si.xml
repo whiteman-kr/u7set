@@ -1,0 +1,30 @@
+<AFB id="#math_abs_si_v1" Caption="math_abs_si" Version="1.0006">
+	<Properties>
+		<Description>Function Block outputs the absolute value of the input signal in signed integer data forma</Description>
+		<Category>Math</Category>
+		<OpCode>16</OpCode>
+		<InternalUse>false</InternalUse>
+		<MinWidth>26</MinWidth>
+	</Properties>
+	<Inputs>
+		<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="1" Size="32"/>
+	</Inputs>
+	<Outputs>
+		<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="5" Size="32"/>
+	</Outputs>
+	<Params>
+		<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+			<Value>8</Value>
+			<Default>8</Default>
+			<LowLimit>1</LowLimit>
+			<HighLimit>8</HighLimit>
+			<Script>
+				<Changed/>
+			</Script>
+		</Param>
+	</Params>
+	<CommonScript>
+		<Library/>
+		<AfterCreation/>
+	</CommonScript>
+</AFB>

@@ -1,13 +1,13 @@
 #include "../Builder/ModuleLogicCompiler.h"
-#include "../Builder/ApplicationLogicCompiler.h"
-#include "../lib/DeviceHelper.h"
+#include "../Builder/AppLogicCompiler.h"
 #include "../UtilsLib/Crc.h"
 #include "../HardwareLib/Connection.h"
-#include "../lib/LanControllerInfoHelper.h"
 
+#include "LanControllerInfoHelper.h"
+#include "DeviceHelper.h"
 #include "SoftwareCfgGenerator.h"
 #include "Parser.h"
-#include "LmDescriptionSet.h" 
+#include "LmDescriptionSet.h"
 
 #define LOG_UNDEFINED_UAL_ADDRESS(log, ualSignal) log->writeError(QString("Undefined signal's ualAddress: %1 (File: %2 Line: %3 Function: %4)").arg(ualSignal->refSignalIDs().join(", ")).arg(__FILE__).arg(__LINE__).arg(SHORT_FUNC_INFO));
 
@@ -15,18 +15,111 @@ namespace Builder
 {
 	// ---------------------------------------------------------------------------------
 	//
+	//	ModuleLogicCompiler::BusFilling class implementation
+	//
+	// ---------------------------------------------------------------------------------
+
+	ModuleLogicCompiler::BusFilling::BusFilling(BusShared bus)
+	{
+		TEST_PTR_RETURN(bus);
+
+		m_busArea.assign(bus->sizeW(), 0);
+	}
+
+	void ModuleLogicCompiler::BusFilling::fillWord(int offsetInBus)
+	{
+		fill(offsetInBus, 1);
+	}
+
+	void ModuleLogicCompiler::BusFilling::fillDword(int offsetInBus)
+	{
+		fill(offsetInBus, 2);
+	}
+
+	void ModuleLogicCompiler::BusFilling::fill(int offsetInBus, int sizeW)
+	{
+		int busSizeW = static_cast<int>(m_busArea.size());
+
+		if (sizeW == 0)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		if (offsetInBus < 0 ||
+			(offsetInBus + sizeW) > busSizeW)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		for(int i = offsetInBus; i < offsetInBus + sizeW; i++)
+		{
+			Q_ASSERT(m_busArea[i] == 0);
+
+			m_busArea[i] = 0xFFFF;
+		}
+	}
+
+	void ModuleLogicCompiler::BusFilling::getUnfilled(std::vector<std::pair<int, int>>* unfilledAreas) const
+	{
+		TEST_PTR_RETURN(unfilledAreas);
+
+		unfilledAreas->clear();
+
+		int startUnfilled = -1;
+		int sizeW = 0;
+
+		for(int i = 0; i < static_cast<int>(m_busArea.size()); i++)
+		{
+			if (m_busArea[i] == 0)
+			{
+				if (startUnfilled == -1)
+				{
+					startUnfilled = i;
+					sizeW = 1;
+				}
+				else
+				{
+					sizeW++;
+				}
+
+				continue;
+			}
+
+			// w != 0
+
+			if (startUnfilled != -1)
+			{
+				unfilledAreas->push_back({startUnfilled, sizeW});
+
+				startUnfilled = -1;
+				sizeW = 0;
+			}
+		}
+
+		if (startUnfilled != -1)
+		{
+			unfilledAreas->push_back({startUnfilled, sizeW});
+		}
+	}
+
+	// ---------------------------------------------------------------------------------
+	//
 	//	ModuleLogicCompiler class implementation
 	//
 	// ---------------------------------------------------------------------------------
 
-	const char* ModuleLogicCompiler::INPUT_CONTROLLER_SUFFIX = "_CTRLIN";
-	const char* ModuleLogicCompiler::OUTPUT_CONTROLLER_SUFFIX = "_CTRLOUT";
-	const char* ModuleLogicCompiler::PLATFORM_INTERFACE_CONTROLLER_SUFFIX = "_PI";
+//	const char* ModuleLogicCompiler::INPUT_CONTROLLER_SUFFIX = "_CTRLIN";
+//	const char* ModuleLogicCompiler::OUTPUT_CONTROLLER_SUFFIX = "_CTRLOUT";
+//	const char* ModuleLogicCompiler::PLATFORM_INTERFACE_CONTROLLER_SUFFIX = "_PI";
 
-	const char* ModuleLogicCompiler::BUS_COMPOSER_CAPTION = "BusComposer";
-	const char* ModuleLogicCompiler::BUS_EXTRACTOR_CAPTION = "BusExtractor";
+//	const char* ModuleLogicCompiler::BUS_COMPOSER_CAPTION = "BusComposer";
+//	const char* ModuleLogicCompiler::BUS_EXTRACTOR_CAPTION = "BusExtractor";
 
-	const char* ModuleLogicCompiler::TEST_DATA_DIR = "TestData/";
+//	const char* ModuleLogicCompiler::TEST_DATA_DIR = "TestData/";
+
+	const QString ModuleLogicCompiler::EMPTY_STR(QStringLiteral(""));
 
 	ModuleLogicCompiler::ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, const Hardware::DeviceModule* lm) :
 		m_appLogicCompiler(appLogicCompiler),
@@ -48,9 +141,11 @@ namespace Builder
 
 		m_lmDescription = appLogicCompiler.lmDescriptions()->get(lm);
 
-		m_lmShared = getLmSharedPtr();
+		Q_ASSERT(m_lmDescription != nullptr);
 
-		assert(m_lmDescription != nullptr);
+		m_afbComponents.init(m_lmDescription);
+
+		m_lmShared = getLmSharedPtr();
 
 		m_appLogicData = appLogicCompiler.appLogicData();
 		m_resultWriter = appLogicCompiler.buildResultWriter();
@@ -60,6 +155,8 @@ namespace Builder
 		m_optoModuleStorage = appLogicCompiler.opticModuleStorage();
 		m_tuningDataStorage = appLogicCompiler.tuningDataStorage();
 		m_cmpSet = appLogicCompiler.comparatorSet();
+
+		m_bitAccAvailable = m_lmDescription->isBitAccAvailable();
 	}
 
 	ModuleLogicCompiler::~ModuleLogicCompiler()
@@ -121,7 +218,7 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::createSignalLists),
 //			PROC_TO_CALL(ModuleLogicCompiler::groupTxSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::disposeSignalsInMemory),
-			PROC_TO_CALL(ModuleLogicCompiler::appendAfbsForAnalogInOutSignalsConversion),
+			PROC_TO_CALL(ModuleLogicCompiler::appendAfbsForInOutSignalsConversion),
 			PROC_TO_CALL(ModuleLogicCompiler::setOutputSignalsAsComputed),
 			PROC_TO_CALL(ModuleLogicCompiler::setOptoRawInSignalsAsComputed),
 			PROC_TO_CALL(ModuleLogicCompiler::fillComparatorSet),
@@ -154,13 +251,13 @@ namespace Builder
 
 			PROC_TO_CALL(ModuleLogicCompiler::finalizeOptoConnectionsProcessing),
 			PROC_TO_CALL(ModuleLogicCompiler::setOptoUalSignalsAddresses),
-			PROC_TO_CALL(ModuleLogicCompiler::writeSignalLists),
+			//PROC_TO_CALL(ModuleLogicCompiler::writeSignalLists),			// extra debug info signal lists
 
 			// code generation functions
 
 			PROC_TO_CALL(ModuleLogicCompiler::generateAlpPhaseCode),
 
-			// Some UalAfb items dinamically creating in time of generateAlpPhaseCode processing.
+			// Some UalAfb items dynamically creating in time of generateAlpPhaseCode processing.
 			// Therefore generateIdrPhaseCode, that produce UalAfb params initialization code,
 			// called AFTER generateAlpPhaseCode!
 			//
@@ -180,6 +277,7 @@ namespace Builder
 
 			PROC_TO_CALL(ModuleLogicCompiler::setLmAppLANDataSize),
 			PROC_TO_CALL(ModuleLogicCompiler::detectUnusedSignals),
+			PROC_TO_CALL(ModuleLogicCompiler::detectUsedReservedSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::fillAnalogSignalsOnSchemas),
 			PROC_TO_CALL(ModuleLogicCompiler::writeResult)
 		};
@@ -213,7 +311,7 @@ namespace Builder
 		{
 			assert(false);
 			LOG_NULLPTR_ERROR(m_log);
-			return QString();
+			return EMPTY_STR;
 		}
 
 		return m_lm->equipmentIdTemplate();
@@ -271,9 +369,9 @@ namespace Builder
 
 		bool result = true;
 
-		const std::vector<LogicPin>& outputs = item->outputs();
+		const std::vector<SchemaPin>& outputs = item->outputs();
 
-		for(const LogicPin& outPin : outputs)
+		for(const SchemaPin& outPin : outputs)
 		{
 			result &= getSignalsAndPinsLinkedToOutPin(item, outPin, linkedSignals, linkedItems, linkedPins);
 		}
@@ -335,12 +433,17 @@ namespace Builder
 		return getLmAssociatedOptoPortsAreas(optoTxAreas, false);
 	}
 
+	const UalAfbs& ModuleLogicCompiler::ualAfbs() const
+	{
+		return m_ualAfbs;
+	}
+
 	QList<const UalSignal*> ModuleLogicCompiler::getLoopbacksUalSignals() const
 	{
 		return m_loopbacks.getLoopbacksUalSignals();
 	}
 
-	bool ModuleLogicCompiler::optimizeCode(CodeOptimizationType optimizationType,
+	bool ModuleLogicCompiler::optimizeCode( CodeOptimizationType optimizationType,
 											const CodeSnippet& srcCode,
 											CodeSnippetConstIterator start,
 											CodeSnippetConstIterator end,
@@ -366,6 +469,7 @@ namespace Builder
 												arg(OptimizationInfo::typeStr(optimizationType)));
 		optimizedCode << CodeItem();
 
+		int replacementCodeSizeW  = replacementCode.codeSizeW(m_lmDescription);
 		int replacedCodeSizeW = 0;
 
 		do
@@ -379,7 +483,7 @@ namespace Builder
 
 			replacedCodeSizeW += srcCodeItem.sizeW();
 
-			QString mnemo = srcCodeItem.getAsmCode(false);
+			QString mnemo = srcCodeItem.getAsmCode(m_lmDescription, true, false);
 
 			optimizedCode << CodeItem().setComment(mnemo);
 
@@ -398,8 +502,9 @@ namespace Builder
 
 		optimizedCode << CodeItem();
 
-		optimizedCode << CodeItem().setComment(QString("Optimization (%1) ------ End ------").
-											  arg(m_optimizationNo));
+		optimizedCode << CodeItem().setComment(QString("Optimization (%1) ------ End ------ Code size %2").
+											  arg(m_optimizationNo).
+											  arg(replacementCodeSizeW - replacedCodeSizeW));
 		if (start != srcCode.end())
 		{
 			CodeSnippetConstIterator next = start + 1;
@@ -426,10 +531,6 @@ namespace Builder
 
 		OptimizationInfo& optiInfo = it->second;
 
-		int replacementCodeSizeW  = replacementCode.codeSizeW();
-
-		Q_ASSERT(replacedCodeSizeW > replacementCodeSizeW);
-
 		optiInfo.optimizationsCount++;
 		optiInfo.codeReductionSizeW += replacedCodeSizeW - replacementCodeSizeW;
 
@@ -441,14 +542,43 @@ namespace Builder
 		return m_memoryMap.bitAccumulatorAddress();
 	}
 
+	Address16 ModuleLogicCompiler::bitAccumulatorAddress16() const
+	{
+		return Address16(m_memoryMap.bitAccumulatorAddress(), 0);
+	}
+
 	int ModuleLogicCompiler::wordAccumulatorAddress() const
 	{
 		return m_memoryMap.wordAccumulatorAddress();
 	}
 
+	Address16 ModuleLogicCompiler::wordAccumulatorAddress16() const
+	{
+		return Address16(m_memoryMap.wordAccumulatorAddress(), 0);
+	}
+
 	int ModuleLogicCompiler::wordAccumulator2Address() const
 	{
 		return m_memoryMap.wordAccumulator2Address();
+	}
+
+	Address16 ModuleLogicCompiler::getDiscreteUalAddrBitConstIncluded(const UalSignal* ualSignal) const
+	{
+		if (ualSignal->isConstDiscrete() == true)
+		{
+			return ualSignal->constDiscreteValue() == 0 ?
+							constBit0Addr() :
+							constBit1Addr();
+		}
+
+		if (ualSignal->isDiscrete() == true)
+		{
+			return ualSignal->ualAddr();
+		}
+
+		Q_ASSERT(false);
+
+		return Address16();
 	}
 
 	bool ModuleLogicCompiler::getLmAssociatedOptoPortsAreas(std::vector<CodeChecker::MemArea>* optoAreas, bool rx) const
@@ -558,7 +688,7 @@ namespace Builder
 
 		m_modules.insert(lmEquipmentID(), m);
 
-		// chek LM subsystem ID
+		// check LM subsystem ID
 		//
 		m_lmSubsystemKey = m_appLogicCompiler.subsystems()->ssKey(m_lmSubsystemID);
 
@@ -628,16 +758,14 @@ namespace Builder
 	{
 		bool result = true;
 
-		qsizetype signalCount = m_signals->count();
-
 		m_chassisSignals.clear();
 		m_ioSignals.clear();
 
-		for(qsizetype i = 0; i < signalCount; i++)
+		for(AppSignal* sg : *m_signals)
 		{
-			AppSignal& s = (*m_signals)[i];
+			TEST_PTR_CONTINUE(sg);
 
-			if (s.equipmentID().isEmpty() == true)
+			if (sg->equipmentID().isEmpty() == true)
 			{
 				continue;
 			}
@@ -646,7 +774,7 @@ namespace Builder
 
 			bool isIoSignal = false;
 
-			Hardware::DeviceObject* device = m_equipmentSet->deviceObject(s.equipmentID()).get();
+			Hardware::DeviceObject* device = m_equipmentSet->deviceObject(sg->equipmentID()).get();
 
 			if (device == nullptr)
 			{
@@ -717,21 +845,21 @@ namespace Builder
 				continue;
 			}
 
-			if (m_chassisSignals.contains(s.appSignalID()) == true)
+			if (m_chassisSignals.contains(sg->appSignalID()) == true)
 			{
 				assert(false);				// duplicate signal!
 				continue;
 			}
 
-			m_chassisSignals.insert({s.appSignalID(), &s});
+			m_chassisSignals.insert({sg->appSignalID(), sg});
 
 			if (isIoSignal == true)
 			{
-				m_ioSignals.insert(s.appSignalID(), &s);
+				m_ioSignals.insert(sg->appSignalID(), sg);
 
 				if (deviceAppSignal != nullptr)
 				{
-					m_equipmentSignals.insert(deviceAppSignal->equipmentIdTemplate(), &s);
+					m_equipmentSignals.insert(deviceAppSignal->equipmentIdTemplate(), sg);
 				}
 				else
 				{
@@ -745,13 +873,6 @@ namespace Builder
 
 	bool ModuleLogicCompiler::createUalItemsMaps()
 	{
-		m_afbls.clear();
-
-		for(std::shared_ptr<Afb::AfbElement> afbl : m_lmDescription->afbElements())
-		{
-			m_afbls.insert(afbl);
-		}
-
 		m_ualItems.clear();
 		m_pinParent.clear();
 
@@ -769,13 +890,12 @@ namespace Builder
 			//
 			if (m_ualItems.contains(logicItem.m_fblItem->guid()) == true)
 			{
-				UalItem* firstItem = m_ualItems[logicItem.m_fblItem->guid()];
+				UalItem* firstItem = m_ualItems.value(logicItem.m_fblItem->guid());
 
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 								   QString(tr("Duplicate GUID %1 of %2 and %3 elements")).
 										arg(logicItem.m_fblItem->guid().toString()).arg(firstItem->strID()).
 										arg(getUalItemStrID(logicItem)));
-
 				result = false;
 
 				continue;
@@ -791,9 +911,10 @@ namespace Builder
 
 			// add input pins
 			//
-			for(const LogicPin& input : appItem->inputs())
+			for(const SchemaPin& input : appItem->inputs())
 			{
-				UalItem* firstItem = m_pinParent.value(input.guid(), nullptr);
+				UalItem* firstItem = getValueOrNullptr(m_pinParent, input.guid());
+				//UalItem* firstItem = m_pinParent.value(input.guid(), nullptr);
 
 				if (firstItem != nullptr)
 				{
@@ -808,14 +929,14 @@ namespace Builder
 					continue;
 				}
 
-				m_pinParent.insert(input.guid(), appItem);
+				m_pinParent.emplace(input.guid(), appItem);
 			}
 
 			// add output pins
 			//
-			for(const LogicPin& output : appItem->outputs())
+			for(const SchemaPin& output : appItem->outputs())
 			{
-				UalItem* firstItem = m_pinParent.value(output.guid(), nullptr);
+				UalItem* firstItem = getValueOrNullptr(m_pinParent, output.guid());
 
 				if (firstItem != nullptr)
 				{
@@ -830,7 +951,7 @@ namespace Builder
 					continue;
 				}
 
-				m_pinParent.insert(output.guid(), appItem);
+				m_pinParent.emplace(output.guid(), appItem);
 			}
 		}
 
@@ -846,6 +967,8 @@ namespace Builder
 	{
 		bool result = true;
 
+		bool packedLogicExists = false;
+
 		for(UalItem* ualItem : m_ualItems)
 		{
 			if (ualItem->isAfb() == false)
@@ -858,10 +981,58 @@ namespace Builder
 			if (ualAfb == nullptr)
 			{
 				result = false;
+				continue;
 			}
+
+			packedLogicExists |= ualAfb->isPackedLogic();
+		}
+
+		RETURN_IF_FALSE(result);
+
+		findLogicAfbsForBitAccReplacing(Afb::AFB_AND, 1, &m_afbsAndForBitAccReplacing);
+		findLogicAfbsForBitAccReplacing(Afb::AFB_OR, 2, &m_afbsOrForBitAccReplacing);
+
+		if (packedLogicExists && m_lmDescription->isBitAccAvailable() == false)
+		{
+			// reserve one instance of AFB LOGIC to process Packed Logic items
+			// this instance will fully configured just before packed logic processing
+			//
+			result &= m_afbComponents.addInstance(TO_INT(Afb::AfbType::LOGIC), &m_packedLogicAfbInstance, m_log);
+
+			Q_ASSERT(m_packedLogicAfbInstance >= 0);
 		}
 
 		return result;
+	}
+
+	UalAfb* ModuleLogicCompiler::createUalAfb(const UalItem& ualItem)
+	{
+		if (ualItem.isAfb() == false)
+		{
+			return nullptr;
+		}
+
+		UalAfb* ualAfb = new UalAfb(ualItem, m_afbComponents.isBusProcessingAfb(ualItem.strID()));
+
+		if (ualAfb->calculateFbParamValues(this) == false)
+		{
+			delete ualAfb;
+			return nullptr;
+		}
+
+		// get Functional Block instance
+		//
+		bool result = m_afbComponents.addInstance(ualAfb, m_log);
+
+		if (result == false)
+		{
+			delete ualAfb;
+			return nullptr;
+		}
+
+		m_ualAfbs.insert(ualAfb);
+
+		return ualAfb;
 	}
 
 	bool ModuleLogicCompiler::createUalSignals()
@@ -872,6 +1043,8 @@ namespace Builder
 		bool result = true;
 
 		result &= writeUalItemsFile();
+
+		result &= createUalItemSignalsList();
 
 		result &= loopbacksPreprocessing();
 
@@ -969,10 +1142,6 @@ namespace Builder
 
 		result &= checkBusProcessingItemsConnections();
 
-		RETURN_IF_FALSE(result);
-
-		signalSet()->buildID2IndexMap();
-
 		return result;
 	}
 
@@ -991,19 +1160,112 @@ namespace Builder
 
 			E::UalItemType itemType = ualItem->type();
 
-			itemStr = QString("%1, %2").arg(E::valueToString(itemType)).arg(ualItem->label());
+			itemStr = QString("%1, %2").arg(E::valueToString(itemType)).arg(ualItem->label().leftJustified(16));
 
-			if (itemType == E::UalItemType::Signal)
+			switch(itemType)
 			{
-				itemStr += QString(", %1").arg(ualItem->strID());
+			case E::UalItemType::Unknown:
+				break;
+
+			case E::UalItemType::Signal:
+				{
+					const SchemaSignal* l = ualItem->schemaSignal();
+					TEST_PTR_CONTINUE(l);
+					itemStr += QString(", ids=%1").arg(l->appSignalIdList().join(","));
+				}
+				break;
+
+			case E::UalItemType::Afb:
+				{
+					const SchemaAfb* l = ualItem->schemaAfb();
+					TEST_PTR_CONTINUE(l);
+					itemStr += QString(", %1, opcode=%2").arg(l->afbStrID()).arg(l->afbElement().opCode());
+				}
+				break;
+
+			case E::UalItemType::Const:
+				{
+					const SchemaConst* l = ualItem->schemaConst();
+					TEST_PTR_CONTINUE(l);
+					itemStr += QString(", type=%1").
+									arg(E::valueToString(l->type()));
+
+					switch(l->type())
+					{
+					case VFrame30::SchemaItemConst::ConstType::IntegerType:
+							itemStr += QString(", val=%1").arg(l->signedInt32NativeValue());
+							break;
+					case VFrame30::SchemaItemConst::ConstType::FloatType:
+							itemStr += QString(", val=%1").arg(l->floatNativeValue());
+							break;
+					case VFrame30::SchemaItemConst::ConstType::Discrete:
+							itemStr += QString(", val=%1").arg(l->discreteNativeValue());
+							break;
+					}
+				}
+				break;
+
+			case E::UalItemType::Transmitter:
+				{
+					const SchemaTransmitter* l = ualItem->schemaTransmitter();
+					TEST_PTR_CONTINUE(l);
+					itemStr += QString(", conn=%1").arg(l->connectionIdsAsList().join(", "));
+				}
+				break;
+
+			case E::UalItemType::Receiver:
+				{
+					const SchemaReceiver* l = ualItem->schemaReceiver();
+					TEST_PTR_CONTINUE(l);
+					itemStr += QString(", conn=%1").arg(l->connectionIdsAsList().join(", "));
+				}
+				break;
+
+			case E::UalItemType::Terminator:
+				break;
+
+			case E::UalItemType::BusComposer:
+				{
+					const SchemaBusComposer* l = ualItem->schemaBusComposer();
+					TEST_PTR_CONTINUE(l);
+					itemStr += QString(", busType=%1").arg(l->busTypeId());
+				}
+				break;
+
+			case E::UalItemType::BusExtractor:
+				{
+					const SchemaBusExtractor* l = ualItem->schemaBusExtractor();
+					TEST_PTR_CONTINUE(l);
+					itemStr += QString(", busType=%1").arg(l->busTypeId());
+				}
+				break;
+
+			case E::UalItemType::LoopbackSource:
+				{
+					const SchemaLoopbackSource* l = ualItem->schemaLoopbackSource();
+					TEST_PTR_CONTINUE(l);
+					itemStr += QString(", loopbackID=%1").arg(l->loopbackId());
+				}
+				break;
+
+			case E::UalItemType::LoopbackTarget:
+				{
+					const SchemaLoopbackTarget* l = ualItem->schemaLoopbackTarget();
+					TEST_PTR_CONTINUE(l);
+					itemStr += QString(", loopbackID=%1").arg(l->loopbackId());
+				}
+				break;
+
+			default:
+				Q_ASSERT(false);
 			}
 
 			items.append(itemStr);
 		}
 
-		return m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID), lmEquipmentID() + ".uil", "", "", items, false);
+		return m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
+									   getInfoFileName("uil"), "", "", items, false);
 	}
-
 
 	bool ModuleLogicCompiler::loopbacksPreprocessing()
 	{
@@ -1041,9 +1303,9 @@ namespace Builder
 				continue;
 			}
 
-			std::vector<LogicPin>& outputs = ualItem->outputs();
+			std::vector<SchemaPin>& outputs = ualItem->outputs();
 
-			for(LogicPin& output : outputs)
+			for(SchemaPin& output : outputs)
 			{
 				QVector<QUuid> connectedInputsGuids;
 
@@ -1071,13 +1333,13 @@ namespace Builder
 
 					// LoopbackSource creation
 					//
-					std::shared_ptr<UalLoopbackSource> loopbackSource = std::make_shared<UalLoopbackSource>();
+					std::shared_ptr<SchemaLoopbackSource> loopbackSource = std::make_shared<SchemaLoopbackSource>();
 					loopbackSource->setLoopbackId(autoLoopbackID);
 					loopbackSource->setLabel(autoLoopbackSourceLabel);
 
 					UalItem* newSourceUalItem = new UalItem(AppLogicItem(loopbackSource, ualItem->schema()));
 					createdItems.append(newSourceUalItem);
-					m_pinParent.insert(loopbackSource->inputs()[0].guid(), newSourceUalItem);
+					m_pinParent.emplace(loopbackSource->inputs()[0].guid(), newSourceUalItem);
 
 					// link ualItem output and loopback source input to each other
 					//
@@ -1086,7 +1348,7 @@ namespace Builder
 				}
 				else
 				{
-					// has LoopbackSource connected to ouput, auto LoopbackSource is not requred
+					// has LoopbackSource connected to ouput, auto LoopbackSource is not required
 					// init variables for auto LoopbackTarget creation only
 					//
 					autoLoopbackTargetLabel = autoLoopbackID;
@@ -1099,7 +1361,7 @@ namespace Builder
 				//
 				for(const QUuid& inputGuid : connectedInputsGuids)
 				{
-					LogicPin& input = ualItem->input(inputGuid);
+					SchemaPin& input = ualItem->input(inputGuid);
 
 					// break output to input link
 					//
@@ -1108,13 +1370,13 @@ namespace Builder
 
 					// LoopbackTarget creation
 					//
-					std::shared_ptr<UalLoopbackTarget> loopbackTarget = std::make_shared<UalLoopbackTarget>();
+					std::shared_ptr<SchemaLoopbackTarget> loopbackTarget = std::make_shared<SchemaLoopbackTarget>();
 					loopbackTarget->setLoopbackId(autoLoopbackID);
 					loopbackTarget->setLabel(autoLoopbackTargetLabel);
 
 					UalItem* newTargetUalItem = new UalItem(AppLogicItem(loopbackTarget, ualItem->schema()));
 					createdItems.append(newTargetUalItem);
-					m_pinParent.insert(loopbackTarget->outputs()[0].guid(), newTargetUalItem);
+					m_pinParent.emplace(loopbackTarget->outputs()[0].guid(), newTargetUalItem);
 
 					// link loopback target output and ualItem input to each other
 					//
@@ -1133,7 +1395,7 @@ namespace Builder
 	}
 
 	void ModuleLogicCompiler::getInputsDirectlyConnectedToOutput(const UalItem* ualItem,
-														 const LogicPin& output,
+														 const SchemaPin& output,
 														 QVector<QUuid>* connectedInputsGuids)
 	{
 		TEST_PTR_RETURN(ualItem);
@@ -1143,7 +1405,7 @@ namespace Builder
 
 		for(const QUuid& pinGuid : associatedIOsGuids)
 		{
-			UalItem* pinParent = m_pinParent.value(pinGuid, nullptr);
+			UalItem* pinParent = getValueOrNullptr(m_pinParent, pinGuid);
 
 			if (pinParent == nullptr)
 			{
@@ -1158,13 +1420,13 @@ namespace Builder
 		}
 	}
 
-	QString ModuleLogicCompiler::getConnectedLoopbackSourceID(const LogicPin& output)
+	QString ModuleLogicCompiler::getConnectedLoopbackSourceID(const SchemaPin& output)
 	{
 		const std::vector<QUuid>& associatedIOsGuids = output.associatedIOs();
 
 		for(const QUuid& pinGuid : associatedIOsGuids)
 		{
-			UalItem* pinParent = m_pinParent.value(pinGuid, nullptr);
+			UalItem* pinParent = getValueOrNullptr(m_pinParent, pinGuid);
 
 			if (pinParent == nullptr)
 			{
@@ -1174,7 +1436,7 @@ namespace Builder
 
 			if (pinParent->isLoopbackSource() == true)
 			{
-				const UalLoopbackSource* src = pinParent->ualLoopbackSource();
+				const SchemaLoopbackSource* src = pinParent->schemaLoopbackSource();
 
 				if (src != nullptr)
 				{
@@ -1185,7 +1447,7 @@ namespace Builder
 			}
 		}
 
-		return QString();
+		return EMPTY_STR;
 	}
 
 	bool ModuleLogicCompiler::findLoopbackSources()
@@ -1201,7 +1463,7 @@ namespace Builder
 				continue;
 			}
 
-			const UalLoopbackSource* source = ualItem->ualLoopbackSource();
+			const SchemaLoopbackSource* source = ualItem->schemaLoopbackSource();
 
 			if (source == nullptr)
 			{
@@ -1240,7 +1502,7 @@ namespace Builder
 				continue;
 			}
 
-			const UalLoopbackTarget* target = ualItem->ualLoopbackTarget();
+			const SchemaLoopbackTarget* target = ualItem->schemaLoopbackTarget();
 
 			if (target == nullptr)
 			{
@@ -1273,7 +1535,7 @@ namespace Builder
 	}
 
 	bool ModuleLogicCompiler::getSignalsAndPinsLinkedToOutPin(const UalItem* ualItem,
-															const LogicPin& outPin,
+															const SchemaPin& outPin,
 															std::set<QString>* linkedSignals,
 															std::set<const UalItem*>* linkedItems,
 															std::map<QUuid, const UalItem*>* linkedPins)
@@ -1294,7 +1556,7 @@ namespace Builder
 
 		for(QUuid inPin : associatedInPins)
 		{
-			const UalItem* linkedItem = m_pinParent.value(inPin, nullptr);
+			const UalItem* linkedItem = getValueOrNullptr(m_pinParent, inPin);
 
 			if (linkedItem == nullptr)
 			{
@@ -1368,6 +1630,45 @@ namespace Builder
 		return result;
 	}
 
+	bool ModuleLogicCompiler::createUalItemSignalsList()
+	{
+		m_ualItemsSignals.clear();
+
+		for(const UalItem* ualItem : m_ualItems)
+		{
+			TEST_PTR_CONTINUE(ualItem);
+
+			if (ualItem->isSignal() == false)
+			{
+				continue;
+			}
+
+			const SchemaSignal* s = ualItem->schemaSignal();
+
+			TEST_PTR_CONTINUE(s);
+
+			QStringList appSignalIDs = s->appSignalIdList();
+
+			for(const QString& id : appSignalIDs)
+			{
+				Hash idHash = calcHash(id);
+
+				auto it = m_ualItemsSignals.find(idHash);
+
+				if (it == m_ualItemsSignals.end())
+				{
+					auto [newIt, b] = m_ualItemsSignals.emplace(idHash, std::set<QUuid>());
+
+					it = newIt;
+				}
+
+				it->second.insert(ualItem->guid());
+			}
+		}
+
+		return true;
+	}
+
 	bool ModuleLogicCompiler::createUalSignalsFromInputAndTuningAcquiredSignals()
 	{
 		bool result = true;
@@ -1435,7 +1736,7 @@ namespace Builder
 	{
 		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
 
-		const UalBusComposer* busComposer = ualItem->ualBusComposer();
+		const SchemaBusComposer* busComposer = ualItem->schemaBusComposer();
 
 		if (busComposer == nullptr)
 		{
@@ -1443,7 +1744,7 @@ namespace Builder
 			return false;
 		}
 
-		const std::vector<LogicPin>& outputs = busComposer->outputs();
+		const std::vector<SchemaPin>& outputs = busComposer->outputs();
 
 		if (outputs.size() != 1)
 		{
@@ -1451,7 +1752,7 @@ namespace Builder
 			return false;
 		}
 
-		const LogicPin& outPin = outputs[0];
+		const SchemaPin& outPin = outputs[0];
 
 		if (isConnectedToTerminatorOnly(outPin) == true)
 		{
@@ -1477,7 +1778,7 @@ namespace Builder
 		return result;
 	}
 
-	UalSignal* ModuleLogicCompiler::createBusParentSignal(UalItem* ualItem, const LogicPin& outPin, AppSignal* appBusSignal, const QString& busTypeID)
+	UalSignal* ModuleLogicCompiler::createBusParentSignal(UalItem* ualItem, const SchemaPin& outPin, AppSignal* appBusSignal, const QString& busTypeID)
 	{
 		BusShared bus = m_signals->getBus(busTypeID);
 
@@ -1510,7 +1811,7 @@ namespace Builder
 			return nullptr;
 		}
 
-		const UalBusExtractor* busExtractor = ualItem->ualBusExtractor();
+		const SchemaBusExtractor* busExtractor = ualItem->schemaBusExtractor();
 
 		if (busExtractor == nullptr)
 		{
@@ -1518,7 +1819,7 @@ namespace Builder
 			return nullptr;
 		}
 
-		const std::vector<LogicPin>& inputs = busExtractor->inputs();
+		const std::vector<SchemaPin>& inputs = busExtractor->inputs();
 
 		if (inputs.size() != 1)
 		{
@@ -1526,7 +1827,7 @@ namespace Builder
 			return nullptr;
 		}
 
-		const LogicPin& inPin = inputs[0];
+		const SchemaPin& inPin = inputs[0];
 
 		QString busTypeID = busExtractor->busTypeId();
 
@@ -1565,7 +1866,7 @@ namespace Builder
 	{
 		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
 
-		const UalReceiver* ualReceiver = ualItem->ualReceiver();
+		const SchemaReceiver* ualReceiver = ualItem->schemaReceiver();
 
 		if (ualReceiver == nullptr)
 		{
@@ -1592,7 +1893,7 @@ namespace Builder
 			return false;
 		}
 
-		const std::vector<LogicPin>& outputs = ualItem->outputs();
+		const std::vector<SchemaPin>& outputs = ualItem->outputs();
 
 		int outPinIndex = -1;
 		int validityPinIndex = -1;
@@ -1630,7 +1931,7 @@ namespace Builder
 
 		// UalSignal creation from receiver's output pin
 		//
-		const LogicPin& outPin = outputs[outPinIndex];
+		const SchemaPin& outPin = outputs[outPinIndex];
 
 		if (ualReceiver->appSignalIdsAsList().size() > 1)
 		{
@@ -1652,14 +1953,14 @@ namespace Builder
 			return result;						// receiver hasn't validity pin, it is ok
 		}
 
-		const LogicPin& validityPin = outputs[validityPinIndex];
+		const SchemaPin& validityPin = outputs[validityPinIndex];
 
 		result &= createUalSignalFromReceiverValidity(ualItem, validityPin, connection);
 
 		return result;
 	}
 
-	bool ModuleLogicCompiler::createUalSignalFromReceiverOutput(UalItem* ualItem, const LogicPin& outPin, const QString& receivedAppSignalID, bool isSinglePortConnection)
+	bool ModuleLogicCompiler::createUalSignalFromReceiverOutput(UalItem* ualItem, const SchemaPin& outPin, const QString& receivedAppSignalID, bool isSinglePortConnection)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
 
@@ -1763,7 +2064,7 @@ namespace Builder
 			return false;
 		}
 
-		ualSignal->setReceivedOptoAppSignalID(receivedAppSignalID, ualItem->ualReceiver());
+		ualSignal->setReceivedOptoAppSignalID(receivedAppSignalID, ualItem->schemaReceiver());
 
 		result &= linkConnectedItems(ualItem, outPin, ualSignal);
 
@@ -1771,7 +2072,7 @@ namespace Builder
 	}
 
 	bool ModuleLogicCompiler::createUalSignalFromReceiverValidity(UalItem* ualItem,
-																  const LogicPin& validityPin,
+																  const SchemaPin& validityPin,
 																  std::shared_ptr<Hardware::Connection> connection)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
@@ -1827,7 +2128,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::getReceiverConnectionID(const UalReceiver* receiver, QString* connectionID, const QString& schemaID)
+	bool ModuleLogicCompiler::getReceiverConnectionID(const SchemaReceiver* receiver, QString* connectionID, const QString& schemaID)
 	{
 		TEST_PTR_RETURN_FALSE(receiver);
 		TEST_PTR_RETURN_FALSE(connectionID);
@@ -1970,7 +2271,7 @@ namespace Builder
 				else
 				{
 					m_signals->append(validitySignal, m_lmShared);
-					m_signals->updateID2IndexInMap(validitySignal);
+
 					m_chassisSignals.insert({validitySignal->appSignalID(), validitySignal});
 					m_ioSignals.insert(validitySignal->appSignalID(), validitySignal);
 					m_equipmentSignals.insert(validitySignalEquipmentID, validitySignal);
@@ -2085,7 +2386,7 @@ namespace Builder
 			return false;
 		}
 
-		const std::vector<LogicPin>& outputs = ualItem->outputs();
+		const std::vector<SchemaPin>& outputs = ualItem->outputs();
 
 		if (outputs.size() != 1)
 		{
@@ -2094,7 +2395,7 @@ namespace Builder
 			return false;
 		}
 
-		const LogicPin& outPin = ualItem->outputs()[0];
+		const SchemaPin& outPin = ualItem->outputs()[0];
 
 		switch(appSignal->signalType())
 		{
@@ -2141,7 +2442,7 @@ namespace Builder
 	{
 		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
 
-		const UalConst* ualConst = ualItem->ualConst();
+		const SchemaConst* ualConst = ualItem->schemaConst();
 
 		if (ualConst == nullptr)
 		{
@@ -2149,7 +2450,7 @@ namespace Builder
 			return false;
 		}
 
-		const std::vector<LogicPin>& outputs = ualItem->outputs();
+		const std::vector<SchemaPin>& outputs = ualItem->outputs();
 
 		if (outputs.size() != 1)
 		{
@@ -2158,7 +2459,7 @@ namespace Builder
 			return false;
 		}
 
-		const LogicPin& outPin = ualItem->outputs()[0];
+		const SchemaPin& outPin = ualItem->outputs()[0];
 
 		E::SignalType constSignalType = E::SignalType::Discrete;
 		E::AnalogAppSignalFormat constAnalogFormat = E::AnalogAppSignalFormat::SignedInt32;
@@ -2234,12 +2535,11 @@ namespace Builder
 		return result;
 	}
 
-
 	bool ModuleLogicCompiler::createUalSignalsFromAfbOuts(UalItem* ualItem)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
 
-		UalAfb* ualAfb = m_ualAfbs.value(ualItem->guid(), nullptr);
+		UalAfb* ualAfb = m_ualAfbs.getAfb(ualItem->guid());
 
 		if (ualAfb == nullptr)
 		{
@@ -2280,11 +2580,11 @@ namespace Builder
 			}
 		}
 
-		const std::vector<LogicPin>& outputs = ualItem->outputs();
+		const std::vector<SchemaPin>& outputs = ualItem->outputs();
 
-		for(const LogicPin& outPin : outputs)
+		for(const SchemaPin& outPin : outputs)
 		{
-			LogicAfbSignal outAfbSignal;
+			AfbSignal outAfbSignal;
 
 			if (ualAfb->getAfbSignalByPin(outPin, &outAfbSignal) == false)
 			{
@@ -2354,9 +2654,9 @@ namespace Builder
 	{
 		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
 
-		const UalBusExtractor* extractor = ualItem->ualBusExtractor();
+		const SchemaBusExtractor* extractor = ualItem->schemaBusExtractor();
 
-		const std::vector<LogicPin>& inputs = extractor->inputs();
+		const std::vector<SchemaPin>& inputs = extractor->inputs();
 
 		if (inputs.size() != 1)
 		{
@@ -2392,11 +2692,11 @@ namespace Builder
 			return false;
 		}
 
-		const std::vector<LogicPin>& outputs = extractor->outputs();
+		const std::vector<SchemaPin>& outputs = extractor->outputs();
 
 		bool result = true;
 
-		for(const LogicPin& outPin : outputs)
+		for(const SchemaPin& outPin : outputs)
 		{
 			UalSignal* busChildSignal = busSignal->getBusChildSignal(outPin.caption());
 
@@ -2428,7 +2728,7 @@ namespace Builder
 	}
 
 
-	bool ModuleLogicCompiler::linkConnectedItems(UalItem* srcUalItem, const LogicPin& outPin, UalSignal* ualSignal)
+	bool ModuleLogicCompiler::linkConnectedItems(UalItem* srcUalItem, const SchemaPin& outPin, UalSignal* ualSignal)
 	{
 		if (srcUalItem == nullptr || ualSignal == nullptr)
 		{
@@ -2448,7 +2748,7 @@ namespace Builder
 
 		for(QUuid inPinUuid : associatedInputs)
 		{
-			UalItem* destUalItem = m_pinParent.value(inPinUuid, nullptr);
+			UalItem* destUalItem = getValueOrNullptr(m_pinParent, inPinUuid);
 
 			if (destUalItem == nullptr)
 			{
@@ -2564,48 +2864,11 @@ namespace Builder
 
 		if (result == false)
 		{
-			// Uncompatible signals connection (Logic schema '%1').
+			// Incompatible signals connection (Logic schema '%1').
 			//
 			m_log->errALC5117(srcItem->guid(), srcItem->label(), signalItem->guid(), signalItem->label(), signalItem->schemaID());
 			return false;
 		}
-
-/*		if (s->isOutput() == true)
-		{
-			// create separate UAL signal for each output signal
-
-			UalSignal* outUalSignal = m_ualSignals.createSignal(s);
-
-			if (result == false)
-			{
-				return false;
-			}
-
-			result = m_ualSignals.appendRefPin(signalItem, inPinUuid, outUalSignal);
-
-			if (result == false)
-			{
-				return false;
-			}
-
-			m_outUalSignals.insert(outUalSignal, srcUalSignal);
-		}
-		else
-		{
-			result = m_ualSignals.appendRefPin(signalItem, inPinUuid, srcUalSignal);
-
-			if (result == false)
-			{
-				return false;
-			}
-
-			result = m_ualSignals.appendRefSignal(s, srcUalSignal);
-
-			if (result == false)
-			{
-				return false;
-			}
-		}*/
 
 		//
 
@@ -2625,7 +2888,7 @@ namespace Builder
 
 		//
 
-		const std::vector<LogicPin>& outputs = signalItem->outputs();
+		const std::vector<SchemaPin>& outputs = signalItem->outputs();
 
 		if (outputs.size() > 1)
 		{
@@ -2635,7 +2898,7 @@ namespace Builder
 
 		if (outputs.size() == 1)
 		{
-			const LogicPin& output = outputs[0];
+			const SchemaPin& output = outputs[0];
 
 			m_ualSignals.appendRefPin(signalItem, output.guid(), srcUalSignal);
 
@@ -2661,7 +2924,7 @@ namespace Builder
 			return false;
 		}
 
-		UalAfb* ualAfb = m_ualAfbs.value(destItem->guid(), nullptr);
+		UalAfb* ualAfb = m_ualAfbs.getAfb(destItem->guid());
 
 		if (ualAfb == nullptr)
 		{
@@ -2669,7 +2932,7 @@ namespace Builder
 			return false;
 		}
 
-		LogicAfbSignal inSignal;
+		AfbSignal inSignal;
 
 		bool result = ualAfb->getAfbSignalByPinUuid(inPinUuid, &inSignal);
 
@@ -2711,13 +2974,13 @@ namespace Builder
 		//    Items connected to "out" also should be linked to "in"
 		//
 
-		UalAfb* ualAfb = m_ualAfbs.value(setFlagsItem->guid(), nullptr);
+		UalAfb* ualAfb = m_ualAfbs.getAfb(setFlagsItem->guid());
 
 		LOG_IF_NULLPTR_RETURN_FALSE(ualAfb, m_log);
 
 		LOG_INTERNAL_ERROR_IF_FALSE_RETURN_FALSE(ualAfb->isSetFlagsItem(), m_log);
 
-		const LogicPin* inPin = ualAfb->getPin(inPinUuid);
+		const SchemaPin* inPin = ualAfb->getPin(inPinUuid);
 
 		LOG_IF_NULLPTR_RETURN_FALSE(inPin, m_log);
 
@@ -2736,11 +2999,11 @@ namespace Builder
 
 		// linking items connected to "out"
 		//
-		const std::vector<LogicPin>& outputs = ualAfb->outputs();
+		const std::vector<SchemaPin>& outputs = ualAfb->outputs();
 
 		LOG_INTERNAL_ERROR_IF_FALSE_RETURN_FALSE(outputs.size() == 1, log());
 
-		const LogicPin& outPin = outputs[0];
+		const SchemaPin& outPin = outputs[0];
 
 		LOG_INTERNAL_ERROR_IF_FALSE_RETURN_FALSE(outPin.caption() == Afb::OUT_PIN_CAPTION, log());
 
@@ -2761,7 +3024,7 @@ namespace Builder
 			return false;
 		}
 
-		const UalBusComposer* busComposer = busComposerItem->ualBusComposer();
+		const SchemaBusComposer* busComposer = busComposerItem->schemaBusComposer();
 
 		if (busComposer == nullptr)
 		{
@@ -2781,7 +3044,7 @@ namespace Builder
 			return false;
 		}
 
-		const LogicPin& inPin = busComposer->input(inPinUuid);
+		const SchemaPin& inPin = busComposer->input(inPinUuid);
 
 		QString busSignalID = inPin.caption();
 
@@ -2795,7 +3058,7 @@ namespace Builder
 
 		if (ualSignal->isCompatible(bus, busSignal, log()) == false)
 		{
-			// Uncompatible signals connection (Logic schema '%1').
+			// Incompatible signals connection (Logic schema '%1').
 			//
 			m_log->errALC5117(ualSignal->ualItemGuid(), ualSignal->appSignalID(), busComposerItem->guid(), busComposerItem->label(), busComposerItem->schemaID());
 			return false;
@@ -2814,7 +3077,7 @@ namespace Builder
 			return false;
 		}
 
-		const UalBusExtractor* busExtractor = busExtractorItem->ualBusExtractor();
+		const SchemaBusExtractor* busExtractor = busExtractorItem->schemaBusExtractor();
 
 		if (busExtractor == nullptr)
 		{
@@ -2855,7 +3118,7 @@ namespace Builder
 
 		if (ualSignal->isBus() != true || ualSignal->busTypeID() != busTypeID)
 		{
-			// Uncompatible signals connection (Logic schema '%1').
+			// Incompatible signals connection (Logic schema '%1').
 			//
 			m_log->errALC5117(ualSignal->ualItemGuid(), ualSignal->appSignalID(), busExtractorItem->guid(), busExtractorItem->label(), busExtractorItem->schemaID());
 			return false;
@@ -2913,7 +3176,7 @@ namespace Builder
 	{
 		TEST_PTR_LOG_RETURN_FALSE(loopbackTargetItem, m_log);
 
-		const UalLoopbackTarget* target = loopbackTargetItem->ualLoopbackTarget();
+		const SchemaLoopbackTarget* target = loopbackTargetItem->schemaLoopbackTarget();
 
 		if  (target == nullptr)
 		{
@@ -2936,7 +3199,7 @@ namespace Builder
 			return true;
 		}
 
-		const std::vector<LogicPin>& outputs = loopbackTargetItem->outputs();
+		const std::vector<SchemaPin>& outputs = loopbackTargetItem->outputs();
 
 		if (outputs.size() != 1)
 		{
@@ -2964,7 +3227,7 @@ namespace Builder
 				continue;
 			}
 
-			const UalAfb* afb = m_ualAfbs.value(ualItem->guid(), nullptr);
+			const UalAfb* afb = m_ualAfbs.getAfb(ualItem->guid());
 
 			TEST_PTR_LOG_RETURN_FALSE(afb, m_log);
 
@@ -3074,7 +3337,7 @@ namespace Builder
 			if (linkedValiditySignal->isInput() == false ||
 				linkedValiditySignal->isDiscrete() == false)
 			{
-				// Linked validity signal %1 shoud have Discrete Input type (input signal %2).
+				// Linked validity signal %1 should have Discrete Input type (input signal %2).
 				//
 				m_log->errALC5156(linkedValiditySignal->appSignalID(), s->appSignalID());
 				result = false;
@@ -3148,7 +3411,7 @@ namespace Builder
 				continue;
 			}
 
-			const UalReceiver* receiver = optoSignal->ualReceiver();
+			const SchemaReceiver* receiver = optoSignal->ualReceiver();
 
 			TEST_PTR_CONTINUE(receiver);
 
@@ -3182,12 +3445,12 @@ namespace Builder
 				continue;
 			}
 
-			if (ualItem->assignFlags() == false)
+			if (ualItem->assignFlags(log()) == false)
 			{
 				continue;
 			}
 
-			UalAfb* simLockItem = m_ualAfbs.value(ualItem->guid(), nullptr);
+			UalAfb* simLockItem = m_ualAfbs.getAfb(ualItem->guid());
 
 			if (simLockItem == nullptr)
 			{
@@ -3198,7 +3461,7 @@ namespace Builder
 
 			Q_ASSERT(simLockItem->isSimLockItem() == true);
 
-			const LogicPin* outPin = simLockItem->getPin(Afb::OUT_PIN_CAPTION);
+			const SchemaPin* outPin = simLockItem->getPin(Afb::OUT_PIN_CAPTION);
 
 			if (outPin == nullptr)
 			{
@@ -3255,12 +3518,12 @@ namespace Builder
 				continue;
 			}
 
-			if (ualItem->assignFlags() == false)
+			if (ualItem->assignFlags(log()) == false)
 			{
 				continue;
 			}
 
-			UalAfb* mismatchItem = m_ualAfbs.value(ualItem->guid(), nullptr);
+			UalAfb* mismatchItem = m_ualAfbs.getAfb(ualItem->guid());
 
 			if (mismatchItem == nullptr)
 			{
@@ -3278,7 +3541,7 @@ namespace Builder
 				const QString& inPinCaption = inPinCaptions[pinNo];
 				const QString& outPinCaption = outPinCaptions[pinNo];
 
-				const LogicPin* inPin = mismatchItem->getPin(inPinCaption);
+				const SchemaPin* inPin = mismatchItem->getPin(inPinCaption);
 
 				if (inPin == nullptr)
 				{
@@ -3322,7 +3585,7 @@ namespace Builder
 				continue;
 			}
 
-			UalAfb* setFlagsItem = m_ualAfbs.value(ualItem->guid(), nullptr);
+			UalAfb* setFlagsItem = m_ualAfbs.getAfb(ualItem->guid());
 
 			if (setFlagsItem == nullptr)
 			{
@@ -3333,7 +3596,7 @@ namespace Builder
 
 			Q_ASSERT(setFlagsItem->isSetFlagsItem() == true);
 
-			const LogicPin* outPin = setFlagsItem->getPin(Afb::OUT_PIN_CAPTION);
+			const SchemaPin* outPin = setFlagsItem->getPin(Afb::OUT_PIN_CAPTION);
 
 			if (outPin == nullptr)
 			{
@@ -3401,7 +3664,7 @@ namespace Builder
 
 		// flagIsSet can be == nullptr !
 
-		const LogicPin* pin = ualItem->getPin(pinCaption);
+		const SchemaPin* pin = ualItem->getPin(pinCaption);
 
 		if (pin == nullptr)
 		{
@@ -3472,7 +3735,7 @@ namespace Builder
 								signalWithFlagID,
 								currentStateFlagSignalID,
 								(setFlagsItem == nullptr ? QUuid() : setFlagsItem->guid()),
-								(setFlagsItem == nullptr ? QString() : setFlagsItem->schemaID()));
+								(setFlagsItem == nullptr ? EMPTY_STR : setFlagsItem->schemaID()));
 			return false;
 		}
 
@@ -3642,8 +3905,8 @@ namespace Builder
 			file.append(str);
 		}
 
-		m_resultWriter->addFile(m_resultWriter->subsystemDirectory(lmSubsystemEquipmentIdPath()),
-								QString("SignalsWithFlags.csv"), file);
+		m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
+								getInfoFileName("swf"), file);		// Signals With Flags
 	}
 
 	bool ModuleLogicCompiler::sortUalSignals()
@@ -3658,7 +3921,7 @@ namespace Builder
 		return true;
 	}
 
-	AppSignal* ModuleLogicCompiler::getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal, const QString& busTypeID)
+	AppSignal* ModuleLogicCompiler::getCompatibleConnectedSignal(const SchemaPin& outPin, const AfbSignal& outAfbSignal, const QString& busTypeID)
 	{
 		const std::vector<QUuid>& connectedPinsUuids = outPin.associatedIOs();
 
@@ -3666,7 +3929,7 @@ namespace Builder
 
 		for(QUuid inPinUuid : connectedPinsUuids)
 		{
-			UalItem* connectedItem = m_pinParent.value(inPinUuid, nullptr);
+			UalItem* connectedItem = getValueOrNullptr(m_pinParent, inPinUuid);
 
 			if (connectedItem == nullptr)
 			{
@@ -3676,7 +3939,7 @@ namespace Builder
 
 			if (connectedItem->isLoopbackSource() == true)
 			{
-				const UalLoopbackSource* source = connectedItem->ualLoopbackSource();
+				const SchemaLoopbackSource* source = connectedItem->schemaLoopbackSource();
 
 				if (source == nullptr)
 				{
@@ -3694,7 +3957,7 @@ namespace Builder
 				// if 'outPin' is connected to 'in' pin of set_flags item
 				// items connected to 'out' pin of set_flags item should be checked
 
-				const LogicPin* inPin = connectedItem->getPin(inPinUuid);
+				const SchemaPin* inPin = connectedItem->getPin(inPinUuid);
 
 				if (inPin == nullptr)
 				{
@@ -3709,7 +3972,7 @@ namespace Builder
 
 				// yes, this is 'in' pin of set_flags item
 
-				const LogicPin* connectedItemOutPin = connectedItem->getPin(Afb::OUT_PIN_CAPTION);
+				const SchemaPin* connectedItemOutPin = connectedItem->getPin(Afb::OUT_PIN_CAPTION);
 
 				if (connectedItemOutPin == nullptr)
 				{
@@ -3772,14 +4035,14 @@ namespace Builder
 		return nullptr;
 	}
 
-	AppSignal* ModuleLogicCompiler::getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal)
+	AppSignal* ModuleLogicCompiler::getCompatibleConnectedSignal(const SchemaPin& outPin, const AfbSignal& outAfbSignal)
 	{
-		return getCompatibleConnectedSignal(outPin, outAfbSignal, QString());
+		return getCompatibleConnectedSignal(outPin, outAfbSignal, EMPTY_STR);
 	}
 
-	AppSignal* ModuleLogicCompiler::getCompatibleConnectedSignal(const LogicPin& outPin, const AppSignal& s)
+	AppSignal* ModuleLogicCompiler::getCompatibleConnectedSignal(const SchemaPin& outPin, const AppSignal& s)
 	{
-		LogicAfbSignal dummySignal;
+		AfbSignal dummySignal;
 
 		dummySignal.setType(s.signalType());
 
@@ -3796,16 +4059,16 @@ namespace Builder
 		return getCompatibleConnectedSignal(outPin, dummySignal, busTypeID);
 	}
 
-	AppSignal* ModuleLogicCompiler::getCompatibleConnectedBusSignal(const LogicPin& outPin, const QString& busTypeID)
+	AppSignal* ModuleLogicCompiler::getCompatibleConnectedBusSignal(const SchemaPin& outPin, const QString& busTypeID)
 	{
-		LogicAfbSignal dummyBusSignal;
+		AfbSignal dummyBusSignal;
 
 		dummyBusSignal.setType(E::SignalType::Bus);
 
 		return getCompatibleConnectedSignal(outPin, dummyBusSignal, busTypeID);
 	}
 
-	bool ModuleLogicCompiler::isCompatible(const LogicAfbSignal& outAfbSignal, const QString& busTypeID, const AppSignal* s)
+	bool ModuleLogicCompiler::isCompatible(const AfbSignal& outAfbSignal, const QString& busTypeID, const AppSignal* s)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(s, m_log);
 
@@ -3830,13 +4093,13 @@ namespace Builder
 		return false;
 	}
 
-	bool ModuleLogicCompiler::isConnectedToTerminatorOnly(const LogicPin& outPin)
+	bool ModuleLogicCompiler::isConnectedToTerminatorOnly(const SchemaPin& outPin) const
 	{
 		const std::vector<QUuid>& connectedPinsUuids = outPin.associatedIOs();
 
 		for(QUuid inPinUuid : connectedPinsUuids)
 		{
-			UalItem* connectedItem = m_pinParent.value(inPinUuid, nullptr);
+			const UalItem* connectedItem = getValueOrNullptr(m_pinParent, inPinUuid);
 
 			TEST_PTR_CONTINUE(connectedItem);
 
@@ -3849,7 +4112,24 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::isConnectedToLoopback(const LogicPin& inPin, std::shared_ptr<Loopback>* loopback)
+	bool ModuleLogicCompiler::isOutConnectedToTerminatorOnly(const UalAfb* ualItem) const
+	{
+		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
+
+		const auto& outs = ualItem->outputs();
+
+		for(const SchemaPin& out : outs)
+		{
+			if (isConnectedToTerminatorOnly(out) == false)
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::isConnectedToLoopback(const SchemaPin& inPin, std::shared_ptr<Loopback>* loopback)
 	{
 		TEST_PTR_RETURN_FALSE(loopback);
 
@@ -3867,8 +4147,8 @@ namespace Builder
 
 		// AFB's out bus type determination rules:
 		//
-		// 1) try determinte BusType by input UalSignals
-		// 2) try determine BusType by bus signal connected to output
+		// 1) try to determine BusType by input UalSignals
+		// 2) try to determine BusType by bus signal connected to output
 
 		determineBusTypeByInputs(ualAfb, outBusTypeID);
 
@@ -3888,9 +4168,9 @@ namespace Builder
 
 		bool result = true;
 
-		for(const LogicPin& inPin : ualAfb->inputs())
+		for(const SchemaPin& inPin : ualAfb->inputs())
 		{
-			LogicAfbSignal afbSignal;
+			AfbSignal afbSignal;
 
 			bool res = ualAfb->getAfbSignalByPin(inPin, &afbSignal);
 
@@ -3926,7 +4206,7 @@ namespace Builder
 					continue;
 				}
 
-				// Uncompatible signals connection (Logic schema '%1').
+				// Incompatible signals connection (Logic schema '%1').
 				//
 				assert(false);				// this error must be detected earlier
 
@@ -4005,11 +4285,11 @@ namespace Builder
 	{
 		QStringList busTypes;
 
-		const std::vector<LogicPin> outputs = ualAfb->outputs();
+		const std::vector<SchemaPin> outputs = ualAfb->outputs();
 
-		for(const LogicPin& outPin : outputs)
+		for(const SchemaPin& outPin : outputs)
 		{
-			LogicAfbSignal afbSignal;
+			AfbSignal afbSignal;
 
 			bool res = ualAfb->getAfbSignalByPin(outPin, &afbSignal);
 
@@ -4110,7 +4390,7 @@ namespace Builder
 		return true;
 	}
 
-	std::optional<int> ModuleLogicCompiler::getOutPinExpectedReadCount(const LogicPin& outPin)
+	std::optional<int> ModuleLogicCompiler::getOutPinExpectedReadCount(const SchemaPin& outPin)
 	{
 		Q_ASSERT(outPin.IsOutput() == true);
 
@@ -4121,7 +4401,7 @@ namespace Builder
 
 		for(const QUuid& inPinGuid : outPin.associatedIOs())
 		{
-			UalItem* inPinParentItem = m_pinParent.value(inPinGuid);
+			UalItem* inPinParentItem = getValueOrNullptr(m_pinParent, inPinGuid);
 
 			TEST_PTR_CONTINUE(inPinParentItem);
 
@@ -4190,7 +4470,7 @@ namespace Builder
 
 		// this is set_flags AFB
 		//
-		const LogicPin* inPin = ualItem->getPin(inPinGuid);
+		const SchemaPin* inPin = ualItem->getPin(inPinGuid);
 
 		if (inPin == nullptr)
 		{
@@ -4208,7 +4488,7 @@ namespace Builder
 		// this is "in" pin of set_flags AFB
 		// calculation of all reads of pins connected to "out" pin is required
 		//
-		const std::vector<LogicPin>& outs = ualItem->outputs();
+		const std::vector<SchemaPin>& outs = ualItem->outputs();
 
 		if (outs.size() != 1)
 		{
@@ -4249,7 +4529,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::checkPinsConnectedToSignal(const std::vector<LogicPin>& pins, bool shouldConnectToSameSignal, UalSignal** sameSignalPtr)
+	bool ModuleLogicCompiler::checkPinsConnectedToSignal(const std::vector<SchemaPin>& pins, bool shouldConnectToSameSignal, UalSignal** sameSignalPtr)
 	{
 		if (sameSignalPtr == nullptr)
 		{
@@ -4257,7 +4537,7 @@ namespace Builder
 			return false;
 		}
 
-		for(const LogicPin& pin : pins)
+		for(const SchemaPin& pin : pins)
 		{
 			UalSignal* connectedSignal = m_ualSignals.get(pin.guid());
 
@@ -4291,7 +4571,7 @@ namespace Builder
 	{
 		bool result = true;
 
-		for(const LogicPin& inPin : ualItem->inputs())
+		for(const SchemaPin& inPin : ualItem->inputs())
 		{
 			UalSignal* existsSignal = m_ualSignals.get(inPin.guid());
 
@@ -4306,7 +4586,7 @@ namespace Builder
 			}
 		}
 
-		for(const LogicPin& outPin : ualItem->outputs())
+		for(const SchemaPin& outPin : ualItem->outputs())
 		{
 			UalSignal* existsSignal = m_ualSignals.get(outPin.guid());
 
@@ -4337,7 +4617,7 @@ namespace Builder
 		// 2) maxBusSize > BusTypeID.sizeW
 		// 3) same E::BusDataFormat
 		//
-		UalAfb* destAppFb = m_ualAfbs.value(destAppItem->guid(), nullptr);
+		UalAfb* destAppFb = m_ualAfbs.getAfb(destAppItem->guid());
 
 		if (destAppFb == nullptr)
 		{
@@ -4345,7 +4625,7 @@ namespace Builder
 			return false;
 		}
 
-		LogicAfbSignal destAfbSignal;
+		AfbSignal destAfbSignal;
 
 		if (destAppFb->getAfbSignalByPinUuid(destPinUuid, &destAfbSignal) == false)
 		{
@@ -4420,7 +4700,7 @@ namespace Builder
 			return false;
 		}
 
-		const UalBusExtractor* busExtractor = destAppItem->ualBusExtractor();
+		const SchemaBusExtractor* busExtractor = destAppItem->schemaBusExtractor();
 
 		if (busExtractor == nullptr)
 		{
@@ -4483,7 +4763,7 @@ namespace Builder
 		{
 			if (tuningEnabled == true)
 			{
-				// Tuning is enabled for module %1 but tunable signals is not found.
+				// Tuning is enabled for module %1 but tunable signals are not found.
 				//
 				m_log->wrnALC5165(lmEquipmentID());
 			}
@@ -4713,6 +4993,8 @@ namespace Builder
 			return false;
 		}
 
+		RETURN_IF_FALSE(listsUniquenessCheck());
+
 		result &= setSignalsCalculatedAttributes();
 
 		if (result == false)
@@ -4721,7 +5003,10 @@ namespace Builder
 			return false;
 		}
 
+		// Discretes
+		//
 		sortSignalList(m_acquiredDiscreteInputSignals);
+		sortSignalList(m_acquiredDiscreteInvertedInputSignals);
 		sortSignalList(m_acquiredDiscreteStrictOutputSignals);
 		sortSignalList(m_acquiredDiscreteInternalSignals);
 		sortSignalList(m_acquiredDiscreteOptoSignals);
@@ -4729,7 +5014,10 @@ namespace Builder
 		sortSignalList(m_acquiredDiscreteConstSignals);
 		//	m_acquiredDiscreteTuningSignals;		sorting not required
 
+		// Analogs
+		//
 		sortSignalList(m_nonAcquiredDiscreteInputSignals);
+		sortSignalList(m_nonAcquiredDiscreteInvertedInputSignals);
 		sortSignalList(m_nonAcquiredDiscreteStrictOutputSignals);
 		sortSignalList(m_nonAcquiredDiscreteInternalSignals);
 
@@ -4744,6 +5032,8 @@ namespace Builder
 		sortSignalList(m_nonAcquiredAnalogStrictOutputSignals);
 		sortSignalList(m_nonAcquiredAnalogInternalSignals);
 
+		// Buses
+		//
 		sortSignalList(m_acquiredInputBuses);
 		sortSignalList(m_acquiredOutputBuses);
 		sortSignalList(m_acquiredInternalBuses);
@@ -4761,6 +5051,7 @@ namespace Builder
 	bool ModuleLogicCompiler::createAcquiredDiscreteInputSignalsList()
 	{
 		m_acquiredDiscreteInputSignals.clear();
+		m_acquiredDiscreteInvertedInputSignals.clear();
 
 		//	list include signals that:
 		//
@@ -4780,7 +5071,14 @@ namespace Builder
 				s->isInput() == true &&
 				s->isBusChild() == false)
 			{
-				m_acquiredDiscreteInputSignals.append(s);
+				if (s->invertSignal() == true)
+				{
+					m_acquiredDiscreteInvertedInputSignals.append(s);
+				}
+				else
+				{
+					m_acquiredDiscreteInputSignals.append(s);
+				}
 			}
 		}
 
@@ -4960,6 +5258,7 @@ namespace Builder
 	bool ModuleLogicCompiler::createNonAcquiredDiscreteInputSignalsList()
 	{
 		m_nonAcquiredDiscreteInputSignals.clear();
+		m_nonAcquiredDiscreteInvertedInputSignals.clear();
 
 		//	list include signals that:
 		//
@@ -4979,7 +5278,14 @@ namespace Builder
 				s->isInput() == true &&
 				s->isBusChild() == false)
 			{
-				m_nonAcquiredDiscreteInputSignals.append(s);
+				if (s->invertSignal() == true)
+				{
+					m_nonAcquiredDiscreteInvertedInputSignals.append(s);
+				}
+				else
+				{
+					m_nonAcquiredDiscreteInputSignals.append(s);
+				}
 			}
 		}
 
@@ -5042,6 +5348,31 @@ namespace Builder
 				s->isHeapPlaced() == false)
 			{
 				m_nonAcquiredDiscreteInternalSignals.append(s);
+			}
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::createDiscreteInvertedOutputSignalsList()
+	{
+		m_discreteInvertedOutputSignals.clear();
+
+		//	list include signals that:
+		//
+		//	+ discrete
+		//	+ output
+		//	+ invertSignal
+
+		for(UalSignal* s : m_ualSignals)
+		{
+			TEST_PTR_CONTINUE(s);
+
+			if (s->isDiscrete() == true &&
+				s->isOutput() == true &&
+				s->invertSignal() == true)
+			{
+				m_discreteInvertedOutputSignals.append(s);
 			}
 		}
 
@@ -5170,7 +5501,7 @@ namespace Builder
 			if (s->isAcquired() == true &&
 				s->isAnalog() == true &&
 				s->isBusChild() == true &&
-				s->isFrombusConversionRequired() == false &&	// if isFrombusConversionRequired() == true,
+				s->isFrombusConversionRequired() == false &&	// if isFromBusConversionRequired() == true,
 																// this signal acquired as Internal Analog (after frombus conversion)
 				s->isConst() == false &&
 				s->anyParentBusIsAcquired() == false)
@@ -5382,7 +5713,7 @@ namespace Builder
 		//  - enableTuning
 		//	+ used in UAL
 		//	+ bus child == false
-		//  + bus_child == true && FromBusConversionRequierd == true
+		//  + bus_child == true && FromBusConversionRequired == true
 		//	+ auto analog internal signals (auto generated in m_appSignals)
 
 		for(UalSignal* s : m_ualSignals)
@@ -5724,57 +6055,60 @@ namespace Builder
 	{
 		bool result = true;
 
-		QHash<UalSignal*, UalSignal*> signalsMap;
+		std::set<UalSignal*> presentSignalsMap;
 
-		signalsMap.reserve(static_cast<int>(m_chassisSignals.size()));
+		result &= listUniquenessCheck(&presentSignalsMap, m_acquiredDiscreteInputSignals);
+		result &= listUniquenessCheck(&presentSignalsMap, m_acquiredDiscreteInvertedInputSignals);
+		result &= listUniquenessCheck(&presentSignalsMap, m_acquiredDiscreteStrictOutputSignals);
+		result &= listUniquenessCheck(&presentSignalsMap, m_acquiredDiscreteInternalSignals);
+		result &= listUniquenessCheck(&presentSignalsMap, m_acquiredDiscreteOptoSignals);
+		result &= listUniquenessCheck(&presentSignalsMap, m_acquiredDiscreteBusChildSignals);
+		result &= listUniquenessCheck(&presentSignalsMap, m_acquiredDiscreteTuningSignals);
 
-		result &= listUniquenessCheck(signalsMap, m_acquiredDiscreteInputSignals);
-		result &= listUniquenessCheck(signalsMap, m_acquiredDiscreteStrictOutputSignals);
-		result &= listUniquenessCheck(signalsMap, m_acquiredDiscreteInternalSignals);
-		result &= listUniquenessCheck(signalsMap, m_acquiredDiscreteOptoSignals);
-		result &= listUniquenessCheck(signalsMap, m_acquiredDiscreteBusChildSignals);
-		result &= listUniquenessCheck(signalsMap, m_acquiredDiscreteTuningSignals);
+		result &= listUniquenessCheck(&presentSignalsMap, m_nonAcquiredDiscreteInvertedInputSignals);
+		result &= listUniquenessCheck(&presentSignalsMap, m_nonAcquiredDiscreteStrictOutputSignals);
+		result &= listUniquenessCheck(&presentSignalsMap, m_nonAcquiredDiscreteInternalSignals);
 
-		result &= listUniquenessCheck(signalsMap, m_nonAcquiredDiscreteStrictOutputSignals);
-		result &= listUniquenessCheck(signalsMap, m_nonAcquiredDiscreteInternalSignals);
+		result &= listUniquenessCheck(&presentSignalsMap, m_acquiredAnalogInputSignals);
+		result &= listUniquenessCheck(&presentSignalsMap, m_acquiredAnalogStrictOutputSignals);
+		result &= listUniquenessCheck(&presentSignalsMap, m_acquiredAnalogInternalSignals);
+		result &= listUniquenessCheck(&presentSignalsMap, m_acquiredAnalogOptoSignals);
+		result &= listUniquenessCheck(&presentSignalsMap, m_acquiredAnalogBusChildSignals);
+		result &= listUniquenessCheck(&presentSignalsMap, m_acquiredAnalogTuningSignals);
 
-		result &= listUniquenessCheck(signalsMap, m_acquiredAnalogInputSignals);
-		result &= listUniquenessCheck(signalsMap, m_acquiredAnalogStrictOutputSignals);
-		result &= listUniquenessCheck(signalsMap, m_acquiredAnalogInternalSignals);
-		result &= listUniquenessCheck(signalsMap, m_acquiredAnalogOptoSignals);
-		result &= listUniquenessCheck(signalsMap, m_acquiredAnalogBusChildSignals);
-		result &= listUniquenessCheck(signalsMap, m_acquiredAnalogTuningSignals);
+		result &= listUniquenessCheck(&presentSignalsMap, m_nonAcquiredAnalogInputSignals);
+		result &= listUniquenessCheck(&presentSignalsMap, m_nonAcquiredAnalogStrictOutputSignals);
+		result &= listUniquenessCheck(&presentSignalsMap, m_nonAcquiredAnalogInternalSignals);
 
-		result &= listUniquenessCheck(signalsMap, m_nonAcquiredAnalogInputSignals);
-		result &= listUniquenessCheck(signalsMap, m_nonAcquiredAnalogStrictOutputSignals);
-		result &= listUniquenessCheck(signalsMap, m_nonAcquiredAnalogInternalSignals);
+		result &= listUniquenessCheck(&presentSignalsMap, m_acquiredInputBuses);
+		result &= listUniquenessCheck(&presentSignalsMap, m_acquiredOutputBuses);
+		result &= listUniquenessCheck(&presentSignalsMap, m_acquiredInternalBuses);
+		result &= listUniquenessCheck(&presentSignalsMap, m_acquiredBusChildBuses);
+		result &= listUniquenessCheck(&presentSignalsMap, m_acquiredOptoBuses);
 
-		result &= listUniquenessCheck(signalsMap, m_acquiredInputBuses);
-		result &= listUniquenessCheck(signalsMap, m_acquiredOutputBuses);
-		result &= listUniquenessCheck(signalsMap, m_acquiredInternalBuses);
-		result &= listUniquenessCheck(signalsMap, m_acquiredBusChildBuses);
-		result &= listUniquenessCheck(signalsMap, m_acquiredOptoBuses);
-
-		result &= listUniquenessCheck(signalsMap, m_nonAcquiredOutputBuses);
-		result &= listUniquenessCheck(signalsMap, m_nonAcquiredInternalBuses);
+		result &= listUniquenessCheck(&presentSignalsMap, m_nonAcquiredOutputBuses);
+		result &= listUniquenessCheck(&presentSignalsMap, m_nonAcquiredInternalBuses);
 
 		return result;
 	}
 
-	bool ModuleLogicCompiler::listUniquenessCheck(QHash<UalSignal *, UalSignal *> &signalsMap, const QVector<UalSignal *> &signalList) const
+	bool ModuleLogicCompiler::listUniquenessCheck(std::set<UalSignal*>* presentSignalsSet, const QVector<UalSignal*>& signalList) const
 	{
+		TEST_PTR_RETURN_FALSE(presentSignalsSet);
+
 		bool result = true;
 
 		for(UalSignal* s : signalList)
 		{
-			if (signalsMap.contains(s) == true)
+			if (presentSignalsSet->contains(s) == true)
 			{
-				assert(false);				// signal is duplicate in different signals lists!
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal %1 present in several signals processing lists!").
+														arg(s->appSignalID()));
 				result = false;
 				continue;
 			}
 
-			signalsMap.insert(s, s);
+			presentSignalsSet->insert(s);
 		}
 
 		return result;
@@ -5834,6 +6168,8 @@ namespace Builder
 			if (disposeNonAcquiredAnalogSignals() == false) break;
 
 			if (disposeNonAcquiredBuses() == false) break;
+
+			if (disposeNonAcquiredDiscreteInvertedInputSignals() == false) break;
 
 			if (disposeAnalogAndBusSignalsHeap() == false) break;
 
@@ -6046,6 +6382,11 @@ namespace Builder
 				continue;
 			}
 
+			if (ualSignal->isDiscrete() && ualSignal->invertSignal())
+			{
+				continue;		// UalAddr for inverted signals will be set later
+			}
+
 			ualSignal->setUalAddr(ioSignal->ioBufAddr());
 		}
 
@@ -6060,6 +6401,15 @@ namespace Builder
 		result &= m_memoryMap.appendAcquiredDiscreteInternalSignals(m_acquiredDiscreteInternalSignals);
 		result &= m_memoryMap.appendNonAcquiredDiscreteStrictOutputSignals(m_nonAcquiredDiscreteStrictOutputSignals);
 		result &= m_memoryMap.appendNonAcquiredDiscreteInternalSignals(m_nonAcquiredDiscreteInternalSignals);
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::disposeNonAcquiredDiscreteInvertedInputSignals()
+	{
+		bool result = true;
+
+		result &= m_memoryMap.appendNonAcquiredDiscreteInvertedInputSignals(m_nonAcquiredDiscreteInvertedInputSignals);
 
 		return result;
 	}
@@ -6128,6 +6478,7 @@ namespace Builder
 		bool result = true;
 
 		result &= m_memoryMap.appendAcquiredDiscreteInputSignalsInRegBuf(m_acquiredDiscreteInputSignals);
+		result &= m_memoryMap.appendAcquiredDiscreteInvertedInputSignalsInRegBuf(m_acquiredDiscreteInvertedInputSignals);
 		result &= m_memoryMap.appendAcquiredDiscreteStrictOutputSignalsInRegBuf(m_acquiredDiscreteStrictOutputSignals);
 		result &= m_memoryMap.appendAcquiredDiscreteInternalSignalsInRegBuf(m_acquiredDiscreteInternalSignals);
 		result &= m_memoryMap.appendAcquiredDiscreteOptoSignalsInRegBuf(m_acquiredDiscreteOptoSignals);
@@ -6216,9 +6567,9 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::appendAfbsForAnalogInOutSignalsConversion()
+	bool ModuleLogicCompiler::appendAfbsForInOutSignalsConversion()
 	{
-		if (findFbsForAnalogInOutSignalsConversion() == false)
+		if (findFbsForInOutSignalsConversion() == false)
 		{
 			return false;
 		}
@@ -6228,9 +6579,26 @@ namespace Builder
 			return true;
 		}
 
+		auto assignUalAfbToFbConv = [this](const UalAfb* ualAfb) -> bool
+									{
+										TEST_PTR_RETURN_FALSE(ualAfb);
+
+										auto it = this->m_fbConv.find(ualAfb->caption());
+
+										if (it == this->m_fbConv.end())
+										{
+											LOG_INTERNAL_ERROR(m_log);
+											return false;
+										}
+
+										it->second.ualAfbs.insert(ualAfb);
+
+										return true;
+									};
+
 		bool result = true;
 
-		// append FBs  for analog input signals conversion
+		// append FBs for analog input signals conversion
 		//
 		QVector<UalSignal*> analogInputSignals;
 
@@ -6269,13 +6637,17 @@ namespace Builder
 
 			if (needConversion == true)
 			{
-				UalAfb* appFb = createUalAfb(appItem);
+				UalAfb* ualAfb = createUalAfb(appItem);
 
-				m_inOutSignalsToScalAppFbMap.insert(s->appSignalID(), appFb);
+				RETURN_IF_FALSE(assignUalAfbToFbConv(ualAfb));
+
+				m_inOutSignalsToScalAppFbMap.insert(s->appSignalID(), ualAfb);
 			}
 		}
 
-		// append FBs  for analog output signals conversion
+		RETURN_IF_FALSE(result);
+
+		// append FBs for analog output signals conversion
 		//
 		for(AppSignal* s : m_analogOutputSignalsToConversion)
 		{
@@ -6300,16 +6672,73 @@ namespace Builder
 
 			if (needConversion == true)
 			{
-				UalAfb* appFb = createUalAfb(appItem);
+				UalAfb* ualAfb = createUalAfb(appItem);
 
-				m_inOutSignalsToScalAppFbMap.insert(s->appSignalID(), appFb);
+				RETURN_IF_FALSE(assignUalAfbToFbConv(ualAfb));
+
+				m_inOutSignalsToScalAppFbMap.insert(s->appSignalID(), ualAfb);
+			}
+		}
+
+		RETURN_IF_FALSE(result);
+
+		// append FBs for discrete in/output signals conversion
+		//
+		if ((m_acquiredDiscreteInvertedInputSignals.size() +
+			m_nonAcquiredDiscreteInvertedInputSignals.size() +
+			m_discreteInvertedOutputSignals.size()) > 0)
+		{
+			static const std::vector<QString> afbsNotCaptions =
+			{
+				Afb::AFB_BUS_NOT,
+				Afb::AFB_NOT
+			};
+
+			for(const QString& afbCaption : afbsNotCaptions)
+			{
+				UalAfb* ualAfb = nullptr;
+
+				auto it = this->m_fbConv.find(afbCaption);
+
+				if (it == this->m_fbConv.end())
+				{
+					LOG_INTERNAL_ERROR(this->m_log);
+					result = false;
+					continue;
+				}
+
+				FbConv& fb = it->second;
+
+				QString errorMsg;
+				UalItem appItem;
+
+				appItem.init(fb.pointer, errorMsg);
+
+				if (errorMsg.isEmpty() == false)
+				{
+					LOG_INTERNAL_ERROR_MSG(this->m_log, errorMsg);
+					result = false;
+					continue;
+				}
+
+				ualAfb = createUalAfb(appItem);
+
+				if (ualAfb != nullptr)
+				{
+					fb.ualAfbs.insert(ualAfb);
+				}
+				else
+				{
+					LOG_INTERNAL_ERROR(this->m_log);
+					result = false;
+				}
 			}
 		}
 
 		return result;
 	}
 
-	bool ModuleLogicCompiler::findFbsForAnalogInOutSignalsConversion()
+	bool ModuleLogicCompiler::findFbsForInOutSignalsConversion()
 	{
 		if (m_lm->isBvb() == true)
 		{
@@ -6318,77 +6747,78 @@ namespace Builder
 
 		bool result = true;
 
-		// find AFB: scal_16ui_32fp, scal_16ui_32si, scal_32fp_16ui, scal_32si_16ui
-		//
-		const char* const fbScalCaption[] =
+		static const QString fbConvCaption[] =
 		{
-
-			// for input signals conversion
+			// for analog input signals conversion
 			//
+			Afb::SCALE_UI16_FP32,
+			Afb::SCALE_UI16_SI32,
 
-			"scale_16ui_fp",				// FB_SCALE_16UI_FP_INDEX
-			"scale_16ui_si",				// FB_SCALE_16UI_SI_INDEX
-
-			// for output signals conversion
+			// for analog output signals conversion
 			//
+			Afb::SCALE_FP32_UI16,
+			Afb::SCALE_SI32_UI16,
 
-			"scale_fp_16ui",				// FB_SCALE_FP_16UI_INDEX
-			"scale_si_16ui",				// FB_SCALE_SI_16UI_INDEX
+			// for analog int/out signals conversion
+			//
+			Afb::TCONV_FP32_SI32,
+			Afb::TCONV_SI32_FP32,
 
-			"tconv_fp_si",					// FB_TCONV_FP_SI_INDEX
-			"tconv_si_fp",					// FB_TCONV_SI_FP_INDEX
+			// for discrete int/out signals inversion
+			//
+			Afb::AFB_BUS_NOT,
+			Afb::AFB_NOT,
 		};
 
-		const char* const FB_SCALE_X1_OPNAME = "x1";
-		const char* const FB_SCALE_X2_OPNAME = "x2";
-		const char* const FB_SCALE_Y1_OPNAME = "y1";
-		const char* const FB_SCALE_Y2_OPNAME = "y2";
+		static const QString FB_SCALE_PREFIX("scale_");
 
-		const char* const FB_SCALE_INPUT_SIGNAL_CAPTION = "i_data";
-		const char* const FB_SCALE_OUTPUT_SIGNAL_CAPTION = "o_result";
-
-		for(const char* const fbCaption : fbScalCaption)
+		for(const QString& fbCaption : fbConvCaption)
 		{
 			bool fbFound = false;
 
-			for(std::shared_ptr<Afb::AfbElement> afbElement : m_lmDescription->afbElements())
+			for(const std::shared_ptr<Afb::AfbElement>& afbElement : m_lmDescription->afbElements())
 			{
 				if (afbElement->caption() != fbCaption)
 				{
 					continue;
 				}
 
-				bool isScaleAfb = QString(fbCaption).startsWith("scale_");
+				bool isScaleAfb = fbCaption.startsWith(FB_SCALE_PREFIX);
 
 				fbFound = true;
 
-				FbScal fb;
+				FbConv fb;
 
 				fb.caption = fbCaption;
 				fb.pointer = afbElement;
 
-				int index = 0;
-
 				if (isScaleAfb == true)
 				{
+					int index = 0;
+
 					for(const Afb::AfbParam& afbParam : afbElement->params())
 					{
-						if (afbParam.opName() == FB_SCALE_X1_OPNAME)
+						// do not replace 'index' on 'afbParam.operandIndex()' !
+						//
+						// operandIndex() for parameters always == -1
+						//
+
+						if (afbParam.caption() == Afb::SCALE_PARAM_X1)
 						{
 							fb.x1ParamIndex = index;
 						}
 
-						if (afbParam.opName() == FB_SCALE_X2_OPNAME)
+						if (afbParam.caption() == Afb::SCALE_PARAM_X2)
 						{
 							fb.x2ParamIndex = index;
 						}
 
-						if (afbParam.opName() == FB_SCALE_Y1_OPNAME)
+						if (afbParam.caption() == Afb::SCALE_PARAM_Y1)
 						{
 							fb.y1ParamIndex = index;
 						}
 
-						if (afbParam.opName() == FB_SCALE_Y2_OPNAME)
+						if (afbParam.caption() == Afb::SCALE_PARAM_Y2)
 						{
 							fb.y2ParamIndex = index;
 						}
@@ -6400,25 +6830,25 @@ namespace Builder
 					{
 						// Required parameter %1 of AFB %2 is missing.
 						//
-						m_log->errALC5045(FB_SCALE_X1_OPNAME, fbCaption, QUuid());
+						m_log->errALC5045(Afb::SCALE_PARAM_X1, fbCaption, QUuid());
 						result = false;
 					}
 
 					if (fb.x2ParamIndex == -1)
 					{
-						m_log->errALC5045(FB_SCALE_X2_OPNAME, fbCaption, QUuid());
+						m_log->errALC5045(Afb::SCALE_PARAM_X2, fbCaption, QUuid());
 						result = false;
 					}
 
 					if (fb.y1ParamIndex == -1)
 					{
-						m_log->errALC5045(FB_SCALE_Y1_OPNAME, fbCaption, QUuid());
+						m_log->errALC5045(Afb::SCALE_PARAM_Y1, fbCaption, QUuid());
 						result = false;
 					}
 
 					if (fb.y2ParamIndex == -1)
 					{
-						m_log->errALC5045(FB_SCALE_Y2_OPNAME, fbCaption, QUuid());
+						m_log->errALC5045(Afb::SCALE_PARAM_Y2, fbCaption, QUuid());
 						result = false;
 					}
 				}
@@ -6428,11 +6858,12 @@ namespace Builder
 					break;
 				}
 
-				for(Afb::AfbSignal afbSignal : afbElement->inputSignals())
+				for(const Afb::AfbSignal& afbSignal : afbElement->inputSignals())
 				{
-					if (afbSignal.opName() == FB_SCALE_INPUT_SIGNAL_CAPTION)
+					if (afbSignal.caption() == Afb::IN_PIN_CAPTION)
 					{
 						fb.inputSignalIndex = afbSignal.operandIndex();
+						fb.inputSignalDataSize = afbSignal.size();
 						break;
 					}
 				}
@@ -6441,16 +6872,17 @@ namespace Builder
 				{
 					// Required pin %1 of AFB %2 is missing.
 					//
-					m_log->errALC5173(FB_SCALE_INPUT_SIGNAL_CAPTION, fbCaption, QUuid());
+					m_log->errALC5173(Afb::IN_PIN_CAPTION, fbCaption, QUuid());
 					result = false;
 					break;
 				}
 
-				for(Afb::AfbSignal afbSignal : afbElement->outputSignals())
+				for(const Afb::AfbSignal& afbSignal : afbElement->outputSignals())
 				{
-					if (afbSignal.opName() == FB_SCALE_OUTPUT_SIGNAL_CAPTION)
+					if (afbSignal.caption() == Afb::OUT_PIN_CAPTION)
 					{
 						fb.outputSignalIndex = afbSignal.operandIndex();
+						fb.outputSignalDataSize = afbSignal.size();
 						break;
 					}
 				}
@@ -6459,12 +6891,12 @@ namespace Builder
 				{
 					// Required pin %1 of AFB %2 is missing.
 					//
-					m_log->errALC5173(FB_SCALE_INPUT_SIGNAL_CAPTION, fbCaption, QUuid());
+					m_log->errALC5173(Afb::OUT_PIN_CAPTION, fbCaption, QUuid());
 					result = false;
 					break;
 				}
 
-				m_fbScal.append(fb);
+				m_fbConv.emplace(fb.caption, fb);
 			}
 
 			if (fbFound == false)
@@ -6548,21 +6980,31 @@ namespace Builder
 				{
 					conversionIsKnown = true;
 
-					FbScal fb = m_fbScal[FB_SCALE_16UI_FP_INDEX];
+					auto it = m_fbConv.find(Afb::SCALE_UI16_FP32);
 
-					fb.pointer->params()[fb.x1ParamIndex].afbParamValue().setValue(QVariant(x1));
-					fb.pointer->params()[fb.x2ParamIndex].afbParamValue().setValue(QVariant(x2));
-
-					fb.pointer->params()[fb.y1ParamIndex].afbParamValue().setValue(QVariant(y1));
-					fb.pointer->params()[fb.y2ParamIndex].afbParamValue().setValue(QVariant(y2));
-
-					result &= appItem->init(fb.pointer, errorMsg);
-					appItem->setLabel(signal.appSignalID());
-
-					if (errorMsg.isEmpty() == false)
+					if (it == m_fbConv.end())
 					{
-						LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+						LOG_INTERNAL_ERROR(m_log);
 						result = false;
+					}
+					else
+					{
+						const FbConv& fb = it->second;
+
+						fb.pointer->params()[fb.x1ParamIndex].afbParamValue().setValue(QVariant(x1));
+						fb.pointer->params()[fb.x2ParamIndex].afbParamValue().setValue(QVariant(x2));
+
+						fb.pointer->params()[fb.y1ParamIndex].afbParamValue().setValue(QVariant(y1));
+						fb.pointer->params()[fb.y2ParamIndex].afbParamValue().setValue(QVariant(y2));
+
+						result &= appItem->init(fb.pointer, errorMsg);
+						appItem->setLabel(signal.appSignalID());
+
+						if (errorMsg.isEmpty() == false)
+						{
+							LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+							result = false;
+						}
 					}
 				}
 
@@ -6572,21 +7014,31 @@ namespace Builder
 				{
 					conversionIsKnown = true;
 
-					FbScal& fb = m_fbScal[FB_SCALE_16UI_SI_INDEX];
+					auto it = m_fbConv.find(Afb::SCALE_UI16_SI32);
 
-					fb.pointer->params()[fb.x1ParamIndex].afbParamValue().setValue(QVariant(x1));
-					fb.pointer->params()[fb.x2ParamIndex].afbParamValue().setValue(QVariant(x2));
-
-					fb.pointer->params()[fb.y1ParamIndex].afbParamValue().setValue(QVariant(y1).toInt());
-					fb.pointer->params()[fb.y2ParamIndex].afbParamValue().setValue(QVariant(y2).toInt());
-
-					result &= appItem->init(fb.pointer, errorMsg);
-					appItem->setLabel(signal.appSignalID());
-
-					if (errorMsg.isEmpty() == false)
+					if (it == m_fbConv.end())
 					{
-						LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+						LOG_INTERNAL_ERROR(m_log);
 						result = false;
+					}
+					else
+					{
+						const FbConv& fb = it->second;
+
+						fb.pointer->params()[fb.x1ParamIndex].afbParamValue().setValue(QVariant(x1));
+						fb.pointer->params()[fb.x2ParamIndex].afbParamValue().setValue(QVariant(x2));
+
+						fb.pointer->params()[fb.y1ParamIndex].afbParamValue().setValue(QVariant(y1).toInt());
+						fb.pointer->params()[fb.y2ParamIndex].afbParamValue().setValue(QVariant(y2).toInt());
+
+						result &= appItem->init(fb.pointer, errorMsg);
+						appItem->setLabel(signal.appSignalID());
+
+						if (errorMsg.isEmpty() == false)
+						{
+							LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+							result = false;
+						}
 					}
 				}
 
@@ -6607,15 +7059,25 @@ namespace Builder
 				{
 					conversionIsKnown = true;
 
-					FbScal& fb = m_fbScal[FB_TCONV_FP_SI_INDEX];
+					auto it = m_fbConv.find(Afb::TCONV_FP32_SI32);
 
-					result &= appItem->init(fb.pointer, errorMsg);
-					appItem->setLabel(signal.appSignalID());
-
-					if (errorMsg.isEmpty() == false)
+					if (it == m_fbConv.end())
 					{
-						LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+						LOG_INTERNAL_ERROR(m_log);
 						result = false;
+					}
+					else
+					{
+						const FbConv& fb = it->second;
+
+						result &= appItem->init(fb.pointer, errorMsg);
+						appItem->setLabel(signal.appSignalID());
+
+						if (errorMsg.isEmpty() == false)
+						{
+							LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+							result = false;
+						}
 					}
 				}
 
@@ -6636,15 +7098,25 @@ namespace Builder
 				{
 					conversionIsKnown = true;
 
-					FbScal& fb = m_fbScal[FB_TCONV_SI_FP_INDEX];
+					auto it = m_fbConv.find(Afb::TCONV_SI32_FP32);
 
-					result &= appItem->init(fb.pointer, errorMsg);
-					appItem->setLabel(signal.appSignalID());
-
-					if (errorMsg.isEmpty() == false)
+					if (it == m_fbConv.end())
 					{
-						LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+						LOG_INTERNAL_ERROR(m_log);
 						result = false;
+					}
+					else
+					{
+						const FbConv& fb = it->second;
+
+						result &= appItem->init(fb.pointer, errorMsg);
+						appItem->setLabel(signal.appSignalID());
+
+						if (errorMsg.isEmpty() == false)
+						{
+							LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+							result = false;
+						}
 					}
 				}
 
@@ -6730,21 +7202,31 @@ namespace Builder
 				{
 					conversionIsKnown = true;
 
-					FbScal& fb = m_fbScal[FB_SCALE_FP_16UI_INDEX];
+					auto it = m_fbConv.find(Afb::SCALE_FP32_UI16);
 
-					fb.pointer->params()[fb.x1ParamIndex].afbParamValue().setValue(QVariant(x1));
-					fb.pointer->params()[fb.x2ParamIndex].afbParamValue().setValue(QVariant(x2));
-
-					fb.pointer->params()[fb.y1ParamIndex].afbParamValue().setValue(QVariant(y1).toInt());
-					fb.pointer->params()[fb.y2ParamIndex].afbParamValue().setValue(QVariant(y2).toInt());
-
-					result = appItem->init(fb.pointer, errorMsg);
-					appItem->setLabel(signal.appSignalID());
-
-					if (errorMsg.isEmpty() == false)
+					if (it == m_fbConv.end())
 					{
-						LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+						LOG_INTERNAL_ERROR(m_log);
 						result = false;
+					}
+					else
+					{
+						const FbConv& fb = it->second;
+
+						fb.pointer->params()[fb.x1ParamIndex].afbParamValue().setValue(QVariant(x1));
+						fb.pointer->params()[fb.x2ParamIndex].afbParamValue().setValue(QVariant(x2));
+
+						fb.pointer->params()[fb.y1ParamIndex].afbParamValue().setValue(QVariant(y1).toInt());
+						fb.pointer->params()[fb.y2ParamIndex].afbParamValue().setValue(QVariant(y2).toInt());
+
+						result = appItem->init(fb.pointer, errorMsg);
+						appItem->setLabel(signal.appSignalID());
+
+						if (errorMsg.isEmpty() == false)
+						{
+							LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+							result = false;
+						}
 					}
 				}
 
@@ -6754,21 +7236,31 @@ namespace Builder
 				{
 					conversionIsKnown = true;
 
-					FbScal& fb = m_fbScal[FB_SCALE_SI_16UI_INDEX];
+					auto it = m_fbConv.find(Afb::SCALE_SI32_UI16);
 
-					fb.pointer->params()[fb.x1ParamIndex].afbParamValue().setValue(QVariant(x1).toInt());
-					fb.pointer->params()[fb.x2ParamIndex].afbParamValue().setValue(QVariant(x2).toInt());
-
-					fb.pointer->params()[fb.y1ParamIndex].afbParamValue().setValue(QVariant(y1).toInt());
-					fb.pointer->params()[fb.y2ParamIndex].afbParamValue().setValue(QVariant(y2).toInt());
-
-					result = appItem->init(fb.pointer, errorMsg);
-					appItem->setLabel(signal.appSignalID());
-
-					if (errorMsg.isEmpty() == false)
+					if (it == m_fbConv.end())
 					{
-						LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+						LOG_INTERNAL_ERROR(m_log);
 						result = false;
+					}
+					else
+					{
+						const FbConv& fb = it->second;
+
+						fb.pointer->params()[fb.x1ParamIndex].afbParamValue().setValue(QVariant(x1).toInt());
+						fb.pointer->params()[fb.x2ParamIndex].afbParamValue().setValue(QVariant(x2).toInt());
+
+						fb.pointer->params()[fb.y1ParamIndex].afbParamValue().setValue(QVariant(y1).toInt());
+						fb.pointer->params()[fb.y2ParamIndex].afbParamValue().setValue(QVariant(y2).toInt());
+
+						result = appItem->init(fb.pointer, errorMsg);
+						appItem->setLabel(signal.appSignalID());
+
+						if (errorMsg.isEmpty() == false)
+						{
+							LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+							result = false;
+						}
 					}
 				}
 
@@ -6789,15 +7281,25 @@ namespace Builder
 				{
 					conversionIsKnown = true;
 
-					FbScal& fb = m_fbScal[FB_TCONV_SI_FP_INDEX];
+					auto it = m_fbConv.find(Afb::TCONV_SI32_FP32);
 
-					result &= appItem->init(fb.pointer, errorMsg);
-					appItem->setLabel(signal.appSignalID());
-
-					if (errorMsg.isEmpty() == false)
+					if (it == m_fbConv.end())
 					{
-						LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+						LOG_INTERNAL_ERROR(m_log);
 						result = false;
+					}
+					else
+					{
+						const FbConv& fb = it->second;
+
+						result &= appItem->init(fb.pointer, errorMsg);
+						appItem->setLabel(signal.appSignalID());
+
+						if (errorMsg.isEmpty() == false)
+						{
+							LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+							result = false;
+						}
 					}
 				}
 
@@ -6818,15 +7320,25 @@ namespace Builder
 				{
 					conversionIsKnown = true;
 
-					FbScal& fb = m_fbScal[FB_TCONV_FP_SI_INDEX];
+					auto it = m_fbConv.find(Afb::TCONV_FP32_SI32);
 
-					result &= appItem->init(fb.pointer, errorMsg);
-					appItem->setLabel(signal.appSignalID());
-
-					if (errorMsg.isEmpty() == false)
+					if (it == m_fbConv.end())
 					{
-						LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+						LOG_INTERNAL_ERROR(m_log);
 						result = false;
+					}
+					else
+					{
+						const FbConv& fb = it->second;
+
+						result &= appItem->init(fb.pointer, errorMsg);
+						appItem->setLabel(signal.appSignalID());
+
+						if (errorMsg.isEmpty() == false)
+						{
+							LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+							result = false;
+						}
 					}
 				}
 
@@ -6879,44 +7391,6 @@ namespace Builder
 		}
 
 		return false;
-	}
-
-	UalAfb* ModuleLogicCompiler::createUalAfb(const UalItem& appItem)
-	{
-		if (appItem.isAfb() == false)
-		{
-			return nullptr;
-		}
-
-		Afbl* afbl = m_afbls.value(appItem.strID(), nullptr);
-
-		if (afbl == nullptr)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return nullptr;
-		}
-
-		UalAfb* appFb = new UalAfb(appItem, afbl->isBusProcessingAfb());
-
-		if (appFb->calculateFbParamValues(this) == false)
-		{
-			delete appFb;
-			return nullptr;
-		}
-
-		// get Functional Block instance
-		//
-		bool result = m_afbls.addInstance(appFb, m_log);
-
-		if (result == false)
-		{
-			delete appFb;
-			return nullptr;
-		}
-
-		m_ualAfbs.insert(appFb);
-
-		return appFb;
 	}
 
 	bool ModuleLogicCompiler::setOutputSignalsAsComputed()
@@ -6979,7 +7453,7 @@ namespace Builder
 		do
 		{
 			// add Tx signals from transmitters in txSignal lists of all Optical and Serial ports associated with current LM
-			// check that added regulat Tx signals exists in current LM
+			// check that added regular Tx signals exists in current LM
 			//
 			if (processTransmitters() == false) break;
 
@@ -7079,7 +7553,9 @@ namespace Builder
 
 		assert(ualItem->isTransmitter() == true);
 
-		const LogicTransmitter& transmitter = ualItem->logicTransmitter();
+		const SchemaTransmitter* transmitter = ualItem->schemaTransmitter();
+
+		TEST_PTR_RETURN_FALSE(transmitter);
 
 		bool result = true;
 
@@ -7094,7 +7570,7 @@ namespace Builder
 
 		for(const QPair<QString, UalSignal*>& connectedSignal : connectedSignals)
 		{
-			const QStringList& connectionIDs = transmitter.connectionIdsAsList();
+			const QStringList& connectionIDs = transmitter->connectionIdsAsList();
 
 			if (connectionIDs.count() == 0)
 			{
@@ -7107,7 +7583,7 @@ namespace Builder
 
 			for(const QString& connectionID : connectionIDs)
 			{
-				result &= m_optoModuleStorage->appendTxSignal(ualItem->schemaID(), connectionID, transmitter.guid(),
+				result &= m_optoModuleStorage->appendTxSignal(ualItem->schemaID(), connectionID, transmitter->guid(),
 														   lmEquipmentID(),
 														   connectedSignal.first,
 														   connectedSignal.second,
@@ -7128,11 +7604,11 @@ namespace Builder
 
 		connectedSignals->clear();
 
-		const std::vector<LogicPin>& inPins = transmitterItem->inputs();
+		const std::vector<SchemaPin>& inPins = transmitterItem->inputs();
 
 		bool result = true;
 
-		for(const LogicPin& inPin : inPins)
+		for(const SchemaPin& inPin : inPins)
 		{
 			if (inPin.IsInput() == false)
 			{
@@ -7185,7 +7661,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::getDirectlyConnectedInSignalID(const LogicPin& inPin, QString* directlyConnectedInSignalID)
+	bool ModuleLogicCompiler::getDirectlyConnectedInSignalID(const SchemaPin& inPin, QString* directlyConnectedInSignalID)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(directlyConnectedInSignalID, log());
 
@@ -7195,7 +7671,7 @@ namespace Builder
 
 		for(QUuid outPinUuid : accosiatedOutputsUuids)
 		{
-			UalItem* ualItem = m_pinParent.value(outPinUuid, nullptr);
+			UalItem* ualItem = getValueOrNullptr(m_pinParent, outPinUuid);
 
 			TEST_PTR_CONTINUE(ualItem);
 
@@ -7212,7 +7688,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::getNearestInSignalIDs(const LogicPin& inPin, QStringList* nearestSignalIDs)
+	bool ModuleLogicCompiler::getNearestInSignalIDs(const SchemaPin& inPin, QStringList* nearestSignalIDs)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(nearestSignalIDs, log());
 
@@ -7224,7 +7700,7 @@ namespace Builder
 
 		for(QUuid outPinUuid : accosiatedOutputsUuids)
 		{
-			UalItem* ualItem = m_pinParent.value(outPinUuid, nullptr);
+			UalItem* ualItem = getValueOrNullptr(m_pinParent, outPinUuid);
 
 			if (ualItem == nullptr)
 			{
@@ -7256,7 +7732,7 @@ namespace Builder
 
 		QUuid outPinUuid = accosiatedOutputsUuids[0];						// take out pin of AFB1 item
 
-		UalItem* ualItem = m_pinParent.value(outPinUuid, nullptr);
+		UalItem* ualItem = getValueOrNullptr(m_pinParent, outPinUuid);
 
 		if (ualItem == nullptr)
 		{
@@ -7264,7 +7740,7 @@ namespace Builder
 			return false;
 		}
 
-		const LogicPin* outPin = ualItem->getPin(outPinUuid);
+		const SchemaPin* outPin = ualItem->getPin(outPinUuid);
 
 		if (outPin == nullptr)
 		{
@@ -7276,7 +7752,7 @@ namespace Builder
 
 		for(QUuid inPinUuid : associatedInputs)
 		{
-			UalItem* nearestUalItem = m_pinParent.value(inPinUuid, nullptr);
+			UalItem* nearestUalItem = getValueOrNullptr(m_pinParent, inPinUuid);
 
 			if (nearestUalItem == nullptr)
 			{
@@ -7293,7 +7769,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::getNearestInSignalID(const LogicPin& inPin, QString* nearestSignalID)
+	bool ModuleLogicCompiler::getNearestInSignalID(const SchemaPin& inPin, QString* nearestSignalID)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(nearestSignalID, log());
 
@@ -7311,7 +7787,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::getNearestOutSignalIDs(const LogicPin& outPin, QStringList* nearestSignalIDs)
+	bool ModuleLogicCompiler::getNearestOutSignalIDs(const SchemaPin& outPin, QStringList* nearestSignalIDs)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(nearestSignalIDs, log());
 		LOG_INTERNAL_ERROR_IF_FALSE_RETURN_FALSE(outPin.IsOutput(), log());
@@ -7322,7 +7798,7 @@ namespace Builder
 
 		for(QUuid linkedPin : linkedPins)
 		{
-			UalItem* ualItem = m_pinParent.value(linkedPin, nullptr);
+			UalItem* ualItem = getValueOrNullptr(m_pinParent, linkedPin);
 
 			TEST_PTR_CONTINUE(ualItem);
 
@@ -7335,7 +7811,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::getNearestOutSignalID(const LogicPin& outPin, QString* nearestSignalID)
+	bool ModuleLogicCompiler::getNearestOutSignalID(const SchemaPin& outPin, QString* nearestSignalID)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(nearestSignalID, log());
 
@@ -7353,7 +7829,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::getNearestSignalID(const LogicPin& inOutPin, QString* nearestSignalID)
+	bool ModuleLogicCompiler::getNearestSignalID(const SchemaPin& inOutPin, QString* nearestSignalID)
 	{
 		if (inOutPin.IsInput() == true)
 		{
@@ -7399,9 +7875,11 @@ namespace Builder
 			return true;				// item is not receiver, nothing to processing
 		}
 
-		const UalReceiver& receiver = item->logicReceiver();
+		const SchemaReceiver* receiver = item->schemaReceiver();
 
-		QString connectionID = receiver.connectionIds();
+		TEST_PTR_RETURN_FALSE(receiver);
+
+		QString connectionID = receiver->connectionIds();
 
 		std::shared_ptr<Hardware::Connection> connection = m_optoModuleStorage->getConnection(connectionID);
 
@@ -7418,12 +7896,12 @@ namespace Builder
 			return true;				// process Serial connections receivers only
 		}
 
-		if (receiver.appSignalIdsAsList().size() > 1)
+		if (receiver->appSignalIdsAsList().size() > 1)
 		{
 			m_log->errINT1001(QString("SchemaItemReceiver has more then one AppSignalID"), item->schemaID(), item->guid());
 		}
 
-		QString rxSignalID = receiver.appSignalIds();
+		QString rxSignalID = receiver->appSignalIds();
 
 		if (m_chassisSignals.contains(rxSignalID) == false)
 		{
@@ -7512,11 +7990,11 @@ namespace Builder
 	{
 		bool result = true;
 
-		for(UalAfb* ualAfb : m_ualAfbs)
+		for(UalAfb* afb : m_ualAfbs)
 		{
-			TEST_PTR_CONTINUE(ualAfb);
+			TEST_PTR_CONTINUE(afb);
 
-			result &= addToComparatorSet(ualAfb);
+			result &= addToComparatorSet(afb);
 		}
 
 		return result;
@@ -7613,7 +8091,7 @@ namespace Builder
 				continue;
 			}
 
-			const UalReceiver* ualReceiver = ualItem->ualReceiver();
+			const SchemaReceiver* ualReceiver = ualItem->schemaReceiver();
 
 			if (ualReceiver == nullptr)
 			{
@@ -7684,6 +8162,7 @@ namespace Builder
 		CodeGenProcsToCallArray procs =
 		{
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredRawDataInRegBuf),
+			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::invertDiscreteInputSignals),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::convertAnalogInputSignals),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateAppLogicCode),
 
@@ -7764,9 +8243,12 @@ namespace Builder
 
 	bool ModuleLogicCompiler::cleanupHeaps()
 	{
-		m_ualSignals.finalizeHeaps();
+		bool result = true;
 
-		return true;
+		result &= m_ualSignals.finalizeHeaps();
+		result &= writeHeapsLog();
+
+		return result;
 	}
 
 	bool ModuleLogicCompiler::optimizeAppLogicCode()
@@ -7944,7 +8426,7 @@ namespace Builder
 		cd << cmd.writeFuncBlockConst(14, 1, 0, 1, "SCALE_16UI_16UI", "init SCALE_16UI_16UI");
 		cd << cmd.writeFuncBlock(14, 1, 5, wordAcc1, "SCALE_16UI_16UI", "fb.input16 <= word");
 		cd << cmd.writeFuncBlock(14, 1, 5, bitAcc, "SCALE_16UI_16UI", "fb.input16 <= bit");
-		cd << cmd.start(14, 1, "SCALE_16UI_16UI", 4);
+		cd << cmd.startafb(14, 1, "SCALE_16UI_16UI", 4);
 		cd << cmd.readFuncBlock(wordAcc1, 14, 1, 8, "SCALE_16UI_16UI", "word <= fb.output16");
 		cd << cmd.readFuncBlock(bitAcc, 14, 1, 8, "SCALE_16UI_16UI", "bit <= fb.output16");
 
@@ -7957,7 +8439,7 @@ namespace Builder
 		cd << cmd.writeFuncBlockBit(1, 0, 3, bitAcc, 7, "AND", "fb.input <= bit");
 		cd << cmd.writeFuncBlockBit(1, 0, 4, wordAcc1, 11, "AND", "fb.input <= word");
 
-		cd << cmd.start(1, 0, "AND", 5);
+		cd << cmd.startafb(1, 0, "AND", 5);
 
 		cd << cmd.readFuncBlockBit(wordAcc1, 12, 1, 0, 20, "AND", "word <= fb.output");
 		cd << cmd.readFuncBlockBit(bitAcc,4, 1, 0, 20, "AND", "bit <= fb.output");
@@ -7990,7 +8472,7 @@ namespace Builder
 		cd << cmd.writeFuncBlockConst(14, 2, 0, 2, "SCALE_16UI_SI", "init SCALE_16UI_SI");
 		cd << cmd.writeFuncBlockConstInt32(14, 2, 1, 32768, "SCALE_16UI_SI", "fb.input32 <= const32");
 		cd << cmd.writeFuncBlock32(14, 2, 2, wordAcc1, "SCALE_16UI_SI", "fb.input32 <= word");
-		cd << cmd.start(14, 2, "SCALE_16UI_SI", 4);
+		cd << cmd.startafb(14, 2, "SCALE_16UI_SI", 4);
 		cd << cmd.readFuncBlock32(wordAcc1, 14, 2, 9, "SCALE_16UI_SI", "word <= fb.output32");
 
 		cd.newLine();
@@ -8013,10 +8495,10 @@ namespace Builder
 
 		cd.newLine();
 
-		cd << cmd.fill(wordAcc1, bitAcc, 3, "word <= bit");
-		cd << cmd.fill(wordAcc1, wordAcc2, 3, "word <= from word");
-		cd << cmd.fill(bitAcc, wordAcc2, 3, "bit <= from word");
-		cd << cmd.fill(bitAcc, bitAcc + 1, 4, "bit <= from bit");
+		cd << cmd.fillb(wordAcc1, bitAcc, 3, "word <= bit");
+		cd << cmd.fillb(wordAcc1, wordAcc2, 3, "word <= from word");
+		cd << cmd.fillb(bitAcc, wordAcc2, 3, "bit <= from word");
+		cd << cmd.fillb(bitAcc, bitAcc + 1, 4, "bit <= from bit");
 
 		cd.newLine();
 
@@ -8047,9 +8529,6 @@ namespace Builder
 		{
 			opCodes.insert(component.second->opCode(), true);
 		}
-
-		const int MIN_AFB_OPCODE = 1;
-		const int MAX_AFB_OPCODE = 63;
 
 		CodeItem cmd;
 		int resultBitNo = 0;
@@ -8104,7 +8583,7 @@ namespace Builder
 
 			if (opCodes.contains(afbOpcode) == true)
 			{
-				auto component = components.at(afbOpcode);
+				const auto& component = components.at(afbOpcode);
 
 				cmd.readFuncBlockCompare(afbOpcode, 0,
 										component->versionOpIndex(),
@@ -8143,11 +8622,9 @@ namespace Builder
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 
-		//		m_alpCode_init(&m_resourcesUsageInfo.initAfbs);
-
 		LOG_MESSAGE(m_log, QString(tr("Generation of AFB initialization code...")));
 
-		QHash<QString, QString> instanceUsedBy;
+		std::map<QString, QString> instanceUsedBy;
 
 		for(UalAfb* ualAfb : m_ualAfbs)
 		{
@@ -8160,13 +8637,17 @@ namespace Builder
 
 			QString instantiatorID = ualAfb->instantiatorID();
 
-			if (instanceUsedBy.contains(instantiatorID) == false)
+			auto it = instanceUsedBy.find(instantiatorID);
+
+			if (it == instanceUsedBy.end())
 			{
-				instanceUsedBy.insert(instantiatorID, ualAfb->label());
+				instanceUsedBy.emplace(instantiatorID, ualAfb->label());
 			}
 			else
-			{
-				instanceUsedBy.insert(instantiatorID, QString("%1, %2").arg(instanceUsedBy.value(instantiatorID)).arg(ualAfb->label()));
+			{	QString& labels = it->second;
+
+				labels += QStringLiteral(", ");
+				labels += ualAfb->label();
 			}
 		}
 
@@ -8174,17 +8655,17 @@ namespace Builder
 
 		code->comment_nl("AFBs initialization code");
 
-		QHash<QString, int> instantiatorStrIDsMap;
+		std::set<QString> processedInstantiatorsID;
 
-		for(Afbl* afbl : m_afbls)
+		for(const AfbElementShared& afbElement : m_lmDescription->afbElements())
 		{
-			TEST_PTR_CONTINUE(afbl);
+			TEST_PTR_CONTINUE(afbElement);
 
 			for(UalAfb* ualAfb : m_ualAfbs)
 			{
 				TEST_PTR_CONTINUE(ualAfb);
 
-				if (ualAfb->afbStrID() != afbl->strID())
+				if (ualAfb->afbStrID() != afbElement->strID())
 				{
 					continue;
 				}
@@ -8193,7 +8674,7 @@ namespace Builder
 				{
 					// initialize all params for each instance of FB with RAM
 					//
-					result &= generateInitAppFbParamsCode(code, *ualAfb, ualAfb->label());
+					result &= generateIDRPhaseInitAppFbParamsCode(code, *ualAfb, ualAfb->label());
 				}
 				else
 				{
@@ -8202,26 +8683,32 @@ namespace Builder
 					//
 					QString instantiatorID = ualAfb->instantiatorID();
 
-					if (instantiatorStrIDsMap.contains(instantiatorID) == false)
+					if (processedInstantiatorsID.contains(instantiatorID) == false)
 					{
-						instantiatorStrIDsMap.insert(instantiatorID, 0);
+						auto it = instanceUsedBy.find(instantiatorID);
 
-						result &= generateInitAppFbParamsCode(code, *ualAfb, instanceUsedBy.value(instantiatorID));
+						if (it == instanceUsedBy.end())
+						{
+							Q_ASSERT(false);
+						}
+						else
+						{
+							result &= generateIDRPhaseInitAppFbParamsCode(code, *ualAfb, it->second);
+							processedInstantiatorsID.emplace(instantiatorID);
+						}
 					}
 				}
 			}
 		}
 
-		//m_alpCode_calculate(&m_resourcesUsageInfo.initAfbs);
-
 		return result;
 	}
 
-	bool ModuleLogicCompiler::generateInitAppFbParamsCode(CodeSnippet* code, const UalAfb& appFb, const QString& usedBy)
+	bool ModuleLogicCompiler::generateIDRPhaseInitAppFbParamsCode(CodeSnippet* code, const UalAfb& appFb, const QString& usedBy)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 
-		const AppFbParamValuesArray& appFbParamValues = appFb.paramValuesArray();
+		const AfbParamValuesArray& appFbParamValues = appFb.paramValuesArray();
 
 		if (appFbParamValues.hasParamsToInitialization() == false)
 		{
@@ -8248,16 +8735,42 @@ namespace Builder
 
 		code->newLine();
 
-		bool commandAdded = false;
+		CodeSnippet initCode;
 
-		for(const AppFbParamValue& paramValue : appFbParamValues)
+		result &= generateInitAppFbParamsCode(&initCode, appFb, true);
+
+		if (initCode.isEmpty() == false)
 		{
-			int operandIndex = paramValue.operandIndex();
+			code->append(initCode);
+			code->newLine();
+		}
 
-			if (operandIndex == AppFbParamValue::NOT_FB_OPERAND_INDEX)
+		return result;
+	}
+
+	bool ModuleLogicCompiler::generateInitAppFbParamsCode(CodeSnippet* code, const UalAfb& appFb, bool instantiator)
+	{
+		const AfbParamValuesArray& appFbParamValues = appFb.paramValuesArray();
+
+		QString fbCaption = appFb.caption();
+		int fbOpcode = appFb.opcode();
+		int fbInstance = appFb.instance();
+
+		bool result = true;
+
+		for(const AfbParamValue& paramValue : appFbParamValues)
+		{
+			if (paramValue.isNoFbOperand() == true)
 			{
 				continue;
 			}
+
+			if (paramValue.instantiator() != instantiator)
+			{
+				continue;
+			}
+
+			int operandIndex = paramValue.operandIndex();
 
 			QString opName = paramValue.opName();
 
@@ -8271,9 +8784,6 @@ namespace Builder
 				cmd.setComment(QString("%1 <= %2").arg(opName).arg(paramValue.unsignedIntValue()));
 
 				code->append(cmd);
-
-				commandAdded = true;
-
 				continue;
 			}
 
@@ -8320,26 +8830,18 @@ namespace Builder
 					break;
 
 				case E::DataFormat::Float:
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("Afb parameter '%1' with Float data format must have dataSize == 32")).arg(opName));
+					LOG_INTERNAL_ERROR_MSG(m_log, QString("Afb parameter '%1' with Float data format must have dataSize == 32").arg(opName));
 					result = false;
 					break;
 
 				default:
-					assert(false);
 
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("Unknown Afb parameter data format"));
+					LOG_INTERNAL_ERROR_MSG(m_log, QString("Unknown Afb parameter data format"));
 					result = false;
 				}
 			}
 
 			code->append(cmd);
-
-			commandAdded = true;
-		}
-
-		if (commandAdded == true)
-		{
-			code->newLine();
 		}
 
 		return result;
@@ -8349,9 +8851,9 @@ namespace Builder
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 
-		const AppFbParamValuesArray& appFbParamValues = appFb.paramValuesArray();
+		const AfbParamValuesArray& appFbParamValues = appFb.paramValuesArray();
 
-		for(const AppFbParamValue& paramValue : appFbParamValues)
+		for(const AfbParamValue& paramValue : appFbParamValues)
 		{
 			if (paramValue.isVisible() == false && paramValue.isNoFbOperand() == true)
 			{
@@ -8366,6 +8868,11 @@ namespace Builder
 			}
 
 			commentStr.append(QString(" = %1").arg(paramValue.toString()));
+
+			if (paramValue.instantiator() == true)
+			{
+				commentStr.append(QStringLiteral(" (instantiator)"));
+			}
 
 			code->comment(commentStr);
 		}
@@ -8593,6 +9100,19 @@ namespace Builder
 		return true;
 	}
 
+	bool ModuleLogicCompiler::invertDiscreteInputSignals(CodeSnippet* code)
+	{
+		bool result = true;
+
+		result &= generateInvertDiscreteInputsCode(code, m_acquiredDiscreteInvertedInputSignals,
+												   QStringLiteral("Inversion of acquired discrete inputs"));
+
+		result &= generateInvertDiscreteInputsCode(code, m_nonAcquiredDiscreteInvertedInputSignals,
+												   QStringLiteral("Inversion of non acquired discrete inputs"));
+
+		return result;
+	}
+
 	bool ModuleLogicCompiler::convertAnalogInputSignals(CodeSnippet* code)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
@@ -8655,55 +9175,51 @@ namespace Builder
 
 			if (appFb == nullptr)
 			{
-				ASSERT_RETURN_FALSE;
-			}
-
-			bool isTconvAfb = appFb->caption().startsWith("tconv_");
-
-			FbScal fbScal;
-
-			switch(s->analogSignalFormat())
-			{
-			case E::AnalogAppSignalFormat::Float32:
-				fbScal = m_fbScal[FB_SCALE_16UI_FP_INDEX];
-				break;
-
-			case E::AnalogAppSignalFormat::SignedInt32:
-				if (isTconvAfb == true)
-				{
-					fbScal = m_fbScal[FB_TCONV_FP_SI_INDEX];
-				}
-				else
-				{
-					fbScal = m_fbScal[FB_SCALE_16UI_SI_INDEX];
-				}
-				break;
-
-			default:
-				assert(false);			// unknown format
+				LOG_INTERNAL_ERROR(m_log);
+				Q_ASSERT(false);
 				return false;
 			}
 
-			if (isTconvAfb == true)
+			auto it = m_fbConv.find(appFb->caption());
+
+			if (it == m_fbConv.end())
 			{
-				cmd.writeFuncBlock32(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
-								   s->ioBufAddr().offset(), appFb->caption());
+				LOG_INTERNAL_ERROR(m_log);
+				Q_ASSERT(false);
+				return false;
 			}
-			else
+
+			const FbConv& fbConv = it->second;
+
+			switch(fbConv.inputSignalDataSize)
 			{
-				cmd.writeFuncBlock(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
+			case SIZE_32BIT:
+				cmd.writeFuncBlock32(appFb->opcode(), appFb->instance(), fbConv.inputSignalIndex,
 								   s->ioBufAddr().offset(), appFb->caption());
+				break;
+
+			case SIZE_16BIT:
+				cmd.writeFuncBlock(appFb->opcode(), appFb->instance(), fbConv.inputSignalIndex,
+								   s->ioBufAddr().offset(), appFb->caption());
+				break;
+
+			default:
+				LOG_INTERNAL_ERROR(m_log);
+				Q_ASSERT(false);
+				return false;
 			}
 
 			cmd.setComment(QString(tr("conversion of analog input %1")).arg(s->appSignalID()));
 			code->append(cmd);
 
-			cmd.start(appFb->opcode(), appFb->instance(), appFb->caption(), appFb->runTime());
+			cmd.startafb(appFb->opcode(), appFb->instance(), appFb->caption(), appFb->runTime());
 			cmd.clearComment();
 			code->append(cmd);
 
+			Q_ASSERT(fbConv.outputSignalDataSize == SIZE_32BIT);
+
 			cmd.readFuncBlock32(s->ualAddr().offset(), appFb->opcode(), appFb->instance(),
-								fbScal.outputSignalIndex, appFb->caption());
+								fbConv.outputSignalIndex, appFb->caption());
 			code->append(cmd);
 
 			code->newLine();
@@ -8788,7 +9304,7 @@ namespace Builder
 			ASSERT_RETURN_FALSE
 		}
 
-		const UalAfb* ualAfb = m_ualAfbs.value(ualItem->guid(), nullptr);
+		const UalAfb* ualAfb = m_ualAfbs.getAfb(ualItem->guid());
 
 		if (ualAfb->isSetFlagsItem() == true)
 		{
@@ -8799,11 +9315,7 @@ namespace Builder
 
 		bool result = true;
 
-		bool isBusProcAfb = false;
-
-		result = isBusProcessingAfb(ualAfb, &isBusProcAfb);
-
-		RETURN_IF_FALSE(result)
+		bool isBusProcAfb = m_afbComponents.isBusProcessingAfb(ualAfb->strID());
 
 		std::vector<int> busProcessingStepsSizes;
 
@@ -8829,7 +9341,7 @@ namespace Builder
 
 		int currentBusSignalOffsetBits = 0;
 
-		for(int stepNo = 0; stepNo < busProcessingStepsNumber; stepNo++)
+		for(int stepNo = 0; stepNo < busProcessingStepsNumber && result == true; stepNo++)
 		{
 			BusProcessingStepInfo bpStepInfo;
 
@@ -8840,11 +9352,41 @@ namespace Builder
 
 			//
 
-			result &= generateSignalsToAfbInputsCode(code, ualAfb, bpStepInfo);
+			if (ualAfb->isPackedLogic() == true)
+			{
+				Q_ASSERT(busProcessingStepsNumber == 1);
 
-			result &= startAfb(code, ualAfb, bpStepInfo);
+				result &= generatePackedAfbCode(code, ualAfb);
 
-			result &= generateAfbOutputsToSignalsCode(code, ualAfb, bpStepInfo);
+				continue;
+			}
+
+			//
+
+			bool bitAccCodeGenerated = false;
+
+			if (m_bitAccAvailable == true)
+			{
+				bool res = true;
+				bitAccCodeGenerated = generateAfbBitAccCode(code, ualAfb, bpStepInfo, &res);
+				result &= res;
+
+				if (res == false)
+				{
+					continue;
+				}
+			}
+
+			if (bitAccCodeGenerated == false)
+			{
+				result &= generateInitAppFbParamsCode(code, *ualAfb, false);
+
+				result &= generateSignalsToAfbInputsCode(code, ualAfb, bpStepInfo);
+
+				result &= startAfb(code, ualAfb, bpStepInfo);
+
+				result &= generateAfbOutputsToSignalsCode(code, ualAfb, bpStepInfo);
+			}
 
 			//
 
@@ -8866,7 +9408,7 @@ namespace Builder
 
 		bool result = true;
 
-		for(const LogicPin& inPin : ualAfb->inputs())
+		for(const SchemaPin& inPin : ualAfb->inputs())
 		{
 			if (inPin.IsInput() == false)
 			{
@@ -8883,7 +9425,7 @@ namespace Builder
 				return false;
 			}
 
-			LogicAfbSignal inAfbSignal;
+			AfbSignal inAfbSignal;
 
 			bool res = ualAfb->getAfbSignalByPin(inPin, &inAfbSignal);
 
@@ -8902,7 +9444,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::generateSignalToAfbInputCode(CodeSnippet* code,
 														   const UalAfb* ualAfb,
-														   const LogicAfbSignal& inAfbSignal,
+														   const AfbSignal& inAfbSignal,
 														   const UalSignal* inUalSignal,
 														   const BusProcessingStepInfo& bpStepInfo,
 														   const Address16& readAddr,
@@ -9086,7 +9628,7 @@ namespace Builder
 	}
 
 	bool ModuleLogicCompiler::generateSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb,
-															  const LogicAfbSignal& inAfbSignal,
+															  const AfbSignal& inAfbSignal,
 															  const UalSignal* inUalSignal,
 															  const BusProcessingStepInfo& bpStepInfo)
 	{
@@ -9120,7 +9662,7 @@ namespace Builder
 	}
 
 	bool ModuleLogicCompiler::generateDiscreteSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb,
-																	  const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal,
+																	  const AfbSignal& inAfbSignal, const UalSignal* inUalSignal,
 																	  const BusProcessingStepInfo& bpStepInfo)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
@@ -9165,7 +9707,7 @@ namespace Builder
 
 		bool result = true;
 
-		QString comment = QString("%1.%2 << %3").arg(ualAfb->caption()).arg(inAfbSignal.caption()).arg(inUalSignal->refSignalIDsJoined());
+		QString comment = QString("%1.%2 <= %3").arg(ualAfb->caption()).arg(inAfbSignal.caption()).arg(inUalSignal->refSignalIDsJoined());
 
 		CodeItem cmd;
 
@@ -9203,7 +9745,7 @@ namespace Builder
 				return false;
 			}
 
-			cmd.fill(Address16(wordAccAddr, 0), readUalAddr);
+			cmd.fillb(Address16(wordAccAddr, 0), readUalAddr);
 			code->append(cmd);
 
 			if (inputSize == SIZE_16BIT)
@@ -9228,7 +9770,7 @@ namespace Builder
 	}
 
 	bool ModuleLogicCompiler::generateBusSignalToAfbBusInputCode(CodeSnippet* code, const UalAfb* ualAfb,
-																 const LogicAfbSignal& inAfbSignal, const UalSignal* inUalSignal,
+																 const AfbSignal& inAfbSignal, const UalSignal* inUalSignal,
 																 const BusProcessingStepInfo& bpStepInfo)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
@@ -9294,7 +9836,7 @@ namespace Builder
 			return false;
 		}
 
-		cmd.setComment(QString("%1.%2 << %3 (part %4)").
+		cmd.setComment(QString("%1.%2 <= %3 (part %4)").
 					   arg(ualAfb->caption()).arg(inAfbSignal.caption()).
 					   arg(inUalSignal->refSignalIDsJoined()).arg(bpStepInfo.currentStep + 1));
 
@@ -9310,7 +9852,7 @@ namespace Builder
 
 		CodeItem cmd;
 
-		cmd.start(ualAfb->opcode(), ualAfb->instance(), ualAfb->caption(), ualAfb->runTime());
+		cmd.startafb(ualAfb->opcode(), ualAfb->instance(), ualAfb->caption(), ualAfb->runTime());
 
 		if (ualAfb->isBusProcessing() == false || bpStepInfo.stepsNumber == 1)
 		{
@@ -9337,7 +9879,7 @@ namespace Builder
 
 		bool result = true;
 
-		for(const LogicPin& outPin : ualAfb->outputs())
+		for(const SchemaPin& outPin : ualAfb->outputs())
 		{
 			if (outPin.IsOutput() == false)
 			{
@@ -9359,7 +9901,7 @@ namespace Builder
 				return false;
 			}
 
-			LogicAfbSignal outAfbSignal;
+			AfbSignal outAfbSignal;
 
 			bool res = ualAfb->getAfbSignalByPin(outPin, &outAfbSignal);
 
@@ -9378,7 +9920,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::generateAfbOutputToSignalCode(CodeSnippet* code,
 															const UalAfb* ualAfb,
-															const LogicAfbSignal& outAfbSignal,
+															const AfbSignal& outAfbSignal,
 															const UalSignal* outUalSignal,
 															const BusProcessingStepInfo& bpStepInfo,
 															const Address16& writeAddr,
@@ -9534,7 +10076,7 @@ namespace Builder
 	}
 
 	bool ModuleLogicCompiler::generateAfbBusOutputToBusSignalCode(CodeSnippet* code, const UalAfb* ualAfb,
-																  const LogicAfbSignal& outAfbSignal, const UalSignal* outUalSignal,
+																  const AfbSignal& outAfbSignal, const UalSignal* outUalSignal,
 																  const BusProcessingStepInfo& bpStepInfo)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
@@ -9589,13 +10131,1363 @@ namespace Builder
 			return false;
 		}
 
-		cmd.setComment(QString("%1 (part %2) << %3.%4").
+		cmd.setComment(QString("%1 (part %2) <= %3.%4").
 					   arg(outUalSignal->refSignalIDsJoined()).arg(bpStepInfo.currentStep + 1).
 					   arg(ualAfb->caption()).arg(outAfbSignal.caption()));
 
 		code->append(cmd);
 
 		return true;
+	}
+
+	bool ModuleLogicCompiler::generatePackedAfbCode(CodeSnippet* code, const UalAfb* afb)
+	{
+		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(afb, m_log);
+
+		Q_ASSERT(afb->isPackedLogic());
+
+		bool result = true;
+
+		const std::vector<SchemaPin>& inputs = afb->inputs();
+
+		std::vector<std::pair<const UalSignal*, Address16>> nonConstInSignals;	// vector of pair<inputSignal, readAddr>
+		std::set<const UalSignal*> uniqueInSignals;
+
+		int packedAfbOpcode = afb->opcode();
+
+		int const0Count = 0;
+		int const1Count = 0;
+
+		auto it = m_context->m_packedLogicSources.find(afb->label());
+
+		if (it != m_context->m_packedLogicSources.end())
+		{
+#ifdef QT_DEBUG
+			const std::list<LmPackedLogicSources>& sources = it->second;
+
+			for(const LmPackedLogicSources& src : sources)
+			{
+				if (src.lmID == lmEquipmentID())
+				{
+					Q_ASSERT(false);
+					LOG_INTERNAL_ERROR(m_log);
+					return false;
+				}
+			}
+#endif
+		}
+		else
+		{
+			auto [newIt, b] = m_context->m_packedLogicSources.emplace(afb->label(), std::list<LmPackedLogicSources>{});
+			it = newIt;
+		}
+
+		LmPackedLogicSources& lmSources = it->second.emplace_back(LmPackedLogicSources{});
+
+		lmSources.lmID = lmEquipmentID();
+
+		// input signals checking
+		//
+		for(const SchemaPin& inPin : inputs)
+		{
+			const UalSignal* inSignal = getUalSignalByPinCaption(afb, inPin.caption(), true);
+
+			if (inSignal == nullptr)
+			{
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal not found for '%1' pin of AFB %2 (schema %3)").
+													arg(inPin.caption()).arg(afb->label()).arg(afb->schemaID()));
+				result = false;
+				continue;
+			}
+
+			PackedLogicSource src;
+
+			src.appSignalID = inSignal->appSignalID();
+			src.sourceItemLabelOut = inSignal->ualItemLabelOutPinCaption();
+
+			lmSources.sources.push_back(src);
+
+			Address16 readAddr;
+
+			if (inSignal->isConstDiscrete() == true)
+			{
+				if (inSignal->constDiscreteValue() == 0)
+				{
+					if (packedAfbOpcode == Afb::PACKED_AND_OPCODE)
+					{
+						// const value 0 on input
+						//
+						const UalItem* inItem = inSignal->ualItem();
+
+						TEST_PTR_LOG_RETURN_FALSE(inItem, m_log);
+
+						// Permanent const 0 on output of packed_and %1 (item %2, schema %3) due to const 0 on input (item %4, schema %5).
+						//
+						m_log->wrnALC5204(afb->packedLogicID(), afb->label(), afb->guid(), afb->schemaID(),
+										inItem->label(), inItem->guid(), inItem->schemaID());
+					}
+
+					const0Count++;
+				}
+				else
+				{
+					if (packedAfbOpcode == Afb::PACKED_OR_OPCODE)
+					{
+						// const value 1 on input
+						//
+						const UalItem* inItem = inSignal->ualItem();
+
+						TEST_PTR_LOG_RETURN_FALSE(inItem, m_log);
+
+						// Permanent const 1 on output of packed_or %1 (item %2, schema %3) due to const 1 on input (item %4, schema %5).
+						//
+						m_log->wrnALC5203(afb->packedLogicID(), afb->label(), afb->guid(), afb->schemaID(),
+										inItem->label(), inItem->guid(), inItem->schemaID());
+					}
+
+					const1Count++;
+				}
+
+				continue;
+			}
+
+			// non-const signals processing
+
+			if (inSignal->isDiscrete() == true)
+			{
+				readAddr = m_ualSignals.getSignalReadAddress(*inSignal, true);
+
+				if(readAddr.isValid() == false)
+				{
+					// Undefined UAL address of signal %1 (Logic schema %2).
+					//
+					m_log->errALC5105(inSignal->appSignalID(), inSignal->ualItemGuid(), inSignal->ualItemSchemaID());
+					result = false;
+					continue;
+				}
+			}
+			else
+			{
+				// Uncompatible signals connection (Logic schema '%1').
+				//
+				m_log->errALC5117(afb->guid(), afb->label(), inSignal->ualItemGuid(), inSignal->ualItemLabel(), afb->schemaID());
+				result = false;
+				continue;
+			}
+
+			if (uniqueInSignals.contains(inSignal) == true)
+			{
+				continue;
+			}
+
+			nonConstInSignals.emplace_back(inSignal, readAddr);
+			uniqueInSignals.insert(inSignal);
+		}
+
+		RETURN_IF_FALSE(result);
+
+		if (isOutConnectedToTerminatorOnly(afb) == true)
+		{
+			return true;			// no code generation required
+		}
+
+		//
+
+		const UalSignal* outSignal = getUalSignalByPinCaption(afb, Afb::OUT_PIN_CAPTION, false);
+
+		if (outSignal == nullptr)
+		{
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal not found for 'out' pin of AFB %1 (schema %2)").
+												arg(afb->label()).arg(afb->schemaID()));
+			return false;
+		}
+
+		if (outSignal->isDiscrete() == false)
+		{
+			// Uncompatible signals connection (Logic schema '%1').
+			//
+			m_log->errALC5117(afb->guid(), afb->label(), outSignal->ualItemGuid(), outSignal->ualItemLabel(), afb->schemaID());
+			return false;
+		}
+
+		Address16 outWriteAddr = m_ualSignals.getSignalWriteAddress(*outSignal);
+
+		if(outWriteAddr.isValid() == false)
+		{
+			// Undefined UAL address of signal %1 (Logic schema %2).
+			//
+			m_log->errALC5105(outSignal->appSignalID(), outSignal->ualItemGuid(), outSignal->ualItemSchemaID());
+			return false;
+		}
+
+		//
+		// optimized code generation
+		//
+
+		std::optional<int> constOutValue;
+
+		switch(packedAfbOpcode)
+		{
+		case Afb::PACKED_AND_OPCODE:
+
+			if (const0Count > 0)
+			{
+				constOutValue = 0;
+			}
+			else
+			{
+				if (const1Count > 0 && nonConstInSignals.size() == 0)
+				{
+					constOutValue = 1;
+				}
+			}
+
+			break;
+
+		case Afb::PACKED_OR_OPCODE:
+
+			if (const1Count > 0)
+			{
+				constOutValue = 1;
+			}
+			else
+			{
+				if (const0Count > 0 && nonConstInSignals.size() == 0)
+				{
+					constOutValue = 0;
+				}
+			}
+
+			break;
+
+		default:
+			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		if (constOutValue.has_value() == true)
+		{
+			*code << CodeItem().movBitConst(outWriteAddr, constOutValue.value(),
+											QString("@%1 optimized processing: out <= const %2").
+													arg(afb->label()).arg(constOutValue.value()));
+			return true;
+		}
+
+		if (nonConstInSignals.size() == 1)
+		{
+			const UalSignal* inSignal = nonConstInSignals[0].first;
+			Address16 readAddr = nonConstInSignals[0].second;
+
+			*code << CodeItem().movBit(outWriteAddr, readAddr,
+									   QString("@%1 optimized processing: out <= %2").
+											arg(afb->label()).arg(inSignal->appSignalID()));
+			return true;
+		}
+
+		//
+
+		if (m_lmDescription->isBitAccAvailable() == true)
+		{
+			result &= generateBitAccBasedPackedAfbCode(code, afb, nonConstInSignals,
+																outSignal, outWriteAddr);
+		}
+		else
+		{
+			result &= generateAfbBasedPackedAfbCode(code, afb, nonConstInSignals,
+													outSignal, outWriteAddr);
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::generateBitAccBasedPackedAfbCode(CodeSnippet* code, const UalAfb* afb,
+													const std::vector<std::pair<const UalSignal*, Address16>>& inSignals,
+													const UalSignal* outSignal, const Address16& outWriteAddr)
+	{
+		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(afb, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(outSignal, m_log);
+
+		Q_ASSERT(m_lmDescription->isBitAccAvailable() == true);
+
+		//
+		// inSignals - is unique non const input signals
+		//
+
+		bool isAndLogic = false;
+		QString afbCaption;
+
+		if (afb->isPackedAndLogic() == true)
+		{
+			isAndLogic = true;
+			afbCaption = Afb::AFB_AND;
+		}
+		else
+		{
+			if (afb->isPackedOrLogic() == true)
+			{
+				isAndLogic = false;
+				afbCaption = Afb::AFB_OR;
+			}
+			else
+			{
+				Q_ASSERT(false);
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
+		}
+
+		code->comment_nl(QString("Packed_%1 %2 processing").arg(afbCaption).arg(afb->label()));
+
+		CodeItem cmd;
+
+		int inSignalsCount = static_cast<int>(inSignals.size());
+
+		if (inSignalsCount < 2)
+		{
+			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		int inSignalIndex = 0;
+
+		int step = 1;
+
+		int canProcessBits = SIZE_16BIT;
+
+		while(inSignalIndex < inSignals.size())
+		{
+			int remainSignalsCount = inSignalsCount - inSignalIndex;
+
+			if (step > 1)
+			{
+				canProcessBits = SIZE_16BIT - 1;	//	take into consideration prev step result saved in ACC[0]
+			}
+
+			remainSignalsCount = std::min(remainSignalsCount, canProcessBits);
+
+			if (remainSignalsCount < canProcessBits)
+			{
+				if (step > 1)
+				{
+					*code << cmd.movBitAddrAcc(bitAccumulatorAddress16());
+				}
+
+				// initialization of bits that will not used
+				//
+				if (isAndLogic)
+				{
+					*code << cmd.setAcc();
+				}
+				else
+				{
+					*code << cmd.resetAcc();
+				}
+
+				if (step > 1)
+				{
+					*code << cmd.movBitAccAddr(bitAccumulatorAddress16());
+				}
+			}
+
+			int bitNo = 0;
+
+			while(bitNo < canProcessBits && inSignalIndex < inSignals.size())
+			{
+				const auto& [inSignal, readAddr] = inSignals[inSignalIndex];
+
+				inSignalIndex++;
+
+				// load next input signal
+				//
+				*code << cmd.movBitAccAddr(readAddr, QString("ACC[0] <= %1").arg(inSignal->appSignalID()));
+
+				bitNo++;
+			}
+
+			if (isAndLogic)
+			{
+				*code << cmd.andAcc(QString("compute @%1 step %2").arg(afb->label()).arg(step));
+			}
+			else
+			{
+				*code << cmd.orAcc(QString("compute @%1 step %2").arg(afb->label()).arg(step));
+			}
+
+			step++;
+
+
+			if (inSignalIndex >= inSignals.size())
+			{
+				// finalize processing
+				//
+				*code << cmd.movBitAddrAcc(outWriteAddr, QString("%1 <= ACC[0] (final result)").
+															arg(outSignal->appSignalID()));
+			}
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::generateAfbBasedPackedAfbCode(CodeSnippet* code, const UalAfb* afb,
+													const std::vector<std::pair<const UalSignal*, Address16>>& inSignals,
+													const UalSignal* outSignal, const Address16& outWriteAddr)
+	{
+		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(afb, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(outSignal, m_log);
+
+		Q_ASSERT(m_lmDescription->isBitAccAvailable() == false);
+
+		//
+		// inSignals - is unique non const input signals
+		//
+
+		if (m_packedLogicAfbInstance == -1)
+		{
+			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		const AfbComponents::LogicInfo& li = m_afbComponents.logicInfo();
+
+		if (li.isValid() == false)
+		{
+			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		QString afbCaption;
+		int confValue = -1;
+		int instance = m_packedLogicAfbInstance;
+
+		if (afb->isPackedAndLogic() == true)
+		{
+			afbCaption = Afb::AFB_AND;
+			confValue = li.confAnd;
+		}
+		else
+		{
+			if (afb->isPackedOrLogic() == true)
+			{
+				afbCaption = Afb::AFB_OR;
+				confValue = li.confOr;
+			}
+			else
+			{
+				Q_ASSERT(false);
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
+		}
+
+		code->comment_nl(QString("Packed_%1 %2 processing").arg(afbCaption).arg(afb->label()));
+
+		CodeItem cmd;
+
+		// set operation AND or OR
+		//
+		*code << cmd.writeFuncBlockConst(li.opCode, instance, li.confIndex, confValue, afbCaption,
+										 QString("%1.%2 <= %3").arg(afbCaption).
+										 arg(Afb::PARAM_I_CONF).arg(confValue));
+
+		// bus width set to 1
+		//
+		*code << cmd.writeFuncBlockConst(li.opCode, instance, li.busWidthIndex, 1, afbCaption,
+										 QString("%1.%2 <= %3").arg(afbCaption).
+										 arg(Afb::PARAM_I_BUS_WIDTH).arg(1));
+
+		//
+
+		int inSignalsCount = static_cast<int>(inSignals.size());
+
+		if (inSignalsCount < li.minOperandsCount)
+		{
+			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+		int inSignalIndex = 0;
+
+		int step = 1;
+		int prevOperandsCount = -1;
+
+		while(inSignalIndex < inSignals.size())
+		{
+			int remainSignalsCount = inSignalsCount - inSignalIndex;
+
+			if (step > 1)
+			{
+				remainSignalsCount++;	//	take into consideration prev step result saved in bit accumulator
+			}
+
+			remainSignalsCount = std::min(remainSignalsCount, li.maxOperandsCount);
+
+			Q_ASSERT(remainSignalsCount >= li.minOperandsCount);
+
+			if (prevOperandsCount != remainSignalsCount)
+			{
+				*code << cmd.writeFuncBlockConst(li.opCode, instance, li.operandQuantityIndex,
+												 remainSignalsCount, afbCaption,
+												 QString("%1.%2 <= %3").arg(afbCaption).
+												 arg(Afb::PARAM_I_OPRD_QUANT).arg(remainSignalsCount));
+
+				prevOperandsCount = remainSignalsCount;
+			}
+
+			int inputNo = 0;
+
+			if (step > 1)
+			{
+				// load prev step result from bit accumulator
+				//
+				*code << cmd.writeFuncBlockBit(li.opCode, instance, li.firstInIndex + inputNo,
+														bitAccumulatorAddress16(), afbCaption,
+														QString("%1.in_%2 <= prev step result").arg(afbCaption).
+															arg(inputNo + 1));
+				inputNo++;
+			}
+
+			while(inputNo < remainSignalsCount && inSignalIndex < inSignals.size())
+			{
+				const auto& [inSignal, readAddr] = inSignals[inSignalIndex];
+
+				inSignalIndex++;
+
+				// load next input signal
+				//
+				*code << cmd.writeFuncBlockBit(li.opCode, instance, li.firstInIndex + inputNo,
+														readAddr, afbCaption,
+														QString("%1.in_%2 <= %3").arg(afbCaption).
+																arg(inputNo + 1).arg(inSignal->appSignalID()));
+				inputNo++;
+			}
+
+			*code << CodeItem().startafb(li.opCode, instance, afbCaption, 2,
+											QString("compute @%1 step %2").arg(afb->label()).arg(step));
+
+			if (inSignalIndex < inSignals.size())
+			{
+				// save intermediate result into bit accumulator
+				//
+				*code << cmd.readFuncBlockBit(bitAccumulatorAddress16(), li.opCode, instance,
+													 li.resultIndex, afbCaption,
+														QString("bitAccumulator <= @%1.out (intermediate result)").
+															arg(afb->label()));
+				step++;			// go to next step
+			}
+			else
+			{
+				// finalize processing
+				//
+				*code << cmd.readFuncBlockBit(outWriteAddr, li.opCode, instance,
+													 li.resultIndex, afbCaption,
+														QString("%1 <= @%2.out (final result)").
+															arg(outSignal->appSignalID()).arg(afb->label()));
+			}
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::generateAfbBitAccCode(CodeSnippet* code, const UalAfb* ualAfb,
+													const BusProcessingStepInfo& bpStepInfo, bool* result)
+	{
+		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(ualAfb, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(result, m_log);
+		Q_ASSERT(m_bitAccAvailable == true);
+
+		if ((ualAfb->caption() == Afb::AFB_NOT ||
+			ualAfb->caption() == Afb::AFB_BUS_NOT) &&
+			ualAfb->opcode() == Afb::AFB_NOT_ACC_OPCODE)
+		{
+			return generateAfbBitAccNotCode(code, ualAfb, bpStepInfo, result);
+		}
+
+		if (ualAfb->opcode() == TO_INT(Afb::AfbType::LOGIC))
+		{
+			if (m_afbsOrForBitAccReplacing.contains(ualAfb->guid()))
+			{
+				return generateAfbBitAccOrCode(code, ualAfb, result);
+			}
+
+			if (m_afbsAndForBitAccReplacing.contains(ualAfb->guid()))
+			{
+				return generateAfbBitAccAndCode(code, ualAfb, result);
+			}
+		}
+
+		return false;
+	}
+
+	bool ModuleLogicCompiler::generateAfbBitAccNotCode(CodeSnippet* code, const UalAfb* ualAfb,
+													const BusProcessingStepInfo& bpStepInfo, bool* result)
+	{
+		Q_ASSERT(ualAfb->opcode() == Afb::AFB_NOT_ACC_OPCODE);
+
+		*result = true;
+
+		UalSignal* inSignal = getUalSignalByPinCaption(ualAfb, Afb::IN_PIN_CAPTION, true);
+
+		if (inSignal == nullptr)
+		{
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal not found for 'in' pin of AFB %1 (schema %2)").
+												arg(ualAfb->label()).arg(ualAfb->schemaID()));
+			*result = false;
+			return false;
+		}
+
+		UalSignal* outSignal = getUalSignalByPinCaption(ualAfb, Afb::OUT_PIN_CAPTION, false);
+
+		if (outSignal == nullptr)
+		{
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal not found for 'out' pin of AFB %1 (schema %2)").
+												arg(ualAfb->label()).arg(ualAfb->schemaID()));
+			*result = false;
+			return false;
+		}
+
+		if (ualAfb->caption() == Afb::AFB_NOT)
+		{
+			return generateAfbBitAcc1NotCode(code, ualAfb, inSignal, outSignal, result);
+		}
+
+		if (ualAfb->caption() == Afb::AFB_BUS_NOT)
+		{
+			return generateAfbBitAccBusNotCode(code, ualAfb, bpStepInfo, inSignal, outSignal, result);
+		}
+
+		Q_ASSERT(false);
+		return false;
+	}
+
+	bool ModuleLogicCompiler::generateAfbBitAcc1NotCode(CodeSnippet* code, const UalAfb* ualAfb,
+														UalSignal* inSignal, UalSignal* outSignal,
+														bool* result)
+	{
+		if (inSignal->isDiscrete() == false &&
+			(inSignal->isConstDiscrete() == false))
+		{
+			// Uncompatible signals connection (Logic schema '%1').
+			//
+			m_log->errALC5117(ualAfb->guid(), ualAfb->label(), inSignal->ualItemGuid(), inSignal->ualItemLabel(), ualAfb->schemaID());
+			*result = false;
+			return false;
+		}
+
+		if (outSignal->isDiscrete() == false)
+		{
+			// Uncompatible signals connection (Logic schema '%1').
+			//
+			m_log->errALC5117(ualAfb->guid(), ualAfb->label(), outSignal->ualItemGuid(), outSignal->ualItemLabel(), ualAfb->schemaID());
+			*result = false;
+			return false;
+		}
+
+		if (inSignal->isConstDiscrete() == true)
+		{
+			Address16 writeAddr = m_ualSignals.getSignalWriteAddress(*outSignal);
+
+			if(writeAddr.isValid() == false)
+			{
+				// Undefined UAL address of signal %1 (Logic schema %2).
+				//
+				m_log->errALC5105(outSignal->appSignalID(), outSignal->ualItemGuid(), outSignal->ualItemSchemaID());
+				*result = false;
+				return false;
+			}
+
+			*code << CodeItem().movBitConst(writeAddr, inSignal->constDiscreteValue() == 0 ? 1 : 0,
+								QString("compute not @%1 (optimized)").arg(ualAfb->label()));
+			return true;
+		}
+
+		Address16 readAddr = m_ualSignals.getSignalReadAddress(*inSignal, true);
+
+		if(readAddr.isValid() == false)
+		{
+			// Undefined UAL address of signal %1 (Logic schema %2).
+			//
+			m_log->errALC5105(inSignal->appSignalID(), inSignal->ualItemGuid(), inSignal->ualItemSchemaID());
+			*result = false;
+			return false;
+		}
+
+		if (isOutConnectedToTerminatorOnly(ualAfb) == true)
+		{
+			*result = true;
+			return true;		// report like a "code generated"
+		}
+
+		Address16 writeAddr = m_ualSignals.getSignalWriteAddress(*outSignal);
+
+		if(writeAddr.isValid() == false)
+		{
+			// Undefined UAL address of signal %1 (Logic schema %2).
+			//
+			m_log->errALC5105(outSignal->appSignalID(), outSignal->ualItemGuid(), outSignal->ualItemSchemaID());
+			*result = false;
+			return false;
+		}
+
+		*code << CodeItem().movBitAccAddr(readAddr, QString("ACC[0] <= %1").
+											arg(inSignal->refSignalIDsJoined()));
+		*code << CodeItem().notAcc(QString("compute not @%1").arg(ualAfb->label()));
+		*code << CodeItem().movBitAddrAcc(writeAddr, QString("%1 <= ACC[0]").
+											arg(outSignal->refSignalIDsJoined()));
+		return true;
+	}
+
+	bool ModuleLogicCompiler::generateAfbBitAccBusNotCode(CodeSnippet* code, const UalAfb* ualAfb,
+														const BusProcessingStepInfo& bpStepInfo,
+														UalSignal* inSignal, UalSignal* outSignal, bool* result)
+	{
+		if (inSignal->isDiscrete() == false &&
+			inSignal->isConstDiscrete() == false &&
+			inSignal->isBus() == false)
+		{
+			// Uncompatible signals connection (Logic schema '%1').
+			//
+			m_log->errALC5117(ualAfb->guid(), ualAfb->label(), inSignal->ualItemGuid(), inSignal->ualItemLabel(), ualAfb->schemaID());
+			*result = false;
+			return false;
+		}
+
+		AfbSignal logicInSignal;
+
+		if (ualAfb->getAfbSignalByCaption(Afb::IN_PIN_CAPTION, &logicInSignal) == false)
+		{
+			*result = false;
+			return false;
+		}
+
+		if (inSignal->isCanBeConnectedTo(*ualAfb, logicInSignal, m_log) == false)
+		{
+			*result = false;
+			return false;
+		}
+
+		if (outSignal->isBus() == false)
+		{
+			// Uncompatible signals connection (Logic schema '%1').
+			//
+			m_log->errALC5117(ualAfb->guid(), ualAfb->label(), outSignal->ualItemGuid(), outSignal->ualItemLabel(), ualAfb->schemaID());
+			*result = false;
+			return false;
+		}
+
+		AfbSignal logicOutSignal;
+
+		if (ualAfb->getAfbSignalByCaption(Afb::OUT_PIN_CAPTION, &logicOutSignal) == false)
+		{
+			*result = false;
+			return false;
+		}
+
+		if (outSignal->isCanBeConnectedTo(*ualAfb, logicOutSignal, m_log) == false)
+		{
+			*result = false;
+			return false;
+		}
+
+		if (inSignal->isConstDiscrete() == true)
+		{
+			Address16 writeAddr = m_ualSignals.getSignalWriteAddress(*outSignal);
+
+			if(writeAddr.isValid() == false)
+			{
+				// Undefined UAL address of signal %1 (Logic schema %2).
+				//
+				m_log->errALC5105(outSignal->appSignalID(), outSignal->ualItemGuid(), outSignal->ualItemSchemaID());
+				*result = false;
+				return false;
+			}
+
+			writeAddr.addWord(bpStepInfo.currentBusSignalOffsetW);
+
+			*code << CodeItem().movConst(writeAddr, inSignal->constDiscreteValue() == 0 ? 0xFFFF : 0,
+										QString("compute bus_not @%1 (step %2/%3 optimized)").
+										 arg(ualAfb->label()).
+										 arg(bpStepInfo.currentStep + 1).
+										 arg(bpStepInfo.stepsNumber));
+			return true;
+		}
+
+		if (inSignal->isDiscrete() == true)
+		{
+			Address16 readAddr = m_ualSignals.getSignalReadAddress(*inSignal, true);
+
+			if(readAddr.isValid() == false)
+			{
+				// Undefined UAL address of signal %1 (Logic schema %2).
+				//
+				m_log->errALC5105(inSignal->appSignalID(), inSignal->ualItemGuid(), inSignal->ualItemSchemaID());
+				*result = false;
+				return false;
+			}
+
+			if (isOutConnectedToTerminatorOnly(ualAfb) == true)
+			{
+				*result = true;
+				return true;		// report like a "code generated"
+			}
+
+			Address16 writeAddr = m_ualSignals.getSignalWriteAddress(*outSignal);
+
+			if(writeAddr.isValid() == false)
+			{
+				// Undefined UAL address of signal %1 (Logic schema %2).
+				//
+				m_log->errALC5105(outSignal->appSignalID(), outSignal->ualItemGuid(), outSignal->ualItemSchemaID());
+				*result = false;
+				return false;
+			}
+
+			writeAddr.addWord(bpStepInfo.currentBusSignalOffsetW);
+
+			*code << CodeItem().fillb(wordAccumulatorAddress16(), readAddr,
+									  QString("WordACC <= %1").arg(inSignal->refSignalIDsJoined()));
+			*code << CodeItem().movAccAddr(wordAccumulatorAddress());
+			*code << CodeItem().notAcc(QString("compute bus_not @%1 (step %2/%3)").
+														arg(ualAfb->label()).
+														arg(bpStepInfo.currentStep + 1).
+														arg(bpStepInfo.stepsNumber));
+			*code << CodeItem().movAddrAcc(writeAddr, QString("%1 (part %2)) <= bus_not.out").
+										   arg(outSignal->appSignalID()).arg(bpStepInfo.currentStep + 1));
+			return true;
+		}
+
+		// inSignal and outSignal is busses
+
+		Address16 readAddr = m_ualSignals.getSignalReadAddress(*inSignal, true);
+
+		if(readAddr.isValid() == false)
+		{
+			// Undefined UAL address of signal %1 (Logic schema %2).
+			//
+			m_log->errALC5105(inSignal->appSignalID(), inSignal->ualItemGuid(), inSignal->ualItemSchemaID());
+			*result = false;
+			return false;
+		}
+
+		readAddr.addWord(bpStepInfo.currentBusSignalOffsetW);
+
+		Address16 writeAddr = m_ualSignals.getSignalWriteAddress(*outSignal);
+
+		if(writeAddr.isValid() == false)
+		{
+			// Undefined UAL address of signal %1 (Logic schema %2).
+			//
+			m_log->errALC5105(outSignal->appSignalID(), outSignal->ualItemGuid(), outSignal->ualItemSchemaID());
+			*result = false;
+			return false;
+		}
+
+		writeAddr.addWord(bpStepInfo.currentBusSignalOffsetW);
+
+		*code << CodeItem().movAccAddr(readAddr, QString("ACC <= %1 (part %2)").
+														arg(inSignal->appSignalID()).
+														arg(bpStepInfo.currentStep + 1));
+
+		*code << CodeItem().notAcc(QString("compute bus_not @%1 (step %2/%3)").
+											arg(ualAfb->label()).
+											arg(bpStepInfo.currentStep + 1).
+											arg(bpStepInfo.stepsNumber));
+
+		*code << CodeItem().movAddrAcc(writeAddr, QString("%1 (part %2)) <= bus_not.out").
+														arg(outSignal->appSignalID()).
+														arg(bpStepInfo.currentStep + 1));
+		return true;
+	}
+
+	bool ModuleLogicCompiler::generateAfbBitAccOrCode(CodeSnippet* code, const UalAfb* ualAfb, bool* result)
+	{
+		TEST_PTR_RETURN_FALSE(code);
+		TEST_PTR_RETURN_FALSE(ualAfb);
+		TEST_PTR_RETURN_FALSE(result);
+
+		*result = true;
+
+		std::vector<std::pair<const UalSignal*, Address16>> inSignals;			// pair<ualSignal, readAddress>
+
+		const std::vector<SchemaPin>& inputs = ualAfb->inputs();
+
+		bool hasConst1 = false;
+		bool allInputsConst0 = true;
+
+		for(const SchemaPin& inPin : inputs)
+		{
+			UalSignal* inSignal = getUalSignalByPinCaption(ualAfb, inPin.caption(), true);
+
+			if (inSignal == nullptr)
+			{
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal not found for '%1' pin of AFB %2 (schema %3)").
+													arg(inPin.caption()).arg(ualAfb->label()).arg(ualAfb->schemaID()));
+				*result = false;
+				return false;
+			}
+
+			if (inSignal->isConstDiscrete() == true)
+			{
+				if (inSignal->constDiscreteValue() == 1)
+				{
+					hasConst1 = true;
+				}
+
+				continue;			// skip const 0 value
+			}
+
+			if (inSignal->isDiscrete() == true)
+			{
+				allInputsConst0 = false;
+
+				Address16 readAddr = m_ualSignals.getSignalReadAddress(*inSignal, true);
+
+				if(readAddr.isValid() == false)
+				{
+					// Undefined UAL address of signal %1 (Logic schema %2).
+					//
+					m_log->errALC5105(inSignal->appSignalID(), inSignal->ualItemGuid(), inSignal->ualItemSchemaID());
+					*result = false;
+					return false;
+				}
+
+				inSignals.emplace_back(inSignal, readAddr);
+				continue;
+			}
+
+			// Uncompatible signals connection (Logic schema '%1').
+			//
+			m_log->errALC5117(ualAfb->guid(), ualAfb->label(), inSignal->ualItemGuid(), inSignal->ualItemLabel(), ualAfb->schemaID());
+			*result = false;
+			return false;
+		}
+
+		if (isOutConnectedToTerminatorOnly(ualAfb) == true)
+		{
+			*result = true;
+			return true;		// report like a "code generated"
+		}
+
+		UalSignal* outSignal = getUalSignalByPinCaption(ualAfb, Afb::OUT_PIN_CAPTION, false);
+
+		if (outSignal == nullptr)
+		{
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal not found for 'out' pin of AFB %1 (schema %2)").
+												arg(ualAfb->label()).arg(ualAfb->schemaID()));
+			*result = false;
+			return false;
+		}
+
+		if (outSignal->isDiscrete() == false)
+		{
+			// Uncompatible signals connection (Logic schema '%1').
+			//
+			m_log->errALC5117(ualAfb->guid(), ualAfb->label(), outSignal->ualItemGuid(), outSignal->ualItemLabel(), ualAfb->schemaID());
+			*result = false;
+			return false;
+		}
+
+		Address16 writeAddr = m_ualSignals.getSignalWriteAddress(*outSignal);
+
+		if(writeAddr.isValid() == false)
+		{
+			// Undefined UAL address of signal %1 (Logic schema %2).
+			//
+			m_log->errALC5105(outSignal->appSignalID(), outSignal->ualItemGuid(), outSignal->ualItemSchemaID());
+			*result = false;
+			return false;
+		}
+
+		//
+
+		if (hasConst1 == true)
+		{
+			*code << CodeItem().movBitConst(writeAddr, 1, QString("compute or @%1 (optimized) %2 <= 1").
+											arg(ualAfb->label()).
+											arg(outSignal->refSignalIDsJoined()));
+			return true;
+		}
+
+		if (allInputsConst0 == true)
+		{
+			*code << CodeItem().movBitConst(writeAddr, 0, QString("compute or @%1 (optimized) %2 <= 0").
+											arg(ualAfb->label()).
+											arg(outSignal->refSignalIDsJoined()));
+			return true;
+		}
+
+		//
+
+		if (inSignals.size() == 1)
+		{
+			const UalSignal* inSignal = inSignals.begin()->first;
+			Address16 readAddr = inSignals.begin()->second;
+
+			*code << CodeItem().movBit(writeAddr, readAddr, QString("compute or @%1 (optimized) %2 <= %3").
+									   arg(ualAfb->label()).
+									   arg(outSignal->refSignalIDsJoined()).
+									   arg(inSignal->refSignalIDsJoined()));
+			return true;
+		}
+
+		*code << CodeItem().resetAcc();
+
+		for(auto const& [inSignal, readAddr] : inSignals)
+		{
+			*code << CodeItem().movBitAccAddr(readAddr, QString("ACC <= %1").arg(inSignal->refSignalIDsJoined()));
+		}
+
+		*code << CodeItem().orAcc(QString("compute or @%1").arg(ualAfb->label()));
+		*code << CodeItem().movBitAddrAcc(writeAddr, QString("%1 <= ACC[0]").arg(outSignal->refSignalIDsJoined()));
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::generateAfbBitAccAndCode(CodeSnippet* code, const UalAfb* ualAfb, bool* result)
+	{
+		TEST_PTR_RETURN_FALSE(code);
+		TEST_PTR_RETURN_FALSE(ualAfb);
+		TEST_PTR_RETURN_FALSE(result);
+
+		*result = true;
+
+		std::vector<std::pair<const UalSignal*, Address16>> inSignals;	// pair<ualSignal, readAddress>
+
+		const std::vector<SchemaPin>& inputs = ualAfb->inputs();
+
+		bool hasConst0 = false;
+		bool allInputsConst1 = true;
+
+		for(const SchemaPin& inPin : inputs)
+		{
+			UalSignal* inSignal = getUalSignalByPinCaption(ualAfb, inPin.caption(), true);
+
+			if (inSignal == nullptr)
+			{
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal not found for '%1' pin of AFB %2 (schema %3)").
+													arg(inPin.caption()).arg(ualAfb->label()).arg(ualAfb->schemaID()));
+				*result = false;
+				return false;
+			}
+
+			if (inSignal->isConstDiscrete() == true)
+			{
+				if (inSignal->constDiscreteValue() == 0)
+				{
+					hasConst0 = true;
+				}
+
+				continue;			// skip const 1 value
+			}
+
+			if (inSignal->isDiscrete() == true)
+			{
+				allInputsConst1 = false;
+
+				Address16 readAddr = m_ualSignals.getSignalReadAddress(*inSignal, true);
+
+				if(readAddr.isValid() == false)
+				{
+					// Undefined UAL address of signal %1 (Logic schema %2).
+					//
+					m_log->errALC5105(inSignal->appSignalID(), inSignal->ualItemGuid(), inSignal->ualItemSchemaID());
+					*result = false;
+					return false;
+				}
+
+				inSignals.emplace_back(inSignal, readAddr);
+				continue;
+			}
+
+			// Uncompatible signals connection (Logic schema '%1').
+			//
+			m_log->errALC5117(ualAfb->guid(), ualAfb->label(), inSignal->ualItemGuid(), inSignal->ualItemLabel(), ualAfb->schemaID());
+			*result = false;
+			return false;
+		}
+
+		if (isOutConnectedToTerminatorOnly(ualAfb) == true)
+		{
+			*result = true;
+			return true;		// report like a "code generated"
+		}
+
+		UalSignal* outSignal = getUalSignalByPinCaption(ualAfb, Afb::OUT_PIN_CAPTION, false);
+
+		if (outSignal == nullptr)
+		{
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal not found for 'out' pin of AFB %1 (schema %2)").
+												arg(ualAfb->label()).arg(ualAfb->schemaID()));
+			*result = false;
+			return false;
+		}
+
+		if (outSignal->isDiscrete() == false)
+		{
+			// Uncompatible signals connection (Logic schema '%1').
+			//
+			m_log->errALC5117(ualAfb->guid(), ualAfb->label(), outSignal->ualItemGuid(), outSignal->ualItemLabel(), ualAfb->schemaID());
+			*result = false;
+			return false;
+		}
+
+		Address16 writeAddr = m_ualSignals.getSignalWriteAddress(*outSignal);
+
+		if(writeAddr.isValid() == false)
+		{
+			// Undefined UAL address of signal %1 (Logic schema %2).
+			//
+			m_log->errALC5105(outSignal->appSignalID(), outSignal->ualItemGuid(), outSignal->ualItemSchemaID());
+			*result = false;
+			return false;
+		}
+
+		//
+
+		if (hasConst0 == true)
+		{
+			*code << CodeItem().movBitConst(writeAddr, 0, QString("compute and @%1 (optimized) %2 <= 0").
+											arg(ualAfb->label()).
+											arg(outSignal->refSignalIDsJoined()));
+			return true;
+		}
+
+		if (allInputsConst1 == true)
+		{
+			*code << CodeItem().movBitConst(writeAddr, 1, QString("compute and @%1 (optimized) %2 <= 1").
+											arg(ualAfb->label()).
+											arg(outSignal->refSignalIDsJoined()));
+			return true;
+		}
+
+		//
+
+		if (inSignals.size() == 1)
+		{
+			const UalSignal* inSignal = inSignals.begin()->first;
+			Address16 readAddr = inSignals.begin()->second;
+
+			*code << CodeItem().movBit(writeAddr, readAddr, QString("compute and @%1 (optimized) %2 <= %3").
+									   arg(ualAfb->label()).
+									   arg(outSignal->refSignalIDsJoined()).
+									   arg(inSignal->refSignalIDsJoined()));
+			return true;
+		}
+
+		*code << CodeItem().setAcc();
+
+		for(const auto& [inSignal, readAddr] : inSignals)
+		{
+			*code << CodeItem().movBitAccAddr(readAddr, QString("ACC <= %1").arg(inSignal->refSignalIDsJoined()));
+		}
+
+		*code << CodeItem().andAcc(QString("compute and @%1").arg(ualAfb->label()));
+		*code << CodeItem().movBitAddrAcc(writeAddr, QString("%1 <= ACC[0]").arg(outSignal->refSignalIDsJoined()));
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::generateInvertDiscreteInputsCode(CodeSnippet* code,
+															   const QVector<UalSignal*>& inDiscreteSignals,
+															   const QString& comment)
+	{
+		TEST_PTR_RETURN_FALSE(code);
+
+		if (inDiscreteSignals.isEmpty())
+		{
+			return true;
+		}
+
+		bool result = true;
+
+		// map of inSignals arrays placed in same offset
+		//
+		std::map<int, std::vector<const UalSignal*>> offsetSignals;		// inSignal->ualAddr().offset() => vector of inSignal
+
+		// sort signals by offsets
+		//
+		for(const UalSignal* inSignal : inDiscreteSignals)
+		{
+			TEST_PTR_CONTINUE(inSignal);
+
+			if (inSignal->ioBufAddr().isValid() == false)
+			{
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal %1 ioBufAddr is NOT valid!").arg(inSignal->appSignalID()));
+				result = false;
+				continue;
+			}
+
+			if (inSignal->ualAddr().isValid() == false)
+			{
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal %1 ualAddr is NOT valid!").arg(inSignal->appSignalID()));
+				result = false;
+				continue;
+			}
+
+			int offset = inSignal->ualAddr().offset();
+
+			auto it = offsetSignals.find(offset);
+
+			if (it == offsetSignals.end())
+			{
+				auto [new_it, b] = offsetSignals.emplace(offset, std::vector<const UalSignal*>{});
+
+				it = new_it;
+			}
+
+			auto& offsetInSignals = it->second;
+
+			offsetInSignals.push_back(inSignal);
+
+			if (offsetInSignals.size() > SIZE_16BIT)
+			{
+				Q_ASSERT(false);
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+			}
+		}
+
+		RETURN_IF_FALSE(result);
+
+		const FbConv* fbBusNot = nullptr;
+		const UalAfb* afbBusNot = nullptr;
+
+		if (m_bitAccAvailable == false)
+		{
+			auto it = m_fbConv.find(Afb::AFB_BUS_NOT);
+
+			if (it == m_fbConv.end())
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
+
+			fbBusNot = &it->second;
+
+			if (fbBusNot->ualAfbs.size() != 1)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
+
+			afbBusNot = *fbBusNot->ualAfbs.begin();
+
+			if (afbBusNot == nullptr)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
+		}
+
+		RETURN_IF_FALSE(result);
+
+		int bitAccAddr = bitAccumulatorAddress();
+		CodeItem cmd;
+
+		code->comment_nl(comment);
+
+		for(auto& [offset, inSignals] : offsetSignals)
+		{
+			// sort iSignals by ualAddr().bitAddress() ascending
+			//
+			std::sort(	inSignals.begin(), inSignals.end(),
+						[](const UalSignal* a, const UalSignal* b)
+						{
+							return a->ualAddr().bitAddress() < b->ualAddr().bitAddress();
+						});
+
+			// sequential signals placement checking
+			//
+			int bitNo = -1;
+			for(const UalSignal* inSignal : inSignals)
+			{
+				int ualAddrBitNo = inSignal->ualAddr().bit();
+
+				if (bitNo == -1)
+				{
+					result &= (ualAddrBitNo == 0);
+				}
+				else
+				{
+					result &= (ualAddrBitNo == bitNo + 1);
+				}
+
+				Q_ASSERT(result);
+
+				bitNo = ualAddrBitNo;
+			}
+
+			RETURN_IF_FALSE(result);
+
+			//
+
+			if (m_bitAccAvailable == true)
+			{
+				// generation of code that use bit accumulator
+				//
+				if (inSignals.size() < SIZE_16BIT)
+				{
+					*code << cmd.resetAcc();
+				}
+
+				auto reverseIt = inSignals.rbegin();
+
+				while(reverseIt != inSignals.rend())
+				{
+					*code << cmd.movBitAccAddr((*reverseIt)->ioBufAddr(),
+												  QString("acc <= %1").arg((*reverseIt)->appSignalID()));
+					reverseIt++;
+				}
+
+				*code << cmd.notAcc();
+				*code << cmd.movAddrAcc(offset);
+			}
+			else
+			{
+				// old style code generation (AFB BUS_NOT used)
+				//
+				int bitNo = 0;
+
+				if (inSignals.size() < SIZE_16BIT)
+				{
+					*code << cmd.movConst(bitAccAddr, 0);
+				}
+
+				for(const UalSignal* inSignal : inSignals)
+				{
+					*code << cmd.movBit(Address16(bitAccAddr, bitNo), inSignal->ioBufAddr());
+					bitNo++;
+				}
+
+				*code << cmd.writeFuncBlock(afbBusNot->opcode(),
+										   afbBusNot->instance(),
+										   fbBusNot->inputSignalIndex,
+										   bitAccAddr,
+										   afbBusNot->caption());
+
+				*code << cmd.startafb(afbBusNot->opcode(),
+									 afbBusNot->instance(),
+									 afbBusNot->caption(),
+									 afbBusNot->runTime());
+
+				*code << cmd.readFuncBlock(offset,
+										  afbBusNot->opcode(),
+										  afbBusNot->instance(),
+										  fbBusNot->outputSignalIndex,
+										  afbBusNot->caption());
+			}
+
+			code->newLine();
+		}
+
+		return result;
 	}
 
 	bool ModuleLogicCompiler::calcBusProcessingSteps(const UalAfb* ualAfb, std::vector<int>* busProcessingStepsSizes)
@@ -9704,7 +11596,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::getPinsAndSignalsBusSizes(const UalAfb* ualAfb, const std::vector<LogicPin>& pins,
+	bool ModuleLogicCompiler::getPinsAndSignalsBusSizes(const UalAfb* ualAfb, const std::vector<SchemaPin>& pins,
 														std::vector<std::vector<int>>* pinsSizes, int* busSignalsSize, bool isInputs,
 														bool* allBusInputsConnectedToDiscretes)
 	{
@@ -9718,9 +11610,9 @@ namespace Builder
 		*busSignalsSize = -1;
 		*allBusInputsConnectedToDiscretes = true;
 
-		for(const LogicPin& pin : pins)
+		for(const SchemaPin& pin : pins)
 		{
-			LogicAfbSignal afbSignal;
+			AfbSignal afbSignal;
 
 			bool res = ualAfb->getAfbSignalByPin(pin, &afbSignal);
 
@@ -9810,27 +11702,6 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::isBusProcessingAfb(const UalAfb* ualAfb, bool* isBusProcessing)
-	{
-		if (ualAfb == nullptr || isBusProcessing == nullptr)
-		{
-			LOG_NULLPTR_ERROR(m_log);
-			return false;
-		}
-
-		Afbl* afbl = m_afbls.value(ualAfb->strID(), nullptr);
-
-		if (afbl == nullptr)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		*isBusProcessing = afbl->isBusProcessingAfb();
-
-		return true;
-	}
-
 	bool ModuleLogicCompiler::generateBusComposerCode(CodeSnippet* code,  const UalItem* ualItem)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
@@ -9869,11 +11740,15 @@ namespace Builder
 
 		bool result = true;
 
-		code->comment_nl(QString("BusComposer %1 processing").arg(ualItem->label()));
+		code->comment_nl(QString("BusComposer %1 processing (BusType %2) start").
+									arg(ualItem->label()).
+									arg(bus->busTypeID()));
 
-		int count = 0;
+		BusFilling busFilling(bus);
 
-		code->append(codeSetMemory(ualBusSignal->ualAddr().offset(), 0, bus->sizeW(), QString("init %1").arg(ualBusSignal->appSignalID())));
+		// std::map<inbusOffset, std::map<bitNo, std::pair<inputSignal, busChildSignal>>>
+		//
+		std::map<int, std::map<int, std::pair<UalSignal*, UalSignal*>>> busDiscretes;
 
 		for(const BusSignal& busSignal : bus->busSignals())
 		{
@@ -9915,12 +11790,24 @@ namespace Builder
 
 			switch(busChildSignal->signalType())
 			{
-			case E::SignalType::Analog:
-				res = generateAnalogSignalToBusAnalogInputCode(code, inputSignal, busChildSignal, busSignal, ualItem->label());
+			case E::SignalType::Discrete:
+				{
+					//res = generateDiscreteSignalToBusDiscreteInputCode(code, inputSignal, busChildSignal, busSignal);
+
+					auto it = busDiscretes.find(busSignal.inbusOffset());
+
+					if (it == busDiscretes.end())
+					{
+						auto p = busDiscretes.insert({busSignal.inbusOffset(), {}});
+						it = p.first;
+					}
+
+					it->second.insert({busSignal.inbusAddr.bit(), {inputSignal, busChildSignal}});
+				}
 				break;
 
-			case E::SignalType::Discrete:
-				res = generateDiscreteSignalToBusDiscreteInputCode(code, inputSignal, busChildSignal, busSignal);
+			case E::SignalType::Analog:
+				res = generateAnalogSignalToBusAnalogInputCode(code, inputSignal, busChildSignal, busSignal, ualItem->label(), &busFilling);
 				break;
 
 			case E::SignalType::Bus:
@@ -9928,11 +11815,11 @@ namespace Builder
 					switch(inputSignal->signalType())
 					{
 					case E::SignalType::Discrete:
-						res = generateDiscreteSignalToBusBusInputCode(code, inputSignal, busChildSignal);
+						res = generateDiscreteSignalToBusBusInputCode(code, inputSignal, busChildSignal, busSignal, &busFilling);
 						break;
 
 					case E::SignalType::Bus:
-						res = generateBusSignalToBusBusInputCode(code, inputSignal, busChildSignal, busSignal);
+						res = generateBusSignalToBusBusInputCode(code, inputSignal, busChildSignal, busSignal, &busFilling);
 						break;
 
 					default:
@@ -9948,21 +11835,20 @@ namespace Builder
 				result = false;
 			}
 
-			if (res == true)
-			{
-				count++;
-			}
-			else
+			if (res == false)
 			{
 				result = false;
 			}
 		}
 
-		if (count > 0)
-		{
-			code->newLine();
-		}
+		result &= generateDiscreteSignalsToBusDiscreteInputsCode(code, busDiscretes, *ualBusSignal, &busFilling);
 
+		clearUnusedBusSpace(code, *ualBusSignal, busFilling);
+
+		code->finalizeByNewLine();
+		code->comment_nl(QString("BusComposer %1 processing (BusType %2) end").
+									arg(ualItem->label()).
+									arg(bus->busTypeID()));
 		return result;
 	}
 
@@ -9976,7 +11862,7 @@ namespace Builder
 
 		*connectedToTedrminatorOnly = false;
 
-		const std::vector<LogicPin>& outputs = composerItem->outputs();
+		const std::vector<SchemaPin>& outputs = composerItem->outputs();
 
 		if (outputs.size() != 1)
 		{
@@ -9985,7 +11871,7 @@ namespace Builder
 			return nullptr;
 		}
 
-		const LogicPin& output = outputs[0];
+		const SchemaPin& output = outputs[0];
 
 		if (isConnectedToTerminatorOnly(output) == true)
 		{
@@ -10017,18 +11903,26 @@ namespace Builder
 																	   const UalSignal* inputSignal,
 																	   const UalSignal* busChildSignal,
 																	   const BusSignal& busSignal,
-																	   const QString& busComposerLabel)
+																	   const QString& busComposerLabel,
+																	   BusFilling* busFilling)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(inputSignal, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(busChildSignal, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(busFilling, m_log);
 
 		Q_ASSERT(busChildSignal->ualAddrIsValid() == true);
 		Q_ASSERT(busChildSignal->ualAddr().bit() == 0);
 
 		if (busSignal.conversionRequired() == true)
 		{
-			return generateInbusConversionCode(code, inputSignal, busChildSignal, busSignal, busComposerLabel);
+			bool res = generateInbusConversionCode(code, inputSignal, busChildSignal, busSignal, busComposerLabel);
+
+			if (res == true)
+			{
+				busFilling->fill(busSignal.inbusOffset(), busSignal.inbusSizeBits / 16);
+			}
+			return res;
 		}
 
 		QString inputSignalIDs = inputSignal->refSignalIDsJoined();
@@ -10072,6 +11966,8 @@ namespace Builder
 		}
 
 		code->append(cmd);
+
+		busFilling->fillDword(busSignal.inbusOffset());
 
 		return true;
 	}
@@ -10259,8 +12155,8 @@ namespace Builder
 		// No param initialization code required here.
 		// Params initialization code will be generated in generateInitAfbsCode.
 
-		LogicAfbSignal inSignal;
-		LogicAfbSignal outSignal;
+		AfbSignal inSignal;
+		AfbSignal outSignal;
 
 		result &= scale->getAfbSignalByCaption(Afb::IN_PIN_CAPTION, &inSignal);
 		result &= scale->getAfbSignalByCaption(Afb::OUT_PIN_CAPTION, &outSignal);
@@ -10459,8 +12355,8 @@ namespace Builder
 
 		bool result = true;
 
-		LogicAfbSignal inSignal;
-		LogicAfbSignal outSignal;
+		AfbSignal inSignal;
+		AfbSignal outSignal;
 
 		result &= tconv->getAfbSignalByCaption(Afb::IN_PIN_CAPTION, &inSignal);
 		result &= tconv->getAfbSignalByCaption(Afb::OUT_PIN_CAPTION, &outSignal);
@@ -10566,8 +12462,8 @@ namespace Builder
 
 		bool result = true;
 
-		LogicAfbSignal inSignal;
-		LogicAfbSignal outSignal;
+		AfbSignal inSignal;
+		AfbSignal outSignal;
 
 		result &= boTconv->getAfbSignalByCaption(Afb::IN_PIN_CAPTION, &inSignal);
 		result &= boTconv->getAfbSignalByCaption(Afb::OUT_PIN_CAPTION, &outSignal);
@@ -10622,12 +12518,16 @@ namespace Builder
 
 		if (inputSignal->isConst() == true)
 		{
-			if (inputSignal->constDiscreteValue() != 0)
-			{
-				cmd.movBitConst(busChildSignal->ualAddr(), inputSignal->constDiscreteValue());
-				cmd.setComment(QString("%1 <= %2").arg(busChildSignalIDs).arg(inputSignal->constDiscreteValue()));
-				code->append(cmd);
-			}
+//			if (inputSignal->constDiscreteValue() != 0)
+//			{
+//				cmd.movBitConst(busChildSignal->ualAddr(), inputSignal->constDiscreteValue());
+//				cmd.setComment(QString("%1 <= %2").arg(busChildSignalIDs).arg(inputSignal->constDiscreteValue()));
+//				code->append(cmd);
+//			}
+
+			cmd.movBitConst(busChildSignal->ualAddr(), inputSignal->constDiscreteValue());
+			cmd.setComment(QString("%1 <= %2").arg(busChildSignalIDs).arg(inputSignal->constDiscreteValue()));
+			code->append(cmd);
 		}
 		else
 		{
@@ -10647,9 +12547,99 @@ namespace Builder
 		return true;
 	}
 
+	bool ModuleLogicCompiler::generateDiscreteSignalsToBusDiscreteInputsCode(CodeSnippet* code,
+			const std::map<int, std::map<int, std::pair<UalSignal*, UalSignal*>>>& busDiscretes,
+			const UalSignal& busSignal, BusFilling* busFilling)
+	{
+		// std::map<inbusOffset, std::map<bitNo, std::pair<inputSignal, busChildSignal>>>
+
+		TEST_PTR_RETURN_FALSE(m_log);
+		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(busFilling, m_log);
+
+		bool result = true;
+
+		int busSignalUalAddrOffset = m_ualSignals.getSignalWriteAddress(busSignal).offset();
+
+		for(const auto& [inbusOffset, offsetDiscretes] : busDiscretes)
+		{
+			if (offsetDiscretes.empty() == true)
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			//std::map<Address16, std::tuple<const UalSignal*, Address16, QString>> srcSignals;
+			CopyBitsMap srcSignals;
+
+			int busChildSignalsOffset = -1;
+
+			for(const auto& [bitNo, inBusSignals] : offsetDiscretes)
+			{
+				const auto [inSignal, busChildSignal] = inBusSignals;
+
+				if (inSignal == nullptr || busChildSignal == nullptr)
+				{
+					Q_ASSERT(false);
+					LOG_INTERNAL_ERROR(m_log);
+					result = false;
+					continue;
+				}
+
+				if (busChildSignalsOffset == -1)
+				{
+					busChildSignalsOffset = busSignalUalAddrOffset + inbusOffset;
+				}
+
+				CopyBitInfo cbi;
+
+				cbi.ualSignal = inSignal;
+
+				if (inSignal->isConstDiscrete() == false)
+				{
+					cbi.srcBitAddr = m_ualSignals.getSignalReadAddress(*inSignal, true);
+				}
+
+				cbi.comment = QString("%1 <= %2").
+										arg(busChildSignal->appSignalID()).
+										arg(inSignal->refSignalIDsJoined());
+
+				srcSignals.emplace(busChildSignal->ualAddr(), cbi);
+			}
+
+			result &= codeCopyBits(code, busChildSignalsOffset, srcSignals);
+			code->newLine();
+
+			busFilling->fillWord(inbusOffset);
+		}
+
+		return true;
+	}
+
+	void ModuleLogicCompiler::clearUnusedBusSpace(CodeSnippet* code,
+												const UalSignal& busSignal,
+												const BusFilling& busFilling)
+	{
+		int busSignalAddr = busSignal.ualAddr().offset();
+
+		std::vector<std::pair<int, int>> unfilledAreas;
+
+		busFilling.getUnfilled(&unfilledAreas);
+
+		for (auto const& p : unfilledAreas)
+		{
+			int startAddr = p.first;
+			int sizeW = p.second;
+
+			*code << codeSetMemory(busSignalAddr + startAddr, 0, sizeW);
+		}
+	}
+
 	bool ModuleLogicCompiler::generateDiscreteSignalToBusBusInputCode(CodeSnippet* code,
 																	  UalSignal* inputSignal,
-																	  UalSignal* busChildSignal)
+																	  UalSignal* busChildSignal,
+																	  const BusSignal& busSignal,
+																	  BusFilling* busFilling)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(inputSignal, m_log);
@@ -10715,14 +12705,14 @@ namespace Builder
 				return false;
 			}
 
-			cmd.fill(wordAccAddr, inputSignalAddr.offset(), inputSignalAddr.bit());
+			cmd.fillb(wordAccAddr, inputSignalAddr.offset(), inputSignalAddr.bit());
 			cmd.setComment(QString("%1 <= %2").arg(busChildSignal->appSignalID()).arg(inputSignal->appSignalID()));
 
 			code->append(cmd);
 
 			if (busSizeW > 1)
 			{
-				cmd.fill(wordAccAddr + 1, inputSignalAddr.offset(), inputSignalAddr.bit());
+				cmd.fillb(wordAccAddr + 1, inputSignalAddr.offset(), inputSignalAddr.bit());
 				code->append(cmd);
 			}
 
@@ -10741,10 +12731,15 @@ namespace Builder
 			code->append(cmd);
 		}
 
+		busFilling->fill(busSignal.inbusOffset(), busSizeW);
 		return true;
 	}
 
-	bool ModuleLogicCompiler::generateBusSignalToBusBusInputCode(CodeSnippet* code, UalSignal* inputSignal, UalSignal* busChildSignal, const BusSignal& busSignal)
+	bool ModuleLogicCompiler::generateBusSignalToBusBusInputCode(CodeSnippet* code,
+																 UalSignal* inputSignal,
+																 UalSignal* busChildSignal,
+																 const BusSignal& busSignal,
+																 BusFilling* busFilling)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(inputSignal, m_log);
@@ -10809,6 +12804,8 @@ namespace Builder
 		cmd.setComment(QString("%1 <= %2").arg(busChildSignalIDs).arg(inputSignalIDs));
 		code->append(cmd);
 
+		busFilling->fill(busSignal.inbusOffset(), busSizeW);
+
 		return true;
 	}
 
@@ -10817,7 +12814,7 @@ namespace Builder
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
 
-		const UalBusExtractor* busExtractor = ualItem->ualBusExtractor();
+		const SchemaBusExtractor* busExtractor = ualItem->schemaBusExtractor();
 
 		if (busExtractor == nullptr)
 		{
@@ -10825,7 +12822,7 @@ namespace Builder
 			return false;
 		}
 
-		const std::vector<LogicPin>& inputs = busExtractor->inputs();
+		const std::vector<SchemaPin>& inputs = busExtractor->inputs();
 
 		if (inputs.size() != 1)
 		{
@@ -10833,7 +12830,7 @@ namespace Builder
 			return false;
 		}
 
-		const LogicPin& inPin = inputs[0];
+		const SchemaPin& inPin = inputs[0];
 
 		const std::vector<QUuid>& associatedOutPins = inPin.associatedIOs();
 
@@ -11086,8 +13083,8 @@ namespace Builder
 
 		bool result = true;
 
-		LogicAfbSignal inSignal;
-		LogicAfbSignal outSignal;
+		AfbSignal inSignal;
+		AfbSignal outSignal;
 
 		result &= boTconv->getAfbSignalByCaption(Afb::IN_PIN_CAPTION, &inSignal);
 		result &= boTconv->getAfbSignalByCaption(Afb::OUT_PIN_CAPTION, &outSignal);
@@ -11246,10 +13243,10 @@ namespace Builder
 
 			UalAfb* swtch = createUalAfb(switchItem);
 
-			const LogicPin* select = swtch->getPin(Afb::SWITCH_SI_PIN_SELECT);
-			const LogicPin* x1 = swtch->getPin(Afb::SWITCH_SI_PIN_X1);
-			const LogicPin* x2 = swtch->getPin(Afb::SWITCH_SI_PIN_X2);
-			const LogicPin* output = swtch->getPin(Afb::SWITCH_SI_PIN_OUTPUT);
+			const SchemaPin* select = swtch->getPin(Afb::SWITCH_SI_PIN_SELECT);
+			const SchemaPin* x1 = swtch->getPin(Afb::SWITCH_SI_PIN_X1);
+			const SchemaPin* x2 = swtch->getPin(Afb::SWITCH_SI_PIN_X2);
+			const SchemaPin* output = swtch->getPin(Afb::SWITCH_SI_PIN_OUTPUT);
 
 			if (select == nullptr ||
 				x1 == nullptr ||
@@ -11312,7 +13309,7 @@ namespace Builder
 								  select->afbOperandIndex(), readAddr, swtch->caption());
 			code->append(cmd);
 
-			cmd.start(swtch->opcode(), swtch->instance(), swtch->caption(), swtch->runTime());
+			cmd.startafb(swtch->opcode(), swtch->instance(), swtch->caption(), swtch->runTime());
 			code->append(cmd);
 
 			cmd.readFuncBlock32(writeAddr,
@@ -11383,8 +13380,8 @@ namespace Builder
 
 		bool result = true;
 
-		LogicAfbSignal inSignal;
-		LogicAfbSignal outSignal;
+		AfbSignal inSignal;
+		AfbSignal outSignal;
 
 		result &= tconv->getAfbSignalByCaption(Afb::IN_PIN_CAPTION, &inSignal);
 		result &= tconv->getAfbSignalByCaption(Afb::OUT_PIN_CAPTION, &outSignal);
@@ -11493,8 +13490,8 @@ namespace Builder
 		// No param initialization code required here.
 		// Params initialization code will be generated in generateInitAfbsCode.
 
-		LogicAfbSignal inSignal;
-		LogicAfbSignal outSignal;
+		AfbSignal inSignal;
+		AfbSignal outSignal;
 
 		result &= scale->getAfbSignalByCaption(Afb::IN_PIN_CAPTION, &inSignal);
 		result &= scale->getAfbSignalByCaption(Afb::OUT_PIN_CAPTION, &outSignal);
@@ -11529,7 +13526,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::generateDiscreteSignalToBusExtractorCode(CodeSnippet* code,
 																	   const UalItem* ualItem,
-																	   const LogicPin& inPin,
+																	   const SchemaPin& inPin,
 																	   const UalSignal* inputSignal)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
@@ -11694,11 +13691,11 @@ namespace Builder
 
 		UalItem* connectedItem = nullptr;
 
-		const std::vector<LogicPin>& inputs = currentItem->inputs();
+		const std::vector<SchemaPin>& inputs = currentItem->inputs();
 
 		bool pinFound = false;
 
-		for(const LogicPin& input : inputs)
+		for(const SchemaPin& input : inputs)
 		{
 			if (input.caption() != inPinCaption)
 			{
@@ -11718,7 +13715,7 @@ namespace Builder
 
 			*connectedOutPinUuid = associatedOuts[0];
 
-			connectedItem = m_pinParent.value(*connectedOutPinUuid, nullptr);
+			connectedItem = getValueOrNullptr(m_pinParent, *connectedOutPinUuid);
 
 			if (connectedItem == nullptr)
 			{
@@ -11740,7 +13737,7 @@ namespace Builder
 		return connectedItem;
 	}
 
-	UalItem* ModuleLogicCompiler::getAssociatedOutputPinParent(const LogicPin& inputPin, QUuid* connectedOutPinUuid) const
+	UalItem* ModuleLogicCompiler::getAssociatedOutputPinParent(const SchemaPin& inputPin, QUuid* connectedOutPinUuid) const
 	{
 		if (inputPin.IsInput() == false)
 		{
@@ -11763,7 +13760,7 @@ namespace Builder
 			*connectedOutPinUuid = associatedOuts[0];
 		}
 
-		UalItem* connectedOutPinParent = m_pinParent.value(associatedOuts[0], nullptr);
+		UalItem* connectedOutPinParent = getValueOrNullptr(m_pinParent, associatedOuts[0]);
 
 		if (connectedOutPinParent == nullptr)
 		{
@@ -11777,7 +13774,7 @@ namespace Builder
 
 	const UalSignal* ModuleLogicCompiler::getExtractorBusSignal(const UalItem* appBusExtractor)
 	{
-		const UalBusExtractor* extractor = appBusExtractor->ualBusExtractor();
+		const SchemaBusExtractor* extractor = appBusExtractor->schemaBusExtractor();
 
 		if (extractor == nullptr)
 		{
@@ -11787,7 +13784,7 @@ namespace Builder
 
 		// getting extractor's input pin
 		//
-		const std::vector<LogicPin>& inputs = appBusExtractor->inputs();
+		const std::vector<SchemaPin>& inputs = appBusExtractor->inputs();
 
 		if (inputs.size() != 1)
 		{
@@ -11838,7 +13835,7 @@ namespace Builder
 		return srcSignal;
 	}
 
-	bool ModuleLogicCompiler::getConnectedAppItems(const LogicPin& pin, ConnectedAppItems* connectedAppItems)
+	bool ModuleLogicCompiler::getConnectedAppItems(const SchemaPin& pin, ConnectedAppItems* connectedAppItems)
 	{
 		if (connectedAppItems == nullptr)
 		{
@@ -11853,7 +13850,7 @@ namespace Builder
 
 		for(QUuid connectedPinUuid : pin.associatedIOs())
 		{
-			UalItem* connectedPinParent = m_pinParent.value(connectedPinUuid, nullptr);
+			UalItem* connectedPinParent = getValueOrNullptr(m_pinParent, connectedPinUuid);
 
 			if (connectedPinParent == nullptr)
 			{
@@ -11868,27 +13865,17 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::getBusProcessingParams(const UalAfb* appFb, bool& isBusProcessingAfb, QString& busTypeID)
+	bool ModuleLogicCompiler::getBusProcessingParams(const UalAfb* ualAfb, bool& isBusProcessingAfb, QString& busTypeID)
 	{
-		if (appFb == nullptr)
+		if (ualAfb == nullptr)
 		{
 			LOG_NULLPTR_ERROR(m_log);
 			return false;
 		}
 
-		isBusProcessingAfb = false;
 		busTypeID.clear();
 
-		const Afbl* afbl = m_afbls.value(appFb->afbStrID(), nullptr);
-
-		if (afbl == nullptr)
-		{
-			assert(false);
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		isBusProcessingAfb = afbl->isBusProcessingAfb();
+		isBusProcessingAfb = m_afbComponents.isBusProcessingAfb(ualAfb->afbStrID());
 
 		if (isBusProcessingAfb == false)
 		{
@@ -11901,11 +13888,11 @@ namespace Builder
 
 		QStringList busTypeIDs;
 
-		for(const LogicPin& inPin : appFb->inputs())
+		for(const SchemaPin& inPin : ualAfb->inputs())
 		{
-			LogicAfbSignal pinSignal;
+			AfbSignal pinSignal;
 
-			result = appFb->getAfbSignalByPin(inPin, &pinSignal);
+			result = ualAfb->getAfbSignalByPin(inPin, &pinSignal);
 
 			if (result == false)
 			{
@@ -11945,7 +13932,7 @@ namespace Builder
 		{
 			// Cannot identify AFB bus type (Logic schema %1).
 			//
-			m_log->errALC5108(appFb->guid(), appFb->schemaID());
+			m_log->errALC5108(ualAfb->guid(), ualAfb->schemaID());
 			return false;
 		}
 
@@ -11963,7 +13950,7 @@ namespace Builder
 			{
 				// Different bus types on AFB inputs (Logic schema %1).
 				//
-				m_log->errALC5109(appFb->guid(), appFb->schemaID());
+				m_log->errALC5109(ualAfb->guid(), ualAfb->schemaID());
 				return false;
 			}
 		}
@@ -11973,7 +13960,7 @@ namespace Builder
 		return true;
 	}
 
-	UalSignal* ModuleLogicCompiler::getPinInputAppSignal(const LogicPin& inPin)
+	UalSignal* ModuleLogicCompiler::getPinInputAppSignal(const SchemaPin& inPin)
 	{
 		assert(inPin.IsInput());
 
@@ -11987,7 +13974,7 @@ namespace Builder
 
 		QUuid associatedOutUuid = associatedOuts[0];
 
-		const UalItem* connectedPinParent = m_pinParent.value(associatedOutUuid, nullptr);
+		const UalItem* connectedPinParent = getValueOrNullptr(m_pinParent, associatedOutUuid);
 
 		if (connectedPinParent == nullptr)
 		{
@@ -12017,14 +14004,14 @@ namespace Builder
 			return nullptr;
 		}
 
-		const std::vector<LogicPin>* pins = &ualItem->inputs();
+		const std::vector<SchemaPin>* pins = &ualItem->inputs();
 
 		if (isInput == false)
 		{
 			pins = &ualItem->outputs();
 		}
 
-		for(const LogicPin& pin : *pins)
+		for(const SchemaPin& pin : *pins)
 		{
 			if (pin.caption() != pinCaption)
 			{
@@ -12051,23 +14038,23 @@ namespace Builder
 		return nullptr;
 	}
 
-	bool ModuleLogicCompiler::addToComparatorSet(const UalAfb* appFb)
+	bool ModuleLogicCompiler::addToComparatorSet(const UalAfb* afb)
 	{
-		if (appFb == nullptr)
+		if (afb == nullptr)
 		{
 			assert(false);
 			LOG_INTERNAL_ERROR(m_log);
 			return false;
 		}
 
-		if (appFb->isComparator() == false)
+		if (afb->isComparator() == false)
 		{
 			return true;
 		}
 
 		std::shared_ptr<Comparator> cmp = std::make_shared<Comparator>();
 
-		bool result = initComparator(cmp, appFb);
+		bool result = initComparator(cmp, afb);
 
 		RETURN_IF_FALSE(result);
 
@@ -12076,18 +14063,21 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::initComparator(std::shared_ptr<Comparator> cmp, const UalAfb* appFb)
+	bool ModuleLogicCompiler::initComparator(std::shared_ptr<Comparator> cmp, const UalAfb* afb)
 	{
-		TEST_PTR_LOG_RETURN_FALSE(appFb, log());
+		TEST_PTR_LOG_RETURN_FALSE(afb, log());
 
 		// set compare type of value
 		//
-		bool isConstComparator = appFb->isConstComaparator();
-		bool hysteresisIsConst = appFb->caption().contains("_dh_") == false;
+		bool isConstComparator = afb->isConstComaparator();
+		bool hysteresisIsConst = afb->caption().contains("_dh_") == false;
 
 		//	set comparator type, compare-value, hysteresis-value
 		//
-		for(Afb::AfbParam pv : appFb->logicFb().params())
+
+		const std::vector<Afb::AfbParam>& params = afb->params();
+
+		for(const AfbParam& pv : params)
 		{
 			if (pv.opName() == "i_conf") // set comparator type: =(1(SI)), > (2(SI)), < (3(SI)), != (4(SI)),= (5(FP)), > (6(FP)), < (7(FP)), != (8(FP)), >= (9 (SI)), <= (10 (SI)),  >= (11 (FP)),  <= (12 (FP))
 			{
@@ -12115,9 +14105,9 @@ namespace Builder
 			{
 				switch (pv.dataFormat())
 				{
-					case E::DataFormat::Float :			cmp->compare().setConstValue(pv.afbParamValue().value().toDouble());	break;
-					case E::DataFormat::SignedInt :		cmp->compare().setConstValue(pv.afbParamValue().value().toInt());		break;
-					case E::DataFormat::UnsignedInt :	cmp->compare().setConstValue(pv.afbParamValue().value().toInt());		break;
+					case E::DataFormat::Float:			cmp->compare().setConstValue(pv.afbParamValue().value().toDouble());	break;
+					case E::DataFormat::SignedInt:		cmp->compare().setConstValue(pv.afbParamValue().value().toInt());		break;
+					case E::DataFormat::UnsignedInt:	cmp->compare().setConstValue(pv.afbParamValue().value().toInt());		break;
 
 					default:
 						assert(0);
@@ -12128,9 +14118,9 @@ namespace Builder
 			{
 				switch (pv.dataFormat())
 				{
-					case E::DataFormat::Float :			cmp->hysteresis().setConstValue(pv.afbParamValue().value().toDouble());	break;
-					case E::DataFormat::SignedInt :		cmp->hysteresis().setConstValue(pv.afbParamValue().value().toInt());	break;
-					case E::DataFormat::UnsignedInt :	cmp->hysteresis().setConstValue(pv.afbParamValue().value().toInt());	break;
+					case E::DataFormat::Float:			cmp->hysteresis().setConstValue(pv.afbParamValue().value().toDouble());	break;
+					case E::DataFormat::SignedInt:		cmp->hysteresis().setConstValue(pv.afbParamValue().value().toInt());	break;
+					case E::DataFormat::UnsignedInt:	cmp->hysteresis().setConstValue(pv.afbParamValue().value().toInt());	break;
 
 					default:
 						assert(0);
@@ -12140,15 +14130,12 @@ namespace Builder
 
 		// set comparator signals
 		//
-		for(const LogicPin& pin : appFb->inputs())
+		for(const SchemaPin& pin : afb->inputs())
 		{
 
 			UalSignal* ualSignal = m_ualSignals.get(pin.guid());
 
-			if (ualSignal == nullptr)
-			{
-				continue;
-			}
+			TEST_PTR_CONTINUE(ualSignal);
 
 			if (ualSignal->isAnalog() == false)
 			{
@@ -12200,7 +14187,7 @@ namespace Builder
 			}
 		}
 
-		for(const LogicPin& pin : appFb->outputs())
+		for(const SchemaPin& pin : afb->outputs())
 		{
 			UalSignal* ualSignal = m_ualSignals.get(pin.guid());
 
@@ -12227,17 +14214,17 @@ namespace Builder
 
 		//
 		//
-		cmp->setLabel(appFb->label());
-		cmp->setPrecision(appFb->logicFb().precision());
-		cmp->setSchemaID(appFb->schemaID());
-		cmp->setSchemaItemUuid(appFb->guid());
+		cmp->setLabel(afb->label());
+		cmp->setPrecision(afb->precision());
+		cmp->setSchemaID(afb->schemaID());
+		cmp->setSchemaItemUuid(afb->guid());
 
 		// tests
 		//
 		if (cmp->input().appSignalID().isEmpty() == true)
 		{
 			assert(false);
-			QString strError = QString("Error of comparator: %1 , schema: %2 - Empty input signal").arg(appFb->caption()).arg(appFb->schemaID());
+			QString strError = QString("Error of comparator: %1 , schema: %2 - Empty input signal").arg(afb->caption()).arg(afb->schemaID());
 			LOG_INTERNAL_ERROR_MSG(m_log, strError);
 			qDebug() << strError;
 			return false;
@@ -12253,7 +14240,7 @@ namespace Builder
 
 		if (isConstComparator == false && cmp->compare().appSignalID().isEmpty() == true)
 		{
-			QString strError = QString("Error of comparator: %1 , schema: %2 - Empty cmp signal").arg(appFb->caption()).arg(appFb->schemaID());
+			QString strError = QString("Error of comparator: %1 , schema: %2 - Empty cmp signal").arg(afb->caption()).arg(afb->schemaID());
 			LOG_INTERNAL_ERROR_MSG(m_log, strError);
 			qDebug() << strError;
 			return false;
@@ -12261,7 +14248,7 @@ namespace Builder
 
 		if (hysteresisIsConst == false && cmp->hysteresis().appSignalID().isEmpty() == true)
 		{
-			QString strError = QString("Error of comparator: %1 , schema: %2 - Empty hysteresis signal").arg(appFb->caption()).arg(appFb->schemaID());
+			QString strError = QString("Error of comparator: %1 , schema: %2 - Empty hysteresis signal").arg(afb->caption()).arg(afb->schemaID());
 			LOG_INTERNAL_ERROR_MSG(m_log, strError);
 			qDebug() << strError;
 			return false;
@@ -12274,7 +14261,7 @@ namespace Builder
 			{
 				if (cmp->hysteresisIsConstSignal() == true && cmp->hysteresis().constValue() == 0.0)
 				{
-					log()->wrnALC5177(appFb->caption(), cmp->hysteresisPinCaption(), appFb->guid(), appFb->schemaID());
+					log()->wrnALC5177(afb->caption(), cmp->hysteresisPinCaption(), afb->guid(), afb->schemaID());
 				}
 			}
 		}
@@ -13007,7 +14994,7 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::copyScatteredDiscreteSignalsInRegBuf(CodeSnippet* code, const QVector<UalSignal*>& signalsList, const QString &description)
+	bool ModuleLogicCompiler::copyScatteredDiscreteSignalsInRegBuf(CodeSnippet* code, const QVector<UalSignal*>& signalsList, const QString& description)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 
@@ -13016,27 +15003,21 @@ namespace Builder
 			return true;
 		}
 
+		bool result = true;
+
 		code->comment_nl(QString("Copy %1 in regBuf").arg(description));
 
-		int bitAccAddr = m_memoryMap.bitAccumulatorAddress();
+		CopyBitsMap srcSignals;
 
-		qsizetype signalsCount = signalsList.count();
+		TEST_PTR_LOG_RETURN_FALSE(signalsList[0], m_log);
 
-		int count = 0;
+		int destAddressOffset = signalsList[0]->regBufAddr().offset();
 
-		CodeItem cmd;
-
-		int countReminder16 = 0;
-
-		bool zeroLastWord = (signalsCount % SIZE_16BIT) != 0 ? true : false;
-
-		for(UalSignal* ualSignal : signalsList)
+		for(const UalSignal* ualSignal : signalsList)
 		{
 			TEST_PTR_LOG_RETURN_FALSE(ualSignal, m_log);
 
-			assert(ualSignal->isConst() == false);
-
-			if (ualSignal->ualAddrIsValid() == false ||
+			if (ualSignal->isDiscrete() == false ||
 				ualSignal->regBufAddr().isValid() == false ||
 				ualSignal->regValueAddr().isValid() == false)
 			{
@@ -13045,34 +15026,34 @@ namespace Builder
 				return false;
 			}
 
-			countReminder16 = count % SIZE_16BIT;
-
-			assert(ualSignal->regBufAddr().bit() == countReminder16);
-
-			if (countReminder16 == 0 && (signalsCount - count) < SIZE_16BIT && zeroLastWord == true)
+			if (destAddressOffset != ualSignal->regBufAddr().offset())
 			{
-				cmd.movConst(bitAccAddr, 0);
-				cmd.clearComment();
-				code->append(cmd);
-				zeroLastWord = false;
+				if (srcSignals.empty() == false)
+				{
+					result &= codeCopyBits(code, destAddressOffset, srcSignals);
+					code->newLine();
+
+					srcSignals.clear();
+				}
+
+				destAddressOffset = ualSignal->regBufAddr().offset();
 			}
 
-			cmd.movBit(bitAccAddr, ualSignal->regBufAddr().bit(), ualSignal->ualAddr().offset(), ualSignal->ualAddr().bit());
-			cmd.setComment(QString("copy %1").arg(ualSignal->refSignalIDsJoined()));
-			code->append(cmd);
+			CopyBitInfo cbi;
 
-			count++;
+			cbi.ualSignal = ualSignal;
+			cbi.srcBitAddr = ualSignal->ualAddr();
 
-			if ((count % SIZE_16BIT) == 0 || count == signalsCount)
-			{
-				cmd.clearComment();
-				cmd.mov(ualSignal->regBufAddr().offset(), bitAccAddr);
-				code->append(cmd);
-				code->newLine();;
-			}
+			srcSignals.emplace(ualSignal->regBufAddr(), cbi);
 		}
 
-		return true;
+		if (srcSignals.empty() == false)
+		{
+			result &= codeCopyBits(code, destAddressOffset, srcSignals);
+			code->newLine();
+		}
+
+		return result;
 	}
 
 	bool ModuleLogicCompiler::copyOutputSignalsInOutputModulesMemory(CodeSnippet* code)
@@ -13263,44 +15244,31 @@ namespace Builder
 
 			TEST_PTR_CONTINUE(appFb);
 
-			bool isTconvAfb = appFb->caption().startsWith("tconv_");
+			auto it = m_fbConv.find(appFb->caption());
 
-			FbScal fbScal;
-
-			switch(s->analogSignalFormat())
+			if (it == m_fbConv.end())
 			{
-			case E::AnalogAppSignalFormat::Float32:
-
-				fbScal = m_fbScal[FB_SCALE_FP_16UI_INDEX];
-				break;
-
-			case E::AnalogAppSignalFormat::SignedInt32:
-				if (isTconvAfb == true)
-				{
-					fbScal = m_fbScal[FB_TCONV_SI_FP_INDEX];
-				}
-				else
-				{
-					fbScal = m_fbScal[FB_SCALE_SI_16UI_INDEX];
-				}
-				break;
-
-			default:
-				assert(false);
+				LOG_INTERNAL_ERROR(m_log);
+				Q_ASSERT(false);
+				return false;
 			}
+
+			const FbConv& fbConv = it->second;
+
+			Q_ASSERT(fbConv.inputSignalDataSize == SIZE_32BIT);
 
 			if (ualSignal->isConst() == true)
 			{
 				if(constIsFloat == true)
 				{
-					cmd.writeFuncBlockConstFloat(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
+					cmd.writeFuncBlockConstFloat(appFb->opcode(), appFb->instance(), fbConv.inputSignalIndex,
 													constFloatValue, appFb->caption());
 					cmd.setComment(QString(tr("float const %1 to output analog %2 conversion")).
 										arg(constFloatValue).arg(s->appSignalID()));
 				}
 				else
 				{
-					cmd.writeFuncBlockConstInt32(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
+					cmd.writeFuncBlockConstInt32(appFb->opcode(), appFb->instance(), fbConv.inputSignalIndex,
 													constIntValue, appFb->caption());
 					cmd.setComment(QString(tr("int const %1 to output analog %2 conversion")).
 										arg(constIntValue).arg(s->appSignalID()));
@@ -13310,28 +15278,36 @@ namespace Builder
 			}
 			else
 			{
-				cmd.writeFuncBlock32(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
+				cmd.writeFuncBlock32(appFb->opcode(), appFb->instance(), fbConv.inputSignalIndex,
 								   s->ualAddr().offset(), appFb->caption());
 				cmd.setComment(QString(tr("output analog %1 conversion")).arg(s->appSignalID()));
 				code->append(cmd);
 			}
 
-			cmd.start(appFb->opcode(), appFb->instance(), appFb->caption(), appFb->runTime());
+			cmd.startafb(appFb->opcode(), appFb->instance(), appFb->caption(), appFb->runTime());
 			cmd.clearComment();
 			code->append(cmd);
 
-			if (isTconvAfb == true)
+			switch(fbConv.outputSignalDataSize)
 			{
+			case SIZE_32BIT:
 				cmd.readFuncBlock32(s->ioBufAddr().offset(),
 								  appFb->opcode(), appFb->instance(),
-								  fbScal.outputSignalIndex, appFb->caption());
-			}
-			else
-			{
+								  fbConv.outputSignalIndex, appFb->caption());
+				break;
+
+			case SIZE_16BIT:
 				cmd.readFuncBlock(s->ioBufAddr().offset(),
 								  appFb->opcode(), appFb->instance(),
-								  fbScal.outputSignalIndex, appFb->caption());
+								  fbConv.outputSignalIndex, appFb->caption());
+				break;
+
+			default:
+				LOG_INTERNAL_ERROR(m_log);
+				Q_ASSERT(false);
+				return false;
 			}
+
 			code->append(cmd);
 			code->newLine();
 		}
@@ -13396,7 +15372,7 @@ namespace Builder
 
 		bool result = true;
 
-		QMultiHash<int, AppSignal*> writeAddressesMap;
+		std::map<int, CopyBitsMap> destCopyMaps;	// destAddrOffset => CopyBitsMap
 
 		for(AppSignal* s : m_ioSignals)
 		{
@@ -13414,95 +15390,66 @@ namespace Builder
 
 			UalSignal* ualSignal = m_ualSignals.get(s->appSignalID());
 
-			if (ualSignal != nullptr)
+			if (ualSignal == nullptr)
 			{
-				writeAddressesMap.insert(s->ioBufAddr().offset(), s);
+				continue;
 			}
+
+			Address16 destAddr = s->ioBufAddr();
+			int destAddrOffset = destAddr.offset();
+
+			auto it = destCopyMaps.find(destAddrOffset);
+
+			if (it == destCopyMaps.end())
+			{
+				auto [new_it, b] = destCopyMaps.emplace(destAddrOffset,
+											CopyBitsMap{});
+				it = new_it;
+			}
+
+			CopyBitsMap& copyBitsMap = it->second;
+
+			if (copyBitsMap.contains(destAddr))
+			{
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal %1 has duplicate IO buf addr").arg(s->appSignalID()));
+				result = false;
+				continue;
+			}
+
+			CopyBitInfo cbi;
+
+			cbi.ualSignal = ualSignal;
+
+			if (ualSignal->isConstDiscrete() == false)
+			{
+				cbi.srcBitAddr = ualSignal->ualAddr();
+			}
+
+			cbi.invertBit = s->invertSignal();
+
+			copyBitsMap.emplace(destAddr, cbi);
 		}
+
+		RETURN_IF_FALSE(result);
 
 		int lmOutputsAddress = m_lmDescription->memory().m_appDataOffset;
 		bool lmOutputsIsWritten = false;
 
 		code->comment_nl("Copy output discrete signals to output modules memory");
 
-		QList<int> writeAddreses = writeAddressesMap.uniqueKeys();
-
-		QVector<int> sortedWriteAddress = QVector<int>::fromList(writeAddreses);
-
-		std::sort(sortedWriteAddress.begin(), sortedWriteAddress.end());
-
-		int bitAccAddr = m_memoryMap.bitAccumulatorAddress();
-
-		for(int writeAddr : sortedWriteAddress)
+		for(const auto& [destAddrOffset, copyBitsMap] : destCopyMaps)
 		{
-			QList<AppSignal*> writeSignals = writeAddressesMap.values(writeAddr);
+			bool res = codeCopyBits(code, destAddrOffset, copyBitsMap);
 
-			// signals sorting by ioBufAddr via std::map
-			//
-			std::map<int, AppSignal*> sortedWriteSignals;
-
-			for(AppSignal* s : writeSignals)
+			if (res == false)
 			{
-				sortedWriteSignals.insert(std::make_pair(s->ioBufAddr().bitAddress(), s));
+				result = false;
+				continue;
 			}
 
-			CodeItem cmd;
-
-			cmd.movConst(bitAccAddr, 0);
-			code->append(cmd);
-
-			for(const std::pair<int, AppSignal*> pair: sortedWriteSignals)
-			{
-				AppSignal* s = pair.second;
-
-				TEST_PTR_CONTINUE(s);
-
-				if (s->ioBufAddr().isValid() == false)
-				{
-					assert(false);
-					LOG_INTERNAL_ERROR(m_log);
-					result = false;
-					continue;
-				}
-
-				UalSignal* ualSignal = m_ualSignals.get(s->appSignalID());
-
-				if (ualSignal == nullptr)
-				{
-					assert(false);
-					LOG_NULLPTR_ERROR(m_log);
-					result = false;
-					continue;
-				}
-
-				if (ualSignal->isConst() == true)
-				{
-					cmd.movBitConst(bitAccAddr, s->ioBufAddr().bit(), ualSignal->constDiscreteValue());
-				}
-				else
-				{
-					if (s->ualAddrIsValid() == false)
-					{
-						assert(false);
-						LOG_INTERNAL_ERROR(m_log);
-						result = false;
-						continue;
-					}
-
-					cmd.movBit(bitAccAddr, s->ioBufAddr().bit(), s->ualAddr().offset(), s->ualAddr().bit());
-				}
-
-				cmd.setComment(s->appSignalID());
-
-				code->append(cmd);
-			}
-
-			cmd.mov(writeAddr, bitAccAddr);
-			cmd.clearComment();
-			code->append(cmd);
 			code->newLine();
 
-			if (writeAddr == lmOutputsAddress)
+			if (destAddrOffset == lmOutputsAddress)
 			{
 				lmOutputsIsWritten = true;
 			}
@@ -13691,30 +15638,6 @@ namespace Builder
 
 		result &= copyOptoPortRawTxBusSignals(code, port);
 
-/*		MemWriteMap::AreaList nonWrittenAreas;
-
-		memWriteMap.getNonWrittenAreas(&nonWrittenAreas);
-
-		bool first = true;
-
-		for(MemWriteMap::Area nonWrittenArea : nonWrittenAreas)
-		{
-			QString comment;
-
-			if (first == true)
-			{
-				comment = "fill non written txRawData by 0";
-				first = false;
-			}
-
-			m_code.append(codeSetMemory(nonWrittenArea.first, 0, nonWrittenArea.second, comment));
-		}
-
-		if (first == false)
-		{
-			m_code.newLine();
-		}*/
-
 		return result;
 	}
 
@@ -13787,7 +15710,9 @@ namespace Builder
 			if (ualSignal->isConst() == false)
 			{
 				cmd.mov32(txSignalAddress.offset(), ualSignal->ualAddr().offset());
-				cmd.setComment(QString("%1 >> %2").arg(ualSignal->refSignalIDsJoined()).arg(port->connectionID()));
+				cmd.setComment(QString("%1 <= %2").
+								arg(port->connectionID()).
+								arg(ualSignal->refSignalIDsJoined()));
 			}
 			else
 			{
@@ -13795,15 +15720,20 @@ namespace Builder
 				{
 				case E::AnalogAppSignalFormat::Float32:
 					cmd.movConstFloat(txSignalAddress.offset(), ualSignal->constAnalogFloatValue());
-					cmd.setComment(QString("%1 (const %2) >> %3").arg(ualSignal->refSignalIDsJoined()).
-								   arg(ualSignal->constAnalogFloatValue()).arg(port->connectionID()));
+					cmd.setComment(QString("%1 <= %2 (const %3)").
+									arg(port->connectionID()).
+									arg(ualSignal->refSignalIDsJoined()).
+									arg(ualSignal->constAnalogFloatValue()));
 					break;
 
 				case E::AnalogAppSignalFormat::SignedInt32:
 					cmd.movConstInt32(txSignalAddress.offset(), ualSignal->constAnalogIntValue());
-					cmd.setComment(QString("%1 (const %2) >> %3").arg(ualSignal->refSignalIDsJoined()).
-								   arg(ualSignal->constAnalogIntValue()).arg(port->connectionID()));
+					cmd.setComment(QString("%1 <= %2 (const %3)").
+									arg(port->connectionID()).
+									arg(ualSignal->refSignalIDsJoined()).
+									arg(ualSignal->constAnalogIntValue()));
 					break;
+
 				default:
 					assert(false);
 				}
@@ -13903,7 +15833,9 @@ namespace Builder
 				cmd.movMem(txSignalAddress, ualSignal->ualAddr(), ualSignal->sizeW());
 			}
 
-			cmd.setComment(QString("%1 >> %2").arg(txSignal->appSignalIDs().join(", ")).arg(port->connectionID()));
+			cmd.setComment(QString("%1 <= %2").
+								arg(port->connectionID()).
+								arg(txSignal->appSignalIDs().join(", ")));
 			code->append(cmd);
 		}
 
@@ -14011,15 +15943,19 @@ namespace Builder
 			if (ualSignal->isConst() == true)
 			{
 				cmd.movBitConst(bitAccumulatorAddress, bit, ualSignal->constDiscreteValue());
-				cmd.setComment(QString("%1 (const %2) >> %3").arg(ualSignal->refSignalIDsJoined()).
-							   arg(ualSignal->constDiscreteValue()).arg(port->connectionID()));
+				cmd.setComment(QString("%1 <= %2 (const %3)").
+									arg(port->connectionID()).
+									arg(ualSignal->refSignalIDsJoined()).
+									arg(ualSignal->constDiscreteValue()));
 
 				copyCode.append(cmd);
 			}
 			else
 			{
 				cmd.movBit(bitAccumulatorAddress, bit, ualSignal->ualAddr().offset(), ualSignal->ualAddr().bit());
-				cmd.setComment(QString("%1 >> %2").arg(ualSignal->refSignalIDsJoined()).arg(port->connectionID()));
+				cmd.setComment(QString("%1 <= %2").
+										arg(port->connectionID()).
+										arg(ualSignal->refSignalIDsJoined()));
 
 				copyCode.append(cmd);
 
@@ -14045,7 +15981,7 @@ namespace Builder
 				if (isCopyOptimizationAllowed(copyCode, &srcAddr) == true)
 				{
 					cmd.mov(txSignalAddress, srcAddr);
-					cmd.setComment(QString("%1 >> %2").arg(ids).arg(port->connectionID()));
+					cmd.setComment(QString("%1 <= %2").arg(port->connectionID()).arg(ids));
 
 					code->append(cmd);
 				}
@@ -14486,7 +16422,9 @@ namespace Builder
 				cmd.mov32(writeAddr, ualSignal->ualAddr().offset());
 			}
 
-			cmd.setComment(QString("%1 >> %2").arg(txSignal->appSignalID()).arg(port->connectionID()));
+			cmd.setComment(QString("%1 <= %2").
+							arg(port->connectionID()).
+							arg(txSignal->appSignalID()));
 
 			code->append(cmd);
 
@@ -14590,7 +16528,9 @@ namespace Builder
 					cmd.movBit(bitAccAddr, addrInBuf.bit(), ualSignal->ualAddr().offset(), ualSignal->ualAddr().bit());
 				}
 
-				cmd.setComment(QString("%1 >> %2").arg(discrete->appSignalID()).arg(port->connectionID()));
+				cmd.setComment(QString("%1 <= %2").
+								arg(port->connectionID()).
+								arg(discrete->appSignalID()));
 
 				code->append(cmd);
 
@@ -14712,7 +16652,9 @@ namespace Builder
 				cmd.movMem(writeAddr, ualSignal->ualAddr().offset(), writeSizeW);
 			}
 
-			cmd.setComment(QString("%1 >> %2").arg(txSignal->appSignalID()).arg(port->connectionID()));
+			cmd.setComment(QString("%1 <= %2").
+							arg(port->connectionID()).
+							arg(txSignal->appSignalID()));
 			code->append(cmd);
 
 			count++;
@@ -14736,37 +16678,68 @@ namespace Builder
 		}
 
 		return DeviceHelper::setIntProperty(const_cast<Hardware::DeviceModule*>(m_lm),
-		                                    EquipmentPropNames::LM_APP_LAN_DATA_SIZE,
+											EquipmentPropNames::LM_APP_LAN_DATA_SIZE,
 											m_memoryMap.regBufSizeW(),
 											m_log);
 	}
 
 	bool ModuleLogicCompiler::detectUnusedSignals()
 	{
-		QStringList unusedSignals;
-
-		for(auto pair : m_chassisSignals)
+		for(const auto& pair : m_chassisSignals)
 		{
 			const AppSignal* s = pair.second;
 
 			TEST_PTR_CONTINUE(s);
 
-			if (s->isInternal() == true && m_ualSignals.contains(s->appSignalID()) == false)
+			if (s->isInternal() == true &&
+				s->reserved() == false &&
+				m_ualSignals.contains(s->appSignalID()) == false)
 			{
-				unusedSignals.append(s->appSignalID());
+				m_log->wrnALC5148(s->appSignalID());
 			}
 		}
 
-		unusedSignals.sort();
+		return true;
+	}
 
-		for(const QString& unusedSignal : unusedSignals)
+	bool ModuleLogicCompiler::detectUsedReservedSignals()
+	{
+		bool result = true;
+
+		for(const auto& pair : m_chassisSignals)
 		{
-			// Internal signal %1 is unused.
-			//
-			m_log->wrnALC5148(unusedSignal);
+			const AppSignal* s = pair.second;
+
+			TEST_PTR_CONTINUE(s);
+
+			if (s->reserved() == false)
+			{
+				continue;
+			}
+
+			auto it = m_ualItemsSignals.find(calcHash(s->appSignalID()));
+
+			if (it == m_ualItemsSignals.end())
+			{
+				continue;
+			}
+
+			const std::set<QUuid>& ualItemGuids = it->second;
+
+			for(auto const& guid : ualItemGuids)
+			{
+				const UalItem* ualItem = m_ualItems.value(guid, nullptr);
+
+				TEST_PTR_CONTINUE(ualItem);
+
+				// Reserved signal %1 used on schema %2.
+				//
+				m_log->errALC5201(s->appSignalID(), ualItem->guid(), ualItem->schemaID());
+				result = false;
+			}
 		}
 
-		return true;
+		return result;
 	}
 
 	bool ModuleLogicCompiler::fillAnalogSignalsOnSchemas()
@@ -14834,8 +16807,6 @@ namespace Builder
 
 		result &= writeLoopbacksReport();
 
-		result &= writeHeapsLog();
-
 		return result;
 	}
 
@@ -14843,7 +16814,7 @@ namespace Builder
 	{
 		QStringList asmCode;
 
-		code.getAsmCode(&asmCode);
+		code.getAsmCode(m_lmDescription, &asmCode);
 
 		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
 									(code.optimized() ? getInfoFileName("asm") : getSrcInfoFileName("asm")),
@@ -14899,7 +16870,7 @@ namespace Builder
 		printOptiStatistics(m_idrCode, m_optiIdrCode, &file);
 		printOptiStatistics(m_alpCode, m_optiAlpCode, &file);
 		printOptiStatistics(m_appLogicCode, m_optiAppLogicCode, &file);
-		printOptimizationsInfo(&file);
+		printOptimizationsInfo(&file, m_appLogicCode.codeSizeW());
 
 		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
 												getInfoFileName("orpt"), file);
@@ -14971,14 +16942,15 @@ namespace Builder
 		file << Separator::EMPTY_STR;
 	}
 
-	void ModuleLogicCompiler::printOptimizationsInfo(QStringList* outFile) const
+	void ModuleLogicCompiler::printOptimizationsInfo(QStringList* outFile, int srcCodeSize) const
 	{
 		TEST_PTR_RETURN(outFile);
 
 		QStringList& file = *outFile;
 
-		file << QString("   Optimization type    |  Count   | Code reduction");
-		file << QString("------------------------+----------+----------------");
+		file << QString("   Optimization         |  Count   | Code     |  Abs, %  |  Rel, %");
+		file << QString("   type                 |          | decrease |          |");
+		file << QString("------------------------+----------+----------+----------+----------");
 
 		int totalOptimizationCount = 0;
 		int totalCodeReduction = 0;
@@ -14987,19 +16959,37 @@ namespace Builder
 		{
 			const OptimizationInfo& oi = p.second;
 
-			file << QString(" %1 | %2 | %3").
-							arg(OptimizationInfo::typeStr(oi.type), -22).
-							arg(oi.optimizationsCount, 8).
-							arg(oi.codeReductionSizeW, 8);
-
 			totalOptimizationCount += oi.optimizationsCount;
 			totalCodeReduction += oi.codeReductionSizeW;
 		}
 
-		file << QString("------------------------+----------+----------------");
-		file << QString("         Total          | %1 | %2").
+		double totalAbsDiff = 0;
+		double totalRelDiff = 0;
+
+		for(const auto& p : m_optimizationsInfo)
+		{
+			const OptimizationInfo& oi = p.second;
+
+			double absDiff = ((-oi.codeReductionSizeW * 100.0) / srcCodeSize);
+			double relDiff = ((oi.codeReductionSizeW * 100.0) / totalCodeReduction);
+
+			totalAbsDiff += absDiff;
+			totalRelDiff += relDiff;
+
+			file << QString(" %1 | %2 | %3 | %4 | %5").
+							arg(OptimizationInfo::typeStr(oi.type), -22).
+							arg(oi.optimizationsCount, 8).
+							arg(oi.codeReductionSizeW, 8).
+							arg(absDiff, 8, 'f', 3).
+							arg(relDiff, 8, 'f', 3);
+		}
+
+		file << QString("------------------------+----------+----------+----------+----------");
+		file << QString("         Total          | %1 | %2 | %3 | %4").
 						arg(totalOptimizationCount, 8).
-						arg(totalCodeReduction, 8);
+						arg(totalCodeReduction, 8).
+						arg(totalAbsDiff, 8, 'f', 3).
+						arg(totalRelDiff, 8, 'f', 3);
 	}
 
 	bool ModuleLogicCompiler::writeTuningInfoFile() const
@@ -15243,9 +17233,8 @@ namespace Builder
 
 		m_ualSignals.getHeapsLog(&file);
 
-		BuildFile* bf = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(lmSubsystemEquipmentIdPath()),
+		BuildFile* bf = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
 												getInfoFileName("heaps"), file);
-
 		return bf != nullptr;
 	}
 
@@ -15307,7 +17296,7 @@ namespace Builder
 
 		QStringList metadataFields;
 
-		m_appLogicCode.getAsmMetadataFields(&metadataFields, &metadataFieldsVersion);
+		m_optiAppLogicCode.getAsmMetadataFields(&metadataFields, &metadataFieldsVersion);
 
 		Hardware::ModuleFirmwareWriter* firmwareWriter = m_resultWriter->firmwareWriter();
 
@@ -15332,11 +17321,11 @@ namespace Builder
 
 		QByteArray binCode;
 
-		m_appLogicCode.getBinCode(&binCode);
+		m_optiAppLogicCode.getBinCode(&binCode);
 
 		std::vector<QVariantList> metadata;
 
-		m_appLogicCode.getAsmMetadata(&metadata);
+		m_optiAppLogicCode.getAsmMetadata(m_lmDescription, &metadata);
 
 		result &= firmwareWriter->setChannelData(m_lmSubsystemID,
 												 appLogicUartID,
@@ -15426,7 +17415,7 @@ namespace Builder
 		m_appLogicUniqueID = crc.result();
 
 		return DeviceHelper::setUIntProperty(const_cast<Hardware::DeviceModule*>(m_lm),
-		                                    EquipmentPropNames::LM_APP_LAN_DATA_UID,
+											EquipmentPropNames::LM_APP_LAN_DATA_UID,
 											crc.result32(),
 											m_log);
 	}
@@ -15619,7 +17608,7 @@ namespace Builder
 	{
 		std::vector<CommandStatistics> stat;
 
-		code.getCommandsStatistics(&stat);
+		code.getCommandsStatistics(m_lmDescription, &stat);
 
 		QString phaseStr;
 		int phaseClocks = 0;
@@ -15760,10 +17749,19 @@ namespace Builder
 
 			//
 
-			file << getStatStr(lmCommands.getMnemo(cs.code),
-							   cs.usedCount, usedPercent,
-							   cs.codeSizeW, sizePercent,
-							   cs.execTime, execPercent, false);
+			const LmCommand* lmCmd = m_lmDescription->commandPtr(cs.code);
+
+			if (lmCmd != nullptr)
+			{
+				file << getStatStr(lmCmd->caption.toUpper(),
+								   cs.usedCount, usedPercent,
+								   cs.codeSizeW, sizePercent,
+								   cs.execTime, execPercent, false);
+			}
+			else
+			{
+				Q_ASSERT(false);
+			}
 		}
 
 		Q_ASSERT(code.commandsCount() == usedCountTotal);
@@ -15843,7 +17841,7 @@ namespace Builder
 	{
 		QString str;
 
-		double percentOfUsedCodeMemory = (m_appLogicCode.codeSizeW() * 100.0) / m_lmCodeMemorySize;
+		double percentOfUsedCodeMemory = (m_optiAppLogicCode.codeSizeW() * 100.0) / m_lmCodeMemorySize;
 
 		bool result = true;
 
@@ -15851,7 +17849,7 @@ namespace Builder
 
 		LOG_MESSAGE(m_log, QString(tr("Used resources of %1:")).arg(lmEquipmentID()));
 
-		str.setNum(percentOfUsedCodeMemory, 'g', 2);
+		str.setNum(percentOfUsedCodeMemory, 'f', 2);
 
 		LOG_MESSAGE(m_log, QString(tr("Code memory - %1%")).arg(str));
 
@@ -15876,7 +17874,7 @@ namespace Builder
 
 		double percentOfUsedBitMemory = m_memoryMap.bitAddressedMemoryUsed();
 
-		str.setNum(percentOfUsedBitMemory, 'g', 2);
+		str.setNum(percentOfUsedBitMemory, 'f', 2);
 
 		LOG_MESSAGE(m_log, QString(tr("Bit-addressed memory - %1%")).arg(str));
 
@@ -15901,7 +17899,7 @@ namespace Builder
 
 		double percentOfUsedWordMemory = m_memoryMap.wordAddressedMemoryUsed();
 
-		str.setNum(percentOfUsedWordMemory, 'g', 2);
+		str.setNum(percentOfUsedWordMemory, 'f', 2);
 
 		LOG_MESSAGE(m_log, QString(tr("Word-addressed memory - %1%")).arg(str));
 
@@ -15928,7 +17926,7 @@ namespace Builder
 
 		// display IDR phase timing
 		//
-		double idrPhaseTime = (1.0/m_lmClockFrequency) * m_idrCode.clockCount();
+		double idrPhaseTime = (1.0/m_lmClockFrequency) * m_optiIdrCode.clockCount();
 		double idrPhaseTimeUsed = 0;
 
 		assert(m_lmIDRPhaseTime != 0);
@@ -15938,11 +17936,11 @@ namespace Builder
 			idrPhaseTimeUsed = (idrPhaseTime * 100) / (static_cast<double>(m_lmIDRPhaseTime) / 1000000.0);
 		}
 
-		str_percent.setNum(static_cast<float>(idrPhaseTimeUsed), 'g', 2);
-		str.setNum(static_cast<float>(idrPhaseTime * 1000000), 'g', 2);
+		str_percent.setNum(static_cast<float>(idrPhaseTimeUsed), 'f', 2);
+		str.setNum(static_cast<float>(idrPhaseTime * 1000000), 'f', 2);
 
 		LOG_MESSAGE(m_log, QString(tr("Input Data Receive phase time - %1% (%2 clocks or %3 &micro;s of %4 &micro;s)")).
-					arg(str_percent).arg(m_idrCode.clockCount()).arg(str).arg(m_lmIDRPhaseTime));
+					arg(str_percent).arg(m_optiIdrCode.clockCount()).arg(str).arg(m_lmIDRPhaseTime));
 
 		if (idrPhaseTimeUsed > 90)
 		{
@@ -15963,7 +17961,7 @@ namespace Builder
 
 		// display ALP phase timing
 		//
-		double alpPhaseTime = (1.0/m_lmClockFrequency) * m_alpCode.clockCount();
+		double alpPhaseTime = (1.0/m_lmClockFrequency) * m_optiAlpCode.clockCount();
 		double alpPhaseTimeUsed = 0;
 
 		assert(m_lmALPPhaseTime != 0);
@@ -15973,11 +17971,11 @@ namespace Builder
 			alpPhaseTimeUsed = (alpPhaseTime * 100) / (static_cast<double>(m_lmALPPhaseTime) / 1000000.0);
 		}
 
-		str_percent.setNum(static_cast<float>(alpPhaseTimeUsed), 'g', 2);
-		str.setNum(static_cast<float>(alpPhaseTime * 1000000), 'g', 2);
+		str_percent.setNum(static_cast<float>(alpPhaseTimeUsed), 'f', 2);
+		str.setNum(static_cast<float>(alpPhaseTime * 1000000), 'f', 2);
 
 		LOG_MESSAGE(m_log, QString(tr("Application Logic Processing phase time - %1% (%2 clocks or %3 &micro;s of %4 &micro;s)")).
-					arg(str_percent).arg(m_alpCode.clockCount()).arg(str).arg(m_lmALPPhaseTime));
+					arg(str_percent).arg(m_optiAlpCode.clockCount()).arg(str).arg(m_lmALPPhaseTime));
 
 		if (alpPhaseTimeUsed > 90)
 		{
@@ -16006,26 +18004,6 @@ namespace Builder
 		result &= getAfblUsageInfo();
 
 		//
-
-/*		LOG_MESSAGE(m_log, QString("Init AFBs code: %1").arg(m_resourcesUsageInfo.initAfbs.codePercentStr()));
-		LOG_MESSAGE(m_log, QString("Analog inputs conversion code: %1").arg(m_resourcesUsageInfo.convertAnalogInputSignals.codePercentStr()));
-		LOG_MESSAGE(m_log, QString("Application logic code: %1").arg(m_resourcesUsageInfo.appLogicCode.codePercentStr()));
-		LOG_MESSAGE(m_log, QString("Acquired analog opto signals copying to RegBuf: %1").arg(m_resourcesUsageInfo.copyAcquiredAnalogOptoSignalsToRegBuf.codePercentStr()));
-		LOG_MESSAGE(m_log, QString("Acquired tuning analog signals copying to RegBuf: %1").arg(m_resourcesUsageInfo.copyAcquiredTuningAnalogSignalsToRegBuf.codePercentStr()));
-		LOG_MESSAGE(m_log, QString("Acquired tuning discrete signals copying to RegBuf: %1").arg(m_resourcesUsageInfo.copyAcquiredTuningDiscreteSignalsToRegBuf.codePercentStr()));
-		LOG_MESSAGE(m_log, QString("Acquired discrete input signals copying to RegBuf: %1").arg(m_resourcesUsageInfo.copyAcquiredDiscreteInputSignalsToRegBuf.codePercentStr()));
-		LOG_MESSAGE(m_log, QString("Acquired discrete output and internal signals copying to RegBuf: %1").arg(m_resourcesUsageInfo.copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf.codePercentStr()));
-		LOG_MESSAGE(m_log, QString("Acquired discrete opto and bus child signals copying to RegBuf: %1").arg(m_resourcesUsageInfo.copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf.codePercentStr()));
-		LOG_MESSAGE(m_log, QString("Output signals copying to output modules: %1").arg(m_resourcesUsageInfo.copyOutputSignalsInOutputModulesMemory.codePercentStr()));
-
-		LOG_MESSAGE(m_log, QString("Opto connections tx data copying: %1").arg(m_resourcesUsageInfo.copyOptoConnectionsTxData.codePercentStr()));*/
-
-/*		CodeFragmentMetrics copyAcquiredRawDataInRegBuf;
-		CodeFragmentMetrics copyAcquiredAnalogBusChildSignalsToRegBuf;
-		CodeFragmentMetrics copyAcquiredConstAnalogSignalsToRegBuf;
-		CodeFragmentMetrics copyAcquiredDiscreteOutputAndInternalSignalsToRegBuf;
-		CodeFragmentMetrics copyAcquiredDiscreteConstSignalsToRegBuf;
-		CodeFragmentMetrics copyOutputSignalsInOutputModulesMemory;*/
 
 		LOG_EMPTY_LINE(m_log);
 
@@ -16118,7 +18096,7 @@ namespace Builder
 			aui.maxInstances = component->maxInstCount();
 			aui.version = component->impVersion();
 
-			aui.usedInstances = m_afbls.getUsedInstances(componentOpCode);
+			aui.usedInstances = m_afbComponents.getUsedInstancesCount(componentOpCode);
 
 			if (aui.maxInstances != 0)
 			{
@@ -16201,7 +18179,7 @@ namespace Builder
 		return false;
 	}
 
-	bool ModuleLogicCompiler::checkLoopbackTargetSignalsCompatibility(const AppSignal& srcSignal, QUuid srcSignalUuid, const UalAfb& fb, const LogicAfbSignal& afbSignal)
+	bool ModuleLogicCompiler::checkLoopbackTargetSignalsCompatibility(const AppSignal& srcSignal, QUuid srcSignalUuid, const UalAfb& fb, const AfbSignal& afbSignal)
 	{
 		if (srcSignal.isDiscrete())
 		{
@@ -16264,7 +18242,7 @@ namespace Builder
 			return appItem->schemaID();
 		}
 
-		return QString();
+		return EMPTY_STR;
 	}
 
 	bool ModuleLogicCompiler::getLMIntProperty(const QString& name, int *value)
@@ -16373,7 +18351,6 @@ namespace Builder
 		result &= writeSignalList(m_nonAcquiredDiscreteInputSignals, "nonAcquiredDiscreteInput");
 		result &= writeSignalList(m_nonAcquiredDiscreteStrictOutputSignals, "nonAcquiredDiscreteStrictOutput");
 		result &= writeSignalList(m_nonAcquiredDiscreteInternalSignals, "nonAcquiredDiscreteInternal");
-		result &= writeSignalList(m_nonAcquiredDiscreteOptoSignals, "nonAcquiredDiscreteOpto");
 
 		result &= writeSignalList(m_acquiredAnalogInputSignals, "acquiredAnalogInput");
 		result &= writeSignalList(m_acquiredAnalogStrictOutputSignals, "acquiredAnalogStrictOutput");
@@ -16537,6 +18514,402 @@ namespace Builder
 		}
 
 		return cmd;
+	}
+
+	bool ModuleLogicCompiler::codeCopyBits(CodeSnippet* code, int destAddrOffset, const CopyBitsMap& copyBitsMap)
+	{
+		TEST_PTR_RETURN_FALSE(m_log);
+		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
+
+		if (copyBitsMap.empty() == true)
+		{
+			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		bool result = true;
+
+		int const0Count = 0;
+		int const1Count = 0;
+		int nonConstCount = 0;
+		int nonConstInvertedBitsCount = 0;
+
+		std::set<Address16> uniqueSrcBitAddrs;
+
+		for(const auto& [destBitAddr, copyBitInfo] : copyBitsMap)
+		{
+			if (destBitAddr.isValid() == false ||
+				destBitAddr.offset() != destAddrOffset ||
+				copyBitInfo.ualSignal == nullptr ||
+				(copyBitInfo.ualSignal->isConstDiscrete() == false && copyBitInfo.srcBitAddr.isValid() == false))
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			if (copyBitInfo.ualSignal->isConstDiscrete() == true )
+			{
+				copyBitInfo.constValue = copyBitInfo.ualSignal->constDiscreteValue();
+
+				if (copyBitInfo.invertBit)
+				{
+					copyBitInfo.constValue ^= 1;
+				}
+
+				const1Count += copyBitInfo.constValue;
+			}
+			else
+			{
+				if (copyBitInfo.ualSignal->isDiscrete() == false)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					result = false;
+					continue;
+				}
+
+				nonConstCount++;
+
+				if (copyBitInfo.invertBit == true)
+				{
+					nonConstInvertedBitsCount++;
+				}
+
+				uniqueSrcBitAddrs.insert(copyBitInfo.srcBitAddr);
+			}
+		}
+
+		const0Count = SIZE_16BIT - (nonConstCount + const1Count);
+
+		RETURN_IF_FALSE(result);
+
+		auto getComment = [](const CopyBitInfo& cbi) -> QString
+		{
+			if (cbi.comment.isEmpty() == false)
+			{
+				return cbi.comment;
+			}
+
+			return QString("copy %1").arg(cbi.ualSignal->refSignalIDsJoined());
+		};
+
+		CodeItem cmd;
+
+		//
+
+		if (const1Count == SIZE_16BIT)
+		{
+			const CopyBitInfo& first = copyBitsMap.begin()->second;
+
+			*code << cmd.movConst(destAddrOffset, 0xFFFF, getComment(first));
+
+			return true;
+		}
+
+		if (const0Count == SIZE_16BIT)
+		{
+			const CopyBitInfo& first = copyBitsMap.begin()->second;
+
+			*code << cmd.movConst(destAddrOffset, 0x0000, getComment(first));
+
+			return true;
+		}
+
+		if (nonConstCount == SIZE_16BIT && uniqueSrcBitAddrs.size() == 1)
+		{
+			// whole word fills by one non constant bit
+			//
+			const CopyBitInfo& cbi = copyBitsMap.begin()->second;
+
+			Address16 srcBitAddrAddr = *uniqueSrcBitAddrs.begin();
+
+			if (nonConstInvertedBitsCount == 0)
+			{
+				*code << cmd.fillb(Address16(destAddrOffset, 0),
+										  srcBitAddrAddr, getComment(cbi));
+				return true;
+			}
+
+			if (nonConstInvertedBitsCount == SIZE_16BIT)
+			{
+				*code << cmd.fillb(wordAccumulatorAddress16(),
+									srcBitAddrAddr, getComment(cbi));
+
+				result &= codeNotWord(code, wordAccumulatorAddress16(), EMPTY_STR,
+									  Address16(destAddrOffset, 0), EMPTY_STR);
+				return result;
+			}
+
+			// else, i.e. invertedBitsCount > 0 && < SIZE_16BIT, continue below
+		}
+
+		int initializedBy = -1;
+
+		if (m_bitAccAvailable == false || nonConstInvertedBitsCount > 0)
+		{
+			int destAccAddr = destAddrOffset;
+
+			if (addressInBitMemory(destAddrOffset) == false)
+			{
+				destAccAddr = bitAccumulatorAddress();
+			}
+
+			if (nonConstCount < SIZE_16BIT)
+			{
+				if (const1Count > const0Count)
+				{
+					// destAcc <= 0xFFFF
+					//
+					*code << cmd.movConst(destAccAddr, 0xFFFF);
+					initializedBy = 1;
+				}
+				else
+				{
+					// destAcc <= 0x0000
+					//
+					*code << cmd.movConst(destAccAddr, 0);
+					initializedBy = 0;
+				}
+			}
+
+			for(const auto& [destBitAddr, copyBitInfo] : copyBitsMap)
+			{
+				switch(copyBitInfo.constValue)
+				{
+				case CopyBitInfo::CONST_0:
+					if (initializedBy != CopyBitInfo::CONST_0)
+					{
+						*code << cmd.movBitConst(destAccAddr, destBitAddr.bit(), 0, getComment(copyBitInfo));
+					}
+					break;
+
+				case CopyBitInfo::CONST_1:
+					if (initializedBy != CopyBitInfo::CONST_1)
+					{
+						*code << cmd.movBitConst(destAccAddr, destBitAddr.bit(), 1, getComment(copyBitInfo));
+					}
+					break;
+
+				case CopyBitInfo::NON_CONST:
+					if (copyBitInfo.invertBit == true)
+					{
+						result &= codeNotBit(code, copyBitInfo.srcBitAddr, getComment(copyBitInfo),
+											 Address16(destAccAddr, destBitAddr.bit()), EMPTY_STR);
+					}
+					else
+					{
+						*code << cmd.movBit(Address16(destAccAddr, destBitAddr.bit()),
+											copyBitInfo.srcBitAddr, getComment(copyBitInfo));
+					}
+					break;
+
+				default:
+					Q_ASSERT(false);
+					LOG_INTERNAL_ERROR(m_log);
+					return false;
+				}
+			}
+
+			if (destAccAddr != destAddrOffset)
+			{
+				*code << cmd.mov(destAddrOffset, destAccAddr);
+			}
+		}
+		else
+		{
+			auto it = copyBitsMap.rbegin();
+
+			// find highest non-zero bitNo
+			//
+			int bitNo = SIZE_16BIT - 1;
+
+			while(it != copyBitsMap.rend())
+			{
+				const auto& [destBitAddr, copyBitInfo] = *it;
+
+				bitNo = destBitAddr.bit();
+
+				if (copyBitInfo.constValue != CopyBitInfo::CONST_0)
+				{
+					break;
+				}
+
+				it++;
+			}
+
+			if (bitNo < SIZE_16BIT - 1)
+			{
+				*code << cmd.resetAcc();
+			}
+
+			while(bitNo >= 0)
+			{
+				bool bitWritten = false;
+
+				if (it != copyBitsMap.rend())
+				{
+					const auto& [destBitAddr, copyBitInfo] = *it;
+
+					if (bitNo == destBitAddr.bit())
+					{
+						switch(copyBitInfo.constValue)
+						{
+						case CopyBitInfo::NON_CONST:
+							*code << cmd.movBitAccAddr(copyBitInfo.srcBitAddr, getComment(copyBitInfo));
+							break;
+
+						case CopyBitInfo::CONST_0:
+								*code << cmd.lshift0Acc(getComment(copyBitInfo));
+							break;
+
+						case CopyBitInfo::CONST_1:
+								*code << cmd.lshift1Acc(getComment(copyBitInfo));
+							break;
+
+						default:
+							Q_ASSERT(false);
+							LOG_INTERNAL_ERROR(m_log);
+							return false;
+						}
+
+						it++;
+						bitWritten = true;
+					}
+				}
+
+				if (bitWritten == false)
+				{
+					*code << cmd.lshift0Acc();
+				}
+
+				bitNo--;
+			}
+
+			*code << cmd.movAddrAcc(destAddrOffset);
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::codeNotWord(CodeSnippet* code,
+										  const Address16& srcAddr,
+										  const QString& srcComment,
+										  const Address16& destAddr,
+										  const QString& destComment) const
+	{
+		CodeItem cmd;
+
+		if (m_bitAccAvailable == true)
+		{
+			// code used bit acc
+			//
+			*code << cmd.movAccAddr(srcAddr, srcComment);
+			*code << cmd.notAcc();
+			*code << cmd.movAddrAcc(destAddr, destComment);
+
+			return true;
+		}
+
+		// code used AFB bus_not
+		//
+		auto it = m_fbConv.find(Afb::AFB_BUS_NOT);
+
+		if (it == m_fbConv.end())
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		const FbConv& fbBusNot = it->second;
+
+		if (fbBusNot.ualAfbs.size() != 1)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		const UalAfb* afbBusNot = *fbBusNot.ualAfbs.begin();
+
+		*code << cmd.writeFuncBlock(afbBusNot->opcode(),
+								   afbBusNot->instance(),
+								   fbBusNot.inputSignalIndex,
+								   srcAddr,
+								   afbBusNot->caption(),
+								   srcComment);
+
+		*code << cmd.startafb(afbBusNot->opcode(),
+							 afbBusNot->instance(),
+							 afbBusNot->caption(),
+							 afbBusNot->runTime());
+
+		*code << cmd.readFuncBlock(destAddr,
+								  afbBusNot->opcode(),
+								  afbBusNot->instance(),
+								  fbBusNot.outputSignalIndex,
+								  afbBusNot->caption(),
+								  destComment);
+		return true;
+	}
+
+	bool ModuleLogicCompiler::codeNotBit(CodeSnippet* code,
+										  const Address16& srcAddr,
+										  const QString& srcComment,
+										  const Address16& destAddr,
+										  const QString& destComment) const
+	{
+		CodeItem cmd;
+
+		if (m_bitAccAvailable == true)
+		{
+			// code used bit acc
+			//
+			*code << cmd.movBitAccAddr(srcAddr, srcComment);
+			*code << cmd.notAcc();
+			*code << cmd.movBitAddrAcc(destAddr, destComment);
+
+			return true;
+		}
+
+		// code used AFB bus_not
+		//
+		auto it = m_fbConv.find(Afb::AFB_NOT);
+
+		if (it == m_fbConv.end())
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		const FbConv& fbNot = it->second;
+
+		if (fbNot.ualAfbs.size() != 1)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		const UalAfb* afbNot = *fbNot.ualAfbs.begin();
+
+		*code << cmd.writeFuncBlockBit(afbNot->opcode(),
+									   afbNot->instance(),
+									   fbNot.inputSignalIndex,
+									   srcAddr,
+									   afbNot->caption(),
+									   srcComment);
+
+		*code << cmd.startafb(afbNot->opcode(),
+							 afbNot->instance(),
+							 afbNot->caption(),
+							 afbNot->runTime());
+
+		*code << cmd.readFuncBlockBit(destAddr,
+									  afbNot->opcode(),
+									  afbNot->instance(),
+									  fbNot.outputSignalIndex,
+									  afbNot->caption(),
+									  destComment);
+		return true;
 	}
 
 	QString ModuleLogicCompiler::getFormatStr(const Hardware::DeviceAppSignal& ds)
@@ -16863,7 +19236,7 @@ namespace Builder
 		{
 			// initialization of m_chassisSignalsByEquipmentID
 			//
-			for(auto pair : m_chassisSignals)
+			for(const auto& pair : m_chassisSignals)
 			{
 				const AppSignal* appSignal = pair.second;
 
@@ -16884,6 +19257,50 @@ namespace Builder
 			}
 
 			resultSignalList->push_back(it->second);
+		}
+	}
+
+	void ModuleLogicCompiler::findLogicAfbsForBitAccReplacing(const QString& afbCaption,
+															  int logicConfValue, std::set<QUuid>* guidsMap)
+	{
+		TEST_PTR_RETURN(guidsMap);
+
+		if (m_lmDescription->isBitAccAvailable() == false)
+		{
+			return;
+		}
+
+		for(const UalAfb* ualAfb : m_ualAfbs)
+		{
+			TEST_PTR_CONTINUE(ualAfb);
+
+			if (ualAfb->caption() != afbCaption)
+			{
+				continue;
+			}
+
+			if (ualAfb->opcode() != TO_INT(Afb::AfbType::LOGIC))
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			bool ok = false;
+
+			int iConfValue = ualAfb->getParamIntValueByOpName(Afb::PARAM_I_CONF, &ok);
+
+			if (ok == false )
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			if (iConfValue != logicConfValue)
+			{
+				continue;
+			}
+
+			guidsMap->insert(ualAfb->guid());
 		}
 	}
 
@@ -16942,10 +19359,9 @@ namespace Builder
 		if (device == nullptr)
 		{
 			Q_ASSERT(false);
-			return QString();
+			return EMPTY_STR;
 		}
 
 		return device->equipmentIdTemplate();
 	}
-
 }

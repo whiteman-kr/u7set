@@ -1,8 +1,4 @@
 #include "DialogOptionsMvh.h"
-
-#include <QColorDialog>
-#include <QHeaderView>
-
 #include "Delegate.h"
 #include "MeasureViewHeader.h"
 

@@ -1,0 +1,123 @@
+cmake_minimum_required(VERSION 3.16)
+
+project(OnlineLib LANGUAGES CXX)
+
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+
+find_package(Qt6 REQUIRED COMPONENTS Network)
+
+set(TARGET OnlineLib)
+
+qt_add_library(${TARGET} STATIC
+	BuildInfo.cpp
+	BuildInfo.h
+	CfgServerLoader.cpp
+	CfgServerLoader.h
+	CircularLogger.cpp
+	CircularLogger.h
+	MatsUsers.cpp
+	MatsUsers.h
+	SocketIO.cpp
+	SocketIO.h
+	SoftwareInfo.cpp
+	SoftwareInfo.h
+	SoftwareSettings.cpp
+	SoftwareSettings.h
+	Tcp.cpp
+	Tcp.h
+	TcpClientStatistics.cpp
+	TcpClientStatistics.h
+	TcpFileTransfer.cpp
+	TcpFileTransfer.h
+	UdpSocket.cpp
+	UdpSocket.h
+)
+
+target_precompile_headers(${TARGET} PUBLIC
+	# C++ includes
+	#
+	<algorithm>
+	<array>
+	<atomic>
+	<cassert>
+	<chrono>
+	<cmath>
+	<concepts>
+	<condition_variable>
+	<cstdint>
+	<cstdlib>
+	<functional>
+	<limits>
+	<list>
+	<map>
+	<memory>
+	<optional>
+	<queue>
+	<set>
+	<type_traits>
+	<unordered_map>
+	<utility>
+	<vector>
+
+	# Qt includes
+	#
+	<QAbstractSocket>
+	<QCommandLineParser>
+	<QCoreApplication>
+	<QCryptographicHash>
+	<QDateTime>
+	<QDebug>
+	<QDir>
+	<QElapsedTimer>
+	<QEventLoop>
+	<QFile>
+	<QFileInfo>
+	<QHash>
+	<QHostAddress>
+	<QList>
+	<QMap>
+	<QMetaClassInfo>
+	<QMetaEnum>
+	<QMetaObject>
+	<QMutex>
+	<QMutexLocker>
+	<QObject>
+	<QQueue>
+	<QSettings>
+	<QSslCertificate>
+	<QSslPreSharedKeyAuthenticator>
+	<QSslSocket>
+	<QStandardPaths>
+	<QString>
+	<QStringList>
+	<QTextStream>
+	<QtGlobal>
+	<QThread>
+	<QTimer>
+	<QHostAddress>
+	<QUdpSocket>
+	<QUuid>
+	<QVariant>
+	<QVector>
+	<QXmlStreamReader>
+	<QXmlStreamWriter>
+
+
+	# Project includes
+	#
+	"../Proto/ProtoSerialization.h"
+	"../Proto/serialization.pb.h"
+	"../Proto/network.pb.h"
+)
+
+target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
+
+target_link_libraries(${TARGET} PRIVATE Qt6::Network)
+target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib)
+
+target_compile_definitions(${TARGET} PRIVATE ONLINE_LIB_DOMAIN)
+#target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+
+add_code_coverage_options(${TARGET} CODE_COVERAGE)

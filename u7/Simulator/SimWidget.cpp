@@ -31,7 +31,6 @@ SimWidget::SimWidget(std::shared_ptr<Sim::ConsoleLogFile> ideLogFile,
 	// --
 	//
 	m_appSignalController = new VFrame30::AppSignalController{&m_simulator->appSignalManager(), this};
-	m_tuningController = new VFrame30::TuningController{&m_simulator->tuningSignalManager(), &m_tuningConnection, this};
 
 	// --
 	//
@@ -185,11 +184,10 @@ void SimWidget::openSchemaTabPage(QString schemaId, QStringList highlightIds)
 	}
 
 	SimSchemaPage* page = new SimSchemaPage{schema,
-											m_simulator.get(),
-											&m_schemaManager,
-											m_appSignalController,
-											m_tuningController,
-											m_tabWidget};
+			m_simulator.get(),
+			&m_schemaManager,
+			m_appSignalController,
+			m_tabWidget};
 
 	int tabIndex = m_tabWidget->addTab(page, schema->schemaId());
 	m_tabWidget->setCurrentIndex(tabIndex);
@@ -299,6 +297,7 @@ void SimWidget::createToolBar()
 
 	m_findSignalAction = new QAction{QIcon(":/Images/Images/SimFindSignal.svg"), tr("Find Signal"), this};
 	m_findSignalAction->setEnabled(true);
+	m_findSignalAction->setShortcut(QKeySequence::Find);
 	connect(m_findSignalAction, &QAction::triggered, this, &SimWidget::showFindSignal);
 
 
@@ -1006,15 +1005,15 @@ void SimWidget::showTrends()
 {
 	// Get Trends list
 	//
-	std::vector<QString> trends = SimTrends::getTrendsList();
+	std::vector<SimTrendsWidget*> trends = SimTrends::getTrendsList();
 
 	// Choose trend
 	//
-	QString trendToActivate;
+	SimTrendsWidget* trendToActivate = nullptr;
 
 	if (trends.empty() == true)
 	{
-		trendToActivate.clear();	// if trendToActivate is empty, then create new trend
+		trendToActivate = nullptr;	// if trendToActivate is nullptr, then create a new trend.
 	}
 	else
 	{
@@ -1027,7 +1026,7 @@ void SimWidget::showTrends()
 
 		for (size_t i = 0; i < trends.size(); i++)
 		{
-			QAction* a = menu.addAction(trends[i]);
+			QAction* a = menu.addAction(trends[i]->windowTitle());
 			Q_ASSERT(a);
 
 			a->setData(QVariant::fromValue<int>(static_cast<int>(i)));		// Data is index in trend vector
@@ -1046,7 +1045,7 @@ void SimWidget::showTrends()
 
 		if (trendIndex == -1)
 		{
-			trendToActivate.clear();	// if trendToActivate is empty, then create new trend
+			trendToActivate = nullptr;	// if trendToActivate is nullptr, then create a new trend.
 		}
 		else
 		{
@@ -1058,11 +1057,12 @@ void SimWidget::showTrends()
 			}
 
 			trendToActivate = trends.at(trendIndex);
-		}	}
+		}	
+	}
 
 	// Start new trend or activate chosen one
 	//
-	if (trendToActivate.isEmpty() == true)
+	if (trendToActivate == nullptr)
 	{
 		std::vector<AppSignalParam> appSignals;
 		SimTrends::startTrendApp(m_simulator, appSignals, this);
@@ -1085,7 +1085,7 @@ bool SimWidget::loadBuild(QString buildPath)
 
 	if (ok == false)
 	{
-		QMessageBox::critical(this, qAppName(), tr("Cannot open project for simultaion. For details see Output window."));
+		QMessageBox::critical(this, qAppName(), tr("Cannot open project for simulation. For details see Output window."));
 	}
 
 	return ok;
@@ -1158,7 +1158,7 @@ void SimWidget::openCodeTabPage(QString lmEquipmentId)
 	auto lm = m_simulator->logicModule(lmEquipmentId);
 	if (lm == nullptr)
 	{
-		QMessageBox::critical(this, qAppName(), tr("Cannot find LogicModuel %1").arg(lmEquipmentId));
+		QMessageBox::critical(this, qAppName(), tr("Cannot find LogicModule %1").arg(lmEquipmentId));
 		return;
 	}
 
@@ -1267,7 +1267,7 @@ void SimWidget::tabCloseRequest(int index)
 
 void SimWidget::tabCurrentChanged(int index)
 {
-	// Show/hide close burron for inactive tab bar
+	// Show/hide close button for inactive tab bar
 	//
 	QTabBar::ButtonPosition closeSide = (QTabBar::ButtonPosition)style()->styleHint(QStyle::SH_TabBar_CloseButtonPosition, 0, m_tabWidget->tabBar());
 
@@ -1399,7 +1399,7 @@ void SimToolBar::dropEvent(QDropEvent* event)
 		trendActionWidget->geometry().contains(event->position().toPoint()) &&
 		event->mimeData()->hasFormat(AppSignalParamMimeType::value))
 	{
-		// Lets assume parent isManitorMainWindow
+		// Lets assume parent isMonitorMainWindow
 		//
 		SimWidget* sw = dynamic_cast<SimWidget*>(this->parent());
 		if (sw == nullptr)
@@ -1447,4 +1447,3 @@ void SimToolBar::dropEvent(QDropEvent* event)
 
 	return;
 }
-

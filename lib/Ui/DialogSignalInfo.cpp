@@ -4,6 +4,7 @@
 #include "../AppSignalLib/ComparatorSet.h"
 #include "../Proto/serialization.pb.h"
 #include "../UtilsLib/Ui/UiTools.h"
+#include "../lib/Ui/DialogWriteValues.h"
 
 //
 //
@@ -35,12 +36,12 @@ QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowClose
 
 	switch (c->cmpType())
 	{
-		case E::CmpType::Greate:	s += "Type: <b>&gt; (Greater)</b><br>";		break;
-		case E::CmpType::Less:		s += "Type: <b>&lt; (Less)</b><br>";		break;
-		case E::CmpType::Equal:		s += "Type: <b>= (Equal)</b><br>";			break;
-		case E::CmpType::NotEqual:	s += "Type: <b>&lt;&gt; (Not Equal)</b><br>";		break;
-		case E::CmpType::GreateEqual:	s += "Type: <b>&gt;= (Greater or Equal)</b><br>";	break;
-		case E::CmpType::LessEqual:		s += "Type: <b>&lt;= (Less or Equal)</b><br>";		break;
+		case E::CmpType::Greate:	s += tr("Type: <b>&gt; (Greater)</b><br>");		break;
+		case E::CmpType::Less:		s += tr("Type: <b>&lt; (Less)</b><br>");		break;
+		case E::CmpType::Equal:		s += tr("Type: <b>= (Equal)</b><br>");			break;
+		case E::CmpType::NotEqual:	s += tr("Type: <b>&lt;&gt; (Not Equal)</b><br>");		break;
+		case E::CmpType::GreateEqual:	s += tr("Type: <b>&gt;= (Greater or Equal)</b><br>");	break;
+		case E::CmpType::LessEqual:		s += tr("Type: <b>&lt;= (Less or Equal)</b><br>");		break;
 	}
 
 	// Input
@@ -294,26 +295,26 @@ AppSignalFlagsWidget::AppSignalFlagsWidget(QWidget* parent)
 {
 	m_flagNames =
 		{
-			QStringLiteral("VALID"),
-			QStringLiteral("ST.AVAIL"),
-			QStringLiteral("SIM"),
-			QStringLiteral("LOCK"),
-			QStringLiteral("MISMATCH"),
-			QStringLiteral("HIGH"),
-			QStringLiteral("LOW"),
-			QStringLiteral("SW.SIM"),
+			tr("VALID"),
+			tr("ST.AVAIL"),
+			tr("SIM"),
+			tr("LOCK"),
+			tr("MISMATCH"),
+			tr("HIGH"),
+			tr("LOW"),
+			tr("SW.SIM"),
 		};
 
 	m_flagTooltips =
 		{
-			QStringLiteral("Signal Validity\n\nSet to 1 when validity signal of the signal is set to 1.\nSet to 0 when validity signal of the signal is set to 0.\nIf no validity signal exists - equal to \"ST.AVAIL\" flag."),
-			QStringLiteral("Signal State is Available\n\nSet to 1 if application data is received from LM.\nSet to 0 if no application data is received from LM."),
-			QStringLiteral("Signal is Simulated\n\nSet to 1 when simulation signal is set to 1 (see AFB sim_lock),\notherwise set to 0. If no simulation signal exists, also set to 0."),
-			QStringLiteral("Signal is Locked\n\nSet to 1 when locking signal is set to 1 (see AFB sim_lock),\notherwise set to 0. If no locking signal exists, also set to 0."),
-			QStringLiteral("Signal is Mismatched\n\nSet to 1 when mismatch signal is set to 1 (see AFB mismatch),\notherwise set to 0. If no mismatch signal exists, also set to 0."),
-			QStringLiteral("Signal Value is High\n\nSet to 1 when signal value is greater than\nHighEngineeringUnits limit, otherwise set to 0."),
-			QStringLiteral("Signal Value is Low\n\nSet to 1 when signal value is less than\nLowEngineeringUnits limit, otherwise set to 0."),
-			QStringLiteral("Signal Value simulated by software."),
+			tr("Signal Validity\n\nSet to 1 when validity signal of the signal is set to 1.\nSet to 0 when validity signal of the signal is set to 0.\nIf no validity signal exists - equal to \"ST.AVAIL\" flag."),
+			tr("Signal State is Available\n\nSet to 1 if application data is received from LM.\nSet to 0 if no application data is received from LM."),
+			tr("Signal is Simulated\n\nSet to 1 when simulation signal is set to 1 (see AFB sim_lock),\notherwise set to 0. If no simulation signal exists, also set to 0."),
+			tr("Signal is Locked\n\nSet to 1 when locking signal is set to 1 (see AFB sim_lock),\notherwise set to 0. If no locking signal exists, also set to 0."),
+			tr("Signal is Mismatched\n\nSet to 1 when mismatch signal is set to 1 (see AFB mismatch),\notherwise set to 0. If no mismatch signal exists, also set to 0."),
+			tr("Signal Value is High\n\nSet to 1 when signal value is greater than\nHighEngineeringUnits limit, otherwise set to 0."),
+			tr("Signal Value is Low\n\nSet to 1 when signal value is less than\nLowEngineeringUnits limit, otherwise set to 0."),
+			tr("Signal Value simulated by software."),
 		};
 
 }
@@ -416,22 +417,22 @@ TuningSignalFlagsWidget::TuningSignalFlagsWidget(QWidget* parent)
 {
 	m_flagNames =
 		{
-			QStringLiteral("VALID"),
-			QStringLiteral("RANGE"),
-			QStringLiteral("WRITING"),
-			QStringLiteral("CONTROL"),
-			QStringLiteral("ACCESS"),
-			QStringLiteral("DEFAULT"),
+			tr("VALID"),
+			tr("RANGE"),
+			tr("WRITING"),
+			tr("CONTROL"),
+			tr("ACCESS"),
+			tr("DEFAULT"),
 		};
 
 	m_flagTooltips =
 		{
-			QStringLiteral("Signal validity\n\nSet to 1 if tuning data is received from LM.\nSet to 0 if no tuning data is received from LM."),
-			QStringLiteral("Signal is out of range\n\nSet to 1 when tuning value is out of range, otherwise set to 0."),
-			QStringLiteral("Writing in progress\n\nSet to 1 when writing a value is in progress. Resets to 0 after writing was finished "),
-			QStringLiteral("Control is enabled\n\nSet to 1 when  tuning control for LM is enabled by TuningService, otherwise set to 0.\n\nNOTE: if SingleLmControl property of TuningService is set to false, this flag is always set to 1."),
-			QStringLiteral("Writing is enabled\n\nSet to 1 when LM access key is set, otherwise set to 0.\n\nNOTE: this flag is used only when StatusFlagFunction property\nof TuningClient  is set to 'AccessKey'."),
-			QStringLiteral("Default value\n\nSet to 1 tuning signal value is set to default value,\notherwise set to 0."),
+			tr("Signal validity\n\nSet to 1 if tuning data is received from LM.\nSet to 0 if no tuning data is received from LM."),
+			tr("Signal is out of range\n\nSet to 1 when tuning value is out of range, otherwise set to 0."),
+			tr("Writing in progress\n\nSet to 1 when writing a value is in progress. Resets to 0 after writing was finished "),
+			tr("Control is enabled\n\nSet to 1 when  tuning control for LM is enabled by TuningService, otherwise set to 0.\n\nNOTE: if SingleLmControl property of TuningService is set to false, this flag is always set to 1."),
+			tr("Writing is enabled\n\nSet to 1 when LM access key is set, otherwise set to 0.\n\nNOTE: this flag is used only when StatusFlagFunction property\nof TuningClient  is set to 'AccessKey'."),
+			tr("Default value\n\nSet to 1 tuning signal value is set to default value,\notherwise set to 0."),
 		};
 
 }
@@ -529,21 +530,34 @@ std::map<QString, DialogSignalInfo*> DialogSignalInfo::m_dialogSignalInfoMap;
 
 DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 								   IAppSignalManager* appSignalManager,
-								   VFrame30::TuningController* tuningController,
+								   ISignalDataServer* signalDataServer,
+								   const std::vector<SoftwareEndpoint::AppDataService>& appDataServices,
+								   ITuningSignalManager& tuningSignalManager,
+								   ITuningConnection& tuningConnection,
+								   ITuningAuthorization& tuningAuthorization,
 								   bool tuningEnabled,
 								   DialogSignalInfo::DialogType dialogType,
 								   QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogSignalInfo),
+	m_dialogType(dialogType),
 	m_signal(signal),
 	m_appSignalManager(appSignalManager),
-	m_tuningController(tuningController),	// it can be nullptr
+	m_signalDataServer(signalDataServer),	// it can be nullptr
+	m_appDataServices(appDataServices),		// it can be emptu,
+	m_tuningAuthorization(tuningAuthorization),
+	m_tuningController(tuningSignalManager, tuningConnection, tuningAuthorization, this),
 	m_tuningEnabled(tuningEnabled)
 {
 	if (m_appSignalManager == nullptr)
 	{
 		Q_ASSERT(m_appSignalManager);
 		return;
+	}
+
+	if (m_signalDataServer != nullptr)
+	{
+		m_dataServiceIds = m_signalDataServer->dataServiceIds(signal.appSignalId());
 	}
 
 	ui->setupUi(this);
@@ -600,7 +614,7 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 
 	if (dialogType == DialogType::Monitor)
 	{
-		removeTabPage("Extended");
+		removeTabPage(tr("Extended"));
 	}
 
 	ui->labelValue->setWordWrap(true);
@@ -888,55 +902,45 @@ void DialogSignalInfo::on_treeSetpoints_itemDoubleClicked(QTreeWidgetItem *item,
 
 void DialogSignalInfo::on_pushButtonSetZero_clicked()
 {
-	if (m_tuningController == nullptr || m_signal.isDiscrete() == false)
+	if (m_signal.isDiscrete() == false)
 	{
 		Q_ASSERT(false);
 		return;
 	}
 
-	int result = QMessageBox::warning(this, qAppName(),
-									  tr("Are you sure you want to write value '%1'\n\nto signal '%2' ('%3')?")
-									  .arg(0).
-									  arg(m_signal.customSignalId()).
-									  arg(m_signal.caption()),
-									  QMessageBox::Yes|QMessageBox::No,
-									  QMessageBox::No);
-
-	if (result != QMessageBox::Yes)
+	if (DialogWriteValues::askConfirmation(m_signal,
+										   m_tuningController.signalState(m_signal.appSignalId(), nullptr).value(),
+										   TuningValue(m_signal.tuningType(), 0),
+										   E::AnalogFormat::f_9, this) != QDialog::Accepted)
 	{
 		return;
 	}
 
-	m_tuningController->writeValue(m_signal.appSignalId(), false);
+	m_tuningController.writeValue(m_signal.appSignalId(), false);
 }
 
 void DialogSignalInfo::on_pushButtonSetOne_clicked()
 {
-	if (m_tuningController == nullptr || m_signal.isDiscrete() == false)
+	if (m_signal.isDiscrete() == false)
 	{
 		Q_ASSERT(false);
 		return;
 	}
 
-	int result = QMessageBox::warning(this, qAppName(),
-									  tr("Are you sure you want to write value '%1'\n\nto signal '%2' ('%3')?")
-									  .arg(1).
-									  arg(m_signal.customSignalId()).
-									  arg(m_signal.caption()),
-									  QMessageBox::Yes|QMessageBox::No,
-									  QMessageBox::No);
-
-	if (result != QMessageBox::Yes)
+	if (DialogWriteValues::askConfirmation(m_signal,
+						m_tuningController.signalState(m_signal.appSignalId(), nullptr).value(),
+						TuningValue(m_signal.tuningType(), 1),
+						E::AnalogFormat::f_9, this) != QDialog::Accepted)
 	{
 		return;
 	}
 
-	m_tuningController->writeValue(m_signal.appSignalId(), true);
+	m_tuningController.writeValue(m_signal.appSignalId(), true);
 }
 
 void DialogSignalInfo::on_pushButtonSetValue_clicked()
 {
-	if (m_tuningController == nullptr || m_signal.isAnalog() == false)
+	if (m_signal.isAnalog() == false)
 	{
 		Q_ASSERT(false);
 		return;
@@ -958,20 +962,23 @@ void DialogSignalInfo::on_pushButtonSetValue_clicked()
 		return;
 	}
 
-	int result = QMessageBox::warning(this, qAppName(),
-									  tr("Are you sure you want to write value '%1'\n\nto signal '%2' ('%3')?")
-									  .arg(strValue).
-									  arg(m_signal.customSignalId()).
-									  arg(m_signal.caption()),
-									  QMessageBox::Yes|QMessageBox::No,
-									  QMessageBox::No);
+	if (value < m_signal.tuningLowBound().toDouble() || value > m_signal.tuningHighBound().toDouble())
+	{
+		QMessageBox::critical(this, qAppName(), tr("Input value is out of range (%1..%2)!")
+							  .arg(m_signal.tuningLowBound().toString())
+							  .arg(m_signal.tuningHighBound().toString()));
+		return;
+	}
 
-	if (result != QMessageBox::Yes)
+	if (DialogWriteValues::askConfirmation(m_signal,
+						m_tuningController.signalState(m_signal.appSignalId(), nullptr).value(),
+						TuningValue(m_signal.tuningType(), value),
+						E::AnalogFormat::f_9, this) != QDialog::Accepted)
 	{
 		return;
 	}
 
-	m_tuningController->writeValue(m_signal.appSignalId(), value);
+	m_tuningController.writeValue(m_signal.appSignalId(), value);
 }
 
 
@@ -1219,7 +1226,10 @@ void DialogSignalInfo::fillSignalData()
 
 	fillSignalInfo();
 	fillProperties();
-	fillExtProperties();
+	if (m_dialogType == DialogType::Simulator)
+	{
+		fillExtProperties();
+	}
 	fillSetpoints();
 	fillSchemas();
 	fillTuningTab();
@@ -1233,7 +1243,7 @@ void DialogSignalInfo::fillSignalInfo()
 	//
 	m_currentPrecision = m_signal.precision();
 
-	setWindowTitle(m_signal.customSignalId() + tr(" - ") + m_signal.caption());
+	setWindowTitle(m_signal.customSignalId() + " - " + m_signal.caption());
 
 	if (m_signal.isAnalog())
 	{
@@ -1257,20 +1267,39 @@ void DialogSignalInfo::fillSignalInfo()
 
 	ui->editAppSignalID->setText(m_signal.appSignalId());
 	ui->editCustomAppSignalID->setText(m_signal.customSignalId());
-	ui->editCaption->setPlainText(m_signal.caption());
 	ui->editEquipment->setText(m_signal.equipmentId());
 
-	QString str = E::valueToString<E::SignalType>(m_signal.type());
+	ui->editCaption->setFont(ui->editCustomAppSignalID->font());
+	ui->editCaption->document()->setDocumentMargin(2);
+	ui->editCaption->setPlainText(m_signal.caption());
+	
+	QString signalProperties[] = {tr("Analog"),		//E::SignalType
+								  tr("Discrete"),
+								  tr("Bus"),
+								  tr("Input"),		//E::SignalInOutType
+								  tr("Output"),
+								  tr("Internal")};
+	Q_UNUSED(signalProperties);
+
+	QString str;
 	if (m_signal.isAnalog())
 	{
-		str = QString("%1 (%2)").arg(str).arg(E::valueToString<E::AnalogAppSignalFormat>(static_cast<int>(m_signal.analogSignalFormat())));
+		str = tr("Channel: %1, %2 (%3), %4")
+				.arg(E::valueToString<E::Channel>(m_signal.channel()))
+				.arg(tr(E::valueToString<E::SignalType>(m_signal.type()).toUtf8()))
+				.arg(E::valueToString<E::AnalogAppSignalFormat>(static_cast<int>(m_signal.analogSignalFormat())))
+				.arg(tr(E::valueToString<E::SignalInOutType>(m_signal.inOutType()).toUtf8()));
+	}
+	else
+	{
+		str = tr("Channel: %1, %2, %3")
+				.arg(E::valueToString<E::Channel>(m_signal.channel()))
+				.arg(tr(E::valueToString<E::SignalType>(m_signal.type()).toUtf8()))
+				.arg(tr(E::valueToString<E::SignalInOutType>(m_signal.inOutType()).toUtf8()));
 	}
 
-	str = QString("%1, %2").arg(str).arg(E::valueToString<E::SignalInOutType>(m_signal.inOutType()));
-
-	ui->editSignalType->setText(str);
-
-	ui->editChannel->setText(E::valueToString<E::Channel>(m_signal.channel()));
+	ui->editSignalOther->setText(str);
+	ui->editSignalOther->setFixedHeight(ui->editEquipment->frameGeometry().height());
 }
 
 void DialogSignalInfo::fillProperties()
@@ -1280,14 +1309,29 @@ void DialogSignalInfo::fillProperties()
 	// Fill properties list
 	//
 	QStringList columns;
-	columns << "Caption";
-	columns << "Value";
+	columns << tr("Caption");
+	columns << tr("Value");
 	ui->treeProperties->setHeaderLabels(columns);
 
 	QTreeWidgetItem* itemGroup1 = new QTreeWidgetItem(QStringList()<<tr("General"));
 
 	itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("AppSignalID") << m_signal.appSignalId()));
 	itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("EquipmentID") << m_signal.equipmentId()));
+
+	if (m_signalDataServer != nullptr)
+	{
+		QStringList shortenIds;
+		QStringList dataServiceIds =  m_signalDataServer->dataServiceIds(m_signal.appSignalId());
+		for (const auto& ads : m_appDataServices)
+		{
+			if (std::find(dataServiceIds.begin(), dataServiceIds.end(), ads.equipmentId) != dataServiceIds.end())
+			{
+				shortenIds.push_back(ads.shortenId);
+			}
+		}
+
+		itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("Servers") << shortenIds.join("; ")));
+	}
 
 	if (m_signal.isAnalog())
 	{
@@ -1308,17 +1352,29 @@ void DialogSignalInfo::fillProperties()
 	ui->treeProperties->addTopLevelItem(itemGroup2);
 	itemGroup2->setExpanded(true);
 
-	if (m_signal.isAnalog())
 	{
-		QTreeWidgetItem* itemGroup3 = new QTreeWidgetItem(QStringList() << tr("Parameters"));
+		QTreeWidgetItem* itemGroupParameters = new QTreeWidgetItem(QStringList() << tr("Parameters"));
 
-		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("Precision") << QString::number(m_signal.precision())));
-		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("Aperture") << QString::number(m_signal.aperture(), 'f', m_signal.precision())));
-		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("FilteringTime") << QString::number(m_signal.filteringTime(), 'f', m_signal.precision())));
-		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("SpreadTolerance") << QString::number(m_signal.spreadTolerance(), 'f', m_signal.precision())));
+		if (m_signal.isAnalog() == true)
+		{
+			itemGroupParameters->addChild(new QTreeWidgetItem(QStringList() << tr("Precision") << QString::number(m_signal.precision())));
+			itemGroupParameters->addChild(new QTreeWidgetItem(QStringList() << tr("FineAperture") << QString::number(m_signal.fineAaperture(), 'f', m_signal.precision())));
+			itemGroupParameters->addChild(new QTreeWidgetItem(QStringList() << tr("CoarseAperture") << QString::number(m_signal.coarseAaperture(), 'f', m_signal.precision())));
+			itemGroupParameters->addChild(new QTreeWidgetItem(QStringList() << tr("FilteringTime") << QString::number(m_signal.filteringTime(), 'f', m_signal.precision())));
+			itemGroupParameters->addChild(new QTreeWidgetItem(QStringList() << tr("SpreadTolerance") << QString::number(m_signal.spreadTolerance(), 'f', m_signal.precision())));
+		}
 
-		ui->treeProperties->addTopLevelItem(itemGroup3);
-		itemGroup3->setExpanded(true);
+		if (m_signal.isDiscrete() == true)
+		{
+			QStringList inverted;
+			inverted << tr("Inverted");
+			inverted << (m_signal.isInverted() ? tr("Yes") : tr("No"));
+
+			itemGroupParameters->addChild(new QTreeWidgetItem(inverted));
+		}
+
+		ui->treeProperties->addTopLevelItem(itemGroupParameters);
+		itemGroupParameters->setExpanded(true);
 	}
 
 	if (m_signal.isAnalog())
@@ -1393,8 +1449,8 @@ void DialogSignalInfo::fillExtProperties()
 	// Fill properties list
 	//
 	QStringList columns;
-	columns << "Caption";
-	columns << "Value";
+	columns << tr("Caption");
+	columns << tr("Value");
 	ui->treePropertiesExt->setHeaderLabels(columns);
 
 	QTreeWidgetItem* itemGroup1 = new QTreeWidgetItem(QStringList()<<tr("General"));
@@ -1436,7 +1492,7 @@ void DialogSignalInfo::fillExtProperties()
 		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("Archive") << (signalExt.archive() ? tr("Yes") : tr("No")) ));
 		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("CoarseAperture") << QString::number(signalExt.coarseAperture(), 'f', signalExt.decimalPlaces())));
 		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("FineAperture") << QString::number(signalExt.fineAperture(), 'f', signalExt.decimalPlaces())));
-		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("AdaptiveAperture") << (signalExt.adaptiveAperture() ? tr("Yes") : tr("No")) ));
+		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("ApertureType") << E::valueToString<E::ApertureType>(signalExt.apertureType()) ));
 
 		ui->treePropertiesExt->addTopLevelItem(itemGroup3);
 		itemGroup3->setExpanded(true);
@@ -1468,7 +1524,7 @@ void DialogSignalInfo::fillExtProperties()
 		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("InputHighLimit") << QString::number(signalExt.electricHighLimit(), 'f', signalExt.decimalPlaces())));
 		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("InputUnitID") << QString::number(signalExt.electricUnit())));
 
-		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("rload_Ohm") << QString::number(signalExt.rload_Ohm(), 'f', signalExt.decimalPlaces())));
+		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("rload_Ohm") << QString::number(signalExt.rloadOhm(), 'f', signalExt.decimalPlaces())));
 		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("r0_Ohm") << QString::number(signalExt.r0_Ohm(), 'f', signalExt.decimalPlaces())));
 
 		itemGroup5->addChild(new QTreeWidgetItem(QStringList() << tr("SensorType") << E::valueToString<E::SensorType>(signalExt.sensorType())));
@@ -1698,7 +1754,7 @@ void DialogSignalInfo::fillSchemas()
 	ui->treeSchemas->clear();
 
 	QStringList columns;
-	columns << "Schema";
+	columns << tr("Schema");
 	ui->treeSchemas->setHeaderLabels(columns);
 
 	QStringList schemas = schemasByAppSignalId(m_signal.appSignalId());
@@ -1718,7 +1774,7 @@ void DialogSignalInfo::fillSchemas()
 
 void DialogSignalInfo::fillTuningTab()
 {
-	const QString tuningTabPageName = QObject::tr("Tuning");
+	const QString tuningTabPageName = tr("Tuning");
 
 	bool tuningEnabled = m_signal.enableTuning() == true && m_tuningEnabled == true;
 	bool tuningTabVisible = tabPageExists(tuningTabPageName);
@@ -1776,7 +1832,18 @@ void DialogSignalInfo::updateAppSignalState()
 {
 	bool ok = false;
 
-	AppSignalState appSignalState = m_appSignalManager->signalState(m_signal.hash(), &ok);
+	AppSignalState appSignalState;
+
+	if (m_dataServiceId.isEmpty() == true)
+	{
+		// Latest server state
+		appSignalState = m_appSignalManager->signalState(m_signal.hash(), &ok);
+	}
+	else
+	{
+		// Specific server state
+		appSignalState = m_appSignalManager->signalState(m_signal.hash(), ::calcHash(m_dataServiceId), &ok);
+	}
 	if (ok == false)
 	{
 		return;
@@ -1823,16 +1890,20 @@ void DialogSignalInfo::updateAppSignalState()
 		}
 	}
 
-	if (oldFontSize != m_currentFontSize)
+	if (oldFontSize != m_currentFontSize || ui->labelValue->font().underline() != m_signal.isInverted())
 	{
 		QFont font = ui->labelValue->font();
 		font.setPixelSize(m_currentFontSize);
 
-		ui->labelValue->setFont(font);
 		ui->labelValueTuning->setFont(font);
 
 		ui->labelStrUnit->setFont(font);
 		ui->labelStrUnitTuning->setFont(font);
+
+		// Underline (signal is inverted) is set only for state label.
+		//
+		font.setUnderline(m_signal.isInverted());
+		ui->labelValue->setFont(font);
 	}
 
 	// Set text
@@ -1880,7 +1951,18 @@ void DialogSignalInfo::updateSetpoints()
 
 			bool ok = false;
 
-			AppSignalState stateCompare = m_appSignalManager->signalState(paramCompare.hash(), &ok);
+			AppSignalState stateCompare;
+
+			if (m_dataServiceId.isEmpty() == true)
+			{
+				// Latest server state
+				stateCompare = m_appSignalManager->signalState(paramCompare.hash(), &ok);
+			}
+			else
+			{
+				// Specific server state
+				stateCompare = m_appSignalManager->signalState(paramCompare.hash(), ::calcHash(m_dataServiceId), &ok);
+			}
 			if (ok == false)
 			{
 				item->setText(static_cast<int>(SetpointsColumns::CompareToValue), "?");
@@ -1901,7 +1983,18 @@ void DialogSignalInfo::updateSetpoints()
 
 			bool ok = false;
 
-			AppSignalState stateOutput = m_appSignalManager->signalState(paramOutput.hash(), &ok);
+			AppSignalState stateOutput;
+
+			if (m_dataServiceId.isEmpty() == true)
+			{
+				// Latest server state
+				stateOutput = m_appSignalManager->signalState(paramOutput.hash(), &ok);
+			}
+			else
+			{
+				// Specific server state
+				stateOutput = m_appSignalManager->signalState(paramOutput.hash(), ::calcHash(m_dataServiceId), &ok);
+			}
 			if (ok == false)
 			{
 				item->setText(static_cast<int>(SetpointsColumns::OutputValue), "?");
@@ -1920,7 +2013,7 @@ void DialogSignalInfo::updateTuningSignalState()
 {
 	// Tuning information
 
-	TuningSignalState tuningSignalState = m_tuningController->signalState(m_signal.appSignalId()).value<TuningSignalState>();
+	TuningSignalState tuningSignalState = m_tuningController.signalState(m_signal.appSignalId()).value<TuningSignalState>();
 
 	QString strValue = tuningSignalStateText(m_signal, tuningSignalState, m_viewType, m_currentPrecision);
 
@@ -1942,6 +2035,31 @@ void DialogSignalInfo::updateTuningSignalState()
 	bool controlEnabled = tuningSignalState.valid() == true &&
 						  tuningSignalState.controlIsEnabled() == true;// &&
 						  //tuningSignalState.writingIsEnabled() == true;	// This flag is not always used! ???
+	
+	if (m_tuningAuthorization.enabled() == true)
+	{
+		// User is logged in and is allowed to tune this signal
+		//
+		controlEnabled &= (m_tuningAuthorization.isLoggedIn() == true);
+
+		if (controlEnabled == true)
+		{
+			bool tagFound = false;
+
+			std::set<QString> signalTags = m_signal.tags();
+			QStringList userTags = m_tuningAuthorization.userTags();
+			for (const QString& t : userTags)
+			{
+				if (signalTags.contains(t) == true)
+				{
+					tagFound = true;
+					break;
+				}
+			}
+
+			controlEnabled &= tagFound;
+		}
+	}
 
 	if (ui->pushButtonSetOne->isEnabled() != controlEnabled)
 	{
@@ -2007,7 +2125,7 @@ void DialogSignalInfo::stateContextMenu(QPoint pos)
 
 	// View type
 	//
-	QActionGroup *viewGroup = new QActionGroup(this);
+	QActionGroup* viewGroup = new QActionGroup(this);
 	viewGroup->setExclusive(true);
 
 	for (int i = 0; i < static_cast<int>(E::ValueViewType::Count); i++)
@@ -2052,6 +2170,67 @@ void DialogSignalInfo::stateContextMenu(QPoint pos)
 
 	menu.addAction(actionCopy);
 
+	// Server
+	//
+	if (m_dataServiceIds.size() > 1)
+	{
+		QMenu* serversMenu = menu.addMenu(tr("Server State"));
+
+		QActionGroup* serverGroup = new QActionGroup(this);
+		serverGroup->setExclusive(true);
+
+		// Latest action
+		//
+		{
+			QAction* actionServer = new QAction(tr("Latest"), &menu);
+			actionServer->setCheckable(true);
+
+			if (m_dataServiceId.isEmpty() == true)
+			{
+				actionServer->setChecked(true);
+			}
+
+			connect(actionServer, &QAction::triggered, this, [this]()
+			{
+				m_dataServiceId.clear();
+			});
+
+			serverGroup->addAction(actionServer);
+		}
+
+		// Servers actions
+		//
+		for (const QString& serverId : m_dataServiceIds)
+		{
+			QString serverShortenId;
+			for (const auto& ads : m_appDataServices)
+			{
+				if (ads.equipmentId == serverId)
+				{
+					serverShortenId = ads.shortenId;
+					break;
+				}
+			}
+
+			QAction* actionServer = new QAction(serverShortenId, &menu);
+			actionServer->setCheckable(true);
+
+			if (serverId == m_dataServiceId)
+			{
+				actionServer->setChecked(true);
+			}
+
+			connect(actionServer, &QAction::triggered, this, [this, serverId]() -> void
+			{
+				m_dataServiceId = serverId;
+			});
+
+			serverGroup->addAction(actionServer);
+		}
+
+		serversMenu->addActions(serverGroup->actions());
+	}
+
 	// --
 	//
 	menu.exec(mapToGlobal(pos));
@@ -2063,12 +2242,17 @@ QString DialogSignalInfo::appSignalStateText(const AppSignalParam& param, const 
 {
 	// Generate value string even if signal is not valid
 	//
-
 	QString strValue;
 
 	if (param.isDiscrete() == true)
 	{
 		strValue = QString("%1").arg(state.m_value);
+#if 0
+		if (param.isInverted() == true)
+		{
+			strValue.append(" (inverted)");
+		}
+#endif
 	}
 
 	if (param.isAnalog() == true)

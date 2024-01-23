@@ -1,4 +1,4 @@
-set RPCT_VERSION="0.9.%CI_PIPELINE_ID%"
+set RPCT_VERSION="%U7SET_FULL_VERSION%"
 echo Software Version is %RPCT_VERSION%
 
 powershell -Command "(gc config\config.in) -replace '<Version>1.0.0</Version>', '<Version>%RPCT_VERSION%</Version>' | Out-File -encoding ASCII config\config.xml"
@@ -26,6 +26,11 @@ md packages\u7set.tools.testsuite\data
 
 echo --------------- Copying Source Files ------------------
 
+xcopy ..\bin\release\qt*.qm packages\u7set\data /sy
+xcopy ..\bin\release\ClientLib*.qm packages\u7set\data /sy
+xcopy ..\bin\release\TrendView*.qm packages\u7set\data /sy
+xcopy ..\bin\release\UtilsLib*.qm packages\u7set\data /sy
+
 xcopy ..\bin\release\*.dll packages\u7set\data /sy
 copy ..\bin\release\vc_redist.x64.exe packages\u7set\data
 
@@ -47,17 +52,20 @@ copy ..\bin\release\ArchSrv.exe packages\u7set.mats.archsrv\data
 copy ..\bin\release\TuningSrv.exe packages\u7set.mats.tunsrv\data
 copy ..\bin\release\scm.exe packages\u7set.mats.scm\data
 copy ..\bin\release\Monitor.exe packages\u7set.mats.monitor\data
+xcopy ..\bin\release\Monitor*.qm packages\u7set.mats.monitor\data /sy
 copy ..\bin\release\docs\D11.8_FSC_MATS_User_Manual.pdf packages\u7set.mats.monitor.docs\data\docs
 copy ..\bin\release\TuningClient.exe packages\u7set.mats.tuningclient\data
+xcopy ..\bin\release\TuningClient*.qm packages\u7set.mats.tuningclient\data /sy
 copy ..\bin\release\docs\D11.9_FSC_Tuning_User_Manual.pdf packages\u7set.mats.tuningclient.docs\data\docs
 
 copy ..\bin\release\Metrology.exe packages\u7set.tools.metrology\data
 copy ..\bin\release\mconf.exe packages\u7set.tools.mconf\data
 copy ..\bin\release\TestSuite.exe packages\u7set.tools.testsuite\data
 copy ..\bin\release\TestSuiteConsole.exe packages\u7set.tools.testsuite\data
+xcopy ..\bin\release\TestSuite*.qm packages\u7set.tools.testsuite\data /sy
 
 echo --------------- Building the installer ------------------
 
-binarycreator.exe --offline-only -c config\config.xml -p packages ..\bin\u7setinstall_%RPCT_VERSION%_%CI_BUILD_REF_SLUG%_%CI_COMMIT_SHA%.exe
+binarycreator.exe --offline-only -c config\config.xml -p packages ..\bin\u7setinstall-%RPCT_VERSION%-PPID_%CI_PIPELINE_ID%-%CI_RELEASE_TYPE%-%CI_COMMIT_REF_SLUG%_%CI_COMMIT_SHA%.exe
 
 echo --------------- Done ------------------

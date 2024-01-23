@@ -15,15 +15,15 @@ class MonitorCentralWidget : public TabWidgetEx
 public:
 	MonitorCentralWidget(MonitorSchemaManager* schemaManager,
 						 VFrame30::AppSignalController* appSignalController,
-						 VFrame30::TuningController* tuningController,
 						 VFrame30::LogController* logController,
 						 ITimeStats* timeStats,
 						 QWidget* parent);
 	~MonitorCentralWidget();
 
 public:
+	void applyZoomMode(VFrame30::ZoomMode zoomMode);
+
 	MonitorSchemaWidget* currentTab();
-	VFrame30::TuningController* tuningController();
 
 protected:
 	virtual void timerEvent(QTimerEvent* event) override;
@@ -31,7 +31,7 @@ protected:
 
 	// Signals
 signals:
-	void signal_tabPageChanged(bool schemaWidgetSelected);		// Emmited to enable/disable QActions dependo on current tab (schema/schemalist)
+	void signal_tabPageChanged(bool schemaWidgetSelected);		// Emitted to enable/disable QActions depend on current tab (schema/schemaList).
 	void signal_actionCloseTabUpdated(bool allowed);
 	void signal_schemaChanged(QString strId);
 	void signal_historyChanged(bool enableBack, bool enableForward);
@@ -56,6 +56,8 @@ public slots:
 	void slot_signalContextMenu(const QStringList signalList, const QList<QMenu*>& customMenu);
 	void slot_signalInfo(QString signalId);
 
+	void slot_export();
+
 protected slots:
 	void slot_tabCloseRequested(int index);
 	void slot_resetSchema();
@@ -73,12 +75,12 @@ private:
 	MonitorSchemaManager* m_schemaManager = nullptr;
 
 	VFrame30::AppSignalController* m_appSignalController = nullptr;
-	VFrame30::TuningController* m_tuningController = nullptr;
+
 	VFrame30::LogController* m_logController = nullptr;
 
 	ITimeStats* m_timeStats = nullptr;
 
-	int m_eventLoopTimerId = 0;				// We need to cathc event loop. Start timer, as we enter event loop timerEvent comes
-	int m_eventLoopTimerCounter = 0;		// We need to cathc event loop. Start timer, as we enter event loop timerEvent comes
+	int m_eventLoopTimerId = 0;				// We need to catch event loop. Start timer, as we enter event loop timerEvent comes.
+	int m_eventLoopTimerCounter = 0;		// We need to catch event loop. Start timer, as we enter event loop timerEvent comes.
 };
 

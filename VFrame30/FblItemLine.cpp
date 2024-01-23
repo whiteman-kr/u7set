@@ -4,14 +4,13 @@
 
 namespace VFrame30
 {
-	FblItemLine::FblItemLine(void)
+	FblItemLine::FblItemLine(void) :
+		FblItemLine(SchemaUnit::Inch)
 	{
 		return;
 	}
 
-	FblItemLine::FblItemLine(SchemaUnit unit) :
-		m_weight(0),
-		m_lineColor(qRgb(0x00, 0x00, 0xC0))
+	FblItemLine::FblItemLine(SchemaUnit unit) 
 	{
 		setItemUnit(unit);
 		m_static = false;

@@ -1,8 +1,5 @@
 #include "Calibrator.h"
 
-#include <cassert>
-#include <QThread>
-
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -580,7 +577,7 @@ bool Calibrator::write(QString cmd)
 				QByteArray cmdData = cmd.toLocal8Bit();
 
 				qint64 writtenBytes = m_port.write(cmdData);
-				if (writtenBytes != cmdData.count())
+				if (writtenBytes != cmdData.size())
 				{
 					m_lastError = QString("Calibrator error! "
 										  "Function: %1, Serial port: %2, "
@@ -689,7 +686,7 @@ bool Calibrator::read()
 
 					if (requestData.isEmpty() == false)
 					{
-						if (memcmp(requestData.data() + requestData.count() - param.terminamtor.length(),
+						if (memcmp(requestData.data() + requestData.size() - param.terminamtor.length(),
 								   param.terminamtor.toLocal8Bit(),
 								   static_cast<size_t>(param.terminamtor.length())) == 0)
 						{
@@ -1519,7 +1516,7 @@ void Calibrator::parseResponse()
 				break;
 			}
 
-			value.remove(endPos, value.count());
+			value.remove(endPos, value.size());
 
 			m_measureValue = value.toDouble();
 
@@ -1539,7 +1536,7 @@ void Calibrator::parseResponse()
 				break;
 			}
 
-			value.remove(endPos, value.count());
+			value.remove(endPos, value.size());
 
 			m_sourceValue = value.toDouble();
 

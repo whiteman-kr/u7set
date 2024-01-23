@@ -1,11 +1,14 @@
 #pragma once
 
+#include "../lib/Ui/TabWidgetEx.h"
+
 class MainTabPage;
 
 
-class CentralWidget : public QTabWidget
+class CentralWidget : public TabWidgetEx
 {
 	Q_OBJECT
+
 public:
 	explicit CentralWidget(QWidget* parent = nullptr);
 

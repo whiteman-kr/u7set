@@ -1,5 +1,5 @@
 #ifndef SERVICE_LIB_DOMAIN
-#error Don't include this file in the project! Link ServiceLib instead.
+#error Do not include this file in the project! Link ServiceLib instead.
 #endif
 
 #include "Service.h"
@@ -16,74 +16,62 @@ int ServiceWorker::m_instanceNo = 0;
 
 ServiceWorker::ServiceWorker(const SoftwareInfo& softwareInfo,
 							 const QString& serviceName,
-							 int& argc,
+							 int argc,
 							 char** argv,
-							 CircularLoggerShared logger,
-							 E::ServiceRunMode runMode) :
+							 CircularLoggerShared logger) :
 	m_softwareInfo(softwareInfo),
 	m_serviceName(serviceName),
 	m_argc(argc),
-	m_argv(argv),
+	m_argv(const_cast<const char**>(argv)),
+	m_cmdLineParser(Manufacturer::RADIY, serviceName, argc, argv),
 	m_logger(logger),
-	m_serviceRunMode(runMode),
-	m_settings(QSettings::SystemScope, Manufacturer::RADIY, serviceName, this),
-	m_cmdLineParser(argc, argv),
 	m_softwareSettingsSet(softwareInfo.softwareType())
 {
 	TEST_PTR_RETURN(argv);
 
-	m_instanceNo++;
+	setThisInstanceNo();
+
+	Q_ASSERT(m_thisInstanceNo == 1);
+
+	copyCmdLineArgs(m_argc, m_argv);
+}
+
+ServiceWorker::ServiceWorker(const ServiceWorker* prevInstance) :
+	m_softwareInfo(prevInstance->softwareInfo()),
+	m_serviceName(prevInstance->serviceName()),
+	m_logger(prevInstance->logger()),
+	m_argc(prevInstance->argc()),
+	m_argv(prevInstance->argv()),
+	m_cmdLineArgs(prevInstance->cmdLineArgs()),
+	m_cmdLineParser(prevInstance->commandLineParser()),
+	m_serviceRunMode(prevInstance->serviceRunMode()),
+	m_softwareSettingsSet(prevInstance->softwareInfo().softwareType())
+{
+	setThisInstanceNo();
+
+	Q_ASSERT(m_thisInstanceNo > 1);
 }
 
 ServiceWorker::~ServiceWorker()
 {
 }
 
-int& ServiceWorker::argc() const
-{
-	return m_argc;
-}
-
-char** ServiceWorker::argv() const
-{
-	return m_argv;
-}
-
 QString ServiceWorker::appPath() const
 {
-	if (m_argv == nullptr ||
-		m_argc == 0)
+	if (m_cmdLineArgs.size() < 1)
 	{
-		assert(false);
+		Q_ASSERT(false);
 		return QString();
 	}
 
-	return QString(m_argv[0]);
+	return m_cmdLineArgs[0];
 }
 
 QString ServiceWorker::cmdLine() const
 {
-	if (m_argv == nullptr ||
-		m_argc == 0)
-	{
-		assert(false);
-		return QString();
-	}
+	Q_ASSERT(m_cmdLineArgs.size() >= 1);
 
-	QString cl;
-
-	for(int i = 0; i < m_argc; i++)
-	{
-		if (m_argv[i] == nullptr)
-		{
-			assert(false);
-			continue;
-		}
-
-		cl += QString("%1 ").arg(m_argv[i]);
-	}
-
-	return cl.trimmed();
+	return m_cmdLineArgs.join(" ");
 }
 
 QString ServiceWorker::serviceName() const
@@ -101,19 +89,22 @@ E::SoftwareType ServiceWorker::softwareType() const
 	return m_softwareInfo.softwareType();
 }
 
-bool ServiceWorker::initAndProcessCmdLineSettings()
+void ServiceWorker::loadCommonServicesSettings()
 {
-	if (m_instanceNo > 1)
+	m_equipmentID = getSettingValue(SoftwareSetting::EQUIPMENT_ID);
+
+	m_softwareInfo.setEquipmentID(m_equipmentID);		// !
+
+	if (m_softwareInfo.softwareType() != E::SoftwareType::ConfigurationService)
 	{
-		assert(false);			// call initAndProcessCmdLineSettings() for first ServiceWorker instance only!
-		return true;
+		m_cfgServiceIP1Str = getSettingValue(SoftwareSetting::CFG_SERVICE_IP1);
+
+		m_cfgServiceIP1.setAddressPortStr(m_cfgServiceIP1Str, PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
+
+		m_cfgServiceIP2Str = getSettingValue(SoftwareSetting::CFG_SERVICE_IP2);
+
+		m_cfgServiceIP2.setAddressPortStr(m_cfgServiceIP2Str, PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
 	}
-
-	init();
-
-	m_cmdLineParser.processSettings(m_settings, m_logger);
-
-	return processCustomCmdLineSettings();
 }
 
 void ServiceWorker::setService(Service* service)
@@ -123,13 +114,8 @@ void ServiceWorker::setService(Service* service)
 
 Service* ServiceWorker::service()
 {
-	assert(m_service != nullptr);
+	Q_ASSERT(m_service != nullptr);
 	return m_service;
-}
-
-CommandLineParser& ServiceWorker::cmdLineParser()
-{
-	return m_cmdLineParser;
 }
 
 void ServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
@@ -139,58 +125,59 @@ void ServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) co
 
 bool ServiceWorker::clearSettings()
 {
-	m_settings.clear();
-
-	m_settings.sync();
-
-	return CommandLineParser::checkSettingWriteStatus(m_settings, "", nullptr);
+	return m_cmdLineParser.clearSettings();
 }
 
-QString ServiceWorker::getStrSetting(const QString& settingName)
+QString ServiceWorker::getSettingValue(const QString& settingName)
 {
-	QString cmdLineValue = m_cmdLineParser.settingValue(settingName);
-
-	if (cmdLineValue.isEmpty() == true)
-	{
-		return m_settings.value(settingName).toString();
-	}
-
-	return cmdLineValue;
+	return m_cmdLineParser.getSettingValue(settingName);
 }
 
-OptionalBool ServiceWorker::getBoolSetting(const QString& settingName)
+bool ServiceWorker::getBoolSettingValue(const QString& settingName)
 {
-	OptionalBool result;
+	QString valueStr = getSettingValue(settingName);
 
-	QString cmdLineValue = m_cmdLineParser.settingValue(settingName);
+	bool ok = false;
 
-	if (cmdLineValue.isEmpty() == true)
+	bool result = stringToBool(valueStr, &ok);
+
+	if (ok == false)
 	{
-		cmdLineValue = m_settings.value(settingName).toString();
+		qDebug() << "ServiceWorker::getBoolSettingValue: Cannot convert setting" << settingName << ", value " << valueStr << " to bool.";
+		Q_ASSERT(false);
+		result = false;
 	}
-
-	result = CommandLineParser::strToBool(cmdLineValue);
 
 	return result;
 }
 
-QString ServiceWorker::getCmdLineSetting(const QString& settingName)
+QStringList ServiceWorker::getSoftwareInfo() const
 {
-	return  m_cmdLineParser.settingValue(settingName);
-}
+	const SoftwareInfo& si = m_softwareInfo;
 
-QString ServiceWorker::getSoftwareInfoStr() const
-{
-	QString swInfo =
-		QString("%1 %2.%3.%4 (%5) SHA: %6").
+	QStringList res;
+
+
+	res << QString(" %1 v%2.%3.%4 (%5)").
 			arg(m_serviceName).
-			arg(m_softwareInfo.majorVersion()).
-			arg(m_softwareInfo.minorVersion()).
-			arg(m_softwareInfo.commitNo()).
-			arg(m_softwareInfo.buildBranch()).
-			arg(m_softwareInfo.commitSHA());
+			arg(si.majorVersion()).
+			arg(si.minorVersion()).
+			arg(si.patchVersion()).
+			arg(si.branchName());
+	res << QString();
+#ifdef QT_DEBUG
+	res << QString(" Build:          %1 Debug").arg(si.releaseType());
+#else
+	res << QString(" Build:          %1 Release").arg(si.releaseType());
+#endif
+	res << QString(" Branch name:    %1").arg(si.branchName());
+	res << QString(" Commit SHA:     %1").arg(si.commitHash());
+	res << QString(" Build date:     %1").arg(si.buildDate());
+	res << QString(" Build username: %1").arg(si.buildUserName());
+	res << QString(" Build hostname: %1").arg(si.buildHostname());
+	res << QString(" Pipeline ID:    %1").arg(si.pipelineID());
 
-	return swInfo;
+	return res;
 }
 
 void ServiceWorker::setSessionParams(const SessionParams& sp)
@@ -217,48 +204,117 @@ E::ServiceRunMode ServiceWorker::serviceRunMode() const
 	return m_serviceRunMode;
 }
 
-void ServiceWorker::init()
+bool ServiceWorker::addSimpleNoWritableCmdLineArg(const QString& cmdLineArgName,
+												  const QString& description)
 {
-	m_cmdLineParser.addSimpleOption("h", "Print this help.");
-	m_cmdLineParser.addSimpleOption("v", "Display version of service.");
-	m_cmdLineParser.addSimpleOption("e", "Run service as a regular application.");
-	m_cmdLineParser.addSimpleOption("i", "Install the service. Needs administrator rights.");
-	m_cmdLineParser.addSimpleOption("u", "Uninstall the service. Needs administrator rights.");
-	m_cmdLineParser.addSimpleOption("t", "Terminate (stop) the service.");
-	m_cmdLineParser.addSingleValueOption("inst", "ServiceInstanceID", "Set service instance ID.", "InstanceID");
-	m_cmdLineParser.addSimpleOption("clr", "Clear all service settings.");
-
-	initCmdLineParser();
-
-	m_cmdLineParser.parse();
+	return m_cmdLineParser.addSimpleNoWritableCmdLineArg(cmdLineArgName, description);
 }
 
-bool ServiceWorker::processCustomCmdLineSettings()
+bool ServiceWorker::addSimpleCmdLineArg(const QString& cmdLineArgName,
+						 const QString& settingName,
+						 const QString& description)
 {
-	return true;		// continue service running
-						// return false to exit service
+	return m_cmdLineParser.addSimpleCmdLineArg(cmdLineArgName, settingName, description);
+}
+
+bool ServiceWorker::addValueNoWritebleCmdLineArg(const QString& cmdLineArgName,
+								  const QString& description,
+								  const QString& paramExample)
+{
+	return m_cmdLineParser.addValueNoWritebleCmdLineArg(cmdLineArgName, description, paramExample);
+}
+
+bool ServiceWorker::addValueCmdLineArg(const QString& cmdLineArgName,
+						const QString& settingName,
+						const QString& description,
+						const QString& paramExample)
+{
+	return m_cmdLineParser.addValueCmdLineArg(cmdLineArgName, settingName, description, paramExample);
+}
+
+bool ServiceWorker::addBoolCmdLineArg(const QString& cmdLineArgName,
+						const QString& settingName,
+						const QString& description)
+{
+	return m_cmdLineParser.addBoolCmdLineArg(cmdLineArgName, settingName, description);
+}
+
+bool ServiceWorker::cmdLineArgIsSet(const QString& cmdLineArgName) const
+{
+	return m_cmdLineParser.cmdLineArgIsSet(cmdLineArgName);
+}
+
+QString ServiceWorker::helpText() const
+{
+	return m_cmdLineParser.helpText();
+}
+
+bool ServiceWorker::processServiceSpecificCmdLineArgs()
+{
+	return true;		// return TRUE to continue service running
+						// return FALSE to exit service
+}
+
+void ServiceWorker::setThisInstanceNo()
+{
+	m_instanceNo++;
+	m_thisInstanceNo = m_instanceNo;
+}
+
+void ServiceWorker::copyCmdLineArgs(int argc, const char** argv)
+{
+	Q_ASSERT(argc >= 1);
+	TEST_PTR_RETURN(argv);
+
+	Q_ASSERT(m_thisInstanceNo == 1);
+
+	m_cmdLineArgs.clear();
+
+	for(int i = 0; i < argc; i++)
+	{
+		TEST_PTR_CONTINUE(argv[i]);
+
+		m_cmdLineArgs.append(QString(argv[i]).trimmed());
+	}
+}
+
+bool ServiceWorker::initInstance1()
+{
+	if (m_thisInstanceNo > 1)
+	{
+		Q_ASSERT(false);
+		return true;
+	}
+
+	m_cmdLineParser.addSimpleNoWritableCmdLineArg(CmdLineArg::HELP, "Print this help.");
+	m_cmdLineParser.addSimpleNoWritableCmdLineArg(CmdLineArg::VERSION, "Display version of service.");
+	m_cmdLineParser.addSimpleNoWritableCmdLineArg(CmdLineArg::EXEC_AS_APP, "Run service as a regular application.");
+	m_cmdLineParser.addSimpleNoWritableCmdLineArg(CmdLineArg::INSTALL, "Install the service. Needs administrator rights.");
+	m_cmdLineParser.addSimpleNoWritableCmdLineArg(CmdLineArg::UNINSTALL, "Uninstall the service. Needs administrator rights.");
+	m_cmdLineParser.addSimpleNoWritableCmdLineArg(CmdLineArg::TERMINATE, "Terminate (stop) the service.");
+	m_cmdLineParser.addValueCmdLineArg(CmdLineArg::INSTANCE, "ServiceInstanceID", "Set service instance ID.", "InstanceID");
+	m_cmdLineParser.addSimpleNoWritableCmdLineArg(CmdLineArg::CLEAR, "Clear all service settings.");
+
+	initServiceSpecificCmdLineArgs();
+
+	m_cmdLineParser.readAndApplySettingsFromRegistry();
+
+	m_cmdLineParser.parseAndApplyCmdLineArgs();
+
+	m_cmdLineParser.writeSettingsToRegistry(m_logger);
+
+	return true;
 }
 
 void ServiceWorker::onThreadStarted()
 {
-	// loading common settings of services
+	DEBUG_LOG_MSG(m_logger, QString("%1::onThreadStarted(), instanceNo = %2, RunMode = %3").
+								arg(metaObject()->className()).
+								arg(m_thisInstanceNo).
+								arg(E::valueToString<E::ServiceRunMode>(m_serviceRunMode)));
 
-	m_equipmentID = getStrSetting(SoftwareSetting::EQUIPMENT_ID);
-
-	m_softwareInfo.setEquipmentID(m_equipmentID);		// !
-
-	m_cfgServiceIP1Str = getStrSetting(SoftwareSetting::CFG_SERVICE_IP1);
-
-	m_cfgServiceIP1.setAddressPortStr(m_cfgServiceIP1Str, PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
-
-	m_cfgServiceIP2Str = getStrSetting(SoftwareSetting::CFG_SERVICE_IP2);
-
-	m_cfgServiceIP2.setAddressPortStr(m_cfgServiceIP2Str, PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
-
-	//
-
-	loadSettings();
-
+	loadCommonServicesSettings();
+	loadServiceSpecificSettings();
 	initialize();
 
 	emit work();
@@ -268,6 +324,10 @@ void ServiceWorker::onThreadFinished()
 {
 	shutdown();
 	emit stopped();
+
+	DEBUG_LOG_MSG(m_logger, QString("%1::onThreadFinished(), instanceNo = %2").
+								arg(metaObject()->className()).
+								arg(m_thisInstanceNo));
 }
 
 // -------------------------------------------------------------------------------------
@@ -364,7 +424,7 @@ void Service::onBaseRequest(UdpRequest request)
 			break;
 
 		default:
-			assert(false);
+			Q_ASSERT(false);
 			ack.setErrorCode(RQERROR_UNKNOWN_REQUEST);
 			break;
 	}
@@ -378,13 +438,13 @@ void Service::startServiceWorkerThread()
 
 	if (m_serviceWorkerThread != nullptr)
 	{
-		assert(false);
+		Q_ASSERT(false);
 		return;
 	}
 
 	if (m_state != ServiceState::Stopped)
 	{
-		assert(false);
+		Q_ASSERT(false);
 		return;
 	}
 
@@ -496,256 +556,3 @@ void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 		serviceInfo.set_serviceruntime(0);
 	}
 }
-
-// -------------------------------------------------------------------------------------
-//
-// DaemonServiceStarter class implementation
-//
-// -------------------------------------------------------------------------------------
-
-DaemonServiceStarter::DaemonServiceStarter(QCoreApplication& app, ServiceWorker& serviceWorker, std::shared_ptr<CircularLogger> logger) :
-	QtService(serviceWorker.argc(),
-			  serviceWorker.argv(),
-			  &app,
-			  serviceWorker.serviceName(),
-			  logger),
-	m_app(app),
-	m_serviceWorker(serviceWorker),
-	m_logger(logger)
-{
-}
-
-DaemonServiceStarter::~DaemonServiceStarter()
-{
-	stopAndDeleteService();
-}
-
-int DaemonServiceStarter::exec()
-{
-	setServiceFlags(QtServiceBase::ServiceFlag::NeedsStopOnShutdown);
-
-	int result = QtService::exec();
-
-	return result;
-}
-
-void DaemonServiceStarter::start()
-{
-	LOG_CALL(m_logger);
-
-	m_service = new Service(m_serviceWorker, m_logger);
-
-	m_service->start();
-}
-
-void DaemonServiceStarter::stop()
-{
-	stopAndDeleteService();
-
-	LOG_CALL(m_logger);
-}
-
-void DaemonServiceStarter::stopAndDeleteService()
-{
-	if (m_service == nullptr)
-	{
-		return;
-	}
-
-	m_service->stop();
-
-	delete m_service;
-	m_service = nullptr;
-}
-
-// -------------------------------------------------------------------------------------
-//
-// ServiceStarter class implementation
-//
-// -------------------------------------------------------------------------------------
-
-ServiceStarter::ServiceStarter(QCoreApplication& app, ServiceWorker& serviceWorker, std::shared_ptr<CircularLogger> logger) :
-	m_app(app),
-	m_serviceWorker(serviceWorker),
-	m_logger(logger)
-{
-	app.setOrganizationName(Manufacturer::RADIY);
-	app.setApplicationName(serviceWorker.serviceName());
-}
-
-int ServiceStarter::exec()
-{
-	LOG_MSG(m_logger, QString("Run: %1").arg(m_serviceWorker.cmdLine()));
-
-	int result = privateRun();
-
-	LOG_MSG(m_logger, QString("Exit: %1, result = %2").arg(m_serviceWorker.appPath()).arg(result));
-
-	QThread::msleep(500);			// not delete! wait while logger flush buffers
-
-	return result;
-}
-
-int ServiceStarter::privateRun()
-{
-	QString swInfo = m_serviceWorker.getSoftwareInfoStr();
-
-	DEBUG_LOG_MSG(m_logger, Separator::LINE);
-	DEBUG_LOG_MSG(m_logger, swInfo);
-	DEBUG_LOG_MSG(m_logger, Separator::LINE);
-	DEBUG_LOG_MSG(m_logger, QString());
-
-	// 1. init CommanLineParser
-	// 2. process cmd line args
-	// 3. update and store service settings
-	//
-	bool continueRun = m_serviceWorker.initAndProcessCmdLineSettings();
-
-	if (continueRun == false)
-	{
-		return 0;
-	}
-
-	bool pauseAndExit = false;
-
-	bool startAsRegularApp = false;
-
-	processCmdLineArguments(pauseAndExit, startAsRegularApp);
-
-	if (pauseAndExit == true)
-	{
-		return 0;
-	}
-
-	int result = 0;
-
-	if (startAsRegularApp == true)
-	{
-		m_serviceWorker.setServiceRunMode(E::ServiceRunMode::ConsoleApp);
-
-		if (m_serviceWorker.getStrSetting(SoftwareSetting::EQUIPMENT_ID).isEmpty() == true)
-		{
-			DEBUG_LOG_MSG(m_logger, "");
-			DEBUG_LOG_ERR(m_logger, QString(tr("EquipmentID of service is NOT SET !!!")));
-			return 7;
-		}
-
-		result = runAsRegularApplication();
-	}
-	else
-	{
-		m_serviceWorker.setServiceRunMode(E::ServiceRunMode::Service);
-
-		DaemonServiceStarter daemonStarter(m_app, m_serviceWorker, m_logger);
-
-		result = daemonStarter.exec();
-	}
-
-	return result;
-}
-
-// returns 'true' for application exit
-//
-void ServiceStarter::processCmdLineArguments(bool& pauseAndExit, bool& startAsRegularApp)
-{
-	pauseAndExit = false;
-	startAsRegularApp = false;
-
-	const CommandLineParser& cmdLineParser = m_serviceWorker.cmdLineParser();
-
-	// print Help and exit if "-h" is set
-	//
-	if (cmdLineParser.optionIsSet("h") == true)
-	{
-		QString helpText = cmdLineParser.helpText();
-
-		helpText += QString(tr("Run program without options to start service.\n"));
-
-		std::cout << C_STR(helpText);
-
-		LOG_MSG(m_logger, QString(tr("Help printed.")))
-
-		pauseAndExit = true;
-		return;
-	}
-
-	// print Version and exit if "-v" is set
-	//
-	if (cmdLineParser.optionIsSet("v") == true)
-	{
-		QString swInfo = m_serviceWorker.getSoftwareInfoStr();
-
-		DEBUG_LOG_MSG(m_logger, swInfo);
-
-		pauseAndExit = true;
-		return;
-	}
-
-	// clear settings and exit if "-clr" is set
-	//
-	if (cmdLineParser.optionIsSet("clr") == true)
-	{
-		bool res = m_serviceWorker.clearSettings();
-
-		if (res == true)
-		{
-			DEBUG_LOG_MSG(m_logger, QString(tr("\nService settings has been cleaned.\n\n")));
-		}
-		else
-		{
-			DEBUG_LOG_ERR(m_logger, QString(tr("\nService settings cleaning error. Administrative rights required.\n\n")));
-		}
-
-		pauseAndExit = true;
-		return;
-	}
-
-	// run service as a regular application if "-e" is set
-	//
-	if (cmdLineParser.optionIsSet("e") == true)
-	{
-		startAsRegularApp = true;
-		return;
-	}
-}
-
-int ServiceStarter::runAsRegularApplication()
-{
-	KeyReaderThread keyReaderThread;
-
-	keyReaderThread.start();
-
-	// run service
-	//
-	Service* service = new Service(m_serviceWorker, m_logger);
-	service->start();
-
-	int result = m_app.exec();
-
-	service->stop();
-	delete service;
-
-	keyReaderThread.stop();
-
-	return result;
-}
-
-ServiceStarter::KeyReaderThread::KeyReaderThread()
-{
-	setTerminationEnabled(true);
-}
-
-void ServiceStarter::KeyReaderThread::run()
-{
-	char ch = 0;
-
-	std::cin >> ch;
-	QCoreApplication::exit(0);
-}
-
-void ServiceStarter::KeyReaderThread::stop()
-{
-	terminate();
-	wait();
-}
-

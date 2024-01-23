@@ -1,16 +1,16 @@
 #include "SchemaItemAfb.h"
-#include "SchemaView.h"
-#include "Schema.h"
-#include "PropertyNames.h"
 #include "DrawParam.h"
+#include "PropertyNames.h"
+#include "Schema.h"
+#include "SchemaView.h"
 
 namespace VFrame30
 {
 	SchemaItemAfb::SchemaItemAfb(void) :
 		SchemaItemAfb(SchemaUnit::Inch)
 	{
-		// This contructor can be called while serialization,
-		// Object will be created and serailizartion will initialize all the members
+		// This constructor can be called while serialization,
+		// Object will be created and serialization will initialize all the members.
 		//
 	}
 
@@ -32,10 +32,10 @@ namespace VFrame30
 
 		// Add tags for scripting
 		//
-		addTag("ufb");
+		addTag("afb");
 		addTag(fblElement.caption());
 
-		// Create input output signals in VFrame30::FblEtem
+		// Create input output signals in VFrame30::FblItem
 		//
 		updateAfbElement(fblElement, errorMsg);
 
@@ -44,16 +44,12 @@ namespace VFrame30
 		return;
 	}
 
-	SchemaItemAfb::~SchemaItemAfb(void)
-	{
-	}
-
 	void SchemaItemAfb::draw(CDrawParam* drawParam) const
 	{
 		QPainter* p = drawParam->painter();
 
-		double dpiX = drawParam->realDpiX();
-		double pinWidth = GetPinWidth(itemUnit(), dpiX);
+		//double dpiX = drawParam->realDpiX();
+		//double pinWidth = GetPinWidth(itemUnit(), dpiX);
 
 		FontParam smallFont = m_font;
 		smallFont.setDrawSize(m_font.drawSize() * 0.75);
@@ -64,27 +60,7 @@ namespace VFrame30
 
 		// Draw other
 		//
-		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
-
-		if (std::abs(r.left() - r.right()) < 0.000001)
-		{
-			r.setRight(r.left() + 0.000001);
-		}
-
-		if (std::abs(r.bottom() - r.top()) < 0.000001)
-		{
-			r.setBottom(r.top() + 0.000001);
-		}
-
-		if (inputsCount() > 0)
-		{
-			r.setLeft(r.left() + pinWidth);
-		}
-
-		if (outputsCount() > 0)
-		{
-			r.setRight(r.right() - pinWidth);
-		}
+		QRectF r = itemRectPinIndent(drawParam);
 
 		r.setLeft(r.left() + m_font.drawSize() / 4.0);
 		r.setRight(r.right() - m_font.drawSize() / 4.0);
@@ -111,8 +87,8 @@ namespace VFrame30
 		// Draw params
 		//
 		text.clear();
-		r.setTop(topDocPt() + m_font.drawSize() * 1.4);
-		r.setHeight(heightDocPt() - m_font.drawSize() * 1.4);
+		r.setTop(topDocPt() + m_font.drawSize() * 1.2);
+		r.setBottom(r.bottom() - m_font.drawSize() / 8.0);
 
 		const std::vector<Afb::AfbParam>& params = m_afbElement.params();
 
@@ -139,6 +115,16 @@ namespace VFrame30
 			{
 				text.append(QString("\n%1").arg(paramStr));
 			}
+		}
+
+		if (isPackedLogic() == true)
+		{
+			if (text.isEmpty() == false)
+			{
+				text.append("\n--");
+			}
+
+			text += "\n" + packedLogicId();
 		}
 
 		p->setPen(textColor());
@@ -169,49 +155,55 @@ namespace VFrame30
 
 		auto drawTextFunc =
 			[](QPainter* p, const QRectF rect, QString text, int flags)
-			{
-				p->save();
-				p->resetTransform();
+		{
+			p->save();
+			p->resetTransform();
 
-				QRectF textRect(rect.left() * p->device()->physicalDpiX(),
-								rect.top() * p->device()->physicalDpiY(),
-								rect.width() * p->device()->physicalDpiX(),
-								rect.height() * p->device()->physicalDpiY());
+			QRectF textRect(rect.left() * p->device()->physicalDpiX(),
+							rect.top() * p->device()->physicalDpiY(),
+							rect.width() * p->device()->physicalDpiX(),
+							rect.height() * p->device()->physicalDpiY());
 
-				p->drawText(textRect, flags, text);
-				p->restore();
-			};
+			p->drawText(textRect, flags, text);
+			p->restore();
+		};
 
 		auto pinTypeText =
 			[](E::SignalType type, E::DataFormat dataFormat) -> QString
-			{
-				QString result = "UNK";
+		{
+			QString result = "UNK";
 
-				switch (type)
+			switch (type)
+			{
+			case E::SignalType::Analog:
+				switch (dataFormat)
 				{
-				case  E::SignalType::Analog:
-					switch(dataFormat)
-					{
-					case E::DataFormat::UnsignedInt:	result = "UINT";		break;
-					case E::DataFormat::SignedInt:		result = "SINT";		break;
-					case E::DataFormat::Float:			result = "FLOAT";		break;
-					default:
-						assert(false);
-					}
+				case E::DataFormat::UnsignedInt:
+					result = "UINT";
 					break;
-				case  E::SignalType::Discrete:
-					result = "DISCR";
+				case E::DataFormat::SignedInt:
+					result = "SINT";
 					break;
-				case  E::SignalType::Bus:
-					result = "BUS";
+				case E::DataFormat::Float:
+					result = "FLOAT";
 					break;
 				default:
 					assert(false);
-					break;
 				}
+				break;
+			case E::SignalType::Discrete:
+				result = "DISCR";
+				break;
+			case E::SignalType::Bus:
+				result = "BUS";
+				break;
+			default:
+				assert(false);
+				break;
+			}
 
-				return result;
-			};
+			return result;
+		};
 
 		QPainter* p = painter;
 
@@ -222,7 +214,7 @@ namespace VFrame30
 		p->scale(p->device()->physicalDpiX(), p->device()->physicalDpiY());
 
 		const double intend = 1.0 / 4.0;
-		const double pinWdith = 2.0 / 4.0;
+		const double pinWidth = 2.0 / 4.0;
 		const double pinHeight = static_cast<double>(p->fontInfo().pixelSize()) / p->device()->physicalDpiY() * 1.25;
 		const double typeWidth = 2.0 / 4.0;
 
@@ -237,9 +229,9 @@ namespace VFrame30
 		pen.setWidth(0);
 		p->setPen(pen);
 
-		QRectF itemRect(rect.left() + intend + pinWdith,
+		QRectF itemRect(rect.left() + intend + pinWidth,
 						rect.top() + intend,
-						rect.width() - (intend + pinWdith) * 2.0,
+						rect.width() - (intend + pinWidth) * 2.0,
 						pinHeight * qMax(inputsCount(), outputsCount()));
 
 		if (itemRect.width() < 1.5)
@@ -258,9 +250,9 @@ namespace VFrame30
 		// Draw caption
 		//
 		QRectF captionRect(itemRect.left(),
-							0,
-							itemRect.width(),
-							intend);
+						   0,
+						   itemRect.width(),
+						   intend);
 
 		drawTextFunc(p, captionRect, afb.caption(), Qt::AlignCenter | Qt::TextDontClip);
 
@@ -280,27 +272,42 @@ namespace VFrame30
 			//
 			QRectF pinTextRect(intend,
 							   pinY - pinHeight,
-							   pinWdith,
+							   pinWidth,
 							   pinHeight);
 
 			drawTextFunc(p, pinTextRect, input.caption() + " ", Qt::AlignRight | Qt::AlignBaseline | Qt::TextDontClip);
 
 			// Draw pin type
 			//
-			const std::vector<Afb::AfbSignal>& afbInputs = afb.inputSignals();
-			for (const Afb::AfbSignal& afbPin : afbInputs)
 			{
-				if (afbPin.caption() == input.caption())
-				{
-					QRectF pinTypeRect(itemRect.left(),
-									   pinY - pinHeight / 2.0,
-									   typeWidth,
-									   pinHeight);
+				QRectF pinTypeRect(itemRect.left(),
+								   pinY - pinHeight / 2.0,
+								   typeWidth,
+								   pinHeight);
 
-					QString str = pinTypeText(afbPin.type(), afbPin.dataFormat());
+				bool found = false;
+				const std::vector<Afb::AfbSignal>& afbInputs = afb.inputSignals();
+				for (const Afb::AfbSignal& afbPin : afbInputs)
+				{
+					if (afbPin.caption() == input.caption())
+					{
+						QString str = pinTypeText(afbPin.type(), afbPin.dataFormat());
+
+						drawTextFunc(p, pinTypeRect, str, Qt::AlignCenter | Qt::TextDontClip);
+
+						found = true;
+						break;
+					}
+				}
+
+				if (found == false)
+				{
+					// Draw type info from the pin.
+					// This is the fix for packed logic, these items do not have AfbSignals, just pins.
+					//
+					QString str = E::valueToString<E::SignalType>(input.signalType());
 
 					drawTextFunc(p, pinTypeRect, str, Qt::AlignCenter | Qt::TextDontClip);
-					break;
 				}
 			}
 
@@ -324,13 +331,13 @@ namespace VFrame30
 			// Drawing pin
 			//
 			p->drawLine(QPointF(itemRect.right(), pinY),
-						QPointF(itemRect.right() + pinWdith, pinY));
+						QPointF(itemRect.right() + pinWidth, pinY));
 
 			// Draw pin text
 			//
 			QRectF pinTextRect(itemRect.right(),
 							   pinY - pinHeight,
-							   pinWdith,
+							   pinWidth,
 							   pinHeight);
 
 			drawTextFunc(p, pinTextRect, " " + out.caption(), Qt::AlignLeft | Qt::AlignBaseline | Qt::TextDontClip);
@@ -370,8 +377,11 @@ namespace VFrame30
 
 		std::vector<Afb::AfbParam> sortedParams = params();
 		sortedParams.erase(
-					std::remove_if(sortedParams.begin(), sortedParams.end(), [](const Afb::AfbParam& p){	return p.user() == false;	})
-						, sortedParams.end());
+			std::remove_if(sortedParams.begin(), sortedParams.end(), [](const Afb::AfbParam& p)
+						   {
+							   return p.user() == false;
+						   }),
+			sortedParams.end());
 
 		if (sortedParams.empty() == false)
 		{
@@ -381,15 +391,14 @@ namespace VFrame30
 			paramY += pinHeight;
 		}
 
-		std::sort(sortedParams.begin(), sortedParams.end(),
-				[](const Afb::AfbParam& p1, const Afb::AfbParam& p2)
-				{
-					return p1.caption() < p2.caption();
-				});
+		std::sort(sortedParams.begin(), sortedParams.end(), [](const Afb::AfbParam& p1, const Afb::AfbParam& p2)
+				  {
+					  return p1.caption() < p2.caption();
+				  });
 
 		for (const Afb::AfbParam& param : sortedParams)
 		{
-			if (param.user() == false)		// Actually it was already filtered in erase/remove_if
+			if (param.user() == false) // Actually it was already filtered in erase/remove_if
 			{
 				continue;
 			}
@@ -406,21 +415,21 @@ namespace VFrame30
 				if (param.units().isEmpty() == false)
 				{
 					str = QString("%1, %2: %3 (%4 - %5), %6")
-						  .arg(param.caption())
-						  .arg(param.units())
-						  .arg(paramValue)
-						  .arg(param.lowLimit().toString())
-						  .arg(param.highLimit().toString())
-						  .arg(typeStr);
+							  .arg(param.caption())
+							  .arg(param.units())
+							  .arg(paramValue)
+							  .arg(param.lowLimit().toString())
+							  .arg(param.highLimit().toString())
+							  .arg(typeStr);
 				}
 				else
 				{
 					str = QString("%1: %2 (%3 - %4), %5")
-						  .arg(param.caption())
-						  .arg(paramValue)
-						  .arg(param.lowLimit().toString())
-						  .arg(param.highLimit().toString())
-						  .arg(typeStr);
+							  .arg(param.caption())
+							  .arg(paramValue)
+							  .arg(param.lowLimit().toString())
+							  .arg(param.highLimit().toString())
+							  .arg(typeStr);
 				}
 			}
 			else
@@ -428,8 +437,8 @@ namespace VFrame30
 				assert(param.isDiscrete() == true);
 
 				str = QString("%1: %2")
-					  .arg(param.caption())
-					  .arg(paramValue);
+						  .arg(param.caption())
+						  .arg(paramValue);
 			}
 
 			drawTextFunc(p, paramRect, str, Qt::AlignLeft | Qt::AlignVCenter | Qt::TextDontClip);
@@ -454,13 +463,18 @@ namespace VFrame30
 			assert(message->has_schemaitem());
 			return false;
 		}
-	
+
 		// --
 		//
 		Proto::SchemaItemAfb* vifble = message->mutable_schemaitem()->mutable_afb();
 
 		vifble->set_precision(m_precision);
 		m_afbElement.saveToXml(vifble->mutable_afbelement());
+
+		for (const QString& pls : m_packedLogicInputSignalIds)
+		{
+			vifble->add_packedlogicinputs(pls.toStdString());
+		}
 
 		return true;
 	}
@@ -488,9 +502,9 @@ namespace VFrame30
 			assert(message.schemaitem().has_afb());
 			return false;
 		}
-		
+
 		const Proto::SchemaItemAfb& vifble = message.schemaitem().afb();
-		
+
 		m_precision = vifble.precision();
 
 		if (vifble.has_deprecated_afbelement() == true)
@@ -518,6 +532,12 @@ namespace VFrame30
 			}
 		}
 
+		m_packedLogicInputSignalIds.clear();
+		for (const std::string& pls : vifble.packedlogicinputs())
+		{
+			m_packedLogicInputSignalIds.push_back(QString::fromStdString(pls));
+		}
+
 		// Add afb properties to class meta object
 		//
 		addSpecificParamProperties();
@@ -529,7 +549,7 @@ namespace VFrame30
 	{
 		QImage image(QSize(static_cast<int>(3 * dpiX * devicePixelRatio),
 						   static_cast<int>(3 * dpiY * devicePixelRatio)),
-						   QImage::Format_RGB32);		// size 3x3 inches
+					 QImage::Format_RGB32); // size 3x3 inches
 
 		image.fill(Qt::white);
 
@@ -549,9 +569,9 @@ namespace VFrame30
 		image.save(&buffer, "PNG", 100);
 
 		QString html = QString("<img src='data:image/png;base64, %0' height=\"%2\" width=\"%3\"/>")
-					   .arg(QString(data.toBase64()))
-					   .arg(image.size().height() / devicePixelRatio)
-					   .arg(image.size().width() / devicePixelRatio);
+						   .arg(QString(data.toBase64()))
+						   .arg(image.size().height() / devicePixelRatio)
+						   .arg(image.size().width() / devicePixelRatio);
 
 		return html;
 	}
@@ -560,8 +580,8 @@ namespace VFrame30
 	QString SchemaItemAfb::buildName() const
 	{
 		return QString("%1 %2")
-				.arg(afbStrID())
-				.arg(label());
+			.arg(afbStrID())
+			.arg(label());
 	}
 
 	bool SchemaItemAfb::setAfbParam(const QString& name, QVariant value, std::shared_ptr<Schema> schema, QString* errorMsg)
@@ -585,9 +605,9 @@ namespace VFrame30
 		Afb::AfbParamValue newValue = value.value<Afb::AfbParamValue>();
 
 		auto found = std::find_if(m_afbElement.params().begin(), m_afbElement.params().end(), [&name](const Afb::AfbParam& p)
-			{
-				return p.caption() == name;
-			});
+								  {
+									  return p.caption() == name;
+								  });
 
 		if (found == m_afbElement.params().end())
 		{
@@ -597,10 +617,7 @@ namespace VFrame30
 
 		if (found->afbParamValue() != newValue)
 		{
-			qDebug() << tr("Param %1 was changed from %2 to %3").
-						arg(name).
-						arg(found->afbParamValue().toString()).
-						arg(newValue.toString());
+			qDebug() << tr("Param %1 was changed from %2 to %3").arg(name).arg(found->afbParamValue().toString()).arg(newValue.toString());
 
 			found->setAfbParamValue(newValue);
 
@@ -615,7 +632,6 @@ namespace VFrame30
 					return false;
 				}
 			}
-
 		}
 
 		return true;
@@ -629,18 +645,18 @@ namespace VFrame30
 			return false;
 		}
 
-//		if (value.canConvert<Afb::AfbParamValue>() == false)
-//		{
-//			Q_ASSERT(value.canConvert<Afb::AfbParamValue>());
-//			return false;
-//		}
+		//		if (value.canConvert<Afb::AfbParamValue>() == false)
+		//		{
+		//			Q_ASSERT(value.canConvert<Afb::AfbParamValue>());
+		//			return false;
+		//		}
 
-//		Afb::AfbParamValue newValue = value.value<Afb::AfbParamValue>();
+		//		Afb::AfbParamValue newValue = value.value<Afb::AfbParamValue>();
 
 		auto found = std::find_if(m_afbElement.params().begin(), m_afbElement.params().end(), [&opName](const Afb::AfbParam& p)
-			{
-				return p.opName() == opName;
-			});
+								  {
+									  return p.opName() == opName;
+								  });
 
 		if (found == m_afbElement.params().end())
 		{
@@ -648,10 +664,10 @@ namespace VFrame30
 			return false;
 		}
 
-//		qDebug() << tr("Param %1 was changed from %2 to %3").
-//					arg(opName).
-//					arg(found->value().toString()).
-//					arg(value.toString());
+		//		qDebug() << tr("Param %1 was changed from %2 to %3").
+		//					arg(opName).
+		//					arg(found->value().toString()).
+		//					arg(value.toString());
 
 		found->setAfbParamValue(value);
 
@@ -741,6 +757,8 @@ namespace VFrame30
 			return false;
 		}
 
+		QString packedLogicId = m_afbElement.packedLogicId();
+
 		// Update params, m_afbElement contains old parameters
 		//
 		std::vector<Afb::AfbParam> newParams = sourceAfb.params();
@@ -753,11 +771,10 @@ namespace VFrame30
 				continue;
 			}
 
-			auto foundExistingParam = std::find_if(currentParams.begin(), currentParams.end(),
-					[&p](const Afb::AfbParam& mp)
-					{
-						return p.caption() == mp.caption();		// Don't use opIndex, it can be same (-1)
-					});
+			auto foundExistingParam = std::find_if(currentParams.begin(), currentParams.end(), [&p](const Afb::AfbParam& mp)
+												   {
+													   return p.caption() == mp.caption(); // Don't use opIndex, it can be same (-1)
+												   });
 
 			if (foundExistingParam != currentParams.end())
 			{
@@ -768,7 +785,7 @@ namespace VFrame30
 				if (p.afbParamValue().value().metaType() == currentParam.afbParamValue().value().metaType())
 				{
 					p.setAfbParamValue(currentParam.afbParamValue());
-					//qDebug() << "Param: " << currentParam.caption() << ", value: " << p.afbParamValue().toString();
+					// qDebug() << "Param: " << currentParam.caption() << ", value: " << p.afbParamValue().toString();
 				}
 			}
 		}
@@ -777,8 +794,15 @@ namespace VFrame30
 		//
 		m_afbElement = sourceAfb;
 
-		std::swap(params(), newParams);		// The prev assignemnt (m_afbElement = sourceAfb) just reseted all paramas
-											// Set them to the actual values
+		std::swap(params(), newParams); // The prev assignment (m_afbElement = sourceAfb) just reset all params
+										// Set them to the actual values
+
+		// Restore packedLogicId, as it is stored in m_afbElement.
+		//
+		if (packedLogicId.isEmpty() == false)
+		{
+			setPackedLogicId(packedLogicId);
+		}
 
 		// Update in/out pins
 		//
@@ -797,7 +821,7 @@ namespace VFrame30
 			addOutput(s);
 		}
 
-		// Run afterCreationScript, lets assume we create allmost new itesm, as we deleted all inputs/outs and updated params
+		// Run afterCreationScript, lets assume we create almost new items, as we deleted all inputs/outs and updated params
 		//
 		QString afterCreationScript = m_afbElement.afterCreationScript();
 
@@ -831,19 +855,24 @@ namespace VFrame30
 		// 1 string for caption
 		// N param count
 		//
-		int textLineCount = 1;
+		const double smallFontSize = m_font.drawSize() * 0.85;
+
+		double textLineCount = 1.2 * m_font.drawSize();       // First line for caption.
 		for (const Afb::AfbParam& p : m_afbElement.params())
 		{
 			if (p.visible() == true)
 			{
-				textLineCount ++;
+				textLineCount += smallFontSize;               // All params are small font.
 			}
 		}
 
-		double pinVertGap =	VFrame30::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
+		textLineCount += isPackedLogic() ? smallFontSize : 0; // +1 line for packed logic id.
+		textLineCount += m_font.drawSize() / 8.0;             // Bottom margin
+
+		double pinVertGap = VFrame30::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
 
 		double minPinHeight = VFrame30::snapToGrid(pinVertGap * static_cast<double>(pinCount), gridSize);
-		double minTextHeight = VFrame30::snapToGrid(m_font.drawSize() * static_cast<double>(textLineCount), gridSize);
+		double minTextHeight = VFrame30::snapToGrid(textLineCount, gridSize);
 
 		if (minTextHeight < minPinHeight)
 		{
@@ -895,6 +924,20 @@ namespace VFrame30
 			}
 			prop->setPrecision(precision());
 		}
+
+		// Add or remove special property for packed logic.
+		//
+		if (m_afbElement.isPackedLogic() == true)
+		{
+			ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::packedLogicId, PropertyNames::parametersCategory, true, SchemaItemAfb::packedLogicId, SchemaItemAfb::setPackedLogicId)
+				->setEssential(true);
+		}
+		else
+		{
+			removeProperty(PropertyNames::packedLogicId);
+		}
+
+		return;
 	}
 
 	bool SchemaItemAfb::executeScript(const QString& script, const Afb::AfbElement& afb, QString* errorMessage)
@@ -949,7 +992,6 @@ namespace VFrame30
 		}
 
 		return true;
-
 	}
 
 	double SchemaItemAfb::getParamDoubleValue(const QString& name)
@@ -978,9 +1020,9 @@ namespace VFrame30
 		}
 
 		auto found = std::find_if(m_afbElement.params().begin(), m_afbElement.params().end(), [&opName](const Afb::AfbParam& p)
-			{
-				return p.opName() == opName;
-			});
+								  {
+									  return p.opName() == opName;
+								  });
 
 		if (found == m_afbElement.params().end())
 		{
@@ -1020,9 +1062,9 @@ namespace VFrame30
 		}
 
 		auto found = std::find_if(m_afbElement.params().begin(), m_afbElement.params().end(), [&opName](const Afb::AfbParam& p)
-			{
-				return p.opName() == opName;
-			});
+								  {
+									  return p.opName() == opName;
+								  });
 
 		if (found == m_afbElement.params().end())
 		{
@@ -1062,9 +1104,9 @@ namespace VFrame30
 		}
 
 		auto found = std::find_if(m_afbElement.params().begin(), m_afbElement.params().end(), [&opName](const Afb::AfbParam& p)
-			{
-				return p.opName() == opName;
-			});
+								  {
+									  return p.opName() == opName;
+								  });
 
 		if (found == m_afbElement.params().end())
 		{
@@ -1127,68 +1169,104 @@ namespace VFrame30
 		bool afbParamValueIsString = param.afbParamValue().reference().isEmpty() == false;
 
 		QVariant a = afbParamValueIsString ?
-						param.afbParamValue().reference() :
-						param.afbParamValue().value();
+						 param.afbParamValue().reference() :
+						 param.afbParamValue().value();
 
 		switch (param.type())
 		{
-			case E::SignalType::Analog:
+		case E::SignalType::Analog:
+			{
+				char paramFormat = precision() > 5 ? 'g' : 'f';
+
+				switch (param.dataFormat())
 				{
-					char paramFormat = precision() > 5 ? 'g' : 'f';
-
-					switch (param.dataFormat())
-					{
-						case E::DataFormat::UnsignedInt:
-							paramValue = a.toString();
-							break;
-
-						case E::DataFormat::SignedInt:
-							paramValue = a.toString();
-							break;
-
-						case E::DataFormat::Float:
-							if (afbParamValueIsString == true)
-							{
-								paramValue = a.toString();
-							}
-							else
-							{
-								paramValue = param.afbParamValue().toString(paramFormat, precision());
-
-								if (paramValue.contains(QChar('.')) == true &&
-									paramValue.contains(QChar('e')) == false &&
-									paramValue.size() > 2)
-								{
-									while(paramValue.endsWith('0'))
-									{
-										paramValue.chop(1);
-									}
-
-									if (paramValue.endsWith('.'))
-									{
-										paramValue.chop(1);
-									}
-								}
-							}
-							break;
-
-						default:
-							assert(false);
-					}
-				}
-				break;
-
-			case E::SignalType::Discrete:
-				{
+				case E::DataFormat::UnsignedInt:
 					paramValue = a.toString();
+					break;
+
+				case E::DataFormat::SignedInt:
+					paramValue = a.toString();
+					break;
+
+				case E::DataFormat::Float:
+					if (afbParamValueIsString == true)
+					{
+						paramValue = a.toString();
+					}
+					else
+					{
+						paramValue = param.afbParamValue().toString(paramFormat, precision());
+
+						if (paramValue.contains(QChar('.')) == true &&
+							paramValue.contains(QChar('e')) == false &&
+							paramValue.size() > 2)
+						{
+							while (paramValue.endsWith('0'))
+							{
+								paramValue.chop(1);
+							}
+
+							if (paramValue.endsWith('.'))
+							{
+								paramValue.chop(1);
+							}
+						}
+					}
+					break;
+
+				default:
+					assert(false);
 				}
-				break;
-			default:
-				assert(false);
+			}
+			break;
+
+		case E::SignalType::Discrete:
+			{
+				paramValue = a.toString();
+			}
+			break;
+		default:
+			assert(false);
 		}
 		return paramValue;
 	}
 
+	// IMatsSchemaItemAssociations implementation.
+	//
+	QStringList SchemaItemAfb::associatedAppSignalIds() const
+	{
+		QStringList result; 
+
+		if (isPackedLogic() == true)
+		{
+			result += packedLogicInputSignalIds();
+		}
+
+		return result;
+	}
+
+	QStringList SchemaItemAfb::associatedImpactAppSignalIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemAfb::associatedConnectionIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemAfb::associatedLoopbackIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemAfb::associatedSchemaItemLabels() const
+	{
+		return {};
+	}
+
+	// Properties
+	//	
 	const QString& SchemaItemAfb::afbStrID() const
 	{
 		return m_afbElement.strID();
@@ -1252,5 +1330,35 @@ namespace VFrame30
 
 		return;
 	}
-}
 
+	bool SchemaItemAfb::isPackedLogic() const
+	{
+		return m_afbElement.isPackedLogic();
+	}
+
+	const QString& SchemaItemAfb::packedLogicId() const
+	{
+		return m_afbElement.packedLogicId();
+	}
+
+	void SchemaItemAfb::setPackedLogicId(const QString& value)
+	{
+		m_afbElement.setPackedLogicId(value);
+	}
+
+	Afb::AfbElement::PackedLogicData SchemaItemAfb::packedLogic() const
+	{
+		return m_afbElement.packedLogic();
+	}
+
+	QStringList SchemaItemAfb::packedLogicInputSignalIds() const
+	{
+		return m_packedLogicInputSignalIds;
+	}
+
+	void SchemaItemAfb::setPackedLogicInputSignalIds(const QStringList& value)
+	{
+		m_packedLogicInputSignalIds = value;
+	}
+
+} // namespace VFrame30

@@ -1,34 +1,38 @@
 #include "VFrame30Library.h"
-#include "Schema.h"
+
+#include "../CommonLib/Types.h"
+
 #include "DiagSchema.h"
-#include "LogicSchema.h"
-#include "UfbSchema.h"
-#include "MonitorSchema.h"
-#include "TuningSchema.h"
-#include "WiringSchema.h"
-#include "SchemaLayer.h"
-#include "SchemaItemLine.h"
-#include "SchemaItemRect.h"
-#include "SchemaItemFrame.h"
-#include "SchemaItemPath.h"
-#include "SchemaItemImage.h"
 #include "FblItemLine.h"
 #include "FblItemRect.h"
-#include "SchemaItemLink.h"
+#include "LogicSchema.h"
+#include "MonitorSchema.h"
+#include "Schema.h"
 #include "SchemaItemAfb.h"
-#include "SchemaItemSignal.h"
-#include "SchemaItemConst.h"
-#include "SchemaItemConnection.h"
-#include "SchemaItemUfb.h"
-#include "SchemaItemTerminator.h"
-#include "SchemaItemPushButton.h"
-#include "SchemaItemLineEdit.h"
-#include "SchemaItemIndicator.h"
-#include "SchemaItemValue.h"
-#include "SchemaItemImageValue.h"
 #include "SchemaItemBus.h"
+#include "SchemaItemConnection.h"
+#include "SchemaItemConst.h"
+#include "SchemaItemFrame.h"
+#include "SchemaItemImage.h"
+#include "SchemaItemImageValue.h"
+#include "SchemaItemIndicator.h"
+#include "SchemaItemLine.h"
+#include "SchemaItemLineEdit.h"
+#include "SchemaItemLink.h"
 #include "SchemaItemLoopback.h"
-#include "../CommonLib/Types.h"
+#include "SchemaItemPath.h"
+#include "SchemaItemPushButton.h"
+#include "SchemaItemRect.h"
+#include "SchemaItemSignal.h"
+#include "SchemaItemSlider.h"
+#include "SchemaItemTerminator.h"
+#include "SchemaItemUfb.h"
+#include "SchemaItemValue.h"
+#include "SchemaLayer.h"
+#include "TuningSchema.h"
+#include "UfbSchema.h"
+#include "WiringSchema.h"
+
 
 namespace VFrame30
 {
@@ -51,34 +55,35 @@ namespace VFrame30
 
 		// Registering SchemaItems
 		//
-		SchemaItemFactory.Register<SchemaItemLine>();
-		SchemaItemFactory.Register<SchemaItemRect>();
-		SchemaItemFactory.Register<SchemaItemPath>();
+		//SchemaItemFactory.Register<SchemaItemFrame>();
 		SchemaItemFactory.Register<FblItemLine>();
 		SchemaItemFactory.Register<FblItemRect>();
-		//SchemaItemFactory.Register<SchemaItemFrame>();
-		SchemaItemFactory.Register<SchemaItemLink>();
-		SchemaItemFactory.Register<SchemaItemImage>();
 		SchemaItemFactory.Register<SchemaItemAfb>();
-		SchemaItemFactory.Register<SchemaItemInput>();
-		SchemaItemFactory.Register<SchemaItemOutput>();
-		SchemaItemFactory.Register<SchemaItemInOut>();
-		SchemaItemFactory.Register<SchemaItemConst>();
-		SchemaItemFactory.Register<SchemaItemTransmitter>();
-		SchemaItemFactory.Register<SchemaItemReceiver>();
-		SchemaItemFactory.Register<SchemaItemUfb>();
-		SchemaItemFactory.Register<SchemaItemTerminator>();
-		SchemaItemFactory.Register<SchemaItemPushButton>();
-		SchemaItemFactory.Register<SchemaItemLineEdit>();
-		SchemaItemFactory.Register<SchemaItemIndicator>();
-		SchemaItemFactory.Register<SchemaItemValue>();
-		SchemaItemFactory.Register<SchemaItemImageValue>();
 		SchemaItemFactory.Register<SchemaItemBus>();
 		SchemaItemFactory.Register<SchemaItemBusComposer>();
 		SchemaItemFactory.Register<SchemaItemBusExtractor>();
+		SchemaItemFactory.Register<SchemaItemConst>();
+		SchemaItemFactory.Register<SchemaItemImage>();
+		SchemaItemFactory.Register<SchemaItemImageValue>();
+		SchemaItemFactory.Register<SchemaItemIndicator>();
+		SchemaItemFactory.Register<SchemaItemInOut>();
+		SchemaItemFactory.Register<SchemaItemInput>();
+		SchemaItemFactory.Register<SchemaItemLine>();
+		SchemaItemFactory.Register<SchemaItemLineEdit>();
+		SchemaItemFactory.Register<SchemaItemLink>();
 		SchemaItemFactory.Register<SchemaItemLoopback>();
 		SchemaItemFactory.Register<SchemaItemLoopbackSource>();
 		SchemaItemFactory.Register<SchemaItemLoopbackTarget>();
+		SchemaItemFactory.Register<SchemaItemOutput>();
+		SchemaItemFactory.Register<SchemaItemPath>();
+		SchemaItemFactory.Register<SchemaItemPushButton>();
+		SchemaItemFactory.Register<SchemaItemReceiver>();
+		SchemaItemFactory.Register<SchemaItemRect>();
+		SchemaItemFactory.Register<SchemaItemSlider>();
+		SchemaItemFactory.Register<SchemaItemTerminator>();
+		SchemaItemFactory.Register<SchemaItemTransmitter>();
+		SchemaItemFactory.Register<SchemaItemUfb>();
+		SchemaItemFactory.Register<SchemaItemValue>();
 
 		QMetaType::registerConverter<int, VFrame30::SchemaItemConst::ConstType>(IntToEnum<VFrame30::SchemaItemConst::ConstType>);
 

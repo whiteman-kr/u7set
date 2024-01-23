@@ -1,181 +1,37 @@
 #pragma once
 
-#include <QDateTime>
 #include <memory>
 #include <set>
 
 #include "../CommonLib/Hash.h"
 #include "../CommonLib/Times.h"
 #include "../CommonLib/Types.h"
-#include "../Proto/serialization.pb.h"
-#include "AppSignal.h"
-#include "AppSignalStateFlags.h"
+#include "TuningValue.h"
+
+class AppSignal;
+
+namespace Proto
+{
+	class AppSignal;
+}
 
 struct AppSignalParamMimeType
 {
 	static const char* value;	// = "application/x-appsignalparam";	Data in format ::Proto::AppSiagnalParamSet
 };
 
-/*! \class AppSignalState
-	\ingroup groupParamsStates
-	\brief Describes signal state in Monitor application
-
-	AppSignalState class describes signal state in Monitor application.	This state is received from ApplicationDataService.
-	\ref VFrame30::ScriptAppSignalController "ScriptAppSignalController" class accesed by global <b>signals</b> object is used for requesting signal states.
-
-	\warning
-	After requesting signal state it is highly recommended to check function return values, because errors can occur. For example,
-	connection to ApplicationDataService can be down, or signal with specified identifier could not exist.
-
-	<b>Example:</b>
-
-	\code
-	// Request signal state by identifier "#APPSIGNALID"
-	//
-	var state = signals.signalState("#APPSIGNALID");
-
-	if (state == undefined)
-	{
-		// No state was received for this signal
-		//
-		return;
-	}
-
-	// Check signal validity
-	//
-	if (state.valid == true)
-	{
-		// Put signal value to a schema item
-		//
-		schemaItemValue.Text = signalState.value;
-	}
-	\endcode
-*/
-class AppSignalState
-{
-	Q_GADGET
-
-	/// \brief Contains a unique 64-bit hash of a signal identifier
-	Q_PROPERTY(Hash hash READ hash)
-	Q_PROPERTY(Hash Hash READ hash)
-
-	/*! \brief Contains current signal value
-
-		Contains current signal value. For discrete signals <b>"False"</b> is equal to <b>0</b>, <b>"True"</b> is equal to <b>1</b>.
-
-		\warning Be careful when comparing values. Remember that <b>double</b> can't be compared directly,
-		because doubles and floats cannot express every numerical value. They are using approximations to represent the value.
-		It is recommended to make comparsions as follows, especially analog values:
-
-		\code
-		var a = state.value;
-		var b = 1.5;
-
-		var threshold = 0.0000001;
-
-		if (Math.abs(a - b) <= threshold)
-		{
-		...
-		}
-		\endcode
-	*/
-	Q_PROPERTY(double value READ value)
-	Q_PROPERTY(double Value READ value)
-
-	/// \brief Contains signal validity flag
-	Q_PROPERTY(bool valid READ isValid)
-	Q_PROPERTY(bool Valid READ isValid)
-
-	/// \brief Signal value is received from Application Data Service
-	Q_PROPERTY(bool stateAvailable READ isStateAvailable)
-	Q_PROPERTY(bool StateAvailable READ isStateAvailable)
-
-	/// \brief Signal value simulated flag (see AFB simlock)
-	Q_PROPERTY(bool simulated READ isSimulated)
-	Q_PROPERTY(bool Simulated READ isSimulated)
-
-	/// \brief Signal value blocked flag (see AFB simlock)
-	Q_PROPERTY(bool blocked READ isBlocked)
-	Q_PROPERTY(bool Blocked READ isBlocked)
-
-	/// \brief Signal value mismatch flag (see AFB mismatch)
-	Q_PROPERTY(bool mismatch READ isMismatch)
-	Q_PROPERTY(bool Mismatch READ isMismatch)
-
-	/// \brief Signal value is above high limit
-	Q_PROPERTY(bool aboveHighLimit READ isAboveHighLimit)
-	Q_PROPERTY(bool AboveHighLimit READ isAboveHighLimit)
-
-	/// \brief Signal value is below low limit
-	Q_PROPERTY(bool belowLowLimit READ isBelowLowLimit)
-	Q_PROPERTY(bool BelowLowLimit READ isBelowLowLimit)
-
-	/// \brief Signal value is out of limits
-	Q_PROPERTY(bool outOfLimits READ isOutOfLimits)
-	Q_PROPERTY(bool OutOfLimits READ isOutOfLimits)
-
-	/// \brief Tunable signal value is equal to tuningDefaultValue
-	Q_PROPERTY(bool tuningDefault READ isTuningDefault)
-	Q_PROPERTY(bool TuningDefault READ isTuningDefault)
-
-public:
-	AppSignalState() = default;
-	AppSignalState(const AppSignalState&) = default;
-	AppSignalState(AppSignalState&&) = default;
-	AppSignalState(const Proto::AppSignalState& protoState);
-	~AppSignalState() = default;
-
-	AppSignalState(Hash hash, Times times, double value, AppSignalStateFlags flags);
-
-	AppSignalState& operator= (const AppSignalState& state) = default;
-
-	[[nodiscard]] Hash hash() const;
-	[[nodiscard]] const Times& time() const;
-	[[nodiscard]] const TimeStamp& time(E::TimeType timeType) const;
-	[[nodiscard]] double value() const noexcept;
-
-	[[nodiscard]] bool isValid() const noexcept;
-	[[nodiscard]] bool isStateAvailable() const;
-	[[nodiscard]] bool isSimulated() const;
-	[[nodiscard]] bool isBlocked() const;
-	[[nodiscard]] bool isMismatch() const;
-	[[nodiscard]] bool isAboveHighLimit() const;
-	[[nodiscard]] bool isBelowLowLimit() const;
-	[[nodiscard]] bool isOutOfLimits() const;		//  isAboveHighLimit() || isBelowLowLimit()
-	[[nodiscard]] bool isTuningDefault() const;
-
-	void save(Proto::AppSignalState* protoState);
-	Hash load(const Proto::AppSignalState& protoState);
-
-	[[nodiscard]] bool hasSameValue(const AppSignalState& b) const;
-
-	[[nodiscard]] static QString toString(double value, E::ValueViewType viewType, E::AnalogFormat analogFormat, E::AnalogAppSignalFormat analogAppSignalFormat, int precision);
-
-public:
-	Hash m_hash = {0};
-	Times m_time{};
-	double m_value{};
-	AppSignalStateFlags m_flags{};
-
-	static const quint32 VALID = 1;
-	static const quint32 INVALID = 0;
-};
-
-
-Q_DECLARE_METATYPE(AppSignalState)
-
 
 /*! \class AppSignalParam
 	\ingroup groupParamsStates
 	\brief Describes signal parameters in Monitor and TuningClient applications.
 
-	AppSignalParam class describes signal parmeters in Monitor and TuningClient applications. This state is received from ApplicationDataService by Monitor or
+	AppSignalParam class describes signal parameters in Monitor and TuningClient applications. This state is received from ApplicationDataService by Monitor or
 	from TuningService by Monitor or TuningClient.
 
-	\ref VFrame30::ScriptAppSignalController "ScriptAppSignalController" class accesed by global <b>signals</b> object is used for
+	\ref VFrame30::ScriptAppSignalController "ScriptAppSignalController" class accessed by global <b>signals</b> object is used for
 	requesting signal parameters from Application Data Service.
 
-	\ref VFrame30::TuningController "TuningController" class accesed by global <b>tuning</b> object is used for
+	\ref VFrame30::TuningController "TuningController" class accessed by global <b>tuning</b> object is used for
 	requesting signal parameters from Tuning Service.
 
 	\warning
@@ -326,14 +182,28 @@ class AppSignalParam
 	Q_PROPERTY(bool isEndpoint READ isEndpoint)
 	Q_PROPERTY(bool IsEndpoint READ isEndpoint)
 
+	/// \brief Signal state is inverted (applicable only for discrete signals)
+	Q_PROPERTY(bool isInverted READ isInverted)
+	Q_PROPERTY(bool IsInverted READ isInverted)
+
 public:
+	AppSignalParam(const AppSignal& signal);
+
+	// Shallow copy.
+	//
 	AppSignalParam() = default;
 	AppSignalParam(const AppSignalParam&) = default;
-	AppSignalParam(const AppSignal& signal);
+	AppSignalParam(AppSignalParam&&) noexcept = default;
+	AppSignalParam& operator=(const AppSignalParam&) = default;
+	AppSignalParam& operator=(AppSignalParam&&) noexcept = default;
 
 	bool load(const Proto::AppSignal& message);
 	void load(const AppSignal& signal);
 	void save(::Proto::AppSignal* message) const;
+
+	// Make a deep copy of the AppSignalParam.
+	//
+	AppSignalParam clone() const;
 
 	// Properties
 	//
@@ -341,19 +211,19 @@ public:
 	[[nodiscard]] Hash hash() const;
 	void setHash(Hash value);
 
-	[[nodiscard]] const QString& appSignalId() const;
+	[[nodiscard]] QString appSignalId() const;
 	void setAppSignalId(const QString& value);
 
-	[[nodiscard]] const QString& customSignalId() const;
+	[[nodiscard]] QString customSignalId() const;
 	void setCustomSignalId(const QString& value);
 
-	[[nodiscard]] const QString& caption() const;
+	[[nodiscard]] QString caption() const;
 	void setCaption(const QString& value);
 
-	[[nodiscard]] const QString& equipmentId() const;
+	[[nodiscard]] QString equipmentId() const;
 	void setEquipmentId(const QString& value);
 
-	[[nodiscard]] const QString& lmEquipmentId() const;
+	[[nodiscard]] QString lmEquipmentId() const;
 	void setLmEquipmentId(const QString& value);
 
 	[[nodiscard]] E::Channel channel() const;
@@ -367,6 +237,7 @@ public:
 
 	[[nodiscard]] bool isAnalog() const;
 	[[nodiscard]] bool isDiscrete() const;
+	[[nodiscard]] bool isBus() const;
 	[[nodiscard]] E::SignalType type() const;
 	void setType(E::SignalType value);
 
@@ -378,11 +249,8 @@ public:
 	[[nodiscard]] E::ByteOrder byteOrder() const;
 	void setByteOrder(E::ByteOrder value);
 
-	[[nodiscard]] int unitId() const;
-	void setUnitId(int value);
-
-	[[nodiscard]] const QString& unit() const;
-	void setUnit(QString value);
+	[[nodiscard]] QString unit() const;
+	void setUnit(const QString& value);
 
 	[[nodiscard]] double lowValidRange() const;
 	[[nodiscard]] double highValidRange() const;
@@ -407,13 +275,16 @@ public:
 	[[nodiscard]] int precision() const;
 	void setPrecision(int value);
 
-	[[nodiscard]] double aperture();
-	void setAperture(double value);
+	[[nodiscard]] double fineAaperture() const;
+	void setFineAperture(double value);
 
-	[[nodiscard]] double filteringTime();
+	[[nodiscard]] double coarseAaperture() const;
+	void setCoarseAperture(double value);
+
+	[[nodiscard]] double filteringTime() const;
 	void setFilteringTime(double value);
 
-	[[nodiscard]] double spreadTolerance();
+	[[nodiscard]] double spreadTolerance() const;
 	void setSpreadTolerance(double value);
 
 	[[nodiscard]] bool enableTuning() const;
@@ -421,6 +292,9 @@ public:
 
 	[[nodiscard]] bool isEndpoint() const;
 	void setEndpoint(bool value);
+
+	[[nodiscard]] bool isInverted() const;
+	void setInverted(bool value);
 
 	[[nodiscard]] TuningValue tuningDefaultValue() const;
 	[[nodiscard]] QVariant tuningDefaultValueToVariant() const;
@@ -434,10 +308,8 @@ public:
 	[[nodiscard]] QVariant tuningHighBoundToVariant() const;
 	void setTuningHighBound(const TuningValue& value);
 
-	[[nodiscard]] const std::set<QString>& tags() const;
-	[[nodiscard]] std::set<QString>& mutableTags();
+	[[nodiscard]] std::set<QString> tags() const;
 	[[nodiscard]] QStringList tagStringList() const;
-
 	void setTags(std::set<QString> tags);
 
 public slots:
@@ -448,52 +320,64 @@ public:
 	static const int NO_UNIT_ID = 1;
 
 private:
-	Hash m_hash = UNDEFINED_HASH;				// Hash from m_appSignalId
-	QString m_appSignalId;
-	QString m_customSignalId;
-	QString m_caption;
-	QString m_equipmentId;
-	QString m_lmEquipmentId;
+	void detach();
 
-	E::Channel m_channel = E::Channel::A;
-	E::SignalInOutType m_inOutType = E::SignalInOutType::Internal;
-	E::SignalType m_signalType = E::SignalType::Analog;
-	E::AnalogAppSignalFormat m_analogSignalFormat = E::AnalogAppSignalFormat::Float32;
-	E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
+	struct PrivateData
+	{
+		bool load(const Proto::AppSignal& message);
+		void load(const AppSignal& signal);
+		void save(::Proto::AppSignal* message) const;
 
-	QString m_unit;
+		Hash m_hash = UNDEFINED_HASH;				// Hash from m_appSignalId
+		QString m_appSignalId;
+		QString m_customSignalId;
+		QString m_caption;
+		QString m_equipmentId;
+		QString m_lmEquipmentId;
 
-	double m_lowValidRange = 0;
-	double m_highValidRange = 100;
-	double m_lowEngineeringUnits = 0;
-	double m_highEngineeringUnits = 100;
+		E::Channel m_channel = E::Channel::A;
+		E::SignalInOutType m_inOutType = E::SignalInOutType::Internal;
+		E::SignalType m_signalType = E::SignalType::Analog;
+		E::AnalogAppSignalFormat m_analogSignalFormat = E::AnalogAppSignalFormat::Float32;
+		E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
 
-	double m_electricLowLimit = 0;									// low electric value for input range
-	double m_electricHighLimit = 0;									// high electric value for input range
-	E::ElectricUnit m_electricUnit = E::ElectricUnit::NoUnit;		// electric unit for input range (mA, mV, Ohm, V ....)
-	E::SensorType m_sensorType = E::SensorType::NoSensor;			// electric sensor type for input range (was created for m_inputUnitID)
+		QString m_unit;
 
-	double m_outputLowLimit = 0;									// low physical value for output range
-	double m_outputHighLimit = 0;									// high physical value for output range
-	int m_outputUnitId = NO_UNIT_ID;								// physical unit for output range (kg, mm, Pa ...)
-	E::OutputMode m_outputMode = E::OutputMode::Plus0_Plus5_V;		// output electric range (or mode ref. OutputModeStr[])
-	E::SensorType m_outputSensorType = E::SensorType::NoSensor;		// electric sensor type for output range (was created for m_outputMode)
+		double m_lowValidRange = 0;
+		double m_highValidRange = 100;
+		double m_lowEngineeringUnits = 0;
+		double m_highEngineeringUnits = 100;
 
-	int m_precision = 2;
-	double m_coarseAperture = 1;
-	double m_fineAperture = 0.5;
-	double m_filteringTime = 0.005;
-	double m_spreadTolerance = 2;
-	bool m_enableTuning = false;
-	bool m_isEndpoint = false;
-	TuningValue m_tuningDefaultValue;
-	TuningValue m_tuningLowBound;
-	TuningValue m_tuningHighBound;
+		double m_electricLowLimit = 0;									// low electric value for input range
+		double m_electricHighLimit = 0;									// high electric value for input range
+		E::ElectricUnit m_electricUnit = E::ElectricUnit::NoUnit;		// electric unit for input range (mA, mV, Ohm, V ....)
+		E::SensorType m_sensorType = E::SensorType::NoSensor;			// electric sensor type for input range (was created for m_inputUnitID)
 
-	QString m_specPropStruct;
-	QByteArray m_specPropValues;
+		double m_outputLowLimit = 0;									// low physical value for output range
+		double m_outputHighLimit = 0;									// high physical value for output range
+		int m_outputUnitId = NO_UNIT_ID;								// physical unit for output range (kg, mm, Pa ...)
+		E::OutputMode m_outputMode = E::OutputMode::Plus0_Plus5_V;		// output electric range (or mode ref. OutputModeStr[])
+		E::SensorType m_outputSensorType = E::SensorType::NoSensor;		// electric sensor type for output range (was created for m_outputMode)
 
-	std::set<QString> m_tags;
+		int m_precision = 2;
+		double m_coarseAperture = 1;
+		double m_fineAperture = 0.5;
+		double m_filteringTime = 0.005;
+		double m_spreadTolerance = 2;
+		bool m_enableTuning = false;
+		bool m_endpoint = false;
+		bool m_inverted = false;
+		TuningValue m_tuningDefaultValue;
+		TuningValue m_tuningLowBound;
+		TuningValue m_tuningHighBound;
+
+		QString m_specPropStruct;
+		QByteArray m_specPropValues;
+
+		std::set<QString> m_tags;
+	};
+
+	std::shared_ptr<PrivateData> m_data = std::make_shared<PrivateData>();
 };
 
 Q_DECLARE_METATYPE(AppSignalParam)

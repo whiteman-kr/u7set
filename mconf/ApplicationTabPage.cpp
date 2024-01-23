@@ -1,7 +1,6 @@
-#include "Stable.h"
 #include "ApplicationTabPage.h"
-#include "../lib/OutputLog.h"
-
+#include "Globals.h"
+#include "../UtilsLib/OutputLog.h"
 #include "../lib/Configurator.h"
 
 ApplicationTabPage::ApplicationTabPage(bool expertMode, QWidget *parent)

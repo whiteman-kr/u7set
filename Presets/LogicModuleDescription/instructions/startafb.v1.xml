@@ -1,0 +1,17 @@
+<Command 
+	Caption="startafb" 
+	Code="0080" 
+	CodeMask="07c0" 
+	SimulationFunc="command_startafb" 
+	ParseFunc="parse_startafb" 
+	Description="Start AFB"
+
+	CodeSize="2" 
+	ReadTime="8" 
+	WaitFbExecution="true"
+
+	ConstRuntime="6"
+
+	CheckFunc="check_startafb"
+	GetMnemoFunc="mnemo_startafb"
+	CalcExecTimeFunc="exectime_startafb"/>

@@ -187,16 +187,16 @@ public:
 	// Signal Masks
 
 	QString customAppSignalIDMask() const;
-	void setCustomAppSignalIDMask(const QString& value);
+	void setCustomAppSignalIDMask(QString value);
 
 	QString equipmentIDMask() const;
-	void setEquipmentIDMask(const QString& value);
+	void setEquipmentIDMask(QString value);
 
 	QString appSignalIDMask() const;
-	void setAppSignalIDMask(const QString& value);
+	void setAppSignalIDMask(QString value);
 
 	QString appSignalTags() const;
-	void setAppSignalTags(const QString& value);
+	void setAppSignalTags(QString value);
 
 	// Filter Signals
 
@@ -334,10 +334,17 @@ private:
 
 	// Filters
 	//
-	QStringList m_customAppSignalIDMasks;
-	QStringList m_equipmentIDMasks;
-	QStringList m_appSignalIDMasks;
-	QStringList m_appSignalTags;
+	QString m_customAppSignalIDMasks;
+	QString m_equipmentIDMasks;
+	QString m_appSignalIDMasks;
+	QString m_appSignalTags;
+
+	// Cached filters splitted to string list, \n replaced to ';'
+	//
+	QStringList m_cachedCustomAppSignalIDMasks;
+	QStringList m_cachedEquipmentIDMasks;
+	QStringList m_cachedAppSignalIDMasks;
+	QStringList m_cachedAppSignalTags;
 
 	// Tab appearance
 	//
@@ -347,6 +354,12 @@ private:
 	TabType m_tabType = TabType::Generic;
 	CounterType m_counterType = CounterType::StatusBar;
 
+	// Values
+	//
+	std::map <Hash, TuningFilterSignal> m_signalValuesMap;
+
+	// Visible columns
+	//
 	bool m_columnCustomAppId = true;
 	bool m_columnAppId = false;
 	bool m_columnEquipmentId = true;
@@ -358,16 +371,10 @@ private:
 	bool m_columnValid = false;
 	bool m_columnOutOfRange = false;
 
-private:
-
 	//
 	// Run-time data
 	//
-
-	// Values
-	//
-	std::map <Hash, TuningFilterSignal> m_signalValuesMap;
-
+private:
 	// Parent and child
 	//
 	TuningFilter* m_parentFilter = nullptr;
@@ -422,10 +429,9 @@ public:
 										const std::vector<Hash> &allHashes,
 										TuningFilter *filter,
 										TuningFilter::Source source);
+
 protected:
-
 	std::shared_ptr<TuningFilter> m_root = nullptr;
-
 	std::vector<VFrame30::SchemaDetails> m_schemasDetails;
 };
 

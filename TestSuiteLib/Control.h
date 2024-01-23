@@ -8,148 +8,120 @@
 #include "TestScriptsStorage.h"
 #include "IInputController.h"
 #include "IOutputController.h"
+#include "ControlState.h"
+#include "ScriptRunner.h"
 #include "../ClientLib/AppSignalManager.h"
+#include "../ClientLib/TuningUserManager.h"
 
 namespace TestSuite
 {
-	using namespace std::literals::chrono_literals;
-
-	enum class ControlState
+	struct ControlParams
 	{
-		Stop,
-		Run,
-		Pause
-	};
 
-	struct ControlData
-	{
-		// Keep this struct simple, it should copy fast enough
-		//
-		//std::vector<SimControlRunStruct> m_lms;			// LMs added to simulation
-		ControlState m_state = ControlState::Stop;
+		ControlParams() = default;
 
-		std::chrono::microseconds m_startTime = 0us;		// When simulation was started, computer time
-		//std::chrono::microseconds m_sliceStartTime = 0us;	// When simulation was started for current 'slice' (duration)
-		std::chrono::microseconds m_currentTime = 0us;		// Current time in simulation
-
-		std::chrono::microseconds m_duration{0};		// Simulation is started for this time
-														// if time < 0 then no time limit
-														// if time == 0 then run one cycle (NO, IT WILL RESET IF ON PAUSE MODE)
-														// if time > 0 then run this time
-
-		QDateTime currentTime() const
+		ControlParams(const QStringList& scriptsFiles,
+					  const QString& scriptsPath,
+					  const QString& reportsPath,
+					  const TestScriptSelection& testsFilter,
+					  const QString& userName,
+					  const QString& password)
 		{
-			auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(m_currentTime);
-			return QDateTime::fromMSecsSinceEpoch(ms.count(), Qt::UTC);
+			this->scriptsFiles = scriptsFiles;
+			this->scriptsPath = scriptsPath;
+			this->reportsPath = reportsPath;
+			this->testsFilter = testsFilter;
+			this->userName = userName;
+			this->password = password;
 		}
-	};
-
-	struct ControlStatus
-	{
-		ControlStatus() = default;
-
-		ControlStatus(const ControlData& cd) :
-			m_startTime(cd.m_startTime),
-			m_currentTime(cd.m_currentTime),
-			m_duration(cd.m_currentTime - cd.m_startTime),
-			m_state(cd.m_state)
+			
+		explicit ControlParams(const QString& scriptsPath)
 		{
-//			m_lmDeviceModes.reserve(cd.m_lms.size());
-
-//			for (const SimControlRunStruct& lm : cd.m_lms)
-//			{
-//				m_lmDeviceModes.push_back(Sim::ControlStatus::LmMode{lm.equipmentId(), lm.m_lm->deviceState()});
-//			}
+			this->scriptsPath = scriptsPath;
 		}
 
-		std::chrono::microseconds m_startTime = 0us;	// When testing was started, it's computer time
-		std::chrono::microseconds m_currentTime = 0us;	// Current time in testing
-
-		std::chrono::microseconds m_duration{0};
-		ControlState m_state = ControlState::Stop;
-
-//		struct LmMode
-//		{
-//			QString lmEquipmentId;
-//			Sim::DeviceState deviceState;
-//		};
-
-//		std::vector<Sim::ControlStatus::LmMode> m_lmDeviceModes;
+		QStringList scriptsFiles;        // List of script files for execution, if empty then exec all.
+		QString scriptsPath;             // Load scripts from disk, path to dir for *.js files.
+		QString reportsPath;             // Save reports to disk if path is not empty
+		TestScriptSelection testsFilter; // Tests filter
+		QString userName;
+		QString password;
 	};
 
 	class ControlThread : public QThread
 	{
-		Q_OBJECT
-
 	public:
-		ControlThread(ILogFile* appLog, ITestLog* testLog);
+		ControlThread(ILogFile* appLog, TestLog* testLog, const QString& runContext);
+		virtual ~ControlThread();
 
 	public:
 		void setTestParams(const SoftwareInfo& softwareInfo,
 						   const TestSuiteSettings& settings,
-						   const QStringList& executionTests,	// List of tests for execution, if empty then exec all.
-						   const QString& scriptsPath);			// Load scripts from disk, path to dir for *.js files.
+						   const ControlParams& controlParams);
 
 		int result() const;
 
-	protected:
-		virtual void run() override;
+		ControlStatus status() const;
 
-	private:
-		void cleanUp();
+	protected:
+		virtual void run() = 0;
+
+	protected:
 		void checkAndInterruptTestExecution();
 
+		void cleanUp();
 		void taskCfgServiceConnection();
 		void taskInitInputController();
 		void taskInitOutputController();
 
-		void taskRunTests();
-
-	private:
+	protected:
 		HasLogFile m_appLog;
-		ITestLog* m_testLog = nullptr;
-
-		SoftwareInfo m_softwareInfo;
-		TestSuiteSettings m_settings;
-
-		QStringList m_executionTests;	// List of tests for execution, if empty then exec all.
-		QString m_scriptsPath;			// Load scripts from disk, path to dir for *.js files.
+		TestLog* m_testLog = nullptr;
 
 		// --
 		//
-		std::atomic<int> m_result{0};
-
+		SoftwareInfo m_softwareInfo;
+		TestSuiteSettings m_settings;
 		ConfigSettings m_configuration;
-		std::vector<TestScript> m_scripts;
+		ConfigData m_configData;
+		ControlParams m_controlParams;
 
+		// --
+		//
 		ClientLib::AppSignalManager m_signals;
 		std::unique_ptr<IInputController> m_inputController;
 		std::unique_ptr<IOutputController> m_outputController;
-	};
 
+		// --
+		//
+		mutable QMutex m_statusMutex;
+		ControlStatus m_status;
+
+		std::atomic<int> m_result{0};
+	};
 
 	class Control : public QObject
 	{
-		Q_OBJECT
-
 	public:
-		explicit Control(ILogFile* appLog, ITestLog* testLog);
+		Control(ILogFile* appLog, TestLog* testLog, ControlThread* controlThread);
+		virtual ~Control();
 
 	public:
 		bool execute(const SoftwareInfo& softwareInfo,
 					 const TestSuiteSettings& settings,
-					 const QStringList& executionTests,
-					 const QString& scriptsPath);
+					 const ControlParams& controlParams);
 		bool stop();
 		bool isRunning() const;
 
-	signals:
-		void finished(int result);
+		ControlStatus status() const;
+
+	protected:
+		ILogFile* m_appLog = nullptr;
+		TestLog* m_testLog = nullptr;
+
+		std::unique_ptr<ControlThread> m_controlThread{nullptr};
 
 	private:
-		ILogFile* m_appLog = nullptr;
-		ITestLog* m_testLog = nullptr;
-
-		ControlThread m_controlThread;
+		std::atomic<bool> m_stopRequested{false};
 	};
 }

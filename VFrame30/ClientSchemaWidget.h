@@ -8,6 +8,13 @@
 
 namespace VFrame30
 {
+	enum class ZoomMode
+	{
+		Manual,				// Zoom is fully manual.
+		Always100Percent,	// View is always zoomed to 100% (like Monitor 2.0).
+		FitToScreen	// View is always zoomed to fit the Monitor window.
+	};
+
 	struct SchemaHistoryItem
 	{
 		SchemaHistoryItem() = default;
@@ -36,9 +43,9 @@ namespace VFrame30
 	public:
 		ClientSchemaWidget() = delete;
 		ClientSchemaWidget(ClientSchemaView* schemaView, std::shared_ptr<VFrame30::Schema> schema, VFrame30::SchemaManager* schemaManager, QWidget* parent);
-		virtual ~ClientSchemaWidget();
 
 	protected:
+		virtual void resizeEvent(QResizeEvent* event) override;
 		virtual void mousePressEvent(QMouseEvent* event) override;
 		virtual void mouseMoveEvent(QMouseEvent* event) override;
 
@@ -65,7 +72,11 @@ namespace VFrame30
 		void emitHistoryChanged();
 
 	public slots:
-		virtual void setSchema(QString schemaId, QStringList highlightIds);
+		// using BaseSchemaWidget::setSchema -- use ClientSchemaWidget::setSchema and it's overloads.
+		//
+		virtual void setSchema(QString schemaId, QStringList highlightIds, bool forceSchemaUpdate);
+
+		virtual void setZoom(double zoom, bool repaint, int horzScrollValue = -1, int vertScrollValue = -1) override;
 
 		// Signals
 		//
@@ -81,6 +92,9 @@ namespace VFrame30
 
 		[[nodiscard]] VFrame30::SchemaManager* schemaManager();
 
+		[[nodiscard]] VFrame30::ZoomMode zoomMode() const;
+		void setZoomMode(VFrame30::ZoomMode zoomMode, bool repaint);
+
 		[[nodiscard]] ClientSchemaView* clientSchemaView();
 		[[nodiscard]] const ClientSchemaView* clientSchemaView() const;
 
@@ -88,6 +102,8 @@ namespace VFrame30
 		//
 	private:
 		VFrame30::SchemaManager* m_schemaManager = nullptr;
+
+		VFrame30::ZoomMode m_zoomMode = ZoomMode::Manual;
 
 		QPoint m_dragStartPosition;							// For drag and drop
 

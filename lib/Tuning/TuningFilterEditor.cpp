@@ -49,18 +49,28 @@ ChooseTuningSignalsWidget::ChooseTuningSignalsWidget(TuningSignalManager& signal
 
 	m_baseFilterTypeCombo = new QComboBox();
 	m_baseFilterTypeCombo->blockSignals(true);
-	m_baseFilterTypeCombo->addItem(tr("All Text"), static_cast<int>(FilterType::All));
-	m_baseFilterTypeCombo->addItem(tr("AppSignalID"), static_cast<int>(FilterType::AppSignalID));
-	m_baseFilterTypeCombo->addItem(tr("CustomAppSignalID"), static_cast<int>(FilterType::CustomAppSignalID));
-	m_baseFilterTypeCombo->addItem(tr("EquipmentID"), static_cast<int>(FilterType::EquipmentID));
-	m_baseFilterTypeCombo->addItem(tr("Caption"), static_cast<int>(FilterType::Caption));
+	m_baseFilterTypeCombo->addItem(tr("All Text"), static_cast<int>(BaseFilterType::All));
+	m_baseFilterTypeCombo->addItem(tr("AppSignalID"), static_cast<int>(BaseFilterType::AppSignalID));
+	m_baseFilterTypeCombo->addItem(tr("CustomAppSignalID"), static_cast<int>(BaseFilterType::CustomAppSignalID));
+	m_baseFilterTypeCombo->addItem(tr("EquipmentID"), static_cast<int>(BaseFilterType::EquipmentID));
+	m_baseFilterTypeCombo->addItem(tr("Caption"), static_cast<int>(BaseFilterType::Caption));
+	m_baseFilterTypeCombo->addItem(tr("Tag"), static_cast<int>(BaseFilterType::Tag));
 	m_baseFilterTypeCombo->setCurrentIndex(0);
 	m_baseFilterTypeCombo->blockSignals(false);
 	connect(m_baseFilterTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(on_m_baseFilterTypeCombo_currentIndexChanged(int)));
 	leftFilterLayout->addWidget(m_baseFilterTypeCombo);
 
 	m_baseFilterText = new QLineEdit();
-	connect(m_baseFilterText, &QLineEdit::returnPressed, this, &ChooseTuningSignalsWidget::on_m_baseFilterText_returnPressed);
+	connect(m_baseFilterText, &QLineEdit::returnPressed, this, &ChooseTuningSignalsWidget::on_m_baseFilterText_Changed);
+	connect(m_baseFilterText, &QLineEdit::textChanged, this, [this](const QString& str){
+		if (str.isEmpty() == true)
+		{
+			// Process mask if text was cleared
+			on_m_baseFilterText_Changed();
+		}
+	});
+	m_baseFilterText->setClearButtonEnabled(true);
+	m_baseFilterText->setFixedWidth(150);
 	leftFilterLayout->addWidget(m_baseFilterText);
 
 	m_baseApplyFilter = new QPushButton(tr("Apply Filter"));
@@ -78,9 +88,9 @@ ChooseTuningSignalsWidget::ChooseTuningSignalsWidget(TuningSignalManager& signal
 		leftFilterLayout->addWidget(l);
 
 		m_baseFilterValueCombo = new QComboBox();
-		m_baseFilterValueCombo->addItem(tr("Any Value"), static_cast<int>(FilterType::All));
-		m_baseFilterValueCombo->addItem(tr("Discrete 0"), static_cast<int>(FilterType::Zero));
-		m_baseFilterValueCombo->addItem(tr("Discrete 1"), static_cast<int>(FilterType::One));
+		m_baseFilterValueCombo->addItem(tr("Any Value"), static_cast<int>(ValueFilterType::All));
+		m_baseFilterValueCombo->addItem(tr("Discrete 0"), static_cast<int>(ValueFilterType::Zero));
+		m_baseFilterValueCombo->addItem(tr("Discrete 1"), static_cast<int>(ValueFilterType::One));
 		leftFilterLayout->addWidget(m_baseFilterValueCombo);
 
 		connect(m_baseFilterValueCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(on_m_baseFilterValueCombo_currentIndexChanged(int)));
@@ -211,11 +221,11 @@ void ChooseTuningSignalsWidget::setReadOnly(bool value)
 
 	m_removeValue->setEnabled(readOnly() == false && selectedFilterValuesItems.size() > 0);
 
-	m_setValue->setEnabled(readOnly() == false && selectedFilterValuesItems.size() == 1);
+    m_setValue->setEnabled(readOnly() == false && selectedFilterValuesItems.size() > 0);
 
 	if (m_setCurrent != nullptr)
 	{
-		m_setCurrent->setEnabled(readOnly() == false && selectedFilterValuesItems.size() == 1);
+        m_setCurrent->setEnabled(readOnly() == false && selectedFilterValuesItems.size() > 0);
 	}
 
 	return;
@@ -245,20 +255,20 @@ void ChooseTuningSignalsWidget::fillBaseSignalsList()
 		signalType = static_cast<SignalType>(data.toInt());
 	}
 
-	FilterType filterType = FilterType::AppSignalID;
+	BaseFilterType filterType = BaseFilterType::AppSignalID;
 	data = m_baseFilterTypeCombo->currentData();
 	if (data.isNull() == false && data.isValid() == true)
 	{
-		filterType = static_cast<FilterType>(data.toInt());
+		filterType = static_cast<BaseFilterType>(data.toInt());
 	}
 
-	FilterType filterValue = FilterType::All;
+	ValueFilterType filterValue = ValueFilterType::All;
 	if (m_baseFilterValueCombo != nullptr)
 	{
 		data = m_baseFilterValueCombo->currentData();
 		if (data.isValid() == true)
 		{
-			filterValue = static_cast<FilterType>(data.toInt());
+			filterValue = static_cast<ValueFilterType>(data.toInt());
 		}
 	}
 
@@ -292,19 +302,28 @@ void ChooseTuningSignalsWidget::fillBaseSignalsList()
 		// Value filter
 		//
 
-		if (filterValue != FilterType::All && asp.isDiscrete() == true)
+		if (filterValue != ValueFilterType::All)
 		{
+			if (asp.isDiscrete() == false)
+			{
+				continue;
+			}
+
 			bool ok = false;
 
-			const TuningSignalState state = m_signalManager.state(hash, &ok);
+			const TuningSignalState state = m_signalManager.queuedState(hash, &ok);
 
-			if (ok == true && state.valid() == true)
+			if (ok == true)
 			{
-				if (filterValue == FilterType::Zero && state.value().discreteValue() != 0)
+				if (state.valid() == false)
 				{
 					continue;
 				}
-				if (filterValue == FilterType::One && state.value().discreteValue() != 1)
+				if (filterValue == ValueFilterType::Zero && state.value().discreteValue() != 0)
+				{
+					continue;
+				}
+				if (filterValue == ValueFilterType::One && state.value().discreteValue() != 1)
 				{
 					continue;
 				}
@@ -320,18 +339,19 @@ void ChooseTuningSignalsWidget::fillBaseSignalsList()
 
 			switch (filterType)
 			{
-			case FilterType::All:
+			case BaseFilterType::All:
 			{
 				if (asp.appSignalId().contains(filterText, Qt::CaseInsensitive) == true
 						||asp.customSignalId().contains(filterText, Qt::CaseInsensitive) == true
 						||asp.lmEquipmentId().contains(filterText, Qt::CaseInsensitive) == true
-						||asp.caption().contains(filterText, Qt::CaseInsensitive) == true )
+						||asp.caption().contains(filterText, Qt::CaseInsensitive) == true
+						||asp.tags().contains(filterText) == true)
 				{
 					filterResult = true;
 				}
 			}
 				break;
-			case FilterType::AppSignalID:
+			case BaseFilterType::AppSignalID:
 			{
 				if (asp.appSignalId().contains(filterText, Qt::CaseInsensitive) == true)
 				{
@@ -339,7 +359,7 @@ void ChooseTuningSignalsWidget::fillBaseSignalsList()
 				}
 			}
 				break;
-			case FilterType::CustomAppSignalID:
+			case BaseFilterType::CustomAppSignalID:
 			{
 				if (asp.customSignalId().contains(filterText, Qt::CaseInsensitive) == true)
 				{
@@ -347,7 +367,7 @@ void ChooseTuningSignalsWidget::fillBaseSignalsList()
 				}
 			}
 				break;
-			case FilterType::EquipmentID:
+			case BaseFilterType::EquipmentID:
 			{
 				if (asp.lmEquipmentId().contains(filterText, Qt::CaseInsensitive) == true)
 				{
@@ -355,13 +375,19 @@ void ChooseTuningSignalsWidget::fillBaseSignalsList()
 				}
 			}
 				break;
-			case FilterType::Caption:
+			case BaseFilterType::Caption:
 			{
 				if (asp.caption().contains(filterText, Qt::CaseInsensitive) == true)
 				{
 					filterResult = true;
 				}
 			}
+				break;
+			case BaseFilterType::Tag:
+				if (asp.tags().contains(filterText) == true)
+				{
+					filterResult = true;
+				}
 				break;
 			}
 
@@ -435,7 +461,7 @@ void ChooseTuningSignalsWidget::on_m_add_clicked()
 			return;
 		}
 
-		const TuningSignalState s = m_signalManager.state(hash, &ok);
+		const TuningSignalState s = m_signalManager.queuedState(hash, &ok);
 
 		if (m_filter == nullptr)
 		{
@@ -538,6 +564,7 @@ void ChooseTuningSignalsWidget::on_m_setValue_clicked()
 	TuningValue defaultValue;
 
 	bool sameValue = true;
+	bool sameDefaultValue = true;
 
 	QList<QTreeWidgetItem*> selectedItems = m_filterValuesTree->selectedItems();
 
@@ -610,20 +637,21 @@ void ChooseTuningSignalsWidget::on_m_setValue_clicked()
 				}
 			}
 
-			if (asp.tuningDefaultValue() != defaultValue)
+			if (fv.useValue() == true)
 			{
-				QMessageBox::warning(this, tr("Filter Editor"), tr("Selected signals have different default value."));
-				return;
+				if (fv.value() != value)
+				{
+					sameValue = false;
+				}
 			}
-
-			if (fv.useValue() == true && fv.value() != value)
+			if (defaultValue != asp.tuningDefaultValue())
 			{
-				sameValue = false;
+				sameDefaultValue = false;
 			}
 		}
 	}
 
-	DialogInputTuningValue d(value, defaultValue, sameValue, lowLimit, highLimit, E::AnalogFormat::g_9_or_9e, precision, this);
+	DialogInputTuningValue d(value, defaultValue, sameValue, sameDefaultValue, lowLimit, highLimit, E::AnalogFormat::g_9_or_9e, precision, this);
 	if (d.exec() != QDialog::Accepted)
 	{
 		return;
@@ -723,14 +751,16 @@ void ChooseTuningSignalsWidget::on_m_exportValues_clicked()
 
 	int rowCount = m_filterValuesTree->topLevelItemCount();
 
+	static QString path{"."};
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Export to CSV"),
-													QString(),
+													path + QDir::separator(),
 													tr("CSV (*.csv)"));
 
 	if (fileName.isEmpty() == true)
 	{
 		return;
 	}
+	path = QFileInfo(fileName).path(); // store path for next time
 
 	QFile file(fileName);
 	if (file.open(QFile::WriteOnly | QFile::Truncate) == false)
@@ -787,14 +817,16 @@ void ChooseTuningSignalsWidget::on_m_importValues_clicked()
 		return;
 	}
 
+	static QString path{"."};
 	QString fileName = QFileDialog::getOpenFileName(this, tr("Import from CSV"),
-													QString(),
+													path,
 													tr("CSV (*.csv)"));
 
 	if (fileName.isEmpty() == true)
 	{
 		return;
 	}
+	path = QFileInfo(fileName).path(); // store path for next time
 
 	QFile file(fileName);
 	if (file.open(QFile::ReadOnly) == false)
@@ -965,11 +997,11 @@ void ChooseTuningSignalsWidget::on_m_filterValuesTree_itemSelectionChanged()
 
 	m_removeValue->setEnabled(readOnly() == false && selectedFilterValuesItems.size() > 0);
 
-	m_setValue->setEnabled(readOnly() == false && selectedFilterValuesItems.size() == 1);
+    m_setValue->setEnabled(readOnly() == false && selectedFilterValuesItems.size() > 0);
 
 	if (m_setCurrent != nullptr)
 	{
-		m_setCurrent->setEnabled(readOnly() == false && selectedFilterValuesItems.size() == 1);
+        m_setCurrent->setEnabled(readOnly() == false && selectedFilterValuesItems.size() > 0);
 	}
 
 	return;
@@ -1007,7 +1039,7 @@ void ChooseTuningSignalsWidget::on_m_baseFilterValueCombo_currentIndexChanged(in
 	fillBaseSignalsList();
 }
 
-void ChooseTuningSignalsWidget::on_m_baseFilterText_returnPressed()
+void ChooseTuningSignalsWidget::on_m_baseFilterText_Changed()
 {
 	fillBaseSignalsList();
 }

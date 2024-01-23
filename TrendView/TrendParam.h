@@ -12,18 +12,6 @@ namespace Proto
 	class TrendParam;
 }
 
-
-namespace TrendLib
-{
-	enum class TrendViewMode
-	{
-		Separated,
-		Overlapped
-	};
-}
-
-Q_DECLARE_METATYPE(TrendLib::TrendViewMode)
-
 namespace TrendLib
 {
 	class TrendParam
@@ -52,8 +40,8 @@ namespace TrendLib
 		double devicePixelRatio() const;
 		void setDpi(double dpiX, double dpiY, double devicePixelRatio);
 
-		TrendViewMode viewMode() const;
-		void setViewMode(TrendViewMode value);
+		E::TrendViewMode viewMode() const;
+		void setViewMode(E::TrendViewMode value);
 
 		E::TrendScaleType scaleType() const;
 		void setScaleType(E::TrendScaleType value);
@@ -101,7 +89,7 @@ namespace TrendLib
 		double m_dpiY = 96;
 		double m_devicePixelRatio = 1.0;
 
-		TrendViewMode m_viewMode = TrendViewMode::Separated;
+		E::TrendViewMode m_viewMode = E::TrendViewMode::Separated;
 		E::TrendScaleType m_scaleType = E::TrendScaleType::Linear;
 		E::TimeType m_timeType = E::TimeType::Local;
 		int m_laneCount = 1;

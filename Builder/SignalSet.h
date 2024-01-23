@@ -22,7 +22,8 @@ namespace Builder
 		const ::AppSignalSet* appSignalSet() const;
 
 		bool prepareBusses();
-		bool checkSignals();
+		bool checkSignals(bool isSafetyProject);
+		bool checkSignalsIDsAndHashes();
 		bool bindSignalsToLMs(Hardware::EquipmentSet* equipment);
 		void initCalculatedSignalsProperties();
 		void cacheSpecPropValues();
@@ -48,6 +49,8 @@ namespace Builder
 
 		bool isSignalExists(const QString& appSignalID) const;
 
+		void resetAddresses();
+
 	private:
 		QString expandBusSignalCaptionTemplate(const AppSignal& busParentSignal, BusShared bus, const BusSignal& busSignal) const;
 
@@ -59,10 +62,6 @@ namespace Builder
 		VFrame30::BusSet* m_busSet = nullptr;
 		std::shared_ptr<BuildResultWriter> m_resultWriter = nullptr;
 		IssueLogger* m_log = nullptr;
-
-		//
-
-		QHash<qsizetype, QString> m_busSignals;
 
 		Busses m_busses;
 

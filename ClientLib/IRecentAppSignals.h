@@ -15,6 +15,7 @@ namespace ClientLib
 		virtual void addRecentAppSignals(const std::vector<Hash>& hashes) = 0;
 
 		virtual std::vector<Hash> recentlyUsedAppSignals(const QString& appDataServivceId) = 0;
+		virtual bool hasRecentlyUsedAppSignals() = 0;
 	};
 
 }

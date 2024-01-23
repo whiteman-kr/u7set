@@ -78,7 +78,8 @@ constexpr FontParam::FontParam(
   , name_obsolete_(nullptr)
   , size_(0)
   , bold_(false)
-  , italic_(false){}
+  , italic_(false)
+  , underline_(false){}
 struct FontParamDefaultTypeInternal {
   constexpr FontParamDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -399,6 +400,7 @@ constexpr SchemaItem::SchemaItem(
   , posrectimpl_(nullptr)
   , poslineimpl_(nullptr)
   , posconnectionimpl_(nullptr)
+  , posrectrotatable_(nullptr)
   , fblitem_(nullptr)
   , fblitemrect_(nullptr)
   , fblitemline_(nullptr)
@@ -431,6 +433,7 @@ constexpr SchemaItem::SchemaItem(
   , control_(nullptr)
   , pushbutton_(nullptr)
   , lineedit_(nullptr)
+  , slider_(nullptr)
   , itemunit_(0)
 
   , isstatic_(false)
@@ -462,6 +465,19 @@ struct PosRectImplDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PosRectImplDefaultTypeInternal _PosRectImpl_default_instance_;
+constexpr PosRectRotatable::PosRectRotatable(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : angle_(0)
+  , rotationpoint_(0){}
+struct PosRectRotatableDefaultTypeInternal {
+  constexpr PosRectRotatableDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~PosRectRotatableDefaultTypeInternal() {}
+  union {
+    PosRectRotatable _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PosRectRotatableDefaultTypeInternal _PosRectRotatable_default_instance_;
 constexpr PosLineImpl::PosLineImpl(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : startxdocpt_(0)
@@ -662,9 +678,14 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT IndicatorTrendSignalParamDefaul
 constexpr IndicatorTrend::IndicatorTrend(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : trendsignalparams_()
+  , backcolor2nd_(0u)
   , duration_(PROTOBUF_LONGLONG(0))
   , sampleperiod_(0)
   , timetype_(0)
+  , viewmode_(0)
+  , scaletype_(0)
+  , lanecount_(0)
+  , backcolor1st_(0u)
   , redrawinterval_(PROTOBUF_LONGLONG(0)){}
 struct IndicatorTrendDefaultTypeInternal {
   constexpr IndicatorTrendDefaultTypeInternal()
@@ -835,6 +856,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT SchemaItemLinkDefaultTypeIntern
 constexpr SchemaItemAfb::SchemaItemAfb(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : params_()
+  , packedlogicinputs_()
   , deprecated_label_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , afbstrid_(nullptr)
   , deprecated_afbelement_(nullptr)
@@ -1111,11 +1133,41 @@ struct SchemaItemLineEditDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT SchemaItemLineEditDefaultTypeInternal _SchemaItemLineEdit_default_instance_;
+constexpr SchemaItemSlider::SchemaItemSlider(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : scriptaftercreate_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , scriptslidermoved_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , scriptsliderpressed_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , scriptsliderreleased_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , scriptvaluechanged_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , invertedappearance_(false)
+  , invertedcontrols_(false)
+  , enablemousewheel_(false)
+  , minimum_(0)
+  , tickposition_(0)
+  , defaultvalue_(0)
+  , tickinterval_(0)
+  , tracking_(true)
+  , maximum_(99)
+  , orientation_(2)
+  , pagestep_(10)
+  , singlestep_(1){}
+struct SchemaItemSliderDefaultTypeInternal {
+  constexpr SchemaItemSliderDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~SchemaItemSliderDefaultTypeInternal() {}
+  union {
+    SchemaItemSlider _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT SchemaItemSliderDefaultTypeInternal _SchemaItemSlider_default_instance_;
 constexpr DeviceObject::DeviceObject(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : properties_()
+  , tags_()
   , children_()
   , specific_properties_struct_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , presetprotectedproperties_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , uuid_(nullptr)
   , equipmentid_(nullptr)
   , caption_(nullptr)
@@ -1472,11 +1524,13 @@ constexpr AppSignal::AppSignal(
   , calcparam_(nullptr)
   , channel_(0)
   , datasize_(0)
+  , aperturetype_(0)
   , excludefrombuild_(false)
+  , invertsignal_(false)
+  , reserved_(false)
   , enabletuning_(false)
   , acquire_(false)
   , archive_(false)
-  , adaptiveaperture_(false)
   , decimalplaces_(2)
   , signaltype_(1)
   , inouttype_(2)
@@ -1518,8 +1572,11 @@ constexpr ProtoAppSignalData::ProtoAppSignalData(
   , tuninghighbound_(nullptr)
   , channel_(0)
   , enabletuning_(false)
-  , adaptiveaperture_(false)
+  , obsolete_adaptiveaperture_(false)
   , excludefrombuild_(false)
+  , invertsignal_(false)
+  , aperturetype_(0)
+  , reserved_(false)
   , decimalplaces_(2)
   , datasize_(32)
   , byteorder_(1)
@@ -1629,6 +1686,7 @@ constexpr SchemaDetails::SchemaDetails(
   , schematags_()
   , loopbacks_()
   , itemtags_()
+  , packedlogicids_()
   , trendindicators_()
   , schemaid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , caption_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
@@ -1646,11 +1704,32 @@ struct SchemaDetailsDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT SchemaDetailsDefaultTypeInternal _SchemaDetails_default_instance_;
+constexpr BuildInfo::BuildInfo(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : project_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , datetime_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , user_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , workstation_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , buildno_(0)
+  , changeset_(0){}
+struct BuildInfoDefaultTypeInternal {
+  constexpr BuildInfoDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~BuildInfoDefaultTypeInternal() {}
+  union {
+    BuildInfo _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT BuildInfoDefaultTypeInternal _BuildInfo_default_instance_;
 constexpr ArchSignal::ArchSignal(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : appsignalid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , hash_(PROTOBUF_ULONGLONG(0))
-  , isanalog_(false){}
+  , unit_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , lowlimit_(0)
+  , highlimit_(0)
+  , fineaperture_(0)
+  , coarseaperture_(0)
+  , signaltype_(0){}
 struct ArchSignalDefaultTypeInternal {
   constexpr ArchSignalDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -1660,18 +1739,20 @@ struct ArchSignalDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ArchSignalDefaultTypeInternal _ArchSignal_default_instance_;
-constexpr ArchSignals::ArchSignals(
+constexpr ArchInfo::ArchInfo(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : archsignals_(){}
-struct ArchSignalsDefaultTypeInternal {
-  constexpr ArchSignalsDefaultTypeInternal()
+  : archsignal_()
+  , archiveserviceid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , buildinfo_(nullptr){}
+struct ArchInfoDefaultTypeInternal {
+  constexpr ArchInfoDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
-  ~ArchSignalsDefaultTypeInternal() {}
+  ~ArchInfoDefaultTypeInternal() {}
   union {
-    ArchSignals _instance;
+    ArchInfo _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ArchSignalsDefaultTypeInternal _ArchSignals_default_instance_;
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ArchInfoDefaultTypeInternal _ArchInfo_default_instance_;
 constexpr BusSignal::BusSignal(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : signalid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
@@ -1866,7 +1947,7 @@ struct SimOverrideSignalWorkspaceDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT SimOverrideSignalWorkspaceDefaultTypeInternal _SimOverrideSignalWorkspace_default_instance_;
 }  // namespace Proto
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_serialization_2eproto[107];
+static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_serialization_2eproto[110];
 static const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* file_level_enum_descriptors_serialization_2eproto[4];
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_serialization_2eproto = nullptr;
 
@@ -1912,11 +1993,13 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_serialization_2eproto::offsets
   PROTOBUF_FIELD_OFFSET(::Proto::FontParam, bold_),
   PROTOBUF_FIELD_OFFSET(::Proto::FontParam, italic_),
   PROTOBUF_FIELD_OFFSET(::Proto::FontParam, name_),
+  PROTOBUF_FIELD_OFFSET(::Proto::FontParam, underline_),
   1,
   2,
   3,
   4,
   0,
+  5,
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaPoint, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaPoint, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -2234,6 +2317,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_serialization_2eproto::offsets
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaItem, labelpos_),
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaItem, predrawscript_),
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaItem, posrectimpl_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItem, posrectrotatable_),
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaItem, poslineimpl_),
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaItem, posconnectionimpl_),
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaItem, fblitem_),
@@ -2268,22 +2352,23 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_serialization_2eproto::offsets
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaItem, control_),
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaItem, pushbutton_),
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaItem, lineedit_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItem, slider_),
   5,
-  42,
-  43,
-  41,
   44,
-  0,
   45,
+  43,
+  46,
+  0,
+  47,
   1,
   2,
   3,
-  46,
+  48,
   4,
   6,
+  9,
   7,
   8,
-  9,
   10,
   11,
   12,
@@ -2315,6 +2400,8 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_serialization_2eproto::offsets
   38,
   39,
   40,
+  41,
+  42,
   PROTOBUF_FIELD_OFFSET(::Proto::PosRectImpl, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::Proto::PosRectImpl, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -2328,6 +2415,15 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_serialization_2eproto::offsets
   1,
   2,
   3,
+  PROTOBUF_FIELD_OFFSET(::Proto::PosRectRotatable, _has_bits_),
+  PROTOBUF_FIELD_OFFSET(::Proto::PosRectRotatable, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::Proto::PosRectRotatable, angle_),
+  PROTOBUF_FIELD_OFFSET(::Proto::PosRectRotatable, rotationpoint_),
+  0,
+  1,
   PROTOBUF_FIELD_OFFSET(::Proto::PosLineImpl, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::Proto::PosLineImpl, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -2541,13 +2637,23 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_serialization_2eproto::offsets
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::Proto::IndicatorTrend, sampleperiod_),
   PROTOBUF_FIELD_OFFSET(::Proto::IndicatorTrend, timetype_),
+  PROTOBUF_FIELD_OFFSET(::Proto::IndicatorTrend, viewmode_),
+  PROTOBUF_FIELD_OFFSET(::Proto::IndicatorTrend, scaletype_),
+  PROTOBUF_FIELD_OFFSET(::Proto::IndicatorTrend, lanecount_),
+  PROTOBUF_FIELD_OFFSET(::Proto::IndicatorTrend, backcolor1st_),
+  PROTOBUF_FIELD_OFFSET(::Proto::IndicatorTrend, backcolor2nd_),
   PROTOBUF_FIELD_OFFSET(::Proto::IndicatorTrend, redrawinterval_),
   PROTOBUF_FIELD_OFFSET(::Proto::IndicatorTrend, duration_),
   PROTOBUF_FIELD_OFFSET(::Proto::IndicatorTrend, trendsignalparams_),
-  1,
   2,
   3,
+  4,
+  5,
+  6,
+  7,
   0,
+  8,
+  1,
   ~0u,
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemIndicator, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemIndicator, _internal_metadata_),
@@ -2684,12 +2790,14 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_serialization_2eproto::offsets
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemAfb, deprecated_afbelement_),
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemAfb, deprecated_label_),
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemAfb, afbelement_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemAfb, packedlogicinputs_),
   ~0u,
   1,
   4,
   2,
   0,
   3,
+  ~0u,
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemConst, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemConst, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -2924,6 +3032,45 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_serialization_2eproto::offsets
   3,
   4,
   5,
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemSlider, _has_bits_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemSlider, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemSlider, invertedappearance_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemSlider, invertedcontrols_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemSlider, enablemousewheel_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemSlider, maximum_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemSlider, minimum_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemSlider, orientation_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemSlider, pagestep_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemSlider, singlestep_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemSlider, tracking_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemSlider, defaultvalue_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemSlider, tickinterval_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemSlider, tickposition_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemSlider, scriptaftercreate_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemSlider, scriptslidermoved_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemSlider, scriptsliderpressed_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemSlider, scriptsliderreleased_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemSlider, scriptvaluechanged_),
+  5,
+  6,
+  7,
+  13,
+  8,
+  14,
+  15,
+  16,
+  12,
+  10,
+  11,
+  9,
+  0,
+  1,
+  2,
+  3,
+  4,
   PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -2936,12 +3083,14 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_serialization_2eproto::offsets
   PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, place_),
   PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, specific_properties_struct_),
   PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, properties_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, tags_),
   PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, preset_),
   PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, presetroot_),
   PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, presetname_),
   PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, presetobjectuuid_),
   PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, childcounthint_),
   PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, presetversion_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, presetprotectedproperties_),
   PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, root_),
   PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, system_),
   PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, rack_),
@@ -2952,20 +3101,21 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_serialization_2eproto::offsets
   PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, workstation_),
   PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, software_),
   PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, children_),
-  1,
   2,
   3,
   4,
-  16,
+  5,
+  17,
   0,
   ~0u,
-  17,
+  ~0u,
   18,
-  5,
-  6,
   19,
-  20,
+  6,
   7,
+  20,
+  21,
+  1,
   8,
   9,
   10,
@@ -2974,6 +3124,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_serialization_2eproto::offsets
   13,
   14,
   15,
+  16,
   ~0u,
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::Proto::DeviceRoot, _internal_metadata_),
@@ -3245,6 +3396,8 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_serialization_2eproto::offsets
   PROTOBUF_FIELD_OFFSET(::Proto::AppSignal, bustypeid_),
   PROTOBUF_FIELD_OFFSET(::Proto::AppSignal, channel_),
   PROTOBUF_FIELD_OFFSET(::Proto::AppSignal, excludefrombuild_),
+  PROTOBUF_FIELD_OFFSET(::Proto::AppSignal, invertsignal_),
+  PROTOBUF_FIELD_OFFSET(::Proto::AppSignal, reserved_),
   PROTOBUF_FIELD_OFFSET(::Proto::AppSignal, signaltype_),
   PROTOBUF_FIELD_OFFSET(::Proto::AppSignal, inouttype_),
   PROTOBUF_FIELD_OFFSET(::Proto::AppSignal, datasize_),
@@ -3260,7 +3413,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_serialization_2eproto::offsets
   PROTOBUF_FIELD_OFFSET(::Proto::AppSignal, decimalplaces_),
   PROTOBUF_FIELD_OFFSET(::Proto::AppSignal, coarseaperture_),
   PROTOBUF_FIELD_OFFSET(::Proto::AppSignal, fineaperture_),
-  PROTOBUF_FIELD_OFFSET(::Proto::AppSignal, adaptiveaperture_),
+  PROTOBUF_FIELD_OFFSET(::Proto::AppSignal, aperturetype_),
   PROTOBUF_FIELD_OFFSET(::Proto::AppSignal, specpropstruct_),
   PROTOBUF_FIELD_OFFSET(::Proto::AppSignal, specpropvalues_),
   PROTOBUF_FIELD_OFFSET(::Proto::AppSignal, tags_),
@@ -3273,23 +3426,25 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_serialization_2eproto::offsets
   4,
   5,
   14,
-  16,
-  22,
-  23,
-  15,
+  17,
+  18,
+  19,
   24,
   25,
+  15,
+  26,
+  27,
   6,
-  17,
+  20,
   9,
   10,
   11,
-  18,
-  19,
   21,
-  26,
-  27,
-  20,
+  22,
+  23,
+  28,
+  29,
+  16,
   7,
   8,
   ~0u,
@@ -3322,32 +3477,38 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_serialization_2eproto::offsets
   PROTOBUF_FIELD_OFFSET(::Proto::ProtoAppSignalData, decimalplaces_),
   PROTOBUF_FIELD_OFFSET(::Proto::ProtoAppSignalData, coarseaperture_),
   PROTOBUF_FIELD_OFFSET(::Proto::ProtoAppSignalData, fineaperture_),
-  PROTOBUF_FIELD_OFFSET(::Proto::ProtoAppSignalData, adaptiveaperture_),
+  PROTOBUF_FIELD_OFFSET(::Proto::ProtoAppSignalData, obsolete_adaptiveaperture_),
   PROTOBUF_FIELD_OFFSET(::Proto::ProtoAppSignalData, excludefrombuild_),
   PROTOBUF_FIELD_OFFSET(::Proto::ProtoAppSignalData, tags_),
   PROTOBUF_FIELD_OFFSET(::Proto::ProtoAppSignalData, userspecpropstruct_),
   PROTOBUF_FIELD_OFFSET(::Proto::ProtoAppSignalData, userspecpropvalues_),
+  PROTOBUF_FIELD_OFFSET(::Proto::ProtoAppSignalData, aperturetype_),
+  PROTOBUF_FIELD_OFFSET(::Proto::ProtoAppSignalData, invertsignal_),
+  PROTOBUF_FIELD_OFFSET(::Proto::ProtoAppSignalData, reserved_),
   0,
   1,
   9,
-  14,
-  15,
-  16,
+  17,
+  18,
+  19,
   2,
   10,
   6,
   7,
   8,
-  17,
-  18,
-  13,
-  19,
   20,
+  21,
+  16,
+  22,
+  23,
   11,
   12,
   3,
   4,
   5,
+  14,
+  13,
+  15,
   PROTOBUF_FIELD_OFFSET(::Proto::AppSignalState, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::Proto::AppSignalState, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -3464,6 +3625,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_serialization_2eproto::offsets
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaDetails, schematags_),
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaDetails, loopbacks_),
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaDetails, itemtags_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaDetails, packedlogicids_),
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaDetails, trendindicators_),
   5,
   0,
@@ -3480,23 +3642,54 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_serialization_2eproto::offsets
   ~0u,
   ~0u,
   ~0u,
+  ~0u,
+  PROTOBUF_FIELD_OFFSET(::Proto::BuildInfo, _has_bits_),
+  PROTOBUF_FIELD_OFFSET(::Proto::BuildInfo, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::Proto::BuildInfo, project_),
+  PROTOBUF_FIELD_OFFSET(::Proto::BuildInfo, buildno_),
+  PROTOBUF_FIELD_OFFSET(::Proto::BuildInfo, datetime_),
+  PROTOBUF_FIELD_OFFSET(::Proto::BuildInfo, changeset_),
+  PROTOBUF_FIELD_OFFSET(::Proto::BuildInfo, user_),
+  PROTOBUF_FIELD_OFFSET(::Proto::BuildInfo, workstation_),
+  0,
+  4,
+  1,
+  5,
+  2,
+  3,
   PROTOBUF_FIELD_OFFSET(::Proto::ArchSignal, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::Proto::ArchSignal, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::Proto::ArchSignal, hash_),
-  PROTOBUF_FIELD_OFFSET(::Proto::ArchSignal, isanalog_),
   PROTOBUF_FIELD_OFFSET(::Proto::ArchSignal, appsignalid_),
-  1,
-  2,
+  PROTOBUF_FIELD_OFFSET(::Proto::ArchSignal, signaltype_),
+  PROTOBUF_FIELD_OFFSET(::Proto::ArchSignal, lowlimit_),
+  PROTOBUF_FIELD_OFFSET(::Proto::ArchSignal, highlimit_),
+  PROTOBUF_FIELD_OFFSET(::Proto::ArchSignal, unit_),
+  PROTOBUF_FIELD_OFFSET(::Proto::ArchSignal, fineaperture_),
+  PROTOBUF_FIELD_OFFSET(::Proto::ArchSignal, coarseaperture_),
   0,
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::Proto::ArchSignals, _internal_metadata_),
+  6,
+  2,
+  3,
+  1,
+  4,
+  5,
+  PROTOBUF_FIELD_OFFSET(::Proto::ArchInfo, _has_bits_),
+  PROTOBUF_FIELD_OFFSET(::Proto::ArchInfo, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::Proto::ArchSignals, archsignals_),
+  PROTOBUF_FIELD_OFFSET(::Proto::ArchInfo, buildinfo_),
+  PROTOBUF_FIELD_OFFSET(::Proto::ArchInfo, archiveserviceid_),
+  PROTOBUF_FIELD_OFFSET(::Proto::ArchInfo, archsignal_),
+  1,
+  0,
+  ~0u,
   PROTOBUF_FIELD_OFFSET(::Proto::BusSignal, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::Proto::BusSignal, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -3698,110 +3891,113 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 0, 6, sizeof(::Proto::Uuid)},
   { 7, 18, sizeof(::Proto::qvariant)},
   { 24, 30, sizeof(::Proto::wstring)},
-  { 31, 41, sizeof(::Proto::FontParam)},
-  { 46, 53, sizeof(::Proto::SchemaPoint)},
-  { 55, 65, sizeof(::Proto::ImageItem)},
-  { 70, 81, sizeof(::Proto::AfbParamValue)},
-  { 87, 103, sizeof(::Proto::Envelope)},
-  { 114, -1, sizeof(::Proto::EnvelopeSet)},
-  { 120, 134, sizeof(::Proto::EnvelopeSetShortDescription)},
-  { 143, 151, sizeof(::Proto::ExportedDevicePreset)},
-  { 154, 166, sizeof(::Proto::Configuration)},
-  { 173, -1, sizeof(::Proto::AfbElementCollection)},
-  { 179, 185, sizeof(::Proto::AfbElementXml)},
-  { 186, 200, sizeof(::Proto::FblElement)},
-  { 209, 220, sizeof(::Proto::AfbSignal)},
-  { 226, 245, sizeof(::Proto::AfbParam)},
-  { 259, 284, sizeof(::Proto::Schema)},
-  { 304, 312, sizeof(::Proto::LogicSchema)},
-  { 315, 324, sizeof(::Proto::UfbSchema)},
-  { 328, 339, sizeof(::Proto::SchemaLayer)},
-  { 345, 397, sizeof(::Proto::SchemaItem)},
-  { 444, 453, sizeof(::Proto::PosRectImpl)},
-  { 457, 466, sizeof(::Proto::PosLineImpl)},
-  { 470, -1, sizeof(::Proto::PosConnectionImpl)},
-  { 476, 494, sizeof(::Proto::SchemaItemRect)},
-  { 507, 519, sizeof(::Proto::SchemaItemLine)},
-  { 526, 538, sizeof(::Proto::SchemaItemPath)},
-  { 545, 551, sizeof(::Proto::SchemaItemImage)},
-  { 552, 560, sizeof(::Proto::SchemaItemFrame)},
-  { 563, 571, sizeof(::Proto::VFrameSetPoint)},
-  { 574, 608, sizeof(::Proto::IndicatorHistogramVert)},
-  { 637, 646, sizeof(::Proto::IndicatorArrowIndicator)},
-  { 650, 659, sizeof(::Proto::IndicatorTrendSignalParam)},
-  { 663, 673, sizeof(::Proto::IndicatorTrend)},
-  { 678, 688, sizeof(::Proto::SchemaItemIndicator)},
-  { 693, 705, sizeof(::Proto::FblConnectionPoint)},
-  { 712, -1, sizeof(::Proto::FblItem)},
-  { 718, 732, sizeof(::Proto::FblItemRect)},
-  { 741, 749, sizeof(::Proto::FblItemLine)},
-  { 752, 760, sizeof(::Proto::SchemaItemSignalColumn)},
-  { 763, 775, sizeof(::Proto::SchemaItemSignal)},
-  { 782, -1, sizeof(::Proto::SchemaItemInput)},
-  { 787, -1, sizeof(::Proto::SchemaItemOutput)},
-  { 792, -1, sizeof(::Proto::SchemaItemInOut)},
-  { 797, -1, sizeof(::Proto::SchemaItemLink)},
-  { 802, 813, sizeof(::Proto::SchemaItemAfb)},
-  { 819, 836, sizeof(::Proto::SchemaItemConst)},
-  { 848, 854, sizeof(::Proto::SchemaItemConnection)},
-  { 855, 861, sizeof(::Proto::SchemaItemTransmitter)},
-  { 862, 873, sizeof(::Proto::SchemaItemReceiver)},
-  { 879, 889, sizeof(::Proto::SchemaItemUfb)},
-  { 894, -1, sizeof(::Proto::SchemaItemTerminator)},
-  { 899, 917, sizeof(::Proto::SchemaItemValue)},
-  { 930, 944, sizeof(::Proto::SchemaItemImageValue)},
-  { 953, 961, sizeof(::Proto::SchemaItemBus)},
-  { 964, -1, sizeof(::Proto::SchemaItemBusComposer)},
-  { 969, -1, sizeof(::Proto::SchemaItemBusExtractor)},
-  { 975, 981, sizeof(::Proto::SchemaItemLoopback)},
-  { 982, -1, sizeof(::Proto::SchemaItemLoopbackSource)},
-  { 987, -1, sizeof(::Proto::SchemaItemLoopbackTarget)},
-  { 992, 999, sizeof(::Proto::SchemaItemControl)},
-  { 1001, 1017, sizeof(::Proto::SchemaItemPushButton)},
-  { 1028, 1043, sizeof(::Proto::SchemaItemLineEdit)},
-  { 1053, 1081, sizeof(::Proto::DeviceObject)},
-  { 1104, -1, sizeof(::Proto::DeviceRoot)},
-  { 1109, -1, sizeof(::Proto::DeviceSystem)},
-  { 1114, -1, sizeof(::Proto::DeviceRack)},
-  { 1119, 1125, sizeof(::Proto::DeviceChassis)},
-  { 1126, 1136, sizeof(::Proto::DeviceModule)},
-  { 1141, -1, sizeof(::Proto::DeviceController)},
-  { 1146, 1169, sizeof(::Proto::DeviceAppSignal)},
-  { 1187, 1194, sizeof(::Proto::Workstation)},
-  { 1196, 1202, sizeof(::Proto::Software)},
-  { 1203, 1211, sizeof(::Proto::ModuleConfiguration)},
-  { 1214, 1221, sizeof(::Proto::ModuleConfigurationValue)},
-  { 1223, 1230, sizeof(::Proto::Property)},
-  { 1232, 1247, sizeof(::Proto::SignalSpecPropValue)},
-  { 1257, -1, sizeof(::Proto::SignalSpecPropValues)},
-  { 1263, 1270, sizeof(::Proto::Address16)},
-  { 1272, 1279, sizeof(::Proto::Unit)},
-  { 1281, -1, sizeof(::Proto::UnitSet)},
-  { 1287, 1295, sizeof(::Proto::TuningValue)},
-  { 1298, 1313, sizeof(::Proto::AppSignalDbField)},
-  { 1323, 1330, sizeof(::Proto::StateFlagSignal)},
-  { 1332, 1349, sizeof(::Proto::AppSignalCalculatedParam)},
-  { 1361, 1395, sizeof(::Proto::AppSignal)},
-  { 1424, -1, sizeof(::Proto::AppSignalSet)},
-  { 1430, 1456, sizeof(::Proto::ProtoAppSignalData)},
-  { 1477, 1490, sizeof(::Proto::AppSignalState)},
-  { 1498, 1528, sizeof(::Proto::Connection)},
-  { 1553, -1, sizeof(::Proto::SchemaDetailsSet)},
-  { 1559, 1569, sizeof(::Proto::SchemaDetails_TrendIndicatorSchemaItems)},
-  { 1574, 1594, sizeof(::Proto::SchemaDetails)},
-  { 1609, 1617, sizeof(::Proto::ArchSignal)},
-  { 1620, -1, sizeof(::Proto::ArchSignals)},
-  { 1626, 1650, sizeof(::Proto::BusSignal)},
-  { 1669, 1681, sizeof(::Proto::Bus)},
-  { 1688, 1697, sizeof(::Proto::ComparatorSignal)},
-  { 1701, 1717, sizeof(::Proto::Comparator)},
-  { 1728, 1735, sizeof(::Proto::LmComparatorSet)},
-  { 1737, -1, sizeof(::Proto::ComparatorSet)},
-  { 1743, 1757, sizeof(::Proto::MetrologySignalLocation)},
-  { 1766, 1782, sizeof(::Proto::MetrologySignal)},
-  { 1793, -1, sizeof(::Proto::MetrologySignalSet)},
-  { 1799, 1810, sizeof(::Proto::SimOverrideSignal)},
-  { 1816, -1, sizeof(::Proto::SimOverrideSignalWorkspace)},
+  { 31, 42, sizeof(::Proto::FontParam)},
+  { 48, 55, sizeof(::Proto::SchemaPoint)},
+  { 57, 67, sizeof(::Proto::ImageItem)},
+  { 72, 83, sizeof(::Proto::AfbParamValue)},
+  { 89, 105, sizeof(::Proto::Envelope)},
+  { 116, -1, sizeof(::Proto::EnvelopeSet)},
+  { 122, 136, sizeof(::Proto::EnvelopeSetShortDescription)},
+  { 145, 153, sizeof(::Proto::ExportedDevicePreset)},
+  { 156, 168, sizeof(::Proto::Configuration)},
+  { 175, -1, sizeof(::Proto::AfbElementCollection)},
+  { 181, 187, sizeof(::Proto::AfbElementXml)},
+  { 188, 202, sizeof(::Proto::FblElement)},
+  { 211, 222, sizeof(::Proto::AfbSignal)},
+  { 228, 247, sizeof(::Proto::AfbParam)},
+  { 261, 286, sizeof(::Proto::Schema)},
+  { 306, 314, sizeof(::Proto::LogicSchema)},
+  { 317, 326, sizeof(::Proto::UfbSchema)},
+  { 330, 341, sizeof(::Proto::SchemaLayer)},
+  { 347, 401, sizeof(::Proto::SchemaItem)},
+  { 450, 459, sizeof(::Proto::PosRectImpl)},
+  { 463, 470, sizeof(::Proto::PosRectRotatable)},
+  { 472, 481, sizeof(::Proto::PosLineImpl)},
+  { 485, -1, sizeof(::Proto::PosConnectionImpl)},
+  { 491, 509, sizeof(::Proto::SchemaItemRect)},
+  { 522, 534, sizeof(::Proto::SchemaItemLine)},
+  { 541, 553, sizeof(::Proto::SchemaItemPath)},
+  { 560, 566, sizeof(::Proto::SchemaItemImage)},
+  { 567, 575, sizeof(::Proto::SchemaItemFrame)},
+  { 578, 586, sizeof(::Proto::VFrameSetPoint)},
+  { 589, 623, sizeof(::Proto::IndicatorHistogramVert)},
+  { 652, 661, sizeof(::Proto::IndicatorArrowIndicator)},
+  { 665, 674, sizeof(::Proto::IndicatorTrendSignalParam)},
+  { 678, 693, sizeof(::Proto::IndicatorTrend)},
+  { 703, 713, sizeof(::Proto::SchemaItemIndicator)},
+  { 718, 730, sizeof(::Proto::FblConnectionPoint)},
+  { 737, -1, sizeof(::Proto::FblItem)},
+  { 743, 757, sizeof(::Proto::FblItemRect)},
+  { 766, 774, sizeof(::Proto::FblItemLine)},
+  { 777, 785, sizeof(::Proto::SchemaItemSignalColumn)},
+  { 788, 800, sizeof(::Proto::SchemaItemSignal)},
+  { 807, -1, sizeof(::Proto::SchemaItemInput)},
+  { 812, -1, sizeof(::Proto::SchemaItemOutput)},
+  { 817, -1, sizeof(::Proto::SchemaItemInOut)},
+  { 822, -1, sizeof(::Proto::SchemaItemLink)},
+  { 827, 839, sizeof(::Proto::SchemaItemAfb)},
+  { 846, 863, sizeof(::Proto::SchemaItemConst)},
+  { 875, 881, sizeof(::Proto::SchemaItemConnection)},
+  { 882, 888, sizeof(::Proto::SchemaItemTransmitter)},
+  { 889, 900, sizeof(::Proto::SchemaItemReceiver)},
+  { 906, 916, sizeof(::Proto::SchemaItemUfb)},
+  { 921, -1, sizeof(::Proto::SchemaItemTerminator)},
+  { 926, 944, sizeof(::Proto::SchemaItemValue)},
+  { 957, 971, sizeof(::Proto::SchemaItemImageValue)},
+  { 980, 988, sizeof(::Proto::SchemaItemBus)},
+  { 991, -1, sizeof(::Proto::SchemaItemBusComposer)},
+  { 996, -1, sizeof(::Proto::SchemaItemBusExtractor)},
+  { 1002, 1008, sizeof(::Proto::SchemaItemLoopback)},
+  { 1009, -1, sizeof(::Proto::SchemaItemLoopbackSource)},
+  { 1014, -1, sizeof(::Proto::SchemaItemLoopbackTarget)},
+  { 1019, 1026, sizeof(::Proto::SchemaItemControl)},
+  { 1028, 1044, sizeof(::Proto::SchemaItemPushButton)},
+  { 1055, 1070, sizeof(::Proto::SchemaItemLineEdit)},
+  { 1080, 1102, sizeof(::Proto::SchemaItemSlider)},
+  { 1119, 1149, sizeof(::Proto::DeviceObject)},
+  { 1174, -1, sizeof(::Proto::DeviceRoot)},
+  { 1179, -1, sizeof(::Proto::DeviceSystem)},
+  { 1184, -1, sizeof(::Proto::DeviceRack)},
+  { 1189, 1195, sizeof(::Proto::DeviceChassis)},
+  { 1196, 1206, sizeof(::Proto::DeviceModule)},
+  { 1211, -1, sizeof(::Proto::DeviceController)},
+  { 1216, 1239, sizeof(::Proto::DeviceAppSignal)},
+  { 1257, 1264, sizeof(::Proto::Workstation)},
+  { 1266, 1272, sizeof(::Proto::Software)},
+  { 1273, 1281, sizeof(::Proto::ModuleConfiguration)},
+  { 1284, 1291, sizeof(::Proto::ModuleConfigurationValue)},
+  { 1293, 1300, sizeof(::Proto::Property)},
+  { 1302, 1317, sizeof(::Proto::SignalSpecPropValue)},
+  { 1327, -1, sizeof(::Proto::SignalSpecPropValues)},
+  { 1333, 1340, sizeof(::Proto::Address16)},
+  { 1342, 1349, sizeof(::Proto::Unit)},
+  { 1351, -1, sizeof(::Proto::UnitSet)},
+  { 1357, 1365, sizeof(::Proto::TuningValue)},
+  { 1368, 1383, sizeof(::Proto::AppSignalDbField)},
+  { 1393, 1400, sizeof(::Proto::StateFlagSignal)},
+  { 1402, 1419, sizeof(::Proto::AppSignalCalculatedParam)},
+  { 1431, 1467, sizeof(::Proto::AppSignal)},
+  { 1498, -1, sizeof(::Proto::AppSignalSet)},
+  { 1504, 1533, sizeof(::Proto::ProtoAppSignalData)},
+  { 1557, 1570, sizeof(::Proto::AppSignalState)},
+  { 1578, 1608, sizeof(::Proto::Connection)},
+  { 1633, -1, sizeof(::Proto::SchemaDetailsSet)},
+  { 1639, 1649, sizeof(::Proto::SchemaDetails_TrendIndicatorSchemaItems)},
+  { 1654, 1675, sizeof(::Proto::SchemaDetails)},
+  { 1691, 1702, sizeof(::Proto::BuildInfo)},
+  { 1708, 1720, sizeof(::Proto::ArchSignal)},
+  { 1727, 1735, sizeof(::Proto::ArchInfo)},
+  { 1738, 1762, sizeof(::Proto::BusSignal)},
+  { 1781, 1793, sizeof(::Proto::Bus)},
+  { 1800, 1809, sizeof(::Proto::ComparatorSignal)},
+  { 1813, 1829, sizeof(::Proto::Comparator)},
+  { 1840, 1847, sizeof(::Proto::LmComparatorSet)},
+  { 1849, -1, sizeof(::Proto::ComparatorSet)},
+  { 1855, 1869, sizeof(::Proto::MetrologySignalLocation)},
+  { 1878, 1894, sizeof(::Proto::MetrologySignal)},
+  { 1905, -1, sizeof(::Proto::MetrologySignalSet)},
+  { 1911, 1922, sizeof(::Proto::SimOverrideSignal)},
+  { 1928, -1, sizeof(::Proto::SimOverrideSignalWorkspace)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -3828,6 +4024,7 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_SchemaLayer_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_SchemaItem_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_PosRectImpl_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_PosRectRotatable_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_PosLineImpl_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_PosConnectionImpl_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_SchemaItemRect_default_instance_),
@@ -3869,6 +4066,7 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_SchemaItemControl_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_SchemaItemPushButton_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_SchemaItemLineEdit_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_SchemaItemSlider_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_DeviceObject_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_DeviceRoot_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_DeviceSystem_default_instance_),
@@ -3899,8 +4097,9 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_SchemaDetailsSet_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_SchemaDetails_TrendIndicatorSchemaItems_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_SchemaDetails_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_BuildInfo_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_ArchSignal_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_ArchSignals_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_ArchInfo_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_BusSignal_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_Bus_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_ComparatorSignal_default_instance_),
@@ -3920,368 +4119,390 @@ const char descriptor_table_protodef_serialization_2eproto[] PROTOBUF_SECTION_VA
   "\010intValue\030\002 \001(\005:\0010\022\024\n\tuintValue\030\003 \001(\r:\0010"
   "\022\026\n\013doubleValue\030\004 \001(\001:\0010\022\030\n\tboolValue\030\005 "
   "\001(\010:\005false\022\025\n\nfloatValue\030\006 \001(\002:\0010\"\027\n\007wst"
-  "ring\022\014\n\004text\030\001 \002(\014\"l\n\tFontParam\022%\n\rname_"
-  "obsolete\030\001 \002(\0132\016.Proto.wstring\022\014\n\004size\030\002"
-  " \002(\001\022\014\n\004bold\030\003 \002(\010\022\016\n\006italic\030\004 \002(\010\022\014\n\004na"
-  "me\030\005 \001(\t\"#\n\013SchemaPoint\022\t\n\001x\030\001 \002(\001\022\t\n\001y\030"
-  "\002 \002(\001\"y\n\tImageItem\022\030\n\nallowScale\030\001 \001(\010:\004"
-  "true\022\035\n\017keepAspectRatio\030\002 \001(\010:\004true\022\017\n\007i"
-  "mageId\030\003 \001(\t\022\021\n\timageData\030\010 \001(\014\022\017\n\007svgDa"
-  "ta\030\t \001(\t\"\203\001\n\rAfbParamValue\022\017\n\007version\030\001 "
-  "\001(\005\022\014\n\004type\030\002 \001(\005\022\022\n\ndataFormat\030\003 \001(\005\022\014\n"
-  "\004size\030\004 \001(\005\022\036\n\005value\030\006 \001(\0132\017.Proto.qvari"
-  "ant\022\021\n\treference\030\007 \001(\t\"\235\003\n\010Envelope\022\025\n\rc"
-  "lassnamehash\030\001 \002(\r\022\030\n\020compressedObject\030\002"
-  " \001(\014\022%\n\nschemaitem\030\006 \001(\0132\021.Proto.SchemaI"
-  "tem\022)\n\014deviceobject\030\007 \001(\0132\023.Proto.Device"
-  "Object\022\035\n\006schema\030d \001(\0132\r.Proto.Schema\022\'\n"
-  "\013schemalayer\030e \001(\0132\022.Proto.SchemaLayer\022%"
-  "\n\nfblelement\030f \001(\0132\021.Proto.FblElement\022+\n"
-  "\rconfiguration\030g \001(\0132\024.Proto.Configurati"
-  "on\022%\n\nconnection\030h \001(\0132\021.Proto.Connectio"
-  "n\0221\n\020schemaDetailsSet\030i \001(\0132\027.Proto.Sche"
-  "maDetailsSet\022\030\n\003bus\030\310\001 \001(\0132\n.Proto.Bus\"-"
-  "\n\013EnvelopeSet\022\036\n\005items\030\001 \003(\0132\017.Proto.Env"
-  "elope\"\340\001\n\033EnvelopeSetShortDescription\022\030\n"
-  "\020projectdbversion\030\001 \001(\r\022\025\n\rclassnamehash"
-  "\030\002 \003(\r\022\022\n\ndevicetype\030\n \003(\005\022\027\n\017equipmentE"
-  "ditor\030\003 \001(\010\022\024\n\014presetEditor\030\004 \001(\010\022\022\n\npre"
-  "setRoot\030\005 \001(\010\022\023\n\013projectName\030\006 \001(\t\022\020\n\010us"
-  "erName\030\007 \001(\t\022\022\n\nexportTime\030\010 \001(\004\"\212\001\n\024Exp"
-  "ortedDevicePreset\0227\n\013description\030\001 \001(\0132\""
-  ".Proto.EnvelopeSetShortDescription\022!\n\005it"
-  "ems\030\002 \001(\0132\022.Proto.EnvelopeSet\022\026\n\016compres"
-  "sedThis\030\003 \001(\014\"\361\001\n\rConfiguration\022\031\n\004uuid\030"
-  "\001 \002(\0132\013.Proto.Uuid\022\035\n\005strID\030\002 \002(\0132\016.Prot"
-  "o.wstring\022\037\n\007caption\030\003 \002(\0132\016.Proto.wstri"
-  "ng\022!\n\tvariables\030\004 \002(\0132\016.Proto.wstring\022\037\n"
-  "\007globals\030\005 \002(\0132\016.Proto.wstring\022\037\n\nschema"
-  "sIDs\030d \003(\0132\013.Proto.Uuid\022 \n\007schemas\030e \003(\013"
-  "2\017.Proto.Envelope\">\n\024AfbElementCollectio"
-  "n\022&\n\010elements\030\001 \003(\0132\024.Proto.AfbElementXm"
-  "l\"\035\n\rAfbElementXml\022\014\n\004data\030\001 \002(\014\"\233\002\n\nFbl"
-  "Element\022\035\n\005strID\030\002 \002(\0132\016.Proto.wstring\022\037"
-  "\n\007caption\030\003 \002(\0132\016.Proto.wstring\022\016\n\006opcod"
-  "e\030\004 \002(\r\022\025\n\006hasRam\030\005 \001(\010:\005false\022\033\n\rrequir"
-  "edStart\030\006 \001(\010:\004true\022 \n\006inputs\030\013 \003(\0132\020.Pr"
-  "oto.AfbSignal\022!\n\007outputs\030\014 \003(\0132\020.Proto.A"
-  "fbSignal\022\037\n\006params\030\r \003(\0132\017.Proto.AfbPara"
-  "m\022#\n\013description\030\016 \001(\0132\016.Proto.wstring\"\304"
-  "\001\n\tAfbSignal\022\037\n\007caption\030\001 \002(\0132\016.Proto.ws"
-  "tring\022\"\n\004type\030\002 \002(\0162\024.Proto.FblSignalTyp"
-  "e\022\027\n\014operandIndex\030\003 \001(\005:\0010\022\017\n\004size\030\004 \001(\005"
-  ":\0010\022\036\n\006opName\030\005 \001(\0132\016.Proto.wstring\022(\n\nd"
-  "ataFormat\030\006 \001(\0162\024.Proto.FblDataFormat\"\273\003"
-  "\n\010AfbParam\022\037\n\007caption\030\001 \002(\0132\016.Proto.wstr"
-  "ing\022\017\n\007visible\030\007 \002(\010\022\027\n\014operandIndex\030\010 \001"
-  "(\005:\0010\022\017\n\004size\030\t \001(\005:\0010\022\033\n\014instantiator\030\n"
-  " \001(\010:\005false\022\023\n\004user\030\013 \001(\010:\005false\022%\n\rchan"
-  "gedScript\030\014 \001(\0132\016.Proto.wstring\022\036\n\005value"
-  "\030\r \001(\0132\017.Proto.qvariant\022%\n\014defaultvalue\030"
-  "\016 \001(\0132\017.Proto.qvariant\022!\n\010lowlimit\030\017 \001(\013"
-  "2\017.Proto.qvariant\022\"\n\thighlimit\030\020 \001(\0132\017.P"
-  "roto.qvariant\022\036\n\006opName\030\021 \001(\0132\016.Proto.ws"
-  "tring\022\"\n\004type\030\022 \001(\0162\024.Proto.FblSignalTyp"
-  "e\022(\n\ndataFormat\030\023 \001(\0162\024.Proto.FblDataFor"
-  "mat\"\304\004\n\006Schema\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uui"
-  "d\022 \n\010schemaID\030\002 \002(\0132\016.Proto.wstring\022\037\n\007c"
-  "aption\030\003 \002(\0132\016.Proto.wstring\022\r\n\005width\030\004 "
-  "\002(\001\022\016\n\006height\030\005 \002(\001\022\037\n\004unit\030\006 \002(\0162\021.Prot"
-  "o.SchemaUnit\022\037\n\020excludeFromBuild\030\007 \001(\010:\005"
-  "false\022\027\n\017backgroundColor\030\010 \001(\r\022\014\n\004tags\030\t"
-  " \001(\t\022\037\n\020joinHorzPriority\030\037 \001(\010:\005false\022\030\n"
-  "\020joinLeftSchemaId\030  \001(\t\022\027\n\017joinTopSchema"
-  "Id\030! \001(\t\022\031\n\021joinRightSchemaId\030\" \001(\t\022\032\n\022j"
-  "oinBottomSchemaId\030# \001(\t\022\025\n\rpreDrawScript"
-  "\0302 \001(\t\022\024\n\014onShowScript\0303 \001(\t\022\037\n\006layers\030d"
-  " \003(\0132\017.Proto.Envelope\022)\n\004afbs\030e \002(\0132\033.Pr"
-  "oto.AfbElementCollection\022)\n\014logic_schema"
-  "\030\310\001 \001(\0132\022.Proto.LogicSchema\022%\n\nufb_schem"
-  "a\030\311\001 \001(\0132\020.Proto.UfbSchema\"b\n\013LogicSchem"
-  "a\022$\n\014equipmentids\030\001 \003(\0132\016.Proto.wstring\022"
-  "\022\n\007counter\030\002 \001(\005:\0010\022\031\n\021lmDescriptionFile"
-  "\030\003 \001(\t\"s\n\tUfbSchema\022\023\n\013description\030\001 \001(\t"
-  "\022\022\n\007version\030\002 \001(\005:\0011\022\031\n\021lmDescriptionFil"
-  "e\030\003 \001(\t\022\"\n\032specific_properties_struct\030\006 "
-  "\001(\t\"\224\001\n\013SchemaLayer\022\031\n\004uuid\030\001 \002(\0132\013.Prot"
-  "o.Uuid\022\034\n\004name\030\002 \002(\0132\016.Proto.wstring\022\017\n\007"
-  "compile\030\003 \002(\010\022\014\n\004show\030\004 \002(\010\022\r\n\005print\030\005 \002"
-  "(\010\022\036\n\005items\030\017 \003(\0132\017.Proto.Envelope\"\274\016\n\nS"
-  "chemaItem\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022\020\n\010"
-  "isStatic\030\002 \002(\010\022\020\n\010isLocked\030\003 \002(\010\022#\n\010item"
-  "Unit\030\004 \002(\0162\021.Proto.SchemaUnit\022\032\n\013acceptC"
-  "lick\030\005 \001(\010:\005false\022\023\n\013clickScript\030\007 \001(\t\022\032"
-  "\n\013isCommented\030\010 \001(\010:\005false\022\022\n\nobjectName"
-  "\030\t \001(\t\022\014\n\004tags\030\r \001(\t\022\r\n\005label\030\016 \001(\t\022\023\n\010l"
-  "abelPos\030\017 \001(\005:\0012\022\025\n\rpreDrawScript\030\036 \001(\t\022"
-  "\'\n\013PosRectImpl\030\n \001(\0132\022.Proto.PosRectImpl"
-  "\022\'\n\013PosLineImpl\030\013 \001(\0132\022.Proto.PosLineImp"
-  "l\0223\n\021PosConnectionImpl\030\014 \001(\0132\030.Proto.Pos"
-  "ConnectionImpl\022\037\n\007FblItem\030j \001(\0132\016.Proto."
-  "FblItem\022\'\n\013FblItemRect\030k \001(\0132\022.Proto.Fbl"
-  "ItemRect\022\'\n\013FblItemLine\030l \001(\0132\022.Proto.Fb"
-  "lItemLine\022#\n\004Rect\030t \001(\0132\025.Proto.SchemaIt"
-  "emRect\022#\n\004Line\030u \001(\0132\025.Proto.SchemaItemL"
-  "ine\022#\n\004Path\030v \001(\0132\025.Proto.SchemaItemPath"
-  "\022%\n\005Image\030w \001(\0132\026.Proto.SchemaItemImage\022"
-  "%\n\005Frame\030x \001(\0132\026.Proto.SchemaItemFrame\022-"
-  "\n\tIndicator\030y \001(\0132\032.Proto.SchemaItemIndi"
-  "cator\022\'\n\006Signal\030| \001(\0132\027.Proto.SchemaItem"
-  "Signal\022+\n\013InputSignal\030} \001(\0132\026.Proto.Sche"
-  "maItemInput\022-\n\014OutputSignal\030~ \001(\0132\027.Prot"
-  "o.SchemaItemOutput\022#\n\004Link\030\177 \001(\0132\025.Proto"
-  ".SchemaItemLink\022\"\n\003Afb\030\200\001 \001(\0132\024.Proto.Sc"
-  "hemaItemAfb\022*\n\tConstItem\030\201\001 \001(\0132\026.Proto."
-  "SchemaItemConst\0224\n\016ConnectionItem\030\202\001 \001(\013"
-  "2\033.Proto.SchemaItemConnection\0226\n\017Transmi"
-  "tterItem\030\203\001 \001(\0132\034.Proto.SchemaItemTransm"
-  "itter\0220\n\014ReceiverItem\030\204\001 \001(\0132\031.Proto.Sch"
-  "emaItemReceiver\022,\n\013InOutSignal\030\205\001 \001(\0132\026."
-  "Proto.SchemaItemInOut\022\"\n\003ufb\030\206\001 \001(\0132\024.Pr"
-  "oto.SchemaItemUfb\0220\n\nterminator\030\207\001 \001(\0132\033"
-  ".Proto.SchemaItemTerminator\022&\n\005Value\030\210\001 "
-  "\001(\0132\026.Proto.SchemaItemValue\0220\n\nImageValu"
-  "e\030\211\001 \001(\0132\033.Proto.SchemaItemImageValue\022&\n"
-  "\007BusItem\030\226\001 \001(\0132\024.Proto.SchemaItemBus\0222\n"
-  "\013BusComposer\030\227\001 \001(\0132\034.Proto.SchemaItemBu"
-  "sComposer\0224\n\014BusExtractor\030\230\001 \001(\0132\035.Proto"
-  ".SchemaItemBusExtractor\0220\n\014LoopbackItem\030"
-  "\233\001 \001(\0132\031.Proto.SchemaItemLoopback\0228\n\016loo"
-  "pbackSource\030\234\001 \001(\0132\037.Proto.SchemaItemLoo"
-  "pbackSource\0228\n\016loopbackTarget\030\235\001 \001(\0132\037.P"
-  "roto.SchemaItemLoopbackTarget\022*\n\007control"
-  "\030\310\001 \001(\0132\030.Proto.SchemaItemControl\0220\n\npus"
-  "hButton\030\322\001 \001(\0132\033.Proto.SchemaItemPushBut"
-  "ton\022,\n\010lineEdit\030\323\001 \001(\0132\031.Proto.SchemaIte"
-  "mLineEdit\"[\n\013PosRectImpl\022\021\n\tleftDocPt\030\001 "
+  "ring\022\014\n\004text\030\001 \002(\014\"\206\001\n\tFontParam\022%\n\rname"
+  "_obsolete\030\001 \002(\0132\016.Proto.wstring\022\014\n\004size\030"
+  "\002 \002(\001\022\014\n\004bold\030\003 \002(\010\022\016\n\006italic\030\004 \002(\010\022\014\n\004n"
+  "ame\030\005 \001(\t\022\030\n\tunderline\030\006 \001(\010:\005false\"#\n\013S"
+  "chemaPoint\022\t\n\001x\030\001 \002(\001\022\t\n\001y\030\002 \002(\001\"y\n\tImag"
+  "eItem\022\030\n\nallowScale\030\001 \001(\010:\004true\022\035\n\017keepA"
+  "spectRatio\030\002 \001(\010:\004true\022\017\n\007imageId\030\003 \001(\t\022"
+  "\021\n\timageData\030\010 \001(\014\022\017\n\007svgData\030\t \001(\t\"\203\001\n\r"
+  "AfbParamValue\022\017\n\007version\030\001 \001(\005\022\014\n\004type\030\002"
+  " \001(\005\022\022\n\ndataFormat\030\003 \001(\005\022\014\n\004size\030\004 \001(\005\022\036"
+  "\n\005value\030\006 \001(\0132\017.Proto.qvariant\022\021\n\trefere"
+  "nce\030\007 \001(\t\"\235\003\n\010Envelope\022\025\n\rclassnamehash\030"
+  "\001 \002(\r\022\030\n\020compressedObject\030\002 \001(\014\022%\n\nschem"
+  "aitem\030\006 \001(\0132\021.Proto.SchemaItem\022)\n\014device"
+  "object\030\007 \001(\0132\023.Proto.DeviceObject\022\035\n\006sch"
+  "ema\030d \001(\0132\r.Proto.Schema\022\'\n\013schemalayer\030"
+  "e \001(\0132\022.Proto.SchemaLayer\022%\n\nfblelement\030"
+  "f \001(\0132\021.Proto.FblElement\022+\n\rconfiguratio"
+  "n\030g \001(\0132\024.Proto.Configuration\022%\n\nconnect"
+  "ion\030h \001(\0132\021.Proto.Connection\0221\n\020schemaDe"
+  "tailsSet\030i \001(\0132\027.Proto.SchemaDetailsSet\022"
+  "\030\n\003bus\030\310\001 \001(\0132\n.Proto.Bus\"-\n\013EnvelopeSet"
+  "\022\036\n\005items\030\001 \003(\0132\017.Proto.Envelope\"\340\001\n\033Env"
+  "elopeSetShortDescription\022\030\n\020projectdbver"
+  "sion\030\001 \001(\r\022\025\n\rclassnamehash\030\002 \003(\r\022\022\n\ndev"
+  "icetype\030\n \003(\005\022\027\n\017equipmentEditor\030\003 \001(\010\022\024"
+  "\n\014presetEditor\030\004 \001(\010\022\022\n\npresetRoot\030\005 \001(\010"
+  "\022\023\n\013projectName\030\006 \001(\t\022\020\n\010userName\030\007 \001(\t\022"
+  "\022\n\nexportTime\030\010 \001(\004\"\212\001\n\024ExportedDevicePr"
+  "eset\0227\n\013description\030\001 \001(\0132\".Proto.Envelo"
+  "peSetShortDescription\022!\n\005items\030\002 \001(\0132\022.P"
+  "roto.EnvelopeSet\022\026\n\016compressedThis\030\003 \001(\014"
+  "\"\361\001\n\rConfiguration\022\031\n\004uuid\030\001 \002(\0132\013.Proto"
+  ".Uuid\022\035\n\005strID\030\002 \002(\0132\016.Proto.wstring\022\037\n\007"
+  "caption\030\003 \002(\0132\016.Proto.wstring\022!\n\tvariabl"
+  "es\030\004 \002(\0132\016.Proto.wstring\022\037\n\007globals\030\005 \002("
+  "\0132\016.Proto.wstring\022\037\n\nschemasIDs\030d \003(\0132\013."
+  "Proto.Uuid\022 \n\007schemas\030e \003(\0132\017.Proto.Enve"
+  "lope\">\n\024AfbElementCollection\022&\n\010elements"
+  "\030\001 \003(\0132\024.Proto.AfbElementXml\"\035\n\rAfbEleme"
+  "ntXml\022\014\n\004data\030\001 \002(\014\"\233\002\n\nFblElement\022\035\n\005st"
+  "rID\030\002 \002(\0132\016.Proto.wstring\022\037\n\007caption\030\003 \002"
+  "(\0132\016.Proto.wstring\022\016\n\006opcode\030\004 \002(\r\022\025\n\006ha"
+  "sRam\030\005 \001(\010:\005false\022\033\n\rrequiredStart\030\006 \001(\010"
+  ":\004true\022 \n\006inputs\030\013 \003(\0132\020.Proto.AfbSignal"
+  "\022!\n\007outputs\030\014 \003(\0132\020.Proto.AfbSignal\022\037\n\006p"
+  "arams\030\r \003(\0132\017.Proto.AfbParam\022#\n\013descript"
+  "ion\030\016 \001(\0132\016.Proto.wstring\"\304\001\n\tAfbSignal\022"
+  "\037\n\007caption\030\001 \002(\0132\016.Proto.wstring\022\"\n\004type"
+  "\030\002 \002(\0162\024.Proto.FblSignalType\022\027\n\014operandI"
+  "ndex\030\003 \001(\005:\0010\022\017\n\004size\030\004 \001(\005:\0010\022\036\n\006opName"
+  "\030\005 \001(\0132\016.Proto.wstring\022(\n\ndataFormat\030\006 \001"
+  "(\0162\024.Proto.FblDataFormat\"\273\003\n\010AfbParam\022\037\n"
+  "\007caption\030\001 \002(\0132\016.Proto.wstring\022\017\n\007visibl"
+  "e\030\007 \002(\010\022\027\n\014operandIndex\030\010 \001(\005:\0010\022\017\n\004size"
+  "\030\t \001(\005:\0010\022\033\n\014instantiator\030\n \001(\010:\005false\022\023"
+  "\n\004user\030\013 \001(\010:\005false\022%\n\rchangedScript\030\014 \001"
+  "(\0132\016.Proto.wstring\022\036\n\005value\030\r \001(\0132\017.Prot"
+  "o.qvariant\022%\n\014defaultvalue\030\016 \001(\0132\017.Proto"
+  ".qvariant\022!\n\010lowlimit\030\017 \001(\0132\017.Proto.qvar"
+  "iant\022\"\n\thighlimit\030\020 \001(\0132\017.Proto.qvariant"
+  "\022\036\n\006opName\030\021 \001(\0132\016.Proto.wstring\022\"\n\004type"
+  "\030\022 \001(\0162\024.Proto.FblSignalType\022(\n\ndataForm"
+  "at\030\023 \001(\0162\024.Proto.FblDataFormat\"\304\004\n\006Schem"
+  "a\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022 \n\010schemaID"
+  "\030\002 \002(\0132\016.Proto.wstring\022\037\n\007caption\030\003 \002(\0132"
+  "\016.Proto.wstring\022\r\n\005width\030\004 \002(\001\022\016\n\006height"
+  "\030\005 \002(\001\022\037\n\004unit\030\006 \002(\0162\021.Proto.SchemaUnit\022"
+  "\037\n\020excludeFromBuild\030\007 \001(\010:\005false\022\027\n\017back"
+  "groundColor\030\010 \001(\r\022\014\n\004tags\030\t \001(\t\022\037\n\020joinH"
+  "orzPriority\030\037 \001(\010:\005false\022\030\n\020joinLeftSche"
+  "maId\030  \001(\t\022\027\n\017joinTopSchemaId\030! \001(\t\022\031\n\021j"
+  "oinRightSchemaId\030\" \001(\t\022\032\n\022joinBottomSche"
+  "maId\030# \001(\t\022\025\n\rpreDrawScript\0302 \001(\t\022\024\n\014onS"
+  "howScript\0303 \001(\t\022\037\n\006layers\030d \003(\0132\017.Proto."
+  "Envelope\022)\n\004afbs\030e \002(\0132\033.Proto.AfbElemen"
+  "tCollection\022)\n\014logic_schema\030\310\001 \001(\0132\022.Pro"
+  "to.LogicSchema\022%\n\nufb_schema\030\311\001 \001(\0132\020.Pr"
+  "oto.UfbSchema\"b\n\013LogicSchema\022$\n\014equipmen"
+  "tids\030\001 \003(\0132\016.Proto.wstring\022\022\n\007counter\030\002 "
+  "\001(\005:\0010\022\031\n\021lmDescriptionFile\030\003 \001(\t\"s\n\tUfb"
+  "Schema\022\023\n\013description\030\001 \001(\t\022\022\n\007version\030\002"
+  " \001(\005:\0011\022\031\n\021lmDescriptionFile\030\003 \001(\t\022\"\n\032sp"
+  "ecific_properties_struct\030\006 \001(\t\"\224\001\n\013Schem"
+  "aLayer\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022\034\n\004nam"
+  "e\030\002 \002(\0132\016.Proto.wstring\022\017\n\007compile\030\003 \002(\010"
+  "\022\014\n\004show\030\004 \002(\010\022\r\n\005print\030\005 \002(\010\022\036\n\005items\030\017"
+  " \003(\0132\017.Proto.Envelope\"\231\017\n\nSchemaItem\022\031\n\004"
+  "uuid\030\001 \002(\0132\013.Proto.Uuid\022\020\n\010isStatic\030\002 \002("
+  "\010\022\020\n\010isLocked\030\003 \002(\010\022#\n\010itemUnit\030\004 \002(\0162\021."
+  "Proto.SchemaUnit\022\032\n\013acceptClick\030\005 \001(\010:\005f"
+  "alse\022\023\n\013clickScript\030\007 \001(\t\022\032\n\013isCommented"
+  "\030\010 \001(\010:\005false\022\022\n\nobjectName\030\t \001(\t\022\014\n\004tag"
+  "s\030\r \001(\t\022\r\n\005label\030\016 \001(\t\022\023\n\010labelPos\030\017 \001(\005"
+  ":\0012\022\025\n\rpreDrawScript\030\036 \001(\t\022\'\n\013PosRectImp"
+  "l\030\n \001(\0132\022.Proto.PosRectImpl\0221\n\020PosRectRo"
+  "tatable\030\024 \001(\0132\027.Proto.PosRectRotatable\022\'"
+  "\n\013PosLineImpl\030\013 \001(\0132\022.Proto.PosLineImpl\022"
+  "3\n\021PosConnectionImpl\030\014 \001(\0132\030.Proto.PosCo"
+  "nnectionImpl\022\037\n\007FblItem\030j \001(\0132\016.Proto.Fb"
+  "lItem\022\'\n\013FblItemRect\030k \001(\0132\022.Proto.FblIt"
+  "emRect\022\'\n\013FblItemLine\030l \001(\0132\022.Proto.FblI"
+  "temLine\022#\n\004Rect\030t \001(\0132\025.Proto.SchemaItem"
+  "Rect\022#\n\004Line\030u \001(\0132\025.Proto.SchemaItemLin"
+  "e\022#\n\004Path\030v \001(\0132\025.Proto.SchemaItemPath\022%"
+  "\n\005Image\030w \001(\0132\026.Proto.SchemaItemImage\022%\n"
+  "\005Frame\030x \001(\0132\026.Proto.SchemaItemFrame\022-\n\t"
+  "Indicator\030y \001(\0132\032.Proto.SchemaItemIndica"
+  "tor\022\'\n\006Signal\030| \001(\0132\027.Proto.SchemaItemSi"
+  "gnal\022+\n\013InputSignal\030} \001(\0132\026.Proto.Schema"
+  "ItemInput\022-\n\014OutputSignal\030~ \001(\0132\027.Proto."
+  "SchemaItemOutput\022#\n\004Link\030\177 \001(\0132\025.Proto.S"
+  "chemaItemLink\022\"\n\003Afb\030\200\001 \001(\0132\024.Proto.Sche"
+  "maItemAfb\022*\n\tConstItem\030\201\001 \001(\0132\026.Proto.Sc"
+  "hemaItemConst\0224\n\016ConnectionItem\030\202\001 \001(\0132\033"
+  ".Proto.SchemaItemConnection\0226\n\017Transmitt"
+  "erItem\030\203\001 \001(\0132\034.Proto.SchemaItemTransmit"
+  "ter\0220\n\014ReceiverItem\030\204\001 \001(\0132\031.Proto.Schem"
+  "aItemReceiver\022,\n\013InOutSignal\030\205\001 \001(\0132\026.Pr"
+  "oto.SchemaItemInOut\022\"\n\003ufb\030\206\001 \001(\0132\024.Prot"
+  "o.SchemaItemUfb\0220\n\nterminator\030\207\001 \001(\0132\033.P"
+  "roto.SchemaItemTerminator\022&\n\005Value\030\210\001 \001("
+  "\0132\026.Proto.SchemaItemValue\0220\n\nImageValue\030"
+  "\211\001 \001(\0132\033.Proto.SchemaItemImageValue\022&\n\007B"
+  "usItem\030\226\001 \001(\0132\024.Proto.SchemaItemBus\0222\n\013B"
+  "usComposer\030\227\001 \001(\0132\034.Proto.SchemaItemBusC"
+  "omposer\0224\n\014BusExtractor\030\230\001 \001(\0132\035.Proto.S"
+  "chemaItemBusExtractor\0220\n\014LoopbackItem\030\233\001"
+  " \001(\0132\031.Proto.SchemaItemLoopback\0228\n\016loopb"
+  "ackSource\030\234\001 \001(\0132\037.Proto.SchemaItemLoopb"
+  "ackSource\0228\n\016loopbackTarget\030\235\001 \001(\0132\037.Pro"
+  "to.SchemaItemLoopbackTarget\022*\n\007control\030\310"
+  "\001 \001(\0132\030.Proto.SchemaItemControl\0220\n\npushB"
+  "utton\030\322\001 \001(\0132\033.Proto.SchemaItemPushButto"
+  "n\022,\n\010lineEdit\030\323\001 \001(\0132\031.Proto.SchemaItemL"
+  "ineEdit\022(\n\006slider\030\324\001 \001(\0132\027.Proto.SchemaI"
+  "temSlider\"[\n\013PosRectImpl\022\021\n\tleftDocPt\030\001 "
   "\002(\001\022\020\n\010topDocPt\030\002 \002(\001\022\022\n\nwidthDocPt\030\003 \002("
-  "\001\022\023\n\013heightDocPt\030\004 \002(\001\"]\n\013PosLineImpl\022\023\n"
-  "\013startXDocPt\030\001 \002(\001\022\023\n\013startYDocPt\030\002 \002(\001\022"
-  "\021\n\tendXDocPt\030\003 \002(\001\022\021\n\tendYDocPt\030\004 \002(\001\"7\n"
-  "\021PosConnectionImpl\022\"\n\006points\030\001 \003(\0132\022.Pro"
-  "to.SchemaPoint\"\261\002\n\016SchemaItemRect\022\016\n\006wei"
-  "ght\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\022\021\n\tfillColo"
-  "r\030\003 \002(\r\022\034\n\004text\030\004 \002(\0132\016.Proto.wstring\022\021\n"
-  "\ttextColor\030\005 \002(\r\022\036\n\004font\030\006 \002(\0132\020.Proto.F"
-  "ontParam\022\014\n\004fill\030\007 \002(\010\022\026\n\010drawrect\030\010 \001(\010"
-  ":\004true\022\024\n\thorzAlign\030\t \001(\005:\0014\022\026\n\tvertAlig"
-  "n\030\n \001(\005:\003128\022\027\n\010wordWrap\030\013 \001(\010:\005false\022\024\n"
-  "\tlineStyle\030\014 \001(\005:\0011\022\025\n\ntextFormat\030\r \001(\005:"
-  "\0010\"\255\001\n\016SchemaItemLine\022\016\n\006weight\030\001 \002(\001\022\021\n"
-  "\tlineColor\030\002 \002(\r\022\024\n\tlineStyle\030\003 \001(\005:\0011\022\030"
-  "\n\014lineStyleCap\030\007 \001(\005:\00216\022\027\n\014lineCapStart"
-  "\030\004 \001(\005:\0010\022\025\n\nlineCapEnd\030\005 \001(\005:\0010\022\030\n\rline"
-  "CapFactor\030\006 \001(\001:\0012\"\255\001\n\016SchemaItemPath\022\016\n"
-  "\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\022\024\n\tline"
-  "Style\030\003 \001(\005:\0011\022\030\n\014lineStyleCap\030\007 \001(\005:\00216"
-  "\022\027\n\014lineCapStart\030\004 \001(\005:\0010\022\025\n\nlineCapEnd\030"
-  "\005 \001(\005:\0010\022\030\n\rlineCapFactor\030\006 \001(\001:\0012\"2\n\017Sc"
-  "hemaItemImage\022\037\n\005image\030\001 \001(\0132\020.Proto.Ima"
-  "geItem\"\\\n\017SchemaItemFrame\022\020\n\010schemaId\030\001 "
-  "\001(\t\022\030\n\nallowScale\030\002 \001(\010:\004true\022\035\n\017keepAsp"
-  "ectRatio\030\003 \001(\010:\004true\"R\n\016VFrameSetPoint\022\r"
-  "\n\005color\030\003 \001(\r\022\026\n\013colorSource\030\004 \001(\005:\0010\022\031\n"
-  "\021outputAppSignalId\030\024 \001(\t\"\250\006\n\026IndicatorHi"
-  "stogramVert\022\027\n\014signalSource\030d \001(\005:\0010\022\024\n\t"
-  "precision\030g \001(\005:\0012\022\031\n\014analogFormat\030h \001(\005"
-  ":\003102\022\036\n\004font\030m \001(\0132\020.Proto.FontParam\022\027\n"
-  "\010drawRect\030n \001(\010:\005false\022\025\n\nlineWeight\030o \001"
-  "(\001:\0010\022\027\n\017backgroundColor\030t \001(\r\022\021\n\tlineCo"
-  "lor\030u \001(\r\022\024\n\014signalColors\030v \003(\r\022\022\n\nstart"
-  "Value\030\001 \001(\001\022\020\n\010endValue\030\002 \001(\001\022\020\n\010barWidt"
-  "h\030\020 \001(\001\022\022\n\nleftMargin\030\024 \001(\001\022\021\n\ttopMargin"
-  "\030\025 \001(\001\022\023\n\013rightMargin\030\026 \001(\001\022\024\n\014bottomMar"
-  "gin\030\027 \001(\001\022\031\n\013drawBarRect\030  \001(\010:\004true\022\026\n\010"
-  "drawGrid\030( \001(\010:\004true\022!\n\022drawGridForAllBa"
-  "rs\030) \001(\010:\005false\022\034\n\016drawGridValues\030* \001(\010:"
-  "\004true\022&\n\027drawGridValueForAllBars\030+ \001(\010:\005"
-  "false\022 \n\022drawGridValueUnits\030, \001(\010:\004true\022"
-  "\036\n\022linearGridMainStep\0302 \001(\001:\00250\022\037\n\023linea"
-  "rGridSmallStep\0303 \001(\001:\00210\022\"\n\027logarithmicG"
-  "ridMainStep\0304 \001(\001:\0011\022%\n\030logarithmicGridS"
-  "mallStep\0305 \001(\001:\0030.5\022\030\n\rdrawSetpoints\030F \001"
-  "(\005:\0010\022.\n\017customSetPoints\030H \003(\0132\025.Proto.V"
-  "FrameSetPoint\022\024\n\tscaleType\030K \001(\005:\0010\"f\n\027I"
-  "ndicatorArrowIndicator\022\022\n\nstartValue\030\001 \001"
-  "(\001\022\020\n\010endValue\030\002 \001(\001\022\022\n\nstartAngle\030\020 \001(\001"
-  "\022\021\n\tspanAngle\030\021 \001(\001\"c\n\031IndicatorTrendSig"
-  "nalParam\022\r\n\005color\030\002 \001(\007\022\022\n\nlineWieght\030\003 "
-  "\001(\005\022\020\n\010lowLimit\030\024 \001(\001\022\021\n\thighLimit\030\025 \001(\001"
-  "\"\237\001\n\016IndicatorTrend\022\024\n\014sampleperiod\030Z \001("
-  "\005\022\020\n\010timeType\030[ \001(\005\022\026\n\016redrawinterval\030d "
-  "\001(\003\022\020\n\010duration\0303 \001(\003\022;\n\021trendSignalPara"
-  "ms\030n \003(\0132 .Proto.IndicatorTrendSignalPar"
-  "am\"\350\001\n\023SchemaItemIndicator\022\021\n\tsignalIds\030"
-  "\001 \001(\t\022\017\n\004type\030  \001(\r:\0010\022=\n\026indicatorHisto"
-  "gramVert\0300 \001(\0132\035.Proto.IndicatorHistogra"
-  "mVert\022\?\n\027indicatorArrowIndicator\0301 \001(\0132\036"
-  ".Proto.IndicatorArrowIndicator\022-\n\016indica"
-  "torTrend\0302 \001(\0132\025.Proto.IndicatorTrend\"\351\001"
-  "\n\022FblConnectionPoint\022!\n\005point\030\001 \001(\0132\022.Pr"
-  "oto.SchemaPoint\022/\n\ndirrection\030\002 \001(\0162\033.Pr"
-  "oto.ConnectionDirrection\022\031\n\004uuid\030\003 \001(\0132\013"
-  ".Proto.Uuid\022\030\n\014operandIndex\030\004 \001(\005:\002-1\022\017\n"
-  "\007caption\030\005 \001(\t\022\"\n\rassociatedIos\030\006 \003(\0132\013."
-  "Proto.Uuid\022\025\n\nsignalType\030\007 \001(\005:\0010\"4\n\007Fbl"
-  "Item\022)\n\006points\030\001 \003(\0132\031.Proto.FblConnecti"
-  "onPoint\"\325\001\n\013FblItemRect\022\016\n\006weight\030\001 \002(\001\022"
-  "\021\n\tlineColor\030\002 \002(\r\022\021\n\tfillColor\030\003 \002(\r\022\021\n"
-  "\ttextColor\030\004 \002(\r\022\036\n\004font\030\005 \002(\0132\020.Proto.F"
-  "ontParam\022\025\n\robsoleteLabel\030\006 \001(\t\022\020\n\010userT"
-  "ext\030\007 \001(\t\022\026\n\013userTextPos\030\010 \001(\005:\0011\022\034\n\020obs"
-  "oleteLabelPos\030\t \001(\005:\002-1\"F\n\013FblItemLine\022\016"
-  "\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\022\024\n\tlin"
-  "eStyle\030\003 \001(\005:\0011\"R\n\026SchemaItemSignalColum"
-  "n\022\021\n\005width\030\001 \001(\001:\00220\022\017\n\004data\030\002 \001(\005:\0010\022\024\n"
-  "\thorzAlign\030\003 \001(\005:\0011\"\342\001\n\020SchemaItemSignal"
-  "\022$\n\014appSignalIDs\030\001 \003(\0132\016.Proto.wstring\022\024"
-  "\n\tprecision\030\002 \001(\005:\0012\022\031\n\014analogFormat\030\003 \001"
-  "(\005:\003102\022.\n\007columns\030\004 \003(\0132\035.Proto.SchemaI"
-  "temSignalColumn\022\027\n\tmultiLine\030\005 \001(\010:\004true"
-  "\022\032\n\022impactAppSignalIDs\030\006 \003(\t\022\022\n\ncustomTe"
-  "xt\030\020 \001(\t\"\021\n\017SchemaItemInput\"\022\n\020SchemaIte"
-  "mOutput\"\021\n\017SchemaItemInOut\"\020\n\016SchemaItem"
-  "Link\"\341\001\n\rSchemaItemAfb\022\037\n\006params\030\002 \003(\0132\017"
-  ".Proto.AfbParam\022 \n\010afbStrid\030\003 \001(\0132\016.Prot"
-  "o.wstring\022\024\n\tprecision\030\004 \001(\005:\0012\0223\n\025depre"
-  "cated_afbelement\030\005 \001(\0132\024.Proto.AfbElemen"
-  "tXml\022\030\n\020deprecated_label\030\006 \001(\t\022(\n\nafbele"
-  "ment\030\007 \001(\0132\024.Proto.AfbElementXml\"\236\002\n\017Sch"
-  "emaItemConst\022\017\n\004type\030\001 \001(\005:\0010\022\024\n\tprecisi"
-  "on\030\004 \001(\005:\0012\022\024\n\thorzAlign\030\005 \001(\005:\0014\022\026\n\tver"
-  "tAlign\030\006 \001(\005:\003128\022\031\n\014analogFormat\030\010 \001(\005:"
-  "\003102\022\023\n\010intValue\030\002 \001(\005:\0010\022\016\n\006intRef\030\n \001("
-  "\t\022\036\n\023floatValue_obsolete\030\003 \001(\001:\0010\022\025\n\nflo"
-  "atValue\030\t \001(\002:\0010\022\020\n\010floatRef\030\013 \001(\t\022\030\n\rdi"
-  "screteValue\030\007 \001(\005:\0010\022\023\n\013discreteRef\030\014 \001("
-  "\t\",\n\024SchemaItemConnection\022\024\n\014connectioni"
-  "d\030\001 \001(\t\",\n\025SchemaItemTransmitter\022\023\n\010pinC"
-  "ount\030\001 \001(\005:\0011\"\240\001\n\022SchemaItemReceiver\022\032\n\014"
-  "showValidity\030\001 \001(\010:\004true\022\024\n\014appSignalIds"
-  "\030\002 \001(\t\022\023\n\010dataType\030\003 \001(\005:\0010\022\024\n\tprecision"
-  "\030\004 \001(\005:\0012\022\031\n\014analogFormat\030\005 \001(\005:\003102\022\022\n\n"
-  "customText\030\020 \001(\t\"\231\001\n\rSchemaItemUfb\022\023\n\013uf"
-  "bSchemaId\030\001 \001(\t\022\022\n\nufbCaption\030\002 \001(\t\022\026\n\nu"
-  "fbVersion\030\003 \001(\005:\002-1\022\"\n\032specific_properti"
-  "es_struct\030\n \001(\t\022#\n\nproperties\030\013 \003(\0132\017.Pr"
-  "oto.Property\"\026\n\024SchemaItemTerminator\"\260\002\n"
-  "\017SchemaItemValue\022\021\n\tsignalIds\030\001 \001(\t\022\027\n\014s"
-  "ignalSource\030\002 \001(\005:\0010\022\022\n\nlineWeight\030\004 \001(\001"
-  "\022\021\n\tlineColor\030\005 \001(\r\022\021\n\tfillColor\030\006 \001(\r\022\021"
-  "\n\ttextColor\030\007 \001(\r\022\014\n\004text\030\010 \001(\t\022\036\n\004font\030"
-  "\t \001(\0132\020.Proto.FontParam\022\026\n\010drawRect\030\n \001("
-  "\010:\004true\022\024\n\thorzAlign\030\013 \001(\005:\0014\022\026\n\tvertAli"
-  "gn\030\014 \001(\005:\003128\022\025\n\tprecision\030\r \001(\005:\002-1\022\031\n\014"
-  "analogFormat\030\016 \001(\005:\003102\"\203\002\n\024SchemaItemIm"
-  "ageValue\022\021\n\tsignalIds\030\001 \001(\t\022\027\n\014signalSou"
-  "rce\030\002 \001(\005:\0010\022\026\n\016currentImageId\030\003 \001(\t\022\025\n\n"
-  "lineWeight\030\006 \001(\001:\0010\022\035\n\tlineColor\030\007 \001(\r:\n"
-  "4278190080\022\035\n\tfillColor\030\010 \001(\r:\n427819027"
-  "2\022\027\n\010drawRect\030\t \001(\010:\005false\022\027\n\010fillRect\030\n"
-  " \001(\010:\005false\022 \n\006images\030\016 \003(\0132\020.Proto.Imag"
-  "eItem\"P\n\rSchemaItemBus\022\021\n\tbusTypeId\030\002 \001("
-  "\t\022\023\n\013busTypeHash\030\003 \001(\006\022\027\n\003bus\030\005 \001(\0132\n.Pr"
-  "oto.Bus\"\027\n\025SchemaItemBusComposer\"=\n\026Sche"
-  "maItemBusExtractor\022#\n\nproperties\030\002 \003(\0132\017"
-  ".Proto.Property\"(\n\022SchemaItemLoopback\022\022\n"
-  "\nloopbackId\030\002 \001(\t\"\032\n\030SchemaItemLoopbackS"
-  "ource\"\032\n\030SchemaItemLoopbackTarget\"8\n\021Sch"
-  "emaItemControl\022\022\n\nstyleSheet\030\001 \001(\t\022\017\n\007to"
-  "olTip\030\002 \001(\t\"\220\002\n\024SchemaItemPushButton\022\014\n\004"
-  "text\030\001 \001(\t\022\021\n\tcheckable\030\002 \001(\010\022\026\n\016checked"
-  "Default\030\003 \001(\010\022\022\n\nautoRepeat\030\004 \001(\010\022\027\n\017aut"
-  "oRepeatDelay\030\005 \001(\005\022\032\n\022autoRepeatInterval"
-  "\030\006 \001(\005\022\031\n\021scriptAfterCreate\030\025 \001(\t\022\025\n\rscr"
-  "iptClicked\030\026 \001(\t\022\025\n\rscriptPressed\030\027 \001(\t\022"
-  "\026\n\016scriptReleased\030\030 \001(\t\022\025\n\rscriptToggled"
-  "\030\031 \001(\t\"\370\001\n\022SchemaItemLineEdit\022\014\n\004text\030\001 "
-  "\001(\t\022\021\n\thorzAlign\030\002 \001(\005\022\021\n\tvertAlign\030\003 \001("
-  "\005\022\021\n\tmaxLength\030\004 \001(\005\022\027\n\017placeholderText\030"
-  "\005 \001(\t\022\020\n\010readOnly\030\006 \001(\010\022\031\n\021scriptAfterCr"
-  "eate\030\025 \001(\t\022\035\n\025scriptEditingFinished\030\026 \001("
-  "\t\022\033\n\023scriptReturnPressed\030\027 \001(\t\022\031\n\021script"
-  "TextChanged\030\030 \001(\t\"\236\006\n\014DeviceObject\022\031\n\004uu"
-  "id\030\001 \002(\0132\013.Proto.Uuid\022#\n\013equipmentId\030\002 \002"
-  "(\0132\016.Proto.wstring\022\037\n\007caption\030\003 \002(\0132\016.Pr"
-  "oto.wstring\022(\n\020childRestriction\030\004 \001(\0132\016."
-  "Proto.wstring\022\020\n\005place\030\005 \001(\005:\0010\022\"\n\032speci"
-  "fic_properties_struct\030\006 \001(\t\022#\n\npropertie"
-  "s\030\007 \003(\0132\017.Proto.Property\022\025\n\006preset\030  \001(\010"
-  ":\005false\022\031\n\npresetRoot\030! \001(\010:\005false\022\"\n\npr"
-  "esetName\030\" \001(\0132\016.Proto.wstring\022%\n\020preset"
-  "ObjectUuid\030# \001(\0132\013.Proto.Uuid\022\031\n\016childCo"
-  "untHint\030$ \001(\005:\0010\022\025\n\rpresetVersion\030% \001(\005\022"
-  "\037\n\004Root\030d \001(\0132\021.Proto.DeviceRoot\022#\n\006Syst"
-  "em\030e \001(\0132\023.Proto.DeviceSystem\022\037\n\004Rack\030f "
-  "\001(\0132\021.Proto.DeviceRack\022%\n\007Chassis\030g \001(\0132"
-  "\024.Proto.DeviceChassis\022#\n\006Module\030h \001(\0132\023."
-  "Proto.DeviceModule\022+\n\nController\030i \001(\0132\027"
-  ".Proto.DeviceController\022)\n\tAppSignal\030j \001"
-  "(\0132\026.Proto.DeviceAppSignal\022\'\n\013Workstatio"
-  "n\030k \001(\0132\022.Proto.Workstation\022!\n\010Software\030"
-  "l \001(\0132\017.Proto.Software\022\"\n\010children\030\310\001 \003("
-  "\0132\017.Proto.Envelope\"\014\n\nDeviceRoot\"\016\n\014Devi"
-  "ceSystem\"\014\n\nDeviceRack\" \n\rDeviceChassis\022"
-  "\017\n\004type\030\001 \001(\005:\0010\"\223\001\n\014DeviceModule\022\027\n\014typ"
-  "eObsolete\030\001 \001(\005:\0010\022\033\n\023configurationScrip"
-  "t\030\002 \001(\t\022\022\n\nmoduleType\030\003 \001(\005\022\032\n\022rawDataDe"
-  "scription\030\004 \001(\t\022\035\n\022customModuleFamily\030\005 "
-  "\001(\005:\0010\"\022\n\020DeviceController\"\363\003\n\017DeviceApp"
-  "Signal\022\027\n\014obsoletetype\030\001 \001(\005:\0010\022\024\n\tbyteO"
-  "rder\030\002 \001(\005:\0010\022\021\n\006format\030\003 \001(\005:\0010\022\017\n\004size"
-  "\030\004 \001(\005:\0010\022\026\n\013valueOffset\030\007 \001(\005:\0010\022\023\n\010val"
-  "ueBit\030\010 \001(\005:\0010\022\017\n\004type\030\t \001(\005:\0010\022\023\n\010funct"
-  "ion\030\n \001(\005:\0010\022\025\n\nmemoryArea\030\013 \001(\005:\0010\022\032\n\017a"
-  "ppSignalLowAdc\030\014 \001(\005:\0010\022\037\n\020appSignalHigh"
-  "Adc\030\r \001(\005:\00565535\022\037\n\024appSignalLowEngUnits"
-  "\030\016 \001(\001:\0010\022\"\n\025appSignalHighEngUnits\030\017 \001(\001"
-  ":\003100\022\036\n\023appSignalDataFormat\030\020 \001(\005:\0012\022\030\n"
-  "\020validitySignalId\030\024 \001(\t\022\032\n\022appSignalBusT"
-  "ypeId\030\032 \001(\t\022\035\n\025signalSpecPropsStruct\030( \001"
-  "(\t\022,\n\035signalSpecPropsStructWasFixed\030) \001("
-  "\010:\005false\"0\n\013Workstation\022\017\n\004type\030\001 \001(\005:\0010"
-  "\022\020\n\010hostname\030\002 \001(\t\"\033\n\010Software\022\017\n\004type\030\001"
-  " \001(\005:\0010\"p\n\023ModuleConfiguration\022\032\n\022struct"
-  "_description\030\001 \001(\t\022/\n\006values\030\002 \003(\0132\037.Pro"
-  "to.ModuleConfigurationValue\022\014\n\004name\030\003 \001("
-  "\t\"7\n\030ModuleConfigurationValue\022\014\n\004name\030\001 "
-  "\002(\t\022\r\n\005value\030\002 \002(\t\"\'\n\010Property\022\014\n\004name\030\001"
-  " \002(\t\022\r\n\005value\030\002 \002(\t\"\314\001\n\023SignalSpecPropVa"
-  "lue\022\014\n\004name\030\001 \002(\t\022\017\n\004type\030\002 \002(\005:\0010\022\025\n\006is"
-  "Enum\030\003 \002(\010:\005false\022\020\n\010int32Val\030\n \001(\005\022\021\n\tu"
-  "int32Val\030\013 \001(\r\022\020\n\010int64Val\030\014 \001(\003\022\021\n\tuint"
-  "64Val\030\r \001(\004\022\021\n\tdoubleVal\030\016 \001(\001\022\017\n\007boolVa"
-  "l\030\017 \001(\010\022\021\n\tstringVal\030\020 \001(\t\"A\n\024SignalSpec"
-  "PropValues\022)\n\005value\030\001 \003(\0132\032.Proto.Signal"
-  "SpecPropValue\"0\n\tAddress16\022\022\n\006offset\030\001 \002"
-  "(\005:\002-1\022\017\n\003bit\030\002 \002(\005:\002-1\"&\n\004Unit\022\r\n\002id\030\001 "
-  "\002(\005:\0010\022\017\n\007caption\030\002 \002(\t\"$\n\007UnitSet\022\031\n\004un"
-  "it\030\001 \003(\0132\013.Proto.Unit\"H\n\013TuningValue\022\014\n\004"
-  "type\030\001 \001(\005\022\023\n\010intValue\030\002 \001(\003:\0010\022\026\n\013doubl"
-  "eValue\030\003 \001(\001:\0010\"\206\002\n\020AppSignalDbField\022\016\n\002"
-  "ID\030\001 \001(\005:\002-1\022\031\n\rsignalGroupID\030\002 \001(\005:\002-1\022"
-  "\034\n\020signalInstanceID\030\003 \001(\005:\002-1\022\027\n\013changes"
-  "etID\030\004 \001(\005:\002-1\022\031\n\ncheckedOut\030\005 \001(\010:\005fals"
-  "e\022\022\n\006userID\030\006 \001(\005:\002-1\022\022\n\007created\030\007 \001(\003:\001"
-  "0\022\026\n\007deleted\030\010 \001(\010:\005false\022\032\n\017instanceCre"
-  "ated\030\t \001(\003:\0010\022\031\n\016instanceAction\030\n \001(\005:\0010"
-  "\"<\n\017StateFlagSignal\022\023\n\010flagType\030\001 \001(\005:\0010"
-  "\022\024\n\014flagSignalID\030\002 \001(\t\"\247\003\n\030AppSignalCalc"
-  "ulatedParam\022\017\n\004hash\030\001 \001(\004:\0010\022#\n\tioBufAdd"
-  "r\030\002 \001(\0132\020.Proto.Address16\022$\n\ntuningAddr\030"
-  "\003 \001(\0132\020.Proto.Address16\022!\n\007ualAddr\030\004 \001(\013"
-  "2\020.Proto.Address16\022$\n\nregBufAddr\030\005 \001(\0132\020"
-  ".Proto.Address16\022&\n\014regValueAddr\030\006 \001(\0132\020"
-  ".Proto.Address16\022)\n\017regValidityAddr\030\007 \001("
-  "\0132\020.Proto.Address16\022\026\n\013lmRamAccess\030\010 \001(\005"
-  ":\0010\022\026\n\007isConst\030\t \001(\010:\005false\022\025\n\nconstValu"
-  "e\030\n \001(\001:\0010\0221\n\021stateFlagsSignals\030\013 \003(\0132\026."
-  "Proto.StateFlagSignal\022\031\n\nisEndpoint\030\014 \001("
-  "\010:\005false\"\250\006\n\tAppSignal\022\023\n\013appSignalID\030\001 "
-  "\001(\t\022\031\n\021customAppSignalID\030\002 \001(\t\022\017\n\007captio"
-  "n\030\003 \001(\t\022\023\n\013equipmentID\030\004 \001(\t\022\025\n\rlmEquipm"
-  "entID\030\005 \001(\t\022\021\n\tbusTypeID\030\006 \001(\t\022\022\n\007channe"
-  "l\030\007 \001(\005:\0010\022\037\n\020excludeFromBuild\030\010 \001(\010:\005fa"
+  "\001\022\023\n\013heightDocPt\030\004 \002(\001\"8\n\020PosRectRotatab"
+  "le\022\r\n\005angle\030\002 \001(\001\022\025\n\rrotationpoint\030\003 \001(\005"
+  "\"]\n\013PosLineImpl\022\023\n\013startXDocPt\030\001 \002(\001\022\023\n\013"
+  "startYDocPt\030\002 \002(\001\022\021\n\tendXDocPt\030\003 \002(\001\022\021\n\t"
+  "endYDocPt\030\004 \002(\001\"7\n\021PosConnectionImpl\022\"\n\006"
+  "points\030\001 \003(\0132\022.Proto.SchemaPoint\"\261\002\n\016Sch"
+  "emaItemRect\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor"
+  "\030\002 \002(\r\022\021\n\tfillColor\030\003 \002(\r\022\034\n\004text\030\004 \002(\0132"
+  "\016.Proto.wstring\022\021\n\ttextColor\030\005 \002(\r\022\036\n\004fo"
+  "nt\030\006 \002(\0132\020.Proto.FontParam\022\014\n\004fill\030\007 \002(\010"
+  "\022\026\n\010drawrect\030\010 \001(\010:\004true\022\024\n\thorzAlign\030\t "
+  "\001(\005:\0014\022\026\n\tvertAlign\030\n \001(\005:\003128\022\027\n\010wordWr"
+  "ap\030\013 \001(\010:\005false\022\024\n\tlineStyle\030\014 \001(\005:\0011\022\025\n"
+  "\ntextFormat\030\r \001(\005:\0010\"\255\001\n\016SchemaItemLine\022"
+  "\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\022\024\n\tli"
+  "neStyle\030\003 \001(\005:\0011\022\030\n\014lineStyleCap\030\007 \001(\005:\002"
+  "16\022\027\n\014lineCapStart\030\004 \001(\005:\0010\022\025\n\nlineCapEn"
+  "d\030\005 \001(\005:\0010\022\030\n\rlineCapFactor\030\006 \001(\001:\0012\"\255\001\n"
+  "\016SchemaItemPath\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineC"
+  "olor\030\002 \002(\r\022\024\n\tlineStyle\030\003 \001(\005:\0011\022\030\n\014line"
+  "StyleCap\030\007 \001(\005:\00216\022\027\n\014lineCapStart\030\004 \001(\005"
+  ":\0010\022\025\n\nlineCapEnd\030\005 \001(\005:\0010\022\030\n\rlineCapFac"
+  "tor\030\006 \001(\001:\0012\"2\n\017SchemaItemImage\022\037\n\005image"
+  "\030\001 \001(\0132\020.Proto.ImageItem\"\\\n\017SchemaItemFr"
+  "ame\022\020\n\010schemaId\030\001 \001(\t\022\030\n\nallowScale\030\002 \001("
+  "\010:\004true\022\035\n\017keepAspectRatio\030\003 \001(\010:\004true\"R"
+  "\n\016VFrameSetPoint\022\r\n\005color\030\003 \001(\r\022\026\n\013color"
+  "Source\030\004 \001(\005:\0010\022\031\n\021outputAppSignalId\030\024 \001"
+  "(\t\"\250\006\n\026IndicatorHistogramVert\022\027\n\014signalS"
+  "ource\030d \001(\005:\0010\022\024\n\tprecision\030g \001(\005:\0012\022\031\n\014"
+  "analogFormat\030h \001(\005:\003102\022\036\n\004font\030m \001(\0132\020."
+  "Proto.FontParam\022\027\n\010drawRect\030n \001(\010:\005false"
+  "\022\025\n\nlineWeight\030o \001(\001:\0010\022\027\n\017backgroundCol"
+  "or\030t \001(\r\022\021\n\tlineColor\030u \001(\r\022\024\n\014signalCol"
+  "ors\030v \003(\r\022\022\n\nstartValue\030\001 \001(\001\022\020\n\010endValu"
+  "e\030\002 \001(\001\022\020\n\010barWidth\030\020 \001(\001\022\022\n\nleftMargin\030"
+  "\024 \001(\001\022\021\n\ttopMargin\030\025 \001(\001\022\023\n\013rightMargin\030"
+  "\026 \001(\001\022\024\n\014bottomMargin\030\027 \001(\001\022\031\n\013drawBarRe"
+  "ct\030  \001(\010:\004true\022\026\n\010drawGrid\030( \001(\010:\004true\022!"
+  "\n\022drawGridForAllBars\030) \001(\010:\005false\022\034\n\016dra"
+  "wGridValues\030* \001(\010:\004true\022&\n\027drawGridValue"
+  "ForAllBars\030+ \001(\010:\005false\022 \n\022drawGridValue"
+  "Units\030, \001(\010:\004true\022\036\n\022linearGridMainStep\030"
+  "2 \001(\001:\00250\022\037\n\023linearGridSmallStep\0303 \001(\001:\002"
+  "10\022\"\n\027logarithmicGridMainStep\0304 \001(\001:\0011\022%"
+  "\n\030logarithmicGridSmallStep\0305 \001(\001:\0030.5\022\030\n"
+  "\rdrawSetpoints\030F \001(\005:\0010\022.\n\017customSetPoin"
+  "ts\030H \003(\0132\025.Proto.VFrameSetPoint\022\024\n\tscale"
+  "Type\030K \001(\005:\0010\"f\n\027IndicatorArrowIndicator"
+  "\022\022\n\nstartValue\030\001 \001(\001\022\020\n\010endValue\030\002 \001(\001\022\022"
+  "\n\nstartAngle\030\020 \001(\001\022\021\n\tspanAngle\030\021 \001(\001\"c\n"
+  "\031IndicatorTrendSignalParam\022\r\n\005color\030\002 \001("
+  "\007\022\022\n\nlineWieght\030\003 \001(\005\022\020\n\010lowLimit\030\024 \001(\001\022"
+  "\021\n\thighLimit\030\025 \001(\001\"\203\002\n\016IndicatorTrend\022\024\n"
+  "\014sampleperiod\030Z \001(\005\022\020\n\010timeType\030[ \001(\005\022\020\n"
+  "\010viewMode\030\\ \001(\005\022\021\n\tscaleType\030] \001(\005\022\021\n\tla"
+  "neCount\030^ \001(\005\022\024\n\014backColor1st\030_ \001(\007\022\024\n\014b"
+  "ackColor2nd\030` \001(\007\022\026\n\016redrawinterval\030d \001("
+  "\003\022\020\n\010duration\0303 \001(\003\022;\n\021trendSignalParams"
+  "\030n \003(\0132 .Proto.IndicatorTrendSignalParam"
+  "\"\350\001\n\023SchemaItemIndicator\022\021\n\tsignalIds\030\001 "
+  "\001(\t\022\017\n\004type\030  \001(\r:\0010\022=\n\026indicatorHistogr"
+  "amVert\0300 \001(\0132\035.Proto.IndicatorHistogramV"
+  "ert\022\?\n\027indicatorArrowIndicator\0301 \001(\0132\036.P"
+  "roto.IndicatorArrowIndicator\022-\n\016indicato"
+  "rTrend\0302 \001(\0132\025.Proto.IndicatorTrend\"\351\001\n\022"
+  "FblConnectionPoint\022!\n\005point\030\001 \001(\0132\022.Prot"
+  "o.SchemaPoint\022/\n\ndirrection\030\002 \001(\0162\033.Prot"
+  "o.ConnectionDirrection\022\031\n\004uuid\030\003 \001(\0132\013.P"
+  "roto.Uuid\022\030\n\014operandIndex\030\004 \001(\005:\002-1\022\017\n\007c"
+  "aption\030\005 \001(\t\022\"\n\rassociatedIos\030\006 \003(\0132\013.Pr"
+  "oto.Uuid\022\025\n\nsignalType\030\007 \001(\005:\0010\"4\n\007FblIt"
+  "em\022)\n\006points\030\001 \003(\0132\031.Proto.FblConnection"
+  "Point\"\325\001\n\013FblItemRect\022\016\n\006weight\030\001 \002(\001\022\021\n"
+  "\tlineColor\030\002 \002(\r\022\021\n\tfillColor\030\003 \002(\r\022\021\n\tt"
+  "extColor\030\004 \002(\r\022\036\n\004font\030\005 \002(\0132\020.Proto.Fon"
+  "tParam\022\025\n\robsoleteLabel\030\006 \001(\t\022\020\n\010userTex"
+  "t\030\007 \001(\t\022\026\n\013userTextPos\030\010 \001(\005:\0011\022\034\n\020obsol"
+  "eteLabelPos\030\t \001(\005:\002-1\"F\n\013FblItemLine\022\016\n\006"
+  "weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\022\024\n\tlineS"
+  "tyle\030\003 \001(\005:\0011\"R\n\026SchemaItemSignalColumn\022"
+  "\021\n\005width\030\001 \001(\001:\00220\022\017\n\004data\030\002 \001(\005:\0010\022\024\n\th"
+  "orzAlign\030\003 \001(\005:\0011\"\342\001\n\020SchemaItemSignal\022$"
+  "\n\014appSignalIDs\030\001 \003(\0132\016.Proto.wstring\022\024\n\t"
+  "precision\030\002 \001(\005:\0012\022\031\n\014analogFormat\030\003 \001(\005"
+  ":\003102\022.\n\007columns\030\004 \003(\0132\035.Proto.SchemaIte"
+  "mSignalColumn\022\027\n\tmultiLine\030\005 \001(\010:\004true\022\032"
+  "\n\022impactAppSignalIDs\030\006 \003(\t\022\022\n\ncustomText"
+  "\030\020 \001(\t\"\021\n\017SchemaItemInput\"\022\n\020SchemaItemO"
+  "utput\"\021\n\017SchemaItemInOut\"\020\n\016SchemaItemLi"
+  "nk\"\374\001\n\rSchemaItemAfb\022\037\n\006params\030\002 \003(\0132\017.P"
+  "roto.AfbParam\022 \n\010afbStrid\030\003 \001(\0132\016.Proto."
+  "wstring\022\024\n\tprecision\030\004 \001(\005:\0012\0223\n\025depreca"
+  "ted_afbelement\030\005 \001(\0132\024.Proto.AfbElementX"
+  "ml\022\030\n\020deprecated_label\030\006 \001(\t\022(\n\nafbeleme"
+  "nt\030\007 \001(\0132\024.Proto.AfbElementXml\022\031\n\021packed"
+  "LogicInputs\030\010 \003(\t\"\236\002\n\017SchemaItemConst\022\017\n"
+  "\004type\030\001 \001(\005:\0010\022\024\n\tprecision\030\004 \001(\005:\0012\022\024\n\t"
+  "horzAlign\030\005 \001(\005:\0014\022\026\n\tvertAlign\030\006 \001(\005:\0031"
+  "28\022\031\n\014analogFormat\030\010 \001(\005:\003102\022\023\n\010intValu"
+  "e\030\002 \001(\005:\0010\022\016\n\006intRef\030\n \001(\t\022\036\n\023floatValue"
+  "_obsolete\030\003 \001(\001:\0010\022\025\n\nfloatValue\030\t \001(\002:\001"
+  "0\022\020\n\010floatRef\030\013 \001(\t\022\030\n\rdiscreteValue\030\007 \001"
+  "(\005:\0010\022\023\n\013discreteRef\030\014 \001(\t\",\n\024SchemaItem"
+  "Connection\022\024\n\014connectionid\030\001 \001(\t\",\n\025Sche"
+  "maItemTransmitter\022\023\n\010pinCount\030\001 \001(\005:\0011\"\240"
+  "\001\n\022SchemaItemReceiver\022\032\n\014showValidity\030\001 "
+  "\001(\010:\004true\022\024\n\014appSignalIds\030\002 \001(\t\022\023\n\010dataT"
+  "ype\030\003 \001(\005:\0010\022\024\n\tprecision\030\004 \001(\005:\0012\022\031\n\014an"
+  "alogFormat\030\005 \001(\005:\003102\022\022\n\ncustomText\030\020 \001("
+  "\t\"\231\001\n\rSchemaItemUfb\022\023\n\013ufbSchemaId\030\001 \001(\t"
+  "\022\022\n\nufbCaption\030\002 \001(\t\022\026\n\nufbVersion\030\003 \001(\005"
+  ":\002-1\022\"\n\032specific_properties_struct\030\n \001(\t"
+  "\022#\n\nproperties\030\013 \003(\0132\017.Proto.Property\"\026\n"
+  "\024SchemaItemTerminator\"\260\002\n\017SchemaItemValu"
+  "e\022\021\n\tsignalIds\030\001 \001(\t\022\027\n\014signalSource\030\002 \001"
+  "(\005:\0010\022\022\n\nlineWeight\030\004 \001(\001\022\021\n\tlineColor\030\005"
+  " \001(\r\022\021\n\tfillColor\030\006 \001(\r\022\021\n\ttextColor\030\007 \001"
+  "(\r\022\014\n\004text\030\010 \001(\t\022\036\n\004font\030\t \001(\0132\020.Proto.F"
+  "ontParam\022\026\n\010drawRect\030\n \001(\010:\004true\022\024\n\thorz"
+  "Align\030\013 \001(\005:\0014\022\026\n\tvertAlign\030\014 \001(\005:\003128\022\025"
+  "\n\tprecision\030\r \001(\005:\002-1\022\031\n\014analogFormat\030\016 "
+  "\001(\005:\003102\"\203\002\n\024SchemaItemImageValue\022\021\n\tsig"
+  "nalIds\030\001 \001(\t\022\027\n\014signalSource\030\002 \001(\005:\0010\022\026\n"
+  "\016currentImageId\030\003 \001(\t\022\025\n\nlineWeight\030\006 \001("
+  "\001:\0010\022\035\n\tlineColor\030\007 \001(\r:\n4278190080\022\035\n\tf"
+  "illColor\030\010 \001(\r:\n4278190272\022\027\n\010drawRect\030\t"
+  " \001(\010:\005false\022\027\n\010fillRect\030\n \001(\010:\005false\022 \n\006"
+  "images\030\016 \003(\0132\020.Proto.ImageItem\"P\n\rSchema"
+  "ItemBus\022\021\n\tbusTypeId\030\002 \001(\t\022\023\n\013busTypeHas"
+  "h\030\003 \001(\006\022\027\n\003bus\030\005 \001(\0132\n.Proto.Bus\"\027\n\025Sche"
+  "maItemBusComposer\"=\n\026SchemaItemBusExtrac"
+  "tor\022#\n\nproperties\030\002 \003(\0132\017.Proto.Property"
+  "\"(\n\022SchemaItemLoopback\022\022\n\nloopbackId\030\002 \001"
+  "(\t\"\032\n\030SchemaItemLoopbackSource\"\032\n\030Schema"
+  "ItemLoopbackTarget\"8\n\021SchemaItemControl\022"
+  "\022\n\nstyleSheet\030\001 \001(\t\022\017\n\007toolTip\030\002 \001(\t\"\220\002\n"
+  "\024SchemaItemPushButton\022\014\n\004text\030\001 \001(\t\022\021\n\tc"
+  "heckable\030\002 \001(\010\022\026\n\016checkedDefault\030\003 \001(\010\022\022"
+  "\n\nautoRepeat\030\004 \001(\010\022\027\n\017autoRepeatDelay\030\005 "
+  "\001(\005\022\032\n\022autoRepeatInterval\030\006 \001(\005\022\031\n\021scrip"
+  "tAfterCreate\030\025 \001(\t\022\025\n\rscriptClicked\030\026 \001("
+  "\t\022\025\n\rscriptPressed\030\027 \001(\t\022\026\n\016scriptReleas"
+  "ed\030\030 \001(\t\022\025\n\rscriptToggled\030\031 \001(\t\"\370\001\n\022Sche"
+  "maItemLineEdit\022\014\n\004text\030\001 \001(\t\022\021\n\thorzAlig"
+  "n\030\002 \001(\005\022\021\n\tvertAlign\030\003 \001(\005\022\021\n\tmaxLength\030"
+  "\004 \001(\005\022\027\n\017placeholderText\030\005 \001(\t\022\020\n\010readOn"
+  "ly\030\006 \001(\010\022\031\n\021scriptAfterCreate\030\025 \001(\t\022\035\n\025s"
+  "criptEditingFinished\030\026 \001(\t\022\033\n\023scriptRetu"
+  "rnPressed\030\027 \001(\t\022\031\n\021scriptTextChanged\030\030 \001"
+  "(\t\"\325\003\n\020SchemaItemSlider\022!\n\022invertedAppea"
+  "rance\030\002 \001(\010:\005false\022\037\n\020invertedControls\030\003"
+  " \001(\010:\005false\022\037\n\020enableMouseWheel\030\004 \001(\010:\005f"
+  "alse\022\023\n\007maximum\030\006 \001(\005:\00299\022\022\n\007minimum\030\007 \001"
+  "(\005:\0010\022\026\n\013orientation\030\n \001(\005:\0012\022\024\n\010pageSte"
+  "p\030\014 \001(\005:\00210\022\025\n\nsingleStep\030\r \001(\005:\0011\022\026\n\010tr"
+  "acking\030\020 \001(\010:\004true\022\027\n\014defaultValue\030\021 \001(\005"
+  ":\0010\022\027\n\014tickInterval\030\024 \001(\005:\0010\022\027\n\014tickPosi"
+  "tion\030\025 \001(\005:\0010\022\031\n\021scriptAfterCreate\030\037 \001(\t"
+  "\022\031\n\021scriptSliderMoved\030  \001(\t\022\033\n\023scriptSli"
+  "derPressed\030! \001(\t\022\034\n\024scriptSliderReleased"
+  "\030\" \001(\t\022\032\n\022scriptValueChanged\030# \001(\t\"\317\006\n\014D"
+  "eviceObject\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022#"
+  "\n\013equipmentId\030\002 \002(\0132\016.Proto.wstring\022\037\n\007c"
+  "aption\030\003 \002(\0132\016.Proto.wstring\022(\n\020childRes"
+  "triction\030\004 \001(\0132\016.Proto.wstring\022\020\n\005place\030"
+  "\005 \001(\005:\0010\022\"\n\032specific_properties_struct\030\006"
+  " \001(\t\022#\n\nproperties\030\007 \003(\0132\017.Proto.Propert"
+  "y\022\014\n\004tags\030\010 \003(\t\022\025\n\006preset\030  \001(\010:\005false\022\031"
+  "\n\npresetRoot\030! \001(\010:\005false\022\"\n\npresetName\030"
+  "\" \001(\0132\016.Proto.wstring\022%\n\020presetObjectUui"
+  "d\030# \001(\0132\013.Proto.Uuid\022\031\n\016childCountHint\030$"
+  " \001(\005:\0010\022\025\n\rpresetVersion\030% \001(\005\022!\n\031preset"
+  "ProtectedProperties\030& \001(\t\022\037\n\004Root\030d \001(\0132"
+  "\021.Proto.DeviceRoot\022#\n\006System\030e \001(\0132\023.Pro"
+  "to.DeviceSystem\022\037\n\004Rack\030f \001(\0132\021.Proto.De"
+  "viceRack\022%\n\007Chassis\030g \001(\0132\024.Proto.Device"
+  "Chassis\022#\n\006Module\030h \001(\0132\023.Proto.DeviceMo"
+  "dule\022+\n\nController\030i \001(\0132\027.Proto.DeviceC"
+  "ontroller\022)\n\tAppSignal\030j \001(\0132\026.Proto.Dev"
+  "iceAppSignal\022\'\n\013Workstation\030k \001(\0132\022.Prot"
+  "o.Workstation\022!\n\010Software\030l \001(\0132\017.Proto."
+  "Software\022\"\n\010children\030\310\001 \003(\0132\017.Proto.Enve"
+  "lope\"\014\n\nDeviceRoot\"\016\n\014DeviceSystem\"\014\n\nDe"
+  "viceRack\" \n\rDeviceChassis\022\017\n\004type\030\001 \001(\005:"
+  "\0010\"\223\001\n\014DeviceModule\022\027\n\014typeObsolete\030\001 \001("
+  "\005:\0010\022\033\n\023configurationScript\030\002 \001(\t\022\022\n\nmod"
+  "uleType\030\003 \001(\005\022\032\n\022rawDataDescription\030\004 \001("
+  "\t\022\035\n\022customModuleFamily\030\005 \001(\005:\0010\"\022\n\020Devi"
+  "ceController\"\363\003\n\017DeviceAppSignal\022\027\n\014obso"
+  "letetype\030\001 \001(\005:\0010\022\024\n\tbyteOrder\030\002 \001(\005:\0010\022"
+  "\021\n\006format\030\003 \001(\005:\0010\022\017\n\004size\030\004 \001(\005:\0010\022\026\n\013v"
+  "alueOffset\030\007 \001(\005:\0010\022\023\n\010valueBit\030\010 \001(\005:\0010"
+  "\022\017\n\004type\030\t \001(\005:\0010\022\023\n\010function\030\n \001(\005:\0010\022\025"
+  "\n\nmemoryArea\030\013 \001(\005:\0010\022\032\n\017appSignalLowAdc"
+  "\030\014 \001(\005:\0010\022\037\n\020appSignalHighAdc\030\r \001(\005:\005655"
+  "35\022\037\n\024appSignalLowEngUnits\030\016 \001(\001:\0010\022\"\n\025a"
+  "ppSignalHighEngUnits\030\017 \001(\001:\003100\022\036\n\023appSi"
+  "gnalDataFormat\030\020 \001(\005:\0012\022\030\n\020validitySigna"
+  "lId\030\024 \001(\t\022\032\n\022appSignalBusTypeId\030\032 \001(\t\022\035\n"
+  "\025signalSpecPropsStruct\030( \001(\t\022,\n\035signalSp"
+  "ecPropsStructWasFixed\030) \001(\010:\005false\"0\n\013Wo"
+  "rkstation\022\017\n\004type\030\001 \001(\005:\0010\022\020\n\010hostname\030\002"
+  " \001(\t\"\033\n\010Software\022\017\n\004type\030\001 \001(\005:\0010\"p\n\023Mod"
+  "uleConfiguration\022\032\n\022struct_description\030\001"
+  " \001(\t\022/\n\006values\030\002 \003(\0132\037.Proto.ModuleConfi"
+  "gurationValue\022\014\n\004name\030\003 \001(\t\"7\n\030ModuleCon"
+  "figurationValue\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002"
+  " \002(\t\"\'\n\010Property\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030"
+  "\002 \002(\t\"\314\001\n\023SignalSpecPropValue\022\014\n\004name\030\001 "
+  "\002(\t\022\017\n\004type\030\002 \002(\005:\0010\022\025\n\006isEnum\030\003 \002(\010:\005fa"
+  "lse\022\020\n\010int32Val\030\n \001(\005\022\021\n\tuint32Val\030\013 \001(\r"
+  "\022\020\n\010int64Val\030\014 \001(\003\022\021\n\tuint64Val\030\r \001(\004\022\021\n"
+  "\tdoubleVal\030\016 \001(\001\022\017\n\007boolVal\030\017 \001(\010\022\021\n\tstr"
+  "ingVal\030\020 \001(\t\"A\n\024SignalSpecPropValues\022)\n\005"
+  "value\030\001 \003(\0132\032.Proto.SignalSpecPropValue\""
+  "0\n\tAddress16\022\022\n\006offset\030\001 \002(\005:\002-1\022\017\n\003bit\030"
+  "\002 \002(\005:\002-1\"&\n\004Unit\022\r\n\002id\030\001 \002(\005:\0010\022\017\n\007capt"
+  "ion\030\002 \002(\t\"$\n\007UnitSet\022\031\n\004unit\030\001 \003(\0132\013.Pro"
+  "to.Unit\"H\n\013TuningValue\022\014\n\004type\030\001 \001(\005\022\023\n\010"
+  "intValue\030\002 \001(\003:\0010\022\026\n\013doubleValue\030\003 \001(\001:\001"
+  "0\"\206\002\n\020AppSignalDbField\022\016\n\002ID\030\001 \001(\005:\002-1\022\031"
+  "\n\rsignalGroupID\030\002 \001(\005:\002-1\022\034\n\020signalInsta"
+  "nceID\030\003 \001(\005:\002-1\022\027\n\013changesetID\030\004 \001(\005:\002-1"
+  "\022\031\n\ncheckedOut\030\005 \001(\010:\005false\022\022\n\006userID\030\006 "
+  "\001(\005:\002-1\022\022\n\007created\030\007 \001(\003:\0010\022\026\n\007deleted\030\010"
+  " \001(\010:\005false\022\032\n\017instanceCreated\030\t \001(\003:\0010\022"
+  "\031\n\016instanceAction\030\n \001(\005:\0010\"<\n\017StateFlagS"
+  "ignal\022\023\n\010flagType\030\001 \001(\005:\0010\022\024\n\014flagSignal"
+  "ID\030\002 \001(\t\"\247\003\n\030AppSignalCalculatedParam\022\017\n"
+  "\004hash\030\001 \001(\004:\0010\022#\n\tioBufAddr\030\002 \001(\0132\020.Prot"
+  "o.Address16\022$\n\ntuningAddr\030\003 \001(\0132\020.Proto."
+  "Address16\022!\n\007ualAddr\030\004 \001(\0132\020.Proto.Addre"
+  "ss16\022$\n\nregBufAddr\030\005 \001(\0132\020.Proto.Address"
+  "16\022&\n\014regValueAddr\030\006 \001(\0132\020.Proto.Address"
+  "16\022)\n\017regValidityAddr\030\007 \001(\0132\020.Proto.Addr"
+  "ess16\022\026\n\013lmRamAccess\030\010 \001(\005:\0010\022\026\n\007isConst"
+  "\030\t \001(\010:\005false\022\025\n\nconstValue\030\n \001(\001:\0010\0221\n\021"
+  "stateFlagsSignals\030\013 \003(\0132\026.Proto.StateFla"
+  "gSignal\022\031\n\nisEndpoint\030\014 \001(\010:\005false\"\326\006\n\tA"
+  "ppSignal\022\023\n\013appSignalID\030\001 \001(\t\022\031\n\021customA"
+  "ppSignalID\030\002 \001(\t\022\017\n\007caption\030\003 \001(\t\022\023\n\013equ"
+  "ipmentID\030\004 \001(\t\022\025\n\rlmEquipmentID\030\005 \001(\t\022\021\n"
+  "\tbusTypeID\030\006 \001(\t\022\022\n\007channel\030\007 \001(\005:\0010\022\037\n\020"
+  "excludeFromBuild\030\010 \001(\010:\005false\022\033\n\014invertS"
+  "ignal\030\t \001(\010:\005false\022\027\n\010reserved\030\n \001(\010:\005fa"
   "lse\022\025\n\nsignalType\030\020 \001(\005:\0011\022\024\n\tinOutType\030"
   "\021 \001(\005:\0012\022\023\n\010dataSize\030\025 \001(\005:\0010\022\024\n\tbyteOrd"
   "er\030\026 \001(\005:\0011\022\035\n\022analogSignalFormat\030\032 \001(\005:"
@@ -4292,28 +4513,30 @@ const char descriptor_table_protodef_serialization_2eproto[] PROTOBUF_SECTION_VA
   "(\0132\022.Proto.TuningValue\022\026\n\007acquire\030Q \001(\010:"
   "\005false\022\026\n\007archive\030R \001(\010:\005false\022\030\n\rdecima"
   "lPlaces\030S \001(\005:\0012\022\031\n\016coarseAperture\030T \001(\001"
-  ":\0011\022\031\n\014fineAperture\030U \001(\001:\0030.5\022\037\n\020adapti"
-  "veAperture\030V \001(\010:\005false\022\026\n\016specPropStruc"
-  "t\030Z \001(\t\022\026\n\016specPropValues\030[ \001(\014\022\014\n\004tags\030"
-  "\\ \003(\t\022(\n\007dbField\030x \001(\0132\027.Proto.AppSignal"
-  "DbField\0222\n\tcalcParam\030y \001(\0132\037.Proto.AppSi"
-  "gnalCalculatedParam\"3\n\014AppSignalSet\022#\n\ta"
-  "ppSignal\030\001 \003(\0132\020.Proto.AppSignal\"\321\004\n\022Pro"
-  "toAppSignalData\022\021\n\tbusTypeID\030\001 \001(\t\022\017\n\007ca"
-  "ption\030\002 \001(\t\022\022\n\007channel\030\003 \001(\005:\0010\022\024\n\010dataS"
-  "ize\030\004 \001(\005:\00232\022\024\n\tbyteOrder\030\005 \001(\005:\0011\022\035\n\022a"
-  "nalogSignalFormat\030\006 \001(\005:\0012\022\014\n\004unit\030\007 \001(\t"
-  "\022\033\n\014enableTuning\030\010 \001(\010:\005false\022.\n\022tuningD"
-  "efaultValue\030\t \001(\0132\022.Proto.TuningValue\022*\n"
-  "\016tuningLowBound\030\n \001(\0132\022.Proto.TuningValu"
-  "e\022+\n\017tuningHighBound\030\013 \001(\0132\022.Proto.Tunin"
-  "gValue\022\025\n\007acquire\030\014 \001(\010:\004true\022\025\n\007archive"
-  "\030\r \001(\010:\004true\022\030\n\rdecimalPlaces\030\016 \001(\005:\0012\022\031"
-  "\n\016coarseAperture\030\017 \001(\001:\0011\022\031\n\014fineApertur"
-  "e\030\020 \001(\001:\0030.5\022\037\n\020adaptiveAperture\030\021 \001(\010:\005"
-  "false\022\037\n\020excludefromBuild\030\022 \001(\010:\005false\022\014"
-  "\n\004tags\030\023 \001(\t\022\032\n\022userSpecPropStruct\030\024 \001(\t"
-  "\022\032\n\022userSpecPropValues\030\025 \001(\014\"\264\001\n\016AppSign"
+  ":\0011\022\031\n\014fineAperture\030U \001(\001:\0030.5\022\027\n\014apertu"
+  "reType\030V \001(\005:\0010\022\026\n\016specPropStruct\030Z \001(\t\022"
+  "\026\n\016specPropValues\030[ \001(\014\022\014\n\004tags\030\\ \003(\t\022(\n"
+  "\007dbField\030x \001(\0132\027.Proto.AppSignalDbField\022"
+  "2\n\tcalcParam\030y \001(\0132\037.Proto.AppSignalCalc"
+  "ulatedParam\"3\n\014AppSignalSet\022#\n\tappSignal"
+  "\030\001 \003(\0132\020.Proto.AppSignal\"\251\005\n\022ProtoAppSig"
+  "nalData\022\021\n\tbusTypeID\030\001 \001(\t\022\017\n\007caption\030\002 "
+  "\001(\t\022\022\n\007channel\030\003 \001(\005:\0010\022\024\n\010dataSize\030\004 \001("
+  "\005:\00232\022\024\n\tbyteOrder\030\005 \001(\005:\0011\022\035\n\022analogSig"
+  "nalFormat\030\006 \001(\005:\0012\022\014\n\004unit\030\007 \001(\t\022\033\n\014enab"
+  "leTuning\030\010 \001(\010:\005false\022.\n\022tuningDefaultVa"
+  "lue\030\t \001(\0132\022.Proto.TuningValue\022*\n\016tuningL"
+  "owBound\030\n \001(\0132\022.Proto.TuningValue\022+\n\017tun"
+  "ingHighBound\030\013 \001(\0132\022.Proto.TuningValue\022\025"
+  "\n\007acquire\030\014 \001(\010:\004true\022\025\n\007archive\030\r \001(\010:\004"
+  "true\022\030\n\rdecimalPlaces\030\016 \001(\005:\0012\022\031\n\016coarse"
+  "Aperture\030\017 \001(\001:\0011\022\031\n\014fineAperture\030\020 \001(\001:"
+  "\0030.5\022(\n\031obsolete_adaptiveAperture\030\021 \001(\010:"
+  "\005false\022\037\n\020excludefromBuild\030\022 \001(\010:\005false\022"
+  "\014\n\004tags\030\023 \001(\t\022\032\n\022userSpecPropStruct\030\024 \001("
+  "\t\022\032\n\022userSpecPropValues\030\025 \001(\014\022\027\n\014apertur"
+  "eType\030\026 \001(\005:\0010\022\033\n\014invertSignal\030\027 \001(\010:\005fa"
+  "lse\022\027\n\010reserved\030\030 \001(\010:\005false\"\264\001\n\016AppSign"
   "alState\022\017\n\004hash\030\001 \001(\004:\0010\022\020\n\005value\030\002 \001(\001:"
   "\0010\022\020\n\005flags\030\003 \001(\r:\0010\022\025\n\nsystemTime\030\004 \001(\020"
   ":\0010\022\024\n\tlocalTime\030\005 \001(\020:\0010\022\024\n\tplantTime\030\006"
@@ -4339,89 +4562,96 @@ const char descriptor_table_protodef_serialization_2eproto[] PROTOBUF_SECTION_VA
   "\005:\0010\022\035\n\022ObsoleteSerialMode\030\007 \001(\005:\0010\022#\n\024O"
   "bsoleteEnableDuplex\030\n \001(\010:\005false\"@\n\020Sche"
   "maDetailsSet\022,\n\016schemasDetails\030\002 \003(\0132\024.P"
-  "roto.SchemaDetails\"\206\004\n\rSchemaDetails\022\017\n\007"
+  "roto.SchemaDetails\"\236\004\n\rSchemaDetails\022\017\n\007"
   "version\030\002 \001(\005\022\020\n\010schemaId\030\004 \001(\t\022\017\n\007capti"
   "on\030\005 \001(\t\022\031\n\021excludedfromBuild\030\006 \001(\010\022\023\n\013e"
   "quipmentId\030\007 \001(\t\022\031\n\021lmDescriptionFile\030\010 "
   "\001(\t\022\014\n\004path\030\t \001(\t\022\021\n\tsignalIds\030\024 \003(\t\022\016\n\006"
   "labels\030\025 \003(\t\022\023\n\013connections\030\026 \003(\t\022\032\n\005gui"
   "ds\030\027 \003(\0132\013.Proto.Uuid\022\022\n\nschematags\030\030 \003("
-  "\t\022\021\n\tloopbacks\030\031 \003(\t\022\020\n\010itemtags\030\032 \003(\t\022G"
-  "\n\017trendIndicators\030\036 \003(\0132..Proto.SchemaDe"
-  "tails.TrendIndicatorSchemaItems\032\221\001\n\031Tren"
-  "dIndicatorSchemaItems\022\035\n\010itemUuid\030\002 \001(\0132"
-  "\013.Proto.Uuid\022\024\n\014samplePeriod\030\003 \001(\005\022\020\n\010ti"
-  "meType\030\004 \001(\005\022\027\n\017durationSeconds\030\005 \001(\005\022\024\n"
-  "\014appSignalIds\030\006 \003(\t\"A\n\nArchSignal\022\014\n\004has"
-  "h\030\001 \002(\004\022\020\n\010isAnalog\030\002 \002(\010\022\023\n\013appSignalID"
-  "\030\003 \002(\t\"5\n\013ArchSignals\022&\n\013archSignals\030\001 \003"
-  "(\0132\021.Proto.ArchSignal\"\326\003\n\tBusSignal\022\020\n\010s"
-  "ignalId\030\001 \001(\t\022\017\n\007caption\030\002 \001(\t\022\014\n\004type\030\003"
-  " \001(\005\022\r\n\005units\030\004 \001(\t\022\024\n\014analogFormat\030\n \001("
-  "\005\022\024\n\tprecision\030\013 \001(\005:\0012\022\031\n\016coarseApertur"
-  "e\030\014 \001(\001:\0011\022\031\n\014fineAperture\030\r \001(\001:\0030.5\022\037\n"
-  "\020adaptiveAperture\030\016 \001(\010:\005false\022\021\n\tbusTyp"
-  "eId\030\017 \001(\t\022\023\n\013inbusOffset\030  \001(\005\022\032\n\022inbusD"
-  "iscreteBitNo\030( \001(\005\022\027\n\017inbusAnalogSize\0302 "
-  "\001(\005\022\031\n\021inbusAnalogFormat\0303 \001(\005\022\034\n\024inbusA"
-  "nalogByteOrder\0304 \001(\005\022\031\n\021busAnalogLowLimi"
-  "t\0305 \001(\001\022\032\n\022busAnalogHighLimit\0306 \001(\001\022\033\n\023i"
-  "nbusAnalogLowLimit\0307 \001(\001\022\034\n\024inbusAnalogH"
-  "ighLimit\0308 \001(\001\"\355\001\n\003Bus\022\031\n\004uuid\030\001 \001(\0132\013.P"
-  "roto.Uuid\022\021\n\tbusTypeId\030\002 \001(\t\022$\n\nbusSigna"
-  "ls\030\003 \003(\0132\020.Proto.BusSignal\022!\n\023autoSignal"
-  "Placement\030\n \001(\010:\004true\022\030\n\rmanualBusSize\030\013"
-  " \001(\005:\0010\022\"\n\023enableManualBusSize\030\014 \001(\010:\005fa"
-  "lse\0221\n#enableManualBusSizeIsNotInitializ"
-  "ed\030\r \001(\010:\004true\"p\n\020ComparatorSignal\022\025\n\007is"
-  "Const\030\001 \001(\010:\004true\022\025\n\nconstValue\030\002 \001(\001:\0010"
-  "\022\023\n\013appSignalId\030\003 \001(\t\022\031\n\nisAcquired\030\004 \001("
-  "\010:\005false\"\352\002\n\nComparator\022\022\n\007cmpType\030\001 \001(\005"
-  ":\0011\022\037\n\024inAnalogSignalFormat\030\002 \001(\005:\0011\022&\n\005"
-  "input\030\003 \001(\0132\027.Proto.ComparatorSignal\022(\n\007"
-  "compare\030\004 \001(\0132\027.Proto.ComparatorSignal\022+"
-  "\n\nhysteresis\030\005 \001(\0132\027.Proto.ComparatorSig"
-  "nal\022\'\n\006output\030\006 \001(\0132\027.Proto.ComparatorSi"
-  "gnal\022#\n\024allSignalsIsAcquired\030\007 \001(\010:\005fals"
-  "e\022\024\n\tprecision\030\010 \001(\005:\0012\022\r\n\005label\030\t \001(\t\022\020"
-  "\n\010schemaId\030\n \001(\t\022#\n\016schemaItemUuid\030\013 \001(\013"
-  "2\013.Proto.Uuid\"O\n\017LmComparatorSet\022\025\n\rlmEq"
-  "uipmentID\030\001 \001(\t\022%\n\ncomparator\030\002 \003(\0132\021.Pr"
-  "oto.Comparator\"@\n\rComparatorSet\022/\n\017lmCom"
-  "paratorSet\030\001 \003(\0132\026.Proto.LmComparatorSet"
-  "\"\321\001\n\027MetrologySignalLocation\022\016\n\006rackID\030\001"
-  " \001(\t\022\021\n\tchassisID\030\002 \001(\t\022\023\n\007chassis\030\003 \001(\005"
-  ":\002-1\022\025\n\rmoduleCaption\030\t \001(\t\022\020\n\010moduleID\030"
-  "\004 \001(\t\022\022\n\006module\030\005 \001(\005:\002-1\022\021\n\005place\030\006 \001(\005"
-  ":\002-1\022\017\n\007contact\030\007 \001(\t\022\035\n\016shownOnSchemas\030"
-  "\010 \001(\010:\005false\"\347\002\n\017MetrologySignal\022#\n\tappS"
-  "ignal\030\001 \001(\0132\020.Proto.AppSignal\0220\n\010locatio"
-  "n\030\002 \001(\0132\036.Proto.MetrologySignalLocation\022"
-  "\033\n\020electricLowLimit\030\003 \001(\001:\0010\022\034\n\021electric"
-  "HighLimit\030\004 \001(\001:\0010\022\031\n\016electricUnitID\030\005 \001"
-  "(\005:\0011\022\035\n\022electricSensorType\030\006 \001(\005:\0011\022\030\n\r"
-  "electricRload\030\013 \001(\001:\0010\022\025\n\nelectricR0\030\007 \001"
-  "(\001:\0010\022\034\n\021electricPrecision\030\010 \001(\005:\0014\022\033\n\020p"
-  "hysicalLowLimit\030\t \001(\001:\0010\022\034\n\021physicalHigh"
-  "Limit\030\n \001(\001:\0010\"E\n\022MetrologySignalSet\022/\n\017"
-  "metrologySignal\030\001 \003(\0132\026.Proto.MetrologyS"
-  "ignal\"\240\001\n\021SimOverrideSignal\022\017\n\007enabled\030\002"
-  " \001(\010\022\r\n\005index\030\003 \001(\005\022\023\n\013appSignalId\030\n \001(\t"
-  "\022\026\n\016overrideMethod\030\036 \001(\005\022&\n\roverrideValu"
-  "e\030( \001(\0132\017.Proto.qvariant\022\026\n\016overrideScri"
-  "pt\0302 \001(\t\"O\n\032SimOverrideSignalWorkspace\0221"
-  "\n\017overrideSignals\030\002 \003(\0132\030.Proto.SimOverr"
-  "ideSignal*3\n\nSchemaUnit\022\013\n\007Display\020\000\022\016\n\n"
-  "Millimeter\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionDirr"
-  "ection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rFblSign"
-  "alType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*:\n\rFblD"
-  "ataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\tSignedInt\020"
-  "\001\022\t\n\005Float\020\002"
+  "\t\022\021\n\tloopbacks\030\031 \003(\t\022\020\n\010itemtags\030\032 \003(\t\022\026"
+  "\n\016packedLogicIds\030\033 \003(\t\022G\n\017trendIndicator"
+  "s\030\036 \003(\0132..Proto.SchemaDetails.TrendIndic"
+  "atorSchemaItems\032\221\001\n\031TrendIndicatorSchema"
+  "Items\022\035\n\010itemUuid\030\002 \001(\0132\013.Proto.Uuid\022\024\n\014"
+  "samplePeriod\030\003 \001(\005\022\020\n\010timeType\030\004 \001(\005\022\027\n\017"
+  "durationSeconds\030\005 \001(\005\022\024\n\014appSignalIds\030\006 "
+  "\003(\t\"{\n\tBuildInfo\022\017\n\007project\030\001 \001(\t\022\022\n\007bui"
+  "ldNo\030\002 \001(\005:\0010\022\020\n\010dateTime\030\003 \001(\t\022\024\n\tchang"
+  "eset\030\004 \001(\005:\0010\022\014\n\004user\030\005 \001(\t\022\023\n\013workstati"
+  "on\030\006 \001(\t\"\242\001\n\nArchSignal\022\023\n\013appSignalID\030\001"
+  " \002(\t\022\022\n\nsignalType\030\002 \002(\005\022\023\n\010lowLimit\030\003 \001"
+  "(\001:\0010\022\024\n\thighLimit\030\004 \001(\001:\0010\022\014\n\004unit\030\005 \001("
+  "\t\022\027\n\014fineAperture\030\006 \001(\001:\0010\022\031\n\016coarseAper"
+  "ture\030\007 \001(\001:\0010\"p\n\010ArchInfo\022#\n\tbuildInfo\030\001"
+  " \002(\0132\020.Proto.BuildInfo\022\030\n\020archiveService"
+  "ID\030\002 \002(\t\022%\n\narchSignal\030\003 \003(\0132\021.Proto.Arc"
+  "hSignal\"\326\003\n\tBusSignal\022\020\n\010signalId\030\001 \001(\t\022"
+  "\017\n\007caption\030\002 \001(\t\022\014\n\004type\030\003 \001(\005\022\r\n\005units\030"
+  "\004 \001(\t\022\024\n\014analogFormat\030\n \001(\005\022\024\n\tprecision"
+  "\030\013 \001(\005:\0012\022\031\n\016coarseAperture\030\014 \001(\001:\0011\022\031\n\014"
+  "fineAperture\030\r \001(\001:\0030.5\022\037\n\020adaptiveApert"
+  "ure\030\016 \001(\010:\005false\022\021\n\tbusTypeId\030\017 \001(\t\022\023\n\013i"
+  "nbusOffset\030  \001(\005\022\032\n\022inbusDiscreteBitNo\030("
+  " \001(\005\022\027\n\017inbusAnalogSize\0302 \001(\005\022\031\n\021inbusAn"
+  "alogFormat\0303 \001(\005\022\034\n\024inbusAnalogByteOrder"
+  "\0304 \001(\005\022\031\n\021busAnalogLowLimit\0305 \001(\001\022\032\n\022bus"
+  "AnalogHighLimit\0306 \001(\001\022\033\n\023inbusAnalogLowL"
+  "imit\0307 \001(\001\022\034\n\024inbusAnalogHighLimit\0308 \001(\001"
+  "\"\355\001\n\003Bus\022\031\n\004uuid\030\001 \001(\0132\013.Proto.Uuid\022\021\n\tb"
+  "usTypeId\030\002 \001(\t\022$\n\nbusSignals\030\003 \003(\0132\020.Pro"
+  "to.BusSignal\022!\n\023autoSignalPlacement\030\n \001("
+  "\010:\004true\022\030\n\rmanualBusSize\030\013 \001(\005:\0010\022\"\n\023ena"
+  "bleManualBusSize\030\014 \001(\010:\005false\0221\n#enableM"
+  "anualBusSizeIsNotInitialized\030\r \001(\010:\004true"
+  "\"p\n\020ComparatorSignal\022\025\n\007isConst\030\001 \001(\010:\004t"
+  "rue\022\025\n\nconstValue\030\002 \001(\001:\0010\022\023\n\013appSignalI"
+  "d\030\003 \001(\t\022\031\n\nisAcquired\030\004 \001(\010:\005false\"\352\002\n\nC"
+  "omparator\022\022\n\007cmpType\030\001 \001(\005:\0011\022\037\n\024inAnalo"
+  "gSignalFormat\030\002 \001(\005:\0011\022&\n\005input\030\003 \001(\0132\027."
+  "Proto.ComparatorSignal\022(\n\007compare\030\004 \001(\0132"
+  "\027.Proto.ComparatorSignal\022+\n\nhysteresis\030\005"
+  " \001(\0132\027.Proto.ComparatorSignal\022\'\n\006output\030"
+  "\006 \001(\0132\027.Proto.ComparatorSignal\022#\n\024allSig"
+  "nalsIsAcquired\030\007 \001(\010:\005false\022\024\n\tprecision"
+  "\030\010 \001(\005:\0012\022\r\n\005label\030\t \001(\t\022\020\n\010schemaId\030\n \001"
+  "(\t\022#\n\016schemaItemUuid\030\013 \001(\0132\013.Proto.Uuid\""
+  "O\n\017LmComparatorSet\022\025\n\rlmEquipmentID\030\001 \001("
+  "\t\022%\n\ncomparator\030\002 \003(\0132\021.Proto.Comparator"
+  "\"@\n\rComparatorSet\022/\n\017lmComparatorSet\030\001 \003"
+  "(\0132\026.Proto.LmComparatorSet\"\321\001\n\027Metrology"
+  "SignalLocation\022\016\n\006rackID\030\001 \001(\t\022\021\n\tchassi"
+  "sID\030\002 \001(\t\022\023\n\007chassis\030\003 \001(\005:\002-1\022\025\n\rmodule"
+  "Caption\030\t \001(\t\022\020\n\010moduleID\030\004 \001(\t\022\022\n\006modul"
+  "e\030\005 \001(\005:\002-1\022\021\n\005place\030\006 \001(\005:\002-1\022\017\n\007contac"
+  "t\030\007 \001(\t\022\035\n\016shownOnSchemas\030\010 \001(\010:\005false\"\347"
+  "\002\n\017MetrologySignal\022#\n\tappSignal\030\001 \001(\0132\020."
+  "Proto.AppSignal\0220\n\010location\030\002 \001(\0132\036.Prot"
+  "o.MetrologySignalLocation\022\033\n\020electricLow"
+  "Limit\030\003 \001(\001:\0010\022\034\n\021electricHighLimit\030\004 \001("
+  "\001:\0010\022\031\n\016electricUnitID\030\005 \001(\005:\0011\022\035\n\022elect"
+  "ricSensorType\030\006 \001(\005:\0011\022\030\n\relectricRload\030"
+  "\013 \001(\001:\0010\022\025\n\nelectricR0\030\007 \001(\001:\0010\022\034\n\021elect"
+  "ricPrecision\030\010 \001(\005:\0014\022\033\n\020physicalLowLimi"
+  "t\030\t \001(\001:\0010\022\034\n\021physicalHighLimit\030\n \001(\001:\0010"
+  "\"E\n\022MetrologySignalSet\022/\n\017metrologySigna"
+  "l\030\001 \003(\0132\026.Proto.MetrologySignal\"\240\001\n\021SimO"
+  "verrideSignal\022\017\n\007enabled\030\002 \001(\010\022\r\n\005index\030"
+  "\003 \001(\005\022\023\n\013appSignalId\030\n \001(\t\022\026\n\016overrideMe"
+  "thod\030\036 \001(\005\022&\n\roverrideValue\030( \001(\0132\017.Prot"
+  "o.qvariant\022\026\n\016overrideScript\0302 \001(\t\"O\n\032Si"
+  "mOverrideSignalWorkspace\0221\n\017overrideSign"
+  "als\030\002 \003(\0132\030.Proto.SimOverrideSignal*3\n\nS"
+  "chemaUnit\022\013\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010"
+  "\n\004Inch\020\002*-\n\024ConnectionDirrection\022\t\n\005Inpu"
+  "t\020\000\022\n\n\006Output\020\001*)\n\rFblSignalType\022\n\n\006Anal"
+  "og\020\000\022\014\n\010Discrete\020\001*:\n\rFblDataFormat\022\017\n\013U"
+  "nsignedInt\020\000\022\r\n\tSignedInt\020\001\022\t\n\005Float\020\002"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_serialization_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_serialization_2eproto = {
-  false, false, 20052, descriptor_table_protodef_serialization_2eproto, "serialization.proto", 
-  &descriptor_table_serialization_2eproto_once, nullptr, 0, 107,
+  false, false, 21318, descriptor_table_protodef_serialization_2eproto, "serialization.proto", 
+  &descriptor_table_serialization_2eproto_once, nullptr, 0, 110,
   schemas, file_default_instances, TableStruct_serialization_2eproto::offsets,
   file_level_metadata_serialization_2eproto, file_level_enum_descriptors_serialization_2eproto, file_level_service_descriptors_serialization_2eproto,
 };
@@ -5290,6 +5520,9 @@ class FontParam::_Internal {
   static void set_has_name(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
   }
+  static void set_has_underline(HasBits* has_bits) {
+    (*has_bits)[0] |= 32u;
+  }
   static bool MissingRequiredFields(const HasBits& has_bits) {
     return ((has_bits[0] & 0x0000001e) ^ 0x0000001e) != 0;
   }
@@ -5320,8 +5553,8 @@ FontParam::FontParam(const FontParam& from)
     name_obsolete_ = nullptr;
   }
   ::memcpy(&size_, &from.size_,
-    static_cast<size_t>(reinterpret_cast<char*>(&italic_) -
-    reinterpret_cast<char*>(&size_)) + sizeof(italic_));
+    static_cast<size_t>(reinterpret_cast<char*>(&underline_) -
+    reinterpret_cast<char*>(&size_)) + sizeof(underline_));
   // @@protoc_insertion_point(copy_constructor:Proto.FontParam)
 }
 
@@ -5329,8 +5562,8 @@ void FontParam::SharedCtor() {
 name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
     reinterpret_cast<char*>(&name_obsolete_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&italic_) -
-    reinterpret_cast<char*>(&name_obsolete_)) + sizeof(italic_));
+    0, static_cast<size_t>(reinterpret_cast<char*>(&underline_) -
+    reinterpret_cast<char*>(&name_obsolete_)) + sizeof(underline_));
 }
 
 FontParam::~FontParam() {
@@ -5371,10 +5604,10 @@ void FontParam::Clear() {
       name_obsolete_->Clear();
     }
   }
-  if (cached_has_bits & 0x0000001cu) {
+  if (cached_has_bits & 0x0000003cu) {
     ::memset(&size_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&italic_) -
-        reinterpret_cast<char*>(&size_)) + sizeof(italic_));
+        reinterpret_cast<char*>(&underline_) -
+        reinterpret_cast<char*>(&size_)) + sizeof(underline_));
   }
   _has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -5427,6 +5660,14 @@ const char* FontParam::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::
           #ifndef NDEBUG
           ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.FontParam.name");
           #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional bool underline = 6 [default = false];
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 48)) {
+          _Internal::set_has_underline(&has_bits);
+          underline_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -5494,6 +5735,12 @@ failure:
       "Proto.FontParam.name");
     target = stream->WriteStringMaybeAliased(
         5, this->_internal_name(), target);
+  }
+
+  // optional bool underline = 6 [default = false];
+  if (cached_has_bits & 0x00000020u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(6, this->_internal_underline(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -5566,6 +5813,11 @@ size_t FontParam::ByteSizeLong() const {
         this->_internal_name());
   }
 
+  // optional bool underline = 6 [default = false];
+  if (cached_has_bits & 0x00000020u) {
+    total_size += 1 + 1;
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
         _internal_metadata_, total_size, &_cached_size_);
@@ -5598,7 +5850,7 @@ void FontParam::MergeFrom(const FontParam& from) {
   (void) cached_has_bits;
 
   cached_has_bits = from._has_bits_[0];
-  if (cached_has_bits & 0x0000001fu) {
+  if (cached_has_bits & 0x0000003fu) {
     if (cached_has_bits & 0x00000001u) {
       _internal_set_name(from._internal_name());
     }
@@ -5613,6 +5865,9 @@ void FontParam::MergeFrom(const FontParam& from) {
     }
     if (cached_has_bits & 0x00000010u) {
       italic_ = from.italic_;
+    }
+    if (cached_has_bits & 0x00000020u) {
+      underline_ = from.underline_;
     }
     _has_bits_[0] |= cached_has_bits;
   }
@@ -5646,8 +5901,8 @@ void FontParam::InternalSwap(FontParam* other) {
   swap(_has_bits_[0], other->_has_bits_[0]);
   name_.Swap(&other->name_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(FontParam, italic_)
-      + sizeof(FontParam::italic_)
+      PROTOBUF_FIELD_OFFSET(FontParam, underline_)
+      + sizeof(FontParam::underline_)
       - PROTOBUF_FIELD_OFFSET(FontParam, name_obsolete_)>(
           reinterpret_cast<char*>(&name_obsolete_),
           reinterpret_cast<char*>(&other->name_obsolete_));
@@ -13094,22 +13349,22 @@ class SchemaItem::_Internal {
     (*has_bits)[0] |= 32u;
   }
   static void set_has_isstatic(HasBits* has_bits) {
-    (*has_bits)[1] |= 1024u;
+    (*has_bits)[1] |= 4096u;
   }
   static void set_has_islocked(HasBits* has_bits) {
-    (*has_bits)[1] |= 2048u;
+    (*has_bits)[1] |= 8192u;
   }
   static void set_has_itemunit(HasBits* has_bits) {
-    (*has_bits)[1] |= 512u;
+    (*has_bits)[1] |= 2048u;
   }
   static void set_has_acceptclick(HasBits* has_bits) {
-    (*has_bits)[1] |= 4096u;
+    (*has_bits)[1] |= 16384u;
   }
   static void set_has_clickscript(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
   }
   static void set_has_iscommented(HasBits* has_bits) {
-    (*has_bits)[1] |= 8192u;
+    (*has_bits)[1] |= 32768u;
   }
   static void set_has_objectname(HasBits* has_bits) {
     (*has_bits)[0] |= 2u;
@@ -13121,7 +13376,7 @@ class SchemaItem::_Internal {
     (*has_bits)[0] |= 8u;
   }
   static void set_has_labelpos(HasBits* has_bits) {
-    (*has_bits)[1] |= 16384u;
+    (*has_bits)[1] |= 65536u;
   }
   static void set_has_predrawscript(HasBits* has_bits) {
     (*has_bits)[0] |= 16u;
@@ -13129,6 +13384,10 @@ class SchemaItem::_Internal {
   static const ::Proto::PosRectImpl& posrectimpl(const SchemaItem* msg);
   static void set_has_posrectimpl(HasBits* has_bits) {
     (*has_bits)[0] |= 64u;
+  }
+  static const ::Proto::PosRectRotatable& posrectrotatable(const SchemaItem* msg);
+  static void set_has_posrectrotatable(HasBits* has_bits) {
+    (*has_bits)[0] |= 512u;
   }
   static const ::Proto::PosLineImpl& poslineimpl(const SchemaItem* msg);
   static void set_has_poslineimpl(HasBits* has_bits) {
@@ -13140,135 +13399,139 @@ class SchemaItem::_Internal {
   }
   static const ::Proto::FblItem& fblitem(const SchemaItem* msg);
   static void set_has_fblitem(HasBits* has_bits) {
-    (*has_bits)[0] |= 512u;
+    (*has_bits)[0] |= 1024u;
   }
   static const ::Proto::FblItemRect& fblitemrect(const SchemaItem* msg);
   static void set_has_fblitemrect(HasBits* has_bits) {
-    (*has_bits)[0] |= 1024u;
+    (*has_bits)[0] |= 2048u;
   }
   static const ::Proto::FblItemLine& fblitemline(const SchemaItem* msg);
   static void set_has_fblitemline(HasBits* has_bits) {
-    (*has_bits)[0] |= 2048u;
+    (*has_bits)[0] |= 4096u;
   }
   static const ::Proto::SchemaItemRect& rect(const SchemaItem* msg);
   static void set_has_rect(HasBits* has_bits) {
-    (*has_bits)[0] |= 4096u;
+    (*has_bits)[0] |= 8192u;
   }
   static const ::Proto::SchemaItemLine& line(const SchemaItem* msg);
   static void set_has_line(HasBits* has_bits) {
-    (*has_bits)[0] |= 8192u;
+    (*has_bits)[0] |= 16384u;
   }
   static const ::Proto::SchemaItemPath& path(const SchemaItem* msg);
   static void set_has_path(HasBits* has_bits) {
-    (*has_bits)[0] |= 16384u;
+    (*has_bits)[0] |= 32768u;
   }
   static const ::Proto::SchemaItemImage& image(const SchemaItem* msg);
   static void set_has_image(HasBits* has_bits) {
-    (*has_bits)[0] |= 32768u;
+    (*has_bits)[0] |= 65536u;
   }
   static const ::Proto::SchemaItemFrame& frame(const SchemaItem* msg);
   static void set_has_frame(HasBits* has_bits) {
-    (*has_bits)[0] |= 65536u;
+    (*has_bits)[0] |= 131072u;
   }
   static const ::Proto::SchemaItemIndicator& indicator(const SchemaItem* msg);
   static void set_has_indicator(HasBits* has_bits) {
-    (*has_bits)[0] |= 131072u;
+    (*has_bits)[0] |= 262144u;
   }
   static const ::Proto::SchemaItemSignal& signal(const SchemaItem* msg);
   static void set_has_signal(HasBits* has_bits) {
-    (*has_bits)[0] |= 262144u;
+    (*has_bits)[0] |= 524288u;
   }
   static const ::Proto::SchemaItemInput& inputsignal(const SchemaItem* msg);
   static void set_has_inputsignal(HasBits* has_bits) {
-    (*has_bits)[0] |= 524288u;
+    (*has_bits)[0] |= 1048576u;
   }
   static const ::Proto::SchemaItemOutput& outputsignal(const SchemaItem* msg);
   static void set_has_outputsignal(HasBits* has_bits) {
-    (*has_bits)[0] |= 1048576u;
+    (*has_bits)[0] |= 2097152u;
   }
   static const ::Proto::SchemaItemLink& link(const SchemaItem* msg);
   static void set_has_link(HasBits* has_bits) {
-    (*has_bits)[0] |= 2097152u;
+    (*has_bits)[0] |= 4194304u;
   }
   static const ::Proto::SchemaItemAfb& afb(const SchemaItem* msg);
   static void set_has_afb(HasBits* has_bits) {
-    (*has_bits)[0] |= 4194304u;
+    (*has_bits)[0] |= 8388608u;
   }
   static const ::Proto::SchemaItemConst& constitem(const SchemaItem* msg);
   static void set_has_constitem(HasBits* has_bits) {
-    (*has_bits)[0] |= 8388608u;
+    (*has_bits)[0] |= 16777216u;
   }
   static const ::Proto::SchemaItemConnection& connectionitem(const SchemaItem* msg);
   static void set_has_connectionitem(HasBits* has_bits) {
-    (*has_bits)[0] |= 16777216u;
+    (*has_bits)[0] |= 33554432u;
   }
   static const ::Proto::SchemaItemTransmitter& transmitteritem(const SchemaItem* msg);
   static void set_has_transmitteritem(HasBits* has_bits) {
-    (*has_bits)[0] |= 33554432u;
+    (*has_bits)[0] |= 67108864u;
   }
   static const ::Proto::SchemaItemReceiver& receiveritem(const SchemaItem* msg);
   static void set_has_receiveritem(HasBits* has_bits) {
-    (*has_bits)[0] |= 67108864u;
+    (*has_bits)[0] |= 134217728u;
   }
   static const ::Proto::SchemaItemInOut& inoutsignal(const SchemaItem* msg);
   static void set_has_inoutsignal(HasBits* has_bits) {
-    (*has_bits)[0] |= 134217728u;
+    (*has_bits)[0] |= 268435456u;
   }
   static const ::Proto::SchemaItemUfb& ufb(const SchemaItem* msg);
   static void set_has_ufb(HasBits* has_bits) {
-    (*has_bits)[0] |= 268435456u;
+    (*has_bits)[0] |= 536870912u;
   }
   static const ::Proto::SchemaItemTerminator& terminator(const SchemaItem* msg);
   static void set_has_terminator(HasBits* has_bits) {
-    (*has_bits)[0] |= 536870912u;
+    (*has_bits)[0] |= 1073741824u;
   }
   static const ::Proto::SchemaItemValue& value(const SchemaItem* msg);
   static void set_has_value(HasBits* has_bits) {
-    (*has_bits)[0] |= 1073741824u;
+    (*has_bits)[0] |= 2147483648u;
   }
   static const ::Proto::SchemaItemImageValue& imagevalue(const SchemaItem* msg);
   static void set_has_imagevalue(HasBits* has_bits) {
-    (*has_bits)[0] |= 2147483648u;
+    (*has_bits)[1] |= 1u;
   }
   static const ::Proto::SchemaItemBus& busitem(const SchemaItem* msg);
   static void set_has_busitem(HasBits* has_bits) {
-    (*has_bits)[1] |= 1u;
+    (*has_bits)[1] |= 2u;
   }
   static const ::Proto::SchemaItemBusComposer& buscomposer(const SchemaItem* msg);
   static void set_has_buscomposer(HasBits* has_bits) {
-    (*has_bits)[1] |= 2u;
+    (*has_bits)[1] |= 4u;
   }
   static const ::Proto::SchemaItemBusExtractor& busextractor(const SchemaItem* msg);
   static void set_has_busextractor(HasBits* has_bits) {
-    (*has_bits)[1] |= 4u;
+    (*has_bits)[1] |= 8u;
   }
   static const ::Proto::SchemaItemLoopback& loopbackitem(const SchemaItem* msg);
   static void set_has_loopbackitem(HasBits* has_bits) {
-    (*has_bits)[1] |= 8u;
+    (*has_bits)[1] |= 16u;
   }
   static const ::Proto::SchemaItemLoopbackSource& loopbacksource(const SchemaItem* msg);
   static void set_has_loopbacksource(HasBits* has_bits) {
-    (*has_bits)[1] |= 16u;
+    (*has_bits)[1] |= 32u;
   }
   static const ::Proto::SchemaItemLoopbackTarget& loopbacktarget(const SchemaItem* msg);
   static void set_has_loopbacktarget(HasBits* has_bits) {
-    (*has_bits)[1] |= 32u;
+    (*has_bits)[1] |= 64u;
   }
   static const ::Proto::SchemaItemControl& control(const SchemaItem* msg);
   static void set_has_control(HasBits* has_bits) {
-    (*has_bits)[1] |= 64u;
+    (*has_bits)[1] |= 128u;
   }
   static const ::Proto::SchemaItemPushButton& pushbutton(const SchemaItem* msg);
   static void set_has_pushbutton(HasBits* has_bits) {
-    (*has_bits)[1] |= 128u;
+    (*has_bits)[1] |= 256u;
   }
   static const ::Proto::SchemaItemLineEdit& lineedit(const SchemaItem* msg);
   static void set_has_lineedit(HasBits* has_bits) {
-    (*has_bits)[1] |= 256u;
+    (*has_bits)[1] |= 512u;
+  }
+  static const ::Proto::SchemaItemSlider& slider(const SchemaItem* msg);
+  static void set_has_slider(HasBits* has_bits) {
+    (*has_bits)[1] |= 1024u;
   }
   static bool MissingRequiredFields(const HasBits& has_bits) {
     return (((has_bits[0] & 0x00000020) ^ 0x00000020)
-       | ((has_bits[1] & 0x00000e00) ^ 0x00000e00)) != 0;
+       | ((has_bits[1] & 0x00003800) ^ 0x00003800)) != 0;
   }
 };
 
@@ -13279,6 +13542,10 @@ SchemaItem::_Internal::uuid(const SchemaItem* msg) {
 const ::Proto::PosRectImpl&
 SchemaItem::_Internal::posrectimpl(const SchemaItem* msg) {
   return *msg->posrectimpl_;
+}
+const ::Proto::PosRectRotatable&
+SchemaItem::_Internal::posrectrotatable(const SchemaItem* msg) {
+  return *msg->posrectrotatable_;
 }
 const ::Proto::PosLineImpl&
 SchemaItem::_Internal::poslineimpl(const SchemaItem* msg) {
@@ -13416,6 +13683,10 @@ const ::Proto::SchemaItemLineEdit&
 SchemaItem::_Internal::lineedit(const SchemaItem* msg) {
   return *msg->lineedit_;
 }
+const ::Proto::SchemaItemSlider&
+SchemaItem::_Internal::slider(const SchemaItem* msg) {
+  return *msg->slider_;
+}
 SchemaItem::SchemaItem(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
@@ -13470,6 +13741,11 @@ SchemaItem::SchemaItem(const SchemaItem& from)
     posconnectionimpl_ = new ::Proto::PosConnectionImpl(*from.posconnectionimpl_);
   } else {
     posconnectionimpl_ = nullptr;
+  }
+  if (from._internal_has_posrectrotatable()) {
+    posrectrotatable_ = new ::Proto::PosRectRotatable(*from.posrectrotatable_);
+  } else {
+    posrectrotatable_ = nullptr;
   }
   if (from._internal_has_fblitem()) {
     fblitem_ = new ::Proto::FblItem(*from.fblitem_);
@@ -13631,6 +13907,11 @@ SchemaItem::SchemaItem(const SchemaItem& from)
   } else {
     lineedit_ = nullptr;
   }
+  if (from._internal_has_slider()) {
+    slider_ = new ::Proto::SchemaItemSlider(*from.slider_);
+  } else {
+    slider_ = nullptr;
+  }
   ::memcpy(&itemunit_, &from.itemunit_,
     static_cast<size_t>(reinterpret_cast<char*>(&labelpos_) -
     reinterpret_cast<char*>(&itemunit_)) + sizeof(labelpos_));
@@ -13667,6 +13948,7 @@ void SchemaItem::SharedDtor() {
   if (this != internal_default_instance()) delete posrectimpl_;
   if (this != internal_default_instance()) delete poslineimpl_;
   if (this != internal_default_instance()) delete posconnectionimpl_;
+  if (this != internal_default_instance()) delete posrectrotatable_;
   if (this != internal_default_instance()) delete fblitem_;
   if (this != internal_default_instance()) delete fblitemrect_;
   if (this != internal_default_instance()) delete fblitemline_;
@@ -13699,6 +13981,7 @@ void SchemaItem::SharedDtor() {
   if (this != internal_default_instance()) delete control_;
   if (this != internal_default_instance()) delete pushbutton_;
   if (this != internal_default_instance()) delete lineedit_;
+  if (this != internal_default_instance()) delete slider_;
 }
 
 void SchemaItem::ArenaDtor(void* object) {
@@ -13753,147 +14036,157 @@ void SchemaItem::Clear() {
       posconnectionimpl_->Clear();
     }
     if (cached_has_bits & 0x00000200u) {
+      GOOGLE_DCHECK(posrectrotatable_ != nullptr);
+      posrectrotatable_->Clear();
+    }
+    if (cached_has_bits & 0x00000400u) {
       GOOGLE_DCHECK(fblitem_ != nullptr);
       fblitem_->Clear();
     }
-    if (cached_has_bits & 0x00000400u) {
+    if (cached_has_bits & 0x00000800u) {
       GOOGLE_DCHECK(fblitemrect_ != nullptr);
       fblitemrect_->Clear();
     }
-    if (cached_has_bits & 0x00000800u) {
+    if (cached_has_bits & 0x00001000u) {
       GOOGLE_DCHECK(fblitemline_ != nullptr);
       fblitemline_->Clear();
     }
-    if (cached_has_bits & 0x00001000u) {
+    if (cached_has_bits & 0x00002000u) {
       GOOGLE_DCHECK(rect_ != nullptr);
       rect_->Clear();
     }
-    if (cached_has_bits & 0x00002000u) {
+    if (cached_has_bits & 0x00004000u) {
       GOOGLE_DCHECK(line_ != nullptr);
       line_->Clear();
     }
-    if (cached_has_bits & 0x00004000u) {
+    if (cached_has_bits & 0x00008000u) {
       GOOGLE_DCHECK(path_ != nullptr);
       path_->Clear();
-    }
-    if (cached_has_bits & 0x00008000u) {
-      GOOGLE_DCHECK(image_ != nullptr);
-      image_->Clear();
     }
   }
   if (cached_has_bits & 0x00ff0000u) {
     if (cached_has_bits & 0x00010000u) {
+      GOOGLE_DCHECK(image_ != nullptr);
+      image_->Clear();
+    }
+    if (cached_has_bits & 0x00020000u) {
       GOOGLE_DCHECK(frame_ != nullptr);
       frame_->Clear();
     }
-    if (cached_has_bits & 0x00020000u) {
+    if (cached_has_bits & 0x00040000u) {
       GOOGLE_DCHECK(indicator_ != nullptr);
       indicator_->Clear();
     }
-    if (cached_has_bits & 0x00040000u) {
+    if (cached_has_bits & 0x00080000u) {
       GOOGLE_DCHECK(signal_ != nullptr);
       signal_->Clear();
     }
-    if (cached_has_bits & 0x00080000u) {
+    if (cached_has_bits & 0x00100000u) {
       GOOGLE_DCHECK(inputsignal_ != nullptr);
       inputsignal_->Clear();
     }
-    if (cached_has_bits & 0x00100000u) {
+    if (cached_has_bits & 0x00200000u) {
       GOOGLE_DCHECK(outputsignal_ != nullptr);
       outputsignal_->Clear();
     }
-    if (cached_has_bits & 0x00200000u) {
+    if (cached_has_bits & 0x00400000u) {
       GOOGLE_DCHECK(link_ != nullptr);
       link_->Clear();
     }
-    if (cached_has_bits & 0x00400000u) {
+    if (cached_has_bits & 0x00800000u) {
       GOOGLE_DCHECK(afb_ != nullptr);
       afb_->Clear();
-    }
-    if (cached_has_bits & 0x00800000u) {
-      GOOGLE_DCHECK(constitem_ != nullptr);
-      constitem_->Clear();
     }
   }
   if (cached_has_bits & 0xff000000u) {
     if (cached_has_bits & 0x01000000u) {
+      GOOGLE_DCHECK(constitem_ != nullptr);
+      constitem_->Clear();
+    }
+    if (cached_has_bits & 0x02000000u) {
       GOOGLE_DCHECK(connectionitem_ != nullptr);
       connectionitem_->Clear();
     }
-    if (cached_has_bits & 0x02000000u) {
+    if (cached_has_bits & 0x04000000u) {
       GOOGLE_DCHECK(transmitteritem_ != nullptr);
       transmitteritem_->Clear();
     }
-    if (cached_has_bits & 0x04000000u) {
+    if (cached_has_bits & 0x08000000u) {
       GOOGLE_DCHECK(receiveritem_ != nullptr);
       receiveritem_->Clear();
     }
-    if (cached_has_bits & 0x08000000u) {
+    if (cached_has_bits & 0x10000000u) {
       GOOGLE_DCHECK(inoutsignal_ != nullptr);
       inoutsignal_->Clear();
     }
-    if (cached_has_bits & 0x10000000u) {
+    if (cached_has_bits & 0x20000000u) {
       GOOGLE_DCHECK(ufb_ != nullptr);
       ufb_->Clear();
     }
-    if (cached_has_bits & 0x20000000u) {
+    if (cached_has_bits & 0x40000000u) {
       GOOGLE_DCHECK(terminator_ != nullptr);
       terminator_->Clear();
     }
-    if (cached_has_bits & 0x40000000u) {
+    if (cached_has_bits & 0x80000000u) {
       GOOGLE_DCHECK(value_ != nullptr);
       value_->Clear();
-    }
-    if (cached_has_bits & 0x80000000u) {
-      GOOGLE_DCHECK(imagevalue_ != nullptr);
-      imagevalue_->Clear();
     }
   }
   cached_has_bits = _has_bits_[1];
   if (cached_has_bits & 0x000000ffu) {
     if (cached_has_bits & 0x00000001u) {
+      GOOGLE_DCHECK(imagevalue_ != nullptr);
+      imagevalue_->Clear();
+    }
+    if (cached_has_bits & 0x00000002u) {
       GOOGLE_DCHECK(busitem_ != nullptr);
       busitem_->Clear();
     }
-    if (cached_has_bits & 0x00000002u) {
+    if (cached_has_bits & 0x00000004u) {
       GOOGLE_DCHECK(buscomposer_ != nullptr);
       buscomposer_->Clear();
     }
-    if (cached_has_bits & 0x00000004u) {
+    if (cached_has_bits & 0x00000008u) {
       GOOGLE_DCHECK(busextractor_ != nullptr);
       busextractor_->Clear();
     }
-    if (cached_has_bits & 0x00000008u) {
+    if (cached_has_bits & 0x00000010u) {
       GOOGLE_DCHECK(loopbackitem_ != nullptr);
       loopbackitem_->Clear();
     }
-    if (cached_has_bits & 0x00000010u) {
+    if (cached_has_bits & 0x00000020u) {
       GOOGLE_DCHECK(loopbacksource_ != nullptr);
       loopbacksource_->Clear();
     }
-    if (cached_has_bits & 0x00000020u) {
+    if (cached_has_bits & 0x00000040u) {
       GOOGLE_DCHECK(loopbacktarget_ != nullptr);
       loopbacktarget_->Clear();
     }
-    if (cached_has_bits & 0x00000040u) {
+    if (cached_has_bits & 0x00000080u) {
       GOOGLE_DCHECK(control_ != nullptr);
       control_->Clear();
     }
-    if (cached_has_bits & 0x00000080u) {
+  }
+  if (cached_has_bits & 0x00000700u) {
+    if (cached_has_bits & 0x00000100u) {
       GOOGLE_DCHECK(pushbutton_ != nullptr);
       pushbutton_->Clear();
     }
+    if (cached_has_bits & 0x00000200u) {
+      GOOGLE_DCHECK(lineedit_ != nullptr);
+      lineedit_->Clear();
+    }
+    if (cached_has_bits & 0x00000400u) {
+      GOOGLE_DCHECK(slider_ != nullptr);
+      slider_->Clear();
+    }
   }
-  if (cached_has_bits & 0x00000100u) {
-    GOOGLE_DCHECK(lineedit_ != nullptr);
-    lineedit_->Clear();
-  }
-  if (cached_has_bits & 0x00007e00u) {
+  if (cached_has_bits & 0x0000f800u) {
     ::memset(&itemunit_, 0, static_cast<size_t>(
         reinterpret_cast<char*>(&iscommented_) -
         reinterpret_cast<char*>(&itemunit_)) + sizeof(iscommented_));
-    labelpos_ = 2;
   }
+  labelpos_ = 2;
   _has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
@@ -14026,6 +14319,13 @@ const char* SchemaItem::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 120)) {
           _Internal::set_has_labelpos(&_has_bits_);
           labelpos_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional .Proto.PosRectRotatable PosRectRotatable = 20;
+      case 20:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 162)) {
+          ptr = ctx->ParseMessage(_internal_mutable_posrectrotatable(), ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -14264,6 +14564,13 @@ const char* SchemaItem::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID:
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
+      // optional .Proto.SchemaItemSlider slider = 212;
+      case 212:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 162)) {
+          ptr = ctx->ParseMessage(_internal_mutable_slider(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
       default: {
       handle_unusual:
         if ((tag & 7) == 4 || tag == 0) {
@@ -14303,26 +14610,26 @@ failure:
 
   cached_has_bits = _has_bits_[1];
   // required bool isStatic = 2;
-  if (cached_has_bits & 0x00000400u) {
+  if (cached_has_bits & 0x00001000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(2, this->_internal_isstatic(), target);
   }
 
   // required bool isLocked = 3;
-  if (cached_has_bits & 0x00000800u) {
+  if (cached_has_bits & 0x00002000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(3, this->_internal_islocked(), target);
   }
 
   // required .Proto.SchemaUnit itemUnit = 4;
-  if (cached_has_bits & 0x00000200u) {
+  if (cached_has_bits & 0x00000800u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteEnumToArray(
       4, this->_internal_itemunit(), target);
   }
 
   // optional bool acceptClick = 5 [default = false];
-  if (cached_has_bits & 0x00001000u) {
+  if (cached_has_bits & 0x00004000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(5, this->_internal_acceptclick(), target);
   }
@@ -14340,7 +14647,7 @@ failure:
 
   cached_has_bits = _has_bits_[1];
   // optional bool isCommented = 8 [default = false];
-  if (cached_has_bits & 0x00002000u) {
+  if (cached_has_bits & 0x00008000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(8, this->_internal_iscommented(), target);
   }
@@ -14402,12 +14709,20 @@ failure:
 
   cached_has_bits = _has_bits_[1];
   // optional int32 labelPos = 15 [default = 2];
-  if (cached_has_bits & 0x00004000u) {
+  if (cached_has_bits & 0x00010000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(15, this->_internal_labelpos(), target);
   }
 
   cached_has_bits = _has_bits_[0];
+  // optional .Proto.PosRectRotatable PosRectRotatable = 20;
+  if (cached_has_bits & 0x00000200u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        20, _Internal::posrectrotatable(this), target, stream);
+  }
+
   // optional string preDrawScript = 30;
   if (cached_has_bits & 0x00000010u) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
@@ -14419,7 +14734,7 @@ failure:
   }
 
   // optional .Proto.FblItem FblItem = 106;
-  if (cached_has_bits & 0x00000200u) {
+  if (cached_has_bits & 0x00000400u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -14427,7 +14742,7 @@ failure:
   }
 
   // optional .Proto.FblItemRect FblItemRect = 107;
-  if (cached_has_bits & 0x00000400u) {
+  if (cached_has_bits & 0x00000800u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -14435,7 +14750,7 @@ failure:
   }
 
   // optional .Proto.FblItemLine FblItemLine = 108;
-  if (cached_has_bits & 0x00000800u) {
+  if (cached_has_bits & 0x00001000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -14443,7 +14758,7 @@ failure:
   }
 
   // optional .Proto.SchemaItemRect Rect = 116;
-  if (cached_has_bits & 0x00001000u) {
+  if (cached_has_bits & 0x00002000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -14451,7 +14766,7 @@ failure:
   }
 
   // optional .Proto.SchemaItemLine Line = 117;
-  if (cached_has_bits & 0x00002000u) {
+  if (cached_has_bits & 0x00004000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -14459,7 +14774,7 @@ failure:
   }
 
   // optional .Proto.SchemaItemPath Path = 118;
-  if (cached_has_bits & 0x00004000u) {
+  if (cached_has_bits & 0x00008000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -14467,7 +14782,7 @@ failure:
   }
 
   // optional .Proto.SchemaItemImage Image = 119;
-  if (cached_has_bits & 0x00008000u) {
+  if (cached_has_bits & 0x00010000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -14475,7 +14790,7 @@ failure:
   }
 
   // optional .Proto.SchemaItemFrame Frame = 120;
-  if (cached_has_bits & 0x00010000u) {
+  if (cached_has_bits & 0x00020000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -14483,7 +14798,7 @@ failure:
   }
 
   // optional .Proto.SchemaItemIndicator Indicator = 121;
-  if (cached_has_bits & 0x00020000u) {
+  if (cached_has_bits & 0x00040000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -14491,7 +14806,7 @@ failure:
   }
 
   // optional .Proto.SchemaItemSignal Signal = 124;
-  if (cached_has_bits & 0x00040000u) {
+  if (cached_has_bits & 0x00080000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -14499,7 +14814,7 @@ failure:
   }
 
   // optional .Proto.SchemaItemInput InputSignal = 125;
-  if (cached_has_bits & 0x00080000u) {
+  if (cached_has_bits & 0x00100000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -14507,7 +14822,7 @@ failure:
   }
 
   // optional .Proto.SchemaItemOutput OutputSignal = 126;
-  if (cached_has_bits & 0x00100000u) {
+  if (cached_has_bits & 0x00200000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -14515,7 +14830,7 @@ failure:
   }
 
   // optional .Proto.SchemaItemLink Link = 127;
-  if (cached_has_bits & 0x00200000u) {
+  if (cached_has_bits & 0x00400000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -14523,7 +14838,7 @@ failure:
   }
 
   // optional .Proto.SchemaItemAfb Afb = 128;
-  if (cached_has_bits & 0x00400000u) {
+  if (cached_has_bits & 0x00800000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -14531,7 +14846,7 @@ failure:
   }
 
   // optional .Proto.SchemaItemConst ConstItem = 129;
-  if (cached_has_bits & 0x00800000u) {
+  if (cached_has_bits & 0x01000000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -14539,7 +14854,7 @@ failure:
   }
 
   // optional .Proto.SchemaItemConnection ConnectionItem = 130;
-  if (cached_has_bits & 0x01000000u) {
+  if (cached_has_bits & 0x02000000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -14547,7 +14862,7 @@ failure:
   }
 
   // optional .Proto.SchemaItemTransmitter TransmitterItem = 131;
-  if (cached_has_bits & 0x02000000u) {
+  if (cached_has_bits & 0x04000000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -14555,7 +14870,7 @@ failure:
   }
 
   // optional .Proto.SchemaItemReceiver ReceiverItem = 132;
-  if (cached_has_bits & 0x04000000u) {
+  if (cached_has_bits & 0x08000000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -14563,7 +14878,7 @@ failure:
   }
 
   // optional .Proto.SchemaItemInOut InOutSignal = 133;
-  if (cached_has_bits & 0x08000000u) {
+  if (cached_has_bits & 0x10000000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -14571,7 +14886,7 @@ failure:
   }
 
   // optional .Proto.SchemaItemUfb ufb = 134;
-  if (cached_has_bits & 0x10000000u) {
+  if (cached_has_bits & 0x20000000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -14579,7 +14894,7 @@ failure:
   }
 
   // optional .Proto.SchemaItemTerminator terminator = 135;
-  if (cached_has_bits & 0x20000000u) {
+  if (cached_has_bits & 0x40000000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -14587,24 +14902,24 @@ failure:
   }
 
   // optional .Proto.SchemaItemValue Value = 136;
-  if (cached_has_bits & 0x40000000u) {
+  if (cached_has_bits & 0x80000000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
         136, _Internal::value(this), target, stream);
   }
 
+  cached_has_bits = _has_bits_[1];
   // optional .Proto.SchemaItemImageValue ImageValue = 137;
-  if (cached_has_bits & 0x80000000u) {
+  if (cached_has_bits & 0x00000001u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
         137, _Internal::imagevalue(this), target, stream);
   }
 
-  cached_has_bits = _has_bits_[1];
   // optional .Proto.SchemaItemBus BusItem = 150;
-  if (cached_has_bits & 0x00000001u) {
+  if (cached_has_bits & 0x00000002u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -14612,7 +14927,7 @@ failure:
   }
 
   // optional .Proto.SchemaItemBusComposer BusComposer = 151;
-  if (cached_has_bits & 0x00000002u) {
+  if (cached_has_bits & 0x00000004u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -14620,7 +14935,7 @@ failure:
   }
 
   // optional .Proto.SchemaItemBusExtractor BusExtractor = 152;
-  if (cached_has_bits & 0x00000004u) {
+  if (cached_has_bits & 0x00000008u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -14628,7 +14943,7 @@ failure:
   }
 
   // optional .Proto.SchemaItemLoopback LoopbackItem = 155;
-  if (cached_has_bits & 0x00000008u) {
+  if (cached_has_bits & 0x00000010u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -14636,7 +14951,7 @@ failure:
   }
 
   // optional .Proto.SchemaItemLoopbackSource loopbackSource = 156;
-  if (cached_has_bits & 0x00000010u) {
+  if (cached_has_bits & 0x00000020u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -14644,7 +14959,7 @@ failure:
   }
 
   // optional .Proto.SchemaItemLoopbackTarget loopbackTarget = 157;
-  if (cached_has_bits & 0x00000020u) {
+  if (cached_has_bits & 0x00000040u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -14652,7 +14967,7 @@ failure:
   }
 
   // optional .Proto.SchemaItemControl control = 200;
-  if (cached_has_bits & 0x00000040u) {
+  if (cached_has_bits & 0x00000080u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -14660,7 +14975,7 @@ failure:
   }
 
   // optional .Proto.SchemaItemPushButton pushButton = 210;
-  if (cached_has_bits & 0x00000080u) {
+  if (cached_has_bits & 0x00000100u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -14668,11 +14983,19 @@ failure:
   }
 
   // optional .Proto.SchemaItemLineEdit lineEdit = 211;
-  if (cached_has_bits & 0x00000100u) {
+  if (cached_has_bits & 0x00000200u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
         211, _Internal::lineedit(this), target, stream);
+  }
+
+  // optional .Proto.SchemaItemSlider slider = 212;
+  if (cached_has_bits & 0x00000400u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        212, _Internal::slider(this), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -14717,7 +15040,7 @@ size_t SchemaItem::ByteSizeLong() const {
   size_t total_size = 0;
 
   if ((((_has_bits_[0] & 0x00000020) ^ 0x00000020)
-       | ((_has_bits_[1] & 0x00000e00) ^ 0x00000e00)) == 0) {  // All required fields are present.
+       | ((_has_bits_[1] & 0x00003800) ^ 0x00003800)) == 0) {  // All required fields are present.
     // required .Proto.Uuid uuid = 1;
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
@@ -14802,257 +15125,273 @@ size_t SchemaItem::ByteSizeLong() const {
           *posconnectionimpl_);
     }
 
-    // optional .Proto.FblItem FblItem = 106;
+    // optional .Proto.PosRectRotatable PosRectRotatable = 20;
     if (cached_has_bits & 0x00000200u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *posrectrotatable_);
+    }
+
+    // optional .Proto.FblItem FblItem = 106;
+    if (cached_has_bits & 0x00000400u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *fblitem_);
     }
 
     // optional .Proto.FblItemRect FblItemRect = 107;
-    if (cached_has_bits & 0x00000400u) {
+    if (cached_has_bits & 0x00000800u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *fblitemrect_);
     }
 
     // optional .Proto.FblItemLine FblItemLine = 108;
-    if (cached_has_bits & 0x00000800u) {
+    if (cached_has_bits & 0x00001000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *fblitemline_);
     }
 
     // optional .Proto.SchemaItemRect Rect = 116;
-    if (cached_has_bits & 0x00001000u) {
+    if (cached_has_bits & 0x00002000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *rect_);
     }
 
     // optional .Proto.SchemaItemLine Line = 117;
-    if (cached_has_bits & 0x00002000u) {
+    if (cached_has_bits & 0x00004000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *line_);
     }
 
     // optional .Proto.SchemaItemPath Path = 118;
-    if (cached_has_bits & 0x00004000u) {
+    if (cached_has_bits & 0x00008000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *path_);
     }
 
+  }
+  if (cached_has_bits & 0x00ff0000u) {
     // optional .Proto.SchemaItemImage Image = 119;
-    if (cached_has_bits & 0x00008000u) {
+    if (cached_has_bits & 0x00010000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *image_);
     }
 
-  }
-  if (cached_has_bits & 0x00ff0000u) {
     // optional .Proto.SchemaItemFrame Frame = 120;
-    if (cached_has_bits & 0x00010000u) {
+    if (cached_has_bits & 0x00020000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *frame_);
     }
 
     // optional .Proto.SchemaItemIndicator Indicator = 121;
-    if (cached_has_bits & 0x00020000u) {
+    if (cached_has_bits & 0x00040000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *indicator_);
     }
 
     // optional .Proto.SchemaItemSignal Signal = 124;
-    if (cached_has_bits & 0x00040000u) {
+    if (cached_has_bits & 0x00080000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *signal_);
     }
 
     // optional .Proto.SchemaItemInput InputSignal = 125;
-    if (cached_has_bits & 0x00080000u) {
+    if (cached_has_bits & 0x00100000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *inputsignal_);
     }
 
     // optional .Proto.SchemaItemOutput OutputSignal = 126;
-    if (cached_has_bits & 0x00100000u) {
+    if (cached_has_bits & 0x00200000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *outputsignal_);
     }
 
     // optional .Proto.SchemaItemLink Link = 127;
-    if (cached_has_bits & 0x00200000u) {
+    if (cached_has_bits & 0x00400000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *link_);
     }
 
     // optional .Proto.SchemaItemAfb Afb = 128;
-    if (cached_has_bits & 0x00400000u) {
+    if (cached_has_bits & 0x00800000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *afb_);
     }
 
+  }
+  if (cached_has_bits & 0xff000000u) {
     // optional .Proto.SchemaItemConst ConstItem = 129;
-    if (cached_has_bits & 0x00800000u) {
+    if (cached_has_bits & 0x01000000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *constitem_);
     }
 
-  }
-  if (cached_has_bits & 0xff000000u) {
     // optional .Proto.SchemaItemConnection ConnectionItem = 130;
-    if (cached_has_bits & 0x01000000u) {
+    if (cached_has_bits & 0x02000000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *connectionitem_);
     }
 
     // optional .Proto.SchemaItemTransmitter TransmitterItem = 131;
-    if (cached_has_bits & 0x02000000u) {
+    if (cached_has_bits & 0x04000000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *transmitteritem_);
     }
 
     // optional .Proto.SchemaItemReceiver ReceiverItem = 132;
-    if (cached_has_bits & 0x04000000u) {
+    if (cached_has_bits & 0x08000000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *receiveritem_);
     }
 
     // optional .Proto.SchemaItemInOut InOutSignal = 133;
-    if (cached_has_bits & 0x08000000u) {
+    if (cached_has_bits & 0x10000000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *inoutsignal_);
     }
 
     // optional .Proto.SchemaItemUfb ufb = 134;
-    if (cached_has_bits & 0x10000000u) {
+    if (cached_has_bits & 0x20000000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *ufb_);
     }
 
     // optional .Proto.SchemaItemTerminator terminator = 135;
-    if (cached_has_bits & 0x20000000u) {
+    if (cached_has_bits & 0x40000000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *terminator_);
     }
 
     // optional .Proto.SchemaItemValue Value = 136;
-    if (cached_has_bits & 0x40000000u) {
+    if (cached_has_bits & 0x80000000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *value_);
     }
 
+  }
+  cached_has_bits = _has_bits_[1];
+  if (cached_has_bits & 0x000000ffu) {
     // optional .Proto.SchemaItemImageValue ImageValue = 137;
-    if (cached_has_bits & 0x80000000u) {
+    if (cached_has_bits & 0x00000001u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *imagevalue_);
     }
 
-  }
-  cached_has_bits = _has_bits_[1];
-  if (cached_has_bits & 0x000000ffu) {
     // optional .Proto.SchemaItemBus BusItem = 150;
-    if (cached_has_bits & 0x00000001u) {
+    if (cached_has_bits & 0x00000002u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *busitem_);
     }
 
     // optional .Proto.SchemaItemBusComposer BusComposer = 151;
-    if (cached_has_bits & 0x00000002u) {
+    if (cached_has_bits & 0x00000004u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *buscomposer_);
     }
 
     // optional .Proto.SchemaItemBusExtractor BusExtractor = 152;
-    if (cached_has_bits & 0x00000004u) {
+    if (cached_has_bits & 0x00000008u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *busextractor_);
     }
 
     // optional .Proto.SchemaItemLoopback LoopbackItem = 155;
-    if (cached_has_bits & 0x00000008u) {
+    if (cached_has_bits & 0x00000010u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *loopbackitem_);
     }
 
     // optional .Proto.SchemaItemLoopbackSource loopbackSource = 156;
-    if (cached_has_bits & 0x00000010u) {
+    if (cached_has_bits & 0x00000020u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *loopbacksource_);
     }
 
     // optional .Proto.SchemaItemLoopbackTarget loopbackTarget = 157;
-    if (cached_has_bits & 0x00000020u) {
+    if (cached_has_bits & 0x00000040u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *loopbacktarget_);
     }
 
     // optional .Proto.SchemaItemControl control = 200;
-    if (cached_has_bits & 0x00000040u) {
+    if (cached_has_bits & 0x00000080u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *control_);
     }
 
+  }
+  if (cached_has_bits & 0x00000700u) {
     // optional .Proto.SchemaItemPushButton pushButton = 210;
-    if (cached_has_bits & 0x00000080u) {
+    if (cached_has_bits & 0x00000100u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *pushbutton_);
     }
 
-  }
-  // optional .Proto.SchemaItemLineEdit lineEdit = 211;
-  if (cached_has_bits & 0x00000100u) {
-    total_size += 2 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-        *lineedit_);
-  }
+    // optional .Proto.SchemaItemLineEdit lineEdit = 211;
+    if (cached_has_bits & 0x00000200u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *lineedit_);
+    }
 
-  if (cached_has_bits & 0x00007000u) {
+    // optional .Proto.SchemaItemSlider slider = 212;
+    if (cached_has_bits & 0x00000400u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *slider_);
+    }
+
+  }
+  if (cached_has_bits & 0x0000c000u) {
     // optional bool acceptClick = 5 [default = false];
-    if (cached_has_bits & 0x00001000u) {
+    if (cached_has_bits & 0x00004000u) {
       total_size += 1 + 1;
     }
 
     // optional bool isCommented = 8 [default = false];
-    if (cached_has_bits & 0x00002000u) {
+    if (cached_has_bits & 0x00008000u) {
       total_size += 1 + 1;
     }
 
-    // optional int32 labelPos = 15 [default = 2];
-    if (cached_has_bits & 0x00004000u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-          this->_internal_labelpos());
-    }
-
   }
+  // optional int32 labelPos = 15 [default = 2];
+  if (cached_has_bits & 0x00010000u) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+        this->_internal_labelpos());
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
         _internal_metadata_, total_size, &_cached_size_);
@@ -15116,129 +15455,135 @@ void SchemaItem::MergeFrom(const SchemaItem& from) {
       _internal_mutable_posconnectionimpl()->::Proto::PosConnectionImpl::MergeFrom(from._internal_posconnectionimpl());
     }
     if (cached_has_bits & 0x00000200u) {
-      _internal_mutable_fblitem()->::Proto::FblItem::MergeFrom(from._internal_fblitem());
+      _internal_mutable_posrectrotatable()->::Proto::PosRectRotatable::MergeFrom(from._internal_posrectrotatable());
     }
     if (cached_has_bits & 0x00000400u) {
-      _internal_mutable_fblitemrect()->::Proto::FblItemRect::MergeFrom(from._internal_fblitemrect());
+      _internal_mutable_fblitem()->::Proto::FblItem::MergeFrom(from._internal_fblitem());
     }
     if (cached_has_bits & 0x00000800u) {
-      _internal_mutable_fblitemline()->::Proto::FblItemLine::MergeFrom(from._internal_fblitemline());
+      _internal_mutable_fblitemrect()->::Proto::FblItemRect::MergeFrom(from._internal_fblitemrect());
     }
     if (cached_has_bits & 0x00001000u) {
-      _internal_mutable_rect()->::Proto::SchemaItemRect::MergeFrom(from._internal_rect());
+      _internal_mutable_fblitemline()->::Proto::FblItemLine::MergeFrom(from._internal_fblitemline());
     }
     if (cached_has_bits & 0x00002000u) {
-      _internal_mutable_line()->::Proto::SchemaItemLine::MergeFrom(from._internal_line());
+      _internal_mutable_rect()->::Proto::SchemaItemRect::MergeFrom(from._internal_rect());
     }
     if (cached_has_bits & 0x00004000u) {
-      _internal_mutable_path()->::Proto::SchemaItemPath::MergeFrom(from._internal_path());
+      _internal_mutable_line()->::Proto::SchemaItemLine::MergeFrom(from._internal_line());
     }
     if (cached_has_bits & 0x00008000u) {
-      _internal_mutable_image()->::Proto::SchemaItemImage::MergeFrom(from._internal_image());
+      _internal_mutable_path()->::Proto::SchemaItemPath::MergeFrom(from._internal_path());
     }
   }
   if (cached_has_bits & 0x00ff0000u) {
     if (cached_has_bits & 0x00010000u) {
-      _internal_mutable_frame()->::Proto::SchemaItemFrame::MergeFrom(from._internal_frame());
+      _internal_mutable_image()->::Proto::SchemaItemImage::MergeFrom(from._internal_image());
     }
     if (cached_has_bits & 0x00020000u) {
-      _internal_mutable_indicator()->::Proto::SchemaItemIndicator::MergeFrom(from._internal_indicator());
+      _internal_mutable_frame()->::Proto::SchemaItemFrame::MergeFrom(from._internal_frame());
     }
     if (cached_has_bits & 0x00040000u) {
-      _internal_mutable_signal()->::Proto::SchemaItemSignal::MergeFrom(from._internal_signal());
+      _internal_mutable_indicator()->::Proto::SchemaItemIndicator::MergeFrom(from._internal_indicator());
     }
     if (cached_has_bits & 0x00080000u) {
-      _internal_mutable_inputsignal()->::Proto::SchemaItemInput::MergeFrom(from._internal_inputsignal());
+      _internal_mutable_signal()->::Proto::SchemaItemSignal::MergeFrom(from._internal_signal());
     }
     if (cached_has_bits & 0x00100000u) {
-      _internal_mutable_outputsignal()->::Proto::SchemaItemOutput::MergeFrom(from._internal_outputsignal());
+      _internal_mutable_inputsignal()->::Proto::SchemaItemInput::MergeFrom(from._internal_inputsignal());
     }
     if (cached_has_bits & 0x00200000u) {
-      _internal_mutable_link()->::Proto::SchemaItemLink::MergeFrom(from._internal_link());
+      _internal_mutable_outputsignal()->::Proto::SchemaItemOutput::MergeFrom(from._internal_outputsignal());
     }
     if (cached_has_bits & 0x00400000u) {
-      _internal_mutable_afb()->::Proto::SchemaItemAfb::MergeFrom(from._internal_afb());
+      _internal_mutable_link()->::Proto::SchemaItemLink::MergeFrom(from._internal_link());
     }
     if (cached_has_bits & 0x00800000u) {
-      _internal_mutable_constitem()->::Proto::SchemaItemConst::MergeFrom(from._internal_constitem());
+      _internal_mutable_afb()->::Proto::SchemaItemAfb::MergeFrom(from._internal_afb());
     }
   }
   if (cached_has_bits & 0xff000000u) {
     if (cached_has_bits & 0x01000000u) {
-      _internal_mutable_connectionitem()->::Proto::SchemaItemConnection::MergeFrom(from._internal_connectionitem());
+      _internal_mutable_constitem()->::Proto::SchemaItemConst::MergeFrom(from._internal_constitem());
     }
     if (cached_has_bits & 0x02000000u) {
-      _internal_mutable_transmitteritem()->::Proto::SchemaItemTransmitter::MergeFrom(from._internal_transmitteritem());
+      _internal_mutable_connectionitem()->::Proto::SchemaItemConnection::MergeFrom(from._internal_connectionitem());
     }
     if (cached_has_bits & 0x04000000u) {
-      _internal_mutable_receiveritem()->::Proto::SchemaItemReceiver::MergeFrom(from._internal_receiveritem());
+      _internal_mutable_transmitteritem()->::Proto::SchemaItemTransmitter::MergeFrom(from._internal_transmitteritem());
     }
     if (cached_has_bits & 0x08000000u) {
-      _internal_mutable_inoutsignal()->::Proto::SchemaItemInOut::MergeFrom(from._internal_inoutsignal());
+      _internal_mutable_receiveritem()->::Proto::SchemaItemReceiver::MergeFrom(from._internal_receiveritem());
     }
     if (cached_has_bits & 0x10000000u) {
-      _internal_mutable_ufb()->::Proto::SchemaItemUfb::MergeFrom(from._internal_ufb());
+      _internal_mutable_inoutsignal()->::Proto::SchemaItemInOut::MergeFrom(from._internal_inoutsignal());
     }
     if (cached_has_bits & 0x20000000u) {
-      _internal_mutable_terminator()->::Proto::SchemaItemTerminator::MergeFrom(from._internal_terminator());
+      _internal_mutable_ufb()->::Proto::SchemaItemUfb::MergeFrom(from._internal_ufb());
     }
     if (cached_has_bits & 0x40000000u) {
-      _internal_mutable_value()->::Proto::SchemaItemValue::MergeFrom(from._internal_value());
+      _internal_mutable_terminator()->::Proto::SchemaItemTerminator::MergeFrom(from._internal_terminator());
     }
     if (cached_has_bits & 0x80000000u) {
-      _internal_mutable_imagevalue()->::Proto::SchemaItemImageValue::MergeFrom(from._internal_imagevalue());
+      _internal_mutable_value()->::Proto::SchemaItemValue::MergeFrom(from._internal_value());
     }
   }
   cached_has_bits = from._has_bits_[1];
   if (cached_has_bits & 0x000000ffu) {
     if (cached_has_bits & 0x00000001u) {
-      _internal_mutable_busitem()->::Proto::SchemaItemBus::MergeFrom(from._internal_busitem());
+      _internal_mutable_imagevalue()->::Proto::SchemaItemImageValue::MergeFrom(from._internal_imagevalue());
     }
     if (cached_has_bits & 0x00000002u) {
-      _internal_mutable_buscomposer()->::Proto::SchemaItemBusComposer::MergeFrom(from._internal_buscomposer());
+      _internal_mutable_busitem()->::Proto::SchemaItemBus::MergeFrom(from._internal_busitem());
     }
     if (cached_has_bits & 0x00000004u) {
-      _internal_mutable_busextractor()->::Proto::SchemaItemBusExtractor::MergeFrom(from._internal_busextractor());
+      _internal_mutable_buscomposer()->::Proto::SchemaItemBusComposer::MergeFrom(from._internal_buscomposer());
     }
     if (cached_has_bits & 0x00000008u) {
-      _internal_mutable_loopbackitem()->::Proto::SchemaItemLoopback::MergeFrom(from._internal_loopbackitem());
+      _internal_mutable_busextractor()->::Proto::SchemaItemBusExtractor::MergeFrom(from._internal_busextractor());
     }
     if (cached_has_bits & 0x00000010u) {
-      _internal_mutable_loopbacksource()->::Proto::SchemaItemLoopbackSource::MergeFrom(from._internal_loopbacksource());
+      _internal_mutable_loopbackitem()->::Proto::SchemaItemLoopback::MergeFrom(from._internal_loopbackitem());
     }
     if (cached_has_bits & 0x00000020u) {
-      _internal_mutable_loopbacktarget()->::Proto::SchemaItemLoopbackTarget::MergeFrom(from._internal_loopbacktarget());
+      _internal_mutable_loopbacksource()->::Proto::SchemaItemLoopbackSource::MergeFrom(from._internal_loopbacksource());
     }
     if (cached_has_bits & 0x00000040u) {
-      _internal_mutable_control()->::Proto::SchemaItemControl::MergeFrom(from._internal_control());
+      _internal_mutable_loopbacktarget()->::Proto::SchemaItemLoopbackTarget::MergeFrom(from._internal_loopbacktarget());
     }
     if (cached_has_bits & 0x00000080u) {
-      _internal_mutable_pushbutton()->::Proto::SchemaItemPushButton::MergeFrom(from._internal_pushbutton());
+      _internal_mutable_control()->::Proto::SchemaItemControl::MergeFrom(from._internal_control());
     }
   }
-  if (cached_has_bits & 0x00007f00u) {
+  if (cached_has_bits & 0x0000ff00u) {
     if (cached_has_bits & 0x00000100u) {
-      _internal_mutable_lineedit()->::Proto::SchemaItemLineEdit::MergeFrom(from._internal_lineedit());
+      _internal_mutable_pushbutton()->::Proto::SchemaItemPushButton::MergeFrom(from._internal_pushbutton());
     }
     if (cached_has_bits & 0x00000200u) {
-      itemunit_ = from.itemunit_;
+      _internal_mutable_lineedit()->::Proto::SchemaItemLineEdit::MergeFrom(from._internal_lineedit());
     }
     if (cached_has_bits & 0x00000400u) {
-      isstatic_ = from.isstatic_;
+      _internal_mutable_slider()->::Proto::SchemaItemSlider::MergeFrom(from._internal_slider());
     }
     if (cached_has_bits & 0x00000800u) {
-      islocked_ = from.islocked_;
+      itemunit_ = from.itemunit_;
     }
     if (cached_has_bits & 0x00001000u) {
-      acceptclick_ = from.acceptclick_;
+      isstatic_ = from.isstatic_;
     }
     if (cached_has_bits & 0x00002000u) {
-      iscommented_ = from.iscommented_;
+      islocked_ = from.islocked_;
     }
     if (cached_has_bits & 0x00004000u) {
-      labelpos_ = from.labelpos_;
+      acceptclick_ = from.acceptclick_;
+    }
+    if (cached_has_bits & 0x00008000u) {
+      iscommented_ = from.iscommented_;
     }
     _has_bits_[1] |= cached_has_bits;
+  }
+  if (cached_has_bits & 0x00010000u) {
+    _internal_set_labelpos(from._internal_labelpos());
   }
 }
 
@@ -15650,6 +15995,253 @@ void PosRectImpl::InternalSwap(PosRectImpl* other) {
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata PosRectImpl::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
+class PosRectRotatable::_Internal {
+ public:
+  using HasBits = decltype(std::declval<PosRectRotatable>()._has_bits_);
+  static void set_has_angle(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
+  static void set_has_rotationpoint(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
+};
+
+PosRectRotatable::PosRectRotatable(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:Proto.PosRectRotatable)
+}
+PosRectRotatable::PosRectRotatable(const PosRectRotatable& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message(),
+      _has_bits_(from._has_bits_) {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::memcpy(&angle_, &from.angle_,
+    static_cast<size_t>(reinterpret_cast<char*>(&rotationpoint_) -
+    reinterpret_cast<char*>(&angle_)) + sizeof(rotationpoint_));
+  // @@protoc_insertion_point(copy_constructor:Proto.PosRectRotatable)
+}
+
+void PosRectRotatable::SharedCtor() {
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&angle_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&rotationpoint_) -
+    reinterpret_cast<char*>(&angle_)) + sizeof(rotationpoint_));
+}
+
+PosRectRotatable::~PosRectRotatable() {
+  // @@protoc_insertion_point(destructor:Proto.PosRectRotatable)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void PosRectRotatable::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+}
+
+void PosRectRotatable::ArenaDtor(void* object) {
+  PosRectRotatable* _this = reinterpret_cast< PosRectRotatable* >(object);
+  (void)_this;
+}
+void PosRectRotatable::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void PosRectRotatable::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void PosRectRotatable::Clear() {
+// @@protoc_insertion_point(message_clear_start:Proto.PosRectRotatable)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    ::memset(&angle_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&rotationpoint_) -
+        reinterpret_cast<char*>(&angle_)) + sizeof(rotationpoint_));
+  }
+  _has_bits_.Clear();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* PosRectRotatable::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  _Internal::HasBits has_bits{};
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // optional double angle = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 17)) {
+          _Internal::set_has_angle(&has_bits);
+          angle_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
+          ptr += sizeof(double);
+        } else goto handle_unusual;
+        continue;
+      // optional int32 rotationpoint = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
+          _Internal::set_has_rotationpoint(&has_bits);
+          rotationpoint_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  _has_bits_.Or(has_bits);
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* PosRectRotatable::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:Proto.PosRectRotatable)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  cached_has_bits = _has_bits_[0];
+  // optional double angle = 2;
+  if (cached_has_bits & 0x00000001u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(2, this->_internal_angle(), target);
+  }
+
+  // optional int32 rotationpoint = 3;
+  if (cached_has_bits & 0x00000002u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(3, this->_internal_rotationpoint(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:Proto.PosRectRotatable)
+  return target;
+}
+
+size_t PosRectRotatable::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:Proto.PosRectRotatable)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    // optional double angle = 2;
+    if (cached_has_bits & 0x00000001u) {
+      total_size += 1 + 8;
+    }
+
+    // optional int32 rotationpoint = 3;
+    if (cached_has_bits & 0x00000002u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_rotationpoint());
+    }
+
+  }
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void PosRectRotatable::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:Proto.PosRectRotatable)
+  GOOGLE_DCHECK_NE(&from, this);
+  const PosRectRotatable* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<PosRectRotatable>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.PosRectRotatable)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.PosRectRotatable)
+    MergeFrom(*source);
+  }
+}
+
+void PosRectRotatable::MergeFrom(const PosRectRotatable& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:Proto.PosRectRotatable)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  cached_has_bits = from._has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    if (cached_has_bits & 0x00000001u) {
+      angle_ = from.angle_;
+    }
+    if (cached_has_bits & 0x00000002u) {
+      rotationpoint_ = from.rotationpoint_;
+    }
+    _has_bits_[0] |= cached_has_bits;
+  }
+}
+
+void PosRectRotatable::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:Proto.PosRectRotatable)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void PosRectRotatable::CopyFrom(const PosRectRotatable& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:Proto.PosRectRotatable)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool PosRectRotatable::IsInitialized() const {
+  return true;
+}
+
+void PosRectRotatable::InternalSwap(PosRectRotatable* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  swap(_has_bits_[0], other->_has_bits_[0]);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(PosRectRotatable, rotationpoint_)
+      + sizeof(PosRectRotatable::rotationpoint_)
+      - PROTOBUF_FIELD_OFFSET(PosRectRotatable, angle_)>(
+          reinterpret_cast<char*>(&angle_),
+          reinterpret_cast<char*>(&other->angle_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata PosRectRotatable::GetMetadata() const {
   return GetMetadataStatic();
 }
 
@@ -20048,16 +20640,31 @@ class IndicatorTrend::_Internal {
  public:
   using HasBits = decltype(std::declval<IndicatorTrend>()._has_bits_);
   static void set_has_sampleperiod(HasBits* has_bits) {
-    (*has_bits)[0] |= 2u;
-  }
-  static void set_has_timetype(HasBits* has_bits) {
     (*has_bits)[0] |= 4u;
   }
-  static void set_has_redrawinterval(HasBits* has_bits) {
+  static void set_has_timetype(HasBits* has_bits) {
     (*has_bits)[0] |= 8u;
   }
-  static void set_has_duration(HasBits* has_bits) {
+  static void set_has_viewmode(HasBits* has_bits) {
+    (*has_bits)[0] |= 16u;
+  }
+  static void set_has_scaletype(HasBits* has_bits) {
+    (*has_bits)[0] |= 32u;
+  }
+  static void set_has_lanecount(HasBits* has_bits) {
+    (*has_bits)[0] |= 64u;
+  }
+  static void set_has_backcolor1st(HasBits* has_bits) {
+    (*has_bits)[0] |= 128u;
+  }
+  static void set_has_backcolor2nd(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
+  }
+  static void set_has_redrawinterval(HasBits* has_bits) {
+    (*has_bits)[0] |= 256u;
+  }
+  static void set_has_duration(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
   }
 };
 
@@ -20073,17 +20680,17 @@ IndicatorTrend::IndicatorTrend(const IndicatorTrend& from)
       _has_bits_(from._has_bits_),
       trendsignalparams_(from.trendsignalparams_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::memcpy(&duration_, &from.duration_,
+  ::memcpy(&backcolor2nd_, &from.backcolor2nd_,
     static_cast<size_t>(reinterpret_cast<char*>(&redrawinterval_) -
-    reinterpret_cast<char*>(&duration_)) + sizeof(redrawinterval_));
+    reinterpret_cast<char*>(&backcolor2nd_)) + sizeof(redrawinterval_));
   // @@protoc_insertion_point(copy_constructor:Proto.IndicatorTrend)
 }
 
 void IndicatorTrend::SharedCtor() {
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-    reinterpret_cast<char*>(&duration_) - reinterpret_cast<char*>(this)),
+    reinterpret_cast<char*>(&backcolor2nd_) - reinterpret_cast<char*>(this)),
     0, static_cast<size_t>(reinterpret_cast<char*>(&redrawinterval_) -
-    reinterpret_cast<char*>(&duration_)) + sizeof(redrawinterval_));
+    reinterpret_cast<char*>(&backcolor2nd_)) + sizeof(redrawinterval_));
 }
 
 IndicatorTrend::~IndicatorTrend() {
@@ -20114,11 +20721,12 @@ void IndicatorTrend::Clear() {
 
   trendsignalparams_.Clear();
   cached_has_bits = _has_bits_[0];
-  if (cached_has_bits & 0x0000000fu) {
-    ::memset(&duration_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&redrawinterval_) -
-        reinterpret_cast<char*>(&duration_)) + sizeof(redrawinterval_));
+  if (cached_has_bits & 0x000000ffu) {
+    ::memset(&backcolor2nd_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&backcolor1st_) -
+        reinterpret_cast<char*>(&backcolor2nd_)) + sizeof(backcolor1st_));
   }
+  redrawinterval_ = PROTOBUF_LONGLONG(0);
   _has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
@@ -20153,6 +20761,46 @@ const char* IndicatorTrend::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE
           _Internal::set_has_timetype(&has_bits);
           timetype_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int32 viewMode = 92;
+      case 92:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 224)) {
+          _Internal::set_has_viewmode(&has_bits);
+          viewmode_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int32 scaleType = 93;
+      case 93:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 232)) {
+          _Internal::set_has_scaletype(&has_bits);
+          scaletype_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int32 laneCount = 94;
+      case 94:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 240)) {
+          _Internal::set_has_lanecount(&has_bits);
+          lanecount_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional fixed32 backColor1st = 95;
+      case 95:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 253)) {
+          _Internal::set_has_backcolor1st(&has_bits);
+          backcolor1st_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<::PROTOBUF_NAMESPACE_ID::uint32>(ptr);
+          ptr += sizeof(::PROTOBUF_NAMESPACE_ID::uint32);
+        } else goto handle_unusual;
+        continue;
+      // optional fixed32 backColor2nd = 96;
+      case 96:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 5)) {
+          _Internal::set_has_backcolor2nd(&has_bits);
+          backcolor2nd_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<::PROTOBUF_NAMESPACE_ID::uint32>(ptr);
+          ptr += sizeof(::PROTOBUF_NAMESPACE_ID::uint32);
         } else goto handle_unusual;
         continue;
       // optional int64 redrawinterval = 100;
@@ -20206,25 +20854,55 @@ failure:
 
   cached_has_bits = _has_bits_[0];
   // optional int64 duration = 51;
-  if (cached_has_bits & 0x00000001u) {
+  if (cached_has_bits & 0x00000002u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(51, this->_internal_duration(), target);
   }
 
   // optional int32 sampleperiod = 90;
-  if (cached_has_bits & 0x00000002u) {
+  if (cached_has_bits & 0x00000004u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(90, this->_internal_sampleperiod(), target);
   }
 
   // optional int32 timeType = 91;
-  if (cached_has_bits & 0x00000004u) {
+  if (cached_has_bits & 0x00000008u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(91, this->_internal_timetype(), target);
   }
 
+  // optional int32 viewMode = 92;
+  if (cached_has_bits & 0x00000010u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(92, this->_internal_viewmode(), target);
+  }
+
+  // optional int32 scaleType = 93;
+  if (cached_has_bits & 0x00000020u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(93, this->_internal_scaletype(), target);
+  }
+
+  // optional int32 laneCount = 94;
+  if (cached_has_bits & 0x00000040u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(94, this->_internal_lanecount(), target);
+  }
+
+  // optional fixed32 backColor1st = 95;
+  if (cached_has_bits & 0x00000080u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFixed32ToArray(95, this->_internal_backcolor1st(), target);
+  }
+
+  // optional fixed32 backColor2nd = 96;
+  if (cached_has_bits & 0x00000001u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFixed32ToArray(96, this->_internal_backcolor2nd(), target);
+  }
+
   // optional int64 redrawinterval = 100;
-  if (cached_has_bits & 0x00000008u) {
+  if (cached_has_bits & 0x00000100u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(100, this->_internal_redrawinterval(), target);
   }
@@ -20261,36 +20939,67 @@ size_t IndicatorTrend::ByteSizeLong() const {
   }
 
   cached_has_bits = _has_bits_[0];
-  if (cached_has_bits & 0x0000000fu) {
-    // optional int64 duration = 51;
+  if (cached_has_bits & 0x000000ffu) {
+    // optional fixed32 backColor2nd = 96;
     if (cached_has_bits & 0x00000001u) {
+      total_size += 2 + 4;
+    }
+
+    // optional int64 duration = 51;
+    if (cached_has_bits & 0x00000002u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
           this->_internal_duration());
     }
 
     // optional int32 sampleperiod = 90;
-    if (cached_has_bits & 0x00000002u) {
+    if (cached_has_bits & 0x00000004u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_sampleperiod());
     }
 
     // optional int32 timeType = 91;
-    if (cached_has_bits & 0x00000004u) {
+    if (cached_has_bits & 0x00000008u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_timetype());
     }
 
-    // optional int64 redrawinterval = 100;
-    if (cached_has_bits & 0x00000008u) {
+    // optional int32 viewMode = 92;
+    if (cached_has_bits & 0x00000010u) {
       total_size += 2 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_redrawinterval());
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_viewmode());
+    }
+
+    // optional int32 scaleType = 93;
+    if (cached_has_bits & 0x00000020u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_scaletype());
+    }
+
+    // optional int32 laneCount = 94;
+    if (cached_has_bits & 0x00000040u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_lanecount());
+    }
+
+    // optional fixed32 backColor1st = 95;
+    if (cached_has_bits & 0x00000080u) {
+      total_size += 2 + 4;
     }
 
   }
+  // optional int64 redrawinterval = 100;
+  if (cached_has_bits & 0x00000100u) {
+    total_size += 2 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
+        this->_internal_redrawinterval());
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
         _internal_metadata_, total_size, &_cached_size_);
@@ -20324,20 +21033,35 @@ void IndicatorTrend::MergeFrom(const IndicatorTrend& from) {
 
   trendsignalparams_.MergeFrom(from.trendsignalparams_);
   cached_has_bits = from._has_bits_[0];
-  if (cached_has_bits & 0x0000000fu) {
+  if (cached_has_bits & 0x000000ffu) {
     if (cached_has_bits & 0x00000001u) {
-      duration_ = from.duration_;
+      backcolor2nd_ = from.backcolor2nd_;
     }
     if (cached_has_bits & 0x00000002u) {
-      sampleperiod_ = from.sampleperiod_;
+      duration_ = from.duration_;
     }
     if (cached_has_bits & 0x00000004u) {
-      timetype_ = from.timetype_;
+      sampleperiod_ = from.sampleperiod_;
     }
     if (cached_has_bits & 0x00000008u) {
-      redrawinterval_ = from.redrawinterval_;
+      timetype_ = from.timetype_;
+    }
+    if (cached_has_bits & 0x00000010u) {
+      viewmode_ = from.viewmode_;
+    }
+    if (cached_has_bits & 0x00000020u) {
+      scaletype_ = from.scaletype_;
+    }
+    if (cached_has_bits & 0x00000040u) {
+      lanecount_ = from.lanecount_;
+    }
+    if (cached_has_bits & 0x00000080u) {
+      backcolor1st_ = from.backcolor1st_;
     }
     _has_bits_[0] |= cached_has_bits;
+  }
+  if (cached_has_bits & 0x00000100u) {
+    _internal_set_redrawinterval(from._internal_redrawinterval());
   }
 }
 
@@ -20367,9 +21091,9 @@ void IndicatorTrend::InternalSwap(IndicatorTrend* other) {
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(IndicatorTrend, redrawinterval_)
       + sizeof(IndicatorTrend::redrawinterval_)
-      - PROTOBUF_FIELD_OFFSET(IndicatorTrend, duration_)>(
-          reinterpret_cast<char*>(&duration_),
-          reinterpret_cast<char*>(&other->duration_));
+      - PROTOBUF_FIELD_OFFSET(IndicatorTrend, backcolor2nd_)>(
+          reinterpret_cast<char*>(&backcolor2nd_),
+          reinterpret_cast<char*>(&other->backcolor2nd_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata IndicatorTrend::GetMetadata() const {
@@ -23611,7 +24335,8 @@ SchemaItemAfb::_Internal::afbelement(const SchemaItemAfb* msg) {
 }
 SchemaItemAfb::SchemaItemAfb(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena),
-  params_(arena) {
+  params_(arena),
+  packedlogicinputs_(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
   // @@protoc_insertion_point(arena_constructor:Proto.SchemaItemAfb)
@@ -23619,7 +24344,8 @@ SchemaItemAfb::SchemaItemAfb(::PROTOBUF_NAMESPACE_ID::Arena* arena)
 SchemaItemAfb::SchemaItemAfb(const SchemaItemAfb& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
       _has_bits_(from._has_bits_),
-      params_(from.params_) {
+      params_(from.params_),
+      packedlogicinputs_(from.packedlogicinputs_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   deprecated_label_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (from._internal_has_deprecated_label()) {
@@ -23685,6 +24411,7 @@ void SchemaItemAfb::Clear() {
   (void) cached_has_bits;
 
   params_.Clear();
+  packedlogicinputs_.Clear();
   cached_has_bits = _has_bits_[0];
   if (cached_has_bits & 0x0000001fu) {
     if (cached_has_bits & 0x00000001u) {
@@ -23768,6 +24495,22 @@ const char* SchemaItemAfb::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
+      // repeated string packedLogicInputs = 8;
+      case 8:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 66)) {
+          ptr -= 1;
+          do {
+            ptr += 1;
+            auto str = _internal_add_packedlogicinputs();
+            ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+            #ifndef NDEBUG
+            ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.SchemaItemAfb.packedLogicInputs");
+            #endif  // !NDEBUG
+            CHK_(ptr);
+            if (!ctx->DataAvailable(ptr)) break;
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<66>(ptr));
+        } else goto handle_unusual;
+        continue;
       default: {
       handle_unusual:
         if ((tag & 7) == 4 || tag == 0) {
@@ -23846,6 +24589,16 @@ failure:
         7, _Internal::afbelement(this), target, stream);
   }
 
+  // repeated string packedLogicInputs = 8;
+  for (int i = 0, n = this->_internal_packedlogicinputs_size(); i < n; i++) {
+    const auto& s = this->_internal_packedlogicinputs(i);
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      s.data(), static_cast<int>(s.length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Proto.SchemaItemAfb.packedLogicInputs");
+    target = stream->WriteString(8, s, target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -23867,6 +24620,14 @@ size_t SchemaItemAfb::ByteSizeLong() const {
   for (const auto& msg : this->params_) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
+  }
+
+  // repeated string packedLogicInputs = 8;
+  total_size += 1 *
+      ::PROTOBUF_NAMESPACE_ID::internal::FromIntSize(packedlogicinputs_.size());
+  for (int i = 0, n = packedlogicinputs_.size(); i < n; i++) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+      packedlogicinputs_.Get(i));
   }
 
   cached_has_bits = _has_bits_[0];
@@ -23939,6 +24700,7 @@ void SchemaItemAfb::MergeFrom(const SchemaItemAfb& from) {
   (void) cached_has_bits;
 
   params_.MergeFrom(from.params_);
+  packedlogicinputs_.MergeFrom(from.packedlogicinputs_);
   cached_has_bits = from._has_bits_[0];
   if (cached_has_bits & 0x0000001fu) {
     if (cached_has_bits & 0x00000001u) {
@@ -23993,6 +24755,7 @@ void SchemaItemAfb::InternalSwap(SchemaItemAfb* other) {
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   swap(_has_bits_[0], other->_has_bits_[0]);
   params_.InternalSwap(&other->params_);
+  packedlogicinputs_.InternalSwap(&other->packedlogicinputs_);
   deprecated_label_.Swap(&other->deprecated_label_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(SchemaItemAfb, afbelement_)
@@ -29692,89 +30455,855 @@ void SchemaItemLineEdit::InternalSwap(SchemaItemLineEdit* other) {
 
 // ===================================================================
 
+class SchemaItemSlider::_Internal {
+ public:
+  using HasBits = decltype(std::declval<SchemaItemSlider>()._has_bits_);
+  static void set_has_invertedappearance(HasBits* has_bits) {
+    (*has_bits)[0] |= 32u;
+  }
+  static void set_has_invertedcontrols(HasBits* has_bits) {
+    (*has_bits)[0] |= 64u;
+  }
+  static void set_has_enablemousewheel(HasBits* has_bits) {
+    (*has_bits)[0] |= 128u;
+  }
+  static void set_has_maximum(HasBits* has_bits) {
+    (*has_bits)[0] |= 8192u;
+  }
+  static void set_has_minimum(HasBits* has_bits) {
+    (*has_bits)[0] |= 256u;
+  }
+  static void set_has_orientation(HasBits* has_bits) {
+    (*has_bits)[0] |= 16384u;
+  }
+  static void set_has_pagestep(HasBits* has_bits) {
+    (*has_bits)[0] |= 32768u;
+  }
+  static void set_has_singlestep(HasBits* has_bits) {
+    (*has_bits)[0] |= 65536u;
+  }
+  static void set_has_tracking(HasBits* has_bits) {
+    (*has_bits)[0] |= 4096u;
+  }
+  static void set_has_defaultvalue(HasBits* has_bits) {
+    (*has_bits)[0] |= 1024u;
+  }
+  static void set_has_tickinterval(HasBits* has_bits) {
+    (*has_bits)[0] |= 2048u;
+  }
+  static void set_has_tickposition(HasBits* has_bits) {
+    (*has_bits)[0] |= 512u;
+  }
+  static void set_has_scriptaftercreate(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
+  static void set_has_scriptslidermoved(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
+  static void set_has_scriptsliderpressed(HasBits* has_bits) {
+    (*has_bits)[0] |= 4u;
+  }
+  static void set_has_scriptsliderreleased(HasBits* has_bits) {
+    (*has_bits)[0] |= 8u;
+  }
+  static void set_has_scriptvaluechanged(HasBits* has_bits) {
+    (*has_bits)[0] |= 16u;
+  }
+};
+
+SchemaItemSlider::SchemaItemSlider(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:Proto.SchemaItemSlider)
+}
+SchemaItemSlider::SchemaItemSlider(const SchemaItemSlider& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message(),
+      _has_bits_(from._has_bits_) {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  scriptaftercreate_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_scriptaftercreate()) {
+    scriptaftercreate_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_scriptaftercreate(), 
+      GetArena());
+  }
+  scriptslidermoved_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_scriptslidermoved()) {
+    scriptslidermoved_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_scriptslidermoved(), 
+      GetArena());
+  }
+  scriptsliderpressed_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_scriptsliderpressed()) {
+    scriptsliderpressed_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_scriptsliderpressed(), 
+      GetArena());
+  }
+  scriptsliderreleased_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_scriptsliderreleased()) {
+    scriptsliderreleased_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_scriptsliderreleased(), 
+      GetArena());
+  }
+  scriptvaluechanged_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_scriptvaluechanged()) {
+    scriptvaluechanged_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_scriptvaluechanged(), 
+      GetArena());
+  }
+  ::memcpy(&invertedappearance_, &from.invertedappearance_,
+    static_cast<size_t>(reinterpret_cast<char*>(&singlestep_) -
+    reinterpret_cast<char*>(&invertedappearance_)) + sizeof(singlestep_));
+  // @@protoc_insertion_point(copy_constructor:Proto.SchemaItemSlider)
+}
+
+void SchemaItemSlider::SharedCtor() {
+scriptaftercreate_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+scriptslidermoved_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+scriptsliderpressed_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+scriptsliderreleased_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+scriptvaluechanged_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&invertedappearance_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&tickinterval_) -
+    reinterpret_cast<char*>(&invertedappearance_)) + sizeof(tickinterval_));
+tracking_ = true;
+maximum_ = 99;
+orientation_ = 2;
+pagestep_ = 10;
+singlestep_ = 1;
+}
+
+SchemaItemSlider::~SchemaItemSlider() {
+  // @@protoc_insertion_point(destructor:Proto.SchemaItemSlider)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void SchemaItemSlider::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  scriptaftercreate_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  scriptslidermoved_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  scriptsliderpressed_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  scriptsliderreleased_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  scriptvaluechanged_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+}
+
+void SchemaItemSlider::ArenaDtor(void* object) {
+  SchemaItemSlider* _this = reinterpret_cast< SchemaItemSlider* >(object);
+  (void)_this;
+}
+void SchemaItemSlider::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void SchemaItemSlider::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void SchemaItemSlider::Clear() {
+// @@protoc_insertion_point(message_clear_start:Proto.SchemaItemSlider)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x0000001fu) {
+    if (cached_has_bits & 0x00000001u) {
+      scriptaftercreate_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000002u) {
+      scriptslidermoved_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000004u) {
+      scriptsliderpressed_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000008u) {
+      scriptsliderreleased_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000010u) {
+      scriptvaluechanged_.ClearNonDefaultToEmpty();
+    }
+  }
+  if (cached_has_bits & 0x000000e0u) {
+    ::memset(&invertedappearance_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&enablemousewheel_) -
+        reinterpret_cast<char*>(&invertedappearance_)) + sizeof(enablemousewheel_));
+  }
+  if (cached_has_bits & 0x0000ff00u) {
+    ::memset(&minimum_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&tickinterval_) -
+        reinterpret_cast<char*>(&minimum_)) + sizeof(tickinterval_));
+    tracking_ = true;
+    maximum_ = 99;
+    orientation_ = 2;
+    pagestep_ = 10;
+  }
+  singlestep_ = 1;
+  _has_bits_.Clear();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* SchemaItemSlider::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  _Internal::HasBits has_bits{};
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // optional bool invertedAppearance = 2 [default = false];
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
+          _Internal::set_has_invertedappearance(&has_bits);
+          invertedappearance_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional bool invertedControls = 3 [default = false];
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
+          _Internal::set_has_invertedcontrols(&has_bits);
+          invertedcontrols_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional bool enableMouseWheel = 4 [default = false];
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
+          _Internal::set_has_enablemousewheel(&has_bits);
+          enablemousewheel_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int32 maximum = 6 [default = 99];
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 48)) {
+          _Internal::set_has_maximum(&has_bits);
+          maximum_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int32 minimum = 7 [default = 0];
+      case 7:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 56)) {
+          _Internal::set_has_minimum(&has_bits);
+          minimum_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int32 orientation = 10 [default = 2];
+      case 10:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 80)) {
+          _Internal::set_has_orientation(&has_bits);
+          orientation_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int32 pageStep = 12 [default = 10];
+      case 12:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 96)) {
+          _Internal::set_has_pagestep(&has_bits);
+          pagestep_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int32 singleStep = 13 [default = 1];
+      case 13:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 104)) {
+          _Internal::set_has_singlestep(&has_bits);
+          singlestep_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional bool tracking = 16 [default = true];
+      case 16:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 128)) {
+          _Internal::set_has_tracking(&has_bits);
+          tracking_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int32 defaultValue = 17 [default = 0];
+      case 17:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 136)) {
+          _Internal::set_has_defaultvalue(&has_bits);
+          defaultvalue_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int32 tickInterval = 20 [default = 0];
+      case 20:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 160)) {
+          _Internal::set_has_tickinterval(&has_bits);
+          tickinterval_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int32 tickPosition = 21 [default = 0];
+      case 21:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 168)) {
+          _Internal::set_has_tickposition(&has_bits);
+          tickposition_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional string scriptAfterCreate = 31;
+      case 31:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 250)) {
+          auto str = _internal_mutable_scriptaftercreate();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.SchemaItemSlider.scriptAfterCreate");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional string scriptSliderMoved = 32;
+      case 32:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 2)) {
+          auto str = _internal_mutable_scriptslidermoved();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.SchemaItemSlider.scriptSliderMoved");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional string scriptSliderPressed = 33;
+      case 33:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          auto str = _internal_mutable_scriptsliderpressed();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.SchemaItemSlider.scriptSliderPressed");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional string scriptSliderReleased = 34;
+      case 34:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+          auto str = _internal_mutable_scriptsliderreleased();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.SchemaItemSlider.scriptSliderReleased");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional string scriptValueChanged = 35;
+      case 35:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+          auto str = _internal_mutable_scriptvaluechanged();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.SchemaItemSlider.scriptValueChanged");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  _has_bits_.Or(has_bits);
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* SchemaItemSlider::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:Proto.SchemaItemSlider)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  cached_has_bits = _has_bits_[0];
+  // optional bool invertedAppearance = 2 [default = false];
+  if (cached_has_bits & 0x00000020u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(2, this->_internal_invertedappearance(), target);
+  }
+
+  // optional bool invertedControls = 3 [default = false];
+  if (cached_has_bits & 0x00000040u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(3, this->_internal_invertedcontrols(), target);
+  }
+
+  // optional bool enableMouseWheel = 4 [default = false];
+  if (cached_has_bits & 0x00000080u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(4, this->_internal_enablemousewheel(), target);
+  }
+
+  // optional int32 maximum = 6 [default = 99];
+  if (cached_has_bits & 0x00002000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(6, this->_internal_maximum(), target);
+  }
+
+  // optional int32 minimum = 7 [default = 0];
+  if (cached_has_bits & 0x00000100u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(7, this->_internal_minimum(), target);
+  }
+
+  // optional int32 orientation = 10 [default = 2];
+  if (cached_has_bits & 0x00004000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(10, this->_internal_orientation(), target);
+  }
+
+  // optional int32 pageStep = 12 [default = 10];
+  if (cached_has_bits & 0x00008000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(12, this->_internal_pagestep(), target);
+  }
+
+  // optional int32 singleStep = 13 [default = 1];
+  if (cached_has_bits & 0x00010000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(13, this->_internal_singlestep(), target);
+  }
+
+  // optional bool tracking = 16 [default = true];
+  if (cached_has_bits & 0x00001000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(16, this->_internal_tracking(), target);
+  }
+
+  // optional int32 defaultValue = 17 [default = 0];
+  if (cached_has_bits & 0x00000400u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(17, this->_internal_defaultvalue(), target);
+  }
+
+  // optional int32 tickInterval = 20 [default = 0];
+  if (cached_has_bits & 0x00000800u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(20, this->_internal_tickinterval(), target);
+  }
+
+  // optional int32 tickPosition = 21 [default = 0];
+  if (cached_has_bits & 0x00000200u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(21, this->_internal_tickposition(), target);
+  }
+
+  // optional string scriptAfterCreate = 31;
+  if (cached_has_bits & 0x00000001u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_scriptaftercreate().data(), static_cast<int>(this->_internal_scriptaftercreate().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Proto.SchemaItemSlider.scriptAfterCreate");
+    target = stream->WriteStringMaybeAliased(
+        31, this->_internal_scriptaftercreate(), target);
+  }
+
+  // optional string scriptSliderMoved = 32;
+  if (cached_has_bits & 0x00000002u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_scriptslidermoved().data(), static_cast<int>(this->_internal_scriptslidermoved().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Proto.SchemaItemSlider.scriptSliderMoved");
+    target = stream->WriteStringMaybeAliased(
+        32, this->_internal_scriptslidermoved(), target);
+  }
+
+  // optional string scriptSliderPressed = 33;
+  if (cached_has_bits & 0x00000004u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_scriptsliderpressed().data(), static_cast<int>(this->_internal_scriptsliderpressed().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Proto.SchemaItemSlider.scriptSliderPressed");
+    target = stream->WriteStringMaybeAliased(
+        33, this->_internal_scriptsliderpressed(), target);
+  }
+
+  // optional string scriptSliderReleased = 34;
+  if (cached_has_bits & 0x00000008u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_scriptsliderreleased().data(), static_cast<int>(this->_internal_scriptsliderreleased().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Proto.SchemaItemSlider.scriptSliderReleased");
+    target = stream->WriteStringMaybeAliased(
+        34, this->_internal_scriptsliderreleased(), target);
+  }
+
+  // optional string scriptValueChanged = 35;
+  if (cached_has_bits & 0x00000010u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_scriptvaluechanged().data(), static_cast<int>(this->_internal_scriptvaluechanged().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Proto.SchemaItemSlider.scriptValueChanged");
+    target = stream->WriteStringMaybeAliased(
+        35, this->_internal_scriptvaluechanged(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:Proto.SchemaItemSlider)
+  return target;
+}
+
+size_t SchemaItemSlider::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:Proto.SchemaItemSlider)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x000000ffu) {
+    // optional string scriptAfterCreate = 31;
+    if (cached_has_bits & 0x00000001u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_scriptaftercreate());
+    }
+
+    // optional string scriptSliderMoved = 32;
+    if (cached_has_bits & 0x00000002u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_scriptslidermoved());
+    }
+
+    // optional string scriptSliderPressed = 33;
+    if (cached_has_bits & 0x00000004u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_scriptsliderpressed());
+    }
+
+    // optional string scriptSliderReleased = 34;
+    if (cached_has_bits & 0x00000008u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_scriptsliderreleased());
+    }
+
+    // optional string scriptValueChanged = 35;
+    if (cached_has_bits & 0x00000010u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_scriptvaluechanged());
+    }
+
+    // optional bool invertedAppearance = 2 [default = false];
+    if (cached_has_bits & 0x00000020u) {
+      total_size += 1 + 1;
+    }
+
+    // optional bool invertedControls = 3 [default = false];
+    if (cached_has_bits & 0x00000040u) {
+      total_size += 1 + 1;
+    }
+
+    // optional bool enableMouseWheel = 4 [default = false];
+    if (cached_has_bits & 0x00000080u) {
+      total_size += 1 + 1;
+    }
+
+  }
+  if (cached_has_bits & 0x0000ff00u) {
+    // optional int32 minimum = 7 [default = 0];
+    if (cached_has_bits & 0x00000100u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_minimum());
+    }
+
+    // optional int32 tickPosition = 21 [default = 0];
+    if (cached_has_bits & 0x00000200u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_tickposition());
+    }
+
+    // optional int32 defaultValue = 17 [default = 0];
+    if (cached_has_bits & 0x00000400u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_defaultvalue());
+    }
+
+    // optional int32 tickInterval = 20 [default = 0];
+    if (cached_has_bits & 0x00000800u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_tickinterval());
+    }
+
+    // optional bool tracking = 16 [default = true];
+    if (cached_has_bits & 0x00001000u) {
+      total_size += 2 + 1;
+    }
+
+    // optional int32 maximum = 6 [default = 99];
+    if (cached_has_bits & 0x00002000u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_maximum());
+    }
+
+    // optional int32 orientation = 10 [default = 2];
+    if (cached_has_bits & 0x00004000u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_orientation());
+    }
+
+    // optional int32 pageStep = 12 [default = 10];
+    if (cached_has_bits & 0x00008000u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_pagestep());
+    }
+
+  }
+  // optional int32 singleStep = 13 [default = 1];
+  if (cached_has_bits & 0x00010000u) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+        this->_internal_singlestep());
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void SchemaItemSlider::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:Proto.SchemaItemSlider)
+  GOOGLE_DCHECK_NE(&from, this);
+  const SchemaItemSlider* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<SchemaItemSlider>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.SchemaItemSlider)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.SchemaItemSlider)
+    MergeFrom(*source);
+  }
+}
+
+void SchemaItemSlider::MergeFrom(const SchemaItemSlider& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:Proto.SchemaItemSlider)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  cached_has_bits = from._has_bits_[0];
+  if (cached_has_bits & 0x000000ffu) {
+    if (cached_has_bits & 0x00000001u) {
+      _internal_set_scriptaftercreate(from._internal_scriptaftercreate());
+    }
+    if (cached_has_bits & 0x00000002u) {
+      _internal_set_scriptslidermoved(from._internal_scriptslidermoved());
+    }
+    if (cached_has_bits & 0x00000004u) {
+      _internal_set_scriptsliderpressed(from._internal_scriptsliderpressed());
+    }
+    if (cached_has_bits & 0x00000008u) {
+      _internal_set_scriptsliderreleased(from._internal_scriptsliderreleased());
+    }
+    if (cached_has_bits & 0x00000010u) {
+      _internal_set_scriptvaluechanged(from._internal_scriptvaluechanged());
+    }
+    if (cached_has_bits & 0x00000020u) {
+      invertedappearance_ = from.invertedappearance_;
+    }
+    if (cached_has_bits & 0x00000040u) {
+      invertedcontrols_ = from.invertedcontrols_;
+    }
+    if (cached_has_bits & 0x00000080u) {
+      enablemousewheel_ = from.enablemousewheel_;
+    }
+    _has_bits_[0] |= cached_has_bits;
+  }
+  if (cached_has_bits & 0x0000ff00u) {
+    if (cached_has_bits & 0x00000100u) {
+      minimum_ = from.minimum_;
+    }
+    if (cached_has_bits & 0x00000200u) {
+      tickposition_ = from.tickposition_;
+    }
+    if (cached_has_bits & 0x00000400u) {
+      defaultvalue_ = from.defaultvalue_;
+    }
+    if (cached_has_bits & 0x00000800u) {
+      tickinterval_ = from.tickinterval_;
+    }
+    if (cached_has_bits & 0x00001000u) {
+      tracking_ = from.tracking_;
+    }
+    if (cached_has_bits & 0x00002000u) {
+      maximum_ = from.maximum_;
+    }
+    if (cached_has_bits & 0x00004000u) {
+      orientation_ = from.orientation_;
+    }
+    if (cached_has_bits & 0x00008000u) {
+      pagestep_ = from.pagestep_;
+    }
+    _has_bits_[0] |= cached_has_bits;
+  }
+  if (cached_has_bits & 0x00010000u) {
+    _internal_set_singlestep(from._internal_singlestep());
+  }
+}
+
+void SchemaItemSlider::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:Proto.SchemaItemSlider)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void SchemaItemSlider::CopyFrom(const SchemaItemSlider& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:Proto.SchemaItemSlider)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool SchemaItemSlider::IsInitialized() const {
+  return true;
+}
+
+void SchemaItemSlider::InternalSwap(SchemaItemSlider* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  swap(_has_bits_[0], other->_has_bits_[0]);
+  scriptaftercreate_.Swap(&other->scriptaftercreate_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  scriptslidermoved_.Swap(&other->scriptslidermoved_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  scriptsliderpressed_.Swap(&other->scriptsliderpressed_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  scriptsliderreleased_.Swap(&other->scriptsliderreleased_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  scriptvaluechanged_.Swap(&other->scriptvaluechanged_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(SchemaItemSlider, tickinterval_)
+      + sizeof(SchemaItemSlider::tickinterval_)
+      - PROTOBUF_FIELD_OFFSET(SchemaItemSlider, invertedappearance_)>(
+          reinterpret_cast<char*>(&invertedappearance_),
+          reinterpret_cast<char*>(&other->invertedappearance_));
+  swap(tracking_, other->tracking_);
+  swap(maximum_, other->maximum_);
+  swap(orientation_, other->orientation_);
+  swap(pagestep_, other->pagestep_);
+  swap(singlestep_, other->singlestep_);
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata SchemaItemSlider::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
 class DeviceObject::_Internal {
  public:
   using HasBits = decltype(std::declval<DeviceObject>()._has_bits_);
   static const ::Proto::Uuid& uuid(const DeviceObject* msg);
   static void set_has_uuid(HasBits* has_bits) {
-    (*has_bits)[0] |= 2u;
+    (*has_bits)[0] |= 4u;
   }
   static const ::Proto::wstring& equipmentid(const DeviceObject* msg);
   static void set_has_equipmentid(HasBits* has_bits) {
-    (*has_bits)[0] |= 4u;
+    (*has_bits)[0] |= 8u;
   }
   static const ::Proto::wstring& caption(const DeviceObject* msg);
   static void set_has_caption(HasBits* has_bits) {
-    (*has_bits)[0] |= 8u;
+    (*has_bits)[0] |= 16u;
   }
   static const ::Proto::wstring& childrestriction(const DeviceObject* msg);
   static void set_has_childrestriction(HasBits* has_bits) {
-    (*has_bits)[0] |= 16u;
+    (*has_bits)[0] |= 32u;
   }
   static void set_has_place(HasBits* has_bits) {
-    (*has_bits)[0] |= 65536u;
+    (*has_bits)[0] |= 131072u;
   }
   static void set_has_specific_properties_struct(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
   }
   static void set_has_preset(HasBits* has_bits) {
-    (*has_bits)[0] |= 131072u;
+    (*has_bits)[0] |= 262144u;
   }
   static void set_has_presetroot(HasBits* has_bits) {
-    (*has_bits)[0] |= 262144u;
+    (*has_bits)[0] |= 524288u;
   }
   static const ::Proto::wstring& presetname(const DeviceObject* msg);
   static void set_has_presetname(HasBits* has_bits) {
-    (*has_bits)[0] |= 32u;
+    (*has_bits)[0] |= 64u;
   }
   static const ::Proto::Uuid& presetobjectuuid(const DeviceObject* msg);
   static void set_has_presetobjectuuid(HasBits* has_bits) {
-    (*has_bits)[0] |= 64u;
+    (*has_bits)[0] |= 128u;
   }
   static void set_has_childcounthint(HasBits* has_bits) {
-    (*has_bits)[0] |= 524288u;
+    (*has_bits)[0] |= 1048576u;
   }
   static void set_has_presetversion(HasBits* has_bits) {
-    (*has_bits)[0] |= 1048576u;
+    (*has_bits)[0] |= 2097152u;
+  }
+  static void set_has_presetprotectedproperties(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
   }
   static const ::Proto::DeviceRoot& root(const DeviceObject* msg);
   static void set_has_root(HasBits* has_bits) {
-    (*has_bits)[0] |= 128u;
+    (*has_bits)[0] |= 256u;
   }
   static const ::Proto::DeviceSystem& system(const DeviceObject* msg);
   static void set_has_system(HasBits* has_bits) {
-    (*has_bits)[0] |= 256u;
+    (*has_bits)[0] |= 512u;
   }
   static const ::Proto::DeviceRack& rack(const DeviceObject* msg);
   static void set_has_rack(HasBits* has_bits) {
-    (*has_bits)[0] |= 512u;
+    (*has_bits)[0] |= 1024u;
   }
   static const ::Proto::DeviceChassis& chassis(const DeviceObject* msg);
   static void set_has_chassis(HasBits* has_bits) {
-    (*has_bits)[0] |= 1024u;
+    (*has_bits)[0] |= 2048u;
   }
   static const ::Proto::DeviceModule& module(const DeviceObject* msg);
   static void set_has_module(HasBits* has_bits) {
-    (*has_bits)[0] |= 2048u;
+    (*has_bits)[0] |= 4096u;
   }
   static const ::Proto::DeviceController& controller(const DeviceObject* msg);
   static void set_has_controller(HasBits* has_bits) {
-    (*has_bits)[0] |= 4096u;
+    (*has_bits)[0] |= 8192u;
   }
   static const ::Proto::DeviceAppSignal& appsignal(const DeviceObject* msg);
   static void set_has_appsignal(HasBits* has_bits) {
-    (*has_bits)[0] |= 8192u;
+    (*has_bits)[0] |= 16384u;
   }
   static const ::Proto::Workstation& workstation(const DeviceObject* msg);
   static void set_has_workstation(HasBits* has_bits) {
-    (*has_bits)[0] |= 16384u;
+    (*has_bits)[0] |= 32768u;
   }
   static const ::Proto::Software& software(const DeviceObject* msg);
   static void set_has_software(HasBits* has_bits) {
-    (*has_bits)[0] |= 32768u;
+    (*has_bits)[0] |= 65536u;
   }
   static bool MissingRequiredFields(const HasBits& has_bits) {
-    return ((has_bits[0] & 0x0000000e) ^ 0x0000000e) != 0;
+    return ((has_bits[0] & 0x0000001c) ^ 0x0000001c) != 0;
   }
 };
 
@@ -29841,6 +31370,7 @@ DeviceObject::_Internal::software(const DeviceObject* msg) {
 DeviceObject::DeviceObject(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena),
   properties_(arena),
+  tags_(arena),
   children_(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
@@ -29850,11 +31380,17 @@ DeviceObject::DeviceObject(const DeviceObject& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
       _has_bits_(from._has_bits_),
       properties_(from.properties_),
+      tags_(from.tags_),
       children_(from.children_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   specific_properties_struct_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (from._internal_has_specific_properties_struct()) {
     specific_properties_struct_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_specific_properties_struct(), 
+      GetArena());
+  }
+  presetprotectedproperties_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_presetprotectedproperties()) {
+    presetprotectedproperties_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_presetprotectedproperties(), 
       GetArena());
   }
   if (from._internal_has_uuid()) {
@@ -29940,6 +31476,7 @@ DeviceObject::DeviceObject(const DeviceObject& from)
 
 void DeviceObject::SharedCtor() {
 specific_properties_struct_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+presetprotectedproperties_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
     reinterpret_cast<char*>(&uuid_) - reinterpret_cast<char*>(this)),
     0, static_cast<size_t>(reinterpret_cast<char*>(&presetversion_) -
@@ -29955,6 +31492,7 @@ DeviceObject::~DeviceObject() {
 void DeviceObject::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
   specific_properties_struct_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  presetprotectedproperties_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (this != internal_default_instance()) delete uuid_;
   if (this != internal_default_instance()) delete equipmentid_;
   if (this != internal_default_instance()) delete caption_;
@@ -29989,6 +31527,7 @@ void DeviceObject::Clear() {
   (void) cached_has_bits;
 
   properties_.Clear();
+  tags_.Clear();
   children_.Clear();
   cached_has_bits = _has_bits_[0];
   if (cached_has_bits & 0x000000ffu) {
@@ -29996,69 +31535,72 @@ void DeviceObject::Clear() {
       specific_properties_struct_.ClearNonDefaultToEmpty();
     }
     if (cached_has_bits & 0x00000002u) {
+      presetprotectedproperties_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000004u) {
       GOOGLE_DCHECK(uuid_ != nullptr);
       uuid_->Clear();
     }
-    if (cached_has_bits & 0x00000004u) {
+    if (cached_has_bits & 0x00000008u) {
       GOOGLE_DCHECK(equipmentid_ != nullptr);
       equipmentid_->Clear();
     }
-    if (cached_has_bits & 0x00000008u) {
+    if (cached_has_bits & 0x00000010u) {
       GOOGLE_DCHECK(caption_ != nullptr);
       caption_->Clear();
     }
-    if (cached_has_bits & 0x00000010u) {
+    if (cached_has_bits & 0x00000020u) {
       GOOGLE_DCHECK(childrestriction_ != nullptr);
       childrestriction_->Clear();
     }
-    if (cached_has_bits & 0x00000020u) {
+    if (cached_has_bits & 0x00000040u) {
       GOOGLE_DCHECK(presetname_ != nullptr);
       presetname_->Clear();
     }
-    if (cached_has_bits & 0x00000040u) {
+    if (cached_has_bits & 0x00000080u) {
       GOOGLE_DCHECK(presetobjectuuid_ != nullptr);
       presetobjectuuid_->Clear();
-    }
-    if (cached_has_bits & 0x00000080u) {
-      GOOGLE_DCHECK(root_ != nullptr);
-      root_->Clear();
     }
   }
   if (cached_has_bits & 0x0000ff00u) {
     if (cached_has_bits & 0x00000100u) {
+      GOOGLE_DCHECK(root_ != nullptr);
+      root_->Clear();
+    }
+    if (cached_has_bits & 0x00000200u) {
       GOOGLE_DCHECK(system_ != nullptr);
       system_->Clear();
     }
-    if (cached_has_bits & 0x00000200u) {
+    if (cached_has_bits & 0x00000400u) {
       GOOGLE_DCHECK(rack_ != nullptr);
       rack_->Clear();
     }
-    if (cached_has_bits & 0x00000400u) {
+    if (cached_has_bits & 0x00000800u) {
       GOOGLE_DCHECK(chassis_ != nullptr);
       chassis_->Clear();
     }
-    if (cached_has_bits & 0x00000800u) {
+    if (cached_has_bits & 0x00001000u) {
       GOOGLE_DCHECK(module_ != nullptr);
       module_->Clear();
     }
-    if (cached_has_bits & 0x00001000u) {
+    if (cached_has_bits & 0x00002000u) {
       GOOGLE_DCHECK(controller_ != nullptr);
       controller_->Clear();
     }
-    if (cached_has_bits & 0x00002000u) {
+    if (cached_has_bits & 0x00004000u) {
       GOOGLE_DCHECK(appsignal_ != nullptr);
       appsignal_->Clear();
     }
-    if (cached_has_bits & 0x00004000u) {
+    if (cached_has_bits & 0x00008000u) {
       GOOGLE_DCHECK(workstation_ != nullptr);
       workstation_->Clear();
     }
-    if (cached_has_bits & 0x00008000u) {
-      GOOGLE_DCHECK(software_ != nullptr);
-      software_->Clear();
-    }
   }
-  if (cached_has_bits & 0x001f0000u) {
+  if (cached_has_bits & 0x00010000u) {
+    GOOGLE_DCHECK(software_ != nullptr);
+    software_->Clear();
+  }
+  if (cached_has_bits & 0x003e0000u) {
     ::memset(&place_, 0, static_cast<size_t>(
         reinterpret_cast<char*>(&presetversion_) -
         reinterpret_cast<char*>(&place_)) + sizeof(presetversion_));
@@ -30134,6 +31676,22 @@ const char* DeviceObject::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<58>(ptr));
         } else goto handle_unusual;
         continue;
+      // repeated string tags = 8;
+      case 8:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 66)) {
+          ptr -= 1;
+          do {
+            ptr += 1;
+            auto str = _internal_add_tags();
+            ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+            #ifndef NDEBUG
+            ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DeviceObject.tags");
+            #endif  // !NDEBUG
+            CHK_(ptr);
+            if (!ctx->DataAvailable(ptr)) break;
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<66>(ptr));
+        } else goto handle_unusual;
+        continue;
       // optional bool preset = 32 [default = false];
       case 32:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 0)) {
@@ -30177,6 +31735,17 @@ const char* DeviceObject::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 40)) {
           _Internal::set_has_presetversion(&has_bits);
           presetversion_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional string presetProtectedProperties = 38;
+      case 38:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 50)) {
+          auto str = _internal_mutable_presetprotectedproperties();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DeviceObject.presetProtectedProperties");
+          #endif  // !NDEBUG
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -30286,7 +31855,7 @@ failure:
 
   cached_has_bits = _has_bits_[0];
   // required .Proto.Uuid uuid = 1;
-  if (cached_has_bits & 0x00000002u) {
+  if (cached_has_bits & 0x00000004u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -30294,7 +31863,7 @@ failure:
   }
 
   // required .Proto.wstring equipmentId = 2;
-  if (cached_has_bits & 0x00000004u) {
+  if (cached_has_bits & 0x00000008u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -30302,7 +31871,7 @@ failure:
   }
 
   // required .Proto.wstring caption = 3;
-  if (cached_has_bits & 0x00000008u) {
+  if (cached_has_bits & 0x00000010u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -30310,7 +31879,7 @@ failure:
   }
 
   // optional .Proto.wstring childRestriction = 4;
-  if (cached_has_bits & 0x00000010u) {
+  if (cached_has_bits & 0x00000020u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -30318,7 +31887,7 @@ failure:
   }
 
   // optional int32 place = 5 [default = 0];
-  if (cached_has_bits & 0x00010000u) {
+  if (cached_has_bits & 0x00020000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(5, this->_internal_place(), target);
   }
@@ -30341,20 +31910,30 @@ failure:
       InternalWriteMessage(7, this->_internal_properties(i), target, stream);
   }
 
+  // repeated string tags = 8;
+  for (int i = 0, n = this->_internal_tags_size(); i < n; i++) {
+    const auto& s = this->_internal_tags(i);
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      s.data(), static_cast<int>(s.length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Proto.DeviceObject.tags");
+    target = stream->WriteString(8, s, target);
+  }
+
   // optional bool preset = 32 [default = false];
-  if (cached_has_bits & 0x00020000u) {
+  if (cached_has_bits & 0x00040000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(32, this->_internal_preset(), target);
   }
 
   // optional bool presetRoot = 33 [default = false];
-  if (cached_has_bits & 0x00040000u) {
+  if (cached_has_bits & 0x00080000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(33, this->_internal_presetroot(), target);
   }
 
   // optional .Proto.wstring presetName = 34;
-  if (cached_has_bits & 0x00000020u) {
+  if (cached_has_bits & 0x00000040u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -30362,7 +31941,7 @@ failure:
   }
 
   // optional .Proto.Uuid presetObjectUuid = 35;
-  if (cached_has_bits & 0x00000040u) {
+  if (cached_has_bits & 0x00000080u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -30370,19 +31949,29 @@ failure:
   }
 
   // optional int32 childCountHint = 36 [default = 0];
-  if (cached_has_bits & 0x00080000u) {
+  if (cached_has_bits & 0x00100000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(36, this->_internal_childcounthint(), target);
   }
 
   // optional int32 presetVersion = 37;
-  if (cached_has_bits & 0x00100000u) {
+  if (cached_has_bits & 0x00200000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(37, this->_internal_presetversion(), target);
   }
 
+  // optional string presetProtectedProperties = 38;
+  if (cached_has_bits & 0x00000002u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_presetprotectedproperties().data(), static_cast<int>(this->_internal_presetprotectedproperties().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Proto.DeviceObject.presetProtectedProperties");
+    target = stream->WriteStringMaybeAliased(
+        38, this->_internal_presetprotectedproperties(), target);
+  }
+
   // optional .Proto.DeviceRoot Root = 100;
-  if (cached_has_bits & 0x00000080u) {
+  if (cached_has_bits & 0x00000100u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -30390,7 +31979,7 @@ failure:
   }
 
   // optional .Proto.DeviceSystem System = 101;
-  if (cached_has_bits & 0x00000100u) {
+  if (cached_has_bits & 0x00000200u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -30398,7 +31987,7 @@ failure:
   }
 
   // optional .Proto.DeviceRack Rack = 102;
-  if (cached_has_bits & 0x00000200u) {
+  if (cached_has_bits & 0x00000400u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -30406,7 +31995,7 @@ failure:
   }
 
   // optional .Proto.DeviceChassis Chassis = 103;
-  if (cached_has_bits & 0x00000400u) {
+  if (cached_has_bits & 0x00000800u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -30414,7 +32003,7 @@ failure:
   }
 
   // optional .Proto.DeviceModule Module = 104;
-  if (cached_has_bits & 0x00000800u) {
+  if (cached_has_bits & 0x00001000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -30422,7 +32011,7 @@ failure:
   }
 
   // optional .Proto.DeviceController Controller = 105;
-  if (cached_has_bits & 0x00001000u) {
+  if (cached_has_bits & 0x00002000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -30430,7 +32019,7 @@ failure:
   }
 
   // optional .Proto.DeviceAppSignal AppSignal = 106;
-  if (cached_has_bits & 0x00002000u) {
+  if (cached_has_bits & 0x00004000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -30438,7 +32027,7 @@ failure:
   }
 
   // optional .Proto.Workstation Workstation = 107;
-  if (cached_has_bits & 0x00004000u) {
+  if (cached_has_bits & 0x00008000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -30446,7 +32035,7 @@ failure:
   }
 
   // optional .Proto.Software Software = 108;
-  if (cached_has_bits & 0x00008000u) {
+  if (cached_has_bits & 0x00010000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
@@ -30500,7 +32089,7 @@ size_t DeviceObject::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:Proto.DeviceObject)
   size_t total_size = 0;
 
-  if (((_has_bits_[0] & 0x0000000e) ^ 0x0000000e) == 0) {  // All required fields are present.
+  if (((_has_bits_[0] & 0x0000001c) ^ 0x0000001c) == 0) {  // All required fields are present.
     // required .Proto.Uuid uuid = 1;
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
@@ -30530,6 +32119,14 @@ size_t DeviceObject::ByteSizeLong() const {
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
+  // repeated string tags = 8;
+  total_size += 1 *
+      ::PROTOBUF_NAMESPACE_ID::internal::FromIntSize(tags_.size());
+  for (int i = 0, n = tags_.size(); i < n; i++) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+      tags_.Get(i));
+  }
+
   // repeated .Proto.Envelope children = 200;
   total_size += 2UL * this->_internal_children_size();
   for (const auto& msg : this->children_) {
@@ -30537,129 +32134,138 @@ size_t DeviceObject::ByteSizeLong() const {
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
-  // optional string specific_properties_struct = 6;
   cached_has_bits = _has_bits_[0];
-  if (cached_has_bits & 0x00000001u) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_specific_properties_struct());
-  }
+  if (cached_has_bits & 0x00000003u) {
+    // optional string specific_properties_struct = 6;
+    if (cached_has_bits & 0x00000001u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_specific_properties_struct());
+    }
 
-  if (cached_has_bits & 0x000000f0u) {
+    // optional string presetProtectedProperties = 38;
+    if (cached_has_bits & 0x00000002u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_presetprotectedproperties());
+    }
+
+  }
+  if (cached_has_bits & 0x000000e0u) {
     // optional .Proto.wstring childRestriction = 4;
-    if (cached_has_bits & 0x00000010u) {
+    if (cached_has_bits & 0x00000020u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *childrestriction_);
     }
 
     // optional .Proto.wstring presetName = 34;
-    if (cached_has_bits & 0x00000020u) {
+    if (cached_has_bits & 0x00000040u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *presetname_);
     }
 
     // optional .Proto.Uuid presetObjectUuid = 35;
-    if (cached_has_bits & 0x00000040u) {
+    if (cached_has_bits & 0x00000080u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *presetobjectuuid_);
     }
 
+  }
+  if (cached_has_bits & 0x0000ff00u) {
     // optional .Proto.DeviceRoot Root = 100;
-    if (cached_has_bits & 0x00000080u) {
+    if (cached_has_bits & 0x00000100u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *root_);
     }
 
-  }
-  if (cached_has_bits & 0x0000ff00u) {
     // optional .Proto.DeviceSystem System = 101;
-    if (cached_has_bits & 0x00000100u) {
+    if (cached_has_bits & 0x00000200u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *system_);
     }
 
     // optional .Proto.DeviceRack Rack = 102;
-    if (cached_has_bits & 0x00000200u) {
+    if (cached_has_bits & 0x00000400u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *rack_);
     }
 
     // optional .Proto.DeviceChassis Chassis = 103;
-    if (cached_has_bits & 0x00000400u) {
+    if (cached_has_bits & 0x00000800u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *chassis_);
     }
 
     // optional .Proto.DeviceModule Module = 104;
-    if (cached_has_bits & 0x00000800u) {
+    if (cached_has_bits & 0x00001000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *module_);
     }
 
     // optional .Proto.DeviceController Controller = 105;
-    if (cached_has_bits & 0x00001000u) {
+    if (cached_has_bits & 0x00002000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *controller_);
     }
 
     // optional .Proto.DeviceAppSignal AppSignal = 106;
-    if (cached_has_bits & 0x00002000u) {
+    if (cached_has_bits & 0x00004000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *appsignal_);
     }
 
     // optional .Proto.Workstation Workstation = 107;
-    if (cached_has_bits & 0x00004000u) {
+    if (cached_has_bits & 0x00008000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *workstation_);
     }
 
+  }
+  if (cached_has_bits & 0x003f0000u) {
     // optional .Proto.Software Software = 108;
-    if (cached_has_bits & 0x00008000u) {
+    if (cached_has_bits & 0x00010000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *software_);
     }
 
-  }
-  if (cached_has_bits & 0x001f0000u) {
     // optional int32 place = 5 [default = 0];
-    if (cached_has_bits & 0x00010000u) {
+    if (cached_has_bits & 0x00020000u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_place());
     }
 
     // optional bool preset = 32 [default = false];
-    if (cached_has_bits & 0x00020000u) {
-      total_size += 2 + 1;
-    }
-
-    // optional bool presetRoot = 33 [default = false];
     if (cached_has_bits & 0x00040000u) {
       total_size += 2 + 1;
     }
 
-    // optional int32 childCountHint = 36 [default = 0];
+    // optional bool presetRoot = 33 [default = false];
     if (cached_has_bits & 0x00080000u) {
+      total_size += 2 + 1;
+    }
+
+    // optional int32 childCountHint = 36 [default = 0];
+    if (cached_has_bits & 0x00100000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_childcounthint());
     }
 
     // optional int32 presetVersion = 37;
-    if (cached_has_bits & 0x00100000u) {
+    if (cached_has_bits & 0x00200000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_presetversion());
@@ -30698,6 +32304,7 @@ void DeviceObject::MergeFrom(const DeviceObject& from) {
   (void) cached_has_bits;
 
   properties_.MergeFrom(from.properties_);
+  tags_.MergeFrom(from.tags_);
   children_.MergeFrom(from.children_);
   cached_has_bits = from._has_bits_[0];
   if (cached_has_bits & 0x000000ffu) {
@@ -30705,67 +32312,70 @@ void DeviceObject::MergeFrom(const DeviceObject& from) {
       _internal_set_specific_properties_struct(from._internal_specific_properties_struct());
     }
     if (cached_has_bits & 0x00000002u) {
-      _internal_mutable_uuid()->::Proto::Uuid::MergeFrom(from._internal_uuid());
+      _internal_set_presetprotectedproperties(from._internal_presetprotectedproperties());
     }
     if (cached_has_bits & 0x00000004u) {
-      _internal_mutable_equipmentid()->::Proto::wstring::MergeFrom(from._internal_equipmentid());
+      _internal_mutable_uuid()->::Proto::Uuid::MergeFrom(from._internal_uuid());
     }
     if (cached_has_bits & 0x00000008u) {
-      _internal_mutable_caption()->::Proto::wstring::MergeFrom(from._internal_caption());
+      _internal_mutable_equipmentid()->::Proto::wstring::MergeFrom(from._internal_equipmentid());
     }
     if (cached_has_bits & 0x00000010u) {
-      _internal_mutable_childrestriction()->::Proto::wstring::MergeFrom(from._internal_childrestriction());
+      _internal_mutable_caption()->::Proto::wstring::MergeFrom(from._internal_caption());
     }
     if (cached_has_bits & 0x00000020u) {
-      _internal_mutable_presetname()->::Proto::wstring::MergeFrom(from._internal_presetname());
+      _internal_mutable_childrestriction()->::Proto::wstring::MergeFrom(from._internal_childrestriction());
     }
     if (cached_has_bits & 0x00000040u) {
-      _internal_mutable_presetobjectuuid()->::Proto::Uuid::MergeFrom(from._internal_presetobjectuuid());
+      _internal_mutable_presetname()->::Proto::wstring::MergeFrom(from._internal_presetname());
     }
     if (cached_has_bits & 0x00000080u) {
-      _internal_mutable_root()->::Proto::DeviceRoot::MergeFrom(from._internal_root());
+      _internal_mutable_presetobjectuuid()->::Proto::Uuid::MergeFrom(from._internal_presetobjectuuid());
     }
   }
   if (cached_has_bits & 0x0000ff00u) {
     if (cached_has_bits & 0x00000100u) {
-      _internal_mutable_system()->::Proto::DeviceSystem::MergeFrom(from._internal_system());
+      _internal_mutable_root()->::Proto::DeviceRoot::MergeFrom(from._internal_root());
     }
     if (cached_has_bits & 0x00000200u) {
-      _internal_mutable_rack()->::Proto::DeviceRack::MergeFrom(from._internal_rack());
+      _internal_mutable_system()->::Proto::DeviceSystem::MergeFrom(from._internal_system());
     }
     if (cached_has_bits & 0x00000400u) {
-      _internal_mutable_chassis()->::Proto::DeviceChassis::MergeFrom(from._internal_chassis());
+      _internal_mutable_rack()->::Proto::DeviceRack::MergeFrom(from._internal_rack());
     }
     if (cached_has_bits & 0x00000800u) {
-      _internal_mutable_module()->::Proto::DeviceModule::MergeFrom(from._internal_module());
+      _internal_mutable_chassis()->::Proto::DeviceChassis::MergeFrom(from._internal_chassis());
     }
     if (cached_has_bits & 0x00001000u) {
-      _internal_mutable_controller()->::Proto::DeviceController::MergeFrom(from._internal_controller());
+      _internal_mutable_module()->::Proto::DeviceModule::MergeFrom(from._internal_module());
     }
     if (cached_has_bits & 0x00002000u) {
-      _internal_mutable_appsignal()->::Proto::DeviceAppSignal::MergeFrom(from._internal_appsignal());
+      _internal_mutable_controller()->::Proto::DeviceController::MergeFrom(from._internal_controller());
     }
     if (cached_has_bits & 0x00004000u) {
-      _internal_mutable_workstation()->::Proto::Workstation::MergeFrom(from._internal_workstation());
+      _internal_mutable_appsignal()->::Proto::DeviceAppSignal::MergeFrom(from._internal_appsignal());
     }
     if (cached_has_bits & 0x00008000u) {
-      _internal_mutable_software()->::Proto::Software::MergeFrom(from._internal_software());
+      _internal_mutable_workstation()->::Proto::Workstation::MergeFrom(from._internal_workstation());
     }
   }
-  if (cached_has_bits & 0x001f0000u) {
+  if (cached_has_bits & 0x003f0000u) {
     if (cached_has_bits & 0x00010000u) {
-      place_ = from.place_;
+      _internal_mutable_software()->::Proto::Software::MergeFrom(from._internal_software());
     }
     if (cached_has_bits & 0x00020000u) {
-      preset_ = from.preset_;
+      place_ = from.place_;
     }
     if (cached_has_bits & 0x00040000u) {
-      presetroot_ = from.presetroot_;
+      preset_ = from.preset_;
     }
     if (cached_has_bits & 0x00080000u) {
-      childcounthint_ = from.childcounthint_;
+      presetroot_ = from.presetroot_;
     }
     if (cached_has_bits & 0x00100000u) {
+      childcounthint_ = from.childcounthint_;
+    }
+    if (cached_has_bits & 0x00200000u) {
       presetversion_ = from.presetversion_;
     }
     _has_bits_[0] |= cached_has_bits;
@@ -30816,8 +32426,10 @@ void DeviceObject::InternalSwap(DeviceObject* other) {
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   swap(_has_bits_[0], other->_has_bits_[0]);
   properties_.InternalSwap(&other->properties_);
+  tags_.InternalSwap(&other->tags_);
   children_.InternalSwap(&other->children_);
   specific_properties_struct_.Swap(&other->specific_properties_struct_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  presetprotectedproperties_.Swap(&other->presetprotectedproperties_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(DeviceObject, presetversion_)
       + sizeof(DeviceObject::presetversion_)
@@ -37260,28 +38872,34 @@ class AppSignal::_Internal {
     (*has_bits)[0] |= 16384u;
   }
   static void set_has_excludefrombuild(HasBits* has_bits) {
-    (*has_bits)[0] |= 65536u;
+    (*has_bits)[0] |= 131072u;
+  }
+  static void set_has_invertsignal(HasBits* has_bits) {
+    (*has_bits)[0] |= 262144u;
+  }
+  static void set_has_reserved(HasBits* has_bits) {
+    (*has_bits)[0] |= 524288u;
   }
   static void set_has_signaltype(HasBits* has_bits) {
-    (*has_bits)[0] |= 4194304u;
+    (*has_bits)[0] |= 16777216u;
   }
   static void set_has_inouttype(HasBits* has_bits) {
-    (*has_bits)[0] |= 8388608u;
+    (*has_bits)[0] |= 33554432u;
   }
   static void set_has_datasize(HasBits* has_bits) {
     (*has_bits)[0] |= 32768u;
   }
   static void set_has_byteorder(HasBits* has_bits) {
-    (*has_bits)[0] |= 16777216u;
+    (*has_bits)[0] |= 67108864u;
   }
   static void set_has_analogsignalformat(HasBits* has_bits) {
-    (*has_bits)[0] |= 33554432u;
+    (*has_bits)[0] |= 134217728u;
   }
   static void set_has_unit(HasBits* has_bits) {
     (*has_bits)[0] |= 64u;
   }
   static void set_has_enabletuning(HasBits* has_bits) {
-    (*has_bits)[0] |= 131072u;
+    (*has_bits)[0] |= 1048576u;
   }
   static const ::Proto::TuningValue& tuningdefaultvalue(const AppSignal* msg);
   static void set_has_tuningdefaultvalue(HasBits* has_bits) {
@@ -37296,22 +38914,22 @@ class AppSignal::_Internal {
     (*has_bits)[0] |= 2048u;
   }
   static void set_has_acquire(HasBits* has_bits) {
-    (*has_bits)[0] |= 262144u;
-  }
-  static void set_has_archive(HasBits* has_bits) {
-    (*has_bits)[0] |= 524288u;
-  }
-  static void set_has_decimalplaces(HasBits* has_bits) {
     (*has_bits)[0] |= 2097152u;
   }
+  static void set_has_archive(HasBits* has_bits) {
+    (*has_bits)[0] |= 4194304u;
+  }
+  static void set_has_decimalplaces(HasBits* has_bits) {
+    (*has_bits)[0] |= 8388608u;
+  }
   static void set_has_coarseaperture(HasBits* has_bits) {
-    (*has_bits)[0] |= 67108864u;
+    (*has_bits)[0] |= 268435456u;
   }
   static void set_has_fineaperture(HasBits* has_bits) {
-    (*has_bits)[0] |= 134217728u;
+    (*has_bits)[0] |= 536870912u;
   }
-  static void set_has_adaptiveaperture(HasBits* has_bits) {
-    (*has_bits)[0] |= 1048576u;
+  static void set_has_aperturetype(HasBits* has_bits) {
+    (*has_bits)[0] |= 65536u;
   }
   static void set_has_specpropstruct(HasBits* has_bits) {
     (*has_bits)[0] |= 128u;
@@ -37449,8 +39067,8 @@ specpropstruct_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStr
 specpropvalues_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
     reinterpret_cast<char*>(&tuningdefaultvalue_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&adaptiveaperture_) -
-    reinterpret_cast<char*>(&tuningdefaultvalue_)) + sizeof(adaptiveaperture_));
+    0, static_cast<size_t>(reinterpret_cast<char*>(&archive_) -
+    reinterpret_cast<char*>(&tuningdefaultvalue_)) + sizeof(archive_));
 decimalplaces_ = 2;
 signaltype_ = 1;
 inouttype_ = 2;
@@ -37559,14 +39177,14 @@ void AppSignal::Clear() {
         reinterpret_cast<char*>(&channel_)) + sizeof(datasize_));
   }
   if (cached_has_bits & 0x00ff0000u) {
-    ::memset(&excludefrombuild_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&adaptiveaperture_) -
-        reinterpret_cast<char*>(&excludefrombuild_)) + sizeof(adaptiveaperture_));
+    ::memset(&aperturetype_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&archive_) -
+        reinterpret_cast<char*>(&aperturetype_)) + sizeof(archive_));
     decimalplaces_ = 2;
+  }
+  if (cached_has_bits & 0x3f000000u) {
     signaltype_ = 1;
     inouttype_ = 2;
-  }
-  if (cached_has_bits & 0x0f000000u) {
     byteorder_ = 1;
     analogsignalformat_ = 1;
     coarseaperture_ = 1;
@@ -37663,6 +39281,22 @@ const char* AppSignal::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 64)) {
           _Internal::set_has_excludefrombuild(&has_bits);
           excludefrombuild_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional bool invertSignal = 9 [default = false];
+      case 9:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 72)) {
+          _Internal::set_has_invertsignal(&has_bits);
+          invertsignal_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional bool reserved = 10 [default = false];
+      case 10:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 80)) {
+          _Internal::set_has_reserved(&has_bits);
+          reserved_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -37786,11 +39420,11 @@ const char* AppSignal::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::
           ptr += sizeof(double);
         } else goto handle_unusual;
         continue;
-      // optional bool adaptiveAperture = 86 [default = false];
+      // optional int32 apertureType = 86 [default = 0];
       case 86:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 176)) {
-          _Internal::set_has_adaptiveaperture(&has_bits);
-          adaptiveaperture_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          _Internal::set_has_aperturetype(&has_bits);
+          aperturetype_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -37940,19 +39574,31 @@ failure:
   }
 
   // optional bool excludeFromBuild = 8 [default = false];
-  if (cached_has_bits & 0x00010000u) {
+  if (cached_has_bits & 0x00020000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(8, this->_internal_excludefrombuild(), target);
   }
 
+  // optional bool invertSignal = 9 [default = false];
+  if (cached_has_bits & 0x00040000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(9, this->_internal_invertsignal(), target);
+  }
+
+  // optional bool reserved = 10 [default = false];
+  if (cached_has_bits & 0x00080000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(10, this->_internal_reserved(), target);
+  }
+
   // optional int32 signalType = 16 [default = 1];
-  if (cached_has_bits & 0x00400000u) {
+  if (cached_has_bits & 0x01000000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(16, this->_internal_signaltype(), target);
   }
 
   // optional int32 inOutType = 17 [default = 2];
-  if (cached_has_bits & 0x00800000u) {
+  if (cached_has_bits & 0x02000000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(17, this->_internal_inouttype(), target);
   }
@@ -37964,13 +39610,13 @@ failure:
   }
 
   // optional int32 byteOrder = 22 [default = 1];
-  if (cached_has_bits & 0x01000000u) {
+  if (cached_has_bits & 0x04000000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(22, this->_internal_byteorder(), target);
   }
 
   // optional int32 analogSignalFormat = 26 [default = 1];
-  if (cached_has_bits & 0x02000000u) {
+  if (cached_has_bits & 0x08000000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(26, this->_internal_analogsignalformat(), target);
   }
@@ -37986,7 +39632,7 @@ failure:
   }
 
   // optional bool enableTuning = 71 [default = false];
-  if (cached_has_bits & 0x00020000u) {
+  if (cached_has_bits & 0x00100000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(71, this->_internal_enabletuning(), target);
   }
@@ -38016,39 +39662,39 @@ failure:
   }
 
   // optional bool acquire = 81 [default = false];
-  if (cached_has_bits & 0x00040000u) {
+  if (cached_has_bits & 0x00200000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(81, this->_internal_acquire(), target);
   }
 
   // optional bool archive = 82 [default = false];
-  if (cached_has_bits & 0x00080000u) {
+  if (cached_has_bits & 0x00400000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(82, this->_internal_archive(), target);
   }
 
   // optional int32 decimalPlaces = 83 [default = 2];
-  if (cached_has_bits & 0x00200000u) {
+  if (cached_has_bits & 0x00800000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(83, this->_internal_decimalplaces(), target);
   }
 
   // optional double coarseAperture = 84 [default = 1];
-  if (cached_has_bits & 0x04000000u) {
+  if (cached_has_bits & 0x10000000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(84, this->_internal_coarseaperture(), target);
   }
 
   // optional double fineAperture = 85 [default = 0.5];
-  if (cached_has_bits & 0x08000000u) {
+  if (cached_has_bits & 0x20000000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(85, this->_internal_fineaperture(), target);
   }
 
-  // optional bool adaptiveAperture = 86 [default = false];
-  if (cached_has_bits & 0x00100000u) {
+  // optional int32 apertureType = 86 [default = 0];
+  if (cached_has_bits & 0x00010000u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(86, this->_internal_adaptiveaperture(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(86, this->_internal_aperturetype(), target);
   }
 
   // optional string specPropStruct = 90;
@@ -38235,75 +39881,87 @@ size_t AppSignal::ByteSizeLong() const {
 
   }
   if (cached_has_bits & 0x00ff0000u) {
-    // optional bool excludeFromBuild = 8 [default = false];
+    // optional int32 apertureType = 86 [default = 0];
     if (cached_has_bits & 0x00010000u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_aperturetype());
+    }
+
+    // optional bool excludeFromBuild = 8 [default = false];
+    if (cached_has_bits & 0x00020000u) {
+      total_size += 1 + 1;
+    }
+
+    // optional bool invertSignal = 9 [default = false];
+    if (cached_has_bits & 0x00040000u) {
+      total_size += 1 + 1;
+    }
+
+    // optional bool reserved = 10 [default = false];
+    if (cached_has_bits & 0x00080000u) {
       total_size += 1 + 1;
     }
 
     // optional bool enableTuning = 71 [default = false];
-    if (cached_has_bits & 0x00020000u) {
-      total_size += 2 + 1;
-    }
-
-    // optional bool acquire = 81 [default = false];
-    if (cached_has_bits & 0x00040000u) {
-      total_size += 2 + 1;
-    }
-
-    // optional bool archive = 82 [default = false];
-    if (cached_has_bits & 0x00080000u) {
-      total_size += 2 + 1;
-    }
-
-    // optional bool adaptiveAperture = 86 [default = false];
     if (cached_has_bits & 0x00100000u) {
       total_size += 2 + 1;
     }
 
-    // optional int32 decimalPlaces = 83 [default = 2];
+    // optional bool acquire = 81 [default = false];
     if (cached_has_bits & 0x00200000u) {
+      total_size += 2 + 1;
+    }
+
+    // optional bool archive = 82 [default = false];
+    if (cached_has_bits & 0x00400000u) {
+      total_size += 2 + 1;
+    }
+
+    // optional int32 decimalPlaces = 83 [default = 2];
+    if (cached_has_bits & 0x00800000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_decimalplaces());
     }
 
+  }
+  if (cached_has_bits & 0x3f000000u) {
     // optional int32 signalType = 16 [default = 1];
-    if (cached_has_bits & 0x00400000u) {
+    if (cached_has_bits & 0x01000000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_signaltype());
     }
 
     // optional int32 inOutType = 17 [default = 2];
-    if (cached_has_bits & 0x00800000u) {
+    if (cached_has_bits & 0x02000000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_inouttype());
     }
 
-  }
-  if (cached_has_bits & 0x0f000000u) {
     // optional int32 byteOrder = 22 [default = 1];
-    if (cached_has_bits & 0x01000000u) {
+    if (cached_has_bits & 0x04000000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_byteorder());
     }
 
     // optional int32 analogSignalFormat = 26 [default = 1];
-    if (cached_has_bits & 0x02000000u) {
+    if (cached_has_bits & 0x08000000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_analogsignalformat());
     }
 
     // optional double coarseAperture = 84 [default = 1];
-    if (cached_has_bits & 0x04000000u) {
+    if (cached_has_bits & 0x10000000u) {
       total_size += 2 + 8;
     }
 
     // optional double fineAperture = 85 [default = 0.5];
-    if (cached_has_bits & 0x08000000u) {
+    if (cached_has_bits & 0x20000000u) {
       total_size += 2 + 8;
     }
 
@@ -38396,42 +40054,48 @@ void AppSignal::MergeFrom(const AppSignal& from) {
   }
   if (cached_has_bits & 0x00ff0000u) {
     if (cached_has_bits & 0x00010000u) {
-      excludefrombuild_ = from.excludefrombuild_;
+      aperturetype_ = from.aperturetype_;
     }
     if (cached_has_bits & 0x00020000u) {
-      enabletuning_ = from.enabletuning_;
+      excludefrombuild_ = from.excludefrombuild_;
     }
     if (cached_has_bits & 0x00040000u) {
-      acquire_ = from.acquire_;
+      invertsignal_ = from.invertsignal_;
     }
     if (cached_has_bits & 0x00080000u) {
-      archive_ = from.archive_;
+      reserved_ = from.reserved_;
     }
     if (cached_has_bits & 0x00100000u) {
-      adaptiveaperture_ = from.adaptiveaperture_;
+      enabletuning_ = from.enabletuning_;
     }
     if (cached_has_bits & 0x00200000u) {
-      decimalplaces_ = from.decimalplaces_;
+      acquire_ = from.acquire_;
     }
     if (cached_has_bits & 0x00400000u) {
-      signaltype_ = from.signaltype_;
+      archive_ = from.archive_;
     }
     if (cached_has_bits & 0x00800000u) {
-      inouttype_ = from.inouttype_;
+      decimalplaces_ = from.decimalplaces_;
     }
     _has_bits_[0] |= cached_has_bits;
   }
-  if (cached_has_bits & 0x0f000000u) {
+  if (cached_has_bits & 0x3f000000u) {
     if (cached_has_bits & 0x01000000u) {
-      byteorder_ = from.byteorder_;
+      signaltype_ = from.signaltype_;
     }
     if (cached_has_bits & 0x02000000u) {
-      analogsignalformat_ = from.analogsignalformat_;
+      inouttype_ = from.inouttype_;
     }
     if (cached_has_bits & 0x04000000u) {
-      coarseaperture_ = from.coarseaperture_;
+      byteorder_ = from.byteorder_;
     }
     if (cached_has_bits & 0x08000000u) {
+      analogsignalformat_ = from.analogsignalformat_;
+    }
+    if (cached_has_bits & 0x10000000u) {
+      coarseaperture_ = from.coarseaperture_;
+    }
+    if (cached_has_bits & 0x20000000u) {
       fineaperture_ = from.fineaperture_;
     }
     _has_bits_[0] |= cached_has_bits;
@@ -38474,8 +40138,8 @@ void AppSignal::InternalSwap(AppSignal* other) {
   specpropstruct_.Swap(&other->specpropstruct_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   specpropvalues_.Swap(&other->specpropvalues_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(AppSignal, adaptiveaperture_)
-      + sizeof(AppSignal::adaptiveaperture_)
+      PROTOBUF_FIELD_OFFSET(AppSignal, archive_)
+      + sizeof(AppSignal::archive_)
       - PROTOBUF_FIELD_OFFSET(AppSignal, tuningdefaultvalue_)>(
           reinterpret_cast<char*>(&tuningdefaultvalue_),
           reinterpret_cast<char*>(&other->tuningdefaultvalue_));
@@ -38703,13 +40367,13 @@ class ProtoAppSignalData::_Internal {
     (*has_bits)[0] |= 512u;
   }
   static void set_has_datasize(HasBits* has_bits) {
-    (*has_bits)[0] |= 16384u;
+    (*has_bits)[0] |= 131072u;
   }
   static void set_has_byteorder(HasBits* has_bits) {
-    (*has_bits)[0] |= 32768u;
+    (*has_bits)[0] |= 262144u;
   }
   static void set_has_analogsignalformat(HasBits* has_bits) {
-    (*has_bits)[0] |= 65536u;
+    (*has_bits)[0] |= 524288u;
   }
   static void set_has_unit(HasBits* has_bits) {
     (*has_bits)[0] |= 4u;
@@ -38730,21 +40394,21 @@ class ProtoAppSignalData::_Internal {
     (*has_bits)[0] |= 256u;
   }
   static void set_has_acquire(HasBits* has_bits) {
-    (*has_bits)[0] |= 131072u;
-  }
-  static void set_has_archive(HasBits* has_bits) {
-    (*has_bits)[0] |= 262144u;
-  }
-  static void set_has_decimalplaces(HasBits* has_bits) {
-    (*has_bits)[0] |= 8192u;
-  }
-  static void set_has_coarseaperture(HasBits* has_bits) {
-    (*has_bits)[0] |= 524288u;
-  }
-  static void set_has_fineaperture(HasBits* has_bits) {
     (*has_bits)[0] |= 1048576u;
   }
-  static void set_has_adaptiveaperture(HasBits* has_bits) {
+  static void set_has_archive(HasBits* has_bits) {
+    (*has_bits)[0] |= 2097152u;
+  }
+  static void set_has_decimalplaces(HasBits* has_bits) {
+    (*has_bits)[0] |= 65536u;
+  }
+  static void set_has_coarseaperture(HasBits* has_bits) {
+    (*has_bits)[0] |= 4194304u;
+  }
+  static void set_has_fineaperture(HasBits* has_bits) {
+    (*has_bits)[0] |= 8388608u;
+  }
+  static void set_has_obsolete_adaptiveaperture(HasBits* has_bits) {
     (*has_bits)[0] |= 2048u;
   }
   static void set_has_excludefrombuild(HasBits* has_bits) {
@@ -38758,6 +40422,15 @@ class ProtoAppSignalData::_Internal {
   }
   static void set_has_userspecpropvalues(HasBits* has_bits) {
     (*has_bits)[0] |= 32u;
+  }
+  static void set_has_aperturetype(HasBits* has_bits) {
+    (*has_bits)[0] |= 16384u;
+  }
+  static void set_has_invertsignal(HasBits* has_bits) {
+    (*has_bits)[0] |= 8192u;
+  }
+  static void set_has_reserved(HasBits* has_bits) {
+    (*has_bits)[0] |= 32768u;
   }
 };
 
@@ -38843,8 +40516,8 @@ userspecpropstruct_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmpt
 userspecpropvalues_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
     reinterpret_cast<char*>(&tuningdefaultvalue_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&excludefrombuild_) -
-    reinterpret_cast<char*>(&tuningdefaultvalue_)) + sizeof(excludefrombuild_));
+    0, static_cast<size_t>(reinterpret_cast<char*>(&reserved_) -
+    reinterpret_cast<char*>(&tuningdefaultvalue_)) + sizeof(reserved_));
 decimalplaces_ = 2;
 datasize_ = 32;
 byteorder_ = 1;
@@ -38925,13 +40598,13 @@ void ProtoAppSignalData::Clear() {
   }
   if (cached_has_bits & 0x0000fe00u) {
     ::memset(&channel_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&excludefrombuild_) -
-        reinterpret_cast<char*>(&channel_)) + sizeof(excludefrombuild_));
+        reinterpret_cast<char*>(&reserved_) -
+        reinterpret_cast<char*>(&channel_)) + sizeof(reserved_));
+  }
+  if (cached_has_bits & 0x00ff0000u) {
     decimalplaces_ = 2;
     datasize_ = 32;
     byteorder_ = 1;
-  }
-  if (cached_has_bits & 0x001f0000u) {
     analogsignalformat_ = 2;
     acquire_ = true;
     archive_ = true;
@@ -39084,11 +40757,11 @@ const char* ProtoAppSignalData::_InternalParse(const char* ptr, ::PROTOBUF_NAMES
           ptr += sizeof(double);
         } else goto handle_unusual;
         continue;
-      // optional bool adaptiveAperture = 17 [default = false];
+      // optional bool obsolete_adaptiveAperture = 17 [default = false];
       case 17:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 136)) {
-          _Internal::set_has_adaptiveaperture(&has_bits);
-          adaptiveaperture_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          _Internal::set_has_obsolete_adaptiveaperture(&has_bits);
+          obsolete_adaptiveaperture_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -39127,6 +40800,30 @@ const char* ProtoAppSignalData::_InternalParse(const char* ptr, ::PROTOBUF_NAMES
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 170)) {
           auto str = _internal_mutable_userspecpropvalues();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int32 apertureType = 22 [default = 0];
+      case 22:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 176)) {
+          _Internal::set_has_aperturetype(&has_bits);
+          aperturetype_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional bool invertSignal = 23 [default = false];
+      case 23:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 184)) {
+          _Internal::set_has_invertsignal(&has_bits);
+          invertsignal_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional bool reserved = 24 [default = false];
+      case 24:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 192)) {
+          _Internal::set_has_reserved(&has_bits);
+          reserved_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -39187,19 +40884,19 @@ failure:
   }
 
   // optional int32 dataSize = 4 [default = 32];
-  if (cached_has_bits & 0x00004000u) {
+  if (cached_has_bits & 0x00020000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(4, this->_internal_datasize(), target);
   }
 
   // optional int32 byteOrder = 5 [default = 1];
-  if (cached_has_bits & 0x00008000u) {
+  if (cached_has_bits & 0x00040000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(5, this->_internal_byteorder(), target);
   }
 
   // optional int32 analogSignalFormat = 6 [default = 2];
-  if (cached_has_bits & 0x00010000u) {
+  if (cached_has_bits & 0x00080000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(6, this->_internal_analogsignalformat(), target);
   }
@@ -39245,39 +40942,39 @@ failure:
   }
 
   // optional bool acquire = 12 [default = true];
-  if (cached_has_bits & 0x00020000u) {
+  if (cached_has_bits & 0x00100000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(12, this->_internal_acquire(), target);
   }
 
   // optional bool archive = 13 [default = true];
-  if (cached_has_bits & 0x00040000u) {
+  if (cached_has_bits & 0x00200000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(13, this->_internal_archive(), target);
   }
 
   // optional int32 decimalPlaces = 14 [default = 2];
-  if (cached_has_bits & 0x00002000u) {
+  if (cached_has_bits & 0x00010000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(14, this->_internal_decimalplaces(), target);
   }
 
   // optional double coarseAperture = 15 [default = 1];
-  if (cached_has_bits & 0x00080000u) {
+  if (cached_has_bits & 0x00400000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(15, this->_internal_coarseaperture(), target);
   }
 
   // optional double fineAperture = 16 [default = 0.5];
-  if (cached_has_bits & 0x00100000u) {
+  if (cached_has_bits & 0x00800000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(16, this->_internal_fineaperture(), target);
   }
 
-  // optional bool adaptiveAperture = 17 [default = false];
+  // optional bool obsolete_adaptiveAperture = 17 [default = false];
   if (cached_has_bits & 0x00000800u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(17, this->_internal_adaptiveaperture(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(17, this->_internal_obsolete_adaptiveaperture(), target);
   }
 
   // optional bool excludefromBuild = 18 [default = false];
@@ -39310,6 +41007,24 @@ failure:
   if (cached_has_bits & 0x00000020u) {
     target = stream->WriteBytesMaybeAliased(
         21, this->_internal_userspecpropvalues(), target);
+  }
+
+  // optional int32 apertureType = 22 [default = 0];
+  if (cached_has_bits & 0x00004000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(22, this->_internal_aperturetype(), target);
+  }
+
+  // optional bool invertSignal = 23 [default = false];
+  if (cached_has_bits & 0x00002000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(23, this->_internal_invertsignal(), target);
+  }
+
+  // optional bool reserved = 24 [default = false];
+  if (cached_has_bits & 0x00008000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(24, this->_internal_reserved(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -39407,7 +41122,7 @@ size_t ProtoAppSignalData::ByteSizeLong() const {
       total_size += 1 + 1;
     }
 
-    // optional bool adaptiveAperture = 17 [default = false];
+    // optional bool obsolete_adaptiveAperture = 17 [default = false];
     if (cached_has_bits & 0x00000800u) {
       total_size += 2 + 1;
     }
@@ -39417,53 +41132,70 @@ size_t ProtoAppSignalData::ByteSizeLong() const {
       total_size += 2 + 1;
     }
 
-    // optional int32 decimalPlaces = 14 [default = 2];
+    // optional bool invertSignal = 23 [default = false];
     if (cached_has_bits & 0x00002000u) {
+      total_size += 2 + 1;
+    }
+
+    // optional int32 apertureType = 22 [default = 0];
+    if (cached_has_bits & 0x00004000u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_aperturetype());
+    }
+
+    // optional bool reserved = 24 [default = false];
+    if (cached_has_bits & 0x00008000u) {
+      total_size += 2 + 1;
+    }
+
+  }
+  if (cached_has_bits & 0x00ff0000u) {
+    // optional int32 decimalPlaces = 14 [default = 2];
+    if (cached_has_bits & 0x00010000u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_decimalplaces());
     }
 
     // optional int32 dataSize = 4 [default = 32];
-    if (cached_has_bits & 0x00004000u) {
+    if (cached_has_bits & 0x00020000u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_datasize());
     }
 
     // optional int32 byteOrder = 5 [default = 1];
-    if (cached_has_bits & 0x00008000u) {
+    if (cached_has_bits & 0x00040000u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_byteorder());
     }
 
-  }
-  if (cached_has_bits & 0x001f0000u) {
     // optional int32 analogSignalFormat = 6 [default = 2];
-    if (cached_has_bits & 0x00010000u) {
+    if (cached_has_bits & 0x00080000u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_analogsignalformat());
     }
 
     // optional bool acquire = 12 [default = true];
-    if (cached_has_bits & 0x00020000u) {
+    if (cached_has_bits & 0x00100000u) {
       total_size += 1 + 1;
     }
 
     // optional bool archive = 13 [default = true];
-    if (cached_has_bits & 0x00040000u) {
+    if (cached_has_bits & 0x00200000u) {
       total_size += 1 + 1;
     }
 
     // optional double coarseAperture = 15 [default = 1];
-    if (cached_has_bits & 0x00080000u) {
+    if (cached_has_bits & 0x00400000u) {
       total_size += 1 + 8;
     }
 
     // optional double fineAperture = 16 [default = 0.5];
-    if (cached_has_bits & 0x00100000u) {
+    if (cached_has_bits & 0x00800000u) {
       total_size += 2 + 8;
     }
 
@@ -39537,36 +41269,45 @@ void ProtoAppSignalData::MergeFrom(const ProtoAppSignalData& from) {
       enabletuning_ = from.enabletuning_;
     }
     if (cached_has_bits & 0x00000800u) {
-      adaptiveaperture_ = from.adaptiveaperture_;
+      obsolete_adaptiveaperture_ = from.obsolete_adaptiveaperture_;
     }
     if (cached_has_bits & 0x00001000u) {
       excludefrombuild_ = from.excludefrombuild_;
     }
     if (cached_has_bits & 0x00002000u) {
-      decimalplaces_ = from.decimalplaces_;
+      invertsignal_ = from.invertsignal_;
     }
     if (cached_has_bits & 0x00004000u) {
-      datasize_ = from.datasize_;
+      aperturetype_ = from.aperturetype_;
     }
     if (cached_has_bits & 0x00008000u) {
-      byteorder_ = from.byteorder_;
+      reserved_ = from.reserved_;
     }
     _has_bits_[0] |= cached_has_bits;
   }
-  if (cached_has_bits & 0x001f0000u) {
+  if (cached_has_bits & 0x00ff0000u) {
     if (cached_has_bits & 0x00010000u) {
-      analogsignalformat_ = from.analogsignalformat_;
+      decimalplaces_ = from.decimalplaces_;
     }
     if (cached_has_bits & 0x00020000u) {
-      acquire_ = from.acquire_;
+      datasize_ = from.datasize_;
     }
     if (cached_has_bits & 0x00040000u) {
-      archive_ = from.archive_;
+      byteorder_ = from.byteorder_;
     }
     if (cached_has_bits & 0x00080000u) {
-      coarseaperture_ = from.coarseaperture_;
+      analogsignalformat_ = from.analogsignalformat_;
     }
     if (cached_has_bits & 0x00100000u) {
+      acquire_ = from.acquire_;
+    }
+    if (cached_has_bits & 0x00200000u) {
+      archive_ = from.archive_;
+    }
+    if (cached_has_bits & 0x00400000u) {
+      coarseaperture_ = from.coarseaperture_;
+    }
+    if (cached_has_bits & 0x00800000u) {
       fineaperture_ = from.fineaperture_;
     }
     _has_bits_[0] |= cached_has_bits;
@@ -39602,8 +41343,8 @@ void ProtoAppSignalData::InternalSwap(ProtoAppSignalData* other) {
   userspecpropstruct_.Swap(&other->userspecpropstruct_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   userspecpropvalues_.Swap(&other->userspecpropvalues_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(ProtoAppSignalData, excludefrombuild_)
-      + sizeof(ProtoAppSignalData::excludefrombuild_)
+      PROTOBUF_FIELD_OFFSET(ProtoAppSignalData, reserved_)
+      + sizeof(ProtoAppSignalData::reserved_)
       - PROTOBUF_FIELD_OFFSET(ProtoAppSignalData, tuningdefaultvalue_)>(
           reinterpret_cast<char*>(&tuningdefaultvalue_),
           reinterpret_cast<char*>(&other->tuningdefaultvalue_));
@@ -41616,6 +43357,7 @@ SchemaDetails::SchemaDetails(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   schematags_(arena),
   loopbacks_(arena),
   itemtags_(arena),
+  packedlogicids_(arena),
   trendindicators_(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
@@ -41631,6 +43373,7 @@ SchemaDetails::SchemaDetails(const SchemaDetails& from)
       schematags_(from.schematags_),
       loopbacks_(from.loopbacks_),
       itemtags_(from.itemtags_),
+      packedlogicids_(from.packedlogicids_),
       trendindicators_(from.trendindicators_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   schemaid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
@@ -41714,6 +43457,7 @@ void SchemaDetails::Clear() {
   schematags_.Clear();
   loopbacks_.Clear();
   itemtags_.Clear();
+  packedlogicids_.Clear();
   trendindicators_.Clear();
   cached_has_bits = _has_bits_[0];
   if (cached_has_bits & 0x0000001fu) {
@@ -41929,6 +43673,22 @@ const char* SchemaDetails::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<210>(ptr));
         } else goto handle_unusual;
         continue;
+      // repeated string packedLogicIds = 27;
+      case 27:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 218)) {
+          ptr -= 2;
+          do {
+            ptr += 2;
+            auto str = _internal_add_packedlogicids();
+            ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+            #ifndef NDEBUG
+            ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.SchemaDetails.packedLogicIds");
+            #endif  // !NDEBUG
+            CHK_(ptr);
+            if (!ctx->DataAvailable(ptr)) break;
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<218>(ptr));
+        } else goto handle_unusual;
+        continue;
       // repeated .Proto.SchemaDetails.TrendIndicatorSchemaItems trendIndicators = 30;
       case 30:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 242)) {
@@ -42101,6 +43861,16 @@ failure:
     target = stream->WriteString(26, s, target);
   }
 
+  // repeated string packedLogicIds = 27;
+  for (int i = 0, n = this->_internal_packedlogicids_size(); i < n; i++) {
+    const auto& s = this->_internal_packedlogicids(i);
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      s.data(), static_cast<int>(s.length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Proto.SchemaDetails.packedLogicIds");
+    target = stream->WriteString(27, s, target);
+  }
+
   // repeated .Proto.SchemaDetails.TrendIndicatorSchemaItems trendIndicators = 30;
   for (unsigned int i = 0,
       n = static_cast<unsigned int>(this->_internal_trendindicators_size()); i < n; i++) {
@@ -42178,6 +43948,14 @@ size_t SchemaDetails::ByteSizeLong() const {
   for (int i = 0, n = itemtags_.size(); i < n; i++) {
     total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
       itemtags_.Get(i));
+  }
+
+  // repeated string packedLogicIds = 27;
+  total_size += 2 *
+      ::PROTOBUF_NAMESPACE_ID::internal::FromIntSize(packedlogicids_.size());
+  for (int i = 0, n = packedlogicids_.size(); i < n; i++) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+      packedlogicids_.Get(i));
   }
 
   // repeated .Proto.SchemaDetails.TrendIndicatorSchemaItems trendIndicators = 30;
@@ -42275,6 +44053,7 @@ void SchemaDetails::MergeFrom(const SchemaDetails& from) {
   schematags_.MergeFrom(from.schematags_);
   loopbacks_.MergeFrom(from.loopbacks_);
   itemtags_.MergeFrom(from.itemtags_);
+  packedlogicids_.MergeFrom(from.packedlogicids_);
   trendindicators_.MergeFrom(from.trendindicators_);
   cached_has_bits = from._has_bits_[0];
   if (cached_has_bits & 0x0000007fu) {
@@ -42334,6 +44113,7 @@ void SchemaDetails::InternalSwap(SchemaDetails* other) {
   schematags_.InternalSwap(&other->schematags_);
   loopbacks_.InternalSwap(&other->loopbacks_);
   itemtags_.InternalSwap(&other->itemtags_);
+  packedlogicids_.InternalSwap(&other->packedlogicids_);
   trendindicators_.InternalSwap(&other->trendindicators_);
   schemaid_.Swap(&other->schemaid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   caption_.Swap(&other->caption_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
@@ -42355,20 +44135,463 @@ void SchemaDetails::InternalSwap(SchemaDetails* other) {
 
 // ===================================================================
 
+class BuildInfo::_Internal {
+ public:
+  using HasBits = decltype(std::declval<BuildInfo>()._has_bits_);
+  static void set_has_project(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
+  static void set_has_buildno(HasBits* has_bits) {
+    (*has_bits)[0] |= 16u;
+  }
+  static void set_has_datetime(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
+  static void set_has_changeset(HasBits* has_bits) {
+    (*has_bits)[0] |= 32u;
+  }
+  static void set_has_user(HasBits* has_bits) {
+    (*has_bits)[0] |= 4u;
+  }
+  static void set_has_workstation(HasBits* has_bits) {
+    (*has_bits)[0] |= 8u;
+  }
+};
+
+BuildInfo::BuildInfo(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:Proto.BuildInfo)
+}
+BuildInfo::BuildInfo(const BuildInfo& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message(),
+      _has_bits_(from._has_bits_) {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  project_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_project()) {
+    project_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_project(), 
+      GetArena());
+  }
+  datetime_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_datetime()) {
+    datetime_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_datetime(), 
+      GetArena());
+  }
+  user_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_user()) {
+    user_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_user(), 
+      GetArena());
+  }
+  workstation_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_workstation()) {
+    workstation_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_workstation(), 
+      GetArena());
+  }
+  ::memcpy(&buildno_, &from.buildno_,
+    static_cast<size_t>(reinterpret_cast<char*>(&changeset_) -
+    reinterpret_cast<char*>(&buildno_)) + sizeof(changeset_));
+  // @@protoc_insertion_point(copy_constructor:Proto.BuildInfo)
+}
+
+void BuildInfo::SharedCtor() {
+project_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+datetime_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+user_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+workstation_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&buildno_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&changeset_) -
+    reinterpret_cast<char*>(&buildno_)) + sizeof(changeset_));
+}
+
+BuildInfo::~BuildInfo() {
+  // @@protoc_insertion_point(destructor:Proto.BuildInfo)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void BuildInfo::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  project_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  datetime_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  user_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  workstation_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+}
+
+void BuildInfo::ArenaDtor(void* object) {
+  BuildInfo* _this = reinterpret_cast< BuildInfo* >(object);
+  (void)_this;
+}
+void BuildInfo::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void BuildInfo::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void BuildInfo::Clear() {
+// @@protoc_insertion_point(message_clear_start:Proto.BuildInfo)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x0000000fu) {
+    if (cached_has_bits & 0x00000001u) {
+      project_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000002u) {
+      datetime_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000004u) {
+      user_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000008u) {
+      workstation_.ClearNonDefaultToEmpty();
+    }
+  }
+  if (cached_has_bits & 0x00000030u) {
+    ::memset(&buildno_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&changeset_) -
+        reinterpret_cast<char*>(&buildno_)) + sizeof(changeset_));
+  }
+  _has_bits_.Clear();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* BuildInfo::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  _Internal::HasBits has_bits{};
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // optional string project = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          auto str = _internal_mutable_project();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.BuildInfo.project");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int32 buildNo = 2 [default = 0];
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
+          _Internal::set_has_buildno(&has_bits);
+          buildno_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional string dateTime = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+          auto str = _internal_mutable_datetime();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.BuildInfo.dateTime");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int32 changeset = 4 [default = 0];
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
+          _Internal::set_has_changeset(&has_bits);
+          changeset_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional string user = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 42)) {
+          auto str = _internal_mutable_user();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.BuildInfo.user");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional string workstation = 6;
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 50)) {
+          auto str = _internal_mutable_workstation();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.BuildInfo.workstation");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  _has_bits_.Or(has_bits);
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* BuildInfo::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:Proto.BuildInfo)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  cached_has_bits = _has_bits_[0];
+  // optional string project = 1;
+  if (cached_has_bits & 0x00000001u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_project().data(), static_cast<int>(this->_internal_project().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Proto.BuildInfo.project");
+    target = stream->WriteStringMaybeAliased(
+        1, this->_internal_project(), target);
+  }
+
+  // optional int32 buildNo = 2 [default = 0];
+  if (cached_has_bits & 0x00000010u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(2, this->_internal_buildno(), target);
+  }
+
+  // optional string dateTime = 3;
+  if (cached_has_bits & 0x00000002u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_datetime().data(), static_cast<int>(this->_internal_datetime().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Proto.BuildInfo.dateTime");
+    target = stream->WriteStringMaybeAliased(
+        3, this->_internal_datetime(), target);
+  }
+
+  // optional int32 changeset = 4 [default = 0];
+  if (cached_has_bits & 0x00000020u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(4, this->_internal_changeset(), target);
+  }
+
+  // optional string user = 5;
+  if (cached_has_bits & 0x00000004u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_user().data(), static_cast<int>(this->_internal_user().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Proto.BuildInfo.user");
+    target = stream->WriteStringMaybeAliased(
+        5, this->_internal_user(), target);
+  }
+
+  // optional string workstation = 6;
+  if (cached_has_bits & 0x00000008u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_workstation().data(), static_cast<int>(this->_internal_workstation().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Proto.BuildInfo.workstation");
+    target = stream->WriteStringMaybeAliased(
+        6, this->_internal_workstation(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:Proto.BuildInfo)
+  return target;
+}
+
+size_t BuildInfo::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:Proto.BuildInfo)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x0000003fu) {
+    // optional string project = 1;
+    if (cached_has_bits & 0x00000001u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_project());
+    }
+
+    // optional string dateTime = 3;
+    if (cached_has_bits & 0x00000002u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_datetime());
+    }
+
+    // optional string user = 5;
+    if (cached_has_bits & 0x00000004u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_user());
+    }
+
+    // optional string workstation = 6;
+    if (cached_has_bits & 0x00000008u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_workstation());
+    }
+
+    // optional int32 buildNo = 2 [default = 0];
+    if (cached_has_bits & 0x00000010u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_buildno());
+    }
+
+    // optional int32 changeset = 4 [default = 0];
+    if (cached_has_bits & 0x00000020u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_changeset());
+    }
+
+  }
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void BuildInfo::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:Proto.BuildInfo)
+  GOOGLE_DCHECK_NE(&from, this);
+  const BuildInfo* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<BuildInfo>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.BuildInfo)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.BuildInfo)
+    MergeFrom(*source);
+  }
+}
+
+void BuildInfo::MergeFrom(const BuildInfo& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:Proto.BuildInfo)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  cached_has_bits = from._has_bits_[0];
+  if (cached_has_bits & 0x0000003fu) {
+    if (cached_has_bits & 0x00000001u) {
+      _internal_set_project(from._internal_project());
+    }
+    if (cached_has_bits & 0x00000002u) {
+      _internal_set_datetime(from._internal_datetime());
+    }
+    if (cached_has_bits & 0x00000004u) {
+      _internal_set_user(from._internal_user());
+    }
+    if (cached_has_bits & 0x00000008u) {
+      _internal_set_workstation(from._internal_workstation());
+    }
+    if (cached_has_bits & 0x00000010u) {
+      buildno_ = from.buildno_;
+    }
+    if (cached_has_bits & 0x00000020u) {
+      changeset_ = from.changeset_;
+    }
+    _has_bits_[0] |= cached_has_bits;
+  }
+}
+
+void BuildInfo::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:Proto.BuildInfo)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void BuildInfo::CopyFrom(const BuildInfo& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:Proto.BuildInfo)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool BuildInfo::IsInitialized() const {
+  return true;
+}
+
+void BuildInfo::InternalSwap(BuildInfo* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  swap(_has_bits_[0], other->_has_bits_[0]);
+  project_.Swap(&other->project_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  datetime_.Swap(&other->datetime_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  user_.Swap(&other->user_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  workstation_.Swap(&other->workstation_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(BuildInfo, changeset_)
+      + sizeof(BuildInfo::changeset_)
+      - PROTOBUF_FIELD_OFFSET(BuildInfo, buildno_)>(
+          reinterpret_cast<char*>(&buildno_),
+          reinterpret_cast<char*>(&other->buildno_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata BuildInfo::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
 class ArchSignal::_Internal {
  public:
   using HasBits = decltype(std::declval<ArchSignal>()._has_bits_);
-  static void set_has_hash(HasBits* has_bits) {
-    (*has_bits)[0] |= 2u;
-  }
-  static void set_has_isanalog(HasBits* has_bits) {
-    (*has_bits)[0] |= 4u;
-  }
   static void set_has_appsignalid(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
   }
+  static void set_has_signaltype(HasBits* has_bits) {
+    (*has_bits)[0] |= 64u;
+  }
+  static void set_has_lowlimit(HasBits* has_bits) {
+    (*has_bits)[0] |= 4u;
+  }
+  static void set_has_highlimit(HasBits* has_bits) {
+    (*has_bits)[0] |= 8u;
+  }
+  static void set_has_unit(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
+  static void set_has_fineaperture(HasBits* has_bits) {
+    (*has_bits)[0] |= 16u;
+  }
+  static void set_has_coarseaperture(HasBits* has_bits) {
+    (*has_bits)[0] |= 32u;
+  }
   static bool MissingRequiredFields(const HasBits& has_bits) {
-    return ((has_bits[0] & 0x00000007) ^ 0x00000007) != 0;
+    return ((has_bits[0] & 0x00000041) ^ 0x00000041) != 0;
   }
 };
 
@@ -42387,18 +44610,24 @@ ArchSignal::ArchSignal(const ArchSignal& from)
     appsignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_appsignalid(), 
       GetArena());
   }
-  ::memcpy(&hash_, &from.hash_,
-    static_cast<size_t>(reinterpret_cast<char*>(&isanalog_) -
-    reinterpret_cast<char*>(&hash_)) + sizeof(isanalog_));
+  unit_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_unit()) {
+    unit_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_unit(), 
+      GetArena());
+  }
+  ::memcpy(&lowlimit_, &from.lowlimit_,
+    static_cast<size_t>(reinterpret_cast<char*>(&signaltype_) -
+    reinterpret_cast<char*>(&lowlimit_)) + sizeof(signaltype_));
   // @@protoc_insertion_point(copy_constructor:Proto.ArchSignal)
 }
 
 void ArchSignal::SharedCtor() {
 appsignalid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+unit_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-    reinterpret_cast<char*>(&hash_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&isanalog_) -
-    reinterpret_cast<char*>(&hash_)) + sizeof(isanalog_));
+    reinterpret_cast<char*>(&lowlimit_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&signaltype_) -
+    reinterpret_cast<char*>(&lowlimit_)) + sizeof(signaltype_));
 }
 
 ArchSignal::~ArchSignal() {
@@ -42410,6 +44639,7 @@ ArchSignal::~ArchSignal() {
 void ArchSignal::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
   appsignalid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  unit_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
 void ArchSignal::ArenaDtor(void* object) {
@@ -42429,13 +44659,18 @@ void ArchSignal::Clear() {
   (void) cached_has_bits;
 
   cached_has_bits = _has_bits_[0];
-  if (cached_has_bits & 0x00000001u) {
-    appsignalid_.ClearNonDefaultToEmpty();
+  if (cached_has_bits & 0x00000003u) {
+    if (cached_has_bits & 0x00000001u) {
+      appsignalid_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000002u) {
+      unit_.ClearNonDefaultToEmpty();
+    }
   }
-  if (cached_has_bits & 0x00000006u) {
-    ::memset(&hash_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&isanalog_) -
-        reinterpret_cast<char*>(&hash_)) + sizeof(isanalog_));
+  if (cached_has_bits & 0x0000007cu) {
+    ::memset(&lowlimit_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&signaltype_) -
+        reinterpret_cast<char*>(&lowlimit_)) + sizeof(signaltype_));
   }
   _has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -42449,31 +44684,66 @@ const char* ArchSignal::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID:
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     CHK_(ptr);
     switch (tag >> 3) {
-      // required uint64 hash = 1;
+      // required string appSignalID = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          _Internal::set_has_hash(&has_bits);
-          hash_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // required bool isAnalog = 2;
-      case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
-          _Internal::set_has_isanalog(&has_bits);
-          isanalog_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // required string appSignalID = 3;
-      case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
           auto str = _internal_mutable_appsignalid();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
           ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.ArchSignal.appSignalID");
           #endif  // !NDEBUG
           CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // required int32 signalType = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
+          _Internal::set_has_signaltype(&has_bits);
+          signaltype_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional double lowLimit = 3 [default = 0];
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 25)) {
+          _Internal::set_has_lowlimit(&has_bits);
+          lowlimit_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
+          ptr += sizeof(double);
+        } else goto handle_unusual;
+        continue;
+      // optional double highLimit = 4 [default = 0];
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 33)) {
+          _Internal::set_has_highlimit(&has_bits);
+          highlimit_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
+          ptr += sizeof(double);
+        } else goto handle_unusual;
+        continue;
+      // optional string unit = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 42)) {
+          auto str = _internal_mutable_unit();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.ArchSignal.unit");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional double fineAperture = 6 [default = 0];
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 49)) {
+          _Internal::set_has_fineaperture(&has_bits);
+          fineaperture_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
+          ptr += sizeof(double);
+        } else goto handle_unusual;
+        continue;
+      // optional double coarseAperture = 7 [default = 0];
+      case 7:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 57)) {
+          _Internal::set_has_coarseaperture(&has_bits);
+          coarseaperture_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
+          ptr += sizeof(double);
         } else goto handle_unusual;
         continue;
       default: {
@@ -42506,26 +44776,54 @@ failure:
   (void) cached_has_bits;
 
   cached_has_bits = _has_bits_[0];
-  // required uint64 hash = 1;
-  if (cached_has_bits & 0x00000002u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_hash(), target);
-  }
-
-  // required bool isAnalog = 2;
-  if (cached_has_bits & 0x00000004u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(2, this->_internal_isanalog(), target);
-  }
-
-  // required string appSignalID = 3;
+  // required string appSignalID = 1;
   if (cached_has_bits & 0x00000001u) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_appsignalid().data(), static_cast<int>(this->_internal_appsignalid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
       "Proto.ArchSignal.appSignalID");
     target = stream->WriteStringMaybeAliased(
-        3, this->_internal_appsignalid(), target);
+        1, this->_internal_appsignalid(), target);
+  }
+
+  // required int32 signalType = 2;
+  if (cached_has_bits & 0x00000040u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(2, this->_internal_signaltype(), target);
+  }
+
+  // optional double lowLimit = 3 [default = 0];
+  if (cached_has_bits & 0x00000004u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(3, this->_internal_lowlimit(), target);
+  }
+
+  // optional double highLimit = 4 [default = 0];
+  if (cached_has_bits & 0x00000008u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(4, this->_internal_highlimit(), target);
+  }
+
+  // optional string unit = 5;
+  if (cached_has_bits & 0x00000002u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_unit().data(), static_cast<int>(this->_internal_unit().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Proto.ArchSignal.unit");
+    target = stream->WriteStringMaybeAliased(
+        5, this->_internal_unit(), target);
+  }
+
+  // optional double fineAperture = 6 [default = 0];
+  if (cached_has_bits & 0x00000010u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(6, this->_internal_fineaperture(), target);
+  }
+
+  // optional double coarseAperture = 7 [default = 0];
+  if (cached_has_bits & 0x00000020u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(7, this->_internal_coarseaperture(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -42541,22 +44839,17 @@ size_t ArchSignal::RequiredFieldsByteSizeFallback() const {
   size_t total_size = 0;
 
   if (_internal_has_appsignalid()) {
-    // required string appSignalID = 3;
+    // required string appSignalID = 1;
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_appsignalid());
   }
 
-  if (_internal_has_hash()) {
-    // required uint64 hash = 1;
+  if (_internal_has_signaltype()) {
+    // required int32 signalType = 2;
     total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_hash());
-  }
-
-  if (_internal_has_isanalog()) {
-    // required bool isAnalog = 2;
-    total_size += 1 + 1;
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+        this->_internal_signaltype());
   }
 
   return total_size;
@@ -42565,19 +44858,16 @@ size_t ArchSignal::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:Proto.ArchSignal)
   size_t total_size = 0;
 
-  if (((_has_bits_[0] & 0x00000007) ^ 0x00000007) == 0) {  // All required fields are present.
-    // required string appSignalID = 3;
+  if (((_has_bits_[0] & 0x00000041) ^ 0x00000041) == 0) {  // All required fields are present.
+    // required string appSignalID = 1;
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_appsignalid());
 
-    // required uint64 hash = 1;
+    // required int32 signalType = 2;
     total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_hash());
-
-    // required bool isAnalog = 2;
-    total_size += 1 + 1;
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+        this->_internal_signaltype());
 
   } else {
     total_size += RequiredFieldsByteSizeFallback();
@@ -42586,6 +44876,36 @@ size_t ArchSignal::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x0000003eu) {
+    // optional string unit = 5;
+    if (cached_has_bits & 0x00000002u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_unit());
+    }
+
+    // optional double lowLimit = 3 [default = 0];
+    if (cached_has_bits & 0x00000004u) {
+      total_size += 1 + 8;
+    }
+
+    // optional double highLimit = 4 [default = 0];
+    if (cached_has_bits & 0x00000008u) {
+      total_size += 1 + 8;
+    }
+
+    // optional double fineAperture = 6 [default = 0];
+    if (cached_has_bits & 0x00000010u) {
+      total_size += 1 + 8;
+    }
+
+    // optional double coarseAperture = 7 [default = 0];
+    if (cached_has_bits & 0x00000020u) {
+      total_size += 1 + 8;
+    }
+
+  }
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
         _internal_metadata_, total_size, &_cached_size_);
@@ -42618,15 +44938,27 @@ void ArchSignal::MergeFrom(const ArchSignal& from) {
   (void) cached_has_bits;
 
   cached_has_bits = from._has_bits_[0];
-  if (cached_has_bits & 0x00000007u) {
+  if (cached_has_bits & 0x0000007fu) {
     if (cached_has_bits & 0x00000001u) {
       _internal_set_appsignalid(from._internal_appsignalid());
     }
     if (cached_has_bits & 0x00000002u) {
-      hash_ = from.hash_;
+      _internal_set_unit(from._internal_unit());
     }
     if (cached_has_bits & 0x00000004u) {
-      isanalog_ = from.isanalog_;
+      lowlimit_ = from.lowlimit_;
+    }
+    if (cached_has_bits & 0x00000008u) {
+      highlimit_ = from.highlimit_;
+    }
+    if (cached_has_bits & 0x00000010u) {
+      fineaperture_ = from.fineaperture_;
+    }
+    if (cached_has_bits & 0x00000020u) {
+      coarseaperture_ = from.coarseaperture_;
+    }
+    if (cached_has_bits & 0x00000040u) {
+      signaltype_ = from.signaltype_;
     }
     _has_bits_[0] |= cached_has_bits;
   }
@@ -42656,12 +44988,13 @@ void ArchSignal::InternalSwap(ArchSignal* other) {
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   swap(_has_bits_[0], other->_has_bits_[0]);
   appsignalid_.Swap(&other->appsignalid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  unit_.Swap(&other->unit_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(ArchSignal, isanalog_)
-      + sizeof(ArchSignal::isanalog_)
-      - PROTOBUF_FIELD_OFFSET(ArchSignal, hash_)>(
-          reinterpret_cast<char*>(&hash_),
-          reinterpret_cast<char*>(&other->hash_));
+      PROTOBUF_FIELD_OFFSET(ArchSignal, signaltype_)
+      + sizeof(ArchSignal::signaltype_)
+      - PROTOBUF_FIELD_OFFSET(ArchSignal, lowlimit_)>(
+          reinterpret_cast<char*>(&lowlimit_),
+          reinterpret_cast<char*>(&other->lowlimit_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata ArchSignal::GetMetadata() const {
@@ -42671,74 +45004,134 @@ void ArchSignal::InternalSwap(ArchSignal* other) {
 
 // ===================================================================
 
-class ArchSignals::_Internal {
+class ArchInfo::_Internal {
  public:
+  using HasBits = decltype(std::declval<ArchInfo>()._has_bits_);
+  static const ::Proto::BuildInfo& buildinfo(const ArchInfo* msg);
+  static void set_has_buildinfo(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
+  static void set_has_archiveserviceid(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
+  static bool MissingRequiredFields(const HasBits& has_bits) {
+    return ((has_bits[0] & 0x00000003) ^ 0x00000003) != 0;
+  }
 };
 
-ArchSignals::ArchSignals(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+const ::Proto::BuildInfo&
+ArchInfo::_Internal::buildinfo(const ArchInfo* msg) {
+  return *msg->buildinfo_;
+}
+ArchInfo::ArchInfo(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena),
-  archsignals_(arena) {
+  archsignal_(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
-  // @@protoc_insertion_point(arena_constructor:Proto.ArchSignals)
+  // @@protoc_insertion_point(arena_constructor:Proto.ArchInfo)
 }
-ArchSignals::ArchSignals(const ArchSignals& from)
+ArchInfo::ArchInfo(const ArchInfo& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
-      archsignals_(from.archsignals_) {
+      _has_bits_(from._has_bits_),
+      archsignal_(from.archsignal_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  // @@protoc_insertion_point(copy_constructor:Proto.ArchSignals)
+  archiveserviceid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_archiveserviceid()) {
+    archiveserviceid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_archiveserviceid(), 
+      GetArena());
+  }
+  if (from._internal_has_buildinfo()) {
+    buildinfo_ = new ::Proto::BuildInfo(*from.buildinfo_);
+  } else {
+    buildinfo_ = nullptr;
+  }
+  // @@protoc_insertion_point(copy_constructor:Proto.ArchInfo)
 }
 
-void ArchSignals::SharedCtor() {
+void ArchInfo::SharedCtor() {
+archiveserviceid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+buildinfo_ = nullptr;
 }
 
-ArchSignals::~ArchSignals() {
-  // @@protoc_insertion_point(destructor:Proto.ArchSignals)
+ArchInfo::~ArchInfo() {
+  // @@protoc_insertion_point(destructor:Proto.ArchInfo)
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void ArchSignals::SharedDtor() {
+void ArchInfo::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
+  archiveserviceid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (this != internal_default_instance()) delete buildinfo_;
 }
 
-void ArchSignals::ArenaDtor(void* object) {
-  ArchSignals* _this = reinterpret_cast< ArchSignals* >(object);
+void ArchInfo::ArenaDtor(void* object) {
+  ArchInfo* _this = reinterpret_cast< ArchInfo* >(object);
   (void)_this;
 }
-void ArchSignals::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+void ArchInfo::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 }
-void ArchSignals::SetCachedSize(int size) const {
+void ArchInfo::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
 
-void ArchSignals::Clear() {
-// @@protoc_insertion_point(message_clear_start:Proto.ArchSignals)
+void ArchInfo::Clear() {
+// @@protoc_insertion_point(message_clear_start:Proto.ArchInfo)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  archsignals_.Clear();
+  archsignal_.Clear();
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    if (cached_has_bits & 0x00000001u) {
+      archiveserviceid_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000002u) {
+      GOOGLE_DCHECK(buildinfo_ != nullptr);
+      buildinfo_->Clear();
+    }
+  }
+  _has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* ArchSignals::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* ArchInfo::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  _Internal::HasBits has_bits{};
   while (!ctx->Done(&ptr)) {
     ::PROTOBUF_NAMESPACE_ID::uint32 tag;
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     CHK_(ptr);
     switch (tag >> 3) {
-      // repeated .Proto.ArchSignal archSignals = 1;
+      // required .Proto.BuildInfo buildInfo = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          ptr = ctx->ParseMessage(_internal_mutable_buildinfo(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // required string archiveServiceID = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+          auto str = _internal_mutable_archiveserviceid();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.ArchInfo.archiveServiceID");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // repeated .Proto.ArchSignal archSignal = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
           ptr -= 1;
           do {
             ptr += 1;
-            ptr = ctx->ParseMessage(_internal_add_archsignals(), ptr);
+            ptr = ctx->ParseMessage(_internal_add_archsignal(), ptr);
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
-          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<10>(ptr));
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<26>(ptr));
         } else goto handle_unusual;
         continue;
       default: {
@@ -42756,6 +45149,7 @@ const char* ArchSignals::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID
     }  // switch
   }  // while
 success:
+  _has_bits_.Or(has_bits);
   return ptr;
 failure:
   ptr = nullptr;
@@ -42763,39 +45157,92 @@ failure:
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* ArchSignals::_InternalSerialize(
+::PROTOBUF_NAMESPACE_ID::uint8* ArchInfo::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:Proto.ArchSignals)
+  // @@protoc_insertion_point(serialize_to_array_start:Proto.ArchInfo)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // repeated .Proto.ArchSignal archSignals = 1;
-  for (unsigned int i = 0,
-      n = static_cast<unsigned int>(this->_internal_archsignals_size()); i < n; i++) {
+  cached_has_bits = _has_bits_[0];
+  // required .Proto.BuildInfo buildInfo = 1;
+  if (cached_has_bits & 0x00000002u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(1, this->_internal_archsignals(i), target, stream);
+      InternalWriteMessage(
+        1, _Internal::buildinfo(this), target, stream);
+  }
+
+  // required string archiveServiceID = 2;
+  if (cached_has_bits & 0x00000001u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_archiveserviceid().data(), static_cast<int>(this->_internal_archiveserviceid().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Proto.ArchInfo.archiveServiceID");
+    target = stream->WriteStringMaybeAliased(
+        2, this->_internal_archiveserviceid(), target);
+  }
+
+  // repeated .Proto.ArchSignal archSignal = 3;
+  for (unsigned int i = 0,
+      n = static_cast<unsigned int>(this->_internal_archsignal_size()); i < n; i++) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(3, this->_internal_archsignal(i), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:Proto.ArchSignals)
+  // @@protoc_insertion_point(serialize_to_array_end:Proto.ArchInfo)
   return target;
 }
 
-size_t ArchSignals::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:Proto.ArchSignals)
+size_t ArchInfo::RequiredFieldsByteSizeFallback() const {
+// @@protoc_insertion_point(required_fields_byte_size_fallback_start:Proto.ArchInfo)
   size_t total_size = 0;
 
+  if (_internal_has_archiveserviceid()) {
+    // required string archiveServiceID = 2;
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_archiveserviceid());
+  }
+
+  if (_internal_has_buildinfo()) {
+    // required .Proto.BuildInfo buildInfo = 1;
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *buildinfo_);
+  }
+
+  return total_size;
+}
+size_t ArchInfo::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:Proto.ArchInfo)
+  size_t total_size = 0;
+
+  if (((_has_bits_[0] & 0x00000003) ^ 0x00000003) == 0) {  // All required fields are present.
+    // required string archiveServiceID = 2;
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_archiveserviceid());
+
+    // required .Proto.BuildInfo buildInfo = 1;
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *buildinfo_);
+
+  } else {
+    total_size += RequiredFieldsByteSizeFallback();
+  }
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated .Proto.ArchSignal archSignals = 1;
-  total_size += 1UL * this->_internal_archsignals_size();
-  for (const auto& msg : this->archsignals_) {
+  // repeated .Proto.ArchSignal archSignal = 3;
+  total_size += 1UL * this->_internal_archsignal_size();
+  for (const auto& msg : this->archsignal_) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
@@ -42809,57 +45256,70 @@ size_t ArchSignals::ByteSizeLong() const {
   return total_size;
 }
 
-void ArchSignals::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:Proto.ArchSignals)
+void ArchInfo::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:Proto.ArchInfo)
   GOOGLE_DCHECK_NE(&from, this);
-  const ArchSignals* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<ArchSignals>(
+  const ArchInfo* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<ArchInfo>(
           &from);
   if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.ArchSignals)
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.ArchInfo)
     ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
   } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.ArchSignals)
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.ArchInfo)
     MergeFrom(*source);
   }
 }
 
-void ArchSignals::MergeFrom(const ArchSignals& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:Proto.ArchSignals)
+void ArchInfo::MergeFrom(const ArchInfo& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:Proto.ArchInfo)
   GOOGLE_DCHECK_NE(&from, this);
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  archsignals_.MergeFrom(from.archsignals_);
+  archsignal_.MergeFrom(from.archsignal_);
+  cached_has_bits = from._has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    if (cached_has_bits & 0x00000001u) {
+      _internal_set_archiveserviceid(from._internal_archiveserviceid());
+    }
+    if (cached_has_bits & 0x00000002u) {
+      _internal_mutable_buildinfo()->::Proto::BuildInfo::MergeFrom(from._internal_buildinfo());
+    }
+  }
 }
 
-void ArchSignals::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:Proto.ArchSignals)
+void ArchInfo::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:Proto.ArchInfo)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void ArchSignals::CopyFrom(const ArchSignals& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:Proto.ArchSignals)
+void ArchInfo::CopyFrom(const ArchInfo& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:Proto.ArchInfo)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool ArchSignals::IsInitialized() const {
-  if (!::PROTOBUF_NAMESPACE_ID::internal::AllAreInitialized(archsignals_)) return false;
+bool ArchInfo::IsInitialized() const {
+  if (_Internal::MissingRequiredFields(_has_bits_)) return false;
+  if (!::PROTOBUF_NAMESPACE_ID::internal::AllAreInitialized(archsignal_)) return false;
   return true;
 }
 
-void ArchSignals::InternalSwap(ArchSignals* other) {
+void ArchInfo::InternalSwap(ArchInfo* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
-  archsignals_.InternalSwap(&other->archsignals_);
+  swap(_has_bits_[0], other->_has_bits_[0]);
+  archsignal_.InternalSwap(&other->archsignal_);
+  archiveserviceid_.Swap(&other->archiveserviceid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  swap(buildinfo_, other->buildinfo_);
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata ArchSignals::GetMetadata() const {
+::PROTOBUF_NAMESPACE_ID::Metadata ArchInfo::GetMetadata() const {
   return GetMetadataStatic();
 }
 
@@ -47405,6 +49865,9 @@ template<> PROTOBUF_NOINLINE ::Proto::SchemaItem* Arena::CreateMaybeMessage< ::P
 template<> PROTOBUF_NOINLINE ::Proto::PosRectImpl* Arena::CreateMaybeMessage< ::Proto::PosRectImpl >(Arena* arena) {
   return Arena::CreateMessageInternal< ::Proto::PosRectImpl >(arena);
 }
+template<> PROTOBUF_NOINLINE ::Proto::PosRectRotatable* Arena::CreateMaybeMessage< ::Proto::PosRectRotatable >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::Proto::PosRectRotatable >(arena);
+}
 template<> PROTOBUF_NOINLINE ::Proto::PosLineImpl* Arena::CreateMaybeMessage< ::Proto::PosLineImpl >(Arena* arena) {
   return Arena::CreateMessageInternal< ::Proto::PosLineImpl >(arena);
 }
@@ -47528,6 +49991,9 @@ template<> PROTOBUF_NOINLINE ::Proto::SchemaItemPushButton* Arena::CreateMaybeMe
 template<> PROTOBUF_NOINLINE ::Proto::SchemaItemLineEdit* Arena::CreateMaybeMessage< ::Proto::SchemaItemLineEdit >(Arena* arena) {
   return Arena::CreateMessageInternal< ::Proto::SchemaItemLineEdit >(arena);
 }
+template<> PROTOBUF_NOINLINE ::Proto::SchemaItemSlider* Arena::CreateMaybeMessage< ::Proto::SchemaItemSlider >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::Proto::SchemaItemSlider >(arena);
+}
 template<> PROTOBUF_NOINLINE ::Proto::DeviceObject* Arena::CreateMaybeMessage< ::Proto::DeviceObject >(Arena* arena) {
   return Arena::CreateMessageInternal< ::Proto::DeviceObject >(arena);
 }
@@ -47618,11 +50084,14 @@ template<> PROTOBUF_NOINLINE ::Proto::SchemaDetails_TrendIndicatorSchemaItems* A
 template<> PROTOBUF_NOINLINE ::Proto::SchemaDetails* Arena::CreateMaybeMessage< ::Proto::SchemaDetails >(Arena* arena) {
   return Arena::CreateMessageInternal< ::Proto::SchemaDetails >(arena);
 }
+template<> PROTOBUF_NOINLINE ::Proto::BuildInfo* Arena::CreateMaybeMessage< ::Proto::BuildInfo >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::Proto::BuildInfo >(arena);
+}
 template<> PROTOBUF_NOINLINE ::Proto::ArchSignal* Arena::CreateMaybeMessage< ::Proto::ArchSignal >(Arena* arena) {
   return Arena::CreateMessageInternal< ::Proto::ArchSignal >(arena);
 }
-template<> PROTOBUF_NOINLINE ::Proto::ArchSignals* Arena::CreateMaybeMessage< ::Proto::ArchSignals >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::Proto::ArchSignals >(arena);
+template<> PROTOBUF_NOINLINE ::Proto::ArchInfo* Arena::CreateMaybeMessage< ::Proto::ArchInfo >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::Proto::ArchInfo >(arena);
 }
 template<> PROTOBUF_NOINLINE ::Proto::BusSignal* Arena::CreateMaybeMessage< ::Proto::BusSignal >(Arena* arena) {
   return Arena::CreateMessageInternal< ::Proto::BusSignal >(arena);

@@ -19,14 +19,14 @@ namespace Sim
 		virtual void beforeAppLogicParse() override;
 		virtual void afterAppLogicParse(std::vector<DeviceCommand>* commands) override;
 
-		// Update platform interface, this function is called before work cyle,
+		// Update platform interface, this function is called before work cycle,
 		// to update such platform inteface signals as Blink.
-		// Update mustb be done directly in RAM
+		// Update must be done directly in RAM
 		//
 		virtual bool updatePlatformInterfaceState(const QDateTime& currentTime) override;
 
-		// Get state of signal 'Set SOR Chassis', this state is fetched from RAM withount any mutex, so
-		// device must not run or performe any work cycle while calling this function
+		// Get state of signal 'Set SOR Chassis', this state is fetched from RAM without any mutex, so
+		// device must not run or perform any work cycle while calling this function
 		//
 		virtual quint16 signalSetSorChassis() const override;
 
@@ -45,11 +45,60 @@ namespace Sim
 		void command_not_implemented(const DeviceCommand& command);
 
 		// Command: nop
-		// Code: 1
+		// Code: 1 - ext: 0b000000
 		// Description: No operation
 		//
 		void parse_nop(DeviceCommand* command);
 		void command_nop(const DeviceCommand& command);
+
+		// Command: reset
+		// Code: 1 - ext: 0b100000
+		// Description: Reset ACC to 0
+		//
+		void parse_reset(DeviceCommand* command);
+		void command_reset(const DeviceCommand& command);
+
+		// Command: set
+		// Code: 1 - ext: 0b010000
+		// Description: Set ACC to 0xFFFF
+		//
+		void parse_set(DeviceCommand* command);
+		void command_set(const DeviceCommand& command);
+
+		// Command: or
+		// Code: 1 - ext: 0b110000
+		// Description: OR all ACC bits to ACC[0]
+		//
+		void parse_or(DeviceCommand* command);
+		void command_or(const DeviceCommand& command);
+
+		// Command: and
+		// Code: 1 - ext: 0b001000
+		// Description: AND all ACC bits to ACC[0]
+		//
+		void parse_and(DeviceCommand* command);
+		void command_and(const DeviceCommand& command);
+
+		// Command: not
+		// Code: 1 - ext: 0b101000
+		// Description: Invert ACC[0] bit
+		//
+		void parse_not(DeviceCommand* command);
+		void command_not(const DeviceCommand& command);
+
+		// Command: lshift0
+		// Code: 1 - ext: 0b011000
+		// Description: Shift ACC left and load 0 in ACC[0]
+		//
+		void parse_lshift0(DeviceCommand* command);
+		void command_lshift0(const DeviceCommand& command);
+
+		// Command: lshift1
+		// Code: 1 - ext: 0b111000
+		// Description: Shift ACC left and load 1 in ACC[0]
+		//
+		void parse_lshift1(DeviceCommand* command);
+		void command_lshift1(const DeviceCommand& command);
 
 		// Command: startafb
 		// Code: 2
@@ -66,11 +115,25 @@ namespace Sim
 		void command_stop(const DeviceCommand& command);
 
 		// Command: mov
-		// Code: 4
+		// Code: 4 - ext: 0b000000
 		// Description: Move word from RAM to RAM
 		//
 		void parse_mov(DeviceCommand* command);
 		void command_mov(const DeviceCommand& command);
+
+		// Command: mov - mov_addr_acc
+		// Code: 4 - ext: 0b100000
+		// Description: Copy 16-bit word from ACC to memory
+		//
+		void parse_mov_addr_acc(DeviceCommand* command);
+		void command_mov_addr_acc(const DeviceCommand& command);
+
+		// Command: mov - mov_acc_addr
+		// Code: 4 - ext: 0b010000
+		// Description: Copy 16-bit word from memory to ACC
+		//
+		void parse_mov_acc_addr(DeviceCommand* command);
+		void command_mov_acc_addr(const DeviceCommand& command);
 
 		// Command: movmem
 		// Code: 5
@@ -80,11 +143,18 @@ namespace Sim
 		void command_movmem(const DeviceCommand& command);
 
 		// Command: movc
-		// Code: 6
+		// Code: 6 - ext: 0xb000000
 		// Description: Write word const to RAM
 		//
 		void parse_movc(DeviceCommand* command);
 		void command_movc(const DeviceCommand& command);
+
+		// Command: movc - mov_acc
+		// Code: 6 - ext: 0xb100000
+		// Description: Write 16-bit constant to ACC
+		//
+		void parse_movc_acc(DeviceCommand* command);
+		void command_movc_acc(const DeviceCommand& command);
 
 		// Command: movbc
 		// Code: 7
@@ -143,11 +213,25 @@ namespace Sim
 		void command_setmem(const DeviceCommand& command);
 
 		// Command: movb
-		// Code: 15
+		// Code: 15 - ext: 0xb000000
 		// Description: Move bit from RAM to RAM
 		//
 		void parse_movb(DeviceCommand* command);
 		void command_movb(const DeviceCommand& command);
+
+		// Command: movb - movb_acc_addr
+		// Code: 15 - 0b10xxxx
+		// Description: Shift left ACC and copy 1-bit from memory to ACC[0]
+		//
+		void parse_movb_acc_addr(DeviceCommand* command);
+		void command_movb_acc_addr(const DeviceCommand& command);
+
+		// Command: movb - movb_addr_acc
+		// Code: 15 - 0b01xxxx
+		// Description: Copy 1-bit from ACC[0] to memory and shift right ACC
+		//
+		void parse_movb_addr_acc(DeviceCommand* command);
+		void command_movb_addr_acc(const DeviceCommand& command);
 
 		// Command: appstart
 		// Code: 17
@@ -227,7 +311,7 @@ namespace Sim
 		void command_fillb(const DeviceCommand& command);
 
 		//
-		// AFB's simultaion code
+		// AFB's simulation code
 		//
 
 		//	LOGIC, OpCode 1
@@ -286,6 +370,7 @@ namespace Sim
 		//
 		void afb_mem_v7(AfbComponentInstance* instance);
 		void afb_mem_v8(AfbComponentInstance* instance);
+		void afb_mem_v9(AfbComponentInstance* instance);
 		void afb_mem_private(AfbComponentInstance* instance, int conf, int count, int version);
 
 		//	MATH, OpCode 13
@@ -385,33 +470,45 @@ namespace Sim
 
 		const std::map<QString, SimCommandFunc> m_nameToFuncCommand
 		{
-			{QStringLiteral("command_nop"),			&CommandProcessor_LM5_LM6::command_nop},				// 1
-			{QStringLiteral("command_startafb"),	&CommandProcessor_LM5_LM6::command_startafb},			// 2
-			{QStringLiteral("command_stop"),		&CommandProcessor_LM5_LM6::command_stop},				// 3
-			{QStringLiteral("command_mov"),			&CommandProcessor_LM5_LM6::command_mov},				// 4
-			{QStringLiteral("command_movmem"),		&CommandProcessor_LM5_LM6::command_movmem},				// 5
-			{QStringLiteral("command_movc"),		&CommandProcessor_LM5_LM6::command_movc},				// 6
-			{QStringLiteral("command_movbc"),		&CommandProcessor_LM5_LM6::command_movbc},				// 7
-			{QStringLiteral("command_wrfb"),		&CommandProcessor_LM5_LM6::command_wrfb},				// 8
-			{QStringLiteral("command_rdfb"),		&CommandProcessor_LM5_LM6::command_rdfb},				// 9
-			{QStringLiteral("command_wrfbc"),		&CommandProcessor_LM5_LM6::command_wrfbc},				// 10
-			{QStringLiteral("command_wrfbb"),		&CommandProcessor_LM5_LM6::command_wrfbb},				// 11
-			{QStringLiteral("command_rdfbb"),		&CommandProcessor_LM5_LM6::command_rdfbb},				// 12
-			{QStringLiteral("command_rdfbcmp"),		&CommandProcessor_LM5_LM6::command_rdfbcmp},			// 13
-			{QStringLiteral("command_setmem"),		&CommandProcessor_LM5_LM6::command_setmem},				// 14
-			{QStringLiteral("command_movb"),		&CommandProcessor_LM5_LM6::command_movb},				// 15
-			{QStringLiteral("command_nstartafb"),	&CommandProcessor_LM5_LM6::command_not_implemented},	// 16 Not supported?
-			{QStringLiteral("command_appstart"),	&CommandProcessor_LM5_LM6::command_appstart},			// 17
-			{QStringLiteral("command_mov32"),		&CommandProcessor_LM5_LM6::command_mov32},				// 18
-			{QStringLiteral("command_movc32"),		&CommandProcessor_LM5_LM6::command_movc32},				// 19
-			{QStringLiteral("command_wrfb32"),		&CommandProcessor_LM5_LM6::command_wrfb32},				// 20
-			{QStringLiteral("command_rdfb32"),		&CommandProcessor_LM5_LM6::command_rdfb32},				// 21
-			{QStringLiteral("command_wrfbc32"),		&CommandProcessor_LM5_LM6::command_wrfbc32},			// 22
-			{QStringLiteral("command_rdfbcmp32"),	&CommandProcessor_LM5_LM6::command_rdfbcmp32},			// 23
-			{QStringLiteral("command_movcmpf"),		&CommandProcessor_LM5_LM6::command_movcmpf},			// 24
-			{QStringLiteral("command_pmov"),		&CommandProcessor_LM5_LM6::command_pmov},				// 25
-			{QStringLiteral("command_pmov32"),		&CommandProcessor_LM5_LM6::command_pmov32},				// 26
-			{QStringLiteral("command_fillb"),		&CommandProcessor_LM5_LM6::command_fillb},				// 27
+			{QStringLiteral("command_nop"),				&CommandProcessor_LM5_LM6::command_nop},			// Code: 1 - ext: 0b000000
+			{QStringLiteral("command_reset"),			&CommandProcessor_LM5_LM6::command_reset},			// Code: 1 - ext: 0b100000
+			{QStringLiteral("command_set"),				&CommandProcessor_LM5_LM6::command_set},			// Code: 1 - ext: 0b010000
+			{QStringLiteral("command_or"),				&CommandProcessor_LM5_LM6::command_or},				// Code: 1 - ext: 0b110000
+			{QStringLiteral("command_and"),				&CommandProcessor_LM5_LM6::command_and},			// Code: 1 - ext: 0b001000
+			{QStringLiteral("command_not"),				&CommandProcessor_LM5_LM6::command_not},			// Code: 1 - ext: 0b101000
+			{QStringLiteral("command_lshift0"),			&CommandProcessor_LM5_LM6::command_lshift0},		// Code: 1 - ext: 0b011000
+			{QStringLiteral("command_lshift1"),			&CommandProcessor_LM5_LM6::command_lshift1},		// Code: 1 - ext: 0b111000
+			{QStringLiteral("command_startafb"),		&CommandProcessor_LM5_LM6::command_startafb},		// 2
+			{QStringLiteral("command_stop"),			&CommandProcessor_LM5_LM6::command_stop},			// 3
+			{QStringLiteral("command_mov"),				&CommandProcessor_LM5_LM6::command_mov},			// Code: 4 - ext: 0b000000
+			{QStringLiteral("command_mov_addr_acc"),	&CommandProcessor_LM5_LM6::command_mov_addr_acc},	// Code: 4 - ext: 0b100000
+			{QStringLiteral("command_mov_acc_addr"),	&CommandProcessor_LM5_LM6::command_mov_acc_addr},	// Code: 4 - ext: 0b010000
+			{QStringLiteral("command_movmem"),			&CommandProcessor_LM5_LM6::command_movmem},			// 5
+			{QStringLiteral("command_movc"),			&CommandProcessor_LM5_LM6::command_movc},			// Code: 6 - ext: 0xb000000
+			{QStringLiteral("command_movc_acc"),		&CommandProcessor_LM5_LM6::command_movc_acc},		// Code: 6 - ext: 0xb100000
+			{QStringLiteral("command_movbc"),			&CommandProcessor_LM5_LM6::command_movbc},			// 7
+			{QStringLiteral("command_wrfb"),			&CommandProcessor_LM5_LM6::command_wrfb},			// 8
+			{QStringLiteral("command_rdfb"),			&CommandProcessor_LM5_LM6::command_rdfb},			// 9
+			{QStringLiteral("command_wrfbc"),			&CommandProcessor_LM5_LM6::command_wrfbc},			// 10
+			{QStringLiteral("command_wrfbb"),			&CommandProcessor_LM5_LM6::command_wrfbb},			// 11
+			{QStringLiteral("command_rdfbb"),			&CommandProcessor_LM5_LM6::command_rdfbb},			// 12
+			{QStringLiteral("command_rdfbcmp"),			&CommandProcessor_LM5_LM6::command_rdfbcmp},		// 13
+			{QStringLiteral("command_setmem"),			&CommandProcessor_LM5_LM6::command_setmem},			// 14
+			{QStringLiteral("command_movb"),			&CommandProcessor_LM5_LM6::command_movb},			// Code: 15 - ext: 0xb000000
+			{QStringLiteral("command_movb_acc_addr"),	&CommandProcessor_LM5_LM6::command_movb_acc_addr},	// Code: 15 - 0b10xxxx
+			{QStringLiteral("command_movb_addr_acc"),	&CommandProcessor_LM5_LM6::command_movb_addr_acc},	// Code: 15 - 0b01xxxx
+			{QStringLiteral("command_nstartafb"),		&CommandProcessor_LM5_LM6::command_not_implemented},// 16 Not supported?
+			{QStringLiteral("command_appstart"),		&CommandProcessor_LM5_LM6::command_appstart},		// 17
+			{QStringLiteral("command_mov32"),			&CommandProcessor_LM5_LM6::command_mov32},			// 18
+			{QStringLiteral("command_movc32"),			&CommandProcessor_LM5_LM6::command_movc32},			// 19
+			{QStringLiteral("command_wrfb32"),			&CommandProcessor_LM5_LM6::command_wrfb32},			// 20
+			{QStringLiteral("command_rdfb32"),			&CommandProcessor_LM5_LM6::command_rdfb32},			// 21
+			{QStringLiteral("command_wrfbc32"),			&CommandProcessor_LM5_LM6::command_wrfbc32},		// 22
+			{QStringLiteral("command_rdfbcmp32"),		&CommandProcessor_LM5_LM6::command_rdfbcmp32},		// 23
+			{QStringLiteral("command_movcmpf"),			&CommandProcessor_LM5_LM6::command_movcmpf},		// 24
+			{QStringLiteral("command_pmov"),			&CommandProcessor_LM5_LM6::command_pmov},			// 25
+			{QStringLiteral("command_pmov32"),			&CommandProcessor_LM5_LM6::command_pmov32},			// 26
+			{QStringLiteral("command_fillb"),			&CommandProcessor_LM5_LM6::command_fillb},			// 27
 		};
 
 
@@ -434,6 +531,7 @@ namespace Sim
 			{QStringLiteral("afb_damper_v112"),		&CommandProcessor_LM5_LM6::afb_damper_v112},			// 11
 			{QStringLiteral("afb_mem_v7"),			&CommandProcessor_LM5_LM6::afb_mem_v7},					// 12
 			{QStringLiteral("afb_mem_v8"),			&CommandProcessor_LM5_LM6::afb_mem_v8},					// 12
+			{QStringLiteral("afb_mem_v9"),			&CommandProcessor_LM5_LM6::afb_mem_v9},					// 12
 			{QStringLiteral("afb_math_v104"),		&CommandProcessor_LM5_LM6::afb_math_v104},				// 13
 			{QStringLiteral("afb_math_v105"),		&CommandProcessor_LM5_LM6::afb_math_v105},				// 13
 			{QStringLiteral("afb_scale_v108"),		&CommandProcessor_LM5_LM6::afb_scale_v108},				// 14

@@ -385,6 +385,31 @@
         <file>Upgrade0383.sql</file>
         <file>Upgrade0384.sql</file>
         <file>Upgrade0385.sql</file>
+        <file>Upgrade0386.sql</file>
+        <file>Upgrade0387.sql</file>
+        <file>Upgrade0388.sql</file>
+        <file>Upgrade0389.sql</file>
+        <file>Upgrade0390.sql</file>
+        <file>Upgrade0391.sql</file>
+        <file>Upgrade0392.sql</file>
+        <file>Upgrade0393.sql</file>
+        <file>Upgrade0394.sql</file>
+        <file>Upgrade0395.sql</file>
+        <file>Upgrade0396.sql</file>
+        <file>Upgrade0397.sql</file>
+        <file>Upgrade0398.sql</file>
+        <file>Upgrade0399.sql</file>
+        <file>Upgrade0400.sql</file>
+        <file>Upgrade0401.sql</file>
+        <file>Upgrade0402.sql</file>
+        <file>Upgrade0403.sql</file>
+        <file>Upgrade0404.sql</file>
+        <file>Upgrade0405.sql</file>
+        <file>Upgrade0406.sql</file>
+        <file>Upgrade0407.sql</file>
+        <file>Upgrade0408.sql</file>
+        <file>Upgrade0409.sql</file>
+        <file>Upgrade0410.sql</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

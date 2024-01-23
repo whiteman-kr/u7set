@@ -1,9 +1,8 @@
 #pragma once
 #include "MainTabPage.h"
-#include "../lib/OutputLog.h"
+#include "../UtilsLib/OutputLog.h"
 #include "../lib/Configurator.h"
-#include "../lib/OutputLog.h"
-#include "../lib/BuildInfo.h"
+#include "../OnlineLib/BuildInfo.h"
 #include "../HardwareLib/ModuleFirmware.h"
 
 class DbController;
@@ -78,7 +77,7 @@ private:
 
 	void refreshBinaryFile();
 
-	bool readBuildInfo(const QString& buildPath, Builder::BuildInfo* buildInfo, bool* success);
+	bool readBuildInfo(const QString& buildPath, OnlineLib::BuildInfo* buildInfo, bool* success);
 
 private slots:
 

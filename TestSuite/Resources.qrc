@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/Images">
-        <file>Images/logo.png</file>
         <file>Images/TestsPause.svg</file>
         <file>Images/TestsRefresh.svg</file>
         <file>Images/TestsRun.svg</file>
@@ -8,5 +7,8 @@
         <file>Images/CloseButtonBlack.svg</file>
         <file>Images/CloseButtonGray.svg</file>
         <file>Images/TestSuite.ico</file>
+        <file>Images/TestsReport.svg</file>
+        <file>Images/OpenLog.svg</file>
+        <file>Images/SaveLog.svg</file>
     </qresource>
 </RCC>

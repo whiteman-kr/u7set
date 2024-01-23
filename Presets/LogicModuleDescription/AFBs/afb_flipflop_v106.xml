@@ -1,0 +1,11 @@
+<AFBComponent Caption="FLIP_FLOP" OpCode="4" HasRam="true" ImpVersion="106" VersionOpIndex="9" MaxInstCount="0" SimulationFunc="afb_flipflop_v106">
+    <Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
+    <Pin OpName="i_result"		OpIndex ="1"	PinType = "Input"/>
+    <Pin OpName="i_c_t_prev"	OpIndex ="2"	PinType = "Input"/>
+    <Pin OpName="i_r_c_t"		OpIndex ="3"	PinType = "Input"/>
+    <Pin OpName="i_s_d"		    OpIndex ="4"	PinType = "Input"/>
+    <Pin OpName="o_result"		OpIndex ="6"	PinType = "Output"/>
+    <Pin OpName="o_c_t"		    OpIndex ="7"	PinType = "Output"/>
+    <Pin OpName="o_ff_edi"		OpIndex ="8"	PinType = "Output"/>
+    <Pin OpName="o_version"		OpIndex ="9"	PinType = "Output"/>
+</AFBComponent>

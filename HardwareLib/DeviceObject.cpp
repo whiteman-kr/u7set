@@ -1,23 +1,10 @@
 #ifndef HARDWARE_LIB_DOMAIN
-#error Don't include this file in the project! Link HardwareLib instead.
+#error Do not include this file in the project! Link HardwareLib instead.
 #endif
 
 #include "DeviceObject.h"
 #include "ScriptDeviceObject.h"
 #include "../lib/ConstStrings.h"
-#include "../Proto/ProtoSerialization.h"
-#include <utility>
-#include <QJSEngine>
-#include <QQmlEngine>
-#include <QDebug>
-#include <QFile>
-#include <QMetaObject>
-#include <QMetaProperty>
-#include <QXmlStreamReader>
-#include <QFile>
-#include <QMetaProperty>
-#include <QtConcurrent>
-#include <QFuture>
 
 namespace Hardware
 {
@@ -106,11 +93,16 @@ namespace Hardware
 	const QString PropertyNames::place = "Place";
 	const QString PropertyNames::specificProperties = "SpecificProperties";
 	const QString PropertyNames::signalSpecificProperties = "SignalSpecificProperties";
+	const QString PropertyNames::tags = "Tags";
+	const QString PropertyNames::tagsDescription = "Space separated object's tags";
+	
 	const QString PropertyNames::preset = "Preset";
 	const QString PropertyNames::presetRoot = "PresetRoot";
 	const QString PropertyNames::presetName = "PresetName";
 	const QString PropertyNames::presetVersion = "PresetVersion";
 	const QString PropertyNames::presetObjectUuid = "PresetObjectUuid";
+	const QString PropertyNames::presetProtectedProperties = "PresetProtectedProperties";
+	const QString PropertyNames::presetProtectedPropertiesDescription = "Protected from \"Update from Preset\" comma separated property list";
 
 	const QString PropertyNames::lmDescriptionFile = "LmDescriptionFile";
 	const QString PropertyNames::lmNumber = "LMNumber";
@@ -161,20 +153,18 @@ namespace Hardware
 
 		ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::place, true, DeviceObject::place, DeviceObject::setPlace);
 
-		auto specificProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::specificProperties, true, DeviceObject::specificProperties, DeviceObject::setSpecificProperties);
+		auto specificProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::specificProperties, true, DeviceObject::specificPropertiesStruct, DeviceObject::setSpecificPropertiesStruct);
 		specificProp->setExpert(true);
 		specificProp->setSpecificEditor(E::PropertySpecificEditor::SpecificPropertyStruct);
+
+		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::tags, true, DeviceObject::tagsAsString, DeviceObject::setTags)
+			->setDescription(PropertyNames::tagsDescription)
+			.setSpecificEditor(E::PropertySpecificEditor::Tags);
 
 		auto presetProp = ADD_PROPERTY_GETTER(bool, PropertyNames::preset, true, DeviceObject::isPreset);
 		presetProp->setExpert(true);
 
-		auto presetRootProp = ADD_PROPERTY_GETTER(bool, PropertyNames::presetRoot, true, DeviceObject::presetRoot);
-		presetRootProp->setExpert(true);
-
 		setPreset(preset);
-
-		auto presetObjectUuidProp = ADD_PROPERTY_GETTER(QUuid, PropertyNames::presetObjectUuid, true, DeviceObject::presetObjectUuid);
-		presetObjectUuidProp->setExpert(true);
 
 		captionProp->setUpdateFromPreset(true);
 		childRestrProp->setUpdateFromPreset(true);
@@ -298,6 +288,13 @@ namespace Hardware
 			}
 		}
 
+		// Save tags.
+		//
+		for (const auto& tag : m_tags)
+		{
+			mutableDeviceObject->add_tags(tag.second.toStdString());
+		}
+
 		// --
 		//
 		if (m_preset == true)
@@ -306,6 +303,7 @@ namespace Hardware
 
 			mutableDeviceObject->set_presetroot(presetRoot());
 			mutableDeviceObject->set_presetversion(presetVersion());
+			mutableDeviceObject->set_presetprotectedproperties(presetProtectedPropertiesStr().toStdString());
 
 			Proto::Write(mutableDeviceObject->mutable_presetname(), m_presetName);
 			Proto::Write(mutableDeviceObject->mutable_presetobjectuuid(), m_presetObjectUuid);
@@ -362,6 +360,20 @@ namespace Hardware
 		m_specificPropertiesStruct = QString::fromStdString(deviceobject.specific_properties_struct());
 		parseSpecificPropertiesStruct(m_specificPropertiesStruct);
 
+		// Load tags.
+		//
+		{
+			QStringList tags;
+			tags.reserve(deviceobject.tags_size());
+
+			for (const std::string& tag : deviceobject.tags())
+			{
+				tags.push_back(QString::fromStdString(tag));
+			}
+
+			setTags(tags);
+		}
+
 		// Load specific properties' values. They are already exists after calling parseSpecificPropertiesStruct()
 		//
 		std::vector<std::shared_ptr<Property>> specificProps = PropertyObject::specificProperties();
@@ -369,7 +381,7 @@ namespace Hardware
 		for (const ::Proto::Property& p :  deviceobject.properties())
 		{
 			auto it = std::find_if(specificProps.begin(), specificProps.end(),
-				[p](std::shared_ptr<Property>& dp)
+				[p](const std::shared_ptr<Property>& dp)
 				{
 					return dp->caption().toStdString() == p.name();
 				});
@@ -380,7 +392,7 @@ namespace Hardware
 			}
 			else
 			{
-				std::shared_ptr<Property>& property = *it;
+				Property* property = it->get();
 
 				Q_ASSERT(property->specific() == true);	// it's suppose to be specific property;
 
@@ -399,6 +411,7 @@ namespace Hardware
 
 			setPresetRoot(deviceobject.presetroot());
 			setPresetVersion(deviceobject.presetversion());
+			setPresetProtectedPropertiesStr(QString::fromStdString(deviceobject.presetprotectedproperties()));
 
 			Proto::Read(deviceobject.presetname(), &m_presetName);
 
@@ -1288,12 +1301,12 @@ namespace Hardware
 		m_childRestriction = value;
 	}
 
-	QString DeviceObject::specificProperties() const
+	QString DeviceObject::specificPropertiesStruct() const
 	{
 		return m_specificPropertiesStruct;
 	}
 
-	void DeviceObject::setSpecificProperties(QString value)
+	void DeviceObject::setSpecificPropertiesStruct(QString value)
 	{
 		if (m_specificPropertiesStruct != value)
 		{
@@ -1311,6 +1324,56 @@ namespace Hardware
 	{
 		m_place = value;
 	}
+
+	bool DeviceObject::hasTag(const QString& tag) const
+	{
+		return hasTag(::calcHash(tag));
+	}
+
+	bool DeviceObject::hasTag(Hash tagHash) const
+	{
+		return m_tags.contains(tagHash);
+	}
+
+	QStringList DeviceObject::tags() const
+	{
+		QStringList result;
+		result.reserve(m_tags.size());
+
+		for (const auto& pair : m_tags)
+		{
+			result.push_back(pair.second);
+		}
+
+		result.sort();
+
+		return result;
+	}
+
+	QString DeviceObject::tagsAsString() const
+	{
+		return tags().join(" ");
+	}
+	
+	void DeviceObject::setTags(const QStringList& tags)
+	{
+		m_tags.clear();
+		m_tags.reserve(tags.size());
+
+		for (const QString& tag : tags)
+		{
+			m_tags[::calcHash(tag)] = tag;
+		};
+
+		return;
+	}
+
+	void DeviceObject::setTags(const QString& tags)
+	{
+		auto list = tags.split(QRegularExpression("\\W+"), Qt::SkipEmptyParts);
+		return setTags(list);
+	}
+
 
 	// JSON short description, uuid, equipmentId, caption, place, etc
 	//
@@ -1348,12 +1411,26 @@ R"DELIM({
 
 		if (m_preset == true)
 		{
-			auto presetNameProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::presetName, true, DeviceObject::presetName, DeviceObject::setPresetName);
-			presetNameProp->setExpert(true);
+			Property* p = ADD_PROPERTY_GETTER(bool, PropertyNames::presetRoot, true, DeviceObject::presetRoot);
+			p->setExpert(true);
+
+			p = ADD_PROPERTY_GETTER(QUuid, PropertyNames::presetObjectUuid, true, DeviceObject::presetObjectUuid);
+			p->setExpert(true);
+
+			p = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::presetName, true, DeviceObject::presetName, DeviceObject::setPresetName);
+			p->setExpert(true);
+
+			p = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::presetProtectedProperties, true, DeviceObject::presetProtectedPropertiesStr, DeviceObject::setPresetProtectedPropertiesStr);
+			p->setExpert(true);
+			p->setUpdateFromPreset(false);
+			p->setDescription(PropertyNames::presetProtectedPropertiesDescription);
 		}
 		else
 		{
+			removeProperty(PropertyNames::presetRoot);
+			removeProperty(PropertyNames::presetObjectUuid);
 			removeProperty(PropertyNames::presetName);
+			removeProperty(PropertyNames::presetProtectedProperties);
 		}
 	}
 
@@ -1368,7 +1445,7 @@ R"DELIM({
 
 		if (m_presetRoot == true)
 		{
-			auto p = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::presetVersion, true, DeviceObject::presetVersion, DeviceObject::setPresetVersion);
+			Property* p = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::presetVersion, true, DeviceObject::presetVersion, DeviceObject::setPresetVersion);
 			p->setUpdateFromPreset(true);
 			p->setExpert(true);
 		}
@@ -1410,6 +1487,27 @@ R"DELIM({
 		m_presetObjectUuid = value;
 	}
 
+	QString DeviceObject::presetProtectedPropertiesStr() const
+	{
+		return m_presetProtectedProperties.join(", ");
+	}
+
+	void DeviceObject::setPresetProtectedPropertiesStr(const QString& value)
+	{
+		// Split by comma, semicolon, return or space, remove empty parts.
+		//
+		m_presetProtectedProperties	= value.split(QRegularExpression(QStringLiteral("[,;\\n\\r\\s]")), Qt::SkipEmptyParts);
+	}
+
+	const QStringList& DeviceObject::presetProtectedProperties() const
+	{
+		return m_presetProtectedProperties;
+	}
+
+	void DeviceObject::setPresetProtectedProperties(const QStringList& value)
+	{
+		m_presetProtectedProperties = value;
+	}
 
 	DbFileInfo* DeviceObject::data()
 	{
@@ -2947,7 +3045,7 @@ R"DELIM({
 						return;
 					}
 
-					deviceObject->setSpecificProperties(attr.value("SpecificProperties").toString());
+					deviceObject->setSpecificPropertiesStruct(attr.value("SpecificProperties").toString());
 
 					for (auto p : deviceObject->properties())
 					{

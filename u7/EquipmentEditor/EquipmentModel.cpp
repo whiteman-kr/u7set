@@ -1,5 +1,4 @@
 #include "EquipmentModel.h"
-#include "../../DbLib/DbController.h"
 #include "../../lib/StandardColors.h"
 #include "../CheckInDialog.h"
 
@@ -1291,7 +1290,7 @@ QModelIndexList EquipmentModel::findObjects(const QModelIndex& findStartIndex, i
 	//
 	if (level == equipmentIdFragments.size())
 	{
-		for (auto mi : foundIndexes)
+		for (const auto& mi : foundIndexes)
 		{
 			if (canFetchMore(mi) == true)
 			{

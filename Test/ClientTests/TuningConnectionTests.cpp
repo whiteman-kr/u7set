@@ -1,5 +1,9 @@
 #include "../../ClientLib/TuningConnection.h"
 #include "../../ClientLib/ITuningLog.h"
+#include "../../ClientLib/IRecentAppSignals.h"
+#include "../../AppSignalLib/AppSignal.h"
+#include "../../AppSignalLib/AppSignalParam.h"
+#include "ConnectionPorts.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -107,9 +111,9 @@ protected:
 		}
 	};
 
-	inline static const SoftwareInfo s_softwareInfo = {E::SoftwareType::TuningClient, "SYSTEMID_CLIENTTEST_WS03_TUN", 1, 2, 3};
-	inline static const SoftwareInfo s_safeSoftwareInfoA = {E::SoftwareType::TuningClient, "SYSTEMID_CLIENTTEST_WS04_TUNA", 1, 2, 3};
-	inline static const SoftwareInfo s_safeSoftwareInfoB = {E::SoftwareType::TuningClient, "SYSTEMID_CLIENTTEST_WS04_TUNB", 1, 2, 3};
+	inline static const SoftwareInfo s_softwareInfo = {E::SoftwareType::TuningClient, "SYSTEMID_CLIENTTEST_WS03_TUN"};
+	inline static const SoftwareInfo s_safeSoftwareInfoA = {E::SoftwareType::TuningClient, "SYSTEMID_CLIENTTEST_WS04_TUNA"};
+	inline static const SoftwareInfo s_safeSoftwareInfoB = {E::SoftwareType::TuningClient, "SYSTEMID_CLIENTTEST_WS04_TUNB"};
 };
 
 
@@ -148,21 +152,43 @@ public:
 
 	MOCK_METHOD(void, invalidateSignalStates, (Hash tuningServiceHash), (override));
 
-	MOCK_METHOD(void, setState, (const TuningSignalState& state, Hash tuningServiceHash), (override));
-	MOCK_METHOD(void, setStates, (const std::vector<TuningSignalState>& states, Hash tuningServiceHash), (override));
+	virtual void setState(const TuningSignalState& state, Hash tuningServiceHash) override
+	{
+	}
+	virtual void setStates(const std::vector<TuningSignalState>& states, Hash tuningServiceHash) override
+	{
+	}
 
 	MOCK_METHOD(void, notifySignalParamsUpdated, (), (override));
 };
 
+class IRecentAppSignalsStub : public ClientLib::IRecentAppSignals
+{
+public:
+	virtual void addRecentAppSignal(Hash h) override
+	{
+	}
+	virtual void addRecentAppSignals(const std::vector<Hash>& hashes) override
+	{
+	}
+	virtual std::vector<Hash> recentlyUsedAppSignals(const QString& appDataServivceId) override	
+	{
+		return {};
+	}
+	virtual bool hasRecentlyUsedAppSignals() override
+	{
+		return false;
+	}
+};
 
 TEST_F(TuningConnectionTests, connect)
 {
 	ILogFileStub logFile;
 
-	//TuningSignalManager signalManager{s_softwareInfo.equipmentID(), &logFile};
-
 	MockITuningSignalManager signalManager{};
 	MockITuningSignalUpdater signalUpdater{};
+	IRecentAppSignalsStub recentAppSignals{};
+	TuningAuthorizationStub tuningAuthorization;
 
 	EXPECT_CALL(signalUpdater, invalidateSignalStates(::calcHash(s_tuningServices[0].equipmentId)))
 			.Times(1);	// 1 times, when connection to TuningService is closed;
@@ -177,7 +203,7 @@ TEST_F(TuningConnectionTests, connect)
 	ClientLib::TuningLogStub tuningLog;
 
 	{
-		ClientLib::TuningConnection tc{signalManager, signalUpdater, &logFile, &tuningLog};
+		ClientLib::TuningConnection tc{signalManager, signalUpdater, recentAppSignals, tuningAuthorization, &logFile, &tuningLog};
 		tc.updateConnections(s_softwareInfo, s_tuningServices, true, TuningClientSettings::LmStatusFlagMode::None);
 
 		// Wait for connection established
@@ -193,7 +219,7 @@ TEST_F(TuningConnectionTests, connect)
 			// Wait for several replies
 			//
 			std::vector<Tcp::ConnectionState> connStates = tc.tcpTuningConnStates();
-			if (std::all_of(connStates.begin(), connStates.end(), [](const auto& s) { return s.isConnected && s.replyCount > 2; }))
+			if (std::all_of(connStates.begin(), connStates.end(), [](const auto& s) { return s.isConnected && s.replyCount > 4; }))
 			{
 				break;
 			}
@@ -210,6 +236,7 @@ TEST_F(TuningConnectionTests, connect)
 
 		EXPECT_EQ(connStates[0].peerAddr, s_tuningServices[0].clientRequestAddress);
 		EXPECT_EQ(connStates[1].peerAddr, s_tuningServices[1].clientRequestAddress);
+
 	}
 
 	return;
@@ -218,6 +245,7 @@ TEST_F(TuningConnectionTests, connect)
 TEST_F(TuningConnectionTests, tuningSourceInfo)
 {
 	ILogFileStub logFile;
+	TuningAuthorizationStub tuningAuthorization;
 
 	TuningSignalManager signalManager{s_safeSoftwareInfoA.equipmentID(), &logFile};
 
@@ -225,7 +253,7 @@ TEST_F(TuningConnectionTests, tuningSourceInfo)
 
 	Hash lmHash = {::calcHash(QStringLiteral("SYSTEMID_CLIENTTEST_CH12_MD00"))};
 
-	ClientLib::TuningConnection tc{signalManager, signalManager, &logFile, &tuningLog};
+	ClientLib::TuningConnection tc{signalManager, signalManager, signalManager, tuningAuthorization, &logFile, &tuningLog};
 	tc.updateConnections(s_safeSoftwareInfoA, s_safeTuningServices, true, TuningClientSettings::LmStatusFlagMode::None);
 
 	// Wait for connection established
@@ -242,7 +270,7 @@ TEST_F(TuningConnectionTests, tuningSourceInfo)
 			// Wait for several replies
 			//
 			std::vector<Tcp::ConnectionState> connStates = tc.tcpTuningConnStates();
-			if (std::all_of(connStates.begin(), connStates.end(), [](const auto& s) { return s.isConnected && s.replyCount > 2; }))
+			if (std::all_of(connStates.begin(), connStates.end(), [](const auto& s) { return s.isConnected && s.replyCount > 4; }))
 			{
 				QThread::msleep(2000);
 				break;
@@ -407,13 +435,14 @@ TEST_F(TuningConnectionTests, activeClientInfo)
 	TuningSignalManager signalManagerB{s_safeSoftwareInfoB.equipmentID(), &logFile};
 
 	ClientLib::TuningLogStub tuningLog;
+	TuningAuthorizationStub tuningAuthorization;
 
 	Hash lmHash = {::calcHash(QStringLiteral("SYSTEMID_CLIENTTEST_CH12_MD00"))};
 
 	// Create 2 tuning connections to the service
 	//
-	ClientLib::TuningConnection tcA{signalManagerA, signalManagerA, &logFile, &tuningLog};
-	ClientLib::TuningConnection tcB{signalManagerB, signalManagerB, &logFile, &tuningLog};
+	ClientLib::TuningConnection tcA{signalManagerA, signalManagerA, signalManagerA, tuningAuthorization, &logFile, &tuningLog};
+	ClientLib::TuningConnection tcB{signalManagerB, signalManagerB, signalManagerB, tuningAuthorization, &logFile, &tuningLog};
 
 	tcA.updateConnections(s_safeSoftwareInfoA, s_safeTuningServices, true, TuningClientSettings::LmStatusFlagMode::SOR);
 	tcB.updateConnections(s_safeSoftwareInfoB, s_safeTuningServices, true, TuningClientSettings::LmStatusFlagMode::SOR);
@@ -435,8 +464,9 @@ TEST_F(TuningConnectionTests, activeClientInfo)
 			std::vector<Tcp::ConnectionState> connStatesB = tcB.tcpTuningConnStates();
 
 			connStatesA.insert(connStatesA.end(), connStatesB.begin(), connStatesB.end());
-			if (std::all_of(connStatesA.begin(), connStatesA.end(), [](const auto& s) { return s.isConnected && s.replyCount > 2; }))
+			if (std::all_of(connStatesA.begin(), connStatesA.end(), [](const auto& s) { return s.isConnected && s.replyCount > 4; }))
 			{
+				QThread::msleep(2000);
 				break;
 			}
 		}
@@ -542,10 +572,11 @@ TEST_F(TuningConnectionTests, writeAnalogSignals)
 	EXPECT_TRUE(ok);
 
 	ClientLib::TuningLogStub tuningLog;
+	TuningAuthorizationStub tuningAuthorization;
 
 	// Create tuning connection to the service
 	//
-	ClientLib::TuningConnection tc{signalManager, signalManager, &logFile, &tuningLog};
+	ClientLib::TuningConnection tc{signalManager, signalManager, signalManager, tuningAuthorization, &logFile, &tuningLog};
 	tc.updateConnections(s_softwareInfo, s_tuningServices, false/*autoApply*/, TuningClientSettings::LmStatusFlagMode::SOR);
 
 	// Wait for connection established
@@ -680,10 +711,11 @@ TEST_F(TuningConnectionTests, applyAnalogSignals)
 	EXPECT_TRUE(ok);
 
 	ClientLib::TuningLogStub tuningLog;
+	TuningAuthorizationStub tuningAuthorization;
 
 	// Create tuning connection to the service
 	//
-	ClientLib::TuningConnection tc{signalManager, signalManager, &logFile, &tuningLog};
+	ClientLib::TuningConnection tc{signalManager, signalManager, signalManager, tuningAuthorization, &logFile, &tuningLog};
 	tc.updateConnections(s_softwareInfo, s_tuningServices, false/*autoApply*/, TuningClientSettings::LmStatusFlagMode::SOR);
 
 	// Wait for connection established
@@ -782,10 +814,11 @@ TEST_F(TuningConnectionTests, writeDiscreteSignals)
 	EXPECT_TRUE(ok);
 
 	ClientLib::TuningLogStub tuningLog;
+	TuningAuthorizationStub tuningAuthorization;
 
 	// Create tuning connection to the service
 	//
-	ClientLib::TuningConnection tc{signalManager, signalManager, &logFile, &tuningLog};
+	ClientLib::TuningConnection tc{signalManager, signalManager, signalManager, tuningAuthorization, &logFile, &tuningLog};
 	tc.updateConnections(s_softwareInfo, s_tuningServices, false/*autoApply*/, TuningClientSettings::LmStatusFlagMode::AccessKey);
 
 	// Wait for connection established
@@ -885,10 +918,11 @@ TEST_F(TuningConnectionTests, applyDiscreteSignals)
 	EXPECT_TRUE(ok);
 
 	ClientLib::TuningLogStub tuningLog;
+	TuningAuthorizationStub tuningAuthorization;
 
 	// Create tuning connection to the service
 	//
-	ClientLib::TuningConnection tc{signalManager, signalManager, &logFile, &tuningLog};
+	ClientLib::TuningConnection tc{signalManager, signalManager, signalManager, tuningAuthorization, &logFile, &tuningLog};
 	tc.updateConnections(s_softwareInfo, s_tuningServices, false/*autoApply*/, TuningClientSettings::LmStatusFlagMode::SOR);
 
 	// Wait for connection established

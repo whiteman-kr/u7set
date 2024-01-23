@@ -1,6 +1,5 @@
 #include "EquipmentView.h"
 #include "EquipmentModel.h"
-#include "../../DbLib/DbController.h"
 #include "../../Builder/SubsystemStorage.h"
 #include "DialogChoosePreset.h"
 #include "../GlobalMessanger.h"
@@ -10,7 +9,6 @@
 #include "../Forms/DialogUpdateFromPreset.h"
 #include "../SchemaEditor/CreateSignalDialog.h"
 #include "../SignalsTabPage.h"
-
 
 //
 //
@@ -1181,7 +1179,7 @@ void EquipmentView::addInOutsToSignals(std::shared_ptr<Hardware::DeviceModule> m
 
 	// Get all hardware inputs outputs from the module
 	//
-	std::vector<Hardware::DeviceAppSignal*> inOuts;
+	std::vector<const Hardware::DeviceAppSignal*> inOuts;
 
 	std::function<void(Hardware::DeviceObject*)> getInOuts =
 		[&inOuts, &getInOuts](Hardware::DeviceObject* device)
@@ -1264,14 +1262,14 @@ void EquipmentView::addInOutsToSignals(std::shared_ptr<Hardware::DeviceModule> m
 	// Add signals to the project DB
 	//
 	std::sort(std::begin(inOuts), std::end(inOuts),
-		[](Hardware::DeviceObject* a, Hardware::DeviceObject* b)
+		[](const Hardware::DeviceObject* a, const Hardware::DeviceObject* b)
 		{
 			return a->equipmentIdTemplate() < b->equipmentIdTemplate();
 		});
 
 	std::vector<AppSignal> addedSignals;
 
-	bool result = db()->autoAddSignals(&inOuts, &addedSignals, this);
+	bool result = AppSignalSetProvider::getInstance()->autoAddSignals(inOuts, &addedSignals, this);
 
 	qDebug() << "Signals added:" << addedSignals.size();
 
@@ -1281,17 +1279,17 @@ void EquipmentView::addInOutsToSignals(std::shared_ptr<Hardware::DeviceModule> m
 
 		if (addedSignals.empty() == true)
 		{
-			messageText = tr("Application Logic signlas for inputs/outputs were not added. Apparently they were added earlier.");
+			messageText = tr("Application Logic signals for inputs/outputs were not added. Apparently they were added earlier.");
 		}
 
 		if (addedSignals.size() == 1)
 		{
-			messageText = tr("1 Appllication Logic signal for inputs/Ooutputs was added.");
+			messageText = tr("1 Application Logic signal for inputs/outputs was added.");
 		}
 
 		if (addedSignals.size() > 1)
 		{
-			messageText = tr("%1 Appllication Logic signals for inputs/outputs were added.").arg(addedSignals.size());
+			messageText = tr("%1 Application Logic signals for inputs/outputs were added.").arg(addedSignals.size());
 		}
 
 		QMessageBox::information(this, qAppName(), messageText);
@@ -1336,7 +1334,7 @@ void EquipmentView::addInOutsToSignals(std::vector<std::shared_ptr<Hardware::Dev
 
 	// Get all hardware inputs outputs
 	//
-	std::vector<Hardware::DeviceAppSignal*> inOuts;
+	std::vector<const Hardware::DeviceAppSignal*> inOuts;
 
 	for (auto has : hardwareAppSignals)
 	{
@@ -1378,14 +1376,14 @@ void EquipmentView::addInOutsToSignals(std::vector<std::shared_ptr<Hardware::Dev
 	// Add signals to the project DB
 	//
 	std::sort(std::begin(inOuts), std::end(inOuts),
-		[](Hardware::DeviceObject* a, Hardware::DeviceObject* b)
+		[](const Hardware::DeviceObject* a, const Hardware::DeviceObject* b)
 		{
 			return a->equipmentIdTemplate() < b->equipmentIdTemplate();
 		});
 
 	std::vector<AppSignal> addedSignals;
 
-	bool result = db()->autoAddSignals(&inOuts, &addedSignals, this);
+	bool result = AppSignalSetProvider::getInstance()->autoAddSignals(inOuts, &addedSignals, this);
 
 	qDebug() << "Signals added:" << addedSignals.size();
 
@@ -1395,17 +1393,17 @@ void EquipmentView::addInOutsToSignals(std::vector<std::shared_ptr<Hardware::Dev
 
 		if (addedSignals.empty() == true)
 		{
-			messageText = tr("Application Logic signlas for inputs/outputs were not added. Apparently they were added earlier.");
+			messageText = tr("Application Logic signals for inputs/outputs were not added. Apparently they were added earlier.");
 		}
 
 		if (addedSignals.size() == 1)
 		{
-			messageText = tr("1 Appllication Logic signal for inputs/Ooutputs was added.");
+			messageText = tr("1 Application Logic signal for inputs/outputs was added.");
 		}
 
 		if (addedSignals.size() > 1)
 		{
-			messageText = tr("%1 Appllication Logic signals for inputs/outputs were added.").arg(addedSignals.size());
+			messageText = tr("%1 Application Logic signals for inputs/outputs were added.").arg(addedSignals.size());
 		}
 
 		QMessageBox::information(this, qAppName(), messageText);
@@ -2176,7 +2174,7 @@ void EquipmentView::findObject()
 
 bool EquipmentView::findObject(QString equipmentId)
 {
-	// If the tab page was not shown yet, this update helps to initiate loading of objectes, then search will work.
+	// If the tab page was not shown yet, this update helps to initiate loading of objects, then search will work.
 	//
 	equipmentModel()->updateFirstLevelObjects();
 
@@ -2482,7 +2480,7 @@ void EquipmentView::updateFromPreset()
 		{
 			QMessageBox::critical(this,
 								  QApplication::applicationName(),
-								  tr("There are preset with the same name %1. Preset names must be unique. Update from preset is not posible.")
+								  tr("There are preset with the same name %1. Preset names must be unique. Update from preset is not possible.")
 										.arg(preset->presetName()));
 			return;
 		}
@@ -2493,7 +2491,7 @@ void EquipmentView::updateFromPreset()
 
 	presetRoot.reset();
 
-	// Show confirmation dialog
+	// Show confirmation dialog.
 	//
 	DialogUpdateFromPreset dialog(true/*theSettings.isExpertMode() -- ALWAYS ALLOW*/, presetsToUpdate, this);
 
@@ -2527,20 +2525,23 @@ void EquipmentView::updateFromPreset()
 
 	Q_ASSERT(root);
 
-	// Check out all preset files
+	// Check out ont preset selected by user (presetsToUpdate).
 	//
 	std::vector<DbFileInfo> presetFiles;									// Files to check out
 	presetFiles.reserve(65536 * 2);
 
-	std::vector<std::shared_ptr<Hardware::DeviceObject>> presetRoots;		// Preset root objectes to start update from preset operation
+	std::vector<std::shared_ptr<Hardware::DeviceObject>> presetRoots;		// Preset root objects to start update from preset operation
 	presetRoots.reserve(8192);
 
+	//
+
 	std::function<void(std::shared_ptr<Hardware::DeviceObject>)> getPresetFiles =
-		[&presetRoots, &getPresetFiles, &presetFiles](std::shared_ptr<Hardware::DeviceObject> object)
+		[&presetRoots, &getPresetFiles, &presetFiles, &presetsToUpdate](std::shared_ptr<Hardware::DeviceObject> object)
 		{
 			Q_ASSERT(object);
 
-			if (object->isPreset() == true)
+			if (object->isPreset() == true && 
+				presetsToUpdate.contains(object->presetName()) == true)
 			{
 				const DbFileInfo* objectFileInfo = object->data();
 				Q_ASSERT(objectFileInfo);
@@ -2549,7 +2550,8 @@ void EquipmentView::updateFromPreset()
 			}
 
 			if (object->isPreset() == true &&
-				object->presetRoot() == true)
+				object->presetRoot() == true && 
+				presetsToUpdate.contains(object->presetName()) == true)
 			{
 				presetRoots.push_back(object);
 			}
@@ -2574,11 +2576,11 @@ void EquipmentView::updateFromPreset()
 
 	if (ok == false)
 	{
-		// Cannot check out one or more files, update from preset is imposiible
+		// Cannot check out one or more files, update from preset is impossible
 		//
 		QMessageBox::critical(this,
 							  QApplication::applicationName(),
-							  tr("Cannot check out one or more files, update from preset is not posible."));
+							  tr("Cannot check out one or more files, update from preset is not possible."));
 		return;
 	}
 
@@ -2591,8 +2593,8 @@ void EquipmentView::updateFromPreset()
 	std::vector<Hardware::DeviceObject*> deleteDeviceList;
 	std::vector<std::pair<int, int>> addDeviceList;		// first: parent fileId, second: preset file id
 
-	QVector<Hardware::DeviceAppSignal*> deviceSignalsToUpdateAppSignals;	// This array will be passed to application signals to
-																			// to updater them
+	std::vector<const Hardware::DeviceAppSignal*> deviceSignalsToUpdateAppSignals;	// This array will be passed to application signals to
+																					// to updater them
 
 	updateDeviceList.reserve(65536 * 2);
 	deleteDeviceList.reserve(65536);
@@ -2722,6 +2724,12 @@ void EquipmentView::updateFromPreset()
 			return;
 		}
 
+		if (device == nullptr)
+		{
+			Q_ASSERT(device);
+			return;
+		}
+
 		const DbFileInfo* deviceFileInfo = device->data();
 		Q_ASSERT(deviceFileInfo);
 
@@ -2737,7 +2745,7 @@ void EquipmentView::updateFromPreset()
 			return;
 		}
 
-		// Set new id, recusively to all children
+		// Set new id, recursively to all children
 		//
 		std::function<void(Hardware::DeviceObject*)> setUuid = [&setUuid](Hardware::DeviceObject* object)
 			{
@@ -2766,7 +2774,7 @@ void EquipmentView::updateFromPreset()
 	//
 	if (updateAppSignals == true)
 	{
-		SignalsTabPage::updateSignalsSpecProps(db(), deviceSignalsToUpdateAppSignals, forceUpdateProperties);
+		SignalsTabPage::updateSignalsSpecProps(deviceSignalsToUpdateAppSignals, forceUpdateProperties);
 	}
 
 	// Reset model
@@ -2776,7 +2784,7 @@ void EquipmentView::updateFromPreset()
 
 	// Done
 	//
-	QMessageBox::information(this, QApplication::applicationName(), tr("Update from preset done"));
+	QMessageBox::information(this, QApplication::applicationName(), tr("Update from preset done."));
 
 	return;
 }
@@ -2787,8 +2795,8 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 										   const QStringList& presetsToUpdate,					// Update only these presets
 										   std::vector<std::shared_ptr<Hardware::DeviceObject>>* updateDeviceList,
 										   std::vector<Hardware::DeviceObject*>* deleteDeviceList,	// Devices to delete after update
-										   std::vector<std::pair<int, int>>* addDeviceList,			// Devices to add aftre update
-										   QVector<Hardware::DeviceAppSignal*>* deviceSignalsToUpdateAppSignals)	// DeviceSignal list to updateA ppSignals
+										   std::vector<std::pair<int, int>>* addDeviceList,			// Devices to add after update
+										   std::vector<const Hardware::DeviceAppSignal*>* deviceSignalsToUpdateAppSignals)	// DeviceSignal list to updateA ppSignals
 {
 	if (updateDeviceList == nullptr ||
 		deleteDeviceList == nullptr ||
@@ -2828,7 +2836,7 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 	// Solution: If preset version is 1, then find properties AppDataServiceID1 and AppDataServiceID2, then after update if
 	//			 property AppDataServiceIDs is present then set old values to it.
 	//
-	QString monitorMitigateComaptibilityAppDataService;
+	QString monitorMitigateCompatibilityAppDataService;
 
 	if (device->presetRoot() &&
 		device->presetName() == QStringLiteral("MONITOR") &&
@@ -2849,7 +2857,7 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 			adsList << ads2->value().toString();
 		}
 
-		monitorMitigateComaptibilityAppDataService = adsList.join(QChar(';'));
+		monitorMitigateCompatibilityAppDataService = adsList.join(QChar(';'));
 	}
 
 	// End of Monitor fix
@@ -2882,12 +2890,22 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 			std::vector<std::shared_ptr<Property>> deviceProperties = device->properties();
 			std::vector<std::shared_ptr<Property>> presetProperties = preset->properties();
 
-			for (auto dit = deviceProperties.begin(); dit != deviceProperties.end(); /*iterator inceremented in the loop body*/)
+			for (auto dit = deviceProperties.begin(); dit != deviceProperties.end(); /*iterator incremented in the loop body*/)
 			{
-				std::shared_ptr<Property> deviceProperty = *dit;
+				Property* deviceProperty = dit->get();
 
+				// Is property protected for update from preset?
+				//
+				if (device->presetProtectedProperties().contains(deviceProperty->caption(), Qt::CaseInsensitive) == true)
+				{
+					++dit;
+					continue;
+				}
+
+				// --
+				//
 				auto pit = std::find_if(presetProperties.begin(), presetProperties.end(),
-										[&deviceProperty](const std::shared_ptr<Property>& preset)
+										[deviceProperty](const std::shared_ptr<Property>& preset)
 										{
 											return preset->caption() == deviceProperty->caption();
 										});
@@ -2923,8 +2941,8 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 					}
 					else
 					{
-						// The type is different, PropertyValue<int> <-> PropettyValue<QString>
-						// Obviosly thi2s is static properties
+						// The type is different, PropertyValue<int> <-> PropertyValue<QString>
+						// Obviously thi2s is static properties
 						//
 						Q_ASSERT(false);
 					}
@@ -2934,11 +2952,11 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 				}
 			}
 
-			// Check if there are any new proprties in preset, the add them to device
+			// Check if there are any new properties in preset, the add them to device
 			//
 			for (auto pit = presetProperties.begin(); pit != presetProperties.end();)
 			{
-				std::shared_ptr<Property> presetProperty = *pit;
+				Property* presetProperty = pit->get();
 
 				auto dit = std::find_if(deviceProperties.begin(), deviceProperties.end(),
 										[presetProperty](const std::shared_ptr<Property>& device)
@@ -2952,12 +2970,12 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 					//
 					std::shared_ptr<Property> newDeviceProperty;
 
-					if (dynamic_cast<PropertyValueNoGetterSetter*>(presetProperty.get()) != nullptr)
+					if (dynamic_cast<PropertyValueNoGetterSetter*>(presetProperty) != nullptr)
 					{
 						newDeviceProperty = std::make_shared<PropertyValueNoGetterSetter>();
 					}
 
-					if (auto x = dynamic_cast<PropertyValue<std::vector<std::pair<QString, int>>>*>(presetProperty.get());
+					if (auto x = dynamic_cast<PropertyValue<std::vector<std::pair<QString, int>>>*>(presetProperty);
 						x != nullptr)
 					{
 						auto enumList = x->enumValues();
@@ -2976,7 +2994,7 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 
 					if (newDeviceProperty != nullptr)
 					{
-						newDeviceProperty->updateFromPreset(presetProperty.get(), true);
+						newDeviceProperty->updateFromPreset(presetProperty, true);
 						deviceProperties.push_back(newDeviceProperty);
 					}
 
@@ -2997,9 +3015,9 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 			std::shared_ptr<Hardware::DeviceObject> deviceChild = device->child(i);
 			std::shared_ptr<Hardware::DeviceObject> presetChild = preset->child(deviceChild->presetObjectUuid());
 
-			// WARNING, in the nex condition we cannot check for presetsToUpdate, as in this case we cannot go deeper as presetChild is nullptr and
-			// we will have assert in the begining of updateDeviceFromPreset(). So deleted child will be removed from instance even though the prteset
-			// should not be updated
+			// WARNING, in the next condition we cannot check for presetsToUpdate, as in this case we cannot go deeper as presetChild is nullptr and
+			// we will have assert in the beginning of updateDeviceFromPreset(). So deleted child will be removed from instance even though the preset
+			// should not be updated.
 			//
 			if (deviceChild->isPreset() == true &&
 				deviceChild->presetName() == device->presetName() &&
@@ -3069,7 +3087,7 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 		if (deviceChild->isPreset() == false)
 		{
 			updateDeviceFromPreset(deviceChild,
-								   {},			// not intialized, as deviceChild is not preset
+								   {},			// not initialized, as deviceChild is not preset
 								   forceUpdateProperties,
 								   presetsToUpdate,
 								   updateDeviceList,
@@ -3081,12 +3099,12 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 
 	// Problem: Preset of Monitor has compatibility breaking changes, here we try to mitigate it.
 	//
-	if (monitorMitigateComaptibilityAppDataService.isEmpty() == false)
+	if (monitorMitigateCompatibilityAppDataService.isEmpty() == false)
 	{
 		auto adsProp = device->propertyByCaption(QStringLiteral("AppDataServiceIDs"));
 		if (adsProp != nullptr)
 		{
-			adsProp->setValue(monitorMitigateComaptibilityAppDataService);
+			adsProp->setValue(monitorMitigateCompatibilityAppDataService);
 		}
 	}
 

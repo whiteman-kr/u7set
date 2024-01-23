@@ -1,0 +1,18 @@
+<Command 
+	Caption="movbc"
+	Code="01c0"
+	CodeMask="07c0"
+	SimulationFunc="command_movbc"
+	ParseFunc="parse_movbc"
+	Description="Write 1-bit constant to memory"
+
+	CodeSize="4" 
+	ReadTime="14" 
+	WaitFbExecution="false"
+
+	WriteToBitMemRuntime="6"
+	WriteToWordMemRuntime="14"
+
+	CheckFunc="check_movbc"
+	GetMnemoFunc="mnemo_movbc"
+	CalcExecTimeFunc="exectime_write_bit_or_word_mem"/>

@@ -1,8 +1,9 @@
 #ifndef APP_SIGNAL_LIB_DOMAIN
-#error Don't include this file in the project! Link AppSignalLib instead.
+#error Do not include this file in the project! Link AppSignalLib instead.
 #endif
 
 #include "TuningValue.h"
+#include "../UtilsLib/WUtils.h"
 #include <cmath>
 
 const char* TuningValue::TYPE_STR_DISCRETE = "Discrete";
@@ -423,11 +424,7 @@ void TuningValue::fromString(QString value, bool* ok)
 
 bool TuningValue::save(Proto::TuningValue* message) const
 {
-	if (message == nullptr)
-	{
-		assert(message);
-		return false;
-	}
+	TEST_PTR_RETURN_FALSE(message);
 
 	message->set_type(static_cast<int>(m_type));
 	message->set_intvalue(m_int64);

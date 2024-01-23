@@ -79,9 +79,6 @@ private:
 	E::RtTrendsSamplePeriod m_samplePeriod = E::RtTrendsSamplePeriod::sp_1s;
 	E::TimeType m_timeType = E::TimeType::Local;
 	std::map<Hash, RtSchemaTrendSignal> m_trendSignals;		// Key is hash from appSignalId
-
-	TrendLib::TrendStateItem m_minState{};
-	TrendLib::TrendStateItem m_maxState{};
 };
 
 

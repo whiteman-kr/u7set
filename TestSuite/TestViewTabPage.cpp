@@ -42,7 +42,25 @@ TestViewTabPage::~TestViewTabPage()
 	qDebug() << "TestViewTabPage " << m_script.fileName() << " closed.";
 }
 
+void TestViewTabPage::setScript(const TestSuite::TestScript& script)
+{
+	m_script = script;
+	m_codeEditor->setText(m_script.script());
+}
+
 const TestSuite::TestScript& TestViewTabPage::script() const
 {
 	return m_script;
+}
+
+void TestViewTabPage::scrollToFunction(const QString& functionName)
+{
+	QTimer::singleShot(10, [this, functionName]() 
+		{
+			bool result = m_codeEditor->findFirst("function " + functionName, true/*caseSensitive*/, true/*wholeWord*/);
+			if (result == false)
+			{
+				m_codeEditor->findFirst(functionName, true/*caseSensitive*/, true/*wholeWord*/);
+			}
+		});
 }

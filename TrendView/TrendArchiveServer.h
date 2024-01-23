@@ -1,5 +1,9 @@
 #pragma once
 
+#include <QString>
+#include <QMetaType>
+
+
 namespace TrendLib
 {
 	class TrendSignalParam;

@@ -2,6 +2,7 @@
 #define DIALOGTRENDSIGNALPOINTS_H
 
 #include <QDialog>
+#include <QAbstractTableModel>
 #include "TrendSignalSet.h"
 #include "TrendScale.h"
 

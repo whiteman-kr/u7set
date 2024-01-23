@@ -1,15 +1,12 @@
 #include "Main.h"
-#include <QCommandLineParser>
-#include "MainWindow.h"
-#include <QApplication>
-#include "Settings.h"
-#include "ScriptTuningClientApplication.h"
 #include "../ClientLib/TuningUserManager.h"
 #include "../VFrame30/VFrame30Library.h"
-
-#if __has_include("../gitlabci_version.h")
-#	include "../gitlabci_version.h"
-#endif
+#include "MainWindow.h"
+#include "ScriptTuningClientApplication.h"
+#include "Settings.h"
+#include "version.h"
+#include <QApplication>
+#include <QCommandLineParser>
 
 //// ---------------- Minidump generating functions -------------------
 ////
@@ -43,9 +40,9 @@ void CreateMiniDump(EXCEPTION_POINTERS* pep)
 		0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
 	HWND hWnd = NULL;
-	if (theMainWindow != nullptr)
+	if (theApp.mainWindow() != nullptr)
 	{
-		hWnd = reinterpret_cast<HWND>(theMainWindow->winId());
+		hWnd = reinterpret_cast<HWND>(theApp.mainWindow()->winId());
 	}
 
 	if ((hFile != NULL) && (hFile != INVALID_HANDLE_VALUE))
@@ -159,20 +156,53 @@ int main(int argc, char* argv[])
 	a.setOrganizationName(Manufacturer::RADIY);
 	a.setOrganizationDomain(Manufacturer::SITE);
 
-
-#ifdef GITLAB_CI_BUILD
-	a.setApplicationVersion(QString("0.9.%1 (%2)").arg(CI_PIPELINE_ID).arg(CI_BUILD_REF_SLUG));
-#else
-	a.setApplicationVersion(QString("0.9.LOCALBUILD"));
-#endif
+	a.setApplicationVersion(QString("%1.%2.%3 (%4)")
+							.arg(U7SET_MAJOR_VERSION)
+							.arg(U7SET_MINOR_VERSION)
+							.arg(U7SET_PATCH_VERSION)
+							.arg(U7SET_BRANCH_NAME));
 
 	VFrame30::init();
 
-	theSettings.RestoreUser();
-	theSettings.RestoreSystem();
+	TuningClientAppSettings::instance().loadUser();
 
 	// Parse the command line
 	//
+	{
+		QStringList arguments = a.arguments();
+
+		QString settingsFileName;
+		for (const QString& s : arguments)
+		{
+			if (s.contains(".ini") == true)
+			{
+				settingsFileName = s;
+				break;
+			}
+		}
+
+		if (settingsFileName.isEmpty() == false && QFile::exists(settingsFileName) == false)
+		{
+			QMessageBox::critical(nullptr, qAppName(), QObject::tr("Application settings file %1 is not exist.").arg(settingsFileName));
+			return 1;
+		}
+
+		// Read settings
+		//
+		if (settingsFileName.isEmpty() == true)
+		{
+			TuningClientAppSettings::instance().load();
+		}
+		else
+		{
+			bool loadSettingsOk = TuningClientAppSettings::instance().loadFromFile(settingsFileName);
+			if (loadSettingsOk == false)
+			{
+				QMessageBox::critical(nullptr, qAppName(), QObject::tr("Error loading application settings from file %1.").arg(settingsFileName));
+				return 1;
+			}
+		}
+	}
 
 	QCommandLineParser parser;
 
@@ -180,11 +210,9 @@ int main(int argc, char* argv[])
 	parser.addVersionOption();
 
 	// A string option with id (-id)
-
+	//
 	QCommandLineOption idOption("id", "Set the TuningClient ID.", "TuningClient ID");
 	parser.addOption(idOption);
-
-	// A boolean option with simulation (-simulate)
 
 	parser.process(*qApp);
 
@@ -192,19 +220,17 @@ int main(int argc, char* argv[])
 
 	if (clientID.isEmpty() == false)
 	{
-	    theSettings.setInstanceStrId(clientID);
+		TuningClientAppSettings::instance().system().m_instanceStrId = clientID;
 	}
 
 	//
 	//
 
-	SoftwareInfo softwareInfo;
-
-	softwareInfo.init(E::SoftwareType::TuningClient, theSettings.instanceStrId(), 0, 1);
+	SoftwareInfo softwareInfo(E::SoftwareType::TuningClient, TuningClientAppSettings::instance().instanceStrId());
 
 	// Check to run the application in one instance
 	//
-	theSharedMemorySingleApp = new QSharedMemory(QString("TuningClient") + theSettings.instanceStrId());
+	theSharedMemorySingleApp = new QSharedMemory(QString("TuningClient") + TuningClientAppSettings::instance().instanceStrId());
 
 	if(theSharedMemorySingleApp->attach(QSharedMemory::ReadWrite) == false)
 	{
@@ -238,15 +264,19 @@ int main(int argc, char* argv[])
 
 			// Run the application
 			//
-			theMainWindow = new MainWindow(softwareInfo);
-			theMainWindow->show();
+			{
+				MainWindow mainWindow(softwareInfo);
 
-			result = a.exec();
+				theApp.setMainWindow(&mainWindow);
 
-			delete theMainWindow;
-			theMainWindow = nullptr;
+				mainWindow.show();
 
-			theSettings.StoreUser();
+				result = a.exec();
+
+				theApp.setMainWindow(nullptr);
+			}
+
+			TuningClientAppSettings::instance().saveUser();
 		}
 	}
 	else

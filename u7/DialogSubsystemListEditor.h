@@ -1,7 +1,6 @@
 #ifndef DIALOGSUBSYSTEMLISTEDITOR_H
 #define DIALOGSUBSYSTEMLISTEDITOR_H
 
-#include "../DbLib/DbController.h"
 #include "../Builder/SubsystemStorage.h"
 
 namespace Ui {

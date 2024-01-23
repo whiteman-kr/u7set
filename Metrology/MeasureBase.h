@@ -5,7 +5,7 @@
 #include "MetrologySignal.h"
 #include "MetrologyFormula.h"
 #include "SignalBase.h"
-#include "UnitsConvertor.h"
+#include "UnitsConverter.h"
 
 namespace Measure
 {
@@ -33,7 +33,7 @@ namespace Measure
 		OneRack = 0,
 		OneModule = 1,
 		MultiRack = 2,
-		MultiRack_MC = 3,
+		MultiRack_MC = 3,		// simultaneous (parallel) multichannel measurements
 	};
 
 	const int KIND_COUNT	= 4;
@@ -145,12 +145,10 @@ namespace Measure
 
 	// ==============================================================================================
 
-	const int Timeout[] =
+	inline static const std::vector<int> Timeout =
 	{
 		0, 1, 2, 3, 5, 10, 15, 20, 30, 45, 60,  // default value of seconds
 	};
-
-	const int TIMEOUT_COUNT = sizeof(Timeout)/sizeof(Timeout[0]);
 
 	// ==============================================================================================
 

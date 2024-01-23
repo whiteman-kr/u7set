@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../DbLib/DbController.h"
 #include "../DbLib/DbStruct.h"
 
 namespace Ui {
@@ -11,9 +10,8 @@ class SelectChangesetDialog : public QDialog
 {
 	Q_OBJECT
 	
-private:
-	SelectChangesetDialog();
 public:
+	SelectChangesetDialog() = delete;
 	SelectChangesetDialog(QString title, DbController* db, const std::vector<DbChangeset>& history, QWidget* parent);
 	~SelectChangesetDialog();
 

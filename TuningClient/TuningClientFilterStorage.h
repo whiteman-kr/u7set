@@ -16,8 +16,6 @@ public:
 									 std::vector<std::pair<QString, QString>> &notFoundSignalsAndFilters,
 									 QWidget* parentWidget);
 
-	void createSchemaCounterFilters();
-
 	void updateCounters(const TuningSignalManager& tunigSignals,
 						const ClientLib::TuningConnection& tuningConnection,
 						const std::vector<ClientLib::TuningSource>& sourceStates,
@@ -25,13 +23,6 @@ public:
 						TuningFilter* filter = nullptr);
 
 	void removeFilters(TuningFilter::Source sourceType);
-
-	int schemaCounterFiltersCount() const;
-	const QStringList& schemaCounterFiltersNames() const;
-
-private:
-	int m_schemaCounterFiltersCount = 0;		// filled by createSchemaCounterFilters
-	QStringList m_schemaCounterFiltersNames;
 };
 
 class DialogCheckFilterSignals : public QDialog

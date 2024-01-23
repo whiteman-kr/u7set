@@ -1,10 +1,20 @@
 variables:
   GIT_DEPTH: "1"
-  QT_VERSION: "6.4.3"
-  COMPILER_TESTS_PROJECT_NAME: "compiler_tests_v385"
-  SIMULATOR_PROJECT_NAME: "test_simulator_v385"
+
+  # Version. Set to the desired release type "Default" or "Stable"
+  #
+  CI_RELEASE_TYPE: "Default"    # Set to the desired release type "Default" or "Stable"
+  CI_MAJOR_VERSION: "9"         # Odd is for development, even is for release
+  CI_MINOR_VERSION: "0"
+  CI_PATCH_VERSION: "0"         # Path version for Default release is ignored and set to pipeline id.
+
+  # Build and test data
+  #
+  QT_VERSION: "6.5.3"
+  COMPILER_TESTS_PROJECT_NAME: "compiler_tests_v410"
+  SIMULATOR_PROJECT_NAME: "test_simulator_v410"
   PGPASSWORD: "P2ssw0rd"
-  
+
 stages:
   - prepare
   - build
@@ -43,6 +53,7 @@ project_backup_job:
     - "f:\\TestDatabase\\UpdateFileIfDifferent.ps1 f:\\TestDatabase\\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql.1 f:\\TestDatabase\\u7_${Env:COMPILER_TESTS_PROJECT_NAME}.sql"
     - "f:\\TestDatabase\\UpdateFileIfDifferent.ps1 f:\\TestDatabase\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql.1 f:\\TestDatabase\\u7_${Env:SIMULATOR_PROJECT_NAME}.sql"
 
+
 linux_build_job:
   stage: build
   needs: ["project_backup_job"]
@@ -65,30 +76,20 @@ linux_build_job:
     - "cd $CI_PROJECT_DIR"
     - "git status"
     - "git log -1"
-#generation version file
-    - "echo '#pragma once' > gitlabci_version.h"
-    - "echo >> gitlabci_version.h"
-    - "echo '#define GITLAB_CI_BUILD' >> gitlabci_version.h"
-    - echo '#define CI_BUILD_REF_SLUG' \"$CI_BUILD_REF_SLUG\" >> gitlabci_version.h
-    - echo '#define CI_COMMIT_SHA' \"$CI_COMMIT_SHA\" >> gitlabci_version.h
-    - echo '#define GITLAB_USER_NAME' \"$GITLAB_USER_NAME\" >> gitlabci_version.h
-    - echo '#define CI_PIPELINE_ID' $CI_PIPELINE_ID >> gitlabci_version.h
-    - echo '#define COMPUTERNAME' \"$HOSTNAME\" >> gitlabci_version.h
-    - echo '#define BUILD_DATE' \"$(date)\" >> gitlabci_version.h
 
 #Build Project
     - "# ----------------------------------------------"
     - "#               Build Project"
     - "# ----------------------------------------------"    
-    - "/opt/Qt/${QT_VERSION}/gcc_64/bin/qmake u7set.pro -spec linux-g++"
-    - "make -j12"
+    - "cmake -S . -B ./build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/opt/Qt/${QT_VERSION}/gcc_64 -DBIN_OUT_DIR=$CI_PROJECT_DIR/bin/release"
+    - "cmake --build ./build"
 
   artifacts:
-    name: "u7set_linux_0.9.$CI_PIPELINE_ID $CI_BUILD_REF_SLUG $CI_COMMIT_SHA"
+    name: "u7set-linux-x64-${CI_MAJOR_VERSION}.${CI_MINOR_VERSION}.${CI_PATCH_VERSION}-p${CI_PIPELINE_ID}-${CI_RELEASE_TYPE}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHA}"
     paths:
-      - bin_unix/*
+      - bin/release/*
     exclude:
-      - bin_unix/**/*.a
+      - bin/release/**/*.a
 #
 
 windows_build_job:
@@ -105,22 +106,12 @@ windows_build_job:
   tags:
     - vs2017
   script:
-    - "# dir env:"
+    - "dir env:"
     - "echo $Env:CI_COMMIT_SHA"
     - "git status"
     - "git log -1"
     - $Env:QT_BIN_DIR="C:\\Qt\\${Env:QT_VERSION}\\msvc2019_64"
-#generation version file
-    - "'#pragma once' > gitlabci_version.h"
-    - "' ' >> gitlabci_version.h"
-    - "'#define GITLAB_CI_BUILD' >> gitlabci_version.h"
-    - "'#define CI_BUILD_REF_SLUG \"' + $env:CI_BUILD_REF_SLUG + '\"' >> gitlabci_version.h"
-    - "'#define CI_COMMIT_SHA \"' + $env:CI_COMMIT_SHA + '\"' >> gitlabci_version.h"
-    - "'#define GITLAB_USER_NAME \"' + $env:GITLAB_USER_NAME + '\"' >> gitlabci_version.h"
-    - "'#define CI_PIPELINE_ID ' + $env:CI_PIPELINE_ID + '' >> gitlabci_version.h"
-    - "'#define COMPUTERNAME \"' + $env:HOSTNAME + '\"' >> gitlabci_version.h"
-    - "$Env:timestamp = Get-Date -Format 'dd MMMM yyyy HH:mm (K)'"
-    - "'#define BUILD_DATE \"' + $Env:timestamp + '\"' >> gitlabci_version.h"
+    - $Env:BIN_OUT_DIR="$Env:CI_PROJECT_DIR/bin/release"
 #Build Project
     - "# ----------------------------------------------"
     - "#               Build Project"
@@ -132,41 +123,37 @@ windows_build_job:
     - "# ----------------------------------------------"
     - "& './CI/windeploy.bat'"
 #Copy PostgreSQL DLL to bin/release
-    - "copy C:\\libpq_my_build\\libpq.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
-# Copy Metrology plugins
-    - "copy $Env:CI_PROJECT_DIR\\bin_Win64\\visa64.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
-    - "copy $Env:CI_PROJECT_DIR\\bin_Win64\\visaConfMgr.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
-    - "copy $Env:CI_PROJECT_DIR\\bin_Win64\\visaUtilities.dll \"$Env:CI_PROJECT_DIR/bin/release/\""
+    - "copy C:\\libpq_my_build\\libpq.dll $Env:BIN_OUT_DIR\\"
 # Copy documents
-    - "mkdir \"$Env:CI_PROJECT_DIR/bin/release/docs\""
-    - "copy $Env:CI_PROJECT_DIR\\Metrology\\docs\\Metrology_User_Manual.pdf \"$Env:CI_PROJECT_DIR/bin/release/docs/\""
+    - "mkdir \"$Env:BIN_OUT_DIR/docs\""
+    - "copy $Env:CI_PROJECT_DIR\\Metrology\\docs\\Metrology_User_Manual.pdf $Env:BIN_OUT_DIR\\docs\\"
 # Copy GlobalScript library
-    - "mkdir \"$Env:CI_PROJECT_DIR/bin/release/scripting\""
-    - "copy $Env:CI_PROJECT_DIR\\Scripts\\GlobalScript\\*.* \"$Env:CI_PROJECT_DIR/bin/release/scripting/\""
+    - "mkdir \"$Env:BIN_OUT_DIR/scripting\""
+    - "copy $Env:CI_PROJECT_DIR\\Scripts\\GlobalScript\\*.* $Env:BIN_OUT_DIR\\scripting\\"
 
 #Remove some files not requiered for releases
     - "# ----------------------------------------------"
     - "#               Remove some files not requiered for releases"
     - "# ----------------------------------------------"
-    - "del -Force $Env:CI_PROJECT_DIR/bin/release/DiagDataSrv.exe"
+    - "del -Force $Env:BIN_OUT_DIR/DiagDataSrv.exe"
     
 #Signing Files
     - "# ----------------------------------------------"
     - "#               Sign Files"
     - "# ----------------------------------------------"
 #    - "$SIGNTOOL='C:/Program Files (x86)/Windows Kits/10/App Certification Kit/signtool.exe'"
-#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD bin\\release\\AppDataSrv.exe"
-#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD bin\\release\\ArchSrv.exe"
-#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD bin\\release\\CfgSrv.exe"
-#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD bin\\release\\mconf.exe"
-#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD bin\\release\\PacketSource.exe"
-#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD bin\\release\\PacketViewer.exe"
-#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD bin\\release\\Metrology.exe"
-#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD bin\\release\\Monitor.exe"
-#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD bin\\release\\scm.exe"
-#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD bin\\release\\TuningClient.exe"
-#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD bin\\release\\TuningSrv.exe"
-#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD bin\\release\\u7.exe"    
+#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD $Env:BIN_OUT_DIR\\AppDataSrv.exe"
+#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD $Env:BIN_OUT_DIR\\ArchSrv.exe"
+#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD $Env:BIN_OUT_DIR\\CfgSrv.exe"
+#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD $Env:BIN_OUT_DIR\\mconf.exe"
+#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD $Env:BIN_OUT_DIR\\PacketSource.exe"
+#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD $Env:BIN_OUT_DIR\\PacketViewer.exe"
+#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD $Env:BIN_OUT_DIR\\Metrology.exe"
+#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD $Env:BIN_OUT_DIR\\Monitor.exe"
+#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD $Env:BIN_OUT_DIR\\scm.exe"
+#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD $Env:BIN_OUT_DIR\\TuningClient.exe"
+#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD $Env:BIN_OUT_DIR\\TuningSrv.exe"
+#    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD $Env:BIN_OUT_DIR\\u7.exe"    
 
 #Generate ScriptHelp
     - "# ----------------------------------------------"
@@ -190,14 +177,11 @@ windows_build_job:
     - "# ----------------------------------------------"
     - "#               Build Installer"
     - "# ----------------------------------------------"
-    - "pushd ."	
-    - "cd $Env:CI_PROJECT_DIR/u7setinstall"
-    - "&./createinstall.bat"
-    - "popd"	
-#    - "&$SIGNTOOL sign /v /a  /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD bin\\*.exe"
+    - "cmake --build ./build --target create_install"	
+#    - "&$SIGNTOOL sign /v /a  /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD $Env:BIN_OUT_DIR\\..\\*.exe"
 
   artifacts:
-    name: "u7set_0.9.$CI_PIPELINE_ID $CI_BUILD_REF_SLUG $CI_COMMIT_SHA"
+    name: "u7set-win-x64-${CI_MAJOR_VERSION}.${CI_MINOR_VERSION}.${CI_PATCH_VERSION}-p${CI_PIPELINE_ID}-${CI_RELEASE_TYPE}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHA}"
     paths:
       - bin/*.exe
       - bin/release/*.exe
@@ -246,7 +230,7 @@ windows_test_job:
     - "#               Run XML validation"
     - "# ----------------------------------------------"
     - "pushd ."	
-    - "cd $Env:CI_PROJECT_DIR/Presets/LogicModuleDescription"
+    - "cd $Env:CI_PROJECT_DIR/Presets/LogicModuleDescription/generated"
     - "&./validate_xmls.bat"
     - "popd"
 
@@ -276,7 +260,7 @@ windows_test_job:
     - "# ----------------------------------------------"
     - "#               Run Simulator AFBs tests"
     - "# ----------------------------------------------"
-    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorConsole.exe -build=c:/temp/build/$Env:SIMULATOR_PROJECT_NAME/build -script=\"$Env:CI_PROJECT_DIR/Simulator/SimProjectTests.js\""
+    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorConsole.exe -build=c:/temp/build/$Env:SIMULATOR_PROJECT_NAME/build -script=\"$Env:CI_PROJECT_DIR/Simulator/Scripts/SimProjectTests.js\""
 
 #Run ROVT to check configuration generation
     - "# ----------------------------------------------"
@@ -308,7 +292,7 @@ linux_test_job:
 #    - "# ----------------------------------------------"
 #    - "#               Run XML validation"
 #    - "# ----------------------------------------------"
-    - "pushd $CI_PROJECT_DIR/Presets/LogicModuleDescription"
+    - "pushd $CI_PROJECT_DIR/Presets/LogicModuleDescription/generated"
     - "chmod a+x validate_xmls.sh"
     - "./validate_xmls.sh"
     - "popd"
@@ -319,8 +303,8 @@ linux_test_job:
     - "cp $CI_PROJECT_DIR/Test/ImportDatabase.sh /tmp"
     - "cp /mnt/f/TestDatabase/u7_${COMPILER_TESTS_PROJECT_NAME}.sql /tmp"
     - "cp /mnt/f/TestDatabase/u7_${SIMULATOR_PROJECT_NAME}.sql /tmp"
-    - "echo P2ssw0rd | su postgres /tmp/ImportDatabase.sh /tmp/u7_${COMPILER_TESTS_PROJECT_NAME}.sql u7_${COMPILER_TESTS_PROJECT_NAME}"
-    - "echo P2ssw0rd | su postgres /tmp/ImportDatabase.sh /tmp/u7_${SIMULATOR_PROJECT_NAME}.sql u7_${SIMULATOR_PROJECT_NAME}"
+    - "echo P2ssw0rd | su postgres /tmp/ImportDatabase.sh /tmp/u7_${COMPILER_TESTS_PROJECT_NAME}.sql u7_${COMPILER_TESTS_PROJECT_NAME} 5433"
+    - "echo P2ssw0rd | su postgres /tmp/ImportDatabase.sh /tmp/u7_${SIMULATOR_PROJECT_NAME}.sql u7_${SIMULATOR_PROJECT_NAME} 5433"
     - "rm /tmp/ImportDatabase.sh"
     - "rm /tmp/u7_${COMPILER_TESTS_PROJECT_NAME}.sql"
     - "rm /tmp/u7_${SIMULATOR_PROJECT_NAME}.sql"
@@ -332,19 +316,19 @@ linux_test_job:
     - "#               Run BuilderConsole tests"
     - "# ----------------------------------------------"
     - "if [ -d \"/tmp/build/test_simulator\" ]; then rm -Rf /tmp/build/test_simulator; fi"
-    - "$CI_PROJECT_DIR/bin_unix/release/BuilderConsole $CI_PROJECT_DIR/Test/BuilderConsoleArgsLinux.xml"
+    - "$CI_PROJECT_DIR/bin/release/BuilderConsole $CI_PROJECT_DIR/Test/BuilderConsoleArgsLinux.xml"
     
 #Run Compiler tests
     - "# ----------------------------------------------"
     - "#               Run Compiler tests"
     - "# ----------------------------------------------"
-    - "$CI_PROJECT_DIR/bin_unix/release/BuilderConsole $CI_PROJECT_DIR/Test/CompilerTestsArgsLinux.xml"
+    - "$CI_PROJECT_DIR/bin/release/BuilderConsole $CI_PROJECT_DIR/Test/CompilerTestsArgsLinux.xml"
 
 #Run Sim AFB Tests
     - "# ----------------------------------------------"
     - "#               Run Simulator AFBs tests"
     - "# ----------------------------------------------"
-    - "$CI_PROJECT_DIR/bin_unix/release/SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -script=\"$CI_PROJECT_DIR/Simulator/SimProjectTests.js\""
+    - "$CI_PROJECT_DIR/bin/release/SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -script=\"$CI_PROJECT_DIR/Simulator/Scripts/SimProjectTests.js\""
 
 #Run unit tests
     - "# ----------------------------------------------"
@@ -352,7 +336,7 @@ linux_test_job:
     - "# ----------------------------------------------"
     - "function StopServices () { pkill CfgSrv || true; pkill AppDataSrv || true; pkill TuningSrv || true; pkill SimulatorConsol || true; sleep 2; }"
     - "trap StopServices EXIT"
-    - "pushd $CI_PROJECT_DIR/bin_unix/release"
+    - "pushd $CI_PROJECT_DIR/bin/release"
     - "StopServices || true"
     - "cp /tmp/build/${SIMULATOR_PROJECT_NAME}/build/RunServiceScripts/Linux/linux_test_job_systemid_clienttest*.sh ."
     - "chmod +x *.sh"
@@ -376,9 +360,9 @@ linux_test_job:
     - "# ----------------------------------------------"
     - "#               Run unit tests"
     - "# ----------------------------------------------"
-    - "$CI_PROJECT_DIR/bin_unix/release/SimulatorTests"
-    - "$CI_PROJECT_DIR/bin_unix/release/MetrologyTests"
-    - "$CI_PROJECT_DIR/bin_unix/release/u7databasetests -config=$CI_PROJECT_DIR/Test/u7databasetestsArgsLinux.xml"
+    - "$CI_PROJECT_DIR/bin/release/SimulatorTests"
+    - "$CI_PROJECT_DIR/bin/release/MetrologyTests"
+    - "$CI_PROJECT_DIR/bin/release/u7databasetests -config=$CI_PROJECT_DIR/Test/u7databasetestsArgsLinux.xml"
 
 #Run ROVT to check configuration generation
 #    - "# ----------------------------------------------"
@@ -413,7 +397,7 @@ linux_code_coverage_job:
     - "pushd /tmp"
     - "cp $CI_PROJECT_DIR/Test/ImportDatabase.sh /tmp"
     - "cp /mnt/f/TestDatabase/u7_${SIMULATOR_PROJECT_NAME}.sql /tmp"
-    - "echo P2ssw0rd | su postgres /tmp/ImportDatabase.sh /tmp/u7_${SIMULATOR_PROJECT_NAME}.sql u7_${SIMULATOR_PROJECT_NAME}"
+    - "echo P2ssw0rd | su postgres /tmp/ImportDatabase.sh /tmp/u7_${SIMULATOR_PROJECT_NAME}.sql u7_${SIMULATOR_PROJECT_NAME} 5434"
     - "rm /tmp/ImportDatabase.sh"
     - "rm /tmp/u7_${SIMULATOR_PROJECT_NAME}.sql"
     - "popd"
@@ -421,8 +405,8 @@ linux_code_coverage_job:
     - "# ----------------------------------------------"
     - "#                    Build                      "
     - "# ----------------------------------------------"
-    - "/opt/Qt/${QT_VERSION}/gcc_64/bin/qmake u7set_tests.pro -spec linux-g++ CONFIG+=debug CONFIG-=qml_debug CONFIG-=qtquickcompiler CONFIG+=separate_debug_info CONFIG+=CODE_COVERAGE "
-    - "make -j12"
+    - "cmake -S . -B ./build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH=/opt/Qt/${QT_VERSION}/gcc_64 -DBIN_OUT_DIR=$CI_PROJECT_DIR/bin/debug -DCODE_COVERAGE=ON -DADDRESS_SANITIZER=ON"
+    - "cmake --build ./build"    
     - "# ----------------------------------------------"
     - "#           Collect Test Coverage Data          "
     - "# ----------------------------------------------"
@@ -430,7 +414,7 @@ linux_code_coverage_job:
 
   coverage: '/lines......: \d+\.\d+/'
   artifacts:
-    name: "coverage_report.$CI_PIPELINE_ID $CI_BUILD_REF_SLUG $CI_COMMIT_SHA"
+    name: "coverage_report.$CI_PIPELINE_ID-$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHA"
     paths:
 #      - CodeCoverage/coverage.xml
       - CodeCoverage/Report/
@@ -438,4 +422,5 @@ linux_code_coverage_job:
 #      coverage_report:
 #        coverage_format: cobertura
 #        path: CodeCoverage/coverage.xml
+
 

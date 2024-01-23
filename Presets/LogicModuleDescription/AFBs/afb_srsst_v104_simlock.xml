@@ -1,0 +1,30 @@
+<AFB id="#simlock_v1" Caption="simlock" Version="1.0010">
+	<Properties>
+		<Description>Locking and simulation module</Description>
+		<Category>Logic</Category>
+		<OpCode>7</OpCode>
+		<InternalUse>false</InternalUse>
+		<MinWidth>18</MinWidth>
+	</Properties>
+	<Inputs>
+		<Pin OpName="i_data" Caption="in" Type="Discrete" ByteOrder="BigEndian" OpIndex="0" Size="1"/>
+		<Pin OpName="i_set" Caption="sim" Type="Discrete" ByteOrder="BigEndian" OpIndex="1" Size="1"/>
+		<Pin OpName="i_reset" Caption="block" Type="Discrete" ByteOrder="BigEndian" OpIndex="2" Size="1"/>
+	</Inputs>
+	<Outputs>
+		<Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="4" Size="1"/>
+	</Outputs>
+	<Params>
+		<Param OpName="AssignFlags" Caption="AssignFlags" Visible="true" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+			<Value>1</Value>
+			<Default>1</Default>
+			<Script>
+				<Changed/>
+			</Script>
+		</Param>
+	</Params>
+	<CommonScript>
+		<Library/>
+		<AfterCreation/>
+	</CommonScript>
+</AFB>

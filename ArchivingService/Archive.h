@@ -38,15 +38,22 @@ public:
 	static QString formatTime(qint64 time);
 
 public:
-	Archive(const QString& projectID,
+	Archive(const QString& projectID,					// Read/write archive constructor
 			const QString& equipmentID,
 			const QString& archDir,
-			const Proto::ArchSignals& protoArchSignals,
+			QByteArray& archFileInfoData,
 			int shortTermPeriod,
 			int longTermPeriod,
 			int maintenanceDelayMinutes,
 			int minQueueSizeForFlushing,
 			CircularLoggerShared logger);
+
+	Archive(const QString& projectID,					// Read only archive constructor
+			const QString& equipmentID,
+			const QString& readOnlyArchFullPath,
+			QByteArray& archFileInfoData,
+			CircularLoggerShared logger);
+
 	~Archive();
 
 	void start();
@@ -57,12 +64,12 @@ public:
 	int minQueueSizeForFlushing() const { return m_minQueueSizeForFlushing; }
 	int maintenanceDelayMinutes() const { return m_maintenanceDelayMinutes; }
 
-	QString archDir() const { return m_archDir; }
 	QString projectID() const { return m_projectID; }
 	QString equipmentID() const { return m_equipmentID; }
 	QString archFullPath() const { return m_archFullPath; }
 
 	bool isWorkable() const { return m_isWorkable; }
+	bool isReadOnly() const { return m_readOnlyArchive; }
 
 	std::shared_ptr<ArchRequest> startNewRequest(E::TimeType timeType,
 												 qint64 sartTime,
@@ -97,11 +104,15 @@ public:
 	static QString timeTypeStr(E::TimeType timeType);
 
 private:
+	bool loadArchInfoFile();
+	bool initArchFiles();
 	bool checkAndCreateArchiveDirs();
 	bool archDirIsWritableChecking();
 	bool createGroupDirs();
 
-	void writeArchFilesInfoFile(const QVector<QVector<ArchFile*>>& archFilesGroups);
+	bool saveArchInfoProtoFile() const;
+
+	void writeArchFilesInfoFile(const std::vector<std::vector<ArchFile *>>& archFilesGroups);
 
 	quint32 getNewRequestID();
 
@@ -126,6 +137,9 @@ private:
 	void clear();
 
 private:
+	bool m_readOnlyArchive = true;
+	QByteArray* m_archInfoFileData = nullptr;
+
 	QString m_projectID;
 	QString m_equipmentID;
 	QString m_archDir;

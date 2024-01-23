@@ -1,0 +1,17 @@
+<Command 
+	Caption="lshift1"
+	Code="0078"
+	CodeMask="07f8"	
+	SimulationFunc="command_lshift1"
+	ParseFunc="parse_lshift1"
+	Description="Shift ACC left and load 1 in ACC[0]"
+
+	CodeSize="1" 
+	ReadTime="5" 
+	WaitFbExecution="false"
+
+	ConstRuntime="2"
+
+	CheckFunc="check_nothing"
+	GetMnemoFunc="mnemo_acc"
+	CalcExecTimeFunc="exectime_const"/>

@@ -3,7 +3,6 @@
 
 #include "../lib/PropertyEditor.h"
 #include "../lib/PropertyEditorDialog.h"
-#include "../lib/PropertyEditorDialog.h"
 
 #include "BusStorage.h"
 

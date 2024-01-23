@@ -1,38 +1,26 @@
 #include "TuningController.h"
-#include "../AppSignalLib/AppSignalParam.h"
 #include "../AppSignalLib/ITuningSignalManager.h"
 
 namespace VFrame30
 {
-	TuningController::TuningController(ITuningSignalManager* signalManager, ITuningConnection* tuningConnection, QWidget* parent) :
+	TuningController::TuningController(ITuningSignalManager& signalManager, ITuningConnection& tuningConnection, ITuningAuthorization& tuningAuthorization, QWidget* parent) :
 		QObject(parent),
+		m_parent(parent),
 		m_signalManager(signalManager),
-		m_tuningConnection(tuningConnection)
+		m_tuningConnection(tuningConnection),
+		m_tuningAuthorization(tuningAuthorization)
 	{
-		assert(m_signalManager);
 		return;
 	}
 
 	AppSignalParam TuningController::signalParam(const QString& appSignalId, bool* ok) const
 	{
-		if (m_signalManager == nullptr)
-		{
-			assert(m_signalManager);
-			return {};
-		}
-
-		return m_signalManager->signalParam(appSignalId, ok);
+		return m_signalManager.signalParam(appSignalId, ok);
 	}
 
 	TuningSignalState TuningController::signalState(const QString& appSignalId, bool* ok) const
 	{
-		if (m_signalManager == nullptr)
-		{
-			assert(m_signalManager);
-			return {};
-		}
-
-		return m_signalManager->state(appSignalId, ok);
+		return m_signalManager.state(appSignalId, ok);
 	}
 
 	QVariant TuningController::signalParam(const QString& appSignalId) const
@@ -66,18 +54,12 @@ namespace VFrame30
 	{
 		QJSValueList result;
 
-		if (m_signalManager == nullptr)
-		{
-			assert(m_signalManager);
-			return result;
-		}
-
 		// --
 		//
 		std::vector<QString> signalIds{appSignalIds.begin(), appSignalIds.end()};
 		std::vector<TuningSignalState> states;
 
-		m_signalManager->state(signalIds, &states, nullptr);
+		m_signalManager.state(signalIds, &states, nullptr);
 
 		// --
 		//
@@ -99,37 +81,19 @@ namespace VFrame30
 
 	bool TuningController::signalExists(QString signalId) const
 	{
-		if (m_signalManager == nullptr)
-		{
-			assert(m_signalManager);
-			return {};
-		}
-
-		return m_signalManager->signalExists(::calcHash(signalId));
+		return m_signalManager.signalExists(::calcHash(signalId));
 	}
 
 	bool TuningController::signalsExist(QStringList signalIds)
 	{
-		if (m_signalManager == nullptr)
-		{
-			assert(m_signalManager);
-			return {};
-		}
-
-		return m_signalManager->signalsExist(signalIds);
+		return m_signalManager.signalsExist(signalIds);
 	}
 
 	bool TuningController::isDiscrete(QString signalId) const
 	{
-		if (m_signalManager == nullptr)
-		{
-			assert(m_signalManager);
-			return {};
-		}
-
 		bool ok = false;
 
-		AppSignalParam asp = m_signalManager->signalParam(::calcHash(signalId), &ok);
+		AppSignalParam asp = m_signalManager.signalParam(::calcHash(signalId), &ok);
 
 		return ok ?
 					(asp.type() == E::SignalType::Discrete) :
@@ -138,15 +102,9 @@ namespace VFrame30
 
 	bool TuningController::isAnalog(QString signalId) const
 	{
-		if (m_signalManager == nullptr)
-		{
-			assert(m_signalManager);
-			return {};
-		}
-
 		bool ok = false;
 
-		AppSignalParam asp = m_signalManager->signalParam(::calcHash(signalId), &ok);
+		AppSignalParam asp = m_signalManager.signalParam(::calcHash(signalId), &ok);
 
 		return ok ?
 					(asp.type() == E::SignalType::Analog) :
@@ -155,55 +113,77 @@ namespace VFrame30
 
 	int TuningController::precision(QString signalId) const
 	{
-		if (m_signalManager == nullptr)
-		{
-			assert(m_signalManager);
-			return {};
-		}
-
 		bool ok = false;
 
-		AppSignalParam asp = m_signalManager->signalParam(::calcHash(signalId), &ok);
+		AppSignalParam asp = m_signalManager.signalParam(::calcHash(signalId), &ok);
 
 		return (ok == true && asp.isAnalog() == true) ? asp.precision() : 0;
 	}
 
 	QStringList TuningController::signalIdsByTag(QString tag) const
 	{
-		if (m_signalManager == nullptr)
-		{
-			assert(m_signalManager);
-			return {};
-		}
-
-		return m_signalManager->signalIdsByTag(tag);
+		return m_signalManager.signalIdsByTag(tag);
 	}
 
 	bool TuningController::writeValue(QString appSignalId, QVariant value)
 	{
-		if (checkTuningAccess() == false)
+		if (m_tuningAuthorization.login(m_parent) == false)
 		{
-			return true;	// Access is denied, this is not an error
+			return false;
 		}
 
-		return m_tuningConnection->writeTuningSignal(appSignalId, value);
+		return m_tuningConnection.writeTuningSignal(appSignalId, value);
 	}
 
-	void TuningController::apply()
+	bool TuningController::writeValueBool(QString appSignalId, bool value)
 	{
-		if (checkTuningAccess() == false)
+		return writeValue(appSignalId, value);
+	}
+
+	bool TuningController::writeValueInt(QString appSignalId, int value)
+	{
+		return writeValue(appSignalId, value);
+	}
+
+	bool TuningController::writeValueDouble(QString appSignalId, double value)
+	{
+		return writeValue(appSignalId, value);
+	}
+
+	bool TuningController::apply()
+	{
+		if (m_tuningAuthorization.login(m_parent) == false)
 		{
-			return;	// Access is denied, this is not an error
+			return false;
 		}
 
-		m_tuningConnection->applyTuningSignals();
+		m_tuningConnection.applyTuningSignals();
 
-		return;
-	}
-
-	bool TuningController::checkTuningAccess() const
-	{
 		return true;
 	}
 
+	bool TuningController::tuningLogin() const
+	{
+		return m_tuningAuthorization.enabled();
+	}
+
+	bool TuningController::isLoggedIn() const
+	{
+		if (m_tuningAuthorization.enabled() == true)
+		{
+			return m_tuningAuthorization.isLoggedIn();
+		}
+
+		return true;
+	}
+
+	QString TuningController::userName() const
+	{
+		return m_tuningAuthorization.userName();
+	}
+
+	QStringList TuningController::userTags() const
+	{
+		return m_tuningAuthorization.userTags();
+	}
 }

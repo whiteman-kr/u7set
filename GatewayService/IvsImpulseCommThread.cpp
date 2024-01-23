@@ -16,6 +16,7 @@ namespace Gateway
 		m_states(handler.m_states),
 		m_signalStatesUpdated(handler.m_signalStatesUpdated),
 		m_lists(handler.m_lists),
+		m_logGatewayPackets(handler.m_logGatewayPackets),
 		m_timer(this)
 	{
 		HostAddressPort localIP = handler.m_gateway->localGatewayIP1();
@@ -45,6 +46,18 @@ namespace Gateway
 
 	void IvsImpulseCommThreadWorker::onThreadStarted()
 	{
+		if (m_logGatewayPackets == true)
+		{
+			m_packetsLog = std::make_shared<CircularLogger>();
+			circularLoggerInit(m_packetsLog, QString("%1_Packets").arg(m_gateway->gatewayID()),
+							   QString(), 10, 50);
+			m_packetsLog->setLogCodeInfo(false);
+
+			m_logStartTime = QDateTime::currentMSecsSinceEpoch();
+		}
+
+		//
+
 		m_timer.setTimerType(Qt::PreciseTimer);
 		m_timer.setInterval(m_gateway->period());
 		m_timer.setSingleShot(false);
@@ -68,6 +81,8 @@ namespace Gateway
 			sendStateChanges();			// at first flush all existing state changes
 			periodicSendStates();
 		}
+
+		checkLogTime();
 	}
 
 	bool IvsImpulseCommThreadWorker::tryCreateSockets()
@@ -183,6 +198,8 @@ namespace Gateway
 			li->stateChangesToRead.clear();
 			li->stateChangesMutex.unlock(thread);
 
+			baseTime_ms = convertTimeToUTC(baseTime_ms, m_gateway->timeType());
+
 			//
 
 			header.paramCount = static_cast<quint16>(writtenParamCount);
@@ -217,7 +234,10 @@ namespace Gateway
 
 			if (eventsPacket == true)
 			{
-				// logEventPacket(packet);
+				if (m_packetsLog != nullptr)
+				{
+					logEventsPacket(packet);
+				}
 
 				ci.eventPacketsSentCount++;
 
@@ -231,6 +251,11 @@ namespace Gateway
 			}
 			else
 			{
+				if (m_packetsLog != nullptr)
+				{
+					logPeriodicPacket(packet);
+				}
+
 				ci.statesPacketsSentCount++;
 
 				if ((ci.statesPacketsSentCount % 20) == 0)
@@ -240,14 +265,14 @@ namespace Gateway
 									  arg(ci.localGatewayIP.addressPortStr()).
 									  arg(ci.statesPacketsSentCount));
 				}
-
 			}
 		}
 
 	}
 
-	void IvsImpulseCommThreadWorker::logEventPacket(const char* packet)
+	void IvsImpulseCommThreadWorker::logEventsPacket(const char* packet)
 	{
+		TEST_PTR_RETURN(m_packetsLog);
 		TEST_PTR_RETURN(packet);
 
 		auto toBin = [](quint8 b) -> QString
@@ -267,21 +292,104 @@ namespace Gateway
 		const IvsImpulsePacketHeader& header = eventPacket->header;
 		const IvsImpulseSignalEvent* event = &eventPacket->signalEvents;
 
-		QString&& str = QString("SysID=%1, DataType=%2, ListID=%3, ListVer=%4, FirstIndex=%5, ParamCount=%6, BaseTime=%7, PacketNo=%8: ").
-							arg(header.systemID).arg(header.dataType).arg(header.listID).arg(header.listVersion).
-							arg(header.firstParamIndex).arg(header.paramCount).arg(header.time).
-							arg(*reinterpret_cast<const quint16*>(event + header.paramCount));
+		QString&& str = QString("events Time=%1, SID=%2, DT=%3, LID=%4, LV=%5, FI=%6, PCnt=%7, PacketNo=%8: ").
+				arg(formatTime(header.time)).
+				arg(header.systemID).arg(QChar(header.dataType)).arg(header.listID).arg(header.listVersion).
+				arg(header.firstParamIndex).arg(header.paramCount).
+				arg(*reinterpret_cast<const quint16*>(event + header.paramCount));
 
 		for(quint16 i = 0; i < header.paramCount; i++, event++)
 		{
-			str += QString("[indx=%1, time=%2, prev=%3, new=%4]").
+			str += QString("[indx=%1, tm=%2, p=%3, n=%4]").
 						arg(event->indexInList).arg(event->timeOffset).
 						arg(toBin(event->prevCode_A.allFlags)).arg(toBin(event->newCode_A.allFlags));
 		}
 
-		str += "\n";
+		DEBUG_LOG_MSG(m_packetsLog, str);
+	}
 
-		qDebug() << C_STR(str);
+	void IvsImpulseCommThreadWorker::logPeriodicPacket(const char* packet)
+	{
+		TEST_PTR_RETURN(m_packetsLog);
+		TEST_PTR_RETURN(packet);
+
+		const IvsImpulseStatesPacket* statesPacket = reinterpret_cast<const IvsImpulseStatesPacket*>(packet);
+		const IvsImpulsePacketHeader& header = statesPacket->header;
+
+		QString&& str = QString("period Time=%1, SID=%2, DT=%3, LID=%4, LV=%5, FI=%6, PCnt=%7").
+				arg(formatTime(header.time)).
+				arg(header.systemID).arg(QChar(header.dataType)).arg(header.listID).arg(header.listVersion).
+				arg(header.firstParamIndex).arg(header.paramCount);
+
+		DEBUG_LOG_MSG(m_packetsLog, str);
+	}
+
+	void IvsImpulseCommThreadWorker::checkLogTime()
+	{
+		if (m_packetsLog == nullptr)
+		{
+			return;
+		}
+
+		m_checkLogTimeCtr++;
+
+		if (m_checkLogTimeCtr < 10)
+		{
+			return;
+		}
+
+		m_checkLogTimeCtr = 0;
+
+		if (QDateTime::currentMSecsSinceEpoch() - m_logStartTime > 2 * 60 * 60 * 1000)		// 2 Hours
+		{
+			m_packetsLog.reset();
+		}
+	}
+
+	qint64 IvsImpulseCommThreadWorker::convertTimeToUTC(quint64 time, ::E::TimeType timeType) const
+	{
+		switch(timeType)
+		{
+		case ::E::TimeType::Local:
+		case ::E::TimeType::Plant:
+			{
+				// convert local time to UTC0
+				//
+				QDateTime dt = QDateTime::fromMSecsSinceEpoch(time, Qt::UTC);
+				dt.setTimeSpec(Qt::LocalTime);
+				time = dt.toMSecsSinceEpoch();
+			}
+			break;
+
+		case ::E::TimeType::System:
+			// no conversion required
+			break;
+
+		default:
+			Q_ASSERT(false);
+
+		}
+
+		return time;
+	}
+
+	QString IvsImpulseCommThreadWorker::formatTime(quint32 seconds)
+	{
+		QDateTime dt;
+
+		dt.setTimeSpec(Qt::UTC);
+		dt.setSecsSinceEpoch(seconds);
+
+		QDate d = dt.date();
+		QTime t = dt.time();
+
+		return QString("%1.%2.%3 %4:%5:%6").
+						arg(d.year()).
+						arg(d.month(), 2, 10, Latin1Char::ZERO).
+						arg(d.day(), 2, 10, Latin1Char::ZERO).
+						arg(t.hour(), 2, 10, Latin1Char::ZERO).
+						arg(t.minute(), 2, 10, Latin1Char::ZERO).
+						arg(t.second(), 2, 10, Latin1Char::ZERO);
 	}
 
 	int IvsImpulseCommThreadWorker::writeStatesToPacket(IvsImpulseStatesPacket* packet,
@@ -291,22 +399,36 @@ namespace Gateway
 	{
 		TEST_PTR_RETURN_VALUE(packet, 0);
 
+		int dataSize = 0;
+
 		switch(dataType)
 		{
 		case E::SignalListDataType::Analog_A:
-			return writeStatesToPacket_A(&packet->states_A, startIndex, size, paramCount, time);
+			dataSize = writeStatesToPacket_A(&packet->states_A, startIndex, size, paramCount, time);
+			break;
 
 		case E::SignalListDataType::Discrete_B:
-			return writeStatesToPacket_B(&packet->states_B, startIndex, size, paramCount, time);
+			dataSize = writeStatesToPacket_B(&packet->states_B, startIndex, size, paramCount, time);
+			break;
 
 		case E::SignalListDataType::Discrete_D:
-			return writeStatesToPacket_D(&packet->states_D, startIndex, size, paramCount, time);
+			dataSize = writeStatesToPacket_D(&packet->states_D, startIndex, size, paramCount, time);
+			break;
 
 		default:
 			Q_ASSERT(false);
 		}
 
-		return 0;
+		if (time == 0)
+		{
+			time = QDateTime::currentMSecsSinceEpoch();
+		}
+		else
+		{
+			time = convertTimeToUTC(time, m_gateway->timeType());
+		}
+
+		return dataSize;
 	}
 
 	int IvsImpulseCommThreadWorker::writeStatesToPacket_A(AnalogState_A* states,

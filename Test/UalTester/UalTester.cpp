@@ -15,7 +15,7 @@
 //
 // -------------------------------------------------------------------------------------------------------------------
 
-UalTester::UalTester(int& argc, char** argv, std::shared_ptr<CircularLogger> logger) :
+UalTester::UalTester(int argc, char** argv, std::shared_ptr<CircularLogger> logger) :
 	m_log(logger),
 	m_waitSocketsConnectionTimer(this)
 {
@@ -81,7 +81,7 @@ void UalTester::slot_loadConfiguration(const QByteArray configurationXmlData,
 
 	// load signals
 	//
-	for(Builder::BuildFileInfo bfi : buildFileInfoArray)
+	for(OnlineLib::BuildFileInfo bfi : buildFileInfoArray)
 	{
 		QByteArray fileData;
 		QString errStr;
@@ -168,7 +168,7 @@ void UalTester::slot_runTestFile()
 
 void UalTester::runCfgLoaderThread()
 {
-	m_softwareInfo.init(E::SoftwareType::TestClient, m_cmdLineParam.equipmentID(), 1, 0);
+	m_softwareInfo = SoftwareInfo(E::SoftwareType::TestClient, m_cmdLineParam.equipmentID());
 
 	m_cfgLoaderThread = new CfgLoaderThread(m_softwareInfo,
 											1,

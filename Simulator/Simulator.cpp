@@ -4,7 +4,7 @@
 #include <QDir>
 #include <QtConcurrent/QtConcurrent>
 #include "../HardwareLib/ModuleFirmware.h"
-#include "../lib/LogicModulesInfo.h"
+#include "../HardwareLib/LogicModulesInfo.h"
 #include "SimScriptRamAddress.h"
 #include "SimScriptLogicModule.h"
 #include "SimScriptSignal.h"
@@ -105,12 +105,12 @@ namespace Sim
 		return m_control.state() == SimControlState::Stop;
 	}
 
-	bool Simulator::runScript(const SimScriptItem& script, qint64 timeout)
+	bool Simulator::runScript(const SimScriptItem& script, const SimScriptItem& globalScript, qint64 timeout)
 	{
-		return runScripts({script}, timeout);
+		return runScripts({script}, globalScript, timeout);
 	}
 
-	bool Simulator::runScripts(const std::vector<SimScriptItem>& scripts, qint64 timeout)
+	bool Simulator::runScripts(const std::vector<SimScriptItem>& scripts, const SimScriptItem& globalScript, qint64 timeout)
 	{
 		if (m_scriptSimulator.isRunning() == true)
 		{
@@ -120,7 +120,7 @@ namespace Sim
 		m_scriptSimulator.log().setDebugMessagesEnabled(false);
 		m_scriptSimulator.setExecutionTimeout(timeout);
 
-		return m_scriptSimulator.runScripts(scripts);
+		return m_scriptSimulator.runScripts(scripts, globalScript);
 	}
 
 	bool Simulator::stopScript()
@@ -278,7 +278,7 @@ namespace Sim
 			}
 		}
 
-		// Load ConnectinsInfo
+		// Load ConnectionsInfo
 		//
 		ok = loadConnectionsInfo(buildPath);
 		if (ok == false)
@@ -301,7 +301,7 @@ namespace Sim
 				return false;
 			}
 
-			// There are cases when subsustem does not have some UARTs (like BVB), then we cannot simulate such
+			// There are cases when subsystem does not have some UARTs (like BVB), then we cannot simulate such
 			// subsystems, but still want to simulate other LM's
 			//
 			if (firmware.uartExists(static_cast<int>(UartId::ApplicationLogic)) == false)
@@ -318,7 +318,7 @@ namespace Sim
 
 			if (firmware.uartExists(static_cast<int>(UartId::Configuration)) == false)
 			{
-				m_log.writeWarning(QObject::tr("Subsystem %1 has no Congiguration, it will not be simulated.").arg(subsystemId));
+				m_log.writeWarning(QObject::tr("Subsystem %1 has no Configuration, it will not be simulated.").arg(subsystemId));
 				continue;
 			}
 
@@ -336,7 +336,7 @@ namespace Sim
 
 			Subsystem& ss = *subsystem.get();
 
-			// Get LogicMoudelDescription
+			// Get LogicModuleDescription
 			//
 			QString lmDescriptionFile = firmware.lmDescriptionFile();
 
@@ -349,7 +349,7 @@ namespace Sim
 
 			const LmDescription& lmDescription = *(lmit->second.get());
 
-			// Upload data to susbystem
+			// Upload data to subsystem
 			//
 			ok = ss.load(firmware, lmDescription, m_connections, logicModulesInfo);
 			if (ok == false)
@@ -361,7 +361,7 @@ namespace Sim
 			}
 		}
 
-		// Load appilcation signals
+		// Load application signals
 		//
 		ok = loadAppSignals(buildPath);
 		if (ok == false)

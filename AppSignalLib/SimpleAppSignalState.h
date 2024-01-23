@@ -3,23 +3,31 @@
 #include "../CommonLib/Hash.h"
 #include "../CommonLib/Times.h"
 #include "../UtilsLib/Queue.h"
-#include "../Proto/serialization.pb.h"
-#include "../Proto/network.pb.h"
-#include "AppSignalParam.h"
+#include "AppSignalState.h"
+
+namespace Proto
+{
+	class AppSignalState;
+}
+
+namespace Network
+{
+	class GatewayAppSignalState;
+}
 
 struct SimpleAppSignalState
 {
 	// light version of AppSignalState to use in queues and other AppDataService data structs
 	//
 	Hash hash = 0;					// == calcHash(AppSignalID)
-	Times time;
-	AppSignalStateFlags flags;
+	Times time{};
+	AppSignalStateFlags flags{};
 	double value = 0;
 	quint16 packetNo = 0;
 
-	operator AppSignalState() const;
+	operator ::AppSignalState() const;
 
-	inline void copyTo(AppSignalState& state) const
+	inline void copyTo(::AppSignalState& state) const
 	{
 		state.m_hash = hash;
 		state.m_time = time;

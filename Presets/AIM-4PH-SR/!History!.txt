@@ -1,0 +1,3 @@
+AIM-4PH-SR
+	28.11.2023	Version: 0	AIM-4PH-SR_v0.u7devp	Preset was created from AIM-4PH preset
+	18.12.2023	Version: 1	AIM-4PH-SR_v1.u7devp	Preset and configuration script refactoring

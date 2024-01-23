@@ -4,11 +4,10 @@
 
 #include "TcpFileTransfer.h"
 #include "SoftwareSettings.h"
-#include "../CommonLib/OrderedHash.h"
-#include "../lib/BuildInfo.h"
+#include "../CommonLib/HashedVector.h"
+#include "../OnlineLib/BuildInfo.h"
 
-
-typedef QVector<Builder::BuildFileInfo> BuildFileInfoArray;
+using BuildFileInfoArray = std::vector<OnlineLib::BuildFileInfo>;
 
 // -------------------------------------------------------------------------------------
 //
@@ -58,7 +57,7 @@ public:
 	virtual void onServerThreadStarted() override;
 	virtual void onServerThreadFinished() override;
 
-	const Builder::BuildInfo& buildInfo() { return m_buildInfo; }
+	const OnlineLib::BuildInfo& buildInfo() { return m_buildInfo; }
 
 private:
 	void readBuildXml();
@@ -72,8 +71,8 @@ private:
 
 	QString m_buildXmlPathFileName;
 
-	Builder::BuildInfo m_buildInfo;
-	HashedVector<QString, Builder::BuildFileInfo> m_buildFileInfo;		// fileName => buildFileInfo
+	OnlineLib::BuildInfo m_buildInfo;
+	std::map<QString, OnlineLib::BuildFileInfo> m_buildFileInfo;		// fileName => buildFileInfo
 
 	ErrorCode m_errorCode = ErrorCode::Ok;
 };
@@ -111,7 +110,7 @@ public:
 	Tcp::FileTransferResult getLastError() const { return m_lastError; }
 	QString getLastErrorStr() const { return getErrorStr(getLastError()); }
 
-	Builder::BuildInfo buildInfo();
+	OnlineLib::BuildInfo buildInfo();
 	SoftwareInfo softwareInfo() const { return localSoftwareInfo(); }
 	int appInstance() const { return m_appInstance; }
 	bool enableDownloadCfg() const { return m_enableDownloadConfiguration; }
@@ -182,13 +181,13 @@ private:
 	QString getFilePathNameByID(QString fileID) const;
 
 private:
-	struct CfgFileInfo : public Builder::BuildFileInfo
+	struct CfgFileInfo : public OnlineLib::BuildFileInfo
 	{
 		QByteArray fileData;
 		bool md5IsValid = false;
 	};
 
-	typedef HashedVector<QString, CfgFileInfo> CfgFilesInfo;
+	using CfgFilesInfo = HashedVector<QString, CfgFileInfo> ;
 
 	struct FileDownloadRequest
 	{
@@ -236,11 +235,11 @@ private:
 	bool m_allFilesLoaded = false;
 	int m_autoDownloadIndex = 0;
 
-	Builder::BuildInfo m_buildInfo;
-	CfgFilesInfo m_cfgFilesInfo;
+	OnlineLib::BuildInfo m_buildInfo;
+	CfgFilesInfo m_cfgFilesInfo;					// can't remove HashedVector here because
+													// configuration.xml should be in m_cfgFilesInfo[0]!!!
 
 	bool m_hasValidSavedConfiguration = false;
-	CfgFilesInfo m_savedCfgFileInfo;
 
 	QWaitCondition m_fileReadyCondition;
 	QMutex m_getFileBlockedMutex;
@@ -305,7 +304,7 @@ public:
 
 	bool hasFileID(QString fileID) const;
 
-	Builder::BuildInfo buildInfo();
+	OnlineLib::BuildInfo buildInfo();
 
 	QString getLastErrorStr();
 

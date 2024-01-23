@@ -1,14 +1,10 @@
 #pragma once
 
-#include "ApplicationLogicCode.h"
+#include "AppLogicCode.h"
 
 namespace Builder
 {
 	class ModuleLogicCompiler;
-
-	class CodeChecker;
-
-	typedef bool (CodeChecker::*CheckFuncPtr)(const CodeItem& cmd);
 
 	class CodeChecker
 	{
@@ -63,34 +59,35 @@ namespace Builder
 
 		//
 
-		bool checkNoCommand(const CodeItem& cmd);
-		bool checkNop(const CodeItem& cmd);
-		bool checkStart(const CodeItem& cmd);
-		bool checkStop(const CodeItem& cmd);
-		bool checkMov(const CodeItem& cmd);
-		bool checkMovMem(const CodeItem& cmd);
-		bool checkMovConst(const CodeItem& cmd);
-		bool checkMovBitConst(const CodeItem& cmd);
-		bool checkWriteFuncBlock(const CodeItem& cmd);
-		bool checkReadFuncBlock(const CodeItem& cmd);
-		bool checkWriteFuncBlockConst(const CodeItem& cmd);
-		bool checkWriteFuncBlockBit(const CodeItem& cmd);
-		bool checkReadFuncBlockBit(const CodeItem& cmd);
-		bool checkReadFuncBlockTest(const CodeItem& cmd);
-		bool checkSetMem(const CodeItem& cmd);
-		bool checkMovBit(const CodeItem& cmd);
-		bool checkNstart(const CodeItem& cmd);
-		bool checkAppStart(const CodeItem& cmd);
-		bool checkMov32(const CodeItem& cmd);
-		bool checkMovConst32(const CodeItem& cmd);
-		bool checkWriteFuncBlock32(const CodeItem& cmd);
-		bool checkReadFuncBlock32(const CodeItem& cmd);
-		bool checkWriteFuncBlockConst32(const CodeItem& cmd);
-		bool checkReadFuncBlockTest32(const CodeItem& cmd);
-		bool checkMovCompareFlag(const CodeItem& cmd);
-		bool checkPrevMov(const CodeItem& cmd);
-		bool checkPrevMov32(const CodeItem& cmd);
-		bool checkFill(const CodeItem& cmd);
+		bool check_nothing(const CodeItem& cmd);
+		bool check_startafb(const CodeItem& cmd);
+		bool check_mov(const CodeItem& cmd);
+		bool check_mov_addr_acc(const CodeItem& cmd);
+		bool check_mov_acc_addr(const CodeItem& cmd);
+		bool check_movmem(const CodeItem& cmd);
+		bool check_movc(const CodeItem& cmd);
+		bool check_movbc(const CodeItem& cmd);
+		bool check_wrfb(const CodeItem& cmd);
+		bool check_rdfb(const CodeItem& cmd);
+		bool check_wrfbc(const CodeItem& cmd);
+		bool check_wrfbb(const CodeItem& cmd);
+		bool check_rdfbb(const CodeItem& cmd);
+		bool check_rdfbcmp(const CodeItem& cmd);
+		bool check_setmem(const CodeItem& cmd);
+		bool check_movb(const CodeItem& cmd);
+		bool check_movb_acc_addr(const CodeItem& cmd);
+		bool check_movb_addr_acc(const CodeItem& cmd);
+		bool check_nstart(const CodeItem& cmd);
+		bool check_mov32(const CodeItem& cmd);
+		bool check_movc32(const CodeItem& cmd);
+		bool check_wrfb32(const CodeItem& cmd);
+		bool check_rdfb32(const CodeItem& cmd);
+		bool check_wrfbc32(const CodeItem& cmd);
+		bool check_rdfbcmp32(const CodeItem& cmd);
+		bool check_movcmpf(const CodeItem& cmd);
+		bool check_pmov(const CodeItem& cmd);
+		bool check_pmov32(const CodeItem& cmd);
+		bool check_fillb(const CodeItem& cmd);
 
 		//
 
@@ -113,20 +110,60 @@ namespace Builder
 		const MemArea& findMemArea(const std::map<quint32, MemArea>& areas,
 								   quint32 addr, quint32 sizeW) const;
 
+		bool addrInBitMemArea(quint32 addr, quint32 sizeW) const;
+		bool addrNotInBitMemArea(quint32 addr, quint32 sizeW) const;
+
 	private:
 		const ModuleLogicCompiler& m_compiler;
-		const LmDescription* m_lmDesc = nullptr;
+		LmDescriptionConstShared m_lmDesc;
+		const std::map<int, LmCommand>* m_lmCommands = nullptr;
 		mutable IssueLogger* m_log = nullptr;
 
-		static CheckFuncPtr m_checkFunc[LM_COMMANDS_COUNT];
+		using CheckFuncPtr = bool (CodeChecker::*)(const CodeItem& cmd);
+
+		static inline const std::map<QString, CheckFuncPtr> m_checkFuncMap =		// checkFuncName => checkFuncPtr
+		{
+			{ QStringLiteral("check_nothing"), &CodeChecker::check_nothing },
+			{ QStringLiteral("check_startafb"), &CodeChecker::check_startafb },
+			{ QStringLiteral("check_mov"), &CodeChecker::check_mov },
+			{ QStringLiteral("check_mov_addr_acc"), &CodeChecker::check_mov_addr_acc },
+			{ QStringLiteral("check_mov_acc_addr"), &CodeChecker::check_mov_acc_addr },
+			{ QStringLiteral("check_movmem"), &CodeChecker::check_movmem },
+			{ QStringLiteral("check_movc"), &CodeChecker::check_movc },
+			{ QStringLiteral("check_movbc"), &CodeChecker::check_movbc },
+			{ QStringLiteral("check_wrfb"), &CodeChecker::check_wrfb },
+			{ QStringLiteral("check_rdfb"), &CodeChecker::check_rdfb },
+			{ QStringLiteral("check_wrfbc"), &CodeChecker::check_wrfbc },
+			{ QStringLiteral("check_wrfbb"), &CodeChecker::check_wrfbb },
+			{ QStringLiteral("check_rdfbb"), &CodeChecker::check_rdfbb },
+			{ QStringLiteral("check_rdfbcmp"), &CodeChecker::check_rdfbcmp },
+			{ QStringLiteral("check_setmem"), &CodeChecker::check_setmem },
+			{ QStringLiteral("check_movb"), &CodeChecker::check_movb },
+			{ QStringLiteral("check_movb_acc_addr"), &CodeChecker::check_movb_acc_addr },
+			{ QStringLiteral("check_movb_addr_acc"), &CodeChecker::check_movb_addr_acc },
+			{ QStringLiteral("check_nstart"), &CodeChecker::check_nstart },
+			{ QStringLiteral("check_mov32"), &CodeChecker::check_mov32 },
+			{ QStringLiteral("check_movc32"), &CodeChecker::check_movc32 },
+			{ QStringLiteral("check_wrfb32"), &CodeChecker::check_wrfb32 },
+			{ QStringLiteral("check_rdfb32"), &CodeChecker::check_rdfb32 },
+			{ QStringLiteral("check_wrfbc32"), &CodeChecker::check_wrfbc32 },
+			{ QStringLiteral("check_rdfbcmp32"), &CodeChecker::check_rdfbcmp32 },
+			{ QStringLiteral("check_movcmpf"), &CodeChecker::check_movcmpf },
+			{ QStringLiteral("check_pmov"), &CodeChecker::check_pmov },
+			{ QStringLiteral("check_pmov32"), &CodeChecker::check_pmov32 },
+			{ QStringLiteral("check_fillb"), &CodeChecker::check_fillb }
+		};
 
 		quint16* m_mem = nullptr;
 		quint32 m_memSizeW = 0;
 
-		std::map<quint32, MemArea> m_readAreas;
-		std::map<quint32, MemArea> m_writeAreas;
+		std::map<quint32, MemArea> m_readAreas;			// startAddr => MemArea	(startAddr == MemArea.startAddr)
+		std::map<quint32, MemArea> m_writeAreas;		// startAddr => MemArea	(startAddr == MemArea.startAddr)
 
 		std::set<quint32> m_addrCanBeParialWritten;
+
+		MemArea m_bitMemArea;
+		MemArea m_appWordMemArea;
 
 		inline static const MemArea m_notValidArea;
 	};

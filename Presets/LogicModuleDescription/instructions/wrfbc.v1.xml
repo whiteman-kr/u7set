@@ -1,0 +1,17 @@
+<Command 
+	Caption="wrfbc"
+	Code="0280"
+	CodeMask="07c0"
+	SimulationFunc="command_wrfbc"
+	ParseFunc="parse_wrfbc"
+	Description="Write 16-bit word constant to AFB input"
+
+	CodeSize="3" 
+	ReadTime="11" 
+	WaitFbExecution="false"
+
+	ConstRuntime="9"
+
+	CheckFunc="check_wrfbc"
+	GetMnemoFunc="mnemo_wrfbc"
+	CalcExecTimeFunc="exectime_const"/>

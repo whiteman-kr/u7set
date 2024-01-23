@@ -1,0 +1,1384 @@
+#include "../lib/DataSource.h"
+#include "../HardwareLib/LmDescription.h"
+#include "../HardwareLib/LogicModulesInfo.h"
+#include "../OnlineLib/SoftwareSettings.h"
+
+#include "DeviceHelper.h"
+#include "ConnectionsInfoWriter.h"
+#include "LanControllerInfoHelper.h"
+#include "AppLogicCompiler.h"
+#include "SoftwareCfgGenerator.h"
+#include "AppDataServiceCfgGenerator.h"
+#include "BdfFile.h"
+
+namespace Builder
+{
+
+	// ---------------------------------------------------------------------------------
+	//
+	//	ApplicationLogicCompiler class implementation
+	//
+	// ---------------------------------------------------------------------------------
+
+	//IssueLogger* ApplicationLogicCompiler::log() = nullptr;
+
+
+	ApplicationLogicCompiler::ApplicationLogicCompiler(Context* context) :
+		m_context(context)
+	{
+	}
+
+	ApplicationLogicCompiler::~ApplicationLogicCompiler()
+	{
+		clear();
+	}
+
+	bool ApplicationLogicCompiler::run()
+	{
+		if (m_context == nullptr)
+		{
+			return false;
+		}
+
+		if (subsystems() == nullptr ||
+			equipmentSet() == nullptr ||
+			signalSet() == nullptr ||
+			lmDescriptions() == nullptr ||
+			appLogicData() == nullptr ||
+			tuningDataStorage() == nullptr ||
+			comparatorSet() == nullptr ||
+			buildResultWriter() == nullptr ||
+			connectionStorage() == nullptr ||
+			busSet() == nullptr)
+		{
+			LOG_NULLPTR_ERROR(log());
+			return false;
+		}
+
+		DeviceHelper::init();
+
+		signalSet()->resetAddresses();
+
+		ApplicationLogicCompilerProc appLogicCompilerProcs[] =
+		{
+			&ApplicationLogicCompiler::checkLmIpAddresses,
+			&ApplicationLogicCompiler::compileModulesLogicsPass1,
+			&ApplicationLogicCompiler::checkSignalsIDsAndHashes,		// SignalSet checking after AUTO-signals creation
+			&ApplicationLogicCompiler::compileModulesLogicsPass2,
+			&ApplicationLogicCompiler::writeResourcesUsageReport,
+			&ApplicationLogicCompiler::writeSerialDataXml,
+			&ApplicationLogicCompiler::writeOptoConnectionsReport,
+			&ApplicationLogicCompiler::writeOptoConnectionsXml,
+			&ApplicationLogicCompiler::writeOptoVhdFiles,
+			&ApplicationLogicCompiler::writeAppSignalSetFile,
+			&ApplicationLogicCompiler::writeCommonAppSignalsExtXmlFile,
+			&ApplicationLogicCompiler::writeComparatorSetFile,
+			&ApplicationLogicCompiler::writeSubsystemsXml,
+		};
+
+		bool result = true;
+
+		int procsCount = sizeof(appLogicCompilerProcs) / sizeof(ApplicationLogicCompilerProc);
+
+		for(int i = 0; i < procsCount; i++)
+		{
+			if (isBuildCancelled() == true)
+			{
+				result = false;
+				break;
+			}
+
+			result &= (this->*appLogicCompilerProcs[i])();		// call next ApplicationLogicCompiler procedure
+
+			if (result == false)
+			{
+				break;
+			}
+		}
+
+		clear();
+
+		DeviceHelper::shutdown();
+
+		return result;
+	}
+
+	Context* ApplicationLogicCompiler::context()
+	{
+		return m_context;
+	}
+
+	IssueLogger* ApplicationLogicCompiler::log()
+	{
+		return m_context->m_log;
+	}
+
+	SubsystemStorage* ApplicationLogicCompiler::subsystems()
+	{
+		return m_context->m_subsystems.get();
+	}
+
+	Hardware::EquipmentSet* ApplicationLogicCompiler::equipmentSet()
+	{
+		return m_context->m_equipmentSet.get();
+	}
+
+	SignalSet* ApplicationLogicCompiler::signalSet()
+	{
+		return m_context->m_signalSet.get();
+	}
+
+	LmDescriptionSet* ApplicationLogicCompiler::lmDescriptions()
+	{
+		return m_context->m_lmDescriptions.get();
+	}
+
+	AppLogicData* ApplicationLogicCompiler::appLogicData()
+	{
+		return m_context->m_appLogicData.get();
+	}
+
+	Tuning::TuningDataStorage* ApplicationLogicCompiler::tuningDataStorage()
+	{
+		return m_context->m_tuningDataStorage.get();
+	}
+
+	ComparatorSet* ApplicationLogicCompiler::comparatorSet()
+	{
+		return m_context->m_comparatorSet.get();
+	}
+
+	BuildResultWriter* ApplicationLogicCompiler::buildResultWriter()
+	{
+		return m_context->m_buildResultWriter.get();
+	}
+
+	Builder::ConnectionStorage* ApplicationLogicCompiler::connectionStorage()
+	{
+		return m_context->m_connections.get();
+	}
+
+	const VFrame30::BusSet* ApplicationLogicCompiler::busSet()
+	{
+		return m_context->m_busSet.get();
+	}
+
+	Hardware::OptoModuleStorage* ApplicationLogicCompiler::opticModuleStorage()
+	{
+		return m_context->m_opticModuleStorage.get();
+	}
+
+	std::vector<Hardware::DeviceModule*>& ApplicationLogicCompiler::lmModules()
+	{
+		return m_context->m_lmModules;
+	}
+
+	std::vector<Hardware::DeviceModule*>& ApplicationLogicCompiler::fscModules()
+	{
+		return m_context->m_fscModules;
+	}
+
+	OnlineLib::BuildInfo ApplicationLogicCompiler::buildInfo()
+	{
+		return m_context->m_buildResultWriter->buildInfo();
+	}
+
+	bool ApplicationLogicCompiler::isBuildCancelled()
+	{
+		if (QThread::currentThread()->isInterruptionRequested() == true)
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	bool ApplicationLogicCompiler::checkLmIpAddresses()
+	{
+		LOG_MESSAGE(log(), QString(tr("Check LM's ethernet adapters IP addresses...")));
+
+		bool result = true;
+
+		QHash<QString, const Hardware::DeviceModule*> ip2Modules;
+
+		for(const Hardware::DeviceModule* lm : lmModules())
+		{
+			if (lm == nullptr)
+			{
+				LOG_INTERNAL_ERROR(log());
+				assert(false);
+				return false;
+			}
+
+			std::shared_ptr<LmDescription> lmDescription = lmDescriptions()->get(lm);
+
+			if (lmDescription == nullptr)
+			{
+				LOG_INTERNAL_ERROR_MSG(log(), QString("LmDescription is not found for module %1").arg(lm->equipmentIdTemplate()));
+				result = false;
+				continue;
+			}
+
+			const LmDescription::Lan& lan = lmDescription->lan();
+
+			for(const LmDescription::LanController& lanController : lan.m_lanControllers)
+			{
+				LanControllerInfo lanControllerInfo;
+
+				bool res = true;
+
+				res = LanControllerInfoHelper::getInfo(*lm, lanController.m_type, lanController.m_place,
+												 *m_context, true, &lanControllerInfo, log());
+				if (res == false)
+				{
+					result = false;
+					continue;
+				}
+
+				if (LanControllerInfo::isProvideTuning(lanController.m_type) == true)
+				{
+					if (lanControllerInfo.tuningEnable == true)
+					{
+						lanControllerInfo.tuningIP = lanControllerInfo.tuningIP.trimmed();
+
+						if (ip2Modules.contains(lanControllerInfo.tuningIP) == true)
+						{
+							const Hardware::DeviceModule* lm1 = ip2Modules[lanControllerInfo.tuningIP];
+
+							log()->errEQP6003(lm1->equipmentId(), lm->equipmentId(), lanControllerInfo.tuningIP, lm1->uuid(), lm->uuid());
+
+							result = false;
+						}
+						else
+						{
+							ip2Modules.insert(lanControllerInfo.tuningIP, lm);
+						}
+					}
+				}
+
+				if (LanControllerInfo::isProvideAppData(lanController.m_type) == true)
+				{
+					if (lanControllerInfo.appDataEnable == true)
+					{
+						lanControllerInfo.appDataIP = lanControllerInfo.appDataIP.trimmed();
+
+						if (ip2Modules.contains(lanControllerInfo.appDataIP) == true)
+						{
+							const Hardware::DeviceModule* lm1 = ip2Modules[lanControllerInfo.appDataIP];
+
+							log()->errEQP6003(lm1->equipmentId(), lm->equipmentId(), lanControllerInfo.appDataIP, lm1->uuid(), lm->uuid());
+
+							result = false;
+						}
+						else
+						{
+							ip2Modules.insert(lanControllerInfo.appDataIP, lm);
+						}
+					}
+				}
+
+				if (LanControllerInfo::isProvideDiagData(lanController.m_type) == true)
+				{
+					if (lanControllerInfo.diagDataEnable == true)
+					{
+						lanControllerInfo.diagDataIP = lanControllerInfo.diagDataIP.trimmed();
+
+						if (ip2Modules.contains(lanControllerInfo.diagDataIP) == true)
+						{
+							const Hardware::DeviceModule* lm1 = ip2Modules[lanControllerInfo.diagDataIP];
+
+							log()->errEQP6003(lm1->equipmentId(), lm->equipmentId(), lanControllerInfo.diagDataIP, lm1->uuid(), lm->uuid());
+
+							result = false;
+						}
+						else
+						{
+							ip2Modules.insert(lanControllerInfo.diagDataIP, lm);
+						}
+					}
+				}
+			}
+		}
+
+		if (result == true)
+		{
+			LOG_MESSAGE(m_context->m_log, tr("Ok"));
+		}
+
+		return result;
+	}
+
+	bool ApplicationLogicCompiler::compileModulesLogicsPass1()
+	{
+		LOG_EMPTY_LINE(log());
+		LOG_MESSAGE(log(), QString(tr("Application logic compiler pass #1...")));
+
+		bool result = true;
+
+		// first compiler pass
+		//
+		for(const Hardware::DeviceModule* lm : fscModules())
+		{
+			if (lm == nullptr)
+			{
+				LOG_NULLPTR_ERROR(log());
+				result = false;
+				continue;
+			}
+
+			ModuleLogicCompiler* moduleLogicCompiler = new ModuleLogicCompiler(*this, lm);
+
+			m_moduleCompilers.append(moduleLogicCompiler);
+
+			result &= moduleLogicCompiler->pass1();
+
+			if (isBuildCancelled() == true)
+			{
+				result = false;
+				break;
+			}
+		}
+
+		for(ModuleLogicCompiler* mc : m_moduleCompilers)
+		{
+			TEST_PTR_CONTINUE(mc);
+
+			mc->setModuleCompilersRef(&m_moduleCompilers);
+		}
+
+		return result;
+	}
+
+	bool ApplicationLogicCompiler::compileModulesLogicsPass2()
+	{
+		bool result = true;
+
+		LOG_EMPTY_LINE(log());
+		LOG_MESSAGE(log(), QString(tr("Application logic compiler pass #2...")));
+
+		// second compiler pass
+		//
+		for(ModuleLogicCompiler* moduleLogicCompiler : m_moduleCompilers)
+		{
+			if (moduleLogicCompiler == nullptr)
+			{
+				LOG_NULLPTR_ERROR(log());
+				result = false;
+				continue;
+			}
+
+			result &= moduleLogicCompiler->pass2();
+
+			if (isBuildCancelled() == true)
+			{
+				result = false;
+				break;
+			}
+		}
+
+		return result;
+	}
+
+	bool ApplicationLogicCompiler::checkSignalsIDsAndHashes()
+	{
+		return signalSet()->checkSignalsIDsAndHashes();
+	}
+
+	bool ApplicationLogicCompiler::writeResourcesUsageReport()
+	{
+		bool result = true;
+
+		LOG_EMPTY_LINE(log());
+		LOG_MESSAGE(log(), QString(tr("Resources usage report generation...")));
+
+		QList<std::tuple<QString, QString, double, double, double, double, double>> fileContent;
+		QStringList file;
+
+		QString header = "LM Equipment ID";
+
+		QStringList restHeaderColumns;
+		restHeaderColumns << "Bit Memory, %"
+						  << "Word Memory, %"
+						  << "Code memory, %"
+						  << "IdrPhase Time, %"
+						  << "AlpPhase Time, %";
+
+		qsizetype maxIdLength = header.length();
+
+		QStringList afbsUsage;
+
+		QStringList afbsUsageHeader;
+		afbsUsageHeader << "OpCode"
+						<< "Caption"
+						<< "UsagePercent"
+						<< "UsedInstances"
+						<< "MaxInstances"
+						<< "Version";
+
+		auto getFirstFieldValue = [](double value) -> QString
+		{
+			if (value > 100)
+			{
+				return "##";
+			}
+
+			if (value > 90)
+			{
+				return "!!";
+			}
+
+			if (value > 80)
+			{
+				return "! ";
+			}
+
+			return "  ";
+		};
+
+		for(const ModuleLogicCompiler* moduleCompiler : m_moduleCompilers)
+		{
+			const ModuleLogicCompiler::ResourcesUsageInfo& info = moduleCompiler->resourcesUsageInfo();
+
+			double maxValue = info.bitMemoryUsed;
+			maxValue = std::max(maxValue, info.wordMemoryUsed);
+			maxValue = std::max(maxValue, info.codeMemoryUsed);
+			maxValue = std::max(maxValue, info.idrPhaseTimeUsed);
+			maxValue = std::max(maxValue, info.alpPhaseTimeUsed);
+
+			QString firstFieldValue = getFirstFieldValue(maxValue);
+
+			maxIdLength = std::max(maxIdLength, info.lmEquipmentID.length());
+
+			fileContent << std::make_tuple(firstFieldValue,
+										   info.lmEquipmentID,
+										   info.bitMemoryUsed,
+										   info.wordMemoryUsed,
+										   info.codeMemoryUsed,
+										   info.idrPhaseTimeUsed,
+										   info.alpPhaseTimeUsed);
+
+			// creating AFBL Usage tables
+			//
+			if (info.afblUsageInfo.count() == 0)
+			{
+				continue;
+			}
+
+			qsizetype captionLength = afbsUsageHeader[1].length();
+			for(const ModuleLogicCompiler::AfblUsageInfo& afblUsage : info.afblUsageInfo)
+			{
+				captionLength = std::max(captionLength, afblUsage.caption.length());
+			}
+
+			afbsUsage.append("");
+			afbsUsage.append(QString("LM %1 AFB components usage").arg(info.lmEquipmentID));
+			afbsUsage.append("");
+
+			QString headerRow = "  ";
+			QString delimiterRow = "--";
+
+			for (qsizetype j = 0; j < afbsUsageHeader.count(); j++)
+			{
+				qsizetype length = (j == 1) ? captionLength : afbsUsageHeader[j].length();
+				headerRow += " | " + afbsUsageHeader[j].leftJustified(length);
+				delimiterRow += "-+-" + QString().leftJustified(length, '-');
+			}
+
+			afbsUsage << headerRow << delimiterRow;
+
+			for(const ModuleLogicCompiler::AfblUsageInfo& afblUsage : info.afblUsageInfo)
+			{
+				afbsUsage << getFirstFieldValue(afblUsage.usagePercent) + " | " +
+							 QString::number(afblUsage.opCode).rightJustified(afbsUsageHeader[0].length()) + " | " +
+						afblUsage.caption.leftJustified(captionLength) + " | " +
+						QString::number(afblUsage.usagePercent, 'f', 2).rightJustified(afbsUsageHeader[2].length()) + " | " +
+						QString::number(afblUsage.usedInstances).rightJustified(afbsUsageHeader[3].length()) + " | " +
+						QString::number(afblUsage.maxInstances).rightJustified(afbsUsageHeader[4].length()) + " | " +
+						QString::number(afblUsage.version).rightJustified(afbsUsageHeader[5].length());
+			}
+
+			afbsUsage.append("");
+			// creating AFBL Usage tables complete
+		}
+
+		auto reportGenerator = [&](QString caption, std::function<bool
+				(std::tuple<QString, QString, double, double, double, double, double>& first,
+				 std::tuple<QString, QString, double, double, double, double, double>& second)> comparator,
+				int expectedRowQuantity = -1)
+		{
+			QStringList result;
+
+			result << caption;
+			result << "";
+
+			std::sort(fileContent.begin(), fileContent.end(), comparator);
+
+			if (expectedRowQuantity == -1)
+			{
+				expectedRowQuantity = static_cast<int>(fileContent.count());
+			}
+			int reportRowQuantity = std::min(expectedRowQuantity, static_cast<int>(fileContent.count()));
+
+			result << "   | " + header.leftJustified(maxIdLength, ' ') + " | " + restHeaderColumns.join(" | ");
+
+			QString delimiter;
+			delimiter = "---+-" + delimiter.leftJustified(maxIdLength, '-');
+
+			for (int i = 0; i < restHeaderColumns.count(); i++)
+			{
+				delimiter += "-+-";
+				delimiter = delimiter.leftJustified(delimiter.length() + restHeaderColumns[i].length(), '-');
+			}
+
+			result << delimiter;
+
+			for (int i = 0; i < reportRowQuantity; i++)
+			{
+				auto& item = fileContent[i];
+				result << std::get<0>(item) + " | " +
+						  std::get<1>(item).leftJustified(maxIdLength, ' ') + " | " +
+						  QString::number(std::get<2>(item), 'f', 2).rightJustified(restHeaderColumns[0].length()) + " | " +
+						  QString::number(std::get<3>(item), 'f', 2).rightJustified(restHeaderColumns[1].length()) + " | " +
+						  QString::number(std::get<4>(item), 'f', 2).rightJustified(restHeaderColumns[2].length()) + " | " +
+						  QString::number(std::get<5>(item), 'f', 2).rightJustified(restHeaderColumns[3].length()) + " | " +
+						  QString::number(std::get<6>(item), 'f', 2).rightJustified(restHeaderColumns[4].length());
+			}
+
+			result << "" << "";
+
+			return result;
+		};
+
+		file << reportGenerator("LM's resources usage", []
+												(std::tuple<QString, QString, double, double, double, double, double>& first,
+												std::tuple<QString, QString, double, double, double, double, double>& second)
+		{
+			return std::get<1>(first) < std::get<1>(second);
+		});
+
+		file << reportGenerator("Top LMs of BitMemory usage", []
+												(std::tuple<QString, QString, double, double, double, double, double>& first,
+												std::tuple<QString, QString, double, double, double, double, double>& second)
+		{
+			return std::get<2>(first) > std::get<2>(second);
+		}, 10);
+
+		file << reportGenerator("Top LMs of WordMemory usage", []
+												(std::tuple<QString, QString, double, double, double, double, double>& first,
+												std::tuple<QString, QString, double, double, double, double, double>& second)
+		{
+			return std::get<3>(first) > std::get<3>(second);
+		}, 10);
+
+		file << reportGenerator("Top LMs of CodeMemory usage", []
+												(std::tuple<QString, QString, double, double, double, double, double>& first,
+												std::tuple<QString, QString, double, double, double, double, double>& second)
+		{
+			return std::get<4>(first) > std::get<4>(second);
+		}, 10);
+
+		file << reportGenerator("Top LMs of IdrPhase Time usage", []
+												(std::tuple<QString, QString, double, double, double, double, double>& first,
+												std::tuple<QString, QString, double, double, double, double, double>& second)
+		{
+			return std::get<5>(first) > std::get<5>(second);
+		}, 10);
+
+		file << reportGenerator("Top LMs of AlpPhase Time usage", []
+												(std::tuple<QString, QString, double, double, double, double, double>& first,
+												std::tuple<QString, QString, double, double, double, double, double>& second)
+		{
+			return std::get<6>(first) > std::get<6>(second);
+		}, 10);
+
+		file.append("");
+		file.append(afbsUsage);
+
+		buildResultWriter()->addFile(Directory::REPORTS, File::RESOURCES_TXT, file);
+
+		return result;
+	}
+
+	bool ApplicationLogicCompiler::writeSerialDataXml()
+	{
+		return m_context->m_opticModuleStorage->writeSerialDataXml(buildResultWriter());
+	}
+
+	bool ApplicationLogicCompiler::writeOptoConnectionsReport()
+	{
+		int count = connectionStorage()->count();
+
+		if (count == 0)
+		{
+			return true;
+		}
+
+		QStringList list;
+
+		QString delim = "==================================================================================";
+		QString delim2 = "----------------------------------------------------------------------------------";
+
+		for(int i = 0; i < count; i++)
+		{
+			std::shared_ptr<Hardware::Connection> cn = connectionStorage()->get(i);
+
+			if (cn == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			list.append(delim);
+
+			list.append(QString(tr("Connection ID:\t\t\t%1")).arg(cn->connectionID()));
+			list.append(QString(tr("Link ID:\t\t\t%1\n")).arg(cn->linkID()));
+			list.append(QString(tr("Mode:\t\t\t\t%1")).arg(cn->typeStr()));
+			list.append(QString(tr("Settings:\t\t\t%1")).arg(cn->manualSettings() == true ? "Manual" : "Auto"));
+			list.append(QString(tr("Data ID control:\t\t%1\n")).arg(cn->disableDataId() == true ? "Disabled" : "Enabled"));
+
+			list.append(QString(tr("Port1 equipmentID:\t\t%1")).arg(cn->port1EquipmentID()));
+
+			if (cn->isPortToPort() == true)
+			{
+				list.append(QString(tr("Port2 equipmentID:\t\t%1")).arg(cn->port2EquipmentID()));
+			}
+
+			list.append(delim);
+			list.append("");
+
+			switch(cn->type())
+			{
+			case Hardware::Connection::Type::SinglePort:
+				{
+					Hardware::OptoPortShared p1 = opticModuleStorage()->getOptoPort(cn->port1EquipmentID());
+
+					if (p1 != nullptr)
+					{
+						p1->writeInfo(list);
+					}
+					else
+					{
+						assert(false);
+					}
+				}
+				break;
+
+			case Hardware::Connection::Type::PortToPort:
+				{
+					Hardware::OptoPortShared p1 = opticModuleStorage()->getOptoPort(cn->port1EquipmentID());
+
+					if (p1 != nullptr)
+					{
+						p1->writeInfo(list);
+					}
+					else
+					{
+						assert(false);
+					}
+
+					list.append(delim2);
+					list.append("");
+
+					Hardware::OptoPortShared p2 = opticModuleStorage()->getOptoPort(cn->port2EquipmentID());
+
+					if (p2 != nullptr)
+					{
+						p2->writeInfo(list);
+					}
+					else
+					{
+						assert(false);
+					}
+				}
+				break;
+
+			default:
+				assert(false);
+				return false;
+			}
+		}
+
+		buildResultWriter()->addFile(Directory::REPORTS, File::CONNECTIONS_TXT, "", "", list);
+
+		return true;
+	}
+
+	bool ApplicationLogicCompiler::writeOptoConnectionsXml()
+	{
+		ConnectionsInfoWriter connectionsInfoWriter;
+
+		Builder::ConnectionStorage* connStorage = connectionStorage();
+
+		TEST_PTR_LOG_RETURN_FALSE(connStorage, log());
+
+		Hardware::OptoModuleStorage* optoStorage = opticModuleStorage();
+
+		TEST_PTR_LOG_RETURN_FALSE(optoStorage, log());
+
+		connectionsInfoWriter.fill(*connStorage, *optoStorage);
+
+		QByteArray xmlData;
+
+		connectionsInfoWriter.save(&xmlData);
+
+		bool result = true;
+
+		BuildFile* file = buildResultWriter()->addFile(Directory::COMMON, File::CONNECTIONS_XML, "", "", xmlData);
+
+		if (file == nullptr)
+		{
+			result = false;
+		}
+
+		return result;
+	}
+
+	bool ApplicationLogicCompiler::writeOptoVhdFiles()
+	{
+		int count = connectionStorage()->count();
+
+		if (count == 0)
+		{
+			return true;
+		}
+
+		QStringList list;
+
+		QString delim = "--------------------------------------------------------------------";
+
+		QString str;
+
+		for(int i = 0; i < count; i++)
+		{
+			std::shared_ptr<Hardware::Connection> cn = connectionStorage()->get(i);
+
+			if (cn == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (cn->generateVHDFile() == false)
+			{
+				continue;
+			}
+
+			if (cn->isPortToPort() == true)
+			{
+				Hardware::OptoPortShared p1 = opticModuleStorage()->getOptoPort(cn->port1EquipmentID());
+				Hardware::OptoPortShared p2 = opticModuleStorage()->getOptoPort(cn->port2EquipmentID());
+
+				writeOptoPortToPortVhdFile(cn->connectionID(), p1, p2);
+				writeOptoPortToPortVhdFile(cn->connectionID(), p2, p1);
+			}
+			else
+			{
+				Hardware::OptoPortShared p1 = opticModuleStorage()->getOptoPort(cn->port1EquipmentID());
+				writeOptoSinglePortVhdFile(cn->connectionID(), p1);
+			}
+		}
+
+		return true;
+	}
+
+	bool ApplicationLogicCompiler::writeOptoPortToPortVhdFile(const QString& connectionID, Hardware::OptoPortShared outPort, Hardware::OptoPortShared inPort)
+	{
+		if (outPort == nullptr || inPort == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		if (outPort->txSignalsCount() == 0)
+		{
+			return true;
+		}
+
+		QString outPortID = outPort->equipmentID().toLower();
+		QString inPortID = inPort->equipmentID().toLower();
+
+		QString vhdFileName = QString("%1.vhd").arg(inPortID);
+		QString bdfFileName = QString("%1.bdf").arg(inPortID);
+
+		BdfFile bdfFile;
+
+		QStringList list;
+		QString str;
+
+		int inBusWidth = outPort->txDataSizeW() * SIZE_16BIT;
+
+		quint32 dataID = outPort->txDataID();
+
+		QVector<Hardware::TxRxSignalShared> txAnalogs;
+
+		outPort->getTxAnalogSignals(txAnalogs, false);
+
+		QVector<Hardware::TxRxSignalShared> txDiscretes;
+
+		outPort->getTxDiscreteSignals(txDiscretes, false);
+
+		list.append("--");
+		list.append("-- This file has been generated automatically by RPCT software");
+		list.append("--");
+
+		OnlineLib::BuildInfo bi = buildInfo();
+
+		str = QString("-- Project:\t%1").arg(bi.project);
+		list.append(str);
+
+		str = QString("-- Build No:\t%1").arg(bi.id);
+		list.append(str);
+
+		str = QString("-- Build date:\t%1").arg(bi.dateStr());
+		list.append(str);
+
+		str = QString("-- User:\t%1").arg(bi.user);
+		list.append(str);
+
+		str = QString("-- Host:\t%1").arg(bi.workstation);
+		list.append(str);
+
+		list.append("--");
+
+		str = QString("-- Port-to-port connection ID:\t%1").arg(connectionID);
+		list.append(str);
+
+		str = QString("-- Opto port ID:\t%1").arg(inPort->equipmentID());
+		list.append(str);
+
+		str = QString("-- Rx data size:\t%1 words (%2 bytes)").arg(outPort->txDataSizeW()).arg(outPort->txDataSizeW() * sizeof(quint16));
+		list.append(str);
+
+		str = QString("-- Rx data ID:\t\t%1 (0x%2)").arg(dataID).arg(dataID, 8, 16, Latin1Char::ZERO);
+		list.append(str);
+
+		list.append("--\n");
+
+		// declaration section
+
+		list.append("library ieee;");
+		list.append("use ieee.std_logic_1164.all;");
+		list.append("use ieee.numeric_std.all;\n");
+
+		str = QString("entity %1 is\n\tport (\n").arg(inPortID);
+		list.append(str);
+
+		str = QString("\t\tconst_rx_data_id : out std_logic_vector(32-1 downto 0);");
+		list.append(str);
+
+		bdfFile.addConnector32("const_rx_data_id");
+
+		str = QString("\t\trx_data_id : out std_logic_vector(32-1 downto 0);\n");
+		list.append(str);
+
+		bdfFile.addConnector32("rx_data_id");
+
+		if (txAnalogs.count() > 0)
+		{
+			for(Hardware::TxRxSignalShared txAnalog :  txAnalogs)
+			{
+				str = QString("\t\t%1 : out std_logic_vector(%2-1 downto 0);").
+						arg(txAnalog->appSignalID().remove("#")).
+						arg(txAnalog->dataSize());
+
+				list.append(str);
+
+				bdfFile.addConnector(txAnalog->appSignalID(), txAnalog->dataSize());
+			}
+
+			list.append("");
+		}
+
+		if (txDiscretes.count() > 0)
+		{
+			for(Hardware::TxRxSignalShared txDiscrete :  txDiscretes)
+			{
+				str = QString("\t\t%1 : out std_logic;").arg(txDiscrete->appSignalID().remove("#"));
+				list.append(str);
+
+				bdfFile.addConnector1(txDiscrete->appSignalID());
+			}
+
+			list.append("");
+		}
+
+		str = QString("\t\t%1 : in std_logic_vector(%2-1 downto 0)").arg(outPortID).arg(inBusWidth);
+		list.append(str);
+
+		str = QString("\t);\nend %1;\n").arg(inPortID);
+		list.append(str);
+
+		// architecture section
+
+		str = QString("architecture arch of %1 is").arg(inPortID);
+		list.append(str);
+
+		str = QString("\tsignal in_data : std_logic_vector(%1-1 downto 0);").arg(inBusWidth);
+		list.append(str);
+
+		str = QString("begin");
+		list.append(str);
+
+		str = QString("\tin_data <= %1;\n").arg(outPortID);
+		list.append(str);
+
+		str = QString("\tconst_rx_data_id <= std_logic_vector(to_unsigned(%1,32));").arg(dataID);
+		list.append(str);
+		str = QString("\trx_data_id <= in_data(32-1 downto 0);\n");
+		list.append(str);
+
+		if (txAnalogs.count() > 0)
+		{
+			for(Hardware::TxRxSignalShared txAnalog :  txAnalogs)
+			{
+				str = QString("\t%1 <= in_data(%2-1 downto %3);").
+						arg(txAnalog->appSignalID().remove("#")).
+						arg(txAnalog->addrInBuf().offset() * 16 + txAnalog->dataSize()).
+						arg(txAnalog->addrInBuf().offset() * 16);
+
+				list.append(str);
+			}
+
+			list.append("");
+		}
+
+		if (txDiscretes.count() > 0)
+		{
+			for(Hardware::TxRxSignalShared txDiscrete :  txDiscretes)
+			{
+				str = QString("\t%1 <= in_data(%2);").
+						arg(txDiscrete->appSignalID().remove("#")).
+						arg(txDiscrete->addrInBuf().offset() * 16 + txDiscrete->addrInBuf().bit());
+				list.append(str);
+			}
+
+			list.append("");
+		}
+
+		list.append("end arch;");
+
+		buildResultWriter()->addFile(Directory::OPTO_VHD, vhdFileName, list);
+
+		buildResultWriter()->addFile(Directory::OPTO_VHD, bdfFileName, bdfFile.stringList());
+
+		return true;
+	}
+
+	bool ApplicationLogicCompiler::writeOptoSinglePortVhdFile(const QString& connectionID, Hardware::OptoPortShared outPort)
+	{
+		if (outPort == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		if (outPort->txSignalsCount() == 0)
+		{
+			return true;
+		}
+
+		QString outPortID = outPort->equipmentID().toLower();
+
+		QString vhdFileName = QString("%1_tx.vhd").arg(outPortID);
+		QString bdfFileName = QString("%1_tx.bdf").arg(outPortID);
+
+		BdfFile bdfFile;
+
+		QStringList list;
+		QString str;
+
+		int inBusWidth = outPort->txDataSizeW() * SIZE_16BIT;
+
+		quint32 dataID = outPort->txDataID();
+
+		QVector<Hardware::TxRxSignalShared> txAnalogs;
+
+		outPort->getTxAnalogSignals(txAnalogs, false);
+
+		QVector<Hardware::TxRxSignalShared> txDiscretes;
+
+		outPort->getTxDiscreteSignals(txDiscretes, false);
+
+		list.append("--");
+		list.append("-- This file has been generated automatically by RPCT software");
+		list.append("--");
+
+		OnlineLib::BuildInfo bi = buildInfo();
+
+		str = QString("-- Project:\t%1").arg(bi.project);
+		list.append(str);
+
+		str = QString("-- Build No:\t%1").arg(bi.id);
+		list.append(str);
+
+		str = QString("-- Build date:\t%1").arg(bi.dateStr());
+		list.append(str);
+
+		str = QString("-- User:\t%1").arg(bi.user);
+		list.append(str);
+
+		str = QString("-- Host:\t%1").arg(bi.workstation);
+		list.append(str);
+
+		list.append("--");
+
+		str = QString("-- Single-port connection ID:\t%1").arg(connectionID);
+		list.append(str);
+
+		str = QString("-- Rx data size:\t%1 words (%2 bytes)").arg(outPort->txDataSizeW()).arg(outPort->txDataSizeW() * sizeof(quint16));
+		list.append(str);
+
+		str = QString("-- Rx data ID:\t\t%u (0x%08X)").arg(dataID).arg(dataID, 8, 16, Latin1Char::ZERO);
+		list.append(str);
+
+		list.append("--\n");
+
+		// declaration section
+
+		list.append("library ieee;");
+		list.append("use ieee.std_logic_1164.all;");
+		list.append("use ieee.numeric_std.all;\n");
+
+		str = QString("entity %1_tx is\n\tport (\n").arg(outPortID);
+		list.append(str);
+
+		str = QString("\t\tconst_rx_data_id : out std_logic_vector(32-1 downto 0);");
+		list.append(str);
+
+		bdfFile.addConnector32("const_rx_data_id");
+
+		str = QString("\t\trx_data_id : out std_logic_vector(32-1 downto 0);\n");
+		list.append(str);
+
+		bdfFile.addConnector32("rx_data_id");
+
+		if (txAnalogs.count() > 0)
+		{
+			for(Hardware::TxRxSignalShared txAnalog :  txAnalogs)
+			{
+				str = QString("\t\t%1 : out std_logic_vector(%2-1 downto 0);").
+						arg(txAnalog->appSignalID().remove("#")).
+						arg(txAnalog->dataSize());
+
+				list.append(str);
+
+				bdfFile.addConnector(txAnalog->appSignalID(), txAnalog->dataSize());
+			}
+
+			list.append("");
+		}
+
+		if (txDiscretes.count() > 0)
+		{
+			for(Hardware::TxRxSignalShared txDiscrete :  txDiscretes)
+			{
+				str = QString("\t\t%1 : out std_logic;").arg(txDiscrete->appSignalID().remove("#"));
+				list.append(str);
+
+				bdfFile.addConnector1(txDiscrete->appSignalID());
+			}
+
+			list.append("");
+		}
+
+		str = QString("\t\t%1 : in std_logic_vector(%2-1 downto 0)").arg(outPortID).arg(inBusWidth);
+		list.append(str);
+
+		str = QString("\t);\nend %1_tx;\n").arg(outPortID);
+		list.append(str);
+
+		// architecture section
+
+		str = QString("architecture arch of %1_tx is").arg(outPortID);
+		list.append(str);
+
+		str = QString("\tsignal in_data : std_logic_vector(%1-1 downto 0);").arg(inBusWidth);
+		list.append(str);
+
+		str = QString("begin");
+		list.append(str);
+
+		str = QString("\tin_data <= %1;\n").arg(outPortID);
+		list.append(str);
+
+		str = QString("\tconst_rx_data_id <= std_logic_vector(to_unsigned(%1,32));").arg(dataID);
+		list.append(str);
+		str = QString("\trx_data_id <= in_data(32-1 downto 0);\n");
+		list.append(str);
+
+		if (txAnalogs.count() > 0)
+		{
+			for(Hardware::TxRxSignalShared txAnalog :  txAnalogs)
+			{
+				str = QString("\t%1 <= in_data(%2-1 downto %3);").
+						arg(txAnalog->appSignalID().remove("#")).
+						arg(txAnalog->addrInBuf().offset() * 16 + txAnalog->dataSize()).
+						arg(txAnalog->addrInBuf().offset() * 16);
+
+				list.append(str);
+			}
+
+			list.append("");
+		}
+
+		if (txDiscretes.count() > 0)
+		{
+			for(const Hardware::TxRxSignalShared& txDiscrete :  txDiscretes)
+			{
+				str = QString("\t%1 <= in_data(%2);").
+						arg(txDiscrete->appSignalID().remove("#")).
+						arg(txDiscrete->addrInBuf().offset() * 16 + txDiscrete->addrInBuf().bit());
+				list.append(str);
+			}
+
+			list.append("");
+		}
+
+		list.append("end arch;");
+
+		buildResultWriter()->addFile(Directory::OPTO_VHD, vhdFileName, list);
+
+		buildResultWriter()->addFile(Directory::OPTO_VHD, bdfFileName, bdfFile.stringList());
+
+		return true;
+	}
+
+	bool ApplicationLogicCompiler::writeAppSignalSetFile()
+	{
+		SignalSet* sigSet = signalSet();
+
+		if (sigSet == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		::Proto::AppSignalSet protoAppSignalSet;
+
+		// fill signals
+		//
+		for(const AppSignal* s : *sigSet)
+		{
+			::Proto::AppSignal* protoAppSignal = protoAppSignalSet.add_appsignal();
+
+			s->saveToProto(protoAppSignal);
+		}
+
+		int dataSize = static_cast<int>(protoAppSignalSet.ByteSizeLong());
+
+		QByteArray data;
+
+		data.resize(dataSize);
+
+		protoAppSignalSet.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(data.data()));
+
+		BuildFile* appSignalSetFile = buildResultWriter()->addFile(Directory::COMMON, File::APP_SIGNALS_ASGS, CfgFileId::APP_SIGNAL_SET, "", data, true);
+
+		return appSignalSetFile != nullptr;
+	}
+
+	bool ApplicationLogicCompiler::writeCommonAppSignalsExtXmlFile()
+	{
+		SignalSet* sgSet = signalSet();
+
+		if (sgSet == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		return AppDataServiceCfgGenerator::writeAppSignalsExtXml(dynamic_cast<AppSignalSet*>(sgSet),
+																 nullptr,
+																 buildResultWriter(),
+																 Directory::COMMON);
+	}
+
+	bool ApplicationLogicCompiler::writeComparatorSetFile()
+	{
+		if (comparatorSet() == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		::Proto::ComparatorSet protoComparatorSet;
+		comparatorSet()->serializeTo(&protoComparatorSet);
+
+		int dataSize = static_cast<int>(protoComparatorSet.ByteSizeLong());
+
+		QByteArray data;
+
+		data.resize(dataSize);
+
+		protoComparatorSet.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(data.data()));
+
+		BuildFile* comparatorSetFile = buildResultWriter()->addFile(Directory::COMMON, File::COMPARATORS_SET, CfgFileId::COMPARATOR_SET, "", data, true);
+
+		return comparatorSetFile != nullptr;
+	}
+
+	bool ApplicationLogicCompiler::writeSubsystemsXml()
+	{
+		bool result = true;
+
+		int subsystemsCount = subsystems()->count();
+
+		QHash<QString, std::shared_ptr<Hardware::Subsystem>> subsys;
+
+		for(int i = 0; i < subsystemsCount; i++)
+		{
+			std::shared_ptr<Hardware::Subsystem> subsystem = subsystems()->get(i);
+
+			if (subsystem == nullptr)
+			{
+				LOG_NULLPTR_ERROR(log());
+				result = false;
+				continue;
+			}
+
+			subsys.insert(subsystem->subsystemId(), subsystem);
+		}
+
+		QMultiHash<QString, QString> subsystemModules;
+		QHash<QString, const Hardware::DeviceModule*> modules;
+
+		for(const Hardware::DeviceModule* module : lmModules())
+		{
+			if (module == nullptr)
+			{
+				LOG_NULLPTR_ERROR(log());
+				result = false;
+				continue;
+			}
+
+			modules.insert(module->equipmentIdTemplate(), module);
+
+			QString lmSubsystem;
+
+			bool res= DeviceHelper::getStrProperty(module, "SubsystemID", &lmSubsystem, log());
+
+			if (res == false)
+			{
+				result = false;
+				continue;
+			}
+
+			if (subsys.contains(lmSubsystem) == false)
+			{
+				// Subsystem '%1' is not found in subsystem set (Logic Module '%2').
+				//
+				log()->errCFG3001(lmSubsystem, module->equipmentIdTemplate());
+				result = false;
+				continue;
+			}
+
+			subsystemModules.insert(lmSubsystem, module->equipmentIdTemplate());
+		}
+
+		QByteArray data;
+		XmlWriteHelper xml(&data);
+
+		xml.setAutoFormatting(true);
+		xml.writeStartDocument();
+
+		buildInfo().writeToXml(*xml.xmlStreamWriter());
+
+		xml.writeStartElement("Subsystems");
+		xml.writeIntAttribute("Count", subsystemsCount);
+
+		QStringList subsystemIDs = subsys.keys();
+
+		subsystemIDs.sort();
+
+		for(const QString& subsystemID : subsystemIDs)
+		{
+			std::shared_ptr<Hardware::Subsystem> subsystem = subsys.value(subsystemID, nullptr);
+
+			if (subsystem == nullptr)
+			{
+				LOG_INTERNAL_ERROR(log());
+				result = false;
+				continue;
+			}
+
+			QStringList subsysModuleIds = subsystemModules.values(subsystemID);
+			subsysModuleIds.sort();
+
+			xml.writeStartElement("Subsystem");
+
+			xml.writeStringAttribute("Id", subsystem->subsystemId());
+			xml.writeStringAttribute("Caption", subsystem->caption());
+			xml.writeIntAttribute("Index", subsystem->index());
+			xml.writeIntAttribute("Key", subsystem->key());
+			xml.writeIntAttribute("ModulesCount", static_cast<int>(subsysModuleIds.count()));
+
+			for(const QString& moduleID : subsysModuleIds)
+			{
+				const Hardware::DeviceModule* module = modules.value(moduleID, nullptr);
+
+				if (module == nullptr)
+				{
+					LOG_INTERNAL_ERROR(log());
+					result = false;
+					continue;
+				}
+
+				int lmNumber = 0;
+				int lmChannel = 0;
+				QString lmSubsystem;
+
+				bool res = true;
+
+				res &= DeviceHelper::getIntProperty(module, "LMNumber", &lmNumber, log());
+				res &= DeviceHelper::getIntProperty(module, "SubsystemChannel", &lmChannel, log());
+				res &= DeviceHelper::getStrProperty(module, "SubsystemID", &lmSubsystem, log());
+
+				if (res == false)
+				{
+					result = false;
+					continue;
+				}
+
+				xml.writeStartElement("Module");
+
+				xml.writeStringAttribute("EquipmentId", module->equipmentIdTemplate());
+				xml.writeStringAttribute("SubsystemId", lmSubsystem);
+				xml.writeIntAttribute("LmNumber", lmNumber);
+				xml.writeIntAttribute("SubsystemChannel", lmChannel);
+				xml.writeIntAttribute("ModuleType", module->moduleType());
+				xml.writeIntAttribute("ModuleFamily", module->moduleFamily());
+				xml.writeIntAttribute("ModuleVersion", module->moduleVersion());
+				xml.writeIntAttribute("CustomModuleFamily", module->customModuleFamily());
+
+				xml.writeEndElement(); // </Module>
+			}
+
+			xml.writeEndElement(); // </Subsystem>
+		}
+
+		xml.writeEndElement(); // </Subsystems>
+		xml.writeEndDocument();
+
+		BuildFile* buildFile = buildResultWriter()->addFile(Directory::COMMON, File::SUBSYSTEMS_XML, "", "",  data);
+
+		if (buildFile == nullptr)
+		{
+			result = false;
+		}
+
+		return result;
+	}
+
+	void ApplicationLogicCompiler::clear()
+	{
+		for(ModuleLogicCompiler* mc : m_moduleCompilers)
+		{
+			delete mc;
+		}
+
+		m_moduleCompilers.clear();
+	}
+}
+
+
+

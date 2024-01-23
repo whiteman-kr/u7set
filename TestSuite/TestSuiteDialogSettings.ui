@@ -6,15 +6,45 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>540</width>
-    <height>304</height>
+    <width>485</width>
+    <height>255</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Settings</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0" colspan="2">
+   <item row="1" column="0">
+    <widget class="QPushButton" name="saveAsButton">
+     <property name="text">
+      <string>Save As...</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>361</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="1" column="2">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="3">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
       <number>0</number>
@@ -27,15 +57,21 @@
        <item row="0" column="0">
         <widget class="QLabel" name="label">
          <property name="text">
-          <string>Instance ID</string>
+          <string>Instance StrID</string>
          </property>
         </widget>
        </item>
        <item row="0" column="1">
         <widget class="QComboBox" name="m_instanceCombo">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="minimumSize">
           <size>
-           <width>250</width>
+           <width>0</width>
            <height>0</height>
           </size>
          </property>
@@ -47,23 +83,10 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="2">
-        <spacer name="horizontalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>171</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
        <item row="1" column="0">
         <widget class="QLabel" name="label_2">
          <property name="text">
-          <string>Configurator IP Address 1:</string>
+          <string>Configurator IP Address 1</string>
          </property>
         </widget>
        </item>
@@ -73,7 +96,7 @@
        <item row="2" column="0">
         <widget class="QLabel" name="label_3">
          <property name="text">
-          <string>Configurator Port 1:</string>
+          <string>Configurator Port 1</string>
          </property>
         </widget>
        </item>
@@ -83,7 +106,7 @@
        <item row="3" column="0">
         <widget class="QLabel" name="label_4">
          <property name="text">
-          <string>Configurator IP Address 2:</string>
+          <string>Configurator IP Address 2</string>
          </property>
         </widget>
        </item>
@@ -93,7 +116,7 @@
        <item row="4" column="0">
         <widget class="QLabel" name="label_5">
          <property name="text">
-          <string>Configurator Port 2:</string>
+          <string>Configurator Port 2</string>
          </property>
         </widget>
        </item>
@@ -152,7 +175,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Load Test Scripts from:</string>
+        <string>Load Test Scripts from directory:</string>
        </property>
       </widget>
      </widget>
@@ -163,15 +186,15 @@
       <widget class="QComboBox" name="m_languageCombo">
        <property name="geometry">
         <rect>
-         <x>20</x>
-         <y>40</y>
-         <width>200</width>
+         <x>70</x>
+         <y>20</y>
+         <width>161</width>
          <height>22</height>
         </rect>
        </property>
        <property name="minimumSize">
         <size>
-         <width>200</width>
+         <width>161</width>
          <height>0</height>
         </size>
        </property>
@@ -179,40 +202,17 @@
       <widget class="QLabel" name="label_6">
        <property name="geometry">
         <rect>
-         <x>20</x>
-         <y>18</y>
+         <x>10</x>
+         <y>20</y>
          <width>97</width>
-         <height>16</height>
+         <height>22</height>
         </rect>
        </property>
        <property name="text">
-        <string>Language</string>
+        <string>Language:</string>
        </property>
       </widget>
      </widget>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <spacer name="horizontalSpacer">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>361</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="1" column="1">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
     </widget>
    </item>
   </layout>

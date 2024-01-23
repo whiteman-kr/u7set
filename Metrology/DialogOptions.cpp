@@ -1,14 +1,4 @@
 #include "DialogOptions.h"
-
-#include <QApplication>
-#include <QScreen>
-#include <QSettings>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QListWidget>
-#include <QPushButton>
-#include <cassert>
-
 #include "DialogMeasurePoint.h"
 #include "DialogOptionsMvh.h"
 

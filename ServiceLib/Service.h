@@ -62,17 +62,25 @@ class ServiceWorker : public SimpleThreadWorker
 	Q_OBJECT
 
 public:
+	// FIRST instance of ServiceWorker constructor
+	//
 	ServiceWorker(const SoftwareInfo& softwareInfo,
 				  const QString& serviceInstanceName,
-				  int& argc,
+				  int argc,
 				  char** argv,
-				  CircularLoggerShared logger,
-				  E::ServiceRunMode runMode);
+				  CircularLoggerShared logger);
 
+protected:
+	// SECOND instance of ServiceWorker constructor
+	// should be called in createInstance function of derived class only!
+	//
+	ServiceWorker(const ServiceWorker* prevInstance);
+
+public:
 	virtual ~ServiceWorker();
 
-	int& argc() const;
-	char** argv() const;
+	int argc() const { return m_argc; }
+	const char** argv() const { return m_argv; }
 
 	QString appPath() const;
 	QString cmdLine() const;
@@ -82,21 +90,20 @@ public:
 	const SoftwareInfo& softwareInfo() const;
 	E::SoftwareType softwareType() const;
 
-	bool initAndProcessCmdLineSettings();
-
 	void setService(Service* service);
 	Service* service();
 
-	CommandLineParser& cmdLineParser();
-
-	virtual ServiceWorker* createInstance() const = 0;	// Must be implemented in derived class as:
-														//
-														// ServiceWorker* createInstance() const override
-														// {
-														//		DerivedServiceWorker* newInstance = new DerivedServiceWorker(serviceName(), argc(), argv());
-														//		newInstance->init();
-														//		return newInstance;
-														// }
+	// createInstance() must be implemented in derived class as:
+	//
+	// ServiceWorker* DerivedServiceWorker::createInstance() const override
+	// {
+	//		DerivedServiceWorker* newInstance =
+	//				new DerivedServiceWorker(this);
+	//
+	//		return newInstance;
+	// }
+	//
+	virtual ServiceWorker* createInstance() const = 0;
 
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& servicesInfo) const = 0;
 
@@ -109,11 +116,10 @@ public:
 
 	CircularLoggerShared logger() const { return m_logger; }
 
-	QString getStrSetting(const QString& settingName);
-	OptionalBool getBoolSetting(const QString& settingName);
-	QString getCmdLineSetting(const QString& settingName);
+	QString getSettingValue(const QString& settingName);
+	bool getBoolSettingValue(const QString& settingName);
 
-	QString getSoftwareInfoStr() const;
+	QStringList getSoftwareInfo() const;
 
 	SoftwareSettingsSet& softwareSettingsSet() { return m_softwareSettingsSet; }
 	const SoftwareSettingsSet& softwareSettingsSet() const { return m_softwareSettingsSet; }
@@ -124,25 +130,65 @@ public:
 	void setServiceRunMode(E::ServiceRunMode srm);
 	E::ServiceRunMode serviceRunMode() const;
 
+	bool addSimpleNoWritableCmdLineArg(	const QString& cmdLineArgName,
+										const QString& description);
+
+	bool addSimpleCmdLineArg(const QString& cmdLineArgName,
+							 const QString& settingName,
+							 const QString& description);
+
+	bool addValueNoWritebleCmdLineArg(const QString& cmdLineArgName,
+									  const QString& description,
+									  const QString& paramExample);
+
+	bool addValueCmdLineArg(const QString& cmdLineArgName,
+							const QString& settingName,
+							const QString& description,
+							const QString& paramExample);
+
+	bool addBoolCmdLineArg(const QString& cmdLineArgName,
+							const QString& settingName,
+							const QString& description);
+
+	bool cmdLineArgIsSet(const QString& cmdLineArgName) const;
+	QString helpText() const;
+
+	int thisInstanceNo() const { return m_thisInstanceNo; }
+
 signals:
 	void work();
 	void stopped();
 
 protected:
-	void init();
+	virtual void initialize() = 0;						// calls on ServiceWorker's thread start
+	virtual void shutdown() = 0;						// calls on ServiceWorker's thread shutdown
 
-	virtual bool processCustomCmdLineSettings();			// override to process service-specific cmd line settings
-													// return true - to continue service running
-													// return false - to exit service
+	virtual void initServiceSpecificCmdLineArgs() = 0;	// override to add service-specific options to m_cmdLineParser
 
-	virtual void initCmdLineParser() = 0;			// override to add service-specific options to m_cmdLineParser
-	virtual void loadSettings() = 0;				// override to load service-specific settings
-	virtual void initialize() = 0;					// calls on ServiceWorker's thread start
-	virtual void shutdown() = 0;					// calls on ServiceWorker's thread shutdown
+	virtual bool processServiceSpecificCmdLineArgs();	// override to process service-specific cmd line settings
+														// return true - to continue service running
+														// return false - to exit service
+	virtual void loadServiceSpecificSettings()
+	{
+		DEBUG_LOG_MSG(m_logger, QString("ServiceWorker::loadServiceSpecificSettings() override to load service-specific settings"));
+	}
+
+	const CommandLineParser& commandLineParser() const { return m_cmdLineParser; }
 
 private:
+	void setThisInstanceNo();
+
+	void copyCmdLineArgs(int argc, const char** argv);
+	const QStringList cmdLineArgs() const { return m_cmdLineArgs; }
+
+	bool initInstance1();					// called by ServiceStarter only for instance 1 of ServiceWorker derived class
+
 	void onThreadStarted() override final;
 	void onThreadFinished() override final;
+
+	void loadCommonServicesSettings();
+
+	friend class ServiceStarter;
 
 private:
 	QString m_equipmentID;
@@ -159,12 +205,14 @@ private:
 
 	QString m_serviceName;
 
-	int& m_argc;
-	char** m_argv = nullptr;
 	CircularLoggerShared m_logger;
-	E::ServiceRunMode m_serviceRunMode = E::ServiceRunMode::ConsoleApp;
 
-	QSettings m_settings;
+	int m_argc = 0;
+	const char** m_argv = nullptr;
+
+	QStringList m_cmdLineArgs;
+
+	E::ServiceRunMode m_serviceRunMode = E::ServiceRunMode::ConsoleApp;
 
 	CommandLineParser m_cmdLineParser;
 
@@ -173,9 +221,10 @@ private:
 	mutable QRecursiveMutex m_spMutex;
 	SessionParams m_sessionParams;
 
+	int m_thisInstanceNo = 0;
+
 	static int m_instanceNo;
 };
-
 
 // -------------------------------------------------------------------------------------
 //
@@ -239,68 +288,3 @@ private:
 };
 
 
-// -------------------------------------------------------------------------------------
-//
-// DaemonServiceStarter class declaration
-//
-// -------------------------------------------------------------------------------------
-
-class DaemonServiceStarter : private QtService
-{
-public:
-	DaemonServiceStarter(QCoreApplication& app, ServiceWorker& serviceWorker, std::shared_ptr<CircularLogger> logger);
-	virtual ~DaemonServiceStarter();
-
-	int exec();
-
-private:
-	void start() override final;			// override QtService::start
-	void stop() override final;				// override QtService::stop
-
-	void stopAndDeleteService();
-
-private:
-	QCoreApplication& m_app;
-	ServiceWorker& m_serviceWorker;
-	std::shared_ptr<CircularLogger> m_logger;
-
-	Service* m_service = nullptr;
-};
-
-
-// -------------------------------------------------------------------------------------
-//
-// ServiceStarter class declaration
-//
-// -------------------------------------------------------------------------------------
-
-class ServiceStarter : public QObject
-{
-	Q_OBJECT
-
-public:
-	ServiceStarter(QCoreApplication& app, ServiceWorker& m_serviceWorker, std::shared_ptr<CircularLogger> logger);
-
-	int exec();
-
-private:
-	int privateRun();
-
-	void processCmdLineArguments(bool& pauseAndExit, bool& startAsRegularApp);
-
-	int runAsRegularApplication();
-
-private:
-	class KeyReaderThread : public RunOverrideThread
-	{
-	public:
-		KeyReaderThread();
-		virtual void run() override;
-		void stop();
-	};
-
-private:
-	QCoreApplication& m_app;
-	ServiceWorker& m_serviceWorker;
-	std::shared_ptr<CircularLogger> m_logger;
-};

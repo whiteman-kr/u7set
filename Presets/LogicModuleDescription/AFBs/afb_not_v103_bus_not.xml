@@ -1,0 +1,21 @@
+<AFB id="#bus_not_v1" Caption="bus_not" Version="1.0002">
+	<Properties>
+		<Description>NOT Block outputs the logical inverse of the input in accordance with control signal.</Description>
+		<Category>Bus Logic</Category>
+		<OpCode>2</OpCode>
+		<InternalUse>false</InternalUse>
+		<MinWidth>19</MinWidth>
+	</Properties>
+	<Inputs>
+		<Pin OpName="i_oprd" Caption="in" Type="Bus" ByteOrder="BigEndian" OpIndex="0" Size="16" BusDataFormat="Discrete"/>
+	</Inputs>
+	<Outputs>
+		<Pin OpName="o_result" Caption="out" Type="Bus" ByteOrder="BigEndian" OpIndex="2" Size="16" BusDataFormat="Discrete"/>
+	</Outputs>
+	<Params>
+    </Params>
+	<CommonScript>
+		<Library/>
+		<AfterCreation/>
+	</CommonScript>
+</AFB>

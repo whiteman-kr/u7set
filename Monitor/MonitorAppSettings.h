@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../OnlineLib/SocketIO.h"
-#include "MonitorSignalSnapshot.h"
 #include "../lib/Ui/DialogSignalSearch.h"
+#include "../VFrame30/ClientSchemaWidget.h"
 
 class MonitorAppSettings
 {
@@ -28,6 +28,8 @@ public:
 		bool showSchemasTabBar = true;
 		bool showLogo = true;
 		bool showItemsLabels = false;
+		VFrame30::ZoomMode zoomMode = VFrame30::ZoomMode::Manual;
+
 		bool singleInstance = false;
 	};
 
@@ -41,6 +43,8 @@ public:
 
 	bool saveToFile(QString fileName) const;
 	bool loadFromFile(QString fileName);
+
+	bool wasLoadedFromFile() const;
 
 private:
 	void save(QSettings& settings) const;
@@ -73,11 +77,14 @@ public:
 	bool showSchemasTabBar() const;
 	bool showLogo() const;
 	bool showItemsLabels() const;
+	VFrame30::ZoomMode zoomMode() const;
+
 	bool singleInstance() const;
 
 private:
 	mutable QMutex m_mutex;
 	Data m_data;
+	bool m_wasLoadedFromFile = false;
 };
 
 

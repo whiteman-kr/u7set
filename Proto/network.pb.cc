@@ -350,7 +350,7 @@ constexpr AppDataSourceState::AppDataSourceState(
   , receivesdata_(false)
   , receiveddataid_(0u)
   , uptime_(PROTOBUF_LONGLONG(0))
-  , rupframeplanttime_(PROTOBUF_LONGLONG(0))
+  , lmtime_(PROTOBUF_LONGLONG(0))
   , datareceivingspeed_(0)
   , receiveddatasize_(PROTOBUF_LONGLONG(0))
   , receivedframescount_(PROTOBUF_LONGLONG(0))
@@ -410,16 +410,18 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT AppDataServiceStateDefaultTypeI
 constexpr SoftwareInfo::SoftwareInfo(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : equipmentid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , buildbranch_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , commitsha_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , username_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , clientdescription_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , releasetype_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , branchname_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , commithash_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , buildusername_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , builddate_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , buildhostname_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , hostname_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , osusername_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , majorversion_(0)
   , minorversion_(0)
-  , commitno_(0)
-  , buildno_(0)
-  , crc_(0u)
+  , patchversion_(0)
+  , pipelineid_(0)
   , softwaretype_(8000){}
 struct SoftwareInfoDefaultTypeInternal {
   constexpr SoftwareInfoDefaultTypeInternal()
@@ -702,8 +704,8 @@ constexpr TuningSourceState::TuningSourceState(
   , fotipflagwritingdisabled_(PROTOBUF_LONGLONG(0))
   , fotipprocessingnumerator_(PROTOBUF_ULONGLONG(0))
   , errrupprotocolversion_(PROTOBUF_LONGLONG(0))
-  , hasunappliedparams_(false)
   , errrupframesize_(PROTOBUF_LONGLONG(0))
+  , hasunappliedparams_(false)
   , errrupnontuningdata_(PROTOBUF_LONGLONG(0))
   , errrupmoduletype_(PROTOBUF_LONGLONG(0))
   , errrupframesquantity_(PROTOBUF_LONGLONG(0))
@@ -724,7 +726,8 @@ constexpr TuningSourceState::TuningSourceState(
   , errpartialsent_(PROTOBUF_LONGLONG(0))
   , errreplysize_(PROTOBUF_LONGLONG(0))
   , errnoreply_(PROTOBUF_LONGLONG(0))
-  , errtuningframeupdate_(PROTOBUF_LONGLONG(0)){}
+  , errtuningframeupdate_(PROTOBUF_LONGLONG(0))
+  , lmtime_(PROTOBUF_LONGLONG(0)){}
 struct TuningSourceStateDefaultTypeInternal {
   constexpr TuningSourceStateDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -822,7 +825,8 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT TuningSignalStateDefaultTypeInt
 constexpr TuningSignalsReadReply::TuningSignalsReadReply(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : tuningsignalstate_()
-  , error_(0){}
+  , error_(0)
+  , pendingsignalsstatechanges_(0){}
 struct TuningSignalsReadReplyDefaultTypeInternal {
   constexpr TuningSignalsReadReplyDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -832,6 +836,31 @@ struct TuningSignalsReadReplyDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT TuningSignalsReadReplyDefaultTypeInternal _TuningSignalsReadReply_default_instance_;
+constexpr GetTuningSignalsStateChangesRequest::GetTuningSignalsStateChangesRequest(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized){}
+struct GetTuningSignalsStateChangesRequestDefaultTypeInternal {
+  constexpr GetTuningSignalsStateChangesRequestDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~GetTuningSignalsStateChangesRequestDefaultTypeInternal() {}
+  union {
+    GetTuningSignalsStateChangesRequest _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT GetTuningSignalsStateChangesRequestDefaultTypeInternal _GetTuningSignalsStateChangesRequest_default_instance_;
+constexpr GetTuningSignalsStateChangesReply::GetTuningSignalsStateChangesReply(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : tuningsignalstate_()
+  , error_(0)
+  , pendingsignalsstatechanges_(0){}
+struct GetTuningSignalsStateChangesReplyDefaultTypeInternal {
+  constexpr GetTuningSignalsStateChangesReplyDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~GetTuningSignalsStateChangesReplyDefaultTypeInternal() {}
+  union {
+    GetTuningSignalsStateChangesReply _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT GetTuningSignalsStateChangesReplyDefaultTypeInternal _GetTuningSignalsStateChangesReply_default_instance_;
 constexpr TuningWriteCommand::TuningWriteCommand(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : value_(nullptr)
@@ -848,6 +877,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT TuningWriteCommandDefaultTypeIn
 constexpr TuningSignalsWrite::TuningSignalsWrite(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : commands_()
+  , matsuser_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , autoapply_(false){}
 struct TuningSignalsWriteDefaultTypeInternal {
   constexpr TuningSignalsWriteDefaultTypeInternal()
@@ -1146,7 +1176,7 @@ struct GetFileReplyDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT GetFileReplyDefaultTypeInternal _GetFileReply_default_instance_;
 }  // namespace Network
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_network_2eproto[72];
+static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_network_2eproto[74];
 static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_network_2eproto = nullptr;
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_network_2eproto = nullptr;
 
@@ -1440,7 +1470,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_network_2eproto::offsets[] PRO
   PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, receivesdata_),
   PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, uptime_),
   PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, receiveddataid_),
-  PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, rupframeplanttime_),
+  PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, lmtime_),
   PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, rupframenumerator_),
   PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, datareceivingspeed_),
   PROTOBUF_FIELD_OFFSET(::Network::AppDataSourceState, receiveddatasize_),
@@ -1517,26 +1547,30 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_network_2eproto::offsets[] PRO
   PROTOBUF_FIELD_OFFSET(::Network::SoftwareInfo, equipmentid_),
   PROTOBUF_FIELD_OFFSET(::Network::SoftwareInfo, majorversion_),
   PROTOBUF_FIELD_OFFSET(::Network::SoftwareInfo, minorversion_),
-  PROTOBUF_FIELD_OFFSET(::Network::SoftwareInfo, commitno_),
-  PROTOBUF_FIELD_OFFSET(::Network::SoftwareInfo, buildbranch_),
-  PROTOBUF_FIELD_OFFSET(::Network::SoftwareInfo, commitsha_),
-  PROTOBUF_FIELD_OFFSET(::Network::SoftwareInfo, username_),
-  PROTOBUF_FIELD_OFFSET(::Network::SoftwareInfo, buildno_),
-  PROTOBUF_FIELD_OFFSET(::Network::SoftwareInfo, crc_),
-  PROTOBUF_FIELD_OFFSET(::Network::SoftwareInfo, clientdescription_),
+  PROTOBUF_FIELD_OFFSET(::Network::SoftwareInfo, patchversion_),
+  PROTOBUF_FIELD_OFFSET(::Network::SoftwareInfo, releasetype_),
+  PROTOBUF_FIELD_OFFSET(::Network::SoftwareInfo, branchname_),
+  PROTOBUF_FIELD_OFFSET(::Network::SoftwareInfo, commithash_),
+  PROTOBUF_FIELD_OFFSET(::Network::SoftwareInfo, buildusername_),
+  PROTOBUF_FIELD_OFFSET(::Network::SoftwareInfo, builddate_),
+  PROTOBUF_FIELD_OFFSET(::Network::SoftwareInfo, buildhostname_),
+  PROTOBUF_FIELD_OFFSET(::Network::SoftwareInfo, pipelineid_),
   PROTOBUF_FIELD_OFFSET(::Network::SoftwareInfo, hostname_),
-  11,
+  PROTOBUF_FIELD_OFFSET(::Network::SoftwareInfo, osusername_),
+  13,
   0,
-  6,
-  7,
-  8,
+  9,
+  10,
+  11,
   1,
   2,
   3,
-  9,
-  10,
   4,
   5,
+  6,
+  12,
+  7,
+  8,
   PROTOBUF_FIELD_OFFSET(::Network::SecurityLevelReply, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::Network::SecurityLevelReply, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -1772,6 +1806,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_network_2eproto::offsets[] PRO
   PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errreplysize_),
   PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errnoreply_),
   PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, errtuningframeupdate_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSourceState, lmtime_),
   1,
   0,
   5,
@@ -1781,7 +1816,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_network_2eproto::offsets[] PRO
   6,
   7,
   8,
-  26,
+  27,
   9,
   10,
   11,
@@ -1799,7 +1834,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_network_2eproto::offsets[] PRO
   23,
   24,
   25,
-  27,
+  26,
   28,
   29,
   30,
@@ -1821,6 +1856,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_network_2eproto::offsets[] PRO
   46,
   47,
   48,
+  49,
   PROTOBUF_FIELD_OFFSET(::Network::GetTuningSourcesStatesReply, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::Network::GetTuningSourcesStatesReply, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -1912,8 +1948,26 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_network_2eproto::offsets[] PRO
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::Network::TuningSignalsReadReply, error_),
   PROTOBUF_FIELD_OFFSET(::Network::TuningSignalsReadReply, tuningsignalstate_),
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSignalsReadReply, pendingsignalsstatechanges_),
   0,
   ~0u,
+  1,
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::Network::GetTuningSignalsStateChangesRequest, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::Network::GetTuningSignalsStateChangesReply, _has_bits_),
+  PROTOBUF_FIELD_OFFSET(::Network::GetTuningSignalsStateChangesReply, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::Network::GetTuningSignalsStateChangesReply, error_),
+  PROTOBUF_FIELD_OFFSET(::Network::GetTuningSignalsStateChangesReply, tuningsignalstate_),
+  PROTOBUF_FIELD_OFFSET(::Network::GetTuningSignalsStateChangesReply, pendingsignalsstatechanges_),
+  0,
+  ~0u,
+  1,
   PROTOBUF_FIELD_OFFSET(::Network::TuningWriteCommand, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::Network::TuningWriteCommand, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -1928,9 +1982,11 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_network_2eproto::offsets[] PRO
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::Network::TuningSignalsWrite, matsuser_),
   PROTOBUF_FIELD_OFFSET(::Network::TuningSignalsWrite, autoapply_),
   PROTOBUF_FIELD_OFFSET(::Network::TuningSignalsWrite, commands_),
   0,
+  1,
   ~0u,
   PROTOBUF_FIELD_OFFSET(::Network::TuningSignalWriteResult, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::Network::TuningSignalWriteResult, _internal_metadata_),
@@ -2174,55 +2230,57 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 278, 306, sizeof(::Network::AppDataSourceState)},
   { 329, 336, sizeof(::Network::GetAppDataSourcesStatesReply)},
   { 338, 350, sizeof(::Network::AppDataServiceState)},
-  { 357, 374, sizeof(::Network::SoftwareInfo)},
-  { 386, 393, sizeof(::Network::SecurityLevelReply)},
-  { 395, 401, sizeof(::Network::IntroduceMyselfRequest)},
-  { 402, 410, sizeof(::Network::IntroduceMyselfReply)},
-  { 413, -1, sizeof(::Network::GetServiceInfoRequest)},
-  { 418, 425, sizeof(::Network::SessionParams)},
-  { 427, 438, sizeof(::Network::ServiceInfo)},
-  { 444, 451, sizeof(::Network::GetServiceInfoReply)},
-  { 453, 461, sizeof(::Network::ConfigurationServiceState)},
-  { 464, 474, sizeof(::Network::ServiceClientInfo)},
-  { 479, -1, sizeof(::Network::ServiceClients)},
-  { 485, 496, sizeof(::Network::BuildInfo)},
-  { 502, 510, sizeof(::Network::ConfigurationServiceSettings)},
-  { 513, 521, sizeof(::Network::ServiceSettings)},
-  { 524, -1, sizeof(::Network::GetTuningSourcesInfo)},
-  { 529, 539, sizeof(::Network::GetTuningSourcesInfoReply)},
-  { 544, -1, sizeof(::Network::GetTuningSourcesStates)},
-  { 549, 556, sizeof(::Network::SignalsAssociatedToTuningSource)},
-  { 558, 565, sizeof(::Network::TuningSourceFilling)},
-  { 567, 621, sizeof(::Network::TuningSourceState)},
-  { 670, 680, sizeof(::Network::GetTuningSourcesStatesReply)},
-  { 685, 693, sizeof(::Network::ChangeConrolledTuningSourceRequest)},
-  { 696, 704, sizeof(::Network::ChangeConrolledTuningSourceReply)},
-  { 707, -1, sizeof(::Network::TuningSignalsRead)},
-  { 713, 736, sizeof(::Network::TuningSignalState)},
-  { 754, 761, sizeof(::Network::TuningSignalsReadReply)},
-  { 763, 770, sizeof(::Network::TuningWriteCommand)},
-  { 772, 779, sizeof(::Network::TuningSignalsWrite)},
-  { 781, 788, sizeof(::Network::TuningSignalWriteResult)},
-  { 790, 797, sizeof(::Network::TuningSignalsWriteReply)},
-  { 799, -1, sizeof(::Network::TuningSignalsApply)},
-  { 804, 810, sizeof(::Network::TuningSignalsApplyReply)},
-  { 811, 818, sizeof(::Network::DataSourceWrite)},
-  { 820, 826, sizeof(::Network::DataSourceWriteReply)},
-  { 827, -1, sizeof(::Network::PacketSourceExit)},
-  { 832, 838, sizeof(::Network::PacketSourceExitReply)},
-  { 839, 846, sizeof(::Network::SaveAppSignalsStatesToArchiveRequest)},
-  { 848, 855, sizeof(::Network::SaveAppSignalsStatesToArchiveReply)},
-  { 857, 868, sizeof(::Network::GetAppSignalStatesFromArchiveStartRequest)},
-  { 874, 883, sizeof(::Network::GetAppSignalStatesFromArchiveStartReply)},
-  { 887, 893, sizeof(::Network::GetAppSignalStatesFromArchiveNextRequest)},
-  { 894, 909, sizeof(::Network::GetAppSignalStatesFromArchiveNextReply)},
-  { 919, 925, sizeof(::Network::GetAppSignalStatesFromArchiveCancelRequest)},
-  { 926, 934, sizeof(::Network::GetAppSignalStatesFromArchiveCancelReply)},
-  { 937, 946, sizeof(::Network::RtTrendsManagementRequest)},
-  { 950, 959, sizeof(::Network::RtTrendsManagementReply)},
-  { 963, -1, sizeof(::Network::RtTrendsGetStateChangesRequest)},
-  { 968, 976, sizeof(::Network::RtTrendsGetStateChangesReply)},
-  { 979, 991, sizeof(::Network::GetFileReply)},
+  { 357, 376, sizeof(::Network::SoftwareInfo)},
+  { 390, 397, sizeof(::Network::SecurityLevelReply)},
+  { 399, 405, sizeof(::Network::IntroduceMyselfRequest)},
+  { 406, 414, sizeof(::Network::IntroduceMyselfReply)},
+  { 417, -1, sizeof(::Network::GetServiceInfoRequest)},
+  { 422, 429, sizeof(::Network::SessionParams)},
+  { 431, 442, sizeof(::Network::ServiceInfo)},
+  { 448, 455, sizeof(::Network::GetServiceInfoReply)},
+  { 457, 465, sizeof(::Network::ConfigurationServiceState)},
+  { 468, 478, sizeof(::Network::ServiceClientInfo)},
+  { 483, -1, sizeof(::Network::ServiceClients)},
+  { 489, 500, sizeof(::Network::BuildInfo)},
+  { 506, 514, sizeof(::Network::ConfigurationServiceSettings)},
+  { 517, 525, sizeof(::Network::ServiceSettings)},
+  { 528, -1, sizeof(::Network::GetTuningSourcesInfo)},
+  { 533, 543, sizeof(::Network::GetTuningSourcesInfoReply)},
+  { 548, -1, sizeof(::Network::GetTuningSourcesStates)},
+  { 553, 560, sizeof(::Network::SignalsAssociatedToTuningSource)},
+  { 562, 569, sizeof(::Network::TuningSourceFilling)},
+  { 571, 626, sizeof(::Network::TuningSourceState)},
+  { 676, 686, sizeof(::Network::GetTuningSourcesStatesReply)},
+  { 691, 699, sizeof(::Network::ChangeConrolledTuningSourceRequest)},
+  { 702, 710, sizeof(::Network::ChangeConrolledTuningSourceReply)},
+  { 713, -1, sizeof(::Network::TuningSignalsRead)},
+  { 719, 742, sizeof(::Network::TuningSignalState)},
+  { 760, 768, sizeof(::Network::TuningSignalsReadReply)},
+  { 771, -1, sizeof(::Network::GetTuningSignalsStateChangesRequest)},
+  { 776, 784, sizeof(::Network::GetTuningSignalsStateChangesReply)},
+  { 787, 794, sizeof(::Network::TuningWriteCommand)},
+  { 796, 804, sizeof(::Network::TuningSignalsWrite)},
+  { 807, 814, sizeof(::Network::TuningSignalWriteResult)},
+  { 816, 823, sizeof(::Network::TuningSignalsWriteReply)},
+  { 825, -1, sizeof(::Network::TuningSignalsApply)},
+  { 830, 836, sizeof(::Network::TuningSignalsApplyReply)},
+  { 837, 844, sizeof(::Network::DataSourceWrite)},
+  { 846, 852, sizeof(::Network::DataSourceWriteReply)},
+  { 853, -1, sizeof(::Network::PacketSourceExit)},
+  { 858, 864, sizeof(::Network::PacketSourceExitReply)},
+  { 865, 872, sizeof(::Network::SaveAppSignalsStatesToArchiveRequest)},
+  { 874, 881, sizeof(::Network::SaveAppSignalsStatesToArchiveReply)},
+  { 883, 894, sizeof(::Network::GetAppSignalStatesFromArchiveStartRequest)},
+  { 900, 909, sizeof(::Network::GetAppSignalStatesFromArchiveStartReply)},
+  { 913, 919, sizeof(::Network::GetAppSignalStatesFromArchiveNextRequest)},
+  { 920, 935, sizeof(::Network::GetAppSignalStatesFromArchiveNextReply)},
+  { 945, 951, sizeof(::Network::GetAppSignalStatesFromArchiveCancelRequest)},
+  { 952, 960, sizeof(::Network::GetAppSignalStatesFromArchiveCancelReply)},
+  { 963, 972, sizeof(::Network::RtTrendsManagementRequest)},
+  { 976, 985, sizeof(::Network::RtTrendsManagementReply)},
+  { 989, -1, sizeof(::Network::RtTrendsGetStateChangesRequest)},
+  { 994, 1002, sizeof(::Network::RtTrendsGetStateChangesReply)},
+  { 1005, 1017, sizeof(::Network::GetFileReply)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -2275,6 +2333,8 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Network::_TuningSignalsRead_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Network::_TuningSignalState_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Network::_TuningSignalsReadReply_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Network::_GetTuningSignalsStateChangesRequest_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Network::_GetTuningSignalsStateChangesReply_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Network::_TuningWriteCommand_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Network::_TuningSignalsWrite_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Network::_TuningSignalWriteResult_default_instance_),
@@ -2379,214 +2439,221 @@ const char descriptor_table_protodef_network_2eproto[] PROTOBUF_SECTION_VARIABLE
   "\0010\022\030\n\rerrSimVersion\030\007 \001(\003:\0010\022$\n\031errUnkno"
   "wnAppDataSourceIP\030\010 \001(\003:\0010\022\031\n\016errRupFram"
   "eCRC\030\t \001(\003:\0010\022\"\n\027errNotExpectedSimPacket"
-  "\030\n \001(\003:\0010\"\304\005\n\022AppDataSourceState\022\r\n\002id\030\001"
+  "\030\n \001(\003:\0010\"\271\005\n\022AppDataSourceState\022\r\n\002id\030\001"
   " \001(\004:\0010\022\025\n\rlmEquipmentID\030\002 \001(\t\022$\n\025dataPr"
   "ocessingEnabled\030\003 \001(\010:\005false\022\033\n\014receives"
   "Data\030\004 \001(\010:\005false\022\021\n\006uptime\030\005 \001(\003:\0010\022\031\n\016"
-  "receivedDataID\030\006 \001(\r:\0010\022\034\n\021rupFramePlant"
-  "Time\030\007 \001(\003:\0010\022\034\n\021rupFrameNumerator\030\010 \001(\r"
-  ":\0010\022\035\n\022dataReceivingSpeed\030\t \001(\001:\0010\022\033\n\020re"
-  "ceivedDataSize\030\n \001(\003:\0010\022\036\n\023receivedFrame"
-  "sCount\030\013 \001(\003:\0010\022\036\n\023receivedPacketCount\030\014"
-  " \001(\003:\0010\022\032\n\017lostPacketCount\030\r \001(\003:\0010\022#\n\030s"
-  "ignalStatesQueueCurSize\030\016 \001(\005:\0010\022&\n\033sign"
-  "alStatesQueueCurMaxSize\030\017 \001(\005:\0010\022\037\n\024erro"
-  "rProtocolVersion\030\020 \001(\003:\0010\022\036\n\023errorFrames"
-  "Quantity\030\021 \001(\003:\0010\022\027\n\014errorFrameNo\030\022 \001(\003:"
-  "\0010\022\030\n\rerrorFrameCRC\030\023 \001(\003:\0010\022\026\n\013errorDat"
-  "aID\030\024 \001(\003:\0010\022\"\n\027errorDuplicatePlantTime\030"
-  "\025 \001(\003:\0010\022%\n\032errorNonmonotonicPlantTime\030\026"
-  " \001(\003:\0010\022\037\n\024errorPlantTimeFormat\030\027 \001(\003:\0010"
-  "\"k\n\034GetAppDataSourcesStatesReply\022\020\n\005erro"
-  "r\030\001 \001(\005:\0010\0229\n\024appDataSourcesStates\030\002 \003(\013"
-  "2\033.Network.AppDataSourceState\"\220\002\n\023AppDat"
-  "aServiceState\022$\n\025CfgServiceIsConnected\030\001"
-  " \002(\010:\005false\022\027\n\014CfgServiceIp\030\002 \001(\r:\0010\022\031\n\016"
-  "CfgServicePort\030\003 \001(\005:\0010\022(\n\031ArchiveServic"
-  "eIsConnected\030\004 \002(\010:\005false\022\033\n\020ArchiveServ"
-  "iceIp\030\005 \001(\r:\0010\022\035\n\022ArchiveServicePort\030\006 \001"
-  "(\005:\0010\0229\n\023appDataReceiveState\030\007 \001(\0132\034.Net"
-  "work.AppDataReceiveState\"\221\002\n\014SoftwareInf"
-  "o\022\032\n\014softwareType\030\001 \002(\005:\0048000\022\023\n\013equipme"
-  "ntId\030\002 \002(\t\022\027\n\014majorVersion\030\003 \002(\005:\0010\022\027\n\014m"
-  "inorVersion\030\004 \002(\005:\0010\022\023\n\010commitNo\030\005 \002(\005:\001"
-  "0\022\023\n\013buildBranch\030\006 \002(\t\022\021\n\tcommitSHA\030\007 \002("
-  "\t\022\020\n\010userName\030\010 \002(\t\022\022\n\007buildNo\030\t \002(\005:\0010\022"
-  "\016\n\003crc\030\n \002(\r:\0010\022\031\n\021clientDescription\030\013 \001"
-  "(\t\022\020\n\010hostname\030\014 \001(\t\"D\n\022SecurityLevelRep"
-  "ly\022\024\n\014connectionNo\030\001 \002(\005\022\030\n\rsecurityLeve"
-  "l\030\002 \002(\005:\0010\"K\n\026IntroduceMyselfRequest\0221\n\022"
-  "clientSoftwareInfo\030\001 \002(\0132\025.Network.Softw"
-  "areInfo\"x\n\024IntroduceMyselfReply\0221\n\022serve"
-  "rSoftwareInfo\030\001 \002(\0132\025.Network.SoftwareIn"
-  "fo\022\033\n\023setConnectionResult\030\002 \002(\005\022\020\n\010error"
-  "Msg\030\003 \001(\t\"\027\n\025GetServiceInfoRequest\"K\n\rSe"
-  "ssionParams\022\036\n\026currentSettingsProfile\030\001 "
-  "\001(\t\022\032\n\017softwareRunMode\030\002 \001(\005:\0010\"\305\001\n\013Serv"
-  "iceInfo\022+\n\014softwareInfo\030\001 \002(\0132\025.Network."
-  "SoftwareInfo\022\021\n\006uptime\030\002 \001(\003:\0010\022\027\n\014servi"
-  "ceState\030\003 \001(\005:\0010\022\031\n\016serviceRuntime\030\004 \001(\003"
-  ":\0010\022-\n\rsessionParams\030\005 \001(\0132\026.Network.Ses"
-  "sionParams\022\023\n\013settingsXml\030\006 \001(\t\"R\n\023GetSe"
-  "rviceInfoReply\022\020\n\005error\030\001 \002(\005:\0010\022)\n\013serv"
-  "iceInfo\030\002 \002(\0132\024.Network.ServiceInfo\"x\n\031C"
-  "onfigurationServiceState\022\035\n\025currentBuild"
-  "Directory\030\001 \002(\t\022!\n\031checkBuildAttemptQuan"
-  "tity\030\002 \002(\005\022\031\n\021buildCheckerState\030\003 \002(\005\"\205\001"
-  "\n\021ServiceClientInfo\022\n\n\002ip\030\003 \002(\005\022\016\n\006uptim"
-  "e\030\005 \002(\003\022\020\n\010isActual\030\006 \002(\010\022\025\n\rreplyQuanti"
-  "ty\030\007 \002(\003\022+\n\014softwareInfo\030\013 \002(\0132\025.Network"
-  ".SoftwareInfo\"=\n\016ServiceClients\022+\n\007clien"
-  "ts\030\001 \003(\0132\032.Network.ServiceClientInfo\"s\n\t"
-  "BuildInfo\022\017\n\007project\030\001 \002(\t\022\016\n\002id\030\002 \002(\005:\002"
-  "-1\022\014\n\004date\030\004 \002(\003\022\024\n\tchangeset\030\005 \002(\005:\0010\022\014"
-  "\n\004user\030\006 \002(\t\022\023\n\013workstation\030\007 \002(\t\"e\n\034Con"
-  "figurationServiceSettings\022\023\n\013equipmentID"
-  "\030\001 \002(\t\022\031\n\021autoloadBuildPath\030\002 \002(\t\022\025\n\rwor"
-  "kDirectory\030\003 \002(\t\"L\n\017ServiceSettings\022\023\n\013e"
-  "quipmentID\030\001 \002(\t\022\021\n\tconfigIP1\030\002 \002(\t\022\021\n\tc"
-  "onfigIP2\030\003 \002(\t\"\026\n\024GetTuningSourcesInfo\"\263"
-  "\001\n\031GetTuningSourcesInfoReply\022\020\n\005error\030\001 "
-  "\001(\005:\0010\0221\n\020tuningSourceInfo\030\002 \003(\0132\027.Netwo"
-  "rk.DataSourceInfo\022!\n\023singleLmControlMode"
-  "\030\003 \001(\010:\004true\022\026\n\016activeClientID\030\004 \001(\t\022\026\n\016"
-  "activeClientIP\030\005 \001(\t\"\030\n\026GetTuningSources"
-  "States\"G\n\037SignalsAssociatedToTuningSourc"
-  "e\022\020\n\010sourceID\030\001 \002(\004\022\022\n\nsignalHash\030\002 \003(\004\""
-  "n\n\023TuningSourceFilling\022\023\n\013signalCount\030\001 "
-  "\002(\004\022B\n\020signalsPerSource\030\002 \003(\0132(.Network."
-  "SignalsAssociatedToTuningSource\"\370\013\n\021Tuni"
-  "ngSourceState\022\023\n\010sourceID\030\001 \001(\004:\0010\022\026\n\016la"
-  "nEquipmentID\030\002 \001(\t\022\026\n\007isReply\030\n \001(\010:\005fal"
-  "se\022\027\n\014requestCount\030\013 \001(\003:\0010\022\025\n\nreplyCoun"
-  "t\030\014 \001(\003:\0010\022\033\n\020commandQueueSize\030\r \001(\005:\0010\022"
-  "\036\n\017controlIsActive\030\016 \001(\010:\005false\022\025\n\006setSO"
-  "R\030\017 \001(\010:\005false\022\036\n\017writingDisabled\030\020 \001(\010:"
-  "\005false\022!\n\022hasUnappliedParams\030\021 \001(\010:\005fals"
-  "e\022&\n\033fotipFlagBoundsCheckSuccess\030\036 \001(\003:\001"
-  "0\022 \n\025fotipFlagWriteSuccess\030\037 \001(\003:\0010\022\037\n\024f"
-  "otipFlagDataTypeErr\030  \001(\003:\0010\022\035\n\022fotipFla"
-  "gOpCodeErr\030! \001(\003:\0010\022 \n\025fotipFlagStartAdd"
-  "rErr\030\" \001(\003:\0010\022\036\n\023fotipFlagRomSizeErr\030# \001"
-  "(\003:\0010\022#\n\030fotipFlagRomFrameSizeErr\030$ \001(\003:"
-  "\0010\022 \n\025fotipFlagFrameSizeErr\030% \001(\003:\0010\022&\n\033"
-  "fotipFlagProtocolVersionErr\030& \001(\003:\0010\022#\n\030"
-  "fotipFlagSubsystemKeyErr\030\' \001(\003:\0010\022\036\n\023fot"
-  "ipFlagUniueIDErr\030( \001(\003:\0010\022\035\n\022fotipFlagOf"
-  "fsetErr\030) \001(\003:\0010\022 \n\025fotipFlagApplySucces"
-  "s\030* \001(\003:\0010\022\032\n\017fotipFlagSetSOR\030+ \001(\003:\0010\022#"
-  "\n\030fotipFlagWritingDisabled\030, \001(\003:\0010\022#\n\030f"
-  "otipProcessingNumerator\030- \001(\004:\0010\022 \n\025errR"
-  "upProtocolVersion\0302 \001(\003:\0010\022\032\n\017errRupFram"
-  "eSize\0303 \001(\003:\0010\022\036\n\023errRupNonTuningData\0304 "
-  "\001(\003:\0010\022\033\n\020errRupModuleType\0305 \001(\003:\0010\022\037\n\024e"
-  "rrRupFramesQuantity\0306 \001(\003:\0010\022\034\n\021errRupFr"
-  "ameNumber\0307 \001(\003:\0010\022\024\n\terrRupCRC\0308 \001(\003:\0010"
-  "\022\"\n\027errFotipProtocolVersion\030< \001(\003:\0010\022\033\n\020"
-  "errFotipUniqueID\030= \001(\003:\0010\022\033\n\020errFotipLmN"
-  "umber\030> \001(\003:\0010\022 \n\025errFotipSubsystemCode\030"
-  "\? \001(\003:\0010\022 \n\025errFotipOperationCode\030@ \001(\003:"
-  "\0010\022\034\n\021errFotipFrameSize\030A \001(\003:\0010\022\032\n\017errF"
-  "otipRomSize\030B \001(\003:\0010\022\037\n\024errFotipRomFrame"
-  "Size\030C \001(\003:\0010\022!\n\026errAnalogLowBoundCheck\030"
-  "D \001(\003:\0010\022\"\n\027errAnalogHighBoundCheck\030E \001("
-  "\003:\0010\022\034\n\021errUntimelyReplay\030F \001(\003:\0010\022\022\n\007er"
-  "rSent\030G \001(\003:\0010\022\031\n\016errPartialSent\030H \001(\003:\001"
-  "0\022\027\n\014errReplySize\030I \001(\003:\0010\022\025\n\nerrNoReply"
-  "\030J \001(\003:\0010\022\037\n\024errTuningFrameUpdate\030K \001(\003:"
-  "\0010\"\272\001\n\033GetTuningSourcesStatesReply\022\020\n\005er"
-  "ror\030\001 \001(\005:\0010\0226\n\022tuningSourcesState\030\002 \003(\013"
-  "2\032.Network.TuningSourceState\022!\n\023singleLm"
-  "ControlMode\030\003 \001(\010:\004true\022\026\n\016activeClientI"
-  "D\030\004 \001(\t\022\026\n\016activeClientIP\030\005 \001(\t\"z\n\"Chang"
-  "eConrolledTuningSourceRequest\022\023\n\013takeCon"
-  "trol\030\001 \001(\010\022\037\n\027tuningSourceEquipmentID\030\002 "
-  "\001(\t\022\036\n\017activateControl\030\003 \001(\010:\005false\"\177\n C"
-  "hangeConrolledTuningSourceReply\022\020\n\005error"
-  "\030\001 \001(\005:\0010\022)\n!controlledTuningSourceEquip"
-  "mentID\030\002 \001(\t\022\036\n\017controlIsActive\030\003 \001(\010:\005f"
-  "alse\"\'\n\021TuningSignalsRead\022\022\n\nsignalHash\030"
-  "\002 \003(\004\"\250\004\n\021TuningSignalState\022\025\n\nsignalHas"
-  "h\030\001 \001(\006:\0010\022\020\n\005error\030\002 \001(\005:\0010\022\024\n\005valid\030\003 "
-  "\001(\010:\005false\022!\n\005value\030\004 \001(\0132\022.Proto.Tuning"
-  "Value\022(\n\014readLowBound\030\005 \001(\0132\022.Proto.Tuni"
-  "ngValue\022)\n\rreadHighBound\030\006 \001(\0132\022.Proto.T"
-  "uningValue\022\036\n\017writeInProgress\030\007 \001(\010:\005fal"
-  "se\022\031\n\016writeErrorCode\030\010 \001(\005:\0010\022\026\n\013writeCl"
-  "ient\030\t \001(\006:\0010\022\035\n\022successfulReadTime\030\n \001("
-  "\020:\0010\022\033\n\020writeRequestTime\030\013 \001(\020:\0010\022\036\n\023suc"
-  "cessfulWriteTime\030\014 \001(\020:\0010\022 \n\025unsuccessfu"
-  "lWriteTime\030\r \001(\020:\0010\022\025\n\006setSOR\030\016 \001(\010:\005fal"
-  "se\022\036\n\017writingDisabled\030\017 \001(\010:\005false\022\034\n\rtu"
-  "ningDefault\030\020 \001(\010:\005false\022\021\n\006lmTime\030\021 \001(\020"
-  ":\0010\022#\n\030fotipProcessingNumerator\030\022 \001(\006:\0010"
-  "\"a\n\026TuningSignalsReadReply\022\020\n\005error\030\001 \001("
-  "\005:\0010\0225\n\021tuningSignalState\030\002 \003(\0132\032.Networ"
-  "k.TuningSignalState\"N\n\022TuningWriteComman"
-  "d\022\025\n\nsignalHash\030\001 \001(\004:\0010\022!\n\005value\030\002 \001(\0132"
-  "\022.Proto.TuningValue\"]\n\022TuningSignalsWrit"
-  "e\022\030\n\tautoApply\030\002 \001(\010:\005false\022-\n\010commands\030"
-  "\003 \003(\0132\033.Network.TuningWriteCommand\"B\n\027Tu"
-  "ningSignalWriteResult\022\025\n\nsignalHash\030\001 \001("
-  "\004:\0010\022\020\n\005error\030\002 \001(\005:\0010\"b\n\027TuningSignalsW"
-  "riteReply\022\020\n\005error\030\001 \001(\005:\0010\0225\n\013writeResu"
-  "lt\030\002 \003(\0132 .Network.TuningSignalWriteResu"
-  "lt\"\024\n\022TuningSignalsApply\"+\n\027TuningSignal"
-  "sApplyReply\022\020\n\005error\030\001 \001(\005:\0010\"B\n\017DataSou"
-  "rceWrite\022\031\n\021sourceEquipmentID\030\001 \001(\t\022\024\n\005s"
-  "tate\030\002 \001(\010:\005false\"(\n\024DataSourceWriteRepl"
-  "y\022\020\n\005error\030\001 \001(\005:\0010\"\022\n\020PacketSourceExit\""
-  ")\n\025PacketSourceExitReply\022\020\n\005error\030\001 \001(\005:"
-  "\0010\"q\n$SaveAppSignalsStatesToArchiveReque"
-  "st\022\031\n\021clientEquipmentID\030\001 \001(\t\022.\n\017appSign"
-  "alStates\030\002 \003(\0132\025.Proto.AppSignalState\"N\n"
-  "\"SaveAppSignalsStatesToArchiveReply\022\020\n\005e"
-  "rror\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\"\271\001"
-  "\n)GetAppSignalStatesFromArchiveStartRequ"
-  "est\022\031\n\021clientEquipmentID\030\001 \001(\t\022\023\n\010timeTy"
-  "pe\030\002 \001(\005:\0011\022\024\n\tstartTime\030\003 \001(\020:\0010\022\022\n\007end"
-  "Time\030\004 \001(\020:\0010\022\024\n\014signalHashes\030\005 \003(\004\022\034\n\016r"
-  "emovePeriodic\030\006 \001(\010:\004true\"~\n\'GetAppSigna"
-  "lStatesFromArchiveStartReply\022\020\n\005error\030\001 "
-  "\001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\023\n\013errorS"
-  "tring\030\004 \001(\t\022\024\n\trequestID\030\003 \001(\r:\0010\"@\n(Get"
-  "AppSignalStatesFromArchiveNextRequest\022\024\n"
-  "\trequestID\030\001 \001(\r:\0010\"\271\002\n&GetAppSignalStat"
-  "esFromArchiveNextReply\022\020\n\005error\030\001 \001(\005:\0010"
-  "\022\026\n\tarchError\030\002 \001(\005:\003100\022\024\n\trequestID\030\003 "
-  "\001(\r:\0010\022\023\n\013errorString\030\n \001(\t\022\030\n\tdataReady"
-  "\030\004 \001(\010:\005false\022\033\n\020totalStatesCount\030\005 \001(\005:"
-  "\0010\022\032\n\017sentStatesCount\030\006 \001(\005:\0010\022\034\n\021states"
-  "InPartCount\030\007 \001(\005:\0010\022\031\n\nisLastPart\030\010 \001(\010"
-  ":\005false\022.\n\017appSignalStates\030\t \003(\0132\025.Proto"
-  ".AppSignalState\"B\n*GetAppSignalStatesFro"
-  "mArchiveCancelRequest\022\024\n\trequestID\030\001 \001(\r"
-  ":\0010\"i\n(GetAppSignalStatesFromArchiveCanc"
-  "elReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError\030\002"
-  " \001(\005:\003100\022\023\n\013errorString\030\003 \001(\t\"\204\001\n\031RtTre"
-  "ndsManagementRequest\022\031\n\021clientEquipmentI"
-  "D\030\001 \001(\t\022\024\n\014samplePeriod\030\002 \001(\005\022\032\n\022appendS"
-  "ignalHashes\030\003 \003(\004\022\032\n\022deleteSignalHashes\030"
-  "\004 \003(\004\"s\n\027RtTrendsManagementReply\022\020\n\005erro"
-  "r\030\001 \001(\005:\0010\022\023\n\013errorString\030\002 \001(\t\022\024\n\014sampl"
-  "ePeriod\030\003 \001(\005\022\033\n\023trackedSignalHashes\030\004 \003"
-  "(\004\" \n\036RtTrendsGetStateChangesRequest\"r\n\034"
-  "RtTrendsGetStateChangesReply\022\020\n\005error\030\001 "
-  "\001(\005:\0010\022\023\n\013errorString\030\002 \001(\t\022+\n\014signalSta"
-  "tes\030\003 \003(\0132\025.Proto.AppSignalState\"\247\001\n\014Get"
-  "FileReply\022\024\n\terrorCode\030\001 \002(\005:\0010\022\023\n\010fileS"
-  "ize\030\002 \001(\003:\0010\022\025\n\ntotalParts\030\003 \001(\005:\0010\022\026\n\013c"
-  "urrentPart\030\004 \001(\005:\0010\022\032\n\017currentPartSize\030\005"
-  " \001(\005:\0010\022\013\n\003md5\030\006 \001(\014\022\024\n\014filePartData\030\n \001"
-  "(\014"
+  "receivedDataID\030\006 \001(\r:\0010\022\021\n\006lmTime\030\007 \001(\003:"
+  "\0010\022\034\n\021rupFrameNumerator\030\010 \001(\r:\0010\022\035\n\022data"
+  "ReceivingSpeed\030\t \001(\001:\0010\022\033\n\020receivedDataS"
+  "ize\030\n \001(\003:\0010\022\036\n\023receivedFramesCount\030\013 \001("
+  "\003:\0010\022\036\n\023receivedPacketCount\030\014 \001(\003:\0010\022\032\n\017"
+  "lostPacketCount\030\r \001(\003:\0010\022#\n\030signalStates"
+  "QueueCurSize\030\016 \001(\005:\0010\022&\n\033signalStatesQue"
+  "ueCurMaxSize\030\017 \001(\005:\0010\022\037\n\024errorProtocolVe"
+  "rsion\030\020 \001(\003:\0010\022\036\n\023errorFramesQuantity\030\021 "
+  "\001(\003:\0010\022\027\n\014errorFrameNo\030\022 \001(\003:\0010\022\030\n\rerror"
+  "FrameCRC\030\023 \001(\003:\0010\022\026\n\013errorDataID\030\024 \001(\003:\001"
+  "0\022\"\n\027errorDuplicatePlantTime\030\025 \001(\003:\0010\022%\n"
+  "\032errorNonmonotonicPlantTime\030\026 \001(\003:\0010\022\037\n\024"
+  "errorPlantTimeFormat\030\027 \001(\003:\0010\"k\n\034GetAppD"
+  "ataSourcesStatesReply\022\020\n\005error\030\001 \001(\005:\0010\022"
+  "9\n\024appDataSourcesStates\030\002 \003(\0132\033.Network."
+  "AppDataSourceState\"\220\002\n\023AppDataServiceSta"
+  "te\022$\n\025CfgServiceIsConnected\030\001 \002(\010:\005false"
+  "\022\027\n\014CfgServiceIp\030\002 \001(\r:\0010\022\031\n\016CfgServiceP"
+  "ort\030\003 \001(\005:\0010\022(\n\031ArchiveServiceIsConnecte"
+  "d\030\004 \002(\010:\005false\022\033\n\020ArchiveServiceIp\030\005 \001(\r"
+  ":\0010\022\035\n\022ArchiveServicePort\030\006 \001(\005:\0010\0229\n\023ap"
+  "pDataReceiveState\030\007 \001(\0132\034.Network.AppDat"
+  "aReceiveState\"\305\002\n\014SoftwareInfo\022\032\n\014softwa"
+  "reType\030\001 \002(\005:\0048000\022\023\n\013equipmentId\030\002 \002(\t\022"
+  "\027\n\014majorVersion\030\003 \002(\005:\0010\022\027\n\014minorVersion"
+  "\030\004 \002(\005:\0010\022\027\n\014patchVersion\030\005 \002(\005:\0010\022\023\n\013re"
+  "leaseType\030\006 \002(\t\022\022\n\nbranchName\030\007 \001(\t\022\022\n\nc"
+  "ommitHash\030\010 \001(\t\022\025\n\rbuildUserName\030\t \001(\t\022\021"
+  "\n\tbuildDate\030\n \001(\t\022\025\n\rbuildHostname\030\013 \001(\t"
+  "\022\025\n\npipelineID\030\014 \001(\005:\0010\022\020\n\010hostname\030\r \001("
+  "\t\022\022\n\nosUsername\030\016 \001(\t\"D\n\022SecurityLevelRe"
+  "ply\022\024\n\014connectionNo\030\001 \002(\005\022\030\n\rsecurityLev"
+  "el\030\002 \002(\005:\0010\"K\n\026IntroduceMyselfRequest\0221\n"
+  "\022clientSoftwareInfo\030\001 \002(\0132\025.Network.Soft"
+  "wareInfo\"x\n\024IntroduceMyselfReply\0221\n\022serv"
+  "erSoftwareInfo\030\001 \002(\0132\025.Network.SoftwareI"
+  "nfo\022\033\n\023setConnectionResult\030\002 \002(\005\022\020\n\010erro"
+  "rMsg\030\003 \001(\t\"\027\n\025GetServiceInfoRequest\"K\n\rS"
+  "essionParams\022\036\n\026currentSettingsProfile\030\001"
+  " \001(\t\022\032\n\017softwareRunMode\030\002 \001(\005:\0010\"\305\001\n\013Ser"
+  "viceInfo\022+\n\014softwareInfo\030\001 \002(\0132\025.Network"
+  ".SoftwareInfo\022\021\n\006uptime\030\002 \001(\003:\0010\022\027\n\014serv"
+  "iceState\030\003 \001(\005:\0010\022\031\n\016serviceRuntime\030\004 \001("
+  "\003:\0010\022-\n\rsessionParams\030\005 \001(\0132\026.Network.Se"
+  "ssionParams\022\023\n\013settingsXml\030\006 \001(\t\"R\n\023GetS"
+  "erviceInfoReply\022\020\n\005error\030\001 \002(\005:\0010\022)\n\013ser"
+  "viceInfo\030\002 \002(\0132\024.Network.ServiceInfo\"x\n\031"
+  "ConfigurationServiceState\022\035\n\025currentBuil"
+  "dDirectory\030\001 \002(\t\022!\n\031checkBuildAttemptQua"
+  "ntity\030\002 \002(\005\022\031\n\021buildCheckerState\030\003 \002(\005\"\205"
+  "\001\n\021ServiceClientInfo\022\n\n\002ip\030\003 \002(\005\022\016\n\006upti"
+  "me\030\005 \002(\003\022\020\n\010isActual\030\006 \002(\010\022\025\n\rreplyQuant"
+  "ity\030\007 \002(\003\022+\n\014softwareInfo\030\013 \002(\0132\025.Networ"
+  "k.SoftwareInfo\"=\n\016ServiceClients\022+\n\007clie"
+  "nts\030\001 \003(\0132\032.Network.ServiceClientInfo\"s\n"
+  "\tBuildInfo\022\017\n\007project\030\001 \002(\t\022\016\n\002id\030\002 \002(\005:"
+  "\002-1\022\014\n\004date\030\004 \002(\003\022\024\n\tchangeset\030\005 \002(\005:\0010\022"
+  "\014\n\004user\030\006 \002(\t\022\023\n\013workstation\030\007 \002(\t\"e\n\034Co"
+  "nfigurationServiceSettings\022\023\n\013equipmentI"
+  "D\030\001 \002(\t\022\031\n\021autoloadBuildPath\030\002 \002(\t\022\025\n\rwo"
+  "rkDirectory\030\003 \002(\t\"L\n\017ServiceSettings\022\023\n\013"
+  "equipmentID\030\001 \002(\t\022\021\n\tconfigIP1\030\002 \002(\t\022\021\n\t"
+  "configIP2\030\003 \002(\t\"\026\n\024GetTuningSourcesInfo\""
+  "\263\001\n\031GetTuningSourcesInfoReply\022\020\n\005error\030\001"
+  " \001(\005:\0010\0221\n\020tuningSourceInfo\030\002 \003(\0132\027.Netw"
+  "ork.DataSourceInfo\022!\n\023singleLmControlMod"
+  "e\030\003 \001(\010:\004true\022\026\n\016activeClientID\030\004 \001(\t\022\026\n"
+  "\016activeClientIP\030\005 \001(\t\"\030\n\026GetTuningSource"
+  "sStates\"G\n\037SignalsAssociatedToTuningSour"
+  "ce\022\020\n\010sourceID\030\001 \002(\004\022\022\n\nsignalHash\030\002 \003(\004"
+  "\"n\n\023TuningSourceFilling\022\023\n\013signalCount\030\001"
+  " \002(\004\022B\n\020signalsPerSource\030\002 \003(\0132(.Network"
+  ".SignalsAssociatedToTuningSource\"\213\014\n\021Tun"
+  "ingSourceState\022\023\n\010sourceID\030\001 \001(\004:\0010\022\026\n\016l"
+  "anEquipmentID\030\002 \001(\t\022\026\n\007isReply\030\n \001(\010:\005fa"
+  "lse\022\027\n\014requestCount\030\013 \001(\003:\0010\022\025\n\nreplyCou"
+  "nt\030\014 \001(\003:\0010\022\033\n\020commandQueueSize\030\r \001(\005:\0010"
+  "\022\036\n\017controlIsActive\030\016 \001(\010:\005false\022\025\n\006setS"
+  "OR\030\017 \001(\010:\005false\022\036\n\017writingDisabled\030\020 \001(\010"
+  ":\005false\022!\n\022hasUnappliedParams\030\021 \001(\010:\005fal"
+  "se\022&\n\033fotipFlagBoundsCheckSuccess\030\036 \001(\003:"
+  "\0010\022 \n\025fotipFlagWriteSuccess\030\037 \001(\003:\0010\022\037\n\024"
+  "fotipFlagDataTypeErr\030  \001(\003:\0010\022\035\n\022fotipFl"
+  "agOpCodeErr\030! \001(\003:\0010\022 \n\025fotipFlagStartAd"
+  "drErr\030\" \001(\003:\0010\022\036\n\023fotipFlagRomSizeErr\030# "
+  "\001(\003:\0010\022#\n\030fotipFlagRomFrameSizeErr\030$ \001(\003"
+  ":\0010\022 \n\025fotipFlagFrameSizeErr\030% \001(\003:\0010\022&\n"
+  "\033fotipFlagProtocolVersionErr\030& \001(\003:\0010\022#\n"
+  "\030fotipFlagSubsystemKeyErr\030\' \001(\003:\0010\022\036\n\023fo"
+  "tipFlagUniueIDErr\030( \001(\003:\0010\022\035\n\022fotipFlagO"
+  "ffsetErr\030) \001(\003:\0010\022 \n\025fotipFlagApplySucce"
+  "ss\030* \001(\003:\0010\022\032\n\017fotipFlagSetSOR\030+ \001(\003:\0010\022"
+  "#\n\030fotipFlagWritingDisabled\030, \001(\003:\0010\022#\n\030"
+  "fotipProcessingNumerator\030- \001(\004:\0010\022 \n\025err"
+  "RupProtocolVersion\0302 \001(\003:\0010\022\032\n\017errRupFra"
+  "meSize\0303 \001(\003:\0010\022\036\n\023errRupNonTuningData\0304"
+  " \001(\003:\0010\022\033\n\020errRupModuleType\0305 \001(\003:\0010\022\037\n\024"
+  "errRupFramesQuantity\0306 \001(\003:\0010\022\034\n\021errRupF"
+  "rameNumber\0307 \001(\003:\0010\022\024\n\terrRupCRC\0308 \001(\003:\001"
+  "0\022\"\n\027errFotipProtocolVersion\030< \001(\003:\0010\022\033\n"
+  "\020errFotipUniqueID\030= \001(\003:\0010\022\033\n\020errFotipLm"
+  "Number\030> \001(\003:\0010\022 \n\025errFotipSubsystemCode"
+  "\030\? \001(\003:\0010\022 \n\025errFotipOperationCode\030@ \001(\003"
+  ":\0010\022\034\n\021errFotipFrameSize\030A \001(\003:\0010\022\032\n\017err"
+  "FotipRomSize\030B \001(\003:\0010\022\037\n\024errFotipRomFram"
+  "eSize\030C \001(\003:\0010\022!\n\026errAnalogLowBoundCheck"
+  "\030D \001(\003:\0010\022\"\n\027errAnalogHighBoundCheck\030E \001"
+  "(\003:\0010\022\034\n\021errUntimelyReplay\030F \001(\003:\0010\022\022\n\007e"
+  "rrSent\030G \001(\003:\0010\022\031\n\016errPartialSent\030H \001(\003:"
+  "\0010\022\027\n\014errReplySize\030I \001(\003:\0010\022\025\n\nerrNoRepl"
+  "y\030J \001(\003:\0010\022\037\n\024errTuningFrameUpdate\030K \001(\003"
+  ":\0010\022\021\n\006lmTime\030L \001(\003:\0010\"\272\001\n\033GetTuningSour"
+  "cesStatesReply\022\020\n\005error\030\001 \001(\005:\0010\0226\n\022tuni"
+  "ngSourcesState\030\002 \003(\0132\032.Network.TuningSou"
+  "rceState\022!\n\023singleLmControlMode\030\003 \001(\010:\004t"
+  "rue\022\026\n\016activeClientID\030\004 \001(\t\022\026\n\016activeCli"
+  "entIP\030\005 \001(\t\"z\n\"ChangeConrolledTuningSour"
+  "ceRequest\022\023\n\013takeControl\030\001 \001(\010\022\037\n\027tuning"
+  "SourceEquipmentID\030\002 \001(\t\022\036\n\017activateContr"
+  "ol\030\003 \001(\010:\005false\"\177\n ChangeConrolledTuning"
+  "SourceReply\022\020\n\005error\030\001 \001(\005:\0010\022)\n!control"
+  "ledTuningSourceEquipmentID\030\002 \001(\t\022\036\n\017cont"
+  "rolIsActive\030\003 \001(\010:\005false\"\'\n\021TuningSignal"
+  "sRead\022\022\n\nsignalHash\030\002 \003(\004\"\250\004\n\021TuningSign"
+  "alState\022\025\n\nsignalHash\030\001 \001(\006:\0010\022\020\n\005error\030"
+  "\002 \001(\005:\0010\022\024\n\005valid\030\003 \001(\010:\005false\022!\n\005value\030"
+  "\004 \001(\0132\022.Proto.TuningValue\022(\n\014readLowBoun"
+  "d\030\005 \001(\0132\022.Proto.TuningValue\022)\n\rreadHighB"
+  "ound\030\006 \001(\0132\022.Proto.TuningValue\022\036\n\017writeI"
+  "nProgress\030\007 \001(\010:\005false\022\031\n\016writeErrorCode"
+  "\030\010 \001(\005:\0010\022\026\n\013writeClient\030\t \001(\006:\0010\022\035\n\022suc"
+  "cessfulReadTime\030\n \001(\020:\0010\022\033\n\020writeRequest"
+  "Time\030\013 \001(\020:\0010\022\036\n\023successfulWriteTime\030\014 \001"
+  "(\020:\0010\022 \n\025unsuccessfulWriteTime\030\r \001(\020:\0010\022"
+  "\025\n\006setSOR\030\016 \001(\010:\005false\022\036\n\017writingDisable"
+  "d\030\017 \001(\010:\005false\022\034\n\rtuningDefault\030\020 \001(\010:\005f"
+  "alse\022\021\n\006lmTime\030\021 \001(\020:\0010\022#\n\030fotipProcessi"
+  "ngNumerator\030\022 \001(\006:\0010\"\210\001\n\026TuningSignalsRe"
+  "adReply\022\020\n\005error\030\001 \001(\005:\0010\0225\n\021tuningSigna"
+  "lState\030\002 \003(\0132\032.Network.TuningSignalState"
+  "\022%\n\032pendingSignalsStateChanges\030\003 \001(\005:\0010\""
+  "%\n#GetTuningSignalsStateChangesRequest\"\223"
+  "\001\n!GetTuningSignalsStateChangesReply\022\020\n\005"
+  "error\030\001 \001(\005:\0010\0225\n\021tuningSignalState\030\002 \003("
+  "\0132\032.Network.TuningSignalState\022%\n\032pending"
+  "SignalsStateChanges\030\003 \001(\005:\0010\"N\n\022TuningWr"
+  "iteCommand\022\025\n\nsignalHash\030\001 \001(\004:\0010\022!\n\005val"
+  "ue\030\002 \001(\0132\022.Proto.TuningValue\"o\n\022TuningSi"
+  "gnalsWrite\022\020\n\010matsUser\030\001 \001(\t\022\030\n\tautoAppl"
+  "y\030\002 \001(\010:\005false\022-\n\010commands\030\003 \003(\0132\033.Netwo"
+  "rk.TuningWriteCommand\"B\n\027TuningSignalWri"
+  "teResult\022\025\n\nsignalHash\030\001 \001(\004:\0010\022\020\n\005error"
+  "\030\002 \001(\005:\0010\"b\n\027TuningSignalsWriteReply\022\020\n\005"
+  "error\030\001 \001(\005:\0010\0225\n\013writeResult\030\002 \003(\0132 .Ne"
+  "twork.TuningSignalWriteResult\"\024\n\022TuningS"
+  "ignalsApply\"+\n\027TuningSignalsApplyReply\022\020"
+  "\n\005error\030\001 \001(\005:\0010\"B\n\017DataSourceWrite\022\031\n\021s"
+  "ourceEquipmentID\030\001 \001(\t\022\024\n\005state\030\002 \001(\010:\005f"
+  "alse\"(\n\024DataSourceWriteReply\022\020\n\005error\030\001 "
+  "\001(\005:\0010\"\022\n\020PacketSourceExit\")\n\025PacketSour"
+  "ceExitReply\022\020\n\005error\030\001 \001(\005:\0010\"q\n$SaveApp"
+  "SignalsStatesToArchiveRequest\022\031\n\021clientE"
+  "quipmentID\030\001 \001(\t\022.\n\017appSignalStates\030\002 \003("
+  "\0132\025.Proto.AppSignalState\"N\n\"SaveAppSigna"
+  "lsStatesToArchiveReply\022\020\n\005error\030\001 \001(\005:\0010"
+  "\022\026\n\tarchError\030\002 \001(\005:\003100\"\271\001\n)GetAppSigna"
+  "lStatesFromArchiveStartRequest\022\031\n\021client"
+  "EquipmentID\030\001 \001(\t\022\023\n\010timeType\030\002 \001(\005:\0011\022\024"
+  "\n\tstartTime\030\003 \001(\020:\0010\022\022\n\007endTime\030\004 \001(\020:\0010"
+  "\022\024\n\014signalHashes\030\005 \003(\004\022\034\n\016removePeriodic"
+  "\030\006 \001(\010:\004true\"~\n\'GetAppSignalStatesFromAr"
+  "chiveStartReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarc"
+  "hError\030\002 \001(\005:\003100\022\023\n\013errorString\030\004 \001(\t\022\024"
+  "\n\trequestID\030\003 \001(\r:\0010\"@\n(GetAppSignalStat"
+  "esFromArchiveNextRequest\022\024\n\trequestID\030\001 "
+  "\001(\r:\0010\"\271\002\n&GetAppSignalStatesFromArchive"
+  "NextReply\022\020\n\005error\030\001 \001(\005:\0010\022\026\n\tarchError"
+  "\030\002 \001(\005:\003100\022\024\n\trequestID\030\003 \001(\r:\0010\022\023\n\013err"
+  "orString\030\n \001(\t\022\030\n\tdataReady\030\004 \001(\010:\005false"
+  "\022\033\n\020totalStatesCount\030\005 \001(\005:\0010\022\032\n\017sentSta"
+  "tesCount\030\006 \001(\005:\0010\022\034\n\021statesInPartCount\030\007"
+  " \001(\005:\0010\022\031\n\nisLastPart\030\010 \001(\010:\005false\022.\n\017ap"
+  "pSignalStates\030\t \003(\0132\025.Proto.AppSignalSta"
+  "te\"B\n*GetAppSignalStatesFromArchiveCance"
+  "lRequest\022\024\n\trequestID\030\001 \001(\r:\0010\"i\n(GetApp"
+  "SignalStatesFromArchiveCancelReply\022\020\n\005er"
+  "ror\030\001 \001(\005:\0010\022\026\n\tarchError\030\002 \001(\005:\003100\022\023\n\013"
+  "errorString\030\003 \001(\t\"\204\001\n\031RtTrendsManagement"
+  "Request\022\031\n\021clientEquipmentID\030\001 \001(\t\022\024\n\014sa"
+  "mplePeriod\030\002 \001(\005\022\032\n\022appendSignalHashes\030\003"
+  " \003(\004\022\032\n\022deleteSignalHashes\030\004 \003(\004\"s\n\027RtTr"
+  "endsManagementReply\022\020\n\005error\030\001 \001(\005:\0010\022\023\n"
+  "\013errorString\030\002 \001(\t\022\024\n\014samplePeriod\030\003 \001(\005"
+  "\022\033\n\023trackedSignalHashes\030\004 \003(\004\" \n\036RtTrend"
+  "sGetStateChangesRequest\"r\n\034RtTrendsGetSt"
+  "ateChangesReply\022\020\n\005error\030\001 \001(\005:\0010\022\023\n\013err"
+  "orString\030\002 \001(\t\022+\n\014signalStates\030\003 \003(\0132\025.P"
+  "roto.AppSignalState\"\247\001\n\014GetFileReply\022\024\n\t"
+  "errorCode\030\001 \002(\005:\0010\022\023\n\010fileSize\030\002 \001(\003:\0010\022"
+  "\025\n\ntotalParts\030\003 \001(\005:\0010\022\026\n\013currentPart\030\004 "
+  "\001(\005:\0010\022\032\n\017currentPartSize\030\005 \001(\005:\0010\022\013\n\003md"
+  "5\030\006 \001(\014\022\024\n\014filePartData\030\n \001(\014"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_network_2eproto_deps[1] = {
   &::descriptor_table_serialization_2eproto,
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_network_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_network_2eproto = {
-  false, false, 11082, descriptor_table_protodef_network_2eproto, "network.proto", 
-  &descriptor_table_network_2eproto_once, descriptor_table_network_2eproto_deps, 1, 72,
+  false, false, 11389, descriptor_table_protodef_network_2eproto, "network.proto", 
+  &descriptor_table_network_2eproto_once, descriptor_table_network_2eproto_deps, 1, 74,
   schemas, file_default_instances, TableStruct_network_2eproto::offsets,
   file_level_metadata_network_2eproto, file_level_enum_descriptors_network_2eproto, file_level_service_descriptors_network_2eproto,
 };
@@ -9186,7 +9253,7 @@ class AppDataSourceState::_Internal {
   static void set_has_receiveddataid(HasBits* has_bits) {
     (*has_bits)[0] |= 16u;
   }
-  static void set_has_rupframeplanttime(HasBits* has_bits) {
+  static void set_has_lmtime(HasBits* has_bits) {
     (*has_bits)[0] |= 64u;
   }
   static void set_has_rupframenumerator(HasBits* has_bits) {
@@ -9377,11 +9444,11 @@ const char* AppDataSourceState::_InternalParse(const char* ptr, ::PROTOBUF_NAMES
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional int64 rupFramePlantTime = 7 [default = 0];
+      // optional int64 lmTime = 7 [default = 0];
       case 7:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 56)) {
-          _Internal::set_has_rupframeplanttime(&has_bits);
-          rupframeplanttime_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          _Internal::set_has_lmtime(&has_bits);
+          lmtime_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -9583,10 +9650,10 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(6, this->_internal_receiveddataid(), target);
   }
 
-  // optional int64 rupFramePlantTime = 7 [default = 0];
+  // optional int64 lmTime = 7 [default = 0];
   if (cached_has_bits & 0x00000040u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(7, this->_internal_rupframeplanttime(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(7, this->_internal_lmtime(), target);
   }
 
   // optional uint32 rupFrameNumerator = 8 [default = 0];
@@ -9741,11 +9808,11 @@ size_t AppDataSourceState::ByteSizeLong() const {
           this->_internal_uptime());
     }
 
-    // optional int64 rupFramePlantTime = 7 [default = 0];
+    // optional int64 lmTime = 7 [default = 0];
     if (cached_has_bits & 0x00000040u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-          this->_internal_rupframeplanttime());
+          this->_internal_lmtime());
     }
 
     // optional double dataReceivingSpeed = 9 [default = 0];
@@ -9915,7 +9982,7 @@ void AppDataSourceState::MergeFrom(const AppDataSourceState& from) {
       uptime_ = from.uptime_;
     }
     if (cached_has_bits & 0x00000040u) {
-      rupframeplanttime_ = from.rupframeplanttime_;
+      lmtime_ = from.lmtime_;
     }
     if (cached_has_bits & 0x00000080u) {
       datareceivingspeed_ = from.datareceivingspeed_;
@@ -10668,43 +10735,49 @@ class SoftwareInfo::_Internal {
  public:
   using HasBits = decltype(std::declval<SoftwareInfo>()._has_bits_);
   static void set_has_softwaretype(HasBits* has_bits) {
-    (*has_bits)[0] |= 2048u;
+    (*has_bits)[0] |= 8192u;
   }
   static void set_has_equipmentid(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
   }
   static void set_has_majorversion(HasBits* has_bits) {
-    (*has_bits)[0] |= 64u;
-  }
-  static void set_has_minorversion(HasBits* has_bits) {
-    (*has_bits)[0] |= 128u;
-  }
-  static void set_has_commitno(HasBits* has_bits) {
-    (*has_bits)[0] |= 256u;
-  }
-  static void set_has_buildbranch(HasBits* has_bits) {
-    (*has_bits)[0] |= 2u;
-  }
-  static void set_has_commitsha(HasBits* has_bits) {
-    (*has_bits)[0] |= 4u;
-  }
-  static void set_has_username(HasBits* has_bits) {
-    (*has_bits)[0] |= 8u;
-  }
-  static void set_has_buildno(HasBits* has_bits) {
     (*has_bits)[0] |= 512u;
   }
-  static void set_has_crc(HasBits* has_bits) {
+  static void set_has_minorversion(HasBits* has_bits) {
     (*has_bits)[0] |= 1024u;
   }
-  static void set_has_clientdescription(HasBits* has_bits) {
+  static void set_has_patchversion(HasBits* has_bits) {
+    (*has_bits)[0] |= 2048u;
+  }
+  static void set_has_releasetype(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
+  static void set_has_branchname(HasBits* has_bits) {
+    (*has_bits)[0] |= 4u;
+  }
+  static void set_has_commithash(HasBits* has_bits) {
+    (*has_bits)[0] |= 8u;
+  }
+  static void set_has_buildusername(HasBits* has_bits) {
     (*has_bits)[0] |= 16u;
   }
-  static void set_has_hostname(HasBits* has_bits) {
+  static void set_has_builddate(HasBits* has_bits) {
     (*has_bits)[0] |= 32u;
   }
+  static void set_has_buildhostname(HasBits* has_bits) {
+    (*has_bits)[0] |= 64u;
+  }
+  static void set_has_pipelineid(HasBits* has_bits) {
+    (*has_bits)[0] |= 4096u;
+  }
+  static void set_has_hostname(HasBits* has_bits) {
+    (*has_bits)[0] |= 128u;
+  }
+  static void set_has_osusername(HasBits* has_bits) {
+    (*has_bits)[0] |= 256u;
+  }
   static bool MissingRequiredFields(const HasBits& has_bits) {
-    return ((has_bits[0] & 0x00000fcf) ^ 0x00000fcf) != 0;
+    return ((has_bits[0] & 0x00002e03) ^ 0x00002e03) != 0;
   }
 };
 
@@ -10723,29 +10796,44 @@ SoftwareInfo::SoftwareInfo(const SoftwareInfo& from)
     equipmentid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_equipmentid(), 
       GetArena());
   }
-  buildbranch_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (from._internal_has_buildbranch()) {
-    buildbranch_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_buildbranch(), 
+  releasetype_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_releasetype()) {
+    releasetype_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_releasetype(), 
       GetArena());
   }
-  commitsha_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (from._internal_has_commitsha()) {
-    commitsha_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_commitsha(), 
+  branchname_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_branchname()) {
+    branchname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_branchname(), 
       GetArena());
   }
-  username_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (from._internal_has_username()) {
-    username_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_username(), 
+  commithash_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_commithash()) {
+    commithash_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_commithash(), 
       GetArena());
   }
-  clientdescription_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (from._internal_has_clientdescription()) {
-    clientdescription_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_clientdescription(), 
+  buildusername_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_buildusername()) {
+    buildusername_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_buildusername(), 
+      GetArena());
+  }
+  builddate_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_builddate()) {
+    builddate_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_builddate(), 
+      GetArena());
+  }
+  buildhostname_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_buildhostname()) {
+    buildhostname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_buildhostname(), 
       GetArena());
   }
   hostname_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (from._internal_has_hostname()) {
     hostname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_hostname(), 
+      GetArena());
+  }
+  osusername_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_osusername()) {
+    osusername_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_osusername(), 
       GetArena());
   }
   ::memcpy(&majorversion_, &from.majorversion_,
@@ -10756,15 +10844,18 @@ SoftwareInfo::SoftwareInfo(const SoftwareInfo& from)
 
 void SoftwareInfo::SharedCtor() {
 equipmentid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-buildbranch_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-commitsha_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-username_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-clientdescription_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+releasetype_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+branchname_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+commithash_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+buildusername_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+builddate_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+buildhostname_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 hostname_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+osusername_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
     reinterpret_cast<char*>(&majorversion_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&crc_) -
-    reinterpret_cast<char*>(&majorversion_)) + sizeof(crc_));
+    0, static_cast<size_t>(reinterpret_cast<char*>(&pipelineid_) -
+    reinterpret_cast<char*>(&majorversion_)) + sizeof(pipelineid_));
 softwaretype_ = 8000;
 }
 
@@ -10777,11 +10868,14 @@ SoftwareInfo::~SoftwareInfo() {
 void SoftwareInfo::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
   equipmentid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  buildbranch_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  commitsha_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  username_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  clientdescription_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  releasetype_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  branchname_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  commithash_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  buildusername_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  builddate_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  buildhostname_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   hostname_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  osusername_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
 void SoftwareInfo::ArenaDtor(void* object) {
@@ -10801,35 +10895,39 @@ void SoftwareInfo::Clear() {
   (void) cached_has_bits;
 
   cached_has_bits = _has_bits_[0];
-  if (cached_has_bits & 0x0000003fu) {
+  if (cached_has_bits & 0x000000ffu) {
     if (cached_has_bits & 0x00000001u) {
       equipmentid_.ClearNonDefaultToEmpty();
     }
     if (cached_has_bits & 0x00000002u) {
-      buildbranch_.ClearNonDefaultToEmpty();
+      releasetype_.ClearNonDefaultToEmpty();
     }
     if (cached_has_bits & 0x00000004u) {
-      commitsha_.ClearNonDefaultToEmpty();
+      branchname_.ClearNonDefaultToEmpty();
     }
     if (cached_has_bits & 0x00000008u) {
-      username_.ClearNonDefaultToEmpty();
+      commithash_.ClearNonDefaultToEmpty();
     }
     if (cached_has_bits & 0x00000010u) {
-      clientdescription_.ClearNonDefaultToEmpty();
+      buildusername_.ClearNonDefaultToEmpty();
     }
     if (cached_has_bits & 0x00000020u) {
+      builddate_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000040u) {
+      buildhostname_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000080u) {
       hostname_.ClearNonDefaultToEmpty();
     }
   }
-  if (cached_has_bits & 0x000000c0u) {
-    ::memset(&majorversion_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&minorversion_) -
-        reinterpret_cast<char*>(&majorversion_)) + sizeof(minorversion_));
+  if (cached_has_bits & 0x00000100u) {
+    osusername_.ClearNonDefaultToEmpty();
   }
-  if (cached_has_bits & 0x00000f00u) {
-    ::memset(&commitno_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&crc_) -
-        reinterpret_cast<char*>(&commitno_)) + sizeof(crc_));
+  if (cached_has_bits & 0x00003e00u) {
+    ::memset(&majorversion_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&pipelineid_) -
+        reinterpret_cast<char*>(&majorversion_)) + sizeof(pipelineid_));
     softwaretype_ = 8000;
   }
   _has_bits_.Clear();
@@ -10879,81 +10977,106 @@ const char* SoftwareInfo::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // required int32 commitNo = 5 [default = 0];
+      // required int32 patchVersion = 5 [default = 0];
       case 5:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 40)) {
-          _Internal::set_has_commitno(&has_bits);
-          commitno_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          _Internal::set_has_patchversion(&has_bits);
+          patchversion_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // required string buildBranch = 6;
+      // required string releaseType = 6;
       case 6:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 50)) {
-          auto str = _internal_mutable_buildbranch();
+          auto str = _internal_mutable_releasetype();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Network.SoftwareInfo.buildBranch");
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Network.SoftwareInfo.releaseType");
           #endif  // !NDEBUG
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // required string commitSHA = 7;
+      // optional string branchName = 7;
       case 7:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 58)) {
-          auto str = _internal_mutable_commitsha();
+          auto str = _internal_mutable_branchname();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Network.SoftwareInfo.commitSHA");
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Network.SoftwareInfo.branchName");
           #endif  // !NDEBUG
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // required string userName = 8;
+      // optional string commitHash = 8;
       case 8:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 66)) {
-          auto str = _internal_mutable_username();
+          auto str = _internal_mutable_commithash();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Network.SoftwareInfo.userName");
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Network.SoftwareInfo.commitHash");
           #endif  // !NDEBUG
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // required int32 buildNo = 9 [default = 0];
+      // optional string buildUserName = 9;
       case 9:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 72)) {
-          _Internal::set_has_buildno(&has_bits);
-          buildno_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 74)) {
+          auto str = _internal_mutable_buildusername();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Network.SoftwareInfo.buildUserName");
+          #endif  // !NDEBUG
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // required uint32 crc = 10 [default = 0];
+      // optional string buildDate = 10;
       case 10:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 80)) {
-          _Internal::set_has_crc(&has_bits);
-          crc_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 82)) {
+          auto str = _internal_mutable_builddate();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Network.SoftwareInfo.buildDate");
+          #endif  // !NDEBUG
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional string clientDescription = 11;
+      // optional string buildHostname = 11;
       case 11:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 90)) {
-          auto str = _internal_mutable_clientdescription();
+          auto str = _internal_mutable_buildhostname();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Network.SoftwareInfo.clientDescription");
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Network.SoftwareInfo.buildHostname");
           #endif  // !NDEBUG
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional string hostname = 12;
+      // optional int32 pipelineID = 12 [default = 0];
       case 12:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 98)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 96)) {
+          _Internal::set_has_pipelineid(&has_bits);
+          pipelineid_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional string hostname = 13;
+      case 13:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 106)) {
           auto str = _internal_mutable_hostname();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
           ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Network.SoftwareInfo.hostname");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional string osUsername = 14;
+      case 14:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 114)) {
+          auto str = _internal_mutable_osusername();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Network.SoftwareInfo.osUsername");
           #endif  // !NDEBUG
           CHK_(ptr);
         } else goto handle_unusual;
@@ -10989,7 +11112,7 @@ failure:
 
   cached_has_bits = _has_bits_[0];
   // required int32 softwareType = 1 [default = 8000];
-  if (cached_has_bits & 0x00000800u) {
+  if (cached_has_bits & 0x00002000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(1, this->_internal_softwaretype(), target);
   }
@@ -11005,83 +11128,107 @@ failure:
   }
 
   // required int32 majorVersion = 3 [default = 0];
-  if (cached_has_bits & 0x00000040u) {
+  if (cached_has_bits & 0x00000200u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(3, this->_internal_majorversion(), target);
   }
 
   // required int32 minorVersion = 4 [default = 0];
-  if (cached_has_bits & 0x00000080u) {
+  if (cached_has_bits & 0x00000400u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(4, this->_internal_minorversion(), target);
   }
 
-  // required int32 commitNo = 5 [default = 0];
-  if (cached_has_bits & 0x00000100u) {
+  // required int32 patchVersion = 5 [default = 0];
+  if (cached_has_bits & 0x00000800u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(5, this->_internal_commitno(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(5, this->_internal_patchversion(), target);
   }
 
-  // required string buildBranch = 6;
+  // required string releaseType = 6;
   if (cached_has_bits & 0x00000002u) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->_internal_buildbranch().data(), static_cast<int>(this->_internal_buildbranch().length()),
+      this->_internal_releasetype().data(), static_cast<int>(this->_internal_releasetype().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Network.SoftwareInfo.buildBranch");
+      "Network.SoftwareInfo.releaseType");
     target = stream->WriteStringMaybeAliased(
-        6, this->_internal_buildbranch(), target);
+        6, this->_internal_releasetype(), target);
   }
 
-  // required string commitSHA = 7;
+  // optional string branchName = 7;
   if (cached_has_bits & 0x00000004u) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->_internal_commitsha().data(), static_cast<int>(this->_internal_commitsha().length()),
+      this->_internal_branchname().data(), static_cast<int>(this->_internal_branchname().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Network.SoftwareInfo.commitSHA");
+      "Network.SoftwareInfo.branchName");
     target = stream->WriteStringMaybeAliased(
-        7, this->_internal_commitsha(), target);
+        7, this->_internal_branchname(), target);
   }
 
-  // required string userName = 8;
+  // optional string commitHash = 8;
   if (cached_has_bits & 0x00000008u) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->_internal_username().data(), static_cast<int>(this->_internal_username().length()),
+      this->_internal_commithash().data(), static_cast<int>(this->_internal_commithash().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Network.SoftwareInfo.userName");
+      "Network.SoftwareInfo.commitHash");
     target = stream->WriteStringMaybeAliased(
-        8, this->_internal_username(), target);
+        8, this->_internal_commithash(), target);
   }
 
-  // required int32 buildNo = 9 [default = 0];
-  if (cached_has_bits & 0x00000200u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(9, this->_internal_buildno(), target);
-  }
-
-  // required uint32 crc = 10 [default = 0];
-  if (cached_has_bits & 0x00000400u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(10, this->_internal_crc(), target);
-  }
-
-  // optional string clientDescription = 11;
+  // optional string buildUserName = 9;
   if (cached_has_bits & 0x00000010u) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->_internal_clientdescription().data(), static_cast<int>(this->_internal_clientdescription().length()),
+      this->_internal_buildusername().data(), static_cast<int>(this->_internal_buildusername().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Network.SoftwareInfo.clientDescription");
+      "Network.SoftwareInfo.buildUserName");
     target = stream->WriteStringMaybeAliased(
-        11, this->_internal_clientdescription(), target);
+        9, this->_internal_buildusername(), target);
   }
 
-  // optional string hostname = 12;
+  // optional string buildDate = 10;
   if (cached_has_bits & 0x00000020u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_builddate().data(), static_cast<int>(this->_internal_builddate().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Network.SoftwareInfo.buildDate");
+    target = stream->WriteStringMaybeAliased(
+        10, this->_internal_builddate(), target);
+  }
+
+  // optional string buildHostname = 11;
+  if (cached_has_bits & 0x00000040u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_buildhostname().data(), static_cast<int>(this->_internal_buildhostname().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Network.SoftwareInfo.buildHostname");
+    target = stream->WriteStringMaybeAliased(
+        11, this->_internal_buildhostname(), target);
+  }
+
+  // optional int32 pipelineID = 12 [default = 0];
+  if (cached_has_bits & 0x00001000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(12, this->_internal_pipelineid(), target);
+  }
+
+  // optional string hostname = 13;
+  if (cached_has_bits & 0x00000080u) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_hostname().data(), static_cast<int>(this->_internal_hostname().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
       "Network.SoftwareInfo.hostname");
     target = stream->WriteStringMaybeAliased(
-        12, this->_internal_hostname(), target);
+        13, this->_internal_hostname(), target);
+  }
+
+  // optional string osUsername = 14;
+  if (cached_has_bits & 0x00000100u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_osusername().data(), static_cast<int>(this->_internal_osusername().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Network.SoftwareInfo.osUsername");
+    target = stream->WriteStringMaybeAliased(
+        14, this->_internal_osusername(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -11103,25 +11250,11 @@ size_t SoftwareInfo::RequiredFieldsByteSizeFallback() const {
         this->_internal_equipmentid());
   }
 
-  if (_internal_has_buildbranch()) {
-    // required string buildBranch = 6;
+  if (_internal_has_releasetype()) {
+    // required string releaseType = 6;
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_buildbranch());
-  }
-
-  if (_internal_has_commitsha()) {
-    // required string commitSHA = 7;
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_commitsha());
-  }
-
-  if (_internal_has_username()) {
-    // required string userName = 8;
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_username());
+        this->_internal_releasetype());
   }
 
   if (_internal_has_majorversion()) {
@@ -11138,25 +11271,11 @@ size_t SoftwareInfo::RequiredFieldsByteSizeFallback() const {
         this->_internal_minorversion());
   }
 
-  if (_internal_has_commitno()) {
-    // required int32 commitNo = 5 [default = 0];
+  if (_internal_has_patchversion()) {
+    // required int32 patchVersion = 5 [default = 0];
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-        this->_internal_commitno());
-  }
-
-  if (_internal_has_buildno()) {
-    // required int32 buildNo = 9 [default = 0];
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-        this->_internal_buildno());
-  }
-
-  if (_internal_has_crc()) {
-    // required uint32 crc = 10 [default = 0];
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
-        this->_internal_crc());
+        this->_internal_patchversion());
   }
 
   if (_internal_has_softwaretype()) {
@@ -11172,26 +11291,16 @@ size_t SoftwareInfo::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:Network.SoftwareInfo)
   size_t total_size = 0;
 
-  if (((_has_bits_[0] & 0x00000fcf) ^ 0x00000fcf) == 0) {  // All required fields are present.
+  if (((_has_bits_[0] & 0x00002e03) ^ 0x00002e03) == 0) {  // All required fields are present.
     // required string equipmentId = 2;
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_equipmentid());
 
-    // required string buildBranch = 6;
+    // required string releaseType = 6;
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_buildbranch());
-
-    // required string commitSHA = 7;
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_commitsha());
-
-    // required string userName = 8;
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_username());
+        this->_internal_releasetype());
 
     // required int32 majorVersion = 3 [default = 0];
     total_size += 1 +
@@ -11203,20 +11312,10 @@ size_t SoftwareInfo::ByteSizeLong() const {
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
         this->_internal_minorversion());
 
-    // required int32 commitNo = 5 [default = 0];
+    // required int32 patchVersion = 5 [default = 0];
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-        this->_internal_commitno());
-
-    // required int32 buildNo = 9 [default = 0];
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-        this->_internal_buildno());
-
-    // required uint32 crc = 10 [default = 0];
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
-        this->_internal_crc());
+        this->_internal_patchversion());
 
     // required int32 softwareType = 1 [default = 8000];
     total_size += 1 +
@@ -11231,22 +11330,64 @@ size_t SoftwareInfo::ByteSizeLong() const {
   (void) cached_has_bits;
 
   cached_has_bits = _has_bits_[0];
-  if (cached_has_bits & 0x00000030u) {
-    // optional string clientDescription = 11;
+  if (cached_has_bits & 0x000000fcu) {
+    // optional string branchName = 7;
+    if (cached_has_bits & 0x00000004u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_branchname());
+    }
+
+    // optional string commitHash = 8;
+    if (cached_has_bits & 0x00000008u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_commithash());
+    }
+
+    // optional string buildUserName = 9;
     if (cached_has_bits & 0x00000010u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-          this->_internal_clientdescription());
+          this->_internal_buildusername());
     }
 
-    // optional string hostname = 12;
+    // optional string buildDate = 10;
     if (cached_has_bits & 0x00000020u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_builddate());
+    }
+
+    // optional string buildHostname = 11;
+    if (cached_has_bits & 0x00000040u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_buildhostname());
+    }
+
+    // optional string hostname = 13;
+    if (cached_has_bits & 0x00000080u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
           this->_internal_hostname());
     }
 
   }
+  // optional string osUsername = 14;
+  if (cached_has_bits & 0x00000100u) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_osusername());
+  }
+
+  // optional int32 pipelineID = 12 [default = 0];
+  if (cached_has_bits & 0x00001000u) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+        this->_internal_pipelineid());
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
         _internal_metadata_, total_size, &_cached_size_);
@@ -11284,39 +11425,44 @@ void SoftwareInfo::MergeFrom(const SoftwareInfo& from) {
       _internal_set_equipmentid(from._internal_equipmentid());
     }
     if (cached_has_bits & 0x00000002u) {
-      _internal_set_buildbranch(from._internal_buildbranch());
+      _internal_set_releasetype(from._internal_releasetype());
     }
     if (cached_has_bits & 0x00000004u) {
-      _internal_set_commitsha(from._internal_commitsha());
+      _internal_set_branchname(from._internal_branchname());
     }
     if (cached_has_bits & 0x00000008u) {
-      _internal_set_username(from._internal_username());
+      _internal_set_commithash(from._internal_commithash());
     }
     if (cached_has_bits & 0x00000010u) {
-      _internal_set_clientdescription(from._internal_clientdescription());
+      _internal_set_buildusername(from._internal_buildusername());
     }
     if (cached_has_bits & 0x00000020u) {
-      _internal_set_hostname(from._internal_hostname());
+      _internal_set_builddate(from._internal_builddate());
     }
     if (cached_has_bits & 0x00000040u) {
-      majorversion_ = from.majorversion_;
+      _internal_set_buildhostname(from._internal_buildhostname());
     }
     if (cached_has_bits & 0x00000080u) {
-      minorversion_ = from.minorversion_;
+      _internal_set_hostname(from._internal_hostname());
     }
-    _has_bits_[0] |= cached_has_bits;
   }
-  if (cached_has_bits & 0x00000f00u) {
+  if (cached_has_bits & 0x00003f00u) {
     if (cached_has_bits & 0x00000100u) {
-      commitno_ = from.commitno_;
+      _internal_set_osusername(from._internal_osusername());
     }
     if (cached_has_bits & 0x00000200u) {
-      buildno_ = from.buildno_;
+      majorversion_ = from.majorversion_;
     }
     if (cached_has_bits & 0x00000400u) {
-      crc_ = from.crc_;
+      minorversion_ = from.minorversion_;
     }
     if (cached_has_bits & 0x00000800u) {
+      patchversion_ = from.patchversion_;
+    }
+    if (cached_has_bits & 0x00001000u) {
+      pipelineid_ = from.pipelineid_;
+    }
+    if (cached_has_bits & 0x00002000u) {
       softwaretype_ = from.softwaretype_;
     }
     _has_bits_[0] |= cached_has_bits;
@@ -11347,14 +11493,17 @@ void SoftwareInfo::InternalSwap(SoftwareInfo* other) {
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   swap(_has_bits_[0], other->_has_bits_[0]);
   equipmentid_.Swap(&other->equipmentid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  buildbranch_.Swap(&other->buildbranch_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  commitsha_.Swap(&other->commitsha_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  username_.Swap(&other->username_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  clientdescription_.Swap(&other->clientdescription_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  releasetype_.Swap(&other->releasetype_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  branchname_.Swap(&other->branchname_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  commithash_.Swap(&other->commithash_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  buildusername_.Swap(&other->buildusername_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  builddate_.Swap(&other->builddate_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  buildhostname_.Swap(&other->buildhostname_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   hostname_.Swap(&other->hostname_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  osusername_.Swap(&other->osusername_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(SoftwareInfo, crc_)
-      + sizeof(SoftwareInfo::crc_)
+      PROTOBUF_FIELD_OFFSET(SoftwareInfo, pipelineid_)
+      + sizeof(SoftwareInfo::pipelineid_)
       - PROTOBUF_FIELD_OFFSET(SoftwareInfo, majorversion_)>(
           reinterpret_cast<char*>(&majorversion_),
           reinterpret_cast<char*>(&other->majorversion_));
@@ -16512,7 +16661,7 @@ class TuningSourceState::_Internal {
     (*has_bits)[0] |= 256u;
   }
   static void set_has_hasunappliedparams(HasBits* has_bits) {
-    (*has_bits)[0] |= 67108864u;
+    (*has_bits)[0] |= 134217728u;
   }
   static void set_has_fotipflagboundschecksuccess(HasBits* has_bits) {
     (*has_bits)[0] |= 512u;
@@ -16566,7 +16715,7 @@ class TuningSourceState::_Internal {
     (*has_bits)[0] |= 33554432u;
   }
   static void set_has_errrupframesize(HasBits* has_bits) {
-    (*has_bits)[0] |= 134217728u;
+    (*has_bits)[0] |= 67108864u;
   }
   static void set_has_errrupnontuningdata(HasBits* has_bits) {
     (*has_bits)[0] |= 268435456u;
@@ -16631,6 +16780,9 @@ class TuningSourceState::_Internal {
   static void set_has_errtuningframeupdate(HasBits* has_bits) {
     (*has_bits)[1] |= 65536u;
   }
+  static void set_has_lmtime(HasBits* has_bits) {
+    (*has_bits)[1] |= 131072u;
+  }
 };
 
 TuningSourceState::TuningSourceState(::PROTOBUF_NAMESPACE_ID::Arena* arena)
@@ -16649,8 +16801,8 @@ TuningSourceState::TuningSourceState(const TuningSourceState& from)
       GetArena());
   }
   ::memcpy(&sourceid_, &from.sourceid_,
-    static_cast<size_t>(reinterpret_cast<char*>(&errtuningframeupdate_) -
-    reinterpret_cast<char*>(&sourceid_)) + sizeof(errtuningframeupdate_));
+    static_cast<size_t>(reinterpret_cast<char*>(&lmtime_) -
+    reinterpret_cast<char*>(&sourceid_)) + sizeof(lmtime_));
   // @@protoc_insertion_point(copy_constructor:Network.TuningSourceState)
 }
 
@@ -16658,8 +16810,8 @@ void TuningSourceState::SharedCtor() {
 lanequipmentid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
     reinterpret_cast<char*>(&sourceid_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&errtuningframeupdate_) -
-    reinterpret_cast<char*>(&sourceid_)) + sizeof(errtuningframeupdate_));
+    0, static_cast<size_t>(reinterpret_cast<char*>(&lmtime_) -
+    reinterpret_cast<char*>(&sourceid_)) + sizeof(lmtime_));
 }
 
 TuningSourceState::~TuningSourceState() {
@@ -16724,7 +16876,11 @@ void TuningSourceState::Clear() {
         reinterpret_cast<char*>(&errnoreply_) -
         reinterpret_cast<char*>(&errfotipromframesize_)) + sizeof(errnoreply_));
   }
-  errtuningframeupdate_ = PROTOBUF_LONGLONG(0);
+  if (cached_has_bits & 0x00030000u) {
+    ::memset(&errtuningframeupdate_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&lmtime_) -
+        reinterpret_cast<char*>(&errtuningframeupdate_)) + sizeof(lmtime_));
+  }
   _has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
@@ -17131,6 +17287,14 @@ const char* TuningSourceState::_InternalParse(const char* ptr, ::PROTOBUF_NAMESP
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
+      // optional int64 lmTime = 76 [default = 0];
+      case 76:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 96)) {
+          _Internal::set_has_lmtime(&_has_bits_);
+          lmtime_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
       default: {
       handle_unusual:
         if ((tag & 7) == 4 || tag == 0) {
@@ -17219,7 +17383,7 @@ failure:
   }
 
   // optional bool hasUnappliedParams = 17 [default = false];
-  if (cached_has_bits & 0x04000000u) {
+  if (cached_has_bits & 0x08000000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(17, this->_internal_hasunappliedparams(), target);
   }
@@ -17327,7 +17491,7 @@ failure:
   }
 
   // optional int64 errRupFrameSize = 51 [default = 0];
-  if (cached_has_bits & 0x08000000u) {
+  if (cached_has_bits & 0x04000000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(51, this->_internal_errrupframesize(), target);
   }
@@ -17457,6 +17621,12 @@ failure:
   if (cached_has_bits & 0x00010000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(75, this->_internal_errtuningframeupdate(), target);
+  }
+
+  // optional int64 lmTime = 76 [default = 0];
+  if (cached_has_bits & 0x00020000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt64ToArray(76, this->_internal_lmtime(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -17657,16 +17827,16 @@ size_t TuningSourceState::ByteSizeLong() const {
           this->_internal_errrupprotocolversion());
     }
 
-    // optional bool hasUnappliedParams = 17 [default = false];
-    if (cached_has_bits & 0x04000000u) {
-      total_size += 2 + 1;
-    }
-
     // optional int64 errRupFrameSize = 51 [default = 0];
-    if (cached_has_bits & 0x08000000u) {
+    if (cached_has_bits & 0x04000000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
           this->_internal_errrupframesize());
+    }
+
+    // optional bool hasUnappliedParams = 17 [default = false];
+    if (cached_has_bits & 0x08000000u) {
+      total_size += 2 + 1;
     }
 
     // optional int64 errRupNonTuningData = 52 [default = 0];
@@ -17815,13 +17985,22 @@ size_t TuningSourceState::ByteSizeLong() const {
     }
 
   }
-  // optional int64 errTuningFrameUpdate = 75 [default = 0];
-  if (cached_has_bits & 0x00010000u) {
-    total_size += 2 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
-        this->_internal_errtuningframeupdate());
-  }
+  if (cached_has_bits & 0x00030000u) {
+    // optional int64 errTuningFrameUpdate = 75 [default = 0];
+    if (cached_has_bits & 0x00010000u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
+          this->_internal_errtuningframeupdate());
+    }
 
+    // optional int64 lmTime = 76 [default = 0];
+    if (cached_has_bits & 0x00020000u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int64Size(
+          this->_internal_lmtime());
+    }
+
+  }
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
         _internal_metadata_, total_size, &_cached_size_);
@@ -17943,10 +18122,10 @@ void TuningSourceState::MergeFrom(const TuningSourceState& from) {
       errrupprotocolversion_ = from.errrupprotocolversion_;
     }
     if (cached_has_bits & 0x04000000u) {
-      hasunappliedparams_ = from.hasunappliedparams_;
+      errrupframesize_ = from.errrupframesize_;
     }
     if (cached_has_bits & 0x08000000u) {
-      errrupframesize_ = from.errrupframesize_;
+      hasunappliedparams_ = from.hasunappliedparams_;
     }
     if (cached_has_bits & 0x10000000u) {
       errrupnontuningdata_ = from.errrupnontuningdata_;
@@ -18017,8 +18196,14 @@ void TuningSourceState::MergeFrom(const TuningSourceState& from) {
     }
     _has_bits_[1] |= cached_has_bits;
   }
-  if (cached_has_bits & 0x00010000u) {
-    _internal_set_errtuningframeupdate(from._internal_errtuningframeupdate());
+  if (cached_has_bits & 0x00030000u) {
+    if (cached_has_bits & 0x00010000u) {
+      errtuningframeupdate_ = from.errtuningframeupdate_;
+    }
+    if (cached_has_bits & 0x00020000u) {
+      lmtime_ = from.lmtime_;
+    }
+    _has_bits_[1] |= cached_has_bits;
   }
 }
 
@@ -18047,8 +18232,8 @@ void TuningSourceState::InternalSwap(TuningSourceState* other) {
   swap(_has_bits_[1], other->_has_bits_[1]);
   lanequipmentid_.Swap(&other->lanequipmentid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(TuningSourceState, errtuningframeupdate_)
-      + sizeof(TuningSourceState::errtuningframeupdate_)
+      PROTOBUF_FIELD_OFFSET(TuningSourceState, lmtime_)
+      + sizeof(TuningSourceState::lmtime_)
       - PROTOBUF_FIELD_OFFSET(TuningSourceState, sourceid_)>(
           reinterpret_cast<char*>(&sourceid_),
           reinterpret_cast<char*>(&other->sourceid_));
@@ -19945,6 +20130,9 @@ class TuningSignalsReadReply::_Internal {
   static void set_has_error(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
   }
+  static void set_has_pendingsignalsstatechanges(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
 };
 
 TuningSignalsReadReply::TuningSignalsReadReply(::PROTOBUF_NAMESPACE_ID::Arena* arena)
@@ -19959,12 +20147,17 @@ TuningSignalsReadReply::TuningSignalsReadReply(const TuningSignalsReadReply& fro
       _has_bits_(from._has_bits_),
       tuningsignalstate_(from.tuningsignalstate_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  error_ = from.error_;
+  ::memcpy(&error_, &from.error_,
+    static_cast<size_t>(reinterpret_cast<char*>(&pendingsignalsstatechanges_) -
+    reinterpret_cast<char*>(&error_)) + sizeof(pendingsignalsstatechanges_));
   // @@protoc_insertion_point(copy_constructor:Network.TuningSignalsReadReply)
 }
 
 void TuningSignalsReadReply::SharedCtor() {
-error_ = 0;
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&error_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&pendingsignalsstatechanges_) -
+    reinterpret_cast<char*>(&error_)) + sizeof(pendingsignalsstatechanges_));
 }
 
 TuningSignalsReadReply::~TuningSignalsReadReply() {
@@ -19994,7 +20187,12 @@ void TuningSignalsReadReply::Clear() {
   (void) cached_has_bits;
 
   tuningsignalstate_.Clear();
-  error_ = 0;
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    ::memset(&error_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&pendingsignalsstatechanges_) -
+        reinterpret_cast<char*>(&error_)) + sizeof(pendingsignalsstatechanges_));
+  }
   _has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
@@ -20025,6 +20223,14 @@ const char* TuningSignalsReadReply::_InternalParse(const char* ptr, ::PROTOBUF_N
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<18>(ptr));
+        } else goto handle_unusual;
+        continue;
+      // optional int32 pendingSignalsStateChanges = 3 [default = 0];
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
+          _Internal::set_has_pendingsignalsstatechanges(&has_bits);
+          pendingsignalsstatechanges_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
         } else goto handle_unusual;
         continue;
       default: {
@@ -20071,6 +20277,12 @@ failure:
       InternalWriteMessage(2, this->_internal_tuningsignalstate(i), target, stream);
   }
 
+  // optional int32 pendingSignalsStateChanges = 3 [default = 0];
+  if (cached_has_bits & 0x00000002u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(3, this->_internal_pendingsignalsstatechanges(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -20094,14 +20306,23 @@ size_t TuningSignalsReadReply::ByteSizeLong() const {
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
-  // optional int32 error = 1 [default = 0];
   cached_has_bits = _has_bits_[0];
-  if (cached_has_bits & 0x00000001u) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-        this->_internal_error());
-  }
+  if (cached_has_bits & 0x00000003u) {
+    // optional int32 error = 1 [default = 0];
+    if (cached_has_bits & 0x00000001u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_error());
+    }
 
+    // optional int32 pendingSignalsStateChanges = 3 [default = 0];
+    if (cached_has_bits & 0x00000002u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_pendingsignalsstatechanges());
+    }
+
+  }
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
         _internal_metadata_, total_size, &_cached_size_);
@@ -20134,8 +20355,15 @@ void TuningSignalsReadReply::MergeFrom(const TuningSignalsReadReply& from) {
   (void) cached_has_bits;
 
   tuningsignalstate_.MergeFrom(from.tuningsignalstate_);
-  if (from._internal_has_error()) {
-    _internal_set_error(from._internal_error());
+  cached_has_bits = from._has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    if (cached_has_bits & 0x00000001u) {
+      error_ = from.error_;
+    }
+    if (cached_has_bits & 0x00000002u) {
+      pendingsignalsstatechanges_ = from.pendingsignalsstatechanges_;
+    }
+    _has_bits_[0] |= cached_has_bits;
   }
 }
 
@@ -20162,10 +20390,453 @@ void TuningSignalsReadReply::InternalSwap(TuningSignalsReadReply* other) {
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   swap(_has_bits_[0], other->_has_bits_[0]);
   tuningsignalstate_.InternalSwap(&other->tuningsignalstate_);
-  swap(error_, other->error_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(TuningSignalsReadReply, pendingsignalsstatechanges_)
+      + sizeof(TuningSignalsReadReply::pendingsignalsstatechanges_)
+      - PROTOBUF_FIELD_OFFSET(TuningSignalsReadReply, error_)>(
+          reinterpret_cast<char*>(&error_),
+          reinterpret_cast<char*>(&other->error_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata TuningSignalsReadReply::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
+class GetTuningSignalsStateChangesRequest::_Internal {
+ public:
+};
+
+GetTuningSignalsStateChangesRequest::GetTuningSignalsStateChangesRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:Network.GetTuningSignalsStateChangesRequest)
+}
+GetTuningSignalsStateChangesRequest::GetTuningSignalsStateChangesRequest(const GetTuningSignalsStateChangesRequest& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  // @@protoc_insertion_point(copy_constructor:Network.GetTuningSignalsStateChangesRequest)
+}
+
+void GetTuningSignalsStateChangesRequest::SharedCtor() {
+}
+
+GetTuningSignalsStateChangesRequest::~GetTuningSignalsStateChangesRequest() {
+  // @@protoc_insertion_point(destructor:Network.GetTuningSignalsStateChangesRequest)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void GetTuningSignalsStateChangesRequest::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+}
+
+void GetTuningSignalsStateChangesRequest::ArenaDtor(void* object) {
+  GetTuningSignalsStateChangesRequest* _this = reinterpret_cast< GetTuningSignalsStateChangesRequest* >(object);
+  (void)_this;
+}
+void GetTuningSignalsStateChangesRequest::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void GetTuningSignalsStateChangesRequest::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void GetTuningSignalsStateChangesRequest::Clear() {
+// @@protoc_insertion_point(message_clear_start:Network.GetTuningSignalsStateChangesRequest)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* GetTuningSignalsStateChangesRequest::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* GetTuningSignalsStateChangesRequest::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:Network.GetTuningSignalsStateChangesRequest)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:Network.GetTuningSignalsStateChangesRequest)
+  return target;
+}
+
+size_t GetTuningSignalsStateChangesRequest::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:Network.GetTuningSignalsStateChangesRequest)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void GetTuningSignalsStateChangesRequest::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:Network.GetTuningSignalsStateChangesRequest)
+  GOOGLE_DCHECK_NE(&from, this);
+  const GetTuningSignalsStateChangesRequest* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<GetTuningSignalsStateChangesRequest>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Network.GetTuningSignalsStateChangesRequest)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:Network.GetTuningSignalsStateChangesRequest)
+    MergeFrom(*source);
+  }
+}
+
+void GetTuningSignalsStateChangesRequest::MergeFrom(const GetTuningSignalsStateChangesRequest& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:Network.GetTuningSignalsStateChangesRequest)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+}
+
+void GetTuningSignalsStateChangesRequest::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:Network.GetTuningSignalsStateChangesRequest)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void GetTuningSignalsStateChangesRequest::CopyFrom(const GetTuningSignalsStateChangesRequest& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:Network.GetTuningSignalsStateChangesRequest)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool GetTuningSignalsStateChangesRequest::IsInitialized() const {
+  return true;
+}
+
+void GetTuningSignalsStateChangesRequest::InternalSwap(GetTuningSignalsStateChangesRequest* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata GetTuningSignalsStateChangesRequest::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
+class GetTuningSignalsStateChangesReply::_Internal {
+ public:
+  using HasBits = decltype(std::declval<GetTuningSignalsStateChangesReply>()._has_bits_);
+  static void set_has_error(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
+  static void set_has_pendingsignalsstatechanges(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
+};
+
+GetTuningSignalsStateChangesReply::GetTuningSignalsStateChangesReply(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena),
+  tuningsignalstate_(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:Network.GetTuningSignalsStateChangesReply)
+}
+GetTuningSignalsStateChangesReply::GetTuningSignalsStateChangesReply(const GetTuningSignalsStateChangesReply& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message(),
+      _has_bits_(from._has_bits_),
+      tuningsignalstate_(from.tuningsignalstate_) {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::memcpy(&error_, &from.error_,
+    static_cast<size_t>(reinterpret_cast<char*>(&pendingsignalsstatechanges_) -
+    reinterpret_cast<char*>(&error_)) + sizeof(pendingsignalsstatechanges_));
+  // @@protoc_insertion_point(copy_constructor:Network.GetTuningSignalsStateChangesReply)
+}
+
+void GetTuningSignalsStateChangesReply::SharedCtor() {
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&error_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&pendingsignalsstatechanges_) -
+    reinterpret_cast<char*>(&error_)) + sizeof(pendingsignalsstatechanges_));
+}
+
+GetTuningSignalsStateChangesReply::~GetTuningSignalsStateChangesReply() {
+  // @@protoc_insertion_point(destructor:Network.GetTuningSignalsStateChangesReply)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void GetTuningSignalsStateChangesReply::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+}
+
+void GetTuningSignalsStateChangesReply::ArenaDtor(void* object) {
+  GetTuningSignalsStateChangesReply* _this = reinterpret_cast< GetTuningSignalsStateChangesReply* >(object);
+  (void)_this;
+}
+void GetTuningSignalsStateChangesReply::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void GetTuningSignalsStateChangesReply::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void GetTuningSignalsStateChangesReply::Clear() {
+// @@protoc_insertion_point(message_clear_start:Network.GetTuningSignalsStateChangesReply)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  tuningsignalstate_.Clear();
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    ::memset(&error_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&pendingsignalsstatechanges_) -
+        reinterpret_cast<char*>(&error_)) + sizeof(pendingsignalsstatechanges_));
+  }
+  _has_bits_.Clear();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* GetTuningSignalsStateChangesReply::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  _Internal::HasBits has_bits{};
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // optional int32 error = 1 [default = 0];
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
+          _Internal::set_has_error(&has_bits);
+          error_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // repeated .Network.TuningSignalState tuningSignalState = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+          ptr -= 1;
+          do {
+            ptr += 1;
+            ptr = ctx->ParseMessage(_internal_add_tuningsignalstate(), ptr);
+            CHK_(ptr);
+            if (!ctx->DataAvailable(ptr)) break;
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<18>(ptr));
+        } else goto handle_unusual;
+        continue;
+      // optional int32 pendingSignalsStateChanges = 3 [default = 0];
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
+          _Internal::set_has_pendingsignalsstatechanges(&has_bits);
+          pendingsignalsstatechanges_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  _has_bits_.Or(has_bits);
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* GetTuningSignalsStateChangesReply::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:Network.GetTuningSignalsStateChangesReply)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  cached_has_bits = _has_bits_[0];
+  // optional int32 error = 1 [default = 0];
+  if (cached_has_bits & 0x00000001u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(1, this->_internal_error(), target);
+  }
+
+  // repeated .Network.TuningSignalState tuningSignalState = 2;
+  for (unsigned int i = 0,
+      n = static_cast<unsigned int>(this->_internal_tuningsignalstate_size()); i < n; i++) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(2, this->_internal_tuningsignalstate(i), target, stream);
+  }
+
+  // optional int32 pendingSignalsStateChanges = 3 [default = 0];
+  if (cached_has_bits & 0x00000002u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(3, this->_internal_pendingsignalsstatechanges(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:Network.GetTuningSignalsStateChangesReply)
+  return target;
+}
+
+size_t GetTuningSignalsStateChangesReply::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:Network.GetTuningSignalsStateChangesReply)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // repeated .Network.TuningSignalState tuningSignalState = 2;
+  total_size += 1UL * this->_internal_tuningsignalstate_size();
+  for (const auto& msg : this->tuningsignalstate_) {
+    total_size +=
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
+  }
+
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    // optional int32 error = 1 [default = 0];
+    if (cached_has_bits & 0x00000001u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_error());
+    }
+
+    // optional int32 pendingSignalsStateChanges = 3 [default = 0];
+    if (cached_has_bits & 0x00000002u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_pendingsignalsstatechanges());
+    }
+
+  }
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void GetTuningSignalsStateChangesReply::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:Network.GetTuningSignalsStateChangesReply)
+  GOOGLE_DCHECK_NE(&from, this);
+  const GetTuningSignalsStateChangesReply* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<GetTuningSignalsStateChangesReply>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Network.GetTuningSignalsStateChangesReply)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:Network.GetTuningSignalsStateChangesReply)
+    MergeFrom(*source);
+  }
+}
+
+void GetTuningSignalsStateChangesReply::MergeFrom(const GetTuningSignalsStateChangesReply& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:Network.GetTuningSignalsStateChangesReply)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  tuningsignalstate_.MergeFrom(from.tuningsignalstate_);
+  cached_has_bits = from._has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    if (cached_has_bits & 0x00000001u) {
+      error_ = from.error_;
+    }
+    if (cached_has_bits & 0x00000002u) {
+      pendingsignalsstatechanges_ = from.pendingsignalsstatechanges_;
+    }
+    _has_bits_[0] |= cached_has_bits;
+  }
+}
+
+void GetTuningSignalsStateChangesReply::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:Network.GetTuningSignalsStateChangesReply)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void GetTuningSignalsStateChangesReply::CopyFrom(const GetTuningSignalsStateChangesReply& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:Network.GetTuningSignalsStateChangesReply)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool GetTuningSignalsStateChangesReply::IsInitialized() const {
+  return true;
+}
+
+void GetTuningSignalsStateChangesReply::InternalSwap(GetTuningSignalsStateChangesReply* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  swap(_has_bits_[0], other->_has_bits_[0]);
+  tuningsignalstate_.InternalSwap(&other->tuningsignalstate_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(GetTuningSignalsStateChangesReply, pendingsignalsstatechanges_)
+      + sizeof(GetTuningSignalsStateChangesReply::pendingsignalsstatechanges_)
+      - PROTOBUF_FIELD_OFFSET(GetTuningSignalsStateChangesReply, error_)>(
+          reinterpret_cast<char*>(&error_),
+          reinterpret_cast<char*>(&other->error_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata GetTuningSignalsStateChangesReply::GetMetadata() const {
   return GetMetadataStatic();
 }
 
@@ -20438,8 +21109,11 @@ void TuningWriteCommand::InternalSwap(TuningWriteCommand* other) {
 class TuningSignalsWrite::_Internal {
  public:
   using HasBits = decltype(std::declval<TuningSignalsWrite>()._has_bits_);
-  static void set_has_autoapply(HasBits* has_bits) {
+  static void set_has_matsuser(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
+  }
+  static void set_has_autoapply(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
   }
 };
 
@@ -20455,11 +21129,17 @@ TuningSignalsWrite::TuningSignalsWrite(const TuningSignalsWrite& from)
       _has_bits_(from._has_bits_),
       commands_(from.commands_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  matsuser_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_matsuser()) {
+    matsuser_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_matsuser(), 
+      GetArena());
+  }
   autoapply_ = from.autoapply_;
   // @@protoc_insertion_point(copy_constructor:Network.TuningSignalsWrite)
 }
 
 void TuningSignalsWrite::SharedCtor() {
+matsuser_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 autoapply_ = false;
 }
 
@@ -20471,6 +21151,7 @@ TuningSignalsWrite::~TuningSignalsWrite() {
 
 void TuningSignalsWrite::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
+  matsuser_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
 void TuningSignalsWrite::ArenaDtor(void* object) {
@@ -20490,6 +21171,10 @@ void TuningSignalsWrite::Clear() {
   (void) cached_has_bits;
 
   commands_.Clear();
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x00000001u) {
+    matsuser_.ClearNonDefaultToEmpty();
+  }
   autoapply_ = false;
   _has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -20503,6 +21188,17 @@ const char* TuningSignalsWrite::_InternalParse(const char* ptr, ::PROTOBUF_NAMES
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     CHK_(ptr);
     switch (tag >> 3) {
+      // optional string matsUser = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          auto str = _internal_mutable_matsuser();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Network.TuningSignalsWrite.matsUser");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
       // optional bool autoApply = 2 [default = false];
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
@@ -20553,8 +21249,18 @@ failure:
   (void) cached_has_bits;
 
   cached_has_bits = _has_bits_[0];
-  // optional bool autoApply = 2 [default = false];
+  // optional string matsUser = 1;
   if (cached_has_bits & 0x00000001u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_matsuser().data(), static_cast<int>(this->_internal_matsuser().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Network.TuningSignalsWrite.matsUser");
+    target = stream->WriteStringMaybeAliased(
+        1, this->_internal_matsuser(), target);
+  }
+
+  // optional bool autoApply = 2 [default = false];
+  if (cached_has_bits & 0x00000002u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(2, this->_internal_autoapply(), target);
   }
@@ -20590,12 +21296,21 @@ size_t TuningSignalsWrite::ByteSizeLong() const {
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
-  // optional bool autoApply = 2 [default = false];
   cached_has_bits = _has_bits_[0];
-  if (cached_has_bits & 0x00000001u) {
-    total_size += 1 + 1;
-  }
+  if (cached_has_bits & 0x00000003u) {
+    // optional string matsUser = 1;
+    if (cached_has_bits & 0x00000001u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_matsuser());
+    }
 
+    // optional bool autoApply = 2 [default = false];
+    if (cached_has_bits & 0x00000002u) {
+      total_size += 1 + 1;
+    }
+
+  }
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
         _internal_metadata_, total_size, &_cached_size_);
@@ -20628,8 +21343,15 @@ void TuningSignalsWrite::MergeFrom(const TuningSignalsWrite& from) {
   (void) cached_has_bits;
 
   commands_.MergeFrom(from.commands_);
-  if (from._internal_has_autoapply()) {
-    _internal_set_autoapply(from._internal_autoapply());
+  cached_has_bits = from._has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    if (cached_has_bits & 0x00000001u) {
+      _internal_set_matsuser(from._internal_matsuser());
+    }
+    if (cached_has_bits & 0x00000002u) {
+      autoapply_ = from.autoapply_;
+    }
+    _has_bits_[0] |= cached_has_bits;
   }
 }
 
@@ -20656,6 +21378,7 @@ void TuningSignalsWrite::InternalSwap(TuningSignalsWrite* other) {
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   swap(_has_bits_[0], other->_has_bits_[0]);
   commands_.InternalSwap(&other->commands_);
+  matsuser_.Swap(&other->matsuser_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   swap(autoapply_, other->autoapply_);
 }
 
@@ -26352,6 +27075,12 @@ template<> PROTOBUF_NOINLINE ::Network::TuningSignalState* Arena::CreateMaybeMes
 }
 template<> PROTOBUF_NOINLINE ::Network::TuningSignalsReadReply* Arena::CreateMaybeMessage< ::Network::TuningSignalsReadReply >(Arena* arena) {
   return Arena::CreateMessageInternal< ::Network::TuningSignalsReadReply >(arena);
+}
+template<> PROTOBUF_NOINLINE ::Network::GetTuningSignalsStateChangesRequest* Arena::CreateMaybeMessage< ::Network::GetTuningSignalsStateChangesRequest >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::Network::GetTuningSignalsStateChangesRequest >(arena);
+}
+template<> PROTOBUF_NOINLINE ::Network::GetTuningSignalsStateChangesReply* Arena::CreateMaybeMessage< ::Network::GetTuningSignalsStateChangesReply >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::Network::GetTuningSignalsStateChangesReply >(arena);
 }
 template<> PROTOBUF_NOINLINE ::Network::TuningWriteCommand* Arena::CreateMaybeMessage< ::Network::TuningWriteCommand >(Arena* arena) {
   return Arena::CreateMessageInternal< ::Network::TuningWriteCommand >(arena);

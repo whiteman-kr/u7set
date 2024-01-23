@@ -101,7 +101,7 @@ namespace Builder
 	//
 	// ------------------------------------------------------------------------
 
-	JsSignalSet::JsSignalSet(SignalSet* signalSet):
+	JsSignalSet::JsSignalSet(const SignalSet* signalSet):
 		m_signalSet(signalSet)
 	{
 		if (m_signalSet == nullptr)
@@ -118,11 +118,11 @@ namespace Builder
 			return nullptr;
 		}
 
-		for (int i = 0; i < m_signalSet->count(); i++)
+		for (const AppSignal* s : *m_signalSet)
 		{
-			if ((*m_signalSet)[i].equipmentID() == equpmentID)
+			if (s->equipmentID() == equpmentID)
 			{
-				AppSignalProperties* sp = new AppSignalProperties((*m_signalSet)[i]);
+				AppSignalProperties* sp = new AppSignalProperties(*s);
 				return sp;
 
 				//QObject* c = &(*m_signalSet)[i];
@@ -369,6 +369,7 @@ namespace Builder
 
 		// Find Logic modules for each subsystem and execute configuration script for each subsystem
 		//
+		int errorCount = m_log->errorCount();	// Save log errors count for later comparing
 
 		for (int i = 0; i < subsystemsCount; i++)
 		{
@@ -578,6 +579,12 @@ namespace Builder
 		if (m_buildResultWriter->addFile("Reports", "LmJumpers.txt", lmReportData) == nullptr)
 		{
 			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Failed to save LmJumpers.txt file!"));
+			return false;
+		}
+
+		if (m_log->errorCount() > errorCount)
+		{
+			// New error messages arrived during build - build failed
 			return false;
 		}
 

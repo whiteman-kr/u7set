@@ -2,19 +2,16 @@
 
 !include ./CommonLib.puml
 !include ./UtilsLib.puml
-!include ./OnlineLib.puml
-!include ./Protobuf.puml
 !include ./AppSignalLib.puml
+!include ./OnlineLib.puml
 !include ./VFrame30.puml
 !include ./ClientLib.puml
-
 
 [TuningClient]
 TuningClient -up-> [CommonLib]
 TuningClient -up-> [UtilsLib]
-TuningClient -up-> [OnlineLib]
-TuningClient -up-> [Protobuf]
 TuningClient -up-> [AppSignalLib]
+TuningClient -up-> [OnlineLib]
 TuningClient -up-> [ClientLib]
 TuningClient -up-> [VFrame30]
 

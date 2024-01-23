@@ -1,9 +1,10 @@
 #ifndef DB_LIB_DOMAIN
-#error Don't include this file in the project! Link DbLib instead.
+#error Do not include this file in the project! Link DbLib instead.
 #endif
 
 #include <functional>
 #include <QDateTime>
+#include <QApplication>
 #include <QFile>
 #include <QSqlDriver>
 #include <QSqlError>
@@ -11,6 +12,8 @@
 #include <QDebug>
 #include <QHostInfo>
 #include <QElapsedTimer>
+
+#include <QMessageBox>
 
 #include "DbWorker.h"
 #include "DbProgress.h"
@@ -332,7 +335,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0310.sql", "Upgrade to version 310, LAN section is modified in LM description files"},
 	{":/DatabaseUpgrade/Upgrade0311.sql", "Upgrade to version 311, Added AdditionSizes section to AFB bus_switch in LM description files"},
 	{":/DatabaseUpgrade/Upgrade0312.sql", "Upgrade to version 312, Removed outs med_in, max_in, min_in for median AFBs, set sim functions for AFBs"},
-	{":/DatabaseUpgrade/Upgrade0313.sql", "Upgrade to version 313, Changed set_flags vesrion so it can be updated after new opcode 255"},
+	{":/DatabaseUpgrade/Upgrade0313.sql", "Upgrade to version 313, Changed set_flags version so it can be updated after new opcode 255"},
 	{":/DatabaseUpgrade/Upgrade0314.sql", "Upgrade to version 314, Added SetFlagsToInput property to simlock, mismatch_* AFB"},
 	{":/DatabaseUpgrade/Upgrade0315.sql", "Upgrade to version 315, SetFlagsToInput renamed to AssignFlags in simlock, mismatch_* AFB"},
 	{":/DatabaseUpgrade/Upgrade0316.sql", "Upgrade to version 316, AFB integrator and derive have min and max as inputs"},
@@ -405,14 +408,34 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0383.sql", "Upgrade to version 383, Change OCM RxAppDataSize (->2397) and RxAppDataOffset (->0) values"},
 	{":/DatabaseUpgrade/Upgrade0384.sql", "Upgrade to version 384, Set ConfigService.CheckHostname to false by default"},
 	{":/DatabaseUpgrade/Upgrade0385.sql", "Upgrade to version 385, Set default value Monitor.StartSchemaID to empty"},
+	{":/DatabaseUpgrade/Upgrade0386.sql", "Upgrade to version 386, Removed output median_fp(si).validity (AFB version 8) from LMs LM1_SR05, LM1_SR20, LM11_SR90"},
+	{":/DatabaseUpgrade/Upgrade0387.sql", "Upgrade to version 387, Move from manual LM Descriptions to generated, removed all LMs except SF40, SR03, SR04, SR05, SR20, SR90"},
+	{":/DatabaseUpgrade/Upgrade0388.sql", "Upgrade to version 388, Add presets of LMs SR05 and SR20"},
+	{":/DatabaseUpgrade/Upgrade0389.sql", "Upgrade to version 389, LMs SR05, SR20, SR90: AFB MEM changed from version 8 to version 9"},
+	{":/DatabaseUpgrade/Upgrade0390.sql", "Upgrade to version 390, New instructions for LMs SR05, SR20, SR90"},
+	{":/DatabaseUpgrade/Upgrade0391.sql", "Upgrade to version 391, Removed property OnConfigurationArrived from Monitor, TuningClient"},
+	{":/DatabaseUpgrade/Upgrade0392.sql", "Upgrade to version 392, Add file Tests/GlobalScript.js"},
+	{":/DatabaseUpgrade/Upgrade0393.sql", "Upgrade to version 393, Hidden AssignFlag from mismatch_*, changed minimum size for mux"},
+	{":/DatabaseUpgrade/Upgrade0394.sql", "Upgrade to version 394, Add TestSuite preset to database updates"},
+	{":/DatabaseUpgrade/Upgrade0395.sql", "Upgrade to version 395, TestSuite preset report template update"},
+	{":/DatabaseUpgrade/Upgrade0396.sql", "Upgrade to version 396, Add InvertSignal and ApertureType properties"},
+	{":/DatabaseUpgrade/Upgrade0397.sql", "Upgrade to version 397, TestSuite preset report template update"},
+	{":/DatabaseUpgrade/Upgrade0398.sql", "Upgrade to version 398, Attribute instantiator revision in all AFBs"},
+	{":/DatabaseUpgrade/Upgrade0399.sql", "Upgrade to version 399, TestSuite preset update (added script tags)"},
+	{":/DatabaseUpgrade/Upgrade0400.sql", "Upgrade to version 400, Update file Tests/GlobalScript.js"},
+	{":/DatabaseUpgrade/Upgrade0401.sql", "Upgrade to version 401, InvertSignal property bug fix"},
+	{":/DatabaseUpgrade/Upgrade0402.sql", "Upgrade to version 402, Fixed AFB Limiter attribute HasRAM (set to false)"},
+	{":/DatabaseUpgrade/Upgrade0403.sql", "Upgrade to version 403, In AOM-4PH validity signals link was removed from output signals"},
+	{":/DatabaseUpgrade/Upgrade0404.sql", "Upgrade to version 404, Review module certifications (AIM, AOM), FIM and AIFM removed, FSC Chassis fix"},
+	{":/DatabaseUpgrade/Upgrade0405.sql", "Upgrade to version 405, Update official logo"},
+	{":/DatabaseUpgrade/Upgrade0406.sql", "Upgrade to version 406, Added packed_logic items"},
+	{":/DatabaseUpgrade/Upgrade0407.sql", "Upgrade to version 407, TestSuite preset update (added default report template)"},
+	{":/DatabaseUpgrade/Upgrade0408.sql", "Upgrade to version 408, Remove from SR LMs outputs 1, 2 and their validity"},
+	{":/DatabaseUpgrade/Upgrade0409.sql", "Upgrade to version 409, Show on schema param AssignFlags for AFBs mismatch_*"},
+	{":/DatabaseUpgrade/Upgrade0410.sql", "Upgrade to version 410, Update tuning logins editor for Monitor, TuningClient and TestSuite"},
 };
 
 int DbWorker::counter = 0;
-
-DbWorker::DbWorker()
-{
-	assert(false);
-}
 
 DbWorker::DbWorker(DbProgress* progress) :
 	m_host("127.0.0.1"),
@@ -712,23 +735,27 @@ void DbWorker::slot_getProjectList(std::vector<DbProject>* out)
 		db.close();
 	}
 
-	// Open each project and get it's version
-	//
-	for (auto pi = out->begin(); pi != out->end(); ++pi)
+	QElapsedTimer et;
+	et.start();
+	double oneProjectProgress = 100.0 / out->size();
+	double progress = 0.0;
+	m_progress->setValue(static_cast<int>(progress));
+
+	auto getProjectVersionFunc = [this, oneProjectProgress, &progress](DbProject* project, int instanceNo) -> bool
 	{
-		QString projectDatabaseConnectionName = QString("%1_%2 connection").arg(m_instanceNo).arg(pi->projectName());
+		Q_ASSERT(project);
+
+		QString projectDatabaseConnectionName = QString("%1_%2 connection").arg(instanceNo).arg(project->projectName());
 
 		std::shared_ptr<int*> removeDatabase(nullptr, [projectDatabaseConnectionName](void*)
-			{
-				QSqlDatabase::removeDatabase(projectDatabaseConnectionName);		// remove database
-			});
+											 {
+												 QSqlDatabase::removeDatabase(projectDatabaseConnectionName); // remove database
+											 });
 
-		// --
-		//
 		QSqlDatabase projectDb = QSqlDatabase::addDatabase("QPSQL", projectDatabaseConnectionName);
 		projectDb.setHostName(host());
 		projectDb.setPort(port());
-		projectDb.setDatabaseName(pi->databaseName());
+		projectDb.setDatabaseName(project->databaseName());
 		projectDb.setUserName(serverUsername());
 		projectDb.setPassword(serverPassword());
 
@@ -736,7 +763,10 @@ void DbWorker::slot_getProjectList(std::vector<DbProject>* out)
 		if (result == false)
 		{
 			emitError(projectDb, projectDb.lastError());
-			continue;
+
+			progress += oneProjectProgress;
+			m_progress->setValue(static_cast<int>(progress));
+			return false;
 		}
 
 		// Get project version, scope is for versionQuery
@@ -761,12 +791,12 @@ void DbWorker::slot_getProjectList(std::vector<DbProject>* out)
 				}
 			}
 
-			pi->setVersion(projectVersion);
+			project->setVersion(projectVersion);
 		}
 
 		// From this version ProjectProperties table is added, so it is possible to request propertyes
 		//
-		if (pi->version() >= 41)
+		if (project->version() >= 41)
 		{
 			QString getProjectDescriptionSql = QString("SELECT Value FROM ProjectProperties WHERE Name = 'Description';");
 
@@ -787,13 +817,38 @@ void DbWorker::slot_getProjectList(std::vector<DbProject>* out)
 				}
 			}
 
-			pi->setDescription(projectDescription);
+			project->setDescription(projectDescription);
 		}
+
+		qDebug() << "DbWorker::slot_getProjectList(): project: " << project->projectName() << ", version: " << project->version();
 
 		// --
 		//
 		projectDb.close();
+
+		progress += oneProjectProgress;
+		m_progress->setValue(static_cast<int>(progress));
+		return true;
+	};
+
+	// Open each project and get it's version
+	//
+	std::vector<QFuture<bool>> futures;
+	futures.reserve(out->size());
+
+	size_t index = m_instanceNo * 1000;
+	for (auto& project : *out)
+	{
+		auto f = QtConcurrent::run(getProjectVersionFunc, &project, index++);
+		futures.emplace_back(std::move(f));
 	}
+
+	for (const auto& f : futures)
+	{
+		std::ignore = f.result();
+	}
+
+	qDebug() << "DbWorker::slot_getProjectList(): Get project list time:" << et.elapsed() << "ms" << ", projects: " << out->size();
 
 	return;
 }
@@ -4646,17 +4701,10 @@ void DbWorker::slot_addDeviceObject(Hardware::DeviceObject* device, int parentId
 	return;
 }
 
-void DbWorker::slot_getSignalsIDs(QVector<int>* signalsIDs)
+void DbWorker::slot_getSignalsIDs(std::vector<int>* signalsIDs)
 {
 	AUTO_COMPLETE
-
-	// Check parameters
-	//
-	if (signalsIDs == nullptr)
-	{
-		assert(signalsIDs != nullptr);
-		return;
-	}
+	TEST_PTR_RETURN(signalsIDs);
 
 	signalsIDs->clear();
 
@@ -4688,23 +4736,16 @@ void DbWorker::slot_getSignalsIDs(QVector<int>* signalsIDs)
 	{
 		int signalID = q.value(0).toInt();
 
-		signalsIDs->append(signalID);
+		signalsIDs->push_back(signalID);
 	}
 
 	return;
 }
 
-void DbWorker::slot_getSignalsIDAppSignalID(QVector<ID_AppSignalID>* signalsIDAppSignalID)
+void DbWorker::slot_getSignalsIDAppSignalID(std::vector<ID_AppSignalID>* signalsIDAppSignalID, bool withDeleted)
 {
 	AUTO_COMPLETE
-
-	// Check parameters
-	//
-	if (signalsIDAppSignalID == nullptr)
-	{
-		Q_ASSERT(signalsIDAppSignalID);
-		return;
-	}
+	TEST_PTR_RETURN(signalsIDAppSignalID);
 
 	signalsIDAppSignalID->clear();
 
@@ -4720,8 +4761,8 @@ void DbWorker::slot_getSignalsIDAppSignalID(QVector<ID_AppSignalID>* signalsIDAp
 
 	// request
 	//
-	QString request = QString("SELECT * FROM get_signals_id_appsignalid(%1, %2)")
-		.arg(currentUser().userId()).arg("false");
+	QString request = QString("SELECT * FROM get_signals_id_appsignalid(%1, %2)").
+								arg(currentUserId()).arg(boolToString(withDeleted));
 	QSqlQuery q(db);
 
 	bool result = q.exec(request);
@@ -4732,46 +4773,38 @@ void DbWorker::slot_getSignalsIDAppSignalID(QVector<ID_AppSignalID>* signalsIDAp
 		return;
 	}
 
-	ID_AppSignalID iasi;
+	signalsIDAppSignalID->reserve(q.size());
+
+	static const int COLUMN_SIGNAL_ID = 0;
+	static const int COLUMN_SIGNAL_GROUP_ID = 1;
+	static const int COLUMN_APP_SIGNAL_ID = 2;
 
 	while(q.next() != false)
 	{
-
-		iasi.ID = q.value(0).toInt();
-		iasi.signalGroupID = q.value(1).toInt();
-		iasi.appSignalID = q.value(2).toString();
-
-		signalsIDAppSignalID->append(iasi);
+		signalsIDAppSignalID->emplace_back(	q.value(COLUMN_SIGNAL_ID).toInt(),
+											q.value(COLUMN_SIGNAL_GROUP_ID).toInt(),
+											q.value(COLUMN_APP_SIGNAL_ID).toString());
 	}
 
 	return;
 }
-
-
 
 void DbWorker::slot_getSignals(AppSignalSet* signalSet, bool excludeDeleted)
 {
 	getSignals(signalSet, excludeDeleted, false);
 }
 
-
 void DbWorker::slot_getTunableSignals(AppSignalSet* signalSet)
 {
 	getSignals(signalSet, true, true);
 }
 
-
 void DbWorker::getSignals(AppSignalSet* signalSet, bool excludeDeleted, bool tunableOnly)
 {
 	AUTO_COMPLETE
+	TEST_PTR_RETURN(signalSet);
 
-	// Check parameters
-	//
-	if (signalSet == nullptr)
-	{
-		assert(signalSet != nullptr);
-		return;
-	}
+	signalSet->clear();
 
 	// Operation
 	//
@@ -4785,8 +4818,7 @@ void DbWorker::getSignals(AppSignalSet* signalSet, bool excludeDeleted, bool tun
 
 	int signalCount = 0;
 
-	QString request = QString("SELECT * FROM get_signal_count(%1)")
-		.arg(currentUser().userId());
+	QString request = QString("SELECT * FROM get_signal_count(%1)").arg(currentUser().userId());
 
 	QSqlQuery q(db);
 
@@ -4804,8 +4836,11 @@ void DbWorker::getSignals(AppSignalSet* signalSet, bool excludeDeleted, bool tun
 		dProgress = signalCount / 20;
 	}
 
-	request = QString("SELECT * FROM get_latest_signals_all(%1)")
-		.arg(currentUser().userId());
+	QElapsedTimer tm;
+
+	request = QString("SELECT * FROM get_latest_signals_all(%1)").arg(currentUser().userId());
+
+	tm.start();
 
 	result = q.exec(request);
 
@@ -4814,6 +4849,8 @@ void DbWorker::getSignals(AppSignalSet* signalSet, bool excludeDeleted, bool tun
 		emitError(db, tr("Can't get signal workcopy! Error: ") +  q.lastError().text());
 		return;
 	}
+
+	signalSet->reserve(q.size());
 
 	int n = 0;
 
@@ -4842,10 +4879,8 @@ void DbWorker::getSignals(AppSignalSet* signalSet, bool excludeDeleted, bool tun
 			continue;
 		}
 
-		signalSet->append(s->ID(), s);
+		signalSet->append(s);
 	}
-
-	signalSet->buildID2IndexMap();
 
 	m_progress->setValue(100);
 
@@ -4855,19 +4890,11 @@ void DbWorker::getSignals(AppSignalSet* signalSet, bool excludeDeleted, bool tun
 void DbWorker::slot_getLatestSignal(int signalID, AppSignal* signal)
 {
 	AUTO_COMPLETE
-
-	// Check parameters
-	//
-	if (signal == nullptr)
-	{
-		assert(signal != nullptr);
-		return;
-	}
+	TEST_PTR_RETURN(signal);
+	Q_ASSERT(signalID > 0);
 
 	signal->setID(0);		// bad signal flag
 
-	// Operation
-	//
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 
 	if (db.isOpen() == false)
@@ -4878,8 +4905,7 @@ void DbWorker::slot_getLatestSignal(int signalID, AppSignal* signal)
 
 	// request
 	//
-	QString request = QString("SELECT * FROM get_latest_signal(%1, %2)")
-		.arg(currentUser().userId()).arg(signalID);
+	QString request = QString("SELECT * FROM get_latest_signal(%1, %2)").arg(currentUserId()).arg(signalID);
 	QSqlQuery q(db);
 
 	bool result = q.exec(request);
@@ -4895,18 +4921,20 @@ void DbWorker::slot_getLatestSignal(int signalID, AppSignal* signal)
 		getSignalData(q, *signal);
 	}
 
+	signal->setLoaded(true);
+
 	return;
 }
 
-void DbWorker::slot_getLatestSignals(QVector<int> signalIDs, QVector<AppSignal>* signalsArray)
+void DbWorker::slot_getLatestSignals(const std::vector<int>& signalIDs, std::vector<AppSignal>* signalsArray)
 {
 	AUTO_COMPLETE
+	TEST_PTR_RETURN(signalsArray);
 
-	// Check parameters
-	//
-	if (signalsArray == nullptr)
+	signalsArray->clear();
+
+	if (signalIDs.size() == 0)
 	{
-		assert(signalsArray != nullptr);
 		return;
 	}
 
@@ -4920,32 +4948,18 @@ void DbWorker::slot_getLatestSignals(QVector<int> signalIDs, QVector<AppSignal>*
 		return;
 	}
 
-	signalsArray->clear();
-	signalsArray->reserve(signalIDs.count());
+	signalsArray->reserve(signalIDs.size());
+
+	QString logMessage = QString("slot_getLatestSignals: SignalCount %1, SignalIDs ").arg(signalIDs.size());
 
 	// request
 	//
+	QString request = QString("SELECT * FROM get_latest_signals(%1,").arg(currentUserId());
 
-	QString idsStr("ARRAY[");
-	bool first = true;
+	appendIDsArray(signalIDs, &request, true, &logMessage);
 
-	for(int id : signalIDs)
-	{
-		if (first == true)
-		{
-			idsStr += QString("%1").arg(id);
-			first = false;
-		}
-		else
-		{
-			idsStr += QString(",%1").arg(id);
-		}
-	}
+	addLogRecord(db, logMessage);
 
-	idsStr += "]";
-
-	QString request = QString("SELECT * FROM get_latest_signals(%1, %2)")
-		.arg(currentUser().userId()).arg(idsStr);
 	QSqlQuery q(db);
 
 	bool result = q.exec(request);
@@ -4956,30 +4970,20 @@ void DbWorker::slot_getLatestSignals(QVector<int> signalIDs, QVector<AppSignal>*
 		return;
 	}
 
-	while(q.next() != false)
-	{
-		AppSignal s;
-		getSignalData(q, s);
-
-		signalsArray->append(s);
-	}
+	readSignalsToVector(q, signalsArray);
 
 	return;
 }
 
-void DbWorker::slot_getLatestSignalsByAppSignalIDs(QStringList appSignalIds, QVector<AppSignal>* signalArray)
+void DbWorker::slot_getLatestSignalsByAppSignalIDs(const QStringList& appSignalIds, std::vector<AppSignal>* signalArray)
 {
 	AUTO_COMPLETE
 
-	if (signalArray == nullptr)
-	{
-		assert(false);
-		return;
-	}
+	TEST_PTR_RETURN(signalArray);
 
 	signalArray->clear();
 
-	if (appSignalIds.empty())
+	if (appSignalIds.empty() == true)
 	{
 		return;
 	}
@@ -5012,8 +5016,8 @@ void DbWorker::slot_getLatestSignalsByAppSignalIDs(QStringList appSignalIds, QVe
 
 	// request
 	//
-	QString request = QString("SELECT * FROM get_latest_signals_by_appsignalids(%1, ARRAY[%2])")
-		.arg(currentUser().userId()).arg(appSignalIdsStr);
+	QString request = QString("SELECT * FROM get_latest_signals_by_appsignalids(%1, ARRAY[%2])").
+							arg(currentUser().userId()).arg(appSignalIdsStr);
 	QSqlQuery q(db);
 
 	bool result = q.exec(request);
@@ -5030,7 +5034,7 @@ void DbWorker::slot_getLatestSignalsByAppSignalIDs(QStringList appSignalIds, QVe
 
 		getSignalData(q, signal);
 
-		signalArray->append(signal);
+		signalArray->emplace_back(signal);
 	}
 
 	return;
@@ -5077,17 +5081,12 @@ void DbWorker::slot_getLatestSignalsWithUserID(std::vector<AppSignal>* out)
 	return;
 }
 
-void DbWorker::slot_getCheckedOutSignalsIDs(QVector<int>* signalsIDs)
+void DbWorker::slot_getCheckedOutSignalsIDs(std::vector<int>* signalsIDs)
 {
 	AUTO_COMPLETE
+	TEST_PTR_RETURN(signalsIDs);
 
-	// Check parameters
-	//
-	if (signalsIDs == nullptr)
-	{
-		assert(signalsIDs != nullptr);
-		return;
-	}
+	signalsIDs->clear();
 
 	// Operation
 	//
@@ -5101,8 +5100,8 @@ void DbWorker::slot_getCheckedOutSignalsIDs(QVector<int>* signalsIDs)
 
 	// request
 	//
-	QString request = QString("SELECT * FROM get_checked_out_signals_ids(%1)")
-		.arg(currentUser().userId());
+	QString request = QString("SELECT * FROM get_checked_out_signals_ids(%1)").
+									arg(currentUserId());
 	QSqlQuery q(db);
 
 	bool result = q.exec(request);
@@ -5113,14 +5112,13 @@ void DbWorker::slot_getCheckedOutSignalsIDs(QVector<int>* signalsIDs)
 		return;
 	}
 
-	signalsIDs->clear();
 	signalsIDs->reserve(q.size());
 
 	while(q.next() != false)
 	{
 		int signalID = q.value(0).toInt();
 
-		signalsIDs->append(signalID);
+		signalsIDs->push_back(signalID);
 	}
 
 	return;
@@ -5180,7 +5178,7 @@ void DbWorker::getSignalData(QSqlQuery& q, AppSignal& s)
 
 	s.setInstanceAction(static_cast<E::VcsItemAction>(q.value(SD_INSTANCE_ACTION).toInt()));
 
-	s.setIsLoaded(true);
+	s.setLoaded(true);
 }
 
 
@@ -5215,14 +5213,14 @@ QString DbWorker::getSignalDataStr(const AppSignal& s)
 	return str;
 }
 
-void DbWorker::slot_addSignal(E::SignalType signalType, QVector<AppSignal>* newSignal)
+void DbWorker::slot_addSignals(E::SignalType signalType, std::vector<AppSignal>* newSignal)
 {
 	AUTO_COMPLETE
 
-	addSignal(signalType, newSignal);
+	addSignals(signalType, newSignal);
 }
 
-bool DbWorker::addSignal(E::SignalType signalType, QVector<AppSignal>* newSignal)
+bool DbWorker::addSignals(E::SignalType signalType, std::vector<AppSignal>* newSignal)
 {
 	TEST_PTR_RETURN_FALSE(newSignal);
 
@@ -5232,8 +5230,6 @@ bool DbWorker::addSignal(E::SignalType signalType, QVector<AppSignal>* newSignal
 		return false;
 	}
 
-	// Operation
-	//
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 
 	if (db.isOpen() == false)
@@ -5244,19 +5240,22 @@ bool DbWorker::addSignal(E::SignalType signalType, QVector<AppSignal>* newSignal
 
 	// Log action
 	//
-	QString logMessage = QString("addSignal: SignalCount %1, SignalIDs ")
-						 .arg(newSignal->size());
+	QString logMessage = QString("addSignal: SignalCount %1, SignalIDs ").
+										arg(newSignal->size());
 
 	for (const AppSignal& s : *newSignal)
 	{
 		logMessage += s.appSignalID() + QLatin1String(" ");
 	}
+
 	addLogRecord(db, logMessage);
 
 	// request
 	//
-	QString request = QString("SELECT * FROM add_signal(%1, %2, %3)")
-		.arg(currentUser().userId()).arg(TO_INT(signalType)).arg(newSignal->count());
+	QString request = QString("SELECT * FROM add_signal(%1, %2, %3)").
+									arg(currentUserId()).
+									arg(TO_INT(signalType)).
+									arg(newSignal->size());
 	QSqlQuery q(db);
 
 	bool result = q.exec(request);
@@ -5363,9 +5362,8 @@ bool DbWorker::setSignalWorkcopy(QSqlDatabase& db, const AppSignal& s, ObjectSta
 
 	QString sds = getSignalDataStr(s);
 
-	QString request = QString("SELECT * FROM set_signal_workcopy(%1, %2)")
-		.arg(currentUser().userId()).arg(sds);
-
+	QString request = QString("SELECT * FROM set_signal_workcopy(%1, %2)").
+									arg(currentUserId()).arg(sds);
 	QSqlQuery q(db);
 
 	bool result = q.exec(request);
@@ -5404,25 +5402,19 @@ bool DbWorker::setSignalWorkcopy(QSqlDatabase& db, const AppSignal& s, ObjectSta
 	return true;
 }
 
-void DbWorker::slot_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates)
+void DbWorker::slot_checkoutSignals(const std::vector<int>& signalIDs, std::vector<ObjectState>* objectStates)
 {
 	AUTO_COMPLETE
 
 	// Check parameters
 	//
-	if (signalIDs == nullptr)
-	{
-		assert(signalIDs != nullptr);
-		return;
-	}
-
 	if (objectStates == nullptr)
 	{
 		assert(objectStates != nullptr);
 		return;
 	}
 
-	if (signalIDs->size() == 0)
+	if (signalIDs.size() == 0)
 	{
 		return;				// nothing to checkout
 	}
@@ -5441,32 +5433,15 @@ void DbWorker::slot_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState
 
 	// Log action
 	//
-	QString logMessage = QString("slot_checkoutSignals: SignalCount %1, SignalIDs ")
-						 .arg(signalIDs->size());
-
-	for (int id : *signalIDs)
-	{
-		logMessage += QString("%1 ").arg(id);
-	}
-	addLogRecord(db, logMessage);
+	QString logMessage = QString("slot_checkoutSignals: SignalCount %1, SignalIDs ").arg(signalIDs.size());
 
 	// request
 	//
-	QString request = QString("SELECT * FROM checkout_signals(%1,ARRAY[").arg(currentUser().userId());
+	QString request = QString("SELECT * FROM checkout_signals(%1,").arg(currentUser().userId());
 
-	qsizetype count = signalIDs->count();
+	appendIDsArray(signalIDs, &request, true, &logMessage);
 
-	for(qsizetype i = 0; i < count; i++)
-	{
-		if (i < count - 1)
-		{
-			request += QString("%1,").arg((*signalIDs)[i]);
-		}
-		else
-		{
-			request += QString("%1])").arg((*signalIDs)[i]);
-		}
-	}
+	addLogRecord(db, logMessage);
 
 	QSqlQuery q(db);
 
@@ -5478,35 +5453,24 @@ void DbWorker::slot_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState
 		return;
 	}
 
+	objectStates->reserve(q.size());
+
 	while(q.next() != false)
 	{
 		ObjectState os;
 
 		db_objectState(q, &os);
 
-		objectStates->append(os);
+		objectStates->emplace_back(os);
 	}
 }
 
-
-void DbWorker::slot_setSignalWorkcopy(AppSignal* signal, ObjectState *objectState)
+void DbWorker::slot_setSignalWorkcopy(AppSignal* signal, ObjectState* objectState)
 {
 	AUTO_COMPLETE
+	TEST_PTR_RETURN(signal);
+	TEST_PTR_RETURN(objectState);
 
-	if (signal == nullptr)
-	{
-		assert(signal != nullptr);
-		return;
-	}
-
-	if (objectState == nullptr)
-	{
-		assert(objectState != nullptr);
-		return;
-	}
-
-	// Operation
-	//
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 
 	if (db.isOpen() == false)
@@ -5514,11 +5478,6 @@ void DbWorker::slot_setSignalWorkcopy(AppSignal* signal, ObjectState *objectStat
 		emitError(db, tr("Cannot set signal workcopy. Database connection is not opened."));
 		return;
 	}
-
-	// request
-	//
-	//signal->setCreated(QDateTime::currentDateTime());
-	//signal->setInstanceCreated(QDateTime::currentDateTime());
 
 	QString errMsg;
 
@@ -5530,8 +5489,8 @@ void DbWorker::slot_setSignalWorkcopy(AppSignal* signal, ObjectState *objectStat
 		return;
 	}
 
-	QString request2 = QString("SELECT * FROM get_latest_signal(%1, %2)")
-		.arg(currentUser().userId()).arg(signal->ID());
+	QString request2 = QString("SELECT * FROM get_latest_signal(%1, %2)").
+									arg(currentUserId()).arg(signal->ID());
 
 	QSqlQuery q2(db);
 
@@ -5553,9 +5512,15 @@ void DbWorker::slot_setSignalWorkcopy(AppSignal* signal, ObjectState *objectStat
 	}
 }
 
-void DbWorker::slot_setSignalsWorkcopies(const QVector<AppSignal>* signalsList)
+void DbWorker::slot_setSignalsWorkcopies(const std::vector<AppSignal>& signalsList)
 {
 	AUTO_COMPLETE
+
+	if (signalsList.size() == 0)
+	{
+		Q_ASSERT(false);
+		return;
+	}
 
 	// Operation
 	//
@@ -5571,9 +5536,9 @@ void DbWorker::slot_setSignalsWorkcopies(const QVector<AppSignal>* signalsList)
 
 	double sum = 0;
 	double prevSum = 0;
-	double interval = signalsList->count() / 50.0;
+	double interval = signalsList.size() / 50.0;
 
-	for(AppSignal signal : *signalsList)
+	for(const AppSignal& signal : signalsList)
 	{
 		//
 
@@ -5581,7 +5546,7 @@ void DbWorker::slot_setSignalsWorkcopies(const QVector<AppSignal>* signalsList)
 
 		if (sum >= prevSum + interval)
 		{
-			m_progress->setValue(static_cast<int>((sum * 100.0) / (*signalsList).count()));
+			m_progress->setValue(static_cast<int>((sum * 100.0) / (signalsList).size()));
 			prevSum = sum;
 		}
 
@@ -5701,13 +5666,13 @@ void DbWorker::slot_undoSignalChanges(int signalID, ObjectState* objectState)
 	}
 }
 
-void DbWorker::slot_undoSignalsChanges(QVector<int> signalIDs, QVector<ObjectState>* objectStates)
+void DbWorker::slot_undoSignalsChanges(const std::vector<int>& signalIDs, std::vector<ObjectState>* objectStates)
 {
 	AUTO_COMPLETE
+	TEST_PTR_RETURN(objectStates);
 
-	if (objectStates == nullptr)
+	if (signalIDs.empty() == true)
 	{
-		assert(objectStates != nullptr);
 		return;
 	}
 
@@ -5722,38 +5687,19 @@ void DbWorker::slot_undoSignalsChanges(QVector<int> signalIDs, QVector<ObjectSta
 	}
 
 	objectStates->clear();
-	objectStates->reserve(signalIDs.count());
-
-	//
-
-	QString idsStr("ARRAY[");
-	bool first = true;
-
-	for(int id : signalIDs)
-	{
-		if (first == true)
-		{
-			idsStr += QString("%1").arg(id);
-			first = false;
-		}
-		else
-		{
-			idsStr += QString(",%1").arg(id);
-		}
-	}
-
-	idsStr += "]";
+	objectStates->reserve(signalIDs.size());
 
 	// Log action
 	//
-	QString logMessage = QString("slot_undoSignalsChanges: SignalIDs %1").arg(idsStr);
-
-	addLogRecord(db, logMessage);
+	QString logMessage = QString("slot_undoSignalsChanges: SignalCount %1 SignalIDs ").arg(signalIDs.size());
 
 	// --
 	//
-	QString request = QString("SELECT * FROM undo_signals_changes(%1, %2)")
-		.arg(currentUser().userId()).arg(idsStr);
+	QString request = QString("SELECT * FROM undo_signals_changes(%1,").arg(currentUser().userId());
+
+	appendIDsArray(signalIDs, &request, true, &logMessage);
+
+	addLogRecord(db, logMessage);
 
 	QSqlQuery q(db);
 
@@ -5769,30 +5715,18 @@ void DbWorker::slot_undoSignalsChanges(QVector<int> signalIDs, QVector<ObjectSta
 	{
 		ObjectState os;
 		db_objectState(q, &os);
-		objectStates->append(os);
+		objectStates->emplace_back(os);
 	}
 }
 
-void DbWorker::slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState> *objectState)
+void DbWorker::slot_checkinSignals(const std::vector<int>& signalIDs, QString comment, std::vector<ObjectState>* objectState)
 {
 	AUTO_COMPLETE
 
-	if (signalIDs == nullptr)
-	{
-		assert(signalIDs != nullptr);
-		return;
-	}
-
-	if (objectState == nullptr)
-	{
-		assert(objectState != nullptr);
-		return;
-	}
+	TEST_PTR_RETURN(objectState);
 
 	objectState->clear();
 
-	// Operation
-	//
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 
 	if (db.isOpen() == false)
@@ -5803,36 +5737,16 @@ void DbWorker::slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVe
 
 	// Log action
 	//
-	QString logMessage = QString("slot_checkinSignals: Comment '%1', SiganlCount %2, SignalIDs ")
-						 .arg(comment)
-						 .arg(signalIDs->size());
+	QString logMessage = QString("slot_checkinSignals: Comment '%1', SignalCount %2, SignalIDs ").
+										arg(comment).arg(signalIDs.size());
 
-	for (int id : *signalIDs)
-	{
-		logMessage += QString("%1 ").arg(id);
-	}
+	QString request = QString("SELECT * FROM checkin_signals(%1,").arg(currentUserId());
+
+	appendIDsArray(signalIDs, &request, false, &logMessage);
+
 	addLogRecord(db, logMessage);
 
-	// --
-	//
-	qsizetype count = signalIDs->count();
-
-	QString request = QString("SELECT * FROM checkin_signals(%1, ARRAY[")
-		.arg(currentUser().userId());
-
-	for(qsizetype i = 0; i < count; i++)
-	{
-		if (i < count-1)
-		{
-			request += QString("%1,").arg(signalIDs->at(i));
-		}
-		else
-		{
-			request += QString("%1],").arg(signalIDs->at(i));
-		}
-	}
-
-	request += QString("'%1')").arg(comment);
+	request.append(QString(",'%1')").arg(DbWorker::toSqlStr(comment)));
 
 	QSqlQuery q(db);
 
@@ -5844,33 +5758,27 @@ void DbWorker::slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVe
 		return;
 	}
 
+	objectState->reserve(q.size());
+
 	while(q.next())
 	{
 		ObjectState os;
 
 		db_objectState(q, &os);
 
-		objectState->append(os);
+		objectState->emplace_back(os);
 	}
 }
 
-void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals,
+void DbWorker::slot_autoAddSignals(const std::vector<const Hardware::DeviceAppSignal*>& deviceSignals,
 								   std::vector<AppSignal>* addedSignals)
 {
 	AUTO_COMPLETE
+	TEST_PTR_RETURN(addedSignals);
 
-	if (deviceSignals == nullptr)
-	{
-		Q_ASSERT(deviceSignals);
-		return;
-	}
+	addedSignals->clear();
 
-	if (addedSignals != nullptr)
-	{
-		addedSignals->clear();
-	}
-
-	int signalCount = int(deviceSignals->size());
+	int signalCount = static_cast<int>(deviceSignals.size());
 
 	for(int i = 0; i < signalCount; i++)
 	{
@@ -5879,7 +5787,7 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>
 			m_progress->setValue((i * 100) / signalCount);
 		}
 
-		const Hardware::DeviceAppSignal* deviceSignal = deviceSignals->at(i);
+		const Hardware::DeviceAppSignal* deviceSignal = deviceSignals[i];
 
 		if (deviceSignal == nullptr)
 		{
@@ -5893,9 +5801,13 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>
 			{
 				QString errMsg;
 
-				AppSignal appSignal;
+				std::vector<AppSignal> newSignals;
 
-				errMsg = initAppSignalFromDeviceAppSignal(*deviceSignal, &appSignal);
+				newSignals.resize(1);
+
+				AppSignal& newSignal = newSignals[0];
+
+				errMsg = initAppSignalFromDeviceAppSignal(*deviceSignal, &newSignal);
 
 				if (errMsg.isEmpty() == false)
 				{
@@ -5903,15 +5815,11 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceAppSignal*>
 					return;
 				}
 
-				QVector<AppSignal> newSignals;
+				bool result = addSignals(newSignal.signalType(), &newSignals);
 
-				newSignals.append(appSignal);
-
-				bool result = addSignal(appSignal.signalType(), &newSignals);
-
-				if (result == true && addedSignals != nullptr)
+				if (result == true)
 				{
-					addedSignals->push_back(newSignals[0]);
+					addedSignals->emplace_back(newSignal);
 				}
 			}
 		}
@@ -6049,12 +5957,10 @@ QString DbWorker::initAppSignalFromDeviceAppSignal(const Hardware::DeviceAppSign
 	return errMsg;
 }
 
-void DbWorker::slot_autoDeleteSignals(const std::vector<Hardware::DeviceAppSignal*>* deviceSignals)
+void DbWorker::slot_autoDeleteSignals(const std::vector<const Hardware::DeviceAppSignal*>& deviceSignals)
 {
 	AUTO_COMPLETE
 
-	// Operation
-	//
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 
 	if (db.isOpen() == false)
@@ -6063,14 +5969,15 @@ void DbWorker::slot_autoDeleteSignals(const std::vector<Hardware::DeviceAppSigna
 		return;
 	}
 
-	//--
-	//
 	ObjectState os;
 
-	for(Hardware::DeviceAppSignal* deviceSignal : *deviceSignals)
+	for(const Hardware::DeviceAppSignal* deviceSignal : deviceSignals)
 	{
-		QString request = QString("SELECT * FROM delete_signal_by_equipmentid(%1, '%2')")
-			.arg(currentUser().userId()).arg(toSqlStr(deviceSignal->equipmentIdTemplate()));
+		TEST_PTR_CONTINUE(deviceSignal);
+
+		QString request = QString("SELECT * FROM delete_signal_by_equipmentid(%1, '%2')").
+										arg(currentUser().userId()).
+										arg(toSqlStr(deviceSignal->equipmentIdTemplate()));
 
 		QSqlQuery q(db);
 
@@ -6092,7 +5999,6 @@ void DbWorker::slot_autoDeleteSignals(const std::vector<Hardware::DeviceAppSigna
 		}
 	}
 }
-
 
 bool DbWorker::isSignalWithEquipmentIDExists(const QString& equipmentID)
 {
@@ -6130,7 +6036,7 @@ bool DbWorker::isSignalWithEquipmentIDExists(const QString& equipmentID)
 	return result;
 }
 
-
+/*
 void DbWorker::slot_getSignalsIDsWithAppSignalID(QString appSignalID, QVector<int>* signalIDs)
 {
 	AUTO_COMPLETE
@@ -6252,18 +6158,20 @@ void DbWorker::slot_getSignalsIDsWithEquipmentID(QString equipmentID, QVector<in
 		signalIDs->append(q.value(0).toInt());
 	}
 }
+*/
 
-void DbWorker::slot_getMultipleSignalsIDsWithEquipmentID(const QStringList& equipmentIDs, QMultiHash<QString, int>* signalIDs)
+void DbWorker::slot_getMultipleSignalsIDsWithEquipmentID(const QStringList& equipmentIDs,
+														 std::map<QString, std::set<int>>* signalIDs)
 {
 	AUTO_COMPLETE
-
-	if (signalIDs == nullptr)
-	{
-		assert(false);
-		return;
-	}
+	TEST_PTR_RETURN(signalIDs);
 
 	signalIDs->clear();
+
+	if (equipmentIDs.empty() == true)
+	{
+		return;
+	}
 
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 
@@ -6279,8 +6187,6 @@ void DbWorker::slot_getMultipleSignalsIDsWithEquipmentID(const QStringList& equi
 
 	for(const QString& equipmentID : equipmentIDs)
 	{
-		//
-
 		sum += 1;
 
 		if (sum >= prevSum + interval)
@@ -6289,12 +6195,9 @@ void DbWorker::slot_getMultipleSignalsIDsWithEquipmentID(const QStringList& equi
 			prevSum = sum;
 		}
 
-		//
-
-		QString request = QString("SELECT * FROM get_signal_ids_with_equipmentid(%1, '%2')")
-						  .arg(currentUser().userId())
-						  .arg(toSqlStr(equipmentID));
-
+		QString request = QString("SELECT * FROM get_signal_ids_with_equipmentid(%1, '%2')").
+											arg(currentUser().userId()).
+											arg(toSqlStr(equipmentID));
 		QSqlQuery q(db);
 
 		bool result = q.exec(request);
@@ -6305,30 +6208,28 @@ void DbWorker::slot_getMultipleSignalsIDsWithEquipmentID(const QStringList& equi
 			return;
 		}
 
+		auto it = signalIDs->end();
+
 		while(q.next() == true)
 		{
+			if (it == signalIDs->end())
+			{
+				auto p = signalIDs->emplace(equipmentID, std::set<int>{});
+				it = p.first;
+			}
+
 			int signalID = q.value(0).toInt();
 
-			signalIDs->insert(equipmentID, signalID);
+			it->second.insert(signalID);
 		}
 	}
 }
 
-
 void DbWorker::slot_getSignalHistory(int signalID, std::vector<DbChangeset>* out)
 {
 	AUTO_COMPLETE
+	TEST_PTR_RETURN(out);
 
-	// Check parameters
-	//
-	if (out == nullptr)
-	{
-		assert(false);
-		return;
-	}
-
-	// Operation
-	//
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 
 	if (db.isOpen() == false)
@@ -6339,13 +6240,13 @@ void DbWorker::slot_getSignalHistory(int signalID, std::vector<DbChangeset>* out
 
 	// Request for history
 	//
-	QString request = QString("SELECT * FROM get_signal_history(%1, %2)")
-			.arg(currentUser().userId())
-			.arg(signalID);
+	QString request = QString("SELECT * FROM get_signal_history(%1, %2)").
+									arg(currentUser().userId()).arg(signalID);
 
 	QSqlQuery q(db);
 
 	bool result = q.exec(request);
+
 	if (result == false)
 	{
 		emitError(db, tr("Error: ") +  q.lastError().text());
@@ -6356,28 +6257,25 @@ void DbWorker::slot_getSignalHistory(int signalID, std::vector<DbChangeset>* out
 	{
 		DbChangeset ci;
 		db_dbChangeset(q, &ci);
-
 		out->push_back(ci);
 	}
 
 	return;
 }
 
-void DbWorker::slot_getSpecificSignals(const std::vector<int>* signalIDs, int changesetId, std::vector<AppSignal>* out)
+void DbWorker::slot_getSpecificSignalsByIDs(const std::vector<int>& signalIDs, int changesetId, std::vector<AppSignal>* out)
 {
 	AUTO_COMPLETE
+	TEST_PTR_RETURN(out);
 
-	// Check parameters
-	//
-	if (signalIDs == nullptr ||
-		signalIDs->empty() == true ||
-		out == nullptr)
+	out->clear();
+
+	if (signalIDs.empty() == true)
 	{
-		assert(signalIDs != nullptr);
-		assert(signalIDs->empty() != true);
-		assert(out != nullptr);
 		return;
 	}
+
+	out->reserve(signalIDs.size());
 
 	// Operation
 	//
@@ -6388,12 +6286,8 @@ void DbWorker::slot_getSpecificSignals(const std::vector<int>* signalIDs, int ch
 		return;
 	}
 
-	// Iterate through signalIDs
-	//
-	for (unsigned int i = 0; i < signalIDs->size(); i++)
+	for (int signalID : signalIDs)
 	{
-		int signalID = signalIDs->at(i);
-
 		// Set progress value here
 		// ...
 		// -- end ofSet progress value here
@@ -6405,14 +6299,15 @@ void DbWorker::slot_getSpecificSignals(const std::vector<int>* signalIDs, int ch
 
 		// request
 		//
-		QString request = QString("SELECT * FROM get_specific_signal(%1, %2, %3);")
-				.arg(currentUser().userId())
-				.arg(signalID)
-				.arg(changesetId);
+		QString request = QString("SELECT * FROM get_specific_signal(%1, %2, %3);").
+										arg(currentUser().userId()).
+										arg(signalID).
+										arg(changesetId);
 
 		QSqlQuery q(db);
 
 		bool result = q.exec(request);
+
 		if (result == false)
 		{
 			emitError(db, tr("Can't get signal. Error: ") +  q.lastError().text());
@@ -6429,24 +6324,17 @@ void DbWorker::slot_getSpecificSignals(const std::vector<int>* signalIDs, int ch
 
 		getSignalData(q, s);
 
-		out->push_back(s);
+		out->emplace_back(s);
 	}
 
 	return;
 }
 
-void DbWorker::slot_getSpecificSignals(int changesetId, std::vector<AppSignal>* out)
+void DbWorker::slot_getSpecificSignalsByChangesetID(int changesetId, std::vector<AppSignal>* out)
 {
 	AUTO_COMPLETE
+	TEST_PTR_RETURN(out);
 
-	if (out == nullptr)
-	{
-		Q_ASSERT(out);
-		return;
-	}
-
-	// Operation
-	//
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 
 	if (db.isOpen() == false)
@@ -6455,9 +6343,8 @@ void DbWorker::slot_getSpecificSignals(int changesetId, std::vector<AppSignal>* 
 		return;
 	}
 
-	QString request = QString("SELECT * FROM get_specific_signals_all_by_changeset_id(%1, %2)")
-		.arg(currentUser().userId()).arg(changesetId);
-
+	QString request = QString("SELECT * FROM get_specific_signals_all_by_changeset_id(%1, %2)").
+									arg(currentUser().userId()).arg(changesetId);
 	QSqlQuery q(db);
 
 	bool result = q.exec(request);
@@ -6471,18 +6358,11 @@ void DbWorker::slot_getSpecificSignals(int changesetId, std::vector<AppSignal>* 
 	readSignalsToVector(q, out);
 }
 
-void DbWorker::slot_getSpecificSignals(QDateTime date, std::vector<AppSignal>* out)
+void DbWorker::slot_getSpecificSignalsByDate(QDateTime date, std::vector<AppSignal>* out)
 {
 	AUTO_COMPLETE
+	TEST_PTR_RETURN(out);
 
-	if (out == nullptr)
-	{
-		Q_ASSERT(out);
-		return;
-	}
-
-	// Operation
-	//
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 
 	if (db.isOpen() == false)
@@ -6492,8 +6372,8 @@ void DbWorker::slot_getSpecificSignals(QDateTime date, std::vector<AppSignal>* o
 	}
 
 	QString request = QString("SELECT * FROM get_specific_signals_all_by_date(%1, '%2'::timestamp with time zone)").
-							arg(currentUser().userId()).
-							arg(date.toString("yyyy-MM-dd HH:mm:ss"));
+										arg(currentUser().userId()).
+										arg(date.toString("yyyy-MM-dd HH:mm:ss"));
 
 	QSqlQuery q(db);
 
@@ -6518,8 +6398,14 @@ void DbWorker::readSignalsToVector(QSqlQuery& q, std::vector<AppSignal>* out)
 
 	out->clear();
 
-	int dProgress = 0;
 	int signalCount = q.size();
+
+	if (signalCount == 0)
+	{
+		return;
+	}
+
+	int dProgress = 0;
 
 	if (signalCount != -1)
 	{
@@ -6565,14 +6451,7 @@ void DbWorker::readSignalsToVector(QSqlQuery& q, std::vector<AppSignal>* out)
 void DbWorker::slot_hasCheckedOutSignals(bool* hasCheckedOut)
 {
 	AUTO_COMPLETE
-
-	// Check parameters
-	//
-	if (hasCheckedOut == nullptr)
-	{
-		assert(false);
-		return;
-	}
+	TEST_PTR_RETURN(hasCheckedOut);
 
 	*hasCheckedOut = true;
 
@@ -6829,6 +6708,7 @@ void DbWorker::slot_nextCounterValue(int* counter)
 	}
 
 	q.next();
+
 	*counter = q.value(0).toInt();
 
 	return;
@@ -7442,6 +7322,11 @@ void DbWorker::setCurrentUser(const DbUser& user)
 	m_currentUser = user;
 }
 
+int DbWorker::currentUserId() const
+{
+	return currentUser().userId();
+}
+
 DbProject DbWorker::currentProject() const
 {
 	QReadLocker rl(&m_lock);
@@ -7514,6 +7399,12 @@ bool DbWorker::processingAfterDatabaseUpgrade(QSqlDatabase& db, int currentVersi
 
 	case 302:
 		return processingAfterDatabaseUpgrade0302(db, errorMessage);
+
+	case 396:
+		return processingAfterDatabaseUpgrade0396(db, errorMessage);
+
+	case 401:
+		return processingAfterDatabaseUpgrade0401(db, errorMessage);
 	}
 
 	return true;
@@ -7679,7 +7570,7 @@ bool DbWorker::processingAfterDatabaseUpgrade0215(QSqlDatabase& db, QString* err
 		protoData.set_decimalplaces(q.value(SD_DECIMAL_PLACES).toInt());
 		protoData.set_coarseaperture(q.value(SD_COARSE_APERTURE).toDouble());
 		protoData.set_fineaperture(q.value(SD_FINE_APERTURE).toDouble());
-		protoData.set_adaptiveaperture(q.value(SD_ADAPTIVE_APERTURE).toBool());
+		protoData.set_obsolete_adaptiveaperture(q.value(SD_ADAPTIVE_APERTURE).toBool());
 
 		int protoDataSize = static_cast<int>(protoData.ByteSizeLong());
 
@@ -7808,11 +7699,7 @@ bool DbWorker::processingAfterDatabaseUpgrade0215(QSqlDatabase& db, QString* err
 
 bool DbWorker::processingAfterDatabaseUpgrade0302(QSqlDatabase& db, QString* errorMessage)
 {
-	if (errorMessage == nullptr)
-	{
-		Q_ASSERT(errorMessage);
-		return false;
-	}
+	TEST_PTR_RETURN_FALSE(errorMessage);
 
 	QSqlQuery q(db);
 
@@ -7845,7 +7732,8 @@ bool DbWorker::processingAfterDatabaseUpgrade0302(QSqlDatabase& db, QString* err
 		{
 			if (parseErrorCount < 10)
 			{
-				*errorMessage += QString(tr("SignalInstance %1 specPropValues data parsing error\n"));
+				*errorMessage += QString(tr("SignalInstance %1 specPropValues data parsing error\n")).
+										arg(signalInstanceID);
 			}
 
 			parseErrorCount++;
@@ -7874,7 +7762,8 @@ bool DbWorker::processingAfterDatabaseUpgrade0302(QSqlDatabase& db, QString* err
 			{
 				if (updateErrorCount < 10)
 				{
-					*errorMessage += QString(tr("SignalInstance %1 specPropValues updating error\n"));
+					*errorMessage += QString(tr("SignalInstance %1 specPropValues updating error\n")).
+											arg(signalInstanceID);
 				}
 
 				updateErrorCount++;
@@ -7900,4 +7789,332 @@ bool DbWorker::processingAfterDatabaseUpgrade0302(QSqlDatabase& db, QString* err
 
 	return result;
 }
+
+bool DbWorker::processingAfterDatabaseUpgrade0396(QSqlDatabase& db, QString* errorMessage)
+{
+	TEST_PTR_RETURN_FALSE(errorMessage);
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(QString("SELECT SI.SignalInstanceID, SI.ProtoData "
+								 "FROM Signal AS S, SignalInstance AS SI WHERE S.SignalID=SI.SignalID AND "
+								 "S.Type=0"));		// Analog signal
+
+	if (result == false)
+	{
+		*errorMessage = QString(tr("Can't retrieve signal instances to update: %1")).arg(q.lastError().text());
+		return false;
+	}
+
+	int parseErrorCount = 0;
+	int updateErrorCount = 0;
+
+	const int COL_SIGNAL_INSTANCE_ID = 0;
+	const int COL_PROTO_DATA = 1;
+
+	while(q.next() == true)
+	{
+		int signalInstanceID = q.value(COL_SIGNAL_INSTANCE_ID).toInt();
+		QByteArray signalProtoData = q.value(COL_PROTO_DATA).toByteArray();
+
+		// Updating non-specific properties proto data due adding ApertureType property.
+		//
+		Proto::ProtoAppSignalData psd;
+
+		bool res = psd.ParseFromArray(signalProtoData.constData(), static_cast<int>(signalProtoData.size()));
+
+		if (res == false)
+		{
+			if (parseErrorCount < 10)
+			{
+				*errorMessage += QString(tr("SignalInstance %1 signalProtoData data parsing error\n")).
+										arg(signalInstanceID);
+			}
+
+			parseErrorCount++;
+			continue;
+		}
+
+		if (psd.obsolete_adaptiveaperture() == true)
+		{
+			psd.set_aperturetype(TO_INT(E::ApertureType::ValuePercent));
+		}
+		else
+		{
+			psd.set_aperturetype(TO_INT(E::ApertureType::RangePercent));
+		}
+
+		int protoDataSize = static_cast<int>(psd.ByteSizeLong());
+
+		signalProtoData.clear();
+		signalProtoData.resize(protoDataSize);
+
+		psd.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(signalProtoData.data()));
+
+		QString queryStr = QString(	"UPDATE SignalInstance SET ProtoData = %1 "
+									"WHERE SignalInstanceID = %2").
+											arg(toSqlByteaStr(signalProtoData)).
+											arg(signalInstanceID);
+		QSqlQuery updateQuery(db);
+
+		bool updateRes = updateQuery.exec(queryStr);
+
+		if (updateRes == false)
+		{
+			if (updateErrorCount < 10)
+			{
+				*errorMessage += QString(tr("SignalInstance %1 updating error\n")).
+										arg(signalInstanceID);
+			}
+
+			updateErrorCount++;
+			continue;
+		}
+	}
+
+	if (parseErrorCount > 0)
+	{
+		*errorMessage += QString(tr("Total parsing errors: %1\n")).arg(parseErrorCount);
+
+		result = false;
+	}
+
+	if (updateErrorCount > 0)
+	{
+
+		*errorMessage += QString(tr("Total updating errors: %1\n")).arg(updateErrorCount);
+
+		result = false;
+	}
+
+	return result;
+}
+
+bool DbWorker::processingAfterDatabaseUpgrade0401(QSqlDatabase& db, QString* errorMessage)
+{
+	TEST_PTR_RETURN_FALSE(errorMessage);
+
+	// Task RPCT-3720
+	//
+	// Moving InvertSignal property from specific properties to non-specific properties in
+	// Input and Output discrete signals
+	//
+
+	QSqlQuery q(db);
+
+	QString queryStr = QString("SELECT SI.SignalInstanceID, SI.ProtoData, SI.SpecPropStruct, SI.SpecPropValues "
+							   "FROM Signal AS S, SignalInstance AS SI WHERE S.SignalID = SI.SignalID AND "
+											  "S.Type=1 AND "							// == Discrete
+											  "(SI.InOutType=0 OR SI.InOutType=1)");	// == Input or Output
+	bool result = q.exec(queryStr);
+
+	if (result == false)
+	{
+		*errorMessage = QString(tr("Can't retrieve signal instances to update."));
+		return false;
+	}
+
+	int parseErrorCount = 0;
+	int updateErrorCount = 0;
+
+	const int COL_SIGNAL_INSTANCE_ID = 0;
+	const int COL_PROTO_DATA = 1;
+	const int COL_SPEC_PROP_STRUCT = 2;
+	const int COL_SPEC_PROP_VALUES = 3;
+
+	const QString INVERT_SIGNAL_PROP_NAME = ";" + AppSignalPropNames::INVERT_SIGNAL + ";";
+
+	while(q.next() == true)
+	{
+		int signalInstanceID = q.value(COL_SIGNAL_INSTANCE_ID).toInt();
+
+		// read non-spec props
+		//
+		QByteArray signalProtoData = q.value(COL_PROTO_DATA).toByteArray();
+
+		Proto::ProtoAppSignalData psd;
+
+		bool res = psd.ParseFromArray(signalProtoData.constData(), static_cast<int>(signalProtoData.size()));
+
+		if (res == false)
+		{
+			if (parseErrorCount < 10)
+			{
+				*errorMessage += QString(tr("SignalInstance %1 signalProtoData data parsing error\n")).
+										arg(signalInstanceID);
+			}
+
+			parseErrorCount++;
+			continue;
+		}
+
+		// check is InvertSignal exists in spec props
+		//
+		QString specPropStructStr = q.value(COL_SPEC_PROP_STRUCT).toString();
+
+		if (specPropStructStr.contains(INVERT_SIGNAL_PROP_NAME) == true)
+		{
+			// read spec props values
+			//
+			QByteArray specPropValuesBin = q.value(COL_SPEC_PROP_VALUES).toByteArray();
+
+			AppSignalSpecPropValues spv;
+
+			bool res = spv.parseValuesFromArray(specPropValuesBin);
+
+			if (res == false)
+			{
+				if (parseErrorCount < 10)
+				{
+					*errorMessage += QString(tr("SignalInstance %1 specPropValues data parsing error\n")).
+												arg(signalInstanceID);
+				}
+
+				parseErrorCount++;
+				continue;
+			}
+
+			// copy InvertSignal value from spec prop to non-spec prop
+			//
+			QVariant qv;
+
+			res = spv.getValue(AppSignalPropNames::INVERT_SIGNAL, &qv);
+
+			Q_ASSERT(res);
+
+			psd.set_invertsignal(qv.toBool());
+
+			// remove InvertSignal from specPropStruct
+			//
+			QStringList specPropStructLines = specPropStructStr.split(Separator::NEW_LINE, Qt::SkipEmptyParts);
+
+			specPropStructStr.clear();
+
+			for(const QString& line : specPropStructLines)
+			{
+				if (line.contains(INVERT_SIGNAL_PROP_NAME) == true)
+				{
+					continue;		// skip InverSignal property description
+				}
+
+				specPropStructStr.append(line);
+				specPropStructStr.append(Separator::NEW_LINE);
+			}
+
+			// remove InvertSignal from specPropValues
+			//
+			spv.removeValue(AppSignalPropNames::INVERT_SIGNAL);
+
+			specPropValuesBin.clear();
+
+			spv.serializeValuesToArray(&specPropValuesBin);
+
+			// update SignalInstance table
+			//
+			QString queryStr = QString(	"UPDATE SignalInstance SET SpecPropStruct = '%1', "
+										"SpecPropValues = %2 "
+										"WHERE SignalInstanceID = %3").
+												arg(specPropStructStr).
+												arg(toSqlByteaStr(specPropValuesBin)).
+												arg(signalInstanceID);
+			QSqlQuery updateQuery(db);
+
+			bool updateRes = updateQuery.exec(queryStr);
+
+			if (updateRes == false)
+			{
+				if (updateErrorCount < 10)
+				{
+					*errorMessage += QString(tr("SignalInstance %1 updating error\n")).
+											arg(signalInstanceID);
+				}
+
+				updateErrorCount++;
+			}
+		}
+
+		int protoDataSize = static_cast<int>(psd.ByteSizeLong());
+
+		signalProtoData.clear();
+		signalProtoData.resize(protoDataSize);
+
+		psd.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(signalProtoData.data()));
+
+		QString queryStr = QString(	"UPDATE SignalInstance SET ProtoData = %1 "
+									"WHERE SignalInstanceID = %2").
+											arg(toSqlByteaStr(signalProtoData)).
+											arg(signalInstanceID);
+		QSqlQuery updateQuery(db);
+
+		bool updateRes = updateQuery.exec(queryStr);
+
+		if (updateRes == false)
+		{
+			if (updateErrorCount < 10)
+			{
+				*errorMessage += QString(tr("SignalInstance %1 updating error\n")).
+										arg(signalInstanceID);
+			}
+
+			updateErrorCount++;
+			continue;
+		}
+	}
+
+	if (parseErrorCount > 0)
+	{
+		*errorMessage += QString(tr("Total parsing errors: %1\n")).arg(parseErrorCount);
+
+		result = false;
+	}
+
+	if (updateErrorCount > 0)
+	{
+
+		*errorMessage += QString(tr("Total updating errors: %1\n")).arg(updateErrorCount);
+
+		result = false;
+	}
+
+	return result;
+}
+
+void DbWorker::appendIDsArray(const std::vector<int>& ids, QString* request,
+							  bool appendCloseBracket, QString* logMessage) const
+{
+	TEST_PTR_RETURN(request);
+
+	// appends string "ARRAY[id1,id2,...,idN]" to request
+
+	request->append(QStringLiteral("ARRAY["));
+
+	bool first = true;
+
+	for(int id : ids)
+	{
+		if (first == false)
+		{
+			request->append(QStringLiteral(","));
+		}
+
+		request->append(QString::number(id));
+		first = false;
+
+		if (logMessage != nullptr)
+		{
+			logMessage->append(QString::number(id));
+			logMessage->append(QStringLiteral(" "));
+		}
+	}
+
+	if (appendCloseBracket == true)
+	{
+		request->append(QStringLiteral("])"));
+	}
+	else
+	{
+		request->append(QStringLiteral("]"));
+	}
+}
+
 

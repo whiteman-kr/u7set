@@ -8,6 +8,7 @@
 #include "../lib/Ui/DialogTcpStatistics.h"
 #include "../lib/Ui/DialogAlert.h"
 #include "../OnlineLib/TcpClientStatistics.h"
+#include "../ClientLib/ClientTranslator.h"
 
 #include "AppLogOutputWidget.h"
 #include "TestListWidget.h"
@@ -42,12 +43,18 @@ private:
 	void loadScriptsFromConfiguration();
 	void loadScriptsFromLocalPath();
 
-	void clearTestsTree();
-	void fillTestsTree();
+    void updateReportActions();
+	
+	void updateTestViewTabPages();
 	void updateActionsState();
-	void updateTimeIndicator(const TestSuite::ControlStatus& state);
+
+	bool loadTestLog();
+	bool saveTestLog();
+
+	void updateStatusIndicator();
 
 	bool eventFilter(QObject *object, QEvent *event) override;
+	void closeEvent(QCloseEvent* event) override;
 	void timerEvent(QTimerEvent* event) override;
 
 private slots:
@@ -56,42 +63,70 @@ private slots:
 	void onExit();
 	void on_m_run_clicked();
 	void on_m_stop_clicked();
+	void on_m_report_clicked();
+	void on_m_single_report_clicked();
+
+	void onSaveTestLog();
+	void onLoadTestLog();
+	void onClearTestLog();
+
 	void onSettings();
 	void showStatistics();
+	void showDataSources();
 	void showAppLog();
 	void showAboutQt();
 	void showAbout();
-	void onTestsRefresh();
-	void onShowTestContents(const QString& testName);
+	void onTestsScriptsReload();
+	void onShowTestContents(const QString& scriptName, const QString& functionName);
 	void onTabCloseRequested(int index);
+    void onGenerateReport(const QString& caption);
+	void viewGlobalScript();
 
 	// Processing slots
 	//
 	void onConfigurationArrived();
 	void onTestingFinished(int result);
+	void onGlobalPermissionChanged(bool result);
 
 private:
 	// Ui
-	//Ui::TestSuiteMainWindow *ui;
+	// User interface
+	//
+	ClientLib::ClientTranslator m_translator;
+
+
 	DialogAlert m_dialogAlert;
 
 	QAction* m_pExitAction = nullptr;
 	QAction* m_pSettingsAction = nullptr;
+	QAction* m_pDataSourcesAction = nullptr;
 	QAction* m_pStatisticsAction = nullptr;
 	QAction* m_pAppLogAction = nullptr;
 	QAction* m_aboutQtAction = nullptr;
 	QAction* m_pAboutAction = nullptr;
 
-	QAction* m_refreshTestsAction = nullptr;
+	QAction* m_reloadTestsScriptsAction = nullptr;
 	QAction* m_runAction = nullptr;
 	//QAction* m_pauseAction = nullptr;
 	QAction* m_stopAction = nullptr;
 
+	QAction* m_viewGlobalScriptAction = nullptr;
+
+	QAction* m_reportToolbarAction = nullptr;	// Report button on the toolbar
+
+	QAction* m_saveTestLogAction = nullptr;
+	QAction* m_loadTestLogAction = nullptr;
+	QAction* m_clearTestLogAction = nullptr;
+
+	QAction* m_singleReportAction = nullptr;	// Single report action
+    
+	QMenu* m_multipleReportsMenu = nullptr;		// Multiple reports submenu
+    std::vector<QAction*> m_multipleReportActions;
+
 	TabWidgetEx* m_tabWidget = nullptr;
 
 	QToolBar* m_toolBar = nullptr;
-	QLabel* m_timeIndicator = nullptr;	// Widget on toolbar to show current simulation time
-
+	QLabel* m_statusIndicator = nullptr;
 
 	TestListWidget* m_testListWidget = nullptr;
 	TestLogTabPage* m_testLogTabPage = nullptr;
@@ -104,6 +139,10 @@ private:
 	TestSuiteTestLogOutput m_testLogOutput;
 
 	TestSuite::TestSuiteConfigController m_configController;
+	TestSuite::ConfigSettings m_configuration;
+	TestSuite::ConfigData m_configData;
+
+
 	TestSuite::TestSuite m_testSuite;
 	TestSuite::TestScriptsStorage m_testScriptsStorage;
 

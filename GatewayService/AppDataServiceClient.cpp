@@ -7,7 +7,8 @@ namespace Gateway
 											   const HostAddressPort& serverAddressPort1,
 											   const HostAddressPort& serverAddressPort2,
 											   const QString& clientDescription,
-											   IvsImpulseHandler& handler) :
+											   IvsImpulseHandler& handler,
+											   CircularLoggerShared logger) :
 		Tcp::Client(softwareInfo, serverAddressPort1, serverAddressPort2, clientDescription),
 		m_lists(handler.m_lists),
 		m_states(handler.m_states),
@@ -15,6 +16,7 @@ namespace Gateway
 		m_signalStatesUpdated(handler.m_signalStatesUpdated),
 		m_timer(this)
 	{
+		setLogger(logger);
 	}
 
 	void AppDataServiceClient::onClientThreadStarted()

@@ -1,6 +1,8 @@
-#include "../AppSignalLib/TuningSignalManager.h"
-#include "../Proto/serialization.pb.h"
+#include "../../AppSignalLib/AppSignal.h"
+#include "../../AppSignalLib/AppSignalParam.h"
 #include "../../OnlineLib/SoftwareInfo.h"
+#include "../../AppSignalLib/TuningSignalManager.h"
+#include "../Proto/serialization.pb.h"
 
 class TuningSignalManagerTests : public ::testing::Test
 {
@@ -55,7 +57,7 @@ protected:
 
 	Proto::AppSignalSet protoSignalSet;
 
-	inline static const SoftwareInfo s_softwareInfo = {E::SoftwareType::TuningClient, "SYSTEMID_CLIENTTEST_WS01_TUN", 1, 2, 3};
+	inline static const SoftwareInfo s_softwareInfo = {E::SoftwareType::TuningClient, "SYSTEMID_CLIENTTEST_WS01_TUN"};
 	inline static const QString s_tuningServiceId1 = "SYSTEMID_CLIENTTEST_WS01_TUNS";
 	inline static const QString s_tuningServiceId2 = "SYSTEMID_CLIENTTEST_WS02_TUNS";
 

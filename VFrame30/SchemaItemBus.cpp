@@ -254,7 +254,7 @@ namespace VFrame30
 		auto layer = parentLayer();
 		Q_ASSERT(layer);
 
-		int connectionCount = layer->GetPinPosConnectinCount(vip, itemUnit());
+		int connectionCount = layer->GetPinPosConnectinCount(vip);
 
 		if (connectionCount > 1)
 		{
@@ -543,7 +543,7 @@ R"(<p><b>BusComposer:</b> Create a bus signal</p>
 		auto layer = parentLayer();
 		Q_ASSERT(layer);
 
-		int connectionCount = layer->GetPinPosConnectinCount(vip, itemUnit());
+		int connectionCount = layer->GetPinPosConnectinCount(vip);
 
 		if (connectionCount > 1)
 		{

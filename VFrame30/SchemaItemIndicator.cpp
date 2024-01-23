@@ -1,5 +1,4 @@
 #include "SchemaItemIndicator.h"
-#include "../AppSignalLib/AppSignalParam.h"
 #include "../AppSignalLib/TuningSignalState.h"
 #include "PropertyNames.h"
 #include "DrawParam.h"
@@ -199,6 +198,32 @@ namespace VFrame30
 		return i->durationSeconds();
 	}
 
+	// IMatsSchemaItemAssociations implementation.
+	//
+	QStringList SchemaItemIndicator::associatedAppSignalIds() const
+	{
+		return signalIds();
+	}
+
+	QStringList SchemaItemIndicator::associatedImpactAppSignalIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemIndicator::associatedConnectionIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemIndicator::associatedLoopbackIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemIndicator::associatedSchemaItemLabels() const
+	{
+		return {};
+	}
 
 	// Properties and Data
 	//

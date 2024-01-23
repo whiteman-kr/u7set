@@ -1,10 +1,13 @@
-#include "MonitorCfgGenerator.h"
-#include "TuningClientCfgGenerator.h"
-#include "SoftwareSettingsGetter.h"
-#include "Context.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../VFrame30/Schema.h"
 #include "../lib/ClientBehavior.h"
+
+#include "Context.h"
+#include "MonitorCfgGenerator.h"
+#include "ScriptChecker.h"
+#include "SoftwareSettingsGetter.h"
+#include "TuningClientCfgGenerator.h"
+
 
 namespace Builder
 {
@@ -44,18 +47,10 @@ namespace Builder
 			return false;
 		}
 
-		// Writing GlobalScript
-		//
 		bool result = true;
 
-		result &= saveScriptProperties("GlobalScript", "GlobalScript.js");
-
-		// Writing event scripts: OnConfigurationArrived
-		//
-		result &= saveScriptProperties("OnConfigurationArrived", "OnConfigurationArrived.js");
-
+		result &= saveScriptProperties("GlobalScript", File::GLOBAL_SCRIPT);
 		result &= initSchemaTags();
-
 		result &= initTuningSources();
 
 		// Add links to schema files (previously written) via m_cfgXml->addLinkToFile(...)
@@ -73,13 +68,21 @@ namespace Builder
 			if (settings->tuningLogin == true &&
 				settings->tuningUserAccounts.split(';', Qt::SkipEmptyParts).isEmpty() == true)
 			{
-				m_log->errEQP6202(m_software->equipmentIdTemplate());
+				m_log->errEQP6202(EquipmentPropNames::TUNING_USER_ACCOUNTS, EquipmentPropNames::TUNING_LOGIN, m_software->equipmentIdTemplate());
 				return false;
 			}
 
 			// Generate tuning signals file
 			//
 			result &= writeTuningSignals();
+
+			// Write MATS users
+			//
+			if (settings->tuningLogin == true)
+			{
+				result &= writeMatsUsers(EquipmentPropNames::TUNING_USER_ACCOUNTS,
+										 settings->tuningUserAccounts.split(Separator::SEMICOLON, Qt::SkipEmptyParts));
+			}
 		}
 
 		// Generate behavior
@@ -113,7 +116,7 @@ namespace Builder
 			return false;
 		}
 
-		// Check that schema from property startSchemaId is exist. Check for all exisiting profiles.
+		// Check that schema from property startSchemaId is exist. Check for all existing profiles.
 		// m_detailsSet must be filled in.
 		//
 		bool result = true;
@@ -148,7 +151,7 @@ namespace Builder
 		if (settings->tuningEnabled == true &&
 			m_context->m_projectProperties.safetyProject() == true)
 		{
-			// Tuning for Monitor is forbiden for Safety Projects
+			// Tuning for Monitor is forbidden for Safety Projects
 			// Stupid decision but not mine
 			//
 			m_log->errEQP6200(m_software->equipmentIdTemplate());
@@ -171,7 +174,7 @@ namespace Builder
 		{
 			// Property %1.TuningServiceID can't be empty if tuning enabled.
 			//
-			m_log-> errEQP6206(equipmentID());
+			m_log->errEQP6206(equipmentID());
 			return false;
 		}
 
@@ -179,7 +182,7 @@ namespace Builder
 
 		m_tuningSources.clear();
 
-		for(const auto& tsc : settings->tuningServices)
+		for (const auto& tsc : settings->tuningServices)
 		{
 			std::shared_ptr<Hardware::DeviceObject> tuningServiceObject = m_equipment->deviceObject(tsc.equipmentId);
 			if (tuningServiceObject == nullptr)
@@ -210,7 +213,7 @@ namespace Builder
 			{
 				QStringList clientEquipmentList = tunClient.uniqueSourcesIDs();
 
-				for (const QString& ce : clientEquipmentList )
+				for (const QString& ce : clientEquipmentList)
 				{
 					if (m_tuningSources.contains(ce) == false)
 					{
@@ -220,8 +223,7 @@ namespace Builder
 			}
 			else
 			{
-				LOG_INTERNAL_ERROR_MSG(m_log, QString("Monitor %1 isn't found in clients list of TuningService %2").
-											arg(equipmentID()).arg(tsc.equipmentId));
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Monitor %1 isn't found in clients list of TuningService %2").arg(equipmentID()).arg(tsc.equipmentId));
 				result = false;
 				continue;
 			}
@@ -242,9 +244,17 @@ namespace Builder
 		}
 		else
 		{
+			// Get script for the property.
+			//
 			QString script = m_software->propertyValue(scriptProperty).toString();
-			BuildFile* scriptBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), fileName, script);
 
+			// Check script correctness
+			//
+			result &= ScriptChecker::checkEquipmentProperty(script, equipmentID(), scriptProperty, *m_log);
+
+			// Write script to file.
+			//
+			BuildFile* scriptBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), fileName, script);
 			if (scriptBuildFile != nullptr)
 			{
 				m_cfgXml->addLinkToFile(scriptBuildFile);
@@ -271,7 +281,7 @@ namespace Builder
 		//
 		if (m_schemaTagList.isEmpty() == true)
 		{
-			for (auto&[tag, schemaFile] : SoftwareCfgGenerator::m_schemaTagToFile)
+			for (auto& [tag, schemaFile] : SoftwareCfgGenerator::m_schemaTagToFile)
 			{
 				Q_UNUSED(tag);
 				if (schemaFile->fileName.endsWith(QStringLiteral(".") + Db::File::AlFileExtension, Qt::CaseInsensitive) == true ||
@@ -513,4 +523,4 @@ namespace Builder
 
 		return ok;
 	}
-}
+} // namespace Builder

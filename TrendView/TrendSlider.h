@@ -46,13 +46,13 @@ public:
 	TimeStamp min() const;
 	void setMin(const TimeStamp& value);
 
-	qint64 signleStep() const;
+	qint64 singleStep() const;
 	void setSingleStep(qint64 ms);
 
 	qint64 pageStep() const;
 	void setPageStep(qint64 ms);
 
-	qint64 laneDuartion() const;
+	qint64 laneDuration() const;
 	void setLaneDuration(qint64 ms);
 
 private:
@@ -61,7 +61,7 @@ private:
 	qint64 m_min = 0;
 	qint64 m_singleStep = 1000;
 	qint64 m_pageStep = 10000;
-	qint64 m_laneDuartion = 0;
+	qint64 m_laneDuration = 0;
 
 	QPushButton* m_setTimeButton = nullptr;
 	QPushButton* m_lineLeftButton = nullptr;
@@ -76,7 +76,7 @@ class TrendSliderRailSubcontrol : public QWidget
 	Q_OBJECT
 
 public:
-	TrendSliderRailSubcontrol(TrendSlider* threndSlider, TrendLib::TrendRulerSet* rulerSet);
+	TrendSliderRailSubcontrol(TrendSlider* trendSlider, TrendLib::TrendRulerSet* rulerSet);
 
 signals:
 	void valueChanged(qint64 value);

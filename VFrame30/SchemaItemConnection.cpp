@@ -285,6 +285,33 @@ namespace VFrame30
 		return str;
 	}
 
+	// IMatsSchemaItemAssociations implementation.
+	//
+	QStringList SchemaItemTransmitter::associatedAppSignalIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemTransmitter::associatedImpactAppSignalIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemTransmitter::associatedConnectionIds() const
+	{
+		return connectionIdsAsList();
+	}
+
+	QStringList SchemaItemTransmitter::associatedLoopbackIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemTransmitter::associatedSchemaItemLabels() const
+	{
+		return {};
+	}
+
 	int SchemaItemTransmitter::pinCount() const
 	{
 		return m_pinCount;
@@ -529,16 +556,17 @@ namespace VFrame30
 
 			QRectF signalRect = {r.left(), r.top() + lineHeight * textRow, r.width(), lineHeight};
 
-			QString dataText = SchemaItemSignal::getCoulumnText(context.get(),
-																drawParam->drawMode(),
-																this,
-																m_dataType,
-																signal,
-																signalState,
-																signal,				// There is no impact signalfor connection
-																signalState,		// There is no impact signalfor connection
-																m_analogFormat,
-																m_precision);
+			QString dataText = SchemaItemSignal::getColumnText(context.get(),
+															   drawParam->drawMode(),
+															   this,
+															   m_dataType,
+															   signal,
+															   signalState,
+															   signal,      // There is no impact signalfor connection
+															   signalState, // There is no impact signalfor connection
+															   m_analogFormat,
+															   m_precision,
+															   nullptr);
 
 			DrawHelper::drawText(p, m_font, itemUnit(), dataText, signalRect, Qt::AlignHCenter | Qt::AlignBottom);
 
@@ -566,7 +594,7 @@ namespace VFrame30
 		//
 		for (const QString& appSignalId : m_appSignalIds)
 		{
-			if (drawParam->hightlightIds().contains(appSignalId) == true)
+			if (drawParam->highlightIds().contains(appSignalId) == true)
 			{
 				QRectF highlightRect = boundingRectInDocPt(drawParam);
 				drawHighlightRect(drawParam, highlightRect);
@@ -616,6 +644,33 @@ namespace VFrame30
 						.arg(appSignalIds());
 
 		return str;
+	}
+
+	// IMatsSchemaItemAssociations implementation.
+	//
+	QStringList SchemaItemReceiver::associatedAppSignalIds() const
+	{
+		return m_appSignalIds;
+	}
+
+	QStringList SchemaItemReceiver::associatedImpactAppSignalIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemReceiver::associatedConnectionIds() const
+	{
+		return connectionIdsAsList();
+	}
+
+	QStringList SchemaItemReceiver::associatedLoopbackIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemReceiver::associatedSchemaItemLabels() const
+	{
+		return {};
 	}
 
 	QString SchemaItemReceiver::appSignalIds() const

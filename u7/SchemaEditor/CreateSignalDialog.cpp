@@ -1,5 +1,4 @@
 #include "CreateSignalDialog.h"
-#include "../DbLib/DbController.h"
 #include "BusStorage.h"
 #include "SignalPropertiesDialog.h"
 #include "../AppSignalSetProvider.h"
@@ -321,9 +320,9 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 		return QStringList();
 	}
 
-	// Generatuing Signal and show it's properties
+	// Generating Signal and show it's properties
 	//
-	QVector<AppSignal> newSignals;
+	std::vector<AppSignal> newSignals;
 
 	CreateSignalDialogResult resultData = d.resultData();
 
@@ -379,7 +378,7 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 			return {};
 		}
 
-		initNewSignal(signal);
+		SignalPropertiesDialog::initNewSignal(signal);
 
 		// Do it here, as initNewSignal sets EnableTuning to the last value from settings
 		//
@@ -409,14 +408,14 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 
 	// Show properties dialog
 	//
-	QVector<AppSignal*> signalPtrVector;
+	std::vector<AppSignal*> signalPtrVector;
 
 	for (AppSignal& signal : newSignals)
 	{
 		signalPtrVector.push_back(&signal);
 	}
 
-	SignalPropertiesDialog signalPropDialog(dbc, signalPtrVector, false, false, parent);
+	SignalPropertiesDialog signalPropDialog(signalPtrVector, false, false, parent);
 
 	dialogResult = signalPropDialog.exec();
 	if (dialogResult != QDialog::Accepted)
@@ -426,17 +425,15 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 
 	for (AppSignal& signal : newSignals)
 	{
-		AppSignalSetProvider::trimSignalTextFields(signal);
+		signal.trimTextFields();
 	}
 
-	bool ok = dbc->addSignal(newSignals.front().signalType(), &newSignals, parent);
+	bool ok = AppSignalSetProvider::getInstance()->addSignals(newSignals.begin()->signalType(), &newSignals, parent);
+
 	if (ok == false)
 	{
 		return {};
 	}
-
-	AppSignalSetProvider* model = AppSignalSetProvider::getInstance();
-	model->loadSignals();
 
 	QVector<int> selectIdList(newSignals.size());
 	int currentIdIndex = 0;

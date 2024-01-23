@@ -19,15 +19,26 @@ protected:
 	void paintEvent(QPaintEvent* pe) override;
 
 public:
-	[[nodiscard]] bool drawTopLine() const;
-	void setDrawTopLine(bool value);
+	enum Style
+	{
+		Default,
+		TopLineActive,
+		TopLineRoundedAlways
+	};
+
+	[[nodiscard]] TabBarEx::Style topStyle() const;
+	void setTopStyle(TabBarEx::Style value);
 
 	[[nodiscard]] QRgb topLineColor() const;
 	void setTopLineColor(QRgb value);
 
+	void setTabColors(std::map<QString, QRgb> tabTextToLineColor);
+
 private:
-	bool m_drawTopLine = true;
+	Style m_style = Style::TopLineActive;
 	QRgb m_topLineColor = 0x000080;
+
+	std::map<QString, QRgb> m_tabTextToLineColor;
 };
 
 

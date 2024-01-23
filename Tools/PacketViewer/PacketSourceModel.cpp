@@ -11,7 +11,7 @@
 #include "SourceStatusWidget.h"
 #include <QDirIterator>
 #include <QMessageBox>
-#include "../OnlineLib/DataProtocols.h"
+#include "../HardwareLib/DataProtocols.h"
 #include "../lib/DataSource.h"
 #include <QTimer>
 
@@ -791,10 +791,12 @@ void PacketSourceModel::initDataSources(QHash<quint32, std::shared_ptr<DataSourc
 //				????????
 
 				QString signalPrefix = currentModule->parent()->equipmentId();
+
 				int signalPrefixLength = static_cast<int>(signalPrefix.length());
+
 				for (int i = 0; i < signalSet.count(); i++)
 				{
-					if (signalSet[i].equipmentID().left(signalPrefixLength) == signalPrefix)
+					if (signalSet.at(i)->equipmentID().left(signalPrefixLength) == signalPrefix)
 					{
 						ds->addSignalIndex(i);
 					}

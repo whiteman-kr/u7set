@@ -2,7 +2,7 @@
 #define SIMCODEPAGE_H
 
 #include "SimBasePage.h"
-#include "SimLogicModule.h"
+#include "../../Simulator/SimLogicModule.h"
 
 
 enum class CodePageColumns

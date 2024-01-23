@@ -10,7 +10,8 @@ namespace Tuning
 	//
 	// -------------------------------------------------------------------------------
 
-	const char* TcpTuningServer::SCM_CLIENT_ID = "SCM";
+	const QString TcpTuningServer::SCM_CLIENT_ID("SCM");
+	quint64 TcpTuningServer::m_staticTcpConnectionID = 0;
 
 	TcpTuningServer::TcpTuningServer(TuningServiceWorker& service,
 									 const TuningSources& tuningSources,
@@ -20,20 +21,33 @@ namespace Tuning
 		m_tuningSources(tuningSources),
 		m_logger(logger)
 	{
+		m_tcpConnectionID = ++m_staticTcpConnectionID;
+
 		prepareSignalGetter();
 	}
 
 	void TcpTuningServer::onServerThreadStarted()
 	{
+		m_thread = QThread::currentThread();
 	}
 
 	void TcpTuningServer::onServerThreadFinished()
 	{
 	}
 
+	void TcpTuningServer::onConnection()
+	{
+		Tcp::Server::onConnection();
+
+		m_clientEquipmentID = connectedSoftwareInfo().equipmentID();
+		m_service.registerSignalsStateChangesQueue(m_clientEquipmentID, m_tcpConnectionID);
+	}
+
 	void TcpTuningServer::onDisconnection()
 	{
 		Tcp::Server::onDisconnection();
+
+		m_service.unregisterSignalsStateChangesQueue(m_clientEquipmentID, m_tcpConnectionID);
 
 		m_service.clientIsDisconnected(connectedSoftwareInfo(), peerAddr().addressStr());
 	}
@@ -69,6 +83,10 @@ namespace Tuning
 			onTuningSignalsReadRequest(requestData, requestDataSize);
 			break;
 
+		case TDS_GET_SIGNALS_STATE_CHANGES:
+			onGetTuningSignalsStateChangesRequest(requestData, requestDataSize);
+			break;
+
 		case TDS_TUNING_SIGNALS_WRITE:
 			onTuningSignalsWriteRequest(requestData, requestDataSize);
 			break;
@@ -99,7 +117,7 @@ namespace Tuning
 		m_service.clientIsConnected(connectedSoftwareInfo(), peerAddr().addressStr());
 	}
 
-	void TcpTuningServer::onGetTuningSourcesInfoRequest(const char *requestData, quint32 requestDataSize)
+	void TcpTuningServer::onGetTuningSourcesInfoRequest(const char* requestData, quint32 requestDataSize)
 	{
 		m_getTuningSourcesInfoReply.Clear();
 
@@ -112,18 +130,16 @@ namespace Tuning
 			return;
 		}
 
-		QString clientEquipmentID = connectedSoftwareInfo().equipmentID();
-
 		DEBUG_LOG_MSG(m_logger, QString(tr("TDS_GET_TUNING_SOURCES_INFO request from %1, %2")).
-					  arg(clientEquipmentID).arg(peerAddr().addressStr()));
+					  arg(m_clientEquipmentID).arg(peerAddr().addressStr()));
 
 		E::NetworkError errCode = E::NetworkError::Success;
 
 		const TuningClientContext* clntContext =
-				m_service.getClientContext(clientEquipmentID);
+				m_service.getClientContext(m_clientEquipmentID);
 
 		if (clntContext == nullptr &&
-			clientEquipmentID != SCM_CLIENT_ID)
+			m_clientEquipmentID != SCM_CLIENT_ID)
 		{
 			// unknown clientID
 			//
@@ -139,7 +155,7 @@ namespace Tuning
 
 		if (m_clientSourcesList.has_value() == false)
 		{
-			initClientSourcesList(clientEquipmentID);
+			initClientSourcesList(m_clientEquipmentID);
 		}
 
 		for(const QString& sourceID : m_clientSourcesList.value())
@@ -169,7 +185,7 @@ namespace Tuning
 					  arg(E::valueToString(errCode)).arg(peerAddr().addressStr()));
 	}
 
-	void TcpTuningServer::onGetTuningSourcesStateRequest(const char *requestData, quint32 requestDataSize)
+	void TcpTuningServer::onGetTuningSourcesStateRequest(const char* requestData, quint32 requestDataSize)
 	{
 		m_getTuningSourcesStatesReply.Clear();
 
@@ -182,13 +198,11 @@ namespace Tuning
 			return;
 		}
 
-		QString clientEquipmentID = connectedSoftwareInfo().equipmentID();
-
 		const TuningClientContext* clntContext =
-				m_service.getClientContext(clientEquipmentID);
+				m_service.getClientContext(m_clientEquipmentID);
 
 		if (clntContext == nullptr &&
-			clientEquipmentID != SCM_CLIENT_ID)
+			m_clientEquipmentID != SCM_CLIENT_ID)
 		{
 			// unknown clientID
 			//
@@ -204,7 +218,7 @@ namespace Tuning
 
 		if (m_clientSourcesList.has_value() == false)
 		{
-			initClientSourcesList(clientEquipmentID);
+			initClientSourcesList(m_clientEquipmentID);
 		}
 
 		for(const QString& sourceID : m_clientSourcesList.value())
@@ -248,7 +262,7 @@ namespace Tuning
 		sendReply(m_getTuningSourcesStatesReply);
 	}
 
-	void TcpTuningServer::onTuningSignalsReadRequest(const char *requestData, quint32 requestDataSize)
+	void TcpTuningServer::onTuningSignalsReadRequest(const char* requestData, quint32 requestDataSize)
 	{
 		m_tuningSignalsReadReply.Clear();
 
@@ -261,11 +275,11 @@ namespace Tuning
 			return;
 		}
 
-		QString clientEquipmentID = connectedSoftwareInfo().equipmentID();
+		m_tuningSignalsReadReply.set_pendingsignalsstatechanges(0);
 
 		E::NetworkError errCode = E::NetworkError::Success;
 
-		if (clientEquipmentID == SCM_CLIENT_ID)
+		if (m_clientEquipmentID == SCM_CLIENT_ID)
 		{
 			int signalQuantity = m_tuningSignalsReadRequest.signalhash_size();
 
@@ -299,7 +313,7 @@ namespace Tuning
 		else
 		{
 			const TuningClientContext* clientContext =
-					m_service.getClientContext(clientEquipmentID);
+					m_service.getClientContext(m_clientEquipmentID);
 
 			if (clientContext == nullptr)
 			{
@@ -318,6 +332,18 @@ namespace Tuning
 			//
 			clientContext->readSignalStates(m_tuningSignalsReadRequest, &m_tuningSignalsReadReply);
 
+			TuningSignalsChangesQueue* queue =
+					m_service.getSignalChangesQueue(m_clientEquipmentID, m_tcpConnectionID);
+
+			if (queue != nullptr)
+			{
+				m_tuningSignalsReadReply.set_pendingsignalsstatechanges(queue->size(m_thread));
+			}
+			else
+			{
+				Q_ASSERT(false);
+			}
+
 			sendReply(m_tuningSignalsReadReply);
 		}
 
@@ -332,7 +358,63 @@ namespace Tuning
 		}
 	}
 
-	void TcpTuningServer::onTuningSignalsWriteRequest(const char *requestData, quint32 requestDataSize)
+	void TcpTuningServer::onGetTuningSignalsStateChangesRequest(const char* requestData, quint32 requestDataSize)
+	{
+		Q_UNUSED(requestData);
+		Q_UNUSED(requestDataSize);
+
+		m_getStateChangesReply.Clear();
+
+		E::NetworkError errCode = E::NetworkError::Success;
+
+		TuningSignalsChangesQueue* queue =
+				m_service.getSignalChangesQueue(m_clientEquipmentID, m_tcpConnectionID);
+
+		if (queue == nullptr)
+		{
+			errCode = E::NetworkError::InternalError;
+
+			m_getStateChangesReply.set_error(TO_INT(errCode));
+
+			sendReply(m_getStateChangesReply);
+
+			DEBUG_LOG_ERR(m_logger, QString(tr("Send reply %1 on TDS_GET_SIGNALS_STATE_CHANGES to %2")).
+						  arg(E::valueToString(errCode)).arg(peerAddr().addressStr()));
+			return;
+		}
+
+		int count = 0;
+
+		while(queue->isEmpty(m_thread) == false && count < 10000)
+		{
+			Network::TuningSignalState* protoState = m_getStateChangesReply.add_tuningsignalstate();
+
+			TuningSignal::State* state = queue->beginPop(m_thread);
+
+			state->saveToProto(protoState);
+
+			queue->completePop(m_thread);
+
+			count++;
+		}
+
+		m_getStateChangesReply.set_pendingsignalsstatechanges(queue->size(m_thread));
+		m_getStateChangesReply.set_error(TO_INT(E::NetworkError::Success));
+
+		sendReply(m_getStateChangesReply);
+
+		errCode = static_cast<E::NetworkError>(m_getStateChangesReply.error());
+
+		if (errCode != E::NetworkError::Success)
+		{
+			// log errors only
+			//
+			DEBUG_LOG_ERR(m_logger, QString(tr("Send reply %1 on TDS_TUNING_SIGNALS_READ to %2")).
+						  arg(E::valueToString(errCode)).arg(peerAddr().addressStr()));
+		}
+	}
+
+	void TcpTuningServer::onTuningSignalsWriteRequest(const char* requestData, quint32 requestDataSize)
 	{
 		m_tuningSignalsWriteReply.Clear();
 
@@ -370,6 +452,14 @@ namespace Tuning
 			return;
 		}
 
+		E::SoftwareType swType = connectedSoftwareInfo().softwareType();
+
+		if (swType == E::SoftwareType::TestSuite && m_tuningSignalsWriteRequest.autoapply() == true)
+		{
+			DEBUG_LOG_WRN(m_logger, QString(tr("Autoapply ignored (set to FALSE)")));
+			m_tuningSignalsWriteRequest.set_autoapply(false);
+		}
+
 		if (m_service.singleLmControl() == true)
 		{
 			QString activeClientID = m_service.activeClientID();
@@ -389,11 +479,11 @@ namespace Tuning
 			}
 		}
 
-		QString user = connectedSoftwareInfo().userName();
+		QString matsUser = QString::fromStdString(m_tuningSignalsWriteRequest.matsuser());
 
-		// m_tuningSignalsWriteReply.set_error(???) is set inside clientContext->writeSignalStates()
+		// m_tuningSignalsWriteReply.set_error(???) is set inside clientContext->ІwriteSignalStates()
 		//
-		clientContext->writeSignalStates(clientEquipmentID, user, m_tuningSignalsWriteRequest, &m_tuningSignalsWriteReply);
+		clientContext->writeSignalStates(clientEquipmentID, matsUser, m_tuningSignalsWriteRequest, &m_tuningSignalsWriteReply);
 
 		sendReply(m_tuningSignalsWriteReply);
 
@@ -438,7 +528,24 @@ namespace Tuning
 
 		if (clientContext == nullptr)
 		{
-			m_tuningSignalsApplyReply.set_error(TO_INT(E::NetworkError::UnknownTuningClientID));
+			errCode = E::NetworkError::UnknownTuningClientID;
+
+			m_tuningSignalsApplyReply.set_error(TO_INT(errCode));
+
+			sendReply(m_tuningSignalsApplyReply);
+
+			DEBUG_LOG_ERR(m_logger, QString(tr("Send reply %1 on TDS_TUNING_SIGNALS_APPLY to %2")).
+						  arg(E::valueToString(errCode)).arg(peerAddr().addressStr()));
+			return;
+		}
+
+		E::SoftwareType swType = connectedSoftwareInfo().softwareType();
+
+		if (swType == E::SoftwareType::TestSuite)
+		{
+			errCode = E::NetworkError::TuningCommandDenied;
+
+			m_tuningSignalsApplyReply.set_error(TO_INT(errCode));
 
 			sendReply(m_tuningSignalsApplyReply);
 
@@ -466,7 +573,7 @@ namespace Tuning
 			}
 		}
 
-		QString user = connectedSoftwareInfo().userName();
+		QString user = connectedSoftwareInfo().osUsername();
 
 		clientContext->applySignalStates(clientEquipmentID, user);
 
@@ -480,7 +587,7 @@ namespace Tuning
 					  arg(E::valueToString(errCode)).arg(peerAddr().addressStr()));
 	}
 
-	void TcpTuningServer::onChangeControlledTuningSourceRequest(const char *requestData, quint32 requestDataSize)
+	void TcpTuningServer::onChangeControlledTuningSourceRequest(const char* requestData, quint32 requestDataSize)
 	{
 		m_changeControlledTuningSourceReply.Clear();
 
@@ -605,7 +712,7 @@ namespace Tuning
 		sendReply(m_getTuningSourceFillingReply);
 	}
 
-	void TcpTuningServer::onGetTuningSignalParam(const char *requestData, quint32 requestDataSize)
+	void TcpTuningServer::onGetTuningSignalParam(const char* requestData, quint32 requestDataSize)
 	{
 		m_getAppSignalParamReply.Clear();
 

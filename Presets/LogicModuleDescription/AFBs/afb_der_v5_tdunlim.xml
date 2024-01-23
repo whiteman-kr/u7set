@@ -1,0 +1,21 @@
+<AFBComponent Caption="DER"		OpCode="26"	HasRam="true"	ImpVersion="5"	VersionOpIndex="28"	MaxInstCount="0" SimulationFunc="afb_der_v5_tdunlim">
+	<Pin OpName="i_kd"			OpIndex ="0"	PinType = "Param"/>
+	<Pin OpName="i_td"			OpIndex ="2"	PinType = "Param"/>
+	<Pin OpName="i_max"			OpIndex ="4"	PinType = "Param"/>
+	<Pin OpName="i_min"			OpIndex ="6"	PinType = "Param"/>
+	<Pin OpName="i_x_prev"		OpIndex ="8"	PinType = "Param"/>
+	<Pin OpName="i_yd_prev"		OpIndex ="10"	PinType = "Param"/>
+	<Pin OpName="i_x"			OpIndex ="12"	PinType = "Input"/>
+	<Pin OpName="i_reset"		OpIndex ="14"	PinType = "Input"/>
+	<Pin OpName="i_pause"		OpIndex ="15"	PinType = "Input"/>
+	<Pin OpName="o_x_prev"		OpIndex ="17"	PinType = "Output"/>
+	<Pin OpName="o_result"		OpIndex ="19"	PinType = "Output"/>
+	<Pin OpName="o_max"			OpIndex ="21"	PinType = "Output"/>
+	<Pin OpName="o_min"			OpIndex ="22"	PinType = "Output"/>
+	<Pin OpName="o_param_err"	OpIndex ="23"	PinType = "Output"/>
+	<Pin OpName="o_overflow"	OpIndex ="24"	PinType = "Output"/>
+	<Pin OpName="o_underflow"	OpIndex ="25"	PinType = "Output"/>
+	<Pin OpName="o_zero"		OpIndex ="26"	PinType = "Output"/>
+	<Pin OpName="o_nan"			OpIndex ="27"	PinType = "Output"/>
+	<Pin OpName="o_version"		OpIndex ="28"	PinType = "Output"/>
+</AFBComponent>

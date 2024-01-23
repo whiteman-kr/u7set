@@ -1,6 +1,6 @@
 #pragma once
-#include "TrendMainWindow.h"
-#include "SimAppSignalManager.h"
+#include "../../../TrendView/TrendMainWindow.h"
+#include "../../../Simulator/SimAppSignalManager.h"
 
 
 class SimIdeSimulator;
@@ -11,25 +11,24 @@ class QLabel;
 class SimTrends
 {
 public:
-	static std::vector<QString> getTrendsList();
-	static bool activateTrendWindow(QString trendName);
+	static std::vector<SimTrendsWidget*> getTrendsList();
+	static bool activateTrendWindow(SimTrendsWidget* trendWidget);
 	static bool startTrendApp(std::shared_ptr<SimIdeSimulator> simulator, const std::vector<AppSignalParam>& appSignals, QWidget* parent);
 
-	static void registerTrendWindow(QString name, SimTrendsWidget* window);
-	static void unregisterTrendWindow(QString name);
+	static void registerTrendWindow(SimTrendsWidget* window);
+	static void unregisterTrendWindow(const SimTrendsWidget* window);
 
 	template <typename Func>
 	static void applyForAll(Func func)
 	{
-		for (auto& [key, trendWidget] : m_trendsList)
+		for (auto& trendWidget : s_trendsList)
 		{
-			Q_UNUSED(key);
 			func(trendWidget);
 		}
 	}
 
 private:
-	static std::map<QString, SimTrendsWidget*> m_trendsList;
+	static std::list<SimTrendsWidget*> s_trendsList;
 };
 
 

@@ -1,5 +1,5 @@
 #ifndef UTILS_LIB_DOMAIN
-#error Don't include this file in the project! Link UtilsLib instead.
+#error Do not include this file in the project! Link UtilsLib instead.
 #endif
 
 #include "XmlHelper.h"
@@ -228,6 +228,7 @@ void XmlWriteHelper::writeQVariantAttribute(const QString& name, const QVariant&
 
 	case QMetaType::Type::LongLong:
 		writeInt64Attribute(name, qv.toLongLong());
+		break;
 
 	case QMetaType::Type::UInt:
 		writeUInt64Attribute(name, qv.toUInt());
@@ -281,6 +282,11 @@ XmlReadHelper::~XmlReadHelper()
 	{
 		delete m_xmlLocalReader;
 	}
+}
+
+QXmlStreamReader* XmlReadHelper::xmlStreamReader() const
+{
+	return m_xmlReader;
 }
 
 bool XmlReadHelper::readNextStartElement()
@@ -717,5 +723,14 @@ bool XmlReadHelper::readQVariantAttribute(const QString& name, QVariant* qv)
 	}
 
 	return result;
+}
+
+bool XmlReadHelper::readEnumValueAttributeAsInt(const QString& name, int* value)
+{
+	TEST_PTR_RETURN_FALSE(value);
+
+	QString attrName = name + QString(XmlAttribute::ENUM_VALUE_SUFFIX);
+
+	return readIntAttribute(attrName, value);;
 }
 

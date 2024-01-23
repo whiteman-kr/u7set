@@ -1,0 +1,41 @@
+<AFB id="#tctc_off_v1" Caption="tctc_off" Version="1.10">
+	<Properties>
+		<Description>Time Counter Block with constant time value, turn off delay function</Description>
+		<Category>Delay</Category>
+		<OpCode>3</OpCode>
+		<InternalUse>false</InternalUse>
+		<MinWidth>20</MinWidth>
+		<MinHeight>8</MinHeight>
+	</Properties>
+	<Inputs>
+		<Pin OpName="i_wave" Caption="in" Type="Discrete" ByteOrder="BigEndian" OpIndex="6" Size="1"/>
+	</Inputs>
+	<Outputs>
+		<Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="8" Size="1"/>
+	</Outputs>
+	<Params>
+		<Param OpName="i_counter" Caption="Time" Visible="true" OpIndex="1" Size="32" Instantiator="true" User="true" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+			<Value>1000</Value>
+			<Default>1000</Default>
+			<LowLimit>5</LowLimit>
+			<HighLimit>2147483647</HighLimit>
+			<Script>
+				<Changed/>
+			</Script>
+			<Units>ms</Units>
+		</Param>
+		<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="16" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
+			<Value>2</Value>
+			<Default>2</Default>
+			<LowLimit>1</LowLimit>
+			<HighLimit>4</HighLimit>
+			<Script>
+				<Changed/>
+			</Script>
+		</Param>
+	</Params>
+	<CommonScript>
+		<Library/>
+		<AfterCreation/>
+	</CommonScript>
+</AFB>

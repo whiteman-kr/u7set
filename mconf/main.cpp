@@ -1,14 +1,8 @@
-#include "Stable.h"
-#include "ModuleConfigurator.h"
 #include "../lib/ConstStrings.h"
+#include "version.h"
+#include "ModuleConfigurator.h"
 #include <QtWidgets/QApplication>
 #include <google/protobuf/stubs/common.h>
-
-#if __has_include("../gitlabci_version.h")
-#	include "../gitlabci_version.h"
-#endif
-
-OutputLog theLog;
 
 Q_DECLARE_METATYPE(std::vector<quint8>)
 
@@ -20,11 +14,11 @@ int main(int argc, char *argv[])
 	QCoreApplication::setOrganizationDomain(Manufacturer::SITE);
 	QCoreApplication::setApplicationName("ModuleConfigurator");
 
-#ifdef GITLAB_CI_BUILD
-	a.setApplicationVersion(QString("0.9.%1 (%2)").arg(CI_PIPELINE_ID).arg(CI_BUILD_REF_SLUG));
-#else
-	QCoreApplication::setApplicationVersion(QString("0.9.LOCALBUILD"));
-#endif
+	a.setApplicationVersion(QString("%1.%2.%3 (%4)")
+							.arg(U7SET_MAJOR_VERSION)
+							.arg(U7SET_MINOR_VERSION)
+							.arg(U7SET_PATCH_VERSION)
+							.arg(U7SET_BRANCH_NAME));
 
     qRegisterMetaType<std::vector<quint8>>();
 

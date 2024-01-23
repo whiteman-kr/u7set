@@ -1,0 +1,18 @@
+<Command 
+	Caption="mov" 
+	Code="0100" 
+	CodeMask="07f0" 
+	SimulationFunc="command_mov" 
+	ParseFunc="parse_mov" 
+	Description="Copy 16-bit word from memory to memory"
+
+	CodeSize="3" 
+	ReadTime="11" 
+	WaitFbExecution="false"
+
+	WriteToBitMemRuntime="70"
+	WriteToWordMemRuntime="10"
+	
+	CheckFunc="check_mov"
+	GetMnemoFunc="mnemo_mov"
+	CalcExecTimeFunc="exectime_write_bit_or_word_mem"/>

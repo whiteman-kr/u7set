@@ -47,7 +47,6 @@ HEADERS += \
     ../../lib/SimpleMutex.h \
     ../../lib/XmlHelper.h \
     ../../lib/HostAddressPort.h \
-    ../../lib/OutputLog.h \
     ../../lib/DeviceHelper.h \
     ../../lib/DeviceObject.h \
     ../../Builder/IssueLogger.h \
@@ -82,7 +81,6 @@ SOURCES += \
     ../../lib/XmlHelper.cpp \
 	../../lib/SoftwareSettings.cpp \
     ../../lib/HostAddressPort.cpp \
-    ../../lib/OutputLog.cpp \
     ../../lib/DeviceHelper.cpp \
     ../../lib/DeviceObject.cpp \
     ../../Builder/IssueLogger.cpp \

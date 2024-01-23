@@ -1,0 +1,14 @@
+<AFBComponent Caption="DPCOMP"		OpCode="20"	HasRam="true"	ImpVersion="6"	VersionOpIndex="16"	MaxInstCount="0" SimulationFunc="afb_dpcomp_v6">
+	<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
+	<Pin OpName="i_hys"		OpIndex ="1"	PinType = "Param"/>
+	<Pin OpName="i_result"		OpIndex ="3"	PinType = "Input"/>
+	<Pin OpName="i_data"		OpIndex ="4"	PinType = "Input"/>
+	<Pin OpName="i_sp_in"		OpIndex ="6"	PinType = "Input"/>
+	<Pin OpName="o_result"		OpIndex ="9"	PinType = "Output"/>
+	<Pin OpName="o_overflow"	OpIndex ="10"	PinType = "Output"/>
+	<Pin OpName="o_underflow"	OpIndex ="11"	PinType = "Output"/>
+	<Pin OpName="o_nan"		OpIndex ="13"	PinType = "Output"/>
+	<Pin OpName="o_param_err"	OpIndex ="14"	PinType = "Output"/>
+	<Pin OpName="o_dpcomp_edi"	OpIndex ="15"	PinType = "Output"/>
+	<Pin OpName="o_version"		OpIndex ="16"	PinType = "Output"/>
+</AFBComponent>

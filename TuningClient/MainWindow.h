@@ -29,6 +29,15 @@ public:
 	explicit MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent = 0);
 	~MainWindow();
 
+	TuningSignalManager& tuningSignalManager();
+	const TuningSignalManager& tuningSignalManager() const;
+
+	ClientLib::TuningConnection& tuningConnection();
+	const ClientLib::TuningConnection& tuningConnection() const;
+
+	ITuningAuthorization& tuningAuthorization();
+	const ITuningAuthorization& tuningAuthorization() const;
+
 private:
 	void createActions();
 	void createMenu();
@@ -80,7 +89,6 @@ signals:
 	void timerTick500();
 
 public:
-	int m_mainWindowTimerId_250ms = -1;
 	int m_mainWindowTimerId_500ms = -1;
 
 private:
@@ -102,7 +110,6 @@ private:
 
 	// Workspace items
 	//
-	LogonWorkspace* m_logonWorkspace = nullptr;
 	TuningWorkspace* m_tuningWorkspace = nullptr;
 	std::vector<SchemasWorkspace*> m_schemasWorkspaces;
 
@@ -139,6 +146,10 @@ private:
 	QLabel* m_statusBarTuningConnection = nullptr;
 	QLabel* m_statusBarLogAlerts = nullptr;
 
+	// Login controls
+	//
+	LogonWidget* m_logonWidget = nullptr;
+
 	// Status bar counters
 	//
 	int m_discreteCounter = -1;
@@ -149,8 +160,5 @@ private:
 	QString m_sorTooltipText;
 };
 
-// Global definitions
-
-extern MainWindow* theMainWindow;
 
 

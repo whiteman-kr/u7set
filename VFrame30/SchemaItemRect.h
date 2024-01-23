@@ -1,8 +1,8 @@
 #pragma once
 
-#include "PosRectImpl.h"
 #include "FontParam.h"
-#include <QTextDocument>
+#include "PosRectRotatable.h"
+
 
 class QPen;
 class QBrush;
@@ -17,7 +17,7 @@ namespace VFrame30
 
 		<b>Event handlers</b>
 
-		To customize item's apperance and behaviour, event handler code is placed to following properties of the schema item using RPCT:
+		To customize item's appearance and behaviour, event handler code is placed to following properties of the schema item using RPCT:
 
 		- <b>ClickScript</b> contains mouse click event handler code.
 		Click event is generated each time when user clicks mouse button on the item and <b>AcceptClick</b> property is set to true;<br>
@@ -81,7 +81,7 @@ namespace VFrame30
 		})
 		\endcode
 	*/
-	class SchemaItemRect : public PosRectImpl
+	class SchemaItemRect : public PosRectRotatable
 	{
 		Q_OBJECT
 
@@ -151,6 +151,9 @@ namespace VFrame30
 		Q_PROPERTY(bool fontItalic READ getFontItalic WRITE setFontItalic)
 		Q_PROPERTY(bool FontItalic READ getFontItalic WRITE setFontItalic)
 
+		/// \brief Angle of rotation
+		Q_PROPERTY(double angle READ angle WRITE setAngle)
+		Q_PROPERTY(double Angle READ angle WRITE setAngle)
 
 	public:
 		SchemaItemRect(void);
@@ -167,6 +170,9 @@ namespace VFrame30
 		//
 	public:
 		virtual void draw(CDrawParam* drawParam) const override;
+
+	private:
+		void drawPrivate(CDrawParam* drawParam) const;
 
 	protected:
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
@@ -218,7 +224,7 @@ namespace VFrame30
 		void setDrawRect(bool value);
 
 	private:
-		double m_weight = 0.0;				// Line weight, in pixels or inches depends on UnitDocPt
+		double m_weight = 0.0; // Line weight, in pixels or inches depends on UnitDocPt
 		QColor m_lineColor;
 		QColor m_fillColor;
 		QColor m_textColor;
@@ -234,7 +240,7 @@ namespace VFrame30
 
 		FontParam m_font;
 		bool m_fill = true;
-		bool m_drawRect = true;			// Rect is visible, thikness 0 is possible
+		bool m_drawRect = true; // Rect is visible, thickness 0 is possible
 
 		// Drawing resources
 		//
@@ -247,4 +253,4 @@ namespace VFrame30
 		mutable E::TextFormat m_cachetextFormat = E::TextFormat::PlainText;
 		mutable FontParam m_cachedFont{};
 	};
-}
+} // namespace VFrame30

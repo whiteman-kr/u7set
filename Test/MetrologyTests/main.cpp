@@ -1,6 +1,7 @@
 #include <QCoreApplication>
+#include <QTest>
 
-#include "UnitsConvertorTests.h"
+#include "UnitsConverterTests.h"
 #include "MetrologyFormulaTests.h"
 
 int main(int argc, char *argv[])
@@ -8,7 +9,7 @@ int main(int argc, char *argv[])
 	int status = 0;
 
 	{
-		UnitsConvertorTests uc;
+		UnitsConverterTests uc;
 		status |= QTest::qExec(&uc, argc, argv);
 	}
 

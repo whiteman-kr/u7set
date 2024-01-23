@@ -5,10 +5,10 @@ namespace VFrame30
 
 	class PropertyNames
 	{
-	public:
+	  public:
 		PropertyNames() = delete;
 
-	public:
+	  public:
 		inline static const QString schemaId{"SchemaID"};
 
 		inline static const QString top{"Top"};
@@ -34,6 +34,11 @@ namespace VFrame30
 		inline static const QString fontItalic{"FontItalic"};
 
 		inline static const QString color{"Color"};
+
+		inline static const QString rotationPoint{"RotationPoint"};
+		inline static const QString rotationPointDescription{"The point around which the item is rotated."};
+		inline static const QString angle{"Angle"};
+		inline static const QString angleDescription{"Item rotation angle (rotates around RotationPoint)."};
 
 		inline static const QString type{"Type"};
 		inline static const QString value{"Value"};
@@ -80,6 +85,40 @@ namespace VFrame30
 		inline static const QString svg{"Svg"};
 		inline static const QString currentImageId{"CurrentImageID"};
 
+		inline static const QString orientation{"Orientation"};
+		
+		inline static const QString sliderInvertedAppearance{"InvertedAppearance"};
+		inline static const QString sliderInvertedAppearanceToolTip{"This property holds whether or not a slider shows its values inverted.\nIf this property is false, the minimum and maximum will be shown in its classic position for the inherited widget.If the value is true, the minimum and maximum appear at their opposite location."};
+		inline static const QString sliderInvertedControls{"InvertedControls"};
+		inline static const QString sliderInvertedControlsToolTip{"This property holds whether or not the slider inverts its wheel and key events.\nIf this property is false, scrolling the mouse wheel \"up\" and using keys like page up will increase the slider's value towards its maximum. Otherwise pressing page up will move value towards the slider's minimum."};
+		inline static const QString sliderEnableMouseWheel{"EnableMouseWheel"};
+		inline static const QString sliderEnableMouseWheelToolTip{"If `true` then mouse wheel will affect slider value (note that zoom in/out by mouse wheel then will not work over the slider). If `false` then mouse wheel is ignored and event is propagated to the view."};
+		inline static const QString sliderMaximum{"Maximum"};
+		inline static const QString sliderMaximumToolTip{"This property holds the slider's maximum value.\nWhen setting this property, the minimum is adjusted if necessary to ensure that the range remains valid.Also the slider's current value is adjusted to be within the new range."};
+		inline static const QString sliderMinimum{"Minimum"};
+		inline static const QString sliderMinimumToolTip{"This property holds the slider's minimum value.\nWhen setting this property, the maximum is adjusted if necessary to ensure that the range remains valid.Also the slider's current value is adjusted to be within the new range."};
+		inline static const QString sliderPageStep{"PageStep"};
+		inline static const QString sliderPageStepToolTip{"This property holds the page step.\nThe larger of two natural steps that a slider provides and typically corresponds to the user pressing PageUp or PageDown."};
+		inline static const QString sliderSingleStep{"SingleStep"};
+		inline static const QString sliderSingleStepToolTip{"This property holds the single step.\nThe smaller of two natural steps that a slider provides and typically corresponds to the user pressing an arrow key."};
+		inline static const QString sliderTracking{"Tracking"};
+		inline static const QString sliderTrackingToolTip{"This property holds whether slider tracking is enabled.\nIf tracking is enabled, the slider emits the valueChanged() signal while the slider is being dragged.If tracking is disabled, the slider emits the valueChanged() signal only when the user releases the slider."};
+		inline static const QString sliderTickInterval{"TickInterval"};
+		inline static const QString sliderTickIntervalToolTip{"This property holds the interval between tickmarks.\nThis is a value interval, not a pixel interval.If it is 0, the slider will choose between singleStep and pageStep."};
+		inline static const QString sliderTickPosition{"TickPosition"};
+		inline static const QString sliderTickPositionToolTip{""};
+		inline static const QString sliderDefaultValue{"DefaultValue"};
+		inline static const QString sliderDefaultEventScript{"(function(schemaItem, sliderWidget, value)\n{\n})"};
+
+		inline static const QString sliderMoved{"SliderMoved"};
+		inline static const QString sliderMovedToolTip{"This signal is emitted when sliderDown is true and the slider moves. This usually happens when the user is dragging the slider. The value is the new slider position.\nThis signal is emitted even when tracking is turned off."};
+		inline static const QString sliderPressed{"SliderPressed"};
+		inline static const QString sliderPressedToolTip{"This signal is emitted when the user presses the slider with the mouse, or programmatically when setSliderDown(true) is called."};
+		inline static const QString sliderReleased{"SliderReleased"};
+		inline static const QString sliderReleasedToolTip{"This signal is emitted when the user releases the slider with the mouse, or programmatically when setSliderDown(false) is called."};
+		inline static const QString sliderValueChanged{"ValueChanged"};
+		inline static const QString sliderValueChangedToolTip{"This signal is emitted when the slider value has changed, with the new slider value as argument."};
+
 		inline static const QString drawGrid{"DrawGrid"};
 		inline static const QString drawGridForAllBars{"DrawGridForAllBars"};
 		inline static const QString drawGridValues{"DrawGridValues"};
@@ -116,11 +155,16 @@ namespace VFrame30
 		inline static const QString timeType{"TimeType"};
 		inline static const QString timeTypeToolTip{"Plant: plant time received from LogicModule, System: server time (UTC+0), Local: localized server time (UTC+Time Zone)"};
 
-		inline static const QString indicatorTrendSamplePeriod{"SamplePeriod"};
-		inline static const QString indicatorTrendRedrawInterval{"RedrawInterval"};
-		inline static const QString indicatorTrendRedrawIntervalToolTip{"Trend image update time, ms"};
+		inline static const QString indicatorTrendBackColor1st{"BackColor1st"};
+		inline static const QString indicatorTrendBackColor2nd{"BackColor2nd"};
+		inline static const QString indicatorTrendLaneCount{"LaneCount"};
 		inline static const QString indicatorTrendLaneDuration{"LaneDuration"};
 		inline static const QString indicatorTrendLaneDurationToolTip{"Lane duration, seconds"};
+		inline static const QString indicatorTrendRedrawInterval{"RedrawInterval"};
+		inline static const QString indicatorTrendRedrawIntervalToolTip{"Trend image update time, ms"};
+		inline static const QString indicatorTrendSamplePeriod{"SamplePeriod"};
+		inline static const QString indicatorTrendScaleType{"ScaleType"};
+		inline static const QString indicatorTrendViewMode{"ViewMode"};
 
 		inline static const QString indicatorMargingLeft{"MarginLeft"};
 		inline static const QString indicatorMargingTop{"MarginTop"};
@@ -141,10 +185,11 @@ namespace VFrame30
 		inline static const QString textValuePropDescription{"$(value) Signal value\n"
 															 "$(caption) Signal caption\n"
 															 "$(signalid) SignalID (CustomSignalID)\n"
-															 "$(appsignalid) AppSignalID (#APPSIGANLID)\n"
-															 "$(equipmentid) Signal EquipmentID (LM for internal signals, input/output equipment port for IO signals)\n"};
-															 //"$(highlimit) High limit\n"
-															 //"$(lowlimit) Low limit"};
+															 "$(appsignalid) AppSignalID (#APPSIGNALID)\n"
+															 "$(equipmentid) Signal EquipmentID (LM for internal signals, input/output equipment port for IO signals)\n"
+															 "$(units) Signal units\n"};
+		//"$(highlimit) High limit\n"
+		//"$(lowlimit) Low limit"};
 
 		inline static const QString userText{"UserText"};
 		inline static const QString userTextPos{"UserTextPos"};
@@ -199,6 +244,7 @@ namespace VFrame30
 		inline static const QString adaptiveAperture{"AdaptiveAperture"};
 
 		inline static const QString loopbackId{"LoopbackID"};
+		inline static const QString packedLogicId{"PackedLogicID"};
 
 		inline static const QString compareType{"CompareType"};
 
@@ -270,4 +316,4 @@ namespace VFrame30
 		inline static const QString scriptGlobalVariableSignals{"signals"};
 		inline static const QString scriptGlobalVariableLog{"log"};
 	};
-}
+} // namespace VFrame30

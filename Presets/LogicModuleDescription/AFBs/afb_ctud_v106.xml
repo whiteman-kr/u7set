@@ -1,0 +1,11 @@
+<AFBComponent Caption="CTUD" OpCode="5" HasRam="true" ImpVersion="106" VersionOpIndex="11" MaxInstCount="0" SimulationFunc="afb_ctud_v106">
+    <Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
+    <Pin OpName="i_counter_dff"	OpIndex ="1"	PinType = "Input"/>
+    <Pin OpName="i_wave_dff"	OpIndex ="3"	PinType = "Input"/>
+    <Pin OpName="i_wave"		OpIndex ="4"	PinType = "Input"/>
+    <Pin OpName="i_reset"		OpIndex ="5"	PinType = "Input"/>
+    <Pin OpName="o_result"		OpIndex ="7"	PinType = "Output"/>
+    <Pin OpName="o_wave_dff"	OpIndex ="9"	PinType = "Output"/>
+    <Pin OpName="o_ctud_edi"	OpIndex ="10"	PinType = "Output"/>
+    <Pin OpName="o_version"		OpIndex ="11"	PinType = "Output"/>
+</AFBComponent>

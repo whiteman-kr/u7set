@@ -460,7 +460,7 @@ function test_UAL_CONN_4_1_07(sim)
 	assert(receivedDataID === conn01_port1.rxDataID);
 	assert(receivedDataID === conn01_port2.txDataID);
 	
-	transmittedDataID = lm1.readRamDword(conn01_port1.txBufAbsAddr, RamWriteAccess);
+	let transmittedDataID = lm1.readRamDword(conn01_port1.txBufAbsAddr, RamWriteAccess);
 	
 	assert(transmittedDataID != 0);
 	assert(transmittedDataID === conn01_port1.txDataID);
@@ -474,7 +474,7 @@ function test_UAL_CONN_4_1_07(sim)
 	assert(receivedDataID === conn01_port2.rxDataID);
 	assert(receivedDataID === conn01_port1.txDataID);
 	
-	let transmittedDataID = lm2.readRamDword(conn01_port2.txBufAbsAddr, RamWriteAccess);
+	transmittedDataID = lm2.readRamDword(conn01_port2.txBufAbsAddr, RamWriteAccess);
 	
 	assert(transmittedDataID != 0);
 	assert(transmittedDataID === conn01_port1.rxDataID);
@@ -496,7 +496,7 @@ function test_UAL_CONN_4_1_08(sim)
 	assert(receivedDataID === conn02_port1.rxDataID);
 	assert(receivedDataID === conn02_port2.txDataID);
 	
-	transmittedDataID = lm1.readRamDword(conn02_port1.txBufAbsAddr, RamWriteAccess);
+	let transmittedDataID = lm1.readRamDword(conn02_port1.txBufAbsAddr, RamWriteAccess);
 	
 	assert(transmittedDataID === 0);
 	assert(transmittedDataID === conn02_port1.txDataID);
@@ -510,7 +510,7 @@ function test_UAL_CONN_4_1_08(sim)
 	assert(receivedDataID === conn02_port2.rxDataID);
 	assert(receivedDataID === conn02_port1.txDataID);
 	
-	let transmittedDataID = lm2.readRamDword(conn02_port2.txBufAbsAddr, RamWriteAccess);
+	transmittedDataID = lm2.readRamDword(conn02_port2.txBufAbsAddr, RamWriteAccess);
 	
 	assert(transmittedDataID === 0);
 	assert(transmittedDataID === conn02_port1.rxDataID);

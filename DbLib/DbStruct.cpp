@@ -1,5 +1,5 @@
 #ifndef DB_LIB_DOMAIN
-#error Don't include this file in the project! Link DbLib instead.
+#error Do not include this file in the project! Link DbLib instead.
 #endif
 
 #include "DbStruct.h"
@@ -886,9 +886,17 @@ bool DbFileTree::removeFile(int fileId)
 		FileChildren& ch = it->second;
 		assert(ch.m_fileId == fileInfo->fileId());
 
+		std::vector<int> childFilesIds;
+		childFilesIds.reserve(ch.m_children.size());
+
 		for (std::shared_ptr<DbFileInfo>& fc : ch.m_children)
 		{
-			removeFile(fc->fileId());
+			childFilesIds.push_back(fc->fileId());
+		}
+
+		for(int childFileId : childFilesIds)
+		{
+			removeFile(childFileId);
 		}
 	}
 
@@ -995,7 +1003,10 @@ bool DbFileTree::removeIf(std::function<bool(const DbFileInfo&)> pred)
 	bool ok = true;
 	for (std::shared_ptr<DbFileInfo> file : filesToRemove)
 	{
-		ok &= removeFile(file);
+		if (m_files.contains(file->fileId()) == true)		// to avoid assert when try to remove recursively deleted files
+		{
+			ok &= removeFile(file);
+		}
 	}
 
 	return true;

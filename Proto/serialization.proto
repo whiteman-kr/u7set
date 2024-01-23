@@ -50,6 +50,7 @@ message FontParam
 	required bool bold = 3;
 	required bool italic = 4;
 	optional string name = 5;
+	optional bool underline = 6 [default = false];
 }
 
 //
@@ -420,6 +421,7 @@ message SchemaItem
 	// Inherited from SchmeItem
 	//
 	optional PosRectImpl PosRectImpl = 10;
+	optional PosRectRotatable PosRectRotatable = 20;
 	optional PosLineImpl PosLineImpl = 11;
 	optional PosConnectionImpl PosConnectionImpl = 12;
 
@@ -429,7 +431,7 @@ message SchemaItem
 	optional FblItemRect FblItemRect = 107;					// +PosRectImpl, FblItem
 	optional FblItemLine FblItemLine = 108;					// +PosConnectionImpl, FblItem
 
-	// Inherited from PosRectImpl, PosLineImpl, PosConnectionImpl
+	// Inherited from PosRectImpl, PosRectRotatable, PosLineImpl, PosConnectionImpl
 	//
 	optional SchemaItemRect Rect = 116;						// +PosRectImpl
 	optional SchemaItemLine Line = 117;						// +PosLineImpl
@@ -464,6 +466,7 @@ message SchemaItem
     optional SchemaItemControl control = 200;				// +FblItemRect
 	optional SchemaItemPushButton pushButton = 210;			// +SchemaItemControl
 	optional SchemaItemLineEdit lineEdit = 211;				// +SchemaItemControl
+	optional SchemaItemSlider slider = 212;					// +SchemaItemControl
 }
 
 //
@@ -477,6 +480,15 @@ message PosRectImpl
 	required double heightDocPt = 4;
 }
 
+
+//
+// PosRectRotatable
+//
+message PosRectRotatable
+{
+	optional double angle = 2;
+	optional int32 rotationpoint = 3; // Reflected to enum VFrame30::RotationPoint
+}
 
 //
 // PosLineImpl
@@ -647,6 +659,11 @@ message IndicatorTrend
 {
     optional int32 sampleperiod = 90;
 	optional int32 timeType = 91;
+	optional int32 viewMode = 92;		// E::TrendViewMode
+	optional int32 scaleType = 93;		// E::TrendScaleType
+	optional int32 laneCount = 94;
+	optional fixed32 backColor1st = 95;
+	optional fixed32 backColor2nd = 96;
     optional int64 redrawinterval = 100;
 	optional int64 duration = 51;
 
@@ -780,6 +797,7 @@ message SchemaItemAfb
 	optional AfbElementXml deprecated_afbelement = 5;	// Old formatted XML for AFB, use now afbelement = 7
 	optional string deprecated_label = 6;				// Don't use 6 anymore
 	optional AfbElementXml afbelement = 7;
+	repeated string packedLogicInputs = 8;				// If item is a packed logic out, then it's a list of inputs (AppSignalIds or Label)
 }
 
 //
@@ -986,6 +1004,32 @@ message SchemaItemLineEdit
 	optional string scriptTextChanged = 24;
 }
 
+//
+// SchemaItemSlider
+//
+message SchemaItemSlider
+{
+	optional bool invertedAppearance = 2 [default = false];
+	optional bool invertedControls = 3 [default = false];
+	optional bool enableMouseWheel = 4 [default = false];
+	optional int32 maximum = 6 [default = 99];
+	optional int32 minimum = 7 [default = 0];
+	optional int32 orientation = 10 [default = 2];		// Qt::Orientation - Qt::Horizontal(0x1), Qt::Vertical(0x2)
+	optional int32 pageStep = 12 [default = 10];
+	optional int32 singleStep = 13 [default = 1];
+	optional bool tracking = 16 [default = true];
+	optional int32 defaultValue = 17 [default = 0];
+
+	optional int32 tickInterval = 20 [default = 0];
+	optional int32 tickPosition = 21 [default = 0];	// QSlider::TickPosition 0 - QSlider::NoTicks
+
+    optional string scriptAfterCreate = 31;
+    optional string scriptSliderMoved = 32;
+	optional string scriptSliderPressed = 33;
+	optional string scriptSliderReleased = 34;
+	optional string scriptValueChanged = 35;
+}
+
 
 
 
@@ -1006,6 +1050,7 @@ message DeviceObject
 	optional int32 place = 5 [default = 0];
 	optional string specific_properties_struct = 6;
 	repeated Property properties = 7;
+	repeated string tags = 8;
 
 	optional bool preset = 32 [default = false];
 	optional bool presetRoot = 33 [default = false];
@@ -1013,6 +1058,7 @@ message DeviceObject
 	optional Uuid presetObjectUuid = 35;
 	optional int32 childCountHint = 36 [default = 0];	// Hint for calling m_children.reserve()
 	optional int32 presetVersion = 37;
+	optional string presetProtectedProperties = 38;
 
 	// Derived from Hardware::DeviceObject
 	//
@@ -1232,6 +1278,9 @@ message AppSignal
     optional int32 channel = 7 [default = 0];
 	optional bool excludeFromBuild = 8 [default = false];
 
+	optional bool invertSignal = 9 [default = false];
+	optional bool reserved = 10 [default = false];
+
     // Signal type
 
     optional int32 signalType = 16 [default = 1];		// E::SignalType::Discrete
@@ -1263,7 +1312,8 @@ message AppSignal
     optional int32 decimalPlaces = 83 [default = 2];
     optional double coarseAperture = 84 [default = 1];
     optional double fineAperture = 85 [default = 0.5];
-    optional bool adaptiveAperture = 86 [default = false];
+	//optional bool obsolete_adaptiveAperture = 86 [default = false];
+	optional int32 apertureType = 86 [default = 0 /* E::ApertureType::RangePercent */];
 
     // Signal specific properties
 
@@ -1312,13 +1362,19 @@ message ProtoAppSignalData
 	optional int32 decimalPlaces = 14 [default = 2];
 	optional double coarseAperture = 15 [default = 1.0];
 	optional double fineAperture = 16 [default = 0.5];
-	optional bool adaptiveAperture = 17 [default = false];
+	optional bool obsolete_adaptiveAperture = 17 [default = false];		// not used from 395 DB version
+																		// ApertureType used instead
 	optional bool excludefromBuild = 18 [default = false];
 
     optional string tags = 19;
 
     optional string userSpecPropStruct = 20;
-	optional bytes userSpecPropValues = 21;				// serialized message Proto::SignalSpecPropValues
+	optional bytes userSpecPropValues = 21;					// serialized message Proto::SignalSpecPropValues
+
+	optional int32 apertureType = 22 [default = 0 /* E::ApertureType::RangePercent */];
+	
+	optional bool invertSignal = 23 [default = false];
+	optional bool reserved = 24 [default = false];
 }
 
 // Data structs
@@ -1405,6 +1461,7 @@ message SchemaDetails
 	repeated string schematags = 24;
 	repeated string loopbacks = 25;
 	repeated string itemtags = 26;
+	repeated string packedLogicIds = 27;
 
     message TrendIndicatorSchemaItems
 	{
@@ -1417,18 +1474,32 @@ message SchemaDetails
 	repeated TrendIndicatorSchemaItems trendIndicators = 30;
 }
 
+message BuildInfo
+{
+	optional string project = 1;
+	optional int32 buildNo = 2 [default = 0];
+	optional string dateTime = 3;
+	optional int32 changeset = 4 [default = 0];
+	optional string user = 5;
+	optional string workstation = 6;
+}
 
 message ArchSignal
 {
-    required uint64 hash = 1;
-    required bool isAnalog = 2;
-    required string appSignalID = 3;
+	required string appSignalID = 1;
+	required int32 signalType = 2;
+	optional double lowLimit = 3 [default = 0];
+	optional double highLimit = 4 [default = 0];
+	optional string unit = 5;
+	optional double fineAperture = 6 [default = 0];
+	optional double coarseAperture = 7 [default = 0];
 }
 
-
-message ArchSignals
+message ArchInfo
 {
-    repeated ArchSignal archSignals = 1;
+	required BuildInfo buildInfo = 1;
+	required string archiveServiceID = 2;
+	repeated ArchSignal archSignal = 3;
 }
 
 //

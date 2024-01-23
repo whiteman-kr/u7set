@@ -1,0 +1,125 @@
+#include "MconfSettings.h"
+
+
+MconfSettings::MconfSettings(void) :
+#ifdef Q_OS_LINUX
+	m_serialPort("ttyS0"),
+#endif
+#ifdef Q_OS_WIN32
+	m_serialPort("\\\\.\\COM3"),
+#endif
+	m_showDebugInfo(false),
+	m_verify(true),
+	m_expertMode(false),
+	m_server("127.0.0.1"),
+	m_serverUsername("u7"),
+	m_serverPassword("P2ssw0rd")
+{
+}
+
+
+MconfSettings::~MconfSettings(void)
+{
+}
+
+void MconfSettings::save() const
+{
+	QSettings s;
+
+	s.setValue("m_serialPort", m_serialPort);
+	s.setValue("m_showDebugInfo", m_showDebugInfo);
+	s.setValue("m_verify", m_verify);
+	s.setValue("m_expertMode", m_expertMode);
+
+	s.setValue("m_server", m_server);
+	s.setValue("m_serverUsername", m_serverUsername);
+	s.setValue("m_serverPassword", m_serverPassword);
+
+	return;
+}
+
+void MconfSettings::load()
+{
+	QSettings s;
+
+	m_serialPort = s.value("m_serialPort").toString();
+	m_showDebugInfo = s.value("m_showDebugInfo").toBool();
+	m_verify = s.value("m_verify").toBool();
+	m_expertMode = s.value("m_expertMode").toBool();
+
+	m_server = s.value("m_server", "127.0.0.1").toString();
+	m_serverUsername = s.value("m_serverUsername", "u7").toString();
+	m_serverPassword = s.value("m_serverPassword", "P2ssw0rd").toString();
+
+	return;
+}
+
+QString MconfSettings::serialPort() const
+{
+	return m_serialPort;
+}
+
+void MconfSettings::setSerialPort(const QString& value)
+{
+	m_serialPort = value;
+}
+
+bool MconfSettings::showDebugInfo() const
+{
+	return m_showDebugInfo;
+}
+
+void MconfSettings::setShowDebugInfo(bool value)
+{
+	m_showDebugInfo = value;
+}
+
+bool MconfSettings::verify() const
+{
+	return m_verify;
+}
+
+void MconfSettings::setVerify(bool value)
+{
+	m_verify = value;
+}
+
+bool MconfSettings::expertMode() const
+{
+	return m_expertMode;
+}
+
+void MconfSettings::setExpertMode(bool value)
+{
+	m_expertMode = value;
+}
+
+QString MconfSettings::server() const
+{
+	return m_server;
+}
+
+void MconfSettings::setServer(const QString& value)
+{
+	m_server = value;
+}
+
+QString MconfSettings::serverUsername() const
+{
+	return m_serverUsername;
+}
+
+void MconfSettings::setServerUsername(const QString& value)
+{
+	m_serverUsername = value;
+}
+
+QString MconfSettings::serverPassword() const
+{
+	return m_serverPassword;
+}
+
+void MconfSettings::setServerPassword(const QString& value)
+{
+	m_serverPassword = value;
+}

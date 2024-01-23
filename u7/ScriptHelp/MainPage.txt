@@ -50,7 +50,15 @@ This manual is divided in the following sections:
 /** \defgroup testsScripts Tests Scripts
  */
 
-/** @addtogroup simulator Core Objects
+/** @addtogroup simulator Simulator Tests Core Objects
+  * \ingroup testsScripts
+  *  @{ */
+
+  // classes, etc.
+
+  /** @} */
+
+/** @addtogroup testsuite Hardware Tests Core Objects
   * \ingroup testsScripts
   *  @{ */
 
@@ -130,17 +138,24 @@ Script code error messages are displayed directly on appropriate schema item whe
 
 During project development it is necessary to test its correctness. For example, project designer has
 to check if required signals were not deleted or application logic still performs correct calculations
-before uploading the executable code into logic modules.
+before uploading the executable code into logic modules. For other example, project designer can run
+test on physical logic module to ensure that all logic is working as expected.
 
-Testing can be performed using RPCT simulation tools. Ttis approach does not require physical hardware. 
-RPCT simulates application logic of the project just on developer's computer. Simulator can set
-required input signal values and allows to see how logic works. Simulation tools cover all AFBL library elements,
-connections, busses and other parts of the project.
+Testing can be performed in two approaches: using simulation tools or using physical hardware. 
 
-Testing can be automated by scripts. Testing scripts are written in JavaScript language using special simulator API
-and stored in project's database. They can be executed after each successful build.
+The first approach does not require physical hardware. RPCT simulates application logic of the project just 
+on developer's computer. Simulator can set required input signal values and allows to see how logic works. 
+Simulation tools cover all AFBL library elements, connections, busses and other parts of the project.
 
-Testin scripts can perform following actions:
+The second approach requires physical hardware. It requires application logic code to be uploaded to logic modules.
+The TestSuite application is used for running tests. While testing, input signal values are set to different states 
+using tuning interface, and output values are received from application logic interface and checked for expected values 
+defined by algorithms.
+
+Testing can be automated by scripts. Testing scripts are written in JavaScript language using special API
+and stored in project's database. Simulator tests can be executed after each successful build.
+
+Simulator testing scripts can perform following actions:
 
 - access Logic Modules descriptions;
 - access Connections descriptions;
@@ -151,9 +166,22 @@ Testin scripts can perform following actions:
 - send signal data to Application Data Service
 .... and more features will be added!
 
-The following classes are used to perform testing:
+Hardware testing scripts can perform following actions:
+
+- access Application Signals descriptions;
+- override tunable signals values;
+- read application signals values;
+- analyze received values and generate repors;
+.... and more features will be added!
+
+The following classes are used to perform testing by simulation:
 
 - \ref Sim::ScriptSimulator "ScriptSimulator" is s class that runs all simulations on compiled project. 
+- \ref Sim::ScriptLogicModule "ScriptLogicModule" is s class that represetns logic module properties and commands. 
+
+The following classes are used to perform testing using hardware:
+
+- \ref TestSuite::TestController "TestController" is s class that controls all hardware testing. 
 */
 
 /*! @page maskDescription Masks Description
@@ -166,7 +194,7 @@ Examples:
 <br>
 <br>
 Mask for AppSignalID:
-<b>#SF001P014*</b> will mean #SF001P014_MID, #SF001P014_A, #SF001P014_B, #SF001P014_C
+<b>\#SF001P014*</b> will mean \#SF001P014_MID, \#SF001P014_A, \#SF001P014_B, \#SF001P014_C
 <br>
 <br>
 Mask for CustomAppSignalID:
@@ -174,6 +202,6 @@ Mask for CustomAppSignalID:
 <br>
 <br>
 Mask for Equipment ID:
-<b>#SYSTEMID_RACK01_CH01_MD??</b> means #SYSTEMID_RACK01_CH01_MD12, #SYSTEMID_RACK01_CH01_MD02, #SYSTEMID_RACK01_CH01_MD08, but NOT #SYSTEMID_RACK01_CH01_MD00A
+<b>\#SYSTEMID_RACK01_CH01_MD??</b> means \#SYSTEMID_RACK01_CH01_MD12, \#SYSTEMID_RACK01_CH01_MD02, \#SYSTEMID_RACK01_CH01_MD08, but NOT \#SYSTEMID_RACK01_CH01_MD00A
 
 */

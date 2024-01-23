@@ -36,12 +36,8 @@ private slots:
 	void on_buttonSelectNone_clicked();
 	void on_categoriesList_itemPressed(QListWidgetItem *item);
 	void on_fileBrowseButton_clicked();
-	void on_pageSetupButton_clicked();
-	void on_pageSetDefault_clicked();
 	void on_multiFilepageSetupButton_clicked();
 
-private:
-	void updatePageSizeInfo();
 
 private:
 	DbController* m_db = nullptr;

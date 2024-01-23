@@ -1,13 +1,5 @@
 #include "DlgMetrologyConnection.h"
-
-#include <QApplication>
-#include <QFileDialog>
-#include <QClipboard>
-#include <QMessageBox>
-#include <QKeyEvent>
-
 #include "../lib/StandardColors.h"
-
 #include "Settings.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -163,7 +155,7 @@ QVariant MetrologyConnectionTable::data(const QModelIndex &index, int role) cons
 	{
 		if (column == METROLOGY_CONNECTION_COLUMN_IN_ID)
 		{
-			::AppSignal* pSignal = m_signalSetProvider->getSignalByStrID(connection.appSignalID(Metrology::ConnectionIoType::Source));
+			::AppSignal* pSignal = m_signalSetProvider->getSignal(connection.appSignalID(Metrology::ConnectionIoType::Source));
 			TEST_PTR_RETURN_VALUE(pSignal, QColor(0xFF, 0xA0, 0xA0)); // if input signal is not exist
 		}
 
@@ -177,7 +169,7 @@ QVariant MetrologyConnectionTable::data(const QModelIndex &index, int role) cons
 
 		if (column == METROLOGY_CONNECTION_COLUMN_OUT_ID)
 		{
-			::AppSignal* pSignal = m_signalSetProvider->getSignalByStrID(connection.appSignalID(Metrology::ConnectionIoType::Destination));
+			::AppSignal* pSignal = m_signalSetProvider->getSignal(connection.appSignalID(Metrology::ConnectionIoType::Destination));
 			TEST_PTR_RETURN_VALUE(pSignal, QColor(0xFF, 0xA0, 0xA0)); // if output signal is not exist
 		}
 
@@ -446,7 +438,7 @@ void DialogMetrologyConnectionItem::onOk()
 	//
 	//
 
-	AppSignal* pInSignal = m_signalSetProvider->getSignalByStrID(inputAppSignalID);
+	AppSignal* pInSignal = m_signalSetProvider->getSignal(inputAppSignalID);
 	if (pInSignal == nullptr)
 	{
 		QMessageBox::information(this,
@@ -467,7 +459,7 @@ void DialogMetrologyConnectionItem::onOk()
 		return;
 	}
 
-	AppSignal* pOutSignal = m_signalSetProvider->getSignalByStrID(outputAppSignalID);
+	AppSignal* pOutSignal = m_signalSetProvider->getSignal(outputAppSignalID);
 	if (pOutSignal == nullptr)
 	{
 		QMessageBox::information(this,
@@ -599,8 +591,19 @@ void DialogMetrologyConnectionItem::onOk()
 	//
 	//
 
-	m_connection.setSignal(Metrology::ConnectionIoType::Source, pInSignal);
-	m_connection.setSignal(Metrology::ConnectionIoType::Destination, pOutSignal);
+	QString err;
+
+	if (m_connection.setSignal(Metrology::ConnectionIoType::Source, pInSignal, &err) == false)
+	{
+		QMessageBox::information(this, windowTitle(), err);
+		return;
+	}
+
+	if (m_connection.setSignal(Metrology::ConnectionIoType::Destination, pOutSignal, &err) == false)
+	{
+		QMessageBox::information(this, windowTitle(), err);
+		return;
+	}
 
 	accept();
 }
@@ -610,14 +613,17 @@ void DialogMetrologyConnectionItem::onOk()
 // -------------------------------------------------------------------------------------------------------------------
 // class DialogMetrologyConnection
 
-DialogMetrologyConnection::DialogMetrologyConnection(AppSignalSetProvider* signalSetProvider, QWidget* parent) :
+DialogMetrologyConnection::DialogMetrologyConnection(AppSignalSetProvider* signalSetProvider,
+													 DbController* dbController,
+													 QWidget* parent) :
 	QDialog(parent),
-	m_signalSetProvider(signalSetProvider)
+	m_signalSetProvider(signalSetProvider),
+	m_db(dbController)
 {
 	TEST_PTR_RETURN(m_signalSetProvider);
 
 	m_connectionTable.setSignalSetProvider(m_signalSetProvider);
-	m_connectionBase.setDbController(m_signalSetProvider->dbController());
+	m_connectionBase.setDbController(m_db);
 
 	m_isModified = false;
 
@@ -896,16 +902,17 @@ void DialogMetrologyConnection::findSignal_in_signalSet()
 				continue;
 			}
 
-			AppSignal* pSignal = m_signalSetProvider->getSignalByStrID(connection->appSignalID(ioType));
+			AppSignal* pSignal = m_signalSetProvider->getSignal(connection->appSignalID(ioType));
 			if (pSignal == nullptr)
 			{
 				qDebug() << __FUNCTION__ << "Signal" << connection->appSignalID(ioType) << "was not found";
 				continue;
 			}
 
-			m_signalSetProvider->loadSignal(pSignal->ID());
+			m_signalSetProvider->getLoadedSignalByID(pSignal->ID(), false);
 
-			connection->setSignal(ioType, pSignal);
+			QString err;
+			connection->setSignal(ioType, pSignal, &err);
 		}
 	}
 }
@@ -1111,12 +1118,14 @@ bool DialogMetrologyConnection::createConnectionBySignal(AppSignal* pSignal)
 
 	Metrology::Connection connection;
 
+	QString err;
+
 	switch (pSignal->inOutType())
 	{
 		case E::SignalInOutType::Input:
 
 			connection.setType(Metrology::ConnectionType::Input_Internal);
-			connection.setSignal(Metrology::ConnectionIoType::Source, pSignal);
+			connection.setSignal(Metrology::ConnectionIoType::Source, pSignal, &err);
 
 			break;
 
@@ -1125,12 +1134,12 @@ bool DialogMetrologyConnection::createConnectionBySignal(AppSignal* pSignal)
 			if (pSignal->enableTuning() == false)
 			{
 				connection.setType(Metrology::ConnectionType::Input_Internal);
-				connection.setSignal(Metrology::ConnectionIoType::Destination, pSignal);
+				connection.setSignal(Metrology::ConnectionIoType::Destination, pSignal, &err);
 			}
 			else
 			{
 				connection.setType(Metrology::ConnectionType::Tuning_Output);
-				connection.setSignal(Metrology::ConnectionIoType::Source, pSignal);
+				connection.setSignal(Metrology::ConnectionIoType::Source, pSignal, &err);
 			}
 
 			break;
@@ -1138,13 +1147,19 @@ bool DialogMetrologyConnection::createConnectionBySignal(AppSignal* pSignal)
 		case E::SignalInOutType::Output:
 
 			connection.setType(Metrology::ConnectionType::Input_Output);
-			connection.setSignal(Metrology::ConnectionIoType::Destination, pSignal);
+			connection.setSignal(Metrology::ConnectionIoType::Destination, pSignal, &err);
 			break;
 
 		default:
 
 			Q_ASSERT(false);
 			return false;
+	}
+
+	if (err.isEmpty() == false)
+	{
+		QMessageBox::information(this, m_windowTitle, err);
+		return false;
 	}
 
 	fillConnection(true, connection);
@@ -1623,14 +1638,15 @@ void DialogMetrologyConnection::importConnections()
 
 		for(int ioType = 0; ioType < Metrology::CONNECTION_IO_TYPE_COUNT; ioType++)
 		{
-			AppSignal* pSignal = m_signalSetProvider->getSignalByStrID(pConnection->appSignalID(ioType));
+			AppSignal* pSignal = m_signalSetProvider->getSignal(pConnection->appSignalID(ioType));
 			if (pSignal == nullptr)
 			{
 				qDebug() << __FUNCTION__ << "Signal" << pConnection->appSignalID(ioType) << "was not found";
 				continue;
 			}
 
-			pConnection->setSignal(ioType, pSignal);
+			QString err;
+			pConnection->setSignal(ioType, pSignal, &err);
 		}
 	}
 

@@ -40,13 +40,13 @@ bool EditSchemaAppSignalProvider::signalExists(Hash hash) const
 
 bool EditSchemaAppSignalProvider::signalExists(const QString& appSignalId) const
 {
-	return m_signalSetProvider->signalSet().contains(appSignalId);
+	return m_signalSetProvider->signalExists(appSignalId);
 }
 
 bool EditSchemaAppSignalProvider::signalsExist(const QStringList& signalIds) const
 {
 	return std::all_of(signalIds.begin(), signalIds.end(), [this](const QString& appSignalId) {
-		return m_signalSetProvider->signalSet().contains(appSignalId);
+		return m_signalSetProvider->signalExists(appSignalId);
 	});
 }
 
@@ -64,7 +64,7 @@ AppSignalParam EditSchemaAppSignalProvider::signalParam(const QString& appSignal
 {
 	AppSignalParam result;
 
-	AppSignal* s = m_signalSetProvider->getSignalByStrID(appSignalId);
+	AppSignal* s = m_signalSetProvider->getSignal(appSignalId);
 
 	if (found != nullptr)
 	{
@@ -94,7 +94,7 @@ AppSignalState EditSchemaAppSignalProvider::signalState(const QString& appSignal
 	AppSignalState result;
 	result.m_hash = ::calcHash(appSignalId);
 
-	AppSignal* s = m_signalSetProvider->getSignalByStrID(appSignalId);
+	AppSignal* s = m_signalSetProvider->getSignal(appSignalId);
 	if (found != nullptr)
 	{
 		*found = s != nullptr;
@@ -104,13 +104,19 @@ AppSignalState EditSchemaAppSignalProvider::signalState(const QString& appSignal
 	{
 		result.m_flags.valid = 1;
 		result.m_value = 0;
-
-//		result.m_time.plant = TimeStamp{QDateTime::currentDateTime()};
-//		result.m_time.local = result.m_time.plant;
-//		result.m_time.system = TimeStamp{QDateTime::currentDateTimeUtc()};
 	}
 
 	return result;
+}
+
+AppSignalState EditSchemaAppSignalProvider::signalState(Hash signalHash, Hash /*dataServerHash*/, bool* found) const
+{
+	return signalState(signalHash, found);
+}
+
+AppSignalState EditSchemaAppSignalProvider::signalState(const QString& appSignalId, const QString& /*dataServerId*/, bool* found) const
+{
+	return signalState(appSignalId, found);
 }
 
 void EditSchemaAppSignalProvider::signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const
@@ -155,6 +161,16 @@ void EditSchemaAppSignalProvider::signalState(const std::vector<QString>& appSig
 	return;
 }
 
+void EditSchemaAppSignalProvider::signalState(const std::vector<Hash>& appSignalHashes, Hash /*dataServerHash*/, std::vector<AppSignalState>* result, int* found) const
+{
+	return signalState(appSignalHashes, result, found);
+}
+
+void EditSchemaAppSignalProvider::signalState(const std::vector<QString>& appSignalIds, const QString& /*dataServerId*/, std::vector<AppSignalState>* result, int* found) const
+{
+	return signalState(appSignalIds, result, found);
+}
+
 QStringList EditSchemaAppSignalProvider::signalTags(Hash signalHash) const
 {
 	// Unlikely this function required for schema editing
@@ -166,7 +182,7 @@ QStringList EditSchemaAppSignalProvider::signalTags(Hash signalHash) const
 
 QStringList EditSchemaAppSignalProvider::signalTags(const QString& appSignalId) const
 {
-	AppSignal* s = m_signalSetProvider->getSignalByStrID(appSignalId);
+	AppSignal* s = m_signalSetProvider->getSignal(appSignalId);
 
 	if (s != nullptr)
 	{
@@ -212,7 +228,7 @@ E::SignalType EditSchemaAppSignalProvider::signalType(const QString& appSignalId
 	return signalType(::calcHash(appSignalId), found);
 }
 
-QString EditSchemaAppSignalProvider::equipmentToAppSiganlId(const QString& /*equipmentId*/) const
+QString EditSchemaAppSignalProvider::equipmentToAppSignalId(const QString& /*equipmentId*/) const
 {
 	Q_ASSERT(false);	// todo
 	return {};
@@ -251,14 +267,14 @@ bool EditSchemaTuningSignalProvider::signalExists(Hash hash) const
 
 bool EditSchemaTuningSignalProvider::signalExists(const QString& appSignalId) const
 {
-	AppSignal* s = m_signalSetProvider->getSignalByStrID(appSignalId);
+	AppSignal* s = m_signalSetProvider->getSignal(appSignalId);
 	return s != nullptr;
 }
 
 bool EditSchemaTuningSignalProvider::signalsExist(const QStringList& signalIds) const
 {
 	return std::all_of(signalIds.begin(), signalIds.end(), [this](const QString& appSignalId) {
-		return m_signalSetProvider->getSignalByStrID(appSignalId) != nullptr;
+		return m_signalSetProvider->getSignal(appSignalId) != nullptr;
 	});
 }
 
@@ -276,7 +292,7 @@ AppSignalParam EditSchemaTuningSignalProvider::signalParam(const QString& appSig
 {
 	AppSignalParam result;
 
-	AppSignal* s = m_signalSetProvider->getSignalByStrID(appSignalId);
+	AppSignal* s = m_signalSetProvider->getSignal(appSignalId);
 
 	if (found != nullptr)
 	{
@@ -309,7 +325,7 @@ bool EditSchemaTuningSignalProvider::signalParam(const QString& appSignalId, App
 		return false;
 	}
 
-	AppSignal* s = m_signalSetProvider->getSignalByStrID(appSignalId);
+	AppSignal* s = m_signalSetProvider->getSignal(appSignalId);
 
 	if (s != nullptr)
 	{
@@ -335,7 +351,7 @@ TuningSignalState EditSchemaTuningSignalProvider::state(const QString& appSignal
 	TuningSignalState result;
 	result.m_hash = ::calcHash(appSignalId);
 
-	AppSignal* s = m_signalSetProvider->getSignalByStrID(appSignalId);
+	AppSignal* s = m_signalSetProvider->getSignal(appSignalId);
 	if (found != nullptr)
 	{
 		*found = s != nullptr;

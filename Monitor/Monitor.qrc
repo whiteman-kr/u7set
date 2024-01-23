@@ -1,11 +1,4 @@
 <RCC>
-    <qresource prefix="/">
-        <file>../ClientLib/languages/ClientLib_ua.qm</file>
-        <file>../TrendView/languages/TrendView_ua.qm</file>
-        <file>../UtilsLib/languages/UtilsLib_ua.qm</file>
-        <file>languages/Monitor_ua.qm</file>
-        <file>languages/qtbase_uk.qm</file>
-    </qresource>
     <qresource prefix="/Images">
         <file>Images/NewSchema.svg</file>
         <file>Images/Backward.svg</file>
@@ -20,7 +13,6 @@
         <file>Images/Archive.svg</file>
         <file>Images/Log.svg</file>
         <file>Images/TuningSources.svg</file>
-        <file>Images/Logo.png</file>
         <file>Images/AppDataSources.svg</file>
         <file>Images/NetworkConnections.svg</file>
         <file>Images/dragndrop.png</file>

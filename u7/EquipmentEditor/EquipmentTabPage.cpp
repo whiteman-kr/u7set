@@ -1506,15 +1506,17 @@ void EquipmentTabPage::exportPreset()
 
 	// --
 	//
+	static QString path{"."};
 	QString fileName = QFileDialog::getSaveFileName(this,
 													tr("Save File"),
-													firstDeviceName,
+													path + QDir::separator() + firstDeviceName,
 													tr("Device Presets (*.u7devp);;All Files (*.*)"));
 
 	if (fileName.isEmpty() == true)
 	{
 		return;
 	}
+	path = QFileInfo(fileName).path(); // store path for next time
 
 	// Read devices from the project database
 	//
@@ -1596,15 +1598,17 @@ void EquipmentTabPage::exportPreset()
 
 void EquipmentTabPage::importPreset()
 {
+	static QString path{"."};
 	QString fileName = QFileDialog::getOpenFileName(this,
 													tr("Open Device Preset"),
-													QString{},
+													path,
 													tr("Device Presets (*.u7devp);;All Files (*.*)"));
 
 	if (fileName.isEmpty() == true)
 	{
 		return;
 	}
+	path = QFileInfo(fileName).path(); // store path for next time
 
 	// --
 	//
@@ -1622,7 +1626,7 @@ void EquipmentTabPage::importPreset()
 	bool ok = fileMessage.ParseFromIstream(&input);
 	if (ok == false)
 	{
-		QMessageBox::critical(this, qAppName(), tr("Pase file %1 error. File may be corrupted.").arg(fileName));
+		QMessageBox::critical(this, qAppName(), tr("Parse file %1 error. File may be corrupted.").arg(fileName));
 		return;
 	}
 

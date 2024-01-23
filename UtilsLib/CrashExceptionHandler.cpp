@@ -1,3 +1,7 @@
+#ifndef UTILS_LIB_DOMAIN
+#error Do not include this file in the project! Link UtilsLib instead.
+#endif
+
 #include "CrashExceptionHandler.h"
 
 #if defined (Q_OS_WIN)
@@ -57,7 +61,7 @@ bool CrashExceptionHandler::EnableDumping(DWORD dumpCount)
 
 void CrashExceptionHandler::CreateMiniDump(EXCEPTION_POINTERS* pep)
 {
-	QString dumpFileName = qAppName() + "_" + QDateTime::currentDateTime().toString("dd_MM_yyyy_hh_mm_ss") + ".dmp";
+	QString dumpFileName = QCoreApplication::instance()->applicationName() + "_" + QDateTime::currentDateTime().toString("dd_MM_yyyy_hh_mm_ss") + ".dmp";
 
 	QString dumpPath = QDir::toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
 

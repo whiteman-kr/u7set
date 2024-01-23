@@ -85,10 +85,10 @@ namespace Builder
 		Q_OBJECT
 
 	private:
-		SignalSet* m_signalSet = nullptr;
+		const SignalSet* m_signalSet = nullptr;
 
 	public:
-		JsSignalSet(SignalSet* signalSet);
+		JsSignalSet(const SignalSet* signalSet);
 		Q_INVOKABLE QObject* getSignalByEquipmentID(const QString& equpmentID);
 
 		Q_INVOKABLE bool busExists(const QString& busTypeId);
@@ -139,7 +139,7 @@ namespace Builder
 
 
 	private:
-		Builder::BuildResultWriter* m_buildResultWriter = nullptr;
+		BuildResultWriter* m_buildResultWriter = nullptr;
 
 		BuildWorkerThread* m_buildWorkerThread = nullptr;
 		DbController* m_db = nullptr;

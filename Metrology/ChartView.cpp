@@ -1,7 +1,5 @@
 #include "ChartView.h"
 
-#include <QKeyEvent>
-
 // -------------------------------------------------------------------------------------------------------------------
 
 ChartView::ChartView(QChart* chart, QWidget* parent) :

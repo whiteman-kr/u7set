@@ -9,13 +9,16 @@ class MonitorDialogSignalSnapshot : public DialogSignalSnapshot
 
 public:
 	static MonitorDialogSignalSnapshot* createDialog(MonitorConfigController *configController,
-						   MonitorSignalManager* monitorSignalManager,
-						   MonitorCentralWidget* centralWidget);
+													 MonitorSignalManager* monitorSignalManager,
+													 MonitorCentralWidget* centralWidget);
 
 private:
 	explicit MonitorDialogSignalSnapshot(MonitorConfigController *configController,
-								  MonitorSignalManager* monitorSignalManager,
-								  QWidget *parent);
+										 IAppSignalManager* appSignalManager,
+										 ISignalDataServer* signalDataServer,
+										 const QString& projectName,
+										 const QString& equipmentId,
+										 QWidget *parent);
 
 private:
 	virtual std::vector<VFrame30::SchemaDetails> schemasDetails() override;

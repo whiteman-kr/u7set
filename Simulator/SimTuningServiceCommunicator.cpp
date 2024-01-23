@@ -470,9 +470,6 @@ namespace Sim
 
 			// bind Ok
 
-			/* m_log.writeDebug(QString("Tuning simulation listening socket is created and bound to %1").
-							   arg(m_tuningRequestsReceivingIP.addressPortStr())); */
-
 			QVariant newRecvBufSize(static_cast<int>(2 * 1024 * 1024));
 
 			m_socket->setSocketOption(QAbstractSocket::ReceiveBufferSizeSocketOption, newRecvBufSize);
@@ -607,21 +604,27 @@ namespace Sim
 
 		if (size != sizeof(SimRupFotip))
 		{
-			Q_ASSERT(false);
+			logWarningThinned(__LINE__, QString("Tuning request from %1 wrong lenght %2, expected %3. "
+												"Check that TuningService is in Simulation mode.").
+														arg(m_controllerEquipmentID).arg(size).arg(sizeof(SimRupFotip)));
 			return true;
 		}
 
 		if (m_request.rupFotip.checkCRC64() == false)
 		{
-			Q_ASSERT(false);
+			logWarningThinned(__LINE__, QString("Tuning request from %1 wrong CRC64.").
+													arg(m_controllerEquipmentID));
 			return true;
 		}
 
 		quint16 simVersion = reverseUint16(m_request.simVersion);
 
-		if (simVersion != 1)
+		const int EXPECTED_SIM_VERSION = 1;
+
+		if (simVersion != EXPECTED_SIM_VERSION)
 		{
-			Q_ASSERT(false);
+			logWarningThinned(__LINE__, QString("Tuning request from %1 wrong version %2, expected %3!").
+												arg(m_controllerEquipmentID).arg(simVersion).arg(EXPECTED_SIM_VERSION));
 			return true;
 		}
 
@@ -675,6 +678,26 @@ namespace Sim
 
 			p.second->cancelOperations();
 		}
+	}
+
+	void TuningRequestsProcessingThread::logWarningThinned(int codeLine, const QString& warning)
+	{
+		static std::map<int, int> wrnCtrMap;		// codeLine => wrnCounter
+
+		auto it = wrnCtrMap.find(codeLine);
+
+		if (it == wrnCtrMap.end())
+		{
+			auto [newIt, b] = wrnCtrMap.emplace(codeLine, 0);
+			it = newIt;
+		}
+
+		if ((it->second % 100) == 0)
+		{
+			m_log.writeWarning(warning);
+		}
+
+		it->second++;
 	}
 
 	// ---------------------------------------------------------------------------------------------------------
@@ -836,7 +859,6 @@ namespace Sim
 
 		if (m_waitingConfirmationID.has_value() == true)
 		{
-			Q_ASSERT(false);
 			cancelOperations();
 		}
 
@@ -867,7 +889,7 @@ namespace Sim
 
 		replyRupHeader.protocolVersion = static_cast<quint16>(m_rupVersion);
 		replyRupHeader.numerator = requestRupHeader.numerator;
-		replyRupHeader.frameSize = Socket::ENTIRE_UDP_SIZE;
+		replyRupHeader.frameSize = Rup::ENTIRE_UDP_SIZE;
 
 		replyRupHeader.flags.all = 0;
 		replyRupHeader.flags.tuningData = 1;
@@ -967,7 +989,7 @@ namespace Sim
 			return false;
 		}
 
-		if (rupHeader.frameSize != Socket::ENTIRE_UDP_SIZE)
+		if (rupHeader.frameSize != Rup::ENTIRE_UDP_SIZE)
 		{
 			return false;
 		}

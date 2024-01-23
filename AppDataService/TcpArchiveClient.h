@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../OnlineLib/Tcp.h"
-#include "../Proto/network.pb.h"
 #include "../AppSignalLib/SimpleAppSignalState.h"
 
 class AppDataServiceWorker;

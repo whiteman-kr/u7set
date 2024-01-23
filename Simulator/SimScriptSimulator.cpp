@@ -1,8 +1,12 @@
 #include <algorithm>
-#include <QJSValueIterator>
-#include "SimScriptSimulator.h"
-#include "Simulator.h"
+
+#include "../ClientLib/ScriptTestObserver.h"
+
 #include "SimScriptLogicModule.h"
+#include "SimScriptSimulator.h"
+#include "SimTestObserver.h"
+#include "Simulator.h"
+
 
 namespace Sim
 {
@@ -23,7 +27,7 @@ namespace Sim
 
 	void ScriptWorkerThread::run()
 	{
-        m_result = true;
+		m_result = true;
 
 		if (m_scriptSimulator == nullptr)
 		{
@@ -35,31 +39,33 @@ namespace Sim
 		// Run watchdog thread
 		//
 		QFuture<void> wdResult = QtConcurrent::run(
-							[waitThread = this,
-							timeout = this->m_scriptSimulator->executionTimeout(),
-							log = ScopedLog{m_log}]
-							() mutable
-							{
-								bool ok = waitThread->wait(static_cast<unsigned long>(timeout));
-								if (ok == false)
-								{
-									log.writeError("Script execution timeout.");
-									waitThread->interruptScript();
-								}
-							});
+			[waitThread = this, timeout = this->m_scriptSimulator->executionTimeout(), log = ScopedLog{m_log}]() mutable
+			{
+				bool ok = waitThread->wait(static_cast<unsigned long>(timeout));
+				if (ok == false)
+				{
+					log.writeError("Script execution timeout.");
+					waitThread->interruptScript();
+				}
+			});
 
 		Q_UNUSED(wdResult);
-
 
 		// --
 		//
 		int totalFailed = 0;
 
-		try		// runScriptFunction() can throw an expception in case of script interruption
+		try // runScriptFunction() can throw an exception in case of script interruption
 		{
 			for (const SimScriptItem& script : m_scripts)
 			{
-				m_jsEngine = std::make_unique<QJSEngine>();						// Creating new QJSEngine clears all old context
+				if (m_jsEngine != nullptr)
+				{
+					m_jsEngine->collectGarbage();
+					m_jsEngine.reset();
+				}
+
+				m_jsEngine = std::make_unique<QJSEngine>(); // Creating new QJSEngine clears all old context
 				m_jsEngine->installExtensions(QJSEngine::ConsoleExtension);
 
 				m_log.writeMessage(tr("********** Start testing of %1 **********").arg(script.scriptCaption));
@@ -74,21 +80,39 @@ namespace Sim
 				m_jsEngine->globalObject().setProperty("isSimulator", QJSValue{true});
 				m_jsEngine->globalObject().setProperty("isTestSuite", QJSValue{false});
 
+				// Evaluate GlobalScript
+				//
+				if (QJSValue globalScriptValue = m_jsEngine->evaluate(m_globalScript.script);
+					globalScriptValue.isError() == true)
+				{
+					m_log.writeError(tr("GlobalScript %1 evaluate error at line %2\n"
+										"\tClass: %3\n"
+										"\tStack: %4\n"
+										"\tMessage: %5")
+										 .arg(m_globalScript.scriptCaption)
+										 .arg(globalScriptValue.property("lineNumber").toInt())
+										 .arg(metaObject()->className())
+										 .arg(globalScriptValue.property("stack").toString())
+										 .arg(globalScriptValue.toString()));
+
+					m_result = false;
+					return;
+				}
+
 				// Evaluate script
 				//
-				QJSValue scriptValue = m_jsEngine->evaluate(script.script);
-
-				if (scriptValue.isError() == true)
+				if (QJSValue scriptValue = m_jsEngine->evaluate(script.script);
+					scriptValue.isError() == true)
 				{
 					m_log.writeError(tr("Script %1 evaluate error at line %2\n"
 										"\tClass: %3\n"
 										"\tStack: %4\n"
 										"\tMessage: %5")
-									 .arg(script.scriptCaption)
-									 .arg(scriptValue.property("lineNumber").toInt())
-									 .arg(metaObject()->className())
-									 .arg(scriptValue.property("stack").toString())
-									 .arg(scriptValue.toString()));
+										 .arg(script.scriptCaption)
+										 .arg(scriptValue.property("lineNumber").toInt())
+										 .arg(metaObject()->className())
+										 .arg(scriptValue.property("stack").toString())
+										 .arg(scriptValue.toString()));
 
 					m_result = false;
 					return;
@@ -132,7 +156,7 @@ namespace Sim
 
 				QJSValueIterator it(m_jsEngine->globalObject());
 				while (it.hasNext() == true)
-				{					
+				{
 					it.next();
 
 					if (it.name().startsWith("test"))
@@ -157,8 +181,8 @@ namespace Sim
 					}
 					else
 					{
-						failed ++;
-						totalFailed ++;
+						failed++;
+						totalFailed++;
 						m_log.writeError(testFunc + ": FAILED");
 					}
 
@@ -185,7 +209,7 @@ namespace Sim
 				m_log.writeMessage(tr("********** Finished testing of %1 **********").arg(script.scriptCaption));
 			}
 		}
-		catch(...)
+		catch (...)
 		{
 			m_log.writeText(tr("Interrupted..."));
 			m_result = false;
@@ -195,64 +219,71 @@ namespace Sim
 		m_scriptSimulator->simulator()->clear();
 
 		m_result = (totalFailed == 0);
+
+		if (m_jsEngine != nullptr)
+		{
+			m_jsEngine->collectGarbage();
+			m_jsEngine.reset();
+		}
+
 		return;
 	}
 
-    bool ScriptWorkerThread::runScriptFunction(const QString& functionName)
-    {
+	bool ScriptWorkerThread::runScriptFunction(const QString& functionName)
+	{
 		QJSValue funcProp = m_jsEngine->globalObject().property(functionName);
-        if (funcProp.isUndefined() == true)
-        {
-            return false;
-        }
+		if (funcProp.isUndefined() == true)
+		{
+			return false;
+		}
 
-        if (funcProp.isCallable() == false)
-        {
+		if (funcProp.isCallable() == false)
+		{
 			m_log.writeError(tr("%1 is callable function").arg(functionName));
-            return false;
-        }
+			return false;
+		}
 
-        Q_ASSERT(m_jsThis.isUndefined() == false && m_jsThis.isObject() == true);
+		Q_ASSERT(m_jsThis.isUndefined() == false && m_jsThis.isObject() == true);
 		Q_ASSERT(m_jsLog.isUndefined() == false && m_jsLog.isObject() == true);
 
-        // Run script function
-        //
-        QJSValue result = funcProp.call(QJSValueList{} << m_jsThis);
+		// Run script function
+		//
+		QJSValue result = funcProp.call(QJSValueList{} << m_jsThis);
 
 		if (m_jsEngine->isInterrupted())
 		{
 			throw 1;
 		}
 
-        // Log errors and exit
-        //
+		// Log errors and exit
+		//
 		if (result.isError() == true)
-        {
+		{
 			if (result.errorType() == QJSValue::ErrorType::GenericError)
 			{
 				// Assume that JS code must report about the error
 				//
 				m_log.writeError(tr("Error, stack trace: %1\n\tMessage: %2")
-								 .arg(result.property("stack").toString())
-								 .arg(result.toString()));
+									 .arg(result.property("stack").toString())
+									 .arg(result.toString()));
 			}
 			else
 			{
 				m_log.writeError(tr("Error at line %1\n"
 									"\tStack: %2\n"
 									"\tMessage: %3")
-								 .arg(result.property("lineNumber").toInt())
-								 .arg(result.property("stack").toString())
-								 .arg(result.toString()));
+									 .arg(result.property("lineNumber").toInt())
+									 .arg(result.property("stack").toString())
+									 .arg(result.toString()));
 			}
 
-            return false;
-        }
+			return false;
+		}
 
-        return true;
-    }
+		return true;
+	}
 
-	void ScriptWorkerThread::start(QThread::Priority priority/* = InheritPriority*/)
+	void ScriptWorkerThread::start(QThread::Priority priority /* = InheritPriority*/)
 	{
 		m_result = true;
 
@@ -272,7 +303,7 @@ namespace Sim
 
 		// Wait for thread finishing
 		//
-		wait(20'000);	// timeout is 20s
+		wait(20'000); // timeout is 20s
 
 		return true;
 	}
@@ -282,17 +313,17 @@ namespace Sim
 		return m_result;
 	}
 
-	void ScriptWorkerThread::setScripts(const std::vector<SimScriptItem>& scripts)
+	void ScriptWorkerThread::setScripts(const std::vector<SimScriptItem>& scripts, const SimScriptItem& globalScript)
 	{
+		m_globalScript = globalScript;
 		m_scripts = scripts;
 
 		std::sort(m_scripts.begin(),
 				  m_scripts.end(),
 				  [](const auto& s1, const auto& s2)
 				  {
-						return s1.scriptCaption < s2.scriptCaption;
-				  }
-			);
+					  return s1.scriptCaption < s2.scriptCaption;
+				  });
 
 		return;
 	}
@@ -312,7 +343,7 @@ namespace Sim
 		stopScript();
 	}
 
-	bool ScriptSimulator::runScripts(const std::vector<SimScriptItem>& scripts)
+	bool ScriptSimulator::runScripts(const std::vector<SimScriptItem>& scripts, const SimScriptItem& globalScript)
 	{
 		if (m_simulator == nullptr)
 		{
@@ -338,7 +369,7 @@ namespace Sim
 
 		// Set script and start thread
 		//
-		m_workerThread.setScripts(scripts);
+		m_workerThread.setScripts(scripts, globalScript);
 		m_workerThread.start();
 
 		return true;
@@ -362,7 +393,7 @@ namespace Sim
 	bool ScriptSimulator::wait(unsigned long msecs /*= ULONG_MAX*/)
 	{
 		bool ok = m_workerThread.wait(msecs);
-        return ok && m_workerThread.result();
+		return ok && m_workerThread.result();
 	}
 
 	bool ScriptSimulator::result() const
@@ -404,11 +435,11 @@ namespace Sim
 	{
 		using namespace std::chrono;
 
-        QJSEngine* jsEngine = qjsEngine(this);
-        if (jsEngine == nullptr)
-        {
-            assert(jsEngine);
-        }
+		QJSEngine* jsEngine = qjsEngine(this);
+		if (jsEngine == nullptr)
+		{
+			assert(jsEngine);
+		}
 
 		if (m_simulator->isRunning() == true)
 		{
@@ -419,21 +450,26 @@ namespace Sim
 		milliseconds durationMs{msecs};
 		microseconds durationUs = duration_cast<microseconds>(durationMs);
 
-        bool ok = m_simulator->control().startSimulation(durationUs);
-        if (ok == false)
-        {
-            jsEngine->throwError(tr("Start simulation error."));
-            return false;
-        }
+		bool ok = m_simulator->control().startSimulation(durationUs);
+		if (ok == false)
+		{
+			jsEngine->throwError(tr("Start simulation error."));
+			return false;
+		}
 
-        // This is blocking call, wait for finishing simulation
-        //
-        while (m_simulator->control().isRunning() == true)
-        {
+		// This is blocking call, wait for finishing simulation
+		//
+		while (m_simulator->control().isRunning() == true)
+		{
 			QThread::msleep(0);
-        }
+		}
 
-        return ok;
+		return ok;
+	}
+
+	bool ScriptSimulator::waitForMs(int msecs)
+	{
+		return startForMs(msecs);
 	}
 
 	bool ScriptSimulator::reset()
@@ -449,25 +485,46 @@ namespace Sim
 		return true;
 	}
 
+	QJSValue ScriptSimulator::createObserver()
+	{
+		QJSValue result;
+
+		QJSEngine* jsEngine = qjsEngine(this);
+		if (jsEngine == nullptr)
+		{
+			assert(jsEngine);
+			return result;
+		}
+
+		ScriptTestObserver* observer = new ScriptTestObserver{std::make_unique<Sim::TestObserver>(*m_simulator), m_log.logInterface(), nullptr};
+		result = jsEngine->newQObject(observer);
+
+		return result;
+	}
+
 	QJSValue ScriptSimulator::signalState(QString appSignalId)
 	{
+		QJSValue result;
+
 		bool ok = false;
 		AppSignalState state = m_simulator->appSignalManager().signalState(appSignalId, &ok, true);
 
 		if (ok == false)
 		{
 			throwScriptException(this, tr("signalState(%1), signal not found.").arg(appSignalId));
-			return -1;
+			result = -1;
+			return result;
 		}
 
 		QJSEngine* jsEngine = qjsEngine(this);
 		if (jsEngine == nullptr)
 		{
 			assert(jsEngine);
-			return {};
+			return result;
 		}
 
-		return jsEngine->toScriptValue(state);
+		result = jsEngine->toScriptValue(state);
+		return result;
 	}
 
 	double ScriptSimulator::signalValue(QString appSignalId)
@@ -499,9 +556,58 @@ namespace Sim
 		return true;
 	}
 
-	void ScriptSimulator::overridesReset()
+	bool ScriptSimulator::waitForSignalOverrides(qint64 timeoutMs)
 	{
-		m_simulator->overrideSignals().clear();
+		Q_UNUSED(timeoutMs);
+
+		// Always wait for one workcycle, it is a simulation, it is enough.
+		//
+		return startForMs(1);
+	}
+
+	bool ScriptSimulator::expectSignalValue(QString appSignalId, qint64 timeoutMs, double value, double tolerance)
+	{
+		auto deadline = m_simulator->control().controlData().m_currentTime + std::chrono::milliseconds{timeoutMs};
+
+		auto isEqual = [](double expectedValue, double value, double tolerance)
+		{
+			if (std::isnan(expectedValue) == true && std::isnan(value) == true)
+			{
+				return true;
+			}
+
+			if (std::isinf(expectedValue) == true && std::isinf(value) == true && std::signbit(expectedValue) == std::signbit(value))
+			{
+				return true;
+			}
+
+			return std::abs(expectedValue - value) <= tolerance;
+		};
+
+		while (isEqual(value, signalValue(appSignalId), tolerance) == false && m_simulator->control().controlData().m_currentTime < deadline)
+		{
+			startForMs(1);
+		}
+
+		return isEqual(value, signalValue(appSignalId), tolerance) == true;
+	}
+
+	void ScriptSimulator::overridesReset(qint64 /*timeoutMs*/ /*= 5000*/, QStringList excludeAppSignals /*= {}*/)
+	{
+		QStringList signalsToRemove = m_simulator->overrideSignals().overrideSignalIds();
+		for (const QString& s : excludeAppSignals)
+		{
+			signalsToRemove.removeAll(s);
+		}
+		
+		m_simulator->overrideSignals().removeSignals(signalsToRemove);
+
+		startForMs(1);
+	}
+
+	QStringList ScriptSimulator::getOverridenSignals() const
+	{
+		return m_simulator->overrideSignals().overrideSignalIds();
 	}
 
 	bool ScriptSimulator::logicModuleExists(QString equipmentId) const
@@ -637,6 +743,11 @@ namespace Sim
 		return m_simulator->buildPath();
 	}
 
+	QString ScriptSimulator::projectName() const
+	{
+		return m_simulator->projectName();
+	}
+
 	int ScriptSimulator::buildNo() const
 	{
 		return m_simulator->buildNo();
@@ -701,4 +812,4 @@ namespace Sim
 	{
 		m_simulator->software().setEnabled(value);
 	}
-}
+} // namespace Sim

@@ -1,13 +1,12 @@
 #include "SchemaItemImageValue.h"
-#include "SchemaView.h"
-#include "Schema.h"
+#include "../AppSignalLib/TuningSignalState.h"
+#include "AppSignalController.h"
+#include "DrawParam.h"
 #include "MacrosExpander.h"
 #include "PropertyNames.h"
-#include "DrawParam.h"
+#include "Schema.h"
+#include "SchemaView.h"
 #include "TuningController.h"
-#include "AppSignalController.h"
-#include "../AppSignalLib/AppSignalParam.h"
-#include "../AppSignalLib/TuningSignalState.h"
 
 
 namespace VFrame30
@@ -29,7 +28,7 @@ namespace VFrame30
 		auto strIdProperty = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::appSignalIDs, PropertyNames::functionalCategory, true, SchemaItemImageValue::signalIdsString, SchemaItemImageValue::setSignalIdsString);
 		strIdProperty->setValidator(PropertyNames::appSignalIDsOrReferenceValidator);
 
-		//ADD_PROPERTY_GET_SET_CAT(E::SignalSource, PropertyNames::signalSource, PropertyNames::functionalCategory, true, SchemaItemImageValue::signalSource, SchemaItemImageValue::setSignalSource);
+		// ADD_PROPERTY_GET_SET_CAT(E::SignalSource, PropertyNames::signalSource, PropertyNames::functionalCategory, true, SchemaItemImageValue::signalSource, SchemaItemImageValue::setSignalSource);
 
 		ADD_PROPERTY_GET_SET_CAT(PropertyVector<ImageItem>, PropertyNames::images, PropertyNames::functionalCategory, true, SchemaItemImageValue::images, SchemaItemImageValue::setImages);
 		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::currentImageId, PropertyNames::functionalCategory, true, SchemaItemImageValue::currentImageId, SchemaItemImageValue::setCurrentImageId);
@@ -56,7 +55,7 @@ namespace VFrame30
 	//
 	bool SchemaItemImageValue::SaveData(Proto::Envelope* message) const
 	{
-		bool result = PosRectImpl::SaveData(message);
+		bool result = PosRectRotatable::SaveData(message);
 		if (result == false ||
 			message->has_schemaitem() == false)
 		{
@@ -64,12 +63,12 @@ namespace VFrame30
 			assert(message->has_schemaitem());
 			return false;
 		}
-		
+
 		// --
 		//
 		Proto::SchemaItemImageValue* valueMessage = message->mutable_schemaitem()->mutable_imagevalue();
 
-		valueMessage->set_signalids(signalIdsString(nullptr).toStdString());	// nullptr avoid macro expansion
+		valueMessage->set_signalids(signalIdsString(nullptr).toStdString()); // nullptr avoid macro expansion
 		valueMessage->set_signalsource(static_cast<int32_t>(m_signalSource));
 
 		for (const auto& image : m_images)
@@ -97,7 +96,7 @@ namespace VFrame30
 
 		// --
 		//
-		bool result = PosRectImpl::LoadData(message);
+		bool result = PosRectRotatable::LoadData(message);
 		if (result == false)
 		{
 			return false;
@@ -138,12 +137,20 @@ namespace VFrame30
 	//
 	void SchemaItemImageValue::draw(CDrawParam* drawParam) const
 	{
+		return drawRotated(drawParam, [drawParam, this]()
+						   {
+							   return drawPrivate(drawParam);
+						   });
+	}
+
+	void SchemaItemImageValue::drawPrivate(CDrawParam* drawParam) const
+	{
 		QPainter* p = drawParam->painter();
 
 		// Initialization drawing resources
 		//
 		initDrawingResources();
-						
+
 		// Calculate rectangle
 		//
 		QRectF rect = boundingRectInDocPt(drawParam);
@@ -200,11 +207,19 @@ namespace VFrame30
 
 	void SchemaItemImageValue::drawHighlight(CDrawParam* drawParam) const
 	{
+		return drawRotated(drawParam, [drawParam, this]()
+						   {
+							   return drawHighlightPrivate(drawParam);
+						   });
+	}
+
+	void SchemaItemImageValue::drawHighlightPrivate(CDrawParam* drawParam) const
+	{
 		// Draw highlights by signals
 		//
 		for (const QString& appSignalId : m_signalIds)
 		{
-			if (drawParam->hightlightIds().contains(appSignalId) == true)
+			if (drawParam->highlightIds().contains(appSignalId) == true)
 			{
 				QRectF highlightRect = boundingRectInDocPt(drawParam);
 				drawHighlightRect(drawParam, highlightRect);
@@ -283,6 +298,33 @@ namespace VFrame30
 		return nullptr;
 	}
 
+	// IMatsSchemaItemAssociations implementation.
+	//
+	QStringList SchemaItemImageValue::associatedAppSignalIds() const
+	{
+		return signalIds();
+	}
+
+	QStringList SchemaItemImageValue::associatedImpactAppSignalIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemImageValue::associatedConnectionIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemImageValue::associatedLoopbackIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemImageValue::associatedSchemaItemLabels() const
+	{
+		return {};
+	}
+
 	QString SchemaItemImageValue::signalIdsString() const
 	{
 		std::shared_ptr<Context> context = this->context();
@@ -305,7 +347,7 @@ namespace VFrame30
 			{
 				if (s.startsWith('@') == true)
 				{
-					s = context->appSignalController()->appSignalManager()->equipmentToAppSiganlId(s);
+					s = context->appSignalController()->appSignalManager()->equipmentToAppSignalId(s);
 				}
 			}
 		}
@@ -340,7 +382,7 @@ namespace VFrame30
 			{
 				if (s.startsWith('@') == true)
 				{
-					s = context->appSignalController()->appSignalManager()->equipmentToAppSiganlId(s);
+					s = context->appSignalController()->appSignalManager()->equipmentToAppSignalId(s);
 				}
 			}
 		}
@@ -460,7 +502,4 @@ namespace VFrame30
 	{
 		m_fillRect = value;
 	}
-
-
-}
-
+} // namespace VFrame30

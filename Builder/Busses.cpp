@@ -225,6 +225,13 @@ namespace Builder
 		return signalID.isEmpty() == false && signalID != Bus::INVALUD_BUS_SIGNAL_ID;
 	}
 
+	int BusSignal::inbusOffset() const
+	{
+		Q_ASSERT(inbusAddr.isValid());
+
+		return inbusAddr.offset();
+	}
+
 	const QString Bus::INVALUD_BUS_SIGNAL_ID("##InvalidBusSignalID##");
 
 	Bus::Bus(const Busses& busses, const VFrame30::Bus& bus, IssueLogger* log) :

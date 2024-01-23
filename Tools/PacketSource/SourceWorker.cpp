@@ -63,7 +63,7 @@ void SourceWorker::process()
 			// header RupFrame
 			//
 			Rup::Header& header = m_simFrame.rupFrame.header;
-			header.frameSize = Socket::ENTIRE_UDP_SIZE;
+			header.frameSize = Rup::ENTIRE_UDP_SIZE;
 			header.protocolVersion = PS::SUPPORT_VERSION;
 			header.flags.appData = 1;
 			header.dataId = static_cast<quint32>(pSource->info().dataID);

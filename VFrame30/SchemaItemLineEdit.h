@@ -201,7 +201,7 @@ namespace VFrame30
 		// Methods
 	public:
 		virtual QWidget* createWidgetImpl(QWidget* parent, bool editMode, double zoom) override;
-		virtual void updateWidgetProperties(QWidget* widget) const  override;
+		virtual void updateWidgetProperties(QWidget* widget, bool editMode) const  override;
 
 	protected:
 		virtual void afterCreateImpl(QWidget* control) override;
@@ -211,7 +211,7 @@ namespace VFrame30
 		void returnPressed();
 		void textChanged(const QString& text);
 
-		void runEventScript(QJSValue& evaluatedJs, QLineEdit* controlWidget, bool allowMessageBox);
+		void runEventScript(QString scriptName, QJSValue& evaluatedJs, QLineEdit* controlWidget, bool allowMessageBox);
 
 		// Properties and Data
 		//
@@ -326,9 +326,12 @@ namespace VFrame30
 		/// \brief This property holds whether the widget is enabled
 		Q_PROPERTY(bool enabled READ someBoolProperty WRITE setSomeBoolProperty)
 
-		/*! \brief This property holds the widget's style sheet
+		/// \brief This property holds whether the widget is modified by user. This flag is reset by setting text (widget.text = value)
+		Q_PROPERTY(bool modified READ someBoolProperty WRITE setSomeBoolProperty)
 
-		The style sheet contains a textual description of customizations to the widget's style, as described in the <a href="https://doc.qt.io/qt-5/stylesheet.html">Qt Style Sheets</a> document.
+			/*! \brief This property holds the widget's style sheet
+
+		The style sheet contains a textual description of customizations to the widget's style, as described in the <a href="https://doc.qt.io/qt-6/stylesheet.html">Qt Style Sheets</a> document.
 
 		<b>Example</b>
 

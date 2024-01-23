@@ -1,9 +1,12 @@
 #include "SoftwareCfgGenerator.h"
-#include "ApplicationLogicCompiler.h"
-#include "../VFrame30/SchemaLayer.h"
+#include "AppLogicCompiler.h"
+#include "DeviceHelper.h"
+#include "LanControllerInfoHelper.h"
+#include "ScriptChecker.h"
+
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../lib/DeviceHelper.h"
-#include "../lib/LanControllerInfoHelper.h"
+#include "../VFrame30/SchemaLayer.h"
+#include "../VFrame30/PropertyNames.h"
 
 
 namespace Builder
@@ -108,13 +111,13 @@ namespace Builder
 	{
 		if (context == nullptr)
 		{
-			assert(false);
+			assert(context);
 			return false;
 		}
 
 		if (context->m_buildResultWriter == nullptr)
 		{
-			assert(false);
+			assert(context->m_buildResultWriter);
 			return false;
 		}
 
@@ -122,7 +125,7 @@ namespace Builder
 
 		if (log == nullptr)
 		{
-			assert(false);
+			assert(log);
 			return false;
 		}
 
@@ -130,7 +133,8 @@ namespace Builder
 			context->m_equipmentSet == nullptr)
 		{
 			LOG_INTERNAL_ERROR(log);
-			assert(false);
+			assert(context->m_signalSet);
+			assert(context->m_equipmentSet);
 			return false;
 		}
 
@@ -188,7 +192,7 @@ namespace Builder
 				return f.action() == E::VcsItemAction::Deleted;
 			});
 
-		// Remove all unsuported files and marked for deleting
+		// Remove all unsupported files and marked for deleting
 		//
 		std::vector<DbFileInfo> files = filesTree.toVectorIf([](const DbFileInfo& f)
 						{
@@ -215,7 +219,7 @@ namespace Builder
 		// --
 		//
 		std::atomic_bool returnResult = true;		// returnResult is used in multithreaded schema load, that's why it is atomic
-		std::atomic_bool iterruptRequest = false;
+		std::atomic_bool interruptRequest = false;
 
 		std::vector<QFuture<bool>> loadSchemaTasks;
 		loadSchemaTasks.reserve(files.size());
@@ -248,9 +252,9 @@ namespace Builder
 			// Read schema files
 			//
 			auto task = QtConcurrent::run(
-				[fileLatestVersion, log, &returnResult, &iterruptRequest, &schemaMap, &schemasMutex]() -> bool
+				[fileLatestVersion, log, &returnResult, &interruptRequest, &schemaMap, &schemasMutex]() -> bool
 				{
-					if (iterruptRequest == true)
+					if (interruptRequest == true)
 					{
 						return false;
 					}
@@ -262,11 +266,12 @@ namespace Builder
 						//
 						log->errCMN0010(fileLatestVersion->fileName());
 						returnResult = false;
+						return false;
 					}
 
 					if (schema->excludeFromBuild() == false)
 					{
-						QMutexLocker locker(&schemasMutex);	// Mutext used only here, as only here concurent access to schemas is possible
+						QMutexLocker locker(&schemasMutex);	// Mutex used only here, as only here concurrent access to schemas is possible
 						schemaMap[schema->schemaId()] = FileSchemaStruct{fileLatestVersion, schema};
 					}
 
@@ -297,45 +302,123 @@ namespace Builder
 			}
 			else
 			{
-				// Set iterruptRequest, so work threads can get it and exit
+				// Set interruptRequest, so work threads can get it and exit
 				//
-				iterruptRequest = QThread::currentThread()->isInterruptionRequested();
+				interruptRequest = QThread::currentThread()->isInterruptionRequested();
 				QThread::yieldCurrentThread();
 			}
 		} while (true);
 
+		// Add AppSignalIDs to packed logic output items.
+		//  
+		for (auto& [schemaId, fileSchema] : schemaMap)
+		{
+			std::shared_ptr<DbFile>& file = fileSchema.file;
+			std::shared_ptr<VFrame30::Schema>& schema = fileSchema.schema;
+
+			Q_ASSERT(file);
+			Q_ASSERT(schema);
+
+			bool schemaModified = false;
+
+			for (auto& layer : schema->layers())
+			{
+				for (auto& schemaItem : layer->items())
+				{
+					auto schemaItemAfb = schemaItem->toSchemaItemAfb();
+					if (schemaItemAfb == nullptr || schemaItemAfb->isPackedLogic() == false)
+					{
+						continue;
+					}
+
+					// This is a packed logic item, it is an output counterpart if it does not have any inputs 
+					// (on schema, in the parser and compiler they are added, but on schema not).
+					//
+					if (schemaItemAfb->inputsCount() != 0)
+					{
+						continue;
+					}
+
+					// This is a packed logic output item, add property AppSignalIDs to it.
+					//
+					auto packedLogicSourcesIt = context->m_packedLogicSources.find(schemaItemAfb->label());
+					if (packedLogicSourcesIt == context->m_packedLogicSources.end())
+					{
+						continue;
+					}
+
+					const std::list<LmPackedLogicSources>& packedLogicSources = packedLogicSourcesIt->second;
+
+					std::set<QString> appSignalIds;
+					for (const auto& src : packedLogicSources)
+					{
+						for (const auto& srcItem : src.sources)
+						{
+							QString someId = srcItem.appSignalID.isEmpty() == false ?
+												 srcItem.appSignalID :
+												 srcItem.sourceItemLabelOut;
+
+							appSignalIds.insert(someId);
+						}
+					}
+
+					// Join set to a string.
+					// 
+					QStringList appSignalIdsList;
+					for (const QString& appSignalId : appSignalIds)
+					{
+						appSignalIdsList << appSignalId;
+					}
+
+					if (appSignalIdsList.isEmpty() == false)
+					{
+						schemaModified = true;
+						schemaItemAfb->setPackedLogicInputSignalIds(appSignalIdsList);
+					}
+				}
+			}
+
+			if (schemaModified == true)
+			{
+				QByteArray ba;
+				schema->saveToByteArray(&ba);
+
+				file->setData(std::move(ba));
+			}
+		}
+
 		// All schemas are parsed and loaded to map schemas
-		// iterate them and joint schemas to left/right/top/buttom
+		// iterate them and join schemas to left/right/top/bottom
 		//
 		QString group{"Schema"};
 		bool schemaItemFrameWasProcessed = false;
 
-		auto findPannelSchemaFunc = [&schemaMap](QString pannelSchemaId)
+		auto findPanelSchemaFunc = [&schemaMap](QString panelSchemaId)
 			{
-				if (auto pannelSchemaIt = schemaMap.find(pannelSchemaId);
-					pannelSchemaIt != schemaMap.end())
+				if (auto panelSchemaIt = schemaMap.find(panelSchemaId);
+					panelSchemaIt != schemaMap.end())
 				{
-					return pannelSchemaIt->second.schema;
+					return panelSchemaIt->second.schema;
 				}
 
 				return std::shared_ptr<VFrame30::Schema>{};
 			};
 
-		auto joinSschemasFunc = [context, log, findPannelSchemaFunc, &schemaItemFrameWasProcessed](auto schema, QString pannelSchemaId, Qt::Edge edge)
+		auto joinSchemasFunc = [context, log, findPanelSchemaFunc, &schemaItemFrameWasProcessed](auto schema, QString panelSchemaId, Qt::Edge edge)
 		{
-			if (pannelSchemaId.isEmpty() == false)
+			if (panelSchemaId.isEmpty() == false)
 			{
-				std::shared_ptr<VFrame30::Schema> pannelSchema = findPannelSchemaFunc(pannelSchemaId);
+				std::shared_ptr<VFrame30::Schema> panelSchema = findPanelSchemaFunc(panelSchemaId);
 
-				if (pannelSchema == nullptr)
+				if (panelSchema == nullptr)
 				{
-					log->errALP4080(schema->schemaId(), pannelSchemaId);
+					log->errALP4080(schema->schemaId(), panelSchemaId);
 					return false;
 				}
 
 				// Expand schema, move all items right
 				//
-				joinSchemas(context, schema.get(), pannelSchema.get(), edge);
+				joinSchemas(context, schema.get(), panelSchema.get(), edge);
 
 				schemaItemFrameWasProcessed = true;
 			}
@@ -366,22 +449,31 @@ namespace Builder
 
 			if (schema->joinHorzPriority() == true)
 			{
-				joinResult &= joinSschemasFunc(schema, schema->joinLeftSchemaId().trimmed(), Qt::LeftEdge);
-				joinResult &= joinSschemasFunc(schema, schema->joinRightSchemaId().trimmed(), Qt::RightEdge);
+				joinResult &= joinSchemasFunc(schema, schema->joinLeftSchemaId().trimmed(), Qt::LeftEdge);
+				joinResult &= joinSchemasFunc(schema, schema->joinRightSchemaId().trimmed(), Qt::RightEdge);
 
-				joinResult &= joinSschemasFunc(schema, schema->joinTopSchemaId().trimmed(), Qt::TopEdge);
-				joinResult &= joinSschemasFunc(schema, schema->joinBottomSchemaId().trimmed(), Qt::BottomEdge);
+				joinResult &= joinSchemasFunc(schema, schema->joinTopSchemaId().trimmed(), Qt::TopEdge);
+				joinResult &= joinSchemasFunc(schema, schema->joinBottomSchemaId().trimmed(), Qt::BottomEdge);
 			}
 			else
 			{
-				joinResult &= joinSschemasFunc(schema, schema->joinTopSchemaId().trimmed(), Qt::TopEdge);
-				joinResult &= joinSschemasFunc(schema, schema->joinBottomSchemaId().trimmed(), Qt::BottomEdge);
+				joinResult &= joinSchemasFunc(schema, schema->joinTopSchemaId().trimmed(), Qt::TopEdge);
+				joinResult &= joinSchemasFunc(schema, schema->joinBottomSchemaId().trimmed(), Qt::BottomEdge);
 
-				joinResult &= joinSschemasFunc(schema, schema->joinLeftSchemaId().trimmed(), Qt::LeftEdge);
-				joinResult &= joinSschemasFunc(schema, schema->joinRightSchemaId().trimmed(), Qt::RightEdge);
+				joinResult &= joinSchemasFunc(schema, schema->joinLeftSchemaId().trimmed(), Qt::LeftEdge);
+				joinResult &= joinSchemasFunc(schema, schema->joinRightSchemaId().trimmed(), Qt::RightEdge);
 			}
 
 			if (joinResult == false)
+			{
+				returnResult = false;
+			}
+
+			//
+			// Check all script on schemas
+			//
+			if (bool checkScriptResult = ScriptChecker::checkSchema(schema.get(), *log);
+				checkScriptResult == false)
 			{
 				returnResult = false;
 			}
@@ -755,34 +847,34 @@ namespace Builder
 		return device->getParentSoftware();
 	}
 
-	bool SoftwareCfgGenerator::joinSchemas(Context* context, VFrame30::Schema* schema, const VFrame30::Schema* pannel, Qt::Edge edge)
+	bool SoftwareCfgGenerator::joinSchemas(Context* context, VFrame30::Schema* schema, const VFrame30::Schema* panel, Qt::Edge edge)
 	{
-		if (context == nullptr || schema == nullptr || pannel == nullptr)
+		if (context == nullptr || schema == nullptr || panel == nullptr)
 		{
 			Q_ASSERT(context);
 			Q_ASSERT(schema);
-			Q_ASSERT(pannel);
+			Q_ASSERT(panel);
 			return false;
 		}
 
 		IssueLogger* log = context->m_log;
 
-		if (schema->unit() != pannel->unit())
+		if (schema->unit() != panel->unit())
 		{
-			log->errALP4082(schema->schemaId(), pannel->schemaId());
+			log->errALP4082(schema->schemaId(), panel->schemaId());
 			return false;
 		}
 
-		if (schema->schemaId() == pannel->schemaId())
+		if (schema->schemaId() == panel->schemaId())
 		{
 			log->errALP4081(schema->schemaId());
 			return false;
 		}
 
-		// Expand schema and calc rects
+		// Expand schema and calc rectangles
 		//
 		QRectF schemaRect;		// New rect for existing items
-		QRectF pannelRect;		// Rect to move pannel items yo
+		QRectF panelRect;		// Rect to move panel items yo
 
 		switch (edge)
 		{
@@ -790,10 +882,10 @@ namespace Builder
 		case Qt::Edge::RightEdge:
 			{
 				schemaRect = QRectF{0, 0, schema->docWidth(), schema->docHeight()};
-				pannelRect = QRectF{0, 0, pannel->docWidth(), pannel->docHeight()};
+				panelRect = QRectF{0, 0, panel->docWidth(), panel->docHeight()};
 
-				schema->setDocWidth(schema->docWidth() + pannel->docWidth());
-				schema->setDocHeight(std::max(schema->docHeight(), pannel->docHeight()));
+				schema->setDocWidth(schema->docWidth() + panel->docWidth());
+				schema->setDocHeight(std::max(schema->docHeight(), panel->docHeight()));
 
 				if (edge == Qt::Edge::LeftEdge)
 				{
@@ -801,7 +893,7 @@ namespace Builder
 				}
 				else // edge == Qt::Edge::RightEdge)
 				{
-					pannelRect.moveRight(schema->docWidth());
+					panelRect.moveRight(schema->docWidth());
 				}
 			}
 			break;
@@ -810,10 +902,10 @@ namespace Builder
 		case Qt::Edge::BottomEdge:
 			{
 				schemaRect = QRectF{0, 0, schema->docWidth(), schema->docHeight()};
-				pannelRect = QRectF{0, 0, pannel->docWidth(), pannel->docHeight()};
+				panelRect = QRectF{0, 0, panel->docWidth(), panel->docHeight()};
 
-				schema->setDocWidth(std::max(schema->docWidth(), pannel->docWidth()));
-				schema->setDocHeight(schema->docHeight() + pannel->docHeight());
+				schema->setDocWidth(std::max(schema->docWidth(), panel->docWidth()));
+				schema->setDocHeight(schema->docHeight() + panel->docHeight());
 
 				if (edge == Qt::Edge::TopEdge)
 				{
@@ -821,7 +913,7 @@ namespace Builder
 				}
 				else // edge == Qt::Edge::BottomEdge)
 				{
-					pannelRect.moveBottom(schema->docHeight());
+					panelRect.moveBottom(schema->docHeight());
 				}
 			}
 			break;
@@ -833,7 +925,7 @@ namespace Builder
 		}
 
 		Q_ASSERT(schemaRect.isNull() == false);
-		Q_ASSERT(pannelRect.isNull() == false);
+		Q_ASSERT(panelRect.isNull() == false);
 
 		// Move schema items to new pos in schemaRect
 		//
@@ -862,14 +954,14 @@ namespace Builder
 			}
 		}
 
-		// Add pannel items to pannelRect
+		// Add panel items to panelRect
 		//
-		for (const auto& pannelLayer : pannel->layers())
+		for (const auto& panelLayer : panel->layers())
 		{
-			Q_ASSERT(pannelLayer);
+			Q_ASSERT(panelLayer);
 
 			auto foundDestLayerIt = std::find_if(schema->layers().begin(), schema->layers().end(),
-												 [pannelLayer](auto l) { return l->name() == pannelLayer->name(); } );
+												 [panelLayer](auto l) { return l->name() == panelLayer->name(); } );
 
 			if (foundDestLayerIt == schema->layers().end())
 			{
@@ -897,7 +989,7 @@ namespace Builder
 				return false;
 			}
 
-			for (const SchemaItemPtr& sourceItem : pannelLayer->items())
+			for (const SchemaItemPtr& sourceItem : panelLayer->items())
 			{
 				// Make a deep copy of source item, set new guid and label to it
 				//
@@ -923,9 +1015,9 @@ namespace Builder
 				//
 				newItem->setLabel(schema->schemaId() + "_" + newItem->label());
 
-				// Insert newItem to destionation schema layer
+				// Insert newItem to destination schema layer
 				//
-				newItem->moveItem(pannelRect.left(), pannelRect.top());
+				newItem->moveItem(panelRect.left(), panelRect.top());
 
 				// --
 				//
@@ -974,7 +1066,7 @@ namespace Builder
 	{
 		QString commStart = getCommentStart(os);
 
-        BuildInfo b = m_buildResultWriter->buildInfo();
+		OnlineLib::BuildInfo b = m_buildResultWriter->buildInfo();
 
 		QString comments;
 
@@ -1104,6 +1196,49 @@ namespace Builder
 		}
 
 		return profile + "_" + m_software->equipmentIdTemplate().toLower() + "." + extention;
+	}
+
+	bool SoftwareCfgGenerator::writeMatsUsers(const QString& propertyName, const QStringList& tuningUserAccounts)
+	{
+		Builder::DbMatsUserStorage storage;
+
+		QString errorCode;
+		if (storage.load(m_dbController, errorCode) == false)
+		{
+			m_log->errCMN0010(File::MATSUSERS_XML);
+			return false;
+		}
+
+		// Check if TuningUserAccounts exist in MATS users storage
+		//
+		for (const QString& user : tuningUserAccounts)
+		{
+			if (std::find_if(storage.users().begin(), storage.users().end(), [&user](const OnlineLib::MatsUser& matsUser)
+							 {
+								 return matsUser.login() == user;
+							 }) == storage.users().end())
+			{
+				m_log->errEQP6212(propertyName, user, m_software->equipmentIdTemplate());
+				return false;
+			}
+		}
+
+		// Save MATS users to XML
+		//
+		QByteArray data;
+		storage.saveToByteArray(data);
+
+		// Write file
+		//
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), File::MATSUSERS_XML, CfgFileId::MATSUSERS, "", data);
+		if (buildFile == nullptr)
+		{
+			m_log->errCMN0012(File::MATSUSERS_XML);
+			return false;
+		}
+
+		bool ok = m_cfgXml->addLinkToFile(buildFile);
+		return ok;
 	}
 }
 

@@ -2,7 +2,7 @@
 #include "../lib/PropertyEditor.h"
 #include "Simulator/SimSignalSnapshot.h"
 #include "../lib/Ui/DialogSignalSearch.h"
-#include "keychain.h"
+#include "../Tools/qtkeychain/keychain.h"
 
 Settings theSettings;
 
@@ -412,7 +412,7 @@ void Settings::loadSystemScope()
 	QSettings fallbackSettings{};
 	QByteArray raw;
 
-	// Database connection setting are sored in secure storage
+	// Database connection setting are stored in secure storage
 	//
 	{
 		QKeychain::ReadPasswordJob readJob(QLatin1String("u7keychain18"));

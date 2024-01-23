@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../Builder/Context.h"
-#include "../Builder/IssueLogger.h"
 #include "../TuningService/TuningSource.h"
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../lib/DeviceHelper.h"
+#include "Context.h"
+#include "IssueLogger.h"
+#include "DeviceHelper.h"
 
 // -------------------------------------------------------------------------------------------
 
@@ -185,6 +185,8 @@ private:
 	bool fillTuningClientsInfo(const Builder::Context* context,
 							   const Hardware::Software* software,
 							   bool singleLmControlEnabled);
+
+	bool fillMatsUsers(const Builder::Context* context);
 };
 
 // -------------------------------------------------------------------------------------------

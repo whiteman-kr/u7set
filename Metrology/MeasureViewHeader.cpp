@@ -1,8 +1,4 @@
 #include "MeasureViewHeader.h"
-
-#include <cassert>
-#include <QSettings>
-
 #include "Options.h"
 
 namespace Measure

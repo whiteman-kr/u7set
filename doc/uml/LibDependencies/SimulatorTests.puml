@@ -1,12 +1,10 @@
 @startuml
 
-!include ./CommonLib.puml
 !include ./Protobuf.puml
 !include ./HardwareLib.puml
 !include ./Simulator.puml
 
 [SimulatorTests]
-SimulatorTests -up-> [CommonLib]
 SimulatorTests -up-> [Protobuf]
 SimulatorTests -up-> [HardwareLib]
 SimulatorTests -up-> [Simulator]

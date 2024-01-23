@@ -2,7 +2,6 @@
 #include "SchemaLayer.h"
 #include "SchemaItemAfb.h"
 #include "SchemaItemUfb.h"
-#include "SchemaItemSignal.h"
 #include "SchemaItemConnection.h"
 #include "PropertyNames.h"
 
@@ -197,7 +196,144 @@ namespace VFrame30
 		return;
     }
 
-	std::set<QString> LogicSchema::getSignalMap() const
+	std::map<QString, SchemaItemSignal*> LogicSchema::getSignalItemsMap() const
+	{
+		std::map<QString, SchemaItemSignal*> result;
+
+		for (const auto& layer : layers())
+		{
+			if (layer->compile() == true)
+			{
+				// Get all signals
+				//
+				for (const auto& item : layer->items())
+				{
+					if (VFrame30::SchemaItemSignal* itemSignal = item->toType<SchemaItemSignal>();
+							itemSignal != nullptr)
+					{
+						QStringList appSignals = itemSignal->appSignalIdList();
+						for (const QString& id : appSignals)
+						{
+							result[id] = itemSignal;
+						}
+
+						appSignals = itemSignal->impactAppSignalIdList();
+						for (const QString& id : appSignals)
+						{
+							result[id] = itemSignal;
+						}
+					}
+				}
+			}
+		}
+
+		return result;
+	}
+
+	std::map<QString, SchemaItemReceiver*> LogicSchema::getSignalReceiversMap() const
+	{
+		std::map<QString, SchemaItemReceiver*> result;
+
+		for (const auto& layer : layers())
+		{
+			if (layer->compile() == true)
+			{
+				// Get all signals
+				//
+				for (const auto& item : layer->items())
+				{
+					if (VFrame30::SchemaItemReceiver* itemReceiver = item->toType<SchemaItemReceiver>();
+							itemReceiver != nullptr)
+					{
+						QStringList appSignals = itemReceiver->appSignalIdsAsList();
+						for (const QString& id : appSignals)
+						{
+							result[id] = itemReceiver;
+						}
+					}
+				}
+			}
+		}
+
+		return result;
+	}
+
+	std::map<QString, SchemaItemLoopback*> LogicSchema::getLoopbacksMap() const
+	{
+		std::map<QString, VFrame30::SchemaItemLoopback*> result;
+
+		for (const auto& layer : layers())
+		{
+			if (layer->compile() == true)
+			{
+				// Get all signals
+				//
+				for (const auto& item : layer->items())
+				{
+					if (VFrame30::SchemaItemLoopback* itemLoopback = item->toType<SchemaItemLoopback>();
+							itemLoopback != nullptr)
+					{
+						result[itemLoopback->loopbackId()] = itemLoopback;
+					}
+				}
+			}
+		}
+		return result;
+	}
+
+	std::map<QString, SchemaItemTransmitter*> LogicSchema::getTransmittersMap() const
+	{
+		std::map<QString, VFrame30::SchemaItemTransmitter*> result;
+
+		for (const auto& layer : layers())
+		{
+			if (layer->compile() == true)
+			{
+				// Get all signals
+				//
+				for (const auto& item : layer->items())
+				{
+					if (VFrame30::SchemaItemTransmitter* itemTransmitter = item->toType<SchemaItemTransmitter>();
+							itemTransmitter != nullptr)
+					{
+						for (const QString& c : itemTransmitter->connectionIdsAsList())
+						{
+							result[c] = itemTransmitter;
+						}
+					}
+				}
+			}
+		}
+		return result;
+	}
+
+	std::map<QString, SchemaItemReceiver*> LogicSchema::getReceiversMap() const
+	{
+		std::map<QString, VFrame30::SchemaItemReceiver*> result;
+
+		for (const auto& layer : layers())
+		{
+			if (layer->compile() == true)
+			{
+				// Get all signals
+				//
+				for (const auto& item : layer->items())
+				{
+					if (VFrame30::SchemaItemReceiver* itemReceiver = item->toType<SchemaItemReceiver>();
+							itemReceiver != nullptr)
+					{
+						for (const QString& c : itemReceiver->connectionIdsAsList())
+						{
+							result[c] = itemReceiver;
+						}
+					}
+				}
+			}
+		}
+		return result;
+	}
+
+	std::set<QString> LogicSchema::getSignalSet() const
 	{
 		std::set<QString> signalMap;	// signal ids can be duplicated, std::set removes dupilcates
 
@@ -209,9 +345,9 @@ namespace VFrame30
 				//
 				for (const auto& item : layer->items())
 				{
-					if (item->isType<VFrame30::SchemaItemSignal>() == true)
+					if (const VFrame30::SchemaItemSignal* itemSignal = item->toType<VFrame30::SchemaItemSignal>();
+							itemSignal != nullptr)
 					{
-						const VFrame30::SchemaItemSignal* itemSignal = item->toType<VFrame30::SchemaItemSignal>();
 						assert(itemSignal);
 
 						QStringList appSignals = itemSignal->appSignalIdList();
@@ -228,7 +364,7 @@ namespace VFrame30
 					}
 
 					if (const VFrame30::SchemaItemReceiver* itemReceiver = item->toType<VFrame30::SchemaItemReceiver>();
-						itemReceiver != nullptr)
+							itemReceiver != nullptr)
 					{
 						for (const QString& appSignalId : itemReceiver->appSignalIdsAsList())
 						{
@@ -237,11 +373,11 @@ namespace VFrame30
 					}
 
 					if (const VFrame30::SchemaItemUfb* itemUfb = item->toType<VFrame30::SchemaItemUfb>();
-						itemUfb != nullptr)
+							itemUfb != nullptr)
 					{
 						std::vector<std::shared_ptr<Property>> props = static_cast<const PropertyObject*>(itemUfb)->specificProperties();
 
-						for (auto p : props)
+						for (const auto& p : props)
 						{
 							QString v = p->value().toString();
 							QStringList valueAsList = v.split(QChar::LineFeed, Qt::SkipEmptyParts);
@@ -255,7 +391,6 @@ namespace VFrame30
 							}
 						}
 					}
-
 				}
 
 				break;
@@ -268,7 +403,7 @@ namespace VFrame30
 
 	QStringList LogicSchema::getSignalList() const
 	{
-		std::set<QString> signalMap = getSignalMap();	// signal ids can be duplicated, std::set removes dupilcates
+		std::set<QString> signalMap = getSignalSet();	// signal ids can be duplicated, std::set removes dupilcates
 
 		// Move set to list
 		//
@@ -351,5 +486,4 @@ namespace VFrame30
 	{
 		m_lmDescriptionFile = value;
 	}
-
 }

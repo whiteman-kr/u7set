@@ -1,0 +1,17 @@
+<Command 
+	Caption="wrfbb"
+	Code="02c0"
+	CodeMask="07c0"
+	SimulationFunc="command_wrfbb"
+	ParseFunc="parse_wrfbb"
+	Description="Read 1-bit from memory and write to AFB input"
+
+	CodeSize="4" 
+	ReadTime="14" 
+	WaitFbExecution="false"
+
+	ConstRuntime="13"
+
+	CheckFunc="check_wrfbb"
+	GetMnemoFunc="mnemo_wrfbb"
+	CalcExecTimeFunc="exectime_const"/>

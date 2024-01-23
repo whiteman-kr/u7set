@@ -1,5 +1,6 @@
 #include "MetrologySignal.h"
-#include "UnitsConvertor.h"
+#include "UnitsConverter.h"
+#include "../Proto/serialization.pb.h"
 
 namespace Metrology
 {
@@ -353,7 +354,7 @@ namespace Metrology
 
 		if (signal.isAnalog() == true)
 		{
-			UnitsConvertor uc;
+			UnitsConverter uc;
 
 			UnitsConvertResult qpl;
 			UnitsConvertResult qph;
@@ -396,7 +397,7 @@ namespace Metrology
 								{
 									if (signal.isSpecPropExists(AppSignalPropNames::RLOAD_OHM) == true)
 									{
-										m_electricRLoad = signal.rload_Ohm();
+										m_electricRLoad = signal.rloadOhm();
 									}
 								}
 
@@ -702,7 +703,7 @@ namespace Metrology
 			return;
 		}
 
-		AppSignal::setRload_Ohm(rload);
+		AppSignal::setRloadOhm(rload);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -1386,7 +1387,7 @@ namespace Metrology
 
 					if (param.electricRangeIsValid() == true)
 					{
-						UnitsConvertor uc;
+						UnitsConverter uc;
 						double electric = uc.conversion(compareValue, UnitsConvertType::PhysicalToElectric, param);
 
 						value += "  [" + QString::number(electric, 'f', param.electricPrecision()) + " " + param.electricUnitStr() + "]";
@@ -1457,7 +1458,6 @@ namespace Metrology
 		}
 		else
 		{
-
 			value = hysteresisSignalID(idType);
 
 			switch (cmpType())

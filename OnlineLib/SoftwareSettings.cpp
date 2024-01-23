@@ -1,12 +1,6 @@
-#include <QXmlStreamReader>
-#include <QXmlStreamWriter>
-#include <QObject>
-
 #include "../UtilsLib/XmlHelper.h"
 #include "../UtilsLib/WUtils.h"
-#include "../Proto/network.pb.h"
 #include "SocketIO.h"
-
 #include "SoftwareSettings.h"
 
 // -------------------------------------------------------------------------------------
@@ -105,7 +99,7 @@ void SoftwareSettings::setShortId(std::vector<SERVICETYPE>* services)
 		QString shortId = ss[0].shortId;
 
 		if (qsizetype underscoreIndex = shortId.indexOf('_');
-			underscoreIndex != -1)
+				underscoreIndex != -1)
 		{
 			ss[0].shortId = shortId.right(shortId.size() - (underscoreIndex + 1));
 		}
@@ -127,9 +121,9 @@ void SoftwareSettings::setShortId(std::vector<SERVICETYPE>* services)
 
 			bool firstLetterIsSame = std::all_of(ss.begin(), ss.end(),
 												 [firstLetter](const ServiceRecord& sr)
-												 {
-													return sr.currentId[0] == firstLetter;
-												 });
+			{
+				return sr.currentId[0] == firstLetter;
+			});
 
 			if (firstLetterIsSame == true)
 			{
@@ -753,6 +747,9 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml) const
 	{
 		xml.writeStartElement(XmlElement::TUNING_CLIENT);
 		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, tc.equipmentID);
+		xml.writeStringAttribute(EquipmentPropNames::SOFTWARE_TYPE, E::valueToString(tc.softwareType));
+		xml.writeBoolAttribute(EquipmentPropNames::TUNING_LOGIN, tc.tuningLogin);
+		xml.writeStringAttribute(XmlAttribute::MATS_USERS, tc.matsUsers);
 
 		writeTuningSourcesToXml(xml, tc.drivenSources);
 
@@ -761,6 +758,20 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml) const
 
 	xml.writeEndElement();			// TUNING_CLIENTS
 
+	// write MATS users info
+	//
+	xml.writeStartElement(XmlElement::MATS_USERS);
+	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(matsUsers.size()));
+
+	for(const auto& matsUser : matsUsers)
+	{
+		matsUser.save(*xml.xmlStreamWriter());
+	}
+
+	xml.writeEndElement();			// MATS_USERS
+
+	// write channels info
+	//
 	for(int channel = CHANNEL_1; channel < channelCount; channel++)
 	{
 		const ChannelSettings& ch = channelSettings[channel];
@@ -842,11 +853,57 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 		result &= xml.findElement(XmlElement::TUNING_CLIENT);
 		result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &tc.equipmentID);
 
+		QString swTypeStr;
+		result &= xml.readStringAttribute(EquipmentPropNames::SOFTWARE_TYPE, &swTypeStr);
+
+		bool ok = false;
+		tc.softwareType = E::stringToValue<E::SoftwareType>(swTypeStr, &ok);
+
+		result &= ok;
+
+		result &= xml.readBoolAttribute(EquipmentPropNames::TUNING_LOGIN, &tc.tuningLogin);
+		result &= xml.readStringAttribute(XmlAttribute::MATS_USERS, &tc.matsUsers);
+
 		result &= readTuningSourcesFromXml(xml, &tc.drivenSources);
 
 		clients.push_back(tc);
 	}
 
+	// read MATS users info
+	//
+	matsUsers.clear();
+
+	result = xml.findElement(XmlElement::MATS_USERS);
+
+	RETURN_IF_FALSE(result);
+
+	int matsUsersCount = 0;
+
+	result = xml.readIntAttribute(XmlAttribute::COUNT, &matsUsersCount);
+
+	RETURN_IF_FALSE(result);
+
+	for(int i = 0; i < matsUsersCount; i++)
+	{
+		OnlineLib::MatsUser mu;
+
+		bool res = xml.findElement(XmlElement::MATS_USER);
+
+		if (res == false)
+		{
+			result = false;
+			break;
+		}
+
+		result &= mu.load(*xml.xmlStreamReader());
+
+		matsUsers.emplace_back(mu);
+	}
+
+	RETURN_IF_FALSE(result);
+
+	// read channels info
+	//
 	for(int channel = CHANNEL_1; channel < channelCount; channel++)
 	{
 		result &= xml.findElement(XmlElement::TUNING_CHANNEL_TEMPLATE.arg(channel + 1));
@@ -883,7 +940,7 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 }
 
 bool TuningServiceSettings::writeTuningSourcesToXml(XmlWriteHelper& xml,
-												  const std::vector<TuningSource>& sources)
+													const std::vector<TuningSource>& sources)
 {
 	xml.writeStartElement(XmlElement::TUNING_SOURCES);
 	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(sources.size()));
@@ -1750,17 +1807,17 @@ const TuningClientSettings& TuningClientSettings::operator = (const TuningClient
 bool TuningClientSettings::appearanceChanged(const TuningClientSettings& src) const
 {
 	if (autoApply != src.autoApply ||
-		filterByEquipment != src.filterByEquipment ||
-		filterBySchema != src.filterBySchema ||
-		showSchemasList != src.showSchemasList ||
-		showSchemasTabs != src.showSchemasTabs ||
-		showSchemas != src.showSchemas ||
-		showSignals != src.showSignals ||
-		statusFlagFunction != src.statusFlagFunction ||
-		tuningLogin != src.tuningLogin ||
-		tuningSessionTimeout != src.tuningSessionTimeout ||
-		tuningUserAccounts != src.tuningUserAccounts ||
-		loginPerOperation != src.loginPerOperation)
+			filterByEquipment != src.filterByEquipment ||
+			filterBySchema != src.filterBySchema ||
+			showSchemasList != src.showSchemasList ||
+			showSchemasTabs != src.showSchemasTabs ||
+			showSchemas != src.showSchemas ||
+			showSignals != src.showSignals ||
+			statusFlagFunction != src.statusFlagFunction ||
+			tuningLogin != src.tuningLogin ||
+			tuningSessionTimeout != src.tuningSessionTimeout ||
+			tuningUserAccounts != src.tuningUserAccounts ||
+			loginPerOperation != src.loginPerOperation)
 	{
 		return true;
 	}
@@ -1771,8 +1828,8 @@ bool TuningClientSettings::appearanceChanged(const TuningClientSettings& src) co
 bool TuningClientSettings::connectionChanged(const TuningClientSettings& src) const
 {
 	if (tuningServices.size() != src.tuningServices.size() ||
-		autoApply != src.autoApply ||
-		statusFlagFunction != src.statusFlagFunction)
+			autoApply != src.autoApply ||
+			statusFlagFunction != src.statusFlagFunction)
 	{
 		return true;
 	}
@@ -1849,6 +1906,33 @@ bool TestSuiteSettings::writeToXml(XmlWriteHelper& xml) const
 	xml.writeEndElement();		// </TuningServices>
 
 	//
+
+	// --
+	//
+	xml.writeStartElement(XmlElement::TESTING_SECURITY);
+
+	xml.writeBoolAttribute(EquipmentPropNames::TESTING_LOGIN, login);
+	xml.writeStringAttribute(EquipmentPropNames::TESTING_USER_ACCOUNTS, userAccounts);
+
+	xml.writeEndElement();			// </TestSecurity>
+
+	// --
+	//
+	xml.writeStartElement(XmlElement::TESTING_REPORTS);
+
+	xml.writeStringAttribute(EquipmentPropNames::TESTING_PLANT, plant);
+	xml.writeStringAttribute(EquipmentPropNames::TESTING_UNIT, unit);
+	xml.writeStringAttribute(EquipmentPropNames::TESTING_SYSTEM, system);
+
+	xml.writeEndElement();			// </TestingReports>
+
+	// --
+	//
+	xml.writeStartElement(XmlElement::TESTING_SETTINGS);
+	xml.writeStringAttribute(EquipmentPropNames::TESTING_SCRIPTTAGS, scriptTags);
+	xml.writeEndElement();          // </TestingSettings>
+
+
 
 	writeEndSettings(xml);;			// </Settings>
 
@@ -1935,6 +2019,18 @@ bool TestSuiteSettings::readFromXml(XmlReadHelper& xml)
 		tuningServices.push_back(tsc);
 	}
 
+	result &= xml.findElement(XmlElement::TESTING_SECURITY);
+	result &= xml.readBoolAttribute(EquipmentPropNames::TESTING_LOGIN, &login);
+	result &= xml.readStringAttribute(EquipmentPropNames::TESTING_USER_ACCOUNTS, &userAccounts);
+
+	result &= xml.findElement(XmlElement::TESTING_REPORTS);
+	result &= xml.readStringAttribute(EquipmentPropNames::TESTING_PLANT, &plant);
+	result &= xml.readStringAttribute(EquipmentPropNames::TESTING_UNIT, &unit);
+	result &= xml.readStringAttribute(EquipmentPropNames::TESTING_SYSTEM, &system);
+
+	result &= xml.findElement(XmlElement::TESTING_SETTINGS);
+	result &= xml.readStringAttribute(EquipmentPropNames::TESTING_SCRIPTTAGS, &scriptTags);
+
 	return result;
 }
 
@@ -1942,6 +2038,12 @@ void TestSuiteSettings::clear()
 {
 	*this = TestSuiteSettings{};
 }
+
+QStringList TestSuiteSettings::getUsersAccounts() const
+{
+	return userAccounts.split(Separator::SEMICOLON, Qt::SkipEmptyParts);
+}
+
 
 // -------------------------------------------------------------------------------------
 //

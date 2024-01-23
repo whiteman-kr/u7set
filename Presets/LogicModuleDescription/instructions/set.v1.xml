@@ -1,0 +1,17 @@
+<Command 
+	Caption="set"
+	Code="0050"
+	CodeMask="07f8"	
+	SimulationFunc="command_set"
+	ParseFunc="parse_set"
+	Description="Set ACC to 0xFFFF"
+
+	CodeSize="1" 
+	ReadTime="5" 
+	WaitFbExecution="false"
+
+	ConstRuntime="2"
+
+	CheckFunc="check_nothing"
+	GetMnemoFunc="mnemo_acc"
+	CalcExecTimeFunc="exectime_const"/>

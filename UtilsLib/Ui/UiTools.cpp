@@ -1,5 +1,5 @@
 #ifndef UTILS_LIB_DOMAIN
-#error Don't include this file in the project! Link UtilsLib instead.
+#error Do not include this file in the project! Link UtilsLib instead.
 #endif
 
 #include "UiTools.h"
@@ -12,6 +12,8 @@
 #include <QDateTime>
 #include <QDesktopServices>
 #include <QScreen>
+#include <QFile>
+#include <QUrl>
 
 //
 // UiTools
@@ -83,7 +85,7 @@ void UiTools::adjustDialogPlacement(QDialog* dialog)
 	}
 }
 
-void UiTools::openHelp(const QString& file, QWidget* parent)
+void UiTools::openPdf(const QString& file, QWidget* parent)
 {
 	QFile f(file);
 	if (f.exists() == true)
@@ -93,7 +95,7 @@ void UiTools::openHelp(const QString& file, QWidget* parent)
 	}
 	else
 	{
-		QMessageBox::critical(parent, qAppName(), QObject::tr("Help file '%1' does not exist!").arg(file));
+		QMessageBox::critical(parent, qAppName(), QObject::tr("File '%1' does not exist!").arg(file));
 	}
 }
 

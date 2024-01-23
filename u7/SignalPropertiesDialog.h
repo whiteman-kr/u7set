@@ -1,76 +1,82 @@
-#ifndef SIGNALPROPERTIESDIALOG_H
-#define SIGNALPROPERTIESDIALOG_H
+#pragma once
 
 #include "../AppSignalLib/AppSignal.h"
 #include "IdePropertyEditor.h"
-
-class QtProperty;
-class QtStringPropertyManager;
-class QtEnumPropertyManager;
-class QtIntPropertyManager;
-class QtDoublePropertyManager;
-class QtBoolPropertyManager;
-class QtTreePropertyBrowser;
-class QDialogButtonBox;
-enum class SignalType;
-
+#include "AppSignalSetProvider.h"
 
 namespace ExtWidgets
 {
 	class PropertyEditor;
 }
 
-
-std::vector<std::pair<QString, QString> > editApplicationSignals(QStringList& signalId, DbController* dbController, QWidget *parent = 0);
-void initNewSignal(AppSignal& signal);
-
-
 class SignalPropertiesDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	explicit SignalPropertiesDialog(DbController* dbController, QVector<AppSignal*> signalVector, bool readOnly, bool tryCheckout, QWidget *parent = 0);
+	explicit SignalPropertiesDialog(const std::vector<AppSignal*>& signalsToEdit,
+									bool readOnly, bool isExistSignals, QWidget* parent = nullptr);
 
-	bool isEditedSignal(int id) const { return m_editedSignalsId.contains(id); }
-	bool hasEditedSignals() const { return m_editedSignalsId.empty() == false; }
+	bool isEditedSignal(int id) const;
+	bool hasEditedSignals() const;
+	bool isValid() const;
 
-	bool isValid() const { return m_isValid; }
+	//
 
+	static void initNewSignal(AppSignal& signal);
+	static std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& signalId,
+																		   DbController* dbController,
+																		   QWidget* parent = nullptr);
 signals:
 	void signalChanged(int id, bool updateView);
 
-public slots:
-	void checkAndSaveSignal();
-	void rejectCheckoutProperty();
-	void saveDialogSettings();
-	void onSignalPropertyChanged(QList<std::shared_ptr<PropertyObject> > objects);
+private slots:
+	void onSignalsPropChanged(QList<std::shared_ptr<PropertyObject>> objects);
+
+	void onOk();
+	void onCancel();
+
+private:
+	void uppercaseAppSignalIDs();
+	void createSignalsProps();
+
 	void checkoutSignals(QList<std::shared_ptr<PropertyObject>> objects);
+	bool checkoutSignal(AppSignal&s , QString* message);
+
+	void limitPropsPrecisionOnPropChanged(const QList<std::shared_ptr<PropertyObject>>& objects);
+
+	bool checkAndSaveSignal();
+	void undoCheckouts();
+
+
 	void saveLastEditedSignalProperties();
-	void showError(QString errorString);
+	void saveDialogSettings();
 
-protected:
-	void closeEvent(QCloseEvent* event);
+	void setDialogEditable();
+	void setDialogReadOnly();
 
-private:
-	bool checkoutSignal(AppSignal& s, QString& message);
-	QString errorMessage(const ObjectState& state) const;
-
-	bool isPropertyDependentOnPrecision(const QString& propName) { return m_propertiesDependentOnPrecision.value(propName, false); }
-	void addPropertyDependentOnPrecision(const QString& propName) { m_propertiesDependentOnPrecision.insert(propName, true); }
+	void showError(const QString& errMsg);
 
 private:
-	DbController* m_dbController;
-	QVector<AppSignal*> m_signalVector;
-	std::set<int> m_editedSignalsId;
-	QDialogButtonBox* m_buttonBox;
-	QList<std::shared_ptr<PropertyObject>> m_objList;
-	bool m_tryCheckout;
-	QWidget* m_parent;
-	IdePropertyEditor* m_propertyEditor;
+	const std::vector<AppSignal*> m_signalsToEdit;
+	std::vector<std::shared_ptr<PropertyObject>> m_signalsProps;
 
+	AppSignalSetProvider* m_signalSetProvider = nullptr;
+	AppSignalPropertyManager* m_propManager = nullptr;
+
+	bool m_readOnly = false;
+	bool m_isExistSignals = false;						// exist signals should be checked out before properties changing
+														// new signals don't require checkout
+	bool m_uppercaseAppSignalID = false;
 	bool m_isValid = false;
 
-	QHash<QString, bool> m_propertiesDependentOnPrecision;
+	bool m_firstPropChange = true;
+	std::set<int> m_editedSignalsId;
+	std::set<int> m_checkedOutSignalsId;						// signals checked out by SignalPropertiesDialog
+	std::set<QString> m_propsWithPrecision;
+
+	//
+
+	IdePropertyEditor* m_propertyEditor = nullptr;
+	QDialogButtonBox* m_buttonBox = nullptr;
 };
 
-#endif // SIGNALPROPERTIESDIALOG_H

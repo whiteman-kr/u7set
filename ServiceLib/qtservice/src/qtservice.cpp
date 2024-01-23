@@ -640,7 +640,7 @@ int QtServiceBasePrivate::run(bool asService, const QStringList &argList)
     \sa exec(), start(), QtServiceController::install()
 */
 QtServiceBase::QtServiceBase(int argc,
-							 char **argv,
+							 const char **argv,
 							 const QString& serviceName,
 							 std::shared_ptr<CircularLogger> logger) :
 	m_logger(logger)
@@ -798,7 +798,9 @@ int QtServiceBase::exec()
 			continue;	// skip service command line
 		}
 
-		if (arg.trimmed().toLower().startsWith(QtService::ARG_INSTANCE_ID))
+		arg = arg.trimmed().toLower();
+
+		if (arg.startsWith(QtService::ARG_INSTANCE_ID))
 		{
 			continue;
 		}
@@ -1447,8 +1449,8 @@ const QString QtService::ARG_INSTANCE_ID("-inst");
     \sa QtServiceBase()
 */
 
-QtService::QtService(	int argc,
-						char** argv,
+QtService::QtService(int argc,
+						const char** argv,
 						QCoreApplication* app,
 						const QString& serviceName,
 						std::shared_ptr<CircularLogger> logger)	:

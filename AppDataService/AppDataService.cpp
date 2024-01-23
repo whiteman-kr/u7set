@@ -17,12 +17,15 @@
 
 AppDataServiceWorker::AppDataServiceWorker(const SoftwareInfo& softwareInfo,
 										   const QString& serviceName,
-										   int& argc,
+										   int argc,
 										   char** argv,
-										   CircularLoggerShared logger,
-										   E::ServiceRunMode runMode) :
-	ServiceWorker(softwareInfo, serviceName, argc, argv, logger, runMode),
-	m_timer(this)
+										   CircularLoggerShared logger) :
+	ServiceWorker(softwareInfo, serviceName, argc, argv, logger)
+{
+}
+
+AppDataServiceWorker::AppDataServiceWorker(const AppDataServiceWorker* worker) :
+	ServiceWorker(worker)
 {
 }
 
@@ -32,12 +35,7 @@ AppDataServiceWorker::~AppDataServiceWorker()
 
 ServiceWorker* AppDataServiceWorker::createInstance() const
 {
-	AppDataServiceWorker* newInstance = new AppDataServiceWorker(softwareInfo(),
-																 serviceName(),
-																 argc(), argv(),
-																 logger(),
-																 serviceRunMode());
-	newInstance->init();
+	AppDataServiceWorker* newInstance = new AppDataServiceWorker(this);
 
 	return newInstance;
 }
@@ -137,33 +135,34 @@ void AppDataServiceWorker::fillAppDataReceiveState(Network::AppDataReceiveState*
 	}
 }
 
-void AppDataServiceWorker::initCmdLineParser()
+void AppDataServiceWorker::initServiceSpecificCmdLineArgs()
 {
-	CommandLineParser& cp = cmdLineParser();
-
-	cp.addSingleValueOption(CmdLineOption::ID, SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
-	cp.addSingleValueOption(CmdLineOption::CFG_IP1, SoftwareSetting::CFG_SERVICE_IP1, "IP address of first Configuration Service.", "IPv4:Port");
-	cp.addSingleValueOption(CmdLineOption::CFG_IP2, SoftwareSetting::CFG_SERVICE_IP2, "IP address of second Configuration Service.", "IPv4:Port");
-	cp.addSingleValueOption("ptc", SoftwareSetting::PROCESSING_THREADS_COUNT, "App data processing threads count", "N");
-	cp.addSingleValueOption("recvip", SoftwareSetting::OVERRIDE_APP_DATA_RECEIVING_IP, "Override AppDataReceivingIP", "IPv4:Port");
-	cp.addSimpleOption(CmdLineOption::LOG_RUP_TIME_ERR, "Log RUP frames time errors");
+	addValueCmdLineArg(CmdLineArg::ID, SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
+	addValueCmdLineArg(CmdLineArg::CFG_IP1, SoftwareSetting::CFG_SERVICE_IP1, "IP address of first Configuration Service.", "IPv4:Port");
+	addValueCmdLineArg(CmdLineArg::CFG_IP2, SoftwareSetting::CFG_SERVICE_IP2, "IP address of second Configuration Service.", "IPv4:Port");
+	addValueCmdLineArg("ptc", SoftwareSetting::PROCESSING_THREADS_COUNT, "App data processing threads count", "N");
+	addValueCmdLineArg("recvip", SoftwareSetting::OVERRIDE_APP_DATA_RECEIVING_IP, "Override AppDataReceivingIP", "IPv4:Port");
+	addSimpleNoWritableCmdLineArg(CmdLineArg::LOG_RUP_TIME_ERR, "Log RUP frames time errors");
 }
 
-void AppDataServiceWorker::loadSettings()
+void AppDataServiceWorker::loadServiceSpecificSettings()
 {
-	m_appDataProcessingThreadCount = QString(getStrSetting(SoftwareSetting::PROCESSING_THREADS_COUNT)).toInt();
+	m_appDataProcessingThreadCount = getSettingValue(SoftwareSetting::PROCESSING_THREADS_COUNT).toInt();
 
-	m_strCmdLineAppDataReceivingIP = getStrSetting(SoftwareSetting::OVERRIDE_APP_DATA_RECEIVING_IP);
+	m_strCmdLineAppDataReceivingIP = getSettingValue(SoftwareSetting::OVERRIDE_APP_DATA_RECEIVING_IP);
 	m_cmdLineAppDataReceivingIP.setAddressPortStr(m_strCmdLineAppDataReceivingIP, PORT_APP_DATA_SERVICE_DATA);
 
-	m_logRupTimeErrors = cmdLineParser().optionIsSet(CmdLineOption::LOG_RUP_TIME_ERR);
+	m_logRupTimeErrors = cmdLineArgIsSet(CmdLineArg::LOG_RUP_TIME_ERR);
 
-	DEBUG_LOG_MSG(logger(), QString(tr("Settings from command line or registry:")));
+	DEBUG_LOG_MSG(logger(), "");
+	DEBUG_LOG_MSG(logger(), QString(tr("Service settings:")));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::EQUIPMENT_ID).arg(equipmentID()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStrIfSet()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStrIfSet()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::PROCESSING_THREADS_COUNT).arg(m_appDataProcessingThreadCount));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::OVERRIDE_APP_DATA_RECEIVING_IP).arg(m_cmdLineAppDataReceivingIP.addressPortStrIfSet()));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::OVERRIDE_APP_DATA_RECEIVING_IP).arg(m_cmdLineAppDataReceivingIP.addressPortStrIfSet()));
+	DEBUG_LOG_MSG(logger(), "");
 }
 
 void AppDataServiceWorker::runAppDataReceiverThread()
@@ -180,7 +179,6 @@ void AppDataServiceWorker::runAppDataReceiverThread()
 											m_appDataProcessingThreadCount,
 											sessionParams().softwareRunMode,
 											logger());
-
 	m_appDataReceiver->start();
 }
 
@@ -268,32 +266,16 @@ void AppDataServiceWorker::stopRtTrendsServerThread()
 	}
 }
 
-void AppDataServiceWorker::runTimer()
-{
-	connect(&m_timer, &QTimer::timeout, this, &AppDataServiceWorker::onTimer);
-
-	m_timer.setInterval(1000);
-	m_timer.start();
-}
-
-void AppDataServiceWorker::stopTimer()
-{
-	m_timer.stop();
-}
-
 void AppDataServiceWorker::initialize()
 {
 	DEBUG_LOG_MSG(logger(), "AppDataServiceWorker is started");
 
 	runCfgLoaderThread();
-	runTimer();
 }
 
 void AppDataServiceWorker::shutdown()
 {
 	clearConfiguration();
-
-	stopTimer();
 
 	stopTcpAppDataServer();
 	stopCfgLoaderThread();
@@ -368,7 +350,7 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 
 	bool result = true;
 
-	for(const Builder::BuildFileInfo& bfi : buildFileInfoArray)
+	for(const OnlineLib::BuildFileInfo& bfi : buildFileInfoArray)
 	{
 		QByteArray fileData;
 		QString errStr;
@@ -389,9 +371,9 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 			result &= readAppDataSources(fileData, sessionParams.currentSettingsProfile);			// fill m_appDataSources
 		}
 
-		if (bfi.ID == CfgFileId::APP_SIGNAL_SET)
+		if (bfi.ID == CfgFileId::ACQUIRED_APP_SIGNALS)
 		{
-			result &= readAppSignals(fileData);				// fill m_unitInfo and m_appSignals
+			result &= readAppSignals(fileData);				// fills m_appSignals
 		}
 
 		if (result == true)
@@ -409,10 +391,6 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 	{
 		applyNewConfiguration();
 	}
-}
-
-void AppDataServiceWorker::onTimer()
-{
 }
 
 bool AppDataServiceWorker::readAppDataSources(const QByteArray& fileData, const QString& profile)

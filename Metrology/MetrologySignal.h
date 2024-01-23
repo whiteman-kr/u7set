@@ -1,10 +1,16 @@
 #pragma once
 
-#include "../AppSignalLib/AppSignalParam.h"
+#include "../AppSignalLib/AppSignal.h"
+#include "../AppSignalLib/AppSignalState.h"
 #include "../AppSignalLib/ComparatorSet.h"
 #include "../HardwareLib/DeviceObject.h"
 #include "../UtilsLib/XmlHelper.h"
-#include "../Proto/ProtoSerialization.h"
+
+namespace Proto
+{
+	class MetrologySignalLocation;
+	class MetrologySignal;
+}
 
 // Attention !!!
 // If you want to change any function writeToXml you must change CFG_FILE_VER_METROLOGY_ITEMS
@@ -12,7 +18,7 @@
 
 const int CFG_FILE_VER_METROLOGY_ITEMS_XML	= 1;
 
-// Historty of version
+// History of version
 //
 // version 1 - it is base version
 //

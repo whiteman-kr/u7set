@@ -1,5 +1,5 @@
 #ifndef HARDWARE_LIB_DOMAIN
-#error Don't include this file in the project! Link HardwareLib instead.
+#error Do not include this file in the project! Link HardwareLib instead.
 #endif
 
 #include "Subsystem.h"
@@ -18,7 +18,7 @@ namespace Hardware
 		QObject(parent),
 		m_index(index),
 		m_key(key),
-		m_subsystemId(std::move(subsystemId)),
+		m_subsystemId(subsystemId),
 		m_caption(caption)
 	{
 

@@ -1,9 +1,4 @@
 #include "MeasureView.h"
-
-#include <QApplication>
-#include <QHeaderView>
-#include <QMessageBox>
-
 #include "Database.h"
 #include "ProcessData.h"
 #include "DialogObjectProperties.h"

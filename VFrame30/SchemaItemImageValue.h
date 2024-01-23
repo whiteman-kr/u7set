@@ -1,7 +1,9 @@
 #pragma once
 
-#include "PosRectImpl.h"
+#include "IMatsSchemaItemAssociations.h"
 #include "ImageItem.h"
+#include "PosRectImpl.h"
+#include "PosRectRotatable.h"
 
 class AppSignalState;
 class AppSignalParam;
@@ -21,14 +23,14 @@ namespace VFrame30
 
 		An example of Svg code can be found in \ref VFrame30::SchemaItemImage "SchemaItemImage" description.
 
-		Signal identidiers set to the schema item are stored in <b>SignalIDs</b> array property.
+		Signal identifiers set to the schema item are stored in <b>SignalIDs</b> array property.
 
 		To set an image to display, set <b>CurrentImageID</b> property to required item identifier depending on signal states.
 		Usually it is done by <b>PreDrawScript</b> event handler code.
 
 		<b>Event handlers</b>
 
-		To customize item's apperance and behaviour, event handler code is placed to following properties of the schema item using RPCT:
+		To customize item's appearance and behaviour, event handler code is placed to following properties of the schema item using RPCT:
 
 		- <b>ClickScript</b> contains mouse click event handler code.
 		Click event is generated each time when user clicks mouse button on the item and <b>AcceptClick</b> property is set to true;<br>
@@ -135,7 +137,7 @@ namespace VFrame30
 		})
 		\endcode
 	*/
-	class SchemaItemImageValue : public PosRectImpl
+	class SchemaItemImageValue : public PosRectRotatable, public IMatsSchemaItemAssociations
 	{
 		Q_OBJECT
 
@@ -186,12 +188,14 @@ namespace VFrame30
 		//
 	public:
 		virtual void draw(CDrawParam* drawParam) const override;
+		void drawPrivate(CDrawParam* drawParam) const;
 
 		virtual void drawHighlight(CDrawParam* drawParam) const override;
+		void drawHighlightPrivate(CDrawParam* drawParam) const;
 
 	protected:
 		void initDrawingResources() const;
-		//bool getSignalState(CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const;
+		// bool getSignalState(CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const;
 
 		void drawImage(CDrawParam* drawParam, const QString& imageId, const QRectF& rect);
 
@@ -199,12 +203,21 @@ namespace VFrame30
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
 
-		// Java Script invocables specific for SchemaItemImageValue
+		// Java Script invocable specific for SchemaItemImageValue
 		//
 	public slots:
 		/// \brief Returns \ref VFrame30::ScriptImageItem "ScriptImageItem" specified by <b>imageId</b>.
 		///
 		QObject* imageItem(QString imageId);
+
+		// IMatsSchemaItemAssociations implementation.
+		//
+	public:
+		virtual QStringList associatedAppSignalIds() const override;
+		virtual QStringList associatedImpactAppSignalIds() const override;
+		virtual QStringList associatedConnectionIds() const override;
+		virtual QStringList associatedLoopbackIds() const override;
+		virtual QStringList associatedSchemaItemLabels() const override;
 
 		// Properties and Data
 		//
@@ -245,7 +258,7 @@ namespace VFrame30
 		QStringList m_signalIds = {"#APPSIGNALID"};
 		E::SignalSource m_signalSource = E::SignalSource::AppDataService;
 
-		PropertyVector<ImageItem> m_images;	// Each image is a std::shared_ptr
+		PropertyVector<ImageItem> m_images; // Each image is a std::shared_ptr
 
 		// MonitorMode variables
 		//
@@ -258,7 +271,7 @@ namespace VFrame30
 		QColor m_lineColor = {qRgba(0x00, 0x00, 0x00, 0xFF)};
 		QColor m_fillColor = {qRgba(0x00, 0x00, 0xC0, 0xFF)};
 
-		bool m_drawRect = false;							// Rect is visible, thikness 0 is possible
+		bool m_drawRect = false; // Rect is visible, thickness 0 is possible
 		bool m_fillRect = false;
 
 		// Drawing resources
@@ -266,6 +279,4 @@ namespace VFrame30
 		mutable std::unique_ptr<QPen> m_rectPen;
 		mutable std::unique_ptr<QBrush> m_fillBrush;
 	};
-}
-
-
+} // namespace VFrame30

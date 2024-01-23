@@ -8,174 +8,102 @@ namespace TestSuite
 		m_testLog{testOutput},
 		m_softwareInfo{softwareInfo},
 		m_settings{settings},
-		m_control{appLog, &m_testLog}
-		//m_configController(softwareInfo, settings.configuratorAddress1(), settings.configuratorAddress2(), appLog)
-		//m_scriptTestLog(&m_testLog)
+		m_testControl{appLog, &m_testLog},
+		m_runControl{appLog, &m_testLog}
 	{
-		//connect(&m_configController, &TestSuiteConfigController::configurationArrived, this, &TestSuite::onConfigurationArrived);
+		connect(&m_testControl, &TestControl::testStarted, this, &TestSuite::testStarted);
+		connect(&m_testControl, &TestControl::testFinished, this, &TestSuite::testFinished);
 
-		//m_configController.start();
+		connect(&m_testControl, &TestControl::finished, this, &TestSuite::finished);
 
-		//	if (m_librarySettings.loadScriptsFromPath() == true)
-		//	{
-		//		loadTestsFromPath();
-		//	}
+		connect(&m_runControl, &RunControl::scriptPermissionChanged, this, &TestSuite::scriptPermissionChanged);
+		connect(&m_runControl, &RunControl::globalPermissionChanged, this, &TestSuite::globalPermissionChanged);
+		connect(&m_runControl, &RunControl::noPermissionsExist, this, &TestSuite::noPermissionsExist);
 
-		connect(&m_control, &Control::finished, this, &TestSuite::finished);
 		return;
 	}
 
-//	TestSuiteConfigController& TestSuite::configController()
-//	{
-//		return m_configController;
-//	}
+	TestSuite::~TestSuite()
+	{
+		stopRunControl();
+	}
 
-//	const TestSuiteConfigController& TestSuite::configController() const
-//	{
-//		return m_configController;
-//	}
+	bool TestSuite::executeRunControl(const ControlParams& controlParams)
+	{
+		return m_runControl.execute(m_softwareInfo, m_settings, controlParams);
+	}
 
-	//TestScriptsStorage& TestLibrary::testScriptsStorage()
-	//{
-	//	return m_testScriptsStorage;
-	//}
+	bool TestSuite::hasRunControl()
+	{
+		return m_runControl.isRunning();
+	}
 
-	//const TestScriptsStorage& TestLibrary::testScriptsStorage() const
-	//{
-	//	return m_testScriptsStorage;
-	//}
+	void TestSuite::resetRunControl()
+	{
+		m_runControl.reset();
+	}
 
-	//const TestLog& TestLibrary::testResultLog() const
-	//{
-	//	return m_testLog;
-	//}
+	void TestSuite::stopRunControl()
+	{
+		if (m_runControl.isRunning() == true)
+		{
+			m_runControl.stop();
+		}
+	}
 
-	bool TestSuite::execute(const QStringList& executionTests,		// List of tests for execution, if empty then exec all.
-							const QString& scriptsPath)				// Load scripts from disk, path to dir for *.js files.);
+	bool TestSuite::execute(const ControlParams& controlParams)
 	{
 		m_testLog.clear();
-
-		return m_control.execute(m_softwareInfo, m_settings, executionTests, scriptsPath);
+		return m_testControl.execute(m_softwareInfo, m_settings, controlParams);
 	}
 
 	void TestSuite::stop()
 	{
-		m_control.stop();
+		m_testControl.stop();
 		return;
 	}
 
 	bool TestSuite::isRunning() const
 	{
-		return m_control.isRunning();
+		return m_testControl.isRunning();
 	}
 
-	//void TestLibrary::runTests()
-	//{
-	//	if (state() == TestLibraryState::Running)
-	//	{
-	//		Q_ASSERT(false);
-	//		return;
-	//	}
+	void TestSuite::updateSettings(const TestSuiteSettings& settings, const ControlParams& controlParams)
+	{
+		m_settings = settings;
+		m_softwareInfo.setEquipmentID(settings.instanceStrId());
 
-	//	if (m_testWorkerThread != nullptr)
-	//	{
-	//		Q_ASSERT(m_testWorkerThread == nullptr);
-	//		return;
-	//	}
-
-	//	setState(TestLibraryState::Running);
-
-	//	m_testLog.writeMessage("TestLibrary::execute");
-
-	//	m_testWorkerThread = new TestWorkerThread(&m_testController, &m_scriptTestLog, this);
-	//	connect(m_testWorkerThread, &TestWorkerThread::finished, this, &TestLibrary::onTestingFinished);
-	//	m_testWorkerThread->worker().setScripts(m_testScriptsStorage.scripts());	// Set all scripts to the worker
-	//	m_testWorkerThread->run();
-	//}
-
-//	void TestSuite::onConfigurationArrived()
-//	{
-		//	if (state() == TestLibraryState::Running)
-		//	{
-		//		stopTests();
-		//	}
-
-//		if (m_librarySettings.loadScriptsFromPath() == false)
-//		{
-//			bool ok = loadTestsFromConfiguration();
-//			if (ok == false)
-//			{
-//				setState(TestLibraryState::Error);
-//			}
-//		}
-
-//		if (state() == TestLibraryState::WaitingForConfiguration)
-//		{
-//			execute();
-//		}
-
-		// Log out from tuning
+		// Restart run control with new parameters
 		//
-		/*if (m_tuningUserManager.isLoggedIn() == true)
-	{
-		m_tuningUserManager.logout();
+		if (m_runControl.isRunning() == true)
+		{
+			m_runControl.stop();
+			m_runControl.execute(m_softwareInfo, m_settings, controlParams);
+		}
 	}
 
-	// Refresh TuningUserManager configuration
-	//
-	m_tuningUserManager.setConfiguration(configuration.tuningLogin,
-										 configuration.tuningUserAccounts,
-										 false,
-										 configuration.tuningSessionTimeout);
-
-	showTuningLoginControls();
-
-	m_pTuningLogAction->setVisible(configuration.tuningEnabled == true);
-
-	// Close TuningTcpClients
-	//
-	stopTuningTcpClients();
-
-	// Create TuningTcpClients if tuning is enabled
-	//
-	if (configuration.tuningEnabled == true)
+	TestLog& TestSuite::testLog()
 	{
-		runTuningTcpClients();
+		return m_testLog;
 	}
 
-	m_tuningController->setTcpClients({m_tuningTcpClients.begin(),m_tuningTcpClients.end()});
-
-	if (m_dialogDataSources != nullptr)
+	ControlStatus TestSuite::testStatus() const
 	{
-		m_dialogDataSources->setTuningTcpClients(configuration.tuningEnabled, {m_tuningTcpClients.begin(),m_tuningTcpClients.end()}, false);
+		return m_testControl.status();
 	}
 
-	m_statusBarTuningConnection->setVisible(configuration.tuningEnabled == true);
+	ControlStatus TestSuite::runStatus() const
+	{
+		return m_runControl.status();
+	}
 
-	m_logoImage = configuration.logoImage;
+	bool TestSuite::scriptPermission(const QString& fileName) const
+	{
+		return m_runControl.scriptPermission(fileName);
+	}
 
-	showLogo();*/
-
-		//fillTestsTree();
-
-//		return;
-//	}
-
-	//void TestLibrary::onTestingFinished(int errorCode)
-	//{
-	//	if (m_testWorkerThread == nullptr)
-	//	{
-	//		Q_ASSERT(m_testWorkerThread);
-	//		return;
-	//	}
-
-	//	m_testLog.writeMessage("TestLibrary::finished");
-	//	m_testWorkerThread->deleteLater();
-	//	m_testWorkerThread = nullptr;
-
-	//	setState(TestLibraryState::Idle);
-
-	//	emit testingFinished(errorCode);
-	//}
-
+	bool TestSuite::globalPermission() const
+	{
+		return m_runControl.globalPermission();
+	}
 }

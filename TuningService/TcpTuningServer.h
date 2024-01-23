@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../OnlineLib/Tcp.h"
-#include "../Proto/network.pb.h"
 #include "TuningSource.h"
 
 namespace Tuning
@@ -25,6 +24,7 @@ namespace Tuning
 		virtual void onServerThreadStarted() override;
 		virtual void onServerThreadFinished() override;
 
+		virtual void onConnection() override;
 		virtual void onDisconnection() override;
 
 		Tcp::Server* getNewInstance() override;
@@ -34,26 +34,38 @@ namespace Tuning
 		virtual void onConnectedSoftwareInfoChanged() override;
 
 		void onGetTuningSourcesInfoRequest(const char* requestData, quint32 requestDataSize);
-		void onGetTuningSourcesStateRequest(const char *requestData, quint32 requestDataSize);
-		void onTuningSignalsReadRequest(const char *requestData, quint32 requestDataSize);
-		void onTuningSignalsWriteRequest(const char *requestData, quint32 requestDataSize);
-		void onTuningSignalsApplyRequest(const char *requestData, quint32 requestDataSize);
-		void onChangeControlledTuningSourceRequest(const char *requestData, quint32 requestDataSize);
-		void onGetTuningServiceSettings(const char *requestData, quint32 requestDataSize);
+		void onGetTuningSourcesStateRequest(const char* requestData, quint32 requestDataSize);
+		void onTuningSignalsReadRequest(const char* requestData, quint32 requestDataSize);
+		void onGetTuningSignalsStateChangesRequest(const char* requestData, quint32 requestDataSize);
+		void onTuningSignalsWriteRequest(const char* requestData, quint32 requestDataSize);
+		void onTuningSignalsApplyRequest(const char* requestData, quint32 requestDataSize);
+		void onChangeControlledTuningSourceRequest(const char* requestData, quint32 requestDataSize);
+		void onGetTuningServiceSettings(const char* requestData, quint32 requestDataSize);
 
-		void onGetTuningSourceFilling(const char *requestData, quint32 requestDataSize);
-		void onGetTuningSignalParam(const char *requestData, quint32 requestDataSize);
+		void onGetTuningSourceFilling(const char* requestData, quint32 requestDataSize);
+		void onGetTuningSignalParam(const char* requestData, quint32 requestDataSize);
 
 		void prepareSignalGetter();
 
 		void initClientSourcesList(const QString& clientEquipmentID);
 
 	private:
-		static const char* SCM_CLIENT_ID;
-
 		TuningServiceWorker& m_service;
 
 		const TuningSources& m_tuningSources;
+
+		//
+
+		static const QString SCM_CLIENT_ID;
+
+		static quint64 m_staticTcpConnectionID;
+
+		QThread* m_thread = nullptr;
+
+		QString m_clientEquipmentID;
+		quint64 m_tcpConnectionID = 0;
+
+		//
 
 		QHash<Hash, const AppSignal*> m_signalHash2SignalPtr;
 		QHash<Hash, quint32> m_signalHash2SourceIP;
@@ -87,6 +99,8 @@ namespace Tuning
 		Network::GetAppSignalParamReply m_getAppSignalParamReply;
 
 		Network::ServiceSettings m_getServiceSettingsReply;
+
+		Network::GetTuningSignalsStateChangesReply m_getStateChangesReply;
 	};
 
 	// -------------------------------------------------------------------------------

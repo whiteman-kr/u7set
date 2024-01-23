@@ -95,6 +95,9 @@ TEST(AppSignalManagerTests, invalidateSignalStates)
 	ILogFileStub log;
 	ClientLib::AppSignalManager sm{&log};
 
+	QString dataServerId{"DATA_SERVERID"};
+	Hash dataServerHash = ::calcHash(dataServerId);
+
 	QSignalSpy spy{&sm, &ClientLib::AppSignalManager::signalParamsUpdated};
 
 	AppSignalParam sp1;
@@ -115,12 +118,12 @@ TEST(AppSignalManagerTests, invalidateSignalStates)
 	auto thread2 = std::bit_cast<Qt::HANDLE>(2ull);
 
 	AppSignalState state1{sp2.hash(), {0, 0, 0}, 123.0, {.valid = 1, .stateAvailable = 1}};
-	sm.setState("#SP2", state1, thread1);
+	sm.setState("#SP2", state1, dataServerHash, thread1);
 
 	QThread::currentThread()->msleep(10);
 
 	AppSignalState state2{sp2.hash(), {1, 1, 1}, 124.0, {.valid = 1, .stateAvailable = 1}};
-	sm.setState("#SP2", state2, thread2);
+	sm.setState("#SP2", state2, dataServerHash, thread2);
 
 	// --
 	//
@@ -150,6 +153,9 @@ TEST(AppSignalManagerTests, setState)
 	ILogFileStub log;
 	ClientLib::AppSignalManager sm{&log};
 
+	QString dataServerId{"DATA_SERVERID"};
+	Hash dataServerHash = ::calcHash(dataServerId);
+
 	QSignalSpy spy{&sm, &ClientLib::AppSignalManager::signalParamsUpdated};
 
 	AppSignalParam sp1;
@@ -167,12 +173,12 @@ TEST(AppSignalManagerTests, setState)
 	EXPECT_EQ(sm.signalsCount(), 2);
 
 	AppSignalState state1{sp2.hash(), {}, 123.0, {.valid = 1, .stateAvailable = 0}};
-	sm.setState("#SP2", state1, std::bit_cast<Qt::HANDLE>(1ull));
+	sm.setState("#SP2", state1, dataServerHash, std::bit_cast<Qt::HANDLE>(1ull));
 
 	QThread::currentThread()->msleep(10);
 
 	AppSignalState state2{sp2.hash(), {}, 124.0, {.valid = 1, .stateAvailable = 0}};
-	sm.setState("#SP2", state2, std::bit_cast<Qt::HANDLE>(2ull));
+	sm.setState("#SP2", state2, dataServerHash, std::bit_cast<Qt::HANDLE>(2ull));
 
 	// Check #SP1 is not valid
 	//
@@ -197,6 +203,9 @@ TEST(AppSignalManagerTests, setStateAsVector)
 	ILogFileStub log;
 	ClientLib::AppSignalManager sm{&log};
 
+	QString dataServerId{"DATA_SERVERID"};
+	Hash dataServerHash = ::calcHash(dataServerId);
+
 	QSignalSpy spy{&sm, &ClientLib::AppSignalManager::signalParamsUpdated};
 
 	AppSignalParam sp1;
@@ -216,7 +225,7 @@ TEST(AppSignalManagerTests, setStateAsVector)
 	AppSignalState state1{sp1.hash(), {}, 1.0, {.valid = 1, .stateAvailable = 1}};
 	AppSignalState state2{sp2.hash(), {}, 2.0, {.valid = 1, .stateAvailable = 1}};
 
-	sm.setState({state1, state2}, std::bit_cast<Qt::HANDLE>(1ull));
+	sm.setState({state1, state2}, dataServerHash, std::bit_cast<Qt::HANDLE>(1ull));
 
 	auto state = sm.signalState(sp1.hash(), nullptr);
 	EXPECT_TRUE(state.isValid());
@@ -239,7 +248,7 @@ TEST(AppSignalManagerTests, setStateForZeroHash)
 	ASSERT_DEATH({
 					 ILogFileStub log;
 					 ClientLib::AppSignalManager sm{&log};
-					 sm.setState(Hash{0}, AppSignalState{}, std::bit_cast<Qt::HANDLE>(1ull));
+					 sm.setState(Hash{0}, AppSignalState{}, UNDEFINED_HASH, std::bit_cast<Qt::HANDLE>(1ull));
 				 }, "");
 #endif
 }
@@ -353,7 +362,7 @@ TEST(AppSignalManagerTests, addRecentAppSignal)
 	AppSignalParam sp3;
 	sp1.setAppSignalId("#SP1");
 	sp2.setAppSignalId("#SP2");
-	sp2.setAppSignalId("#SP3");
+	sp3.setAppSignalId("#SP3");
 
 	std::vector<AppSignalParam> v1;
 	v1.push_back(sp1);
@@ -548,6 +557,9 @@ TEST(AppSignalManagerTests, signalState)
 	ILogFileStub log;
 	ClientLib::AppSignalManager sm{&log};
 
+	QString dataServerId{"DATA_SERVERID"};
+	Hash dataServerHash = ::calcHash(dataServerId);
+
 	AppSignalParam sp1;
 	AppSignalParam sp2;
 	sp1.setAppSignalId("#SP1");
@@ -561,10 +573,10 @@ TEST(AppSignalManagerTests, signalState)
 	sm.addSignals(v, "ADS2");
 
 	AppSignalState state1{sp1.hash(), {}, 1.0, {.valid = 1, .stateAvailable = 1}};
-	sm.setState("#SP1", state1, std::bit_cast<Qt::HANDLE>(1ull));
+	sm.setState("#SP1", state1, dataServerHash, std::bit_cast<Qt::HANDLE>(1ull));
 
 	AppSignalState state2{sp2.hash(), {}, 2.0, {.valid = 1, .stateAvailable = 1}};
-	sm.setState("#SP2", state2, std::bit_cast<Qt::HANDLE>(1ull));
+	sm.setState("#SP2", state2, dataServerHash, std::bit_cast<Qt::HANDLE>(1ull));
 
 	// --
 	//
@@ -730,7 +742,7 @@ TEST(AppSignalManagerTests, signalType)
 	return;
 }
 
-TEST(AppSignalManagerTests, equipmentToAppSiganlId)
+TEST(AppSignalManagerTests, equipmentToAppSignalId)
 {
 	ILogFileStub log;
 	ClientLib::AppSignalManager sm{&log};
@@ -751,10 +763,10 @@ TEST(AppSignalManagerTests, equipmentToAppSiganlId)
 	sm.addSignal(sp2, "ADS");
 	sm.addSignal(sp3, "ADS");
 
-	EXPECT_EQ(sm.equipmentToAppSiganlId("@USB_LM1_IN1"), "#SP1");	// Symbol @ must be at the beginning
-	EXPECT_EQ(sm.equipmentToAppSiganlId("@USB_LM1_IN2"), "#SP2");
-	EXPECT_EQ(sm.equipmentToAppSiganlId("@USB_LM1_IN3"), "#SP3");
-	EXPECT_EQ(sm.equipmentToAppSiganlId("@FAIL"), "");
+	EXPECT_EQ(sm.equipmentToAppSignalId("@USB_LM1_IN1"), "#SP1");	// Symbol @ must be at the beginning
+	EXPECT_EQ(sm.equipmentToAppSignalId("@USB_LM1_IN2"), "#SP2");
+	EXPECT_EQ(sm.equipmentToAppSignalId("@USB_LM1_IN3"), "#SP3");
+	EXPECT_EQ(sm.equipmentToAppSignalId("@FAIL"), "");
 
 	return;
 }

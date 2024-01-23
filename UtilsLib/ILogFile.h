@@ -5,24 +5,22 @@ class ILogFile
 {
 public:
 	virtual ~ILogFile() = default;
-	virtual bool writeAlert(const QString& text) = 0;
-	virtual bool writeError(const QString& text) = 0;
-	virtual bool writeWarning(const QString& text) = 0;
-	virtual bool writeMessage(const QString& text) = 0;
-	virtual bool writeText(const QString& text) = 0;
+	virtual bool writeAlert(const QString& text, const QString& tag = {}) = 0;	// tags are used by ReportLib, so they can be ignored in many cases.
+	virtual bool writeError(const QString& text, const QString& tag = {}) = 0;
+	virtual bool writeWarning(const QString& text, const QString& tag = {}) = 0;
+	virtual bool writeMessage(const QString& text, const QString& tag = {}) = 0;
+	virtual bool writeText(const QString& text, const QString& tag = {}) = 0;
 };
-
 
 class ILogFileStub : public ILogFile
 {
 public:
-	virtual bool writeAlert(const QString&) override { return true; }
-	virtual bool writeError(const QString&)  override { return true; }
-	virtual bool writeWarning(const QString&) override { return true; }
-	virtual bool writeMessage(const QString&) override { return true; }
-	virtual bool writeText(const QString&)  override { return true; }
+	virtual bool writeAlert(const QString&, const QString&) override { return true; }
+	virtual bool writeError(const QString&, const QString&) override { return true; }
+	virtual bool writeWarning(const QString&, const QString&) override { return true; }
+	virtual bool writeMessage(const QString&, const QString&) override { return true; }
+	virtual bool writeText(const QString&, const QString&) override { return true; }
 };
-
 
 class HasLogFile
 {
@@ -56,8 +54,8 @@ public:
 	bool writeAlert(const QString& text)
 	{
 		return m_context.isEmpty() == true ?
-					m_logFile->writeAlert(text) :
-					m_logFile->writeAlert(QString("%1: %2").arg(m_context, text));
+				   m_logFile->writeAlert(text) :
+				   m_logFile->writeAlert(QString("%1: %2").arg(m_context, text));
 	}
 
 	bool writeError(const QString& text)
@@ -74,22 +72,22 @@ public:
 	bool writeWarning(const QString& text)
 	{
 		return m_context.isEmpty() == true ?
-					m_logFile->writeWarning(text) :
-					m_logFile->writeWarning(QString("%1: %2").arg(m_context, text));
+				   m_logFile->writeWarning(text) :
+				   m_logFile->writeWarning(QString("%1: %2").arg(m_context, text));
 	}
 
 	bool writeMessage(const QString& text)
 	{
 		return m_context.isEmpty() == true ?
-					m_logFile->writeMessage(text) :
-					m_logFile->writeMessage(QString("%1: %2").arg(m_context, text));
+				   m_logFile->writeMessage(text) :
+				   m_logFile->writeMessage(QString("%1: %2").arg(m_context, text));
 	}
 
 	bool writeText(const QString& text)
 	{
 		return m_context.isEmpty() == true ?
-					m_logFile->writeText(text) :
-					m_logFile->writeText(QString("%1: %2").arg(m_context, text));
+				   m_logFile->writeText(text) :
+				   m_logFile->writeText(QString("%1: %2").arg(m_context, text));
 	}
 
 	[[nodiscard]] ILogFile* logFile()

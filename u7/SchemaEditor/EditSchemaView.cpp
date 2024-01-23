@@ -1,13 +1,15 @@
 #include "EditSchemaView.h"
-#include "../GlobalMessanger.h"
-#include "../Settings.h"
-#include "../../VFrame30/VFrameTools.h"
+
 #include "../../VFrame30/DrawParam.h"
-#include "../../VFrame30/SchemaLayer.h"
 #include "../../VFrame30/LogicSchema.h"
+#include "../../VFrame30/PosConnectionImpl.h"
 #include "../../VFrame30/PosLineImpl.h"
 #include "../../VFrame30/PosRectImpl.h"
-#include "../../VFrame30/PosConnectionImpl.h"
+#include "../../VFrame30/PosRectRotatable.h"
+#include "../../VFrame30/SchemaLayer.h"
+#include "../../VFrame30/VFrameTools.h"
+#include "../GlobalMessanger.h"
+#include "../Settings.h"
 
 //
 //
@@ -20,8 +22,7 @@ EditSchemaView::EditSchemaView(AppSignalSetProvider* signalSetProvider, QWidget*
 	m_mouseState(MouseState::None),
 	m_appSignalProvider(signalSetProvider),
 	m_tuningSignalProvider(signalSetProvider),
-	m_appSignalController(&m_appSignalProvider, nullptr),
-	m_tuningController(&m_tuningSignalProvider, nullptr, nullptr)
+	m_appSignalController(&m_appSignalProvider, nullptr)
 {
 	Q_ASSERT(signalSetProvider);
 
@@ -36,12 +37,11 @@ EditSchemaView::EditSchemaView(AppSignalSetProvider* signalSetProvider, std::sha
 	m_mouseState(MouseState::None),
 	m_appSignalProvider(signalSetProvider),
 	m_tuningSignalProvider(signalSetProvider),
-	m_appSignalController(&m_appSignalProvider, nullptr),
-	m_tuningController(&m_tuningSignalProvider, nullptr, nullptr)
+	m_appSignalController(&m_appSignalProvider, nullptr)
 {
 	Q_ASSERT(signalSetProvider);
 
-	auto context = VFrame30::Context::create(&m_appSignalController, &m_tuningController, nullptr, nullptr);
+	auto context = VFrame30::Context::create(&m_appSignalController, nullptr/*m_tuningController*/, nullptr, nullptr);
 	schema->setContext(std::move(context));
 
 	// Timer for updates of WRN/ERR count
@@ -136,7 +136,7 @@ void EditSchemaView::paintEvent(QPaintEvent* paintEvent)
 	//
 	p.setRenderHint(QPainter::Antialiasing);
 
-	// Ajust QPainter
+	// Adjust QPainter
 	//
 	Ajust(&p, schema()->unit(), 0, 0, zoom());
 
@@ -177,6 +177,10 @@ void EditSchemaView::paintEvent(QPaintEvent* paintEvent)
 	// Items are being moved drawing
 	//
 	drawMovingItems(&drawParam);
+
+	// Draw proposed auto connections.
+	//
+	drawAutoFblItemConnection(drawParam);
 
 	// --
 	//
@@ -573,6 +577,15 @@ void EditSchemaView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 
 		std::vector<VFrame30::SchemaPoint> points = ipoint->getPointList();
 
+		// If item is rotated we need to take just the first point (top left), all other points are outside of the bounding rect.
+		//
+		VFrame30::PosRectRotatable* itemPosRotatable = dynamic_cast<VFrame30::PosRectRotatable*>(si.get());
+		bool rotated = itemPosRotatable != nullptr && itemPosRotatable->angle() != 0;
+		if (rotated)
+		{
+			points.resize(1);
+		}
+
 		for (size_t i = 0; i < points.size(); i++)
 		{
 			const VFrame30::SchemaPoint& p = points[i];
@@ -658,26 +671,26 @@ void EditSchemaView::drawRectSizing(VFrame30::CDrawParam* drawParam)
 		return;
 	}
 
-	double xdif = m_editEndDocPt.x() - m_editStartDocPt.x();
-	double ydif = m_editEndDocPt.y() - m_editStartDocPt.y();
+	auto schemaItem = selectedItems().front();
 
-	VFrame30::IPosRect* itemPos = dynamic_cast<VFrame30::IPosRect*>(selectedItems().front().get());
+	VFrame30::IPosRect* itemPos = dynamic_cast<VFrame30::IPosRect*>(schemaItem.get());
 	if (itemPos == nullptr)
 	{
 		assert(itemPos != nullptr);
 		return;
 	}
 
-	auto si = selectedItems().front();
-
 	// Get new rect
 	//
+	double xdif = m_editEndDocPt.x() - m_editStartDocPt.x();
+	double ydif = m_editEndDocPt.y() - m_editStartDocPt.y();
+
 	QRectF newItemRect = sizingRectItem(xdif, ydif, itemPos);
 	newItemRect = newItemRect.normalized();
 
 	// Save old state
 	//
-	std::vector<VFrame30::SchemaPoint> oldPos = si->getPointList();
+	std::vector<VFrame30::SchemaPoint> oldPos = schemaItem->getPointList();
 
 	// Set new pos
 	//
@@ -688,59 +701,78 @@ void EditSchemaView::drawRectSizing(VFrame30::CDrawParam* drawParam)
 
 	// Save result for drawing rulers
 	//
-	m_addRectStartPoint = VFrame30::SchemaPoint(newItemRect.topLeft());
-	m_addRectEndPoint = VFrame30::SchemaPoint(newItemRect.bottomRight());
+	m_addRectStartPoint = newItemRect.topLeft();
+	m_addRectEndPoint = newItemRect.bottomRight();
 
-	// Draw rulers by bounding rect
+	// Rotate m_addRectEndPoint if needed.
 	//
-	QPainter* p = drawParam->painter();
-
-	QRectF rulerRect(m_addRectStartPoint, m_addRectEndPoint);
-
-	QPen outlinePen(Qt::blue);
-	outlinePen.setStyle(Qt::PenStyle::DashLine);
-	outlinePen.setWidth(0);
-
-	QPainter::RenderHints oldrenderhints = p->renderHints();
-	p->setRenderHint(QPainter::Antialiasing, false);
-
-	p->setPen(outlinePen);
-
-	switch (mouseState())
+	auto itemPosRotatable = dynamic_cast<VFrame30::PosRectRotatable*>(selectedItems().front().get());
+	bool rotated = itemPosRotatable != nullptr && itemPosRotatable->angle() != 0;
+	if (rotated == true)
 	{
-	case MouseState::SizingTopLeft:
-		p->drawLine(QPointF(rulerRect.left(), 0.0), QPointF(rulerRect.left(), schema()->docHeight()));
-		p->drawLine(QPointF(0.0, rulerRect.top()), QPointF(schema()->docWidth(), rulerRect.top()));
-		break;
-	case MouseState::SizingTop:
-		p->drawLine(QPointF(0.0, rulerRect.top()), QPointF(schema()->docWidth(), rulerRect.top()));
-		break;
-	case MouseState::SizingTopRight:
-		p->drawLine(QPointF(rulerRect.right(), 0.0), QPointF(rulerRect.right(), schema()->docHeight()));
-		p->drawLine(QPointF(0.0, rulerRect.top()), QPointF(schema()->docWidth(), rulerRect.top()));
-		break;
-	case MouseState::SizingRight:
-		p->drawLine(QPointF(rulerRect.right(), 0.0), QPointF(rulerRect.right(), schema()->docHeight()));
-		break;
-	case MouseState::SizingBottomRight:
-		p->drawLine(QPointF(rulerRect.right(), 0.0), QPointF(rulerRect.right(), schema()->docHeight()));
-		p->drawLine(QPointF(0.0, rulerRect.bottom()), QPointF(schema()->docWidth(), rulerRect.bottom()));
-		break;
-	case MouseState::SizingBottom:
-		p->drawLine(QPointF(0.0, rulerRect.bottom()), QPointF(schema()->docWidth(), rulerRect.bottom()));
-		break;
-	case MouseState::SizingBottomLeft:
-		p->drawLine(QPointF(rulerRect.left(), 0.0), QPointF(rulerRect.left(), schema()->docHeight()));
-		p->drawLine(QPointF(0.0, rulerRect.bottom()), QPointF(schema()->docWidth(), rulerRect.bottom()));
-		break;
-	case MouseState::SizingLeft:
-		p->drawLine(QPointF(rulerRect.left(), 0.0), QPointF(rulerRect.left(), schema()->docHeight()));
-		break;
-	default:
-		assert(false);
-		break;
+		auto rotatePoint = itemPosRotatable->rotationPointInDocPt();
+
+		QTransform transform;
+		transform.translate(rotatePoint.x(), rotatePoint.y());
+		transform.rotate(itemPosRotatable->angle());
+		transform.translate(-rotatePoint.x(), -rotatePoint.y());
+
+		m_addRectEndPoint = transform.map(m_addRectEndPoint);
 	}
-	p->setRenderHints(oldrenderhints);
+
+	// Draw rulers by bounding rect only if rect is not rotated or if it is rotated and we are sizing bottom right corner.
+	//
+	if (rotated == false || (rotated == true && mouseState() == MouseState::SizingBottomRight))
+	{
+		QPainter* p = drawParam->painter();
+
+		QRectF rulerRect(m_addRectStartPoint, m_addRectEndPoint);
+
+		QPen outlinePen(Qt::blue);
+		outlinePen.setStyle(Qt::PenStyle::DashLine);
+		outlinePen.setWidth(0);
+
+		QPainter::RenderHints oldrenderhints = p->renderHints();
+		p->setRenderHint(QPainter::Antialiasing, false);
+
+		p->setPen(outlinePen);
+
+		switch (mouseState())
+		{
+		case MouseState::SizingTopLeft:
+			p->drawLine(QPointF(rulerRect.left(), 0.0), QPointF(rulerRect.left(), schema()->docHeight()));
+			p->drawLine(QPointF(0.0, rulerRect.top()), QPointF(schema()->docWidth(), rulerRect.top()));
+			break;
+		case MouseState::SizingTop:
+			p->drawLine(QPointF(0.0, rulerRect.top()), QPointF(schema()->docWidth(), rulerRect.top()));
+			break;
+		case MouseState::SizingTopRight:
+			p->drawLine(QPointF(rulerRect.right(), 0.0), QPointF(rulerRect.right(), schema()->docHeight()));
+			p->drawLine(QPointF(0.0, rulerRect.top()), QPointF(schema()->docWidth(), rulerRect.top()));
+			break;
+		case MouseState::SizingRight:
+			p->drawLine(QPointF(rulerRect.right(), 0.0), QPointF(rulerRect.right(), schema()->docHeight()));
+			break;
+		case MouseState::SizingBottomRight:
+			p->drawLine(QPointF(rulerRect.right(), 0.0), QPointF(rulerRect.right(), schema()->docHeight()));
+			p->drawLine(QPointF(0.0, rulerRect.bottom()), QPointF(schema()->docWidth(), rulerRect.bottom()));
+			break;
+		case MouseState::SizingBottom:
+			p->drawLine(QPointF(0.0, rulerRect.bottom()), QPointF(schema()->docWidth(), rulerRect.bottom()));
+			break;
+		case MouseState::SizingBottomLeft:
+			p->drawLine(QPointF(rulerRect.left(), 0.0), QPointF(rulerRect.left(), schema()->docHeight()));
+			p->drawLine(QPointF(0.0, rulerRect.bottom()), QPointF(schema()->docWidth(), rulerRect.bottom()));
+			break;
+		case MouseState::SizingLeft:
+			p->drawLine(QPointF(rulerRect.left(), 0.0), QPointF(rulerRect.left(), schema()->docHeight()));
+			break;
+		default:
+			assert(false);
+			break;
+		}
+		p->setRenderHints(oldrenderhints);
+	}
 
 	// Draw item outline
 	//
@@ -748,7 +780,7 @@ void EditSchemaView::drawRectSizing(VFrame30::CDrawParam* drawParam)
 
 	// restore position
 	//
-	si->setPointList(oldPos);
+	schemaItem->setPointList(oldPos);
 	return;
 }
 
@@ -838,7 +870,7 @@ void EditSchemaView::drawMovingLinePoint(VFrame30::CDrawParam* drawParam)
 	//
 	VFrame30::SchemaItem::drawOutline(drawParam, m_selectedItems);
 
-	// Resotore points
+	// Restore points
 	//
 	si->setPointList(oldPos);
 
@@ -989,6 +1021,31 @@ void EditSchemaView::drawCompareOutlines(VFrame30::CDrawParam* drawParam, const 
 
 }
 
+void EditSchemaView::drawAutoFblItemConnection(VFrame30::CDrawParam& drawParam)
+{
+	QPainter* painter = drawParam.painter();
+	
+	QPen pen{Qt::darkGray};
+	pen.setCosmetic(true);
+	pen.setStyle(Qt::PenStyle::DashLine);
+
+	painter->setPen(pen);
+	painter->setBrush(QColor{0xF0, 0xF0, 0xF0, 0xE0});
+
+	static const VFrame30::FontParam font{"Arial", 1.0 / 8.0, false, false};
+
+	for (auto lines = m_autoFblItemConnection.getPropositions();
+		 const auto& line : lines)
+	{
+		painter->drawLine(line.from, line.to);
+		painter->drawRect(line.addButtonRect);
+
+		VFrame30::DrawHelper::drawText(painter, font, SchemaUnit::Inch, "+", line.addButtonRect, Qt::AlignCenter);
+	}
+
+	return;
+}
+
 void EditSchemaView::drawGrid(QPainter* p, const QRectF& clipRect)
 {
 	Q_ASSERT(p);
@@ -1131,53 +1188,113 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 			return SchemaItemAction::NoAction;
 		}
 
-		// --
+		// Check control bars.
 		//
-		QRectF itemRectangle;
+		QRectF itemRectangle{itemPos->leftDocPt(), itemPos->topDocPt(), itemPos->widthDocPt(), itemPos->heightDocPt()};
 
-		itemRectangle.setX(itemPos->leftDocPt());
-		itemRectangle.setY(itemPos->topDocPt());
-		itemRectangle.setWidth(itemPos->widthDocPt());
-		itemRectangle.setHeight(itemPos->heightDocPt());
-
-		if (QRectF(itemRectangle.left() - controlBarSize, itemRectangle.top() - controlBarSize, controlBarSize, controlBarSize).contains(point) == true)
+		std::vector<std::pair<QRectF, SchemaItemAction>> barRects;
+		barRects.reserve(8);
+ 
+		// If this is the rotatable item and the angle is not 0, for different rotation points deferent control bars.
+		// Attention, this code has duplication with PosRectRotatable::drawSelectionPrivate() method.
+		//
+		if (const auto rotatableItem = dynamic_cast<const VFrame30::PosRectRotatable*>(schemaItem);
+			rotatableItem != nullptr)
 		{
-			return SchemaItemAction::ChangeSizeTopLeft;
+			auto controlBarArray = rotatableItem->controlBarRects(controlBarSize);
+			static_assert(controlBarArray.size() == 8);
+
+			if (controlBarArray[0].isNull() == false)
+			{
+				barRects.emplace_back(controlBarArray[0], SchemaItemAction::ChangeSizeTopLeft);
+			}
+			if (controlBarArray[1].isNull() == false)
+			{
+				barRects.emplace_back(controlBarArray[1], SchemaItemAction::ChangeSizeTop);
+			}
+			if (controlBarArray[2].isNull() == false)
+			{
+				barRects.emplace_back(controlBarArray[2], SchemaItemAction::ChangeSizeTopRight);
+			}
+			if (controlBarArray[3].isNull() == false)
+			{
+				barRects.emplace_back(controlBarArray[3], SchemaItemAction::ChangeSizeRight);
+			}
+			if (controlBarArray[4].isNull() == false)
+			{
+				barRects.emplace_back(controlBarArray[4], SchemaItemAction::ChangeSizeBottomRight);
+			}
+			if (controlBarArray[5].isNull() == false)
+			{
+				barRects.emplace_back(controlBarArray[5], SchemaItemAction::ChangeSizeBottom);
+			}
+			if (controlBarArray[6].isNull() == false)
+			{
+				barRects.emplace_back(controlBarArray[6], SchemaItemAction::ChangeSizeBottomLeft);
+			}
+			if (controlBarArray[7].isNull() == false)
+			{
+				barRects.emplace_back(controlBarArray[7], SchemaItemAction::ChangeSizeLeft);
+			}
+		}
+		else
+		{
+			barRects.emplace_back(QRectF{itemRectangle.left() - controlBarSize, itemRectangle.top() - controlBarSize, controlBarSize, controlBarSize},
+								  SchemaItemAction::ChangeSizeTopLeft);
+			barRects.emplace_back(QRectF{itemRectangle.left() + itemRectangle.width() / 2 - controlBarSize / 2, itemRectangle.top() - controlBarSize, controlBarSize, controlBarSize},
+								  SchemaItemAction::ChangeSizeTop);
+			barRects.emplace_back(QRectF{itemRectangle.right(), itemRectangle.top() - controlBarSize, controlBarSize, controlBarSize},
+								  SchemaItemAction::ChangeSizeTopRight);
+			barRects.emplace_back(QRectF{itemRectangle.right(), itemRectangle.top() + itemRectangle.height() / 2 - controlBarSize / 2, controlBarSize, controlBarSize},
+								  SchemaItemAction::ChangeSizeRight);
+			barRects.emplace_back(QRectF{itemRectangle.right(), itemRectangle.top() + itemRectangle.height(), controlBarSize, controlBarSize},
+								  SchemaItemAction::ChangeSizeBottomRight);
+			barRects.emplace_back(QRectF{itemRectangle.left() + itemRectangle.width() / 2 - controlBarSize / 2, itemRectangle.top() + itemRectangle.height(), controlBarSize, controlBarSize},
+								  SchemaItemAction::ChangeSizeBottom);
+			barRects.emplace_back(QRectF{itemRectangle.left() - controlBarSize, itemRectangle.top() + itemRectangle.height(), controlBarSize, controlBarSize},
+								  SchemaItemAction::ChangeSizeBottomLeft);
+			barRects.emplace_back(QRectF{itemRectangle.left() - controlBarSize, itemRectangle.top() + itemRectangle.height() / 2 - controlBarSize / 2, controlBarSize, controlBarSize},
+								  SchemaItemAction::ChangeSizeLeft);
 		}
 
-		if (QRectF(itemRectangle.left() + itemRectangle.width() / 2 - controlBarSize / 2, itemRectangle.top() - controlBarSize, controlBarSize, controlBarSize).contains(point) == true)
+		if (VFrame30::PosRectRotatable* rotatableItem = dynamic_cast<VFrame30::PosRectRotatable*>(schemaItem);
+			rotatableItem != nullptr && rotatableItem->angle() != 0.0)
 		{
-			return SchemaItemAction::ChangeSizeTop;
-		}
+			// Check BarRectangles with rotations
+			//  
+			auto rotatePoint = rotatableItem->rotationPointInDocPt();
 
-		if (QRectF(itemRectangle.right(), itemRectangle.top() - controlBarSize, controlBarSize, controlBarSize).contains(point) == true)
-		{
-			return SchemaItemAction::ChangeSizeTopRight;
-		}
+			QTransform transform;
+			transform.translate(rotatePoint.x(), rotatePoint.y());
+			transform.rotate(rotatableItem->angle());
+			transform.translate(-rotatePoint.x(), -rotatePoint.y());
 
-		if (QRectF(itemRectangle.right(), itemRectangle.top() + itemRectangle.height() / 2 - controlBarSize / 2, controlBarSize, controlBarSize).contains(point) == true)
-		{
-			return SchemaItemAction::ChangeSizeRight;
-		}
+			QPainterPath path;
+			for (const auto& [barRect, action] : barRects)
+			{
+				QPolygonF rotatedRect = transform.map(barRect);
 
-		if (QRectF(itemRectangle.right(), itemRectangle.top() + itemRectangle.height(), controlBarSize, controlBarSize).contains(point) == true)
-		{
-			return SchemaItemAction::ChangeSizeBottomRight;
-		}
+				path.clear();
+				path.addPolygon(rotatedRect);
+				path.closeSubpath();
 
-		if (QRectF(itemRectangle.left() + itemRectangle.width() / 2 - controlBarSize / 2, itemRectangle.top() + itemRectangle.height(), controlBarSize, controlBarSize).contains(point) == true)
-		{
-			return SchemaItemAction::ChangeSizeBottom;
+				if (path.contains(point) == true)
+				{
+					return action;
+				}
+			}
 		}
-
-		if (QRectF(itemRectangle.left() - controlBarSize, itemRectangle.top() + itemRectangle.height(), controlBarSize, controlBarSize).contains(point) == true)
+		else
 		{
-			return SchemaItemAction::ChangeSizeBottomLeft;
-		}
-
-		if (QRectF(itemRectangle.left() - controlBarSize, itemRectangle.top() + itemRectangle.height() / 2 - controlBarSize / 2, controlBarSize, controlBarSize).contains(point) == true)
-		{
-			return SchemaItemAction::ChangeSizeLeft;
+			// Check BarRectangles without rotations
+			//
+			for (const auto& [rect, action] : barRects)
+			{
+				if (rect.contains(point) == true)
+				{
+					return action;
+				}
+			}
 		}
 
 		return SchemaItemAction::NoAction;
@@ -1322,7 +1439,7 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 	return SchemaItemAction::NoAction;
 }
 
-QRectF EditSchemaView::sizingRectItem(double xdif, double ydif, VFrame30::IPosRect* itemPos)
+QRectF EditSchemaView::sizingRectItem(double xdif, double ydif, const VFrame30::IPosRect* itemPos)
 {
 	if (itemPos == nullptr)
 	{
@@ -1421,7 +1538,6 @@ QRectF EditSchemaView::sizingRectItem(double xdif, double ydif, VFrame30::IPosRe
 		break;
 	}
 
-
 	QRectF result(std::min(x1, x2),
 				  std::min(y1, y2),
 				  std::abs(x2 - x1),
@@ -1496,7 +1612,7 @@ void EditSchemaView::setSelectedItems(const std::vector<SchemaItemPtr>& items)
 		}
 	}
 
-	// Check if the selected items are the same, don't do anything and don't emit selectionCanged
+	// Check if the selected items are the same, don't do anything and don't emit selectionChanged
 	//
 	if (uniqueItems.size() == m_selectedItems.size())
 	{
@@ -1521,6 +1637,8 @@ void EditSchemaView::setSelectedItems(const std::vector<SchemaItemPtr>& items)
 	// Set new selection
 	//
 	m_selectedItems = uniqueItems;
+
+	m_autoFblItemConnection.setItems(m_selectedItems);
 
 	emit selectionChanged();
 
@@ -1555,6 +1673,8 @@ void EditSchemaView::setSelectedItems(const std::list<SchemaItemPtr>& items)
 	//
 	m_selectedItems.clear();
 	m_selectedItems.insert(m_selectedItems.begin(), items.begin(), items.end());
+	
+	m_autoFblItemConnection.setItems(m_selectedItems);
 
 	emit selectionChanged();
 
@@ -1571,6 +1691,8 @@ void EditSchemaView::setSelectedItem(const SchemaItemPtr& item)
 	m_selectedItems.clear();
 	m_selectedItems.push_back(item);
 
+	m_autoFblItemConnection.setItems(m_selectedItems);
+
 	emit selectionChanged();
 
 	return;
@@ -1583,6 +1705,7 @@ void EditSchemaView::addSelection(const SchemaItemPtr& item, bool emitSectionCha
 	if (fp == std::end(m_selectedItems))
 	{
 		m_selectedItems.push_back(item);
+		m_autoFblItemConnection.setItems(m_selectedItems);
 
 		if (emitSectionChanged == true)
 		{
@@ -1601,6 +1724,8 @@ void EditSchemaView::clearSelection()
 	}
 
 	m_selectedItems.clear();
+	m_autoFblItemConnection.setItems(m_selectedItems);
+
 	emit selectionChanged();
 
 	return;
@@ -1613,6 +1738,7 @@ bool EditSchemaView::removeFromSelection(const SchemaItemPtr& item, bool emitSec
 	if (findResult != m_selectedItems.end())
 	{
 		m_selectedItems.erase(findResult);
+		m_autoFblItemConnection.setItems(m_selectedItems);
 
 		if (emitSectionChanged == true)
 		{

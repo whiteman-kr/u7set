@@ -1,13 +1,8 @@
 #ifndef HARDWARE_LIB_DOMAIN
-#error Don't include this file in the project! Link HardwareLib instead.
+#error Do not include this file in the project! Link HardwareLib instead.
 #endif
 
-#include <QXmlStreamReader>
-#include <QXmlStreamWriter>
-
 #include "Connection.h"
-#include <set>
-
 #include "../CommonLib/Hash.h"
 
 

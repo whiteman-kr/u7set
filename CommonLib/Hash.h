@@ -6,11 +6,10 @@
 #include <QUuid>
 #include <QRectF>
 #include <QSize>
-#include <QtGlobal>
 
 using Hash = quint64;
 
-#define UNDEFINED_HASH 0x0000000000000000ULL
+#define UNDEFINED_HASH 0x0000000000000000ULL		// Do not change to other value.
 
 
 inline Hash calcHash(const QString& str, Hash init = 0)

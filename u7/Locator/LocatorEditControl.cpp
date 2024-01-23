@@ -35,7 +35,6 @@ namespace Locator
 		QWidget* currentWidget = QApplication::focusWidget();
 
 		if (currentWidget == this ||
-			currentWidget == this ||
 			currentWidget == m_focusCameFrom)
 		{
 			return;

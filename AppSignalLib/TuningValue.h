@@ -3,7 +3,11 @@
 #include <QObject>
 
 #include "../CommonLib/Types.h"
-#include "../Proto/network.pb.h"
+
+namespace Proto
+{
+	class TuningValue;
+}
 
 enum class TuningValueType
 {

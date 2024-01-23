@@ -21,7 +21,6 @@
 #include <QTimer>
 #include <QDebug>
 
-#include "../CommonLib/OrderedHash.h"
 #include "../CommonLib/Types.h"
 #include "../CommonLib/AfbParamValue.h"
 
@@ -140,6 +139,11 @@ public:
 	{
 		m_category = value;
 		return *this;
+	}
+
+	[[nodiscard]] bool isCategorized() const noexcept
+	{
+		return !m_category.isEmpty();
 	}
 
 	[[nodiscard]] const QString& validator() const noexcept
@@ -1231,169 +1235,6 @@ private:
 	QVariant m_highLimit;
 };
 
-
-//			Dynamic Enum Property
-//			Class PropertyValue specialization for OrderedHash<int, QString>,
-//			class behaves like enum
-//
-template <>
-class PropertyValue<OrderedHash<int, QString>> final : public Property
-{
-public:
-	PropertyValue(std::shared_ptr<OrderedHash<int, QString>> enumValues) :
-		m_enumValues(std::move(enumValues))
-	{
-		Q_ASSERT(m_enumValues);
-	}
-
-	virtual ~PropertyValue() = default;
-
-public:
-	[[nodiscard]] virtual bool isEnum() const noexcept final
-	{
-		return true;	// This is dynamic enumeration
-	}
-
-	[[nodiscard]] virtual std::vector<std::pair<int, QString>> enumValues() const noexcept final
-	{
-		return m_enumValues->getKeyValueVector();
-	}
-
-	[[nodiscard]] virtual QVariant enumValue() const noexcept final
-	{
-		return value();
-	}
-
-public:
-	[[nodiscard]] virtual QVariant value() const noexcept final
-	{
-		if (m_getter)
-		{
-			QVariant result(QVariant::fromValue(m_getter()));
-			return result;
-		}
-		else
-		{
-			return {m_value};
-		}
-	}
-
-	void setValueDirect(int value) noexcept 			// Not virtual, is called from class ProprtyObject for direct access
-	{
-		// setValueDirect is used for non enum types only
-		//
-		Q_UNUSED(value);
-		return;
-	}
-
-	void setValue(const QVariant& value) noexcept final	// Overriden from class Propery
-	{
-		if (value.metaType().id() == QMetaType::Int)
-		{
-			setEnumValue(value.toInt());
-			return;
-		}
-
-		if (value.metaType().id() == QMetaType::QString)
-		{
-			int key = m_enumValues->key(value.toString());
-			setEnumValue(key);
-			return;
-		}
-
-		Q_ASSERT(false);
-	}
-
-	virtual void setEnumValue(int value) noexcept final	// Overriden from class Propery
-	{
-		if (m_setter)
-		{
-			m_setter(value);
-		}
-		else
-		{
-			m_value = value;
-		}
-	}
-
-	virtual void setEnumValue(const char* value) noexcept final	// Overriden from class Propery
-	{
-		int key = m_enumValues->key(QString::fromLatin1(value));
-		setEnumValue(key);
-	}
-
-private:
-	void checkLimits()
-	{
-	}
-
-public:
-	void setLimits(const QVariant& low, const QVariant& high) noexcept
-	{
-		Q_UNUSED(low);
-		Q_UNUSED(high);
-	}
-
-	[[nodiscard]] virtual const QVariant& lowLimit() const noexcept final
-	{
-		static const QVariant dummy;			//	for return from lowLimt, hughLimt
-		return dummy;
-	}
-	virtual void setLowLimit(const QVariant& value) noexcept final
-	{
-		Q_UNUSED(value);
-	}
-
-	[[nodiscard]] virtual const QVariant& highLimit() const noexcept final
-	{
-		static const QVariant dummy;			//	for return from lowLimt, hughLimt
-		return dummy;
-	}
-	virtual void setHighLimit(const QVariant& value) noexcept final
-	{
-		Q_UNUSED(value);
-	}
-
-	void setGetter(std::function<int(void)> getter) noexcept
-	{
-		m_getter = std::move(getter);
-	}
-	void setSetter(std::function<void(int)> setter) noexcept
-	{
-		m_setter = std::move(setter);
-	}
-
-	[[nodiscard]] virtual bool isTheSameType(Property* property) noexcept final
-	{
-		if (dynamic_cast<PropertyValue<OrderedHash<int, QString>>*>(property) == nullptr)
-		{
-			return false;
-		}
-
-		return true;
-	}
-
-	virtual void updateFromPreset(Property* presetProperty, bool updateValue) noexcept final
-	{
-		// Implementation is not requiered yet
-		// To do if requeired
-		//
-		Q_UNUSED(presetProperty);
-		Q_UNUSED(updateValue);
-	}
-
-private:
-	// WARNING!!! If you add a field, do not forget to add it to updateFromPreset();
-	//
-	std::shared_ptr<OrderedHash<int, QString>> m_enumValues;
-
-	int m_value = 0;
-
-	std::function<int(void)> m_getter;
-	std::function<void(int)> m_setter;
-};
-
-
 //			Dynamic Enum Property based on std::vector, it's slower then PropertyValue<OrderedHash> but consumes
 //			less memory and in plain way.
 //			class behaves like enum
@@ -1703,13 +1544,6 @@ public:
 											 bool visible,
 											 const QVariant& value);
 
-	PropertyValue<OrderedHash<int, QString>>* addDynamicEnumProperty(
-			const QString& caption,
-			const std::shared_ptr<OrderedHash<int, QString>>& enumValues,
-			bool visible = false,
-			const std::function<int(void)>& getter = std::function<int(void)>(),
-			const std::function<void(int)>& setter = std::function<void(int)>());
-
 	PropertyValue<std::vector<std::pair<QString, int>>>* addDynamicEnumProperty(
 			const QString& caption,
 			const std::vector<std::pair<QString, int>>& enumValues,
@@ -1741,7 +1575,7 @@ public:
 	// if they were added via PropertyObject::addProperty and later removed by removeAllProperties
 	//
 	void addProperties(const std::vector<std::shared_ptr<Property>>& properties);
-	void addProperty(std::shared_ptr<Property>& property);
+	void addProperty(std::shared_ptr<Property> property);
 
 	// Get specific property by its caption,
 	// return Property* or nullptr if property is not found
@@ -1823,6 +1657,7 @@ public:
 	std::pair<bool, QString> parseSpecificPropertiesStructV5(const QStringList& columns);
 	std::pair<bool, QString> parseSpecificPropertiesStructV6(const QStringList& columns);
 	std::pair<bool, QString> parseSpecificPropertiesStructV7(const QStringList& columns);
+private:
 	std::pair<bool, QString> parseSpecificPropertiesCreate(int version,
 														   const QString& name,
 														   const QString& category,
@@ -1840,6 +1675,7 @@ public:
 														   const QString& strEssential,
 														   const QString& strReadOnly);
 
+public:
 	static std::pair<E::SpecificPropertyType, bool> parseSpecificPropertyType(const QString& strType);
 	static std::vector<std::pair<QString, int>> parseSpecificPropertyTypeDynamicEnum(const QString& strType, bool* ok);
 

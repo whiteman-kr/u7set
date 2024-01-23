@@ -1,11 +1,6 @@
 #ifndef ONLINE_LIB_DOMAIN
-#error Don't include this file in the project! Link OnlineLib instead.
+#error Do not include this file in the project! Link OnlineLib instead.
 #endif
-
-#include <QDir>
-#include <QStandardPaths>
-#include <QDateTime>
-#include <QCoreApplication>
 
 #include "../UtilsLib/WUtils.h"
 #include "CircularLogger.h"
@@ -457,7 +452,7 @@ void CircularLogger::composeAndWriteRecord(RecordType type, const QString& messa
 		return;
 	}
 
-	QString msg = message.simplified();
+	QString msg = message;
 
 	msg.replace("&nbsp;", " ");
 

@@ -1,0 +1,22 @@
+<AFBComponent Caption="INT" OpCode="17" HasRam="true" ImpVersion="7" VersionOpIndex="29" MaxInstCount="0" SimulationFunc="afb_int_v7_tiunlim">
+	<Pin OpName="i_ki" OpIndex="0" PinType="Param"/>
+	<Pin OpName="i_ti" OpIndex="2" PinType="Param"/>
+	<Pin OpName="i_max" OpIndex="4" PinType="Param"/>
+	<Pin OpName="i_min" OpIndex="6" PinType="Param"/>
+	<Pin OpName="i_ri_const" OpIndex="8" PinType="Param"/>
+	<Pin OpName="i_yi_prev" OpIndex="10" PinType="Input"/>
+	<Pin OpName="i_x_tr" OpIndex="12" PinType="Input"/>
+	<Pin OpName="i_x" OpIndex="14" PinType="Input"/>
+	<Pin OpName="i_reset" OpIndex="16" PinType="Input"/>
+	<Pin OpName="i_pause" OpIndex="17" PinType="Input"/>
+	<Pin OpName="i_track" OpIndex="18" PinType="Input"/>
+	<Pin OpName="o_result" OpIndex="20" PinType="Output"/>
+	<Pin OpName="o_max" OpIndex="22" PinType="Output"/>
+	<Pin OpName="o_min" OpIndex="23" PinType="Output"/>
+	<Pin OpName="o_param_err" OpIndex="24" PinType="Output"/>
+	<Pin OpName="o_overflow" OpIndex="25" PinType="Output"/>
+	<Pin OpName="o_underflow" OpIndex="26" PinType="Output"/>
+	<Pin OpName="o_zero" OpIndex="27" PinType="Output"/>
+	<Pin OpName="o_nan" OpIndex="28" PinType="Output"/>
+	<Pin OpName="o_version" OpIndex="29" PinType="Output"/>
+</AFBComponent>

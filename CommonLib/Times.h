@@ -51,7 +51,8 @@ struct TimeStamp
 	TimeStamp(qint64 value) : timeStamp(value)
 	{
 	}
-	explicit TimeStamp(const QDateTime& dateTime) : timeStamp(dateTime.toMSecsSinceEpoch() + dateTime.offsetFromUtc() * 1000)
+	explicit TimeStamp(const QDateTime& dateTime) : 
+		timeStamp(dateTime.toMSecsSinceEpoch() + static_cast<qint64>(dateTime.offsetFromUtc()) * 1000ll)
 	{
 	}
 

@@ -3,6 +3,7 @@
 
 #include "MonitorSignalManager.h"
 #include "../lib/Ui/DialogSignalInfo.h"
+#include "../lib/ISignalDataServer.h"
 
 class MonitorCentralWidget;
 class MonitorConfigController;
@@ -12,7 +13,10 @@ class MonitorSignalInfo : public DialogSignalInfo
 	Q_OBJECT
 public:
 	static bool showDialog(QString appSignalId,
-						   MonitorSignalManager* signalManager,
+						   MonitorSignalManager* appSignalManager,
+						   ITuningSignalManager& tuningSignalManager,
+						   ITuningConnection& tuningConnection,
+						   ITuningAuthorization& tuningAuthorization,
 						   MonitorConfigController* configController,
 						   MonitorCentralWidget* centralWidget);
 
@@ -20,7 +24,10 @@ private:
 	MonitorSignalInfo(const AppSignalParam& signal,
 					  MonitorConfigController* configController,
 					  IAppSignalManager* appSignalManager,
-					  VFrame30::TuningController* tuningController,
+					  ISignalDataServer* signalDataServer,
+					  ITuningSignalManager& tuningSignalManager,
+					  ITuningConnection& tuningConnection,
+					  ITuningAuthorization& tuningAuthorization,
 					  bool tuningEnabled,
 					  MonitorCentralWidget* centralWidget);
 

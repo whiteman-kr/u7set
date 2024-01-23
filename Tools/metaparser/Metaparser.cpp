@@ -76,7 +76,7 @@ int Metaparser::searchBlocks()
 
 				while (dataFromInputFile.atEnd() == false &&
 					   oneLineFromInputFile.indexOf("///") != -1 &&
-					   oneLineFromInputFile[oneLineFromInputFile.indexOf("///") + 3] != '/' &&
+//					   oneLineFromInputFile[oneLineFromInputFile.indexOf("///") + 3] != '/' &&
 					   stringForCheckingLineBeginning.indexOf("///") == 0)
 				{
 					oneLineFromInputFile = dataFromInputFile.readLine().trimmed();
@@ -160,8 +160,9 @@ Metaparser::BlockFromFile Metaparser::processBlock(const QStringList &block)
 					   bufferLine.indexOf(title) == -1 &&
 					   bufferLine.indexOf(parameters) == -1 &&
 					   bufferLine.indexOf(description) == -1 &&
-					   bufferLine[bufferLine.indexOf("///") + 3] != '/' &&
 					   bufferLine.indexOf("///") != -1)
+//					   &&
+//					   bufferLine[bufferLine.indexOf("///") + 3] != '/')
 				{
 					bufferPart += bufferLine.remove(0, bufferLine.indexOf("///")+3);
 

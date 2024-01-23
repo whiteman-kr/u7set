@@ -1,6 +1,5 @@
 #include "../Forms/ProjectPropertiesForm.h"
 #include "../../lib/PropertyEditorDialog.h"
-#include <memory>
 
 //
 // ProjectPropertiesForm
@@ -40,9 +39,14 @@ bool ProjectPropertiesForm::show(QWidget* parent, DbController* db)
 		Q_ASSERT(prop);
 	}
 
+	// Only Administrator can edit @SafetyProject@
+	//
+	bool safetyProjectOldValue = true;
+
 	if (auto prop = propertyObject->propertyByCaption(Db::ProjectProperty::SafetyProject);
 		prop != nullptr)
 	{
+		safetyProjectOldValue = prop->value().toBool();
 		prop->setReadOnly(!db->currentUser().isAdminstrator());
 	}
 	else
@@ -115,9 +119,16 @@ bool ProjectPropertiesForm::show(QWidget* parent, DbController* db)
 			showInformationBox = true;
 		}
 
+		if (auto prop = propertyObject->propertyByCaption(Db::ProjectProperty::SafetyProject);
+			prop != nullptr &&
+			prop->value().toBool() != safetyProjectOldValue)
+		{
+			showInformationBox = true;
+		}
+
 		if (showInformationBox == true)
 		{
-			QMessageBox::information(parent, qAppName(), "To apply option some properties project reopen can be required.");
+			QMessageBox::information(parent, qAppName(), "To apply some properties project reopening required.");
 		}
 	}
 

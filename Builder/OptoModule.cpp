@@ -1,11 +1,11 @@
 #include "OptoModule.h"
 #include <QQmlEngine>
-#include "../lib/LmDescription.h"
-#include "../lib/DeviceHelper.h"
+#include "../HardwareLib/LmDescription.h"
 #include "../lib/ConstStrings.h"
 #include "../UtilsLib/Crc.h"
 #include "../Builder/Context.h"
-#include "../Builder/ApplicationLogicCompiler.h"
+#include "../Builder/AppLogicCompiler.h"
+#include "DeviceHelper.h"
 #include "UalItems.h"
 #include "LmDescriptionSet.h"
 

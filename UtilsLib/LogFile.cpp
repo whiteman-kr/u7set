@@ -1,32 +1,8 @@
 #ifndef UTILS_LIB_DOMAIN
-#error Don't include this file in the project! Link UtilsLib instead.
+#error Do not include this file in the project! Link UtilsLib instead.
 #endif
 
 #include "LogFile.h"
-#include <QApplication>
-#include <QDir>
-#include <QFile>
-#include <QTimer>
-#include <QTextStream>
-#include <QDateTime>
-#include <QAbstractItemModel>
-#include <QComboBox>
-#include <QUuid>
-#include <QScreen>
-#include <QTableView>
-#include <QFileDialog>
-#include <QHeaderView>
-#include <QVBoxLayout>
-#include <QMessageBox>
-#include <QLineEdit>
-#include <QKeyEvent>
-#include <QClipboard>
-#include <QAction>
-#include <QShortcut>
-#include <QDesktopServices>
-#include <QDateTimeEdit>
-#include <QScrollBar>
-#include <array>
 #include "./Ui/UiTools.h"
 #include "../CommonLib/Hash.h"
 
@@ -42,13 +18,23 @@ namespace Log
 
 	const QString messageTimeFormat("dd.MM.yyyy hh:mm:ss.zzz");
 
+	void replaceStringInPlace(std::string& subject, const std::string& search, const std::string& replace)
+	{
+		size_t pos = 0;
+		while ((pos = subject.find(search, pos)) != std::string::npos)
+		{
+			 subject.replace(pos, search.length(), replace);
+			 pos += replace.length();
+		}
+	}
+
 	QString LogFileRecord::toString(const QString& sessionHashString) const
 	{
 		if (type == MessageType::Text)
 		{
 			return QString("%1\t%2\r\n")
 					.arg(sessionHashString)
-					.arg(QString::fromLocal8Bit(text.c_str()));
+					.arg(QString::fromLocal8Bit(text.c_str()).replace('\n', "\\n"));
 		}
 
 		size_t intType = static_cast<int>(type);
@@ -62,7 +48,7 @@ namespace Log
 				.arg(sessionHashString)
 				.arg(QDateTime().fromMSecsSinceEpoch(time).toString(messageTimeFormat))
 				.arg(messageTypeTextShort[intType])
-				.arg(QString::fromLocal8Bit(text.c_str()));
+				.arg(QString::fromLocal8Bit(text.c_str()).replace('\n', "\\n"));
 	}
 
     bool LogFileRecord::loadFromString(const char* buf, const qint64 bufSize, const quint64 currentSessionHash)
@@ -239,6 +225,7 @@ namespace Log
 			}
 
 			text.assign(ptr, strLen);
+			replaceStringInPlace(text, "\\n", "\n");
 			return true;
 		}
 
@@ -318,6 +305,7 @@ namespace Log
 			return false;
 		}
 		text.assign(ptr, strLen - 1/*remove last \n*/);
+		replaceStringInPlace(text, "\\n", "\n");
 		return true;
 	}
 
@@ -1406,9 +1394,34 @@ namespace Log
         return emptyRecord;
     }
 
-    QBrush LogRecordModel::color(const QModelIndex& index) const
+    QBrush LogRecordModel::color(const QModelIndex& index, bool selected) const
     {
-        return data(index, Qt::ForegroundRole).value<QBrush>();
+		const LogFileRecord& rec = record(index.row());
+
+		switch (rec.type)
+		{
+		case MessageType::Error:
+		case MessageType::Alert:
+			if (selected == true)
+			{
+				return QBrush{qRgb(0xFF, 0x00, 0x00)};
+			}
+			else
+			{
+				return QBrush{qRgb(0xE0, 0x33, 0x33)};
+			}
+		case MessageType::Warning:
+			if (selected == true)
+			{
+				return QBrush{qRgb(0xD8, 0x52, 0x07)};
+			}
+			else
+			{
+				return QBrush{qRgb(0xF8, 0x72, 0x17)};
+			}
+		default:
+			return {};
+		}
     }
 
     int LogRecordModel::rowCount(const QModelIndex& parent) const
@@ -1487,23 +1500,19 @@ namespace Log
 				}
 				else
 				{
-                    return QString::fromLocal8Bit(rec.text.c_str());
+					return QString::fromLocal8Bit(rec.text.c_str()).replace('\n', ' ');
 				}
 			}
 		}
 
-		if (role == Qt::ForegroundRole)
+		if (role == Qt::ToolTipRole)
 		{
-            switch (rec.type)
+			// Display tooltip only for text if it contains '\n'
+			if (static_cast<int>(column) >= m_columnText &&
+					rec.type != MessageType::Data &&
+					rec.text.find('\n') != std::string::npos)
 			{
-			case MessageType::Error:
-				return QBrush{qRgb(0xE0, 0x33, 0x33)};
-			case MessageType::Alert:
-				return QBrush{qRgb(0xE0, 0x33, 0x33)};
-			case MessageType::Warning:
-				return QBrush{qRgb(0xF8, 0x72, 0x17)};
-			default:
-				return {};
+				return QString::fromLocal8Bit(rec.text.c_str());
 			}
 		}
 
@@ -1545,15 +1554,17 @@ namespace Log
 	void SelectionControlDelegate::initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const
 	{
 		QStyledItemDelegate::initStyleOption(option, index);
-
+		
 		bool active = option->state & QStyle::State_Active;
 		bool selected = option->state & QStyle::State_Selected;
 
-		// Set background color for selected item (by default it is displayed by white)
+		QBrush br = m_model->color(m_proxyModel->mapToSource(index), selected);
+		option->palette.setColor(QPalette::Text, br.color());
+		
+		// Set color for selected item (by default it is displayed by white)
 		//
 		if (selected == true)
 		{
-            QBrush br = m_model->color(m_proxyModel->mapToSource(index));
 			if (br.style() == Qt::NoBrush && active == true)
 			{
 				// Use white color on selected items if control is active
@@ -1564,6 +1575,18 @@ namespace Log
 			{
 				option->palette.setColor(QPalette::HighlightedText, br.color());
 			}
+			if (active == true)
+			{
+				option->palette.setColor(QPalette::Highlight, qRgb(0x90, 0xc8, 0xf6));
+			}
+			else
+			{
+				option->palette.setColor(QPalette::Highlight, qRgb(0xe0, 0xe0, 0xe0));
+			}
+		}
+		else
+		{
+			option->palette.setColor(QPalette::Base, Qt::white);
 		}
 	}
 
@@ -1580,12 +1603,12 @@ namespace Log
 
 		QVBoxLayout* mainLayout = new QVBoxLayout();
 
-		mainLayout->addWidget(new QLabel("Start Time:"));
+		mainLayout->addWidget(new QLabel(tr("Start Time:")));
 		m_timeFromEdit = new QDateTimeEdit(this);
 		m_timeFromEdit->setDisplayFormat(messageTimeFormat);
 		mainLayout->addWidget(m_timeFromEdit);
 
-		mainLayout->addWidget(new QLabel("End Time:"));
+		mainLayout->addWidget(new QLabel(tr("End Time:")));
 		m_timeToEdit = new QDateTimeEdit(this);
 		m_timeToEdit->setDisplayFormat(messageTimeFormat);
 		mainLayout->addWidget(m_timeToEdit);
@@ -1729,7 +1752,7 @@ namespace Log
 
 		if (useMessageType == true)
 		{
-			topLayout->addWidget(new QLabel("Type:"));
+			topLayout->addWidget(new QLabel(tr("Type:")));
 
 			m_recordTypeCombo = new QComboBox();
 			m_recordTypeCombo->addItem(tr("All Messages"), MessageType::All);
@@ -2220,10 +2243,10 @@ namespace Log
         m_counterLabel->setText(tr("Total records: %1, Errors: %2, Warnings: %3").arg(m_proxyModel.rowCount()).arg(m_proxyModel.errorCount()).arg(m_proxyModel.warningCount()));
 
         if (m_autoScroll->isChecked() == true)
-        {
-            m_table->scrollToBottom();
+		{
+			m_table->scrollToBottom();
         }
-    }
+	}
 
     void LogFileDialog::onLoadComplete()
 	{
@@ -2246,6 +2269,8 @@ namespace Log
         }
 
         enableControls(true);
+
+		m_table->scrollToBottom();
 	}
 
 	void LogFileDialog::onRecordArrived(LogFileRecord record)
@@ -2370,11 +2395,13 @@ namespace Log
 
 	void LogFileDialog::onLoad()
 	{
-		QString fileName = QFileDialog::getOpenFileName(this, tr("Select File"), QString(), "Log Files (*.log)");
+		static QString path{"."};
+		QString fileName = QFileDialog::getOpenFileName(this, tr("Select File"), path, "Log Files (*.log)");
 		if (fileName.isEmpty() == true)
 		{
 			return;
 		}
+		path = QFileInfo(fileName).path(); // store path for next time
 
 		m_loadedFromFile = true;
         m_loadedFileName = fileName;
@@ -2410,15 +2437,17 @@ namespace Log
 
 	void LogFileDialog::onExport()
 	{
+		static QString path{"."};
         QString fileName = QFileDialog::getSaveFileName(this,
 														tr("Save File"),
-														"Untitled.log",
+														path + QDir::separator() + "Untitled.log",
 														tr("Log files (*.log)"));
 
 		if (fileName.isEmpty() == true)
 		{
 			return;
 		}
+		path = QFileInfo(fileName).path(); // store path for next time
 
 		std::vector<LogFileRecord> exportRecords;
 
@@ -2552,12 +2581,12 @@ namespace Log
 		return;
 	}
 
-	bool LogFile::writeMessage(const QString& text)
+	bool LogFile::writeMessage(const QString& text, const QString& /*tag*/)
 	{
 		return write(MessageType::Message, text);
 	}
 
-	bool LogFile::writeAlert(const QString& text)
+	bool LogFile::writeAlert(const QString& text, const QString& /*tag*/)
 	{
 		m_alertAckCounter++;
 
@@ -2566,21 +2595,21 @@ namespace Log
 		return write(MessageType::Alert, text);
 	}
 
-	bool LogFile::writeError(const QString& text)
+	bool LogFile::writeError(const QString& text, const QString& /*tag*/)
 	{
 		m_errorAckCounter++;
 
 		return write(MessageType::Error, text);
 	}
 
-	bool LogFile::writeWarning(const QString& text)
+	bool LogFile::writeWarning(const QString& text, const QString& /*tag*/)
 	{
 		m_warningAckCounter++;
 
 		return write(MessageType::Warning, text);
 	}
 
-	bool LogFile::writeText(const QString& text)
+	bool LogFile::writeText(const QString& text, const QString& /*tag*/)
 	{
 		return write(MessageType::Text, text);
 	}

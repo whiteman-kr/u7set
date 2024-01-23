@@ -2,27 +2,13 @@
 
 #include <fstream>
 #include <memory>
+
 #include <QUuid>
 #include <QVariant>
-#include "../CommonLib/PropertyObject.h"
+
 #include "../CommonLib/AfbParamValue.h"
+#include "../CommonLib/PropertyObject.h"
 #include "../Proto/serialization.pb.h"
-
-#ifdef Q_OS_WIN
-#pragma warning (push)
-#pragma warning(disable : 4244)
-#pragma warning(disable : 4125)
-#pragma warning(disable : 6011)
-#pragma warning(disable : 4267)
-#pragma warning(disable : 4512)
-#pragma warning(disable : 4127)
-#pragma warning(disable : 4996)
-#endif // Q_OS_WIN
-
-#include "serialization.pb.h"
-#ifdef Q_OS_WIN
-#pragma warning (pop)
-#endif // Q_OS_WIN
 
 
 namespace Proto
@@ -40,14 +26,14 @@ namespace Proto
 	};
 
 
-	// Template and imlementation seriazlization functions
+	// Template and implementation serialization functions
 	// VFrameType must have functions CreateObject, SaveData, LoadData
 	//
-	template <typename VFrameType>
+	template<typename VFrameType>
 	class ObjectSerialization
 	{
-	public:
-		ObjectSerialization(ProtoCompress compression = Proto::ProtoCompress::Auto, size_t autoCompressionLimit = 2048) noexcept:
+	  public:
+		ObjectSerialization(ProtoCompress compression = Proto::ProtoCompress::Auto, size_t autoCompressionLimit = 2048) noexcept :
 			m_compression(compression),
 			m_autoCompressionLimit(autoCompressionLimit)
 		{
@@ -150,7 +136,7 @@ namespace Proto
 					return false;
 				}
 			}
-			catch(...)
+			catch (...)
 			{
 				assert(false);
 				return false;
@@ -305,12 +291,12 @@ namespace Proto
 				}
 
 				std::shared_ptr<int> emitPropertyListChanged(nullptr, [propertyObject](void*)
-					{
-						if (propertyObject != nullptr)
-						{
-							propertyObject->blockSignals(false);
-						}
-					});
+															 {
+																 if (propertyObject != nullptr)
+																 {
+																	 propertyObject->blockSignals(false);
+																 }
+															 });
 
 				//--
 				//
@@ -420,11 +406,11 @@ namespace Proto
 			}
 		}
 
-	protected:
+	  protected:
 		virtual bool SaveData(Proto::Envelope* message) const = 0;
 		virtual bool LoadData(const Proto::Envelope& message) = 0;
 
-	public:
+	  public:
 		[[nodiscard]] ProtoCompress compression() const
 		{
 			return m_compression;
@@ -443,7 +429,7 @@ namespace Proto
 			m_autoCompressionLimit = value;
 		}
 
-	private:
+	  private:
 		ProtoCompress m_compression = ProtoCompress::Auto;
 		size_t m_autoCompressionLimit = 2048;
 	};
@@ -458,7 +444,7 @@ namespace Proto
 	void Read(const Proto::wstring& message, QString* dst);
 	void Write(Proto::wstring* pMessage, const QString& str);
 
-	// Read/write qvariant message
+	// Read/write qVariant message
 	//
 	const QVariant Read(const Proto::qvariant& message);
 	void Write(Proto::qvariant* pMessage, const QVariant& value);
@@ -473,7 +459,4 @@ namespace Proto
 	//
 	void Read(const Proto::AfbParamValue& message, Afb::AfbParamValue* dst);
 	void Write(Proto::AfbParamValue* message, const Afb::AfbParamValue& src);
-}
-
-
-
+} // namespace Proto

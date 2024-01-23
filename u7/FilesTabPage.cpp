@@ -1,5 +1,4 @@
 #include "FilesTabPage.h"
-#include "../DbLib/DbController.h"
 #include "GlobalMessanger.h"
 #include "Forms/ComparePropertyObjectDialog.h"
 

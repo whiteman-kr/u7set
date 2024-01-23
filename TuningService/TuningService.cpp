@@ -12,14 +12,18 @@ namespace Tuning
 
 	TuningServiceWorker::TuningServiceWorker(const SoftwareInfo& softwareInfo,
 											 const QString& serviceName,
-											 int& argc,
+											 int argc,
 											 char** argv,
 											 CircularLoggerShared logger,
-											 E::ServiceRunMode runMode,
 											 CircularLoggerShared tuningLog) :
-		ServiceWorker(softwareInfo, serviceName, argc, argv, logger, runMode),
-		m_logger(logger),
+		ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
 		m_tuningLog(tuningLog)
+	{
+	}
+
+	TuningServiceWorker::TuningServiceWorker(const TuningServiceWorker* worker) :
+		ServiceWorker(worker),
+		m_tuningLog(worker->tuningLog())
 	{
 	}
 
@@ -30,45 +34,37 @@ namespace Tuning
 
 	ServiceWorker* TuningServiceWorker::createInstance() const
 	{
-		TuningServiceWorker* newInstance = new TuningServiceWorker(softwareInfo(),
-																   serviceName(),
-																   argc(), argv(),
-																   logger(),
-																   serviceRunMode(),
-																   m_tuningLog);
-
-		newInstance->init();
-
+		TuningServiceWorker* newInstance = new TuningServiceWorker(this);
 		return newInstance;
 	}
 
 	void TuningServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
 	{
-		QString xmlString = SoftwareSettingsSet::writeSettingsToXmlString(E::SoftwareType::TuningService, m_settings);
+		QString xmlString = SoftwareSettingsSet::writeSettingsToXmlString(E::SoftwareType::TuningService, m_serviceSettings);
 
 		serviceInfo.set_settingsxml(xmlString.toStdString());
 	}
 
-	void TuningServiceWorker::initCmdLineParser()
+	void TuningServiceWorker::initServiceSpecificCmdLineArgs()
 	{
-		CommandLineParser& cp = cmdLineParser();
+		addValueCmdLineArg(CmdLineArg::ID, SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
 
-		cp.addSingleValueOption("id", SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
-
-		cp.addSingleValueOption("cfgip1", SoftwareSetting::CFG_SERVICE_IP1,
+		addValueCmdLineArg(CmdLineArg::CFG_IP1, SoftwareSetting::CFG_SERVICE_IP1,
 								QString("IP-address of first Configuration Service (default port - %1).").
 											arg(PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST), "ip[:port]");
-		cp.addSingleValueOption("cfgip2", SoftwareSetting::CFG_SERVICE_IP2,
+		addValueCmdLineArg(CmdLineArg::CFG_IP2, SoftwareSetting::CFG_SERVICE_IP2,
 								QString("IP-address of second Configuration Service (default port - %1).").
 											arg(PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST), "ip[:port]");
 	}
 
-	void TuningServiceWorker::loadSettings()
+	void TuningServiceWorker::loadServiceSpecificSettings()
 	{
-		DEBUG_LOG_MSG(m_logger, QString(tr("Settings from command line or registry:")));
-		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SoftwareSetting::EQUIPMENT_ID).arg(equipmentID()));
-		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStrIfSet()));
-		DEBUG_LOG_MSG(m_logger, QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStrIfSet()));
+		DEBUG_LOG_MSG(logger(), "");
+		DEBUG_LOG_MSG(logger(), QString(tr("Service settings:")));
+		DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::EQUIPMENT_ID).arg(equipmentID()));
+		DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStrIfSet()));
+		DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStrIfSet()));
+		DEBUG_LOG_MSG(logger(), "");
 	}
 
 	void TuningServiceWorker::clear()
@@ -112,17 +108,12 @@ namespace Tuning
 
 	void TuningServiceWorker::getAllClientContexts(QVector<const TuningClientContext*>& clientContexts)
 	{
-		clientContexts.clear();
-
-		for(const TuningClientContext* clntContext : m_clientContextMap)
-		{
-			clientContexts.append(clntContext);
-		}
+		m_clientContextMap.getAllClientContexts(clientContexts);
 	}
 
 	bool TuningServiceWorker::singleLmControl() const
 	{
-		return m_settings.singleLmControl;
+		return m_serviceSettings.singleLmControl;
 	}
 
 	// called from TcpTuningServer thread!!!
@@ -137,7 +128,7 @@ namespace Tuning
 			return E::NetworkError::InternalError;
 		}
 
-		if (m_settings.singleLmControl == false)
+		if (m_serviceSettings.singleLmControl == false)
 		{
 			controlledTuningSource->clear();
 			*controlIsActive = false;
@@ -183,7 +174,7 @@ namespace Tuning
 
 		AUTO_LOCK(m_mainMutex);
 
-		if (m_settings.singleLmControl == true)
+		if (m_serviceSettings.singleLmControl == true)
 		{
 			if (m_activeClientInfo.equipmentID().isEmpty() == true)
 			{
@@ -209,7 +200,7 @@ namespace Tuning
 
 		AUTO_LOCK(m_mainMutex);
 
-		if (m_settings.singleLmControl == true)
+		if (m_serviceSettings.singleLmControl == true)
 		{
 			if (m_activeClientInfo.equipmentID() == softwareInfo.equipmentID() &&
 				m_activeClientIP == clientIP)
@@ -236,7 +227,7 @@ namespace Tuning
 
 		AUTO_LOCK(m_mainMutex);
 
-		if (m_settings.singleLmControl == true)
+		if (m_serviceSettings.singleLmControl == true)
 		{
 			m_activeClientInfo = softwareInfo;
 			m_activeClientIP = clientIP;
@@ -321,15 +312,45 @@ namespace Tuning
 
 	E::SecurityLevel TuningServiceWorker::securityLevel() const
 	{
-		return m_settings.securityLevel;
+		return m_serviceSettings.securityLevel;
+	}
+
+	void TuningServiceWorker::registerSignalsStateChangesQueue(const QString& clientEquipmentID,
+														qint64 tcpConnectionID)
+	{
+		TuningClientContext* clientContext = m_clientContextMap.getClientContext(clientEquipmentID);
+
+		TEST_PTR_RETURN(clientContext);
+
+		clientContext->registerStateChangesQueue(tcpConnectionID);
+	}
+
+	void TuningServiceWorker::unregisterSignalsStateChangesQueue(const QString& clientEquipmentID, qint64 tcpConnectionID)
+	{
+		TuningClientContext* clientContext = m_clientContextMap.getClientContext(clientEquipmentID);
+
+		TEST_PTR_RETURN(clientContext);
+
+		clientContext->unregisterStateChangesQueue(tcpConnectionID);
+	}
+
+	void TuningServiceWorker::pushSignalStateChange(const TuningSignal::State& state, QThread* thread)
+	{
+		m_clientContextMap.pushSignalStateChange(state, thread);
+	}
+
+	TuningSignalsChangesQueue* TuningServiceWorker::getSignalChangesQueue(const QString& clientEquipmentID,
+																		  qint64 tcpConnectionID)
+	{
+		TuningClientContext* clientContext = m_clientContextMap.getClientContext(clientEquipmentID);
+
+		TEST_PTR_RETURN_NULLPTR(clientContext);
+
+		return clientContext->getSignalChangesQueue(tcpConnectionID);
 	}
 
 	void TuningServiceWorker::initialize()
 	{
-//		m_tuningPacketLog = std::make_shared<CircularLogger>();
-//		LOGGER_INIT(m_tuningPacketLog, QString("TuningPacket"), Service::getInstanceID(argc(), argv()));
-//		m_tuningPacketLog->setLogCodeInfo(false);
-
 		runCfgLoaderThread();
 	}
 
@@ -346,7 +367,7 @@ namespace Tuning
 
 	void TuningServiceWorker::runCfgLoaderThread()
 	{
-		m_cfgLoaderThread = new CfgLoaderThread(softwareInfo(), 1, cfgServiceIP1(), cfgServiceIP2(), false, m_logger);
+		m_cfgLoaderThread = new CfgLoaderThread(softwareInfo(), 1, cfgServiceIP1(), cfgServiceIP2(), false, logger());
 
 		connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &TuningServiceWorker::onConfigurationReady);
 
@@ -368,7 +389,7 @@ namespace Tuning
 
 	void TuningServiceWorker::clearConfiguration()
 	{
-		DEBUG_LOG_MSG(m_logger, QString("Clear current configuration"));
+		DEBUG_LOG_MSG(logger(), QString("Clear current configuration"));
 
 		stopTcpTuningServerThread();
 
@@ -383,7 +404,7 @@ namespace Tuning
 
 	void TuningServiceWorker::applyNewConfiguration(const TuningSources& newSources)
 	{
-		DEBUG_LOG_MSG(m_logger, QString("Apply new configuration"));
+		DEBUG_LOG_MSG(logger(), QString("Apply new configuration"));
 
 		m_mainMutex.lock();
 
@@ -400,7 +421,7 @@ namespace Tuning
 	{
 		m_tuningSources = newSources;
 		fillControlledLans();
-		m_clientContextMap.init(m_settings, m_tuningSources);
+		m_clientContextMap.init(m_serviceSettings, m_tuningSources);
 	}
 
 	void TuningServiceWorker::clearServiceMaps()
@@ -416,7 +437,7 @@ namespace Tuning
 
 		for(int channel = CHANNEL_1; channel < TuningServiceSettings::CHANNELS_COUNT; channel++)
 		{
-			const TuningServiceSettings::ChannelSettings& ch = m_settings.channelSettings[channel];
+			const TuningServiceSettings::ChannelSettings& ch = m_serviceSettings.channelSettings[channel];
 
 			if (ch.enable == false)
 			{
@@ -457,7 +478,7 @@ namespace Tuning
 
 			if (typedSettingsPtr != nullptr)
 			{
-				m_settings = *typedSettingsPtr;
+				m_serviceSettings = *typedSettingsPtr;
 			}
 			else
 			{
@@ -476,7 +497,7 @@ namespace Tuning
 
 		if (file.open(QIODevice::ReadOnly) == false)
 		{
-			DEBUG_LOG_ERR(m_logger, QString("Error open configuration file: %1").arg(fileName));
+			DEBUG_LOG_ERR(logger(), QString("Error open configuration file: %1").arg(fileName));
 			return false;
 		}
 
@@ -488,11 +509,11 @@ namespace Tuning
 
 		if  (result == true)
 		{
-			DEBUG_LOG_MSG(m_logger, QString("Configuration is loaded from file: %1").arg(fileName));
+			DEBUG_LOG_MSG(logger(), QString("Configuration is loaded from file: %1").arg(fileName));
 		}
 		else
 		{
-			DEBUG_LOG_ERR(m_logger, QString("Loading configuration error from file: %1").arg(fileName));
+			DEBUG_LOG_ERR(logger(), QString("Loading configuration error from file: %1").arg(fileName));
 		}
 
 		return result;
@@ -527,11 +548,11 @@ namespace Tuning
 	{
 		Q_ASSERT(m_tcpTuningServerThread == nullptr);
 
-		TcpTuningServer* tcpTuningSever = new TcpTuningServer(*this, m_tuningSources, m_logger);
+		TcpTuningServer* tcpTuningSever = new TcpTuningServer(*this, m_tuningSources, logger());
 
-		m_tcpTuningServerThread = new TcpTuningServerThread(m_settings.clientRequestIP,
+		m_tcpTuningServerThread = new TcpTuningServerThread(m_serviceSettings.clientRequestIP,
 												tcpTuningSever,
-												m_logger);
+												logger());
 		m_tcpTuningServerThread->start();
 	}
 
@@ -543,13 +564,13 @@ namespace Tuning
 			delete m_tcpTuningServerThread;
 			m_tcpTuningServerThread = nullptr;
 
-			DEBUG_LOG_MSG(m_logger, QString("TcpTuningServerThread stoped"));
+			DEBUG_LOG_MSG(logger(), QString("TcpTuningServerThread stoped"));
 		}
 	}
 
 	void TuningServiceWorker::runTuningSourceThreads()
 	{
-		if (m_settings.singleLmControl == false)
+		if (m_serviceSettings.singleLmControl == false)
 		{
 			// running all TuningSourceWorkers at once if SingleLmControl is disabled
 			//
@@ -574,14 +595,14 @@ namespace Tuning
 				continue;
 			}
 
-			if (m_settings.isSourceExists(tuningSource.moduleEquipmentID()) == false)
+			if (m_serviceSettings.isSourceExists(tuningSource.moduleEquipmentID()) == false)
 			{
 				continue;
 			}
 
 			if (tuningSource.hasTuningSignals() == false)
 			{
-				DEBUG_LOG_MSG(m_logger,
+				DEBUG_LOG_MSG(logger(),
 							  QString("Tuning source %1 has no signals. Controlling thread wouldn't be run.").
 							  arg(tuningSource.moduleEquipmentID()));
 				continue;
@@ -621,10 +642,10 @@ namespace Tuning
 
 		TuningSourceThreadShared sourceThread =
 				std::make_shared<TuningSourceThread>(	*this,
-														m_settings,
+														m_serviceSettings,
 														source,
 														sessionParams().softwareRunMode,
-														m_logger,
+														logger(),
 														m_tuningLog);
 
 		m_sourceThreads.insert({source.moduleEquipmentID(), sourceThread});
@@ -669,7 +690,7 @@ namespace Tuning
 	{
 		if (m_sourceThreads.size() == 0)
 		{
-			DEBUG_LOG_MSG(m_logger, QString("Tuning sources workers is not running. Listener thread is not run also."));
+			DEBUG_LOG_MSG(logger(), QString("Tuning sources workers is not running. Listener thread is not run also."));
 			return;
 		}
 
@@ -679,11 +700,11 @@ namespace Tuning
 
 		for(int channel = CHANNEL_1; channel < TuningServiceSettings::CHANNELS_COUNT; channel++)
 		{
-			const TuningServiceSettings::ChannelSettings& ch = m_settings.channelSettings[channel];
+			const TuningServiceSettings::ChannelSettings& ch = m_serviceSettings.channelSettings[channel];
 
 			if (isSourceHandlerExistsForChannel(channel) == false)
 			{
-				DEBUG_LOG_MSG(m_logger,
+				DEBUG_LOG_MSG(logger(),
 							  QString("No tuning sources found for channel %1. Therefore Listener of IP %2 will not be run.").
 							  arg(channel + 1).arg(ch.tuningDataIP.addressPortStr()));
 				continue;
@@ -695,7 +716,7 @@ namespace Tuning
 														 ch.tuningDataIP,
 														 channel,
 														 isSimulationMode(),
-														 m_logger);
+														 logger());
 			m_socketListenerThreads.push_back(thread);
 
 			thread->start();
@@ -719,30 +740,12 @@ namespace Tuning
 	{
 		TEST_PTR_RETURN(thread);
 
-		for(TuningClientContext* clientContext : m_clientContextMap)
-		{
-			if (clientContext == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			clientContext->setSourceThread(thread);
-		}
+		m_clientContextMap.setSourceThreadInTuningClientContexts(thread);
 	}
 
 	void TuningServiceWorker::removeSourceThreadFromTuningClientContexts(const QString& tuningSourceID)
 	{
-		for(TuningClientContext* clientContext : m_clientContextMap)
-		{
-			if (clientContext == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			clientContext->removeSourceThread(tuningSourceID);
-		}
+		m_clientContextMap.removeSourceThreadFromTuningClientContexts(tuningSourceID);
 	}
 
 	bool TuningServiceWorker::isSimulationMode() const
@@ -787,13 +790,13 @@ namespace Tuning
 			return;
 		}
 
-		m_settings = *typedSettingsPtr;
+		m_serviceSettings = *typedSettingsPtr;
 
 		bool result = true;
 
 		TuningSources newSources;
 
-		for(Builder::BuildFileInfo bfi : buildFileInfoArray)
+		for(OnlineLib::BuildFileInfo bfi : buildFileInfoArray)
 		{
 			QByteArray fileData;
 			QString errStr;
@@ -802,7 +805,7 @@ namespace Tuning
 
 			if (errStr.isEmpty() == false)
 			{
-				DEBUG_LOG_ERR(m_logger, errStr);
+				DEBUG_LOG_ERR(logger(), errStr);
 				result = false;
 				continue;
 			}
@@ -816,18 +819,18 @@ namespace Tuning
 
 			if (result == true)
 			{
-				DEBUG_LOG_MSG(m_logger, QString("Read file %1 OK").arg(bfi.pathFileName));
+				DEBUG_LOG_MSG(logger(), QString("Read file %1 OK").arg(bfi.pathFileName));
 			}
 			else
 			{
-				DEBUG_LOG_ERR(m_logger, QString("Read file %1 ERROR").arg(bfi.pathFileName));
+				DEBUG_LOG_ERR(logger(), QString("Read file %1 ERROR").arg(bfi.pathFileName));
 				break;
 			}
 		}
 
 		if (result == true)
 		{
-			DEBUG_LOG_MSG(m_logger, QString("Configuration reading success"));
+			DEBUG_LOG_MSG(logger(), QString("Configuration reading success"));
 
 			clearConfiguration();
 			applyNewConfiguration(newSources);

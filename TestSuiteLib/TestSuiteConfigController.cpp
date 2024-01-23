@@ -22,6 +22,7 @@ namespace TestSuite
 														const BuildFileInfoArray& files)
 	{
 		ConfigSettings config{};
+		ConfigData configData{};
 
 		config.configInfo = conf;
 		config.appDataServices = settings.appDataServices;
@@ -37,9 +38,23 @@ namespace TestSuite
 			config.tuningServices.clear();
 		}
 
+		config.login = settings.login;
+		config.userAccounts = settings.getUsersAccounts();
+
+		if (config.login == false)
+		{
+			m_logFile.writeWarning(tr("Testing user authorization is disabled. Tests can be executed without supplying a password!"));
+		}
+
+		config.plant = settings.plant;
+		config.unit = settings.unit;
+		config.system = settings.system;
+
+		config.scriptTags = settings.scriptTags;
+
 		// Get test files list
 		//
-		for (const Builder::BuildFileInfo& buildFileInfo : files)
+		for (const OnlineLib::BuildFileInfo& buildFileInfo : files)
 		{
 			if (buildFileInfo.pathFileName.endsWith(".js") == false)
 			{
@@ -53,8 +68,7 @@ namespace TestSuite
 
 		// Get script files form CfgService
 		//
-		std::vector<TestScript> scripts;
-		scripts.reserve(config.scriptFiles.size());
+		configData.scripts.reserve(config.scriptFiles.size());
 
 		for (const QString& fileName : config.scriptFiles)
 		{
@@ -71,7 +85,7 @@ namespace TestSuite
 				{
 					QWriteLocker locker(&m_confugurationLock);
 					m_configuration = {};
-					m_scripts.clear();
+					m_configData = {};
 				}
 
 				emit configrationError();
@@ -85,15 +99,53 @@ namespace TestSuite
 				shortenFileName.remove(0, 1);
 			}
 			m_logFile.writeMessage("Loaded script file: " + shortenFileName);
-			scripts.emplace_back(shortenFileName, data);
+			configData.scripts.emplace_back(shortenFileName, data);
 		}
 
 		// Get file CfgFileId::TUNING_SIGNALS
 		//
-		if (bool result = getFileBlockedById(CfgFileId::TUNING_SIGNALS, &config.tuningSignalsFile, nullptr);
+		if (config.tuningEnabled == true)
+		{
+			if (bool result = getFileBlockedById(CfgFileId::TUNING_SIGNALS, &config.tuningSignalsFile, nullptr);
+				result == false)
+			{
+				m_logFile.writeError("Failed to load tuning signal list file: TuningSignals.dat");
+				emit configrationError();
+				return false;
+			}
+		}
+
+		// Get file CfgFileId::REPORT_TEMPLATES
+		//
+		QByteArray data;
+		if (bool result = getFileBlockedById(CfgFileId::TESTSUITE_REPORTTEMPLATES, &data, nullptr);
 			result == false)
 		{
-			m_logFile.writeError("Failed to load tuning signal list file: TuningSignals.dat");
+			m_logFile.writeError("Failed to get report templates file: ReportTemplates.dat");
+			emit configrationError();
+			return false;
+		}
+
+		// Get file MATS_USERS
+		//
+		if (config.tuningEnabled == true && config.login == true)
+		{
+			QByteArray matsUsersData;
+			getFileBlockedById(CfgFileId::MATSUSERS, &matsUsersData, nullptr);
+
+			QString errorString;
+			bool ok = config.matsUsers.loadFromByteArray(matsUsersData, errorString);
+			if (ok == false)
+			{
+				m_logFile.writeError(tr("MATS users storage loading failed."));
+				config.matsUsers.clear();
+			}
+		}
+
+		QString errorMsg;
+		if (configData.reportTemplates.load(data, &errorMsg) == false)
+		{
+			m_logFile.writeError("Failed to load report templates file: ReportTemplates.dat");
 			emit configrationError();
 			return false;
 		}
@@ -111,7 +163,7 @@ namespace TestSuite
 			QWriteLocker locker(&m_confugurationLock);
 			config.configurationId = s_configurationIdCounter++;
 			m_configuration = config;		// Cannot move config here as it is used later for `emit configurationArrived(config)`
-			m_scripts = std::move(scripts);
+			m_configData = std::move(configData);
 		}
 
 		// Emit signal to inform everybody about new configuration
@@ -171,9 +223,9 @@ namespace TestSuite
 		return m_configuration.configInfo;
 	}
 
-	std::vector<TestSuite::TestScript> TestSuiteConfigController::scripts() const
+	ConfigData TestSuiteConfigController::configData() const
 	{
 		QReadLocker locker(&m_confugurationLock);
-		return m_scripts;
+		return m_configData;
 	}
 }

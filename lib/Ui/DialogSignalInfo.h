@@ -3,6 +3,8 @@
 #include <optional>
 #include "../VFrame30/TuningController.h"
 #include "../AppSignalLib/IAppSignalManager.h"
+#include "../OnlineLib/SoftwareSettings.h"
+#include "../lib/ISignalDataServer.h"
 #include "../lib/Ui/DragDropHelper.h"
 #include "../../AppSignalLib/AppSignal.h"
 
@@ -27,8 +29,6 @@ private:
 
 class SignalFlagsWidget : public QWidget
 {
-	Q_OBJECT
-
 public:
 	SignalFlagsWidget(QWidget* parent = nullptr);
 
@@ -56,6 +56,7 @@ private:
 
 class AppSignalFlagsWidget : public SignalFlagsWidget
 {
+	Q_OBJECT
 public:
 	enum class AppSignalFlagsFields
 	{
@@ -82,6 +83,7 @@ private:
 
 class TuningSignalFlagsWidget : public SignalFlagsWidget
 {
+	Q_OBJECT
 public:
 	enum class TuningSignalFlagsFields
 	{
@@ -118,10 +120,15 @@ protected:
 
 	DialogSignalInfo(const AppSignalParam& signal,
 					 IAppSignalManager* appSignalManager,
-					 VFrame30::TuningController* tuningController,
+					 ISignalDataServer* signalDataServer,			// Can be empty, e.g. in Simulator
+					 const std::vector<SoftwareEndpoint::AppDataService>& appDataServices,	// Can be empty, e.g. in Simulator
+					 ITuningSignalManager& tuningSignalManager,
+					 ITuningConnection& tuningConnection,
+					 ITuningAuthorization& tuningAuthorization,
 					 bool tuningEnabled,
 					 DialogType dialogType,
 					 QWidget* parent);
+
 	virtual ~DialogSignalInfo();
 
 	// Register functions
@@ -216,14 +223,20 @@ private:
 
 private:
 	Ui::DialogSignalInfo *ui;
+	DialogSignalInfo::DialogType m_dialogType;
 
 	static std::map<QString, DialogSignalInfo*> m_dialogSignalInfoMap;
 
 	AppSignalParam m_signal;
+	QStringList m_dataServiceIds;	// Specifies signal data service IDs
+	QString m_dataServiceId;	// Specifies server to take data. If empty - take latest
 
 	IAppSignalManager* m_appSignalManager = nullptr;
+	ISignalDataServer* m_signalDataServer = nullptr;
+	std::vector<SoftwareEndpoint::AppDataService> m_appDataServices;
 
-	VFrame30::TuningController* m_tuningController = nullptr;	// Can be null if tuning is not enabled
+	ITuningAuthorization& m_tuningAuthorization;
+	VFrame30::TuningController m_tuningController;
 	bool m_tuningEnabled = false;
 	QWidget* m_tuningTabWidget = nullptr;
 

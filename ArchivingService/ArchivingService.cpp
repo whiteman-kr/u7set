@@ -11,29 +11,25 @@
 
 ArchivingService::ArchivingService(const SoftwareInfo& softwareInfo,
 											   const QString& serviceName,
-											   int& argc,
+											   int argc,
 											   char** argv,
-											   CircularLoggerShared logger,
-											   E::ServiceRunMode runMode) :
-	ServiceWorker(softwareInfo, serviceName, argc, argv, logger, runMode)
+											   CircularLoggerShared logger) :
+	ServiceWorker(softwareInfo, serviceName, argc, argv, logger)
 {
 }
 
+ArchivingService::ArchivingService(const ArchivingService* worker) :
+	ServiceWorker(worker)
+{
+}
 
 ArchivingService::~ArchivingService()
 {
-	deleteArchSignalsProto();
 }
 
 ServiceWorker* ArchivingService::createInstance() const
 {
-	ArchivingService* archServiceWorker = new ArchivingService(softwareInfo(),
-															   serviceName(),
-															   argc(), argv(),
-															   logger(),
-															   serviceRunMode());
-	archServiceWorker->init();
-
+	ArchivingService* archServiceWorker = new ArchivingService(this);
 	return archServiceWorker;
 }
 
@@ -44,28 +40,31 @@ void ArchivingService::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo)
 	serviceInfo.set_settingsxml(xmlString.toStdString());
 }
 
-void ArchivingService::initCmdLineParser()
+bool ArchivingService::isReadOnlyArchive() const
 {
-	CommandLineParser& cp = cmdLineParser();
+	return !m_readOnlyArchivePath.isEmpty();
+}
 
-	cp.addSingleValueOption("id", SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
-	cp.addSingleValueOption("cfgip1", SoftwareSetting::CFG_SERVICE_IP1, "IP-addres of first Configuration Service.", "");
-	cp.addSingleValueOption("cfgip2", SoftwareSetting::CFG_SERVICE_IP2, "IP-addres of second Configuration Service.", "");
-	cp.addSingleValueOption("location",
-							SoftwareSetting::ARCHIVE_LOCATION,
-							"Path to archive location (overwrite ArchiveLocation from project settings)", "D:\\Archives");
-	cp.addSingleValueOption("mq",
+void ArchivingService::initServiceSpecificCmdLineArgs()
+{
+	addValueCmdLineArg(CmdLineArg::ID, SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
+	addValueCmdLineArg(CmdLineArg::CFG_IP1, SoftwareSetting::CFG_SERVICE_IP1, "IP-addres of first Configuration Service.", "");
+	addValueCmdLineArg(CmdLineArg::CFG_IP2, SoftwareSetting::CFG_SERVICE_IP2, "IP-addres of second Configuration Service.", "");
+	addValueCmdLineArg("location",
+						SoftwareSetting::ARCHIVE_LOCATION,
+						"Path to archive location (overwrite ArchiveLocation from project settings)", "D:\\Archives");
+	addValueCmdLineArg("mq",
 							SoftwareSetting::MIN_QUEUE_SIZE_FOR_FLUSHING,
 							QString("Minimum size of signal states queue for flushing to disk (default = %1 states).").
 								arg(Archive::DEFAULT_QUEUE_SIZE_FOR_FLUSHING), "");
-
+	addValueCmdLineArg(CmdLineArg::READ_ONLY, SoftwareSetting::READ_ONLY_ARCHIVE_PATH, "Path to read only archive.", "D:\\Archive\\ProjectID");
 }
 
-void ArchivingService::loadSettings()
+void ArchivingService::loadServiceSpecificSettings()
 {
-	m_overwriteArchiveLocation = QString(getStrSetting(SoftwareSetting::ARCHIVE_LOCATION));
+	m_overwriteArchiveLocation = getSettingValue(SoftwareSetting::ARCHIVE_LOCATION);
 
-	QString sizeStr = getStrSetting(SoftwareSetting::MIN_QUEUE_SIZE_FOR_FLUSHING);
+	QString sizeStr = getSettingValue(SoftwareSetting::MIN_QUEUE_SIZE_FOR_FLUSHING);
 
 	bool ok = false;
 
@@ -76,7 +75,10 @@ void ArchivingService::loadSettings()
 		m_minQueueSizeForFlushing = Archive::DEFAULT_QUEUE_SIZE_FOR_FLUSHING;
 	}
 
-	DEBUG_LOG_MSG(logger(), QString(tr("Settings from command line or registry:")));
+	m_readOnlyArchivePath = getSettingValue(SoftwareSetting::READ_ONLY_ARCHIVE_PATH);
+
+	DEBUG_LOG_MSG(logger(), "");
+	DEBUG_LOG_MSG(logger(), QString(tr("Service settings:")));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::EQUIPMENT_ID).arg(equipmentID()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP1).
 						arg(cfgServiceIP1().addressPortStrIfSet()));
@@ -84,6 +86,7 @@ void ArchivingService::loadSettings()
 						arg(cfgServiceIP2().addressPortStrIfSet()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::ARCHIVE_LOCATION).arg(m_overwriteArchiveLocation));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::MIN_QUEUE_SIZE_FOR_FLUSHING).arg(m_minQueueSizeForFlushing));
+	DEBUG_LOG_MSG(logger(), "");
 }
 
 void ArchivingService::initialize()
@@ -91,7 +94,6 @@ void ArchivingService::initialize()
 	// Service Main Function initialization
 	//
 	runCfgLoaderThread();
-
 	DEBUG_LOG_MSG(logger(), QString(tr("ArchivingServiceWorker initialized")));
 }
 
@@ -100,10 +102,7 @@ void ArchivingService::shutdown()
 	// Service Main Function deinitialization
 	//
 	stopAllThreads();
-
 	stopCfgLoaderThread();
-
-	DEBUG_LOG_MSG(logger(), QString(tr("ArchivingServiceWorker stoped")));
 }
 
 void ArchivingService::runCfgLoaderThread()
@@ -130,11 +129,17 @@ void ArchivingService::startAllThreads()
 {
 	startArchive();
 
-	if (m_archive->isWorkable() == true)
+	if (m_archive->isWorkable() == false)
+	{
+		return;
+	}
+
+	if (m_archive->isReadOnly() == false)
 	{
 		startTcpAppDataServerThread();
-		startTcpArchRequestsServerThread();
 	}
+
+	startTcpArchRequestsServerThread();
 }
 
 void ArchivingService::stopAllThreads()
@@ -147,36 +152,40 @@ void ArchivingService::stopAllThreads()
 
 void ArchivingService::startArchive()
 {
-	TEST_PTR_RETURN(m_archSignalsProto);
+	Q_ASSERT(m_archive == nullptr);
 
-	if (m_archive == nullptr)
+	if (isReadOnlyArchive() == true)
 	{
 		m_archive = new Archive(m_buildInfo.project,
 								equipmentID(),
+								m_readOnlyArchivePath,
+								m_archInfoFileData,
+								logger());
+	}
+	else
+	{
+		Q_ASSERT(m_archInfoFileData.isEmpty() == false);
+
+		m_archive = new Archive(m_buildInfo.project,
+								equipmentID(),
 								m_serviceSettings.archiveLocation,
-								*m_archSignalsProto,
+								m_archInfoFileData,
 								m_serviceSettings.shortTermArchivePeriod,
 								m_serviceSettings.longTermArchivePeriod,
 								Archive::DEFAULT_MAINTENANCE_DELAY_MINUTES,
 								m_minQueueSizeForFlushing,
 								logger());
+	}
 
-		deleteArchSignalsProto();				// no more required
+	m_archive->start();
 
-		m_archive->start();
-
-		if (m_archive->isWorkable() == true)
-		{
-			DEBUG_LOG_MSG(logger(), QString("Archive is workable. Directory: %1").arg(m_archive->archFullPath()));
-		}
-		else
-		{
-			DEBUG_LOG_ERR(logger(), QString("Archive is NOT WORKABLE!"));
-		}
+	if (m_archive->isWorkable() == true)
+	{
+		DEBUG_LOG_MSG(logger(), QString("Archive is workable. Directory: %1").arg(m_archive->archFullPath()));
 	}
 	else
 	{
-		assert(false);
+		DEBUG_LOG_ERR(logger(), QString("Archive is NOT WORKABLE!"));
 	}
 }
 
@@ -239,26 +248,6 @@ void ArchivingService::stopTcpArchiveRequestsServerThread()
 	}
 }
 
-bool ArchivingService::loadArchSignalsProto(const QByteArray& fileData)
-{
-	deleteArchSignalsProto();
-
-	m_archSignalsProto = new Proto::ArchSignals;
-
-	bool result = m_archSignalsProto->ParseFromArray(fileData.constData(), static_cast<int>(fileData.size()));
-
-	return result;
-}
-
-void ArchivingService::deleteArchSignalsProto()
-{
-	if (m_archSignalsProto != nullptr)
-	{
-		delete m_archSignalsProto;
-		m_archSignalsProto = nullptr;
-	}
-}
-
 void ArchivingService::logFileLoadResult(bool loadOk, const QString& fileName)
 {
 	if (loadOk == true)
@@ -297,7 +286,9 @@ void ArchivingService::onConfigurationReady(const QByteArray configurationXmlDat
 
 	bool fileResult = true;
 
-	for(const Builder::BuildFileInfo& bfi : buildFileInfoArray)
+	m_archInfoFileData.clear();
+
+	for(const OnlineLib::BuildFileInfo& bfi : buildFileInfoArray)
 	{
 		QByteArray fileData;
 		QString errStr;
@@ -310,19 +301,9 @@ void ArchivingService::onConfigurationReady(const QByteArray configurationXmlDat
 			continue;
 		}
 
-		bool res = true;
-
-		if (bfi.pathFileName.endsWith("ArchSignals.proto"))
+		if (bfi.pathFileName.endsWith(File::ARCH_INFO_PROTO))
 		{
-			res = loadArchSignalsProto(fileData);
-
-			logFileLoadResult(res, bfi.pathFileName);
-		}
-
-		if (res == false)
-		{
-			fileResult = false;
-			break;
+			m_archInfoFileData.swap(fileData);
 		}
 	}
 

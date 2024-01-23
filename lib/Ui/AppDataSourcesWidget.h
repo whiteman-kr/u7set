@@ -67,7 +67,7 @@ private:
 		LmNumber,
 
 		State,
-		Uptime,
+		LmTime,
 		ReceivedPacketCount,
 		DataReceivingRate,
 

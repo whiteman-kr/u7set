@@ -1,17 +1,17 @@
 #include "SchemaItemUfb.h"
+#include "DrawParam.h"
+#include "PropertyNames.h"
+#include "SchemaItemSignal.h"
 #include "SchemaLayer.h"
 #include "UfbSchema.h"
-#include "SchemaItemSignal.h"
-#include "PropertyNames.h"
-#include "DrawParam.h"
 
 namespace VFrame30
 {
 	SchemaItemUfb::SchemaItemUfb(void) :
 		SchemaItemUfb(SchemaUnit::Inch)
 	{
-		// Вызов этого конструктора возможен при сериализации объектов такого типа.
-		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
+		// This constructor can be called during serialization of objects of this type.
+		// After this call, you need to initialize everything that is done by serialization itself.
 		//
 	}
 
@@ -47,7 +47,7 @@ namespace VFrame30
 		addTag("ufb");
 		addTag(ufbSchema->schemaId());
 
-		// Create input output signals in VFrame30::FblEtem
+		// Create input output signals in VFrame30::FblItem
 		//
 		updateUfbElement(ufbSchema, errorMsg);
 
@@ -96,7 +96,7 @@ namespace VFrame30
 			r.setRight(r.right() - pinWidth);
 		}
 
-		//QRectF labelRect(r);	// save rect for future use
+		// QRectF labelRect(r);	// save rect for future use
 
 		r.setLeft(r.left() + m_font.drawSize() / 4.0);
 		r.setRight(r.right() - m_font.drawSize() / 4.0);
@@ -117,24 +117,24 @@ namespace VFrame30
 		auto props = PropertyObject::specificProperties();
 
 		std::ranges::sort(props,
-			[](const auto& p1, const auto& p2)
-			{
-				if (p1->category() == p2->category())
-				{
-					if (p1->viewOrder() == p2->viewOrder())
-					{
-						return p1->caption() < p2->caption();
-					}
-					else
-					{
-						return p1->viewOrder() < p2->viewOrder();
-					}
-				}
-				else
-				{
-					return p1->category() < p2->category();
-				}
-			});
+						  [](const auto& p1, const auto& p2)
+						  {
+							  if (p1->category() == p2->category())
+							  {
+								  if (p1->viewOrder() == p2->viewOrder())
+								  {
+									  return p1->caption() < p2->caption();
+								  }
+								  else
+								  {
+									  return p1->viewOrder() < p2->viewOrder();
+								  }
+							  }
+							  else
+							  {
+								  return p1->category() < p2->category();
+							  }
+						  });
 
 		for (const auto& prop : props)
 		{
@@ -172,7 +172,7 @@ namespace VFrame30
 						propValueText.contains(QChar('e')) == false &&
 						propValueText.size() > 2)
 					{
-						while(propValueText.endsWith('0'))
+						while (propValueText.endsWith('0'))
 						{
 							propValueText.chop(1);
 						}
@@ -226,7 +226,7 @@ namespace VFrame30
 
 			for (const QString& s : valueAsList)
 			{
-				if (s.startsWith(QChar('#')) == true && drawParam->hightlightIds().contains(s))
+				if (s.startsWith(QChar('#')) == true && drawParam->highlightIds().contains(s))
 				{
 					QRectF highlightRect = boundingRectInDocPt(drawParam);
 					drawHighlightRect(drawParam, highlightRect);
@@ -255,7 +255,7 @@ namespace VFrame30
 			assert(message->has_schemaitem());
 			return false;
 		}
-	
+
 		// --
 		//
 		Proto::SchemaItemUfb* ufbpb = message->mutable_schemaitem()->mutable_ufb();
@@ -305,7 +305,7 @@ namespace VFrame30
 			assert(message.schemaitem().has_ufb());
 			return false;
 		}
-		
+
 		const Proto::SchemaItemUfb& ufbpb = message.schemaitem().ufb();
 
 		m_ufbSchemaId = QString::fromStdString(ufbpb.ufbschemaid());
@@ -328,11 +328,10 @@ namespace VFrame30
 
 		for (const ::Proto::Property& p : ufbpb.properties())
 		{
-			auto it = std::find_if(specificProps.begin(), specificProps.end(),
-				[p](std::shared_ptr<Property>& dp)
-				{
-					return dp->caption().toStdString() == p.name();
-				});
+			auto it = std::find_if(specificProps.begin(), specificProps.end(), [p](std::shared_ptr<Property>& dp)
+								   {
+									   return dp->caption().toStdString() == p.name();
+								   });
 
 			if (it == specificProps.end())
 			{
@@ -341,7 +340,7 @@ namespace VFrame30
 			else
 			{
 				std::shared_ptr<Property>& property = *it;
-				Q_ASSERT(property->specific() == true);		// it's suppose to be specific property;
+				Q_ASSERT(property->specific() == true); // it's suppose to be specific property;
 
 				bool loadOk = Proto::loadProperty(p, property);
 
@@ -356,8 +355,8 @@ namespace VFrame30
 	QString SchemaItemUfb::buildName() const
 	{
 		return QString("%1 %2")
-				.arg(m_ufbCaption)
-				.arg(label());
+			.arg(m_ufbCaption)
+			.arg(label());
 	}
 
 	bool SchemaItemUfb::updateUfbElement(const UfbSchema* ufbSchema, QString* errorMessage)
@@ -379,7 +378,7 @@ namespace VFrame30
 		m_ufbSchemaId = ufbSchema->schemaId();
 		m_ufbCaption = ufbSchema->caption();
 		m_ufbVersion = ufbSchema->version();
-		setSpecificProperties(ufbSchema->specificProperties());		// it creates specific properties from PropertyObject
+		setSpecificProperties(ufbSchema->specificProperties()); // it creates specific properties from PropertyObject
 
 		// Get in/outs from ufb schema
 		//
@@ -401,7 +400,7 @@ namespace VFrame30
 						continue;
 					}
 
-					// Check it this siganl item is just variable reference
+					// Check it this signal item is just variable reference
 					//
 					QString appSignalIds = itemSignal->appSignalIds();
 					if (appSignalIds.startsWith("$(") == true && appSignalIds.endsWith(")") == true)
@@ -432,17 +431,15 @@ namespace VFrame30
 
 		// Sort in/outs by vert pos
 		//
-		std::sort(ufbInputs.begin(), ufbInputs.end(),
-				[](const SchemaItemSignal* s1, const SchemaItemSignal* s2)
-				{
-					return s1->topDocPt() < s2->topDocPt();
-				});
+		std::sort(ufbInputs.begin(), ufbInputs.end(), [](const SchemaItemSignal* s1, const SchemaItemSignal* s2)
+				  {
+					  return s1->topDocPt() < s2->topDocPt();
+				  });
 
-		std::sort(ufbOutputs.begin(), ufbOutputs.end(),
-				[](const SchemaItemSignal* s1, const SchemaItemSignal* s2)
-				{
-					return s1->topDocPt() < s2->topDocPt();
-				});
+		std::sort(ufbOutputs.begin(), ufbOutputs.end(), [](const SchemaItemSignal* s1, const SchemaItemSignal* s2)
+				  {
+					  return s1->topDocPt() < s2->topDocPt();
+				  });
 
 		// Create in/outs in this item
 		//
@@ -454,7 +451,7 @@ namespace VFrame30
 			this->addInput(-1, E::SignalType::Discrete, in->appSignalIds());
 		}
 
-		for (const SchemaItemSignal* out: ufbOutputs)
+		for (const SchemaItemSignal* out : ufbOutputs)
 		{
 			this->addOutput(-1, E::SignalType::Discrete, out->appSignalIds());
 		}
@@ -464,6 +461,45 @@ namespace VFrame30
 		adjustHeight();
 
 		return true;
+	}
+
+	// IMatsSchemaItemAssociations implementation.
+	//
+	QStringList SchemaItemUfb::associatedAppSignalIds() const
+	{
+		QStringList result;
+
+		for (std::vector<std::shared_ptr<Property>> props = static_cast<const PropertyObject*>(this)->specificProperties();
+			 const auto& p : props)
+		{
+			QString v = p->value().toString();
+			if (v.startsWith(QChar('#')) == true)
+			{
+				result += v.split(QChar::LineFeed, Qt::SkipEmptyParts);
+			}
+		}
+
+		return result;
+	}
+
+	QStringList SchemaItemUfb::associatedImpactAppSignalIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemUfb::associatedConnectionIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemUfb::associatedLoopbackIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemUfb::associatedSchemaItemLabels() const
+	{
+		return {};
 	}
 
 	QString SchemaItemUfb::ufbSchemaId() const
@@ -496,4 +532,4 @@ namespace VFrame30
 
 		return;
 	}
-}
+} // namespace VFrame30

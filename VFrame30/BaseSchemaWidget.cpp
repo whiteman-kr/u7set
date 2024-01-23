@@ -198,8 +198,8 @@ namespace VFrame30
 
 	void BaseSchemaWidget::screenChanged(QScreen* /*screen*/)
 	{
-		// If we have several screens with different resolution or DPI, this slot is requeired to recalculate
-		// zoom params
+		// If we have several screens with different resolution or DPI, this slot is required to recalculate
+		// zoom params.
 		//
 		setZoom(zoom(), true);
 	}
