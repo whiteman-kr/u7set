@@ -555,6 +555,7 @@ namespace File
 
 	inline const QString DIAG_SIGNAL_TYPES_XML("DiagSignalTypes.xml");
 	inline const QString DIAG_DATA_SOURCES_XML("DiagDataSources.xml");
+	inline const QString ACQUIRED_DIAG_SIGNALS_ASGS("AcquiredDiagSignals.asgs");
 
 	inline const QString METROLOGY_ITEMS_XML("MetrologyItems.xml");
 	inline const QString METROLOGY_SIGNAL_SET("MetrologySignal.set");

@@ -810,29 +810,30 @@ message GetFileReply
 
 message AcquiredDiagObject
 {
-	required int32 deviceType = 1 [default = 0];			// enum Hardware::DeviceType value
-	required string equipmentID = 2;
+	required string equipmentID = 1;
+	required int32 deviceType = 2 [default = 0];			// enum Hardware::DeviceType value
 	required uint64 parentHash = 3 [default = 0];			// calcHash(parent.equipmentID)
 }
 
 message AcquiredDiagSignal
 {
-	required AcquiredDiagObject diagObject = 1;
+	required uint64 equipmentIdHash = 1  [default = 0];
+	required uint64 parentHash = 2 [default = 0];			// calcHash(parent.equipmentID)
+	required int32 diagLevel = 3 [default = 0];				// enum E::DiagLevel value
+	required uint64 diagSignalTypeIdHash = 4 [default = 0];
 
-	required int32 diagLevel = 2 [default = 0];				// enum E::DiagLevel value
-	required string diagSignalTypeID = 3;
-	optional bool isReflection = 4 [default = false];
-	optional string reflectedSignalID = 5;
-	optional string validitySignalID = 6;
-	optional int32 valueSizeBit = 7 [default = 0];
-	optional int32 discreteContainerSize = 8 [default = 0];
-	optional bool logChanges = 9 [default = false];
-	optional bool archive = 10 [default = false];
-	optional bool reserved = 11 [default = false];
-	optional int32 apertureType = 12 [default = 0];			// enum E::ApertureType value
-	optional double coarseAperture = 13  [default = 0];
-	optional double fineAperture = 14  [default = 0];
-	optional int32 absAddrBit = 15 [default = 0];
+	optional bool isReflection = 5 [default = false];
+	optional uint64 reflectedSignalIdHash = 6  [default = 0];
+	optional uint64 validitySignalIdHash = 7  [default = 0];
+	optional int32 valueSizeBit = 8 [default = 0];
+	optional int32 discreteContainerSize = 9 [default = 0];
+	optional bool logChanges = 10 [default = false];
+	optional bool archive = 11 [default = false];
+	optional bool reserved = 12 [default = false];
+	optional int32 apertureType = 13 [default = 0];			// enum E::ApertureType value
+	optional double coarseAperture = 14  [default = 0];
+	optional double fineAperture = 15  [default = 0];
+	optional int32 absAddrBit = 16 [default = 0];
 }
 
 message AcquiredDiagSignals

@@ -231,6 +231,7 @@ namespace Hardware
 
 		[[nodiscard]] DeviceType deviceType() const noexcept;
 		[[nodiscard]] QString deviceTypeName() const noexcept;
+		[[nodiscard]] static QString deviceTypeName(DeviceType type) noexcept;
 
 		[[nodiscard]] bool isRoot() const noexcept;
 		[[nodiscard]] bool isSystem() const noexcept;

@@ -11,6 +11,8 @@ find_package(Qt6 REQUIRED COMPONENTS Network)
 set(TARGET OnlineLib)
 
 qt_add_library(${TARGET} STATIC
+	AcquiredDiagSignal.cpp
+	AcquiredDiagSignal.h
 	BuildInfo.cpp
 	BuildInfo.h
 	CfgServerLoader.cpp

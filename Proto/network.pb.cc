@@ -1226,12 +1226,13 @@ struct AcquiredDiagObjectDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT AcquiredDiagObjectDefaultTypeInternal _AcquiredDiagObject_default_instance_;
 constexpr AcquiredDiagSignal::AcquiredDiagSignal(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : diagsignaltypeid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , reflectedsignalid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , validitysignalid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , diagobject_(nullptr)
+  : equipmentidhash_(PROTOBUF_ULONGLONG(0))
+  , parenthash_(PROTOBUF_ULONGLONG(0))
+  , diagsignaltypeidhash_(PROTOBUF_ULONGLONG(0))
   , diaglevel_(0)
   , valuesizebit_(0)
+  , reflectedsignalidhash_(PROTOBUF_ULONGLONG(0))
+  , validitysignalidhash_(PROTOBUF_ULONGLONG(0))
   , discretecontainersize_(0)
   , isreflection_(false)
   , logchanges_(false)
@@ -2351,23 +2352,24 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_network_2eproto::offsets[] PRO
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagObject, devicetype_),
   PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagObject, equipmentid_),
+  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagObject, devicetype_),
   PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagObject, parenthash_),
-  2,
   0,
+  2,
   1,
   PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, diagobject_),
+  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, equipmentidhash_),
+  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, parenthash_),
   PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, diaglevel_),
-  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, diagsignaltypeid_),
+  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, diagsignaltypeidhash_),
   PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, isreflection_),
-  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, reflectedsignalid_),
-  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, validitysignalid_),
+  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, reflectedsignalidhash_),
+  PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, validitysignalidhash_),
   PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, valuesizebit_),
   PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, discretecontainersize_),
   PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, logchanges_),
@@ -2377,21 +2379,22 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_network_2eproto::offsets[] PRO
   PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, coarseaperture_),
   PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, fineaperture_),
   PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignal, absaddrbit_),
-  3,
-  4,
   0,
-  7,
   1,
+  3,
   2,
+  8,
   5,
   6,
-  8,
+  4,
+  7,
   9,
   10,
-  12,
   11,
-  14,
   13,
+  12,
+  15,
+  14,
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::Network::AcquiredDiagSignals, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -2477,8 +2480,8 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 1047, 1055, sizeof(::Network::RtTrendsGetStateChangesReply)},
   { 1058, 1070, sizeof(::Network::GetFileReply)},
   { 1077, 1085, sizeof(::Network::AcquiredDiagObject)},
-  { 1088, 1108, sizeof(::Network::AcquiredDiagSignal)},
-  { 1123, -1, sizeof(::Network::AcquiredDiagSignals)},
+  { 1088, 1109, sizeof(::Network::AcquiredDiagSignal)},
+  { 1125, -1, sizeof(::Network::AcquiredDiagSignals)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -2866,30 +2869,30 @@ const char descriptor_table_protodef_network_2eproto[] PROTOBUF_SECTION_VARIABLE
   "\0010\022\023\n\010fileSize\030\002 \001(\003:\0010\022\025\n\ntotalParts\030\003 "
   "\001(\005:\0010\022\026\n\013currentPart\030\004 \001(\005:\0010\022\032\n\017curren"
   "tPartSize\030\005 \001(\005:\0010\022\013\n\003md5\030\006 \001(\014\022\024\n\014fileP"
-  "artData\030\n \001(\014\"W\n\022AcquiredDiagObject\022\025\n\nd"
-  "eviceType\030\001 \002(\005:\0010\022\023\n\013equipmentID\030\002 \002(\t\022"
-  "\025\n\nparentHash\030\003 \002(\004:\0010\"\262\003\n\022AcquiredDiagS"
-  "ignal\022/\n\ndiagObject\030\001 \002(\0132\033.Network.Acqu"
-  "iredDiagObject\022\024\n\tdiagLevel\030\002 \002(\005:\0010\022\030\n\020"
-  "diagSignalTypeID\030\003 \002(\t\022\033\n\014isReflection\030\004"
-  " \001(\010:\005false\022\031\n\021reflectedSignalID\030\005 \001(\t\022\030"
-  "\n\020validitySignalID\030\006 \001(\t\022\027\n\014valueSizeBit"
-  "\030\007 \001(\005:\0010\022 \n\025discreteContainerSize\030\010 \001(\005"
-  ":\0010\022\031\n\nlogChanges\030\t \001(\010:\005false\022\026\n\007archiv"
-  "e\030\n \001(\010:\005false\022\027\n\010reserved\030\013 \001(\010:\005false\022"
-  "\027\n\014apertureType\030\014 \001(\005:\0010\022\031\n\016coarseApertu"
-  "re\030\r \001(\001:\0010\022\027\n\014fineAperture\030\016 \001(\001:\0010\022\025\n\n"
-  "absAddrBit\030\017 \001(\005:\0010\"y\n\023AcquiredDiagSigna"
-  "ls\0220\n\013diagSignals\030\001 \003(\0132\033.Network.Acquir"
-  "edDiagSignal\0220\n\013diagObjects\030\002 \003(\0132\033.Netw"
-  "ork.AcquiredDiagObject"
+  "artData\030\n \001(\014\"W\n\022AcquiredDiagObject\022\023\n\013e"
+  "quipmentID\030\001 \002(\t\022\025\n\ndeviceType\030\002 \002(\005:\0010\022"
+  "\025\n\nparentHash\030\003 \002(\004:\0010\"\275\003\n\022AcquiredDiagS"
+  "ignal\022\027\n\017equipmentIDHash\030\001 \002(\004\022\025\n\nparent"
+  "Hash\030\002 \002(\004:\0010\022\024\n\tdiagLevel\030\003 \002(\005:\0010\022\034\n\024d"
+  "iagSignalTypeIDHash\030\004 \002(\004\022\033\n\014isReflectio"
+  "n\030\005 \001(\010:\005false\022\035\n\025reflectedSignalIDHash\030"
+  "\006 \001(\004\022\034\n\024validitySignalIDHash\030\007 \001(\004\022\027\n\014v"
+  "alueSizeBit\030\010 \001(\005:\0010\022 \n\025discreteContaine"
+  "rSize\030\t \001(\005:\0010\022\031\n\nlogChanges\030\n \001(\010:\005fals"
+  "e\022\026\n\007archive\030\013 \001(\010:\005false\022\027\n\010reserved\030\014 "
+  "\001(\010:\005false\022\027\n\014apertureType\030\r \001(\005:\0010\022\031\n\016c"
+  "oarseAperture\030\016 \001(\001:\0010\022\027\n\014fineAperture\030\017"
+  " \001(\001:\0010\022\025\n\nabsAddrBit\030\020 \001(\005:\0010\"y\n\023Acquir"
+  "edDiagSignals\0220\n\013diagSignals\030\001 \003(\0132\033.Net"
+  "work.AcquiredDiagSignal\0220\n\013diagObjects\030\002"
+  " \003(\0132\033.Network.AcquiredDiagObject"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_network_2eproto_deps[1] = {
   &::descriptor_table_serialization_2eproto,
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_network_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_network_2eproto = {
-  false, false, 12782, descriptor_table_protodef_network_2eproto, "network.proto", 
+  false, false, 12793, descriptor_table_protodef_network_2eproto, "network.proto", 
   &descriptor_table_network_2eproto_once, descriptor_table_network_2eproto_deps, 1, 78,
   schemas, file_default_instances, TableStruct_network_2eproto::offsets,
   file_level_metadata_network_2eproto, file_level_enum_descriptors_network_2eproto, file_level_service_descriptors_network_2eproto,
@@ -28054,11 +28057,11 @@ void GetFileReply::InternalSwap(GetFileReply* other) {
 class AcquiredDiagObject::_Internal {
  public:
   using HasBits = decltype(std::declval<AcquiredDiagObject>()._has_bits_);
-  static void set_has_devicetype(HasBits* has_bits) {
-    (*has_bits)[0] |= 4u;
-  }
   static void set_has_equipmentid(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
+  }
+  static void set_has_devicetype(HasBits* has_bits) {
+    (*has_bits)[0] |= 4u;
   }
   static void set_has_parenthash(HasBits* has_bits) {
     (*has_bits)[0] |= 2u;
@@ -28145,22 +28148,22 @@ const char* AcquiredDiagObject::_InternalParse(const char* ptr, ::PROTOBUF_NAMES
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     CHK_(ptr);
     switch (tag >> 3) {
-      // required int32 deviceType = 1 [default = 0];
+      // required string equipmentID = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          _Internal::set_has_devicetype(&has_bits);
-          devicetype_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // required string equipmentID = 2;
-      case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
           auto str = _internal_mutable_equipmentid();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
           ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Network.AcquiredDiagObject.equipmentID");
           #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // required int32 deviceType = 2 [default = 0];
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
+          _Internal::set_has_devicetype(&has_bits);
+          devicetype_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -28202,20 +28205,20 @@ failure:
   (void) cached_has_bits;
 
   cached_has_bits = _has_bits_[0];
-  // required int32 deviceType = 1 [default = 0];
-  if (cached_has_bits & 0x00000004u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(1, this->_internal_devicetype(), target);
-  }
-
-  // required string equipmentID = 2;
+  // required string equipmentID = 1;
   if (cached_has_bits & 0x00000001u) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_equipmentid().data(), static_cast<int>(this->_internal_equipmentid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
       "Network.AcquiredDiagObject.equipmentID");
     target = stream->WriteStringMaybeAliased(
-        2, this->_internal_equipmentid(), target);
+        1, this->_internal_equipmentid(), target);
+  }
+
+  // required int32 deviceType = 2 [default = 0];
+  if (cached_has_bits & 0x00000004u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(2, this->_internal_devicetype(), target);
   }
 
   // required uint64 parentHash = 3 [default = 0];
@@ -28237,7 +28240,7 @@ size_t AcquiredDiagObject::RequiredFieldsByteSizeFallback() const {
   size_t total_size = 0;
 
   if (_internal_has_equipmentid()) {
-    // required string equipmentID = 2;
+    // required string equipmentID = 1;
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_equipmentid());
@@ -28251,7 +28254,7 @@ size_t AcquiredDiagObject::RequiredFieldsByteSizeFallback() const {
   }
 
   if (_internal_has_devicetype()) {
-    // required int32 deviceType = 1 [default = 0];
+    // required int32 deviceType = 2 [default = 0];
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
         this->_internal_devicetype());
@@ -28264,7 +28267,7 @@ size_t AcquiredDiagObject::ByteSizeLong() const {
   size_t total_size = 0;
 
   if (((_has_bits_[0] & 0x00000007) ^ 0x00000007) == 0) {  // All required fields are present.
-    // required string equipmentID = 2;
+    // required string equipmentID = 1;
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_equipmentid());
@@ -28274,7 +28277,7 @@ size_t AcquiredDiagObject::ByteSizeLong() const {
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
         this->_internal_parenthash());
 
-    // required int32 deviceType = 1 [default = 0];
+    // required int32 deviceType = 2 [default = 0];
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
         this->_internal_devicetype());
@@ -28374,61 +28377,59 @@ void AcquiredDiagObject::InternalSwap(AcquiredDiagObject* other) {
 class AcquiredDiagSignal::_Internal {
  public:
   using HasBits = decltype(std::declval<AcquiredDiagSignal>()._has_bits_);
-  static const ::Network::AcquiredDiagObject& diagobject(const AcquiredDiagSignal* msg);
-  static void set_has_diagobject(HasBits* has_bits) {
-    (*has_bits)[0] |= 8u;
-  }
-  static void set_has_diaglevel(HasBits* has_bits) {
-    (*has_bits)[0] |= 16u;
-  }
-  static void set_has_diagsignaltypeid(HasBits* has_bits) {
+  static void set_has_equipmentidhash(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
   }
-  static void set_has_isreflection(HasBits* has_bits) {
-    (*has_bits)[0] |= 128u;
-  }
-  static void set_has_reflectedsignalid(HasBits* has_bits) {
+  static void set_has_parenthash(HasBits* has_bits) {
     (*has_bits)[0] |= 2u;
   }
-  static void set_has_validitysignalid(HasBits* has_bits) {
+  static void set_has_diaglevel(HasBits* has_bits) {
+    (*has_bits)[0] |= 8u;
+  }
+  static void set_has_diagsignaltypeidhash(HasBits* has_bits) {
     (*has_bits)[0] |= 4u;
   }
-  static void set_has_valuesizebit(HasBits* has_bits) {
-    (*has_bits)[0] |= 32u;
-  }
-  static void set_has_discretecontainersize(HasBits* has_bits) {
-    (*has_bits)[0] |= 64u;
-  }
-  static void set_has_logchanges(HasBits* has_bits) {
+  static void set_has_isreflection(HasBits* has_bits) {
     (*has_bits)[0] |= 256u;
   }
-  static void set_has_archive(HasBits* has_bits) {
+  static void set_has_reflectedsignalidhash(HasBits* has_bits) {
+    (*has_bits)[0] |= 32u;
+  }
+  static void set_has_validitysignalidhash(HasBits* has_bits) {
+    (*has_bits)[0] |= 64u;
+  }
+  static void set_has_valuesizebit(HasBits* has_bits) {
+    (*has_bits)[0] |= 16u;
+  }
+  static void set_has_discretecontainersize(HasBits* has_bits) {
+    (*has_bits)[0] |= 128u;
+  }
+  static void set_has_logchanges(HasBits* has_bits) {
     (*has_bits)[0] |= 512u;
   }
-  static void set_has_reserved(HasBits* has_bits) {
+  static void set_has_archive(HasBits* has_bits) {
     (*has_bits)[0] |= 1024u;
   }
-  static void set_has_aperturetype(HasBits* has_bits) {
-    (*has_bits)[0] |= 4096u;
-  }
-  static void set_has_coarseaperture(HasBits* has_bits) {
+  static void set_has_reserved(HasBits* has_bits) {
     (*has_bits)[0] |= 2048u;
   }
-  static void set_has_fineaperture(HasBits* has_bits) {
-    (*has_bits)[0] |= 16384u;
-  }
-  static void set_has_absaddrbit(HasBits* has_bits) {
+  static void set_has_aperturetype(HasBits* has_bits) {
     (*has_bits)[0] |= 8192u;
   }
+  static void set_has_coarseaperture(HasBits* has_bits) {
+    (*has_bits)[0] |= 4096u;
+  }
+  static void set_has_fineaperture(HasBits* has_bits) {
+    (*has_bits)[0] |= 32768u;
+  }
+  static void set_has_absaddrbit(HasBits* has_bits) {
+    (*has_bits)[0] |= 16384u;
+  }
   static bool MissingRequiredFields(const HasBits& has_bits) {
-    return ((has_bits[0] & 0x00000019) ^ 0x00000019) != 0;
+    return ((has_bits[0] & 0x0000000f) ^ 0x0000000f) != 0;
   }
 };
 
-const ::Network::AcquiredDiagObject&
-AcquiredDiagSignal::_Internal::diagobject(const AcquiredDiagSignal* msg) {
-  return *msg->diagobject_;
-}
 AcquiredDiagSignal::AcquiredDiagSignal(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
@@ -28439,40 +28440,17 @@ AcquiredDiagSignal::AcquiredDiagSignal(const AcquiredDiagSignal& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
       _has_bits_(from._has_bits_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  diagsignaltypeid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (from._internal_has_diagsignaltypeid()) {
-    diagsignaltypeid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_diagsignaltypeid(), 
-      GetArena());
-  }
-  reflectedsignalid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (from._internal_has_reflectedsignalid()) {
-    reflectedsignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_reflectedsignalid(), 
-      GetArena());
-  }
-  validitysignalid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (from._internal_has_validitysignalid()) {
-    validitysignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_validitysignalid(), 
-      GetArena());
-  }
-  if (from._internal_has_diagobject()) {
-    diagobject_ = new ::Network::AcquiredDiagObject(*from.diagobject_);
-  } else {
-    diagobject_ = nullptr;
-  }
-  ::memcpy(&diaglevel_, &from.diaglevel_,
+  ::memcpy(&equipmentidhash_, &from.equipmentidhash_,
     static_cast<size_t>(reinterpret_cast<char*>(&fineaperture_) -
-    reinterpret_cast<char*>(&diaglevel_)) + sizeof(fineaperture_));
+    reinterpret_cast<char*>(&equipmentidhash_)) + sizeof(fineaperture_));
   // @@protoc_insertion_point(copy_constructor:Network.AcquiredDiagSignal)
 }
 
 void AcquiredDiagSignal::SharedCtor() {
-diagsignaltypeid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-reflectedsignalid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-validitysignalid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-    reinterpret_cast<char*>(&diagobject_) - reinterpret_cast<char*>(this)),
+    reinterpret_cast<char*>(&equipmentidhash_) - reinterpret_cast<char*>(this)),
     0, static_cast<size_t>(reinterpret_cast<char*>(&fineaperture_) -
-    reinterpret_cast<char*>(&diagobject_)) + sizeof(fineaperture_));
+    reinterpret_cast<char*>(&equipmentidhash_)) + sizeof(fineaperture_));
 }
 
 AcquiredDiagSignal::~AcquiredDiagSignal() {
@@ -28483,10 +28461,6 @@ AcquiredDiagSignal::~AcquiredDiagSignal() {
 
 void AcquiredDiagSignal::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
-  diagsignaltypeid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  reflectedsignalid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  validitysignalid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (this != internal_default_instance()) delete diagobject_;
 }
 
 void AcquiredDiagSignal::ArenaDtor(void* object) {
@@ -28506,30 +28480,15 @@ void AcquiredDiagSignal::Clear() {
   (void) cached_has_bits;
 
   cached_has_bits = _has_bits_[0];
-  if (cached_has_bits & 0x0000000fu) {
-    if (cached_has_bits & 0x00000001u) {
-      diagsignaltypeid_.ClearNonDefaultToEmpty();
-    }
-    if (cached_has_bits & 0x00000002u) {
-      reflectedsignalid_.ClearNonDefaultToEmpty();
-    }
-    if (cached_has_bits & 0x00000004u) {
-      validitysignalid_.ClearNonDefaultToEmpty();
-    }
-    if (cached_has_bits & 0x00000008u) {
-      GOOGLE_DCHECK(diagobject_ != nullptr);
-      diagobject_->Clear();
-    }
+  if (cached_has_bits & 0x000000ffu) {
+    ::memset(&equipmentidhash_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&discretecontainersize_) -
+        reinterpret_cast<char*>(&equipmentidhash_)) + sizeof(discretecontainersize_));
   }
-  if (cached_has_bits & 0x000000f0u) {
-    ::memset(&diaglevel_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&isreflection_) -
-        reinterpret_cast<char*>(&diaglevel_)) + sizeof(isreflection_));
-  }
-  if (cached_has_bits & 0x00007f00u) {
-    ::memset(&logchanges_, 0, static_cast<size_t>(
+  if (cached_has_bits & 0x0000ff00u) {
+    ::memset(&isreflection_, 0, static_cast<size_t>(
         reinterpret_cast<char*>(&fineaperture_) -
-        reinterpret_cast<char*>(&logchanges_)) + sizeof(fineaperture_));
+        reinterpret_cast<char*>(&isreflection_)) + sizeof(fineaperture_));
   }
   _has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -28543,129 +28502,129 @@ const char* AcquiredDiagSignal::_InternalParse(const char* ptr, ::PROTOBUF_NAMES
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     CHK_(ptr);
     switch (tag >> 3) {
-      // required .Network.AcquiredDiagObject diagObject = 1;
+      // required uint64 equipmentIDHash = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
-          ptr = ctx->ParseMessage(_internal_mutable_diagobject(), ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
+          _Internal::set_has_equipmentidhash(&has_bits);
+          equipmentidhash_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // required int32 diagLevel = 2 [default = 0];
+      // required uint64 parentHash = 2 [default = 0];
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
+          _Internal::set_has_parenthash(&has_bits);
+          parenthash_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // required int32 diagLevel = 3 [default = 0];
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
           _Internal::set_has_diaglevel(&has_bits);
           diaglevel_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // required string diagSignalTypeID = 3;
-      case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
-          auto str = _internal_mutable_diagsignaltypeid();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Network.AcquiredDiagSignal.diagSignalTypeID");
-          #endif  // !NDEBUG
+      // required uint64 diagSignalTypeIDHash = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
+          _Internal::set_has_diagsignaltypeidhash(&has_bits);
+          diagsignaltypeidhash_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional bool isReflection = 4 [default = false];
-      case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
+      // optional bool isReflection = 5 [default = false];
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 40)) {
           _Internal::set_has_isreflection(&has_bits);
           isreflection_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional string reflectedSignalID = 5;
-      case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 42)) {
-          auto str = _internal_mutable_reflectedsignalid();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Network.AcquiredDiagSignal.reflectedSignalID");
-          #endif  // !NDEBUG
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional string validitySignalID = 6;
+      // optional uint64 reflectedSignalIDHash = 6;
       case 6:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 50)) {
-          auto str = _internal_mutable_validitysignalid();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Network.AcquiredDiagSignal.validitySignalID");
-          #endif  // !NDEBUG
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 48)) {
+          _Internal::set_has_reflectedsignalidhash(&has_bits);
+          reflectedsignalidhash_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional int32 valueSizeBit = 7 [default = 0];
+      // optional uint64 validitySignalIDHash = 7;
       case 7:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 56)) {
+          _Internal::set_has_validitysignalidhash(&has_bits);
+          validitysignalidhash_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int32 valueSizeBit = 8 [default = 0];
+      case 8:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 64)) {
           _Internal::set_has_valuesizebit(&has_bits);
           valuesizebit_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional int32 discreteContainerSize = 8 [default = 0];
-      case 8:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 64)) {
+      // optional int32 discreteContainerSize = 9 [default = 0];
+      case 9:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 72)) {
           _Internal::set_has_discretecontainersize(&has_bits);
           discretecontainersize_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional bool logChanges = 9 [default = false];
-      case 9:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 72)) {
+      // optional bool logChanges = 10 [default = false];
+      case 10:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 80)) {
           _Internal::set_has_logchanges(&has_bits);
           logchanges_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional bool archive = 10 [default = false];
-      case 10:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 80)) {
+      // optional bool archive = 11 [default = false];
+      case 11:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 88)) {
           _Internal::set_has_archive(&has_bits);
           archive_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional bool reserved = 11 [default = false];
-      case 11:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 88)) {
+      // optional bool reserved = 12 [default = false];
+      case 12:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 96)) {
           _Internal::set_has_reserved(&has_bits);
           reserved_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional int32 apertureType = 12 [default = 0];
-      case 12:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 96)) {
+      // optional int32 apertureType = 13 [default = 0];
+      case 13:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 104)) {
           _Internal::set_has_aperturetype(&has_bits);
           aperturetype_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional double coarseAperture = 13 [default = 0];
-      case 13:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 105)) {
+      // optional double coarseAperture = 14 [default = 0];
+      case 14:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 113)) {
           _Internal::set_has_coarseaperture(&has_bits);
           coarseaperture_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
           ptr += sizeof(double);
         } else goto handle_unusual;
         continue;
-      // optional double fineAperture = 14 [default = 0];
-      case 14:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 113)) {
+      // optional double fineAperture = 15 [default = 0];
+      case 15:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 121)) {
           _Internal::set_has_fineaperture(&has_bits);
           fineaperture_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
           ptr += sizeof(double);
         } else goto handle_unusual;
         continue;
-      // optional int32 absAddrBit = 15 [default = 0];
-      case 15:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 120)) {
+      // optional int32 absAddrBit = 16 [default = 0];
+      case 16:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 128)) {
           _Internal::set_has_absaddrbit(&has_bits);
           absaddrbit_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
@@ -28701,108 +28660,100 @@ failure:
   (void) cached_has_bits;
 
   cached_has_bits = _has_bits_[0];
-  // required .Network.AcquiredDiagObject diagObject = 1;
+  // required uint64 equipmentIDHash = 1;
+  if (cached_has_bits & 0x00000001u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_equipmentidhash(), target);
+  }
+
+  // required uint64 parentHash = 2 [default = 0];
+  if (cached_has_bits & 0x00000002u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(2, this->_internal_parenthash(), target);
+  }
+
+  // required int32 diagLevel = 3 [default = 0];
   if (cached_has_bits & 0x00000008u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        1, _Internal::diagobject(this), target, stream);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(3, this->_internal_diaglevel(), target);
   }
 
-  // required int32 diagLevel = 2 [default = 0];
-  if (cached_has_bits & 0x00000010u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(2, this->_internal_diaglevel(), target);
-  }
-
-  // required string diagSignalTypeID = 3;
-  if (cached_has_bits & 0x00000001u) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->_internal_diagsignaltypeid().data(), static_cast<int>(this->_internal_diagsignaltypeid().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Network.AcquiredDiagSignal.diagSignalTypeID");
-    target = stream->WriteStringMaybeAliased(
-        3, this->_internal_diagsignaltypeid(), target);
-  }
-
-  // optional bool isReflection = 4 [default = false];
-  if (cached_has_bits & 0x00000080u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(4, this->_internal_isreflection(), target);
-  }
-
-  // optional string reflectedSignalID = 5;
-  if (cached_has_bits & 0x00000002u) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->_internal_reflectedsignalid().data(), static_cast<int>(this->_internal_reflectedsignalid().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Network.AcquiredDiagSignal.reflectedSignalID");
-    target = stream->WriteStringMaybeAliased(
-        5, this->_internal_reflectedsignalid(), target);
-  }
-
-  // optional string validitySignalID = 6;
+  // required uint64 diagSignalTypeIDHash = 4;
   if (cached_has_bits & 0x00000004u) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->_internal_validitysignalid().data(), static_cast<int>(this->_internal_validitysignalid().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Network.AcquiredDiagSignal.validitySignalID");
-    target = stream->WriteStringMaybeAliased(
-        6, this->_internal_validitysignalid(), target);
-  }
-
-  // optional int32 valueSizeBit = 7 [default = 0];
-  if (cached_has_bits & 0x00000020u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(7, this->_internal_valuesizebit(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(4, this->_internal_diagsignaltypeidhash(), target);
   }
 
-  // optional int32 discreteContainerSize = 8 [default = 0];
-  if (cached_has_bits & 0x00000040u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(8, this->_internal_discretecontainersize(), target);
-  }
-
-  // optional bool logChanges = 9 [default = false];
+  // optional bool isReflection = 5 [default = false];
   if (cached_has_bits & 0x00000100u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(9, this->_internal_logchanges(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(5, this->_internal_isreflection(), target);
   }
 
-  // optional bool archive = 10 [default = false];
+  // optional uint64 reflectedSignalIDHash = 6;
+  if (cached_has_bits & 0x00000020u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(6, this->_internal_reflectedsignalidhash(), target);
+  }
+
+  // optional uint64 validitySignalIDHash = 7;
+  if (cached_has_bits & 0x00000040u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(7, this->_internal_validitysignalidhash(), target);
+  }
+
+  // optional int32 valueSizeBit = 8 [default = 0];
+  if (cached_has_bits & 0x00000010u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(8, this->_internal_valuesizebit(), target);
+  }
+
+  // optional int32 discreteContainerSize = 9 [default = 0];
+  if (cached_has_bits & 0x00000080u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(9, this->_internal_discretecontainersize(), target);
+  }
+
+  // optional bool logChanges = 10 [default = false];
   if (cached_has_bits & 0x00000200u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(10, this->_internal_archive(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(10, this->_internal_logchanges(), target);
   }
 
-  // optional bool reserved = 11 [default = false];
+  // optional bool archive = 11 [default = false];
   if (cached_has_bits & 0x00000400u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(11, this->_internal_reserved(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(11, this->_internal_archive(), target);
   }
 
-  // optional int32 apertureType = 12 [default = 0];
-  if (cached_has_bits & 0x00001000u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(12, this->_internal_aperturetype(), target);
-  }
-
-  // optional double coarseAperture = 13 [default = 0];
+  // optional bool reserved = 12 [default = false];
   if (cached_has_bits & 0x00000800u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(13, this->_internal_coarseaperture(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(12, this->_internal_reserved(), target);
   }
 
-  // optional double fineAperture = 14 [default = 0];
-  if (cached_has_bits & 0x00004000u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(14, this->_internal_fineaperture(), target);
-  }
-
-  // optional int32 absAddrBit = 15 [default = 0];
+  // optional int32 apertureType = 13 [default = 0];
   if (cached_has_bits & 0x00002000u) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(15, this->_internal_absaddrbit(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(13, this->_internal_aperturetype(), target);
+  }
+
+  // optional double coarseAperture = 14 [default = 0];
+  if (cached_has_bits & 0x00001000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(14, this->_internal_coarseaperture(), target);
+  }
+
+  // optional double fineAperture = 15 [default = 0];
+  if (cached_has_bits & 0x00008000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(15, this->_internal_fineaperture(), target);
+  }
+
+  // optional int32 absAddrBit = 16 [default = 0];
+  if (cached_has_bits & 0x00004000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(16, this->_internal_absaddrbit(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -28817,22 +28768,29 @@ size_t AcquiredDiagSignal::RequiredFieldsByteSizeFallback() const {
 // @@protoc_insertion_point(required_fields_byte_size_fallback_start:Network.AcquiredDiagSignal)
   size_t total_size = 0;
 
-  if (_internal_has_diagsignaltypeid()) {
-    // required string diagSignalTypeID = 3;
+  if (_internal_has_equipmentidhash()) {
+    // required uint64 equipmentIDHash = 1;
     total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_diagsignaltypeid());
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_equipmentidhash());
   }
 
-  if (_internal_has_diagobject()) {
-    // required .Network.AcquiredDiagObject diagObject = 1;
+  if (_internal_has_parenthash()) {
+    // required uint64 parentHash = 2 [default = 0];
     total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-        *diagobject_);
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_parenthash());
+  }
+
+  if (_internal_has_diagsignaltypeidhash()) {
+    // required uint64 diagSignalTypeIDHash = 4;
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_diagsignaltypeidhash());
   }
 
   if (_internal_has_diaglevel()) {
-    // required int32 diagLevel = 2 [default = 0];
+    // required int32 diagLevel = 3 [default = 0];
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
         this->_internal_diaglevel());
@@ -28844,18 +28802,23 @@ size_t AcquiredDiagSignal::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:Network.AcquiredDiagSignal)
   size_t total_size = 0;
 
-  if (((_has_bits_[0] & 0x00000019) ^ 0x00000019) == 0) {  // All required fields are present.
-    // required string diagSignalTypeID = 3;
+  if (((_has_bits_[0] & 0x0000000f) ^ 0x0000000f) == 0) {  // All required fields are present.
+    // required uint64 equipmentIDHash = 1;
     total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_diagsignaltypeid());
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_equipmentidhash());
 
-    // required .Network.AcquiredDiagObject diagObject = 1;
+    // required uint64 parentHash = 2 [default = 0];
     total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-        *diagobject_);
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_parenthash());
 
-    // required int32 diagLevel = 2 [default = 0];
+    // required uint64 diagSignalTypeIDHash = 4;
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_diagsignaltypeidhash());
+
+    // required int32 diagLevel = 3 [default = 0];
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
         this->_internal_diaglevel());
@@ -28868,80 +28831,78 @@ size_t AcquiredDiagSignal::ByteSizeLong() const {
   (void) cached_has_bits;
 
   cached_has_bits = _has_bits_[0];
-  if (cached_has_bits & 0x00000006u) {
-    // optional string reflectedSignalID = 5;
-    if (cached_has_bits & 0x00000002u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-          this->_internal_reflectedsignalid());
-    }
-
-    // optional string validitySignalID = 6;
-    if (cached_has_bits & 0x00000004u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-          this->_internal_validitysignalid());
-    }
-
-  }
-  if (cached_has_bits & 0x000000e0u) {
-    // optional int32 valueSizeBit = 7 [default = 0];
-    if (cached_has_bits & 0x00000020u) {
+  if (cached_has_bits & 0x000000f0u) {
+    // optional int32 valueSizeBit = 8 [default = 0];
+    if (cached_has_bits & 0x00000010u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_valuesizebit());
     }
 
-    // optional int32 discreteContainerSize = 8 [default = 0];
+    // optional uint64 reflectedSignalIDHash = 6;
+    if (cached_has_bits & 0x00000020u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+          this->_internal_reflectedsignalidhash());
+    }
+
+    // optional uint64 validitySignalIDHash = 7;
     if (cached_has_bits & 0x00000040u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+          this->_internal_validitysignalidhash());
+    }
+
+    // optional int32 discreteContainerSize = 9 [default = 0];
+    if (cached_has_bits & 0x00000080u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_discretecontainersize());
     }
 
-    // optional bool isReflection = 4 [default = false];
-    if (cached_has_bits & 0x00000080u) {
-      total_size += 1 + 1;
-    }
-
   }
-  if (cached_has_bits & 0x00007f00u) {
-    // optional bool logChanges = 9 [default = false];
+  if (cached_has_bits & 0x0000ff00u) {
+    // optional bool isReflection = 5 [default = false];
     if (cached_has_bits & 0x00000100u) {
       total_size += 1 + 1;
     }
 
-    // optional bool archive = 10 [default = false];
+    // optional bool logChanges = 10 [default = false];
     if (cached_has_bits & 0x00000200u) {
       total_size += 1 + 1;
     }
 
-    // optional bool reserved = 11 [default = false];
+    // optional bool archive = 11 [default = false];
     if (cached_has_bits & 0x00000400u) {
       total_size += 1 + 1;
     }
 
-    // optional double coarseAperture = 13 [default = 0];
+    // optional bool reserved = 12 [default = false];
     if (cached_has_bits & 0x00000800u) {
+      total_size += 1 + 1;
+    }
+
+    // optional double coarseAperture = 14 [default = 0];
+    if (cached_has_bits & 0x00001000u) {
       total_size += 1 + 8;
     }
 
-    // optional int32 apertureType = 12 [default = 0];
-    if (cached_has_bits & 0x00001000u) {
+    // optional int32 apertureType = 13 [default = 0];
+    if (cached_has_bits & 0x00002000u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_aperturetype());
     }
 
-    // optional int32 absAddrBit = 15 [default = 0];
-    if (cached_has_bits & 0x00002000u) {
-      total_size += 1 +
+    // optional int32 absAddrBit = 16 [default = 0];
+    if (cached_has_bits & 0x00004000u) {
+      total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_absaddrbit());
     }
 
-    // optional double fineAperture = 14 [default = 0];
-    if (cached_has_bits & 0x00004000u) {
+    // optional double fineAperture = 15 [default = 0];
+    if (cached_has_bits & 0x00008000u) {
       total_size += 1 + 8;
     }
 
@@ -28980,51 +28941,54 @@ void AcquiredDiagSignal::MergeFrom(const AcquiredDiagSignal& from) {
   cached_has_bits = from._has_bits_[0];
   if (cached_has_bits & 0x000000ffu) {
     if (cached_has_bits & 0x00000001u) {
-      _internal_set_diagsignaltypeid(from._internal_diagsignaltypeid());
+      equipmentidhash_ = from.equipmentidhash_;
     }
     if (cached_has_bits & 0x00000002u) {
-      _internal_set_reflectedsignalid(from._internal_reflectedsignalid());
+      parenthash_ = from.parenthash_;
     }
     if (cached_has_bits & 0x00000004u) {
-      _internal_set_validitysignalid(from._internal_validitysignalid());
+      diagsignaltypeidhash_ = from.diagsignaltypeidhash_;
     }
     if (cached_has_bits & 0x00000008u) {
-      _internal_mutable_diagobject()->::Network::AcquiredDiagObject::MergeFrom(from._internal_diagobject());
-    }
-    if (cached_has_bits & 0x00000010u) {
       diaglevel_ = from.diaglevel_;
     }
-    if (cached_has_bits & 0x00000020u) {
+    if (cached_has_bits & 0x00000010u) {
       valuesizebit_ = from.valuesizebit_;
     }
+    if (cached_has_bits & 0x00000020u) {
+      reflectedsignalidhash_ = from.reflectedsignalidhash_;
+    }
     if (cached_has_bits & 0x00000040u) {
-      discretecontainersize_ = from.discretecontainersize_;
+      validitysignalidhash_ = from.validitysignalidhash_;
     }
     if (cached_has_bits & 0x00000080u) {
-      isreflection_ = from.isreflection_;
+      discretecontainersize_ = from.discretecontainersize_;
     }
     _has_bits_[0] |= cached_has_bits;
   }
-  if (cached_has_bits & 0x00007f00u) {
+  if (cached_has_bits & 0x0000ff00u) {
     if (cached_has_bits & 0x00000100u) {
-      logchanges_ = from.logchanges_;
+      isreflection_ = from.isreflection_;
     }
     if (cached_has_bits & 0x00000200u) {
-      archive_ = from.archive_;
+      logchanges_ = from.logchanges_;
     }
     if (cached_has_bits & 0x00000400u) {
-      reserved_ = from.reserved_;
+      archive_ = from.archive_;
     }
     if (cached_has_bits & 0x00000800u) {
-      coarseaperture_ = from.coarseaperture_;
+      reserved_ = from.reserved_;
     }
     if (cached_has_bits & 0x00001000u) {
-      aperturetype_ = from.aperturetype_;
+      coarseaperture_ = from.coarseaperture_;
     }
     if (cached_has_bits & 0x00002000u) {
-      absaddrbit_ = from.absaddrbit_;
+      aperturetype_ = from.aperturetype_;
     }
     if (cached_has_bits & 0x00004000u) {
+      absaddrbit_ = from.absaddrbit_;
+    }
+    if (cached_has_bits & 0x00008000u) {
       fineaperture_ = from.fineaperture_;
     }
     _has_bits_[0] |= cached_has_bits;
@@ -29047,9 +29011,6 @@ void AcquiredDiagSignal::CopyFrom(const AcquiredDiagSignal& from) {
 
 bool AcquiredDiagSignal::IsInitialized() const {
   if (_Internal::MissingRequiredFields(_has_bits_)) return false;
-  if (_internal_has_diagobject()) {
-    if (!diagobject_->IsInitialized()) return false;
-  }
   return true;
 }
 
@@ -29057,15 +29018,12 @@ void AcquiredDiagSignal::InternalSwap(AcquiredDiagSignal* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   swap(_has_bits_[0], other->_has_bits_[0]);
-  diagsignaltypeid_.Swap(&other->diagsignaltypeid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  reflectedsignalid_.Swap(&other->reflectedsignalid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  validitysignalid_.Swap(&other->validitysignalid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(AcquiredDiagSignal, fineaperture_)
       + sizeof(AcquiredDiagSignal::fineaperture_)
-      - PROTOBUF_FIELD_OFFSET(AcquiredDiagSignal, diagobject_)>(
-          reinterpret_cast<char*>(&diagobject_),
-          reinterpret_cast<char*>(&other->diagobject_));
+      - PROTOBUF_FIELD_OFFSET(AcquiredDiagSignal, equipmentidhash_)>(
+          reinterpret_cast<char*>(&equipmentidhash_),
+          reinterpret_cast<char*>(&other->equipmentidhash_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata AcquiredDiagSignal::GetMetadata() const {

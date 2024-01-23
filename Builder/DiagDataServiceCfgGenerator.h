@@ -1,47 +1,13 @@
 #pragma once
 
 #include "../OnlineLib/SoftwareSettings.h"
+#include "../OnlineLib/AcquiredDiagSignal.h"
 #include "../UtilsLib/XmlHelper.h"
 #include "SoftwareCfgGenerator.h"
 #include "DeviceHelper.h"
 
 namespace Builder
 {
-	class AcquiredDiagObject
-	{
-	public:
-		AcquiredDiagObject(std::shared_ptr<const Hardware::DeviceObject> dev,
-						   Hardware::DeviceType devType,
-						   const QString& equipID);
-		std::shared_ptr<const Hardware::DeviceObject> device;
-
-		Hardware::DeviceType deviceType = Hardware::DeviceType::DeviceTypeCount;	// means - not initialized
-		QString equipmentID;
-		Hash parentHash = 0;					// calcHash(parent.equipmentID)
-	};
-
-	class AcquiredDiagSignal: public AcquiredDiagObject
-	{
-	public:
-		AcquiredDiagSignal(std::shared_ptr<const Hardware::DiagSignal> ds);
-
-		E::DiagLevel diagLevel = E::DiagLevel::Message;
-		QString diagSignalTypeID;
-		bool isReflection = false;
-		QString reflectedSignalID;
-		QString validitySignalID;
-		int valueSizeBit = 0;
-		int discreteContainerSize = 0;
-		bool logChanges = false;
-		bool archive = false;
-		bool reserved = false;
-		E::ApertureType apertureType = E::ApertureType::AbsValue;
-		double coarseAperture = 0;
-		double fineAperture = 0;
-		Address16 absAddr;					// signal data address from beginning of module diag data offset in RUP diag packet
-											// calculate as controller.DiagDataOffset + diagSignal.DataOffset
-	};
-
 	class DiagDataServiceCfgGenerator : public SoftwareCfgGenerator
 	{
 	private:
@@ -58,13 +24,15 @@ namespace Builder
 
 		bool writeDiagSignalTypesXml();
 		bool writeDiagDataSourcesXml();
+		bool writeAcquiredDiagSignalsFile();
 
+		bool appendAquiredDiagSignalsToDataSource(const Hardware::DeviceModule* lm, DataSource* ds);
 		bool findAcquiredDiagSignals(const Hardware::DeviceModule* lm);
 		bool findAcquiredParentObjects();
 
 	private:
-		std::vector<std::shared_ptr<const Hardware::DiagSignal>> m_acquiredDiagSignals;
-		std::map<Hash, AcquiredDiagObject> m_acquiredDiagObjects;	// calcHash(diagObject->equipmentID) => acquiredDiagObject
+		std::map<QString, std::vector<DiagSignalConstShared>> m_lmAcquiredDiagSignals;	// LM equipmetID => diagSignals array
 
+		Network::AcquiredDiagSignals m_protoAcquiredDiagSignals;
 	};
 }

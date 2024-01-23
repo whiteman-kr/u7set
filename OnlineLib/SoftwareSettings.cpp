@@ -1,3 +1,7 @@
+#ifndef ONLINE_LIB_DOMAIN
+#error Do not include this file in the project! Link OnlineLib instead.
+#endif
+
 #include "../UtilsLib/XmlHelper.h"
 #include "../UtilsLib/WUtils.h"
 #include "SocketIO.h"

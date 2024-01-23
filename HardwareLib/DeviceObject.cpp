@@ -615,6 +615,12 @@ namespace Hardware
 		return DeviceTypeNames[static_cast<size_t>(m_deviceType)];
 	}
 
+	QString DeviceObject::deviceTypeName(DeviceType type) noexcept
+	{
+		Q_ASSERT(static_cast<size_t>(type) < std::size(Hardware::DeviceTypeNames));
+		return DeviceTypeNames[static_cast<size_t>(type)];
+	}
+
 	bool DeviceObject::isRoot() const noexcept
 	{
 		return deviceType() == DeviceType::Root;
