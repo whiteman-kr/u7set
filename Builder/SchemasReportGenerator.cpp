@@ -2049,7 +2049,7 @@ namespace Builder
 				if (const VFrame30::SchemaItemReceiver* receiverElement = item->toReceiverElement();
 					receiverElement != nullptr)
 				{
-					auto otherItemSignalSet = otherLogicSchema->getSignalSet();
+					const auto otherItemSignalSet = otherLogicSchema->getSignalList();
 					auto r = std::find_if(otherItemSignalSet.begin(), otherItemSignalSet.end(), [signalId](const auto& it)
 										  {
 											  // Find an item on other schema with this signal

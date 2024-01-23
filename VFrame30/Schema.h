@@ -143,7 +143,7 @@ namespace VFrame30
 		bool updateAllSchemaItemUfb(const std::vector<std::shared_ptr<UfbSchema>>& ufbs, int* updatedItemCount, QString* errorMessage);
 		bool updateAllSchemaItemBusses(const std::vector<Bus>& busses, int* updatedItemCount, QString* errorMessage);
 
-		virtual QStringList getSignalList() const;
+		QStringList getSignalList() const;
 		virtual QStringList getLabels() const;
 		virtual std::vector<QUuid> getGuids() const;
 

@@ -33,9 +33,6 @@ namespace VFrame30
 		std::map<QString, SchemaItemTransmitter*> getTransmittersMap() const; // Get the map of SchemaItemTransmitter* items, key is Connection ID
 		std::map<QString, SchemaItemReceiver*> getReceiversMap() const;       // Get the map of SchemaItemReceiver* items, key is Connection ID
 
-		std::set<QString> getSignalSet() const;
-		virtual QStringList getSignalList() const override;
-
 		// Properties
 		//
 	public:
