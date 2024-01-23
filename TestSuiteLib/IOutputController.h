@@ -23,9 +23,9 @@ namespace TestSuite
 		bool writeSignalValue(const QString& /*appSignalId*/, const QVariant& /*value*/) override {return false;}
 		bool waitForAllSignalsWritten(qint64 /*timeoutMs*/, quint64& /*timeElapsedMs*/ ) const override { return false; }
 
-		bool tuningSourceIsActive(QString lmEquipmentId) const override { return true; }
-		bool tuningSourceIsInactive(QString lmEquipmentId) const override { return true; }
-		bool activateTuningSource(QString lmEquipmentId, bool activate) override { return true; }
+		bool tuningSourceIsActive(QString /*lmEquipmentId*/) const override { return true; }
+		bool tuningSourceIsInactive(QString /*lmEquipmentId*/) const override { return true; }
+		bool activateTuningSource(QString /*lmEquipmentId*/, bool /*activate*/) override { return true; }
 	};
 }
 

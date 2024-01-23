@@ -602,7 +602,7 @@ namespace TrendLib
 			case E::SignalType::Analog:
 				{
 					bool ok = true;
-					double value = TrendScale::valueToScaleValue(lastState.value, drawParam.scaleType(), &ok);
+					/*double value = */TrendScale::valueToScaleValue(lastState.value, drawParam.scaleType(), &ok);
 					if (ok == false)
 					{
 						strValue = "?";

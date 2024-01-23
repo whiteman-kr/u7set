@@ -48,7 +48,7 @@ namespace VFrame30
 	{
 		QPainter* p = drawParam->painter();
 
-		double dpiX = drawParam->realDpiX();
+		//double dpiX = drawParam->realDpiX();
 		//double pinWidth = GetPinWidth(itemUnit(), dpiX);
 
 		FontParam smallFont = m_font;

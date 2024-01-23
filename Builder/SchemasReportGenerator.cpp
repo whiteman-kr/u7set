@@ -436,7 +436,7 @@ namespace Builder
 
 	int SchemaTypesParams::pageLayoutCount() const
 	{
-		return m_pageLayouts.size();
+		return std::ssize(m_pageLayouts);
 	}
 
 	const QString& SchemaTypesParams::pageLayoutCaption(int index) const
@@ -521,7 +521,7 @@ namespace Builder
 		{
 			// Maybe some saved version has been changed
 			Q_ASSERT(false);
-			count = m_pageLayouts.size();
+			count = std::ssize(m_pageLayouts);
 		}
 
 		for (int i = 0; i < count; i++)

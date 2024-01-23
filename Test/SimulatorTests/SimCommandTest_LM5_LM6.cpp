@@ -750,7 +750,7 @@ void SimCommandTest_LM5_LM6::test_command_mov_acc_addr()
 	const quint16 opExt = 0b010000;
 
 	quint16 appLogicWordDataOffset = AppLogicWordDataOffset;
-	const quint16 src = AppLogicWordDataOffset + 20u;
+	const quint16 src = appLogicWordDataOffset + 20u;
 
 	// Parse
 	//

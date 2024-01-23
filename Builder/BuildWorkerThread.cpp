@@ -2570,7 +2570,7 @@ namespace Builder
 
 		{
 			DbFileInfo globalScriptFileInfo;
-			bool ok = db.getFileInfo(File::GLOBAL_SCRIPT_FULL_PATH, &globalScriptFileInfo, nullptr);
+			ok = db.getFileInfo(File::GLOBAL_SCRIPT_FULL_PATH, &globalScriptFileInfo, nullptr);
 
 			if (ok == true && globalScriptFileInfo.isNull() == false && globalScriptFileInfo.deleted() == false)
 			{
@@ -2650,7 +2650,6 @@ namespace Builder
 		}
 
 		ok = simulator.scriptResult();
-
 		return ok;
 	}
 

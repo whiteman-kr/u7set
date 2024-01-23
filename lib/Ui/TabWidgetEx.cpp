@@ -106,7 +106,7 @@ void TabBarEx::paintEvent(QPaintEvent* pe)
 						points[3].rx() -= lineWeight;
 					}
 
-					painter.drawPolyline(points.data(), points.size());
+					painter.drawPolyline(points.data(), std::ssize(points));
 				}
 				else
 				{

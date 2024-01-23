@@ -605,6 +605,8 @@ namespace Builder
 
 	void AppLogicItem::writeXml(QXmlStreamWriter& writer, const VFrame30::SchemaItemTerminator& item)
 	{
+		Q_UNUSED(item);
+
 		writer.writeEmptyElement("SchemaItemTerminator");
 		return;
 	}
@@ -3071,7 +3073,7 @@ namespace Builder
 									outputItem->m_fblItem->label(),
 									outputItem->m_fblItem->guid(),
 									outputItem->afbElement().packedLogic().minInputCount,
-									packedLogic.inputs.size(),
+									std::ssize(packedLogic.inputs),
 									packedLogicId);
 
 					result = false;
