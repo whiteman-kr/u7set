@@ -145,7 +145,7 @@ namespace TestSuite
 		return m_connection.writeTuningSignal(appSignalId, value);
 	}
 
-	bool TunsOutputController::waitForAllSignalsWritten(qint64 timeoutMs, quint64& timeElapsedMs) const
+	bool TunsOutputController::waitForAllSignalsWritten(qint64 timeoutMs, qint64& timeElapsedMs) const
 	{
 		using namespace std::chrono_literals;
 		using namespace std::chrono;

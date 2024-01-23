@@ -130,10 +130,10 @@ namespace ReportLib
 							QString s;
 							do
 							{
-								QString t = text(tagValue, &ok);
+								QString tx = text(tagValue, &ok);
 								if (ok == true)
 								{
-									s = t;
+									s = tx;
 									tagFound = true;
 								}
 							} while (ok == true);

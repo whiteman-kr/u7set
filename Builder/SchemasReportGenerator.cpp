@@ -1256,7 +1256,7 @@ namespace Builder
 					// Filter files by schema tags
 					//
 					VFrame30::SchemaDetails details;
-					bool ok = details.parseDetails(fi->details());
+					ok = details.parseDetails(fi->details());
 					if (ok == true)
 					{
 						bool schemaTagFound = false;

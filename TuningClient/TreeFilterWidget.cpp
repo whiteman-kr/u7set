@@ -1104,7 +1104,7 @@ void TreeFilterWidget::slot_treeContextMenuRequested(const QPoint& pos)
 	}
 }
 
-void TreeFilterWidget::slot_treeItemDoubleClicked(QTreeWidgetItem *item, int column)
+void TreeFilterWidget::slot_treeItemDoubleClicked(QTreeWidgetItem* item, int /*column*/)
 {
 	if (item == nullptr)
 	{

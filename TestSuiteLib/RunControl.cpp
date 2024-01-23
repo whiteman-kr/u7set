@@ -240,7 +240,7 @@ namespace TestSuite
 
 					std::mutex fakeMutex;
 					std::unique_lock l(fakeMutex);
-					auto threadStopped = callFinishedCondVariable.wait_for(
+					[[maybe_unused]] auto threadStopped = callFinishedCondVariable.wait_for(
 						l,
 						std::chrono::milliseconds{200},
 						[&callFinished, scriptRunThread]()
