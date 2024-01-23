@@ -410,6 +410,7 @@
         <file>Upgrade0408.sql</file>
         <file>Upgrade0409.sql</file>
         <file>Upgrade0410.sql</file>
+        <file>Upgrade0411.sql</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>
