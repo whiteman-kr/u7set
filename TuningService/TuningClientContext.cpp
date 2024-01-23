@@ -133,8 +133,8 @@ namespace Tuning
 
 				if (tagIt != tagSignals.end())
 				{
-					const std::set<Hash>& tagSignals = tagIt->second;
-					userAllowedSignals.insert(tagSignals.begin(), tagSignals.end());
+					const std::set<Hash>& tagSignalsHashes = tagIt->second;
+					userAllowedSignals.insert(tagSignalsHashes.begin(), tagSignalsHashes.end());
 				}
 			}
 		}

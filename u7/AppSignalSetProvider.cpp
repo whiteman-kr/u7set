@@ -450,7 +450,7 @@ bool AppSignalSetProvider::createNewSignals(const AppSignal& templateSignal,
 		{
 			for (const AppSignal& newSignal : newSignalsVector)
 			{
-				auto [s, index] = m_signalSet.append(newSignal);
+				auto [sg, index] = m_signalSet.append(newSignal);
 
 				addedSignalIDs->push_back(newSignal.ID());
 				newSignalIndex = index;
@@ -611,6 +611,8 @@ std::vector<int> AppSignalSetProvider::cloneSignals(const std::vector<int>& sign
 bool AppSignalSetProvider::saveSignal(AppSignal* signal, QWidget* parentWidget)
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
+
+	Q_UNUSED(parentWidget);
 
 	TEST_PTR_RETURN_FALSE(signal);
 
@@ -1247,7 +1249,7 @@ void AppSignalSetProvider::loadIdAppSignalId()
 	m_db->getSignalsIDAppSignalID(&ids, false, nullptr);
 
 	m_signalSet.clear();
-	m_signalSet.reserve(ids.size());
+	m_signalSet.reserve(TO_INT(ids.size()));
 
 	for(const ID_AppSignalID& id : ids)
 	{

@@ -299,7 +299,7 @@ bool SignalPropertiesDialog::checkAndSaveSignal()
 
 	// Save changes from propertyObjects array to m_signalsToEdit array
 	//
-	for (qsizetype i = 0; i < m_signalsProps.size(); i++)
+	for (int i = 0; i < m_signalsProps.size(); i++)
 	{
 		AppSignalProperties* signalProps = dynamic_cast<AppSignalProperties*>(m_signalsProps[i].get());
 
