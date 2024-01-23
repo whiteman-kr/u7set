@@ -22,7 +22,7 @@ namespace TestSuite
 	private:
 		bool enabled() const  override { return false; }
 		
-		bool login(QWidget* parent) { return true; }
+		bool login(QWidget* /*parent*/) { return true; }
 		bool isLoggedIn() const { return true; }
 		
 		QString userName() const override { return m_userName; }
@@ -46,7 +46,7 @@ namespace TestSuite
 		virtual bool waitForConnection(qint64 timeoutMs) const override;
 		virtual bool writeSignalValue(const QString& appSignalId, const QVariant& value) override;
 
-		virtual bool waitForAllSignalsWritten(qint64 timeoutMs, quint64& timeElapsedMs) const override;
+		virtual bool waitForAllSignalsWritten(qint64 timeoutMs, qint64& timeElapsedMs) const override;
 
 		bool tuningSourceIsActive(QString lmEquipmentId) const override;
 		bool tuningSourceIsInactive(QString lmEquipmentId) const override;

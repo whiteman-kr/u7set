@@ -152,10 +152,10 @@ public:
 
 	MOCK_METHOD(void, invalidateSignalStates, (Hash tuningServiceHash), (override));
 
-	virtual void setState(const TuningSignalState& state, Hash tuningServiceHash) override
+	virtual void setState(const TuningSignalState& /*state*/, Hash /*tuningServiceHash*/) override
 	{
 	}
-	virtual void setStates(const std::vector<TuningSignalState>& states, Hash tuningServiceHash) override
+	virtual void setStates(const std::vector<TuningSignalState>& /*states*/, Hash /* tuningServiceHash*/) override
 	{
 	}
 
@@ -165,13 +165,13 @@ public:
 class IRecentAppSignalsStub : public ClientLib::IRecentAppSignals
 {
 public:
-	virtual void addRecentAppSignal(Hash h) override
+	virtual void addRecentAppSignal(Hash /*h*/) override
 	{
 	}
-	virtual void addRecentAppSignals(const std::vector<Hash>& hashes) override
+	virtual void addRecentAppSignals(const std::vector<Hash>& /*hashes*/) override
 	{
 	}
-	virtual std::vector<Hash> recentlyUsedAppSignals(const QString& appDataServivceId) override	
+	virtual std::vector<Hash> recentlyUsedAppSignals(const QString& /*appDataServivceId*/) override	
 	{
 		return {};
 	}

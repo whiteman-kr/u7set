@@ -479,9 +479,9 @@ bool CodeEditor::processPrefix(const QString& prefix, int operationCode)
 
     // Split selection into lines and process its prefix
     //
-    QString s = c.selection().toPlainText();
+    QString str = c.selection().toPlainText();
         
-	QStringList l = s.split("\n", Qt::KeepEmptyParts);
+	QStringList l = str.split("\n", Qt::KeepEmptyParts);
     if (l.isEmpty() == true)
     {
         return false;

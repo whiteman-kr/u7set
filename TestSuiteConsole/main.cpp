@@ -297,8 +297,6 @@ int main(int argc, char* argv[])
 								  .arg(U7SET_PATCH_VERSION)
 								  .arg(U7SET_BRANCH_NAME));
 
-	const int buildNo = U7SET_PATCH_VERSION;
-
 	// Parse command line arguments
 	//
 	CommandLineArgs args = parseCommandLine(QCoreApplication::arguments());
