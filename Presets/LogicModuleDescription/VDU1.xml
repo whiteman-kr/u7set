@@ -67,7 +67,7 @@
 		<OcmRxDataSizeLimit>0</OcmRxDataSizeLimit>
 	</Other>
 
-    <LogicUnitCommnads>
+    <LogicUnitCommnads Version="1">
 	</LogicUnitCommnads>
 	
     <AFBImplementation CheckAfbVersions="false" CheckAfbVersionsOffset="0">
