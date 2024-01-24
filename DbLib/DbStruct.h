@@ -22,6 +22,7 @@ enum class DbDir
 	MonitorSchemasDir,			// $root$/Schemas/Monitor
 	TuningSchemasDir,			// $root$/Schemas/Tuning
 	DiagnosticsSchemasDir,		// $root$/Schemas/Diagnostics
+	VduSchemasDir,				// $root$/Schemas/VDU
 	HardwareConfigurationDir,	// $root$/HC
 	HardwarePresetsDir,			// $root$/HP
 	ModuleConfigurationDir,		// $root$/MC
@@ -69,6 +70,7 @@ namespace Db
 				{DbDir::MonitorSchemasDir, QStringLiteral("$root$/Schemas/Monitor")},			// Monitor Video Schemas
 				{DbDir::TuningSchemasDir, QStringLiteral("$root$/Schemas/Tuning")},				// TuningClient Schemas
 				{DbDir::DiagnosticsSchemasDir, QStringLiteral("$root$/Schemas/Diagnostics")},	// Diagnostics Schemas
+				{DbDir::VduSchemasDir, QStringLiteral("$root$/Schemas/VDU")},					// VDU Schemas
 				{DbDir::HardwareConfigurationDir, QStringLiteral("$root$/HC")},					// Hardware Configuratiun
 				{DbDir::HardwarePresetsDir, QStringLiteral("$root$/HP")},						// Hardware Presets
 				{DbDir::ModuleConfigurationDir, QStringLiteral("$root$/MC")},					// Module Configuration
@@ -101,6 +103,9 @@ namespace Db
 
 		constexpr static const char* DvsFileExtension = "dvs";						// Diagnostics schema file extnesion
 		constexpr static const char* DvsTemplExtension = "templ_dvs";				// Diagnostics schema template file extnesion
+
+		constexpr static const char* VduFileExtension = "vus";						// VDU schema file extnesion
+		constexpr static const char* VduTemplExtension = "templ_vus";				// VDU schema template file extnesion
 
 		constexpr static const char* OclFileExtension = "ocl";						// (Optical) Connection Link
 		constexpr static const char* BusFileExtension = "bus_type";					// Bus type

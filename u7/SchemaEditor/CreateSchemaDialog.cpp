@@ -8,6 +8,7 @@
 #include "../VFrame30/LogicSchema.h"
 #include "../VFrame30/Settings.h"
 #include "../VFrame30/SchemaItem.h"
+#include "../VFrame30/VduSchema.h"
 
 
 //1. если мен€ютс€ юниты то надо помен€ть введенные размеры
@@ -117,6 +118,16 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 	{
 		idLabel = "DiagSchemaID";
 		assert(false);	// to do
+	}
+
+	if (isVduSchema() == true)
+	{
+		idLabel = "VduSchemaID";
+
+		tempateParentFileId = db->systemFileId(DbDir::VduSchemasDir);
+		templateFileExtension = Db::File::VduTemplExtension;
+
+		units.push_back(pxUnits);
 	}
 
 	assert(tempateParentFileId != -1);
@@ -605,6 +616,11 @@ bool CreateSchemaDialog::isTuningSchema() const
 bool CreateSchemaDialog::isDiagSchema() const
 {
 	return m_schema->isDiagSchema();
+}
+
+bool CreateSchemaDialog::isVduSchema() const
+{
+	return m_schema->isVduSchema();
 }
 
 std::shared_ptr<VFrame30::LogicSchema> CreateSchemaDialog::logicSchema()

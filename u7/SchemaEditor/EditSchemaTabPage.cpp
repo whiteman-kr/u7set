@@ -62,12 +62,18 @@ EditSchemaTabPage::EditSchemaTabPage(QTabWidget* tabWidget,
 	m_toolBar->addAction(m_fileAction);
 
 	m_toolBar->addSeparator();
-	m_toolBar->addAction(m_schemaWidget->m_addLineAction);
-	m_toolBar->addAction(m_schemaWidget->m_addRectAction);
-	m_toolBar->addAction(m_schemaWidget->m_addPathAction);
-	m_toolBar->addAction(m_schemaWidget->m_addTextAction);
-	m_toolBar->addAction(m_schemaWidget->m_addImageAction);
-	//m_toolBar->addAction(m_schemaWidget->m_addFrameAction);
+	if (schema->isVduSchema() == false)
+	{
+		m_toolBar->addAction(m_schemaWidget->m_addLineAction);
+		m_toolBar->addAction(m_schemaWidget->m_addRectAction);
+		m_toolBar->addAction(m_schemaWidget->m_addPathAction);
+		m_toolBar->addAction(m_schemaWidget->m_addTextAction);
+		m_toolBar->addAction(m_schemaWidget->m_addImageAction);
+		//m_toolBar->addAction(m_schemaWidget->m_addFrameAction);
+	}
+	else
+	{
+	}
 
 	if (schema->isLogicSchema() == true)
 	{

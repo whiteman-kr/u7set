@@ -473,6 +473,10 @@ std::vector<Builder::SchemaTypesParams> ProjectDiffGenerator::defaultFileTypePar
 	result.push_back({db->systemFileId(DbDir::UfblDir), QObject::tr("UFBL Descriptions"), true,
 					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, langscapeMargins, QPageLayout::Unit::Millimeter), layoutNames});
 
+	result.push_back({db->systemFileId(DbDir::VduSchemasDir), QObject::tr("VDU Schemas"), true,
+					  QPageLayout(QPageSize(QPageSize::A3), QPageLayout::Orientation::Landscape, langscapeMargins, QPageLayout::Unit::Millimeter), layoutNames});
+
+
 	// Other objects
 
 	result.push_back({db->systemFileId(DbDir::BusTypesDir),	QObject::tr("Busses"), true,
@@ -2509,7 +2513,7 @@ bool ProjectDiffGenerator::isTextFile(const QString& fileName) const
 
 bool ProjectDiffGenerator::isSchemaFile(const QString& fileName) const
 {
-	const std::array<QString, 10> TextExtensions =
+	const std::array<QString, 12> TextExtensions =
 	{
 		Db::File::AlFileExtension,			// Script
 		Db::File::AlTemplExtension,			// Xml Document
@@ -2520,7 +2524,9 @@ bool ProjectDiffGenerator::isSchemaFile(const QString& fileName) const
 		Db::File::TvsFileExtension,
 		Db::File::TvsTemplExtension,
 		Db::File::DvsFileExtension,
-		Db::File::DvsTemplExtension
+		Db::File::DvsTemplExtension,
+		Db::File::VduFileExtension,
+		Db::File::VduTemplExtension
 	};
 
 	for (const QString& ext : TextExtensions)

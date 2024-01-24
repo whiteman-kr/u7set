@@ -42,6 +42,7 @@
 #include "../VFrame30/SchemaLayer.h"
 #include "../VFrame30/Session.h"
 #include "../VFrame30/UfbSchema.h"
+#include "../VFrame30/VduSchema.h"
 
 
 const EditSchemaWidget::MouseStateCursor EditSchemaWidget::m_mouseStateCursor[] =
@@ -1044,12 +1045,15 @@ void EditSchemaWidget::createActions()
 
 	m_addSubMenu = new QMenu(tr("Add Item"), this);
 
+	if (isVduSchema() == false)
+	{
 		m_addSubMenu->addAction(m_addLineAction);
 		m_addSubMenu->addAction(m_addRectAction);
 		m_addSubMenu->addAction(m_addPathAction);
 		m_addSubMenu->addAction(m_addTextAction);
 		m_addSubMenu->addAction(m_addImageAction);
 		//m_addMenu->addAction(m_addFrameAction);
+	}
 
 		m_addSubMenu->addAction(m_addSeparatorAction0);
 
@@ -3196,6 +3200,11 @@ bool EditSchemaWidget::isMonitorSchema() const
 bool EditSchemaWidget::isTuningSchema() const
 {
 	return schema()->isTuningSchema();
+}
+
+bool EditSchemaWidget::isVduSchema() const
+{
+	return schema()->isVduSchema();
 }
 
 std::shared_ptr<VFrame30::LogicSchema> EditSchemaWidget::logicSchema()

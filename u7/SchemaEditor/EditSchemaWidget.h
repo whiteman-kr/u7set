@@ -300,6 +300,7 @@ public:
 	bool isUfbSchema() const;
 	bool isMonitorSchema() const;
 	bool isTuningSchema() const;
+	bool isVduSchema() const;
 
 	std::shared_ptr<VFrame30::LogicSchema> logicSchema();
 	const std::shared_ptr<VFrame30::LogicSchema> logicSchema() const;

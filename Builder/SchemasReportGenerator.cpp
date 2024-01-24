@@ -986,6 +986,14 @@ namespace Builder
 									  QPageLayout::Unit::Millimeter),
 						  layoutNames});
 
+		result.push_back({db->systemFileId(DbDir::VduSchemasDir),
+						  QObject::tr("VDU Schemas"),
+						  true,
+						  QPageLayout(QPageSize(QPageSize::A3),
+									  QPageLayout::Orientation::Landscape,
+									  QMarginsF(30, 20, 15, 20),
+									  QPageLayout::Unit::Millimeter),
+						  layoutNames});
 
 		result.push_back({-1,
 						  QObject::tr("Single-File Report"),
@@ -1248,7 +1256,8 @@ namespace Builder
 						fi->fileName().endsWith("." + QString(Db::File::UfbFileExtension)) == false &&
 						fi->fileName().endsWith("." + QString(Db::File::MvsFileExtension)) == false &&
 						fi->fileName().endsWith("." + QString(Db::File::TvsFileExtension)) == false &&
-						fi->fileName().endsWith("." + QString(Db::File::DvsFileExtension)) == false)
+						fi->fileName().endsWith("." + QString(Db::File::DvsFileExtension)) == false &&
+						fi->fileName().endsWith("." + QString(Db::File::VduFileExtension)) == false)
 					{
 						continue;
 					}

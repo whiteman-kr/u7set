@@ -7,6 +7,7 @@
 #include "../VFrame30/MonitorSchema.h"
 #include "../VFrame30/UfbSchema.h"
 #include "../VFrame30/TuningSchema.h"
+#include "../VFrame30/VduSchema.h"
 #include "EditSchemaTabPage.h"
 #include "CreateSchemaDialog.h"
 #include "CheckInDialog.h"
@@ -2359,32 +2360,23 @@ std::shared_ptr<VFrame30::Schema> SchemaControlTabPage::createSchema(const DbFil
 	// If parent  or it's parent... is $root$/Schemas/ApplicatinLogic
 	// the create als
 	//
-	auto createAppLogicSchema = [] {	return std::make_shared<VFrame30::LogicSchema>();	};
-	auto createMonitorSchema = [] {	return std::make_shared<VFrame30::MonitorSchema>();	};
-	auto createTuningSchema = [] {	return std::make_shared<VFrame30::TuningSchema>();	};
-	auto createUfbSchema = [] {	return std::make_shared<VFrame30::UfbSchema>();		};
+
+	const std::map<int, std::function<std::shared_ptr<VFrame30::Schema>()>> createSchemaMap = {
+		{db()->systemFileId(DbDir::AppLogicDir), []() { return std::make_shared<VFrame30::LogicSchema>(); }},
+		{db()->systemFileId(DbDir::MonitorSchemasDir), []() { return std::make_shared<VFrame30::MonitorSchema>(); }},
+		{db()->systemFileId(DbDir::TuningSchemasDir), []() { return std::make_shared<VFrame30::TuningSchema>(); }},
+		{db()->systemFileId(DbDir::UfblDir), []() { return std::make_shared<VFrame30::UfbSchema>(); }},
+		{db()->systemFileId(DbDir::VduSchemasDir), []() { return std::make_shared<VFrame30::VduSchema>(); }}
+	};
 
 	DbFileInfo lookForSystemParent = parentFile;
+
 	do
 	{
-		if (lookForSystemParent.fileId() == db()->systemFileId(DbDir::AppLogicDir))
+		if (auto it = createSchemaMap.find(lookForSystemParent.fileId());
+			it != createSchemaMap.end())
 		{
-			return createAppLogicSchema();
-		}
-
-		if (lookForSystemParent.fileId() == db()->systemFileId(DbDir::MonitorSchemasDir))
-		{
-			return createMonitorSchema();
-		}
-
-		if (lookForSystemParent.fileId() == db()->systemFileId(DbDir::TuningSchemasDir))
-		{
-			return createTuningSchema();
-		}
-
-		if (lookForSystemParent.fileId() == db()->systemFileId(DbDir::UfblDir))
-		{
-			return createUfbSchema();
+			return it->second();
 		}
 
 		lookForSystemParent = m_filesView->filesModel().file(lookForSystemParent.parentId());
@@ -3044,6 +3036,12 @@ void SchemaControlTabPage::addFile()
 	{
 		defaultId = "DIAGSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
 		extension = Db::File::DvsFileExtension;
+	}
+
+	if (schema->isVduSchema() == true)
+	{
+		defaultId = "VDUSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
+		extension = Db::File::VduFileExtension;
 	}
 
 	Q_ASSERT(extension.isEmpty() == false);
@@ -3967,7 +3965,9 @@ void SchemaControlTabPage::compareObject(DbChangesetObject object, CompareData c
 		object.name().endsWith("." + QString(Db::File::TvsFileExtension)) == false &&
 		object.name().endsWith("." + QString(Db::File::TvsTemplExtension)) == false &&
 		object.name().endsWith("." + QString(Db::File::DvsFileExtension)) == false &&
-		object.name().endsWith("." + QString(Db::File::DvsTemplExtension)) == false)
+		object.name().endsWith("." + QString(Db::File::DvsTemplExtension)) == false &&
+		object.name().endsWith("." + QString(Db::File::VduFileExtension)) == false &&
+		object.name().endsWith("." + QString(Db::File::VduTemplExtension)) == false)
 	{
 		return;
 	}
