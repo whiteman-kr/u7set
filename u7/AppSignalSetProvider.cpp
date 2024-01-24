@@ -133,6 +133,16 @@ QString AppSignalSetProvider::getUserName(int userId)
 	return QString("Unknown user ID=%1").arg(userId);
 }
 
+QString AppSignalSetProvider::signalCheckedOutByUser(const AppSignal& s)
+{
+	if (s.checkedOut() == true)
+	{
+		return getUserName(s.userID());
+	}
+
+	return QString();
+}
+
 void AppSignalSetProvider::reloadAllSignals()
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
@@ -814,39 +824,9 @@ bool AppSignalSetProvider::checkinSignals(const std::vector<int>& signalIDs,
 
 	bool result = m_db->checkinSignals(channelSignalsIDs, comment, &states, m_parentWidget);
 
-//	showErrors(states);
+	RETURN_IF_FALSE(result);
 
-	std::vector<int> updatedIDs;
-	std::vector<int> removedIDs;
-
-	for(const ObjectState& state : states)
-	{
-		if (state.errCode == ERR_SIGNAL_IS_NOT_CHECKED_OUT ||
-			state.errCode != ERR_SIGNAL_OK)
-		{
-			continue;
-		}
-
-		if (state.deleted == true)
-		{
-			removedIDs.push_back(state.id);
-		}
-		else
-		{
-			updatedIDs.push_back(state.id);
-		}
-	}
-
-	if (updatedIDs.empty() == false)
-	{
-		reloadSignals(updatedIDs, true);
-	}
-
-	if (removedIDs.empty() == false)
-	{
-		m_signalSet.removeSignals(removedIDs);
-		emit signalsCountChanged();
-	}
+	updateSignalSet(states);
 
 	return result;
 }
@@ -892,7 +872,7 @@ bool AppSignalSetProvider::undoSignalsChanges(const std::vector<int>& signalIDs,
 
 	RETURN_IF_FALSE(result);
 
-	reloadSignals(ids, true);
+	updateSignalSet(states);
 
 	return result;
 }
@@ -1076,7 +1056,6 @@ bool AppSignalSetProvider::updateSignalsSpecProps(const std::vector<const Hardwa
 	return result;
 }
 
-
 void AppSignalSetProvider::deleteSignals(const std::vector<int>& signalIDs)
 {
 	Q_ASSERT(m_thread == QThread::currentThread());
@@ -1094,50 +1073,68 @@ void AppSignalSetProvider::deleteSignals(const std::vector<int>& signalIDs)
 				  std::inserter(signalsToDeleteIDs, signalsToDeleteIDs.end()));
 	}
 
-	std::vector<int> updatedIDs;
-	std::vector<int> removedIDs;
+	reloadSignals(std::vector<int>(signalsToDeleteIDs.begin(), signalsToDeleteIDs.end()), false);
+
+	//
+
+	QString warning = "Signal(s):\n\n";
+	int wrnCount = 0;
+
+	for (const int signalID : signalsToDeleteIDs)
+	{
+		AppSignal* s = getSignalByID(signalID);
+
+		TEST_PTR_CONTINUE(s);
+
+		E::VcsItemAction ia = s->instanceAction();
+
+		if (ia == E::VcsItemAction::Added)
+		{
+			if (wrnCount < 5)
+			{
+				warning += s->appSignalID() + "\n";
+			}
+
+			wrnCount++;
+		}
+	}
+
+	if (wrnCount > 0)
+	{
+		warning += "\n";
+
+		if (wrnCount > 5)
+		{
+			warning += QString("and %1 more signal(s) ").arg(wrnCount - 5);
+		}
+
+		warning += "are just added  and not previously checked in.\n\n";
+		warning += "So these signals will completely delete without possibility to restore.\n\n"
+					"A you sure to completely delete these signals?";
+
+		QMessageBox::StandardButton res = QMessageBox::warning(m_parentWidget, "Warning", warning, QMessageBox::Yes | QMessageBox::No);
+
+		if (res == QMessageBox::No)
+		{
+			return;
+		}
+	}
+
+	//
+
+	std::vector<ObjectState> states;
+
+	states.reserve(signalsToDeleteIDs.size());
 
 	for (const int signalID : signalsToDeleteIDs)
 	{
 		ObjectState state;
-
 		m_db->deleteSignal(signalID, &state, nullptr);
 
-		if (state.errCode != ERR_SIGNAL_OK)
-		{
-			showError(state);
-			continue;
-		}
-
-		Q_ASSERT(state.deleted == true);
-
-		if (state.checkedOut == true)
-		{
-			// deletion of previously checked in signal
-			// signal is checked out and marked as deleted
-			// but NOT physically deleted
-			//
-			updatedIDs.push_back(signalID);
-		}
-		else
-		{
-			// deletion of just added (not yet checked in) signal
-			// signal is physically removed
-			//
-			removedIDs.push_back(signalID);
-		}
+		states.emplace_back(state);
 	}
 
-	if (updatedIDs.empty() == false)
-	{
-		reloadSignals(updatedIDs, true);
-	}
-
-	if (removedIDs.empty() == false)
-	{
-		m_signalSet.removeSignals(removedIDs);
-		emit signalsCountChanged();
-	}
+	updateSignalSet(states);
 }
 
 bool AppSignalSetProvider::getProjectProperties(DbProjectProperties* projectProps) const
@@ -1275,6 +1272,58 @@ void AppSignalSetProvider::appendSignalsAndUpdateViews(const std::vector<AppSign
 
 	emit detectNewProperties(newIndexes);
 	emit signalsCountChanged();
+}
+
+void AppSignalSetProvider::updateSignalSet(const std::vector<ObjectState>& states)
+{
+	std::vector<int> updatedIDs;
+	std::vector<int> removedIDs;
+
+	for(const ObjectState& state : states)
+	{
+		if (state.errCode != ERR_SIGNAL_OK)
+		{
+			showError(state);
+			continue;
+		}
+
+		if (state.deleted == true)
+		{
+			if (state.checkedOut == true)
+			{
+				// deletion of previously checked in signal
+				// signal is ONLY checked out and marked as deleted
+				// but NOT physically deleted
+				//
+				updatedIDs.push_back(state.id);
+			}
+			else
+			{
+				// deletion of just added (not yet checked in) signal
+				// or check in of signal already marked as deleted
+				// physically removed signal and NOT checkedOut
+				//
+				removedIDs.push_back(state.id);
+			}
+		}
+		else
+		{
+			updatedIDs.push_back(state.id);
+		}
+	}
+
+	if (updatedIDs.empty() == false)
+	{
+		bool updateViews = removedIDs.empty();		// if removedIDs NOT empty views will update on signalsCountChanged() below
+
+		reloadSignals(updatedIDs, updateViews);
+	}
+
+	if (removedIDs.empty() == false)
+	{
+		m_signalSet.removeSignals(removedIDs);
+		emit signalsCountChanged();
+	}
 }
 
 void AppSignalSetProvider::onSignalsLoadTimer()

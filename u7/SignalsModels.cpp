@@ -204,9 +204,9 @@ Qt::ItemFlags SignalsModel::flags(const QModelIndex &index) const
 	}
 }
 
-SignalsDelegate* SignalsModel::createDelegate(SignalsProxyModel* signalsProxyModel)
+SignalsTablePropEditor* SignalsModel::createDelegate(SignalsProxyModel* signalsProxyModel)
 {
-	return new SignalsDelegate(this, signalsProxyModel, parent());
+	return new SignalsTablePropEditor(signalsProxyModel, parent());
 }
 
 QWidget* SignalsModel::parentWidget()
@@ -276,13 +276,10 @@ void SignalsModel::slot_signalsUpdated(const std::vector<int>& indexes)
 
 void SignalsModel::slot_signalsCountChanged()
 {
-	if (m_rowCount != m_signalSetProvider->signalCount())
-	{
-		beginResetModel();
-		m_rowCount = m_signalSetProvider->signalCount();
-		m_columnCount = m_signalSetProvider->signalPropertyManager().count();
-		endResetModel();
-	}
+	beginResetModel();
+	m_rowCount = m_signalSetProvider->signalCount();
+	m_columnCount = m_signalSetProvider->signalPropertyManager().count();
+	endResetModel();
 }
 
 void SignalsModel::beginIncreaseColumnCount(int newColumnCount)
@@ -490,43 +487,59 @@ void SignalsProxyModel::applyNewFilter()
 
 // -------------------------------------------------------------------------------------------------------
 //
-// SignalsDelegate class implementation
+// SignalsTablePropEditor class implementation
 //
 // -------------------------------------------------------------------------------------------------------
 
-SignalsDelegate::SignalsDelegate(SignalsModel* model, SignalsProxyModel* proxyModel, QObject* parent) :
+SignalsTablePropEditor::SignalsTablePropEditor(SignalsProxyModel* proxyModel, QObject* parent) :
 	QStyledItemDelegate(parent),
-	m_model(model),
 	m_proxyModel(proxyModel),
+	m_provider(AppSignalSetProvider::getInstance()),
+	m_propManager(AppSignalPropertyManager::getInstance()),
 	m_dblValidatorEx(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max(), 1000, false)
 {
-	connect(this, &QAbstractItemDelegate::closeEditor, this, &SignalsDelegate::onCloseEditorEvent);
+	connect(this, &QAbstractItemDelegate::closeEditor, this, &SignalsTablePropEditor::onCloseEditorEvent);
 }
 
-SignalsDelegate::~SignalsDelegate()
+SignalsTablePropEditor::~SignalsTablePropEditor()
 {
 }
 
-QWidget* SignalsDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
+QWidget* SignalsTablePropEditor::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& proxyIndex) const
 {
-	AppSignalSetProvider* provider = m_model->signalSetProvider();
-	AppSignalPropertyManager* manager = m_model->propManager();
+	Q_ASSERT(proxyIndex.model() == m_proxyModel);
 
-	TEST_PTR_RETURN_NULLPTR(provider);
-	TEST_PTR_RETURN_NULLPTR(manager);
+	TEST_PTR_RETURN_NULLPTR(m_provider);
+	TEST_PTR_RETURN_NULLPTR(m_propManager);
 
-	int col = index.column();
-	int row = m_proxyModel->mapToSource(index).row();
+	// always reinit with vars on createEditor()!
 
-	int editedSignalID = provider->signalID(row);
+	m_editingSignalId = AppSignalSet::BAD_ID;
+	m_signalCheckedOut = false;
+	m_valueChanged = false;
 
-	const AppSignal* s = provider->loadSignal(editedSignalID, true);	// get current checkedOut state
+	//
+
+	int col = proxyIndex.column();
+	int sourceRow = m_proxyModel->mapToSource(proxyIndex).row();
+
+	int editedSignalID = m_provider->signalID(sourceRow);
+
+	const AppSignal* s = m_provider->loadSignal(editedSignalID, true);	// get current checkedOut state
 
 	TEST_PTR_RETURN_NULLPTR(s);
 
+	if (m_provider->isEditableSignal(s) == false)
+	{
+		QMessageBox::warning(parent, tr("Warning"),
+							 QString("Signal %1\nis checked out by user %2.\n\nEditing impossible!").
+									arg(s->appSignalID()).arg(m_provider->signalCheckedOutByUser(*s)));
+		return nullptr;
+	}
+
 	Q_ASSERT(editedSignalID == s->ID());
 
-	const AppSignalPropertyDescription& propDesc = manager->getPropertyDescription(col);
+	const AppSignalPropertyDescription& propDesc = m_propManager->getPropertyDescription(col);
 
 	if (propDesc.isValid() == false)
 	{
@@ -541,36 +554,36 @@ QWidget* SignalsDelegate::createEditor(QWidget* parent, const QStyleOptionViewIt
 
 	bool isExpert = theSettings.isExpertMode();
 
-	E::PropertyBehaviourType behaviour = manager->getBehaviour(*s, col);
+	E::PropertyBehaviourType behaviour = m_propManager->getBehaviour(*s, col);
 
-	if (manager->isHidden(behaviour, isExpert) || manager->isReadOnly(behaviour, isExpert))
+	if (m_propManager->isHidden(behaviour, isExpert) || m_propManager->isReadOnly(behaviour, isExpert))
 	{
 		return nullptr;
 	}
 
-	if (!s->checkedOut())
+	if (s->checkedOut() == false)
 	{
-		signalIdForUndoOnCancelEditing = editedSignalID;
-	}
-	else
-	{
-		signalIdForUndoOnCancelEditing = AppSignalSet::BAD_ID;
+		if (m_provider->checkoutSignalByIndex(sourceRow, nullptr) == false)
+		{
+			return nullptr;
+		}
+
+		m_signalCheckedOut = true;
 	}
 
-	if (!provider->checkoutSignalByIndex(row, nullptr))
-	{
-		return nullptr;
-	}
+	m_editingSignalId = s->ID();
 
-	const AppSignal* appSignal = provider->loadSignal(editedSignalID, true);	// update new checkedOut state on view
+	const AppSignal* appSignal = m_provider->loadSignal(editedSignalID, true);	// update new checkedOut state on view
 
 	TEST_PTR_RETURN_VALUE(appSignal, nullptr);
 
-	if (manager->isEnumProperty(col) == true)
+	// QComboBox editor creation
+	//
+	if (m_propManager->isEnumProperty(col) == true)
 	{
 		std::vector<std::pair<int, QString>> enumPropValues;
 
-		manager->getSignalEnumPropertyValues(*appSignal, col, &enumPropValues);
+		m_propManager->getSignalEnumPropertyValues(*appSignal, col, &enumPropValues);
 
 		QComboBox* cb = new QComboBox(parent);
 
@@ -582,13 +595,15 @@ QWidget* SignalsDelegate::createEditor(QWidget* parent, const QStyleOptionViewIt
 		return cb;
 	}
 
-	switch (manager->type(col))
+	// QLineEdit editor creation
+	//
+	switch (m_propManager->type(col))
 	{
 	case QMetaType::QString:
 	{
 		QLineEdit* le = new QLineEdit(parent);
 
-		if (manager->name(col).right(2) == "ID")
+		if (m_propManager->name(col).right(2) == "ID")
 		{
 			QRegularExpression rx4ID(AppSignal::IDENTIFICATORS_VALIDATOR);
 			le->setValidator(new QRegularExpressionValidator(rx4ID, le));
@@ -623,7 +638,7 @@ QWidget* SignalsDelegate::createEditor(QWidget* parent, const QStyleOptionViewIt
 		return cb;
 	}
 	default:
-		if (manager->type(col) == qMetaTypeId<TuningValue>())
+		if (m_propManager->type(col) == qMetaTypeId<TuningValue>())
 		{
 			QLineEdit* le = new QLineEdit(parent);
 			if (s->isAnalog())
@@ -639,12 +654,12 @@ QWidget* SignalsDelegate::createEditor(QWidget* parent, const QStyleOptionViewIt
 		else
 		{
 			assert(false);
-			return QStyledItemDelegate::createEditor(parent, option, index);
+			return QStyledItemDelegate::createEditor(parent, option, proxyIndex);
 		}
 	}
 }
 
-void SignalsDelegate::updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const
+void SignalsTablePropEditor::updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
 	Q_UNUSED(index);
 
@@ -658,30 +673,27 @@ void SignalsDelegate::updateEditorGeometry(QWidget* editor, const QStyleOptionVi
 	}
 }
 
-void SignalsDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
+void SignalsTablePropEditor::setEditorData(QWidget* editor, const QModelIndex& index) const
 {
-	AppSignalSetProvider* provider = m_model->signalSetProvider();
-	AppSignalPropertyManager* manager = m_model->propManager();
-
-	TEST_PTR_RETURN(provider);
-	TEST_PTR_RETURN(manager);
+	TEST_PTR_RETURN(m_provider);
+	TEST_PTR_RETURN(m_propManager);
 
 	int col = index.column();
 	int row = m_proxyModel->mapToSource(index).row();
-	if (row >= provider->signalCount())
+	if (row >= m_provider->signalCount())
 	{
 		return;
 	}
 
 	QComboBox* cb = dynamic_cast<QComboBox*>(editor);
 
-	const AppSignal* s = provider->getLoadedSignalByIndex(row, true);
+	const AppSignal* s = m_provider->getLoadedSignalByIndex(row, true);
 
 	TEST_PTR_RETURN(s);
 
 	bool isExpert = theSettings.isExpertMode();
 
-	if (manager->isEnumProperty(col))
+	if (m_propManager->isEnumProperty(col))
 	{
 		if (cb == nullptr)
 		{
@@ -689,12 +701,12 @@ void SignalsDelegate::setEditorData(QWidget* editor, const QModelIndex& index) c
 			return;
 		}
 
-		int curIndex = cb->findText(manager->value(s, col, isExpert).toString());
+		int curIndex = cb->findText(m_propManager->value(s, col, isExpert).toString());
 		cb->setCurrentIndex(curIndex);
 		return;
 	}
 
-	QMetaType::Type type = manager->type(col);
+	QMetaType::Type type = m_propManager->type(col);
 
 	if (type == QMetaType::Bool)
 	{
@@ -704,7 +716,7 @@ void SignalsDelegate::setEditorData(QWidget* editor, const QModelIndex& index) c
 			return;
 		}
 
-		cb->setCurrentIndex(cb->findData(manager->value(s, col, isExpert).toBool()));
+		cb->setCurrentIndex(cb->findData(m_propManager->value(s, col, isExpert).toBool()));
 		return;
 	}
 
@@ -722,12 +734,12 @@ void SignalsDelegate::setEditorData(QWidget* editor, const QModelIndex& index) c
 	case QMetaType::QString:
 	case QMetaType::Int:
 	case QMetaType::UInt:
-		le->setText(manager->value(s, col, isExpert).toString());
+		le->setText(m_propManager->value(s, col, isExpert).toString());
 		break;
 	default:
 		if (type == qMetaTypeId<TuningValue>())
 		{
-			le->setText(manager->value(s, col, isExpert).toString());
+			le->setText(m_propManager->value(s, col, isExpert).toString());
 		}
 		else
 		{
@@ -737,32 +749,29 @@ void SignalsDelegate::setEditorData(QWidget* editor, const QModelIndex& index) c
 	}
 }
 
-void SignalsDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
+void SignalsTablePropEditor::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& proxyIndex) const
 {
-	AppSignalSetProvider* provider = m_model->signalSetProvider();
-	AppSignalPropertyManager* manager = m_model->propManager();
+	Q_ASSERT(proxyIndex.model() == m_proxyModel);
 
-	TEST_PTR_RETURN(provider);
-	TEST_PTR_RETURN(manager);
+	TEST_PTR_RETURN(m_provider);
+	TEST_PTR_RETURN(m_propManager);
 
 	Q_UNUSED(model);
 
-	int col = index.column();
-	int row = m_proxyModel->mapToSource(index).row();
-	if (row >= provider->signalCount())
-	{
-		return;
-	}
+	int col = proxyIndex.column();
+	int sourceRow = m_proxyModel->mapToSource(proxyIndex).row();
 
-	AppSignal* ls = provider->getLoadedSignalByIndex(row, true);
+	AppSignal* ls = m_provider->getLoadedSignalByIndex(sourceRow, true);
+
+	TEST_PTR_RETURN(ls);
 
 	AppSignal s(*ls);
 
-	bool valueChanged = false;
-
 	bool isExpert = theSettings.isExpertMode();
 
-	if (manager->isEnumProperty(col) == true)
+	// Set Enum property value
+	//
+	if (m_propManager->isEnumProperty(col) == true)
 	{
 		QComboBox* cb = dynamic_cast<QComboBox*>(editor);
 
@@ -772,137 +781,114 @@ void SignalsDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, c
 
 		if (data.isValid())
 		{
-			valueChanged = manager->setValue(&s, col, data, isExpert);
-
-			if (valueChanged == true)
-			{
-				provider->saveSignal(&s, nullptr);
-			}
-			else
-			{
-				provider->undoSignal(s);
-			}
-
-			signalIdForUndoOnCancelEditing = AppSignalSet::BAD_ID;
+			m_valueChanged = m_propManager->setValue(&s, col, data, isExpert);
 		}
-
-		return;
-	}
-
-	QMetaType::Type type = manager->type(col);
-
-	if (type == QMetaType::Bool)
-	{
-		QComboBox* cb = dynamic_cast<QComboBox*>(editor);
-
-		TEST_PTR_RETURN(cb);
-
-		valueChanged = manager->setValue(&s, col, cb->currentData(), isExpert);
-
-		if (valueChanged == true)
-		{
-			provider->saveSignal(&s, nullptr);
-		}
-		else
-		{
-			provider->undoSignal(s);
-		}
-
-		signalIdForUndoOnCancelEditing = AppSignalSet::BAD_ID;
-		return;
-	}
-
-	QLineEdit* le = dynamic_cast<QLineEdit*>(editor);
-
-	TEST_PTR_RETURN(le);
-
-	QString value = le->text();
-
-	switch (type)
-	{
-	case QMetaType::QString:
-	{
-		QString name = manager->name(col);
-
-		if (name == AppSignalPropNames::APP_SIGNAL_ID &&
-				(value.isEmpty() || value[0] != '#'))
-		{
-			value = ('#' + value).trimmed();
-		}
-		if ((name == AppSignalPropNames::CUSTOM_APP_SIGNAL_ID ||
-			 name == AppSignalPropNames::BUS_TYPE_ID ||
-			 name == AppSignalPropNames::EQUIPMENT_ID) &&
-				(value.isEmpty() == false && value[0] == '#'))
-		{
-			value = value.mid(1).trimmed();
-		}
-		if (name == AppSignalPropNames::CAPTION)
-		{
-			value = value.trimmed();
-		}
-
-		valueChanged = manager->setValue(&s, col, value, isExpert);
-
-		break;
-	}
-
-	case QMetaType::Double:
-	case QMetaType::Float:
-		{
-			bool ok = false;
-
-			double dbl = m_defaultLocale.toDouble(value, &ok);
-
-			valueChanged = manager->setValue(&s, col, dbl, isExpert);
-		}
-		break;
-
-	case QMetaType::Int:
-		valueChanged = manager->setValue(&s, col, value.toInt(), isExpert);
-		break;
-
-	case QMetaType::UInt:
-		valueChanged = manager->setValue(&s, col, value.toUInt(), isExpert);
-		break;
-
-	default:
-		if (type == qMetaTypeId<TuningValue>())
-		{
-			valueChanged = manager->setValue(&s, col, value, isExpert);
-		}
-		else
-		{
-			Q_ASSERT(false);
-		}
-	}
-
-	if (valueChanged == true)
-	{
-		provider->saveSignal(&s, nullptr);
 	}
 	else
 	{
-		provider->undoSignal(s);
+		// Set Bool property value
+		//
+		QMetaType::Type type = m_propManager->type(col);
+
+		if (type == QMetaType::Bool)
+		{
+			QComboBox* cb = dynamic_cast<QComboBox*>(editor);
+
+			TEST_PTR_RETURN(cb);
+
+			m_valueChanged = m_propManager->setValue(&s, col, cb->currentData(), isExpert);
+		}
+		else
+		{
+			QLineEdit* le = dynamic_cast<QLineEdit*>(editor);
+
+			TEST_PTR_RETURN(le);
+
+			QString value = le->text();
+
+			switch (type)
+			{
+			case QMetaType::QString:
+			{
+				QString name = m_propManager->name(col);
+
+				if (name == AppSignalPropNames::APP_SIGNAL_ID &&
+						(value.isEmpty() || value[0] != '#'))
+				{
+					value = ('#' + value).trimmed();
+				}
+				if ((name == AppSignalPropNames::CUSTOM_APP_SIGNAL_ID ||
+					 name == AppSignalPropNames::BUS_TYPE_ID ||
+					 name == AppSignalPropNames::EQUIPMENT_ID) &&
+						(value.isEmpty() == false && value[0] == '#'))
+				{
+					value = value.mid(1).trimmed();
+				}
+				if (name == AppSignalPropNames::CAPTION)
+				{
+					value = value.trimmed();
+				}
+
+				m_valueChanged = m_propManager->setValue(&s, col, value, isExpert);
+
+				break;
+			}
+
+			case QMetaType::Double:
+			case QMetaType::Float:
+				{
+					bool ok = false;
+
+					double dbl = m_defaultLocale.toDouble(value, &ok);
+
+					m_valueChanged = m_propManager->setValue(&s, col, dbl, isExpert);
+				}
+				break;
+
+			case QMetaType::Int:
+				m_valueChanged = m_propManager->setValue(&s, col, value.toInt(), isExpert);
+				break;
+
+			case QMetaType::UInt:
+				m_valueChanged = m_propManager->setValue(&s, col, value.toUInt(), isExpert);
+				break;
+
+			default:
+				if (type == qMetaTypeId<TuningValue>())
+				{
+					m_valueChanged = m_propManager->setValue(&s, col, value, isExpert);
+				}
+				else
+				{
+					Q_ASSERT(false);
+				}
+			}
+		}
 	}
 
-	signalIdForUndoOnCancelEditing = AppSignalSet::BAD_ID;
-}
-
-void SignalsDelegate::onCloseEditorEvent(QWidget*, QAbstractItemDelegate::EndEditHint hint)
-{
-	if (hint == QAbstractItemDelegate::RevertModelCache && signalIdForUndoOnCancelEditing != AppSignalSet::BAD_ID)
+	if (m_valueChanged == true)
 	{
-		AppSignalSetProvider* provider = m_model->signalSetProvider();
-
-		TEST_PTR_RETURN(provider);
-
-		provider->undoSignal(signalIdForUndoOnCancelEditing);
-
-		signalIdForUndoOnCancelEditing = AppSignalSet::BAD_ID;
+		m_provider->saveSignal(&s, nullptr);
 	}
 }
 
-bool SignalsDelegate::editorEvent(QEvent* event, QAbstractItemModel* model,
+void SignalsTablePropEditor::onCloseEditorEvent(QWidget*, QAbstractItemDelegate::EndEditHint hint)
+{
+	Q_UNUSED(hint);
+
+	if (m_editingSignalId == AppSignalSet::BAD_ID)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	if (m_signalCheckedOut == true && m_valueChanged == false)
+	{
+		m_provider->undoSignal(m_editingSignalId);
+	}
+}
+
+bool SignalsTablePropEditor::editorEvent(QEvent* event, QAbstractItemModel* model,
 								  const QStyleOptionViewItem& option, const QModelIndex& index)
 {
 	Q_UNUSED(model);
