@@ -73,6 +73,7 @@ EditSchemaTabPage::EditSchemaTabPage(QTabWidget* tabWidget,
 	}
 	else
 	{
+		m_toolBar->addAction(m_schemaWidget->m_addVduLineAction);
 	}
 
 	if (schema->isLogicSchema() == true)

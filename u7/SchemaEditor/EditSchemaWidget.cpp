@@ -39,6 +39,7 @@
 #include "../VFrame30/SchemaItemTerminator.h"
 #include "../VFrame30/SchemaItemUfb.h"
 #include "../VFrame30/SchemaItemValue.h"
+#include "../VFrame30/SchemaItemVduLine.h"
 #include "../VFrame30/SchemaLayer.h"
 #include "../VFrame30/Session.h"
 #include "../VFrame30/UfbSchema.h"
@@ -654,6 +655,17 @@ void EditSchemaWidget::createActions()
 		addItem(item);
 	});
 
+	// VDU items
+	//
+	m_addVduLineAction = new QAction(tr("Line"), this);
+	m_addVduLineAction->setEnabled(true);
+	m_addVduLineAction->setIcon(QIcon(":/Images/Images/SchemaLine.svg"));
+	connect(m_addVduLineAction, &QAction::triggered,
+			[this](bool)
+			{
+				addItem(std::make_shared<VFrame30::SchemaItemVduLine>(schema()->unit()));
+			});
+
 	//
 	// Edit
 	//
@@ -1053,6 +1065,10 @@ void EditSchemaWidget::createActions()
 		m_addSubMenu->addAction(m_addTextAction);
 		m_addSubMenu->addAction(m_addImageAction);
 		//m_addMenu->addAction(m_addFrameAction);
+	}
+	else
+	{
+		m_addSubMenu->addAction(m_addVduLineAction);
 	}
 
 		m_addSubMenu->addAction(m_addSeparatorAction0);

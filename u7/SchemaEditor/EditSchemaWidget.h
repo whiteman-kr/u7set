@@ -468,6 +468,10 @@ private:
 		QAction* m_addSliderAction = nullptr;
 		QAction* m_addIndicatorAction = nullptr;
 
+		// VDU items
+		//
+		QAction* m_addVduLineAction = nullptr;
+
 	// Edit
 	//
 	QMenu* m_editSubMenu = nullptr;

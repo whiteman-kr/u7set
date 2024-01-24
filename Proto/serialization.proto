@@ -467,6 +467,8 @@ message SchemaItem
 	optional SchemaItemPushButton pushButton = 210;			// +SchemaItemControl
 	optional SchemaItemLineEdit lineEdit = 211;				// +SchemaItemControl
 	optional SchemaItemSlider slider = 212;					// +SchemaItemControl
+
+	optional SchemaItemVduLine vduLine = 300;				// +PosLineImpl
 }
 
 //
@@ -1030,7 +1032,14 @@ message SchemaItemSlider
 	optional string scriptValueChanged = 35;
 }
 
-
+//
+// SchemaItemVduLine
+//
+message SchemaItemVduLine
+{
+	optional int32 weight = 1;
+	optional uint32 lineColor = 2;
+}
 
 
 //------------------------------------------------------------------------------------------
