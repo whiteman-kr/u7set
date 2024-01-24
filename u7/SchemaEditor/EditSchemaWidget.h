@@ -471,6 +471,7 @@ private:
 		// VDU items
 		//
 		QAction* m_addVduLineAction = nullptr;
+		QAction* m_addVduRectAction = nullptr;
 
 	// Edit
 	//

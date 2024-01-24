@@ -131,6 +131,8 @@ qt_add_library(${TARGET} STATIC
 	SchemaItemValue.h
 	SchemaItemVduLine.cpp
 	SchemaItemVduLine.h
+	SchemaItemVduRect.cpp
+	SchemaItemVduRect.h
 	SchemaLayer.cpp
 	SchemaLayer.h
 	SchemaManager.cpp

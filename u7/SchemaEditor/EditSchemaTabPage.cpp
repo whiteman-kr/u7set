@@ -74,6 +74,7 @@ EditSchemaTabPage::EditSchemaTabPage(QTabWidget* tabWidget,
 	else
 	{
 		m_toolBar->addAction(m_schemaWidget->m_addVduLineAction);
+		m_toolBar->addAction(m_schemaWidget->m_addVduRectAction);
 	}
 
 	if (schema->isLogicSchema() == true)

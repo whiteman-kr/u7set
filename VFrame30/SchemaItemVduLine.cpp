@@ -126,11 +126,6 @@ namespace VFrame30
 
 	void SchemaItemVduLine::setWeight(int weight)
 	{
-		if (weight < 0)
-		{
-			weight = 0;
-		}
-		
 		m_weight = std::clamp(weight, 0, 16);
 	}
 

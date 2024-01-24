@@ -34,6 +34,7 @@
 #include "WiringSchema.h"
 #include "VduSchema.h"
 #include "SchemaItemVduLine.h"
+#include "SchemaItemVduRect.h"
 
 
 namespace VFrame30
@@ -89,6 +90,7 @@ namespace VFrame30
 		SchemaItemFactory.Register<SchemaItemValue>();
 		
 		SchemaItemFactory.Register<SchemaItemVduLine>();
+		SchemaItemFactory.Register<SchemaItemVduRect>();
 
 		QMetaType::registerConverter<int, VFrame30::SchemaItemConst::ConstType>(IntToEnum<VFrame30::SchemaItemConst::ConstType>);
 

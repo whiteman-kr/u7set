@@ -40,6 +40,7 @@
 #include "../VFrame30/SchemaItemUfb.h"
 #include "../VFrame30/SchemaItemValue.h"
 #include "../VFrame30/SchemaItemVduLine.h"
+#include "../VFrame30/SchemaItemVduRect.h"
 #include "../VFrame30/SchemaLayer.h"
 #include "../VFrame30/Session.h"
 #include "../VFrame30/UfbSchema.h"
@@ -666,6 +667,15 @@ void EditSchemaWidget::createActions()
 				addItem(std::make_shared<VFrame30::SchemaItemVduLine>(schema()->unit()));
 			});
 
+	m_addVduRectAction = new QAction(tr("Rect"), this);
+	m_addVduRectAction->setEnabled(true);
+	m_addVduRectAction->setIcon(QIcon(":/Images/Images/SchemaRect.svg"));
+	connect(m_addVduRectAction, &QAction::triggered,
+			[this](bool)
+			{
+				addItem(std::make_shared<VFrame30::SchemaItemVduRect>(schema()->unit()));
+			});
+
 	//
 	// Edit
 	//
@@ -1069,6 +1079,7 @@ void EditSchemaWidget::createActions()
 	else
 	{
 		m_addSubMenu->addAction(m_addVduLineAction);
+		m_addSubMenu->addAction(m_addVduRectAction);
 	}
 
 		m_addSubMenu->addAction(m_addSeparatorAction0);
