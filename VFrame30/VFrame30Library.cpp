@@ -32,6 +32,7 @@
 #include "TuningSchema.h"
 #include "UfbSchema.h"
 #include "WiringSchema.h"
+#include "VduSchema.h"
 
 
 namespace VFrame30
@@ -48,6 +49,7 @@ namespace VFrame30
 		SchemaFactory.Register<MonitorSchema>();
 		SchemaFactory.Register<TuningSchema>();
 		SchemaFactory.Register<WiringSchema>();
+		SchemaFactory.Register<VduSchema>();
 
 		// Registering VideoLayers
 		//

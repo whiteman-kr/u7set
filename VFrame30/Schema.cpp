@@ -5,6 +5,7 @@
 #include "MonitorSchema.h"
 #include "TuningSchema.h"
 #include "DiagSchema.h"
+#include "VduSchema.h"
 #include "ClientSchemaView.h"
 #include "FblItem.h"
 #include "SchemaItemAfb.h"
@@ -429,6 +430,9 @@ namespace VFrame30
 
 		if (schema == nullptr)
 		{
+			// Ups, you forgot to register schema type in SchemaFactory.
+			// Go to VFrame30Library.cpp and do it!
+			//
 			assert(schema);
 			return nullptr;
 		}
@@ -1885,6 +1889,11 @@ namespace VFrame30
 	bool Schema::isDiagSchema() const
 	{
 		return dynamic_cast<const VFrame30::DiagSchema*>(this) != nullptr;
+	}
+	
+	bool Schema::isVduSchema() const
+	{
+		return dynamic_cast<const VFrame30::VduSchema*>(this) != nullptr;
 	}
 
 	LogicSchema* Schema::toLogicSchema()

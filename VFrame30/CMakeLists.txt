@@ -147,6 +147,8 @@ qt_add_library(${TARGET} STATIC
 	TuningSchema.h
 	UfbSchema.cpp
 	UfbSchema.h
+	VduSchema.cpp
+	VduSchema.h
 	VFrame30Library.cpp
 	VFrame30Library.h
 	VFrameTools.cpp
