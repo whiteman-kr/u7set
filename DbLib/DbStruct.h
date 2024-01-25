@@ -106,6 +106,7 @@ namespace Db
 
 		constexpr static const char* VduFileExtension = "vus";						// VDU schema file extnesion
 		constexpr static const char* VduTemplExtension = "templ_vus";				// VDU schema template file extnesion
+		constexpr static const char* VduNativeFileExtension = "vbs";				// VDU schema file extension in native VDU format
 
 		constexpr static const char* OclFileExtension = "ocl";						// (Optical) Connection Link
 		constexpr static const char* BusFileExtension = "bus_type";					// Bus type

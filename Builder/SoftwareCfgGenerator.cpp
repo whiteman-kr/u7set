@@ -7,6 +7,7 @@
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../VFrame30/SchemaLayer.h"
 #include "../VFrame30/PropertyNames.h"
+#include "../VduSchemaGenerator/VduSchemaGenerator.h"
 
 
 namespace Builder
@@ -553,7 +554,48 @@ namespace Builder
 			context->m_buildResultWriter->addFile(subDir, "SchemaDetails.pbuf", fileData);
 		}
 
+		// Generate VDU schemas in vdu-native format, save them to build result /VDU/Schemas
+		//
+		for (auto& [schemaId, fileSchema] : schemaMap)
+		{
+			std::shared_ptr<VFrame30::Schema>& schema = fileSchema.schema;
+			Q_ASSERT(schema);
+
+			if (schema->isVduSchema() == false)
+			{
+				continue;
+			}
+
+			bool convertOk = generateVduSchemas(static_cast<const VFrame30::VduSchema&>(*schema), *context);
+			if (convertOk == false)
+			{
+				returnResult = false;
+			}
+		}
+
 		return returnResult;
+	}
+
+	bool SoftwareCfgGenerator::generateVduSchemas(const VFrame30::VduSchema& schema, Context& context)
+	{
+		IssueLogger* log = context.m_log;
+		Q_ASSERT(log);
+
+		bool result = true;
+
+		LOG_MESSAGE(log, tr("Converting schema %1 to VDU format.").arg(schema.schemaId())); 
+
+		QByteArray data;
+		QStringList errorMessages;
+		result = vdu::VduSchemaGenerator::generateVduSchema(schema, data, errorMessages);
+
+		QString fileName = QString("%1.%2")
+							   .arg(schema.schemaId())
+							   .arg(Db::File::VduNativeFileExtension);
+
+		context.m_buildResultWriter->addFile(Directory::VDU + "/Schemas", fileName, data);
+
+		return result;
 	}
 
 	bool SoftwareCfgGenerator::writeSchemaScriptProperties(VFrame30::Schema* schema, QString dir, BuildResultWriter* buildResultWriter)

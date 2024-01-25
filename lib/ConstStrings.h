@@ -466,6 +466,7 @@ namespace Directory
 	inline const QString BIN("Bin");
 	inline const QString SUBSYSTEMS("Subsystems");
 	inline const QString TESTS("Tests");
+	inline const QString VDU("VDU");
 }
 
 namespace File

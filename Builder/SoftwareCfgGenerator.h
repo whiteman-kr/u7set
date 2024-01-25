@@ -2,8 +2,7 @@
 
 #include "../DbLib/DbController.h"
 #include "../HardwareLib/DeviceObject.h"
-#include "../VFrame30/Schema.h"
-#include "../VFrame30/SchemaItemFrame.h"
+#include "../VFrame30/VduSchema.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../lib/DataSource.h"
 
@@ -60,6 +59,7 @@ namespace Builder
 
 		static bool generalSoftwareCfgGeneration(Context* context);
 		static bool loadAllSchemas(Context* context);
+		static bool generateVduSchemas(const VFrame30::VduSchema& schema, Context& context);
 		static void clearStaticData();
 
 		static bool writeSchemaScriptProperties(VFrame30::Schema* schema, QString dir, BuildResultWriter* buildResultWriter);

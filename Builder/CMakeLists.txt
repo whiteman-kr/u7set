@@ -177,7 +177,7 @@ target_precompile_headers(${TARGET} PUBLIC
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Widgets Qt6::Qml Qt6::Xml Qt6::Sql Qt6::Concurrent Qt6::Gui Qt6::PrintSupport)
-target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib HardwareLib DbLib AppSignalLib OnlineLib VFrame30 Simulator ReportLib)
+target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib HardwareLib DbLib AppSignalLib OnlineLib VFrame30 Simulator ReportLib VduSchemaGenerator)
 
 target_compile_definitions(${TARGET} PRIVATE IS_BUILDER)
 #target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
