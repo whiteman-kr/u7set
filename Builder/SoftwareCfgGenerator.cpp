@@ -7,7 +7,7 @@
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../VFrame30/SchemaLayer.h"
 #include "../VFrame30/PropertyNames.h"
-#include "../VduSchemaGenerator/VduSchemaGenerator.h"
+#include "./VduSchemaGenerator/VduSchemaGenerator.h"
 
 
 namespace Builder

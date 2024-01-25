@@ -97,7 +97,6 @@ add_subdirectory(DbLib)
 add_subdirectory(ServiceLib)
 add_subdirectory(ClientLib)
 add_subdirectory(ReportLib)
-add_subdirectory(VduSchemaGenerator)
 
 add_subdirectory(TrendView)
 add_subdirectory(VFrame30)
