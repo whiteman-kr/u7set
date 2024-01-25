@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdbool.h>
 
 // string_ref is an offset in a file to a string.
 // The string is a null terminated QChar string 
@@ -33,7 +34,7 @@ struct VduSchemaFile
 	char magic[4];        // "VDU\0"
 	uint16_t fileVersion; // 1
 
-	VduSchemaFileProperties1 schemaProperties;
+	struct VduSchemaFileProperties1 schemaProperties;
 	uint32_t reserve[32];
 	
 	uint16_t count;
