@@ -11406,6 +11406,7 @@ namespace Builder
 			// sequential signals placement checking
 			//
 			int bitNo = -1;
+
 			for(const UalSignal* inSignal : inSignals)
 			{
 				int ualAddrBitNo = inSignal->ualAddr().bit();
@@ -11453,7 +11454,7 @@ namespace Builder
 			{
 				// old style code generation (AFB BUS_NOT used)
 				//
-				int bitNo = 0;
+				int bitNo2 = 0;
 
 				if (inSignals.size() < SIZE_16BIT)
 				{
@@ -11462,8 +11463,8 @@ namespace Builder
 
 				for(const UalSignal* inSignal : inSignals)
 				{
-					*code << cmd.movBit(Address16(bitAccAddr, bitNo), inSignal->ioBufAddr());
-					bitNo++;
+					*code << cmd.movBit(Address16(bitAccAddr, bitNo2), inSignal->ioBufAddr());
+					bitNo2++;
 				}
 
 				*code << cmd.writeFuncBlock(afbBusNot->opcode(),

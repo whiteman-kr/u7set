@@ -6,7 +6,7 @@
 class AppSignalSetProvider;
 class AppSignalPropertyManager;
 class SignalsProxyModel;
-class SignalsDelegate;
+class SignalsTablePropEditor;
 
 // -------------------------------------------------------------------------------------------------------
 //
@@ -37,7 +37,7 @@ public:
 	bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
 	Qt::ItemFlags flags(const QModelIndex& index) const override;
 
-	SignalsDelegate* createDelegate(SignalsProxyModel* signalsProxyModel);
+	SignalsTablePropEditor* createDelegate(SignalsProxyModel* signalsProxyModel);
 
 	QWidget* parentWidget();
 
@@ -112,19 +112,18 @@ private:
 
 // -------------------------------------------------------------------------------------------------------
 //
-//	SignalsDelegate class provides display and editing facilities
-//	for data from SignalModel and SignalProxyModel.
+//	SignalsTablePropEditor class provides display and editing facilities
+//	for data from SignalModel and SignalProxyModel on SignalsTabPage.
 //
 // -------------------------------------------------------------------------------------------------------
 
-class SignalsDelegate : public QStyledItemDelegate
+class SignalsTablePropEditor : public QStyledItemDelegate
 {
 	Q_OBJECT
 public:
-	explicit SignalsDelegate(SignalsModel* model,
-							 SignalsProxyModel* signalsProxyModel,
+	explicit SignalsTablePropEditor(SignalsProxyModel* signalsProxyModel,
 							 QObject* parent = nullptr);
-	~SignalsDelegate();
+	~SignalsTablePropEditor();
 
 	QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const;
 
@@ -144,12 +143,16 @@ protected:
 					 const QStyleOptionViewItem& option, const QModelIndex& index);
 
 private:
-	SignalsModel* m_model = nullptr;
 	SignalsProxyModel* m_proxyModel = nullptr;
+	AppSignalSetProvider* m_provider = nullptr;
+	AppSignalPropertyManager* m_propManager = nullptr;
+
 	QLocale m_defaultLocale;
 	QDoubleValidatorEx m_dblValidatorEx;
 
-	mutable int signalIdForUndoOnCancelEditing = AppSignalSet::BAD_ID;
+	mutable int m_editingSignalId = AppSignalSet::BAD_ID;
+	mutable bool m_valueChanged = false;
+	mutable bool m_signalCheckedOut = false;
 };
 
 // -------------------------------------------------------------------------------------------------------

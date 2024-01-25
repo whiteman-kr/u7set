@@ -7961,9 +7961,9 @@ bool DbWorker::processingAfterDatabaseUpgrade0401(QSqlDatabase& db, QString* err
 
 			AppSignalSpecPropValues spv;
 
-			bool res = spv.parseValuesFromArray(specPropValuesBin);
+			bool res2 = spv.parseValuesFromArray(specPropValuesBin);
 
-			if (res == false)
+			if (res2 == false)
 			{
 				if (parseErrorCount < 10)
 				{
@@ -7979,9 +7979,9 @@ bool DbWorker::processingAfterDatabaseUpgrade0401(QSqlDatabase& db, QString* err
 			//
 			QVariant qv;
 
-			res = spv.getValue(AppSignalPropNames::INVERT_SIGNAL, &qv);
+			res2 = spv.getValue(AppSignalPropNames::INVERT_SIGNAL, &qv);
 
-			Q_ASSERT(res);
+			Q_ASSERT(res2);
 
 			psd.set_invertsignal(qv.toBool());
 
@@ -8012,7 +8012,7 @@ bool DbWorker::processingAfterDatabaseUpgrade0401(QSqlDatabase& db, QString* err
 
 			// update SignalInstance table
 			//
-			QString queryStr = QString(	"UPDATE SignalInstance SET SpecPropStruct = '%1', "
+			queryStr = QString(	"UPDATE SignalInstance SET SpecPropStruct = '%1', "
 										"SpecPropValues = %2 "
 										"WHERE SignalInstanceID = %3").
 												arg(specPropStructStr).
@@ -8041,7 +8041,7 @@ bool DbWorker::processingAfterDatabaseUpgrade0401(QSqlDatabase& db, QString* err
 
 		psd.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(signalProtoData.data()));
 
-		QString queryStr = QString(	"UPDATE SignalInstance SET ProtoData = %1 "
+		queryStr = QString(	"UPDATE SignalInstance SET ProtoData = %1 "
 									"WHERE SignalInstanceID = %2").
 											arg(toSqlByteaStr(signalProtoData)).
 											arg(signalInstanceID);
