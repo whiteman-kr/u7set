@@ -125,8 +125,8 @@ SignalsTabPage::SignalsTabPage(AppSignalSetProvider* signalSetProvider,
 	m_signalsView->verticalHeader()->setDefaultAlignment(Qt::AlignRight | Qt::AlignVCenter);
 	m_signalsView->verticalHeader()->setFixedWidth(DEFAULT_COLUMN_WIDTH);
 	m_signalsView->verticalHeader()->hide();
-	SignalsDelegate* delegate = m_signalsModel->createDelegate(m_signalsProxyModel);
-	m_signalsView->setItemDelegate(delegate);
+	SignalsTablePropEditor* editor = m_signalsModel->createDelegate(m_signalsProxyModel);
+	m_signalsView->setItemDelegate(editor);
 
 	QHeaderView* horizontalHeader = m_signalsView->horizontalHeader();
 	m_signalsView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
@@ -173,7 +173,7 @@ SignalsTabPage::SignalsTabPage(AppSignalSetProvider* signalSetProvider,
 
 	m_signalsView->setStyleSheet("QTableView::item:focus{background-color:darkcyan}");
 
-	connect(delegate, &SignalsDelegate::itemDoubleClicked, this, &SignalsTabPage::editSignal);
+	connect(editor, &SignalsTablePropEditor::itemDoubleClicked, this, &SignalsTabPage::editSignal);
 	connect(m_signalTypeFilterCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &SignalsTabPage::changeSignalTypeFilter);
 
 	connect(m_signalsView->verticalScrollBar(), &QScrollBar::valueChanged, this, &SignalsTabPage::changeSignalsLoadingSequence);

@@ -30,6 +30,7 @@ public:
 	int currentUserID() const;
 	bool currentUserIsAdmin() const;
 	QString getUserName(int userId);
+	QString signalCheckedOutByUser(const AppSignal& s);
 
 	void reloadAllSignals();
 	void reloadSignals(const std::vector<int>& signalIds, bool updateViews);
@@ -128,6 +129,8 @@ private:
 	void loadIdAppSignalId();
 
 	void appendSignalsAndUpdateViews(const std::vector<AppSignal>& newSignals);
+
+	void updateSignalSet(const std::vector<ObjectState>& states);
 
 	void onSignalsLoadTimer();
 

@@ -173,8 +173,6 @@ namespace Builder
 
 		ComponentInfo& ci = instanceIt->second;
 
-		bool useExistInstance = false;
-
 		const QString& instantiatorID = ualAfb->instantiatorID();
 
 		if (ci.hasRam == false)

@@ -244,11 +244,11 @@ void AppSignalPropertyDescription::checkEnumValues(Hash specPropStructHash, cons
 
 	for(const auto& p : enumValuesVector)
 	{
-		auto it = enumValues.find(p.first);
+		auto it2 = enumValues.find(p.first);
 
-		if (it != enumValues.end())
+		if (it2 != enumValues.end())
 		{
-			Q_ASSERT(p.second == it->second);
+			Q_ASSERT(p.second == it2->second);
 		}
 		else
 		{
