@@ -58,7 +58,8 @@ public:
 	E::ApertureType apertureType = E::ApertureType::AbsValue;
 	double coarseAperture = 0;
 	double fineAperture = 0;
-	Address16 absAddr;					// signal data address from beginning of module diag data offset in RUP diag packet
-										// calculate as controller.DiagDataOffset + diagSignal.DataOffset
+	Address16 absAddr;			// absolute signal data address from beginning of FODIP (LM diagnosticts packet)
+								//
+								// calculate as: module.DiagDataOffset (in FODIP) + controller.DiagDataOffset + diagSignal.DataOffset
 };
 

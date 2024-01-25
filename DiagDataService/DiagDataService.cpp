@@ -227,16 +227,16 @@ bool DiagDataServiceWorker::readDiagDataSources(const QByteArray& fileData, cons
 
 bool DiagDataServiceWorker::readDiagSignals(const QByteArray& fileData)
 {
-/*	::Proto::AppSignalSet signalSet;
+	::Network::AcquiredDiagSignals diagSignalsSet;
 
-	bool result = signalSet.ParseFromArray(fileData.constData(), static_cast<int>(fileData.size()));
+	bool result = diagSignalsSet.ParseFromArray(fileData.constData(), static_cast<int>(fileData.size()));
 
 	if (result == false)
 	{
 		return false;
 	}
 
-	int signalCount = signalSet.appsignal_size();
+/*	int signalCount = signalSet.appsignal_size();
 
 	for(int i = 0; i < signalCount; i++)
 	{

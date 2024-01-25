@@ -185,7 +185,7 @@ void XmlWriteHelper::writeQHostAddressAttribute(const QString& name, const QHost
 
 void XmlWriteHelper::writeUuidAttribute(const QString& name, const QUuid& guid)
 {
-	writeStringAttribute(XmlAttribute::UUID, guid.toString(QUuid::WithBraces));
+	writeStringAttribute(name, guid.toString(QUuid::WithBraces));
 }
 
 void XmlWriteHelper::writeString(const QString& str)

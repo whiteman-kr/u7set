@@ -235,7 +235,7 @@ namespace Builder
 		TEST_PTR_RETURN_FALSE(lm);
 		TEST_PTR_RETURN_FALSE(ds);
 
-		auto it = m_lmAcquiredDiagSignals.find(lm->equipmentIdTemplate());
+		auto it = m_lmAcquiredDiagSignals.find(calcHash(lm->equipmentIdTemplate()));
 
 		if (it == m_lmAcquiredDiagSignals.end())
 		{
@@ -257,14 +257,16 @@ namespace Builder
 	{
 		TEST_PTR_RETURN_FALSE(lm);
 
-		if (m_lmAcquiredDiagSignals.contains(lm->equipmentIdTemplate()) == true)
+		Hash lmEquipHash = calcHash(lm->equipmentIdTemplate());
+
+		if (m_lmAcquiredDiagSignals.contains(lmEquipHash) == true)
 		{
 			return true;			// diagSignals already found
 		}
 
 		bool result = true;
 
-		auto [it, b] = m_lmAcquiredDiagSignals.emplace(lm->equipmentIdTemplate(), std::vector<DiagSignalConstShared>{});
+		auto [it, b] = m_lmAcquiredDiagSignals.emplace(lmEquipHash, std::vector<DiagSignalConstShared>{});
 
 		std::vector<DiagSignalConstShared>& acquiredDiagSignals = it->second;
 
@@ -276,7 +278,43 @@ namespace Builder
 			return false;
 		}
 
-		DeviceHelper::getChildDiagSignals(chassis, &acquiredDiagSignals);
+		const std::vector<std::shared_ptr<Hardware::DeviceObject>>& chassisChildren = chassis->children();
+
+		int moduleDiagPacketOffset = 0;		// from beginning of FODIP
+
+		for(const std::shared_ptr<Hardware::DeviceObject>& devObject : chassisChildren)
+		{
+			std::shared_ptr<Hardware::DeviceModule> module = devObject->toModule();
+
+			TEST_PTR_CONTINUE(module);
+
+			Hash hash = calcHash(module->equipmentIdTemplate());
+
+			Q_ASSERT(m_moduleDiagDataOffset.contains(hash) == false);
+
+			m_moduleDiagDataOffset.emplace(hash, moduleDiagPacketOffset);
+
+			int diagDataPacketSizeW = 0;
+
+			if (module->isLogicModule() == true)
+			{
+				Q_ASSERT(module->place() == 0);
+
+				std::shared_ptr<LmDescription> lmDescription = m_context->m_lmDescriptions->get(module.get());
+
+				TEST_PTR_CONTINUE(lmDescription);
+
+				diagDataPacketSizeW = static_cast<int>(lmDescription->memory().m_txDiagDataSize);
+			}
+			else
+			{
+				result &= DeviceHelper::getIntProperty(module.get(), EquipmentPropNames::TX_DIAG_DATA_SIZE, &diagDataPacketSizeW, m_log);
+			}
+
+			DeviceHelper::getChildDiagSignals(chassis, &acquiredDiagSignals);
+
+			moduleDiagPacketOffset += diagDataPacketSizeW;
+		}
 
 		return result;
 	}
@@ -327,6 +365,20 @@ namespace Builder
 						ads.absAddr.addWord(controller->diagDataOffset());
 					}
 
+					if (parent->isModule())
+					{
+						auto it = m_moduleDiagDataOffset.find(calcHash(parent->equipmentIdTemplate()));
+
+						if (it != m_moduleDiagDataOffset.end())
+						{
+							ads.absAddr.addWord(it->second);
+						}
+						else
+						{
+							Q_ASSERT(false);
+						}
+					}
+
 					Hash parentHash = calcHash(parent->equipmentIdTemplate());
 
 					if (acquiredObjectHashes.contains(parentHash) == false)
@@ -342,7 +394,10 @@ namespace Builder
 					}
 					else
 					{
-						break;			// parent and hence upper objects already added to map
+						if (parent->isChassis())
+						{
+							break;			// parent chassis and hence upper objects already added to map
+						}
 					}
 				}
 
