@@ -593,7 +593,35 @@ namespace Builder
 							   .arg(schema.schemaId())
 							   .arg(Db::File::VduNativeFileExtension);
 
-		context.m_buildResultWriter->addFile(Directory::VDU + "/Schemas", fileName, data);
+		context.m_buildResultWriter->addFile(Directory::VDUs + "/Schemas", fileName, data);
+
+		// Write schema to the VDU folder.
+		//
+		for (const Hardware::DeviceModule* vdu : context.m_vduModules)
+		{
+			Q_ASSERT(vdu);
+
+			auto schemaTagsProperty = vdu->propertyByCaption(EquipmentPropNames::SCHEMA_TAGS);
+			if (schemaTagsProperty == nullptr)
+			{
+				// Property '%1.%2' is not found.
+				//
+				log->errCFG3020(vdu->equipmentId(), EquipmentPropNames::SCHEMA_TAGS);
+				result = false;
+				continue;
+			}
+
+			auto schemaTagList = schemaTagsProperty->value().toString().split(QRegularExpression("\\W+"), Qt::SkipEmptyParts);
+			for (QString& tag : schemaTagList)
+			{
+				if (schema.tagsAsList().contains(tag.toLower()) == true)
+				{
+					QString vduDir = Directory::VDUs + "/" + vdu->equipmentId() + "/Schemas";
+					context.m_buildResultWriter->addFile(vduDir, fileName, data);
+					break;
+				}
+			}
+		}
 
 		return result;
 	}

@@ -675,7 +675,7 @@ namespace Builder
 			QByteArray fileData;
 			if (writer.save(fileData, m_log) == true)
 			{
-				BuildFile* buildFile = m_buildResultWriter->addFile(QString("VDUs/%1").arg(vdu->equipmentId()),
+				BuildFile* buildFile = m_buildResultWriter->addFile(QString("%1/%2").arg(Directory::VDUs).arg(vdu->equipmentId()),
 																	QString("%1.bts").arg(vdu->equipmentId().toLower()), fileData);
 
 				if (buildFile == nullptr)
@@ -690,7 +690,7 @@ namespace Builder
 
 			if (log.isEmpty() == false)
 			{
-				if (m_buildResultWriter->addFile(QString("VDUs/%1").arg(vdu->equipmentId()),
+				if (m_buildResultWriter->addFile(QString("%1/%2").arg(Directory::VDUs).arg(vdu->equipmentId()),
 												 vdu->equipmentId().toLower() + ".mct", log) == nullptr)
 				{
 					return false;
