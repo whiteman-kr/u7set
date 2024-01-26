@@ -1,6 +1,8 @@
 #include "VduSchemaGenerator.h"
+#include "../../VFrame30/DrawParam.h"
 #include "../../VFrame30/SchemaItemVduLine.h"
 #include "../../VFrame30/SchemaItemVduRect.h"
+#include "../../VFrame30/SchemaView.h"
 #include "../../VFrame30/VduSchema.h"
 #include "VduSchemaFile.h"
 
@@ -143,6 +145,82 @@ namespace vdu
 #endif
 
 		return result;
+	}
+
+	bool VduSchemaGenerator::generateVduBackgroundBitmap(std::shared_ptr<VFrame30::Schema> schema, QImage& out)
+	{
+		// Generate background image in size of the schema.
+		// Fill it with schema's background color.
+		// Draw only static schema items on it.
+		//
+		class DrawBackgroundSchemaView : public VFrame30::SchemaView
+		{
+		public:
+			DrawBackgroundSchemaView(std::shared_ptr<VFrame30::Schema> schema) :
+				VFrame30::SchemaView(schema)
+			{
+			}
+
+			virtual VFrame30::DrawMode drawMode() const override
+			{
+				return VFrame30::DrawMode::Monitor;
+			}
+		};
+
+		auto oldContext = schema->context();
+		schema->setContext(VFrame30::Context::create(nullptr, nullptr, nullptr, nullptr));
+
+		DrawBackgroundSchemaView schemaView{schema};
+
+		QPageSize pageSize;
+		double pageWidth = schema->docWidth();
+		double pageHeight = schema->docHeight();
+
+		if (schema->unit() == SchemaUnit::Inch)
+		{
+			pageSize = QPageSize(QSizeF(pageWidth, pageHeight), QPageSize::Inch);
+		}
+		else
+		{
+			assert(schema->unit() == SchemaUnit::Display);
+			pageSize = QPageSize(QSize(static_cast<int>(pageWidth), static_cast<int>(pageHeight)));
+		}
+
+		// Calc size
+		//
+		const int resolution = 300;                                       // Image resolution is 300 dpi
+
+		int widthInPixel = schema->GetDocumentWidth(resolution, 100.0);   // Export 100% zoom
+		int heightInPixel = schema->GetDocumentHeight(resolution, 100.0); // Export 100% zoom
+
+		// --
+		//
+		out = QImage(QSize(widthInPixel, heightInPixel), QImage::Format_ARGB32);
+
+		QPainter p(&out);
+		VFrame30::CDrawParam drawParam(&p, &schemaView, schema->gridSize(), schema->pinGridStep(), schema->unit());
+
+		drawParam.setInfoMode(false);
+		drawParam.setPdfMode(false);
+
+		// Clear device
+		//
+		p.fillRect(QRectF(0, 0, widthInPixel + 1, heightInPixel + 1), schema->backgroundColor());
+		p.setRenderHint(QPainter::Antialiasing);
+
+		// Adjust QPainter
+		//
+		VFrame30::SchemaView::Ajust(&p, schema->unit(), 0, 0, 100.0); // Export 100% zoom
+
+		// Draw Schema
+		//
+		QRectF clipRect(0, 0, schema->docWidth(), schema->docHeight());
+
+		schema->Draw(&drawParam, clipRect);
+
+		schema->setContext(oldContext);
+
+		return true;
 	}
 
 	bool VduSchemaGenerator::saveSchemaItem1(const VFrame30::SchemaItem& schemaItem, QByteArray& out, std::list<std::pair<QString, size_t>>& addedStringReferences)

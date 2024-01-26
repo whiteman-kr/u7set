@@ -211,7 +211,7 @@ namespace VFrame30
 
 	void SchemaItemVduRect::setWeight(int weight)
 	{
-		m_weight = std::clamp(weight, 0, 16);
+		m_weight = std::clamp(weight, 1, 16);
 	}
 
 	bool SchemaItemVduRect::fill() const

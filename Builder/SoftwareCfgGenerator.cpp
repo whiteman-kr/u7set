@@ -566,7 +566,7 @@ namespace Builder
 				continue;
 			}
 
-			bool convertOk = generateVduSchemas(static_cast<const VFrame30::VduSchema&>(*schema), *context);
+			bool convertOk = generateVduSchemas(schema, *context);
 			if (convertOk == false)
 			{
 				returnResult = false;
@@ -576,24 +576,70 @@ namespace Builder
 		return returnResult;
 	}
 
-	bool SoftwareCfgGenerator::generateVduSchemas(const VFrame30::VduSchema& schema, Context& context)
+	bool SoftwareCfgGenerator::generateVduSchemas(std::shared_ptr<VFrame30::Schema> schema, Context& context)
 	{
+		if (schema == nullptr || schema->isVduSchema() == false)
+		{
+			Q_ASSERT(schema != nullptr && schema->isVduSchema() == true);
+			return false;
+		}
+
+		const VFrame30::VduSchema& vduSchema = static_cast<const VFrame30::VduSchema&>(*schema);
+
 		IssueLogger* log = context.m_log;
 		Q_ASSERT(log);
 
 		bool result = true;
 
-		LOG_MESSAGE(log, tr("Converting schema %1 to VDU format.").arg(schema.schemaId())); 
+		// Generate VDU schema in VDU format. Save it to VDUs/Schemas folder.
+		//
+		QByteArray nativeVduData;
+		QString nativeVduSchemaFileName = QString("%1.%2")
+											  .arg(vduSchema.schemaId())
+											  .arg(Db::File::VduNativeFileExtension);
 
-		QByteArray data;
-		QStringList errorMessages;
-		result = vdu::VduSchemaGenerator::generateVduSchema(schema, data, errorMessages);
+		{
+			LOG_MESSAGE(log, tr("Converting schema %1 to VDU format.").arg(vduSchema.schemaId()));
 
-		QString fileName = QString("%1.%2")
-							   .arg(schema.schemaId())
-							   .arg(Db::File::VduNativeFileExtension);
+			QStringList errorMessages;
+			result = vdu::VduSchemaGenerator::generateVduSchema(vduSchema, nativeVduData, errorMessages);
 
-		context.m_buildResultWriter->addFile(Directory::VDUs + "/Schemas", fileName, data);
+			if (result == false)
+			{
+				log->errINT1001(tr("vdu::VduSchemaGenerator::generateVduSchema internal error, schema: %1").arg(vduSchema.schemaId()));
+				for (const QString& msg : errorMessages)
+				{
+					log->errINT1001(msg);
+				}
+
+				return false;
+			}
+
+			context.m_buildResultWriter->addFile(Directory::VDUs + "/Schemas", nativeVduSchemaFileName, nativeVduData);
+		}
+
+		// Generate background bitmap from the static data.
+		//
+		QByteArray backgroundImageData;
+		QString backgroundBitmapFileName = QString("%1.bmp")
+			.arg(vduSchema.schemaId());
+
+		{
+			QImage backgroundImage;
+			result = vdu::VduSchemaGenerator::generateVduBackgroundBitmap(schema, backgroundImage);
+
+			if (result == false)
+			{
+				log->errINT1001(tr("vdu::VduSchemaGenerator::generateVduBackgroundBitmap internal error, schema:").arg(vduSchema.schemaId()));
+				return false;
+			}
+
+			QBuffer buffer(&backgroundImageData);
+			buffer.open(QIODevice::WriteOnly);
+			backgroundImage.save(&buffer, "BMP");
+
+			context.m_buildResultWriter->addFile(Directory::VDUs + "/Schemas", backgroundBitmapFileName, backgroundImageData);
+		}
 
 		// Write schema to the VDU folder.
 		//
@@ -614,10 +660,13 @@ namespace Builder
 			auto schemaTagList = schemaTagsProperty->value().toString().split(QRegularExpression("\\W+"), Qt::SkipEmptyParts);
 			for (QString& tag : schemaTagList)
 			{
-				if (schema.tagsAsList().contains(tag.toLower()) == true)
+				if (vduSchema.tagsAsList().contains(tag.toLower()) == true)
 				{
 					QString vduDir = Directory::VDUs + "/" + vdu->equipmentId() + "/Schemas";
-					context.m_buildResultWriter->addFile(vduDir, fileName, data);
+					
+					context.m_buildResultWriter->addFile(vduDir, nativeVduSchemaFileName, nativeVduData);
+					context.m_buildResultWriter->addFile(vduDir, backgroundBitmapFileName, backgroundImageData);
+
 					break;
 				}
 			}

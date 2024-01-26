@@ -126,7 +126,7 @@ namespace VFrame30
 
 	void SchemaItemVduLine::setWeight(int weight)
 	{
-		m_weight = std::clamp(weight, 0, 16);
+		m_weight = std::clamp(weight, 1, 16);
 	}
 
 	QColor SchemaItemVduLine::lineColor() const
