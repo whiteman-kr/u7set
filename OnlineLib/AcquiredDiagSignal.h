@@ -42,6 +42,8 @@ public:
 	void loadFromProto(const Network::AcquiredDiagSignal& proto);
 
 public:
+	QString equipmentId;			// only for debugging
+
 	Hash equipmentIdHash;
 	Hash parentHash = 0;			// calcHash(parent.equipmentID)
 

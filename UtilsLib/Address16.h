@@ -25,6 +25,7 @@ public:
 
 	void set(int offset, int bit);
 	void reset();
+	void clear();
 
 	void setOffset(int offset);
 	int offset() const;
@@ -138,6 +139,11 @@ inline void Address16::reset()
 {
 	m_offset = BAD_ADDRESS;
 	m_bit = BAD_ADDRESS;
+}
+
+inline void Address16::clear()
+{
+
 }
 
 inline void Address16::setOffset(int offset)

@@ -62,6 +62,8 @@ AcquiredDiagSignal::AcquiredDiagSignal(DiagSignalConstShared diagSignal)
 {
 	TEST_PTR_RETURN(diagSignal);
 
+	equipmentId = diagSignal->equipmentIdTemplate();
+
 	equipmentIdHash = calcHash(diagSignal->equipmentIdTemplate());
 
 	auto parent = diagSignal->parent();
@@ -69,6 +71,10 @@ AcquiredDiagSignal::AcquiredDiagSignal(DiagSignalConstShared diagSignal)
 	if (parent != nullptr)
 	{
 		parentHash = calcHash(parent->equipmentIdTemplate());
+	}
+	else
+	{
+		Q_ASSERT(false);
 	}
 
 	diagLevel = diagSignal->level();

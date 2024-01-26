@@ -264,12 +264,6 @@ namespace Builder
 			return true;			// diagSignals already found
 		}
 
-		bool result = true;
-
-		auto [it, b] = m_lmAcquiredDiagSignals.emplace(lmEquipHash, std::vector<DiagSignalConstShared>{});
-
-		std::vector<DiagSignalConstShared>& acquiredDiagSignals = it->second;
-
 		std::shared_ptr<const Hardware::DeviceChassis> chassis = lm->getParentChassisShared();
 
 		if (chassis == nullptr)
@@ -278,21 +272,58 @@ namespace Builder
 			return false;
 		}
 
-		const std::vector<std::shared_ptr<Hardware::DeviceObject>>& chassisChildren = chassis->children();
+		bool result = true;
 
-		int moduleDiagPacketOffset = 0;		// from beginning of FODIP
+		auto [it, b] = m_lmAcquiredDiagSignals.emplace(lmEquipHash, std::vector<DiagSignalConstShared>{});
 
-		for(const std::shared_ptr<Hardware::DeviceObject>& devObject : chassisChildren)
+		std::vector<DiagSignalConstShared>& acquiredDiagSignals = it->second;
+
+		// find all chassis child signals
+		//
+		DeviceHelper::getChildDiagSignals(chassis, &acquiredDiagSignals);
+
+		qDebug() << C_STR(QString("LM %1 diag signals:").arg(lm->equipmentIdTemplate()));
+
+		for(auto& ds : acquiredDiagSignals)
+		{
+			qDebug() << C_STR(ds->equipmentIdTemplate());
+		}
+
+		// --------------------------------------------------------------------------------------------
+
+		// order chassis modules by place
+		//
+		std::map<int, std::shared_ptr<Hardware::DeviceModule>> chassisModules;
+
+		for (auto& devObject : chassis->children())
 		{
 			std::shared_ptr<Hardware::DeviceModule> module = devObject->toModule();
 
 			TEST_PTR_CONTINUE(module);
 
-			Hash hash = calcHash(module->equipmentIdTemplate());
+			chassisModules.emplace(module->place(), module);
+		}
 
-			Q_ASSERT(m_moduleDiagDataOffset.contains(hash) == false);
+		// calculate modules diagData offsets
+		//
+		int moduleDiagPacketOffset = 0;		// from beginning of FODIP
 
-			m_moduleDiagDataOffset.emplace(hash, moduleDiagPacketOffset);
+		for (const auto& p : chassisModules)
+		{
+			int place = p.first;
+			std::shared_ptr<Hardware::DeviceModule> module = p.second;
+
+//			Hash hash = calcHash(module->equipmentIdTemplate());
+
+//			Q_ASSERT(m_moduleDiagDataOffset.contains(hash) == false);
+
+//			m_moduleDiagDataOffset.emplace(hash, moduleDiagPacketOffset);
+
+			QString equipmentId = module->equipmentIdTemplate();
+
+			Q_ASSERT(m_moduleDiagDataOffset.contains(equipmentId) == false);
+
+			m_moduleDiagDataOffset.emplace(equipmentId, moduleDiagPacketOffset);
 
 			int diagDataPacketSizeW = 0;
 
@@ -311,8 +342,6 @@ namespace Builder
 				result &= DeviceHelper::getIntProperty(module.get(), EquipmentPropNames::TX_DIAG_DATA_SIZE, &diagDataPacketSizeW, m_log);
 			}
 
-			DeviceHelper::getChildDiagSignals(chassis, &acquiredDiagSignals);
-
 			moduleDiagPacketOffset += diagDataPacketSizeW;
 		}
 
@@ -325,6 +354,10 @@ namespace Builder
 
 		std::set<Hash> acquiredSignalsHashes;				// set of calcHash(diagSignal->equipmentID)
 		std::set<Hash> acquiredObjectHashes;				// set of calcHash(diagObject->equipmentID)
+
+		Address16 offsetSignal;
+		Address16 offsetController;
+		Address16 offsetModule;
 
 		for(const auto& [lmEquipmentID, acquiredDiagSignals] : m_lmAcquiredDiagSignals)
 		{
@@ -340,7 +373,13 @@ namespace Builder
 
 				acquiredSignalsHashes.emplace(signalHash);
 
+				offsetSignal.reset();
+				offsetController.reset();
+				offsetModule.reset();
+
 				AcquiredDiagSignal ads(diagSignal);
+
+				offsetSignal = ads.absAddr;
 
 				std::shared_ptr<Hardware::DeviceObject> parent = diagSignal->parent();
 
@@ -363,15 +402,19 @@ namespace Builder
 						}
 
 						ads.absAddr.addWord(controller->diagDataOffset());
+
+						offsetController = Address16(controller->diagDataOffset(), 0);
 					}
 
 					if (parent->isModule())
 					{
-						auto it = m_moduleDiagDataOffset.find(calcHash(parent->equipmentIdTemplate()));
+						auto it = m_moduleDiagDataOffset.find(parent->equipmentIdTemplate());
 
 						if (it != m_moduleDiagDataOffset.end())
 						{
 							ads.absAddr.addWord(it->second);
+
+							offsetModule = Address16(it->second, 0);
 						}
 						else
 						{
@@ -389,20 +432,27 @@ namespace Builder
 						ado.saveToProto(protoAdo);
 
 						acquiredObjectHashes.emplace(parentHash);
-
-						parent = parent->parent();
 					}
 					else
 					{
 						if (parent->isChassis())
 						{
-							break;			// parent chassis and hence upper objects already added to map
+							break; // parent chassis and hence upper objects already added to map
 						}
 					}
+
+					parent = parent->parent();
 				}
 
 				Network::AcquiredDiagSignal* protoAds = m_protoAcquiredDiagSignals.add_diagsignals();
 				ads.saveToProto(protoAds);
+
+				qDebug() << C_STR(QString("Diag siagnal: %1 addr %2 + %3 + %4 = %5").
+									arg(ads.equipmentId).
+									arg(offsetModule.toString()).
+									arg(offsetController.toString()).
+									arg(offsetSignal.toString()).
+									arg(ads.absAddr.toString()) );
 			}
 		}
 

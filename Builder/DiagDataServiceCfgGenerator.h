@@ -32,7 +32,8 @@ namespace Builder
 
 	private:
 		std::map<Hash, std::vector<DiagSignalConstShared>> m_lmAcquiredDiagSignals;	// calcHash(LM equipmetID) => diagSignals array
-		std::map<Hash, int> m_moduleDiagDataOffset;									// calcHash(Module equipmetID) => module diag data offset in FODIP
+		//std::map<Hash, int> m_moduleDiagDataOffset;									// calcHash(Module equipmetID) => module diag data offset in FODIP
+		std::map<QString, int> m_moduleDiagDataOffset;									// calcHash(Module equipmetID) => module diag data offset in FODIP
 
 		Network::AcquiredDiagSignals m_protoAcquiredDiagSignals;
 	};
