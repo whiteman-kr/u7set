@@ -17,6 +17,7 @@
 #include "TuningClientFilterStorage.h"
 #include "TuningSchemaManager.h"
 
+
 MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow(parent),
 	m_logFile("TuningClient", QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + softwareInfo.equipmentID()),
@@ -39,6 +40,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 
 	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/TuningClient_uk.qm");
 	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/ClientLib_uk.qm");
+	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/SchemaClientLib_uk.qm");
 	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/UtilsLib_uk.qm");
 	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/qt_uk.qm");
 
@@ -1008,7 +1010,7 @@ void MainWindow::showSoftwareConnection(const QString& caption,
 }
 
 
-void MainWindow::slot_configurationArrived(ConfigSettings configuration)
+void MainWindow::slot_configurationArrived(TuningClientConfigSettings configuration)
 {
 	// Modify logon mode
 	//

@@ -1,18 +1,17 @@
 #include "MonitorMainWindow.h"
-#include "MonitorCentralWidget.h"
-#include "DialogSettings.h"
-#include "MonitorSchemaWidget.h"
-#include "MonitorSchemaView.h"
-#include "MonitorSignalSnapshot.h"
-#include "./Archive/MonitorArchive.h"
-#include "DialogDataSources.h"
-#include "Globals.h"
-#include "./Trend/MonitorTrends.h"
-#include "../VFrame30/Schema.h"
-#include "../lib/Ui/DialogSignalSearch.h"
 #include "../UtilsLib/Ui/UiTools.h"
+#include "../VFrame30/Schema.h"
 #include "../lib/Ui/DialogAbout.h"
+#include "../lib/Ui/DialogSignalSearch.h"
 #include "../lib/Ui/SchemaListWidget.h"
+#include "./Archive/MonitorArchive.h"
+#include "./Trend/MonitorTrends.h"
+#include "DialogDataSources.h"
+#include "DialogSettings.h"
+#include "Globals.h"
+#include "MonitorSchemaView.h"
+#include "MonitorSchemaWidget.h"
+#include "MonitorSignalSnapshot.h"
 
 MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow{parent},
@@ -32,6 +31,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 
 	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/Monitor_uk.qm");
 	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/ClientLib_uk.qm");
+	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/SchemaClientLib_uk.qm");
 	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/TrendView_uk.qm");
 	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/UtilsLib_uk.qm");
 	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/qt_uk.qm");
@@ -70,16 +70,23 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 
 	// Creating signals controllers for VFrame30
 	//
-	m_appSignalController = std::make_unique<VFrame30::AppSignalController>(&m_signalManager);
+	m_appSignalController = std::make_unique<VFrame30::AppSignalController>(m_signalManager);
 	m_logController = std::make_unique<VFrame30::LogController>(&m_LogFile);
 
 	// --
 	//
-	MonitorCentralWidget* monitorCentralWidget = new MonitorCentralWidget(&m_schemaManager,
-																		  m_appSignalController.get(),
-																		  m_logController.get(),
-																		  &m_schemaStats,
-																		  this);
+	auto createSchemaWidgetFunc = [this](std::shared_ptr<VFrame30::Schema> schema, QWidget* parentWidget)
+	{
+		return new MonitorSchemaWidget(schema,
+									   &m_schemaManager,
+									   m_appSignalController.get(),
+									   m_logController.get(),
+									   &m_schemaStats,
+									   parentWidget);
+	};
+
+	auto monitorCentralWidget = new MonitorCentralWidget(&m_schemaManager, std::move(createSchemaWidgetFunc), this);
+	
 	setCentralWidget(monitorCentralWidget);
 
 	// Create Menus, ToolBars, StatusBar
@@ -113,8 +120,13 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 
 	// --
 	//
+	monitorCentralWidget->setVisibleTabBar(MonitorAppSettings::instance().showSchemasTabBar());
+	monitorCentralWidget->setZoomMode(MonitorAppSettings::instance().zoomMode());
+
 	centralWidget()->show();
 
+	// --
+	//
 	m_configController.start();
 
 	m_updateStatusBarTimerId = startTimer(200);
@@ -974,7 +986,7 @@ void MonitorMainWindow::showSettings()
 		showLogo();
 		showZoomControls();
 		setVisibleTabBar(MonitorAppSettings::instance().showSchemasTabBar());
-		monitorCentralWidget()->applyZoomMode(MonitorAppSettings::instance().zoomMode());
+		monitorCentralWidget()->setZoomMode(MonitorAppSettings::instance().zoomMode());
 
 		// Reconnect
 		//
@@ -1199,7 +1211,7 @@ void MonitorMainWindow::slot_archive()
 	if (archiveWindowToActivate.isEmpty() == true)
 	{
 		std::vector<AppSignalParam> appSignals;
-		MonitorArchive::startNewWidget(&m_signalManager, &m_configController, appSignals, this);
+		MonitorArchive::startNewWidget(m_signalManager, &m_configController, appSignals, this);
 	}
 	else
 	{
@@ -1279,7 +1291,7 @@ void MonitorMainWindow::slot_archive(QStringList signalsList, QDateTime startTim
 		return;
 	}
 
-	MonitorArchive::requestArchiveWithNewWidget(&m_signalManager, &configController(), appSignals, startTime, endTime, static_cast<E::TimeType>(timeType), this);
+	MonitorArchive::requestArchiveWithNewWidget(m_signalManager, &configController(), appSignals, startTime, endTime, static_cast<E::TimeType>(timeType), this);
 	return;
 }
 
@@ -1470,7 +1482,7 @@ void MonitorMainWindow::slot_findSignal()
 
 	DialogSignalSearch* dsi = new DialogSignalSearch(this, &m_signalManager);
 
-	connect(&m_signalManager, &MonitorSignalManager::signalParamsUpdated, dsi, &DialogSignalSearch::signalsUpdated);
+	connect(&m_signalManager, &ClientLib::AppSignalManager::signalParamsUpdated, dsi, &DialogSignalSearch::signalsUpdated);
 
 	connect(dsi, &DialogSignalSearch::signalContextMenu, cw, &MonitorCentralWidget::slot_signalContextMenu);
 	connect(dsi, &DialogSignalSearch::signalInfo, cw, &MonitorCentralWidget::slot_signalInfo);
@@ -1511,8 +1523,10 @@ void MonitorMainWindow::slot_updateActions(bool schemaWidgetSelected)
 	return;
 }
 
-void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
+void MonitorMainWindow::slot_configurationArrived(MonitorConfigSettings configuration)
 {
+	monitorCentralWidget()->setStartSchemaId(configuration.startSchemaId);
+
 	// Update AppSignalManager with specific data
 	//
 	m_adsConnection.updateConnections(m_configController.softwareInfo(), configuration.appDataServices);
@@ -1622,12 +1636,10 @@ void MonitorMainWindow::setVisibleSchemaTree(bool visible)
 
 void MonitorMainWindow::setVisibleTabBar(bool visible)
 {
-	MonitorCentralWidget* m = monitorCentralWidget();
-	Q_ASSERT(m);
-
-	if (m != nullptr)
+	if (MonitorCentralWidget* m = monitorCentralWidget();
+		m != nullptr)
 	{
-		m->tabBar()->setVisible(visible);
+		m->setVisibleTabBar(visible);
 	}
 
 	m_newTabAction->setVisible(visible);
@@ -1751,12 +1763,12 @@ const MonitorConfigController& MonitorMainWindow::configController() const
 	return m_configController;
 }
 
-MonitorSignalManager& MonitorMainWindow::signalManager()
+ClientLib::AppSignalManager& MonitorMainWindow::signalManager()
 {
 	return m_signalManager;
 }
 
-const MonitorSignalManager& MonitorMainWindow::signalManager() const
+const ClientLib::AppSignalManager& MonitorMainWindow::signalManager() const
 {
 	return m_signalManager;
 }
@@ -1996,7 +2008,7 @@ void MonitorToolBar::dropEvent(QDropEvent* event)
 
 		if (appSignals.empty() == false)
 		{
-			MonitorArchive::startNewWidget(&mainWindow->signalManager(), &mainWindow->configController(), appSignals, mainWindow);
+			MonitorArchive::startNewWidget(mainWindow->signalManager(), &mainWindow->configController(), appSignals, mainWindow);
 		}
 	}
 

@@ -4,7 +4,7 @@
 #include "../ClientLib/RtDataProvider.h"
 #include "../TrendView/TrendMainWindow.h"
 #include "MonitorConfigController.h"
-#include "MonitorSignalManager.h"
+#include "../ClientLib/AppSignalManager.h" 
 #include "MonitorTrendArchiveConnections.h"
 
 class MonitorTrendsWidget;
@@ -16,7 +16,7 @@ class MonitorTrends
 public:
 	static std::vector<MonitorTrendsWidget*> getTrendsList();
 	static bool activateTrendWindow(MonitorTrendsWidget* trendWidget);
-	static bool startTrendApp(const MonitorSignalManager& signalManager,
+	static bool startTrendApp(const ClientLib::AppSignalManager& signalManager,
 							  const MonitorConfigController& configController,
 							  const std::vector<AppSignalParam>& appSignals,
 							  QWidget* parent);
@@ -34,7 +34,7 @@ class MonitorTrendsWidget : public TrendLib::TrendMainWindow
 	Q_OBJECT
 
 public:
-	MonitorTrendsWidget(const MonitorSignalManager& signalManager,
+	MonitorTrendsWidget(const ClientLib::AppSignalManager& signalManager,
 						const MonitorConfigController& configController,
 						QWidget* parent);
 	virtual ~MonitorTrendsWidget();
@@ -65,12 +65,12 @@ protected slots:
 								   TrendLib::TrendStateItem maxState);
 	void slot_trendModeChanged();
 
-	void slot_configurationArrived(ConfigSettings configuration);
+	void slot_configurationArrived(MonitorConfigSettings configuration);
 
 	// Data
 	//
 private:
-	const MonitorSignalManager& m_signalManager;
+	const ClientLib::AppSignalManager& m_signalManager;
 	const MonitorConfigController& m_configController;
 
 	MonitorTrendArchiveConnections m_archiveDataProvider;

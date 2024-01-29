@@ -6,6 +6,7 @@
 #include "LanControllerInfoHelper.h"
 #include "DeviceHelper.h"
 #include "SoftwareCfgGenerator.h"
+#include "DiagDataServiceCfgGenerator.h"
 #include "Parser.h"
 #include "LmDescriptionSet.h"
 
@@ -279,6 +280,10 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::detectUnusedSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::detectUsedReservedSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::fillAnalogSignalsOnSchemas),
+
+			PROC_TO_CALL(ModuleLogicCompiler::calcAppDataUID),
+			PROC_TO_CALL(ModuleLogicCompiler::calcDiagDataUID),
+
 			PROC_TO_CALL(ModuleLogicCompiler::writeResult)
 		};
 
@@ -672,8 +677,10 @@ namespace Builder
 
 		Module m;
 
-		m.device = m_lm;
-		m.place = LM1_PLACE;
+		m.device = m_lmShared;
+		m.place = m_lmShared->place();
+
+		Q_ASSERT(m.place == DeviceHelper::LM1_PLACE);
 
 		m.txDiagDataOffset = m_lmDescription->memory().m_txDiagDataOffset;
 		m.txDiagDataSize = m_lmDescription->memory().m_txDiagDataSize;
@@ -686,7 +693,9 @@ namespace Builder
 		m.rxAppDataOffset = m.txAppDataOffset;
 		m.rxAppDataSize = m.txAppDataSize;
 
-		m_modules.insert(lmEquipmentID(), m);
+		Q_ASSERT(m_modules.contains(m.place) == false);
+
+		m_modules.emplace(m.place, m);
 
 		// check LM subsystem ID
 		//
@@ -705,6 +714,9 @@ namespace Builder
 
 	bool ModuleLogicCompiler::loadModulesSettings()
 	{
+		TEST_PTR_RETURN_FALSE(m_log);
+		TEST_PTR_LOG_RETURN_FALSE(m_lm, m_log);
+
 		if (m_lm->isBvb() == true)
 		{
 			return true;
@@ -712,43 +724,79 @@ namespace Builder
 
 		bool result = true;
 
-		// build Module structures array
-		//
-		for(int place = 1; place <= static_cast<int>(m_lmDescription->memory().m_moduleCount); place++)
-		{
-			Module m;
+		const Hardware::DeviceChassis* chassis = m_lm->getParentChassis();
 
-			const Hardware::DeviceModule* device = DeviceHelper::getModuleOnPlace(m_lm, place);
+		if (chassis == nullptr)
+		{
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Can't find parent chassis for LM %1").
+											arg(m_lm->equipmentIdTemplate()));
+			return false;
+		}
+
+		int count = chassis->childrenCount();
+
+		for(int i = 0; i < count; i++)
+		{
+			std::shared_ptr<const Hardware::DeviceObject> device = chassis->child(i);
 
 			if (device == nullptr)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			if (device->isModule() == false)
 			{
 				continue;
 			}
 
-			m.device = device;
-			m.place = place;
+			std::shared_ptr<const Hardware::DeviceModule> module = device->toModule();
 
-			const DeviceHelper::IntPropertyNameVar moduleSettings[] =
+			if (module == nullptr)
 			{
-				{	"TxDataSize", &m.txDataSize },
-				{	"TxDiagDataOffset", &m.txDiagDataOffset },
-				{	"TxDiagDataSize", &m.txDiagDataSize },
-				{	"TxAppDataOffset", &m.txAppDataOffset },
-				{	"TxAppDataSize", &m.txAppDataSize },
-
-				{	"RxDataSize", &m.rxDataSize },
-				{	"RxAppDataOffset", &m.rxAppDataOffset },
-				{	"RxAppDataSize", &m.rxAppDataSize },
-			};
-
-			for(DeviceHelper::IntPropertyNameVar moduleSetting : moduleSettings)
-			{
-				result &= DeviceHelper::getIntProperty(device, moduleSetting.name, moduleSetting.var, m_log);
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
 			}
 
-			m.moduleDataOffset = m_memoryMap.getModuleDataOffset(place);
+			if (module->place() == DeviceHelper::LM1_PLACE)
+			{
+				if (module != m_lmShared)
+				{
+					Q_ASSERT(false);
+					LOG_INTERNAL_ERROR(m_log);
+					result = false;
+				}
 
-			m_modules.insert(device->equipmentIdTemplate(), m);
+				continue;			// LM module already added in ModuleLogicCompiler::loadLMSettings()
+			}
+
+			Module m;
+
+			m.device = module;
+			m.place = module->place();
+
+			// parameters of data RECEIVED from module to LM (i.e. TRANSMITTED by module)
+			//
+			result &= DeviceHelper::getIntProperty(module.get(), EquipmentPropNames::TX_DATA_SIZE, &m.txDataSize, m_log);
+
+			result &= DeviceHelper::getIntProperty(module.get(), EquipmentPropNames::TX_DIAG_DATA_OFFSET, &m.txDiagDataOffset, m_log);
+			result &= DeviceHelper::getIntProperty(module.get(), EquipmentPropNames::TX_DIAG_DATA_SIZE, &m.txDiagDataSize, m_log);
+
+			result &= DeviceHelper::getIntProperty(module.get(), EquipmentPropNames::TX_APP_DATA_OFFSET, &m.txAppDataOffset, m_log);
+			result &= DeviceHelper::getIntProperty(module.get(), EquipmentPropNames::TX_APP_DATA_SIZE, &m.txAppDataSize, m_log);
+
+			// parameters of data TRANSMITTED from LM to module (i.e. RECEIVED by module)
+			//
+			result &= DeviceHelper::getIntProperty(module.get(), EquipmentPropNames::RX_DATA_SIZE, &m.rxDataSize, m_log);
+
+			result &= DeviceHelper::getIntProperty(module.get(), EquipmentPropNames::RX_APP_DATA_OFFSET, &m.rxAppDataOffset, m_log);
+			result &= DeviceHelper::getIntProperty(module.get(), EquipmentPropNames::RX_APP_DATA_SIZE, &m.rxAppDataSize, m_log);
+
+			m.moduleDataOffset = m_memoryMap.getModuleDataOffset(m.place);
+
+			m_modules.emplace(m.place, m);
 		}
 
 		return result;
@@ -4792,12 +4840,19 @@ namespace Builder
 			return false;
 		}
 
-		tuningData->generateUniqueID(lmEquipmentID());
+		tuningData->calcTuningDataUID(lmEquipmentID());
+
+		m_rupTuningDataUID = tuningData->rupTuningDataUID();
+		m_fotipTuningDataUID = tuningData->fotipTuningDataUID();
 
 		m_tuningData = tuningData;
 		m_tuningDataStorage->appendTuningData(lmEquipmentID(), tuningData);
 
-		return true;
+		result &= DeviceHelper::setUIntProperty(const_cast<Hardware::DeviceModule*>(m_lm),
+											EquipmentPropNames::TUNING_LAN_DATA_UID,
+											m_rupTuningDataUID,
+											m_log);
+		return result;
 	}
 
 	bool ModuleLogicCompiler::buildTuningSignalsLists(Tuning::TuningDataShared tuningData)
@@ -6202,13 +6257,17 @@ namespace Builder
 
 			if (device == nullptr)
 			{
-				assert(false);
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Can't find DeviceObject with equipmentID %1").
+													arg(s->equipmentID()));
+				result = false;
 				continue;
 			}
 
 			if (device->isAppSignal() == false)
 			{
-				assert(false);
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("DeviceObject %1 is not a DeviceAppSignal").
+													arg(s->equipmentID()));
+				result = false;
 				continue;
 			}
 
@@ -6216,7 +6275,8 @@ namespace Builder
 
 			if (deviceAppSignal == nullptr)
 			{
-				assert(false);
+				LOG_INTERNAL_ERROR(m_log);
+				result =  false;
 				continue;
 			}
 
@@ -6226,17 +6286,34 @@ namespace Builder
 
 			if (deviceModule == nullptr)
 			{
-				//assert(false);
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Can't find parent DeviceModule for DeviceAppSignal %1").
+													arg(deviceAppSignal->equipmentIdTemplate()));
+				result = false;
 				continue;
 			}
 
-			if (m_modules.contains(deviceModule->equipmentIdTemplate()) == false)
+			int modulePlace = deviceModule->place();
+
+			if (modulePlace < 0)
 			{
-				assert(false);
+				Q_ASSERT(false);
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("DeviceModule %1 has wrong place %2").
+													arg(deviceModule->equipmentIdTemplate()).
+													arg(modulePlace));
+				result = false;
 				continue;
 			}
 
-			Module module = m_modules.value(deviceModule->equipmentIdTemplate());
+			auto it = m_modules.find(modulePlace);
+
+			if (it == m_modules.end())
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			const Module& module = it->second;
 
 			Address16 ioBufAddr(module.moduleDataOffset, deviceAppSignal->valueBit());
 
@@ -15125,7 +15202,7 @@ namespace Builder
 		//
 		bool firstModule = true;
 
-		for(const Module& module : m_modules)
+		for(const auto& [place, module] : m_modules)
 		{
 			if (module.isOutputModule() == false)
 			{
@@ -16679,7 +16756,7 @@ namespace Builder
 		}
 
 		return DeviceHelper::setIntProperty(const_cast<Hardware::DeviceModule*>(m_lm),
-											EquipmentPropNames::LM_APP_LAN_DATA_SIZE,
+											EquipmentPropNames::APP_LAN_DATA_SIZE,
 											m_memoryMap.regBufSizeW(),
 											m_log);
 	}
@@ -17009,11 +17086,9 @@ namespace Builder
 		file.append(QString("LM number: %1\n").arg(m_lmNumber));
 		file.append(QString("Frames used total: %1").arg(m_tuningData->usedFramesCount()));
 
-		QString s;
+		quint64 uniqueID = m_tuningData->fotipTuningDataUID();
 
-		quint64 uniqueID = m_tuningData->uniqueID();
-
-		file.append(QString("Unique data ID: %1 (0x%2)").arg(uniqueID).arg(uniqueID, 16, 16, Latin1Char::ZERO));
+		file.append(QString("FOTIP tuning data UID: %1 (0x%2)").arg(uniqueID).arg(QString::number(uniqueID, 16).toUpper(), 16, Latin1Char::ZERO));
 
 		const QVector<AppSignal*>& analogFloatSignals = m_tuningData->getAnalogFloatSignals();
 
@@ -17247,13 +17322,9 @@ namespace Builder
 
 		m_optiAppLogicCode.getBinCode(&binCode);
 
-		result &= calcAppLogicUniqueID(binCode);
-
-		RETURN_IF_FALSE(result);
-
 		if (m_lmDescription->flashMemory().m_appLogicWriteBitstream == true)
 		{
-			result &= writeBinCodeForLm();
+			result &= writeBinCodeForLm(binCode);
 
 			RETURN_IF_FALSE(result);
 		}
@@ -17289,7 +17360,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::writeBinCodeForLm()
+	bool ModuleLogicCompiler::writeBinCodeForLm(const QByteArray& binCode)
 	{
 		bool result = true;
 
@@ -17320,10 +17391,6 @@ namespace Builder
 
 		firmwareWriter->setDescriptionFields(m_lmSubsystemID, appLogicUartID, metadataFieldsVersion, metadataFields);
 
-		QByteArray binCode;
-
-		m_optiAppLogicCode.getBinCode(&binCode);
-
 		std::vector<QVariantList> metadata;
 
 		m_optiAppLogicCode.getAsmMetadata(m_lmDescription, &metadata);
@@ -17334,14 +17401,14 @@ namespace Builder
 												 m_lmNumber,
 												 m_lmAppLogicFramePayload,
 												 m_lmAppLogicFrameCount,
-												 m_appLogicUniqueID,
+												 m_rupAppDataUID,
 												 binCode,
 												 metadata,
 												 log());
 		return result;
 	}
 
-	bool ModuleLogicCompiler::calcAppLogicUniqueID(const QByteArray& lmAppCode)
+	bool ModuleLogicCompiler::calcAppDataUID()
 	{
 		QVector<UalSignal*> acquiredSignals;
 
@@ -17391,9 +17458,17 @@ namespace Builder
 			acquiredSignals.append(constUalSignal);
 		}
 
+		//
+
 		Crc64 crc;
 
-		crc.add(lmAppCode);
+		crc.add(m_lm->equipmentIdTemplate());
+
+		QByteArray appLogicBinCode;
+
+		m_optiAppLogicCode.getBinCode(&appLogicBinCode);
+
+		crc.add(appLogicBinCode);
 
 		// add signals to UID
 		//
@@ -17413,13 +17488,30 @@ namespace Builder
 			}
 		}
 
-		m_appLogicUniqueID = crc.result();
+		m_rupAppDataUID = crc.result32();
 
 		return DeviceHelper::setUIntProperty(const_cast<Hardware::DeviceModule*>(m_lm),
-											EquipmentPropNames::LM_APP_LAN_DATA_UID,
-											crc.result32(),
+											EquipmentPropNames::APP_LAN_DATA_UID,
+											m_rupAppDataUID,
 											m_log);
 	}
+
+	bool ModuleLogicCompiler::calcDiagDataUID()
+	{
+		Crc64 crc;
+
+		crc.add(m_lm->equipmentIdTemplate());
+
+		//
+
+		m_rupDiagDataUID = crc.result32();
+
+		return DeviceHelper::setUIntProperty(const_cast<Hardware::DeviceModule*>(m_lm),
+											EquipmentPropNames::DIAG_LAN_DATA_UID,
+											m_rupDiagDataUID,
+											m_log);
+	}
+
 
 /*
  * Generation of binary representation of tuning frames data

@@ -1,3 +1,7 @@
+#ifndef ONLINE_LIB_DOMAIN
+#error Do not include this file in the project! Link OnlineLib instead.
+#endif
+
 #include "BuildInfo.h"
 #include "../lib/ConstStrings.h"
 #include "../UtilsLib/WUtils.h"

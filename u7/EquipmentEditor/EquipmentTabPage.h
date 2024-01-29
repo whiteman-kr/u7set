@@ -72,6 +72,8 @@ protected slots:
 	void exportPreset();
 	void importPreset();
 
+	void diagSignalTypes();
+
 	void onEquipmentViewContextMenuRequested(const QPoint& pos);
 
 	void findDeviceObject(QString equipmentId);
@@ -86,7 +88,9 @@ private:
 	QAction* m_addChassisAction = nullptr;
 	QAction* m_addModuleAction = nullptr;
 	QAction* m_addControllerAction = nullptr;
-	QAction* m_addSignalAction = nullptr;
+	QAction* m_addAppSignalAction = nullptr;
+	QAction* m_addDiagSignalAction = nullptr;
+	QAction* m_addDiagSignalReflectionAction = nullptr;
 	QAction* m_addWorkstationAction = nullptr;
 	QAction* m_addSoftwareAction = nullptr;
 
@@ -145,6 +149,11 @@ private:
 	QAction* m_separatorPresetExportImport = nullptr;
 	QAction* m_exportPresetAction = nullptr;
 	QAction* m_importPresetAction = nullptr;
+
+	// --
+	//
+	QAction* m_separatorAction4 = nullptr;
+	QAction* m_diagSignalTypesAction = nullptr;
 
 	//--
 	//

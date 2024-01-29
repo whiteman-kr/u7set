@@ -16,9 +16,19 @@ qt_standard_project_setup()
 set(TARGET DiagDataSrv)
 
 add_executable(${TARGET}
+	../lib/DataSource.cpp
+	../lib/DataSource.h
+	DiagDataReceiver.cpp
+	DiagDataReceiver.h
 	DiagDataService.cpp
 	DiagDataService.h
 	DiagDataServiceMain.cpp
+	DiagDataSource.cpp
+	DiagDataSource.h
+	DynamicDiagSignalState.cpp
+	DynamicDiagSignalState.h
+	SignalStatesProcessingThread.cpp
+	SignalStatesProcessingThread.h
 )
 
 target_precompile_headers(${TARGET} PRIVATE
@@ -80,6 +90,9 @@ target_precompile_headers(${TARGET} PRIVATE
 )
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
+
+target_include_directories(${TARGET} PRIVATE ./../asio/include)
+target_compile_definitions(${TARGET} PRIVATE ASIO_STANDALONE=1)
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Network Qt6::Widgets Qt6::Qml Qt6::Xml)
 target_link_libraries(${TARGET} PRIVATE HardwareLib AppSignalLib OnlineLib ServiceLib)

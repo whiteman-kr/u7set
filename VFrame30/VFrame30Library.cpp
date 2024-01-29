@@ -12,6 +12,7 @@
 #include "SchemaItemBus.h"
 #include "SchemaItemConnection.h"
 #include "SchemaItemConst.h"
+#include "SchemaItemDiagValue.h"
 #include "SchemaItemFrame.h"
 #include "SchemaItemImage.h"
 #include "SchemaItemImageValue.h"
@@ -67,6 +68,7 @@ namespace VFrame30
 		SchemaItemFactory.Register<SchemaItemBusComposer>();
 		SchemaItemFactory.Register<SchemaItemBusExtractor>();
 		SchemaItemFactory.Register<SchemaItemConst>();
+		SchemaItemFactory.Register<SchemaItemDiagValue>();
 		SchemaItemFactory.Register<SchemaItemImage>();
 		SchemaItemFactory.Register<SchemaItemImageValue>();
 		SchemaItemFactory.Register<SchemaItemIndicator>();

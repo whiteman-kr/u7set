@@ -721,6 +721,137 @@ namespace VFrame30
 		return;
 	}
 
+	bool ClientSchemaView::saveSchemaToPdf(const QString& fileName)
+	{
+		if (schema() == nullptr)
+		{
+			Q_ASSERT(schema());
+			return false;
+		}
+
+		// --
+		//
+		QPdfWriter pdfWriter(fileName);
+
+		pdfWriter.setTitle(schema()->caption());
+
+		QPageSize pageSize;
+		double pageWidth = schema()->docWidth();
+		double pageHeight = schema()->docHeight();
+
+		if (schema()->unit() == SchemaUnit::Inch)
+		{
+			pageSize = QPageSize(QSizeF(pageWidth, pageHeight), QPageSize::Inch);
+		}
+		else
+		{
+			assert(schema()->unit() == SchemaUnit::Display);
+			pageSize = QPageSize(QSize(static_cast<int>(pageWidth), static_cast<int>(pageHeight)));
+
+			pdfWriter.setResolution(72);	// 72 is from enum QPageLayout::Unit help,
+			// QPageLayout::Point	1	1/!!! 72th !!!! of an inch
+		}
+
+		pdfWriter.setPageSize(pageSize);
+		pdfWriter.setPageMargins(QMarginsF(0, 0, 0, 0));
+
+		// --
+		//
+		QPainter p(&pdfWriter);
+		VFrame30::CDrawParam drawParam(&p, this, schema()->gridSize(), schema()->pinGridStep(), schema()->unit());
+
+		drawParam.setInfoMode(false);
+		drawParam.setPdfMode(true);
+
+		// Calc size
+		//
+		int widthInPixel = schema()->GetDocumentWidth(pdfWriter.resolution(), 100.0);		// Export 100% zoom
+		int heightInPixel = schema()->GetDocumentHeight(pdfWriter.resolution(), 100.0);		// Export 100% zoom
+
+		// Clear device
+		//
+		p.fillRect(QRectF(0, 0, widthInPixel + 1, heightInPixel + 1), QColor(0xB0, 0xB0, 0xB0));
+		p.setRenderHint(QPainter::Antialiasing);
+
+		// Ajust QPainter
+		//
+		Ajust(&p, schema()->unit(), 0, 0, 100.0);			// Export 100% zoom
+
+		// Draw Schema
+		//
+		QRectF clipRect(0, 0, schema()->docWidth(), schema()->docHeight());
+
+		schema()->Draw(&drawParam, clipRect);
+
+		// Ending
+		//
+
+		return true;
+	}
+
+	bool ClientSchemaView::saveSchemaToPng(const QString& fileName)
+	{
+		if (schema() == nullptr)
+		{
+			Q_ASSERT(schema());
+			return false;
+		}
+
+		QPageSize pageSize;
+		double pageWidth = schema()->docWidth();
+		double pageHeight = schema()->docHeight();
+
+		if (schema()->unit() == SchemaUnit::Inch)
+		{
+			pageSize = QPageSize(QSizeF(pageWidth, pageHeight), QPageSize::Inch);
+		}
+		else
+		{
+			assert(schema()->unit() == SchemaUnit::Display);
+			pageSize = QPageSize(QSize(static_cast<int>(pageWidth), static_cast<int>(pageHeight)));
+		}
+
+		// Calc size
+		//
+		const int resolution = 300;	// Image resolution is 300 dpi
+
+		int widthInPixel = schema()->GetDocumentWidth(resolution, 100.0);		// Export 100% zoom
+		int heightInPixel = schema()->GetDocumentHeight(resolution, 100.0);		// Export 100% zoom
+
+		// --
+		//
+		QImage image(QSize(widthInPixel, heightInPixel), QImage::Format_RGB32);
+
+		QPainter p(&image);
+		VFrame30::CDrawParam drawParam(&p, this, schema()->gridSize(), schema()->pinGridStep(), schema()->unit());
+
+		drawParam.setInfoMode(false);
+		drawParam.setPdfMode(true);
+
+		// Clear device
+		//
+		p.fillRect(QRectF(0, 0, widthInPixel + 1, heightInPixel + 1), QColor(0xB0, 0xB0, 0xB0));
+		p.setRenderHint(QPainter::Antialiasing);
+
+		// Ajust QPainter
+		//
+		Ajust(&p, schema()->unit(), 0, 0, (double)resolution / image.logicalDpiX() * 100.0);			// Export 100% zoom
+
+		// Draw Schema
+		//
+		QRectF clipRect(0, 0, schema()->docWidth(), schema()->docHeight());
+
+		schema()->Draw(&drawParam, clipRect);
+
+		// Saving
+		//
+		if (image.save(fileName) == false)
+		{
+			return false;
+		}
+		return true;
+	}
+
 	VFrame30::SchemaManager* ClientSchemaView::schemaManager()
 	{
 		return m_schemaManager;
@@ -776,6 +907,25 @@ namespace VFrame30
 											   ITuningAuthorization& tuningAuthorization)
 	{
 		m_tuningController = std::make_unique<TuningController>(signalManager, tuningConnection, tuningAuthorization, this);
+		m_jsEngineGlobalsWereCreated = false; // it will make jsEngine() to initialize global script vars again
+
+		return;
+	}
+
+	DiagStateController* ClientSchemaView::diagStateController()
+	{
+		return m_diagStateController;
+	}
+
+	const DiagStateController* ClientSchemaView::diagStateController() const
+	{
+		return m_diagStateController;
+	}
+
+	void ClientSchemaView::setDiagStateController(DiagStateController* value)
+	{
+		m_diagStateController = value;
+		m_scriptDiagStateController = std::make_unique<ScriptDiagStateController>(m_diagStateController->diagStateManager());
 		m_jsEngineGlobalsWereCreated = false; // it will make jsEngine() to initialize global script vars again
 
 		return;

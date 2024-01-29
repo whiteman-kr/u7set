@@ -1360,6 +1360,41 @@ namespace Builder
 		bool ok = m_cfgXml->addLinkToFile(buildFile);
 		return ok;
 	}
+
+	bool SoftwareCfgGenerator::saveScriptProperties(QString scriptProperty, QString fileName)
+	{
+		bool result = true;
+
+		if (m_software->propertyExists(scriptProperty) == false)
+		{
+			m_log->errCFG3000(scriptProperty, m_software->equipmentIdTemplate());
+			result = false;
+		}
+		else
+		{
+			// Get script for the property.
+			//
+			QString script = m_software->propertyValue(scriptProperty).toString();
+
+			// Check script correctness
+			//
+			result &= ScriptChecker::checkEquipmentProperty(script, equipmentID(), scriptProperty, *m_log);
+
+			// Write script to file.
+			//
+			BuildFile* scriptBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), fileName, script);
+			if (scriptBuildFile != nullptr)
+			{
+				m_cfgXml->addLinkToFile(scriptBuildFile);
+			}
+			else
+			{
+				result = false;
+			}
+		}
+
+		return result;
+	}
 }
 
 

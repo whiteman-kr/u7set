@@ -230,8 +230,6 @@ public:
 	void resetGatewayQueueMask(const std::set<Hash>& hashes, quint32 mask);
 
 private:
-	QMutex m_allMutex;
-
 	DynamicAppSignalState* m_appSignalState = nullptr;
 	int m_size = 0;
 

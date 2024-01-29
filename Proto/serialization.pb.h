@@ -61,7 +61,7 @@ struct TableStruct_serialization_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[112]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[115]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -142,6 +142,9 @@ extern DeviceChassisDefaultTypeInternal _DeviceChassis_default_instance_;
 class DeviceController;
 struct DeviceControllerDefaultTypeInternal;
 extern DeviceControllerDefaultTypeInternal _DeviceController_default_instance_;
+class DeviceDiagSignal;
+struct DeviceDiagSignalDefaultTypeInternal;
+extern DeviceDiagSignalDefaultTypeInternal _DeviceDiagSignal_default_instance_;
 class DeviceModule;
 struct DeviceModuleDefaultTypeInternal;
 extern DeviceModuleDefaultTypeInternal _DeviceModule_default_instance_;
@@ -157,6 +160,9 @@ extern DeviceRootDefaultTypeInternal _DeviceRoot_default_instance_;
 class DeviceSystem;
 struct DeviceSystemDefaultTypeInternal;
 extern DeviceSystemDefaultTypeInternal _DeviceSystem_default_instance_;
+class DiagSignalType;
+struct DiagSignalTypeDefaultTypeInternal;
+extern DiagSignalTypeDefaultTypeInternal _DiagSignalType_default_instance_;
 class Envelope;
 struct EnvelopeDefaultTypeInternal;
 extern EnvelopeDefaultTypeInternal _Envelope_default_instance_;
@@ -277,6 +283,9 @@ extern SchemaItemConstDefaultTypeInternal _SchemaItemConst_default_instance_;
 class SchemaItemControl;
 struct SchemaItemControlDefaultTypeInternal;
 extern SchemaItemControlDefaultTypeInternal _SchemaItemControl_default_instance_;
+class SchemaItemDiagValue;
+struct SchemaItemDiagValueDefaultTypeInternal;
+extern SchemaItemDiagValueDefaultTypeInternal _SchemaItemDiagValue_default_instance_;
 class SchemaItemFrame;
 struct SchemaItemFrameDefaultTypeInternal;
 extern SchemaItemFrameDefaultTypeInternal _SchemaItemFrame_default_instance_;
@@ -432,11 +441,13 @@ template<> ::Proto::Connection* Arena::CreateMaybeMessage<::Proto::Connection>(A
 template<> ::Proto::DeviceAppSignal* Arena::CreateMaybeMessage<::Proto::DeviceAppSignal>(Arena*);
 template<> ::Proto::DeviceChassis* Arena::CreateMaybeMessage<::Proto::DeviceChassis>(Arena*);
 template<> ::Proto::DeviceController* Arena::CreateMaybeMessage<::Proto::DeviceController>(Arena*);
+template<> ::Proto::DeviceDiagSignal* Arena::CreateMaybeMessage<::Proto::DeviceDiagSignal>(Arena*);
 template<> ::Proto::DeviceModule* Arena::CreateMaybeMessage<::Proto::DeviceModule>(Arena*);
 template<> ::Proto::DeviceObject* Arena::CreateMaybeMessage<::Proto::DeviceObject>(Arena*);
 template<> ::Proto::DeviceRack* Arena::CreateMaybeMessage<::Proto::DeviceRack>(Arena*);
 template<> ::Proto::DeviceRoot* Arena::CreateMaybeMessage<::Proto::DeviceRoot>(Arena*);
 template<> ::Proto::DeviceSystem* Arena::CreateMaybeMessage<::Proto::DeviceSystem>(Arena*);
+template<> ::Proto::DiagSignalType* Arena::CreateMaybeMessage<::Proto::DiagSignalType>(Arena*);
 template<> ::Proto::Envelope* Arena::CreateMaybeMessage<::Proto::Envelope>(Arena*);
 template<> ::Proto::EnvelopeSet* Arena::CreateMaybeMessage<::Proto::EnvelopeSet>(Arena*);
 template<> ::Proto::EnvelopeSetShortDescription* Arena::CreateMaybeMessage<::Proto::EnvelopeSetShortDescription>(Arena*);
@@ -477,6 +488,7 @@ template<> ::Proto::SchemaItemBusExtractor* Arena::CreateMaybeMessage<::Proto::S
 template<> ::Proto::SchemaItemConnection* Arena::CreateMaybeMessage<::Proto::SchemaItemConnection>(Arena*);
 template<> ::Proto::SchemaItemConst* Arena::CreateMaybeMessage<::Proto::SchemaItemConst>(Arena*);
 template<> ::Proto::SchemaItemControl* Arena::CreateMaybeMessage<::Proto::SchemaItemControl>(Arena*);
+template<> ::Proto::SchemaItemDiagValue* Arena::CreateMaybeMessage<::Proto::SchemaItemDiagValue>(Arena*);
 template<> ::Proto::SchemaItemFrame* Arena::CreateMaybeMessage<::Proto::SchemaItemFrame>(Arena*);
 template<> ::Proto::SchemaItemImage* Arena::CreateMaybeMessage<::Proto::SchemaItemImage>(Arena*);
 template<> ::Proto::SchemaItemImageValue* Arena::CreateMaybeMessage<::Proto::SchemaItemImageValue>(Arena*);
@@ -2150,6 +2162,7 @@ class Envelope PROTOBUF_FINAL :
     kCompressedObjectFieldNumber = 2,
     kSchemaitemFieldNumber = 6,
     kDeviceobjectFieldNumber = 7,
+    kDiagSignalTypeFieldNumber = 8,
     kSchemaFieldNumber = 100,
     kSchemalayerFieldNumber = 101,
     kFblelementFieldNumber = 102,
@@ -2214,6 +2227,24 @@ class Envelope PROTOBUF_FINAL :
   void unsafe_arena_set_allocated_deviceobject(
       ::Proto::DeviceObject* deviceobject);
   ::Proto::DeviceObject* unsafe_arena_release_deviceobject();
+
+  // optional .Proto.DiagSignalType diagSignalType = 8;
+  bool has_diagsignaltype() const;
+  private:
+  bool _internal_has_diagsignaltype() const;
+  public:
+  void clear_diagsignaltype();
+  const ::Proto::DiagSignalType& diagsignaltype() const;
+  ::Proto::DiagSignalType* release_diagsignaltype();
+  ::Proto::DiagSignalType* mutable_diagsignaltype();
+  void set_allocated_diagsignaltype(::Proto::DiagSignalType* diagsignaltype);
+  private:
+  const ::Proto::DiagSignalType& _internal_diagsignaltype() const;
+  ::Proto::DiagSignalType* _internal_mutable_diagsignaltype();
+  public:
+  void unsafe_arena_set_allocated_diagsignaltype(
+      ::Proto::DiagSignalType* diagsignaltype);
+  ::Proto::DiagSignalType* unsafe_arena_release_diagsignaltype();
 
   // optional .Proto.Schema schema = 100;
   bool has_schema() const;
@@ -2366,6 +2397,7 @@ class Envelope PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr compressedobject_;
   ::Proto::SchemaItem* schemaitem_;
   ::Proto::DeviceObject* deviceobject_;
+  ::Proto::DiagSignalType* diagsignaltype_;
   ::Proto::Schema* schema_;
   ::Proto::SchemaLayer* schemalayer_;
   ::Proto::FblElement* fblelement_;
@@ -5857,6 +5889,7 @@ class SchemaItem PROTOBUF_FINAL :
     kTerminatorFieldNumber = 135,
     kValueFieldNumber = 136,
     kImageValueFieldNumber = 137,
+    kDiagValueFieldNumber = 138,
     kBusItemFieldNumber = 150,
     kBusComposerFieldNumber = 151,
     kBusExtractorFieldNumber = 152,
@@ -6480,6 +6513,24 @@ class SchemaItem PROTOBUF_FINAL :
       ::Proto::SchemaItemImageValue* imagevalue);
   ::Proto::SchemaItemImageValue* unsafe_arena_release_imagevalue();
 
+  // optional .Proto.SchemaItemDiagValue DiagValue = 138;
+  bool has_diagvalue() const;
+  private:
+  bool _internal_has_diagvalue() const;
+  public:
+  void clear_diagvalue();
+  const ::Proto::SchemaItemDiagValue& diagvalue() const;
+  ::Proto::SchemaItemDiagValue* release_diagvalue();
+  ::Proto::SchemaItemDiagValue* mutable_diagvalue();
+  void set_allocated_diagvalue(::Proto::SchemaItemDiagValue* diagvalue);
+  private:
+  const ::Proto::SchemaItemDiagValue& _internal_diagvalue() const;
+  ::Proto::SchemaItemDiagValue* _internal_mutable_diagvalue();
+  public:
+  void unsafe_arena_set_allocated_diagvalue(
+      ::Proto::SchemaItemDiagValue* diagvalue);
+  ::Proto::SchemaItemDiagValue* unsafe_arena_release_diagvalue();
+
   // optional .Proto.SchemaItemBus BusItem = 150;
   bool has_busitem() const;
   private:
@@ -6819,6 +6870,7 @@ class SchemaItem PROTOBUF_FINAL :
   ::Proto::SchemaItemTerminator* terminator_;
   ::Proto::SchemaItemValue* value_;
   ::Proto::SchemaItemImageValue* imagevalue_;
+  ::Proto::SchemaItemDiagValue* diagvalue_;
   ::Proto::SchemaItemBus* busitem_;
   ::Proto::SchemaItemBusComposer* buscomposer_;
   ::Proto::SchemaItemBusExtractor* busextractor_;
@@ -14414,6 +14466,339 @@ class SchemaItemImageValue PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class SchemaItemDiagValue PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.SchemaItemDiagValue) */ {
+ public:
+  inline SchemaItemDiagValue() : SchemaItemDiagValue(nullptr) {}
+  virtual ~SchemaItemDiagValue();
+  explicit constexpr SchemaItemDiagValue(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  SchemaItemDiagValue(const SchemaItemDiagValue& from);
+  SchemaItemDiagValue(SchemaItemDiagValue&& from) noexcept
+    : SchemaItemDiagValue() {
+    *this = ::std::move(from);
+  }
+
+  inline SchemaItemDiagValue& operator=(const SchemaItemDiagValue& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline SchemaItemDiagValue& operator=(SchemaItemDiagValue&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
+    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
+  }
+  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
+    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const SchemaItemDiagValue& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const SchemaItemDiagValue* internal_default_instance() {
+    return reinterpret_cast<const SchemaItemDiagValue*>(
+               &_SchemaItemDiagValue_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    56;
+
+  friend void swap(SchemaItemDiagValue& a, SchemaItemDiagValue& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(SchemaItemDiagValue* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(SchemaItemDiagValue* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline SchemaItemDiagValue* New() const final {
+    return CreateMaybeMessage<SchemaItemDiagValue>(nullptr);
+  }
+
+  SchemaItemDiagValue* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<SchemaItemDiagValue>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const SchemaItemDiagValue& from);
+  void MergeFrom(const SchemaItemDiagValue& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(SchemaItemDiagValue* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Proto.SchemaItemDiagValue";
+  }
+  protected:
+  explicit SchemaItemDiagValue(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_serialization_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kSignalIdsFieldNumber = 1,
+    kTextFieldNumber = 8,
+    kFontFieldNumber = 9,
+    kLineWeightFieldNumber = 4,
+    kLineColorFieldNumber = 5,
+    kFillColorFieldNumber = 6,
+    kTextColorFieldNumber = 7,
+    kAnalogFormatFieldNumber = 14,
+    kDrawRectFieldNumber = 10,
+    kHorzAlignFieldNumber = 11,
+    kVertAlignFieldNumber = 12,
+    kPrecisionFieldNumber = 13,
+  };
+  // optional string signalIds = 1;
+  bool has_signalids() const;
+  private:
+  bool _internal_has_signalids() const;
+  public:
+  void clear_signalids();
+  const std::string& signalids() const;
+  void set_signalids(const std::string& value);
+  void set_signalids(std::string&& value);
+  void set_signalids(const char* value);
+  void set_signalids(const char* value, size_t size);
+  std::string* mutable_signalids();
+  std::string* release_signalids();
+  void set_allocated_signalids(std::string* signalids);
+  private:
+  const std::string& _internal_signalids() const;
+  void _internal_set_signalids(const std::string& value);
+  std::string* _internal_mutable_signalids();
+  public:
+
+  // optional string text = 8;
+  bool has_text() const;
+  private:
+  bool _internal_has_text() const;
+  public:
+  void clear_text();
+  const std::string& text() const;
+  void set_text(const std::string& value);
+  void set_text(std::string&& value);
+  void set_text(const char* value);
+  void set_text(const char* value, size_t size);
+  std::string* mutable_text();
+  std::string* release_text();
+  void set_allocated_text(std::string* text);
+  private:
+  const std::string& _internal_text() const;
+  void _internal_set_text(const std::string& value);
+  std::string* _internal_mutable_text();
+  public:
+
+  // optional .Proto.FontParam font = 9;
+  bool has_font() const;
+  private:
+  bool _internal_has_font() const;
+  public:
+  void clear_font();
+  const ::Proto::FontParam& font() const;
+  ::Proto::FontParam* release_font();
+  ::Proto::FontParam* mutable_font();
+  void set_allocated_font(::Proto::FontParam* font);
+  private:
+  const ::Proto::FontParam& _internal_font() const;
+  ::Proto::FontParam* _internal_mutable_font();
+  public:
+  void unsafe_arena_set_allocated_font(
+      ::Proto::FontParam* font);
+  ::Proto::FontParam* unsafe_arena_release_font();
+
+  // optional double lineWeight = 4;
+  bool has_lineweight() const;
+  private:
+  bool _internal_has_lineweight() const;
+  public:
+  void clear_lineweight();
+  double lineweight() const;
+  void set_lineweight(double value);
+  private:
+  double _internal_lineweight() const;
+  void _internal_set_lineweight(double value);
+  public:
+
+  // optional uint32 lineColor = 5;
+  bool has_linecolor() const;
+  private:
+  bool _internal_has_linecolor() const;
+  public:
+  void clear_linecolor();
+  ::PROTOBUF_NAMESPACE_ID::uint32 linecolor() const;
+  void set_linecolor(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_linecolor() const;
+  void _internal_set_linecolor(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // optional uint32 fillColor = 6;
+  bool has_fillcolor() const;
+  private:
+  bool _internal_has_fillcolor() const;
+  public:
+  void clear_fillcolor();
+  ::PROTOBUF_NAMESPACE_ID::uint32 fillcolor() const;
+  void set_fillcolor(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_fillcolor() const;
+  void _internal_set_fillcolor(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // optional uint32 textColor = 7;
+  bool has_textcolor() const;
+  private:
+  bool _internal_has_textcolor() const;
+  public:
+  void clear_textcolor();
+  ::PROTOBUF_NAMESPACE_ID::uint32 textcolor() const;
+  void set_textcolor(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_textcolor() const;
+  void _internal_set_textcolor(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // optional int32 analogFormat = 14 [default = 102];
+  bool has_analogformat() const;
+  private:
+  bool _internal_has_analogformat() const;
+  public:
+  void clear_analogformat();
+  ::PROTOBUF_NAMESPACE_ID::int32 analogformat() const;
+  void set_analogformat(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_analogformat() const;
+  void _internal_set_analogformat(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional bool drawRect = 10 [default = true];
+  bool has_drawrect() const;
+  private:
+  bool _internal_has_drawrect() const;
+  public:
+  void clear_drawrect();
+  bool drawrect() const;
+  void set_drawrect(bool value);
+  private:
+  bool _internal_drawrect() const;
+  void _internal_set_drawrect(bool value);
+  public:
+
+  // optional int32 horzAlign = 11 [default = 4];
+  bool has_horzalign() const;
+  private:
+  bool _internal_has_horzalign() const;
+  public:
+  void clear_horzalign();
+  ::PROTOBUF_NAMESPACE_ID::int32 horzalign() const;
+  void set_horzalign(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_horzalign() const;
+  void _internal_set_horzalign(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int32 vertAlign = 12 [default = 128];
+  bool has_vertalign() const;
+  private:
+  bool _internal_has_vertalign() const;
+  public:
+  void clear_vertalign();
+  ::PROTOBUF_NAMESPACE_ID::int32 vertalign() const;
+  void set_vertalign(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_vertalign() const;
+  void _internal_set_vertalign(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int32 precision = 13 [default = -1];
+  bool has_precision() const;
+  private:
+  bool _internal_has_precision() const;
+  public:
+  void clear_precision();
+  ::PROTOBUF_NAMESPACE_ID::int32 precision() const;
+  void set_precision(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_precision() const;
+  void _internal_set_precision(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:Proto.SchemaItemDiagValue)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr signalids_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr text_;
+  ::Proto::FontParam* font_;
+  double lineweight_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 linecolor_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 fillcolor_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 textcolor_;
+  ::PROTOBUF_NAMESPACE_ID::int32 analogformat_;
+  bool drawrect_;
+  ::PROTOBUF_NAMESPACE_ID::int32 horzalign_;
+  ::PROTOBUF_NAMESPACE_ID::int32 vertalign_;
+  ::PROTOBUF_NAMESPACE_ID::int32 precision_;
+  friend struct ::TableStruct_serialization_2eproto;
+};
+// -------------------------------------------------------------------
+
 class SchemaItemBus PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.SchemaItemBus) */ {
  public:
@@ -14464,7 +14849,7 @@ class SchemaItemBus PROTOBUF_FINAL :
                &_SchemaItemBus_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    56;
+    57;
 
   friend void swap(SchemaItemBus& a, SchemaItemBus& b) {
     a.Swap(&b);
@@ -14655,7 +15040,7 @@ class SchemaItemBusComposer PROTOBUF_FINAL :
                &_SchemaItemBusComposer_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    57;
+    58;
 
   friend void swap(SchemaItemBusComposer& a, SchemaItemBusComposer& b) {
     a.Swap(&b);
@@ -14786,7 +15171,7 @@ class SchemaItemBusExtractor PROTOBUF_FINAL :
                &_SchemaItemBusExtractor_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    58;
+    59;
 
   friend void swap(SchemaItemBusExtractor& a, SchemaItemBusExtractor& b) {
     a.Swap(&b);
@@ -14939,7 +15324,7 @@ class SchemaItemLoopback PROTOBUF_FINAL :
                &_SchemaItemLoopback_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    59;
+    60;
 
   friend void swap(SchemaItemLoopback& a, SchemaItemLoopback& b) {
     a.Swap(&b);
@@ -15095,7 +15480,7 @@ class SchemaItemLoopbackSource PROTOBUF_FINAL :
                &_SchemaItemLoopbackSource_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    60;
+    61;
 
   friend void swap(SchemaItemLoopbackSource& a, SchemaItemLoopbackSource& b) {
     a.Swap(&b);
@@ -15226,7 +15611,7 @@ class SchemaItemLoopbackTarget PROTOBUF_FINAL :
                &_SchemaItemLoopbackTarget_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    61;
+    62;
 
   friend void swap(SchemaItemLoopbackTarget& a, SchemaItemLoopbackTarget& b) {
     a.Swap(&b);
@@ -15357,7 +15742,7 @@ class SchemaItemControl PROTOBUF_FINAL :
                &_SchemaItemControl_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    62;
+    63;
 
   friend void swap(SchemaItemControl& a, SchemaItemControl& b) {
     a.Swap(&b);
@@ -15535,7 +15920,7 @@ class SchemaItemPushButton PROTOBUF_FINAL :
                &_SchemaItemPushButton_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    63;
+    64;
 
   friend void swap(SchemaItemPushButton& a, SchemaItemPushButton& b) {
     a.Swap(&b);
@@ -15876,7 +16261,7 @@ class SchemaItemLineEdit PROTOBUF_FINAL :
                &_SchemaItemLineEdit_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    64;
+    65;
 
   friend void swap(SchemaItemLineEdit& a, SchemaItemLineEdit& b) {
     a.Swap(&b);
@@ -16202,7 +16587,7 @@ class SchemaItemSlider PROTOBUF_FINAL :
                &_SchemaItemSlider_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    65;
+    66;
 
   friend void swap(SchemaItemSlider& a, SchemaItemSlider& b) {
     a.Swap(&b);
@@ -16626,7 +17011,7 @@ class SchemaItemVduLine PROTOBUF_FINAL :
                &_SchemaItemVduLine_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    66;
+    67;
 
   friend void swap(SchemaItemVduLine& a, SchemaItemVduLine& b) {
     a.Swap(&b);
@@ -16790,7 +17175,7 @@ class SchemaItemVduRect PROTOBUF_FINAL :
                &_SchemaItemVduRect_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    67;
+    68;
 
   friend void swap(SchemaItemVduRect& a, SchemaItemVduRect& b) {
     a.Swap(&b);
@@ -17088,7 +17473,7 @@ class DeviceObject PROTOBUF_FINAL :
                &_DeviceObject_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    68;
+    69;
 
   friend void swap(DeviceObject& a, DeviceObject& b) {
     a.Swap(&b);
@@ -17178,6 +17563,7 @@ class DeviceObject PROTOBUF_FINAL :
     kAppSignalFieldNumber = 106,
     kWorkstationFieldNumber = 107,
     kSoftwareFieldNumber = 108,
+    kDiagSignalFieldNumber = 109,
     kPlaceFieldNumber = 5,
     kPresetFieldNumber = 32,
     kPresetRootFieldNumber = 33,
@@ -17554,6 +17940,24 @@ class DeviceObject PROTOBUF_FINAL :
       ::Proto::Software* software);
   ::Proto::Software* unsafe_arena_release_software();
 
+  // optional .Proto.DeviceDiagSignal DiagSignal = 109;
+  bool has_diagsignal() const;
+  private:
+  bool _internal_has_diagsignal() const;
+  public:
+  void clear_diagsignal();
+  const ::Proto::DeviceDiagSignal& diagsignal() const;
+  ::Proto::DeviceDiagSignal* release_diagsignal();
+  ::Proto::DeviceDiagSignal* mutable_diagsignal();
+  void set_allocated_diagsignal(::Proto::DeviceDiagSignal* diagsignal);
+  private:
+  const ::Proto::DeviceDiagSignal& _internal_diagsignal() const;
+  ::Proto::DeviceDiagSignal* _internal_mutable_diagsignal();
+  public:
+  void unsafe_arena_set_allocated_diagsignal(
+      ::Proto::DeviceDiagSignal* diagsignal);
+  ::Proto::DeviceDiagSignal* unsafe_arena_release_diagsignal();
+
   // optional int32 place = 5 [default = 0];
   bool has_place() const;
   private:
@@ -17651,6 +18055,7 @@ class DeviceObject PROTOBUF_FINAL :
   ::Proto::DeviceAppSignal* appsignal_;
   ::Proto::Workstation* workstation_;
   ::Proto::Software* software_;
+  ::Proto::DeviceDiagSignal* diagsignal_;
   ::PROTOBUF_NAMESPACE_ID::int32 place_;
   bool preset_;
   bool presetroot_;
@@ -17710,7 +18115,7 @@ class DeviceRoot PROTOBUF_FINAL :
                &_DeviceRoot_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    69;
+    70;
 
   friend void swap(DeviceRoot& a, DeviceRoot& b) {
     a.Swap(&b);
@@ -17841,7 +18246,7 @@ class DeviceSystem PROTOBUF_FINAL :
                &_DeviceSystem_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    70;
+    71;
 
   friend void swap(DeviceSystem& a, DeviceSystem& b) {
     a.Swap(&b);
@@ -17972,7 +18377,7 @@ class DeviceRack PROTOBUF_FINAL :
                &_DeviceRack_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    71;
+    72;
 
   friend void swap(DeviceRack& a, DeviceRack& b) {
     a.Swap(&b);
@@ -18103,7 +18508,7 @@ class DeviceChassis PROTOBUF_FINAL :
                &_DeviceChassis_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    72;
+    73;
 
   friend void swap(DeviceChassis& a, DeviceChassis& b) {
     a.Swap(&b);
@@ -18252,7 +18657,7 @@ class DeviceModule PROTOBUF_FINAL :
                &_DeviceModule_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    73;
+    74;
 
   friend void swap(DeviceModule& a, DeviceModule& b) {
     a.Swap(&b);
@@ -18475,7 +18880,7 @@ class DeviceController PROTOBUF_FINAL :
                &_DeviceController_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    74;
+    75;
 
   friend void swap(DeviceController& a, DeviceController& b) {
     a.Swap(&b);
@@ -18544,6 +18949,22 @@ class DeviceController PROTOBUF_FINAL :
 
   // accessors -------------------------------------------------------
 
+  enum : int {
+    kDiagDataOffsetFieldNumber = 3,
+  };
+  // optional int32 diagDataOffset = 3;
+  bool has_diagdataoffset() const;
+  private:
+  bool _internal_has_diagdataoffset() const;
+  public:
+  void clear_diagdataoffset();
+  ::PROTOBUF_NAMESPACE_ID::int32 diagdataoffset() const;
+  void set_diagdataoffset(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_diagdataoffset() const;
+  void _internal_set_diagdataoffset(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:Proto.DeviceController)
  private:
   class _Internal;
@@ -18551,7 +18972,9 @@ class DeviceController PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::int32 diagdataoffset_;
   friend struct ::TableStruct_serialization_2eproto;
 };
 // -------------------------------------------------------------------
@@ -18606,7 +19029,7 @@ class DeviceAppSignal PROTOBUF_FINAL :
                &_DeviceAppSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    75;
+    76;
 
   friend void swap(DeviceAppSignal& a, DeviceAppSignal& b) {
     a.Swap(&b);
@@ -18981,6 +19404,401 @@ class DeviceAppSignal PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class DeviceDiagSignal PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.DeviceDiagSignal) */ {
+ public:
+  inline DeviceDiagSignal() : DeviceDiagSignal(nullptr) {}
+  virtual ~DeviceDiagSignal();
+  explicit constexpr DeviceDiagSignal(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  DeviceDiagSignal(const DeviceDiagSignal& from);
+  DeviceDiagSignal(DeviceDiagSignal&& from) noexcept
+    : DeviceDiagSignal() {
+    *this = ::std::move(from);
+  }
+
+  inline DeviceDiagSignal& operator=(const DeviceDiagSignal& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline DeviceDiagSignal& operator=(DeviceDiagSignal&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
+    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
+  }
+  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
+    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const DeviceDiagSignal& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const DeviceDiagSignal* internal_default_instance() {
+    return reinterpret_cast<const DeviceDiagSignal*>(
+               &_DeviceDiagSignal_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    77;
+
+  friend void swap(DeviceDiagSignal& a, DeviceDiagSignal& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(DeviceDiagSignal* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(DeviceDiagSignal* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline DeviceDiagSignal* New() const final {
+    return CreateMaybeMessage<DeviceDiagSignal>(nullptr);
+  }
+
+  DeviceDiagSignal* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<DeviceDiagSignal>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const DeviceDiagSignal& from);
+  void MergeFrom(const DeviceDiagSignal& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(DeviceDiagSignal* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Proto.DeviceDiagSignal";
+  }
+  protected:
+  explicit DeviceDiagSignal(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_serialization_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kSignalTypeIdFieldNumber = 4,
+    kValiditySignalIdFieldNumber = 5,
+    kReflectedSignalIdFieldNumber = 7,
+    kLevelFieldNumber = 3,
+    kValueOffsetFieldNumber = 10,
+    kValueBitFieldNumber = 11,
+    kValueBitSizeFieldNumber = 12,
+    kDiscreteContainerSizeFieldNumber = 13,
+    kIsRefelectionFieldNumber = 6,
+    kLogChangesFieldNumber = 16,
+    kArchiveFieldNumber = 17,
+    kReservedFieldNumber = 18,
+    kCoarseApertureFieldNumber = 22,
+    kFineApertureFieldNumber = 23,
+    kApertureTypeFieldNumber = 24,
+    kDecimalPlacesFieldNumber = 30,
+  };
+  // optional string signalTypeId = 4;
+  bool has_signaltypeid() const;
+  private:
+  bool _internal_has_signaltypeid() const;
+  public:
+  void clear_signaltypeid();
+  const std::string& signaltypeid() const;
+  void set_signaltypeid(const std::string& value);
+  void set_signaltypeid(std::string&& value);
+  void set_signaltypeid(const char* value);
+  void set_signaltypeid(const char* value, size_t size);
+  std::string* mutable_signaltypeid();
+  std::string* release_signaltypeid();
+  void set_allocated_signaltypeid(std::string* signaltypeid);
+  private:
+  const std::string& _internal_signaltypeid() const;
+  void _internal_set_signaltypeid(const std::string& value);
+  std::string* _internal_mutable_signaltypeid();
+  public:
+
+  // optional string validitySignalId = 5;
+  bool has_validitysignalid() const;
+  private:
+  bool _internal_has_validitysignalid() const;
+  public:
+  void clear_validitysignalid();
+  const std::string& validitysignalid() const;
+  void set_validitysignalid(const std::string& value);
+  void set_validitysignalid(std::string&& value);
+  void set_validitysignalid(const char* value);
+  void set_validitysignalid(const char* value, size_t size);
+  std::string* mutable_validitysignalid();
+  std::string* release_validitysignalid();
+  void set_allocated_validitysignalid(std::string* validitysignalid);
+  private:
+  const std::string& _internal_validitysignalid() const;
+  void _internal_set_validitysignalid(const std::string& value);
+  std::string* _internal_mutable_validitysignalid();
+  public:
+
+  // optional string reflectedSignalId = 7;
+  bool has_reflectedsignalid() const;
+  private:
+  bool _internal_has_reflectedsignalid() const;
+  public:
+  void clear_reflectedsignalid();
+  const std::string& reflectedsignalid() const;
+  void set_reflectedsignalid(const std::string& value);
+  void set_reflectedsignalid(std::string&& value);
+  void set_reflectedsignalid(const char* value);
+  void set_reflectedsignalid(const char* value, size_t size);
+  std::string* mutable_reflectedsignalid();
+  std::string* release_reflectedsignalid();
+  void set_allocated_reflectedsignalid(std::string* reflectedsignalid);
+  private:
+  const std::string& _internal_reflectedsignalid() const;
+  void _internal_set_reflectedsignalid(const std::string& value);
+  std::string* _internal_mutable_reflectedsignalid();
+  public:
+
+  // optional int32 level = 3;
+  bool has_level() const;
+  private:
+  bool _internal_has_level() const;
+  public:
+  void clear_level();
+  ::PROTOBUF_NAMESPACE_ID::int32 level() const;
+  void set_level(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_level() const;
+  void _internal_set_level(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int32 valueOffset = 10;
+  bool has_valueoffset() const;
+  private:
+  bool _internal_has_valueoffset() const;
+  public:
+  void clear_valueoffset();
+  ::PROTOBUF_NAMESPACE_ID::int32 valueoffset() const;
+  void set_valueoffset(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_valueoffset() const;
+  void _internal_set_valueoffset(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int32 valueBit = 11;
+  bool has_valuebit() const;
+  private:
+  bool _internal_has_valuebit() const;
+  public:
+  void clear_valuebit();
+  ::PROTOBUF_NAMESPACE_ID::int32 valuebit() const;
+  void set_valuebit(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_valuebit() const;
+  void _internal_set_valuebit(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int32 valueBitSize = 12;
+  bool has_valuebitsize() const;
+  private:
+  bool _internal_has_valuebitsize() const;
+  public:
+  void clear_valuebitsize();
+  ::PROTOBUF_NAMESPACE_ID::int32 valuebitsize() const;
+  void set_valuebitsize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_valuebitsize() const;
+  void _internal_set_valuebitsize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int32 discreteContainerSize = 13;
+  bool has_discretecontainersize() const;
+  private:
+  bool _internal_has_discretecontainersize() const;
+  public:
+  void clear_discretecontainersize();
+  ::PROTOBUF_NAMESPACE_ID::int32 discretecontainersize() const;
+  void set_discretecontainersize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_discretecontainersize() const;
+  void _internal_set_discretecontainersize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional bool isRefelection = 6;
+  bool has_isrefelection() const;
+  private:
+  bool _internal_has_isrefelection() const;
+  public:
+  void clear_isrefelection();
+  bool isrefelection() const;
+  void set_isrefelection(bool value);
+  private:
+  bool _internal_isrefelection() const;
+  void _internal_set_isrefelection(bool value);
+  public:
+
+  // optional bool logChanges = 16;
+  bool has_logchanges() const;
+  private:
+  bool _internal_has_logchanges() const;
+  public:
+  void clear_logchanges();
+  bool logchanges() const;
+  void set_logchanges(bool value);
+  private:
+  bool _internal_logchanges() const;
+  void _internal_set_logchanges(bool value);
+  public:
+
+  // optional bool archive = 17;
+  bool has_archive() const;
+  private:
+  bool _internal_has_archive() const;
+  public:
+  void clear_archive();
+  bool archive() const;
+  void set_archive(bool value);
+  private:
+  bool _internal_archive() const;
+  void _internal_set_archive(bool value);
+  public:
+
+  // optional bool reserved = 18;
+  bool has_reserved() const;
+  private:
+  bool _internal_has_reserved() const;
+  public:
+  void clear_reserved();
+  bool reserved() const;
+  void set_reserved(bool value);
+  private:
+  bool _internal_reserved() const;
+  void _internal_set_reserved(bool value);
+  public:
+
+  // optional double coarseAperture = 22;
+  bool has_coarseaperture() const;
+  private:
+  bool _internal_has_coarseaperture() const;
+  public:
+  void clear_coarseaperture();
+  double coarseaperture() const;
+  void set_coarseaperture(double value);
+  private:
+  double _internal_coarseaperture() const;
+  void _internal_set_coarseaperture(double value);
+  public:
+
+  // optional double fineAperture = 23;
+  bool has_fineaperture() const;
+  private:
+  bool _internal_has_fineaperture() const;
+  public:
+  void clear_fineaperture();
+  double fineaperture() const;
+  void set_fineaperture(double value);
+  private:
+  double _internal_fineaperture() const;
+  void _internal_set_fineaperture(double value);
+  public:
+
+  // optional int32 apertureType = 24;
+  bool has_aperturetype() const;
+  private:
+  bool _internal_has_aperturetype() const;
+  public:
+  void clear_aperturetype();
+  ::PROTOBUF_NAMESPACE_ID::int32 aperturetype() const;
+  void set_aperturetype(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_aperturetype() const;
+  void _internal_set_aperturetype(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int32 decimalPlaces = 30;
+  bool has_decimalplaces() const;
+  private:
+  bool _internal_has_decimalplaces() const;
+  public:
+  void clear_decimalplaces();
+  ::PROTOBUF_NAMESPACE_ID::int32 decimalplaces() const;
+  void set_decimalplaces(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_decimalplaces() const;
+  void _internal_set_decimalplaces(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:Proto.DeviceDiagSignal)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr signaltypeid_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr validitysignalid_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr reflectedsignalid_;
+  ::PROTOBUF_NAMESPACE_ID::int32 level_;
+  ::PROTOBUF_NAMESPACE_ID::int32 valueoffset_;
+  ::PROTOBUF_NAMESPACE_ID::int32 valuebit_;
+  ::PROTOBUF_NAMESPACE_ID::int32 valuebitsize_;
+  ::PROTOBUF_NAMESPACE_ID::int32 discretecontainersize_;
+  bool isrefelection_;
+  bool logchanges_;
+  bool archive_;
+  bool reserved_;
+  double coarseaperture_;
+  double fineaperture_;
+  ::PROTOBUF_NAMESPACE_ID::int32 aperturetype_;
+  ::PROTOBUF_NAMESPACE_ID::int32 decimalplaces_;
+  friend struct ::TableStruct_serialization_2eproto;
+};
+// -------------------------------------------------------------------
+
 class Workstation PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.Workstation) */ {
  public:
@@ -19031,7 +19849,7 @@ class Workstation PROTOBUF_FINAL :
                &_Workstation_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    76;
+    78;
 
   friend void swap(Workstation& a, Workstation& b) {
     a.Swap(&b);
@@ -19202,7 +20020,7 @@ class Software PROTOBUF_FINAL :
                &_Software_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    77;
+    79;
 
   friend void swap(Software& a, Software& b) {
     a.Swap(&b);
@@ -19301,6 +20119,443 @@ class Software PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class DiagSignalType PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.DiagSignalType) */ {
+ public:
+  inline DiagSignalType() : DiagSignalType(nullptr) {}
+  virtual ~DiagSignalType();
+  explicit constexpr DiagSignalType(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  DiagSignalType(const DiagSignalType& from);
+  DiagSignalType(DiagSignalType&& from) noexcept
+    : DiagSignalType() {
+    *this = ::std::move(from);
+  }
+
+  inline DiagSignalType& operator=(const DiagSignalType& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline DiagSignalType& operator=(DiagSignalType&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
+    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
+  }
+  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
+    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const DiagSignalType& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const DiagSignalType* internal_default_instance() {
+    return reinterpret_cast<const DiagSignalType*>(
+               &_DiagSignalType_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    80;
+
+  friend void swap(DiagSignalType& a, DiagSignalType& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(DiagSignalType* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(DiagSignalType* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline DiagSignalType* New() const final {
+    return CreateMaybeMessage<DiagSignalType>(nullptr);
+  }
+
+  DiagSignalType* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<DiagSignalType>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const DiagSignalType& from);
+  void MergeFrom(const DiagSignalType& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(DiagSignalType* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Proto.DiagSignalType";
+  }
+  protected:
+  explicit DiagSignalType(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_serialization_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kSignalTypeIdFieldNumber = 3,
+    kNormalStateString0FieldNumber = 26,
+    kNormalStateString1FieldNumber = 27,
+    kUnitsFieldNumber = 40,
+    kUuidFieldNumber = 4,
+    kTypeFieldNumber = 6,
+    kByteOrderFieldNumber = 7,
+    kAnalogformatFieldNumber = 32,
+    kSystemSignalTypeFieldNumber = 5,
+    kInverseValueFieldNumber = 20,
+    kUseLimitsFieldNumber = 39,
+    kNormalStateFieldNumber = 25,
+    kAdcHighLimitFieldNumber = 33,
+    kAdcLowLimitFieldNumber = 34,
+    kValueHighLimitFieldNumber = 35,
+    kValueLowLimitFieldNumber = 36,
+    kValueMultiplierFieldNumber = 37,
+    kValueOffsetFieldNumber = 38,
+  };
+  // optional string signalTypeId = 3;
+  bool has_signaltypeid() const;
+  private:
+  bool _internal_has_signaltypeid() const;
+  public:
+  void clear_signaltypeid();
+  const std::string& signaltypeid() const;
+  void set_signaltypeid(const std::string& value);
+  void set_signaltypeid(std::string&& value);
+  void set_signaltypeid(const char* value);
+  void set_signaltypeid(const char* value, size_t size);
+  std::string* mutable_signaltypeid();
+  std::string* release_signaltypeid();
+  void set_allocated_signaltypeid(std::string* signaltypeid);
+  private:
+  const std::string& _internal_signaltypeid() const;
+  void _internal_set_signaltypeid(const std::string& value);
+  std::string* _internal_mutable_signaltypeid();
+  public:
+
+  // optional string normalStateString0 = 26;
+  bool has_normalstatestring0() const;
+  private:
+  bool _internal_has_normalstatestring0() const;
+  public:
+  void clear_normalstatestring0();
+  const std::string& normalstatestring0() const;
+  void set_normalstatestring0(const std::string& value);
+  void set_normalstatestring0(std::string&& value);
+  void set_normalstatestring0(const char* value);
+  void set_normalstatestring0(const char* value, size_t size);
+  std::string* mutable_normalstatestring0();
+  std::string* release_normalstatestring0();
+  void set_allocated_normalstatestring0(std::string* normalstatestring0);
+  private:
+  const std::string& _internal_normalstatestring0() const;
+  void _internal_set_normalstatestring0(const std::string& value);
+  std::string* _internal_mutable_normalstatestring0();
+  public:
+
+  // optional string normalStateString1 = 27;
+  bool has_normalstatestring1() const;
+  private:
+  bool _internal_has_normalstatestring1() const;
+  public:
+  void clear_normalstatestring1();
+  const std::string& normalstatestring1() const;
+  void set_normalstatestring1(const std::string& value);
+  void set_normalstatestring1(std::string&& value);
+  void set_normalstatestring1(const char* value);
+  void set_normalstatestring1(const char* value, size_t size);
+  std::string* mutable_normalstatestring1();
+  std::string* release_normalstatestring1();
+  void set_allocated_normalstatestring1(std::string* normalstatestring1);
+  private:
+  const std::string& _internal_normalstatestring1() const;
+  void _internal_set_normalstatestring1(const std::string& value);
+  std::string* _internal_mutable_normalstatestring1();
+  public:
+
+  // optional string units = 40;
+  bool has_units() const;
+  private:
+  bool _internal_has_units() const;
+  public:
+  void clear_units();
+  const std::string& units() const;
+  void set_units(const std::string& value);
+  void set_units(std::string&& value);
+  void set_units(const char* value);
+  void set_units(const char* value, size_t size);
+  std::string* mutable_units();
+  std::string* release_units();
+  void set_allocated_units(std::string* units);
+  private:
+  const std::string& _internal_units() const;
+  void _internal_set_units(const std::string& value);
+  std::string* _internal_mutable_units();
+  public:
+
+  // optional .Proto.Uuid uuid = 4;
+  bool has_uuid() const;
+  private:
+  bool _internal_has_uuid() const;
+  public:
+  void clear_uuid();
+  const ::Proto::Uuid& uuid() const;
+  ::Proto::Uuid* release_uuid();
+  ::Proto::Uuid* mutable_uuid();
+  void set_allocated_uuid(::Proto::Uuid* uuid);
+  private:
+  const ::Proto::Uuid& _internal_uuid() const;
+  ::Proto::Uuid* _internal_mutable_uuid();
+  public:
+  void unsafe_arena_set_allocated_uuid(
+      ::Proto::Uuid* uuid);
+  ::Proto::Uuid* unsafe_arena_release_uuid();
+
+  // optional int32 type = 6;
+  bool has_type() const;
+  private:
+  bool _internal_has_type() const;
+  public:
+  void clear_type();
+  ::PROTOBUF_NAMESPACE_ID::int32 type() const;
+  void set_type(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_type() const;
+  void _internal_set_type(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int32 byteOrder = 7;
+  bool has_byteorder() const;
+  private:
+  bool _internal_has_byteorder() const;
+  public:
+  void clear_byteorder();
+  ::PROTOBUF_NAMESPACE_ID::int32 byteorder() const;
+  void set_byteorder(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_byteorder() const;
+  void _internal_set_byteorder(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int32 analogformat = 32;
+  bool has_analogformat() const;
+  private:
+  bool _internal_has_analogformat() const;
+  public:
+  void clear_analogformat();
+  ::PROTOBUF_NAMESPACE_ID::int32 analogformat() const;
+  void set_analogformat(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_analogformat() const;
+  void _internal_set_analogformat(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional bool systemSignalType = 5;
+  bool has_systemsignaltype() const;
+  private:
+  bool _internal_has_systemsignaltype() const;
+  public:
+  void clear_systemsignaltype();
+  bool systemsignaltype() const;
+  void set_systemsignaltype(bool value);
+  private:
+  bool _internal_systemsignaltype() const;
+  void _internal_set_systemsignaltype(bool value);
+  public:
+
+  // optional bool inverseValue = 20;
+  bool has_inversevalue() const;
+  private:
+  bool _internal_has_inversevalue() const;
+  public:
+  void clear_inversevalue();
+  bool inversevalue() const;
+  void set_inversevalue(bool value);
+  private:
+  bool _internal_inversevalue() const;
+  void _internal_set_inversevalue(bool value);
+  public:
+
+  // optional bool useLimits = 39;
+  bool has_uselimits() const;
+  private:
+  bool _internal_has_uselimits() const;
+  public:
+  void clear_uselimits();
+  bool uselimits() const;
+  void set_uselimits(bool value);
+  private:
+  bool _internal_uselimits() const;
+  void _internal_set_uselimits(bool value);
+  public:
+
+  // optional int32 normalState = 25;
+  bool has_normalstate() const;
+  private:
+  bool _internal_has_normalstate() const;
+  public:
+  void clear_normalstate();
+  ::PROTOBUF_NAMESPACE_ID::int32 normalstate() const;
+  void set_normalstate(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_normalstate() const;
+  void _internal_set_normalstate(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional double adcHighLimit = 33;
+  bool has_adchighlimit() const;
+  private:
+  bool _internal_has_adchighlimit() const;
+  public:
+  void clear_adchighlimit();
+  double adchighlimit() const;
+  void set_adchighlimit(double value);
+  private:
+  double _internal_adchighlimit() const;
+  void _internal_set_adchighlimit(double value);
+  public:
+
+  // optional double adcLowLimit = 34;
+  bool has_adclowlimit() const;
+  private:
+  bool _internal_has_adclowlimit() const;
+  public:
+  void clear_adclowlimit();
+  double adclowlimit() const;
+  void set_adclowlimit(double value);
+  private:
+  double _internal_adclowlimit() const;
+  void _internal_set_adclowlimit(double value);
+  public:
+
+  // optional double valueHighLimit = 35;
+  bool has_valuehighlimit() const;
+  private:
+  bool _internal_has_valuehighlimit() const;
+  public:
+  void clear_valuehighlimit();
+  double valuehighlimit() const;
+  void set_valuehighlimit(double value);
+  private:
+  double _internal_valuehighlimit() const;
+  void _internal_set_valuehighlimit(double value);
+  public:
+
+  // optional double valueLowLimit = 36;
+  bool has_valuelowlimit() const;
+  private:
+  bool _internal_has_valuelowlimit() const;
+  public:
+  void clear_valuelowlimit();
+  double valuelowlimit() const;
+  void set_valuelowlimit(double value);
+  private:
+  double _internal_valuelowlimit() const;
+  void _internal_set_valuelowlimit(double value);
+  public:
+
+  // optional double valueMultiplier = 37;
+  bool has_valuemultiplier() const;
+  private:
+  bool _internal_has_valuemultiplier() const;
+  public:
+  void clear_valuemultiplier();
+  double valuemultiplier() const;
+  void set_valuemultiplier(double value);
+  private:
+  double _internal_valuemultiplier() const;
+  void _internal_set_valuemultiplier(double value);
+  public:
+
+  // optional double valueOffset = 38;
+  bool has_valueoffset() const;
+  private:
+  bool _internal_has_valueoffset() const;
+  public:
+  void clear_valueoffset();
+  double valueoffset() const;
+  void set_valueoffset(double value);
+  private:
+  double _internal_valueoffset() const;
+  void _internal_set_valueoffset(double value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:Proto.DiagSignalType)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr signaltypeid_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr normalstatestring0_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr normalstatestring1_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr units_;
+  ::Proto::Uuid* uuid_;
+  ::PROTOBUF_NAMESPACE_ID::int32 type_;
+  ::PROTOBUF_NAMESPACE_ID::int32 byteorder_;
+  ::PROTOBUF_NAMESPACE_ID::int32 analogformat_;
+  bool systemsignaltype_;
+  bool inversevalue_;
+  bool uselimits_;
+  ::PROTOBUF_NAMESPACE_ID::int32 normalstate_;
+  double adchighlimit_;
+  double adclowlimit_;
+  double valuehighlimit_;
+  double valuelowlimit_;
+  double valuemultiplier_;
+  double valueoffset_;
+  friend struct ::TableStruct_serialization_2eproto;
+};
+// -------------------------------------------------------------------
+
 class ModuleConfiguration PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.ModuleConfiguration) */ {
  public:
@@ -19351,7 +20606,7 @@ class ModuleConfiguration PROTOBUF_FINAL :
                &_ModuleConfiguration_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    78;
+    81;
 
   friend void swap(ModuleConfiguration& a, ModuleConfiguration& b) {
     a.Swap(&b);
@@ -19549,7 +20804,7 @@ class ModuleConfigurationValue PROTOBUF_FINAL :
                &_ModuleConfigurationValue_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    79;
+    82;
 
   friend void swap(ModuleConfigurationValue& a, ModuleConfigurationValue& b) {
     a.Swap(&b);
@@ -19730,7 +20985,7 @@ class Property PROTOBUF_FINAL :
                &_Property_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    80;
+    83;
 
   friend void swap(Property& a, Property& b) {
     a.Swap(&b);
@@ -19911,7 +21166,7 @@ class SignalSpecPropValue PROTOBUF_FINAL :
                &_SignalSpecPropValue_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    81;
+    84;
 
   friend void swap(SignalSpecPropValue& a, SignalSpecPropValue& b) {
     a.Swap(&b);
@@ -20212,7 +21467,7 @@ class SignalSpecPropValues PROTOBUF_FINAL :
                &_SignalSpecPropValues_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    82;
+    85;
 
   friend void swap(SignalSpecPropValues& a, SignalSpecPropValues& b) {
     a.Swap(&b);
@@ -20365,7 +21620,7 @@ class Address16 PROTOBUF_FINAL :
                &_Address16_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    83;
+    86;
 
   friend void swap(Address16& a, Address16& b) {
     a.Swap(&b);
@@ -20532,7 +21787,7 @@ class Unit PROTOBUF_FINAL :
                &_Unit_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    84;
+    87;
 
   friend void swap(Unit& a, Unit& b) {
     a.Swap(&b);
@@ -20706,7 +21961,7 @@ class UnitSet PROTOBUF_FINAL :
                &_UnitSet_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    85;
+    88;
 
   friend void swap(UnitSet& a, UnitSet& b) {
     a.Swap(&b);
@@ -20859,7 +22114,7 @@ class TuningValue PROTOBUF_FINAL :
                &_TuningValue_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    86;
+    89;
 
   friend void swap(TuningValue& a, TuningValue& b) {
     a.Swap(&b);
@@ -21038,7 +22293,7 @@ class AppSignalDbField PROTOBUF_FINAL :
                &_AppSignalDbField_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    87;
+    90;
 
   friend void swap(AppSignalDbField& a, AppSignalDbField& b) {
     a.Swap(&b);
@@ -21322,7 +22577,7 @@ class StateFlagSignal PROTOBUF_FINAL :
                &_StateFlagSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    88;
+    91;
 
   friend void swap(StateFlagSignal& a, StateFlagSignal& b) {
     a.Swap(&b);
@@ -21493,7 +22748,7 @@ class AppSignalCalculatedParam PROTOBUF_FINAL :
                &_AppSignalCalculatedParam_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    89;
+    92;
 
   friend void swap(AppSignalCalculatedParam& a, AppSignalCalculatedParam& b) {
     a.Swap(&b);
@@ -21842,7 +23097,7 @@ class AppSignal PROTOBUF_FINAL :
                &_AppSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    90;
+    93;
 
   friend void swap(AppSignal& a, AppSignal& b) {
     a.Swap(&b);
@@ -22540,7 +23795,7 @@ class AppSignalSet PROTOBUF_FINAL :
                &_AppSignalSet_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    91;
+    94;
 
   friend void swap(AppSignalSet& a, AppSignalSet& b) {
     a.Swap(&b);
@@ -22693,7 +23948,7 @@ class ProtoAppSignalData PROTOBUF_FINAL :
                &_ProtoAppSignalData_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    92;
+    95;
 
   friend void swap(ProtoAppSignalData& a, ProtoAppSignalData& b) {
     a.Swap(&b);
@@ -23244,7 +24499,7 @@ class AppSignalState PROTOBUF_FINAL :
                &_AppSignalState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    93;
+    96;
 
   friend void swap(AppSignalState& a, AppSignalState& b) {
     a.Swap(&b);
@@ -23498,7 +24753,7 @@ class Connection PROTOBUF_FINAL :
                &_Connection_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    94;
+    97;
 
   friend void swap(Connection& a, Connection& b) {
     a.Swap(&b);
@@ -24047,7 +25302,7 @@ class SchemaDetailsSet PROTOBUF_FINAL :
                &_SchemaDetailsSet_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    95;
+    98;
 
   friend void swap(SchemaDetailsSet& a, SchemaDetailsSet& b) {
     a.Swap(&b);
@@ -24200,7 +25455,7 @@ class SchemaDetails_TrendIndicatorSchemaItems PROTOBUF_FINAL :
                &_SchemaDetails_TrendIndicatorSchemaItems_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    96;
+    99;
 
   friend void swap(SchemaDetails_TrendIndicatorSchemaItems& a, SchemaDetails_TrendIndicatorSchemaItems& b) {
     a.Swap(&b);
@@ -24425,7 +25680,7 @@ class SchemaDetails PROTOBUF_FINAL :
                &_SchemaDetails_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    97;
+    100;
 
   friend void swap(SchemaDetails& a, SchemaDetails& b) {
     a.Swap(&b);
@@ -24923,7 +26178,7 @@ class BuildInfo PROTOBUF_FINAL :
                &_BuildInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    98;
+    101;
 
   friend void swap(BuildInfo& a, BuildInfo& b) {
     a.Swap(&b);
@@ -25175,7 +26430,7 @@ class ArchSignal PROTOBUF_FINAL :
                &_ArchSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    99;
+    102;
 
   friend void swap(ArchSignal& a, ArchSignal& b) {
     a.Swap(&b);
@@ -25431,7 +26686,7 @@ class ArchInfo PROTOBUF_FINAL :
                &_ArchInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    100;
+    103;
 
   friend void swap(ArchInfo& a, ArchInfo& b) {
     a.Swap(&b);
@@ -25630,7 +26885,7 @@ class BusSignal PROTOBUF_FINAL :
                &_BusSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    101;
+    104;
 
   friend void swap(BusSignal& a, BusSignal& b) {
     a.Swap(&b);
@@ -26077,7 +27332,7 @@ class Bus PROTOBUF_FINAL :
                &_Bus_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    102;
+    105;
 
   friend void swap(Bus& a, Bus& b) {
     a.Swap(&b);
@@ -26333,7 +27588,7 @@ class ComparatorSignal PROTOBUF_FINAL :
                &_ComparatorSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    103;
+    106;
 
   friend void swap(ComparatorSignal& a, ComparatorSignal& b) {
     a.Swap(&b);
@@ -26534,7 +27789,7 @@ class Comparator PROTOBUF_FINAL :
                &_Comparator_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    104;
+    107;
 
   friend void swap(Comparator& a, Comparator& b) {
     a.Swap(&b);
@@ -26872,7 +28127,7 @@ class LmComparatorSet PROTOBUF_FINAL :
                &_LmComparatorSet_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    105;
+    108;
 
   friend void swap(LmComparatorSet& a, LmComparatorSet& b) {
     a.Swap(&b);
@@ -27048,7 +28303,7 @@ class ComparatorSet PROTOBUF_FINAL :
                &_ComparatorSet_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    106;
+    109;
 
   friend void swap(ComparatorSet& a, ComparatorSet& b) {
     a.Swap(&b);
@@ -27201,7 +28456,7 @@ class MetrologySignalLocation PROTOBUF_FINAL :
                &_MetrologySignalLocation_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    107;
+    110;
 
   friend void swap(MetrologySignalLocation& a, MetrologySignalLocation& b) {
     a.Swap(&b);
@@ -27505,7 +28760,7 @@ class MetrologySignal PROTOBUF_FINAL :
                &_MetrologySignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    108;
+    111;
 
   friend void swap(MetrologySignal& a, MetrologySignal& b) {
     a.Swap(&b);
@@ -27814,7 +29069,7 @@ class MetrologySignalSet PROTOBUF_FINAL :
                &_MetrologySignalSet_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    109;
+    112;
 
   friend void swap(MetrologySignalSet& a, MetrologySignalSet& b) {
     a.Swap(&b);
@@ -27967,7 +29222,7 @@ class SimOverrideSignal PROTOBUF_FINAL :
                &_SimOverrideSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    110;
+    113;
 
   friend void swap(SimOverrideSignal& a, SimOverrideSignal& b) {
     a.Swap(&b);
@@ -28210,7 +29465,7 @@ class SimOverrideSignalWorkspace PROTOBUF_FINAL :
                &_SimOverrideSignalWorkspace_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    111;
+    114;
 
   friend void swap(SimOverrideSignalWorkspace& a, SimOverrideSignalWorkspace& b) {
     a.Swap(&b);
@@ -29533,7 +30788,7 @@ inline void AfbParamValue::set_allocated_reference(std::string* reference) {
 
 // required uint32 classnamehash = 1;
 inline bool Envelope::_internal_has_classnamehash() const {
-  bool value = (_has_bits_[0] & 0x00000400u) != 0;
+  bool value = (_has_bits_[0] & 0x00000800u) != 0;
   return value;
 }
 inline bool Envelope::has_classnamehash() const {
@@ -29541,7 +30796,7 @@ inline bool Envelope::has_classnamehash() const {
 }
 inline void Envelope::clear_classnamehash() {
   classnamehash_ = 0u;
-  _has_bits_[0] &= ~0x00000400u;
+  _has_bits_[0] &= ~0x00000800u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint32 Envelope::_internal_classnamehash() const {
   return classnamehash_;
@@ -29551,7 +30806,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint32 Envelope::classnamehash() const {
   return _internal_classnamehash();
 }
 inline void Envelope::_internal_set_classnamehash(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[0] |= 0x00000400u;
+  _has_bits_[0] |= 0x00000800u;
   classnamehash_ = value;
 }
 inline void Envelope::set_classnamehash(::PROTOBUF_NAMESPACE_ID::uint32 value) {
@@ -29798,9 +31053,92 @@ inline void Envelope::set_allocated_deviceobject(::Proto::DeviceObject* deviceob
   // @@protoc_insertion_point(field_set_allocated:Proto.Envelope.deviceobject)
 }
 
+// optional .Proto.DiagSignalType diagSignalType = 8;
+inline bool Envelope::_internal_has_diagsignaltype() const {
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  PROTOBUF_ASSUME(!value || diagsignaltype_ != nullptr);
+  return value;
+}
+inline bool Envelope::has_diagsignaltype() const {
+  return _internal_has_diagsignaltype();
+}
+inline void Envelope::clear_diagsignaltype() {
+  if (diagsignaltype_ != nullptr) diagsignaltype_->Clear();
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline const ::Proto::DiagSignalType& Envelope::_internal_diagsignaltype() const {
+  const ::Proto::DiagSignalType* p = diagsignaltype_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Proto::DiagSignalType&>(
+      ::Proto::_DiagSignalType_default_instance_);
+}
+inline const ::Proto::DiagSignalType& Envelope::diagsignaltype() const {
+  // @@protoc_insertion_point(field_get:Proto.Envelope.diagSignalType)
+  return _internal_diagsignaltype();
+}
+inline void Envelope::unsafe_arena_set_allocated_diagsignaltype(
+    ::Proto::DiagSignalType* diagsignaltype) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(diagsignaltype_);
+  }
+  diagsignaltype_ = diagsignaltype;
+  if (diagsignaltype) {
+    _has_bits_[0] |= 0x00000008u;
+  } else {
+    _has_bits_[0] &= ~0x00000008u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.Envelope.diagSignalType)
+}
+inline ::Proto::DiagSignalType* Envelope::release_diagsignaltype() {
+  _has_bits_[0] &= ~0x00000008u;
+  ::Proto::DiagSignalType* temp = diagsignaltype_;
+  diagsignaltype_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::Proto::DiagSignalType* Envelope::unsafe_arena_release_diagsignaltype() {
+  // @@protoc_insertion_point(field_release:Proto.Envelope.diagSignalType)
+  _has_bits_[0] &= ~0x00000008u;
+  ::Proto::DiagSignalType* temp = diagsignaltype_;
+  diagsignaltype_ = nullptr;
+  return temp;
+}
+inline ::Proto::DiagSignalType* Envelope::_internal_mutable_diagsignaltype() {
+  _has_bits_[0] |= 0x00000008u;
+  if (diagsignaltype_ == nullptr) {
+    auto* p = CreateMaybeMessage<::Proto::DiagSignalType>(GetArena());
+    diagsignaltype_ = p;
+  }
+  return diagsignaltype_;
+}
+inline ::Proto::DiagSignalType* Envelope::mutable_diagsignaltype() {
+  // @@protoc_insertion_point(field_mutable:Proto.Envelope.diagSignalType)
+  return _internal_mutable_diagsignaltype();
+}
+inline void Envelope::set_allocated_diagsignaltype(::Proto::DiagSignalType* diagsignaltype) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete diagsignaltype_;
+  }
+  if (diagsignaltype) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(diagsignaltype);
+    if (message_arena != submessage_arena) {
+      diagsignaltype = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, diagsignaltype, submessage_arena);
+    }
+    _has_bits_[0] |= 0x00000008u;
+  } else {
+    _has_bits_[0] &= ~0x00000008u;
+  }
+  diagsignaltype_ = diagsignaltype;
+  // @@protoc_insertion_point(field_set_allocated:Proto.Envelope.diagSignalType)
+}
+
 // optional .Proto.Schema schema = 100;
 inline bool Envelope::_internal_has_schema() const {
-  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  bool value = (_has_bits_[0] & 0x00000010u) != 0;
   PROTOBUF_ASSUME(!value || schema_ != nullptr);
   return value;
 }
@@ -29809,7 +31147,7 @@ inline bool Envelope::has_schema() const {
 }
 inline void Envelope::clear_schema() {
   if (schema_ != nullptr) schema_->Clear();
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline const ::Proto::Schema& Envelope::_internal_schema() const {
   const ::Proto::Schema* p = schema_;
@@ -29827,14 +31165,14 @@ inline void Envelope::unsafe_arena_set_allocated_schema(
   }
   schema_ = schema;
   if (schema) {
-    _has_bits_[0] |= 0x00000008u;
+    _has_bits_[0] |= 0x00000010u;
   } else {
-    _has_bits_[0] &= ~0x00000008u;
+    _has_bits_[0] &= ~0x00000010u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.Envelope.schema)
 }
 inline ::Proto::Schema* Envelope::release_schema() {
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000010u;
   ::Proto::Schema* temp = schema_;
   schema_ = nullptr;
   if (GetArena() != nullptr) {
@@ -29844,13 +31182,13 @@ inline ::Proto::Schema* Envelope::release_schema() {
 }
 inline ::Proto::Schema* Envelope::unsafe_arena_release_schema() {
   // @@protoc_insertion_point(field_release:Proto.Envelope.schema)
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000010u;
   ::Proto::Schema* temp = schema_;
   schema_ = nullptr;
   return temp;
 }
 inline ::Proto::Schema* Envelope::_internal_mutable_schema() {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000010u;
   if (schema_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::Schema>(GetArena());
     schema_ = p;
@@ -29873,9 +31211,9 @@ inline void Envelope::set_allocated_schema(::Proto::Schema* schema) {
       schema = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, schema, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000008u;
+    _has_bits_[0] |= 0x00000010u;
   } else {
-    _has_bits_[0] &= ~0x00000008u;
+    _has_bits_[0] &= ~0x00000010u;
   }
   schema_ = schema;
   // @@protoc_insertion_point(field_set_allocated:Proto.Envelope.schema)
@@ -29883,7 +31221,7 @@ inline void Envelope::set_allocated_schema(::Proto::Schema* schema) {
 
 // optional .Proto.SchemaLayer schemalayer = 101;
 inline bool Envelope::_internal_has_schemalayer() const {
-  bool value = (_has_bits_[0] & 0x00000010u) != 0;
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
   PROTOBUF_ASSUME(!value || schemalayer_ != nullptr);
   return value;
 }
@@ -29892,7 +31230,7 @@ inline bool Envelope::has_schemalayer() const {
 }
 inline void Envelope::clear_schemalayer() {
   if (schemalayer_ != nullptr) schemalayer_->Clear();
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline const ::Proto::SchemaLayer& Envelope::_internal_schemalayer() const {
   const ::Proto::SchemaLayer* p = schemalayer_;
@@ -29910,14 +31248,14 @@ inline void Envelope::unsafe_arena_set_allocated_schemalayer(
   }
   schemalayer_ = schemalayer;
   if (schemalayer) {
-    _has_bits_[0] |= 0x00000010u;
+    _has_bits_[0] |= 0x00000020u;
   } else {
-    _has_bits_[0] &= ~0x00000010u;
+    _has_bits_[0] &= ~0x00000020u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.Envelope.schemalayer)
 }
 inline ::Proto::SchemaLayer* Envelope::release_schemalayer() {
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000020u;
   ::Proto::SchemaLayer* temp = schemalayer_;
   schemalayer_ = nullptr;
   if (GetArena() != nullptr) {
@@ -29927,13 +31265,13 @@ inline ::Proto::SchemaLayer* Envelope::release_schemalayer() {
 }
 inline ::Proto::SchemaLayer* Envelope::unsafe_arena_release_schemalayer() {
   // @@protoc_insertion_point(field_release:Proto.Envelope.schemalayer)
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000020u;
   ::Proto::SchemaLayer* temp = schemalayer_;
   schemalayer_ = nullptr;
   return temp;
 }
 inline ::Proto::SchemaLayer* Envelope::_internal_mutable_schemalayer() {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000020u;
   if (schemalayer_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::SchemaLayer>(GetArena());
     schemalayer_ = p;
@@ -29956,9 +31294,9 @@ inline void Envelope::set_allocated_schemalayer(::Proto::SchemaLayer* schemalaye
       schemalayer = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, schemalayer, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000010u;
+    _has_bits_[0] |= 0x00000020u;
   } else {
-    _has_bits_[0] &= ~0x00000010u;
+    _has_bits_[0] &= ~0x00000020u;
   }
   schemalayer_ = schemalayer;
   // @@protoc_insertion_point(field_set_allocated:Proto.Envelope.schemalayer)
@@ -29966,7 +31304,7 @@ inline void Envelope::set_allocated_schemalayer(::Proto::SchemaLayer* schemalaye
 
 // optional .Proto.FblElement fblelement = 102;
 inline bool Envelope::_internal_has_fblelement() const {
-  bool value = (_has_bits_[0] & 0x00000020u) != 0;
+  bool value = (_has_bits_[0] & 0x00000040u) != 0;
   PROTOBUF_ASSUME(!value || fblelement_ != nullptr);
   return value;
 }
@@ -29975,7 +31313,7 @@ inline bool Envelope::has_fblelement() const {
 }
 inline void Envelope::clear_fblelement() {
   if (fblelement_ != nullptr) fblelement_->Clear();
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000040u;
 }
 inline const ::Proto::FblElement& Envelope::_internal_fblelement() const {
   const ::Proto::FblElement* p = fblelement_;
@@ -29993,14 +31331,14 @@ inline void Envelope::unsafe_arena_set_allocated_fblelement(
   }
   fblelement_ = fblelement;
   if (fblelement) {
-    _has_bits_[0] |= 0x00000020u;
+    _has_bits_[0] |= 0x00000040u;
   } else {
-    _has_bits_[0] &= ~0x00000020u;
+    _has_bits_[0] &= ~0x00000040u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.Envelope.fblelement)
 }
 inline ::Proto::FblElement* Envelope::release_fblelement() {
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000040u;
   ::Proto::FblElement* temp = fblelement_;
   fblelement_ = nullptr;
   if (GetArena() != nullptr) {
@@ -30010,13 +31348,13 @@ inline ::Proto::FblElement* Envelope::release_fblelement() {
 }
 inline ::Proto::FblElement* Envelope::unsafe_arena_release_fblelement() {
   // @@protoc_insertion_point(field_release:Proto.Envelope.fblelement)
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000040u;
   ::Proto::FblElement* temp = fblelement_;
   fblelement_ = nullptr;
   return temp;
 }
 inline ::Proto::FblElement* Envelope::_internal_mutable_fblelement() {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000040u;
   if (fblelement_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::FblElement>(GetArena());
     fblelement_ = p;
@@ -30039,9 +31377,9 @@ inline void Envelope::set_allocated_fblelement(::Proto::FblElement* fblelement) 
       fblelement = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, fblelement, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000020u;
+    _has_bits_[0] |= 0x00000040u;
   } else {
-    _has_bits_[0] &= ~0x00000020u;
+    _has_bits_[0] &= ~0x00000040u;
   }
   fblelement_ = fblelement;
   // @@protoc_insertion_point(field_set_allocated:Proto.Envelope.fblelement)
@@ -30049,7 +31387,7 @@ inline void Envelope::set_allocated_fblelement(::Proto::FblElement* fblelement) 
 
 // optional .Proto.Configuration configuration = 103;
 inline bool Envelope::_internal_has_configuration() const {
-  bool value = (_has_bits_[0] & 0x00000040u) != 0;
+  bool value = (_has_bits_[0] & 0x00000080u) != 0;
   PROTOBUF_ASSUME(!value || configuration_ != nullptr);
   return value;
 }
@@ -30058,7 +31396,7 @@ inline bool Envelope::has_configuration() const {
 }
 inline void Envelope::clear_configuration() {
   if (configuration_ != nullptr) configuration_->Clear();
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000080u;
 }
 inline const ::Proto::Configuration& Envelope::_internal_configuration() const {
   const ::Proto::Configuration* p = configuration_;
@@ -30076,14 +31414,14 @@ inline void Envelope::unsafe_arena_set_allocated_configuration(
   }
   configuration_ = configuration;
   if (configuration) {
-    _has_bits_[0] |= 0x00000040u;
+    _has_bits_[0] |= 0x00000080u;
   } else {
-    _has_bits_[0] &= ~0x00000040u;
+    _has_bits_[0] &= ~0x00000080u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.Envelope.configuration)
 }
 inline ::Proto::Configuration* Envelope::release_configuration() {
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000080u;
   ::Proto::Configuration* temp = configuration_;
   configuration_ = nullptr;
   if (GetArena() != nullptr) {
@@ -30093,13 +31431,13 @@ inline ::Proto::Configuration* Envelope::release_configuration() {
 }
 inline ::Proto::Configuration* Envelope::unsafe_arena_release_configuration() {
   // @@protoc_insertion_point(field_release:Proto.Envelope.configuration)
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000080u;
   ::Proto::Configuration* temp = configuration_;
   configuration_ = nullptr;
   return temp;
 }
 inline ::Proto::Configuration* Envelope::_internal_mutable_configuration() {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000080u;
   if (configuration_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::Configuration>(GetArena());
     configuration_ = p;
@@ -30122,9 +31460,9 @@ inline void Envelope::set_allocated_configuration(::Proto::Configuration* config
       configuration = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, configuration, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000040u;
+    _has_bits_[0] |= 0x00000080u;
   } else {
-    _has_bits_[0] &= ~0x00000040u;
+    _has_bits_[0] &= ~0x00000080u;
   }
   configuration_ = configuration;
   // @@protoc_insertion_point(field_set_allocated:Proto.Envelope.configuration)
@@ -30132,7 +31470,7 @@ inline void Envelope::set_allocated_configuration(::Proto::Configuration* config
 
 // optional .Proto.Connection connection = 104;
 inline bool Envelope::_internal_has_connection() const {
-  bool value = (_has_bits_[0] & 0x00000080u) != 0;
+  bool value = (_has_bits_[0] & 0x00000100u) != 0;
   PROTOBUF_ASSUME(!value || connection_ != nullptr);
   return value;
 }
@@ -30141,7 +31479,7 @@ inline bool Envelope::has_connection() const {
 }
 inline void Envelope::clear_connection() {
   if (connection_ != nullptr) connection_->Clear();
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000100u;
 }
 inline const ::Proto::Connection& Envelope::_internal_connection() const {
   const ::Proto::Connection* p = connection_;
@@ -30159,14 +31497,14 @@ inline void Envelope::unsafe_arena_set_allocated_connection(
   }
   connection_ = connection;
   if (connection) {
-    _has_bits_[0] |= 0x00000080u;
+    _has_bits_[0] |= 0x00000100u;
   } else {
-    _has_bits_[0] &= ~0x00000080u;
+    _has_bits_[0] &= ~0x00000100u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.Envelope.connection)
 }
 inline ::Proto::Connection* Envelope::release_connection() {
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000100u;
   ::Proto::Connection* temp = connection_;
   connection_ = nullptr;
   if (GetArena() != nullptr) {
@@ -30176,13 +31514,13 @@ inline ::Proto::Connection* Envelope::release_connection() {
 }
 inline ::Proto::Connection* Envelope::unsafe_arena_release_connection() {
   // @@protoc_insertion_point(field_release:Proto.Envelope.connection)
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000100u;
   ::Proto::Connection* temp = connection_;
   connection_ = nullptr;
   return temp;
 }
 inline ::Proto::Connection* Envelope::_internal_mutable_connection() {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000100u;
   if (connection_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::Connection>(GetArena());
     connection_ = p;
@@ -30205,9 +31543,9 @@ inline void Envelope::set_allocated_connection(::Proto::Connection* connection) 
       connection = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, connection, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000080u;
+    _has_bits_[0] |= 0x00000100u;
   } else {
-    _has_bits_[0] &= ~0x00000080u;
+    _has_bits_[0] &= ~0x00000100u;
   }
   connection_ = connection;
   // @@protoc_insertion_point(field_set_allocated:Proto.Envelope.connection)
@@ -30215,7 +31553,7 @@ inline void Envelope::set_allocated_connection(::Proto::Connection* connection) 
 
 // optional .Proto.SchemaDetailsSet schemaDetailsSet = 105;
 inline bool Envelope::_internal_has_schemadetailsset() const {
-  bool value = (_has_bits_[0] & 0x00000100u) != 0;
+  bool value = (_has_bits_[0] & 0x00000200u) != 0;
   PROTOBUF_ASSUME(!value || schemadetailsset_ != nullptr);
   return value;
 }
@@ -30224,7 +31562,7 @@ inline bool Envelope::has_schemadetailsset() const {
 }
 inline void Envelope::clear_schemadetailsset() {
   if (schemadetailsset_ != nullptr) schemadetailsset_->Clear();
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000200u;
 }
 inline const ::Proto::SchemaDetailsSet& Envelope::_internal_schemadetailsset() const {
   const ::Proto::SchemaDetailsSet* p = schemadetailsset_;
@@ -30242,14 +31580,14 @@ inline void Envelope::unsafe_arena_set_allocated_schemadetailsset(
   }
   schemadetailsset_ = schemadetailsset;
   if (schemadetailsset) {
-    _has_bits_[0] |= 0x00000100u;
+    _has_bits_[0] |= 0x00000200u;
   } else {
-    _has_bits_[0] &= ~0x00000100u;
+    _has_bits_[0] &= ~0x00000200u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.Envelope.schemaDetailsSet)
 }
 inline ::Proto::SchemaDetailsSet* Envelope::release_schemadetailsset() {
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000200u;
   ::Proto::SchemaDetailsSet* temp = schemadetailsset_;
   schemadetailsset_ = nullptr;
   if (GetArena() != nullptr) {
@@ -30259,13 +31597,13 @@ inline ::Proto::SchemaDetailsSet* Envelope::release_schemadetailsset() {
 }
 inline ::Proto::SchemaDetailsSet* Envelope::unsafe_arena_release_schemadetailsset() {
   // @@protoc_insertion_point(field_release:Proto.Envelope.schemaDetailsSet)
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000200u;
   ::Proto::SchemaDetailsSet* temp = schemadetailsset_;
   schemadetailsset_ = nullptr;
   return temp;
 }
 inline ::Proto::SchemaDetailsSet* Envelope::_internal_mutable_schemadetailsset() {
-  _has_bits_[0] |= 0x00000100u;
+  _has_bits_[0] |= 0x00000200u;
   if (schemadetailsset_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::SchemaDetailsSet>(GetArena());
     schemadetailsset_ = p;
@@ -30288,9 +31626,9 @@ inline void Envelope::set_allocated_schemadetailsset(::Proto::SchemaDetailsSet* 
       schemadetailsset = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, schemadetailsset, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000100u;
+    _has_bits_[0] |= 0x00000200u;
   } else {
-    _has_bits_[0] &= ~0x00000100u;
+    _has_bits_[0] &= ~0x00000200u;
   }
   schemadetailsset_ = schemadetailsset;
   // @@protoc_insertion_point(field_set_allocated:Proto.Envelope.schemaDetailsSet)
@@ -30298,7 +31636,7 @@ inline void Envelope::set_allocated_schemadetailsset(::Proto::SchemaDetailsSet* 
 
 // optional .Proto.Bus bus = 200;
 inline bool Envelope::_internal_has_bus() const {
-  bool value = (_has_bits_[0] & 0x00000200u) != 0;
+  bool value = (_has_bits_[0] & 0x00000400u) != 0;
   PROTOBUF_ASSUME(!value || bus_ != nullptr);
   return value;
 }
@@ -30307,7 +31645,7 @@ inline bool Envelope::has_bus() const {
 }
 inline void Envelope::clear_bus() {
   if (bus_ != nullptr) bus_->Clear();
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000400u;
 }
 inline const ::Proto::Bus& Envelope::_internal_bus() const {
   const ::Proto::Bus* p = bus_;
@@ -30325,14 +31663,14 @@ inline void Envelope::unsafe_arena_set_allocated_bus(
   }
   bus_ = bus;
   if (bus) {
-    _has_bits_[0] |= 0x00000200u;
+    _has_bits_[0] |= 0x00000400u;
   } else {
-    _has_bits_[0] &= ~0x00000200u;
+    _has_bits_[0] &= ~0x00000400u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.Envelope.bus)
 }
 inline ::Proto::Bus* Envelope::release_bus() {
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000400u;
   ::Proto::Bus* temp = bus_;
   bus_ = nullptr;
   if (GetArena() != nullptr) {
@@ -30342,13 +31680,13 @@ inline ::Proto::Bus* Envelope::release_bus() {
 }
 inline ::Proto::Bus* Envelope::unsafe_arena_release_bus() {
   // @@protoc_insertion_point(field_release:Proto.Envelope.bus)
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000400u;
   ::Proto::Bus* temp = bus_;
   bus_ = nullptr;
   return temp;
 }
 inline ::Proto::Bus* Envelope::_internal_mutable_bus() {
-  _has_bits_[0] |= 0x00000200u;
+  _has_bits_[0] |= 0x00000400u;
   if (bus_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::Bus>(GetArena());
     bus_ = p;
@@ -30371,9 +31709,9 @@ inline void Envelope::set_allocated_bus(::Proto::Bus* bus) {
       bus = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, bus, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000200u;
+    _has_bits_[0] |= 0x00000400u;
   } else {
-    _has_bits_[0] &= ~0x00000200u;
+    _has_bits_[0] &= ~0x00000400u;
   }
   bus_ = bus;
   // @@protoc_insertion_point(field_set_allocated:Proto.Envelope.bus)
@@ -35185,7 +36523,7 @@ inline void SchemaItem::set_allocated_uuid(::Proto::Uuid* uuid) {
 
 // required bool isStatic = 2;
 inline bool SchemaItem::_internal_has_isstatic() const {
-  bool value = (_has_bits_[1] & 0x00004000u) != 0;
+  bool value = (_has_bits_[1] & 0x00008000u) != 0;
   return value;
 }
 inline bool SchemaItem::has_isstatic() const {
@@ -35193,7 +36531,7 @@ inline bool SchemaItem::has_isstatic() const {
 }
 inline void SchemaItem::clear_isstatic() {
   isstatic_ = false;
-  _has_bits_[1] &= ~0x00004000u;
+  _has_bits_[1] &= ~0x00008000u;
 }
 inline bool SchemaItem::_internal_isstatic() const {
   return isstatic_;
@@ -35203,7 +36541,7 @@ inline bool SchemaItem::isstatic() const {
   return _internal_isstatic();
 }
 inline void SchemaItem::_internal_set_isstatic(bool value) {
-  _has_bits_[1] |= 0x00004000u;
+  _has_bits_[1] |= 0x00008000u;
   isstatic_ = value;
 }
 inline void SchemaItem::set_isstatic(bool value) {
@@ -35213,7 +36551,7 @@ inline void SchemaItem::set_isstatic(bool value) {
 
 // required bool isLocked = 3;
 inline bool SchemaItem::_internal_has_islocked() const {
-  bool value = (_has_bits_[1] & 0x00008000u) != 0;
+  bool value = (_has_bits_[1] & 0x00010000u) != 0;
   return value;
 }
 inline bool SchemaItem::has_islocked() const {
@@ -35221,7 +36559,7 @@ inline bool SchemaItem::has_islocked() const {
 }
 inline void SchemaItem::clear_islocked() {
   islocked_ = false;
-  _has_bits_[1] &= ~0x00008000u;
+  _has_bits_[1] &= ~0x00010000u;
 }
 inline bool SchemaItem::_internal_islocked() const {
   return islocked_;
@@ -35231,7 +36569,7 @@ inline bool SchemaItem::islocked() const {
   return _internal_islocked();
 }
 inline void SchemaItem::_internal_set_islocked(bool value) {
-  _has_bits_[1] |= 0x00008000u;
+  _has_bits_[1] |= 0x00010000u;
   islocked_ = value;
 }
 inline void SchemaItem::set_islocked(bool value) {
@@ -35241,7 +36579,7 @@ inline void SchemaItem::set_islocked(bool value) {
 
 // required .Proto.SchemaUnit itemUnit = 4;
 inline bool SchemaItem::_internal_has_itemunit() const {
-  bool value = (_has_bits_[1] & 0x00002000u) != 0;
+  bool value = (_has_bits_[1] & 0x00004000u) != 0;
   return value;
 }
 inline bool SchemaItem::has_itemunit() const {
@@ -35249,7 +36587,7 @@ inline bool SchemaItem::has_itemunit() const {
 }
 inline void SchemaItem::clear_itemunit() {
   itemunit_ = 0;
-  _has_bits_[1] &= ~0x00002000u;
+  _has_bits_[1] &= ~0x00004000u;
 }
 inline ::Proto::SchemaUnit SchemaItem::_internal_itemunit() const {
   return static_cast< ::Proto::SchemaUnit >(itemunit_);
@@ -35260,7 +36598,7 @@ inline ::Proto::SchemaUnit SchemaItem::itemunit() const {
 }
 inline void SchemaItem::_internal_set_itemunit(::Proto::SchemaUnit value) {
   assert(::Proto::SchemaUnit_IsValid(value));
-  _has_bits_[1] |= 0x00002000u;
+  _has_bits_[1] |= 0x00004000u;
   itemunit_ = value;
 }
 inline void SchemaItem::set_itemunit(::Proto::SchemaUnit value) {
@@ -35270,7 +36608,7 @@ inline void SchemaItem::set_itemunit(::Proto::SchemaUnit value) {
 
 // optional bool acceptClick = 5 [default = false];
 inline bool SchemaItem::_internal_has_acceptclick() const {
-  bool value = (_has_bits_[1] & 0x00010000u) != 0;
+  bool value = (_has_bits_[1] & 0x00020000u) != 0;
   return value;
 }
 inline bool SchemaItem::has_acceptclick() const {
@@ -35278,7 +36616,7 @@ inline bool SchemaItem::has_acceptclick() const {
 }
 inline void SchemaItem::clear_acceptclick() {
   acceptclick_ = false;
-  _has_bits_[1] &= ~0x00010000u;
+  _has_bits_[1] &= ~0x00020000u;
 }
 inline bool SchemaItem::_internal_acceptclick() const {
   return acceptclick_;
@@ -35288,7 +36626,7 @@ inline bool SchemaItem::acceptclick() const {
   return _internal_acceptclick();
 }
 inline void SchemaItem::_internal_set_acceptclick(bool value) {
-  _has_bits_[1] |= 0x00010000u;
+  _has_bits_[1] |= 0x00020000u;
   acceptclick_ = value;
 }
 inline void SchemaItem::set_acceptclick(bool value) {
@@ -35371,7 +36709,7 @@ inline void SchemaItem::set_allocated_clickscript(std::string* clickscript) {
 
 // optional bool isCommented = 8 [default = false];
 inline bool SchemaItem::_internal_has_iscommented() const {
-  bool value = (_has_bits_[1] & 0x00020000u) != 0;
+  bool value = (_has_bits_[1] & 0x00040000u) != 0;
   return value;
 }
 inline bool SchemaItem::has_iscommented() const {
@@ -35379,7 +36717,7 @@ inline bool SchemaItem::has_iscommented() const {
 }
 inline void SchemaItem::clear_iscommented() {
   iscommented_ = false;
-  _has_bits_[1] &= ~0x00020000u;
+  _has_bits_[1] &= ~0x00040000u;
 }
 inline bool SchemaItem::_internal_iscommented() const {
   return iscommented_;
@@ -35389,7 +36727,7 @@ inline bool SchemaItem::iscommented() const {
   return _internal_iscommented();
 }
 inline void SchemaItem::_internal_set_iscommented(bool value) {
-  _has_bits_[1] |= 0x00020000u;
+  _has_bits_[1] |= 0x00040000u;
   iscommented_ = value;
 }
 inline void SchemaItem::set_iscommented(bool value) {
@@ -35618,7 +36956,7 @@ inline void SchemaItem::set_allocated_label(std::string* label) {
 
 // optional int32 labelPos = 15 [default = 2];
 inline bool SchemaItem::_internal_has_labelpos() const {
-  bool value = (_has_bits_[1] & 0x00040000u) != 0;
+  bool value = (_has_bits_[1] & 0x00080000u) != 0;
   return value;
 }
 inline bool SchemaItem::has_labelpos() const {
@@ -35626,7 +36964,7 @@ inline bool SchemaItem::has_labelpos() const {
 }
 inline void SchemaItem::clear_labelpos() {
   labelpos_ = 2;
-  _has_bits_[1] &= ~0x00040000u;
+  _has_bits_[1] &= ~0x00080000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItem::_internal_labelpos() const {
   return labelpos_;
@@ -35636,7 +36974,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItem::labelpos() const {
   return _internal_labelpos();
 }
 inline void SchemaItem::_internal_set_labelpos(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[1] |= 0x00040000u;
+  _has_bits_[1] |= 0x00080000u;
   labelpos_ = value;
 }
 inline void SchemaItem::set_labelpos(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -37958,9 +39296,92 @@ inline void SchemaItem::set_allocated_imagevalue(::Proto::SchemaItemImageValue* 
   // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItem.ImageValue)
 }
 
+// optional .Proto.SchemaItemDiagValue DiagValue = 138;
+inline bool SchemaItem::_internal_has_diagvalue() const {
+  bool value = (_has_bits_[1] & 0x00000002u) != 0;
+  PROTOBUF_ASSUME(!value || diagvalue_ != nullptr);
+  return value;
+}
+inline bool SchemaItem::has_diagvalue() const {
+  return _internal_has_diagvalue();
+}
+inline void SchemaItem::clear_diagvalue() {
+  if (diagvalue_ != nullptr) diagvalue_->Clear();
+  _has_bits_[1] &= ~0x00000002u;
+}
+inline const ::Proto::SchemaItemDiagValue& SchemaItem::_internal_diagvalue() const {
+  const ::Proto::SchemaItemDiagValue* p = diagvalue_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Proto::SchemaItemDiagValue&>(
+      ::Proto::_SchemaItemDiagValue_default_instance_);
+}
+inline const ::Proto::SchemaItemDiagValue& SchemaItem::diagvalue() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItem.DiagValue)
+  return _internal_diagvalue();
+}
+inline void SchemaItem::unsafe_arena_set_allocated_diagvalue(
+    ::Proto::SchemaItemDiagValue* diagvalue) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(diagvalue_);
+  }
+  diagvalue_ = diagvalue;
+  if (diagvalue) {
+    _has_bits_[1] |= 0x00000002u;
+  } else {
+    _has_bits_[1] &= ~0x00000002u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.SchemaItem.DiagValue)
+}
+inline ::Proto::SchemaItemDiagValue* SchemaItem::release_diagvalue() {
+  _has_bits_[1] &= ~0x00000002u;
+  ::Proto::SchemaItemDiagValue* temp = diagvalue_;
+  diagvalue_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::Proto::SchemaItemDiagValue* SchemaItem::unsafe_arena_release_diagvalue() {
+  // @@protoc_insertion_point(field_release:Proto.SchemaItem.DiagValue)
+  _has_bits_[1] &= ~0x00000002u;
+  ::Proto::SchemaItemDiagValue* temp = diagvalue_;
+  diagvalue_ = nullptr;
+  return temp;
+}
+inline ::Proto::SchemaItemDiagValue* SchemaItem::_internal_mutable_diagvalue() {
+  _has_bits_[1] |= 0x00000002u;
+  if (diagvalue_ == nullptr) {
+    auto* p = CreateMaybeMessage<::Proto::SchemaItemDiagValue>(GetArena());
+    diagvalue_ = p;
+  }
+  return diagvalue_;
+}
+inline ::Proto::SchemaItemDiagValue* SchemaItem::mutable_diagvalue() {
+  // @@protoc_insertion_point(field_mutable:Proto.SchemaItem.DiagValue)
+  return _internal_mutable_diagvalue();
+}
+inline void SchemaItem::set_allocated_diagvalue(::Proto::SchemaItemDiagValue* diagvalue) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete diagvalue_;
+  }
+  if (diagvalue) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(diagvalue);
+    if (message_arena != submessage_arena) {
+      diagvalue = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, diagvalue, submessage_arena);
+    }
+    _has_bits_[1] |= 0x00000002u;
+  } else {
+    _has_bits_[1] &= ~0x00000002u;
+  }
+  diagvalue_ = diagvalue;
+  // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItem.DiagValue)
+}
+
 // optional .Proto.SchemaItemBus BusItem = 150;
 inline bool SchemaItem::_internal_has_busitem() const {
-  bool value = (_has_bits_[1] & 0x00000002u) != 0;
+  bool value = (_has_bits_[1] & 0x00000004u) != 0;
   PROTOBUF_ASSUME(!value || busitem_ != nullptr);
   return value;
 }
@@ -37969,7 +39390,7 @@ inline bool SchemaItem::has_busitem() const {
 }
 inline void SchemaItem::clear_busitem() {
   if (busitem_ != nullptr) busitem_->Clear();
-  _has_bits_[1] &= ~0x00000002u;
+  _has_bits_[1] &= ~0x00000004u;
 }
 inline const ::Proto::SchemaItemBus& SchemaItem::_internal_busitem() const {
   const ::Proto::SchemaItemBus* p = busitem_;
@@ -37987,14 +39408,14 @@ inline void SchemaItem::unsafe_arena_set_allocated_busitem(
   }
   busitem_ = busitem;
   if (busitem) {
-    _has_bits_[1] |= 0x00000002u;
+    _has_bits_[1] |= 0x00000004u;
   } else {
-    _has_bits_[1] &= ~0x00000002u;
+    _has_bits_[1] &= ~0x00000004u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.SchemaItem.BusItem)
 }
 inline ::Proto::SchemaItemBus* SchemaItem::release_busitem() {
-  _has_bits_[1] &= ~0x00000002u;
+  _has_bits_[1] &= ~0x00000004u;
   ::Proto::SchemaItemBus* temp = busitem_;
   busitem_ = nullptr;
   if (GetArena() != nullptr) {
@@ -38004,13 +39425,13 @@ inline ::Proto::SchemaItemBus* SchemaItem::release_busitem() {
 }
 inline ::Proto::SchemaItemBus* SchemaItem::unsafe_arena_release_busitem() {
   // @@protoc_insertion_point(field_release:Proto.SchemaItem.BusItem)
-  _has_bits_[1] &= ~0x00000002u;
+  _has_bits_[1] &= ~0x00000004u;
   ::Proto::SchemaItemBus* temp = busitem_;
   busitem_ = nullptr;
   return temp;
 }
 inline ::Proto::SchemaItemBus* SchemaItem::_internal_mutable_busitem() {
-  _has_bits_[1] |= 0x00000002u;
+  _has_bits_[1] |= 0x00000004u;
   if (busitem_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::SchemaItemBus>(GetArena());
     busitem_ = p;
@@ -38033,9 +39454,9 @@ inline void SchemaItem::set_allocated_busitem(::Proto::SchemaItemBus* busitem) {
       busitem = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, busitem, submessage_arena);
     }
-    _has_bits_[1] |= 0x00000002u;
+    _has_bits_[1] |= 0x00000004u;
   } else {
-    _has_bits_[1] &= ~0x00000002u;
+    _has_bits_[1] &= ~0x00000004u;
   }
   busitem_ = busitem;
   // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItem.BusItem)
@@ -38043,7 +39464,7 @@ inline void SchemaItem::set_allocated_busitem(::Proto::SchemaItemBus* busitem) {
 
 // optional .Proto.SchemaItemBusComposer BusComposer = 151;
 inline bool SchemaItem::_internal_has_buscomposer() const {
-  bool value = (_has_bits_[1] & 0x00000004u) != 0;
+  bool value = (_has_bits_[1] & 0x00000008u) != 0;
   PROTOBUF_ASSUME(!value || buscomposer_ != nullptr);
   return value;
 }
@@ -38052,7 +39473,7 @@ inline bool SchemaItem::has_buscomposer() const {
 }
 inline void SchemaItem::clear_buscomposer() {
   if (buscomposer_ != nullptr) buscomposer_->Clear();
-  _has_bits_[1] &= ~0x00000004u;
+  _has_bits_[1] &= ~0x00000008u;
 }
 inline const ::Proto::SchemaItemBusComposer& SchemaItem::_internal_buscomposer() const {
   const ::Proto::SchemaItemBusComposer* p = buscomposer_;
@@ -38070,14 +39491,14 @@ inline void SchemaItem::unsafe_arena_set_allocated_buscomposer(
   }
   buscomposer_ = buscomposer;
   if (buscomposer) {
-    _has_bits_[1] |= 0x00000004u;
+    _has_bits_[1] |= 0x00000008u;
   } else {
-    _has_bits_[1] &= ~0x00000004u;
+    _has_bits_[1] &= ~0x00000008u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.SchemaItem.BusComposer)
 }
 inline ::Proto::SchemaItemBusComposer* SchemaItem::release_buscomposer() {
-  _has_bits_[1] &= ~0x00000004u;
+  _has_bits_[1] &= ~0x00000008u;
   ::Proto::SchemaItemBusComposer* temp = buscomposer_;
   buscomposer_ = nullptr;
   if (GetArena() != nullptr) {
@@ -38087,13 +39508,13 @@ inline ::Proto::SchemaItemBusComposer* SchemaItem::release_buscomposer() {
 }
 inline ::Proto::SchemaItemBusComposer* SchemaItem::unsafe_arena_release_buscomposer() {
   // @@protoc_insertion_point(field_release:Proto.SchemaItem.BusComposer)
-  _has_bits_[1] &= ~0x00000004u;
+  _has_bits_[1] &= ~0x00000008u;
   ::Proto::SchemaItemBusComposer* temp = buscomposer_;
   buscomposer_ = nullptr;
   return temp;
 }
 inline ::Proto::SchemaItemBusComposer* SchemaItem::_internal_mutable_buscomposer() {
-  _has_bits_[1] |= 0x00000004u;
+  _has_bits_[1] |= 0x00000008u;
   if (buscomposer_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::SchemaItemBusComposer>(GetArena());
     buscomposer_ = p;
@@ -38116,9 +39537,9 @@ inline void SchemaItem::set_allocated_buscomposer(::Proto::SchemaItemBusComposer
       buscomposer = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, buscomposer, submessage_arena);
     }
-    _has_bits_[1] |= 0x00000004u;
+    _has_bits_[1] |= 0x00000008u;
   } else {
-    _has_bits_[1] &= ~0x00000004u;
+    _has_bits_[1] &= ~0x00000008u;
   }
   buscomposer_ = buscomposer;
   // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItem.BusComposer)
@@ -38126,7 +39547,7 @@ inline void SchemaItem::set_allocated_buscomposer(::Proto::SchemaItemBusComposer
 
 // optional .Proto.SchemaItemBusExtractor BusExtractor = 152;
 inline bool SchemaItem::_internal_has_busextractor() const {
-  bool value = (_has_bits_[1] & 0x00000008u) != 0;
+  bool value = (_has_bits_[1] & 0x00000010u) != 0;
   PROTOBUF_ASSUME(!value || busextractor_ != nullptr);
   return value;
 }
@@ -38135,7 +39556,7 @@ inline bool SchemaItem::has_busextractor() const {
 }
 inline void SchemaItem::clear_busextractor() {
   if (busextractor_ != nullptr) busextractor_->Clear();
-  _has_bits_[1] &= ~0x00000008u;
+  _has_bits_[1] &= ~0x00000010u;
 }
 inline const ::Proto::SchemaItemBusExtractor& SchemaItem::_internal_busextractor() const {
   const ::Proto::SchemaItemBusExtractor* p = busextractor_;
@@ -38153,14 +39574,14 @@ inline void SchemaItem::unsafe_arena_set_allocated_busextractor(
   }
   busextractor_ = busextractor;
   if (busextractor) {
-    _has_bits_[1] |= 0x00000008u;
+    _has_bits_[1] |= 0x00000010u;
   } else {
-    _has_bits_[1] &= ~0x00000008u;
+    _has_bits_[1] &= ~0x00000010u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.SchemaItem.BusExtractor)
 }
 inline ::Proto::SchemaItemBusExtractor* SchemaItem::release_busextractor() {
-  _has_bits_[1] &= ~0x00000008u;
+  _has_bits_[1] &= ~0x00000010u;
   ::Proto::SchemaItemBusExtractor* temp = busextractor_;
   busextractor_ = nullptr;
   if (GetArena() != nullptr) {
@@ -38170,13 +39591,13 @@ inline ::Proto::SchemaItemBusExtractor* SchemaItem::release_busextractor() {
 }
 inline ::Proto::SchemaItemBusExtractor* SchemaItem::unsafe_arena_release_busextractor() {
   // @@protoc_insertion_point(field_release:Proto.SchemaItem.BusExtractor)
-  _has_bits_[1] &= ~0x00000008u;
+  _has_bits_[1] &= ~0x00000010u;
   ::Proto::SchemaItemBusExtractor* temp = busextractor_;
   busextractor_ = nullptr;
   return temp;
 }
 inline ::Proto::SchemaItemBusExtractor* SchemaItem::_internal_mutable_busextractor() {
-  _has_bits_[1] |= 0x00000008u;
+  _has_bits_[1] |= 0x00000010u;
   if (busextractor_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::SchemaItemBusExtractor>(GetArena());
     busextractor_ = p;
@@ -38199,9 +39620,9 @@ inline void SchemaItem::set_allocated_busextractor(::Proto::SchemaItemBusExtract
       busextractor = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, busextractor, submessage_arena);
     }
-    _has_bits_[1] |= 0x00000008u;
+    _has_bits_[1] |= 0x00000010u;
   } else {
-    _has_bits_[1] &= ~0x00000008u;
+    _has_bits_[1] &= ~0x00000010u;
   }
   busextractor_ = busextractor;
   // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItem.BusExtractor)
@@ -38209,7 +39630,7 @@ inline void SchemaItem::set_allocated_busextractor(::Proto::SchemaItemBusExtract
 
 // optional .Proto.SchemaItemLoopback LoopbackItem = 155;
 inline bool SchemaItem::_internal_has_loopbackitem() const {
-  bool value = (_has_bits_[1] & 0x00000010u) != 0;
+  bool value = (_has_bits_[1] & 0x00000020u) != 0;
   PROTOBUF_ASSUME(!value || loopbackitem_ != nullptr);
   return value;
 }
@@ -38218,7 +39639,7 @@ inline bool SchemaItem::has_loopbackitem() const {
 }
 inline void SchemaItem::clear_loopbackitem() {
   if (loopbackitem_ != nullptr) loopbackitem_->Clear();
-  _has_bits_[1] &= ~0x00000010u;
+  _has_bits_[1] &= ~0x00000020u;
 }
 inline const ::Proto::SchemaItemLoopback& SchemaItem::_internal_loopbackitem() const {
   const ::Proto::SchemaItemLoopback* p = loopbackitem_;
@@ -38236,14 +39657,14 @@ inline void SchemaItem::unsafe_arena_set_allocated_loopbackitem(
   }
   loopbackitem_ = loopbackitem;
   if (loopbackitem) {
-    _has_bits_[1] |= 0x00000010u;
+    _has_bits_[1] |= 0x00000020u;
   } else {
-    _has_bits_[1] &= ~0x00000010u;
+    _has_bits_[1] &= ~0x00000020u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.SchemaItem.LoopbackItem)
 }
 inline ::Proto::SchemaItemLoopback* SchemaItem::release_loopbackitem() {
-  _has_bits_[1] &= ~0x00000010u;
+  _has_bits_[1] &= ~0x00000020u;
   ::Proto::SchemaItemLoopback* temp = loopbackitem_;
   loopbackitem_ = nullptr;
   if (GetArena() != nullptr) {
@@ -38253,13 +39674,13 @@ inline ::Proto::SchemaItemLoopback* SchemaItem::release_loopbackitem() {
 }
 inline ::Proto::SchemaItemLoopback* SchemaItem::unsafe_arena_release_loopbackitem() {
   // @@protoc_insertion_point(field_release:Proto.SchemaItem.LoopbackItem)
-  _has_bits_[1] &= ~0x00000010u;
+  _has_bits_[1] &= ~0x00000020u;
   ::Proto::SchemaItemLoopback* temp = loopbackitem_;
   loopbackitem_ = nullptr;
   return temp;
 }
 inline ::Proto::SchemaItemLoopback* SchemaItem::_internal_mutable_loopbackitem() {
-  _has_bits_[1] |= 0x00000010u;
+  _has_bits_[1] |= 0x00000020u;
   if (loopbackitem_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::SchemaItemLoopback>(GetArena());
     loopbackitem_ = p;
@@ -38282,9 +39703,9 @@ inline void SchemaItem::set_allocated_loopbackitem(::Proto::SchemaItemLoopback* 
       loopbackitem = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, loopbackitem, submessage_arena);
     }
-    _has_bits_[1] |= 0x00000010u;
+    _has_bits_[1] |= 0x00000020u;
   } else {
-    _has_bits_[1] &= ~0x00000010u;
+    _has_bits_[1] &= ~0x00000020u;
   }
   loopbackitem_ = loopbackitem;
   // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItem.LoopbackItem)
@@ -38292,7 +39713,7 @@ inline void SchemaItem::set_allocated_loopbackitem(::Proto::SchemaItemLoopback* 
 
 // optional .Proto.SchemaItemLoopbackSource loopbackSource = 156;
 inline bool SchemaItem::_internal_has_loopbacksource() const {
-  bool value = (_has_bits_[1] & 0x00000020u) != 0;
+  bool value = (_has_bits_[1] & 0x00000040u) != 0;
   PROTOBUF_ASSUME(!value || loopbacksource_ != nullptr);
   return value;
 }
@@ -38301,7 +39722,7 @@ inline bool SchemaItem::has_loopbacksource() const {
 }
 inline void SchemaItem::clear_loopbacksource() {
   if (loopbacksource_ != nullptr) loopbacksource_->Clear();
-  _has_bits_[1] &= ~0x00000020u;
+  _has_bits_[1] &= ~0x00000040u;
 }
 inline const ::Proto::SchemaItemLoopbackSource& SchemaItem::_internal_loopbacksource() const {
   const ::Proto::SchemaItemLoopbackSource* p = loopbacksource_;
@@ -38319,14 +39740,14 @@ inline void SchemaItem::unsafe_arena_set_allocated_loopbacksource(
   }
   loopbacksource_ = loopbacksource;
   if (loopbacksource) {
-    _has_bits_[1] |= 0x00000020u;
+    _has_bits_[1] |= 0x00000040u;
   } else {
-    _has_bits_[1] &= ~0x00000020u;
+    _has_bits_[1] &= ~0x00000040u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.SchemaItem.loopbackSource)
 }
 inline ::Proto::SchemaItemLoopbackSource* SchemaItem::release_loopbacksource() {
-  _has_bits_[1] &= ~0x00000020u;
+  _has_bits_[1] &= ~0x00000040u;
   ::Proto::SchemaItemLoopbackSource* temp = loopbacksource_;
   loopbacksource_ = nullptr;
   if (GetArena() != nullptr) {
@@ -38336,13 +39757,13 @@ inline ::Proto::SchemaItemLoopbackSource* SchemaItem::release_loopbacksource() {
 }
 inline ::Proto::SchemaItemLoopbackSource* SchemaItem::unsafe_arena_release_loopbacksource() {
   // @@protoc_insertion_point(field_release:Proto.SchemaItem.loopbackSource)
-  _has_bits_[1] &= ~0x00000020u;
+  _has_bits_[1] &= ~0x00000040u;
   ::Proto::SchemaItemLoopbackSource* temp = loopbacksource_;
   loopbacksource_ = nullptr;
   return temp;
 }
 inline ::Proto::SchemaItemLoopbackSource* SchemaItem::_internal_mutable_loopbacksource() {
-  _has_bits_[1] |= 0x00000020u;
+  _has_bits_[1] |= 0x00000040u;
   if (loopbacksource_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::SchemaItemLoopbackSource>(GetArena());
     loopbacksource_ = p;
@@ -38365,9 +39786,9 @@ inline void SchemaItem::set_allocated_loopbacksource(::Proto::SchemaItemLoopback
       loopbacksource = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, loopbacksource, submessage_arena);
     }
-    _has_bits_[1] |= 0x00000020u;
+    _has_bits_[1] |= 0x00000040u;
   } else {
-    _has_bits_[1] &= ~0x00000020u;
+    _has_bits_[1] &= ~0x00000040u;
   }
   loopbacksource_ = loopbacksource;
   // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItem.loopbackSource)
@@ -38375,7 +39796,7 @@ inline void SchemaItem::set_allocated_loopbacksource(::Proto::SchemaItemLoopback
 
 // optional .Proto.SchemaItemLoopbackTarget loopbackTarget = 157;
 inline bool SchemaItem::_internal_has_loopbacktarget() const {
-  bool value = (_has_bits_[1] & 0x00000040u) != 0;
+  bool value = (_has_bits_[1] & 0x00000080u) != 0;
   PROTOBUF_ASSUME(!value || loopbacktarget_ != nullptr);
   return value;
 }
@@ -38384,7 +39805,7 @@ inline bool SchemaItem::has_loopbacktarget() const {
 }
 inline void SchemaItem::clear_loopbacktarget() {
   if (loopbacktarget_ != nullptr) loopbacktarget_->Clear();
-  _has_bits_[1] &= ~0x00000040u;
+  _has_bits_[1] &= ~0x00000080u;
 }
 inline const ::Proto::SchemaItemLoopbackTarget& SchemaItem::_internal_loopbacktarget() const {
   const ::Proto::SchemaItemLoopbackTarget* p = loopbacktarget_;
@@ -38402,14 +39823,14 @@ inline void SchemaItem::unsafe_arena_set_allocated_loopbacktarget(
   }
   loopbacktarget_ = loopbacktarget;
   if (loopbacktarget) {
-    _has_bits_[1] |= 0x00000040u;
+    _has_bits_[1] |= 0x00000080u;
   } else {
-    _has_bits_[1] &= ~0x00000040u;
+    _has_bits_[1] &= ~0x00000080u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.SchemaItem.loopbackTarget)
 }
 inline ::Proto::SchemaItemLoopbackTarget* SchemaItem::release_loopbacktarget() {
-  _has_bits_[1] &= ~0x00000040u;
+  _has_bits_[1] &= ~0x00000080u;
   ::Proto::SchemaItemLoopbackTarget* temp = loopbacktarget_;
   loopbacktarget_ = nullptr;
   if (GetArena() != nullptr) {
@@ -38419,13 +39840,13 @@ inline ::Proto::SchemaItemLoopbackTarget* SchemaItem::release_loopbacktarget() {
 }
 inline ::Proto::SchemaItemLoopbackTarget* SchemaItem::unsafe_arena_release_loopbacktarget() {
   // @@protoc_insertion_point(field_release:Proto.SchemaItem.loopbackTarget)
-  _has_bits_[1] &= ~0x00000040u;
+  _has_bits_[1] &= ~0x00000080u;
   ::Proto::SchemaItemLoopbackTarget* temp = loopbacktarget_;
   loopbacktarget_ = nullptr;
   return temp;
 }
 inline ::Proto::SchemaItemLoopbackTarget* SchemaItem::_internal_mutable_loopbacktarget() {
-  _has_bits_[1] |= 0x00000040u;
+  _has_bits_[1] |= 0x00000080u;
   if (loopbacktarget_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::SchemaItemLoopbackTarget>(GetArena());
     loopbacktarget_ = p;
@@ -38448,9 +39869,9 @@ inline void SchemaItem::set_allocated_loopbacktarget(::Proto::SchemaItemLoopback
       loopbacktarget = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, loopbacktarget, submessage_arena);
     }
-    _has_bits_[1] |= 0x00000040u;
+    _has_bits_[1] |= 0x00000080u;
   } else {
-    _has_bits_[1] &= ~0x00000040u;
+    _has_bits_[1] &= ~0x00000080u;
   }
   loopbacktarget_ = loopbacktarget;
   // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItem.loopbackTarget)
@@ -38458,7 +39879,7 @@ inline void SchemaItem::set_allocated_loopbacktarget(::Proto::SchemaItemLoopback
 
 // optional .Proto.SchemaItemControl control = 200;
 inline bool SchemaItem::_internal_has_control() const {
-  bool value = (_has_bits_[1] & 0x00000080u) != 0;
+  bool value = (_has_bits_[1] & 0x00000100u) != 0;
   PROTOBUF_ASSUME(!value || control_ != nullptr);
   return value;
 }
@@ -38467,7 +39888,7 @@ inline bool SchemaItem::has_control() const {
 }
 inline void SchemaItem::clear_control() {
   if (control_ != nullptr) control_->Clear();
-  _has_bits_[1] &= ~0x00000080u;
+  _has_bits_[1] &= ~0x00000100u;
 }
 inline const ::Proto::SchemaItemControl& SchemaItem::_internal_control() const {
   const ::Proto::SchemaItemControl* p = control_;
@@ -38485,14 +39906,14 @@ inline void SchemaItem::unsafe_arena_set_allocated_control(
   }
   control_ = control;
   if (control) {
-    _has_bits_[1] |= 0x00000080u;
+    _has_bits_[1] |= 0x00000100u;
   } else {
-    _has_bits_[1] &= ~0x00000080u;
+    _has_bits_[1] &= ~0x00000100u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.SchemaItem.control)
 }
 inline ::Proto::SchemaItemControl* SchemaItem::release_control() {
-  _has_bits_[1] &= ~0x00000080u;
+  _has_bits_[1] &= ~0x00000100u;
   ::Proto::SchemaItemControl* temp = control_;
   control_ = nullptr;
   if (GetArena() != nullptr) {
@@ -38502,13 +39923,13 @@ inline ::Proto::SchemaItemControl* SchemaItem::release_control() {
 }
 inline ::Proto::SchemaItemControl* SchemaItem::unsafe_arena_release_control() {
   // @@protoc_insertion_point(field_release:Proto.SchemaItem.control)
-  _has_bits_[1] &= ~0x00000080u;
+  _has_bits_[1] &= ~0x00000100u;
   ::Proto::SchemaItemControl* temp = control_;
   control_ = nullptr;
   return temp;
 }
 inline ::Proto::SchemaItemControl* SchemaItem::_internal_mutable_control() {
-  _has_bits_[1] |= 0x00000080u;
+  _has_bits_[1] |= 0x00000100u;
   if (control_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::SchemaItemControl>(GetArena());
     control_ = p;
@@ -38531,9 +39952,9 @@ inline void SchemaItem::set_allocated_control(::Proto::SchemaItemControl* contro
       control = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, control, submessage_arena);
     }
-    _has_bits_[1] |= 0x00000080u;
+    _has_bits_[1] |= 0x00000100u;
   } else {
-    _has_bits_[1] &= ~0x00000080u;
+    _has_bits_[1] &= ~0x00000100u;
   }
   control_ = control;
   // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItem.control)
@@ -38541,7 +39962,7 @@ inline void SchemaItem::set_allocated_control(::Proto::SchemaItemControl* contro
 
 // optional .Proto.SchemaItemPushButton pushButton = 210;
 inline bool SchemaItem::_internal_has_pushbutton() const {
-  bool value = (_has_bits_[1] & 0x00000100u) != 0;
+  bool value = (_has_bits_[1] & 0x00000200u) != 0;
   PROTOBUF_ASSUME(!value || pushbutton_ != nullptr);
   return value;
 }
@@ -38550,7 +39971,7 @@ inline bool SchemaItem::has_pushbutton() const {
 }
 inline void SchemaItem::clear_pushbutton() {
   if (pushbutton_ != nullptr) pushbutton_->Clear();
-  _has_bits_[1] &= ~0x00000100u;
+  _has_bits_[1] &= ~0x00000200u;
 }
 inline const ::Proto::SchemaItemPushButton& SchemaItem::_internal_pushbutton() const {
   const ::Proto::SchemaItemPushButton* p = pushbutton_;
@@ -38568,14 +39989,14 @@ inline void SchemaItem::unsafe_arena_set_allocated_pushbutton(
   }
   pushbutton_ = pushbutton;
   if (pushbutton) {
-    _has_bits_[1] |= 0x00000100u;
+    _has_bits_[1] |= 0x00000200u;
   } else {
-    _has_bits_[1] &= ~0x00000100u;
+    _has_bits_[1] &= ~0x00000200u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.SchemaItem.pushButton)
 }
 inline ::Proto::SchemaItemPushButton* SchemaItem::release_pushbutton() {
-  _has_bits_[1] &= ~0x00000100u;
+  _has_bits_[1] &= ~0x00000200u;
   ::Proto::SchemaItemPushButton* temp = pushbutton_;
   pushbutton_ = nullptr;
   if (GetArena() != nullptr) {
@@ -38585,13 +40006,13 @@ inline ::Proto::SchemaItemPushButton* SchemaItem::release_pushbutton() {
 }
 inline ::Proto::SchemaItemPushButton* SchemaItem::unsafe_arena_release_pushbutton() {
   // @@protoc_insertion_point(field_release:Proto.SchemaItem.pushButton)
-  _has_bits_[1] &= ~0x00000100u;
+  _has_bits_[1] &= ~0x00000200u;
   ::Proto::SchemaItemPushButton* temp = pushbutton_;
   pushbutton_ = nullptr;
   return temp;
 }
 inline ::Proto::SchemaItemPushButton* SchemaItem::_internal_mutable_pushbutton() {
-  _has_bits_[1] |= 0x00000100u;
+  _has_bits_[1] |= 0x00000200u;
   if (pushbutton_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::SchemaItemPushButton>(GetArena());
     pushbutton_ = p;
@@ -38614,9 +40035,9 @@ inline void SchemaItem::set_allocated_pushbutton(::Proto::SchemaItemPushButton* 
       pushbutton = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, pushbutton, submessage_arena);
     }
-    _has_bits_[1] |= 0x00000100u;
+    _has_bits_[1] |= 0x00000200u;
   } else {
-    _has_bits_[1] &= ~0x00000100u;
+    _has_bits_[1] &= ~0x00000200u;
   }
   pushbutton_ = pushbutton;
   // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItem.pushButton)
@@ -38624,7 +40045,7 @@ inline void SchemaItem::set_allocated_pushbutton(::Proto::SchemaItemPushButton* 
 
 // optional .Proto.SchemaItemLineEdit lineEdit = 211;
 inline bool SchemaItem::_internal_has_lineedit() const {
-  bool value = (_has_bits_[1] & 0x00000200u) != 0;
+  bool value = (_has_bits_[1] & 0x00000400u) != 0;
   PROTOBUF_ASSUME(!value || lineedit_ != nullptr);
   return value;
 }
@@ -38633,7 +40054,7 @@ inline bool SchemaItem::has_lineedit() const {
 }
 inline void SchemaItem::clear_lineedit() {
   if (lineedit_ != nullptr) lineedit_->Clear();
-  _has_bits_[1] &= ~0x00000200u;
+  _has_bits_[1] &= ~0x00000400u;
 }
 inline const ::Proto::SchemaItemLineEdit& SchemaItem::_internal_lineedit() const {
   const ::Proto::SchemaItemLineEdit* p = lineedit_;
@@ -38651,14 +40072,14 @@ inline void SchemaItem::unsafe_arena_set_allocated_lineedit(
   }
   lineedit_ = lineedit;
   if (lineedit) {
-    _has_bits_[1] |= 0x00000200u;
+    _has_bits_[1] |= 0x00000400u;
   } else {
-    _has_bits_[1] &= ~0x00000200u;
+    _has_bits_[1] &= ~0x00000400u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.SchemaItem.lineEdit)
 }
 inline ::Proto::SchemaItemLineEdit* SchemaItem::release_lineedit() {
-  _has_bits_[1] &= ~0x00000200u;
+  _has_bits_[1] &= ~0x00000400u;
   ::Proto::SchemaItemLineEdit* temp = lineedit_;
   lineedit_ = nullptr;
   if (GetArena() != nullptr) {
@@ -38668,13 +40089,13 @@ inline ::Proto::SchemaItemLineEdit* SchemaItem::release_lineedit() {
 }
 inline ::Proto::SchemaItemLineEdit* SchemaItem::unsafe_arena_release_lineedit() {
   // @@protoc_insertion_point(field_release:Proto.SchemaItem.lineEdit)
-  _has_bits_[1] &= ~0x00000200u;
+  _has_bits_[1] &= ~0x00000400u;
   ::Proto::SchemaItemLineEdit* temp = lineedit_;
   lineedit_ = nullptr;
   return temp;
 }
 inline ::Proto::SchemaItemLineEdit* SchemaItem::_internal_mutable_lineedit() {
-  _has_bits_[1] |= 0x00000200u;
+  _has_bits_[1] |= 0x00000400u;
   if (lineedit_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::SchemaItemLineEdit>(GetArena());
     lineedit_ = p;
@@ -38697,9 +40118,9 @@ inline void SchemaItem::set_allocated_lineedit(::Proto::SchemaItemLineEdit* line
       lineedit = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, lineedit, submessage_arena);
     }
-    _has_bits_[1] |= 0x00000200u;
+    _has_bits_[1] |= 0x00000400u;
   } else {
-    _has_bits_[1] &= ~0x00000200u;
+    _has_bits_[1] &= ~0x00000400u;
   }
   lineedit_ = lineedit;
   // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItem.lineEdit)
@@ -38707,7 +40128,7 @@ inline void SchemaItem::set_allocated_lineedit(::Proto::SchemaItemLineEdit* line
 
 // optional .Proto.SchemaItemSlider slider = 212;
 inline bool SchemaItem::_internal_has_slider() const {
-  bool value = (_has_bits_[1] & 0x00000400u) != 0;
+  bool value = (_has_bits_[1] & 0x00000800u) != 0;
   PROTOBUF_ASSUME(!value || slider_ != nullptr);
   return value;
 }
@@ -38716,7 +40137,7 @@ inline bool SchemaItem::has_slider() const {
 }
 inline void SchemaItem::clear_slider() {
   if (slider_ != nullptr) slider_->Clear();
-  _has_bits_[1] &= ~0x00000400u;
+  _has_bits_[1] &= ~0x00000800u;
 }
 inline const ::Proto::SchemaItemSlider& SchemaItem::_internal_slider() const {
   const ::Proto::SchemaItemSlider* p = slider_;
@@ -38734,14 +40155,14 @@ inline void SchemaItem::unsafe_arena_set_allocated_slider(
   }
   slider_ = slider;
   if (slider) {
-    _has_bits_[1] |= 0x00000400u;
+    _has_bits_[1] |= 0x00000800u;
   } else {
-    _has_bits_[1] &= ~0x00000400u;
+    _has_bits_[1] &= ~0x00000800u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.SchemaItem.slider)
 }
 inline ::Proto::SchemaItemSlider* SchemaItem::release_slider() {
-  _has_bits_[1] &= ~0x00000400u;
+  _has_bits_[1] &= ~0x00000800u;
   ::Proto::SchemaItemSlider* temp = slider_;
   slider_ = nullptr;
   if (GetArena() != nullptr) {
@@ -38751,13 +40172,13 @@ inline ::Proto::SchemaItemSlider* SchemaItem::release_slider() {
 }
 inline ::Proto::SchemaItemSlider* SchemaItem::unsafe_arena_release_slider() {
   // @@protoc_insertion_point(field_release:Proto.SchemaItem.slider)
-  _has_bits_[1] &= ~0x00000400u;
+  _has_bits_[1] &= ~0x00000800u;
   ::Proto::SchemaItemSlider* temp = slider_;
   slider_ = nullptr;
   return temp;
 }
 inline ::Proto::SchemaItemSlider* SchemaItem::_internal_mutable_slider() {
-  _has_bits_[1] |= 0x00000400u;
+  _has_bits_[1] |= 0x00000800u;
   if (slider_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::SchemaItemSlider>(GetArena());
     slider_ = p;
@@ -38780,9 +40201,9 @@ inline void SchemaItem::set_allocated_slider(::Proto::SchemaItemSlider* slider) 
       slider = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, slider, submessage_arena);
     }
-    _has_bits_[1] |= 0x00000400u;
+    _has_bits_[1] |= 0x00000800u;
   } else {
-    _has_bits_[1] &= ~0x00000400u;
+    _has_bits_[1] &= ~0x00000800u;
   }
   slider_ = slider;
   // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItem.slider)
@@ -38790,7 +40211,7 @@ inline void SchemaItem::set_allocated_slider(::Proto::SchemaItemSlider* slider) 
 
 // optional .Proto.SchemaItemVduLine vduLine = 300;
 inline bool SchemaItem::_internal_has_vduline() const {
-  bool value = (_has_bits_[1] & 0x00000800u) != 0;
+  bool value = (_has_bits_[1] & 0x00001000u) != 0;
   PROTOBUF_ASSUME(!value || vduline_ != nullptr);
   return value;
 }
@@ -38799,7 +40220,7 @@ inline bool SchemaItem::has_vduline() const {
 }
 inline void SchemaItem::clear_vduline() {
   if (vduline_ != nullptr) vduline_->Clear();
-  _has_bits_[1] &= ~0x00000800u;
+  _has_bits_[1] &= ~0x00001000u;
 }
 inline const ::Proto::SchemaItemVduLine& SchemaItem::_internal_vduline() const {
   const ::Proto::SchemaItemVduLine* p = vduline_;
@@ -38817,14 +40238,14 @@ inline void SchemaItem::unsafe_arena_set_allocated_vduline(
   }
   vduline_ = vduline;
   if (vduline) {
-    _has_bits_[1] |= 0x00000800u;
+    _has_bits_[1] |= 0x00001000u;
   } else {
-    _has_bits_[1] &= ~0x00000800u;
+    _has_bits_[1] &= ~0x00001000u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.SchemaItem.vduLine)
 }
 inline ::Proto::SchemaItemVduLine* SchemaItem::release_vduline() {
-  _has_bits_[1] &= ~0x00000800u;
+  _has_bits_[1] &= ~0x00001000u;
   ::Proto::SchemaItemVduLine* temp = vduline_;
   vduline_ = nullptr;
   if (GetArena() != nullptr) {
@@ -38834,13 +40255,13 @@ inline ::Proto::SchemaItemVduLine* SchemaItem::release_vduline() {
 }
 inline ::Proto::SchemaItemVduLine* SchemaItem::unsafe_arena_release_vduline() {
   // @@protoc_insertion_point(field_release:Proto.SchemaItem.vduLine)
-  _has_bits_[1] &= ~0x00000800u;
+  _has_bits_[1] &= ~0x00001000u;
   ::Proto::SchemaItemVduLine* temp = vduline_;
   vduline_ = nullptr;
   return temp;
 }
 inline ::Proto::SchemaItemVduLine* SchemaItem::_internal_mutable_vduline() {
-  _has_bits_[1] |= 0x00000800u;
+  _has_bits_[1] |= 0x00001000u;
   if (vduline_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::SchemaItemVduLine>(GetArena());
     vduline_ = p;
@@ -38863,9 +40284,9 @@ inline void SchemaItem::set_allocated_vduline(::Proto::SchemaItemVduLine* vdulin
       vduline = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, vduline, submessage_arena);
     }
-    _has_bits_[1] |= 0x00000800u;
+    _has_bits_[1] |= 0x00001000u;
   } else {
-    _has_bits_[1] &= ~0x00000800u;
+    _has_bits_[1] &= ~0x00001000u;
   }
   vduline_ = vduline;
   // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItem.vduLine)
@@ -38873,7 +40294,7 @@ inline void SchemaItem::set_allocated_vduline(::Proto::SchemaItemVduLine* vdulin
 
 // optional .Proto.SchemaItemVduRect vduRect = 301;
 inline bool SchemaItem::_internal_has_vdurect() const {
-  bool value = (_has_bits_[1] & 0x00001000u) != 0;
+  bool value = (_has_bits_[1] & 0x00002000u) != 0;
   PROTOBUF_ASSUME(!value || vdurect_ != nullptr);
   return value;
 }
@@ -38882,7 +40303,7 @@ inline bool SchemaItem::has_vdurect() const {
 }
 inline void SchemaItem::clear_vdurect() {
   if (vdurect_ != nullptr) vdurect_->Clear();
-  _has_bits_[1] &= ~0x00001000u;
+  _has_bits_[1] &= ~0x00002000u;
 }
 inline const ::Proto::SchemaItemVduRect& SchemaItem::_internal_vdurect() const {
   const ::Proto::SchemaItemVduRect* p = vdurect_;
@@ -38900,14 +40321,14 @@ inline void SchemaItem::unsafe_arena_set_allocated_vdurect(
   }
   vdurect_ = vdurect;
   if (vdurect) {
-    _has_bits_[1] |= 0x00001000u;
+    _has_bits_[1] |= 0x00002000u;
   } else {
-    _has_bits_[1] &= ~0x00001000u;
+    _has_bits_[1] &= ~0x00002000u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.SchemaItem.vduRect)
 }
 inline ::Proto::SchemaItemVduRect* SchemaItem::release_vdurect() {
-  _has_bits_[1] &= ~0x00001000u;
+  _has_bits_[1] &= ~0x00002000u;
   ::Proto::SchemaItemVduRect* temp = vdurect_;
   vdurect_ = nullptr;
   if (GetArena() != nullptr) {
@@ -38917,13 +40338,13 @@ inline ::Proto::SchemaItemVduRect* SchemaItem::release_vdurect() {
 }
 inline ::Proto::SchemaItemVduRect* SchemaItem::unsafe_arena_release_vdurect() {
   // @@protoc_insertion_point(field_release:Proto.SchemaItem.vduRect)
-  _has_bits_[1] &= ~0x00001000u;
+  _has_bits_[1] &= ~0x00002000u;
   ::Proto::SchemaItemVduRect* temp = vdurect_;
   vdurect_ = nullptr;
   return temp;
 }
 inline ::Proto::SchemaItemVduRect* SchemaItem::_internal_mutable_vdurect() {
-  _has_bits_[1] |= 0x00001000u;
+  _has_bits_[1] |= 0x00002000u;
   if (vdurect_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::SchemaItemVduRect>(GetArena());
     vdurect_ = p;
@@ -38946,9 +40367,9 @@ inline void SchemaItem::set_allocated_vdurect(::Proto::SchemaItemVduRect* vdurec
       vdurect = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, vdurect, submessage_arena);
     }
-    _has_bits_[1] |= 0x00001000u;
+    _has_bits_[1] |= 0x00002000u;
   } else {
-    _has_bits_[1] &= ~0x00001000u;
+    _has_bits_[1] &= ~0x00002000u;
   }
   vdurect_ = vdurect;
   // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItem.vduRect)
@@ -46097,6 +47518,491 @@ SchemaItemImageValue::images() const {
 
 // -------------------------------------------------------------------
 
+// SchemaItemDiagValue
+
+// optional string signalIds = 1;
+inline bool SchemaItemDiagValue::_internal_has_signalids() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool SchemaItemDiagValue::has_signalids() const {
+  return _internal_has_signalids();
+}
+inline void SchemaItemDiagValue::clear_signalids() {
+  signalids_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& SchemaItemDiagValue::signalids() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemDiagValue.signalIds)
+  return _internal_signalids();
+}
+inline void SchemaItemDiagValue::set_signalids(const std::string& value) {
+  _internal_set_signalids(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemDiagValue.signalIds)
+}
+inline std::string* SchemaItemDiagValue::mutable_signalids() {
+  // @@protoc_insertion_point(field_mutable:Proto.SchemaItemDiagValue.signalIds)
+  return _internal_mutable_signalids();
+}
+inline const std::string& SchemaItemDiagValue::_internal_signalids() const {
+  return signalids_.Get();
+}
+inline void SchemaItemDiagValue::_internal_set_signalids(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  signalids_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void SchemaItemDiagValue::set_signalids(std::string&& value) {
+  _has_bits_[0] |= 0x00000001u;
+  signalids_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.SchemaItemDiagValue.signalIds)
+}
+inline void SchemaItemDiagValue::set_signalids(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000001u;
+  signalids_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.SchemaItemDiagValue.signalIds)
+}
+inline void SchemaItemDiagValue::set_signalids(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000001u;
+  signalids_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.SchemaItemDiagValue.signalIds)
+}
+inline std::string* SchemaItemDiagValue::_internal_mutable_signalids() {
+  _has_bits_[0] |= 0x00000001u;
+  return signalids_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* SchemaItemDiagValue::release_signalids() {
+  // @@protoc_insertion_point(field_release:Proto.SchemaItemDiagValue.signalIds)
+  if (!_internal_has_signalids()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return signalids_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SchemaItemDiagValue::set_allocated_signalids(std::string* signalids) {
+  if (signalids != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  signalids_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), signalids,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItemDiagValue.signalIds)
+}
+
+// optional double lineWeight = 4;
+inline bool SchemaItemDiagValue::_internal_has_lineweight() const {
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  return value;
+}
+inline bool SchemaItemDiagValue::has_lineweight() const {
+  return _internal_has_lineweight();
+}
+inline void SchemaItemDiagValue::clear_lineweight() {
+  lineweight_ = 0;
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline double SchemaItemDiagValue::_internal_lineweight() const {
+  return lineweight_;
+}
+inline double SchemaItemDiagValue::lineweight() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemDiagValue.lineWeight)
+  return _internal_lineweight();
+}
+inline void SchemaItemDiagValue::_internal_set_lineweight(double value) {
+  _has_bits_[0] |= 0x00000008u;
+  lineweight_ = value;
+}
+inline void SchemaItemDiagValue::set_lineweight(double value) {
+  _internal_set_lineweight(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemDiagValue.lineWeight)
+}
+
+// optional uint32 lineColor = 5;
+inline bool SchemaItemDiagValue::_internal_has_linecolor() const {
+  bool value = (_has_bits_[0] & 0x00000010u) != 0;
+  return value;
+}
+inline bool SchemaItemDiagValue::has_linecolor() const {
+  return _internal_has_linecolor();
+}
+inline void SchemaItemDiagValue::clear_linecolor() {
+  linecolor_ = 0u;
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 SchemaItemDiagValue::_internal_linecolor() const {
+  return linecolor_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 SchemaItemDiagValue::linecolor() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemDiagValue.lineColor)
+  return _internal_linecolor();
+}
+inline void SchemaItemDiagValue::_internal_set_linecolor(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _has_bits_[0] |= 0x00000010u;
+  linecolor_ = value;
+}
+inline void SchemaItemDiagValue::set_linecolor(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_linecolor(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemDiagValue.lineColor)
+}
+
+// optional uint32 fillColor = 6;
+inline bool SchemaItemDiagValue::_internal_has_fillcolor() const {
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
+  return value;
+}
+inline bool SchemaItemDiagValue::has_fillcolor() const {
+  return _internal_has_fillcolor();
+}
+inline void SchemaItemDiagValue::clear_fillcolor() {
+  fillcolor_ = 0u;
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 SchemaItemDiagValue::_internal_fillcolor() const {
+  return fillcolor_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 SchemaItemDiagValue::fillcolor() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemDiagValue.fillColor)
+  return _internal_fillcolor();
+}
+inline void SchemaItemDiagValue::_internal_set_fillcolor(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _has_bits_[0] |= 0x00000020u;
+  fillcolor_ = value;
+}
+inline void SchemaItemDiagValue::set_fillcolor(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_fillcolor(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemDiagValue.fillColor)
+}
+
+// optional uint32 textColor = 7;
+inline bool SchemaItemDiagValue::_internal_has_textcolor() const {
+  bool value = (_has_bits_[0] & 0x00000040u) != 0;
+  return value;
+}
+inline bool SchemaItemDiagValue::has_textcolor() const {
+  return _internal_has_textcolor();
+}
+inline void SchemaItemDiagValue::clear_textcolor() {
+  textcolor_ = 0u;
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 SchemaItemDiagValue::_internal_textcolor() const {
+  return textcolor_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 SchemaItemDiagValue::textcolor() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemDiagValue.textColor)
+  return _internal_textcolor();
+}
+inline void SchemaItemDiagValue::_internal_set_textcolor(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _has_bits_[0] |= 0x00000040u;
+  textcolor_ = value;
+}
+inline void SchemaItemDiagValue::set_textcolor(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_textcolor(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemDiagValue.textColor)
+}
+
+// optional string text = 8;
+inline bool SchemaItemDiagValue::_internal_has_text() const {
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool SchemaItemDiagValue::has_text() const {
+  return _internal_has_text();
+}
+inline void SchemaItemDiagValue::clear_text() {
+  text_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline const std::string& SchemaItemDiagValue::text() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemDiagValue.text)
+  return _internal_text();
+}
+inline void SchemaItemDiagValue::set_text(const std::string& value) {
+  _internal_set_text(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemDiagValue.text)
+}
+inline std::string* SchemaItemDiagValue::mutable_text() {
+  // @@protoc_insertion_point(field_mutable:Proto.SchemaItemDiagValue.text)
+  return _internal_mutable_text();
+}
+inline const std::string& SchemaItemDiagValue::_internal_text() const {
+  return text_.Get();
+}
+inline void SchemaItemDiagValue::_internal_set_text(const std::string& value) {
+  _has_bits_[0] |= 0x00000002u;
+  text_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void SchemaItemDiagValue::set_text(std::string&& value) {
+  _has_bits_[0] |= 0x00000002u;
+  text_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.SchemaItemDiagValue.text)
+}
+inline void SchemaItemDiagValue::set_text(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000002u;
+  text_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.SchemaItemDiagValue.text)
+}
+inline void SchemaItemDiagValue::set_text(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000002u;
+  text_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.SchemaItemDiagValue.text)
+}
+inline std::string* SchemaItemDiagValue::_internal_mutable_text() {
+  _has_bits_[0] |= 0x00000002u;
+  return text_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* SchemaItemDiagValue::release_text() {
+  // @@protoc_insertion_point(field_release:Proto.SchemaItemDiagValue.text)
+  if (!_internal_has_text()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000002u;
+  return text_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SchemaItemDiagValue::set_allocated_text(std::string* text) {
+  if (text != nullptr) {
+    _has_bits_[0] |= 0x00000002u;
+  } else {
+    _has_bits_[0] &= ~0x00000002u;
+  }
+  text_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), text,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItemDiagValue.text)
+}
+
+// optional .Proto.FontParam font = 9;
+inline bool SchemaItemDiagValue::_internal_has_font() const {
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  PROTOBUF_ASSUME(!value || font_ != nullptr);
+  return value;
+}
+inline bool SchemaItemDiagValue::has_font() const {
+  return _internal_has_font();
+}
+inline void SchemaItemDiagValue::clear_font() {
+  if (font_ != nullptr) font_->Clear();
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline const ::Proto::FontParam& SchemaItemDiagValue::_internal_font() const {
+  const ::Proto::FontParam* p = font_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Proto::FontParam&>(
+      ::Proto::_FontParam_default_instance_);
+}
+inline const ::Proto::FontParam& SchemaItemDiagValue::font() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemDiagValue.font)
+  return _internal_font();
+}
+inline void SchemaItemDiagValue::unsafe_arena_set_allocated_font(
+    ::Proto::FontParam* font) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(font_);
+  }
+  font_ = font;
+  if (font) {
+    _has_bits_[0] |= 0x00000004u;
+  } else {
+    _has_bits_[0] &= ~0x00000004u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.SchemaItemDiagValue.font)
+}
+inline ::Proto::FontParam* SchemaItemDiagValue::release_font() {
+  _has_bits_[0] &= ~0x00000004u;
+  ::Proto::FontParam* temp = font_;
+  font_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::Proto::FontParam* SchemaItemDiagValue::unsafe_arena_release_font() {
+  // @@protoc_insertion_point(field_release:Proto.SchemaItemDiagValue.font)
+  _has_bits_[0] &= ~0x00000004u;
+  ::Proto::FontParam* temp = font_;
+  font_ = nullptr;
+  return temp;
+}
+inline ::Proto::FontParam* SchemaItemDiagValue::_internal_mutable_font() {
+  _has_bits_[0] |= 0x00000004u;
+  if (font_ == nullptr) {
+    auto* p = CreateMaybeMessage<::Proto::FontParam>(GetArena());
+    font_ = p;
+  }
+  return font_;
+}
+inline ::Proto::FontParam* SchemaItemDiagValue::mutable_font() {
+  // @@protoc_insertion_point(field_mutable:Proto.SchemaItemDiagValue.font)
+  return _internal_mutable_font();
+}
+inline void SchemaItemDiagValue::set_allocated_font(::Proto::FontParam* font) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete font_;
+  }
+  if (font) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(font);
+    if (message_arena != submessage_arena) {
+      font = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, font, submessage_arena);
+    }
+    _has_bits_[0] |= 0x00000004u;
+  } else {
+    _has_bits_[0] &= ~0x00000004u;
+  }
+  font_ = font;
+  // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItemDiagValue.font)
+}
+
+// optional bool drawRect = 10 [default = true];
+inline bool SchemaItemDiagValue::_internal_has_drawrect() const {
+  bool value = (_has_bits_[0] & 0x00000100u) != 0;
+  return value;
+}
+inline bool SchemaItemDiagValue::has_drawrect() const {
+  return _internal_has_drawrect();
+}
+inline void SchemaItemDiagValue::clear_drawrect() {
+  drawrect_ = true;
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline bool SchemaItemDiagValue::_internal_drawrect() const {
+  return drawrect_;
+}
+inline bool SchemaItemDiagValue::drawrect() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemDiagValue.drawRect)
+  return _internal_drawrect();
+}
+inline void SchemaItemDiagValue::_internal_set_drawrect(bool value) {
+  _has_bits_[0] |= 0x00000100u;
+  drawrect_ = value;
+}
+inline void SchemaItemDiagValue::set_drawrect(bool value) {
+  _internal_set_drawrect(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemDiagValue.drawRect)
+}
+
+// optional int32 horzAlign = 11 [default = 4];
+inline bool SchemaItemDiagValue::_internal_has_horzalign() const {
+  bool value = (_has_bits_[0] & 0x00000200u) != 0;
+  return value;
+}
+inline bool SchemaItemDiagValue::has_horzalign() const {
+  return _internal_has_horzalign();
+}
+inline void SchemaItemDiagValue::clear_horzalign() {
+  horzalign_ = 4;
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemDiagValue::_internal_horzalign() const {
+  return horzalign_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemDiagValue::horzalign() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemDiagValue.horzAlign)
+  return _internal_horzalign();
+}
+inline void SchemaItemDiagValue::_internal_set_horzalign(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000200u;
+  horzalign_ = value;
+}
+inline void SchemaItemDiagValue::set_horzalign(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_horzalign(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemDiagValue.horzAlign)
+}
+
+// optional int32 vertAlign = 12 [default = 128];
+inline bool SchemaItemDiagValue::_internal_has_vertalign() const {
+  bool value = (_has_bits_[0] & 0x00000400u) != 0;
+  return value;
+}
+inline bool SchemaItemDiagValue::has_vertalign() const {
+  return _internal_has_vertalign();
+}
+inline void SchemaItemDiagValue::clear_vertalign() {
+  vertalign_ = 128;
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemDiagValue::_internal_vertalign() const {
+  return vertalign_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemDiagValue::vertalign() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemDiagValue.vertAlign)
+  return _internal_vertalign();
+}
+inline void SchemaItemDiagValue::_internal_set_vertalign(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000400u;
+  vertalign_ = value;
+}
+inline void SchemaItemDiagValue::set_vertalign(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_vertalign(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemDiagValue.vertAlign)
+}
+
+// optional int32 precision = 13 [default = -1];
+inline bool SchemaItemDiagValue::_internal_has_precision() const {
+  bool value = (_has_bits_[0] & 0x00000800u) != 0;
+  return value;
+}
+inline bool SchemaItemDiagValue::has_precision() const {
+  return _internal_has_precision();
+}
+inline void SchemaItemDiagValue::clear_precision() {
+  precision_ = -1;
+  _has_bits_[0] &= ~0x00000800u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemDiagValue::_internal_precision() const {
+  return precision_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemDiagValue::precision() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemDiagValue.precision)
+  return _internal_precision();
+}
+inline void SchemaItemDiagValue::_internal_set_precision(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000800u;
+  precision_ = value;
+}
+inline void SchemaItemDiagValue::set_precision(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_precision(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemDiagValue.precision)
+}
+
+// optional int32 analogFormat = 14 [default = 102];
+inline bool SchemaItemDiagValue::_internal_has_analogformat() const {
+  bool value = (_has_bits_[0] & 0x00000080u) != 0;
+  return value;
+}
+inline bool SchemaItemDiagValue::has_analogformat() const {
+  return _internal_has_analogformat();
+}
+inline void SchemaItemDiagValue::clear_analogformat() {
+  analogformat_ = 102;
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemDiagValue::_internal_analogformat() const {
+  return analogformat_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SchemaItemDiagValue::analogformat() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemDiagValue.analogFormat)
+  return _internal_analogformat();
+}
+inline void SchemaItemDiagValue::_internal_set_analogformat(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000080u;
+  analogformat_ = value;
+}
+inline void SchemaItemDiagValue::set_analogformat(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_analogformat(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemDiagValue.analogFormat)
+}
+
+// -------------------------------------------------------------------
+
 // SchemaItemBus
 
 // optional string busTypeId = 2;
@@ -49178,7 +51084,7 @@ inline void DeviceObject::set_allocated_childrestriction(::Proto::wstring* child
 
 // optional int32 place = 5 [default = 0];
 inline bool DeviceObject::_internal_has_place() const {
-  bool value = (_has_bits_[0] & 0x00020000u) != 0;
+  bool value = (_has_bits_[0] & 0x00040000u) != 0;
   return value;
 }
 inline bool DeviceObject::has_place() const {
@@ -49186,7 +51092,7 @@ inline bool DeviceObject::has_place() const {
 }
 inline void DeviceObject::clear_place() {
   place_ = 0;
-  _has_bits_[0] &= ~0x00020000u;
+  _has_bits_[0] &= ~0x00040000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::_internal_place() const {
   return place_;
@@ -49196,7 +51102,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::place() const {
   return _internal_place();
 }
 inline void DeviceObject::_internal_set_place(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00020000u;
+  _has_bits_[0] |= 0x00040000u;
   place_ = value;
 }
 inline void DeviceObject::set_place(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -49392,7 +51298,7 @@ DeviceObject::mutable_tags() {
 
 // optional bool preset = 32 [default = false];
 inline bool DeviceObject::_internal_has_preset() const {
-  bool value = (_has_bits_[0] & 0x00040000u) != 0;
+  bool value = (_has_bits_[0] & 0x00080000u) != 0;
   return value;
 }
 inline bool DeviceObject::has_preset() const {
@@ -49400,7 +51306,7 @@ inline bool DeviceObject::has_preset() const {
 }
 inline void DeviceObject::clear_preset() {
   preset_ = false;
-  _has_bits_[0] &= ~0x00040000u;
+  _has_bits_[0] &= ~0x00080000u;
 }
 inline bool DeviceObject::_internal_preset() const {
   return preset_;
@@ -49410,7 +51316,7 @@ inline bool DeviceObject::preset() const {
   return _internal_preset();
 }
 inline void DeviceObject::_internal_set_preset(bool value) {
-  _has_bits_[0] |= 0x00040000u;
+  _has_bits_[0] |= 0x00080000u;
   preset_ = value;
 }
 inline void DeviceObject::set_preset(bool value) {
@@ -49420,7 +51326,7 @@ inline void DeviceObject::set_preset(bool value) {
 
 // optional bool presetRoot = 33 [default = false];
 inline bool DeviceObject::_internal_has_presetroot() const {
-  bool value = (_has_bits_[0] & 0x00080000u) != 0;
+  bool value = (_has_bits_[0] & 0x00100000u) != 0;
   return value;
 }
 inline bool DeviceObject::has_presetroot() const {
@@ -49428,7 +51334,7 @@ inline bool DeviceObject::has_presetroot() const {
 }
 inline void DeviceObject::clear_presetroot() {
   presetroot_ = false;
-  _has_bits_[0] &= ~0x00080000u;
+  _has_bits_[0] &= ~0x00100000u;
 }
 inline bool DeviceObject::_internal_presetroot() const {
   return presetroot_;
@@ -49438,7 +51344,7 @@ inline bool DeviceObject::presetroot() const {
   return _internal_presetroot();
 }
 inline void DeviceObject::_internal_set_presetroot(bool value) {
-  _has_bits_[0] |= 0x00080000u;
+  _has_bits_[0] |= 0x00100000u;
   presetroot_ = value;
 }
 inline void DeviceObject::set_presetroot(bool value) {
@@ -49614,7 +51520,7 @@ inline void DeviceObject::set_allocated_presetobjectuuid(::Proto::Uuid* presetob
 
 // optional int32 childCountHint = 36 [default = 0];
 inline bool DeviceObject::_internal_has_childcounthint() const {
-  bool value = (_has_bits_[0] & 0x00100000u) != 0;
+  bool value = (_has_bits_[0] & 0x00200000u) != 0;
   return value;
 }
 inline bool DeviceObject::has_childcounthint() const {
@@ -49622,7 +51528,7 @@ inline bool DeviceObject::has_childcounthint() const {
 }
 inline void DeviceObject::clear_childcounthint() {
   childcounthint_ = 0;
-  _has_bits_[0] &= ~0x00100000u;
+  _has_bits_[0] &= ~0x00200000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::_internal_childcounthint() const {
   return childcounthint_;
@@ -49632,7 +51538,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::childcounthint() const {
   return _internal_childcounthint();
 }
 inline void DeviceObject::_internal_set_childcounthint(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00100000u;
+  _has_bits_[0] |= 0x00200000u;
   childcounthint_ = value;
 }
 inline void DeviceObject::set_childcounthint(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -49642,7 +51548,7 @@ inline void DeviceObject::set_childcounthint(::PROTOBUF_NAMESPACE_ID::int32 valu
 
 // optional int32 presetVersion = 37;
 inline bool DeviceObject::_internal_has_presetversion() const {
-  bool value = (_has_bits_[0] & 0x00200000u) != 0;
+  bool value = (_has_bits_[0] & 0x00400000u) != 0;
   return value;
 }
 inline bool DeviceObject::has_presetversion() const {
@@ -49650,7 +51556,7 @@ inline bool DeviceObject::has_presetversion() const {
 }
 inline void DeviceObject::clear_presetversion() {
   presetversion_ = 0;
-  _has_bits_[0] &= ~0x00200000u;
+  _has_bits_[0] &= ~0x00400000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::_internal_presetversion() const {
   return presetversion_;
@@ -49660,7 +51566,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::presetversion() const {
   return _internal_presetversion();
 }
 inline void DeviceObject::_internal_set_presetversion(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00200000u;
+  _has_bits_[0] |= 0x00400000u;
   presetversion_ = value;
 }
 inline void DeviceObject::set_presetversion(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -50322,6 +52228,89 @@ inline void DeviceObject::set_allocated_appsignal(::Proto::DeviceAppSignal* apps
   // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.AppSignal)
 }
 
+// optional .Proto.DeviceDiagSignal DiagSignal = 109;
+inline bool DeviceObject::_internal_has_diagsignal() const {
+  bool value = (_has_bits_[0] & 0x00020000u) != 0;
+  PROTOBUF_ASSUME(!value || diagsignal_ != nullptr);
+  return value;
+}
+inline bool DeviceObject::has_diagsignal() const {
+  return _internal_has_diagsignal();
+}
+inline void DeviceObject::clear_diagsignal() {
+  if (diagsignal_ != nullptr) diagsignal_->Clear();
+  _has_bits_[0] &= ~0x00020000u;
+}
+inline const ::Proto::DeviceDiagSignal& DeviceObject::_internal_diagsignal() const {
+  const ::Proto::DeviceDiagSignal* p = diagsignal_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Proto::DeviceDiagSignal&>(
+      ::Proto::_DeviceDiagSignal_default_instance_);
+}
+inline const ::Proto::DeviceDiagSignal& DeviceObject::diagsignal() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.DiagSignal)
+  return _internal_diagsignal();
+}
+inline void DeviceObject::unsafe_arena_set_allocated_diagsignal(
+    ::Proto::DeviceDiagSignal* diagsignal) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(diagsignal_);
+  }
+  diagsignal_ = diagsignal;
+  if (diagsignal) {
+    _has_bits_[0] |= 0x00020000u;
+  } else {
+    _has_bits_[0] &= ~0x00020000u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.DiagSignal)
+}
+inline ::Proto::DeviceDiagSignal* DeviceObject::release_diagsignal() {
+  _has_bits_[0] &= ~0x00020000u;
+  ::Proto::DeviceDiagSignal* temp = diagsignal_;
+  diagsignal_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::Proto::DeviceDiagSignal* DeviceObject::unsafe_arena_release_diagsignal() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceObject.DiagSignal)
+  _has_bits_[0] &= ~0x00020000u;
+  ::Proto::DeviceDiagSignal* temp = diagsignal_;
+  diagsignal_ = nullptr;
+  return temp;
+}
+inline ::Proto::DeviceDiagSignal* DeviceObject::_internal_mutable_diagsignal() {
+  _has_bits_[0] |= 0x00020000u;
+  if (diagsignal_ == nullptr) {
+    auto* p = CreateMaybeMessage<::Proto::DeviceDiagSignal>(GetArena());
+    diagsignal_ = p;
+  }
+  return diagsignal_;
+}
+inline ::Proto::DeviceDiagSignal* DeviceObject::mutable_diagsignal() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject.DiagSignal)
+  return _internal_mutable_diagsignal();
+}
+inline void DeviceObject::set_allocated_diagsignal(::Proto::DeviceDiagSignal* diagsignal) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete diagsignal_;
+  }
+  if (diagsignal) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(diagsignal);
+    if (message_arena != submessage_arena) {
+      diagsignal = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, diagsignal, submessage_arena);
+    }
+    _has_bits_[0] |= 0x00020000u;
+  } else {
+    _has_bits_[0] &= ~0x00020000u;
+  }
+  diagsignal_ = diagsignal;
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.DiagSignal)
+}
+
 // optional .Proto.Workstation Workstation = 107;
 inline bool DeviceObject::_internal_has_workstation() const {
   bool value = (_has_bits_[0] & 0x00008000u) != 0;
@@ -50808,6 +52797,34 @@ inline void DeviceModule::set_custommodulefamily(::PROTOBUF_NAMESPACE_ID::int32 
 // -------------------------------------------------------------------
 
 // DeviceController
+
+// optional int32 diagDataOffset = 3;
+inline bool DeviceController::_internal_has_diagdataoffset() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool DeviceController::has_diagdataoffset() const {
+  return _internal_has_diagdataoffset();
+}
+inline void DeviceController::clear_diagdataoffset() {
+  diagdataoffset_ = 0;
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceController::_internal_diagdataoffset() const {
+  return diagdataoffset_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceController::diagdataoffset() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceController.diagDataOffset)
+  return _internal_diagdataoffset();
+}
+inline void DeviceController::_internal_set_diagdataoffset(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000001u;
+  diagdataoffset_ = value;
+}
+inline void DeviceController::set_diagdataoffset(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_diagdataoffset(value);
+  // @@protoc_insertion_point(field_set:Proto.DeviceController.diagDataOffset)
+}
 
 // -------------------------------------------------------------------
 
@@ -51454,6 +53471,593 @@ inline void DeviceAppSignal::set_signalspecpropsstructwasfixed(bool value) {
 
 // -------------------------------------------------------------------
 
+// DeviceDiagSignal
+
+// optional int32 level = 3;
+inline bool DeviceDiagSignal::_internal_has_level() const {
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  return value;
+}
+inline bool DeviceDiagSignal::has_level() const {
+  return _internal_has_level();
+}
+inline void DeviceDiagSignal::clear_level() {
+  level_ = 0;
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::_internal_level() const {
+  return level_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::level() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.level)
+  return _internal_level();
+}
+inline void DeviceDiagSignal::_internal_set_level(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000008u;
+  level_ = value;
+}
+inline void DeviceDiagSignal::set_level(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_level(value);
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.level)
+}
+
+// optional string signalTypeId = 4;
+inline bool DeviceDiagSignal::_internal_has_signaltypeid() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool DeviceDiagSignal::has_signaltypeid() const {
+  return _internal_has_signaltypeid();
+}
+inline void DeviceDiagSignal::clear_signaltypeid() {
+  signaltypeid_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& DeviceDiagSignal::signaltypeid() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.signalTypeId)
+  return _internal_signaltypeid();
+}
+inline void DeviceDiagSignal::set_signaltypeid(const std::string& value) {
+  _internal_set_signaltypeid(value);
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.signalTypeId)
+}
+inline std::string* DeviceDiagSignal::mutable_signaltypeid() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceDiagSignal.signalTypeId)
+  return _internal_mutable_signaltypeid();
+}
+inline const std::string& DeviceDiagSignal::_internal_signaltypeid() const {
+  return signaltypeid_.Get();
+}
+inline void DeviceDiagSignal::_internal_set_signaltypeid(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  signaltypeid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void DeviceDiagSignal::set_signaltypeid(std::string&& value) {
+  _has_bits_[0] |= 0x00000001u;
+  signaltypeid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.DeviceDiagSignal.signalTypeId)
+}
+inline void DeviceDiagSignal::set_signaltypeid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000001u;
+  signaltypeid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.DeviceDiagSignal.signalTypeId)
+}
+inline void DeviceDiagSignal::set_signaltypeid(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000001u;
+  signaltypeid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.DeviceDiagSignal.signalTypeId)
+}
+inline std::string* DeviceDiagSignal::_internal_mutable_signaltypeid() {
+  _has_bits_[0] |= 0x00000001u;
+  return signaltypeid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* DeviceDiagSignal::release_signaltypeid() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceDiagSignal.signalTypeId)
+  if (!_internal_has_signaltypeid()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return signaltypeid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void DeviceDiagSignal::set_allocated_signaltypeid(std::string* signaltypeid) {
+  if (signaltypeid != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  signaltypeid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), signaltypeid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceDiagSignal.signalTypeId)
+}
+
+// optional string validitySignalId = 5;
+inline bool DeviceDiagSignal::_internal_has_validitysignalid() const {
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool DeviceDiagSignal::has_validitysignalid() const {
+  return _internal_has_validitysignalid();
+}
+inline void DeviceDiagSignal::clear_validitysignalid() {
+  validitysignalid_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline const std::string& DeviceDiagSignal::validitysignalid() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.validitySignalId)
+  return _internal_validitysignalid();
+}
+inline void DeviceDiagSignal::set_validitysignalid(const std::string& value) {
+  _internal_set_validitysignalid(value);
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.validitySignalId)
+}
+inline std::string* DeviceDiagSignal::mutable_validitysignalid() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceDiagSignal.validitySignalId)
+  return _internal_mutable_validitysignalid();
+}
+inline const std::string& DeviceDiagSignal::_internal_validitysignalid() const {
+  return validitysignalid_.Get();
+}
+inline void DeviceDiagSignal::_internal_set_validitysignalid(const std::string& value) {
+  _has_bits_[0] |= 0x00000002u;
+  validitysignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void DeviceDiagSignal::set_validitysignalid(std::string&& value) {
+  _has_bits_[0] |= 0x00000002u;
+  validitysignalid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.DeviceDiagSignal.validitySignalId)
+}
+inline void DeviceDiagSignal::set_validitysignalid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000002u;
+  validitysignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.DeviceDiagSignal.validitySignalId)
+}
+inline void DeviceDiagSignal::set_validitysignalid(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000002u;
+  validitysignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.DeviceDiagSignal.validitySignalId)
+}
+inline std::string* DeviceDiagSignal::_internal_mutable_validitysignalid() {
+  _has_bits_[0] |= 0x00000002u;
+  return validitysignalid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* DeviceDiagSignal::release_validitysignalid() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceDiagSignal.validitySignalId)
+  if (!_internal_has_validitysignalid()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000002u;
+  return validitysignalid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void DeviceDiagSignal::set_allocated_validitysignalid(std::string* validitysignalid) {
+  if (validitysignalid != nullptr) {
+    _has_bits_[0] |= 0x00000002u;
+  } else {
+    _has_bits_[0] &= ~0x00000002u;
+  }
+  validitysignalid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), validitysignalid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceDiagSignal.validitySignalId)
+}
+
+// optional bool isRefelection = 6;
+inline bool DeviceDiagSignal::_internal_has_isrefelection() const {
+  bool value = (_has_bits_[0] & 0x00000100u) != 0;
+  return value;
+}
+inline bool DeviceDiagSignal::has_isrefelection() const {
+  return _internal_has_isrefelection();
+}
+inline void DeviceDiagSignal::clear_isrefelection() {
+  isrefelection_ = false;
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline bool DeviceDiagSignal::_internal_isrefelection() const {
+  return isrefelection_;
+}
+inline bool DeviceDiagSignal::isrefelection() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.isRefelection)
+  return _internal_isrefelection();
+}
+inline void DeviceDiagSignal::_internal_set_isrefelection(bool value) {
+  _has_bits_[0] |= 0x00000100u;
+  isrefelection_ = value;
+}
+inline void DeviceDiagSignal::set_isrefelection(bool value) {
+  _internal_set_isrefelection(value);
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.isRefelection)
+}
+
+// optional string reflectedSignalId = 7;
+inline bool DeviceDiagSignal::_internal_has_reflectedsignalid() const {
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline bool DeviceDiagSignal::has_reflectedsignalid() const {
+  return _internal_has_reflectedsignalid();
+}
+inline void DeviceDiagSignal::clear_reflectedsignalid() {
+  reflectedsignalid_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline const std::string& DeviceDiagSignal::reflectedsignalid() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.reflectedSignalId)
+  return _internal_reflectedsignalid();
+}
+inline void DeviceDiagSignal::set_reflectedsignalid(const std::string& value) {
+  _internal_set_reflectedsignalid(value);
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.reflectedSignalId)
+}
+inline std::string* DeviceDiagSignal::mutable_reflectedsignalid() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceDiagSignal.reflectedSignalId)
+  return _internal_mutable_reflectedsignalid();
+}
+inline const std::string& DeviceDiagSignal::_internal_reflectedsignalid() const {
+  return reflectedsignalid_.Get();
+}
+inline void DeviceDiagSignal::_internal_set_reflectedsignalid(const std::string& value) {
+  _has_bits_[0] |= 0x00000004u;
+  reflectedsignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void DeviceDiagSignal::set_reflectedsignalid(std::string&& value) {
+  _has_bits_[0] |= 0x00000004u;
+  reflectedsignalid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.DeviceDiagSignal.reflectedSignalId)
+}
+inline void DeviceDiagSignal::set_reflectedsignalid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000004u;
+  reflectedsignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.DeviceDiagSignal.reflectedSignalId)
+}
+inline void DeviceDiagSignal::set_reflectedsignalid(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000004u;
+  reflectedsignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.DeviceDiagSignal.reflectedSignalId)
+}
+inline std::string* DeviceDiagSignal::_internal_mutable_reflectedsignalid() {
+  _has_bits_[0] |= 0x00000004u;
+  return reflectedsignalid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* DeviceDiagSignal::release_reflectedsignalid() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceDiagSignal.reflectedSignalId)
+  if (!_internal_has_reflectedsignalid()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000004u;
+  return reflectedsignalid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void DeviceDiagSignal::set_allocated_reflectedsignalid(std::string* reflectedsignalid) {
+  if (reflectedsignalid != nullptr) {
+    _has_bits_[0] |= 0x00000004u;
+  } else {
+    _has_bits_[0] &= ~0x00000004u;
+  }
+  reflectedsignalid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), reflectedsignalid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceDiagSignal.reflectedSignalId)
+}
+
+// optional int32 valueOffset = 10;
+inline bool DeviceDiagSignal::_internal_has_valueoffset() const {
+  bool value = (_has_bits_[0] & 0x00000010u) != 0;
+  return value;
+}
+inline bool DeviceDiagSignal::has_valueoffset() const {
+  return _internal_has_valueoffset();
+}
+inline void DeviceDiagSignal::clear_valueoffset() {
+  valueoffset_ = 0;
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::_internal_valueoffset() const {
+  return valueoffset_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::valueoffset() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.valueOffset)
+  return _internal_valueoffset();
+}
+inline void DeviceDiagSignal::_internal_set_valueoffset(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000010u;
+  valueoffset_ = value;
+}
+inline void DeviceDiagSignal::set_valueoffset(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_valueoffset(value);
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.valueOffset)
+}
+
+// optional int32 valueBit = 11;
+inline bool DeviceDiagSignal::_internal_has_valuebit() const {
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
+  return value;
+}
+inline bool DeviceDiagSignal::has_valuebit() const {
+  return _internal_has_valuebit();
+}
+inline void DeviceDiagSignal::clear_valuebit() {
+  valuebit_ = 0;
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::_internal_valuebit() const {
+  return valuebit_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::valuebit() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.valueBit)
+  return _internal_valuebit();
+}
+inline void DeviceDiagSignal::_internal_set_valuebit(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000020u;
+  valuebit_ = value;
+}
+inline void DeviceDiagSignal::set_valuebit(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_valuebit(value);
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.valueBit)
+}
+
+// optional int32 valueBitSize = 12;
+inline bool DeviceDiagSignal::_internal_has_valuebitsize() const {
+  bool value = (_has_bits_[0] & 0x00000040u) != 0;
+  return value;
+}
+inline bool DeviceDiagSignal::has_valuebitsize() const {
+  return _internal_has_valuebitsize();
+}
+inline void DeviceDiagSignal::clear_valuebitsize() {
+  valuebitsize_ = 0;
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::_internal_valuebitsize() const {
+  return valuebitsize_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::valuebitsize() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.valueBitSize)
+  return _internal_valuebitsize();
+}
+inline void DeviceDiagSignal::_internal_set_valuebitsize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000040u;
+  valuebitsize_ = value;
+}
+inline void DeviceDiagSignal::set_valuebitsize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_valuebitsize(value);
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.valueBitSize)
+}
+
+// optional int32 discreteContainerSize = 13;
+inline bool DeviceDiagSignal::_internal_has_discretecontainersize() const {
+  bool value = (_has_bits_[0] & 0x00000080u) != 0;
+  return value;
+}
+inline bool DeviceDiagSignal::has_discretecontainersize() const {
+  return _internal_has_discretecontainersize();
+}
+inline void DeviceDiagSignal::clear_discretecontainersize() {
+  discretecontainersize_ = 0;
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::_internal_discretecontainersize() const {
+  return discretecontainersize_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::discretecontainersize() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.discreteContainerSize)
+  return _internal_discretecontainersize();
+}
+inline void DeviceDiagSignal::_internal_set_discretecontainersize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000080u;
+  discretecontainersize_ = value;
+}
+inline void DeviceDiagSignal::set_discretecontainersize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_discretecontainersize(value);
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.discreteContainerSize)
+}
+
+// optional bool logChanges = 16;
+inline bool DeviceDiagSignal::_internal_has_logchanges() const {
+  bool value = (_has_bits_[0] & 0x00000200u) != 0;
+  return value;
+}
+inline bool DeviceDiagSignal::has_logchanges() const {
+  return _internal_has_logchanges();
+}
+inline void DeviceDiagSignal::clear_logchanges() {
+  logchanges_ = false;
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline bool DeviceDiagSignal::_internal_logchanges() const {
+  return logchanges_;
+}
+inline bool DeviceDiagSignal::logchanges() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.logChanges)
+  return _internal_logchanges();
+}
+inline void DeviceDiagSignal::_internal_set_logchanges(bool value) {
+  _has_bits_[0] |= 0x00000200u;
+  logchanges_ = value;
+}
+inline void DeviceDiagSignal::set_logchanges(bool value) {
+  _internal_set_logchanges(value);
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.logChanges)
+}
+
+// optional bool archive = 17;
+inline bool DeviceDiagSignal::_internal_has_archive() const {
+  bool value = (_has_bits_[0] & 0x00000400u) != 0;
+  return value;
+}
+inline bool DeviceDiagSignal::has_archive() const {
+  return _internal_has_archive();
+}
+inline void DeviceDiagSignal::clear_archive() {
+  archive_ = false;
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline bool DeviceDiagSignal::_internal_archive() const {
+  return archive_;
+}
+inline bool DeviceDiagSignal::archive() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.archive)
+  return _internal_archive();
+}
+inline void DeviceDiagSignal::_internal_set_archive(bool value) {
+  _has_bits_[0] |= 0x00000400u;
+  archive_ = value;
+}
+inline void DeviceDiagSignal::set_archive(bool value) {
+  _internal_set_archive(value);
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.archive)
+}
+
+// optional bool reserved = 18;
+inline bool DeviceDiagSignal::_internal_has_reserved() const {
+  bool value = (_has_bits_[0] & 0x00000800u) != 0;
+  return value;
+}
+inline bool DeviceDiagSignal::has_reserved() const {
+  return _internal_has_reserved();
+}
+inline void DeviceDiagSignal::clear_reserved() {
+  reserved_ = false;
+  _has_bits_[0] &= ~0x00000800u;
+}
+inline bool DeviceDiagSignal::_internal_reserved() const {
+  return reserved_;
+}
+inline bool DeviceDiagSignal::reserved() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.reserved)
+  return _internal_reserved();
+}
+inline void DeviceDiagSignal::_internal_set_reserved(bool value) {
+  _has_bits_[0] |= 0x00000800u;
+  reserved_ = value;
+}
+inline void DeviceDiagSignal::set_reserved(bool value) {
+  _internal_set_reserved(value);
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.reserved)
+}
+
+// optional double coarseAperture = 22;
+inline bool DeviceDiagSignal::_internal_has_coarseaperture() const {
+  bool value = (_has_bits_[0] & 0x00001000u) != 0;
+  return value;
+}
+inline bool DeviceDiagSignal::has_coarseaperture() const {
+  return _internal_has_coarseaperture();
+}
+inline void DeviceDiagSignal::clear_coarseaperture() {
+  coarseaperture_ = 0;
+  _has_bits_[0] &= ~0x00001000u;
+}
+inline double DeviceDiagSignal::_internal_coarseaperture() const {
+  return coarseaperture_;
+}
+inline double DeviceDiagSignal::coarseaperture() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.coarseAperture)
+  return _internal_coarseaperture();
+}
+inline void DeviceDiagSignal::_internal_set_coarseaperture(double value) {
+  _has_bits_[0] |= 0x00001000u;
+  coarseaperture_ = value;
+}
+inline void DeviceDiagSignal::set_coarseaperture(double value) {
+  _internal_set_coarseaperture(value);
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.coarseAperture)
+}
+
+// optional double fineAperture = 23;
+inline bool DeviceDiagSignal::_internal_has_fineaperture() const {
+  bool value = (_has_bits_[0] & 0x00002000u) != 0;
+  return value;
+}
+inline bool DeviceDiagSignal::has_fineaperture() const {
+  return _internal_has_fineaperture();
+}
+inline void DeviceDiagSignal::clear_fineaperture() {
+  fineaperture_ = 0;
+  _has_bits_[0] &= ~0x00002000u;
+}
+inline double DeviceDiagSignal::_internal_fineaperture() const {
+  return fineaperture_;
+}
+inline double DeviceDiagSignal::fineaperture() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.fineAperture)
+  return _internal_fineaperture();
+}
+inline void DeviceDiagSignal::_internal_set_fineaperture(double value) {
+  _has_bits_[0] |= 0x00002000u;
+  fineaperture_ = value;
+}
+inline void DeviceDiagSignal::set_fineaperture(double value) {
+  _internal_set_fineaperture(value);
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.fineAperture)
+}
+
+// optional int32 apertureType = 24;
+inline bool DeviceDiagSignal::_internal_has_aperturetype() const {
+  bool value = (_has_bits_[0] & 0x00004000u) != 0;
+  return value;
+}
+inline bool DeviceDiagSignal::has_aperturetype() const {
+  return _internal_has_aperturetype();
+}
+inline void DeviceDiagSignal::clear_aperturetype() {
+  aperturetype_ = 0;
+  _has_bits_[0] &= ~0x00004000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::_internal_aperturetype() const {
+  return aperturetype_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::aperturetype() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.apertureType)
+  return _internal_aperturetype();
+}
+inline void DeviceDiagSignal::_internal_set_aperturetype(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00004000u;
+  aperturetype_ = value;
+}
+inline void DeviceDiagSignal::set_aperturetype(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_aperturetype(value);
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.apertureType)
+}
+
+// optional int32 decimalPlaces = 30;
+inline bool DeviceDiagSignal::_internal_has_decimalplaces() const {
+  bool value = (_has_bits_[0] & 0x00008000u) != 0;
+  return value;
+}
+inline bool DeviceDiagSignal::has_decimalplaces() const {
+  return _internal_has_decimalplaces();
+}
+inline void DeviceDiagSignal::clear_decimalplaces() {
+  decimalplaces_ = 0;
+  _has_bits_[0] &= ~0x00008000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::_internal_decimalplaces() const {
+  return decimalplaces_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::decimalplaces() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.decimalPlaces)
+  return _internal_decimalplaces();
+}
+inline void DeviceDiagSignal::_internal_set_decimalplaces(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00008000u;
+  decimalplaces_ = value;
+}
+inline void DeviceDiagSignal::set_decimalplaces(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_decimalplaces(value);
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.decimalPlaces)
+}
+
+// -------------------------------------------------------------------
+
 // Workstation
 
 // optional int32 type = 1 [default = 0];
@@ -51587,6 +54191,749 @@ inline void Software::_internal_set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
 inline void Software::set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_type(value);
   // @@protoc_insertion_point(field_set:Proto.Software.type)
+}
+
+// -------------------------------------------------------------------
+
+// DiagSignalType
+
+// optional string signalTypeId = 3;
+inline bool DiagSignalType::_internal_has_signaltypeid() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool DiagSignalType::has_signaltypeid() const {
+  return _internal_has_signaltypeid();
+}
+inline void DiagSignalType::clear_signaltypeid() {
+  signaltypeid_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& DiagSignalType::signaltypeid() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.signalTypeId)
+  return _internal_signaltypeid();
+}
+inline void DiagSignalType::set_signaltypeid(const std::string& value) {
+  _internal_set_signaltypeid(value);
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.signalTypeId)
+}
+inline std::string* DiagSignalType::mutable_signaltypeid() {
+  // @@protoc_insertion_point(field_mutable:Proto.DiagSignalType.signalTypeId)
+  return _internal_mutable_signaltypeid();
+}
+inline const std::string& DiagSignalType::_internal_signaltypeid() const {
+  return signaltypeid_.Get();
+}
+inline void DiagSignalType::_internal_set_signaltypeid(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  signaltypeid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void DiagSignalType::set_signaltypeid(std::string&& value) {
+  _has_bits_[0] |= 0x00000001u;
+  signaltypeid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.DiagSignalType.signalTypeId)
+}
+inline void DiagSignalType::set_signaltypeid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000001u;
+  signaltypeid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.DiagSignalType.signalTypeId)
+}
+inline void DiagSignalType::set_signaltypeid(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000001u;
+  signaltypeid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.DiagSignalType.signalTypeId)
+}
+inline std::string* DiagSignalType::_internal_mutable_signaltypeid() {
+  _has_bits_[0] |= 0x00000001u;
+  return signaltypeid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* DiagSignalType::release_signaltypeid() {
+  // @@protoc_insertion_point(field_release:Proto.DiagSignalType.signalTypeId)
+  if (!_internal_has_signaltypeid()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return signaltypeid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void DiagSignalType::set_allocated_signaltypeid(std::string* signaltypeid) {
+  if (signaltypeid != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  signaltypeid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), signaltypeid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.DiagSignalType.signalTypeId)
+}
+
+// optional .Proto.Uuid uuid = 4;
+inline bool DiagSignalType::_internal_has_uuid() const {
+  bool value = (_has_bits_[0] & 0x00000010u) != 0;
+  PROTOBUF_ASSUME(!value || uuid_ != nullptr);
+  return value;
+}
+inline bool DiagSignalType::has_uuid() const {
+  return _internal_has_uuid();
+}
+inline void DiagSignalType::clear_uuid() {
+  if (uuid_ != nullptr) uuid_->Clear();
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline const ::Proto::Uuid& DiagSignalType::_internal_uuid() const {
+  const ::Proto::Uuid* p = uuid_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Proto::Uuid&>(
+      ::Proto::_Uuid_default_instance_);
+}
+inline const ::Proto::Uuid& DiagSignalType::uuid() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.uuid)
+  return _internal_uuid();
+}
+inline void DiagSignalType::unsafe_arena_set_allocated_uuid(
+    ::Proto::Uuid* uuid) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(uuid_);
+  }
+  uuid_ = uuid;
+  if (uuid) {
+    _has_bits_[0] |= 0x00000010u;
+  } else {
+    _has_bits_[0] &= ~0x00000010u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DiagSignalType.uuid)
+}
+inline ::Proto::Uuid* DiagSignalType::release_uuid() {
+  _has_bits_[0] &= ~0x00000010u;
+  ::Proto::Uuid* temp = uuid_;
+  uuid_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::Proto::Uuid* DiagSignalType::unsafe_arena_release_uuid() {
+  // @@protoc_insertion_point(field_release:Proto.DiagSignalType.uuid)
+  _has_bits_[0] &= ~0x00000010u;
+  ::Proto::Uuid* temp = uuid_;
+  uuid_ = nullptr;
+  return temp;
+}
+inline ::Proto::Uuid* DiagSignalType::_internal_mutable_uuid() {
+  _has_bits_[0] |= 0x00000010u;
+  if (uuid_ == nullptr) {
+    auto* p = CreateMaybeMessage<::Proto::Uuid>(GetArena());
+    uuid_ = p;
+  }
+  return uuid_;
+}
+inline ::Proto::Uuid* DiagSignalType::mutable_uuid() {
+  // @@protoc_insertion_point(field_mutable:Proto.DiagSignalType.uuid)
+  return _internal_mutable_uuid();
+}
+inline void DiagSignalType::set_allocated_uuid(::Proto::Uuid* uuid) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete uuid_;
+  }
+  if (uuid) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(uuid);
+    if (message_arena != submessage_arena) {
+      uuid = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, uuid, submessage_arena);
+    }
+    _has_bits_[0] |= 0x00000010u;
+  } else {
+    _has_bits_[0] &= ~0x00000010u;
+  }
+  uuid_ = uuid;
+  // @@protoc_insertion_point(field_set_allocated:Proto.DiagSignalType.uuid)
+}
+
+// optional bool systemSignalType = 5;
+inline bool DiagSignalType::_internal_has_systemsignaltype() const {
+  bool value = (_has_bits_[0] & 0x00000100u) != 0;
+  return value;
+}
+inline bool DiagSignalType::has_systemsignaltype() const {
+  return _internal_has_systemsignaltype();
+}
+inline void DiagSignalType::clear_systemsignaltype() {
+  systemsignaltype_ = false;
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline bool DiagSignalType::_internal_systemsignaltype() const {
+  return systemsignaltype_;
+}
+inline bool DiagSignalType::systemsignaltype() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.systemSignalType)
+  return _internal_systemsignaltype();
+}
+inline void DiagSignalType::_internal_set_systemsignaltype(bool value) {
+  _has_bits_[0] |= 0x00000100u;
+  systemsignaltype_ = value;
+}
+inline void DiagSignalType::set_systemsignaltype(bool value) {
+  _internal_set_systemsignaltype(value);
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.systemSignalType)
+}
+
+// optional int32 type = 6;
+inline bool DiagSignalType::_internal_has_type() const {
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
+  return value;
+}
+inline bool DiagSignalType::has_type() const {
+  return _internal_has_type();
+}
+inline void DiagSignalType::clear_type() {
+  type_ = 0;
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DiagSignalType::_internal_type() const {
+  return type_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DiagSignalType::type() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.type)
+  return _internal_type();
+}
+inline void DiagSignalType::_internal_set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000020u;
+  type_ = value;
+}
+inline void DiagSignalType::set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_type(value);
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.type)
+}
+
+// optional int32 byteOrder = 7;
+inline bool DiagSignalType::_internal_has_byteorder() const {
+  bool value = (_has_bits_[0] & 0x00000040u) != 0;
+  return value;
+}
+inline bool DiagSignalType::has_byteorder() const {
+  return _internal_has_byteorder();
+}
+inline void DiagSignalType::clear_byteorder() {
+  byteorder_ = 0;
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DiagSignalType::_internal_byteorder() const {
+  return byteorder_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DiagSignalType::byteorder() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.byteOrder)
+  return _internal_byteorder();
+}
+inline void DiagSignalType::_internal_set_byteorder(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000040u;
+  byteorder_ = value;
+}
+inline void DiagSignalType::set_byteorder(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_byteorder(value);
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.byteOrder)
+}
+
+// optional bool inverseValue = 20;
+inline bool DiagSignalType::_internal_has_inversevalue() const {
+  bool value = (_has_bits_[0] & 0x00000200u) != 0;
+  return value;
+}
+inline bool DiagSignalType::has_inversevalue() const {
+  return _internal_has_inversevalue();
+}
+inline void DiagSignalType::clear_inversevalue() {
+  inversevalue_ = false;
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline bool DiagSignalType::_internal_inversevalue() const {
+  return inversevalue_;
+}
+inline bool DiagSignalType::inversevalue() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.inverseValue)
+  return _internal_inversevalue();
+}
+inline void DiagSignalType::_internal_set_inversevalue(bool value) {
+  _has_bits_[0] |= 0x00000200u;
+  inversevalue_ = value;
+}
+inline void DiagSignalType::set_inversevalue(bool value) {
+  _internal_set_inversevalue(value);
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.inverseValue)
+}
+
+// optional int32 normalState = 25;
+inline bool DiagSignalType::_internal_has_normalstate() const {
+  bool value = (_has_bits_[0] & 0x00000800u) != 0;
+  return value;
+}
+inline bool DiagSignalType::has_normalstate() const {
+  return _internal_has_normalstate();
+}
+inline void DiagSignalType::clear_normalstate() {
+  normalstate_ = 0;
+  _has_bits_[0] &= ~0x00000800u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DiagSignalType::_internal_normalstate() const {
+  return normalstate_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DiagSignalType::normalstate() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.normalState)
+  return _internal_normalstate();
+}
+inline void DiagSignalType::_internal_set_normalstate(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000800u;
+  normalstate_ = value;
+}
+inline void DiagSignalType::set_normalstate(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_normalstate(value);
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.normalState)
+}
+
+// optional string normalStateString0 = 26;
+inline bool DiagSignalType::_internal_has_normalstatestring0() const {
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool DiagSignalType::has_normalstatestring0() const {
+  return _internal_has_normalstatestring0();
+}
+inline void DiagSignalType::clear_normalstatestring0() {
+  normalstatestring0_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline const std::string& DiagSignalType::normalstatestring0() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.normalStateString0)
+  return _internal_normalstatestring0();
+}
+inline void DiagSignalType::set_normalstatestring0(const std::string& value) {
+  _internal_set_normalstatestring0(value);
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.normalStateString0)
+}
+inline std::string* DiagSignalType::mutable_normalstatestring0() {
+  // @@protoc_insertion_point(field_mutable:Proto.DiagSignalType.normalStateString0)
+  return _internal_mutable_normalstatestring0();
+}
+inline const std::string& DiagSignalType::_internal_normalstatestring0() const {
+  return normalstatestring0_.Get();
+}
+inline void DiagSignalType::_internal_set_normalstatestring0(const std::string& value) {
+  _has_bits_[0] |= 0x00000002u;
+  normalstatestring0_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void DiagSignalType::set_normalstatestring0(std::string&& value) {
+  _has_bits_[0] |= 0x00000002u;
+  normalstatestring0_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.DiagSignalType.normalStateString0)
+}
+inline void DiagSignalType::set_normalstatestring0(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000002u;
+  normalstatestring0_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.DiagSignalType.normalStateString0)
+}
+inline void DiagSignalType::set_normalstatestring0(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000002u;
+  normalstatestring0_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.DiagSignalType.normalStateString0)
+}
+inline std::string* DiagSignalType::_internal_mutable_normalstatestring0() {
+  _has_bits_[0] |= 0x00000002u;
+  return normalstatestring0_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* DiagSignalType::release_normalstatestring0() {
+  // @@protoc_insertion_point(field_release:Proto.DiagSignalType.normalStateString0)
+  if (!_internal_has_normalstatestring0()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000002u;
+  return normalstatestring0_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void DiagSignalType::set_allocated_normalstatestring0(std::string* normalstatestring0) {
+  if (normalstatestring0 != nullptr) {
+    _has_bits_[0] |= 0x00000002u;
+  } else {
+    _has_bits_[0] &= ~0x00000002u;
+  }
+  normalstatestring0_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), normalstatestring0,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.DiagSignalType.normalStateString0)
+}
+
+// optional string normalStateString1 = 27;
+inline bool DiagSignalType::_internal_has_normalstatestring1() const {
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline bool DiagSignalType::has_normalstatestring1() const {
+  return _internal_has_normalstatestring1();
+}
+inline void DiagSignalType::clear_normalstatestring1() {
+  normalstatestring1_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline const std::string& DiagSignalType::normalstatestring1() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.normalStateString1)
+  return _internal_normalstatestring1();
+}
+inline void DiagSignalType::set_normalstatestring1(const std::string& value) {
+  _internal_set_normalstatestring1(value);
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.normalStateString1)
+}
+inline std::string* DiagSignalType::mutable_normalstatestring1() {
+  // @@protoc_insertion_point(field_mutable:Proto.DiagSignalType.normalStateString1)
+  return _internal_mutable_normalstatestring1();
+}
+inline const std::string& DiagSignalType::_internal_normalstatestring1() const {
+  return normalstatestring1_.Get();
+}
+inline void DiagSignalType::_internal_set_normalstatestring1(const std::string& value) {
+  _has_bits_[0] |= 0x00000004u;
+  normalstatestring1_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void DiagSignalType::set_normalstatestring1(std::string&& value) {
+  _has_bits_[0] |= 0x00000004u;
+  normalstatestring1_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.DiagSignalType.normalStateString1)
+}
+inline void DiagSignalType::set_normalstatestring1(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000004u;
+  normalstatestring1_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.DiagSignalType.normalStateString1)
+}
+inline void DiagSignalType::set_normalstatestring1(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000004u;
+  normalstatestring1_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.DiagSignalType.normalStateString1)
+}
+inline std::string* DiagSignalType::_internal_mutable_normalstatestring1() {
+  _has_bits_[0] |= 0x00000004u;
+  return normalstatestring1_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* DiagSignalType::release_normalstatestring1() {
+  // @@protoc_insertion_point(field_release:Proto.DiagSignalType.normalStateString1)
+  if (!_internal_has_normalstatestring1()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000004u;
+  return normalstatestring1_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void DiagSignalType::set_allocated_normalstatestring1(std::string* normalstatestring1) {
+  if (normalstatestring1 != nullptr) {
+    _has_bits_[0] |= 0x00000004u;
+  } else {
+    _has_bits_[0] &= ~0x00000004u;
+  }
+  normalstatestring1_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), normalstatestring1,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.DiagSignalType.normalStateString1)
+}
+
+// optional int32 analogformat = 32;
+inline bool DiagSignalType::_internal_has_analogformat() const {
+  bool value = (_has_bits_[0] & 0x00000080u) != 0;
+  return value;
+}
+inline bool DiagSignalType::has_analogformat() const {
+  return _internal_has_analogformat();
+}
+inline void DiagSignalType::clear_analogformat() {
+  analogformat_ = 0;
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DiagSignalType::_internal_analogformat() const {
+  return analogformat_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DiagSignalType::analogformat() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.analogformat)
+  return _internal_analogformat();
+}
+inline void DiagSignalType::_internal_set_analogformat(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000080u;
+  analogformat_ = value;
+}
+inline void DiagSignalType::set_analogformat(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_analogformat(value);
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.analogformat)
+}
+
+// optional double adcHighLimit = 33;
+inline bool DiagSignalType::_internal_has_adchighlimit() const {
+  bool value = (_has_bits_[0] & 0x00001000u) != 0;
+  return value;
+}
+inline bool DiagSignalType::has_adchighlimit() const {
+  return _internal_has_adchighlimit();
+}
+inline void DiagSignalType::clear_adchighlimit() {
+  adchighlimit_ = 0;
+  _has_bits_[0] &= ~0x00001000u;
+}
+inline double DiagSignalType::_internal_adchighlimit() const {
+  return adchighlimit_;
+}
+inline double DiagSignalType::adchighlimit() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.adcHighLimit)
+  return _internal_adchighlimit();
+}
+inline void DiagSignalType::_internal_set_adchighlimit(double value) {
+  _has_bits_[0] |= 0x00001000u;
+  adchighlimit_ = value;
+}
+inline void DiagSignalType::set_adchighlimit(double value) {
+  _internal_set_adchighlimit(value);
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.adcHighLimit)
+}
+
+// optional double adcLowLimit = 34;
+inline bool DiagSignalType::_internal_has_adclowlimit() const {
+  bool value = (_has_bits_[0] & 0x00002000u) != 0;
+  return value;
+}
+inline bool DiagSignalType::has_adclowlimit() const {
+  return _internal_has_adclowlimit();
+}
+inline void DiagSignalType::clear_adclowlimit() {
+  adclowlimit_ = 0;
+  _has_bits_[0] &= ~0x00002000u;
+}
+inline double DiagSignalType::_internal_adclowlimit() const {
+  return adclowlimit_;
+}
+inline double DiagSignalType::adclowlimit() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.adcLowLimit)
+  return _internal_adclowlimit();
+}
+inline void DiagSignalType::_internal_set_adclowlimit(double value) {
+  _has_bits_[0] |= 0x00002000u;
+  adclowlimit_ = value;
+}
+inline void DiagSignalType::set_adclowlimit(double value) {
+  _internal_set_adclowlimit(value);
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.adcLowLimit)
+}
+
+// optional double valueHighLimit = 35;
+inline bool DiagSignalType::_internal_has_valuehighlimit() const {
+  bool value = (_has_bits_[0] & 0x00004000u) != 0;
+  return value;
+}
+inline bool DiagSignalType::has_valuehighlimit() const {
+  return _internal_has_valuehighlimit();
+}
+inline void DiagSignalType::clear_valuehighlimit() {
+  valuehighlimit_ = 0;
+  _has_bits_[0] &= ~0x00004000u;
+}
+inline double DiagSignalType::_internal_valuehighlimit() const {
+  return valuehighlimit_;
+}
+inline double DiagSignalType::valuehighlimit() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.valueHighLimit)
+  return _internal_valuehighlimit();
+}
+inline void DiagSignalType::_internal_set_valuehighlimit(double value) {
+  _has_bits_[0] |= 0x00004000u;
+  valuehighlimit_ = value;
+}
+inline void DiagSignalType::set_valuehighlimit(double value) {
+  _internal_set_valuehighlimit(value);
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.valueHighLimit)
+}
+
+// optional double valueLowLimit = 36;
+inline bool DiagSignalType::_internal_has_valuelowlimit() const {
+  bool value = (_has_bits_[0] & 0x00008000u) != 0;
+  return value;
+}
+inline bool DiagSignalType::has_valuelowlimit() const {
+  return _internal_has_valuelowlimit();
+}
+inline void DiagSignalType::clear_valuelowlimit() {
+  valuelowlimit_ = 0;
+  _has_bits_[0] &= ~0x00008000u;
+}
+inline double DiagSignalType::_internal_valuelowlimit() const {
+  return valuelowlimit_;
+}
+inline double DiagSignalType::valuelowlimit() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.valueLowLimit)
+  return _internal_valuelowlimit();
+}
+inline void DiagSignalType::_internal_set_valuelowlimit(double value) {
+  _has_bits_[0] |= 0x00008000u;
+  valuelowlimit_ = value;
+}
+inline void DiagSignalType::set_valuelowlimit(double value) {
+  _internal_set_valuelowlimit(value);
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.valueLowLimit)
+}
+
+// optional double valueMultiplier = 37;
+inline bool DiagSignalType::_internal_has_valuemultiplier() const {
+  bool value = (_has_bits_[0] & 0x00010000u) != 0;
+  return value;
+}
+inline bool DiagSignalType::has_valuemultiplier() const {
+  return _internal_has_valuemultiplier();
+}
+inline void DiagSignalType::clear_valuemultiplier() {
+  valuemultiplier_ = 0;
+  _has_bits_[0] &= ~0x00010000u;
+}
+inline double DiagSignalType::_internal_valuemultiplier() const {
+  return valuemultiplier_;
+}
+inline double DiagSignalType::valuemultiplier() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.valueMultiplier)
+  return _internal_valuemultiplier();
+}
+inline void DiagSignalType::_internal_set_valuemultiplier(double value) {
+  _has_bits_[0] |= 0x00010000u;
+  valuemultiplier_ = value;
+}
+inline void DiagSignalType::set_valuemultiplier(double value) {
+  _internal_set_valuemultiplier(value);
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.valueMultiplier)
+}
+
+// optional double valueOffset = 38;
+inline bool DiagSignalType::_internal_has_valueoffset() const {
+  bool value = (_has_bits_[0] & 0x00020000u) != 0;
+  return value;
+}
+inline bool DiagSignalType::has_valueoffset() const {
+  return _internal_has_valueoffset();
+}
+inline void DiagSignalType::clear_valueoffset() {
+  valueoffset_ = 0;
+  _has_bits_[0] &= ~0x00020000u;
+}
+inline double DiagSignalType::_internal_valueoffset() const {
+  return valueoffset_;
+}
+inline double DiagSignalType::valueoffset() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.valueOffset)
+  return _internal_valueoffset();
+}
+inline void DiagSignalType::_internal_set_valueoffset(double value) {
+  _has_bits_[0] |= 0x00020000u;
+  valueoffset_ = value;
+}
+inline void DiagSignalType::set_valueoffset(double value) {
+  _internal_set_valueoffset(value);
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.valueOffset)
+}
+
+// optional bool useLimits = 39;
+inline bool DiagSignalType::_internal_has_uselimits() const {
+  bool value = (_has_bits_[0] & 0x00000400u) != 0;
+  return value;
+}
+inline bool DiagSignalType::has_uselimits() const {
+  return _internal_has_uselimits();
+}
+inline void DiagSignalType::clear_uselimits() {
+  uselimits_ = false;
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline bool DiagSignalType::_internal_uselimits() const {
+  return uselimits_;
+}
+inline bool DiagSignalType::uselimits() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.useLimits)
+  return _internal_uselimits();
+}
+inline void DiagSignalType::_internal_set_uselimits(bool value) {
+  _has_bits_[0] |= 0x00000400u;
+  uselimits_ = value;
+}
+inline void DiagSignalType::set_uselimits(bool value) {
+  _internal_set_uselimits(value);
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.useLimits)
+}
+
+// optional string units = 40;
+inline bool DiagSignalType::_internal_has_units() const {
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  return value;
+}
+inline bool DiagSignalType::has_units() const {
+  return _internal_has_units();
+}
+inline void DiagSignalType::clear_units() {
+  units_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline const std::string& DiagSignalType::units() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.units)
+  return _internal_units();
+}
+inline void DiagSignalType::set_units(const std::string& value) {
+  _internal_set_units(value);
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.units)
+}
+inline std::string* DiagSignalType::mutable_units() {
+  // @@protoc_insertion_point(field_mutable:Proto.DiagSignalType.units)
+  return _internal_mutable_units();
+}
+inline const std::string& DiagSignalType::_internal_units() const {
+  return units_.Get();
+}
+inline void DiagSignalType::_internal_set_units(const std::string& value) {
+  _has_bits_[0] |= 0x00000008u;
+  units_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void DiagSignalType::set_units(std::string&& value) {
+  _has_bits_[0] |= 0x00000008u;
+  units_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.DiagSignalType.units)
+}
+inline void DiagSignalType::set_units(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000008u;
+  units_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.DiagSignalType.units)
+}
+inline void DiagSignalType::set_units(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000008u;
+  units_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.DiagSignalType.units)
+}
+inline std::string* DiagSignalType::_internal_mutable_units() {
+  _has_bits_[0] |= 0x00000008u;
+  return units_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* DiagSignalType::release_units() {
+  // @@protoc_insertion_point(field_release:Proto.DiagSignalType.units)
+  if (!_internal_has_units()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000008u;
+  return units_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void DiagSignalType::set_allocated_units(std::string* units) {
+  if (units != nullptr) {
+    _has_bits_[0] |= 0x00000008u;
+  } else {
+    _has_bits_[0] &= ~0x00000008u;
+  }
+  units_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), units,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.DiagSignalType.units)
 }
 
 // -------------------------------------------------------------------
@@ -63308,6 +66655,12 @@ SimOverrideSignalWorkspace::overridesignals() const {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

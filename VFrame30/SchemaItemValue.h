@@ -213,6 +213,7 @@ namespace VFrame30
 		// IMatsSchemaItemAssociations implementation.
 		//
 	public:
+		virtual QStringList associatedDiagObjectIds() const override;
 		virtual QStringList associatedAppSignalIds() const override;
 		virtual QStringList associatedImpactAppSignalIds() const override;
 		virtual QStringList associatedConnectionIds() const override;

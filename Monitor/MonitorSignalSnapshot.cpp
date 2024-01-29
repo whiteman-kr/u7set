@@ -1,21 +1,22 @@
 #include "MonitorSignalSnapshot.h"
 #include "MonitorConfigController.h"
+#include "../ClientLib/AppSignalManager.h" 
 
 MonitorDialogSignalSnapshot* MonitorDialogSignalSnapshot::createDialog(MonitorConfigController *configController,
-											 MonitorSignalManager* monitorSignalManager,
+											 ClientLib::AppSignalManager* monitorAppSignalManager,
 											 MonitorCentralWidget* centralWidget)
 {
-	if (configController == nullptr || monitorSignalManager == nullptr || centralWidget == nullptr)
+	if (configController == nullptr || monitorAppSignalManager == nullptr || centralWidget == nullptr)
 	{
 		Q_ASSERT(configController);
-		Q_ASSERT(monitorSignalManager);
+		Q_ASSERT(monitorAppSignalManager);
 		Q_ASSERT(centralWidget);
 		return nullptr;
 	}
 
 	MonitorDialogSignalSnapshot* dss = new MonitorDialogSignalSnapshot(configController,
-																	   monitorSignalManager,
-																	   monitorSignalManager,
+																	   monitorAppSignalManager,
+																	   monitorAppSignalManager,
 																	   configController->configInfo().project,
 																	   configController->configInfo().softwareEquipmentId,
 																	   centralWidget);
@@ -23,7 +24,7 @@ MonitorDialogSignalSnapshot* MonitorDialogSignalSnapshot::createDialog(MonitorCo
 	connect(dss, &DialogSignalSnapshot::signalContextMenu, centralWidget, &MonitorCentralWidget::slot_signalContextMenu);
 	connect(dss, &DialogSignalSnapshot::signalInfo, centralWidget, &MonitorCentralWidget::slot_signalInfo);
 
-	connect(monitorSignalManager, &MonitorSignalManager::signalParamsUpdated, dss, &MonitorDialogSignalSnapshot::signalsUpdated);
+	connect(monitorAppSignalManager, &ClientLib::AppSignalManager::signalParamsUpdated, dss, &MonitorDialogSignalSnapshot::signalsUpdated);
 	connect(configController, &MonitorConfigController::configurationUpdated, dss, &MonitorDialogSignalSnapshot::schemasUpdated);
 
 	return dss;

@@ -1,17 +1,18 @@
 #pragma once
 
-#include "MonitorSchemaManager.h"
-#include "MonitorSignalManager.h"
-#include "../ClientLib/TuningConnection.h"
-#include "../ClientLib/TuningUserManager.h"
 #include "../VFrame30/ClientSchemaWidget.h"
 #include "../VFrame30/AppSignalController.h"
-#include "../VFrame30/TuningController.h"
 #include "../lib/ITimeStats.h"
 
 
 class MonitorSchemaView;
+class MonitorSchemaManager;
 struct SchemaHistoryItem;
+
+namespace ClientLib
+{
+	class AppSignalManager;
+}
 
 //
 //
@@ -54,11 +55,11 @@ public slots:
 	// Properties
 	//
 public:
-	IAppSignalManager* signalManager();
-	const IAppSignalManager* signalManager() const;
+	IAppSignalManager& appSignalManager();
+	const IAppSignalManager& appSignalManager() const;
 
-	MonitorSignalManager* monitorSignalManager();
-	const MonitorSignalManager* monitorSignalManager() const;
+	ClientLib::AppSignalManager& clientAppSignalManager();
+	const ClientLib::AppSignalManager& clientAppSignalManager() const;
 
 	MonitorSchemaView* monitorSchemaView();
 	const MonitorSchemaView* monitorSchemaView() const;

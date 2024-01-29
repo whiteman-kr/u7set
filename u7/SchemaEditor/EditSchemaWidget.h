@@ -300,6 +300,7 @@ public:
 	bool isUfbSchema() const;
 	bool isMonitorSchema() const;
 	bool isTuningSchema() const;
+	bool isDiagSchema() const;
 	bool isVduSchema() const;
 
 	std::shared_ptr<VFrame30::LogicSchema> logicSchema();
@@ -459,7 +460,9 @@ private:
 		QAction* m_addSeparatorBus = nullptr;
 		QAction* m_addBusComposer = nullptr;
 		QAction* m_addBusExtractor = nullptr;
-
+		
+		// Monitor and Tuning items
+		//
 		QAction* m_addValueAction = nullptr;
 		QAction* m_addImageValueAction = nullptr;
 		QAction* m_addLabelAction = nullptr;
@@ -468,6 +471,10 @@ private:
 		QAction* m_addSliderAction = nullptr;
 		QAction* m_addIndicatorAction = nullptr;
 
+		// Diagnostics items
+		// 
+		QAction* m_addDiagSignalAction = nullptr;
+		
 		// VDU items
 		//
 		QAction* m_addVduLineAction = nullptr;
@@ -553,7 +560,7 @@ private:
 	QAction* m_appSignalPropertiesAction = nullptr;
 
 	// --
-	// End of ConextMenu
+	// End of ContextMenu
 private:
 
 	bool m_lastSelectedAddSignal = false;

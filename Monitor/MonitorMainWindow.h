@@ -1,23 +1,24 @@
 #pragma once
 
-
+#include "MonitorCentralWidget.h"
 #include "MonitorConfigController.h"
-#include "MonitorSignalManager.h"
+#include "MonitorSchemaManager.h"
 #include "SelectSchemaWidget.h"
-#include "InstanceResolver.h"
-#include "SchemaDrawStatistics.h"
-//#include "../VFrame30/ClientSchemaView.h"
-#include "../ClientLib/ClientTranslator.h"
+
 #include "../ClientLib/AdsConnection.h"
+#include "../ClientLib/AppSignalManager.h"
+#include "../ClientLib/ClientTranslator.h"
+#include "../ClientLib/TuningConnection.h"
+#include "../ClientLib/TuningLog.h"
 #include "../ClientLib/TuningTcpClient.h"
 #include "../ClientLib/TuningUserManager.h"
-#include "../ClientLib/TuningLog.h"
-#include "../VFrame30/AppSignalController.h"
+#include "../SchemaClientLib/SchemaDrawStatistics.h"
+#include "../UtilsLib/InstanceResolver.h"
 #include "../UtilsLib/LogFile.h"
+#include "../VFrame30/AppSignalController.h"
 #include "../lib/Ui/DialogAlert.h"
 #include "../lib/Ui/DialogTcpStatistics.h"
 
-class MonitorCentralWidget;
 class MonitorToolBar;
 class QLabel;
 class QComboBox;
@@ -42,8 +43,6 @@ protected:
 	// Public methods
 	//
 public:
-	static QString getInstanceKey();
-
 	void showTrends(const std::vector<AppSignalParam>& appSignals);
 
 	// Protected methods
@@ -108,10 +107,9 @@ public slots:
 	void slot_historyChanged(bool enableBack, bool enableForward);
 	void slot_updateActions(bool schemaWidgetSelected);
 
-	void slot_configurationArrived(ConfigSettings configuration);
+	void slot_configurationArrived(MonitorConfigSettings configuration);
 	void slot_configurationError(QString error);
 
-	//void checkMonitorSingleInstance();
 	void activateRequested();
 
 	void toggleSchemaTree();
@@ -137,8 +135,8 @@ public:
 	MonitorConfigController& configController();
 	const MonitorConfigController& configController() const;
 
-	MonitorSignalManager& signalManager();
-	const MonitorSignalManager& signalManager() const;
+	ClientLib::AppSignalManager& signalManager();
+	const ClientLib::AppSignalManager& signalManager() const;
 
 	ClientLib::TuningUserManager& userManager();
 	const ClientLib::TuningUserManager& userManager() const;
@@ -162,7 +160,7 @@ private:
 	InstanceResolver& m_instanceResolver;
 
 	MonitorConfigController m_configController;
-	MonitorSignalManager m_signalManager;
+	ClientLib::AppSignalManager m_signalManager;
 	TuningSignalManager m_tuningSignalManager;
 
 	MonitorSchemaManager m_schemaManager;
@@ -175,7 +173,7 @@ private:
 
 	DialogAlert m_dialogAlert;
 
-	SchemaDrawStatistics m_schemaStats;
+	SchemaClientLib::SchemaDrawStatistics m_schemaStats;
 
 	// File menu
 	//

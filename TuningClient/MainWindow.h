@@ -44,7 +44,7 @@ private:
 	void createStatusBar();
 
 private slots:
-	void slot_configurationArrived(ConfigSettings configuration);
+	void slot_configurationArrived(TuningClientConfigSettings configuration);
 	void slot_projectFiltersUpdated(QByteArray data);
 	void slot_signalsUpdated(QByteArray data);
 

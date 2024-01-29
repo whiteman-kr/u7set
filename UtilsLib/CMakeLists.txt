@@ -13,31 +13,33 @@ find_package(Qt6 REQUIRED COMPONENTS Core Network Xml Widgets LinguistTools)
 set(TARGET UtilsLib)
 
 qt_add_library(${TARGET} STATIC
-	CUtils.h
-	CsvFile.h
-	CsvFile.cpp
-	ILogFile.h
-	LogFile.h
-	LogFile.cpp
 	Address16.h
-	Crc.h
-	Crc.cpp
-	DomXmlHelper.h
-	DomXmlHelper.cpp
-	Queue.h
-	Queue.cpp
-	SimpleMutex.h
-	SimpleThread.h
-	SimpleThread.cpp
-	Ui/UiTools.h
-	Ui/UiTools.cpp
-	WUtils.h
-	XmlHelper.h
-	XmlHelper.cpp
-	OutputLog.h
-	OutputLog.cpp
-	CrashExceptionHandler.h
 	CrashExceptionHandler.cpp
+	CrashExceptionHandler.h
+	Crc.cpp
+	Crc.h
+	CsvFile.cpp
+	CsvFile.h
+	CUtils.h
+	DomXmlHelper.cpp
+	DomXmlHelper.h
+	ILogFile.h
+	InstanceResolver.cpp
+	InstanceResolver.h
+	LogFile.cpp
+	LogFile.h
+	OutputLog.cpp
+	OutputLog.h
+	Queue.cpp
+	Queue.h
+	SimpleMutex.h
+	SimpleThread.cpp
+	SimpleThread.h
+	Ui/UiTools.cpp
+	Ui/UiTools.h
+	WUtils.h
+	XmlHelper.cpp
+	XmlHelper.h
 )
 
 target_precompile_headers(${TARGET} PUBLIC

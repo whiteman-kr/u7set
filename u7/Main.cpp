@@ -3,6 +3,7 @@
 #include "../CommonLib/PropertyObject.h"
 #include "../CommonLib/Times.h"
 #include "../HardwareLib/DeviceObject.h"
+#include "../HardwareLib/HardwareLibrary.h"
 #include "../HardwareLib/LmDescription.h"
 #include "../HardwareLib/LogicModulesInfo.h"
 #include "../Protobuf/google/protobuf/message.h"

@@ -400,7 +400,7 @@ bool ConfigSocket::readAppDataSource(const QByteArray& fileData)
 			si.moduleType = ds.moduleType();
 			si.subSystem = ds.subsystemID();
 			si.frameCount = ds.appDataFramesQuantity();
-			si.dataID = ds.appDataUID();
+			si.dataID = ds.rupAppDataUID();
 
 			si.lmIP = ip;
 			si.appDataSrvIP = m_appDataSrvIP;

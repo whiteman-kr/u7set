@@ -1,13 +1,14 @@
 #include "EquipmentTabPage.h"
-#include "EquipmentModel.h"
-#include "EquipmentView.h"
-#include "EquipmentVcsDialog.h"
-#include "IdePropertyEditor.h"
 #include "../../HardwareLib/DeviceObject.h"
-#include "../Settings.h"
 #include "../DialogConnections.h"
-#include "../Forms/ComparePropertyObjectDialog.h"
 #include "../EquipmentEditor/DialogImportPreset.h"
+#include "../Forms/ComparePropertyObjectDialog.h"
+#include "../Forms/DialogDiagSignalTypes.h"
+#include "../Settings.h"
+#include "EquipmentModel.h"
+#include "EquipmentVcsDialog.h"
+#include "EquipmentView.h"
+#include "IdePropertyEditor.h"
 
 //
 //
@@ -47,7 +48,9 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	m_addObjectMenu->addAction(m_addChassisAction);
 	m_addObjectMenu->addAction(m_addModuleAction);
 	m_addObjectMenu->addAction(m_addControllerAction);
-	m_addObjectMenu->addAction(m_addSignalAction);
+	m_addObjectMenu->addAction(m_addAppSignalAction);
+	m_addObjectMenu->addAction(m_addDiagSignalAction);
+	m_addObjectMenu->addAction(m_addDiagSignalReflectionAction);
 	m_addObjectMenu->addAction(m_addWorkstationAction);
 	m_addObjectMenu->addAction(m_addSoftwareAction);
 
@@ -124,6 +127,9 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	m_toolBar->addAction(m_separatorPresetExportImport);
 	m_toolBar->addAction(m_exportPresetAction);
 	m_toolBar->addAction(m_importPresetAction);
+
+	m_toolBar->addSeparator();
+	m_toolBar->addAction(m_diagSignalTypesAction);
 
 	//m_toolBar->addAction(m_pendingChangesAction);		// Not implemented, removed to be consistent with User Manual
 
@@ -244,11 +250,20 @@ void EquipmentTabPage::CreateActions()
 	m_addControllerAction->setEnabled(false);
 	connect(m_addControllerAction, &QAction::triggered, m_equipmentView, &EquipmentView::addController);
 
-	m_addSignalAction = new QAction(tr("Signal"), this);
-	m_addSignalAction->setStatusTip(tr("Add signal to the configuration..."));
-	m_addSignalAction->setEnabled(false);
-	connect(m_addSignalAction, &QAction::triggered, m_equipmentView, &EquipmentView::addSignal);
+	m_addAppSignalAction = new QAction(tr("AppSignal Port"), this);
+	m_addAppSignalAction->setStatusTip(tr("Add application signal port to the configuration, AppSignal can be creatod from this equipment AppSignal Port ..."));
+	m_addAppSignalAction->setEnabled(false);
+	connect(m_addAppSignalAction, &QAction::triggered, m_equipmentView, &EquipmentView::addAppSignalPort);
 
+	m_addDiagSignalAction = new QAction(tr("DiagSignal"), this);
+	m_addDiagSignalAction->setStatusTip(tr("Add diagnostics signal to the configuration..."));
+	m_addDiagSignalAction->setEnabled(false);
+	connect(m_addDiagSignalAction, &QAction::triggered, m_equipmentView, &EquipmentView::addDiagSignal);
+
+	m_addDiagSignalReflectionAction = new QAction(tr("DiagSignal Reflection"), this);
+	m_addDiagSignalReflectionAction->setStatusTip(tr("Add reflection to diagnostics signal to the configuration..."));
+	m_addDiagSignalReflectionAction->setEnabled(false);
+	connect(m_addDiagSignalReflectionAction, &QAction::triggered, m_equipmentView, &EquipmentView::addDiagSignalReflection);
 
 	m_addWorkstationAction = new QAction(tr("Workstation"), this);
 	m_addWorkstationAction->setStatusTip(tr("Add workstation to the configuration..."));
@@ -473,6 +488,7 @@ void EquipmentTabPage::CreateActions()
 
 	m_separatorPresetExportImport = new QAction{this};
 	m_separatorPresetExportImport->setSeparator(true);
+	m_separatorPresetExportImport->setVisible(false);
 
 	m_exportPresetAction = new QAction{tr("Export Preset..."), this};
 	m_exportPresetAction->setStatusTip(tr("Export selected preset to file"));
@@ -485,6 +501,11 @@ void EquipmentTabPage::CreateActions()
 	m_importPresetAction->setIcon(QIcon{":/Images/Images/ImportPreset.svg"});
 	m_importPresetAction->setVisible(false);
 	connect(m_importPresetAction, &QAction::triggered, this, &EquipmentTabPage::importPreset);
+
+	m_diagSignalTypesAction = new QAction{tr("Diagnostic Signal Types"), this};
+	m_diagSignalTypesAction->setStatusTip(tr("Run Diagnostic Signal Types Editor"));
+	m_diagSignalTypesAction->setIcon(QIcon{":/Images/Images/DiagSignalTypes.svg"});
+	connect(m_diagSignalTypesAction, &QAction::triggered, this, &EquipmentTabPage::diagSignalTypes);
 
 	return;
 }
@@ -541,7 +562,9 @@ void EquipmentTabPage::setActionState()
 	assert(m_addChassisAction);
 	assert(m_addModuleAction);
 	assert(m_addControllerAction);
-	assert(m_addSignalAction);
+	assert(m_addAppSignalAction);
+	assert(m_addDiagSignalAction);
+	assert(m_addDiagSignalReflectionAction);
 	assert(m_addWorkstationAction);
 	assert(m_addSoftwareAction);
 	assert(m_copyObjectAction);
@@ -568,6 +591,7 @@ void EquipmentTabPage::setActionState()
 	assert(m_showObjectConnections);
 	assert(m_exportPresetAction);
 	assert(m_importPresetAction);
+	assert(m_diagSignalTypesAction);
 
 	// Check in is always true, as we perform check in is performed for the tree, and there is no iformation
 	// about does parent have any checked out files
@@ -597,7 +621,9 @@ void EquipmentTabPage::setActionState()
 	m_addChassisAction->setEnabled(false);
 	m_addModuleAction->setEnabled(false);
 	m_addControllerAction->setEnabled(false);
-	m_addSignalAction->setEnabled(false);
+	m_addAppSignalAction->setEnabled(false);
+	m_addDiagSignalAction->setEnabled(false);
+	m_addDiagSignalReflectionAction->setEnabled(false);
 
 	m_addWorkstationAction->setEnabled(false);
 	m_addSoftwareAction->setEnabled(false);
@@ -633,6 +659,8 @@ void EquipmentTabPage::setActionState()
 
 	m_exportPresetAction->setEnabled(false);
 	m_importPresetAction->setEnabled(false);
+
+	m_diagSignalTypesAction->setEnabled(false);
 
 	if (dbController()->isProjectOpened() == false)
 	{
@@ -963,7 +991,9 @@ void EquipmentTabPage::setActionState()
 			m_addWorkstationAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::Workstation));
 			m_addSoftwareAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::Software));
 			m_addControllerAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::Controller));
-			m_addSignalAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::AppSignal));
+			m_addAppSignalAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::AppSignal));
+			m_addDiagSignalAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::DiagSignal));
+			m_addDiagSignalReflectionAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::DiagSignal));
 
 			m_addPresetRackAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::Rack));
 			m_addPresetChassisAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::Chassis));
@@ -1039,6 +1069,10 @@ void EquipmentTabPage::setActionState()
 	//
 	bool enablepaste = m_equipmentView->canPaste();
 	m_pasteObjectAction->setEnabled(enablepaste);
+
+	// Always enable to edit diag signa types.
+	//
+	m_diagSignalTypesAction->setEnabled(true);
 
 	return;
 }
@@ -1666,6 +1700,12 @@ void EquipmentTabPage::importPreset()
 		}
 	}
 
+	return;
+}
+
+void EquipmentTabPage::diagSignalTypes()
+{
+	DialogDiagSignalTypes::showDialog(dbController(), this);
 	return;
 }
 

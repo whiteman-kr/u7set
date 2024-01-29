@@ -30,7 +30,7 @@ SimWidget::SimWidget(std::shared_ptr<Sim::ConsoleLogFile> ideLogFile,
 {
 	// --
 	//
-	m_appSignalController = new VFrame30::AppSignalController{&m_simulator->appSignalManager(), this};
+	m_appSignalController = new VFrame30::AppSignalController{m_simulator->appSignalManager(), this};
 
 	// --
 	//
@@ -174,7 +174,7 @@ void SimWidget::openSchemaTabPage(QString schemaId, QStringList highlightIds)
 
 	// Create a fake context, later it will be changed in SimSchemaWidget::SimSchemaWidget(...)
 	//
-	auto fakeContext = VFrame30::Context::create(nullptr, nullptr, nullptr, nullptr);
+	auto fakeContext = VFrame30::Context::create(nullptr, nullptr, nullptr, nullptr, nullptr);
 
 	std::shared_ptr<VFrame30::Schema> schema = m_schemaManager.schema(schemaId, std::move(fakeContext));
 	if (schema == nullptr)
@@ -987,7 +987,7 @@ void SimWidget::showFindSignal()
 	// 3. You can pass and store 'this->m_appSignalController' and 'this->m_simulator.get()'  to your function
 	//    it is guarantee will not be deleted
 	//
-	DialogSignalSearch* dsi = new DialogSignalSearch(this, m_appSignalController->appSignalManager());
+	DialogSignalSearch* dsi = new DialogSignalSearch(this, &m_appSignalController->appSignalManager());
 
 	connect(m_simulator.get(), &SimIdeSimulator::projectUpdated, dsi, &DialogSignalSearch::signalsUpdated);
 

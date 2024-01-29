@@ -853,6 +853,12 @@ bool DynamicAppSignalState::hasGatewaySendReasone(AppSignalStateFlags flags) con
 	return false;
 }
 
+// -------------------------------------------------------------------------------
+//
+// DynamicAppSignalStates class implementation
+//
+// -------------------------------------------------------------------------------
+
 DynamicAppSignalStates::~DynamicAppSignalStates()
 {
 	clear();
@@ -862,11 +868,7 @@ void DynamicAppSignalStates::clear()
 {
 	m_hash2State.clear();
 
-	if (m_appSignalState != nullptr)
-	{
-		delete [] m_appSignalState;
-		m_appSignalState = nullptr;
-	}
+	DELETE_ARRAY_IF_NOT_NULL(m_appSignalState);
 
 	m_size = 0;
 }
@@ -971,7 +973,7 @@ void DynamicAppSignalStates::setAutoArchivingGroups(int autoArchivingGroupsCount
 
 	for(int i = 0; i < m_size; i++)
 	{
-		if (m_appSignalState->archive() == true)
+		if (m_appSignalState[i].archive() == true)
 		{
 			m_appSignalState[i].setAutoArchivingGroup(count % autoArchivingGroupsCount);
 			count++;

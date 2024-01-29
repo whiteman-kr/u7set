@@ -138,9 +138,9 @@ namespace Builder
 	{
 		// Input data areas of I/O modules actual installed in chassis
 		//
-		for(const ModuleLogicCompiler::Module& module : m_compiler.modules())
+		for(const auto& [place, module] : m_compiler.modules())
 		{
-			quint32 place = module.place;
+			Q_ASSERT(module.place == place);
 
 			if (place > m_lmDesc->memory().m_moduleCount)
 			{
@@ -259,9 +259,9 @@ namespace Builder
 	{
 		// Output data areas of I/O modules actual installed in chassis
 		//
-		for(const ModuleLogicCompiler::Module& module : m_compiler.modules())
+		for(const auto& [place, module] : m_compiler.modules())
 		{
-			quint32 place = module.place;
+			Q_ASSERT(module.place == place);
 
 			if (place > m_lmDesc->memory().m_moduleCount)
 			{

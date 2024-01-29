@@ -2418,7 +2418,7 @@ void DbControllerFileTests::systemFilesTest()
 	QVERIFY2 (m_db->systemFileId(DbDir::AppLogicDir) == al, qPrintable("Error: Wrong AL id returned"));
 	QVERIFY2 (m_db->systemFileId(DbDir::ModuleConfigurationDir) == mc, qPrintable("Error: Wrong MC id returned"));
 	QVERIFY2 (m_db->systemFileId(DbDir::MonitorSchemasDir) == mvs, qPrintable("Error: Wrong MVS id returned"));
-	QVERIFY2 (m_db->systemFileId(DbDir::DiagnosticsSchemasDir) == dvs, qPrintable("Error: Wrong DVS id returned"));
+	QVERIFY2 (m_db->systemFileId(DbDir::DiagSchemasDir) == dvs, qPrintable("Error: Wrong DVS id returned"));
 	QVERIFY2 (m_db->systemFileId(DbDir::HardwareConfigurationDir) == hc, qPrintable("Error: Wrong HC id returned"));
 	QVERIFY2 (m_db->systemFileId(DbDir::HardwarePresetsDir) == hp, qPrintable("Error: Wrong HP id returned"));
 

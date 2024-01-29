@@ -23,3 +23,43 @@ public:
 	///
 	virtual std::vector<Hash> dataServiceSignals(const QString& serviceEquipmentId) const = 0;
 };
+
+
+// Stub implementation of ISignalDataServer.
+//
+class SignalDataServerStub : public ISignalDataServer
+{
+public:
+    QStringList dataServiceIds(const QString& appSignalId) const override
+    {
+        Q_UNUSED(appSignalId);
+
+        QStringList serviceIds;
+        serviceIds << "DummyServiceID1" << "DummyServiceID2";
+        return serviceIds;
+    }
+
+    bool dataServiceHasSignal(const QString& serviceEquipmentId, const QString& signalId) const override
+    {
+        Q_UNUSED(serviceEquipmentId);
+        Q_UNUSED(signalId);
+        return true;
+    }
+
+    bool dataServiceHasSignal(const QString& serviceEquipmentId, Hash signalHash) const override
+    {
+        Q_UNUSED(serviceEquipmentId);
+        Q_UNUSED(signalHash);
+        return true;
+    }
+
+    std::vector<Hash> dataServiceSignals(const QString& serviceEquipmentId) const override
+    {
+        Q_UNUSED(serviceEquipmentId);
+
+        std::vector<Hash> signalHashes;
+        signalHashes.push_back(123);
+        signalHashes.push_back(456);
+        return signalHashes;
+    }
+};

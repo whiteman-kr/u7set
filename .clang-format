@@ -8,8 +8,12 @@ DisableFormat: true
 Language: Cpp
 BasedOnStyle: Microsoft
 
+MaxEmptyLinesToKeep: 2 
+
 # Ok
 AlignAfterOpenBracket: Align	
+
+KeepEmptyLinesAtTheStartOfBlocks: false
 
 # Ok
 AlignConsecutiveAssignments: None
@@ -22,7 +26,6 @@ AlignEscapedNewlines: DontAlign
 AlignOperands: Align
 
 UseTab: ForContinuationAndIndentation
-ColumnLimit: '0'
 IndentWidth: '4'
 TabWidth: '4'
 
@@ -49,7 +52,7 @@ AllowAllParametersOfDeclarationOnNextLine: 'false'
 # Ok
 AllowShortFunctionsOnASingleLine: Inline
 
-AllowShortLambdasOnASingleLine: Empty
+AllowShortLambdasOnASingleLine: None
 
 AllowShortLoopsOnASingleLine: 'false'
 AlwaysBreakAfterReturnType: None

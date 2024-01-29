@@ -223,7 +223,7 @@ public:
 	{
 		LittleEndian,
 		BigEndian,
-		NoEndian				// Dirrect write byte order is not applicable
+		NoEndian				// Direct write byte order is not applicable
 	};
 	Q_ENUM(ByteOrder)
 
@@ -251,7 +251,7 @@ public:
 	//
 	enum class ApertureType
 	{
-		RangePercent,			// Aperture is a percent of range from LowEngineeringUnits to HihgEngineeringUnits
+		RangePercent,			// Aperture is a percent of range from LowEngineeringUnits to HighEngineeringUnits
 		ValuePercent,			// Aperture is a percent of current signal value,
 								// corresponds to obsolete property AdaptiveAperture == true
 		AbsValue,				// Aperture is an absolute value in engineering units
@@ -309,7 +309,8 @@ public:
 		ServiceControlManager = 9008,
 		TestClient = 9009,
 		TestSuite = 9010,
-		GatewayService = 9011
+		GatewayService = 9011,
+		Diagnostics = 9012
 	};
 	Q_ENUM(SoftwareType)
 
@@ -709,6 +710,42 @@ public:
 	};
 	Q_ENUM(NetworkError)
 
+	//
+	// Diagnostics specific
+	//
+	enum class DiagSignalType
+	{
+		Analog = 0,
+		Discrete
+	};
+	Q_ENUM(DiagSignalType)
+	
+	enum class DiagLevel
+	{
+		Message = 0,
+		Attention,
+		Warning,
+		Error,
+		Fault
+	};
+	Q_ENUM(DiagLevel)
+
+	enum class DiagByteOrder
+	{
+		LittleEndian,
+		BigEndian,
+		WordBE_ByteLE	// Words are BigEndian, Bytes in word are LittleEndian
+	};
+	Q_ENUM(DiagByteOrder)
+
+	enum class DiagAnalogFormat
+	{
+		UnsignedInt,
+		SignedInt,
+		BCD,
+		FloatIEEE754
+	};
+	Q_ENUM(DiagAnalogFormat)
 
 public:
 	template <typename ENUM_TYPE>
@@ -994,7 +1031,3 @@ enum class SchemaUnit
 
 Q_DECLARE_METATYPE(SchemaUnit)
 
-Q_DECLARE_METATYPE(E::TrendViewMode)
-Q_DECLARE_METATYPE(E::ColumnData)
-Q_DECLARE_METATYPE(E::SignalType)
-Q_DECLARE_METATYPE(E::AnalogAppSignalFormat)

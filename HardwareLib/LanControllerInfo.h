@@ -27,7 +27,7 @@ struct LanControllerInfo
 	QString appDataServiceIP;
 	int appDataServicePort = 0;
 	QString appDataServiceNetmask;
-	quint32 appDataUID = 0;
+	quint32 rupAppDataUID = 0;
 	int appDataSizeBytes = 0;
 	int appDataFramesQuantity = 0;
 	int overrideAppDataWordCount = -1;
@@ -41,7 +41,8 @@ struct LanControllerInfo
 	QString tuningServiceIP;
 	int tuningServicePort = 0;
 	QString tuningServiceNetmask;
-	quint64 tuningDataUID = 0;
+	quint32 rupTuningDataUID = 0;
+	quint64 fotipTuningDataUID = 0;
 
 	// used if LAN controller provide DiagData
 	//
@@ -52,7 +53,7 @@ struct LanControllerInfo
 	QString diagDataServiceIP;
 	int diagDataServicePort = 0;
 	QString diagDataServiceNetmask;
-	quint32 diagDataUID = 0;
+	quint32 rupDiagDataUID = 0;
 	int diagDataSizeBytes = 0;
 	int diagDataFramesQuantity = 0;
 	int overrideDiagDataWordCount = -1;

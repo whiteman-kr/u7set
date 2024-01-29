@@ -17,7 +17,7 @@ AppDataSource::AppDataSource(const DataSource& dataSource) :
 	//
 	*static_cast<DataSource*>(this) = dataSource;
 
-	m_cachedAppDataUID = appDataUID();
+	m_cachedAppDataUID = rupAppDataUID();
 
 	initParsingBuffers(appDataFramesQuantity());
 
@@ -84,11 +84,6 @@ void AppDataSource::prepare(const AppSignals& appSignals,
 		DynamicAppSignalState* dynState = signalStates->getStateByID(signal->appSignalID());
 
 		dynState->setQueues(&m_signalStatesQueue, &m_gatewaySignalStatesQueue);
-
-/*		if (dynState->appSignalID() == "#LM1_MEANDR_10MS_2")
-		{
-			dynState->m_debug_replace_time = true;
-		}*/
 
 		TEST_PTR_CONTINUE(dynState);
 
@@ -406,6 +401,12 @@ int AppDataSource::getAutoArchivingGroup(qint64 currentSysTime)
 
 	return retGroup;
 }
+
+// -------------------------------------------------------------------------------
+//
+// AppDataSources class implementation
+//
+// -------------------------------------------------------------------------------
 
 AppDataSources::AppDataSources()
 {

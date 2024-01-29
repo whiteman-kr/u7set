@@ -1,5 +1,7 @@
 #pragma once
 #include "../../HardwareLib/DeviceObject.h"
+#include "../../HardwareLib/DiagSignal.h"
+#include "../../HardwareLib/HardwareLibrary.h"
 
 class DeviceObjectTests : public QObject
 {
@@ -32,6 +34,7 @@ private slots:
 	void testCanAddChildModule();
 	void testCanAddChildController();
 	void testCanAddChildAppSignal();
+	void testCanAddChildDiagSignal();
 	void testCanAddChildWorkstation();
 	void testCanAddChildSoftware();
 

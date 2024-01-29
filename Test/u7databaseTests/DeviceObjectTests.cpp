@@ -342,6 +342,7 @@ void DeviceObjectTests::testCanAddChildRoot()
 	QVERIFY(root->canAddChild(Hardware::DeviceType::Module) == true);
 	QVERIFY(root->canAddChild(Hardware::DeviceType::Controller) == true);
 	QVERIFY(root->canAddChild(Hardware::DeviceType::AppSignal) == true);
+	QVERIFY(root->canAddChild(Hardware::DeviceType::DiagSignal) == true);
 	QVERIFY(root->canAddChild(Hardware::DeviceType::Workstation) == true);
 	QVERIFY(root->canAddChild(Hardware::DeviceType::Software) == true);
 
@@ -359,6 +360,7 @@ void DeviceObjectTests::testCanAddChildSystem()
 	QVERIFY(system->canAddChild(Hardware::DeviceType::Module) == true);
 	QVERIFY(system->canAddChild(Hardware::DeviceType::Controller) == true);
 	QVERIFY(system->canAddChild(Hardware::DeviceType::AppSignal) == true);
+	QVERIFY(system->canAddChild(Hardware::DeviceType::DiagSignal) == true);
 	QVERIFY(system->canAddChild(Hardware::DeviceType::Workstation) == true);
 	QVERIFY(system->canAddChild(Hardware::DeviceType::Software) == false);
 
@@ -376,6 +378,7 @@ void DeviceObjectTests::testCanAddChildRack()
 	QVERIFY(rack->canAddChild(Hardware::DeviceType::Module) == true);
 	QVERIFY(rack->canAddChild(Hardware::DeviceType::Controller) == true);
 	QVERIFY(rack->canAddChild(Hardware::DeviceType::AppSignal) == true);
+	QVERIFY(rack->canAddChild(Hardware::DeviceType::DiagSignal) == true);
 	QVERIFY(rack->canAddChild(Hardware::DeviceType::Workstation) == true);
 	QVERIFY(rack->canAddChild(Hardware::DeviceType::Software) == false);
 
@@ -393,6 +396,7 @@ void DeviceObjectTests::testCanAddChildChassis()
 	QVERIFY(chassis->canAddChild(Hardware::DeviceType::Module) == true);
 	QVERIFY(chassis->canAddChild(Hardware::DeviceType::Controller) == true);
 	QVERIFY(chassis->canAddChild(Hardware::DeviceType::AppSignal) == true);
+	QVERIFY(chassis->canAddChild(Hardware::DeviceType::DiagSignal) == true);
 	QVERIFY(chassis->canAddChild(Hardware::DeviceType::Workstation) == true);
 	QVERIFY(chassis->canAddChild(Hardware::DeviceType::Software) == false);
 
@@ -410,7 +414,9 @@ void DeviceObjectTests::testCanAddChildModule()
 	QVERIFY(module->canAddChild(Hardware::DeviceType::Module) == false);
 	QVERIFY(module->canAddChild(Hardware::DeviceType::Controller) == true);
 	QVERIFY(module->canAddChild(Hardware::DeviceType::AppSignal) == true);
-	QVERIFY(module->canAddChild(Hardware::DeviceType::Workstation) == true);
+	// QVERIFY(module->canAddChild(Hardware::DeviceType::Workstation) == true); // For VDU with software?
+	QVERIFY(module->canAddChild(Hardware::DeviceType::DiagSignal) == true);
+	QVERIFY(module->canAddChild(Hardware::DeviceType::Workstation) == false);
 	QVERIFY(module->canAddChild(Hardware::DeviceType::Software) == false);
 
 	return;
@@ -428,6 +434,7 @@ void DeviceObjectTests::testCanAddChildController()
 	QVERIFY(controller->canAddChild(Hardware::DeviceType::Controller) == false);
 	QVERIFY(controller->canAddChild(Hardware::DeviceType::Workstation) == false);
 	QVERIFY(controller->canAddChild(Hardware::DeviceType::Software) == false);
+	QVERIFY(controller->canAddChild(Hardware::DeviceType::DiagSignal) == true);
 
 	// Signal can be added to Controller in Hardware
 	//
@@ -454,11 +461,31 @@ void DeviceObjectTests::testCanAddChildAppSignal()
 	QVERIFY(devAppSignal->canAddChild(Hardware::DeviceType::Module) == false);
 	QVERIFY(devAppSignal->canAddChild(Hardware::DeviceType::Controller) == false);
 	QVERIFY(devAppSignal->canAddChild(Hardware::DeviceType::AppSignal) == false);
+	QVERIFY(devAppSignal->canAddChild(Hardware::DeviceType::DiagSignal) == false);
 	QVERIFY(devAppSignal->canAddChild(Hardware::DeviceType::Workstation) == false);
 	QVERIFY(devAppSignal->canAddChild(Hardware::DeviceType::Software) == false);
 
 	return;
 }
+
+void DeviceObjectTests::testCanAddChildDiagSignal()
+{
+	auto devDiagSignal = std::make_shared<Hardware::DiagSignal>();
+
+	QVERIFY(devDiagSignal->canAddChild(Hardware::DeviceType::Root) == false);
+	QVERIFY(devDiagSignal->canAddChild(Hardware::DeviceType::System) == false);
+	QVERIFY(devDiagSignal->canAddChild(Hardware::DeviceType::Rack) == false);
+	QVERIFY(devDiagSignal->canAddChild(Hardware::DeviceType::Chassis) == false);
+	QVERIFY(devDiagSignal->canAddChild(Hardware::DeviceType::Module) == false);
+	QVERIFY(devDiagSignal->canAddChild(Hardware::DeviceType::Controller) == false);
+	QVERIFY(devDiagSignal->canAddChild(Hardware::DeviceType::AppSignal) == false);
+	QVERIFY(devDiagSignal->canAddChild(Hardware::DeviceType::DiagSignal) == false);
+	QVERIFY(devDiagSignal->canAddChild(Hardware::DeviceType::Workstation) == false);
+	QVERIFY(devDiagSignal->canAddChild(Hardware::DeviceType::Software) == false);
+
+	return;
+}
+
 
 void DeviceObjectTests::testCanAddChildWorkstation()
 {
@@ -471,6 +498,7 @@ void DeviceObjectTests::testCanAddChildWorkstation()
 	QVERIFY(workstation->canAddChild(Hardware::DeviceType::Module) == false);
 	QVERIFY(workstation->canAddChild(Hardware::DeviceType::Controller) == false);
 	QVERIFY(workstation->canAddChild(Hardware::DeviceType::AppSignal) == false);
+	QVERIFY(workstation->canAddChild(Hardware::DeviceType::DiagSignal) == true);
 	QVERIFY(workstation->canAddChild(Hardware::DeviceType::Workstation) == false);
 	QVERIFY(workstation->canAddChild(Hardware::DeviceType::Software) == true);
 
@@ -488,6 +516,7 @@ void DeviceObjectTests::testCanAddChildSoftware()
 	QVERIFY(software->canAddChild(Hardware::DeviceType::Module) == false);
 	QVERIFY(software->canAddChild(Hardware::DeviceType::Controller) == true);
 	QVERIFY(software->canAddChild(Hardware::DeviceType::AppSignal) == false);
+	QVERIFY(software->canAddChild(Hardware::DeviceType::DiagSignal) == true);
 	QVERIFY(software->canAddChild(Hardware::DeviceType::Workstation) == false);
 	QVERIFY(software->canAddChild(Hardware::DeviceType::Software) == false);
 

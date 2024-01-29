@@ -13,7 +13,7 @@ public:
 	explicit SimSchemaManager(SimIdeSimulator* simulator, QObject* parent = nullptr);
 
 protected:
-	virtual std::shared_ptr<VFrame30::Schema> loadSchema(QString schemaId) override;
+	virtual std::shared_ptr<VFrame30::Schema> loadSchema(const QString& schemaId) override;
 
 	// RealTime Trends (ITrendDataProvider)
 	//

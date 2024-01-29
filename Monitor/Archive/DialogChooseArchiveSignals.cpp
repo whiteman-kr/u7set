@@ -1,6 +1,6 @@
 #include "DialogChooseArchiveSignals.h"
 #include "ui_DialogChooseArchiveSignals.h"
-#include "MonitorSignalManager.h"
+#include "../ClientLib/AppSignalManager.h"
 #include "../OnlineLib/SocketIO.h"
 
 //
@@ -13,7 +13,7 @@ QString DialogChooseArchiveSignals::s_lastServer;
 
 using namespace MonitorInternal;
 
-DialogChooseArchiveSignals::DialogChooseArchiveSignals(const MonitorSignalManager* signalManager,
+DialogChooseArchiveSignals::DialogChooseArchiveSignals(const ClientLib::AppSignalManager& signalManager,
 													   const std::vector<SoftwareEndpoint::ArchiveService>& archiveServices,
 													   const ArchiveSource& init,
 													   QWidget* parent) :
@@ -22,8 +22,6 @@ DialogChooseArchiveSignals::DialogChooseArchiveSignals(const MonitorSignalManage
 	m_archiveServices(archiveServices),
 	s_allServers(tr("All Servers"))
 {
-	Q_ASSERT(signalManager);
-
 	ui->setupUi(this);
 
 	setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint | Qt::WindowMaximizeButtonHint);
@@ -99,7 +97,7 @@ DialogChooseArchiveSignals::DialogChooseArchiveSignals(const MonitorSignalManage
 
 	ui->archiveSignals->setHeaderLabels(headerLabels);
 
-	std::vector<AppSignalParam> signalParams = signalManager->signalList();
+	std::vector<AppSignalParam> signalParams = signalManager.signalList();
 
 	std::vector<ArchiveSignal> signalParamsSources;
 	signalParamsSources.reserve(signalParams.size());
@@ -110,7 +108,7 @@ DialogChooseArchiveSignals::DialogChooseArchiveSignals(const MonitorSignalManage
 		//
 		for (const SoftwareEndpoint::ArchiveService& archiveService : m_archiveServices)
 		{
-			if (signalManager->dataServiceHasSignal(archiveService.appDataServiceId, sp.appSignalId()) == true)
+			if (signalManager.dataServiceHasSignal(archiveService.appDataServiceId, sp.appSignalId()) == true)
 			{
 				signalParamsSources.emplace_back(sp, archiveService.equipmentId, archiveService.shortenId);
 			}

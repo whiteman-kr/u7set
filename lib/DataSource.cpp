@@ -90,37 +90,49 @@ int DataSource::overrideDiagDataWordCount() const
 	return 0;
 }
 
-quint32 DataSource::appDataUID() const
+quint32 DataSource::rupAppDataUID() const
 {
 	const LanControllerInfo& lci = m_lanControllersInfo.getFirstCompatibleController(E::LanControllerType::AppData);
 
 	if (lci.isValid() == true)
 	{
-		return lci.appDataUID;
+		return lci.rupAppDataUID;
 	}
 
 	return 0;
 }
 
-quint32 DataSource::diagDataUID() const
+quint32 DataSource::rupDiagDataUID() const
 {
 	const LanControllerInfo& lci = m_lanControllersInfo.getFirstCompatibleController(E::LanControllerType::DiagData);
 
 	if (lci.isValid() == true)
 	{
-		return lci.diagDataUID;
+		return lci.rupDiagDataUID;
 	}
 
 	return 0;
 }
 
-quint64 DataSource::tuningDataUID() const
+quint32 DataSource::rupTuningDataUID() const
 {
 	const LanControllerInfo& lci = m_lanControllersInfo.getFirstCompatibleController(E::LanControllerType::Tuning);
 
 	if (lci.isValid() == true)
 	{
-		return lci.tuningDataUID;
+		return lci.rupTuningDataUID;
+	}
+
+	return 0;
+}
+
+quint64 DataSource::fotipTuningDataUID() const
+{
+	const LanControllerInfo& lci = m_lanControllersInfo.getFirstCompatibleController(E::LanControllerType::Tuning);
+
+	if (lci.isValid() == true)
+	{
+		return lci.fotipTuningDataUID;
 	}
 
 	return 0;
@@ -211,16 +223,20 @@ void DataSource::writeToXml(XmlWriteHelper& xml) const
 	xml.writeIntAttribute(XmlAttribute::MODULE_WORKCYCLE_MCS, m_moduleWorkcycle_mcs);
 
 	xml.writeIntAttribute(EquipmentPropNames::APP_DATA_SIZE_BYTES, appDataSizeBytes());
-	xml.writeUInt32Attribute(EquipmentPropNames::APP_DATA_UID, appDataUID(), false);
-	xml.writeUInt32Attribute(EquipmentPropNames::HEX_APP_DATA_UID, appDataUID(), true);
+	xml.writeUInt32Attribute(EquipmentPropNames::RUP_APP_DATA_UID, rupAppDataUID(), false);
+	xml.writeUInt32Attribute(EquipmentPropNames::HEX_RUP_APP_DATA_UID, rupAppDataUID(), true);
 	xml.writeIntAttribute(EquipmentPropNames::APP_DATA_FRAMES_QUANTITY, appDataFramesQuantity());
 	xml.writeIntAttribute(EquipmentPropNames::OVERRIDE_APP_DATA_WORD_COUNT, overrideAppDataWordCount());
 
-	xml.writeUInt64Attribute(EquipmentPropNames::TUNING_DATA_UID, tuningDataUID(), true);
+	xml.writeUInt32Attribute(EquipmentPropNames::RUP_TUNING_DATA_UID, rupTuningDataUID(), false);
+	xml.writeUInt32Attribute(EquipmentPropNames::HEX_RUP_TUNING_DATA_UID, rupTuningDataUID(), true);
+
+	xml.writeUInt64Attribute(EquipmentPropNames::FOTIP_TUNING_DATA_UID, fotipTuningDataUID(), false);
+	xml.writeUInt32Attribute(EquipmentPropNames::HEX_FOTIP_TUNING_DATA_UID, fotipTuningDataUID(), true);
 
 	xml.writeIntAttribute(EquipmentPropNames::DIAG_DATA_SIZE_BYTES, diagDataSizeBytes());
-	xml.writeUInt32Attribute(EquipmentPropNames::DIAG_DATA_UID, diagDataUID(), false);
-	xml.writeUInt32Attribute(EquipmentPropNames::HEX_DIAG_DATA_UID, diagDataUID(), true);
+	xml.writeUInt32Attribute(EquipmentPropNames::RUP_DIAG_DATA_UID, rupDiagDataUID(), false);
+	xml.writeUInt32Attribute(EquipmentPropNames::HEX_RUP_DIAG_DATA_UID, rupDiagDataUID(), true);
 	xml.writeIntAttribute(EquipmentPropNames::DIAG_DATA_FRAMES_QUANTITY, diagDataFramesQuantity());
 	xml.writeIntAttribute(EquipmentPropNames::OVERRIDE_DIAG_DATA_WORD_COUNT, overrideDiagDataWordCount());
 

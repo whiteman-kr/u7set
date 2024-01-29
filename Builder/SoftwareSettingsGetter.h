@@ -220,17 +220,31 @@ private:
 
 // -------------------------------------------------------------------------------------------
 
-class MonitorSettingsGetter : public MonitorSettings, public SoftwareSettingsGetter
+class MonitorSettingsGetter : public MonitorSettings,
+							  public SoftwareSettingsGetter
 {
 private:
 	bool readSettings(const Builder::Context* context,
-						const Hardware::Software* software) override;
+					  const Hardware::Software* software) override;
 
 	bool readAppDataServiceAndArchiveSettings(const Builder::Context* context,
 											  const Hardware::Software* software);
 
 	bool readTuningServiceSettings(const Builder::Context* context,
 								   const Hardware::Software* software);
+};
+
+// -------------------------------------------------------------------------------------------
+
+class DiagnosticsSettingsGetter : public DiagnosticsSettings,
+								  public SoftwareSettingsGetter
+{
+private:
+	bool readSettings(const Builder::Context* context,
+					  const Hardware::Software* software) override;
+
+	bool readDiagDataServiceAndArchiveSettings(const Builder::Context* context,
+											   const Hardware::Software* software);
 };
 
 // -------------------------------------------------------------------------------------------

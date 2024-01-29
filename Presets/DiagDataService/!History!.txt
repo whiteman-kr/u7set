@@ -1,5 +1,6 @@
 DDS
 	13.12.2022	Version: 1	Diagnostics Data Service_v1.u7devp	RPCT-3357: Add property SecurityLevel to all software services
 	17.01.2023	Version: 2	Diagnostics Data Service_v2.u7devp	RPCT-3357: Property SecurityLevel has SSL=2
+	22.01.2024	Version: 3 	Property RtTrendsRequestPort added
 
 

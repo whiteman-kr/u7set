@@ -5,36 +5,13 @@
 #include "../CommonLib/HostAddressPort.h"
 #include "IssueLogger.h"
 
-const int	LM1_PLACE = 0;
-
 class DeviceHelper : public QObject
 {
 	Q_OBJECT
+public:
+	static const int LM1_PLACE = 0;
 
 public:
-	struct IntPropertyNameVar
-	{
-		const char* name = nullptr;
-		int* var = nullptr;
-
-		IntPropertyNameVar(const char* n, int* v) : name(n), var(v) {}
-	};
-
-
-	struct StrPropertyNameVar
-	{
-		const char* name = nullptr;
-		QString* var = nullptr;
-
-		StrPropertyNameVar(const char* n, QString* v) : name(n), var(v) {}
-	};
-
-	static const char* LM_PLATFORM_INTERFACE_CONTROLLER_SUFFUX;
-
-public:
-	static void init();
-	static void shutdown();
-
 	static bool getIntProperty(const Hardware::DeviceObject* device, const QString& name, qint32* value, Builder::IssueLogger* log);
 	static bool getUIntProperty(const Hardware::DeviceObject* device, const QString& name, quint32* value, Builder::IssueLogger *log);
 	static bool getStrProperty(const Hardware::DeviceObject* device, const QString& name, QString *value, Builder::IssueLogger* log);
@@ -100,6 +77,9 @@ public:
 
 	static const Hardware::Software* getSoftware(const Hardware::EquipmentSet* equipment, const QString& softwareID);
 	static QStringList getSoftwareControllersIDs(const Hardware::Software* software);
+
+	static void getChildDiagSignals(std::shared_ptr<const Hardware::DeviceObject> parent,
+								   std::vector<std::shared_ptr<const Hardware::DiagSignal>>* diagSignals);
 
 	static bool isTwoChannelSoftware(const Hardware::DeviceObject* swObject, QStringList* channelsCntrollersIds = nullptr);
 

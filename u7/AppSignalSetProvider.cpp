@@ -1088,7 +1088,7 @@ void AppSignalSetProvider::deleteSignals(const std::vector<int>& signalIDs)
 
 		E::VcsItemAction ia = s->instanceAction();
 
-		if (ia == E::VcsItemAction::Added)
+		if (ia == E::VcsItemAction::Added && s->changesetID() == 0)
 		{
 			if (wrnCount < 5)
 			{

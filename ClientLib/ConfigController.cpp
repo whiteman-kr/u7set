@@ -135,6 +135,14 @@ namespace ClientLib
 		return false;
 	}
 
+	bool ConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& /*conf*/, const DiagnosticsSettings& /*settings*/, const BuildFileInfoArray& /*files*/)
+	{
+		// Reimplement in the derviced class
+		//
+		Q_ASSERT(false);
+		return false;
+	}
+
 	bool ConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& /*conf*/, const TuningClientSettings& /*settings*/, const BuildFileInfoArray& /*files*/)
 	{
 		// Reimplement in the derviced class
@@ -401,6 +409,10 @@ namespace ClientLib
 		{
 		case E::SoftwareType::Monitor:
 			callUpdateFunc(dynamic_cast<const MonitorSettings*>(curSettingsProfile.get()));
+			return;
+
+		case E::SoftwareType::Diagnostics:
+			callUpdateFunc(dynamic_cast<const DiagnosticsSettings*>(curSettingsProfile.get()));
 			return;
 
 		case E::SoftwareType::TuningClient:

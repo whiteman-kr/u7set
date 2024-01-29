@@ -1,9 +1,10 @@
 #pragma once
-#include <memory>
 #include "../UtilsLib/ILogFile.h"
 #include "AppSignalController.h"
-#include "TuningController.h"
+#include "DiagStateController.h"
 #include "IViewVariables.h"
+#include "TuningController.h"
+#include <memory>
 
 namespace VFrame30
 {
@@ -12,21 +13,23 @@ namespace VFrame30
 	class Context
 	{
 	public:
-		Context(const VFrame30::AppSignalController* appSignalController,
+		Context(const VFrame30::DiagStateController* diagStateController,
+				const VFrame30::AppSignalController* appSignalController,
 				const VFrame30::TuningController* tuningController,
 				VFrame30::IViewVariables* viewVariables,
 				ILogFile* log);
 
 		Context() = default;
 		Context(const Context&) = default;
-		Context(Context&&) = default;
+		Context(Context&&) noexcept = default;
 		~Context() = default;
 
 		Context& operator=(const Context&) = default;
-		Context& operator=(Context&&) = default;
+		Context& operator=(Context&&) noexcept = default;
 
 	public:
-		static std::shared_ptr<Context> create(const VFrame30::AppSignalController* appSignalController,
+		static std::shared_ptr<Context> create(const VFrame30::DiagStateController* diagStateController,
+											   const VFrame30::AppSignalController* appSignalController,
 											   const VFrame30::TuningController* tuningController,
 											   VFrame30::IViewVariables* viewVariables,
 											   ILogFile* log);
@@ -35,10 +38,13 @@ namespace VFrame30
 
 		void reset();
 
-		const VFrame30::AppSignalController* appSignalController() const noexcept;
+		const VFrame30::DiagStateController* diagStateController() const;
+		void setDiagStateController(const VFrame30::DiagStateController* value);
+
+		const VFrame30::AppSignalController* appSignalController() const;
 		void setAppSignalController(const VFrame30::AppSignalController* value);
 
-		const VFrame30::TuningController* tuningController() const noexcept;
+		const VFrame30::TuningController* tuningController() const;
 		void setTuningController(const VFrame30::TuningController* value);
 
 		VFrame30::IViewVariables* viewVariables();
@@ -47,11 +53,11 @@ namespace VFrame30
 		ILogFile* log();
 
 	private:
+		const VFrame30::DiagStateController* m_diagStateController = nullptr;
 		const VFrame30::AppSignalController* m_appSignalController = nullptr;
-		const  VFrame30::TuningController* m_tuningController = nullptr;
+		const VFrame30::TuningController* m_tuningController = nullptr;
 		IViewVariables* m_viewVariables = nullptr;
 		ILogFile* m_log = nullptr;
 	};
 
-}
-
+} // namespace VFrame30

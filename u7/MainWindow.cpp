@@ -3,6 +3,7 @@
 #include "../lib/LogicModuleSet.h"
 #include "../lib/Ui/DialogAbout.h"
 #include "./EquipmentEditor/EquipmentTabPage.h"
+#include "./Forms/DialogDiagSignalTypes.h"
 #include "./Forms/FileHistoryDialog.h"
 #include "./Forms/PendingChangesDialog.h"
 #include "./Forms/ProjectPropertiesForm.h"
@@ -391,6 +392,11 @@ void MainWindow::createActions()
     m_connectionsEditorAction->setEnabled(false);
     connect(m_connectionsEditorAction, &QAction::triggered, this, &MainWindow::runConnectionsEditor);
 
+	m_diagSignalTypesEditorAction = new QAction(tr("Diagnostics Signal Types..."), this);
+	m_diagSignalTypesEditorAction->setStatusTip(tr("Run Diagnostics Signal Types Editor"));
+	m_diagSignalTypesEditorAction->setEnabled(false);
+	connect(m_diagSignalTypesEditorAction, &QAction::triggered, this, &MainWindow::runDiagSignalTypesEditor);
+
 	m_busEditorAction = new QAction(tr("Bus Types Editor..."), this);
 	m_busEditorAction->setStatusTip(tr("Run Bus Types Editor"));
 	m_busEditorAction->setEnabled(false);
@@ -555,12 +561,17 @@ void MainWindow::createMenus()
 
 	pToolsMenu->addAction(m_subsystemListEditorAction);
 	pToolsMenu->addAction(m_connectionsEditorAction);
+	pToolsMenu->addAction(m_diagSignalTypesEditorAction);
+	pToolsMenu->addSeparator();
+
 	pToolsMenu->addAction(m_busEditorAction);
+	pToolsMenu->addSeparator();
+
 	pToolsMenu->addAction(m_tagsEditorAction);
 	pToolsMenu->addAction(m_matsUsersEditorAction);
 	pToolsMenu->addAction(m_simProfilesEditorAction);
-
 	pToolsMenu->addSeparator();
+
 	pToolsMenu->addAction(m_updateUfbsAfbs);
 
 	if (theSettings.isExpertMode() == true)
@@ -825,8 +836,20 @@ void MainWindow::runConnectionsEditor()
 	{
         theDialogConnections->activateWindow();
 	}
+	UiTools::adjustDialogPlacement(theDialogConnections);
 }
 
+void MainWindow::runDiagSignalTypesEditor()
+{
+	if (dbController()->isProjectOpened() == false)
+	{
+		return;
+	}
+
+	DialogDiagSignalTypes::showDialog(dbController(), this);
+
+	return;
+}
 
 void MainWindow::runBusEditor()
 {
@@ -844,6 +867,7 @@ void MainWindow::runBusEditor()
 	{
 		theDialogBusEditor->activateWindow();
 	}
+	UiTools::adjustDialogPlacement(theDialogBusEditor);
 }
 
 void MainWindow::runTagsEditor()
@@ -1211,6 +1235,7 @@ void MainWindow::afbLibraryCheck()
 	{
 		theDialogAfbLibraryCheck->activateWindow();
 	}
+	UiTools::adjustDialogPlacement(theDialogAfbLibraryCheck);
 }
 
 void MainWindow::showAbout()
@@ -1363,6 +1388,7 @@ void MainWindow::projectOpened(DbProject project)
 	m_usersAction->setEnabled(true);
 	m_subsystemListEditorAction->setEnabled(true);
     m_connectionsEditorAction->setEnabled(true);
+	m_diagSignalTypesEditorAction->setEnabled(true);
 	m_busEditorAction->setEnabled(true);
 	m_tagsEditorAction->setEnabled(true);
 	m_matsUsersEditorAction->setEnabled(true);
@@ -1397,6 +1423,7 @@ void MainWindow::projectClosed()
 	m_usersAction->setEnabled(false);
 	m_subsystemListEditorAction->setEnabled(false);
     m_connectionsEditorAction->setEnabled(false);
+	m_diagSignalTypesEditorAction->setEnabled(false);
 	m_busEditorAction->setEnabled(false);
 	m_tagsEditorAction->setEnabled(false);
 	m_matsUsersEditorAction->setEnabled(false);

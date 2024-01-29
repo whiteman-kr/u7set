@@ -29,144 +29,13 @@ MonitorSchemaView::MonitorSchemaView(MonitorSchemaManager* schemaManager,
 
 	Q_ASSERT(schemaManager);
 
-	connect(&schemaManager->monitorConfigController(), &MonitorConfigController::configurationArrived, this, &MonitorSchemaView::configurationArrived);
+	connect(&schemaManager->configController(), &MonitorConfigController::configurationArrived, this, &MonitorSchemaView::configurationArrived);
 
 	// Updates scripts
 	//
-	configurationArrived(monitorSchemaManager()->monitorConfigController().configuration());
+	configurationArrived(monitorSchemaManager()->configController().configuration());
 
 	return;
-}
-
-bool MonitorSchemaView::saveSchemaToPdf(const QString& fileName)
-{
-	if (schema() == nullptr)
-	{
-		Q_ASSERT(schema());
-		return false;
-	}
-
-	// --
-	//
-	QPdfWriter pdfWriter(fileName);
-
-	pdfWriter.setTitle(schema()->caption());
-
-	QPageSize pageSize;
-	double pageWidth = schema()->docWidth();
-	double pageHeight = schema()->docHeight();
-
-	if (schema()->unit() == SchemaUnit::Inch)
-	{
-		pageSize = QPageSize(QSizeF(pageWidth, pageHeight), QPageSize::Inch);
-	}
-	else
-	{
-		assert(schema()->unit() == SchemaUnit::Display);
-		pageSize = QPageSize(QSize(static_cast<int>(pageWidth), static_cast<int>(pageHeight)));
-
-		pdfWriter.setResolution(72);	// 72 is from enum QPageLayout::Unit help,
-										// QPageLayout::Point	1	1/!!! 72th !!!! of an inch
-	}
-
-	pdfWriter.setPageSize(pageSize);
-	pdfWriter.setPageMargins(QMarginsF(0, 0, 0, 0));
-
-	// --
-	//
-	QPainter p(&pdfWriter);
-	VFrame30::CDrawParam drawParam(&p, this, schema()->gridSize(), schema()->pinGridStep(), schema()->unit());
-
-	drawParam.setInfoMode(false);
-	drawParam.setPdfMode(true);
-
-	// Calc size
-	//
-	int widthInPixel = schema()->GetDocumentWidth(pdfWriter.resolution(), 100.0);		// Export 100% zoom
-	int heightInPixel = schema()->GetDocumentHeight(pdfWriter.resolution(), 100.0);		// Export 100% zoom
-
-	// Clear device
-	//
-	p.fillRect(QRectF(0, 0, widthInPixel + 1, heightInPixel + 1), QColor(0xB0, 0xB0, 0xB0));
-	p.setRenderHint(QPainter::Antialiasing);
-
-	// Ajust QPainter
-	//
-	Ajust(&p, schema()->unit(), 0, 0, 100.0);			// Export 100% zoom
-
-	// Draw Schema
-	//
-	QRectF clipRect(0, 0, schema()->docWidth(), schema()->docHeight());
-
-	schema()->Draw(&drawParam, clipRect);
-
-	// Ending
-	//
-
-	return true;
-}
-
-bool MonitorSchemaView::saveSchemaToPng(const QString& fileName)
-{
-	if (schema() == nullptr)
-	{
-		Q_ASSERT(schema());
-		return false;
-	}
-
-	QPageSize pageSize;
-	double pageWidth = schema()->docWidth();
-	double pageHeight = schema()->docHeight();
-
-	if (schema()->unit() == SchemaUnit::Inch)
-	{
-		pageSize = QPageSize(QSizeF(pageWidth, pageHeight), QPageSize::Inch);
-	}
-	else
-	{
-		assert(schema()->unit() == SchemaUnit::Display);
-		pageSize = QPageSize(QSize(static_cast<int>(pageWidth), static_cast<int>(pageHeight)));
-	}
-
-	// Calc size
-	//
-	const int resolution = 300;	// Image resolution is 300 dpi
-
-	int widthInPixel = schema()->GetDocumentWidth(resolution, 100.0);		// Export 100% zoom
-	int heightInPixel = schema()->GetDocumentHeight(resolution, 100.0);		// Export 100% zoom
-
-	// --
-	//
-	QImage image(QSize(widthInPixel, heightInPixel), QImage::Format_RGB32);
-
-	QPainter p(&image);
-	VFrame30::CDrawParam drawParam(&p, this, schema()->gridSize(), schema()->pinGridStep(), schema()->unit());
-
-	drawParam.setInfoMode(false);
-	drawParam.setPdfMode(true);
-
-	// Clear device
-	//
-	p.fillRect(QRectF(0, 0, widthInPixel + 1, heightInPixel + 1), QColor(0xB0, 0xB0, 0xB0));
-	p.setRenderHint(QPainter::Antialiasing);
-
-	// Ajust QPainter
-	//
-	Ajust(&p, schema()->unit(), 0, 0, (double)resolution / image.logicalDpiX() * 100.0);			// Export 100% zoom
-
-	// Draw Schema
-	//
-	QRectF clipRect(0, 0, schema()->docWidth(), schema()->docHeight());
-
-	schema()->Draw(&drawParam, clipRect);
-
-	// Saving
-	//
-	if (image.save(fileName) == false)
-	{
-		return false;
-	}
-	return true;
 }
 
 VFrame30::DrawMode MonitorSchemaView::drawMode() const
@@ -180,10 +49,10 @@ void MonitorSchemaView::paintEvent(QPaintEvent* event)
 	// as the first tab page is created by timer in MonitorCentralWidget::timerEvent, see comment there for
 	// details.
 	//
-	if (int cid = monitorSchemaManager()->monitorConfigController().configurationId();
+	if (int cid = monitorSchemaManager()->configController().configurationId();
 		cid != m_configurationId)
 	{
-		configurationArrived(monitorSchemaManager()->monitorConfigController().configuration());
+		configurationArrived(monitorSchemaManager()->configController().configuration());
 	}
 
 	setInfoMode(MonitorAppSettings::instance().showItemsLabels());
@@ -226,7 +95,7 @@ void MonitorSchemaView::updateScriptGlobalVars(QJSEngine& engine)
 	return;
 }
 
-void MonitorSchemaView::configurationArrived(ConfigSettings configuration)
+void MonitorSchemaView::configurationArrived(MonitorConfigSettings configuration)
 {
 	qDebug() << "MonitorSchemaView::configurationArrived()";
 

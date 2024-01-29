@@ -1,0 +1,1014 @@
+#include "../UtilsLib/WUtils.h"
+#include "DynamicDiagSignalState.h"
+//#include "RtTrendsServer.h"
+
+// -------------------------------------------------------------------------------
+//
+// DynamicDiagSignalState class implementation
+//
+// -------------------------------------------------------------------------------
+
+DynamicDiagSignalState::DynamicDiagSignalState()
+{
+//	m_current[0].flags.all = 0;
+//	m_current[1].flags.all = 0;
+}
+
+//void DynamicDiagSignalState::setSignalParams(const AppSignal* signal, const AppSignals& appSignals)
+//{
+//	TEST_PTR_RETURN(signal);
+
+//	m_signal = signal;
+//	m_signalHash = calcHash(signal->appSignalID());
+
+//	m_valueAddr = signal->regValueAddr();
+
+//	m_signalType = signal->signalType();
+//	m_analogSignalFormat = signal->analogSignalFormat();
+//	m_byteOrder = signal->byteOrder();
+//	m_dataSize = signal->dataSize();
+
+//	m_archive = signal->archive();
+
+//	m_lowLimit = signal->lowEngineeringUnits();
+//	m_highLimit = signal->highEngineeringUnits();
+
+//	m_reverseLimits = (m_lowLimit > m_highLimit);
+
+//	m_apertureType = signal->apertureType();
+
+//	switch(m_apertureType)
+//	{
+//	case E::ApertureType::RangePercent:
+//		m_absCoarseAperture = fabs(((m_highLimit - m_lowLimit) * signal->coarseAperture()) / 100.0);
+//		m_absFineAperture = fabs(((m_highLimit - m_lowLimit) * signal->fineAperture()) / 100.0);
+//		break;
+
+//	case E::ApertureType::ValuePercent:								// ex AdaptiveAperture
+//		// no break - Ok!
+//	case E::ApertureType::AbsValue:
+//		m_absCoarseAperture = fabs(signal->coarseAperture());
+//		m_absFineAperture = fabs(signal->fineAperture());
+//		break;
+
+//	default:
+//		Q_ASSERT(false);
+//	}
+
+//	if (m_absFineAperture > m_absCoarseAperture)
+//	{
+//		std::swap(m_absFineAperture, m_absCoarseAperture);
+//	}
+
+//	m_enableTuning = signal->enableTuning();
+//	m_tuningDefaultValue = signal->tuningDefaultValue();
+
+//	if (signal->hasFlagsSignals() == true)
+//	{
+//		static const std::vector<E::AppSignalStateFlagType> flagsTypes = E::values<E::AppSignalStateFlagType>();
+
+//		for(E::AppSignalStateFlagType flagType : flagsTypes)
+//		{
+//			QString flagSignalID = signal->getFlagSignalID(flagType);
+
+//			if (flagSignalID.isEmpty() == true)
+//			{
+//				continue;
+//			}
+
+//			const AppSignal* flagSignal = appSignals.getSignalByID(flagSignalID);
+
+//			if (flagSignal == nullptr)
+//			{
+//				assert(false);
+//				continue;
+//			}
+
+//			if (flagSignal->regValueAddr().isValid() == false)
+//			{
+//				assert(false);
+//				continue;
+//			}
+
+//			FlagSignalParceInfo fspi;
+
+//			fspi.flagType = flagType;
+
+//#ifdef QT_DEBUG
+//			fspi.flagSignalID = flagSignal->appSignalID();				// required for debugging only
+//#endif
+
+//			fspi.flagSignalAddr = flagSignal->regValueAddr();
+
+//			Q_ASSERT(fspi.flagSignalAddr.bit() >= 0 && fspi.flagSignalAddr.bit() < 16);
+
+//			if (fspi.flagType == E::AppSignalStateFlagType::Validity)
+//			{
+//				m_validityAddr = fspi.flagSignalAddr;		// validity flag should NOT be append to m_flagsSignalsParceInfo, it is Ok
+//			}
+//			else
+//			{
+//				m_flagsSignalsParceInfo.emplace_back(fspi);
+//			}
+//		}
+//	}
+
+//	m_current[0].hash = m_current[1].hash = m_signalHash;
+//}
+
+//void DynamicDiagSignalState::setQueues(SimpleAppSignalStatesArchiveFlagQueue* signalStatesQueue,
+//			   GatewayAppSignalStatesQueue* gatewaySignalStatesQueue)
+//{
+//	Q_ASSERT(signalStatesQueue != nullptr);
+//	Q_ASSERT(gatewaySignalStatesQueue != nullptr);
+
+//	Q_ASSERT(m_statesQueue == nullptr);
+//	Q_ASSERT(m_gwStatesQueue == nullptr);
+
+//	m_statesQueue = signalStatesQueue;
+//	m_gwStatesQueue = gatewaySignalStatesQueue;
+//}
+
+#define PUSH_AUTO_POINT(state)	{																\
+									if (m_archive == true)										\
+									{															\
+										m_statesQueue->pushAutoPoint(state, m_archive, thread); \
+										pushedStatesCtr++;										\
+									}															\
+									if (m_hasRtSessions == true)								\
+									{															\
+										rtSessionsProcessing(state, true, thread);				\
+									}															\
+								}
+
+// returns count of states pushed in statesQueue
+//
+int DynamicDiagSignalState::setState(const Times& time,
+								bool isSimPacket,
+								quint16 packetNo,
+								const char* rupData,
+								int rupDataSize,
+								int autoArchivingGroup,
+								const QThread* thread)
+{
+//	SimpleAppSignalState prevState = current();			// prevState is a COPY of current()!
+//	SimpleAppSignalState curState;
+
+//	// curState's fields should be updated always
+//	//
+//	curState.hash = m_signalHash;
+
+//	curState.time = time;
+
+//	curState.packetNo = packetNo;
+
+//	curState.flags.stateAvailable = 1;
+//	curState.flags.swSimulated = isSimPacket;
+
+//	// update validity flag
+
+//	bool result = false;
+//	int pushedStatesCtr = 0;
+
+//	quint32 validity = AppSignalState::VALID;
+
+//	if (m_validityAddr.isValid() == true)
+//	{
+//		result = getBit(rupData, rupDataSize, m_validityAddr, validity);
+
+//		RETURN_VALUE_IF_FALSE(result, pushedStatesCtr);
+//	}
+
+//	curState.flags.valid = validity;
+
+//	// update signal value
+
+//	double value = 0;
+
+//	result = getValue(rupData, rupDataSize, value);
+
+//	RETURN_VALUE_IF_FALSE(result, pushedStatesCtr);
+
+//	curState.value = value;
+
+//	//
+
+//	if (validity == AppSignalState::INVALID)
+//	{
+//		if (prevState.flags.valid == AppSignalState::VALID)
+//		{
+//			// prevState is valid and not stored, archive it
+//			//
+//			if (m_prevStateIsStored == false)
+//			{
+//				PUSH_AUTO_POINT(prevState)
+//				m_prevStateIsStored = true;
+//			}
+//		}
+//		else
+//		{
+//			// validity is not changed, nothing to do
+//		}
+//	}
+//	else
+//	{
+//		// new state is valid
+//		//
+//		if (prevState.flags.valid == AppSignalState::INVALID)
+//		{
+//			// prevState is invalid, archive invalid autopoint with time (curState.time - 1)
+//			//
+//			SimpleAppSignalState tmpState = prevState;
+
+//			tmpState.time = curState.time;
+//			tmpState.time += -1;						// current time offset back on 1 ms
+
+//			PUSH_AUTO_POINT(tmpState)
+//		}
+//		else
+//		{
+//			//  prevState also is valid, check signal's value
+//			//
+//			switch(m_signalType)
+//			{
+//			case E::SignalType::Discrete:
+
+//				if (curState.value != prevState.value)
+//				{
+//					curState.flags.fineAperture = 0;		// its important!
+//					curState.flags.coarseAperture = 1;		//
+//				}
+//				break;
+
+//			case E::SignalType::Analog:
+//				{
+//					AnalogValueStatus curValueStatus = analogValueStatus(curState.value);
+//					AnalogValueStatus prevValueStatus = analogValueStatus(prevState.value);
+
+//					bool checkApertures = true;
+
+//					if (curValueStatus == AnalogValueStatus::Normal)
+//					{
+//						if (prevValueStatus != AnalogValueStatus::Normal && !m_prevStateIsStored)
+//						{
+//							PUSH_AUTO_POINT(prevState)
+
+//							curState.flags.fineAperture = 1;
+//							curState.flags.coarseAperture = 1;
+//							checkApertures = false;
+//						}
+//					}
+//					else
+//					{
+//						// curValue is NaN or Inf
+//						//
+//						if (prevValueStatus != curValueStatus && !m_prevStateIsStored)
+//						{
+//							PUSH_AUTO_POINT(prevState)
+
+//							curState.flags.fineAperture = 1;
+//							curState.flags.coarseAperture = 1;
+//						}
+
+//						checkApertures = false;
+//					}
+
+//					// check aperture changes
+//					//
+//					if (checkApertures == true)
+//					{
+//						switch(m_apertureType)
+//						{
+//						case E::ApertureType::ValuePercent:
+
+//							if (m_fineStoredValue != 0)
+//							{
+//								double fineAbsAperture = fabs(((value - m_fineStoredValue) * 100) / m_fineStoredValue);
+
+//								if (fineAbsAperture > m_absFineAperture)
+//								{
+//									curState.flags.fineAperture = 1;
+//								}
+//							}
+//							else
+//							{
+//								m_fineStoredValue = curState.value;
+//							}
+
+//							if (m_coarseStoredValue != 0)
+//							{
+//								double coarseAbsAperture = fabs(((value - m_coarseStoredValue) * 100) / m_coarseStoredValue);
+
+//								if (coarseAbsAperture > m_absCoarseAperture)
+//								{
+//									curState.flags.coarseAperture = 1;
+//								}
+//							}
+//							else
+//							{
+//								m_coarseStoredValue = curState.value;
+//							}
+
+//							break;
+
+//						case E::ApertureType::RangePercent:
+//						case E::ApertureType::AbsValue:
+
+//							if (fabs(m_fineStoredValue - curState.value) > m_absFineAperture)
+//							{
+//								curState.flags.fineAperture = 1;
+//							}
+
+//							if (fabs(m_coarseStoredValue - curState.value) > m_absCoarseAperture)
+//							{
+//								curState.flags.coarseAperture = 1;
+//							}
+
+//							break;
+
+//						default:
+//							Q_ASSERT(false);
+//						}
+
+//						if (m_reverseLimits == false)
+//						{
+//							curState.flags.aboveHighLimit = (curState.value > m_highLimit ? 1 : 0);
+//							curState.flags.belowLowLimit = (curState.value < m_lowLimit ? 1 : 0);
+//						}
+//						else
+//						{
+//							curState.flags.aboveHighLimit = (curState.value < m_highLimit ? 1 : 0);
+//							curState.flags.belowLowLimit = (curState.value > m_lowLimit ? 1 : 0);
+//						}
+//					}
+//				}
+
+//				break;
+
+//			case E::SignalType::Bus:
+//				assert(false);					// bus signals should not be parsed here
+//				break;
+//			}
+//		}
+
+//		// update tuningDefault flag
+//		//
+//		if (m_enableTuning == true)
+//		{
+//			TuningValue currTuningValue;
+//			currTuningValue.setValue(m_tuningDefaultValue.type(),
+//									 static_cast<quint64>(value),
+//									 value);
+
+//			curState.flags.tuningDefault = (currTuningValue == m_tuningDefaultValue ? 1 : 0);
+//		}
+//		else
+//		{
+//			// curState.flags.tuningDefault sets to 0 in constructor of curState
+//		}
+
+//		// update other signal flags
+//		//
+//		for(const FlagSignalParceInfo& fspi : m_flagsSignalsParceInfo)
+//		{
+//			quint32 bit = 0;
+
+//			result = getBit(rupData, rupDataSize, fspi.flagSignalAddr, bit);
+
+//			if (result == false)
+//			{
+//				continue;
+//			}
+
+//			switch(fspi.flagType)
+//			{
+//			case E::AppSignalStateFlagType::Validity:
+//			case E::AppSignalStateFlagType::StateAvailable:
+//				assert(false);								// this flags should NOT be in m_flagsSignalsParceInfo array!
+//				break;
+
+//			case E::AppSignalStateFlagType::Simulated:
+//				curState.flags.simulated = bit;
+//				break;
+
+//			case E::AppSignalStateFlagType::Blocked:
+//				curState.flags.blocked = bit;
+//				break;
+
+//			case E::AppSignalStateFlagType::Mismatch:
+//				curState.flags.mismatch = bit;
+//				break;
+
+//			case E::AppSignalStateFlagType::AboveHighLimit:
+//				curState.flags.aboveHighLimit = bit;
+//				break;
+
+//			case E::AppSignalStateFlagType::BelowLowLimit:
+//				curState.flags.belowLowLimit = bit;
+//				break;
+
+//			default:
+//				assert(false);								// unknown flagType
+//			}
+//		}
+//	}
+
+//	if (m_autoArchivingGroup == autoArchivingGroup)
+//	{
+//		curState.flags.autoPoint = 1;
+//	}
+
+//	curState.flags.updateArchivingReasonFlags(prevState.flags);
+
+//	bool hasArchivingReason = curState.flags.hasArchivingReason();
+
+//	if (hasArchivingReason == true)
+//	{
+//		m_statesQueue->push(curState, m_archive, thread);
+//		pushedStatesCtr++;
+
+//		// update apertures stored states
+//		//
+//		if (curState.flags.fineAperture == 1)
+//		{
+//			m_fineStoredValue = curState.value;
+//		}
+
+//		if (curState.flags.coarseAperture == 1)
+//		{
+//			m_coarseStoredValue = curState.value;
+//		}
+
+//		m_prevStateIsStored = true;
+//	}
+//	else
+//	{
+//		m_prevStateIsStored = false;
+//	}
+
+//	if (m_gatewayQueueMask != 0 && hasGatewaySendReasone(curState.flags) == true)
+//	{
+//		sendAppSignalStateChangeToGateway(prevState, curState, thread);
+//		pushedStatesCtr++;
+//	}
+
+//	// curState should be update always
+//	//
+//	setNewCurState(curState);
+
+//	if (m_hasRtSessions == true)
+//	{
+//		rtSessionsProcessing(curState, hasArchivingReason, thread);
+//	}
+
+//	return pushedStatesCtr;
+	return 0;
+}
+
+//int DynamicDiagSignalState::setUnavailable(const Times& time,
+//			  SimpleAppSignalStatesArchiveFlagQueue& statesQueue,
+//			  const QThread* thread)
+//{
+//	int pushedStatesCount = 0;
+
+//	SimpleAppSignalState prevState = current();			// prevState is a COPY of current()!
+
+//	if (prevState.flags.stateAvailable == 0)
+//	{
+//		return pushedStatesCount;
+//	}
+
+//	// prevState.flags.stateAvailable == 1
+//	//
+//	if (m_prevStateIsStored == false)
+//	{
+//		// prevState is not stored, archive it
+//		//
+
+//		statesQueue.pushAutoPoint(prevState, m_archive, thread);
+//		pushedStatesCount++;
+
+//		if (m_hasRtSessions == true)
+//		{
+//			rtSessionsProcessing(prevState, true, thread);
+//		}
+
+//		m_prevStateIsStored = true;
+//	}
+
+//	SimpleAppSignalState curState;
+
+//	curState.hash = prevState.hash;
+//	curState.time = time;
+
+//	// curState.flags set to 0 in constructor
+
+//	curState.flags.updateArchivingReasonFlags(prevState.flags);
+
+//	statesQueue.push(curState, m_archive, thread);
+//	pushedStatesCount++;
+
+//	sendAppSignalStateChangeToGateway(prevState, curState, thread);
+
+//	m_prevStateIsStored = true;
+
+//	setNewCurState(curState);
+
+//	if (m_hasRtSessions == true)
+//	{
+//		rtSessionsProcessing(curState, true, thread);
+//	}
+
+//	return pushedStatesCount;
+//}
+
+Hash DynamicDiagSignalState::hash() const
+{
+//	assert(m_current[0].hash != 0);
+//	return m_current[0].hash;
+	Q_ASSERT(false);	// check!
+	return 0;
+}
+
+//QString DynamicDiagSignalState::appSignalID() const
+//{
+//	if (m_signal == nullptr)
+//	{
+//		assert(false);
+//		return QString();
+//	}
+
+//	return m_signal->appSignalID();
+//}
+
+void DynamicDiagSignalState::setAutoArchivingGroup(int archivingGroup)
+{
+	m_autoArchivingGroup = archivingGroup;
+}
+
+void DynamicDiagSignalState::setGatewayQueueMask(quint32 mask)
+{
+	m_gatewayQueueMask |= mask;
+}
+
+void DynamicDiagSignalState::resetGatewayQueueMask(quint32 mask)
+{
+	m_gatewayQueueMask &= !mask;
+}
+
+//void DynamicDiagSignalState::appendRtSession(Hash signalHash,
+//									const QThread* rtProcessingOwner,
+//									std::shared_ptr<RtTrends::Session> newSession,
+//									int samplePeriodCounter)
+//{
+//	TEST_PTR_RETURN(rtProcessingOwner);
+//	TEST_PTR_RETURN(newSession);
+
+//	if (signalHash != m_signalHash)
+//	{
+//		assert(false);
+//		return;
+//	}
+
+//	int newSessionID = newSession->id();
+
+//	takeRtProcessingOwnership(rtProcessingOwner);
+
+//	if (m_rtSessions.contains(newSessionID) == false)
+//	{
+//		RtSession rtSession;
+
+//		rtSession.session = newSession;
+//		rtSession.sessionID = newSession->id();
+//		rtSession.samplePeriodCounter = samplePeriodCounter;
+//		rtSession.sampleCounter = 1000000;					// big value for first point immediately sending
+
+//		m_rtSessions.emplace(newSessionID, rtSession);
+
+//		m_hasRtSessions = true;
+//	}
+//	else
+//	{
+//		assert(false);
+//	}
+
+//	releaseRtProcessingOwnership(rtProcessingOwner);
+//}
+
+//void DynamicDiagSignalState::removeRtSession(Hash signalHash,
+//									const QThread* rtProcessingOwner,
+//									std::shared_ptr<RtTrends::Session> sessionToRemove)
+//{
+//	TEST_PTR_RETURN(rtProcessingOwner);
+//	TEST_PTR_RETURN(sessionToRemove);
+
+//	if (signalHash != m_signalHash)
+//	{
+//		assert(false);
+//		return;
+//	}
+
+//	int sessionToRemoveID = sessionToRemove->id();
+
+//	takeRtProcessingOwnership(rtProcessingOwner);
+
+//	int removedCount = m_rtSessions.erase(sessionToRemoveID);
+
+//	Q_ASSERT(removedCount == 1);
+
+//	if (m_rtSessions.size() == 0)
+//	{
+//		m_hasRtSessions = false;
+//	}
+
+//	releaseRtProcessingOwnership(rtProcessingOwner);
+//}
+
+//void DynamicDiagSignalState::setRtSessionSamplePeriodCounter(Hash signalHash,
+//					const QThread* rtProcessingOwner,
+//					int sessionID,
+//					int newSamplePeriodCounter)
+//{
+//	TEST_PTR_RETURN(rtProcessingOwner);
+
+//	if (signalHash != m_signalHash)
+//	{
+//		assert(false);
+//		return;
+//	}
+
+//	takeRtProcessingOwnership(rtProcessingOwner);
+
+//	auto it = m_rtSessions.find(sessionID);
+
+//	if (it != m_rtSessions.end())
+//	{
+//		it->second.samplePeriodCounter = newSamplePeriodCounter;
+//	}
+
+//	releaseRtProcessingOwnership(rtProcessingOwner);
+//}
+
+//void DynamicDiagSignalState::rtSessionsProcessing(const SimpleAppSignalState& state, bool pushAnyway, const QThread* thread)
+//{
+//	Q_ASSERT(m_hasRtSessions == true);
+
+//	takeRtProcessingOwnership(thread);
+
+//	for(auto& [id, session] : m_rtSessions)
+//	{
+//		if (pushAnyway == true)
+//		{
+//			session.session->pushSignalState(m_signalHash, state, thread);
+//			session.sampleCounter = 0;
+//			continue;
+//		}
+
+//		session.sampleCounter++;
+
+//		if (session.sampleCounter >= session.samplePeriodCounter)
+//		{
+//			session.session->pushSignalState(m_signalHash, state, thread);
+//			session.sampleCounter = 0;
+//		}
+//	}
+
+//	releaseRtProcessingOwnership(thread);
+//}
+
+bool DynamicDiagSignalState::getValue(const char* rupData, int rupDataSize, double& value)
+{
+	Q_UNUSED(rupDataSize);
+
+	// get double signal value from rupData buffer using parseInfo
+	//
+	int valueOffset = m_valueAddr.offset() * 2;		// offset in Words => offset in Bytes
+	int bitNo = m_valueAddr.bit();
+
+#ifdef QT_DEBUG
+
+	if (valueOffset < 0 ||
+		valueOffset >= rupDataSize ||
+		bitNo < 0 ||
+		bitNo >= SIZE_16BIT)
+	{
+		assert(false);
+		return false;
+	}
+
+#endif
+
+	switch(m_signalType)
+	{
+	case E::SignalType::Discrete:
+		{
+			quint16 rawValue16 = 0;
+
+			assert(m_dataSize == SIZE_1BIT);
+
+			rawValue16 = *reinterpret_cast<const quint16*>(rupData + valueOffset);
+
+			if (m_byteOrder == E::ByteOrder::BigEndian)
+			{
+				rawValue16 = reverseUint16(rawValue16);
+			}
+
+			value = static_cast<double>((rawValue16 >> bitNo) & 0x0001);
+		}
+		break;
+
+	case E::SignalType::Analog:
+		assert(m_dataSize == SIZE_32BIT);
+		assert(bitNo == 0);
+
+		switch (m_analogSignalFormat)
+		{
+		case E::AnalogAppSignalFormat::Float32:
+			{
+				float rawValueFloat = *reinterpret_cast<const float*>(rupData + valueOffset);
+
+				if (m_byteOrder == E::ByteOrder::BigEndian)
+				{
+					rawValueFloat = reverseFloat(rawValueFloat);
+				}
+
+				value = static_cast<double>(rawValueFloat);
+			}
+			break;
+
+		case E::AnalogAppSignalFormat::SignedInt32:
+			{
+				qint32 rawValueInt32 = *reinterpret_cast<const qint32*>(rupData + valueOffset);
+
+				if (m_byteOrder == E::ByteOrder::BigEndian)
+				{
+					rawValueInt32 = reverseInt32(rawValueInt32);
+				}
+
+				value = static_cast<double>(rawValueInt32);
+			}
+			break;
+
+		default:
+			assert(false);			// unknown m_analogSignalFormat
+		}
+
+		break;
+
+	default:
+		assert(false);				// unknown m_signalType
+		return false;
+	}
+
+	return true;
+}
+
+bool DynamicDiagSignalState::getBit(const char* rupData, int rupDataSize, const Address16& addr, quint32& bit)
+{
+	if (addr.isValid() == false)
+	{
+		return false;
+	}
+
+	// get signal validity from m_rupData.data buffer using parseInfo
+	//
+	int offset = addr.offset() * 2;	// offset in Words => offset in Bytes
+
+	if (offset >= rupDataSize)
+	{
+		assert(false);
+		return false;
+	}
+
+	quint16 rawValue = *reinterpret_cast<const quint16*>(rupData + offset);
+
+	if (m_byteOrder == E::ByteOrder::BigEndian)
+	{
+		rawValue = (rawValue >> 8) | (rawValue << 8);			// swap bytes
+	}
+
+	bit = static_cast<quint32>((rawValue >> addr.bit()) & 0x0001);
+
+	return true;
+}
+
+void DynamicDiagSignalState::takeRtProcessingOwnership(const QThread* newProcessingOwner)
+{
+	bool result = false;
+
+	do
+	{
+		const QThread* expectedOwner = nullptr;
+		result = m_rtProcessingOwner.compare_exchange_strong(expectedOwner, newProcessingOwner);
+	}
+	while(result == false);
+}
+
+void DynamicDiagSignalState::releaseRtProcessingOwnership(const QThread* currentProcessingOwner)
+{
+	bool result = m_rtProcessingOwner.compare_exchange_strong(currentProcessingOwner, nullptr);
+
+	assert(result == true);
+
+	Q_UNUSED(result);
+}
+
+//void DynamicDiagSignalState::sendAppSignalStateChangeToGateway(const SimpleAppSignalState& prevState,
+//															  const SimpleAppSignalState& newState,
+//															  const QThread* thread)
+//{
+//	GatewayAppSignalStateQueueMask state;
+
+//	state.gatewayQueueMask = m_gatewayQueueMask;
+//	state.gwState.prevState = prevState;
+//	state.gwState.curState = newState;
+
+//	m_gwStatesQueue->push(state, thread);
+//}
+
+
+//void DynamicDiagSignalState::setNewCurState(const SimpleAppSignalState& newCurState)
+//{
+//	int writeStateIndex = m_curStateIndex.load() == 0 ? 1 : 0;
+
+//	m_current[writeStateIndex] = newCurState;				// safe atomic writing to not-now-reading struct
+
+//	m_curStateIndex.store(writeStateIndex);					// change now-reading struct to updated
+//}
+
+//bool DynamicDiagSignalState::hasGatewaySendReasone(AppSignalStateFlags flags) const
+//{
+//	if (m_signalType == E::SignalType::Discrete)
+//	{
+//		return	flags.validityChange ||
+//				flags.coarseAperture;		// discrete state change
+//	}
+
+//	if (m_signalType == E::SignalType::Analog)
+//	{
+//		return flags.validityChange ||
+//			   flags.limitFlagsChange;
+//	}
+
+//	return false;
+//}
+
+// -------------------------------------------------------------------------------
+//
+// DynamicDiagSignalStates class implementation
+//
+// -------------------------------------------------------------------------------
+
+
+DynamicDiagSignalStates::~DynamicDiagSignalStates()
+{
+	clear();
+}
+
+void DynamicDiagSignalStates::clear()
+{
+	m_hash2State.clear();
+
+	DELETE_IF_NOT_NULL(m_diagSignalState);
+
+	m_size = 0;
+}
+
+void DynamicDiagSignalStates::setSize(int size)
+{
+	clear();
+
+	if (size > 1000000)		// limit to 1 million of signals
+	{
+		assert(false);
+		return;
+	}
+
+	m_diagSignalState = new DynamicDiagSignalState[size];
+	m_size = size;
+}
+
+DynamicDiagSignalState* DynamicDiagSignalStates::operator [] (int index)
+{
+#ifdef QT_DEBUG
+
+	if (m_diagSignalState == nullptr ||
+		index < 0  || index >= m_size)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+#endif
+
+	return m_diagSignalState + index;
+}
+
+const DynamicDiagSignalState* DynamicDiagSignalStates::getStateByHash(Hash signalHash) const
+{
+	return m_hash2State.value(signalHash, nullptr);
+}
+
+DynamicDiagSignalState* DynamicDiagSignalStates::getStateByHash(Hash signalHash)
+{
+	return m_hash2State.value(signalHash, nullptr);
+}
+
+const DynamicDiagSignalState* DynamicDiagSignalStates::getStateByID(const QString& signalID) const
+{
+	return getStateByHash(calcHash(signalID));
+}
+
+DynamicDiagSignalState* DynamicDiagSignalStates::getStateByID(const QString& signalID)
+{
+	return getStateByHash(calcHash(signalID));
+}
+
+void DynamicDiagSignalStates::buidlHash2State()
+{
+	m_hash2State.clear();
+
+	m_hash2State.reserve(static_cast<int>(m_size * 1.3));
+
+	for(int i = 0; i < m_size; i++)
+	{
+		DynamicDiagSignalState& state = m_diagSignalState[i];
+
+		Hash hash = state.hash();
+
+		if (m_hash2State.contains(hash) == true)
+		{
+			assert(false);			// collision !
+		}
+		else
+		{
+			m_hash2State.insert(hash, &state);
+		}
+	}
+}
+
+bool DynamicDiagSignalStates::getCurrentState(Hash hash, AppSignalState& state) const
+{
+/*	if (m_hash2State.contains(hash))
+	{
+		const DynamicDiagSignalState* stateEx = m_hash2State[hash];
+
+		stateEx->current().copyTo(state);
+
+		Q_ASSERT(state.m_hash == hash);
+
+		return true;
+	}*/
+
+	Q_ASSERT(false);	// check!
+
+	return false;
+}
+
+void DynamicDiagSignalStates::setAutoArchivingGroups(int autoArchivingGroupsCount)
+{
+	if (autoArchivingGroupsCount <= 0)
+	{
+		return;
+	}
+
+	int count = 0;
+
+	Q_ASSERT(false);			// check!
+//	for(int i = 0; i < m_size; i++)
+//	{
+//		if (m_appSignalState->archive() == true)
+//		{
+//			m_appSignalState[i].setAutoArchivingGroup(count % autoArchivingGroupsCount);
+//			count++;
+//		}
+//	}
+}
+
+void DynamicDiagSignalStates::setGatewayQueueMask(const std::set<Hash>& hashes, quint32 mask)
+{
+	for(Hash h : hashes)
+	{
+		DynamicDiagSignalState* st = getStateByHash(h);
+
+		if (st != nullptr)
+		{
+			st->setGatewayQueueMask(mask);
+		}
+	}
+}
+
+void DynamicDiagSignalStates::resetGatewayQueueMask(const std::set<Hash>& hashes, quint32 mask)
+{
+	for(Hash h : hashes)
+	{
+		DynamicDiagSignalState* st = getStateByHash(h);
+
+		if (st != nullptr)
+		{
+			st->resetGatewayQueueMask(mask);
+		}
+	}
+}
+
+

@@ -22,7 +22,8 @@ EditSchemaView::EditSchemaView(AppSignalSetProvider* signalSetProvider, QWidget*
 	m_mouseState(MouseState::None),
 	m_appSignalProvider(signalSetProvider),
 	m_tuningSignalProvider(signalSetProvider),
-	m_appSignalController(&m_appSignalProvider, nullptr)
+	m_diagStateController(m_diagStateProvider, nullptr),
+	m_appSignalController(m_appSignalProvider, nullptr)
 {
 	Q_ASSERT(signalSetProvider);
 
@@ -35,13 +36,15 @@ EditSchemaView::EditSchemaView(AppSignalSetProvider* signalSetProvider, std::sha
 	: VFrame30::SchemaViewWidget(schema, parent),
 	m_activeLayer(0),
 	m_mouseState(MouseState::None),
+	m_diagStateProvider(),
 	m_appSignalProvider(signalSetProvider),
 	m_tuningSignalProvider(signalSetProvider),
-	m_appSignalController(&m_appSignalProvider, nullptr)
+	m_diagStateController(m_diagStateProvider, nullptr),
+	m_appSignalController(m_appSignalProvider, nullptr)
 {
 	Q_ASSERT(signalSetProvider);
 
-	auto context = VFrame30::Context::create(&m_appSignalController, nullptr/*m_tuningController*/, nullptr, nullptr);
+	auto context = VFrame30::Context::create(&m_diagStateController, &m_appSignalController, nullptr/*m_tuningController*/, nullptr, nullptr);
 	schema->setContext(std::move(context));
 
 	// Timer for updates of WRN/ERR count

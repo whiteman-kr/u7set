@@ -168,7 +168,7 @@ namespace vdu
 		};
 
 		auto oldContext = schema->context();
-		schema->setContext(VFrame30::Context::create(nullptr, nullptr, nullptr, nullptr));
+		schema->setContext(VFrame30::Context::create(nullptr, nullptr, nullptr, nullptr, nullptr));
 
 		DrawBackgroundSchemaView schemaView{schema};
 

@@ -158,7 +158,7 @@ static const QList<staticPropertyFieldDefinition> staticPropertiesFieldList
 		QStringLiteral("Expected AppDataUID"),
 		[](const DataSource& source)
 		{
-			quint32 dataID = source.appDataUID();
+			quint32 dataID = source.rupAppDataUID();
 			return "0x" + QString("%1").arg(dataID, sizeof(dataID) * 2,
 											16, QChar('0')).toUpper();
 		}

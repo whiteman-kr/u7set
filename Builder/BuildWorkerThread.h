@@ -50,6 +50,7 @@ namespace Builder
 		bool taskLoadSubsystems();					// Load subsystems
 		bool taskLoadConnections();					// Load connections
 		bool taskLoadMatsUsers();					// Load MATS users
+		bool taskLoadDiagSignalTypes();				// Load DiagSignalTypes
 		bool taskCheckSchemaIds();					// Check all schemas ids for uniqueness
 		bool taskParseApplicationLogic();			// Parse application logic schemas
 		bool taskSaveLogicModuleDescriptions();		// Save LogicModule Descriptions
@@ -133,6 +134,11 @@ namespace Builder
 				{
 					.func = &BuildWorkerThread::taskLoadMatsUsers,
 					.name = "Loading MATS users",
+					.breakOnFailed = true
+				},
+				{
+					.func = &BuildWorkerThread::taskLoadDiagSignalTypes,
+					.name = "Loading DiagSignalTypes",
 					.breakOnFailed = true
 				},
 				{

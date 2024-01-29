@@ -195,7 +195,7 @@ namespace Builder
 
 					connectedAdaptersCount++;
 
-					result &= findAppDataSourceAcquiredSignals(ds);	// inside fills m_associatedAppSignals also
+					result &= findAppDataSourceAcquiredSignals(ds);	// inside fills m_acquiredAppSignals also
 
 					dataSources.append(ds);
 				}
@@ -213,7 +213,9 @@ namespace Builder
 
 		//
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(), File::APP_DATA_SOURCES_XML, CfgFileId::APP_DATA_SOURCES, "", fileData);
+		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(),
+															File::APP_DATA_SOURCES_XML,
+															CfgFileId::APP_DATA_SOURCES, "", fileData);
 
 		if (buildFile == nullptr)
 		{

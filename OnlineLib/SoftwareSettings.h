@@ -4,6 +4,7 @@
 #include "../CommonLib/HostAddressPort.h"
 #include "../lib/ConstStrings.h"
 #include "../OnlineLib/MatsUsers.h"
+#include "../HardwareLib/DiagSignalType.h"
 
 class XmlWriteHelper;
 class XmlReadHelper;
@@ -65,6 +66,16 @@ namespace SoftwareEndpoint
 		HostAddressPort address;	// ArchiveService ip address and port
 
 		bool operator==(const ArchiveService&) const = default;
+	};
+
+	struct DiagDataService
+	{
+		QString equipmentId;
+		QString shortenId;			// Short version of equipmentId
+		HostAddressPort address;
+		HostAddressPort realtimeAddress;
+
+		bool operator==(const DiagDataService&) const = default;
 	};
 }
 
@@ -260,6 +271,8 @@ public:
 	HostAddressPort clientRequestIP;
 	QHostAddress clientRequestNetmask;
 	E::SecurityLevel securityLevel = E::SecurityLevel::Basic;
+
+	HostAddressPort rtTrendsRequestIP;
 
 private:
 	// this methods should be call by SoftwareSettingsSet only
@@ -490,6 +503,33 @@ private:
 public:
 	QStringList getSchemaTags() const;
 	QStringList getUsersAccounts() const;
+
+	void clear();
+};
+
+
+class DiagnosticsSettings : virtual public SoftwareSettings
+{
+public:
+	SoftwareEndpoint::ConfigService configService1;
+	SoftwareEndpoint::ConfigService configService2;
+
+	std::vector<SoftwareEndpoint::DiagDataService> diagDataServices;
+	std::vector<SoftwareEndpoint::ArchiveService> archiveServices;
+
+	QString startSchemaId;
+	QString schemaTags;
+
+private:
+	// these methods should be call by SoftwareSettingsSet only
+	//
+	bool writeToXml(XmlWriteHelper& xml) const override;
+	bool readFromXml(XmlReadHelper& xml) override;
+
+	friend class SoftwareSettingsSet;
+
+public:
+	QStringList getSchemaTags() const;
 
 	void clear();
 };

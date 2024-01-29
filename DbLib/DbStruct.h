@@ -21,8 +21,8 @@ enum class DbDir
 	AppLogicDir,				// $root$/Schemas/ApplicationLogic
 	MonitorSchemasDir,			// $root$/Schemas/Monitor
 	TuningSchemasDir,			// $root$/Schemas/Tuning
-	DiagnosticsSchemasDir,		// $root$/Schemas/Diagnostics
-	VduSchemasDir,				// $root$/Schemas/VDU
+	DiagSchemasDir,				// $root$/Schemas/Diagnostics
+	VduSchemasDir,				// $root$/Schemas/Diagnostics
 	HardwareConfigurationDir,	// $root$/HC
 	HardwarePresetsDir,			// $root$/HP
 	ModuleConfigurationDir,		// $root$/MC
@@ -69,8 +69,7 @@ namespace Db
 				{DbDir::AppLogicDir, QStringLiteral("$root$/Schemas/ApplicationLogic")},		// Application Logic Schemas
 				{DbDir::MonitorSchemasDir, QStringLiteral("$root$/Schemas/Monitor")},			// Monitor Video Schemas
 				{DbDir::TuningSchemasDir, QStringLiteral("$root$/Schemas/Tuning")},				// TuningClient Schemas
-				{DbDir::DiagnosticsSchemasDir, QStringLiteral("$root$/Schemas/Diagnostics")},	// Diagnostics Schemas
-				{DbDir::VduSchemasDir, QStringLiteral("$root$/Schemas/VDU")},					// VDU Schemas
+				{DbDir::DiagSchemasDir, QStringLiteral("$root$/Schemas/Diagnostics")},			// Diagnostics Schemas
 				{DbDir::HardwareConfigurationDir, QStringLiteral("$root$/HC")},					// Hardware Configuratiun
 				{DbDir::HardwarePresetsDir, QStringLiteral("$root$/HP")},						// Hardware Presets
 				{DbDir::ModuleConfigurationDir, QStringLiteral("$root$/MC")},					// Module Configuration
@@ -115,6 +114,9 @@ namespace Db
 		constexpr static const char* AppSignalSetFileExtension = "asgs";			// Application signals set file extention (::Proto::AppSignalSet message)
 
 		constexpr static const char* JavaScriptFileExtension = "js";				// JavaScript file extension
+
+		constexpr static const char* DiagSignalTypeFileExtension = "dsgt";			// Diagnostics Signal Type file extension
+		constexpr static const char* DiagSignalTypeSetFileExtension = "dsgts";		// Diagnostics Signal Types set file extension
 	};
 }
 

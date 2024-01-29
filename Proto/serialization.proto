@@ -130,6 +130,7 @@ message Envelope
 	//
 	optional SchemaItem schemaitem = 6;				// VFrame30::SchemaItem
 	optional DeviceObject deviceobject = 7;			// Hardware::DeviceObject
+	optional DiagSignalType diagSignalType = 8;		// Hardware::DiagSignalTypeObject
 	optional Schema schema = 100;					// VFrame30::Schema
 	optional SchemaLayer schemalayer = 101;			// VFrame30::SchemaLayer
 	optional FblElement fblelement = 102;			// Fbl::FblElement
@@ -433,10 +434,10 @@ message SchemaItem
 
 	// Inherited from PosRectImpl, PosRectRotatable, PosLineImpl, PosConnectionImpl
 	//
-	optional SchemaItemRect Rect = 116;						// +PosRectImpl
+	optional SchemaItemRect Rect = 116;						// +PosRectImpl, PosRectRotatable
 	optional SchemaItemLine Line = 117;						// +PosLineImpl
 	optional SchemaItemPath Path = 118;						// +PosConnectionImpl
-	optional SchemaItemImage Image = 119;					// +PosRectImpl
+	optional SchemaItemImage Image = 119;					// +PosRectImpl, PosRectRotatable
 	optional SchemaItemFrame Frame = 120;					// +PosRectImpl
 	optional SchemaItemIndicator Indicator = 121;			// +PosRectImpl
 
@@ -452,8 +453,10 @@ message SchemaItem
 	optional SchemaItemInOut InOutSignal = 133;				// +Signal
 	optional SchemaItemUfb ufb = 134;						// +FblItemRect
 	optional SchemaItemTerminator terminator = 135;			// +FblItemRect
-	optional SchemaItemValue Value = 136;					// +PosRectImpl
-	optional SchemaItemImageValue ImageValue = 137;			// +PosRectImpl
+	optional SchemaItemValue Value = 136;					// +PosRectImpl, PosRectRotatable
+	optional SchemaItemImageValue ImageValue = 137;			// +PosRectImpl, PosRectRotatable
+
+	optional SchemaItemDiagValue DiagValue = 138;			// +PosRectImpl, PosRectRotatable
 
     optional SchemaItemBus BusItem = 150;					// +FblItemRect
 	optional SchemaItemBusComposer BusComposer = 151;		// +SchemaItemBus, FblItemRect
@@ -916,6 +919,27 @@ message SchemaItemImageValue
 }
 
 //
+// SchemaItemDiagValue
+//
+message SchemaItemDiagValue
+{
+    optional string signalIds = 1;
+
+    optional double lineWeight = 4;
+	optional uint32 lineColor = 5;
+	optional uint32 fillColor = 6;
+	optional uint32 textColor = 7;
+	optional string text = 8;
+	optional FontParam font = 9;
+	optional bool drawRect = 10 [default = true];
+	optional int32 horzAlign = 11  [default = 4];		// Qt::AlignHCenter 0x0004 Centers horizontally in the available space.
+	optional int32 vertAlign = 12  [default = 128];		// Qt::AlignVCenter 0x0080 Centers vertically in the available space.
+
+    optional int32 precision = 13 [default = -1];		// -1: Take precision value from signal description
+	optional int32 analogFormat = 14 [default = 102];	// Default 102 (charcode for 'f') is AnalogFormat::f (format as [-]9.9)
+}
+
+//
 // SchemaItemBus
 //
 message SchemaItemBus
@@ -1099,6 +1123,7 @@ message DeviceObject
 	optional DeviceModule Module = 104;
 	optional DeviceController Controller = 105;
 	optional DeviceAppSignal AppSignal = 106;
+	optional DeviceDiagSignal DiagSignal = 109;
 	optional Workstation Workstation = 107;
 	optional Software Software = 108;
 
@@ -1136,6 +1161,7 @@ message DeviceModule
 
 message DeviceController
 {
+	optional int32 diagDataOffset = 3;
 }
 
 message DeviceAppSignal
@@ -1167,6 +1193,30 @@ message DeviceAppSignal
 	optional bool signalSpecPropsStructWasFixed = 41 [default = false];		// The sign that signalSpecPropsStruct already got replaced EngEneered -> EngIneered
 }
 
+message DeviceDiagSignal
+{
+	optional int32 level = 3;			// E::DiagLevel
+	optional string signalTypeId = 4;
+	optional string validitySignalId = 5;
+	optional bool isRefelection = 6;
+	optional string reflectedSignalId = 7;
+
+	optional int32 valueOffset = 10;
+	optional int32 valueBit = 11;
+	optional int32 valueBitSize = 12;
+	optional int32 discreteContainerSize = 13;
+
+	optional bool logChanges = 16;
+	optional bool archive = 17;
+	optional bool reserved = 18;
+
+	optional double coarseAperture = 22;
+	optional double fineAperture = 23;
+	optional int32 apertureType = 24;	 // E::ApertureType;
+
+	optional int32 decimalPlaces = 30;
+}
+
 message Workstation
 {
 	optional int32 type = 1 [default = 0];
@@ -1176,6 +1226,39 @@ message Workstation
 message Software
 {
 	optional int32 type = 1 [default = 0];
+}
+
+message DiagSignalType
+{
+    optional string signalTypeId = 3;
+    optional Uuid uuid = 4;
+    optional bool systemSignalType = 5;
+	optional int32 type = 6; 				// enum E::DiagSignalType
+	optional int32 byteOrder = 7; 			// enum E::DiagByteOrder
+
+	// Discrete specific
+	//
+	optional bool inverseValue = 20;
+	optional int32 normalState = 25;
+	optional string normalStateString0 = 26;
+	optional string normalStateString1 = 27;
+
+	// Analog conversion
+	//
+	optional int32 analogformat = 32; 		// enum E::DiagAnalogFormat
+
+	optional double adcHighLimit = 33;
+	optional double adcLowLimit = 34;
+
+	optional double valueHighLimit = 35;
+	optional double valueLowLimit = 36;
+
+	optional double valueMultiplier = 37;
+	optional double valueOffset = 38;
+
+	optional bool useLimits = 39;
+
+	optional string units = 40;
 }
 
 

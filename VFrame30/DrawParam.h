@@ -31,7 +31,6 @@ namespace VFrame30
 	class Schema;
 	class SchemaView;
 	class ClientSchemaView;
-	class AppSignalController;
 	class TuningController;
 
 	class CDrawParam final

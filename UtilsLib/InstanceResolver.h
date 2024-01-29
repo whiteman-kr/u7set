@@ -1,5 +1,6 @@
 #pragma once
-#include <QSharedMemory>
+
+class QSharedMemory;
 
 class InstanceResolver : public QObject
 {

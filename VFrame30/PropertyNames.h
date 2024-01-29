@@ -228,7 +228,9 @@ namespace VFrame30
 		inline static const QString dataType{"DataType"};
 		inline static const QString units{"Units"};
 
-		inline static const QString signalIDs{"SignalIDs"};
+		inline static const QString diagSignalIDs = QStringLiteral("DiagSignalIDs");
+
+		inline static const QString signalIDs = QStringLiteral("SignalIDs");
 		inline static const QString appSignalIDs{"AppSignalIDs"};
 		inline static const QString appSignalIDsValidator{"^[#]?([A-Za-z\\d_]+((;[#]?)?\\r?(\\n[#]?)?))+$"};
 		inline static const QString appSignalIDsOrReferenceValidator{R"(^[#a-zA-Z0-9\$_\(\).;\n\r]*$)"};

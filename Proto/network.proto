@@ -134,7 +134,8 @@ message LanControllerInfo
 	optional string tuningServiceIP = 14;
 	optional int32 tuningServicePort = 15 [default = 0];
 	optional string tuningServiceNetmask = 16;
-	optional uint64 tuningdatauid = 17;
+	optional uint32 rupTuningDataUID = 17  [default = 0];
+	optional uint64 fotipTuningDataUID = 18  [default = 0];
 
 	// app data parameters
 
@@ -145,7 +146,7 @@ message LanControllerInfo
 	optional string appDataServiceIP = 24;
 	optional int32 appDataServicePort = 25 [default = 0];
 	optional string appDataServiceNetmask = 26;
-	optional uint32 appDataUID = 27 [default = 0];
+	optional uint32 rupAppDataUID = 27 [default = 0];
 	optional int32 appDataSizeBytes = 28 [default = 0];
 	optional int32 appDataFramesQuantity = 29 [default = 0];
 	optional int32 overrideAppDataWordCount = 30 [default = -1];
@@ -159,7 +160,7 @@ message LanControllerInfo
 	optional string diagDataServiceIP = 44;
 	optional int32 diagDataServicePort = 45 [default = 0];
 	optional string diagDataServiceNetmask = 46;
-	optional uint32 diagDataUID = 47 [default = 0];
+	optional uint32 rupDiagDataUID = 47 [default = 0];
 	optional int32 diagDataSizeBytes = 48 [default = 0];
 	optional int32 diagDataFramesQuantity = 49 [default = 0];
 	optional int32 overrideDiagDataWordCount = 50 [default = -1];
@@ -220,6 +221,38 @@ message AppDataReceiveState
 // Getting Application Data Sources states
 //
 message AppDataSourceState
+{
+	optional uint64 id = 1 [default = 0];				// unique id
+	optional string lmEquipmentID = 2;
+
+	optional bool dataProcessingEnabled = 3 [default = false];
+	optional bool receivesData = 4 [default = false];
+	optional int64 uptime = 5 [default = 0];					// time from start of data receiving
+	optional uint32 receivedDataID = 6 [default = 0];
+	optional int64 lmTime = 7 [default = 0];
+	optional uint32 rupFrameNumerator = 8 [default = 0];
+
+	optional double dataReceivingSpeed = 9 [default = 0];	    // bytes/sec
+	optional int64 receivedDataSize = 10 [default = 0];
+	optional int64 receivedFramesCount = 11 [default = 0];
+	optional int64 receivedPacketCount = 12 [default = 0];
+	optional int64 lostPacketCount = 13 [default = 0];
+	optional int32 signalStatesQueueCurSize = 14 [default = 0];
+	optional int32 signalStatesQueueCurMaxSize = 15 [default = 0];
+
+	optional int64 errorProtocolVersion = 16 [default = 0];
+	optional int64 errorFramesQuantity = 17 [default = 0];
+	optional int64 errorFrameNo = 18 [default = 0];
+	optional int64 errorFrameCRC = 19 [default = 0];
+	optional int64 errorDataID = 20 [default = 0];
+	optional int64 errorDuplicatePlantTime = 21 [default = 0];
+	optional int64 errorNonmonotonicPlantTime = 22 [default = 0];
+	optional int64 errorPlantTimeFormat = 23 [default = 0];
+}
+
+// Getting Diagnostic Data Sources states
+//
+message DiagDataSourceState
 {
 	optional uint64 id = 1 [default = 0];				// unique id
 	optional string lmEquipmentID = 2;
@@ -773,3 +806,38 @@ message GetFileReply
 	optional bytes filePartData = 10;
 }
 
+//
+
+message AcquiredDiagObject
+{
+	required string equipmentID = 1;
+	required int32 deviceType = 2 [default = 0];			// enum Hardware::DeviceType value
+	required uint64 parentHash = 3 [default = 0];			// calcHash(parent.equipmentID)
+}
+
+message AcquiredDiagSignal
+{
+	required uint64 equipmentIdHash = 1  [default = 0];
+	required uint64 parentHash = 2 [default = 0];			// calcHash(parent.equipmentID)
+	required int32 diagLevel = 3 [default = 0];				// enum E::DiagLevel value
+	required uint64 diagSignalTypeIdHash = 4 [default = 0];
+
+	optional bool isReflection = 5 [default = false];
+	optional uint64 reflectedSignalIdHash = 6  [default = 0];
+	optional uint64 validitySignalIdHash = 7  [default = 0];
+	optional int32 valueSizeBit = 8 [default = 0];
+	optional int32 discreteContainerSize = 9 [default = 0];
+	optional bool logChanges = 10 [default = false];
+	optional bool archive = 11 [default = false];
+	optional bool reserved = 12 [default = false];
+	optional int32 apertureType = 13 [default = 0];			// enum E::ApertureType value
+	optional double coarseAperture = 14  [default = 0];
+	optional double fineAperture = 15  [default = 0];
+	optional int32 absAddrBit = 16 [default = 0];
+}
+
+message AcquiredDiagSignals
+{
+	repeated AcquiredDiagSignal diagSignals = 1;
+	repeated AcquiredDiagObject diagObjects = 2;
+}

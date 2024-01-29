@@ -85,7 +85,9 @@ namespace Builder
 
 			//
 
-			const Hardware::DeviceModule* device = nullptr;
+			//const Hardware::DeviceModule* device = nullptr;
+			std::shared_ptr<const Hardware::DeviceModule> device;
+
 			int place = 0;
 
 			// properties loaded from Hardware::DeviceModule::dynamicProperties
@@ -216,7 +218,7 @@ namespace Builder
 
 		Builder::Context* builderContext() const { return m_context; }
 
-		const HashedVector<QString, Module>& modules() const { return  m_modules; }
+		const std::map<int, Module>& modules() const { return  m_modules; }
 
 		bool getLmUsedTuningArea(std::vector<CodeChecker::MemArea>* tuningAreas) const;
 
@@ -849,9 +851,11 @@ namespace Builder
 		bool writeLoopbacksReport();
 		bool writeHeapsLog();
 
+		bool calcAppDataUID();
+		bool calcDiagDataUID();
+
 		bool writeResult();
-		bool writeBinCodeForLm();
-		bool calcAppLogicUniqueID(const QByteArray& lmAppCode);
+		bool writeBinCodeForLm(const QByteArray& binCode);
 
 		bool writeOcmRsSignalsXml();
 
@@ -973,13 +977,18 @@ namespace Builder
 
 		bool m_bitAccAvailable = false;
 
-		quint64 m_appLogicUniqueID = 0;
+		quint32 m_rupAppDataUID = 0;			// App data 32-bit UID placed in RUP frame header
+		quint32 m_rupDiagDataUID = 0;			// Diag data 32-bit UID placed in RUP frame header
+		quint32 m_rupTuningDataUID = 0;			// Tuning data 32-bit UID placed in RUP frame header
+		quint64 m_fotipTuningDataUID = 0;		// Tuning data 64-bit UID placed in FOTIP frame header
 
 		// LM's calculated memory offsets and sizes
 		//
 		LmMemoryMap m_memoryMap;
 
-		HashedVector<QString, Module> m_modules;		// modules installed in chassis, module EquipmentID => Module
+//		HashedVector<QString, Module> m_modules;		// modules installed in chassis, module EquipmentID => Module
+
+		std::map<int, Module> m_modules;				// modules installed in chassis, module place => Module
 
 		//
 

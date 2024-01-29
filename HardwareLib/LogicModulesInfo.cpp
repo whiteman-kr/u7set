@@ -162,11 +162,11 @@ bool LogicModulesInfo::load(::LogicModuleInfo* lmi, const QDomNode& lmNode, QStr
 
 	result &= DomXmlHelper::getBoolAttribute(lmElem, EquipmentPropNames::APP_DATA_ENABLE, &lmi->appDataEnable, errMsg);
 	result &= DomXmlHelper::getIntAttribute(lmElem, EquipmentPropNames::APP_DATA_SIZE_BYTES, &lmi->appDataSizeBytes, errMsg);
-	result &= DomXmlHelper::getUInt32Attribute(lmElem, EquipmentPropNames::APP_DATA_UID, &lmi->appDataUID, errMsg);
+	result &= DomXmlHelper::getUInt32Attribute(lmElem, EquipmentPropNames::RUP_APP_DATA_UID, &lmi->rupAppDataUID, errMsg);
 
 	result &= DomXmlHelper::getBoolAttribute(lmElem, EquipmentPropNames::DIAG_DATA_ENABLE, &lmi->diagDataEnable, errMsg);
 	result &= DomXmlHelper::getIntAttribute(lmElem, EquipmentPropNames::DIAG_DATA_SIZE_BYTES, &lmi->diagDataSizeBytes, errMsg);
-	result &= DomXmlHelper::getUInt32Attribute(lmElem, EquipmentPropNames::DIAG_DATA_UID, &lmi->diagDataUID, errMsg);
+	result &= DomXmlHelper::getUInt32Attribute(lmElem, EquipmentPropNames::RUP_DIAG_DATA_UID, &lmi->rupDiagDataUID, errMsg);
 
 	result &= DomXmlHelper::getStringAttribute(lmElem, EquipmentPropNames::MODULE_FAMILY, &lmi->moduleFamily, errMsg);
 

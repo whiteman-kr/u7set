@@ -61,7 +61,7 @@ struct TableStruct_network_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[74]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[78]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -70,6 +70,15 @@ struct TableStruct_network_2eproto {
 extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_network_2eproto;
 ::PROTOBUF_NAMESPACE_ID::Metadata descriptor_table_network_2eproto_metadata_getter(int index);
 namespace Network {
+class AcquiredDiagObject;
+struct AcquiredDiagObjectDefaultTypeInternal;
+extern AcquiredDiagObjectDefaultTypeInternal _AcquiredDiagObject_default_instance_;
+class AcquiredDiagSignal;
+struct AcquiredDiagSignalDefaultTypeInternal;
+extern AcquiredDiagSignalDefaultTypeInternal _AcquiredDiagSignal_default_instance_;
+class AcquiredDiagSignals;
+struct AcquiredDiagSignalsDefaultTypeInternal;
+extern AcquiredDiagSignalsDefaultTypeInternal _AcquiredDiagSignals_default_instance_;
 class AppDataReceiveState;
 struct AppDataReceiveStateDefaultTypeInternal;
 extern AppDataReceiveStateDefaultTypeInternal _AppDataReceiveState_default_instance_;
@@ -103,6 +112,9 @@ extern DataSourceWriteDefaultTypeInternal _DataSourceWrite_default_instance_;
 class DataSourceWriteReply;
 struct DataSourceWriteReplyDefaultTypeInternal;
 extern DataSourceWriteReplyDefaultTypeInternal _DataSourceWriteReply_default_instance_;
+class DiagDataSourceState;
+struct DiagDataSourceStateDefaultTypeInternal;
+extern DiagDataSourceStateDefaultTypeInternal _DiagDataSourceState_default_instance_;
 class GatewayAppSignalState;
 struct GatewayAppSignalStateDefaultTypeInternal;
 extern GatewayAppSignalStateDefaultTypeInternal _GatewayAppSignalState_default_instance_;
@@ -294,6 +306,9 @@ struct TuningWriteCommandDefaultTypeInternal;
 extern TuningWriteCommandDefaultTypeInternal _TuningWriteCommand_default_instance_;
 }  // namespace Network
 PROTOBUF_NAMESPACE_OPEN
+template<> ::Network::AcquiredDiagObject* Arena::CreateMaybeMessage<::Network::AcquiredDiagObject>(Arena*);
+template<> ::Network::AcquiredDiagSignal* Arena::CreateMaybeMessage<::Network::AcquiredDiagSignal>(Arena*);
+template<> ::Network::AcquiredDiagSignals* Arena::CreateMaybeMessage<::Network::AcquiredDiagSignals>(Arena*);
 template<> ::Network::AppDataReceiveState* Arena::CreateMaybeMessage<::Network::AppDataReceiveState>(Arena*);
 template<> ::Network::AppDataServiceState* Arena::CreateMaybeMessage<::Network::AppDataServiceState>(Arena*);
 template<> ::Network::AppDataSourceState* Arena::CreateMaybeMessage<::Network::AppDataSourceState>(Arena*);
@@ -305,6 +320,7 @@ template<> ::Network::ConfigurationServiceState* Arena::CreateMaybeMessage<::Net
 template<> ::Network::DataSourceInfo* Arena::CreateMaybeMessage<::Network::DataSourceInfo>(Arena*);
 template<> ::Network::DataSourceWrite* Arena::CreateMaybeMessage<::Network::DataSourceWrite>(Arena*);
 template<> ::Network::DataSourceWriteReply* Arena::CreateMaybeMessage<::Network::DataSourceWriteReply>(Arena*);
+template<> ::Network::DiagDataSourceState* Arena::CreateMaybeMessage<::Network::DiagDataSourceState>(Arena*);
 template<> ::Network::GatewayAppSignalState* Arena::CreateMaybeMessage<::Network::GatewayAppSignalState>(Arena*);
 template<> ::Network::GatewayGetAppSignalStateChangesReply* Arena::CreateMaybeMessage<::Network::GatewayGetAppSignalStateChangesReply>(Arena*);
 template<> ::Network::GatewayGetAppSignalStateChangesRequest* Arena::CreateMaybeMessage<::Network::GatewayGetAppSignalStateChangesRequest>(Arena*);
@@ -3073,21 +3089,22 @@ class LanControllerInfo PROTOBUF_FINAL :
     kDiagDataServiceNetmaskFieldNumber = 46,
     kLanControllerTypeFieldNumber = 3,
     kTuningPortFieldNumber = 12,
-    kTuningdatauidFieldNumber = 17,
     kTuningServicePortFieldNumber = 15,
+    kRupTuningDataUIDFieldNumber = 17,
+    kFotipTuningDataUIDFieldNumber = 18,
     kAppDataPortFieldNumber = 22,
     kTuningEnableFieldNumber = 10,
     kAppDataEnableFieldNumber = 20,
     kDiagDataEnableFieldNumber = 40,
     kAppDataServicePortFieldNumber = 25,
-    kAppDataUIDFieldNumber = 27,
+    kRupAppDataUIDFieldNumber = 27,
     kAppDataSizeBytesFieldNumber = 28,
     kAppDataFramesQuantityFieldNumber = 29,
+    kDiagDataFramesQuantityFieldNumber = 49,
     kDiagDataPortFieldNumber = 42,
     kDiagDataServicePortFieldNumber = 45,
-    kDiagDataUIDFieldNumber = 47,
+    kRupDiagDataUIDFieldNumber = 47,
     kDiagDataSizeBytesFieldNumber = 48,
-    kDiagDataFramesQuantityFieldNumber = 49,
     kOverrideDiagDataWordCountFieldNumber = 50,
     kControllerNoFieldNumber = 2,
     kOverrideAppDataWordCountFieldNumber = 30,
@@ -3378,19 +3395,6 @@ class LanControllerInfo PROTOBUF_FINAL :
   void _internal_set_tuningport(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
-  // optional uint64 tuningdatauid = 17;
-  bool has_tuningdatauid() const;
-  private:
-  bool _internal_has_tuningdatauid() const;
-  public:
-  void clear_tuningdatauid();
-  ::PROTOBUF_NAMESPACE_ID::uint64 tuningdatauid() const;
-  void set_tuningdatauid(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_tuningdatauid() const;
-  void _internal_set_tuningdatauid(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  public:
-
   // optional int32 tuningServicePort = 15 [default = 0];
   bool has_tuningserviceport() const;
   private:
@@ -3402,6 +3406,32 @@ class LanControllerInfo PROTOBUF_FINAL :
   private:
   ::PROTOBUF_NAMESPACE_ID::int32 _internal_tuningserviceport() const;
   void _internal_set_tuningserviceport(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional uint32 rupTuningDataUID = 17 [default = 0];
+  bool has_ruptuningdatauid() const;
+  private:
+  bool _internal_has_ruptuningdatauid() const;
+  public:
+  void clear_ruptuningdatauid();
+  ::PROTOBUF_NAMESPACE_ID::uint32 ruptuningdatauid() const;
+  void set_ruptuningdatauid(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_ruptuningdatauid() const;
+  void _internal_set_ruptuningdatauid(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // optional uint64 fotipTuningDataUID = 18 [default = 0];
+  bool has_fotiptuningdatauid() const;
+  private:
+  bool _internal_has_fotiptuningdatauid() const;
+  public:
+  void clear_fotiptuningdatauid();
+  ::PROTOBUF_NAMESPACE_ID::uint64 fotiptuningdatauid() const;
+  void set_fotiptuningdatauid(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_fotiptuningdatauid() const;
+  void _internal_set_fotiptuningdatauid(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
   // optional int32 appDataPort = 22 [default = 0];
@@ -3469,17 +3499,17 @@ class LanControllerInfo PROTOBUF_FINAL :
   void _internal_set_appdataserviceport(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
-  // optional uint32 appDataUID = 27 [default = 0];
-  bool has_appdatauid() const;
+  // optional uint32 rupAppDataUID = 27 [default = 0];
+  bool has_rupappdatauid() const;
   private:
-  bool _internal_has_appdatauid() const;
+  bool _internal_has_rupappdatauid() const;
   public:
-  void clear_appdatauid();
-  ::PROTOBUF_NAMESPACE_ID::uint32 appdatauid() const;
-  void set_appdatauid(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  void clear_rupappdatauid();
+  ::PROTOBUF_NAMESPACE_ID::uint32 rupappdatauid() const;
+  void set_rupappdatauid(::PROTOBUF_NAMESPACE_ID::uint32 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_appdatauid() const;
-  void _internal_set_appdatauid(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_rupappdatauid() const;
+  void _internal_set_rupappdatauid(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
   // optional int32 appDataSizeBytes = 28 [default = 0];
@@ -3508,6 +3538,19 @@ class LanControllerInfo PROTOBUF_FINAL :
   void _internal_set_appdataframesquantity(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
+  // optional int32 diagDataFramesQuantity = 49 [default = 0];
+  bool has_diagdataframesquantity() const;
+  private:
+  bool _internal_has_diagdataframesquantity() const;
+  public:
+  void clear_diagdataframesquantity();
+  ::PROTOBUF_NAMESPACE_ID::int32 diagdataframesquantity() const;
+  void set_diagdataframesquantity(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_diagdataframesquantity() const;
+  void _internal_set_diagdataframesquantity(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
   // optional int32 diagDataPort = 42 [default = 0];
   bool has_diagdataport() const;
   private:
@@ -3534,17 +3577,17 @@ class LanControllerInfo PROTOBUF_FINAL :
   void _internal_set_diagdataserviceport(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
-  // optional uint32 diagDataUID = 47 [default = 0];
-  bool has_diagdatauid() const;
+  // optional uint32 rupDiagDataUID = 47 [default = 0];
+  bool has_rupdiagdatauid() const;
   private:
-  bool _internal_has_diagdatauid() const;
+  bool _internal_has_rupdiagdatauid() const;
   public:
-  void clear_diagdatauid();
-  ::PROTOBUF_NAMESPACE_ID::uint32 diagdatauid() const;
-  void set_diagdatauid(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  void clear_rupdiagdatauid();
+  ::PROTOBUF_NAMESPACE_ID::uint32 rupdiagdatauid() const;
+  void set_rupdiagdatauid(::PROTOBUF_NAMESPACE_ID::uint32 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_diagdatauid() const;
-  void _internal_set_diagdatauid(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_rupdiagdatauid() const;
+  void _internal_set_rupdiagdatauid(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
   // optional int32 diagDataSizeBytes = 48 [default = 0];
@@ -3558,19 +3601,6 @@ class LanControllerInfo PROTOBUF_FINAL :
   private:
   ::PROTOBUF_NAMESPACE_ID::int32 _internal_diagdatasizebytes() const;
   void _internal_set_diagdatasizebytes(::PROTOBUF_NAMESPACE_ID::int32 value);
-  public:
-
-  // optional int32 diagDataFramesQuantity = 49 [default = 0];
-  bool has_diagdataframesquantity() const;
-  private:
-  bool _internal_has_diagdataframesquantity() const;
-  public:
-  void clear_diagdataframesquantity();
-  ::PROTOBUF_NAMESPACE_ID::int32 diagdataframesquantity() const;
-  void set_diagdataframesquantity(::PROTOBUF_NAMESPACE_ID::int32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_diagdataframesquantity() const;
-  void _internal_set_diagdataframesquantity(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
   // optional int32 overrideDiagDataWordCount = 50 [default = -1];
@@ -3636,21 +3666,22 @@ class LanControllerInfo PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr diagdataservicenetmask_;
   ::PROTOBUF_NAMESPACE_ID::int32 lancontrollertype_;
   ::PROTOBUF_NAMESPACE_ID::int32 tuningport_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 tuningdatauid_;
   ::PROTOBUF_NAMESPACE_ID::int32 tuningserviceport_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 ruptuningdatauid_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 fotiptuningdatauid_;
   ::PROTOBUF_NAMESPACE_ID::int32 appdataport_;
   bool tuningenable_;
   bool appdataenable_;
   bool diagdataenable_;
   ::PROTOBUF_NAMESPACE_ID::int32 appdataserviceport_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 appdatauid_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 rupappdatauid_;
   ::PROTOBUF_NAMESPACE_ID::int32 appdatasizebytes_;
   ::PROTOBUF_NAMESPACE_ID::int32 appdataframesquantity_;
+  ::PROTOBUF_NAMESPACE_ID::int32 diagdataframesquantity_;
   ::PROTOBUF_NAMESPACE_ID::int32 diagdataport_;
   ::PROTOBUF_NAMESPACE_ID::int32 diagdataserviceport_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 diagdatauid_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 rupdiagdatauid_;
   ::PROTOBUF_NAMESPACE_ID::int32 diagdatasizebytes_;
-  ::PROTOBUF_NAMESPACE_ID::int32 diagdataframesquantity_;
   ::PROTOBUF_NAMESPACE_ID::int32 overridediagdatawordcount_;
   ::PROTOBUF_NAMESPACE_ID::int32 controllerno_;
   ::PROTOBUF_NAMESPACE_ID::int32 overrideappdatawordcount_;
@@ -5119,6 +5150,492 @@ class AppDataSourceState PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class DiagDataSourceState PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Network.DiagDataSourceState) */ {
+ public:
+  inline DiagDataSourceState() : DiagDataSourceState(nullptr) {}
+  virtual ~DiagDataSourceState();
+  explicit constexpr DiagDataSourceState(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  DiagDataSourceState(const DiagDataSourceState& from);
+  DiagDataSourceState(DiagDataSourceState&& from) noexcept
+    : DiagDataSourceState() {
+    *this = ::std::move(from);
+  }
+
+  inline DiagDataSourceState& operator=(const DiagDataSourceState& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline DiagDataSourceState& operator=(DiagDataSourceState&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
+    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
+  }
+  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
+    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const DiagDataSourceState& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const DiagDataSourceState* internal_default_instance() {
+    return reinterpret_cast<const DiagDataSourceState*>(
+               &_DiagDataSourceState_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    21;
+
+  friend void swap(DiagDataSourceState& a, DiagDataSourceState& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(DiagDataSourceState* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(DiagDataSourceState* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline DiagDataSourceState* New() const final {
+    return CreateMaybeMessage<DiagDataSourceState>(nullptr);
+  }
+
+  DiagDataSourceState* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<DiagDataSourceState>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const DiagDataSourceState& from);
+  void MergeFrom(const DiagDataSourceState& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(DiagDataSourceState* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Network.DiagDataSourceState";
+  }
+  protected:
+  explicit DiagDataSourceState(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_network_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kLmEquipmentIDFieldNumber = 2,
+    kIdFieldNumber = 1,
+    kDataProcessingEnabledFieldNumber = 3,
+    kReceivesDataFieldNumber = 4,
+    kReceivedDataIDFieldNumber = 6,
+    kUptimeFieldNumber = 5,
+    kLmTimeFieldNumber = 7,
+    kDataReceivingSpeedFieldNumber = 9,
+    kReceivedDataSizeFieldNumber = 10,
+    kReceivedFramesCountFieldNumber = 11,
+    kRupFrameNumeratorFieldNumber = 8,
+    kSignalStatesQueueCurSizeFieldNumber = 14,
+    kReceivedPacketCountFieldNumber = 12,
+    kLostPacketCountFieldNumber = 13,
+    kErrorProtocolVersionFieldNumber = 16,
+    kErrorFramesQuantityFieldNumber = 17,
+    kErrorFrameNoFieldNumber = 18,
+    kErrorFrameCRCFieldNumber = 19,
+    kErrorDataIDFieldNumber = 20,
+    kErrorDuplicatePlantTimeFieldNumber = 21,
+    kErrorNonmonotonicPlantTimeFieldNumber = 22,
+    kErrorPlantTimeFormatFieldNumber = 23,
+    kSignalStatesQueueCurMaxSizeFieldNumber = 15,
+  };
+  // optional string lmEquipmentID = 2;
+  bool has_lmequipmentid() const;
+  private:
+  bool _internal_has_lmequipmentid() const;
+  public:
+  void clear_lmequipmentid();
+  const std::string& lmequipmentid() const;
+  void set_lmequipmentid(const std::string& value);
+  void set_lmequipmentid(std::string&& value);
+  void set_lmequipmentid(const char* value);
+  void set_lmequipmentid(const char* value, size_t size);
+  std::string* mutable_lmequipmentid();
+  std::string* release_lmequipmentid();
+  void set_allocated_lmequipmentid(std::string* lmequipmentid);
+  private:
+  const std::string& _internal_lmequipmentid() const;
+  void _internal_set_lmequipmentid(const std::string& value);
+  std::string* _internal_mutable_lmequipmentid();
+  public:
+
+  // optional uint64 id = 1 [default = 0];
+  bool has_id() const;
+  private:
+  bool _internal_has_id() const;
+  public:
+  void clear_id();
+  ::PROTOBUF_NAMESPACE_ID::uint64 id() const;
+  void set_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_id() const;
+  void _internal_set_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // optional bool dataProcessingEnabled = 3 [default = false];
+  bool has_dataprocessingenabled() const;
+  private:
+  bool _internal_has_dataprocessingenabled() const;
+  public:
+  void clear_dataprocessingenabled();
+  bool dataprocessingenabled() const;
+  void set_dataprocessingenabled(bool value);
+  private:
+  bool _internal_dataprocessingenabled() const;
+  void _internal_set_dataprocessingenabled(bool value);
+  public:
+
+  // optional bool receivesData = 4 [default = false];
+  bool has_receivesdata() const;
+  private:
+  bool _internal_has_receivesdata() const;
+  public:
+  void clear_receivesdata();
+  bool receivesdata() const;
+  void set_receivesdata(bool value);
+  private:
+  bool _internal_receivesdata() const;
+  void _internal_set_receivesdata(bool value);
+  public:
+
+  // optional uint32 receivedDataID = 6 [default = 0];
+  bool has_receiveddataid() const;
+  private:
+  bool _internal_has_receiveddataid() const;
+  public:
+  void clear_receiveddataid();
+  ::PROTOBUF_NAMESPACE_ID::uint32 receiveddataid() const;
+  void set_receiveddataid(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_receiveddataid() const;
+  void _internal_set_receiveddataid(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // optional int64 uptime = 5 [default = 0];
+  bool has_uptime() const;
+  private:
+  bool _internal_has_uptime() const;
+  public:
+  void clear_uptime();
+  ::PROTOBUF_NAMESPACE_ID::int64 uptime() const;
+  void set_uptime(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_uptime() const;
+  void _internal_set_uptime(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 lmTime = 7 [default = 0];
+  bool has_lmtime() const;
+  private:
+  bool _internal_has_lmtime() const;
+  public:
+  void clear_lmtime();
+  ::PROTOBUF_NAMESPACE_ID::int64 lmtime() const;
+  void set_lmtime(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_lmtime() const;
+  void _internal_set_lmtime(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional double dataReceivingSpeed = 9 [default = 0];
+  bool has_datareceivingspeed() const;
+  private:
+  bool _internal_has_datareceivingspeed() const;
+  public:
+  void clear_datareceivingspeed();
+  double datareceivingspeed() const;
+  void set_datareceivingspeed(double value);
+  private:
+  double _internal_datareceivingspeed() const;
+  void _internal_set_datareceivingspeed(double value);
+  public:
+
+  // optional int64 receivedDataSize = 10 [default = 0];
+  bool has_receiveddatasize() const;
+  private:
+  bool _internal_has_receiveddatasize() const;
+  public:
+  void clear_receiveddatasize();
+  ::PROTOBUF_NAMESPACE_ID::int64 receiveddatasize() const;
+  void set_receiveddatasize(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_receiveddatasize() const;
+  void _internal_set_receiveddatasize(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 receivedFramesCount = 11 [default = 0];
+  bool has_receivedframescount() const;
+  private:
+  bool _internal_has_receivedframescount() const;
+  public:
+  void clear_receivedframescount();
+  ::PROTOBUF_NAMESPACE_ID::int64 receivedframescount() const;
+  void set_receivedframescount(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_receivedframescount() const;
+  void _internal_set_receivedframescount(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional uint32 rupFrameNumerator = 8 [default = 0];
+  bool has_rupframenumerator() const;
+  private:
+  bool _internal_has_rupframenumerator() const;
+  public:
+  void clear_rupframenumerator();
+  ::PROTOBUF_NAMESPACE_ID::uint32 rupframenumerator() const;
+  void set_rupframenumerator(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_rupframenumerator() const;
+  void _internal_set_rupframenumerator(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // optional int32 signalStatesQueueCurSize = 14 [default = 0];
+  bool has_signalstatesqueuecursize() const;
+  private:
+  bool _internal_has_signalstatesqueuecursize() const;
+  public:
+  void clear_signalstatesqueuecursize();
+  ::PROTOBUF_NAMESPACE_ID::int32 signalstatesqueuecursize() const;
+  void set_signalstatesqueuecursize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_signalstatesqueuecursize() const;
+  void _internal_set_signalstatesqueuecursize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int64 receivedPacketCount = 12 [default = 0];
+  bool has_receivedpacketcount() const;
+  private:
+  bool _internal_has_receivedpacketcount() const;
+  public:
+  void clear_receivedpacketcount();
+  ::PROTOBUF_NAMESPACE_ID::int64 receivedpacketcount() const;
+  void set_receivedpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_receivedpacketcount() const;
+  void _internal_set_receivedpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 lostPacketCount = 13 [default = 0];
+  bool has_lostpacketcount() const;
+  private:
+  bool _internal_has_lostpacketcount() const;
+  public:
+  void clear_lostpacketcount();
+  ::PROTOBUF_NAMESPACE_ID::int64 lostpacketcount() const;
+  void set_lostpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_lostpacketcount() const;
+  void _internal_set_lostpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errorProtocolVersion = 16 [default = 0];
+  bool has_errorprotocolversion() const;
+  private:
+  bool _internal_has_errorprotocolversion() const;
+  public:
+  void clear_errorprotocolversion();
+  ::PROTOBUF_NAMESPACE_ID::int64 errorprotocolversion() const;
+  void set_errorprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errorprotocolversion() const;
+  void _internal_set_errorprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errorFramesQuantity = 17 [default = 0];
+  bool has_errorframesquantity() const;
+  private:
+  bool _internal_has_errorframesquantity() const;
+  public:
+  void clear_errorframesquantity();
+  ::PROTOBUF_NAMESPACE_ID::int64 errorframesquantity() const;
+  void set_errorframesquantity(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errorframesquantity() const;
+  void _internal_set_errorframesquantity(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errorFrameNo = 18 [default = 0];
+  bool has_errorframeno() const;
+  private:
+  bool _internal_has_errorframeno() const;
+  public:
+  void clear_errorframeno();
+  ::PROTOBUF_NAMESPACE_ID::int64 errorframeno() const;
+  void set_errorframeno(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errorframeno() const;
+  void _internal_set_errorframeno(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errorFrameCRC = 19 [default = 0];
+  bool has_errorframecrc() const;
+  private:
+  bool _internal_has_errorframecrc() const;
+  public:
+  void clear_errorframecrc();
+  ::PROTOBUF_NAMESPACE_ID::int64 errorframecrc() const;
+  void set_errorframecrc(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errorframecrc() const;
+  void _internal_set_errorframecrc(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errorDataID = 20 [default = 0];
+  bool has_errordataid() const;
+  private:
+  bool _internal_has_errordataid() const;
+  public:
+  void clear_errordataid();
+  ::PROTOBUF_NAMESPACE_ID::int64 errordataid() const;
+  void set_errordataid(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errordataid() const;
+  void _internal_set_errordataid(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errorDuplicatePlantTime = 21 [default = 0];
+  bool has_errorduplicateplanttime() const;
+  private:
+  bool _internal_has_errorduplicateplanttime() const;
+  public:
+  void clear_errorduplicateplanttime();
+  ::PROTOBUF_NAMESPACE_ID::int64 errorduplicateplanttime() const;
+  void set_errorduplicateplanttime(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errorduplicateplanttime() const;
+  void _internal_set_errorduplicateplanttime(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errorNonmonotonicPlantTime = 22 [default = 0];
+  bool has_errornonmonotonicplanttime() const;
+  private:
+  bool _internal_has_errornonmonotonicplanttime() const;
+  public:
+  void clear_errornonmonotonicplanttime();
+  ::PROTOBUF_NAMESPACE_ID::int64 errornonmonotonicplanttime() const;
+  void set_errornonmonotonicplanttime(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errornonmonotonicplanttime() const;
+  void _internal_set_errornonmonotonicplanttime(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int64 errorPlantTimeFormat = 23 [default = 0];
+  bool has_errorplanttimeformat() const;
+  private:
+  bool _internal_has_errorplanttimeformat() const;
+  public:
+  void clear_errorplanttimeformat();
+  ::PROTOBUF_NAMESPACE_ID::int64 errorplanttimeformat() const;
+  void set_errorplanttimeformat(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_errorplanttimeformat() const;
+  void _internal_set_errorplanttimeformat(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // optional int32 signalStatesQueueCurMaxSize = 15 [default = 0];
+  bool has_signalstatesqueuecurmaxsize() const;
+  private:
+  bool _internal_has_signalstatesqueuecurmaxsize() const;
+  public:
+  void clear_signalstatesqueuecurmaxsize();
+  ::PROTOBUF_NAMESPACE_ID::int32 signalstatesqueuecurmaxsize() const;
+  void set_signalstatesqueuecurmaxsize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_signalstatesqueuecurmaxsize() const;
+  void _internal_set_signalstatesqueuecurmaxsize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:Network.DiagDataSourceState)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr lmequipmentid_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 id_;
+  bool dataprocessingenabled_;
+  bool receivesdata_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 receiveddataid_;
+  ::PROTOBUF_NAMESPACE_ID::int64 uptime_;
+  ::PROTOBUF_NAMESPACE_ID::int64 lmtime_;
+  double datareceivingspeed_;
+  ::PROTOBUF_NAMESPACE_ID::int64 receiveddatasize_;
+  ::PROTOBUF_NAMESPACE_ID::int64 receivedframescount_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 rupframenumerator_;
+  ::PROTOBUF_NAMESPACE_ID::int32 signalstatesqueuecursize_;
+  ::PROTOBUF_NAMESPACE_ID::int64 receivedpacketcount_;
+  ::PROTOBUF_NAMESPACE_ID::int64 lostpacketcount_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errorprotocolversion_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errorframesquantity_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errorframeno_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errorframecrc_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errordataid_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errorduplicateplanttime_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errornonmonotonicplanttime_;
+  ::PROTOBUF_NAMESPACE_ID::int64 errorplanttimeformat_;
+  ::PROTOBUF_NAMESPACE_ID::int32 signalstatesqueuecurmaxsize_;
+  friend struct ::TableStruct_network_2eproto;
+};
+// -------------------------------------------------------------------
+
 class GetAppDataSourcesStatesReply PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Network.GetAppDataSourcesStatesReply) */ {
  public:
@@ -5169,7 +5686,7 @@ class GetAppDataSourcesStatesReply PROTOBUF_FINAL :
                &_GetAppDataSourcesStatesReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    21;
+    22;
 
   friend void swap(GetAppDataSourcesStatesReply& a, GetAppDataSourcesStatesReply& b) {
     a.Swap(&b);
@@ -5338,7 +5855,7 @@ class AppDataServiceState PROTOBUF_FINAL :
                &_AppDataServiceState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    22;
+    23;
 
   friend void swap(AppDataServiceState& a, AppDataServiceState& b) {
     a.Swap(&b);
@@ -5585,7 +6102,7 @@ class SoftwareInfo PROTOBUF_FINAL :
                &_SoftwareInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    23;
+    24;
 
   friend void swap(SoftwareInfo& a, SoftwareInfo& b) {
     a.Swap(&b);
@@ -5995,7 +6512,7 @@ class SecurityLevelReply PROTOBUF_FINAL :
                &_SecurityLevelReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    24;
+    25;
 
   friend void swap(SecurityLevelReply& a, SecurityLevelReply& b) {
     a.Swap(&b);
@@ -6162,7 +6679,7 @@ class IntroduceMyselfRequest PROTOBUF_FINAL :
                &_IntroduceMyselfRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    25;
+    26;
 
   friend void swap(IntroduceMyselfRequest& a, IntroduceMyselfRequest& b) {
     a.Swap(&b);
@@ -6316,7 +6833,7 @@ class IntroduceMyselfReply PROTOBUF_FINAL :
                &_IntroduceMyselfReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    26;
+    27;
 
   friend void swap(IntroduceMyselfReply& a, IntroduceMyselfReply& b) {
     a.Swap(&b);
@@ -6510,7 +7027,7 @@ class GetServiceInfoRequest PROTOBUF_FINAL :
                &_GetServiceInfoRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    27;
+    28;
 
   friend void swap(GetServiceInfoRequest& a, GetServiceInfoRequest& b) {
     a.Swap(&b);
@@ -6641,7 +7158,7 @@ class SessionParams PROTOBUF_FINAL :
                &_SessionParams_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    28;
+    29;
 
   friend void swap(SessionParams& a, SessionParams& b) {
     a.Swap(&b);
@@ -6812,7 +7329,7 @@ class ServiceInfo PROTOBUF_FINAL :
                &_ServiceInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    29;
+    30;
 
   friend void swap(ServiceInfo& a, ServiceInfo& b) {
     a.Swap(&b);
@@ -7053,7 +7570,7 @@ class GetServiceInfoReply PROTOBUF_FINAL :
                &_GetServiceInfoReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    30;
+    31;
 
   friend void swap(GetServiceInfoReply& a, GetServiceInfoReply& b) {
     a.Swap(&b);
@@ -7225,7 +7742,7 @@ class ConfigurationServiceState PROTOBUF_FINAL :
                &_ConfigurationServiceState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    31;
+    32;
 
   friend void swap(ConfigurationServiceState& a, ConfigurationServiceState& b) {
     a.Swap(&b);
@@ -7414,7 +7931,7 @@ class ServiceClientInfo PROTOBUF_FINAL :
                &_ServiceClientInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    32;
+    33;
 
   friend void swap(ServiceClientInfo& a, ServiceClientInfo& b) {
     a.Swap(&b);
@@ -7631,7 +8148,7 @@ class ServiceClients PROTOBUF_FINAL :
                &_ServiceClients_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    33;
+    34;
 
   friend void swap(ServiceClients& a, ServiceClients& b) {
     a.Swap(&b);
@@ -7784,7 +8301,7 @@ class BuildInfo PROTOBUF_FINAL :
                &_BuildInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    34;
+    35;
 
   friend void swap(BuildInfo& a, BuildInfo& b) {
     a.Swap(&b);
@@ -8032,7 +8549,7 @@ class ConfigurationServiceSettings PROTOBUF_FINAL :
                &_ConfigurationServiceSettings_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    35;
+    36;
 
   friend void swap(ConfigurationServiceSettings& a, ConfigurationServiceSettings& b) {
     a.Swap(&b);
@@ -8235,7 +8752,7 @@ class ServiceSettings PROTOBUF_FINAL :
                &_ServiceSettings_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    36;
+    37;
 
   friend void swap(ServiceSettings& a, ServiceSettings& b) {
     a.Swap(&b);
@@ -8438,7 +8955,7 @@ class GetTuningSourcesInfo PROTOBUF_FINAL :
                &_GetTuningSourcesInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    37;
+    38;
 
   friend void swap(GetTuningSourcesInfo& a, GetTuningSourcesInfo& b) {
     a.Swap(&b);
@@ -8569,7 +9086,7 @@ class GetTuningSourcesInfoReply PROTOBUF_FINAL :
                &_GetTuningSourcesInfoReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    38;
+    39;
 
   friend void swap(GetTuningSourcesInfoReply& a, GetTuningSourcesInfoReply& b) {
     a.Swap(&b);
@@ -8797,7 +9314,7 @@ class GetTuningSourcesStates PROTOBUF_FINAL :
                &_GetTuningSourcesStates_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    39;
+    40;
 
   friend void swap(GetTuningSourcesStates& a, GetTuningSourcesStates& b) {
     a.Swap(&b);
@@ -8928,7 +9445,7 @@ class SignalsAssociatedToTuningSource PROTOBUF_FINAL :
                &_SignalsAssociatedToTuningSource_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    40;
+    41;
 
   friend void swap(SignalsAssociatedToTuningSource& a, SignalsAssociatedToTuningSource& b) {
     a.Swap(&b);
@@ -9101,7 +9618,7 @@ class TuningSourceFilling PROTOBUF_FINAL :
                &_TuningSourceFilling_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    41;
+    42;
 
   friend void swap(TuningSourceFilling& a, TuningSourceFilling& b) {
     a.Swap(&b);
@@ -9270,7 +9787,7 @@ class TuningSourceState PROTOBUF_FINAL :
                &_TuningSourceState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    42;
+    43;
 
   friend void swap(TuningSourceState& a, TuningSourceState& b) {
     a.Swap(&b);
@@ -10161,7 +10678,7 @@ class GetTuningSourcesStatesReply PROTOBUF_FINAL :
                &_GetTuningSourcesStatesReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    43;
+    44;
 
   friend void swap(GetTuningSourcesStatesReply& a, GetTuningSourcesStatesReply& b) {
     a.Swap(&b);
@@ -10389,7 +10906,7 @@ class ChangeConrolledTuningSourceRequest PROTOBUF_FINAL :
                &_ChangeConrolledTuningSourceRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    44;
+    45;
 
   friend void swap(ChangeConrolledTuningSourceRequest& a, ChangeConrolledTuningSourceRequest& b) {
     a.Swap(&b);
@@ -10575,7 +11092,7 @@ class ChangeConrolledTuningSourceReply PROTOBUF_FINAL :
                &_ChangeConrolledTuningSourceReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    45;
+    46;
 
   friend void swap(ChangeConrolledTuningSourceReply& a, ChangeConrolledTuningSourceReply& b) {
     a.Swap(&b);
@@ -10761,7 +11278,7 @@ class TuningSignalsRead PROTOBUF_FINAL :
                &_TuningSignalsRead_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    46;
+    47;
 
   friend void swap(TuningSignalsRead& a, TuningSignalsRead& b) {
     a.Swap(&b);
@@ -10918,7 +11435,7 @@ class TuningSignalState PROTOBUF_FINAL :
                &_TuningSignalState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    47;
+    48;
 
   friend void swap(TuningSignalState& a, TuningSignalState& b) {
     a.Swap(&b);
@@ -11337,7 +11854,7 @@ class TuningSignalsReadReply PROTOBUF_FINAL :
                &_TuningSignalsReadReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    48;
+    49;
 
   friend void swap(TuningSignalsReadReply& a, TuningSignalsReadReply& b) {
     a.Swap(&b);
@@ -11521,7 +12038,7 @@ class GetTuningSignalsStateChangesRequest PROTOBUF_FINAL :
                &_GetTuningSignalsStateChangesRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    49;
+    50;
 
   friend void swap(GetTuningSignalsStateChangesRequest& a, GetTuningSignalsStateChangesRequest& b) {
     a.Swap(&b);
@@ -11652,7 +12169,7 @@ class GetTuningSignalsStateChangesReply PROTOBUF_FINAL :
                &_GetTuningSignalsStateChangesReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    50;
+    51;
 
   friend void swap(GetTuningSignalsStateChangesReply& a, GetTuningSignalsStateChangesReply& b) {
     a.Swap(&b);
@@ -11836,7 +12353,7 @@ class TuningWriteCommand PROTOBUF_FINAL :
                &_TuningWriteCommand_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    51;
+    52;
 
   friend void swap(TuningWriteCommand& a, TuningWriteCommand& b) {
     a.Swap(&b);
@@ -12005,7 +12522,7 @@ class TuningSignalsWrite PROTOBUF_FINAL :
                &_TuningSignalsWrite_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    52;
+    53;
 
   friend void swap(TuningSignalsWrite& a, TuningSignalsWrite& b) {
     a.Swap(&b);
@@ -12196,7 +12713,7 @@ class TuningSignalWriteResult PROTOBUF_FINAL :
                &_TuningSignalWriteResult_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    53;
+    54;
 
   friend void swap(TuningSignalWriteResult& a, TuningSignalWriteResult& b) {
     a.Swap(&b);
@@ -12360,7 +12877,7 @@ class TuningSignalsWriteReply PROTOBUF_FINAL :
                &_TuningSignalsWriteReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    54;
+    55;
 
   friend void swap(TuningSignalsWriteReply& a, TuningSignalsWriteReply& b) {
     a.Swap(&b);
@@ -12529,7 +13046,7 @@ class TuningSignalsApply PROTOBUF_FINAL :
                &_TuningSignalsApply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    55;
+    56;
 
   friend void swap(TuningSignalsApply& a, TuningSignalsApply& b) {
     a.Swap(&b);
@@ -12660,7 +13177,7 @@ class TuningSignalsApplyReply PROTOBUF_FINAL :
                &_TuningSignalsApplyReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    56;
+    57;
 
   friend void swap(TuningSignalsApplyReply& a, TuningSignalsApplyReply& b) {
     a.Swap(&b);
@@ -12809,7 +13326,7 @@ class DataSourceWrite PROTOBUF_FINAL :
                &_DataSourceWrite_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    57;
+    58;
 
   friend void swap(DataSourceWrite& a, DataSourceWrite& b) {
     a.Swap(&b);
@@ -12980,7 +13497,7 @@ class DataSourceWriteReply PROTOBUF_FINAL :
                &_DataSourceWriteReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    58;
+    59;
 
   friend void swap(DataSourceWriteReply& a, DataSourceWriteReply& b) {
     a.Swap(&b);
@@ -13129,7 +13646,7 @@ class PacketSourceExit PROTOBUF_FINAL :
                &_PacketSourceExit_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    59;
+    60;
 
   friend void swap(PacketSourceExit& a, PacketSourceExit& b) {
     a.Swap(&b);
@@ -13260,7 +13777,7 @@ class PacketSourceExitReply PROTOBUF_FINAL :
                &_PacketSourceExitReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    60;
+    61;
 
   friend void swap(PacketSourceExitReply& a, PacketSourceExitReply& b) {
     a.Swap(&b);
@@ -13409,7 +13926,7 @@ class SaveAppSignalsStatesToArchiveRequest PROTOBUF_FINAL :
                &_SaveAppSignalsStatesToArchiveRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    61;
+    62;
 
   friend void swap(SaveAppSignalsStatesToArchiveRequest& a, SaveAppSignalsStatesToArchiveRequest& b) {
     a.Swap(&b);
@@ -13585,7 +14102,7 @@ class SaveAppSignalsStatesToArchiveReply PROTOBUF_FINAL :
                &_SaveAppSignalsStatesToArchiveReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    62;
+    63;
 
   friend void swap(SaveAppSignalsStatesToArchiveReply& a, SaveAppSignalsStatesToArchiveReply& b) {
     a.Swap(&b);
@@ -13749,7 +14266,7 @@ class GetAppSignalStatesFromArchiveStartRequest PROTOBUF_FINAL :
                &_GetAppSignalStatesFromArchiveStartRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    63;
+    64;
 
   friend void swap(GetAppSignalStatesFromArchiveStartRequest& a, GetAppSignalStatesFromArchiveStartRequest& b) {
     a.Swap(&b);
@@ -13989,7 +14506,7 @@ class GetAppSignalStatesFromArchiveStartReply PROTOBUF_FINAL :
                &_GetAppSignalStatesFromArchiveStartReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    64;
+    65;
 
   friend void swap(GetAppSignalStatesFromArchiveStartReply& a, GetAppSignalStatesFromArchiveStartReply& b) {
     a.Swap(&b);
@@ -14190,7 +14707,7 @@ class GetAppSignalStatesFromArchiveNextRequest PROTOBUF_FINAL :
                &_GetAppSignalStatesFromArchiveNextRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    65;
+    66;
 
   friend void swap(GetAppSignalStatesFromArchiveNextRequest& a, GetAppSignalStatesFromArchiveNextRequest& b) {
     a.Swap(&b);
@@ -14339,7 +14856,7 @@ class GetAppSignalStatesFromArchiveNextReply PROTOBUF_FINAL :
                &_GetAppSignalStatesFromArchiveNextReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    66;
+    67;
 
   friend void swap(GetAppSignalStatesFromArchiveNextReply& a, GetAppSignalStatesFromArchiveNextReply& b) {
     a.Swap(&b);
@@ -14635,7 +15152,7 @@ class GetAppSignalStatesFromArchiveCancelRequest PROTOBUF_FINAL :
                &_GetAppSignalStatesFromArchiveCancelRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    67;
+    68;
 
   friend void swap(GetAppSignalStatesFromArchiveCancelRequest& a, GetAppSignalStatesFromArchiveCancelRequest& b) {
     a.Swap(&b);
@@ -14784,7 +15301,7 @@ class GetAppSignalStatesFromArchiveCancelReply PROTOBUF_FINAL :
                &_GetAppSignalStatesFromArchiveCancelReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    68;
+    69;
 
   friend void swap(GetAppSignalStatesFromArchiveCancelReply& a, GetAppSignalStatesFromArchiveCancelReply& b) {
     a.Swap(&b);
@@ -14970,7 +15487,7 @@ class RtTrendsManagementRequest PROTOBUF_FINAL :
                &_RtTrendsManagementRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    69;
+    70;
 
   friend void swap(RtTrendsManagementRequest& a, RtTrendsManagementRequest& b) {
     a.Swap(&b);
@@ -15189,7 +15706,7 @@ class RtTrendsManagementReply PROTOBUF_FINAL :
                &_RtTrendsManagementReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    70;
+    71;
 
   friend void swap(RtTrendsManagementReply& a, RtTrendsManagementReply& b) {
     a.Swap(&b);
@@ -15399,7 +15916,7 @@ class RtTrendsGetStateChangesRequest PROTOBUF_FINAL :
                &_RtTrendsGetStateChangesRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    71;
+    72;
 
   friend void swap(RtTrendsGetStateChangesRequest& a, RtTrendsGetStateChangesRequest& b) {
     a.Swap(&b);
@@ -15530,7 +16047,7 @@ class RtTrendsGetStateChangesReply PROTOBUF_FINAL :
                &_RtTrendsGetStateChangesReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    72;
+    73;
 
   friend void swap(RtTrendsGetStateChangesReply& a, RtTrendsGetStateChangesReply& b) {
     a.Swap(&b);
@@ -15721,7 +16238,7 @@ class GetFileReply PROTOBUF_FINAL :
                &_GetFileReply_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    73;
+    74;
 
   friend void swap(GetFileReply& a, GetFileReply& b) {
     a.Swap(&b);
@@ -15920,6 +16437,745 @@ class GetFileReply PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::int32 totalparts_;
   ::PROTOBUF_NAMESPACE_ID::int32 currentpart_;
   ::PROTOBUF_NAMESPACE_ID::int32 currentpartsize_;
+  friend struct ::TableStruct_network_2eproto;
+};
+// -------------------------------------------------------------------
+
+class AcquiredDiagObject PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Network.AcquiredDiagObject) */ {
+ public:
+  inline AcquiredDiagObject() : AcquiredDiagObject(nullptr) {}
+  virtual ~AcquiredDiagObject();
+  explicit constexpr AcquiredDiagObject(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  AcquiredDiagObject(const AcquiredDiagObject& from);
+  AcquiredDiagObject(AcquiredDiagObject&& from) noexcept
+    : AcquiredDiagObject() {
+    *this = ::std::move(from);
+  }
+
+  inline AcquiredDiagObject& operator=(const AcquiredDiagObject& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline AcquiredDiagObject& operator=(AcquiredDiagObject&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
+    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
+  }
+  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
+    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const AcquiredDiagObject& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const AcquiredDiagObject* internal_default_instance() {
+    return reinterpret_cast<const AcquiredDiagObject*>(
+               &_AcquiredDiagObject_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    75;
+
+  friend void swap(AcquiredDiagObject& a, AcquiredDiagObject& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(AcquiredDiagObject* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(AcquiredDiagObject* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline AcquiredDiagObject* New() const final {
+    return CreateMaybeMessage<AcquiredDiagObject>(nullptr);
+  }
+
+  AcquiredDiagObject* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<AcquiredDiagObject>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const AcquiredDiagObject& from);
+  void MergeFrom(const AcquiredDiagObject& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(AcquiredDiagObject* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Network.AcquiredDiagObject";
+  }
+  protected:
+  explicit AcquiredDiagObject(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_network_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kEquipmentIDFieldNumber = 1,
+    kParentHashFieldNumber = 3,
+    kDeviceTypeFieldNumber = 2,
+  };
+  // required string equipmentID = 1;
+  bool has_equipmentid() const;
+  private:
+  bool _internal_has_equipmentid() const;
+  public:
+  void clear_equipmentid();
+  const std::string& equipmentid() const;
+  void set_equipmentid(const std::string& value);
+  void set_equipmentid(std::string&& value);
+  void set_equipmentid(const char* value);
+  void set_equipmentid(const char* value, size_t size);
+  std::string* mutable_equipmentid();
+  std::string* release_equipmentid();
+  void set_allocated_equipmentid(std::string* equipmentid);
+  private:
+  const std::string& _internal_equipmentid() const;
+  void _internal_set_equipmentid(const std::string& value);
+  std::string* _internal_mutable_equipmentid();
+  public:
+
+  // required uint64 parentHash = 3 [default = 0];
+  bool has_parenthash() const;
+  private:
+  bool _internal_has_parenthash() const;
+  public:
+  void clear_parenthash();
+  ::PROTOBUF_NAMESPACE_ID::uint64 parenthash() const;
+  void set_parenthash(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_parenthash() const;
+  void _internal_set_parenthash(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // required int32 deviceType = 2 [default = 0];
+  bool has_devicetype() const;
+  private:
+  bool _internal_has_devicetype() const;
+  public:
+  void clear_devicetype();
+  ::PROTOBUF_NAMESPACE_ID::int32 devicetype() const;
+  void set_devicetype(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_devicetype() const;
+  void _internal_set_devicetype(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:Network.AcquiredDiagObject)
+ private:
+  class _Internal;
+
+  // helper for ByteSizeLong()
+  size_t RequiredFieldsByteSizeFallback() const;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr equipmentid_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 parenthash_;
+  ::PROTOBUF_NAMESPACE_ID::int32 devicetype_;
+  friend struct ::TableStruct_network_2eproto;
+};
+// -------------------------------------------------------------------
+
+class AcquiredDiagSignal PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Network.AcquiredDiagSignal) */ {
+ public:
+  inline AcquiredDiagSignal() : AcquiredDiagSignal(nullptr) {}
+  virtual ~AcquiredDiagSignal();
+  explicit constexpr AcquiredDiagSignal(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  AcquiredDiagSignal(const AcquiredDiagSignal& from);
+  AcquiredDiagSignal(AcquiredDiagSignal&& from) noexcept
+    : AcquiredDiagSignal() {
+    *this = ::std::move(from);
+  }
+
+  inline AcquiredDiagSignal& operator=(const AcquiredDiagSignal& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline AcquiredDiagSignal& operator=(AcquiredDiagSignal&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
+    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
+  }
+  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
+    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const AcquiredDiagSignal& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const AcquiredDiagSignal* internal_default_instance() {
+    return reinterpret_cast<const AcquiredDiagSignal*>(
+               &_AcquiredDiagSignal_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    76;
+
+  friend void swap(AcquiredDiagSignal& a, AcquiredDiagSignal& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(AcquiredDiagSignal* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(AcquiredDiagSignal* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline AcquiredDiagSignal* New() const final {
+    return CreateMaybeMessage<AcquiredDiagSignal>(nullptr);
+  }
+
+  AcquiredDiagSignal* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<AcquiredDiagSignal>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const AcquiredDiagSignal& from);
+  void MergeFrom(const AcquiredDiagSignal& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(AcquiredDiagSignal* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Network.AcquiredDiagSignal";
+  }
+  protected:
+  explicit AcquiredDiagSignal(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_network_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kEquipmentIdHashFieldNumber = 1,
+    kParentHashFieldNumber = 2,
+    kDiagSignalTypeIdHashFieldNumber = 4,
+    kDiagLevelFieldNumber = 3,
+    kValueSizeBitFieldNumber = 8,
+    kReflectedSignalIdHashFieldNumber = 6,
+    kValiditySignalIdHashFieldNumber = 7,
+    kDiscreteContainerSizeFieldNumber = 9,
+    kIsReflectionFieldNumber = 5,
+    kLogChangesFieldNumber = 10,
+    kArchiveFieldNumber = 11,
+    kReservedFieldNumber = 12,
+    kCoarseApertureFieldNumber = 14,
+    kApertureTypeFieldNumber = 13,
+    kAbsAddrBitFieldNumber = 16,
+    kFineApertureFieldNumber = 15,
+  };
+  // required uint64 equipmentIdHash = 1 [default = 0];
+  bool has_equipmentidhash() const;
+  private:
+  bool _internal_has_equipmentidhash() const;
+  public:
+  void clear_equipmentidhash();
+  ::PROTOBUF_NAMESPACE_ID::uint64 equipmentidhash() const;
+  void set_equipmentidhash(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_equipmentidhash() const;
+  void _internal_set_equipmentidhash(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // required uint64 parentHash = 2 [default = 0];
+  bool has_parenthash() const;
+  private:
+  bool _internal_has_parenthash() const;
+  public:
+  void clear_parenthash();
+  ::PROTOBUF_NAMESPACE_ID::uint64 parenthash() const;
+  void set_parenthash(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_parenthash() const;
+  void _internal_set_parenthash(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // required uint64 diagSignalTypeIdHash = 4 [default = 0];
+  bool has_diagsignaltypeidhash() const;
+  private:
+  bool _internal_has_diagsignaltypeidhash() const;
+  public:
+  void clear_diagsignaltypeidhash();
+  ::PROTOBUF_NAMESPACE_ID::uint64 diagsignaltypeidhash() const;
+  void set_diagsignaltypeidhash(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_diagsignaltypeidhash() const;
+  void _internal_set_diagsignaltypeidhash(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // required int32 diagLevel = 3 [default = 0];
+  bool has_diaglevel() const;
+  private:
+  bool _internal_has_diaglevel() const;
+  public:
+  void clear_diaglevel();
+  ::PROTOBUF_NAMESPACE_ID::int32 diaglevel() const;
+  void set_diaglevel(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_diaglevel() const;
+  void _internal_set_diaglevel(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int32 valueSizeBit = 8 [default = 0];
+  bool has_valuesizebit() const;
+  private:
+  bool _internal_has_valuesizebit() const;
+  public:
+  void clear_valuesizebit();
+  ::PROTOBUF_NAMESPACE_ID::int32 valuesizebit() const;
+  void set_valuesizebit(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_valuesizebit() const;
+  void _internal_set_valuesizebit(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional uint64 reflectedSignalIdHash = 6 [default = 0];
+  bool has_reflectedsignalidhash() const;
+  private:
+  bool _internal_has_reflectedsignalidhash() const;
+  public:
+  void clear_reflectedsignalidhash();
+  ::PROTOBUF_NAMESPACE_ID::uint64 reflectedsignalidhash() const;
+  void set_reflectedsignalidhash(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_reflectedsignalidhash() const;
+  void _internal_set_reflectedsignalidhash(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // optional uint64 validitySignalIdHash = 7 [default = 0];
+  bool has_validitysignalidhash() const;
+  private:
+  bool _internal_has_validitysignalidhash() const;
+  public:
+  void clear_validitysignalidhash();
+  ::PROTOBUF_NAMESPACE_ID::uint64 validitysignalidhash() const;
+  void set_validitysignalidhash(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_validitysignalidhash() const;
+  void _internal_set_validitysignalidhash(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // optional int32 discreteContainerSize = 9 [default = 0];
+  bool has_discretecontainersize() const;
+  private:
+  bool _internal_has_discretecontainersize() const;
+  public:
+  void clear_discretecontainersize();
+  ::PROTOBUF_NAMESPACE_ID::int32 discretecontainersize() const;
+  void set_discretecontainersize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_discretecontainersize() const;
+  void _internal_set_discretecontainersize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional bool isReflection = 5 [default = false];
+  bool has_isreflection() const;
+  private:
+  bool _internal_has_isreflection() const;
+  public:
+  void clear_isreflection();
+  bool isreflection() const;
+  void set_isreflection(bool value);
+  private:
+  bool _internal_isreflection() const;
+  void _internal_set_isreflection(bool value);
+  public:
+
+  // optional bool logChanges = 10 [default = false];
+  bool has_logchanges() const;
+  private:
+  bool _internal_has_logchanges() const;
+  public:
+  void clear_logchanges();
+  bool logchanges() const;
+  void set_logchanges(bool value);
+  private:
+  bool _internal_logchanges() const;
+  void _internal_set_logchanges(bool value);
+  public:
+
+  // optional bool archive = 11 [default = false];
+  bool has_archive() const;
+  private:
+  bool _internal_has_archive() const;
+  public:
+  void clear_archive();
+  bool archive() const;
+  void set_archive(bool value);
+  private:
+  bool _internal_archive() const;
+  void _internal_set_archive(bool value);
+  public:
+
+  // optional bool reserved = 12 [default = false];
+  bool has_reserved() const;
+  private:
+  bool _internal_has_reserved() const;
+  public:
+  void clear_reserved();
+  bool reserved() const;
+  void set_reserved(bool value);
+  private:
+  bool _internal_reserved() const;
+  void _internal_set_reserved(bool value);
+  public:
+
+  // optional double coarseAperture = 14 [default = 0];
+  bool has_coarseaperture() const;
+  private:
+  bool _internal_has_coarseaperture() const;
+  public:
+  void clear_coarseaperture();
+  double coarseaperture() const;
+  void set_coarseaperture(double value);
+  private:
+  double _internal_coarseaperture() const;
+  void _internal_set_coarseaperture(double value);
+  public:
+
+  // optional int32 apertureType = 13 [default = 0];
+  bool has_aperturetype() const;
+  private:
+  bool _internal_has_aperturetype() const;
+  public:
+  void clear_aperturetype();
+  ::PROTOBUF_NAMESPACE_ID::int32 aperturetype() const;
+  void set_aperturetype(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_aperturetype() const;
+  void _internal_set_aperturetype(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional int32 absAddrBit = 16 [default = 0];
+  bool has_absaddrbit() const;
+  private:
+  bool _internal_has_absaddrbit() const;
+  public:
+  void clear_absaddrbit();
+  ::PROTOBUF_NAMESPACE_ID::int32 absaddrbit() const;
+  void set_absaddrbit(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_absaddrbit() const;
+  void _internal_set_absaddrbit(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // optional double fineAperture = 15 [default = 0];
+  bool has_fineaperture() const;
+  private:
+  bool _internal_has_fineaperture() const;
+  public:
+  void clear_fineaperture();
+  double fineaperture() const;
+  void set_fineaperture(double value);
+  private:
+  double _internal_fineaperture() const;
+  void _internal_set_fineaperture(double value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:Network.AcquiredDiagSignal)
+ private:
+  class _Internal;
+
+  // helper for ByteSizeLong()
+  size_t RequiredFieldsByteSizeFallback() const;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 equipmentidhash_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 parenthash_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 diagsignaltypeidhash_;
+  ::PROTOBUF_NAMESPACE_ID::int32 diaglevel_;
+  ::PROTOBUF_NAMESPACE_ID::int32 valuesizebit_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 reflectedsignalidhash_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 validitysignalidhash_;
+  ::PROTOBUF_NAMESPACE_ID::int32 discretecontainersize_;
+  bool isreflection_;
+  bool logchanges_;
+  bool archive_;
+  bool reserved_;
+  double coarseaperture_;
+  ::PROTOBUF_NAMESPACE_ID::int32 aperturetype_;
+  ::PROTOBUF_NAMESPACE_ID::int32 absaddrbit_;
+  double fineaperture_;
+  friend struct ::TableStruct_network_2eproto;
+};
+// -------------------------------------------------------------------
+
+class AcquiredDiagSignals PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Network.AcquiredDiagSignals) */ {
+ public:
+  inline AcquiredDiagSignals() : AcquiredDiagSignals(nullptr) {}
+  virtual ~AcquiredDiagSignals();
+  explicit constexpr AcquiredDiagSignals(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  AcquiredDiagSignals(const AcquiredDiagSignals& from);
+  AcquiredDiagSignals(AcquiredDiagSignals&& from) noexcept
+    : AcquiredDiagSignals() {
+    *this = ::std::move(from);
+  }
+
+  inline AcquiredDiagSignals& operator=(const AcquiredDiagSignals& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline AcquiredDiagSignals& operator=(AcquiredDiagSignals&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
+    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
+  }
+  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
+    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const AcquiredDiagSignals& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const AcquiredDiagSignals* internal_default_instance() {
+    return reinterpret_cast<const AcquiredDiagSignals*>(
+               &_AcquiredDiagSignals_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    77;
+
+  friend void swap(AcquiredDiagSignals& a, AcquiredDiagSignals& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(AcquiredDiagSignals* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(AcquiredDiagSignals* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline AcquiredDiagSignals* New() const final {
+    return CreateMaybeMessage<AcquiredDiagSignals>(nullptr);
+  }
+
+  AcquiredDiagSignals* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<AcquiredDiagSignals>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const AcquiredDiagSignals& from);
+  void MergeFrom(const AcquiredDiagSignals& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(AcquiredDiagSignals* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Network.AcquiredDiagSignals";
+  }
+  protected:
+  explicit AcquiredDiagSignals(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_network_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kDiagSignalsFieldNumber = 1,
+    kDiagObjectsFieldNumber = 2,
+  };
+  // repeated .Network.AcquiredDiagSignal diagSignals = 1;
+  int diagsignals_size() const;
+  private:
+  int _internal_diagsignals_size() const;
+  public:
+  void clear_diagsignals();
+  ::Network::AcquiredDiagSignal* mutable_diagsignals(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Network::AcquiredDiagSignal >*
+      mutable_diagsignals();
+  private:
+  const ::Network::AcquiredDiagSignal& _internal_diagsignals(int index) const;
+  ::Network::AcquiredDiagSignal* _internal_add_diagsignals();
+  public:
+  const ::Network::AcquiredDiagSignal& diagsignals(int index) const;
+  ::Network::AcquiredDiagSignal* add_diagsignals();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Network::AcquiredDiagSignal >&
+      diagsignals() const;
+
+  // repeated .Network.AcquiredDiagObject diagObjects = 2;
+  int diagobjects_size() const;
+  private:
+  int _internal_diagobjects_size() const;
+  public:
+  void clear_diagobjects();
+  ::Network::AcquiredDiagObject* mutable_diagobjects(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Network::AcquiredDiagObject >*
+      mutable_diagobjects();
+  private:
+  const ::Network::AcquiredDiagObject& _internal_diagobjects(int index) const;
+  ::Network::AcquiredDiagObject* _internal_add_diagobjects();
+  public:
+  const ::Network::AcquiredDiagObject& diagobjects(int index) const;
+  ::Network::AcquiredDiagObject* add_diagobjects();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Network::AcquiredDiagObject >&
+      diagobjects() const;
+
+  // @@protoc_insertion_point(class_scope:Network.AcquiredDiagSignals)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Network::AcquiredDiagSignal > diagsignals_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Network::AcquiredDiagObject > diagobjects_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_network_2eproto;
 };
 // ===================================================================
@@ -17231,7 +18487,7 @@ inline void LanControllerInfo::set_allocated_equipmentid(std::string* equipmenti
 
 // optional int32 controllerNo = 2 [default = -1];
 inline bool LanControllerInfo::_internal_has_controllerno() const {
-  bool value = (_has_bits_[0] & 0x80000000u) != 0;
+  bool value = (_has_bits_[1] & 0x00000001u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_controllerno() const {
@@ -17239,7 +18495,7 @@ inline bool LanControllerInfo::has_controllerno() const {
 }
 inline void LanControllerInfo::clear_controllerno() {
   controllerno_ = -1;
-  _has_bits_[0] &= ~0x80000000u;
+  _has_bits_[1] &= ~0x00000001u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::_internal_controllerno() const {
   return controllerno_;
@@ -17249,7 +18505,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::controllerno() const {
   return _internal_controllerno();
 }
 inline void LanControllerInfo::_internal_set_controllerno(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x80000000u;
+  _has_bits_[1] |= 0x00000001u;
   controllerno_ = value;
 }
 inline void LanControllerInfo::set_controllerno(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -17287,7 +18543,7 @@ inline void LanControllerInfo::set_lancontrollertype(::PROTOBUF_NAMESPACE_ID::in
 
 // optional bool tuningEnable = 10 [default = false];
 inline bool LanControllerInfo::_internal_has_tuningenable() const {
-  bool value = (_has_bits_[0] & 0x00040000u) != 0;
+  bool value = (_has_bits_[0] & 0x00080000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_tuningenable() const {
@@ -17295,7 +18551,7 @@ inline bool LanControllerInfo::has_tuningenable() const {
 }
 inline void LanControllerInfo::clear_tuningenable() {
   tuningenable_ = false;
-  _has_bits_[0] &= ~0x00040000u;
+  _has_bits_[0] &= ~0x00080000u;
 }
 inline bool LanControllerInfo::_internal_tuningenable() const {
   return tuningenable_;
@@ -17305,7 +18561,7 @@ inline bool LanControllerInfo::tuningenable() const {
   return _internal_tuningenable();
 }
 inline void LanControllerInfo::_internal_set_tuningenable(bool value) {
-  _has_bits_[0] |= 0x00040000u;
+  _has_bits_[0] |= 0x00080000u;
   tuningenable_ = value;
 }
 inline void LanControllerInfo::set_tuningenable(bool value) {
@@ -17562,7 +18818,7 @@ inline void LanControllerInfo::set_allocated_tuningserviceip(std::string* tuning
 
 // optional int32 tuningServicePort = 15 [default = 0];
 inline bool LanControllerInfo::_internal_has_tuningserviceport() const {
-  bool value = (_has_bits_[0] & 0x00010000u) != 0;
+  bool value = (_has_bits_[0] & 0x00008000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_tuningserviceport() const {
@@ -17570,7 +18826,7 @@ inline bool LanControllerInfo::has_tuningserviceport() const {
 }
 inline void LanControllerInfo::clear_tuningserviceport() {
   tuningserviceport_ = 0;
-  _has_bits_[0] &= ~0x00010000u;
+  _has_bits_[0] &= ~0x00008000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::_internal_tuningserviceport() const {
   return tuningserviceport_;
@@ -17580,7 +18836,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::tuningserviceport() con
   return _internal_tuningserviceport();
 }
 inline void LanControllerInfo::_internal_set_tuningserviceport(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00010000u;
+  _has_bits_[0] |= 0x00008000u;
   tuningserviceport_ = value;
 }
 inline void LanControllerInfo::set_tuningserviceport(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -17661,37 +18917,65 @@ inline void LanControllerInfo::set_allocated_tuningservicenetmask(std::string* t
   // @@protoc_insertion_point(field_set_allocated:Network.LanControllerInfo.tuningServiceNetmask)
 }
 
-// optional uint64 tuningdatauid = 17;
-inline bool LanControllerInfo::_internal_has_tuningdatauid() const {
-  bool value = (_has_bits_[0] & 0x00008000u) != 0;
+// optional uint32 rupTuningDataUID = 17 [default = 0];
+inline bool LanControllerInfo::_internal_has_ruptuningdatauid() const {
+  bool value = (_has_bits_[0] & 0x00010000u) != 0;
   return value;
 }
-inline bool LanControllerInfo::has_tuningdatauid() const {
-  return _internal_has_tuningdatauid();
+inline bool LanControllerInfo::has_ruptuningdatauid() const {
+  return _internal_has_ruptuningdatauid();
 }
-inline void LanControllerInfo::clear_tuningdatauid() {
-  tuningdatauid_ = PROTOBUF_ULONGLONG(0);
-  _has_bits_[0] &= ~0x00008000u;
+inline void LanControllerInfo::clear_ruptuningdatauid() {
+  ruptuningdatauid_ = 0u;
+  _has_bits_[0] &= ~0x00010000u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint64 LanControllerInfo::_internal_tuningdatauid() const {
-  return tuningdatauid_;
+inline ::PROTOBUF_NAMESPACE_ID::uint32 LanControllerInfo::_internal_ruptuningdatauid() const {
+  return ruptuningdatauid_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint64 LanControllerInfo::tuningdatauid() const {
-  // @@protoc_insertion_point(field_get:Network.LanControllerInfo.tuningdatauid)
-  return _internal_tuningdatauid();
+inline ::PROTOBUF_NAMESPACE_ID::uint32 LanControllerInfo::ruptuningdatauid() const {
+  // @@protoc_insertion_point(field_get:Network.LanControllerInfo.rupTuningDataUID)
+  return _internal_ruptuningdatauid();
 }
-inline void LanControllerInfo::_internal_set_tuningdatauid(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _has_bits_[0] |= 0x00008000u;
-  tuningdatauid_ = value;
+inline void LanControllerInfo::_internal_set_ruptuningdatauid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _has_bits_[0] |= 0x00010000u;
+  ruptuningdatauid_ = value;
 }
-inline void LanControllerInfo::set_tuningdatauid(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_tuningdatauid(value);
-  // @@protoc_insertion_point(field_set:Network.LanControllerInfo.tuningdatauid)
+inline void LanControllerInfo::set_ruptuningdatauid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_ruptuningdatauid(value);
+  // @@protoc_insertion_point(field_set:Network.LanControllerInfo.rupTuningDataUID)
+}
+
+// optional uint64 fotipTuningDataUID = 18 [default = 0];
+inline bool LanControllerInfo::_internal_has_fotiptuningdatauid() const {
+  bool value = (_has_bits_[0] & 0x00020000u) != 0;
+  return value;
+}
+inline bool LanControllerInfo::has_fotiptuningdatauid() const {
+  return _internal_has_fotiptuningdatauid();
+}
+inline void LanControllerInfo::clear_fotiptuningdatauid() {
+  fotiptuningdatauid_ = PROTOBUF_ULONGLONG(0);
+  _has_bits_[0] &= ~0x00020000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 LanControllerInfo::_internal_fotiptuningdatauid() const {
+  return fotiptuningdatauid_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 LanControllerInfo::fotiptuningdatauid() const {
+  // @@protoc_insertion_point(field_get:Network.LanControllerInfo.fotipTuningDataUID)
+  return _internal_fotiptuningdatauid();
+}
+inline void LanControllerInfo::_internal_set_fotiptuningdatauid(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _has_bits_[0] |= 0x00020000u;
+  fotiptuningdatauid_ = value;
+}
+inline void LanControllerInfo::set_fotiptuningdatauid(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_fotiptuningdatauid(value);
+  // @@protoc_insertion_point(field_set:Network.LanControllerInfo.fotipTuningDataUID)
 }
 
 // optional bool appDataEnable = 20 [default = false];
 inline bool LanControllerInfo::_internal_has_appdataenable() const {
-  bool value = (_has_bits_[0] & 0x00080000u) != 0;
+  bool value = (_has_bits_[0] & 0x00100000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_appdataenable() const {
@@ -17699,7 +18983,7 @@ inline bool LanControllerInfo::has_appdataenable() const {
 }
 inline void LanControllerInfo::clear_appdataenable() {
   appdataenable_ = false;
-  _has_bits_[0] &= ~0x00080000u;
+  _has_bits_[0] &= ~0x00100000u;
 }
 inline bool LanControllerInfo::_internal_appdataenable() const {
   return appdataenable_;
@@ -17709,7 +18993,7 @@ inline bool LanControllerInfo::appdataenable() const {
   return _internal_appdataenable();
 }
 inline void LanControllerInfo::_internal_set_appdataenable(bool value) {
-  _has_bits_[0] |= 0x00080000u;
+  _has_bits_[0] |= 0x00100000u;
   appdataenable_ = value;
 }
 inline void LanControllerInfo::set_appdataenable(bool value) {
@@ -17792,7 +19076,7 @@ inline void LanControllerInfo::set_allocated_appdataip(std::string* appdataip) {
 
 // optional int32 appDataPort = 22 [default = 0];
 inline bool LanControllerInfo::_internal_has_appdataport() const {
-  bool value = (_has_bits_[0] & 0x00020000u) != 0;
+  bool value = (_has_bits_[0] & 0x00040000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_appdataport() const {
@@ -17800,7 +19084,7 @@ inline bool LanControllerInfo::has_appdataport() const {
 }
 inline void LanControllerInfo::clear_appdataport() {
   appdataport_ = 0;
-  _has_bits_[0] &= ~0x00020000u;
+  _has_bits_[0] &= ~0x00040000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::_internal_appdataport() const {
   return appdataport_;
@@ -17810,7 +19094,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::appdataport() const {
   return _internal_appdataport();
 }
 inline void LanControllerInfo::_internal_set_appdataport(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00020000u;
+  _has_bits_[0] |= 0x00040000u;
   appdataport_ = value;
 }
 inline void LanControllerInfo::set_appdataport(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -17966,7 +19250,7 @@ inline void LanControllerInfo::set_allocated_appdataserviceip(std::string* appda
 
 // optional int32 appDataServicePort = 25 [default = 0];
 inline bool LanControllerInfo::_internal_has_appdataserviceport() const {
-  bool value = (_has_bits_[0] & 0x00200000u) != 0;
+  bool value = (_has_bits_[0] & 0x00400000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_appdataserviceport() const {
@@ -17974,7 +19258,7 @@ inline bool LanControllerInfo::has_appdataserviceport() const {
 }
 inline void LanControllerInfo::clear_appdataserviceport() {
   appdataserviceport_ = 0;
-  _has_bits_[0] &= ~0x00200000u;
+  _has_bits_[0] &= ~0x00400000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::_internal_appdataserviceport() const {
   return appdataserviceport_;
@@ -17984,7 +19268,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::appdataserviceport() co
   return _internal_appdataserviceport();
 }
 inline void LanControllerInfo::_internal_set_appdataserviceport(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00200000u;
+  _has_bits_[0] |= 0x00400000u;
   appdataserviceport_ = value;
 }
 inline void LanControllerInfo::set_appdataserviceport(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -18065,37 +19349,37 @@ inline void LanControllerInfo::set_allocated_appdataservicenetmask(std::string* 
   // @@protoc_insertion_point(field_set_allocated:Network.LanControllerInfo.appDataServiceNetmask)
 }
 
-// optional uint32 appDataUID = 27 [default = 0];
-inline bool LanControllerInfo::_internal_has_appdatauid() const {
-  bool value = (_has_bits_[0] & 0x00400000u) != 0;
+// optional uint32 rupAppDataUID = 27 [default = 0];
+inline bool LanControllerInfo::_internal_has_rupappdatauid() const {
+  bool value = (_has_bits_[0] & 0x00800000u) != 0;
   return value;
 }
-inline bool LanControllerInfo::has_appdatauid() const {
-  return _internal_has_appdatauid();
+inline bool LanControllerInfo::has_rupappdatauid() const {
+  return _internal_has_rupappdatauid();
 }
-inline void LanControllerInfo::clear_appdatauid() {
-  appdatauid_ = 0u;
-  _has_bits_[0] &= ~0x00400000u;
+inline void LanControllerInfo::clear_rupappdatauid() {
+  rupappdatauid_ = 0u;
+  _has_bits_[0] &= ~0x00800000u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint32 LanControllerInfo::_internal_appdatauid() const {
-  return appdatauid_;
+inline ::PROTOBUF_NAMESPACE_ID::uint32 LanControllerInfo::_internal_rupappdatauid() const {
+  return rupappdatauid_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint32 LanControllerInfo::appdatauid() const {
-  // @@protoc_insertion_point(field_get:Network.LanControllerInfo.appDataUID)
-  return _internal_appdatauid();
+inline ::PROTOBUF_NAMESPACE_ID::uint32 LanControllerInfo::rupappdatauid() const {
+  // @@protoc_insertion_point(field_get:Network.LanControllerInfo.rupAppDataUID)
+  return _internal_rupappdatauid();
 }
-inline void LanControllerInfo::_internal_set_appdatauid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[0] |= 0x00400000u;
-  appdatauid_ = value;
+inline void LanControllerInfo::_internal_set_rupappdatauid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _has_bits_[0] |= 0x00800000u;
+  rupappdatauid_ = value;
 }
-inline void LanControllerInfo::set_appdatauid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _internal_set_appdatauid(value);
-  // @@protoc_insertion_point(field_set:Network.LanControllerInfo.appDataUID)
+inline void LanControllerInfo::set_rupappdatauid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_rupappdatauid(value);
+  // @@protoc_insertion_point(field_set:Network.LanControllerInfo.rupAppDataUID)
 }
 
 // optional int32 appDataSizeBytes = 28 [default = 0];
 inline bool LanControllerInfo::_internal_has_appdatasizebytes() const {
-  bool value = (_has_bits_[0] & 0x00800000u) != 0;
+  bool value = (_has_bits_[0] & 0x01000000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_appdatasizebytes() const {
@@ -18103,7 +19387,7 @@ inline bool LanControllerInfo::has_appdatasizebytes() const {
 }
 inline void LanControllerInfo::clear_appdatasizebytes() {
   appdatasizebytes_ = 0;
-  _has_bits_[0] &= ~0x00800000u;
+  _has_bits_[0] &= ~0x01000000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::_internal_appdatasizebytes() const {
   return appdatasizebytes_;
@@ -18113,7 +19397,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::appdatasizebytes() cons
   return _internal_appdatasizebytes();
 }
 inline void LanControllerInfo::_internal_set_appdatasizebytes(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00800000u;
+  _has_bits_[0] |= 0x01000000u;
   appdatasizebytes_ = value;
 }
 inline void LanControllerInfo::set_appdatasizebytes(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -18123,7 +19407,7 @@ inline void LanControllerInfo::set_appdatasizebytes(::PROTOBUF_NAMESPACE_ID::int
 
 // optional int32 appDataFramesQuantity = 29 [default = 0];
 inline bool LanControllerInfo::_internal_has_appdataframesquantity() const {
-  bool value = (_has_bits_[0] & 0x01000000u) != 0;
+  bool value = (_has_bits_[0] & 0x02000000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_appdataframesquantity() const {
@@ -18131,7 +19415,7 @@ inline bool LanControllerInfo::has_appdataframesquantity() const {
 }
 inline void LanControllerInfo::clear_appdataframesquantity() {
   appdataframesquantity_ = 0;
-  _has_bits_[0] &= ~0x01000000u;
+  _has_bits_[0] &= ~0x02000000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::_internal_appdataframesquantity() const {
   return appdataframesquantity_;
@@ -18141,7 +19425,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::appdataframesquantity()
   return _internal_appdataframesquantity();
 }
 inline void LanControllerInfo::_internal_set_appdataframesquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x01000000u;
+  _has_bits_[0] |= 0x02000000u;
   appdataframesquantity_ = value;
 }
 inline void LanControllerInfo::set_appdataframesquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -18151,7 +19435,7 @@ inline void LanControllerInfo::set_appdataframesquantity(::PROTOBUF_NAMESPACE_ID
 
 // optional int32 overrideAppDataWordCount = 30 [default = -1];
 inline bool LanControllerInfo::_internal_has_overrideappdatawordcount() const {
-  bool value = (_has_bits_[1] & 0x00000001u) != 0;
+  bool value = (_has_bits_[1] & 0x00000002u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_overrideappdatawordcount() const {
@@ -18159,7 +19443,7 @@ inline bool LanControllerInfo::has_overrideappdatawordcount() const {
 }
 inline void LanControllerInfo::clear_overrideappdatawordcount() {
   overrideappdatawordcount_ = -1;
-  _has_bits_[1] &= ~0x00000001u;
+  _has_bits_[1] &= ~0x00000002u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::_internal_overrideappdatawordcount() const {
   return overrideappdatawordcount_;
@@ -18169,7 +19453,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::overrideappdatawordcoun
   return _internal_overrideappdatawordcount();
 }
 inline void LanControllerInfo::_internal_set_overrideappdatawordcount(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[1] |= 0x00000001u;
+  _has_bits_[1] |= 0x00000002u;
   overrideappdatawordcount_ = value;
 }
 inline void LanControllerInfo::set_overrideappdatawordcount(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -18179,7 +19463,7 @@ inline void LanControllerInfo::set_overrideappdatawordcount(::PROTOBUF_NAMESPACE
 
 // optional bool diagDataEnable = 40 [default = false];
 inline bool LanControllerInfo::_internal_has_diagdataenable() const {
-  bool value = (_has_bits_[0] & 0x00100000u) != 0;
+  bool value = (_has_bits_[0] & 0x00200000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_diagdataenable() const {
@@ -18187,7 +19471,7 @@ inline bool LanControllerInfo::has_diagdataenable() const {
 }
 inline void LanControllerInfo::clear_diagdataenable() {
   diagdataenable_ = false;
-  _has_bits_[0] &= ~0x00100000u;
+  _has_bits_[0] &= ~0x00200000u;
 }
 inline bool LanControllerInfo::_internal_diagdataenable() const {
   return diagdataenable_;
@@ -18197,7 +19481,7 @@ inline bool LanControllerInfo::diagdataenable() const {
   return _internal_diagdataenable();
 }
 inline void LanControllerInfo::_internal_set_diagdataenable(bool value) {
-  _has_bits_[0] |= 0x00100000u;
+  _has_bits_[0] |= 0x00200000u;
   diagdataenable_ = value;
 }
 inline void LanControllerInfo::set_diagdataenable(bool value) {
@@ -18280,7 +19564,7 @@ inline void LanControllerInfo::set_allocated_diagdataip(std::string* diagdataip)
 
 // optional int32 diagDataPort = 42 [default = 0];
 inline bool LanControllerInfo::_internal_has_diagdataport() const {
-  bool value = (_has_bits_[0] & 0x02000000u) != 0;
+  bool value = (_has_bits_[0] & 0x08000000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_diagdataport() const {
@@ -18288,7 +19572,7 @@ inline bool LanControllerInfo::has_diagdataport() const {
 }
 inline void LanControllerInfo::clear_diagdataport() {
   diagdataport_ = 0;
-  _has_bits_[0] &= ~0x02000000u;
+  _has_bits_[0] &= ~0x08000000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::_internal_diagdataport() const {
   return diagdataport_;
@@ -18298,7 +19582,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::diagdataport() const {
   return _internal_diagdataport();
 }
 inline void LanControllerInfo::_internal_set_diagdataport(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x02000000u;
+  _has_bits_[0] |= 0x08000000u;
   diagdataport_ = value;
 }
 inline void LanControllerInfo::set_diagdataport(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -18454,7 +19738,7 @@ inline void LanControllerInfo::set_allocated_diagdataserviceip(std::string* diag
 
 // optional int32 diagDataServicePort = 45 [default = 0];
 inline bool LanControllerInfo::_internal_has_diagdataserviceport() const {
-  bool value = (_has_bits_[0] & 0x04000000u) != 0;
+  bool value = (_has_bits_[0] & 0x10000000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_diagdataserviceport() const {
@@ -18462,7 +19746,7 @@ inline bool LanControllerInfo::has_diagdataserviceport() const {
 }
 inline void LanControllerInfo::clear_diagdataserviceport() {
   diagdataserviceport_ = 0;
-  _has_bits_[0] &= ~0x04000000u;
+  _has_bits_[0] &= ~0x10000000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::_internal_diagdataserviceport() const {
   return diagdataserviceport_;
@@ -18472,7 +19756,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::diagdataserviceport() c
   return _internal_diagdataserviceport();
 }
 inline void LanControllerInfo::_internal_set_diagdataserviceport(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x04000000u;
+  _has_bits_[0] |= 0x10000000u;
   diagdataserviceport_ = value;
 }
 inline void LanControllerInfo::set_diagdataserviceport(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -18553,37 +19837,37 @@ inline void LanControllerInfo::set_allocated_diagdataservicenetmask(std::string*
   // @@protoc_insertion_point(field_set_allocated:Network.LanControllerInfo.diagDataServiceNetmask)
 }
 
-// optional uint32 diagDataUID = 47 [default = 0];
-inline bool LanControllerInfo::_internal_has_diagdatauid() const {
-  bool value = (_has_bits_[0] & 0x08000000u) != 0;
+// optional uint32 rupDiagDataUID = 47 [default = 0];
+inline bool LanControllerInfo::_internal_has_rupdiagdatauid() const {
+  bool value = (_has_bits_[0] & 0x20000000u) != 0;
   return value;
 }
-inline bool LanControllerInfo::has_diagdatauid() const {
-  return _internal_has_diagdatauid();
+inline bool LanControllerInfo::has_rupdiagdatauid() const {
+  return _internal_has_rupdiagdatauid();
 }
-inline void LanControllerInfo::clear_diagdatauid() {
-  diagdatauid_ = 0u;
-  _has_bits_[0] &= ~0x08000000u;
+inline void LanControllerInfo::clear_rupdiagdatauid() {
+  rupdiagdatauid_ = 0u;
+  _has_bits_[0] &= ~0x20000000u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint32 LanControllerInfo::_internal_diagdatauid() const {
-  return diagdatauid_;
+inline ::PROTOBUF_NAMESPACE_ID::uint32 LanControllerInfo::_internal_rupdiagdatauid() const {
+  return rupdiagdatauid_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint32 LanControllerInfo::diagdatauid() const {
-  // @@protoc_insertion_point(field_get:Network.LanControllerInfo.diagDataUID)
-  return _internal_diagdatauid();
+inline ::PROTOBUF_NAMESPACE_ID::uint32 LanControllerInfo::rupdiagdatauid() const {
+  // @@protoc_insertion_point(field_get:Network.LanControllerInfo.rupDiagDataUID)
+  return _internal_rupdiagdatauid();
 }
-inline void LanControllerInfo::_internal_set_diagdatauid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[0] |= 0x08000000u;
-  diagdatauid_ = value;
+inline void LanControllerInfo::_internal_set_rupdiagdatauid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _has_bits_[0] |= 0x20000000u;
+  rupdiagdatauid_ = value;
 }
-inline void LanControllerInfo::set_diagdatauid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _internal_set_diagdatauid(value);
-  // @@protoc_insertion_point(field_set:Network.LanControllerInfo.diagDataUID)
+inline void LanControllerInfo::set_rupdiagdatauid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_rupdiagdatauid(value);
+  // @@protoc_insertion_point(field_set:Network.LanControllerInfo.rupDiagDataUID)
 }
 
 // optional int32 diagDataSizeBytes = 48 [default = 0];
 inline bool LanControllerInfo::_internal_has_diagdatasizebytes() const {
-  bool value = (_has_bits_[0] & 0x10000000u) != 0;
+  bool value = (_has_bits_[0] & 0x40000000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_diagdatasizebytes() const {
@@ -18591,7 +19875,7 @@ inline bool LanControllerInfo::has_diagdatasizebytes() const {
 }
 inline void LanControllerInfo::clear_diagdatasizebytes() {
   diagdatasizebytes_ = 0;
-  _has_bits_[0] &= ~0x10000000u;
+  _has_bits_[0] &= ~0x40000000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::_internal_diagdatasizebytes() const {
   return diagdatasizebytes_;
@@ -18601,7 +19885,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::diagdatasizebytes() con
   return _internal_diagdatasizebytes();
 }
 inline void LanControllerInfo::_internal_set_diagdatasizebytes(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x10000000u;
+  _has_bits_[0] |= 0x40000000u;
   diagdatasizebytes_ = value;
 }
 inline void LanControllerInfo::set_diagdatasizebytes(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -18611,7 +19895,7 @@ inline void LanControllerInfo::set_diagdatasizebytes(::PROTOBUF_NAMESPACE_ID::in
 
 // optional int32 diagDataFramesQuantity = 49 [default = 0];
 inline bool LanControllerInfo::_internal_has_diagdataframesquantity() const {
-  bool value = (_has_bits_[0] & 0x20000000u) != 0;
+  bool value = (_has_bits_[0] & 0x04000000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_diagdataframesquantity() const {
@@ -18619,7 +19903,7 @@ inline bool LanControllerInfo::has_diagdataframesquantity() const {
 }
 inline void LanControllerInfo::clear_diagdataframesquantity() {
   diagdataframesquantity_ = 0;
-  _has_bits_[0] &= ~0x20000000u;
+  _has_bits_[0] &= ~0x04000000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::_internal_diagdataframesquantity() const {
   return diagdataframesquantity_;
@@ -18629,7 +19913,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::diagdataframesquantity(
   return _internal_diagdataframesquantity();
 }
 inline void LanControllerInfo::_internal_set_diagdataframesquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x20000000u;
+  _has_bits_[0] |= 0x04000000u;
   diagdataframesquantity_ = value;
 }
 inline void LanControllerInfo::set_diagdataframesquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -18639,7 +19923,7 @@ inline void LanControllerInfo::set_diagdataframesquantity(::PROTOBUF_NAMESPACE_I
 
 // optional int32 overrideDiagDataWordCount = 50 [default = -1];
 inline bool LanControllerInfo::_internal_has_overridediagdatawordcount() const {
-  bool value = (_has_bits_[0] & 0x40000000u) != 0;
+  bool value = (_has_bits_[0] & 0x80000000u) != 0;
   return value;
 }
 inline bool LanControllerInfo::has_overridediagdatawordcount() const {
@@ -18647,7 +19931,7 @@ inline bool LanControllerInfo::has_overridediagdatawordcount() const {
 }
 inline void LanControllerInfo::clear_overridediagdatawordcount() {
   overridediagdatawordcount_ = -1;
-  _has_bits_[0] &= ~0x40000000u;
+  _has_bits_[0] &= ~0x80000000u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::_internal_overridediagdatawordcount() const {
   return overridediagdatawordcount_;
@@ -18657,7 +19941,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 LanControllerInfo::overridediagdatawordcou
   return _internal_overridediagdatawordcount();
 }
 inline void LanControllerInfo::_internal_set_overridediagdatawordcount(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x40000000u;
+  _has_bits_[0] |= 0x80000000u;
   overridediagdatawordcount_ = value;
 }
 inline void LanControllerInfo::set_overridediagdatawordcount(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -20392,6 +21676,699 @@ inline void AppDataSourceState::_internal_set_errorplanttimeformat(::PROTOBUF_NA
 inline void AppDataSourceState::set_errorplanttimeformat(::PROTOBUF_NAMESPACE_ID::int64 value) {
   _internal_set_errorplanttimeformat(value);
   // @@protoc_insertion_point(field_set:Network.AppDataSourceState.errorPlantTimeFormat)
+}
+
+// -------------------------------------------------------------------
+
+// DiagDataSourceState
+
+// optional uint64 id = 1 [default = 0];
+inline bool DiagDataSourceState::_internal_has_id() const {
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_id() const {
+  return _internal_has_id();
+}
+inline void DiagDataSourceState::clear_id() {
+  id_ = PROTOBUF_ULONGLONG(0);
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 DiagDataSourceState::_internal_id() const {
+  return id_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 DiagDataSourceState::id() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.id)
+  return _internal_id();
+}
+inline void DiagDataSourceState::_internal_set_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _has_bits_[0] |= 0x00000002u;
+  id_ = value;
+}
+inline void DiagDataSourceState::set_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_id(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.id)
+}
+
+// optional string lmEquipmentID = 2;
+inline bool DiagDataSourceState::_internal_has_lmequipmentid() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_lmequipmentid() const {
+  return _internal_has_lmequipmentid();
+}
+inline void DiagDataSourceState::clear_lmequipmentid() {
+  lmequipmentid_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& DiagDataSourceState::lmequipmentid() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.lmEquipmentID)
+  return _internal_lmequipmentid();
+}
+inline void DiagDataSourceState::set_lmequipmentid(const std::string& value) {
+  _internal_set_lmequipmentid(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.lmEquipmentID)
+}
+inline std::string* DiagDataSourceState::mutable_lmequipmentid() {
+  // @@protoc_insertion_point(field_mutable:Network.DiagDataSourceState.lmEquipmentID)
+  return _internal_mutable_lmequipmentid();
+}
+inline const std::string& DiagDataSourceState::_internal_lmequipmentid() const {
+  return lmequipmentid_.Get();
+}
+inline void DiagDataSourceState::_internal_set_lmequipmentid(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  lmequipmentid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void DiagDataSourceState::set_lmequipmentid(std::string&& value) {
+  _has_bits_[0] |= 0x00000001u;
+  lmequipmentid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Network.DiagDataSourceState.lmEquipmentID)
+}
+inline void DiagDataSourceState::set_lmequipmentid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000001u;
+  lmequipmentid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Network.DiagDataSourceState.lmEquipmentID)
+}
+inline void DiagDataSourceState::set_lmequipmentid(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000001u;
+  lmequipmentid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Network.DiagDataSourceState.lmEquipmentID)
+}
+inline std::string* DiagDataSourceState::_internal_mutable_lmequipmentid() {
+  _has_bits_[0] |= 0x00000001u;
+  return lmequipmentid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* DiagDataSourceState::release_lmequipmentid() {
+  // @@protoc_insertion_point(field_release:Network.DiagDataSourceState.lmEquipmentID)
+  if (!_internal_has_lmequipmentid()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return lmequipmentid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void DiagDataSourceState::set_allocated_lmequipmentid(std::string* lmequipmentid) {
+  if (lmequipmentid != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  lmequipmentid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), lmequipmentid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Network.DiagDataSourceState.lmEquipmentID)
+}
+
+// optional bool dataProcessingEnabled = 3 [default = false];
+inline bool DiagDataSourceState::_internal_has_dataprocessingenabled() const {
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_dataprocessingenabled() const {
+  return _internal_has_dataprocessingenabled();
+}
+inline void DiagDataSourceState::clear_dataprocessingenabled() {
+  dataprocessingenabled_ = false;
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline bool DiagDataSourceState::_internal_dataprocessingenabled() const {
+  return dataprocessingenabled_;
+}
+inline bool DiagDataSourceState::dataprocessingenabled() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.dataProcessingEnabled)
+  return _internal_dataprocessingenabled();
+}
+inline void DiagDataSourceState::_internal_set_dataprocessingenabled(bool value) {
+  _has_bits_[0] |= 0x00000004u;
+  dataprocessingenabled_ = value;
+}
+inline void DiagDataSourceState::set_dataprocessingenabled(bool value) {
+  _internal_set_dataprocessingenabled(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.dataProcessingEnabled)
+}
+
+// optional bool receivesData = 4 [default = false];
+inline bool DiagDataSourceState::_internal_has_receivesdata() const {
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_receivesdata() const {
+  return _internal_has_receivesdata();
+}
+inline void DiagDataSourceState::clear_receivesdata() {
+  receivesdata_ = false;
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline bool DiagDataSourceState::_internal_receivesdata() const {
+  return receivesdata_;
+}
+inline bool DiagDataSourceState::receivesdata() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.receivesData)
+  return _internal_receivesdata();
+}
+inline void DiagDataSourceState::_internal_set_receivesdata(bool value) {
+  _has_bits_[0] |= 0x00000008u;
+  receivesdata_ = value;
+}
+inline void DiagDataSourceState::set_receivesdata(bool value) {
+  _internal_set_receivesdata(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.receivesData)
+}
+
+// optional int64 uptime = 5 [default = 0];
+inline bool DiagDataSourceState::_internal_has_uptime() const {
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_uptime() const {
+  return _internal_has_uptime();
+}
+inline void DiagDataSourceState::clear_uptime() {
+  uptime_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::_internal_uptime() const {
+  return uptime_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::uptime() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.uptime)
+  return _internal_uptime();
+}
+inline void DiagDataSourceState::_internal_set_uptime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00000020u;
+  uptime_ = value;
+}
+inline void DiagDataSourceState::set_uptime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_uptime(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.uptime)
+}
+
+// optional uint32 receivedDataID = 6 [default = 0];
+inline bool DiagDataSourceState::_internal_has_receiveddataid() const {
+  bool value = (_has_bits_[0] & 0x00000010u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_receiveddataid() const {
+  return _internal_has_receiveddataid();
+}
+inline void DiagDataSourceState::clear_receiveddataid() {
+  receiveddataid_ = 0u;
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 DiagDataSourceState::_internal_receiveddataid() const {
+  return receiveddataid_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 DiagDataSourceState::receiveddataid() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.receivedDataID)
+  return _internal_receiveddataid();
+}
+inline void DiagDataSourceState::_internal_set_receiveddataid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _has_bits_[0] |= 0x00000010u;
+  receiveddataid_ = value;
+}
+inline void DiagDataSourceState::set_receiveddataid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_receiveddataid(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.receivedDataID)
+}
+
+// optional int64 lmTime = 7 [default = 0];
+inline bool DiagDataSourceState::_internal_has_lmtime() const {
+  bool value = (_has_bits_[0] & 0x00000040u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_lmtime() const {
+  return _internal_has_lmtime();
+}
+inline void DiagDataSourceState::clear_lmtime() {
+  lmtime_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::_internal_lmtime() const {
+  return lmtime_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::lmtime() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.lmTime)
+  return _internal_lmtime();
+}
+inline void DiagDataSourceState::_internal_set_lmtime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00000040u;
+  lmtime_ = value;
+}
+inline void DiagDataSourceState::set_lmtime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_lmtime(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.lmTime)
+}
+
+// optional uint32 rupFrameNumerator = 8 [default = 0];
+inline bool DiagDataSourceState::_internal_has_rupframenumerator() const {
+  bool value = (_has_bits_[0] & 0x00000400u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_rupframenumerator() const {
+  return _internal_has_rupframenumerator();
+}
+inline void DiagDataSourceState::clear_rupframenumerator() {
+  rupframenumerator_ = 0u;
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 DiagDataSourceState::_internal_rupframenumerator() const {
+  return rupframenumerator_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 DiagDataSourceState::rupframenumerator() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.rupFrameNumerator)
+  return _internal_rupframenumerator();
+}
+inline void DiagDataSourceState::_internal_set_rupframenumerator(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _has_bits_[0] |= 0x00000400u;
+  rupframenumerator_ = value;
+}
+inline void DiagDataSourceState::set_rupframenumerator(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_rupframenumerator(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.rupFrameNumerator)
+}
+
+// optional double dataReceivingSpeed = 9 [default = 0];
+inline bool DiagDataSourceState::_internal_has_datareceivingspeed() const {
+  bool value = (_has_bits_[0] & 0x00000080u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_datareceivingspeed() const {
+  return _internal_has_datareceivingspeed();
+}
+inline void DiagDataSourceState::clear_datareceivingspeed() {
+  datareceivingspeed_ = 0;
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline double DiagDataSourceState::_internal_datareceivingspeed() const {
+  return datareceivingspeed_;
+}
+inline double DiagDataSourceState::datareceivingspeed() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.dataReceivingSpeed)
+  return _internal_datareceivingspeed();
+}
+inline void DiagDataSourceState::_internal_set_datareceivingspeed(double value) {
+  _has_bits_[0] |= 0x00000080u;
+  datareceivingspeed_ = value;
+}
+inline void DiagDataSourceState::set_datareceivingspeed(double value) {
+  _internal_set_datareceivingspeed(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.dataReceivingSpeed)
+}
+
+// optional int64 receivedDataSize = 10 [default = 0];
+inline bool DiagDataSourceState::_internal_has_receiveddatasize() const {
+  bool value = (_has_bits_[0] & 0x00000100u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_receiveddatasize() const {
+  return _internal_has_receiveddatasize();
+}
+inline void DiagDataSourceState::clear_receiveddatasize() {
+  receiveddatasize_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::_internal_receiveddatasize() const {
+  return receiveddatasize_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::receiveddatasize() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.receivedDataSize)
+  return _internal_receiveddatasize();
+}
+inline void DiagDataSourceState::_internal_set_receiveddatasize(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00000100u;
+  receiveddatasize_ = value;
+}
+inline void DiagDataSourceState::set_receiveddatasize(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_receiveddatasize(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.receivedDataSize)
+}
+
+// optional int64 receivedFramesCount = 11 [default = 0];
+inline bool DiagDataSourceState::_internal_has_receivedframescount() const {
+  bool value = (_has_bits_[0] & 0x00000200u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_receivedframescount() const {
+  return _internal_has_receivedframescount();
+}
+inline void DiagDataSourceState::clear_receivedframescount() {
+  receivedframescount_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::_internal_receivedframescount() const {
+  return receivedframescount_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::receivedframescount() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.receivedFramesCount)
+  return _internal_receivedframescount();
+}
+inline void DiagDataSourceState::_internal_set_receivedframescount(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00000200u;
+  receivedframescount_ = value;
+}
+inline void DiagDataSourceState::set_receivedframescount(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_receivedframescount(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.receivedFramesCount)
+}
+
+// optional int64 receivedPacketCount = 12 [default = 0];
+inline bool DiagDataSourceState::_internal_has_receivedpacketcount() const {
+  bool value = (_has_bits_[0] & 0x00001000u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_receivedpacketcount() const {
+  return _internal_has_receivedpacketcount();
+}
+inline void DiagDataSourceState::clear_receivedpacketcount() {
+  receivedpacketcount_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00001000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::_internal_receivedpacketcount() const {
+  return receivedpacketcount_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::receivedpacketcount() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.receivedPacketCount)
+  return _internal_receivedpacketcount();
+}
+inline void DiagDataSourceState::_internal_set_receivedpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00001000u;
+  receivedpacketcount_ = value;
+}
+inline void DiagDataSourceState::set_receivedpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_receivedpacketcount(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.receivedPacketCount)
+}
+
+// optional int64 lostPacketCount = 13 [default = 0];
+inline bool DiagDataSourceState::_internal_has_lostpacketcount() const {
+  bool value = (_has_bits_[0] & 0x00002000u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_lostpacketcount() const {
+  return _internal_has_lostpacketcount();
+}
+inline void DiagDataSourceState::clear_lostpacketcount() {
+  lostpacketcount_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00002000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::_internal_lostpacketcount() const {
+  return lostpacketcount_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::lostpacketcount() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.lostPacketCount)
+  return _internal_lostpacketcount();
+}
+inline void DiagDataSourceState::_internal_set_lostpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00002000u;
+  lostpacketcount_ = value;
+}
+inline void DiagDataSourceState::set_lostpacketcount(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_lostpacketcount(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.lostPacketCount)
+}
+
+// optional int32 signalStatesQueueCurSize = 14 [default = 0];
+inline bool DiagDataSourceState::_internal_has_signalstatesqueuecursize() const {
+  bool value = (_has_bits_[0] & 0x00000800u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_signalstatesqueuecursize() const {
+  return _internal_has_signalstatesqueuecursize();
+}
+inline void DiagDataSourceState::clear_signalstatesqueuecursize() {
+  signalstatesqueuecursize_ = 0;
+  _has_bits_[0] &= ~0x00000800u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DiagDataSourceState::_internal_signalstatesqueuecursize() const {
+  return signalstatesqueuecursize_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DiagDataSourceState::signalstatesqueuecursize() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.signalStatesQueueCurSize)
+  return _internal_signalstatesqueuecursize();
+}
+inline void DiagDataSourceState::_internal_set_signalstatesqueuecursize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000800u;
+  signalstatesqueuecursize_ = value;
+}
+inline void DiagDataSourceState::set_signalstatesqueuecursize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_signalstatesqueuecursize(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.signalStatesQueueCurSize)
+}
+
+// optional int32 signalStatesQueueCurMaxSize = 15 [default = 0];
+inline bool DiagDataSourceState::_internal_has_signalstatesqueuecurmaxsize() const {
+  bool value = (_has_bits_[0] & 0x00400000u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_signalstatesqueuecurmaxsize() const {
+  return _internal_has_signalstatesqueuecurmaxsize();
+}
+inline void DiagDataSourceState::clear_signalstatesqueuecurmaxsize() {
+  signalstatesqueuecurmaxsize_ = 0;
+  _has_bits_[0] &= ~0x00400000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DiagDataSourceState::_internal_signalstatesqueuecurmaxsize() const {
+  return signalstatesqueuecurmaxsize_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DiagDataSourceState::signalstatesqueuecurmaxsize() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.signalStatesQueueCurMaxSize)
+  return _internal_signalstatesqueuecurmaxsize();
+}
+inline void DiagDataSourceState::_internal_set_signalstatesqueuecurmaxsize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00400000u;
+  signalstatesqueuecurmaxsize_ = value;
+}
+inline void DiagDataSourceState::set_signalstatesqueuecurmaxsize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_signalstatesqueuecurmaxsize(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.signalStatesQueueCurMaxSize)
+}
+
+// optional int64 errorProtocolVersion = 16 [default = 0];
+inline bool DiagDataSourceState::_internal_has_errorprotocolversion() const {
+  bool value = (_has_bits_[0] & 0x00004000u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_errorprotocolversion() const {
+  return _internal_has_errorprotocolversion();
+}
+inline void DiagDataSourceState::clear_errorprotocolversion() {
+  errorprotocolversion_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00004000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::_internal_errorprotocolversion() const {
+  return errorprotocolversion_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::errorprotocolversion() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.errorProtocolVersion)
+  return _internal_errorprotocolversion();
+}
+inline void DiagDataSourceState::_internal_set_errorprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00004000u;
+  errorprotocolversion_ = value;
+}
+inline void DiagDataSourceState::set_errorprotocolversion(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errorprotocolversion(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.errorProtocolVersion)
+}
+
+// optional int64 errorFramesQuantity = 17 [default = 0];
+inline bool DiagDataSourceState::_internal_has_errorframesquantity() const {
+  bool value = (_has_bits_[0] & 0x00008000u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_errorframesquantity() const {
+  return _internal_has_errorframesquantity();
+}
+inline void DiagDataSourceState::clear_errorframesquantity() {
+  errorframesquantity_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00008000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::_internal_errorframesquantity() const {
+  return errorframesquantity_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::errorframesquantity() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.errorFramesQuantity)
+  return _internal_errorframesquantity();
+}
+inline void DiagDataSourceState::_internal_set_errorframesquantity(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00008000u;
+  errorframesquantity_ = value;
+}
+inline void DiagDataSourceState::set_errorframesquantity(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errorframesquantity(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.errorFramesQuantity)
+}
+
+// optional int64 errorFrameNo = 18 [default = 0];
+inline bool DiagDataSourceState::_internal_has_errorframeno() const {
+  bool value = (_has_bits_[0] & 0x00010000u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_errorframeno() const {
+  return _internal_has_errorframeno();
+}
+inline void DiagDataSourceState::clear_errorframeno() {
+  errorframeno_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00010000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::_internal_errorframeno() const {
+  return errorframeno_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::errorframeno() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.errorFrameNo)
+  return _internal_errorframeno();
+}
+inline void DiagDataSourceState::_internal_set_errorframeno(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00010000u;
+  errorframeno_ = value;
+}
+inline void DiagDataSourceState::set_errorframeno(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errorframeno(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.errorFrameNo)
+}
+
+// optional int64 errorFrameCRC = 19 [default = 0];
+inline bool DiagDataSourceState::_internal_has_errorframecrc() const {
+  bool value = (_has_bits_[0] & 0x00020000u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_errorframecrc() const {
+  return _internal_has_errorframecrc();
+}
+inline void DiagDataSourceState::clear_errorframecrc() {
+  errorframecrc_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00020000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::_internal_errorframecrc() const {
+  return errorframecrc_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::errorframecrc() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.errorFrameCRC)
+  return _internal_errorframecrc();
+}
+inline void DiagDataSourceState::_internal_set_errorframecrc(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00020000u;
+  errorframecrc_ = value;
+}
+inline void DiagDataSourceState::set_errorframecrc(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errorframecrc(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.errorFrameCRC)
+}
+
+// optional int64 errorDataID = 20 [default = 0];
+inline bool DiagDataSourceState::_internal_has_errordataid() const {
+  bool value = (_has_bits_[0] & 0x00040000u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_errordataid() const {
+  return _internal_has_errordataid();
+}
+inline void DiagDataSourceState::clear_errordataid() {
+  errordataid_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00040000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::_internal_errordataid() const {
+  return errordataid_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::errordataid() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.errorDataID)
+  return _internal_errordataid();
+}
+inline void DiagDataSourceState::_internal_set_errordataid(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00040000u;
+  errordataid_ = value;
+}
+inline void DiagDataSourceState::set_errordataid(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errordataid(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.errorDataID)
+}
+
+// optional int64 errorDuplicatePlantTime = 21 [default = 0];
+inline bool DiagDataSourceState::_internal_has_errorduplicateplanttime() const {
+  bool value = (_has_bits_[0] & 0x00080000u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_errorduplicateplanttime() const {
+  return _internal_has_errorduplicateplanttime();
+}
+inline void DiagDataSourceState::clear_errorduplicateplanttime() {
+  errorduplicateplanttime_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00080000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::_internal_errorduplicateplanttime() const {
+  return errorduplicateplanttime_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::errorduplicateplanttime() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.errorDuplicatePlantTime)
+  return _internal_errorduplicateplanttime();
+}
+inline void DiagDataSourceState::_internal_set_errorduplicateplanttime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00080000u;
+  errorduplicateplanttime_ = value;
+}
+inline void DiagDataSourceState::set_errorduplicateplanttime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errorduplicateplanttime(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.errorDuplicatePlantTime)
+}
+
+// optional int64 errorNonmonotonicPlantTime = 22 [default = 0];
+inline bool DiagDataSourceState::_internal_has_errornonmonotonicplanttime() const {
+  bool value = (_has_bits_[0] & 0x00100000u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_errornonmonotonicplanttime() const {
+  return _internal_has_errornonmonotonicplanttime();
+}
+inline void DiagDataSourceState::clear_errornonmonotonicplanttime() {
+  errornonmonotonicplanttime_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00100000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::_internal_errornonmonotonicplanttime() const {
+  return errornonmonotonicplanttime_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::errornonmonotonicplanttime() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.errorNonmonotonicPlantTime)
+  return _internal_errornonmonotonicplanttime();
+}
+inline void DiagDataSourceState::_internal_set_errornonmonotonicplanttime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00100000u;
+  errornonmonotonicplanttime_ = value;
+}
+inline void DiagDataSourceState::set_errornonmonotonicplanttime(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errornonmonotonicplanttime(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.errorNonmonotonicPlantTime)
+}
+
+// optional int64 errorPlantTimeFormat = 23 [default = 0];
+inline bool DiagDataSourceState::_internal_has_errorplanttimeformat() const {
+  bool value = (_has_bits_[0] & 0x00200000u) != 0;
+  return value;
+}
+inline bool DiagDataSourceState::has_errorplanttimeformat() const {
+  return _internal_has_errorplanttimeformat();
+}
+inline void DiagDataSourceState::clear_errorplanttimeformat() {
+  errorplanttimeformat_ = PROTOBUF_LONGLONG(0);
+  _has_bits_[0] &= ~0x00200000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::_internal_errorplanttimeformat() const {
+  return errorplanttimeformat_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 DiagDataSourceState::errorplanttimeformat() const {
+  // @@protoc_insertion_point(field_get:Network.DiagDataSourceState.errorPlantTimeFormat)
+  return _internal_errorplanttimeformat();
+}
+inline void DiagDataSourceState::_internal_set_errorplanttimeformat(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _has_bits_[0] |= 0x00200000u;
+  errorplanttimeformat_ = value;
+}
+inline void DiagDataSourceState::set_errorplanttimeformat(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_errorplanttimeformat(value);
+  // @@protoc_insertion_point(field_set:Network.DiagDataSourceState.errorPlantTimeFormat)
 }
 
 // -------------------------------------------------------------------
@@ -29325,9 +31302,684 @@ inline void GetFileReply::set_allocated_filepartdata(std::string* filepartdata) 
   // @@protoc_insertion_point(field_set_allocated:Network.GetFileReply.filePartData)
 }
 
+// -------------------------------------------------------------------
+
+// AcquiredDiagObject
+
+// required string equipmentID = 1;
+inline bool AcquiredDiagObject::_internal_has_equipmentid() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool AcquiredDiagObject::has_equipmentid() const {
+  return _internal_has_equipmentid();
+}
+inline void AcquiredDiagObject::clear_equipmentid() {
+  equipmentid_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& AcquiredDiagObject::equipmentid() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagObject.equipmentID)
+  return _internal_equipmentid();
+}
+inline void AcquiredDiagObject::set_equipmentid(const std::string& value) {
+  _internal_set_equipmentid(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagObject.equipmentID)
+}
+inline std::string* AcquiredDiagObject::mutable_equipmentid() {
+  // @@protoc_insertion_point(field_mutable:Network.AcquiredDiagObject.equipmentID)
+  return _internal_mutable_equipmentid();
+}
+inline const std::string& AcquiredDiagObject::_internal_equipmentid() const {
+  return equipmentid_.Get();
+}
+inline void AcquiredDiagObject::_internal_set_equipmentid(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  equipmentid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void AcquiredDiagObject::set_equipmentid(std::string&& value) {
+  _has_bits_[0] |= 0x00000001u;
+  equipmentid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Network.AcquiredDiagObject.equipmentID)
+}
+inline void AcquiredDiagObject::set_equipmentid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000001u;
+  equipmentid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Network.AcquiredDiagObject.equipmentID)
+}
+inline void AcquiredDiagObject::set_equipmentid(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000001u;
+  equipmentid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Network.AcquiredDiagObject.equipmentID)
+}
+inline std::string* AcquiredDiagObject::_internal_mutable_equipmentid() {
+  _has_bits_[0] |= 0x00000001u;
+  return equipmentid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* AcquiredDiagObject::release_equipmentid() {
+  // @@protoc_insertion_point(field_release:Network.AcquiredDiagObject.equipmentID)
+  if (!_internal_has_equipmentid()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return equipmentid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void AcquiredDiagObject::set_allocated_equipmentid(std::string* equipmentid) {
+  if (equipmentid != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  equipmentid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), equipmentid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Network.AcquiredDiagObject.equipmentID)
+}
+
+// required int32 deviceType = 2 [default = 0];
+inline bool AcquiredDiagObject::_internal_has_devicetype() const {
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline bool AcquiredDiagObject::has_devicetype() const {
+  return _internal_has_devicetype();
+}
+inline void AcquiredDiagObject::clear_devicetype() {
+  devicetype_ = 0;
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 AcquiredDiagObject::_internal_devicetype() const {
+  return devicetype_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 AcquiredDiagObject::devicetype() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagObject.deviceType)
+  return _internal_devicetype();
+}
+inline void AcquiredDiagObject::_internal_set_devicetype(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000004u;
+  devicetype_ = value;
+}
+inline void AcquiredDiagObject::set_devicetype(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_devicetype(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagObject.deviceType)
+}
+
+// required uint64 parentHash = 3 [default = 0];
+inline bool AcquiredDiagObject::_internal_has_parenthash() const {
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool AcquiredDiagObject::has_parenthash() const {
+  return _internal_has_parenthash();
+}
+inline void AcquiredDiagObject::clear_parenthash() {
+  parenthash_ = PROTOBUF_ULONGLONG(0);
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 AcquiredDiagObject::_internal_parenthash() const {
+  return parenthash_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 AcquiredDiagObject::parenthash() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagObject.parentHash)
+  return _internal_parenthash();
+}
+inline void AcquiredDiagObject::_internal_set_parenthash(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _has_bits_[0] |= 0x00000002u;
+  parenthash_ = value;
+}
+inline void AcquiredDiagObject::set_parenthash(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_parenthash(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagObject.parentHash)
+}
+
+// -------------------------------------------------------------------
+
+// AcquiredDiagSignal
+
+// required uint64 equipmentIdHash = 1 [default = 0];
+inline bool AcquiredDiagSignal::_internal_has_equipmentidhash() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool AcquiredDiagSignal::has_equipmentidhash() const {
+  return _internal_has_equipmentidhash();
+}
+inline void AcquiredDiagSignal::clear_equipmentidhash() {
+  equipmentidhash_ = PROTOBUF_ULONGLONG(0);
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 AcquiredDiagSignal::_internal_equipmentidhash() const {
+  return equipmentidhash_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 AcquiredDiagSignal::equipmentidhash() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignal.equipmentIdHash)
+  return _internal_equipmentidhash();
+}
+inline void AcquiredDiagSignal::_internal_set_equipmentidhash(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _has_bits_[0] |= 0x00000001u;
+  equipmentidhash_ = value;
+}
+inline void AcquiredDiagSignal::set_equipmentidhash(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_equipmentidhash(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagSignal.equipmentIdHash)
+}
+
+// required uint64 parentHash = 2 [default = 0];
+inline bool AcquiredDiagSignal::_internal_has_parenthash() const {
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool AcquiredDiagSignal::has_parenthash() const {
+  return _internal_has_parenthash();
+}
+inline void AcquiredDiagSignal::clear_parenthash() {
+  parenthash_ = PROTOBUF_ULONGLONG(0);
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 AcquiredDiagSignal::_internal_parenthash() const {
+  return parenthash_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 AcquiredDiagSignal::parenthash() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignal.parentHash)
+  return _internal_parenthash();
+}
+inline void AcquiredDiagSignal::_internal_set_parenthash(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _has_bits_[0] |= 0x00000002u;
+  parenthash_ = value;
+}
+inline void AcquiredDiagSignal::set_parenthash(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_parenthash(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagSignal.parentHash)
+}
+
+// required int32 diagLevel = 3 [default = 0];
+inline bool AcquiredDiagSignal::_internal_has_diaglevel() const {
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
+  return value;
+}
+inline bool AcquiredDiagSignal::has_diaglevel() const {
+  return _internal_has_diaglevel();
+}
+inline void AcquiredDiagSignal::clear_diaglevel() {
+  diaglevel_ = 0;
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 AcquiredDiagSignal::_internal_diaglevel() const {
+  return diaglevel_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 AcquiredDiagSignal::diaglevel() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignal.diagLevel)
+  return _internal_diaglevel();
+}
+inline void AcquiredDiagSignal::_internal_set_diaglevel(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000008u;
+  diaglevel_ = value;
+}
+inline void AcquiredDiagSignal::set_diaglevel(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_diaglevel(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagSignal.diagLevel)
+}
+
+// required uint64 diagSignalTypeIdHash = 4 [default = 0];
+inline bool AcquiredDiagSignal::_internal_has_diagsignaltypeidhash() const {
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline bool AcquiredDiagSignal::has_diagsignaltypeidhash() const {
+  return _internal_has_diagsignaltypeidhash();
+}
+inline void AcquiredDiagSignal::clear_diagsignaltypeidhash() {
+  diagsignaltypeidhash_ = PROTOBUF_ULONGLONG(0);
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 AcquiredDiagSignal::_internal_diagsignaltypeidhash() const {
+  return diagsignaltypeidhash_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 AcquiredDiagSignal::diagsignaltypeidhash() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignal.diagSignalTypeIdHash)
+  return _internal_diagsignaltypeidhash();
+}
+inline void AcquiredDiagSignal::_internal_set_diagsignaltypeidhash(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _has_bits_[0] |= 0x00000004u;
+  diagsignaltypeidhash_ = value;
+}
+inline void AcquiredDiagSignal::set_diagsignaltypeidhash(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_diagsignaltypeidhash(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagSignal.diagSignalTypeIdHash)
+}
+
+// optional bool isReflection = 5 [default = false];
+inline bool AcquiredDiagSignal::_internal_has_isreflection() const {
+  bool value = (_has_bits_[0] & 0x00000100u) != 0;
+  return value;
+}
+inline bool AcquiredDiagSignal::has_isreflection() const {
+  return _internal_has_isreflection();
+}
+inline void AcquiredDiagSignal::clear_isreflection() {
+  isreflection_ = false;
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline bool AcquiredDiagSignal::_internal_isreflection() const {
+  return isreflection_;
+}
+inline bool AcquiredDiagSignal::isreflection() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignal.isReflection)
+  return _internal_isreflection();
+}
+inline void AcquiredDiagSignal::_internal_set_isreflection(bool value) {
+  _has_bits_[0] |= 0x00000100u;
+  isreflection_ = value;
+}
+inline void AcquiredDiagSignal::set_isreflection(bool value) {
+  _internal_set_isreflection(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagSignal.isReflection)
+}
+
+// optional uint64 reflectedSignalIdHash = 6 [default = 0];
+inline bool AcquiredDiagSignal::_internal_has_reflectedsignalidhash() const {
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
+  return value;
+}
+inline bool AcquiredDiagSignal::has_reflectedsignalidhash() const {
+  return _internal_has_reflectedsignalidhash();
+}
+inline void AcquiredDiagSignal::clear_reflectedsignalidhash() {
+  reflectedsignalidhash_ = PROTOBUF_ULONGLONG(0);
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 AcquiredDiagSignal::_internal_reflectedsignalidhash() const {
+  return reflectedsignalidhash_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 AcquiredDiagSignal::reflectedsignalidhash() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignal.reflectedSignalIdHash)
+  return _internal_reflectedsignalidhash();
+}
+inline void AcquiredDiagSignal::_internal_set_reflectedsignalidhash(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _has_bits_[0] |= 0x00000020u;
+  reflectedsignalidhash_ = value;
+}
+inline void AcquiredDiagSignal::set_reflectedsignalidhash(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_reflectedsignalidhash(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagSignal.reflectedSignalIdHash)
+}
+
+// optional uint64 validitySignalIdHash = 7 [default = 0];
+inline bool AcquiredDiagSignal::_internal_has_validitysignalidhash() const {
+  bool value = (_has_bits_[0] & 0x00000040u) != 0;
+  return value;
+}
+inline bool AcquiredDiagSignal::has_validitysignalidhash() const {
+  return _internal_has_validitysignalidhash();
+}
+inline void AcquiredDiagSignal::clear_validitysignalidhash() {
+  validitysignalidhash_ = PROTOBUF_ULONGLONG(0);
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 AcquiredDiagSignal::_internal_validitysignalidhash() const {
+  return validitysignalidhash_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 AcquiredDiagSignal::validitysignalidhash() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignal.validitySignalIdHash)
+  return _internal_validitysignalidhash();
+}
+inline void AcquiredDiagSignal::_internal_set_validitysignalidhash(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _has_bits_[0] |= 0x00000040u;
+  validitysignalidhash_ = value;
+}
+inline void AcquiredDiagSignal::set_validitysignalidhash(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_validitysignalidhash(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagSignal.validitySignalIdHash)
+}
+
+// optional int32 valueSizeBit = 8 [default = 0];
+inline bool AcquiredDiagSignal::_internal_has_valuesizebit() const {
+  bool value = (_has_bits_[0] & 0x00000010u) != 0;
+  return value;
+}
+inline bool AcquiredDiagSignal::has_valuesizebit() const {
+  return _internal_has_valuesizebit();
+}
+inline void AcquiredDiagSignal::clear_valuesizebit() {
+  valuesizebit_ = 0;
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 AcquiredDiagSignal::_internal_valuesizebit() const {
+  return valuesizebit_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 AcquiredDiagSignal::valuesizebit() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignal.valueSizeBit)
+  return _internal_valuesizebit();
+}
+inline void AcquiredDiagSignal::_internal_set_valuesizebit(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000010u;
+  valuesizebit_ = value;
+}
+inline void AcquiredDiagSignal::set_valuesizebit(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_valuesizebit(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagSignal.valueSizeBit)
+}
+
+// optional int32 discreteContainerSize = 9 [default = 0];
+inline bool AcquiredDiagSignal::_internal_has_discretecontainersize() const {
+  bool value = (_has_bits_[0] & 0x00000080u) != 0;
+  return value;
+}
+inline bool AcquiredDiagSignal::has_discretecontainersize() const {
+  return _internal_has_discretecontainersize();
+}
+inline void AcquiredDiagSignal::clear_discretecontainersize() {
+  discretecontainersize_ = 0;
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 AcquiredDiagSignal::_internal_discretecontainersize() const {
+  return discretecontainersize_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 AcquiredDiagSignal::discretecontainersize() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignal.discreteContainerSize)
+  return _internal_discretecontainersize();
+}
+inline void AcquiredDiagSignal::_internal_set_discretecontainersize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000080u;
+  discretecontainersize_ = value;
+}
+inline void AcquiredDiagSignal::set_discretecontainersize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_discretecontainersize(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagSignal.discreteContainerSize)
+}
+
+// optional bool logChanges = 10 [default = false];
+inline bool AcquiredDiagSignal::_internal_has_logchanges() const {
+  bool value = (_has_bits_[0] & 0x00000200u) != 0;
+  return value;
+}
+inline bool AcquiredDiagSignal::has_logchanges() const {
+  return _internal_has_logchanges();
+}
+inline void AcquiredDiagSignal::clear_logchanges() {
+  logchanges_ = false;
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline bool AcquiredDiagSignal::_internal_logchanges() const {
+  return logchanges_;
+}
+inline bool AcquiredDiagSignal::logchanges() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignal.logChanges)
+  return _internal_logchanges();
+}
+inline void AcquiredDiagSignal::_internal_set_logchanges(bool value) {
+  _has_bits_[0] |= 0x00000200u;
+  logchanges_ = value;
+}
+inline void AcquiredDiagSignal::set_logchanges(bool value) {
+  _internal_set_logchanges(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagSignal.logChanges)
+}
+
+// optional bool archive = 11 [default = false];
+inline bool AcquiredDiagSignal::_internal_has_archive() const {
+  bool value = (_has_bits_[0] & 0x00000400u) != 0;
+  return value;
+}
+inline bool AcquiredDiagSignal::has_archive() const {
+  return _internal_has_archive();
+}
+inline void AcquiredDiagSignal::clear_archive() {
+  archive_ = false;
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline bool AcquiredDiagSignal::_internal_archive() const {
+  return archive_;
+}
+inline bool AcquiredDiagSignal::archive() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignal.archive)
+  return _internal_archive();
+}
+inline void AcquiredDiagSignal::_internal_set_archive(bool value) {
+  _has_bits_[0] |= 0x00000400u;
+  archive_ = value;
+}
+inline void AcquiredDiagSignal::set_archive(bool value) {
+  _internal_set_archive(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagSignal.archive)
+}
+
+// optional bool reserved = 12 [default = false];
+inline bool AcquiredDiagSignal::_internal_has_reserved() const {
+  bool value = (_has_bits_[0] & 0x00000800u) != 0;
+  return value;
+}
+inline bool AcquiredDiagSignal::has_reserved() const {
+  return _internal_has_reserved();
+}
+inline void AcquiredDiagSignal::clear_reserved() {
+  reserved_ = false;
+  _has_bits_[0] &= ~0x00000800u;
+}
+inline bool AcquiredDiagSignal::_internal_reserved() const {
+  return reserved_;
+}
+inline bool AcquiredDiagSignal::reserved() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignal.reserved)
+  return _internal_reserved();
+}
+inline void AcquiredDiagSignal::_internal_set_reserved(bool value) {
+  _has_bits_[0] |= 0x00000800u;
+  reserved_ = value;
+}
+inline void AcquiredDiagSignal::set_reserved(bool value) {
+  _internal_set_reserved(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagSignal.reserved)
+}
+
+// optional int32 apertureType = 13 [default = 0];
+inline bool AcquiredDiagSignal::_internal_has_aperturetype() const {
+  bool value = (_has_bits_[0] & 0x00002000u) != 0;
+  return value;
+}
+inline bool AcquiredDiagSignal::has_aperturetype() const {
+  return _internal_has_aperturetype();
+}
+inline void AcquiredDiagSignal::clear_aperturetype() {
+  aperturetype_ = 0;
+  _has_bits_[0] &= ~0x00002000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 AcquiredDiagSignal::_internal_aperturetype() const {
+  return aperturetype_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 AcquiredDiagSignal::aperturetype() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignal.apertureType)
+  return _internal_aperturetype();
+}
+inline void AcquiredDiagSignal::_internal_set_aperturetype(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00002000u;
+  aperturetype_ = value;
+}
+inline void AcquiredDiagSignal::set_aperturetype(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_aperturetype(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagSignal.apertureType)
+}
+
+// optional double coarseAperture = 14 [default = 0];
+inline bool AcquiredDiagSignal::_internal_has_coarseaperture() const {
+  bool value = (_has_bits_[0] & 0x00001000u) != 0;
+  return value;
+}
+inline bool AcquiredDiagSignal::has_coarseaperture() const {
+  return _internal_has_coarseaperture();
+}
+inline void AcquiredDiagSignal::clear_coarseaperture() {
+  coarseaperture_ = 0;
+  _has_bits_[0] &= ~0x00001000u;
+}
+inline double AcquiredDiagSignal::_internal_coarseaperture() const {
+  return coarseaperture_;
+}
+inline double AcquiredDiagSignal::coarseaperture() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignal.coarseAperture)
+  return _internal_coarseaperture();
+}
+inline void AcquiredDiagSignal::_internal_set_coarseaperture(double value) {
+  _has_bits_[0] |= 0x00001000u;
+  coarseaperture_ = value;
+}
+inline void AcquiredDiagSignal::set_coarseaperture(double value) {
+  _internal_set_coarseaperture(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagSignal.coarseAperture)
+}
+
+// optional double fineAperture = 15 [default = 0];
+inline bool AcquiredDiagSignal::_internal_has_fineaperture() const {
+  bool value = (_has_bits_[0] & 0x00008000u) != 0;
+  return value;
+}
+inline bool AcquiredDiagSignal::has_fineaperture() const {
+  return _internal_has_fineaperture();
+}
+inline void AcquiredDiagSignal::clear_fineaperture() {
+  fineaperture_ = 0;
+  _has_bits_[0] &= ~0x00008000u;
+}
+inline double AcquiredDiagSignal::_internal_fineaperture() const {
+  return fineaperture_;
+}
+inline double AcquiredDiagSignal::fineaperture() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignal.fineAperture)
+  return _internal_fineaperture();
+}
+inline void AcquiredDiagSignal::_internal_set_fineaperture(double value) {
+  _has_bits_[0] |= 0x00008000u;
+  fineaperture_ = value;
+}
+inline void AcquiredDiagSignal::set_fineaperture(double value) {
+  _internal_set_fineaperture(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagSignal.fineAperture)
+}
+
+// optional int32 absAddrBit = 16 [default = 0];
+inline bool AcquiredDiagSignal::_internal_has_absaddrbit() const {
+  bool value = (_has_bits_[0] & 0x00004000u) != 0;
+  return value;
+}
+inline bool AcquiredDiagSignal::has_absaddrbit() const {
+  return _internal_has_absaddrbit();
+}
+inline void AcquiredDiagSignal::clear_absaddrbit() {
+  absaddrbit_ = 0;
+  _has_bits_[0] &= ~0x00004000u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 AcquiredDiagSignal::_internal_absaddrbit() const {
+  return absaddrbit_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 AcquiredDiagSignal::absaddrbit() const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignal.absAddrBit)
+  return _internal_absaddrbit();
+}
+inline void AcquiredDiagSignal::_internal_set_absaddrbit(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00004000u;
+  absaddrbit_ = value;
+}
+inline void AcquiredDiagSignal::set_absaddrbit(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_absaddrbit(value);
+  // @@protoc_insertion_point(field_set:Network.AcquiredDiagSignal.absAddrBit)
+}
+
+// -------------------------------------------------------------------
+
+// AcquiredDiagSignals
+
+// repeated .Network.AcquiredDiagSignal diagSignals = 1;
+inline int AcquiredDiagSignals::_internal_diagsignals_size() const {
+  return diagsignals_.size();
+}
+inline int AcquiredDiagSignals::diagsignals_size() const {
+  return _internal_diagsignals_size();
+}
+inline void AcquiredDiagSignals::clear_diagsignals() {
+  diagsignals_.Clear();
+}
+inline ::Network::AcquiredDiagSignal* AcquiredDiagSignals::mutable_diagsignals(int index) {
+  // @@protoc_insertion_point(field_mutable:Network.AcquiredDiagSignals.diagSignals)
+  return diagsignals_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Network::AcquiredDiagSignal >*
+AcquiredDiagSignals::mutable_diagsignals() {
+  // @@protoc_insertion_point(field_mutable_list:Network.AcquiredDiagSignals.diagSignals)
+  return &diagsignals_;
+}
+inline const ::Network::AcquiredDiagSignal& AcquiredDiagSignals::_internal_diagsignals(int index) const {
+  return diagsignals_.Get(index);
+}
+inline const ::Network::AcquiredDiagSignal& AcquiredDiagSignals::diagsignals(int index) const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignals.diagSignals)
+  return _internal_diagsignals(index);
+}
+inline ::Network::AcquiredDiagSignal* AcquiredDiagSignals::_internal_add_diagsignals() {
+  return diagsignals_.Add();
+}
+inline ::Network::AcquiredDiagSignal* AcquiredDiagSignals::add_diagsignals() {
+  // @@protoc_insertion_point(field_add:Network.AcquiredDiagSignals.diagSignals)
+  return _internal_add_diagsignals();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Network::AcquiredDiagSignal >&
+AcquiredDiagSignals::diagsignals() const {
+  // @@protoc_insertion_point(field_list:Network.AcquiredDiagSignals.diagSignals)
+  return diagsignals_;
+}
+
+// repeated .Network.AcquiredDiagObject diagObjects = 2;
+inline int AcquiredDiagSignals::_internal_diagobjects_size() const {
+  return diagobjects_.size();
+}
+inline int AcquiredDiagSignals::diagobjects_size() const {
+  return _internal_diagobjects_size();
+}
+inline void AcquiredDiagSignals::clear_diagobjects() {
+  diagobjects_.Clear();
+}
+inline ::Network::AcquiredDiagObject* AcquiredDiagSignals::mutable_diagobjects(int index) {
+  // @@protoc_insertion_point(field_mutable:Network.AcquiredDiagSignals.diagObjects)
+  return diagobjects_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Network::AcquiredDiagObject >*
+AcquiredDiagSignals::mutable_diagobjects() {
+  // @@protoc_insertion_point(field_mutable_list:Network.AcquiredDiagSignals.diagObjects)
+  return &diagobjects_;
+}
+inline const ::Network::AcquiredDiagObject& AcquiredDiagSignals::_internal_diagobjects(int index) const {
+  return diagobjects_.Get(index);
+}
+inline const ::Network::AcquiredDiagObject& AcquiredDiagSignals::diagobjects(int index) const {
+  // @@protoc_insertion_point(field_get:Network.AcquiredDiagSignals.diagObjects)
+  return _internal_diagobjects(index);
+}
+inline ::Network::AcquiredDiagObject* AcquiredDiagSignals::_internal_add_diagobjects() {
+  return diagobjects_.Add();
+}
+inline ::Network::AcquiredDiagObject* AcquiredDiagSignals::add_diagobjects() {
+  // @@protoc_insertion_point(field_add:Network.AcquiredDiagSignals.diagObjects)
+  return _internal_add_diagobjects();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Network::AcquiredDiagObject >&
+AcquiredDiagSignals::diagobjects() const {
+  // @@protoc_insertion_point(field_list:Network.AcquiredDiagSignals.diagObjects)
+  return diagobjects_;
+}
+
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

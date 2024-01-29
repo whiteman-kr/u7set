@@ -41,11 +41,11 @@ set (U7_SOURCES
 	../lib/Tuning/TuningFilterEditor.h
 	../lib/Tuning/TuningModel.cpp
 	../lib/Tuning/TuningModel.h
+	../lib/Ui/ChooseTagsWidget.cpp
+	../lib/Ui/ChooseTagsWidget.h
 	../lib/Ui/ClickableLabel.h
 	../lib/Ui/DialogAbout.cpp
 	../lib/Ui/DialogAbout.h
-	../lib/Ui/ChooseTagsWidget.cpp
-	../lib/Ui/ChooseTagsWidget.h
 	../lib/Ui/DialogProgress.cpp
 	../lib/Ui/DialogProgress.h
 	../lib/Ui/DialogSignalInfo.cpp
@@ -54,6 +54,8 @@ set (U7_SOURCES
 	../lib/Ui/DialogSignalSearch.h
 	../lib/Ui/DialogSignalSnapshot.cpp
 	../lib/Ui/DialogSignalSnapshot.h
+	../lib/Ui/DialogWriteValues.cpp
+	../lib/Ui/DialogWriteValues.h
 	../lib/Ui/DragDropHelper.cpp
 	../lib/Ui/DragDropHelper.h
 	../lib/Ui/FilesTreeView.cpp
@@ -66,8 +68,6 @@ set (U7_SOURCES
 	../lib/Ui/TagSelectorWidget.h
 	../lib/Ui/TextEditCompleter.cpp
 	../lib/Ui/TextEditCompleter.h
-	../lib/Ui/DialogWriteValues.cpp
-	../lib/Ui/DialogWriteValues.h
 	../lib/WidgetUtils.cpp
 	../lib/WidgetUtils.h
 	AppSignalPropertyManager.cpp
@@ -164,6 +164,8 @@ set (U7_SOURCES
 	Forms/CompareDialog.h
 	Forms/ComparePropertyObjectDialog.cpp
 	Forms/ComparePropertyObjectDialog.h
+	Forms/DialogDiagSignalTypes.cpp
+	Forms/DialogDiagSignalTypes.h
 	Forms/DialogProjectDiff.cpp
 	Forms/DialogProjectDiff.h
 	Forms/DialogUpdateFromPreset.cpp
@@ -209,10 +211,10 @@ set (U7_SOURCES
 	ProjectsTabPage.h
 	Reports/DialogReportPageSetup.cpp
 	Reports/DialogReportPageSetup.h
-	Reports/DialogSchemasReport.cpp
-	Reports/DialogSchemasReport.h
 	Reports/DialogSchemasExport.cpp
 	Reports/DialogSchemasExport.h
+	Reports/DialogSchemasReport.cpp
+	Reports/DialogSchemasReport.h
 	Reports/ProjectDiffReport.cpp
 	Reports/ProjectDiffReport.h
 	Reports/ReportPropertyEditor.cpp
@@ -227,6 +229,8 @@ set (U7_SOURCES
 	SchemaEditor/CreateSignalDialog.h
 	SchemaEditor/EditConnectionLine.cpp
 	SchemaEditor/EditConnectionLine.h
+	SchemaEditor/EditSchemaDiagStateProvider.cpp
+	SchemaEditor/EditSchemaDiagStateProvider.h
 	SchemaEditor/EditSchemaSignalProvider.cpp
 	SchemaEditor/EditSchemaSignalProvider.h
 	SchemaEditor/EditSchemaTabPage.cpp

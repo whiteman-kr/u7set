@@ -1,12 +1,11 @@
 #pragma once
 
+#include "../SchemaClientLib/ClientSchemaManager.h"
 #include "../lib/ISignalDataServer.h"
-#include "../VFrame30/Schema.h"
-#include "../VFrame30/SchemaManager.h"
-#include "MonitorConfigController.h"
 #include "./Trend/RtSchemaTrend.h"
+#include "MonitorConfigController.h"
 
-class MonitorSchemaManager : public VFrame30::SchemaManager
+class MonitorSchemaManager : public SchemaClientLib::ClientSchemaManager
 {
 	Q_OBJECT
 
@@ -14,27 +13,9 @@ public:
 	explicit MonitorSchemaManager(MonitorConfigController& configController,
 								  const ISignalDataServer& signalDataServer,
 								  QObject* parent = nullptr);
-	virtual ~MonitorSchemaManager();
 
 public:
-	[[nodiscard]] bool hasSchema(QString schemaId) const;
-
-protected:
-	[[nodiscard]] virtual std::shared_ptr<VFrame30::Schema> loadSchema(QString schemaId) override;
-
-public:
-	[[nodiscard]] virtual int schemaCount() const override;
-	[[nodiscard]] virtual std::shared_ptr<VFrame30::Schema> schemaByIndex(int schemaIndex,
-																		  std::shared_ptr<VFrame30::Context> context) override;
-
-	[[nodiscard]] virtual QString schemaCaptionById(const QString& schemaId) const override;
-	[[nodiscard]] virtual QString schemaCaptionByIndex(int schemaIndex) const override;
-	[[nodiscard]] virtual QString schemaIdByIndex(int schemaIndex) const override;
-
 	// RealTimeTrends for schemas, SchemaItemIndicator, type = Trend
-	//
-public:
-
 	// RealTime Trends (ITrendDataProvider)
 	//
 	virtual bool trendData(QUuid trendUuid,
@@ -47,20 +28,18 @@ public:
 
 	virtual TimeStamp maxTimeStamp(QUuid trendUuid, E::TimeType timeType) const override;
 
-	void updateConfiguration(const ConfigSettings& configuration);
+	void updateConfiguration(const MonitorConfigSettings& configuration);
 
 public:
-	[[nodiscard]] MonitorConfigController& monitorConfigController();
-	[[nodiscard]] const MonitorConfigController& monitorConfigController() const;
+	[[nodiscard]] MonitorConfigController& configController();
+	[[nodiscard]] const MonitorConfigController& configController() const;
 
 	// Data
 	//
 private:
-	MonitorConfigController& m_configController;
 	const ISignalDataServer& m_signalDataServer;
 
 	// Data for RealTimeTrends on schemas, SchemaItemIndicator, type = Trend
 	//
 	RtSchemaTrend m_rtTrendSchemas;
 };
-

@@ -91,6 +91,10 @@ qt_add_library(${TARGET} STATIC
 	DeviceHelper.h
 	DiagDataServiceCfgGenerator.cpp
 	DiagDataServiceCfgGenerator.h
+	DiagnosticsCfgGenerator.cpp
+	DiagnosticsCfgGenerator.h
+	DiagSignalTypesStorage.cpp
+	DiagSignalTypesStorage.h
 	FbParamCalculation.cpp
 	GatewayServiceCfgGenerator.cpp
 	GatewayServiceCfgGenerator.h

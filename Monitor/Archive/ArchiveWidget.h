@@ -4,13 +4,17 @@
 #include "ArchiveModelView.h"
 #include "ArchiveConnection.h"
 
-class MonitorSignalManager;
+
+namespace ClientLib
+{
+	class AppSignalManager;
+}
 
 class ArchiveWidget : public QMainWindow
 {
 	Q_OBJECT
 public:
-	explicit ArchiveWidget(MonitorSignalManager* signalManager,
+	explicit ArchiveWidget(ClientLib::AppSignalManager& signalManager,
 						   MonitorConfigController* configController,
 						   QWidget* parent);
 	virtual ~ArchiveWidget();
@@ -54,7 +58,7 @@ protected slots:
 	void showSignalInfo(QString appSignalId);							// Slot to ArchiveView::requestToShowSignalInfo
 	void removeSignal(QString appSignalId, QString archiveServiceId);	// Slot to ArchiveView::requestToRemoveSignal
 
-	void slot_configurationArrived(ConfigSettings configuration);
+	void slot_configurationArrived(MonitorConfigSettings configuration);
 
 	void dataReceived(std::shared_ptr<ArchiveRequestResult> chunk);
 	void requestError(QString errorMessage);
@@ -64,7 +68,7 @@ protected slots:
 	// Data
 	//
 private:
-	MonitorSignalManager* m_signalManager = nullptr;
+	ClientLib::AppSignalManager& m_signalManager;
 
 	// These three updated on slot_configurationArrived
 	//

@@ -15,6 +15,8 @@ add_library(${TARGET} STATIC
 	Report.h
 	ReportAppSignalProvider.cpp
 	ReportAppSignalProvider.h
+	ReportDiagStateProvider.cpp
+	ReportDiagStateProvider.h
 	ReportGenerator.cpp
 	ReportGenerator.h
 	ReportObject.cpp

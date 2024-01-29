@@ -12,6 +12,7 @@
 #include "../VFrame30/Bus.h"
 #include "../VFrame30/LogicSchema.h"
 #include "../lib/TuningDataStorage.h"
+#include "DiagSignalTypesStorage.h"
 
 #include "BuildResultWriter.h"
 #include "ConnectionStorage.h"
@@ -100,6 +101,8 @@ namespace Builder
 		std::map<QString, std::list<LmPackedLogicSources>> m_packedLogicSources;	// Key is label of packed_*_out schema item => list of LmPacketLogicSources
 
 		DbMatsUserStorage m_matsUsers;
+
+		std::shared_ptr<DiagSignalTypesStorage> m_diagSignalTypes;
 	};
 
 } // namespace Builder

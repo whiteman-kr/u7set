@@ -22,7 +22,7 @@ protected:
 	virtual void updateScriptGlobalVars(QJSEngine& engine) override;
 
 private slots:
-	void configurationArrived(ConfigSettings configuration);
+	void configurationArrived(TuningClientConfigSettings configuration);
 
 	// Data
 	//

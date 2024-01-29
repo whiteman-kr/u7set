@@ -901,8 +901,10 @@ namespace Builder
 												   const std::vector<SchemaTypesParams>& schemaTypesParams) :
 		m_schemaView(schemaView),
 		m_printer(schemaView),
+		m_diagStateProvider(),
+		m_diagStateController(m_diagStateProvider, nullptr),
 		m_appSignalProvider(signalSet),
-		m_appSignalController(&m_appSignalProvider, nullptr),
+		m_appSignalController(m_appSignalProvider, nullptr),
 		m_inputFiles(files),
 		m_filePath(filePath),
 		m_serverIp(serverIp),
@@ -949,7 +951,7 @@ namespace Builder
 									  QPageLayout::Unit::Millimeter),
 						  layoutNames});
 
-		result.push_back({db->systemFileId(DbDir::DiagnosticsSchemasDir),
+		result.push_back({db->systemFileId(DbDir::DiagSchemasDir),
 						  QObject::tr("Diagnostics Schemas"),
 						  true,
 						  QPageLayout(QPageSize(QPageSize::A3),
@@ -1639,9 +1641,10 @@ namespace Builder
 			}
 		}
 
+		auto context = VFrame30::Context::create(&m_diagStateController, &m_appSignalController, nullptr, nullptr, nullptr);
+
 		// Load schemas from files
 		//
-
 		for (const std::shared_ptr<DbFile>& dbFile : out)
 		{
 			if (m_stop == true)
@@ -1654,6 +1657,8 @@ namespace Builder
 			{
 				throw(tr("Failed to load schema from '%1'!").arg(dbFile->fileName()));
 			}
+
+			schema->setContext(context);
 
 			{
 				QMutexLocker l(&m_statisticsMutex);
@@ -1745,7 +1750,7 @@ namespace Builder
 		// Render schemas
 		//
 		{
-			auto context = VFrame30::Context::create(&m_appSignalController, nullptr, &report->reportVariables(), nullptr);
+			auto context = VFrame30::Context::create(&m_diagStateController, &m_appSignalController, nullptr, &report->reportVariables(), nullptr);
 
 			for (const auto& schemaInfo : schemas)
 			{

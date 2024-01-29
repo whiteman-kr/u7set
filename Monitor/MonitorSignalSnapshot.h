@@ -3,17 +3,21 @@
 #include "../lib/Ui/DialogSignalSnapshot.h"
 #include "MonitorCentralWidget.h"
 
+
+class MonitorConfigController;
+
+
 class MonitorDialogSignalSnapshot : public DialogSignalSnapshot
 {
 	Q_OBJECT
 
 public:
-	static MonitorDialogSignalSnapshot* createDialog(MonitorConfigController *configController,
-													 MonitorSignalManager* monitorSignalManager,
+	static MonitorDialogSignalSnapshot* createDialog(MonitorConfigController* configController,
+													 ClientLib::AppSignalManager* monitorAppSignalManager,
 													 MonitorCentralWidget* centralWidget);
 
 private:
-	explicit MonitorDialogSignalSnapshot(MonitorConfigController *configController,
+	explicit MonitorDialogSignalSnapshot(MonitorConfigController* configController,
 										 IAppSignalManager* appSignalManager,
 										 ISignalDataServer* signalDataServer,
 										 const QString& projectName,

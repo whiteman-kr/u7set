@@ -37,7 +37,7 @@ bool MonitorTrends::activateTrendWindow(MonitorTrendsWidget* trendWidget)
 	return true;
 }
 
-bool MonitorTrends::startTrendApp(const MonitorSignalManager& signalManager,
+bool MonitorTrends::startTrendApp(const ClientLib::AppSignalManager& signalManager,
 								  const MonitorConfigController& configController,
 								  const std::vector<AppSignalParam>& appSignals,
 								  QWidget* parent)
@@ -124,7 +124,7 @@ void MonitorTrends::unregisterTrendWindow(const MonitorTrendsWidget* window)
 }
 
 
-MonitorTrendsWidget::MonitorTrendsWidget(const MonitorSignalManager& signalManager,
+MonitorTrendsWidget::MonitorTrendsWidget(const ClientLib::AppSignalManager& signalManager,
 										 const MonitorConfigController& configController,
 										 QWidget* parent) :
 	TrendLib::TrendMainWindow(parent),
@@ -283,17 +283,17 @@ void MonitorTrendsWidget::signalsButton()
 	//
 	struct SignalHasTag : ISignalHasTag
 	{
-		SignalHasTag(const MonitorSignalManager& ms) :
-			monitorSignalManager(ms)
+		SignalHasTag(const ClientLib::AppSignalManager& ms) :
+			monitorAppSignalManager(ms)
 		{
 		}
 
 		virtual bool signalHasTag(const QString& signalId, const QString& tag) const override
 		{
-			return monitorSignalManager.signalHasTag(signalId, tag);
+			return monitorAppSignalManager.signalHasTag(signalId, tag);
 		}
 
-		const MonitorSignalManager& monitorSignalManager;
+		const ClientLib::AppSignalManager& monitorAppSignalManager;
 	} signalHasTag{m_signalManager};
 
 	// --
@@ -644,7 +644,7 @@ void MonitorTrendsWidget::slot_trendModeChanged()
 	return;
 }
 
-void MonitorTrendsWidget::slot_configurationArrived(ConfigSettings /*configuration*/)
+void MonitorTrendsWidget::slot_configurationArrived(MonitorConfigSettings /*configuration*/)
 {
 	if (trendMode() == E::TrendMode::Archive)
 	{

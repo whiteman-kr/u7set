@@ -128,7 +128,8 @@ bool LanControllerInfoHelper::getInfo(const Hardware::DeviceModule& lm,
 
 				if (ignoreTuningData == true)
 				{
-					lanControllerInfo->tuningDataUID = 0;
+					lanControllerInfo->rupTuningDataUID = 0;
+					lanControllerInfo->fotipTuningDataUID = 0;
 				}
 				else
 				{
@@ -143,7 +144,8 @@ bool LanControllerInfoHelper::getInfo(const Hardware::DeviceModule& lm,
 					}
 					else
 					{
-						lanControllerInfo->tuningDataUID = tuningData->uniqueID();
+						lanControllerInfo->rupTuningDataUID = tuningData->rupTuningDataUID();
+						lanControllerInfo->fotipTuningDataUID = tuningData->fotipTuningDataUID();
 					}
 				}
 			}
@@ -172,12 +174,11 @@ bool LanControllerInfoHelper::getInfo(const Hardware::DeviceModule& lm,
 		result &= DeviceHelper::getIntProperty(deviceController, EquipmentPropNames::OVERRIDE_APP_DATA_WORD_COUNT,
 												&lanControllerInfo->overrideAppDataWordCount, log);
 
-		result &= DeviceHelper::getUIntProperty(&lm, EquipmentPropNames::LM_APP_LAN_DATA_UID,
-												&lanControllerInfo->appDataUID, log);
-
+		result &= DeviceHelper::getUIntProperty(&lm, EquipmentPropNames::APP_LAN_DATA_UID,
+												&lanControllerInfo->rupAppDataUID, log);
 		int appDataSizeW = 0;
 
-		result &= DeviceHelper::getIntProperty(&lm, EquipmentPropNames::LM_APP_LAN_DATA_SIZE,
+		result &= DeviceHelper::getIntProperty(&lm, EquipmentPropNames::APP_LAN_DATA_SIZE,
 											   &appDataSizeW, log);
 
 		lanControllerInfo->appDataSizeBytes = appDataSizeW * sizeof(quint16);
@@ -232,7 +233,9 @@ bool LanControllerInfoHelper::getInfo(const Hardware::DeviceModule& lm,
 		result &= DeviceHelper::getIntProperty(deviceController, EquipmentPropNames::OVERRIDE_DIAG_DATA_WORD_COUNT,
 												&lanControllerInfo->overrideDiagDataWordCount, log);
 
-		lanControllerInfo->diagDataUID = 0;
+		result &= DeviceHelper::getUIntProperty(&lm, EquipmentPropNames::DIAG_LAN_DATA_UID,
+												&lanControllerInfo->rupDiagDataUID, log);
+
 		lanControllerInfo->diagDataSizeBytes = 0;
 		lanControllerInfo->diagDataFramesQuantity = 0;
 

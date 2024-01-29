@@ -3,6 +3,7 @@
 #endif
 
 #include "DeviceObject.h"
+#include "DiagSignal.h"
 #include "ScriptDeviceObject.h"
 #include "../lib/ConstStrings.h"
 
@@ -10,74 +11,33 @@ namespace Hardware
 {
 	const std::array<QString, 10> DeviceObjectExtensions =
 		{
-			".hrt",			// Root
-			".hsm",			// System
-			".hrk",			// Rack
-			".hcs",			// Chassis
-			".hmd",			// Module
+			".hrt",			// DeviceRoot
+			".hsm",			// DeviceSystem
+			".hrk",			// DeviceRack
+			".hcs",			// DeviceChassis
+			".hmd",			// DeviceModule
 			".hws",			// Workstation
 			".hsw",			// Software
-			".hcr",			// Controller
-			".hds",			// AppSignal
-			".hdds",		// DiagSignal
+			".hcr",			// DeviceController
+			".hds",			// DeviceAppSignal
+			".hsd",			// DiagSignal
 		};
 
 	extern const std::array<QString, 10> DeviceTypeNames =
 		{
-			"Root",			// Root
-			"System",		// System
-			"Rack",			// Rack
-			"Chassis",		// Chassis
-			"Module",		// Module
+			"Root",			// DeviceRoot
+			"System",		// DeviceSystem
+			"Rack",			// DeviceRack
+			"Chassis",		// DeviceChassis
+			"Module",		// DeviceModule
 			"Workstation",	// Workstation
 			"Software",		// Software
-			"Controller",	// Controller
-			"AppSignal",	// Signal
-			"DiagSignal",	// Signal
+			"Controller",	// DeviceController
+			"AppSignal",	// DeviceAppSignal
+			"DiagSignal",	// DiagSignal
 		};
 
 	Factory<DeviceObject> DeviceObjectFactory;
-
-	void init()
-	{
-		qDebug() << "Hardware::init";
-
-		// --
-		//
-		static bool firstRun = false;
-		if (firstRun)
-		{
-			Q_ASSERT(false);
-			Hardware::DeviceObjectFactory.clear();
-		}
-
-		firstRun = true;
-
-		//--
-		//
-		Hardware::DeviceObjectFactory.Register<Hardware::DeviceRoot>();
-		Hardware::DeviceObjectFactory.Register<Hardware::DeviceSystem>();
-		Hardware::DeviceObjectFactory.Register<Hardware::DeviceRack>();
-		Hardware::DeviceObjectFactory.Register<Hardware::DeviceChassis>();
-		Hardware::DeviceObjectFactory.Register<Hardware::DeviceModule>();
-		Hardware::DeviceObjectFactory.Register<Hardware::DeviceController>();
-		Hardware::DeviceObjectFactory.Register<Hardware::DeviceAppSignal>();
-		Hardware::DeviceObjectFactory.Register<Hardware::DeviceAppSignal>("DeviceSignal");		// DeviceAppSignal used to be DeviceSignal, so create fabrica for DeviceSignal too
-		Hardware::DeviceObjectFactory.Register<Hardware::Workstation>();
-		Hardware::DeviceObjectFactory.Register<Hardware::Software>();
-
-		return;
-	}
-
-
-	void shutdown()
-	{
-		qDebug() << "Hardware::Shutdown";
-
-		DeviceObject::PrintRefCounter();
-
-		return;
-	}
 
 	//
 	//
@@ -115,17 +75,59 @@ namespace Hardware
 	const QString PropertyNames::format = "Format";
 	const QString PropertyNames::memoryArea = "MemoryArea";
 	const QString PropertyNames::size = "Size";
+	const QString PropertyNames::units = "Units";
+	const QString PropertyNames::analogFormat = "AnalogFormat";
 
+	const QString PropertyNames::diagDataOffset = "DiagDataOffset";
+	const QString PropertyNames::inverseValue = "InverseValue";
+	const QString PropertyNames::normalState = "NormalState";
+	const QString PropertyNames::normalStateString0 = "NormalStateString0";
+	const QString PropertyNames::normalStateString1 = "NormalStateString1";
+	
+	const QString PropertyNames::adcHighLimit = "AdcHighLimit";
+	const QString PropertyNames::adcLowLimit = "AdcLowLimit";
+	const QString PropertyNames::valueHighLimit = "ValueHighLimit";
+	const QString PropertyNames::valueLowLimit = "ValueLowLimit";
+	const QString PropertyNames::valueMultiplier = "ValueMultiplier";
+	//const QString PropertyNames::valueOffset = "ValueOffset";
+	const QString PropertyNames::useLimits = "UseLimits";
+
+	const QString PropertyNames::isReflection = "IsReflection";
+	const QString PropertyNames::reflectedSignalId = "ReflectedSignalID";
+	const QString PropertyNames::level = "Level";
 	const QString PropertyNames::valueOffset = "ValueOffset";
 	const QString PropertyNames::valueBit = "ValueBit";
-	const QString PropertyNames::validitySignalId = "ValiditySiganlID";
+	const QString PropertyNames::valueBitSize = "ValueBitSize";
+	const QString PropertyNames::valueBitSizeDescription = "Size of data in bits, usually 1, 16, 32...";
+	const QString PropertyNames::discreteContainerSize = "DiscreteContainerSize";
+	const QString PropertyNames::discreteContainerSizeDescription = "Container size of discrete signals, bytes";
+	const QString PropertyNames::validitySignalId = "ValiditySignalID";
 	const QString PropertyNames::appSignalDataFormat = "AppAnalogSignalFormat";
 	const QString PropertyNames::appSignalBusTypeId = "BusTypeID";
 
+	const QString PropertyNames::logChanges = "LogChanges";
+	const QString PropertyNames::archive = "Archive";
+	const QString PropertyNames::reserved = "Reserved";
+	const QString PropertyNames::coarseAperture = "CoarseAperture";
+	const QString PropertyNames::fineAperture = "FineAperture";
+	const QString PropertyNames::apertureType = "ApertureType";
+	const QString PropertyNames::decimalPlaces = "DecimalPlaces";
+
 	const QString PropertyNames::hostname = "Hostname";
+	
+	const QString PropertyNames::diagSignalTypeId = "DiagSignalTypeID";
+	
+	const QString PropertyNames::systemSignalType = "SystemSignalType";
+	const QString PropertyNames::systemSignalTypeDescription = "System signal types are predefined and cannot be changed or deleted.";
 
 	const QString PropertyNames::categoryCommon = "Common";
 	const QString PropertyNames::categoryAppSignal = "AppSignal";
+	const QString PropertyNames::categoryDiagSignal = "DiagSignal";
+	const QString PropertyNames::categoryDiscrete = "Type Discrete";
+	const QString PropertyNames::categoryAnalog = "Type Analog";
+	const QString PropertyNames::categoryData = "Data";
+	const QString PropertyNames::categoryMats = "MATS";
+	const QString PropertyNames::categoryDiagnostics = "Diagnostics";
 
 	//
 	//
@@ -613,6 +615,12 @@ namespace Hardware
 		return DeviceTypeNames[static_cast<size_t>(m_deviceType)];
 	}
 
+	QString DeviceObject::deviceTypeName(DeviceType type) noexcept
+	{
+		Q_ASSERT(static_cast<size_t>(type) < std::size(Hardware::DeviceTypeNames));
+		return DeviceTypeNames[static_cast<size_t>(type)];
+	}
+
 	bool DeviceObject::isRoot() const noexcept
 	{
 		return deviceType() == DeviceType::Root;
@@ -656,6 +664,11 @@ namespace Hardware
 	bool DeviceObject::isAppSignal() const noexcept
 	{
 		return deviceType() == DeviceType::AppSignal;
+	}
+
+	bool DeviceObject::isDiagSignal() const noexcept
+	{
+		return deviceType() == DeviceType::DiagSignal;
 	}
 
 	std::shared_ptr<const DeviceRoot> DeviceObject::toRoot() const noexcept
@@ -727,6 +740,16 @@ namespace Hardware
 	std::shared_ptr<DeviceAppSignal> DeviceObject::toAppSignal() noexcept
 	{
 		return toType<DeviceAppSignal>();
+	}
+
+	std::shared_ptr<const Hardware::DiagSignal> DeviceObject::toDiagSignal() const noexcept
+	{
+		return toType<const Hardware::DiagSignal>();
+	}
+
+	std::shared_ptr<Hardware::DiagSignal> DeviceObject::toDiagSignal() noexcept
+	{
+		return toType<Hardware::DiagSignal>();
 	}
 
 	std::shared_ptr<const Workstation> DeviceObject::toWorkstation() const noexcept
@@ -858,6 +881,29 @@ namespace Hardware
 			{
 				return deviceObject->toChassis().get();
 			}
+		}
+		while(deviceObject != nullptr);
+
+		return nullptr;
+	}
+
+	std::shared_ptr<const Hardware::DeviceChassis> DeviceObject::getParentChassisShared() const
+	{
+		std::shared_ptr<const Hardware::DeviceObject> deviceObject = parent();
+
+		do
+		{
+			if (deviceObject == nullptr)
+			{
+				break;
+			}
+
+			if (deviceObject->isChassis())
+			{
+				return deviceObject->toChassis();
+			}
+
+			deviceObject = deviceObject->parent();
 		}
 		while(deviceObject != nullptr);
 
@@ -1069,12 +1115,20 @@ namespace Hardware
 
 		if (deviceType() == DeviceType::Software)
 		{
-			return childType == DeviceType::Controller;
+			return childType == DeviceType::Controller ||
+				   childType == DeviceType::DiagSignal;
 		}
 
 		if (deviceType() == DeviceType::Workstation)
 		{
-			return childType == DeviceType::Software;
+			return childType == DeviceType::Software ||
+				   childType == DeviceType::DiagSignal;
+		}
+
+		if (deviceType() == DeviceType::AppSignal &&
+			childType == DeviceType::DiagSignal)
+		{
+			return false;
 		}
 
 		if (deviceType() >= childType)
@@ -1088,10 +1142,9 @@ namespace Hardware
 			return false;
 		}
 
-		if ((childType == DeviceType::AppSignal || childType == DeviceType::DiagSignal) &&
-			parent() != nullptr && parent()->isSoftware() == true)
+		if (childType == DeviceType::AppSignal && parent() != nullptr && parent()->isSoftware() == true)
 		{
-			// Cannot add any signal to software or software\controller
+			// Cannot add app signal to software or software\controller
 			//
 			return false;
 		}
@@ -2042,6 +2095,10 @@ R"DELIM({
 	DeviceController::DeviceController(bool preset /*= false*/, QObject* parent /*= nullptr*/) :
 		DeviceObject(DeviceType::Controller, preset, parent)
 	{
+		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::diagDataOffset, PropertyNames::categoryDiagnostics, true, DeviceController::diagDataOffset, DeviceController::setDiagDataOffset)
+			->setUpdateFromPreset(true);
+
+		return;
 	}
 
 	bool DeviceController::SaveData(Proto::Envelope* message, bool saveTree) const
@@ -2058,9 +2115,7 @@ R"DELIM({
 		//
 		Proto::DeviceController* controllerMessage = message->mutable_deviceobject()->mutable_controller();
 
-		Q_UNUSED(controllerMessage);
-		//controllerMessage->set_startxdocpt(m_startXDocPt);
-		//controllerMessage->set_startydocpt(m_startYDocPt);
+		controllerMessage->set_diagdataoffset(m_diagDataOffset);
 
 		return true;
 	}
@@ -2089,11 +2144,19 @@ R"DELIM({
 
 		const Proto::DeviceController& controllerMessage = message.deviceobject().controller();
 
-		Q_UNUSED(controllerMessage);
-		//x = controllerMessage.startxdocpt();
-		//y = controllerMessage.startydocpt();
+		m_diagDataOffset = controllerMessage.diagdataoffset();
 
 		return true;
+	}
+
+	int DeviceController::diagDataOffset() const
+	{
+		return m_diagDataOffset;
+	}
+
+	void DeviceController::setDiagDataOffset(int value)
+	{
+		m_diagDataOffset = value;
 	}
 
 	//
@@ -2623,7 +2686,7 @@ R"DELIM({
 	{
 		m_appSignalDataFormat = value;
 	}
-
+	 
 	QString DeviceAppSignal::appSignalBusTypeId() const
 	{
 		return m_appSignalBusTypeId;

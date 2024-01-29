@@ -1,5 +1,6 @@
 #include "MonitorArchive.h"
 #include "ArchiveWidget.h"
+#include "../ClientLib/AppSignalManager.h"
 
 //
 //
@@ -38,12 +39,11 @@ bool MonitorArchive::activateWindow(QString archiveName)
 	return true;
 }
 
-bool MonitorArchive::startNewWidget(MonitorSignalManager* signalManager,
+bool MonitorArchive::startNewWidget(ClientLib::AppSignalManager& signalManager,
 									MonitorConfigController* configController,
 									const std::vector<AppSignalParam>& appSignals,
 									QWidget* parent)
 {
-	Q_ASSERT(signalManager);
 	Q_ASSERT(configController);
 
 	ArchiveWidget* window = new ArchiveWidget(signalManager, configController, parent);
@@ -53,7 +53,7 @@ bool MonitorArchive::startNewWidget(MonitorSignalManager* signalManager,
 	return false;
 }
 
-bool MonitorArchive::requestArchiveWithNewWidget(MonitorSignalManager* signalManager,
+bool MonitorArchive::requestArchiveWithNewWidget(ClientLib::AppSignalManager& signalManager,
 												 MonitorConfigController* configController,
 												 const std::vector<AppSignalParam>& appSignals,
 												 QDateTime startTime,
@@ -61,7 +61,6 @@ bool MonitorArchive::requestArchiveWithNewWidget(MonitorSignalManager* signalMan
 												 E::TimeType timeType,
 												 QWidget* parent)
 {
-	Q_ASSERT(signalManager);
 	Q_ASSERT(configController);
 
 	ArchiveWidget* window = new ArchiveWidget(signalManager, configController, parent);

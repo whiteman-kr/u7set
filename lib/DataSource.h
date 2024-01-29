@@ -65,14 +65,14 @@ public:
 
 	// AppData properties
 
-	quint32 appDataUID() const;
+	quint32 rupAppDataUID() const;
 	int appDataFramesQuantity() const;
 	int appDataSizeBytes() const;
 	int overrideAppDataWordCount() const;
 
 	// DiagData properties
 
-	quint32 diagDataUID() const;
+	quint32 rupDiagDataUID() const;
 	int diagDataSizeBytes() const;
 	int diagDataFramesQuantity() const;
 	int overrideDiagDataWordCount() const;
@@ -80,7 +80,8 @@ public:
 	// Tuning properties
 
 	int fotipVersion() const { return m_lanControllersInfo.fotipVersion(); }
-	quint64 tuningDataUID() const;
+	quint32 rupTuningDataUID() const;
+	quint64 fotipTuningDataUID() const;
 
 	//
 

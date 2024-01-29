@@ -1,19 +1,26 @@
 #ifndef MONITORSIGNALINFO_H
 #define MONITORSIGNALINFO_H
 
-#include "MonitorSignalManager.h"
-#include "../lib/Ui/DialogSignalInfo.h"
 #include "../lib/ISignalDataServer.h"
+#include "../lib/Ui/DialogSignalInfo.h"
+#include "MonitorCentralWidget.h"
 
-class MonitorCentralWidget;
+
 class MonitorConfigController;
+
+namespace ClientLib
+{
+	class AppSignalManager;
+}
+
 
 class MonitorSignalInfo : public DialogSignalInfo
 {
 	Q_OBJECT
+
 public:
 	static bool showDialog(QString appSignalId,
-						   MonitorSignalManager* appSignalManager,
+						   ClientLib::AppSignalManager& appSignalManager,
 						   ITuningSignalManager& tuningSignalManager,
 						   ITuningConnection& tuningConnection,
 						   ITuningAuthorization& tuningAuthorization,
@@ -23,7 +30,7 @@ public:
 private:
 	MonitorSignalInfo(const AppSignalParam& signal,
 					  MonitorConfigController* configController,
-					  IAppSignalManager* appSignalManager,
+					  IAppSignalManager& appSignalManager,
 					  ISignalDataServer* signalDataServer,
 					  ITuningSignalManager& tuningSignalManager,
 					  ITuningConnection& tuningConnection,

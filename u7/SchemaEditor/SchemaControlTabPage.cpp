@@ -8,6 +8,7 @@
 #include "../VFrame30/UfbSchema.h"
 #include "../VFrame30/TuningSchema.h"
 #include "../VFrame30/VduSchema.h"
+#include "../VFrame30/DiagSchema.h"
 #include "EditSchemaTabPage.h"
 #include "CreateSchemaDialog.h"
 #include "CheckInDialog.h"
@@ -221,25 +222,25 @@ QVariant SchemaListModel::data(const QModelIndex& index, int role/* = Qt::Displa
 				}
 
 				int excludedCount = m_files.calcIf(file->fileId(),
-													[this](const DbFileInfo& f) -> int
-													{
-														return excludedFromBuild(f.fileId()) ? 1 : 0;
-													});
+												   [this](const DbFileInfo& f) -> int
+												   {
+													   return excludedFromBuild(f.fileId()) ? 1 : 0;
+												   });
 
 				Builder::BuildIssues::Counter issues;
 
 				m_files.calcIf(file->fileId(),
-								[&issues](const DbFileInfo& f) -> int
-								{
-									QStringList fn = f.fileName().split('.');
-									if (fn.empty() == false)
-									{
-										auto issueCount = GlobalMessanger::instance().issueForSchema(fn.front());
-										issues.errors += issueCount.errors;
-										issues.warnings += issueCount.warnings;
-									}
-									return 0;
-								});
+							   [&issues](const DbFileInfo& f) -> int
+							   {
+								   QStringList fn = f.fileName().split('.');
+								   if (fn.empty() == false)
+								   {
+									   auto issueCount = GlobalMessanger::instance().issueForSchema(fn.front());
+									   issues.errors += issueCount.errors;
+									   issues.warnings += issueCount.warnings;
+								   }
+								   return 0;
+							   });
 
 				if (excludedCount != 0 && excludedThis == true)
 				{
@@ -534,7 +535,7 @@ std::pair<QModelIndex, bool> SchemaListModel::addFile(QModelIndex parentIndex, s
 }
 
 bool SchemaListModel::deleteFilesUpdate(const QModelIndexList& selectedIndexes,
-										  const std::vector<std::shared_ptr<DbFileInfo>>& deletedFiles)
+										const std::vector<std::shared_ptr<DbFileInfo>>& deletedFiles)
 {
 	std::vector<DbFileInfo> files;
 	files.reserve(deletedFiles.size());
@@ -548,9 +549,9 @@ bool SchemaListModel::deleteFilesUpdate(const QModelIndexList& selectedIndexes,
 }
 
 bool SchemaListModel::moveFilesUpdate(const QModelIndexList& selectedIndexes,
-										int movedToParnetId,
-										const std::vector<DbFileInfo>& movedFiles,
-										std::vector<QModelIndex>* addedFilesIndexes)
+									  int movedToParnetId,
+									  const std::vector<DbFileInfo>& movedFiles,
+									  std::vector<QModelIndex>* addedFilesIndexes)
 {
 	if (addedFilesIndexes == nullptr)
 	{
@@ -664,10 +665,10 @@ bool SchemaListModel::updateFiles(const QModelIndexList& selectedIndexes, const 
 	QModelIndexList sortedRowList = selectedIndexes;
 
 	std::sort(sortedRowList.begin(), sortedRowList.end(),		// Actually, this sort is not required anymore, as rows to remove are stored in map removeRows, which is sorted itslef
-		[](QModelIndex& m1, QModelIndex m2)
-		{
-			return m1.internalId() >= m2.internalId();
-		});
+			  [](QModelIndex& m1, QModelIndex m2)
+			  {
+				  return m1.internalId() >= m2.internalId();
+			  });
 
 	// Update model
 	//
@@ -1299,11 +1300,13 @@ const std::set<QString>& SchemaListModel::tags() const
 //
 SchemaProxyListModel::SchemaProxyListModel(QObject* parent) :
 	QSortFilterProxyModel(parent)
-{}
+{
+}
 
 
 SchemaProxyListModel::~SchemaProxyListModel()
-{}
+{
+}
 
 void SchemaProxyListModel::setSourceModel(QAbstractItemModel* sourceModel)
 {
@@ -1416,8 +1419,8 @@ SchemaFileView::SchemaFileView(DbController* dbc, QWidget* parent) :
 #ifdef _DEBUG
 #if QT_VERSION >= QT_VERSION_CHECK(6, 4, 0)
 	[[maybe_unused]] QAbstractItemModelTester* modelTester = new QAbstractItemModelTester(&m_filesModel,
-																		 QAbstractItemModelTester::FailureReportingMode::Fatal,
-																		 this);
+																						  QAbstractItemModelTester::FailureReportingMode::Fatal,
+																						  this);
 #endif
 #endif
 
@@ -2216,7 +2219,8 @@ SchemaControlTabPage::SchemaControlTabPage(DbController* db, AppSignalSetProvide
 
 
 SchemaControlTabPage::~SchemaControlTabPage()
-{}
+{
+}
 
 namespace
 {
@@ -2253,9 +2257,9 @@ void SchemaControlTabPage::hideEvent(QHideEvent* /*event*/)
 	if (s_hideEventFocusWidget.widget != nullptr)
 	{
 		connect(s_hideEventFocusWidget.widget, &QObject::destroyed, &s_hideEventFocusWidget, []()
-			{
-				s_hideEventFocusWidget.widget = nullptr;
-			});
+				{
+					s_hideEventFocusWidget.widget = nullptr;
+				});
 	}
 
 	return;
@@ -2366,6 +2370,7 @@ std::shared_ptr<VFrame30::Schema> SchemaControlTabPage::createSchema(const DbFil
 		{db()->systemFileId(DbDir::MonitorSchemasDir), []() { return std::make_shared<VFrame30::MonitorSchema>(); }},
 		{db()->systemFileId(DbDir::TuningSchemasDir), []() { return std::make_shared<VFrame30::TuningSchema>(); }},
 		{db()->systemFileId(DbDir::UfblDir), []() { return std::make_shared<VFrame30::UfbSchema>(); }},
+		{db()->systemFileId(DbDir::DiagSchemasDir), []() { return std::make_shared<VFrame30::DiagSchema>(); }},
 		{db()->systemFileId(DbDir::VduSchemasDir), []() { return std::make_shared<VFrame30::VduSchema>(); }}
 	};
 
@@ -2741,9 +2746,9 @@ int SchemaControlTabPage::showSelectFolderDialog(int parentFileId, int currentSe
 	}
 
 	files.removeIf([](const DbFileInfo& fi)
-		{
-			return fi.directoryAttribute() == false;
-		});
+				   {
+					   return fi.directoryAttribute() == false;
+				   });
 
 	std::shared_ptr<DbFileInfo> schemaFile = files.rootFile();		// SchemaFile
 	Q_ASSERT(schemaFile->directoryAttribute() == true);
@@ -2754,43 +2759,43 @@ int SchemaControlTabPage::showSelectFolderDialog(int parentFileId, int currentSe
 
 	std::function<void(std::shared_ptr<DbFileInfo>, QTreeWidgetItem*)> addChilderenFilesFunc =
 		[&addChilderenFilesFunc, &files, treeWidget, currentSelectionFileId, &treeItemToSelect, ptrToIcon](std::shared_ptr<DbFileInfo> parent, QTreeWidgetItem* parentTreeItem)
-	{
-		Q_ASSERT(parent->isNull() == false);
-
-		const auto& childeren = files.children(parent->fileId());
-
-		for (auto file : childeren)
 		{
-			if (file->isNull() == true ||
-				file->directoryAttribute() == false)
-			{
-				Q_ASSERT(file->isNull() == false);
-				Q_ASSERT(file->directoryAttribute() == true);
-				return;
-			}
+			Q_ASSERT(parent->isNull() == false);
 
-			QTreeWidgetItem* treeItem = nullptr;
+			const auto& childeren = files.children(parent->fileId());
 
-			if (parentTreeItem == nullptr)
+			for (auto file : childeren)
 			{
-				treeItem = new QTreeWidgetItem(treeWidget, {file->fileName()}, file->fileId());
-				treeWidget->addTopLevelItem(treeItem);
-			}
-			else
-			{
-				treeItem = new QTreeWidgetItem(parentTreeItem, {file->fileName()}, file->fileId());
-			}
-			treeItem->setIcon(0, *ptrToIcon);
+				if (file->isNull() == true ||
+					file->directoryAttribute() == false)
+				{
+					Q_ASSERT(file->isNull() == false);
+					Q_ASSERT(file->directoryAttribute() == true);
+					return;
+				}
 
-			addChilderenFilesFunc(file, treeItem);
+				QTreeWidgetItem* treeItem = nullptr;
 
-			if (file->fileId() == currentSelectionFileId)
-			{
-				treeItem->setSelected(true);
-				treeItemToSelect = treeItem;
+				if (parentTreeItem == nullptr)
+				{
+					treeItem = new QTreeWidgetItem(treeWidget, {file->fileName()}, file->fileId());
+					treeWidget->addTopLevelItem(treeItem);
+				}
+				else
+				{
+					treeItem = new QTreeWidgetItem(parentTreeItem, {file->fileName()}, file->fileId());
+				}
+				treeItem->setIcon(0, *ptrToIcon);
+
+				addChilderenFilesFunc(file, treeItem);
+
+				if (file->fileId() == currentSelectionFileId)
+				{
+					treeItem->setSelected(true);
+					treeItemToSelect = treeItem;
+				}
 			}
-		}
-	};
+		};
 
 	QTreeWidgetItem* rootTreeItem = nullptr;
 	if (showRootFile == true)
@@ -2897,7 +2902,7 @@ void SchemaControlTabPage::addLogicSchema(QStringList deviceStrIds, QString lmDe
 		QMessageBox::critical(this,
 							  qAppName(),
 							  tr("Can add Logic Schema only to '%1' or it's descendands.")
-								.arg(Db::File::systemDirToName(DbDir::AppLogicDir)));
+							  .arg(Db::File::systemDirToName(DbDir::AppLogicDir)));
 		return;
 	}
 
@@ -3518,12 +3523,12 @@ void SchemaControlTabPage::moveFiles()
 	for (const auto& file : files)
 	{
 		auto foundTab = std::find_if(m_openedFiles.begin(), m_openedFiles.end(),
-					[&file](const EditSchemaTabPage* tabPage)
-					{
-						Q_ASSERT(tabPage);
-						return	tabPage->fileInfo().fileId() == file->fileId() &&
-							tabPage->readOnly() == false;
-					});
+									 [&file](const EditSchemaTabPage* tabPage)
+									 {
+										 Q_ASSERT(tabPage);
+										 return	tabPage->fileInfo().fileId() == file->fileId() &&
+											 tabPage->readOnly() == false;
+									 });
 
 		if (foundTab != m_openedFiles.end())
 		{
@@ -4374,9 +4379,9 @@ void SchemaControlTabPage::exportToPdf()
 			schemaFileName.remove(ptPos, schemaFileName.length() - ptPos);
 		}
 		singleFileName = QFileDialog::getSaveFileName(this,
-														tr("Export to PDF"),
-														path + QDir::separator() + schemaFileName + ".pdf",
-														tr("Portable Documnet Format (*.pdf)"));
+													  tr("Export to PDF"),
+													  path + QDir::separator() + schemaFileName + ".pdf",
+													  tr("Portable Documnet Format (*.pdf)"));
 		if (singleFileName.isEmpty() == true)
 		{
 			return;
@@ -4479,12 +4484,12 @@ void SchemaControlTabPage::showFileProperties()
 	for (const auto& file : selectedFiles)
 	{
 		auto foundTab = std::find_if(m_openedFiles.begin(), m_openedFiles.end(),
-					[&file](const EditSchemaTabPage* tabPage)
-					{
-						Q_ASSERT(tabPage);
-						return	tabPage->fileInfo().fileId() == file->fileId() &&
-							tabPage->readOnly() == false;
-					});
+									 [&file](const EditSchemaTabPage* tabPage)
+									 {
+										 Q_ASSERT(tabPage);
+										 return	tabPage->fileInfo().fileId() == file->fileId() &&
+											 tabPage->readOnly() == false;
+									 });
 
 		if (foundTab != m_openedFiles.end())
 		{
@@ -4531,9 +4536,9 @@ void SchemaControlTabPage::showFileProperties()
 
 	d.setWindowTitle(tr("Schema(s) Properties"));
 	d.setWindowFlags((d.windowFlags() &
-		~Qt::WindowMinimizeButtonHint &
-		~Qt::WindowMaximizeButtonHint &
-		~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+					  ~Qt::WindowMinimizeButtonHint &
+					  ~Qt::WindowMaximizeButtonHint &
+					  ~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
 
 	IdePropertyEditor* propertyEditor = new IdePropertyEditor(this, dbc());
 	propertyEditor->setReadOnly(readOnly);

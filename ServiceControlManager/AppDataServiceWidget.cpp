@@ -316,8 +316,8 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 				case DSC_ADAPTER_ID: return source.lanControllersInfo()[0].equipmentID;
 				case DSC_ENABLE_DATA: return source.lanControllersInfo()[0].appDataEnable;
 				case DSC_DATA_ID: return "0x" + QString("%1").
-										arg(source.lanControllersInfo()[0].appDataUID,
-											sizeof(source.lanControllersInfo()[0].appDataUID) * 2, 16, QChar('0')).toUpper();
+										arg(source.lanControllersInfo()[0].rupAppDataUID,
+											sizeof(source.lanControllersInfo()[0].rupAppDataUID) * 2, 16, QChar('0')).toUpper();
 				case DSC_UNIQUE_ID: return "0x" + QString("%1").arg(source.moduleUniqueID(), sizeof(source.moduleUniqueID()) * 2, 16, QChar('0')).toUpper();
 				case DSC_STATE: return source.stateStr();
 

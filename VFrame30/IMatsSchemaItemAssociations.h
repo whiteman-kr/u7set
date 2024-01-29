@@ -9,6 +9,7 @@ namespace VFrame30
 	public:
 		virtual ~IMatsSchemaItemAssociations() = default;
 
+		virtual QStringList associatedDiagObjectIds() const = 0;
 		virtual QStringList associatedAppSignalIds() const = 0;
 		virtual QStringList associatedImpactAppSignalIds() const = 0;
 		virtual QStringList associatedConnectionIds() const = 0;

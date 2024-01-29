@@ -1,13 +1,14 @@
 #pragma once
 
-#include "../ReportLib/Report.h"
-
-#include "GlobalMessanger.h"
-#include "../HardwareLib/DeviceObject.h"
-
-#include "../ReportLib/ReportAppSignalProvider.h"
-#include "../ReportLib/ReportPrinter.h"
 #include "../Builder/SchemasReportGenerator.h"
+#include "../HardwareLib/DeviceObject.h"
+#include "../ReportLib/Report.h"
+#include "../ReportLib/ReportAppSignalProvider.h"
+#include "../ReportLib/ReportDiagStateProvider.h"
+#include "../ReportLib/ReportPrinter.h"
+#include "../VFrame30/AppSignalController.h"
+#include "../VFrame30/DiagStateController.h"
+#include "GlobalMessanger.h"
 
 //
 // FileDiff
@@ -219,6 +220,11 @@ private:
 							std::shared_ptr<ReportLib::ReportSection> section,
 							ReportLib::ReportTable& headerTable);
 
+	void compareDiagSignalTypes(const std::shared_ptr<DbFile>& sourceFile,
+							const std::shared_ptr<DbFile>& targetFile,
+							std::shared_ptr<ReportLib::ReportSection> section,
+							ReportLib::ReportTable& headerTable);
+
 	void compareFilesData(const std::shared_ptr<DbFile>& sourceFile,
 						  const std::shared_ptr<DbFile>& targetFile,
 						  std::shared_ptr<ReportLib::ReportSection> section,
@@ -240,6 +246,7 @@ private:
 	bool isHardwareFile(const QString& fileName) const;
 	bool isBusTypeFile(const QString& fileName) const;
 	bool isConnectionFile(const QString& fileName) const;
+	bool isDiagSignalTypeFile(const QString& fileName) const;
 	bool isTextFile(const QString& fileName) const;
 	bool isSchemaFile(const QString& fileName) const;
 
@@ -266,6 +273,9 @@ private:
 	DbController m_db;
 	const std::shared_ptr<ReportLib::ReportSchemaView> m_schemaView;
 	ReportLib::ReportPrinter m_reportPrinter;
+
+	ReportLib::ReportDiagStateProvider m_diagStateProvider;
+	VFrame30::DiagStateController m_diagStateController;
 
 	ReportLib::ReportAppSignalProvider m_appSignalProvider;
 	VFrame30::AppSignalController m_appSignalController;
@@ -298,5 +308,4 @@ private:
 	std::atomic_bool m_stop = false;	// Stop processing flag, set by stop()
 
 	static inline const QString titlePageName{"TitlePage"};
-
 };

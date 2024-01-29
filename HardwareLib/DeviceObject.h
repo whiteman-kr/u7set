@@ -17,10 +17,6 @@ namespace Hardware
 	extern const std::array<QString, 10> DeviceObjectExtensions;
 	extern const std::array<QString, 10> DeviceTypeNames;
 
-
-	void init();
-	void shutdown();
-
 	class DeviceObject;
 	class DeviceRoot;
 	class DeviceSystem;
@@ -31,7 +27,8 @@ namespace Hardware
 	class Workstation;
 	class Software;
 	class DeviceAppSignal;
-	class DeviceDiagSignal;
+	class DiagSignal;
+	class DiagSignalTypeObject;
 
 
 	// Device type, for defining hierarchy, don't save these data to file, can be changed (new level) later
@@ -95,10 +92,41 @@ namespace Hardware
 		static const QString format;
 		static const QString memoryArea;
 		static const QString size;
+		static const QString units;
+		static const QString analogFormat;
+		
+		static const QString diagDataOffset;
+		static const QString inverseValue;
+		static const QString normalState;
+		static const QString normalStateString0;
+		static const QString normalStateString1;
 
+		static const QString adcHighLimit;
+		static const QString adcLowLimit;
+		static const QString valueHighLimit;
+		static const QString valueLowLimit;
+		static const QString valueMultiplier;
+		//static const QString valueOffset;
+		static const QString useLimits;
+
+		static const QString isReflection;
+		static const QString reflectedSignalId;
+		static const QString level;
 		static const QString valueOffset;
 		static const QString valueBit;
+		static const QString valueBitSize;
+		static const QString valueBitSizeDescription;
+		static const QString discreteContainerSize;
+		static const QString discreteContainerSizeDescription;
 		static const QString validitySignalId;
+		
+		static const QString logChanges;
+		static const QString archive;
+		static const QString reserved;
+		static const QString coarseAperture;
+		static const QString fineAperture;
+		static const QString apertureType;
+		static const QString decimalPlaces;
 
 		static const QString appSignalLowAdc;
 		static const QString appSignalHighAdc;
@@ -109,8 +137,19 @@ namespace Hardware
 
 		static const QString hostname;
 
+		static const QString diagSignalTypeId;
+		
+		static const QString systemSignalType;
+		static const QString systemSignalTypeDescription;
+
 		static const QString categoryCommon;
 		static const QString categoryAppSignal;
+		static const QString categoryDiagSignal;
+		static const QString categoryDiscrete;
+		static const QString categoryAnalog;
+		static const QString categoryData;
+		static const QString categoryMats;
+		static const QString categoryDiagnostics;
 	};
 
 	//
@@ -192,6 +231,7 @@ namespace Hardware
 
 		[[nodiscard]] DeviceType deviceType() const noexcept;
 		[[nodiscard]] QString deviceTypeName() const noexcept;
+		[[nodiscard]] static QString deviceTypeName(DeviceType type) noexcept;
 
 		[[nodiscard]] bool isRoot() const noexcept;
 		[[nodiscard]] bool isSystem() const noexcept;
@@ -202,6 +242,7 @@ namespace Hardware
 		[[nodiscard]] bool isWorkstation() const noexcept;
 		[[nodiscard]] bool isSoftware() const noexcept;
 		[[nodiscard]] bool isAppSignal() const noexcept;
+		[[nodiscard]] bool isDiagSignal() const noexcept;
 
 		[[nodiscard]] std::shared_ptr<const Hardware::DeviceRoot> toRoot() const noexcept;
 		[[nodiscard]] std::shared_ptr<Hardware::DeviceRoot> toRoot() noexcept;
@@ -223,6 +264,9 @@ namespace Hardware
 
 		[[nodiscard]] std::shared_ptr<const Hardware::DeviceAppSignal> toAppSignal() const noexcept;
 		[[nodiscard]] std::shared_ptr<Hardware::DeviceAppSignal> toAppSignal() noexcept;
+
+		[[nodiscard]] std::shared_ptr<const Hardware::DiagSignal> toDiagSignal() const noexcept;
+		[[nodiscard]] std::shared_ptr<Hardware::DiagSignal> toDiagSignal() noexcept;
 
 		[[nodiscard]] std::shared_ptr<const Hardware::Workstation> toWorkstation() const noexcept;
 		[[nodiscard]] std::shared_ptr<Hardware::Workstation> toWorkstation() noexcept;
@@ -251,6 +295,7 @@ namespace Hardware
 		[[nodiscard]] const Hardware::Software* getParentSoftware() const;
 		[[nodiscard]] const Hardware::Workstation* getParentWorkstation() const;
 		[[nodiscard]] const Hardware::DeviceChassis* getParentChassis() const;
+		[[nodiscard]] std::shared_ptr<const Hardware::DeviceChassis> getParentChassisShared() const;
 		[[nodiscard]] const Hardware::DeviceRack* getParentRack() const;
 		[[nodiscard]] const Hardware::DeviceSystem* getParentSystem() const;
 		[[nodiscard]] const Hardware::DeviceRoot* getParentRoot() const;
@@ -362,7 +407,7 @@ public:
 
 		int m_place = -1;
 
-		std::unordered_map<Hash, QString> m_tags;	// Tags for this object, key is a hash of the tag name
+		std::unordered_map<Hash, QString> m_tags;	// Tags for this object, key is a tag hash, value is a tag value.
 
 	private:
 		// Preset Data
@@ -576,6 +621,17 @@ public:
 	protected:
 		virtual bool SaveData(Proto::Envelope* message, bool saveTree) const override;
 		virtual bool LoadData(const Proto::Envelope& message) override;
+
+		// Properties
+		//
+public:
+		[[nodiscard]] int diagDataOffset() const;
+		void setDiagDataOffset(int value);
+
+		// Data
+		//
+	private:
+		int m_diagDataOffset = 0;
 	};
 
 
@@ -696,6 +752,7 @@ public:
 
 		QString m_signalSpecPropsStruct;		// Description of the specific properties to be generated by AppSignal
 	};
+
 
 	//
 	//

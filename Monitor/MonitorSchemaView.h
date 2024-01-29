@@ -28,9 +28,6 @@ public:
 	virtual ~MonitorSchemaView() = default;
 
 public:
-	bool saveSchemaToPdf(const QString& fileName);	// Export schema to PDF or PNG
-	bool saveSchemaToPng(const QString& fileName);	// Export schema to PDF or PNG
-
 	virtual VFrame30::DrawMode drawMode() const override;
 
 protected:
@@ -38,7 +35,7 @@ protected:
 	virtual void updateScriptGlobalVars(QJSEngine& engine) override;
 
 public slots:
-	void configurationArrived(ConfigSettings configuration);
+	void configurationArrived(MonitorConfigSettings configuration);
 
 	MonitorSchemaManager* monitorSchemaManager();
 	const MonitorSchemaManager* monitorSchemaManager() const;

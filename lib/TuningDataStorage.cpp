@@ -12,29 +12,6 @@ namespace  Tuning
 	//
 	// -------------------------------------------------------------------------------------
 
-	const char* TuningData::TUNING_DATA_ELEMENT = "TuningData";
-	const char* TuningData::LM_ID = "LmID";
-	const char* TuningData::UNIQUE_ID = "UniqueID";
-
-	const char* TuningData::TUNING_FLASH = "TuningFlashMemory";
-	const char* TuningData::TUNING_FLASH_FRAME_COUNT = "FrameCount";
-	const char* TuningData::TUNING_FLASH_FRAME_PAYLOAD_B = "FramePayloadB";
-	const char* TuningData::TUNING_FLASH_FRAME_SIZE_B = "FrameSizeB";
-
-	const char* TuningData::TUNING_DATA = "TuningDataMemory";
-	const char* TuningData::TUNING_DATA_OFFSET_W = "OffsetW";
-	const char* TuningData::TUNING_DATA_SIZE_W = "SizeW";
-	const char* TuningData::TUNING_DATA_FRAME_COUNT = "FrameCount";
-	const char* TuningData::TUNING_DATA_FRAME_PAYLOAD_W = "FramePayloadW";
-	const char* TuningData::TUNING_DATA_FRAME_SIZE_W = "FrameSizeW";
-	const char* TuningData::TUNING_DATA_USED_FRAMES_COUNT = "UsedFramesCount";
-
-	const char* TuningData::TUNING_ALL_SIGNALS_COUNT = "TuningSignalsCount";
-	const char* TuningData::TUNING_ANALOG_FLOAT_SIGNALS = "AnalogFloatSignals";
-	const char* TuningData::TUNING_ANALOG_INT32_SIGNALS = "AnalogInt32Signals";
-	const char* TuningData::TUNING_DISCRETE_SIGNALS = "DiscreteSignals";
-	const char* TuningData::TUNING_SIGNALS_COUNT = "Count";
-
 	QStringList TuningData::m_metadataFields;
 
 	TuningData::TuningData() :
@@ -376,7 +353,7 @@ namespace  Tuning
 		tuningData->append(reinterpret_cast<const char*>(m_tuningData), m_tuningDataSizeB);
 	}
 
-	quint64 TuningData::generateUniqueID(const QString& lmEquipmentID)
+	void TuningData::calcTuningDataUID(const QString& lmEquipmentID)
 	{
 		Crc64 crc;
 
@@ -394,9 +371,8 @@ namespace  Tuning
 			}
 		}
 
-		m_uniqueID = crc.result();
-
-		return m_uniqueID;
+		m_rupTuningDataUID = crc.result32();
+		m_fotipTuningDataUID = crc.result();
 	}
 
 	int TuningData::usedTuningDataSizeW() const
@@ -543,29 +519,29 @@ namespace  Tuning
 
 	void TuningData::writeToXml(XmlWriteHelper& xml)
 	{
-		xml.writeStartElement(TUNING_FLASH);			// <TuningFlashMemory>
+		xml.writeStartElement(XmlElement::TUNING_FLASH_MEMORY);			// <TuningFlashMemory>
 
-		xml.writeIntAttribute(TUNING_FLASH_FRAME_COUNT, m_tuningFlashFrameCount);
-		xml.writeIntAttribute(TUNING_FLASH_FRAME_PAYLOAD_B, m_tuningFlashFramePayloadB);
-		xml.writeIntAttribute(TUNING_FLASH_FRAME_SIZE_B, m_tuningFlashFrameSizeB);
+		xml.writeIntAttribute(XmlAttribute::FRAME_COUNT, m_tuningFlashFrameCount);
+		xml.writeIntAttribute(XmlAttribute::FRAME_PAYLOAD_B, m_tuningFlashFramePayloadB);
+		xml.writeIntAttribute(XmlAttribute::FRAME_SIZE_B, m_tuningFlashFrameSizeB);
 
 		xml.writeEndElement();							// </TuningFlashMemory>
 
-		xml.writeStartElement(TUNING_DATA);				// <TuningDataMemory>
+		xml.writeStartElement(XmlElement::TUNING_DATA_MEMORY);				// <TuningDataMemory>
 
-		xml.writeIntAttribute(TUNING_DATA_OFFSET_W, m_tuningDataOffsetW);
-		xml.writeIntAttribute(TUNING_DATA_SIZE_W, m_tuningDataSizeW);
-		xml.writeIntAttribute(TUNING_DATA_FRAME_COUNT, m_tuningDataFrameCount);
-		xml.writeIntAttribute(TUNING_DATA_FRAME_PAYLOAD_W, m_tuningDataFramePayloadW);
-		xml.writeIntAttribute(TUNING_DATA_FRAME_SIZE_W, m_tuningDataFrameSizeW);
-		xml.writeIntAttribute(TUNING_DATA_USED_FRAMES_COUNT, m_tuningDataUsedFramesCount);
+		xml.writeIntAttribute(XmlAttribute::DATA_OFFSET_W, m_tuningDataOffsetW);
+		xml.writeIntAttribute(XmlAttribute::DATA_SIZE_W, m_tuningDataSizeW);
+		xml.writeIntAttribute(XmlAttribute::FRAME_COUNT, m_tuningDataFrameCount);
+		xml.writeIntAttribute(XmlAttribute::FRAME_PAYLOAD_W, m_tuningDataFramePayloadW);
+		xml.writeIntAttribute(XmlAttribute::FRAME_SIZE_W, m_tuningDataFrameSizeW);
+		xml.writeIntAttribute(XmlAttribute::USED_FRAMES_COUNT, m_tuningDataUsedFramesCount);
 
 		xml.writeEndElement();							// </TuningDataMemory>
 
-		xml.writeStartElement(TUNING_DATA_ELEMENT);		// <TuningData>
+		xml.writeStartElement(XmlElement::TUNING_DATA);		// <TuningData>
 
-		xml.writeStringAttribute(LM_ID, m_lmEquipmentID);
-		xml.writeUInt64Attribute(UNIQUE_ID, m_uniqueID, true);
+		xml.writeStringAttribute(XmlAttribute::LM_EQUIPMENT_ID, m_lmEquipmentID);
+		xml.writeUInt64Attribute(XmlAttribute::FOTIP_TUNING_DATA_UID, m_fotipTuningDataUID, true);
 
 		int signalCount = 0;
 
@@ -574,23 +550,17 @@ namespace  Tuning
 			signalCount += static_cast<int>(signalList.count());
 		}
 
-		xml.writeIntAttribute(TUNING_ALL_SIGNALS_COUNT, signalCount);
+		xml.writeIntAttribute(XmlAttribute::SIGNALS_COUNT, signalCount);
 
-		QVector<const char*> typeSection;
-
-		typeSection.append(TUNING_ANALOG_FLOAT_SIGNALS);
-		typeSection.append(TUNING_ANALOG_INT32_SIGNALS);
-		typeSection.append(TUNING_DISCRETE_SIGNALS);
-
-		Q_ASSERT(typeSection.size() == TYPES_COUNT);
+		Q_ASSERT(m_signalTypeXmlElement.size() == TYPES_COUNT);
 
 		for(int type = TYPE_ANALOG_FLOAT; type < TYPES_COUNT; type++)
 		{
 			QVector<AppSignal*>& tuningSignals = m_tuningSignals[type];
 
-			xml.writeStartElement(typeSection[type]);	//	<typeSection[type]>
+			xml.writeStartElement(m_signalTypeXmlElement[type]);	//	<typeSection[type]>
 
-			xml.writeIntAttribute(TUNING_SIGNALS_COUNT, static_cast<int>(tuningSignals.count()));
+			xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(tuningSignals.count()));
 
 			for(AppSignal* signal : tuningSignals)
 			{
@@ -607,69 +577,63 @@ namespace  Tuning
 	{
 		bool result = true;
 
-		if (xml.findElement(TUNING_FLASH) == false)
+		if (xml.findElement(XmlElement::TUNING_FLASH_MEMORY) == false)
 		{
 			return false;
 		}
 
-		result &= xml.readIntAttribute(TUNING_FLASH_FRAME_COUNT, &m_tuningFlashFrameCount);
-		result &= xml.readIntAttribute(TUNING_FLASH_FRAME_PAYLOAD_B, &m_tuningFlashFramePayloadB);
-		result &= xml.readIntAttribute(TUNING_FLASH_FRAME_SIZE_B, &m_tuningFlashFrameSizeB);
+		result &= xml.readIntAttribute(XmlAttribute::FRAME_COUNT, &m_tuningFlashFrameCount);
+		result &= xml.readIntAttribute(XmlAttribute::FRAME_PAYLOAD_B, &m_tuningFlashFramePayloadB);
+		result &= xml.readIntAttribute(XmlAttribute::FRAME_SIZE_B, &m_tuningFlashFrameSizeB);
 
 		if (result == false)
 		{
 			return false;
 		}
 
-		if (xml.findElement(TUNING_DATA) == false)
+		if (xml.findElement(XmlElement::TUNING_DATA_MEMORY) == false)
 		{
 			return false;
 		}
 
-		result &= xml.readIntAttribute(TUNING_DATA_OFFSET_W, &m_tuningDataOffsetW);
-		result &= xml.readIntAttribute(TUNING_DATA_SIZE_W, &m_tuningDataSizeW);
-		result &= xml.readIntAttribute(TUNING_DATA_FRAME_COUNT, &m_tuningDataFrameCount);
-		result &= xml.readIntAttribute(TUNING_DATA_FRAME_PAYLOAD_W, &m_tuningDataFramePayloadW);
-		result &= xml.readIntAttribute(TUNING_DATA_FRAME_SIZE_W, &m_tuningDataFrameSizeW);
-		result &= xml.readIntAttribute(TUNING_DATA_USED_FRAMES_COUNT, &m_tuningDataUsedFramesCount);
+		result &= xml.readIntAttribute(XmlAttribute::DATA_OFFSET_W, &m_tuningDataOffsetW);
+		result &= xml.readIntAttribute(XmlAttribute::DATA_SIZE_W, &m_tuningDataSizeW);
+		result &= xml.readIntAttribute(XmlAttribute::FRAME_COUNT, &m_tuningDataFrameCount);
+		result &= xml.readIntAttribute(XmlAttribute::FRAME_PAYLOAD_W, &m_tuningDataFramePayloadW);
+		result &= xml.readIntAttribute(XmlAttribute::FRAME_SIZE_W, &m_tuningDataFrameSizeW);
+		result &= xml.readIntAttribute(XmlAttribute::USED_FRAMES_COUNT, &m_tuningDataUsedFramesCount);
 
 		if (result == false)
 		{
 			return false;
 		}
 
-		if (xml.findElement(TUNING_DATA_ELEMENT) == false)
+		if (xml.findElement(XmlElement::TUNING_DATA) == false)
 		{
 			return false;
 		}
 
-		result &= xml.readStringAttribute(LM_ID, &m_lmEquipmentID);
-		result &= xml.readUInt64Attribute(UNIQUE_ID, &m_uniqueID);
+		result &= xml.readStringAttribute(XmlAttribute::LM_EQUIPMENT_ID, &m_lmEquipmentID);
+		result &= xml.readUInt64Attribute(XmlAttribute::FOTIP_TUNING_DATA_UID, &m_fotipTuningDataUID);
 
 		int totalSignalsCount = 0;
 
-		result &= xml.readIntAttribute(TUNING_ALL_SIGNALS_COUNT, &totalSignalsCount);
+		result &= xml.readIntAttribute(XmlAttribute::SIGNALS_COUNT, &totalSignalsCount);
 
 		m_deleteSignals = true;		// !
 
-		QVector<const char*> typeSection;
-
-		typeSection.append(TUNING_ANALOG_FLOAT_SIGNALS);
-		typeSection.append(TUNING_ANALOG_INT32_SIGNALS);
-		typeSection.append(TUNING_DISCRETE_SIGNALS);
-
-		Q_ASSERT(typeSection.size() == TYPES_COUNT);
+		Q_ASSERT(m_signalTypeXmlElement.size() == TYPES_COUNT);
 
 		for(int type = TYPE_ANALOG_FLOAT; type < TYPES_COUNT; type++)
 		{
-			if (xml.findElement(typeSection[type]) == false)
+			if (xml.findElement(m_signalTypeXmlElement[type]) == false)
 			{
 				return false;
 			}
 
 			int count = 0;
 
-			result &= xml.readIntAttribute(TUNING_SIGNALS_COUNT, &count);
+			result &= xml.readIntAttribute(XmlAttribute::COUNT, &count);
 
 			for(int i = 0; i < count; i++)
 			{

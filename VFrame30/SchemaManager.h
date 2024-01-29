@@ -45,7 +45,7 @@ namespace VFrame30
 		// Load schema, must be overriden to perform loading schema appropriate to client.
 		// Default implementation: assert(false);
 		//
-		virtual std::shared_ptr<VFrame30::Schema> loadSchema(QString schemaId);
+		virtual std::shared_ptr<VFrame30::Schema> loadSchema(const QString& schemaId);
 
 		// Signals
 		//

@@ -1,21 +1,22 @@
 #pragma once
 
-#include "../ReportLib/ReportAppSignalProvider.h"
-#include "../ReportLib/Report.h"
-#include "../ReportLib/ReportPrinter.h"
 #include "../DbLib/DbController.h"
-
+#include "../ReportLib/Report.h"
+#include "../ReportLib/ReportAppSignalProvider.h"
+#include "../ReportLib/ReportDiagStateProvider.h"
+#include "../ReportLib/ReportPrinter.h"
+#include "../VFrame30/AppSignalController.h"
+#include "../VFrame30/DiagStateController.h"
 #include "../VFrame30/Schema.h"
-#include "../VFrame30/SchemaItemSignal.h"
 #include "../VFrame30/SchemaItemConnection.h"
 #include "../VFrame30/SchemaItemLoopback.h"
+#include "../VFrame30/SchemaItemSignal.h"
 
 namespace Builder
 {
 	//
 	// SchemasReportOptions
 	//
-
 	class SchemasReportOptions
 	{
 
@@ -354,6 +355,8 @@ namespace Builder
 		const std::shared_ptr<ReportLib::ReportSchemaView> m_schemaView;
 		ReportLib::ReportPrinter m_printer;
 
+		ReportLib::ReportDiagStateProvider m_diagStateProvider;
+		VFrame30::DiagStateController m_diagStateController;
 
 		ReportLib::ReportAppSignalProvider m_appSignalProvider;
 		VFrame30::AppSignalController m_appSignalController;
