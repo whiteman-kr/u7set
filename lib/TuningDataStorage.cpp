@@ -591,7 +591,7 @@ namespace  Tuning
 			return false;
 		}
 
-		if (xml.findElement(XmlElement::TUNING_DATA) == false)
+		if (xml.findElement(XmlElement::TUNING_DATA_MEMORY) == false)
 		{
 			return false;
 		}
@@ -633,7 +633,7 @@ namespace  Tuning
 
 			int count = 0;
 
-			result &= xml.readIntAttribute(XmlAttribute::SIGNALS_COUNT, &count);
+			result &= xml.readIntAttribute(XmlAttribute::COUNT, &count);
 
 			for(int i = 0; i < count; i++)
 			{

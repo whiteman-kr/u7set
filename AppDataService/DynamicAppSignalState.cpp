@@ -868,7 +868,7 @@ void DynamicAppSignalStates::clear()
 {
 	m_hash2State.clear();
 
-	DELETE_IF_NOT_NULL(m_appSignalState);
+	DELETE_ARRAY_IF_NOT_NULL(m_appSignalState);
 
 	m_size = 0;
 }

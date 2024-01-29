@@ -276,7 +276,6 @@ void AppDataServiceWorker::shutdown()
 {
 	clearConfiguration();
 
-	stopTcpAppDataServer();
 	stopCfgLoaderThread();
 
 	DEBUG_LOG_MSG(logger(), "AppDataServiceWorker finished");
