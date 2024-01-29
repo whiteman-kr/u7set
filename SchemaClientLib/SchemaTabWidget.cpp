@@ -20,6 +20,8 @@ namespace SchemaClientLib
 
 	void SchemaTabWidgetSignalSlot::slot_newSchemaTab(QString schemaId)
 	{
+		Q_UNUSED(schemaId);
+
 		Q_ASSERT(false);
 	}
 
@@ -65,16 +67,24 @@ namespace SchemaClientLib
 
 	void SchemaTabWidgetSignalSlot::slot_selectSchemaForCurrentTab(QString schemaId)
 	{
+		Q_UNUSED(schemaId);
+
 		Q_ASSERT(false);
 	}
 
 	void SchemaTabWidgetSignalSlot::slot_signalContextMenu(const QStringList signalList,
 														   const QList<QMenu*>& customMenu)
 	{
+		Q_UNUSED(signalList);
+		Q_UNUSED(customMenu);
+
 		Q_ASSERT(false);
 	}
+
 	void SchemaTabWidgetSignalSlot::slot_signalInfo(QString signalId)
 	{
+		Q_UNUSED(signalId);
+
 		Q_ASSERT(false);
 	}
 
@@ -85,6 +95,8 @@ namespace SchemaClientLib
 
 	void SchemaTabWidgetSignalSlot::slot_tabCloseRequested(int index)
 	{
+		Q_UNUSED(index);
+
 		Q_ASSERT(false);
 	}
 	void SchemaTabWidgetSignalSlot::slot_resetSchema()
@@ -94,21 +106,30 @@ namespace SchemaClientLib
 
 	void SchemaTabWidgetSignalSlot::slot_newSameTab(VFrame30::ClientSchemaWidget* tabWidget)
 	{
+		Q_UNUSED(tabWidget);
+
 		Q_ASSERT(false);
 	}
 	void SchemaTabWidgetSignalSlot::slot_closeTab(QWidget* tabWidget)
 	{
+		Q_UNUSED(tabWidget);
+
 		Q_ASSERT(false);
 	}
 
 	void SchemaTabWidgetSignalSlot::slot_schemaChanged(VFrame30::ClientSchemaWidget* tabWidget,
 													   VFrame30::Schema* schema)
 	{
+		Q_UNUSED(tabWidget);
+		Q_UNUSED(schema);
+
 		Q_ASSERT(false);
 	}
 
 	void SchemaTabWidgetSignalSlot::slot_tabPageChanged(int index)
 	{
+		Q_UNUSED(index);
+
 		Q_ASSERT(false);
 	}
 

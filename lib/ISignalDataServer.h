@@ -32,6 +32,8 @@ class SignalDataServerStub : public ISignalDataServer
 public:
     QStringList dataServiceIds(const QString& appSignalId) const override
     {
+        Q_UNUSED(appSignalId);
+
         QStringList serviceIds;
         serviceIds << "DummyServiceID1" << "DummyServiceID2";
         return serviceIds;
@@ -53,6 +55,8 @@ public:
 
     std::vector<Hash> dataServiceSignals(const QString& serviceEquipmentId) const override
     {
+        Q_UNUSED(serviceEquipmentId);
+
         std::vector<Hash> signalHashes;
         signalHashes.push_back(123);
         signalHashes.push_back(456);

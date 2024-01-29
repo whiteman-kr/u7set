@@ -1632,9 +1632,10 @@ namespace Builder
 			}
 		}
 
+		auto context = VFrame30::Context::create(&m_diagStateController, &m_appSignalController, nullptr, nullptr, nullptr);
+
 		// Load schemas from files
 		//
-
 		for (const std::shared_ptr<DbFile>& dbFile : out)
 		{
 			if (m_stop == true)
@@ -1647,6 +1648,8 @@ namespace Builder
 			{
 				throw(tr("Failed to load schema from '%1'!").arg(dbFile->fileName()));
 			}
+
+			schema->setContext(context);
 
 			{
 				QMutexLocker l(&m_statisticsMutex);
