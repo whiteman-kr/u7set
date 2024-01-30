@@ -266,7 +266,7 @@ function generate_fimsr(confFirmware, module, LMNumber, frame, log, signalSet, o
 			let k1 = (y2 - y1) / (x2 - x1);	// K
 			let k2 = y1 - k1 * x1;			// B
 
-			let lowValidRangeMin = 0.05;
+			let lowValidRangeMin = 0.0;
 			let highValidRangeMax = 50000;
 
 			let lowValidRangeMinEngineering = lowValidRangeMin * k1 + k2;

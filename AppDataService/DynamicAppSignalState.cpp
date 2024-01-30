@@ -973,7 +973,7 @@ void DynamicAppSignalStates::setAutoArchivingGroups(int autoArchivingGroupsCount
 
 	for(int i = 0; i < m_size; i++)
 	{
-		if (m_appSignalState->archive() == true)
+		if (m_appSignalState[i].archive() == true)
 		{
 			m_appSignalState[i].setAutoArchivingGroup(count % autoArchivingGroupsCount);
 			count++;

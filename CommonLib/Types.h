@@ -408,7 +408,8 @@ public:
 		mV_Type_M = 37,
 		mV_Raw_m1200_p1200 = 38,
 
-		Hz_0_60000 = 39
+		Hz_0_60000 = 39,
+		Hz_0_50000 = 40
 	};
 	Q_ENUM(SensorType)
 

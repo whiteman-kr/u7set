@@ -434,6 +434,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0409.sql", "Upgrade to version 409, Show on schema param AssignFlags for AFBs mismatch_*"},
 	{":/DatabaseUpgrade/Upgrade0410.sql", "Upgrade to version 410, Update tuning logins editor for Monitor, TuningClient and TestSuite"},
 	{":/DatabaseUpgrade/Upgrade0411.sql", "Upgrade to version 411, Create folder $root$/Schemas/VDU"},
+	{":/DatabaseUpgrade/Upgrade0412.sql", "Upgrade to version 412, Update DiagDataService preset to v3"},
 };
 
 int DbWorker::counter = 0;
