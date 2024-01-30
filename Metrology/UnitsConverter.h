@@ -182,6 +182,7 @@ class UnitsConverter : public QObject
 		//
 		ELECTRIC_LIMIT(E::ElectricUnit::Hz,		E::SensorType::Hz_005_50000,		0.05,	50000),			// module FIM
 		ELECTRIC_LIMIT(E::ElectricUnit::Hz,		E::SensorType::Hz_0_60000,			0.0,	60000),			// module FIM
+		ELECTRIC_LIMIT(E::ElectricUnit::Hz,		E::SensorType::Hz_0_50000,			0.0,	50000),			// module FIM-SR
 	};
 
 	inline static const std::map<E::ElectricUnit, std::set<E::SensorType>> electricUnitSensors =
@@ -272,7 +273,8 @@ class UnitsConverter : public QObject
 			E::ElectricUnit::Hz,
 			{
 				E::SensorType::Hz_005_50000,
-				E::SensorType::Hz_0_60000
+				E::SensorType::Hz_0_60000,
+				E::SensorType::Hz_0_50000,
 			}
 		}
 	};
