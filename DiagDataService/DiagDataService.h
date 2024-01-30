@@ -42,7 +42,7 @@ private:
 							  std::shared_ptr<const SoftwareSettings> currentSettingsProfile);
 
 	bool readDiagDataSources(const QByteArray& fileData, const QString& profile);
-	bool readDiagSignals(const QByteArray& fileData);
+	bool readDiagSignalsAndObjects(const QByteArray& fileData);
 	bool readDiagSignalTypes(const QByteArray& fileData);
 
 	void applyNewConfiguration();

@@ -215,9 +215,9 @@ namespace Builder
 	{
 		QByteArray fileData;
 
-		fileData.resize(m_protoAcquiredDiagSignals.ByteSizeLong());
+		fileData.resize(m_protoAcquiredDiagSignalsAndObjects.ByteSizeLong());
 
-		m_protoAcquiredDiagSignals.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(fileData.data()));
+		m_protoAcquiredDiagSignalsAndObjects.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(fileData.data()));
 
 		BuildFile* buildFile = m_buildResultWriter->addFile( softwareCfgSubdir(),
 												File::ACQUIRED_DIAG_SIGNALS_ASGS,
@@ -235,7 +235,7 @@ namespace Builder
 		TEST_PTR_RETURN_FALSE(lm);
 		TEST_PTR_RETURN_FALSE(ds);
 
-		auto it = m_lmAcquiredDiagSignals.find(calcHash(lm->equipmentIdTemplate()));
+		auto it = m_lmAcquiredDiagSignals.find(lm->equipmentIdTemplate());
 
 		if (it == m_lmAcquiredDiagSignals.end())
 		{
@@ -257,9 +257,9 @@ namespace Builder
 	{
 		TEST_PTR_RETURN_FALSE(lm);
 
-		Hash lmEquipHash = calcHash(lm->equipmentIdTemplate());
+		QString lmEquipmentID = lm->equipmentIdTemplate();
 
-		if (m_lmAcquiredDiagSignals.contains(lmEquipHash) == true)
+		if (m_lmAcquiredDiagSignals.contains(lmEquipmentID) == true)
 		{
 			return true;			// diagSignals already found
 		}
@@ -274,7 +274,7 @@ namespace Builder
 
 		bool result = true;
 
-		auto [it, b] = m_lmAcquiredDiagSignals.emplace(lmEquipHash, std::vector<DiagSignalConstShared>{});
+		auto [it, b] = m_lmAcquiredDiagSignals.emplace(lmEquipmentID, std::vector<DiagSignalConstShared>{});
 
 		std::vector<DiagSignalConstShared>& acquiredDiagSignals = it->second;
 
@@ -361,6 +361,12 @@ namespace Builder
 
 		for(const auto& [lmEquipmentID, acquiredDiagSignals] : m_lmAcquiredDiagSignals)
 		{
+			Network::LmDiagSignals* lmDiagSignals = m_protoAcquiredDiagSignalsAndObjects.add_lmdiagsignals();
+
+			TEST_PTR_CONTINUE(lmDiagSignals);
+
+			lmDiagSignals->set_lmequipmentid(lmEquipmentID.toStdString());
+
 			for(const auto& diagSignal : acquiredDiagSignals)
 			{
 				Hash signalHash = calcHash(diagSignal->equipmentIdTemplate());
@@ -428,7 +434,7 @@ namespace Builder
 					{
 						AcquiredDiagObject ado(parent);
 
-						Network::AcquiredDiagObject* protoAdo = m_protoAcquiredDiagSignals.add_diagobjects();
+						Network::AcquiredDiagObject* protoAdo = m_protoAcquiredDiagSignalsAndObjects.add_diagobjects();
 						ado.saveToProto(protoAdo);
 
 						acquiredObjectHashes.emplace(parentHash);
@@ -444,7 +450,7 @@ namespace Builder
 					parent = parent->parent();
 				}
 
-				Network::AcquiredDiagSignal* protoAds = m_protoAcquiredDiagSignals.add_diagsignals();
+				Network::AcquiredDiagSignal* protoAds = lmDiagSignals->add_diagsignals();
 				ads.saveToProto(protoAds);
 
 				qDebug() << C_STR(QString("Diag siagnal: %1 addr %2 + %3 + %4 = %5").

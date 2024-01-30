@@ -836,8 +836,14 @@ message AcquiredDiagSignal
 	optional int32 absAddrBit = 16 [default = 0];
 }
 
-message AcquiredDiagSignals
+message LmDiagSignals
 {
-	repeated AcquiredDiagSignal diagSignals = 1;
+	required string lmEquipmentID = 1;
+	repeated AcquiredDiagSignal diagSignals = 2;
+}
+
+message AcquiredDiagSignalsAndObjects
+{
+	repeated Lm	DiagSignals lmDiagSignals = 1;
 	repeated AcquiredDiagObject diagObjects = 2;
 }

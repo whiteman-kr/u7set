@@ -174,7 +174,7 @@ void DiagDataServiceWorker::onConfigurationReady(const QByteArray configurationX
 
 		if (bfi.ID == CfgFileId::ACQUIRED_DIAG_SIGNALS)
 		{
-			result &= readDiagSignals(fileData);				// fills m_appSignals
+			result &= readDiagSignalsAndObjects(fileData);				// fills m_appSignals
 		}
 
 		if (bfi.ID == CfgFileId::DIAG_SIGNAL_TYPES)
@@ -225,11 +225,11 @@ bool DiagDataServiceWorker::readDiagDataSources(const QByteArray& fileData, cons
 	return result;
 }
 
-bool DiagDataServiceWorker::readDiagSignals(const QByteArray& fileData)
+bool DiagDataServiceWorker::readDiagSignalsAndObjects(const QByteArray& fileData)
 {
-	::Network::AcquiredDiagSignals diagSignalsSet;
+	::Network::AcquiredDiagSignalsAndObjects diagSignalsAndObjects;
 
-	bool result = diagSignalsSet.ParseFromArray(fileData.constData(), static_cast<int>(fileData.size()));
+	bool result = diagSignalsAndObjects.ParseFromArray(fileData.constData(), static_cast<int>(fileData.size()));
 
 	if (result == false)
 	{
