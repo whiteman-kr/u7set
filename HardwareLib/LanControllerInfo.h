@@ -92,6 +92,8 @@ struct LanControllerInfo
 	bool isAppDataEnabled() const;
 	bool isDiagDataEnabled() const;
 
+	bool isEnabled(E::LanControllerType lanCtrlType) const;
+
 	void writeToXml(XmlWriteHelper& xml)const;
 	bool readFromXml(XmlReadHelper& xml);
 	bool readFromXml(const QDomNode& lanControllerNode, QString* errMsg);

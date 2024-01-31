@@ -94,3 +94,20 @@ public:
 	bool waitForever() { return wait(0); }
 };
 
+class ThreadWithQuit
+{
+public:
+	void quit()
+	{
+		m_quitRequested = true;
+		wakeupToQuit();
+	}
+
+	bool isQuitRequested() const { return m_quitRequested; }
+
+	virtual void wakeupToQuit() {}
+
+protected:
+	std::atomic_bool m_quitRequested{false};
+};
+

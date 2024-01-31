@@ -21,6 +21,12 @@ qt_add_library(${TARGET} STATIC
 	CircularLogger.h
 	MatsUsers.cpp
 	MatsUsers.h
+	OnlineDataSource.cpp
+	OnlineDataSource.h
+	RupFramesReceiver.cpp
+	RupFramesReceiver.h
+	SignalStatesProcessor.cpp
+	SignalStatesProcessor.h
 	SocketIO.cpp
 	SocketIO.h
 	SoftwareInfo.cpp

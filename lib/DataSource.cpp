@@ -18,6 +18,18 @@ DataSource::~DataSource()
 {
 }
 
+quint32 DataSource::rupAppDataUID() const
+{
+	const LanControllerInfo& lci = m_lanControllersInfo.getFirstCompatibleController(E::LanControllerType::AppData);
+
+	if (lci.isValid() == true)
+	{
+		return lci.rupAppDataUID;
+	}
+
+	return 0;
+}
+
 int DataSource::appDataFramesQuantity() const
 {
 	const LanControllerInfo& lci = m_lanControllersInfo.getFirstCompatibleController(E::LanControllerType::AppData);
@@ -25,18 +37,6 @@ int DataSource::appDataFramesQuantity() const
 	if (lci.isValid() == true)
 	{
 		return lci.appDataFramesQuantity;
-	}
-
-	return 0;
-}
-
-int DataSource::diagDataFramesQuantity() const
-{
-	const LanControllerInfo& lci = m_lanControllersInfo.getFirstCompatibleController(E::LanControllerType::DiagData);
-
-	if (lci.isValid() == true)
-	{
-		return lci.diagDataFramesQuantity;
 	}
 
 	return 0;
@@ -54,7 +54,36 @@ int DataSource::appDataSizeBytes() const
 	return 0;
 }
 
-int DataSource::diagDataSizeBytes() const
+int DataSource::overrideAppDataWordCount() const
+{
+	const LanControllerInfo& lci = m_lanControllersInfo.getFirstCompatibleController(E::LanControllerType::AppData);
+
+	if (lci.isValid() == true)
+	{
+		return lci.overrideAppDataWordCount;
+	}
+
+	return 0;
+}
+
+int DataSource::appSignalsCount() const
+{
+	return TO_INT(m_appSignals.size());
+}
+
+quint32 DataSource::rupDiagDataUID() const
+{
+	const LanControllerInfo& lci = m_lanControllersInfo.getFirstCompatibleController(E::LanControllerType::DiagData);
+
+	if (lci.isValid() == true)
+	{
+		return lci.rupDiagDataUID;
+	}
+
+	return 0;
+}
+
+int DataSource::diagDataFramesQuantity() const
 {
 	const LanControllerInfo& lci = m_lanControllersInfo.getFirstCompatibleController(E::LanControllerType::DiagData);
 
@@ -66,13 +95,13 @@ int DataSource::diagDataSizeBytes() const
 	return 0;
 }
 
-int DataSource::overrideAppDataWordCount() const
+int DataSource::diagDataSizeBytes() const
 {
-	const LanControllerInfo& lci = m_lanControllersInfo.getFirstCompatibleController(E::LanControllerType::AppData);
+	const LanControllerInfo& lci = m_lanControllersInfo.getFirstCompatibleController(E::LanControllerType::DiagData);
 
 	if (lci.isValid() == true)
 	{
-		return lci.overrideAppDataWordCount;
+		return lci.diagDataFramesQuantity;
 	}
 
 	return 0;
@@ -90,28 +119,9 @@ int DataSource::overrideDiagDataWordCount() const
 	return 0;
 }
 
-quint32 DataSource::rupAppDataUID() const
+int DataSource::diagSignalsCount() const
 {
-	const LanControllerInfo& lci = m_lanControllersInfo.getFirstCompatibleController(E::LanControllerType::AppData);
-
-	if (lci.isValid() == true)
-	{
-		return lci.rupAppDataUID;
-	}
-
-	return 0;
-}
-
-quint32 DataSource::rupDiagDataUID() const
-{
-	const LanControllerInfo& lci = m_lanControllersInfo.getFirstCompatibleController(E::LanControllerType::DiagData);
-
-	if (lci.isValid() == true)
-	{
-		return lci.rupDiagDataUID;
-	}
-
-	return 0;
+	return TO_INT(m_diagSignals.size());
 }
 
 quint32 DataSource::rupTuningDataUID() const
@@ -136,6 +146,11 @@ quint64 DataSource::fotipTuningDataUID() const
 	}
 
 	return 0;
+}
+
+int DataSource::fotipVersion() const
+{
+	return m_lanControllersInfo.fotipVersion();
 }
 
 void DataSource::appendAssociatedSignal(E::LanControllerType lanType, const QString& signalID)

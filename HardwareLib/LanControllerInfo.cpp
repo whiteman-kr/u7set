@@ -86,6 +86,31 @@ bool LanControllerInfo::isDiagDataEnabled() const
 	return isProvideDiagData() && diagDataEnable;
 }
 
+bool LanControllerInfo::isEnabled(E::LanControllerType lanCtrlType) const
+{
+	switch(lanCtrlType)
+	{
+	case E::LanControllerType::AppData:
+		return isAppDataEnabled();
+
+	case E::LanControllerType::DiagData:
+		return isDiagDataEnabled();
+
+	case E::LanControllerType::Tuning:
+		return isTuningEnabled();
+
+	case E::LanControllerType::Unknown:
+	case E::LanControllerType::AppAndDiagData:
+	case E::LanControllerType::TuningAndAppAndDiagData:
+	default:
+		// lanCtrlType - no mixed types allowed
+		Q_ASSERT(false);
+	}
+
+	return false;
+}
+
+
 void LanControllerInfo::writeToXml(XmlWriteHelper& xml) const
 {
 	xml.writeStartElement(XmlElement::LAN_CONTROLLER);
