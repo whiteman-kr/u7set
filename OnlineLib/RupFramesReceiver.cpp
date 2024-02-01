@@ -150,7 +150,7 @@ void RupFramesReceiver::updateReceiverStatistics()
 			m_rupFramesReceivingSpeed = static_cast<int>((m_rupFramesReceivedPerSecond * 1000.0) / dt);
 			m_rupFramesReceivedPerSecond = 0;
 
-			qDebug() << C_STR(getLogStr(QString("Receive RUP frames %1/s").arg(m_rupFramesReceivingSpeed)));
+			qDebug() << C_STR(getLogStr(QString("receive RUP frames %1/s").arg(m_rupFramesReceivingSpeed)));
 
 			m_lastUpdateTime = now;
 		}
@@ -253,13 +253,27 @@ void RupFramesReceiver::startReceive()
 		return;
 	}
 
+	udp::endpoint* receiveIntoFromIP = nullptr;
+	char* receiveIntoBuf = nullptr;
+
 	m_receiveBufIndex ^= 1;
 
-	m_socket->async_receive_from(asio::buffer(m_receiveBuffer[m_receiveBufIndex], RECV_BUFFER_SIZE),
-									m_receiveFromIP[m_receiveBufIndex],
-									bind(&RupFramesReceiver::receivePackets, this,
-										std::placeholders::_1,
-										std::placeholders::_2));
+	if (m_receiveBufIndex == 0)
+	{
+		receiveIntoFromIP = &m_receiveFromIP0;
+		receiveIntoBuf = m_receiveBuffer0;
+	}
+	else
+	{
+		receiveIntoFromIP = &m_receiveFromIP1;
+		receiveIntoBuf = m_receiveBuffer1;
+	}
+
+	m_socket->async_receive_from(asio::buffer(	receiveIntoBuf, RECV_BUFFER_SIZE),
+												*receiveIntoFromIP,
+												bind(&RupFramesReceiver::receivePackets, this,
+												std::placeholders::_1,
+												std::placeholders::_2));
 }
 
 void RupFramesReceiver::receivePackets(const error_code& error, size_t bytesReceived)
@@ -279,8 +293,21 @@ void RupFramesReceiver::receivePackets(const error_code& error, size_t bytesRece
 
 	m_noReceiveCtr = 0;
 
-	udp::endpoint receiveFromIP = m_receiveFromIP[m_receiveBufIndex];
-	Rup::SimFrame& simFrame = *reinterpret_cast<Rup::SimFrame*>(m_receiveBuffer[m_receiveBufIndex]);
+	udp::endpoint* receiveFromIP = nullptr;
+	char* receiveBuf = nullptr;
+
+	if (m_receiveBufIndex == 0)
+	{
+		receiveFromIP = &m_receiveFromIP0;
+		receiveBuf = m_receiveBuffer0;
+	}
+	else
+	{
+		receiveFromIP = &m_receiveFromIP1;
+		receiveBuf = m_receiveBuffer1;
+	}
+
+	Rup::SimFrame& simFrame = *reinterpret_cast<Rup::SimFrame*>(receiveBuf);
 
 	startReceive();
 
@@ -294,7 +321,7 @@ void RupFramesReceiver::receivePackets(const error_code& error, size_t bytesRece
 	{
 		if (bytesReceived == sizeof(Rup::Frame))
 		{
-			sourceIP = receiveFromIP.address().to_v4().to_ulong();
+			sourceIP = receiveFromIP->address().to_v4().to_ulong();
 			isValidFrame = true;
 			break;
 		}

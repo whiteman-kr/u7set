@@ -72,7 +72,7 @@ void OnlineDataSource::clearParsingBuffers()
 	m_parsingBuffers.clear();
 }
 
-void OnlineDataSource::pushRupFrame(quint32 sourceIP,
+bool OnlineDataSource::pushRupFrame(quint32 sourceIP,
 									qint64 serverTime,
 									bool isSimFrame,
 									Rup::Frame& rupFrame,
@@ -80,20 +80,24 @@ void OnlineDataSource::pushRupFrame(quint32 sourceIP,
 {
 	Q_UNUSED(sourceIP);
 
+	if (m_dataProcessingEnabled == false)
+	{
+		false;
+	}
+
 	m_receivedFramesCount++;
 	m_receivedDataSize += (isSimFrame == true ? sizeof(Rup::SimFrame) : sizeof(Rup::Frame));
 
-	if (m_dataProcessingEnabled == false)
-	{
-		return;
-	}
+	//
 
-	if (m_parsingBuffers[m_writeBufferIndex]->readyToParsing == true)
+	ParsingBuffer& writeBuffer = *m_parsingBuffers[m_writeBufferIndex];
+
+	if (writeBuffer.readyToParsing == true)
 	{
 		if (moveToNextWriteBuffer(thread) == false)
 		{
 			m_lostPacketCount++;
-			return;
+			return true;
 		}
 	}
 
@@ -104,18 +108,17 @@ void OnlineDataSource::pushRupFrame(quint32 sourceIP,
 	if (rupFrame.header.protocolVersion != rupVersion())
 	{
 		m_errorProtocolVersion++;
-		return;
+		return false;
 	}
 
 	//
 
-	ParsingBuffer& writeBuffer = *m_parsingBuffers[m_writeBufferIndex];
 
 	if (rupFrame.header.framesQuantity != writeBuffer.framesQuantity)
 	{
 		Q_ASSERT(false);
 		m_errorFramesQuantity++;
-		return;
+		return false;
 	}
 
 	//
@@ -126,7 +129,7 @@ void OnlineDataSource::pushRupFrame(quint32 sourceIP,
 	{
 		Q_ASSERT(false);
 		m_errorFrameNo++;
-		return;
+		return false;
 	}
 
 	//
@@ -144,7 +147,7 @@ void OnlineDataSource::pushRupFrame(quint32 sourceIP,
 								arg(m_expectedDataUID, 8, 16).
 								arg(m_receivedDataUID, 8, 16));
 		}
-		return;
+		return false;
 	}
 
 	//
@@ -155,6 +158,8 @@ void OnlineDataSource::pushRupFrame(quint32 sourceIP,
 	{
 		moveToNextWriteBuffer(thread);
 	}
+
+	return readyToParsing;
 }
 
 bool OnlineDataSource::updateStatistics_500ms(bool oneSecond)
@@ -749,9 +754,13 @@ bool OnlineDataSources::pushRupFrame(quint32 sourceIP,
 
 	OnlineDataSource* source = it->second;
 
-	source->pushRupFrame(sourceIP, serverTime, isSimFrame, rupFrame, thread);
 
-	processingRequired(source, true);
+	bool readyToParsing = source->pushRupFrame(sourceIP, serverTime, isSimFrame, rupFrame, thread);
+
+	if (readyToParsing == true)
+	{
+		processingRequired(source, true);
+	}
 
 	return true;
 }
@@ -828,7 +837,7 @@ void OnlineDataSources::processingRequired(OnlineDataSource* source, bool parse)
 	// parse == false - signal states invalidation required
 
 	std::lock_guard lg(m_processigRequiredMutex);
-	m_processingRequired.emplace({source, parse});
+	m_processingRequired.emplace(source, parse);
 	m_processingRequiredCondition.notify_one();
 }
 

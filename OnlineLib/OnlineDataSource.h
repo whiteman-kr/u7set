@@ -43,7 +43,7 @@ public:
 
 	// Functions used by receiver thread
 	//
-	void pushRupFrame(quint32 sourceIP,
+	bool pushRupFrame(quint32 sourceIP,
 					  qint64 serverTime,
 					  bool isSimFrame,
 					  Rup::Frame& rupFrame,

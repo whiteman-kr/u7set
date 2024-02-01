@@ -14,6 +14,9 @@
 using namespace asio;
 using namespace asio::ip;
 
+#pragma warning(push)
+#pragma warning(disable: 4324)
+
 //
 // RupFramesReceiver is receives a RUP frames from socket and
 // push it in OnlineDataSources processing buffers to parse.
@@ -92,11 +95,17 @@ private:
 
 	//
 
-	static const int RECV_BUFFER_SIZE = sizeof(Rup::SimFrame) + 1;
-
 	int m_receiveBufIndex = 0;
-	udp::endpoint m_receiveFromIP[2];				// indexed by m_receiveBufIndex
-	char m_receiveBuffer[2][RECV_BUFFER_SIZE];		// indexed by m_receiveBufIndex
+
+	// selected by m_receiveBufIndex
+	//
+	CACHE_ALIGNED udp::endpoint m_receiveFromIP0;
+	CACHE_ALIGNED udp::endpoint m_receiveFromIP1;
+
+	static const int RECV_BUFFER_SIZE = ROUND_TO_CACHE_LINE_SIZE(sizeof(Rup::SimFrame));
+
+	CACHE_ALIGNED char m_receiveBuffer0[RECV_BUFFER_SIZE];
+	CACHE_ALIGNED char m_receiveBuffer1[RECV_BUFFER_SIZE];
 
 	// statistics variables
 
@@ -121,5 +130,7 @@ private:
 	int m_rupFramesReceivedPerSecond = 0;
 	qint64 m_prevPacketTime = 0;
 };
+
+#pragma warning(pop)
 
 

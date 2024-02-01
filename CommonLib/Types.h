@@ -969,7 +969,6 @@ const char* const DataFormatStr[] =
 	"Float",
 };
 
-
 #define TO_INT(value) (static_cast<int>(value))
 #define ENUM_COUNT(enumName) (static_cast<int>(enumName::Count))
 

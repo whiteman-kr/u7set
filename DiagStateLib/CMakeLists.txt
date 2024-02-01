@@ -11,9 +11,13 @@ find_package(Qt6 REQUIRED COMPONENTS Xml Concurrent Qml)
 set(TARGET DiagStateLib)
 
 qt_add_library(${TARGET} STATIC
+	DiagSignalStateFlags.cpp
+	DiagSignalStateFlags.h
 	DiagState.cpp
 	DiagState.h
 	IDiagStateManager.h
+	SimpleDiagSignalState.cpp
+	SimpleDiagSignalState.h
 )
 
 target_precompile_headers(${TARGET} PUBLIC
