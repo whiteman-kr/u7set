@@ -62,30 +62,3 @@
 //				(flags.autoPoint == 1 ? " auto" : "");
 //}
 
-// ---------------------------------------------------------------------------------------------------------
-//
-// SimpleDiagSignalStatesQueue class implementation
-//
-// ---------------------------------------------------------------------------------------------------------
-
-SimpleDiagSignalStatesQueue::SimpleDiagSignalStatesQueue(int queueSize) :
-	FastThreadSafeQueue<SimpleDiagSignalState>(queueSize)
-{
-}
-
-SimpleDiagSignalStatesQueue::~SimpleDiagSignalStatesQueue()
-{
-}
-
-void SimpleDiagSignalStatesQueue::afterPush()
-{
-	m_afterPushCtr++;
-
-	if (m_afterPushCtr > 50)
-	{
-		m_afterPushCtr = 0;
-
-		emit queueNotEmpty();
-	}
-}
-

@@ -18,8 +18,6 @@ set(TARGET DiagDataSrv)
 add_executable(${TARGET}
 	../lib/DataSource.cpp
 	../lib/DataSource.h
-	DiagDataReceiver.cpp
-	DiagDataReceiver.h
 	DiagDataService.cpp
 	DiagDataService.h
 	DiagDataServiceMain.cpp
@@ -27,8 +25,6 @@ add_executable(${TARGET}
 	DiagDataSource.h
 	DynamicDiagSignalState.cpp
 	DynamicDiagSignalState.h
-	SignalStatesProcessingThread.cpp
-	SignalStatesProcessingThread.h
 )
 
 target_precompile_headers(${TARGET} PRIVATE

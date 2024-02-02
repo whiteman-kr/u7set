@@ -8,7 +8,7 @@
 
 RupFramesReceiver::RupFramesReceiver(const QString& threadName,
 							const HostAddressPort& dataReceivingIP,
-							OnlineDataSources& onlineDataSources,
+							BaseOnlineDataSources& onlineDataSources,
 							E::SoftwareRunMode swRunMode,
 							CircularLoggerShared log) :
 	m_threadName(threadName),
@@ -67,7 +67,6 @@ void RupFramesReceiver::startTimer500ms()
 	m_timer->async_wait(bind(&RupFramesReceiver::onTimer500ms, this,
 						   std::placeholders::_1));
 }
-
 void RupFramesReceiver::onTimer500ms(const error_code& error)
 {
 	if (stopIfQuitRequested() == true)
@@ -110,142 +109,7 @@ void RupFramesReceiver::onTimer500ms(const error_code& error)
 	startTimer500ms();
 }
 
-void RupFramesReceiver::clearReceiverStatistics()
-{
-	m_noReceiveCtr = 0;
-	m_socketErrorCtr = 0;
-
-	m_receivingSpeed = 0;
-	m_rupFramesReceivingSpeed = 0;
-	m_rupFramesCount = 0;
-	m_simFramesCount = 0;
-
-	m_errDatagramSize = 0;
-	m_errSimVersion = 0;
-	m_errUnknownDataSourceIP = 0;
-	m_errRupFrameCRC = 0;
-	m_errNotExpectedSimPacket = 0;
-
-	m_receivedPerSecond = 0;
-	m_rupFramesReceivedPerSecond = 0;
-}
-
-void RupFramesReceiver::updateReceiverStatistics()
-{
-	qint64 now = QDateTime::currentMSecsSinceEpoch();
-
-	if (m_lastUpdateTime == 0)
-	{
-		m_lastUpdateTime = now;
-	}
-	else
-	{
-		qint64 dt = now - m_lastUpdateTime;
-
-		if (dt > 900)
-		{
-			m_receivingSpeed = static_cast<int>((m_receivedPerSecond * 1000.0) / dt);
-			m_receivedPerSecond = 0;
-
-			m_rupFramesReceivingSpeed = static_cast<int>((m_rupFramesReceivedPerSecond * 1000.0) / dt);
-			m_rupFramesReceivedPerSecond = 0;
-
-			qDebug() << C_STR(getLogStr(QString("receive RUP frames %1/s").arg(m_rupFramesReceivingSpeed)));
-
-			m_lastUpdateTime = now;
-		}
-	}
-}
-
-bool RupFramesReceiver::createAndBindSocket()
-{
-	Q_ASSERT(isSocketWorkable() == false);
-
-	TEST_PTR_RETURN_FALSE(m_ioContext);
-
-	if (m_socket != nullptr)
-	{
-		closeSocket();
-	}
-
-	m_socket = new udp::socket(*m_ioContext);
-
-	error_code error;
-
-	m_socket->open(asio::ip::udp::v4(), error);
-
-	if (!error)
-	{
-		m_socketBound = false;
-
-		udp::endpoint recvEndpoint(ip::address::from_string(m_dataReceivingIP.addressStr().toStdString()),
-									m_dataReceivingIP.port());
-
-		m_socket->bind(recvEndpoint, error);
-
-		if (!error)
-		{
-			m_socketBound = true;
-
-			DEBUG_LOG_MSG(m_log, getLogStr(QString("socket created and bound to %1").
-														arg(dataReceivingIPStr())));
-
-			asio::socket_base::receive_buffer_size rxBufferSize(10 * 1024 * 1024);
-
-			m_socket->set_option(rxBufferSize, error);
-
-			if (error)
-			{
-				DEBUG_LOG_ERR(m_log, getLogStr(QString("error changing socket receive buffer size").
-														arg(m_threadName)));
-			}
-
-			m_socket->get_option(rxBufferSize);
-
-			DEBUG_LOG_MSG(m_log, getLogStr(QString("socket receive buffer size %1 bytes").
-														arg(rxBufferSize.value())));
-
-			startReceive();
-		}
-		else
-		{
-			DEBUG_LOG_MSG(m_log, getLogStr(QString("error binding listening socket to %1: %2").
-														arg(m_dataReceivingIP.addressPortStr()).
-														arg(QString::fromStdString(error.message()))));
-
-			closeSocket();
-		}
-	}
-	else
-	{
-		DEBUG_LOG_MSG(m_log, getLogStr(QString("listening socket opening error: %1").
-						arg(QString::fromStdString(error.message()))));
-
-		closeSocket();
-	}
-
-	return isSocketWorkable();
-}
-
-bool RupFramesReceiver::isSocketWorkable() const
-{
-	return	m_socket != nullptr &&
-			m_socket->is_open() &&
-			m_socketBound == true;
-}
-
-void RupFramesReceiver::closeSocket()
-{
-	if (m_socket != nullptr)
-	{
-		m_socket->close();
-		delete m_socket;
-		m_socket = nullptr;
-		m_socketBound = false;
-	}
-}
-
-void RupFramesReceiver::startReceive()
+void RupFramesReceiver::startReceiveRupFrames()
 {
 	if (isSocketWorkable() == false)
 	{
@@ -271,12 +135,12 @@ void RupFramesReceiver::startReceive()
 
 	m_socket->async_receive_from(asio::buffer(	receiveIntoBuf, RECV_BUFFER_SIZE),
 												*receiveIntoFromIP,
-												bind(&RupFramesReceiver::receivePackets, this,
+												bind(&RupFramesReceiver::onRupFrameReceive, this,
 												std::placeholders::_1,
 												std::placeholders::_2));
 }
 
-void RupFramesReceiver::receivePackets(const error_code& error, size_t bytesReceived)
+void RupFramesReceiver::onRupFrameReceive(const error_code& error, size_t bytesReceived)
 {
 	qint64 serverTime = QDateTime::currentMSecsSinceEpoch();
 
@@ -309,7 +173,7 @@ void RupFramesReceiver::receivePackets(const error_code& error, size_t bytesRece
 
 	Rup::SimFrame& simFrame = *reinterpret_cast<Rup::SimFrame*>(receiveBuf);
 
-	startReceive();
+	startReceiveRupFrames();
 
 	m_receivedPerSecond += static_cast<int>(bytesReceived);
 
@@ -388,6 +252,94 @@ void RupFramesReceiver::receivePackets(const error_code& error, size_t bytesRece
 	}
 }
 
+bool RupFramesReceiver::createAndBindSocket()
+{
+	Q_ASSERT(isSocketWorkable() == false);
+
+	TEST_PTR_RETURN_FALSE(m_ioContext);
+
+	if (m_socket != nullptr)
+	{
+		closeSocket();
+	}
+
+	m_socket = new udp::socket(*m_ioContext);
+
+	error_code error;
+
+	m_socket->open(asio::ip::udp::v4(), error);
+
+	if (!error)
+	{
+		m_socketBound = false;
+
+		udp::endpoint recvEndpoint(ip::address::from_string(m_dataReceivingIP.addressStr().toStdString()),
+									m_dataReceivingIP.port());
+
+		m_socket->bind(recvEndpoint, error);
+
+		if (!error)
+		{
+			m_socketBound = true;
+
+			DEBUG_LOG_MSG(m_log, getLogStr(QString("socket created and bound to %1").
+														arg(dataReceivingIPStr())));
+
+			asio::socket_base::receive_buffer_size rxBufferSize(10 * 1024 * 1024);
+
+			m_socket->set_option(rxBufferSize, error);
+
+			if (error)
+			{
+				DEBUG_LOG_ERR(m_log, getLogStr(QString("error changing socket receive buffer size").
+														arg(m_threadName)));
+			}
+
+			m_socket->get_option(rxBufferSize);
+
+			DEBUG_LOG_MSG(m_log, getLogStr(QString("socket receive buffer size %1 bytes").
+														arg(rxBufferSize.value())));
+
+			startReceiveRupFrames();
+		}
+		else
+		{
+			DEBUG_LOG_MSG(m_log, getLogStr(QString("error binding listening socket to %1: %2").
+														arg(m_dataReceivingIP.addressPortStr()).
+														arg(QString::fromStdString(error.message()))));
+
+			closeSocket();
+		}
+	}
+	else
+	{
+		DEBUG_LOG_MSG(m_log, getLogStr(QString("listening socket opening error: %1").
+						arg(QString::fromStdString(error.message()))));
+
+		closeSocket();
+	}
+
+	return isSocketWorkable();
+}
+
+bool RupFramesReceiver::isSocketWorkable() const
+{
+	return	m_socket != nullptr &&
+			m_socket->is_open() &&
+			m_socketBound == true;
+}
+
+void RupFramesReceiver::closeSocket()
+{
+	if (m_socket != nullptr)
+	{
+		m_socket->close();
+		delete m_socket;
+		m_socket = nullptr;
+		m_socketBound = false;
+	}
+}
+
 bool RupFramesReceiver::stopIfQuitRequested()
 {
 	if (isQuitRequested() == false)
@@ -405,6 +357,53 @@ bool RupFramesReceiver::stopIfQuitRequested()
 	}
 
 	return true;
+}
+
+void RupFramesReceiver::clearReceiverStatistics()
+{
+	m_noReceiveCtr = 0;
+	m_socketErrorCtr = 0;
+
+	m_receivingSpeed = 0;
+	m_rupFramesReceivingSpeed = 0;
+	m_rupFramesCount = 0;
+	m_simFramesCount = 0;
+
+	m_errDatagramSize = 0;
+	m_errSimVersion = 0;
+	m_errUnknownDataSourceIP = 0;
+	m_errRupFrameCRC = 0;
+	m_errNotExpectedSimPacket = 0;
+
+	m_receivedPerSecond = 0;
+	m_rupFramesReceivedPerSecond = 0;
+}
+
+void RupFramesReceiver::updateReceiverStatistics()
+{
+	qint64 now = QDateTime::currentMSecsSinceEpoch();
+
+	if (m_lastUpdateTime == 0)
+	{
+		m_lastUpdateTime = now;
+	}
+	else
+	{
+		qint64 dt = now - m_lastUpdateTime;
+
+		if (dt > 900)
+		{
+			m_receivingSpeed = static_cast<int>((m_receivedPerSecond * 1000.0) / dt);
+			m_receivedPerSecond = 0;
+
+			m_rupFramesReceivingSpeed = static_cast<int>((m_rupFramesReceivedPerSecond * 1000.0) / dt);
+			m_rupFramesReceivedPerSecond = 0;
+
+			qDebug() << C_STR(getLogStr(QString("receive RUP frames %1/s").arg(m_rupFramesReceivingSpeed)));
+
+			m_lastUpdateTime = now;
+		}
+	}
 }
 
 QString RupFramesReceiver::dataReceivingIPStr() const

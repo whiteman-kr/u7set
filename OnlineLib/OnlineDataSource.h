@@ -3,12 +3,10 @@
 #include "../CommonLib/Hash.h"
 #include "../lib/DataSource.h"
 
-class OnlineDataSource : public DataSource
+class BaseOnlineDataSource : public DataSource
 {
 private:
 	static const int APP_DATA_SOURCE_TIMEOUT = 500;
-
-protected:
 
 	struct ParsingBuffer
 	{
@@ -34,9 +32,10 @@ protected:
 		int rupDataSize() const;
 	};
 
+
 public:
-	OnlineDataSource(const DataSource& dataSource, E::LanControllerType srcType);
-	virtual ~OnlineDataSource();
+	BaseOnlineDataSource(const DataSource& dataSource, E::LanControllerType srcType);
+	virtual ~BaseOnlineDataSource();
 
 	bool initParsingBuffers(int framesQuantity);
 	void clearParsingBuffers();
@@ -60,9 +59,9 @@ public:
 								quint16 packetNo,
 								const char* rupData,
 								int rupDataSize,
-								const QThread* thread);
+								const QThread* thread) = 0;
 
-	virtual bool invalidateAllSignals(const QThread* thread);
+	virtual bool invalidateAllSignals(const QThread* thread) = 0;
 
 	void checkPlantTime(const Rup::TimeStamp& plantTimeStamp);
 
@@ -70,6 +69,9 @@ public:
 	bool releaseProcessingOwnership(const QThread* processingThread);
 
 	//
+
+	E::LanControllerType sourceType() const { return m_sourceType; }
+	int acquiredSignalsCount() const { return m_acquiredSignalsCount; }
 
 	QString stateStr() const;
 
@@ -174,8 +176,8 @@ protected:
 
 	std::vector<ParsingBuffer*> m_parsingBuffers;
 
-	QueueIndex m_writeBufferIndex = 0;		// modified by packet Receiver only in pushRupFrame
-	QueueIndex m_readBufferIndex = 0;		// modified only by ProcessingThread
+	QueueIndex m_writeBufferIndex = 0;		// modified by RupReceiver only in pushRupFrame
+	QueueIndex m_readBufferIndex = 0;		// modified only by parsing thread
 
 	SimpleMutex m_parsingBuffersMutex;		// locks only while m_writeBufferIndex and m_readBufferIndex modyfied
 
@@ -187,70 +189,23 @@ protected:
 	int m_rupDataSize = 0;
 };
 
-// OnlineDataSources NOT OWNS  OnlineDataSource objects!
-//
-class OnlineDataSources
+template <typename SIGNAL_STATE>
+class OnlineDataSource : public BaseOnlineDataSource
 {
-public:
-	OnlineDataSources();
-	~OnlineDataSources();
+protected:
+	OnlineDataSource(const DataSource& dataSource, E::LanControllerType srcType) :
+		BaseOnlineDataSource(dataSource, srcType),
+		m_states(acquiredSignalsCount() * 3)
+	{
+	}
 
-	bool append(OnlineDataSource* onlineSource,
-				E::LanControllerType lanType,
-				CircularLoggerShared logger);
-
-	void clear();
-
-	bool pushRupFrame(	quint32 sourceIP,
-						qint64 serverTime,
-						bool isSimFrame,
-						Rup::Frame& rupFrame,
-						const QThread* thread);
-
-	void updateDataSourcesStatistics500ms(bool oneSecond);
-
-	OnlineDataSource* getSourceByIP(quint32 ip);
-	OnlineDataSource* getSignalSource(const QString& signalID);
-	OnlineDataSource* getSignalSource(Hash signalHash);
-
-	std::vector<OnlineDataSource*>::iterator begin();
-	std::vector<OnlineDataSource*>::const_iterator begin() const;
-
-	std::vector<OnlineDataSource*>::iterator end();
-	std::vector<OnlineDataSource*>::const_iterator end() const;
+	void pushSignalState(const SIGNAL_STATE& state, const QThread* thread)
+	{
+		m_states.push(state, thread);
+	}
 
 private:
-	void processingRequired(OnlineDataSource* source, bool parse);
-
-private:
-	std::vector<OnlineDataSource*> m_sources;
-
-	// module EquipmentID => OnlineDataSource*
-	//
-	std::map<QString, OnlineDataSource*> m_moduleToSource;
-
-	// lan controller EquipmentID => OnlineDataSource*
-	//
-	std::map<QString, OnlineDataSource*> m_lanControllerToSource;
-
-	// module ethernet adapter IP => OnlineDataSource*
-	//
-	std::map<quint32, OnlineDataSource*> m_ipToSource;
-
-	// signal Hash => OnlineDataSource*
-	//
-	std::map<Hash, OnlineDataSource*> m_signalToSource;
-
-	//
-
-	std::mutex m_processigRequiredMutex;
-	std::condition_variable m_processingRequiredCondition;
-
-	//	{ source, true	}	source require buffer parsing
-	//	{ source, false }	source require signals invalidation
-	//
-	std::queue<std::pair<OnlineDataSource*, bool>> m_processingRequired;
-
+	FastThreadSafeQueue<SIGNAL_STATE> m_states;
 };
 
 

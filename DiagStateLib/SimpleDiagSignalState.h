@@ -47,23 +47,33 @@ struct SimpleDiagSignalState
 	qint64 localTime() const { return time.local.timeStamp; }
 };
 
-class SimpleDiagSignalStatesQueue : public QObject, public FastThreadSafeQueue<SimpleDiagSignalState>
-{
-	Q_OBJECT
+//template <typename SIGNAL_STATE>
+//class SignalStatesQueue : public QObject, public FastThreadSafeQueue<SIGNAL_STATE>
+//{
+//	Q_OBJECT
 
-public:
-	SimpleDiagSignalStatesQueue(int queueSize);
-	virtual ~SimpleDiagSignalStatesQueue();
+//public:
+//	SignalStatesQueue(int queueSize) : FastThreadSafeQueue<SIGNAL_STATE>(queueSize) {}
+//	virtual ~SignalStatesQueue() {}
 
-signals:
-	void queueNotEmpty();
+//signals:
+//	void queueNotEmpty();
 
-private:
-	virtual void afterPush() override;
+//private:
+//	virtual void afterPush() override
+//	{
+//		m_afterPushCtr++;
 
-private:
-	int m_afterPushCtr = 0;
-};
+//		if (m_afterPushCtr > 50)
+//		{
+//			m_afterPushCtr = 0;
 
-using SimpleDiagSignalStatesQueueShared = std::shared_ptr<SimpleDiagSignalStatesQueue>;
+//			emit queueNotEmpty();
+//		}
+//	}
+
+//private:
+//	int m_afterPushCtr = 0;
+//};
+
 

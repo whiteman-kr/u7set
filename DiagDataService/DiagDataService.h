@@ -4,6 +4,7 @@
 #include "../lib/DataSource.h"
 #include "../OnlineLib/CfgServerLoader.h"
 #include "../OnlineLib/SoftwareSettings.h"
+#include "../OnlineLib/OnlineDataSources.h"
 #include "../HardwareLib/DiagSignalType.h"
 
 #include "DiagDataSource.h"
@@ -61,16 +62,12 @@ private:
 
 	std::shared_ptr<const DiagDataServiceSettings> m_serviceSettings;
 
+	OnlineDataSources<DiagDataSource, SimpleDiagSignalState> m_onlineSources;
+
 	Hardware::DiagSignalTypes m_diagSignalTypes;
 
 	int m_diagDataProcessingThreadCount = 0;
 	QString m_strCmdLineDiagDataReceivingIP;
 	HostAddressPort m_cmdLineDiagDataReceivingIP;
-
-	DiagDataSources m_diagDataSources;
-	DynamicDiagSignalStates m_diagSignalStates;
-
-	DiagDataReceiver* m_diagDataReceiver = nullptr;
-
 };
 

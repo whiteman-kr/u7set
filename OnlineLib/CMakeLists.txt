@@ -23,6 +23,8 @@ qt_add_library(${TARGET} STATIC
 	MatsUsers.h
 	OnlineDataSource.cpp
 	OnlineDataSource.h
+	OnlineDataSources.cpp
+	OnlineDataSources.h
 	RupFramesReceiver.cpp
 	RupFramesReceiver.h
 	SignalStatesProcessor.cpp
@@ -121,6 +123,9 @@ target_precompile_headers(${TARGET} PUBLIC
 )
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
+
+target_include_directories(${TARGET} PRIVATE ./../asio/include)
+target_compile_definitions(${TARGET} PRIVATE ASIO_STANDALONE=1)
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Network)
 target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib)

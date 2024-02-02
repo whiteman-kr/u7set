@@ -2,7 +2,6 @@
 #include <QMetaProperty>
 #include "../HardwareLib/DeviceObject.h"
 #include "DiagDataService.h"
-#include "DiagDataReceiver.h"
 
 // -------------------------------------------------------------------------------
 //
@@ -169,12 +168,12 @@ void DiagDataServiceWorker::onConfigurationReady(const QByteArray configurationX
 
 		if (bfi.ID == CfgFileId::DIAG_DATA_SOURCES)
 		{
-			result &= readDiagDataSources(fileData, sessionParams.currentSettingsProfile);			// fill m_appDataSources
+			result &= readDiagDataSources(fileData, sessionParams.currentSettingsProfile);
 		}
 
 		if (bfi.ID == CfgFileId::ACQUIRED_DIAG_SIGNALS)
 		{
-			result &= readDiagSignalsAndObjects(fileData);				// fills m_appSignals
+			result &= readDiagSignalsAndObjects(fileData);
 		}
 
 		if (bfi.ID == CfgFileId::DIAG_SIGNAL_TYPES)
@@ -211,7 +210,8 @@ bool DiagDataServiceWorker::readDiagDataSources(const QByteArray& fileData, cons
 		return false;
 	}
 
-	result = m_diagDataSources.init(profile, dataSources, logger());
+	Q_ASSERT(false);	// to do
+	//result = m_onlineSources.init(profile, dataSources, logger());
 
 	if (result == true)
 	{
@@ -291,7 +291,7 @@ void DiagDataServiceWorker::clearConfiguration()
 
 void DiagDataServiceWorker::runDiagDataReceiverThread()
 {
-	if (m_diagDataReceiver != nullptr)
+/*	if (m_diagDataReceiver != nullptr)
 	{
 		Q_ASSERT(false);
 		return;
@@ -303,17 +303,17 @@ void DiagDataServiceWorker::runDiagDataReceiverThread()
 											m_diagDataProcessingThreadCount,
 											sessionParams().softwareRunMode,
 											logger());
-	m_diagDataReceiver->start();
+	m_diagDataReceiver->start();*/
 }
 
 void DiagDataServiceWorker::stopDiagDataReceiverThread()
 {
-	if (m_diagDataReceiver != nullptr)
+/*	if (m_diagDataReceiver != nullptr)
 	{
 		m_diagDataReceiver->quitAndWait();
 		delete m_diagDataReceiver;
 		m_diagDataReceiver = nullptr;
-	}
+	}*/
 }
 
 void DiagDataServiceWorker::runTcpDiagDataServer()

@@ -6,10 +6,11 @@
 #include "CircularLogger.h"
 
 #include "../UtilsLib/SimpleThread.h"
-#include "../asio/include/asio.hpp"
 
-#include "OnlineDataSource.h"
+#include "OnlineDataSources.h"
 //#include "SignalStatesProcessingThread.h"
+
+#include "../asio/include/asio.hpp"
 
 using namespace asio;
 using namespace asio::ip;
@@ -27,7 +28,7 @@ class RupFramesReceiver : public ThreadWithQuit
 public:
 	RupFramesReceiver(const QString& threadName,
 						const HostAddressPort& dataReceivingIP,
-						OnlineDataSources& onlineDataSources,
+						BaseOnlineDataSources& onlineDataSources,
 						E::SoftwareRunMode swRunMode,
 						CircularLoggerShared log);
 
@@ -41,26 +42,21 @@ private:
 	void startTimer500ms();
 	void onTimer500ms(const error_code& error);
 
-	void clearReceiverStatistics();
-	void updateReceiverStatistics();
-	void updateDataSourcesStatistics();
+	void startReceiveRupFrames();
+	void onRupFrameReceive(const error_code& error, std::size_t bytesReceived);
 
 	bool createAndBindSocket();
 	bool isSocketWorkable() const;
 	void closeSocket();
-	void startReceive();
-	void receivePackets(const error_code& error, std::size_t bytesReceived);
-
-	void requireBufferProcessing(OnlineDataSource* source);
-	void requireSignalsInvalidation(OnlineDataSource* source);
 
 	bool stopIfQuitRequested();
 
+	void clearReceiverStatistics();
+	void updateReceiverStatistics();
+
 	QString dataReceivingIPStr() const;
-
 	QString getLogStr(const QString& str);
-
-	void trace_dt(const QString& portID);
+//	void trace_dt(const QString& portID);
 
 private:
 	static const int TIMER_PEROIOD_MS = 500;				// in milliseconds
@@ -72,7 +68,7 @@ private:
 
 	const QString m_threadName;
 	HostAddressPort m_dataReceivingIP;
-	OnlineDataSources& m_onlineDataSources;
+	BaseOnlineDataSources& m_onlineDataSources;
 	bool m_isSimulationMode = false;
 	CircularLoggerShared m_log;
 
@@ -99,8 +95,8 @@ private:
 
 	// selected by m_receiveBufIndex
 	//
-	CACHE_ALIGNED udp::endpoint m_receiveFromIP0;
-	CACHE_ALIGNED udp::endpoint m_receiveFromIP1;
+	udp::endpoint m_receiveFromIP0;
+	udp::endpoint m_receiveFromIP1;
 
 	static const int RECV_BUFFER_SIZE = ROUND_TO_CACHE_LINE_SIZE(sizeof(Rup::SimFrame));
 
