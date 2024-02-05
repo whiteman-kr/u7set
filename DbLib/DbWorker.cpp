@@ -1165,7 +1165,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 
 	if (user.isDisabled() == true)
 	{
-		emitError(db, tr("User %1 is not allowed to open the project. User is disabled, contact the project administartor.").arg(username));
+		emitError(db, tr("Access Denied: User %1 does not have permission to open this project. Please contact the project administrator for assistance.").arg(username));
 		db.close();
 		return;
 	}
