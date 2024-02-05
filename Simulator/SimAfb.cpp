@@ -176,22 +176,31 @@ namespace Sim
 
 	void AfbComponentParam::addSignedInteger(const AfbComponentParam& operand)
 	{
-		// Signed integer overflow in c++ is undefined behavior, so we extend sinå32 to sint64
+		// Signed integer overflow in c++ is undefined behavior, so we extend sint32 to sint64
 		//
 		qint32 op1 = this->signedIntValue();
 		qint32 op2 = operand.signedIntValue();
-		qint32 result = op1 + op2;
-
+		
+		qint32 result = 0;
 		qint64 wideResult = static_cast<qint64>(op1) + static_cast<qint64>(op2);
+		int overflowFlag = 0;
 
 		if (wideResult > std::numeric_limits<qint32>::max())
 		{
 			result = std::numeric_limits<qint32>::max();
+			overflowFlag = 1;
 		}
-
-		if (wideResult < std::numeric_limits<qint32>::min())
+		else
 		{
-			result = std::numeric_limits<qint32>::min();
+			if (wideResult < std::numeric_limits<qint32>::min())
+			{
+				result = std::numeric_limits<qint32>::min();
+				overflowFlag = 1;
+			}
+			else
+			{
+				result = static_cast<qint32>(wideResult);
+			}
 		}
 
 		setSignedIntValue(result);
@@ -202,8 +211,7 @@ namespace Sim
 		//
 		resetMathFlags();
 
-		setMathOverflow(wideResult > std::numeric_limits<qint32>::max() ||
-						wideResult < std::numeric_limits<qint32>::min());
+		setMathOverflow(overflowFlag);
 		setMathZero(result == 0);
 
 		return;
@@ -211,22 +219,31 @@ namespace Sim
 
 	void AfbComponentParam::subSignedInteger(const AfbComponentParam& operand)
 	{
-		// Signed integer overflow in c++ is undefined behavior, so we extend sinå32 to sint64
+		// Signed integer overflow in c++ is undefined behavior, so we extend sinï¿½32 to sint64
 		//
 		qint32 op1 = this->signedIntValue();
 		qint32 op2 = operand.signedIntValue();
-		qint32 result = op1 - op2;
 
+		qint32 result = 0;
 		qint64 wideResult = static_cast<qint64>(op1) - static_cast<qint64>(op2);
+		int overflowFlag = 0;
 
 		if (wideResult > std::numeric_limits<qint32>::max())
 		{
 			result = std::numeric_limits<qint32>::max();
+			overflowFlag = 1;
 		}
-
-		if (wideResult < std::numeric_limits<qint32>::min())
+		else
 		{
-			result = std::numeric_limits<qint32>::min();
+			if (wideResult < std::numeric_limits<qint32>::min())
+			{
+				result = std::numeric_limits<qint32>::min();
+				overflowFlag = 1;
+			}
+			else
+			{
+				result = static_cast<qint32>(wideResult);
+			}
 		}
 
 		setSignedIntValue(result);
@@ -237,9 +254,7 @@ namespace Sim
 		//
 		resetMathFlags();
 
-		setMathOverflow(wideResult > std::numeric_limits<qint32>::max() ||
-						wideResult < std::numeric_limits<qint32>::min());
-
+		setMathOverflow(overflowFlag);
 		setMathZero(result == 0);
 
 		return;
@@ -251,17 +266,27 @@ namespace Sim
 		//
 		qint32 op1 = this->signedIntValue();
 		qint32 op2 = operand.signedIntValue();
-		qint32 result = op1 * op2;
+		
+		qint32 result = 0;
 		qint64 wideResult = static_cast<qint64>(op1) * static_cast<qint64>(op2);
+		int overflowFlag = 0;
 
 		if (wideResult > std::numeric_limits<qint32>::max())
 		{
 			result = std::numeric_limits<qint32>::max();
+			overflowFlag = 1;
 		}
-
-		if (wideResult < std::numeric_limits<qint32>::min())
+		else
 		{
-			result = std::numeric_limits<qint32>::min();
+			if (wideResult < std::numeric_limits<qint32>::min())
+			{
+				result = std::numeric_limits<qint32>::min();
+				overflowFlag = 1;
+			}
+			else
+			{
+				result = static_cast<qint32>(wideResult);
+			}
 		}
 
 		setSignedIntValue(result);
@@ -272,9 +297,7 @@ namespace Sim
 		//
 		resetMathFlags();
 
-		setMathOverflow(wideResult > std::numeric_limits<qint32>::max() ||
-						wideResult < std::numeric_limits<qint32>::min());
-
+		setMathOverflow(overflowFlag);
 		setMathZero(result == 0);
 
 		return;
