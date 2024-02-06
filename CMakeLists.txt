@@ -59,7 +59,7 @@ if(ADDRESS_SANITIZER)
 	add_link_options(-fsanitize=address)
 endif()
 
-# AddressSanitizer
+# UndfineBehaviorSanitizer
 #
 option(UB_SANITIZER "UB Sanitizer" OFF)
 

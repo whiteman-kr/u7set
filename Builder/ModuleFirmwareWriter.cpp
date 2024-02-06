@@ -678,8 +678,8 @@ namespace Hardware
 
 		quint32 dataBE = qToBigEndian(data);
 
-		quint32* ptr = reinterpret_cast<quint32*>(scriptFirmwareData->frames[frameIndex].data() + offset);
-		*ptr = dataBE;
+		auto ptr = scriptFirmwareData->frames[frameIndex].data() + offset;
+		std::memcpy(ptr, &dataBE, sizeof(dataBE));
 
 		if (scriptFirmwareData->maxFrameIndex < frameIndex)
 		{
@@ -1148,9 +1148,8 @@ static QByteArray err;
 
 				quint8* pData = frame.data();
 
-				quint64* pUniqueIdPtr = (quint64*)(pData + UniqueIdOffset);
-
-				*pUniqueIdPtr = uidBE;
+				auto pUniqueIdPtr = pData + UniqueIdOffset;
+				std::memcpy(pUniqueIdPtr, &uidBE, sizeof(uidBE));
 
 				// Write uniqueID description
 
@@ -1318,12 +1317,14 @@ static QByteArray err;
 					{
 						QByteArray bytes = firmware.subsysId().toUtf8();
 
-						*(quint64*)ptr = qToBigEndian(::calcHash(bytes.data(), bytes.size()));
+						auto h = qToBigEndian(::calcHash(bytes.data(), bytes.size()));
+						std::memcpy(ptr, &h, sizeof(h));
 						ptr += sizeof(quint64);
 					}
 					else
 					{
-						*(quint64*)ptr = qToBigEndian(uniqueId);
+						auto uniqueIdBe = qToBigEndian(uniqueId);
+						std::memcpy(ptr, &uniqueIdBe, sizeof(uniqueIdBe)); 
 						ptr += sizeof(quint64);
 					}
 

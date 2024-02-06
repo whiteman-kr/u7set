@@ -86,11 +86,12 @@ namespace Builder
 				break;
 			}
 
-			result &= (this->*appLogicCompilerProcs[i])();		// call next ApplicationLogicCompiler procedure
+			result &= std::invoke(appLogicCompilerProcs[i], this);
+			//result &= (this->*appLogicCompilerProcs[i])();		// call next ApplicationLogicCompiler procedure
 
 			if (result == false)
 			{
-				break;
+				break; 
 			}
 		}
 
