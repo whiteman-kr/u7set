@@ -33,11 +33,13 @@ struct VduSchemaFile
 {
 	char magic[4];        // "VDU\0"
 	uint16_t fileVersion; // 1
+	uint16_t reserve1;
 
 	struct VduSchemaFileProperties1 schemaProperties;
-	uint32_t reserve[32];
+	uint32_t reserve2[4];
 	
 	uint16_t count;
+	uint16_t reserve3;
 
 	// items is an array of schema_item_ref.
 	// The size of the array is count.

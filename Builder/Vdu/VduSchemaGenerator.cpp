@@ -6,7 +6,7 @@
 #include "../../VFrame30/VduSchema.h"
 #include "VduSchemaFile.h"
 
-namespace vdu
+namespace Builder
 {
 	static const vdu_string_ref StringRefStub = 0x52525453;          // "STRR" - for debug, easy to find in hex editor.
 	static const vdu_schema_item_ref SchemaItemRefStub = 0x29495328; // "(SI)" - for debug, easy to find in hex editor.

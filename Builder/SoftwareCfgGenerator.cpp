@@ -1,13 +1,12 @@
 #include "SoftwareCfgGenerator.h"
+#include "../OnlineLib/SoftwareSettings.h"
+#include "../VFrame30/PropertyNames.h"
+#include "../VFrame30/SchemaLayer.h"
+#include "./Vdu/VduSchemaGenerator.h"
 #include "AppLogicCompiler.h"
 #include "DeviceHelper.h"
 #include "LanControllerInfoHelper.h"
 #include "ScriptChecker.h"
-
-#include "../OnlineLib/SoftwareSettings.h"
-#include "../VFrame30/SchemaLayer.h"
-#include "../VFrame30/PropertyNames.h"
-#include "./VduSchemaGenerator/VduSchemaGenerator.h"
 
 
 namespace Builder
@@ -414,6 +413,8 @@ namespace Builder
 
 				if (panelSchema == nullptr)
 				{
+					// Schema % 1 has join to unknown schema % 2, check properties Join(Left / Top / Right / Bottom)SchemaID for schema % 1.
+					// 
 					log->errALP4080(schema->schemaId(), panelSchemaId);
 					return false;
 				}
@@ -554,6 +555,7 @@ namespace Builder
 			context->m_buildResultWriter->addFile(subDir, "SchemaDetails.pbuf", fileData);
 		}
 
+		// VDU code is here, because we have code about loading, joining and saving schemas here.
 		// Generate VDU schemas in vdu-native format, save them to build result /VDU/Schemas
 		//
 		for (auto& [schemaId, fileSchema] : schemaMap)
@@ -602,7 +604,7 @@ namespace Builder
 			LOG_MESSAGE(log, tr("Converting schema %1 to VDU format.").arg(vduSchema.schemaId()));
 
 			QStringList errorMessages;
-			result = vdu::VduSchemaGenerator::generateVduSchema(vduSchema, nativeVduData, errorMessages);
+			result = Builder::VduSchemaGenerator::generateVduSchema(vduSchema, nativeVduData, errorMessages);
 
 			if (result == false)
 			{
@@ -626,7 +628,7 @@ namespace Builder
 
 		{
 			QImage backgroundImage;
-			result = vdu::VduSchemaGenerator::generateVduBackgroundBitmap(schema, backgroundImage);
+			result = Builder::VduSchemaGenerator::generateVduBackgroundBitmap(schema, backgroundImage);
 
 			if (result == false)
 			{

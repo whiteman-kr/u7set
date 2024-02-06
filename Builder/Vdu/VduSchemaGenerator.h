@@ -7,7 +7,7 @@ namespace VFrame30
 	class SchemaItem;
 } // namespace VFrame30
 
-namespace vdu
+namespace Builder
 {
 	class VduSchemaGenerator
 	{

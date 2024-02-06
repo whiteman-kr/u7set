@@ -44,9 +44,9 @@ qt_add_library(${TARGET} STATIC
 	../Metrology/UnitsConverterTable.h
 	../TuningService/TuningSource.cpp
 	../TuningService/TuningSource.h
-	./VduSchemaGenerator/VduSchemaFile.h
-	./VduSchemaGenerator/VduSchemaGenerator.cpp
-	./VduSchemaGenerator/VduSchemaGenerator.h
+	./Vdu/VduSchemaFile.h
+	./Vdu/VduSchemaGenerator.cpp
+	./Vdu/VduSchemaGenerator.h
 	AppDataServiceCfgGenerator.cpp
 	AppDataServiceCfgGenerator.h
 	AppLogicCode.cpp
