@@ -42,6 +42,7 @@
 #include "../VFrame30/SchemaItemValue.h"
 #include "../VFrame30/SchemaItemVduLine.h"
 #include "../VFrame30/SchemaItemVduRect.h"
+#include "../VFrame30/SchemaItemVduValue.h"
 #include "../VFrame30/SchemaLayer.h"
 #include "../VFrame30/Session.h"
 #include "../VFrame30/UfbSchema.h"
@@ -671,7 +672,7 @@ void EditSchemaWidget::createActions()
 
 	// VDU items
 	//
-	m_addVduLineAction = new QAction(tr("Line"), this);
+	m_addVduLineAction = new QAction(tr("VduLine"), this);
 	m_addVduLineAction->setEnabled(true);
 	m_addVduLineAction->setIcon(QIcon(":/Images/Images/SchemaLine.svg"));
 	connect(m_addVduLineAction, &QAction::triggered,
@@ -680,7 +681,7 @@ void EditSchemaWidget::createActions()
 				addItem(std::make_shared<VFrame30::SchemaItemVduLine>(schema()->unit()));
 			});
 
-	m_addVduRectAction = new QAction(tr("Rect"), this);
+	m_addVduRectAction = new QAction(tr("VduRect"), this);
 	m_addVduRectAction->setEnabled(true);
 	m_addVduRectAction->setIcon(QIcon(":/Images/Images/SchemaRect.svg"));
 	connect(m_addVduRectAction, &QAction::triggered,
@@ -688,6 +689,16 @@ void EditSchemaWidget::createActions()
 			{
 				addItem(std::make_shared<VFrame30::SchemaItemVduRect>(schema()->unit()));
 			});
+
+	m_addVduValueAction = new QAction(tr("VduValue"), this);
+	m_addVduValueAction->setEnabled(true);
+	m_addVduValueAction->setIcon(QIcon(":/Images/Images/SchemaItemValue.svg"));
+	connect(m_addVduValueAction, &QAction::triggered,
+			[this](bool)
+			{
+				addItem(std::make_shared<VFrame30::SchemaItemVduValue>(schema()->unit()));
+			});
+
 
 	//
 	// Edit

@@ -2,6 +2,7 @@
 #include "../../VFrame30/DrawParam.h"
 #include "../../VFrame30/SchemaItemVduLine.h"
 #include "../../VFrame30/SchemaItemVduRect.h"
+#include "../../VFrame30/SchemaItemVduValue.h"
 #include "../../VFrame30/SchemaView.h"
 #include "../../VFrame30/VduSchema.h"
 #include "VduSchemaFile.h"
@@ -238,6 +239,11 @@ namespace Builder
 			{
 				itemType = VduFileSchemaItemRectId;
 			}
+
+			if (dynamic_cast<const VFrame30::SchemaItemVduValue*>(&schemaItem) != nullptr)
+			{
+				itemType = VduFileSchemaItemValueId;
+			}
 		} while (false);
 
 		if (itemType == 0)
@@ -257,6 +263,7 @@ namespace Builder
 		//
 		VduSchemaFileSchemaItemLine1 structLine{};
 		VduSchemaFileSchemaItemRect1 structRect{};
+		VduSchemaFileSchemaItemValue1 structValue{};
 
 		const char* specificItemPtr = nullptr;
 		size_t specificItemSize = 0;
@@ -313,6 +320,38 @@ namespace Builder
 
 				structRect.fontName = StringRefStub;
 				structRect.text = StringRefStub;
+			}
+			break;
+		case VduFileSchemaItemValueId:
+			{
+				const auto& schemaItemVduValue = static_cast<const VFrame30::SchemaItemVduValue&>(schemaItem);
+
+				specificItemPtr = reinterpret_cast<const char*>(&structValue);
+				specificItemSize = sizeof(structValue);
+
+				structValue.itemType = itemType;
+				structValue.version = 1;
+				structValue.size = sizeof(structValue);
+
+				// --
+				//
+				structValue.left = static_cast<decltype(structValue.left)>(schemaItemVduValue.leftDocPt());
+				structValue.top = static_cast<decltype(structValue.top)>(schemaItemVduValue.topDocPt());
+				structValue.width = static_cast<decltype(structValue.width)>(schemaItemVduValue.widthDocPt());
+				structValue.height = static_cast<decltype(structValue.height)>(schemaItemVduValue.heightDocPt());
+
+				structValue.weight = static_cast<decltype(structValue.weight)>(schemaItemVduValue.weight());
+				structValue.drawRect = schemaItemVduValue.drawRect();
+
+				structValue.lineColor = schemaItemVduValue.lineColor().rgba();
+				structValue.fillColor = schemaItemVduValue.fillColor().rgba();
+				structValue.textColor = schemaItemVduValue.textColor().rgba();
+
+				addedStringReferences.emplace_back(schemaItemVduValue.fontName(), sizeof(fileSchemaItem) + offsetof(VduSchemaFileSchemaItemValue1, fontName));
+
+				structValue.fontName = StringRefStub;
+				
+				structValue.appSignalHash = ::calcHash(schemaItemVduValue.appSignalId());
 			}
 			break;
 		}

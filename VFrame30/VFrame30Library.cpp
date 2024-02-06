@@ -36,6 +36,7 @@
 #include "VduSchema.h"
 #include "SchemaItemVduLine.h"
 #include "SchemaItemVduRect.h"
+#include "SchemaItemVduValue.h"
 
 
 namespace VFrame30
@@ -93,6 +94,7 @@ namespace VFrame30
 		
 		SchemaItemFactory.Register<SchemaItemVduLine>();
 		SchemaItemFactory.Register<SchemaItemVduRect>();
+		SchemaItemFactory.Register<SchemaItemVduValue>();
 
 		QMetaType::registerConverter<int, VFrame30::SchemaItemConst::ConstType>(IntToEnum<VFrame30::SchemaItemConst::ConstType>);
 

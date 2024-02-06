@@ -479,6 +479,7 @@ private:
 		//
 		QAction* m_addVduLineAction = nullptr;
 		QAction* m_addVduRectAction = nullptr;
+		QAction* m_addVduValueAction = nullptr;
 
 	// Edit
 	//

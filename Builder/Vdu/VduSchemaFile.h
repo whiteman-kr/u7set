@@ -53,6 +53,7 @@ struct VduSchemaFile
 // VduSchemaFileSchemaItem1::itemType
 const uint16_t VduFileSchemaItemLineId = 1;
 const uint16_t VduFileSchemaItemRectId = 2;
+const uint16_t VduFileSchemaItemValueId = 3;
 
 struct VduSchemaFileSchemaItem1
 {
@@ -112,5 +113,36 @@ struct VduSchemaFileSchemaItemRect1
 	int16_t vertAlign;
 	uint32_t reserve4;
 };
+
+struct VduSchemaFileSchemaItemValue1
+{
+	uint16_t version;  // 1
+	uint16_t itemType; // VduFileSchemaItemLine, VduFileSchemaItemRect, ...
+	uint32_t size;
+	uint32_t reserve0;
+
+	uint16_t left;
+	uint16_t top;
+	uint16_t width;
+	uint16_t height;
+
+	uint16_t weight;
+	bool reserve1;
+	bool drawRect;
+	uint32_t reserve2;
+
+	uint32_t lineColor;
+	uint32_t fillColor;
+	uint32_t textColor;
+	uint32_t reserve3;
+
+	vdu_string_ref fontName;
+	vdu_string_ref reserve4;
+	uint32_t reserve5;
+	uint32_t reserve6;
+
+	uint64_t appSignalHash;
+};
+
 
 #pragma pack(pop)
