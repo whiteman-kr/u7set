@@ -330,13 +330,6 @@ void MainWindow::createActions()
 	m_usersAction->setEnabled(false);
 	connect(m_usersAction, &QAction::triggered, this, &MainWindow::userManagement);
 
-	m_logAction = new QAction(tr("Log..."), this);
-	m_logAction->setStatusTip(tr("Show application log"));
-	//m_pLogAction->setEnabled(false);
-	connect(m_logAction, &QAction::triggered, this, &MainWindow::showLog);
-
-
-
 	m_manualRpctAction = new QAction(tr("RPCT User Manual"), this);
 	m_manualRpctAction->setStatusTip(tr("Show RPCT User Manual"));
 	connect(m_manualRpctAction, &QAction::triggered, this, &MainWindow::showRpctUserManual);
@@ -541,7 +534,6 @@ void MainWindow::createMenus()
 	QMenu* pAdmMenu = menuBar()->addMenu(tr("&Administration"));
 
 	pAdmMenu->addAction(m_usersAction);
-	pAdmMenu->addAction(m_logAction);
 
 	// Project
 	//
@@ -707,11 +699,6 @@ void MainWindow::userManagement()
 	}
 
 	return;
-}
-
-void MainWindow::showLog()
-{
-
 }
 
 void MainWindow::showSettings()
