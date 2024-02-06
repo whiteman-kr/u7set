@@ -57,11 +57,11 @@ namespace Builder
 
 		signalSet()->resetAddresses();
 
-		ApplicationLogicCompilerProc appLogicCompilerProcs[] =
+		std::function<bool(ApplicationLogicCompiler*)> appLogicCompilerProcs[] =
 		{
 			&ApplicationLogicCompiler::checkLmIpAddresses,
 			&ApplicationLogicCompiler::compileModulesLogicsPass1,
-			&ApplicationLogicCompiler::checkSignalsIDsAndHashes,		// SignalSet checking after AUTO-signals creation
+			&ApplicationLogicCompiler::checkSignalsIDsAndHashes,
 			&ApplicationLogicCompiler::compileModulesLogicsPass2,
 			&ApplicationLogicCompiler::writeResourcesUsageReport,
 			&ApplicationLogicCompiler::writeSerialDataXml,
@@ -76,22 +76,13 @@ namespace Builder
 
 		bool result = true;
 
-		int procsCount = sizeof(appLogicCompilerProcs) / sizeof(ApplicationLogicCompilerProc);
-
-		for(int i = 0; i < procsCount; i++)
+		for(auto& compilerProc : appLogicCompilerProcs)
 		{
-			if (isBuildCancelled() == true)
-			{
-				result = false;
-				break;
-			}
+			BREAK_IF_TRUE(isBuildCancelled());
 
-			result &= (this->*appLogicCompilerProcs[i])();		// call next ApplicationLogicCompiler procedure
+			result &= std::invoke(compilerProc, this);
 
-			if (result == false)
-			{
-				break;
-			}
+			BREAK_IF_FALSE(result);
 		}
 
 		clear();

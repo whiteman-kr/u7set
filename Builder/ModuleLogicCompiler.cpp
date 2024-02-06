@@ -202,7 +202,7 @@ namespace Builder
 			m_log->wrnALC5001(lmEquipmentID());
 		}
 
-		ProcsToCallArray procs =
+		std::vector<ProcToCall> procs =
 		{
 			PROC_TO_CALL(ModuleLogicCompiler::loadLMSettings),
 			PROC_TO_CALL(ModuleLogicCompiler::loadModulesSettings),
@@ -246,9 +246,9 @@ namespace Builder
 
 		LOG_MESSAGE(m_log, QString(tr("Compilation pass #2 for LM %1 was started...")).arg(lmEquipmentID()));
 
-		ProcsToCallArray procs =
+		std::vector<ProcToCall> procs =
 		{
-			PROC_TO_CALL(ModuleLogicCompiler::initComparatorSignals),
+			PROC_TO_CALL(Builder::ModuleLogicCompiler::initComparatorSignals),
 
 			PROC_TO_CALL(ModuleLogicCompiler::finalizeOptoConnectionsProcessing),
 			PROC_TO_CALL(ModuleLogicCompiler::setOptoUalSignalsAddresses),
@@ -265,7 +265,7 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::generateIdrPhaseCode),
 			PROC_TO_CALL(ModuleLogicCompiler::cleanupHeaps),
 
-			PROC_TO_CALL(ModuleLogicCompiler::makeAppLogicCode),
+			PROC_TO_CALL(ModuleLogicCompiler::makeSourceAppLogicCode),
 			PROC_TO_CALL(ModuleLogicCompiler::writeInfoFiles),
 			PROC_TO_CALL(ModuleLogicCompiler::checkAppLogicCode),
 
@@ -8211,15 +8211,15 @@ namespace Builder
 
 		//
 
-		CodeGenProcsToCallArray procs =
+		std::vector<CodeGenProcToCall> procs =
 		{
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateIdrCodeStart),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateCustomCode),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateAfbsVersionCheckingCode),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateInitAfbsCode),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateLoopbacksRefreshingCode),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateConstBitsInitialization),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateIdrCodeStop),
+			PROC_TO_CALL(ModuleLogicCompiler::generateIdrCodeStart),
+			PROC_TO_CALL(ModuleLogicCompiler::generateCustomCode),
+			PROC_TO_CALL(ModuleLogicCompiler::generateAfbsVersionCheckingCode),
+			PROC_TO_CALL(ModuleLogicCompiler::generateInitAfbsCode),
+			PROC_TO_CALL(ModuleLogicCompiler::generateLoopbacksRefreshingCode),
+			PROC_TO_CALL(ModuleLogicCompiler::generateConstBitsInitialization),
+			PROC_TO_CALL(ModuleLogicCompiler::generateIdrCodeStop),
 		};
 
 		bool result = runCodeGenProcs(procs, &m_idrCode);
@@ -8236,30 +8236,30 @@ namespace Builder
 
 		//
 
-		CodeGenProcsToCallArray procs =
+		std::vector<CodeGenProcToCall> procs =
 		{
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredRawDataInRegBuf),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::invertDiscreteInputSignals),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::convertAnalogInputSignals),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateAppLogicCode),
+			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredRawDataInRegBuf),
+			PROC_TO_CALL(ModuleLogicCompiler::invertDiscreteInputSignals),
+			PROC_TO_CALL(ModuleLogicCompiler::convertAnalogInputSignals),
+			PROC_TO_CALL(ModuleLogicCompiler::generateAppLogicCode),
 
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogOptoSignalsInRegBuf),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogBusChildSignalsInRegBuf),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredTuningAnalogSignalsInRegBuf),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogConstSignalsInRegBuf),
+			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogOptoSignalsInRegBuf),
+			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogBusChildSignalsInRegBuf),
+			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredTuningAnalogSignalsInRegBuf),
+			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredAnalogConstSignalsInRegBuf),
 
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredInputBusesInRegBuf),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredBusChildBusesInRegBuf),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredOptoBusesInRegBuf),
+			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredInputBusesInRegBuf),
+			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredBusChildBusesInRegBuf),
+			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredOptoBusesInRegBuf),
 
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteInputSignalsInRegBuf),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteOutputAndInternalSignalsInRegBuf),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteOptoSignalsInRegBuf),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteBusChildSignalsInRegBuf),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredTuningDiscreteSignalsInRegBuf),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteConstSignalsInRegBuf),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyOutputSignalsInOutputModulesMemory),
-			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::copyOptoConnectionsTxData),
+			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteInputSignalsInRegBuf),
+			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteOutputAndInternalSignalsInRegBuf),
+			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteOptoSignalsInRegBuf),
+			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteBusChildSignalsInRegBuf),
+			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredTuningDiscreteSignalsInRegBuf),
+			PROC_TO_CALL(ModuleLogicCompiler::copyAcquiredDiscreteConstSignalsInRegBuf),
+			PROC_TO_CALL(ModuleLogicCompiler::copyOutputSignalsInOutputModulesMemory),
+			PROC_TO_CALL(ModuleLogicCompiler::copyOptoConnectionsTxData),
 		};
 
 		bool result = runCodeGenProcs(procs, &m_alpCode);
@@ -8278,7 +8278,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::makeAppLogicCode()
+	bool ModuleLogicCompiler::makeSourceAppLogicCode()
 	{
 		return makeAppLogicCode(m_idrCode, m_alpCode, &m_appLogicCode);
 	}
@@ -8338,26 +8338,29 @@ namespace Builder
 
 		//m_optiIdrCode.removeStopCommand();
 
-		CodeOptimizationProcsToCallArray procs =
+		CodeOptimizationProcToCall procs[] =
 		{
-			CODE_OPTIMIZATION_PROC_TO_CALL(ModuleLogicCompiler::optimizeSequentialMoves),
-			CODE_OPTIMIZATION_PROC_TO_CALL(ModuleLogicCompiler::optimizeSequentialConstMoves),
-			CODE_OPTIMIZATION_PROC_TO_CALL(ModuleLogicCompiler::optimizeSequentialBitMoves),
-			CODE_OPTIMIZATION_PROC_TO_CALL(ModuleLogicCompiler::optimizeBitFilling),
+			PROC_TO_CALL(ModuleLogicCompiler::optimizeSequentialMoves),
+			PROC_TO_CALL(ModuleLogicCompiler::optimizeSequentialConstMoves),
+			PROC_TO_CALL(ModuleLogicCompiler::optimizeSequentialBitMoves),
+			PROC_TO_CALL(ModuleLogicCompiler::optimizeBitFilling),
 		};
 
 		bool result = true;
 
-		for(const CodeOptimizationProcToCall& proc : procs)
+		for(const CodeOptimizationProcToCall& p : procs)
 		{
-			result &= (this->*proc.first)(m_optiIdrCode);
-			result &= (this->*proc.first)(m_optiAlpCode);
+			std::function<bool(ModuleLogicCompiler*, CodeSnippet&)> proc = p.first;
+
+			result &= std::invoke(proc, this, m_optiIdrCode);
+			result &= std::invoke(proc, this, m_optiAlpCode);
 
 			if (result == false)
 			{
 				// %1 has been finished with errors.
 				//
-				m_log->errALC5999(proc.second);
+				const QString& procName = p.second;
+				m_log->errALC5999(procName);
 				break;
 			}
 		}
@@ -18503,19 +18506,22 @@ namespace Builder
 		return buildFile != nullptr;
 	}
 
-	bool ModuleLogicCompiler::runProcs(const ProcsToCallArray& procArray)
+	bool ModuleLogicCompiler::runProcs(const std::vector<ProcToCall>& procArray)
 	{
 		bool result = true;
 
-		for(const ProcToCall& proc : procArray)
+		for(const ProcToCall& p : procArray)
 		{
-			result &= (this->*proc.first)();
+			std::function<bool(ModuleLogicCompiler*)> proc = p.first;
+
+			result &= std::invoke(proc, this);
 
 			if (result == false)
 			{
 				// %1 has been finished with errors.
 				//
-				m_log->errALC5999(proc.second);
+				const QString& procName = p.second;
+				m_log->errALC5999(procName);
 				break;
 			}
 		}
@@ -18523,21 +18529,24 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::runCodeGenProcs(const CodeGenProcsToCallArray& procArray, CodeSnippet* code)
+	bool ModuleLogicCompiler::runCodeGenProcs(const std::vector<CodeGenProcToCall>& procArray, CodeSnippet* code)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 
 		bool result = true;
 
-		for(const CodeGenProcToCall& proc : procArray)
+		for(const CodeGenProcToCall& p : procArray)
 		{
-			result &= (this->*proc.first)(code);
+			std::function<bool(ModuleLogicCompiler*, CodeSnippet*)> proc = p.first;
+
+			result &= std::invoke (proc, this, code);
 
 			if (result == false)
 			{
 				// %1 has been finished with errors.
 				//
-				m_log->errALC5999(proc.second);
+				const QString& procName = p.second;
+				m_log->errALC5999(procName);
 				break;
 			}
 		}

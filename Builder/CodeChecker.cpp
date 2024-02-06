@@ -142,7 +142,7 @@ namespace Builder
 		{
 			Q_ASSERT(module.place == place);
 
-			if (place > m_lmDesc->memory().m_moduleCount)
+			if (place > TO_INT(m_lmDesc->memory().m_moduleCount))
 			{
 				Q_ASSERT(false);
 				continue;
@@ -263,7 +263,7 @@ namespace Builder
 		{
 			Q_ASSERT(module.place == place);
 
-			if (place > m_lmDesc->memory().m_moduleCount)
+			if (place > TO_INT(m_lmDesc->memory().m_moduleCount))
 			{
 				Q_ASSERT(false);
 				continue;
