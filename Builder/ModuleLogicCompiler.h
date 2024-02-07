@@ -912,8 +912,6 @@ namespace Builder
 								 std::vector<int>* resultPartition);
 		bool partitionOfInteger(int number, const QVector<int>& availableParts, QVector<int>* partition);
 
-		void getChassisSignalsWithEquipmentID(QString& equipmentID, std::vector<const AppSignal *>* resultSignalList);
-
 		void findLogicAfbsForBitAccReplacing(const QString& afbCaption, int logicConf, std::set<QUuid>* guidsMap);
 
 	public:
@@ -1006,11 +1004,10 @@ namespace Builder
 		HashedVector<QUuid, UalItem*> m_ualItems;				// item GUID => item ptr
 		std::map<QUuid, UalItem*> m_pinParent;					// pin GUID => parent item ptr
 
-		std::map<QString, AppSignal*> m_chassisSignals;			// all signals available in current chassis, AppSignalID => AppSignal*
-		std::multimap<QString, const AppSignal*> m_chassisSignalsByEquipmentID;		// EquipementID => AppSignal*
-		QHash<QString, AppSignal*> m_ioSignals;					// input/output signals of current chassis, AppSignalID => AppSignal*
-		QHash<QString, AppSignal*> m_equipmentSignals;			// equipment signals to app signals map, signal EquipmentID => Signal*
-		std::map<QString, UalSignal*> m_optoPortValiditySignal;	// OptoPort EquipmentID => OptoPort validity signal
+		std::map<Hash, AppSignal*> m_chassisSignals;			// all signals available in current chassis, calcHash(AppSignalID) => AppSignal*
+		std::vector<AppSignal*> m_ioSignals;					// input/output signals of current chassis
+		std::map<Hash, AppSignal*> m_equipmentSignals;			// equipment signals to app signals map, calcHash(signal EquipmentID) => AppSignal*
+		std::map<Hash, UalSignal*> m_optoPortValiditySignal;	// calcHash(OptoPort EquipmentID) => OptoPort validity signal
 
 		std::map<Hash, std::set<QUuid>> m_ualItemsSignals;		// Hash(appSignalID) => set of UalItem.guid (type Signal) with this appSignalID
 
@@ -1066,8 +1063,6 @@ namespace Builder
 
 		QVector<UalSignal*> m_nonAcquiredOutputBuses;
 		QVector<UalSignal*> m_nonAcquiredInternalBuses;					// non acquired internal buses AND!
-
-		QHash<QUuid, QUuid> m_outPinSignal;								// output pin GUID -> signal GUID
 
 		ResourcesUsageInfo m_resourcesUsageInfo;
 

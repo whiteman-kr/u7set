@@ -167,7 +167,7 @@ namespace Builder
 
 	AppSignal* ModuleLogicCompiler::getSignal(const QString& appSignalID)
 	{
-		auto it = m_chassisSignals.find(appSignalID);
+		auto it = m_chassisSignals.find(calcHash(appSignalID));
 
 		if (it == m_chassisSignals.end())
 		{
@@ -893,21 +893,21 @@ namespace Builder
 				continue;
 			}
 
-			if (m_chassisSignals.contains(sg->appSignalID()) == true)
+			auto [newIt, inserted] = m_chassisSignals.emplace(calcHash(sg->appSignalID()), sg);
+
+			if (inserted == false)
 			{
-				assert(false);				// duplicate signal!
+				Q_ASSERT(false);				// duplicate AppSignalID !!!
 				continue;
 			}
 
-			m_chassisSignals.insert({sg->appSignalID(), sg});
-
 			if (isIoSignal == true)
 			{
-				m_ioSignals.insert(sg->appSignalID(), sg);
+				m_ioSignals.emplace_back(sg);
 
 				if (deviceAppSignal != nullptr)
 				{
-					m_equipmentSignals.insert(deviceAppSignal->equipmentIdTemplate(), sg);
+					m_equipmentSignals.emplace(calcHash(deviceAppSignal->equipmentIdTemplate()), sg);
 				}
 				else
 				{
@@ -1086,7 +1086,6 @@ namespace Builder
 	bool ModuleLogicCompiler::createUalSignals()
 	{
 		m_ualSignals.clear();
-		m_outPinSignal.clear();
 
 		bool result = true;
 
@@ -1723,16 +1722,9 @@ namespace Builder
 
 		// fill m_ualSignals by Input and Tuning Acquired signals
 		//
-		for(auto it = m_chassisSignals.begin(); it != m_chassisSignals.end(); it++)
+		for(const auto& [appSignalID, appSignal] : m_chassisSignals)
 		{
-			AppSignal* appSignal = it->second;
-
-			if (appSignal == nullptr)
-			{
-				LOG_NULLPTR_ERROR(m_log);
-				result = false;
-				continue;
-			}
+			TEST_PTR_CONTINUE(appSignal);
 
 			if (appSignal->isAcquired() == false)
 			{
@@ -2041,7 +2033,7 @@ namespace Builder
 		}
 		else
 		{
-			if (m_chassisSignals.contains(receivedAppSignalID) == true)
+			if (m_chassisSignals.contains(calcHash(receivedAppSignalID)) == true)
 			{
 				// LM's %1 native signal %2 can't be received via opto connection (Logic schema %3)
 				//
@@ -2141,13 +2133,17 @@ namespace Builder
 
 		QString validitySignalEquipmentID = port->validitySignalEquipmentID();
 
-		AppSignal* validityAppSignal = m_equipmentSignals.value(validitySignalEquipmentID);
+		auto it = m_equipmentSignals.find(calcHash(validitySignalEquipmentID));
 
-		if (validityAppSignal == nullptr)
+		if (it == m_equipmentSignals.end())
 		{
 			m_log->errALC5133(validitySignalEquipmentID, ualItem->guid(), ualItem->label(), ualItem->schemaID());
 			return false;
 		}
+
+		AppSignal* validityAppSignal = it->second;
+
+		TEST_PTR_RETURN_FALSE(validityAppSignal);
 
 		UalSignal* ualSignal = m_ualSignals.get(validityAppSignal->appSignalID());
 
@@ -2240,9 +2236,11 @@ namespace Builder
 
 			QString validitySignalEquipmentID = optoPort->validitySignalEquipmentID();
 
-			AppSignal* validitySignal = m_equipmentSignals.value(validitySignalEquipmentID, nullptr);
+			AppSignal* validitySignal = nullptr;
 
-			if (validitySignal == nullptr)
+			auto it = m_equipmentSignals.find(calcHash(validitySignalEquipmentID));
+
+			if (it == m_equipmentSignals.end())
 			{
 				// validity signal is not exists, create corresponding AppSignal
 				//
@@ -2320,9 +2318,9 @@ namespace Builder
 				{
 					m_signals->append(validitySignal, m_lmShared);
 
-					m_chassisSignals.insert({validitySignal->appSignalID(), validitySignal});
-					m_ioSignals.insert(validitySignal->appSignalID(), validitySignal);
-					m_equipmentSignals.insert(validitySignalEquipmentID, validitySignal);
+					m_chassisSignals.emplace(calcHash(validitySignal->appSignalID()), validitySignal);
+					m_ioSignals.emplace_back(validitySignal);
+					m_equipmentSignals.emplace(calcHash(validitySignalEquipmentID), validitySignal);
 				}
 			}
 
@@ -2340,7 +2338,7 @@ namespace Builder
 				result = false;
 			}
 
-			m_optoPortValiditySignal.insert({optoPort->equipmentID(), validtyUalSignal});
+			m_optoPortValiditySignal.emplace(calcHash(optoPort->equipmentID()), validtyUalSignal);
 		}
 
 		return result;
@@ -2366,7 +2364,7 @@ namespace Builder
 			return false;
 		}
 
-		if (m_chassisSignals.contains(signalID) == false)
+		if (m_chassisSignals.contains(calcHash(signalID)) == false)
 		{
 			// The signal '%1' is not associated with LM '%2'.
 			//
@@ -3328,8 +3326,6 @@ namespace Builder
 	{
 		bool result = true;
 
-		QVector<QPair<AppSignal*, QString>> acquiredInputSignalToLinkedValiditySignalID;	// Acquired input signal => linked validity signal EquipmentID
-
 		for(const AppSignal* s : m_ioSignals)
 		{
 			TEST_PTR_CONTINUE(s);
@@ -3371,9 +3367,9 @@ namespace Builder
 				continue;
 			}
 
-			AppSignal* linkedValiditySignal = m_equipmentSignals.value(validitySignalEquipmentID, nullptr);
+			auto it = m_equipmentSignals.find(calcHash(validitySignalEquipmentID));
 
-			if (linkedValiditySignal == nullptr)
+			if (it == m_equipmentSignals.end())
 			{
 				// Linked validity app signal with EquipmentID %1 is not found (input signal %2).
 				//
@@ -3381,6 +3377,8 @@ namespace Builder
 				result = false;
 				continue;
 			}
+
+			AppSignal* linkedValiditySignal = it->second;
 
 			if (linkedValiditySignal->isInput() == false ||
 				linkedValiditySignal->isDiscrete() == false)
@@ -3431,7 +3429,7 @@ namespace Builder
 				continue;
 			}
 
-			auto it = m_optoPortValiditySignal.find(optoPort->equipmentID());
+			auto it = m_optoPortValiditySignal.find(calcHash(optoPort->equipmentID()));
 
 			if (it == m_optoPortValiditySignal.end())
 			{
@@ -4863,9 +4861,9 @@ namespace Builder
 
 		bool result = true;
 
-		for(auto it = m_chassisSignals.begin(); it != m_chassisSignals.end(); it++)
+		for(const auto& [hash, signal] : m_chassisSignals)
 		{
-			AppSignal* signal = it->second;
+			TEST_PTR_CONTINUE(signal);
 
 			if (signal->enableTuning() == false)
 			{
@@ -5939,10 +5937,8 @@ namespace Builder
 	{
 		bool result = true;
 
-		for(auto it = m_chassisSignals.begin(); it != m_chassisSignals.end(); it++)
+		for(auto& [hash, s] : m_chassisSignals)
 		{
-			AppSignal* s = it->second;
-
 			if(s == nullptr)
 			{
 				assert(false);
@@ -6428,7 +6424,7 @@ namespace Builder
 
 		// set ualAddress of Discrete and Bus input UalSignals reffered by m_ioSignals equal to ioBufAddr of input signal
 		//
-		for(AppSignal* ioSignal : m_ioSignals)
+		for(const AppSignal* ioSignal : m_ioSignals)
 		{
 			if (ioSignal == nullptr)
 			{
@@ -7713,7 +7709,7 @@ namespace Builder
 			{
 				AppSignal* s = m_signals->getSignal(id);
 
-				if (s != nullptr && m_chassisSignals.contains(s->appSignalID()) == true)
+				if (s != nullptr && m_chassisSignals.contains(calcHash(s->appSignalID())) == true)
 				{
 					find = true;
 					break;
@@ -7980,7 +7976,7 @@ namespace Builder
 
 		QString rxSignalID = receiver->appSignalIds();
 
-		if (m_chassisSignals.contains(rxSignalID) == false)
+		if (m_chassisSignals.contains(calcHash(rxSignalID)) == false)
 		{
 			// Single-port Rx signal '%1' is not associated with LM '%2' (Logic schema '%3').
 			//
@@ -15402,9 +15398,7 @@ namespace Builder
 
 		bool first = true;
 
-		CodeItem cmd;
-
-		for(AppSignal* s : m_ioSignals)
+		for(const AppSignal* s : m_ioSignals)
 		{
 			TEST_PTR_CONTINUE(s);
 
@@ -15455,7 +15449,7 @@ namespace Builder
 
 		std::map<int, CopyBitsMap> destCopyMaps;	// destAddrOffset => CopyBitsMap
 
-		for(AppSignal* s : m_ioSignals)
+		for(const AppSignal* s : m_ioSignals)
 		{
 			if (s == nullptr)
 			{
@@ -16766,10 +16760,8 @@ namespace Builder
 
 	bool ModuleLogicCompiler::detectUnusedSignals()
 	{
-		for(const auto& pair : m_chassisSignals)
+		for(const auto& [hash, s] : m_chassisSignals)
 		{
-			const AppSignal* s = pair.second;
-
 			TEST_PTR_CONTINUE(s);
 
 			if (s->isInternal() == true &&
@@ -16787,10 +16779,8 @@ namespace Builder
 	{
 		bool result = true;
 
-		for(const auto& pair : m_chassisSignals)
+		for(const auto& [hash, s] : m_chassisSignals)
 		{
-			const AppSignal* s = pair.second;
-
 			TEST_PTR_CONTINUE(s);
 
 			if (s->reserved() == false)
@@ -19322,44 +19312,6 @@ namespace Builder
 		}
 
 		return result;
-	}
-
-	void ModuleLogicCompiler::getChassisSignalsWithEquipmentID(QString& equipmentID,
-															   std::vector<const AppSignal*>* resultSignalList)
-	{
-		if (resultSignalList == nullptr)
-		{
-			LOG_NULLPTR_ERROR(m_log);
-			return;
-		}
-
-		if (m_chassisSignals.size() != 0 &&
-			m_chassisSignalsByEquipmentID.size() == 0)
-		{
-			// initialization of m_chassisSignalsByEquipmentID
-			//
-			for(const auto& pair : m_chassisSignals)
-			{
-				const AppSignal* appSignal = pair.second;
-
-				TEST_PTR_CONTINUE(appSignal);
-
-				m_chassisSignalsByEquipmentID.insert({appSignal->equipmentID(), appSignal});
-			}
-		}
-
-		resultSignalList->clear();
-
-		for(auto it = m_chassisSignalsByEquipmentID.find(equipmentID);
-			it != m_chassisSignalsByEquipmentID.end(); it++)
-		{
-			if (it->first != equipmentID)
-			{
-				break;
-			}
-
-			resultSignalList->push_back(it->second);
-		}
 	}
 
 	void ModuleLogicCompiler::findLogicAfbsForBitAccReplacing(const QString& afbCaption,
