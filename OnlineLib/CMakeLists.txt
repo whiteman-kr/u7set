@@ -27,6 +27,8 @@ qt_add_library(${TARGET} STATIC
 	OnlineDataSources.h
 	RupFramesReceiver.cpp
 	RupFramesReceiver.h
+	SignalStatesDistributor.cpp
+	SignalStatesDistributor.h
 	SignalStatesProcessor.cpp
 	SignalStatesProcessor.h
 	SocketIO.cpp
