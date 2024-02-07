@@ -124,6 +124,12 @@
 										break; \
 									}
 
+#define BREAK_IF_TRUE(result)		if ((result) == true) \
+									{ \
+										break; \
+									}
+
+
 #define AUTO_LOCK(mutex) QMutexLocker _locker_##mutex(&mutex);
 
 #define C_STR(qstring) qstring.toStdString().c_str()

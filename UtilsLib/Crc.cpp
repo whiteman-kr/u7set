@@ -26,7 +26,8 @@ quint64 Crc::setDataBlockCrc(quint16 frameIndex, void* datablock, int blockSize)
 	memcpy(buffer.data() + sizeof(decltype(frameIndex)), datablock, blockSize);
 
 	quint64 crc = Crc::crc64(buffer.data(), buffer.size() - sizeof(crc));
-	*reinterpret_cast<qint64*>(buffer.data() + buffer.size() - sizeof(crc)) = qToBigEndian(crc);						// CONVERT CRC HERE
+	auto crc_be = qToBigEndian(crc);
+	std::memcpy(buffer.data() + buffer.size() - sizeof(crc_be), &crc_be, sizeof(crc_be));
 
 	// Check calculated data CRC
 	//

@@ -59,6 +59,15 @@ if(ADDRESS_SANITIZER)
 	add_link_options(-fsanitize=address)
 endif()
 
+# UndfineBehaviorSanitizer
+#
+option(UB_SANITIZER "UB Sanitizer" OFF)
+
+if(UB_SANITIZER)
+	add_compile_options(-fsanitize=undefined)
+	add_link_options(-fsanitize=undefined)
+endif()
+
 # Update Translations
 # Updates .ts files
 #
@@ -77,6 +86,7 @@ endif()
 message("Build output dir set to: " ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 message("Code coverage: " ${CODE_COVERAGE})
 message("AddressSanitizer: " ${ADDRESS_SANITIZER})
+message("UBSanitizer: " ${UB_SANITIZER})
 message("Update translations: " ${UPDATE_TRANSLATIONS})
 message("CMake executable:  ${CMAKE_COMMAND}")
 message("CMake version:  ${CMAKE_VERSION}")

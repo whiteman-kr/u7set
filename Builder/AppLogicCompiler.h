@@ -8,10 +8,7 @@
 
 namespace Builder
 {
-	class ApplicationLogicCompiler;
 	class LmDescriptionSet;
-
-	typedef bool (ApplicationLogicCompiler::*ApplicationLogicCompilerProc)(void);
 
 	class ApplicationLogicCompiler : public QObject
 	{

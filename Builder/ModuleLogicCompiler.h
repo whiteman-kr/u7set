@@ -25,24 +25,11 @@ namespace Builder
 	class ApplicationLogicCompiler;
 	class ModuleLogicCompiler;
 
-	typedef bool (ModuleLogicCompiler::*ModuleLogicCompilerProc)(void);
-	typedef std::pair<ModuleLogicCompilerProc, const char*> ProcToCall;
-	typedef std::vector<ProcToCall> ProcsToCallArray;
+	using ProcToCall = std::pair<std::function<bool(Builder::ModuleLogicCompiler*)>, QString>;
+	using CodeGenProcToCall = std::pair<std::function<bool(ModuleLogicCompiler*, CodeSnippet*)>, QString>;
+	using CodeOptimizationProcToCall = std::pair<std::function<bool(ModuleLogicCompiler*, CodeSnippet&)>, QString>;
 
 #define PROC_TO_CALL(procName)		{ &procName, #procName }
-
-	typedef bool (ModuleLogicCompiler::*ModuleLogicCompilerCodeGenProc)(CodeSnippet*);
-	typedef std::pair<ModuleLogicCompilerCodeGenProc, const char*> CodeGenProcToCall;
-	typedef std::vector<CodeGenProcToCall> CodeGenProcsToCallArray;
-
-#define CODE_GEN_PROC_TO_CALL(procName)		{ &procName, #procName }
-
-	typedef bool (ModuleLogicCompiler::*CodeOptimizationProc)(CodeSnippet&);
-	typedef std::pair<CodeOptimizationProc, const char*> CodeOptimizationProcToCall;
-	typedef std::vector<CodeOptimizationProcToCall> CodeOptimizationProcsToCallArray;
-
-#define CODE_OPTIMIZATION_PROC_TO_CALL(procName)	{ &procName, #procName }
-
 
 	class ModuleLogicCompiler : public QObject
 	{
@@ -507,7 +494,7 @@ namespace Builder
 		bool generateIdrPhaseCode();
 		bool generateAlpPhaseCode();
 
-		bool makeAppLogicCode();
+		bool makeSourceAppLogicCode();
 
 		bool makeAppLogicCode(AppLogicCode& idrCode,
 							  AppLogicCode& alpCode,
@@ -900,8 +887,8 @@ namespace Builder
 		bool writeSignalList(const QVector<UalSignal *> &signalList, QString listName) const;
 		bool writeUalSignalsList() const;
 
-		bool runProcs(const ProcsToCallArray& procArray);
-		bool runCodeGenProcs(const CodeGenProcsToCallArray& procArray, CodeSnippet* code);
+		bool runProcs(const std::vector<ProcToCall>& procArray);
+		bool runCodeGenProcs(const std::vector<CodeGenProcToCall>& procArray, CodeSnippet* code);
 
 		Address16 getConstBitAddr(UalSignal* constDiscreteUalSignal);
 

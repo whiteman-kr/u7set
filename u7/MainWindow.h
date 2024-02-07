@@ -77,7 +77,6 @@ protected slots:
 	void exit();
 
 	void userManagement();
-	void showLog();
 	void showSettings();
 	void showShortcuts();
 	void showRpctUserManual();
@@ -129,7 +128,6 @@ private:
 	QAction* m_exitAction = nullptr;
 
 	QAction* m_usersAction = nullptr;
-	QAction* m_logAction = nullptr;
 	QAction* m_settingsAction = nullptr;
 	QAction* m_shortcutsAction = nullptr;
 
