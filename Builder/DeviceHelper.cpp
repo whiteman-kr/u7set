@@ -648,8 +648,6 @@ const Hardware::DeviceModule* DeviceHelper::getLmOrBvb(const Hardware::DeviceCha
 	return nullptr;
 }
 
-
-
 const Hardware::DeviceModule* DeviceHelper::getAssociatedLm(const Hardware::DeviceObject* object)
 {
 	//

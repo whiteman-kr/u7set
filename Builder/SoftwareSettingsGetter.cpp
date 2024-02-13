@@ -304,7 +304,6 @@ bool SoftwareSettingsGetter::getLmPropertiesFromDevice(	const Hardware::DeviceMo
 	}
 	else
 	{
-		Q_ASSERT(false);		// LM uniqueID isn't found
 		ds->setModuleUniqueID(0);
 	}
 
