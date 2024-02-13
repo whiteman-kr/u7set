@@ -1,4 +1,5 @@
 #include "DiagSignalType.h"
+#include "../Proto/ProtoCommonHelper.h"
 
 namespace Hardware
 {

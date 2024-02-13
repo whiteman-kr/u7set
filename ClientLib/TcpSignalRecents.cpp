@@ -135,22 +135,26 @@ namespace ClientLib
 			Q_ASSERT(recentSignals.size() <= ADS_GET_APP_SIGNAL_STATE_MAX);
 		}
 
-		m_getSignalStateRequest.mutable_signalhashes()->Clear();
-		m_getSignalStateRequest.mutable_signalhashes()->Reserve(std::ssize(recentSignals));
+		thread_local ::Network::GetAppSignalStateRequest s_getSignalStateRequest;
+
+		s_getSignalStateRequest.mutable_signalhashes()->Clear();
+		s_getSignalStateRequest.mutable_signalhashes()->Reserve(std::ssize(recentSignals));
 
 		for (Hash hash : recentSignals)
 		{
-			m_getSignalStateRequest.add_signalhashes(hash);
+			s_getSignalStateRequest.add_signalhashes(hash);
 		}
 
-		sendRequest(ADS_GET_APP_SIGNAL_STATE, m_getSignalStateRequest);
+		sendRequest(ADS_GET_APP_SIGNAL_STATE, s_getSignalStateRequest);
 
 		return;
 	}
 
 	void TcpSignalRecents::processSignalState(const QByteArray& data)
 	{
-		bool ok = m_getSignalStateReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
+		thread_local ::Network::GetAppSignalStateReply s_getSignalStateReply;
+
+		bool ok = s_getSignalStateReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 
 		if (ok == false)
 		{
@@ -159,18 +163,18 @@ namespace ClientLib
 			return;
 		}
 
-		if (m_getSignalStateReply.error() != 0)
+		if (s_getSignalStateReply.error() != 0)
 		{
-			qDebug() << "TcpSignalRecents::processSignalState, error received: " << m_getSignalStateReply.error();
-			writeError(QString("processSignalState, error received %1").arg(m_getSignalStateReply.error()));
+			qDebug() << "TcpSignalRecents::processSignalState, error received: " << s_getSignalStateReply.error();
+			writeError(QString("processSignalState, error received %1").arg(s_getSignalStateReply.error()));
 
-			Q_ASSERT(m_getSignalStateReply.error() != 0);
+			Q_ASSERT(s_getSignalStateReply.error() != 0);
 
 			requestSignalState();
 			return;
 		}
 
-		int signalStateCount = m_getSignalStateReply.appsignalstates_size();
+		int signalStateCount = s_getSignalStateReply.appsignalstates_size();
 
 		std::vector<AppSignalState> states;
 		states.reserve(signalStateCount);
@@ -179,7 +183,7 @@ namespace ClientLib
 		//
 		for (int i = 0; i < signalStateCount; i++)
 		{
-			const ::Proto::AppSignalState& protoState = m_getSignalStateReply.appsignalstates(i);
+			const ::Proto::AppSignalState& protoState = s_getSignalStateReply.appsignalstates(i);
 			Q_ASSERT(protoState.hash() != 0);
 
 			states.emplace_back(protoState);

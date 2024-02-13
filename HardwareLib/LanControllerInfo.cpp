@@ -1,4 +1,5 @@
 #include "LanControllerInfo.h"
+#include "../Proto/Network.pb.h"
 
 // -----------------------------------------------------------------------------
 //

@@ -1,11 +1,13 @@
 #pragma once
-#include "Context.h"
-#include "DrawParam.h"
+#include "DrawMode.h"
+#include "Session.h"
+
 
 namespace VFrame30
 {
 	class Schema;
 	class SchemaItem;
+	class CDrawParam;
 
 	static constexpr double ZoomStep = 10.0;
 

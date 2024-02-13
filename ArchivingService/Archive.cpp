@@ -6,6 +6,8 @@
 #include "ArchWriterThread.h"
 #include "../lib/ConstStrings.h"
 
+#include "../Proto/ArchSignal.pb.h"
+
 // ----------------------------------------------------------------------------------------------------------------------
 //
 // ArchRequestParam class implementation

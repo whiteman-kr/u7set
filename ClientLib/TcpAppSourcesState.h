@@ -8,7 +8,7 @@
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
-#include "../Proto/network.pb.h"
+#include "../Proto/Network.pb.h"
 
 
 namespace ClientLib

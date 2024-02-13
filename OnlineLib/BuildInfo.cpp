@@ -5,6 +5,7 @@
 #include "BuildInfo.h"
 #include "../lib/ConstStrings.h"
 #include "../UtilsLib/WUtils.h"
+#include "../Proto/BuildInfo.pb.h"
 
 namespace OnlineLib
 {

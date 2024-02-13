@@ -178,6 +178,8 @@ target_precompile_headers(${TARGET} PUBLIC
 	<QVector>
 	<QWidget>
 	<QFile>
+
+	"../Proto/Serialization.pb.h"
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Widgets Qt6::Qml Qt6::Xml Qt6::Sql Qt6::Concurrent Qt6::Gui Qt6::PrintSupport)

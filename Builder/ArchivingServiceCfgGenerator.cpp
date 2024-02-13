@@ -2,6 +2,7 @@
 #include "SoftwareSettingsGetter.h"
 #include "../UtilsLib/WUtils.h"
 #include "../OnlineLib/SoftwareSettings.h"
+#include "../Proto/ArchSignal.pb.h"
 
 namespace Builder
 {

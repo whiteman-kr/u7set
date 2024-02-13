@@ -7,6 +7,8 @@
 #include "BinSearch.h"
 #include "ArchRequest.h"
 
+#include "../Proto/ArchSignal.pb.h"
+
 // -----------------------------------------------------------------------------------------------------------------------
 //
 // ArchFilePartition class implementation

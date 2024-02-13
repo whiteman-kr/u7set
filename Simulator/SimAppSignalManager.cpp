@@ -1,6 +1,6 @@
 #include "SimAppSignalManager.h"
 #include "Simulator.h"
-#include "../Proto/serialization.pb.h"
+#include "../Proto/AppSignal.pb.h"
 #include "../CommonLib/Hash.h"
 
 

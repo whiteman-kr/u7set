@@ -31,7 +31,7 @@ namespace VFrame30
 	private:
 		struct Data
 		{
-			// Separate struct to make it copyiable
+			// Separate struct to make it copyable
 			//
 			QString project;
 			QString username;

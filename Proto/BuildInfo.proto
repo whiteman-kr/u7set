@@ -1,0 +1,13 @@
+syntax = "proto2";
+
+package Proto;
+
+message BuildInfo
+{
+	optional string project = 1;
+	optional int32 buildNo = 2 [default = 0];
+	optional string dateTime = 3;
+	optional int32 changeset = 4 [default = 0];
+	optional string user = 5;
+	optional string workstation = 6;
+}

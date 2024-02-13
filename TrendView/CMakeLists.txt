@@ -60,6 +60,10 @@ qt_add_library(${TARGET} STATIC
 	../Etc/Logo/RadiyLogo.qrc
 )
 
+target_precompile_headers(${TARGET} PRIVATE
+	"../Proto/Trends.pb.h"
+)
+
 #Add translations
 #
 add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})

@@ -2,6 +2,7 @@
 #include "../HardwareLib/LmDescription.h"
 #include "../HardwareLib/LogicModulesInfo.h"
 #include "../OnlineLib/SoftwareSettings.h"
+#include "../Proto/Comparator.pb.h"
 
 #include "DeviceHelper.h"
 #include "ConnectionsInfoWriter.h"

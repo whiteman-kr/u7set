@@ -1,5 +1,5 @@
 #include "DragDropHelper.h"
-#include "../Proto/serialization.pb.h"
+#include "../Proto/AppSignal.pb.h"
 
 DragDropHelper::DragDropHelper()
 {

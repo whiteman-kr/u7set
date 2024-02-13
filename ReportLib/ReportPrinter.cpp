@@ -1,5 +1,6 @@
 #include "ReportPrinter.h"
 #include "../VFrame30/Schema.h"
+#include "../VFrame30/DrawParam.h"
 
 namespace ReportLib
 {

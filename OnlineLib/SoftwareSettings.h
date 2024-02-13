@@ -4,7 +4,7 @@
 #include "../CommonLib/HostAddressPort.h"
 #include "../lib/ConstStrings.h"
 #include "../OnlineLib/MatsUsers.h"
-#include "../HardwareLib/DiagSignalType.h"
+
 
 class XmlWriteHelper;
 class XmlReadHelper;

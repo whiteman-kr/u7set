@@ -44,7 +44,6 @@ target_precompile_headers(${TARGET} PUBLIC
 	<array>
 	<atomic>
 	<cassert>
-	<chrono>
 	<cmath>
 	<concepts>
 	<condition_variable>
@@ -106,12 +105,9 @@ target_precompile_headers(${TARGET} PUBLIC
 	<QXmlStreamReader>
 	<QXmlStreamWriter>
 
-
 	# Project includes
 	#
-	"../Proto/ProtoSerialization.h"
-	"../Proto/serialization.pb.h"
-	"../Proto/network.pb.h"
+	"../Proto/Network.pb.h"
 )
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h

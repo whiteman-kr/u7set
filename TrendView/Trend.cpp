@@ -3,7 +3,6 @@
 #include <QPainter>
 #include <QThread>
 #include "../UtilsLib/CUtils.h"
-#include "../Proto/trends.pb.h"
 #include "TrendScale.h"
 
 namespace TrendLib

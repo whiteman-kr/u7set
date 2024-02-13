@@ -29,7 +29,6 @@ add_executable(${TARGET}
 
 target_precompile_headers(${TARGET} PRIVATE
 	<algorithm>
-	<chrono>
 	<bit>
 	<vector>
 	<list>

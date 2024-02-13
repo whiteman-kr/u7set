@@ -99,8 +99,6 @@ target_precompile_headers(${TARGET} PUBLIC
 	# Project includes
 	#
 	"../Proto/ProtoSerialization.h"
-	"../Proto/serialization.pb.h"
-	"../Proto/network.pb.h"
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Core Qt6::Network Qt6::Xml Qt6::Concurrent Qt6::Qml)

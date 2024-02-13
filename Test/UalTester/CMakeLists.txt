@@ -62,6 +62,8 @@ target_precompile_headers(${TARGET} PRIVATE
 	#
 	<QtNetwork>
 	<QtQml>
+
+	"../../Proto/Network.pb.h"
 )
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Network Qt6::Qml)

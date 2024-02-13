@@ -2,7 +2,7 @@
 #define APPDATASERVICECLIENT_H
 
 #include <qglobal.h>
-#include "../../Proto/network.pb.h"
+#include "../../Proto/Network.pb.h"
 #include "../../lib/Tcp.h"
 #include "../../lib/DataSource.h"
 

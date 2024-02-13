@@ -2,7 +2,7 @@
 
 #include <queue>
 #include <QReadWriteLock>
-#include "../Proto/network.pb.h"
+#include "../Proto/Network.pb.h"
 #include "../AppSignalLib/TuningSignalManager.h"
 #include "../CommonLib/Hash.h"
 #include "../OnlineLib/Tcp.h"

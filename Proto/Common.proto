@@ -1,0 +1,58 @@
+syntax = "proto2";
+
+package Proto;
+
+
+
+//
+// SchemaPoint
+//
+message SchemaPoint
+{
+	required double x = 1;
+	required double y = 2;
+}
+
+
+//------------------------------------------------------------------------------------------
+//
+//
+//								Global structs
+//
+//
+//------------------------------------------------------------------------------------------
+
+//
+// QUuid
+//
+message Uuid
+{
+	required bytes uuid = 1;
+}
+
+//
+// QVariant
+//
+message qvariant
+{
+	required int32 type = 1;
+	optional int32 intValue = 2 [default = 0];
+	optional uint32 uintValue = 3 [default = 0];
+	optional double doubleValue = 4 [default = 0];
+	optional bool boolValue = 5 [default = false];
+	optional float floatValue = 6 [default = 0];
+}
+
+//
+// Unicode string
+//
+message wstring
+{
+	required bytes text = 1;
+}
+
+message Property
+{
+	required string name = 1;
+	required string value = 2;
+}

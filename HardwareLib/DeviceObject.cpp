@@ -6,6 +6,7 @@
 #include "DiagSignal.h"
 #include "ScriptDeviceObject.h"
 #include "../lib/ConstStrings.h"
+#include "../Proto/ProtoCommonHelper.h"
 
 namespace Hardware
 {

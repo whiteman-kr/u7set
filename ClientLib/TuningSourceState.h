@@ -3,7 +3,7 @@
 #include <map>
 #include <QDateTime>
 #include "../CommonLib/Hash.h"
-#include "../Proto/network.pb.h"
+#include "../Proto/Network.pb.h"
 
 namespace ClientLib
 {

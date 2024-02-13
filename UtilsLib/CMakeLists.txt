@@ -47,7 +47,6 @@ target_precompile_headers(${TARGET} PUBLIC
 	<array>
 	<atomic>
 	<cassert>
-	<chrono>
 	<cmath>
 	<cstdint>
 	<functional>

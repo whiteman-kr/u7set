@@ -3,7 +3,6 @@
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
-#include "../Proto/network.pb.h"
 #include "IAppSignalUpdater.h"
 #include "IRecentAppSignals.h"
 
@@ -45,12 +44,6 @@ namespace ClientLib
 		SoftwareEndpoint::AppDataService m_serverSettings;
 		IRecentAppSignals& m_recentAppSignals;
 		IAppSignalUpdater& m_signalUpdater;
-
-	private:
-		// Cache protobug messages
-		//
-		::Network::GetAppSignalStateRequest m_getSignalStateRequest;
-		::Network::GetAppSignalStateReply m_getSignalStateReply;
 	};
 
 }

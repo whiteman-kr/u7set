@@ -234,10 +234,6 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QVector>
 	<QXmlStreamReader>
 	<QXmlStreamWriter>
-
-	"../Proto/ProtoSerialization.h"
-	"../Proto/serialization.pb.h"
-	"../Proto/network.pb.h"
 )
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h

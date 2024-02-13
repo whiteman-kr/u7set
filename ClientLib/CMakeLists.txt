@@ -87,7 +87,7 @@ target_precompile_headers(${TARGET} PUBLIC
 	<QTranslator>
 	<QVBoxLayout>
 
-	"../Proto/network.pb.h"
+	"../Proto/Network.pb.h"
 )
 
 #Add translations

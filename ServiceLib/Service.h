@@ -16,7 +16,7 @@
 #include "../OnlineLib/CircularLogger.h"
 #include "../OnlineLib/SoftwareInfo.h"
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../Proto/network.pb.h"
+#include "../Proto/Network.pb.h"
 #include "CommandLineParser.h"
 
 enum ServiceState

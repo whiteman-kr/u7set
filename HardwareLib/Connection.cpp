@@ -4,7 +4,7 @@
 
 #include "Connection.h"
 #include "../CommonLib/Hash.h"
-
+#include "../Proto/ProtoCommonHelper.h"
 
 namespace Hardware
 {

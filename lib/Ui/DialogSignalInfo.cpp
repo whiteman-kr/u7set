@@ -2,7 +2,7 @@
 #include "ui_DialogSignalInfo.h"
 #include "../CommonLib/Types.h"
 #include "../AppSignalLib/ComparatorSet.h"
-#include "../Proto/serialization.pb.h"
+#include "../Proto/AppSignal.pb.h"
 #include "../UtilsLib/Ui/UiTools.h"
 #include "../lib/Ui/DialogWriteValues.h"
 

@@ -1,5 +1,5 @@
 #include "CfgControlServer.h"
-#include "../Proto/network.pb.h"
+#include "../Proto/Network.pb.h"
 #include "CfgChecker.h"
 
 // -------------------------------------------------------------------------------------

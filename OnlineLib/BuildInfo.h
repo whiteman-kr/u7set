@@ -8,6 +8,11 @@
 
 #include "../CommonLib/Types.h"
 
+namespace Proto
+{
+	class BuildInfo;
+}
+
 namespace OnlineLib
 {
 	struct BuildInfo

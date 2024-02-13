@@ -1,4 +1,5 @@
 #include "SchemaView.h"
+#include "DrawParam.h"
 #include "Schema.h"
 #include "SchemaItemControl.h"
 #include "SchemaLayer.h"

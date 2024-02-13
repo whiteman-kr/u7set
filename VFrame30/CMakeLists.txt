@@ -222,7 +222,7 @@ target_precompile_headers(${TARGET} PUBLIC
 		"VFrameTools.h"
 		"../AppSignalLib/AppSignalParam.h"
 		"../Proto/ProtoSerialization.h"
-		"../Proto/serialization.pb.h"
+		"../Proto/ProtoCommonHelper.h"
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Widgets Qt6::Qml Qt6::Xml Qt6::Svg)

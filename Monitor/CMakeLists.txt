@@ -151,7 +151,6 @@ target_precompile_headers(${TARGET} PRIVATE
 	<algorithm>
 	<array>
 	<atomic>
-	<chrono>
 	<concepts>
 	<deque>
 	<functional>
@@ -175,9 +174,6 @@ target_precompile_headers(${TARGET} PRIVATE
 	# Project includes
 	#
 	"../CommonLib/Types.h"
-
-	"../Proto/network.pb.h"
-	"../Proto/serialization.pb.h"
 )
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
