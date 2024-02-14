@@ -19,11 +19,15 @@ qt_add_library(${TARGET} STATIC
 	AppSignalState.h
 	AppSignalStateFlags.cpp
 	AppSignalStateFlags.h
+	Bus.cpp
+	Bus.h
 	ComparatorSet.cpp
 	ComparatorSet.h
 	IAppSignalManager.h
 	ITuningSignalManager.h
 	ITuningSignalUpdater.h
+	PropertyNames.cpp
+	PropertyNames.h
 	RecentUsed.cpp
 	RecentUsed.h
 	SimpleAppSignalState.cpp

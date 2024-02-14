@@ -4,7 +4,7 @@
 
 using namespace std::chrono_literals;
 
-namespace ClientLib
+namespace AppSignalLib
 {
 	RecentUsed::RecentUsed(size_t maxSize /*= 750*/) :
 		m_maxSize(maxSize)

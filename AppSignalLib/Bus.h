@@ -1,5 +1,4 @@
-#ifndef BUS_H
-#define BUS_H
+#pragma once
 
 #include "../CommonLib/Types.h"
 #include "../CommonLib/Hash.h"
@@ -10,7 +9,7 @@
 class QDomElement;
 class QXmlStreamWriter;
 
-namespace VFrame30
+namespace AppSignalLib
 {
 	//
 	// BusSignal
@@ -21,22 +20,27 @@ namespace VFrame30
 		BusSignal();
 		BusSignal(const BusSignal& src);
 		BusSignal(E::SignalType type);
-		BusSignal& operator= (const BusSignal& src);
+		
+		BusSignal& operator=(const BusSignal& src);
+		BusSignal& operator=(BusSignal&& src) noexcept;
+
+	private:
+		void updateProperties();
 
 	public:
 		bool save(Proto::BusSignal* message) const;
 		bool load(const Proto::BusSignal& message);
 
 	public:
-		QString signalId() const;
+		const QString& signalId() const;
 		void setSignalId(const QString& value);
 
-		QString caption() const;
+		const QString& caption() const;
 		void setCaption(const QString& value);
 
 		E::SignalType type() const;
 
-		QString units() const;
+		const QString& units() const;
 		void setUnits(const QString& value);
 
 		E::AnalogAppSignalFormat analogFormat() const;
@@ -87,37 +91,40 @@ namespace VFrame30
 		void setInbusAnalogHightLimit(double value);
 
 	private:
-		QString m_signalId = QLatin1String("ID");
-		QString m_caption = QLatin1String("Caption");
-		E::SignalType m_type = E::SignalType::Discrete;
-		QString m_units;
+		struct
+		{
+			QString signalId = QLatin1String("ID");
+			QString caption = QLatin1String("Caption");
+			E::SignalType type = E::SignalType::Discrete;
+			QString units;
 
-		// AnalogSignal settings
-		//
-		E::AnalogAppSignalFormat m_analogFormat = E::AnalogAppSignalFormat::Float32;
-		int m_precision = 2;
-		double m_coarseAperture = 1;
-		double m_fineAperture = 0.5;
-		bool m_adaptiveAperture = false;
+			// AnalogSignal settings
+			//
+			E::AnalogAppSignalFormat analogFormat = E::AnalogAppSignalFormat::Float32;
+			int precision = 2;
+			double coarseAperture = 1;
+			double fineAperture = 0.5;
+			bool adaptiveAperture = false;
 
-		// BusSignalSettings
-		//
-		QString m_busTypeId;
+			// BusSignalSettings
+			//
+			QString busTypeId;
 
-		// Manual signal settings
-		//
-		int m_inbusOffset = 0;
-		int m_inbusDiscreteBitNo = 0;
+			// Manual signal settings
+			//
+			int inbusOffset = 0;
+			int inbusDiscreteBitNo = 0;
 
-		int m_inbusAnalogSize = 32;
-		E::DataFormat m_inbusAnalogFormat  = E::DataFormat::SignedInt;
-		E::ByteOrder m_inbusAnalogByteOrder = E::ByteOrder::BigEndian;
+			int inbusAnalogSize = 32;
+			E::DataFormat inbusAnalogFormat = E::DataFormat::SignedInt;
+			E::ByteOrder inbusAnalogByteOrder = E::ByteOrder::BigEndian;
 
-		double m_busAnalogLowLimit = 0.0;
-		double m_busAnalogHighLimit = 65535.0;
+			double busAnalogLowLimit = 0.0;
+			double busAnalogHighLimit = 65535.0;
 
-		double m_inbusAnalogLowLimit = 0.0;
-		double m_inbusAnalogHighLimit = 65535.0;
+			double inbusAnalogLowLimit = 0.0;
+			double inbusAnalogHighLimit = 65535.0;
+		} m_data;
 	};
 
 	//
@@ -156,10 +163,10 @@ namespace VFrame30
 		QUuid uuid() const;
 		void setUuid(const QUuid& uuid);
 
-		QString fileName() const;
+		const QString& fileName() const;
 		void setFileName(const QString& value);
 
-		QString busTypeId() const;
+		const QString& busTypeId() const;
 		void setBusTypeId(const QString& value);
 
 		Hash calcHash() const;
@@ -216,16 +223,14 @@ namespace VFrame30
 		void clear();
 		bool hasBus(QString busTypeId) const;
 
-		const VFrame30::Bus& bus(QString busTypeId) const;
+		const AppSignalLib::Bus& bus(QString busTypeId) const;
 
-		const std::vector<VFrame30::Bus>& busses() const;
-		void setBusses(const std::vector<VFrame30::Bus>& src);
-		void setBusses(std::vector<VFrame30::Bus>&& src);
+		const std::vector<AppSignalLib::Bus>& busses() const;
+		void setBusses(const std::vector<AppSignalLib::Bus>& src);
+		void setBusses(std::vector<AppSignalLib::Bus>&& src);
 
 	private:
-		std::vector<VFrame30::Bus> m_busses;
+		std::vector<AppSignalLib::Bus> m_busses;
 	};
 
 }
-
-#endif // BUS_H

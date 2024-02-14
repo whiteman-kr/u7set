@@ -189,7 +189,7 @@ namespace ClientLib
 		ComparatorSet m_setpoints;
 
 		mutable QMutex m_recentUsedMutex;	// It cannot be read/write locker, as every fetch the time insede RecentUsed is reset (what is write operation).
-		RecentUsed m_recentUsed;
+		AppSignalLib::RecentUsed m_recentUsed;
 	};
 
 }

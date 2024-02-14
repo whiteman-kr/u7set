@@ -44,7 +44,7 @@ namespace Builder
 		bool taskStartBuildResultWriter();
 		bool taskGetEquipment();
 		bool taskCheckPresetVersions();
-		bool taskLoadBusTypes();					// Load BusTypes (VFrame30::BusSet)
+		bool taskLoadBusTypes();					// Load BusTypes (AppSignalLib::BusSet)
 		bool taskLoadAppSignals();					// Load Builder::SignalSet
 		bool taskLoadLmDescriptions();				// Load LmDescription files
 		bool taskLoadSubsystems();					// Load subsystems

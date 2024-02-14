@@ -149,7 +149,7 @@ protected:
 	bool loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbSchema>>* out);
 
 public:
-	static bool loadBusses(DbController* db, std::vector<VFrame30::Bus>* out, QWidget* parentWidget);
+	static bool loadBusses(DbController* db, std::vector<AppSignalLib::Bus>* out, QWidget* parentWidget);
 
 public:
 	void resetAction();

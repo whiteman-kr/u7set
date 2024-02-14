@@ -1,26 +1,8 @@
 #include "EditSchemaWidget.h"
-#include "./EditEngine/EditEngine.h"
-#include "DbTagsEditor.h"
-#include "GlobalMessanger.h"
-#include "SchemaItemPropertiesDialog.h"
-#include "SchemaLayersDialog.h"
-#include "SchemaPropertiesDialog.h"
-#include "Settings.h"
-#include "SignalPropertiesDialog.h"
-
-#include "./Forms/ChooseAfbDialog.h"
-#include "./Forms/ChooseUfbDialog.h"
-#include "./Forms/ComparePropertyObjectDialog.h"
-
-#include "../lib/CodeEditor.h"
-#include "../lib/QDoublevalidatorEx.h"
-#include "../lib/Ui/TextEditCompleter.h"
-
+#include "../AppSignalLib/Bus.h"
 #include "../AppSignalSetProvider.h"
 #include "../Builder/ConnectionStorage.h"
 #include "../HardwareLib/LmDescription.h"
-
-#include "../VFrame30/Bus.h"
 #include "../VFrame30/SchemaItemAfb.h"
 #include "../VFrame30/SchemaItemConst.h"
 #include "../VFrame30/SchemaItemDiagValue.h"
@@ -43,6 +25,20 @@
 #include "../VFrame30/SchemaLayer.h"
 #include "../VFrame30/Session.h"
 #include "../VFrame30/UfbSchema.h"
+#include "../lib/CodeEditor.h"
+#include "../lib/QDoublevalidatorEx.h"
+#include "../lib/Ui/TextEditCompleter.h"
+#include "./EditEngine/EditEngine.h"
+#include "./Forms/ChooseAfbDialog.h"
+#include "./Forms/ChooseUfbDialog.h"
+#include "./Forms/ComparePropertyObjectDialog.h"
+#include "DbTagsEditor.h"
+#include "GlobalMessanger.h"
+#include "SchemaItemPropertiesDialog.h"
+#include "SchemaLayersDialog.h"
+#include "SchemaPropertiesDialog.h"
+#include "Settings.h"
+#include "SignalPropertiesDialog.h"
 
 
 const EditSchemaWidget::MouseStateCursor EditSchemaWidget::m_mouseStateCursor[] =
@@ -3368,7 +3364,7 @@ bool EditSchemaWidget::updateBussesForSchema()
 
 	// Get Bus list
 	//
-	std::vector<VFrame30::Bus> busses;
+	std::vector<AppSignalLib::Bus> busses;
 
 	bool ok = loadBusses(db(), &busses, this);
 
@@ -4285,7 +4281,7 @@ bool EditSchemaWidget::loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbS
 	return true;
 }
 
-bool EditSchemaWidget::loadBusses(DbController* db, std::vector<VFrame30::Bus>* out, QWidget* parentWidget)
+bool EditSchemaWidget::loadBusses(DbController* db, std::vector<AppSignalLib::Bus>* out, QWidget* parentWidget)
 {
 	if (db == nullptr ||
 		out == nullptr)
@@ -4339,7 +4335,7 @@ bool EditSchemaWidget::loadBusses(DbController* db, std::vector<VFrame30::Bus>* 
 
 	// Parse files, create actual Busses
 	//
-	std::vector<VFrame30::Bus> busses;
+	std::vector<AppSignalLib::Bus> busses;
 	busses.reserve(files.size());
 
 	for (const std::shared_ptr<DbFile>& f : files)
@@ -4350,7 +4346,7 @@ bool EditSchemaWidget::loadBusses(DbController* db, std::vector<VFrame30::Bus>* 
 			continue;
 		}
 
-		VFrame30::Bus bus;
+		AppSignalLib::Bus bus;
 		ok = bus.Load(f->data());
 
 		if (ok == false)
@@ -4363,7 +4359,7 @@ bool EditSchemaWidget::loadBusses(DbController* db, std::vector<VFrame30::Bus>* 
 	}
 
 	std::sort(busses.begin(), busses.end(),
-			[](const VFrame30::Bus& b1, const VFrame30::Bus& b2) -> bool
+			[](const AppSignalLib::Bus& b1, const AppSignalLib::Bus& b2) -> bool
 			{
 				return b1.busTypeId() < b2.busTypeId();
 			});
@@ -6465,7 +6461,7 @@ void EditSchemaWidget::f2KeyForBus(SchemaItemPtr item)
 
 	// Get Bus list
 	//
-	std::vector<VFrame30::Bus> busses;
+	std::vector<AppSignalLib::Bus> busses;
 
 	bool ok = loadBusses(db(), &busses, this);
 
@@ -6528,7 +6524,7 @@ void EditSchemaWidget::f2KeyForBus(SchemaItemPtr item)
 	if (result == QDialog::Accepted && text != busTypeCombo->currentText())
 	{
 		int selectedBusIndex = busTypeCombo->currentData().toInt();
-		const VFrame30::Bus& newBus = busses[selectedBusIndex];
+		const AppSignalLib::Bus& newBus = busses[selectedBusIndex];
 
 		QByteArray oldState;
 		busItem->saveToByteArray(&oldState);
@@ -8009,7 +8005,7 @@ void EditSchemaWidget::addBusItem(std::shared_ptr<VFrame30::SchemaItemBus> schem
 
 	// Get Bus list
 	//
-	std::vector<VFrame30::Bus> busses;
+	std::vector<AppSignalLib::Bus> busses;
 
 	bool ok = loadBusses(db(), &busses, this);
 
@@ -8026,7 +8022,7 @@ void EditSchemaWidget::addBusItem(std::shared_ptr<VFrame30::SchemaItemBus> schem
 	QObject actionParent;
 	QList<QAction*> menuActions;
 
-	for (const VFrame30::Bus& bus : busses)
+	for (const AppSignalLib::Bus& bus : busses)
 	{
 		QString caption = QString("%1").arg(bus.busTypeId());
 		QAction* a = new QAction(caption , &actionParent);
@@ -8047,7 +8043,7 @@ void EditSchemaWidget::addBusItem(std::shared_ptr<VFrame30::SchemaItemBus> schem
 	//
 	QString selectedBusId = triggeredAction->data().toString();
 
-	for (const VFrame30::Bus& bus : busses)
+	for (const AppSignalLib::Bus& bus : busses)
 	{
 		if (bus.busTypeId() == selectedBusId)
 		{

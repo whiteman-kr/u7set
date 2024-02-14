@@ -14,6 +14,11 @@ namespace Afb
 	class AfbElement;
 }
 
+namespace AppSignalLib
+{
+	class Bus;
+}
+
 
 namespace VFrame30
 {
@@ -23,7 +28,6 @@ namespace VFrame30
 	class SchemaItem;
 	class LogicSchema;
 	class UfbSchema;
-	class Bus;
 	class SchemaDetails;
 
 	extern ::Factory<VFrame30::Schema> SchemaFactory;
@@ -141,7 +145,7 @@ namespace VFrame30
 
 		bool updateAllSchemaItemFbs(const std::vector<std::shared_ptr<Afb::AfbElement>>& afbs, int* updatedItemCount, QString* errorMessage);
 		bool updateAllSchemaItemUfb(const std::vector<std::shared_ptr<UfbSchema>>& ufbs, int* updatedItemCount, QString* errorMessage);
-		bool updateAllSchemaItemBusses(const std::vector<Bus>& busses, int* updatedItemCount, QString* errorMessage);
+		bool updateAllSchemaItemBusses(const std::vector<AppSignalLib::Bus>& busses, int* updatedItemCount, QString* errorMessage);
 
 		QStringList getSignalList() const;
 		virtual QStringList getLabels() const;

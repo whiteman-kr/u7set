@@ -101,7 +101,7 @@ namespace VFrame30
 		return {};
 	}
 
-	void SchemaItemBus::setBusPins(const Bus& bus)
+	void SchemaItemBus::setBusPins(const AppSignalLib::Bus& bus)
 	{
 		Q_UNUSED(bus);
 		assert(false);
@@ -112,12 +112,12 @@ namespace VFrame30
 		return m_bus.busTypeId();
 	}
 
-	const VFrame30::Bus& SchemaItemBus::busType() const
+	const AppSignalLib::Bus& SchemaItemBus::busType() const
 	{
 		return m_bus;
 	}
 
-	void SchemaItemBus::setBusType(const VFrame30::Bus& bus)
+	void SchemaItemBus::setBusType(const AppSignalLib::Bus& bus)
 	{
 		m_bus = bus;
 		setBusPins(bus);
@@ -130,7 +130,7 @@ namespace VFrame30
 		return m_busTypeHash;
 	}
 
-	const Bus& SchemaItemBus::bus() const
+	const AppSignalLib::Bus& SchemaItemBus::bus() const
 	{
 		return m_bus;
 	}
@@ -308,7 +308,7 @@ R"(<p><b>BusComposer:</b> Create a bus signal</p>
 
 		QString busSignals="<ul style=\"list-style-type:none\">";
 
-		for (const VFrame30::BusSignal& busSignal : bus().busSignals())
+		for (const AppSignalLib::BusSignal& busSignal : bus().busSignals())
 		{
 			QString type;
 			switch (busSignal.type())
@@ -352,7 +352,7 @@ R"(<p><b>BusComposer:</b> Create a bus signal</p>
 		return QString("BusComposer %1").arg(busTypeId());
 	}
 
-	void SchemaItemBusComposer::setBusPins(const VFrame30::Bus& bus)
+	void SchemaItemBusComposer::setBusPins(const AppSignalLib::Bus& bus)
 	{
 		std::map<QString, AfbPin> oldInputs;	// We need to keep pin's GUIDs. If an item is met in UFB, then it will be copied
 												// and old outputs GUID's
@@ -363,7 +363,7 @@ R"(<p><b>BusComposer:</b> Create a bus signal</p>
 
 		inputs().clear();
 
-		for (const VFrame30::BusSignal& busSignal : bus.busSignals())
+		for (const AppSignalLib::BusSignal& busSignal : bus.busSignals())
 		{
 			AfbPin& newPin = addInput(-1, busSignal.type(), busSignal.signalId());
 
@@ -597,7 +597,7 @@ R"(<p><b>BusExtractor:</b> Get signal(s) from a bus</p>
 
 		QString busSignals="<ul style=\"list-style-type:none\">";
 
-		for (const VFrame30::BusSignal& busSignal : bus().busSignals())
+		for (const AppSignalLib::BusSignal& busSignal : bus().busSignals())
 		{
 			QString type;
 			switch (busSignal.type())
@@ -658,7 +658,7 @@ R"(<p><b>BusExtractor:</b> Get signal(s) from a bus</p>
 
 		std::vector<std::shared_ptr<Property>> props = properties();
 
-		for (const VFrame30::BusSignal& busSignal : busType().busSignals())
+		for (const AppSignalLib::BusSignal& busSignal : busType().busSignals())
 		{
 			QString propName = "ShowOut_" + busSignal.signalId();
 
@@ -708,7 +708,7 @@ R"(<p><b>BusExtractor:</b> Get signal(s) from a bus</p>
 		return;
 	}
 
-	void SchemaItemBusExtractor::setBusPins(const VFrame30::Bus& bus)
+	void SchemaItemBusExtractor::setBusPins(const AppSignalLib::Bus& bus)
 	{
 		// Update ShowOut properties
 		//
@@ -716,7 +716,7 @@ R"(<p><b>BusExtractor:</b> Get signal(s) from a bus</p>
 
 		removeSpecificProperties();
 
-		for (const VFrame30::BusSignal& busSignal : bus.busSignals())
+		for (const AppSignalLib::BusSignal& busSignal : bus.busSignals())
 		{
 			QString propName = "ShowOut_" + busSignal.signalId();
 

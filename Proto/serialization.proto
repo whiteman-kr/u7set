@@ -95,7 +95,7 @@ message Envelope
 	optional Connection connection = 104;			// Hardware::Connection
 	optional SchemaDetailsSet schemaDetailsSet = 105; // VFrame30::SchemaDetailsSet
 
-    optional Bus bus = 200;							// VFrame30::Bus
+    optional Bus bus = 200;							// AppSignalLib::Bus
 }
 
 

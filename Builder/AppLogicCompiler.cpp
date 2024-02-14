@@ -156,7 +156,7 @@ namespace Builder
 		return m_context->m_connections.get();
 	}
 
-	const VFrame30::BusSet* ApplicationLogicCompiler::busSet()
+	const AppSignalLib::BusSet* ApplicationLogicCompiler::busSet()
 	{
 		return m_context->m_busSet.get();
 	}

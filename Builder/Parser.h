@@ -6,6 +6,11 @@
 
 class DbController;
 
+namespace AppSignalLib
+{
+	class BusSet;
+} // namespace AppSignalLib
+
 namespace Hardware
 {
 	class EquipmentSet;
@@ -18,7 +23,6 @@ namespace VFrame30
 	class UfbSchema;
 	class LogicSchema;
 	class SchemaItemAfb;
-	class BusSet;
 } // namespace VFrame30
 
 namespace Builder
@@ -329,7 +333,7 @@ namespace Builder
 		bool checkLmDescription(VFrame30::LogicSchema* logicSchema);
 
 		bool checkAfbItemsVersion(VFrame30::Schema* schema);
-		bool checkBusItemsVersion(VFrame30::Schema* schema, const VFrame30::BusSet& busSet);
+		bool checkBusItemsVersion(VFrame30::Schema* schema, const AppSignalLib::BusSet& busSet);
 		bool checkUfbItemsVersion(VFrame30::LogicSchema* logicSchema,
 								  const std::vector<std::shared_ptr<VFrame30::UfbSchema>>& ufbs);
 		bool checkForUniqueLoopbackId(VFrame30::Schema* schema);
@@ -385,7 +389,7 @@ namespace Builder
 		LmDescriptionSet* m_lmDescriptions = nullptr;
 		Hardware::EquipmentSet* m_equipmentSet = nullptr;
 		SignalSet* m_signalSet = nullptr;
-		VFrame30::BusSet* m_busSet = nullptr;
+		AppSignalLib::BusSet* m_busSet = nullptr;
 		Hardware::OptoModuleStorage* m_opticModuleStorage = nullptr;
 
 		RunOrder m_runOrder;

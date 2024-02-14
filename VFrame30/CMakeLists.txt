@@ -28,8 +28,6 @@ qt_add_library(${TARGET} STATIC
 	AppSignalController.h
 	BaseSchemaWidget.cpp
 	BaseSchemaWidget.h
-	Bus.cpp
-	Bus.h
 	ClientSchemaView.cpp
 	ClientSchemaView.h
 	ClientSchemaWidget.cpp

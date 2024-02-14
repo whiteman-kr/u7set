@@ -961,7 +961,7 @@ namespace VFrame30
 		return errorMessage->isEmpty();
 	}
 
-	bool Schema::updateAllSchemaItemBusses(const std::vector<Bus>& busses, int* updatedItemCount, QString* errorMessage)
+	bool Schema::updateAllSchemaItemBusses(const std::vector<AppSignalLib::Bus>& busses, int* updatedItemCount, QString* errorMessage)
 	{
 		if (updatedItemCount == nullptr ||
 			errorMessage == nullptr)
@@ -995,7 +995,7 @@ namespace VFrame30
 		for (std::shared_ptr<VFrame30::SchemaItemBus> si : schemaItemBusses)
 		{
 			auto foundIt = std::find_if(busses.begin(), busses.end(),
-				[&si](const Bus& bus)
+				[&si](const AppSignalLib::Bus& bus)
 				{
 					return si->busTypeId() == bus.busTypeId();
 				});
@@ -1006,7 +1006,7 @@ namespace VFrame30
 				continue;
 			}
 
-			const Bus& bus = *foundIt;
+			const AppSignalLib::Bus& bus = *foundIt;
 
 			if (si->busTypeHash() != bus.calcHash())
 			{
