@@ -1,8 +1,4 @@
 #include "Simulator.h"
-#include <cassert>
-#include <QDebug>
-#include <QDir>
-#include <QtConcurrent/QtConcurrent>
 #include "../HardwareLib/ModuleFirmware.h"
 #include "../HardwareLib/LogicModulesInfo.h"
 #include "SimScriptRamAddress.h"

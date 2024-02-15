@@ -4,7 +4,6 @@
 #include "../HardwareLib/DeviceObject.h"
 #include "../HardwareLib/Connection.h"
 #include "../UtilsLib/Address16.h"
-#include "../AppSignalLib/AppSignal.h"
 
 #include "RawDataDescription.h"
 #include "ModulesRawData.h"

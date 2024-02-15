@@ -13,6 +13,11 @@
 #include "ITuningSignalManager.h"
 #include "TuningValue.h"
 
+namespace Proto
+{
+	class AppSignalSet;
+}
+
 class TuningSignalManager :
 		public QObject,
 		public ITuningSignalManager,

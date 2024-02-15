@@ -1,9 +1,9 @@
 #include "TuningSignalInfo.h"
 #include "ui_TuningSignalInfo.h"
 
-#include "../AppSignalLib/TuningSignalState.h"
 #include "../AppSignalLib/TuningSignalManager.h"
-#include "../lib/Tuning/TuningFilter.h"
+#include "../AppSignalLib/TuningSignalState.h"
+#include "../ClientLib/TuningConnection.h"
 #include "Settings.h"
 #include <QActionGroup>
 

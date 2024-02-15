@@ -69,10 +69,10 @@ namespace Sim
 				m_log.writeMessage(tr("********** Start testing of %1 **********").arg(script.scriptCaption));
 
 				m_jsThis = m_jsEngine->newQObject(m_scriptSimulator);
-				QQmlEngine::setObjectOwnership(m_scriptSimulator, QQmlEngine::CppOwnership);
+				QJSEngine::setObjectOwnership(m_scriptSimulator, QJSEngine::CppOwnership);
 
 				m_jsLog = m_jsEngine->newQObject(&m_log);
-				QQmlEngine::setObjectOwnership(&m_log, QQmlEngine::CppOwnership);
+				QJSEngine::setObjectOwnership(&m_log, QJSEngine::CppOwnership);
 
 				m_jsEngine->globalObject().setProperty("log", m_jsLog);
 				m_jsEngine->globalObject().setProperty("isSimulator", QJSValue{true});

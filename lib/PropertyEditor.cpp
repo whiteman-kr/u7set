@@ -8,6 +8,10 @@
 #include <QColorDialog>
 #include <QTextBrowser>
 #include <QScrollBar>
+#include <QTimer>
+#include <QSplitter>
+#include <QSettings>
+#include <QHeaderView>
 
 #include <algorithm>
 

@@ -1,10 +1,10 @@
 #include "SimOverridePane.h"
-#include "../../AppSignalLib/AppSignalParam.h"
 #include "../../Simulator/SimOverrideSignals.h"
 #include "SimOverrideValueWidget.h"
 
 #include <QStyledItemDelegate>
-
+#include <QStandardPaths>
+#include <QDrag>
 
 SimOverridePane::SimOverridePane(Sim::Simulator* simulator, DbController* dbc, QWidget* parent) :
 	QWidget(parent),

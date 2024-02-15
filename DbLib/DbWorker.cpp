@@ -20,6 +20,7 @@
 #include "DbProgress.h"
 #include "../HardwareLib/DeviceObject.h"
 #include "../UtilsLib/WUtils.h"
+#include "../Proto/AppSignal.pb.h"
 
 // Upgrade database
 //

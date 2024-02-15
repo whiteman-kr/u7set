@@ -1,8 +1,15 @@
 #pragma once
 
 #include <optional>
-#include "../CommonLib/PropertyObject.h"
+#include <set>
+#include <vector>
+#include <optional>
+#include <memory>
+#include <QRgb>
 
+
+class QXmlStreamWriter;
+class QXmlStreamReader;
 
 //
 // ClientBehavior

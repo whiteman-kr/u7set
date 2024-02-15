@@ -1,10 +1,10 @@
 #pragma once
-#include <cassert>
-#include <array>
-#include <QString>
-#include <QUuid>
 #include <QRectF>
 #include <QSize>
+#include <QString>
+#include <QUuid>
+#include <array>
+#include <cassert>
 
 using Hash = quint64;
 

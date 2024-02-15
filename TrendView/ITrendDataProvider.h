@@ -1,6 +1,5 @@
 #ifndef ITRENDDATAPROVIDER_H
 #define ITRENDDATAPROVIDER_H
-#include "../CommonLib/Types.h"
 #include "../CommonLib/Times.h"
 #include <list>
 #include <memory>

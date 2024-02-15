@@ -1,5 +1,6 @@
 #include "DialogSourceInfo.h"
 #include <QTreeWidgetItem>
+#include <QClipboard>
 
 QColor DialogSourceInfo::dataItemErrorColor = QColor(0xc0, 0, 0);
 
@@ -152,7 +153,6 @@ void DialogSourceInfo::prepareContextMenu(const QPoint& pos)
 					return;
 				}
 				clipboard->setText(item->text(1));
-
 			};
 
 	connect(actionCopy, &QAction::triggered, this, f);

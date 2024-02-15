@@ -2,7 +2,13 @@
 #define CLIENTFILTERSTORAGE_H
 
 #include "../lib/Tuning/TuningFilter.h"
-#include "../ClientLib/TuningConnection.h"
+#include "../ClientLib/TuningSourceState.h"
+#include "../OnlineLib/SoftwareSettings.h"
+
+namespace ClientLib
+{
+	class TuningConnection;
+}
 
 class TuningClientFilterStorage : public TuningFilterStorage
 {

@@ -1,7 +1,7 @@
 #ifndef DATABASETESTS_H
 #define DATABASETESTS_H
 
-#include <QObject>
+#include <QTest>
 
 #include "../Metrology/Database.h"
 

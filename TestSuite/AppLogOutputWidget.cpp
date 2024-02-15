@@ -1,4 +1,7 @@
 #include "AppLogOutputWidget.h"
+#include <QContextMenuEvent>
+#include <QKeyEvent>
+
 
 QtMessageHandler AppLogOutputWidget::appLogOriginalMessageHandler = 0;
 QMutex AppLogOutputWidget::m_mutex;

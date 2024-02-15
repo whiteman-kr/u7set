@@ -1,8 +1,4 @@
 #include "DbControllerFileManagementTests.h"
-#include <QSql>
-#include <QSqlError>
-#include <QFile>
-#include <QDebug>
 #include "Settings.h"
 
 DbControllerFileTests::DbControllerFileTests(const QString& projectName):

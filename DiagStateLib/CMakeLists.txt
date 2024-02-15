@@ -16,7 +16,7 @@ qt_add_library(${TARGET} STATIC
 	IDiagStateManager.h
 )
 
-target_precompile_headers(${TARGET} PUBLIC
+target_precompile_headers(${TARGET} PRIVATE
 	<algorithm>
 	<array>
 	<atomic>
@@ -51,8 +51,8 @@ target_precompile_headers(${TARGET} PUBLIC
 
 	# Project includes
 	#
-	"../Proto/Network.pb.h"
 	"../CommonLib/Types.h"
+	"../CommonLib/Hash.h"
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Core Qt6::Xml Qt6::Concurrent Qt6::Qml)

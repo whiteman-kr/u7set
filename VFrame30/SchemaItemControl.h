@@ -93,10 +93,10 @@ namespace VFrame30
 		// Set argument list
 		//
 		QJSValue jsSchemaItem = engine->newQObject(this);
-		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
+		QJSEngine::setObjectOwnership(this, QJSEngine::CppOwnership);
 
 		QJSValue jsWidget = engine->newQObject(widget);
-		QQmlEngine::setObjectOwnership(widget, QQmlEngine::CppOwnership);
+		QJSEngine::setObjectOwnership(widget, QJSEngine::CppOwnership);
 
 		QJSValueList args;
 

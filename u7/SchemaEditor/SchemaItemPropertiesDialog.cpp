@@ -2,6 +2,7 @@
 #include "ui_SchemaItemPropertiesDialog.h"
 #include "EditEngine/EditEngine.h"
 #include "Settings.h"
+#include <QWindow>
 
 
 SchemaItemPropertiesDialog::SchemaItemPropertiesDialog(EditEngine::EditEngine* editEngine, DbController* db, QWidget* parent) :

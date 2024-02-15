@@ -10,7 +10,6 @@
 #include <QLineEdit>
 
 #include "../lib/PropertyEditor.h"
-#include "../CommonLib/PropertyObject.h"
 
 #include "Options.h"
 

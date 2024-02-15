@@ -964,10 +964,10 @@ namespace VFrame30
 		Afb::AfbElement jsAfb = afb;
 
 		QJSValue jsElement = jsEngine.newQObject(this);
-		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
+		QJSEngine::setObjectOwnership(this, QJSEngine::CppOwnership);
 
 		QJSValue jsAfbElement = jsEngine.newQObject(&jsAfb);
-		QQmlEngine::setObjectOwnership(&jsAfb, QQmlEngine::CppOwnership);
+		QJSEngine::setObjectOwnership(&jsAfb, QJSEngine::CppOwnership);
 
 		// Run script
 		//

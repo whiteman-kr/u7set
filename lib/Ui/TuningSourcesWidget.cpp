@@ -1,5 +1,5 @@
 #include "TuningSourcesWidget.h"
-#include "../ClientLib/TuningTcpClient.h"
+#include "../ClientLib/TuningConnection.h"
 #include "../AppSignalLib/TuningSignalManager.h"
 #include "../UtilsLib/Ui/UiTools.h"
 

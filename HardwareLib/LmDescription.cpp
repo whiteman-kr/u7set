@@ -7,7 +7,6 @@
 #include "DataProtocols.h"
 #include "DeviceObject.h"
 #include "PropertyNames.h"
-#include <QDomDocument>
 
 
 bool LmCommand::loadFromXml(const QDomElement& element, QString* errorMessage)

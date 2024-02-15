@@ -1,11 +1,5 @@
 #pragma once
 
-#include "../CommonLib/Types.h"
-#include "../CommonLib/Hash.h"
-#include "../CommonLib/PropertyObject.h"
-#include "../Proto/ProtoSerialization.h"
-
-
 class QDomElement;
 class QXmlStreamWriter;
 

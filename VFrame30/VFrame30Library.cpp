@@ -1,7 +1,5 @@
 #include "VFrame30Library.h"
 
-#include "../CommonLib/Types.h"
-
 #include "DiagSchema.h"
 #include "FblItemLine.h"
 #include "FblItemRect.h"

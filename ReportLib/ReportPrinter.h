@@ -1,16 +1,17 @@
 #pragma once
 
 #include "Report.h"
+#include <QMutex>
+#include <QTextCursor>
 #include <QTextDocument>
-
 
 class QBuffer;
 class QPdfWriter;
+class QPainter;
 
 
 namespace ReportLib
 {
-
 	class ReportPrinter;
 
 	class PrintObject

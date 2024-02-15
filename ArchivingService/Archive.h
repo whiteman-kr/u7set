@@ -1,17 +1,11 @@
 #pragma once
 
+#include "../OnlineLib/CircularLogger.h"
+#include "ArchMaintenance.h"
+#include "ArchRequest.h"
 #include <QHash>
 #include <QMutex>
 #include <QSqlDatabase>
-
-#include "../CommonLib/Hash.h"
-#include "../CommonLib/Times.h"
-#include "../CommonLib/Types.h"
-#include "../CommonLib/HostAddressPort.h"
-#include "../OnlineLib/CircularLogger.h"
-#include "../UtilsLib/Queue.h"
-#include "ArchRequest.h"
-#include "ArchMaintenance.h"
 
 class ArchWriterThread;
 

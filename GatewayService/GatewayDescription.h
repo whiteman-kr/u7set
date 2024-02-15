@@ -2,7 +2,9 @@
 
 #include <QRegularExpression>
 #include "../CommonLib/HostAddressPort.h"
-#include "../AppSignalLib/AppSignal.h"
+
+class XmlWriteHelper;
+class XmlReadHelper;
 
 namespace Gateway
 {

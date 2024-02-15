@@ -61,7 +61,27 @@ qt_add_library(${TARGET} STATIC
 )
 
 target_precompile_headers(${TARGET} PRIVATE
+	<QAction>
+	<QActionGroup>
+	<QComboBox>
+	<QDialogButtonBox>
+	<QElapsedTimer>
+	<QGridLayout>
+	<QMessageBox>
+	<QPrintDialog>
+	<QPrinter>
+	<QPushButton>
+	<QScreen>
+	<QToolBar>
+	<QFile>
+
+	"../CommonLib/Types.h"
+	"../CommonLib/Hash.h"
+
 	"../Proto/Trends.pb.h"
+
+	"../AppSignalLib/AppSignalParam.h"
+	"../AppSignalLib/AppSignalState.h"
 )
 
 #Add translations

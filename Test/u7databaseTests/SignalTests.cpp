@@ -1,6 +1,8 @@
-#include <assert.h>
-
 #include "SignalTests.h"
+#include "../../lib/DbWorker.h"
+#include "../../lib/Signal.h"
+#include "../../lib/WUtils.h"
+#include <assert.h>
 
 
 QString SignalTests::SF_APP_SIGNAL_ID("AppSignalID");

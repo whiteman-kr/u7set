@@ -3,7 +3,6 @@
 #include <QDateTime>
 
 #include "../OnlineLib/CircularLogger.h"
-#include "../CommonLib/Types.h"
 
 // ------------------------------------------------------------------------------------
 //

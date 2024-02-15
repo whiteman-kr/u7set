@@ -5,10 +5,7 @@
 #include <memory>
 #include <array>
 #include "../CommonLib/DebugInstCounter.h"
-#include "../CommonLib/PropertyObject.h"
 #include "../CommonLib/Factory.h"
-#include "../CommonLib/Types.h"
-#include "../Proto/ProtoSerialization.h"
 
 class DbFileInfo;
 

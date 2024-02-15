@@ -3,19 +3,9 @@
 #include "../UtilsLib/ILogFile.h"
 #include "../OnlineLib/SoftwareInfo.h"
 #include "TestSuiteSettings.h"
-#include "TestSuiteConfigController.h"
 #include "RunControl.h"
 #include "TestControl.h"
 #include "TestLog.h"
-
-//#include "InputController.h"
-//#include "OutputController.h"
-//#include "ScriptTestLog.h"
-//#include "TestWorker.h"
-
-//#include "TestScriptsStorage.h"
-
-
 
 namespace TestSuite
 {

@@ -3,7 +3,6 @@
 #include <QFile>
 #include <QDir>
 
-#include "../CommonLib/Hash.h"
 #include "Tcp.h"
 #include "CircularLogger.h"
 

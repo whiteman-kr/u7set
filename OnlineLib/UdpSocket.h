@@ -1,8 +1,9 @@
 #pragma once
 
-#include <QUdpSocket>
-#include <QTimer>
+#include <QMutex>
 #include <QQueue>
+#include <QTimer>
+#include <QUdpSocket>
 
 #include "SocketIO.h"
 #include "CircularLogger.h"

@@ -26,7 +26,7 @@ qt_add_library(${TARGET} STATIC
 	../lib/Ui/TabWidgetEx.h
 )
 
-target_precompile_headers(${TARGET} PUBLIC
+target_precompile_headers(${TARGET} PRIVATE
 	<algorithm>
 	<cassert>
 	<chrono>
@@ -62,6 +62,17 @@ target_precompile_headers(${TARGET} PUBLIC
 	<QTimeZone>
 	<QTranslator>
 	<QVBoxLayout>
+
+	# Project headers
+	#
+	"../CommonLib/Types.h"
+	"../CommonLib/Hash.h"
+	"../CommonLib/PropertyObject.h"
+
+	"../Proto/ProtoSerialization.h"
+
+	"../AppSignalLib/AppSignalParam.h"
+	"../AppSignalLib/AppSignalState.h"
 )
 
 #Add translations

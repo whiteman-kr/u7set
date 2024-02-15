@@ -1,11 +1,7 @@
 #ifndef TESTDBBASE_H
 #define TESTDBBASE_H
 
-#include <QObject>
 #include <QTest>
-#include <QtSql>
-#include "../../DbLib/DbController.h"
-
 
 struct User
 {

@@ -2,8 +2,6 @@
 
 #include <QObject>
 
-#include "../CommonLib/Types.h"
-
 namespace Proto
 {
 	class TuningValue;

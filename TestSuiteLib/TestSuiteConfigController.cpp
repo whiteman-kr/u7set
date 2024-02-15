@@ -19,7 +19,7 @@ namespace TestSuite
 
 	bool TestSuiteConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& conf,
 														const ::TestSuiteSettings& settings,
-														const BuildFileInfoArray& files)
+														const std::vector<OnlineLib::BuildFileInfo>& files)
 	{
 		ConfigSettings config{};
 		ConfigData configData{};

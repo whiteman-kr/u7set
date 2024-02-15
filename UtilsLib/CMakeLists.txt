@@ -42,7 +42,7 @@ qt_add_library(${TARGET} STATIC
 	XmlHelper.h
 )
 
-target_precompile_headers(${TARGET} PUBLIC
+target_precompile_headers(${TARGET} PRIVATE
 	<algorithm>
 	<array>
 	<atomic>
@@ -89,13 +89,21 @@ target_precompile_headers(${TARGET} PUBLIC
 	<QTableView>
 	<QtEndian>
 	<QTextStream>
-	<QThread>
 	<QTimer>
 	<QUuid>
 	<QVariant>
 	<QVBoxLayout>
 	<QXmlStreamReader>
 	<QXmlStreamWriter>
+)
+
+target_precompile_headers(${TARGET} PRIVATE
+	"../CommonLib/Types.h"
+	"../CommonLib/Hash.h"
+)
+
+target_precompile_headers(${TARGET} PUBLIC
+	<QThread>
 )
 
 #Add translations

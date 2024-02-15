@@ -17,6 +17,22 @@ add_executable(${TARGET}
 	main.cpp
 )
 
+target_precompile_headers(${TARGET} PRIVATE
+	"../CommonLib/Types.h"
+	"../CommonLib/Hash.h"
+	"../CommonLib/PropertyObject.h"
+	#"../CommonLib/AfbParamValue.h"
+	
+	#"../Proto/ProtoSerialization.h"
+	#"../Proto/Network.pb.h"	
+	#"../Proto/AppSignal.pb.h"
+	
+	#"../AppSignalLib/AppSignal.h"
+	"../AppSignalLib/AppSignalParam.h"
+	"../AppSignalLib/AppSignalState.h"
+	#"../AppSignalLib/TuningValue.h"
+)
+
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Xml Qt6::Sql Qt6::Qml Qt6::Svg Qt6::Test)

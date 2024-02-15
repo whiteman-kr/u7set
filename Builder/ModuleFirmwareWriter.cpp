@@ -8,7 +8,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QQmlEngine>
+#include <QJSEngine>
 #include <QtEndian>
 #include <qqml.h>
 
@@ -1006,7 +1006,7 @@ namespace Hardware
 
 	UnitsConverter* ModuleFirmwareWriter::jsGetUnitsConvertor()
 	{
-		QQmlEngine::setObjectOwnership(&m_unitsConvertor, QQmlEngine::ObjectOwnership::CppOwnership);
+		QJSEngine::setObjectOwnership(&m_unitsConvertor, QJSEngine::ObjectOwnership::CppOwnership);
 		return &m_unitsConvertor;
 	}
 

@@ -1,5 +1,4 @@
 #include "BuildTask.h"
-#include <cassert>
 #include <iostream>
 
 BuildTask::BuildTask(QObject* parent) :

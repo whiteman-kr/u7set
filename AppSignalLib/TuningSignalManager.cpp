@@ -3,6 +3,7 @@
 #endif
 
 #include "TuningSignalManager.h"
+#include "../Proto/AppSignal.pb.h"
 
 #define ANY_HASH UNDEFINED_HASH
 

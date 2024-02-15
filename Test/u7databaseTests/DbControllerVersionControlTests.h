@@ -1,7 +1,7 @@
 #pragma once
 #include <QTest>
-#include <memory>
-#include "../../DbLib/DbController.h"
+
+class DbController;
 
 class DbControllerVersionControlTests : public QObject
 {

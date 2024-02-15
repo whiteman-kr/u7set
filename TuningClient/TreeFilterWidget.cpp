@@ -1,6 +1,9 @@
 #include "TreeFilterWidget.h"
 #include "Settings.h"
 #include "TuningSourcesHelper.h"
+#include "../ClientLib/TuningConnection.h"
+#include "../ClientLib/TuningUserManager.h"
+
 
 TreeFilterWidget::TreeFilterWidget(TuningConfigController& configController,
 								   TuningClientFilterStorage& tuningFilterStorage,

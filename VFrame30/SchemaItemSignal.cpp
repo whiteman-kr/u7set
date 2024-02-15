@@ -3,7 +3,8 @@
 #include "LogicSchema.h"
 #include "PropertyNames.h"
 #include "DrawParam.h"
-#include "AppSignalController.h"
+//#include "AppSignalController.h"
+#include "Context.h"
 
 
 namespace VFrame30

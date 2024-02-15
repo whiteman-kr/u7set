@@ -1,7 +1,6 @@
 #pragma once
 
 #include "AppSignalParam.h"
-#include "../CommonLib/Hash.h"
 
 namespace Network
 {

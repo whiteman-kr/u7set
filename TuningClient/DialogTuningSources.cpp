@@ -1,6 +1,7 @@
 #include "DialogTuningSources.h"
+#include "../ClientLib/TuningConnection.h"
+#include "../ClientLib/TuningUserManager.h"
 #include "MainWindow.h"
-
 #include "TuningSourcesHelper.h"
 
 ClientTuningSourcesWidget::ClientTuningSourcesWidget(ClientLib::TuningConnection& connection,

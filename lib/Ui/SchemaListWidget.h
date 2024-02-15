@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QTreeWidget>
-#include "../../VFrame30/Schema.h"
+#include "../../VFrame30/SchemaDetails.h"
 
 
 class TagSelectorWidget;

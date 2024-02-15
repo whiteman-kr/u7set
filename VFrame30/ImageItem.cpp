@@ -1,6 +1,5 @@
 #include "ImageItem.h"
 #include "PropertyNames.h"
-#include "Schema.h"
 #include "SchemaView.h"
 
 namespace VFrame30

@@ -1,5 +1,4 @@
 #pragma once
-#include "../../AppSignalLib/AppSignalParam.h"
 
 class ArchiveWidget;
 class MonitorConfigController;

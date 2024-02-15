@@ -2,12 +2,16 @@
 
 #include <map>
 #include <QDateTime>
-#include "../CommonLib/Hash.h"
-#include "../Proto/Network.pb.h"
+
+namespace Network
+{
+	class DataSourceInfo;
+	class TuningSourceState;
+}
+
 
 namespace ClientLib
 {
-
 	class TuningSource
 	{
 	public:

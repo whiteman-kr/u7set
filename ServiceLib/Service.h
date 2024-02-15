@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QObject>
-#include <QThread>
 #include <QDebug>
 #include <QFile>
 #include <QFileInfo>
@@ -16,8 +15,13 @@
 #include "../OnlineLib/CircularLogger.h"
 #include "../OnlineLib/SoftwareInfo.h"
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../Proto/Network.pb.h"
 #include "CommandLineParser.h"
+
+
+namespace Network
+{
+	class ServiceInfo;
+}
 
 enum ServiceState
 {

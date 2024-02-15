@@ -1,7 +1,6 @@
-#include <QtSql>
-#include <QTest>
 #include "OtherTests.h"
 #include "Settings.h"
+
 
 OtherTests::OtherTests():
 	TestDbBase(theSettings.dbTestsProjectName())

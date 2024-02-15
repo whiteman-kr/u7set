@@ -1,11 +1,15 @@
 #pragma once
 
 #include "Schema.h"
-#include "SchemaItemSignal.h"
-#include "SchemaItemLoopback.h"
+
 
 namespace VFrame30
 {
+	class SchemaItemSignal;
+	class SchemaItemLoopback;
+	class SchemaItemTransmitter;
+	class SchemaItemReceiver;
+
 
 	class LogicSchema : public Schema
 	{

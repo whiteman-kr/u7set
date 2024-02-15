@@ -1,11 +1,10 @@
 #include "IndicatorTrend.h"
-#include "Schema.h"
-#include "SchemaView.h"
-#include "ClientSchemaView.h"
-#include "SchemaItemIndicator.h"
-#include "PropertyNames.h"
-#include "DrawParam.h"
 #include "AppSignalController.h"
+#include "ClientSchemaView.h"
+#include "Context.h"
+#include "DrawParam.h"
+#include "PropertyNames.h"
+#include "SchemaItemIndicator.h"
 
 namespace VFrame30
 {

@@ -1,6 +1,9 @@
 #pragma once
 
 #include "ReportObject.h"
+#include <QPageLayout>
+
+class QXmlStreamReader;
 
 namespace ReportLib
 {

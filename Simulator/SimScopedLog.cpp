@@ -1,5 +1,4 @@
 #include "SimScopedLog.h"
-#include <QTime>
 
 
 namespace Sim

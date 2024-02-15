@@ -3,6 +3,7 @@
 #include "../VFrame30/ClientSchemaView.h"
 #include "SimSchemaManager.h"
 
+class SimIdeSimulator;
 
 class SimSchemaView : public VFrame30::ClientSchemaView
 {

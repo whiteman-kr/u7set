@@ -1,5 +1,4 @@
 #pragma once
-#include "../AppSignalLib/AppSignal.h"
 #include "../AppSignalLib/TuningValue.h"
 #include "../AppSignalLib/SimpleAppSignalState.h"
 #include "../UtilsLib/Address16.h"

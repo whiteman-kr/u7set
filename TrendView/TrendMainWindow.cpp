@@ -1,11 +1,3 @@
-#include <QActionGroup>
-#include <QDialogButtonBox>
-#include <QPrintDialog>
-#include <QPrinter>
-#include <QPushButton>
-#include <QToolBar>
-
-#include "../CommonLib/Types.h"
 #include "DialogTrendSignalProperties.h"
 #include "TrendMainWindow.h"
 #include "TrendScale.h"
@@ -13,6 +5,11 @@
 #include "TrendSignal.h"
 #include "TrendWidget.h"
 #include "ui_TrendsMainWindow.h"
+
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QCloseEvent>
+#include <QDateEdit>
 
 namespace TrendLib
 {

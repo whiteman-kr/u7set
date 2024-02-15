@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../AppSignalLib/AppSignal.h"
 #include "../UtilsLib/WUtils.h"
 #include "../VFrame30/FblItemRect.h"
 #include "../VFrame30/SchemaItemSignal.h"

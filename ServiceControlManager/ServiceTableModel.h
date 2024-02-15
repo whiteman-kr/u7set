@@ -1,10 +1,8 @@
 #pragma once
 
 #include <QAbstractTableModel>
-#include <QHostAddress>
 #include "../OnlineLib/UdpSocket.h"
 #include "../ServiceLib/Service.h"
-#include "../CommonLib/Types.h"
 #include "../OnlineLib/Tcp.h"
 
 

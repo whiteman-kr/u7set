@@ -2,8 +2,13 @@
 #define DIALOGTUNINGSOURCES_H
 
 #include "../lib/Ui/TuningSourcesWidget.h"
-#include "../ClientLib/TuningUserManager.h"
-#include "../ClientLib/TuningConnection.h"
+
+
+namespace ClientLib
+{
+	class TuningConnection;
+	class TuningUserManager;
+}
 
 class ClientTuningSourcesWidget : public TuningSourcesWidget
 {

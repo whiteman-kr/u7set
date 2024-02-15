@@ -1,5 +1,7 @@
 #include "CodeEditor.h"
 
+#include <QApplication>
+#include <QPainter>
 #include <QRegularExpression>
 #include <QTextDocumentFragment>
 #include <QTimer>

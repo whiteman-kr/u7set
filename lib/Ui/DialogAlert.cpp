@@ -1,7 +1,14 @@
 #include "DialogAlert.h"
 
 #include <QDateTime>
+#include <QHBoxLayout>
+#include <QPushButton>
 #include <QScreen>
+#include <QSettings>
+#include <QTextCursor>
+#include <QTextEdit>
+#include <QVBoxLayout>
+
 
 #include "../UtilsLib/Ui/UiTools.h"
 

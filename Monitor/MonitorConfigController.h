@@ -3,7 +3,6 @@
 #include "../AppSignalLib/ComparatorSet.h"
 #include "../SchemaClientLib/SchemaClientConfigController.h"
 #include "../lib/ClientBehavior.h"
-#include "../VFrame30/Schema.h"
 #include "../OnlineLib/MatsUsers.h"
 
 
@@ -45,7 +44,7 @@ protected:
 	/// This function is called when the new configuration arrives, it is overriden to get specific Monitor
 	/// configuration, after it signal `configurationArrived` is emitted
 	///
-	virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const MonitorSettings& settings, const BuildFileInfoArray& files) override;
+	virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const MonitorSettings& settings, const std::vector<OnlineLib::BuildFileInfo>& files) override;
 
 	void dump(const MonitorConfigSettings& conf) const;
 

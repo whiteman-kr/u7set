@@ -1,12 +1,20 @@
 #include "FilesTreeView.h"
 #include "../DbLib/DbController.h"
-#include "GlobalMessanger.h"
-#include "DialogFileEditor.h"
-#include "CheckInDialog.h"
-#include "Forms/FileHistoryDialog.h"
-#include "Forms/CompareDialog.h"
-#include "../lib/StandardColors.h"
 #include "../DbLib/DbControllerTools.h"
+#include "../lib/StandardColors.h"
+#include "CheckInDialog.h"
+#include "DialogFileEditor.h"
+#include "Forms/CompareDialog.h"
+#include "Forms/FileHistoryDialog.h"
+#include "GlobalMessanger.h"
+
+#include <QApplication>
+#include <QDir>
+#include <QFileDialog>
+#include <QHeaderView>
+#include <QMessageBox>
+#include <QScrollBar>
+#include <QSortFilterProxyModel>
 
 //
 //

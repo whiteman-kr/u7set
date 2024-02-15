@@ -2,6 +2,7 @@
 #include <map>
 #include <span>
 #include <QMutex>
+#include <QElapsedTimer>
 #include "TrendArchiveServer.h"
 #include "TrendSignal.h"
 #include "TrendSignalState.h"

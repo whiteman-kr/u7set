@@ -4,7 +4,6 @@
 #include "../lib/PropertyEditor.h"
 #include "../lib/PropertyTable.h"
 #include "../lib/Tuning/TuningFilterEditor.h"
-#include "../CommonLib/Types.h"
 
 
 //

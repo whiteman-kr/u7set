@@ -21,7 +21,7 @@ namespace
 		}
 
 	protected:
-		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const MonitorSettings& settings, const BuildFileInfoArray& files) override
+		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const MonitorSettings& settings, const std::vector<OnlineLib::BuildFileInfo>& files) override
 		{
 			std::list<std::tuple<QString, bool, QByteArray>> rf;
 			QString parsingError;
@@ -53,7 +53,7 @@ namespace
 	public:
 		ClientLib::ConfigurationInfo receivedConf;
 		MonitorSettings receivedSettings;
-		BuildFileInfoArray receivedFiles;
+		std::vector<OnlineLib::BuildFileInfo> receivedFiles;
 
 		std::atomic<bool> connectedFlag = false;
 		std::mutex mutexConnected;

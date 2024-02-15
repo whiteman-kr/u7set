@@ -1,8 +1,7 @@
-#include "../../ClientLib/TuningConnection.h"
-#include "../../ClientLib/ITuningLog.h"
+#include "../../AppSignalLib/TuningSignalManager.h"
 #include "../../ClientLib/IRecentAppSignals.h"
-#include "../../AppSignalLib/AppSignal.h"
-#include "../../AppSignalLib/AppSignalParam.h"
+#include "../../ClientLib/ITuningLog.h"
+#include "../../ClientLib/TuningConnection.h"
 #include "ConnectionPorts.h"
 
 using ::testing::_;

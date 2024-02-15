@@ -1,7 +1,6 @@
 #include "SourceWorker.h"
 
 #include <QUdpSocket>
-#include <QThread>
 
 #include "SourceBase.h"
 

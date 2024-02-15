@@ -1,5 +1,6 @@
 #include "DialogChoosePreset.h"
 #include "ui_DialogChoosePreset.h"
+#include "../../DbLib/DbWorker.h"
 
 
 int DialogChoosePreset::m_lastSortColumn = 0;

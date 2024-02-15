@@ -1,4 +1,5 @@
 #include "TestSuiteLog.h"
+#include <QLoggingCategory>
 
 Q_LOGGING_CATEGORY(testsuite_applog, "testsuite.applog")
 

@@ -1,8 +1,7 @@
 #pragma once
 #include <QTest>
-#include <memory>
 #include "TestDbBase.h"
-#include "../../DbLib/DbController.h"
+
 
 class DbControllerProjectTests : public TestDbBase
 {

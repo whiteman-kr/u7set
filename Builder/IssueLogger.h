@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include "../UtilsLib/OutputLog.h"
 #include <QUuid>
 

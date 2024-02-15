@@ -3,8 +3,15 @@
 #include "../ReportLib/ReportGenerator.h"
 #include "TestLog.h"
 
+namespace ReportLib
+{
+	class ReportTemplateStorage;
+}
+
 namespace TestSuite
 {
+	class TestLog;
+
 	class TestReportGenerator : public ReportLib::ReportGenerator
 	{
 	public:

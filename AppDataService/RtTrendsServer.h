@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../OnlineLib/Tcp.h"
-#include "../CommonLib/Hash.h"
 
 #include "AppDataService.h"
 #include "DynamicAppSignalState.h"

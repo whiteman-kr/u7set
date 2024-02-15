@@ -14,7 +14,7 @@ TuningConfigController::TuningConfigController(const SoftwareInfo& softwareInfo,
 	return;
 }
 
-bool TuningConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& conf, const TuningClientSettings& settings, const BuildFileInfoArray& files)
+bool TuningConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& conf, const TuningClientSettings& settings, const std::vector<OnlineLib::BuildFileInfo>& files)
 {
 	// Copy old settings to new settings, EXCEPT schemas information!
 	//

@@ -3,7 +3,6 @@
 
 #include "GlobalMessanger.h"
 #include "../../DbLib/DbStruct.h"
-#include "../../CommonLib/PropertyObject.h"
 
 namespace Ui {
 	class ComparePropertyObjectDialog;

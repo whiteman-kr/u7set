@@ -5,7 +5,6 @@
 #include <vector>
 #include <memory>
 #include <QByteArray>
-#include "../CommonLib/Types.h"
 
 class SimRamTests;
 

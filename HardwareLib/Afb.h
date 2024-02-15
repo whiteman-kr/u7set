@@ -1,5 +1,4 @@
 #pragma once
-#include "../CommonLib/AfbParamValue.h"
 #include <optional>
 
 class QDomElement;

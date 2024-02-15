@@ -3,7 +3,6 @@
 #include "../UtilsLib/SimpleThread.h"
 #include "../OnlineLib/CircularLogger.h"
 #include "../CommonLib/Times.h"
-#include "../CommonLib/Hash.h"
 #include "ArchFile.h"
 
 class ArchRequestParam

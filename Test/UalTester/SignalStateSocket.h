@@ -4,8 +4,6 @@
 
 #include "../../OnlineLib/Tcp.h"
 #include "../../OnlineLib/SocketIO.h"
-#include "../../AppSignalLib/AppSignalParam.h"
-#include "../../CommonLib/Hash.h"
 
 #include "SignalBase.h"
 

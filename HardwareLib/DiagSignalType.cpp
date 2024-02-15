@@ -1,5 +1,4 @@
 #include "DiagSignalType.h"
-#include "../CommonLib/Hash.h"
 #include "../Proto/ProtoCommonHelper.h"
 #include "../UtilsLib/XmlHelper.h"
 #include "PropertyNames.h"

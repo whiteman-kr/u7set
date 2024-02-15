@@ -4,8 +4,6 @@
 
 #include <QElapsedTimer>
 
-#include "../CommonLib/Hash.h"
-
 namespace AppSignalLib
 {
 	class RecentUsed

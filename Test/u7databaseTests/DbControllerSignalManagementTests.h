@@ -1,7 +1,5 @@
 #pragma once
-
-#include <QSqlError>
-#include "../../DbLib/DbController.h"
+#include <QTest>
 
 
 #define OPEN_DATABASE()		QSqlDatabase db; \

@@ -1,9 +1,6 @@
 #ifndef SIGNALBASE_H
 #define SIGNALBASE_H
 
-#include "../CommonLib/Hash.h"
-#include "../AppSignalLib/AppSignal.h"
-
 #include "MetrologySignal.h"
 #include "MetrologyConnection.h"
 #include "CalibratorManager.h"

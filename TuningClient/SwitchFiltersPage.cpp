@@ -2,16 +2,17 @@
 
 #include <QGridLayout>
 #include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QTableWidget>
-#include <QSplitter>
-#include <QPushButton>
 #include <QMessageBox>
+#include <QPushButton>
+#include <QSplitter>
+#include <QTableWidget>
+#include <QVBoxLayout>
 
-#include "SwitchFiltersPageOptions.h"
+#include "../ClientLib/TuningConnection.h"
 #include "Main.h"
 #include "MainWindow.h"
 #include "Settings.h"
+#include "SwitchFiltersPageOptions.h"
 
 FilterPushButton::FilterPushButton(const QString& caption, std::shared_ptr<TuningFilter> filter, QWidget* parent):
 	QPushButton(caption, parent),

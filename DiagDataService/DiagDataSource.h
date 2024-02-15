@@ -2,7 +2,6 @@
 
 #include<queue>
 
-#include "../AppSignalLib/AppSignal.h"
 #include "../lib/DataSource.h"
 #include "../OnlineLib/CircularLogger.h"
 #include "DynamicDiagSignalState.h"

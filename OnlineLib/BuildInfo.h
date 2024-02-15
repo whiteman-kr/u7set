@@ -3,7 +3,6 @@
 #include <QString>
 #include <QDateTime>
 #include <cassert>
-#include "../CommonLib/Types.h"
 
 
 class QXmlStreamReader;

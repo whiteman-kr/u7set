@@ -5,6 +5,7 @@
 
 #include "Afb.h"
 
+class QDomDocument;
 class SimCommandTest_LM5_LM6;
 
 namespace Hardware

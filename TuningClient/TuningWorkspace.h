@@ -1,11 +1,16 @@
 #pragma once
 
-#include "../ClientLib/TuningConnection.h"
 #include "TuningClientFilterStorage.h"
 #include "TuningConfigController.h"
 #include "TuningPage.h"
 #include "TreeFilterWidget.h"
 #include "SwitchFiltersPage.h"
+
+namespace ClientLib
+{
+	class TuningUserManager;
+}
+
 
 class FilterButton : public QPushButton
 {

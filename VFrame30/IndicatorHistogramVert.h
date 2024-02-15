@@ -2,7 +2,6 @@
 #include "Indicator.h"
 #include "FontParam.h"
 #include "Context.h"
-#include "../AppSignalLib/AppSignalParam.h"
 #include "../AppSignalLib/TuningSignalState.h"
 
 class Comparator;

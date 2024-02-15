@@ -2,10 +2,12 @@
 
 #include "../AppSignalLib/Bus.h"
 #include "../Builder/AppSignalProperties.h"
+#include "../DbLib/DbWorker.h"
 #include "../HardwareLib/Connection.h"
 #include "../HardwareLib/DiagSignalType.h"
 #include "../ReportLib/ReportPrinter.h"
 #include "../UtilsLib/Ui/UiTools.h"
+#include "../VFrame30/Context.h"
 #include "../VFrame30/Schema.h"
 #include "../VFrame30/SchemaItem.h"
 #include "../VFrame30/SchemaLayer.h"
@@ -13,6 +15,8 @@
 #include "../lib/Ui/DialogProgress.h"
 
 #include "Settings.h"
+
+#include <QDesktopServices>
 
 using namespace Builder;
 using namespace ReportLib;

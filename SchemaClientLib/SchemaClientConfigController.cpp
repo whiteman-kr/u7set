@@ -1,4 +1,5 @@
 #include "SchemaClientConfigController.h"
+#include "../CommonLib/HostAddressPort.h"
 #include "../OnlineLib/SoftwareSettings.h"
 
 
@@ -6,8 +7,8 @@ namespace SchemaClientLib
 {
 
 	SchemaClientConfigController::SchemaClientConfigController(const SoftwareInfo& softwareInfo,
-															   HostAddressPort address1,
-															   HostAddressPort address2,
+															   const HostAddressPort& address1,
+															   const HostAddressPort& address2,
 															   ILogFile* logFile) :
 		ClientLib::ConfigController{softwareInfo, address1, address2, logFile}
 	{

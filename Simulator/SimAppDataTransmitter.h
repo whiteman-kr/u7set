@@ -3,8 +3,6 @@
 #include <queue>
 #include <QUdpSocket>
 #include "../CommonLib/Times.h"
-#include "../UtilsLib/SimpleThread.h"
-#include "../UtilsLib/SimpleMutex.h"
 #include "SimScopedLog.h"
 
 

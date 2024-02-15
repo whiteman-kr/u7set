@@ -1,9 +1,10 @@
-#include "../CommonLib/PropertyObject.h"
+#include "PropertyTable.h"
 #include "../AppSignalLib/TuningValue.h"
 #include "../lib/PropertyEditor.h"
-#include "PropertyTable.h"
 #include <QAbstractItemModel>
+#include <QClipboard>
 #include <QInputDialog>
+#include <QMimeData>
 
 namespace ExtWidgets
 {

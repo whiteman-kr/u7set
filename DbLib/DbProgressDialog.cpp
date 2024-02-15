@@ -3,6 +3,7 @@
 #endif
 
 #include <QLabel>
+#include <QVBoxLayout>
 #include <QProgressBar>
 #include <QPushButton>
 #include "DbProgressDialog.h"

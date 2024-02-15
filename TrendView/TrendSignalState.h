@@ -2,7 +2,6 @@
 
 #include <vector>
 #include <list>
-#include "../AppSignalLib/AppSignalState.h"
 
 namespace Proto
 {

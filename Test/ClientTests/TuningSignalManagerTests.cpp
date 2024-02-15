@@ -1,5 +1,3 @@
-#include "../../AppSignalLib/AppSignal.h"
-#include "../../AppSignalLib/AppSignalParam.h"
 #include "../../OnlineLib/SoftwareInfo.h"
 #include "../../AppSignalLib/TuningSignalManager.h"
 #include "../Proto/AppSignal.pb.h"

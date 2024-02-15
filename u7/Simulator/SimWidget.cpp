@@ -65,7 +65,7 @@ SimWidget::SimWidget(std::shared_ptr<Sim::ConsoleLogFile> ideLogFile,
 	connect(db, &DbController::projectClosed, this, &SimWidget::closeBuild);
 	connect(db, &DbController::projectClosed, this, &SimWidget::projectClosed);
 
-	connect(m_simulator.get(), &Sim::Simulator::projectUpdated, this, &SimWidget::updateActions);
+	connect(m_simulator.get(), &SimIdeSimulator::projectUpdated, this, &SimWidget::updateActions);
 	connect(&(m_simulator->control()), &Sim::Control::stateChanged, this, &SimWidget::controlStateChanged);
 	connect(&(m_simulator->control()), &Sim::Control::statusUpdate, this, &SimWidget::updateTimeIndicator);
 
@@ -390,7 +390,7 @@ void SimWidget::createDocks()
 	//
 	m_overridePaneDock = new QDockWidget{"Overrides", this};
 	m_overridePaneDock->setObjectName("SimOverridenSignals");
-	m_overridePaneDock->setWidget(new SimOverridePane{m_simulator.get(), dbc(), m_overridePaneDock});
+	m_overridePaneDock->setWidget(new SimOverridePane{m_simulator->simulator(), dbc(), m_overridePaneDock});
 	m_overridePaneDock->setAllowedAreas(Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
 
 	addDockWidget(Qt::BottomDockWidgetArea, m_overridePaneDock);

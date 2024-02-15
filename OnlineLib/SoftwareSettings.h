@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../CommonLib/Types.h"
 #include "../CommonLib/HostAddressPort.h"
 #include "../lib/ConstStrings.h"
 #include "../OnlineLib/MatsUsers.h"

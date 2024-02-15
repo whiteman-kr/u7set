@@ -187,6 +187,12 @@ qt_add_library(${TARGET} STATIC
 	google/protobuf/wire_format_lite.h
 )
 
+target_precompile_headers(${TARGET} PRIVATE
+	"../CommonLib/Types.h"
+	"../CommonLib/Hash.h"
+	"../CommonLib/PropertyObject.h"	
+)
+
 if(Threads_FOUND)
 	target_compile_definitions(${TARGET} PRIVATE HAVE_PTHREAD)
 endif()

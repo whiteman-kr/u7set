@@ -40,6 +40,8 @@
 #include "Settings.h"
 #include "SignalPropertiesDialog.h"
 
+#include <QWindow>
+
 
 const EditSchemaWidget::MouseStateCursor EditSchemaWidget::m_mouseStateCursor[] =
 	{

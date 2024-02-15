@@ -1,7 +1,11 @@
 #pragma once
-#include "DrawMode.h"
+#include "VFrame30Types.h"
+#include "SchemaView.h"
 #include "Session.h"
+#include <QWidget>
 
+class QPainter;
+class QPaintDevice;
 
 namespace VFrame30
 {

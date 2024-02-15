@@ -2,7 +2,6 @@
 #define PROPERTYTABLE_H
 
 #include <QSortFilterProxyModel>
-#include "../CommonLib/PropertyObject.h"
 #include "../lib/PropertyEditor.h"
 
 

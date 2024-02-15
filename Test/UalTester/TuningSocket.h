@@ -22,7 +22,6 @@
 
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/SocketIO.h"
-#include "../CommonLib/Hash.h"
 
 #include "TuningSourceBase.h"
 

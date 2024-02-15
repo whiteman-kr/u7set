@@ -1,8 +1,13 @@
 #include <atomic>
+#include <iostream>
 
 #include <QCoreApplication>
 #include <QDebug>
+#include <QDir>
+#include <QFile>
+#include <QFileInfo>
 #include <QFloat16>
+#include <QTextStream>
 #include <QVector>
 
 #include "../Protobuf/google/protobuf/message_lite.h"

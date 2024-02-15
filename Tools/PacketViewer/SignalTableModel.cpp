@@ -1,5 +1,4 @@
 #include "SignalTableModel.h"
-#include "../../AppSignalLib/AppSignal.h"
 #include "PacketBufferTableModel.h"
 #include "../HardwareLib/DataProtocols.h"
 #include "../lib/DataSource.h"

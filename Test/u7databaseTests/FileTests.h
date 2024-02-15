@@ -1,10 +1,10 @@
 #pragma once
-#include <QString>
 #include <QTest>
-#include <QtSql>
 #include "TestDbBase.h"
 
 struct ObjectState;
+class QSqlQuery;
+
 
 class FileTests : public TestDbBase
 {

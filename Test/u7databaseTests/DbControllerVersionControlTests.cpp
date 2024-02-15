@@ -1,8 +1,6 @@
 #include "DbControllerVersionControlTests.h"
-#include <QSql>
-#include <QSqlError>
-#include <QDebug>
 #include "Settings.h"
+
 
 DbControllerVersionControlTests::DbControllerVersionControlTests(const QString &projectName) :
 	m_db(new DbController()),

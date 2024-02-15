@@ -10,6 +10,12 @@ using DiagSignalShared = std::shared_ptr<Hardware::DiagSignal>;
 using DeviceObjectConstShared = std::shared_ptr<const Hardware::DeviceObject>;
 using DeviceObjectShared = std::shared_ptr<Hardware::DeviceObject>;
 
+namespace Network
+{
+	class AcquiredDiagObject;
+	class AcquiredDiagSignal;
+}
+
 class AcquiredDiagObject
 {
 public:

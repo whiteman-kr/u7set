@@ -1,8 +1,10 @@
 #include "ReportPrinter.h"
-#include <QPdfWriter>
-#include <QBuffer>
-#include "../VFrame30/Schema.h"
 #include "../VFrame30/DrawParam.h"
+#include "../VFrame30/Schema.h"
+#include <QBuffer>
+#include <QFile>
+#include <QPainter>
+#include <QPdfWriter>
 
 namespace ReportLib
 {

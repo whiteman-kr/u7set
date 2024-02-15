@@ -1,8 +1,10 @@
 #include "LogicSchema.h"
 #include "SchemaLayer.h"
-#include "SchemaItemAfb.h"
-#include "SchemaItemUfb.h"
+//#include "SchemaItemAfb.h"
+//#include "SchemaItemUfb.h"
 #include "SchemaItemConnection.h"
+#include "SchemaItemSignal.h"
+#include "SchemaItemLoopback.h"
 #include "PropertyNames.h"
 
 namespace VFrame30

@@ -3,9 +3,6 @@
 #include <memory>
 #include <type_traits>
 
-#include "../AppSignalLib/AppSignal.h"
-#include "../CommonLib/PropertyObject.h"
-
 class AppSignalPropertyBehavior
 {
 public:

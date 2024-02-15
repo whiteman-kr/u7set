@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../AppSignalLib/IAppSignalManager.h"
+#include <QObject>
+#include <QJSValue>
 
 class AppSignalParam;
 class AppSignalState;

@@ -4,9 +4,6 @@
 #include "FblItemRect.h"
 #include "IMatsSchemaItemAssociations.h"
 
-#include "../AppSignalLib/AppSignalParam.h"
-#include "../AppSignalLib/AppSignalState.h"
-
 namespace VFrame30
 {
 	/*! \class SchemaItemSignal

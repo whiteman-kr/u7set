@@ -1,7 +1,8 @@
 #pragma once
 
+#include "../CommonLib/HostAddressPort.h"
 #include "../OnlineLib/SocketIO.h"
-#include "../VFrame30/ClientSchemaWidget.h"
+#include "../VFrame30/VFrame30Types.h"
 
 class MonitorAppSettings
 {

@@ -7,7 +7,6 @@
 #include <functional>
 #include <QString>
 #include <QDateTime>
-#include "../CommonLib/PropertyObject.h"
 
 class AppSignal;
 

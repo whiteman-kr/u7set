@@ -12,6 +12,7 @@
 #include "../VFrame30/SchemaItemConnection.h"
 #include "../VFrame30/SchemaItemUfb.h"
 #include "../VFrame30/SchemaItemLoopback.h"
+#include "../VFrame30/Context.h"
 
 //
 // TuningSchemaWidget

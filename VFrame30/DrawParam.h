@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../CommonLib/Types.h"
 #include "../lib/ClientBehavior.h"
 #include "../lib/ITimeStats.h"
-#include "DrawMode.h"
+#include "VFrame30Types.h"
 #include "FontParam.h"
 #include "Session.h"
+#include "VFrameTools.h"
 
 
 #define VFRAME30_CACHE_DRAW_TEXT	// Use cached draw text, DrawHelper::drawTextCahed(...)

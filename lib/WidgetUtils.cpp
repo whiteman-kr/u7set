@@ -1,13 +1,14 @@
 #include "WidgetUtils.h"
-#include <QStandardItemModel>
-#include <QSettings>
-#include <QTableView>
+#include <QAction>
+#include <QApplication>
+#include <QHBoxLayout>
 #include <QHeaderView>
 #include <QListView>
-#include <QHBoxLayout>
 #include <QPushButton>
-#include <QAction>
 #include <QScreen>
+#include <QSettings>
+#include <QStandardItemModel>
+#include <QTableView>
 
 void saveWindowPosition(QWidget* window, QString widgetKey)
 {

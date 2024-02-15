@@ -1,10 +1,14 @@
 #pragma once
 
 #include <QVector>
-#include <QThread>
-#include "DbWorker.h"
 #include "DbProgress.h"
+#include "DbStruct.h"
 #include "../HardwareLib/DeviceObject.h"
+
+
+struct ID_AppSignalID;	// AppSignal.h
+class DbWorker;
+
 
 class DbController : public QObject
 {

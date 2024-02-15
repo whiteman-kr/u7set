@@ -3,7 +3,11 @@
 #include <fstream>
 #include <memory>
 
-#include "../CommonLib/PropertyObject.h"
+
+// Even though it is included by public precompile header, cmake puts it after this file, so it is needed to include it here
+//
+#include "../CommonLib/PropertyObject.h" 
+
 #include "../Proto/Serialization.pb.h"
 
 

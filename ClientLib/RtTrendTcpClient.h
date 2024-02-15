@@ -3,7 +3,6 @@
 #include "../lib/ISignalDataServer.h"
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
-#include "../CommonLib/Hash.h"
 #include "../TrendView/TrendSignalState.h"
 
 namespace ClientLib

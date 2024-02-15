@@ -1,5 +1,5 @@
 #include "OptoModule.h"
-#include <QQmlEngine>
+#include <QJSEngine>
 #include "../HardwareLib/LmDescription.h"
 #include "../lib/ConstStrings.h"
 #include "../UtilsLib/Crc.h"
@@ -3435,7 +3435,7 @@ namespace Hardware
 		if (port != nullptr)
 		{
 			OptoPort* portPtr = port.get();
-			QQmlEngine::setObjectOwnership(portPtr, QQmlEngine::ObjectOwnership::CppOwnership);
+			QJSEngine::setObjectOwnership(portPtr, QJSEngine::ObjectOwnership::CppOwnership);
 			return portPtr;
 		}
 

@@ -1,5 +1,6 @@
 #include "DialogWriteValues.h"
 #include <utility>
+#include <QHeaderView>
 
 QSize TuningValuesTreeWidget::sizeHint() const
 {

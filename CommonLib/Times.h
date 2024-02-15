@@ -48,6 +48,7 @@ struct TimeStamp
 	//
 	TimeStamp() = default;
 	TimeStamp(const TimeStamp&) = default;
+	TimeStamp(TimeStamp&&) noexcept = default;
 	TimeStamp(qint64 value) : timeStamp(value)
 	{
 	}
@@ -57,6 +58,7 @@ struct TimeStamp
 	}
 
 	TimeStamp& operator=(const TimeStamp& src) = default;
+	TimeStamp& operator=(TimeStamp&& src) noexcept = default;
 
 	[[nodiscard]] QDateTime toDateTime() const
 	{
@@ -78,35 +80,7 @@ struct TimeStamp
 		return TimeStamp{(timeStamp / 1_hour) * 1_hour};
 	}
 
-	bool operator> (const TimeStamp value) const
-	{
-		return this->timeStamp > value.timeStamp;
-	}
-
-	bool operator>= (const TimeStamp value) const
-	{
-		return this->timeStamp >= value.timeStamp;
-	}
-
-	bool operator< (const TimeStamp value) const
-	{
-		return this->timeStamp < value.timeStamp;
-	}
-
-	bool operator<= (const TimeStamp value) const
-	{
-		return this->timeStamp <= value.timeStamp;
-	}
-
-	bool operator== (const TimeStamp value) const
-	{
-		return this->timeStamp == value.timeStamp;
-	}
-
-	bool operator!= (const TimeStamp value) const
-	{
-		return this->timeStamp != value.timeStamp;
-	}
+	auto operator<=>(const TimeStamp&) const = default;
 
 	TimeStamp& operator+= (qint64 timeSpan)
 	{

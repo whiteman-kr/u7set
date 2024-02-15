@@ -1,4 +1,5 @@
 #include "TestReport.h"
+#include "../ReportLib/ReportTemplate.h"
 
 #include <QFileDialog>
 #include <QMessageBox>

@@ -1,8 +1,15 @@
 #pragma once
-
+//#include "../Proto/ProtoSerialization.h"
 
 class XmlWriteHelper;
 class XmlReadHelper;
+
+
+namespace Proto
+{
+	class DiagSignalType;
+	class Envelope;
+} // namespace Proto
 
 
 namespace Hardware

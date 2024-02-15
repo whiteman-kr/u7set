@@ -1,5 +1,9 @@
 #pragma once
+#include <set>
+#include <vector>
 
+class QXmlStreamWriter;
+class QXmlStreamReader;
 
 namespace OnlineLib
 {

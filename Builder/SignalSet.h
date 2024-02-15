@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../AppSignalLib/AppSignal.h"
 #include "../AppSignalLib/Bus.h"
 
 #include "BuildResultWriter.h"

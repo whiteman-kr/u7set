@@ -1,5 +1,4 @@
 #include "SimDiagDataLanInterface.h"
-#include "Simulator.h"
 
 namespace Sim
 {

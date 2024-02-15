@@ -3,16 +3,19 @@
 #endif
 
 #include "ConfigController.h"
+#include "../CommonLib/HostAddressPort.h"
+#include "../OnlineLib/CfgServerLoader.h"
+#include <QDomNode>
 
 
 namespace ClientLib
 {
-	ConfigController::ConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address, ILogFile* logFile) :
+	ConfigController::ConfigController(const SoftwareInfo& softwareInfo, const HostAddressPort& address, ILogFile* logFile) :
 		ConfigController{softwareInfo, address, address, logFile}
 	{
 	}
 
-	ConfigController::ConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2, ILogFile* logFile) :
+	ConfigController::ConfigController(const SoftwareInfo& softwareInfo, const HostAddressPort& address1, const HostAddressPort& address2, ILogFile* logFile) :
 		QObject{nullptr},
 		m_logFile{logFile, "ConfigController"},
 		m_softwareInfo{softwareInfo}
@@ -49,7 +52,7 @@ namespace ClientLib
 		m_cfgLoaderThread->quit();
 	}
 
-	void ConfigController::setConnectionParams(QString equipmentId, HostAddressPort address1, HostAddressPort address2)
+	void ConfigController::setConnectionParams(QString equipmentId, const HostAddressPort& address1, const HostAddressPort& address2)
 	{
 		m_softwareInfo.setEquipmentID(equipmentId);
 
@@ -127,7 +130,7 @@ namespace ClientLib
 		return m_logFile.logFile();
 	}
 
-	bool ConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& /*conf*/, const MonitorSettings& /*settings*/, const BuildFileInfoArray& /*files*/)
+	bool ConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& /*conf*/, const MonitorSettings& /*settings*/, const std::vector<OnlineLib::BuildFileInfo>& /*files*/)
 	{
 		// Reimplement in the derviced class
 		//
@@ -135,7 +138,7 @@ namespace ClientLib
 		return false;
 	}
 
-	bool ConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& /*conf*/, const DiagnosticsSettings& /*settings*/, const BuildFileInfoArray& /*files*/)
+	bool ConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& /*conf*/, const DiagnosticsSettings& /*settings*/, const std::vector<OnlineLib::BuildFileInfo>& /*files*/)
 	{
 		// Reimplement in the derviced class
 		//
@@ -143,7 +146,7 @@ namespace ClientLib
 		return false;
 	}
 
-	bool ConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& /*conf*/, const TuningClientSettings& /*settings*/, const BuildFileInfoArray& /*files*/)
+	bool ConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& /*conf*/, const TuningClientSettings& /*settings*/, const std::vector<OnlineLib::BuildFileInfo>& /*files*/)
 	{
 		// Reimplement in the derviced class
 		//
@@ -151,7 +154,7 @@ namespace ClientLib
 		return false;
 	}
 
-	bool ConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& /*conf*/, const TestClientSettings& /*settings*/, const BuildFileInfoArray& /*files*/)
+	bool ConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& /*conf*/, const TestClientSettings& /*settings*/, const std::vector<OnlineLib::BuildFileInfo>& /*files*/)
 	{
 		// Reimplement in the derviced class
 		//
@@ -159,7 +162,7 @@ namespace ClientLib
 		return false;
 	}
 
-	bool ConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& /*conf*/, const TestSuiteSettings& /*settings*/, const BuildFileInfoArray& /*files*/)
+	bool ConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& /*conf*/, const TestSuiteSettings& /*settings*/, const std::vector<OnlineLib::BuildFileInfo>& /*files*/)
 	{
 		// Reimplement in the derviced class
 		//
@@ -331,7 +334,7 @@ namespace ClientLib
 	}
 
 	void ConfigController::slot_configurationReady(const QByteArray configurationXmlData,
-												   const BuildFileInfoArray buildFileInfoArray,
+												   const std::vector<OnlineLib::BuildFileInfo> buildFileInfoArray,
 												   SessionParams /*sessionParams*/,
 												   std::shared_ptr<const SoftwareSettings> curSettingsProfile)
 	{

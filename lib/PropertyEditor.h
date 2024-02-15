@@ -1,8 +1,8 @@
 #pragma once
 
 #include <QItemDelegate>
-#include "../CommonLib/PropertyObject.h"
-#include "../CommonLib/AfbParamValue.h"
+
+class QSettings;
 
 inline int qVariantTypeId(const QVariant& v)
 {

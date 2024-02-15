@@ -1,14 +1,11 @@
 #include "../TestSuiteLib/TestSuite.h"
 #include "../TestSuiteLib/TestSuiteSettings.h"
 #include "../UtilsLib/LogFile.h"
+#include "../Protobuf/google/protobuf/message_lite.h"
 #include "version.h"
 
-#include <QDomDocument>
-#include <QFile>
 #include <QGuiApplication>
 #include <QStandardPaths>
-#include <QTimer>
-#include <QXmlStreamWriter>
 #include <iostream>
 
 #ifdef Q_OS_WINDOWS

@@ -1,9 +1,11 @@
 #pragma once
 
 #include "../ClientLib/ConfigController.h"
-#include "../CommonLib/HostAddressPort.h"
 #include "../UtilsLib/ILogFile.h"
-#include "../VFrame30/Schema.h"
+#include "../VFrame30/SchemaDetails.h"
+#include <QReadWriteLock>
+
+class HostAddressPort;
 
 namespace SchemaClientLib
 {
@@ -17,7 +19,7 @@ namespace SchemaClientLib
 
 	public:
 		SchemaClientConfigController() = delete;
-		SchemaClientConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2, ILogFile* logFile);
+		SchemaClientConfigController(const SoftwareInfo& softwareInfo, const HostAddressPort& address1, const HostAddressPort& address2, ILogFile* logFile);
 
 	protected:
 		// Call this function to read schemas details from the server.

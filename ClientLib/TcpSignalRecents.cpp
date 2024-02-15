@@ -3,7 +3,6 @@
 #endif
 
 #include "TcpSignalRecents.h"
-#include "../CommonLib/Hash.h"
 
 namespace ClientLib
 {

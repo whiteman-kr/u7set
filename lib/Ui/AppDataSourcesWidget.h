@@ -7,6 +7,7 @@
 class QTreeWidgetItem;
 class TcpAppSourcesState;
 class QTreeWidgetItem;
+class QLabel;
 
 //
 // DialogAppDataSourceInfo

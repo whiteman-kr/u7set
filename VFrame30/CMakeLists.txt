@@ -85,6 +85,8 @@ qt_add_library(${TARGET} STATIC
 	PropertyNames.h
 	Schema.cpp
 	Schema.h
+	SchemaDetails.cpp
+	SchemaDetails.h
 	SchemaItem.cpp
 	SchemaItem.h
 	SchemaItemAfb.cpp
@@ -151,13 +153,14 @@ qt_add_library(${TARGET} STATIC
 	UfbSchema.h
 	VFrame30Library.cpp
 	VFrame30Library.h
+	VFrame30Types.h
 	VFrameTools.cpp
 	VFrameTools.h
 	WiringSchema.cpp
 	WiringSchema.h
 )
 
-target_precompile_headers(${TARGET} PUBLIC
+target_precompile_headers(${TARGET} PRIVATE
 		<algorithm>
 		<array>
 		<cassert>
@@ -200,7 +203,7 @@ target_precompile_headers(${TARGET} PUBLIC
 		<QPainterPath>
 		<QPdfWriter>
 		<QPushButton>
-		<QQmlEngine>
+		<QJSEngine>
 		<QRect>
 		<QScreen>
 		<QScrollArea>
@@ -217,10 +220,19 @@ target_precompile_headers(${TARGET} PUBLIC
 
 		<QtConcurrent/QtConcurrent>
 
-		"VFrameTools.h"
-		"../AppSignalLib/AppSignalParam.h"
+		"../CommonLib/Types.h"
+		"../CommonLib/Hash.h"
+		"../CommonLib/PropertyObject.h"
+		"../CommonLib/AfbParamValue.h"
+
 		"../Proto/ProtoSerialization.h"
 		"../Proto/ProtoCommonHelper.h"
+
+		"../AppSignalLib/AppSignalParam.h"
+		"../AppSignalLib/AppSignalState.h"
+		"../AppSignalLib/TuningValue.h"
+
+		"VFrameTools.h"
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Widgets Qt6::Qml Qt6::Xml Qt6::Svg)

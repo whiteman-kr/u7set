@@ -1,8 +1,8 @@
 #pragma once
 
 #include <QObject>
-#include <QDebug>
 #include "../Builder/Builder.h"
+
 
 class BuildTask : public QObject
 {

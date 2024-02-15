@@ -30,8 +30,21 @@ add_executable(${TARGET}
 )
 
 target_precompile_headers(${TARGET} PRIVATE
+	<map>
+	<set>
+
 	<QVector>
 	<QHostAddress>
+
+	# Project includes
+	#
+	"../../CommonLib/Types.h"
+	"../../CommonLib/Hash.h"
+
+	"../../Proto/ProtoSerialization.h"
+
+	"../../AppSignalLib/AppSignal.h"
+	"../../AppSignalLib/AppSignalState.h"
 )
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Test Qt6::Core Qt6::Network Qt6::Qml)

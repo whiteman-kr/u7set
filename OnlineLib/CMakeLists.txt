@@ -6,7 +6,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Network)
+find_package(Qt6 REQUIRED COMPONENTS Network Qml)
 
 set(TARGET OnlineLib)
 
@@ -31,13 +31,15 @@ qt_add_library(${TARGET} STATIC
 	Tcp.h
 	TcpClientStatistics.cpp
 	TcpClientStatistics.h
+	TcpConnectionState.cpp
+	TcpConnectionState.h
 	TcpFileTransfer.cpp
 	TcpFileTransfer.h
 	UdpSocket.cpp
 	UdpSocket.h
 )
 
-target_precompile_headers(${TARGET} PUBLIC
+target_precompile_headers(${TARGET} PRIVATE
 	# C++ includes
 	#
 	<algorithm>
@@ -77,6 +79,7 @@ target_precompile_headers(${TARGET} PUBLIC
 	<QFileInfo>
 	<QHash>
 	<QHostAddress>
+	<QHostAddress>
 	<QList>
 	<QMap>
 	<QMetaClassInfo>
@@ -97,23 +100,34 @@ target_precompile_headers(${TARGET} PUBLIC
 	<QtGlobal>
 	<QThread>
 	<QTimer>
-	<QHostAddress>
 	<QUdpSocket>
 	<QUuid>
 	<QVariant>
 	<QVector>
 	<QXmlStreamReader>
 	<QXmlStreamWriter>
+)
 
-	# Project includes
-	#
-	"../Proto/Network.pb.h"
+target_precompile_headers(${TARGET} PRIVATE
+	<QHostAddress>
+
+	"../CommonLib/Types.h"
+	"../CommonLib/Hash.h"
+	"../CommonLib/PropertyObject.h"
+	#"../CommonLib/AfbParamValue.h"
+	
+	"../Proto/ProtoSerialization.h"
+	"../Proto/Network.pb.h"	
+	
+	#"../AppSignalLib/AppSignal.h"
+	#"../AppSignalLib/AppSignalParam.h"
+	#"../AppSignalLib/AppSignalState.h"
 )
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
 
-target_link_libraries(${TARGET} PRIVATE Qt6::Network)
-target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib)
+target_link_libraries(${TARGET} PRIVATE Qt6::Network Qt6::Qml)
+target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib HardwareLib)
 
 target_compile_definitions(${TARGET} PRIVATE ONLINE_LIB_DOMAIN)
 #target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

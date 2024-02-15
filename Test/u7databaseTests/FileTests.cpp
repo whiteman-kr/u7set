@@ -1,9 +1,6 @@
-#include <QtSql>
-#include <QString>
-#include <QTest>
 #include "FileTests.h"
-#include "../../DbLib/DbController.h"
 #include "Settings.h"
+
 
 void FileTests::getObjectState(QSqlQuery& q, ObjectState& os)
 {

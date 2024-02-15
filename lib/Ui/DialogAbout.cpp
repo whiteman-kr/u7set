@@ -5,6 +5,9 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <QClipboard>
+#include <QApplication>
+
 
 void DialogAbout::show(QWidget* parent, const QString& description, const QString& imagePath)
 {

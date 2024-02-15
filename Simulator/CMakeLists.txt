@@ -93,7 +93,7 @@ qt_add_library(${TARGET} STATIC
 	SoftwareXmlReader.h
 )
 
-target_precompile_headers(${TARGET} PUBLIC
+target_precompile_headers(${TARGET} PRIVATE
 	<algorithm>
 	<array>
 	<bit>
@@ -112,11 +112,26 @@ target_precompile_headers(${TARGET} PUBLIC
 	<vector>
 
 	<QJSEngine>
-	<QJSValueIterator>
 	<QJSValue>
+	<QJSValueIterator>
+	<QtConcurrent>
+	<QThread>
+	<QUdpSocket>
 	<QVector>
 
+	"../CommonLib/Types.h"
+	"../CommonLib/Hash.h"
+	"../CommonLib/PropertyObject.h"
+	"../CommonLib/AfbParamValue.h"
+	
+	"../Proto/ProtoSerialization.h"
+	"../Proto/Network.pb.h"	
+	"../Proto/AppSignal.pb.h"
+	
+	"../AppSignalLib/AppSignal.h"
 	"../AppSignalLib/AppSignalParam.h"
+	"../AppSignalLib/AppSignalState.h"
+	"../AppSignalLib/TuningValue.h"
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Xml Qt6::Qml Qt6::Core Qt6::Concurrent Qt6::Network)

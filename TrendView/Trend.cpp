@@ -1,7 +1,6 @@
 #include "Trend.h"
 #include <vector>
 #include <QPainter>
-#include <QThread>
 #include "../UtilsLib/CUtils.h"
 #include "TrendScale.h"
 
