@@ -1,6 +1,5 @@
 #pragma once
 #include <cassert>
-#include <type_traits>
 #include <array>
 #include <QString>
 #include <QUuid>

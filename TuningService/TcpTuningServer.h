@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../CommonLib/Hash.h"
 #include "../OnlineLib/Tcp.h"
 #include "TuningSource.h"
 

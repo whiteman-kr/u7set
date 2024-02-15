@@ -1,7 +1,9 @@
 #pragma once
 
-#include "DeviceObject.h"
-#include "../UtilsLib/XmlHelper.h"
+
+class XmlWriteHelper;
+class XmlReadHelper;
+
 
 namespace Hardware
 {

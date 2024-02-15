@@ -60,8 +60,8 @@ target_precompile_headers(${TARGET} PRIVATE
 
 	# Qt includes
 	#
-	<QtNetwork>
-	<QtQml>
+	#<QtNetwork>
+	#<QtQml>
 
 	"../../Proto/Network.pb.h"
 )

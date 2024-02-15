@@ -2,16 +2,19 @@
 
 #include <QString>
 #include <QDateTime>
-#include <QXmlStreamReader>
-#include <QXmlStreamWriter>
 #include <cassert>
-
 #include "../CommonLib/Types.h"
+
+
+class QXmlStreamReader;
+class QXmlStreamWriter;
+
 
 namespace Proto
 {
 	class BuildInfo;
 }
+
 
 namespace OnlineLib
 {

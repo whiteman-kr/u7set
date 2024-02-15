@@ -2,6 +2,7 @@
 #include "../UtilsLib/Crc.h"
 #include <QtEndian>
 #include <QHostInfo>
+#include <QSerialPort>
 #include <cstring>
 
 //#ifdef Q_OS_WIN32

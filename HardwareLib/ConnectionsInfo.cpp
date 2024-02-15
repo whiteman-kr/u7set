@@ -1,4 +1,5 @@
 #include "ConnectionsInfo.h"
+#include "../UtilsLib/DomXmlHelper.h"
 
 
 // -----------------------------------------------------------------------------------

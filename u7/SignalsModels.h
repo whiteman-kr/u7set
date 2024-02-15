@@ -3,6 +3,8 @@
 #include "../lib/QDoublevalidatorEx.h"
 #include "../lib/StandardColors.h"
 
+#include <QStyledItemDelegate>
+
 class AppSignalSetProvider;
 class AppSignalPropertyManager;
 class SignalsProxyModel;

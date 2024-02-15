@@ -2,6 +2,8 @@
 #include "../AppSignalLib/TuningValue.h"
 #include "../lib/PropertyEditor.h"
 #include "PropertyTable.h"
+#include <QAbstractItemModel>
+#include <QInputDialog>
 
 namespace ExtWidgets
 {

@@ -1,4 +1,5 @@
 #include "DiagSignalTypesStorage.h"
+#include "../UtilsLib/WUtils.h"
 
 //
 //

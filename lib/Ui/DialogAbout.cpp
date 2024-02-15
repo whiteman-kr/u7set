@@ -1,7 +1,5 @@
 #include "DialogAbout.h"
 #include "version.h"
-#include <QApplication>
-#include <QClipboard>
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QHBoxLayout>

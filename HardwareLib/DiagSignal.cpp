@@ -1,6 +1,6 @@
 #include "DiagSignal.h"
 #include "DiagSignalType.h"
-#include <ranges>
+#include "PropertyNames.h"
 
 
 namespace Hardware

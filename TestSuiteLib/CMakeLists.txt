@@ -49,9 +49,11 @@ qt_add_library(${TARGET} STATIC
 
 target_precompile_headers(${TARGET} PUBLIC
 	<chrono>
-	<QtQml>
-	<QtXml>
-	<QtTest>
+
+	<QBuffer>
+	<QJSEngine>
+	<QJSValueIterator>
+	<QVariant>
 )
 
 #Add translations

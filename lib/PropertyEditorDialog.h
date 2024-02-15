@@ -4,7 +4,7 @@
 #include <QDialog>
 #include "../CommonLib/PropertyObject.h"
 #include "../lib/PropertyEditor.h"
-#include "../lib/PropertyEditorDialog.h"
+
 
 class PropertyEditorDialog : public QDialog
 {

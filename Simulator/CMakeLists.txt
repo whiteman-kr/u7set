@@ -111,10 +111,9 @@ target_precompile_headers(${TARGET} PUBLIC
 	<unordered_map>
 	<vector>
 
-	<QtQml>
-	<QtNetwork>
-	<QtConcurrent>
-	<QtXml>
+	<QJSEngine>
+	<QJSValueIterator>
+	<QJSValue>
 	<QVector>
 
 	"../AppSignalLib/AppSignalParam.h"

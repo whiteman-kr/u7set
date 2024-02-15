@@ -1,6 +1,7 @@
 #include "CodeEditor.h"
 
 #include <QRegularExpression>
+#include <QTextDocumentFragment>
 #include <QTimer>
 
 //

@@ -1,5 +1,4 @@
 #include "AppDataService.h"
-
 #include "RtTrendsServer.h"
 
 namespace RtTrends

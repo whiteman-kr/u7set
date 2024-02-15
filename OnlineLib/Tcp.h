@@ -8,7 +8,6 @@
 #include <QTcpServer>
 #include <QSslSocket>
 #include <QSslKey>
-#include <cassert>
 
 #include "../Protobuf/google/protobuf/message.h"
 

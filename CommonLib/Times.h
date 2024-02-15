@@ -1,8 +1,8 @@
 #pragma once
 
-#include <QtGlobal>
-#include <QMetaType>
 #include <QDateTime>
+#include <QMetaType>
+
 
 // Time literals converts to ms
 //

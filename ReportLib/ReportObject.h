@@ -3,9 +3,8 @@
 #include "ReportSchemaView.h"
 #include "../VFrame30/IViewVariables.h"
 
-#include <QTextCharFormat>
-#include <QTextBlockFormat>
-#include <QTextCursor>
+
+class QTextCursor;
 
 
 namespace ReportLib

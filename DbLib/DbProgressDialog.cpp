@@ -2,10 +2,9 @@
 #error Do not include this file in the project! Link DbLib instead.
 #endif
 
-#include <QVBoxLayout>
+#include <QLabel>
+#include <QProgressBar>
 #include <QPushButton>
-#include <QTime>
-#include <QThread>
 #include "DbProgressDialog.h"
 #include "DbProgress.h"
 

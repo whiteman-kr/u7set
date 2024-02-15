@@ -1,5 +1,6 @@
 #include "LogicModulesInfo.h"
 #include "../lib/ConstStrings.h"
+#include "../UtilsLib/DomXmlHelper.h"
 
 
 // -----------------------------------------------------------------------------------

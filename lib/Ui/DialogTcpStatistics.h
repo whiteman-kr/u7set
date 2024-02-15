@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QDialog>
 
 class DialogTcpStatistics : public QDialog
 {

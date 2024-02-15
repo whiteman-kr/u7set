@@ -221,7 +221,6 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QtConcurrent>
 	<QTextEdit>
 	<QTextStream>
-	<QtGlobal>
 	<QThread>
 	<QTimer>
 	<QtNetwork/QHostAddress>

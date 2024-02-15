@@ -11,6 +11,7 @@ class QTextEdit;
 class QPushButton;
 class QSplitter;
 class QComboBox;
+class QTextBrowser;
 
 //
 //

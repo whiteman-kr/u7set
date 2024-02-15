@@ -1,7 +1,5 @@
 #include <QDialogButtonBox>
 #include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QSpacerItem>
 #include "../lib/PropertyEditor.h"
 #include "../lib/PropertyEditorDialog.h"
 

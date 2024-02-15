@@ -1,10 +1,6 @@
 #pragma once
 
-#include <QTest>
-#include <QSql>
 #include <QSqlError>
-#include <QDebug>
-
 #include "../../DbLib/DbController.h"
 
 

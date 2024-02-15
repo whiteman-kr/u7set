@@ -3,7 +3,6 @@
 #include <QtCore/QMutex>
 #include <QtCore/QDebug>
 #include <cassert>
-#include <iostream>
 
 
 template <typename ClassType>

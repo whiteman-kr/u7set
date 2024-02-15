@@ -1,4 +1,5 @@
 #include "../HardwareLib/Subsystem.h"
+#include "../HardwareLib/PropertyNames.h"
 #include "../Simulator/Simulator.h"
 
 #include "AppDataServiceCfgGenerator.h"

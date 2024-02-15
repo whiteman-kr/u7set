@@ -53,8 +53,13 @@ target_precompile_headers(${TARGET} PRIVATE
 	<algorithm>
 	<functional>
 
-	<QtWidgets>
+	<QLabel>
+	<QPushButton>
+	<QTreeWidget>
+	<QTreeWidgetItem>
+	<QTextEdit>
 	<QDateEdit>
+	<QSplitter>
 	<QDebug>
 	<QString>
 	<QMessageBox>

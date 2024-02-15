@@ -8,6 +8,8 @@
 #include "SettingsForm.h"
 #include "version.h"
 
+#include <QMimeData>
+
 ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	: QMainWindow(parent)
 {

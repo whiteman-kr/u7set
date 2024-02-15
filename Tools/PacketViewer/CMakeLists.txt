@@ -49,13 +49,11 @@ target_precompile_headers(${TARGET} PRIVATE
 
 	# Qt includes
 	#
-	<QtGui>
-	<QtWidgets>
-	<QtNetwork>
-	<QtConcurrent>
-	<QtQml>
-
-
+	#<QtGui>
+	#<QtWidgets>
+	#<QtNetwork>
+	#<QtConcurrent>
+	#<QtQml>
 )
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network Qt6::Qml Qt6::Xml Qt6::Concurrent)

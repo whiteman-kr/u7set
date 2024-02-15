@@ -3,9 +3,11 @@
 #endif
 
 #include "BuildInfo.h"
-#include "../lib/ConstStrings.h"
-#include "../UtilsLib/WUtils.h"
 #include "../Proto/BuildInfo.pb.h"
+#include "../UtilsLib/WUtils.h"
+#include "../lib/ConstStrings.h"
+#include <QXmlStreamReader>
+#include <QXmlStreamWriter>
 
 namespace OnlineLib
 {

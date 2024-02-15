@@ -10,6 +10,7 @@ namespace Ui {
 }
 
 class DbController;
+class QListWidgetItem;
 
 class DialogProjectDiff : public QDialog
 {

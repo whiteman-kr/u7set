@@ -1,4 +1,5 @@
 #include "TuningSource.h"
+#include "../AppSignalLib/AppSignal.h"
 
 
 namespace Tuning

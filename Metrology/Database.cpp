@@ -1,5 +1,7 @@
 #include "Database.h"
-
+#include <QSqlField>
+#include <QSqlQuery>
+#include <QSqlError>
 
 // -------------------------------------------------------------------------------------------------------------------
 

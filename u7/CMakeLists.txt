@@ -395,22 +395,53 @@ target_precompile_headers(${TARGET} PRIVATE
 	<vector>
 	<ranges>
 
-	<QtDebug>
-	<QtGui>
-	<QtNetwork>
-	<QtQml>
-	<QtSerialPort>
-	<QtSql>
-	<QtSvg>
-	<QtWidgets>
-	<QtXml>
-	<QtPrintSupport>
+	<QAction>
+	<QActionGroup>
+	<QBoxLayout>
+	<QButtonGroup>
+	<QCheckBox>
+	<QCompleter>
+	<QDialog>
+	<QDialogButtonBox>
+	<QDockWidget>
+	<QFormLayout>
+	<QGroupBox>
+	<QHBoxLayout>
+	<QInputDialog>
+	<QLabel>
+	<QListWidget>
+	<QListWidgetItem>
+	<QMenu>
+	<QMenuBar>
+	<QMessageBox>
+	<QPainter>
+	<QPlainTextEdit>
+	<QPrinter>
+	<QProgressBar>
+	<QProgressDialog>
+	<QPushButton>
+	<QRadioButton>
+	<QSpinBox>
+	<QSplitter>
+	<QStandardItemModel>
+	<QStatusBar>
+	<QTableWidget>
+	<QTextBrowser>
+	<QTextDocumentWriter>
+	<QTimer>
+	<QToolBar>
+	<QToolButton>
+	<QToolTip>
+	<QTreeView>
+	<QTreeWidget>
+	<QTreeWidgetItem>
+	<QVBoxLayout>
+
 
 	"../DbLib/DbController.h"
 	"../CommonLib/DebugInstCounter.h"
 	"../CommonLib/Factory.h"
 	"../CommonLib/Types.h"
-	"../Proto/ProtoSerialization.h"
 )
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h

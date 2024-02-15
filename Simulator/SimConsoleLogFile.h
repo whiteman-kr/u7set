@@ -1,5 +1,6 @@
 #pragma once
 #include "../UtilsLib/ILogFile.h"
+#include <QLoggingCategory>
 
 Q_DECLARE_LOGGING_CATEGORY(u7sim)
 

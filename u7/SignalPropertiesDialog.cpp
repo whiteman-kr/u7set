@@ -1,6 +1,6 @@
 #include "../lib/PropertyEditor.h"
 #include "../lib/WidgetUtils.h"
-
+#include "../UtilsLib/WUtils.h"
 #include "SignalPropertiesDialog.h"
 #include "Settings.h"
 

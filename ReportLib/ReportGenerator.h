@@ -4,6 +4,8 @@
 #include "ReportPrinter.h"
 #include "ReportTemplate.h"
 
+class QBuffer;
+
 namespace ReportLib
 {
 	class ReportGenerator

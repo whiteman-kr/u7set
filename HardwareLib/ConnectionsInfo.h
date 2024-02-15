@@ -2,7 +2,6 @@
 
 #include "../CommonLib/Types.h"
 #include "../UtilsLib/Address16.h"
-#include "../UtilsLib/DomXmlHelper.h"
 #include "Connection.h"
 
 class ConnectionTxRxSignal

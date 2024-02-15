@@ -35,6 +35,8 @@ qt_add_library(${TARGET} STATIC
 	LogicModulesInfo.h
 	ModuleFirmware.cpp
 	ModuleFirmware.h
+	PropertyNames.cpp
+	PropertyNames.h
 	ScriptDeviceObject.cpp
 	ScriptDeviceObject.h
 	Subsystem.cpp

@@ -2,7 +2,6 @@
 #define DIALOGWRITEVALUES_H
 
 #include <QDialog>
-#include "../../AppSignalLib/AppSignal.h"
 #include "../../AppSignalLib/AppSignalParam.h"
 
 class TuningValuesTreeWidget : public QTreeWidget

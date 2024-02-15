@@ -69,19 +69,29 @@ add_executable(${TARGET} WIN32
 )
 
 target_precompile_headers(${TARGET} PRIVATE
+	<algorithm>
 	<cassert>
 	<cstdint>
+	<functional>
 	<memory>
 	<vector>
-	<algorithm>
-	<functional>
 
-	<QtGui>
-	<QtWidgets>
-	<QtNetwork>
-	<QtSql>
-	<QtXml>
-	<QtTest>
+	<QAction>
+	<QComboBox>
+	<QCompleter>
+	<QDockWidget>
+	<QList>
+	<QMenu>
+	<QMenuBar>
+	<QPushButton>
+	<QRegularExpression>
+	<QStatusBar>
+	<QTextBrowser>
+	<QTextEdit>
+	<QToolBar>
+	<QTreeWidget>
+	<QTreeWidgetItem>
+
 )
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h

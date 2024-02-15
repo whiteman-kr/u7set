@@ -167,9 +167,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	# Qt includes
 	#
 	<QtPrintSupport>
-	<QtQml>
-	<QtWidgets>
-	<QtXml>
+
 
 	# Project includes
 	#

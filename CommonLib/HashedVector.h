@@ -54,7 +54,7 @@ void HashedVector<KEY, VALUE>::insert(const KEY& key, const VALUE& value)
 {
 	if (contains(key) == true)
 	{
-		Q_ASSERT(false);		// duplicate key
+		assert(false);		// duplicate key
 		return;
 	}
 
@@ -66,14 +66,14 @@ void HashedVector<KEY, VALUE>::insert(const KEY& key, const VALUE& value)
 template <typename KEY, typename VALUE>
 VALUE& HashedVector<KEY, VALUE>::operator[](qsizetype i)
 {
-	Q_ASSERT(i >= 0 && i < count());
+	assert(i >= 0 && i < count());
 	return m_vector[i];
 }
 
 template <typename KEY, typename VALUE>
 const VALUE& HashedVector<KEY, VALUE>::operator[](qsizetype i) const
 {
-	Q_ASSERT(i >= 0 && i < count());
+	assert(i >= 0 && i < count());
 	return m_vector[i];
 }
 
@@ -84,7 +84,7 @@ VALUE& HashedVector<KEY, VALUE>::value(const KEY& key)
 
 	if (it == m_map.end())
 	{
-		Q_ASSERT(false);
+		assert(false);
 		return m_notValidValue;
 	}
 
@@ -98,7 +98,7 @@ const VALUE& HashedVector<KEY, VALUE>::value(const KEY& key) const
 
 	if (it == m_map.end())
 	{
-		Q_ASSERT(false);
+		assert(false);
 		return m_notValidValue;
 	}
 

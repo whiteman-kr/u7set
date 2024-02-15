@@ -1,10 +1,7 @@
 #pragma once
 
-#include <QDialog>
-#include <QLabel>
-#include <QProgressBar>
-
 class DbProgress;
+class QProgressBar;
 
 //
 //

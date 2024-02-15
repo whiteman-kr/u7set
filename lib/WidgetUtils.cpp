@@ -1,7 +1,6 @@
 #include "WidgetUtils.h"
 #include <QStandardItemModel>
 #include <QSettings>
-#include <QApplication>
 #include <QTableView>
 #include <QHeaderView>
 #include <QListView>

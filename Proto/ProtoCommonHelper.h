@@ -1,8 +1,8 @@
 #include <memory>
 #include <QUuid>
 #include <QVariant>
-#include "../CommonLib/PropertyObject.h"
 
+class Property; // "../CommonLib/PropertyObject.h"
 
 namespace Proto
 {

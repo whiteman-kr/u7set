@@ -2,7 +2,6 @@
 
 #include <QVector>
 #include <QThread>
-#include "DbStruct.h"
 #include "DbWorker.h"
 #include "DbProgress.h"
 #include "../HardwareLib/DeviceObject.h"

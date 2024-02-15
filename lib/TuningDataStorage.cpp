@@ -1,8 +1,10 @@
 #include <QtEndian>
+#include "../AppSignalLib/AppSignal.h"
+#include "../UtilsLib/XmlHelper.h"
 #include "../UtilsLib/Crc.h"
 #include "../UtilsLib/WUtils.h"
 #include "TuningDataStorage.h"
-#include "../TuningService/TuningSource.h"
+
 
 namespace  Tuning
 {

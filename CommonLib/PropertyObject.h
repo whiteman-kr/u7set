@@ -1,28 +1,14 @@
 #pragma once
 
+#include "../CommonLib/AfbParamValue.h"
+#include "../CommonLib/Types.h"
+#include <QVariant>
 #include <functional>
-#include <algorithm>
 #include <list>
-#include <utility>
-#include <vector>
-#include <map>
-#include <unordered_map>
-#include <utility>
 #include <memory>
 #include <type_traits>
-
-#include <QtGlobal>
-#include <QObject>
-#include <QString>
-#include <QVariant>
-#include <QMetaEnum>
-#include <QHash>
-#include <QTime>
-#include <QTimer>
-#include <QDebug>
-
-#include "../CommonLib/Types.h"
-#include "../CommonLib/AfbParamValue.h"
+#include <utility>
+#include <vector>
 
 // --
 //

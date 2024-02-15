@@ -4,6 +4,7 @@
 #include "../DbLib/DbController.h"
 #include "../HardwareLib/DeviceObject.h"
 #include "../HardwareLib/LmDescription.h"
+#include "../HardwareLib/PropertyNames.h"
 #include "../VFrame30/FblItemRect.h"
 #include "../VFrame30/HorzVertLinks.h"
 #include "../VFrame30/LogicSchema.h"

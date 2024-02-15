@@ -1,5 +1,4 @@
 #include "DialogWriteValues.h"
-#include <QTableWidget>
 #include <utility>
 
 QSize TuningValuesTreeWidget::sizeHint() const

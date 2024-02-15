@@ -3,6 +3,8 @@
 #include "../../Simulator/SimOverrideSignals.h"
 #include "SimOverrideValueWidget.h"
 
+#include <QStyledItemDelegate>
+
 
 SimOverridePane::SimOverridePane(Sim::Simulator* simulator, DbController* dbc, QWidget* parent) :
 	QWidget(parent),

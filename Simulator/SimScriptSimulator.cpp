@@ -1,5 +1,3 @@
-#include <algorithm>
-
 #include "../ClientLib/ScriptTestObserver.h"
 
 #include "SimScriptLogicModule.h"

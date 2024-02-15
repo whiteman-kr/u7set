@@ -2,6 +2,9 @@
 #include "../UtilsLib/Ui/UiTools.h"
 
 #include <QTreeWidget>
+#include <QTreeWidgetItem>
+#include <QMenu>
+
 
 //
 // DialogAppDataSourceInfo

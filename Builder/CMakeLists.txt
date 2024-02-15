@@ -172,9 +172,8 @@ target_precompile_headers(${TARGET} PUBLIC
 	<unordered_set>
 	<vector>
 
-	<QtGui>
-	<QtQml>
 	<QtConcurrent>
+	<QHostInfo>
 	<QVector>
 	<QWidget>
 	<QFile>

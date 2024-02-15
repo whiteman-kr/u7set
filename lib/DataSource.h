@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QObject>
-
 #include "../UtilsLib/WUtils.h"
 #include "../UtilsLib/Queue.h"
 #include "../UtilsLib/XmlHelper.h"

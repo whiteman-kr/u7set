@@ -1,4 +1,5 @@
 #include "ExportPrint.h"
+#include <QPrinter>
 #include <QPrintDialog>
 #include <QPageSetupDialog>
 

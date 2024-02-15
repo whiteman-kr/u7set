@@ -1,12 +1,12 @@
 #ifndef DialogAppDataSources_H
 #define DialogAppDataSources_H
 
-#include <QDialog>
-
 #include "DialogSourceInfo.h"
 #include "../ClientLib/AdsSourceStateConnection.h"
 
+class QTreeWidgetItem;
 class TcpAppSourcesState;
+class QTreeWidgetItem;
 
 //
 // DialogAppDataSourceInfo

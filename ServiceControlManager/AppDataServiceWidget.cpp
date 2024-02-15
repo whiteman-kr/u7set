@@ -5,6 +5,7 @@
 #include <QAction>
 #include <QHeaderView>
 #include <QStandardItemModel>
+#include <QSortFilterProxyModel>
 #include "../lib/WidgetUtils.h"
 
 const int DSC_EQUIPMENT_ID = 0,

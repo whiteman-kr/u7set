@@ -1,5 +1,9 @@
 #include "DbControllerSignalManagementTests.h"
 #include "Settings.h"
+#include "../UtilsLib/WUtils.h"
+#include <QTest>
+//#include <QSql>
+//#include <QDebug>
 
 //#ifdef Q_CC_MSVC
 //	#pragma warning(push)

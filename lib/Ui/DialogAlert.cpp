@@ -1,6 +1,5 @@
 #include "DialogAlert.h"
 
-#include <QDialog>
 #include <QDateTime>
 #include <QScreen>
 

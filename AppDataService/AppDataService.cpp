@@ -1,6 +1,3 @@
-#include <QXmlStreamReader>
-#include <QMetaProperty>
-
 #include "../OnlineLib/CfgServerLoader.h"
 
 #include "AppDataService.h"

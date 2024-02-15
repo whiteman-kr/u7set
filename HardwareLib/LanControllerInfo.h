@@ -2,8 +2,6 @@
 
 #include "../CommonLib/Types.h"
 #include "../UtilsLib/XmlHelper.h"
-#include "../UtilsLib/DomXmlHelper.h"
-#include "../UtilsLib/WUtils.h"
 #include "../CommonLib/HostAddressPort.h"
 #include "DataProtocols.h"
 

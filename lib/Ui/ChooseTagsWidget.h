@@ -1,8 +1,11 @@
 #pragma once
 #include <QWidget>
-#include <QLayout>
-#include <QPushButton>
 #include "../OnlineLib/MatsUsers.h"
+
+class QLineEdit;
+class QTreeWidget;
+class QPushButton;
+class QTreeWidgetItem;
 
 
 class ChooseTagsWidget : public QWidget

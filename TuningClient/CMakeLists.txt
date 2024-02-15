@@ -174,7 +174,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QPainter>
 	<QScrollArea>
 	<QMouseEvent>
-	<QtQml>
+	#<QtQml>
 )
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h

@@ -1,4 +1,5 @@
 #include "TuningSignal.h"
+#include "../UtilsLib/WUtils.h"
 
 namespace Tuning
 {

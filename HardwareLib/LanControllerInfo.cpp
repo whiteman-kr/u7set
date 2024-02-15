@@ -1,4 +1,5 @@
 #include "LanControllerInfo.h"
+#include "../UtilsLib/DomXmlHelper.h"
 #include "../Proto/Network.pb.h"
 
 // -----------------------------------------------------------------------------

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../lib/ConstStrings.h"
 
 namespace OnlineLib
 {

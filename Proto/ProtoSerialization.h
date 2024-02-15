@@ -3,10 +3,6 @@
 #include <fstream>
 #include <memory>
 
-#include <QUuid>
-#include <QVariant>
-
-#include "../CommonLib/AfbParamValue.h"
 #include "../CommonLib/PropertyObject.h"
 #include "../Proto/Serialization.pb.h"
 

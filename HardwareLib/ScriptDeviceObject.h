@@ -1,6 +1,5 @@
 #pragma once
 #include <memory>
-#include <QJSEngine>
 #include <QUuid>
 
 namespace Hardware

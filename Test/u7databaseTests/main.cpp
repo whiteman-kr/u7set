@@ -14,6 +14,7 @@
 #include "DeviceObjectTests.h"
 
 #include "Settings.h"
+#include "../UtilsLib/WUtils.h"
 
 const int DatabaseProjectVersion = 326;
 

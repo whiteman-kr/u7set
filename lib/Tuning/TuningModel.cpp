@@ -1,5 +1,4 @@
 #include "TuningModel.h"
-#include <QKeyEvent>
 
 
 Hash TuningModelHashSet::firstHash() const

@@ -1,4 +1,5 @@
 #include "DialogSourceInfo.h"
+#include <QTreeWidgetItem>
 
 QColor DialogSourceInfo::dataItemErrorColor = QColor(0xc0, 0, 0);
 

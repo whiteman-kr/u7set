@@ -3,16 +3,23 @@
 #include <QUdpSocket>
 #include <QTimer>
 #include <QQueue>
-#include <QUuid>
 
 #include "SocketIO.h"
 #include "CircularLogger.h"
 #include "../UtilsLib/SimpleThread.h"
-#include "../UtilsLib/WUtils.h"
-#include "../Protobuf/google/protobuf/message.h"
+
 
 class UdpClientSocket;
 class UdpServerSocket;
+
+namespace google
+{
+	namespace protobuf
+	{
+		class Message; // forward declaration
+	}
+}
+
 
 struct RequestHeader
 {

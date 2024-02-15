@@ -4,7 +4,8 @@
 #include <map>
 #include <QObject>
 #include "../HardwareLib/LmDescription.h"
-#include "../DbLib/DbController.h"
+
+class DbController;
 
 class LogicModuleSet : public QObject
 {

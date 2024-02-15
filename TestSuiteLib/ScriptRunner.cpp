@@ -15,12 +15,12 @@ namespace TestSuite
 		// Controllers
 		//
 		m_jsTestController = m_jsEngine.newQObject(&m_testController);
-		QQmlEngine::setObjectOwnership(&m_testController, QQmlEngine::CppOwnership);
+		QJSEngine::setObjectOwnership(&m_testController, QJSEngine::CppOwnership);
 
 		// Log
 		//
 		m_jsLog = m_jsEngine.newQObject(&m_scriptTestLog);
-		QQmlEngine::setObjectOwnership(&m_scriptTestLog, QQmlEngine::CppOwnership);
+		QJSEngine::setObjectOwnership(&m_scriptTestLog, QJSEngine::CppOwnership);
 
 		m_jsEngine.globalObject().setProperty("log", m_jsLog);
 		m_jsEngine.globalObject().setProperty("isSimulator", QJSValue{false});

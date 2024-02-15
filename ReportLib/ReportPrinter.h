@@ -1,9 +1,12 @@
 #pragma once
 
 #include "Report.h"
-
-#include <QPdfWriter>
 #include <QTextDocument>
+
+
+class QBuffer;
+class QPdfWriter;
+
 
 namespace ReportLib
 {

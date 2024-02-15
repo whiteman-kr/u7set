@@ -14,10 +14,12 @@
 #include <QElapsedTimer>
 
 #include <QMessageBox>
+#include <QtConcurrent>
 
 #include "DbWorker.h"
 #include "DbProgress.h"
 #include "../HardwareLib/DeviceObject.h"
+#include "../UtilsLib/WUtils.h"
 
 // Upgrade database
 //

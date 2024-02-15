@@ -4,6 +4,7 @@
 #include "../HardwareLib/DeviceObject.h"
 #include "../HardwareLib/ScriptDeviceObject.h"
 #include "../UtilsLib/Crc.h"
+#include "../UtilsLib/WUtils.h"
 #include "../HardwareLib/Connection.h"
 #include "AppSignalProperties.h"
 #include "IssueLogger.h"

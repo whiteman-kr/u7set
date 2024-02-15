@@ -1,7 +1,5 @@
 #include "RecentUsed.h"
 
-#include <QDateTime>
-
 using namespace std::chrono_literals;
 
 namespace AppSignalLib

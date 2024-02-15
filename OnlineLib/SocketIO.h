@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QtGlobal>
-#include <QDebug>
 #include <QHostAddress>
 #include <QAbstractSocket>
 

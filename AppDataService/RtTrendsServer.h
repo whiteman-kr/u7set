@@ -4,7 +4,8 @@
 #include "../CommonLib/Hash.h"
 
 #include "AppDataService.h"
-#include "AppDataSource.h"
+#include "DynamicAppSignalState.h"
+
 
 namespace RtTrends
 {
