@@ -2305,6 +2305,11 @@ namespace Builder
 				continue;
 			}
 
+			if (optoPort->equipmentID() == "SYSTEMID_RACKID_FSCC02_MD00_OPTOPORT01")
+			{
+				DEBUG_STOP;
+			}
+
 			if (optoPort->isUsedInConnection() == false)
 			{
 				continue;
@@ -2316,7 +2321,11 @@ namespace Builder
 
 			auto it = m_equipmentSignals.find(calcHash(validitySignalEquipmentID));
 
-			if (it == m_equipmentSignals.end())
+			if (it != m_equipmentSignals.end())
+			{
+				validitySignal = it->second;
+			}
+			else
 			{
 				// validity signal is not exists, create corresponding AppSignal
 				//
@@ -2400,10 +2409,7 @@ namespace Builder
 				}
 			}
 
-			if (validitySignal == nullptr)
-			{
-				continue;
-			}
+			TEST_PTR_CONTINUE(validitySignal);
 
 			validitySignal->setAcquire(true);
 
@@ -6852,6 +6858,18 @@ namespace Builder
 
 			m_bvbRegSignals.emplace(ioSignal->regValueAddr(), ioSignal);
 		}
+
+		int acquiredRawDataSizeW = 0;
+
+		for(const auto& [place, module] : m_modules)
+		{
+			if (module.place > DeviceHelper::LM1_PLACE)
+			{
+				acquiredRawDataSizeW += module.txAppDataSize;
+			}
+		}
+
+		m_memoryMap.setAcquiredRawDataSize(acquiredRawDataSizeW);
 
 		return result;
 	}
@@ -16991,17 +17009,16 @@ namespace Builder
 
 	bool ModuleLogicCompiler::setLmAppLANDataSize()
 	{
-		if (m_lm == nullptr)
-		{
-			assert(false);
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
+		TEST_PTR_RETURN_FALSE(m_log);
+		TEST_PTR_LOG_RETURN_FALSE(m_lm, m_log);
+
+		int regBufSizeW = m_memoryMap.regBufSizeW();
 
 		return DeviceHelper::setIntProperty(const_cast<Hardware::DeviceModule*>(m_lm),
 											EquipmentPropNames::APP_LAN_DATA_SIZE,
-											m_memoryMap.regBufSizeW(),
+											regBufSizeW,
 											m_log);
+		return false;
 	}
 
 	bool ModuleLogicCompiler::detectUnusedSignals()
