@@ -6,8 +6,16 @@
 //
 // -------------------------------------------------------------------------------------------
 
-BaseOnlineDataSources::BaseOnlineDataSources()
+BaseOnlineDataSources::BaseOnlineDataSources(int processingThreadsCount, CircularLoggerShared log) :
+	m_processingThreadsCount(processingThreadsCount),
+	m_log(log)
 {
+	int optimalThreadsCount = std::thread::hardware_concurrency();
+
+	if (m_processingThreadsCount <= 0 || m_processingThreadsCount > optimalThreadsCount)
+	{
+		m_processingThreadsCount = optimalThreadsCount;
+	}
 }
 
 BaseOnlineDataSources::~BaseOnlineDataSources()
@@ -29,6 +37,27 @@ void BaseOnlineDataSources::clear()
 
 	m_sources.clear();
 }
+
+void BaseOnlineDataSources::startProcessingThreads()
+{
+	for(int i = 0; i < m_processingThreadsCount; i++)
+	{
+		m_packetProcessingThreads.emplace_back(&processPackets, std::ref(*this), i + 1);
+	}
+
+	DEBUG_LOG_MSG(m_log, QString("Diag data processing threads started (threads count %1").
+							arg(m_processingThreadsCount));
+
+//	stg.append(t);
+}
+
+//void RupFramesReceiver::wakeupAllProcessingThreads()
+//{
+//	std::lock_guard lg(m_packetProcessigRequiredMutex);
+//	m_packetProcessingRequiredCondition.notify_all();
+//	m_statesProcessingRequiredCondition.notify_all();
+//}
+
 
 bool BaseOnlineDataSources::append(BaseOnlineDataSource* onlineSource,
 							   CircularLoggerShared logger)
@@ -181,6 +210,77 @@ void BaseOnlineDataSources::processingRequired(BaseOnlineDataSource* source, boo
 	// parse == false - signal states invalidation required
 
 	std::lock_guard lg(m_processigRequiredMutex);
-	m_processingRequired.emplace(source, parse);
+	m_processingRequiredQueue.emplace(source, parse);
 	m_processingRequiredCondition.notify_one();
 }
+
+void BaseOnlineDataSources::processPackets(BaseOnlineDataSources& dataSources, int threadNumber)
+{
+	CircularLoggerShared log = receiver.log();
+
+	DEBUG_LOG_MSG(log, QString("DiagDataProcessingThread #%1 is started").arg(threadNumber));
+
+	QThread* thisThread = QThread::currentThread();
+
+	auto& waitConditionMutex = dataSources.processingRequiredMutex();
+	auto& waitCondition = dataSources.processingRequiredCondition();
+	auto& requireProcessing = receiver.m_packetProcessingRequired;
+
+	std::unique_lock ul(waitConditionMutex, std::defer_lock);
+
+	while(true)
+	{
+		ul.lock();
+
+		waitCondition.wait(ul, [&receiver, &requireProcessing]() -> bool
+								{
+									return	receiver.isQuitRequested() ||
+											!requireProcessing.empty();
+								});
+
+		// here ul is LOCKED!
+
+		if (receiver.isQuitRequested() == true)
+		{
+			ul.unlock();
+			break;
+		}
+
+		auto it = requireProcessing.begin();
+
+		if (it == requireProcessing.end())
+		{
+			ul.unlock();
+			continue;
+		}
+
+		OnlineDataSource* source = it->first;;
+		bool requireBufferProcessing = it->second;
+
+		requireProcessing.erase(it);
+
+		ul.unlock();
+
+		if (source->takeProcessingOwnership(thisThread) == true)
+		{
+			if (requireBufferProcessing == true)
+			{
+				source->parseNextBuffer(thisThread);
+			}
+			else
+			{
+				source->invalidateAllSignals(thisThread);
+			}
+
+			source->releaseProcessingOwnership(thisThread);
+		}
+		else
+		{
+			// another thread already processing this source
+		}
+	}
+
+	DEBUG_LOG_MSG(log, QString("DiagDataProcessingThread #%1 finished").arg(threadNumber));
+}
+
+

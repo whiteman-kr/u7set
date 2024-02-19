@@ -8,10 +8,12 @@
 class BaseOnlineDataSources
 {
 public:
-	BaseOnlineDataSources();
+	BaseOnlineDataSources(int processingThreadsCount = -1, CircularLoggerShared log);
 	virtual ~BaseOnlineDataSources();
 
 	void clear();
+
+	void startProcessingThreads();
 
 	bool append(BaseOnlineDataSource* onlineSource,
 				CircularLoggerShared logger);
@@ -35,9 +37,20 @@ public:
 	std::vector<BaseOnlineDataSource*>::const_iterator end() const;
 
 private:
+	using ProcessingRequiredQueue = std::queue<std::pair<BaseOnlineDataSource*, bool>>;
+
 	void processingRequired(BaseOnlineDataSource* source, bool parse);
 
+	std::mutex& processingRequiredMutex() { return m_processigRequiredMutex; }
+	std::condition_variable& processingRequiredCondition() { return m_processingRequiredCondition; }
+	ProcessingRequiredQueue& rpcessingRequiredQueue() { return m_processingRequiredQueue; }
+
+	static void processPackets(BaseOnlineDataSource& dataSources, int threadNumber);
+
 private:
+	int m_processingThreadsCount = 2;
+	CircularLoggerShared m_log;
+
 	// owns BaseOnlineDataSource objects
 	//
 	std::vector<BaseOnlineDataSource*> m_sources;
@@ -66,8 +79,9 @@ private:
 	//	{ source, true	}	source require buffer parsing
 	//	{ source, false }	source require signals invalidation
 	//
-	std::queue<std::pair<BaseOnlineDataSource*, bool>> m_processingRequired;
+	ProcessingRequiredQueue m_processingRequiredQueue;
 
+	std::vector<std::jthread> m_packetProcessingThreads;
 };
 
 

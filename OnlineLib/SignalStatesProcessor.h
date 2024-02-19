@@ -1,6 +1,5 @@
 #pragma once
 
-
 class SignalStatesProcessor
 {
 private:
@@ -20,5 +19,3 @@ public:
 	SignalStatesProcessor();
 };
 
-
-//void processPackets(RupReceiver& receiver, int threadNumber);
