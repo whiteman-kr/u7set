@@ -502,6 +502,7 @@ public:
 
 	public:
 		[[nodiscard]] std::shared_ptr<DeviceModule> findLogicModule();
+		[[nodiscard]] std::shared_ptr<DeviceModule> findLogicModuleOrBvb();
 
 		// Properties
 		//

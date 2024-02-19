@@ -145,7 +145,7 @@ namespace Builder
 
 			quint32 receivingSubnet = settings->appDataReceivingIP.address32() & receivingNetmask;
 
-			for(Hardware::DeviceModule* lm : m_context->m_lmModules)
+			for(Hardware::DeviceModule* lm : m_context->m_fscModules)
 			{
 				if (lm == nullptr)
 				{

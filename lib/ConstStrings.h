@@ -78,6 +78,8 @@ namespace EquipmentPropNames
 
 	inline const QString LM_PLATFORM_INTERFACE_CONTROLLER_SUFFIX = "_PI";
 
+	inline const QString ACTUATOR_ID("ActuatorID");
+
 	// I/O Modules properties
 	//
 	inline const QString TX_DATA_SIZE("TxDataSize");

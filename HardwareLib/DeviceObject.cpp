@@ -1835,6 +1835,37 @@ R"DELIM({
 		return {};
 	}
 
+	std::shared_ptr<DeviceModule> DeviceChassis::findLogicModuleOrBvb()
+	{
+		for(const auto& child : m_children)
+		{
+			if (child == nullptr)
+			{
+				Q_ASSERT(child);
+				continue;
+			}
+
+			if (child->isModule())
+			{
+				std::shared_ptr<DeviceModule> module = child->toModule();
+
+				if (module == nullptr)
+				{
+					Q_ASSERT(module);
+					continue;
+				}
+
+				if (module->isLogicModule() || module->isBvb())
+				{
+					return module;
+				}
+			}
+		}
+
+		return {};
+	}
+
+
 	int DeviceChassis::type() const
 	{
 		return m_type;

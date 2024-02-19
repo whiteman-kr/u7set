@@ -481,19 +481,19 @@ namespace Builder
 
 		Address16 ualAddr() const;
 		Address16 ualAddrWithoutChecks() const;
-		bool setUalAddr(Address16 ualAddr);
+		bool setUalAddr(const Address16& ualAddr);
 
 		bool ualAddrIsValid() const;
 
 		bool checkUalAddr() const;
 
 		Address16 regBufAddr() const { return m_regBufAddr; }
-		bool setRegBufAddr(Address16 regBufAddr);
+		bool setRegBufAddr(const Address16& regBufAddr);
 
 		bool checkRegBufAddr() const;
 
 		Address16 regValueAddr() const { return m_regValueAddr; }
-		bool setRegValueAddr(Address16 regValueAddr);
+		bool setRegValueAddr(const Address16& regValueAddr);
 
 		Address16 ioBufAddr() const;
 

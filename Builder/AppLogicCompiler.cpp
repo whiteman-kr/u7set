@@ -188,7 +188,7 @@ namespace Builder
 
 		QHash<QString, const Hardware::DeviceModule*> ip2Modules;
 
-		for(const Hardware::DeviceModule* lm : lmModules())
+		for(const Hardware::DeviceModule* lm : fscModules())
 		{
 			if (lm == nullptr)
 			{

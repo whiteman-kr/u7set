@@ -167,7 +167,7 @@ namespace Builder
 
 	AppSignal* ModuleLogicCompiler::getSignal(const QString& appSignalID)
 	{
-		auto it = m_chassisSignals.find(appSignalID);
+		auto it = m_chassisSignals.find(calcHash(appSignalID));
 
 		if (it == m_chassisSignals.end())
 		{
@@ -266,12 +266,12 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::cleanupHeaps),
 
 			PROC_TO_CALL(ModuleLogicCompiler::makeSourceAppLogicCode),
-			PROC_TO_CALL(ModuleLogicCompiler::writeInfoFiles),
+			PROC_TO_CALL(ModuleLogicCompiler::writeLmInfoFiles),
 			PROC_TO_CALL(ModuleLogicCompiler::checkAppLogicCode),
 
 			PROC_TO_CALL(ModuleLogicCompiler::optimizeAppLogicCode),
 			PROC_TO_CALL(ModuleLogicCompiler::makeOptimizedAppLogicCode),
-			PROC_TO_CALL(ModuleLogicCompiler::writeInfoFilesAfterOptimization),
+			PROC_TO_CALL(ModuleLogicCompiler::writeInfoLmFilesAfterOptimization),
 			PROC_TO_CALL(ModuleLogicCompiler::checkOptimizedAppLogicCode),
 
 			//
@@ -284,7 +284,8 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::calcAppDataUID),
 			PROC_TO_CALL(ModuleLogicCompiler::calcDiagDataUID),
 
-			PROC_TO_CALL(ModuleLogicCompiler::writeResult)
+			PROC_TO_CALL(ModuleLogicCompiler::writeResult),
+			PROC_TO_CALL(ModuleLogicCompiler::writeBvbRegInfoFile)
 		};
 
 		bool result = runProcs(procs);
@@ -436,6 +437,18 @@ namespace Builder
 	bool ModuleLogicCompiler::getLmAssociatedOptoPortsTxAreas(std::vector<CodeChecker::MemArea>* optoTxAreas) const
 	{
 		return getLmAssociatedOptoPortsAreas(optoTxAreas, false);
+	}
+
+	bool ModuleLogicCompiler::noCodeGenRequired() const
+	{
+		TEST_PTR_RETURN_FALSE(m_lm);
+
+		if (m_lm->isBvb() == true)
+		{
+			return true;
+		}
+
+		return false;
 	}
 
 	const UalAfbs& ModuleLogicCompiler::ualAfbs() const
@@ -717,11 +730,6 @@ namespace Builder
 		TEST_PTR_RETURN_FALSE(m_log);
 		TEST_PTR_LOG_RETURN_FALSE(m_lm, m_log);
 
-		if (m_lm->isBvb() == true)
-		{
-			return true;
-		}
-
 		bool result = true;
 
 		const Hardware::DeviceChassis* chassis = m_lm->getParentChassis();
@@ -733,12 +741,13 @@ namespace Builder
 			return false;
 		}
 
-		int count = chassis->childrenCount();
+		const std::vector<std::shared_ptr<Hardware::DeviceObject>>& chassisChildren = chassis->children();
 
-		for(int i = 0; i < count; i++)
+		// fill m_modules ordered by place
+		// LM or BVB already in m_modules!
+		//
+		for(const std::shared_ptr<Hardware::DeviceObject>& device : chassisChildren)
 		{
-			std::shared_ptr<const Hardware::DeviceObject> device = chassis->child(i);
-
 			if (device == nullptr)
 			{
 				LOG_INTERNAL_ERROR(m_log);
@@ -769,7 +778,7 @@ namespace Builder
 					result = false;
 				}
 
-				continue;			// LM module already added in ModuleLogicCompiler::loadLMSettings()
+				continue;			// LM (or BVB) module already added into m_modules in ModuleLogicCompiler::loadLMSettings()
 			}
 
 			Module m;
@@ -777,26 +786,65 @@ namespace Builder
 			m.device = module;
 			m.place = module->place();
 
-			// parameters of data RECEIVED from module to LM (i.e. TRANSMITTED by module)
-			//
-			result &= DeviceHelper::getIntProperty(module.get(), EquipmentPropNames::TX_DATA_SIZE, &m.txDataSize, m_log);
-
-			result &= DeviceHelper::getIntProperty(module.get(), EquipmentPropNames::TX_DIAG_DATA_OFFSET, &m.txDiagDataOffset, m_log);
-			result &= DeviceHelper::getIntProperty(module.get(), EquipmentPropNames::TX_DIAG_DATA_SIZE, &m.txDiagDataSize, m_log);
-
-			result &= DeviceHelper::getIntProperty(module.get(), EquipmentPropNames::TX_APP_DATA_OFFSET, &m.txAppDataOffset, m_log);
-			result &= DeviceHelper::getIntProperty(module.get(), EquipmentPropNames::TX_APP_DATA_SIZE, &m.txAppDataSize, m_log);
-
-			// parameters of data TRANSMITTED from LM to module (i.e. RECEIVED by module)
-			//
-			result &= DeviceHelper::getIntProperty(module.get(), EquipmentPropNames::RX_DATA_SIZE, &m.rxDataSize, m_log);
-
-			result &= DeviceHelper::getIntProperty(module.get(), EquipmentPropNames::RX_APP_DATA_OFFSET, &m.rxAppDataOffset, m_log);
-			result &= DeviceHelper::getIntProperty(module.get(), EquipmentPropNames::RX_APP_DATA_SIZE, &m.rxAppDataSize, m_log);
-
-			m.moduleDataOffset = m_memoryMap.getModuleDataOffset(m.place);
-
 			m_modules.emplace(m.place, m);
+
+		}
+
+		bool isBvbChassis = m_lm->isBvb();
+		int appRegDataOffset = 0;
+		int diagRegDataOffset = 0;
+
+		// read modules properties
+		//
+		for(auto& [place, module] : m_modules)
+		{
+			if (module.place == DeviceHelper::LM1_PLACE)
+			{
+				continue;		// skip LM or BVB
+			}
+
+			const Hardware::DeviceModule* deviceModule = module.device.get();
+
+			if (isBvbChassis == true)
+			{
+				// chassis with BVB
+
+				result &= DeviceHelper::getIntProperty(deviceModule, EquipmentPropNames::TX_APP_DATA_SIZE, &module.txAppDataSize, m_log);
+				result &= DeviceHelper::getIntProperty(deviceModule, EquipmentPropNames::TX_DIAG_DATA_SIZE, &module.txDiagDataSize, m_log);
+
+				module.txAppDataOffset = 0;
+				module.txDiagDataOffset = 0;
+				module.txDataSize = 0;				// its Ok, because is not LM and app and diag data  transmit in separate streams
+
+				module.appRegDataOffset = appRegDataOffset;
+				module.diagRegDataOffset = diagRegDataOffset;
+
+				appRegDataOffset += module.txAppDataSize;
+				diagRegDataOffset += module.txDiagDataSize;
+			}
+			else
+			{
+				// chassis with platform LM
+
+				// parameters of data RECEIVED from module to LM (i.e. TRANSMITTED by module)
+				//
+				result &= DeviceHelper::getIntProperty(deviceModule, EquipmentPropNames::TX_DATA_SIZE, &module.txDataSize, m_log);
+
+				result &= DeviceHelper::getIntProperty(deviceModule, EquipmentPropNames::TX_DIAG_DATA_OFFSET, &module.txDiagDataOffset, m_log);
+				result &= DeviceHelper::getIntProperty(deviceModule, EquipmentPropNames::TX_DIAG_DATA_SIZE, &module.txDiagDataSize, m_log);
+
+				result &= DeviceHelper::getIntProperty(deviceModule, EquipmentPropNames::TX_APP_DATA_OFFSET, &module.txAppDataOffset, m_log);
+				result &= DeviceHelper::getIntProperty(deviceModule, EquipmentPropNames::TX_APP_DATA_SIZE, &module.txAppDataSize, m_log);
+
+				// parameters of data TRANSMITTED from LM to module (i.e. RECEIVED by module)
+				//
+				result &= DeviceHelper::getIntProperty(deviceModule, EquipmentPropNames::RX_DATA_SIZE, &module.rxDataSize, m_log);
+
+				result &= DeviceHelper::getIntProperty(deviceModule, EquipmentPropNames::RX_APP_DATA_OFFSET, &module.rxAppDataOffset, m_log);
+				result &= DeviceHelper::getIntProperty(deviceModule, EquipmentPropNames::RX_APP_DATA_SIZE, &module.rxAppDataSize, m_log);
+
+				module.moduleDataOffset = m_memoryMap.getModuleDataOffset(module.place);
+			}
 		}
 
 		return result;
@@ -893,21 +941,21 @@ namespace Builder
 				continue;
 			}
 
-			if (m_chassisSignals.contains(sg->appSignalID()) == true)
+			auto [newIt, inserted] = m_chassisSignals.emplace(calcHash(sg->appSignalID()), sg);
+
+			if (inserted == false)
 			{
-				assert(false);				// duplicate signal!
+				Q_ASSERT(false);				// duplicate AppSignalID !!!
 				continue;
 			}
 
-			m_chassisSignals.insert({sg->appSignalID(), sg});
-
 			if (isIoSignal == true)
 			{
-				m_ioSignals.insert(sg->appSignalID(), sg);
+				m_ioSignals.emplace_back(sg);
 
 				if (deviceAppSignal != nullptr)
 				{
-					m_equipmentSignals.insert(deviceAppSignal->equipmentIdTemplate(), sg);
+					m_equipmentSignals.emplace(calcHash(deviceAppSignal->equipmentIdTemplate()), sg);
 				}
 				else
 				{
@@ -1086,7 +1134,6 @@ namespace Builder
 	bool ModuleLogicCompiler::createUalSignals()
 	{
 		m_ualSignals.clear();
-		m_outPinSignal.clear();
 
 		bool result = true;
 
@@ -1099,6 +1146,7 @@ namespace Builder
 		// primarily created signals
 		//
 		result &= createUalSignalsFromInputAndTuningAcquiredSignals();
+		result &= createBvbOutputSignals();
 		result &= createUalSignalsFromBusComposers();
 		result &= createUalSignalsFromOptoValidity();
 		result &= createUalSignalsFromReceivers();
@@ -1195,7 +1243,8 @@ namespace Builder
 
 	bool ModuleLogicCompiler::writeUalItemsFile()
 	{
-		if (m_context->generateExtraDebugInfo() == false)
+		if (m_context->generateExtraDebugInfo() == false ||
+			noCodeGenRequired() == true)
 		{
 			return true;
 		}
@@ -1723,16 +1772,9 @@ namespace Builder
 
 		// fill m_ualSignals by Input and Tuning Acquired signals
 		//
-		for(auto it = m_chassisSignals.begin(); it != m_chassisSignals.end(); it++)
+		for(const auto& [appSignalID, appSignal] : m_chassisSignals)
 		{
-			AppSignal* appSignal = it->second;
-
-			if (appSignal == nullptr)
-			{
-				LOG_NULLPTR_ERROR(m_log);
-				result = false;
-				continue;
-			}
+			TEST_PTR_CONTINUE(appSignal);
 
 			if (appSignal->isAcquired() == false)
 			{
@@ -1748,6 +1790,34 @@ namespace Builder
 			if (appSignal->enableTuning() == true)
 			{
 				Q_ASSERT(appSignal->isInternal() == true || appSignal->isOutput() == true);
+				m_ualSignals.createSignal(appSignal);
+				continue;
+			}
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::createBvbOutputSignals()
+	{
+		if (m_lm->isBvb() == false)
+		{
+			return true;
+		}
+
+		bool result = true;
+
+		for(const auto& [appSignalID, appSignal] : m_chassisSignals)
+		{
+			TEST_PTR_CONTINUE(appSignal);
+
+			if (appSignal->isAcquired() == false)
+			{
+				continue;
+			}
+
+			if (appSignal->isOutput() == true)
+			{
 				m_ualSignals.createSignal(appSignal);
 				continue;
 			}
@@ -2041,7 +2111,7 @@ namespace Builder
 		}
 		else
 		{
-			if (m_chassisSignals.contains(receivedAppSignalID) == true)
+			if (m_chassisSignals.contains(calcHash(receivedAppSignalID)) == true)
 			{
 				// LM's %1 native signal %2 can't be received via opto connection (Logic schema %3)
 				//
@@ -2141,13 +2211,17 @@ namespace Builder
 
 		QString validitySignalEquipmentID = port->validitySignalEquipmentID();
 
-		AppSignal* validityAppSignal = m_equipmentSignals.value(validitySignalEquipmentID);
+		auto it = m_equipmentSignals.find(calcHash(validitySignalEquipmentID));
 
-		if (validityAppSignal == nullptr)
+		if (it == m_equipmentSignals.end())
 		{
 			m_log->errALC5133(validitySignalEquipmentID, ualItem->guid(), ualItem->label(), ualItem->schemaID());
 			return false;
 		}
+
+		AppSignal* validityAppSignal = it->second;
+
+		TEST_PTR_RETURN_FALSE(validityAppSignal);
 
 		UalSignal* ualSignal = m_ualSignals.get(validityAppSignal->appSignalID());
 
@@ -2233,6 +2307,11 @@ namespace Builder
 				continue;
 			}
 
+			if (optoPort->equipmentID() == "SYSTEMID_RACKID_FSCC02_MD00_OPTOPORT01")
+			{
+				DEBUG_STOP;
+			}
+
 			if (optoPort->isUsedInConnection() == false)
 			{
 				continue;
@@ -2240,9 +2319,15 @@ namespace Builder
 
 			QString validitySignalEquipmentID = optoPort->validitySignalEquipmentID();
 
-			AppSignal* validitySignal = m_equipmentSignals.value(validitySignalEquipmentID, nullptr);
+			AppSignal* validitySignal = nullptr;
 
-			if (validitySignal == nullptr)
+			auto it = m_equipmentSignals.find(calcHash(validitySignalEquipmentID));
+
+			if (it != m_equipmentSignals.end())
+			{
+				validitySignal = it->second;
+			}
+			else
 			{
 				// validity signal is not exists, create corresponding AppSignal
 				//
@@ -2320,16 +2405,13 @@ namespace Builder
 				{
 					m_signals->append(validitySignal, m_lmShared);
 
-					m_chassisSignals.insert({validitySignal->appSignalID(), validitySignal});
-					m_ioSignals.insert(validitySignal->appSignalID(), validitySignal);
-					m_equipmentSignals.insert(validitySignalEquipmentID, validitySignal);
+					m_chassisSignals.emplace(calcHash(validitySignal->appSignalID()), validitySignal);
+					m_ioSignals.emplace_back(validitySignal);
+					m_equipmentSignals.emplace(calcHash(validitySignalEquipmentID), validitySignal);
 				}
 			}
 
-			if (validitySignal == nullptr)
-			{
-				continue;
-			}
+			TEST_PTR_CONTINUE(validitySignal);
 
 			validitySignal->setAcquire(true);
 
@@ -2340,7 +2422,7 @@ namespace Builder
 				result = false;
 			}
 
-			m_optoPortValiditySignal.insert({optoPort->equipmentID(), validtyUalSignal});
+			m_optoPortValiditySignal.emplace(calcHash(optoPort->equipmentID()), validtyUalSignal);
 		}
 
 		return result;
@@ -2366,7 +2448,7 @@ namespace Builder
 			return false;
 		}
 
-		if (m_chassisSignals.contains(signalID) == false)
+		if (m_chassisSignals.contains(calcHash(signalID)) == false)
 		{
 			// The signal '%1' is not associated with LM '%2'.
 			//
@@ -3328,8 +3410,6 @@ namespace Builder
 	{
 		bool result = true;
 
-		QVector<QPair<AppSignal*, QString>> acquiredInputSignalToLinkedValiditySignalID;	// Acquired input signal => linked validity signal EquipmentID
-
 		for(const AppSignal* s : m_ioSignals)
 		{
 			TEST_PTR_CONTINUE(s);
@@ -3371,9 +3451,9 @@ namespace Builder
 				continue;
 			}
 
-			AppSignal* linkedValiditySignal = m_equipmentSignals.value(validitySignalEquipmentID, nullptr);
+			auto it = m_equipmentSignals.find(calcHash(validitySignalEquipmentID));
 
-			if (linkedValiditySignal == nullptr)
+			if (it == m_equipmentSignals.end())
 			{
 				// Linked validity app signal with EquipmentID %1 is not found (input signal %2).
 				//
@@ -3381,6 +3461,8 @@ namespace Builder
 				result = false;
 				continue;
 			}
+
+			AppSignal* linkedValiditySignal = it->second;
 
 			if (linkedValiditySignal->isInput() == false ||
 				linkedValiditySignal->isDiscrete() == false)
@@ -3431,7 +3513,7 @@ namespace Builder
 				continue;
 			}
 
-			auto it = m_optoPortValiditySignal.find(optoPort->equipmentID());
+			auto it = m_optoPortValiditySignal.find(calcHash(optoPort->equipmentID()));
 
 			if (it == m_optoPortValiditySignal.end())
 			{
@@ -4863,9 +4945,9 @@ namespace Builder
 
 		bool result = true;
 
-		for(auto it = m_chassisSignals.begin(); it != m_chassisSignals.end(); it++)
+		for(const auto& [hash, signal] : m_chassisSignals)
 		{
-			AppSignal* signal = it->second;
+			TEST_PTR_CONTINUE(signal);
 
 			if (signal->enableTuning() == false)
 			{
@@ -5005,6 +5087,9 @@ namespace Builder
 
 	bool ModuleLogicCompiler::createSignalLists()
 	{
+		TEST_PTR_RETURN_FALSE(m_log);
+		TEST_PTR_LOG_RETURN_FALSE(m_lm, m_log);
+
 		bool result = true;
 
 		result &= createAcquiredDiscreteInputSignalsList();
@@ -5939,10 +6024,8 @@ namespace Builder
 	{
 		bool result = true;
 
-		for(auto it = m_chassisSignals.begin(); it != m_chassisSignals.end(); it++)
+		for(auto& [hash, s] : m_chassisSignals)
 		{
-			AppSignal* s = it->second;
-
 			if(s == nullptr)
 			{
 				assert(false);
@@ -6202,33 +6285,44 @@ namespace Builder
 
 		do
 		{
-			if (calculateIoSignalsAddresses() == false) break;
+			if (m_lm->isBvb() == false)
+			{
+				// platform-based LM processing
+				//
+				if (calculateIoSignalsAddresses() == false) break;
 
-			if (setDiscreteAndBusInputSignalsUalAddresses() == false) break;
+				if (setDiscreteAndBusInputSignalsUalAddresses() == false) break;
 
-			if (disposeTunableSignalsUalAddresses() == false) break;
+				if (disposeTunableSignalsUalAddresses() == false) break;
 
-			if (disposeDiscreteSignalsInBitMemory() == false) break;
+				if (disposeDiscreteSignalsInBitMemory() == false) break;
 
-			if (disposeDiscreteSignalsHeap() == false) break;
+				if (disposeDiscreteSignalsHeap() == false) break;
 
-			if (disposeAcquiredRawDataInRegBuf() == false) break;
+				if (disposeAcquiredRawDataInRegBuf() == false) break;
 
-			if (disposeAcquiredAnalogSignalsInRegBuf() == false) break;
+				if (disposeAcquiredAnalogSignalsInRegBuf() == false) break;
 
-			if (disposeAcquiredBusesInRegBuf() == false) break;
+				if (disposeAcquiredBusesInRegBuf() == false) break;
 
-			if (disposeAcquiredDiscreteSignalsInRegBuf() == false) break;
+				if (disposeAcquiredDiscreteSignalsInRegBuf() == false) break;
 
-			if (disposeNonAcquiredAnalogSignals() == false) break;
+				if (disposeNonAcquiredAnalogSignals() == false) break;
 
-			if (disposeNonAcquiredBuses() == false) break;
+				if (disposeNonAcquiredBuses() == false) break;
 
-			if (disposeNonAcquiredDiscreteInvertedInputSignals() == false) break;
+				if (disposeNonAcquiredDiscreteInvertedInputSignals() == false) break;
 
-			if (disposeAnalogAndBusSignalsHeap() == false) break;
+				if (disposeAnalogAndBusSignalsHeap() == false) break;
 
-			if (setSignalsRegValidityAddr() == false) break;
+				if (setSignalsRegValidityAddr() == false) break;
+			}
+			else
+			{
+				// BVB chassis processing
+				//
+				if (disposeBvbSignalsInRegBuf() == false) break;
+			}
 
 			result = true;
 		}
@@ -6243,102 +6337,47 @@ namespace Builder
 		//
 		bool result = true;
 
-		for(AppSignal* s : m_ioSignals)
+		for(AppSignal* ioSignal : m_ioSignals)
 		{
-			if (s == nullptr)
-			{
-				LOG_NULLPTR_ERROR(m_log);
-				return false;
-			}
+			TEST_PTR_CONTINUE(ioSignal);
 
-			// retrieve linked device
-			//
-			Hardware::DeviceObject* device = m_equipmentSet->deviceObject(s->equipmentID()).get();
+			Module module;
+			Hardware::DeviceAppSignal* deviceAppSignal = nullptr;
 
-			if (device == nullptr)
+			bool res = getIoSignalModule(*ioSignal, &module, &deviceAppSignal);
+
+			if (res == false)
 			{
-				LOG_INTERNAL_ERROR_MSG(m_log, QString("Can't find DeviceObject with equipmentID %1").
-													arg(s->equipmentID()));
 				result = false;
 				continue;
 			}
 
-			if (device->isAppSignal() == false)
-			{
-				LOG_INTERNAL_ERROR_MSG(m_log, QString("DeviceObject %1 is not a DeviceAppSignal").
-													arg(s->equipmentID()));
-				result = false;
-				continue;
-			}
+			TEST_PTR_CONTINUE(deviceAppSignal);
 
-			Hardware::DeviceAppSignal* deviceAppSignal = device->toAppSignal().get();
+			Address16 ioBufAddr(deviceAppSignal->valueOffset(), deviceAppSignal->valueBit());
 
-			if (deviceAppSignal == nullptr)
-			{
-				LOG_INTERNAL_ERROR(m_log);
-				result =  false;
-				continue;
-			}
-
-			// retrieve associated module
-			//
-			const Hardware::DeviceModule* deviceModule = deviceAppSignal->getParentModule();
-
-			if (deviceModule == nullptr)
-			{
-				LOG_INTERNAL_ERROR_MSG(m_log, QString("Can't find parent DeviceModule for DeviceAppSignal %1").
-													arg(deviceAppSignal->equipmentIdTemplate()));
-				result = false;
-				continue;
-			}
-
-			int modulePlace = deviceModule->place();
-
-			if (modulePlace < 0)
-			{
-				Q_ASSERT(false);
-				LOG_INTERNAL_ERROR_MSG(m_log, QString("DeviceModule %1 has wrong place %2").
-													arg(deviceModule->equipmentIdTemplate()).
-													arg(modulePlace));
-				result = false;
-				continue;
-			}
-
-			auto it = m_modules.find(modulePlace);
-
-			if (it == m_modules.end())
-			{
-				LOG_INTERNAL_ERROR(m_log);
-				result = false;
-				continue;
-			}
-
-			const Module& module = it->second;
-
-			Address16 ioBufAddr(module.moduleDataOffset, deviceAppSignal->valueBit());
-
-			ioBufAddr.addWord(deviceAppSignal->valueOffset());
+			ioBufAddr.addWord(module.moduleDataOffset);
 
 			switch(deviceAppSignal->memoryArea())
 			{
 			case E::MemoryArea::ApplicationData:
 
-				switch(s->inOutType())
+				switch(ioSignal->inOutType())
 				{
 				case E::SignalInOutType::Input:
 					ioBufAddr.addWord(module.txAppDataOffset);
-					s->setIoBufAddr(ioBufAddr);
+					ioSignal->setIoBufAddr(ioBufAddr);
 					break;
 
 				case E::SignalInOutType::Output:
 					ioBufAddr.addWord(module.rxAppDataOffset);
-					s->setIoBufAddr(ioBufAddr);
+					ioSignal->setIoBufAddr(ioBufAddr);
 					break;
 
 				case E::SignalInOutType::Internal:
 					// Internal application signal %1 cannot be linked to equipment input/output signal %2.
 					//
-					log()->errALC5171(s->appSignalID(), s->equipmentID());
+					log()->errALC5171(ioSignal->appSignalID(), ioSignal->equipmentID());
 					result = false;
 					break;
 
@@ -6349,11 +6388,11 @@ namespace Builder
 
 			case E::MemoryArea::DiagnosticsData:
 
-				switch(s->inOutType())
+				switch(ioSignal->inOutType())
 				{
 				case E::SignalInOutType::Input:
 					ioBufAddr.addWord(module.txDiagDataOffset);
-					s->setIoBufAddr(ioBufAddr);
+					ioSignal->setIoBufAddr(ioBufAddr);
 					break;
 
 				case E::SignalInOutType::Output:
@@ -6363,7 +6402,7 @@ namespace Builder
 				case E::SignalInOutType::Internal:
 					// Internal application signal %1 cannot be linked to equipment input/output signal %2.
 					//
-					log()->errALC5171(s->appSignalID(), s->equipmentID());
+					log()->errALC5171(ioSignal->appSignalID(), ioSignal->equipmentID());
 					result = false;
 					break;
 
@@ -6378,6 +6417,83 @@ namespace Builder
 		}
 
 		return result;
+	}
+
+	bool ModuleLogicCompiler::getIoSignalModule(const AppSignal& ioSignal, Module* module,
+												Hardware::DeviceAppSignal** deviceAppSignal) const
+	{
+		TEST_PTR_RETURN_FALSE(m_log);
+		TEST_PTR_LOG_RETURN_FALSE(module, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(deviceAppSignal, m_log);
+
+		if (ioSignal.isInput() == false &&
+			ioSignal.isOutput() == false)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		// retrieve linked device
+		//
+		Hardware::DeviceObject* device = m_equipmentSet->deviceObject(ioSignal.equipmentID()).get();
+
+		if (device == nullptr)
+		{
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Can't find DeviceObject with equipmentID %1").
+												arg(ioSignal.equipmentID()));
+			return false;
+		}
+
+		if (device->isAppSignal() == false)
+		{
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("DeviceObject %1 is not a DeviceAppSignal").
+												arg(ioSignal.equipmentID()));
+			return false;
+		}
+
+		Hardware::DeviceAppSignal* devAppSignal = device->toAppSignal().get();
+
+		if (devAppSignal == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		*deviceAppSignal = devAppSignal;
+
+		// retrieve associated module
+		//
+		const Hardware::DeviceModule* deviceModule = devAppSignal->getParentModule();
+
+		if (deviceModule == nullptr)
+		{
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Can't find parent DeviceModule for DeviceAppSignal %1").
+												arg(devAppSignal->equipmentIdTemplate()));
+			return false;
+		}
+
+		int modulePlace = deviceModule->place();
+
+		if (modulePlace < 0)
+		{
+			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("DeviceModule %1 has wrong place %2").
+												arg(deviceModule->equipmentIdTemplate()).
+												arg(modulePlace));
+			return false;
+		}
+
+		auto it = m_modules.find(modulePlace);
+
+		if (it == m_modules.end())
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		*module = it->second;
+
+		return true;
 	}
 
 	bool ModuleLogicCompiler::disposeTunableSignalsUalAddresses()
@@ -6428,7 +6544,7 @@ namespace Builder
 
 		// set ualAddress of Discrete and Bus input UalSignals reffered by m_ioSignals equal to ioBufAddr of input signal
 		//
-		for(AppSignal* ioSignal : m_ioSignals)
+		for(const AppSignal* ioSignal : m_ioSignals)
 		{
 			if (ioSignal == nullptr)
 			{
@@ -6640,6 +6756,130 @@ namespace Builder
 
 			signalWithFlag->setRegValidityAddr(validitySignal->regValueAddr());
 		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::disposeBvbSignalsInRegBuf()
+	{
+		// calculation regBufAddr of BVB chassis I/O signals
+		//
+		bool result = true;
+
+		std::map<QString, Address16> validitySignalAddr;		// validity signal EquipmentID => validity signal regValueAddr
+
+		for(AppSignal* ioSignal : m_ioSignals)
+		{
+			TEST_PTR_CONTINUE(ioSignal);
+
+			Module module;
+			Hardware::DeviceAppSignal* deviceSignal = nullptr;
+
+			bool res = getIoSignalModule(*ioSignal, &module, &deviceSignal);
+
+			if (res == false)
+			{
+				result = false;
+				continue;
+			}
+
+			TEST_PTR_CONTINUE(deviceSignal);
+
+			Address16 regValueAddr(deviceSignal->valueOffset(), deviceSignal->valueBit());
+
+			regValueAddr.addWord(module.appRegDataOffset);
+
+			Address16 regValidityAddr;
+
+			QString validitySignalID = deviceSignal->validitySignalId();
+
+			if (validitySignalID.isEmpty() == false)
+			{
+				auto it = validitySignalAddr.find(validitySignalID);
+
+				if (it != validitySignalAddr.end())
+				{
+					regValidityAddr = it->second;
+				}
+				else
+				{
+					auto it2 = m_equipmentSignals.find(calcHash(validitySignalID));
+
+					if (it2 != m_equipmentSignals.end())
+					{
+						const AppSignal* validityAppSignal = it2->second;
+
+						TEST_PTR_CONTINUE(validityAppSignal);
+
+						Module valModule;
+						Hardware::DeviceAppSignal* validityDeviceSignal = nullptr;
+
+						res = getIoSignalModule(*validityAppSignal, &valModule, &validityDeviceSignal);
+
+						if (res == false)
+						{
+							result = false;
+							continue;
+						}
+
+						TEST_PTR_CONTINUE(validityDeviceSignal);
+
+						Address16 valSignalRegValueAddr(validityDeviceSignal->valueOffset(), validityDeviceSignal->valueBit());
+
+						valSignalRegValueAddr.addWord(valModule.appRegDataOffset);
+
+						validitySignalAddr.emplace(validitySignalID, valSignalRegValueAddr);
+
+						regValidityAddr = valSignalRegValueAddr;
+					}
+					else
+					{
+						LOG_INTERNAL_ERROR_MSG(m_log, QString("AppSignal with EquipmentID %1 is not fond.").arg(validitySignalID));
+						result = false;
+						continue;
+					}
+				}
+			}
+
+			//
+
+			UalSignal* ualIoSignal = m_ualSignals.get(ioSignal);
+
+			if (ualIoSignal != nullptr)
+			{
+				// ioSignal->setRegValueAddr(regValueAddr) doing inside next call
+				//
+				ualIoSignal->setRegValueAddr(regValueAddr);
+			}
+			else
+			{
+				Q_ASSERT(false);
+			}
+
+			ioSignal->setRegValidityAddr(regValidityAddr);
+
+			auto it = m_bvbRegSignals.find(ioSignal->regValueAddr());
+
+			if (it == m_bvbRegSignals.end())
+			{
+				auto [newIt, b] = m_bvbRegSignals.emplace(ioSignal->regValueAddr(), std::vector<const AppSignal*>{});
+				it = newIt;
+			}
+
+			it->second.push_back(ioSignal);
+		}
+
+		int acquiredRawDataSizeW = 0;
+
+		for(const auto& [place, module] : m_modules)
+		{
+			if (module.place > DeviceHelper::LM1_PLACE)
+			{
+				acquiredRawDataSizeW += module.txAppDataSize;
+			}
+		}
+
+		m_memoryMap.setAcquiredRawDataSize(acquiredRawDataSizeW);
 
 		return result;
 	}
@@ -7713,7 +7953,7 @@ namespace Builder
 			{
 				AppSignal* s = m_signals->getSignal(id);
 
-				if (s != nullptr && m_chassisSignals.contains(s->appSignalID()) == true)
+				if (s != nullptr && m_chassisSignals.contains(calcHash(s->appSignalID())) == true)
 				{
 					find = true;
 					break;
@@ -7980,7 +8220,7 @@ namespace Builder
 
 		QString rxSignalID = receiver->appSignalIds();
 
-		if (m_chassisSignals.contains(rxSignalID) == false)
+		if (m_chassisSignals.contains(calcHash(rxSignalID)) == false)
 		{
 			// Single-port Rx signal '%1' is not associated with LM '%2' (Logic schema '%3').
 			//
@@ -8207,6 +8447,11 @@ namespace Builder
 		TEST_PTR_RETURN_FALSE(m_log);
 		TEST_PTR_RETURN_FALSE(m_lmDescription);
 
+		if (noCodeGenRequired() == true)
+		{
+			return true;
+		}
+
 		m_idrCode.clear();
 
 		//
@@ -8229,6 +8474,11 @@ namespace Builder
 
 	bool ModuleLogicCompiler::generateAlpPhaseCode()
 	{
+		if (noCodeGenRequired() == true)
+		{
+			return true;
+		}
+
 		m_alpCode.clear();
 
 		m_alpCode.comment("Start of ALP phase code");
@@ -8287,6 +8537,11 @@ namespace Builder
 											   AppLogicCode& alpCode,
 											   AppLogicCode* appCode)
 	{
+		if (noCodeGenRequired() == true)
+		{
+			return true;
+		}
+
 		TEST_PTR_RETURN_FALSE(appCode);
 
 		appCode->clear();
@@ -8313,6 +8568,11 @@ namespace Builder
 
 	bool ModuleLogicCompiler::checkAppLogicCode()
 	{
+		if (noCodeGenRequired() == true)
+		{
+			return true;
+		}
+
 		CodeChecker checker(*this);
 
 		return checker.check(m_appLogicCode);
@@ -8373,8 +8633,13 @@ namespace Builder
 		return makeAppLogicCode(m_optiIdrCode, m_optiAlpCode, &m_optiAppLogicCode);
 	}
 
-	bool ModuleLogicCompiler::writeInfoFilesAfterOptimization()
+	bool ModuleLogicCompiler::writeInfoLmFilesAfterOptimization()
 	{
+		if (noCodeGenRequired() == true)
+		{
+			return true;
+		}
+
 		bool result = true;
 
 		result &= writeAsmFile(m_optiAppLogicCode);
@@ -8418,6 +8683,11 @@ namespace Builder
 
 	bool ModuleLogicCompiler::checkOptimizedAppLogicCode()
 	{
+		if (noCodeGenRequired() == true)
+		{
+			return true;
+		}
+
 		CodeChecker checker(*this);
 
 		return checker.check(m_optiAppLogicCode);
@@ -15402,9 +15672,7 @@ namespace Builder
 
 		bool first = true;
 
-		CodeItem cmd;
-
-		for(AppSignal* s : m_ioSignals)
+		for(const AppSignal* s : m_ioSignals)
 		{
 			TEST_PTR_CONTINUE(s);
 
@@ -15455,7 +15723,7 @@ namespace Builder
 
 		std::map<int, CopyBitsMap> destCopyMaps;	// destAddrOffset => CopyBitsMap
 
-		for(AppSignal* s : m_ioSignals)
+		for(const AppSignal* s : m_ioSignals)
 		{
 			if (s == nullptr)
 			{
@@ -16751,25 +17019,21 @@ namespace Builder
 
 	bool ModuleLogicCompiler::setLmAppLANDataSize()
 	{
-		if (m_lm == nullptr)
-		{
-			assert(false);
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
+		TEST_PTR_RETURN_FALSE(m_log);
+		TEST_PTR_LOG_RETURN_FALSE(m_lm, m_log);
+
+		int regBufSizeW = m_memoryMap.regBufSizeW();
 
 		return DeviceHelper::setIntProperty(const_cast<Hardware::DeviceModule*>(m_lm),
 											EquipmentPropNames::APP_LAN_DATA_SIZE,
-											m_memoryMap.regBufSizeW(),
+											regBufSizeW,
 											m_log);
 	}
 
 	bool ModuleLogicCompiler::detectUnusedSignals()
 	{
-		for(const auto& pair : m_chassisSignals)
+		for(const auto& [hash, s] : m_chassisSignals)
 		{
-			const AppSignal* s = pair.second;
-
 			TEST_PTR_CONTINUE(s);
 
 			if (s->isInternal() == true &&
@@ -16787,10 +17051,8 @@ namespace Builder
 	{
 		bool result = true;
 
-		for(const auto& pair : m_chassisSignals)
+		for(const auto& [hash, s] : m_chassisSignals)
 		{
-			const AppSignal* s = pair.second;
-
 			TEST_PTR_CONTINUE(s);
 
 			if (s->reserved() == false)
@@ -16870,8 +17132,15 @@ namespace Builder
 					arg(fileNameExtension)).toLower();
 	}
 
-	bool ModuleLogicCompiler::writeInfoFiles()
+	bool ModuleLogicCompiler::writeLmInfoFiles()
 	{
+		if (noCodeGenRequired() == true)
+		{
+			return true;
+		}
+
+		TEST_PTR_RETURN_FALSE(m_lm);
+
 		bool result = true;
 
 		result &= writeAsmFile(m_appLogicCode);
@@ -16921,6 +17190,11 @@ namespace Builder
 												  const AppLogicCode& idrCode,
 												  const AppLogicCode& alpCode) const
 	{
+		if (noCodeGenRequired() == true)
+		{
+			return true;
+		}
+
 		TEST_PTR_RETURN_FALSE(m_lmDescription);
 
 		QStringList file;
@@ -17303,7 +17577,8 @@ namespace Builder
 
 	bool ModuleLogicCompiler::writeHeapsLog()
 	{
-		if (m_context->generateExtraDebugInfo() == false)
+		if (m_context->generateExtraDebugInfo() == false ||
+			noCodeGenRequired() == true)
 		{
 			return true;
 		}
@@ -17315,6 +17590,62 @@ namespace Builder
 		BuildFile* bf = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
 												getInfoFileName("heaps"), file);
 		return bf != nullptr;
+	}
+
+	bool ModuleLogicCompiler::writeBvbRegInfoFile() const
+	{
+		TEST_PTR_RETURN_FALSE(m_lm);
+
+		if (m_lm->isBvb() == false)
+		{
+			return true;			// Its Ok
+		}
+
+		int appDataSizeW = 0;
+
+		bool res = DeviceHelper::getIntProperty(m_lm, EquipmentPropNames::APP_LAN_DATA_SIZE, &appDataSizeW, m_log);
+
+		int rupFramesQuantity = (appDataSizeW * 2 + Rup::FRAME_DATA_SIZE - 1) / Rup::FRAME_DATA_SIZE;
+
+		quint32 appDataUID = 0;
+
+		res &= DeviceHelper::getUIntProperty(m_lm, EquipmentPropNames::APP_LAN_DATA_UID, &appDataUID, m_log);
+
+		RETURN_IF_FALSE(res);
+
+		QStringList file;
+
+		file.append(QString("BVB %1 registration info file\n").arg(lmEquipmentID()));
+		file.append(QString("App data size:       %1 words (%2 bytes)").arg(appDataSizeW).arg(appDataSizeW * 2));
+		file.append(QString("RUP frames quantity: %1").arg(rupFramesQuantity));
+		file.append(QString("App data UID:        0x%1 (%2)\n").
+						arg(QString::number(appDataUID, 16).toUpper().rightJustified(8, QChar('0'), false)).
+						arg(appDataUID));
+
+		file.append("-----------------------------------------------------------------------------------------");
+		file.append("  Value   | Validity |            AppSignalID");
+		file.append("-----------------------------------------------------------------------------------------");
+
+		for(const auto& [regValueAddr, appSignals] : m_bvbRegSignals)
+		{
+			for(const AppSignal* appSignal : appSignals)
+			{
+				TEST_PTR_CONTINUE(appSignal);
+
+				Q_ASSERT(regValueAddr == appSignal->regValueAddr());
+
+				file.append(QString(" %1 | %2 | %3").
+									arg(appSignal->regValueAddr().toString(true)).
+									arg(appSignal->regValidityAddr().isValid() ?
+											appSignal->regValidityAddr().toString(true) : "   No   ").
+									arg(appSignal->appSignalID()));
+			}
+		}
+
+		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
+														getInfoFileName("reg"), file);
+
+		return buildFile != nullptr;
 	}
 
 	bool ModuleLogicCompiler::writeResult()
@@ -17481,9 +17812,9 @@ namespace Builder
 
 			crc.add(ualSignal->appSignalID());
 
-			if (ualSignal->regBufAddr().isValid() == true)
+			if (ualSignal->regValueAddr().isValid() == true)
 			{
-				crc.add(ualSignal->regBufAddr().bitAddress());
+				crc.add(ualSignal->regValueAddr().bitAddress());
 			}
 			else
 			{
@@ -17935,6 +18266,11 @@ namespace Builder
 
 	bool ModuleLogicCompiler::displayResourcesUsageInfo()
 	{
+		if (noCodeGenRequired() == true)
+		{
+			return true;
+		}
+
 		QString str;
 
 		double percentOfUsedCodeMemory = (m_optiAppLogicCode.codeSizeW() * 100.0) / m_lmCodeMemorySize;
@@ -19322,44 +19658,6 @@ namespace Builder
 		}
 
 		return result;
-	}
-
-	void ModuleLogicCompiler::getChassisSignalsWithEquipmentID(QString& equipmentID,
-															   std::vector<const AppSignal*>* resultSignalList)
-	{
-		if (resultSignalList == nullptr)
-		{
-			LOG_NULLPTR_ERROR(m_log);
-			return;
-		}
-
-		if (m_chassisSignals.size() != 0 &&
-			m_chassisSignalsByEquipmentID.size() == 0)
-		{
-			// initialization of m_chassisSignalsByEquipmentID
-			//
-			for(const auto& pair : m_chassisSignals)
-			{
-				const AppSignal* appSignal = pair.second;
-
-				TEST_PTR_CONTINUE(appSignal);
-
-				m_chassisSignalsByEquipmentID.insert({appSignal->equipmentID(), appSignal});
-			}
-		}
-
-		resultSignalList->clear();
-
-		for(auto it = m_chassisSignalsByEquipmentID.find(equipmentID);
-			it != m_chassisSignalsByEquipmentID.end(); it++)
-		{
-			if (it->first != equipmentID)
-			{
-				break;
-			}
-
-			resultSignalList->push_back(it->second);
-		}
 	}
 
 	void ModuleLogicCompiler::findLogicAfbsForBitAccReplacing(const QString& afbCaption,
