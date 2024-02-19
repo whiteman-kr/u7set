@@ -525,7 +525,7 @@ namespace Builder
 		bool optimizeSequentialBitMoves(CodeSnippet& srcCode);
 		bool optimizeBitFilling(CodeSnippet& srcCode);
 
-		bool writeInfoFilesAfterOptimization();
+		bool writeInfoLmFilesAfterOptimization();
 		bool checkOptimizedAppLogicCode();
 
 		bool generateIdrCodeStart(CodeSnippet* code);
@@ -835,7 +835,7 @@ namespace Builder
 		QString getInfoFileName(const QString& fileNameExtension) const;
 		QString getSrcInfoFileName(const QString& fileNameExtension) const;
 
-		bool writeInfoFiles();
+		bool writeLmInfoFiles();
 		bool writeAsmFile(const AppLogicCode& code) const;
 		bool writeMemFile() const;
 		bool writeStatisticsFile(const AppLogicCode& code,

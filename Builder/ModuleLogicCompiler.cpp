@@ -266,12 +266,12 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::cleanupHeaps),
 
 			PROC_TO_CALL(ModuleLogicCompiler::makeSourceAppLogicCode),
-			PROC_TO_CALL(ModuleLogicCompiler::writeInfoFiles),
+			PROC_TO_CALL(ModuleLogicCompiler::writeLmInfoFiles),
 			PROC_TO_CALL(ModuleLogicCompiler::checkAppLogicCode),
 
 			PROC_TO_CALL(ModuleLogicCompiler::optimizeAppLogicCode),
 			PROC_TO_CALL(ModuleLogicCompiler::makeOptimizedAppLogicCode),
-			PROC_TO_CALL(ModuleLogicCompiler::writeInfoFilesAfterOptimization),
+			PROC_TO_CALL(ModuleLogicCompiler::writeInfoLmFilesAfterOptimization),
 			PROC_TO_CALL(ModuleLogicCompiler::checkOptimizedAppLogicCode),
 
 			//
@@ -284,7 +284,8 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::calcAppDataUID),
 			PROC_TO_CALL(ModuleLogicCompiler::calcDiagDataUID),
 
-			PROC_TO_CALL(ModuleLogicCompiler::writeResult)
+			PROC_TO_CALL(ModuleLogicCompiler::writeResult),
+			PROC_TO_CALL(ModuleLogicCompiler::writeBvbRegInfoFile)
 		};
 
 		bool result = runProcs(procs);
@@ -1242,7 +1243,8 @@ namespace Builder
 
 	bool ModuleLogicCompiler::writeUalItemsFile()
 	{
-		if (m_context->generateExtraDebugInfo() == false)
+		if (m_context->generateExtraDebugInfo() == false ||
+			noCodeGenRequired() == true)
 		{
 			return true;
 		}
@@ -8631,7 +8633,7 @@ namespace Builder
 		return makeAppLogicCode(m_optiIdrCode, m_optiAlpCode, &m_optiAppLogicCode);
 	}
 
-	bool ModuleLogicCompiler::writeInfoFilesAfterOptimization()
+	bool ModuleLogicCompiler::writeInfoLmFilesAfterOptimization()
 	{
 		if (noCodeGenRequired() == true)
 		{
@@ -17026,7 +17028,6 @@ namespace Builder
 											EquipmentPropNames::APP_LAN_DATA_SIZE,
 											regBufSizeW,
 											m_log);
-		return false;
 	}
 
 	bool ModuleLogicCompiler::detectUnusedSignals()
@@ -17131,32 +17132,30 @@ namespace Builder
 					arg(fileNameExtension)).toLower();
 	}
 
-	bool ModuleLogicCompiler::writeInfoFiles()
+	bool ModuleLogicCompiler::writeLmInfoFiles()
 	{
+		if (noCodeGenRequired() == true)
+		{
+			return true;
+		}
+
 		TEST_PTR_RETURN_FALSE(m_lm);
 
 		bool result = true;
 
-		if (m_lm->isBvb() == true)
-		{
-			result &= writeBvbRegInfoFile();
-		}
-		else
-		{
-			result &= writeAsmFile(m_appLogicCode);
+		result &= writeAsmFile(m_appLogicCode);
 
-			result &= writeMemFile();
+		result &= writeMemFile();
 
-			result &= writeStatisticsFile(m_appLogicCode,
-										  m_idrCode,
-										  m_alpCode);
+		result &= writeStatisticsFile(m_appLogicCode,
+									  m_idrCode,
+									  m_alpCode);
 
-			result &= writeTuningInfoFile();
+		result &= writeTuningInfoFile();
 
-			result &= writeOptoModulesReport();
+		result &= writeOptoModulesReport();
 
-			result &= writeLoopbacksReport();
-		}
+		result &= writeLoopbacksReport();
 
 		return result;
 	}
@@ -17578,7 +17577,8 @@ namespace Builder
 
 	bool ModuleLogicCompiler::writeHeapsLog()
 	{
-		if (m_context->generateExtraDebugInfo() == false)
+		if (m_context->generateExtraDebugInfo() == false ||
+			noCodeGenRequired() == true)
 		{
 			return true;
 		}
@@ -17598,13 +17598,30 @@ namespace Builder
 
 		if (m_lm->isBvb() == false)
 		{
-			Q_ASSERT(false);
-			return false;
+			return true;			// Its Ok
 		}
+
+		int appDataSizeW = 0;
+
+		bool res = DeviceHelper::getIntProperty(m_lm, EquipmentPropNames::APP_LAN_DATA_SIZE, &appDataSizeW, m_log);
+
+		int rupFramesQuantity = (appDataSizeW * 2 + Rup::FRAME_DATA_SIZE - 1) / Rup::FRAME_DATA_SIZE;
+
+		quint32 appDataUID = 0;
+
+		res &= DeviceHelper::getUIntProperty(m_lm, EquipmentPropNames::APP_LAN_DATA_UID, &appDataUID, m_log);
+
+		RETURN_IF_FALSE(res);
 
 		QStringList file;
 
-		file.append(QString("BVB %1 registration info file").arg(lmEquipmentID()));
+		file.append(QString("BVB %1 registration info file\n").arg(lmEquipmentID()));
+		file.append(QString("App data size:       %1 words (%2 bytes)").arg(appDataSizeW).arg(appDataSizeW * 2));
+		file.append(QString("RUP frames quantity: %1").arg(rupFramesQuantity));
+		file.append(QString("App data UID:        0x%1 (%2)\n").
+						arg(QString::number(appDataUID, 16).toUpper().rightJustified(8, QChar('0'), false)).
+						arg(appDataUID));
+
 		file.append("-----------------------------------------------------------------------------------------");
 		file.append("  Value   | Validity |            AppSignalID");
 		file.append("-----------------------------------------------------------------------------------------");
