@@ -6856,7 +6856,15 @@ namespace Builder
 
 			ioSignal->setRegValidityAddr(regValidityAddr);
 
-			m_bvbRegSignals.emplace(ioSignal->regValueAddr(), ioSignal);
+			auto it = m_bvbRegSignals.find(ioSignal->regValueAddr());
+
+			if (it == m_bvbRegSignals.end())
+			{
+				auto [newIt, b] = m_bvbRegSignals.emplace(ioSignal->regValueAddr(), std::vector<const AppSignal*>{});
+				it = newIt;
+			}
+
+			it->second.push_back(ioSignal);
 		}
 
 		int acquiredRawDataSizeW = 0;
@@ -17601,19 +17609,21 @@ namespace Builder
 		file.append("  Value   | Validity |            AppSignalID");
 		file.append("-----------------------------------------------------------------------------------------");
 
-		for(const auto& [regValueAddr, appSignal] : m_bvbRegSignals)
+		for(const auto& [regValueAddr, appSignals] : m_bvbRegSignals)
 		{
-			TEST_PTR_CONTINUE(appSignal);
+			for(const AppSignal* appSignal : appSignals)
+			{
+				TEST_PTR_CONTINUE(appSignal);
 
-			Q_ASSERT(regValueAddr == appSignal->regValueAddr());
+				Q_ASSERT(regValueAddr == appSignal->regValueAddr());
 
-			file.append(QString(" %1 | %2 | %3").
-								arg(appSignal->regValueAddr().toString(true)).
-								arg(appSignal->regValidityAddr().isValid() ?
-										appSignal->regValidityAddr().toString(true) : "   No   ").
-								arg(appSignal->appSignalID()));
+				file.append(QString(" %1 | %2 | %3").
+									arg(appSignal->regValueAddr().toString(true)).
+									arg(appSignal->regValidityAddr().isValid() ?
+											appSignal->regValidityAddr().toString(true) : "   No   ").
+									arg(appSignal->appSignalID()));
+			}
 		}
-
 
 		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
 														getInfoFileName("reg"), file);
