@@ -6,6 +6,8 @@
 #include "OnlineDataSource.h"
 #include "RupFramesReceiver.h"
 
+#include <thread>
+
 class BaseOnlineDataSources
 {
 public:
