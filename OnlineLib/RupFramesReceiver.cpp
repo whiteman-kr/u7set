@@ -70,7 +70,7 @@ void RupFramesReceiver::startTimer500ms()
 		m_timer = new steady_timer(*m_ioContext);
 	}
 
-	m_timer->expires_after(asio::chrono::milliseconds(TIMER_PEROIOD_MS));
+	m_timer->expires_after(asio::chrono::milliseconds(TIMER_PERIOD_MS));
 	m_timer->async_wait(bind(&RupFramesReceiver::onTimer500ms, this,
 						   std::placeholders::_1));
 }

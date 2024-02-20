@@ -57,10 +57,10 @@ private:
 //	void trace_dt(const QString& portID);
 
 private:
-	static const int TIMER_PEROIOD_MS = 500;				// in milliseconds
-	static const int NO_RUP_FRAMES_TIMEOUT_MS = 3000;		// in milliseconds
-	static const int MAX_NO_FRAMES_CTR = NO_RUP_FRAMES_TIMEOUT_MS / TIMER_PEROIOD_MS;
-	static const int MAX_SOCKET_ERROR_COUNT = 3;
+	inline static const int TIMER_PERIOD_MS = 500;				// in milliseconds
+	inline static const int NO_RUP_FRAMES_TIMEOUT_MS = 3000;		// in milliseconds
+	inline static const int MAX_NO_FRAMES_CTR = NO_RUP_FRAMES_TIMEOUT_MS / TIMER_PERIOD_MS;
+	inline static const int MAX_SOCKET_ERROR_COUNT = 3;
 
 	//
 
@@ -97,7 +97,7 @@ private:
 	udp::endpoint m_receiveFromIP0;
 	udp::endpoint m_receiveFromIP1;
 
-	static const int RECV_BUFFER_SIZE = ROUND_TO_CACHE_LINE_SIZE(sizeof(Rup::SimFrame));
+	inline static const int RECV_BUFFER_SIZE = ROUND_TO_CACHE_LINE_SIZE(sizeof(Rup::SimFrame));
 
 	CACHE_ALIGNED char m_receiveBuffer0[RECV_BUFFER_SIZE];
 	CACHE_ALIGNED char m_receiveBuffer1[RECV_BUFFER_SIZE];
