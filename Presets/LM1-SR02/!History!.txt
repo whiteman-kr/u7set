@@ -1,0 +1,5 @@
+LM1-SR02
+	20.02.2024	Version: 1	LM1-SR02_v1.u7devp  	RPCT-3832: Added specific property DiagLANDataSize
+
+
+

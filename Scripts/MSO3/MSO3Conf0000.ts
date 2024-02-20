@@ -196,7 +196,8 @@ let VersionMSO3: number = 0x0053;
 //let configScriptVersion: number = 1;
 //let configScriptVersion: number = 2;	// Changes in LMNumberCount calculation algorithm
 //let configScriptVersion: number = 3;	// Added software type checking
-let configScriptVersion: number = 4;	// ScriptDeviceObject is used
+//let configScriptVersion: number = 4;	// ScriptDeviceObject is used
+let configScriptVersion: number = 5;	// Using DiagLANDataSize calculated by RPCT
 
 let LMDescriptionNumber: number = 0;
 
@@ -361,7 +362,7 @@ function generate_mso3_rev1(builder: Builder, root: ScriptDeviceObject, module: 
 	}
 
 	{
-		let checkProperties: string[] = ["SubsystemID", "LMNumber", "SubsystemChannel", "AppLANDataSize", "TuningLANDataUID", "AppLANDataUID", "DiagLANDataUID"];
+		let checkProperties: string[] = ["SubsystemID", "LMNumber", "SubsystemChannel", "AppLANDataSize", "DiagLANDataSize", "TuningLANDataUID", "AppLANDataUID", "DiagLANDataUID"];
 		for (let cp: number = 0; cp < checkProperties.length; cp++) {
 			if (module.propertyValue(checkProperties[cp]) == undefined) {
 				log.errCFG3000(checkProperties[cp], module.equipmentId);
@@ -392,8 +393,8 @@ function generate_mso3_rev1(builder: Builder, root: ScriptDeviceObject, module: 
 
 	let uartId: number = logicModuleDescription.FlashMemory_ConfigUartId;
 
-	let appWordsCount: number = module.propertyInt("AppLANDataSize");
-	let diagWordsCount: number = logicModuleDescription.Memory_TxDiagDataSize;
+	const appWordsCount: number = module.propertyInt("AppLANDataSize");
+	const diagWordsCount: number = module.propertyInt("DiagLANDataSize");
 
 	let ssKeyValue: number = subsystemStorage.ssKey(subSysID);
 	if (ssKeyValue == -1) {
@@ -553,8 +554,6 @@ function generate_mso3_rev1(builder: Builder, root: ScriptDeviceObject, module: 
 			log.errCFG3000("TxDiagDataSize", ioEquipmentID);
 			return false;
 		}
-
-		diagWordsCount += diagWordsIoCount;
 	}
 
 	// Create LANs configuration

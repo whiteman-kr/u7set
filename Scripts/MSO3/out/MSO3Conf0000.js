@@ -42,7 +42,8 @@ let VersionMSO3 = 0x0053;
 //let configScriptVersion: number = 1;
 //let configScriptVersion: number = 2;	// Changes in LMNumberCount calculation algorithm
 //let configScriptVersion: number = 3;	// Added software type checking
-let configScriptVersion = 4; // ScriptDeviceObject is used
+//let configScriptVersion: number = 4;	// ScriptDeviceObject is used
+let configScriptVersion = 5; // Using DiagLANDataSize calculated by RPCT
 let LMDescriptionNumber = 0;
 //
 function main(builder, root, logicModules, confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription) {
@@ -166,7 +167,7 @@ function generate_mso3_rev1(builder, root, module, confFirmware, log, signalSet,
         return false;
     }
     {
-        let checkProperties = ["SubsystemID", "LMNumber", "SubsystemChannel", "AppLANDataSize", "TuningLANDataUID", "AppLANDataUID", "DiagLANDataUID"];
+        let checkProperties = ["SubsystemID", "LMNumber", "SubsystemChannel", "AppLANDataSize", "DiagLANDataSize", "TuningLANDataUID", "AppLANDataUID", "DiagLANDataUID"];
         for (let cp = 0; cp < checkProperties.length; cp++) {
             if (module.propertyValue(checkProperties[cp]) == undefined) {
                 log.errCFG3000(checkProperties[cp], module.equipmentId);
@@ -191,8 +192,8 @@ function generate_mso3_rev1(builder, root, module, confFirmware, log, signalSet,
         return false;
     }
     let uartId = logicModuleDescription.FlashMemory_ConfigUartId;
-    let appWordsCount = module.propertyInt("AppLANDataSize");
-    let diagWordsCount = logicModuleDescription.Memory_TxDiagDataSize;
+    const appWordsCount = module.propertyInt("AppLANDataSize");
+    const diagWordsCount = module.propertyInt("DiagLANDataSize");
     let ssKeyValue = subsystemStorage.ssKey(subSysID);
     if (ssKeyValue == -1) {
         log.errCFG3001(subSysID, module.equipmentId);
@@ -319,7 +320,6 @@ function generate_mso3_rev1(builder, root, module, confFirmware, log, signalSet,
             log.errCFG3000("TxDiagDataSize", ioEquipmentID);
             return false;
         }
-        diagWordsCount += diagWordsIoCount;
     }
     // Create LANs configuration
     //

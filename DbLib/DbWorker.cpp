@@ -438,6 +438,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0410.sql", "Upgrade to version 410, Update tuning logins editor for Monitor, TuningClient and TestSuite"},
 	{":/DatabaseUpgrade/Upgrade0411.sql", "Upgrade to version 411, Create folder $root$/Schemas/VDU"},
 	{":/DatabaseUpgrade/Upgrade0412.sql", "Upgrade to version 412, Update DiagDataService preset to v3"},
+	{":/DatabaseUpgrade/Upgrade0413.sql", "Upgrade to version 413, Add DiagLANDataSize to all LMs, config script has been changed to use this value"},
 };
 
 int DbWorker::counter = 0;
