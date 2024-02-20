@@ -527,7 +527,12 @@ namespace Builder
 		void errEQP6010(QString equipmemtId);						// Device object %1 not found.
 		void errEQP6011(QString equipmemtId, QString buildStep);	// Device object %1 not found on %2.
 
-		void errEQP6020(QString lm, QUuid lmUuid);					//	Property lmDescriptionFile is empty
+		void errEQP6020(QString lm, QUuid lmUuid);					// Property lmDescriptionFile is empty
+		void errEQP6021(QString deviceEquipmentID, QString devicePropertyName, QUuid deviceUuid);	// Property %1.%2 is empty.
+		void errEQP6022(QString propertyValue,
+						QString device1EquipmentID,QUuid device1Uuid,
+						QString device2EquipmentID,QUuid device2Uuid,
+						QString devicePropertyName);				// Duplicate property value %1 in %2.%4 and %3.%4
 
 		void errEQP6030(QString profileName, QString errorMessage);	// Applying SimProfile %1 error: %2
 

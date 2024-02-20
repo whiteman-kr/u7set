@@ -600,6 +600,70 @@ namespace Builder
 		return result;
 	}
 
+	bool BuildWorkerThread::taskCheckEquipmentProperties()
+	{
+		TEST_PTR_RETURN_FALSE(m_context);
+		TEST_PTR_RETURN_FALSE(m_context->m_log);
+		TEST_PTR_RETURN_FALSE(m_context->m_equipmentSet);
+
+		std::map<QString, Hardware::DeviceObject*> actuators;
+		bool checkResult = true;
+
+		std::function<void (Hardware::DeviceObject*)> checkActuatorID = [this, &actuators, &checkResult](Hardware::DeviceObject* device)
+		{
+			TEST_PTR_RETURN(device);
+
+			if (device->isModule() == false)
+			{
+				return;
+			}
+
+			if (DeviceHelper::isPropertyExists(device, EquipmentPropNames::ACTUATOR_ID) == false)
+			{
+				return;
+			}
+
+			QString actuatorID;
+
+			bool res = DeviceHelper::getStrProperty(device, EquipmentPropNames::ACTUATOR_ID, &actuatorID, m_context->m_log);
+
+			if (res == false)
+			{
+				checkResult = false;
+				return;
+			}
+
+			if (actuatorID.isEmpty())
+			{
+				// Property %1.%2 is empty.
+				//
+				m_context->m_log->errEQP6021(device->equipmentIdTemplate(), EquipmentPropNames::ACTUATOR_ID, device->uuid());
+				checkResult = false;
+				return;
+			}
+
+			auto it = actuators.find(actuatorID);
+
+			if (it != actuators.end())
+			{
+				Hardware::DeviceObject* dev1 = it->second;
+
+				m_context->m_log->errEQP6022(actuatorID,
+											 dev1->equipmentIdTemplate(), dev1->uuid(),
+											 device->equipmentIdTemplate(), device->uuid(),
+											 EquipmentPropNames::ACTUATOR_ID);
+				checkResult = false;
+				return;
+			}
+
+			actuators.emplace(actuatorID, device);
+		};
+
+		Hardware::equipmentWalker(m_context->m_equipmentSet->root().get(), checkActuatorID);
+
+		return checkResult;
+	}
+
 	bool BuildWorkerThread::taskLoadBusTypes()
 	{
 		m_context->m_busSet = std::make_shared<AppSignalLib::BusSet>();

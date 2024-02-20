@@ -44,7 +44,8 @@ namespace Builder
 		bool taskStartBuildResultWriter();
 		bool taskGetEquipment();
 		bool taskCheckPresetVersions();
-		bool taskLoadBusTypes();					// Load BusTypes (AppSignalLib::BusSet)
+		bool taskCheckEquipmentProperties();
+		bool taskLoadBusTypes();					// Load BusTypes (VFrame30::BusSet)
 		bool taskLoadAppSignals();					// Load Builder::SignalSet
 		bool taskLoadLmDescriptions();				// Load LmDescription files
 		bool taskLoadSubsystems();					// Load subsystems
@@ -104,6 +105,11 @@ namespace Builder
 				{
 					.func = &BuildWorkerThread::taskCheckPresetVersions,
 					.name = "Checking Equipment Presets",
+					.breakOnFailed = true
+				},
+				{
+					.func = &BuildWorkerThread::taskCheckEquipmentProperties,
+					.name = "Checking Equipment Properties",
 					.breakOnFailed = true
 				},
 				{

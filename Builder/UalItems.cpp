@@ -2087,7 +2087,7 @@ namespace Builder
 		return m_ualAddr;
 	}
 
-	bool UalSignal::setUalAddr(Address16 ualAddr)
+	bool UalSignal::setUalAddr(const Address16& ualAddr)
 	{
 		if (m_isConst == true)
 		{
@@ -2186,7 +2186,7 @@ namespace Builder
 		return m_ualAddr.isValid();
 	}
 
-	bool UalSignal::setRegBufAddr(Address16 regBufAddr)
+	bool UalSignal::setRegBufAddr(const Address16& regBufAddr)
 	{
 		assert(regBufAddr.isValid() == true);
 
@@ -2262,7 +2262,7 @@ namespace Builder
 		return m_regBufAddr.isValid();
 	}
 
-	bool UalSignal::setRegValueAddr(Address16 regValueAddr)
+	bool UalSignal::setRegValueAddr(const Address16& regValueAddr)
 	{
 		assert(regValueAddr.isValid() == true);
 

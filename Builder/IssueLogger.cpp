@@ -8259,6 +8259,61 @@ namespace Builder
 				  .arg(lm));
 	}
 
+	/// IssueCode: EQP6021
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property %1.%2 is empty.
+	///
+	/// Parameters:
+	///		%1 Device EquipmentID
+	///		%2 Device property name
+	///
+	/// Description:
+	///		Specified property is empty. Check device properties.
+	///
+	void IssueLogger::errEQP6021(QString deviceEquipmentID, QString devicePropertyName, QUuid deviceUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 6021, deviceUuid);
+
+		LOG_ERROR(IssueType::Equipment,
+				  6021,
+				  tr("Property %1.%2 is empty.").
+						arg(deviceEquipmentID).arg(devicePropertyName));
+	}
+
+	/// IssueCode: EQP6022
+	///
+	/// IssueType: Error
+	///
+	/// Title: Duplicate property value %1 in %2.%4 and %3.%4
+	///
+	/// Parameters:
+	///		%1 Property value
+	///		%2 Device 1 EquipmentID
+	///		%3 Device 2 EquipmentID
+	///		%4 Property name
+	///
+	/// Description:
+	///		Specified devices have duplicate property value. Check devices properties.
+	///
+	void IssueLogger::errEQP6022(QString propertyValue,
+								QString device1EquipmentID,QUuid device1Uuid,
+								QString device2EquipmentID,QUuid device2Uuid,
+								QString devicePropertyName)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 6022, device1Uuid);
+		addItemsIssues(OutputMessageLevel::Error, 6022, device2Uuid);
+
+		LOG_ERROR(IssueType::Equipment,
+				  6022,
+				  tr("Duplicate property value %1 in %2.%4 and %3.%4.").
+						arg(propertyValue).
+						arg(device1EquipmentID).
+						arg(device2EquipmentID).
+						arg(devicePropertyName));
+	}
+
 	/// IssueCode: EQP6030
 	///
 	/// IssueType: Error

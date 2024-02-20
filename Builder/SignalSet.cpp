@@ -370,9 +370,9 @@ namespace Builder
 						continue;
 					}
 
-					std::shared_ptr<Hardware::DeviceModule> module = chassis->findLogicModule();
+					std::shared_ptr<Hardware::DeviceModule> module = chassis->findLogicModuleOrBvb();
 
-					if (module != nullptr && module->isLogicModule() == true)
+					if (module != nullptr)
 					{
 						linkSignalToLm(&s, module);
 					}
