@@ -62,7 +62,8 @@ private:
 
 	std::shared_ptr<const DiagDataServiceSettings> m_serviceSettings;
 
-	OnlineDataSources<DiagDataSource, SimpleDiagSignalState> m_onlineSources;
+	std::vector<DataSource> m_dataSources;
+	OnlineDataSources<DiagDataSource, SimpleDiagSignalState>* m_onlineSources = nullptr;
 
 	Hardware::DiagSignalTypes m_diagSignalTypes;
 

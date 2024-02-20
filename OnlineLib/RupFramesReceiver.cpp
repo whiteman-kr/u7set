@@ -1,4 +1,5 @@
 #include "RupFramesReceiver.h"
+#include "OnlineDataSources.h"
 
 // -------------------------------------------------------------------------------
 //
@@ -6,12 +7,11 @@
 //
 // -------------------------------------------------------------------------------
 
-RupFramesReceiver::RupFramesReceiver(const QString& threadName,
-							const HostAddressPort& dataReceivingIP,
-							BaseOnlineDataSources& onlineDataSources,
-							E::SoftwareRunMode swRunMode,
-							CircularLoggerShared log) :
-	m_threadName(threadName),
+RupFramesReceiver::RupFramesReceiver(const HostAddressPort& dataReceivingIP,
+									 E::SoftwareRunMode swRunMode,
+									 BaseOnlineDataSources& onlineDataSources,
+									 CircularLoggerShared log) :
+	m_threadName("RupFramesReceiver"),
 	m_dataReceivingIP(dataReceivingIP),
 	m_onlineDataSources(onlineDataSources),
 	m_log(log)
@@ -23,8 +23,15 @@ RupFramesReceiver::~RupFramesReceiver()
 {
 }
 
-void RupFramesReceiver::run()
+CircularLoggerShared RupFramesReceiver::log()
 {
+	return m_log;
+}
+
+void RupFramesReceiver::run(std::stop_token stopToken)
+{
+	m_stopToken = stopToken;
+
 	DEBUG_LOG_MSG(m_log, getLogStr(QString("thread started (receiving IP %1)").
 													arg(dataReceivingIPStr())));
 
@@ -342,7 +349,7 @@ void RupFramesReceiver::closeSocket()
 
 bool RupFramesReceiver::stopIfQuitRequested()
 {
-	if (isQuitRequested() == false)
+	if (m_stopToken.stop_requested() == false)
 	{
 		return false;
 	}

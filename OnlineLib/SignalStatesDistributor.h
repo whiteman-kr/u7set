@@ -7,12 +7,14 @@
 // Class intended to get signal states from OnlineDataSource(s) queues and
 // distribute this states to archive and clients
 //
+
+/*
 class SignalStatesDistributor
 {
 public:
 	SignalStatesDistributor(CircularLoggerShared log);
 
-/*	void registerDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue,
+	void registerDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue,
 									   bool isArchivingQueue,
 									   const QString& description);
 
@@ -21,7 +23,7 @@ public:
 	void registerGatewaySignalStatesQueue(GatewayAppSignalStatesQueueShared destQueue,
 									   const std::set<Hash>& hashes);
 
-	void unregisterGatewaySignalStatesQueue(GatewayAppSignalStatesQueueShared destQueue);*/
+	void unregisterGatewaySignalStatesQueue(GatewayAppSignalStatesQueueShared destQueue);
 
 	void processStates();
 	void quit() { m_quitRequested = true; }
@@ -29,7 +31,7 @@ public:
 private:
 	std::mutex m_distributionRequiredMutex;
 	std::condition_variable m_distributionRequiredCondition;
-	std::queue<OnlineDataSource*> m_distributionRequiredSources;	//	queue of sources requires states queue processing
+	std::queue<BaseOnlineDataSource*> m_distributionRequiredSources;	//	queue of sources requires states queue processing
 
 	std::atomic_bool m_quitRequested = { false };
 
@@ -41,7 +43,7 @@ private:
 
 	// queuePtr => pair<isArchiveQueue, queueDescription>
 	//
-	std::map<SimpleAppSignalStatesQueueShared, std::pair<bool, QString>> m_queues;
+//	std::map<SimpleAppSignalStatesQueueShared, std::pair<bool, QString>> m_queues;
 
 	//
 
@@ -51,10 +53,10 @@ private:
 
 	struct GatewayQueueHashes
 	{
-		GatewayAppSignalStatesQueueShared queue;
+//		GatewayAppSignalStatesQueueShared queue;
 		std::set<Hash> hashes;
 	};
 
 	std::vector<GatewayQueueHashes> m_gatewayQueues;
 };
-
+*/

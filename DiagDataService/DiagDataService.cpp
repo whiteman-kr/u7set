@@ -200,6 +200,8 @@ void DiagDataServiceWorker::onConfigurationReady(const QByteArray configurationX
 
 bool DiagDataServiceWorker::readDiagDataSources(const QByteArray& fileData, const QString& profile)
 {
+	Q_UNUSED(profile);
+
 	QVector<DataSource> dataSources;
 
 	bool result = DataSourcesXML<DataSource>::readFromXml(fileData, &dataSources);
@@ -210,9 +212,6 @@ bool DiagDataServiceWorker::readDiagDataSources(const QByteArray& fileData, cons
 		return false;
 	}
 
-	Q_ASSERT(false);	// to do
-	//result = m_onlineSources.init(profile, dataSources, logger());
-
 	if (result == true)
 	{
 		DEBUG_LOG_MSG(logger(), QString("DiagDataSources successfully loaded"));
@@ -221,6 +220,10 @@ bool DiagDataServiceWorker::readDiagDataSources(const QByteArray& fileData, cons
 	{
 		DEBUG_LOG_ERR(logger(), QString("DiagDataSources loading error!"));
 	}
+
+	std::vector<DataSource> ds(dataSources.begin(), dataSources.end());
+
+	m_dataSources.swap(ds);
 
 	return result;
 }
@@ -261,6 +264,27 @@ bool DiagDataServiceWorker::readDiagSignalTypes(const QByteArray& fileData)
 
 void DiagDataServiceWorker::applyNewConfiguration()
 {
+	if (m_onlineSources != nullptr)
+	{
+		Q_ASSERT(false);
+	}
+
+	m_onlineSources = new OnlineDataSources<DiagDataSource, SimpleDiagSignalState>(
+								m_curSettingsProfile.diagDataReceivingIP,
+								sessionParams().softwareRunMode,
+								m_diagDataProcessingThreadCount, logger());
+
+	bool res = m_onlineSources->init(m_dataSources);
+
+	if (res == false)
+	{
+		return;
+	}
+
+	m_onlineSources->run();
+
+
+
 //	createTimeErrLog();
 //	createAndInitSignalStates();
 //	buildAcuiredAppSignalIDs();
@@ -274,12 +298,20 @@ void DiagDataServiceWorker::applyNewConfiguration()
 
 void DiagDataServiceWorker::clearConfiguration()
 {
+
 	// free all resources allocated in onConfigurationReady
 	//
 //	stopRtTrendsServerThread();
 //	stopTcpArchiveClientThread();
 	stopTcpDiagDataServer();
 	stopDiagDataReceiverThread();
+
+	if (m_onlineSources != nullptr)
+	{
+		m_onlineSources->stop();
+		delete m_onlineSources;
+		m_onlineSources = nullptr;
+	}
 
 //	shutdownTimeErrLog();
 

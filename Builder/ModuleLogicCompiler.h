@@ -825,7 +825,9 @@ namespace Builder
 		bool copyOptoPortRawTxDiscreteSignals(CodeSnippet* code, Hardware::OptoPortShared port);
 		bool copyOptoPortRawTxBusSignals(CodeSnippet* code, Hardware::OptoPortShared port);
 
-		bool setLmAppLANDataSize();
+		bool setLmAppLanDataSize();
+		bool setLmDiagLanDataSize();
+
 		bool detectUnusedSignals();
 		bool detectUsedReservedSignals();
 		bool fillAnalogSignalsOnSchemas();

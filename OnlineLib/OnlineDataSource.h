@@ -195,8 +195,12 @@ class OnlineDataSource : public BaseOnlineDataSource
 protected:
 	OnlineDataSource(const DataSource& dataSource, E::LanControllerType srcType) :
 		BaseOnlineDataSource(dataSource, srcType),
-		m_states(acquiredSignalsCount() * 3)
+		m_states(3)
 	{
+		if (acquiredSignalsCount() > 0)
+		{
+			m_states.resize(acquiredSignalsCount() * 3);
+		}
 	}
 
 	void pushSignalState(const SIGNAL_STATE& state, const QThread* thread)

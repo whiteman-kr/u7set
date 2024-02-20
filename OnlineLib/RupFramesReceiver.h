@@ -4,11 +4,8 @@
 
 #include "SocketIO.h"
 #include "CircularLogger.h"
-
-#include "../UtilsLib/SimpleThread.h"
-
-#include "OnlineDataSources.h"
-//#include "SignalStatesProcessingThread.h"
+#include "../HardwareLib/DataProtocols.h"
+#include "../UtilsLib/WUtils.h"
 
 #include "../asio/include/asio.hpp"
 
@@ -18,25 +15,25 @@ using namespace asio::ip;
 #pragma warning(push)
 #pragma warning(disable: 4324)
 
+class BaseOnlineDataSources;
+
 //
 // RupFramesReceiver is receives a RUP frames from socket and
 // push it in OnlineDataSources processing buffers to parse.
-// After place RUP frame in buffer wakeup RupFramesParser thread
 //
-class RupFramesReceiver : public ThreadWithQuit
+class RupFramesReceiver
 {
 public:
-	RupFramesReceiver(const QString& threadName,
-						const HostAddressPort& dataReceivingIP,
-						BaseOnlineDataSources& onlineDataSources,
+	RupFramesReceiver(	const HostAddressPort& dataReceivingIP,
 						E::SoftwareRunMode swRunMode,
+						BaseOnlineDataSources& onlineDataSources,
 						CircularLoggerShared log);
 
 	~RupFramesReceiver();
 
-	CircularLoggerShared log() { return m_log; }
+	CircularLoggerShared log();
 
-	void run();
+	void run(std::stop_token stopToken);
 
 private:
 	void startTimer500ms();
@@ -81,6 +78,7 @@ private:
 	io_context* m_ioContext = nullptr;
 	steady_timer* m_timer = nullptr;
 	udp::socket* m_socket = nullptr;
+	std::stop_token m_stopToken;
 
 	//
 

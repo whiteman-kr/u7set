@@ -27,6 +27,11 @@ void BaseOnlineDataSource::ParsingBuffer::clear()
 
 void BaseOnlineDataSource::ParsingBuffer::allocate(int frmsCount)
 {
+	if (frmsCount <= 0)
+	{
+		frmsCount = 1;
+	}
+
 	Q_ASSERT(frmsCount > 0 && frmsCount <= Rup::MAX_FRAME_COUNT);
 
 	clear();

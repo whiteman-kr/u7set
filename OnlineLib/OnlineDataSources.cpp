@@ -6,15 +6,26 @@
 //
 // -------------------------------------------------------------------------------------------
 
-BaseOnlineDataSources::BaseOnlineDataSources(int processingThreadsCount, CircularLoggerShared log) :
-	m_processingThreadsCount(processingThreadsCount),
+BaseOnlineDataSources::BaseOnlineDataSources(const HostAddressPort& dataReceivingIP,
+											 E::SoftwareRunMode swRunMode,
+											 int parsingThreadsCount,
+											 CircularLoggerShared log) :
+	m_rupFramesReceiver(dataReceivingIP, swRunMode, *this, log),
+	m_parsingThreadsCount(parsingThreadsCount),
 	m_log(log)
 {
 	int optimalThreadsCount = std::thread::hardware_concurrency();
 
-	if (m_processingThreadsCount <= 0 || m_processingThreadsCount > optimalThreadsCount)
+	if (m_parsingThreadsCount <= 0 || m_parsingThreadsCount > optimalThreadsCount)
 	{
-		m_processingThreadsCount = optimalThreadsCount;
+		if (optimalThreadsCount != 0)
+		{
+			m_parsingThreadsCount = optimalThreadsCount;
+		}
+		else
+		{
+			m_parsingThreadsCount = 4;
+		}
 	}
 }
 
@@ -38,17 +49,20 @@ void BaseOnlineDataSources::clear()
 	m_sources.clear();
 }
 
-void BaseOnlineDataSources::startProcessingThreads()
+void BaseOnlineDataSources::run()
 {
-	for(int i = 0; i < m_processingThreadsCount; i++)
-	{
-		m_packetProcessingThreads.emplace_back(&processPackets, std::ref(*this), i + 1);
-	}
+	startProcessingThreads();
+	startRupFramesReceiver();
+}
 
-	DEBUG_LOG_MSG(m_log, QString("Diag data processing threads started (threads count %1").
-							arg(m_processingThreadsCount));
+void BaseOnlineDataSources::stop()
+{
+	m_stopSource.request_stop();
+}
 
-//	stg.append(t);
+CircularLoggerShared BaseOnlineDataSources::log()
+{
+	return m_log;
 }
 
 //void RupFramesReceiver::wakeupAllProcessingThreads()
@@ -202,6 +216,19 @@ std::vector<BaseOnlineDataSource*>::const_iterator BaseOnlineDataSources::end() 
 	return m_sources.end();
 }
 
+void BaseOnlineDataSources::startProcessingThreads()
+{
+	for(int i = 0; i < m_parsingThreadsCount; i++)
+	{
+		m_processingThreads.emplace_back(&BaseOnlineDataSources::processPackets, this, i + 1);
+	}
+}
+
+void BaseOnlineDataSources::startRupFramesReceiver()
+{
+	m_processingThreads.emplace_back(&RupFramesReceiver::run, &m_rupFramesReceiver, m_stopSource.get_token());
+}
+
 void BaseOnlineDataSources::processingRequired(BaseOnlineDataSource* source, bool parse)
 {
 	TEST_PTR_RETURN(source);
@@ -214,65 +241,61 @@ void BaseOnlineDataSources::processingRequired(BaseOnlineDataSource* source, boo
 	m_processingRequiredCondition.notify_one();
 }
 
-void BaseOnlineDataSources::processPackets(BaseOnlineDataSources& dataSources, int threadNumber)
+void BaseOnlineDataSources::processPackets(int threadNumber)
 {
-	CircularLoggerShared log = receiver.log();
+	std::stop_token stopToken = m_stopSource.get_token();
 
-	DEBUG_LOG_MSG(log, QString("DiagDataProcessingThread #%1 is started").arg(threadNumber));
+	DEBUG_LOG_MSG(m_log, QString("Diag data parsing thread #%1 started").arg(threadNumber));
 
 	QThread* thisThread = QThread::currentThread();
 
-	auto& waitConditionMutex = dataSources.processingRequiredMutex();
-	auto& waitCondition = dataSources.processingRequiredCondition();
-	auto& requireProcessing = receiver.m_packetProcessingRequired;
-
-	std::unique_lock ul(waitConditionMutex, std::defer_lock);
+	std::unique_lock ul(m_processigRequiredMutex, std::defer_lock);
 
 	while(true)
 	{
 		ul.lock();
 
-		waitCondition.wait(ul, [&receiver, &requireProcessing]() -> bool
+		m_processingRequiredCondition.wait(ul, stopToken, [&]() -> bool
 								{
-									return	receiver.isQuitRequested() ||
-											!requireProcessing.empty();
+									return	!m_processingRequiredQueue.empty();
 								});
 
 		// here ul is LOCKED!
 
-		if (receiver.isQuitRequested() == true)
+		if (stopToken.stop_requested() == true)
 		{
 			ul.unlock();
 			break;
 		}
 
-		auto it = requireProcessing.begin();
-
-		if (it == requireProcessing.end())
+		if (m_processingRequiredQueue.empty())
 		{
+			Q_ASSERT(false);
 			ul.unlock();
 			continue;
 		}
 
-		OnlineDataSource* source = it->first;;
-		bool requireBufferProcessing = it->second;
+		auto& p = m_processingRequiredQueue.front();
 
-		requireProcessing.erase(it);
+		BaseOnlineDataSource* sourceToProcessing = p.first;;
+		bool requireBufferProcessing = p.second;
+
+		m_processingRequiredQueue.pop();
 
 		ul.unlock();
 
-		if (source->takeProcessingOwnership(thisThread) == true)
+		if (sourceToProcessing->takeProcessingOwnership(thisThread) == true)
 		{
 			if (requireBufferProcessing == true)
 			{
-				source->parseNextBuffer(thisThread);
+				sourceToProcessing->parseNextBuffer(thisThread);
 			}
 			else
 			{
-				source->invalidateAllSignals(thisThread);
+				sourceToProcessing->invalidateAllSignals(thisThread);
 			}
 
-			source->releaseProcessingOwnership(thisThread);
+			sourceToProcessing->releaseProcessingOwnership(thisThread);
 		}
 		else
 		{
@@ -280,7 +303,7 @@ void BaseOnlineDataSources::processPackets(BaseOnlineDataSources& dataSources, i
 		}
 	}
 
-	DEBUG_LOG_MSG(log, QString("DiagDataProcessingThread #%1 finished").arg(threadNumber));
+	DEBUG_LOG_MSG(m_log, QString("Diag data parsing thread #%1 finished").arg(threadNumber));
 }
 
 

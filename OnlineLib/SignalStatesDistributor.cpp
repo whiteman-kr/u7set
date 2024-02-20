@@ -1,5 +1,6 @@
 #include "SignalStatesDistributor.h"
 
+/*
 AppSignalStatesDistributor::AppSignalStatesDistributor(DynamicAppSignalStates& signalStates,
 														   CircularLoggerShared log) :
 	m_signalStates(signalStates),
@@ -245,3 +246,4 @@ void SignalStatesDistributor::processStates()
 
 	DEBUG_LOG_MSG(m_log, QString("SignalStatesProcessingThread finished"));
 }
+*/

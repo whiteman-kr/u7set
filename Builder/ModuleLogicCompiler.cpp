@@ -276,7 +276,9 @@ namespace Builder
 
 			//
 
-			PROC_TO_CALL(ModuleLogicCompiler::setLmAppLANDataSize),
+			PROC_TO_CALL(ModuleLogicCompiler::setLmAppLanDataSize),
+			PROC_TO_CALL(ModuleLogicCompiler::setLmDiagLanDataSize),
+
 			PROC_TO_CALL(ModuleLogicCompiler::detectUnusedSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::detectUsedReservedSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::fillAnalogSignalsOnSchemas),
@@ -814,7 +816,7 @@ namespace Builder
 
 				module.txAppDataOffset = 0;
 				module.txDiagDataOffset = 0;
-				module.txDataSize = 0;				// its Ok, because is not LM and app and diag data  transmit in separate streams
+				module.txDataSize = 0;				// its Ok, because it is not LM and app and diag data transmit in separate streams
 
 				module.appRegDataOffset = appRegDataOffset;
 				module.diagRegDataOffset = diagRegDataOffset;
@@ -17017,7 +17019,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::setLmAppLANDataSize()
+	bool ModuleLogicCompiler::setLmAppLanDataSize()
 	{
 		TEST_PTR_RETURN_FALSE(m_log);
 		TEST_PTR_LOG_RETURN_FALSE(m_lm, m_log);
@@ -17027,6 +17029,21 @@ namespace Builder
 		return DeviceHelper::setIntProperty(const_cast<Hardware::DeviceModule*>(m_lm),
 											EquipmentPropNames::APP_LAN_DATA_SIZE,
 											regBufSizeW,
+											m_log);
+	}
+
+	bool ModuleLogicCompiler::setLmDiagLanDataSize()
+	{
+		int diagDataSize = 0;
+
+		for(const auto& [place, module] : m_modules)
+		{
+			diagDataSize += module.txDiagDataSize;
+		}
+
+		return DeviceHelper::setIntProperty(const_cast<Hardware::DeviceModule*>(m_lm),
+											EquipmentPropNames::DIAG_LAN_DATA_SIZE,
+											diagDataSize,
 											m_log);
 	}
 

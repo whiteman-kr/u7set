@@ -4,16 +4,23 @@
 #include "../UtilsLib/WUtils.h"
 #include "CircularLogger.h"
 #include "OnlineDataSource.h"
+#include "RupFramesReceiver.h"
 
 class BaseOnlineDataSources
 {
 public:
-	BaseOnlineDataSources(int processingThreadsCount = -1, CircularLoggerShared log);
+	BaseOnlineDataSources(const HostAddressPort& dataReceivingIP,
+						  E::SoftwareRunMode swRunMode,
+						  int parsingThreadsCount,
+						  CircularLoggerShared log);
 	virtual ~BaseOnlineDataSources();
 
 	void clear();
 
-	void startProcessingThreads();
+	void run();
+	void stop();
+
+	CircularLoggerShared log();
 
 	bool append(BaseOnlineDataSource* onlineSource,
 				CircularLoggerShared logger);
@@ -37,19 +44,24 @@ public:
 	std::vector<BaseOnlineDataSource*>::const_iterator end() const;
 
 private:
+	void startProcessingThreads();
+	void startRupFramesReceiver();
+
 	using ProcessingRequiredQueue = std::queue<std::pair<BaseOnlineDataSource*, bool>>;
 
 	void processingRequired(BaseOnlineDataSource* source, bool parse);
 
 	std::mutex& processingRequiredMutex() { return m_processigRequiredMutex; }
-	std::condition_variable& processingRequiredCondition() { return m_processingRequiredCondition; }
-	ProcessingRequiredQueue& rpcessingRequiredQueue() { return m_processingRequiredQueue; }
+	std::condition_variable_any& processingRequiredCondition() { return m_processingRequiredCondition; }
+	ProcessingRequiredQueue& processingRequiredQueue() { return m_processingRequiredQueue; }
 
-	static void processPackets(BaseOnlineDataSource& dataSources, int threadNumber);
+	void processPackets(int threadNumber);
+
+protected:
+	CircularLoggerShared m_log;
 
 private:
-	int m_processingThreadsCount = 2;
-	CircularLoggerShared m_log;
+	int m_parsingThreadsCount = 2;
 
 	// owns BaseOnlineDataSource objects
 	//
@@ -73,15 +85,18 @@ private:
 
 	//
 
+	RupFramesReceiver m_rupFramesReceiver;
+
 	std::mutex m_processigRequiredMutex;
-	std::condition_variable m_processingRequiredCondition;
+	std::condition_variable_any m_processingRequiredCondition;
 
 	//	{ source, true	}	source require buffer parsing
 	//	{ source, false }	source require signals invalidation
 	//
 	ProcessingRequiredQueue m_processingRequiredQueue;
 
-	std::vector<std::jthread> m_packetProcessingThreads;
+	std::stop_source m_stopSource;
+	std::vector<std::jthread> m_processingThreads;
 };
 
 
@@ -90,18 +105,24 @@ template <typename DATA_SOURCE, typename SIGNAL_STATE>
 class OnlineDataSources : public BaseOnlineDataSources
 {
 public:
-	OnlineDataSources();
-	bool init(const std::vector<DataSource>& dataSourcesFromCfg, CircularLoggerShared logger) {}
+	OnlineDataSources(const HostAddressPort& dataReceivingIP,
+					  E::SoftwareRunMode swRunMode,
+					  int parsingThreadsCount,
+					  CircularLoggerShared log);
+	bool init(const std::vector<DataSource>& dataSourcesFromCfg);
 };
 
 template <typename DATA_SOURCE, typename SIGNAL_STATE>
-OnlineDataSources<DATA_SOURCE, SIGNAL_STATE>::OnlineDataSources()
+OnlineDataSources<DATA_SOURCE, SIGNAL_STATE>::OnlineDataSources(const HostAddressPort& dataReceivingIP,
+																E::SoftwareRunMode swRunMode,
+																int parsingThreadsCount,
+																CircularLoggerShared log) :
+	BaseOnlineDataSources(dataReceivingIP, swRunMode, parsingThreadsCount, log)
 {
 }
-/*
+
 template <typename DATA_SOURCE, typename SIGNAL_STATE>
-OnlineDataSources<DATA_SOURCE, SIGNAL_STATE>::init(const std::vector<DataSource>& dataSourcesFromCfg,
-																CircularLoggerShared logger)
+bool OnlineDataSources<DATA_SOURCE, SIGNAL_STATE>::init(const std::vector<DataSource>& dataSourcesFromCfg)
 {
 	bool result = true;
 
@@ -109,9 +130,9 @@ OnlineDataSources<DATA_SOURCE, SIGNAL_STATE>::init(const std::vector<DataSource>
 	{
 		DATA_SOURCE* dataSource = new DATA_SOURCE(ds);
 
-		result &= append(dataSource, logger);
+		result &= append(dataSource, m_log);
 	}
 
 	return result;
-}*/
+}
 
