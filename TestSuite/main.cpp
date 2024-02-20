@@ -1,8 +1,11 @@
 #include "AppConfigSettings.h"
 #include "TestSuiteMainWindow.h"
 #include "version.h"
+#include "../Protobuf/google/protobuf/message_lite.h"
 
 #include <QApplication>
+#include <QCommandLineParser>
+
 
 
 QSharedMemory* theSharedMemorySingleApp = nullptr;

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QObject>
-#include "../CommonLib/Hash.h"
 #include "../CommonLib/Times.h"
 #include "AppSignalStateFlags.h"
 

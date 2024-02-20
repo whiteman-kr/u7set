@@ -168,16 +168,22 @@ target_precompile_headers(${TARGET} PRIVATE
 	# Qt includes
 	#
 	<QtPrintSupport>
-	<QtQml>
-	<QtWidgets>
-	<QtXml>
 
 	# Project includes
 	#
 	"../CommonLib/Types.h"
-
-	"../Proto/network.pb.h"
-	"../Proto/serialization.pb.h"
+	"../CommonLib/Hash.h"
+	"../CommonLib/PropertyObject.h"
+	#"../CommonLib/AfbParamValue.h"
+	
+	"../Proto/ProtoSerialization.h"
+	"../Proto/Network.pb.h"	
+	#"../Proto/AppSignal.pb.h"
+	
+	#"../AppSignalLib/AppSignal.h"
+	"../AppSignalLib/AppSignalParam.h"
+	"../AppSignalLib/AppSignalState.h"
+	#"../AppSignalLib/TuningValue.h"
 )
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h

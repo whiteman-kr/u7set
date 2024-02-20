@@ -3,6 +3,9 @@
 
 #include <QDialog>
 
+class QTreeWidget;
+class QTreeWidgetItem;
+
 class DialogSourceInfo : public QDialog
 {
 	Q_OBJECT

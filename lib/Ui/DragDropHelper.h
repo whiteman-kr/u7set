@@ -3,7 +3,6 @@
 
 #include <QMouseEvent>
 #include <QDrag>
-#include "../AppSignalLib/AppSignalParam.h"
 
 class DragDropHelper
 {

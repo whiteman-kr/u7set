@@ -3,12 +3,12 @@
 #include <fstream>
 #include <memory>
 
-#include <QUuid>
-#include <QVariant>
 
-#include "../CommonLib/AfbParamValue.h"
-#include "../CommonLib/PropertyObject.h"
-#include "../Proto/serialization.pb.h"
+// Even though it is included by public precompile header, cmake puts it after this file, so it is needed to include it here
+//
+#include "../CommonLib/PropertyObject.h" 
+
+#include "../Proto/Serialization.pb.h"
 
 
 namespace Proto
@@ -433,30 +433,4 @@ namespace Proto
 		ProtoCompress m_compression = ProtoCompress::Auto;
 		size_t m_autoCompressionLimit = 2048;
 	};
-
-	// Helper serialization functions
-	//
-	const QUuid& Read(const Proto::Uuid& message);
-	void Write(Proto::Uuid* pMessage, const QUuid& guid);
-
-	// Read/write wstring message
-	//
-	void Read(const Proto::wstring& message, QString* dst);
-	void Write(Proto::wstring* pMessage, const QString& str);
-
-	// Read/write qVariant message
-	//
-	const QVariant Read(const Proto::qvariant& message);
-	void Write(Proto::qvariant* pMessage, const QVariant& value);
-
-	void saveProperty(::Proto::Property* protoProperty, const std::shared_ptr<::Property>& property);
-	void saveProperty(::Proto::Property* protoProperty, const ::Property* property);
-
-	bool loadProperty(const ::Proto::Property& protoProperty, const std::shared_ptr<::Property>& property);
-	bool loadProperty(const ::Proto::Property& protoProperty, ::Property* property);
-
-	// Read/Write AfbParamValue
-	//
-	void Read(const Proto::AfbParamValue& message, Afb::AfbParamValue* dst);
-	void Write(Proto::AfbParamValue* message, const Afb::AfbParamValue& src);
 } // namespace Proto

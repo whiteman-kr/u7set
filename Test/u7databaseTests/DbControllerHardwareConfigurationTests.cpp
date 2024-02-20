@@ -1,7 +1,4 @@
 #include "DbControllerHardwareConfigurationTests.h"
-#include <QSql>
-#include <QSqlError>
-#include <QDebug>
 #include "Settings.h"
 
 using namespace Hardware;

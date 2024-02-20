@@ -2,7 +2,6 @@
 
 #include <QApplication>
 #include <QScreen>
-#include <QThread>
 #include <QTimer>
 #include <QDebug>
 #include <QFile>

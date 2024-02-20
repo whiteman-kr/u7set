@@ -1,6 +1,5 @@
 #pragma once
 #include "Indicator.h"
-#include "../CommonLib/Times.h"
 #include "../TrendView/Trend.h"
 
 namespace VFrame30

@@ -1,10 +1,11 @@
 #pragma once
 
-#include <vector>
-#include <memory>
 #include <QObject>
-#include <QXmlStreamReader>
-#include <QXmlStreamWriter>
+
+
+class QXmlStreamReader;
+class QXmlStreamWriter;
+
 
 namespace Hardware
 {

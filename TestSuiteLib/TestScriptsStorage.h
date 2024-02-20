@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../CommonLib/Hash.h"
 
 namespace TestSuite
 {

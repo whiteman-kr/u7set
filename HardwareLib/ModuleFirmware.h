@@ -2,7 +2,6 @@
 #include <map>
 #include <vector>
 #include <QObject>
-#include "../CommonLib/Types.h"
 
 // ----------------------------------------------------------------------------
 //

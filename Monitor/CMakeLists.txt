@@ -151,7 +151,6 @@ target_precompile_headers(${TARGET} PRIVATE
 	<algorithm>
 	<array>
 	<atomic>
-	<chrono>
 	<concepts>
 	<deque>
 	<functional>
@@ -167,17 +166,31 @@ target_precompile_headers(${TARGET} PRIVATE
 
 	# Qt includes
 	#
+	<QTreeWidget>
+	<QTreeView>
 	<QtPrintSupport>
-	<QtQml>
-	<QtWidgets>
-	<QtXml>
+	<QToolBar>
+	<QStatusBar>
+	<QPushButton>
+	<QLineEdit>
+	<QLabel>
+	<QFileDialog>
+	<QDialog>
+	<QDateTime>
 
 	# Project includes
 	#
 	"../CommonLib/Types.h"
+	"../CommonLib/Hash.h"
+	"../CommonLib/PropertyObject.h"
 
-	"../Proto/network.pb.h"
-	"../Proto/serialization.pb.h"
+	"../Proto/ProtoSerialization.h"
+	"../Proto/Network.pb.h"
+	"../Proto/AppSignal.pb.h"
+
+	"../AppSignalLib/AppSignal.h"
+	"../AppSignalLib/AppSignalParam.h"
+	"../AppSignalLib/AppSignalState.h"
 )
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h

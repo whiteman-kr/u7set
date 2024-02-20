@@ -1,5 +1,6 @@
 #include "LanControllerInfo.h"
-
+#include "../UtilsLib/DomXmlHelper.h"
+#include <QDomNode>
 // -----------------------------------------------------------------------------
 //
 // LanControllerInfo struct implementation

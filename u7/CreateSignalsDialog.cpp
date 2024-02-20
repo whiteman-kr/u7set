@@ -1,5 +1,7 @@
 #include "CreateSignalsDialog.h"
 
+#include <QFormLayout>
+
 CreateSignalsDialog::CreateSignalsDialog(QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
 {

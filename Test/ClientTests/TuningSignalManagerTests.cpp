@@ -1,8 +1,6 @@
-#include "../../AppSignalLib/AppSignal.h"
-#include "../../AppSignalLib/AppSignalParam.h"
 #include "../../OnlineLib/SoftwareInfo.h"
 #include "../../AppSignalLib/TuningSignalManager.h"
-#include "../Proto/serialization.pb.h"
+#include "../Proto/AppSignal.pb.h"
 
 class TuningSignalManagerTests : public ::testing::Test
 {

@@ -2,9 +2,11 @@
 #define PROPERTYTABLE_H
 
 #include <QSortFilterProxyModel>
-#include <QAbstractItemModel>
-#include "../CommonLib/PropertyObject.h"
 #include "../lib/PropertyEditor.h"
+
+
+class QAbstractItemModel;
+
 
 namespace ExtWidgets
 {

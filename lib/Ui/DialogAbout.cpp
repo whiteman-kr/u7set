@@ -1,12 +1,13 @@
 #include "DialogAbout.h"
 #include "version.h"
-#include <QApplication>
-#include <QClipboard>
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <QClipboard>
+#include <QApplication>
+
 
 void DialogAbout::show(QWidget* parent, const QString& description, const QString& imagePath)
 {

@@ -2,7 +2,8 @@
 #define DATABASE_H
 
 #include <QObject>
-#include <QtSql>
+#include <QSqlDatabase>
+#include <QSqlRecord>
 
 #include "MeasureBase.h"
 #include "Options.h"

@@ -8,7 +8,7 @@ DisableFormat: true
 Language: Cpp
 BasedOnStyle: Microsoft
 
-MaxEmptyLinesToKeep: 2 
+# MaxEmptyLinesToKeep: 2 -- does not work for VS 17.9
 
 # Ok
 AlignAfterOpenBracket: Align	
@@ -109,6 +109,6 @@ SpacesInCStyleCastParentheses: 'false'
 SpacesInContainerLiterals: 'false'
 SpacesInParentheses: 'false'
 SpacesInSquareBrackets: 'false'
-UseTab: ForContinuationAndIndentation
+
 
 ...

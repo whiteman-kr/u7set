@@ -96,7 +96,7 @@ private:
 	ProcessingRequiredQueue m_processingRequiredQueue;
 
 	std::stop_source m_stopSource;
-	std::vector<std::jthread> m_processingThreads;
+	std::list<std::jthread> m_processingThreads;
 };
 
 

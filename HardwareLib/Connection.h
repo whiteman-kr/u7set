@@ -1,9 +1,8 @@
 #pragma once
 
-#include "../Proto/ProtoSerialization.h"
-#include "../CommonLib/PropertyObject.h"
-#include <QXmlStreamReader>
+#include <QUuid>
 
+class QXmlStreamReader;
 
 namespace Hardware
 {
@@ -170,7 +169,7 @@ namespace Hardware
 		void setGenerateVHDFile(bool value);
 
 	private:
-        QUuid m_uuid;
+		QUuid m_uuid;
 		QString m_connectionID;
 
 		int m_port1TxStartAddress = 0;

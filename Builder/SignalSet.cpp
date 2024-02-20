@@ -4,7 +4,7 @@
 namespace Builder
 {
 
-	SignalSet::SignalSet(VFrame30::BusSet* busSet, std::shared_ptr<BuildResultWriter> resultWriter, IssueLogger* log) :
+	SignalSet::SignalSet(AppSignalLib::BusSet* busSet, std::shared_ptr<BuildResultWriter> resultWriter, IssueLogger* log) :
 		m_busSet(busSet),
 		m_resultWriter(resultWriter),
 		m_log(log),

@@ -1,7 +1,9 @@
 #pragma once
 
 #include "../UtilsLib/SimpleThread.h"
+#include "../UtilsLib/WUtils.h"
 #include "../OnlineLib/CircularLogger.h"
+
 #include "GatewayDescription.h"
 #include "AppSignalState.h"
 #include "IvsImpulseDataProtocol.h"

@@ -1,7 +1,4 @@
-#include <QtSql>
-#include <QTest>
 #include "PropertyObjectTests.h"
-#include "../../CommonLib/PropertyObject.h"
 
 PropertyObjectTests::PropertyObjectTests()
 {

@@ -1,7 +1,13 @@
 #pragma once
 #include <set>
 #include <vector>
-#include "../OnlineLib/Tcp.h"
+#include "../OnlineLib/TcpConnectionState.h"
+
+
+namespace Tcp
+{
+	class Client;
+}
 
 
 class TcpClientStatistics

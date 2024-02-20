@@ -1,7 +1,7 @@
 #ifndef METROLOGY_FORMULA_TESTS_H
 #define METROLOGY_FORMULA_TESTS_H
 
-#include <QObject>
+#include <QTest>
 
 // ==============================================================================================
 

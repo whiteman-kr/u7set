@@ -2,10 +2,10 @@
 
 #include <memory>
 #include <QObject>
-#include <QDomDocument>
-#include "../CommonLib/Hash.h"
+
 #include "Afb.h"
 
+class QDomDocument;
 class SimCommandTest_LM5_LM6;
 
 namespace Hardware
@@ -126,7 +126,7 @@ public:
 public:
 	bool load(const QByteArray& xml, QString* errorMessage);
 	bool load(const QString& xml, QString* errorMessage);
-	bool load(QDomDocument doc, QString* errorMessage);
+	bool load(const QDomDocument& doc, QString* errorMessage);
 
 	void clear();
 

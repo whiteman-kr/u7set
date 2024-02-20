@@ -9,6 +9,7 @@
 
 #include <optional>
 
+class QSplitter;
 class QLineEdit;
 class QPushButton;
 class QTextEdit;

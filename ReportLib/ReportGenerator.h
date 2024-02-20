@@ -2,14 +2,19 @@
 
 #include "Report.h"
 #include "ReportPrinter.h"
-#include "ReportTemplate.h"
+
+class QBuffer;
 
 namespace ReportLib
 {
+	class ReportSection;
+	class ReportTemplate;
+	class SectionTemplate;
+
 	class ReportGenerator
 	{
 	public:
-		ReportGenerator(const ReportTemplate& reportTemplate);
+		explicit ReportGenerator(const ReportTemplate& reportTemplate);
 
 		bool generate(QBuffer& buffer, std::atomic_bool& stop);
 

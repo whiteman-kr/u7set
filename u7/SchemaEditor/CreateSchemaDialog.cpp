@@ -2,7 +2,7 @@
 #include "ui_CreateSchemaDialog.h"
 #include "Settings.h"
 #include "../DbLib/DbStruct.h"
-#include "../VFrame30/SchemaLayer.h"
+#include "../HardwareLib/PropertyNames.h"
 #include "../VFrame30/Schema.h"
 #include "../VFrame30/UfbSchema.h"
 #include "../VFrame30/LogicSchema.h"

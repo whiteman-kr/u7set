@@ -29,6 +29,23 @@ add_library(${TARGET} STATIC
 	ReportTemplate.h
 )
 
+target_precompile_headers(${TARGET} PRIVATE
+	"../CommonLib/Types.h"
+	"../CommonLib/Hash.h"
+	"../CommonLib/PropertyObject.h"
+	#"../CommonLib/AfbParamValue.h"
+	
+	"../Proto/ProtoSerialization.h"
+	#"../Proto/Network.pb.h"	
+	#"../Proto/AppSignal.pb.h" 
+	
+	"../AppSignalLib/AppSignal.h"
+	"../AppSignalLib/AppSignalParam.h"
+	"../AppSignalLib/AppSignalState.h"
+	
+	#"../AppSignalLib/TuningValue.h"
+)
+
 target_link_libraries(${TARGET} PUBLIC Qt6::Gui Qt6::Qml Qt6::Xml Qt6::Network Qt6::Widgets)
 target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib OnlineLib AppSignalLib TrendView VFrame30)
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../OnlineLib/Tcp.h"
+#include "../OnlineLib/TcpConnectionState.h"
 #include "../UtilsLib/ILogFile.h"
 #include "../UtilsLib/SimpleThread.h"
 #include "IAppSignalUpdater.h"

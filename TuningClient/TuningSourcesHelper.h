@@ -1,13 +1,14 @@
 #pragma once
 
 #include <vector>
-#include <QWidget>
-#include "../ClientLib/TuningConnection.h"
+#include "../ClientLib/TuningSourceState.h"
 
+class QWidget;
 
 namespace ClientLib
 {
 	class TuningTcpClient;
+	class TuningConnection;
 
 	class TuningSourcesHelper
 	{

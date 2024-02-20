@@ -1,9 +1,11 @@
 #pragma once
 
 #include "../VFrame30/ClientSchemaWidget.h"
+#include "../VFrame30/Context.h"
 #include "../VFrame30/MonitorSchema.h"
 #include "../lib/Ui/TabWidgetEx.h"
 #include "ClientSchemaManager.h"
+#include <QFileDialog>
 
 
 namespace SchemaClientLib

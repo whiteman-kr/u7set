@@ -1,6 +1,7 @@
 #pragma once
 #include "../UtilsLib/ILogFile.h"
-#include <iostream>
+#include <vector>
+#include <QReadWriteLock>
 
 namespace TestSuite
 {

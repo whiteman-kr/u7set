@@ -7,7 +7,7 @@
 #include "../UtilsLib/ILogFile.h"
 #include "../lib/ISignalDataServer.h"
 
-// #include "../AppSignalLib/AppSignalParam.h"
+#include <QJSValue>
 
 namespace TestSuite
 {

@@ -1,20 +1,14 @@
 #pragma once
 
-#include <QString>
-#include <QMultiHash>
-#include <QFile>
-#include <QRegularExpression>
-#include <utility>
+#include <map>
+#include <memory>
 #include <set>
+#include <utility>
 #include <vector>
 
-#include "../UtilsLib/Address16.h"
-#include "../UtilsLib/WUtils.h"
-#include "../lib/ConstStrings.h"
-#include "../CommonLib/Hash.h"
-#include "../CommonLib/Types.h"
-#include "../CommonLib/PropertyObject.h"
+#include <QDateTime>
 
+#include "../UtilsLib/Address16.h"
 #include "TuningValue.h"
 
 namespace Proto
@@ -26,6 +20,8 @@ namespace Proto
 
 class XmlWriteHelper;
 class XmlReadHelper;
+
+class Property;
 
 struct ID_AppSignalID
 {
@@ -375,8 +371,8 @@ public:
 	QString tagsStr() const { return tags().join(QChar::LineFeed); }
 
 	void setTags(const QStringList& tags);
-	void setTags(const std::set<QString>& tags) { m_tags = tags; }
-	void setTagsStr(const QString& tagsStr) { setTags(tagsStr.split(QRegularExpression("\\W+"), Qt::SkipEmptyParts)); }
+	void setTags(const std::set<QString>& tags);
+	void setTagsStr(const QString& tagsStr);
 
 	bool hasTags() const { return m_tags.size() > 0; }
 	bool hasTag(const QString& tag) const { return m_tags.find(tag.toLower().trimmed()) != m_tags.end(); }

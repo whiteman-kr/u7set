@@ -12,7 +12,7 @@ DiagConfigController::DiagConfigController(const SoftwareInfo& softwareInfo, Hos
 	return;
 }
 
-bool DiagConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& conf, const DiagnosticsSettings& settings, const BuildFileInfoArray& /*files*/)
+bool DiagConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& conf, const DiagnosticsSettings& settings, const std::vector<OnlineLib::BuildFileInfo>& /*files*/)
 {
 	DiagConfigSettings config{};
 

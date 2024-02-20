@@ -1,4 +1,7 @@
 #pragma once
+
+// Even though it is included by public precompile header, cmake puts it after this file, so it is needed to include it here
+//
 #include "../CommonLib/Types.h"
 
 namespace VFrame30

@@ -3,9 +3,11 @@
 #endif
 
 #include "LmDescription.h"
-#include "DeviceObject.h"
-#include "DataProtocols.h"
 #include "../UtilsLib/DomXmlHelper.h"
+#include "DataProtocols.h"
+#include "DeviceObject.h"
+#include "PropertyNames.h"
+
 
 bool LmCommand::loadFromXml(const QDomElement& element, QString* errorMessage)
 {
@@ -293,7 +295,7 @@ bool LmDescription::load(const QString& xml, QString* errorMessage)
 	return load(doc, errorMessage);
 }
 
-bool LmDescription::load(QDomDocument doc, QString* errorMessage)
+bool LmDescription::load(const QDomDocument& doc, QString* errorMessage)
 {
 	if (errorMessage == nullptr)
 	{

@@ -1,9 +1,6 @@
 #pragma once
 
-#include <QThread>
 #include <QEventLoop>
-#include <QMutex>
-#include <memory>
 #include <atomic>
 
 class SimpleThreadWorker : public QObject

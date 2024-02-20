@@ -8,7 +8,6 @@
 #include <QTableView>
 #include <QHeaderView>
 #include <QStandardItemModel>
-#include "../CommonLib/Types.h"
 #include "../lib/WidgetUtils.h"
 
 

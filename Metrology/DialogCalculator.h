@@ -10,8 +10,6 @@
 #include <QLineEdit>
 #include <QComboBox>
 
-#include "../CommonLib/Types.h"
-
 #include "UnitsConverter.h"
 
 // ==============================================================================================

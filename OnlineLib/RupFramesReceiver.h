@@ -6,6 +6,7 @@
 #include "CircularLogger.h"
 #include "../HardwareLib/DataProtocols.h"
 #include "../UtilsLib/WUtils.h"
+#include "../CommonLib/HostAddressPort.h"
 
 #include "../asio/include/asio.hpp"
 

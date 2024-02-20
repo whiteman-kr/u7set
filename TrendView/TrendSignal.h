@@ -4,8 +4,6 @@
 #include <list>
 #include <bitset>
 #include <memory>
-#include "../CommonLib/Types.h"
-#include "../AppSignalLib/AppSignalParam.h"
 #include "TrendArchiveServer.h"
 
 

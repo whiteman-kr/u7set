@@ -1,27 +1,33 @@
 #pragma once
 
-#include "MonitorCentralWidget.h"
 #include "MonitorConfigController.h"
 #include "MonitorSchemaManager.h"
-#include "SelectSchemaWidget.h"
 
+#include "../AppSignalLib/TuningSignalManager.h"
 #include "../ClientLib/AdsConnection.h"
 #include "../ClientLib/AppSignalManager.h"
 #include "../ClientLib/ClientTranslator.h"
 #include "../ClientLib/TuningConnection.h"
 #include "../ClientLib/TuningLog.h"
-#include "../ClientLib/TuningTcpClient.h"
 #include "../ClientLib/TuningUserManager.h"
 #include "../SchemaClientLib/SchemaDrawStatistics.h"
 #include "../UtilsLib/InstanceResolver.h"
 #include "../UtilsLib/LogFile.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../lib/Ui/DialogAlert.h"
-#include "../lib/Ui/DialogTcpStatistics.h"
 
+namespace VFrame30
+{
+	class LogController;
+}
+
+class MonitorCentralWidget;
 class MonitorToolBar;
 class QLabel;
 class QComboBox;
+class SelectSchemaWidget;
+class DialogTcpStatistics;
+
 
 class MonitorMainWindow : public QMainWindow
 {
@@ -29,7 +35,7 @@ class MonitorMainWindow : public QMainWindow
 
 public:
 	MonitorMainWindow(InstanceResolver& instanceResolver,  const SoftwareInfo& softwareInfo, QWidget* parent = nullptr);
-	~MonitorMainWindow() = default;
+	~MonitorMainWindow();
 
 	// Events
 	//

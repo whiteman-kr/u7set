@@ -1,5 +1,6 @@
 #include "EquipmentTabPage.h"
 #include "../../HardwareLib/DeviceObject.h"
+#include "../../HardwareLib/PropertyNames.h"
 #include "../DialogConnections.h"
 #include "../EquipmentEditor/DialogImportPreset.h"
 #include "../Forms/ComparePropertyObjectDialog.h"

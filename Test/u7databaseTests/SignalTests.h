@@ -1,11 +1,6 @@
 #pragma once
-
 #include <QTest>
-#include <QtSql>
 #include "TestDbBase.h"
-#include "../../lib/Signal.h"
-#include "../../lib/DbWorker.h"
-#include "../../lib/WUtils.h"
 
 class SignalTests : public TestDbBase
 {

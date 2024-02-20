@@ -1,5 +1,6 @@
 #include "AppSignalPropertyManager.h"
 #include "AppSignalSetProvider.h"
+#include "../UtilsLib/WUtils.h"
 
 // this replacement for properties required to change getter return type from E::* to QString
 //

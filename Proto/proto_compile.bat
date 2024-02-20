@@ -1,36 +1,25 @@
 @echo off
 
-echo Compile Protobuf file serialization.proto
-call ..\Protobuf\protoc.exe --cpp_out=. serialization.proto
-if NOT %ERRORLEVEL% == 0 goto :reporterror
+setlocal enabledelayedexpansion
 
-move /Y serialization.pb.cc body.pb.cc
-copy warningguardstart.cc+body.pb.cc+warningguardend.cc /a serialization.pb.cc /b
-del body.pb.cc
-move /Y serialization.pb.h body.pb.h
-copy warningguardstart.cc+body.pb.h+warningguardend.cc /a serialization.pb.h /b
-del body.pb.h
+for %%f in (*.proto) do (
+    echo --- Compile Protobuf file %%f ---
+    echo Processing file: %%f
+    echo Filename without extension: %%~nf
+    set "fileName=%%~nf"
+    echo Filename variable: !fileName!
 
-echo Compile Protobuf file network.proto 
-call ..\Protobuf\protoc.exe --cpp_out=. network.proto
-if NOT %ERRORLEVEL% == 0 goto :reporterror
-move /Y network.pb.cc body.pb.cc
-copy warningguardstart.cc+body.pb.cc+warningguardend.cc /a network.pb.cc /b
-del body.pb.cc
-move /Y network.pb.h body.pb.h
-copy warningguardstart.cc+body.pb.h+warningguardend.cc /a network.pb.h /b
-del body.pb.h
+    call ..\Protobuf\protoc.exe --cpp_out=. "%%f"
+    if NOT !ERRORLEVEL! == 0 goto :reporterror
 
-echo Compile Protobuf file trends.proto 
-call ..\Protobuf\protoc.exe --cpp_out=. trends.proto
-if NOT %ERRORLEVEL% == 0 goto :reporterror
-move /Y trends.pb.cc body.pb.cc
-copy warningguardstart.cc+body.pb.cc+warningguardend.cc /a trends.pb.cc /b
-del body.pb.cc
-move /Y trends.pb.h body.pb.h
-copy warningguardstart.cc+body.pb.h+warningguardend.cc /a trends.pb.h /b
-del body.pb.h
-                                      
+    move /Y !fileName!.pb.cc body.pb.cc
+    copy warningguardstart.cc+body.pb.cc+warningguardend.cc /a !fileName!.pb.cc /b
+    del body.pb.cc
+
+    move /Y !fileName!.pb.h body.pb.h
+    copy warningguardstart.cc+body.pb.h+warningguardend.cc /a !fileName!.pb.h /b
+    del body.pb.h
+)
 goto :endoffile
 
 :reporterror
@@ -40,3 +29,13 @@ goto :endoffile
 
 :endoffile
 
+rem echo Compile Protobuf file Serialization.proto
+rem call ..\Protobuf\protoc.exe --cpp_out=. Serialization.proto
+rem if NOT %ERRORLEVEL% == 0 goto :reporterror
+
+rem move /Y serialization.pb.cc body.pb.cc
+rem warningguardstart.cc+body.pb.cc+warningguardend.cc /a serialization.pb.cc /b
+rem del body.pb.cc
+rem move /Y serialization.pb.h body.pb.h
+rem copy warningguardstart.cc+body.pb.h+warningguardend.cc /a serialization.pb.h /b
+rem del body.pb.h

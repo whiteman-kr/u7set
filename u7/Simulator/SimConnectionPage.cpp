@@ -1,5 +1,6 @@
 #include "SimConnectionPage.h"
 #include "../SimulatorTabPage.h"
+#include "../../Simulator/SimAppSignalManager.h"
 
 SimConnectionPage::SimConnectionPage(SimIdeSimulator* simulator, QString connectionId, QWidget* parent) :
 	SimBasePage(simulator, parent),
@@ -79,7 +80,7 @@ SimConnectionPage::SimConnectionPage(SimIdeSimulator* simulator, QString connect
 
 	// --
 	//
-	connect(m_simulator, &Sim::Simulator::projectUpdated, this, &SimConnectionPage::updateData);
+	connect(m_simulator, &SimIdeSimulator::projectUpdated, this, &SimConnectionPage::updateData);
 	connect(&(m_simulator->control()), &Sim::Control::stateChanged, this, &SimConnectionPage::updateData);
 	connect(&(m_simulator->connections()), &Sim::Connections::connectionStateChanged, this, &SimConnectionPage::updateConnectionState);
 

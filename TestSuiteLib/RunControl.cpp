@@ -2,7 +2,6 @@
 #include "AdsInputController.h"
 #include "TunsOutputController.h"
 #include <QSignalSpy>
-#include <chrono>
 
 namespace
 {

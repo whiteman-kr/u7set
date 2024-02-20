@@ -26,6 +26,29 @@ qt_add_library(${TARGET} STATIC
 	DbWorker.h
 )
 
+target_precompile_headers(${TARGET} PRIVATE
+	<QCoreApplication>
+	<QGuiApplication>
+	<QJSEngine>
+	<QJSValueIterator>
+	<QMessageBox>
+	<QThread>
+	<QVariant>
+
+	"../CommonLib/Types.h"
+	"../CommonLib/Hash.h"
+	"../CommonLib/PropertyObject.h"
+	#"../CommonLib/AfbParamValue.h"
+	
+	"../Proto/ProtoSerialization.h"
+	#"../Proto/Network.pb.h"	
+	"../Proto/AppSignal.pb.h"
+	
+	"../AppSignalLib/AppSignal.h"
+	#"../AppSignalLib/AppSignalParam.h"
+	#"../AppSignalLib/AppSignalState.h"
+)
+
 target_link_libraries(${TARGET} PUBLIC Qt6::Gui Qt6::Widgets Qt6::Sql Qt6::Concurrent Qt6::Network Qt6::Qml)
 target_link_libraries(${TARGET} PUBLIC CommonLib HardwareLib AppSignalLib)
 

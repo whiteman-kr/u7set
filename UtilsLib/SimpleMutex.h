@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QThread>
-
 class SimpleMutex
 {
 public:

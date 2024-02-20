@@ -914,7 +914,7 @@ void MainWindow::updateUfbsAfbsBusses()
 
 	// Get Busses
 	//
-	std::vector<VFrame30::Bus> busses;
+	std::vector<AppSignalLib::Bus> busses;
 	bool ok = EditSchemaWidget::loadBusses(dbController(), &busses, this);
 
 	if (ok == false)

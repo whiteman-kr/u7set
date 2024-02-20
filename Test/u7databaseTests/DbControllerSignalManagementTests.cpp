@@ -1,4 +1,6 @@
 #include "DbControllerSignalManagementTests.h"
+#include "../Proto/AppSignal.pb.h"
+#include "../UtilsLib/WUtils.h"
 #include "Settings.h"
 
 //#ifdef Q_CC_MSVC

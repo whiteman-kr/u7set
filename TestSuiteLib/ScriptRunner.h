@@ -6,6 +6,8 @@
 #include "../UtilsLib/ILogFile.h"
 #include "ControlState.h"
 
+#include <QJSEngine>
+
 namespace TestSuite
 {
 

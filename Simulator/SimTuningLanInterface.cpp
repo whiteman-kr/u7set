@@ -1,6 +1,6 @@
 #include "SimTuningLanInterface.h"
 #include "SimTuningServiceCommunicator.h"
-#include "Simulator.h"
+
 
 namespace Sim
 {

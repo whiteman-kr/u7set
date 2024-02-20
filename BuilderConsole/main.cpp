@@ -1,6 +1,5 @@
 #include "../Builder/Builder.h"
 #include "../DbLib/DbController.h"
-#include "../HardwareLib/DeviceObject.h"
 #include "../HardwareLib/HardwareLibrary.h"
 #include "../Protobuf/google/protobuf/message.h"
 #include "../VFrame30/VFrame30Library.h"
@@ -9,7 +8,6 @@
 #include <QCoreApplication>
 #include <QDomDocument>
 #include <QFile>
-#include <QTimer>
 #include <QXmlStreamWriter>
 #include <iostream>
 

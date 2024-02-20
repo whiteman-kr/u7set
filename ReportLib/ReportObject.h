@@ -1,11 +1,11 @@
 #pragma once
 
+#include "../VFrame30/IViewVariables.h"
 #include "ReportSchemaView.h"
+#include <QFont>
+#include <QUuid>
 
-#include <QTextCharFormat>
-#include <QTextBlockFormat>
-#include <QTextCursor>
-
+class QTextCursor;
 
 namespace ReportLib
 {
@@ -21,7 +21,6 @@ namespace ReportLib
 		{
 			return QFont{family, pointSize, weight};
 		}
-
 
 		QFont operator()(double scaling) const
 		{

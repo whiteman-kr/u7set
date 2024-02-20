@@ -1,11 +1,17 @@
 #pragma once
-#include "Context.h"
-#include "DrawParam.h"
+#include "VFrame30Types.h"
+#include "SchemaView.h"
+#include "Session.h"
+#include <QWidget>
+
+class QPainter;
+class QPaintDevice;
 
 namespace VFrame30
 {
 	class Schema;
 	class SchemaItem;
+	class CDrawParam;
 
 	static constexpr double ZoomStep = 10.0;
 

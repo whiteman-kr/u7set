@@ -2,8 +2,6 @@
 
 #include "../lib/ClientBehavior.h"
 #include "../lib/ITimeStats.h"
-
-#include "AppSignalController.h"
 #include "DiagStateController.h"
 #include "ISchemaViewHistory.h"
 #include "IViewVariables.h"
@@ -12,6 +10,7 @@
 #include "SchemaManager.h"
 #include "SchemaView.h"
 #include "TuningController.h"
+#include <QJSEngine>
 
 class QPaintEvent;
 class QTimerEvent;
@@ -20,6 +19,7 @@ class QMouseEvent;
 namespace VFrame30
 {
 	class ClientSchemaView;
+	class AppSignalController;
 
 	struct GlobalScriptEvents
 	{

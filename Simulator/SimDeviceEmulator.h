@@ -1,16 +1,12 @@
 #pragma once
 
 #include <memory>
-#include <functional>
-#include <map>
 #include <vector>
 #include <array>
 #include <cstddef>
-#include <chrono>
 #include <limits>
 #include <QObject>
 #include <QMutex>
-#include <QTimerEvent>
 #include "../HardwareLib/LmDescription.h"
 #include "../HardwareLib/LogicModulesInfo.h"
 #include "../HardwareLib/ModuleFirmware.h"

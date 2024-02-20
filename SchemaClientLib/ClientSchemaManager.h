@@ -5,7 +5,6 @@
 
 namespace SchemaClientLib
 {
-
 	class ClientSchemaManager : public VFrame30::SchemaManager
 	{
 		Q_OBJECT

@@ -2,6 +2,7 @@
 #include "../HardwareLib/LmDescription.h"
 #include "../HardwareLib/LogicModulesInfo.h"
 #include "../OnlineLib/SoftwareSettings.h"
+#include "../Proto/Comparator.pb.h"
 
 #include "DeviceHelper.h"
 #include "ConnectionsInfoWriter.h"
@@ -145,7 +146,7 @@ namespace Builder
 		return m_context->m_connections.get();
 	}
 
-	const VFrame30::BusSet* ApplicationLogicCompiler::busSet()
+	const AppSignalLib::BusSet* ApplicationLogicCompiler::busSet()
 	{
 		return m_context->m_busSet.get();
 	}

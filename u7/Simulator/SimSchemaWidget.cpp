@@ -4,17 +4,14 @@
 #include "SimSchemaView.h"
 #include "SimWidget.h"
 
+#include "../../Simulator/SimAppSignalManager.h"
+#include "../../Simulator/SimSoftware.h"
 #include "../VFrame30/IMatsSchemaItemAssociations.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/LogicSchema.h"
-#include "../VFrame30/PropertyNames.h"
-#include "../VFrame30/SchemaItemConnection.h"
-#include "../VFrame30/SchemaItemImageValue.h"
-#include "../VFrame30/SchemaItemIndicator.h"
-#include "../VFrame30/SchemaItemLoopback.h"
-#include "../VFrame30/SchemaItemSignal.h"
-#include "../VFrame30/SchemaItemUfb.h"
-#include "../VFrame30/SchemaItemValue.h"
+#include "../VFrame30/Context.h"
+
+#include <QDrag>
 
 
 namespace

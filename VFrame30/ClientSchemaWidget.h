@@ -1,20 +1,14 @@
-#pragma once
 
+#pragma once
 #include "BaseSchemaWidget.h"
 #include "ClientSchemaView.h"
+#include "ISchemaViewHistory.h"
 #include "Schema.h"
 #include "SchemaManager.h"
-#include "ISchemaViewHistory.h"
+#include "VFrame30Types.h"
 
 namespace VFrame30
 {
-	enum class ZoomMode
-	{
-		Manual,				// Zoom is fully manual.
-		Always100Percent,	// View is always zoomed to 100% (like Monitor 2.0).
-		FitToScreen	// View is always zoomed to fit the Monitor window.
-	};
-
 	struct SchemaHistoryItem
 	{
 		SchemaHistoryItem() = default;

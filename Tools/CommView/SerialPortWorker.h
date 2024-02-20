@@ -1,7 +1,6 @@
 #ifndef SERIALPORTWORKER_H
 #define SERIALPORTWORKER_H
 
-#include <QThread>
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
 

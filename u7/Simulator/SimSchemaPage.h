@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../Simulator/SimLogicModule.h"
+#include "../../Simulator/SimControl.h"
 #include "../../VFrame30/Schema.h"
 #include "../../VFrame30/AppSignalController.h"
 #include "../../VFrame30/TuningController.h"

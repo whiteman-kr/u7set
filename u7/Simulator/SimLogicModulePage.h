@@ -3,6 +3,7 @@
 #include "SimBasePage.h"
 
 #include "../../Simulator/SimLogicModule.h"
+#include "../../Simulator/SimControl.h"
 #include "../../VFrame30/AppSignalController.h"
 
 class SimLogicModulePage : public SimBasePage

@@ -1,5 +1,7 @@
 #include "EquipmentView.h"
 #include "../../Builder/SubsystemStorage.h"
+#include "../../HardwareLib/PropertyNames.h"
+#include "../DbLib/DbWorker.h"
 #include "../DialogConnections.h"
 #include "../Forms/CompareDialog.h"
 #include "../Forms/DialogUpdateFromPreset.h"

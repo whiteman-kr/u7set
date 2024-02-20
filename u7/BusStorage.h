@@ -1,10 +1,10 @@
 #ifndef BUSSTORAGE_H
 #define BUSSTORAGE_H
 
+#include "../AppSignalLib/Bus.h"
 #include "../DbLib/DbObjectStorage.h"
-#include "../VFrame30/Bus.h"
 
-class BusStorage : public DbObjectStorage<std::shared_ptr<VFrame30::Bus>>
+class BusStorage : public DbObjectStorage<std::shared_ptr<AppSignalLib::Bus>>
 {
 public:
 	BusStorage() = delete;

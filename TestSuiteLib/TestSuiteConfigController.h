@@ -1,5 +1,6 @@
 #pragma once
 #include <QReadWriteLock>
+#include "../ReportLib/ReportTemplate.h"
 #include "../ClientLib/ConfigController.h"
 #include "../OnlineLib/SocketIO.h"
 #include "../OnlineLib/MatsUsers.h"
@@ -67,7 +68,7 @@ namespace TestSuite
 		/// This function is called when the new configuarion arrives, it is overrided to get specific Monitor
 		/// configuration, after it signal `configurationArrived` is emitted
 		///
-		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const ::TestSuiteSettings& settings, const BuildFileInfoArray& files) override;
+		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const ::TestSuiteSettings& settings, const std::vector<OnlineLib::BuildFileInfo>& files) override;
 
 		void dump(const ConfigSettings& conf) const;
 

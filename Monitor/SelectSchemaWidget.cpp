@@ -1,4 +1,5 @@
 #include "SelectSchemaWidget.h"
+#include "MonitorConfigController.h"
 
 SelectSchemaWidget::SelectSchemaWidget(MonitorConfigController* configController, MonitorCentralWidget* centralWidget) :
 	m_configController(configController),

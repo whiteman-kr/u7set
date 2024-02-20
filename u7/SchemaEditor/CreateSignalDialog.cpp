@@ -274,7 +274,7 @@ void CreateSignalDialog::initBusTypes()
 
 	for (int i = 0; i < busStorage.count(); i++)
 	{
-		const std::shared_ptr<VFrame30::Bus> bus = busStorage.get(i);
+		const std::shared_ptr<AppSignalLib::Bus> bus = busStorage.get(i);
 		m_busTypeCombo->addItem(bus->busTypeId());
 	}
 

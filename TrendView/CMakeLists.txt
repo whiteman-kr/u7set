@@ -60,6 +60,30 @@ qt_add_library(${TARGET} STATIC
 	../Etc/Logo/RadiyLogo.qrc
 )
 
+target_precompile_headers(${TARGET} PRIVATE
+	<QAction>
+	<QActionGroup>
+	<QComboBox>
+	<QDialogButtonBox>
+	<QElapsedTimer>
+	<QGridLayout>
+	<QMessageBox>
+	<QPrintDialog>
+	<QPrinter>
+	<QPushButton>
+	<QScreen>
+	<QToolBar>
+	<QFile>
+
+	"../CommonLib/Types.h"
+	"../CommonLib/Hash.h"
+
+	"../Proto/Trends.pb.h"
+
+	"../AppSignalLib/AppSignalParam.h"
+	"../AppSignalLib/AppSignalState.h"
+)
+
 #Add translations
 #
 add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})

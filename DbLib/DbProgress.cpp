@@ -5,12 +5,6 @@
 #include "DbProgress.h"
 #include "DbProgressDialog.h"
 
-#include <QThread>
-#include <QGuiApplication>
-#include <QDebug>
-#include <QCoreApplication>
-#include <QMessageBox>
-#include <QProgressDialog>
 
 //
 //

@@ -15,7 +15,6 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QSerialPortInfo>
-#include <QThread>
 #include <QDebug>
 #include <string>
 #include <QTableWidgetItem>

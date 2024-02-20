@@ -5,6 +5,8 @@
 #include "DbController.h"
 #include <QDebug>
 #include <QtConcurrent>
+#include "DbWorker.h"
+
 
 DbController::DbController() :
 	m_worker(nullptr)

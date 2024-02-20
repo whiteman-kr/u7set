@@ -3,11 +3,10 @@
 #include <QDialog>
 
 #include "DialogSourceInfo.h"
-#include "../CommonLib/Hash.h"
-#include "../ClientLib/TuningConnection.h"
 
 namespace ClientLib
 {
+	class TuningConnection;
 	class TuningTcpClient;
 	class TuningSource;
 }

@@ -1,13 +1,15 @@
-#include "Settings.h"
+#include "TuningPage.h"
+#include "DialogChooseFilter.h"
 #include "Main.h"
 #include "MainWindow.h"
-#include "TuningPage.h"
-#include "TuningSourcesHelper.h"
+#include "Settings.h"
 #include "TuningSignalInfo.h"
-#include "DialogChooseFilter.h"
+#include "TuningSourcesHelper.h"
 
-#include "../lib/Ui/DialogWriteValues.h"
+#include "../ClientLib/TuningConnection.h"
+#include "../ClientLib/TuningUserManager.h"
 #include "../VFrame30/DrawParam.h"
+#include "../lib/Ui/DialogWriteValues.h"
 
 #include <QKeyEvent>
 #include <QPushButton>

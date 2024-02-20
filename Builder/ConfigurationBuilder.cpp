@@ -4,12 +4,12 @@
 #include "../HardwareLib/DeviceObject.h"
 #include "../HardwareLib/ScriptDeviceObject.h"
 #include "../UtilsLib/Crc.h"
+#include "../UtilsLib/WUtils.h"
 #include "../HardwareLib/Connection.h"
 #include "AppSignalProperties.h"
 #include "IssueLogger.h"
 #include "SignalSet.h"
 
-#include <QQmlEngine>
 
 namespace Builder
 {
@@ -126,7 +126,7 @@ namespace Builder
 				return sp;
 
 				//QObject* c = &(*m_signalSet)[i];
-				//QQmlEngine::setObjectOwnership(c, QQmlEngine::ObjectOwnership::CppOwnership);
+				//QJSEngine::setObjectOwnership(c, QJSEngine::ObjectOwnership::CppOwnership);
 				//return c;
 			}
 		}
@@ -634,7 +634,7 @@ namespace Builder
 		JsSignalSet jsSignalSet(m_signalSet);
 
 		QJSValue jsBuilder = jsEngine->newQObject(this);
-		QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
+		QJSEngine::setObjectOwnership(this, QJSEngine::CppOwnership);
 
 		QJSValue jsRoot = jsEngine->newQObject(new Hardware::ScriptDeviceObject{m_deviceRoot->sharedPtr()});
 
@@ -667,22 +667,22 @@ namespace Builder
 		m_buildResultWriter->firmwareWriter()->setScriptFirmware(subsysStrID, configUartId);
 
 		QJSValue jsFirmware = jsEngine->newQObject(m_buildResultWriter->firmwareWriter());
-		QQmlEngine::setObjectOwnership(m_buildResultWriter->firmwareWriter(), QQmlEngine::CppOwnership);
+		QJSEngine::setObjectOwnership(m_buildResultWriter->firmwareWriter(), QJSEngine::CppOwnership);
 
 		QJSValue jsLog = jsEngine->newQObject(m_log);
-		QQmlEngine::setObjectOwnership(m_log, QQmlEngine::CppOwnership);
+		QJSEngine::setObjectOwnership(m_log, QJSEngine::CppOwnership);
 
 		QJSValue jsSignalSetObject = jsEngine->newQObject(&jsSignalSet);
-		QQmlEngine::setObjectOwnership(&jsSignalSet, QQmlEngine::CppOwnership);
+		QJSEngine::setObjectOwnership(&jsSignalSet, QJSEngine::CppOwnership);
 
 		QJSValue jsSubsystems = jsEngine->newQObject(m_subsystems);
-		QQmlEngine::setObjectOwnership(m_subsystems, QQmlEngine::CppOwnership);
+		QJSEngine::setObjectOwnership(m_subsystems, QJSEngine::CppOwnership);
 
 		QJSValue jsOpticModuleStorage = jsEngine->newQObject(m_opticModuleStorage);
-		QQmlEngine::setObjectOwnership(m_opticModuleStorage, QQmlEngine::CppOwnership);
+		QJSEngine::setObjectOwnership(m_opticModuleStorage, QJSEngine::CppOwnership);
 
 		QJSValue jsLogicModuleDescription = jsEngine->newQObject(lmDescription);
-		QQmlEngine::setObjectOwnership(lmDescription, QQmlEngine::CppOwnership);
+		QJSEngine::setObjectOwnership(lmDescription, QJSEngine::CppOwnership);
 
 		// Run script
 		//

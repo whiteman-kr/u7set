@@ -5,7 +5,6 @@
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../UtilsLib/Queue.h"
 #include "../lib/DataSource.h"
-#include "../AppSignalLib/AppSignal.h"
 #include "GatewayDescription.h"
 #include "GatewayHandler.h"
 

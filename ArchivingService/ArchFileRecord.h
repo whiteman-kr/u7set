@@ -2,8 +2,6 @@
 
 #include <QtGlobal>
 
-#include "../CommonLib/Types.h"
-#include "../AppSignalLib/AppSignal.h"
 #include "../AppSignalLib/AppSignalStateFlags.h"
 #include "../UtilsLib/Crc.h"
 

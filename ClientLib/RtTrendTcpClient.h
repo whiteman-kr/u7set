@@ -3,8 +3,6 @@
 #include "../lib/ISignalDataServer.h"
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
-#include "../CommonLib/Hash.h"
-#include "../Proto/network.pb.h"
 #include "../TrendView/TrendSignalState.h"
 
 namespace ClientLib
@@ -104,12 +102,6 @@ namespace ClientLib
 		std::set<QString> m_signalSet;
 
 	private:
-		Network::RtTrendsManagementRequest m_managementRequest;
-		Network::RtTrendsManagementReply m_managementReply;
-
-		Network::RtTrendsGetStateChangesRequest m_stateChangesRequest;
-		Network::RtTrendsGetStateChangesReply m_stateChangesReply;
-
 		std::set<Hash> m_trackedSignals;		// Currently tracked signals by AppDataService
 
 		// Statisctics and state variables

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../CommonLib/Types.h"
 #include "../UtilsLib/Address16.h"
 #include "../UtilsLib/DomXmlHelper.h"
 #include "../HardwareLib/LanControllerInfo.h"

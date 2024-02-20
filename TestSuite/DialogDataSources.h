@@ -3,7 +3,6 @@
 #include "../lib/Ui/AppDataSourcesWidget.h"
 #include "../lib/Ui/TuningSourcesWidget.h"
 #include "../AppSignalLib/TuningSignalManager.h"
-#include "../ClientLib/TuningTcpClient.h"
 #include "../ClientLib/AdsSourceStateConnection.h"
 #include "../ClientLib/TuningConnection.h"
 #include "../TestSuiteLib/TestSuiteConfigController.h"

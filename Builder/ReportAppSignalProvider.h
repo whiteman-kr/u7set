@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../AppSignalLib/IAppSignalManager.h"
-#include "../AppSignalLib/AppSignal.h"
 
 namespace Builder
 {

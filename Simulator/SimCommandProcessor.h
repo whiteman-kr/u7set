@@ -1,7 +1,6 @@
 #pragma once
 #include <map>
 #include <functional>
-#include "QtCore"
 #include "SimDeviceEmulator.h"
 
 class SimCommandTest_LM5_LM6;

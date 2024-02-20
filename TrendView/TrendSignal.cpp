@@ -1,6 +1,6 @@
 #include "TrendSignal.h"
 #include <type_traits>
-#include "../Proto/trends.pb.h"
+
 
 namespace TrendLib
 {

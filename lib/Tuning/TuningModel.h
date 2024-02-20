@@ -1,9 +1,6 @@
 #ifndef TUNINGMODEL_H
 #define TUNINGMODEL_H
 
-#include <cmath>
-
-#include "../../AppSignalLib/TuningSignalState.h"
 #include "TuningFilter.h"
 
 

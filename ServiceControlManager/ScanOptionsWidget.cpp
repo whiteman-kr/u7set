@@ -6,7 +6,6 @@
 #include <QComboBox>
 #include <QNetworkInterface>
 #include <QDialogButtonBox>
-#include <QThread>
 #include <QProgressDialog>
 #include <QMessageBox>
 #include <QTimer>

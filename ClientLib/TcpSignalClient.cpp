@@ -4,6 +4,23 @@
 
 #include "TcpSignalClient.h"
 
+namespace
+{
+	thread_local ::Network::GetSignalListStartReply tl_getSignalListStartReply;
+
+	thread_local ::Network::GetSignalListNextRequest tl_getSignalListNextRequest;
+	thread_local ::Network::GetSignalListNextReply tl_getSignalListNextReply;
+
+	thread_local ::Network::GetAppSignalParamRequest tl_getSignalParamRequest;
+	thread_local ::Network::GetAppSignalParamReply tl_getSignalParamReply;
+
+	thread_local ::Network::GetAppSignalStateChangesRequest tl_getSignalStateChangesRequest;
+	thread_local ::Network::GetAppSignalStateChangesReply tl_getSignalStateChangesReply;
+
+	thread_local ::Network::GetAppSignalStateRequest tl_getSignalStateRequest;
+	thread_local ::Network::GetAppSignalStateReply tl_getSignalStateReply;
+}
+
 namespace ClientLib
 {
 
@@ -172,7 +189,7 @@ namespace ClientLib
 
 	void TcpSignalClient::processSignalListStart(const QByteArray& data)
 	{
-		bool ok = m_getSignalListStartReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
+		bool ok = tl_getSignalListStartReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 		if (ok == false)
 		{
 			Q_ASSERT(ok);
@@ -180,43 +197,43 @@ namespace ClientLib
 			return;
 		}
 
-		if (m_getSignalListStartReply.error() != 0)
+		if (tl_getSignalListStartReply.error() != 0)
 		{
-			qDebug() << "TcpSignalClient::processSignalListNext, error received: " << m_getSignalListStartReply.error();
-			writeError(QString("processSignalListNext, error received: %1").arg(m_getSignalListStartReply.error()));
+			qDebug() << "TcpSignalClient::processSignalListNext, error received: " << tl_getSignalListStartReply.error();
+			writeError(QString("processSignalListNext, error received: %1").arg(tl_getSignalListStartReply.error()));
 
-			Q_ASSERT(m_getSignalListStartReply.error() != 0);
+			Q_ASSERT(tl_getSignalListStartReply.error() != 0);
 
 			resetToGetSignalList();
 			return;
 		}
 
 		qDebug() << "----------------- processSignalListStart -----------------" << this->serverAddressPort1().addressPortStr();;
-		qDebug() << "error: " << m_getSignalListStartReply.error();
-		qDebug() << "totalItemCount: " << m_getSignalListStartReply.totalitemcount();
-		qDebug() << "partCount: " << m_getSignalListStartReply.partcount();
-		qDebug() << "itemsPerPart: " << m_getSignalListStartReply.itemsperpart();
+		qDebug() << "error: " << tl_getSignalListStartReply.error();
+		qDebug() << "totalItemCount: " << tl_getSignalListStartReply.totalitemcount();
+		qDebug() << "partCount: " << tl_getSignalListStartReply.partcount();
+		qDebug() << "itemsPerPart: " << tl_getSignalListStartReply.itemsperpart();
 
 		writeMessage("----------------- processSignalListStart -----------------");
-		if (m_getSignalListStartReply.error() == 0)
+		if (tl_getSignalListStartReply.error() == 0)
 		{
-			writeMessage(QString("-- error: %1").arg(m_getSignalListStartReply.error()));
+			writeMessage(QString("-- error: %1").arg(tl_getSignalListStartReply.error()));
 		}
 		else
 		{
-			writeError(QString("-- error: %1").arg(m_getSignalListStartReply.error()));
+			writeError(QString("-- error: %1").arg(tl_getSignalListStartReply.error()));
 		}
-		writeMessage(QString("-- totalItemCount: %1").arg(m_getSignalListStartReply.totalitemcount()));
-		writeMessage(QString("-- partCount: %1").arg(m_getSignalListStartReply.partcount()));
-		writeMessage(QString("-- itemsPerPart: %1").arg(m_getSignalListStartReply.itemsperpart()));
+		writeMessage(QString("-- totalItemCount: %1").arg(tl_getSignalListStartReply.totalitemcount()));
+		writeMessage(QString("-- partCount: %1").arg(tl_getSignalListStartReply.partcount()));
+		writeMessage(QString("-- itemsPerPart: %1").arg(tl_getSignalListStartReply.itemsperpart()));
 
-		if (m_getSignalListStartReply.totalitemcount() == 0 ||
-			m_getSignalListStartReply.partcount() == 0)
+		if (tl_getSignalListStartReply.totalitemcount() == 0 ||
+			tl_getSignalListStartReply.partcount() == 0)
 		{
 			// There is no signals, useless but can be
 			//
-			Q_ASSERT(m_getSignalListStartReply.totalitemcount() == 0);
-			Q_ASSERT(m_getSignalListStartReply.partcount() == 0);
+			Q_ASSERT(tl_getSignalListStartReply.totalitemcount() == 0);
+			Q_ASSERT(tl_getSignalListStartReply.partcount() == 0);
 
 			reset();
 
@@ -227,7 +244,7 @@ namespace ClientLib
 		}
 
 		reset();
-		m_signalList.reserve(m_getSignalListStartReply.totalitemcount());
+		m_signalList.reserve(tl_getSignalListStartReply.totalitemcount());
 
 		requestSignalListNext(0);
 
@@ -240,9 +257,9 @@ namespace ClientLib
 
 		// if all parts were requested then switch to next reply
 		//
-		if (part >= m_getSignalListStartReply.partcount())
+		if (part >= tl_getSignalListStartReply.partcount())
 		{
-			Q_ASSERT(std::ssize(m_signalList) == m_getSignalListStartReply.totalitemcount());
+			Q_ASSERT(std::ssize(m_signalList) == tl_getSignalListStartReply.totalitemcount());
 
 			// Request params
 			//
@@ -252,15 +269,15 @@ namespace ClientLib
 
 		// Request part, partNo is set in processSignalListStart and is incremented in processSignalListNext
 		//
-		m_getSignalListNextRequest.set_part(part);
+		tl_getSignalListNextRequest.set_part(part);
 
-		sendRequest(ADS_GET_APP_SIGNAL_LIST_NEXT, m_getSignalListNextRequest);
+		sendRequest(ADS_GET_APP_SIGNAL_LIST_NEXT, tl_getSignalListNextRequest);
 		return;
 	}
 
 	void TcpSignalClient::processSignalListNext(const QByteArray& data)
 	{
-		bool ok = m_getSignalListNextReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
+		bool ok = tl_getSignalListNextReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 
 		if (ok == false)
 		{
@@ -269,52 +286,52 @@ namespace ClientLib
 			return;
 		}
 
-		if (m_getSignalListNextReply.error() != 0)
+		if (tl_getSignalListNextReply.error() != 0)
 		{
-			qDebug() << "TcpSignalClient::processSignalListNext, error received: " << m_getSignalListNextReply.error();
-			writeError(QString("processSignalListNext, error received: %1").arg(m_getSignalListNextReply.error()));
+			qDebug() << "TcpSignalClient::processSignalListNext, error received: " << tl_getSignalListNextReply.error();
+			writeError(QString("processSignalListNext, error received: %1").arg(tl_getSignalListNextReply.error()));
 
-			Q_ASSERT(m_getSignalListNextReply.error() != 0);
+			Q_ASSERT(tl_getSignalListNextReply.error() != 0);
 
 			resetToGetSignalList();
 			return;
 		}
 
-		if (m_getSignalListNextReply.part() != m_getSignalListNextRequest.part())
+		if (tl_getSignalListNextReply.part() != tl_getSignalListNextRequest.part())
 		{
 			// Asked for one part but got different
 			//
-			Q_ASSERT(m_getSignalListNextReply.part() == m_getSignalListNextRequest.part());
+			Q_ASSERT(tl_getSignalListNextReply.part() == tl_getSignalListNextRequest.part());
 			resetToGetSignalList();
 			return;
 		}
 
 		qDebug() << "----------------- processSignalListNext -----------------";
-		qDebug() << "error: " << m_getSignalListNextReply.error();
-		qDebug() << "part: " << m_getSignalListNextReply.part();
+		qDebug() << "error: " << tl_getSignalListNextReply.error();
+		qDebug() << "part: " << tl_getSignalListNextReply.part();
 
 		writeMessage("----------------- processSignalListNext -----------------");
-		if (m_getSignalListNextReply.error() == 0)
+		if (tl_getSignalListNextReply.error() == 0)
 		{
-			writeMessage(QString("-- error: %1").arg(m_getSignalListNextReply.error()));
+			writeMessage(QString("-- error: %1").arg(tl_getSignalListNextReply.error()));
 		}
 		else
 		{
-			writeError(QString("-- error: %1").arg(m_getSignalListNextReply.error()));
+			writeError(QString("-- error: %1").arg(tl_getSignalListNextReply.error()));
 		}
-		writeMessage(QString("-- part: %1").arg(m_getSignalListNextReply.part()));
+		writeMessage(QString("-- part: %1").arg(tl_getSignalListNextReply.part()));
 
 		{
-			for (int i = 0; i < m_getSignalListNextReply.appsignalids_size(); i++)
+			for (int i = 0; i < tl_getSignalListNextReply.appsignalids_size(); i++)
 			{
-				Hash hash = ::calcHash(QString::fromStdString(m_getSignalListNextReply.appsignalids(i)));
+				Hash hash = ::calcHash(QString::fromStdString(tl_getSignalListNextReply.appsignalids(i)));
 				m_signalList.push_back(hash);
 			}
 		}
 
 		// Next request
 		//
-		requestSignalListNext(m_getSignalListNextReply.part() + 1);
+		requestSignalListNext(tl_getSignalListNextReply.part() + 1);
 
 		return;
 	}
@@ -356,22 +373,22 @@ namespace ClientLib
 			return;
 		}
 
-		m_getSignalParamRequest.mutable_signalhashes()->Clear();
-		m_getSignalParamRequest.mutable_signalhashes()->Reserve(ADS_GET_APP_SIGNAL_PARAM_MAX);
+		tl_getSignalParamRequest.mutable_signalhashes()->Clear();
+		tl_getSignalParamRequest.mutable_signalhashes()->Reserve(ADS_GET_APP_SIGNAL_PARAM_MAX);
 
 		for (int i = startIndex; i < startIndex + ADS_GET_APP_SIGNAL_PARAM_MAX && i < std::ssize(m_signalList); i++)
 		{
 			Hash signalHash = m_signalList[i];
-			m_getSignalParamRequest.add_signalhashes(signalHash);
+			tl_getSignalParamRequest.add_signalhashes(signalHash);
 		}
 
-		sendRequest(ADS_GET_APP_SIGNAL_PARAM, m_getSignalParamRequest);
+		sendRequest(ADS_GET_APP_SIGNAL_PARAM, tl_getSignalParamRequest);
 		return;
 	}
 
 	void TcpSignalClient::processSignalParam(const QByteArray& data)
 	{
-		bool ok = m_getSignalParamReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
+		bool ok = tl_getSignalParamReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 
 		if (ok == false)
 		{
@@ -380,23 +397,23 @@ namespace ClientLib
 			return;
 		}
 
-		if (m_getSignalParamReply.error() != 0)
+		if (tl_getSignalParamReply.error() != 0)
 		{
-			qDebug() << "TcpSignalClient::processSignalParam, error received: " << m_getSignalParamReply.error();
-			writeError(QString("processSignalParam, error received: %1").arg(m_getSignalParamReply.error()));
+			qDebug() << "TcpSignalClient::processSignalParam, error received: " << tl_getSignalParamReply.error();
+			writeError(QString("processSignalParam, error received: %1").arg(tl_getSignalParamReply.error()));
 
-			Q_ASSERT(m_getSignalParamReply.error() != 0);
+			Q_ASSERT(tl_getSignalParamReply.error() != 0);
 
 			resetToGetState(true);
 			return;
 		}
 
 		std::vector<AppSignalParam> appSignals;
-		appSignals.reserve(m_getSignalParamReply.appsignals_size());
+		appSignals.reserve(tl_getSignalParamReply.appsignals_size());
 
-		for (int i = 0; i < m_getSignalParamReply.appsignals_size(); i++)
+		for (int i = 0; i < tl_getSignalParamReply.appsignals_size(); i++)
 		{
-			const ::Proto::AppSignal& protoSignal = m_getSignalParamReply.appsignals(i);
+			const ::Proto::AppSignal& protoSignal = tl_getSignalParamReply.appsignals(i);
 
 			AppSignalParam& s = appSignals.emplace_back();
 			s.load(protoSignal);
@@ -429,14 +446,14 @@ namespace ClientLib
 	{
 		Q_ASSERT(isClearToSendRequest());
 
-		sendRequest(ADS_GET_APP_SIGNAL_STATE_CHANGES, m_getSignalStateChangesRequest);
+		sendRequest(ADS_GET_APP_SIGNAL_STATE_CHANGES, tl_getSignalStateChangesRequest);
 
 		return;
 	}
 
 	void TcpSignalClient::processSignalStateChanges(const QByteArray& data)
 	{
-		if (bool ok = m_getSignalStateChangesReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
+		if (bool ok = tl_getSignalStateChangesReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 			ok == false)
 		{
 			Q_ASSERT(ok);
@@ -444,11 +461,11 @@ namespace ClientLib
 			return;
 		}
 
-		if (m_getSignalStateChangesReply.error() != 0)
+		if (tl_getSignalStateChangesReply.error() != 0)
 		{
-			qDebug() << "TcpSignalClient::processSignalStateChanges, error received: " << m_getSignalStateChangesReply.error();
-			writeError(QString("processSignalStateChanges, error received: %1").arg(m_getSignalStateChangesReply.error()));
-			Q_ASSERT(m_getSignalStateChangesReply.error() != 0);
+			qDebug() << "TcpSignalClient::processSignalStateChanges, error received: " << tl_getSignalStateChangesReply.error();
+			writeError(QString("processSignalStateChanges, error received: %1").arg(tl_getSignalStateChangesReply.error()));
+			Q_ASSERT(tl_getSignalStateChangesReply.error() != 0);
 
 			resetToGetState(true);
 			return;
@@ -458,8 +475,8 @@ namespace ClientLib
 		//
 		if (m_timeDiscrepancyCheckDate.isNull() == true || m_timeDiscrepancyCheckDate != QDate::currentDate())
 		{
-			const qint64 serverUtcTimeMs = m_getSignalStateChangesReply.servertimeutc();
-			const qint64 serverLocalTimeMs = m_getSignalStateChangesReply.servertimelocal();
+			const qint64 serverUtcTimeMs = tl_getSignalStateChangesReply.servertimeutc();
+			const qint64 serverLocalTimeMs = tl_getSignalStateChangesReply.servertimelocal();
 
 			checkTimeDiscrepancy(serverUtcTimeMs, serverLocalTimeMs);
 
@@ -470,7 +487,7 @@ namespace ClientLib
 
 		// --
 		//
-		int signalStateCount = m_getSignalStateChangesReply.appsignalstates_size();
+		int signalStateCount = tl_getSignalStateChangesReply.appsignalstates_size();
 
 		thread_local std::vector<AppSignalState> states;
 
@@ -479,7 +496,7 @@ namespace ClientLib
 
 		for (int i = 0; i < signalStateCount; i++)
 		{
-			const AppSignalState& state = states.emplace_back(m_getSignalStateChangesReply.appsignalstates(i));
+			const AppSignalState& state = states.emplace_back(tl_getSignalStateChangesReply.appsignalstates(i));
 			Q_ASSERT(state.hash() != 0);
 
 			if (m_signalStatesSet.contains(state.hash()) == false)
@@ -495,7 +512,7 @@ namespace ClientLib
 
 		m_signalUpdater.setState(states, ::calcHash(m_serverSettings.equipmentId), QThread::currentThreadId());
 
-		if (m_getSignalStateChangesReply.pendingstatescount() >= ADS_GET_APP_SIGNAL_STATE_MAX)
+		if (tl_getSignalStateChangesReply.pendingstatescount() >= ADS_GET_APP_SIGNAL_STATE_MAX)
 		{
 			// A lot of signals are in the event queue, request one more time.
 			//
@@ -524,22 +541,22 @@ namespace ClientLib
 
 		m_lastSignalStateStartIndex = startIndex;
 
-		m_getSignalStateRequest.mutable_signalhashes()->Clear();
-		m_getSignalStateRequest.mutable_signalhashes()->Reserve(MaxStateRequestCount);
+		tl_getSignalStateRequest.mutable_signalhashes()->Clear();
+		tl_getSignalStateRequest.mutable_signalhashes()->Reserve(MaxStateRequestCount);
 
 		for (int i = startIndex; i < startIndex + MaxStateRequestCount && i < std::ssize(m_signalList); i++)
 		{
 			Hash signalHash = m_signalList[i];
-			m_getSignalStateRequest.add_signalhashes(signalHash);
+			tl_getSignalStateRequest.add_signalhashes(signalHash);
 		}
 
-		sendRequest(ADS_GET_APP_SIGNAL_STATE, m_getSignalStateRequest);
+		sendRequest(ADS_GET_APP_SIGNAL_STATE, tl_getSignalStateRequest);
 		return;
 	}
 
 	void TcpSignalClient::processSignalState(const QByteArray& data)
 	{
-		if (bool ok = m_getSignalStateReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
+		if (bool ok = tl_getSignalStateReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 			ok == false)
 		{
 			Q_ASSERT(ok);
@@ -547,25 +564,25 @@ namespace ClientLib
 			return;
 		}
 
-		if (m_getSignalStateReply.error() != 0)
+		if (tl_getSignalStateReply.error() != 0)
 		{
-			qDebug() << "TcpSignalClient::processSignalState, error received: " << m_getSignalStateReply.error();
-			writeError(QString("processSignalState, error received: %1").arg(m_getSignalStateReply.error()));
+			qDebug() << "TcpSignalClient::processSignalState, error received: " << tl_getSignalStateReply.error();
+			writeError(QString("processSignalState, error received: %1").arg(tl_getSignalStateReply.error()));
 
-			Q_ASSERT(m_getSignalStateReply.error() != 0);
+			Q_ASSERT(tl_getSignalStateReply.error() != 0);
 
 			resetToGetState(true);
 			return;
 		}
 
-		int signalStateCount = m_getSignalStateReply.appsignalstates_size();
+		int signalStateCount = tl_getSignalStateReply.appsignalstates_size();
 
 		std::vector<AppSignalState> states;
 		states.reserve(signalStateCount);
 
 		for (int i = 0; i < signalStateCount; i++)
 		{
-			const AppSignalState& state = states.emplace_back(m_getSignalStateReply.appsignalstates(i));
+			const AppSignalState& state = states.emplace_back(tl_getSignalStateReply.appsignalstates(i));
 			Q_ASSERT(state.m_hash != 0);
 
 			if (m_signalStatesSet.contains(state.hash()) == false)

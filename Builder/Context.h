@@ -5,11 +5,11 @@
 
 #include <QJSEngine>
 
+#include "../AppSignalLib/Bus.h"
 #include "../AppSignalLib/ComparatorSet.h"
 #include "../DbLib/DbController.h"
 #include "../HardwareLib/Connection.h"
 #include "../Simulator/SimProfiles.h"
-#include "../VFrame30/Bus.h"
 #include "../VFrame30/LogicSchema.h"
 #include "../lib/TuningDataStorage.h"
 #include "DiagSignalTypesStorage.h"
@@ -68,7 +68,7 @@ namespace Builder
 		std::shared_ptr<BuildResultWriter> m_buildResultWriter;
 
 		std::shared_ptr<Hardware::EquipmentSet> m_equipmentSet;
-		std::shared_ptr<VFrame30::BusSet> m_busSet;
+		std::shared_ptr<AppSignalLib::BusSet> m_busSet;
 
 		std::shared_ptr<SignalSet> m_signalSet;
 

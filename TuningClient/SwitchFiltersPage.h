@@ -4,7 +4,7 @@
 #include "../AppSignalLib/TuningSignalState.h"
 #include "../AppSignalLib/TuningSignalManager.h"
 #include "../lib/Tuning/TuningFilter.h"
-#include "../ClientLib/TuningConnection.h"
+
 #include "../ClientLib/TuningUserManager.h"
 #include "TuningClientFilterStorage.h"
 #include "TuningConfigController.h"
@@ -12,6 +12,13 @@
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QCheckBox>
+
+
+namespace ClientLib
+{
+	class TuningConnection;
+}
+
 
 //
 // FilterPushButton

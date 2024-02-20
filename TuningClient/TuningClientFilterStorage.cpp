@@ -1,6 +1,7 @@
+#include "TuningClientFilterStorage.h"
+#include "../ClientLib/TuningConnection.h"
 #include "MainWindow.h"
 #include "TuningSourcesHelper.h"
-#include "TuningClientFilterStorage.h"
 
 TuningClientFilterStorage::TuningClientFilterStorage()
 {

@@ -1,4 +1,5 @@
 #include "../HardwareLib/Subsystem.h"
+#include "../HardwareLib/PropertyNames.h"
 #include "../Simulator/Simulator.h"
 
 #include "AppDataServiceCfgGenerator.h"
@@ -665,7 +666,7 @@ namespace Builder
 
 	bool BuildWorkerThread::taskLoadBusTypes()
 	{
-		m_context->m_busSet = std::make_shared<VFrame30::BusSet>();
+		m_context->m_busSet = std::make_shared<AppSignalLib::BusSet>();
 
 		// Get Busses
 		//
@@ -695,7 +696,7 @@ namespace Builder
 
 		// Parse files, create actual Busses
 		//
-		std::vector<VFrame30::Bus> busses;
+		std::vector<AppSignalLib::Bus> busses;
 		busses.reserve(files.size());
 
 		for (const std::shared_ptr<DbFile>& f : files)
@@ -706,7 +707,7 @@ namespace Builder
 				continue;
 			}
 
-			VFrame30::Bus bus;
+			AppSignalLib::Bus bus;
 			ok = bus.Load(f->data());
 			if (ok == false)
 			{

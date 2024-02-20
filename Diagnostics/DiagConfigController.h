@@ -32,7 +32,7 @@ protected:
 	/// This function is called when the new configuration arrives, it is overriden to get specific Diagnostics
 	/// configuration, after it signal `configurationArrived` is emitted
 	///
-	virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const DiagnosticsSettings& settings, const BuildFileInfoArray& files) override;
+	virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const DiagnosticsSettings& settings, const std::vector<OnlineLib::BuildFileInfo>& files) override;
 
 	void dump(const DiagConfigSettings& conf) const;
 

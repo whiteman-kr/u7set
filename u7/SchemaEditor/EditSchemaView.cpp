@@ -8,6 +8,7 @@
 #include "../../VFrame30/PosRectRotatable.h"
 #include "../../VFrame30/SchemaLayer.h"
 #include "../../VFrame30/VFrameTools.h"
+#include "../../VFrame30/Context.h"
 #include "../GlobalMessanger.h"
 #include "../Settings.h"
 

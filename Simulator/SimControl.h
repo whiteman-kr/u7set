@@ -1,17 +1,15 @@
 #pragma once
 
 #include <chrono>
-#include <set>
 #include <atomic>
 #include <memory>
 #include <vector>
 #include <optional>
 #include <mutex>
 #include <condition_variable>
-#include <QThread>
-#include <QtConcurrent>
-#include <QMutex>
-#include "SimLogicModule.h"
+#include <QFuture>
+
+#include "SimDeviceEmulator.h"
 
 
 namespace Sim
@@ -19,6 +17,7 @@ namespace Sim
 	using namespace std::literals::chrono_literals;
 
 	class Simulator;
+	class LogicModule;
 	struct SimControlRunStruct;
 
 	enum class SimControlState
@@ -32,35 +31,14 @@ namespace Sim
 	//
 	struct SimControlRunStruct
 	{
-		SimControlRunStruct(std::shared_ptr<LogicModule> lm) :
-			m_lm(std::move(lm))
-		{
-		}
+		SimControlRunStruct(std::shared_ptr<LogicModule> lm);
 
-		QFuture<bool> start(std::chrono::microseconds time, const QDateTime& currentDateTime, std::condition_variable& cvFinished)
-		{
-			bool reset = m_lastStartTime == 0us;
+		QFuture<bool> start(std::chrono::microseconds time, const QDateTime& currentDateTime, std::condition_variable& cvFinished);
 
-			m_lastStartTime = time;
-			m_possibleToAdvanceTo = time;
-			m_cyclesCounter ++;
-			return m_lm->asyncRunCycle(time, currentDateTime, m_cyclesCounter, reset, cvFinished);
-		}
+		const QString& equipmentId() const;
 
-		const QString& equipmentId() const
-		{
-			return m_lm->equipmentId();
-		}
-
-		LogicModule* operator->()
-		{
-			return m_lm.get();
-		}
-
-		const LogicModule* operator->() const
-		{
-			return m_lm.get();
-		}
+		LogicModule* operator->();
+		const LogicModule* operator->() const;
 
 		std::shared_ptr<LogicModule> m_lm;
 		std::chrono::microseconds m_lastStartTime{0};
@@ -97,20 +75,7 @@ namespace Sim
 	struct ControlStatus
 	{
 		ControlStatus() = default;
-
-		ControlStatus(const ControlData& cd) :
-			m_startTime(cd.m_startTime),
-			m_currentTime(cd.m_currentTime),
-			m_duration(cd.m_currentTime - cd.m_startTime),
-			m_state(cd.m_state)
-		{
-			m_lmDeviceModes.reserve(cd.m_lms.size());
-
-			for (const SimControlRunStruct& lm : cd.m_lms)
-			{
-				m_lmDeviceModes.push_back(Sim::ControlStatus::LmMode{lm.equipmentId(), lm.m_lm->deviceState()});
-			}
-		}
+		ControlStatus(const ControlData& cd);
 
 		std::chrono::microseconds m_startTime = 0us;	// When simulation was started, it's computer time
 		std::chrono::microseconds m_currentTime = 0us;	// Current time in simulation

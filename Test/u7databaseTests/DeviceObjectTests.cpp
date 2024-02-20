@@ -1,5 +1,7 @@
 #include "DeviceObjectTests.h"
-#include <QtTest>
+#include "../../HardwareLib/DeviceObject.h"
+#include "../../HardwareLib/DiagSignal.h"
+#include "../../HardwareLib/HardwareLibrary.h"
 
 DeviceObjectTests::DeviceObjectTests(QObject* parent) :
 	QObject(parent)

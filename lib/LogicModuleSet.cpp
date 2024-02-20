@@ -1,4 +1,6 @@
 #include "LogicModuleSet.h"
+#include "../HardwareLib/PropertyNames.h"
+#include "../DbLib/DbController.h"
 
 LogicModuleSet::LogicModuleSet()
 {

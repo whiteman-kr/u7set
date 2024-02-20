@@ -1,12 +1,7 @@
 #pragma once
 
-#include <QtGlobal>
-#include <QDebug>
-#include <QHostAddress>
-#include <QAbstractSocket>
-
 #include "../OnlineLib/BuildInfo.h"
-#include "../CommonLib/HostAddressPort.h"
+
 
 namespace Socket
 {

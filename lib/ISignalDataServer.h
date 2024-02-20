@@ -1,5 +1,4 @@
 #pragma once
-#include "../CommonLib/Hash.h"
 
 /// Interface for getting signal's data server, like AppDataServiceID or DiagDataServiceID.
 ///

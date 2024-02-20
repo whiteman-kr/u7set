@@ -1,4 +1,6 @@
 #include "ClientBehavior.h"
+#include <QXmlStreamWriter>
+#include <QXmlStreamReader>
 
 //
 // ClientBehavior

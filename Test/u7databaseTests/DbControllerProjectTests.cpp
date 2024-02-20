@@ -1,6 +1,4 @@
 #include "DbControllerProjectTests.h"
-#include <QSql>
-#include <QSqlError>
 #include "Settings.h"
 
 DbControllerProjectTests::DbControllerProjectTests():

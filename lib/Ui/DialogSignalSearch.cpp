@@ -1,4 +1,6 @@
 #include "DialogSignalSearch.h"
+#include <QHeaderView>
+#include <QSettings>
 
 SignalSearchSorter::SignalSearchSorter(std::vector<AppSignalParam>* appSignalParamVec):
     m_appSignalParamVec(appSignalParamVec)

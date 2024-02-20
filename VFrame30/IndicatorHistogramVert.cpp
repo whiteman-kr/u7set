@@ -1,8 +1,6 @@
 #include "IndicatorHistogramVert.h"
-#include "AppSignalController.h"
 #include "DrawParam.h"
 #include "PropertyNames.h"
-#include "Schema.h"
 #include "SchemaItemIndicator.h"
 #include "Settings.h"
 #include "TuningController.h"

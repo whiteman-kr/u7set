@@ -5,6 +5,7 @@
 #include "../../VFrame30/Schema.h"
 #include "../../VFrame30/SchemaView.h"
 #include "../../VFrame30/TuningController.h"
+#include "../../VFrame30/DiagStateController.h"
 #include "../AppSignalSetProvider.h"
 #include "AutoFblItemConnection.h"
 #include "EditConnectionLine.h"

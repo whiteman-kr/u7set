@@ -3,7 +3,7 @@
 
 #include "../lib/Tuning/TuningFilterEditor.h"
 #include "../AppSignalLib/TuningSignalManager.h"
-#include "../ClientLib/TuningConnection.h"
+
 
 class DialogFilterEditor : public QDialog
 {

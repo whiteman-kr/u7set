@@ -1,6 +1,15 @@
 #include "DialogSignalSnapshot.h"
 #include "../lib/Ui/ChooseTagsWidget.h"
 
+#include <QApplication>
+#include <QComboBox>
+#include <QDir>
+#include <QFileDialog>
+#include <QHeaderView>
+#include <QMessageBox>
+#include <QSettings>
+#include <QStringListModel>
+
 //
 // SnapshotExportPrint
 //

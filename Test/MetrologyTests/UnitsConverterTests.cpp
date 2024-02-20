@@ -1,4 +1,3 @@
-#include <QTest>
 #include "UnitsConverterTests.h"
 #include "../Metrology/UnitsConverter.h"
 

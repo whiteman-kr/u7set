@@ -3,6 +3,8 @@
 #endif
 
 #include "Subsystem.h"
+#include <QXmlStreamReader>
+#include <QXmlStreamWriter>
 
 namespace Hardware
 {

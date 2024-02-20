@@ -1,6 +1,6 @@
 #include <iostream>
 #include "../../UtilsLib/WUtils.h"
-#include "../../Proto/serialization.pb.h"
+#include "../../Protobuf/message.h"
 #include "../../OnlineLib/CircularLogger.h"
 #include <iostream>
 #include "Archivist.h"

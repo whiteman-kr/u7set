@@ -1,9 +1,14 @@
 #pragma once
 
-#include "../ClientLib/TuningConnection.h"
 #include "TuningClientFilterStorage.h"
 #include "TuningConfigController.h"
-#include "../ClientLib/TuningUserManager.h"
+
+namespace ClientLib
+{
+	class TuningUserManager;
+	class TuningConnection;
+}
+
 
 class TreeFilterWidget : public QWidget
 {

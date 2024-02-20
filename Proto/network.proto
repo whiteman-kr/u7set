@@ -2,7 +2,7 @@ syntax = "proto2";
 
 package Network;
 
-import "serialization.proto";
+import "AppSignal.proto";
 
 // Get signal list
 // 1. Request GetSignalListStartRequest, wait for reply GetSignalListStartReply
@@ -844,6 +844,6 @@ message LmDiagSignals
 
 message AcquiredDiagSignalsAndObjects
 {
-	repeated Lm	DiagSignals lmDiagSignals = 1;
+	repeated LmDiagSignals lmDiagSignals = 1;
 	repeated AcquiredDiagObject diagObjects = 2;
 }

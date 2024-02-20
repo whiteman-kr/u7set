@@ -29,7 +29,6 @@ add_executable(${TARGET}
 
 target_precompile_headers(${TARGET} PRIVATE
 	<algorithm>
-	<chrono>
 	<bit>
 	<vector>
 	<list>
@@ -45,6 +44,20 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QtGlobal>
 	<QDebug>
 	<QSignalSpy>
+
+	"../../CommonLib/Types.h"
+	"../../CommonLib/Hash.h"
+	"../../CommonLib/PropertyObject.h"
+	#"../../CommonLib/AfbParamValue.h"
+	
+	#"../../Proto/ProtoSerialization.h"
+	"../../Proto/Network.pb.h"	
+	#"../../Proto/AppSignal.pb.h"
+	
+	"../../AppSignalLib/AppSignal.h"
+	"../../AppSignalLib/AppSignalParam.h"
+	"../../AppSignalLib/AppSignalState.h"
+	"../../AppSignalLib/TuningValue.h"
 )
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Test Threads::Threads GTest::gtest_main GTest::gmock)

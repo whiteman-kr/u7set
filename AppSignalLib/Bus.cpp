@@ -1,31 +1,61 @@
 #include "Bus.h"
 #include "PropertyNames.h"
+#include "../Proto/ProtoCommonHelper.h"
 
 
-namespace VFrame30
+namespace AppSignalLib
 {
 	//
 	// BusSignal
 	//
 	BusSignal::BusSignal() :
-		BusSignal(E::SignalType::Discrete)		// Here proprties will be created
+		BusSignal(E::SignalType::Discrete)		// Here properties will be created
 	{
 	}
 
 	BusSignal::BusSignal(const BusSignal& src) :
-		BusSignal(src.m_type)					// Here proprties will be created
+		BusSignal(src.m_data.type)					// Here properties will be created
 	{
 		*this = src;
 	}
 
 	BusSignal::BusSignal(E::SignalType type) :
-		m_type(type)
+		m_data{.type = type}
 	{
+		updateProperties();
+	}
+
+	BusSignal& BusSignal::operator= (const BusSignal& src)
+	{
+		if (this != &src)
+		{
+			m_data = src.m_data;
+			updateProperties();
+		}
+
+		return *this;
+	}
+
+	BusSignal& BusSignal::operator=(BusSignal&& src) noexcept
+	{
+		if (this != &src)
+		{
+			m_data = std::move(src.m_data);
+			updateProperties();
+		}
+
+		return *this;
+	}
+
+	void BusSignal::updateProperties()
+	{
+		removeAllProperties();
+
 		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::busSignalId, true, BusSignal::signalId, BusSignal::setSignalId);
 		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::caption, true, BusSignal::caption, BusSignal::setCaption);
 		ADD_PROPERTY_GETTER(E::SignalType, PropertyNames::type, true, BusSignal::type);
 
-		switch (type)
+		switch (m_data.type)
 		{
 		case E::SignalType::Analog:
 			{
@@ -77,18 +107,6 @@ namespace VFrame30
 		return;
 	}
 
-	BusSignal& BusSignal::operator= (const BusSignal& src)
-	{
-		if (this != &src)
-		{
-			Proto::BusSignal message;
-			src.save(&message);
-			this->load(message);
-		}
-
-		return *this;
-	}
-
 	bool BusSignal::save(Proto::BusSignal* message) const
 	{
 		if (message == nullptr)
@@ -97,240 +115,242 @@ namespace VFrame30
 			return false;
 		}
 
-		message->set_signalid(m_signalId.toStdString());
-		message->set_caption(m_caption.toStdString());
-		message->set_type(static_cast<int>(m_type));
-		message->set_units(m_units.toStdString());
-		message->set_analogformat(static_cast<int>(m_analogFormat));
-		message->set_precision(m_precision);
-		message->set_coarseaperture(m_coarseAperture);
-		message->set_fineaperture(m_fineAperture);
-		message->set_adaptiveaperture(m_adaptiveAperture);
-		message->set_bustypeid(m_busTypeId.toStdString());
+		message->set_signalid(m_data.signalId.toStdString());
+		message->set_caption(m_data.caption.toStdString());
+		message->set_type(static_cast<int>(m_data.type));
+		message->set_units(m_data.units.toStdString());
+		message->set_analogformat(static_cast<int>(m_data.analogFormat));
+		message->set_precision(m_data.precision);
+		message->set_coarseaperture(m_data.coarseAperture);
+		message->set_fineaperture(m_data.fineAperture);
+		message->set_adaptiveaperture(m_data.adaptiveAperture);
+		message->set_bustypeid(m_data.busTypeId.toStdString());
 
-		message->set_inbusoffset(m_inbusOffset);
-		message->set_inbusdiscretebitno(m_inbusDiscreteBitNo);
-		message->set_inbusanalogsize(m_inbusAnalogSize);
-		message->set_inbusanalogformat(static_cast<int>(m_inbusAnalogFormat));
-		message->set_inbusanalogbyteorder(static_cast<int>(m_inbusAnalogByteOrder));
-		message->set_busanaloglowlimit(m_busAnalogLowLimit);
-		message->set_busanaloghighlimit(m_busAnalogHighLimit);
-		message->set_inbusanaloglowlimit(m_inbusAnalogLowLimit);
-		message->set_inbusanaloghighlimit(m_inbusAnalogHighLimit);
+		message->set_inbusoffset(m_data.inbusOffset);
+		message->set_inbusdiscretebitno(m_data.inbusDiscreteBitNo);
+		message->set_inbusanalogsize(m_data.inbusAnalogSize);
+		message->set_inbusanalogformat(static_cast<int>(m_data.inbusAnalogFormat));
+		message->set_inbusanalogbyteorder(static_cast<int>(m_data.inbusAnalogByteOrder));
+		message->set_busanaloglowlimit(m_data.busAnalogLowLimit);
+		message->set_busanaloghighlimit(m_data.busAnalogHighLimit);
+		message->set_inbusanaloglowlimit(m_data.inbusAnalogLowLimit);
+		message->set_inbusanaloghighlimit(m_data.inbusAnalogHighLimit);
 
 		return true;
 	}
 
 	bool BusSignal::load(const Proto::BusSignal& message)
 	{
-		m_signalId = QString::fromStdString(message.signalid());
-		m_caption = QString::fromStdString(message.caption());
-		m_type = static_cast<E::SignalType>(message.type());
-		m_units = QString::fromStdString(message.units());
-		m_analogFormat = static_cast<E::AnalogAppSignalFormat>(message.analogformat());
-		m_precision = message.precision();
-		m_coarseAperture = message.coarseaperture();
-		m_fineAperture = message.fineaperture();
-		m_adaptiveAperture = message.adaptiveaperture();
-		m_busTypeId = QString::fromStdString(message.bustypeid());
+		m_data.signalId = QString::fromStdString(message.signalid());
+		m_data.caption = QString::fromStdString(message.caption());
+		m_data.type = static_cast<E::SignalType>(message.type());
+		m_data.units = QString::fromStdString(message.units());
+		m_data.analogFormat = static_cast<E::AnalogAppSignalFormat>(message.analogformat());
+		m_data.precision = message.precision();
+		m_data.coarseAperture = message.coarseaperture();
+		m_data.fineAperture = message.fineaperture();
+		m_data.adaptiveAperture = message.adaptiveaperture();
+		m_data.busTypeId = QString::fromStdString(message.bustypeid());
 
-		m_inbusOffset = message.inbusoffset();
-		m_inbusDiscreteBitNo = message.inbusdiscretebitno();
-		m_inbusAnalogSize = message.inbusanalogsize();
-		m_inbusAnalogFormat = static_cast<E::DataFormat>(message.inbusanalogformat());
-		m_inbusAnalogByteOrder = static_cast<E::ByteOrder>(message.inbusanalogbyteorder());
-		m_busAnalogLowLimit = message.busanaloglowlimit();
-		m_busAnalogHighLimit = message.busanaloghighlimit();
-		m_inbusAnalogLowLimit = message.inbusanaloglowlimit();
-		m_inbusAnalogHighLimit = message.inbusanaloghighlimit();
+		m_data.inbusOffset = message.inbusoffset();
+		m_data.inbusDiscreteBitNo = message.inbusdiscretebitno();
+		m_data.inbusAnalogSize = message.inbusanalogsize();
+		m_data.inbusAnalogFormat = static_cast<E::DataFormat>(message.inbusanalogformat());
+		m_data.inbusAnalogByteOrder = static_cast<E::ByteOrder>(message.inbusanalogbyteorder());
+		m_data.busAnalogLowLimit = message.busanaloglowlimit();
+		m_data.busAnalogHighLimit = message.busanaloghighlimit();
+		m_data.inbusAnalogLowLimit = message.inbusanaloglowlimit();
+		m_data.inbusAnalogHighLimit = message.inbusanaloghighlimit();
+
+		updateProperties();
 
 		return true;
 	}
 
-	QString BusSignal::signalId() const
+	const QString& BusSignal::signalId() const
 	{
-		return m_signalId;
+		return m_data.signalId;
 	}
 
 	void BusSignal::setSignalId(const QString& value)
 	{
-		m_signalId = value.trimmed();
+		m_data.signalId = value.trimmed();
 	}
 
-	QString BusSignal::caption() const
+	const QString& BusSignal::caption() const
 	{
-		return m_caption;
+		return m_data.caption;
 	}
 
 	void BusSignal::setCaption(const QString& value)
 	{
-		m_caption = value.trimmed();
+		m_data.caption = value.trimmed();
 	}
 
 	E::SignalType BusSignal::type() const
 	{
-		return m_type;
+		return m_data.type;
 	}
 
-	QString BusSignal::units() const
+	const QString& BusSignal::units() const
 	{
-		return m_units;
+		return m_data.units;
 	}
 
 	void BusSignal::setUnits(const QString& value)
 	{
-		m_units = value.trimmed();
+		m_data.units = value.trimmed();
 	}
 
 	E::AnalogAppSignalFormat BusSignal::analogFormat() const
 	{
-		return m_analogFormat;
+		return m_data.analogFormat;
 	}
 
 	void BusSignal::setAnalogFormat(E::AnalogAppSignalFormat value)
 	{
-		m_analogFormat = value;
+		m_data.analogFormat = value;
 	}
 
 	int BusSignal::precision() const
 	{
-		return m_precision;
+		return m_data.precision;
 	}
 
 	void BusSignal::setPrecision(int value)
 	{
-		m_precision = value;
+		m_data.precision = value;
 	}
 
 	double BusSignal::coarseAperture() const
 	{
-		return m_coarseAperture;
+		return m_data.coarseAperture;
 	}
 
 	void BusSignal::setCoarseAperture(double aperture)
 	{
-		m_coarseAperture = aperture;
+		m_data.coarseAperture = aperture;
 	}
 
 	double BusSignal::fineAperture() const
 	{
-		return m_fineAperture;
+		return m_data.fineAperture;
 	}
 
 	void BusSignal::setFineAperture(double aperture)
 	{
-		m_fineAperture = aperture;
+		m_data.fineAperture = aperture;
 	}
 
 	bool BusSignal::adaptiveAperture() const
 	{
-		return m_adaptiveAperture;
+		return m_data.adaptiveAperture;
 	}
 
 	void BusSignal::setAdaptiveAperture(bool adaptive)
 	{
-		m_adaptiveAperture = adaptive;
+		m_data.adaptiveAperture = adaptive;
 	}
 
 	QString BusSignal::busTypeId() const
 	{
-		return m_busTypeId;
+		return m_data.busTypeId;
 	}
 
 	void BusSignal::setBusTypeId(const QString& value)
 	{
-		assert(m_type == E::SignalType::Bus);
-		m_busTypeId = value;
+		assert(m_data.type == E::SignalType::Bus);
+		m_data.busTypeId = value;
 	}
 
 	int BusSignal::inbusOffset() const
 	{
-		return m_inbusOffset;
+		return m_data.inbusOffset;
 	}
 
 	void BusSignal::setInbusOffset(int value)
 	{
-		m_inbusOffset = value;
+		m_data.inbusOffset = value;
 	}
 
 	int BusSignal::inbusDiscreteBitNo() const
 	{
-		return m_inbusDiscreteBitNo;
+		return m_data.inbusDiscreteBitNo;
 	}
 
 	void BusSignal::setInbusDiscreteBitNo(int value)
 	{
-		m_inbusDiscreteBitNo = value;
+		m_data.inbusDiscreteBitNo = value;
 	}
 
 	int BusSignal::inbusAnalogSize() const
 	{
-		return m_inbusAnalogSize;
+		return m_data.inbusAnalogSize;
 	}
 
 	void BusSignal::setInbusAnalogSize(int value)
 	{
-		m_inbusAnalogSize = value;
+		m_data.inbusAnalogSize = value;
 	}
 
 	E::DataFormat BusSignal::inbusAnalogFormat() const
 	{
-		return m_inbusAnalogFormat;
+		return m_data.inbusAnalogFormat;
 	}
 
 	void BusSignal::setInbusAnalogFormat(E::DataFormat value)
 	{
-		m_inbusAnalogFormat = value;
+		m_data.inbusAnalogFormat = value;
 	}
 
 	E::ByteOrder BusSignal::inbusAnalogByteOrder() const
 	{
-		return m_inbusAnalogByteOrder;
+		return m_data.inbusAnalogByteOrder;
 	}
 
 	void BusSignal::setInbusAnalogByteOrder(E::ByteOrder value)
 	{
-		m_inbusAnalogByteOrder = value;
+		m_data.inbusAnalogByteOrder = value;
 	}
 
 	double BusSignal::busAnalogLowLimit() const
 	{
-		return m_busAnalogLowLimit;
+		return m_data.busAnalogLowLimit;
 	}
 
 	void BusSignal::setBusAnalogLowLimit(double value)
 	{
-		m_busAnalogLowLimit = value;
+		m_data.busAnalogLowLimit = value;
 	}
 
 	double BusSignal::busAnalogHighLimit() const
 	{
-		return m_busAnalogHighLimit;
+		return m_data.busAnalogHighLimit;
 	}
 
 	void BusSignal::setBusAnalogHightLimit(double value)
 	{
-		m_busAnalogHighLimit = value;
+		m_data.busAnalogHighLimit = value;
 	}
 
 	double BusSignal::inbusAnalogLowLimit() const
 	{
-		return m_inbusAnalogLowLimit;
+		return m_data.inbusAnalogLowLimit;
 	}
 
 	void BusSignal::setInbusAnalogLowLimit(double value)
 	{
-		m_inbusAnalogLowLimit = value;
+		m_data.inbusAnalogLowLimit = value;
 	}
 
 	double BusSignal::inbusAnalogHighLimit() const
 	{
-		return m_inbusAnalogHighLimit;
+		return m_data.inbusAnalogHighLimit;
 	}
 
 	void BusSignal::setInbusAnalogHightLimit(double value)
 	{
-		m_inbusAnalogHighLimit = value;
+		m_data.inbusAnalogHighLimit = value;
 	}
 
 	//
@@ -496,7 +516,7 @@ namespace VFrame30
 		m_uuid = uuid;
 	}
 
-	QString Bus::fileName() const
+	const QString& Bus::fileName() const
 	{
 		return m_fileName;
 	}
@@ -507,7 +527,7 @@ namespace VFrame30
 	}
 
 
-	QString Bus::busTypeId() const
+	const QString& Bus::busTypeId() const
 	{
 		return m_busTypeId;
 	}
@@ -605,24 +625,24 @@ namespace VFrame30
 	bool BusSet::hasBus(QString busTypeId) const
 	{
 		auto it = std::find_if(m_busses.begin(), m_busses.end(),
-			[&busTypeId](const VFrame30::Bus& bus)
+			[&busTypeId](const AppSignalLib::Bus& bus)
 			{
 				return bus.busTypeId() == busTypeId;
 			});
 		return it != m_busses.end();
 	}
 
-	const VFrame30::Bus& BusSet::bus(QString busTypeId) const
+	const AppSignalLib::Bus& BusSet::bus(QString busTypeId) const
 	{
 		auto it = std::find_if(m_busses.begin(), m_busses.end(),
-			[&busTypeId](const VFrame30::Bus& bus)
+			[&busTypeId](const AppSignalLib::Bus& bus)
 			{
 				return bus.busTypeId() == busTypeId;
 			});
 
 		if (it == m_busses.end())
 		{
-			static const VFrame30::Bus staticBus;
+			static const AppSignalLib::Bus staticBus;
 			return staticBus;
 		}
 		else
@@ -631,17 +651,17 @@ namespace VFrame30
 		}
 	}
 
-	const std::vector<VFrame30::Bus>& BusSet::busses() const
+	const std::vector<AppSignalLib::Bus>& BusSet::busses() const
 	{
 		return m_busses;
 	}
 
-	void BusSet::setBusses(const std::vector<VFrame30::Bus>& src)
+	void BusSet::setBusses(const std::vector<AppSignalLib::Bus>& src)
 	{
 		m_busses = src;
 	}
 
-	void BusSet::setBusses(std::vector<VFrame30::Bus>&& src)
+	void BusSet::setBusses(std::vector<AppSignalLib::Bus>&& src)
 	{
 		m_busses = std::move(src);
 	}

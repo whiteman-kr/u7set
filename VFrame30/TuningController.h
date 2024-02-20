@@ -1,8 +1,11 @@
 #pragma once
 
 #include "../AppSignalLib/ITuningSignalManager.h"
-#include "../lib/Tuning/ITuningConnection.h"
 #include "../lib/Tuning/ITuningAuthorization.h"
+#include "../lib/Tuning/ITuningConnection.h"
+
+#include <QJSValueList>
+#include <QStringList>
 
 class AppSignalParam;
 class TuningSignalState;

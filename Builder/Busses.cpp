@@ -168,7 +168,7 @@ namespace Builder
 		*b = y1 - x1 * (*k);
 	}
 
-	void BusSignal::init(const Busses& busses, const VFrame30::BusSignal& bs)
+	void BusSignal::init(const Busses& busses, const AppSignalLib::BusSignal& bs)
 	{
 		signalID = bs.signalId();
 		signalType = bs.type();
@@ -234,7 +234,7 @@ namespace Builder
 
 	const QString Bus::INVALUD_BUS_SIGNAL_ID("##InvalidBusSignalID##");
 
-	Bus::Bus(const Busses& busses, const VFrame30::Bus& bus, IssueLogger* log) :
+	Bus::Bus(const Busses& busses, const AppSignalLib::Bus& bus, IssueLogger* log) :
 		m_busses(busses),
 		m_srcBus(bus),
 		m_log(log)
@@ -429,14 +429,14 @@ namespace Builder
 		//
 		m_inBusSignalsMap.clear();
 
-		const std::vector<VFrame30::BusSignal>& busSignals = m_srcBus.busSignals();
+		const std::vector<AppSignalLib::BusSignal>& busSignals = m_srcBus.busSignals();
 
 		bool hasAnalogSignals = false;
 		bool hasDiscreteSignals = false;
 
 		for(int i = 0; i < static_cast<int>(busSignals.size()); i++)
 		{
-			const VFrame30::BusSignal& busSignal = busSignals[i];
+			const AppSignalLib::BusSignal& busSignal = busSignals[i];
 
 			if (m_inBusSignalsMap.contains(busSignal.signalId()) == true)
 			{
@@ -516,7 +516,7 @@ namespace Builder
 		QStringList busSignals;
 		QStringList discreteSignals;
 
-		for(const VFrame30::BusSignal& busSignal : m_srcBus.busSignals())
+		for(const AppSignalLib::BusSignal& busSignal : m_srcBus.busSignals())
 		{
 			switch(busSignal.type())
 			{
@@ -584,7 +584,7 @@ namespace Builder
 
 		for(const QString& signalID : signalsOrder)
 		{
-			VFrame30::BusSignal& srcBusSignal = getBusSignal(signalID);
+			AppSignalLib::BusSignal& srcBusSignal = getBusSignal(signalID);
 
 			BusSignal busSignal;
 
@@ -620,9 +620,9 @@ namespace Builder
 
 		QVector<QPair<QString, int>> inBusSignals;		// QPair<busSignalID, signalBitAddressInBus>
 
-		const std::vector<VFrame30::BusSignal>& busSignals = m_srcBus.busSignals();
+		const std::vector<AppSignalLib::BusSignal>& busSignals = m_srcBus.busSignals();
 
-		for(const VFrame30::BusSignal& busSignal : busSignals)
+		for(const AppSignalLib::BusSignal& busSignal : busSignals)
 		{
 			Address16 inBusAddr(0, 0);
 
@@ -723,7 +723,7 @@ namespace Builder
 		//
 		for(const QPair<QString, int>& inBusSignal : inBusSignals)
 		{
-			VFrame30::BusSignal& srcBusSignal = getBusSignal(inBusSignal.first);
+			AppSignalLib::BusSignal& srcBusSignal = getBusSignal(inBusSignal.first);
 
 			BusSignal busSignal;
 
@@ -857,7 +857,7 @@ namespace Builder
 		}
 	}
 
-	VFrame30::BusSignal& Bus::getBusSignal(const QString& signalID)
+	AppSignalLib::BusSignal& Bus::getBusSignal(const QString& signalID)
 	{
 		assert(m_inBusSignalsMap.size() == static_cast<int>(m_srcBus.busSignals().size()));
 
@@ -875,7 +875,7 @@ namespace Builder
 	{
 		QStringList childBussesIDs;
 
-		for(const VFrame30::BusSignal& busSignal : m_srcBus.busSignals())
+		for(const AppSignalLib::BusSignal& busSignal : m_srcBus.busSignals())
 		{
 			if (busSignal.type() != E::SignalType::Bus)
 			{
@@ -888,7 +888,7 @@ namespace Builder
 		return childBussesIDs;
 	}
 
-	Busses::Busses(VFrame30::BusSet* busSet, IssueLogger* log) :
+	Busses::Busses(AppSignalLib::BusSet* busSet, IssueLogger* log) :
 		m_busSet(busSet),
 		m_log(log)
 	{
@@ -904,7 +904,7 @@ namespace Builder
 	{
 		TEST_PTR_RETURN_FALSE(m_busSet);
 
-		const std::vector<VFrame30::Bus>& busses = m_busSet->busses();
+		const std::vector<AppSignalLib::Bus>& busses = m_busSet->busses();
 
 		if (busses.size() == 0)
 		{
@@ -913,7 +913,7 @@ namespace Builder
 
 		bool result = true;
 
-		for(const VFrame30::Bus& srcBus : busses)
+		for(const AppSignalLib::Bus& srcBus : busses)
 		{
 			if (m_busses.contains(srcBus.busTypeId()) == true)
 			{

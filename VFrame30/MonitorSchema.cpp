@@ -1,7 +1,6 @@
 #include "MonitorSchema.h"
 #include "SchemaLayer.h"
-#include "SchemaItemValue.h"
-#include "SchemaItemImageValue.h"
+
 
 namespace VFrame30
 {

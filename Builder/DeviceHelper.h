@@ -2,8 +2,9 @@
 
 #include "../HardwareLib/DeviceObject.h"
 #include "../UtilsLib/OutputLog.h"
-#include "../CommonLib/HostAddressPort.h"
 #include "IssueLogger.h"
+
+class HostAddressPort;
 
 class DeviceHelper : public QObject
 {

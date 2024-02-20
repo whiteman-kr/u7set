@@ -1,7 +1,7 @@
 #pragma once
 
 #include "FblItemRect.h"
-#include "Bus.h"
+#include "../AppSignalLib/Bus.h"
 
 namespace VFrame30
 {
@@ -38,26 +38,26 @@ namespace VFrame30
 		virtual QString buildName() const override;
 
 	protected:
-		virtual void setBusPins(const VFrame30::Bus& bus);
+		virtual void setBusPins(const AppSignalLib::Bus& bus);
 
 		// Properties
 		//
 	public:
 		QString busTypeId() const;
 
-		const VFrame30::Bus& busType() const;
-		void setBusType(const VFrame30::Bus& bus);
+		const AppSignalLib::Bus& busType() const;
+		void setBusType(const AppSignalLib::Bus& bus);
 
 		Hash busTypeHash() const;
 
 	protected:
-		const Bus& bus() const;
+		const AppSignalLib::Bus & bus() const;
 
 		// Data
 		//
 	private:
 		Hash m_busTypeHash = 0xFFFFFFFFFFFFFFFF;
-		Bus m_bus;
+		AppSignalLib::Bus m_bus;
 	};
 
 
@@ -97,7 +97,7 @@ namespace VFrame30
 		virtual QString buildName() const override;
 
 	protected:
-		virtual void setBusPins(const VFrame30::Bus& bus) override;
+		virtual void setBusPins(const AppSignalLib::Bus& bus) override;
 
 		// Properties
 		//
@@ -147,7 +147,7 @@ namespace VFrame30
 		void specificPropertyCouldBeChanged(QString propertyName, const QVariant& value);
 
 	protected:
-		virtual void setBusPins(const VFrame30::Bus& bus) override;
+		virtual void setBusPins(const AppSignalLib::Bus& bus) override;
 
 		// Properties
 		//

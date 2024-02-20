@@ -2,7 +2,6 @@
 #define PORTRECEIVER_H
 
 #include <QSerialPort>
-#include <QThread>
 
 class PortReceiver : public QThread
 {

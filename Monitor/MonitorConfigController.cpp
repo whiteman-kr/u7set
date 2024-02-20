@@ -1,6 +1,5 @@
 #include "MonitorConfigController.h"
 #include "../OnlineLib/SoftwareSettings.h"
-#include "Globals.h"
 #include "MonitorAppSettings.h"
 
 
@@ -12,7 +11,7 @@ MonitorConfigController::MonitorConfigController(const SoftwareInfo& softwareInf
 	return;
 }
 
-bool MonitorConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& conf, const MonitorSettings& settings, const BuildFileInfoArray& /*files*/)
+bool MonitorConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& conf, const MonitorSettings& settings, const std::vector<OnlineLib::BuildFileInfo>& /*files*/)
 {
 	MonitorConfigSettings config{};
 

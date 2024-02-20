@@ -1,6 +1,4 @@
 #pragma once
-#include <QBitArray>
-#include "../CommonLib/AfbParamValue.h"
 #include <optional>
 
 class QDomElement;

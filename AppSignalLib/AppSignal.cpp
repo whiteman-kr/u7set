@@ -4,6 +4,7 @@
 
 #include "AppSignal.h"
 #include "../UtilsLib/XmlHelper.h"
+#include "../lib/ConstStrings.h"
 
 template<typename ENUM_TYPE>
 void writeEnumValueStrSpecPropAttribute(XmlWriteHelper& xml, const AppSignal& s,
@@ -2526,6 +2527,16 @@ void AppSignal::setTags(const QStringList& tags)
 {
 	clearTags();
 	appendTags(tags);
+}
+
+void AppSignal::setTags(const std::set<QString>& tags) 
+{
+	m_tags = tags; 
+}
+
+void AppSignal::setTagsStr(const QString& tagsStr)
+{
+	setTags(tagsStr.split(QRegularExpression("\\W+"), Qt::SkipEmptyParts)); 
 }
 
 void AppSignal::appendTag(const QString& tag)

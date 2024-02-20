@@ -4,6 +4,9 @@
 
 #include "../OnlineLib/OnlineDataSource.h"
 #include "../DiagStateLib/SimpleDiagSignalState.h"
+#include "../lib/DataSource.h"
+#include "../OnlineLib/CircularLogger.h"
+#include "DynamicDiagSignalState.h"
 
 class DiagDataSource : public OnlineDataSource<SimpleDiagSignalState>
 {

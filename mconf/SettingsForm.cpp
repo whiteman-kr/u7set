@@ -1,4 +1,5 @@
 #include "SettingsForm.h"
+#include <QCheckBox>
 
 SettingsForm::SettingsForm(const MconfSettings& settings, QWidget* parent)
 	: QDialog(parent),

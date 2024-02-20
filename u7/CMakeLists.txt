@@ -395,23 +395,85 @@ target_precompile_headers(${TARGET} PRIVATE
 	<vector>
 	<ranges>
 
-	<QtDebug>
-	<QtGui>
-	<QtNetwork>
-	<QtQml>
-	<QtSerialPort>
-	<QtSql>
-	<QtSvg>
-	<QtWidgets>
-	<QtXml>
-	<QtPrintSupport>
+	<QAction>
+	<QActionGroup>
+	<QApplication>
+	<QBoxLayout>
+	<QButtonGroup>
+	<QCheckBox>
+	<QClipboard>
+	<QComboBox>
+	<QCompleter>
+	<QDialog>
+	<QDialogButtonBox>
+	<QDir>
+	<QDockWidget>
+	<QFileDialog>
+	<QFormLayout>
+	<QGroupBox>
+	<QHBoxLayout>
+	<QHeaderView>
+	<QHostInfo>
+	<QInputDialog>
+	<QJsonArray>
+	<QJsonDocument>
+	<QJsonObject>
+	<QJsonValue>
+	<QLabel>
+	<QListWidget>
+	<QListWidgetItem>
+	<QMainWindow>
+	<QMenu>
+	<QMenuBar>
+	<QMessageBox>
+	<QMimeData>
+	<QPainter>
+	<QPainterPath>
+	<QPdfWriter>
+	<QPlainTextEdit>
+	<QPrinter>
+	<QProgressBar>
+	<QProgressDialog>
+	<QPushButton>
+	<QRadioButton>
+	<QScrollBar>
+	<QSettings>
+	<QShortcut>
+	<QSortFilterProxyModel>
+	<QSpinBox>
+	<QSplitter>
+	<QStandardItemModel>
+	<QStatusBar>
+	<QStringListModel>
+	<QSvgRenderer>
+	<QTableWidget>
+	<QTextBrowser>
+	<QTextDocumentWriter>
+	<QThread>
+	<QTimer>
+	<QToolBar>
+	<QToolButton>
+	<QToolTip>
+	<QTreeView>
+	<QTreeWidget>
+	<QTreeWidgetItem>
+	<QVBoxLayout>
 
-	"../DbLib/DbController.h"
+	"../CommonLib/Types.h"
+	"../CommonLib/Hash.h"
+	"../CommonLib/PropertyObject.h"
+	"../CommonLib/AfbParamValue.h"
 	"../CommonLib/DebugInstCounter.h"
 	"../CommonLib/Factory.h"
-	"../CommonLib/Types.h"
+
 	"../Proto/ProtoSerialization.h"
-	"../Proto/serialization.pb.h"
+	"../Proto/AppSignal.pb.h"
+
+	"../AppSignalLib/AppSignal.h"
+	"../AppSignalLib/AppSignalParam.h"
+	"../AppSignalLib/AppSignalState.h"
+
+	"../DbLib/DbController.h"
 )
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h

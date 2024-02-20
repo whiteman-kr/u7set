@@ -4,6 +4,9 @@
 #include "Simulator/SimSelectBuildDialog.h"
 #include "../lib/ConstStrings.h"
 
+#include <QProxyStyle>
+#include <QStylePainter>
+
 
 #ifdef QT_DEBUG
 	#include <QAbstractItemModelTester>

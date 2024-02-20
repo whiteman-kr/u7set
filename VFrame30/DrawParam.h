@@ -1,10 +1,11 @@
 #pragma once
 
-#include "../CommonLib/Types.h"
 #include "../lib/ClientBehavior.h"
 #include "../lib/ITimeStats.h"
-#include "Session.h"
+#include "VFrame30Types.h"
 #include "FontParam.h"
+#include "Session.h"
+#include "VFrameTools.h"
 
 
 #define VFRAME30_CACHE_DRAW_TEXT	// Use cached draw text, DrawHelper::drawTextCahed(...)
@@ -20,14 +21,6 @@ class QPixmap;
 
 namespace VFrame30
 {
-	enum class DrawMode
-	{
-		Monitor,
-		Simulator,
-		Editor
-	};
-
-
 	class Schema;
 	class SchemaView;
 	class ClientSchemaView;

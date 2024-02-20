@@ -1,10 +1,13 @@
 #include "TuningFilterEditor.h"
 #include "../lib/PropertyEditorDialog.h"
 
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QTreeWidget>
+#include <QApplication>
+#include <QComboBox>
 #include <QFileDialog>
+#include <QHBoxLayout>
+#include <QHeaderView>
+#include <QTreeWidget>
+#include <QVBoxLayout>
 
 //
 // DialogChooseTuningSignals

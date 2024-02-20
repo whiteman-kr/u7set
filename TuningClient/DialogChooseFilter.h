@@ -5,6 +5,7 @@
 
 class QListWidget;
 
+
 class DialogChooseFilter : public QDialog
 {
 	Q_OBJECT
@@ -20,7 +21,6 @@ private slots:
 private:
 
 	QListWidget* m_listBox = nullptr;
-
 	TuningFilter* m_chosenFilter = nullptr;
 };
 

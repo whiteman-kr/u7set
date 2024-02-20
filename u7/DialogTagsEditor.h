@@ -2,6 +2,7 @@
 #define DIALOGTAGSEDITOR_H
 
 #include <QDialog>
+#include <QItemDelegate>
 
 namespace Ui {
 	class DialogTagsEditor;

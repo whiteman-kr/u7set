@@ -7,10 +7,18 @@
 #include "../ReportLib/ReportPrinter.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/DiagStateController.h"
-#include "../VFrame30/Schema.h"
-#include "../VFrame30/SchemaItemConnection.h"
-#include "../VFrame30/SchemaItemLoopback.h"
-#include "../VFrame30/SchemaItemSignal.h"
+
+
+namespace VFrame30
+{
+	class Schema;
+	class SchemaDetailsSet;
+	class SchemaItemConnection;
+	class SchemaItemLoopback;
+	class FblItemRect;
+	class LogicSchema;
+}
+
 
 namespace Builder
 {

@@ -1,6 +1,9 @@
 #pragma once
+#include <set>
+#include <vector>
 
-#include "../lib/ConstStrings.h"
+class QXmlStreamWriter;
+class QXmlStreamReader;
 
 namespace OnlineLib
 {

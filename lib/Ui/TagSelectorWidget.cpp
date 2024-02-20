@@ -1,5 +1,8 @@
 #include "TagSelectorWidget.h"
 #include <set>
+#include <map>
+#include <QClipboard>
+#include <QApplication>
 
 TagSelectorWidget::TagSelectorWidget(QWidget* parent)
 	: QWidget(parent)

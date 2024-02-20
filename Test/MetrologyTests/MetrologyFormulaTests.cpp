@@ -1,5 +1,4 @@
 #include "MetrologyFormulaTests.h"
-#include <QTest>
 
 #include "../Metrology/MetrologyFormula.h"
 

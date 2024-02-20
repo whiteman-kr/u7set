@@ -1,12 +1,11 @@
 #pragma once
 
 #include <QJSValue>
-#include "../CommonLib/PropertyObject.h"
 #include "../CommonLib/Factory.h"
 #include "../CommonLib/DebugInstCounter.h"
 #include "../UtilsLib/ILogFile.h"
-#include "../Proto/ProtoSerialization.h"
 #include "SchemaPoint.h"
+#include "Context.h"
 
 
 class QJSEngine;

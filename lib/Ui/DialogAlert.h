@@ -1,10 +1,13 @@
 #ifndef DIALOGALERT_H
 #define DIALOGALERT_H
 
+#include <QDialog>
+
 
 class DialogAlert : public QDialog
 {
 	Q_OBJECT
+
 public:
 	DialogAlert(QWidget* parent, QString title = QString());
 	virtual ~DialogAlert();

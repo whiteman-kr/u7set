@@ -1,6 +1,7 @@
 #include "SignalHistoryDialog.h"
 #include "../lib/WidgetUtils.h"
 #include "../DbLib/DbController.h"
+#include "../UtilsLib/WUtils.h"
 #include "AppSignalSetProvider.h"
 #include "Settings.h"
 

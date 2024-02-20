@@ -355,7 +355,8 @@ let LMNumberCount: number = 0;
 //let configScriptVersion: number = 44;		// Tuning LAN configuration is placed in LAN1 or LAN2/LAN3 depending on LAN description
 //let configScriptVersion: number = 45; 	// Added mV_Type_L, mV_Type_M and mV_Raw_m1200_p1200 sensor types
 //let configScriptVersion: number = 46;		// MAC address is checkind for uniqueness, LAN values are set to 0 if LAN is switched off
-let configScriptVersion: number = 47;		// LAN configuration is dynamically generated
+//let configScriptVersion: number = 47;		// LAN configuration is dynamically generated
+let configScriptVersion: number = 48;		// Using DiagLANDataSize calculated by RPCT
 
 //
 
@@ -516,7 +517,7 @@ function module_lm_1(builder: Builder, root: ScriptDeviceObject, module: ScriptD
 function generate_lm(builder: Builder, root: ScriptDeviceObject, module: ScriptDeviceModule, confFirmware: ModuleFirmware, log: IssueLogger,
 	signalSet: SignalSet, subsystemStorage: SubsystemStorage, opticModuleStorage: OptoModuleStorage, logicModuleDescription: LogicModule) {
 
-	let checkProperties: string[] = ["SubsystemID", "LMNumber", "AppLANDataSize", "TuningLANDataUID", "AppLANDataUID", "DiagLANDataUID"];
+	let checkProperties: string[] = ["SubsystemID", "LMNumber", "AppLANDataSize", "DiagLANDataSize", "TuningLANDataUID", "AppLANDataUID", "DiagLANDataUID"];
 	for (let cp: number = 0; cp < checkProperties.length; cp++) {
 		if (module.propertyValue(checkProperties[cp]) == undefined) {
 			log.errCFG3000(checkProperties[cp], module.equipmentId);
@@ -560,8 +561,8 @@ function generate_lm(builder: Builder, root: ScriptDeviceObject, module: ScriptD
 
 	let uartId: number = 0x0102;
 
-	let appWordsCount: number = module.propertyInt("AppLANDataSize");
-	let diagWordsCount: number = logicModuleDescription.Memory_TxDiagDataSize;
+	const appWordsCount: number = module.propertyInt("AppLANDataSize");
+	const diagWordsCount: number = module.propertyInt("DiagLANDataSize");
 
 	let ssKeyValue: number = subsystemStorage.ssKey(subSysID);
 	if (ssKeyValue == -1) {
@@ -757,8 +758,6 @@ function generate_lm(builder: Builder, root: ScriptDeviceObject, module: ScriptD
 			}
 			confFirmware.writeLog("    [" + frame + ":" + ptr + "] DiagDataSize = " + diagWordsIoCount + "\r\n");
 		}
-
-		diagWordsCount += diagWordsIoCount;
 	}
 
 	let lanConfigFrame: number = frameIOConfig + ioModulesMaxCount;

@@ -259,7 +259,7 @@ TEST(AppSignalManagerTests, recentUsedAdd)
 	// 2. Outdated signals are removed from the list when hashes() is called
 	//
 
-	ClientLib::RecentUsed recentUsed{5};	// Keep up to 5 signals
+	AppSignalLib::RecentUsed recentUsed{5};	// Keep up to 5 signals
 
 	recentUsed.add(1);
 	recentUsed.add(2);
@@ -282,7 +282,7 @@ TEST(AppSignalManagerTests, recentUsedRemove)
 	// 1. Outdated is a signal which was not fetched for 3 seconds or more.
 	// 2. Outdated signals are removed from the list when hashes() is called
 	//
-	ClientLib::RecentUsed recentUsed{10};	// Keep up to 5 signals
+	AppSignalLib::RecentUsed recentUsed{10};	// Keep up to 5 signals
 
 	recentUsed.add({1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
 
@@ -302,7 +302,7 @@ TEST(AppSignalManagerTests, recentUsedRemoveOutdated)
 	// 1. Outdated is a signal which was not fetched for 3 seconds or more.
 	// 2. Outdated signals are removed from the list when hashes() is called
 	//
-	ClientLib::RecentUsed recentUsed{10};
+	AppSignalLib::RecentUsed recentUsed{10};
 
 	for (Hash h = 1; h <= 10; h++)
 	{
@@ -329,7 +329,7 @@ TEST(AppSignalManagerTests, recentUsedFetchOutdate)
 	// 1. Outdated is a signal which was not fetched for 3 seconds or more.
 	// 2. Outdated signals are removed from the list when hashes() is called
 	//
-	ClientLib::RecentUsed recentUsed{10};
+	AppSignalLib::RecentUsed recentUsed{10};
 
 	for (Hash h = 1; h <= 10; h++)
 	{

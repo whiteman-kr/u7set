@@ -1,11 +1,5 @@
 #pragma once
-
 #include <QTest>
-#include <QSql>
-#include <QSqlError>
-#include <QDebug>
-
-#include "../../DbLib/DbController.h"
 
 
 #define OPEN_DATABASE()		QSqlDatabase db; \

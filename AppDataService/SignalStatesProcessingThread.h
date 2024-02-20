@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../UtilsLib/SimpleThread.h"
 #include "../OnlineLib/CircularLogger.h"
 #include "../UtilsLib/SimpleMutex.h"
 #include "../AppSignalLib/SimpleAppSignalState.h"

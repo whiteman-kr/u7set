@@ -1,9 +1,9 @@
-#include "../CommonLib/Times.h"
-
 #include "ClientSchemaView.h"
+#include "AppSignalController.h"
+#include "Context.h"
 #include "DrawParam.h"
 #include "PropertyNames.h"
-#include "SchemaLayer.h"
+
 
 namespace VFrame30
 {
@@ -62,7 +62,7 @@ namespace VFrame30
 			{
 				if (item->objectName() == objectName)
 				{
-					QQmlEngine::setObjectOwnership(item.get(), QQmlEngine::ObjectOwnership::CppOwnership);
+					QJSEngine::setObjectOwnership(item.get(), QJSEngine::ObjectOwnership::CppOwnership);
 					return item.get();
 				}
 			}
@@ -100,7 +100,7 @@ namespace VFrame30
 			return nullptr;
 		}
 
-		QQmlEngine::setObjectOwnership(widget, QQmlEngine::ObjectOwnership::CppOwnership);
+		QJSEngine::setObjectOwnership(widget, QJSEngine::ObjectOwnership::CppOwnership);
 
 		return widget;
 	}
@@ -670,7 +670,7 @@ namespace VFrame30
 		{
 			m_scriptSchemaView = std::make_unique<ScriptSchemaView>(this, m_schemaViewHistory);
 
-			QQmlEngine::setObjectOwnership(m_scriptSchemaView.get(), QQmlEngine::CppOwnership);
+			QJSEngine::setObjectOwnership(m_scriptSchemaView.get(), QJSEngine::CppOwnership);
 			QJSValue jsSchemaView = engine.newQObject(m_scriptSchemaView.get());
 
 			engine.globalObject().setProperty(PropertyNames::scriptGlobalVariableView, jsSchemaView);
@@ -681,7 +681,7 @@ namespace VFrame30
 		if (m_logController != nullptr)
 		{
 			QJSValue jsLog = engine.newQObject(m_logController);
-			QQmlEngine::setObjectOwnership(m_logController, QQmlEngine::CppOwnership);
+			QJSEngine::setObjectOwnership(m_logController, QJSEngine::CppOwnership);
 
 			engine.globalObject().setProperty(PropertyNames::scriptGlobalVariableLog, jsLog);
 		}

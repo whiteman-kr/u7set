@@ -17,7 +17,6 @@
 
 
 #include "../lib/PropertyEditor.h"
-#include "../CommonLib/Hash.h"
 
 #include "MetrologySignal.h"
 #include "DialogList.h"

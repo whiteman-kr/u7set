@@ -5,6 +5,7 @@
 #include "SchemaView.h"
 #include <QAbstractTextDocumentLayout>
 
+
 namespace VFrame30
 {
 	SchemaItemRect::SchemaItemRect(void) :

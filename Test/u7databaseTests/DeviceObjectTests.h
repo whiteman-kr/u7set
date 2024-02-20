@@ -1,7 +1,10 @@
 #pragma once
-#include "../../HardwareLib/DeviceObject.h"
-#include "../../HardwareLib/DiagSignal.h"
-#include "../../HardwareLib/HardwareLibrary.h"
+#include <QTest>
+
+namespace Hardware
+{
+	class DeviceRoot;
+}
 
 class DeviceObjectTests : public QObject
 {

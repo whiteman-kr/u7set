@@ -1,6 +1,7 @@
 #include "SimProjectWidget.h"
 #include "../Settings.h"
 #include "../../Simulator/SimConnections.h"
+#include "../../Simulator/SimSubsystem.h"
 
 using namespace SimProjectTreeItems;
 
@@ -56,7 +57,7 @@ SimProjectWidget::SimProjectWidget(SimIdeSimulator* simulator, QWidget* parent) 
 	connect(m_treeWidget, &QTreeWidget::customContextMenuRequested, this, &SimProjectWidget::treeContextMenu);
 	connect(m_treeWidget, &QTreeWidget::doubleClicked, this, &SimProjectWidget::treeDoubleClicked);
 
-	connect(m_simulator, &Sim::Simulator::projectUpdated, this, &SimProjectWidget::projectUpdated);
+	connect(m_simulator, &SimIdeSimulator::projectUpdated, this, &SimProjectWidget::projectUpdated);
 
 	connect(&(m_simulator->control()), &Sim::Control::statusUpdate, this, &SimProjectWidget::updateModuleStates);
 

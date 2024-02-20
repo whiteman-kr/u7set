@@ -1,0 +1,5 @@
+LM1-SF40-4PH
+	20.02.2024	Version: 1	LM1-SF40-4PH_v1.u7devp 	RPCT-3832: Added specific property DiagLANDataSize
+
+
+

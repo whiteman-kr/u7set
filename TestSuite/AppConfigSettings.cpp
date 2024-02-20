@@ -1,4 +1,6 @@
 #include "AppConfigSettings.h"
+#include <QStandardPaths>
+#include <QDir>
 
 QColor redColor = QColor(192, 0, 0);
 

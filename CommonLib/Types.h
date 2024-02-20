@@ -4,7 +4,7 @@
 #include <cassert>
 #include <QObject>
 #include <QMetaEnum>
-#include <QVariant>
+
 
 /*! \brief Contains enumerations used in RPCT*/
 class E : public QObject
@@ -753,7 +753,7 @@ public:
 	static QMetaEnum metaEnum()
 	{
 		QMetaEnum me = QMetaEnum::fromType<ENUM_TYPE>();
-		Q_ASSERT(me.isValid() == true);
+		assert(me.isValid() == true);
 
 		return me;
 	}
@@ -769,7 +769,7 @@ public:
 		const char* str = me.valueToKey(value);
 		if (str == nullptr)
 		{
-			Q_ASSERT(str);
+			assert(str);
 			return {};
 		}
 
@@ -787,7 +787,7 @@ public:
 		const char* str = me.valueToKey(static_cast<int>(value));
 		if (str == nullptr)
 		{
-			Q_ASSERT(str);
+			assert(str);
 			return {};
 		}
 
@@ -832,7 +832,7 @@ public:
 
 		if (ok == nullptr)
 		{
-			Q_ASSERT(false);		// key is not found!
+			assert(false);		// key is not found!
 		}
 		else
 		{

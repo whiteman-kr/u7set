@@ -2,14 +2,16 @@
 #define TUNINGSIGNALINFO_H
 
 #include <QDialog>
-#include "../ClientLib/TuningConnection.h"
-#include "../CommonLib/Hash.h"
-#include "../CommonLib/Types.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "TuningConfigController.h"
 
 namespace Ui {
 	class TuningSignalInfo;
+}
+
+namespace ClientLib 
+{
+	class TuningConnection;
 }
 
 class TuningSignalManager;

@@ -35,13 +35,15 @@ qt_add_library(${TARGET} STATIC
 	LogicModulesInfo.h
 	ModuleFirmware.cpp
 	ModuleFirmware.h
+	PropertyNames.cpp
+	PropertyNames.h
 	ScriptDeviceObject.cpp
 	ScriptDeviceObject.h
 	Subsystem.cpp
 	Subsystem.h
 )
 
-target_precompile_headers(${TARGET} PUBLIC
+target_precompile_headers(${TARGET} PRIVATE
 	# C++ includes
 	#
 	<algorithm>
@@ -87,7 +89,7 @@ target_precompile_headers(${TARGET} PUBLIC
 	<QMetaObject>
 	<QMetaProperty>
 	<QObject>
-	<QQmlEngine>
+	<QJSEngine>
 	<QtEndian>
 	<QTime>
 	<QUuid>
@@ -95,12 +97,16 @@ target_precompile_headers(${TARGET} PUBLIC
 	<QXmlStreamWriter>
 
 	<QtConcurrent>
+)
 
-	# Project includes
-	#
+target_precompile_headers(${TARGET} PRIVATE
+	"../CommonLib/Types.h"
+	"../CommonLib/Hash.h"
+	"../CommonLib/PropertyObject.h"
+	#"../CommonLib/AfbParamValue.h"
+	
 	"../Proto/ProtoSerialization.h"
-	"../Proto/serialization.pb.h"
-	"../Proto/network.pb.h"
+	"../Proto/Network.pb.h"	
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Core Qt6::Network Qt6::Xml Qt6::Concurrent Qt6::Qml)

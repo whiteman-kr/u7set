@@ -2,8 +2,7 @@
 
 #include "../DbLib/DbController.h"
 #include "../HardwareLib/DeviceObject.h"
-#include "../VFrame30/Schema.h"
-#include "../VFrame30/SchemaItemFrame.h"
+#include "../VFrame30/SchemaDetails.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../lib/DataSource.h"
 

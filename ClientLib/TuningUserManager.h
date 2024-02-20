@@ -1,9 +1,7 @@
 #pragma once
 
-#include <QObject>
 #include <QDialog>
-#include <QComboBox>
-#include <QLineEdit>
+#include <QMutex>
 #include "../lib/Tuning/ITuningAuthorization.h"
 #include "../OnlineLib/MatsUsers.h"
 
@@ -11,6 +9,9 @@
 #include <security/pam_appl.h>
 #include <security/pam_misc.h>
 #endif
+
+class QComboBox;
+class QLineEdit;
 
 
 namespace ClientLib

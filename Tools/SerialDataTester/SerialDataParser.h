@@ -1,7 +1,6 @@
 #pragma once
 #include <QSerialPort>
 #include <QByteArray>
-#include <QThread>
 #include <QTimer>
 
 #include "../../lib/Crc.h"

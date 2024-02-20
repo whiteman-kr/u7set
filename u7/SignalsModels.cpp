@@ -3,6 +3,7 @@
 #include "AppSignalPropertyManager.h"
 #include "SignalsTabPage.h"
 #include "Settings.h"
+#include "../UtilsLib/WUtils.h"
 
 // -------------------------------------------------------------------------------------------------------
 //

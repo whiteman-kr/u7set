@@ -1,17 +1,20 @@
 #include "MonitorMainWindow.h"
 #include "../UtilsLib/Ui/UiTools.h"
+#include "../VFrame30/LogController.h"
 #include "../VFrame30/Schema.h"
 #include "../lib/Ui/DialogAbout.h"
 #include "../lib/Ui/DialogSignalSearch.h"
+#include "../lib/Ui/DialogTcpStatistics.h"
 #include "../lib/Ui/SchemaListWidget.h"
 #include "./Archive/MonitorArchive.h"
 #include "./Trend/MonitorTrends.h"
 #include "DialogDataSources.h"
 #include "DialogSettings.h"
-#include "Globals.h"
-#include "MonitorSchemaView.h"
+#include "MonitorCentralWidget.h"
 #include "MonitorSchemaWidget.h"
 #include "MonitorSignalSnapshot.h"
+#include "SelectSchemaWidget.h"
+
 
 MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow{parent},
@@ -164,6 +167,8 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 
 	return;
 }
+
+MonitorMainWindow::~MonitorMainWindow() = default;
 
 void MonitorMainWindow::closeEvent(QCloseEvent* e)
 {

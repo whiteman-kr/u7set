@@ -1,10 +1,9 @@
 #include "TestSuiteCfgGenerator.h"
-#include "TuningClientCfgGenerator.h"
 #include "../OnlineLib//SoftwareSettings.h"
-#include "SoftwareSettingsGetter.h"
-#include "../VFrame30/Schema.h"
 #include "Context.h"
-#include "../lib/ClientBehavior.h"
+#include "SoftwareSettingsGetter.h"
+#include "TuningClientCfgGenerator.h"
+#include <QJSValueIterator>
 
 namespace Builder
 {

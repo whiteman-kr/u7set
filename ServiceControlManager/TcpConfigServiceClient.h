@@ -2,8 +2,6 @@
 
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/SocketIO.h"
-#include "../CommonLib/Hash.h"
-#include "../AppSignalLib/AppSignal.h"
 #include "../AppDataService/AppDataSource.h"
 
 class QTimer;

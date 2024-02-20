@@ -1,12 +1,8 @@
 #pragma once
 
-#include <map>
-#include <unordered_map>
 #include <memory>
 #include <array>
-#include <optional>
 #include <concepts>
-#include <QObject>
 #include "../HardwareLib/LmDescription.h"
 
 

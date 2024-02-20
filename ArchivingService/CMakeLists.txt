@@ -99,8 +99,11 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QXmlStreamReader>
 	<QXmlStreamWriter>
 
-	"../Proto/network.pb.h"
-	"../Proto/serialization.pb.h"
+	"../CommonLib/Types.h"
+	"../CommonLib/Hash.h"
+
+	"../Proto/Network.pb.h"	
+	#"../AppSignalLib/AppSignal.h"
 )
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h

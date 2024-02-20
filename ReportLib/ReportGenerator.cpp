@@ -1,8 +1,11 @@
 #include "ReportGenerator.h"
+#include "ReportTemplate.h"
+
+#include <QBuffer>
 
 namespace ReportLib
 {
-	ReportGenerator::ReportGenerator(const ReportTemplate& reportTemplate):
+	ReportGenerator::ReportGenerator(const ReportTemplate& reportTemplate) :
 		m_template(reportTemplate)
 	{
 

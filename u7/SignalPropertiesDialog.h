@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../AppSignalLib/AppSignal.h"
 #include "IdePropertyEditor.h"
 #include "AppSignalSetProvider.h"
 

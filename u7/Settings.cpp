@@ -4,6 +4,8 @@
 #include "../lib/Ui/DialogSignalSearch.h"
 #include "../Tools/qtkeychain/keychain.h"
 
+#include <QStandardPaths>
+
 Settings theSettings;
 
 //

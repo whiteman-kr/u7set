@@ -1,7 +1,8 @@
 #include "TuningWorkspace.h"
-#include "Settings.h"
+#include "../ClientLib/TuningConnection.h"
 #include "Main.h"
 #include "MainWindow.h"
+#include "Settings.h"
 
 #include <QButtonGroup>
 #include <QTreeWidget>

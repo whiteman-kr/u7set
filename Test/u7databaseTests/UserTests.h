@@ -1,7 +1,6 @@
 #pragma once
-#include <QString>
-#include <QtSql>
 #include "TestDbBase.h"
+#include <QTest>
 
 class UserTests : public TestDbBase
 {

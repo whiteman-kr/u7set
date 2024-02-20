@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "../UtilsLib/Address16.h"
-#include "../VFrame30/Bus.h"
+#include "../AppSignalLib/Bus.h"
 #include "IssueLogger.h"
 #include "BuildResultWriter.h"
 #include "../lib/ConstStrings.h"
@@ -102,7 +102,7 @@ namespace Builder
 
 		InbusConvDescription getInbusConvDescription() const;
 
-		void init(const Busses& busses, const VFrame30::BusSignal& bs);
+		void init(const Busses& busses, const AppSignalLib::BusSignal& bs);
 		bool isOverlaped(const BusSignal& bs);
 
 		bool isValid() const;
@@ -116,7 +116,7 @@ namespace Builder
 		static const QString INVALUD_BUS_SIGNAL_ID;
 
 	public:
-		Bus(const Busses& busses, const VFrame30::Bus& bus, IssueLogger* log);
+		Bus(const Busses& busses, const AppSignalLib::Bus& bus, IssueLogger* log);
 
 		bool init();
 
@@ -137,8 +137,8 @@ namespace Builder
 
 		const QVector<BusSignal>& busSignals() const { return m_signals; }
 
-		const VFrame30::Bus& srcBus() const { return m_srcBus; }
-		VFrame30::BusSignal& getBusSignal(const QString& signalID);
+		const AppSignalLib::Bus& srcBus() const { return m_srcBus; }
+		AppSignalLib::BusSignal& getBusSignal(const QString& signalID);
 
 		QStringList getChildBussesIDs();
 
@@ -156,7 +156,7 @@ namespace Builder
 
 	private:
 		const Busses& m_busses;
-		VFrame30::Bus m_srcBus;
+		AppSignalLib::Bus m_srcBus;
 		IssueLogger* m_log = nullptr;
 
 		//
@@ -172,7 +172,7 @@ namespace Builder
 		std::vector<int> m_busSignalIndexes;
 		std::map<int, std::vector<int>> m_discreteSignalIndexes;		// discrete signals offset => discrete signal indexes
 
-		VFrame30::BusSignal m_invalidBusSignal;
+		AppSignalLib::BusSignal m_invalidBusSignal;
 		BusSignal m_invalidSignal;
 
 		bool m_isInitialized = false;
@@ -183,7 +183,7 @@ namespace Builder
 	class Busses
 	{
 	public:
-		Busses(VFrame30::BusSet* busSet, IssueLogger* log);
+		Busses(AppSignalLib::BusSet* busSet, IssueLogger* log);
 		virtual ~Busses();
 
 		bool prepare();
@@ -198,7 +198,7 @@ namespace Builder
 		bool getBusInitOrder(QVector<BusShared>* busInitOrder);
 
 	private:
-		VFrame30::BusSet* m_busSet = nullptr;
+		AppSignalLib::BusSet* m_busSet = nullptr;
 		IssueLogger* m_log = nullptr;
 
 		QHash<QString, BusShared> m_busses;

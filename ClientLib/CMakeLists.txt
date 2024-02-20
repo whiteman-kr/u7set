@@ -49,9 +49,11 @@ qt_add_library(${TARGET} STATIC
 	TuningTcpClient.h
 	TuningUserManager.cpp
 	TuningUserManager.h
+	TuningWriteCommand.cpp
+	TuningWriteCommand.h
 )
 
-target_precompile_headers(${TARGET} PUBLIC
+target_precompile_headers(${TARGET} PRIVATE
 	<algorithm>
 	<cassert>
 	<chrono>
@@ -83,11 +85,26 @@ target_precompile_headers(${TARGET} PUBLIC
 	<QPushButton>
 	<QReadWriteLock>
 	<QSharedMemory>
+	<QThread>
 	<QTimeZone>
 	<QTranslator>
 	<QVBoxLayout>
+	<QXmlStreamReader>
+	<QXmlStreamWriter>
 
-	"../Proto/network.pb.h"
+	"../CommonLib/Types.h"
+	"../CommonLib/Hash.h"
+	"../CommonLib/PropertyObject.h"
+
+	"../Proto/ProtoSerialization.h"
+	"../Proto/Network.pb.h"	
+	#"../Proto/AppSignal.pb.h"
+
+	"../AppSignalLib/AppSignalParam.h"
+	"../AppSignalLib/AppSignalState.h"
+	"../AppSignalLib/TuningValue.h"
+
+	"../OnlineLib/Tcp.h"
 )
 
 #Add translations

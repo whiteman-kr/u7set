@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../VFrame30/FblItem.h"
+#include "../VFrame30/SchemaItem.h"
 
 
 namespace VFrame30

@@ -1,13 +1,17 @@
 #pragma once
 
-#include <memory>
-#include <QObject>
-#include <QSharedMemory>
-#include <QDomDocument>
-#include "../CommonLib/HostAddressPort.h"
-#include "../UtilsLib/ILogFile.h"
+#include "../OnlineLib/BuildInfo.h"
 #include "../OnlineLib/SoftwareInfo.h"
-#include "../OnlineLib/CfgServerLoader.h"
+#include "../OnlineLib/SoftwareSettings.h"
+#include "../OnlineLib/TcpConnectionState.h"
+#include "../UtilsLib/ILogFile.h"
+
+#include <QSharedMemory>
+#include <memory>
+
+class QDomNode;
+class CfgLoaderThread;
+class HostAddressPort;
 
 
 namespace ClientLib
@@ -31,12 +35,12 @@ namespace ClientLib
 		ConfigController& operator=(const ConfigController&) = delete;
 		ConfigController& operator=(ConfigController&&) = delete;
 
-		explicit ConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address, ILogFile* logFile);
-		explicit ConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2, ILogFile* logFile);
+		explicit ConfigController(const SoftwareInfo& softwareInfo, const HostAddressPort& address, ILogFile* logFile);
+		explicit ConfigController(const SoftwareInfo& softwareInfo, const HostAddressPort& address1, const HostAddressPort& address2, ILogFile* logFile);
 		virtual ~ConfigController();
 
 	public:
-		void setConnectionParams(QString equipmentId, HostAddressPort address1, HostAddressPort address2);
+		void setConnectionParams(QString equipmentId, const HostAddressPort& address1, const HostAddressPort& address2);
 
 		bool getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr);
 		bool getFileBlockedById(const QString& id, QByteArray* fileData, QString* errorStr);
@@ -50,14 +54,14 @@ namespace ClientLib
 		[[nodiscard]] ILogFile* logFile() const;
 
 	protected:
-		/// This function is called when the new configuarion arrives, reimplement it for specific XML pasing.
-		/// Clinet must override an appropriate to settings class function.
+		/// This function is called when the new configuration arrives, reimplement it for specific XML parsing.
+		/// Client must override an appropriate to settings class function.
 		///
-		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const MonitorSettings& settings, const BuildFileInfoArray& files);
-		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const DiagnosticsSettings& settings, const BuildFileInfoArray& files);
-		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const TuningClientSettings& settings, const BuildFileInfoArray& files);
-		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const TestClientSettings& settings, const BuildFileInfoArray& files);
-		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const TestSuiteSettings& settings, const BuildFileInfoArray& files);
+		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const MonitorSettings& settings, const std::vector<OnlineLib::BuildFileInfo>& files);
+		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const DiagnosticsSettings& settings, const std::vector<OnlineLib::BuildFileInfo>& files);
+		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const TuningClientSettings& settings, const std::vector<OnlineLib::BuildFileInfo>& files);
+		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const TestClientSettings& settings, const std::vector<OnlineLib::BuildFileInfo>& files);
+		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const TestSuiteSettings& settings, const std::vector<OnlineLib::BuildFileInfo>& files);
 
 	private:
 		int acquireAppInstanceNo(const QString& programName);
@@ -71,7 +75,7 @@ namespace ClientLib
 
 	private slots:
 		void slot_configurationReady(const QByteArray configurationXmlData,
-									 const BuildFileInfoArray buildFileInfoArray,
+									 const std::vector<OnlineLib::BuildFileInfo> buildFileInfoArray,
 									 SessionParams sessionParams,
 									 std::shared_ptr<const SoftwareSettings> curSettingsProfile);
 
