@@ -170,6 +170,27 @@ namespace VFrame30
 		Q_PROPERTY(int precision READ precision WRITE setPrecision)
 		Q_PROPERTY(int Precision READ precision WRITE setPrecision)
 
+		/// \brief Angle of rotation
+		Q_PROPERTY(double angle READ angle WRITE setAngle)
+		Q_PROPERTY(double Angle READ angle WRITE setAngle)
+
+		/**
+		* @brief Rotation point of the item.
+		*
+		* This property represents the rotation point of the item. The rotation point is the
+		* point around which the item is rotated when the rotation transformation (property Angle) is applied.
+		* Setting this property allows to specify a custom rotation point for the item.
+		*
+		* Possible values for this property are:
+		* - RotationPoint::TopLeft (0)
+		* - RotationPoint::TopRight (1)
+		* - RotationPoint::BottomRight (2)
+		* - RotationPoint::BottomLeft (3)
+		* - RotationPoint::Center (4)
+		*/
+		Q_PROPERTY(RotationPoint rotationPoint READ rotationPoint WRITE setRotationPoint)
+		Q_PROPERTY(RotationPoint RotationPoint READ rotationPoint WRITE setRotationPoint)
+
 	public:
 		SchemaItemValue(void);
 		explicit SchemaItemValue(SchemaUnit unit);
