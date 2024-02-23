@@ -124,6 +124,10 @@ public:
 
 protected:
 	void addItem(SchemaItemPtr newItem);
+	void runAddItem(SchemaItemPtr item, std::shared_ptr<VFrame30::SchemaLayer> layer);
+	void runAddItem(const std::list<SchemaItemPtr>& items, std::shared_ptr<VFrame30::SchemaLayer> layer);
+
+	bool setDefaultItemProperties(const auto& items);
 
 	void setMouseCursor(QPoint mousePos);
 

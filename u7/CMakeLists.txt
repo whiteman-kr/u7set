@@ -207,6 +207,8 @@ set (U7_SOURCES
 	MainWindow.h
 	PasswordService.cpp
 	PasswordService.h
+	ProjectDefaults.cpp
+	ProjectDefaults.h
 	ProjectsTabPage.cpp
 	ProjectsTabPage.h
 	Reports/DialogReportPageSetup.cpp
