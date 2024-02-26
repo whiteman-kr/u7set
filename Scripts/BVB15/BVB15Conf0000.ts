@@ -337,8 +337,9 @@ function module_bvb15(builder: Builder, root: ScriptDeviceObject, module: Script
 	if (module.customModuleFamily == FamilyBVB15ID) {
 		let place: number = module.place;
 
-		if (place != 0) {
-			log.errCFG3002("Place", place, 0, 0, module.equipmentId);
+		if (place != 0 &&
+		    place != 13) {
+			log.errCFG3002("Place", place, 0, 13, module.equipmentId);
 			return false;
 		}
 

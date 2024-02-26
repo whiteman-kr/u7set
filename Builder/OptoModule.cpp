@@ -1984,7 +1984,7 @@ namespace Hardware
 
 		if (module->isLogicModule() == true || module->isBvb() == true)
 		{
-			Q_ASSERT(m_place == 0);
+			Q_ASSERT(m_place == DeviceHelper::LM1_PLACE || m_place == DeviceHelper::LM2_PLACE);
 
 			m_moduleDataAddr = m_lmDescription->optoInterface().m_optoInterfaceDataOffset;
 

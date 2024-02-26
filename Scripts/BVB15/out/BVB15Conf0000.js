@@ -147,8 +147,9 @@ function valToADC(val, lowLimit, highLimit, lowADC, highADC) {
 function module_bvb15(builder, root, module, confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription) {
     if (module.customModuleFamily == FamilyBVB15ID) {
         let place = module.place;
-        if (place != 0) {
-            log.errCFG3002("Place", place, 0, 0, module.equipmentId);
+        if (place != 0 &&
+            place != 13) {
+            log.errCFG3002("Place", place, 0, 13, module.equipmentId);
             return false;
         }
         // Generate Configuration
