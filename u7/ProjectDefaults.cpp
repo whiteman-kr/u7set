@@ -1,5 +1,4 @@
 #include "ProjectDefaults.h"
-#include <QTemporaryFile>
 
 const std::vector<ProjectDefaults::Property> ProjectDefaults::s_empty;
 
@@ -33,24 +32,24 @@ bool ProjectDefaults::parse(const QString& value)
 	m_defaults.clear();
 
 	// Value is a simple INI file, we cannot use QSettings as it sorts the keys
-	// and we need to keep the order to apply property values in the order, 
+	// and we need to keep the order to apply property values in the order,
 	// it can be useful for setting ColumnCount for SchemaItemSignals and other schema items.
 	//
 	QStringList lines = value.split('\n', Qt::SkipEmptyParts);
-	
+
 	QString currentSection;
 
 	for (QString line : lines)
 	{
+		// Find comments starting with // and remove them
+		//
+		line.replace(QRegularExpression(QStringLiteral("//.*")), QStringLiteral(""));
+
 		line = line.trimmed();
-		
-		if (line.startsWith(QStringLiteral("//")) == true)
+		if (line.isEmpty() == true)
 		{
-			// This is a comment, ignore it
-			//
 			continue;
 		}
-
 		// If it is a section [], then create a new section
 		//
 		if (line.startsWith('[') == true && line.endsWith(']') == true)
@@ -60,15 +59,15 @@ bool ProjectDefaults::parse(const QString& value)
 		}
 		else
 		{
-			// If it is a property, then add it to the last section
+			// If it is a property, then add it to the current section
 			//
 			QStringList parts = line.split('=');
 			if (parts.size() == 2)
 			{
 				QString propertyName = parts[0].trimmed();
 				QString propertyValue = parts[1].trimmed();
-				
-				m_defaults[currentSection].push_back({propertyName, propertyValue});
+
+				m_defaults[currentSection].emplace_back(propertyName, propertyValue);
 			}
 		}
 	}

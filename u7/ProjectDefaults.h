@@ -31,7 +31,8 @@ public:
 	const std::vector<ProjectDefaults::Property>& values(const QString& section) const;
 
 private:
-	std::map<QString, std::vector<Property>> m_defaults;      // Key is a section name, like SchemaItemRect, value is a list of properties
-	
+	std::map<QString, std::vector<Property>>
+		m_defaults; // Key is a section name, like SchemaItemRect, value is a list of properties
+
 	static const std::vector<ProjectDefaults::Property> s_empty;
 };
