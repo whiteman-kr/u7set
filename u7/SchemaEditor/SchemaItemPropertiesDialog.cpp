@@ -1,4 +1,6 @@
 #include "SchemaItemPropertiesDialog.h"
+#include "../../VFrame30/SchemaItemAfb.h"
+#include "../../VFrame30/SchemaItemUfb.h"
 #include "EditEngine/EditEngine.h"
 #include "Settings.h"
 #include "ui_SchemaItemPropertiesDialog.h"
@@ -126,37 +128,56 @@ void SchemaItemPropertiesDialog::updateWindowTitle()
 {
 	QString title;
 
+	auto getItemName = [](SchemaItemPtr item)
+	{
+		if (item->isSchemaItemAfb() == true)
+		{
+			return QString("AFB(%1)").arg(item->toSchemaItemAfb()->afbElement().caption());
+		}
+
+		if (item->isType<VFrame30::SchemaItemUfb>() == true)
+		{
+			return QString("UFB(%1)").arg(item->toType<VFrame30::SchemaItemUfb>()->ufbCaption());
+		}
+
+		return item->type().replace("SchemaItem", "");
+	};
+
 	switch (m_items.size())
 	{
 	case 1:
-		title = tr("%1 Properties").arg(m_items[0]->type());
+		title = tr("%1 item - %2").arg(m_items.size()).arg(getItemName(m_items[0]));
 		break;
 	case 2:
-		title = tr("%1, %2 Properties").arg(m_items[0]->type()).arg(m_items[1]->type());
+		title = tr("%1 items - %2, %3").arg(m_items.size()).arg(getItemName(m_items[0])).arg(getItemName(m_items[1]));
 		break;
 	case 3:
-		title = tr("%1, %2, %3 Properties").arg(m_items[0]->type()).arg(m_items[1]->type()).arg(m_items[2]->type());
+		title = tr("%1 items - %2, %3, %4")
+					.arg(m_items.size())
+					.arg(getItemName(m_items[0]))
+					.arg(getItemName(m_items[1]))
+					.arg(getItemName(m_items[2]));
 		break;
 	case 4:
-		title = tr("%1, %2, %3, %4 Properties")
-					.arg(m_items[0]->type())
-					.arg(m_items[1]->type())
-					.arg(m_items[2]->type())
-					.arg(m_items[3]->type());
+		title = tr("%1 items - %2, %3, %4, %5")
+					.arg(m_items.size())
+					.arg(getItemName(m_items[0]))
+					.arg(getItemName(m_items[1]))
+					.arg(getItemName(m_items[2]))
+					.arg(getItemName(m_items[3]));
 		break;
 	case 5:
-		title = tr("%1, %2, %3, %4, %5 Properties")
-					.arg(m_items[0]->type())
-					.arg(m_items[1]->type())
-					.arg(m_items[2]->type())
-					.arg(m_items[3]->type())
-					.arg(m_items[4]->type());
+		title = tr("%1 items - %2, %3, %4, %5, %6")
+					.arg(m_items.size())
+					.arg(getItemName(m_items[0]))
+					.arg(getItemName(m_items[1]))
+					.arg(getItemName(m_items[2]))
+					.arg(getItemName(m_items[3]))
+					.arg(getItemName(m_items[4]));
 		break;
 	default:
-		title = tr("Schema Item(s) Properties, %1 items").arg(m_items.size());
+		title = tr("%1 Schema Items Properties").arg(m_items.size());
 	}
-
-	title.replace("SchemaItem", "");
 
 	setWindowTitle(title);
 
