@@ -29,11 +29,8 @@ namespace EditEngine
 			Record r;
 
 			r.propertyName = propertyName;
-			r.oldValue = i->propertyValue(propertyName);
 			r.newValue = value;
 			r.item = i;
-
-			assert(r.oldValue.isValid() == true);
 
 			m_items.push_back(r);
 		}
@@ -48,6 +45,11 @@ namespace EditEngine
 
 		for (Record& r : m_items)
 		{
+			// Save the old value now, as in the constructor of SetPropertyCommand it might not ne existing (example setColumnCount for SchemaItemSignal must be called in a batch run).
+			//
+			r.oldValue = r.item->propertyValue(r.propertyName);
+			assert(r.oldValue.isValid() == true);
+
 			QVariant newValue = r.newValue;
 
 			selection.push_back(r.item);

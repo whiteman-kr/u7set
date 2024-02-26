@@ -139,7 +139,7 @@ DbProjectProperties::DbProjectProperties()
 	//
 	p = ADD_PROPERTY_GETTER_SETTER(QString, Db::ProjectProperty::ProjectDefaults, true, DbProjectProperties::projectDefaults, DbProjectProperties::setProjectDefaults);
 	p->setCategory("Other");
-	p->setDescription("Project defaults, ini-file in format:\n[SchemaItemLink]\nLineWeight = 0\nLineColor = #000080");
+	p->setDescription("Project defaults, ini-file in format:\n[SchemaItemLink]\nLineWeight = 0\nLineColor = #000080\n// Comment");
 
 	return;
 }

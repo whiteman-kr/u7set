@@ -18,19 +18,20 @@ public:
 	static ProjectDefaults& instance();
 
 public:
+	struct Property
+	{
+		QString name;
+		QVariant value;
+	};
+
 	bool update(DbController& db, QWidget* parentWidget);
 
-	/// @brief Load the project defaults from the ini file, value is a ini file content
 	bool parse(const QString& value);
 
-	/// @brief Get the default value for a property.
-	/// @param section The section name.
-	/// @param key The property name.
-	/// @return The default value for the property.
-	QVariant value(const QString& section, const QString& key) const;
+	const std::vector<ProjectDefaults::Property>& values(const QString& section) const;
 
 private:
-	using Key = std::pair<QString, QString>; // Key is a pair of section and key (property name).
-
-	std::map<Key, QVariant> m_defaults;      // The default values for the properties.
+	std::map<QString, std::vector<Property>> m_defaults;      // Key is a section name, like SchemaItemRect, value is a list of properties
+	
+	static const std::vector<ProjectDefaults::Property> s_empty;
 };

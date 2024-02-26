@@ -3549,27 +3549,25 @@ bool EditSchemaWidget::setDefaultItemProperties(const auto& items)
 
 	for (auto& schemaItem : items)
 	{
-		auto props = schemaItem->properties();
-		for (auto& property : props)
-		{
-			QVariant defaultValue = pd.value(schemaItem->type(), property->caption());
+		const auto& defaultValues = pd.values(schemaItem->type());
 
-			if (defaultValue.isValid() == true)
+		// Apply defaults in the order of defaultValues.
+		//
+		for (const auto& [propName, defaultValue] : defaultValues)
+		{
+			if (batchCalled == false)
 			{
+				batchCalled = m_editEngine->startBatch();
 				if (batchCalled == false)
 				{
-					batchCalled = m_editEngine->startBatch();
-					if (batchCalled == false)
-					{
-						// Read only schema, we should not end up here at all.
-						//
-						Q_ASSERT(batchCalled);
-						return false;
-					}
+					// Read only schema, we should not end up here at all.
+					//
+					Q_ASSERT(batchCalled);
+					return false;
 				}
-
-				m_editEngine->runSetProperty(property->caption(), defaultValue, schemaItem);
 			}
+
+			m_editEngine->runSetProperty(propName, defaultValue, schemaItem);
 		}
 	}
 

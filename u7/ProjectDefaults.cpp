@@ -1,6 +1,8 @@
 #include "ProjectDefaults.h"
 #include <QTemporaryFile>
 
+const std::vector<ProjectDefaults::Property> ProjectDefaults::s_empty;
+
 
 ProjectDefaults& ProjectDefaults::instance()
 {
@@ -18,7 +20,9 @@ bool ProjectDefaults::update(DbController& db, QWidget* parentWidget)
 
 	if (pdParseOk == false && parentWidget != nullptr)
 	{
-		QMessageBox::critical(parentWidget, qAppName(), QObject::tr("Error parsing project property \"Project defaults\"."));
+		QMessageBox::critical(parentWidget,
+							  qAppName(),
+							  QObject::tr("Error parsing project property \"Project defaults\"."));
 	}
 
 	return pdParseOk;
@@ -28,58 +32,57 @@ bool ProjectDefaults::parse(const QString& value)
 {
 	m_defaults.clear();
 
-	// Save value to a temporary file
+	// Value is a simple INI file, we cannot use QSettings as it sorts the keys
+	// and we need to keep the order to apply property values in the order, 
+	// it can be useful for setting ColumnCount for SchemaItemSignals and other schema items.
 	//
-	QTemporaryFile iniFile;
-	iniFile.setFileTemplate("u7_project_defaults_XXXXXX.ini");
+	QStringList lines = value.split('\n', Qt::SkipEmptyParts);
+	
+	QString currentSection;
 
-	bool ok = iniFile.open();
-	if (ok == false)
+	for (QString line : lines)
 	{
-		return false;
-	}
-
-	qDebug() << iniFile.fileName();
-	iniFile.write(value.toUtf8());
-	iniFile.close();
-
-	// Read the setting from the temporary file
-	//
-	QSettings settings(iniFile.fileName(), QSettings::IniFormat);
-	if (settings.status() != QSettings::NoError)
-	{
-		return false;
-	}
-
-	// Get the default settings and write them into the map m_defaults
-	//
-	QStringList sections = settings.childGroups();
-	for (const QString& section : sections)
-	{
-		settings.beginGroup(section);
-
-		QStringList keys = settings.childKeys();
-		for (const QString& key : keys)
+		line = line.trimmed();
+		
+		if (line.startsWith(QStringLiteral("//")) == true)
 		{
-			Key settingKey = std::make_pair(section, key);
-			m_defaults[settingKey] = settings.value(key);
+			// This is a comment, ignore it
+			//
+			continue;
 		}
 
-		settings.endGroup();
+		// If it is a section [], then create a new section
+		//
+		if (line.startsWith('[') == true && line.endsWith(']') == true)
+		{
+			currentSection = line.mid(1, line.size() - 2);
+			m_defaults[currentSection].reserve(8);
+		}
+		else
+		{
+			// If it is a property, then add it to the last section
+			//
+			QStringList parts = line.split('=');
+			if (parts.size() == 2)
+			{
+				QString propertyName = parts[0].trimmed();
+				QString propertyValue = parts[1].trimmed();
+				
+				m_defaults[currentSection].push_back({propertyName, propertyValue});
+			}
+		}
 	}
 
 	return true;
 }
 
-QVariant ProjectDefaults::value(const QString& section, const QString& key) const
+const std::vector<ProjectDefaults::Property>& ProjectDefaults::values(const QString& section) const
 {
-	QVariant result;
-
-	auto it = m_defaults.find(std::make_pair(section, key));
+	auto it = m_defaults.find(section);
 	if (it != m_defaults.end())
 	{
-		result = it->second;
+		return it->second;
 	}
 
-	return result;
+	return s_empty;
 }
