@@ -270,20 +270,18 @@ void DiagDataServiceWorker::applyNewConfiguration()
 	}
 
 	m_onlineSources = new OnlineDataSources<DiagDataSource, SimpleDiagSignalState>(
+								m_dataSources,
 								m_curSettingsProfile.diagDataReceivingIP,
 								sessionParams().softwareRunMode,
 								m_diagDataProcessingThreadCount, logger());
 
-	bool res = m_onlineSources->init(m_dataSources);
-
-	if (res == false)
+	if (m_onlineSources->isWorkable() == false)
 	{
+		DEBUG_LOG_ERR(logger(), "OnlineDataSources initialization ERROR!");
 		return;
 	}
 
 	m_onlineSources->run();
-
-
 
 //	createTimeErrLog();
 //	createAndInitSignalStates();

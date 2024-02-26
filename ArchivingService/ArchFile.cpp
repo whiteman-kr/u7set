@@ -549,7 +549,7 @@ bool ArchFile::flush(qint64 curPartition,
 
 	int copiedItemsCount = 0;
 
-	bool result = m_queue.copyToBuffer(buffer, bufferSize, &copiedItemsCount, thread);
+	bool result = m_queue.popToBuffer(buffer, bufferSize, &copiedItemsCount, thread);
 
 	if (result == false || copiedItemsCount == 0)
 	{

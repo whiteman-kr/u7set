@@ -190,26 +190,54 @@ protected:
 };
 
 template <typename SIGNAL_STATE>
+class StatesQueue : public FastThreadSafeQueue<SIGNAL_STATE>
+{
+public:
+	StatesQueue(int queueSize) :
+		FastThreadSafeQueue<SIGNAL_STATE>(queueSize)
+	{
+	}
+};
+
+template <typename SIGNAL_STATE>
 class OnlineDataSource : public BaseOnlineDataSource
 {
-protected:
+public:
 	OnlineDataSource(const DataSource& dataSource, E::LanControllerType srcType) :
 		BaseOnlineDataSource(dataSource, srcType),
 		m_states(3)
 	{
-		if (acquiredSignalsCount() > 0)
-		{
-			m_states.resize(acquiredSignalsCount() * 3);
-		}
+		m_states.resize(std::max(acquiredSignalsCount() * 3 , 200));
 	}
 
-	void pushSignalState(const SIGNAL_STATE& state, const QThread* thread)
+	void pushState(const SIGNAL_STATE& state, const QThread* thread)
 	{
 		m_states.push(state, thread);
 	}
 
+	int popStates(SIGNAL_STATE* statesBuffer, int bufferSize, QThread* thread)
+	{
+		int statesCount = 0;
+
+		m_states.popToBuffer(statesBuffer, bufferSize, &statesCount, thread);
+
+		return statesCount;
+	}
+
+	void pushStates(SIGNAL_STATE* statesBuffer, int statesCount, QThread* thread)
+	{
+		m_states.beginPush(thread);
+
+		for(int i = 0; i < statesCount; i++)
+		{
+			m_states.push(statesBuffer[i]);
+		}
+
+		m_states.completePush(thread);
+	}
+
 private:
-	FastThreadSafeQueue<SIGNAL_STATE> m_states;
+	StatesQueue<SIGNAL_STATE> m_states;
 };
 
 
