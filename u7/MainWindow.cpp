@@ -16,6 +16,7 @@
 #include "DialogAfbLibraryCheck.h"
 #include "DialogBusEditor.h"
 #include "DialogConnections.h"
+#include "DialogMatsUsersEditor.h"
 #include "DialogSettings.h"
 #include "DialogShortcuts.h"
 #include "DialogSubsystemListEditor.h"
@@ -23,9 +24,9 @@
 #include "FilesTabPage.h"
 #include "Forms/DialogProjectDiff.h"
 #include "GlobalMessanger.h"
+#include "ProjectDefaults.h"
 #include "ProjectsTabPage.h"
 #include "Reports/DialogSchemasReport.h"
-#include "DialogMatsUsersEditor.h"
 #include "Reports/SchemasReport.h"
 #include "Settings.h"
 #include "SignalsTabPage.h"
@@ -1396,6 +1397,10 @@ void MainWindow::projectOpened(DbProject project)
 		getCentralWidget()->insertTab(m_filesTabPageIndex, m_filesTabPage, m_filesTabPage->windowTitle());
 	}
 
+	// Update Project Defaults
+	//
+	ProjectDefaults::instance().update(*db(), this);
+
 	return;
 }
 
@@ -1429,6 +1434,13 @@ void MainWindow::projectClosed()
 	if (getCentralWidget()->tabText(m_filesTabPageIndex) == m_filesTabPage->windowTitle())
 	{
 		getCentralWidget()->removeTab(m_filesTabPageIndex);
+	}
+
+	// Update Project Defaults
+	//
+	{
+		ProjectDefaults& pd = ProjectDefaults::instance();
+		pd.parse(QString{});
 	}
 
 	return;

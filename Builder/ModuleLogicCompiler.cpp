@@ -696,7 +696,11 @@ namespace Builder
 		m.device = m_lmShared;
 		m.place = m_lmShared->place();
 
-		Q_ASSERT(m.place == DeviceHelper::LM1_PLACE);
+		if (m.place != DeviceHelper::LM1_PLACE && m.place != DeviceHelper::LM2_PLACE)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
 
 		m.txDiagDataOffset = m_lmDescription->memory().m_txDiagDataOffset;
 		m.txDiagDataSize = m_lmDescription->memory().m_txDiagDataSize;
@@ -772,8 +776,14 @@ namespace Builder
 				continue;
 			}
 
-			if (module->place() == DeviceHelper::LM1_PLACE)
+			if (module->place() == DeviceHelper::LM1_PLACE ||
+				module->place() == DeviceHelper::LM2_PLACE)
 			{
+				if (module->place() != m_lm->place())
+				{
+					continue;
+				}
+
 				if (module != m_lmShared)
 				{
 					Q_ASSERT(false);
@@ -801,7 +811,8 @@ namespace Builder
 		//
 		for(auto& [place, module] : m_modules)
 		{
-			if (module.place == DeviceHelper::LM1_PLACE)
+			if (module.place == DeviceHelper::LM1_PLACE ||
+				module.place == DeviceHelper::LM2_PLACE)
 			{
 				continue;		// skip LM or BVB
 			}
@@ -3859,26 +3870,34 @@ namespace Builder
 
 		QString currentStateFlagSignalID = signalWithFlag->getFlagSignalID(flagType);
 
-		if (currentStateFlagSignalID.isEmpty() == false)
+		bool res = true;
+
+		if (currentStateFlagSignalID.isEmpty() == true)
 		{
-			// Duplicate assigning of signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.
-			//
-			m_log->errALC5168(	flagSignalID,
-								E::valueToString<E::AppSignalStateFlagType>(flagType),
-								signalWithFlagID,
-								currentStateFlagSignalID,
-								(setFlagsItem == nullptr ? QUuid() : setFlagsItem->guid()),
-								(setFlagsItem == nullptr ? EMPTY_STR : setFlagsItem->schemaID()));
-			return false;
+			res = signalWithFlag->addFlagSignalID(flagType, flagSignalID);
+			Q_ASSERT(res == true);
 		}
+		else
+		{
+			if (currentStateFlagSignalID != flagSignalID)
+			{
+				// Duplicate assigning of signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.
+				//
+				m_log->errALC5168(	flagSignalID,
+									E::valueToString<E::AppSignalStateFlagType>(flagType),
+									signalWithFlagID,
+									currentStateFlagSignalID,
+									(setFlagsItem == nullptr ? QUuid() : setFlagsItem->guid()),
+									(setFlagsItem == nullptr ? EMPTY_STR : setFlagsItem->schemaID()));
+				return false;
+			}
 
-		bool res = signalWithFlag->addFlagSignalID(flagType, flagSignalID);
-
-		Q_ASSERT(res == true);
+			// this signal already assigned to flag
+		}
 
 		m_signalsWithFlagsIDs.insert(signalWithFlagID);
 
-		return true;
+		return res;
 	}
 
 	bool ModuleLogicCompiler::setAcquiredForFlagSignals()
@@ -6876,10 +6895,14 @@ namespace Builder
 
 		for(const auto& [place, module] : m_modules)
 		{
-			if (module.place > DeviceHelper::LM1_PLACE)
+			if ((module.place == DeviceHelper::LM1_PLACE ||
+				module.place == DeviceHelper::LM2_PLACE) &&
+				module.place != m_lm->place())
 			{
-				acquiredRawDataSizeW += module.txAppDataSize;
+				continue;
 			}
+
+			acquiredRawDataSizeW += module.txAppDataSize;
 		}
 
 		m_memoryMap.setAcquiredRawDataSize(acquiredRawDataSizeW);

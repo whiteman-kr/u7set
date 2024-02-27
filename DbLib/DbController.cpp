@@ -511,11 +511,13 @@ bool DbController::getProjectProperties(DbProjectProperties* out, QWidget* paren
 	bool uppercaseAppSignalId = true;
 	bool generateAppSignalXml = false;
 	bool generateAppLogicDrawings = false;
-	bool generateExtarDebugInfo = false;
+	bool generateExtraDebugInfo = false;
 	bool mismatchPresetVersionAsWarning = false;
 
 	bool runSimTestsOnBuild = true;
 	int simTestsTimeout = true;
+
+	QString projectDefaults;
 
 	ok &= getProjectProperty(Db::ProjectProperty::Description, &description, parentWidget);
 	ok &= getProjectProperty(Db::ProjectProperty::SafetyProject, &safetyProject, parentWidget);
@@ -524,11 +526,17 @@ bool DbController::getProjectProperties(DbProjectProperties* out, QWidget* paren
 	ok &= getProjectProperty(Db::ProjectProperty::UppercaseAppSignalId, &uppercaseAppSignalId, parentWidget);
 	ok &= getProjectProperty(Db::ProjectProperty::GenerateAppSignalsXml, &generateAppSignalXml, parentWidget);
 	ok &= getProjectProperty(Db::ProjectProperty::GenerateAppLogicDrawings, &generateAppLogicDrawings, parentWidget);
-	ok &= getProjectProperty(Db::ProjectProperty::GenerateExtraDebugInfo, &generateExtarDebugInfo, parentWidget);
+	ok &= getProjectProperty(Db::ProjectProperty::GenerateExtraDebugInfo, &generateExtraDebugInfo, parentWidget);
 	ok &= getProjectProperty(Db::ProjectProperty::MismatchPresetVersionAsWarning, &mismatchPresetVersionAsWarning, parentWidget);
 
 	ok &= getProjectProperty(Db::ProjectProperty::RunSimTestsOnBuild, &runSimTestsOnBuild, parentWidget);
 	ok &= getProjectProperty(Db::ProjectProperty::SimulatorTestsTimeout, &simTestsTimeout, parentWidget);
+
+	if (bool projectDefaultsOk = getProjectProperty(Db::ProjectProperty::ProjectDefaults, &projectDefaults, parentWidget);
+		projectDefaultsOk == false)
+	{
+		projectDefaults.clear();
+	}
 
 	// --
 	//
@@ -543,11 +551,12 @@ bool DbController::getProjectProperties(DbProjectProperties* out, QWidget* paren
 	out->setUppercaseAppSignalId(uppercaseAppSignalId);
 	out->setGenerateAppSignalsXml(generateAppSignalXml);
 	out->setGenerateAppLogicDrawings(generateAppLogicDrawings);
-	out->setGenerateExtraDebugInfo(generateExtarDebugInfo);
+	out->setGenerateExtraDebugInfo(generateExtraDebugInfo);
 	out->setMismatchPresetVersionAsWarning(mismatchPresetVersionAsWarning);
 
 	out->setRunSimTestsOnBuild(runSimTestsOnBuild);
 	out->setSimTestsTimeout(simTestsTimeout);
+	out->setProjectDefaults(projectDefaults);
 
 	return true;
 }
@@ -572,6 +581,8 @@ bool DbController::setProjectProperties(const DbProjectProperties& in, QWidget* 
 
 	ok &= setProjectProperty(Db::ProjectProperty::RunSimTestsOnBuild, in.runSimTestsOnBuild(), parentWidget);
 	ok &= setProjectProperty(Db::ProjectProperty::SimulatorTestsTimeout, in.simTestsTimeout(), parentWidget);
+
+	ok &= setProjectProperty(Db::ProjectProperty::ProjectDefaults, in.projectDefaults(), parentWidget);
 
 	return ok;
 }

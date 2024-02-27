@@ -49,6 +49,7 @@ namespace Db
 		constexpr static const char* RunSimTestsOnBuild = "Run Simulator Tests on Build";		// Run simulator based tests on build project
 		constexpr static const char* SimulatorTestsTimeout = "Simulator Tests Timeout";			// Simulator run tests script timeout
 		constexpr static const char* MismatchPresetVersionAsWarning = "Mismatch Preset Version as Warning";	// If preset version mismatch is detected, treat it as a warning
+		constexpr static const char* ProjectDefaults = "Project Defaults";
 	};
 
 	class File
@@ -67,7 +68,7 @@ namespace Db
 				{DbDir::MonitorSchemasDir, QStringLiteral("$root$/Schemas/Monitor")},			// Monitor Video Schemas
 				{DbDir::TuningSchemasDir, QStringLiteral("$root$/Schemas/Tuning")},				// TuningClient Schemas
 				{DbDir::DiagSchemasDir, QStringLiteral("$root$/Schemas/Diagnostics")},			// Diagnostics Schemas
-				{DbDir::HardwareConfigurationDir, QStringLiteral("$root$/HC")},					// Hardware Configuratiun
+				{DbDir::HardwareConfigurationDir, QStringLiteral("$root$/HC")},					// Hardware Configuration
 				{DbDir::HardwarePresetsDir, QStringLiteral("$root$/HP")},						// Hardware Presets
 				{DbDir::ModuleConfigurationDir, QStringLiteral("$root$/MC")},					// Module Configuration
 				{DbDir::ConnectionsDir, QStringLiteral("$root$/CONNECTIONS")},					// Connections
@@ -221,6 +222,9 @@ public:
 	[[nodiscard]] bool mismatchPresetVersionAsWarning() const;
 	void setMismatchPresetVersionAsWarning(bool value);
 
+	[[nodiscard]] QString projectDefaults() const;
+	void setProjectDefaults(const QString& value);
+
 private:
 	QString m_description;
 	bool m_safetyProject = true;
@@ -231,7 +235,8 @@ private:
 	bool m_generateAppSignalsXml = false;
 	bool m_generateAppLogicDrawings = false;
 	bool m_generateExtraDebugInfo = false;
-	bool m_mismatchPresetVersionAsWarning = false;				// If preset version mismatch is detected, treat it as a warning
+	bool m_mismatchPresetVersionAsWarning = false; // If preset version mismatch is detected, treat it as a warning
+	QString m_projectDefaults;                     // ini-file with default project settings
 };
 
 

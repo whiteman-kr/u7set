@@ -97,7 +97,7 @@ DbProjectProperties::DbProjectProperties()
 
 	p = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::SafetyProject, true, DbProjectProperties::safetyProject, DbProjectProperties::setSafetyProject);
 	p->setCategory("Project");
-	p->setDescription("Safety Propject");
+	p->setDescription("Safety Project");
 
 	// --
 	//
@@ -134,6 +134,12 @@ DbProjectProperties::DbProjectProperties()
 	p = ADD_PROPERTY_GETTER_SETTER(int, Db::ProjectProperty::SimulatorTestsTimeout, true, DbProjectProperties::simTestsTimeout, DbProjectProperties::setSimTestsTimeout);
 	p->setCategory("Tests");
 	p->setDescription("Timeout (in ms) for running simulator based script tests, -1 no timeout");
+
+	// --
+	//
+	p = ADD_PROPERTY_GETTER_SETTER(QString, Db::ProjectProperty::ProjectDefaults, true, DbProjectProperties::projectDefaults, DbProjectProperties::setProjectDefaults);
+	p->setCategory("Other");
+	p->setDescription("Project defaults, ini-file in format:\n[SchemaItemLink]\nLineWeight = 0\nLineColor = #000080\n// Comment\nAlignHorz = AlignHCenter");
 
 	return;
 }
@@ -268,6 +274,16 @@ bool DbProjectProperties::mismatchPresetVersionAsWarning() const
 void DbProjectProperties::setMismatchPresetVersionAsWarning(bool value)
 {
 	m_mismatchPresetVersionAsWarning = value;
+}
+
+QString DbProjectProperties::projectDefaults() const
+{
+	return m_projectDefaults;
+}
+
+void DbProjectProperties::setProjectDefaults(const QString& value)
+{
+	m_projectDefaults = value;
 }
 
 

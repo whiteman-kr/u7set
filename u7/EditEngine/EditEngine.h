@@ -67,9 +67,9 @@ namespace EditEngine
 		void selectItems(const std::vector<SchemaItemPtr>& items);
 
 	public:
-		void runAddItem(std::list<SchemaItemPtr> items, std::shared_ptr<VFrame30::SchemaLayer> layer);
-		void runAddItem(std::vector<SchemaItemPtr> items, std::shared_ptr<VFrame30::SchemaLayer> layer);
-		void runAddItem(SchemaItemPtr item, std::shared_ptr<VFrame30::SchemaLayer> layer);
+		bool runAddItem(std::list<SchemaItemPtr> items, std::shared_ptr<VFrame30::SchemaLayer> layer);
+		bool runAddItem(std::vector<SchemaItemPtr> items, std::shared_ptr<VFrame30::SchemaLayer> layer);
+		bool runAddItem(SchemaItemPtr item, std::shared_ptr<VFrame30::SchemaLayer> layer);
 
 		void runDeleteItem(const std::vector<SchemaItemPtr>& items, std::shared_ptr<VFrame30::SchemaLayer> layer);
 		void runDeleteItem(SchemaItemPtr item, std::shared_ptr<VFrame30::SchemaLayer> layer);

@@ -2090,7 +2090,7 @@ void DbWorker::getProjectProperty_worker(QString propertyName, QString* out)
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Database connection is not openned."));
+		emitError(db, tr("Database connection is not opened."));
 		return;
 	}
 

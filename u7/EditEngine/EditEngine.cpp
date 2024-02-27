@@ -276,26 +276,23 @@ namespace EditEngine
 		return;
 	}
 
-	void EditEngine::runAddItem(std::list<SchemaItemPtr> items, std::shared_ptr<VFrame30::SchemaLayer> layer)
+	bool EditEngine::runAddItem(std::list<SchemaItemPtr> items, std::shared_ptr<VFrame30::SchemaLayer> layer)
 	{
-		addCommand(std::make_shared<AddItemCommand>(m_schemaView, items, layer, m_hScrollBar, m_vScrollBar), true);
-		return;
+		return addCommand(std::make_shared<AddItemCommand>(m_schemaView, items, layer, m_hScrollBar, m_vScrollBar), true);
 	}
 
-	void EditEngine::runAddItem(std::vector<SchemaItemPtr> items, std::shared_ptr<VFrame30::SchemaLayer> layer)
+	bool EditEngine::runAddItem(std::vector<SchemaItemPtr> items, std::shared_ptr<VFrame30::SchemaLayer> layer)
 	{
 		std::list<SchemaItemPtr> l(items.begin(), items.end());
-		addCommand(std::make_shared<AddItemCommand>(m_schemaView, l, layer, m_hScrollBar, m_vScrollBar), true);
-		return;
+		return addCommand(std::make_shared<AddItemCommand>(m_schemaView, l, layer, m_hScrollBar, m_vScrollBar), true);
 	}
 
-	void EditEngine::runAddItem(SchemaItemPtr item, std::shared_ptr<VFrame30::SchemaLayer> layer)
+	bool EditEngine::runAddItem(SchemaItemPtr item, std::shared_ptr<VFrame30::SchemaLayer> layer)
 	{
 		std::list<SchemaItemPtr> items;
 		items.push_back(item);
-
-		addCommand(std::make_shared<AddItemCommand>(m_schemaView, items, layer, m_hScrollBar, m_vScrollBar), true);
-		return;
+		
+		return addCommand(std::make_shared<AddItemCommand>(m_schemaView, items, layer, m_hScrollBar, m_vScrollBar), true);
 	}
 
 	void EditEngine::runDeleteItem(const std::vector<SchemaItemPtr>& items, std::shared_ptr<VFrame30::SchemaLayer> layer)

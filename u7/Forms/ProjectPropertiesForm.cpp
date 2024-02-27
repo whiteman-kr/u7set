@@ -1,5 +1,6 @@
 #include "../Forms/ProjectPropertiesForm.h"
 #include "../../lib/PropertyEditorDialog.h"
+#include "../ProjectDefaults.h"
 
 //
 // ProjectPropertiesForm
@@ -19,9 +20,9 @@ bool ProjectPropertiesForm::show(QWidget* parent, DbController* db)
 
 	// Load from project db
 	//
-	std::shared_ptr<DbProjectProperties> propertyObject = std::make_shared<DbProjectProperties>();
+	auto propertyObject = std::make_shared<DbProjectProperties>();
 
-	if (bool loadResult = db->getProjectProperties(propertyObject.get(), parent);
+	if (bool loadResult = db->getProjectProperties(propertyObject.get(), parent); 
 		loadResult == false)
 	{
 		return false;
@@ -110,6 +111,12 @@ bool ProjectPropertiesForm::show(QWidget* parent, DbController* db)
 			return false;
 		}
 
+		// Update Project Defaults
+		//
+		ProjectDefaults::instance().update(*db, parent);
+
+		// --
+		//
 		bool showInformationBox = false;
 
 		if (auto prop = propertyObject->propertyByCaption(Db::ProjectProperty::UppercaseAppSignalId);

@@ -2285,7 +2285,8 @@ namespace Builder
 				continue;
 			}
 
-			assert(s->regValueAddr().isValid() == false);
+			Q_ASSERT(s->regValueAddr().isValid() == false ||
+					 (s->regValueAddr().isValid() == true && s->regValueAddr() == regValueAddr));
 
 			s->setRegValueAddr(regValueAddr);
 		}

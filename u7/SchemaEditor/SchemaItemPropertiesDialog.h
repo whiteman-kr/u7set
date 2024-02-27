@@ -39,6 +39,8 @@ private:
 
 	void saveSettings();
 
+	void updateWindowTitle();
+
 private:
 	Ui::SchemaItemPropertiesDialog *ui;
 
