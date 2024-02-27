@@ -322,7 +322,9 @@ class DataSourcesXML
 {
 public:
 	static bool writeToXml(const QVector<TYPE>& dataSources, QByteArray* fileData);
+
 	static bool readFromXml(const QByteArray& fileData, QVector<TYPE>* dataSources);
+	static bool readFromXml(const QByteArray& fileData, std::vector<TYPE>* dataSources);
 };
 
 
@@ -395,5 +397,39 @@ bool DataSourcesXML<TYPE>::readFromXml(const QByteArray& fileData, QVector<TYPE>
 
 	return result;
 }
+
+template <typename TYPE>
+bool DataSourcesXML<TYPE>::readFromXml(const QByteArray& fileData, std::vector<TYPE>* dataSources)
+{
+	TEST_PTR_RETURN_FALSE(dataSources);
+
+	XmlReadHelper xml(fileData);
+
+	dataSources->clear();
+
+	bool result = true;
+
+	if (xml.findElement(XmlElement::DATA_SOURCES) == false)
+	{
+		return false;
+	}
+
+	int count = 0;
+
+	if (xml.readIntAttribute(XmlAttribute::COUNT, &count) == false)
+	{
+		return false;
+	}
+
+	dataSources->resize(count);
+
+	for(TYPE& ds : *dataSources)
+	{
+		result &= ds.readFromXml(xml);
+	}
+
+	return result;
+}
+
 
 

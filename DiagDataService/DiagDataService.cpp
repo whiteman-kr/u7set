@@ -202,9 +202,9 @@ bool DiagDataServiceWorker::readDiagDataSources(const QByteArray& fileData, cons
 {
 	Q_UNUSED(profile);
 
-	QVector<DataSource> dataSources;
+	m_dataSources.clear();
 
-	bool result = DataSourcesXML<DataSource>::readFromXml(fileData, &dataSources);
+	bool result = DataSourcesXML<DataSource>::readFromXml(fileData, &m_dataSources);
 
 	if (result == false)
 	{
@@ -221,10 +221,6 @@ bool DiagDataServiceWorker::readDiagDataSources(const QByteArray& fileData, cons
 		DEBUG_LOG_ERR(logger(), QString("DiagDataSources loading error!"));
 	}
 
-	std::vector<DataSource> ds(dataSources.begin(), dataSources.end());
-
-	m_dataSources.swap(ds);
-
 	return result;
 }
 
@@ -238,15 +234,6 @@ bool DiagDataServiceWorker::readDiagSignalsAndObjects(const QByteArray& fileData
 	{
 		return false;
 	}
-
-/*	int signalCount = signalSet.appsignal_size();
-
-	for(int i = 0; i < signalCount; i++)
-	{
-		const ::Proto::AppSignal& appSignal = signalSet.appsignal(i);
-
-		m_appSignals.insert(appSignal);
-	}*/
 
 	return true;
 }
@@ -274,6 +261,17 @@ void DiagDataServiceWorker::applyNewConfiguration()
 								m_curSettingsProfile.diagDataReceivingIP,
 								sessionParams().softwareRunMode,
 								m_diagDataProcessingThreadCount, logger());
+
+	int dataSourceCount = m_onlineSources->count();
+
+	for(int i = 0; i < dataSourceCount; i++)
+	{
+		DiagDataSource* dds = m_onlineSources->getDataSource(i);
+
+		TEST_PTR_CONTINUE(dds);
+
+		//dds->init(m_diagSignalTypes, )
+	}
 
 	if (m_onlineSources->isWorkable() == false)
 	{

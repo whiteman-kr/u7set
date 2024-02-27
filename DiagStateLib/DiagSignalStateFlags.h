@@ -56,7 +56,7 @@ union DiagSignalStateFlags
 		quint32 _bit28 : 1;					//	28
 		quint32 _bit29 : 1;					//	29
 
-		quint32 archive: 1;					//	30	point should be send to archive
+		quint32 archive: 1;					//	30	state should be send to archive
 		quint32 realtimePoint: 1;			//	31	special flag for real time trends displaying
 	};
 

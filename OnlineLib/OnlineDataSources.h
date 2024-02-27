@@ -115,10 +115,17 @@ public:
 					  int parsingThreadsCount,
 					  CircularLoggerShared log);
 
+public:
+	int count() const;
+	DATA_SOURCE* getDataSource(int index);
+
 private:
 	void startStatesDistribution() override;
 
 	void statesDistribution();
+
+	void registerSignalStatesQueue(	std::shared_ptr<StatesQueue<SIGNAL_STATE>> queue);
+	void unregisterSignalStatesQueue(std::shared_ptr<StatesQueue<SIGNAL_STATE>> queue);
 
 private:
 	std::mutex m_distributionRequiredMutex;
@@ -126,8 +133,7 @@ private:
 	std::queue<OnlineDataSource<SIGNAL_STATE>*> m_distributionRequiredSources;	//	queue of sources requires states queue processing
 
 	SimpleMutex m_statesQueuesMutex;
-	std::list<std::pair<StatesQueue<SIGNAL_STATE>, QString>> m_stateQueues;		// pairs <queue, description>
-	StatesQueue<SIGNAL_STATE> m_archiveQueue;
+	std::set<std::shared_ptr<StatesQueue<SIGNAL_STATE>>> m_stateQueues;		// pairs <queue, description>
 };
 
 template <typename DATA_SOURCE, typename SIGNAL_STATE>
@@ -136,8 +142,7 @@ OnlineDataSources<DATA_SOURCE, SIGNAL_STATE>::OnlineDataSources(const std::vecto
 																E::SoftwareRunMode swRunMode,
 																int parsingThreadsCount,
 																CircularLoggerShared log) :
-	BaseOnlineDataSources(dataReceivingIP, swRunMode, parsingThreadsCount, log),
-	m_archiveQueue(3)
+	BaseOnlineDataSources(dataReceivingIP, swRunMode, parsingThreadsCount, log)
 {
 	bool res = true;
 
@@ -152,9 +157,21 @@ OnlineDataSources<DATA_SOURCE, SIGNAL_STATE>::OnlineDataSources(const std::vecto
 		acquiredSignalsCount += dataSource->acquiredSignalsCount();
 	}
 
-	m_archiveQueue.resize(acquiredSignalsCount * 2);
-
 	m_isWorkable = res;
+}
+
+template <typename DATA_SOURCE, typename SIGNAL_STATE>
+int OnlineDataSources<DATA_SOURCE, SIGNAL_STATE>::count() const
+{
+	return TO_INT(m_sources.size());
+}
+
+template <typename DATA_SOURCE, typename SIGNAL_STATE>
+DATA_SOURCE* OnlineDataSources<DATA_SOURCE, SIGNAL_STATE>::getDataSource(int index)
+{
+	Q_ASSERT(index >=0 && index < TO_INT(m_sources.size()));
+
+	return dynamic_cast<DATA_SOURCE*>(m_sources[index]);
 }
 
 template <typename DATA_SOURCE, typename SIGNAL_STATE>
@@ -174,7 +191,7 @@ void OnlineDataSources<DATA_SOURCE, SIGNAL_STATE>::statesDistribution()
 
 	std::unique_lock ul(m_distributionRequiredMutex, std::defer_lock);
 
-	const int SIGNAL_STATE_BUFFER_SIZE = 50;
+	const int SIGNAL_STATE_BUFFER_SIZE = 100;
 
 	SIGNAL_STATE signalStatesBuffer[SIGNAL_STATE_BUFFER_SIZE];
 	OnlineDataSource<SIGNAL_STATE>* sourceToDistribute = nullptr;
@@ -195,8 +212,6 @@ void OnlineDataSources<DATA_SOURCE, SIGNAL_STATE>::statesDistribution()
 								{
 									return	!m_distributionRequiredSources.empty();
 								});
-
-		// here ul is LOCKED!
 
 		if (stopToken.stop_requested() == true)
 		{
@@ -231,11 +246,9 @@ void OnlineDataSources<DATA_SOURCE, SIGNAL_STATE>::statesDistribution()
 
 			m_statesQueuesMutex.lock();
 
-			for(auto& p : m_stateQueues)
+			for(auto& queue : m_stateQueues)
 			{
-				StatesQueue<SIGNAL_STATE>& queue = p.first;
-
-				queue.pushFromBuffer(signalStatesBuffer, statesCount, thisThread);
+				queue->pushFromBuffer(signalStatesBuffer, statesCount, thisThread);
 			}
 
 			m_statesQueuesMutex.unlock();
@@ -251,3 +264,22 @@ void OnlineDataSources<DATA_SOURCE, SIGNAL_STATE>::statesDistribution()
 
 	DEBUG_LOG_MSG(m_log, QString("Signal states distribution thread finished"));
 }
+
+template <typename DATA_SOURCE, typename SIGNAL_STATE>
+void OnlineDataSources<DATA_SOURCE, SIGNAL_STATE>::registerSignalStatesQueue(std::shared_ptr<StatesQueue<SIGNAL_STATE>> queue)
+{
+	m_statesQueuesMutex.lock();
+	auto [it, b] = m_stateQueues.insert(queue);
+	Q_ASSERT(b == true);
+	m_statesQueuesMutex.unlock();
+}
+
+template <typename DATA_SOURCE, typename SIGNAL_STATE>
+void OnlineDataSources<DATA_SOURCE, SIGNAL_STATE>::unregisterSignalStatesQueue(std::shared_ptr<StatesQueue<SIGNAL_STATE>> queue)
+{
+	m_statesQueuesMutex.lock();
+	int erasedCount = m_stateQueues.erase(queue);
+	Q_ASSERT(erasedCount == 1);
+	m_statesQueuesMutex.unlock();
+}
+

@@ -5,35 +5,19 @@
 #include "../UtilsLib/Queue.h"
 #include "DiagSignalStateFlags.h"
 
-//namespace Proto
-//{
-//	class AppSignalState;
-//}
-
-//namespace Network
-//{
-//	class GatewayAppSignalState;
-//}
-
 struct SimpleDiagSignalState
 {
 	// light version of AppSignalState to use in queues and other AppDataService data structs
 	//
-	Hash hash = 0;					// == calcHash(AppSignalID)
-	Times time{};
+	Hash hash = 0;							// == calcHash(DiagSignalID)
+	Times time;
 	DiagSignalStateFlags flags{};
 	double value = 0;
 
-	//quint16 packetNo = 0;
-	//operator ::AppSignalState() const;
-
-//	inline void copyTo(::AppSignalState& state) const
-//	{
-//		state.m_hash = hash;
-//		state.m_time = time;
-//		state.m_flags = flags;
-//		state.m_value = value;
-//	}
+	int attentions = 0;
+	int warnings = 0;
+	int errors = 0;
+	int faults = 0;
 
 	bool isValid() const { return flags.valid == 1; }
 
@@ -46,34 +30,3 @@ struct SimpleDiagSignalState
 	qint64 systemTime() const { return time.system.timeStamp; }
 	qint64 localTime() const { return time.local.timeStamp; }
 };
-
-//template <typename SIGNAL_STATE>
-//class SignalStatesQueue : public QObject, public FastThreadSafeQueue<SIGNAL_STATE>
-//{
-//	Q_OBJECT
-
-//public:
-//	SignalStatesQueue(int queueSize) : FastThreadSafeQueue<SIGNAL_STATE>(queueSize) {}
-//	virtual ~SignalStatesQueue() {}
-
-//signals:
-//	void queueNotEmpty();
-
-//private:
-//	virtual void afterPush() override
-//	{
-//		m_afterPushCtr++;
-
-//		if (m_afterPushCtr > 50)
-//		{
-//			m_afterPushCtr = 0;
-
-//			emit queueNotEmpty();
-//		}
-//	}
-
-//private:
-//	int m_afterPushCtr = 0;
-//};
-
-
