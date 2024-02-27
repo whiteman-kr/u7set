@@ -617,8 +617,6 @@ namespace VFrame30
 
 		if (found->afbParamValue() != newValue)
 		{
-			qDebug() << tr("Param %1 was changed from %2 to %3").arg(name).arg(found->afbParamValue().toString()).arg(newValue.toString());
-
 			found->setAfbParamValue(newValue);
 
 			// Call script here
