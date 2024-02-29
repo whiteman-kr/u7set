@@ -120,6 +120,8 @@ set (U7_SOURCES
 	EditEngine/EditEngine.h
 	EditEngine/EditEngineAddItem.cpp
 	EditEngine/EditEngineAddItem.h
+	EditEngine/EditEngineApplyDefaultProperty.cpp
+	EditEngine/EditEngineApplyDefaultProperty.h
 	EditEngine/EditEngineBatch.cpp
 	EditEngine/EditEngineBatch.h
 	EditEngine/EditEngineDeleteItem.cpp

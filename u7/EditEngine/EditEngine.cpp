@@ -1,16 +1,19 @@
 #include "EditEngine.h"
-#include "SchemaEditor/EditSchemaView.h"
 #include "EditEngineAddItem.h"
+#include "EditEngineApplyDefaultProperty.h"
 #include "EditEngineBatch.h"
-#include "EditEngineSetPoints.h"
 #include "EditEngineDeleteItem.h"
 #include "EditEngineMoveItem.h"
-#include "EditEngineSetOrder.h"
-#include "EditEngineSetProperty.h"
-#include "EditEngineSetObject.h"
-#include "EditEngineSetSchemaProperty.h"
 #include "EditEngineNop.h"
+#include "EditEngineSetObject.h"
+#include "EditEngineSetOrder.h"
+#include "EditEngineSetPoints.h"
+#include "EditEngineSetProperty.h"
+#include "EditEngineSetSchemaProperty.h"
+#include "SchemaEditor/EditSchemaView.h"
+
 #include "../../VFrame30/SchemaLayer.h"
+#include "../ProjectDefaults.h"
 
 namespace EditEngine
 {
@@ -368,6 +371,17 @@ namespace EditEngine
 		items.push_back(item);
 
 		return runSetProperty(propertyName, value, items);
+	}
+
+	void EditEngine::runApplyDefaultProperty(const ProjectDefaults& projectDefaults, std::vector<SchemaItemPtr> items)
+	{
+		addCommand(std::make_shared<ApplyDefaultPropertyCommand>(m_schemaView, projectDefaults, std::move(items), m_hScrollBar, m_vScrollBar), true);
+		return;
+	}
+
+	void EditEngine::runApplyDefaultProperty(const ProjectDefaults& projectDefaults, const SchemaItemPtr& item)
+	{
+		return runApplyDefaultProperty(projectDefaults, std::vector{item});
 	}
 
 	void EditEngine::runSetObject(const QByteArray& currentState, const QByteArray& newState, const std::vector<SchemaItemPtr>& items)
