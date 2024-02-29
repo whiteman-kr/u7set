@@ -1,3 +1,4 @@
 BVB-15
 	08.11.2021	Version: 1	BVB-15_v1.u7devp		RPCT-3015:  CustomModuleFamily was specified for BVB-15 preset
 	20.02.2024	Version: 2	BVB-15_v2.u7devp		RPCT-3832:  Added specific property DiagLANDataSize
+	29.02.2024	Version: 3	BVB-15_v3.u7devp		RPCT-3827:  Platform interface controller removed from preset

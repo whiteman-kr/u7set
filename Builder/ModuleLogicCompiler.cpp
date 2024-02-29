@@ -149,6 +149,8 @@ namespace Builder
 
 		m_lmShared = getLmSharedPtr();
 
+		Q_ASSERT(m_lm == m_lmShared.get());
+
 		m_appLogicData = appLogicCompiler.appLogicData();
 		m_resultWriter = appLogicCompiler.buildResultWriter();
 		m_log = appLogicCompiler.log();
@@ -671,7 +673,7 @@ namespace Builder
 		m_lmCodeMemorySize = m_lmDescription->memory().m_codeMemorySize;
 		m_lmAppMemorySize = m_lmDescription->memory().m_appMemorySize;
 
-		if (m_lmCodeMemorySize == 0 || m_lmAppMemorySize == 0)
+		if (m_lm->isLogicModule() && (m_lmCodeMemorySize == 0 || m_lmAppMemorySize == 0))
 		{
 			LOG_INTERNAL_ERROR(m_log);
 			return false;
@@ -696,7 +698,9 @@ namespace Builder
 		m.device = m_lmShared;
 		m.place = m_lmShared->place();
 
-		if (m.place != DeviceHelper::LM1_PLACE && m.place != DeviceHelper::LM2_PLACE)
+		if ((m_lmShared->isLogicModule() && m.place != DeviceHelper::LM1_PLACE) ||
+			(m_lmShared->isBvb() && m.place != DeviceHelper::BVB1_PLACE &&
+									m.place != DeviceHelper::BVB2_PLACE))
 		{
 			LOG_INTERNAL_ERROR(m_log);
 			return false;
@@ -776,8 +780,9 @@ namespace Builder
 				continue;
 			}
 
-			if (module->place() == DeviceHelper::LM1_PLACE ||
-				module->place() == DeviceHelper::LM2_PLACE)
+			if ((module->isLogicModule() &&module->place() == DeviceHelper::LM1_PLACE) ||
+				(module->isBvb() && (module->place() == DeviceHelper::BVB1_PLACE ||
+									 module->place() == DeviceHelper::BVB2_PLACE)))
 			{
 				if (module->place() != m_lm->place())
 				{
@@ -811,12 +816,21 @@ namespace Builder
 		//
 		for(auto& [place, module] : m_modules)
 		{
-			if (module.place == DeviceHelper::LM1_PLACE ||
-				module.place == DeviceHelper::LM2_PLACE)
+			// skip LM
+			//
+			if (module.device->isLogicModule() == true)
 			{
-				continue;		// skip LM or BVB
+				Q_ASSERT(module.place == DeviceHelper::LM1_PLACE);
+				continue;
 			}
 
+			// skip BVB
+			//
+			if (module.device->isBvb() == true)
+			{
+				Q_ASSERT(module.place == DeviceHelper::BVB1_PLACE || module.place == DeviceHelper::BVB2_PLACE);
+				continue;
+			}
 			const Hardware::DeviceModule* deviceModule = module.device.get();
 
 			if (isBvbChassis == true)
@@ -2300,6 +2314,11 @@ namespace Builder
 		TEST_PTR_RETURN_FALSE(m_log);
 		TEST_PTR_LOG_RETURN_FALSE(m_optoModuleStorage, m_log);
 
+		if (m_lm->isLogicModule() == false)
+		{
+			return true;
+		}
+
 		//
 		// Appending OptoValidity signals for USED opto ports in current LM and associated OptoModules
 		//
@@ -2319,11 +2338,6 @@ namespace Builder
 				LOG_NULLPTR_ERROR(m_log);
 				result = false;
 				continue;
-			}
-
-			if (optoPort->equipmentID() == "SYSTEMID_RACKID_FSCC02_MD00_OPTOPORT01")
-			{
-				DEBUG_STOP;
 			}
 
 			if (optoPort->isUsedInConnection() == false)
@@ -6509,7 +6523,13 @@ namespace Builder
 
 		if (it == m_modules.end())
 		{
-			LOG_INTERNAL_ERROR(m_log);
+			for(const auto& p : m_modules)
+			{
+				const Module& m = p.second;
+				LOG_MESSAGE(m_log, QString("Place %1 module %2").arg(p.first).arg(m.device->equipmentIdTemplate()));
+			}
+
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Module for IO signal %1 not found").arg(ioSignal.appSignalID()));
 			return false;
 		}
 
@@ -6895,8 +6915,8 @@ namespace Builder
 
 		for(const auto& [place, module] : m_modules)
 		{
-			if ((module.place == DeviceHelper::LM1_PLACE ||
-				module.place == DeviceHelper::LM2_PLACE) &&
+			if ((module.place == DeviceHelper::BVB1_PLACE ||
+				module.place == DeviceHelper::BVB2_PLACE) &&
 				module.place != m_lm->place())
 			{
 				continue;
