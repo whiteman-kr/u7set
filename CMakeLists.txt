@@ -23,6 +23,17 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# Set the Qt version and find required components.
+# Finding components here speeds up cmake configure step.
+#
+set(QT_VERSION "6.5.3")
+
+find_package(Qt6 ${QT_VERSION} REQUIRED COMPONENTS Charts Concurrent Core DBus Gui LinguistTools Network PrintSupport Qml SerialPort Sql Svg Test Widgets Xml)
+
+if (MSVC)
+	find_package(Qt6 REQUIRED COMPONENTS AxContainer) # Metrology
+endif (MSVC)
+
 # Set warnings level and exclusions.
 #
 include(cmake/warnings.cmake)
