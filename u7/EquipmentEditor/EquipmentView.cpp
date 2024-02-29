@@ -520,11 +520,11 @@ void EquipmentView::replaceObject()
 	{
 		std::shared_ptr<Hardware::DeviceObject> selectedPreset = d.selectedPreset;
 
-		if (selectedObject->presetName() == selectedPreset->presetName())
-		{
-			QMessageBox::critical(this, qAppName(), tr("Cannot replace object to itself."));
-			return;
-		}
+//		if (selectedObject->presetName() == selectedPreset->presetName())
+//		{
+//			QMessageBox::critical(this, qAppName(), tr("Cannot replace object to itself."));
+//			return;
+//		}
 
 		// selectedObject can be not fully loaded, as not all branches could be open in the UI.
 		// Load selectedObject from the equipment
