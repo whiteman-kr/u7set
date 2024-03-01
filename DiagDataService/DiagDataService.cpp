@@ -226,9 +226,9 @@ bool DiagDataServiceWorker::readDiagDataSources(const QByteArray& fileData, cons
 
 bool DiagDataServiceWorker::readDiagSignalsAndObjects(const QByteArray& fileData)
 {
-	::Network::AcquiredDiagSignalsAndObjects diagSignalsAndObjects;
+	m_diagSignalsAndObjects.Clear();
 
-	bool result = diagSignalsAndObjects.ParseFromArray(fileData.constData(), static_cast<int>(fileData.size()));
+	bool result = m_diagSignalsAndObjects.ParseFromArray(fileData.constData(), static_cast<int>(fileData.size()));
 
 	if (result == false)
 	{
@@ -242,9 +242,20 @@ bool DiagDataServiceWorker::readDiagSignalTypes(const QByteArray& fileData)
 {
 	m_diagSignalTypes.clear();
 
+	Hardware::DiagSignalTypes diagSignalTypes;
+
 	XmlReadHelper xml(fileData);
 
-	bool res = m_diagSignalTypes.readFromXml(xml);
+	bool res = diagSignalTypes.readFromXml(xml);
+
+	RETURN_IF_FALSE(res);
+
+	const std::vector<Hardware::DiagSignalType>& dTypes = *diagSignalTypes.mutableDiagSignalTypes();
+
+	for(const Hardware::DiagSignalType& dt : dTypes)
+	{
+		m_diagSignalTypes.emplace(calcHash(dt.signalTypeId), dt);
+	}
 
 	return res;
 }
@@ -264,16 +275,19 @@ void DiagDataServiceWorker::applyNewConfiguration()
 
 	int dataSourceCount = m_onlineSources->count();
 
+	bool initRes = true;
+
 	for(int i = 0; i < dataSourceCount; i++)
 	{
 		DiagDataSource* dds = m_onlineSources->getDataSource(i);
 
 		TEST_PTR_CONTINUE(dds);
 
-		//dds->init(m_diagSignalTypes, )
+		dds->init(m_diagSignalTypes,
+				  m_diagSignalsAndObjects);
 	}
 
-	if (m_onlineSources->isWorkable() == false)
+	if ((m_onlineSources->isWorkable() && initRes)== false)
 	{
 		DEBUG_LOG_ERR(logger(), "OnlineDataSources initialization ERROR!");
 		return;

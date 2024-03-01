@@ -62,10 +62,13 @@ private:
 
 	std::shared_ptr<const DiagDataServiceSettings> m_serviceSettings;
 
+	std::map<Hash, Hardware::DiagSignalType> m_diagSignalTypes;		// calcHash(DiagSignalTypeID) => DiagSignalType
 	std::vector<DataSource> m_dataSources;
+	::Network::AcquiredDiagSignalsAndObjects m_diagSignalsAndObjects;
+
 	OnlineDataSources<DiagDataSource, SimpleDiagSignalState>* m_onlineSources = nullptr;
 
-	Hardware::DiagSignalTypes m_diagSignalTypes;
+
 
 	int m_diagDataProcessingThreadCount = 0;
 	QString m_strCmdLineDiagDataReceivingIP;
