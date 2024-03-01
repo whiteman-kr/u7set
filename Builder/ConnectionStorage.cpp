@@ -235,7 +235,7 @@ namespace Builder
 		//
 		std::vector<DbFileInfo> fileList;
 
-		bool ok = m_db->getFileList(&fileList, DbDir::ConnectionsDir, Db::File::OclFileExtension, true, nullptr);
+		bool ok = m_db->getFileList(&fileList, DbDir::ConnectionsDir, Db::File::OclFileExtension, false /*removeDeleted*/, nullptr);
 		if (ok == false)
 		{
 			*errorMessage = m_db->lastError();
@@ -244,6 +244,12 @@ namespace Builder
 
 		for (DbFileInfo& fi : fileList)
 		{
+			if ((fi.deleted() == true || fi.action() == E::VcsItemAction::Deleted) && 
+				fi.state() == E::VcsState::CheckedIn) 
+			{
+				continue;
+			}
+
 			std::shared_ptr<DbFile> file = nullptr;
 
 			ok = m_db->getLatestVersion(fi, &file, nullptr);

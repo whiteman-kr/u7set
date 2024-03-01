@@ -1,5 +1,6 @@
 #include "DialogConnections.h"
 #include "../lib/PropertyEditorDialog.h"
+#include "../lib/StandardColors.h"
 #include "Settings.h"
 
 
@@ -1184,17 +1185,37 @@ void DialogConnections::updateTreeItemText(QTreeWidgetItem* item)
 
 	DbFileInfo fi = m_connections.fileInfo(connection->uuid());
 
+	QBrush b(StandardColors::VcsCheckedIn);
+
 	if (fi.state() == E::VcsState::CheckedOut)
 	{
 		item->setText(c++, E::valueToString<E::VcsItemAction>(fi.action()));
 
 		int userId = fi.userId();
 		item->setText(c++, m_db->username(userId));
+
+		switch (fi.action())
+		{
+		case E::VcsItemAction::Added:
+			b.setColor(StandardColors::VcsAdded);
+			break;
+		case E::VcsItemAction::Modified:
+			b.setColor(StandardColors::VcsModified);
+			break;
+		case E::VcsItemAction::Deleted:
+			b.setColor(StandardColors::VcsDeleted);
+			break;
+		}
 	}
 	else
 	{
 		item->setText(c++, "");
 		item->setText(c++, "");
+	}
+
+	for (int i = 0; i < m_connectionsTree->header()->count(); i++)
+	{
+		item->setBackground(i, b);
 	}
 
 	return;

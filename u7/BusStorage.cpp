@@ -24,7 +24,7 @@ bool BusStorage::load(QString* errorMessage)
 	//
 	std::vector<DbFileInfo> fileList;
 
-	bool ok = m_db->getFileList(&fileList, DbDir::BusTypesDir, Db::File::BusFileExtension, true, nullptr);
+	bool ok = m_db->getFileList(&fileList, DbDir::BusTypesDir, Db::File::BusFileExtension, false /*removeDeleted*/, nullptr);
 	if (ok == false)
 	{
 		*errorMessage = m_db->lastError();
@@ -54,8 +54,8 @@ bool BusStorage::load(QString* errorMessage)
 
 	for (const std::shared_ptr<DbFile>& f : files)
 	{
-		if (f->deleted() == true ||
-			f->action() == E::VcsItemAction::Deleted)
+		if ((f->deleted() == true || f->action() == E::VcsItemAction::Deleted) && 
+			f->state() == E::VcsState::CheckedIn)
 		{
 			continue;
 		}
