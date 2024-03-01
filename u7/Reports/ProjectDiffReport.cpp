@@ -1,5 +1,4 @@
 #include "ProjectDiffReport.h"
-
 #include "../AppSignalLib/Bus.h"
 #include "../Builder/AppSignalProperties.h"
 #include "../DbLib/DbWorker.h"
@@ -9,11 +8,10 @@
 #include "../UtilsLib/Ui/UiTools.h"
 #include "../VFrame30/Context.h"
 #include "../VFrame30/Schema.h"
-#include "../VFrame30/SchemaItem.h"
+#include "../VFrame30/SchemaItems/SchemaItem.h"
 #include "../VFrame30/SchemaLayer.h"
 #include "../lib/PropertyEditor.h"
 #include "../lib/Ui/DialogProgress.h"
-
 #include "Settings.h"
 
 #include <QDesktopServices>

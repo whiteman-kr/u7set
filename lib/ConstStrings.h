@@ -586,6 +586,8 @@ namespace File
 
 	inline const QString READONLY = "readonly";
 
+	inline static const QString MONITOR_BEHAVIOR = "MonitorBehavior.xml";
+
 	inline static const QString GLOBAL_SCRIPT = "GlobalScript.js";
 	inline static const QString GLOBAL_SCRIPT_FULL_PATH = "$root$/Tests/GlobalScript.js";
 }

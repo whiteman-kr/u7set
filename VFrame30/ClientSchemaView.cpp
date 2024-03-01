@@ -366,6 +366,11 @@ namespace VFrame30
 		return m_clientSchemaView->zoom() / 100.0;
 	}
 
+	Behavior::ScriptMonitorBehavior ScriptSchemaView::monitorBehavior() const
+	{
+		return Behavior::ScriptMonitorBehavior{m_clientSchemaView->monitorBehavior()};
+	}
+
 
 	//
 	// ClientSchemaView
@@ -1332,33 +1337,23 @@ namespace VFrame30
 		return m_timeStats;
 	}
 
-	const MonitorBehavior& ClientSchemaView::monitorBehavior() const noexcept
+	std::shared_ptr<const Behavior::MonitorBehavior> ClientSchemaView::monitorBehavior() const
 	{
 		return m_monitorBehavior;
 	}
 
-	void ClientSchemaView::setMonitorBehavior(const MonitorBehavior& src)
+	void ClientSchemaView::setMonitorBehavior(Behavior::MonitorBehavior src)
 	{
-		m_monitorBehavior = src;
+		m_monitorBehavior = std::make_shared<Behavior::MonitorBehavior>(std::move(src));
 	}
 
-	void ClientSchemaView::setMonitorBehavior(MonitorBehavior&& src)
-	{
-		m_monitorBehavior = std::move(src);
-	}
-
-	const TuningClientBehavior& ClientSchemaView::tuningClientBehavior() const noexcept
+	std::shared_ptr<const Behavior::TuningClientBehavior> ClientSchemaView::tuningClientBehavior() const
 	{
 		return m_tuningClientBehavior;
 	}
 
-	void ClientSchemaView::setTuningClientBehavior(const TuningClientBehavior& src)
+	void ClientSchemaView::setTuningClientBehavior(Behavior::TuningClientBehavior src)
 	{
-		m_tuningClientBehavior = src;
-	}
-
-	void ClientSchemaView::setTuningClientBehavior(TuningClientBehavior&& src)
-	{
-		m_tuningClientBehavior = std::move(src);
+		m_tuningClientBehavior = std::make_shared<Behavior::TuningClientBehavior>(std::move(src));
 	}
 } // namespace VFrame30

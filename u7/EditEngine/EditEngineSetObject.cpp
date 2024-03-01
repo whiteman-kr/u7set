@@ -1,7 +1,6 @@
 #include "EditEngineSetObject.h"
 #include "SchemaEditor/EditSchemaView.h"
-#include "../../VFrame30/SchemaItemAfb.h"
-#include "../../VFrame30/SchemaItemBus.h"
+
 
 namespace EditEngine
 {

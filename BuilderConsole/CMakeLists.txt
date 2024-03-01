@@ -31,7 +31,7 @@ target_precompile_headers(${TARGET} PRIVATE
 )
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Qml Qt6::Sql Qt6::Xml Qt6::Widgets Qt6::Svg)
-target_link_libraries(${TARGET} PRIVATE ReportLib HardwareLib VFrame30 Builder Simulator Protobuf)
+target_link_libraries(${TARGET} PRIVATE CommonLib Behavior ReportLib HardwareLib VFrame30 Builder Simulator Protobuf)
 
 # Link Visaul Leak Detector
 #

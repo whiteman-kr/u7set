@@ -21,8 +21,6 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Sql Network Qml Xml Svg Pr
 qt_standard_project_setup()
 
 set (TC_SOURCES
-	../lib/ClientBehavior.cpp
-	../lib/ClientBehavior.h
 	../lib/ConstStrings.h
 	../lib/PropertyEditor.cpp
 	../lib/PropertyEditor.h

@@ -2,8 +2,9 @@
 
 #include "../AppSignalLib/ComparatorSet.h"
 #include "../SchemaClientLib/SchemaClientConfigController.h"
-#include "../lib/ClientBehavior.h"
 #include "../OnlineLib/MatsUsers.h"
+
+#include <Behavior/MonitorBehavior.h>
 
 
 struct MonitorConfigSettings
@@ -19,7 +20,7 @@ struct MonitorConfigSettings
 	QString startSchemaId;
 	QString globalScript;
 	QPixmap logoImage;
-	MonitorBehavior monitorBeahvior;
+	Behavior::MonitorBehavior monitorBehavior;
 
 	// Tuning settings
 	//

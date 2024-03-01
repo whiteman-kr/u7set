@@ -1,5 +1,8 @@
 #include "DrawParam.h"
 #include "ClientSchemaView.h"
+
+#include <Behavior/MonitorBehavior.h>
+#include <Behavior/TuningClientBehavior.h>
 #include <QSvgRenderer>
 
 namespace
@@ -423,16 +426,20 @@ namespace VFrame30
 		return m_session;
 	}
 
-	const MonitorBehavior& CDrawParam::monitorBehavior() const noexcept
+	const Behavior::MonitorBehavior& CDrawParam::monitorBehavior() const noexcept
 	{
-		Q_ASSERT(m_schemaView);
-		return clientSchemaView()->monitorBehavior();
+		Q_ASSERT(clientSchemaView());
+		Q_ASSERT(clientSchemaView()->monitorBehavior() != nullptr);
+
+		return *clientSchemaView()->monitorBehavior();
 	}
 
-	const TuningClientBehavior& CDrawParam::tuningClientBehavior() const
+	const Behavior::TuningClientBehavior& CDrawParam::tuningClientBehavior() const
 	{
-		Q_ASSERT(m_schemaView);
-		return clientSchemaView()->tuningClientBehavior();
+		Q_ASSERT(clientSchemaView());
+		Q_ASSERT(clientSchemaView()->tuningClientBehavior());
+
+		return *clientSchemaView()->tuningClientBehavior();
 	}
 
 	const QStringList& CDrawParam::highlightIds() const

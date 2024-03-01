@@ -1,6 +1,6 @@
 #include "UalItems.h"
-#include "SignalSet.h"
 #include "ModuleLogicCompiler.h"
+#include "../VFrame30/Schema.h"
 
 namespace Builder
 {

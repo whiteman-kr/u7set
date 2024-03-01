@@ -1,12 +1,10 @@
 #pragma once
 
-#include "../VFrame30/FblItem.h"
-#include "../VFrame30/SchemaItem.h"
-
+#include "../VFrame30/SchemaItems/FblItem.h"
+#include "../VFrame30/SchemaItems/SchemaItem.h"
 
 namespace VFrame30
 {
-	class SchemaItem;
 	class SchemaLayer;
 	class PosConnectionImpl;
 	class CDrawParam;

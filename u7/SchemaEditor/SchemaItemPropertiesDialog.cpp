@@ -1,6 +1,6 @@
 #include "SchemaItemPropertiesDialog.h"
-#include "../../VFrame30/SchemaItemAfb.h"
-#include "../../VFrame30/SchemaItemUfb.h"
+#include "../../VFrame30/SchemaItems/SchemaItemAfb.h"
+#include "../../VFrame30/SchemaItems/SchemaItemUfb.h"
 #include "EditEngine/EditEngine.h"
 #include "Settings.h"
 #include "ui_SchemaItemPropertiesDialog.h"

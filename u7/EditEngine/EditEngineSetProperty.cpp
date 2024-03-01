@@ -1,7 +1,7 @@
 #include "EditEngineSetProperty.h"
-#include "../../VFrame30/SchemaItemAfb.h"
-#include "../../VFrame30/SchemaItemBus.h"
-#include "../../VFrame30/SchemaItemUfb.h"
+#include "../../VFrame30/SchemaItems/SchemaItemAfb.h"
+#include "../../VFrame30/SchemaItems/SchemaItemBus.h"
+#include "../../VFrame30/SchemaItems/SchemaItemUfb.h"
 #include "SchemaEditor/EditSchemaView.h"
 
 namespace EditEngine

@@ -1,7 +1,7 @@
 #include "SchemaLayer.h"
-#include "SchemaItem.h"
-#include "FblItemRect.h"
-#include "PosConnectionImpl.h"
+#include "./SchemaItems/SchemaItem.h"
+#include "./SchemaItems/FblItemRect.h"
+#include "./SchemaItems/PosConnectionImpl.h"
 
 
 namespace VFrame30
