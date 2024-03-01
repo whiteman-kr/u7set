@@ -1,20 +1,28 @@
 #pragma once
 
-#include "../lib/ClientBehavior.h"
 #include "../lib/ITimeStats.h"
+#include "./SchemaItems/SchemaItem.h"
 #include "DiagStateController.h"
 #include "ISchemaViewHistory.h"
 #include "IViewVariables.h"
 #include "LogController.h"
-#include "SchemaItem.h"
 #include "SchemaManager.h"
 #include "SchemaView.h"
 #include "TuningController.h"
+
+#include <Behavior/ClientBehaviorStorage.h>
+#include <Behavior/MonitorBehavior.h>
+#include <Behavior/ScriptMonitorBehavior.h>
+#include <Behavior/TuningClientBehavior.h>
+
+
 #include <QJSEngine>
+
 
 class QPaintEvent;
 class QTimerEvent;
 class QMouseEvent;
+
 
 namespace VFrame30
 {
@@ -31,7 +39,8 @@ namespace VFrame30
 	//
 	/*! \class ScriptSchemaView
 		\ingroup view
-		\brief Represents a class that contains schemas displayed on the screen. Used for switching schemas, searching items and displaying message boxes.
+		\brief Represents a class that contains schemas displayed on the screen. Used for switching schemas, searching items and displaying
+	   message boxes.
 
 		sRepresents a class that contains schemas displayed on the screen. In scripts this object is accessed by global <b>view</b> object.
 
@@ -42,17 +51,19 @@ namespace VFrame30
 		- setting and reading variables;
 		- displaying message boxes.
 
-		\warning Items and widgets searching is performed by objects name. In order to find certain item, an item should have an unique <b>ObjectName</b> property value within the schema.
+		\warning Items and widgets searching is performed by objects name. In order to find certain item, an item should have an unique
+	   <b>ObjectName</b> property value within the schema.
 
 		\n
-		\warning Do not call message box functions (<b>warningMessageBox, errorMessageBox, infoMessageBox and questionMessageBox</b>) from <b>PreDrawScript</b> and <b>AfterCreateScript</b> event handlers.
-		This can cause user interface hang.
+		\warning Do not call message box functions (<b>warningMessageBox, errorMessageBox, infoMessageBox and questionMessageBox</b>) from
+	   <b>PreDrawScript</b> and <b>AfterCreateScript</b> event handlers. This can cause user interface hang.
 
 		<b>Schema Variables</b>
 
 		Schema variables are used to change schema contents dynamically. For example, one schema can display different set of signals.
 		Dynamic schema items (<b>SchemaItemValue</b>, <b>SchemaItemImageValue</b> etc.) can contain variable macros in signal properties
-		(<b>AppSignalIDs</b>) and display different application signals when variable changes. Variable values can be changed by script code.
+		(<b>AppSignalIDs</b>) and display different application signals when variable changes. Variable values can be changed by script
+	   code.
 
 		<b>Example 1. Schema Switching</b>
 
@@ -93,13 +104,13 @@ namespace VFrame30
 
 		<b>Example 4. Using schema variables</b>
 
-		Assume schema has SchemaItemValue with <b>AppSignalIDs</b> property set to <i>"#SIGNAL_0_$(Var01)"</i>. Also schema contains two buttons (SchemaItemPushButton)
-		with click event handlers.
+		Assume schema has SchemaItemValue with <b>AppSignalIDs</b> property set to <i>"#SIGNAL_0_$(Var01)"</i>. Also schema contains two
+	   buttons (SchemaItemPushButton) with click event handlers.
 
 		On first button click, <i>"Var01"</i> variable is set to <i>"SIG001"</i>, on second button click is set to <i>"SIG002"</i>.
 
-		SchemaItemValue variable macro will be replaced to its value, so two different signal values (<i>SIGNAL_0_SIG001</i> or <i>SIGNAL_0_SIG002</i>) will be
-		displayed depending on what button was clicked.
+		SchemaItemValue variable macro will be replaced to its value, so two different signal values (<i>SIGNAL_0_SIG001</i> or
+	   <i>SIGNAL_0_SIG002</i>) will be displayed depending on what button was clicked.
 
 		\code
 		// SchemaItemPushButton 1 ClickScript handler
@@ -131,7 +142,8 @@ namespace VFrame30
 		Q_PROPERTY(QString schemaCaption READ schemaCaption)
 		Q_PROPERTY(QString SchemaCaption READ schemaCaption)
 
-		/// \brief Get current ScriptSchema object. To get SchemaID or SchemaCaption for performance reason use appropriate properties of view <b>view.schemaID</b> and <b>view.schemaCaption</b>.
+		/// \brief Get current ScriptSchema object. To get SchemaID or SchemaCaption for performance reason use appropriate properties of
+		/// view <b>view.schemaID</b> and <b>view.schemaCaption</b>.
 		Q_PROPERTY(QObject* schema READ schema)
 		Q_PROPERTY(QObject* Schema READ schema)
 
@@ -144,9 +156,7 @@ namespace VFrame30
 		Q_PROPERTY(double ZoomFactor READ zoomFactor)
 
 	public:
-		explicit ScriptSchemaView(ClientSchemaView* clientSchemaView,
-								  ISchemaViewHistory* schemaViewHistory,
-								  QObject* parent = nullptr);
+		explicit ScriptSchemaView(ClientSchemaView* clientSchemaView, ISchemaViewHistory* schemaViewHistory, QObject* parent = nullptr);
 		virtual ~ScriptSchemaView() = default;
 
 		// Public slots which are part of Script API
@@ -157,7 +167,8 @@ namespace VFrame30
 		/// \brief Sets the active schema specified in schemaId parameter.
 		void setSchema(QString schemaId); // Set schema by SchemaID
 
-		/// \brief Finds schema item by its name (ObjectName property). Returned value has SchemaItem type or undefined if item is not found.
+		/// \brief Finds schema item by its name (ObjectName property). Returned value has SchemaItem type or undefined if item is not
+		/// found.
 		QObject* findSchemaItem(QString objectName); // Find SchemaItem by ObjectName
 
 		/// \brief Finds a schema control widget (edit control, button, etc...) by its name (ObjectName property).
@@ -212,11 +223,13 @@ namespace VFrame30
 		///
 		bool canForwardHistory() const;
 
-		/// \brief Select the previous schema view from sequence of earlier opened schemas. Use <b>canBackHistory</b> to detect if operation is possible.
+		/// \brief Select the previous schema view from sequence of earlier opened schemas. Use <b>canBackHistory</b> to detect if operation
+		/// is possible.
 		///
 		void historyBack();
 
-		/// \brief Select the next schema view from sequence of earlier opened schemas. Use <b>canForwardHistory</b> to detect if operation is possible.
+		/// \brief Select the next schema view from sequence of earlier opened schemas. Use <b>canForwardHistory</b> to detect if operation
+		/// is possible.
 		///
 		void historyForward();
 
@@ -226,28 +239,32 @@ namespace VFrame30
 		///
 		/// Displays a question message box with specified text.
 		///
-		/// \warning Do not call this function from <b>PreDrawScript</b> and <b>AfterCreateScript</b> event handlers. This can cause user interface hang.
+		/// \warning Do not call this function from <b>PreDrawScript</b> and <b>AfterCreateScript</b> event handlers. This can cause user
+		/// interface hang.
 		void warningMessageBox(QString text, QString details = QString());
 
 		/// \brief Displays an error message box with specified text. Optional details parameter specifies details text.
 		///
 		/// Displays a question message box with specified text. Optional details parameter specifies details text.
 		///
-		/// \warning Do not call this function from <b>PreDrawScript</b> and <b>AfterCreateScript</b> event handlers. This can cause user interface hang.
+		/// \warning Do not call this function from <b>PreDrawScript</b> and <b>AfterCreateScript</b> event handlers. This can cause user
+		/// interface hang.
 		void errorMessageBox(QString text, QString details = QString());
 
 		/// \brief Displays an information message box with specified text. Optional details parameter specifies details text.
 		///
 		/// Displays a question message box with specified text. Optional details parameter specifies details text.
 		///
-		/// \warning Do not call this function from <b>PreDrawScript</b> and <b>AfterCreateScript</b> event handlers. This can cause user interface hang.
+		/// \warning Do not call this function from <b>PreDrawScript</b> and <b>AfterCreateScript</b> event handlers. This can cause user
+		/// interface hang.
 		void infoMessageBox(QString text, QString details = QString());
 
 		/// \brief Displays a question message box with specified text. If user clicked "Yes", returns true, otherwise returns false.
 		///
 		/// Displays a question message box with specified text. If user clicked "Yes", returns true, otherwise returns false.
 		///
-		/// \warning Do not call this function from <b>PreDrawScript</b> and <b>AfterCreateScript</b> event handlers. This can cause user interface hang.
+		/// \warning Do not call this function from <b>PreDrawScript</b> and <b>AfterCreateScript</b> event handlers. This can cause user
+		/// interface hang.
 		bool questionMessageBox(QString text, QString details = QString());
 
 		/// \brief Displays a message box with specified text with specified buttons, default button and icon.
@@ -258,8 +275,13 @@ namespace VFrame30
 		/// Icon is specified as a one of QMessageBox::Icon enum values.
 		/// Return value is QMessageBox::StandardButton enum value.
 		///
-		/// \warning Do not call this function from <b>PreDrawScript</b> and <b>AfterCreateScript</b> event handlers. This can cause user interface hang.
-		int messageBox(QString text, QMessageBox::StandardButtons buttons, QMessageBox::StandardButton defaultButton, QMessageBox::Icon icon, QString details = QString());
+		/// \warning Do not call this function from <b>PreDrawScript</b> and <b>AfterCreateScript</b> event handlers. This can cause user
+		/// interface hang.
+		int messageBox(QString text,
+					   QMessageBox::StandardButtons buttons,
+					   QMessageBox::StandardButton defaultButton,
+					   QMessageBox::Icon icon,
+					   QString details = QString());
 
 		// Variables functions
 		//
@@ -272,7 +294,8 @@ namespace VFrame30
 		/// \brief Sets the value of the variable specified by name.
 		void setVariable(QString name, const QVariant& value);
 
-		/// \brief Get schema by index. Avoid using this function for performance reason. To get schemas' identifiers and captions use schemaCaptionById, schemaCaptionByIndex, schemaIdByIndex
+		/// \brief Get ScriptSchema by index. Avoid using this function for performance reason. To get schemas' identifiers and captions use
+		/// schemaCaptionById, schemaCaptionByIndex, schemaIdByIndex
 		QObject* schemaByIndex(int schemaIndex);
 
 		/// \brief Get schema caption by schema identifier.
@@ -285,6 +308,9 @@ namespace VFrame30
 		// Not documented
 		//
 		QString schemaIdByIndex(int schemaIndex) const;
+
+		/// @brief Returns the monitor behavior object (ScriptMonitorBehavior).
+		Behavior::ScriptMonitorBehavior monitorBehavior() const;
 
 	private:
 		QString schemaId() const;
@@ -398,7 +424,10 @@ namespace VFrame30
 		bool runGlobalScriptEvent(const QString& functionName, const QJSValueList& arguments, bool funcIsOptional);
 
 	private:
-		bool privateRunGlobalScriptEvent(QJSEngine& engine, const QString& functionName, const QJSValueList& arguments, bool funcIsOptional);
+		bool privateRunGlobalScriptEvent(QJSEngine& engine,
+										 const QString& functionName,
+										 const QJSValueList& arguments,
+										 bool funcIsOptional);
 
 	private:
 		bool reEvaluateGlobalScript();
@@ -435,13 +464,11 @@ namespace VFrame30
 
 		// ClientBehavior
 		//
-		const MonitorBehavior& monitorBehavior() const noexcept;
-		void setMonitorBehavior(const MonitorBehavior& src);
-		void setMonitorBehavior(MonitorBehavior&& src);
+		std::shared_ptr<const Behavior::MonitorBehavior> monitorBehavior() const;
+		void setMonitorBehavior(Behavior::MonitorBehavior src);
 
-		const TuningClientBehavior& tuningClientBehavior() const noexcept;
-		void setTuningClientBehavior(const TuningClientBehavior& src);
-		void setTuningClientBehavior(TuningClientBehavior&& src);
+		std::shared_ptr<const Behavior::TuningClientBehavior> tuningClientBehavior() const;
+		void setTuningClientBehavior(Behavior::TuningClientBehavior src);
 
 	private:
 		VFrame30::SchemaManager* m_schemaManager = nullptr;
@@ -449,13 +476,13 @@ namespace VFrame30
 
 	protected:
 		std::unique_ptr<TuningController> m_tuningController;
-		
+
 		DiagStateController* m_diagStateController = nullptr;
 		std::unique_ptr<ScriptDiagStateController> m_scriptDiagStateController;
 
 		AppSignalController* m_appSignalController = nullptr;
 		std::unique_ptr<ScriptAppSignalController> m_scriptAppSignalController;
-		
+
 		LogController* m_logController = nullptr;
 
 	private:
@@ -488,9 +515,11 @@ namespace VFrame30
 		//
 		QVariantHash m_variables; // Key is variable name
 
-		// Behaviors
+		// Behaviors:
+		// It is a smart pointer so it can be effectively shared for the scripts.
+		// Must be always set to some value so we can avoid checking for nullptr.
 		//
-		MonitorBehavior m_monitorBehavior;
-		TuningClientBehavior m_tuningClientBehavior;
+		std::shared_ptr<const Behavior::MonitorBehavior> m_monitorBehavior = std::make_shared<Behavior::MonitorBehavior>();
+		std::shared_ptr<const Behavior::TuningClientBehavior> m_tuningClientBehavior = std::make_shared<Behavior::TuningClientBehavior>();
 	};
 } // namespace VFrame30

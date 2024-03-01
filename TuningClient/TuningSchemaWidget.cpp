@@ -1,18 +1,15 @@
+#include "TuningSchemaWidget.h"
+#include "../VFrame30/Context.h"
+#include "../VFrame30/SchemaItems/SchemaItemConnection.h"
+#include "../VFrame30/SchemaItems/SchemaItemImageValue.h"
+#include "../VFrame30/SchemaItems/SchemaItemIndicator.h"
+#include "../VFrame30/SchemaItems/SchemaItemLoopback.h"
+#include "../VFrame30/SchemaItems/SchemaItemSignal.h"
+#include "../VFrame30/SchemaItems/SchemaItemUfb.h"
+#include "../VFrame30/SchemaItems/SchemaItemValue.h"
 #include "Main.h"
 #include "MainWindow.h"
-#include "TuningSchemaWidget.h"
 #include "TuningSignalInfo.h"
-
-#include "../ClientLib/TuningUserManager.h"
-#include "../VFrame30/MonitorSchema.h"
-#include "../VFrame30/SchemaItemSignal.h"
-#include "../VFrame30/SchemaItemValue.h"
-#include "../VFrame30/SchemaItemImageValue.h"
-#include "../VFrame30/SchemaItemIndicator.h"
-#include "../VFrame30/SchemaItemConnection.h"
-#include "../VFrame30/SchemaItemUfb.h"
-#include "../VFrame30/SchemaItemLoopback.h"
-#include "../VFrame30/Context.h"
 
 //
 // TuningSchemaWidget

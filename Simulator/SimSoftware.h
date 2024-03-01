@@ -3,6 +3,8 @@
 #include "SimAppDataTransmitter.h"
 #include "SimTuningServiceCommunicator.h"
 
+#include <Behavior/MonitorBehavior.h>
+
 namespace  Sim
 {
 	class Simulator;
@@ -72,7 +74,7 @@ namespace  Sim
 		Application(const SoftwareXmlInfo& info);
 		virtual ~Application() = default;
 
-		virtual bool load(QString appDir);
+		virtual bool load(QString appDir, ILogFile* log);
 
 	public:
 		const QString& equipmentId() const;
@@ -91,13 +93,15 @@ namespace  Sim
 		AppMonitor(const SoftwareXmlInfo& info);
 		~AppMonitor() = default;
 
-		virtual bool load(QString appDir) override;
+		virtual bool load(QString appDir, ILogFile* log) override;
 
 	public:
 		QString globalScript() const;
+		const Behavior::MonitorBehavior& monitorBehavior() const;
 
 	private:
 		QString m_globalScript;
+		Behavior::MonitorBehavior m_monitorBehavior;
 	};
 
 

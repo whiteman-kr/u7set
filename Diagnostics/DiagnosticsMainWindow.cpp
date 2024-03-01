@@ -1595,7 +1595,7 @@ void DiagnosticsToolBar::addAction(QAction* action)
 	return;
 }
 
-void DiagnosticsToolBar::dragEnterEvent(QDragEnterEvent* event)
+void DiagnosticsToolBar::dragEnterEvent(QDragEnterEvent* /*event*/)
 {
 //	// Find Trend action
 //	//
@@ -1641,7 +1641,7 @@ void DiagnosticsToolBar::dragEnterEvent(QDragEnterEvent* event)
 	return;
 }
 
-void DiagnosticsToolBar::dropEvent(QDropEvent* event)
+void DiagnosticsToolBar::dropEvent(QDropEvent* /*event*/)
 {
 //	// Find Trend action
 //	//

@@ -17,10 +17,10 @@ qt_add_library(${TARGET} STATIC
 	ClientSchemaManager.h
 	SchemaClientConfigController.cpp
 	SchemaClientConfigController.h
-	SchemaTabWidget.cpp
-	SchemaTabWidget.h
 	SchemaDrawStatistics.cpp
 	SchemaDrawStatistics.h
+	SchemaTabWidget.cpp
+	SchemaTabWidget.h
 
 	../lib/Ui/TabWidgetEx.cpp  # Note that is usend in other projects without this library
 	../lib/Ui/TabWidgetEx.h

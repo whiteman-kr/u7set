@@ -2,13 +2,18 @@
 
 #include "EditEngine.h"
 
+class EditSchemaView;
+namespace VFrame30
+{
+	class Schema;
+}
+
 namespace EditEngine
 {
-
 	class SetObjectCommand : public EditCommand
 	{
-		SetObjectCommand();
 	public:
+		SetObjectCommand() = delete;
 		SetObjectCommand(EditSchemaView* schemaView,
 				const QByteArray& oldState,
 				const QByteArray& newState,
@@ -35,6 +40,5 @@ namespace EditEngine
 		std::vector<Record> m_items;
 		std::shared_ptr<VFrame30::Schema> m_schema;
 	};
-
 }
 

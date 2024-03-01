@@ -1,13 +1,13 @@
 #include "CreateSchemaDialog.h"
-#include "ui_CreateSchemaDialog.h"
-#include "Settings.h"
 #include "../DbLib/DbStruct.h"
 #include "../HardwareLib/PropertyNames.h"
-#include "../VFrame30/Schema.h"
-#include "../VFrame30/UfbSchema.h"
 #include "../VFrame30/LogicSchema.h"
+#include "../VFrame30/Schema.h"
+#include "../VFrame30/SchemaItems/SchemaItem.h"
 #include "../VFrame30/Settings.h"
-#include "../VFrame30/SchemaItem.h"
+#include "../VFrame30/UfbSchema.h"
+#include "Settings.h"
+#include "ui_CreateSchemaDialog.h"
 
 
 //1. если мен€ютс€ юниты то надо помен€ть введенные размеры

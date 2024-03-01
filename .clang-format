@@ -10,6 +10,8 @@ BasedOnStyle: Microsoft
 
 # MaxEmptyLinesToKeep: 2 -- does not work for VS 17.9
 
+ColumnLimit: 140
+
 # Ok
 AlignAfterOpenBracket: Align	
 

@@ -51,6 +51,7 @@ void SimSchemaView::setMonitorId(QString equipmentId, bool emitUpdate)
 		monitor != nullptr)
 	{
 		setGlobalScript(monitor->globalScript());
+		setMonitorBehavior(monitor->monitorBehavior());
 	}
 
 	if (emitUpdate == true)

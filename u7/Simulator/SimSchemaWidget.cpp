@@ -561,7 +561,8 @@ void SimSchemaWidget::signalContextMenu(QStringList appSignals,
 		}
 	}
 
-
+	// The list of Monitors
+	//
 	if (QStringList monitors = m_simulator->software().monitors();
 		monitors.isEmpty() == false)
 	{

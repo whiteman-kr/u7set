@@ -1,6 +1,5 @@
 #pragma once
-#include "../../VFrame30/FblItemRect.h"
-#include "../../VFrame30/Schema.h"
+#include "../../VFrame30/SchemaItems/FblItemRect.h"
 
 struct AutoFblConnectionProposition
 {

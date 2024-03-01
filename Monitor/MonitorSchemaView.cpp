@@ -101,7 +101,7 @@ void MonitorSchemaView::configurationArrived(MonitorConfigSettings configuration
 
 	m_configurationId = configuration.configurationId;
 
-	setMonitorBehavior(std::move(configuration.monitorBeahvior));
+	setMonitorBehavior(std::move(configuration.monitorBehavior));
 
 	// This will update GlobalScripts and reevaluate them.
 	//

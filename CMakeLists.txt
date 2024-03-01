@@ -104,6 +104,8 @@ message("CMake version:  ${CMAKE_VERSION}")
 message("Current file path:  ${CMAKE_CURRENT_LIST_FILE}")
 message("User: ${U7SET_USER_NAME}")
 message("Host: ${U7SET_HOSTNAME}")
+message("Qt Version: ${Qt6_VERSION}")
+message("Qt Path: ${Qt6_DIR}")
 message("-----------------------------------------")
 
 # Add projects.
@@ -121,6 +123,8 @@ add_subdirectory(ClientLib)
 add_subdirectory(DiagClientLib)
 add_subdirectory(SchemaClientLib)
 add_subdirectory(ReportLib)
+
+add_subdirectory(libs/Behavior)
 
 add_subdirectory(TrendView)
 add_subdirectory(VFrame30)

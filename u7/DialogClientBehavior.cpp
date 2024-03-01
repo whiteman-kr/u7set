@@ -1,19 +1,25 @@
 #include "DialogClientBehavior.h"
-#include "Settings.h"
 #include "../UtilsLib/Ui/UiTools.h"
+
+#include <Behavior/ClientBehaviorStorage.h>
+#include <Behavior/MonitorBehavior.h>
+#include <Behavior/TuningClientBehavior.h>
+
+#include "Settings.h"
+
 
 //
 //
 // TagsToColorDelegate
 //
 //
-TagsToColorDelegate::TagsToColorDelegate(QWidget* parent):
+TagsToColorDelegate::TagsToColorDelegate(QWidget* parent) :
 	QItemDelegate(parent),
 	m_parentWidget(parent)
 {
 }
 
-QWidget* TagsToColorDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
+QWidget* TagsToColorDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
 	Q_UNUSED(option);
 
@@ -26,9 +32,8 @@ QWidget* TagsToColorDelegate::createEditor(QWidget *parent, const QStyleOptionVi
 	}
 
 	if (index.column() == static_cast<int>(MonitorBehaviorEditWidget::Columns::Color1) ||
-			index.column() == static_cast<int>(MonitorBehaviorEditWidget::Columns::Color2))
+		index.column() == static_cast<int>(MonitorBehaviorEditWidget::Columns::Color2))
 	{
-
 		QRegularExpression rx("^[#][A-Fa-f\\d]*$");
 		edit->setValidator(new QRegularExpressionValidator(rx, edit));
 	}
@@ -36,7 +41,7 @@ QWidget* TagsToColorDelegate::createEditor(QWidget *parent, const QStyleOptionVi
 	return edit;
 }
 
-void TagsToColorDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
+void TagsToColorDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
 {
 	if (index.column() == static_cast<int>(MonitorBehaviorEditWidget::Columns::Tag))
 	{
@@ -62,7 +67,7 @@ void TagsToColorDelegate::setEditorData(QWidget *editor, const QModelIndex &inde
 
 	QString s = index.model()->data(index, Qt::EditRole).toString();
 
-	QLineEdit *edit = qobject_cast<QLineEdit*>(editor);
+	QLineEdit* edit = qobject_cast<QLineEdit*>(editor);
 	if (edit == nullptr)
 	{
 		Q_ASSERT(edit);
@@ -74,7 +79,7 @@ void TagsToColorDelegate::setEditorData(QWidget *editor, const QModelIndex &inde
 	return;
 }
 
-void TagsToColorDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
+void TagsToColorDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
 {
 	if (index.column() == static_cast<int>(MonitorBehaviorEditWidget::Columns::Tag))
 	{
@@ -105,7 +110,7 @@ void TagsToColorDelegate::setModelData(QWidget *editor, QAbstractItemModel *mode
 // MonitorBehaviorEditWidget
 //
 
-MonitorBehaviorEditWidget::MonitorBehaviorEditWidget(QWidget* parent):
+MonitorBehaviorEditWidget::MonitorBehaviorEditWidget(QWidget* parent) :
 	QWidget(parent)
 {
 	QHBoxLayout* mainLayout = new QHBoxLayout(this);
@@ -158,7 +163,7 @@ MonitorBehaviorEditWidget::MonitorBehaviorEditWidget(QWidget* parent):
 	return;
 }
 
-void MonitorBehaviorEditWidget::setBehavior(std::shared_ptr<MonitorBehavior> mb)
+void MonitorBehaviorEditWidget::setBehavior(std::shared_ptr<Behavior::MonitorBehavior> mb)
 {
 	if (mb == nullptr)
 	{
@@ -185,11 +190,10 @@ void MonitorBehaviorEditWidget::onAddTag()
 
 	QString tag;
 
-	do{
+	do
+	{
 		bool ok = false;
-		tag = QInputDialog::getText(this, tr("Client Behavior Editor"),
-												tr("Enter the new tag name:"), QLineEdit::Normal,
-											tr("tag"), &ok);
+		tag = QInputDialog::getText(this, tr("Client Behavior Editor"), tr("Enter the new tag name:"), QLineEdit::Normal, tr("tag"), &ok);
 
 		if (ok == false)
 		{
@@ -203,7 +207,7 @@ void MonitorBehaviorEditWidget::onAddTag()
 
 		QMessageBox::warning(this, "Client Behavior Editor", "This tag name already exists!");
 
-	}while(true);
+	} while (true);
 
 	// Add tag and display it
 
@@ -255,21 +259,18 @@ void MonitorBehaviorEditWidget::onRemoveTag()
 	// Prevent user from removing default tags
 	//
 	QString tag = item->text(static_cast<int>(Columns::Tag));
-	if (tag == MonitorBehavior::criticalTag ||
-		tag == MonitorBehavior::attentionTag ||
-		tag == MonitorBehavior::generalTag ||
-		tag == MonitorBehavior::nonValidityTag ||
-		tag == MonitorBehavior::simulatedTag ||
-		tag == MonitorBehavior::blockedTag ||
-		tag == MonitorBehavior::mismatchTag ||
-		tag == MonitorBehavior::outOfLimitsTag)
+	if (tag == Behavior::MonitorBehavior::criticalTag || tag == Behavior::MonitorBehavior::attentionTag ||
+		tag == Behavior::MonitorBehavior::generalTag || tag == Behavior::MonitorBehavior::nonValidityTag ||
+		tag == Behavior::MonitorBehavior::simulatedTag || tag == Behavior::MonitorBehavior::blockedTag ||
+		tag == Behavior::MonitorBehavior::mismatchTag || tag == Behavior::MonitorBehavior::outOfLimitsTag)
 	{
 		QMessageBox::critical(this, qAppName(), tr("This tag can't be removed!"));
 		return;
 	}
 
 
-	auto mbResult = QMessageBox::warning(this, qAppName(), tr("Are you sure you want to remove selected tag?"), QMessageBox::Yes, QMessageBox::No);
+	auto mbResult =
+		QMessageBox::warning(this, qAppName(), tr("Are you sure you want to remove selected tag?"), QMessageBox::Yes, QMessageBox::No);
 	if (mbResult == QMessageBox::No)
 	{
 		return;
@@ -328,27 +329,26 @@ void MonitorBehaviorEditWidget::onTagEditFinished(const QModelIndex& index)
 	switch (index.column())
 	{
 	case static_cast<int>(Columns::Tag):
-	{
-		m_behavior->setTag(index.row(), item->text(index.column()));
-		break;
-	}
+		{
+			m_behavior->setTag(index.row(), item->text(index.column()));
+			break;
+		}
 	case static_cast<int>(Columns::Color1):
 	case static_cast<int>(Columns::Color2):
-	{
-		QString tag = item->text(static_cast<int>(Columns::Tag));
-		QColor color1 = QColor(item->text(static_cast<int>(Columns::Color1)));
-		QColor color2 = QColor(item->text(static_cast<int>(Columns::Color2)));
+		{
+			QString tag = item->text(static_cast<int>(Columns::Tag));
+			QColor color1 = QColor(item->text(static_cast<int>(Columns::Color1)));
+			QColor color2 = QColor(item->text(static_cast<int>(Columns::Color2)));
 
-		m_behavior->setTagToColors(tag, std::make_pair(color1.rgb(), color2.rgb()));
+			m_behavior->setTagToColors(tag, std::make_pair(color1.rgb(), color2.rgb()));
 
-		item->setIcon(static_cast<int>(Columns::Color1), UiTools::drawColorBox(color1));
-		item->setIcon(static_cast<int>(Columns::Color2), UiTools::drawColorBox(color2));
-		break;
-	}
+			item->setIcon(static_cast<int>(Columns::Color1), UiTools::drawColorBox(color1));
+			item->setIcon(static_cast<int>(Columns::Color2), UiTools::drawColorBox(color2));
+			break;
+		}
 	default:
 		Q_ASSERT(false);
 		return;
-
 	}
 
 	emit behaviorModified();
@@ -462,8 +462,8 @@ void MonitorBehaviorEditWidget::moveTag(int step)
 // TuningClientBehaviorEditWidget
 //
 
-TuningClientBehaviorEditWidget::TuningClientBehaviorEditWidget(QWidget* parent)
-	:QWidget(parent)
+TuningClientBehaviorEditWidget::TuningClientBehaviorEditWidget(QWidget* parent) :
+	QWidget(parent)
 {
 	QHBoxLayout* mainLayout = new QHBoxLayout(this);
 	mainLayout->setContentsMargins(0, 0, 0, 0);
@@ -482,8 +482,9 @@ TuningClientBehaviorEditWidget::TuningClientBehaviorEditWidget(QWidget* parent)
 //
 //
 
-DialogClientBehavior::DialogClientBehavior(DbController *pDbController, QWidget *parent) :
+DialogClientBehavior::DialogClientBehavior(DbController* pDbController, QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
+	m_behaviorStorage(std::make_unique<Behavior::ClientBehaviorStorage>()),
 	m_dbController(pDbController)
 {
 	assert(db());
@@ -500,7 +501,7 @@ DialogClientBehavior::DialogClientBehavior(DbController *pDbController, QWidget 
 
 	leftLayout->setContentsMargins(0, 0, 0, 0);
 
-	// Behavour list
+	// Behavior list
 
 	m_behaviorTree = new QTreeWidget();
 	m_behaviorTree->setSelectionMode(QTreeWidget::SingleSelection);
@@ -561,7 +562,10 @@ DialogClientBehavior::DialogClientBehavior(DbController *pDbController, QWidget 
 
 	m_tuningClientBehaviorEditWidget = new TuningClientBehaviorEditWidget(this);
 	m_tuningClientBehaviorEditWidget->setVisible(false);
-	connect(m_tuningClientBehaviorEditWidget, &TuningClientBehaviorEditWidget::behaviorModified, this, &DialogClientBehavior::onBehaviorModified);
+	connect(m_tuningClientBehaviorEditWidget,
+			&TuningClientBehaviorEditWidget::behaviorModified,
+			this,
+			&DialogClientBehavior::onBehaviorModified);
 	editorLayout->addWidget(m_tuningClientBehaviorEditWidget);
 
 	m_emptyEditorWidget = new QLabel(tr("No client behavior selected"), this);
@@ -606,14 +610,14 @@ DialogClientBehavior::DialogClientBehavior(DbController *pDbController, QWidget 
 	QString errorCode;
 
 	QByteArray data;
-	bool result = loadFileFromDatabase(db(), m_behaviorStorage.dbFileName(), &errorCode, &data);
+	bool result = loadFileFromDatabase(db(), m_behaviorStorage->dbFileName(), &errorCode, &data);
 	if (result == false)
 	{
 		QMessageBox::critical(this, QString("Error"), tr("Can't load behavior file, error code: \n\n'%1'").arg(errorCode));
 		return;
 	}
 
-	result = m_behaviorStorage.load(data, &errorCode);
+	result = m_behaviorStorage->load(data, &errorCode);
 	if (result == false)
 	{
 		QMessageBox::critical(this, QString("Error"), tr("Can't parse behavior, error code: \n\n'%1'").arg(errorCode));
@@ -668,7 +672,10 @@ bool DialogClientBehavior::askForSaveChanged()
 		return true;
 	}
 
-	QMessageBox::StandardButton result = QMessageBox::warning(this, "Client Behavior Editor", "Do you want to save your changes?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+	QMessageBox::StandardButton result = QMessageBox::warning(this,
+															  "Client Behavior Editor",
+															  "Do you want to save your changes?",
+															  QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
 
 	if (result == QMessageBox::Yes)
 	{
@@ -695,9 +702,12 @@ bool DialogClientBehavior::saveChanges()
 	}
 
 	bool ok = false;
-	QString comment = QInputDialog::getText(this, tr("Client Behavior Editor"),
-											tr("Please enter check-in comment:"), QLineEdit::Normal,
-											tr("comment"), &ok);
+	QString comment = QInputDialog::getText(this,
+											tr("Client Behavior Editor"),
+											tr("Please enter check-in comment:"),
+											QLineEdit::Normal,
+											tr("comment"),
+											&ok);
 
 	if (ok == false)
 	{
@@ -712,11 +722,11 @@ bool DialogClientBehavior::saveChanges()
 	// save data to XML
 	//
 	QByteArray data;
-	m_behaviorStorage.save(&data);
+	m_behaviorStorage->save(&data);
 
 	// save to db
 	//
-	if (saveFileToDatabase(data, db(), m_behaviorStorage.dbFileName(), comment) == false)
+	if (saveFileToDatabase(data, db(), m_behaviorStorage->dbFileName(), comment) == false)
 	{
 		QMessageBox::critical(this, QString("Error"), tr("Can't save client behavoiur file."));
 		return false;
@@ -728,7 +738,7 @@ bool DialogClientBehavior::saveChanges()
 }
 
 
-bool DialogClientBehavior::loadFileFromDatabase(DbController* db, const QString& fileName, QString *errorCode, QByteArray* data)
+bool DialogClientBehavior::loadFileFromDatabase(DbController* db, const QString& fileName, QString* errorCode, QByteArray* data)
 {
 	if (db == nullptr || errorCode == nullptr || data == nullptr)
 	{
@@ -762,7 +772,7 @@ bool DialogClientBehavior::loadFileFromDatabase(DbController* db, const QString&
 	return true;
 }
 
-bool DialogClientBehavior::saveFileToDatabase(const QByteArray& data, DbController* db, const QString& fileName, const QString &comment)
+bool DialogClientBehavior::saveFileToDatabase(const QByteArray& data, DbController* db, const QString& fileName, const QString& comment)
 {
 	if (db == nullptr)
 	{
@@ -831,11 +841,11 @@ void DialogClientBehavior::fillBehaviorList()
 {
 	m_behaviorTree->clear();
 
-	int count = m_behaviorStorage.count();
+	int count = m_behaviorStorage->count();
 
 	for (int i = 0; i < count; i++)
 	{
-		const std::shared_ptr<ClientBehavior> behavior = m_behaviorStorage.get(i);
+		const std::shared_ptr<Behavior::ClientBehavior> behavior = m_behaviorStorage->get(i);
 		if (behavior == nullptr)
 		{
 			assert(behavior);
@@ -873,8 +883,8 @@ void DialogClientBehavior::fillBehaviorProperties()
 
 		int index = item->data(0, Qt::UserRole).toInt();
 
-		std::shared_ptr<ClientBehavior> behavior = m_behaviorStorage.get(index);
-		if(behavior == nullptr)
+		std::shared_ptr<Behavior::ClientBehavior> behavior = m_behaviorStorage->get(index);
+		if (behavior == nullptr)
 		{
 			Q_ASSERT(behavior);
 			return;
@@ -888,7 +898,7 @@ void DialogClientBehavior::fillBehaviorProperties()
 	return;
 }
 
-void DialogClientBehavior::updateBehaviuorItemText(QTreeWidgetItem* item, ClientBehavior* behavior)
+void DialogClientBehavior::updateBehaviuorItemText(QTreeWidgetItem* item, Behavior::ClientBehavior* behavior)
 {
 	if (item == nullptr || behavior == nullptr)
 	{
@@ -919,7 +929,7 @@ void DialogClientBehavior::updateBehaviuorItemText(QTreeWidgetItem* item, Client
 	return;
 }
 
-void DialogClientBehavior::addBehavior(const std::shared_ptr<ClientBehavior> behavior)
+void DialogClientBehavior::addBehavior(const std::shared_ptr<Behavior::ClientBehavior> behavior)
 {
 	if (behavior == nullptr)
 	{
@@ -929,16 +939,14 @@ void DialogClientBehavior::addBehavior(const std::shared_ptr<ClientBehavior> beh
 
 	bool ok = false;
 
-	QString id = QInputDialog::getText(this, qAppName(),
-										 tr("Enter ID:"), QLineEdit::Normal,
-										 behavior->behaviorId(), &ok);
+	QString id = QInputDialog::getText(this, qAppName(), tr("Enter ID:"), QLineEdit::Normal, behavior->behaviorId(), &ok);
 
 	if (ok == false || id.isEmpty() == true)
 	{
 		return;
 	}
 
-	const std::vector<std::shared_ptr<ClientBehavior>> behaviors = m_behaviorStorage.behaviors();
+	const std::vector<std::shared_ptr<Behavior::ClientBehavior>> behaviors = m_behaviorStorage->behaviors();
 	for (const auto& existingBehavior : behaviors)
 	{
 		if (existingBehavior->behaviorId() == id)
@@ -952,10 +960,10 @@ void DialogClientBehavior::addBehavior(const std::shared_ptr<ClientBehavior> beh
 
 	// Add bus, update UI
 	//
-	m_behaviorStorage.add(behavior);
+	m_behaviorStorage->add(behavior);
 
 	QTreeWidgetItem* item = new QTreeWidgetItem();
-	item->setData(0, Qt::UserRole, m_behaviorStorage.count() - 1);
+	item->setData(0, Qt::UserRole, m_behaviorStorage->count() - 1);
 	updateBehaviuorItemText(item, behavior.get());
 	m_behaviorTree->addTopLevelItem(item);
 
@@ -980,13 +988,13 @@ bool DialogClientBehavior::continueWithDuplicateId()
 	bool duplicated = false;
 	QString duplicatedCaption;
 
-	for (int i = 0; i < m_behaviorStorage.count(); i++)
+	for (int i = 0; i < m_behaviorStorage->count(); i++)
 	{
-		ClientBehavior* c = m_behaviorStorage.get(i).get();
+		Behavior::ClientBehavior* c = m_behaviorStorage->get(i).get();
 
-		for (int j = 0; j < m_behaviorStorage.count(); j++)
+		for (int j = 0; j < m_behaviorStorage->count(); j++)
 		{
-			ClientBehavior* e = m_behaviorStorage.get(j).get();
+			Behavior::ClientBehavior* e = m_behaviorStorage->get(j).get();
 			assert(e);
 
 			if (i == j)
@@ -1022,9 +1030,9 @@ bool DialogClientBehavior::continueWithDuplicateId()
 	return true;
 }
 
-void DialogClientBehavior::keyPressEvent(QKeyEvent *evt)
+void DialogClientBehavior::keyPressEvent(QKeyEvent* evt)
 {
-	if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return)
+	if (evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return)
 	{
 		return;
 	}
@@ -1038,8 +1046,7 @@ void DialogClientBehavior::showEvent(QShowEvent*)
 	//
 	QRect screen = parentWidget()->screen()->availableGeometry();
 
-	resize(static_cast<int>(screen.width() * 0.60),
-		   static_cast<int>(screen.height() * 0.50));
+	resize(static_cast<int>(screen.width() * 0.60), static_cast<int>(screen.height() * 0.50));
 	move(screen.center() - rect().center());
 
 	if (m_propertyEditor == nullptr)
@@ -1072,11 +1079,23 @@ void DialogClientBehavior::onAddClicked()
 	QMenu menu;
 
 	QAction* addMonitorBehaviorAction = new QAction(tr("Add MonitorBehavior"), this);
-	connect(addMonitorBehaviorAction, &QAction::triggered, this, [this](){onAddMonitorBehavior();});
+	connect(addMonitorBehaviorAction,
+			&QAction::triggered,
+			this,
+			[this]()
+			{
+				onAddMonitorBehavior();
+			});
 	menu.addAction(addMonitorBehaviorAction);
 
 	QAction* addTuningClientBehaviorAction = new QAction(tr("Add TuningClientBehavior"), this);
-	connect(addTuningClientBehaviorAction, &QAction::triggered, this, [this](){onAddTuningClientBehavior();});
+	connect(addTuningClientBehaviorAction,
+			&QAction::triggered,
+			this,
+			[this]()
+			{
+				onAddTuningClientBehavior();
+			});
 	menu.addAction(addTuningClientBehaviorAction);
 
 	menu.exec(this->cursor().pos());
@@ -1087,14 +1106,14 @@ void DialogClientBehavior::onAddClicked()
 
 void DialogClientBehavior::onAddMonitorBehavior()
 {
-	std::shared_ptr<ClientBehavior> behavior = std::make_shared<MonitorBehavior>();
+	auto behavior = std::make_shared<Behavior::MonitorBehavior>();
 	behavior->setBehaviorId(tr("MONITOR_BEHAVIORID_%1").arg(QString::number(db()->nextCounterValue()).rightJustified(4, '0')));
 	addBehavior(behavior);
 }
 
 void DialogClientBehavior::onAddTuningClientBehavior()
 {
-	std::shared_ptr<ClientBehavior> behavior = std::make_shared<TuningClientBehavior>();
+	auto behavior = std::make_shared<Behavior::TuningClientBehavior>();
 	behavior->setBehaviorId(tr("TC_BEHAVIORID_%1").arg(QString::number(db()->nextCounterValue()).rightJustified(4, '0')));
 	addBehavior(behavior);
 }
@@ -1108,7 +1127,8 @@ void DialogClientBehavior::onRemoveClicked()
 		return;
 	}
 
-	auto mbResult = QMessageBox::warning(this, qAppName(), tr("Are you sure you want to remove selected behavior?"), QMessageBox::Yes, QMessageBox::No);
+	auto mbResult =
+		QMessageBox::warning(this, qAppName(), tr("Are you sure you want to remove selected behavior?"), QMessageBox::Yes, QMessageBox::No);
 	if (mbResult == QMessageBox::No)
 	{
 		return;
@@ -1126,7 +1146,7 @@ void DialogClientBehavior::onRemoveClicked()
 
 	for (int i : itemsToDelete)
 	{
-		if (m_behaviorStorage.remove(i) == false)
+		if (m_behaviorStorage->remove(i) == false)
 		{
 			Q_ASSERT(false);
 			return;
@@ -1151,27 +1171,27 @@ void DialogClientBehavior::onCloneClicked()
 	}
 
 	int index = selectedItems[0]->data(0, Qt::UserRole).toInt();
-	const std::shared_ptr<ClientBehavior> sourceBehavior = m_behaviorStorage.get(index);
+	const std::shared_ptr<Behavior::ClientBehavior> sourceBehavior = m_behaviorStorage->get(index);
 	if (sourceBehavior == nullptr)
 	{
 		Q_ASSERT(sourceBehavior);
 		return;
 	}
 
-	std::shared_ptr<ClientBehavior> clonedBehavior;
+	std::shared_ptr<Behavior::ClientBehavior> clonedBehavior;
 
 	if (sourceBehavior->isMonitorBehavior())
 	{
-		clonedBehavior = std::make_shared<MonitorBehavior>();
+		clonedBehavior = std::make_shared<Behavior::MonitorBehavior>();
 
-		MonitorBehavior* mbSource = dynamic_cast<MonitorBehavior*>(sourceBehavior.get());
+		auto mbSource = dynamic_cast<Behavior::MonitorBehavior*>(sourceBehavior.get());
 		if (mbSource == nullptr)
 		{
 			Q_ASSERT(mbSource);
 			return;
 		}
 
-		MonitorBehavior* mbTarget = dynamic_cast<MonitorBehavior*>(clonedBehavior.get());
+		auto mbTarget = dynamic_cast<Behavior::MonitorBehavior*>(clonedBehavior.get());
 		if (mbTarget == nullptr)
 		{
 			Q_ASSERT(mbTarget);
@@ -1184,16 +1204,16 @@ void DialogClientBehavior::onCloneClicked()
 	{
 		if (sourceBehavior->isTuningClientBehavior())
 		{
-			clonedBehavior = std::make_shared<TuningClientBehavior>();
+			clonedBehavior = std::make_shared<Behavior::TuningClientBehavior>();
 
-			TuningClientBehavior* tbSource = dynamic_cast<TuningClientBehavior*>(sourceBehavior.get());
+			auto tbSource = dynamic_cast<Behavior::TuningClientBehavior*>(sourceBehavior.get());
 			if (tbSource == nullptr)
 			{
 				Q_ASSERT(tbSource);
 				return;
 			}
 
-			TuningClientBehavior* tTarget = dynamic_cast<TuningClientBehavior*>(clonedBehavior.get());
+			auto tTarget = dynamic_cast<Behavior::TuningClientBehavior*>(clonedBehavior.get());
 			if (tTarget == nullptr)
 			{
 				Q_ASSERT(tTarget);
@@ -1207,7 +1227,6 @@ void DialogClientBehavior::onCloneClicked()
 			Q_ASSERT(false);
 			return;
 		}
-
 	}
 
 	clonedBehavior->setBehaviorId(sourceBehavior->behaviorId() + "_CLONE");
@@ -1267,7 +1286,7 @@ void DialogClientBehavior::onBehaviorSelectionChanged()
 
 		int index = item->data(0, Qt::UserRole).toInt();
 
-		const std::shared_ptr<ClientBehavior> behavior = m_behaviorStorage.get(index);
+		const std::shared_ptr<Behavior::ClientBehavior> behavior = m_behaviorStorage->get(index);
 		if (behavior == nullptr)
 		{
 			Q_ASSERT(behavior);
@@ -1281,7 +1300,7 @@ void DialogClientBehavior::onBehaviorSelectionChanged()
 			m_monitorBehaviorEditWidget->setVisible(true);
 			m_tuningClientBehaviorEditWidget->setVisible(false);
 
-			std::shared_ptr<MonitorBehavior> mb = std::dynamic_pointer_cast<MonitorBehavior>(behavior);
+			auto mb = std::dynamic_pointer_cast<Behavior::MonitorBehavior>(behavior);
 			if (mb == nullptr)
 			{
 				Q_ASSERT(mb);
@@ -1324,7 +1343,7 @@ void DialogClientBehavior::onBehaviorPropertiesChanged(QList<std::shared_ptr<Pro
 	{
 		int index = item->data(0, Qt::UserRole).toInt();
 
-		const std::shared_ptr<ClientBehavior> behavior = m_behaviorStorage.get(index);
+		const std::shared_ptr<Behavior::ClientBehavior> behavior = m_behaviorStorage->get(index);
 		if (behavior == nullptr)
 		{
 			Q_ASSERT(behavior);

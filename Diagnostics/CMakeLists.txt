@@ -22,8 +22,6 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Network Qml Xml Svg PrintS
 qt_standard_project_setup()
 
 set (DIAGNOSTICS_SOURCES
-#	../lib/ClientBehavior.cpp
-#	../lib/ClientBehavior.h
 	../lib/ConstStrings.h
 #	../lib/ExportPrint.cpp
 #	../lib/ExportPrint.h

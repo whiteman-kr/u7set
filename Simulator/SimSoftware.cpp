@@ -1,5 +1,6 @@
 #include "SimSoftware.h"
 #include "Simulator.h"
+#include <Behavior/ClientBehaviorStorage.h>
 
 namespace  Sim
 {
@@ -42,7 +43,7 @@ namespace  Sim
 		bool ok = reader.readSoftwareXml(softwareFileName);
 		if (ok == false)
 		{
-			m_log.writeError(QObject::tr("Load sofware description error, file %1 not found or corrupted").arg(softwareFileName));
+			m_log.writeError(QObject::tr("Load software description error, file %1 not found or corrupted").arg(softwareFileName));
 			clear();
 
 			return false;
@@ -70,8 +71,8 @@ namespace  Sim
 
 			Q_ASSERT(app);
 
-			app->load(buildPath + equipmentId);
-
+			ok &= app->load(buildPath + equipmentId, m_log.logInterface());
+			
 			if (si.softwareType() == E::SoftwareType::TuningService)
 			{
 				std::shared_ptr<Sim::TuningServiceCommunicator> tsc = std::make_shared<Sim::TuningServiceCommunicator>(m_simulator, equipmentId);
@@ -215,7 +216,7 @@ namespace  Sim
 	{
 	}
 
-	bool Application::load(QString /*appDir*/)
+	bool Application::load(QString /*appDir*/, ILogFile* /*log*/)
 	{
 		return true;
 	}
@@ -240,17 +241,58 @@ namespace  Sim
 	{
 	}
 
-	bool AppMonitor::load(QString appDir)
+	bool AppMonitor::load(QString appDir, ILogFile* log)
 	{
 		if (appDir.endsWith('/') == false)
 		{
 			appDir += '/';
 		}
 
+		// Global script
+		//
 		if (QFile file(appDir + File::GLOBAL_SCRIPT);
 			file.open(QIODevice::ReadOnly | QIODevice::Text) == true)
 		{
 			m_globalScript = file.readAll();
+		}
+
+		// Monitor behavior
+		//
+		if (QFile file(appDir + File::MONITOR_BEHAVIOR);
+			file.open(QIODevice::ReadOnly | QIODevice::Text) == true)
+		{
+			QByteArray data = file.readAll();
+
+			Behavior::ClientBehaviorStorage storage;
+			QString errorMessage;
+
+			bool loadOk = storage.load(data, &errorMessage);
+			if (loadOk == false)
+			{
+				if (log != nullptr)
+				{
+					log->writeError(QObject::tr("Load monitor behavior error, file %1 corrupted, error %2")
+										.arg(appDir + File::MONITOR_BEHAVIOR)
+										.arg(errorMessage));
+				}
+
+				return false;
+			}
+
+			auto behaviors = storage.monitorBehaviors();
+			if (behaviors.size() != 1)
+			{
+				if (log != nullptr)
+				{
+					log->writeError(QObject::tr("Monitor behavior file %1 must contain one behavior, but it has %2.")
+										.arg(appDir + File::MONITOR_BEHAVIOR)
+										.arg(behaviors.size()));
+				}
+
+				return false;
+			}
+
+			m_monitorBehavior = *behaviors.front();
 		}
 
 		return true;
@@ -259,5 +301,10 @@ namespace  Sim
 	QString AppMonitor::globalScript() const
 	{
 		return m_globalScript;
+	}
+
+	const Behavior::MonitorBehavior& AppMonitor::monitorBehavior() const
+	{
+		return m_monitorBehavior;
 	}
 }
