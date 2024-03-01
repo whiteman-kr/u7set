@@ -44,6 +44,8 @@ public:
 	bool isFolder(const QModelIndex& modelIndex) const;
 
 	QModelIndexList searchFor(const QString searchText);
+	QModelIndexList searchByFileIds(std::set<int> fileIds);
+
 	void setFilter(QString filter);
 	void setTagFilter(const QStringList& tags);
 	const QStringList& tagFilter() const;
@@ -77,6 +79,7 @@ public:
 	bool excludedFromBuild(int fileId) const;
 
 	const DbFileInfo& parentFile() const;
+	const DbFileTree& files() const; // m_files is filtered!
 
 	int schemaFilterCount() const;
 
@@ -104,6 +107,7 @@ public:
 
 	static const int SearchSchemaRole = Qt::UserRole + 1;
 	static const int ExcludedSchemaRole = Qt::UserRole + 2;
+	static const int SearchByFileIds = Qt::UserRole + 3;
 
 private:
 	DbFileInfo m_parentFile;
@@ -111,13 +115,14 @@ private:
 	DbFileTree m_files;
 	mutable QString m_searchText;		// Set in match(), used in data for SearchSchemaRole()
 	mutable QString m_filterText;
+	std::set<int> m_searchByFileIds;
 
 	std::map<int, QString> m_users;							// Key is UserID
 	std::map<int, VFrame30::SchemaDetails> m_details; 		// Key is FileID
 	std::set<QString> m_tags;
 	QStringList m_tagFilter;						// If vector is empty, then all schemas must be shown
 
-	std::set<int> m_systemFiles;	// Key is fileid
+	std::set<int> m_systemFiles;	// Key is fileId
 
 	int m_schemaFilterCount = 0;
 };
@@ -174,6 +179,8 @@ public:
 	void refreshFiles();
 
 	void searchAndSelect(QString searchText);
+	void fullSearchAndSelect(QString searchText);
+	void selectFoundItems(QModelIndexList& indexes);
 
 	void setFilter(QString filter);
 	void setTagFilter(const QStringList& tags);
@@ -218,7 +225,7 @@ private:
 
 	int m_lastBuildIssueCount = -1;
 
-	// Actions, public becaus they are used in control page toolbar
+	// Actions, public because they are used in control page toolbar
 	//
 public:
 	// --
@@ -335,7 +342,7 @@ protected slots:
 
 private slots:
 	void ctrlF();
-	void search();
+	void search(bool fullSearch);
 	void searchSchemaForLm(QString equipmentId);
 
 	void filter();
@@ -359,7 +366,9 @@ private:
 	QLineEdit* m_searchEdit = nullptr;
 	QLineEdit* m_filterEdit = nullptr;
 	QCompleter* m_searchCompleter = nullptr;
+
 	QPushButton* m_searchButton = nullptr;
+	QPushButton* m_fullSearchButton = nullptr;
 	QPushButton* m_filterButton = nullptr;
 	QPushButton* m_resetFilterButton = nullptr;
 

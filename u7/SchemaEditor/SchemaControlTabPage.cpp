@@ -26,6 +26,9 @@
 #include <QAbstractItemModelTester>
 #endif
 
+#include <QtConcurrent>
+#include <queue>
+
 //
 //
 // SchemaListModel
@@ -257,7 +260,7 @@ QVariant SchemaListModel::data(const QModelIndex& index, int role/* = Qt::Displa
 					}
 				}
 
-				// -- Issuese
+				// -- Issues
 				//
 				if (issues.errors == 0 && issues.warnings == 0)
 				{
@@ -416,6 +419,11 @@ QVariant SchemaListModel::data(const QModelIndex& index, int role/* = Qt::Displa
 			const VFrame30::SchemaDetails& details = it->second;
 			return details.searchForString(m_searchText);
 		}
+	}
+
+	if (role == SearchByFileIds)
+	{
+		return m_searchByFileIds.contains(file->fileId());
 	}
 
 	if (role == ExcludedSchemaRole)
@@ -812,6 +820,12 @@ QModelIndexList SchemaListModel::searchFor(const QString searchText)
 {
 	m_searchText = searchText;
 	return match(index(0, 0), SearchSchemaRole, QVariant::fromValue(true), -1, Qt::MatchExactly | Qt::MatchRecursive);
+}
+
+QModelIndexList SchemaListModel::searchByFileIds(std::set<int> fileIds)
+{
+	m_searchByFileIds = std::move(fileIds);
+	return match(index(0, 0), SearchByFileIds, QVariant::fromValue(true), -1, Qt::MatchExactly | Qt::MatchRecursive);
 }
 
 void SchemaListModel::setFilter(QString filter)
@@ -1277,6 +1291,13 @@ const DbFileInfo& SchemaListModel::parentFile() const
 	return m_parentFile;
 }
 
+const DbFileTree& SchemaListModel::files() const
+{
+	// m_files is filetred!
+	//
+	return m_files;
+}
+
 int SchemaListModel::schemaFilterCount() const
 {
 	return m_schemaFilterCount;
@@ -1313,7 +1334,7 @@ void SchemaProxyListModel::setSourceModel(QAbstractItemModel* sourceModel)
 
 bool SchemaProxyListModel::lessThan(const QModelIndex& sourceLeft, const QModelIndex& sourceRight) const
 {
-	// All folders alway at top
+	// All folders always at top
 	//
 	bool leftIsFolder = m_sourceModel->isFolder(sourceLeft);
 	bool rightIsFolder = m_sourceModel->isFolder(sourceRight);
@@ -1779,16 +1800,282 @@ void SchemaFileView::searchAndSelect(QString searchText)
 	QModelIndexList matched = m_filesModel.searchFor(searchText);
 	if (matched.isEmpty() == true)
 	{
+		QMessageBox::information(this, qAppName(), tr("No schema found."));
 		return;
 	}
 
+	selectFoundItems(matched);
+
+	QMessageBox::information(this, qAppName(), tr("Found %1 schema(s)").arg(matched.size()));
+
+	return;
+}
+
+void SchemaFileView::fullSearchAndSelect(QString searchText)
+{
+	clearSelection();
+
+	if (searchText.trimmed().isEmpty() == true)
+	{
+		return;
+	}
+
+	QString limitedSearchText = searchText;
+	if (limitedSearchText.size() > 32)
+	{
+		limitedSearchText.truncate(32);
+		limitedSearchText += "...";
+	}
+
+	// Make shallow search in all schemas and filter all found schemas.
+	//
+	std::set<int> alreadyFoundIds;		// The result of the shallow search.
+
+	{
+		QModelIndexList shallowSearchMatched = m_filesModel.searchFor(searchText);
+
+		for (const auto& mi : shallowSearchMatched)
+		{
+			alreadyFoundIds.insert(m_filesModel.file(mi).fileId());
+		}
+	}
+
+	std::set<int> matchedFileIds{alreadyFoundIds};  // The result of the search. matchedFileIds is a separate copy as it is accessed from parsing thread.
+
+	// --
+	//
+	DbFileTree fileTree = m_filesModel.files();
+
+	auto files = fileTree.toVectorIf([](const DbFileInfo& f)
+									 {
+										 return f.isFolder() == false && f.size() > 0;
+									 });
+	fileTree.clear();
+
+
+	// --
+	//
+	QProgressDialog progress(tr("Searching text %1...").arg(limitedSearchText), tr("Cancel"), 0, std::ssize(files), this);
+	progress.setMinimumDuration(200);
+	progress.setWindowModality(Qt::WindowModal);
+
+	std::atomic<int> processedCount = std::ssize(matchedFileIds); // These files will not be requested from the database and will not be parsed.
+	std::atomic<int> foundCount = std::ssize(matchedFileIds);
+
+	QElapsedTimer timer;
+	timer.start();
+
+	// 1. loads file from the database
+	//
+	std::condition_variable m_filesQueueCondition;
+	std::mutex filesQueueMutex;
+	std::queue<std::shared_ptr<DbFile>> filesQueue;
+
+	std::atomic<bool> cancelSearch = false;	
+	std::atomic<bool> allFilesLoaded = false;
+
+	auto loadFilesFromDb =
+		[&files, &filesQueueMutex, &filesQueue, &m_filesQueueCondition, &cancelSearch, &allFilesLoaded, &alreadyFoundIds](DbController* db)
+	{
+		for (const DbFileInfo& file : files)
+		{
+			if (cancelSearch.load() == true)
+			{
+				return;
+			}
+
+			if (alreadyFoundIds.contains(file.fileId()) == true)
+			{
+				// This file already was matched.
+				//
+				continue;
+			}
+
+			std::shared_ptr<DbFile> outFile;
+			bool ok = db->getLatestVersion(file, &outFile, nullptr);
+			if (ok == true && outFile != nullptr && outFile->size() > 0)
+			{
+				filesQueueMutex.lock();
+				filesQueue.push(outFile);
+				filesQueueMutex.unlock();
+
+				m_filesQueueCondition.notify_one();
+			}
+		}
+
+		allFilesLoaded.store(true);
+
+		return;
+	};
+
+	QFuture<void> loadFuture = QtConcurrent::run(loadFilesFromDb, db());
+
+	// 2. parses schema
+	//
+	auto parseSchemaAndSearch = [&filesQueue,
+								 &filesQueueMutex,
+								 &m_filesQueueCondition,
+								 &cancelSearch,
+								 &processedCount,
+								 &foundCount,
+								 &allFilesLoaded,
+								 &matchedFileIds](QString searchText)
+	{
+		do
+			{
+				std::shared_ptr<DbFile> file;
+
+				// Wait schema to be loaded from teh database.
+				//
+				do 
+				{
+					std::unique_lock<std::mutex> lock(filesQueueMutex);
+					m_filesQueueCondition.wait_for(lock,
+												   std::chrono::milliseconds{10},
+												   [&filesQueue, &cancelSearch]()
+												   {
+													   return filesQueue.empty() == false || cancelSearch.load() == true;
+												   });
+
+					if (cancelSearch.load() == true)
+					{
+						// Check that cancel was requested.
+						//
+						return;
+					}
+
+					if (filesQueue.empty() == true)
+					{
+						if (allFilesLoaded.load() == true)
+						{
+							// All files are loaded and processed.
+							//
+							return;
+						}
+					}
+					else
+					{
+						file = filesQueue.front();
+						filesQueue.pop();
+					}
+
+				} while (file == nullptr); // it happens if timeout occurs in m_filesQueueCondition.wait_for().
+
+				// Parse schema.
+				//
+				auto schema = VFrame30::Schema::Create(file->data());
+				if (schema == nullptr)
+				{
+					continue;
+				}
+
+				// Search schema.
+				//
+				bool found = false;
+				for (const auto& layer : schema->layers())
+				{
+					for (const auto& item : layer->items())
+					{
+						auto searchResult = item->searchTextByProps(searchText, Qt::CaseSensitive);
+
+						if (searchResult.empty() == false)
+						{
+							// Hit!
+							//
+							found = true;	// file.fileId();
+
+							matchedFileIds.insert(file->fileId());
+
+							foundCount ++;
+							break;
+						}
+					}
+
+					if (found == true)
+					{
+						break;
+					}
+				}
+
+				processedCount++;
+
+			} while (cancelSearch.load() == false);
+		};
+
+	QFuture<void> parseFuture = QtConcurrent::run(parseSchemaAndSearch, searchText);
+
+	// Wait all for finished.
+	//
+	int localProcessedCount = -1;
+	int localFoundCount = -1;
+
+	while (loadFuture.isRunning() == true || parseFuture.isRunning() == true)
+	{
+		if (progress.wasCanceled() == true) // Prevents flicking progress dialog - when progress.setValue it makes dialog visible again even
+											// if the user canceled application.
+		{
+			cancelSearch.store(true);
+			break;
+		}
+
+		if (localProcessedCount != processedCount || localFoundCount != foundCount)
+		{
+			localProcessedCount = processedCount;
+			localFoundCount = foundCount;
+
+			progress.setValue(processedCount);
+
+			QString newProgressText = tr("Searching text \"%1\"\n Processed %2 of %3 file(s)...\n Found %4 schema(s)")
+										  .arg(limitedSearchText)
+										  .arg(processedCount)
+										  .arg(files.size())
+										  .arg(foundCount);
+			progress.setLabelText(newProgressText);
+		}
+
+		QCoreApplication::processEvents();
+		QThread::yieldCurrentThread();
+	}
+
+	loadFuture.waitForFinished();
+	parseFuture.waitForFinished();
+
+	qDebug() << "Search time: " << timer.elapsed() << "ms";
+
+	if (progress.wasCanceled() == true && foundCount == 0)
+	{
+		// Do not show message box with text "No schema found."
+		//
+		return;
+	}
+
+	// Get model indexes for the found schemas
+	//
+	if (foundCount == 0)
+	{
+		QMessageBox::information(this, qAppName(), tr("No schema found."));
+	}
+	else
+	{
+		Q_ASSERT(matchedFileIds.empty() == false);
+
+		QModelIndexList matched = m_filesModel.searchByFileIds(std::move(matchedFileIds));
+		selectFoundItems(matched);
+
+		QMessageBox::information(this, qAppName(), tr("Found %1 schema(s).").arg(foundCount));
+	}
+
+	return;
+}
+
+void SchemaFileView::selectFoundItems(QModelIndexList& indexes)
+{
 	QItemSelection selection;
 
-	for (QModelIndex& fileModelIndex : matched)
+	for (QModelIndex& fileModelIndex : indexes)
 	{
 		QModelIndex mappedModelIndex = m_proxyModel.mapFromSource(fileModelIndex);
 
-		//selectionModel()->select(mappedModelIndex, QItemSelectionModel::Select | QItemSelectionModel::Rows);
 		selection.select(mappedModelIndex, mappedModelIndex);
 
 		QModelIndex expandParent = mappedModelIndex.parent();
@@ -1801,16 +2088,12 @@ void SchemaFileView::searchAndSelect(QString searchText)
 
 	selectionModel()->select(selection, QItemSelectionModel::Select | QItemSelectionModel::Rows);
 
-	// Scroll to somewhere, unfortuanatelly selectedIndexes does not provide sorted list, so it's just scroll somewhere
+	// Scroll to somewhere, unfortunately selectedIndexes does not provide sorted list, so it's just scroll somewhere
 	//
 	if (selection.indexes().empty() == false)
 	{
 		scrollTo(selection.indexes().front());
 	}
-
-	QMessageBox::information(this, qAppName(), tr("Found %1 schema(s)").arg(matched.size()));
-
-	return;
 }
 
 void SchemaFileView::setFilter(QString filter)
@@ -2147,6 +2430,11 @@ SchemaControlTabPage::SchemaControlTabPage(DbController* db, AppSignalSetProvide
 	m_filterEdit->setCompleter(m_searchCompleter);
 
 	m_searchButton = new QPushButton(tr("Search"));
+	m_searchButton->setToolTip(tr("Limited and fast search for the text in the schemas"));
+
+	m_fullSearchButton = new QPushButton(tr("Full Search"));
+	m_fullSearchButton->setToolTip(tr("Full search for the text in the schemas.\nFull search loads schemas from the project database and tries to match all elements and properties."));
+
 	m_filterButton = new QPushButton(tr("Filter"));
 
 	m_resetFilterButton = new QPushButton(tr("Reset Filter"));
@@ -2169,6 +2457,7 @@ SchemaControlTabPage::SchemaControlTabPage(DbController* db, AppSignalSetProvide
 
 	layout->addWidget(m_searchEdit, 1, 0, 1, 2);
 	layout->addWidget(m_searchButton, 1, 2, 1, 1);
+	layout->addWidget(m_fullSearchButton, 1, 3, 1, 1);
 
 	layout->addWidget(m_filterEdit, 2, 0, 1, 2);
 	layout->addWidget(m_filterButton, 2, 2, 1, 1);
@@ -2194,9 +2483,10 @@ SchemaControlTabPage::SchemaControlTabPage(DbController* db, AppSignalSetProvide
 	connect(m_filesView, &SchemaFileView::viewFileSignal, this, qOverload<const DbFileInfo&>(&SchemaControlTabPage::viewFile));
 
 	connect(m_searchAction, &QAction::triggered, this, &SchemaControlTabPage::ctrlF);
-	connect(m_searchEdit, &QLineEdit::returnPressed, this, &SchemaControlTabPage::search);
+	connect(m_searchEdit, &QLineEdit::returnPressed, this, [this]() { search(false); });
 	connect(m_filterEdit, &QLineEdit::returnPressed, this, &SchemaControlTabPage::filter);
-	connect(m_searchButton, &QPushButton::clicked, this, &SchemaControlTabPage::search);
+	connect(m_searchButton, &QPushButton::clicked, this, [this]() { search(false); });
+	connect(m_fullSearchButton, &QPushButton::clicked, this, [this]() { search(true); });
 	connect(m_filterButton, &QPushButton::clicked, this, &SchemaControlTabPage::filter);
 	connect(m_resetFilterButton, &QPushButton::clicked, this, &SchemaControlTabPage::resetFilter);
 
@@ -4674,16 +4964,16 @@ void SchemaControlTabPage::ctrlF()
 	return;
 }
 
-void SchemaControlTabPage::search()
+void SchemaControlTabPage::search(bool fullSearch)
 {
 	// Search for text in schemas
 	//
 	Q_ASSERT(m_filesView);
 	Q_ASSERT(m_searchEdit);
 
-	QString searchText = m_searchEdit->text().trimmed();
+	QString searchText = m_searchEdit->text();
 
-	if (searchText.isEmpty() == true)
+	if (searchText.trimmed().isEmpty() == true)
 	{
 		m_filesView->clearSelection();
 		return;
@@ -4709,7 +4999,14 @@ void SchemaControlTabPage::search()
 
 	// Search for text and select schemas with it
 	//
-	m_filesView->searchAndSelect(searchText);
+	if (fullSearch == true)
+	{
+		m_filesView->fullSearchAndSelect(searchText);
+	}
+	else
+	{
+		m_filesView->searchAndSelect(searchText);
+	}
 
 	m_filesView->setFocus();
 
@@ -4737,7 +5034,7 @@ void SchemaControlTabPage::searchSchemaForLm(QString equipmentId)
 	// Set Search string and perform search
 	//
 	m_searchEdit->setText(equipmentId.trimmed());
-	search();
+	search(false);
 
 	return;
 }
