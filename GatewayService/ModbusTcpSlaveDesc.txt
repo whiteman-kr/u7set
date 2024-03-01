@@ -1,0 +1,45 @@
+// This is a Comment
+// 
+// [Gateway], [SignalList], etc - sections
+//
+// Type = V, ID = N, etc - settings
+//
+// Sections names, settings names are case insensitive
+//
+// Settings values are case sensitive
+//
+// * - required settings
+
+[Gateway]   
+
+GatewayType = ModbusTcpSlave            	// * gateway type
+GatewayID = KAES_5SUZR1				// * gateway identifier
+GatewayDescription = KAES block 5 SUZR 1	//   free style gateway description	
+
+// ModbusTcpSlave gateway specifis settings
+
+LocalGatewayIP1 = 192.160.101.100:502		// * IP and port of receiving Modbus TCP requests channel 1
+// LocalGatewayIP2
+
+RemoteGatewayIP1 = 192.160.101.1:502		// * IP and port of receiving Modbus TCP requests channel 1
+// RemoteGatewayIP2
+
+
+CodingMode = ASCII				// ASCII - two ASCII characters on each 8-bit byte
+						// RTU - two 4-bit HEX char on each 8-bit byte (binary format)
+ModbusDeviceAddress = 20				
+
+[SignalList]
+
+// float16 - analog format float16
+// be - Big Endian
+// le - Little Endian
+
+
+AnalogFormat = float16 be
+DiscreteFormat = uint16 be				// general discrete registers format, Big Endian 16 bit
+
+// AppSignalID or CustomAppSignalID can be used
+
+#SIGNAL1 = 1000, 1  				//   [regAddr, bitNo] for discrete
+SIGNAL2 = 1002, float16				//   [regAddr, format] for analog

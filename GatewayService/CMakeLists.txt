@@ -32,8 +32,12 @@ add_executable(${TARGET}
 	IvsImpulseCommThread.cpp
 	IvsImpulseCommThread.h
 	IvsImpulseDataProtocol.h
+	IvsImpulseGateway.cpp
+	IvsImpulseGateway.h
 	IvsImpulseGatewayHandler.cpp
 	IvsImpulseGatewayHandler.h
+	ModbusTcpSlaveGateway.cpp
+	ModbusTcpSlaveGateway.h
 )
 
 target_precompile_headers(${TARGET} PRIVATE
@@ -98,10 +102,14 @@ target_precompile_headers(${TARGET} PRIVATE
 	#
 	"../CommonLib/Types.h"
 	"../CommonLib/Hash.h"
+	"../CommonLib/HostAddressPort.h"
 
 	"../Proto/Network.pb.h"	
 
 	"../AppSignalLib/AppSignal.h"
+
+	"../UtilsLib/WUtils.h"
+	"../UtilsLib/XmlHelper.h"
 )
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h

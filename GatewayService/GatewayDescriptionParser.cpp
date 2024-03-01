@@ -1,5 +1,7 @@
 #include "GatewayDescriptionParser.h"
 #include "../UtilsLib/WUtils.h"
+#include "IvsImpulseGateway.h"
+#include "ModbusTcpSlaveGateway.h"
 
 namespace Gateway
 {
@@ -191,6 +193,16 @@ namespace Gateway
 		{ E::Setting::ListNo,				E::SettingType::Int		},
 		{ E::Setting::DataType,				E::SettingType::String	},
 		{ E::Setting::IncludeAppSignalID,	E::SettingType::Bool	},
+
+		// ModbusTcpSlave gateway specific settings
+		//
+		{ E::Setting::CodingMode,			E::SettingType::String	},
+		{ E::Setting::ModbusDeviceAddress,	E::SettingType::Int	},
+
+		// ModbusTcpSlave signal lists specific settings
+		//
+		{ E::Setting::AnalogFormat,			E::SettingType::String	},
+		{ E::Setting::DiscreteFormat,		E::SettingType::String	},
 	};
 
 	const QRegularExpression Parser::m_anyWhitespaceSymbol("\\s");
@@ -398,7 +410,7 @@ namespace Gateway
 					if (res == false ||
 						gatewayType == E::GatewayType::Unknown)
 					{
-						m_log.logError(plr.lineNo, QString("unknown GatewayType - '%1'").
+						m_log.logError(plr.lineNo, QString("unknown GatewayType '%1'").
 											arg(plr.value.toString()));
 						return ParseResult::CriticalError;
 					}
@@ -791,6 +803,9 @@ namespace Gateway
 		{
 		case E::GatewayType::IVS_Impulse:
 			return std::make_shared<IvsImpulseGateway>();
+
+		case E::GatewayType::ModbusTcpSlave:
+			return std::make_shared<ModbusTcpSlaveGateway>();
 
 		default:
 			Q_ASSERT(false);

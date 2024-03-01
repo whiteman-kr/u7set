@@ -599,6 +599,7 @@ namespace Separator
 	inline const QString MINUS("-");
 	inline const QString DOT(".");
 	inline const QString COMMA(",");
+	inline const QString SPACE(" ");
 	inline const QString COMMA_SPACE(", ");
 	inline const QString LINE("-------------------------------------------------------------------------------");
 	inline const QString DIR("/");
