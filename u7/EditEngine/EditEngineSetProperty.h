@@ -7,14 +7,14 @@ namespace EditEngine
 
 	class SetPropertyCommand : public EditCommand
 	{
-		SetPropertyCommand();
 	public:
+		SetPropertyCommand() = delete;
 		SetPropertyCommand(EditSchemaView* schemaView,
-				QString propertyName,
-				QVariant value,
-				const std::vector<SchemaItemPtr>& items,
-				QScrollBar* hScrollBar,
-				QScrollBar* vScrollBar);
+						   QString propertyName,
+						   QVariant value,
+						   const std::vector<SchemaItemPtr>& items,
+						   QScrollBar* hScrollBar,
+						   QScrollBar* vScrollBar);
 
 	protected:
 		virtual void executeCommand(std::vector<SchemaItemPtr>* itemsToSelect) override;
@@ -30,6 +30,13 @@ namespace EditEngine
 			SchemaItemPtr item;
 		};
 
+	public:
+		static void setProperty(const QString& propertyName,
+								const QVariant& value,
+								const SchemaItemPtr& item,
+								std::shared_ptr<VFrame30::Schema> schema,
+								EditSchemaView* schemaView);
+
 		// Data
 		//
 	private:
@@ -37,5 +44,4 @@ namespace EditEngine
 		std::shared_ptr<VFrame30::Schema> m_schema;
 	};
 
-}
-
+} // namespace EditEngine

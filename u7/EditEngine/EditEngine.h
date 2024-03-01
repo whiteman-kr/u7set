@@ -3,6 +3,7 @@
 #include "../VFrame30/SchemaItem.h"
 
 class EditSchemaView;
+class ProjectDefaults;
 
 namespace VFrame30
 {
@@ -24,7 +25,7 @@ namespace EditEngine
 
 	//
 	//
-	// EditEngine - Класс обеспечивающий выполнение всех команд изменения SchemaView (Undo )
+	// EditEngine
 	//
 	//
 	class EditEngine : public QObject
@@ -84,6 +85,9 @@ namespace EditEngine
 
 		void runSetProperty(const QString& propertyName, QVariant value, const std::vector<SchemaItemPtr>& items);
 		void runSetProperty(const QString& propertyName, QVariant value, const SchemaItemPtr& item);
+
+		void runApplyDefaultProperty(const ProjectDefaults& projectDefaults, std::vector<SchemaItemPtr> items);
+		void runApplyDefaultProperty(const ProjectDefaults& projectDefaults, const SchemaItemPtr& item);
 
 		void runSetObject(const QByteArray& currentState, const QByteArray& newState, const std::vector<SchemaItemPtr>& items);
 		void runSetObject(const QByteArray& currentState, const QByteArray& newState, const SchemaItemPtr& item);

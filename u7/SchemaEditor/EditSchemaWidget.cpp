@@ -3543,42 +3543,23 @@ bool EditSchemaWidget::setDefaultItemProperties(const auto& items)
 {
 	// Update properties to default values
 	//
-	auto& pd = ProjectDefaults::instance();
+	const auto& pd = ProjectDefaults::instance();
 
-	bool batchCalled = false;
+	bool canByApplied = std::any_of(items.cbegin(),
+									items.cend(),
+									[&pd](const SchemaItemPtr& item)
+									{
+										return pd.hasSection(item->type());
+									});
 
-	for (auto& schemaItem : items)
+	if (canByApplied == false)
 	{
-		const auto& defaultValues = pd.values(schemaItem->type());
-
-		// Apply defaults in the order of defaultValues.
-		//
-		for (const auto& [propName, defaultValue] : defaultValues)
-		{
-			if (batchCalled == false)
-			{
-				batchCalled = m_editEngine->startBatch();
-				if (batchCalled == false)
-				{
-					// Read only schema, we should not end up here at all.
-					//
-					Q_ASSERT(batchCalled);
-					return false;
-				}
-			}
-
-			m_editEngine->runSetProperty(propName, defaultValue, schemaItem);
-		}
+		return false;
 	}
 
-	if (batchCalled == true)
-	{
-		m_editEngine->endBatch();
-	}
+	m_editEngine->runApplyDefaultProperty(pd, std::vector<SchemaItemPtr>{items.begin(), items.end()});
 
-	// Returns true if the changes were applied.
-	//
-	return batchCalled;
+	return true;
 }
 
 void EditSchemaWidget::setMouseCursor(QPoint mousePos)

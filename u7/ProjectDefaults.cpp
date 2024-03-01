@@ -85,3 +85,8 @@ const std::vector<ProjectDefaults::Property>& ProjectDefaults::values(const QStr
 
 	return s_empty;
 }
+
+bool ProjectDefaults::hasSection(const QString& section) const
+{
+	return m_defaults.contains(section);
+}

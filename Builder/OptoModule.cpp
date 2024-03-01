@@ -179,15 +179,6 @@ namespace Hardware
 
 		m_lmID = lm->equipmentIdTemplate();
 
-		// opto port validity signal finding
-		//
-		DeviceController* platformInterface = DeviceHelper::getPlatformInterfaceController(module, m_log);
-
-		if (platformInterface == nullptr)
-		{
-			return false;
-		}
-
 		if (m_optoModule.isLmOrBvb() == true)
 		{
 			Q_ASSERT(m_optoModule.txDataSizeW() == m_optoModule.rxDataSizeW());
@@ -196,6 +187,20 @@ namespace Hardware
 		else
 		{
 			m_portBaseAddr = m_optoModule.moduleDataAddr();
+		}
+
+		if (m_optoModule.isBvb() == true)
+		{
+			return true;
+		}
+
+		// opto port validity signal finding
+		//
+		DeviceController* platformInterface = DeviceHelper::getPlatformInterfaceController(module, m_log);
+
+		if (platformInterface == nullptr)
+		{
+			return false;
 		}
 
 		QString optoPortValiditySignalSuffix = QString("_OPTOPORT0%1VALID").arg(portNo + 1);
@@ -1982,9 +1987,17 @@ namespace Hardware
 
 		bool result = true;
 
-		if (module->isLogicModule() == true || module->isBvb() == true)
+		if (module->isLogicModule() == true	|| module->isBvb() == true)
 		{
-			Q_ASSERT(m_place == DeviceHelper::LM1_PLACE || m_place == DeviceHelper::LM2_PLACE);
+			if (module->isLogicModule() == true)
+			{
+				Q_ASSERT(m_place == DeviceHelper::LM1_PLACE);
+			}
+
+			if (module->isBvb() == true)
+			{
+				Q_ASSERT(m_place == DeviceHelper::BVB1_PLACE || m_place == DeviceHelper::BVB2_PLACE);
+			}
 
 			m_moduleDataAddr = m_lmDescription->optoInterface().m_optoInterfaceDataOffset;
 
