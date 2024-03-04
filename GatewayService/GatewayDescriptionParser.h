@@ -71,6 +71,7 @@ namespace Gateway
 		static const QString END_SECTION;
 
 		static const QString EQUAL_SIGN;
+		static const QString POINTER_SIGN;
 		static const QString APP_SIGNAL_ID_START_SIGN;
 
 		static const QString ERR_SYNTAX;
@@ -92,6 +93,7 @@ namespace Gateway
 			Setting,
 			Comment,
 			SignalID,
+			AddressSignalID,
 		};
 
 		struct ParseLineResult
@@ -102,7 +104,8 @@ namespace Gateway
 			E::Section section = E::Section::Unknown;
 			E::Setting setting = E::Setting::Unknown;
 
-			QVariant value;
+			QVariant value;			// SectionName, Setting value or SignalID
+			QString addressStr;
 
 			//
 

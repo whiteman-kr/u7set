@@ -29,9 +29,9 @@ namespace Gateway
 			.value = value
 		};
 
-		auto p = m_settingsValues.insert({ st, sv });
+		auto [it, inserted] = m_settingsValues.insert({ st, sv });
 
-		return !p.second;		// if true - setting value already exists
+		return !inserted;		// if inserted == true - setting value already exists
 	}
 
 	std::map<E::Setting, SettingValue>::const_iterator SettingsValues::begin() const
@@ -105,9 +105,17 @@ namespace Gateway
 	//
 	// ---------------------------------------------------------------------------------
 
-	bool SignalList::setSettingValue(int lineNo, E::Setting st, const QVariant& value)
+	bool SignalList::setSettingValue(int lineNo, E::Setting st, const QVariant& value, ParserLog& log)
 	{
-		return m_settingsValues.insert(lineNo, st, value);
+		bool res = checkAndApplySetting(lineNo, st, value, log);
+
+		RETURN_IF_FALSE(res);
+
+		Q_ASSERT(m_settingsValues.contains(st) == false);
+
+		m_settingsValues.insert(lineNo, st, value);
+
+		return true;
 	}
 
 	bool SignalList::settingIsSet(E::Setting st) const
@@ -121,10 +129,35 @@ namespace Gateway
 		return false;
 	}
 
+	bool SignalList::checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log)
+	{
+		Q_UNUSED(lineNo);
+		Q_UNUSED(st);
+		Q_UNUSED(value);
+		Q_UNUSED(log);
+		return true;
+	}
+
 	bool SignalList::checkAndApplySettings(int lineNo, ParserLog &log)
 	{
 		Q_UNUSED(lineNo);
 		Q_UNUSED(log);
+		return true;
+	}
+
+	bool SignalList::appendSignalID(const QString& signalID, QString* errMsg)
+	{
+		Q_UNUSED(errMsg);
+
+		m_signalIDs.emplace_back(signalID);
+		return true;
+	}
+
+	bool SignalList::appendAddressSignalID(const QString& addressStr, const QString& signalID, QString* errMsg)
+	{
+		Q_UNUSED(addressStr);
+		Q_UNUSED(signalID);
+		Q_UNUSED(errMsg);
 		return true;
 	}
 

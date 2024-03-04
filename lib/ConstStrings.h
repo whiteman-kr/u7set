@@ -373,6 +373,9 @@ namespace XmlAttribute
 	inline const QString SEND_EVENTS("SendEvents");
 	inline const QString INCLUDE_APP_SIGNAL_ID("IncludeAppSignalID");
 
+	inline const QString SIGNAL_FORMAT("SignalFormat");
+	inline const QString BYTE_ORDER("ByteOrder");
+
 	inline const QString SIGNAL_TYPE_ID("SignalTypeID");
 	inline const QString SYSTEM_SIGNAL_TYPE("SystemSignalType");
 	inline const QString DIAG_SIGNAL_TYPE("DiagSignalType");

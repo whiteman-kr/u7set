@@ -12,28 +12,43 @@ namespace Gateway
 
 		struct ModbusFormat
 		{
-			::E::ByteOrder byteOrder = ::E::ByteOrder::NoEndian;
-			E::ModbusDataFormat dataFormat = E::ModbusDataFormat::Unknown;
+			E::ModbusSignalFormat signalsFormat = E::ModbusSignalFormat::Unknown;
+			E::ModbusByteOrder byteOrder = E::ModbusByteOrder::Unknown;
+
+			bool isValid() const
+			{
+				return signalsFormat != E::ModbusSignalFormat::Unknown &&
+					   byteOrder != E::ModbusByteOrder::Unknown;
+			}
+
+			bool isDiscretes() const
+			{
+				return signalsFormat == E::ModbusSignalFormat::DiscreteUint16;
+			}
 		};
 
 	public:
 		ModbusSignalList();
 
 		virtual bool isKnownSetting(E::Setting st) const override;
-		virtual bool checkAndApplySettings(int lineNo, ParserLog& log) override;
+		virtual bool checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log) override;
+		virtual bool appendAddressSignalID(const QString& addressStr, const QString& signalID, QString* errMsg) override;
 
 	private:
 		virtual void writeSettingsToXml(XmlWriteHelper& xml) const override;
 		virtual bool readSettingsFromXml(XmlReadHelper& xml) override;
 
-		bool checkAndApplyAnalogFormat(const SettingValue& sv, ParserLog& log);
-		bool checkAndApplyDiscreteFormat(const SettingValue& sv, ParserLog& log);
+		virtual void writeSignalsToXml(XmlWriteHelper& xml) const override;
+		virtual bool readSignalsFromXml(XmlReadHelper& xml) override;
+
+		bool checkAndApplySignalsFormat(int lineNo, QString formatStr, ParserLog& log);		// copy str Ok!
 
 	private:
-		ModbusFormat m_commonAnalogFormat;
-		ModbusFormat m_commonDiscreteFormat;
-	};
+		ModbusFormat m_modbusFormat;
 
+		std::set<Hash> m_existsSignals;
+		std::map<Address16, QString> m_signals;		// Address16 => AppSignalID (or CustomAppSignalID)
+	};
 
 	class ModbusTcpSlaveGateway : public Gateway
 	{

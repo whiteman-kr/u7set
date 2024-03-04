@@ -160,6 +160,7 @@ namespace Gateway
 	const QString Parser::END_SECTION("]");
 
 	const QString Parser::EQUAL_SIGN("=");
+	const QString Parser::POINTER_SIGN("->");
 	const QString Parser::APP_SIGNAL_ID_START_SIGN("#");
 
 	const QString Parser::ERR_SYNTAX("syntax error");
@@ -201,8 +202,7 @@ namespace Gateway
 
 		// ModbusTcpSlave signal lists specific settings
 		//
-		{ E::Setting::AnalogFormat,			E::SettingType::String	},
-		{ E::Setting::DiscreteFormat,		E::SettingType::String	},
+		{ E::Setting::SignalsFormat,			E::SettingType::String	},
 	};
 
 	const QRegularExpression Parser::m_anyWhitespaceSymbol("\\s");
@@ -500,12 +500,36 @@ namespace Gateway
 						   arg(::E::valueToString<E::Setting>(plr.setting)));
 			}
 
-			sl->setSettingValue(plr.lineNo, plr.setting, plr.value);
+			sl->setSettingValue(plr.lineNo, plr.setting, plr.value, m_log);
 
 			return ParseResult::Ok;
 
 		case LineType::SignalID:
-			sl->m_signalIDs.push_back(plr.value.toString());
+			{
+				QString errMsg;
+
+				bool res = sl->appendSignalID(plr.value.toString(), &errMsg);
+
+				if (res == false)
+				{
+					m_log.logError(plr.lineNo, errMsg);
+					return ParseResult::Error;
+				}
+			}
+			return ParseResult::Ok;
+
+		case LineType::AddressSignalID:
+			{
+				QString errMsg;
+
+				bool res = sl->appendAddressSignalID(plr.addressStr, plr.value.toString(), &errMsg);
+
+				if (res == false)
+				{
+					m_log.logError(plr.lineNo, errMsg);
+					return ParseResult::CriticalError;
+				}
+			}
 			return ParseResult::Ok;
 
 		case LineType::Section:
@@ -527,6 +551,9 @@ namespace Gateway
 				Q_ASSERT(false);
 				break;
 			}
+
+		default:
+			Q_ASSERT(false);
 		}
 
 		return ParseResult::Error;
@@ -638,7 +665,37 @@ namespace Gateway
 
 			plr->setting = st;
 
-			return parseSettingValue(st, settingValueStr, plr);;
+			return parseSettingValue(st, settingValueStr, plr);
+		}
+
+		// check addressSignalID token like:  address -> SignalID
+
+		qsizetype pointerSignIndex = toParse.indexOf(POINTER_SIGN);
+
+		if (pointerSignIndex != -1)
+		{
+			plr->lineType = LineType::AddressSignalID;
+
+			QString addrStr = toParse.mid(0, pointerSignIndex).trimmed();
+			QString signalID = toParse.mid(pointerSignIndex + POINTER_SIGN.length()).trimmed();
+
+			if (addrStr.isEmpty() == true ||
+				signalID.isEmpty() == true)
+			{
+				plr->setError(ERR_SYNTAX);
+				return false;
+			}
+
+			if (signalID.contains(m_anyWhitespaceSymbol) == true)
+			{
+				plr->setError("signal identifier should not contain any whitespace symbols");
+				return false;
+			}
+
+			plr->addressStr = addrStr;
+			plr->value = QVariant(signalID);
+
+			return true;
 		}
 
 		// check signalID token

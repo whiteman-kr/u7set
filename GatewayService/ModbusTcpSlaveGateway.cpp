@@ -14,8 +14,7 @@ namespace Gateway
 
 	const std::set<E::Setting> ModbusSignalList::m_requiredSettings =
 	{
-		E::Setting::AnalogFormat,
-		E::Setting::DiscreteFormat,
+		E::Setting::SignalsFormat,
 	};
 
 	ModbusSignalList::ModbusSignalList()
@@ -27,48 +26,184 @@ namespace Gateway
 		return m_requiredSettings.contains(st);
 	}
 
-	bool ModbusSignalList::checkAndApplySettings(int lineNo, ParserLog& log)
+	bool ModbusSignalList::checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log)
 	{
+		Q_UNUSED(lineNo);
+		Q_UNUSED(st);
+		Q_UNUSED(value);
+		Q_UNUSED(log);
+
 		bool result = true;
 
-		result &= SignalList::checkAndApplySettings(lineNo, log);
-
-		result &= Gateway::checkRequiredSettings(m_requiredSettings,
-												 m_settingsValues,
-												 lineNo, log);
-		RETURN_IF_FALSE(result);
-
-		for(const auto& p : m_settingsValues)
+		switch(st)
 		{
-			E::Setting st = p.first;
-			const SettingValue& sv = p.second;
+		case E::Setting::SignalsFormat:
+			result &= checkAndApplySignalsFormat(lineNo, value.toString(), log);
+			break;
 
-			switch(st)
-			{
-			case E::Setting::AnalogFormat:
-				result &= checkAndApplyAnalogFormat(sv, log);
-				break;
-
-			case E::Setting::DiscreteFormat:
-				result &= checkAndApplyDiscreteFormat(sv, log);
-				break;
-
-			default:
-				Q_ASSERT(false);
-			}
+		default:
+			Q_ASSERT(false);
+			result = false;
+			log.logError(lineNo, "unknown setting");
 		}
 
 		return result;
+	}
+
+	bool ModbusSignalList::appendAddressSignalID(const QString& addressStr, const QString& signalID, QString* errMsg)
+	{
+		Hash hash = calcHash(signalID.trimmed());
+
+		if (m_existsSignals.contains(hash) == true)
+		{
+			*errMsg = QString("signal %1 already in signal list").arg(signalID);
+			return false;
+		}
+
+		m_existsSignals.insert(hash);
+
+		bool res = SignalList::appendSignalID(signalID, errMsg);
+
+		RETURN_IF_FALSE(res);
+
+		if (m_modbusFormat.isValid() == false)
+		{
+			*errMsg = "setting 'SignalsFormat' should be specified first";
+			return false;
+		}
+
+		QString str(addressStr);
+
+		str.replace(Separator::COMMA, Separator::SPACE);
+
+		QStringList addr = str.split(Separator::SPACE, Qt::SkipEmptyParts);
+
+		if (addr.isEmpty() == true)
+		{
+			*errMsg = "address of signal is not specified";
+			return false;
+		}
+
+		QString regAddrStr = addr[0].trimmed().toLower();
+
+		bool ok = false;
+
+		int regAddr = regAddrStr.toInt(&ok, regAddrStr.startsWith("0x") ? 16 : 10);
+		int bitNo = -1;
+
+		if (ok == false)
+		{
+			*errMsg = QString("error converting register address '%1' to int value").arg(regAddrStr);
+			return false;
+		}
+
+		if (m_modbusFormat.isDiscretes() == true)
+		{
+			if (addr.size() < 2)
+			{
+				*errMsg = "register bit number or mask should be specified for discrete signal";
+				return false;
+			}
+
+			QString bitNoStr = addr[1];
+			bool isMask = false;
+
+			if (bitNoStr.startsWith("(") && bitNoStr.endsWith(")"))
+			{
+				bitNoStr = bitNoStr.mid(1, bitNoStr.length() - 2);
+				isMask = true;
+			}
+
+			int bitNoOrMask = bitNoStr.toInt(&ok, bitNoStr.startsWith("0x") ? 16 : 10);
+
+			if (ok == false)
+			{
+				*errMsg = QString("error converting register bitNo or mask '%1' to int value").arg(bitNoStr);
+				return false;
+			}
+
+			if (isMask == true)
+			{
+				if (bitNoOrMask == 0)
+				{
+					*errMsg = "mask can't be 0";
+					return false;
+				}
+
+				if ((bitNoOrMask & ~0xFFFF) != 0)
+				{
+					*errMsg = "mask should be set in 16 bit range";
+					return false;
+				}
+
+				int setBitsCount = 0;
+				int setBitNo = -1;
+
+				for(int i = 0; i < 16; i++)
+				{
+					if ((bitNoOrMask & 0x0001) == 1)
+					{
+						setBitsCount++;
+						setBitNo = i;
+					}
+
+					bitNoOrMask >>= 1;
+				}
+
+				if (setBitsCount > 1)
+				{
+					*errMsg = "only one bit in mask should be set to 1";
+					return false;
+				}
+
+				Q_ASSERT(setBitNo != -1);
+
+				bitNo = setBitNo;
+			}
+			else
+			{
+				if (bitNoOrMask < 0 || bitNoOrMask > 15)
+				{
+					*errMsg = "register bitNo should be in range 0..15";
+					return false;
+				}
+
+				bitNo = bitNoOrMask;
+			}
+		}
+		else
+		{
+			if (addr.size() > 1)
+			{
+				*errMsg = "only register number should be specified for analog signal";
+				return false;
+			}
+
+			bitNo = 0;
+		}
+
+		Address16 addr16(regAddr, bitNo);
+
+		auto it = m_signals.find(addr16);
+
+		if (it != m_signals.end())
+		{
+			*errMsg = QString("signal %1 address %2 is not unique (already assigned to %3)").
+					  arg(signalID).arg(addr16.toString()).arg(it->second);
+			return false;
+		}
+
+		m_signals.emplace(addr16, signalID);
+
+		return true;
 	}
 
 	void ModbusSignalList::writeSettingsToXml(XmlWriteHelper& xml) const
 	{
 		xml.writeStartElement(XmlElement::SIGNAL_LIST);
 
-		// xml.writeIntAttribute(XmlAttribute::LIST_NO, m_listNo);
-		// xml.writeEnumKeyAttribute<E::SignalListDataType>(XmlAttribute::DATA_TYPE, m_dataType);
-		// xml.writeBoolAttribute(XmlAttribute::SEND_EVENTS, m_sendEvents);
-		// xml.writeBoolAttribute(XmlAttribute::INCLUDE_APP_SIGNAL_ID, m_includeAppSignalID);
+		xml.writeEnumKeyAttribute<E::ModbusSignalFormat>(XmlAttribute::SIGNAL_FORMAT, m_modbusFormat.signalsFormat);
+		xml.writeEnumKeyAttribute<E::ModbusByteOrder>(XmlAttribute::BYTE_ORDER, m_modbusFormat.byteOrder);
 
 		xml.writeEndElement();		//	</SignalList>
 	}
@@ -79,90 +214,85 @@ namespace Gateway
 
 		result &= xml.findElement(XmlElement::SIGNAL_LIST);
 
-		// result &= xml.readIntAttribute(XmlAttribute::LIST_NO, &m_listNo);
-		// result &= xml.readEnumKeyAttribute<E::SignalListDataType>(XmlAttribute::DATA_TYPE, &m_dataType);
-		// result &= xml.readBoolAttribute(XmlAttribute::SEND_EVENTS, &m_sendEvents);
-		// result &= xml.readBoolAttribute(XmlAttribute::INCLUDE_APP_SIGNAL_ID, &m_includeAppSignalID);
+		result &= xml.readEnumKeyAttribute<E::ModbusSignalFormat>(XmlAttribute::SIGNAL_FORMAT, &m_modbusFormat.signalsFormat);
+		result &= xml.readEnumKeyAttribute<E::ModbusByteOrder>(XmlAttribute::BYTE_ORDER, &m_modbusFormat.byteOrder);
 
 		return result;
 	}
 
-	bool ModbusSignalList::checkAndApplyAnalogFormat(const SettingValue& sv, ParserLog& log)
+	void ModbusSignalList::writeSignalsToXml(XmlWriteHelper& xml) const
 	{
-		Q_ASSERT(sv.setting == E::Setting::AnalogFormat);
+		xml.writeStartElement(XmlElement::SIGNALS);
+		xml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(m_signalIDs.size()));
 
-		QString str = sv.value.toString().toLower();
-
-		str.replace(Separator::COMMA, Separator::SPACE);
-
-		QStringList options = str.split(Separator::SPACE, Qt::SkipEmptyParts);
-
-		m_commonAnalogFormat.byteOrder = ::E::ByteOrder::LittleEndian;
-
-		if (options.contains("be") == true &&
-			options.contains("le") == true)
+		for(const QString& id : m_signalIDs)
 		{
-			log.logError(sv.lineNo, QString("Byte order is not specified in setting '%1'").arg(sv.settingName()));
-			return false;
+			xml.writeStringElement(XmlElement::ID, id);
 		}
 
-		if (options.contains("be") == true)
-		{
-			m_commonAnalogFormat.byteOrder = ::E::ByteOrder::BigEndian;
-		}
-		else
-		{
-			m_commonAnalogFormat.byteOrder = ::E::ByteOrder::LittleEndian;
-		}
+		xml.writeEndElement();		// </Signals>
 
-		if (options.contains("float16") == true)
-		{
-			m_commonAnalogFormat.dataFormat = E::ModbusDataFormat::AnalogFloat16;
-		}
-		else
-		{
-			log.logError(sv.lineNo, QString("Data format is not specified in setting '%1'").arg(sv.settingName()));
-			return false;
-		}
+	}
 
+	bool ModbusSignalList::readSignalsFromXml(XmlReadHelper& xml)
+	{
 		return true;
 	}
 
-	bool ModbusSignalList::checkAndApplyDiscreteFormat(const SettingValue& sv, ParserLog& log)
+	bool ModbusSignalList::checkAndApplySignalsFormat(int lineNo, QString formatStr, ParserLog& log)
 	{
-		Q_ASSERT(sv.setting == E::Setting::DiscreteFormat);
+		formatStr = formatStr.toLower();
+		formatStr.replace(Separator::COMMA, Separator::SPACE);
 
-		QString str = sv.value.toString().toLower();
+		QStringList options = formatStr.split(Separator::SPACE, Qt::SkipEmptyParts);
 
-		str.replace(Separator::COMMA, Separator::SPACE);
+		m_modbusFormat.byteOrder = E::ModbusByteOrder::Unknown;
 
-		QStringList options = str.split(Separator::SPACE, Qt::SkipEmptyParts);
-
-		m_commonAnalogFormat.byteOrder = ::E::ByteOrder::LittleEndian;
-
-		if (options.contains("be") == true &&
-			options.contains("le") == true)
+		if (options.contains(::E::valueToString(E::ModbusByteOrder::BE).toLower()) == true)
 		{
-			log.logError(sv.lineNo, QString("Byte order is not specified in setting '%1'").arg(sv.settingName()));
+			m_modbusFormat.byteOrder = E::ModbusByteOrder::BE;
+		}
+
+		if (options.contains(::E::valueToString(E::ModbusByteOrder::LE).toLower()) == true)
+		{
+			if (m_modbusFormat.byteOrder != E::ModbusByteOrder::Unknown)
+			{
+				log.logError(lineNo, "undefined byte order");
+				return false;
+			}
+
+			m_modbusFormat.byteOrder = E::ModbusByteOrder::LE;
+		}
+
+		if (m_modbusFormat.byteOrder == E::ModbusByteOrder::Unknown)
+		{
+			log.logError(lineNo, "byte order 'BE' or 'LE' is not specified");
 			return false;
 		}
 
-		if (options.contains("be") == true)
+		static const std::set<E::ModbusSignalFormat> signalsFormats =
 		{
-			m_commonAnalogFormat.byteOrder = ::E::ByteOrder::BigEndian;
-		}
-		else
+			E::ModbusSignalFormat::DiscreteUint16,
+			E::ModbusSignalFormat::AnalogFloat16,
+		};
+
+		for(E::ModbusSignalFormat format : signalsFormats)
 		{
-			m_commonAnalogFormat.byteOrder = ::E::ByteOrder::LittleEndian;
+			if (options.contains(::E::valueToString(format).toLower()))
+			{
+				if (m_modbusFormat.signalsFormat != E::ModbusSignalFormat::Unknown)
+				{
+					log.logError(lineNo, QString("undefined signals format"));
+					return false;
+				}
+
+				m_modbusFormat.signalsFormat = format;
+			}
 		}
 
-		if (options.contains("uint16") == true)
+		if (m_modbusFormat.signalsFormat == E::ModbusSignalFormat::Unknown)
 		{
-			m_commonAnalogFormat.dataFormat = E::ModbusDataFormat::DiscreteUint16;
-		}
-		else
-		{
-			log.logError(sv.lineNo, QString("Data format is not specified in setting '%1'").arg(sv.settingName()));
+			log.logError(lineNo, QString("undefined signals format"));
 			return false;
 		}
 
@@ -191,7 +321,7 @@ namespace Gateway
 	};
 
 	ModbusTcpSlaveGateway::ModbusTcpSlaveGateway() :
-		Gateway(E::GatewayType::IVS_Impulse)
+		Gateway(E::GatewayType::ModbusTcpSlave)
 	{
 	}
 

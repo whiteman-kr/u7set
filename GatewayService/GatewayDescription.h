@@ -59,8 +59,7 @@ namespace Gateway
 
 			CodingMode,
 			ModbusDeviceAddress,
-			AnalogFormat,
-			DiscreteFormat,
+			SignalsFormat,
 		};
 		Q_ENUM(Setting)
 
@@ -95,13 +94,21 @@ namespace Gateway
 		};
 		Q_ENUM(ModbusCoding)
 
-		enum class ModbusDataFormat
+		enum class ModbusSignalFormat
 		{
 			Unknown,
 			DiscreteUint16,
 			AnalogFloat16,
 		};
-		Q_ENUM(ModbusDataFormat)
+		Q_ENUM(ModbusSignalFormat)
+
+		enum class ModbusByteOrder
+		{
+			Unknown,
+			BE,
+			LE,
+		};
+		Q_ENUM(ModbusByteOrder)
 	};
 
 	class ParserLog;
@@ -155,11 +162,15 @@ namespace Gateway
 	class SignalList
 	{
 	public:
-		bool setSettingValue(int lineNo, E::Setting st, const QVariant& value);
+		bool setSettingValue(int lineNo, E::Setting st, const QVariant& value, ParserLog& log);
 		bool settingIsSet(E::Setting st) const;
 
 		virtual bool isKnownSetting(E::Setting st) const;
+		virtual bool checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log);
 		virtual bool checkAndApplySettings(int lineNo, ParserLog& log);
+
+		virtual bool appendSignalID(const QString& signalID, QString* errMsg);
+		virtual bool appendAddressSignalID(const QString& addressStr, const QString& signalID, QString* errMsg);
 
 		SettingValue getSettingValue(E::Setting st) const;
 
