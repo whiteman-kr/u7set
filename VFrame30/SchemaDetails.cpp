@@ -1,8 +1,7 @@
 #include "SchemaDetails.h"
+#include "IMatsSchemaItemAssociations.h"
 #include "./SchemaItems/SchemaItemAfb.h"
-#include "./SchemaItems/SchemaItemConnection.h"
 #include "./SchemaItems/SchemaItemIndicator.h"
-#include "./SchemaItems/SchemaItemLoopback.h"
 #include "LogicSchema.h"
 #include "PropertyNames.h"
 #include "Schema.h"
@@ -15,12 +14,12 @@ namespace VFrame30
 	//				SchemaDetails
 	//
 	//
-	SchemaDetails::SchemaDetails(const QString& details) noexcept
+	SchemaDetails::SchemaDetails(const QString& details)
 	{
 		parseDetails(details);
 	}
 
-	bool SchemaDetails::operator< (const SchemaDetails& b) const noexcept
+	bool SchemaDetails::operator< (const SchemaDetails& b) const
 	{
 		return this->m_schemaId < b.m_schemaId;
 	}
@@ -61,38 +60,24 @@ namespace VFrame30
 				{
 					// Items on LogicSchemas
 					//
-					if (schema->isLogicSchema() == true)
+					if (const auto* associations = dynamic_cast<const IMatsSchemaItemAssociations*>(item.get());
+						associations != nullptr)
 					{
-						if (const SchemaItemConnection* connItem = item->toType<SchemaItemConnection>();
-							connItem != nullptr)
+						for (const auto& connectionId : associations->associatedConnectionIds())
 						{
-							for (const auto& connectionIds = connItem->connectionIdsAsList();
-								 const QString & connectionId : connectionIds)
-							{
-								connections.insert(connectionId);
-							}
+							connections.insert(connectionId);
 						}
 
-						if (const SchemaItemReceiver* receiver = item->toType<SchemaItemReceiver>();
-							receiver != nullptr)
+						for (const auto& loopbackId : associations->associatedLoopbackIds())
 						{
-							for (const QString& appSignalId : receiver->appSignalIdsAsList())
-							{
-								signalIds << appSignalId;
-							}
+							loopbacks.insert(loopbackId);
 						}
+					}
 
-						if (const SchemaItemLoopback* lb = item->toType<SchemaItemLoopback>();
-							lb != nullptr)
-						{
-							loopbacks << lb->loopbackId();
-						}
-
-						if (const SchemaItemAfb* afb = item->toType<SchemaItemAfb>();
-							afb != nullptr && afb->isPackedLogic() == true)
-						{
-							packedLogicIds << afb->packedLogicId();
-						}
+					if (const SchemaItemAfb* afb = item->toType<SchemaItemAfb>();
+						afb != nullptr && afb->isPackedLogic() == true)
+					{
+						packedLogicIds << afb->packedLogicId();
 					}
 
 					// Items on all other schemas
@@ -223,6 +208,8 @@ namespace VFrame30
 		{
 			qDebug() << "Schema details parsing error: " << parseError.errorString();
 			qDebug() << "JSON document: " << details;
+
+			*this = {};
 			return false;
 		}
 
@@ -230,6 +217,8 @@ namespace VFrame30
 		{
 			assert(jsonDoc.isObject());		// have a look at json doc, it is supposed to be an object
 			qDebug() << Q_FUNC_INFO << " json is supposed to be object";
+
+			*this = {};
 			return false;
 		}
 
@@ -241,6 +230,7 @@ namespace VFrame30
 		if (versionInt == -1 ||
 			version.type() != QJsonValue::Double)
 		{
+			*this = {};
 			return false;
 		}
 
@@ -397,8 +387,10 @@ namespace VFrame30
 			break;
 		default:
 			assert(false);
+			*this = {};
 			return false;
 		}
+
 		return true;
 	}
 
@@ -611,6 +603,11 @@ namespace VFrame30
 		}
 
 		return false;
+	}
+
+	bool SchemaDetails::isNull() const
+	{
+		return m_schemaId.isEmpty();
 	}
 
 	bool SchemaDetails::hasSchemaTag(const QString& tag) const

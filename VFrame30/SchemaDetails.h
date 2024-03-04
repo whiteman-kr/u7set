@@ -16,14 +16,9 @@ namespace VFrame30
 	{
 	public:
 		SchemaDetails() noexcept = default;
-		SchemaDetails(const SchemaDetails&) = default;
-		SchemaDetails(SchemaDetails&&) = default;
-		SchemaDetails& operator=(const SchemaDetails&) = default;
-		SchemaDetails& operator=(SchemaDetails&&) noexcept = default;
+		explicit SchemaDetails(const QString& details); // Parse details from string, isNull() will be true if parsing failed.
 
-		explicit SchemaDetails(const QString& details) noexcept;
-
-		bool operator<(const SchemaDetails& b) const noexcept;
+		bool operator<(const SchemaDetails& b) const;
 
 	public:
 		[[nodiscard]] static QString getDetailsString(const Schema* schema, const QString& path);
@@ -34,6 +29,8 @@ namespace VFrame30
 		bool loadData(const Proto::SchemaDetails& message);
 
 		[[nodiscard]] bool searchForString(const QString& searchText) const;
+
+		[[nodiscard]] bool isNull() const;
 
 		[[nodiscard]] bool hasSchemaTag(const QString& tag) const;
 		[[nodiscard]] bool hasSchemaTag(const QStringList& tags) const;

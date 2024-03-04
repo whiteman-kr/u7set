@@ -754,6 +754,33 @@ bool SchemaListModel::updateFiles(const QModelIndexList& selectedIndexes, const 
 	return true;
 }
 
+bool SchemaListModel::updateShemaDetails(VFrame30::SchemaDetails details)
+{
+	if (details.isNull() == true)
+	{
+		return false;
+	}
+
+	auto it = std::find_if(m_details.begin(),
+						   m_details.end(),
+						   [&details](const std::pair<int, VFrame30::SchemaDetails>& p) -> bool
+						   {
+							   if (p.second.m_schemaId == details.m_schemaId)
+							   {
+								   return true;
+							   }
+
+							   return false;
+						   });
+
+	if (it != m_details.end())
+	{
+		it->second = std::move(details);
+	}
+	
+	return it != m_details.end();
+}
+
 DbFileInfo SchemaListModel::file(int fileId) const
 {
 	auto foundFile = m_files.file(fileId);
@@ -2851,6 +2878,7 @@ void SchemaControlTabPage::openFile(const DbFileInfo& file)
 	connect(editTabPage, &EditSchemaTabPage::vcsFileStateChanged, m_filesView, &SchemaFileView::slot_refreshFiles);
 	connect(editTabPage, &EditSchemaTabPage::aboutToClose, this, &SchemaControlTabPage::removeFromOpenedList);
 	connect(editTabPage, &EditSchemaTabPage::pleaseDetachOrAttachWindow, this, &SchemaControlTabPage::detachOrAttachWindow);
+	connect(editTabPage, &EditSchemaTabPage::fileWasSaved, this, &SchemaControlTabPage::schemaWasSaved);
 
 	Q_ASSERT(tabWidget->parent());
 
@@ -3156,6 +3184,18 @@ void SchemaControlTabPage::viewSelectedFile()
 	std::shared_ptr<DbFileInfo> file = selectedFiles.front();
 
 	return viewFile(*file);
+}
+
+void SchemaControlTabPage::schemaWasSaved(QString schemaDetails)
+{
+	if (m_filesView == nullptr)
+	{
+		Q_ASSERT(m_filesView != nullptr);
+		return;
+	}
+
+	m_filesView->filesModel().updateShemaDetails(VFrame30::SchemaDetails{schemaDetails});
+	return;
 }
 
 void SchemaControlTabPage::addLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile)

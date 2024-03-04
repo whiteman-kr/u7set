@@ -36,6 +36,7 @@ public:
 	bool moveFilesUpdate(const QModelIndexList& selectedIndexes, int movedToParnetId, const std::vector<DbFileInfo>& movedFiles, std::vector<QModelIndex>* addedFilesIndexes);
 
 	bool updateFiles(const QModelIndexList& selectedIndexes, const std::vector<DbFileInfo>& files);
+	bool updateShemaDetails(VFrame30::SchemaDetails details);
 
 	DbFileInfo file(int fileId) const;
 	DbFileInfo file(const QModelIndex& modelIndex) const;
@@ -111,18 +112,18 @@ public:
 
 private:
 	DbFileInfo m_parentFile;
-
 	DbFileTree m_files;
-	mutable QString m_searchText;		// Set in match(), used in data for SearchSchemaRole()
+	
+	mutable QString m_searchText;                     // Set in match(), used in data for SearchSchemaRole()
 	mutable QString m_filterText;
 	std::set<int> m_searchByFileIds;
 
-	std::map<int, QString> m_users;							// Key is UserID
-	std::map<int, VFrame30::SchemaDetails> m_details; 		// Key is FileID
+	std::map<int, QString> m_users;                   // Key is UserID
+	std::map<int, VFrame30::SchemaDetails> m_details; // Key is FileID
 	std::set<QString> m_tags;
-	QStringList m_tagFilter;						// If vector is empty, then all schemas must be shown
+	QStringList m_tagFilter;                          // If vector is empty, then all schemas must be shown
 
-	std::set<int> m_systemFiles;	// Key is fileId
+	std::set<int> m_systemFiles;                      // Key is fileId
 
 	int m_schemaFilterCount = 0;
 };
@@ -309,6 +310,8 @@ protected slots:
 
 	void openSelectedFile();
 	void viewSelectedFile();
+	
+	void schemaWasSaved(QString schemaDetails); // Called from EditSchemaTabPage for update file details in the model.
 
 	void addLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile);
 	void addFile();
