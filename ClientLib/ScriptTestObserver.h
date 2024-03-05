@@ -57,7 +57,7 @@ public slots:
 	void clear();
 
 	/// @brief Blocks and waits for an initial condition (if was set), then waits until all other added expectations are met or a timeout occurs.
-	/// @param timeout Timeout duration in milliseconds.
+	/// @param timeoutMs Timeout duration in milliseconds.
 	/// @return `true` if all expectations were satisfied, or `false` if not.
 	bool wait(int timeoutMs);
 

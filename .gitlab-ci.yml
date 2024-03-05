@@ -155,15 +155,6 @@ windows_build_job:
 #    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD $Env:BIN_OUT_DIR\\TuningSrv.exe"
 #    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD $Env:BIN_OUT_DIR\\u7.exe"    
 
-#Generate ScriptHelp
-    - "# ----------------------------------------------"
-    - "#               Generate ScriptHelp"
-    - "# ----------------------------------------------"
-    - "pushd ."	
-    - "cd $Env:CI_PROJECT_DIR\\u7\\ScriptHelp"
-    - "&./ScriptHelp.bat"
-    - "popd"
-
 #Request documents from SVN
     - "# ----------------------------------------------"
     - "#               Request documents from SVN"

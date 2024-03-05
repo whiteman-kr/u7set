@@ -495,3 +495,15 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
 endif()
 
 target_compile_definitions(${TARGET} PRIVATE QTKEYCHAIN_NO_EXPORT)
+
+
+# Generation scripting help
+# Find for Doxygen here as add_subdirectory works with CMake 3.27+ only
+
+find_package(Doxygen)
+
+if(DOXYGEN_FOUND)
+	message(STATUS "Doxygen found: ${DOXYGEN_EXECUTABLE}")
+
+	add_subdirectory(ScriptHelp)	
+endif()
