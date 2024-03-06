@@ -52,6 +52,9 @@ namespace Hardware
 		PropertyObject(parent),
 		m_deviceType(deviceType)
 	{
+		ADD_PROPERTY_GETTER_SETTER(bool, PropertyNames::excludeFromBuild, true, DeviceObject::excludeFromBuild, DeviceObject::setExcludeFromBuild)
+			->setUpdateFromPreset(false);
+
 		auto uuidProp = ADD_PROPERTY_GETTER(QUuid, PropertyNames::uuid, true, DeviceObject::uuid);
 		uuidProp->setExpert(true);
 
@@ -178,6 +181,7 @@ namespace Hardware
 		Proto::Write(mutableDeviceObject->mutable_equipmentid(), m_equipmentId);
 		Proto::Write(mutableDeviceObject->mutable_caption(), m_caption);
 
+		mutableDeviceObject->set_excludefrombuild(m_excludeFromBuild);
 		mutableDeviceObject->set_place(m_place);
 		mutableDeviceObject->set_childcounthint(static_cast<int>(m_children.size()));
 
@@ -256,6 +260,8 @@ namespace Hardware
 
 		Proto::Read(deviceobject.equipmentid(), &m_equipmentId);
 		Proto::Read(deviceobject.caption(), &m_caption);
+
+		m_excludeFromBuild = deviceobject.excludefrombuild();
 		m_place = deviceobject.place();
 
 		size_t childCountHint = deviceobject.childcounthint();
@@ -1174,6 +1180,21 @@ namespace Hardware
 		return result;
 	}
 
+	bool DeviceObject::isExcludedFromBuild() const
+	{
+		return m_excludeFromBuild || (parent() ? parent()->isExcludedFromBuild() : false);
+	}
+
+	bool DeviceObject::excludeFromBuild() const
+	{
+		return m_excludeFromBuild;
+	}
+
+	void DeviceObject::setExcludeFromBuild(bool exclude)
+	{
+		m_excludeFromBuild = exclude;
+	}
+
 	QUuid DeviceObject::uuid() const
 	{
 		return m_uuid;
@@ -1202,7 +1223,7 @@ namespace Hardware
 	{
 		if (equipmentIdTemplate().contains(QChar('$')) == false)
 		{
-			// m_equipmentId does not have any marcos variables, just return it
+			// m_equipmentId does not have any macro variables, just return it
 			//
 			return equipmentIdTemplate();
 		}

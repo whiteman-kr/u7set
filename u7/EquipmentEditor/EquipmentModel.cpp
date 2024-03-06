@@ -204,18 +204,24 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 		break;
 
 	case EquipmentIdRole:
-	{
 		return device->equipmentId();
-	}
 
 	case Qt::TextAlignmentRole:
 		return QVariant{Qt::AlignLeft | Qt::AlignVCenter};
 
 	case Qt::ForegroundRole:
-		return QBrush{index.column() == ObjectTypeColumn ?
-						Qt::darkGray :
-						Qt::black};
+		if (index.column() == ObjectTypeColumn)
+		{
+			return QBrush{Qt::darkGray};
+		}
 
+		if (device->isExcludedFromBuild() == true) 
+		{
+			return QBrush{Qt::darkGray};
+		}
+
+		return {};
+		
 	case Qt::BackgroundRole:
 		{
 			if (deviceFileInfo->state() == E::VcsState::CheckedOut)

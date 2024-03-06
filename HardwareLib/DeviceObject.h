@@ -230,6 +230,13 @@ namespace Hardware
 		// Props
 		//
 	public:
+		/// @brief Check if this object or its parent is excluded from build.
+		[[nodiscard]] bool isExcludedFromBuild() const;
+
+		/// @brief Check if this object is excluded from build (parents are not checked).
+		[[nodiscard]] bool excludeFromBuild() const;
+		void setExcludeFromBuild(bool exclude);
+
 		[[nodiscard]] QUuid uuid() const;
 		void setUuid(QUuid value);
 
@@ -293,6 +300,7 @@ public:
 		//
 	protected:
 		const DeviceType m_deviceType = DeviceType::Root;
+		bool m_excludeFromBuild = false;
 
 		std::weak_ptr<DeviceObject> m_parent;
 		std::vector<std::shared_ptr<DeviceObject>> m_children;

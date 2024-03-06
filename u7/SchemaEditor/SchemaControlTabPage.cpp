@@ -312,6 +312,11 @@ QVariant SchemaListModel::data(const QModelIndex& index, int role/* = Qt::Displa
 		return QVariant{};
 	}
 
+	if (role == Qt::ForegroundRole)
+	{
+		return excludedFromBuild(fileId) ? QBrush{Qt::darkGray} : QVariant{};
+	}
+
 	if (role == Qt::BackgroundRole)
 	{
 		if (file->state() == E::VcsState::CheckedOut)

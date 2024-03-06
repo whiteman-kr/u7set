@@ -416,6 +416,22 @@ namespace Builder
 		}
 
 		//
+		// Remove excluded devices, DeviceObject::isExcludedBromBuild()
+		//
+		LOG_MESSAGE(m_context->m_log, tr("Removing excluded devices"));
+
+		if (bool ok = removeExcludedDevices(deviceRoot.get());
+			ok == false)
+		{
+			return false;
+		}
+		else
+		{
+			LOG_MESSAGE(m_context->m_log, tr("Ok"));
+		}
+		
+
+		//
 		// Expand Devices StrId
 		//
 		LOG_MESSAGE(m_context->m_log, tr("Expanding devices StrIds"));
@@ -1676,6 +1692,49 @@ namespace Builder
 
 		return;
 
+	}
+
+	bool BuildWorkerThread::removeExcludedDevices(Hardware::DeviceObject* parent)
+	{
+		if (parent == nullptr)
+		{
+			assert(parent != nullptr);
+			return false;
+		}
+
+		// Remove excluded devices
+		//
+		std::list<std::shared_ptr<Hardware::DeviceObject>> toDelete;
+		for (auto child : parent->children())
+		{
+			if (child->excludeFromBuild() == true)
+			{
+				toDelete.push_back(child);
+			}
+		}
+
+		// Sort is for better log readability.
+		//
+		toDelete.sort(
+			[](const auto& lhs, const auto& rhs)
+			{
+				return lhs->equipmentId() < rhs->equipmentId();
+			});
+
+		for (auto child : toDelete)
+		{
+			m_log->wrnCFG3102(child->equipmentId()); // Device '%1' is excluded from build.
+			parent->deleteChild(child);
+		}
+
+		// Recursively check children.
+		//
+		for (auto child : parent->children())
+		{
+			removeExcludedDevices(child.get());
+		}
+
+		return true;
 	}
 
 	bool BuildWorkerThread::expandDeviceStrId(Hardware::DeviceObject* device)

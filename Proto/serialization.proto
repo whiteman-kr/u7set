@@ -1032,6 +1032,7 @@ message DeviceObject
 	optional string specific_properties_struct = 6;
 	repeated Property properties = 7;
 	repeated string tags = 8;
+	optional bool excludeFromBuild = 9;
 
 	optional bool preset = 32 [default = false];
 	optional bool presetRoot = 33 [default = false];
