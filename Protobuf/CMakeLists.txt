@@ -53,8 +53,8 @@ qt_add_library(${TARGET} STATIC
 	../Proto/Network.pb.h
 	../Proto/ProtoSerialization.cpp
 	../Proto/ProtoSerialization.h
-	../Proto/Serialization.pb.cc
-	../Proto/Serialization.pb.h
+	../Proto/serialization.pb.cc
+	../Proto/serialization.pb.h
 	../Proto/Simulator.pb.cc
 	../Proto/Simulator.pb.h
 	../Proto/Trends.pb.cc

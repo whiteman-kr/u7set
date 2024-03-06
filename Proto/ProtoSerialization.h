@@ -8,7 +8,7 @@
 //
 #include "../CommonLib/PropertyObject.h" 
 
-#include "../Proto/Serialization.pb.h"
+#include "../Proto/serialization.pb.h"
 
 
 namespace Proto
