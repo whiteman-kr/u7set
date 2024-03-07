@@ -127,9 +127,11 @@ void Symbol::setHeaderOffset(quint32 offset)
 	
 VduFontGenerator::VduFontGenerator() :
 	QDialog(),
-	m_font("Arial", 24)
+	m_font("Arial")
 {
 	setWindowTitle(tr("VDU Font Generator"));
+
+	m_font.setPixelSize(24);
 
 	QVBoxLayout* mainLayout = new QVBoxLayout(this);
 
@@ -163,7 +165,7 @@ VduFontGenerator::VduFontGenerator() :
 	{
 		m_fontSizeCombo->addItem(QString::number(i));
 	}
-	index = m_fontSizeCombo->findText(QString::number(m_font.pointSize()));
+	index = m_fontSizeCombo->findText(QString::number(m_font.pixelSize()));
 	if (index != -1)
 	{
 		m_fontSizeCombo->setCurrentIndex(index);
@@ -175,7 +177,7 @@ VduFontGenerator::VduFontGenerator() :
 				int number = m_fontSizeCombo->currentText().toInt(&ok);
 				if (ok == true)
 				{
-					m_font.setPointSize(number);
+					m_font.setPixelSize(number);
 					emit refresh(m_font);
 				}
 		});
@@ -246,7 +248,7 @@ void VduFontGenerator::onGenerateClicked()
 	static QString lastFile;
 	if (lastFile.isEmpty() == true)
 	{
-		lastFile = tr("%1\\%2_%3.svdu").arg(lastDir).arg(m_font.family()).arg(m_font.pointSize());
+		lastFile = tr("%1\\%2_%3.vduf").arg(lastDir).arg(m_font.family()).arg(m_font.pixelSize());
 	} 
 	
 	if (m_generateDemoFiles->isChecked() == true)
@@ -261,7 +263,7 @@ void VduFontGenerator::onGenerateClicked()
 		}
 
 		lastDir = dir;
-		lastFile = tr("%1\\%2_%3.svdu").arg(lastDir).arg(m_font.family()).arg(m_font.pointSize());
+		lastFile = tr("%1\\%2_%3.vduf").arg(lastDir).arg(m_font.family()).arg(m_font.pixelSize());
 	}
 	else
 	{
@@ -305,14 +307,14 @@ void VduFontGenerator::onGenerateClicked()
 				return;
 			}
 
-			f = tr("%1\\%2.vdut").arg(lastDir).arg(fileNameSuffix);
+			f = tr("%1\\%2.vdust").arg(lastDir).arg(fileNameSuffix);
 			if (s.saveToVdut(f) == false)
 			{
 				QMessageBox::critical(this, qAppName(), tr("Failed to save file: %1!").arg(f));
 				return;
 			}
 
-			f = tr("%1\\%2.vdu").arg(lastDir).arg(fileNameSuffix);
+			f = tr("%1\\%2.vdusf").arg(lastDir).arg(fileNameSuffix);
 			if (s.saveToVdu(f) == false)
 			{
 				QMessageBox::critical(this, qAppName(), tr("Failed to save file: %1!").arg(f));
