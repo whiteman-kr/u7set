@@ -374,7 +374,7 @@ namespace XmlAttribute
 	inline const QString INCLUDE_APP_SIGNAL_ID("IncludeAppSignalID");
 
 	inline const QString SIGNAL_FORMAT("SignalFormat");
-	inline const QString BYTE_ORDER("ByteOrder");
+	inline const QString BYTE_ORDER_ATTR("ByteOrder");
 
 	inline const QString SIGNAL_TYPE_ID("SignalTypeID");
 	inline const QString SYSTEM_SIGNAL_TYPE("SystemSignalType");
@@ -414,6 +414,11 @@ namespace XmlAttribute
 	inline const QString USED_FRAMES_COUNT("UsedFramesCount");
 	inline const QString SIGNALS_COUNT("SignalsCount");
 	inline const QString FOTIP_TUNING_DATA_UID("FotipTuningDataUID");
+
+	inline const QString MODBUS_CODING("ModbusCoding");
+	inline const QString REG_ADDR("RegAddr");
+	inline const QString REG_BIT("RegBit");
+	inline const QString FORMAT("Format");
 }
 
 namespace Latin1Char

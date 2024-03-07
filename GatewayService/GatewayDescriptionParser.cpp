@@ -202,7 +202,7 @@ namespace Gateway
 
 		// ModbusTcpSlave signal lists specific settings
 		//
-		{ E::Setting::SignalsFormat,			E::SettingType::String	},
+		{ E::Setting::SignalsFormat,		E::SettingType::String	},
 	};
 
 	const QRegularExpression Parser::m_anyWhitespaceSymbol("\\s");
@@ -342,7 +342,7 @@ namespace Gateway
 
 		if (errCount == 0)
 		{
-			result &= generateGatewaysRequiredFiles(m_signalSetAdapter);
+			result &= generateGatewaysRequiredFiles();
 		}
 
 		return result;
@@ -359,13 +359,13 @@ namespace Gateway
 		return m_gateways;
 	}
 
-	bool Parser::generateGatewaysRequiredFiles(SignalSetAdapter signalSetAdapter)
+	bool Parser::generateGatewaysRequiredFiles()
 	{
 		bool result = true;
 
 		for(GatewayShared gw : *m_gateways)
 		{
-			result &= gw->generateRequiredFiles(signalSetAdapter, m_log);
+			result &= gw->generateRequiredFiles(m_signalSetAdapter, m_log);
 		}
 
 		return result;
@@ -505,32 +505,10 @@ namespace Gateway
 			return ParseResult::Ok;
 
 		case LineType::SignalID:
-			{
-				QString errMsg;
-
-				bool res = sl->appendSignalID(plr.value.toString(), &errMsg);
-
-				if (res == false)
-				{
-					m_log.logError(plr.lineNo, errMsg);
-					return ParseResult::Error;
-				}
-			}
-			return ParseResult::Ok;
+			return appendAddressSignalID(sl, plr, false);
 
 		case LineType::AddressSignalID:
-			{
-				QString errMsg;
-
-				bool res = sl->appendAddressSignalID(plr.addressStr, plr.value.toString(), &errMsg);
-
-				if (res == false)
-				{
-					m_log.logError(plr.lineNo, errMsg);
-					return ParseResult::CriticalError;
-				}
-			}
-			return ParseResult::Ok;
+			return appendAddressSignalID(sl, plr, true);
 
 		case LineType::Section:
 			switch(plr.section)
@@ -557,6 +535,54 @@ namespace Gateway
 		}
 
 		return ParseResult::Error;
+	}
+
+	Parser::ParseResult Parser::appendAddressSignalID(SignalListShared signalList, const ParseLineResult& plr, bool appendAddr)
+	{
+		QString appSignalID = plr.value.toString().trimmed();
+
+		const AppSignal* s = m_signalSetAdapter.getAppSignal(appSignalID);
+
+		if (s == nullptr)
+		{
+			m_log.logError(plr.lineNo, QString("signal '%1' not found").arg(appSignalID));
+			return ParseResult::Error;
+		}
+
+		std::optional<::E::SignalType> listSignalType = signalList->signalType();
+
+		if (listSignalType.has_value() == false)
+		{
+			m_log.logError(plr.lineNo, QString("required signal type of list is undefined, set list signal type (format) first"));
+			return ParseResult::CriticalError;
+		}
+
+		if (s->signalType() != listSignalType.value())
+		{
+			m_log.logError(plr.lineNo, QString("signal type of '%1' isn't corresponds to list signal type '%2'").
+									   arg(s->appSignalID()).arg(::E::valueToString(listSignalType.value())));
+			return ParseResult::Error;
+		}
+
+		QString errMsg;
+		bool res = true;
+
+		if (appendAddr == false)
+		{
+			res = signalList->appendSignalID(appSignalID, &errMsg);
+		}
+		else
+		{
+			res = signalList->appendAddressSignalID(plr.addressStr, appSignalID, &errMsg);
+		}
+
+		if (res == false)
+		{
+			m_log.logError(plr.lineNo, errMsg);
+			return ParseResult::Error;
+		}
+
+		return ParseResult::Ok;
 	}
 
 	bool Parser::parseLine(const QString& str, ParseLineResult* plr)

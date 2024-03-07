@@ -162,6 +162,8 @@ namespace Gateway
 	class SignalList
 	{
 	public:
+		SignalList();
+
 		bool setSettingValue(int lineNo, E::Setting st, const QVariant& value, ParserLog& log);
 		bool settingIsSet(E::Setting st) const;
 
@@ -169,8 +171,11 @@ namespace Gateway
 		virtual bool checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log);
 		virtual bool checkAndApplySettings(int lineNo, ParserLog& log);
 
-		virtual bool appendSignalID(const QString& signalID, QString* errMsg);
-		virtual bool appendAddressSignalID(const QString& addressStr, const QString& signalID, QString* errMsg);
+		virtual bool appendSignalID(const QString& appSignalID, QString* errMsg);
+		virtual bool appendAddressSignalID(const QString& addressStr, const QString& appSignalID, QString* errMsg);
+
+		std::optional<::E::SignalType> signalType() const;
+		void setSignalType(::E::SignalType st);
 
 		SettingValue getSettingValue(E::Setting st) const;
 
@@ -191,7 +196,9 @@ namespace Gateway
 
 	protected:
 		SettingsValues m_settingsValues;
-		std::vector<QString> m_signalIDs;
+
+		std::vector<QString> m_signalIDs;			// AppSignalIDs
+		std::optional<::E::SignalType> m_signalType;
 
 		friend class Parser;
 	};
@@ -244,8 +251,8 @@ namespace Gateway
 		virtual void writeSettingsToXml(XmlWriteHelper& xml) const;
 		virtual bool readSettingsFromXml(XmlReadHelper& xml);
 
-		void writeSignalListsToXml(XmlWriteHelper& xml) const;
-		bool readSignalListsFromXml(XmlReadHelper& xml);
+		virtual void writeSignalListsToXml(XmlWriteHelper& xml) const;
+		virtual bool readSignalListsFromXml(XmlReadHelper& xml);
 
 		virtual bool generateRequiredFiles(const SignalSetAdapter& signalSetAdapter, ParserLog& log);
 

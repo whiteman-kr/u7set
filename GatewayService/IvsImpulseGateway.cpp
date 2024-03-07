@@ -58,18 +58,21 @@ namespace Gateway
 					if (dataTypeStr == "A")
 					{
 						m_dataType = E::SignalListDataType::Analog_A;
+						setSignalType(::E::SignalType::Analog);
 					}
 					else
 					{
 						if (dataTypeStr == "B")
 						{
 							m_dataType = E::SignalListDataType::Discrete_B;
+							setSignalType(::E::SignalType::Discrete);
 						}
 						else
 						{
 							if (dataTypeStr == "D")
 							{
 								m_dataType = E::SignalListDataType::Discrete_D;
+								setSignalType(::E::SignalType::Discrete);
 							}
 							else
 							{
@@ -474,13 +477,7 @@ namespace Gateway
 		{
 			const AppSignal* s = signalSetAdapter.getAppSignal(signalID);
 
-			if (s == nullptr)
-			{
-				log.logError(QString("signal '%1' not found (GatewayID = %2, ListNo = %3)").
-							 arg(signalID).arg(m_gatewayID).arg(signalList.listNo()));
-				result = false;
-				continue;
-			}
+			TEST_PTR_CONTINUE(s);
 
 			bool res = true;
 

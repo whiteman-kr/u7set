@@ -5,27 +5,32 @@
 
 namespace Gateway
 {
+	struct ModbusFormat
+	{
+		E::ModbusSignalFormat signalFormat = E::ModbusSignalFormat::Unknown;
+		E::ModbusByteOrder byteOrder = E::ModbusByteOrder::Unknown;
+
+		bool isValid() const
+		{
+			return signalFormat != E::ModbusSignalFormat::Unknown &&
+				   byteOrder != E::ModbusByteOrder::Unknown;
+		}
+
+		bool isDiscrete() const
+		{
+			return signalFormat == E::ModbusSignalFormat::DiscreteUint16;
+		}
+
+		QString toString() const
+		{
+			return QString("%1 %2").arg(::E::valueToString(signalFormat)).arg(::E::valueToString(byteOrder));
+		}
+	};
+
 	class ModbusSignalList : public SignalList
 	{
 	private:
 		static const std::set<E::Setting> m_requiredSettings;
-
-		struct ModbusFormat
-		{
-			E::ModbusSignalFormat signalsFormat = E::ModbusSignalFormat::Unknown;
-			E::ModbusByteOrder byteOrder = E::ModbusByteOrder::Unknown;
-
-			bool isValid() const
-			{
-				return signalsFormat != E::ModbusSignalFormat::Unknown &&
-					   byteOrder != E::ModbusByteOrder::Unknown;
-			}
-
-			bool isDiscretes() const
-			{
-				return signalsFormat == E::ModbusSignalFormat::DiscreteUint16;
-			}
-		};
 
 	public:
 		ModbusSignalList();
@@ -33,6 +38,9 @@ namespace Gateway
 		virtual bool isKnownSetting(E::Setting st) const override;
 		virtual bool checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log) override;
 		virtual bool appendAddressSignalID(const QString& addressStr, const QString& signalID, QString* errMsg) override;
+
+		ModbusFormat modbusFormat() const;
+		Address16 getAddress(Hash hash) const;
 
 	private:
 		virtual void writeSettingsToXml(XmlWriteHelper& xml) const override;
@@ -46,8 +54,7 @@ namespace Gateway
 	private:
 		ModbusFormat m_modbusFormat;
 
-		std::set<Hash> m_existsSignals;
-		std::map<Address16, QString> m_signals;		// Address16 => AppSignalID (or CustomAppSignalID)
+		std::map<Hash, Address16> m_signals;		// calcHash(AppSignalID) => Address16
 	};
 
 	class ModbusTcpSlaveGateway : public Gateway
@@ -75,16 +82,14 @@ namespace Gateway
 		virtual void writeSettingsToXml(XmlWriteHelper& xml) const override;
 		virtual bool readSettingsFromXml(XmlReadHelper& xml) override;
 
+		virtual void writeSignalListsToXml(XmlWriteHelper& xml) const override;
+		virtual bool readSignalListsFromXml(XmlReadHelper& xml) override;
+
 	private:
 		virtual bool generateRequiredFiles(const SignalSetAdapter& signalSetAdapter, ParserLog& log) override;
 
-		bool checkSignalListsSettings(ParserLog& log);
-		bool generateSignalListsFiles(const SignalSetAdapter& signalSetAdapter, ParserLog& log);
-
-		bool generateSignalListFile(const ModbusSignalList& signalList,
-									File& file,
-									const SignalSetAdapter& signalSetAdapter,
-									ParserLog& log);
+		bool buildModbusSignalsList(ParserLog& log);
+		bool generateModbusSignalsFile();
 
 	private:
 		HostAddressPort m_localGatewayIP1;
@@ -94,6 +99,8 @@ namespace Gateway
 		HostAddressPort m_remoteGatewayIP2;
 
 		E::ModbusCoding m_coding = E::ModbusCoding::ASCII;
+
+		std::map<Address16, std::pair<QString, ModbusFormat>> m_modbusSignals;
 	};
 
 	using ModbusTcpSlaveGatewayShared = std::shared_ptr<ModbusTcpSlaveGateway>;

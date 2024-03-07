@@ -138,11 +138,13 @@ namespace Gateway
 		void commonInitialization();
 		void clear();
 
-		bool generateGatewaysRequiredFiles(SignalSetAdapter signalSetAdapter);
+		bool generateGatewaysRequiredFiles();
 
 		ParseResult parseUnknownSection(E::Section& parsingSection, const ParseLineResult& plr);
 		ParseResult parseGatewaySection(E::Section& parsingSection, const ParseLineResult& plr);
 		ParseResult parseSignalListSection(E::Section& parsingSection, const ParseLineResult& plr);
+
+		ParseResult appendAddressSignalID(SignalListShared signalList, const ParseLineResult& plr, bool appendAddr);
 
 		bool parseLine(const QString& str, ParseLineResult* plr);
 		bool parseSettingValue(E::Setting setting, const QString& valueStr, ParseLineResult* plr);
@@ -153,6 +155,7 @@ namespace Gateway
 		bool parseIpPortValueStr(const QString& valueStr, ParseLineResult* plr);
 
 		GatewayShared createTypedGateway(E::GatewayType gwType);
+
 
 	private:
 		const SignalSetAdapter m_signalSetAdapter;

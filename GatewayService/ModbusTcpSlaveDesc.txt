@@ -37,13 +37,13 @@ ModbusDeviceAddress = 20
 
 SignalsFormat = AnalogFloat16 BE
 
-100 -> #SIGNAL1					// regAddr = AppSignalID in list default format
-101 -> SIGNAL2			     		// regAddr = CustomSignalID with register specific format
+1000 -> #SYSTEMID_RACKID_CH01_MD00_PI_TEMP		// regAddr -> AppSignalID
+1001 -> #SYSTEMID_RACKID_CH01_MD00_PI_BUILDNUMBER	
+
 
 [SignalList]
 
-SignalsFormat = DiscreteUint16 LE		// general discrete registers format, Big Endian 16 bit
-
-100, 3 -> #SIGNAL3				// regAddr, bitNo = AppSignalID in list default format
-100, (0x8000) -> SIGNAL4			// regAddr, (mask) = CustomAppSignalID in list default format
-100, 3 -> #SIGNAL3				// regAddr, bitNo = AppSignalID with specific format
+SignalsFormat = DiscreteUint16 LE			// general discrete registers format, Big Endian 16 bit
+                                                	
+100, 3 -> #SYSTEMID_RACKID_CH01_MD00_PI_BLINK		// regAddr, bitNo = AppSignalID
+100, (0x8000) -> #SYSTEMID_RACKID_CH01_MD00_PI_SORISSET	// regAddr, (mask) = AppSignalID

@@ -105,6 +105,11 @@ namespace Gateway
 	//
 	// ---------------------------------------------------------------------------------
 
+	SignalList::SignalList()
+	{
+		m_signalIDs.reserve(10000);
+	}
+
 	bool SignalList::setSettingValue(int lineNo, E::Setting st, const QVariant& value, ParserLog& log)
 	{
 		bool res = checkAndApplySetting(lineNo, st, value, log);
@@ -145,20 +150,28 @@ namespace Gateway
 		return true;
 	}
 
-	bool SignalList::appendSignalID(const QString& signalID, QString* errMsg)
+	bool SignalList::appendSignalID(const QString& appSignalID, QString* errMsg)
 	{
 		Q_UNUSED(errMsg);
-
-		m_signalIDs.emplace_back(signalID);
+		m_signalIDs.emplace_back(appSignalID);
 		return true;
 	}
 
-	bool SignalList::appendAddressSignalID(const QString& addressStr, const QString& signalID, QString* errMsg)
+	bool SignalList::appendAddressSignalID(const QString& addressStr, const QString& appSignalID, QString* errMsg)
 	{
 		Q_UNUSED(addressStr);
-		Q_UNUSED(signalID);
-		Q_UNUSED(errMsg);
+		appendSignalID(appSignalID, errMsg);
 		return true;
+	}
+
+	std::optional<::E::SignalType> SignalList::signalType() const
+	{
+		return m_signalType;
+	}
+
+	void SignalList::setSignalType(::E::SignalType st)
+	{
+		m_signalType = st;
 	}
 
 	SettingValue SignalList::getSettingValue(E::Setting st) const
