@@ -233,7 +233,7 @@ namespace VFrame30
 	//
 	bool FblItem::SaveData(Proto::Envelope* message) const
 	{
-		Proto::FblItem* fblItemMessage = message->mutable_schemaitem()->mutable_fblitem();
+		Proto::FblItem* fblItemMessage = message->MutableExtension(Proto::schemaitem)->mutable_fblitem();
 
 		for (auto pt = m_inputPoints.cbegin(); pt != m_inputPoints.cend(); ++pt)
 		{
@@ -258,23 +258,23 @@ namespace VFrame30
 
 	bool FblItem::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemaitem() == false)
+		if (message.HasExtension(Proto::schemaitem) == false)
 		{
-			assert(message.has_schemaitem());
+			assert(message.HasExtension(Proto::schemaitem));
 			return false;
 		}
 
 		// --
 		//
-		if (message.schemaitem().has_fblitem() == false)
+		if (message.GetExtension(Proto::schemaitem).has_fblitem() == false)
 		{
-			assert(message.schemaitem().has_fblitem());
+			assert(message.GetExtension(Proto::schemaitem).has_fblitem());
 			return false;
 		}
 		
 		// --
 		//
-		const Proto::FblItem& fblItemMessage = message.schemaitem().fblitem();
+		const Proto::FblItem& fblItemMessage = message.GetExtension(Proto::schemaitem).fblitem();
 
 		m_inputPoints.clear();
 		m_outputPoints.clear();

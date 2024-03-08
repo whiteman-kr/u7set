@@ -129,7 +129,7 @@ bool DiagSignalTypesStorage::save(const QUuid& uuid, QString* errorMessage)
 		return false;
 	}
 
-	Proto::Envelope2 message;
+	Proto::Envelope message;
 	dst->Save(&message);
 
 	QByteArray data;

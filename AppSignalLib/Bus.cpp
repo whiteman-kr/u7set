@@ -1,6 +1,7 @@
 #include "Bus.h"
 #include "PropertyNames.h"
 #include "../Proto/ProtoCommonHelper.h"
+#include "../Proto/Bus.pb.h"
 
 
 namespace AppSignalLib
@@ -478,22 +479,22 @@ namespace AppSignalLib
 		quint32 classnamehash = ::ClassNameHashCode(className);
 		message->set_classnamehash(classnamehash);
 
-		bool ok = save(message->mutable_bus());
+		bool ok = save(message->MutableExtension(Proto::bus));
 
 		return ok;
 	}
 
 	bool Bus::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_bus() == false ||
+		if (message.HasExtension(Proto::bus) == false ||
 			message.classnamehash() != ::ClassNameHashCode("Bus"))
 		{
-			assert(message.has_bus());
+			assert(message.HasExtension(Proto::bus));
 			assert(message.classnamehash() == ::ClassNameHashCode("Bus"));
 			return false;
 		}
 
-		bool ok = load(message.bus());
+		bool ok = load(message.GetExtension(Proto::bus));
 
 		return ok;
 	}

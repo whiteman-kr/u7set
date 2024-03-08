@@ -3,6 +3,13 @@
 class QDomElement;
 class QXmlStreamWriter;
 
+namespace Proto
+{
+	class Bus;
+	class BusSignal;
+	class Envelope;
+}
+
 namespace AppSignalLib
 {
 	//

@@ -9,7 +9,7 @@ package Proto;
 //
 //
 //------------------------------------------------------------------------------------------
-message Envelope2
+message Envelope
 {
 	// C++ Class for serizalization
 	//
@@ -41,12 +41,12 @@ message Envelope2
 
 // This message is used for clipboard
 //
-message EnvelopeSet2
+message EnvelopeSet
 {
-    repeated Envelope2 items = 1;
+    repeated Envelope items = 1;
 }
 
-message EnvelopeSetShortDescription2
+message EnvelopeSetShortDescription
 {
     optional uint32 projectdbversion = 1;
 	repeated uint32 classnamehash = 2;				// Hash from classname, the way of getting the hash is always the same
@@ -63,8 +63,8 @@ message EnvelopeSetShortDescription2
 //
 message ExportedDevicePreset2
 {
-    optional EnvelopeSetShortDescription2 description = 1;
-	optional EnvelopeSet2 items = 2;
+    optional EnvelopeSetShortDescription description = 1;
+	optional EnvelopeSet items = 2;
 	optional bytes compressedThis = 3;				// Compressed THIS object, contains message ExportedDevicePreset itself
 	                                                // As exported presets already exist, we cannot use standard way of Envelope.compressedObject
 													// so this field added to particulary this struct

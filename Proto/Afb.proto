@@ -1,0 +1,16 @@
+syntax = "proto2";
+
+package Proto;
+
+
+message AfbElementCollection
+{
+	repeated AfbElementXml elements = 1;
+}
+
+// AfbElementXml keeps an XML file
+//
+message AfbElementXml
+{
+	required bytes data = 1;
+}

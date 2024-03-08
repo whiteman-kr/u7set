@@ -1,5 +1,7 @@
 syntax = "proto2";
 
+import "Common.proto";
+
 package Proto;
 
 message Address16

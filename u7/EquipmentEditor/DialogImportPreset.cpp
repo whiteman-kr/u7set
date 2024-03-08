@@ -19,12 +19,12 @@ DialogImportPreset::DialogImportPreset(const Proto::ExportedDevicePreset2& messa
 
 	for (const auto& it : m_message->items().items())
 	{
-		if (it.HasExtension(Proto::deviceobject2) == false)
+		if (it.HasExtension(::Proto::deviceobject) == false)
 		{
 			continue;
 		}
 
-		const auto& deviceObjectMessage = it.GetExtension(Proto::deviceobject2);
+		const auto& deviceObjectMessage = it.GetExtension(::Proto::deviceobject);
 
 		QStringList l;
 		l.push_back(QString::fromStdString(deviceObjectMessage.caption().text()));
@@ -63,7 +63,7 @@ DialogImportPreset::~DialogImportPreset()
 	delete ui;
 }
 
-const Proto::EnvelopeSet2& DialogImportPreset::chosenItems() const
+const Proto::EnvelopeSet& DialogImportPreset::chosenItems() const
 {
 	return m_chosenItems;
 }
@@ -72,12 +72,12 @@ void DialogImportPreset::accept()
 {
 	for (const auto& it : m_message->items().items())
 	{
-		if (it.HasExtension(Proto::deviceobject2) == false)
+		if (it.HasExtension(::Proto::deviceobject) == false)
 		{
 			continue;
 		}
 
-		const auto& deviceObjectMessage = it.GetExtension(Proto::deviceobject2);
+		const auto& deviceObjectMessage = it.GetExtension(::Proto::deviceobject);
 
 		QByteArray uuid(deviceObjectMessage.uuid().uuid().data());
 
@@ -86,7 +86,7 @@ void DialogImportPreset::accept()
 			if (ui->presetsTree->topLevelItem(i)->checkState(0) == Qt::Checked &&
 				ui->presetsTree->topLevelItem(i)->data(0, Qt::UserRole).toByteArray() == uuid)
 			{
-				::Proto::Envelope2* ni = m_chosenItems.add_items();
+				::Proto::Envelope* ni = m_chosenItems.add_items();
 				*ni = it;
 				break;
 			}

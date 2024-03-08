@@ -208,7 +208,7 @@ void DeviceObjectTests::testSaveLoad()
 
 void DeviceObjectTests::testSaveLoadTree()
 {
-	::Proto::Envelope2 e;
+	::Proto::Envelope e;
 
 	bool ok = m_root->SaveObjectTree(&e);
 	QVERIFY(ok);

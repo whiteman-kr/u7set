@@ -28,16 +28,16 @@ namespace VFrame30
 	{
 		bool result = FblItemRect::SaveData(message);
 
-		if (result == false || message->has_schemaitem() == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 
 		// --
 		//
-		Proto::SchemaItemBus* busitem = message->mutable_schemaitem()->mutable_busitem();
+		Proto::SchemaItemBus* busitem = message->MutableExtension(Proto::schemaitem)->mutable_busitem();
 
 		busitem->set_bustypeid(m_bus.busTypeId().toStdString());
 		busitem->set_bustypehash(m_busTypeHash);
@@ -58,13 +58,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemaitem().has_busitem() == false)
+		if (message.GetExtension(Proto::schemaitem).has_busitem() == false)
 		{
-			assert(message.schemaitem().has_busitem() == true);
+			assert(message.GetExtension(Proto::schemaitem).has_busitem() == true);
 			return false;
 		}
 
-		const Proto::SchemaItemBus& busitem = message.schemaitem().busitem();
+		const Proto::SchemaItemBus& busitem = message.GetExtension(Proto::schemaitem).busitem();
 
 		m_bus.setBusTypeId(QString::fromStdString(busitem.bustypeid()));
 		m_busTypeHash = busitem.bustypehash();
@@ -162,16 +162,16 @@ namespace VFrame30
 		bool result = SchemaItemBus::SaveData(message);
 
 		if (result == false ||
-			message->has_schemaitem() == false)
+			message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 
 		// --
 		//
-		Proto::SchemaItemBusComposer* composer = message->mutable_schemaitem()->mutable_buscomposer();
+		Proto::SchemaItemBusComposer* composer = message->MutableExtension(Proto::schemaitem)->mutable_buscomposer();
 
 		Q_UNUSED(composer);
 //		composer->set_pincount(m_pinCount);
@@ -189,13 +189,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemaitem().has_buscomposer() == false)
+		if (message.GetExtension(Proto::schemaitem).has_buscomposer() == false)
 		{
-			assert(message.schemaitem().has_buscomposer() == true);
+			assert(message.GetExtension(Proto::schemaitem).has_buscomposer() == true);
 			return false;
 		}
 
-		const Proto::SchemaItemBusComposer& composer = message.schemaitem().buscomposer();
+		const Proto::SchemaItemBusComposer& composer = message.GetExtension(Proto::schemaitem).buscomposer();
 		Q_UNUSED(composer);
 
 		return true;
@@ -430,16 +430,16 @@ R"(<p><b>BusComposer:</b> Creates a bus signal</p>
 		bool result = SchemaItemBus::SaveData(message);
 
 		if (result == false ||
-			message->has_schemaitem() == false)
+			message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 
 		// --
 		//
-		Proto::SchemaItemBusExtractor* extractor = message->mutable_schemaitem()->mutable_busextractor();
+		Proto::SchemaItemBusExtractor* extractor = message->MutableExtension(Proto::schemaitem)->mutable_busextractor();
 
 		// Save specific properties' values
 		//
@@ -467,13 +467,13 @@ R"(<p><b>BusComposer:</b> Creates a bus signal</p>
 
 		// --
 		//
-		if (message.schemaitem().has_busextractor() == false)
+		if (message.GetExtension(Proto::schemaitem).has_busextractor() == false)
 		{
-			assert(message.schemaitem().has_busextractor() == true);
+			assert(message.GetExtension(Proto::schemaitem).has_busextractor() == true);
 			return false;
 		}
 
-		const Proto::SchemaItemBusExtractor& extractor = message.schemaitem().busextractor();
+		const Proto::SchemaItemBusExtractor& extractor = message.GetExtension(Proto::schemaitem).busextractor();
 
 		// Load specific properties' values. They are already exists after calling setBus
 		//

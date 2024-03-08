@@ -1,5 +1,12 @@
 #pragma once
 
+namespace Proto
+{
+	class SchemaDetails;
+	class TrendIndicatorSchemaItems;
+	class Envelope;
+}
+
 namespace VFrame30
 {
 	class Schema;
@@ -80,8 +87,8 @@ namespace VFrame30
 			QJsonObject toJsonObject() const;
 			bool fromJsonObject(const QJsonObject& jsonObject);
 
-			bool saveData(::Proto::SchemaDetails::TrendIndicatorSchemaItems* message) const;
-			bool loadData(const ::Proto::SchemaDetails::TrendIndicatorSchemaItems& message);
+			bool saveData(::Proto::TrendIndicatorSchemaItems* message) const;
+			bool loadData(const ::Proto::TrendIndicatorSchemaItems& message);
 		};
 
 		std::vector<TrendIndicatorSchemaItems> m_trendsIndicators;

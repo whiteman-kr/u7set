@@ -289,11 +289,11 @@ namespace VFrame30
 		//		}
 
 		std::string className = this->metaObject()->className();
-		quint32 classnamehash = ::ClassNameHashCode(className);
+		quint32 classNameHash = ::ClassNameHashCode(className);
 
-		message->set_classnamehash(classnamehash);	// Required field, class name hash code, by it instance is created
+		message->set_classnamehash(classNameHash);	// Required field, class name hash code, by it instance is created
 
-		Proto::Schema* mutableSchema = message->mutable_schema();
+		Proto::Schema* mutableSchema = message->MutableExtension(Proto::schema);
 
 		Proto::Write(mutableSchema->mutable_uuid(), m_guid);
 		Proto::Write(mutableSchema->mutable_schemaid(), m_schemaID);
@@ -342,13 +342,13 @@ namespace VFrame30
 		//		QTime t;
 		//		t.start();
 
-		if (message.has_schema() == false)
+		if (message.HasExtension(Proto::schema) == false)
 		{
-			assert(message.has_schema());
+			assert(message.HasExtension(Proto::schema));
 			return false;
 		}
 
-		const Proto::Schema& schema = message.schema();
+		const Proto::Schema& schema = message.GetExtension(Proto::schema);
 
 		m_guid = Proto::Read(schema.uuid());
 		Proto::Read(schema.schemaid(), &m_schemaID);
@@ -417,9 +417,9 @@ namespace VFrame30
 	{
 		// This function can create only one instance
 		//
-		if (message.has_schema() == false)
+		if (message.HasExtension(Proto::schema) == false)
 		{
-			assert(message.has_schema());
+			assert(message.HasExtension(Proto::schema));
 			return nullptr;
 		}
 

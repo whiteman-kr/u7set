@@ -36,16 +36,16 @@ namespace VFrame30
 	bool SchemaItemControl::SaveData(Proto::Envelope* message) const
 	{
 		bool result = PosRectImpl::SaveData(message);
-		if (result == false || message->has_schemaitem() == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 		
 		// --
 		//
-		Proto::SchemaItemControl* controlMessage = message->mutable_schemaitem()->mutable_control();
+		Proto::SchemaItemControl* controlMessage = message->MutableExtension(Proto::schemaitem)->mutable_control();
 
 		controlMessage->set_stylesheet(m_styleSheet.toStdString());
 		controlMessage->set_tooltip(m_toolTip.toStdString());
@@ -55,9 +55,9 @@ namespace VFrame30
 
 	bool SchemaItemControl::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemaitem() == false)
+		if (message.HasExtension(Proto::schemaitem) == false)
 		{
-			assert(message.has_schemaitem());
+			assert(message.HasExtension(Proto::schemaitem));
 			return false;
 		}
 
@@ -71,13 +71,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemaitem().has_control() == false)
+		if (message.GetExtension(Proto::schemaitem).has_control() == false)
 		{
-			assert(message.schemaitem().has_control());
+			assert(message.GetExtension(Proto::schemaitem).has_control());
 			return false;
 		}
 
-		const Proto::SchemaItemControl& controlMessage = message.schemaitem().control();
+		const Proto::SchemaItemControl& controlMessage = message.GetExtension(Proto::schemaitem).control();
 
 		setStyleSheet(QString::fromStdString(controlMessage.stylesheet()));		// Text setters can have some string optimization for default values
 		setToolTip(QString::fromStdString(controlMessage.tooltip()));			// Text setters can have some string optimization for default values

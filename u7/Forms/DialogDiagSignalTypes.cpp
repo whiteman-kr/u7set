@@ -417,7 +417,7 @@ void DialogDiagSignalTypes::onCopy()
 		return;
 	}
 
-	Proto::EnvelopeSet2 envelopeSet;
+	Proto::EnvelopeSet envelopeSet;
 
 	for (auto item : selectedItems)
 	{
@@ -475,7 +475,7 @@ void DialogDiagSignalTypes::onPaste()
 		return;
 	}
 
-	Proto::EnvelopeSet2 envelopeSet;
+	Proto::EnvelopeSet envelopeSet;
 	if (envelopeSet.ParseFromArray(data.constData(), data.size()) == false)
 	{
 		return;
@@ -491,7 +491,7 @@ void DialogDiagSignalTypes::onPaste()
 	{
 		const auto& envelope = envelopeSet.items(i);
 
-		if (envelope.HasExtension(Proto::diagSignalType2) == false)
+		if (envelope.HasExtension(::Proto::diagSignalType) == false)
 		{
 			Q_ASSERT(false);
 			continue;
@@ -734,7 +734,7 @@ void DialogDiagSignalTypes::onExport()
 		return;
 	}
 
-	Proto::EnvelopeSet2 envelopeSet;
+	Proto::EnvelopeSet envelopeSet;
 
 	QString defaultFileName;
 	if (selectedItems.size() > 1)
@@ -826,7 +826,7 @@ void DialogDiagSignalTypes::onImport()
 
 	data = file.readAll();
 
-	Proto::EnvelopeSet2 envelopeSet;
+	Proto::EnvelopeSet envelopeSet;
 	if (data.isEmpty() == true || envelopeSet.ParseFromArray(data.constData(), data.size()) == false)
 	{
 		QMessageBox::critical(this, qAppName(), tr("Error parsing file %1 contents!").arg(QDir::toNativeSeparators(fileName)));
@@ -843,7 +843,7 @@ void DialogDiagSignalTypes::onImport()
 	{
 		const auto& envelope = envelopeSet.items(i);
 
-		if (envelope.HasExtension(Proto::diagSignalType2) == false)
+		if (envelope.HasExtension(::Proto::diagSignalType) == false)
 		{
 			Q_ASSERT(false);
 			continue;

@@ -1,4 +1,5 @@
 #include "Afb.h"
+#include "../Proto/Afb.pb.h"
 
 namespace Afb
 {

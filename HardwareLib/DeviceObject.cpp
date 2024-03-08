@@ -162,20 +162,20 @@ namespace Hardware
 		return shared_from_this();
 	}
 
-	bool DeviceObject::SaveData(Proto::Envelope2* message) const
+	bool DeviceObject::SaveData(Proto::Envelope* message) const
 	{
 		bool ok = SaveData(message, false);
 		return ok;
 	}
 
-	bool DeviceObject::SaveData(Proto::Envelope2* message, bool saveTree) const
+	bool DeviceObject::SaveData(Proto::Envelope* message, bool saveTree) const
 	{
 		const std::string& className = this->metaObject()->className();
 		quint32 classnamehash = ::ClassNameHashCode(className);
 
 		message->set_classnamehash(classnamehash);
 
-		auto mutableDeviceObject = message->MutableExtension(Proto::deviceobject2);
+		auto mutableDeviceObject = message->MutableExtension(::Proto::deviceobject);
 
 		Proto::Write(mutableDeviceObject->mutable_uuid(), m_uuid);
 		Proto::Write(mutableDeviceObject->mutable_equipmentid(), m_equipmentId);
@@ -235,7 +235,7 @@ namespace Hardware
 		{
 			for (const std::shared_ptr<DeviceObject>& child : m_children)
 			{
-				::Proto::Envelope2* childMessage = mutableDeviceObject->add_children();
+				::Proto::Envelope* childMessage = mutableDeviceObject->add_children();
 				Q_ASSERT(childMessage);
 
 				child->SaveData(childMessage, saveTree);
@@ -245,15 +245,15 @@ namespace Hardware
 		return true;
 	}
 
-	bool DeviceObject::LoadData(const Proto::Envelope2& message)
+	bool DeviceObject::LoadData(const Proto::Envelope& message)
 	{
-		if (message.HasExtension(Proto::deviceobject2) == false)
+		if (message.HasExtension(::Proto::deviceobject) == false)
 		{
-			Q_ASSERT(message.HasExtension(Proto::deviceobject2));
+			Q_ASSERT(message.HasExtension(::Proto::deviceobject));
 			return false;
 		}
 
-		auto&& deviceobject = message.GetExtension(Proto::deviceobject2);
+		const auto& deviceobject = message.GetExtension(::Proto::deviceobject);
 
 		m_uuid = Proto::Read(deviceobject.uuid());
 		Q_ASSERT(m_uuid.isNull() == false);
@@ -358,7 +358,7 @@ namespace Hardware
 
 			for (int childIndex = 0; childIndex < deviceobject.children_size(); childIndex++)
 			{
-				const ::Proto::Envelope2& childMessage = deviceobject.children(childIndex);
+				const ::Proto::Envelope& childMessage = deviceobject.children(childIndex);
 
 				QFuture<std::shared_ptr<DeviceObject>> f = QtConcurrent::run(DeviceObject::CreateObject, childMessage);
 
@@ -382,7 +382,7 @@ namespace Hardware
 		{
 			for (int childIndex = 0; childIndex < deviceobject.children_size(); childIndex++)
 			{
-				const ::Proto::Envelope2& childMessage = deviceobject.children(childIndex);
+				const ::Proto::Envelope& childMessage = deviceobject.children(childIndex);
 
 				std::shared_ptr<DeviceObject> child(DeviceObject::Create(childMessage));
 
@@ -399,13 +399,13 @@ namespace Hardware
 		return true;
 	}
 
-	std::shared_ptr<DeviceObject> DeviceObject::CreateObject(const Proto::Envelope2& message)
+	std::shared_ptr<DeviceObject> DeviceObject::CreateObject(const Proto::Envelope& message)
 	{
 		// This func can create only one instance
 		//
-		if (message.HasExtension(Proto::deviceobject2) == false)
+		if (message.HasExtension(::Proto::deviceobject) == false)
 		{
-			Q_ASSERT(message.HasExtension(Proto::deviceobject2));
+			Q_ASSERT(message.HasExtension(::Proto::deviceobject));
 			return nullptr;
 		}
 
@@ -423,7 +423,7 @@ namespace Hardware
 		return deviceObject;
 	}
 
-	bool DeviceObject::SaveObjectTree(Proto::Envelope2* message) const
+	bool DeviceObject::SaveObjectTree(Proto::Envelope* message) const
 	{
 		if (message == nullptr)
 		{
@@ -1544,19 +1544,19 @@ R"DELIM({
 		}
 	}
 
-	bool DeviceSystem::SaveData(Proto::Envelope2* message, bool saveTree) const
+	bool DeviceSystem::SaveData(Proto::Envelope* message, bool saveTree) const
 	{
 		bool result = DeviceObject::SaveData(message, saveTree);
-		if (result == false || message->HasExtension(Proto::deviceobject2) == false)
+		if (result == false || message->HasExtension(::Proto::deviceobject) == false)
 		{
 			Q_ASSERT(result);
-			Q_ASSERT(message->HasExtension(Proto::deviceobject2));
+			Q_ASSERT(message->HasExtension(::Proto::deviceobject));
 			return false;
 		}
 
 		// --
 		//
-		auto systemMessage = message->MutableExtension(Proto::deviceobject2)->mutable_system();
+		auto systemMessage = message->MutableExtension(::Proto::deviceobject)->mutable_system();
 
 		Q_UNUSED(systemMessage);
 		//systemMessage->set_startxdocpt(m_startXDocPt);
@@ -1565,11 +1565,11 @@ R"DELIM({
 		return true;
 	}
 
-	bool DeviceSystem::LoadData(const Proto::Envelope2& message)
+	bool DeviceSystem::LoadData(const Proto::Envelope& message)
 	{
-		if (message.HasExtension(Proto::deviceobject2) == false)
+		if (message.HasExtension(::Proto::deviceobject) == false)
 		{
-			Q_ASSERT(message.HasExtension(Proto::deviceobject2));
+			Q_ASSERT(message.HasExtension(::Proto::deviceobject));
 			return false;
 		}
 
@@ -1581,7 +1581,7 @@ R"DELIM({
 
 		// --
 		//
-		const auto& deviceobject = message.GetExtension(Proto::deviceobject2);
+		const auto& deviceobject = message.GetExtension(::Proto::deviceobject);
 
 		if (deviceobject.has_system() == false)
 		{
@@ -1617,19 +1617,19 @@ R"DELIM({
 		}
 	}
 
-	bool DeviceRack::SaveData(Proto::Envelope2* message, bool saveTree) const
+	bool DeviceRack::SaveData(Proto::Envelope* message, bool saveTree) const
 	{
 		bool result = DeviceObject::SaveData(message, saveTree);
-		if (result == false || message->HasExtension(Proto::deviceobject2) == false)
+		if (result == false || message->HasExtension(::Proto::deviceobject) == false)
 		{
 			Q_ASSERT(result);
-			Q_ASSERT(message->HasExtension(Proto::deviceobject2));
+			Q_ASSERT(message->HasExtension(::Proto::deviceobject));
 			return false;
 		}
 
 		// --
 		//
-		[[maybe_unused]] auto rackMessage = message->MutableExtension(Proto::deviceobject2)->mutable_rack();
+		[[maybe_unused]] auto rackMessage = message->MutableExtension(::Proto::deviceobject)->mutable_rack();
 
 		//rackMessage->set_startxdocpt(m_startXDocPt);
 		//rackMessage->set_startydocpt(m_startYDocPt);
@@ -1637,11 +1637,11 @@ R"DELIM({
 		return true;
 	}
 
-	bool DeviceRack::LoadData(const Proto::Envelope2& message)
+	bool DeviceRack::LoadData(const Proto::Envelope& message)
 	{
-		if (message.HasExtension(Proto::deviceobject2) == false)
+		if (message.HasExtension(::Proto::deviceobject) == false)
 		{
-			Q_ASSERT(message.HasExtension(Proto::deviceobject2));
+			Q_ASSERT(message.HasExtension(::Proto::deviceobject));
 			return false;
 		}
 
@@ -1653,7 +1653,7 @@ R"DELIM({
 
 		// --
 		//
-		const auto& deviceobject = message.GetExtension(Proto::deviceobject2);
+		const auto& deviceobject = message.GetExtension(::Proto::deviceobject);
 
 		if (deviceobject.has_rack() == false)
 		{
@@ -1693,30 +1693,30 @@ R"DELIM({
 
 	}
 
-	bool DeviceChassis::SaveData(Proto::Envelope2* message, bool saveTree) const
+	bool DeviceChassis::SaveData(Proto::Envelope* message, bool saveTree) const
 	{
 		bool result = DeviceObject::SaveData(message, saveTree);
-		if (result == false || message->HasExtension(Proto::deviceobject2) == false)
+		if (result == false || message->HasExtension(::Proto::deviceobject) == false)
 		{
 			Q_ASSERT(result);
-			Q_ASSERT(message->HasExtension(Proto::deviceobject2));
+			Q_ASSERT(message->HasExtension(::Proto::deviceobject));
 			return false;
 		}
 
 		// --
 		//
-		auto* chassisMessage = message->MutableExtension(Proto::deviceobject2)->mutable_chassis();
+		auto* chassisMessage = message->MutableExtension(::Proto::deviceobject)->mutable_chassis();
 
 		chassisMessage->set_type(m_type);
 
 		return true;
 	}
 
-	bool DeviceChassis::LoadData(const Proto::Envelope2& message)
+	bool DeviceChassis::LoadData(const Proto::Envelope& message)
 	{
-		if (message.HasExtension(Proto::deviceobject2) == false)
+		if (message.HasExtension(::Proto::deviceobject) == false)
 		{
-			Q_ASSERT(message.HasExtension(Proto::deviceobject2));
+			Q_ASSERT(message.HasExtension(::Proto::deviceobject));
 			return false;
 		}
 
@@ -1728,7 +1728,7 @@ R"DELIM({
 
 		// --
 		//
-		const auto& deviceobject = message.GetExtension(Proto::deviceobject2);
+		const auto& deviceobject = message.GetExtension(::Proto::deviceobject);
 		if (deviceobject.has_chassis() == false)
 		{
 			Q_ASSERT(deviceobject.has_chassis());
@@ -1855,19 +1855,19 @@ R"DELIM({
 		}
 	}
 
-	bool DeviceModule::SaveData(Proto::Envelope2* message, bool saveTree) const
+	bool DeviceModule::SaveData(Proto::Envelope* message, bool saveTree) const
 	{
 		bool result = DeviceObject::SaveData(message, saveTree);
-		if (result == false || message->HasExtension(Proto::deviceobject2) == false)
+		if (result == false || message->HasExtension(::Proto::deviceobject) == false)
 		{
 			Q_ASSERT(result);
-			Q_ASSERT(message->HasExtension(Proto::deviceobject2));
+			Q_ASSERT(message->HasExtension(::Proto::deviceobject));
 			return false;
 		}
 
 		// --
 		//
-		auto moduleMessage = message->MutableExtension(Proto::deviceobject2)->mutable_module();
+		auto moduleMessage = message->MutableExtension(::Proto::deviceobject)->mutable_module();
 
 		moduleMessage->set_moduletype(static_cast<int>(m_type));
 		moduleMessage->set_custommodulefamily(m_customModuleFamily);
@@ -1877,11 +1877,11 @@ R"DELIM({
 		return true;
 	}
 
-	bool DeviceModule::LoadData(const Proto::Envelope2& message)
+	bool DeviceModule::LoadData(const Proto::Envelope& message)
 	{
-		if (message.HasExtension(Proto::deviceobject2) == false)
+		if (message.HasExtension(::Proto::deviceobject) == false)
 		{
-			Q_ASSERT(message.HasExtension(Proto::deviceobject2));
+			Q_ASSERT(message.HasExtension(::Proto::deviceobject));
 			return false;
 		}
 
@@ -1893,7 +1893,7 @@ R"DELIM({
 
 		// --
 		//
-		const auto& deviceobject = message.GetExtension(Proto::deviceobject2);
+		const auto& deviceobject = message.GetExtension(::Proto::deviceobject);
 		if (deviceobject.has_module() == false)
 		{
 			Q_ASSERT(deviceobject.has_module());
@@ -2065,30 +2065,30 @@ R"DELIM({
 		return;
 	}
 
-	bool DeviceController::SaveData(Proto::Envelope2* message, bool saveTree) const
+	bool DeviceController::SaveData(Proto::Envelope* message, bool saveTree) const
 	{
 		bool result = DeviceObject::SaveData(message, saveTree);
-		if (result == false || message->HasExtension(Proto::deviceobject2) == false)
+		if (result == false || message->HasExtension(::Proto::deviceobject) == false)
 		{
 			Q_ASSERT(result);
-			Q_ASSERT(message->HasExtension(Proto::deviceobject2));
+			Q_ASSERT(message->HasExtension(::Proto::deviceobject));
 			return false;
 		}
 
 		// --
 		//
-		auto controllerMessage = message->MutableExtension(Proto::deviceobject2)->mutable_controller();
+		auto controllerMessage = message->MutableExtension(::Proto::deviceobject)->mutable_controller();
 
 		controllerMessage->set_diagdataoffset(m_diagDataOffset);
 
 		return true;
 	}
 
-	bool DeviceController::LoadData(const Proto::Envelope2& message)
+	bool DeviceController::LoadData(const Proto::Envelope& message)
 	{
-		if (message.HasExtension(Proto::deviceobject2) == false)
+		if (message.HasExtension(::Proto::deviceobject) == false)
 		{
-			Q_ASSERT(message.HasExtension(Proto::deviceobject2));
+			Q_ASSERT(message.HasExtension(::Proto::deviceobject));
 			return false;
 		}
 
@@ -2100,7 +2100,7 @@ R"DELIM({
 
 		// --
 		//
-		auto&& deviceobject = message.GetExtension(Proto::deviceobject2);
+		const auto& deviceobject = message.GetExtension(::Proto::deviceobject);
 		if (deviceobject.has_controller() == false)
 		{
 			Q_ASSERT(deviceobject.has_controller());
@@ -2203,19 +2203,19 @@ R"DELIM({
 		return;
 	}
 
-	bool DeviceAppSignal::SaveData(Proto::Envelope2* message, bool saveTree) const
+	bool DeviceAppSignal::SaveData(Proto::Envelope* message, bool saveTree) const
 	{
 		bool result = DeviceObject::SaveData(message, saveTree);
-		if (result == false || message->HasExtension(Proto::deviceobject2) == false)
+		if (result == false || message->HasExtension(::Proto::deviceobject) == false)
 		{
 			Q_ASSERT(result);
-			Q_ASSERT(message->HasExtension(Proto::deviceobject2));
+			Q_ASSERT(message->HasExtension(::Proto::deviceobject));
 			return false;
 		}
 
 		// --
 		//
-		auto signalMessage = message->MutableExtension(Proto::deviceobject2)->mutable_appsignal();
+		auto signalMessage = message->MutableExtension(::Proto::deviceobject)->mutable_appsignal();
 
 		signalMessage->set_type(static_cast<int>(m_signalType));
 		signalMessage->set_function(static_cast<int>(m_function));
@@ -2247,11 +2247,11 @@ R"DELIM({
 		return true;
 	}
 
-	bool DeviceAppSignal::LoadData(const Proto::Envelope2& message)
+	bool DeviceAppSignal::LoadData(const Proto::Envelope& message)
 	{
-		if (message.HasExtension(Proto::deviceobject2) == false)
+		if (message.HasExtension(::Proto::deviceobject) == false)
 		{
-			Q_ASSERT(message.HasExtension(Proto::deviceobject2));
+			Q_ASSERT(message.HasExtension(::Proto::deviceobject));
 			return false;
 		}
 
@@ -2263,7 +2263,7 @@ R"DELIM({
 
 		// --
 		//
-		const auto& deviceobject = message.GetExtension(Proto::deviceobject2);
+		const auto& deviceobject = message.GetExtension(::Proto::deviceobject);
 
 		if (deviceobject.has_appsignal() == false)
 		{
@@ -2698,19 +2698,19 @@ R"DELIM({
 		}
 	}
 
-	bool Workstation::SaveData(Proto::Envelope2* message, bool saveTree) const
+	bool Workstation::SaveData(Proto::Envelope* message, bool saveTree) const
 	{
 		bool result = DeviceObject::SaveData(message, saveTree);
-		if (result == false || message->HasExtension(Proto::deviceobject2) == false)
+		if (result == false || message->HasExtension(::Proto::deviceobject) == false)
 		{
 			Q_ASSERT(result);
-			Q_ASSERT(message->HasExtension(Proto::deviceobject2));
+			Q_ASSERT(message->HasExtension(::Proto::deviceobject));
 			return false;
 		}
 
 		// --
 		//
-		auto workstationMessage = message->MutableExtension(Proto::deviceobject2)->mutable_workstation();
+		auto workstationMessage = message->MutableExtension(::Proto::deviceobject)->mutable_workstation();
 
 		workstationMessage->set_type(m_type);
 		workstationMessage->set_hostname(m_hostname.toStdString());
@@ -2718,11 +2718,11 @@ R"DELIM({
 		return true;
 	}
 
-	bool Workstation::LoadData(const Proto::Envelope2& message)
+	bool Workstation::LoadData(const Proto::Envelope& message)
 	{
-		if (message.HasExtension(Proto::deviceobject2) == false)
+		if (message.HasExtension(::Proto::deviceobject) == false)
 		{
-			Q_ASSERT(message.HasExtension(Proto::deviceobject2));
+			Q_ASSERT(message.HasExtension(::Proto::deviceobject));
 			return false;
 		}
 
@@ -2734,7 +2734,7 @@ R"DELIM({
 
 		// --
 		//
-		const auto& deviceobject = message.GetExtension(Proto::deviceobject2);
+		const auto& deviceobject = message.GetExtension(::Proto::deviceobject);
 		if (deviceobject.has_workstation() == false)
 		{
 			Q_ASSERT(deviceobject.has_workstation());
@@ -2783,30 +2783,30 @@ R"DELIM({
 				.setUpdateFromPreset(true);
 	}
 
-	bool Software::SaveData(Proto::Envelope2* message, bool saveTree) const
+	bool Software::SaveData(Proto::Envelope* message, bool saveTree) const
 	{
 		bool result = DeviceObject::SaveData(message, saveTree);
-		if (result == false || message->HasExtension(Proto::deviceobject2) == false)
+		if (result == false || message->HasExtension(::Proto::deviceobject) == false)
 		{
 			Q_ASSERT(result);
-			Q_ASSERT(message->HasExtension(Proto::deviceobject2));
+			Q_ASSERT(message->HasExtension(::Proto::deviceobject));
 			return false;
 		}
 
 		// --
 		//
-		auto softwareMessage = message->MutableExtension(Proto::deviceobject2)->mutable_software();
+		auto softwareMessage = message->MutableExtension(::Proto::deviceobject)->mutable_software();
 
 		softwareMessage->set_type(static_cast<int>(m_softwareType));
 
 		return true;
 	}
 
-	bool Software::LoadData(const Proto::Envelope2& message)
+	bool Software::LoadData(const Proto::Envelope& message)
 	{
-		if (message.HasExtension(Proto::deviceobject2) == false)
+		if (message.HasExtension(::Proto::deviceobject) == false)
 		{
-			Q_ASSERT(message.HasExtension(Proto::deviceobject2));
+			Q_ASSERT(message.HasExtension(::Proto::deviceobject));
 			return false;
 		}
 
@@ -2818,7 +2818,7 @@ R"DELIM({
 
 		// --
 		//
-		const auto& deviceobject = message.GetExtension(Proto::deviceobject2);
+		const auto& deviceobject = message.GetExtension(::Proto::deviceobject);
 
 		if (deviceobject.has_software() == false)
 		{

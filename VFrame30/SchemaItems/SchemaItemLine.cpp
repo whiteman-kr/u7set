@@ -43,16 +43,16 @@ namespace VFrame30
 	bool SchemaItemLine::SaveData(Proto::Envelope* message) const
 	{
 		bool result = PosLineImpl::SaveData(message);
-		if (result == false || message->has_schemaitem() == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 
 		// --
 		//
-		Proto::SchemaItemLine* lineMessage = message->mutable_schemaitem()->mutable_line();
+		Proto::SchemaItemLine* lineMessage = message->MutableExtension(Proto::schemaitem)->mutable_line();
 
 		lineMessage->set_weight(m_weight);
 		lineMessage->set_linecolor(m_lineColor.rgba());
@@ -69,9 +69,9 @@ namespace VFrame30
 
 	bool SchemaItemLine::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemaitem() == false)
+		if (message.HasExtension(Proto::schemaitem) == false)
 		{
-			assert(message.has_schemaitem());
+			assert(message.HasExtension(Proto::schemaitem));
 			return false;
 		}
 
@@ -84,13 +84,13 @@ namespace VFrame30
 		}
 
 		// --
-		if (message.schemaitem().has_line() == false)
+		if (message.GetExtension(Proto::schemaitem).has_line() == false)
 		{
-			assert(message.schemaitem().has_line());
+			assert(message.GetExtension(Proto::schemaitem).has_line());
 			return false;
 		}
 
-		const Proto::SchemaItemLine& lineMessage = message.schemaitem().line();
+		const Proto::SchemaItemLine& lineMessage = message.GetExtension(Proto::schemaitem).line();
 
 		m_weight = lineMessage.weight();
 		m_lineColor = QColor::fromRgba(lineMessage.linecolor());

@@ -702,7 +702,7 @@ void DialogConnections::onCopy()
 		return;
 	}
 
-	Proto::EnvelopeSet2 envelopeSet;
+	Proto::EnvelopeSet envelopeSet;
 
 	for (auto item : selectedItems)
 	{
@@ -715,7 +715,7 @@ void DialogConnections::onCopy()
 			return;
 		}
 
-		Proto::Envelope2* envelope = envelopeSet.add_items();
+		Proto::Envelope* envelope = envelopeSet.add_items();
 		connection->SaveData(envelope);
 	}
 
@@ -759,7 +759,7 @@ void DialogConnections::onPaste()
 		return;
 	}
 
-	Proto::EnvelopeSet2 envelopeSet;
+	Proto::EnvelopeSet envelopeSet;
 	if (envelopeSet.ParseFromArray(data.constData(), static_cast<int>(data.size())) == false)
 	{
 		return;
@@ -773,11 +773,11 @@ void DialogConnections::onPaste()
 
 	for (int i = 0; i < envelopeSet.items_size(); i++)
 	{
-		const Proto::Envelope2& envelope = envelopeSet.items(i);
+		const Proto::Envelope& envelope = envelopeSet.items(i);
 
-		if (envelope.HasExtension(Proto::connection2) == false)
+		if (envelope.HasExtension(::Proto::connection) == false)
 		{
-			Q_ASSERT(envelope.HasExtension(Proto::connection2));
+			Q_ASSERT(envelope.HasExtension(::Proto::connection));
 			continue;
 		}
 

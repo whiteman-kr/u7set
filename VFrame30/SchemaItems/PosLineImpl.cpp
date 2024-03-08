@@ -58,16 +58,16 @@ namespace VFrame30
 	bool PosLineImpl::SaveData(Proto::Envelope* message) const
 	{
 		bool result = SchemaItem::SaveData(message);
-		if (result == false || message->has_schemaitem() == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 
 		// --
 		//
-		Proto::PosLineImpl* posLineImplMessage = message->mutable_schemaitem()->mutable_poslineimpl();
+		Proto::PosLineImpl* posLineImplMessage = message->MutableExtension(Proto::schemaitem)->mutable_poslineimpl();
 
 		posLineImplMessage->set_startxdocpt(m_startXDocPt);
 		posLineImplMessage->set_startydocpt(m_startYDocPt);
@@ -79,9 +79,9 @@ namespace VFrame30
 
 	bool PosLineImpl::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemaitem() == false)
+		if (message.HasExtension(Proto::schemaitem) == false)
 		{
-			assert(message.has_schemaitem());
+			assert(message.HasExtension(Proto::schemaitem));
 			return false;
 		}
 
@@ -95,13 +95,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemaitem().has_poslineimpl() == false)
+		if (message.GetExtension(Proto::schemaitem).has_poslineimpl() == false)
 		{
-			assert(message.schemaitem().has_poslineimpl());
+			assert(message.GetExtension(Proto::schemaitem).has_poslineimpl());
 			return false;
 		}
 
-		const Proto::PosLineImpl& posLineImplMessage = message.schemaitem().poslineimpl();
+		const Proto::PosLineImpl& posLineImplMessage = message.GetExtension(Proto::schemaitem).poslineimpl();
 
 		m_startXDocPt = posLineImplMessage.startxdocpt();
 		m_startYDocPt = posLineImplMessage.startydocpt();

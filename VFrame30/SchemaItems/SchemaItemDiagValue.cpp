@@ -82,16 +82,16 @@ namespace VFrame30
 	{
 		bool result = PosRectRotatable::SaveData(message);
 		if (result == false ||
-			message->has_schemaitem() == false)
+			message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 
 		// --
 		//
-		Proto::SchemaItemDiagValue* valueMessage = message->mutable_schemaitem()->mutable_diagvalue();
+		Proto::SchemaItemDiagValue* valueMessage = message->MutableExtension(Proto::schemaitem)->mutable_diagvalue();
 
 		valueMessage->set_signalids(diagSignalIdsString(nullptr).toStdString()); // Set context to nullptr so ids WILL NOT be expanded
 
@@ -118,9 +118,9 @@ namespace VFrame30
 
 	bool SchemaItemDiagValue::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemaitem() == false)
+		if (message.HasExtension(Proto::schemaitem) == false)
 		{
-			assert(message.has_schemaitem());
+			assert(message.HasExtension(Proto::schemaitem));
 			return false;
 		}
 
@@ -134,13 +134,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemaitem().has_value() == false)
+		if (message.GetExtension(Proto::schemaitem).has_value() == false)
 		{
-			assert(message.schemaitem().has_diagvalue());
+			assert(message.GetExtension(Proto::schemaitem).has_diagvalue());
 			return false;
 		}
 
-		const Proto::SchemaItemDiagValue& valueMessage = message.schemaitem().diagvalue();
+		const Proto::SchemaItemDiagValue& valueMessage = message.GetExtension(Proto::schemaitem).diagvalue();
 
 		setDiagSignalIdsString(valueMessage.signalids().data());
 

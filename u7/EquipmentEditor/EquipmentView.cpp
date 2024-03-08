@@ -1792,11 +1792,11 @@ void EquipmentView::copySelectedDevices()
 
 	// Save devices to the clipboard
 	//
-	::Proto::EnvelopeSet2 message;
+	::Proto::EnvelopeSet message;
 
 	// Save the short description -- its done for quick understanding what is in the clipboard without reading all data
 	//
-	::Proto::EnvelopeSetShortDescription2 descriptionMessage;
+	::Proto::EnvelopeSetShortDescription descriptionMessage;
 
 	descriptionMessage.set_projectname(db()->currentProject().projectName().toStdString());
 	descriptionMessage.set_username(db()->currentUser().username().toStdString());
@@ -1908,7 +1908,7 @@ void EquipmentView::pasteDevices()
 	//
 	QByteArray cbData = mimeData->data(EquipmentView::mimeType);
 
-	::Proto::EnvelopeSet2 messageItems;
+	::Proto::EnvelopeSet messageItems;
 	bool ok = messageItems.ParseFromArray(cbData.constData(), static_cast<int>(cbData.size()));
 
 	if (ok == false)
@@ -1921,7 +1921,7 @@ void EquipmentView::pasteDevices()
 	//
 	cbData = mimeData->data(EquipmentView::mimeTypeShortDescription);
 
-	::Proto::EnvelopeSetShortDescription2 messageDescr;
+	::Proto::EnvelopeSetShortDescription messageDescr;
 	ok = messageDescr.ParseFromArray(cbData.constData(), static_cast<int>(cbData.size()));
 
 	if (ok == false)
@@ -1937,8 +1937,8 @@ void EquipmentView::pasteDevices()
 	return;
 }
 
-void EquipmentView::pasteDevices(const ::Proto::EnvelopeSet2& messageItems,
-								 const ::Proto::EnvelopeSetShortDescription2& messageDescr,
+void EquipmentView::pasteDevices(const ::Proto::EnvelopeSet& messageItems,
+								 const ::Proto::EnvelopeSetShortDescription& messageDescr,
 								 bool newUuids)		// Generate UUIDs is false for importing presets. Preset has PresetObjectUuid which is used for matching preset and its' equipment
 {
 	QModelIndex parentModelIndex;		// current is root
@@ -2056,7 +2056,7 @@ bool EquipmentView::canPaste() const
 	//
 	QByteArray cbData = mimeData->data(EquipmentView::mimeTypeShortDescription);
 
-	::Proto::EnvelopeSetShortDescription2 message;
+	::Proto::EnvelopeSetShortDescription message;
 	bool ok = message.ParseFromArray(cbData.constData(), static_cast<int>(cbData.size()));
 
 	if (ok == false)
@@ -2067,7 +2067,7 @@ bool EquipmentView::canPaste() const
 	return canPaste(message);
 }
 
-bool EquipmentView::canPaste(const ::Proto::EnvelopeSetShortDescription2& message) const
+bool EquipmentView::canPaste(const ::Proto::EnvelopeSetShortDescription& message) const
 {
 	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
 

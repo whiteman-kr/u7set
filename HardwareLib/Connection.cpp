@@ -134,13 +134,13 @@ namespace Hardware
         propGenerateVHD->setCategory(s_miscellaneous);
 	}
 
-    bool Connection::SaveData(Proto::Envelope2* envelope) const
+    bool Connection::SaveData(Proto::Envelope* envelope) const
 	{
 		const std::string& className = this->metaObject()->className();
 		quint32 classnamehash = ::ClassNameHashCode(className);
 		envelope->set_classnamehash(classnamehash);
 
-		::Proto::Connection2* mutableConnection = envelope->MutableExtension(Proto::connection2);
+		::Proto::Connection* mutableConnection = envelope->MutableExtension(::Proto::connection);
 
         Proto::Write(mutableConnection->mutable_uuid(), m_uuid);
 		mutableConnection->set_connectionid(m_connectionID.toUtf8());
@@ -174,15 +174,15 @@ namespace Hardware
 		return true;
 	}
 
-	bool Connection::LoadData(const Proto::Envelope2& envelope)
+	bool Connection::LoadData(const Proto::Envelope& envelope)
 	{
-		if (envelope.HasExtension(Proto::connection2) == false)
+		if (envelope.HasExtension(::Proto::connection) == false)
 		{
-			assert(envelope.HasExtension(Proto::connection2));
+			assert(envelope.HasExtension(::Proto::connection));
 			return false;
 		}
 
-		::Proto::Connection2 connection = envelope.GetExtension(Proto::connection2);
+		::Proto::Connection connection = envelope.GetExtension(::Proto::connection);
 
         m_uuid = Proto::Read(connection.uuid());
 		m_connectionID = QString::fromStdString(connection.connectionid());
@@ -243,13 +243,13 @@ namespace Hardware
 		return true;
 	}
 
-	std::shared_ptr<Connection> Connection::CreateObject(const Proto::Envelope2& envelope)
+	std::shared_ptr<Connection> Connection::CreateObject(const Proto::Envelope& envelope)
 	{
 		// This func can create only one instance
 		//
-		if (envelope.HasExtension(::Proto::connection2) == false)
+		if (envelope.HasExtension(::Proto::connection) == false)
 		{
-			assert(envelope.HasExtension(::Proto::connection2));
+			assert(envelope.HasExtension(::Proto::connection));
 			return nullptr;
 		}
 

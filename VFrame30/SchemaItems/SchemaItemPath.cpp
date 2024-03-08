@@ -44,16 +44,16 @@ namespace VFrame30
 	bool SchemaItemPath::SaveData(Proto::Envelope* message) const
 	{
 		bool result = PosConnectionImpl::SaveData(message);
-		if (result == false || message->has_schemaitem() == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 	
 		// --
 		//
-		Proto::SchemaItemPath* path = message->mutable_schemaitem()->mutable_path();
+		Proto::SchemaItemPath* path = message->MutableExtension(Proto::schemaitem)->mutable_path();
 
 		path->set_weight(m_weight);
 		path->set_linecolor(m_lineColor.rgba());
@@ -70,9 +70,9 @@ namespace VFrame30
 
 	bool SchemaItemPath::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemaitem() == false)
+		if (message.HasExtension(Proto::schemaitem) == false)
 		{
-			assert(message.has_schemaitem());
+			assert(message.HasExtension(Proto::schemaitem));
 			return false;
 		}
 
@@ -86,13 +86,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemaitem().has_path() == false)
+		if (message.GetExtension(Proto::schemaitem).has_path() == false)
 		{
-			assert(message.schemaitem().has_path());
+			assert(message.GetExtension(Proto::schemaitem).has_path());
 			return false;
 		}
 
-		const Proto::SchemaItemPath& path = message.schemaitem().path();
+		const Proto::SchemaItemPath& path = message.GetExtension(Proto::schemaitem).path();
 
 		m_weight = path.weight();
 		m_lineColor = QColor::fromRgba(path.linecolor());

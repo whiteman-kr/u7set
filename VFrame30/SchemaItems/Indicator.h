@@ -2,6 +2,11 @@
 #include "Settings.h"
 #include "../VFrameTools.h"
 
+namespace Proto
+{
+	class SchemaItemIndicator;
+}
+
 namespace VFrame30
 {
 	class SchemaItemIndicator;

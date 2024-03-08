@@ -1583,8 +1583,8 @@ void EquipmentTabPage::exportPreset()
 	//
 	::Proto::ExportedDevicePreset2 message;
 
-	::Proto::EnvelopeSet2* setMessage = message.mutable_items();
-	::Proto::EnvelopeSetShortDescription2* descriptionMessage = message.mutable_description();
+	::Proto::EnvelopeSet* setMessage = message.mutable_items();
+	::Proto::EnvelopeSetShortDescription* descriptionMessage = message.mutable_description();
 
 	descriptionMessage->set_projectname(db()->currentProject().projectName().toStdString());
 	descriptionMessage->set_username(db()->currentUser().username().toStdString());
@@ -1596,7 +1596,7 @@ void EquipmentTabPage::exportPreset()
 
 	for (std::shared_ptr<Hardware::DeviceObject>& device : latestDevices)
 	{
-		::Proto::Envelope2* protoDevice = setMessage->add_items();
+		::Proto::Envelope* protoDevice = setMessage->add_items();
 		device->SaveObjectTree(protoDevice);
 
 		descriptionMessage->add_classnamehash(protoDevice->classnamehash());
@@ -1694,7 +1694,7 @@ void EquipmentTabPage::importPreset()
 	DialogImportPreset d(message, this);
 	if (d.exec() == QDialog::Accepted)
 	{
-		::Proto::EnvelopeSet2 chosenItems = d.chosenItems();
+		::Proto::EnvelopeSet chosenItems = d.chosenItems();
 		if (chosenItems.items_size() != 0)
 		{
 			m_equipmentView->pasteDevices(chosenItems, message.description(), false);

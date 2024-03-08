@@ -36,16 +36,16 @@
 //	bool SchemaItemFrame::SaveData(Proto::Envelope* message) const
 //	{
 //		bool result = PosRectImpl::SaveData(message);
-//		if (result == false || message->has_schemaitem() == false)
+//		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 //		{
 //			assert(result);
-//			assert(message->has_schemaitem());
+//			assert(message->HasExtension(Proto::schemaitem));
 //			return false;
 //		}
 		
 //		// --
 //		//
-//		Proto::SchemaItemFrame* frameMessage = message->mutable_schemaitem()->mutable_frame();
+//		Proto::SchemaItemFrame* frameMessage = message->MutableExtension(Proto::schemaitem)->mutable_frame();
 
 //		frameMessage->set_schemaid(m_schemaId.toStdString());
 //		frameMessage->set_allowscale(m_allowScale);
@@ -56,9 +56,9 @@
 
 //	bool SchemaItemFrame::LoadData(const Proto::Envelope& message)
 //	{
-//		if (message.has_schemaitem() == false)
+//		if (message.HasExtension(Proto::schemaitem) == false)
 //		{
-//			assert(message.has_schemaitem());
+//			assert(message.HasExtension(Proto::schemaitem));
 //			return false;
 //		}
 
@@ -72,13 +72,13 @@
 
 //		// --
 //		//
-//		if (message.schemaitem().has_frame() == false)
+//		if (message.GetExtension(Proto::schemaitem).has_frame() == false)
 //		{
-//			assert(message.schemaitem().has_frame());
+//			assert(message.GetExtension(Proto::schemaitem).has_frame());
 //			return false;
 //		}
 
-//		const Proto::SchemaItemFrame& frameMessage = message.schemaitem().frame();
+//		const Proto::SchemaItemFrame& frameMessage = message.GetExtension(Proto::schemaitem).frame();
 
 //		m_schemaId = QString::fromStdString(frameMessage.schemaid());
 //		m_allowScale = frameMessage.allowscale();

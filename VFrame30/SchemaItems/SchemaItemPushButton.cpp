@@ -104,19 +104,21 @@ namespace VFrame30
 	bool SchemaItemPushButton::SaveData(Proto::Envelope* message) const
 	{
 		bool result = SchemaItemControl::SaveData(message);
-		if (result == false || message->has_schemaitem() == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 
-		assert(message->schemaitem().has_posrectimpl());
-		assert(message->schemaitem().has_control());
+		auto schemaItemMessage = message->MutableExtension(Proto::schemaitem);
+
+		assert(schemaItemMessage->has_posrectimpl());
+		assert(schemaItemMessage->has_control());
 		
 		// --
 		//
-		Proto::SchemaItemPushButton* pushButtonMessage = message->mutable_schemaitem()->mutable_pushbutton();
+		Proto::SchemaItemPushButton* pushButtonMessage = schemaItemMessage->mutable_pushbutton();
 
 		pushButtonMessage->set_text(m_text.toStdString());
 
@@ -138,22 +140,22 @@ namespace VFrame30
 
 	bool SchemaItemPushButton::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemaitem() == false)
+		if (message.HasExtension(Proto::schemaitem) == false)
 		{
-			assert(message.has_schemaitem());
+			assert(message.HasExtension(Proto::schemaitem));
 			return false;
 		}
 
 		// --
 		//
 		bool result = SchemaItemControl::LoadData(message);
-		if (result == false || message.schemaitem().has_control() == false)
+		if (result == false || message.GetExtension(Proto::schemaitem).has_control() == false)
 		{
-			assert(message.schemaitem().has_control());
+			assert(message.GetExtension(Proto::schemaitem).has_control());
 			return false;
 		}
 
-		const Proto::SchemaItemPushButton& pushButtonMessagemessage = message.schemaitem().pushbutton();
+		const Proto::SchemaItemPushButton& pushButtonMessagemessage = message.GetExtension(Proto::schemaitem).pushbutton();
 
 		setText(QString::fromStdString(pushButtonMessagemessage.text()));							// Text setters can have some string optimization for default values
 

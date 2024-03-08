@@ -8,7 +8,7 @@ namespace Hardware
 {
 	class Connection :
 		public PropertyObject,
-		public Proto::ObjectSerialization<Connection, Proto::Envelope2>
+		public Proto::ObjectSerialization<Connection, Proto::Envelope>
 	{
 		Q_OBJECT
 
@@ -35,19 +35,19 @@ namespace Hardware
 		// Serialization
 		//
 	public:
-		friend Proto::ObjectSerialization<Connection, Proto::Envelope2>;	// for call CreateObject from Proto::ObjectSerialization
+		friend Proto::ObjectSerialization<Connection, Proto::Envelope>;	// for call CreateObject from Proto::ObjectSerialization
 
 	public:
 		// Implementing Proto::ObjectSerialization<DeviceObject>::SaveData, LoadData
 		//
-		virtual bool SaveData(Proto::Envelope2* envelope) const override;
-		virtual bool LoadData(const Proto::Envelope2& envelope) override;
+		virtual bool SaveData(Proto::Envelope* envelope) const override;
+		virtual bool LoadData(const Proto::Envelope& envelope) override;
 
 	private:
 		// Use this function only while serialization, as when object is created is not fully initialized
 		// and must be read before use
 		//
-		static std::shared_ptr<Connection> CreateObject(const Proto::Envelope2& envelope);
+		static std::shared_ptr<Connection> CreateObject(const Proto::Envelope& envelope);
 
 	public:
         // Load connection from deprecated XML document

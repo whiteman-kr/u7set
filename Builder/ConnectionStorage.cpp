@@ -153,7 +153,7 @@ namespace Builder
 			return false;
 		}
 
-		Proto::Envelope2 message;
+		Proto::Envelope message;
 		connection->Save(&message);
 
 		QByteArray data;

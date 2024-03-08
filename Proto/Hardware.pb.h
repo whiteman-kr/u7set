@@ -46,7 +46,7 @@
 #include <google/protobuf/extension_set.h>  // IWYU pragma: export
 #include <google/protobuf/unknown_field_set.h>
 #include "Common.pb.h"
-#include "Envelope2.pb.h"
+#include "Envelope.pb.h"
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
 #define PROTOBUF_INTERNAL_EXPORT_Hardware_2eproto
@@ -71,83 +71,83 @@ struct TableStruct_Hardware_2eproto {
 extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_Hardware_2eproto;
 ::PROTOBUF_NAMESPACE_ID::Metadata descriptor_table_Hardware_2eproto_metadata_getter(int index);
 namespace Proto {
-class Connection2;
-struct Connection2DefaultTypeInternal;
-extern Connection2DefaultTypeInternal _Connection2_default_instance_;
-class DeviceAppSignal2;
-struct DeviceAppSignal2DefaultTypeInternal;
-extern DeviceAppSignal2DefaultTypeInternal _DeviceAppSignal2_default_instance_;
-class DeviceChassis2;
-struct DeviceChassis2DefaultTypeInternal;
-extern DeviceChassis2DefaultTypeInternal _DeviceChassis2_default_instance_;
-class DeviceController2;
-struct DeviceController2DefaultTypeInternal;
-extern DeviceController2DefaultTypeInternal _DeviceController2_default_instance_;
-class DeviceDiagSignal2;
-struct DeviceDiagSignal2DefaultTypeInternal;
-extern DeviceDiagSignal2DefaultTypeInternal _DeviceDiagSignal2_default_instance_;
-class DeviceModule2;
-struct DeviceModule2DefaultTypeInternal;
-extern DeviceModule2DefaultTypeInternal _DeviceModule2_default_instance_;
-class DeviceObject2;
-struct DeviceObject2DefaultTypeInternal;
-extern DeviceObject2DefaultTypeInternal _DeviceObject2_default_instance_;
-class DeviceRack2;
-struct DeviceRack2DefaultTypeInternal;
-extern DeviceRack2DefaultTypeInternal _DeviceRack2_default_instance_;
-class DeviceRoot2;
-struct DeviceRoot2DefaultTypeInternal;
-extern DeviceRoot2DefaultTypeInternal _DeviceRoot2_default_instance_;
-class DeviceSystem2;
-struct DeviceSystem2DefaultTypeInternal;
-extern DeviceSystem2DefaultTypeInternal _DeviceSystem2_default_instance_;
-class DiagSignalType2;
-struct DiagSignalType2DefaultTypeInternal;
-extern DiagSignalType2DefaultTypeInternal _DiagSignalType2_default_instance_;
-class Software2;
-struct Software2DefaultTypeInternal;
-extern Software2DefaultTypeInternal _Software2_default_instance_;
-class Workstation2;
-struct Workstation2DefaultTypeInternal;
-extern Workstation2DefaultTypeInternal _Workstation2_default_instance_;
+class Connection;
+struct ConnectionDefaultTypeInternal;
+extern ConnectionDefaultTypeInternal _Connection_default_instance_;
+class DeviceAppSignal;
+struct DeviceAppSignalDefaultTypeInternal;
+extern DeviceAppSignalDefaultTypeInternal _DeviceAppSignal_default_instance_;
+class DeviceChassis;
+struct DeviceChassisDefaultTypeInternal;
+extern DeviceChassisDefaultTypeInternal _DeviceChassis_default_instance_;
+class DeviceController;
+struct DeviceControllerDefaultTypeInternal;
+extern DeviceControllerDefaultTypeInternal _DeviceController_default_instance_;
+class DeviceDiagSignal;
+struct DeviceDiagSignalDefaultTypeInternal;
+extern DeviceDiagSignalDefaultTypeInternal _DeviceDiagSignal_default_instance_;
+class DeviceModule;
+struct DeviceModuleDefaultTypeInternal;
+extern DeviceModuleDefaultTypeInternal _DeviceModule_default_instance_;
+class DeviceObject;
+struct DeviceObjectDefaultTypeInternal;
+extern DeviceObjectDefaultTypeInternal _DeviceObject_default_instance_;
+class DeviceRack;
+struct DeviceRackDefaultTypeInternal;
+extern DeviceRackDefaultTypeInternal _DeviceRack_default_instance_;
+class DeviceRoot;
+struct DeviceRootDefaultTypeInternal;
+extern DeviceRootDefaultTypeInternal _DeviceRoot_default_instance_;
+class DeviceSystem;
+struct DeviceSystemDefaultTypeInternal;
+extern DeviceSystemDefaultTypeInternal _DeviceSystem_default_instance_;
+class DiagSignalType;
+struct DiagSignalTypeDefaultTypeInternal;
+extern DiagSignalTypeDefaultTypeInternal _DiagSignalType_default_instance_;
+class Software;
+struct SoftwareDefaultTypeInternal;
+extern SoftwareDefaultTypeInternal _Software_default_instance_;
+class Workstation;
+struct WorkstationDefaultTypeInternal;
+extern WorkstationDefaultTypeInternal _Workstation_default_instance_;
 }  // namespace Proto
 PROTOBUF_NAMESPACE_OPEN
-template<> ::Proto::Connection2* Arena::CreateMaybeMessage<::Proto::Connection2>(Arena*);
-template<> ::Proto::DeviceAppSignal2* Arena::CreateMaybeMessage<::Proto::DeviceAppSignal2>(Arena*);
-template<> ::Proto::DeviceChassis2* Arena::CreateMaybeMessage<::Proto::DeviceChassis2>(Arena*);
-template<> ::Proto::DeviceController2* Arena::CreateMaybeMessage<::Proto::DeviceController2>(Arena*);
-template<> ::Proto::DeviceDiagSignal2* Arena::CreateMaybeMessage<::Proto::DeviceDiagSignal2>(Arena*);
-template<> ::Proto::DeviceModule2* Arena::CreateMaybeMessage<::Proto::DeviceModule2>(Arena*);
-template<> ::Proto::DeviceObject2* Arena::CreateMaybeMessage<::Proto::DeviceObject2>(Arena*);
-template<> ::Proto::DeviceRack2* Arena::CreateMaybeMessage<::Proto::DeviceRack2>(Arena*);
-template<> ::Proto::DeviceRoot2* Arena::CreateMaybeMessage<::Proto::DeviceRoot2>(Arena*);
-template<> ::Proto::DeviceSystem2* Arena::CreateMaybeMessage<::Proto::DeviceSystem2>(Arena*);
-template<> ::Proto::DiagSignalType2* Arena::CreateMaybeMessage<::Proto::DiagSignalType2>(Arena*);
-template<> ::Proto::Software2* Arena::CreateMaybeMessage<::Proto::Software2>(Arena*);
-template<> ::Proto::Workstation2* Arena::CreateMaybeMessage<::Proto::Workstation2>(Arena*);
+template<> ::Proto::Connection* Arena::CreateMaybeMessage<::Proto::Connection>(Arena*);
+template<> ::Proto::DeviceAppSignal* Arena::CreateMaybeMessage<::Proto::DeviceAppSignal>(Arena*);
+template<> ::Proto::DeviceChassis* Arena::CreateMaybeMessage<::Proto::DeviceChassis>(Arena*);
+template<> ::Proto::DeviceController* Arena::CreateMaybeMessage<::Proto::DeviceController>(Arena*);
+template<> ::Proto::DeviceDiagSignal* Arena::CreateMaybeMessage<::Proto::DeviceDiagSignal>(Arena*);
+template<> ::Proto::DeviceModule* Arena::CreateMaybeMessage<::Proto::DeviceModule>(Arena*);
+template<> ::Proto::DeviceObject* Arena::CreateMaybeMessage<::Proto::DeviceObject>(Arena*);
+template<> ::Proto::DeviceRack* Arena::CreateMaybeMessage<::Proto::DeviceRack>(Arena*);
+template<> ::Proto::DeviceRoot* Arena::CreateMaybeMessage<::Proto::DeviceRoot>(Arena*);
+template<> ::Proto::DeviceSystem* Arena::CreateMaybeMessage<::Proto::DeviceSystem>(Arena*);
+template<> ::Proto::DiagSignalType* Arena::CreateMaybeMessage<::Proto::DiagSignalType>(Arena*);
+template<> ::Proto::Software* Arena::CreateMaybeMessage<::Proto::Software>(Arena*);
+template<> ::Proto::Workstation* Arena::CreateMaybeMessage<::Proto::Workstation>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 namespace Proto {
 
 // ===================================================================
 
-class DeviceObject2 PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.DeviceObject2) */ {
+class DeviceObject PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.DeviceObject) */ {
  public:
-  inline DeviceObject2() : DeviceObject2(nullptr) {}
-  virtual ~DeviceObject2();
-  explicit constexpr DeviceObject2(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+  inline DeviceObject() : DeviceObject(nullptr) {}
+  virtual ~DeviceObject();
+  explicit constexpr DeviceObject(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
 
-  DeviceObject2(const DeviceObject2& from);
-  DeviceObject2(DeviceObject2&& from) noexcept
-    : DeviceObject2() {
+  DeviceObject(const DeviceObject& from);
+  DeviceObject(DeviceObject&& from) noexcept
+    : DeviceObject() {
     *this = ::std::move(from);
   }
 
-  inline DeviceObject2& operator=(const DeviceObject2& from) {
+  inline DeviceObject& operator=(const DeviceObject& from) {
     CopyFrom(from);
     return *this;
   }
-  inline DeviceObject2& operator=(DeviceObject2&& from) noexcept {
+  inline DeviceObject& operator=(DeviceObject&& from) noexcept {
     if (GetArena() == from.GetArena()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -172,20 +172,20 @@ class DeviceObject2 PROTOBUF_FINAL :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return GetMetadataStatic().reflection;
   }
-  static const DeviceObject2& default_instance() {
+  static const DeviceObject& default_instance() {
     return *internal_default_instance();
   }
-  static inline const DeviceObject2* internal_default_instance() {
-    return reinterpret_cast<const DeviceObject2*>(
-               &_DeviceObject2_default_instance_);
+  static inline const DeviceObject* internal_default_instance() {
+    return reinterpret_cast<const DeviceObject*>(
+               &_DeviceObject_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     0;
 
-  friend void swap(DeviceObject2& a, DeviceObject2& b) {
+  friend void swap(DeviceObject& a, DeviceObject& b) {
     a.Swap(&b);
   }
-  inline void Swap(DeviceObject2* other) {
+  inline void Swap(DeviceObject* other) {
     if (other == this) return;
     if (GetArena() == other->GetArena()) {
       InternalSwap(other);
@@ -193,7 +193,7 @@ class DeviceObject2 PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(DeviceObject2* other) {
+  void UnsafeArenaSwap(DeviceObject* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetArena() == other->GetArena());
     InternalSwap(other);
@@ -201,17 +201,17 @@ class DeviceObject2 PROTOBUF_FINAL :
 
   // implements Message ----------------------------------------------
 
-  inline DeviceObject2* New() const final {
-    return CreateMaybeMessage<DeviceObject2>(nullptr);
+  inline DeviceObject* New() const final {
+    return CreateMaybeMessage<DeviceObject>(nullptr);
   }
 
-  DeviceObject2* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<DeviceObject2>(arena);
+  DeviceObject* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<DeviceObject>(arena);
   }
   void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const DeviceObject2& from);
-  void MergeFrom(const DeviceObject2& from);
+  void CopyFrom(const DeviceObject& from);
+  void MergeFrom(const DeviceObject& from);
   PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
   bool IsInitialized() const final;
 
@@ -225,13 +225,13 @@ class DeviceObject2 PROTOBUF_FINAL :
   inline void SharedCtor();
   inline void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(DeviceObject2* other);
+  void InternalSwap(DeviceObject* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "Proto.DeviceObject2";
+    return "Proto.DeviceObject";
   }
   protected:
-  explicit DeviceObject2(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  explicit DeviceObject(::PROTOBUF_NAMESPACE_ID::Arena* arena);
   private:
   static void ArenaDtor(void* object);
   inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
@@ -320,22 +320,22 @@ class DeviceObject2 PROTOBUF_FINAL :
   std::string* _internal_add_tags();
   public:
 
-  // repeated .Proto.Envelope2 children = 200;
+  // repeated .Proto.Envelope children = 200;
   int children_size() const;
   private:
   int _internal_children_size() const;
   public:
   void clear_children();
-  ::Proto::Envelope2* mutable_children(int index);
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::Envelope2 >*
+  ::Proto::Envelope* mutable_children(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::Envelope >*
       mutable_children();
   private:
-  const ::Proto::Envelope2& _internal_children(int index) const;
-  ::Proto::Envelope2* _internal_add_children();
+  const ::Proto::Envelope& _internal_children(int index) const;
+  ::Proto::Envelope* _internal_add_children();
   public:
-  const ::Proto::Envelope2& children(int index) const;
-  ::Proto::Envelope2* add_children();
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::Envelope2 >&
+  const ::Proto::Envelope& children(int index) const;
+  ::Proto::Envelope* add_children();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::Envelope >&
       children() const;
 
   // optional string specific_properties_struct = 6;
@@ -486,185 +486,185 @@ class DeviceObject2 PROTOBUF_FINAL :
       ::Proto::Uuid* presetobjectuuid);
   ::Proto::Uuid* unsafe_arena_release_presetobjectuuid();
 
-  // optional .Proto.DeviceRoot2 Root = 100;
+  // optional .Proto.DeviceRoot Root = 100;
   bool has_root() const;
   private:
   bool _internal_has_root() const;
   public:
   void clear_root();
-  const ::Proto::DeviceRoot2& root() const;
-  ::Proto::DeviceRoot2* release_root();
-  ::Proto::DeviceRoot2* mutable_root();
-  void set_allocated_root(::Proto::DeviceRoot2* root);
+  const ::Proto::DeviceRoot& root() const;
+  ::Proto::DeviceRoot* release_root();
+  ::Proto::DeviceRoot* mutable_root();
+  void set_allocated_root(::Proto::DeviceRoot* root);
   private:
-  const ::Proto::DeviceRoot2& _internal_root() const;
-  ::Proto::DeviceRoot2* _internal_mutable_root();
+  const ::Proto::DeviceRoot& _internal_root() const;
+  ::Proto::DeviceRoot* _internal_mutable_root();
   public:
   void unsafe_arena_set_allocated_root(
-      ::Proto::DeviceRoot2* root);
-  ::Proto::DeviceRoot2* unsafe_arena_release_root();
+      ::Proto::DeviceRoot* root);
+  ::Proto::DeviceRoot* unsafe_arena_release_root();
 
-  // optional .Proto.DeviceSystem2 System = 101;
+  // optional .Proto.DeviceSystem System = 101;
   bool has_system() const;
   private:
   bool _internal_has_system() const;
   public:
   void clear_system();
-  const ::Proto::DeviceSystem2& system() const;
-  ::Proto::DeviceSystem2* release_system();
-  ::Proto::DeviceSystem2* mutable_system();
-  void set_allocated_system(::Proto::DeviceSystem2* system);
+  const ::Proto::DeviceSystem& system() const;
+  ::Proto::DeviceSystem* release_system();
+  ::Proto::DeviceSystem* mutable_system();
+  void set_allocated_system(::Proto::DeviceSystem* system);
   private:
-  const ::Proto::DeviceSystem2& _internal_system() const;
-  ::Proto::DeviceSystem2* _internal_mutable_system();
+  const ::Proto::DeviceSystem& _internal_system() const;
+  ::Proto::DeviceSystem* _internal_mutable_system();
   public:
   void unsafe_arena_set_allocated_system(
-      ::Proto::DeviceSystem2* system);
-  ::Proto::DeviceSystem2* unsafe_arena_release_system();
+      ::Proto::DeviceSystem* system);
+  ::Proto::DeviceSystem* unsafe_arena_release_system();
 
-  // optional .Proto.DeviceRack2 Rack = 102;
+  // optional .Proto.DeviceRack Rack = 102;
   bool has_rack() const;
   private:
   bool _internal_has_rack() const;
   public:
   void clear_rack();
-  const ::Proto::DeviceRack2& rack() const;
-  ::Proto::DeviceRack2* release_rack();
-  ::Proto::DeviceRack2* mutable_rack();
-  void set_allocated_rack(::Proto::DeviceRack2* rack);
+  const ::Proto::DeviceRack& rack() const;
+  ::Proto::DeviceRack* release_rack();
+  ::Proto::DeviceRack* mutable_rack();
+  void set_allocated_rack(::Proto::DeviceRack* rack);
   private:
-  const ::Proto::DeviceRack2& _internal_rack() const;
-  ::Proto::DeviceRack2* _internal_mutable_rack();
+  const ::Proto::DeviceRack& _internal_rack() const;
+  ::Proto::DeviceRack* _internal_mutable_rack();
   public:
   void unsafe_arena_set_allocated_rack(
-      ::Proto::DeviceRack2* rack);
-  ::Proto::DeviceRack2* unsafe_arena_release_rack();
+      ::Proto::DeviceRack* rack);
+  ::Proto::DeviceRack* unsafe_arena_release_rack();
 
-  // optional .Proto.DeviceChassis2 Chassis = 103;
+  // optional .Proto.DeviceChassis Chassis = 103;
   bool has_chassis() const;
   private:
   bool _internal_has_chassis() const;
   public:
   void clear_chassis();
-  const ::Proto::DeviceChassis2& chassis() const;
-  ::Proto::DeviceChassis2* release_chassis();
-  ::Proto::DeviceChassis2* mutable_chassis();
-  void set_allocated_chassis(::Proto::DeviceChassis2* chassis);
+  const ::Proto::DeviceChassis& chassis() const;
+  ::Proto::DeviceChassis* release_chassis();
+  ::Proto::DeviceChassis* mutable_chassis();
+  void set_allocated_chassis(::Proto::DeviceChassis* chassis);
   private:
-  const ::Proto::DeviceChassis2& _internal_chassis() const;
-  ::Proto::DeviceChassis2* _internal_mutable_chassis();
+  const ::Proto::DeviceChassis& _internal_chassis() const;
+  ::Proto::DeviceChassis* _internal_mutable_chassis();
   public:
   void unsafe_arena_set_allocated_chassis(
-      ::Proto::DeviceChassis2* chassis);
-  ::Proto::DeviceChassis2* unsafe_arena_release_chassis();
+      ::Proto::DeviceChassis* chassis);
+  ::Proto::DeviceChassis* unsafe_arena_release_chassis();
 
-  // optional .Proto.DeviceModule2 Module = 104;
+  // optional .Proto.DeviceModule Module = 104;
   bool has_module() const;
   private:
   bool _internal_has_module() const;
   public:
   void clear_module();
-  const ::Proto::DeviceModule2& module() const;
-  ::Proto::DeviceModule2* release_module();
-  ::Proto::DeviceModule2* mutable_module();
-  void set_allocated_module(::Proto::DeviceModule2* module);
+  const ::Proto::DeviceModule& module() const;
+  ::Proto::DeviceModule* release_module();
+  ::Proto::DeviceModule* mutable_module();
+  void set_allocated_module(::Proto::DeviceModule* module);
   private:
-  const ::Proto::DeviceModule2& _internal_module() const;
-  ::Proto::DeviceModule2* _internal_mutable_module();
+  const ::Proto::DeviceModule& _internal_module() const;
+  ::Proto::DeviceModule* _internal_mutable_module();
   public:
   void unsafe_arena_set_allocated_module(
-      ::Proto::DeviceModule2* module);
-  ::Proto::DeviceModule2* unsafe_arena_release_module();
+      ::Proto::DeviceModule* module);
+  ::Proto::DeviceModule* unsafe_arena_release_module();
 
-  // optional .Proto.DeviceController2 Controller = 105;
+  // optional .Proto.DeviceController Controller = 105;
   bool has_controller() const;
   private:
   bool _internal_has_controller() const;
   public:
   void clear_controller();
-  const ::Proto::DeviceController2& controller() const;
-  ::Proto::DeviceController2* release_controller();
-  ::Proto::DeviceController2* mutable_controller();
-  void set_allocated_controller(::Proto::DeviceController2* controller);
+  const ::Proto::DeviceController& controller() const;
+  ::Proto::DeviceController* release_controller();
+  ::Proto::DeviceController* mutable_controller();
+  void set_allocated_controller(::Proto::DeviceController* controller);
   private:
-  const ::Proto::DeviceController2& _internal_controller() const;
-  ::Proto::DeviceController2* _internal_mutable_controller();
+  const ::Proto::DeviceController& _internal_controller() const;
+  ::Proto::DeviceController* _internal_mutable_controller();
   public:
   void unsafe_arena_set_allocated_controller(
-      ::Proto::DeviceController2* controller);
-  ::Proto::DeviceController2* unsafe_arena_release_controller();
+      ::Proto::DeviceController* controller);
+  ::Proto::DeviceController* unsafe_arena_release_controller();
 
-  // optional .Proto.DeviceAppSignal2 AppSignal = 106;
+  // optional .Proto.DeviceAppSignal AppSignal = 106;
   bool has_appsignal() const;
   private:
   bool _internal_has_appsignal() const;
   public:
   void clear_appsignal();
-  const ::Proto::DeviceAppSignal2& appsignal() const;
-  ::Proto::DeviceAppSignal2* release_appsignal();
-  ::Proto::DeviceAppSignal2* mutable_appsignal();
-  void set_allocated_appsignal(::Proto::DeviceAppSignal2* appsignal);
+  const ::Proto::DeviceAppSignal& appsignal() const;
+  ::Proto::DeviceAppSignal* release_appsignal();
+  ::Proto::DeviceAppSignal* mutable_appsignal();
+  void set_allocated_appsignal(::Proto::DeviceAppSignal* appsignal);
   private:
-  const ::Proto::DeviceAppSignal2& _internal_appsignal() const;
-  ::Proto::DeviceAppSignal2* _internal_mutable_appsignal();
+  const ::Proto::DeviceAppSignal& _internal_appsignal() const;
+  ::Proto::DeviceAppSignal* _internal_mutable_appsignal();
   public:
   void unsafe_arena_set_allocated_appsignal(
-      ::Proto::DeviceAppSignal2* appsignal);
-  ::Proto::DeviceAppSignal2* unsafe_arena_release_appsignal();
+      ::Proto::DeviceAppSignal* appsignal);
+  ::Proto::DeviceAppSignal* unsafe_arena_release_appsignal();
 
-  // optional .Proto.Workstation2 Workstation = 107;
+  // optional .Proto.Workstation Workstation = 107;
   bool has_workstation() const;
   private:
   bool _internal_has_workstation() const;
   public:
   void clear_workstation();
-  const ::Proto::Workstation2& workstation() const;
-  ::Proto::Workstation2* release_workstation();
-  ::Proto::Workstation2* mutable_workstation();
-  void set_allocated_workstation(::Proto::Workstation2* workstation);
+  const ::Proto::Workstation& workstation() const;
+  ::Proto::Workstation* release_workstation();
+  ::Proto::Workstation* mutable_workstation();
+  void set_allocated_workstation(::Proto::Workstation* workstation);
   private:
-  const ::Proto::Workstation2& _internal_workstation() const;
-  ::Proto::Workstation2* _internal_mutable_workstation();
+  const ::Proto::Workstation& _internal_workstation() const;
+  ::Proto::Workstation* _internal_mutable_workstation();
   public:
   void unsafe_arena_set_allocated_workstation(
-      ::Proto::Workstation2* workstation);
-  ::Proto::Workstation2* unsafe_arena_release_workstation();
+      ::Proto::Workstation* workstation);
+  ::Proto::Workstation* unsafe_arena_release_workstation();
 
-  // optional .Proto.Software2 Software = 108;
+  // optional .Proto.Software Software = 108;
   bool has_software() const;
   private:
   bool _internal_has_software() const;
   public:
   void clear_software();
-  const ::Proto::Software2& software() const;
-  ::Proto::Software2* release_software();
-  ::Proto::Software2* mutable_software();
-  void set_allocated_software(::Proto::Software2* software);
+  const ::Proto::Software& software() const;
+  ::Proto::Software* release_software();
+  ::Proto::Software* mutable_software();
+  void set_allocated_software(::Proto::Software* software);
   private:
-  const ::Proto::Software2& _internal_software() const;
-  ::Proto::Software2* _internal_mutable_software();
+  const ::Proto::Software& _internal_software() const;
+  ::Proto::Software* _internal_mutable_software();
   public:
   void unsafe_arena_set_allocated_software(
-      ::Proto::Software2* software);
-  ::Proto::Software2* unsafe_arena_release_software();
+      ::Proto::Software* software);
+  ::Proto::Software* unsafe_arena_release_software();
 
-  // optional .Proto.DeviceDiagSignal2 DiagSignal = 109;
+  // optional .Proto.DeviceDiagSignal DiagSignal = 109;
   bool has_diagsignal() const;
   private:
   bool _internal_has_diagsignal() const;
   public:
   void clear_diagsignal();
-  const ::Proto::DeviceDiagSignal2& diagsignal() const;
-  ::Proto::DeviceDiagSignal2* release_diagsignal();
-  ::Proto::DeviceDiagSignal2* mutable_diagsignal();
-  void set_allocated_diagsignal(::Proto::DeviceDiagSignal2* diagsignal);
+  const ::Proto::DeviceDiagSignal& diagsignal() const;
+  ::Proto::DeviceDiagSignal* release_diagsignal();
+  ::Proto::DeviceDiagSignal* mutable_diagsignal();
+  void set_allocated_diagsignal(::Proto::DeviceDiagSignal* diagsignal);
   private:
-  const ::Proto::DeviceDiagSignal2& _internal_diagsignal() const;
-  ::Proto::DeviceDiagSignal2* _internal_mutable_diagsignal();
+  const ::Proto::DeviceDiagSignal& _internal_diagsignal() const;
+  ::Proto::DeviceDiagSignal* _internal_mutable_diagsignal();
   public:
   void unsafe_arena_set_allocated_diagsignal(
-      ::Proto::DeviceDiagSignal2* diagsignal);
-  ::Proto::DeviceDiagSignal2* unsafe_arena_release_diagsignal();
+      ::Proto::DeviceDiagSignal* diagsignal);
+  ::Proto::DeviceDiagSignal* unsafe_arena_release_diagsignal();
 
   // optional int32 place = 5 [default = 0];
   bool has_place() const;
@@ -744,7 +744,7 @@ class DeviceObject2 PROTOBUF_FINAL :
   void _internal_set_presetversion(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
-  // @@protoc_insertion_point(class_scope:Proto.DeviceObject2)
+  // @@protoc_insertion_point(class_scope:Proto.DeviceObject)
  private:
   class _Internal;
 
@@ -758,7 +758,7 @@ class DeviceObject2 PROTOBUF_FINAL :
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::Property > properties_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> tags_;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::Envelope2 > children_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::Envelope > children_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr specific_properties_struct_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr presetprotectedproperties_;
   ::Proto::Uuid* uuid_;
@@ -767,16 +767,16 @@ class DeviceObject2 PROTOBUF_FINAL :
   ::Proto::wstring* childrestriction_;
   ::Proto::wstring* presetname_;
   ::Proto::Uuid* presetobjectuuid_;
-  ::Proto::DeviceRoot2* root_;
-  ::Proto::DeviceSystem2* system_;
-  ::Proto::DeviceRack2* rack_;
-  ::Proto::DeviceChassis2* chassis_;
-  ::Proto::DeviceModule2* module_;
-  ::Proto::DeviceController2* controller_;
-  ::Proto::DeviceAppSignal2* appsignal_;
-  ::Proto::Workstation2* workstation_;
-  ::Proto::Software2* software_;
-  ::Proto::DeviceDiagSignal2* diagsignal_;
+  ::Proto::DeviceRoot* root_;
+  ::Proto::DeviceSystem* system_;
+  ::Proto::DeviceRack* rack_;
+  ::Proto::DeviceChassis* chassis_;
+  ::Proto::DeviceModule* module_;
+  ::Proto::DeviceController* controller_;
+  ::Proto::DeviceAppSignal* appsignal_;
+  ::Proto::Workstation* workstation_;
+  ::Proto::Software* software_;
+  ::Proto::DeviceDiagSignal* diagsignal_;
   ::PROTOBUF_NAMESPACE_ID::int32 place_;
   bool excludefrombuild_;
   bool preset_;
@@ -787,24 +787,24 @@ class DeviceObject2 PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
-class DeviceRoot2 PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.DeviceRoot2) */ {
+class DeviceRoot PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.DeviceRoot) */ {
  public:
-  inline DeviceRoot2() : DeviceRoot2(nullptr) {}
-  virtual ~DeviceRoot2();
-  explicit constexpr DeviceRoot2(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+  inline DeviceRoot() : DeviceRoot(nullptr) {}
+  virtual ~DeviceRoot();
+  explicit constexpr DeviceRoot(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
 
-  DeviceRoot2(const DeviceRoot2& from);
-  DeviceRoot2(DeviceRoot2&& from) noexcept
-    : DeviceRoot2() {
+  DeviceRoot(const DeviceRoot& from);
+  DeviceRoot(DeviceRoot&& from) noexcept
+    : DeviceRoot() {
     *this = ::std::move(from);
   }
 
-  inline DeviceRoot2& operator=(const DeviceRoot2& from) {
+  inline DeviceRoot& operator=(const DeviceRoot& from) {
     CopyFrom(from);
     return *this;
   }
-  inline DeviceRoot2& operator=(DeviceRoot2&& from) noexcept {
+  inline DeviceRoot& operator=(DeviceRoot&& from) noexcept {
     if (GetArena() == from.GetArena()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -829,20 +829,20 @@ class DeviceRoot2 PROTOBUF_FINAL :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return GetMetadataStatic().reflection;
   }
-  static const DeviceRoot2& default_instance() {
+  static const DeviceRoot& default_instance() {
     return *internal_default_instance();
   }
-  static inline const DeviceRoot2* internal_default_instance() {
-    return reinterpret_cast<const DeviceRoot2*>(
-               &_DeviceRoot2_default_instance_);
+  static inline const DeviceRoot* internal_default_instance() {
+    return reinterpret_cast<const DeviceRoot*>(
+               &_DeviceRoot_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     1;
 
-  friend void swap(DeviceRoot2& a, DeviceRoot2& b) {
+  friend void swap(DeviceRoot& a, DeviceRoot& b) {
     a.Swap(&b);
   }
-  inline void Swap(DeviceRoot2* other) {
+  inline void Swap(DeviceRoot* other) {
     if (other == this) return;
     if (GetArena() == other->GetArena()) {
       InternalSwap(other);
@@ -850,7 +850,7 @@ class DeviceRoot2 PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(DeviceRoot2* other) {
+  void UnsafeArenaSwap(DeviceRoot* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetArena() == other->GetArena());
     InternalSwap(other);
@@ -858,17 +858,17 @@ class DeviceRoot2 PROTOBUF_FINAL :
 
   // implements Message ----------------------------------------------
 
-  inline DeviceRoot2* New() const final {
-    return CreateMaybeMessage<DeviceRoot2>(nullptr);
+  inline DeviceRoot* New() const final {
+    return CreateMaybeMessage<DeviceRoot>(nullptr);
   }
 
-  DeviceRoot2* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<DeviceRoot2>(arena);
+  DeviceRoot* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<DeviceRoot>(arena);
   }
   void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const DeviceRoot2& from);
-  void MergeFrom(const DeviceRoot2& from);
+  void CopyFrom(const DeviceRoot& from);
+  void MergeFrom(const DeviceRoot& from);
   PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
   bool IsInitialized() const final;
 
@@ -882,13 +882,13 @@ class DeviceRoot2 PROTOBUF_FINAL :
   inline void SharedCtor();
   inline void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(DeviceRoot2* other);
+  void InternalSwap(DeviceRoot* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "Proto.DeviceRoot2";
+    return "Proto.DeviceRoot";
   }
   protected:
-  explicit DeviceRoot2(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  explicit DeviceRoot(::PROTOBUF_NAMESPACE_ID::Arena* arena);
   private:
   static void ArenaDtor(void* object);
   inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
@@ -906,7 +906,7 @@ class DeviceRoot2 PROTOBUF_FINAL :
 
   // accessors -------------------------------------------------------
 
-  // @@protoc_insertion_point(class_scope:Proto.DeviceRoot2)
+  // @@protoc_insertion_point(class_scope:Proto.DeviceRoot)
  private:
   class _Internal;
 
@@ -918,24 +918,24 @@ class DeviceRoot2 PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
-class DeviceSystem2 PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.DeviceSystem2) */ {
+class DeviceSystem PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.DeviceSystem) */ {
  public:
-  inline DeviceSystem2() : DeviceSystem2(nullptr) {}
-  virtual ~DeviceSystem2();
-  explicit constexpr DeviceSystem2(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+  inline DeviceSystem() : DeviceSystem(nullptr) {}
+  virtual ~DeviceSystem();
+  explicit constexpr DeviceSystem(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
 
-  DeviceSystem2(const DeviceSystem2& from);
-  DeviceSystem2(DeviceSystem2&& from) noexcept
-    : DeviceSystem2() {
+  DeviceSystem(const DeviceSystem& from);
+  DeviceSystem(DeviceSystem&& from) noexcept
+    : DeviceSystem() {
     *this = ::std::move(from);
   }
 
-  inline DeviceSystem2& operator=(const DeviceSystem2& from) {
+  inline DeviceSystem& operator=(const DeviceSystem& from) {
     CopyFrom(from);
     return *this;
   }
-  inline DeviceSystem2& operator=(DeviceSystem2&& from) noexcept {
+  inline DeviceSystem& operator=(DeviceSystem&& from) noexcept {
     if (GetArena() == from.GetArena()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -960,20 +960,20 @@ class DeviceSystem2 PROTOBUF_FINAL :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return GetMetadataStatic().reflection;
   }
-  static const DeviceSystem2& default_instance() {
+  static const DeviceSystem& default_instance() {
     return *internal_default_instance();
   }
-  static inline const DeviceSystem2* internal_default_instance() {
-    return reinterpret_cast<const DeviceSystem2*>(
-               &_DeviceSystem2_default_instance_);
+  static inline const DeviceSystem* internal_default_instance() {
+    return reinterpret_cast<const DeviceSystem*>(
+               &_DeviceSystem_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     2;
 
-  friend void swap(DeviceSystem2& a, DeviceSystem2& b) {
+  friend void swap(DeviceSystem& a, DeviceSystem& b) {
     a.Swap(&b);
   }
-  inline void Swap(DeviceSystem2* other) {
+  inline void Swap(DeviceSystem* other) {
     if (other == this) return;
     if (GetArena() == other->GetArena()) {
       InternalSwap(other);
@@ -981,7 +981,7 @@ class DeviceSystem2 PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(DeviceSystem2* other) {
+  void UnsafeArenaSwap(DeviceSystem* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetArena() == other->GetArena());
     InternalSwap(other);
@@ -989,17 +989,17 @@ class DeviceSystem2 PROTOBUF_FINAL :
 
   // implements Message ----------------------------------------------
 
-  inline DeviceSystem2* New() const final {
-    return CreateMaybeMessage<DeviceSystem2>(nullptr);
+  inline DeviceSystem* New() const final {
+    return CreateMaybeMessage<DeviceSystem>(nullptr);
   }
 
-  DeviceSystem2* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<DeviceSystem2>(arena);
+  DeviceSystem* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<DeviceSystem>(arena);
   }
   void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const DeviceSystem2& from);
-  void MergeFrom(const DeviceSystem2& from);
+  void CopyFrom(const DeviceSystem& from);
+  void MergeFrom(const DeviceSystem& from);
   PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
   bool IsInitialized() const final;
 
@@ -1013,13 +1013,13 @@ class DeviceSystem2 PROTOBUF_FINAL :
   inline void SharedCtor();
   inline void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(DeviceSystem2* other);
+  void InternalSwap(DeviceSystem* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "Proto.DeviceSystem2";
+    return "Proto.DeviceSystem";
   }
   protected:
-  explicit DeviceSystem2(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  explicit DeviceSystem(::PROTOBUF_NAMESPACE_ID::Arena* arena);
   private:
   static void ArenaDtor(void* object);
   inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
@@ -1037,7 +1037,7 @@ class DeviceSystem2 PROTOBUF_FINAL :
 
   // accessors -------------------------------------------------------
 
-  // @@protoc_insertion_point(class_scope:Proto.DeviceSystem2)
+  // @@protoc_insertion_point(class_scope:Proto.DeviceSystem)
  private:
   class _Internal;
 
@@ -1049,24 +1049,24 @@ class DeviceSystem2 PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
-class DeviceRack2 PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.DeviceRack2) */ {
+class DeviceRack PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.DeviceRack) */ {
  public:
-  inline DeviceRack2() : DeviceRack2(nullptr) {}
-  virtual ~DeviceRack2();
-  explicit constexpr DeviceRack2(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+  inline DeviceRack() : DeviceRack(nullptr) {}
+  virtual ~DeviceRack();
+  explicit constexpr DeviceRack(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
 
-  DeviceRack2(const DeviceRack2& from);
-  DeviceRack2(DeviceRack2&& from) noexcept
-    : DeviceRack2() {
+  DeviceRack(const DeviceRack& from);
+  DeviceRack(DeviceRack&& from) noexcept
+    : DeviceRack() {
     *this = ::std::move(from);
   }
 
-  inline DeviceRack2& operator=(const DeviceRack2& from) {
+  inline DeviceRack& operator=(const DeviceRack& from) {
     CopyFrom(from);
     return *this;
   }
-  inline DeviceRack2& operator=(DeviceRack2&& from) noexcept {
+  inline DeviceRack& operator=(DeviceRack&& from) noexcept {
     if (GetArena() == from.GetArena()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -1091,20 +1091,20 @@ class DeviceRack2 PROTOBUF_FINAL :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return GetMetadataStatic().reflection;
   }
-  static const DeviceRack2& default_instance() {
+  static const DeviceRack& default_instance() {
     return *internal_default_instance();
   }
-  static inline const DeviceRack2* internal_default_instance() {
-    return reinterpret_cast<const DeviceRack2*>(
-               &_DeviceRack2_default_instance_);
+  static inline const DeviceRack* internal_default_instance() {
+    return reinterpret_cast<const DeviceRack*>(
+               &_DeviceRack_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     3;
 
-  friend void swap(DeviceRack2& a, DeviceRack2& b) {
+  friend void swap(DeviceRack& a, DeviceRack& b) {
     a.Swap(&b);
   }
-  inline void Swap(DeviceRack2* other) {
+  inline void Swap(DeviceRack* other) {
     if (other == this) return;
     if (GetArena() == other->GetArena()) {
       InternalSwap(other);
@@ -1112,7 +1112,7 @@ class DeviceRack2 PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(DeviceRack2* other) {
+  void UnsafeArenaSwap(DeviceRack* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetArena() == other->GetArena());
     InternalSwap(other);
@@ -1120,17 +1120,17 @@ class DeviceRack2 PROTOBUF_FINAL :
 
   // implements Message ----------------------------------------------
 
-  inline DeviceRack2* New() const final {
-    return CreateMaybeMessage<DeviceRack2>(nullptr);
+  inline DeviceRack* New() const final {
+    return CreateMaybeMessage<DeviceRack>(nullptr);
   }
 
-  DeviceRack2* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<DeviceRack2>(arena);
+  DeviceRack* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<DeviceRack>(arena);
   }
   void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const DeviceRack2& from);
-  void MergeFrom(const DeviceRack2& from);
+  void CopyFrom(const DeviceRack& from);
+  void MergeFrom(const DeviceRack& from);
   PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
   bool IsInitialized() const final;
 
@@ -1144,13 +1144,13 @@ class DeviceRack2 PROTOBUF_FINAL :
   inline void SharedCtor();
   inline void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(DeviceRack2* other);
+  void InternalSwap(DeviceRack* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "Proto.DeviceRack2";
+    return "Proto.DeviceRack";
   }
   protected:
-  explicit DeviceRack2(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  explicit DeviceRack(::PROTOBUF_NAMESPACE_ID::Arena* arena);
   private:
   static void ArenaDtor(void* object);
   inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
@@ -1168,7 +1168,7 @@ class DeviceRack2 PROTOBUF_FINAL :
 
   // accessors -------------------------------------------------------
 
-  // @@protoc_insertion_point(class_scope:Proto.DeviceRack2)
+  // @@protoc_insertion_point(class_scope:Proto.DeviceRack)
  private:
   class _Internal;
 
@@ -1180,24 +1180,24 @@ class DeviceRack2 PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
-class DeviceChassis2 PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.DeviceChassis2) */ {
+class DeviceChassis PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.DeviceChassis) */ {
  public:
-  inline DeviceChassis2() : DeviceChassis2(nullptr) {}
-  virtual ~DeviceChassis2();
-  explicit constexpr DeviceChassis2(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+  inline DeviceChassis() : DeviceChassis(nullptr) {}
+  virtual ~DeviceChassis();
+  explicit constexpr DeviceChassis(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
 
-  DeviceChassis2(const DeviceChassis2& from);
-  DeviceChassis2(DeviceChassis2&& from) noexcept
-    : DeviceChassis2() {
+  DeviceChassis(const DeviceChassis& from);
+  DeviceChassis(DeviceChassis&& from) noexcept
+    : DeviceChassis() {
     *this = ::std::move(from);
   }
 
-  inline DeviceChassis2& operator=(const DeviceChassis2& from) {
+  inline DeviceChassis& operator=(const DeviceChassis& from) {
     CopyFrom(from);
     return *this;
   }
-  inline DeviceChassis2& operator=(DeviceChassis2&& from) noexcept {
+  inline DeviceChassis& operator=(DeviceChassis&& from) noexcept {
     if (GetArena() == from.GetArena()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -1222,20 +1222,20 @@ class DeviceChassis2 PROTOBUF_FINAL :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return GetMetadataStatic().reflection;
   }
-  static const DeviceChassis2& default_instance() {
+  static const DeviceChassis& default_instance() {
     return *internal_default_instance();
   }
-  static inline const DeviceChassis2* internal_default_instance() {
-    return reinterpret_cast<const DeviceChassis2*>(
-               &_DeviceChassis2_default_instance_);
+  static inline const DeviceChassis* internal_default_instance() {
+    return reinterpret_cast<const DeviceChassis*>(
+               &_DeviceChassis_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     4;
 
-  friend void swap(DeviceChassis2& a, DeviceChassis2& b) {
+  friend void swap(DeviceChassis& a, DeviceChassis& b) {
     a.Swap(&b);
   }
-  inline void Swap(DeviceChassis2* other) {
+  inline void Swap(DeviceChassis* other) {
     if (other == this) return;
     if (GetArena() == other->GetArena()) {
       InternalSwap(other);
@@ -1243,7 +1243,7 @@ class DeviceChassis2 PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(DeviceChassis2* other) {
+  void UnsafeArenaSwap(DeviceChassis* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetArena() == other->GetArena());
     InternalSwap(other);
@@ -1251,17 +1251,17 @@ class DeviceChassis2 PROTOBUF_FINAL :
 
   // implements Message ----------------------------------------------
 
-  inline DeviceChassis2* New() const final {
-    return CreateMaybeMessage<DeviceChassis2>(nullptr);
+  inline DeviceChassis* New() const final {
+    return CreateMaybeMessage<DeviceChassis>(nullptr);
   }
 
-  DeviceChassis2* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<DeviceChassis2>(arena);
+  DeviceChassis* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<DeviceChassis>(arena);
   }
   void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const DeviceChassis2& from);
-  void MergeFrom(const DeviceChassis2& from);
+  void CopyFrom(const DeviceChassis& from);
+  void MergeFrom(const DeviceChassis& from);
   PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
   bool IsInitialized() const final;
 
@@ -1275,13 +1275,13 @@ class DeviceChassis2 PROTOBUF_FINAL :
   inline void SharedCtor();
   inline void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(DeviceChassis2* other);
+  void InternalSwap(DeviceChassis* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "Proto.DeviceChassis2";
+    return "Proto.DeviceChassis";
   }
   protected:
-  explicit DeviceChassis2(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  explicit DeviceChassis(::PROTOBUF_NAMESPACE_ID::Arena* arena);
   private:
   static void ArenaDtor(void* object);
   inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
@@ -1315,7 +1315,7 @@ class DeviceChassis2 PROTOBUF_FINAL :
   void _internal_set_type(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
-  // @@protoc_insertion_point(class_scope:Proto.DeviceChassis2)
+  // @@protoc_insertion_point(class_scope:Proto.DeviceChassis)
  private:
   class _Internal;
 
@@ -1329,24 +1329,24 @@ class DeviceChassis2 PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
-class DeviceModule2 PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.DeviceModule2) */ {
+class DeviceModule PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.DeviceModule) */ {
  public:
-  inline DeviceModule2() : DeviceModule2(nullptr) {}
-  virtual ~DeviceModule2();
-  explicit constexpr DeviceModule2(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+  inline DeviceModule() : DeviceModule(nullptr) {}
+  virtual ~DeviceModule();
+  explicit constexpr DeviceModule(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
 
-  DeviceModule2(const DeviceModule2& from);
-  DeviceModule2(DeviceModule2&& from) noexcept
-    : DeviceModule2() {
+  DeviceModule(const DeviceModule& from);
+  DeviceModule(DeviceModule&& from) noexcept
+    : DeviceModule() {
     *this = ::std::move(from);
   }
 
-  inline DeviceModule2& operator=(const DeviceModule2& from) {
+  inline DeviceModule& operator=(const DeviceModule& from) {
     CopyFrom(from);
     return *this;
   }
-  inline DeviceModule2& operator=(DeviceModule2&& from) noexcept {
+  inline DeviceModule& operator=(DeviceModule&& from) noexcept {
     if (GetArena() == from.GetArena()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -1371,20 +1371,20 @@ class DeviceModule2 PROTOBUF_FINAL :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return GetMetadataStatic().reflection;
   }
-  static const DeviceModule2& default_instance() {
+  static const DeviceModule& default_instance() {
     return *internal_default_instance();
   }
-  static inline const DeviceModule2* internal_default_instance() {
-    return reinterpret_cast<const DeviceModule2*>(
-               &_DeviceModule2_default_instance_);
+  static inline const DeviceModule* internal_default_instance() {
+    return reinterpret_cast<const DeviceModule*>(
+               &_DeviceModule_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     5;
 
-  friend void swap(DeviceModule2& a, DeviceModule2& b) {
+  friend void swap(DeviceModule& a, DeviceModule& b) {
     a.Swap(&b);
   }
-  inline void Swap(DeviceModule2* other) {
+  inline void Swap(DeviceModule* other) {
     if (other == this) return;
     if (GetArena() == other->GetArena()) {
       InternalSwap(other);
@@ -1392,7 +1392,7 @@ class DeviceModule2 PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(DeviceModule2* other) {
+  void UnsafeArenaSwap(DeviceModule* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetArena() == other->GetArena());
     InternalSwap(other);
@@ -1400,17 +1400,17 @@ class DeviceModule2 PROTOBUF_FINAL :
 
   // implements Message ----------------------------------------------
 
-  inline DeviceModule2* New() const final {
-    return CreateMaybeMessage<DeviceModule2>(nullptr);
+  inline DeviceModule* New() const final {
+    return CreateMaybeMessage<DeviceModule>(nullptr);
   }
 
-  DeviceModule2* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<DeviceModule2>(arena);
+  DeviceModule* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<DeviceModule>(arena);
   }
   void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const DeviceModule2& from);
-  void MergeFrom(const DeviceModule2& from);
+  void CopyFrom(const DeviceModule& from);
+  void MergeFrom(const DeviceModule& from);
   PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
   bool IsInitialized() const final;
 
@@ -1424,13 +1424,13 @@ class DeviceModule2 PROTOBUF_FINAL :
   inline void SharedCtor();
   inline void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(DeviceModule2* other);
+  void InternalSwap(DeviceModule* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "Proto.DeviceModule2";
+    return "Proto.DeviceModule";
   }
   protected:
-  explicit DeviceModule2(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  explicit DeviceModule(::PROTOBUF_NAMESPACE_ID::Arena* arena);
   private:
   static void ArenaDtor(void* object);
   inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
@@ -1534,7 +1534,7 @@ class DeviceModule2 PROTOBUF_FINAL :
   void _internal_set_custommodulefamily(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
-  // @@protoc_insertion_point(class_scope:Proto.DeviceModule2)
+  // @@protoc_insertion_point(class_scope:Proto.DeviceModule)
  private:
   class _Internal;
 
@@ -1552,24 +1552,24 @@ class DeviceModule2 PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
-class DeviceController2 PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.DeviceController2) */ {
+class DeviceController PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.DeviceController) */ {
  public:
-  inline DeviceController2() : DeviceController2(nullptr) {}
-  virtual ~DeviceController2();
-  explicit constexpr DeviceController2(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+  inline DeviceController() : DeviceController(nullptr) {}
+  virtual ~DeviceController();
+  explicit constexpr DeviceController(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
 
-  DeviceController2(const DeviceController2& from);
-  DeviceController2(DeviceController2&& from) noexcept
-    : DeviceController2() {
+  DeviceController(const DeviceController& from);
+  DeviceController(DeviceController&& from) noexcept
+    : DeviceController() {
     *this = ::std::move(from);
   }
 
-  inline DeviceController2& operator=(const DeviceController2& from) {
+  inline DeviceController& operator=(const DeviceController& from) {
     CopyFrom(from);
     return *this;
   }
-  inline DeviceController2& operator=(DeviceController2&& from) noexcept {
+  inline DeviceController& operator=(DeviceController&& from) noexcept {
     if (GetArena() == from.GetArena()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -1594,20 +1594,20 @@ class DeviceController2 PROTOBUF_FINAL :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return GetMetadataStatic().reflection;
   }
-  static const DeviceController2& default_instance() {
+  static const DeviceController& default_instance() {
     return *internal_default_instance();
   }
-  static inline const DeviceController2* internal_default_instance() {
-    return reinterpret_cast<const DeviceController2*>(
-               &_DeviceController2_default_instance_);
+  static inline const DeviceController* internal_default_instance() {
+    return reinterpret_cast<const DeviceController*>(
+               &_DeviceController_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     6;
 
-  friend void swap(DeviceController2& a, DeviceController2& b) {
+  friend void swap(DeviceController& a, DeviceController& b) {
     a.Swap(&b);
   }
-  inline void Swap(DeviceController2* other) {
+  inline void Swap(DeviceController* other) {
     if (other == this) return;
     if (GetArena() == other->GetArena()) {
       InternalSwap(other);
@@ -1615,7 +1615,7 @@ class DeviceController2 PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(DeviceController2* other) {
+  void UnsafeArenaSwap(DeviceController* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetArena() == other->GetArena());
     InternalSwap(other);
@@ -1623,17 +1623,17 @@ class DeviceController2 PROTOBUF_FINAL :
 
   // implements Message ----------------------------------------------
 
-  inline DeviceController2* New() const final {
-    return CreateMaybeMessage<DeviceController2>(nullptr);
+  inline DeviceController* New() const final {
+    return CreateMaybeMessage<DeviceController>(nullptr);
   }
 
-  DeviceController2* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<DeviceController2>(arena);
+  DeviceController* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<DeviceController>(arena);
   }
   void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const DeviceController2& from);
-  void MergeFrom(const DeviceController2& from);
+  void CopyFrom(const DeviceController& from);
+  void MergeFrom(const DeviceController& from);
   PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
   bool IsInitialized() const final;
 
@@ -1647,13 +1647,13 @@ class DeviceController2 PROTOBUF_FINAL :
   inline void SharedCtor();
   inline void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(DeviceController2* other);
+  void InternalSwap(DeviceController* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "Proto.DeviceController2";
+    return "Proto.DeviceController";
   }
   protected:
-  explicit DeviceController2(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  explicit DeviceController(::PROTOBUF_NAMESPACE_ID::Arena* arena);
   private:
   static void ArenaDtor(void* object);
   inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
@@ -1687,7 +1687,7 @@ class DeviceController2 PROTOBUF_FINAL :
   void _internal_set_diagdataoffset(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
-  // @@protoc_insertion_point(class_scope:Proto.DeviceController2)
+  // @@protoc_insertion_point(class_scope:Proto.DeviceController)
  private:
   class _Internal;
 
@@ -1701,24 +1701,24 @@ class DeviceController2 PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
-class DeviceAppSignal2 PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.DeviceAppSignal2) */ {
+class DeviceAppSignal PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.DeviceAppSignal) */ {
  public:
-  inline DeviceAppSignal2() : DeviceAppSignal2(nullptr) {}
-  virtual ~DeviceAppSignal2();
-  explicit constexpr DeviceAppSignal2(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+  inline DeviceAppSignal() : DeviceAppSignal(nullptr) {}
+  virtual ~DeviceAppSignal();
+  explicit constexpr DeviceAppSignal(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
 
-  DeviceAppSignal2(const DeviceAppSignal2& from);
-  DeviceAppSignal2(DeviceAppSignal2&& from) noexcept
-    : DeviceAppSignal2() {
+  DeviceAppSignal(const DeviceAppSignal& from);
+  DeviceAppSignal(DeviceAppSignal&& from) noexcept
+    : DeviceAppSignal() {
     *this = ::std::move(from);
   }
 
-  inline DeviceAppSignal2& operator=(const DeviceAppSignal2& from) {
+  inline DeviceAppSignal& operator=(const DeviceAppSignal& from) {
     CopyFrom(from);
     return *this;
   }
-  inline DeviceAppSignal2& operator=(DeviceAppSignal2&& from) noexcept {
+  inline DeviceAppSignal& operator=(DeviceAppSignal&& from) noexcept {
     if (GetArena() == from.GetArena()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -1743,20 +1743,20 @@ class DeviceAppSignal2 PROTOBUF_FINAL :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return GetMetadataStatic().reflection;
   }
-  static const DeviceAppSignal2& default_instance() {
+  static const DeviceAppSignal& default_instance() {
     return *internal_default_instance();
   }
-  static inline const DeviceAppSignal2* internal_default_instance() {
-    return reinterpret_cast<const DeviceAppSignal2*>(
-               &_DeviceAppSignal2_default_instance_);
+  static inline const DeviceAppSignal* internal_default_instance() {
+    return reinterpret_cast<const DeviceAppSignal*>(
+               &_DeviceAppSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     7;
 
-  friend void swap(DeviceAppSignal2& a, DeviceAppSignal2& b) {
+  friend void swap(DeviceAppSignal& a, DeviceAppSignal& b) {
     a.Swap(&b);
   }
-  inline void Swap(DeviceAppSignal2* other) {
+  inline void Swap(DeviceAppSignal* other) {
     if (other == this) return;
     if (GetArena() == other->GetArena()) {
       InternalSwap(other);
@@ -1764,7 +1764,7 @@ class DeviceAppSignal2 PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(DeviceAppSignal2* other) {
+  void UnsafeArenaSwap(DeviceAppSignal* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetArena() == other->GetArena());
     InternalSwap(other);
@@ -1772,17 +1772,17 @@ class DeviceAppSignal2 PROTOBUF_FINAL :
 
   // implements Message ----------------------------------------------
 
-  inline DeviceAppSignal2* New() const final {
-    return CreateMaybeMessage<DeviceAppSignal2>(nullptr);
+  inline DeviceAppSignal* New() const final {
+    return CreateMaybeMessage<DeviceAppSignal>(nullptr);
   }
 
-  DeviceAppSignal2* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<DeviceAppSignal2>(arena);
+  DeviceAppSignal* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<DeviceAppSignal>(arena);
   }
   void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const DeviceAppSignal2& from);
-  void MergeFrom(const DeviceAppSignal2& from);
+  void CopyFrom(const DeviceAppSignal& from);
+  void MergeFrom(const DeviceAppSignal& from);
   PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
   bool IsInitialized() const final;
 
@@ -1796,13 +1796,13 @@ class DeviceAppSignal2 PROTOBUF_FINAL :
   inline void SharedCtor();
   inline void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(DeviceAppSignal2* other);
+  void InternalSwap(DeviceAppSignal* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "Proto.DeviceAppSignal2";
+    return "Proto.DeviceAppSignal";
   }
   protected:
-  explicit DeviceAppSignal2(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  explicit DeviceAppSignal(::PROTOBUF_NAMESPACE_ID::Arena* arena);
   private:
   static void ArenaDtor(void* object);
   inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
@@ -2095,7 +2095,7 @@ class DeviceAppSignal2 PROTOBUF_FINAL :
   void _internal_set_appsignalhighengunits(double value);
   public:
 
-  // @@protoc_insertion_point(class_scope:Proto.DeviceAppSignal2)
+  // @@protoc_insertion_point(class_scope:Proto.DeviceAppSignal)
  private:
   class _Internal;
 
@@ -2126,24 +2126,24 @@ class DeviceAppSignal2 PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
-class DeviceDiagSignal2 PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.DeviceDiagSignal2) */ {
+class DeviceDiagSignal PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.DeviceDiagSignal) */ {
  public:
-  inline DeviceDiagSignal2() : DeviceDiagSignal2(nullptr) {}
-  virtual ~DeviceDiagSignal2();
-  explicit constexpr DeviceDiagSignal2(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+  inline DeviceDiagSignal() : DeviceDiagSignal(nullptr) {}
+  virtual ~DeviceDiagSignal();
+  explicit constexpr DeviceDiagSignal(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
 
-  DeviceDiagSignal2(const DeviceDiagSignal2& from);
-  DeviceDiagSignal2(DeviceDiagSignal2&& from) noexcept
-    : DeviceDiagSignal2() {
+  DeviceDiagSignal(const DeviceDiagSignal& from);
+  DeviceDiagSignal(DeviceDiagSignal&& from) noexcept
+    : DeviceDiagSignal() {
     *this = ::std::move(from);
   }
 
-  inline DeviceDiagSignal2& operator=(const DeviceDiagSignal2& from) {
+  inline DeviceDiagSignal& operator=(const DeviceDiagSignal& from) {
     CopyFrom(from);
     return *this;
   }
-  inline DeviceDiagSignal2& operator=(DeviceDiagSignal2&& from) noexcept {
+  inline DeviceDiagSignal& operator=(DeviceDiagSignal&& from) noexcept {
     if (GetArena() == from.GetArena()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -2168,20 +2168,20 @@ class DeviceDiagSignal2 PROTOBUF_FINAL :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return GetMetadataStatic().reflection;
   }
-  static const DeviceDiagSignal2& default_instance() {
+  static const DeviceDiagSignal& default_instance() {
     return *internal_default_instance();
   }
-  static inline const DeviceDiagSignal2* internal_default_instance() {
-    return reinterpret_cast<const DeviceDiagSignal2*>(
-               &_DeviceDiagSignal2_default_instance_);
+  static inline const DeviceDiagSignal* internal_default_instance() {
+    return reinterpret_cast<const DeviceDiagSignal*>(
+               &_DeviceDiagSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     8;
 
-  friend void swap(DeviceDiagSignal2& a, DeviceDiagSignal2& b) {
+  friend void swap(DeviceDiagSignal& a, DeviceDiagSignal& b) {
     a.Swap(&b);
   }
-  inline void Swap(DeviceDiagSignal2* other) {
+  inline void Swap(DeviceDiagSignal* other) {
     if (other == this) return;
     if (GetArena() == other->GetArena()) {
       InternalSwap(other);
@@ -2189,7 +2189,7 @@ class DeviceDiagSignal2 PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(DeviceDiagSignal2* other) {
+  void UnsafeArenaSwap(DeviceDiagSignal* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetArena() == other->GetArena());
     InternalSwap(other);
@@ -2197,17 +2197,17 @@ class DeviceDiagSignal2 PROTOBUF_FINAL :
 
   // implements Message ----------------------------------------------
 
-  inline DeviceDiagSignal2* New() const final {
-    return CreateMaybeMessage<DeviceDiagSignal2>(nullptr);
+  inline DeviceDiagSignal* New() const final {
+    return CreateMaybeMessage<DeviceDiagSignal>(nullptr);
   }
 
-  DeviceDiagSignal2* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<DeviceDiagSignal2>(arena);
+  DeviceDiagSignal* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<DeviceDiagSignal>(arena);
   }
   void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const DeviceDiagSignal2& from);
-  void MergeFrom(const DeviceDiagSignal2& from);
+  void CopyFrom(const DeviceDiagSignal& from);
+  void MergeFrom(const DeviceDiagSignal& from);
   PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
   bool IsInitialized() const final;
 
@@ -2221,13 +2221,13 @@ class DeviceDiagSignal2 PROTOBUF_FINAL :
   inline void SharedCtor();
   inline void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(DeviceDiagSignal2* other);
+  void InternalSwap(DeviceDiagSignal* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "Proto.DeviceDiagSignal2";
+    return "Proto.DeviceDiagSignal";
   }
   protected:
-  explicit DeviceDiagSignal2(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  explicit DeviceDiagSignal(::PROTOBUF_NAMESPACE_ID::Arena* arena);
   private:
   static void ArenaDtor(void* object);
   inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
@@ -2492,7 +2492,7 @@ class DeviceDiagSignal2 PROTOBUF_FINAL :
   void _internal_set_decimalplaces(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
-  // @@protoc_insertion_point(class_scope:Proto.DeviceDiagSignal2)
+  // @@protoc_insertion_point(class_scope:Proto.DeviceDiagSignal)
  private:
   class _Internal;
 
@@ -2521,24 +2521,24 @@ class DeviceDiagSignal2 PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
-class Workstation2 PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.Workstation2) */ {
+class Workstation PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.Workstation) */ {
  public:
-  inline Workstation2() : Workstation2(nullptr) {}
-  virtual ~Workstation2();
-  explicit constexpr Workstation2(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+  inline Workstation() : Workstation(nullptr) {}
+  virtual ~Workstation();
+  explicit constexpr Workstation(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
 
-  Workstation2(const Workstation2& from);
-  Workstation2(Workstation2&& from) noexcept
-    : Workstation2() {
+  Workstation(const Workstation& from);
+  Workstation(Workstation&& from) noexcept
+    : Workstation() {
     *this = ::std::move(from);
   }
 
-  inline Workstation2& operator=(const Workstation2& from) {
+  inline Workstation& operator=(const Workstation& from) {
     CopyFrom(from);
     return *this;
   }
-  inline Workstation2& operator=(Workstation2&& from) noexcept {
+  inline Workstation& operator=(Workstation&& from) noexcept {
     if (GetArena() == from.GetArena()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -2563,20 +2563,20 @@ class Workstation2 PROTOBUF_FINAL :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return GetMetadataStatic().reflection;
   }
-  static const Workstation2& default_instance() {
+  static const Workstation& default_instance() {
     return *internal_default_instance();
   }
-  static inline const Workstation2* internal_default_instance() {
-    return reinterpret_cast<const Workstation2*>(
-               &_Workstation2_default_instance_);
+  static inline const Workstation* internal_default_instance() {
+    return reinterpret_cast<const Workstation*>(
+               &_Workstation_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     9;
 
-  friend void swap(Workstation2& a, Workstation2& b) {
+  friend void swap(Workstation& a, Workstation& b) {
     a.Swap(&b);
   }
-  inline void Swap(Workstation2* other) {
+  inline void Swap(Workstation* other) {
     if (other == this) return;
     if (GetArena() == other->GetArena()) {
       InternalSwap(other);
@@ -2584,7 +2584,7 @@ class Workstation2 PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(Workstation2* other) {
+  void UnsafeArenaSwap(Workstation* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetArena() == other->GetArena());
     InternalSwap(other);
@@ -2592,17 +2592,17 @@ class Workstation2 PROTOBUF_FINAL :
 
   // implements Message ----------------------------------------------
 
-  inline Workstation2* New() const final {
-    return CreateMaybeMessage<Workstation2>(nullptr);
+  inline Workstation* New() const final {
+    return CreateMaybeMessage<Workstation>(nullptr);
   }
 
-  Workstation2* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<Workstation2>(arena);
+  Workstation* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<Workstation>(arena);
   }
   void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const Workstation2& from);
-  void MergeFrom(const Workstation2& from);
+  void CopyFrom(const Workstation& from);
+  void MergeFrom(const Workstation& from);
   PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
   bool IsInitialized() const final;
 
@@ -2616,13 +2616,13 @@ class Workstation2 PROTOBUF_FINAL :
   inline void SharedCtor();
   inline void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(Workstation2* other);
+  void InternalSwap(Workstation* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "Proto.Workstation2";
+    return "Proto.Workstation";
   }
   protected:
-  explicit Workstation2(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  explicit Workstation(::PROTOBUF_NAMESPACE_ID::Arena* arena);
   private:
   static void ArenaDtor(void* object);
   inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
@@ -2677,7 +2677,7 @@ class Workstation2 PROTOBUF_FINAL :
   void _internal_set_type(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
-  // @@protoc_insertion_point(class_scope:Proto.Workstation2)
+  // @@protoc_insertion_point(class_scope:Proto.Workstation)
  private:
   class _Internal;
 
@@ -2692,24 +2692,24 @@ class Workstation2 PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
-class Software2 PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.Software2) */ {
+class Software PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.Software) */ {
  public:
-  inline Software2() : Software2(nullptr) {}
-  virtual ~Software2();
-  explicit constexpr Software2(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+  inline Software() : Software(nullptr) {}
+  virtual ~Software();
+  explicit constexpr Software(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
 
-  Software2(const Software2& from);
-  Software2(Software2&& from) noexcept
-    : Software2() {
+  Software(const Software& from);
+  Software(Software&& from) noexcept
+    : Software() {
     *this = ::std::move(from);
   }
 
-  inline Software2& operator=(const Software2& from) {
+  inline Software& operator=(const Software& from) {
     CopyFrom(from);
     return *this;
   }
-  inline Software2& operator=(Software2&& from) noexcept {
+  inline Software& operator=(Software&& from) noexcept {
     if (GetArena() == from.GetArena()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -2734,20 +2734,20 @@ class Software2 PROTOBUF_FINAL :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return GetMetadataStatic().reflection;
   }
-  static const Software2& default_instance() {
+  static const Software& default_instance() {
     return *internal_default_instance();
   }
-  static inline const Software2* internal_default_instance() {
-    return reinterpret_cast<const Software2*>(
-               &_Software2_default_instance_);
+  static inline const Software* internal_default_instance() {
+    return reinterpret_cast<const Software*>(
+               &_Software_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     10;
 
-  friend void swap(Software2& a, Software2& b) {
+  friend void swap(Software& a, Software& b) {
     a.Swap(&b);
   }
-  inline void Swap(Software2* other) {
+  inline void Swap(Software* other) {
     if (other == this) return;
     if (GetArena() == other->GetArena()) {
       InternalSwap(other);
@@ -2755,7 +2755,7 @@ class Software2 PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(Software2* other) {
+  void UnsafeArenaSwap(Software* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetArena() == other->GetArena());
     InternalSwap(other);
@@ -2763,17 +2763,17 @@ class Software2 PROTOBUF_FINAL :
 
   // implements Message ----------------------------------------------
 
-  inline Software2* New() const final {
-    return CreateMaybeMessage<Software2>(nullptr);
+  inline Software* New() const final {
+    return CreateMaybeMessage<Software>(nullptr);
   }
 
-  Software2* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<Software2>(arena);
+  Software* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<Software>(arena);
   }
   void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const Software2& from);
-  void MergeFrom(const Software2& from);
+  void CopyFrom(const Software& from);
+  void MergeFrom(const Software& from);
   PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
   bool IsInitialized() const final;
 
@@ -2787,13 +2787,13 @@ class Software2 PROTOBUF_FINAL :
   inline void SharedCtor();
   inline void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(Software2* other);
+  void InternalSwap(Software* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "Proto.Software2";
+    return "Proto.Software";
   }
   protected:
-  explicit Software2(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  explicit Software(::PROTOBUF_NAMESPACE_ID::Arena* arena);
   private:
   static void ArenaDtor(void* object);
   inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
@@ -2827,7 +2827,7 @@ class Software2 PROTOBUF_FINAL :
   void _internal_set_type(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
-  // @@protoc_insertion_point(class_scope:Proto.Software2)
+  // @@protoc_insertion_point(class_scope:Proto.Software)
  private:
   class _Internal;
 
@@ -2841,24 +2841,24 @@ class Software2 PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
-class DiagSignalType2 PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.DiagSignalType2) */ {
+class DiagSignalType PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.DiagSignalType) */ {
  public:
-  inline DiagSignalType2() : DiagSignalType2(nullptr) {}
-  virtual ~DiagSignalType2();
-  explicit constexpr DiagSignalType2(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+  inline DiagSignalType() : DiagSignalType(nullptr) {}
+  virtual ~DiagSignalType();
+  explicit constexpr DiagSignalType(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
 
-  DiagSignalType2(const DiagSignalType2& from);
-  DiagSignalType2(DiagSignalType2&& from) noexcept
-    : DiagSignalType2() {
+  DiagSignalType(const DiagSignalType& from);
+  DiagSignalType(DiagSignalType&& from) noexcept
+    : DiagSignalType() {
     *this = ::std::move(from);
   }
 
-  inline DiagSignalType2& operator=(const DiagSignalType2& from) {
+  inline DiagSignalType& operator=(const DiagSignalType& from) {
     CopyFrom(from);
     return *this;
   }
-  inline DiagSignalType2& operator=(DiagSignalType2&& from) noexcept {
+  inline DiagSignalType& operator=(DiagSignalType&& from) noexcept {
     if (GetArena() == from.GetArena()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -2883,20 +2883,20 @@ class DiagSignalType2 PROTOBUF_FINAL :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return GetMetadataStatic().reflection;
   }
-  static const DiagSignalType2& default_instance() {
+  static const DiagSignalType& default_instance() {
     return *internal_default_instance();
   }
-  static inline const DiagSignalType2* internal_default_instance() {
-    return reinterpret_cast<const DiagSignalType2*>(
-               &_DiagSignalType2_default_instance_);
+  static inline const DiagSignalType* internal_default_instance() {
+    return reinterpret_cast<const DiagSignalType*>(
+               &_DiagSignalType_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     11;
 
-  friend void swap(DiagSignalType2& a, DiagSignalType2& b) {
+  friend void swap(DiagSignalType& a, DiagSignalType& b) {
     a.Swap(&b);
   }
-  inline void Swap(DiagSignalType2* other) {
+  inline void Swap(DiagSignalType* other) {
     if (other == this) return;
     if (GetArena() == other->GetArena()) {
       InternalSwap(other);
@@ -2904,7 +2904,7 @@ class DiagSignalType2 PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(DiagSignalType2* other) {
+  void UnsafeArenaSwap(DiagSignalType* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetArena() == other->GetArena());
     InternalSwap(other);
@@ -2912,17 +2912,17 @@ class DiagSignalType2 PROTOBUF_FINAL :
 
   // implements Message ----------------------------------------------
 
-  inline DiagSignalType2* New() const final {
-    return CreateMaybeMessage<DiagSignalType2>(nullptr);
+  inline DiagSignalType* New() const final {
+    return CreateMaybeMessage<DiagSignalType>(nullptr);
   }
 
-  DiagSignalType2* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<DiagSignalType2>(arena);
+  DiagSignalType* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<DiagSignalType>(arena);
   }
   void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const DiagSignalType2& from);
-  void MergeFrom(const DiagSignalType2& from);
+  void CopyFrom(const DiagSignalType& from);
+  void MergeFrom(const DiagSignalType& from);
   PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
   bool IsInitialized() const final;
 
@@ -2936,13 +2936,13 @@ class DiagSignalType2 PROTOBUF_FINAL :
   inline void SharedCtor();
   inline void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(DiagSignalType2* other);
+  void InternalSwap(DiagSignalType* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "Proto.DiagSignalType2";
+    return "Proto.DiagSignalType";
   }
   protected:
-  explicit DiagSignalType2(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  explicit DiagSignalType(::PROTOBUF_NAMESPACE_ID::Arena* arena);
   private:
   static void ArenaDtor(void* object);
   inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
@@ -3247,7 +3247,7 @@ class DiagSignalType2 PROTOBUF_FINAL :
   void _internal_set_valueoffset(double value);
   public:
 
-  // @@protoc_insertion_point(class_scope:Proto.DiagSignalType2)
+  // @@protoc_insertion_point(class_scope:Proto.DiagSignalType)
  private:
   class _Internal;
 
@@ -3278,24 +3278,24 @@ class DiagSignalType2 PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
-class Connection2 PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.Connection2) */ {
+class Connection PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.Connection) */ {
  public:
-  inline Connection2() : Connection2(nullptr) {}
-  virtual ~Connection2();
-  explicit constexpr Connection2(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+  inline Connection() : Connection(nullptr) {}
+  virtual ~Connection();
+  explicit constexpr Connection(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
 
-  Connection2(const Connection2& from);
-  Connection2(Connection2&& from) noexcept
-    : Connection2() {
+  Connection(const Connection& from);
+  Connection(Connection&& from) noexcept
+    : Connection() {
     *this = ::std::move(from);
   }
 
-  inline Connection2& operator=(const Connection2& from) {
+  inline Connection& operator=(const Connection& from) {
     CopyFrom(from);
     return *this;
   }
-  inline Connection2& operator=(Connection2&& from) noexcept {
+  inline Connection& operator=(Connection&& from) noexcept {
     if (GetArena() == from.GetArena()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -3320,20 +3320,20 @@ class Connection2 PROTOBUF_FINAL :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return GetMetadataStatic().reflection;
   }
-  static const Connection2& default_instance() {
+  static const Connection& default_instance() {
     return *internal_default_instance();
   }
-  static inline const Connection2* internal_default_instance() {
-    return reinterpret_cast<const Connection2*>(
-               &_Connection2_default_instance_);
+  static inline const Connection* internal_default_instance() {
+    return reinterpret_cast<const Connection*>(
+               &_Connection_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     12;
 
-  friend void swap(Connection2& a, Connection2& b) {
+  friend void swap(Connection& a, Connection& b) {
     a.Swap(&b);
   }
-  inline void Swap(Connection2* other) {
+  inline void Swap(Connection* other) {
     if (other == this) return;
     if (GetArena() == other->GetArena()) {
       InternalSwap(other);
@@ -3341,7 +3341,7 @@ class Connection2 PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(Connection2* other) {
+  void UnsafeArenaSwap(Connection* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetArena() == other->GetArena());
     InternalSwap(other);
@@ -3349,17 +3349,17 @@ class Connection2 PROTOBUF_FINAL :
 
   // implements Message ----------------------------------------------
 
-  inline Connection2* New() const final {
-    return CreateMaybeMessage<Connection2>(nullptr);
+  inline Connection* New() const final {
+    return CreateMaybeMessage<Connection>(nullptr);
   }
 
-  Connection2* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<Connection2>(arena);
+  Connection* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<Connection>(arena);
   }
   void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const Connection2& from);
-  void MergeFrom(const Connection2& from);
+  void CopyFrom(const Connection& from);
+  void MergeFrom(const Connection& from);
   PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
   bool IsInitialized() const final;
 
@@ -3373,13 +3373,13 @@ class Connection2 PROTOBUF_FINAL :
   inline void SharedCtor();
   inline void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(Connection2* other);
+  void InternalSwap(Connection* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "Proto.Connection2";
+    return "Proto.Connection";
   }
   protected:
-  explicit Connection2(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  explicit Connection(::PROTOBUF_NAMESPACE_ID::Arena* arena);
   private:
   static void ArenaDtor(void* object);
   inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
@@ -3789,7 +3789,7 @@ class Connection2 PROTOBUF_FINAL :
   void _internal_set_port2rxwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
-  // @@protoc_insertion_point(class_scope:Proto.Connection2)
+  // @@protoc_insertion_point(class_scope:Proto.Connection)
  private:
   class _Internal;
 
@@ -3827,18 +3827,18 @@ class Connection2 PROTOBUF_FINAL :
 };
 // ===================================================================
 
-static const int kDeviceobject2FieldNumber = 7;
-extern ::PROTOBUF_NAMESPACE_ID::internal::ExtensionIdentifier< ::Proto::Envelope2,
-    ::PROTOBUF_NAMESPACE_ID::internal::MessageTypeTraits< ::Proto::DeviceObject2 >, 11, false >
-  deviceobject2;
-static const int kDiagSignalType2FieldNumber = 8;
-extern ::PROTOBUF_NAMESPACE_ID::internal::ExtensionIdentifier< ::Proto::Envelope2,
-    ::PROTOBUF_NAMESPACE_ID::internal::MessageTypeTraits< ::Proto::DiagSignalType2 >, 11, false >
-  diagSignalType2;
-static const int kConnection2FieldNumber = 104;
-extern ::PROTOBUF_NAMESPACE_ID::internal::ExtensionIdentifier< ::Proto::Envelope2,
-    ::PROTOBUF_NAMESPACE_ID::internal::MessageTypeTraits< ::Proto::Connection2 >, 11, false >
-  connection2;
+static const int kDeviceobjectFieldNumber = 7;
+extern ::PROTOBUF_NAMESPACE_ID::internal::ExtensionIdentifier< ::Proto::Envelope,
+    ::PROTOBUF_NAMESPACE_ID::internal::MessageTypeTraits< ::Proto::DeviceObject >, 11, false >
+  deviceobject;
+static const int kDiagSignalTypeFieldNumber = 8;
+extern ::PROTOBUF_NAMESPACE_ID::internal::ExtensionIdentifier< ::Proto::Envelope,
+    ::PROTOBUF_NAMESPACE_ID::internal::MessageTypeTraits< ::Proto::DiagSignalType >, 11, false >
+  diagSignalType;
+static const int kConnectionFieldNumber = 104;
+extern ::PROTOBUF_NAMESPACE_ID::internal::ExtensionIdentifier< ::Proto::Envelope,
+    ::PROTOBUF_NAMESPACE_ID::internal::MessageTypeTraits< ::Proto::Connection >, 11, false >
+  connection;
 
 // ===================================================================
 
@@ -3846,27 +3846,27 @@ extern ::PROTOBUF_NAMESPACE_ID::internal::ExtensionIdentifier< ::Proto::Envelope
   #pragma GCC diagnostic push
   #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif  // __GNUC__
-// DeviceObject2
+// DeviceObject
 
 // required .Proto.Uuid uuid = 1;
-inline bool DeviceObject2::_internal_has_uuid() const {
+inline bool DeviceObject::_internal_has_uuid() const {
   bool value = (_has_bits_[0] & 0x00000004u) != 0;
   PROTOBUF_ASSUME(!value || uuid_ != nullptr);
   return value;
 }
-inline bool DeviceObject2::has_uuid() const {
+inline bool DeviceObject::has_uuid() const {
   return _internal_has_uuid();
 }
-inline const ::Proto::Uuid& DeviceObject2::_internal_uuid() const {
+inline const ::Proto::Uuid& DeviceObject::_internal_uuid() const {
   const ::Proto::Uuid* p = uuid_;
   return p != nullptr ? *p : reinterpret_cast<const ::Proto::Uuid&>(
       ::Proto::_Uuid_default_instance_);
 }
-inline const ::Proto::Uuid& DeviceObject2::uuid() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceObject2.uuid)
+inline const ::Proto::Uuid& DeviceObject::uuid() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.uuid)
   return _internal_uuid();
 }
-inline void DeviceObject2::unsafe_arena_set_allocated_uuid(
+inline void DeviceObject::unsafe_arena_set_allocated_uuid(
     ::Proto::Uuid* uuid) {
   if (GetArena() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(uuid_);
@@ -3877,9 +3877,9 @@ inline void DeviceObject2::unsafe_arena_set_allocated_uuid(
   } else {
     _has_bits_[0] &= ~0x00000004u;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject2.uuid)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.uuid)
 }
-inline ::Proto::Uuid* DeviceObject2::release_uuid() {
+inline ::Proto::Uuid* DeviceObject::release_uuid() {
   _has_bits_[0] &= ~0x00000004u;
   ::Proto::Uuid* temp = uuid_;
   uuid_ = nullptr;
@@ -3888,14 +3888,14 @@ inline ::Proto::Uuid* DeviceObject2::release_uuid() {
   }
   return temp;
 }
-inline ::Proto::Uuid* DeviceObject2::unsafe_arena_release_uuid() {
-  // @@protoc_insertion_point(field_release:Proto.DeviceObject2.uuid)
+inline ::Proto::Uuid* DeviceObject::unsafe_arena_release_uuid() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceObject.uuid)
   _has_bits_[0] &= ~0x00000004u;
   ::Proto::Uuid* temp = uuid_;
   uuid_ = nullptr;
   return temp;
 }
-inline ::Proto::Uuid* DeviceObject2::_internal_mutable_uuid() {
+inline ::Proto::Uuid* DeviceObject::_internal_mutable_uuid() {
   _has_bits_[0] |= 0x00000004u;
   if (uuid_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::Uuid>(GetArena());
@@ -3903,11 +3903,11 @@ inline ::Proto::Uuid* DeviceObject2::_internal_mutable_uuid() {
   }
   return uuid_;
 }
-inline ::Proto::Uuid* DeviceObject2::mutable_uuid() {
-  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject2.uuid)
+inline ::Proto::Uuid* DeviceObject::mutable_uuid() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject.uuid)
   return _internal_mutable_uuid();
 }
-inline void DeviceObject2::set_allocated_uuid(::Proto::Uuid* uuid) {
+inline void DeviceObject::set_allocated_uuid(::Proto::Uuid* uuid) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
   if (message_arena == nullptr) {
     delete reinterpret_cast< ::PROTOBUF_NAMESPACE_ID::MessageLite*>(uuid_);
@@ -3924,28 +3924,28 @@ inline void DeviceObject2::set_allocated_uuid(::Proto::Uuid* uuid) {
     _has_bits_[0] &= ~0x00000004u;
   }
   uuid_ = uuid;
-  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject2.uuid)
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.uuid)
 }
 
 // required .Proto.wstring equipmentId = 2;
-inline bool DeviceObject2::_internal_has_equipmentid() const {
+inline bool DeviceObject::_internal_has_equipmentid() const {
   bool value = (_has_bits_[0] & 0x00000008u) != 0;
   PROTOBUF_ASSUME(!value || equipmentid_ != nullptr);
   return value;
 }
-inline bool DeviceObject2::has_equipmentid() const {
+inline bool DeviceObject::has_equipmentid() const {
   return _internal_has_equipmentid();
 }
-inline const ::Proto::wstring& DeviceObject2::_internal_equipmentid() const {
+inline const ::Proto::wstring& DeviceObject::_internal_equipmentid() const {
   const ::Proto::wstring* p = equipmentid_;
   return p != nullptr ? *p : reinterpret_cast<const ::Proto::wstring&>(
       ::Proto::_wstring_default_instance_);
 }
-inline const ::Proto::wstring& DeviceObject2::equipmentid() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceObject2.equipmentId)
+inline const ::Proto::wstring& DeviceObject::equipmentid() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.equipmentId)
   return _internal_equipmentid();
 }
-inline void DeviceObject2::unsafe_arena_set_allocated_equipmentid(
+inline void DeviceObject::unsafe_arena_set_allocated_equipmentid(
     ::Proto::wstring* equipmentid) {
   if (GetArena() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(equipmentid_);
@@ -3956,9 +3956,9 @@ inline void DeviceObject2::unsafe_arena_set_allocated_equipmentid(
   } else {
     _has_bits_[0] &= ~0x00000008u;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject2.equipmentId)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.equipmentId)
 }
-inline ::Proto::wstring* DeviceObject2::release_equipmentid() {
+inline ::Proto::wstring* DeviceObject::release_equipmentid() {
   _has_bits_[0] &= ~0x00000008u;
   ::Proto::wstring* temp = equipmentid_;
   equipmentid_ = nullptr;
@@ -3967,14 +3967,14 @@ inline ::Proto::wstring* DeviceObject2::release_equipmentid() {
   }
   return temp;
 }
-inline ::Proto::wstring* DeviceObject2::unsafe_arena_release_equipmentid() {
-  // @@protoc_insertion_point(field_release:Proto.DeviceObject2.equipmentId)
+inline ::Proto::wstring* DeviceObject::unsafe_arena_release_equipmentid() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceObject.equipmentId)
   _has_bits_[0] &= ~0x00000008u;
   ::Proto::wstring* temp = equipmentid_;
   equipmentid_ = nullptr;
   return temp;
 }
-inline ::Proto::wstring* DeviceObject2::_internal_mutable_equipmentid() {
+inline ::Proto::wstring* DeviceObject::_internal_mutable_equipmentid() {
   _has_bits_[0] |= 0x00000008u;
   if (equipmentid_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::wstring>(GetArena());
@@ -3982,11 +3982,11 @@ inline ::Proto::wstring* DeviceObject2::_internal_mutable_equipmentid() {
   }
   return equipmentid_;
 }
-inline ::Proto::wstring* DeviceObject2::mutable_equipmentid() {
-  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject2.equipmentId)
+inline ::Proto::wstring* DeviceObject::mutable_equipmentid() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject.equipmentId)
   return _internal_mutable_equipmentid();
 }
-inline void DeviceObject2::set_allocated_equipmentid(::Proto::wstring* equipmentid) {
+inline void DeviceObject::set_allocated_equipmentid(::Proto::wstring* equipmentid) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
   if (message_arena == nullptr) {
     delete reinterpret_cast< ::PROTOBUF_NAMESPACE_ID::MessageLite*>(equipmentid_);
@@ -4003,28 +4003,28 @@ inline void DeviceObject2::set_allocated_equipmentid(::Proto::wstring* equipment
     _has_bits_[0] &= ~0x00000008u;
   }
   equipmentid_ = equipmentid;
-  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject2.equipmentId)
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.equipmentId)
 }
 
 // required .Proto.wstring caption = 3;
-inline bool DeviceObject2::_internal_has_caption() const {
+inline bool DeviceObject::_internal_has_caption() const {
   bool value = (_has_bits_[0] & 0x00000010u) != 0;
   PROTOBUF_ASSUME(!value || caption_ != nullptr);
   return value;
 }
-inline bool DeviceObject2::has_caption() const {
+inline bool DeviceObject::has_caption() const {
   return _internal_has_caption();
 }
-inline const ::Proto::wstring& DeviceObject2::_internal_caption() const {
+inline const ::Proto::wstring& DeviceObject::_internal_caption() const {
   const ::Proto::wstring* p = caption_;
   return p != nullptr ? *p : reinterpret_cast<const ::Proto::wstring&>(
       ::Proto::_wstring_default_instance_);
 }
-inline const ::Proto::wstring& DeviceObject2::caption() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceObject2.caption)
+inline const ::Proto::wstring& DeviceObject::caption() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.caption)
   return _internal_caption();
 }
-inline void DeviceObject2::unsafe_arena_set_allocated_caption(
+inline void DeviceObject::unsafe_arena_set_allocated_caption(
     ::Proto::wstring* caption) {
   if (GetArena() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(caption_);
@@ -4035,9 +4035,9 @@ inline void DeviceObject2::unsafe_arena_set_allocated_caption(
   } else {
     _has_bits_[0] &= ~0x00000010u;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject2.caption)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.caption)
 }
-inline ::Proto::wstring* DeviceObject2::release_caption() {
+inline ::Proto::wstring* DeviceObject::release_caption() {
   _has_bits_[0] &= ~0x00000010u;
   ::Proto::wstring* temp = caption_;
   caption_ = nullptr;
@@ -4046,14 +4046,14 @@ inline ::Proto::wstring* DeviceObject2::release_caption() {
   }
   return temp;
 }
-inline ::Proto::wstring* DeviceObject2::unsafe_arena_release_caption() {
-  // @@protoc_insertion_point(field_release:Proto.DeviceObject2.caption)
+inline ::Proto::wstring* DeviceObject::unsafe_arena_release_caption() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceObject.caption)
   _has_bits_[0] &= ~0x00000010u;
   ::Proto::wstring* temp = caption_;
   caption_ = nullptr;
   return temp;
 }
-inline ::Proto::wstring* DeviceObject2::_internal_mutable_caption() {
+inline ::Proto::wstring* DeviceObject::_internal_mutable_caption() {
   _has_bits_[0] |= 0x00000010u;
   if (caption_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::wstring>(GetArena());
@@ -4061,11 +4061,11 @@ inline ::Proto::wstring* DeviceObject2::_internal_mutable_caption() {
   }
   return caption_;
 }
-inline ::Proto::wstring* DeviceObject2::mutable_caption() {
-  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject2.caption)
+inline ::Proto::wstring* DeviceObject::mutable_caption() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject.caption)
   return _internal_mutable_caption();
 }
-inline void DeviceObject2::set_allocated_caption(::Proto::wstring* caption) {
+inline void DeviceObject::set_allocated_caption(::Proto::wstring* caption) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
   if (message_arena == nullptr) {
     delete reinterpret_cast< ::PROTOBUF_NAMESPACE_ID::MessageLite*>(caption_);
@@ -4082,28 +4082,28 @@ inline void DeviceObject2::set_allocated_caption(::Proto::wstring* caption) {
     _has_bits_[0] &= ~0x00000010u;
   }
   caption_ = caption;
-  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject2.caption)
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.caption)
 }
 
 // optional .Proto.wstring childRestriction = 4;
-inline bool DeviceObject2::_internal_has_childrestriction() const {
+inline bool DeviceObject::_internal_has_childrestriction() const {
   bool value = (_has_bits_[0] & 0x00000020u) != 0;
   PROTOBUF_ASSUME(!value || childrestriction_ != nullptr);
   return value;
 }
-inline bool DeviceObject2::has_childrestriction() const {
+inline bool DeviceObject::has_childrestriction() const {
   return _internal_has_childrestriction();
 }
-inline const ::Proto::wstring& DeviceObject2::_internal_childrestriction() const {
+inline const ::Proto::wstring& DeviceObject::_internal_childrestriction() const {
   const ::Proto::wstring* p = childrestriction_;
   return p != nullptr ? *p : reinterpret_cast<const ::Proto::wstring&>(
       ::Proto::_wstring_default_instance_);
 }
-inline const ::Proto::wstring& DeviceObject2::childrestriction() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceObject2.childRestriction)
+inline const ::Proto::wstring& DeviceObject::childrestriction() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.childRestriction)
   return _internal_childrestriction();
 }
-inline void DeviceObject2::unsafe_arena_set_allocated_childrestriction(
+inline void DeviceObject::unsafe_arena_set_allocated_childrestriction(
     ::Proto::wstring* childrestriction) {
   if (GetArena() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(childrestriction_);
@@ -4114,9 +4114,9 @@ inline void DeviceObject2::unsafe_arena_set_allocated_childrestriction(
   } else {
     _has_bits_[0] &= ~0x00000020u;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject2.childRestriction)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.childRestriction)
 }
-inline ::Proto::wstring* DeviceObject2::release_childrestriction() {
+inline ::Proto::wstring* DeviceObject::release_childrestriction() {
   _has_bits_[0] &= ~0x00000020u;
   ::Proto::wstring* temp = childrestriction_;
   childrestriction_ = nullptr;
@@ -4125,14 +4125,14 @@ inline ::Proto::wstring* DeviceObject2::release_childrestriction() {
   }
   return temp;
 }
-inline ::Proto::wstring* DeviceObject2::unsafe_arena_release_childrestriction() {
-  // @@protoc_insertion_point(field_release:Proto.DeviceObject2.childRestriction)
+inline ::Proto::wstring* DeviceObject::unsafe_arena_release_childrestriction() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceObject.childRestriction)
   _has_bits_[0] &= ~0x00000020u;
   ::Proto::wstring* temp = childrestriction_;
   childrestriction_ = nullptr;
   return temp;
 }
-inline ::Proto::wstring* DeviceObject2::_internal_mutable_childrestriction() {
+inline ::Proto::wstring* DeviceObject::_internal_mutable_childrestriction() {
   _has_bits_[0] |= 0x00000020u;
   if (childrestriction_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::wstring>(GetArena());
@@ -4140,11 +4140,11 @@ inline ::Proto::wstring* DeviceObject2::_internal_mutable_childrestriction() {
   }
   return childrestriction_;
 }
-inline ::Proto::wstring* DeviceObject2::mutable_childrestriction() {
-  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject2.childRestriction)
+inline ::Proto::wstring* DeviceObject::mutable_childrestriction() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject.childRestriction)
   return _internal_mutable_childrestriction();
 }
-inline void DeviceObject2::set_allocated_childrestriction(::Proto::wstring* childrestriction) {
+inline void DeviceObject::set_allocated_childrestriction(::Proto::wstring* childrestriction) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
   if (message_arena == nullptr) {
     delete reinterpret_cast< ::PROTOBUF_NAMESPACE_ID::MessageLite*>(childrestriction_);
@@ -4161,100 +4161,100 @@ inline void DeviceObject2::set_allocated_childrestriction(::Proto::wstring* chil
     _has_bits_[0] &= ~0x00000020u;
   }
   childrestriction_ = childrestriction;
-  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject2.childRestriction)
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.childRestriction)
 }
 
 // optional int32 place = 5 [default = 0];
-inline bool DeviceObject2::_internal_has_place() const {
+inline bool DeviceObject::_internal_has_place() const {
   bool value = (_has_bits_[0] & 0x00040000u) != 0;
   return value;
 }
-inline bool DeviceObject2::has_place() const {
+inline bool DeviceObject::has_place() const {
   return _internal_has_place();
 }
-inline void DeviceObject2::clear_place() {
+inline void DeviceObject::clear_place() {
   place_ = 0;
   _has_bits_[0] &= ~0x00040000u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject2::_internal_place() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::_internal_place() const {
   return place_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject2::place() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceObject2.place)
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::place() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.place)
   return _internal_place();
 }
-inline void DeviceObject2::_internal_set_place(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceObject::_internal_set_place(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00040000u;
   place_ = value;
 }
-inline void DeviceObject2::set_place(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceObject::set_place(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_place(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceObject2.place)
+  // @@protoc_insertion_point(field_set:Proto.DeviceObject.place)
 }
 
 // optional string specific_properties_struct = 6;
-inline bool DeviceObject2::_internal_has_specific_properties_struct() const {
+inline bool DeviceObject::_internal_has_specific_properties_struct() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
 }
-inline bool DeviceObject2::has_specific_properties_struct() const {
+inline bool DeviceObject::has_specific_properties_struct() const {
   return _internal_has_specific_properties_struct();
 }
-inline void DeviceObject2::clear_specific_properties_struct() {
+inline void DeviceObject::clear_specific_properties_struct() {
   specific_properties_struct_.ClearToEmpty();
   _has_bits_[0] &= ~0x00000001u;
 }
-inline const std::string& DeviceObject2::specific_properties_struct() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceObject2.specific_properties_struct)
+inline const std::string& DeviceObject::specific_properties_struct() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.specific_properties_struct)
   return _internal_specific_properties_struct();
 }
-inline void DeviceObject2::set_specific_properties_struct(const std::string& value) {
+inline void DeviceObject::set_specific_properties_struct(const std::string& value) {
   _internal_set_specific_properties_struct(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceObject2.specific_properties_struct)
+  // @@protoc_insertion_point(field_set:Proto.DeviceObject.specific_properties_struct)
 }
-inline std::string* DeviceObject2::mutable_specific_properties_struct() {
-  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject2.specific_properties_struct)
+inline std::string* DeviceObject::mutable_specific_properties_struct() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject.specific_properties_struct)
   return _internal_mutable_specific_properties_struct();
 }
-inline const std::string& DeviceObject2::_internal_specific_properties_struct() const {
+inline const std::string& DeviceObject::_internal_specific_properties_struct() const {
   return specific_properties_struct_.Get();
 }
-inline void DeviceObject2::_internal_set_specific_properties_struct(const std::string& value) {
+inline void DeviceObject::_internal_set_specific_properties_struct(const std::string& value) {
   _has_bits_[0] |= 0x00000001u;
   specific_properties_struct_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
-inline void DeviceObject2::set_specific_properties_struct(std::string&& value) {
+inline void DeviceObject::set_specific_properties_struct(std::string&& value) {
   _has_bits_[0] |= 0x00000001u;
   specific_properties_struct_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Proto.DeviceObject2.specific_properties_struct)
+  // @@protoc_insertion_point(field_set_rvalue:Proto.DeviceObject.specific_properties_struct)
 }
-inline void DeviceObject2::set_specific_properties_struct(const char* value) {
+inline void DeviceObject::set_specific_properties_struct(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   _has_bits_[0] |= 0x00000001u;
   specific_properties_struct_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Proto.DeviceObject2.specific_properties_struct)
+  // @@protoc_insertion_point(field_set_char:Proto.DeviceObject.specific_properties_struct)
 }
-inline void DeviceObject2::set_specific_properties_struct(const char* value,
+inline void DeviceObject::set_specific_properties_struct(const char* value,
     size_t size) {
   _has_bits_[0] |= 0x00000001u;
   specific_properties_struct_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Proto.DeviceObject2.specific_properties_struct)
+  // @@protoc_insertion_point(field_set_pointer:Proto.DeviceObject.specific_properties_struct)
 }
-inline std::string* DeviceObject2::_internal_mutable_specific_properties_struct() {
+inline std::string* DeviceObject::_internal_mutable_specific_properties_struct() {
   _has_bits_[0] |= 0x00000001u;
   return specific_properties_struct_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
-inline std::string* DeviceObject2::release_specific_properties_struct() {
-  // @@protoc_insertion_point(field_release:Proto.DeviceObject2.specific_properties_struct)
+inline std::string* DeviceObject::release_specific_properties_struct() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceObject.specific_properties_struct)
   if (!_internal_has_specific_properties_struct()) {
     return nullptr;
   }
   _has_bits_[0] &= ~0x00000001u;
   return specific_properties_struct_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void DeviceObject2::set_allocated_specific_properties_struct(std::string* specific_properties_struct) {
+inline void DeviceObject::set_allocated_specific_properties_struct(std::string* specific_properties_struct) {
   if (specific_properties_struct != nullptr) {
     _has_bits_[0] |= 0x00000001u;
   } else {
@@ -4262,222 +4262,222 @@ inline void DeviceObject2::set_allocated_specific_properties_struct(std::string*
   }
   specific_properties_struct_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), specific_properties_struct,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject2.specific_properties_struct)
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.specific_properties_struct)
 }
 
 // repeated .Proto.Property properties = 7;
-inline int DeviceObject2::_internal_properties_size() const {
+inline int DeviceObject::_internal_properties_size() const {
   return properties_.size();
 }
-inline int DeviceObject2::properties_size() const {
+inline int DeviceObject::properties_size() const {
   return _internal_properties_size();
 }
-inline ::Proto::Property* DeviceObject2::mutable_properties(int index) {
-  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject2.properties)
+inline ::Proto::Property* DeviceObject::mutable_properties(int index) {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject.properties)
   return properties_.Mutable(index);
 }
 inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::Property >*
-DeviceObject2::mutable_properties() {
-  // @@protoc_insertion_point(field_mutable_list:Proto.DeviceObject2.properties)
+DeviceObject::mutable_properties() {
+  // @@protoc_insertion_point(field_mutable_list:Proto.DeviceObject.properties)
   return &properties_;
 }
-inline const ::Proto::Property& DeviceObject2::_internal_properties(int index) const {
+inline const ::Proto::Property& DeviceObject::_internal_properties(int index) const {
   return properties_.Get(index);
 }
-inline const ::Proto::Property& DeviceObject2::properties(int index) const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceObject2.properties)
+inline const ::Proto::Property& DeviceObject::properties(int index) const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.properties)
   return _internal_properties(index);
 }
-inline ::Proto::Property* DeviceObject2::_internal_add_properties() {
+inline ::Proto::Property* DeviceObject::_internal_add_properties() {
   return properties_.Add();
 }
-inline ::Proto::Property* DeviceObject2::add_properties() {
-  // @@protoc_insertion_point(field_add:Proto.DeviceObject2.properties)
+inline ::Proto::Property* DeviceObject::add_properties() {
+  // @@protoc_insertion_point(field_add:Proto.DeviceObject.properties)
   return _internal_add_properties();
 }
 inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::Property >&
-DeviceObject2::properties() const {
-  // @@protoc_insertion_point(field_list:Proto.DeviceObject2.properties)
+DeviceObject::properties() const {
+  // @@protoc_insertion_point(field_list:Proto.DeviceObject.properties)
   return properties_;
 }
 
 // repeated string tags = 8;
-inline int DeviceObject2::_internal_tags_size() const {
+inline int DeviceObject::_internal_tags_size() const {
   return tags_.size();
 }
-inline int DeviceObject2::tags_size() const {
+inline int DeviceObject::tags_size() const {
   return _internal_tags_size();
 }
-inline void DeviceObject2::clear_tags() {
+inline void DeviceObject::clear_tags() {
   tags_.Clear();
 }
-inline std::string* DeviceObject2::add_tags() {
-  // @@protoc_insertion_point(field_add_mutable:Proto.DeviceObject2.tags)
+inline std::string* DeviceObject::add_tags() {
+  // @@protoc_insertion_point(field_add_mutable:Proto.DeviceObject.tags)
   return _internal_add_tags();
 }
-inline const std::string& DeviceObject2::_internal_tags(int index) const {
+inline const std::string& DeviceObject::_internal_tags(int index) const {
   return tags_.Get(index);
 }
-inline const std::string& DeviceObject2::tags(int index) const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceObject2.tags)
+inline const std::string& DeviceObject::tags(int index) const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.tags)
   return _internal_tags(index);
 }
-inline std::string* DeviceObject2::mutable_tags(int index) {
-  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject2.tags)
+inline std::string* DeviceObject::mutable_tags(int index) {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject.tags)
   return tags_.Mutable(index);
 }
-inline void DeviceObject2::set_tags(int index, const std::string& value) {
-  // @@protoc_insertion_point(field_set:Proto.DeviceObject2.tags)
+inline void DeviceObject::set_tags(int index, const std::string& value) {
+  // @@protoc_insertion_point(field_set:Proto.DeviceObject.tags)
   tags_.Mutable(index)->assign(value);
 }
-inline void DeviceObject2::set_tags(int index, std::string&& value) {
-  // @@protoc_insertion_point(field_set:Proto.DeviceObject2.tags)
+inline void DeviceObject::set_tags(int index, std::string&& value) {
+  // @@protoc_insertion_point(field_set:Proto.DeviceObject.tags)
   tags_.Mutable(index)->assign(std::move(value));
 }
-inline void DeviceObject2::set_tags(int index, const char* value) {
+inline void DeviceObject::set_tags(int index, const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   tags_.Mutable(index)->assign(value);
-  // @@protoc_insertion_point(field_set_char:Proto.DeviceObject2.tags)
+  // @@protoc_insertion_point(field_set_char:Proto.DeviceObject.tags)
 }
-inline void DeviceObject2::set_tags(int index, const char* value, size_t size) {
+inline void DeviceObject::set_tags(int index, const char* value, size_t size) {
   tags_.Mutable(index)->assign(
     reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:Proto.DeviceObject2.tags)
+  // @@protoc_insertion_point(field_set_pointer:Proto.DeviceObject.tags)
 }
-inline std::string* DeviceObject2::_internal_add_tags() {
+inline std::string* DeviceObject::_internal_add_tags() {
   return tags_.Add();
 }
-inline void DeviceObject2::add_tags(const std::string& value) {
+inline void DeviceObject::add_tags(const std::string& value) {
   tags_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add:Proto.DeviceObject2.tags)
+  // @@protoc_insertion_point(field_add:Proto.DeviceObject.tags)
 }
-inline void DeviceObject2::add_tags(std::string&& value) {
+inline void DeviceObject::add_tags(std::string&& value) {
   tags_.Add(std::move(value));
-  // @@protoc_insertion_point(field_add:Proto.DeviceObject2.tags)
+  // @@protoc_insertion_point(field_add:Proto.DeviceObject.tags)
 }
-inline void DeviceObject2::add_tags(const char* value) {
+inline void DeviceObject::add_tags(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   tags_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add_char:Proto.DeviceObject2.tags)
+  // @@protoc_insertion_point(field_add_char:Proto.DeviceObject.tags)
 }
-inline void DeviceObject2::add_tags(const char* value, size_t size) {
+inline void DeviceObject::add_tags(const char* value, size_t size) {
   tags_.Add()->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_add_pointer:Proto.DeviceObject2.tags)
+  // @@protoc_insertion_point(field_add_pointer:Proto.DeviceObject.tags)
 }
 inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>&
-DeviceObject2::tags() const {
-  // @@protoc_insertion_point(field_list:Proto.DeviceObject2.tags)
+DeviceObject::tags() const {
+  // @@protoc_insertion_point(field_list:Proto.DeviceObject.tags)
   return tags_;
 }
 inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
-DeviceObject2::mutable_tags() {
-  // @@protoc_insertion_point(field_mutable_list:Proto.DeviceObject2.tags)
+DeviceObject::mutable_tags() {
+  // @@protoc_insertion_point(field_mutable_list:Proto.DeviceObject.tags)
   return &tags_;
 }
 
 // optional bool excludeFromBuild = 9;
-inline bool DeviceObject2::_internal_has_excludefrombuild() const {
+inline bool DeviceObject::_internal_has_excludefrombuild() const {
   bool value = (_has_bits_[0] & 0x00080000u) != 0;
   return value;
 }
-inline bool DeviceObject2::has_excludefrombuild() const {
+inline bool DeviceObject::has_excludefrombuild() const {
   return _internal_has_excludefrombuild();
 }
-inline void DeviceObject2::clear_excludefrombuild() {
+inline void DeviceObject::clear_excludefrombuild() {
   excludefrombuild_ = false;
   _has_bits_[0] &= ~0x00080000u;
 }
-inline bool DeviceObject2::_internal_excludefrombuild() const {
+inline bool DeviceObject::_internal_excludefrombuild() const {
   return excludefrombuild_;
 }
-inline bool DeviceObject2::excludefrombuild() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceObject2.excludeFromBuild)
+inline bool DeviceObject::excludefrombuild() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.excludeFromBuild)
   return _internal_excludefrombuild();
 }
-inline void DeviceObject2::_internal_set_excludefrombuild(bool value) {
+inline void DeviceObject::_internal_set_excludefrombuild(bool value) {
   _has_bits_[0] |= 0x00080000u;
   excludefrombuild_ = value;
 }
-inline void DeviceObject2::set_excludefrombuild(bool value) {
+inline void DeviceObject::set_excludefrombuild(bool value) {
   _internal_set_excludefrombuild(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceObject2.excludeFromBuild)
+  // @@protoc_insertion_point(field_set:Proto.DeviceObject.excludeFromBuild)
 }
 
 // optional bool preset = 32 [default = false];
-inline bool DeviceObject2::_internal_has_preset() const {
+inline bool DeviceObject::_internal_has_preset() const {
   bool value = (_has_bits_[0] & 0x00100000u) != 0;
   return value;
 }
-inline bool DeviceObject2::has_preset() const {
+inline bool DeviceObject::has_preset() const {
   return _internal_has_preset();
 }
-inline void DeviceObject2::clear_preset() {
+inline void DeviceObject::clear_preset() {
   preset_ = false;
   _has_bits_[0] &= ~0x00100000u;
 }
-inline bool DeviceObject2::_internal_preset() const {
+inline bool DeviceObject::_internal_preset() const {
   return preset_;
 }
-inline bool DeviceObject2::preset() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceObject2.preset)
+inline bool DeviceObject::preset() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.preset)
   return _internal_preset();
 }
-inline void DeviceObject2::_internal_set_preset(bool value) {
+inline void DeviceObject::_internal_set_preset(bool value) {
   _has_bits_[0] |= 0x00100000u;
   preset_ = value;
 }
-inline void DeviceObject2::set_preset(bool value) {
+inline void DeviceObject::set_preset(bool value) {
   _internal_set_preset(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceObject2.preset)
+  // @@protoc_insertion_point(field_set:Proto.DeviceObject.preset)
 }
 
 // optional bool presetRoot = 33 [default = false];
-inline bool DeviceObject2::_internal_has_presetroot() const {
+inline bool DeviceObject::_internal_has_presetroot() const {
   bool value = (_has_bits_[0] & 0x00200000u) != 0;
   return value;
 }
-inline bool DeviceObject2::has_presetroot() const {
+inline bool DeviceObject::has_presetroot() const {
   return _internal_has_presetroot();
 }
-inline void DeviceObject2::clear_presetroot() {
+inline void DeviceObject::clear_presetroot() {
   presetroot_ = false;
   _has_bits_[0] &= ~0x00200000u;
 }
-inline bool DeviceObject2::_internal_presetroot() const {
+inline bool DeviceObject::_internal_presetroot() const {
   return presetroot_;
 }
-inline bool DeviceObject2::presetroot() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceObject2.presetRoot)
+inline bool DeviceObject::presetroot() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.presetRoot)
   return _internal_presetroot();
 }
-inline void DeviceObject2::_internal_set_presetroot(bool value) {
+inline void DeviceObject::_internal_set_presetroot(bool value) {
   _has_bits_[0] |= 0x00200000u;
   presetroot_ = value;
 }
-inline void DeviceObject2::set_presetroot(bool value) {
+inline void DeviceObject::set_presetroot(bool value) {
   _internal_set_presetroot(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceObject2.presetRoot)
+  // @@protoc_insertion_point(field_set:Proto.DeviceObject.presetRoot)
 }
 
 // optional .Proto.wstring presetName = 34;
-inline bool DeviceObject2::_internal_has_presetname() const {
+inline bool DeviceObject::_internal_has_presetname() const {
   bool value = (_has_bits_[0] & 0x00000040u) != 0;
   PROTOBUF_ASSUME(!value || presetname_ != nullptr);
   return value;
 }
-inline bool DeviceObject2::has_presetname() const {
+inline bool DeviceObject::has_presetname() const {
   return _internal_has_presetname();
 }
-inline const ::Proto::wstring& DeviceObject2::_internal_presetname() const {
+inline const ::Proto::wstring& DeviceObject::_internal_presetname() const {
   const ::Proto::wstring* p = presetname_;
   return p != nullptr ? *p : reinterpret_cast<const ::Proto::wstring&>(
       ::Proto::_wstring_default_instance_);
 }
-inline const ::Proto::wstring& DeviceObject2::presetname() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceObject2.presetName)
+inline const ::Proto::wstring& DeviceObject::presetname() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.presetName)
   return _internal_presetname();
 }
-inline void DeviceObject2::unsafe_arena_set_allocated_presetname(
+inline void DeviceObject::unsafe_arena_set_allocated_presetname(
     ::Proto::wstring* presetname) {
   if (GetArena() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(presetname_);
@@ -4488,9 +4488,9 @@ inline void DeviceObject2::unsafe_arena_set_allocated_presetname(
   } else {
     _has_bits_[0] &= ~0x00000040u;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject2.presetName)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.presetName)
 }
-inline ::Proto::wstring* DeviceObject2::release_presetname() {
+inline ::Proto::wstring* DeviceObject::release_presetname() {
   _has_bits_[0] &= ~0x00000040u;
   ::Proto::wstring* temp = presetname_;
   presetname_ = nullptr;
@@ -4499,14 +4499,14 @@ inline ::Proto::wstring* DeviceObject2::release_presetname() {
   }
   return temp;
 }
-inline ::Proto::wstring* DeviceObject2::unsafe_arena_release_presetname() {
-  // @@protoc_insertion_point(field_release:Proto.DeviceObject2.presetName)
+inline ::Proto::wstring* DeviceObject::unsafe_arena_release_presetname() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceObject.presetName)
   _has_bits_[0] &= ~0x00000040u;
   ::Proto::wstring* temp = presetname_;
   presetname_ = nullptr;
   return temp;
 }
-inline ::Proto::wstring* DeviceObject2::_internal_mutable_presetname() {
+inline ::Proto::wstring* DeviceObject::_internal_mutable_presetname() {
   _has_bits_[0] |= 0x00000040u;
   if (presetname_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::wstring>(GetArena());
@@ -4514,11 +4514,11 @@ inline ::Proto::wstring* DeviceObject2::_internal_mutable_presetname() {
   }
   return presetname_;
 }
-inline ::Proto::wstring* DeviceObject2::mutable_presetname() {
-  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject2.presetName)
+inline ::Proto::wstring* DeviceObject::mutable_presetname() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject.presetName)
   return _internal_mutable_presetname();
 }
-inline void DeviceObject2::set_allocated_presetname(::Proto::wstring* presetname) {
+inline void DeviceObject::set_allocated_presetname(::Proto::wstring* presetname) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
   if (message_arena == nullptr) {
     delete reinterpret_cast< ::PROTOBUF_NAMESPACE_ID::MessageLite*>(presetname_);
@@ -4535,28 +4535,28 @@ inline void DeviceObject2::set_allocated_presetname(::Proto::wstring* presetname
     _has_bits_[0] &= ~0x00000040u;
   }
   presetname_ = presetname;
-  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject2.presetName)
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.presetName)
 }
 
 // optional .Proto.Uuid presetObjectUuid = 35;
-inline bool DeviceObject2::_internal_has_presetobjectuuid() const {
+inline bool DeviceObject::_internal_has_presetobjectuuid() const {
   bool value = (_has_bits_[0] & 0x00000080u) != 0;
   PROTOBUF_ASSUME(!value || presetobjectuuid_ != nullptr);
   return value;
 }
-inline bool DeviceObject2::has_presetobjectuuid() const {
+inline bool DeviceObject::has_presetobjectuuid() const {
   return _internal_has_presetobjectuuid();
 }
-inline const ::Proto::Uuid& DeviceObject2::_internal_presetobjectuuid() const {
+inline const ::Proto::Uuid& DeviceObject::_internal_presetobjectuuid() const {
   const ::Proto::Uuid* p = presetobjectuuid_;
   return p != nullptr ? *p : reinterpret_cast<const ::Proto::Uuid&>(
       ::Proto::_Uuid_default_instance_);
 }
-inline const ::Proto::Uuid& DeviceObject2::presetobjectuuid() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceObject2.presetObjectUuid)
+inline const ::Proto::Uuid& DeviceObject::presetobjectuuid() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.presetObjectUuid)
   return _internal_presetobjectuuid();
 }
-inline void DeviceObject2::unsafe_arena_set_allocated_presetobjectuuid(
+inline void DeviceObject::unsafe_arena_set_allocated_presetobjectuuid(
     ::Proto::Uuid* presetobjectuuid) {
   if (GetArena() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(presetobjectuuid_);
@@ -4567,9 +4567,9 @@ inline void DeviceObject2::unsafe_arena_set_allocated_presetobjectuuid(
   } else {
     _has_bits_[0] &= ~0x00000080u;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject2.presetObjectUuid)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.presetObjectUuid)
 }
-inline ::Proto::Uuid* DeviceObject2::release_presetobjectuuid() {
+inline ::Proto::Uuid* DeviceObject::release_presetobjectuuid() {
   _has_bits_[0] &= ~0x00000080u;
   ::Proto::Uuid* temp = presetobjectuuid_;
   presetobjectuuid_ = nullptr;
@@ -4578,14 +4578,14 @@ inline ::Proto::Uuid* DeviceObject2::release_presetobjectuuid() {
   }
   return temp;
 }
-inline ::Proto::Uuid* DeviceObject2::unsafe_arena_release_presetobjectuuid() {
-  // @@protoc_insertion_point(field_release:Proto.DeviceObject2.presetObjectUuid)
+inline ::Proto::Uuid* DeviceObject::unsafe_arena_release_presetobjectuuid() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceObject.presetObjectUuid)
   _has_bits_[0] &= ~0x00000080u;
   ::Proto::Uuid* temp = presetobjectuuid_;
   presetobjectuuid_ = nullptr;
   return temp;
 }
-inline ::Proto::Uuid* DeviceObject2::_internal_mutable_presetobjectuuid() {
+inline ::Proto::Uuid* DeviceObject::_internal_mutable_presetobjectuuid() {
   _has_bits_[0] |= 0x00000080u;
   if (presetobjectuuid_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::Uuid>(GetArena());
@@ -4593,11 +4593,11 @@ inline ::Proto::Uuid* DeviceObject2::_internal_mutable_presetobjectuuid() {
   }
   return presetobjectuuid_;
 }
-inline ::Proto::Uuid* DeviceObject2::mutable_presetobjectuuid() {
-  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject2.presetObjectUuid)
+inline ::Proto::Uuid* DeviceObject::mutable_presetobjectuuid() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject.presetObjectUuid)
   return _internal_mutable_presetobjectuuid();
 }
-inline void DeviceObject2::set_allocated_presetobjectuuid(::Proto::Uuid* presetobjectuuid) {
+inline void DeviceObject::set_allocated_presetobjectuuid(::Proto::Uuid* presetobjectuuid) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
   if (message_arena == nullptr) {
     delete reinterpret_cast< ::PROTOBUF_NAMESPACE_ID::MessageLite*>(presetobjectuuid_);
@@ -4614,128 +4614,128 @@ inline void DeviceObject2::set_allocated_presetobjectuuid(::Proto::Uuid* preseto
     _has_bits_[0] &= ~0x00000080u;
   }
   presetobjectuuid_ = presetobjectuuid;
-  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject2.presetObjectUuid)
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.presetObjectUuid)
 }
 
 // optional int32 childCountHint = 36 [default = 0];
-inline bool DeviceObject2::_internal_has_childcounthint() const {
+inline bool DeviceObject::_internal_has_childcounthint() const {
   bool value = (_has_bits_[0] & 0x00400000u) != 0;
   return value;
 }
-inline bool DeviceObject2::has_childcounthint() const {
+inline bool DeviceObject::has_childcounthint() const {
   return _internal_has_childcounthint();
 }
-inline void DeviceObject2::clear_childcounthint() {
+inline void DeviceObject::clear_childcounthint() {
   childcounthint_ = 0;
   _has_bits_[0] &= ~0x00400000u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject2::_internal_childcounthint() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::_internal_childcounthint() const {
   return childcounthint_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject2::childcounthint() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceObject2.childCountHint)
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::childcounthint() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.childCountHint)
   return _internal_childcounthint();
 }
-inline void DeviceObject2::_internal_set_childcounthint(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceObject::_internal_set_childcounthint(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00400000u;
   childcounthint_ = value;
 }
-inline void DeviceObject2::set_childcounthint(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceObject::set_childcounthint(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_childcounthint(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceObject2.childCountHint)
+  // @@protoc_insertion_point(field_set:Proto.DeviceObject.childCountHint)
 }
 
 // optional int32 presetVersion = 37;
-inline bool DeviceObject2::_internal_has_presetversion() const {
+inline bool DeviceObject::_internal_has_presetversion() const {
   bool value = (_has_bits_[0] & 0x00800000u) != 0;
   return value;
 }
-inline bool DeviceObject2::has_presetversion() const {
+inline bool DeviceObject::has_presetversion() const {
   return _internal_has_presetversion();
 }
-inline void DeviceObject2::clear_presetversion() {
+inline void DeviceObject::clear_presetversion() {
   presetversion_ = 0;
   _has_bits_[0] &= ~0x00800000u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject2::_internal_presetversion() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::_internal_presetversion() const {
   return presetversion_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject2::presetversion() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceObject2.presetVersion)
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceObject::presetversion() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.presetVersion)
   return _internal_presetversion();
 }
-inline void DeviceObject2::_internal_set_presetversion(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceObject::_internal_set_presetversion(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00800000u;
   presetversion_ = value;
 }
-inline void DeviceObject2::set_presetversion(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceObject::set_presetversion(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_presetversion(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceObject2.presetVersion)
+  // @@protoc_insertion_point(field_set:Proto.DeviceObject.presetVersion)
 }
 
 // optional string presetProtectedProperties = 38;
-inline bool DeviceObject2::_internal_has_presetprotectedproperties() const {
+inline bool DeviceObject::_internal_has_presetprotectedproperties() const {
   bool value = (_has_bits_[0] & 0x00000002u) != 0;
   return value;
 }
-inline bool DeviceObject2::has_presetprotectedproperties() const {
+inline bool DeviceObject::has_presetprotectedproperties() const {
   return _internal_has_presetprotectedproperties();
 }
-inline void DeviceObject2::clear_presetprotectedproperties() {
+inline void DeviceObject::clear_presetprotectedproperties() {
   presetprotectedproperties_.ClearToEmpty();
   _has_bits_[0] &= ~0x00000002u;
 }
-inline const std::string& DeviceObject2::presetprotectedproperties() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceObject2.presetProtectedProperties)
+inline const std::string& DeviceObject::presetprotectedproperties() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.presetProtectedProperties)
   return _internal_presetprotectedproperties();
 }
-inline void DeviceObject2::set_presetprotectedproperties(const std::string& value) {
+inline void DeviceObject::set_presetprotectedproperties(const std::string& value) {
   _internal_set_presetprotectedproperties(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceObject2.presetProtectedProperties)
+  // @@protoc_insertion_point(field_set:Proto.DeviceObject.presetProtectedProperties)
 }
-inline std::string* DeviceObject2::mutable_presetprotectedproperties() {
-  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject2.presetProtectedProperties)
+inline std::string* DeviceObject::mutable_presetprotectedproperties() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject.presetProtectedProperties)
   return _internal_mutable_presetprotectedproperties();
 }
-inline const std::string& DeviceObject2::_internal_presetprotectedproperties() const {
+inline const std::string& DeviceObject::_internal_presetprotectedproperties() const {
   return presetprotectedproperties_.Get();
 }
-inline void DeviceObject2::_internal_set_presetprotectedproperties(const std::string& value) {
+inline void DeviceObject::_internal_set_presetprotectedproperties(const std::string& value) {
   _has_bits_[0] |= 0x00000002u;
   presetprotectedproperties_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
-inline void DeviceObject2::set_presetprotectedproperties(std::string&& value) {
+inline void DeviceObject::set_presetprotectedproperties(std::string&& value) {
   _has_bits_[0] |= 0x00000002u;
   presetprotectedproperties_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Proto.DeviceObject2.presetProtectedProperties)
+  // @@protoc_insertion_point(field_set_rvalue:Proto.DeviceObject.presetProtectedProperties)
 }
-inline void DeviceObject2::set_presetprotectedproperties(const char* value) {
+inline void DeviceObject::set_presetprotectedproperties(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   _has_bits_[0] |= 0x00000002u;
   presetprotectedproperties_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Proto.DeviceObject2.presetProtectedProperties)
+  // @@protoc_insertion_point(field_set_char:Proto.DeviceObject.presetProtectedProperties)
 }
-inline void DeviceObject2::set_presetprotectedproperties(const char* value,
+inline void DeviceObject::set_presetprotectedproperties(const char* value,
     size_t size) {
   _has_bits_[0] |= 0x00000002u;
   presetprotectedproperties_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Proto.DeviceObject2.presetProtectedProperties)
+  // @@protoc_insertion_point(field_set_pointer:Proto.DeviceObject.presetProtectedProperties)
 }
-inline std::string* DeviceObject2::_internal_mutable_presetprotectedproperties() {
+inline std::string* DeviceObject::_internal_mutable_presetprotectedproperties() {
   _has_bits_[0] |= 0x00000002u;
   return presetprotectedproperties_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
-inline std::string* DeviceObject2::release_presetprotectedproperties() {
-  // @@protoc_insertion_point(field_release:Proto.DeviceObject2.presetProtectedProperties)
+inline std::string* DeviceObject::release_presetprotectedproperties() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceObject.presetProtectedProperties)
   if (!_internal_has_presetprotectedproperties()) {
     return nullptr;
   }
   _has_bits_[0] &= ~0x00000002u;
   return presetprotectedproperties_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void DeviceObject2::set_allocated_presetprotectedproperties(std::string* presetprotectedproperties) {
+inline void DeviceObject::set_allocated_presetprotectedproperties(std::string* presetprotectedproperties) {
   if (presetprotectedproperties != nullptr) {
     _has_bits_[0] |= 0x00000002u;
   } else {
@@ -4743,33 +4743,33 @@ inline void DeviceObject2::set_allocated_presetprotectedproperties(std::string* 
   }
   presetprotectedproperties_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), presetprotectedproperties,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject2.presetProtectedProperties)
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.presetProtectedProperties)
 }
 
-// optional .Proto.DeviceRoot2 Root = 100;
-inline bool DeviceObject2::_internal_has_root() const {
+// optional .Proto.DeviceRoot Root = 100;
+inline bool DeviceObject::_internal_has_root() const {
   bool value = (_has_bits_[0] & 0x00000100u) != 0;
   PROTOBUF_ASSUME(!value || root_ != nullptr);
   return value;
 }
-inline bool DeviceObject2::has_root() const {
+inline bool DeviceObject::has_root() const {
   return _internal_has_root();
 }
-inline void DeviceObject2::clear_root() {
+inline void DeviceObject::clear_root() {
   if (root_ != nullptr) root_->Clear();
   _has_bits_[0] &= ~0x00000100u;
 }
-inline const ::Proto::DeviceRoot2& DeviceObject2::_internal_root() const {
-  const ::Proto::DeviceRoot2* p = root_;
-  return p != nullptr ? *p : reinterpret_cast<const ::Proto::DeviceRoot2&>(
-      ::Proto::_DeviceRoot2_default_instance_);
+inline const ::Proto::DeviceRoot& DeviceObject::_internal_root() const {
+  const ::Proto::DeviceRoot* p = root_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Proto::DeviceRoot&>(
+      ::Proto::_DeviceRoot_default_instance_);
 }
-inline const ::Proto::DeviceRoot2& DeviceObject2::root() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceObject2.Root)
+inline const ::Proto::DeviceRoot& DeviceObject::root() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.Root)
   return _internal_root();
 }
-inline void DeviceObject2::unsafe_arena_set_allocated_root(
-    ::Proto::DeviceRoot2* root) {
+inline void DeviceObject::unsafe_arena_set_allocated_root(
+    ::Proto::DeviceRoot* root) {
   if (GetArena() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(root_);
   }
@@ -4779,37 +4779,37 @@ inline void DeviceObject2::unsafe_arena_set_allocated_root(
   } else {
     _has_bits_[0] &= ~0x00000100u;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject2.Root)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.Root)
 }
-inline ::Proto::DeviceRoot2* DeviceObject2::release_root() {
+inline ::Proto::DeviceRoot* DeviceObject::release_root() {
   _has_bits_[0] &= ~0x00000100u;
-  ::Proto::DeviceRoot2* temp = root_;
+  ::Proto::DeviceRoot* temp = root_;
   root_ = nullptr;
   if (GetArena() != nullptr) {
     temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
   }
   return temp;
 }
-inline ::Proto::DeviceRoot2* DeviceObject2::unsafe_arena_release_root() {
-  // @@protoc_insertion_point(field_release:Proto.DeviceObject2.Root)
+inline ::Proto::DeviceRoot* DeviceObject::unsafe_arena_release_root() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceObject.Root)
   _has_bits_[0] &= ~0x00000100u;
-  ::Proto::DeviceRoot2* temp = root_;
+  ::Proto::DeviceRoot* temp = root_;
   root_ = nullptr;
   return temp;
 }
-inline ::Proto::DeviceRoot2* DeviceObject2::_internal_mutable_root() {
+inline ::Proto::DeviceRoot* DeviceObject::_internal_mutable_root() {
   _has_bits_[0] |= 0x00000100u;
   if (root_ == nullptr) {
-    auto* p = CreateMaybeMessage<::Proto::DeviceRoot2>(GetArena());
+    auto* p = CreateMaybeMessage<::Proto::DeviceRoot>(GetArena());
     root_ = p;
   }
   return root_;
 }
-inline ::Proto::DeviceRoot2* DeviceObject2::mutable_root() {
-  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject2.Root)
+inline ::Proto::DeviceRoot* DeviceObject::mutable_root() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject.Root)
   return _internal_mutable_root();
 }
-inline void DeviceObject2::set_allocated_root(::Proto::DeviceRoot2* root) {
+inline void DeviceObject::set_allocated_root(::Proto::DeviceRoot* root) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
   if (message_arena == nullptr) {
     delete root_;
@@ -4826,33 +4826,33 @@ inline void DeviceObject2::set_allocated_root(::Proto::DeviceRoot2* root) {
     _has_bits_[0] &= ~0x00000100u;
   }
   root_ = root;
-  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject2.Root)
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.Root)
 }
 
-// optional .Proto.DeviceSystem2 System = 101;
-inline bool DeviceObject2::_internal_has_system() const {
+// optional .Proto.DeviceSystem System = 101;
+inline bool DeviceObject::_internal_has_system() const {
   bool value = (_has_bits_[0] & 0x00000200u) != 0;
   PROTOBUF_ASSUME(!value || system_ != nullptr);
   return value;
 }
-inline bool DeviceObject2::has_system() const {
+inline bool DeviceObject::has_system() const {
   return _internal_has_system();
 }
-inline void DeviceObject2::clear_system() {
+inline void DeviceObject::clear_system() {
   if (system_ != nullptr) system_->Clear();
   _has_bits_[0] &= ~0x00000200u;
 }
-inline const ::Proto::DeviceSystem2& DeviceObject2::_internal_system() const {
-  const ::Proto::DeviceSystem2* p = system_;
-  return p != nullptr ? *p : reinterpret_cast<const ::Proto::DeviceSystem2&>(
-      ::Proto::_DeviceSystem2_default_instance_);
+inline const ::Proto::DeviceSystem& DeviceObject::_internal_system() const {
+  const ::Proto::DeviceSystem* p = system_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Proto::DeviceSystem&>(
+      ::Proto::_DeviceSystem_default_instance_);
 }
-inline const ::Proto::DeviceSystem2& DeviceObject2::system() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceObject2.System)
+inline const ::Proto::DeviceSystem& DeviceObject::system() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.System)
   return _internal_system();
 }
-inline void DeviceObject2::unsafe_arena_set_allocated_system(
-    ::Proto::DeviceSystem2* system) {
+inline void DeviceObject::unsafe_arena_set_allocated_system(
+    ::Proto::DeviceSystem* system) {
   if (GetArena() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(system_);
   }
@@ -4862,37 +4862,37 @@ inline void DeviceObject2::unsafe_arena_set_allocated_system(
   } else {
     _has_bits_[0] &= ~0x00000200u;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject2.System)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.System)
 }
-inline ::Proto::DeviceSystem2* DeviceObject2::release_system() {
+inline ::Proto::DeviceSystem* DeviceObject::release_system() {
   _has_bits_[0] &= ~0x00000200u;
-  ::Proto::DeviceSystem2* temp = system_;
+  ::Proto::DeviceSystem* temp = system_;
   system_ = nullptr;
   if (GetArena() != nullptr) {
     temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
   }
   return temp;
 }
-inline ::Proto::DeviceSystem2* DeviceObject2::unsafe_arena_release_system() {
-  // @@protoc_insertion_point(field_release:Proto.DeviceObject2.System)
+inline ::Proto::DeviceSystem* DeviceObject::unsafe_arena_release_system() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceObject.System)
   _has_bits_[0] &= ~0x00000200u;
-  ::Proto::DeviceSystem2* temp = system_;
+  ::Proto::DeviceSystem* temp = system_;
   system_ = nullptr;
   return temp;
 }
-inline ::Proto::DeviceSystem2* DeviceObject2::_internal_mutable_system() {
+inline ::Proto::DeviceSystem* DeviceObject::_internal_mutable_system() {
   _has_bits_[0] |= 0x00000200u;
   if (system_ == nullptr) {
-    auto* p = CreateMaybeMessage<::Proto::DeviceSystem2>(GetArena());
+    auto* p = CreateMaybeMessage<::Proto::DeviceSystem>(GetArena());
     system_ = p;
   }
   return system_;
 }
-inline ::Proto::DeviceSystem2* DeviceObject2::mutable_system() {
-  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject2.System)
+inline ::Proto::DeviceSystem* DeviceObject::mutable_system() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject.System)
   return _internal_mutable_system();
 }
-inline void DeviceObject2::set_allocated_system(::Proto::DeviceSystem2* system) {
+inline void DeviceObject::set_allocated_system(::Proto::DeviceSystem* system) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
   if (message_arena == nullptr) {
     delete system_;
@@ -4909,33 +4909,33 @@ inline void DeviceObject2::set_allocated_system(::Proto::DeviceSystem2* system) 
     _has_bits_[0] &= ~0x00000200u;
   }
   system_ = system;
-  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject2.System)
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.System)
 }
 
-// optional .Proto.DeviceRack2 Rack = 102;
-inline bool DeviceObject2::_internal_has_rack() const {
+// optional .Proto.DeviceRack Rack = 102;
+inline bool DeviceObject::_internal_has_rack() const {
   bool value = (_has_bits_[0] & 0x00000400u) != 0;
   PROTOBUF_ASSUME(!value || rack_ != nullptr);
   return value;
 }
-inline bool DeviceObject2::has_rack() const {
+inline bool DeviceObject::has_rack() const {
   return _internal_has_rack();
 }
-inline void DeviceObject2::clear_rack() {
+inline void DeviceObject::clear_rack() {
   if (rack_ != nullptr) rack_->Clear();
   _has_bits_[0] &= ~0x00000400u;
 }
-inline const ::Proto::DeviceRack2& DeviceObject2::_internal_rack() const {
-  const ::Proto::DeviceRack2* p = rack_;
-  return p != nullptr ? *p : reinterpret_cast<const ::Proto::DeviceRack2&>(
-      ::Proto::_DeviceRack2_default_instance_);
+inline const ::Proto::DeviceRack& DeviceObject::_internal_rack() const {
+  const ::Proto::DeviceRack* p = rack_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Proto::DeviceRack&>(
+      ::Proto::_DeviceRack_default_instance_);
 }
-inline const ::Proto::DeviceRack2& DeviceObject2::rack() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceObject2.Rack)
+inline const ::Proto::DeviceRack& DeviceObject::rack() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.Rack)
   return _internal_rack();
 }
-inline void DeviceObject2::unsafe_arena_set_allocated_rack(
-    ::Proto::DeviceRack2* rack) {
+inline void DeviceObject::unsafe_arena_set_allocated_rack(
+    ::Proto::DeviceRack* rack) {
   if (GetArena() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(rack_);
   }
@@ -4945,37 +4945,37 @@ inline void DeviceObject2::unsafe_arena_set_allocated_rack(
   } else {
     _has_bits_[0] &= ~0x00000400u;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject2.Rack)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.Rack)
 }
-inline ::Proto::DeviceRack2* DeviceObject2::release_rack() {
+inline ::Proto::DeviceRack* DeviceObject::release_rack() {
   _has_bits_[0] &= ~0x00000400u;
-  ::Proto::DeviceRack2* temp = rack_;
+  ::Proto::DeviceRack* temp = rack_;
   rack_ = nullptr;
   if (GetArena() != nullptr) {
     temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
   }
   return temp;
 }
-inline ::Proto::DeviceRack2* DeviceObject2::unsafe_arena_release_rack() {
-  // @@protoc_insertion_point(field_release:Proto.DeviceObject2.Rack)
+inline ::Proto::DeviceRack* DeviceObject::unsafe_arena_release_rack() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceObject.Rack)
   _has_bits_[0] &= ~0x00000400u;
-  ::Proto::DeviceRack2* temp = rack_;
+  ::Proto::DeviceRack* temp = rack_;
   rack_ = nullptr;
   return temp;
 }
-inline ::Proto::DeviceRack2* DeviceObject2::_internal_mutable_rack() {
+inline ::Proto::DeviceRack* DeviceObject::_internal_mutable_rack() {
   _has_bits_[0] |= 0x00000400u;
   if (rack_ == nullptr) {
-    auto* p = CreateMaybeMessage<::Proto::DeviceRack2>(GetArena());
+    auto* p = CreateMaybeMessage<::Proto::DeviceRack>(GetArena());
     rack_ = p;
   }
   return rack_;
 }
-inline ::Proto::DeviceRack2* DeviceObject2::mutable_rack() {
-  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject2.Rack)
+inline ::Proto::DeviceRack* DeviceObject::mutable_rack() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject.Rack)
   return _internal_mutable_rack();
 }
-inline void DeviceObject2::set_allocated_rack(::Proto::DeviceRack2* rack) {
+inline void DeviceObject::set_allocated_rack(::Proto::DeviceRack* rack) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
   if (message_arena == nullptr) {
     delete rack_;
@@ -4992,33 +4992,33 @@ inline void DeviceObject2::set_allocated_rack(::Proto::DeviceRack2* rack) {
     _has_bits_[0] &= ~0x00000400u;
   }
   rack_ = rack;
-  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject2.Rack)
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.Rack)
 }
 
-// optional .Proto.DeviceChassis2 Chassis = 103;
-inline bool DeviceObject2::_internal_has_chassis() const {
+// optional .Proto.DeviceChassis Chassis = 103;
+inline bool DeviceObject::_internal_has_chassis() const {
   bool value = (_has_bits_[0] & 0x00000800u) != 0;
   PROTOBUF_ASSUME(!value || chassis_ != nullptr);
   return value;
 }
-inline bool DeviceObject2::has_chassis() const {
+inline bool DeviceObject::has_chassis() const {
   return _internal_has_chassis();
 }
-inline void DeviceObject2::clear_chassis() {
+inline void DeviceObject::clear_chassis() {
   if (chassis_ != nullptr) chassis_->Clear();
   _has_bits_[0] &= ~0x00000800u;
 }
-inline const ::Proto::DeviceChassis2& DeviceObject2::_internal_chassis() const {
-  const ::Proto::DeviceChassis2* p = chassis_;
-  return p != nullptr ? *p : reinterpret_cast<const ::Proto::DeviceChassis2&>(
-      ::Proto::_DeviceChassis2_default_instance_);
+inline const ::Proto::DeviceChassis& DeviceObject::_internal_chassis() const {
+  const ::Proto::DeviceChassis* p = chassis_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Proto::DeviceChassis&>(
+      ::Proto::_DeviceChassis_default_instance_);
 }
-inline const ::Proto::DeviceChassis2& DeviceObject2::chassis() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceObject2.Chassis)
+inline const ::Proto::DeviceChassis& DeviceObject::chassis() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.Chassis)
   return _internal_chassis();
 }
-inline void DeviceObject2::unsafe_arena_set_allocated_chassis(
-    ::Proto::DeviceChassis2* chassis) {
+inline void DeviceObject::unsafe_arena_set_allocated_chassis(
+    ::Proto::DeviceChassis* chassis) {
   if (GetArena() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(chassis_);
   }
@@ -5028,37 +5028,37 @@ inline void DeviceObject2::unsafe_arena_set_allocated_chassis(
   } else {
     _has_bits_[0] &= ~0x00000800u;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject2.Chassis)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.Chassis)
 }
-inline ::Proto::DeviceChassis2* DeviceObject2::release_chassis() {
+inline ::Proto::DeviceChassis* DeviceObject::release_chassis() {
   _has_bits_[0] &= ~0x00000800u;
-  ::Proto::DeviceChassis2* temp = chassis_;
+  ::Proto::DeviceChassis* temp = chassis_;
   chassis_ = nullptr;
   if (GetArena() != nullptr) {
     temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
   }
   return temp;
 }
-inline ::Proto::DeviceChassis2* DeviceObject2::unsafe_arena_release_chassis() {
-  // @@protoc_insertion_point(field_release:Proto.DeviceObject2.Chassis)
+inline ::Proto::DeviceChassis* DeviceObject::unsafe_arena_release_chassis() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceObject.Chassis)
   _has_bits_[0] &= ~0x00000800u;
-  ::Proto::DeviceChassis2* temp = chassis_;
+  ::Proto::DeviceChassis* temp = chassis_;
   chassis_ = nullptr;
   return temp;
 }
-inline ::Proto::DeviceChassis2* DeviceObject2::_internal_mutable_chassis() {
+inline ::Proto::DeviceChassis* DeviceObject::_internal_mutable_chassis() {
   _has_bits_[0] |= 0x00000800u;
   if (chassis_ == nullptr) {
-    auto* p = CreateMaybeMessage<::Proto::DeviceChassis2>(GetArena());
+    auto* p = CreateMaybeMessage<::Proto::DeviceChassis>(GetArena());
     chassis_ = p;
   }
   return chassis_;
 }
-inline ::Proto::DeviceChassis2* DeviceObject2::mutable_chassis() {
-  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject2.Chassis)
+inline ::Proto::DeviceChassis* DeviceObject::mutable_chassis() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject.Chassis)
   return _internal_mutable_chassis();
 }
-inline void DeviceObject2::set_allocated_chassis(::Proto::DeviceChassis2* chassis) {
+inline void DeviceObject::set_allocated_chassis(::Proto::DeviceChassis* chassis) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
   if (message_arena == nullptr) {
     delete chassis_;
@@ -5075,33 +5075,33 @@ inline void DeviceObject2::set_allocated_chassis(::Proto::DeviceChassis2* chassi
     _has_bits_[0] &= ~0x00000800u;
   }
   chassis_ = chassis;
-  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject2.Chassis)
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.Chassis)
 }
 
-// optional .Proto.DeviceModule2 Module = 104;
-inline bool DeviceObject2::_internal_has_module() const {
+// optional .Proto.DeviceModule Module = 104;
+inline bool DeviceObject::_internal_has_module() const {
   bool value = (_has_bits_[0] & 0x00001000u) != 0;
   PROTOBUF_ASSUME(!value || module_ != nullptr);
   return value;
 }
-inline bool DeviceObject2::has_module() const {
+inline bool DeviceObject::has_module() const {
   return _internal_has_module();
 }
-inline void DeviceObject2::clear_module() {
+inline void DeviceObject::clear_module() {
   if (module_ != nullptr) module_->Clear();
   _has_bits_[0] &= ~0x00001000u;
 }
-inline const ::Proto::DeviceModule2& DeviceObject2::_internal_module() const {
-  const ::Proto::DeviceModule2* p = module_;
-  return p != nullptr ? *p : reinterpret_cast<const ::Proto::DeviceModule2&>(
-      ::Proto::_DeviceModule2_default_instance_);
+inline const ::Proto::DeviceModule& DeviceObject::_internal_module() const {
+  const ::Proto::DeviceModule* p = module_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Proto::DeviceModule&>(
+      ::Proto::_DeviceModule_default_instance_);
 }
-inline const ::Proto::DeviceModule2& DeviceObject2::module() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceObject2.Module)
+inline const ::Proto::DeviceModule& DeviceObject::module() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.Module)
   return _internal_module();
 }
-inline void DeviceObject2::unsafe_arena_set_allocated_module(
-    ::Proto::DeviceModule2* module) {
+inline void DeviceObject::unsafe_arena_set_allocated_module(
+    ::Proto::DeviceModule* module) {
   if (GetArena() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(module_);
   }
@@ -5111,37 +5111,37 @@ inline void DeviceObject2::unsafe_arena_set_allocated_module(
   } else {
     _has_bits_[0] &= ~0x00001000u;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject2.Module)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.Module)
 }
-inline ::Proto::DeviceModule2* DeviceObject2::release_module() {
+inline ::Proto::DeviceModule* DeviceObject::release_module() {
   _has_bits_[0] &= ~0x00001000u;
-  ::Proto::DeviceModule2* temp = module_;
+  ::Proto::DeviceModule* temp = module_;
   module_ = nullptr;
   if (GetArena() != nullptr) {
     temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
   }
   return temp;
 }
-inline ::Proto::DeviceModule2* DeviceObject2::unsafe_arena_release_module() {
-  // @@protoc_insertion_point(field_release:Proto.DeviceObject2.Module)
+inline ::Proto::DeviceModule* DeviceObject::unsafe_arena_release_module() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceObject.Module)
   _has_bits_[0] &= ~0x00001000u;
-  ::Proto::DeviceModule2* temp = module_;
+  ::Proto::DeviceModule* temp = module_;
   module_ = nullptr;
   return temp;
 }
-inline ::Proto::DeviceModule2* DeviceObject2::_internal_mutable_module() {
+inline ::Proto::DeviceModule* DeviceObject::_internal_mutable_module() {
   _has_bits_[0] |= 0x00001000u;
   if (module_ == nullptr) {
-    auto* p = CreateMaybeMessage<::Proto::DeviceModule2>(GetArena());
+    auto* p = CreateMaybeMessage<::Proto::DeviceModule>(GetArena());
     module_ = p;
   }
   return module_;
 }
-inline ::Proto::DeviceModule2* DeviceObject2::mutable_module() {
-  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject2.Module)
+inline ::Proto::DeviceModule* DeviceObject::mutable_module() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject.Module)
   return _internal_mutable_module();
 }
-inline void DeviceObject2::set_allocated_module(::Proto::DeviceModule2* module) {
+inline void DeviceObject::set_allocated_module(::Proto::DeviceModule* module) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
   if (message_arena == nullptr) {
     delete module_;
@@ -5158,33 +5158,33 @@ inline void DeviceObject2::set_allocated_module(::Proto::DeviceModule2* module) 
     _has_bits_[0] &= ~0x00001000u;
   }
   module_ = module;
-  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject2.Module)
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.Module)
 }
 
-// optional .Proto.DeviceController2 Controller = 105;
-inline bool DeviceObject2::_internal_has_controller() const {
+// optional .Proto.DeviceController Controller = 105;
+inline bool DeviceObject::_internal_has_controller() const {
   bool value = (_has_bits_[0] & 0x00002000u) != 0;
   PROTOBUF_ASSUME(!value || controller_ != nullptr);
   return value;
 }
-inline bool DeviceObject2::has_controller() const {
+inline bool DeviceObject::has_controller() const {
   return _internal_has_controller();
 }
-inline void DeviceObject2::clear_controller() {
+inline void DeviceObject::clear_controller() {
   if (controller_ != nullptr) controller_->Clear();
   _has_bits_[0] &= ~0x00002000u;
 }
-inline const ::Proto::DeviceController2& DeviceObject2::_internal_controller() const {
-  const ::Proto::DeviceController2* p = controller_;
-  return p != nullptr ? *p : reinterpret_cast<const ::Proto::DeviceController2&>(
-      ::Proto::_DeviceController2_default_instance_);
+inline const ::Proto::DeviceController& DeviceObject::_internal_controller() const {
+  const ::Proto::DeviceController* p = controller_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Proto::DeviceController&>(
+      ::Proto::_DeviceController_default_instance_);
 }
-inline const ::Proto::DeviceController2& DeviceObject2::controller() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceObject2.Controller)
+inline const ::Proto::DeviceController& DeviceObject::controller() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.Controller)
   return _internal_controller();
 }
-inline void DeviceObject2::unsafe_arena_set_allocated_controller(
-    ::Proto::DeviceController2* controller) {
+inline void DeviceObject::unsafe_arena_set_allocated_controller(
+    ::Proto::DeviceController* controller) {
   if (GetArena() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(controller_);
   }
@@ -5194,37 +5194,37 @@ inline void DeviceObject2::unsafe_arena_set_allocated_controller(
   } else {
     _has_bits_[0] &= ~0x00002000u;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject2.Controller)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.Controller)
 }
-inline ::Proto::DeviceController2* DeviceObject2::release_controller() {
+inline ::Proto::DeviceController* DeviceObject::release_controller() {
   _has_bits_[0] &= ~0x00002000u;
-  ::Proto::DeviceController2* temp = controller_;
+  ::Proto::DeviceController* temp = controller_;
   controller_ = nullptr;
   if (GetArena() != nullptr) {
     temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
   }
   return temp;
 }
-inline ::Proto::DeviceController2* DeviceObject2::unsafe_arena_release_controller() {
-  // @@protoc_insertion_point(field_release:Proto.DeviceObject2.Controller)
+inline ::Proto::DeviceController* DeviceObject::unsafe_arena_release_controller() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceObject.Controller)
   _has_bits_[0] &= ~0x00002000u;
-  ::Proto::DeviceController2* temp = controller_;
+  ::Proto::DeviceController* temp = controller_;
   controller_ = nullptr;
   return temp;
 }
-inline ::Proto::DeviceController2* DeviceObject2::_internal_mutable_controller() {
+inline ::Proto::DeviceController* DeviceObject::_internal_mutable_controller() {
   _has_bits_[0] |= 0x00002000u;
   if (controller_ == nullptr) {
-    auto* p = CreateMaybeMessage<::Proto::DeviceController2>(GetArena());
+    auto* p = CreateMaybeMessage<::Proto::DeviceController>(GetArena());
     controller_ = p;
   }
   return controller_;
 }
-inline ::Proto::DeviceController2* DeviceObject2::mutable_controller() {
-  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject2.Controller)
+inline ::Proto::DeviceController* DeviceObject::mutable_controller() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject.Controller)
   return _internal_mutable_controller();
 }
-inline void DeviceObject2::set_allocated_controller(::Proto::DeviceController2* controller) {
+inline void DeviceObject::set_allocated_controller(::Proto::DeviceController* controller) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
   if (message_arena == nullptr) {
     delete controller_;
@@ -5241,33 +5241,33 @@ inline void DeviceObject2::set_allocated_controller(::Proto::DeviceController2* 
     _has_bits_[0] &= ~0x00002000u;
   }
   controller_ = controller;
-  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject2.Controller)
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.Controller)
 }
 
-// optional .Proto.DeviceAppSignal2 AppSignal = 106;
-inline bool DeviceObject2::_internal_has_appsignal() const {
+// optional .Proto.DeviceAppSignal AppSignal = 106;
+inline bool DeviceObject::_internal_has_appsignal() const {
   bool value = (_has_bits_[0] & 0x00004000u) != 0;
   PROTOBUF_ASSUME(!value || appsignal_ != nullptr);
   return value;
 }
-inline bool DeviceObject2::has_appsignal() const {
+inline bool DeviceObject::has_appsignal() const {
   return _internal_has_appsignal();
 }
-inline void DeviceObject2::clear_appsignal() {
+inline void DeviceObject::clear_appsignal() {
   if (appsignal_ != nullptr) appsignal_->Clear();
   _has_bits_[0] &= ~0x00004000u;
 }
-inline const ::Proto::DeviceAppSignal2& DeviceObject2::_internal_appsignal() const {
-  const ::Proto::DeviceAppSignal2* p = appsignal_;
-  return p != nullptr ? *p : reinterpret_cast<const ::Proto::DeviceAppSignal2&>(
-      ::Proto::_DeviceAppSignal2_default_instance_);
+inline const ::Proto::DeviceAppSignal& DeviceObject::_internal_appsignal() const {
+  const ::Proto::DeviceAppSignal* p = appsignal_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Proto::DeviceAppSignal&>(
+      ::Proto::_DeviceAppSignal_default_instance_);
 }
-inline const ::Proto::DeviceAppSignal2& DeviceObject2::appsignal() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceObject2.AppSignal)
+inline const ::Proto::DeviceAppSignal& DeviceObject::appsignal() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.AppSignal)
   return _internal_appsignal();
 }
-inline void DeviceObject2::unsafe_arena_set_allocated_appsignal(
-    ::Proto::DeviceAppSignal2* appsignal) {
+inline void DeviceObject::unsafe_arena_set_allocated_appsignal(
+    ::Proto::DeviceAppSignal* appsignal) {
   if (GetArena() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(appsignal_);
   }
@@ -5277,37 +5277,37 @@ inline void DeviceObject2::unsafe_arena_set_allocated_appsignal(
   } else {
     _has_bits_[0] &= ~0x00004000u;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject2.AppSignal)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.AppSignal)
 }
-inline ::Proto::DeviceAppSignal2* DeviceObject2::release_appsignal() {
+inline ::Proto::DeviceAppSignal* DeviceObject::release_appsignal() {
   _has_bits_[0] &= ~0x00004000u;
-  ::Proto::DeviceAppSignal2* temp = appsignal_;
+  ::Proto::DeviceAppSignal* temp = appsignal_;
   appsignal_ = nullptr;
   if (GetArena() != nullptr) {
     temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
   }
   return temp;
 }
-inline ::Proto::DeviceAppSignal2* DeviceObject2::unsafe_arena_release_appsignal() {
-  // @@protoc_insertion_point(field_release:Proto.DeviceObject2.AppSignal)
+inline ::Proto::DeviceAppSignal* DeviceObject::unsafe_arena_release_appsignal() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceObject.AppSignal)
   _has_bits_[0] &= ~0x00004000u;
-  ::Proto::DeviceAppSignal2* temp = appsignal_;
+  ::Proto::DeviceAppSignal* temp = appsignal_;
   appsignal_ = nullptr;
   return temp;
 }
-inline ::Proto::DeviceAppSignal2* DeviceObject2::_internal_mutable_appsignal() {
+inline ::Proto::DeviceAppSignal* DeviceObject::_internal_mutable_appsignal() {
   _has_bits_[0] |= 0x00004000u;
   if (appsignal_ == nullptr) {
-    auto* p = CreateMaybeMessage<::Proto::DeviceAppSignal2>(GetArena());
+    auto* p = CreateMaybeMessage<::Proto::DeviceAppSignal>(GetArena());
     appsignal_ = p;
   }
   return appsignal_;
 }
-inline ::Proto::DeviceAppSignal2* DeviceObject2::mutable_appsignal() {
-  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject2.AppSignal)
+inline ::Proto::DeviceAppSignal* DeviceObject::mutable_appsignal() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject.AppSignal)
   return _internal_mutable_appsignal();
 }
-inline void DeviceObject2::set_allocated_appsignal(::Proto::DeviceAppSignal2* appsignal) {
+inline void DeviceObject::set_allocated_appsignal(::Proto::DeviceAppSignal* appsignal) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
   if (message_arena == nullptr) {
     delete appsignal_;
@@ -5324,33 +5324,33 @@ inline void DeviceObject2::set_allocated_appsignal(::Proto::DeviceAppSignal2* ap
     _has_bits_[0] &= ~0x00004000u;
   }
   appsignal_ = appsignal;
-  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject2.AppSignal)
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.AppSignal)
 }
 
-// optional .Proto.DeviceDiagSignal2 DiagSignal = 109;
-inline bool DeviceObject2::_internal_has_diagsignal() const {
+// optional .Proto.DeviceDiagSignal DiagSignal = 109;
+inline bool DeviceObject::_internal_has_diagsignal() const {
   bool value = (_has_bits_[0] & 0x00020000u) != 0;
   PROTOBUF_ASSUME(!value || diagsignal_ != nullptr);
   return value;
 }
-inline bool DeviceObject2::has_diagsignal() const {
+inline bool DeviceObject::has_diagsignal() const {
   return _internal_has_diagsignal();
 }
-inline void DeviceObject2::clear_diagsignal() {
+inline void DeviceObject::clear_diagsignal() {
   if (diagsignal_ != nullptr) diagsignal_->Clear();
   _has_bits_[0] &= ~0x00020000u;
 }
-inline const ::Proto::DeviceDiagSignal2& DeviceObject2::_internal_diagsignal() const {
-  const ::Proto::DeviceDiagSignal2* p = diagsignal_;
-  return p != nullptr ? *p : reinterpret_cast<const ::Proto::DeviceDiagSignal2&>(
-      ::Proto::_DeviceDiagSignal2_default_instance_);
+inline const ::Proto::DeviceDiagSignal& DeviceObject::_internal_diagsignal() const {
+  const ::Proto::DeviceDiagSignal* p = diagsignal_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Proto::DeviceDiagSignal&>(
+      ::Proto::_DeviceDiagSignal_default_instance_);
 }
-inline const ::Proto::DeviceDiagSignal2& DeviceObject2::diagsignal() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceObject2.DiagSignal)
+inline const ::Proto::DeviceDiagSignal& DeviceObject::diagsignal() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.DiagSignal)
   return _internal_diagsignal();
 }
-inline void DeviceObject2::unsafe_arena_set_allocated_diagsignal(
-    ::Proto::DeviceDiagSignal2* diagsignal) {
+inline void DeviceObject::unsafe_arena_set_allocated_diagsignal(
+    ::Proto::DeviceDiagSignal* diagsignal) {
   if (GetArena() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(diagsignal_);
   }
@@ -5360,37 +5360,37 @@ inline void DeviceObject2::unsafe_arena_set_allocated_diagsignal(
   } else {
     _has_bits_[0] &= ~0x00020000u;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject2.DiagSignal)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.DiagSignal)
 }
-inline ::Proto::DeviceDiagSignal2* DeviceObject2::release_diagsignal() {
+inline ::Proto::DeviceDiagSignal* DeviceObject::release_diagsignal() {
   _has_bits_[0] &= ~0x00020000u;
-  ::Proto::DeviceDiagSignal2* temp = diagsignal_;
+  ::Proto::DeviceDiagSignal* temp = diagsignal_;
   diagsignal_ = nullptr;
   if (GetArena() != nullptr) {
     temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
   }
   return temp;
 }
-inline ::Proto::DeviceDiagSignal2* DeviceObject2::unsafe_arena_release_diagsignal() {
-  // @@protoc_insertion_point(field_release:Proto.DeviceObject2.DiagSignal)
+inline ::Proto::DeviceDiagSignal* DeviceObject::unsafe_arena_release_diagsignal() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceObject.DiagSignal)
   _has_bits_[0] &= ~0x00020000u;
-  ::Proto::DeviceDiagSignal2* temp = diagsignal_;
+  ::Proto::DeviceDiagSignal* temp = diagsignal_;
   diagsignal_ = nullptr;
   return temp;
 }
-inline ::Proto::DeviceDiagSignal2* DeviceObject2::_internal_mutable_diagsignal() {
+inline ::Proto::DeviceDiagSignal* DeviceObject::_internal_mutable_diagsignal() {
   _has_bits_[0] |= 0x00020000u;
   if (diagsignal_ == nullptr) {
-    auto* p = CreateMaybeMessage<::Proto::DeviceDiagSignal2>(GetArena());
+    auto* p = CreateMaybeMessage<::Proto::DeviceDiagSignal>(GetArena());
     diagsignal_ = p;
   }
   return diagsignal_;
 }
-inline ::Proto::DeviceDiagSignal2* DeviceObject2::mutable_diagsignal() {
-  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject2.DiagSignal)
+inline ::Proto::DeviceDiagSignal* DeviceObject::mutable_diagsignal() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject.DiagSignal)
   return _internal_mutable_diagsignal();
 }
-inline void DeviceObject2::set_allocated_diagsignal(::Proto::DeviceDiagSignal2* diagsignal) {
+inline void DeviceObject::set_allocated_diagsignal(::Proto::DeviceDiagSignal* diagsignal) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
   if (message_arena == nullptr) {
     delete diagsignal_;
@@ -5407,33 +5407,33 @@ inline void DeviceObject2::set_allocated_diagsignal(::Proto::DeviceDiagSignal2* 
     _has_bits_[0] &= ~0x00020000u;
   }
   diagsignal_ = diagsignal;
-  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject2.DiagSignal)
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.DiagSignal)
 }
 
-// optional .Proto.Workstation2 Workstation = 107;
-inline bool DeviceObject2::_internal_has_workstation() const {
+// optional .Proto.Workstation Workstation = 107;
+inline bool DeviceObject::_internal_has_workstation() const {
   bool value = (_has_bits_[0] & 0x00008000u) != 0;
   PROTOBUF_ASSUME(!value || workstation_ != nullptr);
   return value;
 }
-inline bool DeviceObject2::has_workstation() const {
+inline bool DeviceObject::has_workstation() const {
   return _internal_has_workstation();
 }
-inline void DeviceObject2::clear_workstation() {
+inline void DeviceObject::clear_workstation() {
   if (workstation_ != nullptr) workstation_->Clear();
   _has_bits_[0] &= ~0x00008000u;
 }
-inline const ::Proto::Workstation2& DeviceObject2::_internal_workstation() const {
-  const ::Proto::Workstation2* p = workstation_;
-  return p != nullptr ? *p : reinterpret_cast<const ::Proto::Workstation2&>(
-      ::Proto::_Workstation2_default_instance_);
+inline const ::Proto::Workstation& DeviceObject::_internal_workstation() const {
+  const ::Proto::Workstation* p = workstation_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Proto::Workstation&>(
+      ::Proto::_Workstation_default_instance_);
 }
-inline const ::Proto::Workstation2& DeviceObject2::workstation() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceObject2.Workstation)
+inline const ::Proto::Workstation& DeviceObject::workstation() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.Workstation)
   return _internal_workstation();
 }
-inline void DeviceObject2::unsafe_arena_set_allocated_workstation(
-    ::Proto::Workstation2* workstation) {
+inline void DeviceObject::unsafe_arena_set_allocated_workstation(
+    ::Proto::Workstation* workstation) {
   if (GetArena() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(workstation_);
   }
@@ -5443,37 +5443,37 @@ inline void DeviceObject2::unsafe_arena_set_allocated_workstation(
   } else {
     _has_bits_[0] &= ~0x00008000u;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject2.Workstation)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.Workstation)
 }
-inline ::Proto::Workstation2* DeviceObject2::release_workstation() {
+inline ::Proto::Workstation* DeviceObject::release_workstation() {
   _has_bits_[0] &= ~0x00008000u;
-  ::Proto::Workstation2* temp = workstation_;
+  ::Proto::Workstation* temp = workstation_;
   workstation_ = nullptr;
   if (GetArena() != nullptr) {
     temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
   }
   return temp;
 }
-inline ::Proto::Workstation2* DeviceObject2::unsafe_arena_release_workstation() {
-  // @@protoc_insertion_point(field_release:Proto.DeviceObject2.Workstation)
+inline ::Proto::Workstation* DeviceObject::unsafe_arena_release_workstation() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceObject.Workstation)
   _has_bits_[0] &= ~0x00008000u;
-  ::Proto::Workstation2* temp = workstation_;
+  ::Proto::Workstation* temp = workstation_;
   workstation_ = nullptr;
   return temp;
 }
-inline ::Proto::Workstation2* DeviceObject2::_internal_mutable_workstation() {
+inline ::Proto::Workstation* DeviceObject::_internal_mutable_workstation() {
   _has_bits_[0] |= 0x00008000u;
   if (workstation_ == nullptr) {
-    auto* p = CreateMaybeMessage<::Proto::Workstation2>(GetArena());
+    auto* p = CreateMaybeMessage<::Proto::Workstation>(GetArena());
     workstation_ = p;
   }
   return workstation_;
 }
-inline ::Proto::Workstation2* DeviceObject2::mutable_workstation() {
-  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject2.Workstation)
+inline ::Proto::Workstation* DeviceObject::mutable_workstation() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject.Workstation)
   return _internal_mutable_workstation();
 }
-inline void DeviceObject2::set_allocated_workstation(::Proto::Workstation2* workstation) {
+inline void DeviceObject::set_allocated_workstation(::Proto::Workstation* workstation) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
   if (message_arena == nullptr) {
     delete workstation_;
@@ -5490,33 +5490,33 @@ inline void DeviceObject2::set_allocated_workstation(::Proto::Workstation2* work
     _has_bits_[0] &= ~0x00008000u;
   }
   workstation_ = workstation;
-  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject2.Workstation)
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.Workstation)
 }
 
-// optional .Proto.Software2 Software = 108;
-inline bool DeviceObject2::_internal_has_software() const {
+// optional .Proto.Software Software = 108;
+inline bool DeviceObject::_internal_has_software() const {
   bool value = (_has_bits_[0] & 0x00010000u) != 0;
   PROTOBUF_ASSUME(!value || software_ != nullptr);
   return value;
 }
-inline bool DeviceObject2::has_software() const {
+inline bool DeviceObject::has_software() const {
   return _internal_has_software();
 }
-inline void DeviceObject2::clear_software() {
+inline void DeviceObject::clear_software() {
   if (software_ != nullptr) software_->Clear();
   _has_bits_[0] &= ~0x00010000u;
 }
-inline const ::Proto::Software2& DeviceObject2::_internal_software() const {
-  const ::Proto::Software2* p = software_;
-  return p != nullptr ? *p : reinterpret_cast<const ::Proto::Software2&>(
-      ::Proto::_Software2_default_instance_);
+inline const ::Proto::Software& DeviceObject::_internal_software() const {
+  const ::Proto::Software* p = software_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Proto::Software&>(
+      ::Proto::_Software_default_instance_);
 }
-inline const ::Proto::Software2& DeviceObject2::software() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceObject2.Software)
+inline const ::Proto::Software& DeviceObject::software() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.Software)
   return _internal_software();
 }
-inline void DeviceObject2::unsafe_arena_set_allocated_software(
-    ::Proto::Software2* software) {
+inline void DeviceObject::unsafe_arena_set_allocated_software(
+    ::Proto::Software* software) {
   if (GetArena() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(software_);
   }
@@ -5526,37 +5526,37 @@ inline void DeviceObject2::unsafe_arena_set_allocated_software(
   } else {
     _has_bits_[0] &= ~0x00010000u;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject2.Software)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DeviceObject.Software)
 }
-inline ::Proto::Software2* DeviceObject2::release_software() {
+inline ::Proto::Software* DeviceObject::release_software() {
   _has_bits_[0] &= ~0x00010000u;
-  ::Proto::Software2* temp = software_;
+  ::Proto::Software* temp = software_;
   software_ = nullptr;
   if (GetArena() != nullptr) {
     temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
   }
   return temp;
 }
-inline ::Proto::Software2* DeviceObject2::unsafe_arena_release_software() {
-  // @@protoc_insertion_point(field_release:Proto.DeviceObject2.Software)
+inline ::Proto::Software* DeviceObject::unsafe_arena_release_software() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceObject.Software)
   _has_bits_[0] &= ~0x00010000u;
-  ::Proto::Software2* temp = software_;
+  ::Proto::Software* temp = software_;
   software_ = nullptr;
   return temp;
 }
-inline ::Proto::Software2* DeviceObject2::_internal_mutable_software() {
+inline ::Proto::Software* DeviceObject::_internal_mutable_software() {
   _has_bits_[0] |= 0x00010000u;
   if (software_ == nullptr) {
-    auto* p = CreateMaybeMessage<::Proto::Software2>(GetArena());
+    auto* p = CreateMaybeMessage<::Proto::Software>(GetArena());
     software_ = p;
   }
   return software_;
 }
-inline ::Proto::Software2* DeviceObject2::mutable_software() {
-  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject2.Software)
+inline ::Proto::Software* DeviceObject::mutable_software() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject.Software)
   return _internal_mutable_software();
 }
-inline void DeviceObject2::set_allocated_software(::Proto::Software2* software) {
+inline void DeviceObject::set_allocated_software(::Proto::Software* software) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
   if (message_arena == nullptr) {
     delete software_;
@@ -5573,184 +5573,184 @@ inline void DeviceObject2::set_allocated_software(::Proto::Software2* software) 
     _has_bits_[0] &= ~0x00010000u;
   }
   software_ = software;
-  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject2.Software)
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceObject.Software)
 }
 
-// repeated .Proto.Envelope2 children = 200;
-inline int DeviceObject2::_internal_children_size() const {
+// repeated .Proto.Envelope children = 200;
+inline int DeviceObject::_internal_children_size() const {
   return children_.size();
 }
-inline int DeviceObject2::children_size() const {
+inline int DeviceObject::children_size() const {
   return _internal_children_size();
 }
-inline ::Proto::Envelope2* DeviceObject2::mutable_children(int index) {
-  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject2.children)
+inline ::Proto::Envelope* DeviceObject::mutable_children(int index) {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceObject.children)
   return children_.Mutable(index);
 }
-inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::Envelope2 >*
-DeviceObject2::mutable_children() {
-  // @@protoc_insertion_point(field_mutable_list:Proto.DeviceObject2.children)
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::Envelope >*
+DeviceObject::mutable_children() {
+  // @@protoc_insertion_point(field_mutable_list:Proto.DeviceObject.children)
   return &children_;
 }
-inline const ::Proto::Envelope2& DeviceObject2::_internal_children(int index) const {
+inline const ::Proto::Envelope& DeviceObject::_internal_children(int index) const {
   return children_.Get(index);
 }
-inline const ::Proto::Envelope2& DeviceObject2::children(int index) const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceObject2.children)
+inline const ::Proto::Envelope& DeviceObject::children(int index) const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceObject.children)
   return _internal_children(index);
 }
-inline ::Proto::Envelope2* DeviceObject2::_internal_add_children() {
+inline ::Proto::Envelope* DeviceObject::_internal_add_children() {
   return children_.Add();
 }
-inline ::Proto::Envelope2* DeviceObject2::add_children() {
-  // @@protoc_insertion_point(field_add:Proto.DeviceObject2.children)
+inline ::Proto::Envelope* DeviceObject::add_children() {
+  // @@protoc_insertion_point(field_add:Proto.DeviceObject.children)
   return _internal_add_children();
 }
-inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::Envelope2 >&
-DeviceObject2::children() const {
-  // @@protoc_insertion_point(field_list:Proto.DeviceObject2.children)
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Proto::Envelope >&
+DeviceObject::children() const {
+  // @@protoc_insertion_point(field_list:Proto.DeviceObject.children)
   return children_;
 }
 
 // -------------------------------------------------------------------
 
-// DeviceRoot2
+// DeviceRoot
 
 // -------------------------------------------------------------------
 
-// DeviceSystem2
+// DeviceSystem
 
 // -------------------------------------------------------------------
 
-// DeviceRack2
+// DeviceRack
 
 // -------------------------------------------------------------------
 
-// DeviceChassis2
+// DeviceChassis
 
 // optional int32 type = 1 [default = 0];
-inline bool DeviceChassis2::_internal_has_type() const {
+inline bool DeviceChassis::_internal_has_type() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
 }
-inline bool DeviceChassis2::has_type() const {
+inline bool DeviceChassis::has_type() const {
   return _internal_has_type();
 }
-inline void DeviceChassis2::clear_type() {
+inline void DeviceChassis::clear_type() {
   type_ = 0;
   _has_bits_[0] &= ~0x00000001u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceChassis2::_internal_type() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceChassis::_internal_type() const {
   return type_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceChassis2::type() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceChassis2.type)
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceChassis::type() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceChassis.type)
   return _internal_type();
 }
-inline void DeviceChassis2::_internal_set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceChassis::_internal_set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000001u;
   type_ = value;
 }
-inline void DeviceChassis2::set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceChassis::set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_type(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceChassis2.type)
+  // @@protoc_insertion_point(field_set:Proto.DeviceChassis.type)
 }
 
 // -------------------------------------------------------------------
 
-// DeviceModule2
+// DeviceModule
 
 // optional int32 typeObsolete = 1 [default = 0];
-inline bool DeviceModule2::_internal_has_typeobsolete() const {
+inline bool DeviceModule::_internal_has_typeobsolete() const {
   bool value = (_has_bits_[0] & 0x00000004u) != 0;
   return value;
 }
-inline bool DeviceModule2::has_typeobsolete() const {
+inline bool DeviceModule::has_typeobsolete() const {
   return _internal_has_typeobsolete();
 }
-inline void DeviceModule2::clear_typeobsolete() {
+inline void DeviceModule::clear_typeobsolete() {
   typeobsolete_ = 0;
   _has_bits_[0] &= ~0x00000004u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceModule2::_internal_typeobsolete() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceModule::_internal_typeobsolete() const {
   return typeobsolete_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceModule2::typeobsolete() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceModule2.typeObsolete)
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceModule::typeobsolete() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceModule.typeObsolete)
   return _internal_typeobsolete();
 }
-inline void DeviceModule2::_internal_set_typeobsolete(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceModule::_internal_set_typeobsolete(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000004u;
   typeobsolete_ = value;
 }
-inline void DeviceModule2::set_typeobsolete(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceModule::set_typeobsolete(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_typeobsolete(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceModule2.typeObsolete)
+  // @@protoc_insertion_point(field_set:Proto.DeviceModule.typeObsolete)
 }
 
 // optional string configurationScript = 2;
-inline bool DeviceModule2::_internal_has_configurationscript() const {
+inline bool DeviceModule::_internal_has_configurationscript() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
 }
-inline bool DeviceModule2::has_configurationscript() const {
+inline bool DeviceModule::has_configurationscript() const {
   return _internal_has_configurationscript();
 }
-inline void DeviceModule2::clear_configurationscript() {
+inline void DeviceModule::clear_configurationscript() {
   configurationscript_.ClearToEmpty();
   _has_bits_[0] &= ~0x00000001u;
 }
-inline const std::string& DeviceModule2::configurationscript() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceModule2.configurationScript)
+inline const std::string& DeviceModule::configurationscript() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceModule.configurationScript)
   return _internal_configurationscript();
 }
-inline void DeviceModule2::set_configurationscript(const std::string& value) {
+inline void DeviceModule::set_configurationscript(const std::string& value) {
   _internal_set_configurationscript(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceModule2.configurationScript)
+  // @@protoc_insertion_point(field_set:Proto.DeviceModule.configurationScript)
 }
-inline std::string* DeviceModule2::mutable_configurationscript() {
-  // @@protoc_insertion_point(field_mutable:Proto.DeviceModule2.configurationScript)
+inline std::string* DeviceModule::mutable_configurationscript() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceModule.configurationScript)
   return _internal_mutable_configurationscript();
 }
-inline const std::string& DeviceModule2::_internal_configurationscript() const {
+inline const std::string& DeviceModule::_internal_configurationscript() const {
   return configurationscript_.Get();
 }
-inline void DeviceModule2::_internal_set_configurationscript(const std::string& value) {
+inline void DeviceModule::_internal_set_configurationscript(const std::string& value) {
   _has_bits_[0] |= 0x00000001u;
   configurationscript_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
-inline void DeviceModule2::set_configurationscript(std::string&& value) {
+inline void DeviceModule::set_configurationscript(std::string&& value) {
   _has_bits_[0] |= 0x00000001u;
   configurationscript_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Proto.DeviceModule2.configurationScript)
+  // @@protoc_insertion_point(field_set_rvalue:Proto.DeviceModule.configurationScript)
 }
-inline void DeviceModule2::set_configurationscript(const char* value) {
+inline void DeviceModule::set_configurationscript(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   _has_bits_[0] |= 0x00000001u;
   configurationscript_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Proto.DeviceModule2.configurationScript)
+  // @@protoc_insertion_point(field_set_char:Proto.DeviceModule.configurationScript)
 }
-inline void DeviceModule2::set_configurationscript(const char* value,
+inline void DeviceModule::set_configurationscript(const char* value,
     size_t size) {
   _has_bits_[0] |= 0x00000001u;
   configurationscript_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Proto.DeviceModule2.configurationScript)
+  // @@protoc_insertion_point(field_set_pointer:Proto.DeviceModule.configurationScript)
 }
-inline std::string* DeviceModule2::_internal_mutable_configurationscript() {
+inline std::string* DeviceModule::_internal_mutable_configurationscript() {
   _has_bits_[0] |= 0x00000001u;
   return configurationscript_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
-inline std::string* DeviceModule2::release_configurationscript() {
-  // @@protoc_insertion_point(field_release:Proto.DeviceModule2.configurationScript)
+inline std::string* DeviceModule::release_configurationscript() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceModule.configurationScript)
   if (!_internal_has_configurationscript()) {
     return nullptr;
   }
   _has_bits_[0] &= ~0x00000001u;
   return configurationscript_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void DeviceModule2::set_allocated_configurationscript(std::string* configurationscript) {
+inline void DeviceModule::set_allocated_configurationscript(std::string* configurationscript) {
   if (configurationscript != nullptr) {
     _has_bits_[0] |= 0x00000001u;
   } else {
@@ -5758,100 +5758,100 @@ inline void DeviceModule2::set_allocated_configurationscript(std::string* config
   }
   configurationscript_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), configurationscript,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceModule2.configurationScript)
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceModule.configurationScript)
 }
 
 // optional int32 moduleType = 3;
-inline bool DeviceModule2::_internal_has_moduletype() const {
+inline bool DeviceModule::_internal_has_moduletype() const {
   bool value = (_has_bits_[0] & 0x00000008u) != 0;
   return value;
 }
-inline bool DeviceModule2::has_moduletype() const {
+inline bool DeviceModule::has_moduletype() const {
   return _internal_has_moduletype();
 }
-inline void DeviceModule2::clear_moduletype() {
+inline void DeviceModule::clear_moduletype() {
   moduletype_ = 0;
   _has_bits_[0] &= ~0x00000008u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceModule2::_internal_moduletype() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceModule::_internal_moduletype() const {
   return moduletype_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceModule2::moduletype() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceModule2.moduleType)
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceModule::moduletype() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceModule.moduleType)
   return _internal_moduletype();
 }
-inline void DeviceModule2::_internal_set_moduletype(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceModule::_internal_set_moduletype(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000008u;
   moduletype_ = value;
 }
-inline void DeviceModule2::set_moduletype(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceModule::set_moduletype(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_moduletype(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceModule2.moduleType)
+  // @@protoc_insertion_point(field_set:Proto.DeviceModule.moduleType)
 }
 
 // optional string rawDataDescription = 4;
-inline bool DeviceModule2::_internal_has_rawdatadescription() const {
+inline bool DeviceModule::_internal_has_rawdatadescription() const {
   bool value = (_has_bits_[0] & 0x00000002u) != 0;
   return value;
 }
-inline bool DeviceModule2::has_rawdatadescription() const {
+inline bool DeviceModule::has_rawdatadescription() const {
   return _internal_has_rawdatadescription();
 }
-inline void DeviceModule2::clear_rawdatadescription() {
+inline void DeviceModule::clear_rawdatadescription() {
   rawdatadescription_.ClearToEmpty();
   _has_bits_[0] &= ~0x00000002u;
 }
-inline const std::string& DeviceModule2::rawdatadescription() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceModule2.rawDataDescription)
+inline const std::string& DeviceModule::rawdatadescription() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceModule.rawDataDescription)
   return _internal_rawdatadescription();
 }
-inline void DeviceModule2::set_rawdatadescription(const std::string& value) {
+inline void DeviceModule::set_rawdatadescription(const std::string& value) {
   _internal_set_rawdatadescription(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceModule2.rawDataDescription)
+  // @@protoc_insertion_point(field_set:Proto.DeviceModule.rawDataDescription)
 }
-inline std::string* DeviceModule2::mutable_rawdatadescription() {
-  // @@protoc_insertion_point(field_mutable:Proto.DeviceModule2.rawDataDescription)
+inline std::string* DeviceModule::mutable_rawdatadescription() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceModule.rawDataDescription)
   return _internal_mutable_rawdatadescription();
 }
-inline const std::string& DeviceModule2::_internal_rawdatadescription() const {
+inline const std::string& DeviceModule::_internal_rawdatadescription() const {
   return rawdatadescription_.Get();
 }
-inline void DeviceModule2::_internal_set_rawdatadescription(const std::string& value) {
+inline void DeviceModule::_internal_set_rawdatadescription(const std::string& value) {
   _has_bits_[0] |= 0x00000002u;
   rawdatadescription_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
-inline void DeviceModule2::set_rawdatadescription(std::string&& value) {
+inline void DeviceModule::set_rawdatadescription(std::string&& value) {
   _has_bits_[0] |= 0x00000002u;
   rawdatadescription_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Proto.DeviceModule2.rawDataDescription)
+  // @@protoc_insertion_point(field_set_rvalue:Proto.DeviceModule.rawDataDescription)
 }
-inline void DeviceModule2::set_rawdatadescription(const char* value) {
+inline void DeviceModule::set_rawdatadescription(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   _has_bits_[0] |= 0x00000002u;
   rawdatadescription_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Proto.DeviceModule2.rawDataDescription)
+  // @@protoc_insertion_point(field_set_char:Proto.DeviceModule.rawDataDescription)
 }
-inline void DeviceModule2::set_rawdatadescription(const char* value,
+inline void DeviceModule::set_rawdatadescription(const char* value,
     size_t size) {
   _has_bits_[0] |= 0x00000002u;
   rawdatadescription_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Proto.DeviceModule2.rawDataDescription)
+  // @@protoc_insertion_point(field_set_pointer:Proto.DeviceModule.rawDataDescription)
 }
-inline std::string* DeviceModule2::_internal_mutable_rawdatadescription() {
+inline std::string* DeviceModule::_internal_mutable_rawdatadescription() {
   _has_bits_[0] |= 0x00000002u;
   return rawdatadescription_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
-inline std::string* DeviceModule2::release_rawdatadescription() {
-  // @@protoc_insertion_point(field_release:Proto.DeviceModule2.rawDataDescription)
+inline std::string* DeviceModule::release_rawdatadescription() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceModule.rawDataDescription)
   if (!_internal_has_rawdatadescription()) {
     return nullptr;
   }
   _has_bits_[0] &= ~0x00000002u;
   return rawdatadescription_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void DeviceModule2::set_allocated_rawdatadescription(std::string* rawdatadescription) {
+inline void DeviceModule::set_allocated_rawdatadescription(std::string* rawdatadescription) {
   if (rawdatadescription != nullptr) {
     _has_bits_[0] |= 0x00000002u;
   } else {
@@ -5859,528 +5859,528 @@ inline void DeviceModule2::set_allocated_rawdatadescription(std::string* rawdata
   }
   rawdatadescription_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), rawdatadescription,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceModule2.rawDataDescription)
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceModule.rawDataDescription)
 }
 
 // optional int32 customModuleFamily = 5 [default = 0];
-inline bool DeviceModule2::_internal_has_custommodulefamily() const {
+inline bool DeviceModule::_internal_has_custommodulefamily() const {
   bool value = (_has_bits_[0] & 0x00000010u) != 0;
   return value;
 }
-inline bool DeviceModule2::has_custommodulefamily() const {
+inline bool DeviceModule::has_custommodulefamily() const {
   return _internal_has_custommodulefamily();
 }
-inline void DeviceModule2::clear_custommodulefamily() {
+inline void DeviceModule::clear_custommodulefamily() {
   custommodulefamily_ = 0;
   _has_bits_[0] &= ~0x00000010u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceModule2::_internal_custommodulefamily() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceModule::_internal_custommodulefamily() const {
   return custommodulefamily_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceModule2::custommodulefamily() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceModule2.customModuleFamily)
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceModule::custommodulefamily() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceModule.customModuleFamily)
   return _internal_custommodulefamily();
 }
-inline void DeviceModule2::_internal_set_custommodulefamily(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceModule::_internal_set_custommodulefamily(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000010u;
   custommodulefamily_ = value;
 }
-inline void DeviceModule2::set_custommodulefamily(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceModule::set_custommodulefamily(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_custommodulefamily(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceModule2.customModuleFamily)
+  // @@protoc_insertion_point(field_set:Proto.DeviceModule.customModuleFamily)
 }
 
 // -------------------------------------------------------------------
 
-// DeviceController2
+// DeviceController
 
 // optional int32 diagDataOffset = 3;
-inline bool DeviceController2::_internal_has_diagdataoffset() const {
+inline bool DeviceController::_internal_has_diagdataoffset() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
 }
-inline bool DeviceController2::has_diagdataoffset() const {
+inline bool DeviceController::has_diagdataoffset() const {
   return _internal_has_diagdataoffset();
 }
-inline void DeviceController2::clear_diagdataoffset() {
+inline void DeviceController::clear_diagdataoffset() {
   diagdataoffset_ = 0;
   _has_bits_[0] &= ~0x00000001u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceController2::_internal_diagdataoffset() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceController::_internal_diagdataoffset() const {
   return diagdataoffset_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceController2::diagdataoffset() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceController2.diagDataOffset)
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceController::diagdataoffset() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceController.diagDataOffset)
   return _internal_diagdataoffset();
 }
-inline void DeviceController2::_internal_set_diagdataoffset(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceController::_internal_set_diagdataoffset(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000001u;
   diagdataoffset_ = value;
 }
-inline void DeviceController2::set_diagdataoffset(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceController::set_diagdataoffset(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_diagdataoffset(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceController2.diagDataOffset)
+  // @@protoc_insertion_point(field_set:Proto.DeviceController.diagDataOffset)
 }
 
 // -------------------------------------------------------------------
 
-// DeviceAppSignal2
+// DeviceAppSignal
 
 // optional int32 obsoletetype = 1 [default = 0];
-inline bool DeviceAppSignal2::_internal_has_obsoletetype() const {
+inline bool DeviceAppSignal::_internal_has_obsoletetype() const {
   bool value = (_has_bits_[0] & 0x00000008u) != 0;
   return value;
 }
-inline bool DeviceAppSignal2::has_obsoletetype() const {
+inline bool DeviceAppSignal::has_obsoletetype() const {
   return _internal_has_obsoletetype();
 }
-inline void DeviceAppSignal2::clear_obsoletetype() {
+inline void DeviceAppSignal::clear_obsoletetype() {
   obsoletetype_ = 0;
   _has_bits_[0] &= ~0x00000008u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal2::_internal_obsoletetype() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal::_internal_obsoletetype() const {
   return obsoletetype_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal2::obsoletetype() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal2.obsoletetype)
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal::obsoletetype() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal.obsoletetype)
   return _internal_obsoletetype();
 }
-inline void DeviceAppSignal2::_internal_set_obsoletetype(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceAppSignal::_internal_set_obsoletetype(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000008u;
   obsoletetype_ = value;
 }
-inline void DeviceAppSignal2::set_obsoletetype(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceAppSignal::set_obsoletetype(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_obsoletetype(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal2.obsoletetype)
+  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal.obsoletetype)
 }
 
 // optional int32 byteOrder = 2 [default = 0];
-inline bool DeviceAppSignal2::_internal_has_byteorder() const {
+inline bool DeviceAppSignal::_internal_has_byteorder() const {
   bool value = (_has_bits_[0] & 0x00000010u) != 0;
   return value;
 }
-inline bool DeviceAppSignal2::has_byteorder() const {
+inline bool DeviceAppSignal::has_byteorder() const {
   return _internal_has_byteorder();
 }
-inline void DeviceAppSignal2::clear_byteorder() {
+inline void DeviceAppSignal::clear_byteorder() {
   byteorder_ = 0;
   _has_bits_[0] &= ~0x00000010u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal2::_internal_byteorder() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal::_internal_byteorder() const {
   return byteorder_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal2::byteorder() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal2.byteOrder)
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal::byteorder() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal.byteOrder)
   return _internal_byteorder();
 }
-inline void DeviceAppSignal2::_internal_set_byteorder(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceAppSignal::_internal_set_byteorder(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000010u;
   byteorder_ = value;
 }
-inline void DeviceAppSignal2::set_byteorder(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceAppSignal::set_byteorder(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_byteorder(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal2.byteOrder)
+  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal.byteOrder)
 }
 
 // optional int32 format = 3 [default = 0];
-inline bool DeviceAppSignal2::_internal_has_format() const {
+inline bool DeviceAppSignal::_internal_has_format() const {
   bool value = (_has_bits_[0] & 0x00000020u) != 0;
   return value;
 }
-inline bool DeviceAppSignal2::has_format() const {
+inline bool DeviceAppSignal::has_format() const {
   return _internal_has_format();
 }
-inline void DeviceAppSignal2::clear_format() {
+inline void DeviceAppSignal::clear_format() {
   format_ = 0;
   _has_bits_[0] &= ~0x00000020u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal2::_internal_format() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal::_internal_format() const {
   return format_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal2::format() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal2.format)
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal::format() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal.format)
   return _internal_format();
 }
-inline void DeviceAppSignal2::_internal_set_format(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceAppSignal::_internal_set_format(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000020u;
   format_ = value;
 }
-inline void DeviceAppSignal2::set_format(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceAppSignal::set_format(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_format(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal2.format)
+  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal.format)
 }
 
 // optional int32 size = 4 [default = 0];
-inline bool DeviceAppSignal2::_internal_has_size() const {
+inline bool DeviceAppSignal::_internal_has_size() const {
   bool value = (_has_bits_[0] & 0x00000040u) != 0;
   return value;
 }
-inline bool DeviceAppSignal2::has_size() const {
+inline bool DeviceAppSignal::has_size() const {
   return _internal_has_size();
 }
-inline void DeviceAppSignal2::clear_size() {
+inline void DeviceAppSignal::clear_size() {
   size_ = 0;
   _has_bits_[0] &= ~0x00000040u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal2::_internal_size() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal::_internal_size() const {
   return size_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal2::size() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal2.size)
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal::size() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal.size)
   return _internal_size();
 }
-inline void DeviceAppSignal2::_internal_set_size(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceAppSignal::_internal_set_size(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000040u;
   size_ = value;
 }
-inline void DeviceAppSignal2::set_size(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceAppSignal::set_size(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_size(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal2.size)
+  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal.size)
 }
 
 // optional int32 valueOffset = 7 [default = 0];
-inline bool DeviceAppSignal2::_internal_has_valueoffset() const {
+inline bool DeviceAppSignal::_internal_has_valueoffset() const {
   bool value = (_has_bits_[0] & 0x00000080u) != 0;
   return value;
 }
-inline bool DeviceAppSignal2::has_valueoffset() const {
+inline bool DeviceAppSignal::has_valueoffset() const {
   return _internal_has_valueoffset();
 }
-inline void DeviceAppSignal2::clear_valueoffset() {
+inline void DeviceAppSignal::clear_valueoffset() {
   valueoffset_ = 0;
   _has_bits_[0] &= ~0x00000080u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal2::_internal_valueoffset() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal::_internal_valueoffset() const {
   return valueoffset_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal2::valueoffset() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal2.valueOffset)
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal::valueoffset() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal.valueOffset)
   return _internal_valueoffset();
 }
-inline void DeviceAppSignal2::_internal_set_valueoffset(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceAppSignal::_internal_set_valueoffset(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000080u;
   valueoffset_ = value;
 }
-inline void DeviceAppSignal2::set_valueoffset(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceAppSignal::set_valueoffset(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_valueoffset(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal2.valueOffset)
+  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal.valueOffset)
 }
 
 // optional int32 valueBit = 8 [default = 0];
-inline bool DeviceAppSignal2::_internal_has_valuebit() const {
+inline bool DeviceAppSignal::_internal_has_valuebit() const {
   bool value = (_has_bits_[0] & 0x00000100u) != 0;
   return value;
 }
-inline bool DeviceAppSignal2::has_valuebit() const {
+inline bool DeviceAppSignal::has_valuebit() const {
   return _internal_has_valuebit();
 }
-inline void DeviceAppSignal2::clear_valuebit() {
+inline void DeviceAppSignal::clear_valuebit() {
   valuebit_ = 0;
   _has_bits_[0] &= ~0x00000100u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal2::_internal_valuebit() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal::_internal_valuebit() const {
   return valuebit_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal2::valuebit() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal2.valueBit)
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal::valuebit() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal.valueBit)
   return _internal_valuebit();
 }
-inline void DeviceAppSignal2::_internal_set_valuebit(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceAppSignal::_internal_set_valuebit(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000100u;
   valuebit_ = value;
 }
-inline void DeviceAppSignal2::set_valuebit(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceAppSignal::set_valuebit(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_valuebit(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal2.valueBit)
+  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal.valueBit)
 }
 
 // optional int32 type = 9 [default = 0];
-inline bool DeviceAppSignal2::_internal_has_type() const {
+inline bool DeviceAppSignal::_internal_has_type() const {
   bool value = (_has_bits_[0] & 0x00000200u) != 0;
   return value;
 }
-inline bool DeviceAppSignal2::has_type() const {
+inline bool DeviceAppSignal::has_type() const {
   return _internal_has_type();
 }
-inline void DeviceAppSignal2::clear_type() {
+inline void DeviceAppSignal::clear_type() {
   type_ = 0;
   _has_bits_[0] &= ~0x00000200u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal2::_internal_type() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal::_internal_type() const {
   return type_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal2::type() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal2.type)
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal::type() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal.type)
   return _internal_type();
 }
-inline void DeviceAppSignal2::_internal_set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceAppSignal::_internal_set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000200u;
   type_ = value;
 }
-inline void DeviceAppSignal2::set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceAppSignal::set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_type(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal2.type)
+  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal.type)
 }
 
 // optional int32 function = 10 [default = 0];
-inline bool DeviceAppSignal2::_internal_has_function() const {
+inline bool DeviceAppSignal::_internal_has_function() const {
   bool value = (_has_bits_[0] & 0x00000400u) != 0;
   return value;
 }
-inline bool DeviceAppSignal2::has_function() const {
+inline bool DeviceAppSignal::has_function() const {
   return _internal_has_function();
 }
-inline void DeviceAppSignal2::clear_function() {
+inline void DeviceAppSignal::clear_function() {
   function_ = 0;
   _has_bits_[0] &= ~0x00000400u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal2::_internal_function() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal::_internal_function() const {
   return function_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal2::function() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal2.function)
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal::function() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal.function)
   return _internal_function();
 }
-inline void DeviceAppSignal2::_internal_set_function(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceAppSignal::_internal_set_function(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000400u;
   function_ = value;
 }
-inline void DeviceAppSignal2::set_function(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceAppSignal::set_function(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_function(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal2.function)
+  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal.function)
 }
 
 // optional int32 memoryArea = 11 [default = 0];
-inline bool DeviceAppSignal2::_internal_has_memoryarea() const {
+inline bool DeviceAppSignal::_internal_has_memoryarea() const {
   bool value = (_has_bits_[0] & 0x00000800u) != 0;
   return value;
 }
-inline bool DeviceAppSignal2::has_memoryarea() const {
+inline bool DeviceAppSignal::has_memoryarea() const {
   return _internal_has_memoryarea();
 }
-inline void DeviceAppSignal2::clear_memoryarea() {
+inline void DeviceAppSignal::clear_memoryarea() {
   memoryarea_ = 0;
   _has_bits_[0] &= ~0x00000800u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal2::_internal_memoryarea() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal::_internal_memoryarea() const {
   return memoryarea_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal2::memoryarea() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal2.memoryArea)
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal::memoryarea() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal.memoryArea)
   return _internal_memoryarea();
 }
-inline void DeviceAppSignal2::_internal_set_memoryarea(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceAppSignal::_internal_set_memoryarea(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000800u;
   memoryarea_ = value;
 }
-inline void DeviceAppSignal2::set_memoryarea(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceAppSignal::set_memoryarea(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_memoryarea(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal2.memoryArea)
+  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal.memoryArea)
 }
 
 // optional int32 appSignalLowAdc = 12 [default = 0];
-inline bool DeviceAppSignal2::_internal_has_appsignallowadc() const {
+inline bool DeviceAppSignal::_internal_has_appsignallowadc() const {
   bool value = (_has_bits_[0] & 0x00001000u) != 0;
   return value;
 }
-inline bool DeviceAppSignal2::has_appsignallowadc() const {
+inline bool DeviceAppSignal::has_appsignallowadc() const {
   return _internal_has_appsignallowadc();
 }
-inline void DeviceAppSignal2::clear_appsignallowadc() {
+inline void DeviceAppSignal::clear_appsignallowadc() {
   appsignallowadc_ = 0;
   _has_bits_[0] &= ~0x00001000u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal2::_internal_appsignallowadc() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal::_internal_appsignallowadc() const {
   return appsignallowadc_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal2::appsignallowadc() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal2.appSignalLowAdc)
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal::appsignallowadc() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal.appSignalLowAdc)
   return _internal_appsignallowadc();
 }
-inline void DeviceAppSignal2::_internal_set_appsignallowadc(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceAppSignal::_internal_set_appsignallowadc(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00001000u;
   appsignallowadc_ = value;
 }
-inline void DeviceAppSignal2::set_appsignallowadc(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceAppSignal::set_appsignallowadc(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_appsignallowadc(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal2.appSignalLowAdc)
+  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal.appSignalLowAdc)
 }
 
 // optional int32 appSignalHighAdc = 13 [default = 65535];
-inline bool DeviceAppSignal2::_internal_has_appsignalhighadc() const {
+inline bool DeviceAppSignal::_internal_has_appsignalhighadc() const {
   bool value = (_has_bits_[0] & 0x00008000u) != 0;
   return value;
 }
-inline bool DeviceAppSignal2::has_appsignalhighadc() const {
+inline bool DeviceAppSignal::has_appsignalhighadc() const {
   return _internal_has_appsignalhighadc();
 }
-inline void DeviceAppSignal2::clear_appsignalhighadc() {
+inline void DeviceAppSignal::clear_appsignalhighadc() {
   appsignalhighadc_ = 65535;
   _has_bits_[0] &= ~0x00008000u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal2::_internal_appsignalhighadc() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal::_internal_appsignalhighadc() const {
   return appsignalhighadc_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal2::appsignalhighadc() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal2.appSignalHighAdc)
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal::appsignalhighadc() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal.appSignalHighAdc)
   return _internal_appsignalhighadc();
 }
-inline void DeviceAppSignal2::_internal_set_appsignalhighadc(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceAppSignal::_internal_set_appsignalhighadc(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00008000u;
   appsignalhighadc_ = value;
 }
-inline void DeviceAppSignal2::set_appsignalhighadc(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceAppSignal::set_appsignalhighadc(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_appsignalhighadc(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal2.appSignalHighAdc)
+  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal.appSignalHighAdc)
 }
 
 // optional double appSignalLowEngUnits = 14 [default = 0];
-inline bool DeviceAppSignal2::_internal_has_appsignallowengunits() const {
+inline bool DeviceAppSignal::_internal_has_appsignallowengunits() const {
   bool value = (_has_bits_[0] & 0x00002000u) != 0;
   return value;
 }
-inline bool DeviceAppSignal2::has_appsignallowengunits() const {
+inline bool DeviceAppSignal::has_appsignallowengunits() const {
   return _internal_has_appsignallowengunits();
 }
-inline void DeviceAppSignal2::clear_appsignallowengunits() {
+inline void DeviceAppSignal::clear_appsignallowengunits() {
   appsignallowengunits_ = 0;
   _has_bits_[0] &= ~0x00002000u;
 }
-inline double DeviceAppSignal2::_internal_appsignallowengunits() const {
+inline double DeviceAppSignal::_internal_appsignallowengunits() const {
   return appsignallowengunits_;
 }
-inline double DeviceAppSignal2::appsignallowengunits() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal2.appSignalLowEngUnits)
+inline double DeviceAppSignal::appsignallowengunits() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal.appSignalLowEngUnits)
   return _internal_appsignallowengunits();
 }
-inline void DeviceAppSignal2::_internal_set_appsignallowengunits(double value) {
+inline void DeviceAppSignal::_internal_set_appsignallowengunits(double value) {
   _has_bits_[0] |= 0x00002000u;
   appsignallowengunits_ = value;
 }
-inline void DeviceAppSignal2::set_appsignallowengunits(double value) {
+inline void DeviceAppSignal::set_appsignallowengunits(double value) {
   _internal_set_appsignallowengunits(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal2.appSignalLowEngUnits)
+  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal.appSignalLowEngUnits)
 }
 
 // optional double appSignalHighEngUnits = 15 [default = 100];
-inline bool DeviceAppSignal2::_internal_has_appsignalhighengunits() const {
+inline bool DeviceAppSignal::_internal_has_appsignalhighengunits() const {
   bool value = (_has_bits_[0] & 0x00020000u) != 0;
   return value;
 }
-inline bool DeviceAppSignal2::has_appsignalhighengunits() const {
+inline bool DeviceAppSignal::has_appsignalhighengunits() const {
   return _internal_has_appsignalhighengunits();
 }
-inline void DeviceAppSignal2::clear_appsignalhighengunits() {
+inline void DeviceAppSignal::clear_appsignalhighengunits() {
   appsignalhighengunits_ = 100;
   _has_bits_[0] &= ~0x00020000u;
 }
-inline double DeviceAppSignal2::_internal_appsignalhighengunits() const {
+inline double DeviceAppSignal::_internal_appsignalhighengunits() const {
   return appsignalhighengunits_;
 }
-inline double DeviceAppSignal2::appsignalhighengunits() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal2.appSignalHighEngUnits)
+inline double DeviceAppSignal::appsignalhighengunits() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal.appSignalHighEngUnits)
   return _internal_appsignalhighengunits();
 }
-inline void DeviceAppSignal2::_internal_set_appsignalhighengunits(double value) {
+inline void DeviceAppSignal::_internal_set_appsignalhighengunits(double value) {
   _has_bits_[0] |= 0x00020000u;
   appsignalhighengunits_ = value;
 }
-inline void DeviceAppSignal2::set_appsignalhighengunits(double value) {
+inline void DeviceAppSignal::set_appsignalhighengunits(double value) {
   _internal_set_appsignalhighengunits(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal2.appSignalHighEngUnits)
+  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal.appSignalHighEngUnits)
 }
 
 // optional int32 appSignalDataFormat = 16 [default = 2];
-inline bool DeviceAppSignal2::_internal_has_appsignaldataformat() const {
+inline bool DeviceAppSignal::_internal_has_appsignaldataformat() const {
   bool value = (_has_bits_[0] & 0x00010000u) != 0;
   return value;
 }
-inline bool DeviceAppSignal2::has_appsignaldataformat() const {
+inline bool DeviceAppSignal::has_appsignaldataformat() const {
   return _internal_has_appsignaldataformat();
 }
-inline void DeviceAppSignal2::clear_appsignaldataformat() {
+inline void DeviceAppSignal::clear_appsignaldataformat() {
   appsignaldataformat_ = 2;
   _has_bits_[0] &= ~0x00010000u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal2::_internal_appsignaldataformat() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal::_internal_appsignaldataformat() const {
   return appsignaldataformat_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal2::appsignaldataformat() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal2.appSignalDataFormat)
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceAppSignal::appsignaldataformat() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal.appSignalDataFormat)
   return _internal_appsignaldataformat();
 }
-inline void DeviceAppSignal2::_internal_set_appsignaldataformat(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceAppSignal::_internal_set_appsignaldataformat(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00010000u;
   appsignaldataformat_ = value;
 }
-inline void DeviceAppSignal2::set_appsignaldataformat(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceAppSignal::set_appsignaldataformat(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_appsignaldataformat(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal2.appSignalDataFormat)
+  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal.appSignalDataFormat)
 }
 
 // optional string validitySignalId = 20;
-inline bool DeviceAppSignal2::_internal_has_validitysignalid() const {
+inline bool DeviceAppSignal::_internal_has_validitysignalid() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
 }
-inline bool DeviceAppSignal2::has_validitysignalid() const {
+inline bool DeviceAppSignal::has_validitysignalid() const {
   return _internal_has_validitysignalid();
 }
-inline void DeviceAppSignal2::clear_validitysignalid() {
+inline void DeviceAppSignal::clear_validitysignalid() {
   validitysignalid_.ClearToEmpty();
   _has_bits_[0] &= ~0x00000001u;
 }
-inline const std::string& DeviceAppSignal2::validitysignalid() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal2.validitySignalId)
+inline const std::string& DeviceAppSignal::validitysignalid() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal.validitySignalId)
   return _internal_validitysignalid();
 }
-inline void DeviceAppSignal2::set_validitysignalid(const std::string& value) {
+inline void DeviceAppSignal::set_validitysignalid(const std::string& value) {
   _internal_set_validitysignalid(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal2.validitySignalId)
+  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal.validitySignalId)
 }
-inline std::string* DeviceAppSignal2::mutable_validitysignalid() {
-  // @@protoc_insertion_point(field_mutable:Proto.DeviceAppSignal2.validitySignalId)
+inline std::string* DeviceAppSignal::mutable_validitysignalid() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceAppSignal.validitySignalId)
   return _internal_mutable_validitysignalid();
 }
-inline const std::string& DeviceAppSignal2::_internal_validitysignalid() const {
+inline const std::string& DeviceAppSignal::_internal_validitysignalid() const {
   return validitysignalid_.Get();
 }
-inline void DeviceAppSignal2::_internal_set_validitysignalid(const std::string& value) {
+inline void DeviceAppSignal::_internal_set_validitysignalid(const std::string& value) {
   _has_bits_[0] |= 0x00000001u;
   validitysignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
-inline void DeviceAppSignal2::set_validitysignalid(std::string&& value) {
+inline void DeviceAppSignal::set_validitysignalid(std::string&& value) {
   _has_bits_[0] |= 0x00000001u;
   validitysignalid_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Proto.DeviceAppSignal2.validitySignalId)
+  // @@protoc_insertion_point(field_set_rvalue:Proto.DeviceAppSignal.validitySignalId)
 }
-inline void DeviceAppSignal2::set_validitysignalid(const char* value) {
+inline void DeviceAppSignal::set_validitysignalid(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   _has_bits_[0] |= 0x00000001u;
   validitysignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Proto.DeviceAppSignal2.validitySignalId)
+  // @@protoc_insertion_point(field_set_char:Proto.DeviceAppSignal.validitySignalId)
 }
-inline void DeviceAppSignal2::set_validitysignalid(const char* value,
+inline void DeviceAppSignal::set_validitysignalid(const char* value,
     size_t size) {
   _has_bits_[0] |= 0x00000001u;
   validitysignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Proto.DeviceAppSignal2.validitySignalId)
+  // @@protoc_insertion_point(field_set_pointer:Proto.DeviceAppSignal.validitySignalId)
 }
-inline std::string* DeviceAppSignal2::_internal_mutable_validitysignalid() {
+inline std::string* DeviceAppSignal::_internal_mutable_validitysignalid() {
   _has_bits_[0] |= 0x00000001u;
   return validitysignalid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
-inline std::string* DeviceAppSignal2::release_validitysignalid() {
-  // @@protoc_insertion_point(field_release:Proto.DeviceAppSignal2.validitySignalId)
+inline std::string* DeviceAppSignal::release_validitysignalid() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceAppSignal.validitySignalId)
   if (!_internal_has_validitysignalid()) {
     return nullptr;
   }
   _has_bits_[0] &= ~0x00000001u;
   return validitysignalid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void DeviceAppSignal2::set_allocated_validitysignalid(std::string* validitysignalid) {
+inline void DeviceAppSignal::set_allocated_validitysignalid(std::string* validitysignalid) {
   if (validitysignalid != nullptr) {
     _has_bits_[0] |= 0x00000001u;
   } else {
@@ -6388,72 +6388,72 @@ inline void DeviceAppSignal2::set_allocated_validitysignalid(std::string* validi
   }
   validitysignalid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), validitysignalid,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceAppSignal2.validitySignalId)
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceAppSignal.validitySignalId)
 }
 
 // optional string appSignalBusTypeId = 26;
-inline bool DeviceAppSignal2::_internal_has_appsignalbustypeid() const {
+inline bool DeviceAppSignal::_internal_has_appsignalbustypeid() const {
   bool value = (_has_bits_[0] & 0x00000002u) != 0;
   return value;
 }
-inline bool DeviceAppSignal2::has_appsignalbustypeid() const {
+inline bool DeviceAppSignal::has_appsignalbustypeid() const {
   return _internal_has_appsignalbustypeid();
 }
-inline void DeviceAppSignal2::clear_appsignalbustypeid() {
+inline void DeviceAppSignal::clear_appsignalbustypeid() {
   appsignalbustypeid_.ClearToEmpty();
   _has_bits_[0] &= ~0x00000002u;
 }
-inline const std::string& DeviceAppSignal2::appsignalbustypeid() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal2.appSignalBusTypeId)
+inline const std::string& DeviceAppSignal::appsignalbustypeid() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal.appSignalBusTypeId)
   return _internal_appsignalbustypeid();
 }
-inline void DeviceAppSignal2::set_appsignalbustypeid(const std::string& value) {
+inline void DeviceAppSignal::set_appsignalbustypeid(const std::string& value) {
   _internal_set_appsignalbustypeid(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal2.appSignalBusTypeId)
+  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal.appSignalBusTypeId)
 }
-inline std::string* DeviceAppSignal2::mutable_appsignalbustypeid() {
-  // @@protoc_insertion_point(field_mutable:Proto.DeviceAppSignal2.appSignalBusTypeId)
+inline std::string* DeviceAppSignal::mutable_appsignalbustypeid() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceAppSignal.appSignalBusTypeId)
   return _internal_mutable_appsignalbustypeid();
 }
-inline const std::string& DeviceAppSignal2::_internal_appsignalbustypeid() const {
+inline const std::string& DeviceAppSignal::_internal_appsignalbustypeid() const {
   return appsignalbustypeid_.Get();
 }
-inline void DeviceAppSignal2::_internal_set_appsignalbustypeid(const std::string& value) {
+inline void DeviceAppSignal::_internal_set_appsignalbustypeid(const std::string& value) {
   _has_bits_[0] |= 0x00000002u;
   appsignalbustypeid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
-inline void DeviceAppSignal2::set_appsignalbustypeid(std::string&& value) {
+inline void DeviceAppSignal::set_appsignalbustypeid(std::string&& value) {
   _has_bits_[0] |= 0x00000002u;
   appsignalbustypeid_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Proto.DeviceAppSignal2.appSignalBusTypeId)
+  // @@protoc_insertion_point(field_set_rvalue:Proto.DeviceAppSignal.appSignalBusTypeId)
 }
-inline void DeviceAppSignal2::set_appsignalbustypeid(const char* value) {
+inline void DeviceAppSignal::set_appsignalbustypeid(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   _has_bits_[0] |= 0x00000002u;
   appsignalbustypeid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Proto.DeviceAppSignal2.appSignalBusTypeId)
+  // @@protoc_insertion_point(field_set_char:Proto.DeviceAppSignal.appSignalBusTypeId)
 }
-inline void DeviceAppSignal2::set_appsignalbustypeid(const char* value,
+inline void DeviceAppSignal::set_appsignalbustypeid(const char* value,
     size_t size) {
   _has_bits_[0] |= 0x00000002u;
   appsignalbustypeid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Proto.DeviceAppSignal2.appSignalBusTypeId)
+  // @@protoc_insertion_point(field_set_pointer:Proto.DeviceAppSignal.appSignalBusTypeId)
 }
-inline std::string* DeviceAppSignal2::_internal_mutable_appsignalbustypeid() {
+inline std::string* DeviceAppSignal::_internal_mutable_appsignalbustypeid() {
   _has_bits_[0] |= 0x00000002u;
   return appsignalbustypeid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
-inline std::string* DeviceAppSignal2::release_appsignalbustypeid() {
-  // @@protoc_insertion_point(field_release:Proto.DeviceAppSignal2.appSignalBusTypeId)
+inline std::string* DeviceAppSignal::release_appsignalbustypeid() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceAppSignal.appSignalBusTypeId)
   if (!_internal_has_appsignalbustypeid()) {
     return nullptr;
   }
   _has_bits_[0] &= ~0x00000002u;
   return appsignalbustypeid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void DeviceAppSignal2::set_allocated_appsignalbustypeid(std::string* appsignalbustypeid) {
+inline void DeviceAppSignal::set_allocated_appsignalbustypeid(std::string* appsignalbustypeid) {
   if (appsignalbustypeid != nullptr) {
     _has_bits_[0] |= 0x00000002u;
   } else {
@@ -6461,72 +6461,72 @@ inline void DeviceAppSignal2::set_allocated_appsignalbustypeid(std::string* apps
   }
   appsignalbustypeid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), appsignalbustypeid,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceAppSignal2.appSignalBusTypeId)
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceAppSignal.appSignalBusTypeId)
 }
 
 // optional string signalSpecPropsStruct = 40;
-inline bool DeviceAppSignal2::_internal_has_signalspecpropsstruct() const {
+inline bool DeviceAppSignal::_internal_has_signalspecpropsstruct() const {
   bool value = (_has_bits_[0] & 0x00000004u) != 0;
   return value;
 }
-inline bool DeviceAppSignal2::has_signalspecpropsstruct() const {
+inline bool DeviceAppSignal::has_signalspecpropsstruct() const {
   return _internal_has_signalspecpropsstruct();
 }
-inline void DeviceAppSignal2::clear_signalspecpropsstruct() {
+inline void DeviceAppSignal::clear_signalspecpropsstruct() {
   signalspecpropsstruct_.ClearToEmpty();
   _has_bits_[0] &= ~0x00000004u;
 }
-inline const std::string& DeviceAppSignal2::signalspecpropsstruct() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal2.signalSpecPropsStruct)
+inline const std::string& DeviceAppSignal::signalspecpropsstruct() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal.signalSpecPropsStruct)
   return _internal_signalspecpropsstruct();
 }
-inline void DeviceAppSignal2::set_signalspecpropsstruct(const std::string& value) {
+inline void DeviceAppSignal::set_signalspecpropsstruct(const std::string& value) {
   _internal_set_signalspecpropsstruct(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal2.signalSpecPropsStruct)
+  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal.signalSpecPropsStruct)
 }
-inline std::string* DeviceAppSignal2::mutable_signalspecpropsstruct() {
-  // @@protoc_insertion_point(field_mutable:Proto.DeviceAppSignal2.signalSpecPropsStruct)
+inline std::string* DeviceAppSignal::mutable_signalspecpropsstruct() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceAppSignal.signalSpecPropsStruct)
   return _internal_mutable_signalspecpropsstruct();
 }
-inline const std::string& DeviceAppSignal2::_internal_signalspecpropsstruct() const {
+inline const std::string& DeviceAppSignal::_internal_signalspecpropsstruct() const {
   return signalspecpropsstruct_.Get();
 }
-inline void DeviceAppSignal2::_internal_set_signalspecpropsstruct(const std::string& value) {
+inline void DeviceAppSignal::_internal_set_signalspecpropsstruct(const std::string& value) {
   _has_bits_[0] |= 0x00000004u;
   signalspecpropsstruct_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
-inline void DeviceAppSignal2::set_signalspecpropsstruct(std::string&& value) {
+inline void DeviceAppSignal::set_signalspecpropsstruct(std::string&& value) {
   _has_bits_[0] |= 0x00000004u;
   signalspecpropsstruct_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Proto.DeviceAppSignal2.signalSpecPropsStruct)
+  // @@protoc_insertion_point(field_set_rvalue:Proto.DeviceAppSignal.signalSpecPropsStruct)
 }
-inline void DeviceAppSignal2::set_signalspecpropsstruct(const char* value) {
+inline void DeviceAppSignal::set_signalspecpropsstruct(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   _has_bits_[0] |= 0x00000004u;
   signalspecpropsstruct_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Proto.DeviceAppSignal2.signalSpecPropsStruct)
+  // @@protoc_insertion_point(field_set_char:Proto.DeviceAppSignal.signalSpecPropsStruct)
 }
-inline void DeviceAppSignal2::set_signalspecpropsstruct(const char* value,
+inline void DeviceAppSignal::set_signalspecpropsstruct(const char* value,
     size_t size) {
   _has_bits_[0] |= 0x00000004u;
   signalspecpropsstruct_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Proto.DeviceAppSignal2.signalSpecPropsStruct)
+  // @@protoc_insertion_point(field_set_pointer:Proto.DeviceAppSignal.signalSpecPropsStruct)
 }
-inline std::string* DeviceAppSignal2::_internal_mutable_signalspecpropsstruct() {
+inline std::string* DeviceAppSignal::_internal_mutable_signalspecpropsstruct() {
   _has_bits_[0] |= 0x00000004u;
   return signalspecpropsstruct_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
-inline std::string* DeviceAppSignal2::release_signalspecpropsstruct() {
-  // @@protoc_insertion_point(field_release:Proto.DeviceAppSignal2.signalSpecPropsStruct)
+inline std::string* DeviceAppSignal::release_signalspecpropsstruct() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceAppSignal.signalSpecPropsStruct)
   if (!_internal_has_signalspecpropsstruct()) {
     return nullptr;
   }
   _has_bits_[0] &= ~0x00000004u;
   return signalspecpropsstruct_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void DeviceAppSignal2::set_allocated_signalspecpropsstruct(std::string* signalspecpropsstruct) {
+inline void DeviceAppSignal::set_allocated_signalspecpropsstruct(std::string* signalspecpropsstruct) {
   if (signalspecpropsstruct != nullptr) {
     _has_bits_[0] |= 0x00000004u;
   } else {
@@ -6534,132 +6534,132 @@ inline void DeviceAppSignal2::set_allocated_signalspecpropsstruct(std::string* s
   }
   signalspecpropsstruct_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), signalspecpropsstruct,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceAppSignal2.signalSpecPropsStruct)
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceAppSignal.signalSpecPropsStruct)
 }
 
 // optional bool signalSpecPropsStructWasFixed = 41 [default = false];
-inline bool DeviceAppSignal2::_internal_has_signalspecpropsstructwasfixed() const {
+inline bool DeviceAppSignal::_internal_has_signalspecpropsstructwasfixed() const {
   bool value = (_has_bits_[0] & 0x00004000u) != 0;
   return value;
 }
-inline bool DeviceAppSignal2::has_signalspecpropsstructwasfixed() const {
+inline bool DeviceAppSignal::has_signalspecpropsstructwasfixed() const {
   return _internal_has_signalspecpropsstructwasfixed();
 }
-inline void DeviceAppSignal2::clear_signalspecpropsstructwasfixed() {
+inline void DeviceAppSignal::clear_signalspecpropsstructwasfixed() {
   signalspecpropsstructwasfixed_ = false;
   _has_bits_[0] &= ~0x00004000u;
 }
-inline bool DeviceAppSignal2::_internal_signalspecpropsstructwasfixed() const {
+inline bool DeviceAppSignal::_internal_signalspecpropsstructwasfixed() const {
   return signalspecpropsstructwasfixed_;
 }
-inline bool DeviceAppSignal2::signalspecpropsstructwasfixed() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal2.signalSpecPropsStructWasFixed)
+inline bool DeviceAppSignal::signalspecpropsstructwasfixed() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceAppSignal.signalSpecPropsStructWasFixed)
   return _internal_signalspecpropsstructwasfixed();
 }
-inline void DeviceAppSignal2::_internal_set_signalspecpropsstructwasfixed(bool value) {
+inline void DeviceAppSignal::_internal_set_signalspecpropsstructwasfixed(bool value) {
   _has_bits_[0] |= 0x00004000u;
   signalspecpropsstructwasfixed_ = value;
 }
-inline void DeviceAppSignal2::set_signalspecpropsstructwasfixed(bool value) {
+inline void DeviceAppSignal::set_signalspecpropsstructwasfixed(bool value) {
   _internal_set_signalspecpropsstructwasfixed(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal2.signalSpecPropsStructWasFixed)
+  // @@protoc_insertion_point(field_set:Proto.DeviceAppSignal.signalSpecPropsStructWasFixed)
 }
 
 // -------------------------------------------------------------------
 
-// DeviceDiagSignal2
+// DeviceDiagSignal
 
 // optional int32 level = 3;
-inline bool DeviceDiagSignal2::_internal_has_level() const {
+inline bool DeviceDiagSignal::_internal_has_level() const {
   bool value = (_has_bits_[0] & 0x00000008u) != 0;
   return value;
 }
-inline bool DeviceDiagSignal2::has_level() const {
+inline bool DeviceDiagSignal::has_level() const {
   return _internal_has_level();
 }
-inline void DeviceDiagSignal2::clear_level() {
+inline void DeviceDiagSignal::clear_level() {
   level_ = 0;
   _has_bits_[0] &= ~0x00000008u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal2::_internal_level() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::_internal_level() const {
   return level_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal2::level() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal2.level)
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::level() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.level)
   return _internal_level();
 }
-inline void DeviceDiagSignal2::_internal_set_level(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceDiagSignal::_internal_set_level(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000008u;
   level_ = value;
 }
-inline void DeviceDiagSignal2::set_level(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceDiagSignal::set_level(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_level(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal2.level)
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.level)
 }
 
 // optional string signalTypeId = 4;
-inline bool DeviceDiagSignal2::_internal_has_signaltypeid() const {
+inline bool DeviceDiagSignal::_internal_has_signaltypeid() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
 }
-inline bool DeviceDiagSignal2::has_signaltypeid() const {
+inline bool DeviceDiagSignal::has_signaltypeid() const {
   return _internal_has_signaltypeid();
 }
-inline void DeviceDiagSignal2::clear_signaltypeid() {
+inline void DeviceDiagSignal::clear_signaltypeid() {
   signaltypeid_.ClearToEmpty();
   _has_bits_[0] &= ~0x00000001u;
 }
-inline const std::string& DeviceDiagSignal2::signaltypeid() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal2.signalTypeId)
+inline const std::string& DeviceDiagSignal::signaltypeid() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.signalTypeId)
   return _internal_signaltypeid();
 }
-inline void DeviceDiagSignal2::set_signaltypeid(const std::string& value) {
+inline void DeviceDiagSignal::set_signaltypeid(const std::string& value) {
   _internal_set_signaltypeid(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal2.signalTypeId)
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.signalTypeId)
 }
-inline std::string* DeviceDiagSignal2::mutable_signaltypeid() {
-  // @@protoc_insertion_point(field_mutable:Proto.DeviceDiagSignal2.signalTypeId)
+inline std::string* DeviceDiagSignal::mutable_signaltypeid() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceDiagSignal.signalTypeId)
   return _internal_mutable_signaltypeid();
 }
-inline const std::string& DeviceDiagSignal2::_internal_signaltypeid() const {
+inline const std::string& DeviceDiagSignal::_internal_signaltypeid() const {
   return signaltypeid_.Get();
 }
-inline void DeviceDiagSignal2::_internal_set_signaltypeid(const std::string& value) {
+inline void DeviceDiagSignal::_internal_set_signaltypeid(const std::string& value) {
   _has_bits_[0] |= 0x00000001u;
   signaltypeid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
-inline void DeviceDiagSignal2::set_signaltypeid(std::string&& value) {
+inline void DeviceDiagSignal::set_signaltypeid(std::string&& value) {
   _has_bits_[0] |= 0x00000001u;
   signaltypeid_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Proto.DeviceDiagSignal2.signalTypeId)
+  // @@protoc_insertion_point(field_set_rvalue:Proto.DeviceDiagSignal.signalTypeId)
 }
-inline void DeviceDiagSignal2::set_signaltypeid(const char* value) {
+inline void DeviceDiagSignal::set_signaltypeid(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   _has_bits_[0] |= 0x00000001u;
   signaltypeid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Proto.DeviceDiagSignal2.signalTypeId)
+  // @@protoc_insertion_point(field_set_char:Proto.DeviceDiagSignal.signalTypeId)
 }
-inline void DeviceDiagSignal2::set_signaltypeid(const char* value,
+inline void DeviceDiagSignal::set_signaltypeid(const char* value,
     size_t size) {
   _has_bits_[0] |= 0x00000001u;
   signaltypeid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Proto.DeviceDiagSignal2.signalTypeId)
+  // @@protoc_insertion_point(field_set_pointer:Proto.DeviceDiagSignal.signalTypeId)
 }
-inline std::string* DeviceDiagSignal2::_internal_mutable_signaltypeid() {
+inline std::string* DeviceDiagSignal::_internal_mutable_signaltypeid() {
   _has_bits_[0] |= 0x00000001u;
   return signaltypeid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
-inline std::string* DeviceDiagSignal2::release_signaltypeid() {
-  // @@protoc_insertion_point(field_release:Proto.DeviceDiagSignal2.signalTypeId)
+inline std::string* DeviceDiagSignal::release_signaltypeid() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceDiagSignal.signalTypeId)
   if (!_internal_has_signaltypeid()) {
     return nullptr;
   }
   _has_bits_[0] &= ~0x00000001u;
   return signaltypeid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void DeviceDiagSignal2::set_allocated_signaltypeid(std::string* signaltypeid) {
+inline void DeviceDiagSignal::set_allocated_signaltypeid(std::string* signaltypeid) {
   if (signaltypeid != nullptr) {
     _has_bits_[0] |= 0x00000001u;
   } else {
@@ -6667,72 +6667,72 @@ inline void DeviceDiagSignal2::set_allocated_signaltypeid(std::string* signaltyp
   }
   signaltypeid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), signaltypeid,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceDiagSignal2.signalTypeId)
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceDiagSignal.signalTypeId)
 }
 
 // optional string validitySignalId = 5;
-inline bool DeviceDiagSignal2::_internal_has_validitysignalid() const {
+inline bool DeviceDiagSignal::_internal_has_validitysignalid() const {
   bool value = (_has_bits_[0] & 0x00000002u) != 0;
   return value;
 }
-inline bool DeviceDiagSignal2::has_validitysignalid() const {
+inline bool DeviceDiagSignal::has_validitysignalid() const {
   return _internal_has_validitysignalid();
 }
-inline void DeviceDiagSignal2::clear_validitysignalid() {
+inline void DeviceDiagSignal::clear_validitysignalid() {
   validitysignalid_.ClearToEmpty();
   _has_bits_[0] &= ~0x00000002u;
 }
-inline const std::string& DeviceDiagSignal2::validitysignalid() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal2.validitySignalId)
+inline const std::string& DeviceDiagSignal::validitysignalid() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.validitySignalId)
   return _internal_validitysignalid();
 }
-inline void DeviceDiagSignal2::set_validitysignalid(const std::string& value) {
+inline void DeviceDiagSignal::set_validitysignalid(const std::string& value) {
   _internal_set_validitysignalid(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal2.validitySignalId)
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.validitySignalId)
 }
-inline std::string* DeviceDiagSignal2::mutable_validitysignalid() {
-  // @@protoc_insertion_point(field_mutable:Proto.DeviceDiagSignal2.validitySignalId)
+inline std::string* DeviceDiagSignal::mutable_validitysignalid() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceDiagSignal.validitySignalId)
   return _internal_mutable_validitysignalid();
 }
-inline const std::string& DeviceDiagSignal2::_internal_validitysignalid() const {
+inline const std::string& DeviceDiagSignal::_internal_validitysignalid() const {
   return validitysignalid_.Get();
 }
-inline void DeviceDiagSignal2::_internal_set_validitysignalid(const std::string& value) {
+inline void DeviceDiagSignal::_internal_set_validitysignalid(const std::string& value) {
   _has_bits_[0] |= 0x00000002u;
   validitysignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
-inline void DeviceDiagSignal2::set_validitysignalid(std::string&& value) {
+inline void DeviceDiagSignal::set_validitysignalid(std::string&& value) {
   _has_bits_[0] |= 0x00000002u;
   validitysignalid_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Proto.DeviceDiagSignal2.validitySignalId)
+  // @@protoc_insertion_point(field_set_rvalue:Proto.DeviceDiagSignal.validitySignalId)
 }
-inline void DeviceDiagSignal2::set_validitysignalid(const char* value) {
+inline void DeviceDiagSignal::set_validitysignalid(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   _has_bits_[0] |= 0x00000002u;
   validitysignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Proto.DeviceDiagSignal2.validitySignalId)
+  // @@protoc_insertion_point(field_set_char:Proto.DeviceDiagSignal.validitySignalId)
 }
-inline void DeviceDiagSignal2::set_validitysignalid(const char* value,
+inline void DeviceDiagSignal::set_validitysignalid(const char* value,
     size_t size) {
   _has_bits_[0] |= 0x00000002u;
   validitysignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Proto.DeviceDiagSignal2.validitySignalId)
+  // @@protoc_insertion_point(field_set_pointer:Proto.DeviceDiagSignal.validitySignalId)
 }
-inline std::string* DeviceDiagSignal2::_internal_mutable_validitysignalid() {
+inline std::string* DeviceDiagSignal::_internal_mutable_validitysignalid() {
   _has_bits_[0] |= 0x00000002u;
   return validitysignalid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
-inline std::string* DeviceDiagSignal2::release_validitysignalid() {
-  // @@protoc_insertion_point(field_release:Proto.DeviceDiagSignal2.validitySignalId)
+inline std::string* DeviceDiagSignal::release_validitysignalid() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceDiagSignal.validitySignalId)
   if (!_internal_has_validitysignalid()) {
     return nullptr;
   }
   _has_bits_[0] &= ~0x00000002u;
   return validitysignalid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void DeviceDiagSignal2::set_allocated_validitysignalid(std::string* validitysignalid) {
+inline void DeviceDiagSignal::set_allocated_validitysignalid(std::string* validitysignalid) {
   if (validitysignalid != nullptr) {
     _has_bits_[0] |= 0x00000002u;
   } else {
@@ -6740,100 +6740,100 @@ inline void DeviceDiagSignal2::set_allocated_validitysignalid(std::string* valid
   }
   validitysignalid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), validitysignalid,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceDiagSignal2.validitySignalId)
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceDiagSignal.validitySignalId)
 }
 
 // optional bool isRefelection = 6;
-inline bool DeviceDiagSignal2::_internal_has_isrefelection() const {
+inline bool DeviceDiagSignal::_internal_has_isrefelection() const {
   bool value = (_has_bits_[0] & 0x00000100u) != 0;
   return value;
 }
-inline bool DeviceDiagSignal2::has_isrefelection() const {
+inline bool DeviceDiagSignal::has_isrefelection() const {
   return _internal_has_isrefelection();
 }
-inline void DeviceDiagSignal2::clear_isrefelection() {
+inline void DeviceDiagSignal::clear_isrefelection() {
   isrefelection_ = false;
   _has_bits_[0] &= ~0x00000100u;
 }
-inline bool DeviceDiagSignal2::_internal_isrefelection() const {
+inline bool DeviceDiagSignal::_internal_isrefelection() const {
   return isrefelection_;
 }
-inline bool DeviceDiagSignal2::isrefelection() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal2.isRefelection)
+inline bool DeviceDiagSignal::isrefelection() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.isRefelection)
   return _internal_isrefelection();
 }
-inline void DeviceDiagSignal2::_internal_set_isrefelection(bool value) {
+inline void DeviceDiagSignal::_internal_set_isrefelection(bool value) {
   _has_bits_[0] |= 0x00000100u;
   isrefelection_ = value;
 }
-inline void DeviceDiagSignal2::set_isrefelection(bool value) {
+inline void DeviceDiagSignal::set_isrefelection(bool value) {
   _internal_set_isrefelection(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal2.isRefelection)
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.isRefelection)
 }
 
 // optional string reflectedSignalId = 7;
-inline bool DeviceDiagSignal2::_internal_has_reflectedsignalid() const {
+inline bool DeviceDiagSignal::_internal_has_reflectedsignalid() const {
   bool value = (_has_bits_[0] & 0x00000004u) != 0;
   return value;
 }
-inline bool DeviceDiagSignal2::has_reflectedsignalid() const {
+inline bool DeviceDiagSignal::has_reflectedsignalid() const {
   return _internal_has_reflectedsignalid();
 }
-inline void DeviceDiagSignal2::clear_reflectedsignalid() {
+inline void DeviceDiagSignal::clear_reflectedsignalid() {
   reflectedsignalid_.ClearToEmpty();
   _has_bits_[0] &= ~0x00000004u;
 }
-inline const std::string& DeviceDiagSignal2::reflectedsignalid() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal2.reflectedSignalId)
+inline const std::string& DeviceDiagSignal::reflectedsignalid() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.reflectedSignalId)
   return _internal_reflectedsignalid();
 }
-inline void DeviceDiagSignal2::set_reflectedsignalid(const std::string& value) {
+inline void DeviceDiagSignal::set_reflectedsignalid(const std::string& value) {
   _internal_set_reflectedsignalid(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal2.reflectedSignalId)
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.reflectedSignalId)
 }
-inline std::string* DeviceDiagSignal2::mutable_reflectedsignalid() {
-  // @@protoc_insertion_point(field_mutable:Proto.DeviceDiagSignal2.reflectedSignalId)
+inline std::string* DeviceDiagSignal::mutable_reflectedsignalid() {
+  // @@protoc_insertion_point(field_mutable:Proto.DeviceDiagSignal.reflectedSignalId)
   return _internal_mutable_reflectedsignalid();
 }
-inline const std::string& DeviceDiagSignal2::_internal_reflectedsignalid() const {
+inline const std::string& DeviceDiagSignal::_internal_reflectedsignalid() const {
   return reflectedsignalid_.Get();
 }
-inline void DeviceDiagSignal2::_internal_set_reflectedsignalid(const std::string& value) {
+inline void DeviceDiagSignal::_internal_set_reflectedsignalid(const std::string& value) {
   _has_bits_[0] |= 0x00000004u;
   reflectedsignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
-inline void DeviceDiagSignal2::set_reflectedsignalid(std::string&& value) {
+inline void DeviceDiagSignal::set_reflectedsignalid(std::string&& value) {
   _has_bits_[0] |= 0x00000004u;
   reflectedsignalid_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Proto.DeviceDiagSignal2.reflectedSignalId)
+  // @@protoc_insertion_point(field_set_rvalue:Proto.DeviceDiagSignal.reflectedSignalId)
 }
-inline void DeviceDiagSignal2::set_reflectedsignalid(const char* value) {
+inline void DeviceDiagSignal::set_reflectedsignalid(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   _has_bits_[0] |= 0x00000004u;
   reflectedsignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Proto.DeviceDiagSignal2.reflectedSignalId)
+  // @@protoc_insertion_point(field_set_char:Proto.DeviceDiagSignal.reflectedSignalId)
 }
-inline void DeviceDiagSignal2::set_reflectedsignalid(const char* value,
+inline void DeviceDiagSignal::set_reflectedsignalid(const char* value,
     size_t size) {
   _has_bits_[0] |= 0x00000004u;
   reflectedsignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Proto.DeviceDiagSignal2.reflectedSignalId)
+  // @@protoc_insertion_point(field_set_pointer:Proto.DeviceDiagSignal.reflectedSignalId)
 }
-inline std::string* DeviceDiagSignal2::_internal_mutable_reflectedsignalid() {
+inline std::string* DeviceDiagSignal::_internal_mutable_reflectedsignalid() {
   _has_bits_[0] |= 0x00000004u;
   return reflectedsignalid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
-inline std::string* DeviceDiagSignal2::release_reflectedsignalid() {
-  // @@protoc_insertion_point(field_release:Proto.DeviceDiagSignal2.reflectedSignalId)
+inline std::string* DeviceDiagSignal::release_reflectedsignalid() {
+  // @@protoc_insertion_point(field_release:Proto.DeviceDiagSignal.reflectedSignalId)
   if (!_internal_has_reflectedsignalid()) {
     return nullptr;
   }
   _has_bits_[0] &= ~0x00000004u;
   return reflectedsignalid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void DeviceDiagSignal2::set_allocated_reflectedsignalid(std::string* reflectedsignalid) {
+inline void DeviceDiagSignal::set_allocated_reflectedsignalid(std::string* reflectedsignalid) {
   if (reflectedsignalid != nullptr) {
     _has_bits_[0] |= 0x00000004u;
   } else {
@@ -6841,412 +6841,412 @@ inline void DeviceDiagSignal2::set_allocated_reflectedsignalid(std::string* refl
   }
   reflectedsignalid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), reflectedsignalid,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceDiagSignal2.reflectedSignalId)
+  // @@protoc_insertion_point(field_set_allocated:Proto.DeviceDiagSignal.reflectedSignalId)
 }
 
 // optional int32 valueOffset = 10;
-inline bool DeviceDiagSignal2::_internal_has_valueoffset() const {
+inline bool DeviceDiagSignal::_internal_has_valueoffset() const {
   bool value = (_has_bits_[0] & 0x00000010u) != 0;
   return value;
 }
-inline bool DeviceDiagSignal2::has_valueoffset() const {
+inline bool DeviceDiagSignal::has_valueoffset() const {
   return _internal_has_valueoffset();
 }
-inline void DeviceDiagSignal2::clear_valueoffset() {
+inline void DeviceDiagSignal::clear_valueoffset() {
   valueoffset_ = 0;
   _has_bits_[0] &= ~0x00000010u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal2::_internal_valueoffset() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::_internal_valueoffset() const {
   return valueoffset_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal2::valueoffset() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal2.valueOffset)
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::valueoffset() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.valueOffset)
   return _internal_valueoffset();
 }
-inline void DeviceDiagSignal2::_internal_set_valueoffset(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceDiagSignal::_internal_set_valueoffset(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000010u;
   valueoffset_ = value;
 }
-inline void DeviceDiagSignal2::set_valueoffset(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceDiagSignal::set_valueoffset(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_valueoffset(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal2.valueOffset)
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.valueOffset)
 }
 
 // optional int32 valueBit = 11;
-inline bool DeviceDiagSignal2::_internal_has_valuebit() const {
+inline bool DeviceDiagSignal::_internal_has_valuebit() const {
   bool value = (_has_bits_[0] & 0x00000020u) != 0;
   return value;
 }
-inline bool DeviceDiagSignal2::has_valuebit() const {
+inline bool DeviceDiagSignal::has_valuebit() const {
   return _internal_has_valuebit();
 }
-inline void DeviceDiagSignal2::clear_valuebit() {
+inline void DeviceDiagSignal::clear_valuebit() {
   valuebit_ = 0;
   _has_bits_[0] &= ~0x00000020u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal2::_internal_valuebit() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::_internal_valuebit() const {
   return valuebit_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal2::valuebit() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal2.valueBit)
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::valuebit() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.valueBit)
   return _internal_valuebit();
 }
-inline void DeviceDiagSignal2::_internal_set_valuebit(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceDiagSignal::_internal_set_valuebit(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000020u;
   valuebit_ = value;
 }
-inline void DeviceDiagSignal2::set_valuebit(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceDiagSignal::set_valuebit(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_valuebit(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal2.valueBit)
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.valueBit)
 }
 
 // optional int32 valueBitSize = 12;
-inline bool DeviceDiagSignal2::_internal_has_valuebitsize() const {
+inline bool DeviceDiagSignal::_internal_has_valuebitsize() const {
   bool value = (_has_bits_[0] & 0x00000040u) != 0;
   return value;
 }
-inline bool DeviceDiagSignal2::has_valuebitsize() const {
+inline bool DeviceDiagSignal::has_valuebitsize() const {
   return _internal_has_valuebitsize();
 }
-inline void DeviceDiagSignal2::clear_valuebitsize() {
+inline void DeviceDiagSignal::clear_valuebitsize() {
   valuebitsize_ = 0;
   _has_bits_[0] &= ~0x00000040u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal2::_internal_valuebitsize() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::_internal_valuebitsize() const {
   return valuebitsize_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal2::valuebitsize() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal2.valueBitSize)
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::valuebitsize() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.valueBitSize)
   return _internal_valuebitsize();
 }
-inline void DeviceDiagSignal2::_internal_set_valuebitsize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceDiagSignal::_internal_set_valuebitsize(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000040u;
   valuebitsize_ = value;
 }
-inline void DeviceDiagSignal2::set_valuebitsize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceDiagSignal::set_valuebitsize(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_valuebitsize(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal2.valueBitSize)
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.valueBitSize)
 }
 
 // optional int32 discreteContainerSize = 13;
-inline bool DeviceDiagSignal2::_internal_has_discretecontainersize() const {
+inline bool DeviceDiagSignal::_internal_has_discretecontainersize() const {
   bool value = (_has_bits_[0] & 0x00000080u) != 0;
   return value;
 }
-inline bool DeviceDiagSignal2::has_discretecontainersize() const {
+inline bool DeviceDiagSignal::has_discretecontainersize() const {
   return _internal_has_discretecontainersize();
 }
-inline void DeviceDiagSignal2::clear_discretecontainersize() {
+inline void DeviceDiagSignal::clear_discretecontainersize() {
   discretecontainersize_ = 0;
   _has_bits_[0] &= ~0x00000080u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal2::_internal_discretecontainersize() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::_internal_discretecontainersize() const {
   return discretecontainersize_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal2::discretecontainersize() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal2.discreteContainerSize)
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::discretecontainersize() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.discreteContainerSize)
   return _internal_discretecontainersize();
 }
-inline void DeviceDiagSignal2::_internal_set_discretecontainersize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceDiagSignal::_internal_set_discretecontainersize(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000080u;
   discretecontainersize_ = value;
 }
-inline void DeviceDiagSignal2::set_discretecontainersize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceDiagSignal::set_discretecontainersize(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_discretecontainersize(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal2.discreteContainerSize)
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.discreteContainerSize)
 }
 
 // optional bool logChanges = 16;
-inline bool DeviceDiagSignal2::_internal_has_logchanges() const {
+inline bool DeviceDiagSignal::_internal_has_logchanges() const {
   bool value = (_has_bits_[0] & 0x00000200u) != 0;
   return value;
 }
-inline bool DeviceDiagSignal2::has_logchanges() const {
+inline bool DeviceDiagSignal::has_logchanges() const {
   return _internal_has_logchanges();
 }
-inline void DeviceDiagSignal2::clear_logchanges() {
+inline void DeviceDiagSignal::clear_logchanges() {
   logchanges_ = false;
   _has_bits_[0] &= ~0x00000200u;
 }
-inline bool DeviceDiagSignal2::_internal_logchanges() const {
+inline bool DeviceDiagSignal::_internal_logchanges() const {
   return logchanges_;
 }
-inline bool DeviceDiagSignal2::logchanges() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal2.logChanges)
+inline bool DeviceDiagSignal::logchanges() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.logChanges)
   return _internal_logchanges();
 }
-inline void DeviceDiagSignal2::_internal_set_logchanges(bool value) {
+inline void DeviceDiagSignal::_internal_set_logchanges(bool value) {
   _has_bits_[0] |= 0x00000200u;
   logchanges_ = value;
 }
-inline void DeviceDiagSignal2::set_logchanges(bool value) {
+inline void DeviceDiagSignal::set_logchanges(bool value) {
   _internal_set_logchanges(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal2.logChanges)
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.logChanges)
 }
 
 // optional bool archive = 17;
-inline bool DeviceDiagSignal2::_internal_has_archive() const {
+inline bool DeviceDiagSignal::_internal_has_archive() const {
   bool value = (_has_bits_[0] & 0x00000400u) != 0;
   return value;
 }
-inline bool DeviceDiagSignal2::has_archive() const {
+inline bool DeviceDiagSignal::has_archive() const {
   return _internal_has_archive();
 }
-inline void DeviceDiagSignal2::clear_archive() {
+inline void DeviceDiagSignal::clear_archive() {
   archive_ = false;
   _has_bits_[0] &= ~0x00000400u;
 }
-inline bool DeviceDiagSignal2::_internal_archive() const {
+inline bool DeviceDiagSignal::_internal_archive() const {
   return archive_;
 }
-inline bool DeviceDiagSignal2::archive() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal2.archive)
+inline bool DeviceDiagSignal::archive() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.archive)
   return _internal_archive();
 }
-inline void DeviceDiagSignal2::_internal_set_archive(bool value) {
+inline void DeviceDiagSignal::_internal_set_archive(bool value) {
   _has_bits_[0] |= 0x00000400u;
   archive_ = value;
 }
-inline void DeviceDiagSignal2::set_archive(bool value) {
+inline void DeviceDiagSignal::set_archive(bool value) {
   _internal_set_archive(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal2.archive)
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.archive)
 }
 
 // optional bool reserved = 18;
-inline bool DeviceDiagSignal2::_internal_has_reserved() const {
+inline bool DeviceDiagSignal::_internal_has_reserved() const {
   bool value = (_has_bits_[0] & 0x00000800u) != 0;
   return value;
 }
-inline bool DeviceDiagSignal2::has_reserved() const {
+inline bool DeviceDiagSignal::has_reserved() const {
   return _internal_has_reserved();
 }
-inline void DeviceDiagSignal2::clear_reserved() {
+inline void DeviceDiagSignal::clear_reserved() {
   reserved_ = false;
   _has_bits_[0] &= ~0x00000800u;
 }
-inline bool DeviceDiagSignal2::_internal_reserved() const {
+inline bool DeviceDiagSignal::_internal_reserved() const {
   return reserved_;
 }
-inline bool DeviceDiagSignal2::reserved() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal2.reserved)
+inline bool DeviceDiagSignal::reserved() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.reserved)
   return _internal_reserved();
 }
-inline void DeviceDiagSignal2::_internal_set_reserved(bool value) {
+inline void DeviceDiagSignal::_internal_set_reserved(bool value) {
   _has_bits_[0] |= 0x00000800u;
   reserved_ = value;
 }
-inline void DeviceDiagSignal2::set_reserved(bool value) {
+inline void DeviceDiagSignal::set_reserved(bool value) {
   _internal_set_reserved(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal2.reserved)
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.reserved)
 }
 
 // optional double coarseAperture = 22;
-inline bool DeviceDiagSignal2::_internal_has_coarseaperture() const {
+inline bool DeviceDiagSignal::_internal_has_coarseaperture() const {
   bool value = (_has_bits_[0] & 0x00001000u) != 0;
   return value;
 }
-inline bool DeviceDiagSignal2::has_coarseaperture() const {
+inline bool DeviceDiagSignal::has_coarseaperture() const {
   return _internal_has_coarseaperture();
 }
-inline void DeviceDiagSignal2::clear_coarseaperture() {
+inline void DeviceDiagSignal::clear_coarseaperture() {
   coarseaperture_ = 0;
   _has_bits_[0] &= ~0x00001000u;
 }
-inline double DeviceDiagSignal2::_internal_coarseaperture() const {
+inline double DeviceDiagSignal::_internal_coarseaperture() const {
   return coarseaperture_;
 }
-inline double DeviceDiagSignal2::coarseaperture() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal2.coarseAperture)
+inline double DeviceDiagSignal::coarseaperture() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.coarseAperture)
   return _internal_coarseaperture();
 }
-inline void DeviceDiagSignal2::_internal_set_coarseaperture(double value) {
+inline void DeviceDiagSignal::_internal_set_coarseaperture(double value) {
   _has_bits_[0] |= 0x00001000u;
   coarseaperture_ = value;
 }
-inline void DeviceDiagSignal2::set_coarseaperture(double value) {
+inline void DeviceDiagSignal::set_coarseaperture(double value) {
   _internal_set_coarseaperture(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal2.coarseAperture)
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.coarseAperture)
 }
 
 // optional double fineAperture = 23;
-inline bool DeviceDiagSignal2::_internal_has_fineaperture() const {
+inline bool DeviceDiagSignal::_internal_has_fineaperture() const {
   bool value = (_has_bits_[0] & 0x00002000u) != 0;
   return value;
 }
-inline bool DeviceDiagSignal2::has_fineaperture() const {
+inline bool DeviceDiagSignal::has_fineaperture() const {
   return _internal_has_fineaperture();
 }
-inline void DeviceDiagSignal2::clear_fineaperture() {
+inline void DeviceDiagSignal::clear_fineaperture() {
   fineaperture_ = 0;
   _has_bits_[0] &= ~0x00002000u;
 }
-inline double DeviceDiagSignal2::_internal_fineaperture() const {
+inline double DeviceDiagSignal::_internal_fineaperture() const {
   return fineaperture_;
 }
-inline double DeviceDiagSignal2::fineaperture() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal2.fineAperture)
+inline double DeviceDiagSignal::fineaperture() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.fineAperture)
   return _internal_fineaperture();
 }
-inline void DeviceDiagSignal2::_internal_set_fineaperture(double value) {
+inline void DeviceDiagSignal::_internal_set_fineaperture(double value) {
   _has_bits_[0] |= 0x00002000u;
   fineaperture_ = value;
 }
-inline void DeviceDiagSignal2::set_fineaperture(double value) {
+inline void DeviceDiagSignal::set_fineaperture(double value) {
   _internal_set_fineaperture(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal2.fineAperture)
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.fineAperture)
 }
 
 // optional int32 apertureType = 24;
-inline bool DeviceDiagSignal2::_internal_has_aperturetype() const {
+inline bool DeviceDiagSignal::_internal_has_aperturetype() const {
   bool value = (_has_bits_[0] & 0x00004000u) != 0;
   return value;
 }
-inline bool DeviceDiagSignal2::has_aperturetype() const {
+inline bool DeviceDiagSignal::has_aperturetype() const {
   return _internal_has_aperturetype();
 }
-inline void DeviceDiagSignal2::clear_aperturetype() {
+inline void DeviceDiagSignal::clear_aperturetype() {
   aperturetype_ = 0;
   _has_bits_[0] &= ~0x00004000u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal2::_internal_aperturetype() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::_internal_aperturetype() const {
   return aperturetype_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal2::aperturetype() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal2.apertureType)
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::aperturetype() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.apertureType)
   return _internal_aperturetype();
 }
-inline void DeviceDiagSignal2::_internal_set_aperturetype(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceDiagSignal::_internal_set_aperturetype(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00004000u;
   aperturetype_ = value;
 }
-inline void DeviceDiagSignal2::set_aperturetype(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceDiagSignal::set_aperturetype(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_aperturetype(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal2.apertureType)
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.apertureType)
 }
 
 // optional int32 decimalPlaces = 30;
-inline bool DeviceDiagSignal2::_internal_has_decimalplaces() const {
+inline bool DeviceDiagSignal::_internal_has_decimalplaces() const {
   bool value = (_has_bits_[0] & 0x00008000u) != 0;
   return value;
 }
-inline bool DeviceDiagSignal2::has_decimalplaces() const {
+inline bool DeviceDiagSignal::has_decimalplaces() const {
   return _internal_has_decimalplaces();
 }
-inline void DeviceDiagSignal2::clear_decimalplaces() {
+inline void DeviceDiagSignal::clear_decimalplaces() {
   decimalplaces_ = 0;
   _has_bits_[0] &= ~0x00008000u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal2::_internal_decimalplaces() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::_internal_decimalplaces() const {
   return decimalplaces_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal2::decimalplaces() const {
-  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal2.decimalPlaces)
+inline ::PROTOBUF_NAMESPACE_ID::int32 DeviceDiagSignal::decimalplaces() const {
+  // @@protoc_insertion_point(field_get:Proto.DeviceDiagSignal.decimalPlaces)
   return _internal_decimalplaces();
 }
-inline void DeviceDiagSignal2::_internal_set_decimalplaces(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceDiagSignal::_internal_set_decimalplaces(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00008000u;
   decimalplaces_ = value;
 }
-inline void DeviceDiagSignal2::set_decimalplaces(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DeviceDiagSignal::set_decimalplaces(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_decimalplaces(value);
-  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal2.decimalPlaces)
+  // @@protoc_insertion_point(field_set:Proto.DeviceDiagSignal.decimalPlaces)
 }
 
 // -------------------------------------------------------------------
 
-// Workstation2
+// Workstation
 
 // optional int32 type = 1 [default = 0];
-inline bool Workstation2::_internal_has_type() const {
+inline bool Workstation::_internal_has_type() const {
   bool value = (_has_bits_[0] & 0x00000002u) != 0;
   return value;
 }
-inline bool Workstation2::has_type() const {
+inline bool Workstation::has_type() const {
   return _internal_has_type();
 }
-inline void Workstation2::clear_type() {
+inline void Workstation::clear_type() {
   type_ = 0;
   _has_bits_[0] &= ~0x00000002u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 Workstation2::_internal_type() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 Workstation::_internal_type() const {
   return type_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 Workstation2::type() const {
-  // @@protoc_insertion_point(field_get:Proto.Workstation2.type)
+inline ::PROTOBUF_NAMESPACE_ID::int32 Workstation::type() const {
+  // @@protoc_insertion_point(field_get:Proto.Workstation.type)
   return _internal_type();
 }
-inline void Workstation2::_internal_set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void Workstation::_internal_set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000002u;
   type_ = value;
 }
-inline void Workstation2::set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void Workstation::set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_type(value);
-  // @@protoc_insertion_point(field_set:Proto.Workstation2.type)
+  // @@protoc_insertion_point(field_set:Proto.Workstation.type)
 }
 
 // optional string hostname = 2;
-inline bool Workstation2::_internal_has_hostname() const {
+inline bool Workstation::_internal_has_hostname() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
 }
-inline bool Workstation2::has_hostname() const {
+inline bool Workstation::has_hostname() const {
   return _internal_has_hostname();
 }
-inline void Workstation2::clear_hostname() {
+inline void Workstation::clear_hostname() {
   hostname_.ClearToEmpty();
   _has_bits_[0] &= ~0x00000001u;
 }
-inline const std::string& Workstation2::hostname() const {
-  // @@protoc_insertion_point(field_get:Proto.Workstation2.hostname)
+inline const std::string& Workstation::hostname() const {
+  // @@protoc_insertion_point(field_get:Proto.Workstation.hostname)
   return _internal_hostname();
 }
-inline void Workstation2::set_hostname(const std::string& value) {
+inline void Workstation::set_hostname(const std::string& value) {
   _internal_set_hostname(value);
-  // @@protoc_insertion_point(field_set:Proto.Workstation2.hostname)
+  // @@protoc_insertion_point(field_set:Proto.Workstation.hostname)
 }
-inline std::string* Workstation2::mutable_hostname() {
-  // @@protoc_insertion_point(field_mutable:Proto.Workstation2.hostname)
+inline std::string* Workstation::mutable_hostname() {
+  // @@protoc_insertion_point(field_mutable:Proto.Workstation.hostname)
   return _internal_mutable_hostname();
 }
-inline const std::string& Workstation2::_internal_hostname() const {
+inline const std::string& Workstation::_internal_hostname() const {
   return hostname_.Get();
 }
-inline void Workstation2::_internal_set_hostname(const std::string& value) {
+inline void Workstation::_internal_set_hostname(const std::string& value) {
   _has_bits_[0] |= 0x00000001u;
   hostname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
-inline void Workstation2::set_hostname(std::string&& value) {
+inline void Workstation::set_hostname(std::string&& value) {
   _has_bits_[0] |= 0x00000001u;
   hostname_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Proto.Workstation2.hostname)
+  // @@protoc_insertion_point(field_set_rvalue:Proto.Workstation.hostname)
 }
-inline void Workstation2::set_hostname(const char* value) {
+inline void Workstation::set_hostname(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   _has_bits_[0] |= 0x00000001u;
   hostname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Proto.Workstation2.hostname)
+  // @@protoc_insertion_point(field_set_char:Proto.Workstation.hostname)
 }
-inline void Workstation2::set_hostname(const char* value,
+inline void Workstation::set_hostname(const char* value,
     size_t size) {
   _has_bits_[0] |= 0x00000001u;
   hostname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Proto.Workstation2.hostname)
+  // @@protoc_insertion_point(field_set_pointer:Proto.Workstation.hostname)
 }
-inline std::string* Workstation2::_internal_mutable_hostname() {
+inline std::string* Workstation::_internal_mutable_hostname() {
   _has_bits_[0] |= 0x00000001u;
   return hostname_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
-inline std::string* Workstation2::release_hostname() {
-  // @@protoc_insertion_point(field_release:Proto.Workstation2.hostname)
+inline std::string* Workstation::release_hostname() {
+  // @@protoc_insertion_point(field_release:Proto.Workstation.hostname)
   if (!_internal_has_hostname()) {
     return nullptr;
   }
   _has_bits_[0] &= ~0x00000001u;
   return hostname_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void Workstation2::set_allocated_hostname(std::string* hostname) {
+inline void Workstation::set_allocated_hostname(std::string* hostname) {
   if (hostname != nullptr) {
     _has_bits_[0] |= 0x00000001u;
   } else {
@@ -7254,108 +7254,108 @@ inline void Workstation2::set_allocated_hostname(std::string* hostname) {
   }
   hostname_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), hostname,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Proto.Workstation2.hostname)
+  // @@protoc_insertion_point(field_set_allocated:Proto.Workstation.hostname)
 }
 
 // -------------------------------------------------------------------
 
-// Software2
+// Software
 
 // optional int32 type = 1 [default = 0];
-inline bool Software2::_internal_has_type() const {
+inline bool Software::_internal_has_type() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
 }
-inline bool Software2::has_type() const {
+inline bool Software::has_type() const {
   return _internal_has_type();
 }
-inline void Software2::clear_type() {
+inline void Software::clear_type() {
   type_ = 0;
   _has_bits_[0] &= ~0x00000001u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 Software2::_internal_type() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 Software::_internal_type() const {
   return type_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 Software2::type() const {
-  // @@protoc_insertion_point(field_get:Proto.Software2.type)
+inline ::PROTOBUF_NAMESPACE_ID::int32 Software::type() const {
+  // @@protoc_insertion_point(field_get:Proto.Software.type)
   return _internal_type();
 }
-inline void Software2::_internal_set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void Software::_internal_set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000001u;
   type_ = value;
 }
-inline void Software2::set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void Software::set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_type(value);
-  // @@protoc_insertion_point(field_set:Proto.Software2.type)
+  // @@protoc_insertion_point(field_set:Proto.Software.type)
 }
 
 // -------------------------------------------------------------------
 
-// DiagSignalType2
+// DiagSignalType
 
 // optional string signalTypeId = 3;
-inline bool DiagSignalType2::_internal_has_signaltypeid() const {
+inline bool DiagSignalType::_internal_has_signaltypeid() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
 }
-inline bool DiagSignalType2::has_signaltypeid() const {
+inline bool DiagSignalType::has_signaltypeid() const {
   return _internal_has_signaltypeid();
 }
-inline void DiagSignalType2::clear_signaltypeid() {
+inline void DiagSignalType::clear_signaltypeid() {
   signaltypeid_.ClearToEmpty();
   _has_bits_[0] &= ~0x00000001u;
 }
-inline const std::string& DiagSignalType2::signaltypeid() const {
-  // @@protoc_insertion_point(field_get:Proto.DiagSignalType2.signalTypeId)
+inline const std::string& DiagSignalType::signaltypeid() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.signalTypeId)
   return _internal_signaltypeid();
 }
-inline void DiagSignalType2::set_signaltypeid(const std::string& value) {
+inline void DiagSignalType::set_signaltypeid(const std::string& value) {
   _internal_set_signaltypeid(value);
-  // @@protoc_insertion_point(field_set:Proto.DiagSignalType2.signalTypeId)
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.signalTypeId)
 }
-inline std::string* DiagSignalType2::mutable_signaltypeid() {
-  // @@protoc_insertion_point(field_mutable:Proto.DiagSignalType2.signalTypeId)
+inline std::string* DiagSignalType::mutable_signaltypeid() {
+  // @@protoc_insertion_point(field_mutable:Proto.DiagSignalType.signalTypeId)
   return _internal_mutable_signaltypeid();
 }
-inline const std::string& DiagSignalType2::_internal_signaltypeid() const {
+inline const std::string& DiagSignalType::_internal_signaltypeid() const {
   return signaltypeid_.Get();
 }
-inline void DiagSignalType2::_internal_set_signaltypeid(const std::string& value) {
+inline void DiagSignalType::_internal_set_signaltypeid(const std::string& value) {
   _has_bits_[0] |= 0x00000001u;
   signaltypeid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
-inline void DiagSignalType2::set_signaltypeid(std::string&& value) {
+inline void DiagSignalType::set_signaltypeid(std::string&& value) {
   _has_bits_[0] |= 0x00000001u;
   signaltypeid_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Proto.DiagSignalType2.signalTypeId)
+  // @@protoc_insertion_point(field_set_rvalue:Proto.DiagSignalType.signalTypeId)
 }
-inline void DiagSignalType2::set_signaltypeid(const char* value) {
+inline void DiagSignalType::set_signaltypeid(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   _has_bits_[0] |= 0x00000001u;
   signaltypeid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Proto.DiagSignalType2.signalTypeId)
+  // @@protoc_insertion_point(field_set_char:Proto.DiagSignalType.signalTypeId)
 }
-inline void DiagSignalType2::set_signaltypeid(const char* value,
+inline void DiagSignalType::set_signaltypeid(const char* value,
     size_t size) {
   _has_bits_[0] |= 0x00000001u;
   signaltypeid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Proto.DiagSignalType2.signalTypeId)
+  // @@protoc_insertion_point(field_set_pointer:Proto.DiagSignalType.signalTypeId)
 }
-inline std::string* DiagSignalType2::_internal_mutable_signaltypeid() {
+inline std::string* DiagSignalType::_internal_mutable_signaltypeid() {
   _has_bits_[0] |= 0x00000001u;
   return signaltypeid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
-inline std::string* DiagSignalType2::release_signaltypeid() {
-  // @@protoc_insertion_point(field_release:Proto.DiagSignalType2.signalTypeId)
+inline std::string* DiagSignalType::release_signaltypeid() {
+  // @@protoc_insertion_point(field_release:Proto.DiagSignalType.signalTypeId)
   if (!_internal_has_signaltypeid()) {
     return nullptr;
   }
   _has_bits_[0] &= ~0x00000001u;
   return signaltypeid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void DiagSignalType2::set_allocated_signaltypeid(std::string* signaltypeid) {
+inline void DiagSignalType::set_allocated_signaltypeid(std::string* signaltypeid) {
   if (signaltypeid != nullptr) {
     _has_bits_[0] |= 0x00000001u;
   } else {
@@ -7363,28 +7363,28 @@ inline void DiagSignalType2::set_allocated_signaltypeid(std::string* signaltypei
   }
   signaltypeid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), signaltypeid,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Proto.DiagSignalType2.signalTypeId)
+  // @@protoc_insertion_point(field_set_allocated:Proto.DiagSignalType.signalTypeId)
 }
 
 // optional .Proto.Uuid uuid = 4;
-inline bool DiagSignalType2::_internal_has_uuid() const {
+inline bool DiagSignalType::_internal_has_uuid() const {
   bool value = (_has_bits_[0] & 0x00000010u) != 0;
   PROTOBUF_ASSUME(!value || uuid_ != nullptr);
   return value;
 }
-inline bool DiagSignalType2::has_uuid() const {
+inline bool DiagSignalType::has_uuid() const {
   return _internal_has_uuid();
 }
-inline const ::Proto::Uuid& DiagSignalType2::_internal_uuid() const {
+inline const ::Proto::Uuid& DiagSignalType::_internal_uuid() const {
   const ::Proto::Uuid* p = uuid_;
   return p != nullptr ? *p : reinterpret_cast<const ::Proto::Uuid&>(
       ::Proto::_Uuid_default_instance_);
 }
-inline const ::Proto::Uuid& DiagSignalType2::uuid() const {
-  // @@protoc_insertion_point(field_get:Proto.DiagSignalType2.uuid)
+inline const ::Proto::Uuid& DiagSignalType::uuid() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.uuid)
   return _internal_uuid();
 }
-inline void DiagSignalType2::unsafe_arena_set_allocated_uuid(
+inline void DiagSignalType::unsafe_arena_set_allocated_uuid(
     ::Proto::Uuid* uuid) {
   if (GetArena() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(uuid_);
@@ -7395,9 +7395,9 @@ inline void DiagSignalType2::unsafe_arena_set_allocated_uuid(
   } else {
     _has_bits_[0] &= ~0x00000010u;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DiagSignalType2.uuid)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.DiagSignalType.uuid)
 }
-inline ::Proto::Uuid* DiagSignalType2::release_uuid() {
+inline ::Proto::Uuid* DiagSignalType::release_uuid() {
   _has_bits_[0] &= ~0x00000010u;
   ::Proto::Uuid* temp = uuid_;
   uuid_ = nullptr;
@@ -7406,14 +7406,14 @@ inline ::Proto::Uuid* DiagSignalType2::release_uuid() {
   }
   return temp;
 }
-inline ::Proto::Uuid* DiagSignalType2::unsafe_arena_release_uuid() {
-  // @@protoc_insertion_point(field_release:Proto.DiagSignalType2.uuid)
+inline ::Proto::Uuid* DiagSignalType::unsafe_arena_release_uuid() {
+  // @@protoc_insertion_point(field_release:Proto.DiagSignalType.uuid)
   _has_bits_[0] &= ~0x00000010u;
   ::Proto::Uuid* temp = uuid_;
   uuid_ = nullptr;
   return temp;
 }
-inline ::Proto::Uuid* DiagSignalType2::_internal_mutable_uuid() {
+inline ::Proto::Uuid* DiagSignalType::_internal_mutable_uuid() {
   _has_bits_[0] |= 0x00000010u;
   if (uuid_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::Uuid>(GetArena());
@@ -7421,11 +7421,11 @@ inline ::Proto::Uuid* DiagSignalType2::_internal_mutable_uuid() {
   }
   return uuid_;
 }
-inline ::Proto::Uuid* DiagSignalType2::mutable_uuid() {
-  // @@protoc_insertion_point(field_mutable:Proto.DiagSignalType2.uuid)
+inline ::Proto::Uuid* DiagSignalType::mutable_uuid() {
+  // @@protoc_insertion_point(field_mutable:Proto.DiagSignalType.uuid)
   return _internal_mutable_uuid();
 }
-inline void DiagSignalType2::set_allocated_uuid(::Proto::Uuid* uuid) {
+inline void DiagSignalType::set_allocated_uuid(::Proto::Uuid* uuid) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
   if (message_arena == nullptr) {
     delete reinterpret_cast< ::PROTOBUF_NAMESPACE_ID::MessageLite*>(uuid_);
@@ -7442,212 +7442,212 @@ inline void DiagSignalType2::set_allocated_uuid(::Proto::Uuid* uuid) {
     _has_bits_[0] &= ~0x00000010u;
   }
   uuid_ = uuid;
-  // @@protoc_insertion_point(field_set_allocated:Proto.DiagSignalType2.uuid)
+  // @@protoc_insertion_point(field_set_allocated:Proto.DiagSignalType.uuid)
 }
 
 // optional bool systemSignalType = 5;
-inline bool DiagSignalType2::_internal_has_systemsignaltype() const {
+inline bool DiagSignalType::_internal_has_systemsignaltype() const {
   bool value = (_has_bits_[0] & 0x00000100u) != 0;
   return value;
 }
-inline bool DiagSignalType2::has_systemsignaltype() const {
+inline bool DiagSignalType::has_systemsignaltype() const {
   return _internal_has_systemsignaltype();
 }
-inline void DiagSignalType2::clear_systemsignaltype() {
+inline void DiagSignalType::clear_systemsignaltype() {
   systemsignaltype_ = false;
   _has_bits_[0] &= ~0x00000100u;
 }
-inline bool DiagSignalType2::_internal_systemsignaltype() const {
+inline bool DiagSignalType::_internal_systemsignaltype() const {
   return systemsignaltype_;
 }
-inline bool DiagSignalType2::systemsignaltype() const {
-  // @@protoc_insertion_point(field_get:Proto.DiagSignalType2.systemSignalType)
+inline bool DiagSignalType::systemsignaltype() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.systemSignalType)
   return _internal_systemsignaltype();
 }
-inline void DiagSignalType2::_internal_set_systemsignaltype(bool value) {
+inline void DiagSignalType::_internal_set_systemsignaltype(bool value) {
   _has_bits_[0] |= 0x00000100u;
   systemsignaltype_ = value;
 }
-inline void DiagSignalType2::set_systemsignaltype(bool value) {
+inline void DiagSignalType::set_systemsignaltype(bool value) {
   _internal_set_systemsignaltype(value);
-  // @@protoc_insertion_point(field_set:Proto.DiagSignalType2.systemSignalType)
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.systemSignalType)
 }
 
 // optional int32 type = 6;
-inline bool DiagSignalType2::_internal_has_type() const {
+inline bool DiagSignalType::_internal_has_type() const {
   bool value = (_has_bits_[0] & 0x00000020u) != 0;
   return value;
 }
-inline bool DiagSignalType2::has_type() const {
+inline bool DiagSignalType::has_type() const {
   return _internal_has_type();
 }
-inline void DiagSignalType2::clear_type() {
+inline void DiagSignalType::clear_type() {
   type_ = 0;
   _has_bits_[0] &= ~0x00000020u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DiagSignalType2::_internal_type() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DiagSignalType::_internal_type() const {
   return type_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DiagSignalType2::type() const {
-  // @@protoc_insertion_point(field_get:Proto.DiagSignalType2.type)
+inline ::PROTOBUF_NAMESPACE_ID::int32 DiagSignalType::type() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.type)
   return _internal_type();
 }
-inline void DiagSignalType2::_internal_set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DiagSignalType::_internal_set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000020u;
   type_ = value;
 }
-inline void DiagSignalType2::set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DiagSignalType::set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_type(value);
-  // @@protoc_insertion_point(field_set:Proto.DiagSignalType2.type)
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.type)
 }
 
 // optional int32 byteOrder = 7;
-inline bool DiagSignalType2::_internal_has_byteorder() const {
+inline bool DiagSignalType::_internal_has_byteorder() const {
   bool value = (_has_bits_[0] & 0x00000040u) != 0;
   return value;
 }
-inline bool DiagSignalType2::has_byteorder() const {
+inline bool DiagSignalType::has_byteorder() const {
   return _internal_has_byteorder();
 }
-inline void DiagSignalType2::clear_byteorder() {
+inline void DiagSignalType::clear_byteorder() {
   byteorder_ = 0;
   _has_bits_[0] &= ~0x00000040u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DiagSignalType2::_internal_byteorder() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DiagSignalType::_internal_byteorder() const {
   return byteorder_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DiagSignalType2::byteorder() const {
-  // @@protoc_insertion_point(field_get:Proto.DiagSignalType2.byteOrder)
+inline ::PROTOBUF_NAMESPACE_ID::int32 DiagSignalType::byteorder() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.byteOrder)
   return _internal_byteorder();
 }
-inline void DiagSignalType2::_internal_set_byteorder(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DiagSignalType::_internal_set_byteorder(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000040u;
   byteorder_ = value;
 }
-inline void DiagSignalType2::set_byteorder(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DiagSignalType::set_byteorder(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_byteorder(value);
-  // @@protoc_insertion_point(field_set:Proto.DiagSignalType2.byteOrder)
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.byteOrder)
 }
 
 // optional bool inverseValue = 20;
-inline bool DiagSignalType2::_internal_has_inversevalue() const {
+inline bool DiagSignalType::_internal_has_inversevalue() const {
   bool value = (_has_bits_[0] & 0x00000200u) != 0;
   return value;
 }
-inline bool DiagSignalType2::has_inversevalue() const {
+inline bool DiagSignalType::has_inversevalue() const {
   return _internal_has_inversevalue();
 }
-inline void DiagSignalType2::clear_inversevalue() {
+inline void DiagSignalType::clear_inversevalue() {
   inversevalue_ = false;
   _has_bits_[0] &= ~0x00000200u;
 }
-inline bool DiagSignalType2::_internal_inversevalue() const {
+inline bool DiagSignalType::_internal_inversevalue() const {
   return inversevalue_;
 }
-inline bool DiagSignalType2::inversevalue() const {
-  // @@protoc_insertion_point(field_get:Proto.DiagSignalType2.inverseValue)
+inline bool DiagSignalType::inversevalue() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.inverseValue)
   return _internal_inversevalue();
 }
-inline void DiagSignalType2::_internal_set_inversevalue(bool value) {
+inline void DiagSignalType::_internal_set_inversevalue(bool value) {
   _has_bits_[0] |= 0x00000200u;
   inversevalue_ = value;
 }
-inline void DiagSignalType2::set_inversevalue(bool value) {
+inline void DiagSignalType::set_inversevalue(bool value) {
   _internal_set_inversevalue(value);
-  // @@protoc_insertion_point(field_set:Proto.DiagSignalType2.inverseValue)
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.inverseValue)
 }
 
 // optional int32 normalState = 25;
-inline bool DiagSignalType2::_internal_has_normalstate() const {
+inline bool DiagSignalType::_internal_has_normalstate() const {
   bool value = (_has_bits_[0] & 0x00000800u) != 0;
   return value;
 }
-inline bool DiagSignalType2::has_normalstate() const {
+inline bool DiagSignalType::has_normalstate() const {
   return _internal_has_normalstate();
 }
-inline void DiagSignalType2::clear_normalstate() {
+inline void DiagSignalType::clear_normalstate() {
   normalstate_ = 0;
   _has_bits_[0] &= ~0x00000800u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DiagSignalType2::_internal_normalstate() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DiagSignalType::_internal_normalstate() const {
   return normalstate_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DiagSignalType2::normalstate() const {
-  // @@protoc_insertion_point(field_get:Proto.DiagSignalType2.normalState)
+inline ::PROTOBUF_NAMESPACE_ID::int32 DiagSignalType::normalstate() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.normalState)
   return _internal_normalstate();
 }
-inline void DiagSignalType2::_internal_set_normalstate(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DiagSignalType::_internal_set_normalstate(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000800u;
   normalstate_ = value;
 }
-inline void DiagSignalType2::set_normalstate(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DiagSignalType::set_normalstate(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_normalstate(value);
-  // @@protoc_insertion_point(field_set:Proto.DiagSignalType2.normalState)
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.normalState)
 }
 
 // optional string normalStateString0 = 26;
-inline bool DiagSignalType2::_internal_has_normalstatestring0() const {
+inline bool DiagSignalType::_internal_has_normalstatestring0() const {
   bool value = (_has_bits_[0] & 0x00000002u) != 0;
   return value;
 }
-inline bool DiagSignalType2::has_normalstatestring0() const {
+inline bool DiagSignalType::has_normalstatestring0() const {
   return _internal_has_normalstatestring0();
 }
-inline void DiagSignalType2::clear_normalstatestring0() {
+inline void DiagSignalType::clear_normalstatestring0() {
   normalstatestring0_.ClearToEmpty();
   _has_bits_[0] &= ~0x00000002u;
 }
-inline const std::string& DiagSignalType2::normalstatestring0() const {
-  // @@protoc_insertion_point(field_get:Proto.DiagSignalType2.normalStateString0)
+inline const std::string& DiagSignalType::normalstatestring0() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.normalStateString0)
   return _internal_normalstatestring0();
 }
-inline void DiagSignalType2::set_normalstatestring0(const std::string& value) {
+inline void DiagSignalType::set_normalstatestring0(const std::string& value) {
   _internal_set_normalstatestring0(value);
-  // @@protoc_insertion_point(field_set:Proto.DiagSignalType2.normalStateString0)
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.normalStateString0)
 }
-inline std::string* DiagSignalType2::mutable_normalstatestring0() {
-  // @@protoc_insertion_point(field_mutable:Proto.DiagSignalType2.normalStateString0)
+inline std::string* DiagSignalType::mutable_normalstatestring0() {
+  // @@protoc_insertion_point(field_mutable:Proto.DiagSignalType.normalStateString0)
   return _internal_mutable_normalstatestring0();
 }
-inline const std::string& DiagSignalType2::_internal_normalstatestring0() const {
+inline const std::string& DiagSignalType::_internal_normalstatestring0() const {
   return normalstatestring0_.Get();
 }
-inline void DiagSignalType2::_internal_set_normalstatestring0(const std::string& value) {
+inline void DiagSignalType::_internal_set_normalstatestring0(const std::string& value) {
   _has_bits_[0] |= 0x00000002u;
   normalstatestring0_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
-inline void DiagSignalType2::set_normalstatestring0(std::string&& value) {
+inline void DiagSignalType::set_normalstatestring0(std::string&& value) {
   _has_bits_[0] |= 0x00000002u;
   normalstatestring0_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Proto.DiagSignalType2.normalStateString0)
+  // @@protoc_insertion_point(field_set_rvalue:Proto.DiagSignalType.normalStateString0)
 }
-inline void DiagSignalType2::set_normalstatestring0(const char* value) {
+inline void DiagSignalType::set_normalstatestring0(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   _has_bits_[0] |= 0x00000002u;
   normalstatestring0_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Proto.DiagSignalType2.normalStateString0)
+  // @@protoc_insertion_point(field_set_char:Proto.DiagSignalType.normalStateString0)
 }
-inline void DiagSignalType2::set_normalstatestring0(const char* value,
+inline void DiagSignalType::set_normalstatestring0(const char* value,
     size_t size) {
   _has_bits_[0] |= 0x00000002u;
   normalstatestring0_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Proto.DiagSignalType2.normalStateString0)
+  // @@protoc_insertion_point(field_set_pointer:Proto.DiagSignalType.normalStateString0)
 }
-inline std::string* DiagSignalType2::_internal_mutable_normalstatestring0() {
+inline std::string* DiagSignalType::_internal_mutable_normalstatestring0() {
   _has_bits_[0] |= 0x00000002u;
   return normalstatestring0_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
-inline std::string* DiagSignalType2::release_normalstatestring0() {
-  // @@protoc_insertion_point(field_release:Proto.DiagSignalType2.normalStateString0)
+inline std::string* DiagSignalType::release_normalstatestring0() {
+  // @@protoc_insertion_point(field_release:Proto.DiagSignalType.normalStateString0)
   if (!_internal_has_normalstatestring0()) {
     return nullptr;
   }
   _has_bits_[0] &= ~0x00000002u;
   return normalstatestring0_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void DiagSignalType2::set_allocated_normalstatestring0(std::string* normalstatestring0) {
+inline void DiagSignalType::set_allocated_normalstatestring0(std::string* normalstatestring0) {
   if (normalstatestring0 != nullptr) {
     _has_bits_[0] |= 0x00000002u;
   } else {
@@ -7655,72 +7655,72 @@ inline void DiagSignalType2::set_allocated_normalstatestring0(std::string* norma
   }
   normalstatestring0_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), normalstatestring0,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Proto.DiagSignalType2.normalStateString0)
+  // @@protoc_insertion_point(field_set_allocated:Proto.DiagSignalType.normalStateString0)
 }
 
 // optional string normalStateString1 = 27;
-inline bool DiagSignalType2::_internal_has_normalstatestring1() const {
+inline bool DiagSignalType::_internal_has_normalstatestring1() const {
   bool value = (_has_bits_[0] & 0x00000004u) != 0;
   return value;
 }
-inline bool DiagSignalType2::has_normalstatestring1() const {
+inline bool DiagSignalType::has_normalstatestring1() const {
   return _internal_has_normalstatestring1();
 }
-inline void DiagSignalType2::clear_normalstatestring1() {
+inline void DiagSignalType::clear_normalstatestring1() {
   normalstatestring1_.ClearToEmpty();
   _has_bits_[0] &= ~0x00000004u;
 }
-inline const std::string& DiagSignalType2::normalstatestring1() const {
-  // @@protoc_insertion_point(field_get:Proto.DiagSignalType2.normalStateString1)
+inline const std::string& DiagSignalType::normalstatestring1() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.normalStateString1)
   return _internal_normalstatestring1();
 }
-inline void DiagSignalType2::set_normalstatestring1(const std::string& value) {
+inline void DiagSignalType::set_normalstatestring1(const std::string& value) {
   _internal_set_normalstatestring1(value);
-  // @@protoc_insertion_point(field_set:Proto.DiagSignalType2.normalStateString1)
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.normalStateString1)
 }
-inline std::string* DiagSignalType2::mutable_normalstatestring1() {
-  // @@protoc_insertion_point(field_mutable:Proto.DiagSignalType2.normalStateString1)
+inline std::string* DiagSignalType::mutable_normalstatestring1() {
+  // @@protoc_insertion_point(field_mutable:Proto.DiagSignalType.normalStateString1)
   return _internal_mutable_normalstatestring1();
 }
-inline const std::string& DiagSignalType2::_internal_normalstatestring1() const {
+inline const std::string& DiagSignalType::_internal_normalstatestring1() const {
   return normalstatestring1_.Get();
 }
-inline void DiagSignalType2::_internal_set_normalstatestring1(const std::string& value) {
+inline void DiagSignalType::_internal_set_normalstatestring1(const std::string& value) {
   _has_bits_[0] |= 0x00000004u;
   normalstatestring1_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
-inline void DiagSignalType2::set_normalstatestring1(std::string&& value) {
+inline void DiagSignalType::set_normalstatestring1(std::string&& value) {
   _has_bits_[0] |= 0x00000004u;
   normalstatestring1_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Proto.DiagSignalType2.normalStateString1)
+  // @@protoc_insertion_point(field_set_rvalue:Proto.DiagSignalType.normalStateString1)
 }
-inline void DiagSignalType2::set_normalstatestring1(const char* value) {
+inline void DiagSignalType::set_normalstatestring1(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   _has_bits_[0] |= 0x00000004u;
   normalstatestring1_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Proto.DiagSignalType2.normalStateString1)
+  // @@protoc_insertion_point(field_set_char:Proto.DiagSignalType.normalStateString1)
 }
-inline void DiagSignalType2::set_normalstatestring1(const char* value,
+inline void DiagSignalType::set_normalstatestring1(const char* value,
     size_t size) {
   _has_bits_[0] |= 0x00000004u;
   normalstatestring1_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Proto.DiagSignalType2.normalStateString1)
+  // @@protoc_insertion_point(field_set_pointer:Proto.DiagSignalType.normalStateString1)
 }
-inline std::string* DiagSignalType2::_internal_mutable_normalstatestring1() {
+inline std::string* DiagSignalType::_internal_mutable_normalstatestring1() {
   _has_bits_[0] |= 0x00000004u;
   return normalstatestring1_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
-inline std::string* DiagSignalType2::release_normalstatestring1() {
-  // @@protoc_insertion_point(field_release:Proto.DiagSignalType2.normalStateString1)
+inline std::string* DiagSignalType::release_normalstatestring1() {
+  // @@protoc_insertion_point(field_release:Proto.DiagSignalType.normalStateString1)
   if (!_internal_has_normalstatestring1()) {
     return nullptr;
   }
   _has_bits_[0] &= ~0x00000004u;
   return normalstatestring1_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void DiagSignalType2::set_allocated_normalstatestring1(std::string* normalstatestring1) {
+inline void DiagSignalType::set_allocated_normalstatestring1(std::string* normalstatestring1) {
   if (normalstatestring1 != nullptr) {
     _has_bits_[0] |= 0x00000004u;
   } else {
@@ -7728,296 +7728,296 @@ inline void DiagSignalType2::set_allocated_normalstatestring1(std::string* norma
   }
   normalstatestring1_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), normalstatestring1,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Proto.DiagSignalType2.normalStateString1)
+  // @@protoc_insertion_point(field_set_allocated:Proto.DiagSignalType.normalStateString1)
 }
 
 // optional int32 analogformat = 32;
-inline bool DiagSignalType2::_internal_has_analogformat() const {
+inline bool DiagSignalType::_internal_has_analogformat() const {
   bool value = (_has_bits_[0] & 0x00000080u) != 0;
   return value;
 }
-inline bool DiagSignalType2::has_analogformat() const {
+inline bool DiagSignalType::has_analogformat() const {
   return _internal_has_analogformat();
 }
-inline void DiagSignalType2::clear_analogformat() {
+inline void DiagSignalType::clear_analogformat() {
   analogformat_ = 0;
   _has_bits_[0] &= ~0x00000080u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DiagSignalType2::_internal_analogformat() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 DiagSignalType::_internal_analogformat() const {
   return analogformat_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 DiagSignalType2::analogformat() const {
-  // @@protoc_insertion_point(field_get:Proto.DiagSignalType2.analogformat)
+inline ::PROTOBUF_NAMESPACE_ID::int32 DiagSignalType::analogformat() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.analogformat)
   return _internal_analogformat();
 }
-inline void DiagSignalType2::_internal_set_analogformat(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DiagSignalType::_internal_set_analogformat(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000080u;
   analogformat_ = value;
 }
-inline void DiagSignalType2::set_analogformat(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void DiagSignalType::set_analogformat(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_analogformat(value);
-  // @@protoc_insertion_point(field_set:Proto.DiagSignalType2.analogformat)
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.analogformat)
 }
 
 // optional double adcHighLimit = 33;
-inline bool DiagSignalType2::_internal_has_adchighlimit() const {
+inline bool DiagSignalType::_internal_has_adchighlimit() const {
   bool value = (_has_bits_[0] & 0x00001000u) != 0;
   return value;
 }
-inline bool DiagSignalType2::has_adchighlimit() const {
+inline bool DiagSignalType::has_adchighlimit() const {
   return _internal_has_adchighlimit();
 }
-inline void DiagSignalType2::clear_adchighlimit() {
+inline void DiagSignalType::clear_adchighlimit() {
   adchighlimit_ = 0;
   _has_bits_[0] &= ~0x00001000u;
 }
-inline double DiagSignalType2::_internal_adchighlimit() const {
+inline double DiagSignalType::_internal_adchighlimit() const {
   return adchighlimit_;
 }
-inline double DiagSignalType2::adchighlimit() const {
-  // @@protoc_insertion_point(field_get:Proto.DiagSignalType2.adcHighLimit)
+inline double DiagSignalType::adchighlimit() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.adcHighLimit)
   return _internal_adchighlimit();
 }
-inline void DiagSignalType2::_internal_set_adchighlimit(double value) {
+inline void DiagSignalType::_internal_set_adchighlimit(double value) {
   _has_bits_[0] |= 0x00001000u;
   adchighlimit_ = value;
 }
-inline void DiagSignalType2::set_adchighlimit(double value) {
+inline void DiagSignalType::set_adchighlimit(double value) {
   _internal_set_adchighlimit(value);
-  // @@protoc_insertion_point(field_set:Proto.DiagSignalType2.adcHighLimit)
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.adcHighLimit)
 }
 
 // optional double adcLowLimit = 34;
-inline bool DiagSignalType2::_internal_has_adclowlimit() const {
+inline bool DiagSignalType::_internal_has_adclowlimit() const {
   bool value = (_has_bits_[0] & 0x00002000u) != 0;
   return value;
 }
-inline bool DiagSignalType2::has_adclowlimit() const {
+inline bool DiagSignalType::has_adclowlimit() const {
   return _internal_has_adclowlimit();
 }
-inline void DiagSignalType2::clear_adclowlimit() {
+inline void DiagSignalType::clear_adclowlimit() {
   adclowlimit_ = 0;
   _has_bits_[0] &= ~0x00002000u;
 }
-inline double DiagSignalType2::_internal_adclowlimit() const {
+inline double DiagSignalType::_internal_adclowlimit() const {
   return adclowlimit_;
 }
-inline double DiagSignalType2::adclowlimit() const {
-  // @@protoc_insertion_point(field_get:Proto.DiagSignalType2.adcLowLimit)
+inline double DiagSignalType::adclowlimit() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.adcLowLimit)
   return _internal_adclowlimit();
 }
-inline void DiagSignalType2::_internal_set_adclowlimit(double value) {
+inline void DiagSignalType::_internal_set_adclowlimit(double value) {
   _has_bits_[0] |= 0x00002000u;
   adclowlimit_ = value;
 }
-inline void DiagSignalType2::set_adclowlimit(double value) {
+inline void DiagSignalType::set_adclowlimit(double value) {
   _internal_set_adclowlimit(value);
-  // @@protoc_insertion_point(field_set:Proto.DiagSignalType2.adcLowLimit)
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.adcLowLimit)
 }
 
 // optional double valueHighLimit = 35;
-inline bool DiagSignalType2::_internal_has_valuehighlimit() const {
+inline bool DiagSignalType::_internal_has_valuehighlimit() const {
   bool value = (_has_bits_[0] & 0x00004000u) != 0;
   return value;
 }
-inline bool DiagSignalType2::has_valuehighlimit() const {
+inline bool DiagSignalType::has_valuehighlimit() const {
   return _internal_has_valuehighlimit();
 }
-inline void DiagSignalType2::clear_valuehighlimit() {
+inline void DiagSignalType::clear_valuehighlimit() {
   valuehighlimit_ = 0;
   _has_bits_[0] &= ~0x00004000u;
 }
-inline double DiagSignalType2::_internal_valuehighlimit() const {
+inline double DiagSignalType::_internal_valuehighlimit() const {
   return valuehighlimit_;
 }
-inline double DiagSignalType2::valuehighlimit() const {
-  // @@protoc_insertion_point(field_get:Proto.DiagSignalType2.valueHighLimit)
+inline double DiagSignalType::valuehighlimit() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.valueHighLimit)
   return _internal_valuehighlimit();
 }
-inline void DiagSignalType2::_internal_set_valuehighlimit(double value) {
+inline void DiagSignalType::_internal_set_valuehighlimit(double value) {
   _has_bits_[0] |= 0x00004000u;
   valuehighlimit_ = value;
 }
-inline void DiagSignalType2::set_valuehighlimit(double value) {
+inline void DiagSignalType::set_valuehighlimit(double value) {
   _internal_set_valuehighlimit(value);
-  // @@protoc_insertion_point(field_set:Proto.DiagSignalType2.valueHighLimit)
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.valueHighLimit)
 }
 
 // optional double valueLowLimit = 36;
-inline bool DiagSignalType2::_internal_has_valuelowlimit() const {
+inline bool DiagSignalType::_internal_has_valuelowlimit() const {
   bool value = (_has_bits_[0] & 0x00008000u) != 0;
   return value;
 }
-inline bool DiagSignalType2::has_valuelowlimit() const {
+inline bool DiagSignalType::has_valuelowlimit() const {
   return _internal_has_valuelowlimit();
 }
-inline void DiagSignalType2::clear_valuelowlimit() {
+inline void DiagSignalType::clear_valuelowlimit() {
   valuelowlimit_ = 0;
   _has_bits_[0] &= ~0x00008000u;
 }
-inline double DiagSignalType2::_internal_valuelowlimit() const {
+inline double DiagSignalType::_internal_valuelowlimit() const {
   return valuelowlimit_;
 }
-inline double DiagSignalType2::valuelowlimit() const {
-  // @@protoc_insertion_point(field_get:Proto.DiagSignalType2.valueLowLimit)
+inline double DiagSignalType::valuelowlimit() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.valueLowLimit)
   return _internal_valuelowlimit();
 }
-inline void DiagSignalType2::_internal_set_valuelowlimit(double value) {
+inline void DiagSignalType::_internal_set_valuelowlimit(double value) {
   _has_bits_[0] |= 0x00008000u;
   valuelowlimit_ = value;
 }
-inline void DiagSignalType2::set_valuelowlimit(double value) {
+inline void DiagSignalType::set_valuelowlimit(double value) {
   _internal_set_valuelowlimit(value);
-  // @@protoc_insertion_point(field_set:Proto.DiagSignalType2.valueLowLimit)
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.valueLowLimit)
 }
 
 // optional double valueMultiplier = 37;
-inline bool DiagSignalType2::_internal_has_valuemultiplier() const {
+inline bool DiagSignalType::_internal_has_valuemultiplier() const {
   bool value = (_has_bits_[0] & 0x00010000u) != 0;
   return value;
 }
-inline bool DiagSignalType2::has_valuemultiplier() const {
+inline bool DiagSignalType::has_valuemultiplier() const {
   return _internal_has_valuemultiplier();
 }
-inline void DiagSignalType2::clear_valuemultiplier() {
+inline void DiagSignalType::clear_valuemultiplier() {
   valuemultiplier_ = 0;
   _has_bits_[0] &= ~0x00010000u;
 }
-inline double DiagSignalType2::_internal_valuemultiplier() const {
+inline double DiagSignalType::_internal_valuemultiplier() const {
   return valuemultiplier_;
 }
-inline double DiagSignalType2::valuemultiplier() const {
-  // @@protoc_insertion_point(field_get:Proto.DiagSignalType2.valueMultiplier)
+inline double DiagSignalType::valuemultiplier() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.valueMultiplier)
   return _internal_valuemultiplier();
 }
-inline void DiagSignalType2::_internal_set_valuemultiplier(double value) {
+inline void DiagSignalType::_internal_set_valuemultiplier(double value) {
   _has_bits_[0] |= 0x00010000u;
   valuemultiplier_ = value;
 }
-inline void DiagSignalType2::set_valuemultiplier(double value) {
+inline void DiagSignalType::set_valuemultiplier(double value) {
   _internal_set_valuemultiplier(value);
-  // @@protoc_insertion_point(field_set:Proto.DiagSignalType2.valueMultiplier)
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.valueMultiplier)
 }
 
 // optional double valueOffset = 38;
-inline bool DiagSignalType2::_internal_has_valueoffset() const {
+inline bool DiagSignalType::_internal_has_valueoffset() const {
   bool value = (_has_bits_[0] & 0x00020000u) != 0;
   return value;
 }
-inline bool DiagSignalType2::has_valueoffset() const {
+inline bool DiagSignalType::has_valueoffset() const {
   return _internal_has_valueoffset();
 }
-inline void DiagSignalType2::clear_valueoffset() {
+inline void DiagSignalType::clear_valueoffset() {
   valueoffset_ = 0;
   _has_bits_[0] &= ~0x00020000u;
 }
-inline double DiagSignalType2::_internal_valueoffset() const {
+inline double DiagSignalType::_internal_valueoffset() const {
   return valueoffset_;
 }
-inline double DiagSignalType2::valueoffset() const {
-  // @@protoc_insertion_point(field_get:Proto.DiagSignalType2.valueOffset)
+inline double DiagSignalType::valueoffset() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.valueOffset)
   return _internal_valueoffset();
 }
-inline void DiagSignalType2::_internal_set_valueoffset(double value) {
+inline void DiagSignalType::_internal_set_valueoffset(double value) {
   _has_bits_[0] |= 0x00020000u;
   valueoffset_ = value;
 }
-inline void DiagSignalType2::set_valueoffset(double value) {
+inline void DiagSignalType::set_valueoffset(double value) {
   _internal_set_valueoffset(value);
-  // @@protoc_insertion_point(field_set:Proto.DiagSignalType2.valueOffset)
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.valueOffset)
 }
 
 // optional bool useLimits = 39;
-inline bool DiagSignalType2::_internal_has_uselimits() const {
+inline bool DiagSignalType::_internal_has_uselimits() const {
   bool value = (_has_bits_[0] & 0x00000400u) != 0;
   return value;
 }
-inline bool DiagSignalType2::has_uselimits() const {
+inline bool DiagSignalType::has_uselimits() const {
   return _internal_has_uselimits();
 }
-inline void DiagSignalType2::clear_uselimits() {
+inline void DiagSignalType::clear_uselimits() {
   uselimits_ = false;
   _has_bits_[0] &= ~0x00000400u;
 }
-inline bool DiagSignalType2::_internal_uselimits() const {
+inline bool DiagSignalType::_internal_uselimits() const {
   return uselimits_;
 }
-inline bool DiagSignalType2::uselimits() const {
-  // @@protoc_insertion_point(field_get:Proto.DiagSignalType2.useLimits)
+inline bool DiagSignalType::uselimits() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.useLimits)
   return _internal_uselimits();
 }
-inline void DiagSignalType2::_internal_set_uselimits(bool value) {
+inline void DiagSignalType::_internal_set_uselimits(bool value) {
   _has_bits_[0] |= 0x00000400u;
   uselimits_ = value;
 }
-inline void DiagSignalType2::set_uselimits(bool value) {
+inline void DiagSignalType::set_uselimits(bool value) {
   _internal_set_uselimits(value);
-  // @@protoc_insertion_point(field_set:Proto.DiagSignalType2.useLimits)
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.useLimits)
 }
 
 // optional string units = 40;
-inline bool DiagSignalType2::_internal_has_units() const {
+inline bool DiagSignalType::_internal_has_units() const {
   bool value = (_has_bits_[0] & 0x00000008u) != 0;
   return value;
 }
-inline bool DiagSignalType2::has_units() const {
+inline bool DiagSignalType::has_units() const {
   return _internal_has_units();
 }
-inline void DiagSignalType2::clear_units() {
+inline void DiagSignalType::clear_units() {
   units_.ClearToEmpty();
   _has_bits_[0] &= ~0x00000008u;
 }
-inline const std::string& DiagSignalType2::units() const {
-  // @@protoc_insertion_point(field_get:Proto.DiagSignalType2.units)
+inline const std::string& DiagSignalType::units() const {
+  // @@protoc_insertion_point(field_get:Proto.DiagSignalType.units)
   return _internal_units();
 }
-inline void DiagSignalType2::set_units(const std::string& value) {
+inline void DiagSignalType::set_units(const std::string& value) {
   _internal_set_units(value);
-  // @@protoc_insertion_point(field_set:Proto.DiagSignalType2.units)
+  // @@protoc_insertion_point(field_set:Proto.DiagSignalType.units)
 }
-inline std::string* DiagSignalType2::mutable_units() {
-  // @@protoc_insertion_point(field_mutable:Proto.DiagSignalType2.units)
+inline std::string* DiagSignalType::mutable_units() {
+  // @@protoc_insertion_point(field_mutable:Proto.DiagSignalType.units)
   return _internal_mutable_units();
 }
-inline const std::string& DiagSignalType2::_internal_units() const {
+inline const std::string& DiagSignalType::_internal_units() const {
   return units_.Get();
 }
-inline void DiagSignalType2::_internal_set_units(const std::string& value) {
+inline void DiagSignalType::_internal_set_units(const std::string& value) {
   _has_bits_[0] |= 0x00000008u;
   units_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
-inline void DiagSignalType2::set_units(std::string&& value) {
+inline void DiagSignalType::set_units(std::string&& value) {
   _has_bits_[0] |= 0x00000008u;
   units_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Proto.DiagSignalType2.units)
+  // @@protoc_insertion_point(field_set_rvalue:Proto.DiagSignalType.units)
 }
-inline void DiagSignalType2::set_units(const char* value) {
+inline void DiagSignalType::set_units(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   _has_bits_[0] |= 0x00000008u;
   units_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Proto.DiagSignalType2.units)
+  // @@protoc_insertion_point(field_set_char:Proto.DiagSignalType.units)
 }
-inline void DiagSignalType2::set_units(const char* value,
+inline void DiagSignalType::set_units(const char* value,
     size_t size) {
   _has_bits_[0] |= 0x00000008u;
   units_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Proto.DiagSignalType2.units)
+  // @@protoc_insertion_point(field_set_pointer:Proto.DiagSignalType.units)
 }
-inline std::string* DiagSignalType2::_internal_mutable_units() {
+inline std::string* DiagSignalType::_internal_mutable_units() {
   _has_bits_[0] |= 0x00000008u;
   return units_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
-inline std::string* DiagSignalType2::release_units() {
-  // @@protoc_insertion_point(field_release:Proto.DiagSignalType2.units)
+inline std::string* DiagSignalType::release_units() {
+  // @@protoc_insertion_point(field_release:Proto.DiagSignalType.units)
   if (!_internal_has_units()) {
     return nullptr;
   }
   _has_bits_[0] &= ~0x00000008u;
   return units_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void DiagSignalType2::set_allocated_units(std::string* units) {
+inline void DiagSignalType::set_allocated_units(std::string* units) {
   if (units != nullptr) {
     _has_bits_[0] |= 0x00000008u;
   } else {
@@ -8025,76 +8025,76 @@ inline void DiagSignalType2::set_allocated_units(std::string* units) {
   }
   units_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), units,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Proto.DiagSignalType2.units)
+  // @@protoc_insertion_point(field_set_allocated:Proto.DiagSignalType.units)
 }
 
 // -------------------------------------------------------------------
 
-// Connection2
+// Connection
 
 // optional string ConnectionID = 2;
-inline bool Connection2::_internal_has_connectionid() const {
+inline bool Connection::_internal_has_connectionid() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
 }
-inline bool Connection2::has_connectionid() const {
+inline bool Connection::has_connectionid() const {
   return _internal_has_connectionid();
 }
-inline void Connection2::clear_connectionid() {
+inline void Connection::clear_connectionid() {
   connectionid_.ClearToEmpty();
   _has_bits_[0] &= ~0x00000001u;
 }
-inline const std::string& Connection2::connectionid() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection2.ConnectionID)
+inline const std::string& Connection::connectionid() const {
+  // @@protoc_insertion_point(field_get:Proto.Connection.ConnectionID)
   return _internal_connectionid();
 }
-inline void Connection2::set_connectionid(const std::string& value) {
+inline void Connection::set_connectionid(const std::string& value) {
   _internal_set_connectionid(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection2.ConnectionID)
+  // @@protoc_insertion_point(field_set:Proto.Connection.ConnectionID)
 }
-inline std::string* Connection2::mutable_connectionid() {
-  // @@protoc_insertion_point(field_mutable:Proto.Connection2.ConnectionID)
+inline std::string* Connection::mutable_connectionid() {
+  // @@protoc_insertion_point(field_mutable:Proto.Connection.ConnectionID)
   return _internal_mutable_connectionid();
 }
-inline const std::string& Connection2::_internal_connectionid() const {
+inline const std::string& Connection::_internal_connectionid() const {
   return connectionid_.Get();
 }
-inline void Connection2::_internal_set_connectionid(const std::string& value) {
+inline void Connection::_internal_set_connectionid(const std::string& value) {
   _has_bits_[0] |= 0x00000001u;
   connectionid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
-inline void Connection2::set_connectionid(std::string&& value) {
+inline void Connection::set_connectionid(std::string&& value) {
   _has_bits_[0] |= 0x00000001u;
   connectionid_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Proto.Connection2.ConnectionID)
+  // @@protoc_insertion_point(field_set_rvalue:Proto.Connection.ConnectionID)
 }
-inline void Connection2::set_connectionid(const char* value) {
+inline void Connection::set_connectionid(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   _has_bits_[0] |= 0x00000001u;
   connectionid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Proto.Connection2.ConnectionID)
+  // @@protoc_insertion_point(field_set_char:Proto.Connection.ConnectionID)
 }
-inline void Connection2::set_connectionid(const char* value,
+inline void Connection::set_connectionid(const char* value,
     size_t size) {
   _has_bits_[0] |= 0x00000001u;
   connectionid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Proto.Connection2.ConnectionID)
+  // @@protoc_insertion_point(field_set_pointer:Proto.Connection.ConnectionID)
 }
-inline std::string* Connection2::_internal_mutable_connectionid() {
+inline std::string* Connection::_internal_mutable_connectionid() {
   _has_bits_[0] |= 0x00000001u;
   return connectionid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
-inline std::string* Connection2::release_connectionid() {
-  // @@protoc_insertion_point(field_release:Proto.Connection2.ConnectionID)
+inline std::string* Connection::release_connectionid() {
+  // @@protoc_insertion_point(field_release:Proto.Connection.ConnectionID)
   if (!_internal_has_connectionid()) {
     return nullptr;
   }
   _has_bits_[0] &= ~0x00000001u;
   return connectionid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void Connection2::set_allocated_connectionid(std::string* connectionid) {
+inline void Connection::set_allocated_connectionid(std::string* connectionid) {
   if (connectionid != nullptr) {
     _has_bits_[0] |= 0x00000001u;
   } else {
@@ -8102,72 +8102,72 @@ inline void Connection2::set_allocated_connectionid(std::string* connectionid) {
   }
   connectionid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), connectionid,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Proto.Connection2.ConnectionID)
+  // @@protoc_insertion_point(field_set_allocated:Proto.Connection.ConnectionID)
 }
 
 // optional string Port1EquipmentID = 3;
-inline bool Connection2::_internal_has_port1equipmentid() const {
+inline bool Connection::_internal_has_port1equipmentid() const {
   bool value = (_has_bits_[0] & 0x00000002u) != 0;
   return value;
 }
-inline bool Connection2::has_port1equipmentid() const {
+inline bool Connection::has_port1equipmentid() const {
   return _internal_has_port1equipmentid();
 }
-inline void Connection2::clear_port1equipmentid() {
+inline void Connection::clear_port1equipmentid() {
   port1equipmentid_.ClearToEmpty();
   _has_bits_[0] &= ~0x00000002u;
 }
-inline const std::string& Connection2::port1equipmentid() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection2.Port1EquipmentID)
+inline const std::string& Connection::port1equipmentid() const {
+  // @@protoc_insertion_point(field_get:Proto.Connection.Port1EquipmentID)
   return _internal_port1equipmentid();
 }
-inline void Connection2::set_port1equipmentid(const std::string& value) {
+inline void Connection::set_port1equipmentid(const std::string& value) {
   _internal_set_port1equipmentid(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection2.Port1EquipmentID)
+  // @@protoc_insertion_point(field_set:Proto.Connection.Port1EquipmentID)
 }
-inline std::string* Connection2::mutable_port1equipmentid() {
-  // @@protoc_insertion_point(field_mutable:Proto.Connection2.Port1EquipmentID)
+inline std::string* Connection::mutable_port1equipmentid() {
+  // @@protoc_insertion_point(field_mutable:Proto.Connection.Port1EquipmentID)
   return _internal_mutable_port1equipmentid();
 }
-inline const std::string& Connection2::_internal_port1equipmentid() const {
+inline const std::string& Connection::_internal_port1equipmentid() const {
   return port1equipmentid_.Get();
 }
-inline void Connection2::_internal_set_port1equipmentid(const std::string& value) {
+inline void Connection::_internal_set_port1equipmentid(const std::string& value) {
   _has_bits_[0] |= 0x00000002u;
   port1equipmentid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
-inline void Connection2::set_port1equipmentid(std::string&& value) {
+inline void Connection::set_port1equipmentid(std::string&& value) {
   _has_bits_[0] |= 0x00000002u;
   port1equipmentid_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Proto.Connection2.Port1EquipmentID)
+  // @@protoc_insertion_point(field_set_rvalue:Proto.Connection.Port1EquipmentID)
 }
-inline void Connection2::set_port1equipmentid(const char* value) {
+inline void Connection::set_port1equipmentid(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   _has_bits_[0] |= 0x00000002u;
   port1equipmentid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Proto.Connection2.Port1EquipmentID)
+  // @@protoc_insertion_point(field_set_char:Proto.Connection.Port1EquipmentID)
 }
-inline void Connection2::set_port1equipmentid(const char* value,
+inline void Connection::set_port1equipmentid(const char* value,
     size_t size) {
   _has_bits_[0] |= 0x00000002u;
   port1equipmentid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Proto.Connection2.Port1EquipmentID)
+  // @@protoc_insertion_point(field_set_pointer:Proto.Connection.Port1EquipmentID)
 }
-inline std::string* Connection2::_internal_mutable_port1equipmentid() {
+inline std::string* Connection::_internal_mutable_port1equipmentid() {
   _has_bits_[0] |= 0x00000002u;
   return port1equipmentid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
-inline std::string* Connection2::release_port1equipmentid() {
-  // @@protoc_insertion_point(field_release:Proto.Connection2.Port1EquipmentID)
+inline std::string* Connection::release_port1equipmentid() {
+  // @@protoc_insertion_point(field_release:Proto.Connection.Port1EquipmentID)
   if (!_internal_has_port1equipmentid()) {
     return nullptr;
   }
   _has_bits_[0] &= ~0x00000002u;
   return port1equipmentid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void Connection2::set_allocated_port1equipmentid(std::string* port1equipmentid) {
+inline void Connection::set_allocated_port1equipmentid(std::string* port1equipmentid) {
   if (port1equipmentid != nullptr) {
     _has_bits_[0] |= 0x00000002u;
   } else {
@@ -8175,72 +8175,72 @@ inline void Connection2::set_allocated_port1equipmentid(std::string* port1equipm
   }
   port1equipmentid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), port1equipmentid,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Proto.Connection2.Port1EquipmentID)
+  // @@protoc_insertion_point(field_set_allocated:Proto.Connection.Port1EquipmentID)
 }
 
 // optional string Port2EquipmentID = 4;
-inline bool Connection2::_internal_has_port2equipmentid() const {
+inline bool Connection::_internal_has_port2equipmentid() const {
   bool value = (_has_bits_[0] & 0x00000004u) != 0;
   return value;
 }
-inline bool Connection2::has_port2equipmentid() const {
+inline bool Connection::has_port2equipmentid() const {
   return _internal_has_port2equipmentid();
 }
-inline void Connection2::clear_port2equipmentid() {
+inline void Connection::clear_port2equipmentid() {
   port2equipmentid_.ClearToEmpty();
   _has_bits_[0] &= ~0x00000004u;
 }
-inline const std::string& Connection2::port2equipmentid() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection2.Port2EquipmentID)
+inline const std::string& Connection::port2equipmentid() const {
+  // @@protoc_insertion_point(field_get:Proto.Connection.Port2EquipmentID)
   return _internal_port2equipmentid();
 }
-inline void Connection2::set_port2equipmentid(const std::string& value) {
+inline void Connection::set_port2equipmentid(const std::string& value) {
   _internal_set_port2equipmentid(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection2.Port2EquipmentID)
+  // @@protoc_insertion_point(field_set:Proto.Connection.Port2EquipmentID)
 }
-inline std::string* Connection2::mutable_port2equipmentid() {
-  // @@protoc_insertion_point(field_mutable:Proto.Connection2.Port2EquipmentID)
+inline std::string* Connection::mutable_port2equipmentid() {
+  // @@protoc_insertion_point(field_mutable:Proto.Connection.Port2EquipmentID)
   return _internal_mutable_port2equipmentid();
 }
-inline const std::string& Connection2::_internal_port2equipmentid() const {
+inline const std::string& Connection::_internal_port2equipmentid() const {
   return port2equipmentid_.Get();
 }
-inline void Connection2::_internal_set_port2equipmentid(const std::string& value) {
+inline void Connection::_internal_set_port2equipmentid(const std::string& value) {
   _has_bits_[0] |= 0x00000004u;
   port2equipmentid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
-inline void Connection2::set_port2equipmentid(std::string&& value) {
+inline void Connection::set_port2equipmentid(std::string&& value) {
   _has_bits_[0] |= 0x00000004u;
   port2equipmentid_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Proto.Connection2.Port2EquipmentID)
+  // @@protoc_insertion_point(field_set_rvalue:Proto.Connection.Port2EquipmentID)
 }
-inline void Connection2::set_port2equipmentid(const char* value) {
+inline void Connection::set_port2equipmentid(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   _has_bits_[0] |= 0x00000004u;
   port2equipmentid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Proto.Connection2.Port2EquipmentID)
+  // @@protoc_insertion_point(field_set_char:Proto.Connection.Port2EquipmentID)
 }
-inline void Connection2::set_port2equipmentid(const char* value,
+inline void Connection::set_port2equipmentid(const char* value,
     size_t size) {
   _has_bits_[0] |= 0x00000004u;
   port2equipmentid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Proto.Connection2.Port2EquipmentID)
+  // @@protoc_insertion_point(field_set_pointer:Proto.Connection.Port2EquipmentID)
 }
-inline std::string* Connection2::_internal_mutable_port2equipmentid() {
+inline std::string* Connection::_internal_mutable_port2equipmentid() {
   _has_bits_[0] |= 0x00000004u;
   return port2equipmentid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
-inline std::string* Connection2::release_port2equipmentid() {
-  // @@protoc_insertion_point(field_release:Proto.Connection2.Port2EquipmentID)
+inline std::string* Connection::release_port2equipmentid() {
+  // @@protoc_insertion_point(field_release:Proto.Connection.Port2EquipmentID)
   if (!_internal_has_port2equipmentid()) {
     return nullptr;
   }
   _has_bits_[0] &= ~0x00000004u;
   return port2equipmentid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void Connection2::set_allocated_port2equipmentid(std::string* port2equipmentid) {
+inline void Connection::set_allocated_port2equipmentid(std::string* port2equipmentid) {
   if (port2equipmentid != nullptr) {
     _has_bits_[0] |= 0x00000004u;
   } else {
@@ -8248,72 +8248,72 @@ inline void Connection2::set_allocated_port2equipmentid(std::string* port2equipm
   }
   port2equipmentid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), port2equipmentid,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Proto.Connection2.Port2EquipmentID)
+  // @@protoc_insertion_point(field_set_allocated:Proto.Connection.Port2EquipmentID)
 }
 
 // optional string Port1RawDataDescription = 5;
-inline bool Connection2::_internal_has_port1rawdatadescription() const {
+inline bool Connection::_internal_has_port1rawdatadescription() const {
   bool value = (_has_bits_[0] & 0x00000008u) != 0;
   return value;
 }
-inline bool Connection2::has_port1rawdatadescription() const {
+inline bool Connection::has_port1rawdatadescription() const {
   return _internal_has_port1rawdatadescription();
 }
-inline void Connection2::clear_port1rawdatadescription() {
+inline void Connection::clear_port1rawdatadescription() {
   port1rawdatadescription_.ClearToEmpty();
   _has_bits_[0] &= ~0x00000008u;
 }
-inline const std::string& Connection2::port1rawdatadescription() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection2.Port1RawDataDescription)
+inline const std::string& Connection::port1rawdatadescription() const {
+  // @@protoc_insertion_point(field_get:Proto.Connection.Port1RawDataDescription)
   return _internal_port1rawdatadescription();
 }
-inline void Connection2::set_port1rawdatadescription(const std::string& value) {
+inline void Connection::set_port1rawdatadescription(const std::string& value) {
   _internal_set_port1rawdatadescription(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection2.Port1RawDataDescription)
+  // @@protoc_insertion_point(field_set:Proto.Connection.Port1RawDataDescription)
 }
-inline std::string* Connection2::mutable_port1rawdatadescription() {
-  // @@protoc_insertion_point(field_mutable:Proto.Connection2.Port1RawDataDescription)
+inline std::string* Connection::mutable_port1rawdatadescription() {
+  // @@protoc_insertion_point(field_mutable:Proto.Connection.Port1RawDataDescription)
   return _internal_mutable_port1rawdatadescription();
 }
-inline const std::string& Connection2::_internal_port1rawdatadescription() const {
+inline const std::string& Connection::_internal_port1rawdatadescription() const {
   return port1rawdatadescription_.Get();
 }
-inline void Connection2::_internal_set_port1rawdatadescription(const std::string& value) {
+inline void Connection::_internal_set_port1rawdatadescription(const std::string& value) {
   _has_bits_[0] |= 0x00000008u;
   port1rawdatadescription_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
-inline void Connection2::set_port1rawdatadescription(std::string&& value) {
+inline void Connection::set_port1rawdatadescription(std::string&& value) {
   _has_bits_[0] |= 0x00000008u;
   port1rawdatadescription_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Proto.Connection2.Port1RawDataDescription)
+  // @@protoc_insertion_point(field_set_rvalue:Proto.Connection.Port1RawDataDescription)
 }
-inline void Connection2::set_port1rawdatadescription(const char* value) {
+inline void Connection::set_port1rawdatadescription(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   _has_bits_[0] |= 0x00000008u;
   port1rawdatadescription_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Proto.Connection2.Port1RawDataDescription)
+  // @@protoc_insertion_point(field_set_char:Proto.Connection.Port1RawDataDescription)
 }
-inline void Connection2::set_port1rawdatadescription(const char* value,
+inline void Connection::set_port1rawdatadescription(const char* value,
     size_t size) {
   _has_bits_[0] |= 0x00000008u;
   port1rawdatadescription_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Proto.Connection2.Port1RawDataDescription)
+  // @@protoc_insertion_point(field_set_pointer:Proto.Connection.Port1RawDataDescription)
 }
-inline std::string* Connection2::_internal_mutable_port1rawdatadescription() {
+inline std::string* Connection::_internal_mutable_port1rawdatadescription() {
   _has_bits_[0] |= 0x00000008u;
   return port1rawdatadescription_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
-inline std::string* Connection2::release_port1rawdatadescription() {
-  // @@protoc_insertion_point(field_release:Proto.Connection2.Port1RawDataDescription)
+inline std::string* Connection::release_port1rawdatadescription() {
+  // @@protoc_insertion_point(field_release:Proto.Connection.Port1RawDataDescription)
   if (!_internal_has_port1rawdatadescription()) {
     return nullptr;
   }
   _has_bits_[0] &= ~0x00000008u;
   return port1rawdatadescription_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void Connection2::set_allocated_port1rawdatadescription(std::string* port1rawdatadescription) {
+inline void Connection::set_allocated_port1rawdatadescription(std::string* port1rawdatadescription) {
   if (port1rawdatadescription != nullptr) {
     _has_bits_[0] |= 0x00000008u;
   } else {
@@ -8321,72 +8321,72 @@ inline void Connection2::set_allocated_port1rawdatadescription(std::string* port
   }
   port1rawdatadescription_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), port1rawdatadescription,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Proto.Connection2.Port1RawDataDescription)
+  // @@protoc_insertion_point(field_set_allocated:Proto.Connection.Port1RawDataDescription)
 }
 
 // optional string Port2RawDataDescription = 6;
-inline bool Connection2::_internal_has_port2rawdatadescription() const {
+inline bool Connection::_internal_has_port2rawdatadescription() const {
   bool value = (_has_bits_[0] & 0x00000010u) != 0;
   return value;
 }
-inline bool Connection2::has_port2rawdatadescription() const {
+inline bool Connection::has_port2rawdatadescription() const {
   return _internal_has_port2rawdatadescription();
 }
-inline void Connection2::clear_port2rawdatadescription() {
+inline void Connection::clear_port2rawdatadescription() {
   port2rawdatadescription_.ClearToEmpty();
   _has_bits_[0] &= ~0x00000010u;
 }
-inline const std::string& Connection2::port2rawdatadescription() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection2.Port2RawDataDescription)
+inline const std::string& Connection::port2rawdatadescription() const {
+  // @@protoc_insertion_point(field_get:Proto.Connection.Port2RawDataDescription)
   return _internal_port2rawdatadescription();
 }
-inline void Connection2::set_port2rawdatadescription(const std::string& value) {
+inline void Connection::set_port2rawdatadescription(const std::string& value) {
   _internal_set_port2rawdatadescription(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection2.Port2RawDataDescription)
+  // @@protoc_insertion_point(field_set:Proto.Connection.Port2RawDataDescription)
 }
-inline std::string* Connection2::mutable_port2rawdatadescription() {
-  // @@protoc_insertion_point(field_mutable:Proto.Connection2.Port2RawDataDescription)
+inline std::string* Connection::mutable_port2rawdatadescription() {
+  // @@protoc_insertion_point(field_mutable:Proto.Connection.Port2RawDataDescription)
   return _internal_mutable_port2rawdatadescription();
 }
-inline const std::string& Connection2::_internal_port2rawdatadescription() const {
+inline const std::string& Connection::_internal_port2rawdatadescription() const {
   return port2rawdatadescription_.Get();
 }
-inline void Connection2::_internal_set_port2rawdatadescription(const std::string& value) {
+inline void Connection::_internal_set_port2rawdatadescription(const std::string& value) {
   _has_bits_[0] |= 0x00000010u;
   port2rawdatadescription_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
-inline void Connection2::set_port2rawdatadescription(std::string&& value) {
+inline void Connection::set_port2rawdatadescription(std::string&& value) {
   _has_bits_[0] |= 0x00000010u;
   port2rawdatadescription_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Proto.Connection2.Port2RawDataDescription)
+  // @@protoc_insertion_point(field_set_rvalue:Proto.Connection.Port2RawDataDescription)
 }
-inline void Connection2::set_port2rawdatadescription(const char* value) {
+inline void Connection::set_port2rawdatadescription(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   _has_bits_[0] |= 0x00000010u;
   port2rawdatadescription_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Proto.Connection2.Port2RawDataDescription)
+  // @@protoc_insertion_point(field_set_char:Proto.Connection.Port2RawDataDescription)
 }
-inline void Connection2::set_port2rawdatadescription(const char* value,
+inline void Connection::set_port2rawdatadescription(const char* value,
     size_t size) {
   _has_bits_[0] |= 0x00000010u;
   port2rawdatadescription_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Proto.Connection2.Port2RawDataDescription)
+  // @@protoc_insertion_point(field_set_pointer:Proto.Connection.Port2RawDataDescription)
 }
-inline std::string* Connection2::_internal_mutable_port2rawdatadescription() {
+inline std::string* Connection::_internal_mutable_port2rawdatadescription() {
   _has_bits_[0] |= 0x00000010u;
   return port2rawdatadescription_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
-inline std::string* Connection2::release_port2rawdatadescription() {
-  // @@protoc_insertion_point(field_release:Proto.Connection2.Port2RawDataDescription)
+inline std::string* Connection::release_port2rawdatadescription() {
+  // @@protoc_insertion_point(field_release:Proto.Connection.Port2RawDataDescription)
   if (!_internal_has_port2rawdatadescription()) {
     return nullptr;
   }
   _has_bits_[0] &= ~0x00000010u;
   return port2rawdatadescription_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void Connection2::set_allocated_port2rawdatadescription(std::string* port2rawdatadescription) {
+inline void Connection::set_allocated_port2rawdatadescription(std::string* port2rawdatadescription) {
   if (port2rawdatadescription != nullptr) {
     _has_bits_[0] |= 0x00000010u;
   } else {
@@ -8394,280 +8394,280 @@ inline void Connection2::set_allocated_port2rawdatadescription(std::string* port
   }
   port2rawdatadescription_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), port2rawdatadescription,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Proto.Connection2.Port2RawDataDescription)
+  // @@protoc_insertion_point(field_set_allocated:Proto.Connection.Port2RawDataDescription)
 }
 
 // optional bool ManualSettings = 11 [default = false];
-inline bool Connection2::_internal_has_manualsettings() const {
+inline bool Connection::_internal_has_manualsettings() const {
   bool value = (_has_bits_[0] & 0x00000200u) != 0;
   return value;
 }
-inline bool Connection2::has_manualsettings() const {
+inline bool Connection::has_manualsettings() const {
   return _internal_has_manualsettings();
 }
-inline void Connection2::clear_manualsettings() {
+inline void Connection::clear_manualsettings() {
   manualsettings_ = false;
   _has_bits_[0] &= ~0x00000200u;
 }
-inline bool Connection2::_internal_manualsettings() const {
+inline bool Connection::_internal_manualsettings() const {
   return manualsettings_;
 }
-inline bool Connection2::manualsettings() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection2.ManualSettings)
+inline bool Connection::manualsettings() const {
+  // @@protoc_insertion_point(field_get:Proto.Connection.ManualSettings)
   return _internal_manualsettings();
 }
-inline void Connection2::_internal_set_manualsettings(bool value) {
+inline void Connection::_internal_set_manualsettings(bool value) {
   _has_bits_[0] |= 0x00000200u;
   manualsettings_ = value;
 }
-inline void Connection2::set_manualsettings(bool value) {
+inline void Connection::set_manualsettings(bool value) {
   _internal_set_manualsettings(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection2.ManualSettings)
+  // @@protoc_insertion_point(field_set:Proto.Connection.ManualSettings)
 }
 
 // optional bool DisableDataID = 12 [default = false];
-inline bool Connection2::_internal_has_disabledataid() const {
+inline bool Connection::_internal_has_disabledataid() const {
   bool value = (_has_bits_[0] & 0x00000400u) != 0;
   return value;
 }
-inline bool Connection2::has_disabledataid() const {
+inline bool Connection::has_disabledataid() const {
   return _internal_has_disabledataid();
 }
-inline void Connection2::clear_disabledataid() {
+inline void Connection::clear_disabledataid() {
   disabledataid_ = false;
   _has_bits_[0] &= ~0x00000400u;
 }
-inline bool Connection2::_internal_disabledataid() const {
+inline bool Connection::_internal_disabledataid() const {
   return disabledataid_;
 }
-inline bool Connection2::disabledataid() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection2.DisableDataID)
+inline bool Connection::disabledataid() const {
+  // @@protoc_insertion_point(field_get:Proto.Connection.DisableDataID)
   return _internal_disabledataid();
 }
-inline void Connection2::_internal_set_disabledataid(bool value) {
+inline void Connection::_internal_set_disabledataid(bool value) {
   _has_bits_[0] |= 0x00000400u;
   disabledataid_ = value;
 }
-inline void Connection2::set_disabledataid(bool value) {
+inline void Connection::set_disabledataid(bool value) {
   _internal_set_disabledataid(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection2.DisableDataID)
+  // @@protoc_insertion_point(field_set:Proto.Connection.DisableDataID)
 }
 
 // optional bool GenerateVHDFile = 13 [default = false];
-inline bool Connection2::_internal_has_generatevhdfile() const {
+inline bool Connection::_internal_has_generatevhdfile() const {
   bool value = (_has_bits_[0] & 0x00000800u) != 0;
   return value;
 }
-inline bool Connection2::has_generatevhdfile() const {
+inline bool Connection::has_generatevhdfile() const {
   return _internal_has_generatevhdfile();
 }
-inline void Connection2::clear_generatevhdfile() {
+inline void Connection::clear_generatevhdfile() {
   generatevhdfile_ = false;
   _has_bits_[0] &= ~0x00000800u;
 }
-inline bool Connection2::_internal_generatevhdfile() const {
+inline bool Connection::_internal_generatevhdfile() const {
   return generatevhdfile_;
 }
-inline bool Connection2::generatevhdfile() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection2.GenerateVHDFile)
+inline bool Connection::generatevhdfile() const {
+  // @@protoc_insertion_point(field_get:Proto.Connection.GenerateVHDFile)
   return _internal_generatevhdfile();
 }
-inline void Connection2::_internal_set_generatevhdfile(bool value) {
+inline void Connection::_internal_set_generatevhdfile(bool value) {
   _has_bits_[0] |= 0x00000800u;
   generatevhdfile_ = value;
 }
-inline void Connection2::set_generatevhdfile(bool value) {
+inline void Connection::set_generatevhdfile(bool value) {
   _internal_set_generatevhdfile(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection2.GenerateVHDFile)
+  // @@protoc_insertion_point(field_set:Proto.Connection.GenerateVHDFile)
 }
 
 // optional int32 Port1TxStartAddress = 14 [default = 0];
-inline bool Connection2::_internal_has_port1txstartaddress() const {
+inline bool Connection::_internal_has_port1txstartaddress() const {
   bool value = (_has_bits_[0] & 0x00000100u) != 0;
   return value;
 }
-inline bool Connection2::has_port1txstartaddress() const {
+inline bool Connection::has_port1txstartaddress() const {
   return _internal_has_port1txstartaddress();
 }
-inline void Connection2::clear_port1txstartaddress() {
+inline void Connection::clear_port1txstartaddress() {
   port1txstartaddress_ = 0;
   _has_bits_[0] &= ~0x00000100u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection2::_internal_port1txstartaddress() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::_internal_port1txstartaddress() const {
   return port1txstartaddress_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection2::port1txstartaddress() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection2.Port1TxStartAddress)
+inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::port1txstartaddress() const {
+  // @@protoc_insertion_point(field_get:Proto.Connection.Port1TxStartAddress)
   return _internal_port1txstartaddress();
 }
-inline void Connection2::_internal_set_port1txstartaddress(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void Connection::_internal_set_port1txstartaddress(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000100u;
   port1txstartaddress_ = value;
 }
-inline void Connection2::set_port1txstartaddress(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void Connection::set_port1txstartaddress(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_port1txstartaddress(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection2.Port1TxStartAddress)
+  // @@protoc_insertion_point(field_set:Proto.Connection.Port1TxStartAddress)
 }
 
 // optional int32 Port1TxWordsQuantity = 15 [default = 479];
-inline bool Connection2::_internal_has_port1txwordsquantity() const {
+inline bool Connection::_internal_has_port1txwordsquantity() const {
   bool value = (_has_bits_[0] & 0x00200000u) != 0;
   return value;
 }
-inline bool Connection2::has_port1txwordsquantity() const {
+inline bool Connection::has_port1txwordsquantity() const {
   return _internal_has_port1txwordsquantity();
 }
-inline void Connection2::clear_port1txwordsquantity() {
+inline void Connection::clear_port1txwordsquantity() {
   port1txwordsquantity_ = 479;
   _has_bits_[0] &= ~0x00200000u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection2::_internal_port1txwordsquantity() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::_internal_port1txwordsquantity() const {
   return port1txwordsquantity_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection2::port1txwordsquantity() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection2.Port1TxWordsQuantity)
+inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::port1txwordsquantity() const {
+  // @@protoc_insertion_point(field_get:Proto.Connection.Port1TxWordsQuantity)
   return _internal_port1txwordsquantity();
 }
-inline void Connection2::_internal_set_port1txwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void Connection::_internal_set_port1txwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00200000u;
   port1txwordsquantity_ = value;
 }
-inline void Connection2::set_port1txwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void Connection::set_port1txwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_port1txwordsquantity(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection2.Port1TxWordsQuantity)
+  // @@protoc_insertion_point(field_set:Proto.Connection.Port1TxWordsQuantity)
 }
 
 // optional int32 Port1RxWordsQuantity = 16 [default = 479];
-inline bool Connection2::_internal_has_port1rxwordsquantity() const {
+inline bool Connection::_internal_has_port1rxwordsquantity() const {
   bool value = (_has_bits_[0] & 0x00400000u) != 0;
   return value;
 }
-inline bool Connection2::has_port1rxwordsquantity() const {
+inline bool Connection::has_port1rxwordsquantity() const {
   return _internal_has_port1rxwordsquantity();
 }
-inline void Connection2::clear_port1rxwordsquantity() {
+inline void Connection::clear_port1rxwordsquantity() {
   port1rxwordsquantity_ = 479;
   _has_bits_[0] &= ~0x00400000u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection2::_internal_port1rxwordsquantity() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::_internal_port1rxwordsquantity() const {
   return port1rxwordsquantity_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection2::port1rxwordsquantity() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection2.Port1RxWordsQuantity)
+inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::port1rxwordsquantity() const {
+  // @@protoc_insertion_point(field_get:Proto.Connection.Port1RxWordsQuantity)
   return _internal_port1rxwordsquantity();
 }
-inline void Connection2::_internal_set_port1rxwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void Connection::_internal_set_port1rxwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00400000u;
   port1rxwordsquantity_ = value;
 }
-inline void Connection2::set_port1rxwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void Connection::set_port1rxwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_port1rxwordsquantity(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection2.Port1RxWordsQuantity)
+  // @@protoc_insertion_point(field_set:Proto.Connection.Port1RxWordsQuantity)
 }
 
 // optional int32 Port2TxStartAddress = 17 [default = 0];
-inline bool Connection2::_internal_has_port2txstartaddress() const {
+inline bool Connection::_internal_has_port2txstartaddress() const {
   bool value = (_has_bits_[0] & 0x00002000u) != 0;
   return value;
 }
-inline bool Connection2::has_port2txstartaddress() const {
+inline bool Connection::has_port2txstartaddress() const {
   return _internal_has_port2txstartaddress();
 }
-inline void Connection2::clear_port2txstartaddress() {
+inline void Connection::clear_port2txstartaddress() {
   port2txstartaddress_ = 0;
   _has_bits_[0] &= ~0x00002000u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection2::_internal_port2txstartaddress() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::_internal_port2txstartaddress() const {
   return port2txstartaddress_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection2::port2txstartaddress() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection2.Port2TxStartAddress)
+inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::port2txstartaddress() const {
+  // @@protoc_insertion_point(field_get:Proto.Connection.Port2TxStartAddress)
   return _internal_port2txstartaddress();
 }
-inline void Connection2::_internal_set_port2txstartaddress(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void Connection::_internal_set_port2txstartaddress(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00002000u;
   port2txstartaddress_ = value;
 }
-inline void Connection2::set_port2txstartaddress(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void Connection::set_port2txstartaddress(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_port2txstartaddress(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection2.Port2TxStartAddress)
+  // @@protoc_insertion_point(field_set:Proto.Connection.Port2TxStartAddress)
 }
 
 // optional int32 Port2TxWordsQuantity = 18 [default = 479];
-inline bool Connection2::_internal_has_port2txwordsquantity() const {
+inline bool Connection::_internal_has_port2txwordsquantity() const {
   bool value = (_has_bits_[0] & 0x00800000u) != 0;
   return value;
 }
-inline bool Connection2::has_port2txwordsquantity() const {
+inline bool Connection::has_port2txwordsquantity() const {
   return _internal_has_port2txwordsquantity();
 }
-inline void Connection2::clear_port2txwordsquantity() {
+inline void Connection::clear_port2txwordsquantity() {
   port2txwordsquantity_ = 479;
   _has_bits_[0] &= ~0x00800000u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection2::_internal_port2txwordsquantity() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::_internal_port2txwordsquantity() const {
   return port2txwordsquantity_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection2::port2txwordsquantity() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection2.Port2TxWordsQuantity)
+inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::port2txwordsquantity() const {
+  // @@protoc_insertion_point(field_get:Proto.Connection.Port2TxWordsQuantity)
   return _internal_port2txwordsquantity();
 }
-inline void Connection2::_internal_set_port2txwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void Connection::_internal_set_port2txwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00800000u;
   port2txwordsquantity_ = value;
 }
-inline void Connection2::set_port2txwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void Connection::set_port2txwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_port2txwordsquantity(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection2.Port2TxWordsQuantity)
+  // @@protoc_insertion_point(field_set:Proto.Connection.Port2TxWordsQuantity)
 }
 
 // optional int32 Port2RxWordsQuantity = 19 [default = 479];
-inline bool Connection2::_internal_has_port2rxwordsquantity() const {
+inline bool Connection::_internal_has_port2rxwordsquantity() const {
   bool value = (_has_bits_[0] & 0x01000000u) != 0;
   return value;
 }
-inline bool Connection2::has_port2rxwordsquantity() const {
+inline bool Connection::has_port2rxwordsquantity() const {
   return _internal_has_port2rxwordsquantity();
 }
-inline void Connection2::clear_port2rxwordsquantity() {
+inline void Connection::clear_port2rxwordsquantity() {
   port2rxwordsquantity_ = 479;
   _has_bits_[0] &= ~0x01000000u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection2::_internal_port2rxwordsquantity() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::_internal_port2rxwordsquantity() const {
   return port2rxwordsquantity_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection2::port2rxwordsquantity() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection2.Port2RxWordsQuantity)
+inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::port2rxwordsquantity() const {
+  // @@protoc_insertion_point(field_get:Proto.Connection.Port2RxWordsQuantity)
   return _internal_port2rxwordsquantity();
 }
-inline void Connection2::_internal_set_port2rxwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void Connection::_internal_set_port2rxwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x01000000u;
   port2rxwordsquantity_ = value;
 }
-inline void Connection2::set_port2rxwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void Connection::set_port2rxwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_port2rxwordsquantity(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection2.Port2RxWordsQuantity)
+  // @@protoc_insertion_point(field_set:Proto.Connection.Port2RxWordsQuantity)
 }
 
 // optional .Proto.Uuid uuid = 20;
-inline bool Connection2::_internal_has_uuid() const {
+inline bool Connection::_internal_has_uuid() const {
   bool value = (_has_bits_[0] & 0x00000020u) != 0;
   PROTOBUF_ASSUME(!value || uuid_ != nullptr);
   return value;
 }
-inline bool Connection2::has_uuid() const {
+inline bool Connection::has_uuid() const {
   return _internal_has_uuid();
 }
-inline const ::Proto::Uuid& Connection2::_internal_uuid() const {
+inline const ::Proto::Uuid& Connection::_internal_uuid() const {
   const ::Proto::Uuid* p = uuid_;
   return p != nullptr ? *p : reinterpret_cast<const ::Proto::Uuid&>(
       ::Proto::_Uuid_default_instance_);
 }
-inline const ::Proto::Uuid& Connection2::uuid() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection2.uuid)
+inline const ::Proto::Uuid& Connection::uuid() const {
+  // @@protoc_insertion_point(field_get:Proto.Connection.uuid)
   return _internal_uuid();
 }
-inline void Connection2::unsafe_arena_set_allocated_uuid(
+inline void Connection::unsafe_arena_set_allocated_uuid(
     ::Proto::Uuid* uuid) {
   if (GetArena() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(uuid_);
@@ -8678,9 +8678,9 @@ inline void Connection2::unsafe_arena_set_allocated_uuid(
   } else {
     _has_bits_[0] &= ~0x00000020u;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.Connection2.uuid)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.Connection.uuid)
 }
-inline ::Proto::Uuid* Connection2::release_uuid() {
+inline ::Proto::Uuid* Connection::release_uuid() {
   _has_bits_[0] &= ~0x00000020u;
   ::Proto::Uuid* temp = uuid_;
   uuid_ = nullptr;
@@ -8689,14 +8689,14 @@ inline ::Proto::Uuid* Connection2::release_uuid() {
   }
   return temp;
 }
-inline ::Proto::Uuid* Connection2::unsafe_arena_release_uuid() {
-  // @@protoc_insertion_point(field_release:Proto.Connection2.uuid)
+inline ::Proto::Uuid* Connection::unsafe_arena_release_uuid() {
+  // @@protoc_insertion_point(field_release:Proto.Connection.uuid)
   _has_bits_[0] &= ~0x00000020u;
   ::Proto::Uuid* temp = uuid_;
   uuid_ = nullptr;
   return temp;
 }
-inline ::Proto::Uuid* Connection2::_internal_mutable_uuid() {
+inline ::Proto::Uuid* Connection::_internal_mutable_uuid() {
   _has_bits_[0] |= 0x00000020u;
   if (uuid_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::Uuid>(GetArena());
@@ -8704,11 +8704,11 @@ inline ::Proto::Uuid* Connection2::_internal_mutable_uuid() {
   }
   return uuid_;
 }
-inline ::Proto::Uuid* Connection2::mutable_uuid() {
-  // @@protoc_insertion_point(field_mutable:Proto.Connection2.uuid)
+inline ::Proto::Uuid* Connection::mutable_uuid() {
+  // @@protoc_insertion_point(field_mutable:Proto.Connection.uuid)
   return _internal_mutable_uuid();
 }
-inline void Connection2::set_allocated_uuid(::Proto::Uuid* uuid) {
+inline void Connection::set_allocated_uuid(::Proto::Uuid* uuid) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
   if (message_arena == nullptr) {
     delete reinterpret_cast< ::PROTOBUF_NAMESPACE_ID::MessageLite*>(uuid_);
@@ -8725,287 +8725,287 @@ inline void Connection2::set_allocated_uuid(::Proto::Uuid* uuid) {
     _has_bits_[0] &= ~0x00000020u;
   }
   uuid_ = uuid;
-  // @@protoc_insertion_point(field_set_allocated:Proto.Connection2.uuid)
+  // @@protoc_insertion_point(field_set_allocated:Proto.Connection.uuid)
 }
 
 // optional bool Port1EnableSerial = 21 [default = false];
-inline bool Connection2::_internal_has_port1enableserial() const {
+inline bool Connection::_internal_has_port1enableserial() const {
   bool value = (_has_bits_[0] & 0x00001000u) != 0;
   return value;
 }
-inline bool Connection2::has_port1enableserial() const {
+inline bool Connection::has_port1enableserial() const {
   return _internal_has_port1enableserial();
 }
-inline void Connection2::clear_port1enableserial() {
+inline void Connection::clear_port1enableserial() {
   port1enableserial_ = false;
   _has_bits_[0] &= ~0x00001000u;
 }
-inline bool Connection2::_internal_port1enableserial() const {
+inline bool Connection::_internal_port1enableserial() const {
   return port1enableserial_;
 }
-inline bool Connection2::port1enableserial() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection2.Port1EnableSerial)
+inline bool Connection::port1enableserial() const {
+  // @@protoc_insertion_point(field_get:Proto.Connection.Port1EnableSerial)
   return _internal_port1enableserial();
 }
-inline void Connection2::_internal_set_port1enableserial(bool value) {
+inline void Connection::_internal_set_port1enableserial(bool value) {
   _has_bits_[0] |= 0x00001000u;
   port1enableserial_ = value;
 }
-inline void Connection2::set_port1enableserial(bool value) {
+inline void Connection::set_port1enableserial(bool value) {
   _internal_set_port1enableserial(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection2.Port1EnableSerial)
+  // @@protoc_insertion_point(field_set:Proto.Connection.Port1EnableSerial)
 }
 
 // optional int32 Port1SerialMode = 22 [default = 0];
-inline bool Connection2::_internal_has_port1serialmode() const {
+inline bool Connection::_internal_has_port1serialmode() const {
   bool value = (_has_bits_[0] & 0x00040000u) != 0;
   return value;
 }
-inline bool Connection2::has_port1serialmode() const {
+inline bool Connection::has_port1serialmode() const {
   return _internal_has_port1serialmode();
 }
-inline void Connection2::clear_port1serialmode() {
+inline void Connection::clear_port1serialmode() {
   port1serialmode_ = 0;
   _has_bits_[0] &= ~0x00040000u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection2::_internal_port1serialmode() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::_internal_port1serialmode() const {
   return port1serialmode_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection2::port1serialmode() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection2.Port1SerialMode)
+inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::port1serialmode() const {
+  // @@protoc_insertion_point(field_get:Proto.Connection.Port1SerialMode)
   return _internal_port1serialmode();
 }
-inline void Connection2::_internal_set_port1serialmode(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void Connection::_internal_set_port1serialmode(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00040000u;
   port1serialmode_ = value;
 }
-inline void Connection2::set_port1serialmode(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void Connection::set_port1serialmode(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_port1serialmode(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection2.Port1SerialMode)
+  // @@protoc_insertion_point(field_set:Proto.Connection.Port1SerialMode)
 }
 
 // optional bool Port1EnableDuplex = 23 [default = false];
-inline bool Connection2::_internal_has_port1enableduplex() const {
+inline bool Connection::_internal_has_port1enableduplex() const {
   bool value = (_has_bits_[0] & 0x00004000u) != 0;
   return value;
 }
-inline bool Connection2::has_port1enableduplex() const {
+inline bool Connection::has_port1enableduplex() const {
   return _internal_has_port1enableduplex();
 }
-inline void Connection2::clear_port1enableduplex() {
+inline void Connection::clear_port1enableduplex() {
   port1enableduplex_ = false;
   _has_bits_[0] &= ~0x00004000u;
 }
-inline bool Connection2::_internal_port1enableduplex() const {
+inline bool Connection::_internal_port1enableduplex() const {
   return port1enableduplex_;
 }
-inline bool Connection2::port1enableduplex() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection2.Port1EnableDuplex)
+inline bool Connection::port1enableduplex() const {
+  // @@protoc_insertion_point(field_get:Proto.Connection.Port1EnableDuplex)
   return _internal_port1enableduplex();
 }
-inline void Connection2::_internal_set_port1enableduplex(bool value) {
+inline void Connection::_internal_set_port1enableduplex(bool value) {
   _has_bits_[0] |= 0x00004000u;
   port1enableduplex_ = value;
 }
-inline void Connection2::set_port1enableduplex(bool value) {
+inline void Connection::set_port1enableduplex(bool value) {
   _internal_set_port1enableduplex(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection2.Port1EnableDuplex)
+  // @@protoc_insertion_point(field_set:Proto.Connection.Port1EnableDuplex)
 }
 
 // optional bool Port2EnableSerial = 24 [default = false];
-inline bool Connection2::_internal_has_port2enableserial() const {
+inline bool Connection::_internal_has_port2enableserial() const {
   bool value = (_has_bits_[0] & 0x00008000u) != 0;
   return value;
 }
-inline bool Connection2::has_port2enableserial() const {
+inline bool Connection::has_port2enableserial() const {
   return _internal_has_port2enableserial();
 }
-inline void Connection2::clear_port2enableserial() {
+inline void Connection::clear_port2enableserial() {
   port2enableserial_ = false;
   _has_bits_[0] &= ~0x00008000u;
 }
-inline bool Connection2::_internal_port2enableserial() const {
+inline bool Connection::_internal_port2enableserial() const {
   return port2enableserial_;
 }
-inline bool Connection2::port2enableserial() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection2.Port2EnableSerial)
+inline bool Connection::port2enableserial() const {
+  // @@protoc_insertion_point(field_get:Proto.Connection.Port2EnableSerial)
   return _internal_port2enableserial();
 }
-inline void Connection2::_internal_set_port2enableserial(bool value) {
+inline void Connection::_internal_set_port2enableserial(bool value) {
   _has_bits_[0] |= 0x00008000u;
   port2enableserial_ = value;
 }
-inline void Connection2::set_port2enableserial(bool value) {
+inline void Connection::set_port2enableserial(bool value) {
   _internal_set_port2enableserial(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection2.Port2EnableSerial)
+  // @@protoc_insertion_point(field_set:Proto.Connection.Port2EnableSerial)
 }
 
 // optional int32 Port2SerialMode = 25 [default = 0];
-inline bool Connection2::_internal_has_port2serialmode() const {
+inline bool Connection::_internal_has_port2serialmode() const {
   bool value = (_has_bits_[0] & 0x00080000u) != 0;
   return value;
 }
-inline bool Connection2::has_port2serialmode() const {
+inline bool Connection::has_port2serialmode() const {
   return _internal_has_port2serialmode();
 }
-inline void Connection2::clear_port2serialmode() {
+inline void Connection::clear_port2serialmode() {
   port2serialmode_ = 0;
   _has_bits_[0] &= ~0x00080000u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection2::_internal_port2serialmode() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::_internal_port2serialmode() const {
   return port2serialmode_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection2::port2serialmode() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection2.Port2SerialMode)
+inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::port2serialmode() const {
+  // @@protoc_insertion_point(field_get:Proto.Connection.Port2SerialMode)
   return _internal_port2serialmode();
 }
-inline void Connection2::_internal_set_port2serialmode(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void Connection::_internal_set_port2serialmode(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00080000u;
   port2serialmode_ = value;
 }
-inline void Connection2::set_port2serialmode(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void Connection::set_port2serialmode(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_port2serialmode(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection2.Port2SerialMode)
+  // @@protoc_insertion_point(field_set:Proto.Connection.Port2SerialMode)
 }
 
 // optional bool Port2EnableDuplex = 26 [default = false];
-inline bool Connection2::_internal_has_port2enableduplex() const {
+inline bool Connection::_internal_has_port2enableduplex() const {
   bool value = (_has_bits_[0] & 0x00010000u) != 0;
   return value;
 }
-inline bool Connection2::has_port2enableduplex() const {
+inline bool Connection::has_port2enableduplex() const {
   return _internal_has_port2enableduplex();
 }
-inline void Connection2::clear_port2enableduplex() {
+inline void Connection::clear_port2enableduplex() {
   port2enableduplex_ = false;
   _has_bits_[0] &= ~0x00010000u;
 }
-inline bool Connection2::_internal_port2enableduplex() const {
+inline bool Connection::_internal_port2enableduplex() const {
   return port2enableduplex_;
 }
-inline bool Connection2::port2enableduplex() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection2.Port2EnableDuplex)
+inline bool Connection::port2enableduplex() const {
+  // @@protoc_insertion_point(field_get:Proto.Connection.Port2EnableDuplex)
   return _internal_port2enableduplex();
 }
-inline void Connection2::_internal_set_port2enableduplex(bool value) {
+inline void Connection::_internal_set_port2enableduplex(bool value) {
   _has_bits_[0] |= 0x00010000u;
   port2enableduplex_ = value;
 }
-inline void Connection2::set_port2enableduplex(bool value) {
+inline void Connection::set_port2enableduplex(bool value) {
   _internal_set_port2enableduplex(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection2.Port2EnableDuplex)
+  // @@protoc_insertion_point(field_set:Proto.Connection.Port2EnableDuplex)
 }
 
 // optional int32 Type = 27 [default = 0];
-inline bool Connection2::_internal_has_type() const {
+inline bool Connection::_internal_has_type() const {
   bool value = (_has_bits_[0] & 0x00100000u) != 0;
   return value;
 }
-inline bool Connection2::has_type() const {
+inline bool Connection::has_type() const {
   return _internal_has_type();
 }
-inline void Connection2::clear_type() {
+inline void Connection::clear_type() {
   type_ = 0;
   _has_bits_[0] &= ~0x00100000u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection2::_internal_type() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::_internal_type() const {
   return type_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection2::type() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection2.Type)
+inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::type() const {
+  // @@protoc_insertion_point(field_get:Proto.Connection.Type)
   return _internal_type();
 }
-inline void Connection2::_internal_set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void Connection::_internal_set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00100000u;
   type_ = value;
 }
-inline void Connection2::set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void Connection::set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_type(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection2.Type)
+  // @@protoc_insertion_point(field_set:Proto.Connection.Type)
 }
 
 // optional int32 ObsoleteMode = 8 [default = 0];
-inline bool Connection2::_internal_has_obsoletemode() const {
+inline bool Connection::_internal_has_obsoletemode() const {
   bool value = (_has_bits_[0] & 0x00000080u) != 0;
   return value;
 }
-inline bool Connection2::has_obsoletemode() const {
+inline bool Connection::has_obsoletemode() const {
   return _internal_has_obsoletemode();
 }
-inline void Connection2::clear_obsoletemode() {
+inline void Connection::clear_obsoletemode() {
   obsoletemode_ = 0;
   _has_bits_[0] &= ~0x00000080u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection2::_internal_obsoletemode() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::_internal_obsoletemode() const {
   return obsoletemode_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection2::obsoletemode() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection2.ObsoleteMode)
+inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::obsoletemode() const {
+  // @@protoc_insertion_point(field_get:Proto.Connection.ObsoleteMode)
   return _internal_obsoletemode();
 }
-inline void Connection2::_internal_set_obsoletemode(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void Connection::_internal_set_obsoletemode(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000080u;
   obsoletemode_ = value;
 }
-inline void Connection2::set_obsoletemode(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void Connection::set_obsoletemode(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_obsoletemode(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection2.ObsoleteMode)
+  // @@protoc_insertion_point(field_set:Proto.Connection.ObsoleteMode)
 }
 
 // optional int32 ObsoleteSerialMode = 7 [default = 0];
-inline bool Connection2::_internal_has_obsoleteserialmode() const {
+inline bool Connection::_internal_has_obsoleteserialmode() const {
   bool value = (_has_bits_[0] & 0x00000040u) != 0;
   return value;
 }
-inline bool Connection2::has_obsoleteserialmode() const {
+inline bool Connection::has_obsoleteserialmode() const {
   return _internal_has_obsoleteserialmode();
 }
-inline void Connection2::clear_obsoleteserialmode() {
+inline void Connection::clear_obsoleteserialmode() {
   obsoleteserialmode_ = 0;
   _has_bits_[0] &= ~0x00000040u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection2::_internal_obsoleteserialmode() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::_internal_obsoleteserialmode() const {
   return obsoleteserialmode_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection2::obsoleteserialmode() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection2.ObsoleteSerialMode)
+inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::obsoleteserialmode() const {
+  // @@protoc_insertion_point(field_get:Proto.Connection.ObsoleteSerialMode)
   return _internal_obsoleteserialmode();
 }
-inline void Connection2::_internal_set_obsoleteserialmode(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void Connection::_internal_set_obsoleteserialmode(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _has_bits_[0] |= 0x00000040u;
   obsoleteserialmode_ = value;
 }
-inline void Connection2::set_obsoleteserialmode(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void Connection::set_obsoleteserialmode(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_obsoleteserialmode(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection2.ObsoleteSerialMode)
+  // @@protoc_insertion_point(field_set:Proto.Connection.ObsoleteSerialMode)
 }
 
 // optional bool ObsoleteEnableDuplex = 10 [default = false];
-inline bool Connection2::_internal_has_obsoleteenableduplex() const {
+inline bool Connection::_internal_has_obsoleteenableduplex() const {
   bool value = (_has_bits_[0] & 0x00020000u) != 0;
   return value;
 }
-inline bool Connection2::has_obsoleteenableduplex() const {
+inline bool Connection::has_obsoleteenableduplex() const {
   return _internal_has_obsoleteenableduplex();
 }
-inline void Connection2::clear_obsoleteenableduplex() {
+inline void Connection::clear_obsoleteenableduplex() {
   obsoleteenableduplex_ = false;
   _has_bits_[0] &= ~0x00020000u;
 }
-inline bool Connection2::_internal_obsoleteenableduplex() const {
+inline bool Connection::_internal_obsoleteenableduplex() const {
   return obsoleteenableduplex_;
 }
-inline bool Connection2::obsoleteenableduplex() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection2.ObsoleteEnableDuplex)
+inline bool Connection::obsoleteenableduplex() const {
+  // @@protoc_insertion_point(field_get:Proto.Connection.ObsoleteEnableDuplex)
   return _internal_obsoleteenableduplex();
 }
-inline void Connection2::_internal_set_obsoleteenableduplex(bool value) {
+inline void Connection::_internal_set_obsoleteenableduplex(bool value) {
   _has_bits_[0] |= 0x00020000u;
   obsoleteenableduplex_ = value;
 }
-inline void Connection2::set_obsoleteenableduplex(bool value) {
+inline void Connection::set_obsoleteenableduplex(bool value) {
   _internal_set_obsoleteenableduplex(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection2.ObsoleteEnableDuplex)
+  // @@protoc_insertion_point(field_set:Proto.Connection.ObsoleteEnableDuplex)
 }
 
 #ifdef __GNUC__

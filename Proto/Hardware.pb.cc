@@ -31,7 +31,7 @@
 
 PROTOBUF_PRAGMA_INIT_SEG
 namespace Proto {
-constexpr DeviceObject2::DeviceObject2(
+constexpr DeviceObject::DeviceObject(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : properties_()
   , tags_()
@@ -60,89 +60,89 @@ constexpr DeviceObject2::DeviceObject2(
   , presetroot_(false)
   , childcounthint_(0)
   , presetversion_(0){}
-struct DeviceObject2DefaultTypeInternal {
-  constexpr DeviceObject2DefaultTypeInternal()
+struct DeviceObjectDefaultTypeInternal {
+  constexpr DeviceObjectDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
-  ~DeviceObject2DefaultTypeInternal() {}
+  ~DeviceObjectDefaultTypeInternal() {}
   union {
-    DeviceObject2 _instance;
+    DeviceObject _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DeviceObject2DefaultTypeInternal _DeviceObject2_default_instance_;
-constexpr DeviceRoot2::DeviceRoot2(
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DeviceObjectDefaultTypeInternal _DeviceObject_default_instance_;
+constexpr DeviceRoot::DeviceRoot(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized){}
-struct DeviceRoot2DefaultTypeInternal {
-  constexpr DeviceRoot2DefaultTypeInternal()
+struct DeviceRootDefaultTypeInternal {
+  constexpr DeviceRootDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
-  ~DeviceRoot2DefaultTypeInternal() {}
+  ~DeviceRootDefaultTypeInternal() {}
   union {
-    DeviceRoot2 _instance;
+    DeviceRoot _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DeviceRoot2DefaultTypeInternal _DeviceRoot2_default_instance_;
-constexpr DeviceSystem2::DeviceSystem2(
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DeviceRootDefaultTypeInternal _DeviceRoot_default_instance_;
+constexpr DeviceSystem::DeviceSystem(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized){}
-struct DeviceSystem2DefaultTypeInternal {
-  constexpr DeviceSystem2DefaultTypeInternal()
+struct DeviceSystemDefaultTypeInternal {
+  constexpr DeviceSystemDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
-  ~DeviceSystem2DefaultTypeInternal() {}
+  ~DeviceSystemDefaultTypeInternal() {}
   union {
-    DeviceSystem2 _instance;
+    DeviceSystem _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DeviceSystem2DefaultTypeInternal _DeviceSystem2_default_instance_;
-constexpr DeviceRack2::DeviceRack2(
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DeviceSystemDefaultTypeInternal _DeviceSystem_default_instance_;
+constexpr DeviceRack::DeviceRack(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized){}
-struct DeviceRack2DefaultTypeInternal {
-  constexpr DeviceRack2DefaultTypeInternal()
+struct DeviceRackDefaultTypeInternal {
+  constexpr DeviceRackDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
-  ~DeviceRack2DefaultTypeInternal() {}
+  ~DeviceRackDefaultTypeInternal() {}
   union {
-    DeviceRack2 _instance;
+    DeviceRack _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DeviceRack2DefaultTypeInternal _DeviceRack2_default_instance_;
-constexpr DeviceChassis2::DeviceChassis2(
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DeviceRackDefaultTypeInternal _DeviceRack_default_instance_;
+constexpr DeviceChassis::DeviceChassis(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : type_(0){}
-struct DeviceChassis2DefaultTypeInternal {
-  constexpr DeviceChassis2DefaultTypeInternal()
+struct DeviceChassisDefaultTypeInternal {
+  constexpr DeviceChassisDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
-  ~DeviceChassis2DefaultTypeInternal() {}
+  ~DeviceChassisDefaultTypeInternal() {}
   union {
-    DeviceChassis2 _instance;
+    DeviceChassis _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DeviceChassis2DefaultTypeInternal _DeviceChassis2_default_instance_;
-constexpr DeviceModule2::DeviceModule2(
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DeviceChassisDefaultTypeInternal _DeviceChassis_default_instance_;
+constexpr DeviceModule::DeviceModule(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : configurationscript_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , rawdatadescription_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , typeobsolete_(0)
   , moduletype_(0)
   , custommodulefamily_(0){}
-struct DeviceModule2DefaultTypeInternal {
-  constexpr DeviceModule2DefaultTypeInternal()
+struct DeviceModuleDefaultTypeInternal {
+  constexpr DeviceModuleDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
-  ~DeviceModule2DefaultTypeInternal() {}
+  ~DeviceModuleDefaultTypeInternal() {}
   union {
-    DeviceModule2 _instance;
+    DeviceModule _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DeviceModule2DefaultTypeInternal _DeviceModule2_default_instance_;
-constexpr DeviceController2::DeviceController2(
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DeviceModuleDefaultTypeInternal _DeviceModule_default_instance_;
+constexpr DeviceController::DeviceController(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : diagdataoffset_(0){}
-struct DeviceController2DefaultTypeInternal {
-  constexpr DeviceController2DefaultTypeInternal()
+struct DeviceControllerDefaultTypeInternal {
+  constexpr DeviceControllerDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
-  ~DeviceController2DefaultTypeInternal() {}
+  ~DeviceControllerDefaultTypeInternal() {}
   union {
-    DeviceController2 _instance;
+    DeviceController _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DeviceController2DefaultTypeInternal _DeviceController2_default_instance_;
-constexpr DeviceAppSignal2::DeviceAppSignal2(
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DeviceControllerDefaultTypeInternal _DeviceController_default_instance_;
+constexpr DeviceAppSignal::DeviceAppSignal(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : validitysignalid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , appsignalbustypeid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
@@ -162,16 +162,16 @@ constexpr DeviceAppSignal2::DeviceAppSignal2(
   , appsignalhighadc_(65535)
   , appsignaldataformat_(2)
   , appsignalhighengunits_(100){}
-struct DeviceAppSignal2DefaultTypeInternal {
-  constexpr DeviceAppSignal2DefaultTypeInternal()
+struct DeviceAppSignalDefaultTypeInternal {
+  constexpr DeviceAppSignalDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
-  ~DeviceAppSignal2DefaultTypeInternal() {}
+  ~DeviceAppSignalDefaultTypeInternal() {}
   union {
-    DeviceAppSignal2 _instance;
+    DeviceAppSignal _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DeviceAppSignal2DefaultTypeInternal _DeviceAppSignal2_default_instance_;
-constexpr DeviceDiagSignal2::DeviceDiagSignal2(
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DeviceAppSignalDefaultTypeInternal _DeviceAppSignal_default_instance_;
+constexpr DeviceDiagSignal::DeviceDiagSignal(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : signaltypeid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , validitysignalid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
@@ -189,41 +189,41 @@ constexpr DeviceDiagSignal2::DeviceDiagSignal2(
   , fineaperture_(0)
   , aperturetype_(0)
   , decimalplaces_(0){}
-struct DeviceDiagSignal2DefaultTypeInternal {
-  constexpr DeviceDiagSignal2DefaultTypeInternal()
+struct DeviceDiagSignalDefaultTypeInternal {
+  constexpr DeviceDiagSignalDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
-  ~DeviceDiagSignal2DefaultTypeInternal() {}
+  ~DeviceDiagSignalDefaultTypeInternal() {}
   union {
-    DeviceDiagSignal2 _instance;
+    DeviceDiagSignal _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DeviceDiagSignal2DefaultTypeInternal _DeviceDiagSignal2_default_instance_;
-constexpr Workstation2::Workstation2(
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DeviceDiagSignalDefaultTypeInternal _DeviceDiagSignal_default_instance_;
+constexpr Workstation::Workstation(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : hostname_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , type_(0){}
-struct Workstation2DefaultTypeInternal {
-  constexpr Workstation2DefaultTypeInternal()
+struct WorkstationDefaultTypeInternal {
+  constexpr WorkstationDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
-  ~Workstation2DefaultTypeInternal() {}
+  ~WorkstationDefaultTypeInternal() {}
   union {
-    Workstation2 _instance;
+    Workstation _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT Workstation2DefaultTypeInternal _Workstation2_default_instance_;
-constexpr Software2::Software2(
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT WorkstationDefaultTypeInternal _Workstation_default_instance_;
+constexpr Software::Software(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : type_(0){}
-struct Software2DefaultTypeInternal {
-  constexpr Software2DefaultTypeInternal()
+struct SoftwareDefaultTypeInternal {
+  constexpr SoftwareDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
-  ~Software2DefaultTypeInternal() {}
+  ~SoftwareDefaultTypeInternal() {}
   union {
-    Software2 _instance;
+    Software _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT Software2DefaultTypeInternal _Software2_default_instance_;
-constexpr DiagSignalType2::DiagSignalType2(
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT SoftwareDefaultTypeInternal _Software_default_instance_;
+constexpr DiagSignalType::DiagSignalType(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : signaltypeid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , normalstatestring0_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
@@ -243,16 +243,16 @@ constexpr DiagSignalType2::DiagSignalType2(
   , valuelowlimit_(0)
   , valuemultiplier_(0)
   , valueoffset_(0){}
-struct DiagSignalType2DefaultTypeInternal {
-  constexpr DiagSignalType2DefaultTypeInternal()
+struct DiagSignalTypeDefaultTypeInternal {
+  constexpr DiagSignalTypeDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
-  ~DiagSignalType2DefaultTypeInternal() {}
+  ~DiagSignalTypeDefaultTypeInternal() {}
   union {
-    DiagSignalType2 _instance;
+    DiagSignalType _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DiagSignalType2DefaultTypeInternal _DiagSignalType2_default_instance_;
-constexpr Connection2::Connection2(
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DiagSignalTypeDefaultTypeInternal _DiagSignalType_default_instance_;
+constexpr Connection::Connection(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : connectionid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , port1equipmentid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
@@ -279,53 +279,53 @@ constexpr Connection2::Connection2(
   , port1rxwordsquantity_(479)
   , port2txwordsquantity_(479)
   , port2rxwordsquantity_(479){}
-struct Connection2DefaultTypeInternal {
-  constexpr Connection2DefaultTypeInternal()
+struct ConnectionDefaultTypeInternal {
+  constexpr ConnectionDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
-  ~Connection2DefaultTypeInternal() {}
+  ~ConnectionDefaultTypeInternal() {}
   union {
-    Connection2 _instance;
+    Connection _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT Connection2DefaultTypeInternal _Connection2_default_instance_;
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ConnectionDefaultTypeInternal _Connection_default_instance_;
 }  // namespace Proto
 static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_Hardware_2eproto[13];
 static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_Hardware_2eproto = nullptr;
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_Hardware_2eproto = nullptr;
 
 const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_Hardware_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject2, _has_bits_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject2, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, _has_bits_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject2, uuid_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject2, equipmentid_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject2, caption_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject2, childrestriction_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject2, place_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject2, specific_properties_struct_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject2, properties_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject2, tags_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject2, excludefrombuild_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject2, preset_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject2, presetroot_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject2, presetname_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject2, presetobjectuuid_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject2, childcounthint_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject2, presetversion_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject2, presetprotectedproperties_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject2, root_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject2, system_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject2, rack_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject2, chassis_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject2, module_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject2, controller_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject2, appsignal_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject2, diagsignal_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject2, workstation_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject2, software_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject2, children_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, uuid_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, equipmentid_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, caption_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, childrestriction_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, place_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, specific_properties_struct_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, properties_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, tags_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, excludefrombuild_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, preset_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, presetroot_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, presetname_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, presetobjectuuid_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, childcounthint_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, presetversion_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, presetprotectedproperties_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, root_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, system_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, rack_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, chassis_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, module_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, controller_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, appsignal_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, diagsignal_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, workstation_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, software_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceObject, children_),
   2,
   3,
   4,
@@ -354,72 +354,72 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_Hardware_2eproto::offsets[] PR
   16,
   ~0u,
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceRoot2, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceRoot, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceSystem2, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceSystem, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceRack2, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceRack, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceChassis2, _has_bits_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceChassis2, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceChassis, _has_bits_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceChassis, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceChassis2, type_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceChassis, type_),
   0,
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceModule2, _has_bits_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceModule2, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceModule, _has_bits_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceModule, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceModule2, typeobsolete_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceModule2, configurationscript_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceModule2, moduletype_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceModule2, rawdatadescription_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceModule2, custommodulefamily_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceModule, typeobsolete_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceModule, configurationscript_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceModule, moduletype_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceModule, rawdatadescription_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceModule, custommodulefamily_),
   2,
   0,
   3,
   1,
   4,
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceController2, _has_bits_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceController2, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceController, _has_bits_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceController, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceController2, diagdataoffset_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceController, diagdataoffset_),
   0,
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal2, _has_bits_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal2, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal, _has_bits_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal2, obsoletetype_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal2, byteorder_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal2, format_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal2, size_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal2, valueoffset_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal2, valuebit_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal2, type_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal2, function_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal2, memoryarea_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal2, appsignallowadc_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal2, appsignalhighadc_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal2, appsignallowengunits_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal2, appsignalhighengunits_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal2, appsignaldataformat_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal2, validitysignalid_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal2, appsignalbustypeid_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal2, signalspecpropsstruct_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal2, signalspecpropsstructwasfixed_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal, obsoletetype_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal, byteorder_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal, format_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal, size_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal, valueoffset_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal, valuebit_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal, type_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal, function_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal, memoryarea_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal, appsignallowadc_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal, appsignalhighadc_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal, appsignallowengunits_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal, appsignalhighengunits_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal, appsignaldataformat_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal, validitysignalid_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal, appsignalbustypeid_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal, signalspecpropsstruct_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceAppSignal, signalspecpropsstructwasfixed_),
   3,
   4,
   5,
@@ -438,27 +438,27 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_Hardware_2eproto::offsets[] PR
   1,
   2,
   14,
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal2, _has_bits_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal2, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal, _has_bits_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal2, level_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal2, signaltypeid_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal2, validitysignalid_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal2, isrefelection_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal2, reflectedsignalid_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal2, valueoffset_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal2, valuebit_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal2, valuebitsize_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal2, discretecontainersize_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal2, logchanges_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal2, archive_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal2, reserved_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal2, coarseaperture_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal2, fineaperture_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal2, aperturetype_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal2, decimalplaces_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal, level_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal, signaltypeid_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal, validitysignalid_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal, isrefelection_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal, reflectedsignalid_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal, valueoffset_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal, valuebit_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal, valuebitsize_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal, discretecontainersize_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal, logchanges_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal, archive_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal, reserved_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal, coarseaperture_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal, fineaperture_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal, aperturetype_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DeviceDiagSignal, decimalplaces_),
   3,
   0,
   1,
@@ -475,45 +475,45 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_Hardware_2eproto::offsets[] PR
   13,
   14,
   15,
-  PROTOBUF_FIELD_OFFSET(::Proto::Workstation2, _has_bits_),
-  PROTOBUF_FIELD_OFFSET(::Proto::Workstation2, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Workstation, _has_bits_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Workstation, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::Proto::Workstation2, type_),
-  PROTOBUF_FIELD_OFFSET(::Proto::Workstation2, hostname_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Workstation, type_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Workstation, hostname_),
   1,
   0,
-  PROTOBUF_FIELD_OFFSET(::Proto::Software2, _has_bits_),
-  PROTOBUF_FIELD_OFFSET(::Proto::Software2, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Software, _has_bits_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Software, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::Proto::Software2, type_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Software, type_),
   0,
-  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType2, _has_bits_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType2, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType, _has_bits_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType2, signaltypeid_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType2, uuid_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType2, systemsignaltype_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType2, type_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType2, byteorder_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType2, inversevalue_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType2, normalstate_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType2, normalstatestring0_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType2, normalstatestring1_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType2, analogformat_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType2, adchighlimit_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType2, adclowlimit_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType2, valuehighlimit_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType2, valuelowlimit_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType2, valuemultiplier_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType2, valueoffset_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType2, uselimits_),
-  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType2, units_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType, signaltypeid_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType, uuid_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType, systemsignaltype_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType, type_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType, byteorder_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType, inversevalue_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType, normalstate_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType, normalstatestring0_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType, normalstatestring1_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType, analogformat_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType, adchighlimit_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType, adclowlimit_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType, valuehighlimit_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType, valuelowlimit_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType, valuemultiplier_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType, valueoffset_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType, uselimits_),
+  PROTOBUF_FIELD_OFFSET(::Proto::DiagSignalType, units_),
   0,
   4,
   8,
@@ -532,36 +532,36 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_Hardware_2eproto::offsets[] PR
   17,
   10,
   3,
-  PROTOBUF_FIELD_OFFSET(::Proto::Connection2, _has_bits_),
-  PROTOBUF_FIELD_OFFSET(::Proto::Connection2, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Connection, _has_bits_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Connection, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::Proto::Connection2, connectionid_),
-  PROTOBUF_FIELD_OFFSET(::Proto::Connection2, port1equipmentid_),
-  PROTOBUF_FIELD_OFFSET(::Proto::Connection2, port2equipmentid_),
-  PROTOBUF_FIELD_OFFSET(::Proto::Connection2, port1rawdatadescription_),
-  PROTOBUF_FIELD_OFFSET(::Proto::Connection2, port2rawdatadescription_),
-  PROTOBUF_FIELD_OFFSET(::Proto::Connection2, manualsettings_),
-  PROTOBUF_FIELD_OFFSET(::Proto::Connection2, disabledataid_),
-  PROTOBUF_FIELD_OFFSET(::Proto::Connection2, generatevhdfile_),
-  PROTOBUF_FIELD_OFFSET(::Proto::Connection2, port1txstartaddress_),
-  PROTOBUF_FIELD_OFFSET(::Proto::Connection2, port1txwordsquantity_),
-  PROTOBUF_FIELD_OFFSET(::Proto::Connection2, port1rxwordsquantity_),
-  PROTOBUF_FIELD_OFFSET(::Proto::Connection2, port2txstartaddress_),
-  PROTOBUF_FIELD_OFFSET(::Proto::Connection2, port2txwordsquantity_),
-  PROTOBUF_FIELD_OFFSET(::Proto::Connection2, port2rxwordsquantity_),
-  PROTOBUF_FIELD_OFFSET(::Proto::Connection2, uuid_),
-  PROTOBUF_FIELD_OFFSET(::Proto::Connection2, port1enableserial_),
-  PROTOBUF_FIELD_OFFSET(::Proto::Connection2, port1serialmode_),
-  PROTOBUF_FIELD_OFFSET(::Proto::Connection2, port1enableduplex_),
-  PROTOBUF_FIELD_OFFSET(::Proto::Connection2, port2enableserial_),
-  PROTOBUF_FIELD_OFFSET(::Proto::Connection2, port2serialmode_),
-  PROTOBUF_FIELD_OFFSET(::Proto::Connection2, port2enableduplex_),
-  PROTOBUF_FIELD_OFFSET(::Proto::Connection2, type_),
-  PROTOBUF_FIELD_OFFSET(::Proto::Connection2, obsoletemode_),
-  PROTOBUF_FIELD_OFFSET(::Proto::Connection2, obsoleteserialmode_),
-  PROTOBUF_FIELD_OFFSET(::Proto::Connection2, obsoleteenableduplex_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Connection, connectionid_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Connection, port1equipmentid_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Connection, port2equipmentid_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Connection, port1rawdatadescription_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Connection, port2rawdatadescription_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Connection, manualsettings_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Connection, disabledataid_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Connection, generatevhdfile_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Connection, port1txstartaddress_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Connection, port1txwordsquantity_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Connection, port1rxwordsquantity_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Connection, port2txstartaddress_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Connection, port2txwordsquantity_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Connection, port2rxwordsquantity_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Connection, uuid_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Connection, port1enableserial_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Connection, port1serialmode_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Connection, port1enableduplex_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Connection, port2enableserial_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Connection, port2serialmode_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Connection, port2enableduplex_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Connection, type_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Connection, obsoletemode_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Connection, obsoleteserialmode_),
+  PROTOBUF_FIELD_OFFSET(::Proto::Connection, obsoleteenableduplex_),
   0,
   1,
   2,
@@ -589,137 +589,136 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_Hardware_2eproto::offsets[] PR
   17,
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, 32, sizeof(::Proto::DeviceObject2)},
-  { 59, -1, sizeof(::Proto::DeviceRoot2)},
-  { 64, -1, sizeof(::Proto::DeviceSystem2)},
-  { 69, -1, sizeof(::Proto::DeviceRack2)},
-  { 74, 80, sizeof(::Proto::DeviceChassis2)},
-  { 81, 91, sizeof(::Proto::DeviceModule2)},
-  { 96, 102, sizeof(::Proto::DeviceController2)},
-  { 103, 126, sizeof(::Proto::DeviceAppSignal2)},
-  { 144, 165, sizeof(::Proto::DeviceDiagSignal2)},
-  { 181, 188, sizeof(::Proto::Workstation2)},
-  { 190, 196, sizeof(::Proto::Software2)},
-  { 197, 220, sizeof(::Proto::DiagSignalType2)},
-  { 238, 268, sizeof(::Proto::Connection2)},
+  { 0, 32, sizeof(::Proto::DeviceObject)},
+  { 59, -1, sizeof(::Proto::DeviceRoot)},
+  { 64, -1, sizeof(::Proto::DeviceSystem)},
+  { 69, -1, sizeof(::Proto::DeviceRack)},
+  { 74, 80, sizeof(::Proto::DeviceChassis)},
+  { 81, 91, sizeof(::Proto::DeviceModule)},
+  { 96, 102, sizeof(::Proto::DeviceController)},
+  { 103, 126, sizeof(::Proto::DeviceAppSignal)},
+  { 144, 165, sizeof(::Proto::DeviceDiagSignal)},
+  { 181, 188, sizeof(::Proto::Workstation)},
+  { 190, 196, sizeof(::Proto::Software)},
+  { 197, 220, sizeof(::Proto::DiagSignalType)},
+  { 238, 268, sizeof(::Proto::Connection)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_DeviceObject2_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_DeviceRoot2_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_DeviceSystem2_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_DeviceRack2_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_DeviceChassis2_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_DeviceModule2_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_DeviceController2_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_DeviceAppSignal2_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_DeviceDiagSignal2_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_Workstation2_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_Software2_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_DiagSignalType2_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_Connection2_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_DeviceObject_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_DeviceRoot_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_DeviceSystem_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_DeviceRack_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_DeviceChassis_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_DeviceModule_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_DeviceController_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_DeviceAppSignal_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_DeviceDiagSignal_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_Workstation_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_Software_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_DiagSignalType_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_Connection_default_instance_),
 };
 
 const char descriptor_table_protodef_Hardware_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\016Hardware.proto\022\005Proto\032\014Common.proto\032\017E"
-  "nvelope2.proto\"\242\007\n\rDeviceObject2\022\031\n\004uuid"
-  "\030\001 \002(\0132\013.Proto.Uuid\022#\n\013equipmentId\030\002 \002(\013"
-  "2\016.Proto.wstring\022\037\n\007caption\030\003 \002(\0132\016.Prot"
-  "o.wstring\022(\n\020childRestriction\030\004 \001(\0132\016.Pr"
-  "oto.wstring\022\020\n\005place\030\005 \001(\005:\0010\022\"\n\032specifi"
-  "c_properties_struct\030\006 \001(\t\022#\n\nproperties\030"
-  "\007 \003(\0132\017.Proto.Property\022\014\n\004tags\030\010 \003(\t\022\030\n\020"
-  "excludeFromBuild\030\t \001(\010\022\025\n\006preset\030  \001(\010:\005"
-  "false\022\031\n\npresetRoot\030! \001(\010:\005false\022\"\n\npres"
-  "etName\030\" \001(\0132\016.Proto.wstring\022%\n\020presetOb"
-  "jectUuid\030# \001(\0132\013.Proto.Uuid\022\031\n\016childCoun"
-  "tHint\030$ \001(\005:\0010\022\025\n\rpresetVersion\030% \001(\005\022!\n"
-  "\031presetProtectedProperties\030& \001(\t\022 \n\004Root"
-  "\030d \001(\0132\022.Proto.DeviceRoot2\022$\n\006System\030e \001"
-  "(\0132\024.Proto.DeviceSystem2\022 \n\004Rack\030f \001(\0132\022"
-  ".Proto.DeviceRack2\022&\n\007Chassis\030g \001(\0132\025.Pr"
-  "oto.DeviceChassis2\022$\n\006Module\030h \001(\0132\024.Pro"
-  "to.DeviceModule2\022,\n\nController\030i \001(\0132\030.P"
-  "roto.DeviceController2\022*\n\tAppSignal\030j \001("
-  "\0132\027.Proto.DeviceAppSignal2\022,\n\nDiagSignal"
-  "\030m \001(\0132\030.Proto.DeviceDiagSignal2\022(\n\013Work"
-  "station\030k \001(\0132\023.Proto.Workstation2\022\"\n\010So"
-  "ftware\030l \001(\0132\020.Proto.Software2\022#\n\010childr"
-  "en\030\310\001 \003(\0132\020.Proto.Envelope2\"\r\n\013DeviceRoo"
-  "t2\"\017\n\rDeviceSystem2\"\r\n\013DeviceRack2\"!\n\016De"
-  "viceChassis2\022\017\n\004type\030\001 \001(\005:\0010\"\224\001\n\rDevice"
-  "Module2\022\027\n\014typeObsolete\030\001 \001(\005:\0010\022\033\n\023conf"
-  "igurationScript\030\002 \001(\t\022\022\n\nmoduleType\030\003 \001("
-  "\005\022\032\n\022rawDataDescription\030\004 \001(\t\022\035\n\022customM"
-  "oduleFamily\030\005 \001(\005:\0010\"+\n\021DeviceController"
-  "2\022\026\n\016diagDataOffset\030\003 \001(\005\"\364\003\n\020DeviceAppS"
-  "ignal2\022\027\n\014obsoletetype\030\001 \001(\005:\0010\022\024\n\tbyteO"
-  "rder\030\002 \001(\005:\0010\022\021\n\006format\030\003 \001(\005:\0010\022\017\n\004size"
-  "\030\004 \001(\005:\0010\022\026\n\013valueOffset\030\007 \001(\005:\0010\022\023\n\010val"
-  "ueBit\030\010 \001(\005:\0010\022\017\n\004type\030\t \001(\005:\0010\022\023\n\010funct"
-  "ion\030\n \001(\005:\0010\022\025\n\nmemoryArea\030\013 \001(\005:\0010\022\032\n\017a"
-  "ppSignalLowAdc\030\014 \001(\005:\0010\022\037\n\020appSignalHigh"
-  "Adc\030\r \001(\005:\00565535\022\037\n\024appSignalLowEngUnits"
-  "\030\016 \001(\001:\0010\022\"\n\025appSignalHighEngUnits\030\017 \001(\001"
-  ":\003100\022\036\n\023appSignalDataFormat\030\020 \001(\005:\0012\022\030\n"
-  "\020validitySignalId\030\024 \001(\t\022\032\n\022appSignalBusT"
-  "ypeId\030\032 \001(\t\022\035\n\025signalSpecPropsStruct\030( \001"
-  "(\t\022,\n\035signalSpecPropsStructWasFixed\030) \001("
-  "\010:\005false\"\362\002\n\021DeviceDiagSignal2\022\r\n\005level\030"
-  "\003 \001(\005\022\024\n\014signalTypeId\030\004 \001(\t\022\030\n\020validityS"
-  "ignalId\030\005 \001(\t\022\025\n\risRefelection\030\006 \001(\010\022\031\n\021"
-  "reflectedSignalId\030\007 \001(\t\022\023\n\013valueOffset\030\n"
-  " \001(\005\022\020\n\010valueBit\030\013 \001(\005\022\024\n\014valueBitSize\030\014"
-  " \001(\005\022\035\n\025discreteContainerSize\030\r \001(\005\022\022\n\nl"
-  "ogChanges\030\020 \001(\010\022\017\n\007archive\030\021 \001(\010\022\020\n\010rese"
-  "rved\030\022 \001(\010\022\026\n\016coarseAperture\030\026 \001(\001\022\024\n\014fi"
-  "neAperture\030\027 \001(\001\022\024\n\014apertureType\030\030 \001(\005\022\025"
-  "\n\rdecimalPlaces\030\036 \001(\005\"1\n\014Workstation2\022\017\n"
-  "\004type\030\001 \001(\005:\0010\022\020\n\010hostname\030\002 \001(\t\"\034\n\tSoft"
-  "ware2\022\017\n\004type\030\001 \001(\005:\0010\"\240\003\n\017DiagSignalTyp"
-  "e2\022\024\n\014signalTypeId\030\003 \001(\t\022\031\n\004uuid\030\004 \001(\0132\013"
-  ".Proto.Uuid\022\030\n\020systemSignalType\030\005 \001(\010\022\014\n"
-  "\004type\030\006 \001(\005\022\021\n\tbyteOrder\030\007 \001(\005\022\024\n\014invers"
-  "eValue\030\024 \001(\010\022\023\n\013normalState\030\031 \001(\005\022\032\n\022nor"
-  "malStateString0\030\032 \001(\t\022\032\n\022normalStateStri"
-  "ng1\030\033 \001(\t\022\024\n\014analogformat\030  \001(\005\022\024\n\014adcHi"
-  "ghLimit\030! \001(\001\022\023\n\013adcLowLimit\030\" \001(\001\022\026\n\016va"
-  "lueHighLimit\030# \001(\001\022\025\n\rvalueLowLimit\030$ \001("
-  "\001\022\027\n\017valueMultiplier\030% \001(\001\022\023\n\013valueOffse"
-  "t\030& \001(\001\022\021\n\tuseLimits\030\' \001(\010\022\r\n\005units\030( \001("
-  "\t\"\213\006\n\013Connection2\022\024\n\014ConnectionID\030\002 \001(\t\022"
-  "\030\n\020Port1EquipmentID\030\003 \001(\t\022\030\n\020Port2Equipm"
-  "entID\030\004 \001(\t\022\037\n\027Port1RawDataDescription\030\005"
-  " \001(\t\022\037\n\027Port2RawDataDescription\030\006 \001(\t\022\035\n"
-  "\016ManualSettings\030\013 \001(\010:\005false\022\034\n\rDisableD"
-  "ataID\030\014 \001(\010:\005false\022\036\n\017GenerateVHDFile\030\r "
-  "\001(\010:\005false\022\036\n\023Port1TxStartAddress\030\016 \001(\005:"
-  "\0010\022!\n\024Port1TxWordsQuantity\030\017 \001(\005:\003479\022!\n"
-  "\024Port1RxWordsQuantity\030\020 \001(\005:\003479\022\036\n\023Port"
-  "2TxStartAddress\030\021 \001(\005:\0010\022!\n\024Port2TxWords"
-  "Quantity\030\022 \001(\005:\003479\022!\n\024Port2RxWordsQuant"
-  "ity\030\023 \001(\005:\003479\022\031\n\004uuid\030\024 \001(\0132\013.Proto.Uui"
-  "d\022 \n\021Port1EnableSerial\030\025 \001(\010:\005false\022\032\n\017P"
-  "ort1SerialMode\030\026 \001(\005:\0010\022 \n\021Port1EnableDu"
-  "plex\030\027 \001(\010:\005false\022 \n\021Port2EnableSerial\030\030"
-  " \001(\010:\005false\022\032\n\017Port2SerialMode\030\031 \001(\005:\0010\022"
-  " \n\021Port2EnableDuplex\030\032 \001(\010:\005false\022\017\n\004Typ"
-  "e\030\033 \001(\005:\0010\022\027\n\014ObsoleteMode\030\010 \001(\005:\0010\022\035\n\022O"
-  "bsoleteSerialMode\030\007 \001(\005:\0010\022#\n\024ObsoleteEn"
-  "ableDuplex\030\n \001(\010:\005false:=\n\rdeviceobject2"
-  "\022\020.Proto.Envelope2\030\007 \001(\0132\024.Proto.DeviceO"
-  "bject2:A\n\017diagSignalType2\022\020.Proto.Envelo"
-  "pe2\030\010 \001(\0132\026.Proto.DiagSignalType2:9\n\013con"
-  "nection2\022\020.Proto.Envelope2\030h \001(\0132\022.Proto"
-  ".Connection2"
+  "\n\016Hardware.proto\022\005Proto\032\014Common.proto\032\016E"
+  "nvelope.proto\"\226\007\n\014DeviceObject\022\031\n\004uuid\030\001"
+  " \002(\0132\013.Proto.Uuid\022#\n\013equipmentId\030\002 \002(\0132\016"
+  ".Proto.wstring\022\037\n\007caption\030\003 \002(\0132\016.Proto."
+  "wstring\022(\n\020childRestriction\030\004 \001(\0132\016.Prot"
+  "o.wstring\022\020\n\005place\030\005 \001(\005:\0010\022\"\n\032specific_"
+  "properties_struct\030\006 \001(\t\022#\n\nproperties\030\007 "
+  "\003(\0132\017.Proto.Property\022\014\n\004tags\030\010 \003(\t\022\030\n\020ex"
+  "cludeFromBuild\030\t \001(\010\022\025\n\006preset\030  \001(\010:\005fa"
+  "lse\022\031\n\npresetRoot\030! \001(\010:\005false\022\"\n\npreset"
+  "Name\030\" \001(\0132\016.Proto.wstring\022%\n\020presetObje"
+  "ctUuid\030# \001(\0132\013.Proto.Uuid\022\031\n\016childCountH"
+  "int\030$ \001(\005:\0010\022\025\n\rpresetVersion\030% \001(\005\022!\n\031p"
+  "resetProtectedProperties\030& \001(\t\022\037\n\004Root\030d"
+  " \001(\0132\021.Proto.DeviceRoot\022#\n\006System\030e \001(\0132"
+  "\023.Proto.DeviceSystem\022\037\n\004Rack\030f \001(\0132\021.Pro"
+  "to.DeviceRack\022%\n\007Chassis\030g \001(\0132\024.Proto.D"
+  "eviceChassis\022#\n\006Module\030h \001(\0132\023.Proto.Dev"
+  "iceModule\022+\n\nController\030i \001(\0132\027.Proto.De"
+  "viceController\022)\n\tAppSignal\030j \001(\0132\026.Prot"
+  "o.DeviceAppSignal\022+\n\nDiagSignal\030m \001(\0132\027."
+  "Proto.DeviceDiagSignal\022\'\n\013Workstation\030k "
+  "\001(\0132\022.Proto.Workstation\022!\n\010Software\030l \001("
+  "\0132\017.Proto.Software\022\"\n\010children\030\310\001 \003(\0132\017."
+  "Proto.Envelope\"\014\n\nDeviceRoot\"\016\n\014DeviceSy"
+  "stem\"\014\n\nDeviceRack\" \n\rDeviceChassis\022\017\n\004t"
+  "ype\030\001 \001(\005:\0010\"\223\001\n\014DeviceModule\022\027\n\014typeObs"
+  "olete\030\001 \001(\005:\0010\022\033\n\023configurationScript\030\002 "
+  "\001(\t\022\022\n\nmoduleType\030\003 \001(\005\022\032\n\022rawDataDescri"
+  "ption\030\004 \001(\t\022\035\n\022customModuleFamily\030\005 \001(\005:"
+  "\0010\"*\n\020DeviceController\022\026\n\016diagDataOffset"
+  "\030\003 \001(\005\"\363\003\n\017DeviceAppSignal\022\027\n\014obsoletety"
+  "pe\030\001 \001(\005:\0010\022\024\n\tbyteOrder\030\002 \001(\005:\0010\022\021\n\006for"
+  "mat\030\003 \001(\005:\0010\022\017\n\004size\030\004 \001(\005:\0010\022\026\n\013valueOf"
+  "fset\030\007 \001(\005:\0010\022\023\n\010valueBit\030\010 \001(\005:\0010\022\017\n\004ty"
+  "pe\030\t \001(\005:\0010\022\023\n\010function\030\n \001(\005:\0010\022\025\n\nmemo"
+  "ryArea\030\013 \001(\005:\0010\022\032\n\017appSignalLowAdc\030\014 \001(\005"
+  ":\0010\022\037\n\020appSignalHighAdc\030\r \001(\005:\00565535\022\037\n\024"
+  "appSignalLowEngUnits\030\016 \001(\001:\0010\022\"\n\025appSign"
+  "alHighEngUnits\030\017 \001(\001:\003100\022\036\n\023appSignalDa"
+  "taFormat\030\020 \001(\005:\0012\022\030\n\020validitySignalId\030\024 "
+  "\001(\t\022\032\n\022appSignalBusTypeId\030\032 \001(\t\022\035\n\025signa"
+  "lSpecPropsStruct\030( \001(\t\022,\n\035signalSpecProp"
+  "sStructWasFixed\030) \001(\010:\005false\"\361\002\n\020DeviceD"
+  "iagSignal\022\r\n\005level\030\003 \001(\005\022\024\n\014signalTypeId"
+  "\030\004 \001(\t\022\030\n\020validitySignalId\030\005 \001(\t\022\025\n\risRe"
+  "felection\030\006 \001(\010\022\031\n\021reflectedSignalId\030\007 \001"
+  "(\t\022\023\n\013valueOffset\030\n \001(\005\022\020\n\010valueBit\030\013 \001("
+  "\005\022\024\n\014valueBitSize\030\014 \001(\005\022\035\n\025discreteConta"
+  "inerSize\030\r \001(\005\022\022\n\nlogChanges\030\020 \001(\010\022\017\n\007ar"
+  "chive\030\021 \001(\010\022\020\n\010reserved\030\022 \001(\010\022\026\n\016coarseA"
+  "perture\030\026 \001(\001\022\024\n\014fineAperture\030\027 \001(\001\022\024\n\014a"
+  "pertureType\030\030 \001(\005\022\025\n\rdecimalPlaces\030\036 \001(\005"
+  "\"0\n\013Workstation\022\017\n\004type\030\001 \001(\005:\0010\022\020\n\010host"
+  "name\030\002 \001(\t\"\033\n\010Software\022\017\n\004type\030\001 \001(\005:\0010\""
+  "\237\003\n\016DiagSignalType\022\024\n\014signalTypeId\030\003 \001(\t"
+  "\022\031\n\004uuid\030\004 \001(\0132\013.Proto.Uuid\022\030\n\020systemSig"
+  "nalType\030\005 \001(\010\022\014\n\004type\030\006 \001(\005\022\021\n\tbyteOrder"
+  "\030\007 \001(\005\022\024\n\014inverseValue\030\024 \001(\010\022\023\n\013normalSt"
+  "ate\030\031 \001(\005\022\032\n\022normalStateString0\030\032 \001(\t\022\032\n"
+  "\022normalStateString1\030\033 \001(\t\022\024\n\014analogforma"
+  "t\030  \001(\005\022\024\n\014adcHighLimit\030! \001(\001\022\023\n\013adcLowL"
+  "imit\030\" \001(\001\022\026\n\016valueHighLimit\030# \001(\001\022\025\n\rva"
+  "lueLowLimit\030$ \001(\001\022\027\n\017valueMultiplier\030% \001"
+  "(\001\022\023\n\013valueOffset\030& \001(\001\022\021\n\tuseLimits\030\' \001"
+  "(\010\022\r\n\005units\030( \001(\t\"\212\006\n\nConnection\022\024\n\014Conn"
+  "ectionID\030\002 \001(\t\022\030\n\020Port1EquipmentID\030\003 \001(\t"
+  "\022\030\n\020Port2EquipmentID\030\004 \001(\t\022\037\n\027Port1RawDa"
+  "taDescription\030\005 \001(\t\022\037\n\027Port2RawDataDescr"
+  "iption\030\006 \001(\t\022\035\n\016ManualSettings\030\013 \001(\010:\005fa"
+  "lse\022\034\n\rDisableDataID\030\014 \001(\010:\005false\022\036\n\017Gen"
+  "erateVHDFile\030\r \001(\010:\005false\022\036\n\023Port1TxStar"
+  "tAddress\030\016 \001(\005:\0010\022!\n\024Port1TxWordsQuantit"
+  "y\030\017 \001(\005:\003479\022!\n\024Port1RxWordsQuantity\030\020 \001"
+  "(\005:\003479\022\036\n\023Port2TxStartAddress\030\021 \001(\005:\0010\022"
+  "!\n\024Port2TxWordsQuantity\030\022 \001(\005:\003479\022!\n\024Po"
+  "rt2RxWordsQuantity\030\023 \001(\005:\003479\022\031\n\004uuid\030\024 "
+  "\001(\0132\013.Proto.Uuid\022 \n\021Port1EnableSerial\030\025 "
+  "\001(\010:\005false\022\032\n\017Port1SerialMode\030\026 \001(\005:\0010\022 "
+  "\n\021Port1EnableDuplex\030\027 \001(\010:\005false\022 \n\021Port"
+  "2EnableSerial\030\030 \001(\010:\005false\022\032\n\017Port2Seria"
+  "lMode\030\031 \001(\005:\0010\022 \n\021Port2EnableDuplex\030\032 \001("
+  "\010:\005false\022\017\n\004Type\030\033 \001(\005:\0010\022\027\n\014ObsoleteMod"
+  "e\030\010 \001(\005:\0010\022\035\n\022ObsoleteSerialMode\030\007 \001(\005:\001"
+  "0\022#\n\024ObsoleteEnableDuplex\030\n \001(\010:\005false::"
+  "\n\014deviceobject\022\017.Proto.Envelope\030\007 \001(\0132\023."
+  "Proto.DeviceObject:>\n\016diagSignalType\022\017.P"
+  "roto.Envelope\030\010 \001(\0132\025.Proto.DiagSignalTy"
+  "pe:6\n\nconnection\022\017.Proto.Envelope\030h \001(\0132"
+  "\021.Proto.Connection"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_Hardware_2eproto_deps[2] = {
   &::descriptor_table_Common_2eproto,
-  &::descriptor_table_Envelope2_2eproto,
+  &::descriptor_table_Envelope_2eproto,
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_Hardware_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_Hardware_2eproto = {
-  false, false, 3612, descriptor_table_protodef_Hardware_2eproto, "Hardware.proto", 
+  false, false, 3578, descriptor_table_protodef_Hardware_2eproto, "Hardware.proto", 
   &descriptor_table_Hardware_2eproto_once, descriptor_table_Hardware_2eproto_deps, 2, 13,
   schemas, file_default_instances, TableStruct_Hardware_2eproto::offsets,
   file_level_metadata_Hardware_2eproto, file_level_enum_descriptors_Hardware_2eproto, file_level_service_descriptors_Hardware_2eproto,
@@ -736,22 +735,22 @@ namespace Proto {
 
 // ===================================================================
 
-class DeviceObject2::_Internal {
+class DeviceObject::_Internal {
  public:
-  using HasBits = decltype(std::declval<DeviceObject2>()._has_bits_);
-  static const ::Proto::Uuid& uuid(const DeviceObject2* msg);
+  using HasBits = decltype(std::declval<DeviceObject>()._has_bits_);
+  static const ::Proto::Uuid& uuid(const DeviceObject* msg);
   static void set_has_uuid(HasBits* has_bits) {
     (*has_bits)[0] |= 4u;
   }
-  static const ::Proto::wstring& equipmentid(const DeviceObject2* msg);
+  static const ::Proto::wstring& equipmentid(const DeviceObject* msg);
   static void set_has_equipmentid(HasBits* has_bits) {
     (*has_bits)[0] |= 8u;
   }
-  static const ::Proto::wstring& caption(const DeviceObject2* msg);
+  static const ::Proto::wstring& caption(const DeviceObject* msg);
   static void set_has_caption(HasBits* has_bits) {
     (*has_bits)[0] |= 16u;
   }
-  static const ::Proto::wstring& childrestriction(const DeviceObject2* msg);
+  static const ::Proto::wstring& childrestriction(const DeviceObject* msg);
   static void set_has_childrestriction(HasBits* has_bits) {
     (*has_bits)[0] |= 32u;
   }
@@ -770,11 +769,11 @@ class DeviceObject2::_Internal {
   static void set_has_presetroot(HasBits* has_bits) {
     (*has_bits)[0] |= 2097152u;
   }
-  static const ::Proto::wstring& presetname(const DeviceObject2* msg);
+  static const ::Proto::wstring& presetname(const DeviceObject* msg);
   static void set_has_presetname(HasBits* has_bits) {
     (*has_bits)[0] |= 64u;
   }
-  static const ::Proto::Uuid& presetobjectuuid(const DeviceObject2* msg);
+  static const ::Proto::Uuid& presetobjectuuid(const DeviceObject* msg);
   static void set_has_presetobjectuuid(HasBits* has_bits) {
     (*has_bits)[0] |= 128u;
   }
@@ -787,43 +786,43 @@ class DeviceObject2::_Internal {
   static void set_has_presetprotectedproperties(HasBits* has_bits) {
     (*has_bits)[0] |= 2u;
   }
-  static const ::Proto::DeviceRoot2& root(const DeviceObject2* msg);
+  static const ::Proto::DeviceRoot& root(const DeviceObject* msg);
   static void set_has_root(HasBits* has_bits) {
     (*has_bits)[0] |= 256u;
   }
-  static const ::Proto::DeviceSystem2& system(const DeviceObject2* msg);
+  static const ::Proto::DeviceSystem& system(const DeviceObject* msg);
   static void set_has_system(HasBits* has_bits) {
     (*has_bits)[0] |= 512u;
   }
-  static const ::Proto::DeviceRack2& rack(const DeviceObject2* msg);
+  static const ::Proto::DeviceRack& rack(const DeviceObject* msg);
   static void set_has_rack(HasBits* has_bits) {
     (*has_bits)[0] |= 1024u;
   }
-  static const ::Proto::DeviceChassis2& chassis(const DeviceObject2* msg);
+  static const ::Proto::DeviceChassis& chassis(const DeviceObject* msg);
   static void set_has_chassis(HasBits* has_bits) {
     (*has_bits)[0] |= 2048u;
   }
-  static const ::Proto::DeviceModule2& module(const DeviceObject2* msg);
+  static const ::Proto::DeviceModule& module(const DeviceObject* msg);
   static void set_has_module(HasBits* has_bits) {
     (*has_bits)[0] |= 4096u;
   }
-  static const ::Proto::DeviceController2& controller(const DeviceObject2* msg);
+  static const ::Proto::DeviceController& controller(const DeviceObject* msg);
   static void set_has_controller(HasBits* has_bits) {
     (*has_bits)[0] |= 8192u;
   }
-  static const ::Proto::DeviceAppSignal2& appsignal(const DeviceObject2* msg);
+  static const ::Proto::DeviceAppSignal& appsignal(const DeviceObject* msg);
   static void set_has_appsignal(HasBits* has_bits) {
     (*has_bits)[0] |= 16384u;
   }
-  static const ::Proto::DeviceDiagSignal2& diagsignal(const DeviceObject2* msg);
+  static const ::Proto::DeviceDiagSignal& diagsignal(const DeviceObject* msg);
   static void set_has_diagsignal(HasBits* has_bits) {
     (*has_bits)[0] |= 131072u;
   }
-  static const ::Proto::Workstation2& workstation(const DeviceObject2* msg);
+  static const ::Proto::Workstation& workstation(const DeviceObject* msg);
   static void set_has_workstation(HasBits* has_bits) {
     (*has_bits)[0] |= 32768u;
   }
-  static const ::Proto::Software2& software(const DeviceObject2* msg);
+  static const ::Proto::Software& software(const DeviceObject* msg);
   static void set_has_software(HasBits* has_bits) {
     (*has_bits)[0] |= 65536u;
   }
@@ -833,109 +832,109 @@ class DeviceObject2::_Internal {
 };
 
 const ::Proto::Uuid&
-DeviceObject2::_Internal::uuid(const DeviceObject2* msg) {
+DeviceObject::_Internal::uuid(const DeviceObject* msg) {
   return *msg->uuid_;
 }
 const ::Proto::wstring&
-DeviceObject2::_Internal::equipmentid(const DeviceObject2* msg) {
+DeviceObject::_Internal::equipmentid(const DeviceObject* msg) {
   return *msg->equipmentid_;
 }
 const ::Proto::wstring&
-DeviceObject2::_Internal::caption(const DeviceObject2* msg) {
+DeviceObject::_Internal::caption(const DeviceObject* msg) {
   return *msg->caption_;
 }
 const ::Proto::wstring&
-DeviceObject2::_Internal::childrestriction(const DeviceObject2* msg) {
+DeviceObject::_Internal::childrestriction(const DeviceObject* msg) {
   return *msg->childrestriction_;
 }
 const ::Proto::wstring&
-DeviceObject2::_Internal::presetname(const DeviceObject2* msg) {
+DeviceObject::_Internal::presetname(const DeviceObject* msg) {
   return *msg->presetname_;
 }
 const ::Proto::Uuid&
-DeviceObject2::_Internal::presetobjectuuid(const DeviceObject2* msg) {
+DeviceObject::_Internal::presetobjectuuid(const DeviceObject* msg) {
   return *msg->presetobjectuuid_;
 }
-const ::Proto::DeviceRoot2&
-DeviceObject2::_Internal::root(const DeviceObject2* msg) {
+const ::Proto::DeviceRoot&
+DeviceObject::_Internal::root(const DeviceObject* msg) {
   return *msg->root_;
 }
-const ::Proto::DeviceSystem2&
-DeviceObject2::_Internal::system(const DeviceObject2* msg) {
+const ::Proto::DeviceSystem&
+DeviceObject::_Internal::system(const DeviceObject* msg) {
   return *msg->system_;
 }
-const ::Proto::DeviceRack2&
-DeviceObject2::_Internal::rack(const DeviceObject2* msg) {
+const ::Proto::DeviceRack&
+DeviceObject::_Internal::rack(const DeviceObject* msg) {
   return *msg->rack_;
 }
-const ::Proto::DeviceChassis2&
-DeviceObject2::_Internal::chassis(const DeviceObject2* msg) {
+const ::Proto::DeviceChassis&
+DeviceObject::_Internal::chassis(const DeviceObject* msg) {
   return *msg->chassis_;
 }
-const ::Proto::DeviceModule2&
-DeviceObject2::_Internal::module(const DeviceObject2* msg) {
+const ::Proto::DeviceModule&
+DeviceObject::_Internal::module(const DeviceObject* msg) {
   return *msg->module_;
 }
-const ::Proto::DeviceController2&
-DeviceObject2::_Internal::controller(const DeviceObject2* msg) {
+const ::Proto::DeviceController&
+DeviceObject::_Internal::controller(const DeviceObject* msg) {
   return *msg->controller_;
 }
-const ::Proto::DeviceAppSignal2&
-DeviceObject2::_Internal::appsignal(const DeviceObject2* msg) {
+const ::Proto::DeviceAppSignal&
+DeviceObject::_Internal::appsignal(const DeviceObject* msg) {
   return *msg->appsignal_;
 }
-const ::Proto::DeviceDiagSignal2&
-DeviceObject2::_Internal::diagsignal(const DeviceObject2* msg) {
+const ::Proto::DeviceDiagSignal&
+DeviceObject::_Internal::diagsignal(const DeviceObject* msg) {
   return *msg->diagsignal_;
 }
-const ::Proto::Workstation2&
-DeviceObject2::_Internal::workstation(const DeviceObject2* msg) {
+const ::Proto::Workstation&
+DeviceObject::_Internal::workstation(const DeviceObject* msg) {
   return *msg->workstation_;
 }
-const ::Proto::Software2&
-DeviceObject2::_Internal::software(const DeviceObject2* msg) {
+const ::Proto::Software&
+DeviceObject::_Internal::software(const DeviceObject* msg) {
   return *msg->software_;
 }
-void DeviceObject2::clear_uuid() {
+void DeviceObject::clear_uuid() {
   if (uuid_ != nullptr) uuid_->Clear();
   _has_bits_[0] &= ~0x00000004u;
 }
-void DeviceObject2::clear_equipmentid() {
+void DeviceObject::clear_equipmentid() {
   if (equipmentid_ != nullptr) equipmentid_->Clear();
   _has_bits_[0] &= ~0x00000008u;
 }
-void DeviceObject2::clear_caption() {
+void DeviceObject::clear_caption() {
   if (caption_ != nullptr) caption_->Clear();
   _has_bits_[0] &= ~0x00000010u;
 }
-void DeviceObject2::clear_childrestriction() {
+void DeviceObject::clear_childrestriction() {
   if (childrestriction_ != nullptr) childrestriction_->Clear();
   _has_bits_[0] &= ~0x00000020u;
 }
-void DeviceObject2::clear_properties() {
+void DeviceObject::clear_properties() {
   properties_.Clear();
 }
-void DeviceObject2::clear_presetname() {
+void DeviceObject::clear_presetname() {
   if (presetname_ != nullptr) presetname_->Clear();
   _has_bits_[0] &= ~0x00000040u;
 }
-void DeviceObject2::clear_presetobjectuuid() {
+void DeviceObject::clear_presetobjectuuid() {
   if (presetobjectuuid_ != nullptr) presetobjectuuid_->Clear();
   _has_bits_[0] &= ~0x00000080u;
 }
-void DeviceObject2::clear_children() {
+void DeviceObject::clear_children() {
   children_.Clear();
 }
-DeviceObject2::DeviceObject2(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+DeviceObject::DeviceObject(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena),
   properties_(arena),
   tags_(arena),
   children_(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
-  // @@protoc_insertion_point(arena_constructor:Proto.DeviceObject2)
+  // @@protoc_insertion_point(arena_constructor:Proto.DeviceObject)
 }
-DeviceObject2::DeviceObject2(const DeviceObject2& from)
+DeviceObject::DeviceObject(const DeviceObject& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
       _has_bits_(from._has_bits_),
       properties_(from.properties_),
@@ -983,62 +982,62 @@ DeviceObject2::DeviceObject2(const DeviceObject2& from)
     presetobjectuuid_ = nullptr;
   }
   if (from._internal_has_root()) {
-    root_ = new ::Proto::DeviceRoot2(*from.root_);
+    root_ = new ::Proto::DeviceRoot(*from.root_);
   } else {
     root_ = nullptr;
   }
   if (from._internal_has_system()) {
-    system_ = new ::Proto::DeviceSystem2(*from.system_);
+    system_ = new ::Proto::DeviceSystem(*from.system_);
   } else {
     system_ = nullptr;
   }
   if (from._internal_has_rack()) {
-    rack_ = new ::Proto::DeviceRack2(*from.rack_);
+    rack_ = new ::Proto::DeviceRack(*from.rack_);
   } else {
     rack_ = nullptr;
   }
   if (from._internal_has_chassis()) {
-    chassis_ = new ::Proto::DeviceChassis2(*from.chassis_);
+    chassis_ = new ::Proto::DeviceChassis(*from.chassis_);
   } else {
     chassis_ = nullptr;
   }
   if (from._internal_has_module()) {
-    module_ = new ::Proto::DeviceModule2(*from.module_);
+    module_ = new ::Proto::DeviceModule(*from.module_);
   } else {
     module_ = nullptr;
   }
   if (from._internal_has_controller()) {
-    controller_ = new ::Proto::DeviceController2(*from.controller_);
+    controller_ = new ::Proto::DeviceController(*from.controller_);
   } else {
     controller_ = nullptr;
   }
   if (from._internal_has_appsignal()) {
-    appsignal_ = new ::Proto::DeviceAppSignal2(*from.appsignal_);
+    appsignal_ = new ::Proto::DeviceAppSignal(*from.appsignal_);
   } else {
     appsignal_ = nullptr;
   }
   if (from._internal_has_workstation()) {
-    workstation_ = new ::Proto::Workstation2(*from.workstation_);
+    workstation_ = new ::Proto::Workstation(*from.workstation_);
   } else {
     workstation_ = nullptr;
   }
   if (from._internal_has_software()) {
-    software_ = new ::Proto::Software2(*from.software_);
+    software_ = new ::Proto::Software(*from.software_);
   } else {
     software_ = nullptr;
   }
   if (from._internal_has_diagsignal()) {
-    diagsignal_ = new ::Proto::DeviceDiagSignal2(*from.diagsignal_);
+    diagsignal_ = new ::Proto::DeviceDiagSignal(*from.diagsignal_);
   } else {
     diagsignal_ = nullptr;
   }
   ::memcpy(&place_, &from.place_,
     static_cast<size_t>(reinterpret_cast<char*>(&presetversion_) -
     reinterpret_cast<char*>(&place_)) + sizeof(presetversion_));
-  // @@protoc_insertion_point(copy_constructor:Proto.DeviceObject2)
+  // @@protoc_insertion_point(copy_constructor:Proto.DeviceObject)
 }
 
-void DeviceObject2::SharedCtor() {
+void DeviceObject::SharedCtor() {
 specific_properties_struct_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 presetprotectedproperties_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
@@ -1047,13 +1046,13 @@ presetprotectedproperties_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::
     reinterpret_cast<char*>(&uuid_)) + sizeof(presetversion_));
 }
 
-DeviceObject2::~DeviceObject2() {
-  // @@protoc_insertion_point(destructor:Proto.DeviceObject2)
+DeviceObject::~DeviceObject() {
+  // @@protoc_insertion_point(destructor:Proto.DeviceObject)
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void DeviceObject2::SharedDtor() {
+void DeviceObject::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
   specific_properties_struct_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   presetprotectedproperties_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
@@ -1075,18 +1074,18 @@ void DeviceObject2::SharedDtor() {
   if (this != internal_default_instance()) delete diagsignal_;
 }
 
-void DeviceObject2::ArenaDtor(void* object) {
-  DeviceObject2* _this = reinterpret_cast< DeviceObject2* >(object);
+void DeviceObject::ArenaDtor(void* object) {
+  DeviceObject* _this = reinterpret_cast< DeviceObject* >(object);
   (void)_this;
 }
-void DeviceObject2::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+void DeviceObject::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 }
-void DeviceObject2::SetCachedSize(int size) const {
+void DeviceObject::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
 
-void DeviceObject2::Clear() {
-// @@protoc_insertion_point(message_clear_start:Proto.DeviceObject2)
+void DeviceObject::Clear() {
+// @@protoc_insertion_point(message_clear_start:Proto.DeviceObject)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -1180,7 +1179,7 @@ void DeviceObject2::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* DeviceObject2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* DeviceObject::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   _Internal::HasBits has_bits{};
   while (!ctx->Done(&ptr)) {
@@ -1230,7 +1229,7 @@ const char* DeviceObject2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_
           auto str = _internal_mutable_specific_properties_struct();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DeviceObject2.specific_properties_struct");
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DeviceObject.specific_properties_struct");
           #endif  // !NDEBUG
           CHK_(ptr);
         } else goto handle_unusual;
@@ -1256,7 +1255,7 @@ const char* DeviceObject2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_
             auto str = _internal_add_tags();
             ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
             #ifndef NDEBUG
-            ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DeviceObject2.tags");
+            ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DeviceObject.tags");
             #endif  // !NDEBUG
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
@@ -1323,82 +1322,82 @@ const char* DeviceObject2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_
           auto str = _internal_mutable_presetprotectedproperties();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DeviceObject2.presetProtectedProperties");
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DeviceObject.presetProtectedProperties");
           #endif  // !NDEBUG
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional .Proto.DeviceRoot2 Root = 100;
+      // optional .Proto.DeviceRoot Root = 100;
       case 100:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 34)) {
           ptr = ctx->ParseMessage(_internal_mutable_root(), ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional .Proto.DeviceSystem2 System = 101;
+      // optional .Proto.DeviceSystem System = 101;
       case 101:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 42)) {
           ptr = ctx->ParseMessage(_internal_mutable_system(), ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional .Proto.DeviceRack2 Rack = 102;
+      // optional .Proto.DeviceRack Rack = 102;
       case 102:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 50)) {
           ptr = ctx->ParseMessage(_internal_mutable_rack(), ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional .Proto.DeviceChassis2 Chassis = 103;
+      // optional .Proto.DeviceChassis Chassis = 103;
       case 103:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 58)) {
           ptr = ctx->ParseMessage(_internal_mutable_chassis(), ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional .Proto.DeviceModule2 Module = 104;
+      // optional .Proto.DeviceModule Module = 104;
       case 104:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 66)) {
           ptr = ctx->ParseMessage(_internal_mutable_module(), ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional .Proto.DeviceController2 Controller = 105;
+      // optional .Proto.DeviceController Controller = 105;
       case 105:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 74)) {
           ptr = ctx->ParseMessage(_internal_mutable_controller(), ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional .Proto.DeviceAppSignal2 AppSignal = 106;
+      // optional .Proto.DeviceAppSignal AppSignal = 106;
       case 106:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 82)) {
           ptr = ctx->ParseMessage(_internal_mutable_appsignal(), ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional .Proto.Workstation2 Workstation = 107;
+      // optional .Proto.Workstation Workstation = 107;
       case 107:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 90)) {
           ptr = ctx->ParseMessage(_internal_mutable_workstation(), ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional .Proto.Software2 Software = 108;
+      // optional .Proto.Software Software = 108;
       case 108:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 98)) {
           ptr = ctx->ParseMessage(_internal_mutable_software(), ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional .Proto.DeviceDiagSignal2 DiagSignal = 109;
+      // optional .Proto.DeviceDiagSignal DiagSignal = 109;
       case 109:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 106)) {
           ptr = ctx->ParseMessage(_internal_mutable_diagsignal(), ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // repeated .Proto.Envelope2 children = 200;
+      // repeated .Proto.Envelope children = 200;
       case 200:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 66)) {
           ptr -= 2;
@@ -1433,9 +1432,9 @@ failure:
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* DeviceObject2::_InternalSerialize(
+::PROTOBUF_NAMESPACE_ID::uint8* DeviceObject::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:Proto.DeviceObject2)
+  // @@protoc_insertion_point(serialize_to_array_start:Proto.DeviceObject)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -1483,7 +1482,7 @@ failure:
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_specific_properties_struct().data(), static_cast<int>(this->_internal_specific_properties_struct().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Proto.DeviceObject2.specific_properties_struct");
+      "Proto.DeviceObject.specific_properties_struct");
     target = stream->WriteStringMaybeAliased(
         6, this->_internal_specific_properties_struct(), target);
   }
@@ -1502,7 +1501,7 @@ failure:
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       s.data(), static_cast<int>(s.length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Proto.DeviceObject2.tags");
+      "Proto.DeviceObject.tags");
     target = stream->WriteString(8, s, target);
   }
 
@@ -1557,12 +1556,12 @@ failure:
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_presetprotectedproperties().data(), static_cast<int>(this->_internal_presetprotectedproperties().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Proto.DeviceObject2.presetProtectedProperties");
+      "Proto.DeviceObject.presetProtectedProperties");
     target = stream->WriteStringMaybeAliased(
         38, this->_internal_presetprotectedproperties(), target);
   }
 
-  // optional .Proto.DeviceRoot2 Root = 100;
+  // optional .Proto.DeviceRoot Root = 100;
   if (cached_has_bits & 0x00000100u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -1570,7 +1569,7 @@ failure:
         100, _Internal::root(this), target, stream);
   }
 
-  // optional .Proto.DeviceSystem2 System = 101;
+  // optional .Proto.DeviceSystem System = 101;
   if (cached_has_bits & 0x00000200u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -1578,7 +1577,7 @@ failure:
         101, _Internal::system(this), target, stream);
   }
 
-  // optional .Proto.DeviceRack2 Rack = 102;
+  // optional .Proto.DeviceRack Rack = 102;
   if (cached_has_bits & 0x00000400u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -1586,7 +1585,7 @@ failure:
         102, _Internal::rack(this), target, stream);
   }
 
-  // optional .Proto.DeviceChassis2 Chassis = 103;
+  // optional .Proto.DeviceChassis Chassis = 103;
   if (cached_has_bits & 0x00000800u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -1594,7 +1593,7 @@ failure:
         103, _Internal::chassis(this), target, stream);
   }
 
-  // optional .Proto.DeviceModule2 Module = 104;
+  // optional .Proto.DeviceModule Module = 104;
   if (cached_has_bits & 0x00001000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -1602,7 +1601,7 @@ failure:
         104, _Internal::module(this), target, stream);
   }
 
-  // optional .Proto.DeviceController2 Controller = 105;
+  // optional .Proto.DeviceController Controller = 105;
   if (cached_has_bits & 0x00002000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -1610,7 +1609,7 @@ failure:
         105, _Internal::controller(this), target, stream);
   }
 
-  // optional .Proto.DeviceAppSignal2 AppSignal = 106;
+  // optional .Proto.DeviceAppSignal AppSignal = 106;
   if (cached_has_bits & 0x00004000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -1618,7 +1617,7 @@ failure:
         106, _Internal::appsignal(this), target, stream);
   }
 
-  // optional .Proto.Workstation2 Workstation = 107;
+  // optional .Proto.Workstation Workstation = 107;
   if (cached_has_bits & 0x00008000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -1626,7 +1625,7 @@ failure:
         107, _Internal::workstation(this), target, stream);
   }
 
-  // optional .Proto.Software2 Software = 108;
+  // optional .Proto.Software Software = 108;
   if (cached_has_bits & 0x00010000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -1634,7 +1633,7 @@ failure:
         108, _Internal::software(this), target, stream);
   }
 
-  // optional .Proto.DeviceDiagSignal2 DiagSignal = 109;
+  // optional .Proto.DeviceDiagSignal DiagSignal = 109;
   if (cached_has_bits & 0x00020000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -1642,7 +1641,7 @@ failure:
         109, _Internal::diagsignal(this), target, stream);
   }
 
-  // repeated .Proto.Envelope2 children = 200;
+  // repeated .Proto.Envelope children = 200;
   for (unsigned int i = 0,
       n = static_cast<unsigned int>(this->_internal_children_size()); i < n; i++) {
     target = stream->EnsureSpace(target);
@@ -1654,12 +1653,12 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:Proto.DeviceObject2)
+  // @@protoc_insertion_point(serialize_to_array_end:Proto.DeviceObject)
   return target;
 }
 
-size_t DeviceObject2::RequiredFieldsByteSizeFallback() const {
-// @@protoc_insertion_point(required_fields_byte_size_fallback_start:Proto.DeviceObject2)
+size_t DeviceObject::RequiredFieldsByteSizeFallback() const {
+// @@protoc_insertion_point(required_fields_byte_size_fallback_start:Proto.DeviceObject)
   size_t total_size = 0;
 
   if (_internal_has_uuid()) {
@@ -1685,8 +1684,8 @@ size_t DeviceObject2::RequiredFieldsByteSizeFallback() const {
 
   return total_size;
 }
-size_t DeviceObject2::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:Proto.DeviceObject2)
+size_t DeviceObject::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:Proto.DeviceObject)
   size_t total_size = 0;
 
   if (((_has_bits_[0] & 0x0000001c) ^ 0x0000001c) == 0) {  // All required fields are present.
@@ -1727,7 +1726,7 @@ size_t DeviceObject2::ByteSizeLong() const {
       tags_.Get(i));
   }
 
-  // repeated .Proto.Envelope2 children = 200;
+  // repeated .Proto.Envelope children = 200;
   total_size += 2UL * this->_internal_children_size();
   for (const auto& msg : this->children_) {
     total_size +=
@@ -1775,56 +1774,56 @@ size_t DeviceObject2::ByteSizeLong() const {
 
   }
   if (cached_has_bits & 0x0000ff00u) {
-    // optional .Proto.DeviceRoot2 Root = 100;
+    // optional .Proto.DeviceRoot Root = 100;
     if (cached_has_bits & 0x00000100u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *root_);
     }
 
-    // optional .Proto.DeviceSystem2 System = 101;
+    // optional .Proto.DeviceSystem System = 101;
     if (cached_has_bits & 0x00000200u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *system_);
     }
 
-    // optional .Proto.DeviceRack2 Rack = 102;
+    // optional .Proto.DeviceRack Rack = 102;
     if (cached_has_bits & 0x00000400u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *rack_);
     }
 
-    // optional .Proto.DeviceChassis2 Chassis = 103;
+    // optional .Proto.DeviceChassis Chassis = 103;
     if (cached_has_bits & 0x00000800u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *chassis_);
     }
 
-    // optional .Proto.DeviceModule2 Module = 104;
+    // optional .Proto.DeviceModule Module = 104;
     if (cached_has_bits & 0x00001000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *module_);
     }
 
-    // optional .Proto.DeviceController2 Controller = 105;
+    // optional .Proto.DeviceController Controller = 105;
     if (cached_has_bits & 0x00002000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *controller_);
     }
 
-    // optional .Proto.DeviceAppSignal2 AppSignal = 106;
+    // optional .Proto.DeviceAppSignal AppSignal = 106;
     if (cached_has_bits & 0x00004000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *appsignal_);
     }
 
-    // optional .Proto.Workstation2 Workstation = 107;
+    // optional .Proto.Workstation Workstation = 107;
     if (cached_has_bits & 0x00008000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
@@ -1833,14 +1832,14 @@ size_t DeviceObject2::ByteSizeLong() const {
 
   }
   if (cached_has_bits & 0x00ff0000u) {
-    // optional .Proto.Software2 Software = 108;
+    // optional .Proto.Software Software = 108;
     if (cached_has_bits & 0x00010000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *software_);
     }
 
-    // optional .Proto.DeviceDiagSignal2 DiagSignal = 109;
+    // optional .Proto.DeviceDiagSignal DiagSignal = 109;
     if (cached_has_bits & 0x00020000u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
@@ -1893,23 +1892,23 @@ size_t DeviceObject2::ByteSizeLong() const {
   return total_size;
 }
 
-void DeviceObject2::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:Proto.DeviceObject2)
+void DeviceObject::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:Proto.DeviceObject)
   GOOGLE_DCHECK_NE(&from, this);
-  const DeviceObject2* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<DeviceObject2>(
+  const DeviceObject* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<DeviceObject>(
           &from);
   if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.DeviceObject2)
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.DeviceObject)
     ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
   } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.DeviceObject2)
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.DeviceObject)
     MergeFrom(*source);
   }
 }
 
-void DeviceObject2::MergeFrom(const DeviceObject2& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:Proto.DeviceObject2)
+void DeviceObject::MergeFrom(const DeviceObject& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:Proto.DeviceObject)
   GOOGLE_DCHECK_NE(&from, this);
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -1947,36 +1946,36 @@ void DeviceObject2::MergeFrom(const DeviceObject2& from) {
   }
   if (cached_has_bits & 0x0000ff00u) {
     if (cached_has_bits & 0x00000100u) {
-      _internal_mutable_root()->::Proto::DeviceRoot2::MergeFrom(from._internal_root());
+      _internal_mutable_root()->::Proto::DeviceRoot::MergeFrom(from._internal_root());
     }
     if (cached_has_bits & 0x00000200u) {
-      _internal_mutable_system()->::Proto::DeviceSystem2::MergeFrom(from._internal_system());
+      _internal_mutable_system()->::Proto::DeviceSystem::MergeFrom(from._internal_system());
     }
     if (cached_has_bits & 0x00000400u) {
-      _internal_mutable_rack()->::Proto::DeviceRack2::MergeFrom(from._internal_rack());
+      _internal_mutable_rack()->::Proto::DeviceRack::MergeFrom(from._internal_rack());
     }
     if (cached_has_bits & 0x00000800u) {
-      _internal_mutable_chassis()->::Proto::DeviceChassis2::MergeFrom(from._internal_chassis());
+      _internal_mutable_chassis()->::Proto::DeviceChassis::MergeFrom(from._internal_chassis());
     }
     if (cached_has_bits & 0x00001000u) {
-      _internal_mutable_module()->::Proto::DeviceModule2::MergeFrom(from._internal_module());
+      _internal_mutable_module()->::Proto::DeviceModule::MergeFrom(from._internal_module());
     }
     if (cached_has_bits & 0x00002000u) {
-      _internal_mutable_controller()->::Proto::DeviceController2::MergeFrom(from._internal_controller());
+      _internal_mutable_controller()->::Proto::DeviceController::MergeFrom(from._internal_controller());
     }
     if (cached_has_bits & 0x00004000u) {
-      _internal_mutable_appsignal()->::Proto::DeviceAppSignal2::MergeFrom(from._internal_appsignal());
+      _internal_mutable_appsignal()->::Proto::DeviceAppSignal::MergeFrom(from._internal_appsignal());
     }
     if (cached_has_bits & 0x00008000u) {
-      _internal_mutable_workstation()->::Proto::Workstation2::MergeFrom(from._internal_workstation());
+      _internal_mutable_workstation()->::Proto::Workstation::MergeFrom(from._internal_workstation());
     }
   }
   if (cached_has_bits & 0x00ff0000u) {
     if (cached_has_bits & 0x00010000u) {
-      _internal_mutable_software()->::Proto::Software2::MergeFrom(from._internal_software());
+      _internal_mutable_software()->::Proto::Software::MergeFrom(from._internal_software());
     }
     if (cached_has_bits & 0x00020000u) {
-      _internal_mutable_diagsignal()->::Proto::DeviceDiagSignal2::MergeFrom(from._internal_diagsignal());
+      _internal_mutable_diagsignal()->::Proto::DeviceDiagSignal::MergeFrom(from._internal_diagsignal());
     }
     if (cached_has_bits & 0x00040000u) {
       place_ = from.place_;
@@ -2000,21 +1999,21 @@ void DeviceObject2::MergeFrom(const DeviceObject2& from) {
   }
 }
 
-void DeviceObject2::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:Proto.DeviceObject2)
+void DeviceObject::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:Proto.DeviceObject)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void DeviceObject2::CopyFrom(const DeviceObject2& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:Proto.DeviceObject2)
+void DeviceObject::CopyFrom(const DeviceObject& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:Proto.DeviceObject)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool DeviceObject2::IsInitialized() const {
+bool DeviceObject::IsInitialized() const {
   if (_Internal::MissingRequiredFields(_has_bits_)) return false;
   if (!::PROTOBUF_NAMESPACE_ID::internal::AllAreInitialized(properties_)) return false;
   if (!::PROTOBUF_NAMESPACE_ID::internal::AllAreInitialized(children_)) return false;
@@ -2039,7 +2038,7 @@ bool DeviceObject2::IsInitialized() const {
   return true;
 }
 
-void DeviceObject2::InternalSwap(DeviceObject2* other) {
+void DeviceObject::InternalSwap(DeviceObject* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   swap(_has_bits_[0], other->_has_bits_[0]);
@@ -2049,61 +2048,61 @@ void DeviceObject2::InternalSwap(DeviceObject2* other) {
   specific_properties_struct_.Swap(&other->specific_properties_struct_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   presetprotectedproperties_.Swap(&other->presetprotectedproperties_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(DeviceObject2, presetversion_)
-      + sizeof(DeviceObject2::presetversion_)
-      - PROTOBUF_FIELD_OFFSET(DeviceObject2, uuid_)>(
+      PROTOBUF_FIELD_OFFSET(DeviceObject, presetversion_)
+      + sizeof(DeviceObject::presetversion_)
+      - PROTOBUF_FIELD_OFFSET(DeviceObject, uuid_)>(
           reinterpret_cast<char*>(&uuid_),
           reinterpret_cast<char*>(&other->uuid_));
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata DeviceObject2::GetMetadata() const {
+::PROTOBUF_NAMESPACE_ID::Metadata DeviceObject::GetMetadata() const {
   return GetMetadataStatic();
 }
 
 
 // ===================================================================
 
-class DeviceRoot2::_Internal {
+class DeviceRoot::_Internal {
  public:
 };
 
-DeviceRoot2::DeviceRoot2(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+DeviceRoot::DeviceRoot(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
-  // @@protoc_insertion_point(arena_constructor:Proto.DeviceRoot2)
+  // @@protoc_insertion_point(arena_constructor:Proto.DeviceRoot)
 }
-DeviceRoot2::DeviceRoot2(const DeviceRoot2& from)
+DeviceRoot::DeviceRoot(const DeviceRoot& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  // @@protoc_insertion_point(copy_constructor:Proto.DeviceRoot2)
+  // @@protoc_insertion_point(copy_constructor:Proto.DeviceRoot)
 }
 
-void DeviceRoot2::SharedCtor() {
+void DeviceRoot::SharedCtor() {
 }
 
-DeviceRoot2::~DeviceRoot2() {
-  // @@protoc_insertion_point(destructor:Proto.DeviceRoot2)
+DeviceRoot::~DeviceRoot() {
+  // @@protoc_insertion_point(destructor:Proto.DeviceRoot)
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void DeviceRoot2::SharedDtor() {
+void DeviceRoot::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
 }
 
-void DeviceRoot2::ArenaDtor(void* object) {
-  DeviceRoot2* _this = reinterpret_cast< DeviceRoot2* >(object);
+void DeviceRoot::ArenaDtor(void* object) {
+  DeviceRoot* _this = reinterpret_cast< DeviceRoot* >(object);
   (void)_this;
 }
-void DeviceRoot2::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+void DeviceRoot::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 }
-void DeviceRoot2::SetCachedSize(int size) const {
+void DeviceRoot::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
 
-void DeviceRoot2::Clear() {
-// @@protoc_insertion_point(message_clear_start:Proto.DeviceRoot2)
+void DeviceRoot::Clear() {
+// @@protoc_insertion_point(message_clear_start:Proto.DeviceRoot)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -2111,7 +2110,7 @@ void DeviceRoot2::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* DeviceRoot2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* DeviceRoot::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     ::PROTOBUF_NAMESPACE_ID::uint32 tag;
@@ -2135,9 +2134,9 @@ failure:
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* DeviceRoot2::_InternalSerialize(
+::PROTOBUF_NAMESPACE_ID::uint8* DeviceRoot::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:Proto.DeviceRoot2)
+  // @@protoc_insertion_point(serialize_to_array_start:Proto.DeviceRoot)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -2145,12 +2144,12 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:Proto.DeviceRoot2)
+  // @@protoc_insertion_point(serialize_to_array_end:Proto.DeviceRoot)
   return target;
 }
 
-size_t DeviceRoot2::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:Proto.DeviceRoot2)
+size_t DeviceRoot::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:Proto.DeviceRoot)
   size_t total_size = 0;
 
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -2166,23 +2165,23 @@ size_t DeviceRoot2::ByteSizeLong() const {
   return total_size;
 }
 
-void DeviceRoot2::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:Proto.DeviceRoot2)
+void DeviceRoot::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:Proto.DeviceRoot)
   GOOGLE_DCHECK_NE(&from, this);
-  const DeviceRoot2* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<DeviceRoot2>(
+  const DeviceRoot* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<DeviceRoot>(
           &from);
   if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.DeviceRoot2)
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.DeviceRoot)
     ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
   } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.DeviceRoot2)
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.DeviceRoot)
     MergeFrom(*source);
   }
 }
 
-void DeviceRoot2::MergeFrom(const DeviceRoot2& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:Proto.DeviceRoot2)
+void DeviceRoot::MergeFrom(const DeviceRoot& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:Proto.DeviceRoot)
   GOOGLE_DCHECK_NE(&from, this);
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -2190,77 +2189,77 @@ void DeviceRoot2::MergeFrom(const DeviceRoot2& from) {
 
 }
 
-void DeviceRoot2::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:Proto.DeviceRoot2)
+void DeviceRoot::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:Proto.DeviceRoot)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void DeviceRoot2::CopyFrom(const DeviceRoot2& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:Proto.DeviceRoot2)
+void DeviceRoot::CopyFrom(const DeviceRoot& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:Proto.DeviceRoot)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool DeviceRoot2::IsInitialized() const {
+bool DeviceRoot::IsInitialized() const {
   return true;
 }
 
-void DeviceRoot2::InternalSwap(DeviceRoot2* other) {
+void DeviceRoot::InternalSwap(DeviceRoot* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata DeviceRoot2::GetMetadata() const {
+::PROTOBUF_NAMESPACE_ID::Metadata DeviceRoot::GetMetadata() const {
   return GetMetadataStatic();
 }
 
 
 // ===================================================================
 
-class DeviceSystem2::_Internal {
+class DeviceSystem::_Internal {
  public:
 };
 
-DeviceSystem2::DeviceSystem2(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+DeviceSystem::DeviceSystem(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
-  // @@protoc_insertion_point(arena_constructor:Proto.DeviceSystem2)
+  // @@protoc_insertion_point(arena_constructor:Proto.DeviceSystem)
 }
-DeviceSystem2::DeviceSystem2(const DeviceSystem2& from)
+DeviceSystem::DeviceSystem(const DeviceSystem& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  // @@protoc_insertion_point(copy_constructor:Proto.DeviceSystem2)
+  // @@protoc_insertion_point(copy_constructor:Proto.DeviceSystem)
 }
 
-void DeviceSystem2::SharedCtor() {
+void DeviceSystem::SharedCtor() {
 }
 
-DeviceSystem2::~DeviceSystem2() {
-  // @@protoc_insertion_point(destructor:Proto.DeviceSystem2)
+DeviceSystem::~DeviceSystem() {
+  // @@protoc_insertion_point(destructor:Proto.DeviceSystem)
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void DeviceSystem2::SharedDtor() {
+void DeviceSystem::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
 }
 
-void DeviceSystem2::ArenaDtor(void* object) {
-  DeviceSystem2* _this = reinterpret_cast< DeviceSystem2* >(object);
+void DeviceSystem::ArenaDtor(void* object) {
+  DeviceSystem* _this = reinterpret_cast< DeviceSystem* >(object);
   (void)_this;
 }
-void DeviceSystem2::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+void DeviceSystem::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 }
-void DeviceSystem2::SetCachedSize(int size) const {
+void DeviceSystem::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
 
-void DeviceSystem2::Clear() {
-// @@protoc_insertion_point(message_clear_start:Proto.DeviceSystem2)
+void DeviceSystem::Clear() {
+// @@protoc_insertion_point(message_clear_start:Proto.DeviceSystem)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -2268,7 +2267,7 @@ void DeviceSystem2::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* DeviceSystem2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* DeviceSystem::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     ::PROTOBUF_NAMESPACE_ID::uint32 tag;
@@ -2292,9 +2291,9 @@ failure:
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* DeviceSystem2::_InternalSerialize(
+::PROTOBUF_NAMESPACE_ID::uint8* DeviceSystem::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:Proto.DeviceSystem2)
+  // @@protoc_insertion_point(serialize_to_array_start:Proto.DeviceSystem)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -2302,12 +2301,12 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:Proto.DeviceSystem2)
+  // @@protoc_insertion_point(serialize_to_array_end:Proto.DeviceSystem)
   return target;
 }
 
-size_t DeviceSystem2::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:Proto.DeviceSystem2)
+size_t DeviceSystem::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:Proto.DeviceSystem)
   size_t total_size = 0;
 
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -2323,23 +2322,23 @@ size_t DeviceSystem2::ByteSizeLong() const {
   return total_size;
 }
 
-void DeviceSystem2::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:Proto.DeviceSystem2)
+void DeviceSystem::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:Proto.DeviceSystem)
   GOOGLE_DCHECK_NE(&from, this);
-  const DeviceSystem2* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<DeviceSystem2>(
+  const DeviceSystem* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<DeviceSystem>(
           &from);
   if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.DeviceSystem2)
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.DeviceSystem)
     ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
   } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.DeviceSystem2)
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.DeviceSystem)
     MergeFrom(*source);
   }
 }
 
-void DeviceSystem2::MergeFrom(const DeviceSystem2& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:Proto.DeviceSystem2)
+void DeviceSystem::MergeFrom(const DeviceSystem& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:Proto.DeviceSystem)
   GOOGLE_DCHECK_NE(&from, this);
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -2347,77 +2346,77 @@ void DeviceSystem2::MergeFrom(const DeviceSystem2& from) {
 
 }
 
-void DeviceSystem2::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:Proto.DeviceSystem2)
+void DeviceSystem::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:Proto.DeviceSystem)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void DeviceSystem2::CopyFrom(const DeviceSystem2& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:Proto.DeviceSystem2)
+void DeviceSystem::CopyFrom(const DeviceSystem& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:Proto.DeviceSystem)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool DeviceSystem2::IsInitialized() const {
+bool DeviceSystem::IsInitialized() const {
   return true;
 }
 
-void DeviceSystem2::InternalSwap(DeviceSystem2* other) {
+void DeviceSystem::InternalSwap(DeviceSystem* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata DeviceSystem2::GetMetadata() const {
+::PROTOBUF_NAMESPACE_ID::Metadata DeviceSystem::GetMetadata() const {
   return GetMetadataStatic();
 }
 
 
 // ===================================================================
 
-class DeviceRack2::_Internal {
+class DeviceRack::_Internal {
  public:
 };
 
-DeviceRack2::DeviceRack2(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+DeviceRack::DeviceRack(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
-  // @@protoc_insertion_point(arena_constructor:Proto.DeviceRack2)
+  // @@protoc_insertion_point(arena_constructor:Proto.DeviceRack)
 }
-DeviceRack2::DeviceRack2(const DeviceRack2& from)
+DeviceRack::DeviceRack(const DeviceRack& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  // @@protoc_insertion_point(copy_constructor:Proto.DeviceRack2)
+  // @@protoc_insertion_point(copy_constructor:Proto.DeviceRack)
 }
 
-void DeviceRack2::SharedCtor() {
+void DeviceRack::SharedCtor() {
 }
 
-DeviceRack2::~DeviceRack2() {
-  // @@protoc_insertion_point(destructor:Proto.DeviceRack2)
+DeviceRack::~DeviceRack() {
+  // @@protoc_insertion_point(destructor:Proto.DeviceRack)
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void DeviceRack2::SharedDtor() {
+void DeviceRack::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
 }
 
-void DeviceRack2::ArenaDtor(void* object) {
-  DeviceRack2* _this = reinterpret_cast< DeviceRack2* >(object);
+void DeviceRack::ArenaDtor(void* object) {
+  DeviceRack* _this = reinterpret_cast< DeviceRack* >(object);
   (void)_this;
 }
-void DeviceRack2::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+void DeviceRack::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 }
-void DeviceRack2::SetCachedSize(int size) const {
+void DeviceRack::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
 
-void DeviceRack2::Clear() {
-// @@protoc_insertion_point(message_clear_start:Proto.DeviceRack2)
+void DeviceRack::Clear() {
+// @@protoc_insertion_point(message_clear_start:Proto.DeviceRack)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -2425,7 +2424,7 @@ void DeviceRack2::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* DeviceRack2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* DeviceRack::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     ::PROTOBUF_NAMESPACE_ID::uint32 tag;
@@ -2449,9 +2448,9 @@ failure:
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* DeviceRack2::_InternalSerialize(
+::PROTOBUF_NAMESPACE_ID::uint8* DeviceRack::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:Proto.DeviceRack2)
+  // @@protoc_insertion_point(serialize_to_array_start:Proto.DeviceRack)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -2459,12 +2458,12 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:Proto.DeviceRack2)
+  // @@protoc_insertion_point(serialize_to_array_end:Proto.DeviceRack)
   return target;
 }
 
-size_t DeviceRack2::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:Proto.DeviceRack2)
+size_t DeviceRack::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:Proto.DeviceRack)
   size_t total_size = 0;
 
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -2480,23 +2479,23 @@ size_t DeviceRack2::ByteSizeLong() const {
   return total_size;
 }
 
-void DeviceRack2::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:Proto.DeviceRack2)
+void DeviceRack::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:Proto.DeviceRack)
   GOOGLE_DCHECK_NE(&from, this);
-  const DeviceRack2* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<DeviceRack2>(
+  const DeviceRack* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<DeviceRack>(
           &from);
   if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.DeviceRack2)
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.DeviceRack)
     ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
   } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.DeviceRack2)
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.DeviceRack)
     MergeFrom(*source);
   }
 }
 
-void DeviceRack2::MergeFrom(const DeviceRack2& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:Proto.DeviceRack2)
+void DeviceRack::MergeFrom(const DeviceRack& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:Proto.DeviceRack)
   GOOGLE_DCHECK_NE(&from, this);
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -2504,84 +2503,84 @@ void DeviceRack2::MergeFrom(const DeviceRack2& from) {
 
 }
 
-void DeviceRack2::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:Proto.DeviceRack2)
+void DeviceRack::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:Proto.DeviceRack)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void DeviceRack2::CopyFrom(const DeviceRack2& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:Proto.DeviceRack2)
+void DeviceRack::CopyFrom(const DeviceRack& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:Proto.DeviceRack)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool DeviceRack2::IsInitialized() const {
+bool DeviceRack::IsInitialized() const {
   return true;
 }
 
-void DeviceRack2::InternalSwap(DeviceRack2* other) {
+void DeviceRack::InternalSwap(DeviceRack* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata DeviceRack2::GetMetadata() const {
+::PROTOBUF_NAMESPACE_ID::Metadata DeviceRack::GetMetadata() const {
   return GetMetadataStatic();
 }
 
 
 // ===================================================================
 
-class DeviceChassis2::_Internal {
+class DeviceChassis::_Internal {
  public:
-  using HasBits = decltype(std::declval<DeviceChassis2>()._has_bits_);
+  using HasBits = decltype(std::declval<DeviceChassis>()._has_bits_);
   static void set_has_type(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
   }
 };
 
-DeviceChassis2::DeviceChassis2(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+DeviceChassis::DeviceChassis(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
-  // @@protoc_insertion_point(arena_constructor:Proto.DeviceChassis2)
+  // @@protoc_insertion_point(arena_constructor:Proto.DeviceChassis)
 }
-DeviceChassis2::DeviceChassis2(const DeviceChassis2& from)
+DeviceChassis::DeviceChassis(const DeviceChassis& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
       _has_bits_(from._has_bits_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   type_ = from.type_;
-  // @@protoc_insertion_point(copy_constructor:Proto.DeviceChassis2)
+  // @@protoc_insertion_point(copy_constructor:Proto.DeviceChassis)
 }
 
-void DeviceChassis2::SharedCtor() {
+void DeviceChassis::SharedCtor() {
 type_ = 0;
 }
 
-DeviceChassis2::~DeviceChassis2() {
-  // @@protoc_insertion_point(destructor:Proto.DeviceChassis2)
+DeviceChassis::~DeviceChassis() {
+  // @@protoc_insertion_point(destructor:Proto.DeviceChassis)
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void DeviceChassis2::SharedDtor() {
+void DeviceChassis::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
 }
 
-void DeviceChassis2::ArenaDtor(void* object) {
-  DeviceChassis2* _this = reinterpret_cast< DeviceChassis2* >(object);
+void DeviceChassis::ArenaDtor(void* object) {
+  DeviceChassis* _this = reinterpret_cast< DeviceChassis* >(object);
   (void)_this;
 }
-void DeviceChassis2::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+void DeviceChassis::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 }
-void DeviceChassis2::SetCachedSize(int size) const {
+void DeviceChassis::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
 
-void DeviceChassis2::Clear() {
-// @@protoc_insertion_point(message_clear_start:Proto.DeviceChassis2)
+void DeviceChassis::Clear() {
+// @@protoc_insertion_point(message_clear_start:Proto.DeviceChassis)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -2591,7 +2590,7 @@ void DeviceChassis2::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* DeviceChassis2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* DeviceChassis::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   _Internal::HasBits has_bits{};
   while (!ctx->Done(&ptr)) {
@@ -2630,9 +2629,9 @@ failure:
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* DeviceChassis2::_InternalSerialize(
+::PROTOBUF_NAMESPACE_ID::uint8* DeviceChassis::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:Proto.DeviceChassis2)
+  // @@protoc_insertion_point(serialize_to_array_start:Proto.DeviceChassis)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -2647,12 +2646,12 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:Proto.DeviceChassis2)
+  // @@protoc_insertion_point(serialize_to_array_end:Proto.DeviceChassis)
   return target;
 }
 
-size_t DeviceChassis2::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:Proto.DeviceChassis2)
+size_t DeviceChassis::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:Proto.DeviceChassis)
   size_t total_size = 0;
 
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -2676,23 +2675,23 @@ size_t DeviceChassis2::ByteSizeLong() const {
   return total_size;
 }
 
-void DeviceChassis2::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:Proto.DeviceChassis2)
+void DeviceChassis::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:Proto.DeviceChassis)
   GOOGLE_DCHECK_NE(&from, this);
-  const DeviceChassis2* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<DeviceChassis2>(
+  const DeviceChassis* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<DeviceChassis>(
           &from);
   if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.DeviceChassis2)
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.DeviceChassis)
     ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
   } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.DeviceChassis2)
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.DeviceChassis)
     MergeFrom(*source);
   }
 }
 
-void DeviceChassis2::MergeFrom(const DeviceChassis2& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:Proto.DeviceChassis2)
+void DeviceChassis::MergeFrom(const DeviceChassis& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:Proto.DeviceChassis)
   GOOGLE_DCHECK_NE(&from, this);
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -2703,41 +2702,41 @@ void DeviceChassis2::MergeFrom(const DeviceChassis2& from) {
   }
 }
 
-void DeviceChassis2::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:Proto.DeviceChassis2)
+void DeviceChassis::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:Proto.DeviceChassis)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void DeviceChassis2::CopyFrom(const DeviceChassis2& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:Proto.DeviceChassis2)
+void DeviceChassis::CopyFrom(const DeviceChassis& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:Proto.DeviceChassis)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool DeviceChassis2::IsInitialized() const {
+bool DeviceChassis::IsInitialized() const {
   return true;
 }
 
-void DeviceChassis2::InternalSwap(DeviceChassis2* other) {
+void DeviceChassis::InternalSwap(DeviceChassis* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   swap(_has_bits_[0], other->_has_bits_[0]);
   swap(type_, other->type_);
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata DeviceChassis2::GetMetadata() const {
+::PROTOBUF_NAMESPACE_ID::Metadata DeviceChassis::GetMetadata() const {
   return GetMetadataStatic();
 }
 
 
 // ===================================================================
 
-class DeviceModule2::_Internal {
+class DeviceModule::_Internal {
  public:
-  using HasBits = decltype(std::declval<DeviceModule2>()._has_bits_);
+  using HasBits = decltype(std::declval<DeviceModule>()._has_bits_);
   static void set_has_typeobsolete(HasBits* has_bits) {
     (*has_bits)[0] |= 4u;
   }
@@ -2755,13 +2754,13 @@ class DeviceModule2::_Internal {
   }
 };
 
-DeviceModule2::DeviceModule2(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+DeviceModule::DeviceModule(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
-  // @@protoc_insertion_point(arena_constructor:Proto.DeviceModule2)
+  // @@protoc_insertion_point(arena_constructor:Proto.DeviceModule)
 }
-DeviceModule2::DeviceModule2(const DeviceModule2& from)
+DeviceModule::DeviceModule(const DeviceModule& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
       _has_bits_(from._has_bits_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
@@ -2778,10 +2777,10 @@ DeviceModule2::DeviceModule2(const DeviceModule2& from)
   ::memcpy(&typeobsolete_, &from.typeobsolete_,
     static_cast<size_t>(reinterpret_cast<char*>(&custommodulefamily_) -
     reinterpret_cast<char*>(&typeobsolete_)) + sizeof(custommodulefamily_));
-  // @@protoc_insertion_point(copy_constructor:Proto.DeviceModule2)
+  // @@protoc_insertion_point(copy_constructor:Proto.DeviceModule)
 }
 
-void DeviceModule2::SharedCtor() {
+void DeviceModule::SharedCtor() {
 configurationscript_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 rawdatadescription_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
@@ -2790,30 +2789,30 @@ rawdatadescription_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmpt
     reinterpret_cast<char*>(&typeobsolete_)) + sizeof(custommodulefamily_));
 }
 
-DeviceModule2::~DeviceModule2() {
-  // @@protoc_insertion_point(destructor:Proto.DeviceModule2)
+DeviceModule::~DeviceModule() {
+  // @@protoc_insertion_point(destructor:Proto.DeviceModule)
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void DeviceModule2::SharedDtor() {
+void DeviceModule::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
   configurationscript_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   rawdatadescription_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
-void DeviceModule2::ArenaDtor(void* object) {
-  DeviceModule2* _this = reinterpret_cast< DeviceModule2* >(object);
+void DeviceModule::ArenaDtor(void* object) {
+  DeviceModule* _this = reinterpret_cast< DeviceModule* >(object);
   (void)_this;
 }
-void DeviceModule2::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+void DeviceModule::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 }
-void DeviceModule2::SetCachedSize(int size) const {
+void DeviceModule::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
 
-void DeviceModule2::Clear() {
-// @@protoc_insertion_point(message_clear_start:Proto.DeviceModule2)
+void DeviceModule::Clear() {
+// @@protoc_insertion_point(message_clear_start:Proto.DeviceModule)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -2836,7 +2835,7 @@ void DeviceModule2::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* DeviceModule2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* DeviceModule::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   _Internal::HasBits has_bits{};
   while (!ctx->Done(&ptr)) {
@@ -2858,7 +2857,7 @@ const char* DeviceModule2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_
           auto str = _internal_mutable_configurationscript();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DeviceModule2.configurationScript");
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DeviceModule.configurationScript");
           #endif  // !NDEBUG
           CHK_(ptr);
         } else goto handle_unusual;
@@ -2877,7 +2876,7 @@ const char* DeviceModule2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_
           auto str = _internal_mutable_rawdatadescription();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DeviceModule2.rawDataDescription");
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DeviceModule.rawDataDescription");
           #endif  // !NDEBUG
           CHK_(ptr);
         } else goto handle_unusual;
@@ -2913,9 +2912,9 @@ failure:
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* DeviceModule2::_InternalSerialize(
+::PROTOBUF_NAMESPACE_ID::uint8* DeviceModule::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:Proto.DeviceModule2)
+  // @@protoc_insertion_point(serialize_to_array_start:Proto.DeviceModule)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -2931,7 +2930,7 @@ failure:
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_configurationscript().data(), static_cast<int>(this->_internal_configurationscript().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Proto.DeviceModule2.configurationScript");
+      "Proto.DeviceModule.configurationScript");
     target = stream->WriteStringMaybeAliased(
         2, this->_internal_configurationscript(), target);
   }
@@ -2947,7 +2946,7 @@ failure:
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_rawdatadescription().data(), static_cast<int>(this->_internal_rawdatadescription().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Proto.DeviceModule2.rawDataDescription");
+      "Proto.DeviceModule.rawDataDescription");
     target = stream->WriteStringMaybeAliased(
         4, this->_internal_rawdatadescription(), target);
   }
@@ -2962,12 +2961,12 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:Proto.DeviceModule2)
+  // @@protoc_insertion_point(serialize_to_array_end:Proto.DeviceModule)
   return target;
 }
 
-size_t DeviceModule2::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:Proto.DeviceModule2)
+size_t DeviceModule::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:Proto.DeviceModule)
   size_t total_size = 0;
 
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -3021,23 +3020,23 @@ size_t DeviceModule2::ByteSizeLong() const {
   return total_size;
 }
 
-void DeviceModule2::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:Proto.DeviceModule2)
+void DeviceModule::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:Proto.DeviceModule)
   GOOGLE_DCHECK_NE(&from, this);
-  const DeviceModule2* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<DeviceModule2>(
+  const DeviceModule* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<DeviceModule>(
           &from);
   if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.DeviceModule2)
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.DeviceModule)
     ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
   } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.DeviceModule2)
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.DeviceModule)
     MergeFrom(*source);
   }
 }
 
-void DeviceModule2::MergeFrom(const DeviceModule2& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:Proto.DeviceModule2)
+void DeviceModule::MergeFrom(const DeviceModule& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:Proto.DeviceModule)
   GOOGLE_DCHECK_NE(&from, this);
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -3064,93 +3063,93 @@ void DeviceModule2::MergeFrom(const DeviceModule2& from) {
   }
 }
 
-void DeviceModule2::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:Proto.DeviceModule2)
+void DeviceModule::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:Proto.DeviceModule)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void DeviceModule2::CopyFrom(const DeviceModule2& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:Proto.DeviceModule2)
+void DeviceModule::CopyFrom(const DeviceModule& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:Proto.DeviceModule)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool DeviceModule2::IsInitialized() const {
+bool DeviceModule::IsInitialized() const {
   return true;
 }
 
-void DeviceModule2::InternalSwap(DeviceModule2* other) {
+void DeviceModule::InternalSwap(DeviceModule* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   swap(_has_bits_[0], other->_has_bits_[0]);
   configurationscript_.Swap(&other->configurationscript_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   rawdatadescription_.Swap(&other->rawdatadescription_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(DeviceModule2, custommodulefamily_)
-      + sizeof(DeviceModule2::custommodulefamily_)
-      - PROTOBUF_FIELD_OFFSET(DeviceModule2, typeobsolete_)>(
+      PROTOBUF_FIELD_OFFSET(DeviceModule, custommodulefamily_)
+      + sizeof(DeviceModule::custommodulefamily_)
+      - PROTOBUF_FIELD_OFFSET(DeviceModule, typeobsolete_)>(
           reinterpret_cast<char*>(&typeobsolete_),
           reinterpret_cast<char*>(&other->typeobsolete_));
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata DeviceModule2::GetMetadata() const {
+::PROTOBUF_NAMESPACE_ID::Metadata DeviceModule::GetMetadata() const {
   return GetMetadataStatic();
 }
 
 
 // ===================================================================
 
-class DeviceController2::_Internal {
+class DeviceController::_Internal {
  public:
-  using HasBits = decltype(std::declval<DeviceController2>()._has_bits_);
+  using HasBits = decltype(std::declval<DeviceController>()._has_bits_);
   static void set_has_diagdataoffset(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
   }
 };
 
-DeviceController2::DeviceController2(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+DeviceController::DeviceController(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
-  // @@protoc_insertion_point(arena_constructor:Proto.DeviceController2)
+  // @@protoc_insertion_point(arena_constructor:Proto.DeviceController)
 }
-DeviceController2::DeviceController2(const DeviceController2& from)
+DeviceController::DeviceController(const DeviceController& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
       _has_bits_(from._has_bits_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   diagdataoffset_ = from.diagdataoffset_;
-  // @@protoc_insertion_point(copy_constructor:Proto.DeviceController2)
+  // @@protoc_insertion_point(copy_constructor:Proto.DeviceController)
 }
 
-void DeviceController2::SharedCtor() {
+void DeviceController::SharedCtor() {
 diagdataoffset_ = 0;
 }
 
-DeviceController2::~DeviceController2() {
-  // @@protoc_insertion_point(destructor:Proto.DeviceController2)
+DeviceController::~DeviceController() {
+  // @@protoc_insertion_point(destructor:Proto.DeviceController)
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void DeviceController2::SharedDtor() {
+void DeviceController::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
 }
 
-void DeviceController2::ArenaDtor(void* object) {
-  DeviceController2* _this = reinterpret_cast< DeviceController2* >(object);
+void DeviceController::ArenaDtor(void* object) {
+  DeviceController* _this = reinterpret_cast< DeviceController* >(object);
   (void)_this;
 }
-void DeviceController2::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+void DeviceController::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 }
-void DeviceController2::SetCachedSize(int size) const {
+void DeviceController::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
 
-void DeviceController2::Clear() {
-// @@protoc_insertion_point(message_clear_start:Proto.DeviceController2)
+void DeviceController::Clear() {
+// @@protoc_insertion_point(message_clear_start:Proto.DeviceController)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -3160,7 +3159,7 @@ void DeviceController2::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* DeviceController2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* DeviceController::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   _Internal::HasBits has_bits{};
   while (!ctx->Done(&ptr)) {
@@ -3199,9 +3198,9 @@ failure:
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* DeviceController2::_InternalSerialize(
+::PROTOBUF_NAMESPACE_ID::uint8* DeviceController::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:Proto.DeviceController2)
+  // @@protoc_insertion_point(serialize_to_array_start:Proto.DeviceController)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -3216,12 +3215,12 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:Proto.DeviceController2)
+  // @@protoc_insertion_point(serialize_to_array_end:Proto.DeviceController)
   return target;
 }
 
-size_t DeviceController2::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:Proto.DeviceController2)
+size_t DeviceController::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:Proto.DeviceController)
   size_t total_size = 0;
 
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -3245,23 +3244,23 @@ size_t DeviceController2::ByteSizeLong() const {
   return total_size;
 }
 
-void DeviceController2::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:Proto.DeviceController2)
+void DeviceController::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:Proto.DeviceController)
   GOOGLE_DCHECK_NE(&from, this);
-  const DeviceController2* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<DeviceController2>(
+  const DeviceController* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<DeviceController>(
           &from);
   if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.DeviceController2)
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.DeviceController)
     ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
   } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.DeviceController2)
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.DeviceController)
     MergeFrom(*source);
   }
 }
 
-void DeviceController2::MergeFrom(const DeviceController2& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:Proto.DeviceController2)
+void DeviceController::MergeFrom(const DeviceController& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:Proto.DeviceController)
   GOOGLE_DCHECK_NE(&from, this);
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -3272,41 +3271,41 @@ void DeviceController2::MergeFrom(const DeviceController2& from) {
   }
 }
 
-void DeviceController2::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:Proto.DeviceController2)
+void DeviceController::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:Proto.DeviceController)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void DeviceController2::CopyFrom(const DeviceController2& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:Proto.DeviceController2)
+void DeviceController::CopyFrom(const DeviceController& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:Proto.DeviceController)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool DeviceController2::IsInitialized() const {
+bool DeviceController::IsInitialized() const {
   return true;
 }
 
-void DeviceController2::InternalSwap(DeviceController2* other) {
+void DeviceController::InternalSwap(DeviceController* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   swap(_has_bits_[0], other->_has_bits_[0]);
   swap(diagdataoffset_, other->diagdataoffset_);
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata DeviceController2::GetMetadata() const {
+::PROTOBUF_NAMESPACE_ID::Metadata DeviceController::GetMetadata() const {
   return GetMetadataStatic();
 }
 
 
 // ===================================================================
 
-class DeviceAppSignal2::_Internal {
+class DeviceAppSignal::_Internal {
  public:
-  using HasBits = decltype(std::declval<DeviceAppSignal2>()._has_bits_);
+  using HasBits = decltype(std::declval<DeviceAppSignal>()._has_bits_);
   static void set_has_obsoletetype(HasBits* has_bits) {
     (*has_bits)[0] |= 8u;
   }
@@ -3363,13 +3362,13 @@ class DeviceAppSignal2::_Internal {
   }
 };
 
-DeviceAppSignal2::DeviceAppSignal2(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+DeviceAppSignal::DeviceAppSignal(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
-  // @@protoc_insertion_point(arena_constructor:Proto.DeviceAppSignal2)
+  // @@protoc_insertion_point(arena_constructor:Proto.DeviceAppSignal)
 }
-DeviceAppSignal2::DeviceAppSignal2(const DeviceAppSignal2& from)
+DeviceAppSignal::DeviceAppSignal(const DeviceAppSignal& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
       _has_bits_(from._has_bits_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
@@ -3391,10 +3390,10 @@ DeviceAppSignal2::DeviceAppSignal2(const DeviceAppSignal2& from)
   ::memcpy(&obsoletetype_, &from.obsoletetype_,
     static_cast<size_t>(reinterpret_cast<char*>(&appsignalhighengunits_) -
     reinterpret_cast<char*>(&obsoletetype_)) + sizeof(appsignalhighengunits_));
-  // @@protoc_insertion_point(copy_constructor:Proto.DeviceAppSignal2)
+  // @@protoc_insertion_point(copy_constructor:Proto.DeviceAppSignal)
 }
 
-void DeviceAppSignal2::SharedCtor() {
+void DeviceAppSignal::SharedCtor() {
 validitysignalid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 appsignalbustypeid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 signalspecpropsstruct_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
@@ -3407,31 +3406,31 @@ appsignaldataformat_ = 2;
 appsignalhighengunits_ = 100;
 }
 
-DeviceAppSignal2::~DeviceAppSignal2() {
-  // @@protoc_insertion_point(destructor:Proto.DeviceAppSignal2)
+DeviceAppSignal::~DeviceAppSignal() {
+  // @@protoc_insertion_point(destructor:Proto.DeviceAppSignal)
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void DeviceAppSignal2::SharedDtor() {
+void DeviceAppSignal::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
   validitysignalid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   appsignalbustypeid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   signalspecpropsstruct_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
-void DeviceAppSignal2::ArenaDtor(void* object) {
-  DeviceAppSignal2* _this = reinterpret_cast< DeviceAppSignal2* >(object);
+void DeviceAppSignal::ArenaDtor(void* object) {
+  DeviceAppSignal* _this = reinterpret_cast< DeviceAppSignal* >(object);
   (void)_this;
 }
-void DeviceAppSignal2::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+void DeviceAppSignal::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 }
-void DeviceAppSignal2::SetCachedSize(int size) const {
+void DeviceAppSignal::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
 
-void DeviceAppSignal2::Clear() {
-// @@protoc_insertion_point(message_clear_start:Proto.DeviceAppSignal2)
+void DeviceAppSignal::Clear() {
+// @@protoc_insertion_point(message_clear_start:Proto.DeviceAppSignal)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -3467,7 +3466,7 @@ void DeviceAppSignal2::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* DeviceAppSignal2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* DeviceAppSignal::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   _Internal::HasBits has_bits{};
   while (!ctx->Done(&ptr)) {
@@ -3593,7 +3592,7 @@ const char* DeviceAppSignal2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPA
           auto str = _internal_mutable_validitysignalid();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DeviceAppSignal2.validitySignalId");
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DeviceAppSignal.validitySignalId");
           #endif  // !NDEBUG
           CHK_(ptr);
         } else goto handle_unusual;
@@ -3604,7 +3603,7 @@ const char* DeviceAppSignal2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPA
           auto str = _internal_mutable_appsignalbustypeid();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DeviceAppSignal2.appSignalBusTypeId");
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DeviceAppSignal.appSignalBusTypeId");
           #endif  // !NDEBUG
           CHK_(ptr);
         } else goto handle_unusual;
@@ -3615,7 +3614,7 @@ const char* DeviceAppSignal2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPA
           auto str = _internal_mutable_signalspecpropsstruct();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DeviceAppSignal2.signalSpecPropsStruct");
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DeviceAppSignal.signalSpecPropsStruct");
           #endif  // !NDEBUG
           CHK_(ptr);
         } else goto handle_unusual;
@@ -3651,9 +3650,9 @@ failure:
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* DeviceAppSignal2::_InternalSerialize(
+::PROTOBUF_NAMESPACE_ID::uint8* DeviceAppSignal::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:Proto.DeviceAppSignal2)
+  // @@protoc_insertion_point(serialize_to_array_start:Proto.DeviceAppSignal)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -3747,7 +3746,7 @@ failure:
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_validitysignalid().data(), static_cast<int>(this->_internal_validitysignalid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Proto.DeviceAppSignal2.validitySignalId");
+      "Proto.DeviceAppSignal.validitySignalId");
     target = stream->WriteStringMaybeAliased(
         20, this->_internal_validitysignalid(), target);
   }
@@ -3757,7 +3756,7 @@ failure:
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_appsignalbustypeid().data(), static_cast<int>(this->_internal_appsignalbustypeid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Proto.DeviceAppSignal2.appSignalBusTypeId");
+      "Proto.DeviceAppSignal.appSignalBusTypeId");
     target = stream->WriteStringMaybeAliased(
         26, this->_internal_appsignalbustypeid(), target);
   }
@@ -3767,7 +3766,7 @@ failure:
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_signalspecpropsstruct().data(), static_cast<int>(this->_internal_signalspecpropsstruct().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Proto.DeviceAppSignal2.signalSpecPropsStruct");
+      "Proto.DeviceAppSignal.signalSpecPropsStruct");
     target = stream->WriteStringMaybeAliased(
         40, this->_internal_signalspecpropsstruct(), target);
   }
@@ -3782,12 +3781,12 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:Proto.DeviceAppSignal2)
+  // @@protoc_insertion_point(serialize_to_array_end:Proto.DeviceAppSignal)
   return target;
 }
 
-size_t DeviceAppSignal2::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:Proto.DeviceAppSignal2)
+size_t DeviceAppSignal::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:Proto.DeviceAppSignal)
   size_t total_size = 0;
 
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -3930,23 +3929,23 @@ size_t DeviceAppSignal2::ByteSizeLong() const {
   return total_size;
 }
 
-void DeviceAppSignal2::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:Proto.DeviceAppSignal2)
+void DeviceAppSignal::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:Proto.DeviceAppSignal)
   GOOGLE_DCHECK_NE(&from, this);
-  const DeviceAppSignal2* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<DeviceAppSignal2>(
+  const DeviceAppSignal* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<DeviceAppSignal>(
           &from);
   if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.DeviceAppSignal2)
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.DeviceAppSignal)
     ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
   } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.DeviceAppSignal2)
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.DeviceAppSignal)
     MergeFrom(*source);
   }
 }
 
-void DeviceAppSignal2::MergeFrom(const DeviceAppSignal2& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:Proto.DeviceAppSignal2)
+void DeviceAppSignal::MergeFrom(const DeviceAppSignal& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:Proto.DeviceAppSignal)
   GOOGLE_DCHECK_NE(&from, this);
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -4018,25 +4017,25 @@ void DeviceAppSignal2::MergeFrom(const DeviceAppSignal2& from) {
   }
 }
 
-void DeviceAppSignal2::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:Proto.DeviceAppSignal2)
+void DeviceAppSignal::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:Proto.DeviceAppSignal)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void DeviceAppSignal2::CopyFrom(const DeviceAppSignal2& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:Proto.DeviceAppSignal2)
+void DeviceAppSignal::CopyFrom(const DeviceAppSignal& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:Proto.DeviceAppSignal)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool DeviceAppSignal2::IsInitialized() const {
+bool DeviceAppSignal::IsInitialized() const {
   return true;
 }
 
-void DeviceAppSignal2::InternalSwap(DeviceAppSignal2* other) {
+void DeviceAppSignal::InternalSwap(DeviceAppSignal* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   swap(_has_bits_[0], other->_has_bits_[0]);
@@ -4044,9 +4043,9 @@ void DeviceAppSignal2::InternalSwap(DeviceAppSignal2* other) {
   appsignalbustypeid_.Swap(&other->appsignalbustypeid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   signalspecpropsstruct_.Swap(&other->signalspecpropsstruct_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(DeviceAppSignal2, signalspecpropsstructwasfixed_)
-      + sizeof(DeviceAppSignal2::signalspecpropsstructwasfixed_)
-      - PROTOBUF_FIELD_OFFSET(DeviceAppSignal2, obsoletetype_)>(
+      PROTOBUF_FIELD_OFFSET(DeviceAppSignal, signalspecpropsstructwasfixed_)
+      + sizeof(DeviceAppSignal::signalspecpropsstructwasfixed_)
+      - PROTOBUF_FIELD_OFFSET(DeviceAppSignal, obsoletetype_)>(
           reinterpret_cast<char*>(&obsoletetype_),
           reinterpret_cast<char*>(&other->obsoletetype_));
   swap(appsignalhighadc_, other->appsignalhighadc_);
@@ -4054,16 +4053,16 @@ void DeviceAppSignal2::InternalSwap(DeviceAppSignal2* other) {
   swap(appsignalhighengunits_, other->appsignalhighengunits_);
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata DeviceAppSignal2::GetMetadata() const {
+::PROTOBUF_NAMESPACE_ID::Metadata DeviceAppSignal::GetMetadata() const {
   return GetMetadataStatic();
 }
 
 
 // ===================================================================
 
-class DeviceDiagSignal2::_Internal {
+class DeviceDiagSignal::_Internal {
  public:
-  using HasBits = decltype(std::declval<DeviceDiagSignal2>()._has_bits_);
+  using HasBits = decltype(std::declval<DeviceDiagSignal>()._has_bits_);
   static void set_has_level(HasBits* has_bits) {
     (*has_bits)[0] |= 8u;
   }
@@ -4114,13 +4113,13 @@ class DeviceDiagSignal2::_Internal {
   }
 };
 
-DeviceDiagSignal2::DeviceDiagSignal2(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+DeviceDiagSignal::DeviceDiagSignal(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
-  // @@protoc_insertion_point(arena_constructor:Proto.DeviceDiagSignal2)
+  // @@protoc_insertion_point(arena_constructor:Proto.DeviceDiagSignal)
 }
-DeviceDiagSignal2::DeviceDiagSignal2(const DeviceDiagSignal2& from)
+DeviceDiagSignal::DeviceDiagSignal(const DeviceDiagSignal& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
       _has_bits_(from._has_bits_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
@@ -4142,10 +4141,10 @@ DeviceDiagSignal2::DeviceDiagSignal2(const DeviceDiagSignal2& from)
   ::memcpy(&level_, &from.level_,
     static_cast<size_t>(reinterpret_cast<char*>(&decimalplaces_) -
     reinterpret_cast<char*>(&level_)) + sizeof(decimalplaces_));
-  // @@protoc_insertion_point(copy_constructor:Proto.DeviceDiagSignal2)
+  // @@protoc_insertion_point(copy_constructor:Proto.DeviceDiagSignal)
 }
 
-void DeviceDiagSignal2::SharedCtor() {
+void DeviceDiagSignal::SharedCtor() {
 signaltypeid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 validitysignalid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 reflectedsignalid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
@@ -4155,31 +4154,31 @@ reflectedsignalid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmpty
     reinterpret_cast<char*>(&level_)) + sizeof(decimalplaces_));
 }
 
-DeviceDiagSignal2::~DeviceDiagSignal2() {
-  // @@protoc_insertion_point(destructor:Proto.DeviceDiagSignal2)
+DeviceDiagSignal::~DeviceDiagSignal() {
+  // @@protoc_insertion_point(destructor:Proto.DeviceDiagSignal)
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void DeviceDiagSignal2::SharedDtor() {
+void DeviceDiagSignal::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
   signaltypeid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   validitysignalid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   reflectedsignalid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
-void DeviceDiagSignal2::ArenaDtor(void* object) {
-  DeviceDiagSignal2* _this = reinterpret_cast< DeviceDiagSignal2* >(object);
+void DeviceDiagSignal::ArenaDtor(void* object) {
+  DeviceDiagSignal* _this = reinterpret_cast< DeviceDiagSignal* >(object);
   (void)_this;
 }
-void DeviceDiagSignal2::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+void DeviceDiagSignal::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 }
-void DeviceDiagSignal2::SetCachedSize(int size) const {
+void DeviceDiagSignal::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
 
-void DeviceDiagSignal2::Clear() {
-// @@protoc_insertion_point(message_clear_start:Proto.DeviceDiagSignal2)
+void DeviceDiagSignal::Clear() {
+// @@protoc_insertion_point(message_clear_start:Proto.DeviceDiagSignal)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -4210,7 +4209,7 @@ void DeviceDiagSignal2::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* DeviceDiagSignal2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* DeviceDiagSignal::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   _Internal::HasBits has_bits{};
   while (!ctx->Done(&ptr)) {
@@ -4232,7 +4231,7 @@ const char* DeviceDiagSignal2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESP
           auto str = _internal_mutable_signaltypeid();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DeviceDiagSignal2.signalTypeId");
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DeviceDiagSignal.signalTypeId");
           #endif  // !NDEBUG
           CHK_(ptr);
         } else goto handle_unusual;
@@ -4243,7 +4242,7 @@ const char* DeviceDiagSignal2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESP
           auto str = _internal_mutable_validitysignalid();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DeviceDiagSignal2.validitySignalId");
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DeviceDiagSignal.validitySignalId");
           #endif  // !NDEBUG
           CHK_(ptr);
         } else goto handle_unusual;
@@ -4262,7 +4261,7 @@ const char* DeviceDiagSignal2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESP
           auto str = _internal_mutable_reflectedsignalid();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DeviceDiagSignal2.reflectedSignalId");
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DeviceDiagSignal.reflectedSignalId");
           #endif  // !NDEBUG
           CHK_(ptr);
         } else goto handle_unusual;
@@ -4378,9 +4377,9 @@ failure:
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* DeviceDiagSignal2::_InternalSerialize(
+::PROTOBUF_NAMESPACE_ID::uint8* DeviceDiagSignal::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:Proto.DeviceDiagSignal2)
+  // @@protoc_insertion_point(serialize_to_array_start:Proto.DeviceDiagSignal)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -4396,7 +4395,7 @@ failure:
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_signaltypeid().data(), static_cast<int>(this->_internal_signaltypeid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Proto.DeviceDiagSignal2.signalTypeId");
+      "Proto.DeviceDiagSignal.signalTypeId");
     target = stream->WriteStringMaybeAliased(
         4, this->_internal_signaltypeid(), target);
   }
@@ -4406,7 +4405,7 @@ failure:
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_validitysignalid().data(), static_cast<int>(this->_internal_validitysignalid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Proto.DeviceDiagSignal2.validitySignalId");
+      "Proto.DeviceDiagSignal.validitySignalId");
     target = stream->WriteStringMaybeAliased(
         5, this->_internal_validitysignalid(), target);
   }
@@ -4422,7 +4421,7 @@ failure:
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_reflectedsignalid().data(), static_cast<int>(this->_internal_reflectedsignalid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Proto.DeviceDiagSignal2.reflectedSignalId");
+      "Proto.DeviceDiagSignal.reflectedSignalId");
     target = stream->WriteStringMaybeAliased(
         7, this->_internal_reflectedsignalid(), target);
   }
@@ -4497,12 +4496,12 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:Proto.DeviceDiagSignal2)
+  // @@protoc_insertion_point(serialize_to_array_end:Proto.DeviceDiagSignal)
   return target;
 }
 
-size_t DeviceDiagSignal2::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:Proto.DeviceDiagSignal2)
+size_t DeviceDiagSignal::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:Proto.DeviceDiagSignal)
   size_t total_size = 0;
 
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -4623,23 +4622,23 @@ size_t DeviceDiagSignal2::ByteSizeLong() const {
   return total_size;
 }
 
-void DeviceDiagSignal2::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:Proto.DeviceDiagSignal2)
+void DeviceDiagSignal::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:Proto.DeviceDiagSignal)
   GOOGLE_DCHECK_NE(&from, this);
-  const DeviceDiagSignal2* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<DeviceDiagSignal2>(
+  const DeviceDiagSignal* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<DeviceDiagSignal>(
           &from);
   if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.DeviceDiagSignal2)
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.DeviceDiagSignal)
     ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
   } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.DeviceDiagSignal2)
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.DeviceDiagSignal)
     MergeFrom(*source);
   }
 }
 
-void DeviceDiagSignal2::MergeFrom(const DeviceDiagSignal2& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:Proto.DeviceDiagSignal2)
+void DeviceDiagSignal::MergeFrom(const DeviceDiagSignal& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:Proto.DeviceDiagSignal)
   GOOGLE_DCHECK_NE(&from, this);
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -4702,25 +4701,25 @@ void DeviceDiagSignal2::MergeFrom(const DeviceDiagSignal2& from) {
   }
 }
 
-void DeviceDiagSignal2::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:Proto.DeviceDiagSignal2)
+void DeviceDiagSignal::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:Proto.DeviceDiagSignal)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void DeviceDiagSignal2::CopyFrom(const DeviceDiagSignal2& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:Proto.DeviceDiagSignal2)
+void DeviceDiagSignal::CopyFrom(const DeviceDiagSignal& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:Proto.DeviceDiagSignal)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool DeviceDiagSignal2::IsInitialized() const {
+bool DeviceDiagSignal::IsInitialized() const {
   return true;
 }
 
-void DeviceDiagSignal2::InternalSwap(DeviceDiagSignal2* other) {
+void DeviceDiagSignal::InternalSwap(DeviceDiagSignal* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   swap(_has_bits_[0], other->_has_bits_[0]);
@@ -4728,23 +4727,23 @@ void DeviceDiagSignal2::InternalSwap(DeviceDiagSignal2* other) {
   validitysignalid_.Swap(&other->validitysignalid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   reflectedsignalid_.Swap(&other->reflectedsignalid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(DeviceDiagSignal2, decimalplaces_)
-      + sizeof(DeviceDiagSignal2::decimalplaces_)
-      - PROTOBUF_FIELD_OFFSET(DeviceDiagSignal2, level_)>(
+      PROTOBUF_FIELD_OFFSET(DeviceDiagSignal, decimalplaces_)
+      + sizeof(DeviceDiagSignal::decimalplaces_)
+      - PROTOBUF_FIELD_OFFSET(DeviceDiagSignal, level_)>(
           reinterpret_cast<char*>(&level_),
           reinterpret_cast<char*>(&other->level_));
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata DeviceDiagSignal2::GetMetadata() const {
+::PROTOBUF_NAMESPACE_ID::Metadata DeviceDiagSignal::GetMetadata() const {
   return GetMetadataStatic();
 }
 
 
 // ===================================================================
 
-class Workstation2::_Internal {
+class Workstation::_Internal {
  public:
-  using HasBits = decltype(std::declval<Workstation2>()._has_bits_);
+  using HasBits = decltype(std::declval<Workstation>()._has_bits_);
   static void set_has_type(HasBits* has_bits) {
     (*has_bits)[0] |= 2u;
   }
@@ -4753,13 +4752,13 @@ class Workstation2::_Internal {
   }
 };
 
-Workstation2::Workstation2(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+Workstation::Workstation(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
-  // @@protoc_insertion_point(arena_constructor:Proto.Workstation2)
+  // @@protoc_insertion_point(arena_constructor:Proto.Workstation)
 }
-Workstation2::Workstation2(const Workstation2& from)
+Workstation::Workstation(const Workstation& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
       _has_bits_(from._has_bits_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
@@ -4769,37 +4768,37 @@ Workstation2::Workstation2(const Workstation2& from)
       GetArena());
   }
   type_ = from.type_;
-  // @@protoc_insertion_point(copy_constructor:Proto.Workstation2)
+  // @@protoc_insertion_point(copy_constructor:Proto.Workstation)
 }
 
-void Workstation2::SharedCtor() {
+void Workstation::SharedCtor() {
 hostname_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 type_ = 0;
 }
 
-Workstation2::~Workstation2() {
-  // @@protoc_insertion_point(destructor:Proto.Workstation2)
+Workstation::~Workstation() {
+  // @@protoc_insertion_point(destructor:Proto.Workstation)
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void Workstation2::SharedDtor() {
+void Workstation::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
   hostname_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
-void Workstation2::ArenaDtor(void* object) {
-  Workstation2* _this = reinterpret_cast< Workstation2* >(object);
+void Workstation::ArenaDtor(void* object) {
+  Workstation* _this = reinterpret_cast< Workstation* >(object);
   (void)_this;
 }
-void Workstation2::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+void Workstation::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 }
-void Workstation2::SetCachedSize(int size) const {
+void Workstation::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
 
-void Workstation2::Clear() {
-// @@protoc_insertion_point(message_clear_start:Proto.Workstation2)
+void Workstation::Clear() {
+// @@protoc_insertion_point(message_clear_start:Proto.Workstation)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -4813,7 +4812,7 @@ void Workstation2::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* Workstation2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* Workstation::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   _Internal::HasBits has_bits{};
   while (!ctx->Done(&ptr)) {
@@ -4835,7 +4834,7 @@ const char* Workstation2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
           auto str = _internal_mutable_hostname();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.Workstation2.hostname");
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.Workstation.hostname");
           #endif  // !NDEBUG
           CHK_(ptr);
         } else goto handle_unusual;
@@ -4863,9 +4862,9 @@ failure:
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* Workstation2::_InternalSerialize(
+::PROTOBUF_NAMESPACE_ID::uint8* Workstation::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:Proto.Workstation2)
+  // @@protoc_insertion_point(serialize_to_array_start:Proto.Workstation)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -4881,7 +4880,7 @@ failure:
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_hostname().data(), static_cast<int>(this->_internal_hostname().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Proto.Workstation2.hostname");
+      "Proto.Workstation.hostname");
     target = stream->WriteStringMaybeAliased(
         2, this->_internal_hostname(), target);
   }
@@ -4890,12 +4889,12 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:Proto.Workstation2)
+  // @@protoc_insertion_point(serialize_to_array_end:Proto.Workstation)
   return target;
 }
 
-size_t Workstation2::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:Proto.Workstation2)
+size_t Workstation::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:Proto.Workstation)
   size_t total_size = 0;
 
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -4928,23 +4927,23 @@ size_t Workstation2::ByteSizeLong() const {
   return total_size;
 }
 
-void Workstation2::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:Proto.Workstation2)
+void Workstation::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:Proto.Workstation)
   GOOGLE_DCHECK_NE(&from, this);
-  const Workstation2* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<Workstation2>(
+  const Workstation* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<Workstation>(
           &from);
   if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.Workstation2)
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.Workstation)
     ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
   } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.Workstation2)
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.Workstation)
     MergeFrom(*source);
   }
 }
 
-void Workstation2::MergeFrom(const Workstation2& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:Proto.Workstation2)
+void Workstation::MergeFrom(const Workstation& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:Proto.Workstation)
   GOOGLE_DCHECK_NE(&from, this);
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -4962,25 +4961,25 @@ void Workstation2::MergeFrom(const Workstation2& from) {
   }
 }
 
-void Workstation2::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:Proto.Workstation2)
+void Workstation::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:Proto.Workstation)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void Workstation2::CopyFrom(const Workstation2& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:Proto.Workstation2)
+void Workstation::CopyFrom(const Workstation& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:Proto.Workstation)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool Workstation2::IsInitialized() const {
+bool Workstation::IsInitialized() const {
   return true;
 }
 
-void Workstation2::InternalSwap(Workstation2* other) {
+void Workstation::InternalSwap(Workstation* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   swap(_has_bits_[0], other->_has_bits_[0]);
@@ -4988,61 +4987,61 @@ void Workstation2::InternalSwap(Workstation2* other) {
   swap(type_, other->type_);
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata Workstation2::GetMetadata() const {
+::PROTOBUF_NAMESPACE_ID::Metadata Workstation::GetMetadata() const {
   return GetMetadataStatic();
 }
 
 
 // ===================================================================
 
-class Software2::_Internal {
+class Software::_Internal {
  public:
-  using HasBits = decltype(std::declval<Software2>()._has_bits_);
+  using HasBits = decltype(std::declval<Software>()._has_bits_);
   static void set_has_type(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
   }
 };
 
-Software2::Software2(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+Software::Software(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
-  // @@protoc_insertion_point(arena_constructor:Proto.Software2)
+  // @@protoc_insertion_point(arena_constructor:Proto.Software)
 }
-Software2::Software2(const Software2& from)
+Software::Software(const Software& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
       _has_bits_(from._has_bits_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   type_ = from.type_;
-  // @@protoc_insertion_point(copy_constructor:Proto.Software2)
+  // @@protoc_insertion_point(copy_constructor:Proto.Software)
 }
 
-void Software2::SharedCtor() {
+void Software::SharedCtor() {
 type_ = 0;
 }
 
-Software2::~Software2() {
-  // @@protoc_insertion_point(destructor:Proto.Software2)
+Software::~Software() {
+  // @@protoc_insertion_point(destructor:Proto.Software)
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void Software2::SharedDtor() {
+void Software::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
 }
 
-void Software2::ArenaDtor(void* object) {
-  Software2* _this = reinterpret_cast< Software2* >(object);
+void Software::ArenaDtor(void* object) {
+  Software* _this = reinterpret_cast< Software* >(object);
   (void)_this;
 }
-void Software2::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+void Software::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 }
-void Software2::SetCachedSize(int size) const {
+void Software::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
 
-void Software2::Clear() {
-// @@protoc_insertion_point(message_clear_start:Proto.Software2)
+void Software::Clear() {
+// @@protoc_insertion_point(message_clear_start:Proto.Software)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -5052,7 +5051,7 @@ void Software2::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* Software2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* Software::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   _Internal::HasBits has_bits{};
   while (!ctx->Done(&ptr)) {
@@ -5091,9 +5090,9 @@ failure:
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* Software2::_InternalSerialize(
+::PROTOBUF_NAMESPACE_ID::uint8* Software::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:Proto.Software2)
+  // @@protoc_insertion_point(serialize_to_array_start:Proto.Software)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -5108,12 +5107,12 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:Proto.Software2)
+  // @@protoc_insertion_point(serialize_to_array_end:Proto.Software)
   return target;
 }
 
-size_t Software2::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:Proto.Software2)
+size_t Software::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:Proto.Software)
   size_t total_size = 0;
 
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -5137,23 +5136,23 @@ size_t Software2::ByteSizeLong() const {
   return total_size;
 }
 
-void Software2::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:Proto.Software2)
+void Software::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:Proto.Software)
   GOOGLE_DCHECK_NE(&from, this);
-  const Software2* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<Software2>(
+  const Software* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<Software>(
           &from);
   if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.Software2)
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.Software)
     ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
   } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.Software2)
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.Software)
     MergeFrom(*source);
   }
 }
 
-void Software2::MergeFrom(const Software2& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:Proto.Software2)
+void Software::MergeFrom(const Software& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:Proto.Software)
   GOOGLE_DCHECK_NE(&from, this);
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -5164,45 +5163,45 @@ void Software2::MergeFrom(const Software2& from) {
   }
 }
 
-void Software2::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:Proto.Software2)
+void Software::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:Proto.Software)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void Software2::CopyFrom(const Software2& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:Proto.Software2)
+void Software::CopyFrom(const Software& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:Proto.Software)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool Software2::IsInitialized() const {
+bool Software::IsInitialized() const {
   return true;
 }
 
-void Software2::InternalSwap(Software2* other) {
+void Software::InternalSwap(Software* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   swap(_has_bits_[0], other->_has_bits_[0]);
   swap(type_, other->type_);
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata Software2::GetMetadata() const {
+::PROTOBUF_NAMESPACE_ID::Metadata Software::GetMetadata() const {
   return GetMetadataStatic();
 }
 
 
 // ===================================================================
 
-class DiagSignalType2::_Internal {
+class DiagSignalType::_Internal {
  public:
-  using HasBits = decltype(std::declval<DiagSignalType2>()._has_bits_);
+  using HasBits = decltype(std::declval<DiagSignalType>()._has_bits_);
   static void set_has_signaltypeid(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
   }
-  static const ::Proto::Uuid& uuid(const DiagSignalType2* msg);
+  static const ::Proto::Uuid& uuid(const DiagSignalType* msg);
   static void set_has_uuid(HasBits* has_bits) {
     (*has_bits)[0] |= 16u;
   }
@@ -5257,20 +5256,20 @@ class DiagSignalType2::_Internal {
 };
 
 const ::Proto::Uuid&
-DiagSignalType2::_Internal::uuid(const DiagSignalType2* msg) {
+DiagSignalType::_Internal::uuid(const DiagSignalType* msg) {
   return *msg->uuid_;
 }
-void DiagSignalType2::clear_uuid() {
+void DiagSignalType::clear_uuid() {
   if (uuid_ != nullptr) uuid_->Clear();
   _has_bits_[0] &= ~0x00000010u;
 }
-DiagSignalType2::DiagSignalType2(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+DiagSignalType::DiagSignalType(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
-  // @@protoc_insertion_point(arena_constructor:Proto.DiagSignalType2)
+  // @@protoc_insertion_point(arena_constructor:Proto.DiagSignalType)
 }
-DiagSignalType2::DiagSignalType2(const DiagSignalType2& from)
+DiagSignalType::DiagSignalType(const DiagSignalType& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
       _has_bits_(from._has_bits_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
@@ -5302,10 +5301,10 @@ DiagSignalType2::DiagSignalType2(const DiagSignalType2& from)
   ::memcpy(&type_, &from.type_,
     static_cast<size_t>(reinterpret_cast<char*>(&valueoffset_) -
     reinterpret_cast<char*>(&type_)) + sizeof(valueoffset_));
-  // @@protoc_insertion_point(copy_constructor:Proto.DiagSignalType2)
+  // @@protoc_insertion_point(copy_constructor:Proto.DiagSignalType)
 }
 
-void DiagSignalType2::SharedCtor() {
+void DiagSignalType::SharedCtor() {
 signaltypeid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 normalstatestring0_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 normalstatestring1_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
@@ -5316,13 +5315,13 @@ units_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlread
     reinterpret_cast<char*>(&uuid_)) + sizeof(valueoffset_));
 }
 
-DiagSignalType2::~DiagSignalType2() {
-  // @@protoc_insertion_point(destructor:Proto.DiagSignalType2)
+DiagSignalType::~DiagSignalType() {
+  // @@protoc_insertion_point(destructor:Proto.DiagSignalType)
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void DiagSignalType2::SharedDtor() {
+void DiagSignalType::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
   signaltypeid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   normalstatestring0_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
@@ -5331,18 +5330,18 @@ void DiagSignalType2::SharedDtor() {
   if (this != internal_default_instance()) delete uuid_;
 }
 
-void DiagSignalType2::ArenaDtor(void* object) {
-  DiagSignalType2* _this = reinterpret_cast< DiagSignalType2* >(object);
+void DiagSignalType::ArenaDtor(void* object) {
+  DiagSignalType* _this = reinterpret_cast< DiagSignalType* >(object);
   (void)_this;
 }
-void DiagSignalType2::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+void DiagSignalType::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 }
-void DiagSignalType2::SetCachedSize(int size) const {
+void DiagSignalType::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
 
-void DiagSignalType2::Clear() {
-// @@protoc_insertion_point(message_clear_start:Proto.DiagSignalType2)
+void DiagSignalType::Clear() {
+// @@protoc_insertion_point(message_clear_start:Proto.DiagSignalType)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -5385,7 +5384,7 @@ void DiagSignalType2::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* DiagSignalType2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* DiagSignalType::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   _Internal::HasBits has_bits{};
   while (!ctx->Done(&ptr)) {
@@ -5399,7 +5398,7 @@ const char* DiagSignalType2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPAC
           auto str = _internal_mutable_signaltypeid();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DiagSignalType2.signalTypeId");
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DiagSignalType.signalTypeId");
           #endif  // !NDEBUG
           CHK_(ptr);
         } else goto handle_unusual;
@@ -5457,7 +5456,7 @@ const char* DiagSignalType2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPAC
           auto str = _internal_mutable_normalstatestring0();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DiagSignalType2.normalStateString0");
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DiagSignalType.normalStateString0");
           #endif  // !NDEBUG
           CHK_(ptr);
         } else goto handle_unusual;
@@ -5468,7 +5467,7 @@ const char* DiagSignalType2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPAC
           auto str = _internal_mutable_normalstatestring1();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DiagSignalType2.normalStateString1");
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DiagSignalType.normalStateString1");
           #endif  // !NDEBUG
           CHK_(ptr);
         } else goto handle_unusual;
@@ -5543,7 +5542,7 @@ const char* DiagSignalType2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPAC
           auto str = _internal_mutable_units();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DiagSignalType2.units");
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.DiagSignalType.units");
           #endif  // !NDEBUG
           CHK_(ptr);
         } else goto handle_unusual;
@@ -5571,9 +5570,9 @@ failure:
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* DiagSignalType2::_InternalSerialize(
+::PROTOBUF_NAMESPACE_ID::uint8* DiagSignalType::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:Proto.DiagSignalType2)
+  // @@protoc_insertion_point(serialize_to_array_start:Proto.DiagSignalType)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -5583,7 +5582,7 @@ failure:
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_signaltypeid().data(), static_cast<int>(this->_internal_signaltypeid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Proto.DiagSignalType2.signalTypeId");
+      "Proto.DiagSignalType.signalTypeId");
     target = stream->WriteStringMaybeAliased(
         3, this->_internal_signaltypeid(), target);
   }
@@ -5631,7 +5630,7 @@ failure:
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_normalstatestring0().data(), static_cast<int>(this->_internal_normalstatestring0().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Proto.DiagSignalType2.normalStateString0");
+      "Proto.DiagSignalType.normalStateString0");
     target = stream->WriteStringMaybeAliased(
         26, this->_internal_normalstatestring0(), target);
   }
@@ -5641,7 +5640,7 @@ failure:
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_normalstatestring1().data(), static_cast<int>(this->_internal_normalstatestring1().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Proto.DiagSignalType2.normalStateString1");
+      "Proto.DiagSignalType.normalStateString1");
     target = stream->WriteStringMaybeAliased(
         27, this->_internal_normalstatestring1(), target);
   }
@@ -5699,7 +5698,7 @@ failure:
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_units().data(), static_cast<int>(this->_internal_units().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Proto.DiagSignalType2.units");
+      "Proto.DiagSignalType.units");
     target = stream->WriteStringMaybeAliased(
         40, this->_internal_units(), target);
   }
@@ -5708,12 +5707,12 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:Proto.DiagSignalType2)
+  // @@protoc_insertion_point(serialize_to_array_end:Proto.DiagSignalType)
   return target;
 }
 
-size_t DiagSignalType2::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:Proto.DiagSignalType2)
+size_t DiagSignalType::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:Proto.DiagSignalType)
   size_t total_size = 0;
 
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -5844,23 +5843,23 @@ size_t DiagSignalType2::ByteSizeLong() const {
   return total_size;
 }
 
-void DiagSignalType2::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:Proto.DiagSignalType2)
+void DiagSignalType::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:Proto.DiagSignalType)
   GOOGLE_DCHECK_NE(&from, this);
-  const DiagSignalType2* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<DiagSignalType2>(
+  const DiagSignalType* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<DiagSignalType>(
           &from);
   if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.DiagSignalType2)
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.DiagSignalType)
     ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
   } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.DiagSignalType2)
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.DiagSignalType)
     MergeFrom(*source);
   }
 }
 
-void DiagSignalType2::MergeFrom(const DiagSignalType2& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:Proto.DiagSignalType2)
+void DiagSignalType::MergeFrom(const DiagSignalType& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:Proto.DiagSignalType)
   GOOGLE_DCHECK_NE(&from, this);
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -5932,28 +5931,28 @@ void DiagSignalType2::MergeFrom(const DiagSignalType2& from) {
   }
 }
 
-void DiagSignalType2::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:Proto.DiagSignalType2)
+void DiagSignalType::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:Proto.DiagSignalType)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void DiagSignalType2::CopyFrom(const DiagSignalType2& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:Proto.DiagSignalType2)
+void DiagSignalType::CopyFrom(const DiagSignalType& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:Proto.DiagSignalType)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool DiagSignalType2::IsInitialized() const {
+bool DiagSignalType::IsInitialized() const {
   if (_internal_has_uuid()) {
     if (!uuid_->IsInitialized()) return false;
   }
   return true;
 }
 
-void DiagSignalType2::InternalSwap(DiagSignalType2* other) {
+void DiagSignalType::InternalSwap(DiagSignalType* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   swap(_has_bits_[0], other->_has_bits_[0]);
@@ -5962,23 +5961,23 @@ void DiagSignalType2::InternalSwap(DiagSignalType2* other) {
   normalstatestring1_.Swap(&other->normalstatestring1_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   units_.Swap(&other->units_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(DiagSignalType2, valueoffset_)
-      + sizeof(DiagSignalType2::valueoffset_)
-      - PROTOBUF_FIELD_OFFSET(DiagSignalType2, uuid_)>(
+      PROTOBUF_FIELD_OFFSET(DiagSignalType, valueoffset_)
+      + sizeof(DiagSignalType::valueoffset_)
+      - PROTOBUF_FIELD_OFFSET(DiagSignalType, uuid_)>(
           reinterpret_cast<char*>(&uuid_),
           reinterpret_cast<char*>(&other->uuid_));
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata DiagSignalType2::GetMetadata() const {
+::PROTOBUF_NAMESPACE_ID::Metadata DiagSignalType::GetMetadata() const {
   return GetMetadataStatic();
 }
 
 
 // ===================================================================
 
-class Connection2::_Internal {
+class Connection::_Internal {
  public:
-  using HasBits = decltype(std::declval<Connection2>()._has_bits_);
+  using HasBits = decltype(std::declval<Connection>()._has_bits_);
   static void set_has_connectionid(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
   }
@@ -6021,7 +6020,7 @@ class Connection2::_Internal {
   static void set_has_port2rxwordsquantity(HasBits* has_bits) {
     (*has_bits)[0] |= 16777216u;
   }
-  static const ::Proto::Uuid& uuid(const Connection2* msg);
+  static const ::Proto::Uuid& uuid(const Connection* msg);
   static void set_has_uuid(HasBits* has_bits) {
     (*has_bits)[0] |= 32u;
   }
@@ -6058,20 +6057,20 @@ class Connection2::_Internal {
 };
 
 const ::Proto::Uuid&
-Connection2::_Internal::uuid(const Connection2* msg) {
+Connection::_Internal::uuid(const Connection* msg) {
   return *msg->uuid_;
 }
-void Connection2::clear_uuid() {
+void Connection::clear_uuid() {
   if (uuid_ != nullptr) uuid_->Clear();
   _has_bits_[0] &= ~0x00000020u;
 }
-Connection2::Connection2(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+Connection::Connection(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
-  // @@protoc_insertion_point(arena_constructor:Proto.Connection2)
+  // @@protoc_insertion_point(arena_constructor:Proto.Connection)
 }
-Connection2::Connection2(const Connection2& from)
+Connection::Connection(const Connection& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
       _has_bits_(from._has_bits_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
@@ -6108,10 +6107,10 @@ Connection2::Connection2(const Connection2& from)
   ::memcpy(&obsoleteserialmode_, &from.obsoleteserialmode_,
     static_cast<size_t>(reinterpret_cast<char*>(&port2rxwordsquantity_) -
     reinterpret_cast<char*>(&obsoleteserialmode_)) + sizeof(port2rxwordsquantity_));
-  // @@protoc_insertion_point(copy_constructor:Proto.Connection2)
+  // @@protoc_insertion_point(copy_constructor:Proto.Connection)
 }
 
-void Connection2::SharedCtor() {
+void Connection::SharedCtor() {
 connectionid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 port1equipmentid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 port2equipmentid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
@@ -6127,13 +6126,13 @@ port2txwordsquantity_ = 479;
 port2rxwordsquantity_ = 479;
 }
 
-Connection2::~Connection2() {
-  // @@protoc_insertion_point(destructor:Proto.Connection2)
+Connection::~Connection() {
+  // @@protoc_insertion_point(destructor:Proto.Connection)
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void Connection2::SharedDtor() {
+void Connection::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
   connectionid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   port1equipmentid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
@@ -6143,18 +6142,18 @@ void Connection2::SharedDtor() {
   if (this != internal_default_instance()) delete uuid_;
 }
 
-void Connection2::ArenaDtor(void* object) {
-  Connection2* _this = reinterpret_cast< Connection2* >(object);
+void Connection::ArenaDtor(void* object) {
+  Connection* _this = reinterpret_cast< Connection* >(object);
   (void)_this;
 }
-void Connection2::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+void Connection::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 }
-void Connection2::SetCachedSize(int size) const {
+void Connection::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
 
-void Connection2::Clear() {
-// @@protoc_insertion_point(message_clear_start:Proto.Connection2)
+void Connection::Clear() {
+// @@protoc_insertion_point(message_clear_start:Proto.Connection)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -6204,7 +6203,7 @@ void Connection2::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* Connection2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* Connection::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   _Internal::HasBits has_bits{};
   while (!ctx->Done(&ptr)) {
@@ -6218,7 +6217,7 @@ const char* Connection2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID
           auto str = _internal_mutable_connectionid();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.Connection2.ConnectionID");
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.Connection.ConnectionID");
           #endif  // !NDEBUG
           CHK_(ptr);
         } else goto handle_unusual;
@@ -6229,7 +6228,7 @@ const char* Connection2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID
           auto str = _internal_mutable_port1equipmentid();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.Connection2.Port1EquipmentID");
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.Connection.Port1EquipmentID");
           #endif  // !NDEBUG
           CHK_(ptr);
         } else goto handle_unusual;
@@ -6240,7 +6239,7 @@ const char* Connection2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID
           auto str = _internal_mutable_port2equipmentid();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.Connection2.Port2EquipmentID");
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.Connection.Port2EquipmentID");
           #endif  // !NDEBUG
           CHK_(ptr);
         } else goto handle_unusual;
@@ -6251,7 +6250,7 @@ const char* Connection2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID
           auto str = _internal_mutable_port1rawdatadescription();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.Connection2.Port1RawDataDescription");
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.Connection.Port1RawDataDescription");
           #endif  // !NDEBUG
           CHK_(ptr);
         } else goto handle_unusual;
@@ -6262,7 +6261,7 @@ const char* Connection2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID
           auto str = _internal_mutable_port2rawdatadescription();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.Connection2.Port2RawDataDescription");
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.Connection.Port2RawDataDescription");
           #endif  // !NDEBUG
           CHK_(ptr);
         } else goto handle_unusual;
@@ -6449,9 +6448,9 @@ failure:
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* Connection2::_InternalSerialize(
+::PROTOBUF_NAMESPACE_ID::uint8* Connection::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:Proto.Connection2)
+  // @@protoc_insertion_point(serialize_to_array_start:Proto.Connection)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -6461,7 +6460,7 @@ failure:
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_connectionid().data(), static_cast<int>(this->_internal_connectionid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Proto.Connection2.ConnectionID");
+      "Proto.Connection.ConnectionID");
     target = stream->WriteStringMaybeAliased(
         2, this->_internal_connectionid(), target);
   }
@@ -6471,7 +6470,7 @@ failure:
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_port1equipmentid().data(), static_cast<int>(this->_internal_port1equipmentid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Proto.Connection2.Port1EquipmentID");
+      "Proto.Connection.Port1EquipmentID");
     target = stream->WriteStringMaybeAliased(
         3, this->_internal_port1equipmentid(), target);
   }
@@ -6481,7 +6480,7 @@ failure:
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_port2equipmentid().data(), static_cast<int>(this->_internal_port2equipmentid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Proto.Connection2.Port2EquipmentID");
+      "Proto.Connection.Port2EquipmentID");
     target = stream->WriteStringMaybeAliased(
         4, this->_internal_port2equipmentid(), target);
   }
@@ -6491,7 +6490,7 @@ failure:
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_port1rawdatadescription().data(), static_cast<int>(this->_internal_port1rawdatadescription().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Proto.Connection2.Port1RawDataDescription");
+      "Proto.Connection.Port1RawDataDescription");
     target = stream->WriteStringMaybeAliased(
         5, this->_internal_port1rawdatadescription(), target);
   }
@@ -6501,7 +6500,7 @@ failure:
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_port2rawdatadescription().data(), static_cast<int>(this->_internal_port2rawdatadescription().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Proto.Connection2.Port2RawDataDescription");
+      "Proto.Connection.Port2RawDataDescription");
     target = stream->WriteStringMaybeAliased(
         6, this->_internal_port2rawdatadescription(), target);
   }
@@ -6632,12 +6631,12 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:Proto.Connection2)
+  // @@protoc_insertion_point(serialize_to_array_end:Proto.Connection)
   return target;
 }
 
-size_t Connection2::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:Proto.Connection2)
+size_t Connection::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:Proto.Connection)
   size_t total_size = 0;
 
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -6819,23 +6818,23 @@ size_t Connection2::ByteSizeLong() const {
   return total_size;
 }
 
-void Connection2::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:Proto.Connection2)
+void Connection::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:Proto.Connection)
   GOOGLE_DCHECK_NE(&from, this);
-  const Connection2* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<Connection2>(
+  const Connection* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<Connection>(
           &from);
   if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.Connection2)
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.Connection)
     ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
   } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.Connection2)
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.Connection)
     MergeFrom(*source);
   }
 }
 
-void Connection2::MergeFrom(const Connection2& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:Proto.Connection2)
+void Connection::MergeFrom(const Connection& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:Proto.Connection)
   GOOGLE_DCHECK_NE(&from, this);
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -6928,28 +6927,28 @@ void Connection2::MergeFrom(const Connection2& from) {
   }
 }
 
-void Connection2::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:Proto.Connection2)
+void Connection::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:Proto.Connection)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void Connection2::CopyFrom(const Connection2& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:Proto.Connection2)
+void Connection::CopyFrom(const Connection& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:Proto.Connection)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool Connection2::IsInitialized() const {
+bool Connection::IsInitialized() const {
   if (_internal_has_uuid()) {
     if (!uuid_->IsInitialized()) return false;
   }
   return true;
 }
 
-void Connection2::InternalSwap(Connection2* other) {
+void Connection::InternalSwap(Connection* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   swap(_has_bits_[0], other->_has_bits_[0]);
@@ -6959,9 +6958,9 @@ void Connection2::InternalSwap(Connection2* other) {
   port1rawdatadescription_.Swap(&other->port1rawdatadescription_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   port2rawdatadescription_.Swap(&other->port2rawdatadescription_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(Connection2, type_)
-      + sizeof(Connection2::type_)
-      - PROTOBUF_FIELD_OFFSET(Connection2, uuid_)>(
+      PROTOBUF_FIELD_OFFSET(Connection, type_)
+      + sizeof(Connection::type_)
+      - PROTOBUF_FIELD_OFFSET(Connection, uuid_)>(
           reinterpret_cast<char*>(&uuid_),
           reinterpret_cast<char*>(&other->uuid_));
   swap(port1txwordsquantity_, other->port1txwordsquantity_);
@@ -6970,61 +6969,61 @@ void Connection2::InternalSwap(Connection2* other) {
   swap(port2rxwordsquantity_, other->port2rxwordsquantity_);
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata Connection2::GetMetadata() const {
+::PROTOBUF_NAMESPACE_ID::Metadata Connection::GetMetadata() const {
   return GetMetadataStatic();
 }
 
-PROTOBUF_ATTRIBUTE_INIT_PRIORITY ::PROTOBUF_NAMESPACE_ID::internal::ExtensionIdentifier< ::Proto::Envelope2,
-    ::PROTOBUF_NAMESPACE_ID::internal::MessageTypeTraits< ::Proto::DeviceObject2 >, 11, false >
-  deviceobject2(kDeviceobject2FieldNumber, ::Proto::DeviceObject2::default_instance());
-PROTOBUF_ATTRIBUTE_INIT_PRIORITY ::PROTOBUF_NAMESPACE_ID::internal::ExtensionIdentifier< ::Proto::Envelope2,
-    ::PROTOBUF_NAMESPACE_ID::internal::MessageTypeTraits< ::Proto::DiagSignalType2 >, 11, false >
-  diagSignalType2(kDiagSignalType2FieldNumber, ::Proto::DiagSignalType2::default_instance());
-PROTOBUF_ATTRIBUTE_INIT_PRIORITY ::PROTOBUF_NAMESPACE_ID::internal::ExtensionIdentifier< ::Proto::Envelope2,
-    ::PROTOBUF_NAMESPACE_ID::internal::MessageTypeTraits< ::Proto::Connection2 >, 11, false >
-  connection2(kConnection2FieldNumber, ::Proto::Connection2::default_instance());
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY ::PROTOBUF_NAMESPACE_ID::internal::ExtensionIdentifier< ::Proto::Envelope,
+    ::PROTOBUF_NAMESPACE_ID::internal::MessageTypeTraits< ::Proto::DeviceObject >, 11, false >
+  deviceobject(kDeviceobjectFieldNumber, ::Proto::DeviceObject::default_instance());
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY ::PROTOBUF_NAMESPACE_ID::internal::ExtensionIdentifier< ::Proto::Envelope,
+    ::PROTOBUF_NAMESPACE_ID::internal::MessageTypeTraits< ::Proto::DiagSignalType >, 11, false >
+  diagSignalType(kDiagSignalTypeFieldNumber, ::Proto::DiagSignalType::default_instance());
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY ::PROTOBUF_NAMESPACE_ID::internal::ExtensionIdentifier< ::Proto::Envelope,
+    ::PROTOBUF_NAMESPACE_ID::internal::MessageTypeTraits< ::Proto::Connection >, 11, false >
+  connection(kConnectionFieldNumber, ::Proto::Connection::default_instance());
 
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace Proto
 PROTOBUF_NAMESPACE_OPEN
-template<> PROTOBUF_NOINLINE ::Proto::DeviceObject2* Arena::CreateMaybeMessage< ::Proto::DeviceObject2 >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::Proto::DeviceObject2 >(arena);
+template<> PROTOBUF_NOINLINE ::Proto::DeviceObject* Arena::CreateMaybeMessage< ::Proto::DeviceObject >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::Proto::DeviceObject >(arena);
 }
-template<> PROTOBUF_NOINLINE ::Proto::DeviceRoot2* Arena::CreateMaybeMessage< ::Proto::DeviceRoot2 >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::Proto::DeviceRoot2 >(arena);
+template<> PROTOBUF_NOINLINE ::Proto::DeviceRoot* Arena::CreateMaybeMessage< ::Proto::DeviceRoot >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::Proto::DeviceRoot >(arena);
 }
-template<> PROTOBUF_NOINLINE ::Proto::DeviceSystem2* Arena::CreateMaybeMessage< ::Proto::DeviceSystem2 >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::Proto::DeviceSystem2 >(arena);
+template<> PROTOBUF_NOINLINE ::Proto::DeviceSystem* Arena::CreateMaybeMessage< ::Proto::DeviceSystem >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::Proto::DeviceSystem >(arena);
 }
-template<> PROTOBUF_NOINLINE ::Proto::DeviceRack2* Arena::CreateMaybeMessage< ::Proto::DeviceRack2 >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::Proto::DeviceRack2 >(arena);
+template<> PROTOBUF_NOINLINE ::Proto::DeviceRack* Arena::CreateMaybeMessage< ::Proto::DeviceRack >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::Proto::DeviceRack >(arena);
 }
-template<> PROTOBUF_NOINLINE ::Proto::DeviceChassis2* Arena::CreateMaybeMessage< ::Proto::DeviceChassis2 >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::Proto::DeviceChassis2 >(arena);
+template<> PROTOBUF_NOINLINE ::Proto::DeviceChassis* Arena::CreateMaybeMessage< ::Proto::DeviceChassis >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::Proto::DeviceChassis >(arena);
 }
-template<> PROTOBUF_NOINLINE ::Proto::DeviceModule2* Arena::CreateMaybeMessage< ::Proto::DeviceModule2 >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::Proto::DeviceModule2 >(arena);
+template<> PROTOBUF_NOINLINE ::Proto::DeviceModule* Arena::CreateMaybeMessage< ::Proto::DeviceModule >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::Proto::DeviceModule >(arena);
 }
-template<> PROTOBUF_NOINLINE ::Proto::DeviceController2* Arena::CreateMaybeMessage< ::Proto::DeviceController2 >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::Proto::DeviceController2 >(arena);
+template<> PROTOBUF_NOINLINE ::Proto::DeviceController* Arena::CreateMaybeMessage< ::Proto::DeviceController >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::Proto::DeviceController >(arena);
 }
-template<> PROTOBUF_NOINLINE ::Proto::DeviceAppSignal2* Arena::CreateMaybeMessage< ::Proto::DeviceAppSignal2 >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::Proto::DeviceAppSignal2 >(arena);
+template<> PROTOBUF_NOINLINE ::Proto::DeviceAppSignal* Arena::CreateMaybeMessage< ::Proto::DeviceAppSignal >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::Proto::DeviceAppSignal >(arena);
 }
-template<> PROTOBUF_NOINLINE ::Proto::DeviceDiagSignal2* Arena::CreateMaybeMessage< ::Proto::DeviceDiagSignal2 >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::Proto::DeviceDiagSignal2 >(arena);
+template<> PROTOBUF_NOINLINE ::Proto::DeviceDiagSignal* Arena::CreateMaybeMessage< ::Proto::DeviceDiagSignal >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::Proto::DeviceDiagSignal >(arena);
 }
-template<> PROTOBUF_NOINLINE ::Proto::Workstation2* Arena::CreateMaybeMessage< ::Proto::Workstation2 >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::Proto::Workstation2 >(arena);
+template<> PROTOBUF_NOINLINE ::Proto::Workstation* Arena::CreateMaybeMessage< ::Proto::Workstation >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::Proto::Workstation >(arena);
 }
-template<> PROTOBUF_NOINLINE ::Proto::Software2* Arena::CreateMaybeMessage< ::Proto::Software2 >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::Proto::Software2 >(arena);
+template<> PROTOBUF_NOINLINE ::Proto::Software* Arena::CreateMaybeMessage< ::Proto::Software >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::Proto::Software >(arena);
 }
-template<> PROTOBUF_NOINLINE ::Proto::DiagSignalType2* Arena::CreateMaybeMessage< ::Proto::DiagSignalType2 >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::Proto::DiagSignalType2 >(arena);
+template<> PROTOBUF_NOINLINE ::Proto::DiagSignalType* Arena::CreateMaybeMessage< ::Proto::DiagSignalType >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::Proto::DiagSignalType >(arena);
 }
-template<> PROTOBUF_NOINLINE ::Proto::Connection2* Arena::CreateMaybeMessage< ::Proto::Connection2 >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::Proto::Connection2 >(arena);
+template<> PROTOBUF_NOINLINE ::Proto::Connection* Arena::CreateMaybeMessage< ::Proto::Connection >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::Proto::Connection >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
 

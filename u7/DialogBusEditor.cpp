@@ -578,7 +578,7 @@ void DialogBusEditor::onPaste()
 	{
 		const Proto::Envelope& envelope = envelopeSet.items(i);
 
-		if (envelope.has_bus() == false)
+		if (envelope.HasExtension(Proto::bus) == false)
 		{
 			Q_ASSERT(false);
 			continue;

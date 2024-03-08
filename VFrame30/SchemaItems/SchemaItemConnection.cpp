@@ -35,16 +35,16 @@ namespace VFrame30
 	{
 		bool result = FblItemRect::SaveData(message);
 
-		if (result == false || message->has_schemaitem() == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 
 		// --
 		//
-		Proto::SchemaItemConnection* connectionitem = message->mutable_schemaitem()->mutable_connectionitem();
+		Proto::SchemaItemConnection* connectionitem = message->MutableExtension(Proto::schemaitem)->mutable_connectionitem();
 
 		connectionitem->set_connectionid(connectionIds().toStdString());
 
@@ -61,13 +61,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemaitem().has_connectionitem() == false)
+		if (message.GetExtension(Proto::schemaitem).has_connectionitem() == false)
 		{
-			assert(message.schemaitem().has_connectionitem() == true);
+			assert(message.GetExtension(Proto::schemaitem).has_connectionitem() == true);
 			return false;
 		}
 
-		const Proto::SchemaItemConnection& connectionitem = message.schemaitem().connectionitem();
+		const Proto::SchemaItemConnection& connectionitem = message.GetExtension(Proto::schemaitem).connectionitem();
 
 		setConnectionIds(QString::fromStdString(connectionitem.connectionid()));
 
@@ -156,16 +156,16 @@ namespace VFrame30
 		bool result = SchemaItemConnection::SaveData(message);
 
 		if (result == false ||
-			message->has_schemaitem() == false)
+			message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 
 		// --
 		//
-		Proto::SchemaItemTransmitter* transmitter = message->mutable_schemaitem()->mutable_transmitteritem();
+		Proto::SchemaItemTransmitter* transmitter = message->MutableExtension(Proto::schemaitem)->mutable_transmitteritem();
 
 		transmitter->set_pincount(m_pinCount);
 
@@ -182,13 +182,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemaitem().has_transmitteritem() == false)
+		if (message.GetExtension(Proto::schemaitem).has_transmitteritem() == false)
 		{
-			assert(message.schemaitem().has_transmitteritem() == true);
+			assert(message.GetExtension(Proto::schemaitem).has_transmitteritem() == true);
 			return false;
 		}
 
-		const Proto::SchemaItemTransmitter& transmitter = message.schemaitem().transmitteritem();
+		const Proto::SchemaItemTransmitter& transmitter = message.GetExtension(Proto::schemaitem).transmitteritem();
 
 		setPinCount(transmitter.pincount());
 
@@ -426,16 +426,16 @@ namespace VFrame30
 		bool result = SchemaItemConnection::SaveData(message);
 
 		if (result == false ||
-			message->has_schemaitem() == false)
+			message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 
 		// --
 		//
-		Proto::SchemaItemReceiver* receiver = message->mutable_schemaitem()->mutable_receiveritem();
+		Proto::SchemaItemReceiver* receiver = message->MutableExtension(Proto::schemaitem)->mutable_receiveritem();
 
 		receiver->set_showvalidity(m_showValidity);
 //		receiver->set_multiline(m_multiline);
@@ -458,13 +458,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemaitem().has_receiveritem() == false)
+		if (message.GetExtension(Proto::schemaitem).has_receiveritem() == false)
 		{
-			assert(message.schemaitem().has_receiveritem() == true);
+			assert(message.GetExtension(Proto::schemaitem).has_receiveritem() == true);
 			return false;
 		}
 
-		const Proto::SchemaItemReceiver& receiver = message.schemaitem().receiveritem();
+		const Proto::SchemaItemReceiver& receiver = message.GetExtension(Proto::schemaitem).receiveritem();
 
 		m_showValidity = receiver.showvalidity();
 //		m_multiline = receiver.multiline();

@@ -523,7 +523,7 @@ private:
 
 		std::shared_ptr<AfbElement> get(const QString& strID) const;
 
-		// Properties and Datas
+		// Properties and Data
 		//
 	public:
 		std::vector<std::shared_ptr<AfbElement>> m_elements;

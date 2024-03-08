@@ -455,7 +455,7 @@ namespace VFrame30
 
 		for (const auto& ti : m_trendsIndicators)
 		{
-			::Proto::SchemaDetails::TrendIndicatorSchemaItems* trendsIndicators = message->add_trendindicators();
+			::Proto::TrendIndicatorSchemaItems* trendsIndicators = message->add_trendindicators();
 			ti.saveData(trendsIndicators);
 		}
 
@@ -708,7 +708,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool SchemaDetails::TrendIndicatorSchemaItems::saveData(::Proto::SchemaDetails::TrendIndicatorSchemaItems* message) const
+	bool SchemaDetails::TrendIndicatorSchemaItems::saveData(::Proto::TrendIndicatorSchemaItems* message) const
 	{
 		Proto::Write(message->mutable_itemuuid(), itemUuid);
 		message->set_sampleperiod(static_cast<int>(samplePeriod));
@@ -723,7 +723,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool SchemaDetails::TrendIndicatorSchemaItems::loadData(const ::Proto::SchemaDetails::TrendIndicatorSchemaItems& message)
+	bool SchemaDetails::TrendIndicatorSchemaItems::loadData(const ::Proto::TrendIndicatorSchemaItems& message)
 	{
 		itemUuid = Proto::Read(message.itemuuid());
 		samplePeriod = static_cast<E::RtTrendsSamplePeriod>(message.sampleperiod());
@@ -747,10 +747,10 @@ namespace VFrame30
 	bool SchemaDetailsSet::SaveData(Proto::Envelope* envelopeMessage) const
 	{
 		std::string className = {"SchemaDetailsSet"};
-		quint32 classnamehash = ::ClassNameHashCode(className);
-		envelopeMessage->set_classnamehash(classnamehash);
+		quint32 classNameHash = ::ClassNameHashCode(className);
+		envelopeMessage->set_classnamehash(classNameHash);
 
-		::Proto::SchemaDetailsSet* setMessage = envelopeMessage->mutable_schemadetailsset();
+		::Proto::SchemaDetailsSet* setMessage = envelopeMessage->MutableExtension(Proto::schemaDetailsSet);
 
 		for (auto detailsPair : m_details)
 		{
@@ -765,13 +765,13 @@ namespace VFrame30
 	{
 		clear();
 
-		if (message.has_schemadetailsset() == false)
+		if (message.HasExtension(Proto::schemaDetailsSet) == false)
 		{
-			assert(message.has_schemadetailsset());
+			assert(message.HasExtension(Proto::schemaDetailsSet));
 			return false;
 		}
 
-		const Proto::SchemaDetailsSet& setMessage = message.schemadetailsset();
+		const Proto::SchemaDetailsSet& setMessage = message.GetExtension(Proto::schemaDetailsSet);
 
 		int detailsCount = setMessage.schemasdetails_size();
 		for (int i = 0; i < detailsCount; i++)

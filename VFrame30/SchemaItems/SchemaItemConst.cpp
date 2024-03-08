@@ -44,16 +44,16 @@ namespace VFrame30
 	{
 		bool result = FblItemRect::SaveData(message);
 
-		if (result == false || message->has_schemaitem() == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 
 		// --
 		//
-		Proto::SchemaItemConst* constitem = message->mutable_schemaitem()->mutable_constitem();
+		Proto::SchemaItemConst* constitem = message->MutableExtension(Proto::schemaitem)->mutable_constitem();
 
 		constitem->set_type(m_type);
 
@@ -89,13 +89,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemaitem().has_constitem() == false)
+		if (message.GetExtension(Proto::schemaitem).has_constitem() == false)
 		{
-			assert(message.schemaitem().has_constitem() == true);
+			assert(message.GetExtension(Proto::schemaitem).has_constitem() == true);
 			return false;
 		}
 
-		const Proto::SchemaItemConst& constitem = message.schemaitem().constitem();
+		const Proto::SchemaItemConst& constitem = message.GetExtension(Proto::schemaitem).constitem();
 
 		setType(static_cast<ConstType>(constitem.type()));		// Value properties created here
 

@@ -5,16 +5,6 @@
 #include "../UtilsLib/Queue.h"
 #include "DiagSignalStateFlags.h"
 
-//namespace Proto
-//{
-//	class AppSignalState;
-//}
-
-//namespace Network
-//{
-//	class GatewayAppSignalState;
-//}
-
 struct SimpleDiagSignalState
 {
 	// light version of AppSignalState to use in queues and other AppDataService data structs

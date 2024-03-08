@@ -1,20 +1,24 @@
 syntax = "proto2";
 
 import "Common.proto";
-import "Envelope2.proto";
+import "Envelope.proto";
 
 package Proto;
 
-extend Envelope2
+
+//
+// EXTEND Envelope
+//
+extend Envelope
 {
 	// Possible types for storing
 	//
-	optional DeviceObject2 deviceobject2 = 7;			// Hardware::DeviceObject
-	optional DiagSignalType2 diagSignalType2 = 8;		// Hardware::DiagSignalTypeObject
-	optional Connection2 connection2 = 104;				// Hardware::Connection
+	optional DeviceObject deviceobject = 7;			// Hardware::DeviceObject
+	optional DiagSignalType diagSignalType = 8;		// Hardware::DiagSignalTypeObject
+	optional Connection connection = 104;			// Hardware::Connection
 }
 
-message DeviceObject2
+message DeviceObject
 {
 	required Uuid uuid = 1;
 	required wstring equipmentId = 2;
@@ -36,41 +40,41 @@ message DeviceObject2
 
 	// Derived from Hardware::DeviceObject
 	//
-	optional DeviceRoot2 Root = 100;					// Not used
-	optional DeviceSystem2 System = 101;
-	optional DeviceRack2 Rack = 102;
-	optional DeviceChassis2 Chassis = 103;
-	optional DeviceModule2 Module = 104;
-	optional DeviceController2 Controller = 105;
-	optional DeviceAppSignal2 AppSignal = 106;
-	optional DeviceDiagSignal2 DiagSignal = 109;
-	optional Workstation2 Workstation = 107;
-	optional Software2 Software = 108;
+	optional DeviceRoot Root = 100;					// Not used
+	optional DeviceSystem System = 101;
+	optional DeviceRack Rack = 102;
+	optional DeviceChassis Chassis = 103;
+	optional DeviceModule Module = 104;
+	optional DeviceController Controller = 105;
+	optional DeviceAppSignal AppSignal = 106;
+	optional DeviceDiagSignal DiagSignal = 109;
+	optional Workstation Workstation = 107;
+	optional Software Software = 108;
 
     // Children usualy are not stored in this object, but if required to store objects
 	// with hierarchy (exmaple is clipboard) then use this filed
 	//
-	repeated Envelope2 children = 200;
+	repeated Envelope children = 200;
 }
 
-message DeviceRoot2
+message DeviceRoot
 {
 }
 
-message DeviceSystem2
+message DeviceSystem
 {
 }
 
-message DeviceRack2
+message DeviceRack
 {
 }
 
-message DeviceChassis2
+message DeviceChassis
 {
 	optional int32 type = 1 [default = 0];
 }
 
-message DeviceModule2
+message DeviceModule
 {
 	optional int32 typeObsolete = 1 [default = 0];
 	optional string configurationScript = 2;
@@ -79,12 +83,12 @@ message DeviceModule2
 	optional int32 customModuleFamily = 5 [default = 0];
 }
 
-message DeviceController2
+message DeviceController
 {
 	optional int32 diagDataOffset = 3;
 }
 
-message DeviceAppSignal2
+message DeviceAppSignal
 {
 	optional int32 obsoletetype = 1 [default = 0];			// old type format, not used anymore, RPCT-345
 
@@ -113,7 +117,7 @@ message DeviceAppSignal2
 	optional bool signalSpecPropsStructWasFixed = 41 [default = false];		// The sign that signalSpecPropsStruct already got replaced EngEneered -> EngIneered
 }
 
-message DeviceDiagSignal2
+message DeviceDiagSignal
 {
 	optional int32 level = 3;			// E::DiagLevel
 	optional string signalTypeId = 4;
@@ -137,18 +141,18 @@ message DeviceDiagSignal2
 	optional int32 decimalPlaces = 30;
 }
 
-message Workstation2
+message Workstation
 {
 	optional int32 type = 1 [default = 0];
 	optional string hostname = 2;
 }
 
-message Software2
+message Software
 {
 	optional int32 type = 1 [default = 0];
 }
 
-message DiagSignalType2
+message DiagSignalType
 {
     optional string signalTypeId = 3;
     optional Uuid uuid = 4;
@@ -181,24 +185,6 @@ message DiagSignalType2
 	optional string units = 40;
 }
 
-
-// Module Configuration
-//
-/*
-message ModuleConfiguration
-{
-    optional string struct_description = 1;			// XML description of the mudule configuration structure
-	repeated ModuleConfigurationValue values = 2;	// Values array
-	optional string name = 3;						// Configuration Name
-}
-
-message ModuleConfigurationValue
-{
-	required string name = 1;
-	required string value = 2;
-}
-*/
-
 // Signal specific properties values messages
 
 
@@ -208,7 +194,7 @@ message ModuleConfigurationValue
 //
 //------------------------------------------------------------------------------------------
 
-message Connection2
+message Connection
 {
     optional string ConnectionID = 2;
 
