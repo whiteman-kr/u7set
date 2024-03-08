@@ -58,7 +58,7 @@ namespace Hardware
 	//
 	class DeviceObject :
 		public PropertyObject,
-		public Proto::ObjectSerialization<DeviceObject>,
+		public Proto::ObjectSerialization<DeviceObject, Proto::Envelope2>,
 		public DebugInstCounter<DeviceObject>,
 		public std::enable_shared_from_this<DeviceObject>
 	{
@@ -81,26 +81,26 @@ namespace Hardware
 
 		// Serialization
 		//
-		friend Proto::ObjectSerialization<DeviceObject>;	// for call CreateObject from Proto::ObjectSerialization
+		friend Proto::ObjectSerialization<DeviceObject, Proto::Envelope2>;	// for call CreateObject from Proto::ObjectSerialization
 	protected:
 		// Implementing Proto::ObjectSerialization<DeviceObject>::SaveData, LoadData
 		//
-		virtual bool SaveData(Proto::Envelope* message) const override;
-		virtual bool SaveData(Proto::Envelope* message, bool saveTree) const;
-		virtual bool LoadData(const Proto::Envelope& message) override;
+		virtual bool SaveData(Proto::Envelope2* message) const override;
+		virtual bool SaveData(Proto::Envelope2* message, bool saveTree) const;
+		virtual bool LoadData(const Proto::Envelope2& message) override;
 
 	private:
 		// Use this function only while serialization, as when object is created is not fully initialized
 		// and must be read before use
 		//
-		[[nodiscard]] static std::shared_ptr<DeviceObject> CreateObject(const Proto::Envelope& message);
+		[[nodiscard]] static std::shared_ptr<DeviceObject> CreateObject(const Proto::Envelope2& message);
 
 		// Public methods
 		//
 	public:
 		// Save object with ALL children
 		//
-		bool SaveObjectTree(Proto::Envelope* message) const;
+		bool SaveObjectTree(Proto::Envelope2* message) const;
 
 		// Expand EquipmentIDTemplate for this and for all children
 		//
@@ -362,8 +362,8 @@ public:
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message, bool saveTree) const override;
-		virtual bool LoadData(const Proto::Envelope& message) override;
+		virtual bool SaveData(Proto::Envelope2* message, bool saveTree) const override;
+		virtual bool LoadData(const Proto::Envelope2& message) override;
 	};
 
 
@@ -383,8 +383,8 @@ public:
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message, bool saveTree) const override;
-		virtual bool LoadData(const Proto::Envelope& message) override;
+		virtual bool SaveData(Proto::Envelope2* message, bool saveTree) const override;
+		virtual bool LoadData(const Proto::Envelope2& message) override;
 	};
 
 
@@ -404,8 +404,8 @@ public:
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message, bool saveTree) const override;
-		virtual bool LoadData(const Proto::Envelope& message) override;
+		virtual bool SaveData(Proto::Envelope2* message, bool saveTree) const override;
+		virtual bool LoadData(const Proto::Envelope2& message) override;
 
 	public:
 		[[nodiscard]] std::shared_ptr<DeviceModule> findLogicModule();
@@ -462,8 +462,8 @@ public:
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message, bool saveTree) const override;
-		virtual bool LoadData(const Proto::Envelope& message) override;
+		virtual bool SaveData(Proto::Envelope2* message, bool saveTree) const override;
+		virtual bool LoadData(const Proto::Envelope2& message) override;
 
 		// Public Methods
 		//
@@ -525,8 +525,8 @@ public:
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message, bool saveTree) const override;
-		virtual bool LoadData(const Proto::Envelope& message) override;
+		virtual bool SaveData(Proto::Envelope2* message, bool saveTree) const override;
+		virtual bool LoadData(const Proto::Envelope2& message) override;
 
 		// Properties
 		//
@@ -560,8 +560,8 @@ public:
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message, bool saveTree) const override;
-		virtual bool LoadData(const Proto::Envelope& message) override;
+		virtual bool SaveData(Proto::Envelope2* message, bool saveTree) const override;
+		virtual bool LoadData(const Proto::Envelope2& message) override;
 
 		// Expand EquipmentIDTemplate, ValiditySignalId for this and for all children
 		//
@@ -676,8 +676,8 @@ public:
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message, bool saveTree) const override;
-		virtual bool LoadData(const Proto::Envelope& message) override;
+		virtual bool SaveData(Proto::Envelope2* message, bool saveTree) const override;
+		virtual bool LoadData(const Proto::Envelope2& message) override;
 
 		// Public Methods
 		//
@@ -716,8 +716,8 @@ public:
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message, bool saveTree) const override;
-		virtual bool LoadData(const Proto::Envelope& message) override;
+		virtual bool SaveData(Proto::Envelope2* message, bool saveTree) const override;
+		virtual bool LoadData(const Proto::Envelope2& message) override;
 
 		// Public Methods
 		//

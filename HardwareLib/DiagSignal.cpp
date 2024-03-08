@@ -94,19 +94,20 @@ namespace Hardware
 		return;
 	}
 
-	bool DiagSignal::SaveData(Proto::Envelope* message, bool saveTree) const
+	bool DiagSignal::SaveData(Proto::Envelope2* message, bool saveTree) const
 	{
 		bool result = DeviceObject::SaveData(message, saveTree);
-		if (result == false || message->has_deviceobject() == false)
+		
+		if (result == false || message->HasExtension(Proto::deviceobject2) == false)
 		{
 			Q_ASSERT(result);
-			Q_ASSERT(message->has_deviceobject());
+			Q_ASSERT(message->HasExtension(Proto::deviceobject2));
 			return false;
 		}
 
 		// --
 		//
-		::Proto::DeviceDiagSignal* signalMessage = message->mutable_deviceobject()->mutable_diagsignal();
+		auto signalMessage = message->MutableExtension(Proto::deviceobject2)->mutable_diagsignal();
 
 		signalMessage->set_isrefelection(m_isReflection);
 		signalMessage->set_reflectedsignalid(m_reflectedSignalId.toStdString());
@@ -133,11 +134,11 @@ namespace Hardware
 		return true;
 	}
 
-	bool DiagSignal::LoadData(const Proto::Envelope& message)
+	bool DiagSignal::LoadData(const Proto::Envelope2& message)
 	{
-		if (message.has_deviceobject() == false)
+		if (message.HasExtension(Proto::deviceobject2) == false)
 		{
-			Q_ASSERT(message.has_deviceobject());
+			Q_ASSERT(message.HasExtension(Proto::deviceobject2));
 			return false;
 		}
 
@@ -149,13 +150,14 @@ namespace Hardware
 
 		// --
 		//
-		if (message.deviceobject().has_diagsignal() == false)
+		const auto& deviceObjectMessage = message.GetExtension(Proto::deviceobject2);
+		if (deviceObjectMessage.has_diagsignal() == false)
 		{
-			Q_ASSERT(message.deviceobject().has_diagsignal());
+			Q_ASSERT(deviceObjectMessage.has_diagsignal());
 			return false;
 		}
 
-		const Proto::DeviceDiagSignal& signalMessage = message.deviceobject().diagsignal();
+		const auto& signalMessage = deviceObjectMessage.diagsignal();
 
 		m_isReflection = signalMessage.isrefelection();
 		m_reflectedSignalId = QString::fromStdString(signalMessage.reflectedsignalid());

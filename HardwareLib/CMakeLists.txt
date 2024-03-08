@@ -106,7 +106,8 @@ target_precompile_headers(${TARGET} PRIVATE
 	#"../CommonLib/AfbParamValue.h"
 	
 	"../Proto/ProtoSerialization.h"
-	"../Proto/Network.pb.h"	
+	"../Proto/Network.pb.h"
+	"../Proto/Hardware.pb.h"	
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Core Qt6::Network Qt6::Xml Qt6::Concurrent Qt6::Qml)

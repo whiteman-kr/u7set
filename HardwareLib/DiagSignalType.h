@@ -7,8 +7,8 @@ class XmlReadHelper;
 
 namespace Proto
 {
-	class DiagSignalType;
-	class Envelope;
+	class DiagSignalType2;
+	class Envelope2;
 } // namespace Proto
 
 
@@ -24,8 +24,8 @@ namespace Hardware
 		void writeToXml(XmlWriteHelper& xml) const;
 		bool readFromXml(XmlReadHelper& xml);
 
-		void save(Proto::DiagSignalType* message) const;
-		bool load(const Proto::DiagSignalType& message);
+		void save(Proto::DiagSignalType2* message) const;
+		bool load(const Proto::DiagSignalType2& message);
 		
 		// Data
 		//
@@ -82,8 +82,8 @@ namespace Hardware
 	//
 	//
 	class DiagSignalTypeObject final : public PropertyObject,
-								 public Proto::ObjectSerialization<DiagSignalTypeObject>,
-								 public std::enable_shared_from_this<DiagSignalTypeObject>
+									   public Proto::ObjectSerialization<DiagSignalTypeObject, Proto::Envelope2>,
+									   public std::enable_shared_from_this<DiagSignalTypeObject>
 	{
 		Q_OBJECT
 
@@ -96,15 +96,15 @@ namespace Hardware
 		// Serialization
 		//
 	protected:
-		friend Proto::ObjectSerialization<DiagSignalTypeObject>; // for call CreateObject from Proto::ObjectSerialization
+		friend Proto::ObjectSerialization<DiagSignalTypeObject, Proto::Envelope2>; // for call CreateObject from Proto::ObjectSerialization
 
 	public:
 		[[nodiscard]] static std::shared_ptr<DiagSignalTypeObject> CreateObject(QObject* parent = nullptr);
-		[[nodiscard]] static std::shared_ptr<DiagSignalTypeObject> CreateObject(const Proto::Envelope& message);
+		[[nodiscard]] static std::shared_ptr<DiagSignalTypeObject> CreateObject(const Proto::Envelope2& message);
 
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const final;
-		virtual bool LoadData(const Proto::Envelope& message) final;
+		virtual bool SaveData(Proto::Envelope2* message) const final;
+		virtual bool LoadData(const Proto::Envelope2& message) final;
 
 		// Properties
 		//

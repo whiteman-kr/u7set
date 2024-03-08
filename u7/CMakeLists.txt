@@ -471,6 +471,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../CommonLib/Factory.h"
 
 	"../Proto/ProtoSerialization.h"
+	"../Proto/Hardware.pb.h"
 	"../Proto/AppSignal.pb.h"
 
 	"../AppSignalLib/AppSignal.h"

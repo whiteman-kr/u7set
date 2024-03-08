@@ -62,7 +62,7 @@ struct TableStruct_serialization_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[82]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[80]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -92,9 +92,6 @@ extern BusSignalDefaultTypeInternal _BusSignal_default_instance_;
 class Configuration;
 struct ConfigurationDefaultTypeInternal;
 extern ConfigurationDefaultTypeInternal _Configuration_default_instance_;
-class Connection;
-struct ConnectionDefaultTypeInternal;
-extern ConnectionDefaultTypeInternal _Connection_default_instance_;
 class DeviceAppSignal;
 struct DeviceAppSignalDefaultTypeInternal;
 extern DeviceAppSignalDefaultTypeInternal _DeviceAppSignal_default_instance_;
@@ -134,9 +131,6 @@ extern EnvelopeSetDefaultTypeInternal _EnvelopeSet_default_instance_;
 class EnvelopeSetShortDescription;
 struct EnvelopeSetShortDescriptionDefaultTypeInternal;
 extern EnvelopeSetShortDescriptionDefaultTypeInternal _EnvelopeSetShortDescription_default_instance_;
-class ExportedDevicePreset;
-struct ExportedDevicePresetDefaultTypeInternal;
-extern ExportedDevicePresetDefaultTypeInternal _ExportedDevicePreset_default_instance_;
 class FblConnectionPoint;
 struct FblConnectionPointDefaultTypeInternal;
 extern FblConnectionPointDefaultTypeInternal _FblConnectionPoint_default_instance_;
@@ -326,7 +320,6 @@ template<> ::Proto::AfbSignal* Arena::CreateMaybeMessage<::Proto::AfbSignal>(Are
 template<> ::Proto::Bus* Arena::CreateMaybeMessage<::Proto::Bus>(Arena*);
 template<> ::Proto::BusSignal* Arena::CreateMaybeMessage<::Proto::BusSignal>(Arena*);
 template<> ::Proto::Configuration* Arena::CreateMaybeMessage<::Proto::Configuration>(Arena*);
-template<> ::Proto::Connection* Arena::CreateMaybeMessage<::Proto::Connection>(Arena*);
 template<> ::Proto::DeviceAppSignal* Arena::CreateMaybeMessage<::Proto::DeviceAppSignal>(Arena*);
 template<> ::Proto::DeviceChassis* Arena::CreateMaybeMessage<::Proto::DeviceChassis>(Arena*);
 template<> ::Proto::DeviceController* Arena::CreateMaybeMessage<::Proto::DeviceController>(Arena*);
@@ -340,7 +333,6 @@ template<> ::Proto::DiagSignalType* Arena::CreateMaybeMessage<::Proto::DiagSigna
 template<> ::Proto::Envelope* Arena::CreateMaybeMessage<::Proto::Envelope>(Arena*);
 template<> ::Proto::EnvelopeSet* Arena::CreateMaybeMessage<::Proto::EnvelopeSet>(Arena*);
 template<> ::Proto::EnvelopeSetShortDescription* Arena::CreateMaybeMessage<::Proto::EnvelopeSetShortDescription>(Arena*);
-template<> ::Proto::ExportedDevicePreset* Arena::CreateMaybeMessage<::Proto::ExportedDevicePreset>(Arena*);
 template<> ::Proto::FblConnectionPoint* Arena::CreateMaybeMessage<::Proto::FblConnectionPoint>(Arena*);
 template<> ::Proto::FblElement* Arena::CreateMaybeMessage<::Proto::FblElement>(Arena*);
 template<> ::Proto::FblItem* Arena::CreateMaybeMessage<::Proto::FblItem>(Arena*);
@@ -1091,13 +1083,10 @@ class Envelope PROTOBUF_FINAL :
   enum : int {
     kCompressedObjectFieldNumber = 2,
     kSchemaitemFieldNumber = 6,
-    kDeviceobjectFieldNumber = 7,
-    kDiagSignalTypeFieldNumber = 8,
     kSchemaFieldNumber = 100,
     kSchemalayerFieldNumber = 101,
     kFblelementFieldNumber = 102,
     kConfigurationFieldNumber = 103,
-    kConnectionFieldNumber = 104,
     kSchemaDetailsSetFieldNumber = 105,
     kBusFieldNumber = 200,
     kClassnamehashFieldNumber = 1,
@@ -1139,42 +1128,6 @@ class Envelope PROTOBUF_FINAL :
   void unsafe_arena_set_allocated_schemaitem(
       ::Proto::SchemaItem* schemaitem);
   ::Proto::SchemaItem* unsafe_arena_release_schemaitem();
-
-  // optional .Proto.DeviceObject deviceobject = 7;
-  bool has_deviceobject() const;
-  private:
-  bool _internal_has_deviceobject() const;
-  public:
-  void clear_deviceobject();
-  const ::Proto::DeviceObject& deviceobject() const;
-  ::Proto::DeviceObject* release_deviceobject();
-  ::Proto::DeviceObject* mutable_deviceobject();
-  void set_allocated_deviceobject(::Proto::DeviceObject* deviceobject);
-  private:
-  const ::Proto::DeviceObject& _internal_deviceobject() const;
-  ::Proto::DeviceObject* _internal_mutable_deviceobject();
-  public:
-  void unsafe_arena_set_allocated_deviceobject(
-      ::Proto::DeviceObject* deviceobject);
-  ::Proto::DeviceObject* unsafe_arena_release_deviceobject();
-
-  // optional .Proto.DiagSignalType diagSignalType = 8;
-  bool has_diagsignaltype() const;
-  private:
-  bool _internal_has_diagsignaltype() const;
-  public:
-  void clear_diagsignaltype();
-  const ::Proto::DiagSignalType& diagsignaltype() const;
-  ::Proto::DiagSignalType* release_diagsignaltype();
-  ::Proto::DiagSignalType* mutable_diagsignaltype();
-  void set_allocated_diagsignaltype(::Proto::DiagSignalType* diagsignaltype);
-  private:
-  const ::Proto::DiagSignalType& _internal_diagsignaltype() const;
-  ::Proto::DiagSignalType* _internal_mutable_diagsignaltype();
-  public:
-  void unsafe_arena_set_allocated_diagsignaltype(
-      ::Proto::DiagSignalType* diagsignaltype);
-  ::Proto::DiagSignalType* unsafe_arena_release_diagsignaltype();
 
   // optional .Proto.Schema schema = 100;
   bool has_schema() const;
@@ -1248,24 +1201,6 @@ class Envelope PROTOBUF_FINAL :
       ::Proto::Configuration* configuration);
   ::Proto::Configuration* unsafe_arena_release_configuration();
 
-  // optional .Proto.Connection connection = 104;
-  bool has_connection() const;
-  private:
-  bool _internal_has_connection() const;
-  public:
-  void clear_connection();
-  const ::Proto::Connection& connection() const;
-  ::Proto::Connection* release_connection();
-  ::Proto::Connection* mutable_connection();
-  void set_allocated_connection(::Proto::Connection* connection);
-  private:
-  const ::Proto::Connection& _internal_connection() const;
-  ::Proto::Connection* _internal_mutable_connection();
-  public:
-  void unsafe_arena_set_allocated_connection(
-      ::Proto::Connection* connection);
-  ::Proto::Connection* unsafe_arena_release_connection();
-
   // optional .Proto.SchemaDetailsSet schemaDetailsSet = 105;
   bool has_schemadetailsset() const;
   private:
@@ -1326,13 +1261,10 @@ class Envelope PROTOBUF_FINAL :
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr compressedobject_;
   ::Proto::SchemaItem* schemaitem_;
-  ::Proto::DeviceObject* deviceobject_;
-  ::Proto::DiagSignalType* diagsignaltype_;
   ::Proto::Schema* schema_;
   ::Proto::SchemaLayer* schemalayer_;
   ::Proto::FblElement* fblelement_;
   ::Proto::Configuration* configuration_;
-  ::Proto::Connection* connection_;
   ::Proto::SchemaDetailsSet* schemadetailsset_;
   ::Proto::Bus* bus_;
   ::PROTOBUF_NAMESPACE_ID::uint32 classnamehash_;
@@ -1794,202 +1726,6 @@ class EnvelopeSetShortDescription PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
-class ExportedDevicePreset PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.ExportedDevicePreset) */ {
- public:
-  inline ExportedDevicePreset() : ExportedDevicePreset(nullptr) {}
-  virtual ~ExportedDevicePreset();
-  explicit constexpr ExportedDevicePreset(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  ExportedDevicePreset(const ExportedDevicePreset& from);
-  ExportedDevicePreset(ExportedDevicePreset&& from) noexcept
-    : ExportedDevicePreset() {
-    *this = ::std::move(from);
-  }
-
-  inline ExportedDevicePreset& operator=(const ExportedDevicePreset& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline ExportedDevicePreset& operator=(ExportedDevicePreset&& from) noexcept {
-    if (GetArena() == from.GetArena()) {
-      if (this != &from) InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
-    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
-  }
-  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
-    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return GetMetadataStatic().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return GetMetadataStatic().reflection;
-  }
-  static const ExportedDevicePreset& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const ExportedDevicePreset* internal_default_instance() {
-    return reinterpret_cast<const ExportedDevicePreset*>(
-               &_ExportedDevicePreset_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    5;
-
-  friend void swap(ExportedDevicePreset& a, ExportedDevicePreset& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(ExportedDevicePreset* other) {
-    if (other == this) return;
-    if (GetArena() == other->GetArena()) {
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(ExportedDevicePreset* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  inline ExportedDevicePreset* New() const final {
-    return CreateMaybeMessage<ExportedDevicePreset>(nullptr);
-  }
-
-  ExportedDevicePreset* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<ExportedDevicePreset>(arena);
-  }
-  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const ExportedDevicePreset& from);
-  void MergeFrom(const ExportedDevicePreset& from);
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
-      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _cached_size_.Get(); }
-
-  private:
-  inline void SharedCtor();
-  inline void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(ExportedDevicePreset* other);
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "Proto.ExportedDevicePreset";
-  }
-  protected:
-  explicit ExportedDevicePreset(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  private:
-  static void ArenaDtor(void* object);
-  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  public:
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    return ::descriptor_table_serialization_2eproto_metadata_getter(kIndexInFileMessages);
-  }
-
-  public:
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kCompressedThisFieldNumber = 3,
-    kDescriptionFieldNumber = 1,
-    kItemsFieldNumber = 2,
-  };
-  // optional bytes compressedThis = 3;
-  bool has_compressedthis() const;
-  private:
-  bool _internal_has_compressedthis() const;
-  public:
-  void clear_compressedthis();
-  const std::string& compressedthis() const;
-  void set_compressedthis(const std::string& value);
-  void set_compressedthis(std::string&& value);
-  void set_compressedthis(const char* value);
-  void set_compressedthis(const void* value, size_t size);
-  std::string* mutable_compressedthis();
-  std::string* release_compressedthis();
-  void set_allocated_compressedthis(std::string* compressedthis);
-  private:
-  const std::string& _internal_compressedthis() const;
-  void _internal_set_compressedthis(const std::string& value);
-  std::string* _internal_mutable_compressedthis();
-  public:
-
-  // optional .Proto.EnvelopeSetShortDescription description = 1;
-  bool has_description() const;
-  private:
-  bool _internal_has_description() const;
-  public:
-  void clear_description();
-  const ::Proto::EnvelopeSetShortDescription& description() const;
-  ::Proto::EnvelopeSetShortDescription* release_description();
-  ::Proto::EnvelopeSetShortDescription* mutable_description();
-  void set_allocated_description(::Proto::EnvelopeSetShortDescription* description);
-  private:
-  const ::Proto::EnvelopeSetShortDescription& _internal_description() const;
-  ::Proto::EnvelopeSetShortDescription* _internal_mutable_description();
-  public:
-  void unsafe_arena_set_allocated_description(
-      ::Proto::EnvelopeSetShortDescription* description);
-  ::Proto::EnvelopeSetShortDescription* unsafe_arena_release_description();
-
-  // optional .Proto.EnvelopeSet items = 2;
-  bool has_items() const;
-  private:
-  bool _internal_has_items() const;
-  public:
-  void clear_items();
-  const ::Proto::EnvelopeSet& items() const;
-  ::Proto::EnvelopeSet* release_items();
-  ::Proto::EnvelopeSet* mutable_items();
-  void set_allocated_items(::Proto::EnvelopeSet* items);
-  private:
-  const ::Proto::EnvelopeSet& _internal_items() const;
-  ::Proto::EnvelopeSet* _internal_mutable_items();
-  public:
-  void unsafe_arena_set_allocated_items(
-      ::Proto::EnvelopeSet* items);
-  ::Proto::EnvelopeSet* unsafe_arena_release_items();
-
-  // @@protoc_insertion_point(class_scope:Proto.ExportedDevicePreset)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr compressedthis_;
-  ::Proto::EnvelopeSetShortDescription* description_;
-  ::Proto::EnvelopeSet* items_;
-  friend struct ::TableStruct_serialization_2eproto;
-};
-// -------------------------------------------------------------------
-
 class Configuration PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.Configuration) */ {
  public:
@@ -2040,7 +1776,7 @@ class Configuration PROTOBUF_FINAL :
                &_Configuration_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    6;
+    5;
 
   friend void swap(Configuration& a, Configuration& b) {
     a.Swap(&b);
@@ -2317,7 +2053,7 @@ class AfbElementCollection PROTOBUF_FINAL :
                &_AfbElementCollection_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    7;
+    6;
 
   friend void swap(AfbElementCollection& a, AfbElementCollection& b) {
     a.Swap(&b);
@@ -2470,7 +2206,7 @@ class AfbElementXml PROTOBUF_FINAL :
                &_AfbElementXml_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    8;
+    7;
 
   friend void swap(AfbElementXml& a, AfbElementXml& b) {
     a.Swap(&b);
@@ -2626,7 +2362,7 @@ class FblElement PROTOBUF_FINAL :
                &_FblElement_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    9;
+    8;
 
   friend void swap(FblElement& a, FblElement& b) {
     a.Swap(&b);
@@ -2928,7 +2664,7 @@ class AfbSignal PROTOBUF_FINAL :
                &_AfbSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    10;
+    9;
 
   friend void swap(AfbSignal& a, AfbSignal& b) {
     a.Swap(&b);
@@ -3165,7 +2901,7 @@ class AfbParam PROTOBUF_FINAL :
                &_AfbParam_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    11;
+    10;
 
   friend void swap(AfbParam& a, AfbParam& b) {
     a.Swap(&b);
@@ -3547,7 +3283,7 @@ class Schema PROTOBUF_FINAL :
                &_Schema_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    12;
+    11;
 
   friend void swap(Schema& a, Schema& b) {
     a.Swap(&b);
@@ -4068,7 +3804,7 @@ class LogicSchema PROTOBUF_FINAL :
                &_LogicSchema_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    13;
+    12;
 
   friend void swap(LogicSchema& a, LogicSchema& b) {
     a.Swap(&b);
@@ -4259,7 +3995,7 @@ class UfbSchema PROTOBUF_FINAL :
                &_UfbSchema_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    14;
+    13;
 
   friend void swap(UfbSchema& a, UfbSchema& b) {
     a.Swap(&b);
@@ -4474,7 +4210,7 @@ class SchemaLayer PROTOBUF_FINAL :
                &_SchemaLayer_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    15;
+    14;
 
   friend void swap(SchemaLayer& a, SchemaLayer& b) {
     a.Swap(&b);
@@ -4716,7 +4452,7 @@ class SchemaItem PROTOBUF_FINAL :
                &_SchemaItem_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    16;
+    15;
 
   friend void swap(SchemaItem& a, SchemaItem& b) {
     a.Swap(&b);
@@ -5833,7 +5569,7 @@ class PosRectImpl PROTOBUF_FINAL :
                &_PosRectImpl_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    17;
+    16;
 
   friend void swap(PosRectImpl& a, PosRectImpl& b) {
     a.Swap(&b);
@@ -6030,7 +5766,7 @@ class PosRectRotatable PROTOBUF_FINAL :
                &_PosRectRotatable_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    18;
+    17;
 
   friend void swap(PosRectRotatable& a, PosRectRotatable& b) {
     a.Swap(&b);
@@ -6194,7 +5930,7 @@ class PosLineImpl PROTOBUF_FINAL :
                &_PosLineImpl_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    19;
+    18;
 
   friend void swap(PosLineImpl& a, PosLineImpl& b) {
     a.Swap(&b);
@@ -6391,7 +6127,7 @@ class PosConnectionImpl PROTOBUF_FINAL :
                &_PosConnectionImpl_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    20;
+    19;
 
   friend void swap(PosConnectionImpl& a, PosConnectionImpl& b) {
     a.Swap(&b);
@@ -6544,7 +6280,7 @@ class SchemaItemRect PROTOBUF_FINAL :
                &_SchemaItemRect_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    21;
+    20;
 
   friend void swap(SchemaItemRect& a, SchemaItemRect& b) {
     a.Swap(&b);
@@ -6886,7 +6622,7 @@ class SchemaItemLine PROTOBUF_FINAL :
                &_SchemaItemLine_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    22;
+    21;
 
   friend void swap(SchemaItemLine& a, SchemaItemLine& b) {
     a.Swap(&b);
@@ -7128,7 +6864,7 @@ class SchemaItemPath PROTOBUF_FINAL :
                &_SchemaItemPath_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    23;
+    22;
 
   friend void swap(SchemaItemPath& a, SchemaItemPath& b) {
     a.Swap(&b);
@@ -7370,7 +7106,7 @@ class SchemaItemImage PROTOBUF_FINAL :
                &_SchemaItemImage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    24;
+    23;
 
   friend void swap(SchemaItemImage& a, SchemaItemImage& b) {
     a.Swap(&b);
@@ -7524,7 +7260,7 @@ class SchemaItemFrame PROTOBUF_FINAL :
                &_SchemaItemFrame_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    25;
+    24;
 
   friend void swap(SchemaItemFrame& a, SchemaItemFrame& b) {
     a.Swap(&b);
@@ -7710,7 +7446,7 @@ class VFrameSetPoint PROTOBUF_FINAL :
                &_VFrameSetPoint_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    26;
+    25;
 
   friend void swap(VFrameSetPoint& a, VFrameSetPoint& b) {
     a.Swap(&b);
@@ -7896,7 +7632,7 @@ class IndicatorHistogramVert PROTOBUF_FINAL :
                &_IndicatorHistogramVert_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    27;
+    26;
 
   friend void swap(IndicatorHistogramVert& a, IndicatorHistogramVert& b) {
     a.Swap(&b);
@@ -8484,7 +8220,7 @@ class IndicatorArrowIndicator PROTOBUF_FINAL :
                &_IndicatorArrowIndicator_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    28;
+    27;
 
   friend void swap(IndicatorArrowIndicator& a, IndicatorArrowIndicator& b) {
     a.Swap(&b);
@@ -8678,7 +8414,7 @@ class IndicatorTrendSignalParam PROTOBUF_FINAL :
                &_IndicatorTrendSignalParam_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    29;
+    28;
 
   friend void swap(IndicatorTrendSignalParam& a, IndicatorTrendSignalParam& b) {
     a.Swap(&b);
@@ -8872,7 +8608,7 @@ class IndicatorTrend PROTOBUF_FINAL :
                &_IndicatorTrend_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    30;
+    29;
 
   friend void swap(IndicatorTrend& a, IndicatorTrend& b) {
     a.Swap(&b);
@@ -9161,7 +8897,7 @@ class SchemaItemIndicator PROTOBUF_FINAL :
                &_SchemaItemIndicator_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    31;
+    30;
 
   friend void swap(SchemaItemIndicator& a, SchemaItemIndicator& b) {
     a.Swap(&b);
@@ -9392,7 +9128,7 @@ class FblConnectionPoint PROTOBUF_FINAL :
                &_FblConnectionPoint_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    32;
+    31;
 
   friend void swap(FblConnectionPoint& a, FblConnectionPoint& b) {
     a.Swap(&b);
@@ -9653,7 +9389,7 @@ class FblItem PROTOBUF_FINAL :
                &_FblItem_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    33;
+    32;
 
   friend void swap(FblItem& a, FblItem& b) {
     a.Swap(&b);
@@ -9806,7 +9542,7 @@ class FblItemRect PROTOBUF_FINAL :
                &_FblItemRect_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    34;
+    33;
 
   friend void swap(FblItemRect& a, FblItemRect& b) {
     a.Swap(&b);
@@ -10097,7 +9833,7 @@ class FblItemLine PROTOBUF_FINAL :
                &_FblItemLine_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    35;
+    34;
 
   friend void swap(FblItemLine& a, FblItemLine& b) {
     a.Swap(&b);
@@ -10279,7 +10015,7 @@ class SchemaItemSignalColumn PROTOBUF_FINAL :
                &_SchemaItemSignalColumn_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    36;
+    35;
 
   friend void swap(SchemaItemSignalColumn& a, SchemaItemSignalColumn& b) {
     a.Swap(&b);
@@ -10458,7 +10194,7 @@ class SchemaItemSignal PROTOBUF_FINAL :
                &_SchemaItemSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    37;
+    36;
 
   friend void swap(SchemaItemSignal& a, SchemaItemSignal& b) {
     a.Swap(&b);
@@ -10725,7 +10461,7 @@ class SchemaItemInput PROTOBUF_FINAL :
                &_SchemaItemInput_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    38;
+    37;
 
   friend void swap(SchemaItemInput& a, SchemaItemInput& b) {
     a.Swap(&b);
@@ -10856,7 +10592,7 @@ class SchemaItemOutput PROTOBUF_FINAL :
                &_SchemaItemOutput_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    39;
+    38;
 
   friend void swap(SchemaItemOutput& a, SchemaItemOutput& b) {
     a.Swap(&b);
@@ -10987,7 +10723,7 @@ class SchemaItemInOut PROTOBUF_FINAL :
                &_SchemaItemInOut_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    40;
+    39;
 
   friend void swap(SchemaItemInOut& a, SchemaItemInOut& b) {
     a.Swap(&b);
@@ -11118,7 +10854,7 @@ class SchemaItemLink PROTOBUF_FINAL :
                &_SchemaItemLink_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    41;
+    40;
 
   friend void swap(SchemaItemLink& a, SchemaItemLink& b) {
     a.Swap(&b);
@@ -11249,7 +10985,7 @@ class SchemaItemAfb PROTOBUF_FINAL :
                &_SchemaItemAfb_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    42;
+    41;
 
   friend void swap(SchemaItemAfb& a, SchemaItemAfb& b) {
     a.Swap(&b);
@@ -11526,7 +11262,7 @@ class SchemaItemConst PROTOBUF_FINAL :
                &_SchemaItemConst_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    43;
+    42;
 
   friend void swap(SchemaItemConst& a, SchemaItemConst& b) {
     a.Swap(&b);
@@ -11861,7 +11597,7 @@ class SchemaItemConnection PROTOBUF_FINAL :
                &_SchemaItemConnection_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    44;
+    43;
 
   friend void swap(SchemaItemConnection& a, SchemaItemConnection& b) {
     a.Swap(&b);
@@ -12017,7 +11753,7 @@ class SchemaItemTransmitter PROTOBUF_FINAL :
                &_SchemaItemTransmitter_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    45;
+    44;
 
   friend void swap(SchemaItemTransmitter& a, SchemaItemTransmitter& b) {
     a.Swap(&b);
@@ -12166,7 +11902,7 @@ class SchemaItemReceiver PROTOBUF_FINAL :
                &_SchemaItemReceiver_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    46;
+    45;
 
   friend void swap(SchemaItemReceiver& a, SchemaItemReceiver& b) {
     a.Swap(&b);
@@ -12404,7 +12140,7 @@ class SchemaItemUfb PROTOBUF_FINAL :
                &_SchemaItemUfb_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    47;
+    46;
 
   friend void swap(SchemaItemUfb& a, SchemaItemUfb& b) {
     a.Swap(&b);
@@ -12639,7 +12375,7 @@ class SchemaItemTerminator PROTOBUF_FINAL :
                &_SchemaItemTerminator_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    48;
+    47;
 
   friend void swap(SchemaItemTerminator& a, SchemaItemTerminator& b) {
     a.Swap(&b);
@@ -12770,7 +12506,7 @@ class SchemaItemValue PROTOBUF_FINAL :
                &_SchemaItemValue_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    49;
+    48;
 
   friend void swap(SchemaItemValue& a, SchemaItemValue& b) {
     a.Swap(&b);
@@ -13118,7 +12854,7 @@ class SchemaItemImageValue PROTOBUF_FINAL :
                &_SchemaItemImageValue_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    50;
+    49;
 
   friend void swap(SchemaItemImageValue& a, SchemaItemImageValue& b) {
     a.Swap(&b);
@@ -13406,7 +13142,7 @@ class SchemaItemDiagValue PROTOBUF_FINAL :
                &_SchemaItemDiagValue_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    51;
+    50;
 
   friend void swap(SchemaItemDiagValue& a, SchemaItemDiagValue& b) {
     a.Swap(&b);
@@ -13739,7 +13475,7 @@ class SchemaItemBus PROTOBUF_FINAL :
                &_SchemaItemBus_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    52;
+    51;
 
   friend void swap(SchemaItemBus& a, SchemaItemBus& b) {
     a.Swap(&b);
@@ -13930,7 +13666,7 @@ class SchemaItemBusComposer PROTOBUF_FINAL :
                &_SchemaItemBusComposer_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    53;
+    52;
 
   friend void swap(SchemaItemBusComposer& a, SchemaItemBusComposer& b) {
     a.Swap(&b);
@@ -14061,7 +13797,7 @@ class SchemaItemBusExtractor PROTOBUF_FINAL :
                &_SchemaItemBusExtractor_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    54;
+    53;
 
   friend void swap(SchemaItemBusExtractor& a, SchemaItemBusExtractor& b) {
     a.Swap(&b);
@@ -14214,7 +13950,7 @@ class SchemaItemLoopback PROTOBUF_FINAL :
                &_SchemaItemLoopback_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    55;
+    54;
 
   friend void swap(SchemaItemLoopback& a, SchemaItemLoopback& b) {
     a.Swap(&b);
@@ -14370,7 +14106,7 @@ class SchemaItemLoopbackSource PROTOBUF_FINAL :
                &_SchemaItemLoopbackSource_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    56;
+    55;
 
   friend void swap(SchemaItemLoopbackSource& a, SchemaItemLoopbackSource& b) {
     a.Swap(&b);
@@ -14501,7 +14237,7 @@ class SchemaItemLoopbackTarget PROTOBUF_FINAL :
                &_SchemaItemLoopbackTarget_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    57;
+    56;
 
   friend void swap(SchemaItemLoopbackTarget& a, SchemaItemLoopbackTarget& b) {
     a.Swap(&b);
@@ -14632,7 +14368,7 @@ class SchemaItemControl PROTOBUF_FINAL :
                &_SchemaItemControl_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    58;
+    57;
 
   friend void swap(SchemaItemControl& a, SchemaItemControl& b) {
     a.Swap(&b);
@@ -14810,7 +14546,7 @@ class SchemaItemPushButton PROTOBUF_FINAL :
                &_SchemaItemPushButton_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    59;
+    58;
 
   friend void swap(SchemaItemPushButton& a, SchemaItemPushButton& b) {
     a.Swap(&b);
@@ -15151,7 +14887,7 @@ class SchemaItemLineEdit PROTOBUF_FINAL :
                &_SchemaItemLineEdit_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    60;
+    59;
 
   friend void swap(SchemaItemLineEdit& a, SchemaItemLineEdit& b) {
     a.Swap(&b);
@@ -15477,7 +15213,7 @@ class SchemaItemSlider PROTOBUF_FINAL :
                &_SchemaItemSlider_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    61;
+    60;
 
   friend void swap(SchemaItemSlider& a, SchemaItemSlider& b) {
     a.Swap(&b);
@@ -15901,7 +15637,7 @@ class DeviceObject PROTOBUF_FINAL :
                &_DeviceObject_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    62;
+    61;
 
   friend void swap(DeviceObject& a, DeviceObject& b) {
     a.Swap(&b);
@@ -16558,7 +16294,7 @@ class DeviceRoot PROTOBUF_FINAL :
                &_DeviceRoot_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    63;
+    62;
 
   friend void swap(DeviceRoot& a, DeviceRoot& b) {
     a.Swap(&b);
@@ -16689,7 +16425,7 @@ class DeviceSystem PROTOBUF_FINAL :
                &_DeviceSystem_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    64;
+    63;
 
   friend void swap(DeviceSystem& a, DeviceSystem& b) {
     a.Swap(&b);
@@ -16820,7 +16556,7 @@ class DeviceRack PROTOBUF_FINAL :
                &_DeviceRack_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    65;
+    64;
 
   friend void swap(DeviceRack& a, DeviceRack& b) {
     a.Swap(&b);
@@ -16951,7 +16687,7 @@ class DeviceChassis PROTOBUF_FINAL :
                &_DeviceChassis_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    66;
+    65;
 
   friend void swap(DeviceChassis& a, DeviceChassis& b) {
     a.Swap(&b);
@@ -17100,7 +16836,7 @@ class DeviceModule PROTOBUF_FINAL :
                &_DeviceModule_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    67;
+    66;
 
   friend void swap(DeviceModule& a, DeviceModule& b) {
     a.Swap(&b);
@@ -17323,7 +17059,7 @@ class DeviceController PROTOBUF_FINAL :
                &_DeviceController_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    68;
+    67;
 
   friend void swap(DeviceController& a, DeviceController& b) {
     a.Swap(&b);
@@ -17472,7 +17208,7 @@ class DeviceAppSignal PROTOBUF_FINAL :
                &_DeviceAppSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    69;
+    68;
 
   friend void swap(DeviceAppSignal& a, DeviceAppSignal& b) {
     a.Swap(&b);
@@ -17897,7 +17633,7 @@ class DeviceDiagSignal PROTOBUF_FINAL :
                &_DeviceDiagSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    70;
+    69;
 
   friend void swap(DeviceDiagSignal& a, DeviceDiagSignal& b) {
     a.Swap(&b);
@@ -18292,7 +18028,7 @@ class Workstation PROTOBUF_FINAL :
                &_Workstation_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    71;
+    70;
 
   friend void swap(Workstation& a, Workstation& b) {
     a.Swap(&b);
@@ -18463,7 +18199,7 @@ class Software PROTOBUF_FINAL :
                &_Software_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    72;
+    71;
 
   friend void swap(Software& a, Software& b) {
     a.Swap(&b);
@@ -18612,7 +18348,7 @@ class DiagSignalType PROTOBUF_FINAL :
                &_DiagSignalType_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    73;
+    72;
 
   friend void swap(DiagSignalType& a, DiagSignalType& b) {
     a.Swap(&b);
@@ -19049,7 +18785,7 @@ class Unit PROTOBUF_FINAL :
                &_Unit_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    74;
+    73;
 
   friend void swap(Unit& a, Unit& b) {
     a.Swap(&b);
@@ -19223,7 +18959,7 @@ class UnitSet PROTOBUF_FINAL :
                &_UnitSet_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    75;
+    74;
 
   friend void swap(UnitSet& a, UnitSet& b) {
     a.Swap(&b);
@@ -19326,555 +19062,6 @@ class UnitSet PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
-class Connection PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.Connection) */ {
- public:
-  inline Connection() : Connection(nullptr) {}
-  virtual ~Connection();
-  explicit constexpr Connection(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  Connection(const Connection& from);
-  Connection(Connection&& from) noexcept
-    : Connection() {
-    *this = ::std::move(from);
-  }
-
-  inline Connection& operator=(const Connection& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline Connection& operator=(Connection&& from) noexcept {
-    if (GetArena() == from.GetArena()) {
-      if (this != &from) InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
-    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
-  }
-  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
-    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return GetMetadataStatic().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return GetMetadataStatic().reflection;
-  }
-  static const Connection& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const Connection* internal_default_instance() {
-    return reinterpret_cast<const Connection*>(
-               &_Connection_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    76;
-
-  friend void swap(Connection& a, Connection& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(Connection* other) {
-    if (other == this) return;
-    if (GetArena() == other->GetArena()) {
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(Connection* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  inline Connection* New() const final {
-    return CreateMaybeMessage<Connection>(nullptr);
-  }
-
-  Connection* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<Connection>(arena);
-  }
-  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const Connection& from);
-  void MergeFrom(const Connection& from);
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
-      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _cached_size_.Get(); }
-
-  private:
-  inline void SharedCtor();
-  inline void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(Connection* other);
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "Proto.Connection";
-  }
-  protected:
-  explicit Connection(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  private:
-  static void ArenaDtor(void* object);
-  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  public:
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    return ::descriptor_table_serialization_2eproto_metadata_getter(kIndexInFileMessages);
-  }
-
-  public:
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kConnectionIDFieldNumber = 2,
-    kPort1EquipmentIDFieldNumber = 3,
-    kPort2EquipmentIDFieldNumber = 4,
-    kPort1RawDataDescriptionFieldNumber = 5,
-    kPort2RawDataDescriptionFieldNumber = 6,
-    kUuidFieldNumber = 20,
-    kObsoleteSerialModeFieldNumber = 7,
-    kObsoleteModeFieldNumber = 8,
-    kPort1TxStartAddressFieldNumber = 14,
-    kManualSettingsFieldNumber = 11,
-    kDisableDataIDFieldNumber = 12,
-    kGenerateVHDFileFieldNumber = 13,
-    kPort1EnableSerialFieldNumber = 21,
-    kPort2TxStartAddressFieldNumber = 17,
-    kPort1EnableDuplexFieldNumber = 23,
-    kPort2EnableSerialFieldNumber = 24,
-    kPort2EnableDuplexFieldNumber = 26,
-    kObsoleteEnableDuplexFieldNumber = 10,
-    kPort1SerialModeFieldNumber = 22,
-    kPort2SerialModeFieldNumber = 25,
-    kTypeFieldNumber = 27,
-    kPort1TxWordsQuantityFieldNumber = 15,
-    kPort1RxWordsQuantityFieldNumber = 16,
-    kPort2TxWordsQuantityFieldNumber = 18,
-    kPort2RxWordsQuantityFieldNumber = 19,
-  };
-  // optional string ConnectionID = 2;
-  bool has_connectionid() const;
-  private:
-  bool _internal_has_connectionid() const;
-  public:
-  void clear_connectionid();
-  const std::string& connectionid() const;
-  void set_connectionid(const std::string& value);
-  void set_connectionid(std::string&& value);
-  void set_connectionid(const char* value);
-  void set_connectionid(const char* value, size_t size);
-  std::string* mutable_connectionid();
-  std::string* release_connectionid();
-  void set_allocated_connectionid(std::string* connectionid);
-  private:
-  const std::string& _internal_connectionid() const;
-  void _internal_set_connectionid(const std::string& value);
-  std::string* _internal_mutable_connectionid();
-  public:
-
-  // optional string Port1EquipmentID = 3;
-  bool has_port1equipmentid() const;
-  private:
-  bool _internal_has_port1equipmentid() const;
-  public:
-  void clear_port1equipmentid();
-  const std::string& port1equipmentid() const;
-  void set_port1equipmentid(const std::string& value);
-  void set_port1equipmentid(std::string&& value);
-  void set_port1equipmentid(const char* value);
-  void set_port1equipmentid(const char* value, size_t size);
-  std::string* mutable_port1equipmentid();
-  std::string* release_port1equipmentid();
-  void set_allocated_port1equipmentid(std::string* port1equipmentid);
-  private:
-  const std::string& _internal_port1equipmentid() const;
-  void _internal_set_port1equipmentid(const std::string& value);
-  std::string* _internal_mutable_port1equipmentid();
-  public:
-
-  // optional string Port2EquipmentID = 4;
-  bool has_port2equipmentid() const;
-  private:
-  bool _internal_has_port2equipmentid() const;
-  public:
-  void clear_port2equipmentid();
-  const std::string& port2equipmentid() const;
-  void set_port2equipmentid(const std::string& value);
-  void set_port2equipmentid(std::string&& value);
-  void set_port2equipmentid(const char* value);
-  void set_port2equipmentid(const char* value, size_t size);
-  std::string* mutable_port2equipmentid();
-  std::string* release_port2equipmentid();
-  void set_allocated_port2equipmentid(std::string* port2equipmentid);
-  private:
-  const std::string& _internal_port2equipmentid() const;
-  void _internal_set_port2equipmentid(const std::string& value);
-  std::string* _internal_mutable_port2equipmentid();
-  public:
-
-  // optional string Port1RawDataDescription = 5;
-  bool has_port1rawdatadescription() const;
-  private:
-  bool _internal_has_port1rawdatadescription() const;
-  public:
-  void clear_port1rawdatadescription();
-  const std::string& port1rawdatadescription() const;
-  void set_port1rawdatadescription(const std::string& value);
-  void set_port1rawdatadescription(std::string&& value);
-  void set_port1rawdatadescription(const char* value);
-  void set_port1rawdatadescription(const char* value, size_t size);
-  std::string* mutable_port1rawdatadescription();
-  std::string* release_port1rawdatadescription();
-  void set_allocated_port1rawdatadescription(std::string* port1rawdatadescription);
-  private:
-  const std::string& _internal_port1rawdatadescription() const;
-  void _internal_set_port1rawdatadescription(const std::string& value);
-  std::string* _internal_mutable_port1rawdatadescription();
-  public:
-
-  // optional string Port2RawDataDescription = 6;
-  bool has_port2rawdatadescription() const;
-  private:
-  bool _internal_has_port2rawdatadescription() const;
-  public:
-  void clear_port2rawdatadescription();
-  const std::string& port2rawdatadescription() const;
-  void set_port2rawdatadescription(const std::string& value);
-  void set_port2rawdatadescription(std::string&& value);
-  void set_port2rawdatadescription(const char* value);
-  void set_port2rawdatadescription(const char* value, size_t size);
-  std::string* mutable_port2rawdatadescription();
-  std::string* release_port2rawdatadescription();
-  void set_allocated_port2rawdatadescription(std::string* port2rawdatadescription);
-  private:
-  const std::string& _internal_port2rawdatadescription() const;
-  void _internal_set_port2rawdatadescription(const std::string& value);
-  std::string* _internal_mutable_port2rawdatadescription();
-  public:
-
-  // optional .Proto.Uuid uuid = 20;
-  bool has_uuid() const;
-  private:
-  bool _internal_has_uuid() const;
-  public:
-  void clear_uuid();
-  const ::Proto::Uuid& uuid() const;
-  ::Proto::Uuid* release_uuid();
-  ::Proto::Uuid* mutable_uuid();
-  void set_allocated_uuid(::Proto::Uuid* uuid);
-  private:
-  const ::Proto::Uuid& _internal_uuid() const;
-  ::Proto::Uuid* _internal_mutable_uuid();
-  public:
-  void unsafe_arena_set_allocated_uuid(
-      ::Proto::Uuid* uuid);
-  ::Proto::Uuid* unsafe_arena_release_uuid();
-
-  // optional int32 ObsoleteSerialMode = 7 [default = 0];
-  bool has_obsoleteserialmode() const;
-  private:
-  bool _internal_has_obsoleteserialmode() const;
-  public:
-  void clear_obsoleteserialmode();
-  ::PROTOBUF_NAMESPACE_ID::int32 obsoleteserialmode() const;
-  void set_obsoleteserialmode(::PROTOBUF_NAMESPACE_ID::int32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_obsoleteserialmode() const;
-  void _internal_set_obsoleteserialmode(::PROTOBUF_NAMESPACE_ID::int32 value);
-  public:
-
-  // optional int32 ObsoleteMode = 8 [default = 0];
-  bool has_obsoletemode() const;
-  private:
-  bool _internal_has_obsoletemode() const;
-  public:
-  void clear_obsoletemode();
-  ::PROTOBUF_NAMESPACE_ID::int32 obsoletemode() const;
-  void set_obsoletemode(::PROTOBUF_NAMESPACE_ID::int32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_obsoletemode() const;
-  void _internal_set_obsoletemode(::PROTOBUF_NAMESPACE_ID::int32 value);
-  public:
-
-  // optional int32 Port1TxStartAddress = 14 [default = 0];
-  bool has_port1txstartaddress() const;
-  private:
-  bool _internal_has_port1txstartaddress() const;
-  public:
-  void clear_port1txstartaddress();
-  ::PROTOBUF_NAMESPACE_ID::int32 port1txstartaddress() const;
-  void set_port1txstartaddress(::PROTOBUF_NAMESPACE_ID::int32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_port1txstartaddress() const;
-  void _internal_set_port1txstartaddress(::PROTOBUF_NAMESPACE_ID::int32 value);
-  public:
-
-  // optional bool ManualSettings = 11 [default = false];
-  bool has_manualsettings() const;
-  private:
-  bool _internal_has_manualsettings() const;
-  public:
-  void clear_manualsettings();
-  bool manualsettings() const;
-  void set_manualsettings(bool value);
-  private:
-  bool _internal_manualsettings() const;
-  void _internal_set_manualsettings(bool value);
-  public:
-
-  // optional bool DisableDataID = 12 [default = false];
-  bool has_disabledataid() const;
-  private:
-  bool _internal_has_disabledataid() const;
-  public:
-  void clear_disabledataid();
-  bool disabledataid() const;
-  void set_disabledataid(bool value);
-  private:
-  bool _internal_disabledataid() const;
-  void _internal_set_disabledataid(bool value);
-  public:
-
-  // optional bool GenerateVHDFile = 13 [default = false];
-  bool has_generatevhdfile() const;
-  private:
-  bool _internal_has_generatevhdfile() const;
-  public:
-  void clear_generatevhdfile();
-  bool generatevhdfile() const;
-  void set_generatevhdfile(bool value);
-  private:
-  bool _internal_generatevhdfile() const;
-  void _internal_set_generatevhdfile(bool value);
-  public:
-
-  // optional bool Port1EnableSerial = 21 [default = false];
-  bool has_port1enableserial() const;
-  private:
-  bool _internal_has_port1enableserial() const;
-  public:
-  void clear_port1enableserial();
-  bool port1enableserial() const;
-  void set_port1enableserial(bool value);
-  private:
-  bool _internal_port1enableserial() const;
-  void _internal_set_port1enableserial(bool value);
-  public:
-
-  // optional int32 Port2TxStartAddress = 17 [default = 0];
-  bool has_port2txstartaddress() const;
-  private:
-  bool _internal_has_port2txstartaddress() const;
-  public:
-  void clear_port2txstartaddress();
-  ::PROTOBUF_NAMESPACE_ID::int32 port2txstartaddress() const;
-  void set_port2txstartaddress(::PROTOBUF_NAMESPACE_ID::int32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_port2txstartaddress() const;
-  void _internal_set_port2txstartaddress(::PROTOBUF_NAMESPACE_ID::int32 value);
-  public:
-
-  // optional bool Port1EnableDuplex = 23 [default = false];
-  bool has_port1enableduplex() const;
-  private:
-  bool _internal_has_port1enableduplex() const;
-  public:
-  void clear_port1enableduplex();
-  bool port1enableduplex() const;
-  void set_port1enableduplex(bool value);
-  private:
-  bool _internal_port1enableduplex() const;
-  void _internal_set_port1enableduplex(bool value);
-  public:
-
-  // optional bool Port2EnableSerial = 24 [default = false];
-  bool has_port2enableserial() const;
-  private:
-  bool _internal_has_port2enableserial() const;
-  public:
-  void clear_port2enableserial();
-  bool port2enableserial() const;
-  void set_port2enableserial(bool value);
-  private:
-  bool _internal_port2enableserial() const;
-  void _internal_set_port2enableserial(bool value);
-  public:
-
-  // optional bool Port2EnableDuplex = 26 [default = false];
-  bool has_port2enableduplex() const;
-  private:
-  bool _internal_has_port2enableduplex() const;
-  public:
-  void clear_port2enableduplex();
-  bool port2enableduplex() const;
-  void set_port2enableduplex(bool value);
-  private:
-  bool _internal_port2enableduplex() const;
-  void _internal_set_port2enableduplex(bool value);
-  public:
-
-  // optional bool ObsoleteEnableDuplex = 10 [default = false];
-  bool has_obsoleteenableduplex() const;
-  private:
-  bool _internal_has_obsoleteenableduplex() const;
-  public:
-  void clear_obsoleteenableduplex();
-  bool obsoleteenableduplex() const;
-  void set_obsoleteenableduplex(bool value);
-  private:
-  bool _internal_obsoleteenableduplex() const;
-  void _internal_set_obsoleteenableduplex(bool value);
-  public:
-
-  // optional int32 Port1SerialMode = 22 [default = 0];
-  bool has_port1serialmode() const;
-  private:
-  bool _internal_has_port1serialmode() const;
-  public:
-  void clear_port1serialmode();
-  ::PROTOBUF_NAMESPACE_ID::int32 port1serialmode() const;
-  void set_port1serialmode(::PROTOBUF_NAMESPACE_ID::int32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_port1serialmode() const;
-  void _internal_set_port1serialmode(::PROTOBUF_NAMESPACE_ID::int32 value);
-  public:
-
-  // optional int32 Port2SerialMode = 25 [default = 0];
-  bool has_port2serialmode() const;
-  private:
-  bool _internal_has_port2serialmode() const;
-  public:
-  void clear_port2serialmode();
-  ::PROTOBUF_NAMESPACE_ID::int32 port2serialmode() const;
-  void set_port2serialmode(::PROTOBUF_NAMESPACE_ID::int32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_port2serialmode() const;
-  void _internal_set_port2serialmode(::PROTOBUF_NAMESPACE_ID::int32 value);
-  public:
-
-  // optional int32 Type = 27 [default = 0];
-  bool has_type() const;
-  private:
-  bool _internal_has_type() const;
-  public:
-  void clear_type();
-  ::PROTOBUF_NAMESPACE_ID::int32 type() const;
-  void set_type(::PROTOBUF_NAMESPACE_ID::int32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_type() const;
-  void _internal_set_type(::PROTOBUF_NAMESPACE_ID::int32 value);
-  public:
-
-  // optional int32 Port1TxWordsQuantity = 15 [default = 479];
-  bool has_port1txwordsquantity() const;
-  private:
-  bool _internal_has_port1txwordsquantity() const;
-  public:
-  void clear_port1txwordsquantity();
-  ::PROTOBUF_NAMESPACE_ID::int32 port1txwordsquantity() const;
-  void set_port1txwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_port1txwordsquantity() const;
-  void _internal_set_port1txwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value);
-  public:
-
-  // optional int32 Port1RxWordsQuantity = 16 [default = 479];
-  bool has_port1rxwordsquantity() const;
-  private:
-  bool _internal_has_port1rxwordsquantity() const;
-  public:
-  void clear_port1rxwordsquantity();
-  ::PROTOBUF_NAMESPACE_ID::int32 port1rxwordsquantity() const;
-  void set_port1rxwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_port1rxwordsquantity() const;
-  void _internal_set_port1rxwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value);
-  public:
-
-  // optional int32 Port2TxWordsQuantity = 18 [default = 479];
-  bool has_port2txwordsquantity() const;
-  private:
-  bool _internal_has_port2txwordsquantity() const;
-  public:
-  void clear_port2txwordsquantity();
-  ::PROTOBUF_NAMESPACE_ID::int32 port2txwordsquantity() const;
-  void set_port2txwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_port2txwordsquantity() const;
-  void _internal_set_port2txwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value);
-  public:
-
-  // optional int32 Port2RxWordsQuantity = 19 [default = 479];
-  bool has_port2rxwordsquantity() const;
-  private:
-  bool _internal_has_port2rxwordsquantity() const;
-  public:
-  void clear_port2rxwordsquantity();
-  ::PROTOBUF_NAMESPACE_ID::int32 port2rxwordsquantity() const;
-  void set_port2rxwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_port2rxwordsquantity() const;
-  void _internal_set_port2rxwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value);
-  public:
-
-  // @@protoc_insertion_point(class_scope:Proto.Connection)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr connectionid_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr port1equipmentid_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr port2equipmentid_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr port1rawdatadescription_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr port2rawdatadescription_;
-  ::Proto::Uuid* uuid_;
-  ::PROTOBUF_NAMESPACE_ID::int32 obsoleteserialmode_;
-  ::PROTOBUF_NAMESPACE_ID::int32 obsoletemode_;
-  ::PROTOBUF_NAMESPACE_ID::int32 port1txstartaddress_;
-  bool manualsettings_;
-  bool disabledataid_;
-  bool generatevhdfile_;
-  bool port1enableserial_;
-  ::PROTOBUF_NAMESPACE_ID::int32 port2txstartaddress_;
-  bool port1enableduplex_;
-  bool port2enableserial_;
-  bool port2enableduplex_;
-  bool obsoleteenableduplex_;
-  ::PROTOBUF_NAMESPACE_ID::int32 port1serialmode_;
-  ::PROTOBUF_NAMESPACE_ID::int32 port2serialmode_;
-  ::PROTOBUF_NAMESPACE_ID::int32 type_;
-  ::PROTOBUF_NAMESPACE_ID::int32 port1txwordsquantity_;
-  ::PROTOBUF_NAMESPACE_ID::int32 port1rxwordsquantity_;
-  ::PROTOBUF_NAMESPACE_ID::int32 port2txwordsquantity_;
-  ::PROTOBUF_NAMESPACE_ID::int32 port2rxwordsquantity_;
-  friend struct ::TableStruct_serialization_2eproto;
-};
-// -------------------------------------------------------------------
-
 class SchemaDetailsSet PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Proto.SchemaDetailsSet) */ {
  public:
@@ -19925,7 +19112,7 @@ class SchemaDetailsSet PROTOBUF_FINAL :
                &_SchemaDetailsSet_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    77;
+    75;
 
   friend void swap(SchemaDetailsSet& a, SchemaDetailsSet& b) {
     a.Swap(&b);
@@ -20078,7 +19265,7 @@ class SchemaDetails_TrendIndicatorSchemaItems PROTOBUF_FINAL :
                &_SchemaDetails_TrendIndicatorSchemaItems_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    78;
+    76;
 
   friend void swap(SchemaDetails_TrendIndicatorSchemaItems& a, SchemaDetails_TrendIndicatorSchemaItems& b) {
     a.Swap(&b);
@@ -20303,7 +19490,7 @@ class SchemaDetails PROTOBUF_FINAL :
                &_SchemaDetails_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    79;
+    77;
 
   friend void swap(SchemaDetails& a, SchemaDetails& b) {
     a.Swap(&b);
@@ -20801,7 +19988,7 @@ class BusSignal PROTOBUF_FINAL :
                &_BusSignal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    80;
+    78;
 
   friend void swap(BusSignal& a, BusSignal& b) {
     a.Swap(&b);
@@ -21248,7 +20435,7 @@ class Bus PROTOBUF_FINAL :
                &_Bus_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    81;
+    79;
 
   friend void swap(Bus& a, Bus& b) {
     a.Swap(&b);
@@ -22012,7 +21199,7 @@ inline void ImageItem::set_allocated_svgdata(std::string* svgdata) {
 
 // required uint32 classnamehash = 1;
 inline bool Envelope::_internal_has_classnamehash() const {
-  bool value = (_has_bits_[0] & 0x00000800u) != 0;
+  bool value = (_has_bits_[0] & 0x00000100u) != 0;
   return value;
 }
 inline bool Envelope::has_classnamehash() const {
@@ -22020,7 +21207,7 @@ inline bool Envelope::has_classnamehash() const {
 }
 inline void Envelope::clear_classnamehash() {
   classnamehash_ = 0u;
-  _has_bits_[0] &= ~0x00000800u;
+  _has_bits_[0] &= ~0x00000100u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint32 Envelope::_internal_classnamehash() const {
   return classnamehash_;
@@ -22030,7 +21217,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint32 Envelope::classnamehash() const {
   return _internal_classnamehash();
 }
 inline void Envelope::_internal_set_classnamehash(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[0] |= 0x00000800u;
+  _has_bits_[0] |= 0x00000100u;
   classnamehash_ = value;
 }
 inline void Envelope::set_classnamehash(::PROTOBUF_NAMESPACE_ID::uint32 value) {
@@ -22194,175 +21381,9 @@ inline void Envelope::set_allocated_schemaitem(::Proto::SchemaItem* schemaitem) 
   // @@protoc_insertion_point(field_set_allocated:Proto.Envelope.schemaitem)
 }
 
-// optional .Proto.DeviceObject deviceobject = 7;
-inline bool Envelope::_internal_has_deviceobject() const {
-  bool value = (_has_bits_[0] & 0x00000004u) != 0;
-  PROTOBUF_ASSUME(!value || deviceobject_ != nullptr);
-  return value;
-}
-inline bool Envelope::has_deviceobject() const {
-  return _internal_has_deviceobject();
-}
-inline void Envelope::clear_deviceobject() {
-  if (deviceobject_ != nullptr) deviceobject_->Clear();
-  _has_bits_[0] &= ~0x00000004u;
-}
-inline const ::Proto::DeviceObject& Envelope::_internal_deviceobject() const {
-  const ::Proto::DeviceObject* p = deviceobject_;
-  return p != nullptr ? *p : reinterpret_cast<const ::Proto::DeviceObject&>(
-      ::Proto::_DeviceObject_default_instance_);
-}
-inline const ::Proto::DeviceObject& Envelope::deviceobject() const {
-  // @@protoc_insertion_point(field_get:Proto.Envelope.deviceobject)
-  return _internal_deviceobject();
-}
-inline void Envelope::unsafe_arena_set_allocated_deviceobject(
-    ::Proto::DeviceObject* deviceobject) {
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(deviceobject_);
-  }
-  deviceobject_ = deviceobject;
-  if (deviceobject) {
-    _has_bits_[0] |= 0x00000004u;
-  } else {
-    _has_bits_[0] &= ~0x00000004u;
-  }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.Envelope.deviceobject)
-}
-inline ::Proto::DeviceObject* Envelope::release_deviceobject() {
-  _has_bits_[0] &= ~0x00000004u;
-  ::Proto::DeviceObject* temp = deviceobject_;
-  deviceobject_ = nullptr;
-  if (GetArena() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-  return temp;
-}
-inline ::Proto::DeviceObject* Envelope::unsafe_arena_release_deviceobject() {
-  // @@protoc_insertion_point(field_release:Proto.Envelope.deviceobject)
-  _has_bits_[0] &= ~0x00000004u;
-  ::Proto::DeviceObject* temp = deviceobject_;
-  deviceobject_ = nullptr;
-  return temp;
-}
-inline ::Proto::DeviceObject* Envelope::_internal_mutable_deviceobject() {
-  _has_bits_[0] |= 0x00000004u;
-  if (deviceobject_ == nullptr) {
-    auto* p = CreateMaybeMessage<::Proto::DeviceObject>(GetArena());
-    deviceobject_ = p;
-  }
-  return deviceobject_;
-}
-inline ::Proto::DeviceObject* Envelope::mutable_deviceobject() {
-  // @@protoc_insertion_point(field_mutable:Proto.Envelope.deviceobject)
-  return _internal_mutable_deviceobject();
-}
-inline void Envelope::set_allocated_deviceobject(::Proto::DeviceObject* deviceobject) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
-  if (message_arena == nullptr) {
-    delete deviceobject_;
-  }
-  if (deviceobject) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(deviceobject);
-    if (message_arena != submessage_arena) {
-      deviceobject = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, deviceobject, submessage_arena);
-    }
-    _has_bits_[0] |= 0x00000004u;
-  } else {
-    _has_bits_[0] &= ~0x00000004u;
-  }
-  deviceobject_ = deviceobject;
-  // @@protoc_insertion_point(field_set_allocated:Proto.Envelope.deviceobject)
-}
-
-// optional .Proto.DiagSignalType diagSignalType = 8;
-inline bool Envelope::_internal_has_diagsignaltype() const {
-  bool value = (_has_bits_[0] & 0x00000008u) != 0;
-  PROTOBUF_ASSUME(!value || diagsignaltype_ != nullptr);
-  return value;
-}
-inline bool Envelope::has_diagsignaltype() const {
-  return _internal_has_diagsignaltype();
-}
-inline void Envelope::clear_diagsignaltype() {
-  if (diagsignaltype_ != nullptr) diagsignaltype_->Clear();
-  _has_bits_[0] &= ~0x00000008u;
-}
-inline const ::Proto::DiagSignalType& Envelope::_internal_diagsignaltype() const {
-  const ::Proto::DiagSignalType* p = diagsignaltype_;
-  return p != nullptr ? *p : reinterpret_cast<const ::Proto::DiagSignalType&>(
-      ::Proto::_DiagSignalType_default_instance_);
-}
-inline const ::Proto::DiagSignalType& Envelope::diagsignaltype() const {
-  // @@protoc_insertion_point(field_get:Proto.Envelope.diagSignalType)
-  return _internal_diagsignaltype();
-}
-inline void Envelope::unsafe_arena_set_allocated_diagsignaltype(
-    ::Proto::DiagSignalType* diagsignaltype) {
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(diagsignaltype_);
-  }
-  diagsignaltype_ = diagsignaltype;
-  if (diagsignaltype) {
-    _has_bits_[0] |= 0x00000008u;
-  } else {
-    _has_bits_[0] &= ~0x00000008u;
-  }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.Envelope.diagSignalType)
-}
-inline ::Proto::DiagSignalType* Envelope::release_diagsignaltype() {
-  _has_bits_[0] &= ~0x00000008u;
-  ::Proto::DiagSignalType* temp = diagsignaltype_;
-  diagsignaltype_ = nullptr;
-  if (GetArena() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-  return temp;
-}
-inline ::Proto::DiagSignalType* Envelope::unsafe_arena_release_diagsignaltype() {
-  // @@protoc_insertion_point(field_release:Proto.Envelope.diagSignalType)
-  _has_bits_[0] &= ~0x00000008u;
-  ::Proto::DiagSignalType* temp = diagsignaltype_;
-  diagsignaltype_ = nullptr;
-  return temp;
-}
-inline ::Proto::DiagSignalType* Envelope::_internal_mutable_diagsignaltype() {
-  _has_bits_[0] |= 0x00000008u;
-  if (diagsignaltype_ == nullptr) {
-    auto* p = CreateMaybeMessage<::Proto::DiagSignalType>(GetArena());
-    diagsignaltype_ = p;
-  }
-  return diagsignaltype_;
-}
-inline ::Proto::DiagSignalType* Envelope::mutable_diagsignaltype() {
-  // @@protoc_insertion_point(field_mutable:Proto.Envelope.diagSignalType)
-  return _internal_mutable_diagsignaltype();
-}
-inline void Envelope::set_allocated_diagsignaltype(::Proto::DiagSignalType* diagsignaltype) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
-  if (message_arena == nullptr) {
-    delete diagsignaltype_;
-  }
-  if (diagsignaltype) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(diagsignaltype);
-    if (message_arena != submessage_arena) {
-      diagsignaltype = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, diagsignaltype, submessage_arena);
-    }
-    _has_bits_[0] |= 0x00000008u;
-  } else {
-    _has_bits_[0] &= ~0x00000008u;
-  }
-  diagsignaltype_ = diagsignaltype;
-  // @@protoc_insertion_point(field_set_allocated:Proto.Envelope.diagSignalType)
-}
-
 // optional .Proto.Schema schema = 100;
 inline bool Envelope::_internal_has_schema() const {
-  bool value = (_has_bits_[0] & 0x00000010u) != 0;
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
   PROTOBUF_ASSUME(!value || schema_ != nullptr);
   return value;
 }
@@ -22371,7 +21392,7 @@ inline bool Envelope::has_schema() const {
 }
 inline void Envelope::clear_schema() {
   if (schema_ != nullptr) schema_->Clear();
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline const ::Proto::Schema& Envelope::_internal_schema() const {
   const ::Proto::Schema* p = schema_;
@@ -22389,14 +21410,14 @@ inline void Envelope::unsafe_arena_set_allocated_schema(
   }
   schema_ = schema;
   if (schema) {
-    _has_bits_[0] |= 0x00000010u;
+    _has_bits_[0] |= 0x00000004u;
   } else {
-    _has_bits_[0] &= ~0x00000010u;
+    _has_bits_[0] &= ~0x00000004u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.Envelope.schema)
 }
 inline ::Proto::Schema* Envelope::release_schema() {
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000004u;
   ::Proto::Schema* temp = schema_;
   schema_ = nullptr;
   if (GetArena() != nullptr) {
@@ -22406,13 +21427,13 @@ inline ::Proto::Schema* Envelope::release_schema() {
 }
 inline ::Proto::Schema* Envelope::unsafe_arena_release_schema() {
   // @@protoc_insertion_point(field_release:Proto.Envelope.schema)
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000004u;
   ::Proto::Schema* temp = schema_;
   schema_ = nullptr;
   return temp;
 }
 inline ::Proto::Schema* Envelope::_internal_mutable_schema() {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000004u;
   if (schema_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::Schema>(GetArena());
     schema_ = p;
@@ -22435,9 +21456,9 @@ inline void Envelope::set_allocated_schema(::Proto::Schema* schema) {
       schema = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, schema, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000010u;
+    _has_bits_[0] |= 0x00000004u;
   } else {
-    _has_bits_[0] &= ~0x00000010u;
+    _has_bits_[0] &= ~0x00000004u;
   }
   schema_ = schema;
   // @@protoc_insertion_point(field_set_allocated:Proto.Envelope.schema)
@@ -22445,7 +21466,7 @@ inline void Envelope::set_allocated_schema(::Proto::Schema* schema) {
 
 // optional .Proto.SchemaLayer schemalayer = 101;
 inline bool Envelope::_internal_has_schemalayer() const {
-  bool value = (_has_bits_[0] & 0x00000020u) != 0;
+  bool value = (_has_bits_[0] & 0x00000008u) != 0;
   PROTOBUF_ASSUME(!value || schemalayer_ != nullptr);
   return value;
 }
@@ -22454,7 +21475,7 @@ inline bool Envelope::has_schemalayer() const {
 }
 inline void Envelope::clear_schemalayer() {
   if (schemalayer_ != nullptr) schemalayer_->Clear();
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline const ::Proto::SchemaLayer& Envelope::_internal_schemalayer() const {
   const ::Proto::SchemaLayer* p = schemalayer_;
@@ -22472,14 +21493,14 @@ inline void Envelope::unsafe_arena_set_allocated_schemalayer(
   }
   schemalayer_ = schemalayer;
   if (schemalayer) {
-    _has_bits_[0] |= 0x00000020u;
+    _has_bits_[0] |= 0x00000008u;
   } else {
-    _has_bits_[0] &= ~0x00000020u;
+    _has_bits_[0] &= ~0x00000008u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.Envelope.schemalayer)
 }
 inline ::Proto::SchemaLayer* Envelope::release_schemalayer() {
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000008u;
   ::Proto::SchemaLayer* temp = schemalayer_;
   schemalayer_ = nullptr;
   if (GetArena() != nullptr) {
@@ -22489,13 +21510,13 @@ inline ::Proto::SchemaLayer* Envelope::release_schemalayer() {
 }
 inline ::Proto::SchemaLayer* Envelope::unsafe_arena_release_schemalayer() {
   // @@protoc_insertion_point(field_release:Proto.Envelope.schemalayer)
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000008u;
   ::Proto::SchemaLayer* temp = schemalayer_;
   schemalayer_ = nullptr;
   return temp;
 }
 inline ::Proto::SchemaLayer* Envelope::_internal_mutable_schemalayer() {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000008u;
   if (schemalayer_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::SchemaLayer>(GetArena());
     schemalayer_ = p;
@@ -22518,9 +21539,9 @@ inline void Envelope::set_allocated_schemalayer(::Proto::SchemaLayer* schemalaye
       schemalayer = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, schemalayer, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000020u;
+    _has_bits_[0] |= 0x00000008u;
   } else {
-    _has_bits_[0] &= ~0x00000020u;
+    _has_bits_[0] &= ~0x00000008u;
   }
   schemalayer_ = schemalayer;
   // @@protoc_insertion_point(field_set_allocated:Proto.Envelope.schemalayer)
@@ -22528,7 +21549,7 @@ inline void Envelope::set_allocated_schemalayer(::Proto::SchemaLayer* schemalaye
 
 // optional .Proto.FblElement fblelement = 102;
 inline bool Envelope::_internal_has_fblelement() const {
-  bool value = (_has_bits_[0] & 0x00000040u) != 0;
+  bool value = (_has_bits_[0] & 0x00000010u) != 0;
   PROTOBUF_ASSUME(!value || fblelement_ != nullptr);
   return value;
 }
@@ -22537,7 +21558,7 @@ inline bool Envelope::has_fblelement() const {
 }
 inline void Envelope::clear_fblelement() {
   if (fblelement_ != nullptr) fblelement_->Clear();
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline const ::Proto::FblElement& Envelope::_internal_fblelement() const {
   const ::Proto::FblElement* p = fblelement_;
@@ -22555,14 +21576,14 @@ inline void Envelope::unsafe_arena_set_allocated_fblelement(
   }
   fblelement_ = fblelement;
   if (fblelement) {
-    _has_bits_[0] |= 0x00000040u;
+    _has_bits_[0] |= 0x00000010u;
   } else {
-    _has_bits_[0] &= ~0x00000040u;
+    _has_bits_[0] &= ~0x00000010u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.Envelope.fblelement)
 }
 inline ::Proto::FblElement* Envelope::release_fblelement() {
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000010u;
   ::Proto::FblElement* temp = fblelement_;
   fblelement_ = nullptr;
   if (GetArena() != nullptr) {
@@ -22572,13 +21593,13 @@ inline ::Proto::FblElement* Envelope::release_fblelement() {
 }
 inline ::Proto::FblElement* Envelope::unsafe_arena_release_fblelement() {
   // @@protoc_insertion_point(field_release:Proto.Envelope.fblelement)
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000010u;
   ::Proto::FblElement* temp = fblelement_;
   fblelement_ = nullptr;
   return temp;
 }
 inline ::Proto::FblElement* Envelope::_internal_mutable_fblelement() {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000010u;
   if (fblelement_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::FblElement>(GetArena());
     fblelement_ = p;
@@ -22601,9 +21622,9 @@ inline void Envelope::set_allocated_fblelement(::Proto::FblElement* fblelement) 
       fblelement = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, fblelement, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000040u;
+    _has_bits_[0] |= 0x00000010u;
   } else {
-    _has_bits_[0] &= ~0x00000040u;
+    _has_bits_[0] &= ~0x00000010u;
   }
   fblelement_ = fblelement;
   // @@protoc_insertion_point(field_set_allocated:Proto.Envelope.fblelement)
@@ -22611,7 +21632,7 @@ inline void Envelope::set_allocated_fblelement(::Proto::FblElement* fblelement) 
 
 // optional .Proto.Configuration configuration = 103;
 inline bool Envelope::_internal_has_configuration() const {
-  bool value = (_has_bits_[0] & 0x00000080u) != 0;
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
   PROTOBUF_ASSUME(!value || configuration_ != nullptr);
   return value;
 }
@@ -22620,7 +21641,7 @@ inline bool Envelope::has_configuration() const {
 }
 inline void Envelope::clear_configuration() {
   if (configuration_ != nullptr) configuration_->Clear();
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline const ::Proto::Configuration& Envelope::_internal_configuration() const {
   const ::Proto::Configuration* p = configuration_;
@@ -22638,14 +21659,14 @@ inline void Envelope::unsafe_arena_set_allocated_configuration(
   }
   configuration_ = configuration;
   if (configuration) {
-    _has_bits_[0] |= 0x00000080u;
+    _has_bits_[0] |= 0x00000020u;
   } else {
-    _has_bits_[0] &= ~0x00000080u;
+    _has_bits_[0] &= ~0x00000020u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.Envelope.configuration)
 }
 inline ::Proto::Configuration* Envelope::release_configuration() {
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000020u;
   ::Proto::Configuration* temp = configuration_;
   configuration_ = nullptr;
   if (GetArena() != nullptr) {
@@ -22655,13 +21676,13 @@ inline ::Proto::Configuration* Envelope::release_configuration() {
 }
 inline ::Proto::Configuration* Envelope::unsafe_arena_release_configuration() {
   // @@protoc_insertion_point(field_release:Proto.Envelope.configuration)
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000020u;
   ::Proto::Configuration* temp = configuration_;
   configuration_ = nullptr;
   return temp;
 }
 inline ::Proto::Configuration* Envelope::_internal_mutable_configuration() {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000020u;
   if (configuration_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::Configuration>(GetArena());
     configuration_ = p;
@@ -22684,100 +21705,17 @@ inline void Envelope::set_allocated_configuration(::Proto::Configuration* config
       configuration = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, configuration, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000080u;
+    _has_bits_[0] |= 0x00000020u;
   } else {
-    _has_bits_[0] &= ~0x00000080u;
+    _has_bits_[0] &= ~0x00000020u;
   }
   configuration_ = configuration;
   // @@protoc_insertion_point(field_set_allocated:Proto.Envelope.configuration)
 }
 
-// optional .Proto.Connection connection = 104;
-inline bool Envelope::_internal_has_connection() const {
-  bool value = (_has_bits_[0] & 0x00000100u) != 0;
-  PROTOBUF_ASSUME(!value || connection_ != nullptr);
-  return value;
-}
-inline bool Envelope::has_connection() const {
-  return _internal_has_connection();
-}
-inline void Envelope::clear_connection() {
-  if (connection_ != nullptr) connection_->Clear();
-  _has_bits_[0] &= ~0x00000100u;
-}
-inline const ::Proto::Connection& Envelope::_internal_connection() const {
-  const ::Proto::Connection* p = connection_;
-  return p != nullptr ? *p : reinterpret_cast<const ::Proto::Connection&>(
-      ::Proto::_Connection_default_instance_);
-}
-inline const ::Proto::Connection& Envelope::connection() const {
-  // @@protoc_insertion_point(field_get:Proto.Envelope.connection)
-  return _internal_connection();
-}
-inline void Envelope::unsafe_arena_set_allocated_connection(
-    ::Proto::Connection* connection) {
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(connection_);
-  }
-  connection_ = connection;
-  if (connection) {
-    _has_bits_[0] |= 0x00000100u;
-  } else {
-    _has_bits_[0] &= ~0x00000100u;
-  }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.Envelope.connection)
-}
-inline ::Proto::Connection* Envelope::release_connection() {
-  _has_bits_[0] &= ~0x00000100u;
-  ::Proto::Connection* temp = connection_;
-  connection_ = nullptr;
-  if (GetArena() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-  return temp;
-}
-inline ::Proto::Connection* Envelope::unsafe_arena_release_connection() {
-  // @@protoc_insertion_point(field_release:Proto.Envelope.connection)
-  _has_bits_[0] &= ~0x00000100u;
-  ::Proto::Connection* temp = connection_;
-  connection_ = nullptr;
-  return temp;
-}
-inline ::Proto::Connection* Envelope::_internal_mutable_connection() {
-  _has_bits_[0] |= 0x00000100u;
-  if (connection_ == nullptr) {
-    auto* p = CreateMaybeMessage<::Proto::Connection>(GetArena());
-    connection_ = p;
-  }
-  return connection_;
-}
-inline ::Proto::Connection* Envelope::mutable_connection() {
-  // @@protoc_insertion_point(field_mutable:Proto.Envelope.connection)
-  return _internal_mutable_connection();
-}
-inline void Envelope::set_allocated_connection(::Proto::Connection* connection) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
-  if (message_arena == nullptr) {
-    delete connection_;
-  }
-  if (connection) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(connection);
-    if (message_arena != submessage_arena) {
-      connection = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, connection, submessage_arena);
-    }
-    _has_bits_[0] |= 0x00000100u;
-  } else {
-    _has_bits_[0] &= ~0x00000100u;
-  }
-  connection_ = connection;
-  // @@protoc_insertion_point(field_set_allocated:Proto.Envelope.connection)
-}
-
 // optional .Proto.SchemaDetailsSet schemaDetailsSet = 105;
 inline bool Envelope::_internal_has_schemadetailsset() const {
-  bool value = (_has_bits_[0] & 0x00000200u) != 0;
+  bool value = (_has_bits_[0] & 0x00000040u) != 0;
   PROTOBUF_ASSUME(!value || schemadetailsset_ != nullptr);
   return value;
 }
@@ -22786,7 +21724,7 @@ inline bool Envelope::has_schemadetailsset() const {
 }
 inline void Envelope::clear_schemadetailsset() {
   if (schemadetailsset_ != nullptr) schemadetailsset_->Clear();
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000040u;
 }
 inline const ::Proto::SchemaDetailsSet& Envelope::_internal_schemadetailsset() const {
   const ::Proto::SchemaDetailsSet* p = schemadetailsset_;
@@ -22804,14 +21742,14 @@ inline void Envelope::unsafe_arena_set_allocated_schemadetailsset(
   }
   schemadetailsset_ = schemadetailsset;
   if (schemadetailsset) {
-    _has_bits_[0] |= 0x00000200u;
+    _has_bits_[0] |= 0x00000040u;
   } else {
-    _has_bits_[0] &= ~0x00000200u;
+    _has_bits_[0] &= ~0x00000040u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.Envelope.schemaDetailsSet)
 }
 inline ::Proto::SchemaDetailsSet* Envelope::release_schemadetailsset() {
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000040u;
   ::Proto::SchemaDetailsSet* temp = schemadetailsset_;
   schemadetailsset_ = nullptr;
   if (GetArena() != nullptr) {
@@ -22821,13 +21759,13 @@ inline ::Proto::SchemaDetailsSet* Envelope::release_schemadetailsset() {
 }
 inline ::Proto::SchemaDetailsSet* Envelope::unsafe_arena_release_schemadetailsset() {
   // @@protoc_insertion_point(field_release:Proto.Envelope.schemaDetailsSet)
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000040u;
   ::Proto::SchemaDetailsSet* temp = schemadetailsset_;
   schemadetailsset_ = nullptr;
   return temp;
 }
 inline ::Proto::SchemaDetailsSet* Envelope::_internal_mutable_schemadetailsset() {
-  _has_bits_[0] |= 0x00000200u;
+  _has_bits_[0] |= 0x00000040u;
   if (schemadetailsset_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::SchemaDetailsSet>(GetArena());
     schemadetailsset_ = p;
@@ -22850,9 +21788,9 @@ inline void Envelope::set_allocated_schemadetailsset(::Proto::SchemaDetailsSet* 
       schemadetailsset = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, schemadetailsset, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000200u;
+    _has_bits_[0] |= 0x00000040u;
   } else {
-    _has_bits_[0] &= ~0x00000200u;
+    _has_bits_[0] &= ~0x00000040u;
   }
   schemadetailsset_ = schemadetailsset;
   // @@protoc_insertion_point(field_set_allocated:Proto.Envelope.schemaDetailsSet)
@@ -22860,7 +21798,7 @@ inline void Envelope::set_allocated_schemadetailsset(::Proto::SchemaDetailsSet* 
 
 // optional .Proto.Bus bus = 200;
 inline bool Envelope::_internal_has_bus() const {
-  bool value = (_has_bits_[0] & 0x00000400u) != 0;
+  bool value = (_has_bits_[0] & 0x00000080u) != 0;
   PROTOBUF_ASSUME(!value || bus_ != nullptr);
   return value;
 }
@@ -22869,7 +21807,7 @@ inline bool Envelope::has_bus() const {
 }
 inline void Envelope::clear_bus() {
   if (bus_ != nullptr) bus_->Clear();
-  _has_bits_[0] &= ~0x00000400u;
+  _has_bits_[0] &= ~0x00000080u;
 }
 inline const ::Proto::Bus& Envelope::_internal_bus() const {
   const ::Proto::Bus* p = bus_;
@@ -22887,14 +21825,14 @@ inline void Envelope::unsafe_arena_set_allocated_bus(
   }
   bus_ = bus;
   if (bus) {
-    _has_bits_[0] |= 0x00000400u;
+    _has_bits_[0] |= 0x00000080u;
   } else {
-    _has_bits_[0] &= ~0x00000400u;
+    _has_bits_[0] &= ~0x00000080u;
   }
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.Envelope.bus)
 }
 inline ::Proto::Bus* Envelope::release_bus() {
-  _has_bits_[0] &= ~0x00000400u;
+  _has_bits_[0] &= ~0x00000080u;
   ::Proto::Bus* temp = bus_;
   bus_ = nullptr;
   if (GetArena() != nullptr) {
@@ -22904,13 +21842,13 @@ inline ::Proto::Bus* Envelope::release_bus() {
 }
 inline ::Proto::Bus* Envelope::unsafe_arena_release_bus() {
   // @@protoc_insertion_point(field_release:Proto.Envelope.bus)
-  _has_bits_[0] &= ~0x00000400u;
+  _has_bits_[0] &= ~0x00000080u;
   ::Proto::Bus* temp = bus_;
   bus_ = nullptr;
   return temp;
 }
 inline ::Proto::Bus* Envelope::_internal_mutable_bus() {
-  _has_bits_[0] |= 0x00000400u;
+  _has_bits_[0] |= 0x00000080u;
   if (bus_ == nullptr) {
     auto* p = CreateMaybeMessage<::Proto::Bus>(GetArena());
     bus_ = p;
@@ -22933,9 +21871,9 @@ inline void Envelope::set_allocated_bus(::Proto::Bus* bus) {
       bus = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, bus, submessage_arena);
     }
-    _has_bits_[0] |= 0x00000400u;
+    _has_bits_[0] |= 0x00000080u;
   } else {
-    _has_bits_[0] &= ~0x00000400u;
+    _has_bits_[0] &= ~0x00000080u;
   }
   bus_ = bus;
   // @@protoc_insertion_point(field_set_allocated:Proto.Envelope.bus)
@@ -23366,249 +22304,6 @@ inline void EnvelopeSetShortDescription::_internal_set_exporttime(::PROTOBUF_NAM
 inline void EnvelopeSetShortDescription::set_exporttime(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   _internal_set_exporttime(value);
   // @@protoc_insertion_point(field_set:Proto.EnvelopeSetShortDescription.exportTime)
-}
-
-// -------------------------------------------------------------------
-
-// ExportedDevicePreset
-
-// optional .Proto.EnvelopeSetShortDescription description = 1;
-inline bool ExportedDevicePreset::_internal_has_description() const {
-  bool value = (_has_bits_[0] & 0x00000002u) != 0;
-  PROTOBUF_ASSUME(!value || description_ != nullptr);
-  return value;
-}
-inline bool ExportedDevicePreset::has_description() const {
-  return _internal_has_description();
-}
-inline void ExportedDevicePreset::clear_description() {
-  if (description_ != nullptr) description_->Clear();
-  _has_bits_[0] &= ~0x00000002u;
-}
-inline const ::Proto::EnvelopeSetShortDescription& ExportedDevicePreset::_internal_description() const {
-  const ::Proto::EnvelopeSetShortDescription* p = description_;
-  return p != nullptr ? *p : reinterpret_cast<const ::Proto::EnvelopeSetShortDescription&>(
-      ::Proto::_EnvelopeSetShortDescription_default_instance_);
-}
-inline const ::Proto::EnvelopeSetShortDescription& ExportedDevicePreset::description() const {
-  // @@protoc_insertion_point(field_get:Proto.ExportedDevicePreset.description)
-  return _internal_description();
-}
-inline void ExportedDevicePreset::unsafe_arena_set_allocated_description(
-    ::Proto::EnvelopeSetShortDescription* description) {
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(description_);
-  }
-  description_ = description;
-  if (description) {
-    _has_bits_[0] |= 0x00000002u;
-  } else {
-    _has_bits_[0] &= ~0x00000002u;
-  }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.ExportedDevicePreset.description)
-}
-inline ::Proto::EnvelopeSetShortDescription* ExportedDevicePreset::release_description() {
-  _has_bits_[0] &= ~0x00000002u;
-  ::Proto::EnvelopeSetShortDescription* temp = description_;
-  description_ = nullptr;
-  if (GetArena() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-  return temp;
-}
-inline ::Proto::EnvelopeSetShortDescription* ExportedDevicePreset::unsafe_arena_release_description() {
-  // @@protoc_insertion_point(field_release:Proto.ExportedDevicePreset.description)
-  _has_bits_[0] &= ~0x00000002u;
-  ::Proto::EnvelopeSetShortDescription* temp = description_;
-  description_ = nullptr;
-  return temp;
-}
-inline ::Proto::EnvelopeSetShortDescription* ExportedDevicePreset::_internal_mutable_description() {
-  _has_bits_[0] |= 0x00000002u;
-  if (description_ == nullptr) {
-    auto* p = CreateMaybeMessage<::Proto::EnvelopeSetShortDescription>(GetArena());
-    description_ = p;
-  }
-  return description_;
-}
-inline ::Proto::EnvelopeSetShortDescription* ExportedDevicePreset::mutable_description() {
-  // @@protoc_insertion_point(field_mutable:Proto.ExportedDevicePreset.description)
-  return _internal_mutable_description();
-}
-inline void ExportedDevicePreset::set_allocated_description(::Proto::EnvelopeSetShortDescription* description) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
-  if (message_arena == nullptr) {
-    delete description_;
-  }
-  if (description) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(description);
-    if (message_arena != submessage_arena) {
-      description = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, description, submessage_arena);
-    }
-    _has_bits_[0] |= 0x00000002u;
-  } else {
-    _has_bits_[0] &= ~0x00000002u;
-  }
-  description_ = description;
-  // @@protoc_insertion_point(field_set_allocated:Proto.ExportedDevicePreset.description)
-}
-
-// optional .Proto.EnvelopeSet items = 2;
-inline bool ExportedDevicePreset::_internal_has_items() const {
-  bool value = (_has_bits_[0] & 0x00000004u) != 0;
-  PROTOBUF_ASSUME(!value || items_ != nullptr);
-  return value;
-}
-inline bool ExportedDevicePreset::has_items() const {
-  return _internal_has_items();
-}
-inline void ExportedDevicePreset::clear_items() {
-  if (items_ != nullptr) items_->Clear();
-  _has_bits_[0] &= ~0x00000004u;
-}
-inline const ::Proto::EnvelopeSet& ExportedDevicePreset::_internal_items() const {
-  const ::Proto::EnvelopeSet* p = items_;
-  return p != nullptr ? *p : reinterpret_cast<const ::Proto::EnvelopeSet&>(
-      ::Proto::_EnvelopeSet_default_instance_);
-}
-inline const ::Proto::EnvelopeSet& ExportedDevicePreset::items() const {
-  // @@protoc_insertion_point(field_get:Proto.ExportedDevicePreset.items)
-  return _internal_items();
-}
-inline void ExportedDevicePreset::unsafe_arena_set_allocated_items(
-    ::Proto::EnvelopeSet* items) {
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(items_);
-  }
-  items_ = items;
-  if (items) {
-    _has_bits_[0] |= 0x00000004u;
-  } else {
-    _has_bits_[0] &= ~0x00000004u;
-  }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.ExportedDevicePreset.items)
-}
-inline ::Proto::EnvelopeSet* ExportedDevicePreset::release_items() {
-  _has_bits_[0] &= ~0x00000004u;
-  ::Proto::EnvelopeSet* temp = items_;
-  items_ = nullptr;
-  if (GetArena() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-  return temp;
-}
-inline ::Proto::EnvelopeSet* ExportedDevicePreset::unsafe_arena_release_items() {
-  // @@protoc_insertion_point(field_release:Proto.ExportedDevicePreset.items)
-  _has_bits_[0] &= ~0x00000004u;
-  ::Proto::EnvelopeSet* temp = items_;
-  items_ = nullptr;
-  return temp;
-}
-inline ::Proto::EnvelopeSet* ExportedDevicePreset::_internal_mutable_items() {
-  _has_bits_[0] |= 0x00000004u;
-  if (items_ == nullptr) {
-    auto* p = CreateMaybeMessage<::Proto::EnvelopeSet>(GetArena());
-    items_ = p;
-  }
-  return items_;
-}
-inline ::Proto::EnvelopeSet* ExportedDevicePreset::mutable_items() {
-  // @@protoc_insertion_point(field_mutable:Proto.ExportedDevicePreset.items)
-  return _internal_mutable_items();
-}
-inline void ExportedDevicePreset::set_allocated_items(::Proto::EnvelopeSet* items) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
-  if (message_arena == nullptr) {
-    delete items_;
-  }
-  if (items) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(items);
-    if (message_arena != submessage_arena) {
-      items = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, items, submessage_arena);
-    }
-    _has_bits_[0] |= 0x00000004u;
-  } else {
-    _has_bits_[0] &= ~0x00000004u;
-  }
-  items_ = items;
-  // @@protoc_insertion_point(field_set_allocated:Proto.ExportedDevicePreset.items)
-}
-
-// optional bytes compressedThis = 3;
-inline bool ExportedDevicePreset::_internal_has_compressedthis() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
-  return value;
-}
-inline bool ExportedDevicePreset::has_compressedthis() const {
-  return _internal_has_compressedthis();
-}
-inline void ExportedDevicePreset::clear_compressedthis() {
-  compressedthis_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline const std::string& ExportedDevicePreset::compressedthis() const {
-  // @@protoc_insertion_point(field_get:Proto.ExportedDevicePreset.compressedThis)
-  return _internal_compressedthis();
-}
-inline void ExportedDevicePreset::set_compressedthis(const std::string& value) {
-  _internal_set_compressedthis(value);
-  // @@protoc_insertion_point(field_set:Proto.ExportedDevicePreset.compressedThis)
-}
-inline std::string* ExportedDevicePreset::mutable_compressedthis() {
-  // @@protoc_insertion_point(field_mutable:Proto.ExportedDevicePreset.compressedThis)
-  return _internal_mutable_compressedthis();
-}
-inline const std::string& ExportedDevicePreset::_internal_compressedthis() const {
-  return compressedthis_.Get();
-}
-inline void ExportedDevicePreset::_internal_set_compressedthis(const std::string& value) {
-  _has_bits_[0] |= 0x00000001u;
-  compressedthis_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void ExportedDevicePreset::set_compressedthis(std::string&& value) {
-  _has_bits_[0] |= 0x00000001u;
-  compressedthis_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Proto.ExportedDevicePreset.compressedThis)
-}
-inline void ExportedDevicePreset::set_compressedthis(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000001u;
-  compressedthis_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Proto.ExportedDevicePreset.compressedThis)
-}
-inline void ExportedDevicePreset::set_compressedthis(const void* value,
-    size_t size) {
-  _has_bits_[0] |= 0x00000001u;
-  compressedthis_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Proto.ExportedDevicePreset.compressedThis)
-}
-inline std::string* ExportedDevicePreset::_internal_mutable_compressedthis() {
-  _has_bits_[0] |= 0x00000001u;
-  return compressedthis_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* ExportedDevicePreset::release_compressedthis() {
-  // @@protoc_insertion_point(field_release:Proto.ExportedDevicePreset.compressedThis)
-  if (!_internal_has_compressedthis()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000001u;
-  return compressedthis_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void ExportedDevicePreset::set_allocated_compressedthis(std::string* compressedthis) {
-  if (compressedthis != nullptr) {
-    _has_bits_[0] |= 0x00000001u;
-  } else {
-    _has_bits_[0] &= ~0x00000001u;
-  }
-  compressedthis_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), compressedthis,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Proto.ExportedDevicePreset.compressedThis)
 }
 
 // -------------------------------------------------------------------
@@ -45578,986 +44273,6 @@ UnitSet::unit() const {
 
 // -------------------------------------------------------------------
 
-// Connection
-
-// optional string ConnectionID = 2;
-inline bool Connection::_internal_has_connectionid() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
-  return value;
-}
-inline bool Connection::has_connectionid() const {
-  return _internal_has_connectionid();
-}
-inline void Connection::clear_connectionid() {
-  connectionid_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline const std::string& Connection::connectionid() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection.ConnectionID)
-  return _internal_connectionid();
-}
-inline void Connection::set_connectionid(const std::string& value) {
-  _internal_set_connectionid(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection.ConnectionID)
-}
-inline std::string* Connection::mutable_connectionid() {
-  // @@protoc_insertion_point(field_mutable:Proto.Connection.ConnectionID)
-  return _internal_mutable_connectionid();
-}
-inline const std::string& Connection::_internal_connectionid() const {
-  return connectionid_.Get();
-}
-inline void Connection::_internal_set_connectionid(const std::string& value) {
-  _has_bits_[0] |= 0x00000001u;
-  connectionid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void Connection::set_connectionid(std::string&& value) {
-  _has_bits_[0] |= 0x00000001u;
-  connectionid_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Proto.Connection.ConnectionID)
-}
-inline void Connection::set_connectionid(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000001u;
-  connectionid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Proto.Connection.ConnectionID)
-}
-inline void Connection::set_connectionid(const char* value,
-    size_t size) {
-  _has_bits_[0] |= 0x00000001u;
-  connectionid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Proto.Connection.ConnectionID)
-}
-inline std::string* Connection::_internal_mutable_connectionid() {
-  _has_bits_[0] |= 0x00000001u;
-  return connectionid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* Connection::release_connectionid() {
-  // @@protoc_insertion_point(field_release:Proto.Connection.ConnectionID)
-  if (!_internal_has_connectionid()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000001u;
-  return connectionid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void Connection::set_allocated_connectionid(std::string* connectionid) {
-  if (connectionid != nullptr) {
-    _has_bits_[0] |= 0x00000001u;
-  } else {
-    _has_bits_[0] &= ~0x00000001u;
-  }
-  connectionid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), connectionid,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Proto.Connection.ConnectionID)
-}
-
-// optional string Port1EquipmentID = 3;
-inline bool Connection::_internal_has_port1equipmentid() const {
-  bool value = (_has_bits_[0] & 0x00000002u) != 0;
-  return value;
-}
-inline bool Connection::has_port1equipmentid() const {
-  return _internal_has_port1equipmentid();
-}
-inline void Connection::clear_port1equipmentid() {
-  port1equipmentid_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000002u;
-}
-inline const std::string& Connection::port1equipmentid() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection.Port1EquipmentID)
-  return _internal_port1equipmentid();
-}
-inline void Connection::set_port1equipmentid(const std::string& value) {
-  _internal_set_port1equipmentid(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection.Port1EquipmentID)
-}
-inline std::string* Connection::mutable_port1equipmentid() {
-  // @@protoc_insertion_point(field_mutable:Proto.Connection.Port1EquipmentID)
-  return _internal_mutable_port1equipmentid();
-}
-inline const std::string& Connection::_internal_port1equipmentid() const {
-  return port1equipmentid_.Get();
-}
-inline void Connection::_internal_set_port1equipmentid(const std::string& value) {
-  _has_bits_[0] |= 0x00000002u;
-  port1equipmentid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void Connection::set_port1equipmentid(std::string&& value) {
-  _has_bits_[0] |= 0x00000002u;
-  port1equipmentid_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Proto.Connection.Port1EquipmentID)
-}
-inline void Connection::set_port1equipmentid(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000002u;
-  port1equipmentid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Proto.Connection.Port1EquipmentID)
-}
-inline void Connection::set_port1equipmentid(const char* value,
-    size_t size) {
-  _has_bits_[0] |= 0x00000002u;
-  port1equipmentid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Proto.Connection.Port1EquipmentID)
-}
-inline std::string* Connection::_internal_mutable_port1equipmentid() {
-  _has_bits_[0] |= 0x00000002u;
-  return port1equipmentid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* Connection::release_port1equipmentid() {
-  // @@protoc_insertion_point(field_release:Proto.Connection.Port1EquipmentID)
-  if (!_internal_has_port1equipmentid()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000002u;
-  return port1equipmentid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void Connection::set_allocated_port1equipmentid(std::string* port1equipmentid) {
-  if (port1equipmentid != nullptr) {
-    _has_bits_[0] |= 0x00000002u;
-  } else {
-    _has_bits_[0] &= ~0x00000002u;
-  }
-  port1equipmentid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), port1equipmentid,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Proto.Connection.Port1EquipmentID)
-}
-
-// optional string Port2EquipmentID = 4;
-inline bool Connection::_internal_has_port2equipmentid() const {
-  bool value = (_has_bits_[0] & 0x00000004u) != 0;
-  return value;
-}
-inline bool Connection::has_port2equipmentid() const {
-  return _internal_has_port2equipmentid();
-}
-inline void Connection::clear_port2equipmentid() {
-  port2equipmentid_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000004u;
-}
-inline const std::string& Connection::port2equipmentid() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection.Port2EquipmentID)
-  return _internal_port2equipmentid();
-}
-inline void Connection::set_port2equipmentid(const std::string& value) {
-  _internal_set_port2equipmentid(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection.Port2EquipmentID)
-}
-inline std::string* Connection::mutable_port2equipmentid() {
-  // @@protoc_insertion_point(field_mutable:Proto.Connection.Port2EquipmentID)
-  return _internal_mutable_port2equipmentid();
-}
-inline const std::string& Connection::_internal_port2equipmentid() const {
-  return port2equipmentid_.Get();
-}
-inline void Connection::_internal_set_port2equipmentid(const std::string& value) {
-  _has_bits_[0] |= 0x00000004u;
-  port2equipmentid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void Connection::set_port2equipmentid(std::string&& value) {
-  _has_bits_[0] |= 0x00000004u;
-  port2equipmentid_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Proto.Connection.Port2EquipmentID)
-}
-inline void Connection::set_port2equipmentid(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000004u;
-  port2equipmentid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Proto.Connection.Port2EquipmentID)
-}
-inline void Connection::set_port2equipmentid(const char* value,
-    size_t size) {
-  _has_bits_[0] |= 0x00000004u;
-  port2equipmentid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Proto.Connection.Port2EquipmentID)
-}
-inline std::string* Connection::_internal_mutable_port2equipmentid() {
-  _has_bits_[0] |= 0x00000004u;
-  return port2equipmentid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* Connection::release_port2equipmentid() {
-  // @@protoc_insertion_point(field_release:Proto.Connection.Port2EquipmentID)
-  if (!_internal_has_port2equipmentid()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000004u;
-  return port2equipmentid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void Connection::set_allocated_port2equipmentid(std::string* port2equipmentid) {
-  if (port2equipmentid != nullptr) {
-    _has_bits_[0] |= 0x00000004u;
-  } else {
-    _has_bits_[0] &= ~0x00000004u;
-  }
-  port2equipmentid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), port2equipmentid,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Proto.Connection.Port2EquipmentID)
-}
-
-// optional string Port1RawDataDescription = 5;
-inline bool Connection::_internal_has_port1rawdatadescription() const {
-  bool value = (_has_bits_[0] & 0x00000008u) != 0;
-  return value;
-}
-inline bool Connection::has_port1rawdatadescription() const {
-  return _internal_has_port1rawdatadescription();
-}
-inline void Connection::clear_port1rawdatadescription() {
-  port1rawdatadescription_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000008u;
-}
-inline const std::string& Connection::port1rawdatadescription() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection.Port1RawDataDescription)
-  return _internal_port1rawdatadescription();
-}
-inline void Connection::set_port1rawdatadescription(const std::string& value) {
-  _internal_set_port1rawdatadescription(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection.Port1RawDataDescription)
-}
-inline std::string* Connection::mutable_port1rawdatadescription() {
-  // @@protoc_insertion_point(field_mutable:Proto.Connection.Port1RawDataDescription)
-  return _internal_mutable_port1rawdatadescription();
-}
-inline const std::string& Connection::_internal_port1rawdatadescription() const {
-  return port1rawdatadescription_.Get();
-}
-inline void Connection::_internal_set_port1rawdatadescription(const std::string& value) {
-  _has_bits_[0] |= 0x00000008u;
-  port1rawdatadescription_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void Connection::set_port1rawdatadescription(std::string&& value) {
-  _has_bits_[0] |= 0x00000008u;
-  port1rawdatadescription_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Proto.Connection.Port1RawDataDescription)
-}
-inline void Connection::set_port1rawdatadescription(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000008u;
-  port1rawdatadescription_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Proto.Connection.Port1RawDataDescription)
-}
-inline void Connection::set_port1rawdatadescription(const char* value,
-    size_t size) {
-  _has_bits_[0] |= 0x00000008u;
-  port1rawdatadescription_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Proto.Connection.Port1RawDataDescription)
-}
-inline std::string* Connection::_internal_mutable_port1rawdatadescription() {
-  _has_bits_[0] |= 0x00000008u;
-  return port1rawdatadescription_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* Connection::release_port1rawdatadescription() {
-  // @@protoc_insertion_point(field_release:Proto.Connection.Port1RawDataDescription)
-  if (!_internal_has_port1rawdatadescription()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000008u;
-  return port1rawdatadescription_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void Connection::set_allocated_port1rawdatadescription(std::string* port1rawdatadescription) {
-  if (port1rawdatadescription != nullptr) {
-    _has_bits_[0] |= 0x00000008u;
-  } else {
-    _has_bits_[0] &= ~0x00000008u;
-  }
-  port1rawdatadescription_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), port1rawdatadescription,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Proto.Connection.Port1RawDataDescription)
-}
-
-// optional string Port2RawDataDescription = 6;
-inline bool Connection::_internal_has_port2rawdatadescription() const {
-  bool value = (_has_bits_[0] & 0x00000010u) != 0;
-  return value;
-}
-inline bool Connection::has_port2rawdatadescription() const {
-  return _internal_has_port2rawdatadescription();
-}
-inline void Connection::clear_port2rawdatadescription() {
-  port2rawdatadescription_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000010u;
-}
-inline const std::string& Connection::port2rawdatadescription() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection.Port2RawDataDescription)
-  return _internal_port2rawdatadescription();
-}
-inline void Connection::set_port2rawdatadescription(const std::string& value) {
-  _internal_set_port2rawdatadescription(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection.Port2RawDataDescription)
-}
-inline std::string* Connection::mutable_port2rawdatadescription() {
-  // @@protoc_insertion_point(field_mutable:Proto.Connection.Port2RawDataDescription)
-  return _internal_mutable_port2rawdatadescription();
-}
-inline const std::string& Connection::_internal_port2rawdatadescription() const {
-  return port2rawdatadescription_.Get();
-}
-inline void Connection::_internal_set_port2rawdatadescription(const std::string& value) {
-  _has_bits_[0] |= 0x00000010u;
-  port2rawdatadescription_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void Connection::set_port2rawdatadescription(std::string&& value) {
-  _has_bits_[0] |= 0x00000010u;
-  port2rawdatadescription_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Proto.Connection.Port2RawDataDescription)
-}
-inline void Connection::set_port2rawdatadescription(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000010u;
-  port2rawdatadescription_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Proto.Connection.Port2RawDataDescription)
-}
-inline void Connection::set_port2rawdatadescription(const char* value,
-    size_t size) {
-  _has_bits_[0] |= 0x00000010u;
-  port2rawdatadescription_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Proto.Connection.Port2RawDataDescription)
-}
-inline std::string* Connection::_internal_mutable_port2rawdatadescription() {
-  _has_bits_[0] |= 0x00000010u;
-  return port2rawdatadescription_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* Connection::release_port2rawdatadescription() {
-  // @@protoc_insertion_point(field_release:Proto.Connection.Port2RawDataDescription)
-  if (!_internal_has_port2rawdatadescription()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000010u;
-  return port2rawdatadescription_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void Connection::set_allocated_port2rawdatadescription(std::string* port2rawdatadescription) {
-  if (port2rawdatadescription != nullptr) {
-    _has_bits_[0] |= 0x00000010u;
-  } else {
-    _has_bits_[0] &= ~0x00000010u;
-  }
-  port2rawdatadescription_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), port2rawdatadescription,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Proto.Connection.Port2RawDataDescription)
-}
-
-// optional bool ManualSettings = 11 [default = false];
-inline bool Connection::_internal_has_manualsettings() const {
-  bool value = (_has_bits_[0] & 0x00000200u) != 0;
-  return value;
-}
-inline bool Connection::has_manualsettings() const {
-  return _internal_has_manualsettings();
-}
-inline void Connection::clear_manualsettings() {
-  manualsettings_ = false;
-  _has_bits_[0] &= ~0x00000200u;
-}
-inline bool Connection::_internal_manualsettings() const {
-  return manualsettings_;
-}
-inline bool Connection::manualsettings() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection.ManualSettings)
-  return _internal_manualsettings();
-}
-inline void Connection::_internal_set_manualsettings(bool value) {
-  _has_bits_[0] |= 0x00000200u;
-  manualsettings_ = value;
-}
-inline void Connection::set_manualsettings(bool value) {
-  _internal_set_manualsettings(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection.ManualSettings)
-}
-
-// optional bool DisableDataID = 12 [default = false];
-inline bool Connection::_internal_has_disabledataid() const {
-  bool value = (_has_bits_[0] & 0x00000400u) != 0;
-  return value;
-}
-inline bool Connection::has_disabledataid() const {
-  return _internal_has_disabledataid();
-}
-inline void Connection::clear_disabledataid() {
-  disabledataid_ = false;
-  _has_bits_[0] &= ~0x00000400u;
-}
-inline bool Connection::_internal_disabledataid() const {
-  return disabledataid_;
-}
-inline bool Connection::disabledataid() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection.DisableDataID)
-  return _internal_disabledataid();
-}
-inline void Connection::_internal_set_disabledataid(bool value) {
-  _has_bits_[0] |= 0x00000400u;
-  disabledataid_ = value;
-}
-inline void Connection::set_disabledataid(bool value) {
-  _internal_set_disabledataid(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection.DisableDataID)
-}
-
-// optional bool GenerateVHDFile = 13 [default = false];
-inline bool Connection::_internal_has_generatevhdfile() const {
-  bool value = (_has_bits_[0] & 0x00000800u) != 0;
-  return value;
-}
-inline bool Connection::has_generatevhdfile() const {
-  return _internal_has_generatevhdfile();
-}
-inline void Connection::clear_generatevhdfile() {
-  generatevhdfile_ = false;
-  _has_bits_[0] &= ~0x00000800u;
-}
-inline bool Connection::_internal_generatevhdfile() const {
-  return generatevhdfile_;
-}
-inline bool Connection::generatevhdfile() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection.GenerateVHDFile)
-  return _internal_generatevhdfile();
-}
-inline void Connection::_internal_set_generatevhdfile(bool value) {
-  _has_bits_[0] |= 0x00000800u;
-  generatevhdfile_ = value;
-}
-inline void Connection::set_generatevhdfile(bool value) {
-  _internal_set_generatevhdfile(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection.GenerateVHDFile)
-}
-
-// optional int32 Port1TxStartAddress = 14 [default = 0];
-inline bool Connection::_internal_has_port1txstartaddress() const {
-  bool value = (_has_bits_[0] & 0x00000100u) != 0;
-  return value;
-}
-inline bool Connection::has_port1txstartaddress() const {
-  return _internal_has_port1txstartaddress();
-}
-inline void Connection::clear_port1txstartaddress() {
-  port1txstartaddress_ = 0;
-  _has_bits_[0] &= ~0x00000100u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::_internal_port1txstartaddress() const {
-  return port1txstartaddress_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::port1txstartaddress() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection.Port1TxStartAddress)
-  return _internal_port1txstartaddress();
-}
-inline void Connection::_internal_set_port1txstartaddress(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000100u;
-  port1txstartaddress_ = value;
-}
-inline void Connection::set_port1txstartaddress(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_port1txstartaddress(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection.Port1TxStartAddress)
-}
-
-// optional int32 Port1TxWordsQuantity = 15 [default = 479];
-inline bool Connection::_internal_has_port1txwordsquantity() const {
-  bool value = (_has_bits_[0] & 0x00200000u) != 0;
-  return value;
-}
-inline bool Connection::has_port1txwordsquantity() const {
-  return _internal_has_port1txwordsquantity();
-}
-inline void Connection::clear_port1txwordsquantity() {
-  port1txwordsquantity_ = 479;
-  _has_bits_[0] &= ~0x00200000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::_internal_port1txwordsquantity() const {
-  return port1txwordsquantity_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::port1txwordsquantity() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection.Port1TxWordsQuantity)
-  return _internal_port1txwordsquantity();
-}
-inline void Connection::_internal_set_port1txwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00200000u;
-  port1txwordsquantity_ = value;
-}
-inline void Connection::set_port1txwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_port1txwordsquantity(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection.Port1TxWordsQuantity)
-}
-
-// optional int32 Port1RxWordsQuantity = 16 [default = 479];
-inline bool Connection::_internal_has_port1rxwordsquantity() const {
-  bool value = (_has_bits_[0] & 0x00400000u) != 0;
-  return value;
-}
-inline bool Connection::has_port1rxwordsquantity() const {
-  return _internal_has_port1rxwordsquantity();
-}
-inline void Connection::clear_port1rxwordsquantity() {
-  port1rxwordsquantity_ = 479;
-  _has_bits_[0] &= ~0x00400000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::_internal_port1rxwordsquantity() const {
-  return port1rxwordsquantity_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::port1rxwordsquantity() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection.Port1RxWordsQuantity)
-  return _internal_port1rxwordsquantity();
-}
-inline void Connection::_internal_set_port1rxwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00400000u;
-  port1rxwordsquantity_ = value;
-}
-inline void Connection::set_port1rxwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_port1rxwordsquantity(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection.Port1RxWordsQuantity)
-}
-
-// optional int32 Port2TxStartAddress = 17 [default = 0];
-inline bool Connection::_internal_has_port2txstartaddress() const {
-  bool value = (_has_bits_[0] & 0x00002000u) != 0;
-  return value;
-}
-inline bool Connection::has_port2txstartaddress() const {
-  return _internal_has_port2txstartaddress();
-}
-inline void Connection::clear_port2txstartaddress() {
-  port2txstartaddress_ = 0;
-  _has_bits_[0] &= ~0x00002000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::_internal_port2txstartaddress() const {
-  return port2txstartaddress_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::port2txstartaddress() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection.Port2TxStartAddress)
-  return _internal_port2txstartaddress();
-}
-inline void Connection::_internal_set_port2txstartaddress(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00002000u;
-  port2txstartaddress_ = value;
-}
-inline void Connection::set_port2txstartaddress(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_port2txstartaddress(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection.Port2TxStartAddress)
-}
-
-// optional int32 Port2TxWordsQuantity = 18 [default = 479];
-inline bool Connection::_internal_has_port2txwordsquantity() const {
-  bool value = (_has_bits_[0] & 0x00800000u) != 0;
-  return value;
-}
-inline bool Connection::has_port2txwordsquantity() const {
-  return _internal_has_port2txwordsquantity();
-}
-inline void Connection::clear_port2txwordsquantity() {
-  port2txwordsquantity_ = 479;
-  _has_bits_[0] &= ~0x00800000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::_internal_port2txwordsquantity() const {
-  return port2txwordsquantity_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::port2txwordsquantity() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection.Port2TxWordsQuantity)
-  return _internal_port2txwordsquantity();
-}
-inline void Connection::_internal_set_port2txwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00800000u;
-  port2txwordsquantity_ = value;
-}
-inline void Connection::set_port2txwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_port2txwordsquantity(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection.Port2TxWordsQuantity)
-}
-
-// optional int32 Port2RxWordsQuantity = 19 [default = 479];
-inline bool Connection::_internal_has_port2rxwordsquantity() const {
-  bool value = (_has_bits_[0] & 0x01000000u) != 0;
-  return value;
-}
-inline bool Connection::has_port2rxwordsquantity() const {
-  return _internal_has_port2rxwordsquantity();
-}
-inline void Connection::clear_port2rxwordsquantity() {
-  port2rxwordsquantity_ = 479;
-  _has_bits_[0] &= ~0x01000000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::_internal_port2rxwordsquantity() const {
-  return port2rxwordsquantity_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::port2rxwordsquantity() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection.Port2RxWordsQuantity)
-  return _internal_port2rxwordsquantity();
-}
-inline void Connection::_internal_set_port2rxwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x01000000u;
-  port2rxwordsquantity_ = value;
-}
-inline void Connection::set_port2rxwordsquantity(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_port2rxwordsquantity(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection.Port2RxWordsQuantity)
-}
-
-// optional .Proto.Uuid uuid = 20;
-inline bool Connection::_internal_has_uuid() const {
-  bool value = (_has_bits_[0] & 0x00000020u) != 0;
-  PROTOBUF_ASSUME(!value || uuid_ != nullptr);
-  return value;
-}
-inline bool Connection::has_uuid() const {
-  return _internal_has_uuid();
-}
-inline const ::Proto::Uuid& Connection::_internal_uuid() const {
-  const ::Proto::Uuid* p = uuid_;
-  return p != nullptr ? *p : reinterpret_cast<const ::Proto::Uuid&>(
-      ::Proto::_Uuid_default_instance_);
-}
-inline const ::Proto::Uuid& Connection::uuid() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection.uuid)
-  return _internal_uuid();
-}
-inline void Connection::unsafe_arena_set_allocated_uuid(
-    ::Proto::Uuid* uuid) {
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(uuid_);
-  }
-  uuid_ = uuid;
-  if (uuid) {
-    _has_bits_[0] |= 0x00000020u;
-  } else {
-    _has_bits_[0] &= ~0x00000020u;
-  }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.Connection.uuid)
-}
-inline ::Proto::Uuid* Connection::release_uuid() {
-  _has_bits_[0] &= ~0x00000020u;
-  ::Proto::Uuid* temp = uuid_;
-  uuid_ = nullptr;
-  if (GetArena() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-  return temp;
-}
-inline ::Proto::Uuid* Connection::unsafe_arena_release_uuid() {
-  // @@protoc_insertion_point(field_release:Proto.Connection.uuid)
-  _has_bits_[0] &= ~0x00000020u;
-  ::Proto::Uuid* temp = uuid_;
-  uuid_ = nullptr;
-  return temp;
-}
-inline ::Proto::Uuid* Connection::_internal_mutable_uuid() {
-  _has_bits_[0] |= 0x00000020u;
-  if (uuid_ == nullptr) {
-    auto* p = CreateMaybeMessage<::Proto::Uuid>(GetArena());
-    uuid_ = p;
-  }
-  return uuid_;
-}
-inline ::Proto::Uuid* Connection::mutable_uuid() {
-  // @@protoc_insertion_point(field_mutable:Proto.Connection.uuid)
-  return _internal_mutable_uuid();
-}
-inline void Connection::set_allocated_uuid(::Proto::Uuid* uuid) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
-  if (message_arena == nullptr) {
-    delete reinterpret_cast< ::PROTOBUF_NAMESPACE_ID::MessageLite*>(uuid_);
-  }
-  if (uuid) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(uuid)->GetArena();
-    if (message_arena != submessage_arena) {
-      uuid = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, uuid, submessage_arena);
-    }
-    _has_bits_[0] |= 0x00000020u;
-  } else {
-    _has_bits_[0] &= ~0x00000020u;
-  }
-  uuid_ = uuid;
-  // @@protoc_insertion_point(field_set_allocated:Proto.Connection.uuid)
-}
-
-// optional bool Port1EnableSerial = 21 [default = false];
-inline bool Connection::_internal_has_port1enableserial() const {
-  bool value = (_has_bits_[0] & 0x00001000u) != 0;
-  return value;
-}
-inline bool Connection::has_port1enableserial() const {
-  return _internal_has_port1enableserial();
-}
-inline void Connection::clear_port1enableserial() {
-  port1enableserial_ = false;
-  _has_bits_[0] &= ~0x00001000u;
-}
-inline bool Connection::_internal_port1enableserial() const {
-  return port1enableserial_;
-}
-inline bool Connection::port1enableserial() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection.Port1EnableSerial)
-  return _internal_port1enableserial();
-}
-inline void Connection::_internal_set_port1enableserial(bool value) {
-  _has_bits_[0] |= 0x00001000u;
-  port1enableserial_ = value;
-}
-inline void Connection::set_port1enableserial(bool value) {
-  _internal_set_port1enableserial(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection.Port1EnableSerial)
-}
-
-// optional int32 Port1SerialMode = 22 [default = 0];
-inline bool Connection::_internal_has_port1serialmode() const {
-  bool value = (_has_bits_[0] & 0x00040000u) != 0;
-  return value;
-}
-inline bool Connection::has_port1serialmode() const {
-  return _internal_has_port1serialmode();
-}
-inline void Connection::clear_port1serialmode() {
-  port1serialmode_ = 0;
-  _has_bits_[0] &= ~0x00040000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::_internal_port1serialmode() const {
-  return port1serialmode_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::port1serialmode() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection.Port1SerialMode)
-  return _internal_port1serialmode();
-}
-inline void Connection::_internal_set_port1serialmode(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00040000u;
-  port1serialmode_ = value;
-}
-inline void Connection::set_port1serialmode(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_port1serialmode(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection.Port1SerialMode)
-}
-
-// optional bool Port1EnableDuplex = 23 [default = false];
-inline bool Connection::_internal_has_port1enableduplex() const {
-  bool value = (_has_bits_[0] & 0x00004000u) != 0;
-  return value;
-}
-inline bool Connection::has_port1enableduplex() const {
-  return _internal_has_port1enableduplex();
-}
-inline void Connection::clear_port1enableduplex() {
-  port1enableduplex_ = false;
-  _has_bits_[0] &= ~0x00004000u;
-}
-inline bool Connection::_internal_port1enableduplex() const {
-  return port1enableduplex_;
-}
-inline bool Connection::port1enableduplex() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection.Port1EnableDuplex)
-  return _internal_port1enableduplex();
-}
-inline void Connection::_internal_set_port1enableduplex(bool value) {
-  _has_bits_[0] |= 0x00004000u;
-  port1enableduplex_ = value;
-}
-inline void Connection::set_port1enableduplex(bool value) {
-  _internal_set_port1enableduplex(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection.Port1EnableDuplex)
-}
-
-// optional bool Port2EnableSerial = 24 [default = false];
-inline bool Connection::_internal_has_port2enableserial() const {
-  bool value = (_has_bits_[0] & 0x00008000u) != 0;
-  return value;
-}
-inline bool Connection::has_port2enableserial() const {
-  return _internal_has_port2enableserial();
-}
-inline void Connection::clear_port2enableserial() {
-  port2enableserial_ = false;
-  _has_bits_[0] &= ~0x00008000u;
-}
-inline bool Connection::_internal_port2enableserial() const {
-  return port2enableserial_;
-}
-inline bool Connection::port2enableserial() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection.Port2EnableSerial)
-  return _internal_port2enableserial();
-}
-inline void Connection::_internal_set_port2enableserial(bool value) {
-  _has_bits_[0] |= 0x00008000u;
-  port2enableserial_ = value;
-}
-inline void Connection::set_port2enableserial(bool value) {
-  _internal_set_port2enableserial(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection.Port2EnableSerial)
-}
-
-// optional int32 Port2SerialMode = 25 [default = 0];
-inline bool Connection::_internal_has_port2serialmode() const {
-  bool value = (_has_bits_[0] & 0x00080000u) != 0;
-  return value;
-}
-inline bool Connection::has_port2serialmode() const {
-  return _internal_has_port2serialmode();
-}
-inline void Connection::clear_port2serialmode() {
-  port2serialmode_ = 0;
-  _has_bits_[0] &= ~0x00080000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::_internal_port2serialmode() const {
-  return port2serialmode_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::port2serialmode() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection.Port2SerialMode)
-  return _internal_port2serialmode();
-}
-inline void Connection::_internal_set_port2serialmode(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00080000u;
-  port2serialmode_ = value;
-}
-inline void Connection::set_port2serialmode(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_port2serialmode(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection.Port2SerialMode)
-}
-
-// optional bool Port2EnableDuplex = 26 [default = false];
-inline bool Connection::_internal_has_port2enableduplex() const {
-  bool value = (_has_bits_[0] & 0x00010000u) != 0;
-  return value;
-}
-inline bool Connection::has_port2enableduplex() const {
-  return _internal_has_port2enableduplex();
-}
-inline void Connection::clear_port2enableduplex() {
-  port2enableduplex_ = false;
-  _has_bits_[0] &= ~0x00010000u;
-}
-inline bool Connection::_internal_port2enableduplex() const {
-  return port2enableduplex_;
-}
-inline bool Connection::port2enableduplex() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection.Port2EnableDuplex)
-  return _internal_port2enableduplex();
-}
-inline void Connection::_internal_set_port2enableduplex(bool value) {
-  _has_bits_[0] |= 0x00010000u;
-  port2enableduplex_ = value;
-}
-inline void Connection::set_port2enableduplex(bool value) {
-  _internal_set_port2enableduplex(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection.Port2EnableDuplex)
-}
-
-// optional int32 Type = 27 [default = 0];
-inline bool Connection::_internal_has_type() const {
-  bool value = (_has_bits_[0] & 0x00100000u) != 0;
-  return value;
-}
-inline bool Connection::has_type() const {
-  return _internal_has_type();
-}
-inline void Connection::clear_type() {
-  type_ = 0;
-  _has_bits_[0] &= ~0x00100000u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::_internal_type() const {
-  return type_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::type() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection.Type)
-  return _internal_type();
-}
-inline void Connection::_internal_set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00100000u;
-  type_ = value;
-}
-inline void Connection::set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_type(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection.Type)
-}
-
-// optional int32 ObsoleteMode = 8 [default = 0];
-inline bool Connection::_internal_has_obsoletemode() const {
-  bool value = (_has_bits_[0] & 0x00000080u) != 0;
-  return value;
-}
-inline bool Connection::has_obsoletemode() const {
-  return _internal_has_obsoletemode();
-}
-inline void Connection::clear_obsoletemode() {
-  obsoletemode_ = 0;
-  _has_bits_[0] &= ~0x00000080u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::_internal_obsoletemode() const {
-  return obsoletemode_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::obsoletemode() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection.ObsoleteMode)
-  return _internal_obsoletemode();
-}
-inline void Connection::_internal_set_obsoletemode(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000080u;
-  obsoletemode_ = value;
-}
-inline void Connection::set_obsoletemode(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_obsoletemode(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection.ObsoleteMode)
-}
-
-// optional int32 ObsoleteSerialMode = 7 [default = 0];
-inline bool Connection::_internal_has_obsoleteserialmode() const {
-  bool value = (_has_bits_[0] & 0x00000040u) != 0;
-  return value;
-}
-inline bool Connection::has_obsoleteserialmode() const {
-  return _internal_has_obsoleteserialmode();
-}
-inline void Connection::clear_obsoleteserialmode() {
-  obsoleteserialmode_ = 0;
-  _has_bits_[0] &= ~0x00000040u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::_internal_obsoleteserialmode() const {
-  return obsoleteserialmode_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 Connection::obsoleteserialmode() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection.ObsoleteSerialMode)
-  return _internal_obsoleteserialmode();
-}
-inline void Connection::_internal_set_obsoleteserialmode(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000040u;
-  obsoleteserialmode_ = value;
-}
-inline void Connection::set_obsoleteserialmode(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_obsoleteserialmode(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection.ObsoleteSerialMode)
-}
-
-// optional bool ObsoleteEnableDuplex = 10 [default = false];
-inline bool Connection::_internal_has_obsoleteenableduplex() const {
-  bool value = (_has_bits_[0] & 0x00020000u) != 0;
-  return value;
-}
-inline bool Connection::has_obsoleteenableduplex() const {
-  return _internal_has_obsoleteenableduplex();
-}
-inline void Connection::clear_obsoleteenableduplex() {
-  obsoleteenableduplex_ = false;
-  _has_bits_[0] &= ~0x00020000u;
-}
-inline bool Connection::_internal_obsoleteenableduplex() const {
-  return obsoleteenableduplex_;
-}
-inline bool Connection::obsoleteenableduplex() const {
-  // @@protoc_insertion_point(field_get:Proto.Connection.ObsoleteEnableDuplex)
-  return _internal_obsoleteenableduplex();
-}
-inline void Connection::_internal_set_obsoleteenableduplex(bool value) {
-  _has_bits_[0] |= 0x00020000u;
-  obsoleteenableduplex_ = value;
-}
-inline void Connection::set_obsoleteenableduplex(bool value) {
-  _internal_set_obsoleteenableduplex(value);
-  // @@protoc_insertion_point(field_set:Proto.Connection.ObsoleteEnableDuplex)
-}
-
-// -------------------------------------------------------------------
-
 // SchemaDetailsSet
 
 // repeated .Proto.SchemaDetails schemasDetails = 2;
@@ -48884,10 +46599,6 @@ inline void Bus::set_enablemanualbussizeisnotinitialized(bool value) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
-// -------------------------------------------------------------------
-
-// -------------------------------------------------------------------
-
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

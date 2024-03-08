@@ -24,8 +24,8 @@ namespace Hardware
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message, bool saveTree) const override;
-		virtual bool LoadData(const Proto::Envelope& message) override;
+		virtual bool SaveData(Proto::Envelope2* message, bool saveTree) const override;
+		virtual bool LoadData(const Proto::Envelope2& message) override;
 
 		// Expand EquipmentIDTemplate, ValiditySignalId for this and for all children
 		//

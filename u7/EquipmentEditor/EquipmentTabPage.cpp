@@ -1581,10 +1581,10 @@ void EquipmentTabPage::exportPreset()
 
 	// Save devices to the clipboard
 	//
-	::Proto::ExportedDevicePreset message;
+	::Proto::ExportedDevicePreset2 message;
 
-	::Proto::EnvelopeSet* setMessage = message.mutable_items();
-	::Proto::EnvelopeSetShortDescription* descriptionMessage = message.mutable_description();
+	::Proto::EnvelopeSet2* setMessage = message.mutable_items();
+	::Proto::EnvelopeSetShortDescription2* descriptionMessage = message.mutable_description();
 
 	descriptionMessage->set_projectname(db()->currentProject().projectName().toStdString());
 	descriptionMessage->set_username(db()->currentUser().username().toStdString());
@@ -1596,7 +1596,7 @@ void EquipmentTabPage::exportPreset()
 
 	for (std::shared_ptr<Hardware::DeviceObject>& device : latestDevices)
 	{
-		::Proto::Envelope* protoDevice = setMessage->add_items();
+		::Proto::Envelope2* protoDevice = setMessage->add_items();
 		device->SaveObjectTree(protoDevice);
 
 		descriptionMessage->add_classnamehash(protoDevice->classnamehash());
@@ -1608,7 +1608,7 @@ void EquipmentTabPage::exportPreset()
 		std::string data = message.SerializeAsString();
 		QByteArray compressedData = qCompress(QByteArray::fromRawData(data.data(), static_cast<int>(data.size())));
 
-		::Proto::ExportedDevicePreset compressedMessage;
+		::Proto::ExportedDevicePreset2 compressedMessage;
 		compressedMessage.mutable_description()->operator=(*descriptionMessage);
 		compressedMessage.set_compressedthis(compressedData.toStdString());
 
@@ -1656,7 +1656,7 @@ void EquipmentTabPage::importPreset()
 
 	// --
 	//
-	::Proto::ExportedDevicePreset fileMessage;
+	::Proto::ExportedDevicePreset2 fileMessage;
 
 	bool ok = fileMessage.ParseFromIstream(&input);
 	if (ok == false)
@@ -1667,7 +1667,7 @@ void EquipmentTabPage::importPreset()
 
 	// Check if data was compressed then uncompress it
 	//
-	::Proto::ExportedDevicePreset message;
+	::Proto::ExportedDevicePreset2 message;
 
 	if (fileMessage.has_compressedthis() == true)
 	{
@@ -1694,7 +1694,7 @@ void EquipmentTabPage::importPreset()
 	DialogImportPreset d(message, this);
 	if (d.exec() == QDialog::Accepted)
 	{
-		::Proto::EnvelopeSet chosenItems = d.chosenItems();
+		::Proto::EnvelopeSet2 chosenItems = d.chosenItems();
 		if (chosenItems.items_size() != 0)
 		{
 			m_equipmentView->pasteDevices(chosenItems, message.description(), false);

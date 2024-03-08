@@ -417,7 +417,7 @@ void DialogDiagSignalTypes::onCopy()
 		return;
 	}
 
-	Proto::EnvelopeSet envelopeSet;
+	Proto::EnvelopeSet2 envelopeSet;
 
 	for (auto item : selectedItems)
 	{
@@ -431,7 +431,7 @@ void DialogDiagSignalTypes::onCopy()
 		}
 
 
-		Proto::Envelope* envelope = envelopeSet.add_items();
+		auto envelope = envelopeSet.add_items();
 		dst->Save(envelope);
 	}
 
@@ -475,7 +475,7 @@ void DialogDiagSignalTypes::onPaste()
 		return;
 	}
 
-	Proto::EnvelopeSet envelopeSet;
+	Proto::EnvelopeSet2 envelopeSet;
 	if (envelopeSet.ParseFromArray(data.constData(), data.size()) == false)
 	{
 		return;
@@ -489,9 +489,9 @@ void DialogDiagSignalTypes::onPaste()
 
 	for (int i = 0; i < envelopeSet.items_size(); i++)
 	{
-		const Proto::Envelope& envelope = envelopeSet.items(i);
+		const auto& envelope = envelopeSet.items(i);
 
-		if (envelope.has_diagsignaltype() == false)
+		if (envelope.HasExtension(Proto::diagSignalType2) == false)
 		{
 			Q_ASSERT(false);
 			continue;
@@ -734,7 +734,7 @@ void DialogDiagSignalTypes::onExport()
 		return;
 	}
 
-	Proto::EnvelopeSet envelopeSet;
+	Proto::EnvelopeSet2 envelopeSet;
 
 	QString defaultFileName;
 	if (selectedItems.size() > 1)
@@ -758,7 +758,7 @@ void DialogDiagSignalTypes::onExport()
 			defaultFileName = tr("%1.%2").arg(dst->signalTypeId()).arg(Db::File::DiagSignalTypeSetFileExtension);
 		}
 
-		Proto::Envelope* envelope = envelopeSet.add_items();
+		auto envelope = envelopeSet.add_items();
 		dst->Save(envelope);
 	}
 
@@ -826,7 +826,7 @@ void DialogDiagSignalTypes::onImport()
 
 	data = file.readAll();
 
-	Proto::EnvelopeSet envelopeSet;
+	Proto::EnvelopeSet2 envelopeSet;
 	if (data.isEmpty() == true || envelopeSet.ParseFromArray(data.constData(), data.size()) == false)
 	{
 		QMessageBox::critical(this, qAppName(), tr("Error parsing file %1 contents!").arg(QDir::toNativeSeparators(fileName)));
@@ -841,9 +841,9 @@ void DialogDiagSignalTypes::onImport()
 
 	for (int i = 0; i < envelopeSet.items_size(); i++)
 	{
-		const Proto::Envelope& envelope = envelopeSet.items(i);
+		const auto& envelope = envelopeSet.items(i);
 
-		if (envelope.has_diagsignaltype() == false)
+		if (envelope.HasExtension(Proto::diagSignalType2) == false)
 		{
 			Q_ASSERT(false);
 			continue;

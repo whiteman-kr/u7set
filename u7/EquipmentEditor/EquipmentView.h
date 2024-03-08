@@ -78,11 +78,11 @@ public slots:
 
 	void copySelectedDevices();
 	void pasteDevices();
-	void pasteDevices(const ::Proto::EnvelopeSet& messageItems,
-					  const Proto::EnvelopeSetShortDescription& messageDescr,
+	void pasteDevices(const ::Proto::EnvelopeSet2& messageItems,
+					  const ::Proto::EnvelopeSetShortDescription2& messageDescr,
 					  bool newUuids);
 	bool canPaste() const;
-	bool canPaste(const ::Proto::EnvelopeSetShortDescription& message) const;
+	bool canPaste(const ::Proto::EnvelopeSetShortDescription2& message) const;
 
 	void findObject();
 	bool findObject(QString equiepmentId);

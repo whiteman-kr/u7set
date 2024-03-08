@@ -1792,11 +1792,11 @@ void EquipmentView::copySelectedDevices()
 
 	// Save devices to the clipboard
 	//
-	::Proto::EnvelopeSet message;
+	::Proto::EnvelopeSet2 message;
 
 	// Save the short description -- its done for quick understanding what is in the clipboard without reading all data
 	//
-	::Proto::EnvelopeSetShortDescription descriptionMessage;
+	::Proto::EnvelopeSetShortDescription2 descriptionMessage;
 
 	descriptionMessage.set_projectname(db()->currentProject().projectName().toStdString());
 	descriptionMessage.set_username(db()->currentUser().username().toStdString());
@@ -1808,7 +1808,7 @@ void EquipmentView::copySelectedDevices()
 
 	for (std::shared_ptr<Hardware::DeviceObject> device : latestDevices)
 	{
-		::Proto::Envelope* protoDevice = message.add_items();
+		auto protoDevice = message.add_items();
 		device->SaveObjectTree(protoDevice);
 
 		descriptionMessage.add_classnamehash(protoDevice->classnamehash());
@@ -1908,7 +1908,7 @@ void EquipmentView::pasteDevices()
 	//
 	QByteArray cbData = mimeData->data(EquipmentView::mimeType);
 
-	::Proto::EnvelopeSet messageItems;
+	::Proto::EnvelopeSet2 messageItems;
 	bool ok = messageItems.ParseFromArray(cbData.constData(), static_cast<int>(cbData.size()));
 
 	if (ok == false)
@@ -1921,7 +1921,7 @@ void EquipmentView::pasteDevices()
 	//
 	cbData = mimeData->data(EquipmentView::mimeTypeShortDescription);
 
-	::Proto::EnvelopeSetShortDescription messageDescr;
+	::Proto::EnvelopeSetShortDescription2 messageDescr;
 	ok = messageDescr.ParseFromArray(cbData.constData(), static_cast<int>(cbData.size()));
 
 	if (ok == false)
@@ -1937,8 +1937,8 @@ void EquipmentView::pasteDevices()
 	return;
 }
 
-void EquipmentView::pasteDevices(const ::Proto::EnvelopeSet& messageItems,
-								 const Proto::EnvelopeSetShortDescription& messageDescr,
+void EquipmentView::pasteDevices(const ::Proto::EnvelopeSet2& messageItems,
+								 const ::Proto::EnvelopeSetShortDescription2& messageDescr,
 								 bool newUuids)		// Generate UUIDs is false for importing presets. Preset has PresetObjectUuid which is used for matching preset and its' equipment
 {
 	QModelIndex parentModelIndex;		// current is root
@@ -2056,7 +2056,7 @@ bool EquipmentView::canPaste() const
 	//
 	QByteArray cbData = mimeData->data(EquipmentView::mimeTypeShortDescription);
 
-	::Proto::EnvelopeSetShortDescription message;
+	::Proto::EnvelopeSetShortDescription2 message;
 	bool ok = message.ParseFromArray(cbData.constData(), static_cast<int>(cbData.size()));
 
 	if (ok == false)
@@ -2067,7 +2067,7 @@ bool EquipmentView::canPaste() const
 	return canPaste(message);
 }
 
-bool EquipmentView::canPaste(const ::Proto::EnvelopeSetShortDescription& message) const
+bool EquipmentView::canPaste(const ::Proto::EnvelopeSetShortDescription2& message) const
 {
 	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
 

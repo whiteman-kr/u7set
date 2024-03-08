@@ -105,7 +105,7 @@ namespace Hardware
 		return result;
 	}
 
-	void DiagSignalType::save(Proto::DiagSignalType* message) const
+	void DiagSignalType::save(Proto::DiagSignalType2* message) const
 	{
 		Q_ASSERT(message);
 
@@ -134,7 +134,7 @@ namespace Hardware
 		return;
 	}
 
-	bool DiagSignalType::load(const Proto::DiagSignalType& message)
+	bool DiagSignalType::load(const Proto::DiagSignalType2& message)
 	{
 		uuid = Proto::Read(message.uuid());
 		Q_ASSERT(uuid.isNull() == false);
@@ -281,7 +281,7 @@ namespace Hardware
 		return std::shared_ptr<DiagSignalTypeObject>(new DiagSignalTypeObject{parent}); // cannot use make_shared as constructor is protected ((
 	}
 
-	std::shared_ptr<DiagSignalTypeObject> DiagSignalTypeObject::CreateObject(const Proto::Envelope& message)
+	std::shared_ptr<DiagSignalTypeObject> DiagSignalTypeObject::CreateObject(const Proto::Envelope2& message)
 	{
 		auto dst = DiagSignalTypeObject::CreateObject();
 		bool ok = dst->LoadData(message);
@@ -289,7 +289,7 @@ namespace Hardware
 		return ok ? dst : std::shared_ptr<DiagSignalTypeObject>();
 	}
 
-	bool DiagSignalTypeObject::SaveData(Proto::Envelope* message) const
+	bool DiagSignalTypeObject::SaveData(Proto::Envelope2* message) const
 	{
 		if (message == nullptr)
 		{
@@ -302,21 +302,21 @@ namespace Hardware
 
 		message->set_classnamehash(classnameHash);
 
-		Proto::DiagSignalType* m = message->mutable_diagsignaltype();
+		auto m = message->MutableExtension(Proto::diagSignalType2);
 		m_data.save(m);
 
 		return true;
 	}
 
-	bool DiagSignalTypeObject::LoadData(const Proto::Envelope& message)
+	bool DiagSignalTypeObject::LoadData(const Proto::Envelope2& message)
 	{
-		if (message.has_diagsignaltype() == false)
+		if (message.HasExtension(Proto::diagSignalType2) == false)
 		{
-			Q_ASSERT(message.has_diagsignaltype());
+			Q_ASSERT(message.HasExtension(Proto::diagSignalType2));
 			return false;
 		}
 
-		return m_data.load(message.diagsignaltype());
+		return m_data.load(message.GetExtension(Proto::diagSignalType2));
 	}
 
 	QUuid DiagSignalTypeObject::uuid() const

@@ -9,6 +9,7 @@
 #include "../CommonLib/PropertyObject.h" 
 
 #include "../Proto/serialization.pb.h"
+#include "../Proto/Envelope2.pb.h"
 
 
 namespace Proto
@@ -29,7 +30,7 @@ namespace Proto
 	// Template and implementation serialization functions
 	// VFrameType must have functions CreateObject, SaveData, LoadData
 	//
-	template<typename VFrameType>
+	template<typename VFrameType, typename ProtoEnvelope = ::Proto::Envelope>
 	class ObjectSerialization
 	{
 	  public:
@@ -68,7 +69,7 @@ namespace Proto
 				return false;
 			}
 
-			Proto::Envelope message;
+			ProtoEnvelope message;
 
 			bool result = Save(&message);
 			if (result == false)
@@ -113,7 +114,7 @@ namespace Proto
 
 							// Create another Envelope, with compressed data,
 							//
-							Proto::Envelope compressMessage;
+							ProtoEnvelope compressMessage;
 
 							compressMessage.set_classnamehash(message.classnamehash());
 							compressMessage.set_compressedobject(compressedData.constData(), compressedData.size());
@@ -144,7 +145,7 @@ namespace Proto
 		}
 		bool saveToByteArray(QByteArray* data) const
 		{
-			Proto::Envelope message;
+			ProtoEnvelope message;
 			this->SaveData(&message);
 
 			switch (m_compression)
@@ -182,7 +183,7 @@ namespace Proto
 
 						// Create another Envelope, with compressed data,
 						//
-						Proto::Envelope compressMessage;
+						ProtoEnvelope compressMessage;
 
 						compressMessage.set_classnamehash(message.classnamehash());
 						compressMessage.set_compressedobject(compressedData.constData(), compressedData.size());
@@ -214,7 +215,7 @@ namespace Proto
 				return false;
 			}
 		}
-		bool Save(Proto::Envelope* message) const
+		bool Save(ProtoEnvelope* message) const
 		{
 			try
 			{
@@ -256,7 +257,7 @@ namespace Proto
 				return false;
 			}
 
-			Proto::Envelope message;
+			ProtoEnvelope message;
 
 			bool result = ParseFromIstream(message, stream);
 			if (result == false)
@@ -268,7 +269,7 @@ namespace Proto
 		}
 		bool Load(const QByteArray& data)
 		{
-			Proto::Envelope message;
+			ProtoEnvelope message;
 
 			bool result = ParseFromArray(message, data);
 			if (result == false)
@@ -278,7 +279,7 @@ namespace Proto
 
 			return Load(message);
 		}
-		bool Load(const Proto::Envelope& message)
+		bool Load(const ProtoEnvelope& message)
 		{
 			try
 			{
@@ -307,7 +308,7 @@ namespace Proto
 					const std::string& compressedString = message.compressedobject();
 					QByteArray uncompressedData = qUncompress(reinterpret_cast<const uchar*>(compressedString.data()), static_cast<int>(compressedString.size()));
 
-					Proto::Envelope uncompressedMessage;
+					ProtoEnvelope uncompressedMessage;
 
 					bool result = ParseFromArray(uncompressedMessage, uncompressedData);
 					if (result == false)
@@ -353,7 +354,7 @@ namespace Proto
 				return nullptr;
 			}
 
-			Proto::Envelope message;
+			ProtoEnvelope message;
 
 			bool result = ParseFromIstream(message, stream);
 			if (result == false)
@@ -365,7 +366,7 @@ namespace Proto
 		}
 		static std::shared_ptr<VFrameType> Create(const QByteArray& data)
 		{
-			Proto::Envelope message;
+			ProtoEnvelope message;
 
 			bool result = ParseFromArray(message, data);
 			if (result == false)
@@ -375,7 +376,7 @@ namespace Proto
 
 			return Create(message);
 		}
-		static std::shared_ptr<VFrameType> Create(const Proto::Envelope& message)
+		static std::shared_ptr<VFrameType> Create(const ProtoEnvelope& message)
 		{
 			if (message.has_compressedobject() == true)
 			{
@@ -384,7 +385,7 @@ namespace Proto
 				const std::string& compressedString = message.compressedobject();
 				QByteArray uncompressedData = qUncompress(reinterpret_cast<const uchar*>(compressedString.data()), static_cast<int>(compressedString.size()));
 
-				Proto::Envelope uncompressedMessage;
+				ProtoEnvelope uncompressedMessage;
 
 				bool result = ParseFromArray(uncompressedMessage, uncompressedData);
 				if (result == false)
@@ -407,8 +408,8 @@ namespace Proto
 		}
 
 	  protected:
-		virtual bool SaveData(Proto::Envelope* message) const = 0;
-		virtual bool LoadData(const Proto::Envelope& message) = 0;
+		virtual bool SaveData(ProtoEnvelope* message) const = 0;
+		virtual bool LoadData(const ProtoEnvelope& message) = 0;
 
 	  public:
 		[[nodiscard]] ProtoCompress compression() const

@@ -61,6 +61,12 @@ qt_add_library(${TARGET} STATIC
 	../Proto/Trends.pb.h
 	../Proto/ProtoCommonHelper.cpp
 	../Proto/ProtoCommonHelper.h
+
+	../Proto/Envelope2.pb.h
+	../Proto/Envelope2.pb.cc
+	../Proto/Hardware.pb.h
+	../Proto/Hardware.pb.cc
+
 	google/protobuf/any.cc
 	google/protobuf/any.h
 	google/protobuf/any.pb.cc

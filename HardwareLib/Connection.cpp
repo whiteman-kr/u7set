@@ -5,6 +5,7 @@
 #include "Connection.h"
 #include "../Proto/ProtoCommonHelper.h"
 
+
 namespace Hardware
 {
 
@@ -133,14 +134,13 @@ namespace Hardware
         propGenerateVHD->setCategory(s_miscellaneous);
 	}
 
-    bool Connection::SaveData(Proto::Envelope* message) const
+    bool Connection::SaveData(Proto::Envelope2* envelope) const
 	{
 		const std::string& className = this->metaObject()->className();
 		quint32 classnamehash = ::ClassNameHashCode(className);
+		envelope->set_classnamehash(classnamehash);
 
-		message->set_classnamehash(classnamehash);
-
-		::Proto::Connection* mutableConnection = message->mutable_connection();
+		::Proto::Connection2* mutableConnection = envelope->MutableExtension(Proto::connection2);
 
         Proto::Write(mutableConnection->mutable_uuid(), m_uuid);
 		mutableConnection->set_connectionid(m_connectionID.toUtf8());
@@ -174,15 +174,15 @@ namespace Hardware
 		return true;
 	}
 
-	bool Connection::LoadData(const Proto::Envelope& message)
+	bool Connection::LoadData(const Proto::Envelope2& envelope)
 	{
-		if (message.has_connection() == false)
+		if (envelope.HasExtension(Proto::connection2) == false)
 		{
-			assert(message.has_connection());
+			assert(envelope.HasExtension(Proto::connection2));
 			return false;
 		}
 
-		const ::Proto::Connection& connection = message.connection();
+		::Proto::Connection2 connection = envelope.GetExtension(Proto::connection2);
 
         m_uuid = Proto::Read(connection.uuid());
 		m_connectionID = QString::fromStdString(connection.connectionid());
@@ -243,10 +243,23 @@ namespace Hardware
 		return true;
 	}
 
-	std::shared_ptr<Connection> Connection::CreateObject(const Proto::Envelope& message)
+	std::shared_ptr<Connection> Connection::CreateObject(const Proto::Envelope2& envelope)
 	{
 		// This func can create only one instance
 		//
+		if (envelope.HasExtension(::Proto::connection2) == false)
+		{
+			assert(envelope.HasExtension(::Proto::connection2));
+			return nullptr;
+		}
+
+		std::shared_ptr<Connection> connection = std::make_shared<Connection>();
+
+		connection->LoadData(envelope);
+
+		return connection;
+
+		/*
 		if (message.has_connection() == false)
 		{
 			assert(message.has_connection());
@@ -257,7 +270,7 @@ namespace Hardware
 
 		connection->LoadData(message);
 
-		return connection;
+		return connection;*/
 	}
 
     bool Connection::loadFromXml(QXmlStreamReader& reader)

@@ -1,0 +1,71 @@
+syntax = "proto2";
+
+package Proto;
+
+//------------------------------------------------------------------------------------------
+//
+//
+//		Envelope - General struct, keeps any base type
+//
+//
+//------------------------------------------------------------------------------------------
+message Envelope2
+{
+	// C++ Class for serizalization
+	//
+	required uint32 classnamehash = 1;				// Hash from classname, the way of getting the hash is always the same
+	optional bytes compressedObject = 2;			// Can contain Envelope iself in compressed state, after uncompression should
+	                                                // be possible to read one of possible types for storing.
+													// Compression is done by qCompress
+													// To decompress it with zlib extra actions are required, read qUncompress help
+
+	extensions 6 to 499;
+
+	// Possible types for storing
+	//
+/*  Moved to extensions
+
+	optional SchemaItem schemaitem = 6;				// VFrame30::SchemaItem
+	optional bytes deviceobject = 7;				// message DeviceObject - Hardware::DeviceObject
+	optional DiagSignalType diagSignalType = 8;		// Hardware::DiagSignalTypeObject
+	optional Schema schema = 100;					// VFrame30::Schema
+	optional SchemaLayer schemalayer = 101;			// VFrame30::SchemaLayer
+	optional FblElement fblelement = 102;			// Fbl::FblElement
+	optional Configuration configuration = 103;		// VFrame30::Configuration
+	optional Connection connection = 104;			// Hardware::Connection
+	optional SchemaDetailsSet schemaDetailsSet = 105; // VFrame30::SchemaDetailsSet
+
+    optional Bus bus = 200;							// AppSignalLib::Bus
+*/
+}
+
+// This message is used for clipboard
+//
+message EnvelopeSet2
+{
+    repeated Envelope2 items = 1;
+}
+
+message EnvelopeSetShortDescription2
+{
+    optional uint32 projectdbversion = 1;
+	repeated uint32 classnamehash = 2;				// Hash from classname, the way of getting the hash is always the same
+	repeated int32 devicetype = 10;					// DeviceObject::type()
+	optional bool equipmentEditor = 3;				// Copy from Equipmnet editor
+	optional bool presetEditor = 4;					// Copy from Equipment preset editor
+	optional bool presetRoot = 5;					// All objects are preset root
+	optional string projectName = 6;
+	optional string userName = 7;
+	optional uint64 exportTime = 8;
+}
+
+// Export Device Preset Message
+//
+message ExportedDevicePreset2
+{
+    optional EnvelopeSetShortDescription2 description = 1;
+	optional EnvelopeSet2 items = 2;
+	optional bytes compressedThis = 3;				// Compressed THIS object, contains message ExportedDevicePreset itself
+	                                                // As exported presets already exist, we cannot use standard way of Envelope.compressedObject
+													// so this field added to particulary this struct
+}

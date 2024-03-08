@@ -7,8 +7,8 @@ class QXmlStreamReader;
 namespace Hardware
 {
 	class Connection :
-			public PropertyObject,
-			public Proto::ObjectSerialization<Connection>
+		public PropertyObject,
+		public Proto::ObjectSerialization<Connection, Proto::Envelope2>
 	{
 		Q_OBJECT
 
@@ -35,22 +35,22 @@ namespace Hardware
 		// Serialization
 		//
 	public:
-		friend Proto::ObjectSerialization<Connection>;	// for call CreateObject from Proto::ObjectSerialization
+		friend Proto::ObjectSerialization<Connection, Proto::Envelope2>;	// for call CreateObject from Proto::ObjectSerialization
 
 	public:
 		// Implementing Proto::ObjectSerialization<DeviceObject>::SaveData, LoadData
 		//
-		virtual bool SaveData(Proto::Envelope* message) const override;
-		virtual bool LoadData(const Proto::Envelope& message) override;
+		virtual bool SaveData(Proto::Envelope2* envelope) const override;
+		virtual bool LoadData(const Proto::Envelope2& envelope) override;
 
 	private:
 		// Use this function only while serialization, as when object is created is not fully initialized
 		// and must be read before use
 		//
-		static std::shared_ptr<Connection> CreateObject(const Proto::Envelope& message);
+		static std::shared_ptr<Connection> CreateObject(const Proto::Envelope2& envelope);
 
 	public:
-        // Load connection from depreated XML document
+        // Load connection from deprecated XML document
         //
         bool loadFromXml(QXmlStreamReader& reader);
 

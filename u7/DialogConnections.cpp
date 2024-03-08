@@ -1,6 +1,5 @@
 #include "DialogConnections.h"
-#include "../lib/PropertyEditorDialog.h"
-#include "../lib/StandardColors.h"
+ #include "../lib/StandardColors.h"
 #include "Settings.h"
 
 
@@ -703,7 +702,7 @@ void DialogConnections::onCopy()
 		return;
 	}
 
-	Proto::EnvelopeSet envelopeSet;
+	Proto::EnvelopeSet2 envelopeSet;
 
 	for (auto item : selectedItems)
 	{
@@ -716,7 +715,7 @@ void DialogConnections::onCopy()
 			return;
 		}
 
-		Proto::Envelope* envelope = envelopeSet.add_items();
+		Proto::Envelope2* envelope = envelopeSet.add_items();
 		connection->SaveData(envelope);
 	}
 
@@ -760,7 +759,7 @@ void DialogConnections::onPaste()
 		return;
 	}
 
-	Proto::EnvelopeSet envelopeSet;
+	Proto::EnvelopeSet2 envelopeSet;
 	if (envelopeSet.ParseFromArray(data.constData(), static_cast<int>(data.size())) == false)
 	{
 		return;
@@ -774,11 +773,11 @@ void DialogConnections::onPaste()
 
 	for (int i = 0; i < envelopeSet.items_size(); i++)
 	{
-		const Proto::Envelope& envelope = envelopeSet.items(i);
+		const Proto::Envelope2& envelope = envelopeSet.items(i);
 
-		if (envelope.has_connection() == false)
+		if (envelope.HasExtension(Proto::connection2) == false)
 		{
-			Q_ASSERT(false);
+			Q_ASSERT(envelope.HasExtension(Proto::connection2));
 			continue;
 		}
 
