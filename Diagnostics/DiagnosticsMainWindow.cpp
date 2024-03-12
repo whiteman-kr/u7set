@@ -161,6 +161,8 @@ DiagnosticsMainWindow::DiagnosticsMainWindow(InstanceResolver& instanceResolver,
 	return;
 }
 
+DiagnosticsMainWindow::~DiagnosticsMainWindow() = default;
+
 void DiagnosticsMainWindow::closeEvent(QCloseEvent* e)
 {
 	saveWindowState();

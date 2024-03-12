@@ -3,4 +3,13 @@
 #include <SchemaClientLib/SchemaTabWidget.h>
 #include "DiagSchemaWidget.h"
 
-using DiagnosticsCentralWidget = SchemaClientLib::SchemaTabWidget<DiagSchemaWidget>;
+class DiagnosticsCentralWidget : public SchemaClientLib::SchemaTabWidget<DiagSchemaWidget>
+{
+public:
+	DiagnosticsCentralWidget(SchemaClientLib::ClientSchemaManager* schemaManager,
+							 CreateSchemaWidgetFunc createSchemaWidgetFunc,
+							 QWidget* parent) :
+		SchemaClientLib::SchemaTabWidget<DiagSchemaWidget>(schemaManager, createSchemaWidgetFunc, parent)
+	{
+	}
+};
