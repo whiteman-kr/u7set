@@ -2,18 +2,26 @@
 #error Do not include this file in the project! Link DbLib instead.
 #endif
 
-#include "DbController.h"
 #include <QDebug>
 #include <QtConcurrent>
+
+#include <DbLib/DbController.h>
+#include <DbLib/DbStruct.h>
+#include <DbLib/DbControllerTools.h>
+
 #include "DbWorker.h"
+#include "DbProgress.h"
+#include "../HardwareLib/DeviceObject.h"
+
 
 
 DbController::DbController() :
-	m_worker(nullptr)
+	m_worker(nullptr),
+	m_progress(new DbProgress)
 {
 	m_thread.setObjectName("DbWorkerThread");
 
-	m_worker = new DbWorker(&m_progress);
+	m_worker = new DbWorker(m_progress.get());
 	m_worker->moveToThread(&m_thread);
 
 	connect(&m_thread, &QThread::finished, m_worker, &QObject::deleteLater);		// delete m_worker on thread termination
@@ -1627,7 +1635,7 @@ bool DbController::checkOut(std::vector<DbFileInfo>& files, QWidget* parentWidge
 
 bool DbController::undoChanges(DbFileInfo& file, QWidget* parentWidget)
 {
-	std::vector<DbFileInfo> fv {file};
+	std::vector<DbFileInfo> fv{file};
 
 	bool ok = undoChanges(fv, parentWidget);
 
@@ -1951,8 +1959,8 @@ bool DbController::getDeviceTreeLatestVersion(const DbFileInfo& file, std::share
 
 			if (threadFiles.size() >= fileCountPerThread)
 			{
-				QFuture<std::vector<std::shared_ptr<Hardware::DeviceObject>>> thread =
-						QtConcurrent::run(DbWorker::deviceObjectFromDbFiles, threadFiles);
+				/*QFuture<std::vector<std::shared_ptr<Hardware::DeviceObject>>> */
+				auto thread = QtConcurrent::run(DbControllerTools::deviceObjectFromDbFiles, threadFiles);
 
 				threads.push_back(thread);
 
@@ -1963,7 +1971,7 @@ bool DbController::getDeviceTreeLatestVersion(const DbFileInfo& file, std::share
 
 	if (threadFiles.empty() == false)
 	{
-		QFuture<std::vector<std::shared_ptr<Hardware::DeviceObject>>> thread = QtConcurrent::run(DbWorker::deviceObjectFromDbFiles, threadFiles);
+		QFuture<std::vector<std::shared_ptr<Hardware::DeviceObject>>> thread = QtConcurrent::run(DbControllerTools::deviceObjectFromDbFiles, threadFiles);
 		threads.push_back(thread);
 
 		threadFiles.clear();
@@ -2898,18 +2906,18 @@ bool DbController::initOperation()
 
 	m_lastError.clear();
 
-	return m_progress.init();
+	return m_progress->init();
 }
 
 // Must be called from the GUI thread
 //
 bool DbController::waitForComplete(QWidget* parentWidget, const QString& description)
 {
-	bool result = m_progress.run(parentWidget, description);
+	bool result = m_progress->run(parentWidget, description);
 
-	if (result == false || m_progress.hasError() == true)
+	if (result == false || m_progress->hasError() == true)
 	{
-		m_lastError = m_progress.errorMessage();
+		m_lastError = m_progress->errorMessage();
 	}
 
 	m_operationMutex.unlock();						// WAS LOCKED IN initOperation
@@ -2929,17 +2937,17 @@ int DbController::databaseVersion()
 
 void DbController::enableProgress()
 {
-	m_progress.enableProgress();
+	m_progress->enableProgress();
 }
 
 void DbController::disableProgress()
 {
-	m_progress.disableProgress();
+	m_progress->disableProgress();
 }
 
 bool DbController::isProgressEnabled() const
 {
-	return m_progress.isProgressEnabled();
+	return m_progress->isProgressEnabled();
 }
 
 const QString& DbController::host() const

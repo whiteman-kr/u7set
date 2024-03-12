@@ -1,6 +1,6 @@
 #pragma once
 #include "../../HardwareLib/DeviceObject.h"
-#include "../../DbLib/DbStruct.h"
+#include <DbLib/DbStruct.h>
 
 class DbController;
 
@@ -51,7 +51,7 @@ public:
 	void checkInDeviceObject(QModelIndexList& rowList);
 
 	void checkOutDeviceObject(QModelIndexList& rowList);
-	void undoChangesDeviceObject(QModelIndexList& undowRowList);
+	void undoChangesDeviceObject(QModelIndexList& undoRowList);
 
 	void refreshDeviceObject(QModelIndexList& rowList);
 	void updateDeviceObject(QModelIndexList& rowList);

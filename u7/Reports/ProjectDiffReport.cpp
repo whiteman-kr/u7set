@@ -1,7 +1,6 @@
 #include "ProjectDiffReport.h"
 #include "../AppSignalLib/Bus.h"
 #include "../Builder/AppSignalProperties.h"
-#include "../DbLib/DbWorker.h"
 #include "../HardwareLib/Connection.h"
 #include "../HardwareLib/DiagSignalType.h"
 #include "../ReportLib/ReportPrinter.h"
@@ -12,6 +11,7 @@
 #include "../VFrame30/SchemaLayer.h"
 #include "../lib/PropertyEditor.h"
 #include "../lib/Ui/DialogProgress.h"
+#include <DbLib/DbControllerTools.h>
 #include "Settings.h"
 
 #include <QDesktopServices>
@@ -1214,7 +1214,7 @@ std::shared_ptr<Hardware::DeviceObject> ProjectDiffGenerator::loadDeviceObject(c
 		return nullptr;
 	}
 
-	std::shared_ptr<Hardware::DeviceObject> object = DbWorker::deviceObjectFromDbFile(*file);
+	std::shared_ptr<Hardware::DeviceObject> object = DbControllerTools::deviceObjectFromDbFile(*file);
 	if (object == nullptr)
 	{
 		return nullptr;

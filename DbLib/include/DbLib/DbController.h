@@ -1,13 +1,18 @@
 #pragma once
 
 #include <QVector>
-#include "DbProgress.h"
+#include <QMutex>
 #include "DbStruct.h"
-#include "../HardwareLib/DeviceObject.h"
 
-
-struct ID_AppSignalID;	// AppSignal.h
 class DbWorker;
+class DbProgress;
+struct ID_AppSignalID;	// AppSignal.h
+
+namespace Hardware
+{
+	class DeviceObject;
+	class DeviceAppSignal;
+}
 
 
 class DbController : public QObject
@@ -22,7 +27,7 @@ public:
 	static void shutdown();
 
 	//
-	// Public signlas
+	// Public signals
 	//
 signals:
 	void projectOpened(DbProject project);
@@ -129,6 +134,7 @@ public:
 	bool checkInTree(std::vector<DbFileInfo>& parentFiles, std::vector<DbFileInfo>* outCheckedIn, const QString& comment, QWidget* parentWidget);
 	bool checkOut(DbFileInfo& file, QWidget* parentWidget);
 	bool checkOut(std::vector<DbFileInfo>& files, QWidget* parentWidget);
+	
 	bool undoChanges(DbFileInfo& file, QWidget* parentWidget);
 	bool undoChanges(std::vector<DbFileInfo>& files, QWidget* parentWidget);
 
@@ -382,10 +388,9 @@ private:
 	QThread m_thread;
 	DbWorker* m_worker;
 
-	//mutable QMutex m_mutex;
-	mutable QMutex m_operationMutex;		// Non Recursive mutex for single opartion at a time
+	mutable QMutex m_operationMutex;		// Non Recursive mutex for single operation at a time
 
-	DbProgress m_progress;
+	std::unique_ptr<DbProgress> m_progress;
 
 	QString m_lastError;
 

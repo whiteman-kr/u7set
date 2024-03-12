@@ -1,8 +1,8 @@
 #include "../Builder/ModuleLogicCompiler.h"
 #include "../Builder/AppLogicCompiler.h"
-#include "../DbLib/DbWorker.h"
 #include "../HardwareLib/Connection.h"
 #include "../UtilsLib/Crc.h"
+#include <DbLib/DbControllerTools.h>
 
 #include "LanControllerInfoHelper.h"
 #include "DeviceHelper.h"
@@ -2384,7 +2384,7 @@ namespace Builder
 
 				validitySignal = new AppSignal;
 
-				QString errStr = DbWorker::initAppSignalFromDeviceAppSignal(*deviceAppSignal, validitySignal);
+				QString errStr = DbControllerTools::initAppSignalFromDeviceAppSignal(*deviceAppSignal, validitySignal);
 
 				if (errStr.isEmpty() == false)
 				{

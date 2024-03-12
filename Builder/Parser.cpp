@@ -1,7 +1,10 @@
 #include "Parser.h"
 #include "Context.h"
 
-#include "../DbLib/DbController.h"
+#include <QtConcurrentRun>
+
+#include <DbLib/DbController.h>
+
 #include "../HardwareLib/DeviceObject.h"
 #include "../HardwareLib/LmDescription.h"
 #include "../HardwareLib/PropertyNames.h"
@@ -22,7 +25,7 @@
 #include "../VFrame30/SchemaPoint.h"
 #include "../VFrame30/UfbSchema.h"
 
-#include <QtConcurrentRun>
+
 
 
 namespace Builder

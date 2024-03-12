@@ -1,6 +1,6 @@
 #include "DialogChoosePreset.h"
 #include "ui_DialogChoosePreset.h"
-#include "../../DbLib/DbWorker.h"
+#include <DbLib/DbControllerTools.h>
 
 
 int DialogChoosePreset::m_lastSortColumn = 0;
@@ -57,7 +57,7 @@ DialogChoosePreset::DialogChoosePreset(QWidget* parent, DbController* db, Hardwa
 
 	for (std::shared_ptr<DbFile>& f : files)
 	{
-		std::shared_ptr<Hardware::DeviceObject> object = DbWorker::deviceObjectFromDbFile(*f);
+		std::shared_ptr<Hardware::DeviceObject> object = DbControllerTools::deviceObjectFromDbFile(*f);
 		Q_ASSERT(object != nullptr);
 
 		m_presets.push_back(object);

@@ -3,7 +3,7 @@
 #include <QSqlQuery>
 #include <QReadWriteLock>
 
-#include "DbStruct.h"
+#include <DbLib/DbStruct.h>
 
 #define AUTO_COMPLETE std::shared_ptr<int*> progressCompleted(nullptr, [this](void*) { this->m_progress->setCompleted(true); } );
 
@@ -53,10 +53,6 @@ public:
 	static QString toSqlBoolean(bool value);
 	static QString toSqlByteaStr(const QByteArray& binData);
 
-	// Hardware Configuration
-	//
-	[[nodiscard]] static std::shared_ptr<Hardware::DeviceObject> deviceObjectFromDbFile(const DbFile& file);
-	[[nodiscard]] static std::vector<std::shared_ptr<Hardware::DeviceObject>> deviceObjectFromDbFiles(const std::vector<std::shared_ptr<DbFile>>& files);
 
     //
     // Operations
@@ -122,7 +118,8 @@ public slots:
     void slot_checkIn(std::vector<DbFileInfo>* files, QString comment);
     void slot_checkInTree(std::vector<DbFileInfo>* parentFiles, std::vector<DbFileInfo>* outCheckedIn, QString comment);
     void slot_checkOut(std::vector<DbFileInfo>* files);
-    void slot_undoChanges(std::vector<DbFileInfo>* files);
+    
+	void slot_undoChanges(std::vector<DbFileInfo>* files);
 
     void slot_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo);
 
@@ -164,7 +161,6 @@ public slots:
 	void slot_checkinSignals(const std::vector<int>& signalIDs, QString comment, std::vector<ObjectState>* objectState);
 
 	void slot_autoAddSignals(const std::vector<const Hardware::DeviceAppSignal*>& deviceSignals, std::vector<AppSignal>* addedSignals);
-	static QString initAppSignalFromDeviceAppSignal(const Hardware::DeviceAppSignal& deviceSignal, AppSignal* appSignal);
 
 	void slot_autoDeleteSignals(const std::vector<const Hardware::DeviceAppSignal*>& deviceSignals);
 

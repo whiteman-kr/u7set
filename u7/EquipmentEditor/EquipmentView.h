@@ -94,6 +94,7 @@ public slots:
 	void checkInSelectedDevices();
 	void checkOutSelectedDevices();
 	void undoChangesSelectedDevices();
+	void undoChangesRecursively();
 	void showHistory();
 	void compare();
 	void refreshSelectedDevices();

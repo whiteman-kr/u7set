@@ -1,7 +1,7 @@
 #pragma once
 
 #include <map>
-#include "DbController.h"
+#include <DbLib/DbController.h>
 
 template <class T>
 class DbObjectStorage

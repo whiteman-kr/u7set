@@ -2,7 +2,7 @@
 	#error Do not include this file in the project! Link DbLib instead.
 #endif
 
-#include "DbStruct.h"
+#include <DbLib/DbStruct.h>
 
 #include <QDebug>
 #include <QFile>

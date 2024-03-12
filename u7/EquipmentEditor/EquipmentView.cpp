@@ -1,7 +1,6 @@
 #include "EquipmentView.h"
 #include "../../Builder/SubsystemStorage.h"
 #include "../../HardwareLib/PropertyNames.h"
-#include "../DbLib/DbWorker.h"
 #include "../DialogConnections.h"
 #include "../Forms/CompareDialog.h"
 #include "../Forms/DialogUpdateFromPreset.h"
@@ -10,6 +9,7 @@
 #include "../HardwareLib/DiagSignal.h"
 #include "../SchemaEditor/CreateSignalDialog.h"
 #include "../SignalsTabPage.h"
+#include <DbLib/DbControllerTools.h>
 #include "DialogChoosePreset.h"
 #include "EquipmentModel.h"
 
@@ -837,7 +837,7 @@ void EquipmentView::choosePreset(Hardware::DeviceType type)
 
 	for (std::shared_ptr<DbFile>& f : files)
 	{
-		auto object = DbWorker::deviceObjectFromDbFile(*f);
+		auto object = DbControllerTools::deviceObjectFromDbFile(*f);
 		Q_ASSERT(object != nullptr);
 
 		presets.push_back(object);
@@ -2356,7 +2356,6 @@ void EquipmentView::checkOutSelectedDevices()
 void EquipmentView::undoChangesSelectedDevices()
 {
 	QModelIndexList selected = selectionModel()->selectedRows();
-
 	if (selected.empty())
 	{
 		return;
@@ -2364,8 +2363,30 @@ void EquipmentView::undoChangesSelectedDevices()
 
 	// disable sending undoChangesDeviceObject::selectionChanged, as it can be called for many objects
 	//
-	const QSignalBlocker blocker(selectionModel());
-	Q_UNUSED(blocker);
+	[[maybe_unused]] const QSignalBlocker blocker{selectionModel()};
+
+	// Perform undo
+	//
+	equipmentModel()->undoChangesDeviceObject(selected);
+
+	// blocker will enable undoChangesDeviceObject::selectionChanged
+	//
+
+	emit updateState();
+	return;
+}
+
+void EquipmentView::undoChangesRecursively()
+{
+	QModelIndexList selected = selectionModel()->selectedRows();
+	if (selected.empty())
+	{
+		return;
+	}
+
+	// disable sending undoChangesDeviceObject::selectionChanged, as it can be called for many objects
+	//
+	[[maybe_unused]] const QSignalBlocker blocker{selectionModel()};
 
 	// Perform undo
 	//

@@ -18,6 +18,7 @@
 
 #include "DbWorker.h"
 #include "DbProgress.h"
+#include <DbLib/DbControllerTools.h>
 #include "../HardwareLib/DeviceObject.h"
 #include "../UtilsLib/WUtils.h"
 #include "../Proto/AppSignal.pb.h"
@@ -625,37 +626,9 @@ QString DbWorker::toSqlByteaStr(const QByteArray& binData)
 	return QString("E'\\\\x%1'").arg(QString(binData.toHex().constData()));
 }
 
-std::shared_ptr<Hardware::DeviceObject> DbWorker::deviceObjectFromDbFile(const DbFile& file)
-{
-	std::shared_ptr<Hardware::DeviceObject> object = Hardware::DeviceObject::Create(file.data());
-	Q_ASSERT(object != nullptr);
-
-	if (object != nullptr)
-	{
-		auto fileInfo = std::make_shared<DbFileInfo>(file, object->details());
-		object->setData(fileInfo);
-	}
-
-	return object;
-}
-
-std::vector<std::shared_ptr<Hardware::DeviceObject>> DbWorker::deviceObjectFromDbFiles(const std::vector<std::shared_ptr<DbFile>>& files)
-{
-	std::vector<std::shared_ptr<Hardware::DeviceObject>> result;
-	result.reserve(files.size());
-
-	for (const std::shared_ptr<DbFile>& f : files)
-	{
-		std::shared_ptr<Hardware::DeviceObject> object = deviceObjectFromDbFile(*f.get());
-		result.push_back(object);
-	}
-
-	return result;
-}
-
 void DbWorker::slot_getProjectList(std::vector<DbProject>* out)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
@@ -861,7 +834,7 @@ void DbWorker::slot_getProjectList(std::vector<DbProject>* out)
 
 void DbWorker::slot_createProject(QString projectName, QString administratorPassword)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
@@ -1071,7 +1044,7 @@ void DbWorker::slot_createProject(QString projectName, QString administratorPass
 
 void DbWorker::slot_openProject(QString projectName, QString username, QString password)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
@@ -1244,7 +1217,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 
 void DbWorker::slot_closeProject()
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
@@ -1295,7 +1268,7 @@ void DbWorker::slot_closeProject()
 
 void DbWorker::slot_cloneProject(QString projectName, QString password, QString newProjectName)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
@@ -1409,7 +1382,7 @@ void DbWorker::slot_cloneProject(QString projectName, QString password, QString 
 
 void DbWorker::slot_deleteProject(QString projectName, QString password, bool doNotBackup)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
@@ -1535,7 +1508,7 @@ void DbWorker::slot_deleteProject(QString projectName, QString password, bool do
 
 void DbWorker::slot_upgradeProject(QString projectName, QString password, bool doNotBackup)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
@@ -1755,7 +1728,7 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 
 			if (projectVersion >= 124)
 			{
-				// Log in to obtaine session key
+				// Log in to obtain session key
 				//
 				QString errorMessage;
 				result = db_logIn(db, username, password, &errorMessage);
@@ -1779,7 +1752,7 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 				//
 				const UpgradeItem& ui = upgradeItems[i];
 
-				// Perform upgade action
+				// Perform upgrade action
 				//
 				QFile upgradeFile(ui.upgradeFileName);
 
@@ -1894,7 +1867,7 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 				//
 				if (i + 1 == 124)	// 'i' is index of update file, +1 to get project version
 				{
-					// Log in to obtaine session key
+					// Log in to obtain session key
 					//
 					QString errorMessage;
 					result = db_logIn(db, username, password, &errorMessage);
@@ -2028,7 +2001,7 @@ void DbWorker::slot_setProjectProperty(QString propertyName, QString propertyVal
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Database connection is not openned."));
+		emitError(db, tr("Database connection is not opened."));
 		return;
 	}
 
@@ -2143,7 +2116,7 @@ void DbWorker::slot_setUserProperty(QString propertyName, QString propertyValue)
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Database connection is not openned."));
+		emitError(db, tr("Database connection is not opened."));
 		return;
 	}
 
@@ -2200,7 +2173,7 @@ void DbWorker::slot_getUserProperty(QString propertyName, QString* out)
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Database connection is not openned."));
+		emitError(db, tr("Database connection is not opened."));
 		return;
 	}
 
@@ -2258,7 +2231,7 @@ void DbWorker::slot_getUserPropertyList(QString propertyTemplate, QStringList* o
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Database connection is not openned."));
+		emitError(db, tr("Database connection is not opened."));
 		return;
 	}
 
@@ -2311,7 +2284,7 @@ void DbWorker::slot_removeUserProperty(QString propertyName)
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Database connection is not openned."));
+		emitError(db, tr("Database connection is not opened."));
 		return;
 	}
 
@@ -2335,7 +2308,7 @@ void DbWorker::slot_removeUserProperty(QString propertyName)
 
 void DbWorker::slot_createUser(DbUser user)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
@@ -2355,7 +2328,7 @@ void DbWorker::slot_createUser(DbUser user)
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Cannot get user list. Database connection is not openned."));
+		emitError(db, tr("Cannot get user list. Database connection is not opened."));
 		return;
 	}
 
@@ -2403,7 +2376,7 @@ void DbWorker::slot_createUser(DbUser user)
 
 void DbWorker::slot_updateUser(DbUser user)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
@@ -2423,7 +2396,7 @@ void DbWorker::slot_updateUser(DbUser user)
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Database connection is not openned."));
+		emitError(db, tr("Database connection is not opened."));
 		return;
 	}
 
@@ -2485,7 +2458,7 @@ void DbWorker::slot_updateUser(DbUser user)
 
 void DbWorker::slot_getUserList(std::vector<DbUser>* out)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
@@ -2506,7 +2479,7 @@ void DbWorker::slot_getUserList(std::vector<DbUser>* out)
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Cannot get user list. Database connection is not openned."));
+		emitError(db, tr("Cannot get user list. Database connection is not opened."));
 		return;
 	}
 
@@ -2558,7 +2531,7 @@ void DbWorker::slot_isFileExists(QString fileName, int parentId, int* fileId)
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Database connection is not openned."));
+		emitError(db, tr("Database connection is not opened."));
 		return;
 	}
 
@@ -2590,7 +2563,7 @@ void DbWorker::slot_isFileExists(QString fileName, int parentId, int* fileId)
 
 void DbWorker::slot_getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter, bool removeDeleted)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
@@ -2617,7 +2590,7 @@ void DbWorker::getFileList_worker(std::vector<DbFileInfo>* files, int parentId, 
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Cannot get file list. Database connection is not openned."));
+		emitError(db, tr("Cannot get file list. Database connection is not opened."));
 		return;
 	}
 
@@ -2665,7 +2638,7 @@ void DbWorker::getFileList_worker(std::vector<DbFileInfo>* files, int parentId, 
 
 void DbWorker::slot_getFileListTree(DbFileTree* filesTree, int parentId, QString filter, bool removeDeleted)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
@@ -2687,7 +2660,7 @@ void DbWorker::slot_getFileListTree(DbFileTree* filesTree, int parentId, QString
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Cannot get file list tree. Database connection is not openned."));
+		emitError(db, tr("Cannot get file list tree. Database connection is not opened."));
 		return;
 	}
 
@@ -2728,7 +2701,7 @@ void DbWorker::slot_getFileListTree(DbFileTree* filesTree, int parentId, QString
 
 void DbWorker::slot_getFileInfo(int parentId, QString fileName, DbFileInfo* out)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
@@ -2748,7 +2721,7 @@ void DbWorker::slot_getFileInfo(int parentId, QString fileName, DbFileInfo* out)
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Cannot get file list. Database connection is not openned."));
+		emitError(db, tr("Cannot get file list. Database connection is not opened."));
 		return;
 	}
 
@@ -2780,7 +2753,7 @@ void DbWorker::slot_getFileInfo(int parentId, QString fileName, DbFileInfo* out)
 
 void DbWorker::slot_getFilesInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
@@ -2805,7 +2778,7 @@ void DbWorker::slot_getFilesInfo(std::vector<int>* fileIds, std::vector<DbFileIn
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Cannot get file list. Database connection is not openned."));
+		emitError(db, tr("Cannot get file list. Database connection is not opened."));
 		return;
 	}
 
@@ -2849,7 +2822,7 @@ void DbWorker::slot_getFilesInfo(std::vector<int>* fileIds, std::vector<DbFileIn
 
 void DbWorker::slot_getFullPathFilesInfo(const std::vector<QString>* fullPathFilenames, std::vector<DbFileInfo>* out)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
@@ -2893,7 +2866,7 @@ bool DbWorker::worker_getFilesInfo(const std::vector<QString>& fullPathFileNames
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Cannot get file list. Database connection is not openned."));
+		emitError(db, tr("Cannot get file list. Database connection is not opened."));
 		return false;
 	}
 
@@ -2950,7 +2923,7 @@ bool DbWorker::worker_getFileInfo(const QString& fullPathFileName, DbFileInfo* o
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Cannot get file list. Database connection is not openned."));
+		emitError(db, tr("Cannot get file list. Database connection is not opened."));
 		return false;
 	}
 
@@ -2979,7 +2952,7 @@ bool DbWorker::worker_getFileInfo(const QString& fullPathFileName, DbFileInfo* o
 
 void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, bool ensureUniquesInParentTree, int uniqueFromFileId)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
@@ -3000,7 +2973,7 @@ void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int pa
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Cannot get file list. Database connection is not openned."));
+		emitError(db, tr("Cannot get file list. Database connection is not opened."));
 		return;
 	}
 
@@ -3059,7 +3032,7 @@ void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int pa
 		else
 		{
 			// api.add_unique_file scans parent tree and finds any files with the same name.
-			// Comparsion done without extension, case insensetive
+			// Comparison done without extension, case insensitive
 			//
 			q.prepare("SELECT * FROM api.add_unique_file(:sessionkey, :filename, :parentid, :uniquefromfileid,  :filedata, :details, :attributes);");
 
@@ -3104,7 +3077,7 @@ void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int pa
 
 void DbWorker::slot_deleteFiles(std::vector<DbFileInfo>* files)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
@@ -3125,7 +3098,7 @@ void DbWorker::slot_deleteFiles(std::vector<DbFileInfo>* files)
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Cannot delete files. Database connection is not openned."));
+		emitError(db, tr("Cannot delete files. Database connection is not opened."));
 		return;
 	}
 
@@ -3139,14 +3112,14 @@ void DbWorker::slot_deleteFiles(std::vector<DbFileInfo>* files)
 
 	addLogRecord(db, logMessage);
 
-	// files for deletion shoud be sorted in DESCENDING FileID order, to delete dependant files first
+	// files for deletion should be sorted in DESCENDING FileID order, to delete dependant files first
 	//
-	std::vector<DbFileInfo> filesToDetele;
-	filesToDetele.reserve(files->size());
+	std::vector<DbFileInfo> filesToDelete;
+	filesToDelete.reserve(files->size());
 
-	filesToDetele.assign(files->begin(), files->end());
+	filesToDelete.assign(files->begin(), files->end());
 
-	std::sort(filesToDetele.begin(), filesToDetele.end(),
+	std::sort(filesToDelete.begin(), filesToDelete.end(),
 		[](const DbFileInfo& f1, const DbFileInfo& f2)
 		{
 			return f1.fileId() >= f2.fileId();
@@ -3154,9 +3127,9 @@ void DbWorker::slot_deleteFiles(std::vector<DbFileInfo>* files)
 
 	// Iterate through files
 	//
-	for (unsigned int i = 0; i < filesToDetele.size(); i++)
+	for (unsigned int i = 0; i < filesToDelete.size(); i++)
 	{
-		DbFileInfo& file = filesToDetele[i];
+		DbFileInfo& file = filesToDelete[i];
 
 		// Set progress value here
 		// ...
@@ -3194,14 +3167,14 @@ void DbWorker::slot_deleteFiles(std::vector<DbFileInfo>* files)
 
 	// set back DbFilInfo states
 	//
-	files->swap(filesToDetele);
+	files->swap(filesToDelete);
 
 	return;
 }
 
 void DbWorker::slot_moveFiles(const std::vector<DbFileInfo>* files, int moveToParentId, std::vector<DbFileInfo>* movedFiles)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
@@ -3231,7 +3204,7 @@ void DbWorker::slot_moveFiles(const std::vector<DbFileInfo>* files, int moveToPa
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Database connection is not openned."));
+		emitError(db, tr("Database connection is not opened."));
 		return;
 	}
 
@@ -3291,7 +3264,7 @@ void DbWorker::slot_moveFiles(const std::vector<DbFileInfo>* files, int moveToPa
 
 void DbWorker::slot_renameFile(const DbFileInfo& file, QString newFileName, DbFileInfo* updatedFileInfo)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
@@ -3303,7 +3276,7 @@ void DbWorker::slot_renameFile(const DbFileInfo& file, QString newFileName, DbFi
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Database connection is not openned."));
+		emitError(db, tr("Database connection is not opened."));
 		return;
 	}
 
@@ -3359,7 +3332,7 @@ void DbWorker::slot_renameFile(const DbFileInfo& file, QString newFileName, DbFi
 
 void DbWorker::slot_getLatestVersion(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
@@ -3383,7 +3356,7 @@ void DbWorker::slot_getLatestVersion(const std::vector<DbFileInfo>* files, std::
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Cannot get file. Database connection is not openned."));
+		emitError(db, tr("Cannot get file. Database connection is not opened."));
 		return;
 	}
 
@@ -3437,7 +3410,7 @@ void DbWorker::slot_getLatestVersion(const std::vector<DbFileInfo>* files, std::
 
 void DbWorker::slot_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::vector<std::shared_ptr<DbFile>>* out)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
@@ -3459,7 +3432,7 @@ void DbWorker::slot_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Cannot get file. Database connection is not openned."));
+		emitError(db, tr("Cannot get file. Database connection is not opened."));
 		return;
 	}
 
@@ -3484,9 +3457,9 @@ void DbWorker::slot_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::
 	out->clear();
 	out->reserve(q.size());
 
-	//qint64 memoryAllocationEllpased = 0;
-	qint64 updateFileEllpased = 0;
-	//qint64 pushBackEllpased = 0;
+	//qint64 memoryAllocationElapsed = 0;
+	qint64 updateFileElapsed = 0;
+	//qint64 pushBackElapsed = 0;
 
 	while (q.next())
 	{
@@ -3497,22 +3470,22 @@ void DbWorker::slot_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::
 
 		db_updateFile(q, file.get());
 
-		updateFileEllpased += updateFileTimer.nsecsElapsed();
+		updateFileElapsed += updateFileTimer.nsecsElapsed();
 
 		out->push_back(file);
 	}
 
 	//qDebug() << "Request time is " << timerObject.elapsed() << " ms, request: " << request;
-	//qDebug() << "\tmemoryAllocationEllpased " << memoryAllocationEllpased / 1000000;
-	//qDebug() << "\tupdateFileEllpased " << updateFileEllpased / 1000000;
-	//qDebug() << "\tpushBackEllpased " << pushBackEllpased / 1000000;
+	//qDebug() << "\tmemoryAllocationElapsed " << memoryAllocationElapsed / 1000000;
+	//qDebug() << "\tupdateFileElapsed " << updateFileElapsed / 1000000;
+	//qDebug() << "\tpushBackElapsed " << pushBackElapsed / 1000000;
 
 	return;
 }
 
 void DbWorker::slot_getCheckedOutFiles(const std::vector<DbFileInfo>* parentFiles, std::vector<DbFileInfo>* out)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
@@ -3536,7 +3509,7 @@ void DbWorker::slot_getCheckedOutFiles(const std::vector<DbFileInfo>* parentFile
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Cannot get file. Database connection is not openned."));
+		emitError(db, tr("Cannot get file. Database connection is not opened."));
 		return;
 	}
 
@@ -3588,7 +3561,7 @@ void DbWorker::slot_getCheckedOutFiles(const std::vector<DbFileInfo>* parentFile
 
 void DbWorker::slot_getWorkcopy(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
@@ -3612,7 +3585,7 @@ void DbWorker::slot_getWorkcopy(const std::vector<DbFileInfo>* files, std::vecto
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Cannot get file. Database connection is not openned."));
+		emitError(db, tr("Cannot get file. Database connection is not opened."));
 		return;
 	}
 
@@ -3666,7 +3639,7 @@ void DbWorker::slot_getWorkcopy(const std::vector<DbFileInfo>* files, std::vecto
 
 void DbWorker::slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* files)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
@@ -3688,7 +3661,7 @@ void DbWorker::slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* file
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Cannot get file. Database connection is not openned."));
+		emitError(db, tr("Cannot get file. Database connection is not opened."));
 		return;
 	}
 
@@ -3761,7 +3734,7 @@ void DbWorker::slot_setWorkcopy(const std::vector<std::shared_ptr<DbFile>>* file
 
 void DbWorker::slot_getSpecificCopy(const std::vector<DbFileInfo>* files, int changesetId, std::vector<std::shared_ptr<DbFile>>* out)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
@@ -3785,7 +3758,7 @@ void DbWorker::slot_getSpecificCopy(const std::vector<DbFileInfo>* files, int ch
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Cannot get file. Database connection is not openned."));
+		emitError(db, tr("Cannot get file. Database connection is not opened."));
 		return;
 	}
 
@@ -3840,7 +3813,7 @@ void DbWorker::slot_getSpecificCopy(const std::vector<DbFileInfo>* files, int ch
 
 void DbWorker::slot_getSpecificCopy(const std::vector<DbFileInfo>* files, QDateTime date, std::vector<std::shared_ptr<DbFile>>* out)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
@@ -3864,7 +3837,7 @@ void DbWorker::slot_getSpecificCopy(const std::vector<DbFileInfo>* files, QDateT
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Cannot get file. Database connection is not openned."));
+		emitError(db, tr("Cannot get file. Database connection is not opened."));
 		return;
 	}
 
@@ -3919,7 +3892,7 @@ void DbWorker::slot_getSpecificCopy(const std::vector<DbFileInfo>* files, QDateT
 
 void DbWorker::slot_checkIn(std::vector<DbFileInfo>* files, QString comment)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
@@ -3941,7 +3914,7 @@ void DbWorker::slot_checkIn(std::vector<DbFileInfo>* files, QString comment)
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Cannot get file. Database connection is not openned."));
+		emitError(db, tr("Cannot get file. Database connection is not opened."));
 		return;
 	}
 
@@ -4017,7 +3990,7 @@ void DbWorker::slot_checkIn(std::vector<DbFileInfo>* files, QString comment)
 
 void DbWorker::slot_checkInTree(std::vector<DbFileInfo>* parentFiles, std::vector<DbFileInfo>* outCheckedIn, QString comment)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
@@ -4041,7 +4014,7 @@ void DbWorker::slot_checkInTree(std::vector<DbFileInfo>* parentFiles, std::vecto
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Cannot get file. Database connection is not openned."));
+		emitError(db, tr("Cannot get file. Database connection is not opened."));
 		return;
 	}
 
@@ -4119,7 +4092,7 @@ void DbWorker::slot_checkInTree(std::vector<DbFileInfo>* parentFiles, std::vecto
 
 void DbWorker::slot_checkOut(std::vector<DbFileInfo>* files)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 		{
@@ -4141,7 +4114,7 @@ void DbWorker::slot_checkOut(std::vector<DbFileInfo>* files)
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Database connection is not openned."));
+		emitError(db, tr("Database connection is not opened."));
 		return;
 	}
 
@@ -4216,17 +4189,17 @@ void DbWorker::slot_checkOut(std::vector<DbFileInfo>* files)
 
 void DbWorker::slot_undoChanges(std::vector<DbFileInfo>* files)
 {
-	// Init automitic varaiables
+	// Init automatic variables.
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 	{
 		this->m_progress->setCompleted(true);			// set complete flag on return
 	});
 
-	// Check parameters
+	// Check parameters.
 	//
 	if (files == nullptr ||
-			files->empty() == true)
+		files->empty() == true)
 	{
 		assert(files != nullptr);
 		assert(files->empty() != true);
@@ -4238,7 +4211,7 @@ void DbWorker::slot_undoChanges(std::vector<DbFileInfo>* files)
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Cannot get file. Database connection is not openned."));
+		emitError(db, tr("Cannot get file. Database connection is not opened."));
 		return;
 	}
 
@@ -4254,8 +4227,7 @@ void DbWorker::slot_undoChanges(std::vector<DbFileInfo>* files)
 
 	// --
 	//
-	QString request = QString("SELECT * FROM undo_changes(%1, ARRAY[")
-			.arg(currentUser().userId());
+	QString request = QString("SELECT * FROM undo_changes(%1, ARRAY[").arg(currentUser().userId());
 
 	// Iterate through files
 	//
@@ -4309,7 +4281,7 @@ void DbWorker::slot_undoChanges(std::vector<DbFileInfo>* files)
 
 void DbWorker::slot_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 	{
@@ -4330,7 +4302,7 @@ void DbWorker::slot_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo)
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Cannot execute function. Database connection is not openned."));
+		emitError(db, tr("Cannot execute function. Database connection is not opened."));
 		return;
 	}
 
@@ -4364,7 +4336,7 @@ void DbWorker::slot_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo)
 
 void DbWorker::slot_getHistory(std::vector<DbChangeset>* out)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 	{
@@ -4384,7 +4356,7 @@ void DbWorker::slot_getHistory(std::vector<DbChangeset>* out)
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Cannot execute function. Database connection is not openned."));
+		emitError(db, tr("Cannot execute function. Database connection is not opened."));
 		return;
 	}
 
@@ -4418,7 +4390,7 @@ void DbWorker::slot_getHistory(std::vector<DbChangeset>* out)
 
 void DbWorker::slot_getFileHistory(DbFileInfo file, std::vector<DbChangeset>* out)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 	{
@@ -4438,7 +4410,7 @@ void DbWorker::slot_getFileHistory(DbFileInfo file, std::vector<DbChangeset>* ou
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Cannot execute function. Database connection is not openned."));
+		emitError(db, tr("Cannot execute function. Database connection is not opened."));
 		return;
 	}
 
@@ -4473,7 +4445,7 @@ void DbWorker::slot_getFileHistory(DbFileInfo file, std::vector<DbChangeset>* ou
 
 void DbWorker::slot_getFileHistoryRecursive(DbFileInfo parentFile, std::vector<DbChangeset>* out)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 	{
@@ -4493,7 +4465,7 @@ void DbWorker::slot_getFileHistoryRecursive(DbFileInfo parentFile, std::vector<D
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Cannot execute function. Database connection is not openned."));
+		emitError(db, tr("Cannot execute function. Database connection is not opened."));
 		return;
 	}
 
@@ -4528,7 +4500,7 @@ void DbWorker::slot_getFileHistoryRecursive(DbFileInfo parentFile, std::vector<D
 
 void DbWorker::slot_getChangesetDetails(int changeset, DbChangesetDetails* out)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 	{
@@ -4548,7 +4520,7 @@ void DbWorker::slot_getChangesetDetails(int changeset, DbChangesetDetails* out)
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Cannot execute function. Database connection is not openned."));
+		emitError(db, tr("Cannot execute function. Database connection is not opened."));
 		return;
 	}
 
@@ -4580,7 +4552,7 @@ void DbWorker::slot_getChangesetDetails(int changeset, DbChangesetDetails* out)
 
 void DbWorker::slot_addDeviceObject(Hardware::DeviceObject* device, int parentId)
 {
-	// Init automitic varaiables
+	// Init automatic variables
 	//
 	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
 	{
@@ -4600,7 +4572,7 @@ void DbWorker::slot_addDeviceObject(Hardware::DeviceObject* device, int parentId
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Cannot get file list. Database connection is not openned."));
+		emitError(db, tr("Cannot get file list. Database connection is not opened."));
 		return;
 	}
 
@@ -5813,7 +5785,7 @@ void DbWorker::slot_autoAddSignals(const std::vector<const Hardware::DeviceAppSi
 
 				AppSignal& newSignal = newSignals[0];
 
-				errMsg = initAppSignalFromDeviceAppSignal(*deviceSignal, &newSignal);
+				errMsg = DbControllerTools::initAppSignalFromDeviceAppSignal(*deviceSignal, &newSignal);
 
 				if (errMsg.isEmpty() == false)
 				{
@@ -5832,135 +5804,6 @@ void DbWorker::slot_autoAddSignals(const std::vector<const Hardware::DeviceAppSi
 	}
 
 	m_progress->setValue(100);
-}
-
-QString DbWorker::initAppSignalFromDeviceAppSignal(const Hardware::DeviceAppSignal& deviceSignal, AppSignal* appSignal)
-{
-	if (appSignal == nullptr)
-	{
-		Q_ASSERT(false);
-		return QString("Null pointer");
-	}
-
-	QString errMsg;
-
-	//
-	// Identificators intialization
-	//
-
-	QString deviceSignalEquipmentID = deviceSignal.equipmentIdTemplate();
-
-	QString appSignalID;
-	QString customAppSignalID;
-	QString appSignalCaption;
-
-	if (deviceSignal.propertyExists(EquipmentPropNames::APP_SIGNAL_ID_TEMPLATE) == true)
-	{
-		appSignalID = Hardware::expandDeviceSignalTemplate(deviceSignal,
-									deviceSignal.propertyValue((EquipmentPropNames::APP_SIGNAL_ID_TEMPLATE)).toString(),
-									&errMsg);
-
-		if (errMsg.isEmpty() == false)
-		{
-			return errMsg;
-		}
-	}
-	else
-	{
-		appSignalID = QString("#%1").arg(deviceSignalEquipmentID);
-	}
-
-	if (deviceSignal.propertyExists(EquipmentPropNames::CUSTOM_APP_SIGNAL_ID_TEMPLATE) == true)
-	{
-		// customSignalIDTemplate will be expand in compile time
-		//
-		customAppSignalID = deviceSignal.propertyValue(EquipmentPropNames::CUSTOM_APP_SIGNAL_ID_TEMPLATE).toString();
-	}
-	else
-	{
-		customAppSignalID = deviceSignalEquipmentID;
-	}
-
-	if (deviceSignal.propertyExists(EquipmentPropNames::APP_SIGNAL_CAPTION_TEMPLATE) == true)
-	{
-		appSignalCaption = deviceSignal.propertyValue(EquipmentPropNames::APP_SIGNAL_CAPTION_TEMPLATE).toString();
-	}
-	else
-	{
-		qsizetype pos = deviceSignalEquipmentID.lastIndexOf(QChar('_'));
-
-		if (pos != -1)
-		{
-			appSignalCaption = QString("Signal %1").arg(deviceSignalEquipmentID.mid(pos + 1));
-		}
-		else
-		{
-			appSignalCaption = QString("Signal %1").arg(deviceSignalEquipmentID);
-		}
-	}
-
-	//
-	// Tuning settings checking
-	//
-
-	bool enableTuning = false;
-
-	QVariant tuningLowBound;
-	QVariant tuningHighBound;
-	QVariant tuningDefaultValue;
-
-	if (deviceSignal.propertyExists(EquipmentPropNames::ENABLE_TUNING) == true)
-	{
-		if (deviceSignal.propertyExists(EquipmentPropNames::TUNING_DEFAULT_VALUE) == false ||
-			deviceSignal.propertyExists(EquipmentPropNames::TUNING_LOW_BOUND) == false ||
-			deviceSignal.propertyExists(EquipmentPropNames::TUNING_HIGH_BOUND) == false)
-		{
-			return QString("Not all required properties for tuning settings initialization is exists in device signal %1").
-							arg(deviceSignalEquipmentID);
-		}
-
-		switch(deviceSignal.signalType())
-		{
-		case E::SignalType::Analog:
-		case E::SignalType::Discrete:
-			break;
-
-		default:
-			return QString("Device signal %1 is not Analog or Discrete. Tuning is no allowed.").
-							arg(deviceSignalEquipmentID);
-		}
-
-		switch(deviceSignal.function())
-		{
-		case E::SignalFunction::Output:
-			break;
-
-		default:
-			return QString("Device signal %1 is not Output. Tuning is no allowed.").
-							arg(deviceSignalEquipmentID);
-		}
-
-		enableTuning = deviceSignal.propertyValue(EquipmentPropNames::ENABLE_TUNING).toBool();
-
-		tuningLowBound = deviceSignal.propertyValue(EquipmentPropNames::TUNING_LOW_BOUND);
-		tuningHighBound = deviceSignal.propertyValue(EquipmentPropNames::TUNING_HIGH_BOUND);
-		tuningDefaultValue = deviceSignal.propertyValue(EquipmentPropNames::TUNING_DEFAULT_VALUE);
-	}
-
-	errMsg = appSignal->initFromDeviceSignal(deviceSignalEquipmentID,
-											deviceSignal.signalType(),
-											deviceSignal.function(),
-											appSignalID,
-											customAppSignalID,
-											appSignalCaption,
-											deviceSignal.appSignalBusTypeId(),
-											deviceSignal.appSignalDataFormat(),
-											deviceSignal.signalSpecPropsStruct(),
-											enableTuning,
-											tuningLowBound,
-											tuningHighBound,
-											tuningDefaultValue);
-	return errMsg;
 }
 
 void DbWorker::slot_autoDeleteSignals(const std::vector<const Hardware::DeviceAppSignal*>& deviceSignals)
@@ -6240,7 +6083,7 @@ void DbWorker::slot_getSignalHistory(int signalID, std::vector<DbChangeset>* out
 
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Cannot execute function. Database connection is not openned."));
+		emitError(db, tr("Cannot execute function. Database connection is not opened."));
 		return;
 	}
 
@@ -6288,7 +6131,7 @@ void DbWorker::slot_getSpecificSignalsByIDs(const std::vector<int>& signalIDs, i
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Cannot get file. Database connection is not openned."));
+		emitError(db, tr("Cannot get file. Database connection is not opened."));
 		return;
 	}
 
@@ -6467,7 +6310,7 @@ void DbWorker::slot_hasCheckedOutSignals(bool* hasCheckedOut)
 
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Cannot get file. Database connection is not openned."));
+		emitError(db, tr("Cannot get file. Database connection is not opened."));
 		return;
 	}
 

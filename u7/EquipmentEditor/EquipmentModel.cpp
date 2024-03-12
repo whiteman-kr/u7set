@@ -835,9 +835,9 @@ void EquipmentModel::checkOutDeviceObject(QModelIndexList& rowList)
 	return;
 }
 
-void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undowRowList)
+void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undoRowList)
 {
-	QModelIndexList rowList = undowRowList;
+	QModelIndexList rowList = undoRowList;
 
 	// As some rows can be deleted during update model,
 	// rowList must be sorted in FileID descending order,
@@ -880,6 +880,8 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undowRowList)
 		}
 	}
 
+	// Ask for confirmation.
+	//
 	auto mb = QMessageBox::question(
 		m_parentWidget,
 		tr("Undo Changes"),
@@ -890,6 +892,8 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undowRowList)
 		return;
 	}
 
+	// Send command Undo changes to the database.
+	//
 	bool ok = dbController()->undoChanges(files, nullptr);
 	if (ok == false)
 	{
@@ -948,7 +952,7 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undowRowList)
 		}
 		else
 		{
-			// Apparently file was completely deleted from the DB
+			// Apparently file was completely deleted from the database.
 			//
 		}
 

@@ -11,17 +11,18 @@ find_package(Qt6 REQUIRED COMPONENTS Gui Widgets Sql Concurrent Network Qml)
 set(TARGET DbLib)
 
 qt_add_library(${TARGET} STATIC
+	include/DbLib/DbController.h
+	include/DbLib/DbStruct.h
+	include/DbLib/DbObjectStorage.h
+	include/DbLib/DbControllerTools.h
+
 	DbController.cpp
-	DbController.h
 	DbControllerTools.cpp
-	DbControllerTools.h
-	DbObjectStorage.h
 	DbProgress.cpp
 	DbProgress.h
 	DbProgressDialog.cpp
 	DbProgressDialog.h
 	DbStruct.cpp
-	DbStruct.h
 	DbWorker.cpp
 	DbWorker.h
 )
@@ -49,10 +50,12 @@ target_precompile_headers(${TARGET} PRIVATE
 	#"../AppSignalLib/AppSignalState.h"
 )
 
+target_compile_definitions(${TARGET} PRIVATE DB_LIB_DOMAIN)
+
 target_link_libraries(${TARGET} PUBLIC Qt6::Gui Qt6::Widgets Qt6::Sql Qt6::Concurrent Qt6::Network Qt6::Qml)
 target_link_libraries(${TARGET} PUBLIC CommonLib HardwareLib AppSignalLib)
 
-target_compile_definitions(${TARGET} PRIVATE DB_LIB_DOMAIN)
-#target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_code_coverage_options(${TARGET} CODE_COVERAGE)

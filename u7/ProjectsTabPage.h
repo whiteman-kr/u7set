@@ -1,7 +1,7 @@
 #pragma once
 
+#include <DbLib/DbStruct.h>
 #include "MainTabPage.h"
-#include "../DbLib/DbStruct.h"
 
 class DbController;
 

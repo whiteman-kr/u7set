@@ -1,5 +1,6 @@
 #include "AppSignalSetProvider.h"
 #include "../UtilsLib/WUtils.h"
+#include "../HardwareLib/DeviceObject.h"
 
 AppSignalSetProvider* AppSignalSetProvider::m_instance = nullptr;
 QThread* AppSignalSetProvider::m_thread = nullptr;

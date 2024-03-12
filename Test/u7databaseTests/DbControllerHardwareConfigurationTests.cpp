@@ -1,5 +1,6 @@
 #include "DbControllerHardwareConfigurationTests.h"
 #include "Settings.h"
+#include "../../HardwareLib/DeviceObject.h"
 
 using namespace Hardware;
 
