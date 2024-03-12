@@ -1,10 +1,12 @@
 #pragma once
 
 #include "../VFrame30/SchemaManager.h"
-#include "SchemaClientConfigController.h"
+
 
 namespace SchemaClientLib
 {
+	class SchemaClientConfigController;
+
 	class ClientSchemaManager : public VFrame30::SchemaManager
 	{
 		Q_OBJECT

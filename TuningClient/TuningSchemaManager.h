@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../SchemaClientLib/ClientSchemaManager.h"
+#include <SchemaClientLib/ClientSchemaManager.h>
 #include "TuningConfigController.h"
 
 class TuningSchemaManager : public SchemaClientLib::ClientSchemaManager

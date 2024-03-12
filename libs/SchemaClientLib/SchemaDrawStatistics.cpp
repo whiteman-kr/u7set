@@ -1,6 +1,4 @@
-#include "SchemaDrawStatistics.h"
-#include <algorithm>
-#include <set>
+#include "SchemaClientLib/SchemaDrawStatistics.h"
 
 namespace SchemaClientLib
 {

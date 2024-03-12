@@ -7,7 +7,7 @@
 #include <DiagClientLib/DiagStateManager.h>
 //#include "SelectSchemaWidget.h"
 #include "../UtilsLib/InstanceResolver.h"
-#include "../SchemaClientLib/SchemaDrawStatistics.h"
+#include <SchemaClientLib/SchemaDrawStatistics.h>
 //#include "../VFrame30/ClientSchemaView.h"
 #include "../ClientLib/ClientTranslator.h"
 #include "../ClientLib/AdsConnection.h"

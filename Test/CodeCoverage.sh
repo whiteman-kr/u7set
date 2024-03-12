@@ -107,12 +107,12 @@ TEST_OUTPUT_FILE="OnlineLib.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # DbLib
-TEST_DIR="./build/DbLib/CMakeFiles/DbLib.dir"
+TEST_DIR="./build/libs/DbLib/CMakeFiles/DbLib.dir"
 TEST_OUTPUT_FILE="DbLib.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # HardwareLib
-TEST_DIR="./build/HardwareLib/CMakeFiles/HardwareLib.dir"
+TEST_DIR="./build/libs/HardwareLib/CMakeFiles/HardwareLib.dir"
 TEST_OUTPUT_FILE="HardwareLib.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 

@@ -1,4 +1,5 @@
-#include "ClientSchemaManager.h"
+#include "SchemaClientLib/ClientSchemaManager.h"
+#include "SchemaClientLib/SchemaClientConfigController.h"
 
 namespace SchemaClientLib
 {

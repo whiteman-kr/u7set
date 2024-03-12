@@ -2,7 +2,7 @@
 
 #include <map>
 #include <set>
-#include "../SchemaClientLib/SchemaClientConfigController.h"
+#include <SchemaClientLib/SchemaClientConfigController.h>
 #include "../OnlineLib/MatsUsers.h"
 
 //
