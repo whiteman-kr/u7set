@@ -56,8 +56,8 @@ target_precompile_headers(${TARGET} PRIVATE
 
 	# Project includes
 	#
-	"../CommonLib/Types.h"
-	"../CommonLib/Hash.h"
+	"../../CommonLib/Types.h"
+	"../../CommonLib/Hash.h"
 )
 
 target_compile_definitions(${TARGET} PRIVATE DIAG_STATE_LIB_DOMAIN)

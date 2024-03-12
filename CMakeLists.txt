@@ -117,7 +117,6 @@ add_subdirectory(AppSignalLib)
 add_subdirectory(OnlineLib)
 add_subdirectory(ServiceLib)
 add_subdirectory(ClientLib)
-add_subdirectory(DiagClientLib)
 add_subdirectory(SchemaClientLib)
 add_subdirectory(ReportLib)
 

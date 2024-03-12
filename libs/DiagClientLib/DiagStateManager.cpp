@@ -1,4 +1,4 @@
-#include "DiagStateManager.h"
+#include "DiagClientLib/DiagStateManager.h"
 
 namespace DiagClientLib
 {

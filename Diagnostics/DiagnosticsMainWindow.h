@@ -4,7 +4,7 @@
 #include "DiagConfigController.h"
 #include "DiagnosticsSchemaManager.h"
 #include "../ClientLib/AppSignalManager.h"
-#include "../DiagClientLib/DiagStateManager.h"
+#include <DiagClientLib/DiagStateManager.h>
 //#include "SelectSchemaWidget.h"
 #include "../UtilsLib/InstanceResolver.h"
 #include "../SchemaClientLib/SchemaDrawStatistics.h"

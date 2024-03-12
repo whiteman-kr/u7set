@@ -11,8 +11,8 @@ find_package(Qt6 REQUIRED COMPONENTS Xml Concurrent Qml)
 set(TARGET DiagClientLib)
 
 qt_add_library(${TARGET} STATIC
+	include/DiagClientLib/DiagStateManager.h
 	DiagStateManager.cpp
-	DiagStateManager.h
 )
 
 target_precompile_headers(${TARGET} PRIVATE
@@ -50,11 +50,13 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QVariant>
 )
 
+target_compile_definitions(${TARGET} PRIVATE DIAG_STATE_LIB_DOMAIN)
+
 target_link_libraries(${TARGET} PUBLIC Qt6::Core Qt6::Xml Qt6::Concurrent Qt6::Qml)
 target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf HardwareLib UtilsLib DiagStateLib)
 
-target_compile_definitions(${TARGET} PRIVATE DIAG_STATE_LIB_DOMAIN)
-#target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_code_coverage_options(${TARGET} CODE_COVERAGE)
 
