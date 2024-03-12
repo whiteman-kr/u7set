@@ -5,7 +5,8 @@
 #include "../OnlineLib/CfgServerLoader.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/OnlineDataSources.h"
-#include "../HardwareLib/DiagSignalType.h"
+
+#include <HardwareLib/DiagSignalType.h>
 
 #include "DiagDataSource.h"
 

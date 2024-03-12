@@ -1,10 +1,16 @@
 #pragma once
 
-#include "../TuningService/TuningSource.h"
+#include <HardwareLib/Software.h>
+
 #include "../OnlineLib/SoftwareSettings.h"
+#include "../UtilsLib/WUtils.h"
+
 #include "Context.h"
 #include "IssueLogger.h"
 #include "DeviceHelper.h"
+
+
+class DataSource;
 
 // -------------------------------------------------------------------------------------------
 

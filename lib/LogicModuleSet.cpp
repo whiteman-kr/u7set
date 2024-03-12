@@ -1,7 +1,8 @@
 #include "LogicModuleSet.h"
-#include "../HardwareLib/DeviceObject.h"
-#include "../HardwareLib/PropertyNames.h"
+
 #include <DbLib/DbController.h>
+#include <HardwareLib/DeviceModule.h>
+#include <HardwareLib/PropertyNames.h>
 
 LogicModuleSet::LogicModuleSet()
 {

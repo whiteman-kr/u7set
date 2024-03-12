@@ -1,5 +1,4 @@
 #pragma once
-//#include "../Proto/ProtoSerialization.h"
 
 class XmlWriteHelper;
 class XmlReadHelper;

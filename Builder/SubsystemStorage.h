@@ -1,5 +1,5 @@
 #pragma once
-#include "../HardwareLib/Subsystem.h"
+#include <HardwareLib/Subsystem.h>
 
 class DbController;
 

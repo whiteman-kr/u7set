@@ -13,7 +13,7 @@
 #include "PropertyObjectTests.h"
 #include "UserPropertyTest.h"
 
-#include "../HardwareLib/HardwareLibrary.h"
+#include <HardwareLib/HardwareLibrary.h>
 #include "../UtilsLib/WUtils.h"
 #include "Settings.h"
 

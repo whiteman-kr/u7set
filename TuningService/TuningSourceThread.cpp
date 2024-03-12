@@ -3,7 +3,8 @@
 #include "../UtilsLib/WUtils.h"
 #include "../UtilsLib/Crc.h"
 #include "../OnlineLib/CircularLogger.h"
-#include "../HardwareLib/DataProtocols.h"
+
+#include <HardwareLib/DataProtocols.h>
 
 #include "TuningSourceThread.h"
 #include "TuningService.h"

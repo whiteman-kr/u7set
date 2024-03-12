@@ -1,11 +1,14 @@
 #ifndef CONFIGURATOR_H
 #define CONFIGURATOR_H
 
+#include <optional>
 #include <QObject>
-#include "../HardwareLib/ModuleFirmware.h"
+
 #include "../UtilsLib/OutputLog.h"
 
-#include <optional>
+#include <HardwareLib/ModuleFirmware.h>
+
+
 
 class OutputLog;
 class QSerialPort;

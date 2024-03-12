@@ -1,5 +1,7 @@
 #include "SchemaControlTabPage.h"
-#include "../HardwareLib/PropertyNames.h"
+
+#include <HardwareLib/PropertyNames.h>
+
 #include "../VFrame30/DiagSchema.h"
 #include "../VFrame30/LogicSchema.h"
 #include "../VFrame30/MonitorSchema.h"
@@ -8,6 +10,7 @@
 #include "../VFrame30/UfbSchema.h"
 #include "../lib/StandardColors.h"
 #include "../lib/Ui/TagSelectorWidget.h"
+
 #include "CheckInDialog.h"
 #include "CreateSchemaDialog.h"
 #include "DialogClientBehavior.h"

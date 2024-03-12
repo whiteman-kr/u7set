@@ -1,7 +1,11 @@
 #pragma once
 
 #include <QJSEngine>
+
+#include <HardwareLib/DeviceModule.h>
+
 #include "../lib/TuningDataStorage.h"
+
 #include "Context.h"
 #include "TuningBuilder.h"
 #include "OptoModule.h"

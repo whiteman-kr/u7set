@@ -1,6 +1,4 @@
 #include "EquipmentTabPage.h"
-#include "../../HardwareLib/DeviceObject.h"
-#include "../../HardwareLib/PropertyNames.h"
 #include "../DialogConnections.h"
 #include "../EquipmentEditor/DialogImportPreset.h"
 #include "../Forms/ComparePropertyObjectDialog.h"
@@ -10,6 +8,10 @@
 #include "EquipmentVcsDialog.h"
 #include "EquipmentView.h"
 #include "IdePropertyEditor.h"
+
+#include <HardwareLib/DeviceModule.h>
+#include <HardwareLib/DeviceController.h>
+#include <HardwareLib/PropertyNames.h>
 
 //
 //

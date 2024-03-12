@@ -2,7 +2,7 @@
 #error Do not include this file in the project! Link HardwareLib instead.
 #endif
 
-#include "Subsystem.h"
+#include "./include/HardwareLib/Subsystem.h"
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 

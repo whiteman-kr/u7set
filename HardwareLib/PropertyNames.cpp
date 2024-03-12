@@ -1,4 +1,4 @@
-#include "PropertyNames.h"
+#include "./include/HardwareLib/PropertyNames.h"
 
 namespace Hardware
 {

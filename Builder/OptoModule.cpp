@@ -1,10 +1,16 @@
 #include "OptoModule.h"
-#include <QJSEngine>
-#include "../HardwareLib/LmDescription.h"
+
+#include <HardwareLib/LmDescription.h>
+#include <HardwareLib/DeviceModule.h>
+#include <HardwareLib/DeviceChassis.h>
+#include <HardwareLib/DeviceController.h>
+#include <HardwareLib/DeviceAppSignal.h>
+
 #include "../lib/ConstStrings.h"
 #include "../UtilsLib/Crc.h"
 #include "../Builder/Context.h"
-#include "../Builder/AppLogicCompiler.h"
+//#include "../Builder/AppLogicCompiler.h"
+
 #include "DeviceHelper.h"
 #include "UalItems.h"
 #include "LmDescriptionSet.h"

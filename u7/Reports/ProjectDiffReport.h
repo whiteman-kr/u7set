@@ -1,13 +1,15 @@
 #pragma once
 
 #include "../Builder/SchemasReportGenerator.h"
-#include "../HardwareLib/DeviceObject.h"
 #include "../ReportLib/Report.h"
 #include "../ReportLib/ReportAppSignalProvider.h"
 #include "../ReportLib/ReportDiagStateProvider.h"
 #include "../ReportLib/ReportPrinter.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/DiagStateController.h"
+
+#include <HardwareLib/DeviceObject.h>
+
 #include "GlobalMessanger.h"
 
 //

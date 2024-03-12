@@ -70,7 +70,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../../AppSignalLib/AppSignal.h"
 	
 	<DbLib/DbController.h>
-	"../../DbLib/DbWorker.h"  # include private libarray part for testing reaon 
+	"../../DbLib/DbWorker.h"  # include private libraray part for testing reaon 
 )
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Test Qt6::Core Qt6::Sql Qt6::Network Qt6::Widgets Qt6::Xml Qt6::Qml)

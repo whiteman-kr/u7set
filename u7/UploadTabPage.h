@@ -3,7 +3,8 @@
 #include "../UtilsLib/OutputLog.h"
 #include "../lib/Configurator.h"
 #include "../OnlineLib/BuildInfo.h"
-#include "../HardwareLib/ModuleFirmware.h"
+
+#include <HardwareLib/ModuleFirmware.h>
 
 class DbController;
 class QCheckBox;

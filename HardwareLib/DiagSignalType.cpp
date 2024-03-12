@@ -1,7 +1,7 @@
-#include "DiagSignalType.h"
+#include "./include/HardwareLib/DiagSignalType.h"
+#include "./include/HardwareLib/PropertyNames.h"
 #include "../Proto/ProtoCommonHelper.h"
 #include "../UtilsLib/XmlHelper.h"
-#include "PropertyNames.h"
 
 namespace Hardware
 {

@@ -1,6 +1,7 @@
 #include "DbControllerHardwareConfigurationTests.h"
 #include "Settings.h"
-#include "../../HardwareLib/DeviceObject.h"
+#include <HardwareLib/DeviceRoot.h>
+#include <HardwareLib/DeviceModule.h>
 
 using namespace Hardware;
 

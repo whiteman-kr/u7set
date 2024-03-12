@@ -2,11 +2,11 @@
 #error Do not include this file in the project! Link HardwareLib instead.
 #endif
 
-#include "LmDescription.h"
 #include "../UtilsLib/DomXmlHelper.h"
-#include "DataProtocols.h"
-#include "DeviceObject.h"
-#include "PropertyNames.h"
+#include "./include/HardwareLib/LmDescription.h"
+#include "./include/HardwareLib/DataProtocols.h"
+#include "./include/HardwareLib/DeviceModule.h"
+#include "./include/HardwareLib/PropertyNames.h"
 
 
 bool LmCommand::loadFromXml(const QDomElement& element, QString* errorMessage)

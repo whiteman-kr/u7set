@@ -2,7 +2,7 @@
 #error Do not include this file in the project! Link HardwareLib instead.
 #endif
 
-#include "DataProtocols.h"
+#include "./include/HardwareLib/DataProtocols.h"
 #include "../lib/ConstStrings.h"
 #include "../UtilsLib/Crc.h"
 #include "../UtilsLib/WUtils.h"

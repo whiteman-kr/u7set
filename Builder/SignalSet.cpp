@@ -1,5 +1,10 @@
 #include "SignalSet.h"
+
 #include "../UtilsLib/WUtils.h"
+
+#include <HardwareLib/EquipmentSet.h>
+#include <HardwareLib/DeviceChassis.h>
+#include <HardwareLib/DeviceModule.h>
 
 namespace Builder
 {

@@ -1,14 +1,15 @@
 #include "ConfigurationBuilder.h"
-#include "../HardwareLib/Connection.h"
-#include "../HardwareLib/DeviceObject.h"
-#include "../HardwareLib/ScriptDeviceObject.h"
+
 #include "../UtilsLib/Crc.h"
 #include "../UtilsLib/WUtils.h"
+
+#include <DbLib/DbController.h>
+#include <HardwareLib/DeviceObject.h>
+#include <HardwareLib/ScriptDeviceObject.h>
+
 #include "AppSignalProperties.h"
 #include "IssueLogger.h"
 #include "SignalSet.h"
-#include <DbLib/DbController.h>
-
 
 namespace Builder
 {

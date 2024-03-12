@@ -4,7 +4,7 @@
 
 #include <DbLib/DbControllerTools.h>
 #include <DbLib/DbController.h>
-#include "../HardwareLib/DeviceObject.h"
+#include <HardwareLib/DeviceAppSignal.h>
 #include "../AppSignalLib/AppSignal.h"
 #include <QDialog>
 #include <QDialogButtonBox>

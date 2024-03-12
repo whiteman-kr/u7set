@@ -3,9 +3,12 @@
 #include <cmath>
 #include <numbers>
 #include <QTest>
+
 #include "SimAfbParamTests.h"
-#include <SimAfb.h>
-#include <SimException.h>
+#include "SimAfb.h"
+#include "SimException.h"
+
+#include <HardwareLib/LmDescription.h>
 
 void SimAfbParamTests::initTestCase()
 {

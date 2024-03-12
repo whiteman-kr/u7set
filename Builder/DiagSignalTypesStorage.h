@@ -1,6 +1,6 @@
 #pragma once
 #include <DbLib/DbObjectStorage.h>
-#include "../HardwareLib/DiagSignalType.h"
+#include <HardwareLib/DiagSignalType.h>
 
 class DiagSignalTypesStorage : public DbObjectStorage<std::shared_ptr<Hardware::DiagSignalTypeObject>>
 {

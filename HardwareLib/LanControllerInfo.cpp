@@ -1,4 +1,4 @@
-#include "LanControllerInfo.h"
+#include "./include/HardwareLib/LanControllerInfo.h"
 #include "../UtilsLib/DomXmlHelper.h"
 #include <QDomNode>
 // -----------------------------------------------------------------------------

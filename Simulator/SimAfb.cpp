@@ -1,8 +1,10 @@
 #include <type_traits>
 #include <cfenv>
+
+#include <HardwareLib/LmDescription.h>
+
 #include "SimAfb.h"
 #include "SimException.h"
-
 
 namespace Sim
 {

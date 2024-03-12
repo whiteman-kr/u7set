@@ -11,7 +11,7 @@
 
 #include "DbWorker.h"
 #include "DbProgress.h"
-#include "../HardwareLib/DeviceObject.h"
+#include <HardwareLib/DeviceRoot.h>
 
 
 

@@ -1,9 +1,9 @@
 #pragma once
 
 #include <DbLib/DbController.h>
+#include <HardwareLib/DeviceObject.h>
+#include <HardwareLib/ModuleFirmware.h>
 
-#include "../HardwareLib/DeviceObject.h"
-#include "../HardwareLib/ModuleFirmware.h"
 #include "../lib/TuningDataStorage.h"
 #include "IssueLogger.h"
 #include "LmDescriptionSet.h"

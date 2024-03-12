@@ -2,8 +2,16 @@
 #error Do not include this file in the project! Link HardwareLib instead.
 #endif
 
-#include "ScriptDeviceObject.h"
-#include "DeviceObject.h"
+#include "./include/HardwareLib/ScriptDeviceObject.h"
+#include "./include/HardwareLib/DeviceSystem.h"
+#include "./include/HardwareLib/DeviceRack.h"
+#include "./include/HardwareLib/DeviceChassis.h"
+#include "./include/HardwareLib/DeviceModule.h"
+#include "./include/HardwareLib/DeviceController.h"
+#include "./include/HardwareLib/Workstation.h"
+#include "./include/HardwareLib/Software.h"
+#include "./include/HardwareLib/DeviceAppSignal.h"
+#include "./include/HardwareLib/DiagSignal.h"
 
 namespace Hardware
 {

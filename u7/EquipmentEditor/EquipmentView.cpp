@@ -1,17 +1,31 @@
 #include "EquipmentView.h"
+
+#include <HardwareLib/DeviceSystem.h>
+#include <HardwareLib/DeviceRack.h>
+#include <HardwareLib/DeviceChassis.h>
+#include <HardwareLib/DeviceModule.h>
+#include <HardwareLib/DeviceController.h>
+#include <HardwareLib/DiagSignal.h>
+#include <HardwareLib/DeviceAppSignal.h>
+#include <HardwareLib/Workstation.h>
+#include <HardwareLib/Software.h>
+#include <HardwareLib/PropertyNames.h>
+#include <HardwareLib/HardwareLibrary.h>
+
+#include <DbLib/DbControllerTools.h>
+
 #include "../../Builder/SubsystemStorage.h"
-#include "../../HardwareLib/PropertyNames.h"
 #include "../DialogConnections.h"
 #include "../Forms/CompareDialog.h"
 #include "../Forms/DialogUpdateFromPreset.h"
 #include "../Forms/FileHistoryDialog.h"
 #include "../GlobalMessanger.h"
-#include "../HardwareLib/DiagSignal.h"
 #include "../SchemaEditor/CreateSignalDialog.h"
 #include "../SignalsTabPage.h"
-#include <DbLib/DbControllerTools.h>
+
 #include "DialogChoosePreset.h"
 #include "EquipmentModel.h"
+
 
 //
 //
@@ -2114,7 +2128,7 @@ bool EquipmentView::canPaste(const ::Proto::EnvelopeSetShortDescription& message
 	{
 		quint32 classNameHash = message.classnamehash(i);
 
-		bool canCreateInstance = Hardware::DeviceObjectFactory.isRegistered(classNameHash);
+		bool canCreateInstance = Hardware::canCreateDevice(classNameHash);
 		if (canCreateInstance == false)
 		{
 			Q_ASSERT(canCreateInstance);

@@ -1,6 +1,6 @@
 #pragma once
 #include "SimScopedLog.h"
-#include "../HardwareLib/LanControllerInfo.h"
+#include <HardwareLib/LanControllerInfo.h>
 
 namespace Sim
 {

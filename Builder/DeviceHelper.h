@@ -1,10 +1,14 @@
 #pragma once
 
-#include "../HardwareLib/DeviceObject.h"
+#include <HardwareLib/DeviceObject.h>
+#include <HardwareLib/EquipmentSet.h>
+
 #include "../UtilsLib/OutputLog.h"
+
 #include "IssueLogger.h"
 
 class HostAddressPort;
+
 
 class DeviceHelper : public QObject
 {

@@ -2,7 +2,7 @@
 
 #include "FblItemRect.h"
 #include "../IMatsSchemaItemAssociations.h"
-#include "../HardwareLib/Afb.h"
+#include <HardwareLib/Afb.h>
 
 
 namespace VFrame30

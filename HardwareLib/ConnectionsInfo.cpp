@@ -1,5 +1,5 @@
-#include "ConnectionsInfo.h"
 #include "../UtilsLib/DomXmlHelper.h"
+#include "./include/HardwareLib/ConnectionsInfo.h"
 #include <QDomNode>
 
 // -----------------------------------------------------------------------------------

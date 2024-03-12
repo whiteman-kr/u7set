@@ -1,10 +1,13 @@
 #pragma once
 
 #include "../UtilsLib/OutputLog.h"
-#include "../HardwareLib/DeviceObject.h"
 #include "../OnlineLib/BuildInfo.h"
 #include "../lib/ConstStrings.h"
+
+#include <HardwareLib/DeviceObject.h>
+
 #include "ModuleFirmwareWriter.h"
+
 
 class DbController;
 

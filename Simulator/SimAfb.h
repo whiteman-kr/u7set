@@ -3,10 +3,12 @@
 #include <memory>
 #include <array>
 #include <concepts>
-#include "../HardwareLib/LmDescription.h"
 
+#include <HardwareLib/Afb.h>
 
+class LmDescription;
 class SimAfbParamTests;
+
 
 namespace Sim
 {

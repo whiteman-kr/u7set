@@ -1,5 +1,6 @@
 #pragma once
-#include "../HardwareLib/Connection.h"
+
+#include <HardwareLib/Connection.h>
 #include <DbLib/DbObjectStorage.h>
 
 namespace Builder

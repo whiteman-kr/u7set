@@ -1,6 +1,15 @@
-#include "HardwareLibrary.h"
-#include "DeviceObject.h"
-#include "DiagSignal.h"
+#include "./include/HardwareLib/HardwareLibrary.h"
+#include "./include/HardwareLib/DeviceRoot.h"
+#include "./include/HardwareLib/DeviceSystem.h"
+#include "./include/HardwareLib/DeviceRack.h"
+#include "./include/HardwareLib/DeviceChassis.h"
+#include "./include/HardwareLib/DeviceModule.h"
+#include "./include/HardwareLib/DeviceController.h"
+#include "./include/HardwareLib/DeviceAppSignal.h"
+#include "./include/HardwareLib/Workstation.h"
+#include "./include/HardwareLib/Software.h"
+#include "./include/HardwareLib/DiagSignal.h"
+#include "DeviceObjectFactory.h"
 
 namespace Hardware
 {
@@ -24,17 +33,17 @@ namespace Hardware
 
 		// Register all device types factory.
 		//
-		Hardware::DeviceObjectFactory.Register<Hardware::DeviceRoot>();
-		Hardware::DeviceObjectFactory.Register<Hardware::DeviceSystem>();
-		Hardware::DeviceObjectFactory.Register<Hardware::DeviceRack>();
-		Hardware::DeviceObjectFactory.Register<Hardware::DeviceChassis>();
-		Hardware::DeviceObjectFactory.Register<Hardware::DeviceModule>();
-		Hardware::DeviceObjectFactory.Register<Hardware::DeviceController>();
-		Hardware::DeviceObjectFactory.Register<Hardware::DeviceAppSignal>();
-		Hardware::DeviceObjectFactory.Register<Hardware::DeviceAppSignal>("DeviceSignal"); // DeviceAppSignal used to be DeviceSignal, so create fabric for DeviceSignal too
-		Hardware::DeviceObjectFactory.Register<Hardware::Workstation>();
-		Hardware::DeviceObjectFactory.Register<Hardware::Software>();
-		Hardware::DeviceObjectFactory.Register<Hardware::DiagSignal>();
+		s_deviceObjectFactory.Register<Hardware::DeviceRoot>();
+		s_deviceObjectFactory.Register<Hardware::DeviceSystem>();
+		s_deviceObjectFactory.Register<Hardware::DeviceRack>();
+		s_deviceObjectFactory.Register<Hardware::DeviceChassis>();
+		s_deviceObjectFactory.Register<Hardware::DeviceModule>();
+		s_deviceObjectFactory.Register<Hardware::DeviceController>();
+		s_deviceObjectFactory.Register<Hardware::DeviceAppSignal>();
+		s_deviceObjectFactory.Register<Hardware::DeviceAppSignal>("DeviceSignal"); // DeviceAppSignal used to be DeviceSignal, so create fabric for DeviceSignal too
+		s_deviceObjectFactory.Register<Hardware::Workstation>();
+		s_deviceObjectFactory.Register<Hardware::Software>();
+		s_deviceObjectFactory.Register<Hardware::DiagSignal>();
 
 		return;
 	}
@@ -45,5 +54,10 @@ namespace Hardware
 		qDebug() << "Hardware::Shutdown";
 		DeviceObject::PrintRefCounter();
 		return;
+	}
+
+	bool canCreateDevice(quint32 classNameHash)
+	{
+		return s_deviceObjectFactory.isRegistered(classNameHash);
 	}
 } // namespace Hardware
