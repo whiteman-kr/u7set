@@ -7,13 +7,10 @@ namespace Gateway
 											   const HostAddressPort& serverAddressPort1,
 											   const HostAddressPort& serverAddressPort2,
 											   const QString& clientDescription,
-											   IvsImpulseHandler& handler,
+											   Handler* handler,
 											   CircularLoggerShared logger) :
 		Tcp::Client(softwareInfo, serverAddressPort1, serverAddressPort2, clientDescription),
-		m_lists(handler.m_lists),
-		m_states(handler.m_states),
-		m_hashToLists(handler.m_hashToLists),
-		m_signalStatesUpdated(handler.m_signalStatesUpdated),
+		m_handler(handler),
 		m_timer(this)
 	{
 		setLogger(logger);
@@ -21,11 +18,15 @@ namespace Gateway
 
 	void AppDataServiceClient::onClientThreadStarted()
 	{
-		m_getStatesRequest.mutable_signalhashes()->Reserve(TO_INT(m_states.size()));
+		std::set<Hash> hashes;
 
-		for(const AppSignalState& st : m_states)
+		m_handler->getRequiredSignalsHashes(&hashes);
+
+		m_getStatesRequest.mutable_signalhashes()->Reserve(TO_INT(hashes.size()));
+
+		for(Hash h : hashes)
 		{
-			m_getStatesRequest.add_signalhashes(st.hash());
+			m_getStatesRequest.add_signalhashes(h);
 		}
 
 		m_timer.setTimerType(Qt::PreciseTimer);
@@ -52,13 +53,7 @@ namespace Gateway
 
 		std::set<Hash> eventHashes;
 
-		for(const AppSignalState& st : m_states)
-		{
-			if (st.isWorkable() == true && st.requestEvents() == true)
-			{
-				eventHashes.insert(st.hash());
-			}
-		}
+		m_handler->getEventSignalsHashes(&eventHashes);
 
 		initialRequest.mutable_signalshashes()->Reserve(TO_INT(eventHashes.size()));
 
@@ -114,20 +109,7 @@ namespace Gateway
 			return;
 		}
 
-		int replyStatesSize = m_getStatesReply.appsignalstates_size();
-
-		if (replyStatesSize != TO_INT(m_states.size()))
-		{
-			Q_ASSERT(false);
-			return;
-		}
-
-		for(int i = 0; i < replyStatesSize; i++)
-		{
-			m_states[i].updateState(m_getStatesReply.appsignalstates(i));
-		}
-
-		m_signalStatesUpdated = true;
+		m_handler->updateSignalStates(m_getStatesReply);
 
 		if (m_getStatesReply.gatewaystatechangesqueuesize() != 0)
 		{
@@ -137,9 +119,7 @@ namespace Gateway
 
 	void AppDataServiceClient::onGatewayGetAppSignalStateChangesReply(const char* replyData, quint32 replyDataSize)
 	{
-		auto& reply = m_gwGetStateChangesReply;
-
-		bool result = reply.ParseFromArray(replyData, replyDataSize);
+		bool result = m_gwGetStateChangesReply.ParseFromArray(replyData, replyDataSize);
 
 		if (result == false)
 		{
@@ -147,54 +127,7 @@ namespace Gateway
 			return;
 		}
 
-		int statesCount = reply.appsignalstates_size();
-
-		if (statesCount == 0)
-		{
-			return;
-		}
-
-		for(auto& list : m_lists)
-		{
-			list->stateChangesToWrite.clear();
-		}
-
-		GatewayAppSignalState state;
-
-		for(int i = 0; i < statesCount; i++)
-		{
-			const ::Network::GatewayAppSignalState& protoState = reply.appsignalstates(i);
-
-			state.loadFromProto(protoState);
-
-			Q_ASSERT(state.prevState.hash == state.curState.hash);
-
-			auto it = m_hashToLists.find(state.prevState.hash);
-
-			if (it == m_hashToLists.end())
-			{
-				Q_ASSERT(false);
-				continue;
-			}
-
-			const std::set<IvsImpulseListInfoShared>& lists = it->second;
-
-			for(const IvsImpulseListInfoShared& list : lists)
-			{
-				list->stateChangesToWrite.push_back(state);
-			}
-		}
-
-		QThread* thread = QThread::currentThread();
-
-		for(IvsImpulseListInfoShared& list : m_lists)
-		{
-			list->stateChangesMutex.lock(thread);
-
-			list->stateChangesToWrite.swap(list->stateChangesToRead);
-
-			list->stateChangesMutex.unlock(thread);
-		}
+		m_handler->processStateChanges(m_gwGetStateChangesReply);
 
 		emit sendStateChanges();
 	}

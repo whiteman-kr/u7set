@@ -1,5 +1,6 @@
 #include "GatewayHandler.h"
 #include "IvsImpulseGatewayHandler.h"
+#include "ModbusTcpSlaveGatewayHandler.h"
 #include "../ServiceLib/Service.h"
 
 namespace Gateway
@@ -18,6 +19,26 @@ namespace Gateway
 		m_log(log),
 		m_logGatewayPackets(logGatewayPackets)
 	{
+	}
+
+	void Handler::getRequiredSignalsHashes(std::set<Hash>* hashes) const
+	{
+		Q_UNUSED(hashes);
+	}
+
+	void Handler::getEventSignalsHashes(std::set<Hash>* hashes) const
+	{
+		Q_UNUSED(hashes);
+	}
+
+	void Handler::updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply)
+	{
+		Q_UNUSED(getStatesReply);
+	}
+
+	void Handler::processStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply)
+	{
+		Q_UNUSED(getStateChangesReply);
 	}
 
 	// ---------------------------------------------------------------------------------
@@ -62,6 +83,25 @@ namespace Gateway
 					m_handlers.push_back(ivsHandler);
 				}
 				break;
+
+			case E::GatewayType::ModbusTcpSlave:
+				{
+					ModbusTcpSlaveGatewayShared modbusGateway = std::dynamic_pointer_cast<ModbusTcpSlaveGateway>(gw);
+
+					if (modbusGateway == nullptr)
+					{
+						result = false;
+						break;
+					}
+
+					ModbusTcpSlaveHandlerShared modbusHandler =
+						std::make_shared<ModbusTcpSlaveHandler>(swInfo, settings, modbusGateway, appSignals,
+															log, logGatewayPackets);
+
+					m_handlers.push_back(modbusHandler);
+				}
+				break;
+
 
 			default:
 				Q_ASSERT(false);

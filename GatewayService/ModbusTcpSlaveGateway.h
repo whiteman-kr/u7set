@@ -46,9 +46,6 @@ namespace Gateway
 		virtual void writeSettingsToXml(XmlWriteHelper& xml) const override;
 		virtual bool readSettingsFromXml(XmlReadHelper& xml) override;
 
-		virtual void writeSignalsToXml(XmlWriteHelper& xml) const override;
-		virtual bool readSignalsFromXml(XmlReadHelper& xml) override;
-
 		bool checkAndApplySignalsFormat(int lineNo, QString formatStr, ParserLog& log);		// copy str Ok!
 
 	private:
@@ -77,6 +74,8 @@ namespace Gateway
 
 		HostAddressPort localGatewayIP2() const;
 		HostAddressPort remoteGatewayIP2() const;
+
+		void getRequiredSignalsHashes(std::set<Hash>* hashes);
 
 	private:
 		virtual void writeSettingsToXml(XmlWriteHelper& xml) const override;

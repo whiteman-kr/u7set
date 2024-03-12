@@ -5,6 +5,7 @@
 #include "GatewayDescriptionParser.h"
 
 #include "GatewayService.h"
+#include "ModbusTcpSlaveGateway.h"
 
 // -------------------------------------------------------------------------------
 //

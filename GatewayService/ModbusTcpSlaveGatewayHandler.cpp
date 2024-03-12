@@ -1,16 +1,16 @@
-#include "IvsImpulseGatewayHandler.h"
+#include "ModbusTcpSlaveGatewayHandler.h"
 
 namespace Gateway
 {
 	// ---------------------------------------------------------------------------------
 	//
-	//	Gateway::IvsImpulseHandler class implementation
+	//	Gateway::ModbusTcpSlaveHandler class implementation
 	//
 	// ---------------------------------------------------------------------------------
 
-	IvsImpulseHandler::IvsImpulseHandler(const SoftwareInfo& swInfo,
+	ModbusTcpSlaveHandler::ModbusTcpSlaveHandler(const SoftwareInfo& swInfo,
 										 const GatewayServiceSettings& settings,
-										 IvsImpulseGatewayShared gateway,
+										 ModbusTcpSlaveGatewayShared gateway,
 										 const AppSignals& appSignals,
 										 CircularLoggerShared log,
 										 bool logGatewayPackets) :
@@ -23,12 +23,12 @@ namespace Gateway
 	{
 	}
 
-	IvsImpulseHandler::~IvsImpulseHandler()
+	ModbusTcpSlaveHandler::~ModbusTcpSlaveHandler()
 	{
 		shutdown();
 	}
 
-	void IvsImpulseHandler::run()
+	void ModbusTcpSlaveHandler::run()
 	{
 		init();
 
@@ -40,20 +40,18 @@ namespace Gateway
 												this, m_log);
 		m_appDataServiceClientThread->start();
 
-		m_ivsImpulseCommThread = new IvsImpulseCommThread(*this);
+		m_modbusTcpSlaveThread = new Modbus::TcpSlaveThread;
 
-		m_ivsImpulseCommThread->connect(m_appDataServiceClientThread->client());
-
-		m_ivsImpulseCommThread->start();
+		m_modbusTcpSlaveThread->start(m_gateway->localGatewayIP1(), m_log);
 	}
 
-	void IvsImpulseHandler::shutdown()
+	void ModbusTcpSlaveHandler::shutdown()
 	{
-		if (m_ivsImpulseCommThread != nullptr)
+		if (m_modbusTcpSlaveThread != nullptr)
 		{
-			m_ivsImpulseCommThread->quitAndWait();
-			delete m_ivsImpulseCommThread;
-			m_ivsImpulseCommThread = nullptr;
+			m_modbusTcpSlaveThread->stop();
+			delete m_modbusTcpSlaveThread;
+			m_modbusTcpSlaveThread = nullptr;
 		}
 
 		if (m_appDataServiceClientThread != nullptr)
@@ -64,106 +62,28 @@ namespace Gateway
 		}
 	}
 
-	void IvsImpulseHandler::getRequiredSignalsHashes(std::set<Hash>* hashes) const
+	void ModbusTcpSlaveHandler::getRequiredSignalsHashes(std::set<Hash>* hashes) const
 	{
 		TEST_PTR_RETURN(hashes);
 
 		hashes->clear();
 
-		for(const AppSignalState state : m_states)
-		{
-			hashes->emplace(state.hash());
-		}
+
 	}
 
-	void IvsImpulseHandler::getEventSignalsHashes(std::set<Hash>* hashes) const
+	void ModbusTcpSlaveHandler::getEventSignalsHashes(std::set<Hash>* hashes) const
 	{
 		TEST_PTR_RETURN(hashes);
 
 		hashes->clear();
 
-		for(const AppSignalState& st : m_states)
-		{
-			if (st.isWorkable() == true && st.requestEvents() == true)
-			{
-				hashes->emplace(st.hash());
-			}
-		}
+		Q_ASSERT(false);		// to do
 	}
 
-	void IvsImpulseHandler::updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply)
+
+	bool ModbusTcpSlaveHandler::init()
 	{
-		int replyStatesSize = getStatesReply.appsignalstates_size();
-
-		if (replyStatesSize != TO_INT(m_states.size()))
-		{
-			Q_ASSERT(false);
-			return;
-		}
-
-		for(int i = 0; i < replyStatesSize; i++)
-		{
-			m_states[i].updateState(getStatesReply.appsignalstates(i));
-		}
-
-		m_signalStatesUpdated = true;
-	}
-
-	void IvsImpulseHandler::processStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply)
-	{
-		int statesCount = getStateChangesReply.appsignalstates_size();
-
-		if (statesCount == 0)
-		{
-			return;
-		}
-
-		for(auto& list : m_lists)
-		{
-			list->stateChangesToWrite.clear();
-		}
-
-		GatewayAppSignalState state;
-
-		for(int i = 0; i < statesCount; i++)
-		{
-			const ::Network::GatewayAppSignalState& protoState = getStateChangesReply.appsignalstates(i);
-
-			state.loadFromProto(protoState);
-
-			Q_ASSERT(state.prevState.hash == state.curState.hash);
-
-			auto it = m_hashToLists.find(state.prevState.hash);
-
-			if (it == m_hashToLists.end())
-			{
-				Q_ASSERT(false);
-				continue;
-			}
-
-			const std::set<IvsImpulseListInfoShared>& lists = it->second;
-
-			for(const IvsImpulseListInfoShared& list : lists)
-			{
-				list->stateChangesToWrite.push_back(state);
-			}
-		}
-
-		QThread* thread = QThread::currentThread();
-
-		for(IvsImpulseListInfoShared& list : m_lists)
-		{
-			list->stateChangesMutex.lock(thread);
-
-			list->stateChangesToWrite.swap(list->stateChangesToRead);
-
-			list->stateChangesMutex.unlock(thread);
-		}
-	}
-
-	bool IvsImpulseHandler::init()
-	{
-		m_lists.clear();
+/*		m_lists.clear();
 		m_states.clear();
 
 		int signalsCount = m_gateway->signalsCount();
@@ -251,7 +171,7 @@ namespace Gateway
 
 				it->second.insert(list);
 			}
-		}
+		}*/
 
 		return true;
 	}

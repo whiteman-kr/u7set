@@ -36,8 +36,12 @@ add_executable(${TARGET}
 	IvsImpulseGateway.h
 	IvsImpulseGatewayHandler.cpp
 	IvsImpulseGatewayHandler.h
+	ModbusProtocol.cpp
+	ModbusProtocol.h
 	ModbusTcpSlaveGateway.cpp
 	ModbusTcpSlaveGateway.h
+	ModbusTcpSlaveGatewayHandler.cpp
+	ModbusTcpSlaveGatewayHandler.h
 )
 
 target_precompile_headers(${TARGET} PRIVATE
@@ -50,6 +54,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	#
 	<algorithm>
 	<atomic>
+	<chrono>
 	<functional>
 	<iostream>
 	<limits>
@@ -58,6 +63,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<memory>
 	<vector>
 	<set>
+	<thread>
 	<type_traits>
 
 	# Qt includes

@@ -216,29 +216,6 @@ namespace Gateway
 		return result;
 	}
 
-	void ModbusSignalList::writeSignalsToXml(XmlWriteHelper& xml) const
-	{
-		xml.writeStartElement(XmlElement::SIGNALS);
-		xml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(m_signalIDs.size()));
-
-		for(const QString& id : m_signalIDs)
-		{
-			xml.writeStartElement(XmlElement::SIGNAL_ELEM);
-
-			//xml.writeStringAttribute(XmlAttribute::APP_SIGNAL_ID, );
-
-			xml.writeEndElement();		// </Signal>
-		}
-
-		xml.writeEndElement();		// </Signals>
-
-	}
-
-	bool ModbusSignalList::readSignalsFromXml(XmlReadHelper& xml)
-	{
-		return true;
-	}
-
 	bool ModbusSignalList::checkAndApplySignalsFormat(int lineNo, QString formatStr, ParserLog& log)
 	{
 		formatStr = formatStr.toLower();
@@ -327,7 +304,7 @@ namespace Gateway
 	}
 
 	ModbusTcpSlaveGateway::ModbusTcpSlaveGateway(const QString& gwID, const QString& gwDesc) :
-		Gateway(E::GatewayType::IVS_Impulse, gwID, gwDesc)
+		Gateway(E::GatewayType::ModbusTcpSlave, gwID, gwDesc)
 	{
 	}
 
@@ -410,6 +387,17 @@ namespace Gateway
 		return m_remoteGatewayIP2;
 	}
 
+	void ModbusTcpSlaveGateway::getRequiredSignalsHashes(std::set<Hash>* hashes)
+	{
+		TEST_PTR_RETURN(hashes);
+
+		for(const auto& [addr16, p] : m_modbusSignals)
+		{
+			const QString& appSignalID = p.first;
+			hashes->emplace(calcHash(appSignalID));
+		}
+	}
+
 	void ModbusTcpSlaveGateway::writeSettingsToXml(XmlWriteHelper& xml) const
 	{
 		xml.writeStartElement(XmlElement::SETTINGS);
@@ -482,7 +470,42 @@ namespace Gateway
 
 	bool ModbusTcpSlaveGateway::readSignalListsFromXml(XmlReadHelper& xml)
 	{
-		return true;
+		m_modbusSignals.clear();
+
+		bool result = true;
+
+		result &= xml.findElement(XmlElement::SIGNALS);
+
+		RETURN_IF_FALSE(result);
+
+		int signalCount = 0;
+
+		result &= xml.readIntAttribute(XmlAttribute::COUNT, &signalCount);
+
+		for(int i = 0; i < signalCount; i++)
+		{
+			result &= xml.findElement(XmlElement::SIGNAL_ELEM);
+
+			BREAK_IF_FALSE(result);
+
+			int offset = 0;
+			int bit = 0;
+			ModbusFormat format;
+			QString appSignalID;
+
+			result &= xml.readIntAttribute(XmlAttribute::REG_ADDR, &offset);
+			result &= xml.readIntAttribute(XmlAttribute::REG_BIT, &bit);
+			result &= xml.readEnumKeyAttribute(XmlAttribute::FORMAT, &format.signalFormat);
+			result &= xml.readEnumKeyAttribute(XmlAttribute::BYTE_ORDER_ATTR, &format.byteOrder);
+			result &= xml.readStringAttribute(XmlAttribute::APP_SIGNAL_ID, &appSignalID);
+
+			BREAK_IF_FALSE(result);
+
+			m_modbusSignals.emplace(Address16(offset, bit),
+									std::pair<QString, ModbusFormat>{appSignalID, format});
+		}
+
+		return result;
 	}
 
 	bool ModbusTcpSlaveGateway::generateRequiredFiles(const SignalSetAdapter& signalSetAdapter,
