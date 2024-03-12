@@ -36,18 +36,14 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QThread>
 	<QVariant>
 
-	"../CommonLib/Types.h"
-	"../CommonLib/Hash.h"
-	"../CommonLib/PropertyObject.h"
-	#"../CommonLib/AfbParamValue.h"
+	"../../CommonLib/Types.h"
+	"../../CommonLib/Hash.h"
+	"../../CommonLib/PropertyObject.h"
 	
-	"../Proto/ProtoSerialization.h"
-	#"../Proto/Network.pb.h"	
-	"../Proto/AppSignal.pb.h"
+	"../../Proto/ProtoSerialization.h"
+	"../../Proto/AppSignal.pb.h"
 	
-	"../AppSignalLib/AppSignal.h"
-	#"../AppSignalLib/AppSignalParam.h"
-	#"../AppSignalLib/AppSignalState.h"
+	"../../AppSignalLib/AppSignal.h"
 )
 
 target_compile_definitions(${TARGET} PRIVATE DB_LIB_DOMAIN)

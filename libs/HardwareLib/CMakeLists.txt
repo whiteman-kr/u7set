@@ -122,14 +122,14 @@ target_precompile_headers(${TARGET} PRIVATE
 )
 
 target_precompile_headers(${TARGET} PRIVATE
-	"../CommonLib/Types.h"
-	"../CommonLib/Hash.h"
-	"../CommonLib/PropertyObject.h"
+	"../../CommonLib/Types.h"
+	"../../CommonLib/Hash.h"
+	"../../CommonLib/PropertyObject.h"
 	#"../CommonLib/AfbParamValue.h"
 	
-	"../Proto/ProtoSerialization.h"
-	"../Proto/Network.pb.h"
-	"../Proto/Hardware.pb.h"	
+	"../../Proto/ProtoSerialization.h"
+	"../../Proto/Network.pb.h"
+	"../../Proto/Hardware.pb.h"	
 )
 
 target_compile_definitions(${TARGET} PRIVATE HARDWARE_LIB_DOMAIN)
