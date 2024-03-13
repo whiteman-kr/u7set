@@ -6,10 +6,12 @@
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
 #include "../lib/Tuning/ITuningAuthorization.h"
-#include "ITuningLog.h"
-#include "TuningSignalManager.h"
-#include "TuningSourceState.h"
-#include "TuningWriteCommand.h"
+
+#include "./include/ClientLib/IRecentAppSignals.h"
+#include "./include/ClientLib/ITuningLog.h"
+#include "./include/ClientLib/ITuningSignalUpdater.h"
+#include "./include/ClientLib/TuningSourceState.h"
+#include "./include/ClientLib/TuningWriteCommand.h"
 
 //
 //		  OnConnection

@@ -2,33 +2,64 @@
 
 #include "../AppSignalLib/ITuningSignalManager.h"
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../OnlineLib/TcpConnectionState.h"
+#include "../OnlineLib/Tcp.h"
 #include "../UtilsLib/ILogFile.h"
 #include "../lib/Tuning/ITuningAuthorization.h"
 #include "../lib/Tuning/ITuningConnection.h"
-#include "IRecentAppSignals.h"
-#include "ITuningLog.h"
-#include "ITuningSignalUpdater.h"
-#include "TuningSourceState.h"
-#include "TuningWriteCommand.h"
 
+#include "./include/ClientLib/IRecentAppSignals.h"
+#include "./include/ClientLib/ITuningSignalUpdater.h"
+#include "./include/ClientLib/ITuningLog.h"
+#include "./include/ClientLib/TuningSourceState.h"
+#include "./include/ClientLib/TuningWriteCommand.h"
+
+class SimpleThread;
 
 namespace ClientLib
 {
-	class TuningConnectionPrivate;
+	class TuningTcpClient;
 
-
-	class TuningConnection : public ITuningConnection
+	class TuningConnectionPrivate : public QObject, public ITuningConnection
 	{
-	public:
-		explicit TuningConnection(ITuningSignalManager& tuningSignalManager,
-								  ITuningSignalUpdater& tuningSignalUpdater,
-								  IRecentAppSignals& recentTuningSignals,
-								  ITuningAuthorization& tuningAuthorization,
-								  ILogFile* logFile,
-								  ITuningLog* tuningLog);
+		Q_OBJECT
 
-		~TuningConnection() override;
+	protected:
+		struct Connection
+		{
+			Connection(const SoftwareInfo& softwareInfo,
+					   const SoftwareEndpoint::TuningService& tuns,
+					   bool autoApply,
+					   TuningClientSettings::LmStatusFlagMode lmStatusFlagMode,
+					   ITuningSignalUpdater& signalUpdater,
+					   IRecentAppSignals& recentTuningSignals,
+					   ITuningAuthorization& tuningAuthorization,
+					   ILogFile* logFile,
+					   ITuningLog* tuningLog);
+			Connection(const Connection&) = delete;
+			Connection(Connection&& src) = delete;
+			~Connection();
+
+			Connection& operator=(const Connection&) = delete;
+			Connection& operator=(Connection&& src) = delete;
+
+			void stopAndDestroy();
+			HostAddressPort address() const;
+
+			bool signalStatesLoaded() const;
+
+			// --
+			//
+			ClientLib::TuningTcpClient* tcpTuningClient = nullptr;
+			SimpleThread* tcpClientThread = nullptr;
+		};
+
+	public:
+		explicit TuningConnectionPrivate(ITuningSignalManager& tuningSignalManager,
+										 ITuningSignalUpdater& tuningSignalUpdater,
+										 IRecentAppSignals& recentTuningSignals,
+										 ITuningAuthorization& tuningAuthorization,
+										 ILogFile* logFile,
+										 ITuningLog* tuningLog);
 
 	public:
 		/// Call this function when the new configuration arrived to recreate communication thread with the new configuration
@@ -53,7 +84,7 @@ namespace ClientLib
 		[[nodiscard]] int tuningSourceStatesCount(Hash sourceHash) const;
 
 		/// Returns number of activated communication channels for tuning source (LogicModule). Now 0, 1 or 2.
-		///	Activation is Tuning Service feature, LM does not know about it.
+		///	Activation is Tusning Service feature, LM does not know about it.
 		/// (Used only Single LM Control is turned on)
 		///
 		[[nodiscard]] int activatedTuningSourceStatesCount(Hash sourceHash) const;
@@ -75,7 +106,7 @@ namespace ClientLib
 
 		/// Tuning signals functions
 		///
-		bool writeTuningSignals(const std::vector<ClientLib::TuningWriteCommand>& writeCommands);
+		bool writeTuningSignals(const std::vector<TuningWriteCommand>& writeCommands);
 		virtual bool writeTuningSignal(const QString& appSignalId, const TuningValue& tuningValue) override;
 		virtual bool writeTuningSignal(const QString& appSignalId, QVariant value) override;
 
@@ -86,7 +117,19 @@ namespace ClientLib
 		void applyTuningSignals(const std::vector<Hash>& signalHashes);
 		virtual void applyTuningSignals() override;
 
+		// --
+		//
+	protected:
+		std::list<Connection> m_conns;
+
 	private:
-		std::unique_ptr<TuningConnectionPrivate> m_pimpl;
+		ITuningSignalManager& m_tuningSignalManager;
+		ITuningSignalUpdater& m_tuningSignalUpdater;
+		IRecentAppSignals& m_recentTuningSignals;
+
+		HasLogFile m_logFile;
+		ITuningAuthorization& m_tuningAuthorization;
+		ITuningLog* m_tuningLog = nullptr;
 	};
-} // namespace ClientLib
+}
+

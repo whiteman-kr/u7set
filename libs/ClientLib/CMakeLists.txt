@@ -31,7 +31,6 @@ qt_add_library(${TARGET} STATIC
 	./include/ClientLib/TuningLog.h
 	./include/ClientLib/TuningSignalManager.h
 	./include/ClientLib/TuningSourceState.h
-	./include/ClientLib/TuningTcpClient.h
 	./include/ClientLib/TuningUserManager.h
 	./include/ClientLib/TuningWriteCommand.h
 	AdsConnection.cpp
@@ -57,10 +56,13 @@ qt_add_library(${TARGET} STATIC
 	TcpSignalRecents.h
 	TcpSignalRecents.cpp
 	TuningConnection.cpp
+	TuningConnectionPrivate.cpp
+	TuningConnectionPrivate.h
 	TuningLog.cpp
 	TuningSignalManager.cpp
 	TuningSourceState.cpp
 	TuningTcpClient.cpp
+	TuningTcpClient.h
 	TuningUserManager.cpp
 	TuningWriteCommand.cpp
 )
