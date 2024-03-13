@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../DbLib/DbStruct.h"
+#include <DbLib/DbStruct.h>
 
 namespace Ui {
 	class FileHistoryDialog;
@@ -22,9 +22,13 @@ public:
 protected:
 	virtual void showEvent(QShowEvent* event) override;
 
-	void fillList();
+	void fillList(QString filterText = QString{});
 	
 private slots:
+	void exportHistory();
+	void filterText();
+	void findText();
+
 	void on_changesetList_doubleClicked(const QModelIndex &index);
 	void on_changesetList_customContextMenuRequested(const QPoint &pos);
 
@@ -41,5 +45,8 @@ private:
 
 	const int AllUsersUserId = -1;
 	const QString AllUsersText = "All users";
+
+	int m_lastFoundLineIndex = -1;
+	QString m_lastFoundText;
 };
 

@@ -57,16 +57,16 @@ namespace VFrame30
 	{
 		bool result = PosRectRotatable::SaveData(message);
 		if (result == false ||
-			message->has_schemaitem() == false)
+			message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 
 		// --
 		//
-		Proto::SchemaItemImageValue* valueMessage = message->mutable_schemaitem()->mutable_imagevalue();
+		Proto::SchemaItemImageValue* valueMessage = message->MutableExtension(Proto::schemaitem)->mutable_imagevalue();
 
 		valueMessage->set_signalids(signalIdsString(nullptr).toStdString()); // nullptr avoid macro expansion
 		valueMessage->set_signalsource(static_cast<int32_t>(m_signalSource));
@@ -88,9 +88,9 @@ namespace VFrame30
 
 	bool SchemaItemImageValue::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemaitem() == false)
+		if (message.HasExtension(Proto::schemaitem) == false)
 		{
-			assert(message.has_schemaitem());
+			assert(message.HasExtension(Proto::schemaitem));
 			return false;
 		}
 
@@ -104,13 +104,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemaitem().has_imagevalue() == false)
+		if (message.GetExtension(Proto::schemaitem).has_imagevalue() == false)
 		{
-			assert(message.schemaitem().has_imagevalue());
+			assert(message.GetExtension(Proto::schemaitem).has_imagevalue());
 			return false;
 		}
 
-		const Proto::SchemaItemImageValue& valueMessage = message.schemaitem().imagevalue();
+		const Proto::SchemaItemImageValue& valueMessage = message.GetExtension(Proto::schemaitem).imagevalue();
 
 		setSignalIdsString(valueMessage.signalids().data());
 		m_signalSource = static_cast<E::SignalSource>(valueMessage.signalsource());

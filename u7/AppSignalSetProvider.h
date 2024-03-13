@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../DbLib/DbController.h"
+#include <DbLib/DbController.h>
 
 #include "AppSignalPropertyManager.h"
 

@@ -1,0 +1,61 @@
+syntax = "proto2";
+
+import "Common.proto";
+import "Envelope.proto";
+
+package Proto;
+
+//
+// Busses
+//
+
+//
+// EXTEND Envelope
+//
+extend Envelope
+{
+    optional Bus bus = 200;								// AppSignalLib::Bus
+}
+
+message BusSignal
+{
+    optional string signalId = 1;
+    optional string caption = 2;
+    optional int32 type = 3;
+    optional string units = 4;
+    optional int32 analogFormat = 10;
+    optional int32 precision = 11 [default = 2];
+    optional double coarseAperture = 12 [default = 1];
+    optional double fineAperture = 13 [default = 0.5];
+    optional bool adaptiveAperture = 14 [default = false];
+    optional string busTypeId = 15;
+
+    optional int32 inbusOffset = 32;
+    optional int32 inbusDiscreteBitNo = 40;
+    optional int32 inbusAnalogSize = 50;
+    optional int32 inbusAnalogFormat = 51;
+    optional int32 inbusAnalogByteOrder = 52;
+    optional double busAnalogLowLimit = 53;
+    optional double busAnalogHighLimit = 54;
+    optional double inbusAnalogLowLimit = 55;
+    optional double inbusAnalogHighLimit = 56;
+}
+
+message Bus
+{
+    optional Uuid uuid = 1;
+    optional string busTypeId = 2;
+    repeated BusSignal busSignals = 3;
+    optional bool autoSignalPlacement = 10 [default = true];
+    optional int32 manualBusSize = 11 [default = 0];
+    optional bool enableManualBusSize = 12 [default = false];
+
+    // On Bus message reading:
+    //
+    // if enableManualBusSizeIsNotInitialized == TRUE then enableManualBusSize should be set to NOT autoSignalPlacement,
+    // and enableManualBusSizeIsNotInitialized should be set to FALSE
+    //
+    // if enableManualBusSizeIsNotInitialized == FALSE nothing to do required
+    //
+    optional bool enableManualBusSizeIsNotInitialized = 13 [default = true];
+}

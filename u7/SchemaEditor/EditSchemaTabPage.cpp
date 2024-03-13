@@ -722,6 +722,8 @@ bool EditSchemaTabPage::saveWorkcopy()
 		emit vcsFileStateChanged();
 	}
 
+	emit fileWasSaved(file->details());
+
 	return true;
 }
 

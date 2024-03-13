@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../SchemaClientLib/SchemaTabWidget.h"
+#include <SchemaClientLib/SchemaTabWidget.h>
 #include "MonitorSchemaWidget.h"
 
 namespace SchemaClientLib

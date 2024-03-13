@@ -74,7 +74,7 @@ bool DiagSignalTypesStorage::load(QString* errorMessage)
 	//
 	std::vector<DbFileInfo> fileList;
 
-	bool ok = m_db->getFileList(&fileList, DbDir::DiagSignalTypesDir, Db::File::DiagSignalTypeFileExtension, true, nullptr);
+	bool ok = m_db->getFileList(&fileList, DbDir::DiagSignalTypesDir, Db::File::DiagSignalTypeFileExtension, false /*removeDeleted*/, nullptr);
 	if (ok == false)
 	{
 		*errorMessage = m_db->lastError();
@@ -97,6 +97,12 @@ bool DiagSignalTypesStorage::load(QString* errorMessage)
 
 	for (const auto& f : files)
 	{
+		if ((f->deleted() == true || f->action() == E::VcsItemAction::Deleted) && 
+			f->state() == E::VcsState::CheckedIn)
+		{
+			continue;
+		}
+
 		auto diagSignalType = Hardware::DiagSignalTypeObject::Create(f->data());
 
 		setFileInfo(diagSignalType->uuid(), *f);

@@ -1,8 +1,9 @@
 #pragma once
 
-#include "../HardwareLib/DeviceObject.h"
-#include "../HardwareLib/ModuleFirmware.h"
-#include "../HardwareLib/Connection.h"
+#include <HardwareLib/DeviceModule.h>
+#include <HardwareLib/ModuleFirmware.h>
+#include <HardwareLib/Connection.h>
+
 #include "../CommonLib/HashedVector.h"
 #include "../AppSignalLib/ComparatorSet.h"
 #include "../lib/TuningDataStorage.h"

@@ -1806,6 +1806,26 @@ namespace Builder
 				  );
 	}
 
+	/// IssueCode: CFG3102
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Device %1 is excluded from build.
+	///
+	/// Parameters:
+	///		%1 EquipmentID
+	///
+	/// Description:
+	///			The device and all its children will be excluded from the build process. To include the device back in the compilation, ensure that the 'ExcludeFromBuild' property is set to false.
+	///
+	void IssueLogger::wrnCFG3102(QString equipmentId)
+	{
+		LOG_WARNING1(IssueType::FscConfiguration,
+					 3102,
+					 tr("Device %1 is excluded from build.")
+					 .arg(equipmentId));
+	}
+
 	/// IssueCode: CFG3103
 	///
 	/// IssueType: Error

@@ -2,7 +2,11 @@
 #include "SoftwareSettingsGetter.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../lib/DataSource.h"
-#include "../HardwareLib/DiagSignal.h"
+
+#include <HardwareLib/DeviceChassis.h>
+#include <HardwareLib/DeviceModule.h>
+#include <HardwareLib/DeviceController.h>
+#include <HardwareLib/DiagSignalType.h>
 
 namespace Builder
 {

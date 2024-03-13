@@ -26,22 +26,24 @@ namespace VFrame30
 	bool SchemaItemLoopback::SaveData(Proto::Envelope* message) const
 	{
 		bool result = FblItemRect::SaveData(message);
-
-		if (result == false ||
-			message->has_schemaitem() == false ||
-			message->schemaitem().has_fblitemrect() == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
-			assert(message->schemaitem().has_fblitemrect() == true);
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
+		}
+
+		auto schemaItemMessage = message->MutableExtension(Proto::schemaitem);
+		if (schemaItemMessage->has_fblitemrect() == false)
+		{
+			assert(schemaItemMessage->has_fblitemrect());
 		}
 
 		// --
 		//
-		Proto::SchemaItemLoopback* loopbackitem = message->mutable_schemaitem()->mutable_loopbackitem();
+		Proto::SchemaItemLoopback* loopbackMessage = schemaItemMessage->mutable_loopbackitem();
 
-		loopbackitem->set_loopbackid(m_loobackId.toStdString());
+		loopbackMessage->set_loopbackid(m_loobackId.toStdString());
 
 		return result;
 	}
@@ -56,15 +58,15 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemaitem().has_loopbackitem() == false)
+		if (message.GetExtension(Proto::schemaitem).has_loopbackitem() == false)
 		{
-			assert(message.schemaitem().has_loopbackitem() == true);
+			assert(message.GetExtension(Proto::schemaitem).has_loopbackitem() == true);
 			return false;
 		}
 
-		const Proto::SchemaItemLoopback& loopbackitem = message.schemaitem().loopbackitem();
+		const Proto::SchemaItemLoopback& loopbackMessage = message.GetExtension(Proto::schemaitem).loopbackitem();
 
-		m_loobackId = QString::fromStdString(loopbackitem.loopbackid());
+		m_loobackId = QString::fromStdString(loopbackMessage.loopbackid());
 
 		return true;
 	}
@@ -137,21 +139,22 @@ namespace VFrame30
 	bool SchemaItemLoopbackSource::SaveData(Proto::Envelope* message) const
 	{
 		bool result = SchemaItemLoopback::SaveData(message);
-
-		if (result == false ||
-			message->has_schemaitem() == false ||
-			message->schemaitem().has_loopbackitem() == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
-			assert(message->schemaitem().has_loopbackitem() == true);
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
+		}
+
+		auto schemaItemMessage = message->MutableExtension(Proto::schemaitem);
+		if (schemaItemMessage->has_loopbackitem() == false)
+		{
+			assert(schemaItemMessage->has_loopbackitem() == true);
 		}
 
 		// --
 		//
-		Proto::SchemaItemLoopbackSource* source = message->mutable_schemaitem()->mutable_loopbacksource();
-		Q_UNUSED(source);
+		[[maybe_unused]] Proto::SchemaItemLoopbackSource* source = schemaItemMessage->mutable_loopbacksource();
 
 		return true;
 	}
@@ -166,13 +169,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemaitem().has_loopbacksource() == false)
+		if (message.GetExtension(Proto::schemaitem).has_loopbacksource() == false)
 		{
-			assert(message.schemaitem().has_loopbacksource() == true);
+			assert(message.GetExtension(Proto::schemaitem).has_loopbacksource() == true);
 			return false;
 		}
 
-		const Proto::SchemaItemLoopbackSource& source = message.schemaitem().loopbacksource();
+		const Proto::SchemaItemLoopbackSource& source = message.GetExtension(Proto::schemaitem).loopbacksource();
 		Q_UNUSED(source);
 
 		return true;
@@ -271,21 +274,23 @@ namespace VFrame30
 	bool SchemaItemLoopbackTarget::SaveData(Proto::Envelope* message) const
 	{
 		bool result = SchemaItemLoopback::SaveData(message);
-
-		if (result == false ||
-			message->has_schemaitem() == false ||
-			message->schemaitem().has_loopbackitem() == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
-			assert(message->schemaitem().has_loopbackitem());
+			assert(message->HasExtension(Proto::schemaitem));
+			
 			return false;
+		}
+
+		auto schemaItemMessage = message->MutableExtension(Proto::schemaitem);
+		if (schemaItemMessage->has_loopbackitem() == false)
+		{
+			assert(schemaItemMessage->has_loopbackitem());
 		}
 
 		// --
 		//
-		Proto::SchemaItemLoopbackTarget* target = message->mutable_schemaitem()->mutable_loopbacktarget();
-		Q_UNUSED(target);
+		[[maybe_unused]] Proto::SchemaItemLoopbackTarget* target = schemaItemMessage->mutable_loopbacktarget();
 
 		return true;
 	}
@@ -300,13 +305,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemaitem().has_loopbacktarget() == false)
+		if (message.GetExtension(Proto::schemaitem).has_loopbacktarget() == false)
 		{
-			assert(message.schemaitem().has_loopbacktarget() == true);
+			assert(message.GetExtension(Proto::schemaitem).has_loopbacktarget() == true);
 			return false;
 		}
 
-		const Proto::SchemaItemLoopbackTarget& target = message.schemaitem().loopbacktarget();
+		const Proto::SchemaItemLoopbackTarget& target = message.GetExtension(Proto::schemaitem).loopbacktarget();
 		Q_UNUSED(target);
 
 		return true;

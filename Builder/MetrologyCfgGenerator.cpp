@@ -3,7 +3,8 @@
 #include "SoftwareSettingsGetter.h"
 #include "DeviceHelper.h"
 
-#include "../HardwareLib/DeviceObject.h"
+#include <HardwareLib/DeviceObject.h>
+
 #include "../UtilsLib/XmlHelper.h"
 #include "../OnlineLib/SoftwareSettings.h"
 

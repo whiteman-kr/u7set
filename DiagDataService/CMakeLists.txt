@@ -98,7 +98,7 @@ target_include_directories(${TARGET} PRIVATE ./../asio/include)
 target_compile_definitions(${TARGET} PRIVATE ASIO_STANDALONE=1)
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Network Qt6::Widgets Qt6::Qml Qt6::Xml)
-target_link_libraries(${TARGET} PRIVATE HardwareLib AppSignalLib OnlineLib ServiceLib)
+target_link_libraries(${TARGET} PRIVATE HardwareLib AppSignalLib OnlineLib ServiceLib DiagStateLib) 
 
 # Link Visaul Leak Detector
 #

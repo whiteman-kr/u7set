@@ -4,8 +4,8 @@
 #include "../UtilsLib/XmlHelper.h"
 #include "../UtilsLib/WUtils.h"
 
-#include "../HardwareLib/Connection.h"
-#include "../HardwareLib/ConnectionsInfo.h"
+#include <HardwareLib/Connection.h>
+#include <HardwareLib/ConnectionsInfo.h>
 
 
 class ConnectionsInfoWriter : public ConnectionsInfo

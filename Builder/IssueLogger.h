@@ -194,8 +194,9 @@ namespace Builder
 
 		void errCFG3060(QString subSysID, int value, int max, int min);	// Subsystem %1 key has wrong value (%2), valid range is %3..%4.
 
-		void errCFG3100(QString equipmentId, int devicePresetVersion, QString presetName, int presetVersion);		// Device %1 has preset version mismatch (%1.PresetVersion = %2, %3.PresetVersion = %4). For updating presets select 'Update from Preset' in Equipment Editor.
-		void wrnCFG3101(QString equipmentId, int devicePresetVersion, QString presetName, int presetVersion);		// Device %1 has preset version mismatch (%1.PresetVersion = %2, %3.PresetVersion = %4). For updating presets select 'Update from Preset' in Equipment Editor.
+		void errCFG3100(QString equipmentId, int devicePresetVersion, QString presetName, int presetVersion);	// Device %1 has preset version mismatch (%1.PresetVersion = %2, %3.PresetVersion = %4). For updating presets select 'Update from Preset' in Equipment Editor.
+		void wrnCFG3101(QString equipmentId, int devicePresetVersion, QString presetName, int presetVersion);	// Device %1 has preset version mismatch (%1.PresetVersion = %2, %3.PresetVersion = %4). For updating presets select 'Update from Preset' in Equipment Editor.
+		void wrnCFG3102(QString equipmentId); // Device % 1 is excluded from build.
 
 		void errCFG3103(int LMNumber, QString module1, QString module2);	// Property System\\LMNumber (%1) is not unique in logic modules %2 and %3.
 

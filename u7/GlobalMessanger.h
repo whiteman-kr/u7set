@@ -1,8 +1,8 @@
 #ifndef GLOBALMESSANGER_H
 #define GLOBALMESSANGER_H
 
+#include <DbLib/DbStruct.h>
 #include "../UtilsLib/OutputLog.h"
-#include "../DbLib/DbStruct.h"
 #include "../Builder/IssueLogger.h"
 #include "../Builder/RunOrder.h"
 

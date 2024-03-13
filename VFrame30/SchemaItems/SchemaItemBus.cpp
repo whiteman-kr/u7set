@@ -28,16 +28,16 @@ namespace VFrame30
 	{
 		bool result = FblItemRect::SaveData(message);
 
-		if (result == false || message->has_schemaitem() == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 
 		// --
 		//
-		Proto::SchemaItemBus* busitem = message->mutable_schemaitem()->mutable_busitem();
+		Proto::SchemaItemBus* busitem = message->MutableExtension(Proto::schemaitem)->mutable_busitem();
 
 		busitem->set_bustypeid(m_bus.busTypeId().toStdString());
 		busitem->set_bustypehash(m_busTypeHash);
@@ -58,13 +58,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemaitem().has_busitem() == false)
+		if (message.GetExtension(Proto::schemaitem).has_busitem() == false)
 		{
-			assert(message.schemaitem().has_busitem() == true);
+			assert(message.GetExtension(Proto::schemaitem).has_busitem() == true);
 			return false;
 		}
 
-		const Proto::SchemaItemBus& busitem = message.schemaitem().busitem();
+		const Proto::SchemaItemBus& busitem = message.GetExtension(Proto::schemaitem).busitem();
 
 		m_bus.setBusTypeId(QString::fromStdString(busitem.bustypeid()));
 		m_busTypeHash = busitem.bustypehash();
@@ -162,16 +162,16 @@ namespace VFrame30
 		bool result = SchemaItemBus::SaveData(message);
 
 		if (result == false ||
-			message->has_schemaitem() == false)
+			message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 
 		// --
 		//
-		Proto::SchemaItemBusComposer* composer = message->mutable_schemaitem()->mutable_buscomposer();
+		Proto::SchemaItemBusComposer* composer = message->MutableExtension(Proto::schemaitem)->mutable_buscomposer();
 
 		Q_UNUSED(composer);
 //		composer->set_pincount(m_pinCount);
@@ -189,13 +189,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemaitem().has_buscomposer() == false)
+		if (message.GetExtension(Proto::schemaitem).has_buscomposer() == false)
 		{
-			assert(message.schemaitem().has_buscomposer() == true);
+			assert(message.GetExtension(Proto::schemaitem).has_buscomposer() == true);
 			return false;
 		}
 
-		const Proto::SchemaItemBusComposer& composer = message.schemaitem().buscomposer();
+		const Proto::SchemaItemBusComposer& composer = message.GetExtension(Proto::schemaitem).buscomposer();
 		Q_UNUSED(composer);
 
 		return true;
@@ -301,12 +301,14 @@ namespace VFrame30
 		Q_UNUSED(devicePixelRatio);
 
 		QString html = QString(
-R"(<p><b>BusComposer:</b> Create a bus signal</p>
+R"(<p><b>BusComposer:</b> Creates a bus signal</p>
 <p><b>BustTypeID:</b> %1</p>
 <p><b>Inputs:</b></p>)")
 .arg(busTypeId());
 
-		QString busSignals="<ul style=\"list-style-type:none\">";
+		html += "<table>";
+
+		QString divider = QChar(0x2502);
 
 		for (const AppSignalLib::BusSignal& busSignal : bus().busSignals())
 		{
@@ -336,13 +338,32 @@ R"(<p><b>BusComposer:</b> Create a bus signal</p>
 				break;
 			}
 
-			busSignals += QString("<li>%1  Type: %2</li>")
-						  .arg(busSignal.signalId())
-						  .arg(type);
-		}
-		busSignals += "</ul>";
+			QString stringPlacement;
+			if (bus().autoSignalPlacement() == true)
+			{
+				stringPlacement = tr("Auto");
+			}
+			else
+			{
+				if (busSignal.type() == E::SignalType::Discrete)
+				{
+					stringPlacement = tr("Offset %1, Bit %2").arg(busSignal.inbusOffset()).arg(busSignal.inbusDiscreteBitNo());
+				}
+				else
+				{
+					stringPlacement = tr("Offset %1").arg(busSignal.inbusOffset());
+				}
+			}
 
-		html += busSignals;
+			html += QString("<tr><td>  %2  </td><td>%1  %3  </td><td>%1  %4  </td><td>%1  %5  </td></tr>")
+				.arg(divider)
+				.arg(busSignal.signalId())
+				.arg(busSignal.caption())
+				.arg(type)
+				.arg(stringPlacement);
+		}
+
+		html += "</table>";
 
 		return html;
 	}
@@ -409,16 +430,16 @@ R"(<p><b>BusComposer:</b> Create a bus signal</p>
 		bool result = SchemaItemBus::SaveData(message);
 
 		if (result == false ||
-			message->has_schemaitem() == false)
+			message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 
 		// --
 		//
-		Proto::SchemaItemBusExtractor* extractor = message->mutable_schemaitem()->mutable_busextractor();
+		Proto::SchemaItemBusExtractor* extractor = message->MutableExtension(Proto::schemaitem)->mutable_busextractor();
 
 		// Save specific properties' values
 		//
@@ -446,13 +467,13 @@ R"(<p><b>BusComposer:</b> Create a bus signal</p>
 
 		// --
 		//
-		if (message.schemaitem().has_busextractor() == false)
+		if (message.GetExtension(Proto::schemaitem).has_busextractor() == false)
 		{
-			assert(message.schemaitem().has_busextractor() == true);
+			assert(message.GetExtension(Proto::schemaitem).has_busextractor() == true);
 			return false;
 		}
 
-		const Proto::SchemaItemBusExtractor& extractor = message.schemaitem().busextractor();
+		const Proto::SchemaItemBusExtractor& extractor = message.GetExtension(Proto::schemaitem).busextractor();
 
 		// Load specific properties' values. They are already exists after calling setBus
 		//
@@ -590,12 +611,14 @@ R"(<p><b>BusComposer:</b> Create a bus signal</p>
 		Q_UNUSED(devicePixelRatio);
 
 		QString html = QString(
-R"(<p><b>BusExtractor:</b> Get signal(s) from a bus</p>
+R"(<p><b>BusExtractor:</b> Gets signal(s) from a bus</p>
 <p><b>BustTypeID:</b> %1</p>
 <p><b>Outputs:</b></p>)")
 .arg(busTypeId());
 
-		QString busSignals="<ul style=\"list-style-type:none\">";
+		html += "<table>";
+
+		QString divider = QChar(0x2502);
 
 		for (const AppSignalLib::BusSignal& busSignal : bus().busSignals())
 		{
@@ -625,13 +648,32 @@ R"(<p><b>BusExtractor:</b> Get signal(s) from a bus</p>
 				break;
 			}
 
-			busSignals += QString("<li>%1  Type: %2</li>")
-						  .arg(busSignal.signalId())
-						  .arg(type);
-		}
-		busSignals += "</ul>";
+			QString stringPlacement;
+			if (bus().autoSignalPlacement() == true)
+			{
+				stringPlacement = tr("Auto");
+			}
+			else
+			{
+				if (busSignal.type() == E::SignalType::Discrete)
+				{
+					stringPlacement = tr("Offset %1, Bit %2").arg(busSignal.inbusOffset()).arg(busSignal.inbusDiscreteBitNo());
+				}
+				else
+				{
+					stringPlacement = tr("Offset %1").arg(busSignal.inbusOffset());
+				}
+			}
 
-		html += busSignals;
+			html += QString("<tr><td>  %2  </td><td>%1  %3  </td><td>%1  %4  </td><td>%1  %5  </td></tr>")
+				.arg(divider)
+				.arg(busSignal.signalId())
+				.arg(busSignal.caption())
+				.arg(type)
+				.arg(stringPlacement);
+		}
+
+		html += "</table>";
 
 		return html;
 	}

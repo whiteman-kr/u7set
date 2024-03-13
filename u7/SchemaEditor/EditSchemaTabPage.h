@@ -50,6 +50,7 @@ signals:
 	void vcsFileStateChanged();
 	void aboutToClose(EditSchemaTabPage*);
 	void pleaseDetachOrAttachWindow(EditSchemaTabPage*);
+	void fileWasSaved(QString schemaDetails);
 
 public slots:
 	void detachOrAttachWindow();

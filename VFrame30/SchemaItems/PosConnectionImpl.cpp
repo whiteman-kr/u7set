@@ -54,16 +54,16 @@ namespace VFrame30
 	bool PosConnectionImpl::SaveData(Proto::Envelope* message) const
 	{
 		bool result = SchemaItem::SaveData(message);
-		if (result == false || message->has_schemaitem() == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 
 		// --
 		//
-		Proto::PosConnectionImpl* posConnectionImplMessage = message->mutable_schemaitem()->mutable_posconnectionimpl();
+		Proto::PosConnectionImpl* posConnectionImplMessage = message->MutableExtension(Proto::schemaitem)->mutable_posconnectionimpl();
 
 		// Сохранить точки
 		//
@@ -80,9 +80,9 @@ namespace VFrame30
 
 	bool PosConnectionImpl::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemaitem() == false)
+		if (message.HasExtension(Proto::schemaitem) == false)
 		{
-			assert(message.has_schemaitem());
+			assert(message.HasExtension(Proto::schemaitem));
 			return false;
 		}
 
@@ -96,13 +96,13 @@ namespace VFrame30
 		
 		//--
 		//
-		if (message.schemaitem().has_posconnectionimpl() == false)
+		if (message.GetExtension(Proto::schemaitem).has_posconnectionimpl() == false)
 		{
-			assert(message.schemaitem().has_posconnectionimpl());
+			assert(message.GetExtension(Proto::schemaitem).has_posconnectionimpl());
 			return false;
 		}
 
-		const Proto::PosConnectionImpl& posConnectionImplMessage = message.schemaitem().posconnectionimpl();
+		const Proto::PosConnectionImpl& posConnectionImplMessage = message.GetExtension(Proto::schemaitem).posconnectionimpl();
 
 		points.clear();
 		for (int i = 0; i < posConnectionImplMessage.points().size(); i++)

@@ -1,6 +1,7 @@
 #include "DialogBusEditor.h"
 #include "Settings.h"
 #include "../lib/PropertyEditorDialog.h"
+#include "../lib/StandardColors.h"
 
 //
 // DialogBusEditor
@@ -577,7 +578,7 @@ void DialogBusEditor::onPaste()
 	{
 		const Proto::Envelope& envelope = envelopeSet.items(i);
 
-		if (envelope.has_bus() == false)
+		if (envelope.HasExtension(Proto::bus) == false)
 		{
 			Q_ASSERT(false);
 			continue;
@@ -1588,17 +1589,37 @@ void DialogBusEditor::updateBusTreeItemText(QTreeWidgetItem* item)
 
 	DbFileInfo fi = m_busses.fileInfo(uuid);
 
+	QBrush b(StandardColors::VcsCheckedIn);
+
 	if (fi.state() == E::VcsState::CheckedOut)
 	{
 		item->setText(1, E::valueToString<E::VcsItemAction>(fi.action()));
 
 		int userId = fi.userId();
 		item->setText(2, m_db->username(userId));
+
+		switch (fi.action())
+		{
+		case E::VcsItemAction::Added:
+			b.setColor(StandardColors::VcsAdded);
+			break;
+		case E::VcsItemAction::Modified:
+			b.setColor(StandardColors::VcsModified);
+			break;
+		case E::VcsItemAction::Deleted:
+			b.setColor(StandardColors::VcsDeleted);
+			break;
+		}
 	}
 	else
 	{
 		item->setText(1, "");
 		item->setText(2, "");
+	}
+
+	for (int i = 0; i < m_busTree->header()->count(); i++)
+	{
+		item->setBackground(i, b);
 	}
 
 	return;

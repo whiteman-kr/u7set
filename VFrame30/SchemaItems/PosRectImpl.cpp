@@ -62,16 +62,16 @@ namespace VFrame30
 	bool PosRectImpl::SaveData(Proto::Envelope* message) const
 	{
 		bool result = SchemaItem::SaveData(message);
-		if (result == false || message->has_schemaitem() == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 
 		// --
 		//
-		Proto::PosRectImpl* posRectImplMessage = message->mutable_schemaitem()->mutable_posrectimpl();
+		Proto::PosRectImpl* posRectImplMessage = message->MutableExtension(Proto::schemaitem)->mutable_posrectimpl();
 
 		posRectImplMessage->set_leftdocpt(m_leftDocPt);
 		posRectImplMessage->set_topdocpt(m_topDocPt);
@@ -83,9 +83,9 @@ namespace VFrame30
 
 	bool PosRectImpl::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemaitem() == false)
+		if (message.HasExtension(Proto::schemaitem) == false)
 		{
-			assert(message.has_schemaitem());
+			assert(message.HasExtension(Proto::schemaitem));
 			return false;
 		}
 		
@@ -98,13 +98,13 @@ namespace VFrame30
 		}
 
 		// --
-		if (message.schemaitem().has_posrectimpl() == false)
+		if (message.GetExtension(Proto::schemaitem).has_posrectimpl() == false)
 		{
-			assert(message.schemaitem().has_posrectimpl());
+			assert(message.GetExtension(Proto::schemaitem).has_posrectimpl());
 			return false;
 		}
 
-		const Proto::PosRectImpl& posRectImplMessage = message.schemaitem().posrectimpl();
+		const Proto::PosRectImpl& posRectImplMessage = message.GetExtension(Proto::schemaitem).posrectimpl();
 
 		m_leftDocPt = posRectImplMessage.leftdocpt();
 		m_topDocPt = posRectImplMessage.topdocpt();

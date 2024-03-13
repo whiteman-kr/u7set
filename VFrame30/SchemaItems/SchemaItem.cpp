@@ -86,7 +86,7 @@ namespace VFrame30
 
 		message->set_classnamehash(classnamehash);	// ������������ ����, �� ����� ������, �� ���� ����������������� �����.
 
-		Proto::SchemaItem* schemaItem = message->mutable_schemaitem();
+		Proto::SchemaItem* schemaItem = message->MutableExtension(Proto::schemaitem);
 
 		Proto::Write(schemaItem->mutable_uuid(), m_guid);
 		schemaItem->set_isstatic(m_static);
@@ -110,13 +110,13 @@ namespace VFrame30
 
 	bool SchemaItem::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemaitem() == false)
+		if (message.HasExtension(Proto::schemaitem) == false)
 		{
-			assert(message.has_schemaitem());
+			assert(message.HasExtension(Proto::schemaitem));
 			return false;
 		}
 
-		const Proto::SchemaItem& schemaitem = message.schemaitem();
+		const Proto::SchemaItem& schemaitem = message.GetExtension(Proto::schemaitem);
 
 		m_guid = Proto::Read(schemaitem.uuid());
 		m_static = schemaitem.isstatic();
@@ -142,9 +142,9 @@ namespace VFrame30
 	{
 		// this func can create just one instance
 		//
-		if (message.has_schemaitem() == false)
+		if (message.HasExtension(Proto::schemaitem) == false)
 		{
-			assert(message.has_schemaitem());
+			assert(message.HasExtension(Proto::schemaitem));
 			return nullptr;
 		}
 

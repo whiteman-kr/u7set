@@ -269,7 +269,8 @@ bool TuningModelSorter::sortFunction(const TuningModelHashSet& set1, const Tunin
 
 TuningModel::TuningModel(TuningSignalManager& tuningSignalManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent)
 	:QAbstractTableModel(parent),
-	  m_tuningSignalManager(tuningSignalManager)
+	m_tuningSignalManager(tuningSignalManager),
+	m_parentWidget(parent)
 {
 	// Fill column names
 
@@ -387,7 +388,9 @@ void TuningModel::setHashes(std::vector<Hash>& hashes)
 	{
 		// Multi channel mode - hashes are distributed to sets by channels
 
-		m_generalHashToHashSetMap.clear();
+		std::map<Hash, Hash> hashToGeneralHashMap;
+		std::map<Hash, TuningModelHashSet> generalHashToHashSetMap;
+		int ambiguousHashes = 0;
 
 		for (const Hash& hash : m_allHashes)
 		{
@@ -395,83 +398,68 @@ void TuningModel::setHashes(std::vector<Hash>& hashes)
 
 			int hashChannel = -1;
 
-			auto hashChannelIt = m_hashToChannelMap.find(hash);
-			if (hashChannelIt == m_hashToChannelMap.end())
+			bool ok = false;
+
+			AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
+
+			QString appSignalId = asp.appSignalId();
+
+			for (int c = 0; c < channelCount; c++)
 			{
-				// Channel is unknown, try to determine it
+				const QStringList& channelSuffxes = m_valueColumnAppSignalIdSuffixes[c];
 
-				bool ok = false;
-
-				AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
-
-				QString appSignalId = asp.appSignalId();
-
-				hashChannel = -1;
-
-				for (int c = 0; c < channelCount; c++)
+				for (const QString& suffix : channelSuffxes)
 				{
-					const QStringList& channelSuffxes = m_valueColumnAppSignalIdSuffixes[c];
+					// Get separate parts of suffix set, separated by '+'. Example TZB5_GENERAL_1SF will give TZB5+_1SF
 
-					for (const QString& suffix : channelSuffxes)
+					QStringList suffixSet = suffix.split('+', Qt::SkipEmptyParts);
+
+					if (suffixSet.isEmpty() == true)
 					{
-						// Get separate parts of suffix set, separated by '+'. Example TZB5_GENERAL_1SF will give TZB5+_1SF
+						continue;
+					}
 
-						QStringList suffixSet = suffix.split('+', Qt::SkipEmptyParts);
+					bool containsSuffix = true;
 
-						if (suffixSet.isEmpty() == true)
+					for (const QString& suffixPart : suffixSet)
+					{
+						if (appSignalId.contains(suffixPart) == false)
 						{
-							continue;
+							containsSuffix = false;
+							break;
 						}
+					}
 
-						bool containsSuffix = true;
+					if (containsSuffix == false)
+					{
+						continue;
+					}
+
+					hashChannel = c;
+
+					// Calculate general hash (without suffix) and put in into mapped cache
+
+					auto hashGeneralHashIt = hashToGeneralHashMap.find(hash);
+
+					if (hashGeneralHashIt == hashToGeneralHashMap.end())
+					{
+						QString generalAppSignalId = appSignalId;
 
 						for (const QString& suffixPart : suffixSet)
 						{
-							if (appSignalId.contains(suffixPart) == false)
-							{
-								containsSuffix = false;
-								break;
-							}
+							generalAppSignalId.remove(suffixPart);
 						}
 
-						if (containsSuffix == false)
-						{
-							continue;
-						}
-
-						hashChannel = c;
-
-						// Calculate general hash (without suffix) and put in into mapped cache
-
-						auto hashGeneralHashIt = m_hashToGeneralHashMap.find(hash);
-
-						if (hashGeneralHashIt == m_hashToGeneralHashMap.end())
-						{
-							QString generalAppSignalId = appSignalId;
-
-							for (const QString& suffixPart : suffixSet)
-							{
-								generalAppSignalId.remove(suffixPart);
-							}
-
-							m_hashToGeneralHashMap[hash] = ::calcHash(generalAppSignalId);
-
-						}
-
-						break;
+						hashToGeneralHashMap[hash] = ::calcHash(generalAppSignalId);
 					}
 
-					if (hashChannel != -1)
-					{
-						break;
-					}
+					break;
 				}
 
-				m_hashToChannelMap[hash] = hashChannel;
-			}
-			else
-			{
-				hashChannel = hashChannelIt->second;		// Channel is already cached
+				if (hashChannel != -1)
+				{
+					break;
+				}
 			}
 
 			if (hashChannel == -1)
@@ -481,55 +469,40 @@ void TuningModel::setHashes(std::vector<Hash>& hashes)
 
 			if (hashChannel < 0 || hashChannel >= channelCount)
 			{
-				assert(false);
+				Q_ASSERT(false);
 				return;
 			}
 
-			// Get generalHash
+			//
 
-			Hash generalHash = UNDEFINED_HASH;
-
-			auto hashGeneralHashIt = m_hashToGeneralHashMap.find(hash);
-
-			if (hashGeneralHashIt == m_hashToGeneralHashMap.end())
-			{
-				assert(false);		// General hash must be calculated earlier
-				continue;
-			}
-			else
-			{
-				generalHash = hashGeneralHashIt->second;		// General hash is already cached
-			}
+			Hash generalHash = hashToGeneralHashMap.at(hash);	// it SHOULD BE calculated earlier
 
 			// Find a set that contains other channels of this signal (key is general hash), or create a new one if not found
 
-			auto hashSetIt = m_generalHashToHashSetMap.find(generalHash);
-			if (hashSetIt == m_generalHashToHashSetMap.end())
+			TuningModelHashSet& set = generalHashToHashSetMap[generalHash];
+			if (set.hash[hashChannel] != UNDEFINED_HASH)
 			{
-				TuningModelHashSet set;
-
-				for (int c = 0; c < MAX_VALUES_COLUMN_COUNT; c++)
-				{
-					set.hash[c] = UNDEFINED_HASH;
-				}
-				set.hash[hashChannel] = hash;
-
-				m_generalHashToHashSetMap[generalHash] = set;
+				ambiguousHashes++;	// There is already assigned hash here!
+				continue;
 			}
-			else
-			{
-				TuningModelHashSet& set = hashSetIt->second;
-
-				set.hash[hashChannel] = hash;
-			}
+			set.hash[hashChannel] = hash;
 		}
 
 		// Copy map data to hashSets
 
-		hashSets.reserve(m_generalHashToHashSetMap.size());
-		for (auto setIt : m_generalHashToHashSetMap)
+		hashSets.reserve(generalHashToHashSetMap.size());
+		for (const auto& setIt : generalHashToHashSetMap)
 		{
 			hashSets.push_back(setIt.second);
+		}
+
+
+		if (ambiguousHashes > 0) 
+		{
+			QMessageBox::critical(
+				m_parentWidget,
+				qAppName(),
+				tr("Error: %1 ambiguous signal to columns allocations occured!\n\nPlease recheck columns suffixes configuration in the project.").arg(ambiguousHashes));
 		}
 	}
 

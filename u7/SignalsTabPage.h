@@ -3,7 +3,7 @@
 #include <QStyledItemDelegate>
 #include <QSortFilterProxyModel>
 
-#include "../DbLib/DbController.h"
+#include <DbLib/DbController.h>
 #include "../lib/QDoublevalidatorEx.h"
 #include "../lib/StandardColors.h"
 

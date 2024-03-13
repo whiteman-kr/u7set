@@ -1,8 +1,8 @@
 #pragma once
 
-//#include "../CommonLib/HashedVector.h"
-#include "../HardwareLib/Afb.h"
-#include "../HardwareLib/LmDescription.h"
+#include <HardwareLib/Afb.h>
+#include <HardwareLib/LmDescription.h>
+
 #include "../VFrame30/SchemaItems/FblItem.h"
 #include "../VFrame30/SchemaItems/FblItemRect.h"
 #include "../VFrame30/SchemaItems/SchemaItemAfb.h"

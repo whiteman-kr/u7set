@@ -1,5 +1,12 @@
 #include "SoftwareSettingsGetter.h"
-#include "../HardwareLib/LanControllerInfo.h"
+
+#include <HardwareLib/LanControllerInfo.h>
+#include <HardwareLib/DeviceController.h>
+#include <HardwareLib/Workstation.h>
+
+#include "../lib/DataSource.h"
+#include "../TuningService/TuningSource.h"
+
 #include "LanControllerInfoHelper.h"
 
 // -------------------------------------------------------------------------------------

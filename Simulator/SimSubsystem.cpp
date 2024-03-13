@@ -1,7 +1,8 @@
 #include "SimSubsystem.h"
 #include "Simulator.h"
 #include "SimConnections.h"
-#include "../HardwareLib/ModuleFirmware.h"
+
+#include <HardwareLib/ModuleFirmware.h>
 
 namespace Sim
 {

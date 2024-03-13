@@ -1,17 +1,31 @@
 #include "EquipmentView.h"
+
+#include <HardwareLib/DeviceSystem.h>
+#include <HardwareLib/DeviceRack.h>
+#include <HardwareLib/DeviceChassis.h>
+#include <HardwareLib/DeviceModule.h>
+#include <HardwareLib/DeviceController.h>
+#include <HardwareLib/DiagSignal.h>
+#include <HardwareLib/DeviceAppSignal.h>
+#include <HardwareLib/Workstation.h>
+#include <HardwareLib/Software.h>
+#include <HardwareLib/PropertyNames.h>
+#include <HardwareLib/HardwareLibrary.h>
+
+#include <DbLib/DbControllerTools.h>
+
 #include "../../Builder/SubsystemStorage.h"
-#include "../../HardwareLib/PropertyNames.h"
-#include "../DbLib/DbWorker.h"
 #include "../DialogConnections.h"
 #include "../Forms/CompareDialog.h"
 #include "../Forms/DialogUpdateFromPreset.h"
 #include "../Forms/FileHistoryDialog.h"
 #include "../GlobalMessanger.h"
-#include "../HardwareLib/DiagSignal.h"
 #include "../SchemaEditor/CreateSignalDialog.h"
 #include "../SignalsTabPage.h"
+
 #include "DialogChoosePreset.h"
 #include "EquipmentModel.h"
+
 
 //
 //
@@ -837,7 +851,7 @@ void EquipmentView::choosePreset(Hardware::DeviceType type)
 
 	for (std::shared_ptr<DbFile>& f : files)
 	{
-		auto object = DbWorker::deviceObjectFromDbFile(*f);
+		auto object = DbControllerTools::deviceObjectFromDbFile(*f);
 		Q_ASSERT(object != nullptr);
 
 		presets.push_back(object);
@@ -1808,7 +1822,7 @@ void EquipmentView::copySelectedDevices()
 
 	for (std::shared_ptr<Hardware::DeviceObject> device : latestDevices)
 	{
-		::Proto::Envelope* protoDevice = message.add_items();
+		auto protoDevice = message.add_items();
 		device->SaveObjectTree(protoDevice);
 
 		descriptionMessage.add_classnamehash(protoDevice->classnamehash());
@@ -1938,7 +1952,7 @@ void EquipmentView::pasteDevices()
 }
 
 void EquipmentView::pasteDevices(const ::Proto::EnvelopeSet& messageItems,
-								 const Proto::EnvelopeSetShortDescription& messageDescr,
+								 const ::Proto::EnvelopeSetShortDescription& messageDescr,
 								 bool newUuids)		// Generate UUIDs is false for importing presets. Preset has PresetObjectUuid which is used for matching preset and its' equipment
 {
 	QModelIndex parentModelIndex;		// current is root
@@ -2114,7 +2128,7 @@ bool EquipmentView::canPaste(const ::Proto::EnvelopeSetShortDescription& message
 	{
 		quint32 classNameHash = message.classnamehash(i);
 
-		bool canCreateInstance = Hardware::DeviceObjectFactory.isRegistered(classNameHash);
+		bool canCreateInstance = Hardware::canCreateDevice(classNameHash);
 		if (canCreateInstance == false)
 		{
 			Q_ASSERT(canCreateInstance);
@@ -2356,7 +2370,6 @@ void EquipmentView::checkOutSelectedDevices()
 void EquipmentView::undoChangesSelectedDevices()
 {
 	QModelIndexList selected = selectionModel()->selectedRows();
-
 	if (selected.empty())
 	{
 		return;
@@ -2364,8 +2377,30 @@ void EquipmentView::undoChangesSelectedDevices()
 
 	// disable sending undoChangesDeviceObject::selectionChanged, as it can be called for many objects
 	//
-	const QSignalBlocker blocker(selectionModel());
-	Q_UNUSED(blocker);
+	[[maybe_unused]] const QSignalBlocker blocker{selectionModel()};
+
+	// Perform undo
+	//
+	equipmentModel()->undoChangesDeviceObject(selected);
+
+	// blocker will enable undoChangesDeviceObject::selectionChanged
+	//
+
+	emit updateState();
+	return;
+}
+
+void EquipmentView::undoChangesRecursively()
+{
+	QModelIndexList selected = selectionModel()->selectedRows();
+	if (selected.empty())
+	{
+		return;
+	}
+
+	// disable sending undoChangesDeviceObject::selectionChanged, as it can be called for many objects
+	//
+	[[maybe_unused]] const QSignalBlocker blocker{selectionModel()};
 
 	// Perform undo
 	//

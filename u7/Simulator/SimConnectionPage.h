@@ -1,7 +1,8 @@
 #pragma once
 #include "SimBasePage.h"
 #include "SimMemoryWidget.h"
-#include "../HardwareLib/ConnectionsInfo.h"
+
+#include <HardwareLib/ConnectionsInfo.h>
 
 class SimConnectionPage : public SimBasePage
 {

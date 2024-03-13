@@ -1,2 +1,3 @@
 BUMDG-41
 	05.02.2024	Version: 1	BUMDG-41_v1.u7devp		RPCT-3826:  Added preset
+	05.03.2024	Version: 2	BUMDG-41_v2.u7devp		RPCT-3826:  Added SVLT signal, some signal descriptions changed

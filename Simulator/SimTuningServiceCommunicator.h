@@ -3,7 +3,7 @@
 #include "../CommonLib/Times.h"
 #include "../UtilsLib/SimpleThread.h"
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../HardwareLib/LogicModulesInfo.h"
+#include <HardwareLib/LogicModulesInfo.h>
 #include "SimRam.h"
 #include "SimTuningRecord.h"
 

@@ -33,21 +33,21 @@ namespace VFrame30
 	bool UfbSchema::SaveData(Proto::Envelope* message) const
 	{
 		bool result = Schema::SaveData(message);
-
-		if (result == false || message->has_schema() == false)
+		if (result == false || message->HasExtension(Proto::schema) == false)
 		{
 			assert(result);
-			assert(message->has_schema());
+			assert(message->HasExtension(Proto::schema));
 			return false;
 		}
 
 		// --
 		//
-		Proto::UfbSchema* us = message->mutable_schema()->mutable_ufb_schema();
+		auto schemaMessage = message->MutableExtension(Proto::schema);
+		Proto::UfbSchema* us = schemaMessage->mutable_ufb_schema();
 
 		us->set_description(m_description.toStdString());
 
-		this->m_version++;		// Incerement version
+		this->m_version++;		// Increment version
 		us->set_version(m_version);
 		us->set_lmdescriptionfile(m_lmDescriptionFile.toStdString());
 		us->set_specific_properties_struct(m_specificPropertiesStruct.toStdString());
@@ -57,9 +57,9 @@ namespace VFrame30
 
 	bool UfbSchema::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schema() == false)
+		if (message.HasExtension(Proto::schema) == false)
 		{
-			assert(message.has_schema());
+			assert(message.HasExtension(Proto::schema));
 			return false;
 		}
 
@@ -73,13 +73,14 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schema().has_ufb_schema() == false)
+		const auto& schemaMessage = message.GetExtension(Proto::schema);
+		if (schemaMessage.has_ufb_schema() == false)
 		{
-			assert(message.schema().has_ufb_schema());
+			assert(schemaMessage.has_ufb_schema());
 			return false;
 		}
 
-		const Proto::UfbSchema& us = message.schema().ufb_schema();
+		const Proto::UfbSchema& us = schemaMessage.ufb_schema();
 
 		m_description = QString::fromStdString(us.description());
 		m_version = us.version();

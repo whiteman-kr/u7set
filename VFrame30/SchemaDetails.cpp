@@ -1,8 +1,7 @@
 #include "SchemaDetails.h"
+#include "IMatsSchemaItemAssociations.h"
 #include "./SchemaItems/SchemaItemAfb.h"
-#include "./SchemaItems/SchemaItemConnection.h"
 #include "./SchemaItems/SchemaItemIndicator.h"
-#include "./SchemaItems/SchemaItemLoopback.h"
 #include "LogicSchema.h"
 #include "PropertyNames.h"
 #include "Schema.h"
@@ -15,12 +14,12 @@ namespace VFrame30
 	//				SchemaDetails
 	//
 	//
-	SchemaDetails::SchemaDetails(const QString& details) noexcept
+	SchemaDetails::SchemaDetails(const QString& details)
 	{
 		parseDetails(details);
 	}
 
-	bool SchemaDetails::operator< (const SchemaDetails& b) const noexcept
+	bool SchemaDetails::operator< (const SchemaDetails& b) const
 	{
 		return this->m_schemaId < b.m_schemaId;
 	}
@@ -61,38 +60,24 @@ namespace VFrame30
 				{
 					// Items on LogicSchemas
 					//
-					if (schema->isLogicSchema() == true)
+					if (const auto* associations = dynamic_cast<const IMatsSchemaItemAssociations*>(item.get());
+						associations != nullptr)
 					{
-						if (const SchemaItemConnection* connItem = item->toType<SchemaItemConnection>();
-							connItem != nullptr)
+						for (const auto& connectionId : associations->associatedConnectionIds())
 						{
-							for (const auto& connectionIds = connItem->connectionIdsAsList();
-								 const QString & connectionId : connectionIds)
-							{
-								connections.insert(connectionId);
-							}
+							connections.insert(connectionId);
 						}
 
-						if (const SchemaItemReceiver* receiver = item->toType<SchemaItemReceiver>();
-							receiver != nullptr)
+						for (const auto& loopbackId : associations->associatedLoopbackIds())
 						{
-							for (const QString& appSignalId : receiver->appSignalIdsAsList())
-							{
-								signalIds << appSignalId;
-							}
+							loopbacks.insert(loopbackId);
 						}
+					}
 
-						if (const SchemaItemLoopback* lb = item->toType<SchemaItemLoopback>();
-							lb != nullptr)
-						{
-							loopbacks << lb->loopbackId();
-						}
-
-						if (const SchemaItemAfb* afb = item->toType<SchemaItemAfb>();
-							afb != nullptr && afb->isPackedLogic() == true)
-						{
-							packedLogicIds << afb->packedLogicId();
-						}
+					if (const SchemaItemAfb* afb = item->toType<SchemaItemAfb>();
+						afb != nullptr && afb->isPackedLogic() == true)
+					{
+						packedLogicIds << afb->packedLogicId();
 					}
 
 					// Items on all other schemas
@@ -223,6 +208,8 @@ namespace VFrame30
 		{
 			qDebug() << "Schema details parsing error: " << parseError.errorString();
 			qDebug() << "JSON document: " << details;
+
+			*this = {};
 			return false;
 		}
 
@@ -230,6 +217,8 @@ namespace VFrame30
 		{
 			assert(jsonDoc.isObject());		// have a look at json doc, it is supposed to be an object
 			qDebug() << Q_FUNC_INFO << " json is supposed to be object";
+
+			*this = {};
 			return false;
 		}
 
@@ -241,6 +230,7 @@ namespace VFrame30
 		if (versionInt == -1 ||
 			version.type() != QJsonValue::Double)
 		{
+			*this = {};
 			return false;
 		}
 
@@ -397,8 +387,10 @@ namespace VFrame30
 			break;
 		default:
 			assert(false);
+			*this = {};
 			return false;
 		}
+
 		return true;
 	}
 
@@ -463,7 +455,7 @@ namespace VFrame30
 
 		for (const auto& ti : m_trendsIndicators)
 		{
-			::Proto::SchemaDetails::TrendIndicatorSchemaItems* trendsIndicators = message->add_trendindicators();
+			::Proto::TrendIndicatorSchemaItems* trendsIndicators = message->add_trendindicators();
 			ti.saveData(trendsIndicators);
 		}
 
@@ -613,6 +605,11 @@ namespace VFrame30
 		return false;
 	}
 
+	bool SchemaDetails::isNull() const
+	{
+		return m_schemaId.isEmpty();
+	}
+
 	bool SchemaDetails::hasSchemaTag(const QString& tag) const
 	{
 		return m_schemaTags.find(tag.trimmed().toLower()) != m_schemaTags.end();
@@ -711,7 +708,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool SchemaDetails::TrendIndicatorSchemaItems::saveData(::Proto::SchemaDetails::TrendIndicatorSchemaItems* message) const
+	bool SchemaDetails::TrendIndicatorSchemaItems::saveData(::Proto::TrendIndicatorSchemaItems* message) const
 	{
 		Proto::Write(message->mutable_itemuuid(), itemUuid);
 		message->set_sampleperiod(static_cast<int>(samplePeriod));
@@ -726,7 +723,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool SchemaDetails::TrendIndicatorSchemaItems::loadData(const ::Proto::SchemaDetails::TrendIndicatorSchemaItems& message)
+	bool SchemaDetails::TrendIndicatorSchemaItems::loadData(const ::Proto::TrendIndicatorSchemaItems& message)
 	{
 		itemUuid = Proto::Read(message.itemuuid());
 		samplePeriod = static_cast<E::RtTrendsSamplePeriod>(message.sampleperiod());
@@ -750,10 +747,10 @@ namespace VFrame30
 	bool SchemaDetailsSet::SaveData(Proto::Envelope* envelopeMessage) const
 	{
 		std::string className = {"SchemaDetailsSet"};
-		quint32 classnamehash = ::ClassNameHashCode(className);
-		envelopeMessage->set_classnamehash(classnamehash);
+		quint32 classNameHash = ::ClassNameHashCode(className);
+		envelopeMessage->set_classnamehash(classNameHash);
 
-		::Proto::SchemaDetailsSet* setMessage = envelopeMessage->mutable_schemadetailsset();
+		::Proto::SchemaDetailsSet* setMessage = envelopeMessage->MutableExtension(Proto::schemaDetailsSet);
 
 		for (auto detailsPair : m_details)
 		{
@@ -768,13 +765,13 @@ namespace VFrame30
 	{
 		clear();
 
-		if (message.has_schemadetailsset() == false)
+		if (message.HasExtension(Proto::schemaDetailsSet) == false)
 		{
-			assert(message.has_schemadetailsset());
+			assert(message.HasExtension(Proto::schemaDetailsSet));
 			return false;
 		}
 
-		const Proto::SchemaDetailsSet& setMessage = message.schemadetailsset();
+		const Proto::SchemaDetailsSet& setMessage = message.GetExtension(Proto::schemaDetailsSet);
 
 		int detailsCount = setMessage.schemasdetails_size();
 		for (int i = 0; i < detailsCount; i++)

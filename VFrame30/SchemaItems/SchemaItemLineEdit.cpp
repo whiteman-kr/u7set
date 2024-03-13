@@ -103,19 +103,21 @@ namespace VFrame30
 	bool SchemaItemLineEdit::SaveData(Proto::Envelope* message) const
 	{
 		bool result = SchemaItemControl::SaveData(message);
-		if (result == false || message->has_schemaitem() == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 
-		assert(message->schemaitem().has_posrectimpl());
-		assert(message->schemaitem().has_control());
+		auto schemaItemMessage = message->MutableExtension(Proto::schemaitem);
+
+		assert(schemaItemMessage->has_posrectimpl());
+		assert(schemaItemMessage->has_control());
 		
 		// --
 		//
-		Proto::SchemaItemLineEdit* lineEditMessage = message->mutable_schemaitem()->mutable_lineedit();
+		Proto::SchemaItemLineEdit* lineEditMessage = schemaItemMessage->mutable_lineedit();
 
 		lineEditMessage->set_text(m_text.toStdString());
 		lineEditMessage->set_placeholdertext(m_placeholderText.toStdString());
@@ -137,37 +139,39 @@ namespace VFrame30
 
 	bool SchemaItemLineEdit::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemaitem() == false)
+		if (message.HasExtension(Proto::schemaitem) == false)
 		{
-			assert(message.has_schemaitem());
+			assert(message.HasExtension(Proto::schemaitem));
 			return false;
 		}
 
 		// --
 		//
+		const auto& schemaItemMessage = message.GetExtension(Proto::schemaitem);
+
 		bool result = SchemaItemControl::LoadData(message);
-		if (result == false || message.schemaitem().has_control() == false)
+		if (result == false || schemaItemMessage.has_control() == false)
 		{
-			assert(message.schemaitem().has_control());
+			assert(schemaItemMessage.has_control());
 			return false;
 		}
 
-		const Proto::SchemaItemLineEdit& lineEditMessagemessage = message.schemaitem().lineedit();
+		const Proto::SchemaItemLineEdit& lineEditMessage = schemaItemMessage.lineedit();
 
-		setText(QString::fromStdString(lineEditMessagemessage.text()));							// Text setters can have some string optimization for default values
-		setPlaceholderText(QString::fromStdString(lineEditMessagemessage.placeholdertext()));
+		setText(QString::fromStdString(lineEditMessage.text()));							// Text setters can have some string optimization for default values
+		setPlaceholderText(QString::fromStdString(lineEditMessage.placeholdertext()));
 
-		m_maxLength = lineEditMessagemessage.maxlength();
+		m_maxLength = lineEditMessage.maxlength();
 
-		m_horzAlign = static_cast<E::HorzAlign>(lineEditMessagemessage.horzalign());
-		m_vertAlign = static_cast<E::VertAlign>(lineEditMessagemessage.vertalign());
+		m_horzAlign = static_cast<E::HorzAlign>(lineEditMessage.horzalign());
+		m_vertAlign = static_cast<E::VertAlign>(lineEditMessage.vertalign());
 
-		m_readOnly = lineEditMessagemessage.readonly();
+		m_readOnly = lineEditMessage.readonly();
 
-		setScriptAfterCreate(QString::fromStdString(lineEditMessagemessage.scriptaftercreate()));			// Text setters can have some string optimization for default values
-		setScriptEditingFinished(QString::fromStdString(lineEditMessagemessage.scripteditingfinished()));	// Text setters can have some string optimization for default values
-		setScriptReturnPressed(QString::fromStdString(lineEditMessagemessage.scriptreturnpressed()));		// Text setters can have some string optimization for default values
-		setScriptTextChanged(QString::fromStdString(lineEditMessagemessage.scripttextchanged()));			// Text setters can have some string optimization for default values
+		setScriptAfterCreate(QString::fromStdString(lineEditMessage.scriptaftercreate()));			// Text setters can have some string optimization for default values
+		setScriptEditingFinished(QString::fromStdString(lineEditMessage.scripteditingfinished()));	// Text setters can have some string optimization for default values
+		setScriptReturnPressed(QString::fromStdString(lineEditMessage.scriptreturnpressed()));		// Text setters can have some string optimization for default values
+		setScriptTextChanged(QString::fromStdString(lineEditMessage.scripttextchanged()));			// Text setters can have some string optimization for default values
 
 		return true;
 	}

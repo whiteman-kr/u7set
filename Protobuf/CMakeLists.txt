@@ -39,28 +39,37 @@ endif (MSVC)
 set(TARGET Protobuf)
 
 qt_add_library(${TARGET} STATIC
+	../Proto/Afb.pb.cc
+	../Proto/Afb.pb.h
 	../Proto/AppSignal.pb.cc
 	../Proto/AppSignal.pb.h
 	../Proto/ArchSignal.pb.cc
 	../Proto/ArchSignal.pb.h
 	../Proto/BuildInfo.pb.cc
 	../Proto/BuildInfo.pb.h
+	../Proto/Bus.pb.cc
+	../Proto/Bus.pb.h
 	../Proto/Common.pb.cc
 	../Proto/Common.pb.h
 	../Proto/Comparator.pb.cc
 	../Proto/Comparator.pb.h
+	../Proto/Envelope.pb.cc
+	../Proto/Envelope.pb.h
+	../Proto/Hardware.pb.cc
+	../Proto/Hardware.pb.h
 	../Proto/Network.pb.cc
 	../Proto/Network.pb.h
+	../Proto/ProtoCommonHelper.cpp
+	../Proto/ProtoCommonHelper.h
 	../Proto/ProtoSerialization.cpp
 	../Proto/ProtoSerialization.h
-	../Proto/Serialization.pb.cc
-	../Proto/Serialization.pb.h
 	../Proto/Simulator.pb.cc
 	../Proto/Simulator.pb.h
 	../Proto/Trends.pb.cc
 	../Proto/Trends.pb.h
-	../Proto/ProtoCommonHelper.cpp
-	../Proto/ProtoCommonHelper.h
+	../Proto/VFrame30.pb.cc
+	../Proto/VFrame30.pb.h
+
 	google/protobuf/any.cc
 	google/protobuf/any.h
 	google/protobuf/any.pb.cc

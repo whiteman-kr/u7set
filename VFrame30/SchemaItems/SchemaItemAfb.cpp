@@ -457,16 +457,16 @@ namespace VFrame30
 	bool SchemaItemAfb::SaveData(Proto::Envelope* message) const
 	{
 		bool result = FblItemRect::SaveData(message);
-		if (result == false || message->has_schemaitem() == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 
 		// --
 		//
-		Proto::SchemaItemAfb* vifble = message->mutable_schemaitem()->mutable_afb();
+		Proto::SchemaItemAfb* vifble = message->MutableExtension(Proto::schemaitem)->mutable_afb();
 
 		vifble->set_precision(m_precision);
 		m_afbElement.saveToXml(vifble->mutable_afbelement());
@@ -481,9 +481,9 @@ namespace VFrame30
 
 	bool SchemaItemAfb::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemaitem() == false)
+		if (message.HasExtension(Proto::schemaitem) == false)
 		{
-			assert(message.has_schemaitem());
+			assert(message.HasExtension(Proto::schemaitem));
 			return false;
 		}
 
@@ -497,13 +497,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemaitem().has_afb() == false)
+		if (message.GetExtension(Proto::schemaitem).has_afb() == false)
 		{
-			assert(message.schemaitem().has_afb());
+			assert(message.GetExtension(Proto::schemaitem).has_afb());
 			return false;
 		}
 
-		const Proto::SchemaItemAfb& vifble = message.schemaitem().afb();
+		const Proto::SchemaItemAfb& vifble = message.GetExtension(Proto::schemaitem).afb();
 
 		m_precision = vifble.precision();
 

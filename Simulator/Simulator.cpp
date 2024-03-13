@@ -1,12 +1,12 @@
 #include "Simulator.h"
-#include "../HardwareLib/ModuleFirmware.h"
-#include "../HardwareLib/LogicModulesInfo.h"
 #include "SimScriptRamAddress.h"
 #include "SimScriptLogicModule.h"
 #include "SimScriptSignal.h"
 #include "SimScriptDevUtils.h"
 #include "SimScopedLog.h"
 
+#include <HardwareLib/ModuleFirmware.h>
+#include <HardwareLib/LogicModulesInfo.h>
 
 namespace Sim
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../DiagStateLib/IDiagStateManager.h"
+#include <DiagStateLib/IDiagStateManager.h>
 
 
 namespace VFrame30

@@ -1,7 +1,11 @@
 #pragma once
 
 #include <QJSEngine>
+
+#include <HardwareLib/DeviceModule.h>
+
 #include "../lib/TuningDataStorage.h"
+
 #include "Context.h"
 #include "TuningBuilder.h"
 #include "OptoModule.h"
@@ -206,6 +210,10 @@ namespace Builder
 
 		void findFSCConfigurationModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out) const;
 		void findModulesByFamily(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out, Hardware::DeviceModule::FamilyType family) const;
+
+		// Remove excluded devices from the equipment.
+		//
+		bool removeExcludedDevices(Hardware::DeviceObject* parent);
 
 		// Expand Devices StrId
 		//

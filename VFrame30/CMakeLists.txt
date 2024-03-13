@@ -101,8 +101,6 @@ qt_add_library(${TARGET} STATIC
 	ClientSchemaView.h
 	ClientSchemaWidget.cpp
 	ClientSchemaWidget.h
-	Configuration.cpp
-	Configuration.h
 	Context.cpp
 	Context.h
 	DiagSchema.cpp
@@ -226,6 +224,7 @@ target_precompile_headers(${TARGET} PRIVATE
 
 		"../Proto/ProtoSerialization.h"
 		"../Proto/ProtoCommonHelper.h"
+		"../Proto/VFrame30.pb.h"
 
 		"../AppSignalLib/AppSignalParam.h"
 		"../AppSignalLib/AppSignalState.h"

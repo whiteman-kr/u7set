@@ -1,9 +1,8 @@
 #pragma once
 #include "VFrame30Types.h"
-#include "SchemaView.h"
 #include "Session.h"
-#include <QWidget>
 
+#include <QWidget>
 class QPainter;
 class QPaintDevice;
 

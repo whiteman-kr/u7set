@@ -3,6 +3,11 @@
 #include <optional>
 #include "../DrawParam.h"
 
+namespace Proto
+{
+	class ImageItem;
+}
+
 namespace VFrame30
 {
 	class ImageItem : public PropertyObject

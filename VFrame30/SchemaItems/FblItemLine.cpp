@@ -38,10 +38,10 @@ namespace VFrame30
 	bool FblItemLine::SaveData(Proto::Envelope* message) const
 	{
 		bool result = PosConnectionImpl::SaveData(message);
-		if (result == false || message->has_schemaitem() == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 
@@ -53,7 +53,7 @@ namespace VFrame30
 
 		// --
 		//
-		Proto::FblItemLine* itemMessage = message->mutable_schemaitem()->mutable_fblitemline();
+		Proto::FblItemLine* itemMessage = message->MutableExtension(Proto::schemaitem)->mutable_fblitemline();
 
 		itemMessage->set_weight(m_weight);
 		itemMessage->set_linecolor(m_lineColor.rgba());
@@ -64,9 +64,9 @@ namespace VFrame30
 
 	bool FblItemLine::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemaitem() == false)
+		if (message.HasExtension(Proto::schemaitem) == false)
 		{
-			assert(message.has_schemaitem());
+			assert(message.HasExtension(Proto::schemaitem));
 			return false;
 		}
 
@@ -86,13 +86,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemaitem().has_fblitemline() == false)
+		if (message.GetExtension(Proto::schemaitem).has_fblitemline() == false)
 		{
-			assert(message.schemaitem().has_fblitemline());
+			assert(message.GetExtension(Proto::schemaitem).has_fblitemline());
 			return false;
 		}
 		
-		const Proto::FblItemLine& itemMessage = message.schemaitem().fblitemline();
+		const Proto::FblItemLine& itemMessage = message.GetExtension(Proto::schemaitem).fblitemline();
 
 		m_weight = itemMessage.weight();
 		m_lineColor = itemMessage.linecolor();

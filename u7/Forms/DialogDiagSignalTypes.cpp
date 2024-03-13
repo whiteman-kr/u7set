@@ -431,7 +431,7 @@ void DialogDiagSignalTypes::onCopy()
 		}
 
 
-		Proto::Envelope* envelope = envelopeSet.add_items();
+		auto envelope = envelopeSet.add_items();
 		dst->Save(envelope);
 	}
 
@@ -489,9 +489,9 @@ void DialogDiagSignalTypes::onPaste()
 
 	for (int i = 0; i < envelopeSet.items_size(); i++)
 	{
-		const Proto::Envelope& envelope = envelopeSet.items(i);
+		const auto& envelope = envelopeSet.items(i);
 
-		if (envelope.has_diagsignaltype() == false)
+		if (envelope.HasExtension(::Proto::diagSignalType) == false)
 		{
 			Q_ASSERT(false);
 			continue;
@@ -758,7 +758,7 @@ void DialogDiagSignalTypes::onExport()
 			defaultFileName = tr("%1.%2").arg(dst->signalTypeId()).arg(Db::File::DiagSignalTypeSetFileExtension);
 		}
 
-		Proto::Envelope* envelope = envelopeSet.add_items();
+		auto envelope = envelopeSet.add_items();
 		dst->Save(envelope);
 	}
 
@@ -841,9 +841,9 @@ void DialogDiagSignalTypes::onImport()
 
 	for (int i = 0; i < envelopeSet.items_size(); i++)
 	{
-		const Proto::Envelope& envelope = envelopeSet.items(i);
+		const auto& envelope = envelopeSet.items(i);
 
-		if (envelope.has_diagsignaltype() == false)
+		if (envelope.HasExtension(::Proto::diagSignalType) == false)
 		{
 			Q_ASSERT(false);
 			continue;

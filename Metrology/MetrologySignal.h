@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../AppSignalLib/ComparatorSet.h"
-#include "../HardwareLib/DeviceObject.h"
 #include "../UtilsLib/XmlHelper.h"
+#include <HardwareLib/DeviceObject.h>
 
 namespace Proto
 {

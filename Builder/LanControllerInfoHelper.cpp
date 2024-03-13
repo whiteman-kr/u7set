@@ -1,11 +1,13 @@
 #include "../Builder/IssueLogger.h"
 #include "../UtilsLib/WUtils.h"
 #include "../OnlineLib/SocketIO.h"
-#include "../HardwareLib/DataProtocols.h"
-#include "../HardwareLib/DeviceObject.h"
 #include "../lib/TuningDataStorage.h"
+
 #include "DeviceHelper.h"
 #include "LanControllerInfoHelper.h"
+
+#include <HardwareLib/DataProtocols.h>
+#include <HardwareLib/DeviceController.h>
 
 // ---------------------------------------------------------------------------------
 //

@@ -2,7 +2,6 @@
 #include "../AppSignalLib/Bus.h"
 #include "../AppSignalSetProvider.h"
 #include "../Builder/ConnectionStorage.h"
-#include "../HardwareLib/LmDescription.h"
 #include "../ProjectDefaults.h"
 #include "../VFrame30/SchemaItems/SchemaItemAfb.h"
 #include "../VFrame30/SchemaItems/SchemaItemConst.h"
@@ -28,10 +27,14 @@
 #include "../lib/CodeEditor.h"
 #include "../lib/QDoublevalidatorEx.h"
 #include "../lib/Ui/TextEditCompleter.h"
+
+#include <HardwareLib/LmDescription.h>
+
 #include "./EditEngine/EditEngine.h"
 #include "./Forms/ChooseAfbDialog.h"
 #include "./Forms/ChooseUfbDialog.h"
 #include "./Forms/ComparePropertyObjectDialog.h"
+
 #include "DbTagsEditor.h"
 #include "GlobalMessanger.h"
 #include "SchemaItemPropertiesDialog.h"

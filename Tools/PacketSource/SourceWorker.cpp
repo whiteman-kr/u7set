@@ -6,10 +6,13 @@
 
 #include "../../UtilsLib/WUtils.h"
 
+#include <HardwareLib/DataProtocols.h>
+
 // -------------------------------------------------------------------------------------------------------------------
 
 SourceWorker::SourceWorker(QObject* pSource) :
 	m_pSource(pSource),
+	m_simFrame(new Rup::SimFrame),
 	m_numerator(0),
 	m_sentFrames(0),
 	m_finishThread(false),
@@ -61,7 +64,7 @@ void SourceWorker::process()
 		{
 			// header RupFrame
 			//
-			Rup::Header& header = m_simFrame.rupFrame.header;
+			Rup::Header& header = m_simFrame->rupFrame.header;
 			header.frameSize = Rup::ENTIRE_UDP_SIZE;
 			header.protocolVersion = PS::SUPPORT_VERSION;
 			header.flags.appData = 1;
@@ -87,21 +90,21 @@ void SourceWorker::process()
 			PS::FrameData* pFrameData = pSource->frameBase().frameDataPtr(currentFrameIndex);
 			if (pFrameData != nullptr)
 			{
-				memcpy(m_simFrame.rupFrame.data, pFrameData->data(), Rup::FRAME_DATA_SIZE);
+				memcpy(m_simFrame->rupFrame.data, pFrameData->data(), Rup::FRAME_DATA_SIZE);
 			}
 
 			// version and IP of simFrame
 			//
-			m_simFrame.simVersion = qToBigEndian<quint16>(PS::SIM_FRAME_VERSION);
-			m_simFrame.sourceIP = qToBigEndian<quint32>(pSource->info().lmIP.address32());
+			m_simFrame->simVersion = qToBigEndian<quint16>(PS::SIM_FRAME_VERSION);
+			m_simFrame->sourceIP = qToBigEndian<quint32>(pSource->info().lmIP.address32());
 
 			// revers header
 			//
-			m_simFrame.rupFrame.header.reverseBytes();
+			m_simFrame->rupFrame.header.reverseBytes();
 
 			// crc64 RupFrame
 			//
-			m_simFrame.rupFrame.calcCRC64();
+			m_simFrame->rupFrame.calcCRC64();
 
 			// send udp to AppDataReceivingIP of AppDataSrv - get from CfgSrv
 			//

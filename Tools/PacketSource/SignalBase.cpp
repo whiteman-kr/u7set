@@ -3,10 +3,10 @@
 #include <assert.h>
 #include <QFile>
 
-#include "../../HardwareLib/DataProtocols.h"
-#include "../../UtilsLib/WUtils.h"
-#include "../../UtilsLib/XmlHelper.h"
-#include "../../lib/ConstStrings.h"
+#include <HardwareLib/DataProtocols.h>
+
+//#include "../../UtilsLib/WUtils.h"
+//#include "../../lib/ConstStrings.h"
 
 #ifndef Q_CONSOLE_APP
 	#include <QMessageBox>

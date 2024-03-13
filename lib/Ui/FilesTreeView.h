@@ -1,7 +1,7 @@
 #ifndef FILESTREEMODEL_H
 #define FILESTREEMODEL_H
 
-#include "../DbLib/DbStruct.h"
+#include <DbLib/DbStruct.h>
 #include <QSortFilterProxyModel>
 #include <QAbstractItemModel>
 
