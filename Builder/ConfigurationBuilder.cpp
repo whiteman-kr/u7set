@@ -607,6 +607,8 @@ namespace Builder
 			return true;
 		}
 
+		std::set<quint16> ssKeyValues;
+
 		//
 		// Generate Module Configuration Binary File for VDU
 		//
@@ -657,6 +659,14 @@ namespace Builder
 				}
 			}
 
+			quint16 ssKey = m_subsystems->ssKeyForVdu(vdu->equipmentId());
+			if (ssKeyValues.contains(ssKey) == true) 
+			{
+				LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("%1: Fatal error, Subsystem key for VDU %2 is not unique!").arg(__FUNCTION__).arg(vdu->equipmentId()));
+				return false;
+			}
+			ssKeyValues.insert(ssKey);
+
 			// Run VDU configuration script for every module
 
 			std::vector<Hardware::DeviceModule*> vduModule;
@@ -667,6 +677,52 @@ namespace Builder
 				if (runConfigurationScriptFile(vdu->equipmentId(), 0, vduModule, description, &writer) == false)
 				{
 					return false;
+				}
+
+
+				const int configFrame = 1;
+				
+				// Write UniqueId
+				//
+				{
+					Hash uniqueId = ::calcHash(vdu->equipmentId());
+
+					const int uniqueIdOffset = 4;
+
+					writer.setData64(configFrame, uniqueIdOffset, uniqueId);
+					writer.jsAddDescription(vdu->place(),
+											tr("%1;%2;%3;0;64;%4;0x%5")
+												.arg(vdu->equipmentId())
+												.arg(configFrame)
+												.arg(uniqueIdOffset)
+												.arg("UniqueId")
+												.arg(QString::number(uniqueId, 16)));
+
+
+					writer.writeLog(tr("    [%1:%2] UniqueId = 0x%3\r\n")
+										.arg(configFrame)
+										.arg(uniqueIdOffset)
+										.arg(QString::number(uniqueId, 16)));
+
+					writer.jsSetUniqueID(vdu->place(), ::calcHash(vdu->equipmentId()));
+				}
+
+				// CRC
+				{
+					const int crcOffset = 172 * 2;
+
+					QString result = writer.storeCrc64(configFrame, 0, crcOffset, crcOffset);
+
+					writer.jsAddDescription(vdu->place(),
+											tr("%1;%2;%3;0;64;%4;0x%5")
+												.arg(vdu->equipmentId())
+												.arg(configFrame)
+												.arg(crcOffset)
+												.arg("CRC64")
+												.arg(result));
+
+
+					writer.writeLog(tr("    [%1:%2] crc64 = 0x%3\r\n").arg(configFrame).arg(crcOffset).arg(result));
 				}
 			}
 
@@ -699,6 +755,61 @@ namespace Builder
 
 		}
 
+				// Find all LM modules and save ssKey and channel information
+		//
+
+		std::sort(m_vduModules.begin(), m_vduModules.end(),
+				  [](const Hardware::DeviceModule* a, const Hardware::DeviceModule* b) -> bool
+		{
+			return a->equipmentIdTemplate() < b->equipmentIdTemplate();
+		});
+
+		QStringList report;
+		report << "Jumpers configuration for VDU modules";
+
+		for (Hardware::DeviceModule* m : m_vduModules)
+		{
+			quint16 ssKey = m_subsystems->ssKeyForVdu(m->equipmentId());
+
+			report << "\r\n";
+			report << "Equipment ID: " + m->equipmentIdTemplate();
+			report << "Caption: " + m->caption();
+			report << "Place: " + QString::number(m->place());
+			report << "Subsystem Code: " + QString::number(ssKey);
+
+			quint16 jumpers = ssKey;
+
+			quint16 crc4 = Crc::crc4(jumpers);
+			jumpers |= (crc4 << 12);
+
+			QString jumpersHex = QString::number(jumpers, 2).rightJustified(16, '0');
+			jumpersHex.insert(4, ' ');
+			jumpersHex.insert(9, ' ');
+			jumpersHex.insert(14, ' ');
+
+			// All other LMs use jumpers
+			//
+			if ((ssKey < 0) || (ssKey > std::numeric_limits<quint16>::max()))
+			{
+				m_log->errCFG3060(m->equipmentIdTemplate(), ssKey, 0, std::numeric_limits<quint16>::max());
+			}
+
+			report << "Jumpers Configuration (HEX): 0x" + QString::number(jumpers, 16);
+			report << "Jumpers Configuration (BIN): " + jumpersHex;
+		}
+
+		QByteArray reportData;
+		for (const QString& s : report)
+		{
+			reportData.append(s.toUtf8());
+			reportData.append(QChar::LineFeed);
+		}
+
+		if (m_buildResultWriter->addFile("Reports", "VduJumpers.txt", reportData) == nullptr)
+		{
+			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Failed to save VduJumpers.txt file!"));
+			return false;
+		}
 
 		return true;
 	}

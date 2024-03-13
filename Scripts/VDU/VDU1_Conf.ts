@@ -19,7 +19,6 @@ function main(builder: ConfigStruct.Builder, root: ConfigStruct.ScriptDeviceObje
 
 	if (logicModules.length != 0)
 	{
-		//let subSysID: string = logicModules[0].propertyString("SubsystemID");
 		log.writeMessage("Subsystem " + " VDU " + ", configuration script: " + logicModuleDescription.jsConfigurationStringFile() + ", version: " + configScriptVersion + ", logic modules count: " + logicModules.length);
 	}
 
@@ -105,18 +104,23 @@ function generate_vdu(builder: ConfigStruct.Builder, root: ConfigStruct.ScriptDe
 		return false;
 	}
 
-	if (frameCount != 1 )
+	if (frameCount != 2 )
 	{
-		log.errCFG3002("FlashMemory/ConfigFrameCount", frameCount, 1, 65535, module.equipmentId);
+		log.errCFG3002("FlashMemory/ConfigFrameCount", frameCount, 2, 2, module.equipmentId);
 		return false;
 	}
 
 	let appWordsCount: number = module.propertyInt("AppLANDataSize");
 	let diagWordsCount: number = logicModuleDescription.Memory_TxDiagDataSize;
 
+	let ssKeyValue: number = subsystemStorage.ssKeyForVdu(subSysID);
+	if (ssKeyValue == -1) {
+		log.errCFG3001(subSysID, module.equipmentId);
+		return false;
+	}
+
 	let maxLMNumber: number = 14;               // Can be changed!
-	let configFrame: number = 0;
-	let configFrameCount: number = 1;          // number of frames in each configuration
+	let configFrame: number = 1;
 
 	if (LMNumber < 1 || LMNumber > maxLMNumber)
 	{
@@ -132,8 +136,6 @@ function generate_vdu(builder: ConfigStruct.Builder, root: ConfigStruct.ScriptDe
 	confFirmware.writeLog("Module: VDU-1\r\n");
 	confFirmware.writeLog("EquipmentID = " + module.equipmentId + "\r\n");
 	confFirmware.writeLog("ModuleID = " + moduleId.toString(16) + "h\r\n");
-	//confFirmware.writeLog("Frame size = " + frameSize + "\r\n");
-	//confFirmware.writeLog("LMNumber = " + LMNumber + "\r\n");
 	confFirmware.writeLog("LMDescriptionNumber = " + logicModuleDescription.descriptionNumber() + "\r\n");
 
 	let ptr: number = 0;
@@ -148,6 +150,19 @@ function generate_vdu(builder: ConfigStruct.Builder, root: ConfigStruct.ScriptDe
 	}
 	confFirmware.writeLog("    [" + configFrame + ":" + ptr + "] VDU_Cfg_Data_Version = " + VDU_Cfg_Data_Version + "\r\n");
 	ptr += 2;
+
+	// SS Key
+	
+	if (ConfigLib.setData16(confFirmware, log, LMNumber, module.equipmentId, configFrame, ptr, "ssKeyValue", ssKeyValue) == false)     //ssKey
+	{
+		return false;
+	}
+	confFirmware.writeLog("    [" + configFrame + ":" + ptr + "] ssKeyValue = " + ssKeyValue + "\r\n");
+	ptr += 2;
+
+	// UniqueID
+	
+	ptr += 8;
 
 	const OptoQuantity:number = 8;
 
@@ -173,7 +188,7 @@ function generate_vdu(builder: ConfigStruct.Builder, root: ConfigStruct.ScriptDe
 	//
 	confFirmware.writeLog("Writing LAN configuration.\r\n");
 
-	const lanConfigPtr:number = 84 * 2;
+	const lanConfigPtr:number = 89 * 2;
 	
 	const lanConfigSize:number = 40 * 2;
 
@@ -296,32 +311,7 @@ function generate_vdu(builder: ConfigStruct.Builder, root: ConfigStruct.ScriptDe
 		}
 	}
 
-	// crc
-
-	ptr = 167 * 2;
-
-	let stringCrc64 = ConfigLib.storeCrc64(confFirmware, log, LMNumber, module.equipmentId, configFrame, 0, ptr, ptr);   //CRC-64
-	if (stringCrc64 == "")
-	{
-		return false;
-	}
-	confFirmware.writeLog("    [" + configFrame + ":" + ptr + "] crc64 = 0x" + stringCrc64 + "\r\n");
-	ptr += 8;    
-
-	// create UniqueID
-	//
-	let startFrame: number = 0;
-
-	let uniqueID: number = 0;
-
-	for (let i: number = 0; i < configFrameCount; i++)
-	{
-		let crc: number = confFirmware.calcCrc32(startFrame + i, 0, frameSize);
-
-		uniqueID ^= crc;
-	}
-
-	confFirmware.jsSetUniqueID(LMNumber, uniqueID);
+	// UniqueId and CRC are computer in ConfigurationBuilder
 
 	return true;
 }

@@ -6,9 +6,9 @@
 		<AppLogicFrameSize>0</AppLogicFrameSize>
 		<AppLogicUartID>0</AppLogicUartID>
 		<AppLogicWriteBitstream>false</AppLogicWriteBitstream>
-		<ConfigFrameCount>1</ConfigFrameCount>
-		<ConfigFramePayload>1024</ConfigFramePayload>
-		<ConfigFrameSize>1024</ConfigFrameSize>
+		<ConfigFrameCount>2</ConfigFrameCount>
+		<ConfigFramePayload>1016</ConfigFramePayload>
+		<ConfigFrameSize>1016</ConfigFrameSize>
 		<ConfigUartID>0</ConfigUartID>
 		<ConfigWriteBitstream>true</ConfigWriteBitstream>
 		<TuningFrameCount>0</TuningFrameCount>

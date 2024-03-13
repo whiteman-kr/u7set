@@ -240,6 +240,7 @@ module ConfigStruct
 	export interface SubsystemStorage
 	{
 		ssKey(subSysID: string): number;
+		ssKeyForVdu(subSysID: string): number;
 	}
 
 	export interface OptoPort

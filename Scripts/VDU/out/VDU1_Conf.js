@@ -710,7 +710,6 @@ let configScriptVersion = 1;
 //
 function main(builder, root, logicModules, confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription) {
     if (logicModules.length != 0) {
-        //let subSysID: string = logicModules[0].propertyString("SubsystemID");
         log.writeMessage("Subsystem " + " VDU " + ", configuration script: " + logicModuleDescription.jsConfigurationStringFile() + ", version: " + configScriptVersion + ", logic modules count: " + logicModules.length);
     }
     for (let i = 0; i < logicModules.length; i++) {
@@ -764,15 +763,19 @@ function generate_vdu(builder, root, module, confFirmware, log, signalSet, subsy
         log.errCFG3002("FlashMemory/ConfigFrameSize", frameSize, 1016, 65535, module.equipmentId);
         return false;
     }
-    if (frameCount != 1) {
-        log.errCFG3002("FlashMemory/ConfigFrameCount", frameCount, 1, 65535, module.equipmentId);
+    if (frameCount != 2) {
+        log.errCFG3002("FlashMemory/ConfigFrameCount", frameCount, 2, 2, module.equipmentId);
         return false;
     }
     let appWordsCount = module.propertyInt("AppLANDataSize");
     let diagWordsCount = logicModuleDescription.Memory_TxDiagDataSize;
+    let ssKeyValue = subsystemStorage.ssKeyForVdu(subSysID);
+    if (ssKeyValue == -1) {
+        log.errCFG3001(subSysID, module.equipmentId);
+        return false;
+    }
     let maxLMNumber = 14; // Can be changed!
-    let configFrame = 0;
-    let configFrameCount = 1; // number of frames in each configuration
+    let configFrame = 1;
     if (LMNumber < 1 || LMNumber > maxLMNumber) {
         log.errCFG3002("System/LMNumber", LMNumber, 1, maxLMNumber, module.equipmentId);
         return false;
@@ -783,8 +786,6 @@ function generate_vdu(builder, root, module, confFirmware, log, signalSet, subsy
     confFirmware.writeLog("Module: VDU-1\r\n");
     confFirmware.writeLog("EquipmentID = " + module.equipmentId + "\r\n");
     confFirmware.writeLog("ModuleID = " + moduleId.toString(16) + "h\r\n");
-    //confFirmware.writeLog("Frame size = " + frameSize + "\r\n");
-    //confFirmware.writeLog("LMNumber = " + LMNumber + "\r\n");
     confFirmware.writeLog("LMDescriptionNumber = " + logicModuleDescription.descriptionNumber() + "\r\n");
     let ptr = 0;
     // Configuration storage format
@@ -796,6 +797,15 @@ function generate_vdu(builder, root, module, confFirmware, log, signalSet, subsy
     }
     confFirmware.writeLog("    [" + configFrame + ":" + ptr + "] VDU_Cfg_Data_Version = " + VDU_Cfg_Data_Version + "\r\n");
     ptr += 2;
+    // SS Key
+    if (ConfigLib.setData16(confFirmware, log, LMNumber, module.equipmentId, configFrame, ptr, "ssKeyValue", ssKeyValue) == false) //ssKey
+     {
+        return false;
+    }
+    confFirmware.writeLog("    [" + configFrame + ":" + ptr + "] ssKeyValue = " + ssKeyValue + "\r\n");
+    ptr += 2;
+    // UniqueID
+    ptr += 8;
     const OptoQuantity = 8;
     if (ConfigLib.setData16(confFirmware, log, LMNumber, module.equipmentId, configFrame, ptr, "OptoQuantity", OptoQuantity) == false) //CFG_Version
      {
@@ -813,7 +823,7 @@ function generate_vdu(builder, root, module, confFirmware, log, signalSet, subsy
     // Create LANs configuration
     //
     confFirmware.writeLog("Writing LAN configuration.\r\n");
-    const lanConfigPtr = 84 * 2;
+    const lanConfigPtr = 89 * 2;
     const lanConfigSize = 40 * 2;
     ptr = lanConfigPtr;
     const maxLanControllerCount = 3;
@@ -900,22 +910,6 @@ function generate_vdu(builder, root, module, confFirmware, log, signalSet, subsy
             appAndDiagChannel++;
         }
     }
-    // crc
-    ptr = 167 * 2;
-    let stringCrc64 = ConfigLib.storeCrc64(confFirmware, log, LMNumber, module.equipmentId, configFrame, 0, ptr, ptr); //CRC-64
-    if (stringCrc64 == "") {
-        return false;
-    }
-    confFirmware.writeLog("    [" + configFrame + ":" + ptr + "] crc64 = 0x" + stringCrc64 + "\r\n");
-    ptr += 8;
-    // create UniqueID
-    //
-    let startFrame = 0;
-    let uniqueID = 0;
-    for (let i = 0; i < configFrameCount; i++) {
-        let crc = confFirmware.calcCrc32(startFrame + i, 0, frameSize);
-        uniqueID ^= crc;
-    }
-    confFirmware.jsSetUniqueID(LMNumber, uniqueID);
+    // UniqueId and CRC are computer in ConfigurationBuilder
     return true;
 }

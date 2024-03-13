@@ -26,6 +26,7 @@ namespace Builder
 		bool save(DbController* db, const QString &comment);
 
 		Q_INVOKABLE int ssKey(QString subsysId);
+		Q_INVOKABLE int ssKeyForVdu(QString subsysId);
 
 		int subsystemKey(const QString& subsystemID);
 
