@@ -4,7 +4,7 @@
 
 #include "AdsConnectionPrivate.h"
 #include "TcpSignalClient.h"
-#include "./include/ClientLib/TcpSignalRecents.h"
+#include "TcpSignalRecents.h"
 #include "../UtilsLib/SimpleThread.h"
 
 

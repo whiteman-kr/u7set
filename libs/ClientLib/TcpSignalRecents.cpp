@@ -2,7 +2,7 @@
 #error Do not include this file in the project! Link ClientLib instead.
 #endif
 
-#include "./include/ClientLib/TcpSignalRecents.h"
+#include "TcpSignalRecents.h"
 
 namespace ClientLib
 {

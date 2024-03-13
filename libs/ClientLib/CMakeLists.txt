@@ -15,6 +15,7 @@ set(TARGET ClientLib)
 qt_add_library(${TARGET} STATIC
 	./include/ClientLib/AdsConnection.h
 	./include/ClientLib/AdsSourceStateConnection.h
+	./include/ClientLib/AppDataSourceState.h
 	./include/ClientLib/AppSignalManager.h
 	./include/ClientLib/ClientTranslator.h
 	./include/ClientLib/ConfigController.h
@@ -26,8 +27,6 @@ qt_add_library(${TARGET} STATIC
 	./include/ClientLib/RtDataProvider.h
 	./include/ClientLib/RtTrendConnectionStatistics.h
 	./include/ClientLib/ScriptTestObserver.h
-	./include/ClientLib/TcpAppSourcesState.h
-	./include/ClientLib/TcpSignalRecents.h
 	./include/ClientLib/TuningConnection.h
 	./include/ClientLib/TuningLog.h
 	./include/ClientLib/TuningSignalManager.h
@@ -39,6 +38,9 @@ qt_add_library(${TARGET} STATIC
 	AdsConnectionPrivate.cpp
 	AdsConnectionPrivate.h
 	AdsSourceStateConnection.cpp
+	AdsSourceStateConnectionPrivate.cpp
+	AdsSourceStateConnectionPrivate.h
+	AppDataSourceState.cpp
 	AppSignalManager.cpp
 	ClientTranslator.cpp
 	ConfigController.cpp
@@ -48,9 +50,11 @@ qt_add_library(${TARGET} STATIC
 	RtTrendTcpClient.h
 	RtTrendTcpClient.cpp
 	ScriptTestObserver.cpp
+	TcpAppSourcesState.h
 	TcpAppSourcesState.cpp
 	TcpSignalClient.cpp
 	TcpSignalClient.h
+	TcpSignalRecents.h
 	TcpSignalRecents.cpp
 	TuningConnection.cpp
 	TuningLog.cpp
@@ -90,6 +94,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QLineEdit>
 	<QLocale>
 	<QMessageBox>
+	<QThread>
 	<QPushButton>
 	<QReadWriteLock>
 	<QSharedMemory>
