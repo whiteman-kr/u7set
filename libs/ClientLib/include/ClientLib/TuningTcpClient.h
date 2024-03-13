@@ -1,15 +1,15 @@
 #pragma once
 
-#include <queue>
 #include <QReadWriteLock>
-#include "../AppSignalLib/TuningSignalManager.h"
+#include <queue>
+#include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
-#include "../OnlineLib/SoftwareSettings.h"
-#include "TuningSourceState.h"
-#include "ITuningLog.h"
-#include "TuningWriteCommand.h"
 #include "../lib/Tuning/ITuningAuthorization.h"
+#include "ITuningLog.h"
+#include "TuningSignalManager.h"
+#include "TuningSourceState.h"
+#include "TuningWriteCommand.h"
 
 //
 //		  OnConnection

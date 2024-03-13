@@ -1,4 +1,4 @@
-#include "RtTrendTcpClient.h"
+#include "./include/ClientLib/RtTrendTcpClient.h"
 
 
 namespace

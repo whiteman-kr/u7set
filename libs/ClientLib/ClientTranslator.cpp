@@ -1,4 +1,4 @@
-#include "ClientTranslator.h"
+#include "./include/ClientLib/ClientTranslator.h"
 
 
 namespace ClientLib

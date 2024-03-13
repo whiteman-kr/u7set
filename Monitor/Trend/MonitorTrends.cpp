@@ -1,10 +1,11 @@
 #include "MonitorTrends.h"
 
-#include "../ClientLib/RtTrendTcpClient.h"
 #include "../TrendView/DialogChooseTrendSignals.h"
 #include "../TrendView/TrendSignalState.h"
 #include "../TrendView/TrendWidget.h"
 #include "../lib/ISignalHasTag.h"
+
+#include <ClientLib/RtTrendTcpClient.h>
 
 std::list<MonitorTrendsWidget*> MonitorTrends::s_trendsList;
 

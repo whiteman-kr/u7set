@@ -1,9 +1,9 @@
 #pragma once
 
 #include "IOutputController.h"
-#include "../AppSignalLib/TuningSignalManager.h"
-#include "../ClientLib/ITuningLog.h"
-#include "../ClientLib/TuningConnection.h"
+#include <ClientLib/TuningSignalManager.h>
+#include <ClientLib/ITuningLog.h>
+#include <ClientLib/TuningConnection.h>
 
 
 namespace TestSuite
@@ -54,7 +54,7 @@ namespace TestSuite
 
 
 	private:
-		TuningSignalManager m_signalManager;
+		ClientLib::TuningSignalManager m_signalManager;
 		mutable HasLogFile m_appLog;
 
 		OutputControllerAuthorization m_authorization;

@@ -1,10 +1,12 @@
 #ifndef DIALOGDATASOURCES_H
 #define DIALOGDATASOURCES_H
 
+#include "MonitorConfigController.h"
+
 #include "../lib/Ui/AppDataSourcesWidget.h"
 #include "../lib/Ui/TuningSourcesWidget.h"
-#include "../ClientLib/AdsSourceStateConnection.h"
-#include "MonitorConfigController.h"
+
+#include <ClientLib/AdsSourceStateConnection.h>
 
 
 class DialogDataSources : public QDialog

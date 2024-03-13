@@ -1,5 +1,5 @@
 #include "../../AppSignalLib/ComparatorSet.h"
-#include "../../ClientLib/AppSignalManager.h"
+#include <ClientLib/AppSignalManager.h>
 #include "gtest/gtest.h"
 
 using namespace testing;

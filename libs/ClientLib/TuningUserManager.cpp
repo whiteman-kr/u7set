@@ -2,7 +2,7 @@
 	#error Do not include this file in the project! Link ClientLib instead.
 #endif
 
-#include "TuningUserManager.h"
+#include "./include/ClientLib/TuningUserManager.h"
 
 #ifdef Q_OS_WIN
 #include <windows.h>

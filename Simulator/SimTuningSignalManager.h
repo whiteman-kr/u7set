@@ -1,13 +1,13 @@
 #ifndef SIMTUNSIGNALMANGER_H
 #define SIMTUNSIGNALMANGER_H
 
-#include "../AppSignalLib/TuningSignalManager.h"
+#include <ClientLib/TuningSignalManager.h>
 #include "SimScopedLog.h"
 
 namespace Sim
 {
 
-	class TuningSignalManager : public ::TuningSignalManager
+	class TuningSignalManager : public ClientLib::TuningSignalManager
 	{
 		Q_OBJECT
 

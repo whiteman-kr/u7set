@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../AppSignalLib/ITuningSignalManager.h"
-#include "../AppSignalLib/ITuningSignalUpdater.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/Tcp.h"
 #include "../UtilsLib/ILogFile.h"
@@ -9,6 +8,7 @@
 #include "../lib/Tuning/ITuningAuthorization.h"
 #include "../lib/Tuning/ITuningConnection.h"
 #include "IRecentAppSignals.h"
+#include "ITuningSignalUpdater.h"
 #include "ITuningLog.h"
 #include "TuningSourceState.h"
 #include "TuningWriteCommand.h"

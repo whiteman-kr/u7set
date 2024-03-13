@@ -2,7 +2,7 @@
 
 
 #include "../AppSignalLib/IAppSignalManager.h"
-#include "../ClientLib/ITestObserver.h"
+#include <ClientLib/ITestObserver.h>
 
 namespace Sim
 {

@@ -12,9 +12,9 @@ namespace Ui {
 namespace ClientLib 
 {
 	class TuningConnection;
+	class TuningSignalManager;
 }
 
-class TuningSignalManager;
 
 class TuningSignalInfo : public QDialog
 {
@@ -22,7 +22,7 @@ class TuningSignalInfo : public QDialog
 
 public:
 	explicit TuningSignalInfo(TuningConfigController& configController,
-							  const TuningSignalManager& signalManager,
+							  const ClientLib::TuningSignalManager& signalManager,
 							  const ClientLib::TuningConnection& tuningConnection,
 							  Hash appSignalHash,
 							  E::AnalogFormat analogFormat,
@@ -47,7 +47,7 @@ private:
 	AppSignalParam m_asp;
 	int m_precision = 0;
 
-	const TuningSignalManager& m_signalManager;
+	const ClientLib::TuningSignalManager& m_signalManager;
 	const ClientLib::TuningConnection& m_tuningConnection;
 
 	Hash m_clientHash;

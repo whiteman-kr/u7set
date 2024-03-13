@@ -8,7 +8,8 @@
 #include <QTableWidget>
 #include <QVBoxLayout>
 
-#include "../ClientLib/TuningConnection.h"
+#include <ClientLib/TuningConnection.h>
+
 #include "Main.h"
 #include "MainWindow.h"
 #include "Settings.h"
@@ -42,7 +43,7 @@ QString SwitchFiltersPage::tag_FilterButton = "FilterButtons";
 QString SwitchFiltersPage::tag_FilterSwitch = "FilterSwitches";
 
 SwitchFiltersPage::SwitchFiltersPage(TuningConfigController& configController,
-									 TuningSignalManager& tuningSignalManager,
+									 ClientLib::TuningSignalManager& tuningSignalManager,
 									 TuningClientFilterStorage& tuningFilterStorage,
 									 ClientLib::TuningUserManager& userManager,
 									 ClientLib::TuningConnection& tuningConnection,

@@ -2,8 +2,8 @@
 #error Do not include this file in the project! Link ClientLib instead.
 #endif
 
-#include "AdsSourceStateConnection.h"
-#include "TcpAppSourcesState.h"
+#include "./include/ClientLib/AdsSourceStateConnection.h"
+#include "./include/ClientLib/TcpAppSourcesState.h"
 #include "../UtilsLib/SimpleThread.h"
 
 namespace ClientLib

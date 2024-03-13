@@ -1,6 +1,8 @@
 #pragma once
 #include <vector>
-#include "TuningSignalState.h"
+
+#include "../AppSignalLib/TuningSignalState.h"
+
 
 class ITuningSignalUpdater
 {

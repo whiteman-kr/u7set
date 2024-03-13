@@ -2,10 +2,10 @@
 #error Do not include this file in the project! Link ClientLib instead.
 #endif
 
-#include "AdsConnection.h"
+#include "./include/ClientLib/AdsConnection.h"
+#include "./include/ClientLib/TcpSignalClient.h"
+#include "./include/ClientLib/TcpSignalRecents.h"
 #include "../UtilsLib/SimpleThread.h"
-#include "TcpSignalClient.h"
-#include "TcpSignalRecents.h"
 
 
 namespace ClientLib

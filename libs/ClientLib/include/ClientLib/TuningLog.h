@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../ClientLib/ITuningLog.h"
+#include "ITuningLog.h"
 #include "../UtilsLib/LogFile.h"
 #include "TuningUserManager.h"
 

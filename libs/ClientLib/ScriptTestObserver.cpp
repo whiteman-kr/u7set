@@ -1,4 +1,4 @@
-#include "ScriptTestObserver.h"
+#include "./include/ClientLib/ScriptTestObserver.h"
 
 ScriptTestObserver::ScriptTestObserver(std::unique_ptr<ITestObserver> observer, ILogFile* logFile, QObject* parent) :
 	QObject{parent},

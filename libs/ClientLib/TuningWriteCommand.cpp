@@ -1,4 +1,4 @@
-#include "TuningWriteCommand.h"
+#include "./include/ClientLib/TuningWriteCommand.h"
 
 namespace ClientLib
 {

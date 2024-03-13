@@ -1,4 +1,4 @@
-#include "../ClientLib/ScriptTestObserver.h"
+#include <ClientLib/ScriptTestObserver.h>
 
 #include "TestController.h"
 #include "TestObserver.h"

@@ -2,10 +2,10 @@
 #error Do not include this file in the project! Link ClientLib instead.
 #endif
 
-#include "TuningConnection.h"
-#include "../AppSignalLib/TuningSignalManager.h"
+#include "./include/ClientLib/TuningConnection.h"
+#include "./include/ClientLib/TuningSignalManager.h"
+#include "./include/ClientLib/TuningTcpClient.h"
 #include "../UtilsLib/SimpleThread.h"
-#include "TuningTcpClient.h"
 
 namespace ClientLib
 {

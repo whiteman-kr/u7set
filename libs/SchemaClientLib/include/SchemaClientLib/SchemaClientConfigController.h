@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../ClientLib/ConfigController.h"
+#include <ClientLib/ConfigController.h>
 #include "../UtilsLib/ILogFile.h"
 #include "../VFrame30/SchemaDetails.h"
 #include <QReadWriteLock>

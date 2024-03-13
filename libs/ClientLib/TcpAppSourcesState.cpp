@@ -2,7 +2,7 @@
 #error Do not include this file in the project! Link ClientLib instead.
 #endif
 
-#include "TcpAppSourcesState.h"
+#include "./include/ClientLib/TcpAppSourcesState.h"
 
 
 namespace ClientLib

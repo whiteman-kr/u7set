@@ -25,15 +25,12 @@ qt_add_library(${TARGET} STATIC
 	ComparatorSet.h
 	IAppSignalManager.h
 	ITuningSignalManager.h
-	ITuningSignalUpdater.h
 	PropertyNames.cpp
 	PropertyNames.h
 	RecentUsed.cpp
 	RecentUsed.h
 	SimpleAppSignalState.cpp
 	SimpleAppSignalState.h
-	TuningSignalManager.cpp
-	TuningSignalManager.h
 	TuningSignalState.cpp
 	TuningSignalState.h
 	TuningValue.cpp
