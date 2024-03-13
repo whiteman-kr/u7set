@@ -19,7 +19,7 @@ add_executable(${TARGET}
 	../lib/DataSource.h
 	../lib/TuningDataStorage.cpp
 	../lib/TuningDataStorage.h
-	../Proto/network.proto
+	../Proto/Network.proto
 	TcpTuningServer.cpp
 	TcpTuningServer.h
 	TuningClientContext.cpp
