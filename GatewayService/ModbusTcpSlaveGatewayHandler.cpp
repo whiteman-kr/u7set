@@ -42,7 +42,9 @@ namespace Gateway
 
 		m_modbusTcpSlaveThread = new Modbus::TcpSlaveThread;
 
-		m_modbusTcpSlaveThread->start(m_gateway->localGatewayIP1(), m_log);
+		m_modbusTcpSlaveThread->start(m_gateway->localGatewayIP1(),
+									  m_gateway->modbusDeviceID(),
+									  m_log);
 	}
 
 	void ModbusTcpSlaveHandler::shutdown()

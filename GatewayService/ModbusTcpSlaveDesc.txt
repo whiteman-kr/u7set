@@ -18,16 +18,16 @@ GatewayDescription = KAES block 5 SUZR 1	//   free style gateway description
 
 // ModbusTcpSlave gateway specifis settings
 
-LocalGatewayIP1 = 192.160.101.100:502		// * IP and port of Modbus TCP server 1
+LocalGatewayIP1 = 192.168.101.100:55002		// * IP and port of Modbus TCP server 1
 // LocalGatewayIP2
 
 RemoteGatewayIP1 = 192.160.101.1:502		// * local IP and port for connect Modbus TCP server 1
 // RemoteGatewayIP2
 
 
-CodingMode = ASCII				// ASCII - two ASCII characters on each 8-bit byte
-						// RTU - two 4-bit HEX char on each 8-bit byte (binary format)
-ModbusDeviceAddress = 20				
+ModbusCoding = RTU				// ASCII - two ASCII characters (2 bytes) on each 8-bit byte
+								// RTU - two 4-bit HEX char (byte) on each 8-bit byte (binary format)
+ModbusDeviceID = 20				
 
 [SignalList]
 
@@ -45,5 +45,5 @@ SignalsFormat = AnalogFloat16 BE
 
 SignalsFormat = DiscreteUint16 LE			// general discrete registers format, Big Endian 16 bit
                                                 	
-100, 3 -> #SYSTEMID_RACKID_CH01_MD00_PI_BLINK		// regAddr, bitNo = AppSignalID
-100, (0x8000) -> #SYSTEMID_RACKID_CH01_MD00_PI_SORISSET	// regAddr, (mask) = AppSignalID
+1002, 3 -> #SYSTEMID_RACKID_CH01_MD00_PI_BLINK		// regAddr, bitNo = AppSignalID
+1002, (0x8000) -> #SYSTEMID_RACKID_CH01_MD00_PI_SORISSET	// regAddr, (mask) = AppSignalID

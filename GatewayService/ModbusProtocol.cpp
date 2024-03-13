@@ -2,6 +2,24 @@
 
 namespace Modbus
 {
+	void Fn03_ReadHoldingRegisters_Request::reverseBytes()
+	{
+		regsStartAddr = reverseUint16(regsStartAddr);
+		regsCount = reverseUint16(regsCount);
+	}
+
+	void TcpHeader::reverseBytes()
+	{
+		transactionID = reverseUint16(transactionID);
+		protocolID = reverseUint16(protocolID);
+		length = reverseUint16(length);
+	}
+
+	void TcpFrame::reverseBytes()
+	{
+		header.reverseBytes();
+	}
+
 	// Modbus ASCII mode LRC (Longitudinal Redundancy Check) calculation
 	//
 	quint8 LRC (const quint8* data, int dataLength)
@@ -67,250 +85,5 @@ namespace Modbus
 		}
 
 		return crc16;
-	}
-
-	// --------------------------------------------------------------------------------------------------------
-	//
-	// Modbus::TcpSlaveThread::Connection class implementaion
-	//
-	// --------------------------------------------------------------------------------------------------------
-
-	TcpSlaveThread::Connection::Connection(Worker& worker) :
-		m_socket(worker.ioContext()),
-		m_worker(worker)
-	{
-	}
-
-	tcp::socket& TcpSlaveThread::Connection::socket()
-	{
-		return m_socket;
-	}
-
-	QString TcpSlaveThread::Connection::peerAddress()
-	{
-		return QString::fromStdString(m_socket.remote_endpoint().address().to_string());
-	}
-
-	void TcpSlaveThread::Connection::startReceive()
-	{
-		m_socket.async_receive(asio::buffer(m_receiveBuffer, RECEIVE_BUFFER_SIZE),
-									bind(&TcpSlaveThread::Connection::onReceiveData, this,
-										std::placeholders::_1,
-										std::placeholders::_2));
-	}
-
-	void TcpSlaveThread::Connection::onReceiveData(const error_code& error, size_t bytesReceived)
-	{
-		if (error)
-		{
-			// print msg
-			return;
-		}
-
-		const TcpFrame* request = reinterpret_cast<TcpFrame*>(m_receiveBuffer);
-
-		Q_ASSERT(request->header.protocolID == 0);
-
-		if (request->header.length + sizeof(request->header) != bytesReceived)
-		{
-			Q_ASSERT(false);
-			return;
-		}
-
-		switch(request->functionCode)
-		{
-		case FC_READ_HOLDING_REGISTERS:
-			// get regs values
-			break;
-
-		default:
-			Q_ASSERT(false);
-		}
-
-		// send reply
-
-		startReceive();
-	}
-
-	// --------------------------------------------------------------------------------------------------------
-	//
-	// Modbus::TcpSlaveThread::Worker class implementaion
-	//
-	// --------------------------------------------------------------------------------------------------------
-
-	TcpSlaveThread::Worker::Worker(io_context& ioContext,
-							 const HostAddressPort& listeningAddr,
-							 std::stop_token stopToken,
-							 CircularLoggerShared logger) :
-		m_ioContext(ioContext),
-		m_listeningAddr(listeningAddr),
-		m_stopToken(stopToken),
-		m_log(logger),
-		m_timer(ioContext),
-		m_acceptor(ioContext, tcp::endpoint(
-								  ip::address::from_string(listeningAddr.addressStr().toStdString()),
-								  listeningAddr.port()))
-	{
-	}
-
-	TcpSlaveThread::Worker::~Worker()
-	{
-	}
-
-	void TcpSlaveThread::Worker::run()
-	{
-		startTimer500ms();
-		startListening();
-
-		m_ioContext.run();
-	}
-
-	io_context& TcpSlaveThread::Worker::ioContext()
-	{
-		return m_ioContext;
-	}
-
-	bool TcpSlaveThread::Worker::exitIfStopRequested()
-	{
-		if (m_stopToken.stop_requested() == false)
-		{
-			return false;
-		}
-
-		m_ioContext.stop();
-
-		return true;
-	}
-
-	void TcpSlaveThread::Worker::startTimer500ms()
-	{
-		m_timer.expires_after(asio::chrono::milliseconds(1000));
-		m_timer.async_wait(bind(&TcpSlaveThread::Worker::onTimer500ms, this,
-								 std::placeholders::_1));
-	}
-
-	void TcpSlaveThread::Worker::onTimer500ms(const error_code& error)
-	{
-		if (exitIfStopRequested() == true)
-		{
-			return;
-		}
-
-		if (!error)
-		{
-//			DEBUG_LOG_MSG(m_log, "Timer");
-		  // if (m_receivedPerSecond == 0 && m_1second)
-		  // {
-		  // 	m_noReceiveCtr++;
-
-				   // 	if (m_noReceiveCtr >= NO_RUP_FRAMES_TIMEOUT)
-				   // 	{
-				   // 		qDebug() << C_STR(QString("No RUP frames received in %1 seconds").
-				   // 						  arg(NO_RUP_FRAMES_TIMEOUT));
-				   // 	}
-				   // }
-
-				   // if (isSocketWorkable() == false ||
-				   // 	m_noReceiveCtr >= NO_RUP_FRAMES_TIMEOUT ||
-				   // 	m_socketErrorCtr >= MAX_SOCKET_ERROR_COUNT)
-				   // {
-				   // 	closeSocket();
-				   // 	clearReceiverStatistics();
-				   // 	createAndBindSocket();
-				   // }
-
-				   // updateReceiverStatistics();
-				   // updateDataSourcesStatistics();
-		}
-
-		startTimer500ms();
-	}
-
-	void TcpSlaveThread::Worker::startListening()
-	{
-		Q_ASSERT(m_newConnection == nullptr);
-
-		m_newConnection = std::make_shared<Connection>(*this);
-
-		m_acceptor.async_accept(m_newConnection->socket(),
-							   std::bind(&Worker::onAcceptConnection, this, m_newConnection,
-										std::placeholders::_1));
-
-		DEBUG_LOG_MSG(m_log, QString("Modbus::TcpSlaveThread accepts conections on %1").
-							 arg(m_listeningAddr.addressPortStr()));
-	}
-
-	void TcpSlaveThread::Worker::onAcceptConnection(ConnectionShared newConnection,
-													const error_code& error)
-	{
-		if (error)
-		{
-			DEBUG_LOG_ERR(m_log, QString("TcpSlaveThread::Worker::onAcceptConnection error: %1").
-								arg(QString::fromStdString(error.message())));
-			return;
-		}
-
-		Q_ASSERT(m_newConnection == newConnection);
-		Q_ASSERT(m_acceptedConnections.contains(newConnection) == false);
-
-		DEBUG_LOG_MSG(m_log, QString("TcpSlaveThread::Worker accept new connection from %1").
-								arg(newConnection->peerAddress()));
-
-		m_acceptedConnections.emplace(m_newConnection);
-
-		m_newConnection->startReceive();
-
-		m_newConnection.reset();
-
-		startListening();
-	}
-
-	// --------------------------------------------------------------------------------------------------------
-	//
-	// Modbus::TcpSlaveThread class implementaion
-	//
-	// --------------------------------------------------------------------------------------------------------
-
-	TcpSlaveThread::TcpSlaveThread()
-	{
-	}
-
-	void TcpSlaveThread::start(const HostAddressPort& listeningAddr, CircularLoggerShared logger)
-	{
-		Q_ASSERT(m_thread == nullptr);
-
-		m_thread = new std::jthread(&TcpSlaveThread::run, this, listeningAddr, logger);
-	}
-
-	void TcpSlaveThread::stop()
-	{
-		TEST_PTR_RETURN(m_thread);
-
-		m_thread->request_stop();
-
-		delete m_thread;
-
-		m_thread = nullptr;
-	}
-
-	void TcpSlaveThread::run(const HostAddressPort& listeningAddr, CircularLoggerShared logger)
-	{
-		DEBUG_LOG_MSG(logger, "Modbus::TcpSlave thread started");
-
-		try
-		{
-			io_context ioContext;
-
-			Worker worker(ioContext, listeningAddr, m_thread->get_stop_token(), logger);
-
-			worker.run();
-		}
-
-		catch (std::exception& e)
-		{
-			std::cout << e.what() << std::endl;
-		}
-
-		DEBUG_LOG_MSG(logger, "Modbus::TcpSlave thread stoped");
 	}
 }

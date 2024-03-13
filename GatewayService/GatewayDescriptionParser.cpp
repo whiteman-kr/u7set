@@ -197,8 +197,8 @@ namespace Gateway
 
 		// ModbusTcpSlave gateway specific settings
 		//
-		{ E::Setting::CodingMode,			E::SettingType::String	},
-		{ E::Setting::ModbusDeviceAddress,	E::SettingType::Int	},
+		{ E::Setting::ModbusCoding,			E::SettingType::String	},
+		{ E::Setting::ModbusDeviceID,	E::SettingType::Int	},
 
 		// ModbusTcpSlave signal lists specific settings
 		//

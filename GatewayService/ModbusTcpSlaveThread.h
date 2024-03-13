@@ -1,0 +1,113 @@
+#pragma once
+
+#include <thread>
+#include "../asio/include/asio.hpp"
+#include "../OnlineLib/CircularLogger.h"
+#include "ModbusProtocol.h"
+
+using namespace asio;
+using namespace asio::ip;
+
+namespace Modbus
+{
+	//
+	// Master/Slave and Client/Server roles in Modbus-TCP:
+	//
+	// Modbus Master is TCP Client.	Master (client) sends requests to Slave (server) and receives reply from Slave.
+	// Modbus Slave is TCP Server. Slave (server) receive requests from Master (client) and sends relpy to Master.
+	//
+
+	class TcpSlaveThread
+	{
+	private:
+
+		class Listener;
+
+		class Connection
+		{
+		public:
+			Connection(Listener& listener);
+
+			tcp::socket& socket();
+			QString peerAddress() const;
+			int connectionNo() const;
+
+			void startReceive();
+
+		private:
+			void onReceiveData(const error_code& error, size_t bytesReceived);
+
+			int onFnReadHoldingRegisters(TcpFrame& request);
+
+			TcpFrame& getRequestRef();
+			TcpFrame& getReplyRef();
+
+		private:
+			Listener& m_listener;
+			tcp::socket m_socket;
+
+			int m_connectionNo = 0;
+
+			static inline const int RECEIVE_BUFFER_SIZE = 64;
+			char m_receiveBuffer[RECEIVE_BUFFER_SIZE];
+
+			static inline const int SEND_BUFFER_SIZE = 1024;
+			char m_sendBuffer[SEND_BUFFER_SIZE];
+
+			static inline int m_connectionInstance = 0;
+		};
+
+		using ConnectionShared = std::shared_ptr<Connection>;
+
+		class Listener
+		{
+		public:
+			Listener(io_context& ioContext,
+					const HostAddressPort& listeningAddr,
+					int modbusDeviceID,
+					std::stop_token stopToken,
+					CircularLoggerShared logger);
+			virtual ~Listener();
+
+			void run();
+
+			io_context& ioContext();
+			int modbusDeviceID() const;
+
+		private:
+			bool exitIfStopRequested();
+
+			void startTimer500ms();
+			void onTimer500ms(const error_code& error);
+
+			void startListening();
+			void onAcceptConnection(ConnectionShared newConnection,
+									const error_code& error);
+
+		private:
+			io_context& m_ioContext;
+			HostAddressPort m_listeningAddr;
+			int m_modbusDeviceID = 0;
+			std::stop_token m_stopToken;
+			CircularLoggerShared m_log;
+
+			steady_timer m_timer;
+			tcp::acceptor m_acceptor;
+
+			ConnectionShared m_newConnection;
+			std::set<ConnectionShared> m_acceptedConnections;
+		};
+
+	public:
+		TcpSlaveThread();
+
+		void start(const HostAddressPort& listeningAddr, int modbusDeviceID, CircularLoggerShared logger);
+		void stop();
+
+	private:
+		void run(const HostAddressPort& listeningAddr, int modbusDeviceID, CircularLoggerShared logger);
+
+	private:
+		std::jthread* m_thread = nullptr;
+	};
+}

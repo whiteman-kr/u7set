@@ -288,8 +288,8 @@ namespace Gateway
 			E::Setting::LocalGatewayIP1,
 			E::Setting::RemoteGatewayIP1,
 
-			E::Setting::CodingMode,
-			E::Setting::ModbusDeviceAddress,
+			E::Setting::ModbusCoding,
+			E::Setting::ModbusDeviceID,
 	};
 
 	const std::set<E::Setting> ModbusTcpSlaveGateway::m_optionalSettings =
@@ -354,6 +354,32 @@ namespace Gateway
 				m_remoteGatewayIP2 = addrPort;
 				break;
 
+			case E::Setting::ModbusCoding:
+				{
+					bool ok = false;
+
+					m_modbusCoding = ::E::stringToValue<E::ModbusCoding>(sv.value.toString(), &ok);
+
+					if (ok == false)
+					{
+						log.logError(sv.lineNo, "Wrong ModbusCoding value. Should be ASCII or RTU.");
+						result = false;
+					}
+				}
+				break;
+
+			case E::Setting::ModbusDeviceID:
+				{
+					m_modbusDeviceID = sv.value.toInt();
+
+					if (m_modbusDeviceID < 0 || m_modbusDeviceID > 255)
+					{
+						log.logError(sv.lineNo, "Wrong ModbusDeviceID value. Should be in range 0..255.");
+						result = false;
+					}
+				}
+				break;
+
 			default:
 				;	// ok
 			}
@@ -387,6 +413,16 @@ namespace Gateway
 		return m_remoteGatewayIP2;
 	}
 
+	E::ModbusCoding ModbusTcpSlaveGateway::modbusCoding() const
+	{
+		return m_modbusCoding;
+	}
+
+	int ModbusTcpSlaveGateway::modbusDeviceID() const
+	{
+		return m_modbusDeviceID;
+	}
+
 	void ModbusTcpSlaveGateway::getRequiredSignalsHashes(std::set<Hash>* hashes)
 	{
 		TEST_PTR_RETURN(hashes);
@@ -406,7 +442,8 @@ namespace Gateway
 		xml.writeHostAddressPortAttribute(XmlAttribute::REMOTE_GATEWAY_IP1, m_remoteGatewayIP1);
 		xml.writeHostAddressPortAttribute(XmlAttribute::LOCAL_GATEWAY_IP2, m_localGatewayIP2);
 		xml.writeHostAddressPortAttribute(XmlAttribute::REMOTE_GATEWAY_IP2, m_remoteGatewayIP2);
-		xml.writeEnumKeyAttribute(XmlAttribute::MODBUS_CODING, m_coding);
+		xml.writeEnumKeyAttribute(XmlAttribute::MODBUS_CODING, m_modbusCoding);
+		xml.writeIntAttribute(XmlAttribute::MODBUS_DEVICE_ID, m_modbusDeviceID);
 
 		xml.writeEndElement();		//	</Settings>
 	}
@@ -439,7 +476,8 @@ namespace Gateway
 
 		result &= okIp1 || okIp2;
 
-		result &= xml.readEnumKeyAttribute(XmlAttribute::MODBUS_CODING, &m_coding);
+		result &= xml.readEnumKeyAttribute(XmlAttribute::MODBUS_CODING, &m_modbusCoding);
+		result &= xml.readIntAttribute(XmlAttribute::MODBUS_DEVICE_ID, &m_modbusDeviceID);
 
 		return result;
 	}

@@ -3,8 +3,10 @@
 #include "GatewayDescription.h"
 #include "GatewayHandler.h"
 #include "AppDataServiceClient.h"
-#include "ModbusTcpSlaveGateway.h"
+
 #include "ModbusProtocol.h"
+#include "ModbusTcpSlaveGateway.h"
+#include "ModbusTcpSlaveThread.h"
 
 namespace Gateway
 {

@@ -75,6 +75,9 @@ namespace Gateway
 		HostAddressPort localGatewayIP2() const;
 		HostAddressPort remoteGatewayIP2() const;
 
+		E::ModbusCoding modbusCoding() const;
+		int modbusDeviceID() const;
+
 		void getRequiredSignalsHashes(std::set<Hash>* hashes);
 
 	private:
@@ -97,7 +100,8 @@ namespace Gateway
 		HostAddressPort m_localGatewayIP2;
 		HostAddressPort m_remoteGatewayIP2;
 
-		E::ModbusCoding m_coding = E::ModbusCoding::ASCII;
+		E::ModbusCoding m_modbusCoding = E::ModbusCoding::ASCII;
+		int m_modbusDeviceID = 0;
 
 		std::map<Address16, std::pair<QString, ModbusFormat>> m_modbusSignals;
 	};

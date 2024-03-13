@@ -57,8 +57,8 @@ namespace Gateway
 
 			// ModbusTcpSlave specific settings
 
-			CodingMode,
-			ModbusDeviceAddress,
+			ModbusCoding,
+			ModbusDeviceID,
 			SignalsFormat,
 		};
 		Q_ENUM(Setting)
