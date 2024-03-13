@@ -5,10 +5,11 @@
 
 #include <QJSEngine>
 
+#include <DbLib/DbController.h>
+#include <HardwareLib/Connection.h>
+
 #include "../AppSignalLib/Bus.h"
 #include "../AppSignalLib/ComparatorSet.h"
-#include "../DbLib/DbController.h"
-#include "../HardwareLib/Connection.h"
 #include "../Simulator/SimProfiles.h"
 #include "../VFrame30/LogicSchema.h"
 #include "../lib/TuningDataStorage.h"

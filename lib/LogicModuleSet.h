@@ -3,7 +3,8 @@
 #include <memory>
 #include <map>
 #include <QObject>
-#include "../HardwareLib/LmDescription.h"
+
+#include <HardwareLib/LmDescription.h>
 
 class DbController;
 

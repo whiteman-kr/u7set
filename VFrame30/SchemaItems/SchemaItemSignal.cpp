@@ -46,16 +46,16 @@ namespace VFrame30
 	{
 		bool result = FblItemRect::SaveData(message);
 
-		if (result == false || message->has_schemaitem() == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 
 		// --
 		//
-		Proto::SchemaItemSignal* signal = message->mutable_schemaitem()->mutable_signal();
+		Proto::SchemaItemSignal* signal = message->MutableExtension(Proto::schemaitem)->mutable_signal();
 
 		for (const QString& strId : m_appSignalIds)
 		{
@@ -87,9 +87,9 @@ namespace VFrame30
 
 	bool SchemaItemSignal::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemaitem() == false)
+		if (message.HasExtension(Proto::schemaitem) == false)
 		{
-			assert(message.has_schemaitem());
+			assert(message.HasExtension(Proto::schemaitem));
 			return false;
 		}
 
@@ -103,13 +103,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemaitem().has_signal() == false)
+		if (message.GetExtension(Proto::schemaitem).has_signal() == false)
 		{
-			assert(message.schemaitem().has_signal());
+			assert(message.GetExtension(Proto::schemaitem).has_signal());
 			return false;
 		}
 
-		const Proto::SchemaItemSignal& signal = message.schemaitem().signal();
+		const Proto::SchemaItemSignal& signal = message.GetExtension(Proto::schemaitem).signal();
 
 		// --
 		//
@@ -2126,16 +2126,16 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 	{
 		bool result = SchemaItemSignal::SaveData(message);
 		
-		if (result == false || message->has_schemaitem() == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 
 		// --
 		//
-		/*Proto::VideoItemInputSignal* inputSignal = */message->mutable_schemaitem()->mutable_inputsignal();
+		/*Proto::VideoItemInputSignal* inputSignal = */message->MutableExtension(Proto::schemaitem)->mutable_inputsignal();
 
 		//inputSignal->set_weight(weight);
 
@@ -2150,9 +2150,9 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 
 	bool SchemaItemInput::loadData(const Proto::Envelope& message, bool loadOwnData)
 	{
-		if (message.has_schemaitem() == false)
+		if (message.HasExtension(Proto::schemaitem) == false)
 		{
-			assert(message.has_schemaitem());
+			assert(message.HasExtension(Proto::schemaitem));
 			return false;
 		}
 
@@ -2171,13 +2171,13 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 			return true;
 		}
 
-		if (message.schemaitem().has_inputsignal() == false)
+		if (message.GetExtension(Proto::schemaitem).has_inputsignal() == false)
 		{
-			assert(message.schemaitem().has_inputsignal());
+			assert(message.GetExtension(Proto::schemaitem).has_inputsignal());
 			return false;
 		}
 
-		/*const Proto::VideoItemInputSignal& inputSignal = */message.schemaitem().inputsignal();
+		/*const Proto::VideoItemInputSignal& inputSignal = */message.GetExtension(Proto::schemaitem).inputsignal();
 		//fill = inputSignal.fill();
 
 		return true;
@@ -2230,16 +2230,16 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 	{
 		bool result = SchemaItemSignal::SaveData(message);
 		
-		if (result == false || message->has_schemaitem() == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 
 		// --
 		//
-		/*Proto::VideoItemOutputSignal* outputSignal = */message->mutable_schemaitem()->mutable_outputsignal();
+		/*Proto::VideoItemOutputSignal* outputSignal = */message->MutableExtension(Proto::schemaitem)->mutable_outputsignal();
 
 		//inputSignal->set_weight(weight);
 
@@ -2254,9 +2254,9 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 
 	bool SchemaItemOutput::loadData(const Proto::Envelope& message, bool loadOwnData)
 	{
-		if (message.has_schemaitem() == false)
+		if (message.HasExtension(Proto::schemaitem) == false)
 		{
-			assert(message.has_schemaitem());
+			assert(message.HasExtension(Proto::schemaitem));
 			return false;
 		}
 
@@ -2274,13 +2274,13 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 			return true;
 		}
 
-		if (message.schemaitem().has_outputsignal() == false)
+		if (message.GetExtension(Proto::schemaitem).has_outputsignal() == false)
 		{
-			assert(message.schemaitem().has_outputsignal());
+			assert(message.GetExtension(Proto::schemaitem).has_outputsignal());
 			return false;
 		}
 
-		/*const Proto::VideoItemOutputSignal& outputSignal = */message.schemaitem().outputsignal();
+		/*const Proto::VideoItemOutputSignal& outputSignal = */message.GetExtension(Proto::schemaitem).outputsignal();
 		//fill = inputSignal.fill();
 
 		return true;
@@ -2331,16 +2331,16 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 	{
 		bool result = SchemaItemSignal::SaveData(message);
 
-		if (result == false || message->has_schemaitem() == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 
 		// --
 		//
-		/*Proto::VideoItemOutputSignal* inoutSignal = */message->mutable_schemaitem()->mutable_inoutsignal();
+		/*Proto::VideoItemOutputSignal* inoutSignal = */message->MutableExtension(Proto::schemaitem)->mutable_inoutsignal();
 
 		//inoutSignal->set_weight(weight);
 
@@ -2355,9 +2355,9 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 
 	bool SchemaItemInOut::loadData(const Proto::Envelope& message, bool loadOwnData)
 	{
-		if (message.has_schemaitem() == false)
+		if (message.HasExtension(Proto::schemaitem) == false)
 		{
-			assert(message.has_schemaitem());
+			assert(message.HasExtension(Proto::schemaitem));
 			return false;
 		}
 
@@ -2376,13 +2376,13 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 			return true;
 		}
 
-		if (message.schemaitem().has_inoutsignal() == false)
+		if (message.GetExtension(Proto::schemaitem).has_inoutsignal() == false)
 		{
-			assert(message.schemaitem().has_inoutsignal());
+			assert(message.GetExtension(Proto::schemaitem).has_inoutsignal());
 			return false;
 		}
 
-		/*const Proto::VideoItemOutputSignal& inoutSignal = */message.schemaitem().inoutsignal();
+		/*const Proto::VideoItemOutputSignal& inoutSignal = */message.GetExtension(Proto::schemaitem).inoutsignal();
 		//fill = inoutSignal.fill();
 
 		return true;

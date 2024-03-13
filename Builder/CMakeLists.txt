@@ -187,6 +187,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../Proto/ProtoCommonHelper.h"
 	"../Proto/Network.pb.h"
 	"../Proto/AppSignal.pb.h"
+	"../Proto/Bus.pb.h"
 
 	"../AppSignalLib/AppSignal.h"
 	"../AppSignalLib/AppSignalParam.h"

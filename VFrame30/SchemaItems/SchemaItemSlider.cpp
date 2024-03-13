@@ -185,19 +185,21 @@ namespace VFrame30
 	bool SchemaItemSlider::SaveData(Proto::Envelope* message) const
 	{
 		bool result = SchemaItemControl::SaveData(message);
-		if (result == false || message->has_schemaitem() == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 
-		assert(message->schemaitem().has_posrectimpl());
-		assert(message->schemaitem().has_control());
+		auto schemaItemMessage = message->MutableExtension(Proto::schemaitem);
+
+		assert(schemaItemMessage->has_posrectimpl());
+		assert(schemaItemMessage->has_control());
 
 		// --
 		//
-		::Proto::SchemaItemSlider* sliderMessage = message->mutable_schemaitem()->mutable_slider();
+		::Proto::SchemaItemSlider* sliderMessage = schemaItemMessage->mutable_slider();
 
 		sliderMessage->set_orientation(m_orientation);
 		sliderMessage->set_invertedappearance(m_invertedAppearance);
@@ -228,22 +230,24 @@ namespace VFrame30
 
 	bool SchemaItemSlider::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemaitem() == false)
+		if (message.HasExtension(Proto::schemaitem) == false)
 		{
-			assert(message.has_schemaitem());
+			assert(message.HasExtension(Proto::schemaitem));
 			return false;
 		}
 
 		// --
 		//
+		const auto& schemaItemMessage = message.GetExtension(Proto::schemaitem);
+
 		bool result = SchemaItemControl::LoadData(message);
-		if (result == false || message.schemaitem().has_control() == false)
+		if (result == false || schemaItemMessage.has_control() == false)
 		{
-			assert(message.schemaitem().has_control());
+			assert(schemaItemMessage.has_control());
 			return false;
 		}
 
-		const Proto::SchemaItemSlider& sliderMessage = message.schemaitem().slider();
+		const Proto::SchemaItemSlider& sliderMessage = schemaItemMessage.slider();
 
 		m_orientation = static_cast<Qt::Orientation>(sliderMessage.orientation());
 		m_invertedAppearance = sliderMessage.invertedappearance();

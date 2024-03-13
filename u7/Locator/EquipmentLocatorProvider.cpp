@@ -1,6 +1,7 @@
 #include "EquipmentLocatorProvider.h"
 #include "../EquipmentEditor/EquipmentTabPage.h"
-#include "../HardwareLib/DeviceObject.h"
+
+#include <HardwareLib/DeviceObject.h>
 
 namespace Locator
 {

@@ -74,16 +74,16 @@ namespace VFrame30
 	bool SchemaItemRect::SaveData(Proto::Envelope* message) const
 	{
 		bool result = PosRectRotatable::SaveData(message);
-		if (result == false || message->has_schemaitem() == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 		
 		// --
 		//
-		Proto::SchemaItemRect* rectMessage = message->mutable_schemaitem()->mutable_rect();
+		Proto::SchemaItemRect* rectMessage = message->MutableExtension(Proto::schemaitem)->mutable_rect();
 
 		rectMessage->set_weight(m_weight);
 		rectMessage->set_linecolor(m_lineColor.rgba());
@@ -108,9 +108,9 @@ namespace VFrame30
 
 	bool SchemaItemRect::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemaitem() == false)
+		if (message.HasExtension(Proto::schemaitem) == false)
 		{
-			assert(message.has_schemaitem());
+			assert(message.HasExtension(Proto::schemaitem));
 			return false;
 		}
 
@@ -124,13 +124,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemaitem().has_rect() == false)
+		if (message.GetExtension(Proto::schemaitem).has_rect() == false)
 		{
-			assert(message.schemaitem().has_rect());
+			assert(message.GetExtension(Proto::schemaitem).has_rect());
 			return false;
 		}
 
-		const Proto::SchemaItemRect& rectMessage = message.schemaitem().rect();
+		const Proto::SchemaItemRect& rectMessage = message.GetExtension(Proto::schemaitem).rect();
 
 		m_weight = rectMessage.weight();
 		m_lineColor = QColor::fromRgba(rectMessage.linecolor());

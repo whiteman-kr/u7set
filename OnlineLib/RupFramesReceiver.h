@@ -4,7 +4,7 @@
 
 #include "SocketIO.h"
 #include "CircularLogger.h"
-#include "../HardwareLib/DataProtocols.h"
+#include <HardwareLib/DataProtocols.h>
 #include "../UtilsLib/WUtils.h"
 #include "../CommonLib/HostAddressPort.h"
 

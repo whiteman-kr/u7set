@@ -1,7 +1,7 @@
 #ifndef CHOOSEAFBDIALOG_H
 #define CHOOSEAFBDIALOG_H
 
-#include "../HardwareLib/Afb.h"
+#include <HardwareLib/Afb.h>
 
 namespace Ui {
 	class ChooseAfbDialog;

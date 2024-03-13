@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../HardwareLib/DataProtocols.h"
+#include <HardwareLib/DataProtocols.h>
+
 #include "../UtilsLib/SimpleMutex.h"
 #include "../UtilsLib/Queue.h"
 

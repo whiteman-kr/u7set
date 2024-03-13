@@ -77,10 +77,10 @@ namespace VFrame30
 	bool FblItemRect::SaveData(Proto::Envelope* message) const
 	{
 		bool result = PosRectImpl::SaveData(message);
-		if (result == false || message->has_schemaitem() == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 
@@ -94,7 +94,7 @@ namespace VFrame30
 
 		// --
 		//
-		Proto::FblItemRect* itemMessage = message->mutable_schemaitem()->mutable_fblitemrect();
+		Proto::FblItemRect* itemMessage = message->MutableExtension(Proto::schemaitem)->mutable_fblitemrect();
 
 		itemMessage->set_weight(m_weight);
 		itemMessage->set_linecolor(m_lineColor);
@@ -114,9 +114,9 @@ namespace VFrame30
 
 	bool FblItemRect::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemaitem() == false)
+		if (message.HasExtension(Proto::schemaitem) == false)
 		{
-			assert(message.has_schemaitem());
+			assert(message.HasExtension(Proto::schemaitem));
 			return false;
 		}
 
@@ -134,13 +134,13 @@ namespace VFrame30
 			return false;
 		}
 
-		if (message.schemaitem().has_fblitemrect() == false)
+		if (message.GetExtension(Proto::schemaitem).has_fblitemrect() == false)
 		{
-			assert(message.schemaitem().has_fblitemrect());
+			assert(message.GetExtension(Proto::schemaitem).has_fblitemrect());
 			return false;
 		}
 
-		const Proto::FblItemRect& itemMessage = message.schemaitem().fblitemrect();
+		const Proto::FblItemRect& itemMessage = message.GetExtension(Proto::schemaitem).fblitemrect();
 
 		m_weight = itemMessage.weight();
 		m_lineColor = itemMessage.linecolor();

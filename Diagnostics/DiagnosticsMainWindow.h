@@ -1,13 +1,12 @@
 #pragma once
 
-#include "DiagnosticsCentralWidget.h"
 #include "DiagConfigController.h"
 #include "DiagnosticsSchemaManager.h"
 #include "../ClientLib/AppSignalManager.h"
-#include "../DiagClientLib/DiagStateManager.h"
+#include <DiagClientLib/DiagStateManager.h>
 //#include "SelectSchemaWidget.h"
 #include "../UtilsLib/InstanceResolver.h"
-#include "../SchemaClientLib/SchemaDrawStatistics.h"
+#include <SchemaClientLib/SchemaDrawStatistics.h>
 //#include "../VFrame30/ClientSchemaView.h"
 #include "../ClientLib/ClientTranslator.h"
 #include "../ClientLib/AdsConnection.h"
@@ -20,6 +19,7 @@
 #include "../OnlineLib/SoftwareInfo.h"
 
 class DiagnosticsToolBar;
+class DiagnosticsCentralWidget;
 
 namespace VFrame30
 {
@@ -33,7 +33,7 @@ class DiagnosticsMainWindow : public QMainWindow
 
 public:
 	DiagnosticsMainWindow(InstanceResolver& instanceResolver,  const SoftwareInfo& softwareInfo, QWidget* parent = nullptr);
-	~DiagnosticsMainWindow() = default;
+	virtual ~DiagnosticsMainWindow() override;
 
 	// Events
 	//

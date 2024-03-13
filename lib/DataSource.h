@@ -4,12 +4,12 @@
 #include "../UtilsLib/Queue.h"
 #include "../UtilsLib/XmlHelper.h"
 #include "../UtilsLib/SimpleThread.h"
-#include "../HardwareLib/DataProtocols.h"
 #include "../OnlineLib/SocketIO.h"
 #include "../OnlineLib/CircularLogger.h"
 #include "../CommonLib/Times.h"
 #include "ConstStrings.h"
-#include "../HardwareLib/LanControllerInfo.h"
+#include <HardwareLib/DataProtocols.h>
+#include <HardwareLib/LanControllerInfo.h>
 
 namespace Network
 {

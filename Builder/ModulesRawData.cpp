@@ -1,5 +1,7 @@
 #include "ModulesRawData.h"
 
+#include <HardwareLib/DeviceModule.h>
+
 const char* ModuleRawDataDescription::RAW_DATA_SIZE = "RAW_DATA_SIZE";
 const char* ModuleRawDataDescription::APP_DATA16 = "APP_DATA16";
 const char* ModuleRawDataDescription::APP_DATA32 = "APP_DATA32";

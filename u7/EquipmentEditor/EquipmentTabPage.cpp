@@ -1,6 +1,4 @@
 #include "EquipmentTabPage.h"
-#include "../../HardwareLib/DeviceObject.h"
-#include "../../HardwareLib/PropertyNames.h"
 #include "../DialogConnections.h"
 #include "../EquipmentEditor/DialogImportPreset.h"
 #include "../Forms/ComparePropertyObjectDialog.h"
@@ -10,6 +8,10 @@
 #include "EquipmentVcsDialog.h"
 #include "EquipmentView.h"
 #include "IdePropertyEditor.h"
+
+#include <HardwareLib/DeviceModule.h>
+#include <HardwareLib/DeviceController.h>
+#include <HardwareLib/PropertyNames.h>
 
 //
 //
@@ -1581,7 +1583,7 @@ void EquipmentTabPage::exportPreset()
 
 	// Save devices to the clipboard
 	//
-	::Proto::ExportedDevicePreset message;
+	::Proto::ExportedDevicePreset2 message;
 
 	::Proto::EnvelopeSet* setMessage = message.mutable_items();
 	::Proto::EnvelopeSetShortDescription* descriptionMessage = message.mutable_description();
@@ -1608,7 +1610,7 @@ void EquipmentTabPage::exportPreset()
 		std::string data = message.SerializeAsString();
 		QByteArray compressedData = qCompress(QByteArray::fromRawData(data.data(), static_cast<int>(data.size())));
 
-		::Proto::ExportedDevicePreset compressedMessage;
+		::Proto::ExportedDevicePreset2 compressedMessage;
 		compressedMessage.mutable_description()->operator=(*descriptionMessage);
 		compressedMessage.set_compressedthis(compressedData.toStdString());
 
@@ -1656,7 +1658,7 @@ void EquipmentTabPage::importPreset()
 
 	// --
 	//
-	::Proto::ExportedDevicePreset fileMessage;
+	::Proto::ExportedDevicePreset2 fileMessage;
 
 	bool ok = fileMessage.ParseFromIstream(&input);
 	if (ok == false)
@@ -1667,7 +1669,7 @@ void EquipmentTabPage::importPreset()
 
 	// Check if data was compressed then uncompress it
 	//
-	::Proto::ExportedDevicePreset message;
+	::Proto::ExportedDevicePreset2 message;
 
 	if (fileMessage.has_compressedthis() == true)
 	{

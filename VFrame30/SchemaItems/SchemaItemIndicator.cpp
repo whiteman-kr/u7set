@@ -53,16 +53,16 @@ namespace VFrame30
 	bool SchemaItemIndicator::SaveData(Proto::Envelope* message) const
 	{
 		bool result = PosRectImpl::SaveData(message);
-		if (result == false || message->has_schemaitem() == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			Q_ASSERT(result);
-			Q_ASSERT(message->has_schemaitem());
+			Q_ASSERT(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 
 		// --
 		//
-		Proto::SchemaItemIndicator* indicatorMessage = message->mutable_schemaitem()->mutable_indicator();
+		Proto::SchemaItemIndicator* indicatorMessage = message->MutableExtension(Proto::schemaitem)->mutable_indicator();
 
 		indicatorMessage->set_signalids(signalIdsString().toStdString());
 
@@ -79,9 +79,9 @@ namespace VFrame30
 
 	bool SchemaItemIndicator::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemaitem() == false)
+		if (message.HasExtension(Proto::schemaitem) == false)
 		{
-			Q_ASSERT(message.has_schemaitem());
+			Q_ASSERT(message.HasExtension(Proto::schemaitem));
 			return false;
 		}
 
@@ -93,13 +93,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemaitem().has_indicator() == false)
+		if (message.GetExtension(Proto::schemaitem).has_indicator() == false)
 		{
-			Q_ASSERT(message.schemaitem().has_indicator());
+			Q_ASSERT(message.GetExtension(Proto::schemaitem).has_indicator());
 			return false;
 		}
 
-		const Proto::SchemaItemIndicator& indicatorMessage = message.schemaitem().indicator();
+		const Proto::SchemaItemIndicator& indicatorMessage = message.GetExtension(Proto::schemaitem).indicator();
 
 		setSignalIdsString(indicatorMessage.signalids().data());
 

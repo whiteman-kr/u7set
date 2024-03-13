@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../DbLib/DbController.h"
+#include <DbLib/DbController.h>
+
 #include "../ReportLib/Report.h"
 #include "../ReportLib/ReportAppSignalProvider.h"
 #include "../ReportLib/ReportDiagStateProvider.h"

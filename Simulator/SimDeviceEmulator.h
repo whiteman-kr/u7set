@@ -5,16 +5,19 @@
 #include <array>
 #include <cstddef>
 #include <limits>
+
 #include <QObject>
 #include <QMutex>
-#include "../HardwareLib/LmDescription.h"
-#include "../HardwareLib/LogicModulesInfo.h"
-#include "../HardwareLib/ModuleFirmware.h"
+
 #include "SimEeprom.h"
 #include "SimRam.h"
 #include "SimConnections.h"
 #include "SimAfb.h"
 #include "SimLans.h"
+
+#include <HardwareLib/LmDescription.h>
+#include <HardwareLib/LogicModulesInfo.h>
+#include <HardwareLib/ModuleFirmware.h>
 
 
 #ifndef __FUNCTION_NAME__

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "MonitorCentralWidget.h"
-#include "MonitorConfigController.h"
 
 
 struct SelectSchemaItem
@@ -11,6 +10,7 @@ struct SelectSchemaItem
 };
 
 class SelectSchemaTable;
+class MonitorCentralWidget;
 
 
 //

@@ -1,7 +1,7 @@
 #include <QXmlStreamReader>
 #include <QMetaProperty>
-#include "../HardwareLib/DeviceObject.h"
 #include "DiagDataService.h"
+
 
 // -------------------------------------------------------------------------------
 //

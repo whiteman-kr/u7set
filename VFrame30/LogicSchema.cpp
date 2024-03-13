@@ -37,16 +37,16 @@ namespace VFrame30
 	{
 		bool result = Schema::SaveData(message);
 
-		if (result == false || message->has_schema() == false)
+		if (result == false || message->HasExtension(Proto::schema) == false)
 		{
 			assert(result);
-			assert(message->has_schema());
+			assert(message->HasExtension(Proto::schema));
 			return false;
 		}
 
 		// --
 		//
-		Proto::LogicSchema* ls = message->mutable_schema()->mutable_logic_schema();
+		Proto::LogicSchema* ls = message->MutableExtension(Proto::schema)->mutable_logic_schema();
 
 		for (const QString& strId : m_equipmentIds)
 		{
@@ -62,9 +62,9 @@ namespace VFrame30
 
 	bool LogicSchema::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schema() == false)
+		if (message.HasExtension(Proto::schema) == false)
 		{
-			assert(message.has_schema());
+			assert(message.HasExtension(Proto::schema));
 			return false;
 		}
 
@@ -147,13 +147,15 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schema().has_logic_schema() == false)
+		const Proto::Schema& schemaMessage = message.GetExtension(Proto::schema);
+
+		if (schemaMessage.has_logic_schema() == false)
 		{
-			assert(message.schema().has_logic_schema());
+			assert(schemaMessage.has_logic_schema());
 			return false;
 		}
 
-		const Proto::LogicSchema& ls = message.schema().logic_schema();
+		const Proto::LogicSchema& ls = schemaMessage.logic_schema();
 
 		m_equipmentIds.clear();
 		m_equipmentIds.reserve(ls.equipmentids_size());

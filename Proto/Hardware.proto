@@ -1,0 +1,244 @@
+syntax = "proto2";
+
+import "Common.proto";
+import "Envelope.proto";
+
+package Proto;
+
+
+//
+// EXTEND Envelope
+//
+extend Envelope
+{
+	// Possible types for storing
+	//
+	optional DeviceObject deviceobject = 7;			// Hardware::DeviceObject
+	optional DiagSignalType diagSignalType = 8;		// Hardware::DiagSignalTypeObject
+	optional Connection connection = 104;			// Hardware::Connection
+}
+
+message DeviceObject
+{
+	required Uuid uuid = 1;
+	required wstring equipmentId = 2;
+	required wstring caption = 3;
+	optional wstring childRestriction = 4;
+	optional int32 place = 5 [default = 0];
+	optional string specific_properties_struct = 6;
+	repeated Property properties = 7;
+	repeated string tags = 8;
+	optional bool excludeFromBuild = 9;
+
+	optional bool preset = 32 [default = false];
+	optional bool presetRoot = 33 [default = false];
+	optional wstring presetName = 34;
+	optional Uuid presetObjectUuid = 35;
+	optional int32 childCountHint = 36 [default = 0];	// Hint for calling m_children.reserve()
+	optional int32 presetVersion = 37;
+	optional string presetProtectedProperties = 38;
+
+	// Derived from Hardware::DeviceObject
+	//
+	optional DeviceRoot Root = 100;					// Not used
+	optional DeviceSystem System = 101;
+	optional DeviceRack Rack = 102;
+	optional DeviceChassis Chassis = 103;
+	optional DeviceModule Module = 104;
+	optional DeviceController Controller = 105;
+	optional DeviceAppSignal AppSignal = 106;
+	optional DeviceDiagSignal DiagSignal = 109;
+	optional Workstation Workstation = 107;
+	optional Software Software = 108;
+
+    // Children usualy are not stored in this object, but if required to store objects
+	// with hierarchy (exmaple is clipboard) then use this filed
+	//
+	repeated Envelope children = 200;
+}
+
+message DeviceRoot
+{
+}
+
+message DeviceSystem
+{
+}
+
+message DeviceRack
+{
+}
+
+message DeviceChassis
+{
+	optional int32 type = 1 [default = 0];
+}
+
+message DeviceModule
+{
+	optional int32 typeObsolete = 1 [default = 0];
+	optional string configurationScript = 2;
+	optional int32 moduleType = 3;
+	optional string rawDataDescription = 4;
+	optional int32 customModuleFamily = 5 [default = 0];
+}
+
+message DeviceController
+{
+	optional int32 diagDataOffset = 3;
+}
+
+message DeviceAppSignal
+{
+	optional int32 obsoletetype = 1 [default = 0];			// old type format, not used anymore, RPCT-345
+
+	optional int32 byteOrder = 2 [default = 0];
+	optional int32 format = 3 [default = 0];
+	optional int32 size = 4 [default = 0];
+	//optional int32 validityOffset = 5 [default = 0];		// Obsolete from RPCT-1660
+	//optional int32 validityBit = 6 [default = 0];			// Obsolete from RPCT-1660
+	optional int32 valueOffset = 7 [default = 0];
+	optional int32 valueBit = 8 [default = 0];
+	optional int32 type = 9 [default = 0];					// RPCT-345
+	optional int32 function = 10 [default = 0];				// RPCT-345
+	optional int32 memoryArea = 11 [default = 0];			// RPCT-888
+
+    optional int32 appSignalLowAdc = 12 [default = 0];
+	optional int32 appSignalHighAdc = 13 [default = 65535];
+	optional double appSignalLowEngUnits = 14 [default = 0];
+	optional double appSignalHighEngUnits = 15 [default = 100];
+	optional int32 appSignalDataFormat = 16 [default = 2];	// E::DataFormat::Float = 2
+
+    optional string validitySignalId = 20;					// RPCT-1660
+
+    optional string appSignalBusTypeId = 26;
+
+    optional string signalSpecPropsStruct = 40;
+	optional bool signalSpecPropsStructWasFixed = 41 [default = false];		// The sign that signalSpecPropsStruct already got replaced EngEneered -> EngIneered
+}
+
+message DeviceDiagSignal
+{
+	optional int32 level = 3;			// E::DiagLevel
+	optional string signalTypeId = 4;
+	optional string validitySignalId = 5;
+	optional bool isRefelection = 6;
+	optional string reflectedSignalId = 7;
+
+	optional int32 valueOffset = 10;
+	optional int32 valueBit = 11;
+	optional int32 valueBitSize = 12;
+	optional int32 discreteContainerSize = 13;
+
+	optional bool logChanges = 16;
+	optional bool archive = 17;
+	optional bool reserved = 18;
+
+	optional double coarseAperture = 22;
+	optional double fineAperture = 23;
+	optional int32 apertureType = 24;	 // E::ApertureType;
+
+	optional int32 decimalPlaces = 30;
+}
+
+message Workstation
+{
+	optional int32 type = 1 [default = 0];
+	optional string hostname = 2;
+}
+
+message Software
+{
+	optional int32 type = 1 [default = 0];
+}
+
+message DiagSignalType
+{
+    optional string signalTypeId = 3;
+    optional Uuid uuid = 4;
+    optional bool systemSignalType = 5;
+	optional int32 type = 6; 				// enum E::DiagSignalType
+	optional int32 byteOrder = 7; 			// enum E::DiagByteOrder
+
+	// Discrete specific
+	//
+	optional bool inverseValue = 20;
+	optional int32 normalState = 25;
+	optional string normalStateString0 = 26;
+	optional string normalStateString1 = 27;
+
+	// Analog conversion
+	//
+	optional int32 analogformat = 32; 		// enum E::DiagAnalogFormat
+
+	optional double adcHighLimit = 33;
+	optional double adcLowLimit = 34;
+
+	optional double valueHighLimit = 35;
+	optional double valueLowLimit = 36;
+
+	optional double valueMultiplier = 37;
+	optional double valueOffset = 38;
+
+	optional bool useLimits = 39;
+
+	optional string units = 40;
+}
+
+// Signal specific properties values messages
+
+
+//------------------------------------------------------------------------------------------
+//
+//  WhiteMan's serialization
+//
+//------------------------------------------------------------------------------------------
+
+message Connection
+{
+    optional string ConnectionID = 2;
+
+    optional string Port1EquipmentID = 3;
+	optional string Port2EquipmentID = 4;
+
+    optional string Port1RawDataDescription = 5;
+	optional string Port2RawDataDescription = 6;
+
+    // Flags
+	//
+    optional bool ManualSettings = 11 [default = false];
+    optional bool DisableDataID = 12 [default = false];
+    optional bool GenerateVHDFile = 13 [default = false];
+
+    // Memory
+	//
+    optional int32 Port1TxStartAddress = 14 [default = 0];
+    optional int32 Port1TxWordsQuantity = 15 [default = 479];
+    optional int32 Port1RxWordsQuantity = 16 [default = 479];
+
+    optional int32 Port2TxStartAddress = 17 [default = 0];
+    optional int32 Port2TxWordsQuantity = 18 [default = 479];
+    optional int32 Port2RxWordsQuantity = 19 [default = 479];
+
+    optional Uuid uuid = 20;
+
+    // Serial
+
+    optional bool Port1EnableSerial = 21 [default = false];
+    optional int32 Port1SerialMode = 22 [default = 0];
+    optional bool Port1EnableDuplex = 23 [default = false];
+
+    optional bool Port2EnableSerial = 24 [default = false];
+    optional int32 Port2SerialMode = 25 [default = 0];
+    optional bool Port2EnableDuplex = 26 [default = false];
+
+    //
+
+    optional int32 Type = 27 [default = 0];
+
+    // Obsolete fields
+
+    optional int32 ObsoleteMode = 8 [default = 0];
+    optional int32 ObsoleteSerialMode = 7 [default = 0];
+    optional bool ObsoleteEnableDuplex = 10 [default = false];
+}

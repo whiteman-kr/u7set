@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../DbLib/DbController.h"
-#include "../HardwareLib/DeviceObject.h"
+#include <DbLib/DbController.h>
+#include <HardwareLib/Software.h>
+
 #include "../VFrame30/SchemaDetails.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../lib/DataSource.h"

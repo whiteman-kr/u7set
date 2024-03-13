@@ -249,16 +249,16 @@ namespace VFrame30
 	bool SchemaItemUfb::SaveData(Proto::Envelope* message) const
 	{
 		bool result = FblItemRect::SaveData(message);
-		if (result == false || message->has_schemaitem() == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 
 		// --
 		//
-		Proto::SchemaItemUfb* ufbpb = message->mutable_schemaitem()->mutable_ufb();
+		Proto::SchemaItemUfb* ufbpb = message->MutableExtension(Proto::schemaitem)->mutable_ufb();
 
 		ufbpb->set_ufbschemaid(m_ufbSchemaId.toStdString());
 		ufbpb->set_ufbcaption(m_ufbCaption.toStdString());
@@ -284,9 +284,9 @@ namespace VFrame30
 
 	bool SchemaItemUfb::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemaitem() == false)
+		if (message.HasExtension(Proto::schemaitem) == false)
 		{
-			assert(message.has_schemaitem());
+			assert(message.HasExtension(Proto::schemaitem));
 			return false;
 		}
 
@@ -300,13 +300,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemaitem().has_ufb() == false)
+		if (message.GetExtension(Proto::schemaitem).has_ufb() == false)
 		{
-			assert(message.schemaitem().has_ufb());
+			assert(message.GetExtension(Proto::schemaitem).has_ufb());
 			return false;
 		}
 
-		const Proto::SchemaItemUfb& ufbpb = message.schemaitem().ufb();
+		const Proto::SchemaItemUfb& ufbpb = message.GetExtension(Proto::schemaitem).ufb();
 
 		m_ufbSchemaId = QString::fromStdString(ufbpb.ufbschemaid());
 		m_ufbCaption = QString::fromStdString(ufbpb.ufbcaption());

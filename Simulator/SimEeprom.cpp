@@ -1,6 +1,8 @@
 #include "SimEeprom.h"
+
 #include <cassert>
-#include "../HardwareLib/ModuleFirmware.h"
+
+#include <HardwareLib/ModuleFirmware.h>
 
 namespace Sim
 {

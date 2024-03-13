@@ -1,5 +1,5 @@
 #pragma once
-#include "../../HardwareLib/DeviceObject.h"
+#include <HardwareLib/DeviceObject.h>
 
 class EquipmentModel;
 
@@ -79,7 +79,7 @@ public slots:
 	void copySelectedDevices();
 	void pasteDevices();
 	void pasteDevices(const ::Proto::EnvelopeSet& messageItems,
-					  const Proto::EnvelopeSetShortDescription& messageDescr,
+					  const ::Proto::EnvelopeSetShortDescription& messageDescr,
 					  bool newUuids);
 	bool canPaste() const;
 	bool canPaste(const ::Proto::EnvelopeSetShortDescription& message) const;
@@ -94,6 +94,7 @@ public slots:
 	void checkInSelectedDevices();
 	void checkOutSelectedDevices();
 	void undoChangesSelectedDevices();
+	void undoChangesRecursively();
 	void showHistory();
 	void compare();
 	void refreshSelectedDevices();

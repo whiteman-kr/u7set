@@ -27,16 +27,16 @@ namespace VFrame30
 	{
 		bool result = FblItemRect::SaveData(message);
 
-		if (result == false || message->has_schemaitem() == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 
 		// --
 		//
-		/*Proto::SchemaItemTerminator* termitem = */message->mutable_schemaitem()->mutable_terminator();
+		/*Proto::SchemaItemTerminator* termitem = */message->MutableExtension(Proto::schemaitem)->mutable_terminator();
 
 		//termitem->set_type(m_type);
 
@@ -53,13 +53,13 @@ namespace VFrame30
 
 		// --
 		//
-		if (message.schemaitem().has_terminator() == false)
+		if (message.GetExtension(Proto::schemaitem).has_terminator() == false)
 		{
-			assert(message.schemaitem().has_terminator() == true);
+			assert(message.GetExtension(Proto::schemaitem).has_terminator() == true);
 			return false;
 		}
 
-		//const Proto::SchemaItemTerminator& termitem = message.schemaitem().terminator();
+		//const Proto::SchemaItemTerminator& termitem = message.GetExtension(Proto::schemaitem).terminator();
 
 		//m_type = static_cast<ConstType>(constitem.type());
 

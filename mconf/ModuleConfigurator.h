@@ -2,8 +2,8 @@
 #define MODULECONFIGURATOR_H
 
 #include <QtWidgets/QMainWindow>
+#include <HardwareLib/ModuleFirmware.h>
 #include "ui_moduleconfigurator.h"
-#include "../HardwareLib/ModuleFirmware.h"
 #include "../UtilsLib/OutputLog.h"
 #include "MconfSettings.h"
 

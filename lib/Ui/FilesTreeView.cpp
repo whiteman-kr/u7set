@@ -1,6 +1,6 @@
 #include "FilesTreeView.h"
-#include "../DbLib/DbController.h"
-#include "../DbLib/DbControllerTools.h"
+#include <DbLib/DbController.h>
+#include <DbLib/DbControllerTools.h>
 #include "../lib/StandardColors.h"
 #include "CheckInDialog.h"
 #include "DialogFileEditor.h"

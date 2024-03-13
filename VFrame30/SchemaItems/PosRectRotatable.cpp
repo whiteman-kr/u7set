@@ -23,16 +23,16 @@ namespace VFrame30
 	bool PosRectRotatable::SaveData(Proto::Envelope* message) const
 	{
 		bool result = PosRectImpl::SaveData(message);
-		if (result == false || message->has_schemaitem() == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
-			assert(message->has_schemaitem());
+			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
 
 		// --
 		//
-		Proto::PosRectRotatable* mm = message->mutable_schemaitem()->mutable_posrectrotatable();
+		Proto::PosRectRotatable* mm = message->MutableExtension(Proto::schemaitem)->mutable_posrectrotatable();
 
 		mm->set_rotationpoint(static_cast<int32_t>(m_rotationPoint));
 		mm->set_angle(m_angle);
@@ -48,14 +48,14 @@ namespace VFrame30
 			return false;
 		}
 
-		if (message.schemaitem().has_posrectrotatable() == false)
+		if (message.GetExtension(Proto::schemaitem).has_posrectrotatable() == false)
 		{
 			// Old versions of the schemaitem did not have this field.
 			//
 			return true;
 		}
 
-		const Proto::PosRectRotatable& mm = message.schemaitem().posrectrotatable();
+		const Proto::PosRectRotatable& mm = message.GetExtension(Proto::schemaitem).posrectrotatable();
 
 		m_rotationPoint = static_cast<RotationPoint>(mm.rotationpoint());
 		m_angle = mm.angle();

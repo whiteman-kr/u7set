@@ -6,6 +6,11 @@
 #include "IssueLogger.h"
 #include "Busses.h"
 
+namespace Hardware
+{
+	class EquipmentSet;
+}
+
 namespace Builder
 {
 	typedef std::shared_ptr<Hardware::DeviceModule> DeviceModuleShared;

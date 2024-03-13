@@ -1,6 +1,6 @@
 #pragma once
+#include <DbLib/DbStruct.h>
 #include "../lib/Ui/ClickableLabel.h"
-#include "../DbLib/DbStruct.h"
 #include "./Locator/EquipmentLocatorProvider.h"
 #include "./Locator/ConnectionLocatorProvider.h"
 #include "./Locator/SchemaLocatorProvider.h"

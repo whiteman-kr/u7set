@@ -1,7 +1,7 @@
 #include "DialogImportPreset.h"
 #include "ui_DialogImportPreset.h"
 
-DialogImportPreset::DialogImportPreset(const Proto::ExportedDevicePreset& message, QWidget *parent) :
+DialogImportPreset::DialogImportPreset(const Proto::ExportedDevicePreset2& message, QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogImportPreset),
 	m_message(&message)
@@ -19,20 +19,22 @@ DialogImportPreset::DialogImportPreset(const Proto::ExportedDevicePreset& messag
 
 	for (const auto& it : m_message->items().items())
 	{
-		if (it.has_deviceobject() == false)
+		if (it.HasExtension(::Proto::deviceobject) == false)
 		{
 			continue;
 		}
 
+		const auto& deviceObjectMessage = it.GetExtension(::Proto::deviceobject);
+
 		QStringList l;
-		l.push_back(QString::fromStdString(it.deviceobject().caption().text()));
-		l.push_back(QString::fromStdString(it.deviceobject().presetname().text()));
-		l.push_back(QString::number(it.deviceobject().presetversion()));
+		l.push_back(QString::fromStdString(deviceObjectMessage.caption().text()));
+		l.push_back(QString::fromStdString(deviceObjectMessage.presetname().text()));
+		l.push_back(QString::number(deviceObjectMessage.presetversion()));
 
 		QTreeWidgetItem* item = new QTreeWidgetItem(l);
 		item->setCheckState(0, Qt::Checked);
 
-		QByteArray uuid(it.deviceobject().uuid().uuid().data());
+		QByteArray uuid(deviceObjectMessage.uuid().uuid().data());
 		item->setData(0, Qt::UserRole, uuid);
 
 		ui->presetsTree->addTopLevelItem(item);
@@ -70,12 +72,14 @@ void DialogImportPreset::accept()
 {
 	for (const auto& it : m_message->items().items())
 	{
-		if (it.has_deviceobject() == false)
+		if (it.HasExtension(::Proto::deviceobject) == false)
 		{
 			continue;
 		}
 
-		QByteArray uuid(it.deviceobject().uuid().uuid().data());
+		const auto& deviceObjectMessage = it.GetExtension(::Proto::deviceobject);
+
+		QByteArray uuid(deviceObjectMessage.uuid().uuid().data());
 
 		for (int i = 0; i < ui->presetsTree->topLevelItemCount(); i++)
 		{

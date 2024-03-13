@@ -1,8 +1,13 @@
 #pragma once
 
-#include "../HardwareLib/LmDescription.h"
-#include "../HardwareLib/ModuleFirmware.h"
+#include <map>
+#include <memory>
+#include <vector>
+
+#include <HardwareLib/LmDescription.h>
+#include <HardwareLib/ModuleFirmware.h>
 #include "../UtilsLib/ILogFile.h"
+
 #include "SimAppSignalManager.h"
 #include "SimConnections.h"
 #include "SimControl.h"
@@ -13,9 +18,6 @@
 #include "SimSoftware.h"
 #include "SimSubsystem.h"
 #include "SimTuningSignalManager.h"
-#include <map>
-#include <memory>
-#include <vector>
 
 class QTextStream;
 

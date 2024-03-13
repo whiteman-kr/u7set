@@ -1,8 +1,8 @@
 #pragma once
 
 #include "MainTabPage.h"
-#include "../DbLib/DbStruct.h"
 #include "GlobalMessanger.h"
+#include <DbLib/DbStruct.h>
 #include "../lib/Ui/FilesTreeView.h"
 
 

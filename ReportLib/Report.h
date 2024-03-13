@@ -1,8 +1,6 @@
 #pragma once
 
 #include "ReportObject.h"
-#include "ReportSchemaView.h"
-
 #include <QPageLayout>
 
 namespace ReportLib

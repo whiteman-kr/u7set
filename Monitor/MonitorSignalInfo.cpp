@@ -1,8 +1,12 @@
 #include "MonitorSignalInfo.h"
-#include "../UtilsLib/Ui/UiTools.h"
-#include "MonitorConfigController.h"
-#include "../ClientLib/AppSignalManager.h" 
 #include "ui_DialogSignalInfo.h"
+
+#include "../UtilsLib/Ui/UiTools.h"
+#include "../ClientLib/AppSignalManager.h" 
+
+#include "MonitorConfigController.h"
+#include "MonitorCentralWidget.h"
+
 
 
 bool MonitorSignalInfo::showDialog(QString appSignalId,

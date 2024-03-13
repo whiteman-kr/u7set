@@ -12,7 +12,7 @@ class DialogImportPreset : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogImportPreset(const Proto::ExportedDevicePreset& message, QWidget* parent);
+	explicit DialogImportPreset(const Proto::ExportedDevicePreset2& message, QWidget* parent);
 	~DialogImportPreset();
 
 	const ::Proto::EnvelopeSet& chosenItems() const;
@@ -22,7 +22,7 @@ private:
 
 private:
 	Ui::DialogImportPreset *ui;
-	const ::Proto::ExportedDevicePreset* m_message = nullptr;
+	const ::Proto::ExportedDevicePreset2* m_message = nullptr;
 	::Proto::EnvelopeSet m_chosenItems;
 };
 

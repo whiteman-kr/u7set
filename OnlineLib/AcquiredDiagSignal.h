@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../HardwareLib/DeviceObject.h"
-#include "../HardwareLib/DiagSignal.h"
+#include <HardwareLib/DeviceObject.h>
+#include <HardwareLib/DiagSignal.h>
 #include "../UtilsLib/Address16.h"
 
 using DiagSignalConstShared = std::shared_ptr<const Hardware::DiagSignal>;

@@ -1,7 +1,8 @@
 #include "AppLogicCode.h"
 #include "ModuleLogicCompiler.h"
 
-#include "../HardwareLib/Afb.h"
+#include <HardwareLib/Afb.h>
+
 #include "../lib/ConstStrings.h"
 
 namespace Builder

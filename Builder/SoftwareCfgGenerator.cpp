@@ -8,6 +8,8 @@
 #include "../VFrame30/SchemaLayer.h"
 #include "../VFrame30/PropertyNames.h"
 
+#include <HardwareLib/Workstation.h>
+
 
 namespace Builder
 {

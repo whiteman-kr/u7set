@@ -1,10 +1,10 @@
 #pragma once
 
 #include "../AppSignalLib/ComparatorSet.h"
-#include "../SchemaClientLib/SchemaClientConfigController.h"
 #include "../OnlineLib/MatsUsers.h"
 
 #include <Behavior/MonitorBehavior.h>
+#include <SchemaClientLib/SchemaClientConfigController.h>
 
 
 struct MonitorConfigSettings

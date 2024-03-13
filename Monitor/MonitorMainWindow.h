@@ -10,11 +10,12 @@
 #include "../ClientLib/TuningConnection.h"
 #include "../ClientLib/TuningLog.h"
 #include "../ClientLib/TuningUserManager.h"
-#include "../SchemaClientLib/SchemaDrawStatistics.h"
 #include "../UtilsLib/InstanceResolver.h"
 #include "../UtilsLib/LogFile.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../lib/Ui/DialogAlert.h"
+
+#include <SchemaClientLib/SchemaDrawStatistics.h>
 
 namespace VFrame30
 {

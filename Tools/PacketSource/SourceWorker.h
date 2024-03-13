@@ -1,7 +1,11 @@
 #ifndef SOURCEWORKER_H
 #define SOURCEWORKER_H
 
-#include "../../HardwareLib/DataProtocols.h"
+
+namespace Rup
+{
+	struct SimFrame;
+} // namespace Rup
 
 // ==============================================================================================
 
@@ -26,7 +30,7 @@ private:
 
 	QObject* m_pSource = nullptr;
 
-	Rup::SimFrame m_simFrame;
+	std::unique_ptr<Rup::SimFrame> m_simFrame;
 
 	int m_numerator = 0;
 	int m_sentFrames = 0;
