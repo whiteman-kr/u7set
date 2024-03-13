@@ -32,12 +32,13 @@ namespace ClientLib
 		ConfigController() = delete;
 		ConfigController(const ConfigController&) = delete;
 		ConfigController(ConfigController&&) = delete;
-		ConfigController& operator=(const ConfigController&) = delete;
-		ConfigController& operator=(ConfigController&&) = delete;
 
 		explicit ConfigController(const SoftwareInfo& softwareInfo, const HostAddressPort& address, ILogFile* logFile);
 		explicit ConfigController(const SoftwareInfo& softwareInfo, const HostAddressPort& address1, const HostAddressPort& address2, ILogFile* logFile);
-		virtual ~ConfigController();
+		virtual ~ConfigController() override;
+
+		ConfigController& operator=(const ConfigController&) = delete;
+		ConfigController& operator=(ConfigController&&) = delete;
 
 	public:
 		void setConnectionParams(QString equipmentId, const HostAddressPort& address1, const HostAddressPort& address2);

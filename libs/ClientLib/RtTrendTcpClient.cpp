@@ -1,4 +1,4 @@
-#include "./include/ClientLib/RtTrendTcpClient.h"
+#include "RtTrendTcpClient.h"
 
 
 namespace
@@ -382,9 +382,9 @@ namespace ClientLib
 		return;
 	}
 
-	RtTrendTcpClient::Stat RtTrendTcpClient::stat() const
+	RtTrendConnectionStatistics RtTrendTcpClient::stat() const
 	{
-		RtTrendTcpClient::Stat result;
+		RtTrendConnectionStatistics result;
 
 		m_statMutex.lock();
 		result = m_stat;
@@ -394,7 +394,7 @@ namespace ClientLib
 		return result;
 	}
 
-	void RtTrendTcpClient::setStat(const Stat& stat)
+	void RtTrendTcpClient::setStat(const RtTrendConnectionStatistics& stat)
 	{
 		m_statMutex.lock();
 		m_stat = stat;

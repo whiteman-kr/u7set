@@ -4,6 +4,7 @@
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
 #include "../TrendView/TrendSignalState.h"
+#include "./include/ClientLib/RtTrendConnectionStatistics.h"
 
 namespace ClientLib
 {
@@ -69,20 +70,9 @@ namespace ClientLib
 		void requestError(QString text);
 		void connectionLost(QString sourceEquipmentId);
 
-		// Staticstic
-		//
 	public:
-		struct Stat
-		{
-			QString text;
-			int requestQueueSize = 0;
-			int requestCount = 0;
-			int replyCount = 0;
-			int isConnected = 0;		// It must be int for summing up statistics for several connections.
-		};
-
-		Stat stat() const;
-		void setStat(const Stat& stat);
+		RtTrendConnectionStatistics stat() const;
+		void setStat(const RtTrendConnectionStatistics& stat);
 
 		void setStatText(const QString& text);
 		void setStatRequestQueueSize(int value);
@@ -104,9 +94,9 @@ namespace ClientLib
 	private:
 		std::set<Hash> m_trackedSignals;		// Currently tracked signals by AppDataService
 
-		// Statisctics and state variables
+		// Statistics and state variables
 		//
 		mutable QMutex m_statMutex;
-		Stat m_stat;
+		RtTrendConnectionStatistics m_stat;
 	};
 }

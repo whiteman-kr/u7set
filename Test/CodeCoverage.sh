@@ -142,7 +142,7 @@ TEST_OUTPUT_FILE="UtilsLib.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # ClientLib
-TEST_DIR="./build/ClientLib/CMakeFiles/ClientLib.dir"
+TEST_DIR="./build/libs/ClientLib/CMakeFiles/ClientLib.dir"
 TEST_OUTPUT_FILE="ClientLib.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 

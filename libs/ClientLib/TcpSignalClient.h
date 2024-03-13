@@ -7,7 +7,8 @@
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
-#include "IAppSignalUpdater.h"
+
+#include <ClientLib/IAppSignalUpdater.h>
 
 
 namespace ClientLib

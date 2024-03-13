@@ -24,10 +24,9 @@ qt_add_library(${TARGET} STATIC
 	./include/ClientLib/ITuningLog.h
 	./include/ClientLib/ITuningSignalUpdater.h
 	./include/ClientLib/RtDataProvider.h
-	./include/ClientLib/RtTrendTcpClient.h
+	./include/ClientLib/RtTrendConnectionStatistics.h
 	./include/ClientLib/ScriptTestObserver.h
 	./include/ClientLib/TcpAppSourcesState.h
-	./include/ClientLib/TcpSignalClient.h
 	./include/ClientLib/TcpSignalRecents.h
 	./include/ClientLib/TuningConnection.h
 	./include/ClientLib/TuningLog.h
@@ -37,15 +36,21 @@ qt_add_library(${TARGET} STATIC
 	./include/ClientLib/TuningUserManager.h
 	./include/ClientLib/TuningWriteCommand.h
 	AdsConnection.cpp
+	AdsConnectionPrivate.cpp
+	AdsConnectionPrivate.h
 	AdsSourceStateConnection.cpp
 	AppSignalManager.cpp
 	ClientTranslator.cpp
 	ConfigController.cpp
 	RtDataProvider.cpp
+	RtDataProviderPrivate.cpp
+	RtDataProviderPrivate.h
+	RtTrendTcpClient.h
 	RtTrendTcpClient.cpp
 	ScriptTestObserver.cpp
 	TcpAppSourcesState.cpp
 	TcpSignalClient.cpp
+	TcpSignalClient.h
 	TcpSignalRecents.cpp
 	TuningConnection.cpp
 	TuningLog.cpp
