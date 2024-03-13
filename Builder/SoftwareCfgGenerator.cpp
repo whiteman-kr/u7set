@@ -1,12 +1,16 @@
 #include "SoftwareCfgGenerator.h"
-#include "../OnlineLib/SoftwareSettings.h"
-#include "../VFrame30/PropertyNames.h"
-#include "../VFrame30/SchemaLayer.h"
+#include "../VFrame30/VduSchema.h"
 #include "./Vdu/VduSchemaGenerator.h"
 #include "AppLogicCompiler.h"
 #include "DeviceHelper.h"
 #include "LanControllerInfoHelper.h"
 #include "ScriptChecker.h"
+
+#include "../OnlineLib/SoftwareSettings.h"
+#include "../VFrame30/SchemaLayer.h"
+#include "../VFrame30/PropertyNames.h"
+
+#include <HardwareLib/Workstation.h>
 
 
 namespace Builder
@@ -788,7 +792,7 @@ namespace Builder
 
 		bool result = true;
 
-		for(Hardware::DeviceModule* lm : context->m_lmModules)
+		for(Hardware::DeviceModule* lm : context->m_fscModules)
 		{
 			std::shared_ptr<LmDescription> lmDescription = context->m_lmDescriptions->get(lm);
 
@@ -806,11 +810,12 @@ namespace Builder
 				LanControllerInfo lanControllerInfo;
 				const Hardware::Software* software = nullptr;
 
-				result &= LanControllerInfoHelper::getInfo(*lm, lanController.m_type, lanController.m_place,
+				bool res = LanControllerInfoHelper::getInfo(*lm, lanController.m_type, lanController.m_place,
 														   *context, false, &lanControllerInfo, log);
-
-				if (result == false)
+				if (res == false)
 				{
+					LOG_INTERNAL_ERROR(log);
+					result = false;
 					continue;
 				}
 

@@ -1,7 +1,8 @@
 #include "SimIdeSimulator.h"
+#include "../../Simulator/Simulator.h"
 
 SimIdeSimulator::SimIdeSimulator(ILogFile* log, bool allowDebugMessages, QObject* parent) :
-	Sim::Simulator(log, allowDebugMessages, parent)
+	m_simulator(new Sim::Simulator(log, allowDebugMessages, parent))
 {
 }
 
@@ -13,7 +14,7 @@ bool SimIdeSimulator::load(QString buildPath)
 {
 	// Save current state of ArminKey, TuningKey. It is convenient feature, so user must not switch on/off tuning options on number of LMs again.
 	//
-	auto oldLogicModules = logicModules();
+	auto oldLogicModules = m_simulator->logicModules();
 
 	// --
 	//
@@ -22,11 +23,11 @@ bool SimIdeSimulator::load(QString buildPath)
 	bool ok = true;
 
 	ok &= loadSchemaDetails(buildPath);
-	ok &= Sim::Simulator::load(buildPath);
+	ok &= m_simulator->load(buildPath);
 
 	// Restore state of ArminKey, TuningKey.
 	//
-	for (auto lms = logicModules();
+	for (auto lms = m_simulator->logicModules();
 		 auto lm : lms)
 	{
 		auto it = std::find_if(oldLogicModules.begin(), oldLogicModules.end(), [&lm](const auto& oldLm)
@@ -54,7 +55,7 @@ bool SimIdeSimulator::load(QString buildPath)
 void SimIdeSimulator::clear()
 {
 	m_schemaDetails.clear();
-	Sim::Simulator::clear();
+	m_simulator->clear();
 
 	return;
 }
@@ -69,6 +70,146 @@ std::vector<VFrame30::SchemaDetails> SimIdeSimulator::schemasForLm(QString equip
 	return m_schemaDetails.schemasDetails(equipmentId);
 }
 
+bool SimIdeSimulator::isRunning() const
+{
+	return m_simulator->isRunning();
+}
+
+bool SimIdeSimulator::isPaused() const
+{
+	return m_simulator->isPaused();
+}
+
+bool SimIdeSimulator::isStopped() const
+{
+	return m_simulator->isStopped();
+}
+
+Sim::ScopedLog& SimIdeSimulator::log()
+{
+	return m_simulator->log();
+}
+
+bool SimIdeSimulator::isLoaded() const
+{
+	return m_simulator->isLoaded();
+}
+
+QString SimIdeSimulator::buildPath() const
+{
+	return m_simulator->buildPath();
+}
+
+int SimIdeSimulator::buildNo() const
+{
+	return m_simulator->buildNo();
+}
+
+QString SimIdeSimulator::projectName() const
+{
+	return m_simulator->projectName();
+}
+
+const Sim::Connections& SimIdeSimulator::connections() const
+{
+	return m_simulator->connections();
+}
+
+Sim::Connections& SimIdeSimulator::connections()
+{
+	return m_simulator->connections();
+}
+
+std::vector<std::shared_ptr<Sim::Subsystem>> SimIdeSimulator::subsystems() const
+{
+	return m_simulator->subsystems();
+}
+
+std::shared_ptr<Sim::LogicModule> SimIdeSimulator::logicModule(QString equipmentId) const
+{
+	return m_simulator->logicModule(equipmentId);
+}
+
+std::vector<std::shared_ptr<Sim::LogicModule>> SimIdeSimulator::logicModules() const
+{
+	return m_simulator->logicModules();
+}
+
+Sim::AppSignalManager& SimIdeSimulator::appSignalManager()
+{
+	return m_simulator->appSignalManager();
+}
+
+const Sim::AppSignalManager& SimIdeSimulator::appSignalManager() const
+{
+	return m_simulator->appSignalManager();
+}
+
+Sim::TuningSignalManager& SimIdeSimulator::tuningSignalManager()
+{
+	return m_simulator->tuningSignalManager();
+}
+
+const Sim::TuningSignalManager& SimIdeSimulator::tuningSignalManager() const
+{
+	return m_simulator->tuningSignalManager();
+}
+
+Sim::OverrideSignals& SimIdeSimulator::overrideSignals()
+{
+	return m_simulator->overrideSignals();
+}
+
+const Sim::OverrideSignals& SimIdeSimulator::overrideSignals() const
+{
+	return m_simulator->overrideSignals();
+}
+
+Sim::Software& SimIdeSimulator::software()
+{
+	return m_simulator->software();
+}
+
+const Sim::Software& SimIdeSimulator::software() const
+{
+	return m_simulator->software();
+}
+
+Sim::Profiles& SimIdeSimulator::profiles()
+{
+	return m_simulator->profiles();
+}
+
+const Sim::Profiles& SimIdeSimulator::profiles() const
+{
+	return m_simulator->profiles();
+}
+
+bool SimIdeSimulator::setCurrentProfile(QString profileName)
+{
+	return m_simulator->setCurrentProfile(profileName);
+}
+
+QString SimIdeSimulator::currentProfileName() const
+{
+	return m_simulator->currentProfileName();
+}
+
+const Sim::Profile& SimIdeSimulator::currentProfile() const
+{
+	return m_simulator->currentProfile();
+}
+
+Sim::Control& SimIdeSimulator::control()
+{
+	return m_simulator->control();
+}
+
+const Sim::Control& SimIdeSimulator::control() const
+{
+	return m_simulator->control();
+}
+
 bool SimIdeSimulator::loadSchemaDetails(QString buildPath)
 {
 	QString fileName = QDir::fromNativeSeparators(buildPath);
@@ -79,7 +220,7 @@ bool SimIdeSimulator::loadSchemaDetails(QString buildPath)
 
 	fileName += "Schemas.als/SchemaDetails.pbuf";
 
-	log().writeMessage(tr("Load logic schema details file: %1").arg(fileName));
+	m_simulator->log().writeMessage(tr("Load logic schema details file: %1").arg(fileName));
 
 	bool ok = true;
 
@@ -87,7 +228,7 @@ bool SimIdeSimulator::loadSchemaDetails(QString buildPath)
 	{
 		// File not exists, can happen if project does not contain any schemas.
 		//
-		log().writeWarning(tr("Project build does not contain any schemas, file %1 not exist.").arg(fileName));
+		m_simulator->log().writeWarning(tr("Project build does not contain any schemas, file %1 not exist.").arg(fileName));
 
 		ok = true;
 	}
@@ -97,13 +238,23 @@ bool SimIdeSimulator::loadSchemaDetails(QString buildPath)
 
 		if (ok == false)
 		{
-			log().writeError(tr("File loading error, file name %1.").arg(fileName));
+			m_simulator->log().writeError(tr("File loading error, file name %1.").arg(fileName));
 		}
 	}
 
 	emit schemaDetailsUpdated();
 
 	return ok;
+}
+
+const Sim::Simulator* SimIdeSimulator::simulator() const
+{
+	return m_simulator.get();
+}
+
+Sim::Simulator* SimIdeSimulator::simulator()
+{
+	return m_simulator.get();
 }
 
 std::vector<VFrame30::SchemaDetails> SimIdeSimulator::schemasDetails() const

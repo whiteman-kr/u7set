@@ -3,16 +3,14 @@
 
 #include "../lib/ISignalDataServer.h"
 #include "../lib/Ui/DialogSignalInfo.h"
-#include "MonitorCentralWidget.h"
 
-
+class MonitorCentralWidget;
 class MonitorConfigController;
 
 namespace ClientLib
 {
 	class AppSignalManager;
 }
-
 
 class MonitorSignalInfo : public DialogSignalInfo
 {

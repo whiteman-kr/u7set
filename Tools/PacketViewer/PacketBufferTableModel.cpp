@@ -1,8 +1,8 @@
 #include "PacketBufferTableModel.h"
-#include "../OnlineLib/SocketIO.h"
-#include <algorithm>
 #include <QSettings>
-#include "../HardwareLib/DataProtocols.h"
+
+#include "../OnlineLib/SocketIO.h"
+#include <HardwareLib/DataProtocols.h>
 
 const int C_DECIMAL = 0,
 C_HEXADECIMAL = 1,

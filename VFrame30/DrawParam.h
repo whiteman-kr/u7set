@@ -1,10 +1,11 @@
 #pragma once
 
-#include "../CommonLib/Types.h"
-#include "../lib/ClientBehavior.h"
 #include "../lib/ITimeStats.h"
-#include "Session.h"
 #include "FontParam.h"
+#include "Session.h"
+#include "VFrame30Types.h"
+#include "VFrameTools.h"
+
 
 
 #define VFRAME30_CACHE_DRAW_TEXT	// Use cached draw text, DrawHelper::drawTextCahed(...)
@@ -18,16 +19,14 @@ class QPainter;
 class QPaintDevice;
 class QPixmap;
 
+namespace Behavior
+{
+	class MonitorBehavior;
+	class TuningClientBehavior;
+} 
+
 namespace VFrame30
 {
-	enum class DrawMode
-	{
-		Monitor,
-		Simulator,
-		Editor
-	};
-
-
 	class Schema;
 	class SchemaView;
 	class ClientSchemaView;
@@ -102,8 +101,8 @@ namespace VFrame30
 		const Session& session() const noexcept;
 		Session& session();
 
-		const MonitorBehavior& monitorBehavior() const noexcept;
-		const TuningClientBehavior& tuningClientBehavior() const;
+		const Behavior::MonitorBehavior& monitorBehavior() const noexcept;
+		const Behavior::TuningClientBehavior& tuningClientBehavior() const;
 
 		const QStringList& highlightIds() const;
 		void setHighlightIds(const QStringList& value);

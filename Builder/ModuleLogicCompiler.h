@@ -1,8 +1,9 @@
 #pragma once
 
-#include "../HardwareLib/DeviceObject.h"
-#include "../HardwareLib/ModuleFirmware.h"
-#include "../HardwareLib/Connection.h"
+#include <HardwareLib/DeviceModule.h>
+#include <HardwareLib/ModuleFirmware.h>
+#include <HardwareLib/Connection.h>
+
 #include "../CommonLib/HashedVector.h"
 #include "../AppSignalLib/ComparatorSet.h"
 #include "../lib/TuningDataStorage.h"
@@ -25,24 +26,11 @@ namespace Builder
 	class ApplicationLogicCompiler;
 	class ModuleLogicCompiler;
 
-	typedef bool (ModuleLogicCompiler::*ModuleLogicCompilerProc)(void);
-	typedef std::pair<ModuleLogicCompilerProc, const char*> ProcToCall;
-	typedef std::vector<ProcToCall> ProcsToCallArray;
+	using ProcToCall = std::pair<std::function<bool(Builder::ModuleLogicCompiler*)>, QString>;
+	using CodeGenProcToCall = std::pair<std::function<bool(ModuleLogicCompiler*, CodeSnippet*)>, QString>;
+	using CodeOptimizationProcToCall = std::pair<std::function<bool(ModuleLogicCompiler*, CodeSnippet&)>, QString>;
 
 #define PROC_TO_CALL(procName)		{ &procName, #procName }
-
-	typedef bool (ModuleLogicCompiler::*ModuleLogicCompilerCodeGenProc)(CodeSnippet*);
-	typedef std::pair<ModuleLogicCompilerCodeGenProc, const char*> CodeGenProcToCall;
-	typedef std::vector<CodeGenProcToCall> CodeGenProcsToCallArray;
-
-#define CODE_GEN_PROC_TO_CALL(procName)		{ &procName, #procName }
-
-	typedef bool (ModuleLogicCompiler::*CodeOptimizationProc)(CodeSnippet&);
-	typedef std::pair<CodeOptimizationProc, const char*> CodeOptimizationProcToCall;
-	typedef std::vector<CodeOptimizationProcToCall> CodeOptimizationProcsToCallArray;
-
-#define CODE_OPTIMIZATION_PROC_TO_CALL(procName)	{ &procName, #procName }
-
 
 	class ModuleLogicCompiler : public QObject
 	{
@@ -107,7 +95,10 @@ namespace Builder
 			int moduleDataOffset = 0;	// offset of data received from module or transmitted to module in LM's memory
 										// depends of module place in the chassis
 
+			// next properties related to non-platfom modules like BUIM* in chassis with non-LM modulws like BVB15
+			//
 			int appRegDataOffset = 0;	// offset of module application data in registration buffer
+			int diagRegDataOffset = 0;	// offset of module diag data in registration buffer
 		};
 
 	private:
@@ -225,6 +216,8 @@ namespace Builder
 		bool getLmAssociatedOptoPortsRxAreas(std::vector<CodeChecker::MemArea>* optoRxAreas) const;
 		bool getLmAssociatedOptoPortsTxAreas(std::vector<CodeChecker::MemArea>* optoTxAreas) const;
 
+		bool noCodeGenRequired() const;
+
 		const LmMemoryMap& lmMemoryMap() const { return m_memoryMap; }
 
 		const UalAfbs& ualAfbs() const;
@@ -297,6 +290,7 @@ namespace Builder
 		bool createUalItemSignalsList();
 
 		bool createUalSignalsFromInputAndTuningAcquiredSignals();
+		bool createBvbOutputSignals();
 
 		bool createUalSignalsFromBusComposers();
 		bool createUalSignalsFromBusComposer(UalItem* ualItem);
@@ -441,6 +435,8 @@ namespace Builder
 		bool disposeSignalsInMemory();
 
 		bool calculateIoSignalsAddresses();
+		bool getIoSignalModule(const AppSignal& ioSignal, Module* module,
+							   Hardware::DeviceAppSignal** deviceAppSignal) const;
 
 		bool disposeTunableSignalsUalAddresses();
 
@@ -466,6 +462,12 @@ namespace Builder
 		bool disposeAnalogAndBusSignalsHeap();
 
 		bool setSignalsRegValidityAddr();
+
+		// BVB chassis signals processing
+		//
+		bool disposeBvbSignalsInRegBuf();
+
+		//
 
 		bool appendAfbsForInOutSignalsConversion();
 		bool findFbsForInOutSignalsConversion();
@@ -507,7 +509,7 @@ namespace Builder
 		bool generateIdrPhaseCode();
 		bool generateAlpPhaseCode();
 
-		bool makeAppLogicCode();
+		bool makeSourceAppLogicCode();
 
 		bool makeAppLogicCode(AppLogicCode& idrCode,
 							  AppLogicCode& alpCode,
@@ -524,7 +526,7 @@ namespace Builder
 		bool optimizeSequentialBitMoves(CodeSnippet& srcCode);
 		bool optimizeBitFilling(CodeSnippet& srcCode);
 
-		bool writeInfoFilesAfterOptimization();
+		bool writeInfoLmFilesAfterOptimization();
 		bool checkOptimizedAppLogicCode();
 
 		bool generateIdrCodeStart(CodeSnippet* code);
@@ -824,7 +826,9 @@ namespace Builder
 		bool copyOptoPortRawTxDiscreteSignals(CodeSnippet* code, Hardware::OptoPortShared port);
 		bool copyOptoPortRawTxBusSignals(CodeSnippet* code, Hardware::OptoPortShared port);
 
-		bool setLmAppLANDataSize();
+		bool setLmAppLanDataSize();
+		bool setLmDiagLanDataSize();
+
 		bool detectUnusedSignals();
 		bool detectUsedReservedSignals();
 		bool fillAnalogSignalsOnSchemas();
@@ -834,7 +838,7 @@ namespace Builder
 		QString getInfoFileName(const QString& fileNameExtension) const;
 		QString getSrcInfoFileName(const QString& fileNameExtension) const;
 
-		bool writeInfoFiles();
+		bool writeLmInfoFiles();
 		bool writeAsmFile(const AppLogicCode& code) const;
 		bool writeMemFile() const;
 		bool writeStatisticsFile(const AppLogicCode& code,
@@ -850,6 +854,8 @@ namespace Builder
 		bool writeOptoModulesReport() const;
 		bool writeLoopbacksReport();
 		bool writeHeapsLog();
+
+		bool writeBvbRegInfoFile() const;
 
 		bool calcAppDataUID();
 		bool calcDiagDataUID();
@@ -900,8 +906,8 @@ namespace Builder
 		bool writeSignalList(const QVector<UalSignal *> &signalList, QString listName) const;
 		bool writeUalSignalsList() const;
 
-		bool runProcs(const ProcsToCallArray& procArray);
-		bool runCodeGenProcs(const CodeGenProcsToCallArray& procArray, CodeSnippet* code);
+		bool runProcs(const std::vector<ProcToCall>& procArray);
+		bool runCodeGenProcs(const std::vector<CodeGenProcToCall>& procArray, CodeSnippet* code);
 
 		Address16 getConstBitAddr(UalSignal* constDiscreteUalSignal);
 
@@ -924,8 +930,6 @@ namespace Builder
 		bool partitionOfInteger(int number, const std::vector<int>& availableParts,
 								 std::vector<int>* resultPartition);
 		bool partitionOfInteger(int number, const QVector<int>& availableParts, QVector<int>* partition);
-
-		void getChassisSignalsWithEquipmentID(QString& equipmentID, std::vector<const AppSignal *>* resultSignalList);
 
 		void findLogicAfbsForBitAccReplacing(const QString& afbCaption, int logicConf, std::set<QUuid>* guidsMap);
 
@@ -1019,11 +1023,11 @@ namespace Builder
 		HashedVector<QUuid, UalItem*> m_ualItems;				// item GUID => item ptr
 		std::map<QUuid, UalItem*> m_pinParent;					// pin GUID => parent item ptr
 
-		std::map<QString, AppSignal*> m_chassisSignals;			// all signals available in current chassis, AppSignalID => AppSignal*
-		std::multimap<QString, const AppSignal*> m_chassisSignalsByEquipmentID;		// EquipementID => AppSignal*
-		QHash<QString, AppSignal*> m_ioSignals;					// input/output signals of current chassis, AppSignalID => AppSignal*
-		QHash<QString, AppSignal*> m_equipmentSignals;			// equipment signals to app signals map, signal EquipmentID => Signal*
-		std::map<QString, UalSignal*> m_optoPortValiditySignal;	// OptoPort EquipmentID => OptoPort validity signal
+		std::map<Hash, AppSignal*> m_chassisSignals;			// all signals available in current chassis, calcHash(AppSignalID) => AppSignal*
+		std::vector<AppSignal*> m_ioSignals;					// input/output signals of current chassis
+		std::map<Hash, AppSignal*> m_equipmentSignals;			// equipment signals to app signals map, calcHash(signal EquipmentID) => AppSignal*
+		std::map<Hash, UalSignal*> m_optoPortValiditySignal;	// calcHash(OptoPort EquipmentID) => OptoPort validity signal
+		std::map<Address16, std::vector<const AppSignal*>> m_bvbRegSignals;	// BVB chassis signal regValueAddr => vector(AppSignal)
 
 		std::map<Hash, std::set<QUuid>> m_ualItemsSignals;		// Hash(appSignalID) => set of UalItem.guid (type Signal) with this appSignalID
 
@@ -1079,8 +1083,6 @@ namespace Builder
 
 		QVector<UalSignal*> m_nonAcquiredOutputBuses;
 		QVector<UalSignal*> m_nonAcquiredInternalBuses;					// non acquired internal buses AND!
-
-		QHash<QUuid, QUuid> m_outPinSignal;								// output pin GUID -> signal GUID
 
 		ResourcesUsageInfo m_resourcesUsageInfo;
 

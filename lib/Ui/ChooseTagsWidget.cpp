@@ -1,5 +1,10 @@
 #include "ChooseTagsWidget.h"
 
+#include <QLineEdit>
+#include <QPushButton>
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
+
 //
 // ChooseTagsWidget
 //
@@ -79,6 +84,7 @@ void ChooseTagsWidget::tagsTextChanged(const QString& text)
 
     return;
 }
+
 void ChooseTagsWidget::tagsListItemChanged(QTreeWidgetItem *item, int column)
 {
     Q_UNUSED(item);

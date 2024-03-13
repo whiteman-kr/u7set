@@ -3,7 +3,8 @@
 #include "Globals.h"
 #include "version.h"
 
-#include "../HardwareLib/HardwareLibrary.h"
+#include <HardwareLib/HardwareLibrary.h>
+
 #include "../VFrame30/VFrame30Library.h"
 #include "../lib/ConstStrings.h"
 

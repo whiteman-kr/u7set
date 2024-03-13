@@ -1,5 +1,4 @@
 #include "SimConsoleLogFile.h"
-#include <QtGlobal>
 
 Q_LOGGING_CATEGORY(u7sim, "u7.sim")
 

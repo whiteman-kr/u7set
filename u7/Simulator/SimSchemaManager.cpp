@@ -1,6 +1,6 @@
 #include "SimSchemaManager.h"
 #include "SimIdeSimulator.h"
-#include "../../DbLib/DbStruct.h"
+#include <DbLib/DbStruct.h>
 
 SimSchemaManager::SimSchemaManager(SimIdeSimulator* simulator, QObject* parent) :
 	VFrame30::SchemaManager(parent),

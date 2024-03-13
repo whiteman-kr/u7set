@@ -25,6 +25,13 @@ qt_add_library(${TARGET} STATIC
   Types.h
 )
 
+#target_precompile_headers(${TARGET} PUBLIC#
+#	"Types.h"
+#	"Hash.h"
+#	"PropertyObject.h"
+#	"AfbParamValue.h"
+#)
+
 target_link_libraries(${TARGET} PUBLIC Qt6::Core)
 target_compile_definitions(${TARGET} PRIVATE COMMON_LIB_DOMAIN)
 target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

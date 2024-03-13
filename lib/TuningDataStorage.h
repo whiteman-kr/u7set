@@ -1,11 +1,15 @@
 #pragma once
 
 #include <QObject>
-#include <QList>
 #include <QVector>
 
-#include "../CommonLib/Types.h"
-#include "../AppSignalLib/AppSignal.h"
+#include "../lib/ConstStrings.h"
+
+
+class AppSignal;
+class XmlWriteHelper;
+class XmlReadHelper;
+
 
 namespace Tuning
 {

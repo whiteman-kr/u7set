@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../AppSignalLib/AppSignalParam.h"
 #include "../ClientLib/ITuningLog.h"
 #include "../UtilsLib/LogFile.h"
 #include "TuningUserManager.h"

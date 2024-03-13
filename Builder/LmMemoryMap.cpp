@@ -393,6 +393,11 @@ namespace Builder
 		return true;
 	}
 
+	int LmMemoryMap::regBufSizeW() const
+	{
+		return m_appWordAdressed.nonAcquiredAnalogInputSignals.startAddress() - m_appWordAdressed.acquiredRawData.startAddress();
+	}
+
 	int LmMemoryMap::getModuleDataOffset(int place) const
 	{
 		if (place < 1 ||
@@ -1122,6 +1127,7 @@ namespace Builder
 	Address16 LmMemoryMap::setAcquiredRawDataSize(int sizeW)
 	{
 		m_appWordAdressed.acquiredRawData.setSizeW(sizeW);
+		recalculateAddresses();
 
 		return Address16(m_appWordAdressed.acquiredRawData.startAddress(), 0);
 	}
@@ -1138,11 +1144,6 @@ namespace Builder
 		return double((m_appWordAdressed.analogAndBusSignalsHeap.nextAddress() -
 					   m_appWordAdressed.memory.startAddress()) * 100) /
 				double(m_appWordAdressed.memory.sizeW());
-	}
-
-	int LmMemoryMap::regBufSizeW() const
-	{
-		return m_appWordAdressed.nonAcquiredAnalogInputSignals.startAddress() - m_appWordAdressed.acquiredRawData.startAddress();
 	}
 
 	bool LmMemoryMap::read16(int address)

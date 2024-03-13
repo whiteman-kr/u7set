@@ -1,18 +1,23 @@
 #include "ProjectDiffReport.h"
 
+#include "../AppSignalLib/Bus.h"
 #include "../Builder/AppSignalProperties.h"
-#include "../lib/PropertyEditor.h"
-#include "../HardwareLib/Connection.h"
 #include "../ReportLib/ReportPrinter.h"
 #include "../UtilsLib/Ui/UiTools.h"
-#include "../VFrame30/Bus.h"
+#include "../VFrame30/Context.h"
 #include "../VFrame30/Schema.h"
+#include "../VFrame30/SchemaItems/SchemaItem.h"
 #include "../VFrame30/SchemaLayer.h"
-#include "../VFrame30/SchemaItem.h"
-#include "../HardwareLib/DiagSignalType.h"
+#include "../lib/PropertyEditor.h"
 #include "../lib/Ui/DialogProgress.h"
 
+#include <DbLib/DbControllerTools.h>
+#include <HardwareLib/Connection.h>
+#include <HardwareLib/DiagSignalType.h>
+
 #include "Settings.h"
+
+#include <QDesktopServices>
 
 using namespace Builder;
 using namespace ReportLib;
@@ -1216,7 +1221,7 @@ std::shared_ptr<Hardware::DeviceObject> ProjectDiffGenerator::loadDeviceObject(c
 		return nullptr;
 	}
 
-	std::shared_ptr<Hardware::DeviceObject> object = DbWorker::deviceObjectFromDbFile(*file);
+	std::shared_ptr<Hardware::DeviceObject> object = DbControllerTools::deviceObjectFromDbFile(*file);
 	if (object == nullptr)
 	{
 		return nullptr;
@@ -1371,8 +1376,8 @@ void ProjectDiffGenerator::compareBusTypes(const std::shared_ptr<DbFile>& source
 		return;
 	}
 
-	VFrame30::Bus sourceBus;
-	VFrame30::Bus targetBus;
+	AppSignalLib::Bus sourceBus;
+	AppSignalLib::Bus targetBus;
 
 	bool ok = false;
 
@@ -1434,11 +1439,11 @@ void ProjectDiffGenerator::compareBusTypes(const std::shared_ptr<DbFile>& source
 
 	// Compare bus signals
 
-	for (const VFrame30::BusSignal& targetBusSignal : targetBus.busSignals())
+	for (const AppSignalLib::BusSignal& targetBusSignal : targetBus.busSignals())
 	{
 		bool busSignalFound = false;
 
-		for (const VFrame30::BusSignal& sourceBusSignal : sourceBus.busSignals())
+		for (const AppSignalLib::BusSignal& sourceBusSignal : sourceBus.busSignals())
 		{
 			if (targetBusSignal.signalId() == sourceBusSignal.signalId())
 			{
@@ -1472,11 +1477,11 @@ void ProjectDiffGenerator::compareBusTypes(const std::shared_ptr<DbFile>& source
 		}
 	}
 
-	for (const VFrame30::BusSignal& sourceBusSignal : sourceBus.busSignals())
+	for (const AppSignalLib::BusSignal& sourceBusSignal : sourceBus.busSignals())
 	{
 		bool busSignalFound = false;
 
-		for (const VFrame30::BusSignal& targetBusSignal : targetBus.busSignals())
+		for (const AppSignalLib::BusSignal& targetBusSignal : targetBus.busSignals())
 		{
 			if (targetBusSignal.signalId() == sourceBusSignal.signalId())
 			{

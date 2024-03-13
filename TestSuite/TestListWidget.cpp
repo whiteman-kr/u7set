@@ -1,6 +1,8 @@
 #include "TestListWidget.h"
 #include "../TestSuiteLib/ScriptRunner.h"
 #include "AppConfigSettings.h"
+#include <QKeyEvent>
+#include <QHeaderView>
 
 //
 // TestTreeWidgetItem

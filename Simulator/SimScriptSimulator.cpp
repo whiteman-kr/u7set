@@ -1,5 +1,3 @@
-#include <algorithm>
-
 #include "../ClientLib/ScriptTestObserver.h"
 
 #include "SimScriptLogicModule.h"
@@ -38,9 +36,12 @@ namespace Sim
 
 		// Run watchdog thread
 		//
+		std::atomic<bool> watchdogStarted = false;
+
 		QFuture<void> wdResult = QtConcurrent::run(
-			[waitThread = this, timeout = this->m_scriptSimulator->executionTimeout(), log = ScopedLog{m_log}]() mutable
+			[waitThread = this, timeout = this->m_scriptSimulator->executionTimeout(), log = ScopedLog{m_log}, &watchdogStarted]() mutable
 			{
+				watchdogStarted = true;
 				bool ok = waitThread->wait(static_cast<unsigned long>(timeout));
 				if (ok == false)
 				{
@@ -50,6 +51,13 @@ namespace Sim
 			});
 
 		Q_UNUSED(wdResult);
+
+		// We do not want watchdog thread started when this thread already finished.
+		// Wait for starting watchdog thread
+		while (watchdogStarted.load() == false)
+		{
+			QThread::yieldCurrentThread();
+		}
 
 		// --
 		//
@@ -71,10 +79,10 @@ namespace Sim
 				m_log.writeMessage(tr("********** Start testing of %1 **********").arg(script.scriptCaption));
 
 				m_jsThis = m_jsEngine->newQObject(m_scriptSimulator);
-				QQmlEngine::setObjectOwnership(m_scriptSimulator, QQmlEngine::CppOwnership);
+				QJSEngine::setObjectOwnership(m_scriptSimulator, QJSEngine::CppOwnership);
 
 				m_jsLog = m_jsEngine->newQObject(&m_log);
-				QQmlEngine::setObjectOwnership(&m_log, QQmlEngine::CppOwnership);
+				QJSEngine::setObjectOwnership(&m_log, QJSEngine::CppOwnership);
 
 				m_jsEngine->globalObject().setProperty("log", m_jsLog);
 				m_jsEngine->globalObject().setProperty("isSimulator", QJSValue{true});

@@ -1,8 +1,8 @@
 #include "SimAppDataTransmitter.h"
 #include "Simulator.h"
 
-#include "../HardwareLib/LogicModulesInfo.h"
-#include "../HardwareLib/DataProtocols.h"
+#include <HardwareLib/LogicModulesInfo.h>
+#include <HardwareLib/DataProtocols.h>
 
 namespace Sim
 {

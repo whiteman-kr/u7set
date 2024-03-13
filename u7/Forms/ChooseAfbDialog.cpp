@@ -1,7 +1,8 @@
 #include "ChooseAfbDialog.h"
 #include "../UtilsLib/Ui/UiTools.h"
 #include "ui_ChooseAfbDialog.h"
-#include "../VFrame30/SchemaItemAfb.h"
+#include "../VFrame30/SchemaItems/SchemaItemAfb.h"
+#include <QWhatsThis>
 
 int ChooseAfbDialog::m_lastSelectedIndex = -1;
 QString ChooseAfbDialog::AllCategoryName = "All";

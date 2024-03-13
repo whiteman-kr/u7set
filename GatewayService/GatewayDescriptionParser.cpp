@@ -1,4 +1,5 @@
 #include "GatewayDescriptionParser.h"
+#include "../UtilsLib/WUtils.h"
 
 namespace Gateway
 {

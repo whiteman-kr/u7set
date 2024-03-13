@@ -1,4 +1,6 @@
 #include "TabWidgetEx.h"
+#include <QMouseEvent>
+#include <QPainter>
 
 TabBarEx::TabBarEx(QWidget* parent) :
 	QTabBar(parent)

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../CommonLib/Types.h"
 #include "../OnlineLib/SoftwareSettings.h"
 
 class SoftwareXmlInfo

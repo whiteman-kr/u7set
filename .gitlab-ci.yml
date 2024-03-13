@@ -4,15 +4,15 @@ variables:
   # Version. Set to the desired release type "Default" or "Stable"
   #
   CI_RELEASE_TYPE: "Default"    # Set to the desired release type "Default" or "Stable"
-  CI_MAJOR_VERSION: "9"         # Odd is for development, even is for release
+  CI_MAJOR_VERSION: "11"        # Odd is for development, even is for release
   CI_MINOR_VERSION: "0"
   CI_PATCH_VERSION: "0"         # Path version for Default release is ignored and set to pipeline id.
 
   # Build and test data
   #
   QT_VERSION: "6.5.3"
-  COMPILER_TESTS_PROJECT_NAME: "compiler_tests_v411"
-  SIMULATOR_PROJECT_NAME: "test_simulator_v411"
+  COMPILER_TESTS_PROJECT_NAME: "compiler_tests_v413"
+  SIMULATOR_PROJECT_NAME: "test_simulator_v413"
   PGPASSWORD: "P2ssw0rd"
 
 stages:
@@ -154,15 +154,6 @@ windows_build_job:
 #    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD $Env:BIN_OUT_DIR\\TuningClient.exe"
 #    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD $Env:BIN_OUT_DIR\\TuningSrv.exe"
 #    - "&$SIGNTOOL sign /v /a /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p $SIGN_PASSWORD $Env:BIN_OUT_DIR\\u7.exe"    
-
-#Generate ScriptHelp
-    - "# ----------------------------------------------"
-    - "#               Generate ScriptHelp"
-    - "# ----------------------------------------------"
-    - "pushd ."	
-    - "cd $Env:CI_PROJECT_DIR\\u7\\ScriptHelp"
-    - "&./ScriptHelp.bat"
-    - "popd"
 
 #Request documents from SVN
     - "# ----------------------------------------------"

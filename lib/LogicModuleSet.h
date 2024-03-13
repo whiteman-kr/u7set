@@ -3,8 +3,10 @@
 #include <memory>
 #include <map>
 #include <QObject>
-#include "../HardwareLib/LmDescription.h"
-#include "../DbLib/DbController.h"
+
+#include <HardwareLib/LmDescription.h>
+
+class DbController;
 
 class LogicModuleSet : public QObject
 {

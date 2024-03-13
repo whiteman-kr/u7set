@@ -21,8 +21,6 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Sql Network Qml Xml Svg Pr
 qt_standard_project_setup()
 
 set (TC_SOURCES
-	../lib/ClientBehavior.cpp
-	../lib/ClientBehavior.h
 	../lib/ConstStrings.h
 	../lib/PropertyEditor.cpp
 	../lib/PropertyEditor.h
@@ -174,7 +172,20 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QPainter>
 	<QScrollArea>
 	<QMouseEvent>
-	<QtQml>
+
+	"../CommonLib/Types.h"
+	"../CommonLib/Hash.h"
+	"../CommonLib/PropertyObject.h"
+	#"../CommonLib/AfbParamValue.h"
+	
+	"../Proto/ProtoSerialization.h"
+	"../Proto/Network.pb.h"	
+	#"../Proto/AppSignal.pb.h"
+	
+	#"../AppSignalLib/AppSignal.h"
+	"../AppSignalLib/AppSignalParam.h"
+	"../AppSignalLib/AppSignalState.h"
+	"../AppSignalLib/TuningValue.h"
 )
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h

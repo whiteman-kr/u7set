@@ -1,18 +1,18 @@
 #pragma once
 
-#include "../CommonLib/Types.h"
 #include "../UtilsLib/Address16.h"
 #include "../UtilsLib/DomXmlHelper.h"
-#include "../HardwareLib/LanControllerInfo.h"
-
-#include "../UtilsLib/XmlHelper.h"
 #include "../UtilsLib/WUtils.h"
-#include "../HardwareLib/LmDescription.h"
-#include "../HardwareLib/LogicModulesInfo.h"
-#include "ModuleLogicCompiler.h"
+#include "../UtilsLib/XmlHelper.h"
+
+#include <HardwareLib/LanControllerInfo.h>
+#include <HardwareLib/LmDescription.h>
+#include <HardwareLib/LogicModulesInfo.h>
+
+#include "Context.h"
 #include "DeviceHelper.h"
 #include "LanControllerInfoHelper.h"
-#include "Context.h"
+#include "ModuleLogicCompiler.h"
 
 
 class LogicModulesInfoWriter : public LogicModulesInfo
@@ -35,6 +35,4 @@ private:
 };
 
 
-//void testLogicModulesInfoLoad();
-
-
+// void testLogicModulesInfoLoad();

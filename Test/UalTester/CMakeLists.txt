@@ -60,8 +60,8 @@ target_precompile_headers(${TARGET} PRIVATE
 
 	# Qt includes
 	#
-	<QtNetwork>
-	<QtQml>
+	#<QtNetwork>
+	#<QtQml>
 )
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Network Qt6::Qml)

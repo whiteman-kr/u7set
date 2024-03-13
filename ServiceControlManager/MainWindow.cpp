@@ -7,7 +7,6 @@
 #include <QTranslator>
 #include <QMessageBox>
 #include <QPushButton>
-#include <QHostAddress>
 #include <QMenuBar>
 #include <QToolBar>
 #include <QActionGroup>

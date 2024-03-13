@@ -1,9 +1,10 @@
 #pragma once
 #include <vector>
 #include <map>
-#include "../HardwareLib/Connection.h"
-#include "../HardwareLib/ConnectionsInfo.h"
-#include "../CommonLib/Hash.h"
+
+#include <HardwareLib/Connection.h>
+#include <HardwareLib/ConnectionsInfo.h>
+
 #include "SimRam.h"
 
 namespace Sim

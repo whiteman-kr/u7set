@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../CommonLib/Times.h"
-#include "../CommonLib/Types.h"
 #include "ITrendDataProvider.h"
 
 #include <QColor>

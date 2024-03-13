@@ -1,5 +1,4 @@
 #pragma once
-#include "../CommonLib/Types.h"
 
 namespace VFrame30
 {

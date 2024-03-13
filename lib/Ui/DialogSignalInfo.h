@@ -6,7 +6,6 @@
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../lib/ISignalDataServer.h"
 #include "../lib/Ui/DragDropHelper.h"
-#include "../../AppSignalLib/AppSignal.h"
 
 namespace Ui {
 	class DialogSignalInfo;

@@ -2,7 +2,7 @@
 #define APPLICATIONTABPAGE_H
 
 #include <QWidget>
-#include "../HardwareLib/ModuleFirmware.h"
+#include <HardwareLib/ModuleFirmware.h>
 
 #include <optional>
 using namespace Hardware;

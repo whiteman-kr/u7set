@@ -1,10 +1,83 @@
-#include "../CommonLib/PropertyObject.h"
+#include "PropertyTable.h"
 #include "../AppSignalLib/TuningValue.h"
 #include "../lib/PropertyEditor.h"
-#include "PropertyTable.h"
+#include <QAbstractItemModel>
+#include <QClipboard>
+#include <QInputDialog>
+#include <QMimeData>
 
 namespace ExtWidgets
 {
+	//
+	// DialogAppend
+	//
+
+	DialogAppend::DialogAppend(const QString& what, bool toTheBegin, QWidget* parent):
+		QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint),
+		m_what(what),
+		m_toTheBegin(toTheBegin)
+	{
+		QGridLayout* gl = new QGridLayout();
+
+		QLabel* l = new QLabel(tr("Append what:"));
+		gl->addWidget(l, 0, 0);
+
+		m_editWhat = new QLineEdit();
+		m_editWhat->setText(what);
+		gl->addWidget(m_editWhat, 0, 1);
+
+		m_checkToTheBegin = new QCheckBox(tr("To the beginning"));
+		m_checkToTheBegin->setChecked(m_toTheBegin);
+
+		gl->addWidget(m_checkToTheBegin, 1, 1);
+
+		//
+
+		QHBoxLayout* hl = new QHBoxLayout();
+		hl->addStretch();
+
+		QPushButton* b = new QPushButton(tr("OK"));
+		connect(b, &QPushButton::clicked, this, &QDialog::accept);
+		hl->addWidget(b);
+
+		b = new QPushButton(tr("Cancel"));
+		connect(b, &QPushButton::clicked, this, &QDialog::reject);
+		hl->addWidget(b);
+
+		//
+
+		QVBoxLayout* vl = new QVBoxLayout();
+		vl->addLayout(gl);
+		vl->addLayout(hl);
+
+		setLayout(vl);
+	}
+
+	const QString& DialogAppend::what() const
+	{
+		return m_what;
+	}
+
+	bool DialogAppend::toTheBegin() const
+	{
+		return m_toTheBegin;
+	}
+
+	void DialogAppend::accept()
+	{
+		if (m_editWhat->text().isEmpty() == true)
+		{
+			QMessageBox::critical(this, qAppName(), tr("Please fill the \"Find What\" field!"));
+			m_editWhat->setFocus();
+			return;
+		}
+		m_what = m_editWhat->text();
+
+		m_toTheBegin = m_checkToTheBegin->isChecked();
+
+		QDialog::accept();
+	}
+
 	//
 	// DialogReplace
 	//
@@ -58,12 +131,12 @@ namespace ExtWidgets
 		setLayout(vl);
 	}
 
-	const QString DialogReplace::what() const
+	const QString& DialogReplace::what() const
 	{
 		return m_what;
 	}
 
-	const QString DialogReplace::to() const
+	const QString& DialogReplace::to() const
 	{
 		return m_to;
 	}
@@ -82,14 +155,8 @@ namespace ExtWidgets
 			return;
 		}
 		m_what = m_editWhat->text();
-
-		if (m_editTo->text().isEmpty() == true)
-		{
-			QMessageBox::critical(this, qAppName(), tr("Please fill the \"Replace With\" field!"));
-			m_editTo->setFocus();
-			return;
-		}
-		m_to = m_editTo->text();
+		
+		m_to = m_editTo->text();		// TO text can be empty to delete some fragment
 
 		m_caseSensitive = m_checkCase->isChecked();
 
@@ -1374,7 +1441,10 @@ namespace ExtWidgets
 			if (selectionType == QMetaType::QString ||
 				selectionType == QMetaType::QStringList)
 			{
-				QAction* a = menu.addAction(tr("Replace..."));
+				QAction* a = menu.addAction(tr("Append..."));
+				connect(a, &QAction::triggered, this, &PropertyTable::onAppend);
+
+				a = menu.addAction(tr("Replace..."));
 				connect(a, &QAction::triggered, this, &PropertyTable::onReplace);
 			}
 
@@ -1429,7 +1499,33 @@ namespace ExtWidgets
 		updatePropertiesValues();
 	}
 
-	void PropertyTable::onReplace()
+	void PropertyTable::onAppend() 
+	{
+		int selectionType = getSelectionType();
+
+		if (selectionType != QMetaType::QString &&
+			selectionType != QMetaType::QStringList)
+		{
+			return;
+		}
+
+		static QString appendWhat;
+		static bool toTheBegin = false;
+
+		DialogAppend d(appendWhat, toTheBegin, this);
+		if (d.exec() != QDialog::Accepted)
+		{
+			return;
+		}
+
+		appendWhat = d.what();
+		toTheBegin = d.toTheBegin();
+
+		StringAppender appender(appendWhat, toTheBegin);
+		doModifyStrings(appender);		
+	}
+	
+	void PropertyTable::onReplace() 
 	{
 		int selectionType = getSelectionType();
 
@@ -1453,8 +1549,12 @@ namespace ExtWidgets
 		replaceTo = d.to();
 		caseSensitive = d.caseSensitive();
 
-		//
+		StringReplacer replacer(replaceWhat, replaceTo, caseSensitive);
+		doModifyStrings(replacer);
+	}
 
+	void PropertyTable::doModifyStrings(const IStringModifier& modifier) 
+	{
 		QModelIndexList selectedIndexes = m_tableView->selectionModel()->selectedIndexes();
 		if (selectedIndexes.isEmpty() == true)
 		{
@@ -1489,7 +1589,7 @@ namespace ExtWidgets
 			{
 				QString s = p->value().toString();
 
-				s = s.replace(replaceWhat, replaceTo, caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive);
+				modifier(s);
 
 				modifiedObjectsData.insert(p->caption(), std::make_pair(po, s));
 			}
@@ -1524,7 +1624,7 @@ namespace ExtWidgets
 
 				QString s = l[row];
 
-				s = s.replace(replaceWhat, replaceTo, caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive);
+				modifier(s);
 
 				l[row] = s;
 

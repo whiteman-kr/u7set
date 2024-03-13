@@ -3,7 +3,7 @@
 #include "MonitorMainWindow.h"
 #include "version.h"
 
-#include "../HardwareLib/HardwareLibrary.h"
+#include <HardwareLib/HardwareLibrary.h>
 #include "../VFrame30/VFrame30Library.h"
 
 

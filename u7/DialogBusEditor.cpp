@@ -1,6 +1,7 @@
 #include "DialogBusEditor.h"
 #include "Settings.h"
 #include "../lib/PropertyEditorDialog.h"
+#include "../lib/StandardColors.h"
 
 //
 // DialogBusEditor
@@ -368,7 +369,7 @@ DialogBusEditor::~DialogBusEditor()
 
 void DialogBusEditor::onAdd()
 {
-	std::shared_ptr<VFrame30::Bus> bus = std::make_shared<VFrame30::Bus>();
+	std::shared_ptr<AppSignalLib::Bus> bus = std::make_shared<AppSignalLib::Bus>();
 
 	bool ok = false;
 
@@ -459,13 +460,13 @@ void DialogBusEditor::onRemove()
 
 void DialogBusEditor::onClone()
 {
-	VFrame30::Bus* bus = getCurrentBus();
+	AppSignalLib::Bus* bus = getCurrentBus();
 	if (bus == nullptr)
 	{
 		return;
 	}
 
-	std::shared_ptr<VFrame30::Bus> cloneBus = std::make_shared<VFrame30::Bus>(*bus);
+	std::shared_ptr<AppSignalLib::Bus> cloneBus = std::make_shared<AppSignalLib::Bus>(*bus);
 
 	bool ok = false;
 
@@ -514,7 +515,7 @@ void DialogBusEditor::onCopy()
 
 		QUuid uuid = d.toUuid();
 
-		std::shared_ptr<VFrame30::Bus> bus = m_busses.get(uuid);
+		std::shared_ptr<AppSignalLib::Bus> bus = m_busses.get(uuid);
 		if (bus == nullptr)
 		{
 			assert(bus);
@@ -538,7 +539,7 @@ void DialogBusEditor::onCopy()
 	if (data.isEmpty() == false)
 	{
 		QMimeData* mime = new QMimeData();
-		mime->setData(VFrame30::Bus::mimeType, data);
+		mime->setData(AppSignalLib::Bus::mimeType, data);
 
 		QClipboard* clipboard = QApplication::clipboard();
 		clipboard->clear();
@@ -554,12 +555,12 @@ void DialogBusEditor::onPaste()
 	QClipboard* clipboard = QApplication::clipboard();
 
 	const QMimeData *mimeData = clipboard->mimeData();
-	if (mimeData->hasFormat(VFrame30::Bus::mimeType) == false)
+	if (mimeData->hasFormat(AppSignalLib::Bus::mimeType) == false)
 	{
 		return;
 	}
 
-	QByteArray data = mimeData->data(VFrame30::Bus::mimeType);
+	QByteArray data = mimeData->data(AppSignalLib::Bus::mimeType);
 	if (data.isEmpty() == true)
 	{
 		return;
@@ -571,19 +572,19 @@ void DialogBusEditor::onPaste()
 		return;
 	}
 
-	std::vector<std::shared_ptr<VFrame30::Bus>> busses;
+	std::vector<std::shared_ptr<AppSignalLib::Bus>> busses;
 
 	for (int i = 0; i < envelopeSet.items_size(); i++)
 	{
 		const Proto::Envelope& envelope = envelopeSet.items(i);
 
-		if (envelope.has_bus() == false)
+		if (envelope.HasExtension(Proto::bus) == false)
 		{
 			Q_ASSERT(false);
 			continue;
 		}
 
-		std::shared_ptr<VFrame30::Bus> pasteBus = std::make_shared<VFrame30::Bus>();
+		std::shared_ptr<AppSignalLib::Bus> pasteBus = std::make_shared<AppSignalLib::Bus>();
 
 		if (pasteBus->LoadData(envelope) == false)
 		{
@@ -846,13 +847,13 @@ void DialogBusEditor::onSignalCreate(E::SignalType type)
 {
 	QUuid uuid;
 
-	VFrame30::Bus* bus = getCurrentBus(&uuid);
+	AppSignalLib::Bus* bus = getCurrentBus(&uuid);
 	if (bus == nullptr)
 	{
 		return;
 	}
 
-	VFrame30::BusSignal bs(type);
+	AppSignalLib::BusSignal bs(type);
 
 	bool ok = false;
 	QString defaultSignalId = QString("sid_%1").arg(bus->busSignals().size());
@@ -880,8 +881,8 @@ void DialogBusEditor::onSignalCreate(E::SignalType type)
 		bs.setBusTypeId("BUSTYPEID");
 	}
 
-	const std::vector<VFrame30::BusSignal>& busSignals = bus->busSignals();
-	for (const VFrame30::BusSignal& checkBs : busSignals)
+	const std::vector<AppSignalLib::BusSignal>& busSignals = bus->busSignals();
+	for (const AppSignalLib::BusSignal& checkBs : busSignals)
 	{
 		if (checkBs.signalId() == bs.signalId())
 		{
@@ -912,7 +913,7 @@ void DialogBusEditor::onSignalCreate(E::SignalType type)
 void DialogBusEditor::onSignalEdit()
 {
 	QUuid uuid;
-	VFrame30::Bus* bus = getCurrentBus(&uuid);
+	AppSignalLib::Bus* bus = getCurrentBus(&uuid);
 	if (bus == nullptr)
 	{
 		return;
@@ -926,7 +927,7 @@ void DialogBusEditor::onSignalEdit()
 
 	// Create a vector with pointers to objects
 	//
-	std::vector<VFrame30::BusSignal> busSignals = bus->busSignals();
+	std::vector<AppSignalLib::BusSignal> busSignals = bus->busSignals();
 
 	QList<std::shared_ptr<PropertyObject>> editSignalsPointers;
 
@@ -944,7 +945,7 @@ void DialogBusEditor::onSignalEdit()
 
 		editIndexes.push_back(index);
 
-		std::shared_ptr<VFrame30::BusSignal> bs = std::make_shared<VFrame30::BusSignal>(busSignals[index].type());
+		std::shared_ptr<AppSignalLib::BusSignal> bs = std::make_shared<AppSignalLib::BusSignal>(busSignals[index].type());
 
 		*bs = busSignals[index];
 
@@ -972,7 +973,7 @@ void DialogBusEditor::onSignalEdit()
 		{
 			size_t editIndex = editIndexes[i];
 
-			VFrame30::BusSignal* editSignal = (dynamic_cast<VFrame30::BusSignal*>(editSignalsPointers[static_cast<int>(i)].get()));
+			AppSignalLib::BusSignal* editSignal = (dynamic_cast<AppSignalLib::BusSignal*>(editSignalsPointers[static_cast<int>(i)].get()));
 			if (editSignal == nullptr)
 			{
 				assert(editSignal);
@@ -1018,7 +1019,7 @@ void DialogBusEditor::onSignalEdit()
 void DialogBusEditor::onSignalRemove()
 {
 	QUuid uuid;
-	VFrame30::Bus* bus = getCurrentBus(&uuid);
+	AppSignalLib::Bus* bus = getCurrentBus(&uuid);
 	if (bus == nullptr)
 	{
 		return;
@@ -1060,7 +1061,7 @@ void DialogBusEditor::onSignalRemove()
 void DialogBusEditor::onSignalUp()
 {
 	QUuid uuid;
-	VFrame30::Bus* bus = getCurrentBus(&uuid);
+	AppSignalLib::Bus* bus = getCurrentBus(&uuid);
 	if (bus == nullptr)
 	{
 		return;
@@ -1079,7 +1080,7 @@ void DialogBusEditor::onSignalUp()
 		selectedIndexes.push_back(item->data(0, Qt::UserRole).toInt());
 	}
 
-	std::vector<VFrame30::BusSignal> busSignals = bus->busSignals();
+	std::vector<AppSignalLib::BusSignal> busSignals = bus->busSignals();
 
 	std::sort(selectedIndexes.begin(), selectedIndexes.end());
 
@@ -1091,7 +1092,7 @@ void DialogBusEditor::onSignalUp()
 			break;
 		}
 
-		VFrame30::BusSignal temp = busSignals[index];
+		AppSignalLib::BusSignal temp = busSignals[index];
 		busSignals[index] = busSignals[index - 1];
 		busSignals[index - 1] = temp;
 
@@ -1121,7 +1122,7 @@ void DialogBusEditor::onSignalUp()
 void DialogBusEditor::onSignalDown()
 {
 	QUuid uuid;
-	VFrame30::Bus* bus = getCurrentBus(&uuid);
+	AppSignalLib::Bus* bus = getCurrentBus(&uuid);
 	if (bus == nullptr)
 	{
 		return;
@@ -1140,7 +1141,7 @@ void DialogBusEditor::onSignalDown()
 		selectedIndexes.push_back(item->data(0, Qt::UserRole).toInt());
 	}
 
-	std::vector<VFrame30::BusSignal> busSignals = bus->busSignals();
+	std::vector<AppSignalLib::BusSignal> busSignals = bus->busSignals();
 
 	std::sort(selectedIndexes.begin(), selectedIndexes.end());
 
@@ -1152,7 +1153,7 @@ void DialogBusEditor::onSignalDown()
 			break;
 		}
 
-		VFrame30::BusSignal temp = busSignals[index];
+		AppSignalLib::BusSignal temp = busSignals[index];
 		busSignals[index] = busSignals[index + 1];
 		busSignals[index + 1] = temp;
 
@@ -1194,7 +1195,7 @@ bool DialogBusEditor::checkBusNames()
 	int count = m_busses.count();
 	for (int i = 0; i < count; i++)
 	{
-		const std::shared_ptr<VFrame30::Bus> busI = m_busses.get(i);
+		const std::shared_ptr<AppSignalLib::Bus> busI = m_busses.get(i);
 
 		for (int j = 0; j < count; j++)
 		{
@@ -1203,7 +1204,7 @@ bool DialogBusEditor::checkBusNames()
 				continue;
 			}
 
-			const std::shared_ptr<VFrame30::Bus> busJ = m_busses.get(j);
+			const std::shared_ptr<AppSignalLib::Bus> busJ = m_busses.get(j);
 
 			if (busI->busTypeId() == busJ->busTypeId())
 			{
@@ -1264,7 +1265,7 @@ void DialogBusEditor::onBusPropertiesChanged(QList<std::shared_ptr<PropertyObjec
 
 	for (const std::shared_ptr<PropertyObject>& object : objects)
 	{
-		const VFrame30::Bus* editBus = dynamic_cast<VFrame30::Bus*>(object.get());
+		const AppSignalLib::Bus* editBus = dynamic_cast<AppSignalLib::Bus*>(object.get());
 		if (editBus == nullptr)
 		{
 			assert(editBus);
@@ -1342,7 +1343,7 @@ void DialogBusEditor::fillBusList()
 
 	for (int i = 0; i < count; i++)
 	{
-		const std::shared_ptr<VFrame30::Bus> bus = m_busses.get(i);
+		const std::shared_ptr<AppSignalLib::Bus> bus = m_busses.get(i);
 
 		QTreeWidgetItem* item = new QTreeWidgetItem();
 
@@ -1393,7 +1394,7 @@ void DialogBusEditor::fillBusProperties()
 
 		QUuid uuid = d.toUuid();
 
-		std::shared_ptr<VFrame30::Bus> bus = m_busses.get(uuid);
+		std::shared_ptr<AppSignalLib::Bus> bus = m_busses.get(uuid);
 
 		busObjects.push_back(bus);
 
@@ -1420,13 +1421,13 @@ void DialogBusEditor::fillBusSignals()
 {
 	m_signalsTree->clear();
 
-	VFrame30::Bus* bus = getCurrentBus();
+	AppSignalLib::Bus* bus = getCurrentBus();
 	if (bus == nullptr)
 	{
 		return;
 	}
 
-	std::vector<VFrame30::BusSignal> busSignals = bus->busSignals();
+	std::vector<AppSignalLib::BusSignal> busSignals = bus->busSignals();
 
 	for (int i = 0; i < static_cast<int>(busSignals.size()); i++)
 	{
@@ -1447,9 +1448,9 @@ void DialogBusEditor::fillBusSignals()
 	return;
 }
 
-void DialogBusEditor::addBus(const std::shared_ptr<VFrame30::Bus> bus)
+void DialogBusEditor::addBus(const std::shared_ptr<AppSignalLib::Bus> bus)
 {
-	std::vector<std::shared_ptr<VFrame30::Bus>> busses;
+	std::vector<std::shared_ptr<AppSignalLib::Bus>> busses;
 	busses.push_back(bus);
 
 	addBus(busses);
@@ -1457,7 +1458,7 @@ void DialogBusEditor::addBus(const std::shared_ptr<VFrame30::Bus> bus)
 	return;
 }
 
-void DialogBusEditor::addBus(const std::vector<std::shared_ptr<VFrame30::Bus>> busses)
+void DialogBusEditor::addBus(const std::vector<std::shared_ptr<AppSignalLib::Bus>> busses)
 {
 	m_busTree->clearSelection();
 
@@ -1521,7 +1522,7 @@ void DialogBusEditor::updateButtonsEnableState()
 	{
 		QUuid uuid = item->data(0, Qt::UserRole).toUuid();
 
-		const std::shared_ptr<VFrame30::Bus> bus = m_busses.get(uuid);
+		const std::shared_ptr<AppSignalLib::Bus> bus = m_busses.get(uuid);
 
 		if (m_busses.fileInfo(bus->uuid()).state() == E::VcsState::CheckedOut)
 		{
@@ -1582,11 +1583,13 @@ void DialogBusEditor::updateBusTreeItemText(QTreeWidgetItem* item)
 
 	QUuid uuid = item->data(0, Qt::UserRole).toUuid();
 
-	const std::shared_ptr<VFrame30::Bus> bus = m_busses.get(uuid);
+	const std::shared_ptr<AppSignalLib::Bus> bus = m_busses.get(uuid);
 
 	updateBusTreeItemText(item, bus.get());
 
 	DbFileInfo fi = m_busses.fileInfo(uuid);
+
+	QBrush b(StandardColors::VcsCheckedIn);
 
 	if (fi.state() == E::VcsState::CheckedOut)
 	{
@@ -1594,6 +1597,19 @@ void DialogBusEditor::updateBusTreeItemText(QTreeWidgetItem* item)
 
 		int userId = fi.userId();
 		item->setText(2, m_db->username(userId));
+
+		switch (fi.action())
+		{
+		case E::VcsItemAction::Added:
+			b.setColor(StandardColors::VcsAdded);
+			break;
+		case E::VcsItemAction::Modified:
+			b.setColor(StandardColors::VcsModified);
+			break;
+		case E::VcsItemAction::Deleted:
+			b.setColor(StandardColors::VcsDeleted);
+			break;
+		}
 	}
 	else
 	{
@@ -1601,10 +1617,15 @@ void DialogBusEditor::updateBusTreeItemText(QTreeWidgetItem* item)
 		item->setText(2, "");
 	}
 
+	for (int i = 0; i < m_busTree->header()->count(); i++)
+	{
+		item->setBackground(i, b);
+	}
+
 	return;
 }
 
-void DialogBusEditor::updateBusTreeItemText(QTreeWidgetItem* item, const VFrame30::Bus* bus)
+void DialogBusEditor::updateBusTreeItemText(QTreeWidgetItem* item, const AppSignalLib::Bus* bus)
 {
 	if (bus == nullptr)
 	{
@@ -1616,7 +1637,7 @@ void DialogBusEditor::updateBusTreeItemText(QTreeWidgetItem* item, const VFrame3
 	return;
 }
 
-void DialogBusEditor::updateSignalsTreeItemText(QTreeWidgetItem* item, const VFrame30::BusSignal& signal)
+void DialogBusEditor::updateSignalsTreeItemText(QTreeWidgetItem* item, const AppSignalLib::BusSignal& signal)
 {
 	if (item == nullptr)
 	{
@@ -1649,7 +1670,7 @@ void DialogBusEditor::updateSignalsTreeItemText(QTreeWidgetItem* item, const VFr
 
 	// Placement
 
-	VFrame30::Bus* bus = getCurrentBus();
+	AppSignalLib::Bus* bus = getCurrentBus();
 	if (bus == nullptr)
 	{
 		return;
@@ -1678,7 +1699,7 @@ void DialogBusEditor::updateSignalsTreeItemText(QTreeWidgetItem* item, const VFr
 	return;
 }
 
-VFrame30::Bus* DialogBusEditor::getCurrentBus(QUuid* uuid)
+AppSignalLib::Bus* DialogBusEditor::getCurrentBus(QUuid* uuid)
 {
 	QList<QTreeWidgetItem*> selectedItems = m_busTree->selectedItems();
 	if (selectedItems.size() != 1)

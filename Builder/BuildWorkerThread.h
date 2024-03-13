@@ -1,7 +1,11 @@
 #pragma once
 
 #include <QJSEngine>
+
+#include <HardwareLib/DeviceModule.h>
+
 #include "../lib/TuningDataStorage.h"
+
 #include "Context.h"
 #include "TuningBuilder.h"
 #include "OptoModule.h"
@@ -44,6 +48,7 @@ namespace Builder
 		bool taskStartBuildResultWriter();
 		bool taskGetEquipment();
 		bool taskCheckPresetVersions();
+		bool taskCheckEquipmentProperties();
 		bool taskLoadBusTypes();					// Load BusTypes (VFrame30::BusSet)
 		bool taskLoadAppSignals();					// Load Builder::SignalSet
 		bool taskLoadLmDescriptions();				// Load LmDescription files
@@ -104,6 +109,11 @@ namespace Builder
 				{
 					.func = &BuildWorkerThread::taskCheckPresetVersions,
 					.name = "Checking Equipment Presets",
+					.breakOnFailed = true
+				},
+				{
+					.func = &BuildWorkerThread::taskCheckEquipmentProperties,
+					.name = "Checking Equipment Properties",
 					.breakOnFailed = true
 				},
 				{
@@ -200,6 +210,10 @@ namespace Builder
 
 		void findFSCConfigurationModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out) const;
 		void findModulesByFamily(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out, Hardware::DeviceModule::FamilyType family) const;
+
+		// Remove excluded devices from the equipment.
+		//
+		bool removeExcludedDevices(Hardware::DeviceObject* parent);
 
 		// Expand Devices StrId
 		//

@@ -1,16 +1,13 @@
 #pragma once
 
-#include <memory>
-#include <QTextStream>
-#include <QByteArray>
-#include <QThread>
-#include <QtConcurrent/QtConcurrent>
 #include "SimEeprom.h"
 #include "SimDeviceEmulator.h"
-#include "../HardwareLib/LmDescription.h"
-#include "../HardwareLib/LogicModulesInfo.h"
-#include "../HardwareLib/ModuleFirmware.h"
 
+#include <HardwareLib/LmDescription.h>
+#include <HardwareLib/LogicModulesInfo.h>
+#include <HardwareLib/ModuleFirmware.h>
+
+#include <QFuture>
 
 namespace Sim
 {

@@ -3,9 +3,9 @@
 #include "MonitorSchemaManager.h"
 #include "ScriptMonitorApplication.h"
 #include "../VFrame30/ClientSchemaView.h"
-#include "../VFrame30/AppSignalController.h"
-#include "../lib/ITimeStats.h"
 
+
+class ITimeStats;
 
 namespace VFrame30
 {

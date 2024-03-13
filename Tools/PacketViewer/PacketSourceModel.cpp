@@ -4,15 +4,17 @@
 #include <QUdpSocket>
 #include "../OnlineLib/SocketIO.h"
 #include "PacketBufferTableModel.h"
-#include <QHBoxLayout>
-#include <QTableView>
 #include "SignalTableModel.h"
 #include <QSettings>
 #include "SourceStatusWidget.h"
 #include <QDirIterator>
 #include <QMessageBox>
-#include "../HardwareLib/DataProtocols.h"
-#include "../HardwareLib/HardwareLibrary.h"
+
+#include <HardwareLib/DataProtocols.h>
+#include <HardwareLib/HardwareLibrary.h>
+#include <HardwareLib/DeviceRoot.h>
+#include <HardwareLib/DeviceModule.h>
+
 #include "../lib/DataSource.h"
 #include <QTimer>
 
@@ -759,10 +761,12 @@ void PacketSourceModel::initDataSources(QHash<quint32, std::shared_ptr<DataSourc
 		{
 			return;
 		}
-		if (typeid(*currentDevice) != typeid(Hardware::DeviceModule))
+
+		if (currentDevice->isModule() == false)
 		{
 			return;
 		}
+
 		Hardware::DeviceModule* currentModule = dynamic_cast<Hardware::DeviceModule*>(currentDevice);
 		if (currentModule == nullptr)
 		{

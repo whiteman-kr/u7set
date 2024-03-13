@@ -1,11 +1,14 @@
 #include "../lib/ConstStrings.h"
 
 #include <QDirIterator>
+#include <QRegularExpression>
 
 #include "ArchFile.h"
 #include "ArchWriterThread.h"
 #include "BinSearch.h"
 #include "ArchRequest.h"
+
+#include "../Proto/ArchSignal.pb.h"
 
 // -----------------------------------------------------------------------------------------------------------------------
 //

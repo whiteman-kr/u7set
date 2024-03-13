@@ -1,8 +1,7 @@
 #pragma once
 
-#include "../CommonLib/Types.h"
 #include "../UtilsLib/WUtils.h"
-#include "../HardwareLib/LmDescription.h"
+#include <HardwareLib/LmDescription.h>
 
 #include "LmMemoryMap.h"
 

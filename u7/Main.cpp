@@ -1,19 +1,17 @@
-#include "../AppSignalLib/AppSignal.h"
 #include "../Builder/Builder.h"
-#include "../CommonLib/PropertyObject.h"
 #include "../CommonLib/Times.h"
-#include "../HardwareLib/DeviceObject.h"
-#include "../HardwareLib/HardwareLibrary.h"
-#include "../HardwareLib/LmDescription.h"
-#include "../HardwareLib/LogicModulesInfo.h"
 #include "../Protobuf/google/protobuf/message.h"
 #include "../UtilsLib/CrashExceptionHandler.h"
 #include "../VFrame30/VFrame30Library.h"
-#include "../lib/Configurator.h"
 #include "../version.h"
+
+#include <HardwareLib/HardwareLibrary.h>
+#include <HardwareLib/ModuleFirmware.h>
+
 #include "GlobalMessanger.h"
 #include "MainWindow.h"
 #include "Settings.h"
+
 
 
 // Visual Leak Detector

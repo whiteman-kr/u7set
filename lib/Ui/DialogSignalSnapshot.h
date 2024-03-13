@@ -3,8 +3,9 @@
 #include "../lib/ExportPrint.h"
 #include "../lib/ISignalDataServer.h"
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../VFrame30/Schema.h"
+#include "../VFrame30/SchemaDetails.h"
 #include "DragDropHelper.h"
+#include "../AppSignalLib/IAppSignalManager.h"
 
 class SignalSnapshotModel;
 

@@ -195,7 +195,8 @@ let FamilyBVB15ID: number = 0x5600;
 //let configScriptVersion: number = 1;
 //let configScriptVersion: number = 2;	//Changes in LMNumberCount calculation algorithm
 //let configScriptVersion: number = 4;	//Added software type checking
-let configScriptVersion: number = 4;	// ScriptDeviceObject is used
+//let configScriptVersion: number = 4;	// ScriptDeviceObject is used
+let configScriptVersion: number = 5;	// Using DiagLANDataSize calculated by RPCT
 
 let LMDescriptionNumber: number = 0;
 
@@ -336,8 +337,9 @@ function module_bvb15(builder: Builder, root: ScriptDeviceObject, module: Script
 	if (module.customModuleFamily == FamilyBVB15ID) {
 		let place: number = module.place;
 
-		if (place != 0) {
-			log.errCFG3002("Place", place, 0, 0, module.equipmentId);
+		if (place != 0 &&
+		    place != 13) {
+			log.errCFG3002("Place", place, 0, 13, module.equipmentId);
 			return false;
 		}
 
@@ -359,7 +361,7 @@ function generate_bvb15_rev1(builder: Builder, root: ScriptDeviceObject, module:
 		return false;
 	}
 
-	let checkProperties: string[] = ["SubsystemID", "LMNumber", "SubsystemChannel", "AppLANDataSize", "TuningLANDataUID", "AppLANDataUID", "DiagLANDataUID",
+	let checkProperties: string[] = ["SubsystemID", "LMNumber", "SubsystemChannel", "AppLANDataSize", "DiagLANDataSize", "TuningLANDataUID", "AppLANDataUID", "DiagLANDataUID",
 		"Bit0_TemperatureSensor1", "Bit1_TemperatureSensor2", "Bit2_TemperatureSensor3", "Bit3_E14", "Bit4_E15", "Bit5_E16", "Bit6_SimulationInputMode"];
 	for (let cp: number = 0; cp < checkProperties.length; cp++) {
 		if (module.propertyValue(checkProperties[cp]) == undefined) {
@@ -390,8 +392,8 @@ function generate_bvb15_rev1(builder: Builder, root: ScriptDeviceObject, module:
 
 	let uartId: number = logicModuleDescription.FlashMemory_ConfigUartId;
 
-	let appWordsCount: number = module.propertyInt("AppLANDataSize");
-	let diagWordsCount: number = logicModuleDescription.Memory_TxDiagDataSize;
+	const appWordsCount: number = module.propertyInt("AppLANDataSize");
+	const diagWordsCount: number = module.propertyInt("DiagLANDataSize");
 
 	let ssKeyValue: number = subsystemStorage.ssKey(subSysID);
 	if (ssKeyValue == -1) {
@@ -556,8 +558,6 @@ function generate_bvb15_rev1(builder: Builder, root: ScriptDeviceObject, module:
 			log.errCFG3000("TxDiagDataSize", ioEquipmentID);
 			return false;
 		}
-
-		diagWordsCount += diagWordsIoCount;
 	}
 
 	// Create LANs configuration

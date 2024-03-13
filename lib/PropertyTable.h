@@ -2,12 +2,38 @@
 #define PROPERTYTABLE_H
 
 #include <QSortFilterProxyModel>
-#include <QAbstractItemModel>
-#include "../CommonLib/PropertyObject.h"
 #include "../lib/PropertyEditor.h"
+
+
+class QAbstractItemModel;
+
 
 namespace ExtWidgets
 {
+	class DialogAppend : public QDialog
+	{
+		Q_OBJECT
+
+	public:
+		DialogAppend(const QString& what, bool toTheBegin, QWidget* parent);
+
+		const QString& what() const;
+		bool toTheBegin() const;
+
+	protected:
+		virtual void accept() override;
+
+	private:
+
+		QLineEdit* m_editWhat = nullptr;
+
+		QCheckBox* m_checkToTheBegin = nullptr;
+
+		QString m_what;
+		bool m_toTheBegin = false;
+
+	};
+
 	class DialogReplace : public QDialog
 	{
 		Q_OBJECT
@@ -15,8 +41,8 @@ namespace ExtWidgets
 	public:
 		DialogReplace(const QString& what, const QString& to, bool caseSensitive, QWidget* parent);
 
-		const QString what() const;
-		const QString to() const;
+		const QString& what() const;
+		const QString& to() const;
 		bool caseSensitive() const;
 
 	protected:
@@ -44,6 +70,49 @@ namespace ExtWidgets
 		int rowCount = 1;
 
 		std::vector<std::shared_ptr<Property>> properties;
+	};
+
+	class IStringModifier
+	{
+	public:
+		virtual void operator()(QString& s) const = 0;
+	};
+
+	class StringAppender: public IStringModifier
+	{
+	public:
+		StringAppender(const QString& text, bool toTheBegin):
+			m_text(text),
+			m_toTheBegin(toTheBegin)
+		{
+		}
+
+		void operator()(QString& s) const override 
+		{ 
+			s = m_toTheBegin ? m_text + s : s + m_text;
+		}
+	private:
+		QString m_text;
+		bool m_toTheBegin;
+	};
+
+	class StringReplacer: public IStringModifier
+	{
+	public:
+		StringReplacer(const QString& what, const QString& to, bool caseSensitive) :
+			m_what(what),
+			m_to(to),
+			m_caseSensitive(caseSensitive)
+		{
+		}
+		void operator()(QString& s) const override 
+		{
+			s = s.replace(m_what, m_to, m_caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive);
+		}
+	private:
+		QString m_what;
+		QString m_to;
+		bool m_caseSensitive;
 	};
 
 	class PropertyTable;
@@ -196,6 +265,7 @@ namespace ExtWidgets
 		void onRemoveString();
 		void onUniqueRowValuesChanged();
 
+		void onAppend();
 		void onReplace();
 
 	public slots:
@@ -215,6 +285,7 @@ namespace ExtWidgets
 		void startEditing();
 		void toggleSelected();
 
+		void doModifyStrings(const IStringModifier& modifier);
 		void addString(bool after);
 		void removeString();
 

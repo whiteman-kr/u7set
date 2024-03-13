@@ -1,12 +1,12 @@
 #include "MonitorSchemaView.h"
-#include "MonitorSchemaManager.h"
-#include "MonitorAppSettings.h"
-#include "Globals.h"
-#include "../VFrame30/DrawParam.h"
-#include "../VFrame30/PropertyNames.h"
 #include "../VFrame30/AppSignalController.h"
-#include "../VFrame30/TuningController.h"
+#include "../VFrame30/PropertyNames.h"
+#include "../lib/ITimeStats.h"
+#include "Globals.h"
+#include "MonitorAppSettings.h"
 #include "MonitorMainWindow.h"
+#include "MonitorSchemaManager.h"
+
 
 //
 // MonitorView
@@ -67,7 +67,7 @@ void MonitorSchemaView::updateScriptGlobalVars(QJSEngine& engine)
 	//
 	{
 		QJSValue jsApp = engine.newQObject(&m_app);
-		QQmlEngine::setObjectOwnership(&m_app, QQmlEngine::CppOwnership);
+		QJSEngine::setObjectOwnership(&m_app, QJSEngine::CppOwnership);
 
 		engine.globalObject().setProperty(VFrame30::PropertyNames::scriptGlobalVariableApp, jsApp);
 	}
@@ -76,7 +76,7 @@ void MonitorSchemaView::updateScriptGlobalVars(QJSEngine& engine)
 	//
 	{
 		QJSValue jsTuning = engine.newQObject(m_tuningController.get());
-		QQmlEngine::setObjectOwnership(m_tuningController.get(), QQmlEngine::CppOwnership);
+		QJSEngine::setObjectOwnership(m_tuningController.get(), QJSEngine::CppOwnership);
 
 		engine.globalObject().setProperty(VFrame30::PropertyNames::scriptGlobalVariableTuning, jsTuning);
 	}
@@ -87,7 +87,7 @@ void MonitorSchemaView::updateScriptGlobalVars(QJSEngine& engine)
 		Q_ASSERT(m_scriptAppSignalController);
 
 		QJSValue jsSignals = engine.newQObject(m_scriptAppSignalController.get());
-		QQmlEngine::setObjectOwnership(m_scriptAppSignalController.get(), QQmlEngine::CppOwnership);
+		QJSEngine::setObjectOwnership(m_scriptAppSignalController.get(), QJSEngine::CppOwnership);
 
 		engine.globalObject().setProperty(VFrame30::PropertyNames::scriptGlobalVariableSignals, jsSignals);
 	}
@@ -101,7 +101,7 @@ void MonitorSchemaView::configurationArrived(MonitorConfigSettings configuration
 
 	m_configurationId = configuration.configurationId;
 
-	setMonitorBehavior(std::move(configuration.monitorBeahvior));
+	setMonitorBehavior(std::move(configuration.monitorBehavior));
 
 	// This will update GlobalScripts and reevaluate them.
 	//

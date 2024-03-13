@@ -1,4 +1,3 @@
-#include "../HardwareLib/DataProtocols.h"
 #include "MainWindow.h"
 #include "Options.h"
 #include "version.h"

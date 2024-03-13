@@ -1,18 +1,15 @@
 #pragma once
 
-#include <QObject>
-
 #include "../UtilsLib/WUtils.h"
 #include "../UtilsLib/Queue.h"
 #include "../UtilsLib/XmlHelper.h"
 #include "../UtilsLib/SimpleThread.h"
-#include "../HardwareLib/DataProtocols.h"
 #include "../OnlineLib/SocketIO.h"
 #include "../OnlineLib/CircularLogger.h"
 #include "../CommonLib/Times.h"
-#include "../CommonLib/HostAddressPort.h"
 #include "ConstStrings.h"
-#include "../HardwareLib/LanControllerInfo.h"
+#include <HardwareLib/DataProtocols.h>
+#include <HardwareLib/LanControllerInfo.h>
 
 namespace Network
 {
@@ -64,24 +61,26 @@ public:
 	void setSubsystemChannel(const QString& channel) { m_subsystemChannel = channel; }
 
 	// AppData properties
-
+	//
 	quint32 rupAppDataUID() const;
 	int appDataFramesQuantity() const;
 	int appDataSizeBytes() const;
 	int overrideAppDataWordCount() const;
+	int appSignalsCount() const;
 
 	// DiagData properties
-
+	//
 	quint32 rupDiagDataUID() const;
 	int diagDataSizeBytes() const;
 	int diagDataFramesQuantity() const;
 	int overrideDiagDataWordCount() const;
+	int diagSignalsCount() const;
 
 	// Tuning properties
-
-	int fotipVersion() const { return m_lanControllersInfo.fotipVersion(); }
+	//
 	quint32 rupTuningDataUID() const;
 	quint64 fotipTuningDataUID() const;
+	int fotipVersion() const;
 
 	//
 

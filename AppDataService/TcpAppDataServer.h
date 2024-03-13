@@ -1,9 +1,8 @@
 #pragma once
 
 #include "../OnlineLib/Tcp.h"
+#include "../AppSignalLib/SimpleAppSignalState.h"
 
-#include "AppDataSource.h"
-#include "SignalStatesProcessingThread.h"
 
 class TcpAppDataServerThread;
 class AppDataServiceWorker;

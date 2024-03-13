@@ -1,10 +1,15 @@
 #include "SignalSet.h"
+
 #include "../UtilsLib/WUtils.h"
+
+#include <HardwareLib/EquipmentSet.h>
+#include <HardwareLib/DeviceChassis.h>
+#include <HardwareLib/DeviceModule.h>
 
 namespace Builder
 {
 
-	SignalSet::SignalSet(VFrame30::BusSet* busSet, std::shared_ptr<BuildResultWriter> resultWriter, IssueLogger* log) :
+	SignalSet::SignalSet(AppSignalLib::BusSet* busSet, std::shared_ptr<BuildResultWriter> resultWriter, IssueLogger* log) :
 		m_busSet(busSet),
 		m_resultWriter(resultWriter),
 		m_log(log),
@@ -370,9 +375,9 @@ namespace Builder
 						continue;
 					}
 
-					std::shared_ptr<Hardware::DeviceModule> module = chassis->findLogicModule();
+					std::shared_ptr<Hardware::DeviceModule> module = chassis->findLogicModuleOrBvb();
 
-					if (module != nullptr && module->isLogicModule() == true)
+					if (module != nullptr)
 					{
 						linkSignalToLm(&s, module);
 					}

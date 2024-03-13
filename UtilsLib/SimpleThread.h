@@ -1,9 +1,6 @@
 #pragma once
 
-#include <QThread>
 #include <QEventLoop>
-#include <QMutex>
-#include <memory>
 #include <atomic>
 
 class SimpleThreadWorker : public QObject
@@ -92,5 +89,22 @@ public:
 											// return false if timeout elapsed
 
 	bool waitForever() { return wait(0); }
+};
+
+class ThreadWithQuit
+{
+public:
+	void quit()
+	{
+		m_quitRequested = true;
+		wakeupToQuit();
+	}
+
+	bool isQuitRequested() const { return m_quitRequested; }
+
+	virtual void wakeupToQuit() {}
+
+protected:
+	std::atomic_bool m_quitRequested{false};
 };
 

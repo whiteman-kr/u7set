@@ -1,7 +1,5 @@
 #include "VduSchema.h"
 #include "SchemaLayer.h"
-#include "SchemaItemValue.h"
-#include "SchemaItemImageValue.h"
 
 namespace VFrame30
 {

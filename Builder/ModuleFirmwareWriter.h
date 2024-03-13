@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../HardwareLib/ModuleFirmware.h"
 #include "IssueLogger.h"
 
+#include <HardwareLib/ModuleFirmware.h>
 #include "../Metrology/UnitsConverter.h"
 
 namespace Hardware

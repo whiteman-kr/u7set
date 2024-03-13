@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../VFrame30/SchemaItem.h"
+#include "../VFrame30/SchemaItems/SchemaItem.h"
 #include "IdePropertyEditor.h"
 
 
@@ -38,6 +38,8 @@ private:
 	virtual void done(int r);
 
 	void saveSettings();
+
+	void updateWindowTitle();
 
 private:
 	Ui::SchemaItemPropertiesDialog *ui;

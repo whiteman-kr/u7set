@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../HardwareLib/DeviceObject.h"
-#include "../HardwareLib/DiagSignal.h"
+#include <HardwareLib/DeviceObject.h>
+#include <HardwareLib/DiagSignal.h>
 #include "../UtilsLib/Address16.h"
 
 using DiagSignalConstShared = std::shared_ptr<const Hardware::DiagSignal>;
@@ -9,6 +9,12 @@ using DiagSignalShared = std::shared_ptr<Hardware::DiagSignal>;
 
 using DeviceObjectConstShared = std::shared_ptr<const Hardware::DeviceObject>;
 using DeviceObjectShared = std::shared_ptr<Hardware::DeviceObject>;
+
+namespace Network
+{
+	class AcquiredDiagObject;
+	class AcquiredDiagSignal;
+}
 
 class AcquiredDiagObject
 {

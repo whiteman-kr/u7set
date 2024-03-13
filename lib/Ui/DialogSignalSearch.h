@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../../AppSignalLib/AppSignalParam.h"
 #include "../AppSignalLib/IAppSignalManager.h"
 #include "DragDropHelper.h"
 

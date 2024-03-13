@@ -1,11 +1,11 @@
 #include "AppDataServiceCfgGenerator.h"
-#include "Builder.h"
 #include "SoftwareSettingsGetter.h"
-#include "DeviceHelper.h"
 
 #include "../UtilsLib/XmlHelper.h"
 #include "../UtilsLib/WUtils.h"
 #include "../lib/DataSource.h"
+
+#include <HardwareLib/DeviceModule.h>
 
 class DataSource;
 
@@ -145,7 +145,7 @@ namespace Builder
 
 			quint32 receivingSubnet = settings->appDataReceivingIP.address32() & receivingNetmask;
 
-			for(Hardware::DeviceModule* lm : m_context->m_lmModules)
+			for(Hardware::DeviceModule* lm : m_context->m_fscModules)
 			{
 				if (lm == nullptr)
 				{

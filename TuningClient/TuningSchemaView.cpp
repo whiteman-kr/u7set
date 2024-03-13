@@ -51,7 +51,7 @@ void TuningSchemaView::updateScriptGlobalVars(QJSEngine& engine)
 	//
 	{
 		QJSValue jsApp = engine.newQObject(&m_app);
-		QQmlEngine::setObjectOwnership(&m_app, QQmlEngine::CppOwnership);
+		QJSEngine::setObjectOwnership(&m_app, QJSEngine::CppOwnership);
 
 		engine.globalObject().setProperty(VFrame30::PropertyNames::scriptGlobalVariableApp, jsApp);
 	}
@@ -60,7 +60,7 @@ void TuningSchemaView::updateScriptGlobalVars(QJSEngine& engine)
 	//
 	{
 		QJSValue jsTuning = engine.newQObject(m_tuningController.get());
-		QQmlEngine::setObjectOwnership(m_tuningController.get(), QQmlEngine::CppOwnership);
+		QJSEngine::setObjectOwnership(m_tuningController.get(), QJSEngine::CppOwnership);
 
 		engine.globalObject().setProperty(VFrame30::PropertyNames::scriptGlobalVariableTuning, jsTuning);
 	}

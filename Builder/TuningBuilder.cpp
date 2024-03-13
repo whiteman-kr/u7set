@@ -1,5 +1,7 @@
 #include "TuningBuilder.h"
 
+#include <HardwareLib/DeviceModule.h>
+
 namespace Builder
 {
 	// ------------------------------------------------------------------------

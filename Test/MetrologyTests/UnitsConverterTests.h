@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QObject>
+#include <QTest>
 
 class UnitsConverterTests : public QObject
 {

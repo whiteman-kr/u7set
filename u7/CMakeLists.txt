@@ -120,6 +120,8 @@ set (U7_SOURCES
 	EditEngine/EditEngine.h
 	EditEngine/EditEngineAddItem.cpp
 	EditEngine/EditEngineAddItem.h
+	EditEngine/EditEngineApplyDefaultProperty.cpp
+	EditEngine/EditEngineApplyDefaultProperty.h
 	EditEngine/EditEngineBatch.cpp
 	EditEngine/EditEngineBatch.h
 	EditEngine/EditEngineDeleteItem.cpp
@@ -207,6 +209,8 @@ set (U7_SOURCES
 	MainWindow.h
 	PasswordService.cpp
 	PasswordService.h
+	ProjectDefaults.cpp
+	ProjectDefaults.h
 	ProjectsTabPage.cpp
 	ProjectsTabPage.h
 	Reports/DialogReportPageSetup.cpp
@@ -395,23 +399,87 @@ target_precompile_headers(${TARGET} PRIVATE
 	<vector>
 	<ranges>
 
-	<QtDebug>
-	<QtGui>
-	<QtNetwork>
-	<QtQml>
-	<QtSerialPort>
-	<QtSql>
-	<QtSvg>
-	<QtWidgets>
-	<QtXml>
-	<QtPrintSupport>
+	<QAction>
+	<QActionGroup>
+	<QApplication>
+	<QBoxLayout>
+	<QButtonGroup>
+	<QCheckBox>
+	<QClipboard>
+	<QComboBox>
+	<QCompleter>
+	<QDialog>
+	<QDialogButtonBox>
+	<QDir>
+	<QDockWidget>
+	<QFileDialog>
+	<QFormLayout>
+	<QGroupBox>
+	<QHBoxLayout>
+	<QHeaderView>
+	<QHostInfo>
+	<QInputDialog>
+	<QJsonArray>
+	<QJsonDocument>
+	<QJsonObject>
+	<QJsonValue>
+	<QLabel>
+	<QListWidget>
+	<QListWidgetItem>
+	<QMainWindow>
+	<QMenu>
+	<QMenuBar>
+	<QMessageBox>
+	<QMimeData>
+	<QPainter>
+	<QPainterPath>
+	<QPdfWriter>
+	<QPlainTextEdit>
+	<QPrinter>
+	<QProgressBar>
+	<QProgressDialog>
+	<QPushButton>
+	<QRadioButton>
+	<QScrollBar>
+	<QSettings>
+	<QShortcut>
+	<QSortFilterProxyModel>
+	<QSpinBox>
+	<QSplitter>
+	<QStandardItemModel>
+	<QStatusBar>
+	<QStringListModel>
+	<QSvgRenderer>
+	<QTableWidget>
+	<QTextBrowser>
+	<QTextDocumentWriter>
+	<QThread>
+	<QTimer>
+	<QToolBar>
+	<QToolButton>
+	<QToolTip>
+	<QTreeView>
+	<QTreeWidget>
+	<QTreeWidgetItem>
+	<QVBoxLayout>
 
-	"../DbLib/DbController.h"
+	"../CommonLib/Types.h"
+	"../CommonLib/Hash.h"
+	"../CommonLib/PropertyObject.h"
+	"../CommonLib/AfbParamValue.h"
 	"../CommonLib/DebugInstCounter.h"
 	"../CommonLib/Factory.h"
-	"../CommonLib/Types.h"
+
 	"../Proto/ProtoSerialization.h"
-	"../Proto/serialization.pb.h"
+	"../Proto/Hardware.pb.h"
+	"../Proto/AppSignal.pb.h"
+	"../Proto/Bus.pb.h"
+
+	"../AppSignalLib/AppSignal.h"
+	"../AppSignalLib/AppSignalParam.h"
+	"../AppSignalLib/AppSignalState.h"
+
+	<DbLib/DbController.h>
 )
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
@@ -429,3 +497,15 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
 endif()
 
 target_compile_definitions(${TARGET} PRIVATE QTKEYCHAIN_NO_EXPORT)
+
+
+# Generation scripting help
+# Find for Doxygen here as add_subdirectory works with CMake 3.27+ only
+
+find_package(Doxygen)
+
+if(DOXYGEN_FOUND)
+	message(STATUS "Doxygen found: ${DOXYGEN_EXECUTABLE}")
+
+	add_subdirectory(ScriptHelp)	
+endif()

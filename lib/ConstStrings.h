@@ -78,6 +78,8 @@ namespace EquipmentPropNames
 
 	inline const QString LM_PLATFORM_INTERFACE_CONTROLLER_SUFFIX = "_PI";
 
+	inline const QString ACTUATOR_ID("ActuatorID");
+
 	// I/O Modules properties
 	//
 	inline const QString TX_DATA_SIZE("TxDataSize");
@@ -584,6 +586,8 @@ namespace File
 	inline const QString ARCH_INFO_PROTO_BAK = "ArchInfo.proto.bak";
 
 	inline const QString READONLY = "readonly";
+
+	inline static const QString MONITOR_BEHAVIOR = "MonitorBehavior.xml";
 
 	inline static const QString GLOBAL_SCRIPT = "GlobalScript.js";
 	inline static const QString GLOBAL_SCRIPT_FULL_PATH = "$root$/Tests/GlobalScript.js";

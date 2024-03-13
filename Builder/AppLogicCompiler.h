@@ -1,17 +1,14 @@
 #pragma once
 
 #include "../AppSignalLib/ComparatorSet.h"
-#include "../VFrame30/Bus.h"
+#include "../AppSignalLib/Bus.h"
 #include "SubsystemStorage.h"
 #include "ModuleLogicCompiler.h"
 
 
 namespace Builder
 {
-	class ApplicationLogicCompiler;
 	class LmDescriptionSet;
-
-	typedef bool (ApplicationLogicCompiler::*ApplicationLogicCompilerProc)(void);
 
 	class ApplicationLogicCompiler : public QObject
 	{
@@ -37,7 +34,7 @@ namespace Builder
 		ComparatorSet* comparatorSet();
 		BuildResultWriter* buildResultWriter();
 		Builder::ConnectionStorage* connectionStorage();
-		const VFrame30::BusSet* busSet();
+		const AppSignalLib::BusSet* busSet();
 		Hardware::OptoModuleStorage* opticModuleStorage();
 		std::vector<Hardware::DeviceModule*>& lmModules();
 		OnlineLib::BuildInfo buildInfo();

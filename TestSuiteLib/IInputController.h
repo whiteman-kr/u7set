@@ -1,6 +1,4 @@
 #pragma once
-#include "../AppSignalLib/AppSignalParam.h"
-#include "../AppSignalLib/AppSignalState.h"
 
 namespace TestSuite
 {

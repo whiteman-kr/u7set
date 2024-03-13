@@ -1,6 +1,7 @@
 #include "TestDbBase.h"
 #include "Settings.h"
 
+
 TestDbBase::TestDbBase(const QString& projectName):
 	m_databaseHost(theSettings.databaseHost()),
 	m_databaseHostPort(theSettings.databasePort()),

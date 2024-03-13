@@ -16,6 +16,7 @@
 #include "DialogAfbLibraryCheck.h"
 #include "DialogBusEditor.h"
 #include "DialogConnections.h"
+#include "DialogMatsUsersEditor.h"
 #include "DialogSettings.h"
 #include "DialogShortcuts.h"
 #include "DialogSubsystemListEditor.h"
@@ -23,9 +24,9 @@
 #include "FilesTabPage.h"
 #include "Forms/DialogProjectDiff.h"
 #include "GlobalMessanger.h"
+#include "ProjectDefaults.h"
 #include "ProjectsTabPage.h"
 #include "Reports/DialogSchemasReport.h"
-#include "DialogMatsUsersEditor.h"
 #include "Reports/SchemasReport.h"
 #include "Settings.h"
 #include "SignalsTabPage.h"
@@ -330,13 +331,6 @@ void MainWindow::createActions()
 	m_usersAction->setEnabled(false);
 	connect(m_usersAction, &QAction::triggered, this, &MainWindow::userManagement);
 
-	m_logAction = new QAction(tr("Log..."), this);
-	m_logAction->setStatusTip(tr("Show application log"));
-	//m_pLogAction->setEnabled(false);
-	connect(m_logAction, &QAction::triggered, this, &MainWindow::showLog);
-
-
-
 	m_manualRpctAction = new QAction(tr("RPCT User Manual"), this);
 	m_manualRpctAction->setStatusTip(tr("Show RPCT User Manual"));
 	connect(m_manualRpctAction, &QAction::triggered, this, &MainWindow::showRpctUserManual);
@@ -541,7 +535,6 @@ void MainWindow::createMenus()
 	QMenu* pAdmMenu = menuBar()->addMenu(tr("&Administration"));
 
 	pAdmMenu->addAction(m_usersAction);
-	pAdmMenu->addAction(m_logAction);
 
 	// Project
 	//
@@ -707,11 +700,6 @@ void MainWindow::userManagement()
 	}
 
 	return;
-}
-
-void MainWindow::showLog()
-{
-
 }
 
 void MainWindow::showSettings()
@@ -927,7 +915,7 @@ void MainWindow::updateUfbsAfbsBusses()
 
 	// Get Busses
 	//
-	std::vector<VFrame30::Bus> busses;
+	std::vector<AppSignalLib::Bus> busses;
 	bool ok = EditSchemaWidget::loadBusses(dbController(), &busses, this);
 
 	if (ok == false)
@@ -1409,6 +1397,10 @@ void MainWindow::projectOpened(DbProject project)
 		getCentralWidget()->insertTab(m_filesTabPageIndex, m_filesTabPage, m_filesTabPage->windowTitle());
 	}
 
+	// Update Project Defaults
+	//
+	ProjectDefaults::instance().update(*db(), this);
+
 	return;
 }
 
@@ -1442,6 +1434,13 @@ void MainWindow::projectClosed()
 	if (getCentralWidget()->tabText(m_filesTabPageIndex) == m_filesTabPage->windowTitle())
 	{
 		getCentralWidget()->removeTab(m_filesTabPageIndex);
+	}
+
+	// Update Project Defaults
+	//
+	{
+		ProjectDefaults& pd = ProjectDefaults::instance();
+		pd.parse(QString{});
 	}
 
 	return;

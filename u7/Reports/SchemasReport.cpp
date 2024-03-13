@@ -1,8 +1,10 @@
 #include "SchemasReport.h"
 #include "../../lib/Ui/DialogProgress.h"
-#include "DialogSchemasReport.h"
 #include "../UtilsLib/Ui/UiTools.h"
+#include "../VFrame30/SchemaDetails.h"
+#include "DialogSchemasReport.h"
 #include "Settings.h"
+#include <QDesktopServices>
 
 using namespace ReportLib;
 using namespace Builder;

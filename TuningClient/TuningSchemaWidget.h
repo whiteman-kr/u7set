@@ -5,8 +5,7 @@
 #include "../VFrame30/SchemaView.h"
 #include "TuningSchemaView.h"
 #include "TuningSchemaManager.h"
-#include "../ClientLib/TuningUserManager.h"
-#include "../ClientLib/TuningConnection.h"
+
 
 class TuningSchemaWidget : public VFrame30::ClientSchemaWidget
 {

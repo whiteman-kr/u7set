@@ -5,8 +5,6 @@
 #include <QPlainTextEdit>
 #include <QPushButton>
 
-#include "../../AppSignalLib/AppSignal.h"
-
 #ifdef _DEBUG
 	#include <QAbstractItemModelTester>
 #endif

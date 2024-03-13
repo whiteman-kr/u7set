@@ -4,6 +4,11 @@
 #include "../AppSignalLib/SimpleAppSignalState.h"
 #include "ArchFileBuffer.h"
 
+namespace Proto
+{
+	class ArchSignal;
+}
+
 enum class ArchFindResult
 {
 	NotFound,

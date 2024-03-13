@@ -1,5 +1,19 @@
 #include "./SchemaListWidget.h"
 #include "./TagSelectorWidget.h"
+#include <QApplication>
+#include <QCompleter>
+#include <QFont>
+#include <QGridLayout>
+#include <QHeaderView>
+#include <QIcon>
+#include <QLineEdit>
+#include <QMenu>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QSettings>
+#include <QStringListModel>
+#include <QTreeWidget>
+
 
 //
 //

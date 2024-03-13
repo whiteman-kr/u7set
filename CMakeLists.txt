@@ -23,6 +23,17 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# Set the Qt version and find required components.
+# Finding components here speeds up cmake configure step.
+#
+set(QT_VERSION "6.5.3")
+
+find_package(Qt6 ${QT_VERSION} REQUIRED COMPONENTS Charts Concurrent Core DBus Gui LinguistTools Network PrintSupport Qml SerialPort Sql Svg Test Widgets Xml)
+
+if (MSVC)
+	find_package(Qt6 REQUIRED COMPONENTS AxContainer) # Metrology
+endif (MSVC)
+
 # Set warnings level and exclusions.
 #
 include(cmake/warnings.cmake)
@@ -59,6 +70,15 @@ if(ADDRESS_SANITIZER)
 	add_link_options(-fsanitize=address)
 endif()
 
+# UndfineBehaviorSanitizer
+#
+option(UB_SANITIZER "UB Sanitizer" OFF)
+
+if(UB_SANITIZER)
+	add_compile_options(-fsanitize=undefined)
+	add_link_options(-fsanitize=undefined)
+endif()
+
 # Update Translations
 # Updates .ts files
 #
@@ -77,12 +97,15 @@ endif()
 message("Build output dir set to: " ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 message("Code coverage: " ${CODE_COVERAGE})
 message("AddressSanitizer: " ${ADDRESS_SANITIZER})
+message("UBSanitizer: " ${UB_SANITIZER})
 message("Update translations: " ${UPDATE_TRANSLATIONS})
 message("CMake executable:  ${CMAKE_COMMAND}")
 message("CMake version:  ${CMAKE_VERSION}")
 message("Current file path:  ${CMAKE_CURRENT_LIST_FILE}")
 message("User: ${U7SET_USER_NAME}")
 message("Host: ${U7SET_HOSTNAME}")
+message("Qt Version: ${Qt6_VERSION}")
+message("Qt Path: ${Qt6_DIR}")
 message("-----------------------------------------")
 
 # Add projects.
@@ -90,16 +113,13 @@ message("-----------------------------------------")
 add_subdirectory(Protobuf)
 add_subdirectory(CommonLib)
 add_subdirectory(UtilsLib)
-add_subdirectory(HardwareLib)
 add_subdirectory(AppSignalLib)
-add_subdirectory(DiagStateLib)
 add_subdirectory(OnlineLib)
-add_subdirectory(DbLib)
 add_subdirectory(ServiceLib)
 add_subdirectory(ClientLib)
-add_subdirectory(DiagClientLib)
-add_subdirectory(SchemaClientLib)
 add_subdirectory(ReportLib)
+
+add_subdirectory(libs)
 
 add_subdirectory(TrendView)
 add_subdirectory(VFrame30)

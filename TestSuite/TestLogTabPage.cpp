@@ -1,6 +1,7 @@
 #include "TestLogTabPage.h"
 #include "AppConfigSettings.h"
 #include "../TestSuiteLib/TestLog.h"
+#include <QStringListModel>
 
 TestLogTabPage::TestLogTabPage(TestSuite::TestLog& testLog, TestSuiteTestLogOutput& testLogOutput, QWidget* parent):
 	QWidget(parent),

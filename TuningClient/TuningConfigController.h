@@ -2,8 +2,7 @@
 
 #include <map>
 #include <set>
-#include "../SchemaClientLib/SchemaClientConfigController.h"
-#include "../ClientLib/TuningTcpClient.h"
+#include <SchemaClientLib/SchemaClientConfigController.h>
 #include "../OnlineLib/MatsUsers.h"
 
 //
@@ -40,7 +39,7 @@ public:
 public:
 
 protected:
-	virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const TuningClientSettings& settings, const BuildFileInfoArray& files) override;
+	virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const TuningClientSettings& settings, const std::vector<OnlineLib::BuildFileInfo>& files) override;
 
 	void dump(const TuningClientConfigSettings& conf) const;
 

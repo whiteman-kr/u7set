@@ -1,10 +1,10 @@
 #pragma once
 
 #include "../AppSignalLib/ComparatorSet.h"
-#include "../SchemaClientLib/SchemaClientConfigController.h"
-#include "../lib/ClientBehavior.h"
-#include "../VFrame30/Schema.h"
 #include "../OnlineLib/MatsUsers.h"
+
+#include <Behavior/MonitorBehavior.h>
+#include <SchemaClientLib/SchemaClientConfigController.h>
 
 
 struct MonitorConfigSettings
@@ -20,7 +20,7 @@ struct MonitorConfigSettings
 	QString startSchemaId;
 	QString globalScript;
 	QPixmap logoImage;
-	MonitorBehavior monitorBeahvior;
+	Behavior::MonitorBehavior monitorBehavior;
 
 	// Tuning settings
 	//
@@ -45,7 +45,7 @@ protected:
 	/// This function is called when the new configuration arrives, it is overriden to get specific Monitor
 	/// configuration, after it signal `configurationArrived` is emitted
 	///
-	virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const MonitorSettings& settings, const BuildFileInfoArray& files) override;
+	virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const MonitorSettings& settings, const std::vector<OnlineLib::BuildFileInfo>& files) override;
 
 	void dump(const MonitorConfigSettings& conf) const;
 

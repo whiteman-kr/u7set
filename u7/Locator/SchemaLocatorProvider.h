@@ -1,7 +1,7 @@
 #pragma once
 
 #include "LocatorProvider.h"
-#include "../../VFrame30/Schema.h"
+#include "../../VFrame30/SchemaDetails.h"
 
 namespace Locator
 {

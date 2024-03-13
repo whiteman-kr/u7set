@@ -1,28 +1,13 @@
 #pragma once
 
+#include "../CommonLib/AfbParamValue.h"
+#include <QVariant>
 #include <functional>
-#include <algorithm>
 #include <list>
-#include <utility>
-#include <vector>
-#include <map>
-#include <unordered_map>
-#include <utility>
 #include <memory>
 #include <type_traits>
-
-#include <QtGlobal>
-#include <QObject>
-#include <QString>
-#include <QVariant>
-#include <QMetaEnum>
-#include <QHash>
-#include <QTime>
-#include <QTimer>
-#include <QDebug>
-
-#include "../CommonLib/Types.h"
-#include "../CommonLib/AfbParamValue.h"
+#include <utility>
+#include <vector>
 
 // --
 //
@@ -920,15 +905,39 @@ public:
 			Q_UNUSED(ok);
 
 			m_value.setValue(v);
-
 			checkLimits();
+
+			return;
+		}
+
+
+		if (m_value.metaType().id() == qMetaTypeId<Afb::AfbParamValue>())
+		{
+			auto afbParamValue = m_value.value<Afb::AfbParamValue>();
+
+			if (afbParamValue.value().canConvert(value.metaType()) == true)
+			{
+				QVariant v(value);
+
+				bool ok = v.convert(value.metaType());
+				Q_ASSERT(ok);
+				Q_UNUSED(ok);
+
+				bool checkResult = afbParamValue.setValue(v);
+
+				if (checkResult == true)
+				{
+					m_value.setValue(afbParamValue);
+					checkLimits();
+				}
+			}
+
 			return;
 		}
 
 		Q_ASSERT(m_value.metaType().id() == value.metaType().id());
 
 		m_value = value;
-
 		checkLimits();
 
 		return;

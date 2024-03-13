@@ -2,6 +2,8 @@
 #include "SimBasePage.h"
 #include "SimMemoryWidget.h"
 
+#include <HardwareLib/ConnectionsInfo.h>
+
 class SimConnectionPage : public SimBasePage
 {
 	Q_OBJECT

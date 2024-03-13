@@ -19,11 +19,15 @@ qt_add_library(${TARGET} STATIC
 	AppSignalState.h
 	AppSignalStateFlags.cpp
 	AppSignalStateFlags.h
+	Bus.cpp
+	Bus.h
 	ComparatorSet.cpp
 	ComparatorSet.h
 	IAppSignalManager.h
 	ITuningSignalManager.h
 	ITuningSignalUpdater.h
+	PropertyNames.cpp
+	PropertyNames.h
 	RecentUsed.cpp
 	RecentUsed.h
 	SimpleAppSignalState.cpp
@@ -36,7 +40,7 @@ qt_add_library(${TARGET} STATIC
 	TuningValue.h
 )
 
-target_precompile_headers(${TARGET} PUBLIC
+target_precompile_headers(${TARGET} PRIVATE
 	<algorithm>
 	<array>
 	<atomic>
@@ -70,13 +74,20 @@ target_precompile_headers(${TARGET} PUBLIC
 	<QMultiHash>
 	<QRegularExpression>
 	<QVariant>
+)
 
-	# Project includes
-	#
-	"../Proto/ProtoSerialization.h"
-	"../Proto/serialization.pb.h"
-	"../Proto/network.pb.h"
+target_precompile_headers(${TARGET} PRIVATE
 	"../CommonLib/Types.h"
+	"../CommonLib/Hash.h"
+	"../CommonLib/PropertyObject.h"
+
+	"../Proto/ProtoSerialization.h"
+	"../Proto/AppSignal.pb.h"
+	"../Proto/Network.pb.h"
+
+#	"AppSignal.h"
+#	"AppSignalParam.h"
+#	"AppSignalState.h"
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Network)

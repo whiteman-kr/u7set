@@ -1,11 +1,11 @@
 #pragma once
 
-#include <chrono>
 #include <map>
 #include <set>
 #include <memory>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 #include <QReadWriteLock>
 
 #include "../lib/ISignalDataServer.h"
@@ -190,7 +190,7 @@ namespace ClientLib
 		ComparatorSet m_setpoints;
 
 		mutable QMutex m_recentUsedMutex;	// It cannot be read/write locker, as every fetch the time insede RecentUsed is reset (what is write operation).
-		RecentUsed m_recentUsed;
+		AppSignalLib::RecentUsed m_recentUsed;
 	};
 
 }

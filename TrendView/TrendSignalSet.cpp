@@ -1,7 +1,7 @@
 #include "TrendSignalSet.h"
 #include <type_traits>
 #include <ranges>
-#include "../Proto/trends.pb.h"
+
 
 namespace TrendLib
 {

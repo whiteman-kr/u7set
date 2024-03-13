@@ -1,5 +1,4 @@
 #include "SimDeviceEmulator.h"
-#include <QtEndian>
 #include "SimException.h"
 #include "SimCommandProcessor.h"
 #include "Simulator.h"

@@ -3,6 +3,7 @@
 #endif
 
 #include "TcpClientStatistics.h"
+#include "../OnlineLib/Tcp.h"
 
 //
 // TcpClientInstance

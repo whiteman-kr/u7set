@@ -1,4 +1,5 @@
 #pragma once
+#include <QScrollArea>
 
 namespace VFrame30
 {

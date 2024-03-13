@@ -19,23 +19,94 @@ endif (MSVC)
 set(TARGET VFrame30)
 
 qt_add_library(${TARGET} STATIC
-	../lib/ClientBehavior.cpp
-	../lib/ClientBehavior.h
 	../lib/ITimeStats.h
 	../lib/Tuning/ITuningConnection.h
+
+	./SchemaItems/FblItem.cpp
+	./SchemaItems/FblItem.h
+	./SchemaItems/FblItemLine.cpp
+	./SchemaItems/FblItemLine.h
+	./SchemaItems/FblItemRect.cpp
+	./SchemaItems/FblItemRect.h
+	./SchemaItems/ImageItem.cpp
+	./SchemaItems/ImageItem.h
+	./SchemaItems/Indicator.cpp
+	./SchemaItems/Indicator.h
+	./SchemaItems/IndicatorArrowIndicator.cpp
+	./SchemaItems/IndicatorArrowIndicator.h
+	./SchemaItems/IndicatorHistogramVert.cpp
+	./SchemaItems/IndicatorHistogramVert.h
+	./SchemaItems/IndicatorTrend.cpp
+	./SchemaItems/IndicatorTrend.h
+	./SchemaItems/PosConnectionImpl.cpp
+	./SchemaItems/PosConnectionImpl.h
+	./SchemaItems/PosLineImpl.cpp
+	./SchemaItems/PosLineImpl.h
+	./SchemaItems/PosRectImpl.cpp
+	./SchemaItems/PosRectImpl.h
+	./SchemaItems/PosRectRotatable.cpp
+	./SchemaItems/PosRectRotatable.h
+	./SchemaItems/SchemaItem.cpp
+	./SchemaItems/SchemaItem.h
+	./SchemaItems/SchemaItemAfb.cpp
+	./SchemaItems/SchemaItemAfb.h
+	./SchemaItems/SchemaItemBus.cpp
+	./SchemaItems/SchemaItemBus.h
+	./SchemaItems/SchemaItemConnection.cpp
+	./SchemaItems/SchemaItemConnection.h
+	./SchemaItems/SchemaItemConst.cpp
+	./SchemaItems/SchemaItemConst.h
+	./SchemaItems/SchemaItemControl.cpp
+	./SchemaItems/SchemaItemControl.h
+	./SchemaItems/SchemaItemDiagValue.cpp
+	./SchemaItems/SchemaItemDiagValue.h
+	./SchemaItems/SchemaItemFrame.cpp
+	./SchemaItems/SchemaItemFrame.h
+	./SchemaItems/SchemaItemImage.cpp
+	./SchemaItems/SchemaItemImage.h
+	./SchemaItems/SchemaItemImageValue.cpp
+	./SchemaItems/SchemaItemImageValue.h
+	./SchemaItems/SchemaItemIndicator.cpp
+	./SchemaItems/SchemaItemIndicator.h
+	./SchemaItems/SchemaItemLine.cpp
+	./SchemaItems/SchemaItemLine.h
+	./SchemaItems/SchemaItemLineEdit.cpp
+	./SchemaItems/SchemaItemLineEdit.h
+	./SchemaItems/SchemaItemLink.cpp
+	./SchemaItems/SchemaItemLink.h
+	./SchemaItems/SchemaItemLoopback.cpp
+	./SchemaItems/SchemaItemLoopback.h
+	./SchemaItems/SchemaItemPath.cpp
+	./SchemaItems/SchemaItemPath.h
+	./SchemaItems/SchemaItemPushButton.cpp
+	./SchemaItems/SchemaItemPushButton.h
+	./SchemaItems/SchemaItemRect.cpp
+	./SchemaItems/SchemaItemRect.h
+	./SchemaItems/SchemaItemSignal.cpp
+	./SchemaItems/SchemaItemSignal.h
+	./SchemaItems/SchemaItemSlider.cpp
+	./SchemaItems/SchemaItemSlider.h
+	./SchemaItems/SchemaItemTerminator.cpp
+	./SchemaItems/SchemaItemTerminator.h
+	./SchemaItems/SchemaItemUfb.cpp
+	./SchemaItems/SchemaItemUfb.h
+	./SchemaItems/SchemaItemValue.cpp
+	./SchemaItems/SchemaItemValue.h
+	./SchemaItems/SchemaItemVduLine.cpp
+	./SchemaItems/SchemaItemVduLine.h
+	./SchemaItems/SchemaItemVduRect.cpp
+	./SchemaItems/SchemaItemVduRect.h
+	./SchemaItems/SchemaItemVduValue.cpp
+	./SchemaItems/SchemaItemVduValue.h
 
 	AppSignalController.cpp
 	AppSignalController.h
 	BaseSchemaWidget.cpp
 	BaseSchemaWidget.h
-	Bus.cpp
-	Bus.h
 	ClientSchemaView.cpp
 	ClientSchemaView.h
 	ClientSchemaWidget.cpp
 	ClientSchemaWidget.h
-	Configuration.cpp
-	Configuration.h
 	Context.cpp
 	Context.h
 	DiagSchema.cpp
@@ -44,27 +115,11 @@ qt_add_library(${TARGET} STATIC
 	DiagStateController.h
 	DrawParam.cpp
 	DrawParam.h
-	FblItem.cpp
-	FblItem.h
-	FblItemLine.cpp
-	FblItemLine.h
-	FblItemRect.cpp
-	FblItemRect.h
 	FontParam.cpp
 	FontParam.h
 	HorzVertLinks.cpp
 	HorzVertLinks.h
-	ImageItem.cpp
-	ImageItem.h
 	IMatsSchemaItemAssociations.h
-	Indicator.cpp
-	Indicator.h
-	IndicatorArrowIndicator.cpp
-	IndicatorArrowIndicator.h
-	IndicatorHistogramVert.cpp
-	IndicatorHistogramVert.h
-	IndicatorTrend.cpp
-	IndicatorTrend.h
 	ISchemaViewHistory.h
 	IViewVariables.h
 	LogController.cpp
@@ -75,70 +130,12 @@ qt_add_library(${TARGET} STATIC
 	MacrosExpander.h
 	MonitorSchema.cpp
 	MonitorSchema.h
-	PosConnectionImpl.cpp
-	PosConnectionImpl.h
-	PosLineImpl.cpp
-	PosLineImpl.h
-	PosRectImpl.cpp
-	PosRectImpl.h
-	PosRectRotatable.cpp
-	PosRectRotatable.h
 	PropertyNames.cpp
 	PropertyNames.h
 	Schema.cpp
 	Schema.h
-	SchemaItem.cpp
-	SchemaItem.h
-	SchemaItemAfb.cpp
-	SchemaItemAfb.h
-	SchemaItemBus.cpp
-	SchemaItemBus.h
-	SchemaItemConnection.cpp
-	SchemaItemConnection.h
-	SchemaItemConst.cpp
-	SchemaItemConst.h
-	SchemaItemControl.cpp
-	SchemaItemControl.h
-	SchemaItemDiagValue.cpp
-	SchemaItemDiagValue.h
-	SchemaItemFrame.cpp
-	SchemaItemFrame.h
-	SchemaItemImage.cpp
-	SchemaItemImage.h
-	SchemaItemImageValue.cpp
-	SchemaItemImageValue.h
-	SchemaItemIndicator.cpp
-	SchemaItemIndicator.h
-	SchemaItemLine.cpp
-	SchemaItemLine.h
-	SchemaItemLineEdit.cpp
-	SchemaItemLineEdit.h
-	SchemaItemLink.cpp
-	SchemaItemLink.h
-	SchemaItemLoopback.cpp
-	SchemaItemLoopback.h
-	SchemaItemPath.cpp
-	SchemaItemPath.h
-	SchemaItemPushButton.cpp
-	SchemaItemPushButton.h
-	SchemaItemRect.cpp
-	SchemaItemRect.h
-	SchemaItemSignal.cpp
-	SchemaItemSignal.h
-	SchemaItemSlider.cpp
-	SchemaItemSlider.h
-	SchemaItemTerminator.cpp
-	SchemaItemTerminator.h
-	SchemaItemUfb.cpp
-	SchemaItemUfb.h
-	SchemaItemValue.cpp
-	SchemaItemValue.h
-	SchemaItemVduLine.cpp
-	SchemaItemVduLine.h
-	SchemaItemVduRect.cpp
-	SchemaItemVduRect.h
-	SchemaItemVduValue.cpp
-	SchemaItemVduValue.h
+	SchemaDetails.cpp
+	SchemaDetails.h
 	SchemaLayer.cpp
 	SchemaLayer.h
 	SchemaManager.cpp
@@ -161,13 +158,14 @@ qt_add_library(${TARGET} STATIC
 	VduSchema.h
 	VFrame30Library.cpp
 	VFrame30Library.h
+	VFrame30Types.h
 	VFrameTools.cpp
 	VFrameTools.h
 	WiringSchema.cpp
 	WiringSchema.h
 )
 
-target_precompile_headers(${TARGET} PUBLIC
+target_precompile_headers(${TARGET} PRIVATE
 		<algorithm>
 		<array>
 		<cassert>
@@ -210,7 +208,7 @@ target_precompile_headers(${TARGET} PUBLIC
 		<QPainterPath>
 		<QPdfWriter>
 		<QPushButton>
-		<QQmlEngine>
+		<QJSEngine>
 		<QRect>
 		<QScreen>
 		<QScrollArea>
@@ -227,14 +225,24 @@ target_precompile_headers(${TARGET} PUBLIC
 
 		<QtConcurrent/QtConcurrent>
 
-		"VFrameTools.h"
-		"../AppSignalLib/AppSignalParam.h"
+		"../CommonLib/Types.h"
+		"../CommonLib/Hash.h"
+		"../CommonLib/PropertyObject.h"
+		"../CommonLib/AfbParamValue.h"
+
 		"../Proto/ProtoSerialization.h"
-		"../Proto/serialization.pb.h"
+		"../Proto/ProtoCommonHelper.h"
+		"../Proto/VFrame30.pb.h"
+
+		"../AppSignalLib/AppSignalParam.h"
+		"../AppSignalLib/AppSignalState.h"
+		"../AppSignalLib/TuningValue.h"
+
+		"VFrameTools.h"
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Widgets Qt6::Qml Qt6::Xml Qt6::Svg)
-target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib AppSignalLib HardwareLib DiagStateLib TrendView)
+target_link_libraries(${TARGET} PUBLIC CommonLib Behavior Protobuf UtilsLib AppSignalLib HardwareLib DiagStateLib TrendView)
 
 target_compile_definitions(${TARGET} PRIVATE VFRAME30_LIBRARY)
 #target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

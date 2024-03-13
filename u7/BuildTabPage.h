@@ -1,9 +1,6 @@
 #pragma once
 #include "MainTabPage.h"
 #include "../Builder/Builder.h"
-#include "../Builder/IssueLogger.h"
-#include "../HardwareLib/DeviceObject.h"
-#include "../UtilsLib/OutputLog.h"
 
 class DbController;
 class QCheckBox;
@@ -11,6 +8,7 @@ class QTextEdit;
 class QPushButton;
 class QSplitter;
 class QComboBox;
+class QTextBrowser;
 
 //
 //

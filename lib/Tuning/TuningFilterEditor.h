@@ -1,9 +1,6 @@
-#ifndef DIALOGPRESETEDITOR_H
-#define DIALOGPRESETEDITOR_H
+#pragma once
 
-#include <QDialog>
 #include "TuningFilter.h"
-#include "../../AppSignalLib/TuningSignalState.h"
 #include "TuningModel.h"
 #include "../lib/PropertyEditor.h"
 
@@ -272,4 +269,3 @@ private:
 	TuningFilter::Source m_source = TuningFilter::Source::User;
 };
 
-#endif // DIALOGPRESETEDITOR_H

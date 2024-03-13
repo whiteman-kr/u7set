@@ -1,8 +1,7 @@
 #include "DbControllerHardwareConfigurationTests.h"
-#include <QSql>
-#include <QSqlError>
-#include <QDebug>
 #include "Settings.h"
+#include <HardwareLib/DeviceRoot.h>
+#include <HardwareLib/DeviceModule.h>
 
 using namespace Hardware;
 

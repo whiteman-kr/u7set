@@ -1,14 +1,17 @@
 #ifndef CONFIGURATOR_H
 #define CONFIGURATOR_H
 
+#include <optional>
 #include <QObject>
-#include <QSerialPort>
-#include "../HardwareLib/ModuleFirmware.h"
+
 #include "../UtilsLib/OutputLog.h"
 
-#include <optional>
+#include <HardwareLib/ModuleFirmware.h>
+
+
 
 class OutputLog;
+class QSerialPort;
 
 const int ProtocolMaxVersion = 1;					// The maximum protocol version, changing it, change CONF_HEADER typedef
 

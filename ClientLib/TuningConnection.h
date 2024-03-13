@@ -6,9 +6,13 @@
 #include "../OnlineLib/Tcp.h"
 #include "../UtilsLib/ILogFile.h"
 #include "../UtilsLib/SimpleThread.h"
-#include "../lib/Tuning/ITuningConnection.h"
 #include "../lib/Tuning/ITuningAuthorization.h"
-#include "TuningTcpClient.h"
+#include "../lib/Tuning/ITuningConnection.h"
+#include "IRecentAppSignals.h"
+#include "ITuningLog.h"
+#include "TuningSourceState.h"
+#include "TuningWriteCommand.h"
+
 
 class SimpleThread;
 class TuningSignalManager;

@@ -46,28 +46,46 @@ add_executable(${TARGET} WIN32
 )
 
 target_precompile_headers(${TARGET} PRIVATE
+	<algorithm>
 	<cassert>
 	<cstdint>
+	<functional>
 	<memory>
 	<vector>
-	<algorithm>
-	<functional>
 
-	<QtWidgets>
+	<QApplication>
+	<QComboBox>
 	<QDateEdit>
 	<QDebug>
-	<QString>
-	<QMessageBox>
-	<QTabWidget>
 	<QFileDialog>
-	<QtNetwork/QHostInfo>
-	<QSqlDatabase>
-	<QSqlError>
-	<QSqlDriver>
-	<QSqlQuery>
-	<QtEndian>
+	<QGridLayout>
+	<QHBoxLayout>
+	<QLabel>
+	<QLineEdit>
+	<QMessageBox>
+	<QPushButton>
 	<QSerialPort>
 	<QSerialPortInfo>
+	<QSettings>
+	<QSplitter>
+	<QSqlDatabase>
+	<QSqlDriver>
+	<QSqlError>
+	<QSqlQuery>
+	<QString>
+	<QTabWidget>
+	<QtEndian>
+	<QTextEdit>
+	<QThread>
+	<QtNetwork/QHostInfo>
+	<QTreeWidget>
+	<QTreeWidgetItem>
+	<QUuid>
+	<QVBoxLayout>
+
+	# Project includes
+	#
+	"../CommonLib/Types.h"
 )
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files

@@ -3,13 +3,11 @@
 #include "../ServiceLib/Service.h"
 #include "../OnlineLib/CfgServerLoader.h"
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../UtilsLib/Queue.h"
-#include "../lib/DataSource.h"
-
 #include "TcpAppDataServer.h"
 #include "TcpArchiveClient.h"
-#include "SignalStatesProcessingThread.h"
 #include "RtTrendsServer.h"
+#include "DynamicAppSignalState.h"
+#include "AppDataSource.h"
 
 
 class TcpArchiveClient;

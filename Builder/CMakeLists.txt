@@ -23,8 +23,6 @@ qt_add_library(${TARGET} STATIC
 	../GatewayService/GatewayDescription.h
 	../GatewayService/GatewayDescriptionParser.cpp
 	../GatewayService/GatewayDescriptionParser.h
-	../lib/ClientBehavior.cpp
-	../lib/ClientBehavior.h
 	../lib/ConstStrings.h
 	../lib/DataSource.cpp
 	../lib/DataSource.h
@@ -160,7 +158,7 @@ qt_add_library(${TARGET} STATIC
 	UalItems.h
 )
 
-target_precompile_headers(${TARGET} PUBLIC
+target_precompile_headers(${TARGET} PRIVATE
 	<cassert>
 	<algorithm>
 	<functional>
@@ -175,16 +173,33 @@ target_precompile_headers(${TARGET} PUBLIC
 	<unordered_set>
 	<vector>
 
-	<QtGui>
-	<QtQml>
+	<QDomDocument>
+	<QFile>
+	<QHostInfo>
 	<QtConcurrent>
 	<QVector>
 	<QWidget>
-	<QFile>
+	<QJSEngine>
+
+	"../CommonLib/Types.h"
+	"../CommonLib/Hash.h"
+	"../CommonLib/PropertyObject.h"
+	"../CommonLib/AfbParamValue.h"
+
+	"../Proto/ProtoSerialization.h"
+	"../Proto/ProtoCommonHelper.h"
+	"../Proto/Network.pb.h"
+	"../Proto/AppSignal.pb.h"
+	"../Proto/Bus.pb.h"
+
+	"../AppSignalLib/AppSignal.h"
+	"../AppSignalLib/AppSignalParam.h"
+	"../AppSignalLib/AppSignalState.h"
+	"../AppSignalLib/TuningValue.h"
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Widgets Qt6::Qml Qt6::Xml Qt6::Sql Qt6::Concurrent Qt6::Gui Qt6::PrintSupport)
-target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib HardwareLib DbLib AppSignalLib OnlineLib VFrame30 Simulator ReportLib)
+target_link_libraries(${TARGET} PUBLIC CommonLib Behavior Protobuf UtilsLib HardwareLib DbLib AppSignalLib OnlineLib VFrame30 Simulator ReportLib)
 
 target_compile_definitions(${TARGET} PRIVATE IS_BUILDER)
 #target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

@@ -1,6 +1,6 @@
 #include "UserTests.h"
-#include <assert.h>
 #include "Settings.h"
+#include <assert.h>
 
 UserTests::UserTests():
 	TestDbBase(theSettings.dbTestsProjectName())

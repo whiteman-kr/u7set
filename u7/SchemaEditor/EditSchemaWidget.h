@@ -2,16 +2,16 @@
 
 #include "../VFrame30/BaseSchemaWidget.h"
 #include "../VFrame30/LogicSchema.h"
-#include "../VFrame30/SchemaItem.h"
+#include "../VFrame30/SchemaItems/SchemaItem.h"
+#include "../VFrame30/SchemaItems/SchemaItemBus.h"
+#include "../VFrame30/SchemaItems/SchemaItemConnection.h"
 #include "../VFrame30/UfbSchema.h"
-#include "../VFrame30/SchemaItemConnection.h"
-#include "../VFrame30/SchemaItemBus.h"
 #include "./EditEngine/EditEngine.h"
-#include "SignalsTabPage.h"
 #include "CreateSignalDialog.h"
 #include "EditConnectionLine.h"
-#include "EditSchemaView.h"
 #include "EditSchemaTypes.h"
+#include "EditSchemaView.h"
+#include "SignalsTabPage.h"
 
 
 // Forward declarations
@@ -124,6 +124,10 @@ public:
 
 protected:
 	void addItem(SchemaItemPtr newItem);
+	void runAddItem(SchemaItemPtr item, std::shared_ptr<VFrame30::SchemaLayer> layer);
+	void runAddItem(const std::list<SchemaItemPtr>& items, std::shared_ptr<VFrame30::SchemaLayer> layer);
+
+	bool setDefaultItemProperties(const auto& items);
 
 	void setMouseCursor(QPoint mousePos);
 
@@ -149,7 +153,7 @@ protected:
 	bool loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbSchema>>* out);
 
 public:
-	static bool loadBusses(DbController* db, std::vector<VFrame30::Bus>* out, QWidget* parentWidget);
+	static bool loadBusses(DbController* db, std::vector<AppSignalLib::Bus>* out, QWidget* parentWidget);
 
 public:
 	void resetAction();

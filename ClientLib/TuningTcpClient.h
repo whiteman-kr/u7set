@@ -2,14 +2,13 @@
 
 #include <queue>
 #include <QReadWriteLock>
-#include "../Proto/network.pb.h"
 #include "../AppSignalLib/TuningSignalManager.h"
-#include "../CommonLib/Hash.h"
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "TuningSourceState.h"
 #include "ITuningLog.h"
+#include "TuningWriteCommand.h"
 #include "../lib/Tuning/ITuningAuthorization.h"
 
 //
@@ -72,64 +71,6 @@
 
 namespace ClientLib
 {
-	struct TuningWriteCommand
-	{
-		enum class TuningWriteCommandType
-		{
-			WriteValue,
-			Apply,
-			ActivateLm
-		};
-
-		// Data
-
-		Hash appSignalHash = 0;
-		Hash equipmentHash = 0;		// Used only for activation/deactivation LM
-		TuningValue value;
-
-		TuningWriteCommandType type = TuningWriteCommandType::WriteValue;
-
-		bool enableControl = false;
-		bool forceTakeControl = false;
-
-		// Write constructor
-		//
-		TuningWriteCommand(const QString& appSignalId, const TuningValue& value) :
-			TuningWriteCommand(::calcHash(appSignalId), value)
-		{
-		}
-
-		TuningWriteCommand(Hash appSignalHash, const TuningValue& value)
-		{
-			type = TuningWriteCommandType::WriteValue;
-			this->appSignalHash = appSignalHash;
-			this->value = value;
-		}
-
-		// Apply constructor
-		//
-		TuningWriteCommand(bool apply)
-		{
-			Q_UNUSED(apply);
-			this->type = TuningWriteCommandType::Apply;
-		}
-
-		// Activate LM constructor
-		//
-		TuningWriteCommand(Hash equipmentHash, bool enableControl, bool forceTakeControl)
-		{
-			type = TuningWriteCommandType::ActivateLm;
-			this->equipmentHash = equipmentHash;
-			this->enableControl = enableControl;
-			this->forceTakeControl = forceTakeControl;
-		}
-
-		// Serializing
-		//
-		bool toProtoWriteCommand(Network::TuningWriteCommand* message) const;
-	};
-
-
 	class TuningTcpClient : public Tcp::Client, public TcpClientStatistics
 	{
 		Q_OBJECT
@@ -308,26 +249,26 @@ namespace ClientLib
 
 		// Cached protobuf messages
 		//
-		::Network::GetTuningSourcesStates m_getTuningSourcesStates;
-		::Network::GetTuningSourcesStatesReply m_tuningSourcesStatesReply;
+		//::Network::GetTuningSourcesStates m_getTuningSourcesStates;
+		//::Network::GetTuningSourcesStatesReply m_tuningSourcesStatesReply;
 
-		::Network::GetTuningSourcesInfo m_getTuningSourcesInfo;
-		::Network::GetTuningSourcesInfoReply m_tuningSourcesInfoReply;
+		//::Network::GetTuningSourcesInfo m_getTuningSourcesInfo;
+		//::Network::GetTuningSourcesInfoReply m_tuningSourcesInfoReply;
 
-		::Network::ChangeConrolledTuningSourceRequest m_activateTuningSource;
-		::Network::ChangeConrolledTuningSourceReply m_activateTuningSourceReply;
+		//::Network::ChangeConrolledTuningSourceRequest m_activateTuningSource;
+		//::Network::ChangeConrolledTuningSourceReply m_activateTuningSourceReply;
 
-		::Network::TuningSignalsRead m_readTuningSignals;
-		::Network::TuningSignalsReadReply m_readTuningSignalsReply;
+		//::Network::TuningSignalsRead m_readTuningSignals;
+		//::Network::TuningSignalsReadReply m_readTuningSignalsReply;
 
-		::Network::GetTuningSignalsStateChangesRequest m_readChangedTuningSignals;
-		::Network::GetTuningSignalsStateChangesReply m_readChangedTuningSignalsReply;
+		//::Network::GetTuningSignalsStateChangesRequest m_readChangedTuningSignals;
+		//::Network::GetTuningSignalsStateChangesReply m_readChangedTuningSignalsReply;
 
-		::Network::TuningSignalsWrite m_writeTuningSignals;
-		::Network::TuningSignalsWriteReply m_writeTuningSignalsReply;
+		//::Network::TuningSignalsWrite m_writeTuningSignals;
+		//::Network::TuningSignalsWriteReply m_writeTuningSignalsReply;
 
-		::Network::TuningSignalsApply m_applyTuningSignals;
-		::Network::TuningSignalsApplyReply m_applyTuningSignalsReply;
+		//::Network::TuningSignalsApply m_applyTuningSignals;
+		//::Network::TuningSignalsApplyReply m_applyTuningSignalsReply;
 	};
 
 }

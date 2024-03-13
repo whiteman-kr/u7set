@@ -1,6 +1,6 @@
 #include <QCoreApplication>
 
-#include "../../Proto/network.pb.h"
+#include "../../Protobuf/message_lite.h"
 
 #include "../PacketSource/ConfigSocket.h"
 #include "../PacketSource/PacketSourceCore.h"

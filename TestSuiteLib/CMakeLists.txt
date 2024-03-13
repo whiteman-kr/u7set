@@ -47,10 +47,36 @@ qt_add_library(${TARGET} STATIC
 	TunsOutputController.h
 )
 
-target_precompile_headers(${TARGET} PUBLIC
-	<QtQml>
-	<QtXml>
-	<QtTest>
+target_precompile_headers(${TARGET} PRIVATE
+	<chrono>
+
+	<QApplication>
+	<QBuffer>
+	<QByteArray>
+	<QDir>
+	<QFile>
+	<QJSEngine>
+	<QJSValueIterator>
+	<QReadLocker>
+	<QRegularExpression>
+	<QSettings>
+	<QVariant>
+	<QWriteLocker>
+	<QXmlStreamWriter>
+
+	"../CommonLib/Types.h"
+	"../CommonLib/Hash.h"
+	"../CommonLib/PropertyObject.h"
+	#"../CommonLib/AfbParamValue.h"
+	
+	#"../Proto/ProtoSerialization.h"
+	"../Proto/Network.pb.h"	
+	#"../Proto/AppSignal.pb.h"
+	
+	#"../AppSignalLib/AppSignal.h"
+	"../AppSignalLib/AppSignalParam.h"
+	"../AppSignalLib/AppSignalState.h"
+	#"../AppSignalLib/TuningValue.h"
 )
 
 #Add translations

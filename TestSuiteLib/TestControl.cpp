@@ -1,6 +1,7 @@
 #include "TestControl.h"
 #include "AdsInputController.h"
 #include "TunsOutputController.h"
+#include "../ClientLib/TuningUserManager.h"
 #include <QSignalSpy>
 
 namespace

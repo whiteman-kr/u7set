@@ -1,5 +1,5 @@
 #include "TrendSignalState.h"
-#include "../Proto/trends.pb.h"
+
 
 namespace TrendLib
 {

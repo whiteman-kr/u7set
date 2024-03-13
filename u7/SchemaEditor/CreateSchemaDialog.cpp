@@ -1,20 +1,21 @@
 #include "CreateSchemaDialog.h"
-#include "ui_CreateSchemaDialog.h"
-#include "Settings.h"
-#include "../DbLib/DbStruct.h"
-#include "../VFrame30/SchemaLayer.h"
-#include "../VFrame30/Schema.h"
-#include "../VFrame30/UfbSchema.h"
 #include "../VFrame30/LogicSchema.h"
+#include "../VFrame30/Schema.h"
+#include "../VFrame30/SchemaItems/SchemaItem.h"
 #include "../VFrame30/Settings.h"
-#include "../VFrame30/SchemaItem.h"
-#include "../VFrame30/VduSchema.h"
+#include "../VFrame30/UfbSchema.h"
+
+#include <DbLib/DbStruct.h>
+#include <HardwareLib/PropertyNames.h>
+
+#include "Settings.h"
+#include "ui_CreateSchemaDialog.h"
 
 
-//1. если меняются юниты то надо поменять введенные размеры
-//2. при приняитии разных инитор менять и
+//1. пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+//2. пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ
 //	setGridSize(Settings::defaultGridSize(unit()));
-//	setPinGridStep(4); и это же надо сохранить в файл????? и прочитать
+//	setPinGridStep(4); пїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ????? пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
 
 

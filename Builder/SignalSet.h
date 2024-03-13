@@ -1,11 +1,15 @@
 #pragma once
 
-#include "../AppSignalLib/AppSignal.h"
-#include "../VFrame30/Bus.h"
+#include "../AppSignalLib/Bus.h"
 
 #include "BuildResultWriter.h"
 #include "IssueLogger.h"
 #include "Busses.h"
+
+namespace Hardware
+{
+	class EquipmentSet;
+}
 
 namespace Builder
 {
@@ -16,7 +20,7 @@ namespace Builder
 		Q_OBJECT
 
 	public:
-		SignalSet(VFrame30::BusSet* busSet, std::shared_ptr<BuildResultWriter> resultWriter, IssueLogger* log);
+		SignalSet(AppSignalLib::BusSet* busSet, std::shared_ptr<BuildResultWriter> resultWriter, IssueLogger* log);
 		virtual ~SignalSet();
 
 		const ::AppSignalSet* appSignalSet() const;
@@ -59,7 +63,7 @@ namespace Builder
 		bool checkSignalTuningValuesRanges(const AppSignal& s, const TuningValue& tuningValue, const QString& propertyName);
 
 	private:
-		VFrame30::BusSet* m_busSet = nullptr;
+		AppSignalLib::BusSet* m_busSet = nullptr;
 		std::shared_ptr<BuildResultWriter> m_resultWriter = nullptr;
 		IssueLogger* m_log = nullptr;
 

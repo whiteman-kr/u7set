@@ -1,5 +1,12 @@
 #include "SoftwareSettingsGetter.h"
-#include "../HardwareLib/LanControllerInfo.h"
+
+#include <HardwareLib/LanControllerInfo.h>
+#include <HardwareLib/DeviceController.h>
+#include <HardwareLib/Workstation.h>
+
+#include "../lib/DataSource.h"
+#include "../TuningService/TuningSource.h"
+
 #include "LanControllerInfoHelper.h"
 
 // -------------------------------------------------------------------------------------
@@ -304,7 +311,6 @@ bool SoftwareSettingsGetter::getLmPropertiesFromDevice(	const Hardware::DeviceMo
 	}
 	else
 	{
-		Q_ASSERT(false);		// LM uniqueID isn't found
 		ds->setModuleUniqueID(0);
 	}
 

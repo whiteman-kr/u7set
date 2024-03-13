@@ -4,7 +4,6 @@
 #include <QPrinter>
 #include <QMouseEvent>
 #include "TrendWidget.h"
-#include "../Proto/trends.pb.h"
 #include "TrendScale.h"
 
 

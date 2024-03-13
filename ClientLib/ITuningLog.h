@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../AppSignalLib/AppSignalParam.h"
 
 namespace ClientLib
 {

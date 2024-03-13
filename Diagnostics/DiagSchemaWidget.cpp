@@ -231,7 +231,7 @@ void DiagSchemaWidget::createActions()
 {
 }
 
-void DiagSchemaWidget::contextMenuRequested(const QPoint& pos)
+void DiagSchemaWidget::contextMenuRequested(const QPoint& /*pos*/)
 {
 	//// Reset highlights
 	////
@@ -282,7 +282,7 @@ void DiagSchemaWidget::contextMenuRequested(const QPoint& pos)
 void DiagSchemaWidget::signalContextMenu(QStringList appSignals,
 											QStringList impactSignals,
 											QStringList loopbacks,
-											const QList<QMenu*>& customMenu)
+											const QList<QMenu*>& /*customMenu*/)
 {
 	//appSignals.sort();
 	//appSignals.removeDuplicates();

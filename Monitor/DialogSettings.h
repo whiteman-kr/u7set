@@ -1,8 +1,11 @@
 #pragma once
 
-#include <QDialog>
 #include "MonitorAppSettings.h"
-#include "../ClientLib/ClientTranslator.h"
+
+namespace ClientLib 
+{
+	class ClientTranslator;
+}
 
 namespace Ui {
 	class DialogSettings;

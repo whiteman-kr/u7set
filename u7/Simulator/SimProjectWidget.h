@@ -1,5 +1,6 @@
 #pragma once
 #include "SimIdeSimulator.h"
+#include "../../Simulator/SimControl.h"
 
 //
 // Widget for selection build and module

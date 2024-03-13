@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QObject>
-#include <chrono>
 #include "TestLog.h"
 #include "TestSuiteSettings.h"
 #include "TestSuiteConfigController.h"
@@ -11,7 +10,6 @@
 #include "ControlState.h"
 #include "ScriptRunner.h"
 #include "../ClientLib/AppSignalManager.h"
-#include "../ClientLib/TuningUserManager.h"
 
 namespace TestSuite
 {

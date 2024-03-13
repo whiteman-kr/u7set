@@ -1,0 +1,23 @@
+syntax = "proto2";
+
+package Proto;
+
+import "BuildInfo.proto";
+
+message ArchSignal
+{
+	required string appSignalID = 1;
+	required int32 signalType = 2;
+	optional double lowLimit = 3 [default = 0];
+	optional double highLimit = 4 [default = 0];
+	optional string unit = 5;
+	optional double fineAperture = 6 [default = 0];
+	optional double coarseAperture = 7 [default = 0];
+}
+
+message ArchInfo
+{
+	required BuildInfo buildInfo = 1;
+	required string archiveServiceID = 2;
+	repeated ArchSignal archSignal = 3;
+}

@@ -1,6 +1,7 @@
 #include "CodeOptimization.h"
 #include "ModuleLogicCompiler.h"
-#include "../HardwareLib/LmDescription.h"
+
+#include <HardwareLib/LmDescription.h>
 
 namespace Builder
 {

@@ -1,11 +1,13 @@
 #include "../Builder/IssueLogger.h"
 #include "../UtilsLib/WUtils.h"
 #include "../OnlineLib/SocketIO.h"
-#include "../HardwareLib/DataProtocols.h"
-#include "../HardwareLib/DeviceObject.h"
 #include "../lib/TuningDataStorage.h"
+
 #include "DeviceHelper.h"
 #include "LanControllerInfoHelper.h"
+
+#include <HardwareLib/DataProtocols.h>
+#include <HardwareLib/DeviceController.h>
 
 // ---------------------------------------------------------------------------------
 //
@@ -183,8 +185,8 @@ bool LanControllerInfoHelper::getInfo(const Hardware::DeviceModule& lm,
 
 		lanControllerInfo->appDataSizeBytes = appDataSizeW * sizeof(quint16);
 
-		lanControllerInfo->appDataFramesQuantity = lanControllerInfo->appDataSizeBytes / sizeof(Rup::Frame::data) +
-													((lanControllerInfo->appDataSizeBytes % sizeof(Rup::Frame::data)) == 0 ? 0 : 1);
+		lanControllerInfo->appDataFramesQuantity =
+				(lanControllerInfo->appDataSizeBytes + Rup::FRAME_DATA_SIZE - 1) / Rup::FRAME_DATA_SIZE;
 
 		lanControllerInfo->appDataServiceIP = Socket::IP_NULL;
 		lanControllerInfo->appDataServicePort = 0;
@@ -235,21 +237,16 @@ bool LanControllerInfoHelper::getInfo(const Hardware::DeviceModule& lm,
 
 		result &= DeviceHelper::getUIntProperty(&lm, EquipmentPropNames::DIAG_LAN_DATA_UID,
 												&lanControllerInfo->rupDiagDataUID, log);
+		int diagDataSizeW = 0;
 
-		lanControllerInfo->diagDataSizeBytes = 0;
-		lanControllerInfo->diagDataFramesQuantity = 0;
+		result &= DeviceHelper::getIntProperty(&lm, EquipmentPropNames::DIAG_LAN_DATA_SIZE,
+											   &diagDataSizeW, log);
 
-/*		UNCOMMENT when LM will have PROP_LM_DIAG_DATA_UID and PROP_LM_DIAG_DATA_SIZE properties  !!!
- *
- * 		result &= DeviceHelper::getIntProperty(lm, PROP_LM_DIAG_DATA_UID, &dataUID, log);
+		lanControllerInfo->diagDataSizeBytes = diagDataSizeW * sizeof(quint16);
 
-		diagDataUID = dataUID;
+		lanControllerInfo->diagDataFramesQuantity =
+				(lanControllerInfo->diagDataSizeBytes + Rup::FRAME_DATA_SIZE - 1) / Rup::FRAME_DATA_SIZE;
 
-		result &= DeviceHelper::getIntProperty(lm, PROP_LM_DIAG_DATA_SIZE, &diagDataSize, log);
-
-		diagDataFramesQuantity = diagDataSize / sizeof(Rup::Frame::data) +
-				((diagDataSize % sizeof(Rup::Frame::data)) == 0 ? 0 : 1);
-*/
 		lanControllerInfo->diagDataServiceIP = Socket::IP_NULL;
 		lanControllerInfo->diagDataServicePort = 0;
 		lanControllerInfo->diagDataServiceNetmask = Socket::IP_NULL;

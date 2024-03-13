@@ -1,6 +1,6 @@
 #pragma once
+#include <DbLib/DbStruct.h>
 #include "../lib/Ui/ClickableLabel.h"
-#include "../DbLib/DbStruct.h"
 #include "./Locator/EquipmentLocatorProvider.h"
 #include "./Locator/ConnectionLocatorProvider.h"
 #include "./Locator/SchemaLocatorProvider.h"
@@ -77,7 +77,6 @@ protected slots:
 	void exit();
 
 	void userManagement();
-	void showLog();
 	void showSettings();
 	void showShortcuts();
 	void showRpctUserManual();
@@ -129,7 +128,6 @@ private:
 	QAction* m_exitAction = nullptr;
 
 	QAction* m_usersAction = nullptr;
-	QAction* m_logAction = nullptr;
 	QAction* m_settingsAction = nullptr;
 	QAction* m_shortcutsAction = nullptr;
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../HardwareLib/LmDescription.h"
+#include <HardwareLib/LmDescription.h>
 
 #include "SimLogicModule.h"
 #include "SimScriptRamAddress.h"

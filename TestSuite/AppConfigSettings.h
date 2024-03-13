@@ -1,7 +1,6 @@
 #pragma once
 
-#include "../CommonLib/HostAddressPort.h"
-#include "../ClientLib//TuningUserManager.h"
+#include "../ClientLib/TuningUserManager.h"
 #include "../TestSuiteLib/TestSuiteSettings.h"
 #include "../TestSuiteLib/TestSuite.h"
 

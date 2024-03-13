@@ -100,11 +100,7 @@ string(TIMESTAMP U7SET_BUILD_DATE "%Y-%m-%d %H:%M:%S")
 
 # Set U7SET_HOSTNAME to current hostname
 #
-if(WIN32)
-	set(U7SET_HOSTNAME $ENV{COMPUTERNAME})
-else(UNIX)
-	set(U7SET_HOSTNAME $ENV{HOSTNAME})
-endif()
+cmake_host_system_information(RESULT U7SET_HOSTNAME QUERY HOSTNAME)
 
 # set U7SET_PIPELINE_ID to current pipeline id, if not defined, set it to 0.
 #

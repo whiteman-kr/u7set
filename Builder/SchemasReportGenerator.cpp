@@ -1,5 +1,11 @@
 #include "SchemasReportGenerator.h"
+#include "../VFrame30/Context.h"
 #include "../VFrame30/LogicSchema.h"
+#include "../VFrame30/Schema.h"
+#include "../VFrame30/SchemaDetails.h"
+#include "../VFrame30/SchemaItems/SchemaItemConnection.h"
+#include "../VFrame30/SchemaItems/SchemaItemLoopback.h"
+#include "../VFrame30/SchemaItems/SchemaItemSignal.h"
 
 namespace Builder
 {

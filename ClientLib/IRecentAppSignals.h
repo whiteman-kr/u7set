@@ -1,6 +1,5 @@
 #pragma once
 #include <vector>
-#include "../CommonLib/Hash.h"
 
 namespace ClientLib
 {

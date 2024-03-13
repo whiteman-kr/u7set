@@ -1,10 +1,10 @@
 #include "TuningClientCfgGenerator.h"
+#include "../OnlineLib/SoftwareSettings.h"
 #include "ScriptChecker.h"
 #include "SoftwareSettingsGetter.h"
 
-#include "../OnlineLib/SoftwareSettings.h"
-#include "../VFrame30/Schema.h"
-#include "../lib/ClientBehavior.h"
+#include <Behavior/ClientBehaviorStorage.h>
+#include <Behavior/TuningClientBehavior.h>
 
 namespace Builder
 {
@@ -648,7 +648,7 @@ namespace Builder
 
 		// Load all clients behavior
 		//
-		ClientBehaviorStorage allBehaviorStorage;
+		Behavior::ClientBehaviorStorage allBehaviorStorage;
 		QString errorCode;
 		QByteArray dbData;
 		int etcFileId = m_dbController->systemFileId(DbDir::EtcDir);
@@ -668,11 +668,10 @@ namespace Builder
 
 		// Find behavior for current tuning client
 		//
-		ClientBehaviorStorage tcBehaviorStorage;
+		Behavior::ClientBehaviorStorage tcBehaviorStorage;
 
-		std::vector<std::shared_ptr<TuningClientBehavior>> behaviors = allBehaviorStorage.tuningClientBehaviors();
-
-		for (auto b : behaviors)
+		for (auto behaviors = allBehaviorStorage.tuningClientBehaviors();
+			 auto b : behaviors)
 		{
 			if (b->behaviorId() == behaviorId)
 			{

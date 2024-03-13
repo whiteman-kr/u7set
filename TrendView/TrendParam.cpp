@@ -1,5 +1,5 @@
 #include "TrendParam.h"
-#include "../Proto/trends.pb.h"
+
 
 namespace TrendLib
 {

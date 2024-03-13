@@ -1,5 +1,5 @@
 #include "SchemaPoint.h"
-#include "../Proto/serialization.pb.h"
+#include "../Proto/Common.pb.h"
 
 namespace VFrame30
 {

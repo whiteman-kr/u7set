@@ -1,8 +1,7 @@
 #include <QXmlStreamReader>
 #include <QMetaProperty>
-#include "../HardwareLib/DeviceObject.h"
 #include "DiagDataService.h"
-#include "DiagDataReceiver.h"
+
 
 // -------------------------------------------------------------------------------
 //
@@ -169,12 +168,12 @@ void DiagDataServiceWorker::onConfigurationReady(const QByteArray configurationX
 
 		if (bfi.ID == CfgFileId::DIAG_DATA_SOURCES)
 		{
-			result &= readDiagDataSources(fileData, sessionParams.currentSettingsProfile);			// fill m_appDataSources
+			result &= readDiagDataSources(fileData, sessionParams.currentSettingsProfile);
 		}
 
 		if (bfi.ID == CfgFileId::ACQUIRED_DIAG_SIGNALS)
 		{
-			result &= readDiagSignals(fileData);				// fills m_appSignals
+			result &= readDiagSignalsAndObjects(fileData);
 		}
 
 		if (bfi.ID == CfgFileId::DIAG_SIGNAL_TYPES)
@@ -201,6 +200,8 @@ void DiagDataServiceWorker::onConfigurationReady(const QByteArray configurationX
 
 bool DiagDataServiceWorker::readDiagDataSources(const QByteArray& fileData, const QString& profile)
 {
+	Q_UNUSED(profile);
+
 	QVector<DataSource> dataSources;
 
 	bool result = DataSourcesXML<DataSource>::readFromXml(fileData, &dataSources);
@@ -211,8 +212,6 @@ bool DiagDataServiceWorker::readDiagDataSources(const QByteArray& fileData, cons
 		return false;
 	}
 
-	result = m_diagDataSources.init(profile, dataSources, logger());
-
 	if (result == true)
 	{
 		DEBUG_LOG_MSG(logger(), QString("DiagDataSources successfully loaded"));
@@ -222,14 +221,18 @@ bool DiagDataServiceWorker::readDiagDataSources(const QByteArray& fileData, cons
 		DEBUG_LOG_ERR(logger(), QString("DiagDataSources loading error!"));
 	}
 
+	std::vector<DataSource> ds(dataSources.begin(), dataSources.end());
+
+	m_dataSources.swap(ds);
+
 	return result;
 }
 
-bool DiagDataServiceWorker::readDiagSignals(const QByteArray& fileData)
+bool DiagDataServiceWorker::readDiagSignalsAndObjects(const QByteArray& fileData)
 {
-	::Network::AcquiredDiagSignals diagSignalsSet;
+	::Network::AcquiredDiagSignalsAndObjects diagSignalsAndObjects;
 
-	bool result = diagSignalsSet.ParseFromArray(fileData.constData(), static_cast<int>(fileData.size()));
+	bool result = diagSignalsAndObjects.ParseFromArray(fileData.constData(), static_cast<int>(fileData.size()));
 
 	if (result == false)
 	{
@@ -261,6 +264,27 @@ bool DiagDataServiceWorker::readDiagSignalTypes(const QByteArray& fileData)
 
 void DiagDataServiceWorker::applyNewConfiguration()
 {
+	if (m_onlineSources != nullptr)
+	{
+		Q_ASSERT(false);
+	}
+
+	m_onlineSources = new OnlineDataSources<DiagDataSource, SimpleDiagSignalState>(
+								m_curSettingsProfile.diagDataReceivingIP,
+								sessionParams().softwareRunMode,
+								m_diagDataProcessingThreadCount, logger());
+
+	bool res = m_onlineSources->init(m_dataSources);
+
+	if (res == false)
+	{
+		return;
+	}
+
+	m_onlineSources->run();
+
+
+
 //	createTimeErrLog();
 //	createAndInitSignalStates();
 //	buildAcuiredAppSignalIDs();
@@ -274,12 +298,20 @@ void DiagDataServiceWorker::applyNewConfiguration()
 
 void DiagDataServiceWorker::clearConfiguration()
 {
+
 	// free all resources allocated in onConfigurationReady
 	//
 //	stopRtTrendsServerThread();
 //	stopTcpArchiveClientThread();
 	stopTcpDiagDataServer();
 	stopDiagDataReceiverThread();
+
+	if (m_onlineSources != nullptr)
+	{
+		m_onlineSources->stop();
+		delete m_onlineSources;
+		m_onlineSources = nullptr;
+	}
 
 //	shutdownTimeErrLog();
 
@@ -291,7 +323,7 @@ void DiagDataServiceWorker::clearConfiguration()
 
 void DiagDataServiceWorker::runDiagDataReceiverThread()
 {
-	if (m_diagDataReceiver != nullptr)
+/*	if (m_diagDataReceiver != nullptr)
 	{
 		Q_ASSERT(false);
 		return;
@@ -303,17 +335,17 @@ void DiagDataServiceWorker::runDiagDataReceiverThread()
 											m_diagDataProcessingThreadCount,
 											sessionParams().softwareRunMode,
 											logger());
-	m_diagDataReceiver->start();
+	m_diagDataReceiver->start();*/
 }
 
 void DiagDataServiceWorker::stopDiagDataReceiverThread()
 {
-	if (m_diagDataReceiver != nullptr)
+/*	if (m_diagDataReceiver != nullptr)
 	{
 		m_diagDataReceiver->quitAndWait();
 		delete m_diagDataReceiver;
 		m_diagDataReceiver = nullptr;
-	}
+	}*/
 }
 
 void DiagDataServiceWorker::runTcpDiagDataServer()

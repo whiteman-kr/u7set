@@ -1,8 +1,7 @@
 #include "ClientSchemaWidget.h"
-#include "LogicSchema.h"
-#include "SchemaLayer.h"
-#include "../VFrame30/SchemaItemSignal.h"
-#include "../VFrame30/PropertyNames.h"
+#include "PropertyNames.h"
+#include "Context.h"
+#include "../Proto/AppSignal.pb.h"
 
 namespace VFrame30
 {
@@ -145,7 +144,7 @@ namespace VFrame30
 			return;
 		}
 
-		// Save signals to protobufer
+		// Save signals to proto buffer
 		//
 		::Proto::AppSignalSet protoSetMessage;
 

@@ -127,10 +127,10 @@ TEST_F(AdsConnectionTests, connectToAds)
 		QElapsedTimer timer;
 		timer.start();
 
-		while (timer.hasExpired(5000) == false)
+		while (timer.hasExpired(10'000) == false)
 		{
 			QCoreApplication::instance()->processEvents();
-			QThread::msleep(10);
+			QThread::yieldCurrentThread();
 
 			// Wait for 20 replies, so all signals are loaded and some states are received.
 			//

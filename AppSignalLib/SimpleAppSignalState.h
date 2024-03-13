@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../CommonLib/Hash.h"
 #include "../CommonLib/Times.h"
 #include "../UtilsLib/Queue.h"
 #include "AppSignalState.h"

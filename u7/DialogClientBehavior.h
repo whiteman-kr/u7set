@@ -2,22 +2,28 @@
 #define DIALOGCLIENTBEHAVIOR_H
 
 #include "../lib/PropertyEditor.h"
-#include "../lib/ClientBehavior.h"
 
-class TagsToColorDelegate: public QItemDelegate
+namespace Behavior
+{
+	class MonitorBehavior;
+	class ClientBehavior;
+	class ClientBehaviorStorage;
+} // namespace Behavior
+
+class TagsToColorDelegate : public QItemDelegate
 {
 	Q_OBJECT
 
 public:
-	TagsToColorDelegate(QWidget *parent);
-	QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+	TagsToColorDelegate(QWidget* parent);
+	QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
 signals:
 	void editingFinished(const QModelIndex& index) const;
 
 private:
-	void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override;
-	void setEditorData(QWidget *editor, const QModelIndex &index) const override;
+	void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override;
+	void setEditorData(QWidget* editor, const QModelIndex& index) const override;
 
 private:
 	mutable QStringList m_existingTags;
@@ -33,7 +39,7 @@ public:
 	MonitorBehaviorEditWidget(QWidget* parent);
 	~MonitorBehaviorEditWidget() = default;
 
-	void setBehavior(std::shared_ptr<MonitorBehavior> mb);
+	void setBehavior(std::shared_ptr<Behavior::MonitorBehavior> mb);
 
 public:
 	enum class Columns
@@ -61,7 +67,7 @@ private:
 private:
 	QTreeWidget* m_tagsTree = nullptr;
 
-	std::shared_ptr<MonitorBehavior> m_behavior;
+	std::shared_ptr<Behavior::MonitorBehavior> m_behavior;
 
 	TagsToColorDelegate* m_tagsToColorDelegate = nullptr;
 };
@@ -80,8 +86,9 @@ signals:
 class DialogClientBehavior : public QDialog
 {
 	Q_OBJECT
+
 public:
-	explicit DialogClientBehavior(DbController* pDbController, QWidget *parent = 0);
+	explicit DialogClientBehavior(DbController* pDbController, QWidget* parent = 0);
 	~DialogClientBehavior();
 
 private:
@@ -91,17 +98,17 @@ private:
 	void fillBehaviorList();
 	void fillBehaviorProperties();
 
-	void updateBehaviuorItemText(QTreeWidgetItem* item, ClientBehavior* behavior);
+	void updateBehaviuorItemText(QTreeWidgetItem* item, Behavior::ClientBehavior* behavior);
 
-	void addBehavior(const std::shared_ptr<ClientBehavior> behavior);
+	void addBehavior(const std::shared_ptr<Behavior::ClientBehavior> behavior);
 
 	bool continueWithDuplicateId();
 
-	bool loadFileFromDatabase(DbController* db, const QString& fileName, QString *errorCode, QByteArray* data);
-	bool saveFileToDatabase(const QByteArray& data, DbController* db, const QString& fileName, const QString &comment);
+	bool loadFileFromDatabase(DbController* db, const QString& fileName, QString* errorCode, QByteArray* data);
+	bool saveFileToDatabase(const QByteArray& data, DbController* db, const QString& fileName, const QString& comment);
 
 protected:
-	virtual void keyPressEvent(QKeyEvent *evt);
+	virtual void keyPressEvent(QKeyEvent* evt);
 	virtual void showEvent(QShowEvent* event) override;
 	virtual void closeEvent(QCloseEvent* e) override;
 
@@ -126,7 +133,7 @@ public:
 	};
 
 private:
-	ClientBehaviorStorage m_behaviorStorage;
+	std::unique_ptr<Behavior::ClientBehaviorStorage> m_behaviorStorage;
 
 	bool m_modified = false;
 

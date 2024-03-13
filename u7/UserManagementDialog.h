@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../DbLib/DbStruct.h"
+#include <DbLib/DbStruct.h>
 
 namespace Ui {
 	class UserManagementDialog;

@@ -1,8 +1,9 @@
 #pragma once
 
-#include "../VFrame30/SchemaItem.h"
+#include "../VFrame30/SchemaItems/SchemaItem.h"
 
 class EditSchemaView;
+class ProjectDefaults;
 
 namespace VFrame30
 {
@@ -24,7 +25,7 @@ namespace EditEngine
 
 	//
 	//
-	// EditEngine - Класс обеспечивающий выполнение всех команд изменения SchemaView (Undo )
+	// EditEngine
 	//
 	//
 	class EditEngine : public QObject
@@ -67,9 +68,9 @@ namespace EditEngine
 		void selectItems(const std::vector<SchemaItemPtr>& items);
 
 	public:
-		void runAddItem(std::list<SchemaItemPtr> items, std::shared_ptr<VFrame30::SchemaLayer> layer);
-		void runAddItem(std::vector<SchemaItemPtr> items, std::shared_ptr<VFrame30::SchemaLayer> layer);
-		void runAddItem(SchemaItemPtr item, std::shared_ptr<VFrame30::SchemaLayer> layer);
+		bool runAddItem(std::list<SchemaItemPtr> items, std::shared_ptr<VFrame30::SchemaLayer> layer);
+		bool runAddItem(std::vector<SchemaItemPtr> items, std::shared_ptr<VFrame30::SchemaLayer> layer);
+		bool runAddItem(SchemaItemPtr item, std::shared_ptr<VFrame30::SchemaLayer> layer);
 
 		void runDeleteItem(const std::vector<SchemaItemPtr>& items, std::shared_ptr<VFrame30::SchemaLayer> layer);
 		void runDeleteItem(SchemaItemPtr item, std::shared_ptr<VFrame30::SchemaLayer> layer);
@@ -84,6 +85,9 @@ namespace EditEngine
 
 		void runSetProperty(const QString& propertyName, QVariant value, const std::vector<SchemaItemPtr>& items);
 		void runSetProperty(const QString& propertyName, QVariant value, const SchemaItemPtr& item);
+
+		void runApplyDefaultProperty(const ProjectDefaults& projectDefaults, std::vector<SchemaItemPtr> items);
+		void runApplyDefaultProperty(const ProjectDefaults& projectDefaults, const SchemaItemPtr& item);
 
 		void runSetObject(const QByteArray& currentState, const QByteArray& newState, const std::vector<SchemaItemPtr>& items);
 		void runSetObject(const QByteArray& currentState, const QByteArray& newState, const SchemaItemPtr& item);

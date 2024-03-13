@@ -1,7 +1,9 @@
 #include "TuningFilter.h"
+
 #include <QApplication>
-#include "../CommonLib/Types.h"
 #include <QClipboard>
+#include <QXmlStreamReader>
+#include <QXmlStreamWriter>
 
 namespace TuningTags
 {

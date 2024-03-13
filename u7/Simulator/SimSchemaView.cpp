@@ -3,6 +3,7 @@
 #include "SimIdeSimulator.h"
 #include "ScriptSimApplication.h"
 #include "../../Simulator/SimOverrideSignals.h"
+#include "../../Simulator/SimSoftware.h"
 #include "../VFrame30/PropertyNames.h"
 
 
@@ -50,6 +51,7 @@ void SimSchemaView::setMonitorId(QString equipmentId, bool emitUpdate)
 		monitor != nullptr)
 	{
 		setGlobalScript(monitor->globalScript());
+		setMonitorBehavior(monitor->monitorBehavior());
 	}
 
 	if (emitUpdate == true)
@@ -79,7 +81,7 @@ void SimSchemaView::updateScriptGlobalVars(QJSEngine& engine)
 	//
 	{
 		QJSValue jsTuning = engine.newQObject(tuningController());
-		QQmlEngine::setObjectOwnership(tuningController(), QQmlEngine::CppOwnership);
+		QJSEngine::setObjectOwnership(tuningController(), QJSEngine::CppOwnership);
 
 		engine.globalObject().setProperty(VFrame30::PropertyNames::scriptGlobalVariableTuning, jsTuning);
 	}
@@ -90,7 +92,7 @@ void SimSchemaView::updateScriptGlobalVars(QJSEngine& engine)
 		Q_ASSERT(m_scriptAppSignalController);
 
 		QJSValue jsSignals = engine.newQObject(m_scriptAppSignalController.get());
-		QQmlEngine::setObjectOwnership(m_scriptAppSignalController.get(), QQmlEngine::CppOwnership);
+		QJSEngine::setObjectOwnership(m_scriptAppSignalController.get(), QJSEngine::CppOwnership);
 
 		engine.globalObject().setProperty(VFrame30::PropertyNames::scriptGlobalVariableSignals, jsSignals);
 	}

@@ -1,9 +1,6 @@
 #ifndef TUNINGMODEL_H
 #define TUNINGMODEL_H
 
-#include <cmath>
-
-#include "../../AppSignalLib/TuningSignalState.h"
 #include "TuningFilter.h"
 
 
@@ -34,7 +31,7 @@ struct TuningModelHashSet
 
 	int hashCount() const;
 
-	Hash hash[MAX_VALUES_COLUMN_COUNT];
+	Hash hash[MAX_VALUES_COLUMN_COUNT]{UNDEFINED_HASH};
 
 };
 
@@ -68,9 +65,6 @@ public:
 
 	TuningValue defaultValue(const AppSignalParam& asp) const;
 	void setDefaultValues(const std::vector<std::pair<Hash, TuningValue>>& values);
-
-public:
-
 
 public:
 	std::vector<Hash> allHashes() const;
@@ -125,6 +119,7 @@ private:
 
 	QFont* m_font = nullptr;
 	QFont* m_importantFont = nullptr;
+	QWidget* m_parentWidget = nullptr;
 
 protected:
 	TuningSignalManager& m_tuningSignalManager;
@@ -132,12 +127,6 @@ protected:
 	std::vector<Hash> m_allHashes;
 
 	std::vector<TuningModelHashSet> m_hashSets;
-
-	std::map<Hash, int> m_hashToChannelMap;
-
-	std::map<Hash, Hash> m_hashToGeneralHashMap;
-
-	std::map<Hash, TuningModelHashSet> m_generalHashToHashSetMap;
 
 	std::map<Hash, TuningValue> m_defaultValues;
 

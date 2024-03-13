@@ -1,7 +1,7 @@
 #include "SchemaLayer.h"
-#include "SchemaItem.h"
-#include "FblItemRect.h"
-#include "PosConnectionImpl.h"
+#include "./SchemaItems/SchemaItem.h"
+#include "./SchemaItems/FblItemRect.h"
+#include "./SchemaItems/PosConnectionImpl.h"
 
 
 namespace VFrame30
@@ -74,7 +74,7 @@ namespace VFrame30
 
 		message->set_classnamehash(classnamehash);	// Required field, hash of the class name, it restores the class.
 
-		auto layer = message->mutable_schemalayer();
+		auto layer = message->MutableExtension(Proto::schemalayer);
 
 		Proto::Write(layer->mutable_uuid(), m_guid);
 		Proto::Write(layer->mutable_name(), m_name);
@@ -100,13 +100,13 @@ namespace VFrame30
 
 	bool SchemaLayer::LoadData(const Proto::Envelope& message)
 	{
-		if (message.has_schemalayer() == false)
+		if (message.HasExtension(Proto::schemalayer) == false)
 		{
-			assert(message.has_schemalayer());
+			assert(message.HasExtension(Proto::schemalayer));
 			return false;
 		}
 
-		const Proto::SchemaLayer& layer = message.schemalayer();
+		const Proto::SchemaLayer& layer = message.GetExtension(Proto::schemalayer);
 
 		m_guid = Proto::Read(layer.uuid());
 		Proto::Read(layer.name(), &m_name);
@@ -150,9 +150,9 @@ namespace VFrame30
 	{
 		// This func can create only one instance
 		//
-		if (message.has_schemalayer() == false)
+		if (message.HasExtension(Proto::schemalayer) == false)
 		{
-			assert(message.has_schemalayer());
+			assert(message.HasExtension(Proto::schemalayer));
 			return nullptr;
 		}
 

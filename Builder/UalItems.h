@@ -1,23 +1,20 @@
 #pragma once
 
-#include "../AppSignalLib/AppSignal.h"
-#include "../UtilsLib/WUtils.h"
-#include "../VFrame30/FblItemRect.h"
-#include "../VFrame30/SchemaItemSignal.h"
-#include "../VFrame30/SchemaItemAfb.h"
-#include "../VFrame30/SchemaItemConst.h"
-#include "../VFrame30/SchemaItemConnection.h"
-#include "../VFrame30/SchemaItemBus.h"
-#include "../VFrame30/SchemaItemLoopback.h"
-#include "../VFrame30/FblItem.h"
-#include "../VFrame30/LogicSchema.h"
-#include "../CommonLib/HashedVector.h"
-#include "../HardwareLib/Afb.h"
-#include "../HardwareLib/LmDescription.h"
+#include <HardwareLib/Afb.h>
+#include <HardwareLib/LmDescription.h>
 
-#include "Parser.h"
+#include "../VFrame30/SchemaItems/FblItem.h"
+#include "../VFrame30/SchemaItems/FblItemRect.h"
+#include "../VFrame30/SchemaItems/SchemaItemAfb.h"
+#include "../VFrame30/SchemaItems/SchemaItemBus.h"
+#include "../VFrame30/SchemaItems/SchemaItemConnection.h"
+#include "../VFrame30/SchemaItems/SchemaItemConst.h"
+#include "../VFrame30/SchemaItems/SchemaItemLoopback.h"
+#include "../VFrame30/SchemaItems/SchemaItemSignal.h"
+
 #include "AppLogicCode.h"
 #include "Busses.h"
+#include "Parser.h"
 #include "SignalsHeap.h"
 
 namespace Builder
@@ -481,19 +478,19 @@ namespace Builder
 
 		Address16 ualAddr() const;
 		Address16 ualAddrWithoutChecks() const;
-		bool setUalAddr(Address16 ualAddr);
+		bool setUalAddr(const Address16& ualAddr);
 
 		bool ualAddrIsValid() const;
 
 		bool checkUalAddr() const;
 
 		Address16 regBufAddr() const { return m_regBufAddr; }
-		bool setRegBufAddr(Address16 regBufAddr);
+		bool setRegBufAddr(const Address16& regBufAddr);
 
 		bool checkRegBufAddr() const;
 
 		Address16 regValueAddr() const { return m_regValueAddr; }
-		bool setRegValueAddr(Address16 regValueAddr);
+		bool setRegValueAddr(const Address16& regValueAddr);
 
 		Address16 ioBufAddr() const;
 

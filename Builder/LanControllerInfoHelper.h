@@ -1,11 +1,11 @@
 #pragma once
 
 #include "../lib/ConstStrings.h"
-#include "../CommonLib/Types.h"
 #include "../Builder/IssueLogger.h"
 #include "../Builder/Context.h"
-#include "../HardwareLib/DeviceObject.h"
-#include "../HardwareLib/LanControllerInfo.h"
+
+#include <HardwareLib/DeviceModule.h>
+#include <HardwareLib/LanControllerInfo.h>
 
 class LanControllerInfoHelper
 {

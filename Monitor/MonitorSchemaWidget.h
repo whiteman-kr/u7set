@@ -1,10 +1,8 @@
 #pragma once
 
 #include "../VFrame30/ClientSchemaWidget.h"
-#include "../VFrame30/AppSignalController.h"
-#include "../lib/ITimeStats.h"
 
-
+class ITimeStats;
 class MonitorSchemaView;
 class MonitorSchemaManager;
 struct SchemaHistoryItem;
@@ -13,6 +11,12 @@ namespace ClientLib
 {
 	class AppSignalManager;
 }
+
+namespace VFrame30
+{
+	class AppSignalController;
+}
+
 
 //
 //

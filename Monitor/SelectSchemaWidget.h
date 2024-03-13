@@ -11,7 +11,7 @@ struct SelectSchemaItem
 };
 
 class SelectSchemaTable;
-
+class MonitorConfigController;
 
 //
 // SelectSchemaWidget -- widget to add to ToolBar

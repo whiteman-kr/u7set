@@ -1,7 +1,6 @@
 #ifndef MEASURETHREAD_H
 #define MEASURETHREAD_H
 
-#include <QThread>
 #include <QMessageBox>
 
 #include "CalibratorBase.h"

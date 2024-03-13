@@ -1,4 +1,6 @@
-#include "../HardwareLib/Subsystem.h"
+#include <HardwareLib/Subsystem.h>
+#include <HardwareLib/PropertyNames.h>
+
 #include "../Simulator/Simulator.h"
 
 #include "AppDataServiceCfgGenerator.h"
@@ -415,6 +417,22 @@ namespace Builder
 		}
 
 		//
+		// Remove excluded devices, DeviceObject::isExcludedBromBuild()
+		//
+		LOG_MESSAGE(m_context->m_log, tr("Removing excluded devices"));
+
+		if (bool ok = removeExcludedDevices(deviceRoot.get());
+			ok == false)
+		{
+			return false;
+		}
+		else
+		{
+			LOG_MESSAGE(m_context->m_log, tr("Ok"));
+		}
+		
+
+		//
 		// Expand Devices StrId
 		//
 		LOG_MESSAGE(m_context->m_log, tr("Expanding devices StrIds"));
@@ -599,9 +617,73 @@ namespace Builder
 		return result;
 	}
 
+	bool BuildWorkerThread::taskCheckEquipmentProperties()
+	{
+		TEST_PTR_RETURN_FALSE(m_context);
+		TEST_PTR_RETURN_FALSE(m_context->m_log);
+		TEST_PTR_RETURN_FALSE(m_context->m_equipmentSet);
+
+		std::map<QString, Hardware::DeviceObject*> actuators;
+		bool checkResult = true;
+
+		std::function<void (Hardware::DeviceObject*)> checkActuatorID = [this, &actuators, &checkResult](Hardware::DeviceObject* device)
+		{
+			TEST_PTR_RETURN(device);
+
+			if (device->isModule() == false)
+			{
+				return;
+			}
+
+			if (DeviceHelper::isPropertyExists(device, EquipmentPropNames::ACTUATOR_ID) == false)
+			{
+				return;
+			}
+
+			QString actuatorID;
+
+			bool res = DeviceHelper::getStrProperty(device, EquipmentPropNames::ACTUATOR_ID, &actuatorID, m_context->m_log);
+
+			if (res == false)
+			{
+				checkResult = false;
+				return;
+			}
+
+			if (actuatorID.isEmpty())
+			{
+				// Property %1.%2 is empty.
+				//
+				m_context->m_log->errEQP6021(device->equipmentIdTemplate(), EquipmentPropNames::ACTUATOR_ID, device->uuid());
+				checkResult = false;
+				return;
+			}
+
+			auto it = actuators.find(actuatorID);
+
+			if (it != actuators.end())
+			{
+				Hardware::DeviceObject* dev1 = it->second;
+
+				m_context->m_log->errEQP6022(actuatorID,
+											 dev1->equipmentIdTemplate(), dev1->uuid(),
+											 device->equipmentIdTemplate(), device->uuid(),
+											 EquipmentPropNames::ACTUATOR_ID);
+				checkResult = false;
+				return;
+			}
+
+			actuators.emplace(actuatorID, device);
+		};
+
+		Hardware::equipmentWalker(m_context->m_equipmentSet->root().get(), checkActuatorID);
+
+		return checkResult;
+	}
+
 	bool BuildWorkerThread::taskLoadBusTypes()
 	{
-		m_context->m_busSet = std::make_shared<VFrame30::BusSet>();
+		m_context->m_busSet = std::make_shared<AppSignalLib::BusSet>();
 
 		// Get Busses
 		//
@@ -631,7 +713,7 @@ namespace Builder
 
 		// Parse files, create actual Busses
 		//
-		std::vector<VFrame30::Bus> busses;
+		std::vector<AppSignalLib::Bus> busses;
 		busses.reserve(files.size());
 
 		for (const std::shared_ptr<DbFile>& f : files)
@@ -642,7 +724,7 @@ namespace Builder
 				continue;
 			}
 
-			VFrame30::Bus bus;
+			AppSignalLib::Bus bus;
 			ok = bus.Load(f->data());
 			if (ok == false)
 			{
@@ -1618,6 +1700,49 @@ namespace Builder
 
 		return;
 
+	}
+
+	bool BuildWorkerThread::removeExcludedDevices(Hardware::DeviceObject* parent)
+	{
+		if (parent == nullptr)
+		{
+			assert(parent != nullptr);
+			return false;
+		}
+
+		// Remove excluded devices
+		//
+		std::list<std::shared_ptr<Hardware::DeviceObject>> toDelete;
+		for (auto child : parent->children())
+		{
+			if (child->excludeFromBuild() == true)
+			{
+				toDelete.push_back(child);
+			}
+		}
+
+		// Sort is for better log readability.
+		//
+		toDelete.sort(
+			[](const auto& lhs, const auto& rhs)
+			{
+				return lhs->equipmentId() < rhs->equipmentId();
+			});
+
+		for (auto child : toDelete)
+		{
+			m_log->wrnCFG3102(child->equipmentId()); // Device '%1' is excluded from build.
+			parent->deleteChild(child);
+		}
+
+		// Recursively check children.
+		//
+		for (auto child : parent->children())
+		{
+			removeExcludedDevices(child.get());
+		}
+
+		return true;
 	}
 
 	bool BuildWorkerThread::expandDeviceStrId(Hardware::DeviceObject* device)

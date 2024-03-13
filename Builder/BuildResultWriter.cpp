@@ -1,14 +1,14 @@
 #include "BuildResultWriter.h"
-#include "IssueLogger.h"
-#include "../u7/Settings.h"
-#include "../DbLib/DbController.h"
 #include "../UtilsLib/WUtils.h"
 #include "../lib/ConstStrings.h"
-#include <QFileInfo>
-#include <QDir>
+#include "../u7/Settings.h"
+#include "IssueLogger.h"
+#include <DbLib/DbController.h>
 #include <QCryptographicHash>
-#include <QStandardPaths>
+#include <QDir>
+#include <QFileInfo>
 #include <QHostInfo>
+#include <QStandardPaths>
 
 
 namespace Builder

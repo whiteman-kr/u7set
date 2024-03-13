@@ -7,8 +7,11 @@
 #include <QFontDialog>
 #include <QColorDialog>
 #include <QTextBrowser>
-#include <QDesktopServices>
 #include <QScrollBar>
+#include <QTimer>
+#include <QSplitter>
+#include <QSettings>
+#include <QHeaderView>
 
 #include <algorithm>
 

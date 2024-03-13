@@ -24,7 +24,7 @@ bool BusStorage::load(QString* errorMessage)
 	//
 	std::vector<DbFileInfo> fileList;
 
-	bool ok = m_db->getFileList(&fileList, DbDir::BusTypesDir, Db::File::BusFileExtension, true, nullptr);
+	bool ok = m_db->getFileList(&fileList, DbDir::BusTypesDir, Db::File::BusFileExtension, false /*removeDeleted*/, nullptr);
 	if (ok == false)
 	{
 		*errorMessage = m_db->lastError();
@@ -49,18 +49,18 @@ bool BusStorage::load(QString* errorMessage)
 
 	// Parse files, create actual Busses
 	//
-	std::vector<VFrame30::Bus> busses;
+	std::vector<AppSignalLib::Bus> busses;
 	busses.reserve(files.size());
 
 	for (const std::shared_ptr<DbFile>& f : files)
 	{
-		if (f->deleted() == true ||
-			f->action() == E::VcsItemAction::Deleted)
+		if ((f->deleted() == true || f->action() == E::VcsItemAction::Deleted) && 
+			f->state() == E::VcsState::CheckedIn)
 		{
 			continue;
 		}
 
-		std::shared_ptr<VFrame30::Bus> bus = std::make_shared<VFrame30::Bus>();
+		std::shared_ptr<AppSignalLib::Bus> bus = std::make_shared<AppSignalLib::Bus>();
 
 		QString loadBusErrorMessage;
 
@@ -83,7 +83,7 @@ bool BusStorage::load(QString* errorMessage)
 
 bool BusStorage::reload(const QUuid& uuid)
 {
-	std::shared_ptr<VFrame30::Bus> bus = get(uuid);
+	std::shared_ptr<AppSignalLib::Bus> bus = get(uuid);
 	if (bus == nullptr)
 	{
 		assert(bus);
@@ -129,7 +129,7 @@ bool BusStorage::save(const QUuid& uuid, QString* errorMessage)
 		return false;
 	}
 
-	std::shared_ptr<VFrame30::Bus> bus = get(uuid);
+	std::shared_ptr<AppSignalLib::Bus> bus = get(uuid);
 	if (bus == nullptr)
 	{
 		assert(bus);

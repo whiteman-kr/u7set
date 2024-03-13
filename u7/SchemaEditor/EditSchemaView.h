@@ -1,8 +1,9 @@
 #pragma once
 #include "../../Builder/IssueLogger.h"
 #include "../../VFrame30/AppSignalController.h"
-#include "../../VFrame30/PosRectImpl.h"
+#include "../../VFrame30/DiagStateController.h"
 #include "../../VFrame30/Schema.h"
+#include "../../VFrame30/SchemaItems/PosRectImpl.h"
 #include "../../VFrame30/SchemaView.h"
 #include "../../VFrame30/TuningController.h"
 #include "../AppSignalSetProvider.h"

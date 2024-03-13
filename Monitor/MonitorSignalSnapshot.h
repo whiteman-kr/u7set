@@ -7,6 +7,11 @@
 class MonitorConfigController;
 
 
+namespace ClientLib
+{
+	class AppSignalManager;
+}
+
 class MonitorDialogSignalSnapshot : public DialogSignalSnapshot
 {
 	Q_OBJECT

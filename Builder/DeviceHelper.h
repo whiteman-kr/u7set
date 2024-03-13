@@ -1,15 +1,23 @@
 #pragma once
 
-#include "../HardwareLib/DeviceObject.h"
+#include <HardwareLib/DeviceObject.h>
+#include <HardwareLib/EquipmentSet.h>
+
 #include "../UtilsLib/OutputLog.h"
-#include "../CommonLib/HostAddressPort.h"
+
 #include "IssueLogger.h"
+
+class HostAddressPort;
+
 
 class DeviceHelper : public QObject
 {
 	Q_OBJECT
 public:
 	static const int LM1_PLACE = 0;
+
+	static const int BVB1_PLACE = 0;
+	static const int BVB2_PLACE = 13;
 
 public:
 	static bool getIntProperty(const Hardware::DeviceObject* device, const QString& name, qint32* value, Builder::IssueLogger* log);

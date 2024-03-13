@@ -22,8 +22,6 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Network Qml Xml Svg PrintS
 qt_standard_project_setup()
 
 set (MONITOR_SOURCES
-	../lib/ClientBehavior.cpp
-	../lib/ClientBehavior.h
 	../lib/ConstStrings.h
 	../lib/ExportPrint.cpp
 	../lib/ExportPrint.h
@@ -151,7 +149,6 @@ target_precompile_headers(${TARGET} PRIVATE
 	<algorithm>
 	<array>
 	<atomic>
-	<chrono>
 	<concepts>
 	<deque>
 	<functional>
@@ -167,23 +164,38 @@ target_precompile_headers(${TARGET} PRIVATE
 
 	# Qt includes
 	#
+	<QTreeWidget>
+	<QTreeView>
 	<QtPrintSupport>
-	<QtQml>
-	<QtWidgets>
-	<QtXml>
+	<QToolBar>
+	<QStatusBar>
+	<QPushButton>
+	<QLineEdit>
+	<QLabel>
+	<QFileDialog>
+	<QDialog>
+	<QDateTime>
+	<QJSEngine>
 
 	# Project includes
 	#
 	"../CommonLib/Types.h"
+	"../CommonLib/Hash.h"
+	"../CommonLib/PropertyObject.h"
 
-	"../Proto/network.pb.h"
-	"../Proto/serialization.pb.h"
+	"../Proto/ProtoSerialization.h"
+	"../Proto/Network.pb.h"
+	"../Proto/AppSignal.pb.h"
+
+	"../AppSignalLib/AppSignal.h"
+	"../AppSignalLib/AppSignalParam.h"
+	"../AppSignalLib/AppSignalState.h"
 )
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network Qt6::Qml Qt6::Xml Qt6::Svg Qt6::PrintSupport)
-target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib OnlineLib TrendView VFrame30 ClientLib SchemaClientLib)
+target_link_libraries(${TARGET} PRIVATE CommonLib Behavior Protobuf UtilsLib AppSignalLib OnlineLib TrendView VFrame30 ClientLib SchemaClientLib)
 
 # Link Visaul Leak Detector
 #

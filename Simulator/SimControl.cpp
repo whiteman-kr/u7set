@@ -1,10 +1,59 @@
 #include "SimControl.h"
 #include "Simulator.h"
+#include "SimLogicModule.h"
 
 
 namespace Sim
 {
+	SimControlRunStruct::SimControlRunStruct(std::shared_ptr<LogicModule> lm) :
+		m_lm(std::move(lm))
+	{
+	}
 
+	QFuture<bool> SimControlRunStruct::start(std::chrono::microseconds time, const QDateTime& currentDateTime, std::condition_variable& cvFinished)
+	{
+		bool reset = m_lastStartTime == 0us;
+
+		m_lastStartTime = time;
+		m_possibleToAdvanceTo = time;
+		m_cyclesCounter++;
+		return m_lm->asyncRunCycle(time, currentDateTime, m_cyclesCounter, reset, cvFinished);
+	}
+
+	const QString& SimControlRunStruct::equipmentId() const
+	{
+		return m_lm->equipmentId();
+	}
+
+	LogicModule* SimControlRunStruct::operator->()
+	{
+		return m_lm.get();
+	}
+
+	const LogicModule* SimControlRunStruct::operator->() const
+	{
+		return m_lm.get();
+	}
+
+	ControlStatus::ControlStatus(const ControlData& cd) :
+		m_startTime(cd.m_startTime),
+		m_currentTime(cd.m_currentTime),
+		m_duration(cd.m_currentTime - cd.m_startTime),
+		m_state(cd.m_state)
+	{
+		m_lmDeviceModes.reserve(cd.m_lms.size());
+
+		for (const SimControlRunStruct& lm : cd.m_lms)
+		{
+			m_lmDeviceModes.push_back(Sim::ControlStatus::LmMode{lm.equipmentId(), lm.m_lm->deviceState()});
+		}
+	}
+
+	//
+	//
+	// Sim::Control
+	//
+	//
 	Control::Control(Simulator* simualtor, QObject* parent) :
 		QThread(parent),
 		m_simulator(simualtor),

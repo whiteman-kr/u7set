@@ -1,15 +1,21 @@
 #include "SchemaItemPropertiesDialog.h"
-#include "ui_SchemaItemPropertiesDialog.h"
+#include "../../VFrame30/SchemaItems/SchemaItemAfb.h"
+#include "../../VFrame30/SchemaItems/SchemaItemUfb.h"
 #include "EditEngine/EditEngine.h"
 #include "Settings.h"
+#include "ui_SchemaItemPropertiesDialog.h"
+#include <QWindow>
 
 
-SchemaItemPropertiesDialog::SchemaItemPropertiesDialog(EditEngine::EditEngine* editEngine, DbController* db, QWidget* parent) :
-	QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint),
+SchemaItemPropertiesDialog::SchemaItemPropertiesDialog(EditEngine::EditEngine* editEngine,
+													   DbController* db,
+													   QWidget* parent) :
+	QDialog(parent,
+			Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint |
+				Qt::WindowCloseButtonHint),
 	ui(new Ui::SchemaItemPropertiesDialog)
 {
 	ui->setupUi(this);
-
 
 	m_propertyEditor = new SchemaItemPropertyEditor(editEngine, db, this);
 	m_propertyEditor->setReadOnly(editEngine->readOnly());
@@ -24,7 +30,7 @@ SchemaItemPropertiesDialog::SchemaItemPropertiesDialog(EditEngine::EditEngine* e
 
 	ui->horizontalLayout->addWidget(tabWidget);
 
-	setWindowTitle(tr("Schema Item(s) Properties"));
+	updateWindowTitle();
 
 	// --
 	//
@@ -64,6 +70,8 @@ void SchemaItemPropertiesDialog::setObjects(const std::vector<SchemaItemPtr>& it
 	m_propertyEditor->setObjects(ol);
 	m_propertyTable->setObjects(ol);
 
+	updateWindowTitle();
+
 	return;
 }
 
@@ -75,13 +83,11 @@ void SchemaItemPropertiesDialog::setReadOnly(bool value)
 
 void SchemaItemPropertiesDialog::ensureVisible()
 {
-	if (QScreen* screen = QGuiApplication::screenAt(geometry().center());
-		screen == nullptr)
+	if (QScreen* screen = QGuiApplication::screenAt(geometry().center()); screen == nullptr)
 	{
 		QScreen* newScreen = QGuiApplication::screens().at(0);
 
-		if (QScreen* parentScreen = parentWidget()->window()->windowHandle()->screen();
-			parentScreen != nullptr)
+		if (QScreen* parentScreen = parentWidget()->window()->windowHandle()->screen(); parentScreen != nullptr)
 		{
 			newScreen = parentScreen;
 		}
@@ -90,9 +96,6 @@ void SchemaItemPropertiesDialog::ensureVisible()
 
 		move(screenGeometry.left() + screenGeometry.width() / 2 - width() / 2,
 			 screenGeometry.top() + screenGeometry.height() / 2 - height() / 2);
-	}
-	else
-	{
 	}
 
 	return;
@@ -121,22 +124,85 @@ void SchemaItemPropertiesDialog::saveSettings()
 	return;
 }
 
+void SchemaItemPropertiesDialog::updateWindowTitle()
+{
+	QString title;
+
+	auto getItemName = [](SchemaItemPtr item)
+	{
+		if (item->isSchemaItemAfb() == true)
+		{
+			return QString("AFB(%1)").arg(item->toSchemaItemAfb()->afbElement().caption());
+		}
+
+		if (item->isType<VFrame30::SchemaItemUfb>() == true)
+		{
+			return QString("UFB(%1)").arg(item->toType<VFrame30::SchemaItemUfb>()->ufbCaption());
+		}
+
+		return item->type().replace("SchemaItem", "");
+	};
+
+	switch (m_items.size())
+	{
+	case 1:
+		title = tr("%1 item - %2").arg(m_items.size()).arg(getItemName(m_items[0]));
+		break;
+	case 2:
+		title = tr("%1 items - %2, %3").arg(m_items.size()).arg(getItemName(m_items[0])).arg(getItemName(m_items[1]));
+		break;
+	case 3:
+		title = tr("%1 items - %2, %3, %4")
+					.arg(m_items.size())
+					.arg(getItemName(m_items[0]))
+					.arg(getItemName(m_items[1]))
+					.arg(getItemName(m_items[2]));
+		break;
+	case 4:
+		title = tr("%1 items - %2, %3, %4, %5")
+					.arg(m_items.size())
+					.arg(getItemName(m_items[0]))
+					.arg(getItemName(m_items[1]))
+					.arg(getItemName(m_items[2]))
+					.arg(getItemName(m_items[3]));
+		break;
+	case 5:
+		title = tr("%1 items - %2, %3, %4, %5, %6")
+					.arg(m_items.size())
+					.arg(getItemName(m_items[0]))
+					.arg(getItemName(m_items[1]))
+					.arg(getItemName(m_items[2]))
+					.arg(getItemName(m_items[3]))
+					.arg(getItemName(m_items[4]));
+		break;
+	default:
+		title = tr("%1 Schema Items Properties").arg(m_items.size());
+	}
+
+	setWindowTitle(title);
+
+	return;
+}
+
 //
 //		SchemaItemPropertyBrowser
 //
 //
-SchemaItemPropertyEditor::SchemaItemPropertyEditor(EditEngine::EditEngine* editEngine, DbController* db, QWidget* parent) :
+SchemaItemPropertyEditor::SchemaItemPropertyEditor(EditEngine::EditEngine* editEngine,
+												   DbController* db,
+												   QWidget* parent) :
 	IdePropertyEditor(parent, db),
 	m_editEngine(editEngine)
 {
 	assert(m_editEngine);
 
-	connect(m_editEngine, &EditEngine::EditEngine::propertiesChanged, this, &SchemaItemPropertyEditor::updatePropertiesValues);
+	connect(m_editEngine,
+			&EditEngine::EditEngine::propertiesChanged,
+			this,
+			&SchemaItemPropertyEditor::updatePropertiesValues);
 }
 
-SchemaItemPropertyEditor::~SchemaItemPropertyEditor()
-{
-}
+SchemaItemPropertyEditor::~SchemaItemPropertyEditor() {}
 
 void SchemaItemPropertyEditor::valueChanged(QString propertyName, QVariant value)
 {
@@ -171,10 +237,11 @@ void SchemaItemPropertyEditor::valueChanged(QString propertyName, QVariant value
 		return;
 	}
 
-	//editEngine()->runSetProperty(property->propertyName(), value, items);	// Is two objects with the diff  BOOL values are selected,
-																			// and then values changed, editEngine()->runSetProperty
-																			// will select ONLY item with changed value, not good ((
-																			// items changed to m_objects
+	// editEngine()->runSetProperty(property->propertyName(), value, items);	// Is two objects with the diff  BOOL
+	// values are selected,
+	//  and then values changed, editEngine()->runSetProperty
+	//  will select ONLY item with changed value, not good ((
+	//  items changed to m_objects
 
 	items.clear();
 	for (auto i : objectsList)
@@ -200,19 +267,22 @@ EditEngine::EditEngine* SchemaItemPropertyEditor::editEngine()
 //		SchemaItemPropertyBrowser
 //
 //
-SchemaItemPropertyTable::SchemaItemPropertyTable(EditEngine::EditEngine* editEngine, SchemaItemPropertiesDialog* schemaItemPropertiesDialog, QWidget* parent) :
+SchemaItemPropertyTable::SchemaItemPropertyTable(EditEngine::EditEngine* editEngine,
+												 SchemaItemPropertiesDialog* schemaItemPropertiesDialog,
+												 QWidget* parent) :
 	IdePropertyTable(parent),
 	m_editEngine(editEngine),
 	m_schemaItemPropertiesDialog(schemaItemPropertiesDialog)
 {
 	assert(m_editEngine);
 
-	connect(m_editEngine, &EditEngine::EditEngine::propertiesChanged, this, &SchemaItemPropertyTable::updatePropertiesValues);
+	connect(m_editEngine,
+			&EditEngine::EditEngine::propertiesChanged,
+			this,
+			&SchemaItemPropertyTable::updatePropertiesValues);
 }
 
-SchemaItemPropertyTable::~SchemaItemPropertyTable()
-{
-}
+SchemaItemPropertyTable::~SchemaItemPropertyTable() {}
 
 void SchemaItemPropertyTable::valueChanged(const ExtWidgets::ModifiedObjectsData& modifiedObjectsData)
 {
@@ -230,7 +300,8 @@ void SchemaItemPropertyTable::valueChanged(const ExtWidgets::ModifiedObjectsData
 
 	for (const QString& propertyName : modifiedObjectsData.keys())
 	{
-		QList<std::pair<std::shared_ptr<PropertyObject>, QVariant>> objectsData = modifiedObjectsData.values(propertyName);
+		QList<std::pair<std::shared_ptr<PropertyObject>, QVariant>> objectsData =
+			modifiedObjectsData.values(propertyName);
 
 		for (auto objectData : objectsData)
 		{

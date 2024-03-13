@@ -3,11 +3,10 @@
 #include <unordered_set>
 #include <QReadWriteLock>
 
-#include "../Proto/network.pb.h"
+
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
-#include "../CommonLib/Hash.h"
 #include "IAppSignalUpdater.h"
 
 
@@ -98,24 +97,12 @@ namespace ClientLib
 		
 		// Cache protobuf messages
 		//
-		::Network::GetSignalListStartReply m_getSignalListStartReply;
-
-		::Network::GetSignalListNextRequest m_getSignalListNextRequest;
-		::Network::GetSignalListNextReply m_getSignalListNextReply;
-
 		std::vector<Hash> m_signalList;
 		std::set<Hash> m_busSignalHashes;		// Bus signal hash set. These hashes are later removed from m_signalList
 		std::set<Hash> m_signalStatesSet;		// Signal hash is added here when signal state is received
 
-		::Network::GetAppSignalParamRequest m_getSignalParamRequest;
-		::Network::GetAppSignalParamReply m_getSignalParamReply;
 		int m_lastSignalParamStartIndex = 0;
 
-		::Network::GetAppSignalStateChangesRequest m_getSignalStateChangesRequest;
-		::Network::GetAppSignalStateChangesReply m_getSignalStateChangesReply;
-
-		::Network::GetAppSignalStateRequest m_getSignalStateRequest;
-		::Network::GetAppSignalStateReply m_getSignalStateReply;
 		int m_lastSignalStateStartIndex = 0;
 
 		// Check that the server and client time is the same.

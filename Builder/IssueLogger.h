@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include "../UtilsLib/OutputLog.h"
 #include <QUuid>
 
@@ -193,8 +194,9 @@ namespace Builder
 
 		void errCFG3060(QString subSysID, int value, int max, int min);	// Subsystem %1 key has wrong value (%2), valid range is %3..%4.
 
-		void errCFG3100(QString equipmentId, int devicePresetVersion, QString presetName, int presetVersion);		// Device %1 has preset version mismatch (%1.PresetVersion = %2, %3.PresetVersion = %4). For updating presets select 'Update from Preset' in Equipment Editor.
-		void wrnCFG3101(QString equipmentId, int devicePresetVersion, QString presetName, int presetVersion);		// Device %1 has preset version mismatch (%1.PresetVersion = %2, %3.PresetVersion = %4). For updating presets select 'Update from Preset' in Equipment Editor.
+		void errCFG3100(QString equipmentId, int devicePresetVersion, QString presetName, int presetVersion);	// Device %1 has preset version mismatch (%1.PresetVersion = %2, %3.PresetVersion = %4). For updating presets select 'Update from Preset' in Equipment Editor.
+		void wrnCFG3101(QString equipmentId, int devicePresetVersion, QString presetName, int presetVersion);	// Device %1 has preset version mismatch (%1.PresetVersion = %2, %3.PresetVersion = %4). For updating presets select 'Update from Preset' in Equipment Editor.
+		void wrnCFG3102(QString equipmentId); // Device % 1 is excluded from build.
 
 		void errCFG3103(int LMNumber, QString module1, QString module2);	// Property System\\LMNumber (%1) is not unique in logic modules %2 and %3.
 
@@ -526,7 +528,12 @@ namespace Builder
 		void errEQP6010(QString equipmemtId);						// Device object %1 not found.
 		void errEQP6011(QString equipmemtId, QString buildStep);	// Device object %1 not found on %2.
 
-		void errEQP6020(QString lm, QUuid lmUuid);					//	Property lmDescriptionFile is empty
+		void errEQP6020(QString lm, QUuid lmUuid);					// Property lmDescriptionFile is empty
+		void errEQP6021(QString deviceEquipmentID, QString devicePropertyName, QUuid deviceUuid);	// Property %1.%2 is empty.
+		void errEQP6022(QString propertyValue,
+						QString device1EquipmentID,QUuid device1Uuid,
+						QString device2EquipmentID,QUuid device2Uuid,
+						QString devicePropertyName);				// Duplicate property value %1 in %2.%4 and %3.%4
 
 		void errEQP6030(QString profileName, QString errorMessage);	// Applying SimProfile %1 error: %2
 

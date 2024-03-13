@@ -2,7 +2,6 @@
 
 #include <queue>
 
-#include "../OnlineLib/SocketIO.h"
 #include "../OnlineLib/CircularLogger.h"
 #include "AppDataSource.h"
 #include "SignalStatesProcessingThread.h"

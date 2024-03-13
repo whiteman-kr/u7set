@@ -1,8 +1,6 @@
 #pragma once
 
 #include <QDialog>
-#include "../../CommonLib/PropertyObject.h"
-
 
 class ProjectPropertiesForm
 {

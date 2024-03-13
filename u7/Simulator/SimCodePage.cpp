@@ -13,7 +13,7 @@ SimCodeModel::SimCodeModel(SimIdeSimulator* simulator,
 	assert(simulator);
 	assert(lmEquipmentId.isEmpty() == false);
 
-	connect(m_simulator, &Sim::Simulator::projectUpdated, this, &SimCodeModel::dataChanged);
+	connect(m_simulator, &SimIdeSimulator::projectUpdated, this, &SimCodeModel::dataChanged);
 
 	dataChanged();	// First init
 

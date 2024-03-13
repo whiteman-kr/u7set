@@ -1,7 +1,10 @@
 #include "../lib/Configurator.h"
 #include "../UtilsLib/Crc.h"
-#include <QtEndian>
+#include <QApplication>
+#include <QDir>
 #include <QHostInfo>
+#include <QSerialPort>
+#include <QtEndian>
 #include <cstring>
 
 //#ifdef Q_OS_WIN32

@@ -1,12 +1,13 @@
+#include "ModuleConfigurator.h"
 #include "../lib/Configurator.h"
 #include "../lib/Ui/DialogAbout.h"
-
 #include "ApplicationTabPage.h"
 #include "DiagTabPage.h"
 #include "Globals.h"
-#include "ModuleConfigurator.h"
 #include "SettingsForm.h"
 #include "version.h"
+#include <QDragEnterEvent>
+#include <QMimeData>
 
 ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	: QMainWindow(parent)

@@ -1,4 +1,5 @@
 #include "MonitorSchemaManager.h"
+#include "MonitorConfigController.h"
 
 MonitorSchemaManager::MonitorSchemaManager(MonitorConfigController& configController,
 										   const ISignalDataServer& signalDataServer,

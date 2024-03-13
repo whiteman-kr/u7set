@@ -1,7 +1,4 @@
 #include "ProjectPropertyTests.h"
-#include <QtSql>
-#include <QString>
-#include <QDebug>
 #include "Settings.h"
 
 ProjectPropertyTests::ProjectPropertyTests()

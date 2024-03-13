@@ -1,7 +1,6 @@
 #pragma once
 
 #include "GatewayDescription.h"
-#include "../AppSignalLib/AppSignal.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/SoftwareInfo.h"
 #include "../OnlineLib/CircularLogger.h"

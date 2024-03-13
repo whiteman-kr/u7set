@@ -3,6 +3,8 @@
 #include <QDomDocument>
 #include "../CommonLib/HostAddressPort.h"
 
+class QSettings;
+
 namespace TestSuite
 {
 	class TestSuiteSettings

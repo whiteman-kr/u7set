@@ -1,7 +1,15 @@
 #include "DeviceHelper.h"
-#include "../UtilsLib/WUtils.h"
+
+#include <HardwareLib/DeviceChassis.h>
+#include <HardwareLib/DeviceModule.h>
+#include <HardwareLib/DeviceController.h>
+#include <HardwareLib/Software.h>
+
+#include "../CommonLib/HostAddressPort.h"
 #include "../OnlineLib/SocketIO.h"
+#include "../UtilsLib/WUtils.h"
 #include "../lib/ConstStrings.h"
+
 #include <QHostAddress>
 
 bool DeviceHelper::getIntProperty(const Hardware::DeviceObject* device, const QString& name, qint32* value, Builder::IssueLogger *log)
@@ -647,8 +655,6 @@ const Hardware::DeviceModule* DeviceHelper::getLmOrBvb(const Hardware::DeviceCha
 
 	return nullptr;
 }
-
-
 
 const Hardware::DeviceModule* DeviceHelper::getAssociatedLm(const Hardware::DeviceObject* object)
 {

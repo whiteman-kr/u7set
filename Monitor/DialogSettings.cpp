@@ -1,6 +1,7 @@
 #include "DialogSettings.h"
+#include "../ClientLib/ClientTranslator.h"
 #include "ui_DialogSettings.h"
-#include <QFileDialog>
+
 
 DialogSettings::DialogSettings(const ClientLib::ClientTranslator& translator, QWidget *parent) :
 	QDialog(parent),

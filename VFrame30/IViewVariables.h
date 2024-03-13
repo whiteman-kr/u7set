@@ -1,8 +1,9 @@
 #pragma once
+#include <QString>
+#include <QVariant>
 
 namespace VFrame30
 {
-
 	/*! \class IViewVariables
 	\brief An interface for accessing schema view variables.
 
@@ -20,5 +21,4 @@ namespace VFrame30
 		virtual void setVariable(const QString& name, const QVariant& value) = 0;
 	};
 
-}
-
+} // namespace VFrame30

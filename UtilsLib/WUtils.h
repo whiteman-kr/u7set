@@ -124,6 +124,12 @@
 										break; \
 									}
 
+#define BREAK_IF_TRUE(result)		if ((result) == true) \
+									{ \
+										break; \
+									}
+
+
 #define AUTO_LOCK(mutex) QMutexLocker _locker_##mutex(&mutex);
 
 #define C_STR(qstring) qstring.toStdString().c_str()
@@ -328,3 +334,15 @@ VALUE getValueOrNullptr(const std::map<KEY, VALUE>& map, const KEY& key)
 {
 	return getValueOrDefault<KEY, VALUE>(map, key, nullptr);
 }
+
+
+#ifdef __cpp_lib_hardware_interference_size
+	const std::size_t CACHE_LINE_SIZE = std::hardware_destructive_interference_size;
+#else
+	// 64 bytes on x86-64
+	const std::size_t CACHE_LINE_SIZE = 64;
+#endif
+
+#define ROUND_TO_CACHE_LINE_SIZE(size)	(((size + CACHE_LINE_SIZE - 1) / CACHE_LINE_SIZE) * CACHE_LINE_SIZE)
+#define CACHE_ALIGNED					alignas(CACHE_LINE_SIZE)
+

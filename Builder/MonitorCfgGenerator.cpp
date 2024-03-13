@@ -1,12 +1,12 @@
-#include "../OnlineLib/SoftwareSettings.h"
-#include "../VFrame30/Schema.h"
-#include "../lib/ClientBehavior.h"
-
-#include "Context.h"
 #include "MonitorCfgGenerator.h"
+#include "../OnlineLib/SoftwareSettings.h"
+#include "Context.h"
 #include "ScriptChecker.h"
 #include "SoftwareSettingsGetter.h"
 #include "TuningClientCfgGenerator.h"
+
+#include <Behavior/ClientBehaviorStorage.h>
+#include <Behavior/MonitorBehavior.h>
 
 
 namespace Builder
@@ -373,7 +373,7 @@ namespace Builder
 
 		// Load all clients behavior
 		//
-		ClientBehaviorStorage allBehaviorStorage;
+		Behavior::ClientBehaviorStorage allBehaviorStorage;
 		QString errorCode;
 		QByteArray dbData;
 		int etcFileId = m_dbController->systemFileId(DbDir::EtcDir);
@@ -393,11 +393,10 @@ namespace Builder
 
 		// Find behavior for current Monitor
 		//
-		ClientBehaviorStorage monitorBehaviorStorage;
+		Behavior::ClientBehaviorStorage monitorBehaviorStorage;
 
-		std::vector<std::shared_ptr<MonitorBehavior>> behaviors = allBehaviorStorage.monitorBehaviors();
-
-		for (auto b : behaviors)
+		for (auto behaviors = allBehaviorStorage.monitorBehaviors(); 
+			 auto b : behaviors)
 		{
 			if (b->behaviorId() == behaviorId)
 			{
@@ -419,7 +418,7 @@ namespace Builder
 
 		// Write file
 		//
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "MonitorBehavior.xml", CfgFileId::CLIENT_BEHAVIOR, "", data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), File::MONITOR_BEHAVIOR, CfgFileId::CLIENT_BEHAVIOR, "", data);
 		if (buildFile == nullptr)
 		{
 			return false;

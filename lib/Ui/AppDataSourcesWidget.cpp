@@ -1,7 +1,12 @@
 #include "AppDataSourcesWidget.h"
 #include "../UtilsLib/Ui/UiTools.h"
-
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QMenu>
 #include <QTreeWidget>
+#include <QTreeWidgetItem>
+#include <QVBoxLayout>
+
 
 //
 // DialogAppDataSourceInfo

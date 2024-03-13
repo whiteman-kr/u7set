@@ -1,5 +1,43 @@
 #include "EditSchemaWidget.h"
+#include "../AppSignalLib/Bus.h"
+#include "../AppSignalSetProvider.h"
+#include "../Builder/ConnectionStorage.h"
+#include "../ProjectDefaults.h"
+#include "../VFrame30/SchemaItems/SchemaItemAfb.h"
+#include "../VFrame30/SchemaItems/SchemaItemConst.h"
+#include "../VFrame30/SchemaItems/SchemaItemDiagValue.h"
+#include "../VFrame30/SchemaItems/SchemaItemImage.h"
+#include "../VFrame30/SchemaItems/SchemaItemImageValue.h"
+#include "../VFrame30/SchemaItems/SchemaItemIndicator.h"
+#include "../VFrame30/SchemaItems/SchemaItemLine.h"
+#include "../VFrame30/SchemaItems/SchemaItemLineEdit.h"
+#include "../VFrame30/SchemaItems/SchemaItemLink.h"
+#include "../VFrame30/SchemaItems/SchemaItemLoopback.h"
+#include "../VFrame30/SchemaItems/SchemaItemPath.h"
+#include "../VFrame30/SchemaItems/SchemaItemPushButton.h"
+#include "../VFrame30/SchemaItems/SchemaItemRect.h"
+#include "../VFrame30/SchemaItems/SchemaItemSignal.h"
+#include "../VFrame30/SchemaItems/SchemaItemSlider.h"
+#include "../VFrame30/SchemaItems/SchemaItemTerminator.h"
+#include "../VFrame30/SchemaItems/SchemaItemUfb.h"
+#include "../VFrame30/SchemaItems/SchemaItemValue.h"
+#include "../VFrame30/SchemaItems/SchemaItemVduLine.h"
+#include "../VFrame30/SchemaItems/SchemaItemVduRect.h"
+#include "../VFrame30/SchemaItems/SchemaItemVduValue.h"
+#include "../VFrame30/SchemaLayer.h"
+#include "../VFrame30/Session.h"
+#include "../VFrame30/UfbSchema.h"
+#include "../lib/CodeEditor.h"
+#include "../lib/QDoublevalidatorEx.h"
+#include "../lib/Ui/TextEditCompleter.h"
+
+#include <HardwareLib/LmDescription.h>
+
 #include "./EditEngine/EditEngine.h"
+#include "./Forms/ChooseAfbDialog.h"
+#include "./Forms/ChooseUfbDialog.h"
+#include "./Forms/ComparePropertyObjectDialog.h"
+
 #include "DbTagsEditor.h"
 #include "GlobalMessanger.h"
 #include "SchemaItemPropertiesDialog.h"
@@ -8,45 +46,7 @@
 #include "Settings.h"
 #include "SignalPropertiesDialog.h"
 
-#include "./Forms/ChooseAfbDialog.h"
-#include "./Forms/ChooseUfbDialog.h"
-#include "./Forms/ComparePropertyObjectDialog.h"
-
-#include "../lib/CodeEditor.h"
-#include "../lib/QDoublevalidatorEx.h"
-#include "../lib/Ui/TextEditCompleter.h"
-
-#include "../AppSignalSetProvider.h"
-#include "../Builder/ConnectionStorage.h"
-#include "../HardwareLib/LmDescription.h"
-
-#include "../VFrame30/Bus.h"
-#include "../VFrame30/SchemaItemAfb.h"
-#include "../VFrame30/SchemaItemConst.h"
-#include "../VFrame30/SchemaItemDiagValue.h"
-#include "../VFrame30/SchemaItemFrame.h"
-#include "../VFrame30/SchemaItemImage.h"
-#include "../VFrame30/SchemaItemImageValue.h"
-#include "../VFrame30/SchemaItemIndicator.h"
-#include "../VFrame30/SchemaItemLine.h"
-#include "../VFrame30/SchemaItemLineEdit.h"
-#include "../VFrame30/SchemaItemLink.h"
-#include "../VFrame30/SchemaItemLoopback.h"
-#include "../VFrame30/SchemaItemPath.h"
-#include "../VFrame30/SchemaItemPushButton.h"
-#include "../VFrame30/SchemaItemRect.h"
-#include "../VFrame30/SchemaItemSignal.h"
-#include "../VFrame30/SchemaItemSlider.h"
-#include "../VFrame30/SchemaItemTerminator.h"
-#include "../VFrame30/SchemaItemUfb.h"
-#include "../VFrame30/SchemaItemValue.h"
-#include "../VFrame30/SchemaItemVduLine.h"
-#include "../VFrame30/SchemaItemVduRect.h"
-#include "../VFrame30/SchemaItemVduValue.h"
-#include "../VFrame30/SchemaLayer.h"
-#include "../VFrame30/Session.h"
-#include "../VFrame30/UfbSchema.h"
-#include "../VFrame30/VduSchema.h"
+#include <QWindow>
 
 
 const EditSchemaWidget::MouseStateCursor EditSchemaWidget::m_mouseStateCursor[] =
@@ -424,6 +424,7 @@ void EditSchemaWidget::createActions()
 	m_addLineAction = new QAction(tr("Line"), this);
 	m_addLineAction->setEnabled(true);
 	m_addLineAction->setIcon(QIcon(":/Images/Images/SchemaLine.svg"));
+	m_addLineAction->setToolTip(tr("Static Line\nType: SchemaItemLine"));
 	connect(m_addLineAction, &QAction::triggered,
 			[this](bool)
 			{
@@ -433,6 +434,7 @@ void EditSchemaWidget::createActions()
 	m_addPathAction = new QAction(tr("Path"), this);
 	m_addPathAction->setEnabled(true);
 	m_addPathAction->setIcon(QIcon(":/Images/Images/SchemaPath.svg"));
+	m_addPathAction->setToolTip(tr("Static Path\nType: SchemaItemPath"));
 	connect(m_addPathAction, &QAction::triggered,
 			[this](bool)
 			{
@@ -442,6 +444,7 @@ void EditSchemaWidget::createActions()
 	m_addRectAction = new QAction(tr("Rect"), this);
 	m_addRectAction->setEnabled(true);
 	m_addRectAction->setIcon(QIcon(":/Images/Images/SchemaRect.svg"));
+	m_addRectAction->setToolTip(tr("Static Rect\nType: SchemaItemRect"));
 	connect(m_addRectAction, &QAction::triggered,
 			[this](bool)
 			{
@@ -451,6 +454,7 @@ void EditSchemaWidget::createActions()
 	m_addTextAction = new QAction(tr("Text"), this);
 	m_addTextAction->setEnabled(true);
 	m_addTextAction->setIcon(QIcon(":/Images/Images/SchemaText.svg"));
+	m_addTextAction->setToolTip(tr("Static Rect\nType: SchemaItemRect"));
 	connect(m_addTextAction, &QAction::triggered,
 			[this](bool)
 			{
@@ -464,6 +468,7 @@ void EditSchemaWidget::createActions()
 	m_addImageAction = new QAction(tr("Image"), this);
 	m_addImageAction->setEnabled(true);
 	m_addImageAction->setIcon(QIcon(":/Images/Images/SchemaItemImage.svg"));
+	m_addImageAction->setToolTip(tr("Static Image\nType: SchemaItemImage"));
 	connect(m_addImageAction, &QAction::triggered,
 			[this](bool)
 			{
@@ -474,6 +479,7 @@ void EditSchemaWidget::createActions()
 //	m_addFrameAction = new QAction(tr("Frame"), this);
 //	m_addFrameAction->setEnabled(true);
 //	m_addFrameAction->setIcon(QIcon(":/Images/Images/SchemaItemFrame.svg"));
+// 	m_addFrameAction->setToolTip(tr("Static Frame\nType: SchemaItemFrame"));
 //	connect(m_addFrameAction, &QAction::triggered,
 //			[this](bool)
 //			{
@@ -487,6 +493,7 @@ void EditSchemaWidget::createActions()
 	m_addLinkAction = new QAction(tr("Link"), this);
 	m_addLinkAction->setEnabled(true);
 	m_addLinkAction->setIcon(QIcon(":/Images/Images/SchemaLink.svg"));
+	m_addLinkAction->setToolTip(tr("Link\nType: SchemaItemLink"));
 	connect(m_addLinkAction, &QAction::triggered,
 			[this](bool)
 			{
@@ -496,6 +503,7 @@ void EditSchemaWidget::createActions()
 	m_addInputSignalAction = new QAction(tr("Input"), this);
 	m_addInputSignalAction->setEnabled(true);
 	m_addInputSignalAction->setIcon(QIcon(":/Images/Images/SchemaInputSignal.svg"));
+	m_addInputSignalAction->setToolTip(tr("Input\nType: SchemaItemInput"));
 	connect(m_addInputSignalAction, &QAction::triggered,
 			[this](bool)
 			{
@@ -506,6 +514,7 @@ void EditSchemaWidget::createActions()
 	m_addInOutSignalAction = new QAction(tr("In/Out"), this);
 	m_addInOutSignalAction->setEnabled(true);
 	m_addInOutSignalAction->setIcon(QIcon(":/Images/Images/SchemaInOutSignal.svg"));
+	m_addInOutSignalAction->setToolTip(tr("In/Out\nType: SchemaItemInOut"));
 	connect(m_addInOutSignalAction, &QAction::triggered,
 			[this](bool)
 			{
@@ -516,6 +525,7 @@ void EditSchemaWidget::createActions()
 	m_addOutputSignalAction = new QAction(tr("Output"), this);
 	m_addOutputSignalAction->setEnabled(true);
 	m_addOutputSignalAction->setIcon(QIcon(":/Images/Images/SchemaOutputSignal.svg"));
+	m_addOutputSignalAction->setToolTip(tr("Output\nType: SchemaItemOutput"));
 	connect(m_addOutputSignalAction, &QAction::triggered,
 			[this](bool)
 			{
@@ -526,6 +536,7 @@ void EditSchemaWidget::createActions()
 	m_addConstantAction = new QAction(tr("Constant"), this);
 	m_addConstantAction->setEnabled(true);
 	m_addConstantAction->setIcon(QIcon(":/Images/Images/SchemaConstant.svg"));
+	m_addConstantAction->setToolTip(tr("Constant\nType: SchemaItemConst"));
 	connect(m_addConstantAction, &QAction::triggered,
 			[this](bool)
 			{
@@ -535,6 +546,7 @@ void EditSchemaWidget::createActions()
 	m_addTerminatorAction = new QAction(tr("Terminator"), this);
 	m_addTerminatorAction->setEnabled(true);
 	m_addTerminatorAction->setIcon(QIcon(":/Images/Images/SchemaTerminator.svg"));
+	m_addTerminatorAction->setToolTip(tr("Terminator\nType: SchemaItemTerminator"));
 	connect(m_addTerminatorAction, &QAction::triggered,
 			[this](bool)
 			{
@@ -548,11 +560,13 @@ void EditSchemaWidget::createActions()
 	m_addAfbAction = new QAction(tr("App Functional Block"), this);
 	m_addAfbAction->setEnabled(true);
 	m_addAfbAction->setIcon(QIcon(":/Images/Images/SchemaFblElement.svg"));
+	m_addAfbAction->setToolTip(tr("App Functional Block\nType: SchemaItemAfb"));
 	connect(m_addAfbAction, &QAction::triggered, this, &EditSchemaWidget::addAfbElement);
 
 	m_addUfbAction = new QAction(tr("User Functional Block"), this);
 	m_addUfbAction->setEnabled(true);
 	m_addUfbAction->setIcon(QIcon(":/Images/Images/SchemaUfbElement.svg"));
+	m_addUfbAction->setToolTip(tr("App Functional Block\nType: SchemaItemUfb"));
 	connect(m_addUfbAction, &QAction::triggered, this, &EditSchemaWidget::addUfbElement);
 
 	// ----------------------------------------
@@ -562,11 +576,13 @@ void EditSchemaWidget::createActions()
 	m_addTransmitter = new QAction(tr("Transmitter"), this);
 	m_addTransmitter->setEnabled(true);
 	m_addTransmitter->setIcon(QIcon(":/Images/Images/SchemaTransmitter.svg"));
+	m_addTransmitter->setToolTip(tr("Transmitter\nType: SchemaItemTransmitter"));
 	connect(m_addTransmitter, &QAction::triggered, this, &EditSchemaWidget::addTransmitter);
 
 	m_addReceiver = new QAction(tr("Receiver"), this);
 	m_addReceiver->setEnabled(true);
 	m_addReceiver->setIcon(QIcon(":/Images/Images/SchemaReceiver.svg"));
+	m_addReceiver->setToolTip(tr("Receiver\nType: SchemaItemReceiver"));
 	connect(m_addReceiver, &QAction::triggered, this, &EditSchemaWidget::addReceiver);
 
 	// ----------------------------------------
@@ -576,11 +592,13 @@ void EditSchemaWidget::createActions()
 	m_addLoopbackSource = new QAction(tr("Loopback Source"), this);
 	m_addLoopbackSource->setEnabled(true);
 	m_addLoopbackSource->setIcon(QIcon(":/Images/Images/SchemaLoopbackSource.svg"));
+	m_addLoopbackSource->setToolTip(tr("Loopback Source\nType: SchemaItemLoopbackSource"));
 	connect(m_addLoopbackSource, &QAction::triggered, this, &EditSchemaWidget::addLoopbackSource);
 
 	m_addLoopbackTarget = new QAction(tr("Loopback Target"), this);
 	m_addLoopbackTarget->setEnabled(true);
 	m_addLoopbackTarget->setIcon(QIcon(":/Images/Images/SchemaLoopbackTarget.svg"));
+	m_addLoopbackTarget->setToolTip(tr("Loopback Target\nType: SchemaItemLoopbackTarget"));
 	connect(m_addLoopbackTarget, &QAction::triggered, this, &EditSchemaWidget::addLoopbackTarget);
 
 	// ----------------------------------------
@@ -590,17 +608,20 @@ void EditSchemaWidget::createActions()
 	m_addBusComposer = new QAction(tr("Bus Composer"), this);
 	m_addBusComposer->setEnabled(true);
 	m_addBusComposer->setIcon(QIcon(":/Images/Images/SchemaBusComposer.svg"));
+	m_addBusComposer->setToolTip(tr("Bus Composer\nType: SchemaItemBusComposer"));
 	connect(m_addBusComposer, &QAction::triggered, this, &EditSchemaWidget::addBusComposer);
 
 	m_addBusExtractor = new QAction(tr("Bus Extractor"), this);
 	m_addBusExtractor->setEnabled(true);
 	m_addBusExtractor->setIcon(QIcon(":/Images/Images/SchemaBusExtractor.svg"));
+	m_addBusExtractor->setToolTip(tr("Bus Extractor\nType: SchemaItemBusExtractor"));
 	connect(m_addBusExtractor, &QAction::triggered, this, &EditSchemaWidget::addBusExtractor);
 
 
 	m_addValueAction = new QAction(tr("Value"), this);
 	m_addValueAction->setEnabled(true);
 	m_addValueAction->setIcon(QIcon(":/Images/Images/SchemaItemValue.svg"));
+	m_addValueAction->setToolTip(tr("Value\nType: SchemaItemValue"));
 	connect(m_addValueAction, &QAction::triggered,
 			[this](bool)
 			{
@@ -611,6 +632,7 @@ void EditSchemaWidget::createActions()
 	m_addImageValueAction = new QAction(tr("Image Value"), this);
 	m_addImageValueAction->setEnabled(true);
 	m_addImageValueAction->setIcon(QIcon(":/Images/Images/SchemaItemImageValue.svg"));
+	m_addImageValueAction->setToolTip(tr("Image Value\nType: SchemaItemImageValue"));
 	connect(m_addImageValueAction, &QAction::triggered,
 			[this](bool)
 	{
@@ -621,6 +643,7 @@ void EditSchemaWidget::createActions()
 	m_addPushButtonAction = new QAction(tr("PushButton"), this);
 	m_addPushButtonAction->setEnabled(true);
 	m_addPushButtonAction->setIcon(QIcon(":/Images/Images/SchemaItemPushButton.svg"));
+	m_addPushButtonAction->setToolTip(tr("PushButton\nType: SchemaItemPushButton"));
 	connect(m_addPushButtonAction, &QAction::triggered,
 			[this](bool)
 			{
@@ -631,6 +654,7 @@ void EditSchemaWidget::createActions()
 	m_addLineEditAction = new QAction(tr("LineEdit"), this);
 	m_addLineEditAction->setEnabled(true);
 	m_addLineEditAction->setIcon(QIcon(":/Images/Images/SchemaItemLineEdit.svg"));
+	m_addLineEditAction->setToolTip(tr("LineEdit\nType: SchemaItemLineEdit"));
 	connect(m_addLineEditAction, &QAction::triggered,
 			[this](bool)
 			{
@@ -641,6 +665,7 @@ void EditSchemaWidget::createActions()
 	m_addSliderAction = new QAction(tr("Slider"), this);
 	m_addSliderAction->setEnabled(true);
 	m_addSliderAction->setIcon(QIcon(":/Images/Images/SchemaItemSlider.svg"));
+	m_addSliderAction->setToolTip(tr("Slider\nType: SchemaItemSlider"));
 	connect(m_addSliderAction, &QAction::triggered,
 			[this](bool)
 			{
@@ -651,6 +676,7 @@ void EditSchemaWidget::createActions()
 	m_addIndicatorAction = new QAction(tr("Indicator"), this);
 	m_addIndicatorAction->setEnabled(true);
 	m_addIndicatorAction->setIcon(QIcon(":/Images/Images/SchemaItemIndicator.svg"));
+	m_addIndicatorAction->setToolTip(tr("Indicator\nType: SchemaItemIndicator"));
 	connect(m_addIndicatorAction, &QAction::triggered,
 			[this](bool)
 	{
@@ -663,6 +689,7 @@ void EditSchemaWidget::createActions()
 	m_addDiagSignalAction = new QAction(tr("DiagValue"), this);
 	m_addDiagSignalAction->setEnabled(true);
 	m_addDiagSignalAction->setIcon(QIcon(":/Images/Images/SchemaItemDiagValue.svg"));
+	m_addDiagSignalAction->setToolTip(tr("DiagValue\nType: SchemaItemDiagValue"));
 	connect(m_addDiagSignalAction, &QAction::triggered,
 			[this](bool)
 			{
@@ -2159,6 +2186,16 @@ void EditSchemaWidget::mouseLeftUp_Moving(QMouseEvent* event)
 			});
 
 		m_editEngine->runAddItem(newItems, editSchemaView()->activeLayer());
+
+		// Apply default values, and undo, so user can choose between a clear copy or a copy with applied default values.
+		//
+		bool defaultsWereSet = setDefaultItemProperties(newItems);
+		if (defaultsWereSet == true)
+		{
+			// Undo one time that user can select what to take, a clear item copy or modified with default properties.
+			//
+			undo();
+		}
 	}
 
 	resetAction();
@@ -2336,7 +2373,10 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosLineEndPoint(QMouseEvent* event)
 	{
 		// Add item to the active layer
 		//
-		m_editEngine->runAddItem(editSchemaView()->m_newItem, editSchemaView()->activeLayer());
+		auto newItem = editSchemaView()->m_newItem;
+
+		runAddItem(newItem, editSchemaView()->activeLayer());
+		/*bool defaultsWereSet = */setDefaultItemProperties(std::list{newItem});
 	}
 
 	resetAction();
@@ -2391,7 +2431,10 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosRectEndPoint(QMouseEvent* event)
 	{
 		// �������� ������� � �������� ����
 		//
-		m_editEngine->runAddItem(editSchemaView()->m_newItem, editSchemaView()->activeLayer());
+		auto newItem = editSchemaView()->m_newItem;
+		runAddItem(newItem, editSchemaView()->activeLayer());
+
+		/*bool defaultsWereSet = */setDefaultItemProperties(std::list{newItem});
 	}
 
 	resetAction();
@@ -2622,7 +2665,10 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 				itemPos->SetPointList(newPoints);
 				assert(itemPos->GetPointList().size() >= 2);
 
-				m_editEngine->runAddItem(editSchemaView()->m_newItem, activeLayer());
+				auto newItem = editSchemaView()->m_newItem;
+				runAddItem(newItem, activeLayer());
+
+				/*bool defaultsWereSet = */setDefaultItemProperties(std::list{newItem});
 			}
 		}
 	}
@@ -3415,7 +3461,7 @@ bool EditSchemaWidget::updateBussesForSchema()
 
 	// Get Bus list
 	//
-	std::vector<VFrame30::Bus> busses;
+	std::vector<AppSignalLib::Bus> busses;
 
 	bool ok = loadBusses(db(), &busses, this);
 
@@ -3522,6 +3568,46 @@ void EditSchemaWidget::addItem(SchemaItemPtr newItem)
 	}
 
 	return;
+}
+
+void EditSchemaWidget::runAddItem(SchemaItemPtr item, std::shared_ptr<VFrame30::SchemaLayer> layer)
+{
+	std::list<SchemaItemPtr> list{item};
+	return runAddItem(list, layer);
+}
+
+void EditSchemaWidget::runAddItem(const std::list<SchemaItemPtr>& items, std::shared_ptr<VFrame30::SchemaLayer> layer)
+{
+	bool ok = m_editEngine->runAddItem(items, layer);
+	if (ok == false)
+	{
+		return;
+	}
+
+	return;
+}
+
+bool EditSchemaWidget::setDefaultItemProperties(const auto& items)
+{
+	// Update properties to default values
+	//
+	const auto& pd = ProjectDefaults::instance();
+
+	bool canByApplied = std::any_of(items.cbegin(),
+									items.cend(),
+									[&pd](const SchemaItemPtr& item)
+									{
+										return pd.hasSection(item->type());
+									});
+
+	if (canByApplied == false)
+	{
+		return false;
+	}
+
+	m_editEngine->runApplyDefaultProperty(pd, std::vector<SchemaItemPtr>{items.begin(), items.end()});
+
+	return true;
 }
 
 void EditSchemaWidget::setMouseCursor(QPoint mousePos)
@@ -4140,7 +4226,8 @@ void EditSchemaWidget::createProposedAfbLink(const std::vector<AutoFblConnection
 		addItems.push_back(linkItem);
 	}
 
-	m_editEngine->runAddItem(addItems, activeLayer());
+	runAddItem(addItems, activeLayer());
+	/*bool defaultsWereSet = */setDefaultItemProperties(addItems);
 
 	return;
 }
@@ -4332,7 +4419,7 @@ bool EditSchemaWidget::loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbS
 	return true;
 }
 
-bool EditSchemaWidget::loadBusses(DbController* db, std::vector<VFrame30::Bus>* out, QWidget* parentWidget)
+bool EditSchemaWidget::loadBusses(DbController* db, std::vector<AppSignalLib::Bus>* out, QWidget* parentWidget)
 {
 	if (db == nullptr ||
 		out == nullptr)
@@ -4386,7 +4473,7 @@ bool EditSchemaWidget::loadBusses(DbController* db, std::vector<VFrame30::Bus>* 
 
 	// Parse files, create actual Busses
 	//
-	std::vector<VFrame30::Bus> busses;
+	std::vector<AppSignalLib::Bus> busses;
 	busses.reserve(files.size());
 
 	for (const std::shared_ptr<DbFile>& f : files)
@@ -4397,7 +4484,7 @@ bool EditSchemaWidget::loadBusses(DbController* db, std::vector<VFrame30::Bus>* 
 			continue;
 		}
 
-		VFrame30::Bus bus;
+		AppSignalLib::Bus bus;
 		ok = bus.Load(f->data());
 
 		if (ok == false)
@@ -4410,7 +4497,7 @@ bool EditSchemaWidget::loadBusses(DbController* db, std::vector<VFrame30::Bus>* 
 	}
 
 	std::sort(busses.begin(), busses.end(),
-			[](const VFrame30::Bus& b1, const VFrame30::Bus& b2) -> bool
+			[](const AppSignalLib::Bus& b1, const AppSignalLib::Bus& b2) -> bool
 			{
 				return b1.busTypeId() < b2.busTypeId();
 			});
@@ -6512,7 +6599,7 @@ void EditSchemaWidget::f2KeyForBus(SchemaItemPtr item)
 
 	// Get Bus list
 	//
-	std::vector<VFrame30::Bus> busses;
+	std::vector<AppSignalLib::Bus> busses;
 
 	bool ok = loadBusses(db(), &busses, this);
 
@@ -6575,7 +6662,7 @@ void EditSchemaWidget::f2KeyForBus(SchemaItemPtr item)
 	if (result == QDialog::Accepted && text != busTypeCombo->currentText())
 	{
 		int selectedBusIndex = busTypeCombo->currentData().toInt();
-		const VFrame30::Bus& newBus = busses[selectedBusIndex];
+		const AppSignalLib::Bus& newBus = busses[selectedBusIndex];
 
 		QByteArray oldState;
 		busItem->saveToByteArray(&oldState);
@@ -7098,14 +7185,22 @@ void EditSchemaWidget::editPaste()
 				 schemaItemConnectionIsPresent == true ||
 				 schemaItemInOutIsPresent == true))
 			{
-				QMessageBox::critical(this, qAppName(), tr("Adding In/Outs, Transmiters/Receivers, User Functional Blocks to UFB Schema is impossible."));
+				QMessageBox::critical(this, qAppName(), tr("Adding In/Outs, Transmitters/Receivers, User Functional Blocks to UFB Schema is impossible."));
 				return;
 			}
 
 			m_editEngine->runAddItem(itemList, editSchemaView()->activeLayer());
+
+			bool defaultsWereSet = setDefaultItemProperties(itemList);
+			if (defaultsWereSet == true)
+			{
+				// Undo one time that user can select what to take, a clear item copy or modified with default properties.
+				//
+				undo();
+			}
 		}
 
-		// If new itesm has differeten afb/ufb description version
+		// If new items has different afb/ufb description version
 		// then they will be updated to the current version
 		//
 		if (schemaItemAfbIsPresent == true)
@@ -8056,7 +8151,7 @@ void EditSchemaWidget::addBusItem(std::shared_ptr<VFrame30::SchemaItemBus> schem
 
 	// Get Bus list
 	//
-	std::vector<VFrame30::Bus> busses;
+	std::vector<AppSignalLib::Bus> busses;
 
 	bool ok = loadBusses(db(), &busses, this);
 
@@ -8073,7 +8168,7 @@ void EditSchemaWidget::addBusItem(std::shared_ptr<VFrame30::SchemaItemBus> schem
 	QObject actionParent;
 	QList<QAction*> menuActions;
 
-	for (const VFrame30::Bus& bus : busses)
+	for (const AppSignalLib::Bus& bus : busses)
 	{
 		QString caption = QString("%1").arg(bus.busTypeId());
 		QAction* a = new QAction(caption , &actionParent);
@@ -8094,7 +8189,7 @@ void EditSchemaWidget::addBusItem(std::shared_ptr<VFrame30::SchemaItemBus> schem
 	//
 	QString selectedBusId = triggeredAction->data().toString();
 
-	for (const VFrame30::Bus& bus : busses)
+	for (const AppSignalLib::Bus& bus : busses)
 	{
 		if (bus.busTypeId() == selectedBusId)
 		{
@@ -9787,6 +9882,16 @@ void EditSchemaWidget::transformIntoInput()
 		m_editEngine->runAddItem(newItems, activeLayer());
 
 		m_editEngine->endBatch();
+
+		// Apply default values, and undo, so user can choose between a clear copy or a copy with applied default values.
+		//
+		bool defaultsWereSet = setDefaultItemProperties(newItems);
+		if (defaultsWereSet == true)
+		{
+			// Undo one time that user can select what to take, a clear item copy or modified with default properties.
+			//
+			undo();
+		}
 	}
 
 	return;
@@ -9829,6 +9934,16 @@ void EditSchemaWidget::transformIntoInOut()
 		m_editEngine->runAddItem(newItems, activeLayer());
 
 		m_editEngine->endBatch();
+
+		// Apply default values, and undo, so user can choose between a clear copy or a copy with applied default values.
+		//
+		bool defaultsWereSet = setDefaultItemProperties(newItems);
+		if (defaultsWereSet == true)
+		{
+			// Undo one time that user can select what to take, a clear item copy or modified with default properties.
+			//
+			undo();
+		}
 	}
 
 	return;
@@ -9871,6 +9986,16 @@ void EditSchemaWidget::transformIntoOutput()
 		m_editEngine->runAddItem(newItems, activeLayer());
 
 		m_editEngine->endBatch();
+
+		// Apply default values, and undo, so user can choose between a clear copy or a copy with applied default values.
+		//
+		bool defaultsWereSet = setDefaultItemProperties(newItems);
+		if (defaultsWereSet == true)
+		{
+			// Undo one time that user can select what to take, a clear item copy or modified with default properties.
+			//
+			undo();
+		}
 	}
 
 	return;

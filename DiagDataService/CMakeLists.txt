@@ -18,8 +18,6 @@ set(TARGET DiagDataSrv)
 add_executable(${TARGET}
 	../lib/DataSource.cpp
 	../lib/DataSource.h
-	DiagDataReceiver.cpp
-	DiagDataReceiver.h
 	DiagDataService.cpp
 	DiagDataService.h
 	DiagDataServiceMain.cpp
@@ -27,8 +25,6 @@ add_executable(${TARGET}
 	DiagDataSource.h
 	DynamicDiagSignalState.cpp
 	DynamicDiagSignalState.h
-	SignalStatesProcessingThread.cpp
-	SignalStatesProcessingThread.h
 )
 
 target_precompile_headers(${TARGET} PRIVATE
@@ -87,6 +83,13 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QVector>
 	<QXmlStreamReader>
 	<QXmlStreamWriter>
+
+	"../CommonLib/Types.h"
+	"../CommonLib/Hash.h"
+	"../CommonLib/PropertyObject.h"
+	
+	"../Proto/ProtoSerialization.h"
+	"../Proto/Network.pb.h"	
 )
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
@@ -95,7 +98,7 @@ target_include_directories(${TARGET} PRIVATE ./../asio/include)
 target_compile_definitions(${TARGET} PRIVATE ASIO_STANDALONE=1)
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Network Qt6::Widgets Qt6::Qml Qt6::Xml)
-target_link_libraries(${TARGET} PRIVATE HardwareLib AppSignalLib OnlineLib ServiceLib)
+target_link_libraries(${TARGET} PRIVATE HardwareLib AppSignalLib OnlineLib ServiceLib DiagStateLib) 
 
 # Link Visaul Leak Detector
 #

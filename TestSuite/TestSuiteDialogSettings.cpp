@@ -1,5 +1,8 @@
 #include "TestSuiteDialogSettings.h"
 #include "ui_TestSuiteDialogSettings.h"
+#include <QFileDialog>
+#include <QScreen>
+
 
 TestSuiteDialogSettings::TestSuiteDialogSettings(const ClientLib::ClientTranslator& translator, QWidget *parent) :
 	QDialog(parent),

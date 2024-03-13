@@ -4,7 +4,6 @@
 #include <list>
 
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../Proto/network.pb.h"
 #include "../UtilsLib/ILogFile.h"
 #include "../OnlineLib/SoftwareInfo.h"
 #include "TcpAppSourcesState.h"

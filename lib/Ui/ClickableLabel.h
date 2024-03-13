@@ -1,8 +1,7 @@
 #pragma once
 
 #include <QLabel>
-#include <QWidget>
-#include <Qt>
+
 
 class ClickableLabel : public QLabel 
 { 

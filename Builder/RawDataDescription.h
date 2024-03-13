@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../CommonLib/Types.h"
 #include "IssueLogger.h"
 
 namespace Hardware

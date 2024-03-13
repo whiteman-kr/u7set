@@ -1,9 +1,12 @@
 #pragma once
 
-#include "../SchemaClientLib/ClientSchemaManager.h"
+#include <SchemaClientLib/ClientSchemaManager.h>
 #include "../lib/ISignalDataServer.h"
 #include "./Trend/RtSchemaTrend.h"
-#include "MonitorConfigController.h"
+
+
+class MonitorConfigController;
+
 
 class MonitorSchemaManager : public SchemaClientLib::ClientSchemaManager
 {

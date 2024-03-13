@@ -4,7 +4,6 @@
 
 #include "LogFile.h"
 #include "./Ui/UiTools.h"
-#include "../CommonLib/Hash.h"
 
 //#define LOGFILE_USE_HEADER	// Uncomment this to use header
 

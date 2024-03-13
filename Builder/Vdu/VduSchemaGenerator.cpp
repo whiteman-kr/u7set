@@ -1,11 +1,14 @@
 #include "VduSchemaGenerator.h"
 #include "../../VFrame30/DrawParam.h"
-#include "../../VFrame30/SchemaItemVduLine.h"
-#include "../../VFrame30/SchemaItemVduRect.h"
-#include "../../VFrame30/SchemaItemVduValue.h"
+#include "../../VFrame30/SchemaItems/SchemaItemVduLine.h"
+#include "../../VFrame30/SchemaItems/SchemaItemVduRect.h"
+#include "../../VFrame30/SchemaItems/SchemaItemVduValue.h"
 #include "../../VFrame30/SchemaView.h"
 #include "../../VFrame30/VduSchema.h"
 #include "VduSchemaFile.h"
+
+#include <QPageSize>
+#include <QPainter>
 
 namespace Builder
 {

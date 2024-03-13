@@ -1,5 +1,4 @@
 #pragma once
-#include "../AppSignalLib/AppSignal.h"
 #include "SimScriptRamAddress.h"
 
 namespace Sim

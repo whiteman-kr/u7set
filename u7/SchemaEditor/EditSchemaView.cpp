@@ -1,13 +1,13 @@
 #include "EditSchemaView.h"
 
+#include "../../VFrame30/Context.h"
 #include "../../VFrame30/DrawParam.h"
 #include "../../VFrame30/LogicSchema.h"
-#include "../../VFrame30/PosConnectionImpl.h"
-#include "../../VFrame30/PosLineImpl.h"
-#include "../../VFrame30/PosRectImpl.h"
-#include "../../VFrame30/PosRectRotatable.h"
+#include "../../VFrame30/SchemaItems/PosConnectionImpl.h"
+#include "../../VFrame30/SchemaItems/PosLineImpl.h"
+#include "../../VFrame30/SchemaItems/PosRectImpl.h"
+#include "../../VFrame30/SchemaItems/PosRectRotatable.h"
 #include "../../VFrame30/SchemaLayer.h"
-#include "../../VFrame30/VFrameTools.h"
 #include "../GlobalMessanger.h"
 #include "../Settings.h"
 

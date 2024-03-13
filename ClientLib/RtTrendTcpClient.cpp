@@ -1,5 +1,16 @@
 #include "RtTrendTcpClient.h"
 
+
+namespace
+{
+	thread_local Network::RtTrendsManagementRequest tl_managementRequest;
+	thread_local Network::RtTrendsManagementReply tl_managementReply;
+
+	thread_local Network::RtTrendsGetStateChangesRequest tl_stateChangesRequest;
+	thread_local Network::RtTrendsGetStateChangesReply tl_stateChangesReply;
+}
+
+
 namespace ClientLib
 {
 	RtTrendTcpClient::RtTrendTcpClient(const SoftwareInfo& softwareInfo,
@@ -176,7 +187,7 @@ namespace ClientLib
 		Q_ASSERT(isClearToSendRequest());
 		incStatRequestCount();
 
-		m_managementRequest.Clear();
+		tl_managementRequest.Clear();
 
 		// --
 		//
@@ -197,8 +208,8 @@ namespace ClientLib
 
 		// --
 		//
-		m_managementRequest.set_clientequipmentid(equipmentID().toStdString());
-		m_managementRequest.set_sampleperiod(static_cast<int>(samplePeriod));
+		tl_managementRequest.set_clientequipmentid(equipmentID().toStdString());
+		tl_managementRequest.set_sampleperiod(static_cast<int>(samplePeriod));
 
 		// Add signals for tracking
 		//
@@ -206,7 +217,7 @@ namespace ClientLib
 		{
 			if (m_trackedSignals.contains(signalHash) == false)
 			{
-				m_managementRequest.add_appendsignalhashes(signalHash);
+				tl_managementRequest.add_appendsignalhashes(signalHash);
 			}
 		}
 
@@ -216,20 +227,20 @@ namespace ClientLib
 		{
 			if (signalSet.contains(trackedSignalHash) == false)
 			{
-				m_managementRequest.add_deletesignalhashes(trackedSignalHash);
+				tl_managementRequest.add_deletesignalhashes(trackedSignalHash);
 			}
 		}
 
 		// --
 		//
-		sendRequest(RT_TRENDS_MANAGEMENT, m_managementRequest);
+		sendRequest(RT_TRENDS_MANAGEMENT, tl_managementRequest);
 
 		return;
 	}
 
 	void RtTrendTcpClient::processTrendManagement(const QByteArray& data)
 	{
-		bool ok = m_managementReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
+		bool ok = tl_managementReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 
 		if (ok == false)
 		{
@@ -240,21 +251,21 @@ namespace ClientLib
 			return;
 		}
 
-		int error = m_managementReply.error();
+		int error = tl_managementReply.error();
 		if (error != 0)
 		{
-			emit requestError(QString::fromStdString(m_managementReply.errorstring()));
-			m_logFile.writeError(QString("processTrendManagement, error received ") + QString::fromStdString(m_managementReply.errorstring()));
+			emit requestError(QString::fromStdString(tl_managementReply.errorstring()));
+			m_logFile.writeError(QString("processTrendManagement, error received ") + QString::fromStdString(tl_managementReply.errorstring()));
 
 			closeConnection();
 			return;
 		}
 
 		m_trackedSignals.clear();
-		int trackedSignalCount = m_managementReply.trackedsignalhashes_size();
+		int trackedSignalCount = tl_managementReply.trackedsignalhashes_size();
 		for (int i = 0; i < trackedSignalCount; i++)
 		{
-			Hash h = m_managementReply.trackedsignalhashes(i);
+			Hash h = tl_managementReply.trackedsignalhashes(i);
 			m_trackedSignals.insert(h);
 		}
 
@@ -270,18 +281,18 @@ namespace ClientLib
 		Q_ASSERT(isClearToSendRequest());
 		incStatRequestCount();
 
-		m_stateChangesRequest.Clear();
+		tl_stateChangesRequest.Clear();
 
 		// --
 		//
-		sendRequest(RT_TRENDS_GET_STATE_CHANGES, m_managementRequest);
+		sendRequest(RT_TRENDS_GET_STATE_CHANGES, tl_managementRequest);
 
 		return;
 	}
 
 	void RtTrendTcpClient::processTrendStateChanges(const QByteArray& data)
 	{
-		bool ok = m_stateChangesReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
+		bool ok = tl_stateChangesReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 
 		if (ok == false)
 		{
@@ -292,10 +303,10 @@ namespace ClientLib
 			return;
 		}
 
-		int error = m_stateChangesReply.error();
+		int error = tl_stateChangesReply.error();
 		if (error != 0)
 		{
-			emit requestError(QString::fromStdString(m_stateChangesReply.errorstring()));
+			emit requestError(QString::fromStdString(tl_stateChangesReply.errorstring()));
 			closeConnection();
 			return;
 		}
@@ -308,13 +319,13 @@ namespace ClientLib
 		TrendLib::TrendStateItem minState{};	// Initialized by zeroes
 		TrendLib::TrendStateItem maxState{};	// Initialized by zeroes
 
-		int stateCount = m_stateChangesReply.signalstates_size();
+		int stateCount = tl_stateChangesReply.signalstates_size();
 
 		//qDebug() << "RtTrendTcpClient::processTrendStateChanges: Received states  " << stateCount;
 
 		for (int i = 0; i < stateCount; i++)
 		{
-			const ::Proto::AppSignalState& stateMessage = m_stateChangesReply.signalstates(i);
+			const ::Proto::AppSignalState& stateMessage = tl_stateChangesReply.signalstates(i);
 
 			TrendLib::RealtimeDataChunk& chunk = realtimeDataBySignals[stateMessage.hash()];
 

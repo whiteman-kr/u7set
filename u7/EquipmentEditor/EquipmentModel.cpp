@@ -2,6 +2,8 @@
 #include "../../lib/StandardColors.h"
 #include "../CheckInDialog.h"
 
+#include <HardwareLib/DeviceRoot.h>
+
 
 //
 //
@@ -204,18 +206,24 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 		break;
 
 	case EquipmentIdRole:
-	{
 		return device->equipmentId();
-	}
 
 	case Qt::TextAlignmentRole:
 		return QVariant{Qt::AlignLeft | Qt::AlignVCenter};
 
 	case Qt::ForegroundRole:
-		return QBrush{index.column() == ObjectTypeColumn ?
-						Qt::darkGray :
-						Qt::black};
+		if (index.column() == ObjectTypeColumn)
+		{
+			return QBrush{Qt::darkGray};
+		}
 
+		if (device->isExcludedFromBuild() == true) 
+		{
+			return QBrush{Qt::darkGray};
+		}
+
+		return {};
+		
 	case Qt::BackgroundRole:
 		{
 			if (deviceFileInfo->state() == E::VcsState::CheckedOut)
@@ -834,9 +842,9 @@ void EquipmentModel::checkOutDeviceObject(QModelIndexList& rowList)
 	return;
 }
 
-void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undowRowList)
+void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undoRowList)
 {
-	QModelIndexList rowList = undowRowList;
+	QModelIndexList rowList = undoRowList;
 
 	// As some rows can be deleted during update model,
 	// rowList must be sorted in FileID descending order,
@@ -879,6 +887,8 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undowRowList)
 		}
 	}
 
+	// Ask for confirmation.
+	//
 	auto mb = QMessageBox::question(
 		m_parentWidget,
 		tr("Undo Changes"),
@@ -889,6 +899,8 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undowRowList)
 		return;
 	}
 
+	// Send command Undo changes to the database.
+	//
 	bool ok = dbController()->undoChanges(files, nullptr);
 	if (ok == false)
 	{
@@ -947,7 +959,7 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undowRowList)
 		}
 		else
 		{
-			// Apparently file was completely deleted from the DB
+			// Apparently file was completely deleted from the database.
 			//
 		}
 

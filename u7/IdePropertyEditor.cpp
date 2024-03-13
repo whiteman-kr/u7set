@@ -5,6 +5,7 @@
 #include "DbTagsEditor.h"
 #include "Reports/ReportPropertyEditor.h"
 
+
 //
 // IdePropertyEditorHelper
 //

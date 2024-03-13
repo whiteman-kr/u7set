@@ -1,5 +1,5 @@
 #pragma once
-#include "../DiagStateLib/IDiagStateManager.h"
+#include <DiagStateLib/IDiagStateManager.h>
 
 // class AppSignalSetProvider;
 

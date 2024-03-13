@@ -1,7 +1,8 @@
 #include "MonitorConfigController.h"
 #include "../OnlineLib/SoftwareSettings.h"
-#include "Globals.h"
 #include "MonitorAppSettings.h"
+
+#include <Behavior/ClientBehaviorStorage.h>
 
 
 MonitorConfigController::MonitorConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2, ILogFile* logFile) :
@@ -12,7 +13,7 @@ MonitorConfigController::MonitorConfigController(const SoftwareInfo& softwareInf
 	return;
 }
 
-bool MonitorConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& conf, const MonitorSettings& settings, const BuildFileInfoArray& /*files*/)
+bool MonitorConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& conf, const MonitorSettings& settings, const std::vector<OnlineLib::BuildFileInfo>& /*files*/)
 {
 	MonitorConfigSettings config{};
 
@@ -142,11 +143,11 @@ bool MonitorConfigController::updateConfiguration(const ClientLib::Configuration
 		if (bool result = getFileBlockedById(CfgFileId::CLIENT_BEHAVIOR, &data, &errorString);
 			result == false)
 		{
-			m_logFile.writeError("Serialize set point list file error.");
+			m_logFile.writeError("Loading CLIENT_BEHAVIOR file error.");
 		}
 		else
 		{
-			ClientBehaviorStorage behavior;
+			Behavior::ClientBehaviorStorage behavior;
 			behavior.clear();
 
 			bool ok = behavior.load(data, &errorString);
@@ -157,11 +158,12 @@ bool MonitorConfigController::updateConfiguration(const ClientLib::Configuration
 			}
 			else
 			{
-				std::vector<std::shared_ptr<MonitorBehavior>> mb = behavior.monitorBehaviors();
+				auto mb = behavior.monitorBehaviors();
 
 				if (mb.empty() == false)
 				{
-					config.monitorBeahvior = std::move(*mb[0]);
+					Q_ASSERT(mb.size() == 1);
+					config.monitorBehavior = std::move(*mb[0]);
 				}
 			}
 		}

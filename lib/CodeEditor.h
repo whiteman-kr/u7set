@@ -2,7 +2,6 @@
 
 #include <QWidget>
 #include <QMenu>
-#include <QPainter>
 #include <QTextBlock>
 #include <QPlainTextEdit>
 #include <QSyntaxHighlighter>
