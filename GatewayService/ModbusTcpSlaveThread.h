@@ -73,6 +73,9 @@ namespace Modbus
 
 			io_context& ioContext();
 			int modbusDeviceID() const;
+			CircularLoggerShared log();
+
+			void removeConnection(int connectionNo);
 
 		private:
 			bool exitIfStopRequested();
@@ -95,7 +98,7 @@ namespace Modbus
 			tcp::acceptor m_acceptor;
 
 			ConnectionShared m_newConnection;
-			std::set<ConnectionShared> m_acceptedConnections;
+			std::map<int, ConnectionShared> m_acceptedConnections;
 		};
 
 	public:

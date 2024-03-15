@@ -43,7 +43,9 @@ namespace Modbus
 	{
 		if (error)
 		{
-			//DEBUG_LOG_ERR(m_log, QString());
+			DEBUG_LOG_ERR(m_listener.log(), QString("TcpSlaveThread::Connection::onReceiveData error: %1").
+											arg(QString::fromStdString(error.message())));
+			m_listener.removeConnection(m_connectionNo);
 			return;
 		}
 
@@ -171,6 +173,26 @@ namespace Modbus
 		return m_modbusDeviceID;
 	}
 
+	CircularLoggerShared TcpSlaveThread::Listener::log()
+	{
+		return m_log;
+	}
+
+	void TcpSlaveThread::Listener::removeConnection(int connectionNo)
+	{
+		size_t removedCount = m_acceptedConnections.erase(connectionNo);
+
+		if (removedCount == 1)
+		{
+				DEBUG_LOG_MSG(m_log, QString("TcpSlaveThread::Listener connection #%1 removed").
+								 arg(connectionNo));
+		}
+		else
+		{
+			Q_ASSERT(false);
+		}
+	}
+
 	bool TcpSlaveThread::Listener::exitIfStopRequested()
 	{
 		if (m_stopToken.stop_requested() == false)
@@ -252,13 +274,13 @@ namespace Modbus
 		}
 
 		Q_ASSERT(m_newConnection == newConnection);
-		Q_ASSERT(m_acceptedConnections.contains(newConnection) == false);
+		Q_ASSERT(m_acceptedConnections.contains(newConnection->connectionNo()) == false);
 
 		DEBUG_LOG_MSG(m_log, QString("Modbus::TcpSlaveThread accept new connection #%1 from %2").
 							 arg(newConnection->connectionNo()).
 							 arg(newConnection->peerAddress()));
 
-		m_acceptedConnections.emplace(m_newConnection);
+		m_acceptedConnections.emplace(newConnection->connectionNo(), m_newConnection);
 
 		m_newConnection->startReceive();
 
