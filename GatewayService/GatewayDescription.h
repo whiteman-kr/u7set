@@ -99,6 +99,7 @@ namespace Gateway
 			Unknown,
 			DiscreteUint16,
 			AnalogFloat16,
+			AnalogFloat32,
 		};
 		Q_ENUM(ModbusSignalFormat)
 

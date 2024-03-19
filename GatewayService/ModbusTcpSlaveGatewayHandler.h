@@ -28,6 +28,12 @@ namespace Gateway
 		virtual void getRequiredSignalsHashes(std::set<Hash>* hashes) const override;
 		virtual void getEventSignalsHashes(std::set<Hash>* hashes) const override;
 
+		HostAddressPort listeningAddr() const;
+		int modbusDeviceID() const;
+
+		int getRegistersValues(int startRegAddr, int regsCount,
+							   Modbus::RegisterValue* destBuffer, int maxRegsCount, QThread* thread);
+
 	private:
 		bool init();
 
@@ -46,6 +52,11 @@ namespace Gateway
 
 		AppDataServiceClientThread* m_appDataServiceClientThread = nullptr;
 		Modbus::TcpSlaveThread* m_modbusTcpSlaveThread = nullptr;
+
+		//
+
+		SimpleMutex m_regsMutex;
+		std::vector<Modbus::RegisterValue> m_registers;
 
 		friend class AppDataServiceClient;
 	};

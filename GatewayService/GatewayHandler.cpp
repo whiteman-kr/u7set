@@ -41,6 +41,11 @@ namespace Gateway
 		Q_UNUSED(getStateChangesReply);
 	}
 
+	CircularLoggerShared Handler::log()
+	{
+		return m_log;
+	}
+
 	// ---------------------------------------------------------------------------------
 	//
 	// Gateway::Handlers class implementation

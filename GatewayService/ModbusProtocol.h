@@ -6,6 +6,12 @@ namespace Modbus
 	inline const quint8 FC_READ_DISCRETE_INPUTS = 0x02;			// Read digital inputs and switching operations
 	inline const quint8 FC_READ_HOLDING_REGISTERS = 0x03;		// Read holding registers
 
+	inline const int FN03_MAX_REGS_COUNT = 127;
+
+	using RegisterValue = quint16;
+
+	inline const int REGISTER_SIZE_BYTES = sizeof(RegisterValue);
+
 #pragma pack(push, 1)
 
 	struct Fn03_ReadHoldingRegisters_Request
@@ -18,8 +24,8 @@ namespace Modbus
 
 	struct Fn03_ReadHoldingRegisters_Reply
 	{
-		quint8 bytesCount;
-		quint16 data;						// data[bytesCount / 2]
+		quint8 bytesCount;										// real filled size in bytes
+		RegisterValue regValues[FN03_MAX_REGS_COUNT];					// registers values
 	};
 
 	struct TcpHeader

@@ -10,21 +10,12 @@ namespace Gateway
 		E::ModbusSignalFormat signalFormat = E::ModbusSignalFormat::Unknown;
 		E::ModbusByteOrder byteOrder = E::ModbusByteOrder::Unknown;
 
-		bool isValid() const
-		{
-			return signalFormat != E::ModbusSignalFormat::Unknown &&
-				   byteOrder != E::ModbusByteOrder::Unknown;
-		}
+		bool isValid() const;
+		bool isDiscrete() const;
 
-		bool isDiscrete() const
-		{
-			return signalFormat == E::ModbusSignalFormat::DiscreteUint16;
-		}
+		int registersCount() const;
 
-		QString toString() const
-		{
-			return QString("%1 %2").arg(::E::valueToString(signalFormat)).arg(::E::valueToString(byteOrder));
-		}
+		QString toString() const;
 	};
 
 	class ModbusSignalList : public SignalList
@@ -79,6 +70,7 @@ namespace Gateway
 		int modbusDeviceID() const;
 
 		void getRequiredSignalsHashes(std::set<Hash>* hashes);
+		const std::map<Address16, std::pair<QString, ModbusFormat>>& modbusSignals() const;
 
 	private:
 		virtual void writeSettingsToXml(XmlWriteHelper& xml) const override;

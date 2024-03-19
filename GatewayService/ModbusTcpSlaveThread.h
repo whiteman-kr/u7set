@@ -8,8 +8,15 @@
 using namespace asio;
 using namespace asio::ip;
 
+namespace Gateway
+{
+	class ModbusTcpSlaveHandler;
+}
+
 namespace Modbus
 {
+
+
 	//
 	// Master/Slave and Client/Server roles in Modbus-TCP:
 	//
@@ -44,6 +51,7 @@ namespace Modbus
 
 		private:
 			Listener& m_listener;
+			::Gateway::ModbusTcpSlaveHandler& m_handler;
 			tcp::socket m_socket;
 
 			int m_connectionNo = 0;
@@ -62,17 +70,15 @@ namespace Modbus
 		class Listener
 		{
 		public:
-			Listener(io_context& ioContext,
-					const HostAddressPort& listeningAddr,
-					int modbusDeviceID,
-					std::stop_token stopToken,
-					CircularLoggerShared logger);
+			Listener(::Gateway::ModbusTcpSlaveHandler& handler,
+					io_context& ioContext,
+					std::stop_token stopToken);
 			virtual ~Listener();
 
 			void run();
 
+			::Gateway::ModbusTcpSlaveHandler& gatewayHandler();
 			io_context& ioContext();
-			int modbusDeviceID() const;
 			CircularLoggerShared log();
 
 			void removeConnection(int connectionNo);
@@ -88,9 +94,10 @@ namespace Modbus
 									const error_code& error);
 
 		private:
+			::Gateway::ModbusTcpSlaveHandler& m_handler;
+
 			io_context& m_ioContext;
 			HostAddressPort m_listeningAddr;
-			int m_modbusDeviceID = 0;
 			std::stop_token m_stopToken;
 			CircularLoggerShared m_log;
 
@@ -102,15 +109,18 @@ namespace Modbus
 		};
 
 	public:
-		TcpSlaveThread();
+		TcpSlaveThread(::Gateway::ModbusTcpSlaveHandler& handler);
 
-		void start(const HostAddressPort& listeningAddr, int modbusDeviceID, CircularLoggerShared logger);
+		void start();
 		void stop();
 
 	private:
-		void run(const HostAddressPort& listeningAddr, int modbusDeviceID, CircularLoggerShared logger);
+		void run();
 
 	private:
+		::Gateway::ModbusTcpSlaveHandler& m_handler;
+		CircularLoggerShared m_log;
+
 		std::jthread* m_thread = nullptr;
 	};
 }

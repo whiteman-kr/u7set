@@ -1,4 +1,5 @@
 #include "ModbusTcpSlaveThread.h"
+#include "ModbusTcpSlaveGatewayHandler.h"
 
 namespace Modbus
 {
@@ -10,7 +11,8 @@ namespace Modbus
 
 	TcpSlaveThread::Connection::Connection(Listener& listener) :
 		m_socket(listener.ioContext()),
-		m_listener(listener)
+		m_listener(listener),
+		m_handler(listener.gatewayHandler())
 	{
 		m_connectionInstance++;
 		m_connectionNo = m_connectionInstance;
@@ -61,7 +63,7 @@ namespace Modbus
 			return;
 		}
 
-		if (request.modbusDeviceID == m_listener.modbusDeviceID())
+		if (request.modbusDeviceID == m_handler.modbusDeviceID())
 		{
 			int sendBytesCount = 0;
 
@@ -97,34 +99,57 @@ namespace Modbus
 
 		fn03Request.reverseBytes();
 
-		int bytesCount = fn03Request.regsCount * 2;
+		int regsStartAddr = fn03Request.regsStartAddr;
+		int regsCount = fn03Request.regsStartAddr;
+
+		Q_ASSERT(regsCount <= 127);
 
 		TcpFrame& reply = getReplyRef();
 
+		int bytesCount = m_handler.getRegistersValues(regsStartAddr, regsCount,
+											reply.fn03Reply.regValues, FN03_MAX_REGS_COUNT,
+											QThread::currentThread());
+		Q_ASSERT(bytesCount < 256);
+
+		// copy request header fields to reply
+		//
 		reply.header.transactionID = request.header.transactionID;
 		reply.header.protocolID = request.header.protocolID;
 
-		reply.header.length = bytesCount + 2 + 1;
+		// set size of reply data after header
+		//
+		reply.header.length = sizeof(reply.modbusDeviceID) +
+							  sizeof(reply.functionCode) +
+							  sizeof(reply.fn03Reply.bytesCount) +
+							  bytesCount;
 
+		// copy request function params to reply
+		//
 		reply.modbusDeviceID = request.modbusDeviceID;
 		reply.functionCode = request.functionCode;
 
-		reply.fn03Reply.bytesCount = bytesCount;
+		// fill reply bytes count
+		//
+		reply.fn03Reply.bytesCount = static_cast<quint8>(bytesCount);
 
-		int sendBytesCount = reply.header.length + 3 * sizeof(quint16);
+		//
 
-		reply.reverseBytes();
+		int sendBytesCount = sizeof(reply.header) + reply.header.length;
+
+		reply.reverseBytes();		// translate header fields to BE
 
 		return sendBytesCount;
 	}
 
 	TcpFrame& TcpSlaveThread::Connection::getRequestRef()
 	{
+		Q_ASSERT(sizeof(Modbus::TcpFrame) < sizeof(m_receiveBuffer));
 		return *reinterpret_cast<TcpFrame*>(m_receiveBuffer);
 	}
 
 	TcpFrame& TcpSlaveThread::Connection::getReplyRef()
 	{
+		Q_ASSERT(sizeof(Modbus::TcpFrame) < sizeof(m_sendBuffer));
 		return *reinterpret_cast<TcpFrame*>(m_sendBuffer);
 	}
 
@@ -134,20 +159,17 @@ namespace Modbus
    //
    // --------------------------------------------------------------------------------------------------------
 
-	TcpSlaveThread::Listener::Listener(io_context& ioContext,
-										const HostAddressPort& listeningAddr,
-										int modbusDeviceID,
-										std::stop_token stopToken,
-										CircularLoggerShared logger) :
+	TcpSlaveThread::Listener::Listener(::Gateway::ModbusTcpSlaveHandler& handler,
+										io_context& ioContext,
+										std::stop_token stopToken) :
+		m_handler(handler),
 		m_ioContext(ioContext),
-		m_listeningAddr(listeningAddr),
-		m_modbusDeviceID(modbusDeviceID),
+		m_listeningAddr(handler.listeningAddr()),
 		m_stopToken(stopToken),
-		m_log(logger),
+		m_log(handler.log()),
 		m_timer(ioContext),
-		m_acceptor(ioContext, tcp::endpoint(
-								  ip::address::from_string(listeningAddr.addressStr().toStdString()),
-								  listeningAddr.port()))
+		m_acceptor(ioContext, tcp::endpoint(ip::address::from_string(handler.listeningAddr().addressStr().toStdString()),
+											handler.listeningAddr().port()))
 	{
 	}
 
@@ -163,14 +185,14 @@ namespace Modbus
 		m_ioContext.run();
 	}
 
+	::Gateway::ModbusTcpSlaveHandler& TcpSlaveThread::Listener::gatewayHandler()
+	{
+		return m_handler;
+	}
+
 	io_context& TcpSlaveThread::Listener::ioContext()
 	{
 		return m_ioContext;
-	}
-
-	int TcpSlaveThread::Listener::modbusDeviceID() const
-	{
-		return m_modbusDeviceID;
 	}
 
 	CircularLoggerShared TcpSlaveThread::Listener::log()
@@ -295,17 +317,17 @@ namespace Modbus
    //
    // --------------------------------------------------------------------------------------------------------
 
-	TcpSlaveThread::TcpSlaveThread()
+	TcpSlaveThread::TcpSlaveThread(::Gateway::ModbusTcpSlaveHandler& handler) :
+		m_handler(handler),
+		m_log(handler.log())
 	{
 	}
 
-	void TcpSlaveThread::start(const HostAddressPort& listeningAddr,
-							   int modbusDeviceID,
-							   CircularLoggerShared logger)
+	void TcpSlaveThread::start()
 	{
 		Q_ASSERT(m_thread == nullptr);
 
-		m_thread = new std::jthread(&TcpSlaveThread::run, this, listeningAddr, modbusDeviceID, logger);
+		m_thread = new std::jthread(&TcpSlaveThread::run, this);
 	}
 
 	void TcpSlaveThread::stop()
@@ -319,17 +341,15 @@ namespace Modbus
 		m_thread = nullptr;
 	}
 
-	void TcpSlaveThread::run(const HostAddressPort& listeningAddr,
-							 int modbusDeviceID,
-							 CircularLoggerShared logger)
+	void TcpSlaveThread::run()
 	{
-		DEBUG_LOG_MSG(logger, "Modbus::TcpSlaveThread started");
+		DEBUG_LOG_MSG(m_log, "Modbus::TcpSlaveThread started");
 
 		try
 		{
 			io_context ioContext;
 
-			Listener listener(ioContext, listeningAddr, modbusDeviceID, m_thread->get_stop_token(), logger);
+			Listener listener(m_handler, ioContext, m_thread->get_stop_token());
 
 			listener.run();
 		}
@@ -339,6 +359,6 @@ namespace Modbus
 			std::cout << e.what() << std::endl;
 		}
 
-		DEBUG_LOG_MSG(logger, "Modbus::TcpSlaveThread stoped");
+		DEBUG_LOG_MSG(m_log, "Modbus::TcpSlaveThread stoped");
 	}
 }

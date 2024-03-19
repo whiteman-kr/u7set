@@ -24,6 +24,8 @@ namespace Gateway
 		virtual void updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply);
 		virtual void processStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply);
 
+		CircularLoggerShared log();
+
 	protected:
 		const SoftwareInfo& m_swInfo;
 		const GatewayServiceSettings& m_settings;

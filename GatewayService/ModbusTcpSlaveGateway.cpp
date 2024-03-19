@@ -6,6 +6,46 @@
 
 namespace Gateway
 {
+	// ---------------------------------------------------------------------------------
+	//
+	// Struct Gateway::ModbusFormat implementation
+	//
+	// ---------------------------------------------------------------------------------
+
+	bool ModbusFormat::isValid() const
+	{
+		return signalFormat != E::ModbusSignalFormat::Unknown &&
+			   byteOrder != E::ModbusByteOrder::Unknown;
+	}
+
+	bool ModbusFormat::isDiscrete() const
+	{
+		return signalFormat == E::ModbusSignalFormat::DiscreteUint16;
+	}
+
+	int ModbusFormat::registersCount() const
+	{
+		switch(signalFormat)
+		{
+		case E::ModbusSignalFormat::DiscreteUint16:
+		case E::ModbusSignalFormat::AnalogFloat16:
+			return 1;
+
+		case E::ModbusSignalFormat::AnalogFloat32:
+			return 2;
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		return 0;
+	}
+
+	QString ModbusFormat::toString() const
+	{
+		return QString("%1 %2").arg(::E::valueToString(signalFormat)).arg(::E::valueToString(byteOrder));
+	}
+
    // ---------------------------------------------------------------------------------
    //
    // Class Gateway::ModbusSignalList implementation
@@ -87,7 +127,7 @@ namespace Gateway
 
 		if (ok == false)
 		{
-			*errMsg = QString("error converting register address '%1' to int value").arg(regAddrStr);
+			*errMsg = QString("error converting register address %1 to int value").arg(regAddrStr);
 			return false;
 		}
 
@@ -243,7 +283,7 @@ namespace Gateway
 
 		if (m_modbusFormat.byteOrder == E::ModbusByteOrder::Unknown)
 		{
-			log.logError(lineNo, "byte order 'BE' or 'LE' is not specified");
+			log.logError(lineNo, "byte order BE or LE is not specified");
 			return false;
 		}
 
@@ -434,6 +474,11 @@ namespace Gateway
 		}
 	}
 
+	const std::map<Address16, std::pair<QString, ModbusFormat>>& ModbusTcpSlaveGateway::modbusSignals() const
+	{
+		return m_modbusSignals;
+	}
+
 	void ModbusTcpSlaveGateway::writeSettingsToXml(XmlWriteHelper& xml) const
 	{
 		xml.writeStartElement(XmlElement::SETTINGS);
@@ -574,6 +619,7 @@ namespace Gateway
 
 		std::set<Hash> existsSignals;
 		std::set<int> discreteRegs;
+		std::set<int> discreteAddrs;
 		std::set<int> analogRegs;
 
 		for(const SignalListShared& sl : lists)
@@ -594,7 +640,7 @@ namespace Gateway
 
 				if (existsSignals.contains(hash))
 				{
-					log.logError(QString("signal '%1' is repeated in several signal lists").arg(signalID));
+					log.logError(QString("signal %1 is repeated in several signal lists").arg(signalID));
 					result = false;
 					continue;
 				}
@@ -605,7 +651,7 @@ namespace Gateway
 
 				if (addr16.isValid() == false)
 				{
-					log.logError(QString("invalid modbus address of signal'%1'"));
+					log.logError(QString("invalid modbus address of signal %1"));
 					result = false;
 					continue;
 				}
@@ -614,91 +660,58 @@ namespace Gateway
 
 				if (it != m_modbusSignals.end())
 				{
-					log.logError(QString("signal '%1' address %2 is not unique (already assigned to '%3')").
+					log.logError(QString("signal %1 address %2 is not unique (already assigned to %3)").
 												arg(signalID).arg(addr16.toString()).arg(it->second.first));
 					result = false;
 					continue;
 				}
 
-				if (format.isDiscrete() == true)
+				int regsCount = format.registersCount();
+
+				if (regsCount == 0)
 				{
-					int regsCount = 0;
+					log.logError(QString("undefined register count for modbus signal %1").arg(signalID));
+					result = false;
+					continue;
+				}
 
-					switch(format.signalFormat)
-					{
-					case E::ModbusSignalFormat::DiscreteUint16:
-						regsCount = 1;
-						break;
-
-					default:
-						Q_ASSERT(false);
-					}
-
-					if (regsCount == 0)
-					{
-						log.logError(QString("undefined register count for signal '%1'").arg(signalID));
-						result = false;
-						continue;
-					}
-
-					bool res = true;
-
-					for(int i = 0; i < regsCount; i++)
+				for(int i = 0; i < regsCount; i++)
+				{
+					if (format.isDiscrete() == true)
 					{
 						if (analogRegs.contains(addr16.offset() + i))
 						{
-							log.logError(QString("discrete signal '%1' register %2 used by analog signal").
+							log.logError(QString("discrete signal %1 register %2 used by analog signal").
 											arg(signalID).arg(addr16.offset() + i));
-							res = false;
-							break;
+							result = false;
 						}
-
-						discreteRegs.emplace(addr16.offset() + i);
+						else
+						{
+							if (discreteAddrs.contains(addr16.bitAddress()) == true)
+							{
+								log.logError(QString("duplicate address %1 of discrete signal %2").
+													 arg(addr16.bitAddress()).arg(signalID));
+							}
+							else
+							{
+								discreteRegs.emplace(addr16.offset() + i);
+								discreteAddrs.emplace(addr16.bitAddress());
+							}
+						}
 					}
-
-					result &= res;
-
-					CONTINUE_IF_FALSE(res)
-				}
-				else
-				{
-					int regsCount = 0;
-
-					switch(format.signalFormat)
-					{
-					case E::ModbusSignalFormat::AnalogFloat16:
-						regsCount = 1;
-						break;
-
-					default:
-						Q_ASSERT(false);
-					}
-
-					if (regsCount == 0)
-					{
-						log.logError(QString("undefined register count for signal '%1'").arg(signalID));
-						result = false;
-						continue;
-					}
-
-					bool res = true;
-
-					for(int i = 0; i < regsCount; i++)
+					else
 					{
 						if (discreteRegs.contains(addr16.offset() + i))
 						{
-							log.logError(QString("analog signal '%1' register %2 used by discrete signals").
+							log.logError(QString("analog signal %1 register %2 used by discrete signals").
 										 arg(signalID).arg(addr16.offset() + i));
-							res = false;
-							break;
+							result = false;
 						}
-
-						analogRegs.emplace(addr16.offset() + i);
+						else
+						{
+							analogRegs.emplace(addr16.offset() + i);
+						}
 					}
-
-					result &= res;
-
-					CONTINUE_IF_FALSE(res)
 				}
 
 				m_modbusSignals.emplace(addr16, std::pair<QString, ModbusFormat>{signalID, format});

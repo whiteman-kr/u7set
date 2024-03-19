@@ -40,11 +40,9 @@ namespace Gateway
 												this, m_log);
 		m_appDataServiceClientThread->start();
 
-		m_modbusTcpSlaveThread = new Modbus::TcpSlaveThread;
+		m_modbusTcpSlaveThread = new Modbus::TcpSlaveThread(*this);
 
-		m_modbusTcpSlaveThread->start(m_gateway->localGatewayIP1(),
-									  m_gateway->modbusDeviceID(),
-									  m_log);
+		m_modbusTcpSlaveThread->start();
 	}
 
 	void ModbusTcpSlaveHandler::shutdown()
@@ -69,111 +67,85 @@ namespace Gateway
 		TEST_PTR_RETURN(hashes);
 
 		hashes->clear();
-
-
+		m_gateway->getRequiredSignalsHashes(hashes);
 	}
 
 	void ModbusTcpSlaveHandler::getEventSignalsHashes(std::set<Hash>* hashes) const
 	{
 		TEST_PTR_RETURN(hashes);
 
-		hashes->clear();
-
-		Q_ASSERT(false);		// to do
+		hashes->clear();			// no events processing for now
 	}
 
+	HostAddressPort ModbusTcpSlaveHandler::listeningAddr() const
+	{
+		return m_gateway->localGatewayIP1();
+	}
+
+	int ModbusTcpSlaveHandler::modbusDeviceID() const
+	{
+		return m_gateway->modbusDeviceID();
+	}
+
+	int ModbusTcpSlaveHandler::getRegistersValues(int startRegAddr, int regsCount,
+												  Modbus::RegisterValue* destBuffer, int maxRegsCount,
+												  QThread* thread)
+	{
+		if (maxRegsCount < regsCount)
+		{
+			Q_ASSERT(false);
+			return 0;
+		}
+
+		int copyRegCount = regsCount;
+
+		if (startRegAddr + copyRegCount > m_registers.size())
+		{
+			copyRegCount = static_cast<int>(m_registers.size()) - startRegAddr;
+		}
+
+		int copyDestSizeBytes = copyRegCount * Modbus::REGISTER_SIZE_BYTES;
+
+		m_regsMutex.lock(thread);
+
+		memcpy_s(reinterpret_cast<char*>(destBuffer), copyDestSizeBytes,
+				 reinterpret_cast<char*>(m_registers.data() + startRegAddr), copyDestSizeBytes);
+
+		m_regsMutex.unlock(thread);
+
+		int fillDestSizeBytes  = (regsCount - copyRegCount) * Modbus::REGISTER_SIZE_BYTES;
+
+		if (fillDestSizeBytes > 0)
+		{
+			memset(reinterpret_cast<char*>(destBuffer + copyRegCount), 0, fillDestSizeBytes);
+		}
+
+		return regsCount * Modbus::REGISTER_SIZE_BYTES;
+	}
 
 	bool ModbusTcpSlaveHandler::init()
 	{
-/*		m_lists.clear();
-		m_states.clear();
+		const std::map<Address16, std::pair<QString, ModbusFormat>>& mbSignals = m_gateway->modbusSignals();
 
-		int signalsCount = m_gateway->signalsCount();
+		auto itLast = mbSignals.rbegin();
 
-		m_states.reserve(signalsCount);
-
-		const SignalLists& lists = m_gateway->signalLists();
-
-		int signalStateIndex = 0;
-
-		for(SignalListShared sl : lists)
+		if (itLast == mbSignals.rend())
 		{
-			TEST_PTR_CONTINUE(sl);
-
-			IvsImpulseSignalListShared ivsList = std::dynamic_pointer_cast<IvsImpulseSignalList>(sl);
-
-			TEST_PTR_CONTINUE(ivsList);
-
-			IvsImpulseListInfoShared li = std::make_shared<IvsImpulseListInfo>();
-
-			li->info = ivsList;
-			li->startIndex = signalStateIndex;
-
-			const auto& ids = ivsList->signalIDs();
-
-			// signal index in list, numbered from 1
-			//
-			int listIndex = 1;
-
-			for(const QString& id : ids)
-			{
-				const AppSignal* s = m_appSignals.getSignalByID(id);
-
-				if (s != nullptr)
-				{
-					Hash h = calcHash(id);
-
-					AppSignalState& newState = m_states.emplace_back(h, ivsList->sendEvents());
-					newState.setListIndex(listIndex);
-
-					auto it = li->hashToListIndexes.find(h);
-
-					if (it == li->hashToListIndexes.end())
-					{
-						li->hashToListIndexes.insert({h, {listIndex}});
-					}
-					else
-					{
-						it->second.push_back(listIndex);
-					}
-				}
-				else
-				{
-					m_states.emplace_back(0, false);		// init as NOT workable
-				}
-
-				listIndex++;
-
-				signalStateIndex++;
-			}
-
-			li->size = signalStateIndex - li->startIndex;
-
-			m_lists.push_back(li);
+			return true;
 		}
 
-		//
+		Address16 maxAddr = itLast->first;
 
-		for(IvsImpulseListInfoShared& list : m_lists)
-		{
-			const auto& ids = list->info->signalIDs();
+		const ModbusFormat lastSignalFormat = itLast->second.second;
 
-			for(const QString& id : ids)
-			{
-				Hash h = calcHash(id);
+		maxAddr.addWord(lastSignalFormat.registersCount());			// maxAddr here is +1 to real registers count, it is ok
 
-				auto it = m_hashToLists.find(h);
+		m_regsMutex.lock();
 
-				if (it == m_hashToLists.end())
-				{
-					auto p = m_hashToLists.emplace(h, std::set<IvsImpulseListInfoShared>());
+		m_registers.clear();
+		m_registers.resize(maxAddr.offset(), 0);
 
-					it = p.first;
-				}
-
-				it->second.insert(list);
-			}
-		}*/
+		m_regsMutex.unlock();
 
 		return true;
 	}
