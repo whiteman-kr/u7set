@@ -1,6 +1,7 @@
 #include "MonitorArchive.h"
 #include "ArchiveWidget.h"
-#include "../ClientLib/AppSignalManager.h"
+
+#include <ClientLib/AppSignalManager.h>
 
 //
 //

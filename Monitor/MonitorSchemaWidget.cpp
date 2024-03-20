@@ -1,13 +1,15 @@
 #include "MonitorSchemaWidget.h"
-#include "../ClientLib/AppSignalManager.h"
-#include "../VFrame30/AppSignalController.h"
-#include "../VFrame30/IMatsSchemaItemAssociations.h"
-#include "../lib/ITimeStats.h"
 #include "Globals.h"
 #include "MonitorMainWindow.h"
 #include "MonitorSchemaManager.h"
 #include "MonitorSchemaView.h"
 #include "MonitorSignalInfo.h"
+
+#include "../VFrame30/AppSignalController.h"
+#include "../VFrame30/IMatsSchemaItemAssociations.h"
+#include "../lib/ITimeStats.h"
+
+#include <ClientLib/AppSignalManager.h>
 
 
 namespace

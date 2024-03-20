@@ -1,5 +1,5 @@
 #pragma once
-#include "../../AppSignalLib/TuningSignalManager.h"
+#include <ClientLib/TuningSignalManager.h>
 #include "../VFrame30/SchemaDetails.h"
 #include <QColor>
 
@@ -429,7 +429,7 @@ public:
 
 	void checkFilterSignals(const std::vector<Hash>& signalHashes, std::vector<std::pair<QString, QString> >& notFoundSignalsAndFilters);
 
-	void createSignalsAndEqipmentHashes(const TuningSignalManager &objects,
+	void createSignalsAndEqipmentHashes(const ClientLib::TuningSignalManager &objects,
 										const std::vector<Hash> &allHashes,
 										TuningFilter *filter,
 										TuningFilter::Source source);

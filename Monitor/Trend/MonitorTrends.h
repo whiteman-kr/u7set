@@ -1,11 +1,13 @@
 #ifndef MONITORTRENDS_H
 #define MONITORTRENDS_H
 
-#include "../ClientLib/RtDataProvider.h"
-#include "../TrendView/TrendMainWindow.h"
 #include "MonitorConfigController.h"
-#include "../ClientLib/AppSignalManager.h" 
 #include "MonitorTrendArchiveConnections.h"
+
+#include "../TrendView/TrendMainWindow.h"
+
+#include <ClientLib/RtDataProvider.h>
+#include <ClientLib/AppSignalManager.h>
 
 class MonitorTrendsWidget;
 class QLabel;

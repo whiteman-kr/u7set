@@ -2,14 +2,14 @@
 
 #include "DiagConfigController.h"
 #include "DiagnosticsSchemaManager.h"
-#include "../ClientLib/AppSignalManager.h"
+#include <ClientLib/AppSignalManager.h>
 #include <DiagClientLib/DiagStateManager.h>
 //#include "SelectSchemaWidget.h"
 #include "../UtilsLib/InstanceResolver.h"
 #include <SchemaClientLib/SchemaDrawStatistics.h>
 //#include "../VFrame30/ClientSchemaView.h"
-#include "../ClientLib/ClientTranslator.h"
-#include "../ClientLib/AdsConnection.h"
+#include <ClientLib/ClientTranslator.h>
+#include <ClientLib/AdsConnection.h>
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/LogController.h"
 #include "../UtilsLib/LogFile.h"

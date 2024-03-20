@@ -1,7 +1,7 @@
 // Functional tests for class ClientLib::Config controller
 // ConfigurationService must be ranning on localhost and default port
 //
-#include "../../ClientLib/ConfigController.h"
+#include <ClientLib/ConfigController.h>
 #include "../../OnlineLib/BuildInfo.h"
 #include "ConnectionPorts.h"
 

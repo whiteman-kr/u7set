@@ -205,7 +205,7 @@ private:
     TuningFilterEditor* m_tuningFilterEditor = nullptr;
 
 	ILogFileStub logFileStub;
-	TuningSignalManager m_signals;
+    ClientLib::TuningSignalManager m_signals;
 	TuningFilterStorage m_filters;
 
 	DbController* m_dbController = nullptr;

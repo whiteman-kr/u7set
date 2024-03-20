@@ -10,7 +10,7 @@ class ChooseTuningSignalsWidget : public QWidget
 
 public:
 
-	ChooseTuningSignalsWidget(TuningSignalManager& signalManager, bool requestValuesEnabled, QWidget* parent);
+	ChooseTuningSignalsWidget(ClientLib::TuningSignalManager& signalManager, bool requestValuesEnabled, QWidget* parent);
 
 	enum class BaseFilterType
 	{
@@ -64,7 +64,7 @@ private:
 
 private:
 
-	TuningSignalManager& m_signalManager;
+	ClientLib::TuningSignalManager& m_signalManager;
 
 	std::shared_ptr<TuningFilter> m_filter;
 
@@ -141,7 +141,7 @@ class TuningFilterEditor : public QWidget
 public:
 
 	explicit TuningFilterEditor(TuningFilterStorage& filterStorage,
-								TuningSignalManager& signalManager,
+								ClientLib::TuningSignalManager& signalManager,
 								bool readOnly,
 								bool requestValuesEnabled,
 								bool typeTreeEnabled,
@@ -249,7 +249,7 @@ private:
 
 	TuningFilterStorage& m_filterStorage;
 
-	TuningSignalManager& m_signalManager;
+	ClientLib::TuningSignalManager& m_signalManager;
 
 private:
 

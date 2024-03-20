@@ -1,6 +1,6 @@
-#include "../../ClientLib/AppSignalManager.h"
-#include "../../ClientLib/IRecentAppSignals.h"
-#include "../../ClientLib/AdsConnection.h"
+#include <ClientLib/AppSignalManager.h>
+#include <ClientLib/IRecentAppSignals.h>
+#include <ClientLib/AdsConnection.h>
 #include "ConnectionPorts.h"
 
 using ::testing::_;

@@ -40,7 +40,7 @@ class TuningWorkspace : public QWidget
 	Q_OBJECT
 public:
 	explicit TuningWorkspace(TuningConfigController& configController,
-							 TuningSignalManager& tuningSignalManager,
+							 ClientLib::TuningSignalManager& tuningSignalManager,
 							 TuningClientFilterStorage& tuningFilterStorage,
 							 ClientLib::TuningUserManager& userManager,
 							 ClientLib::TuningConnection& tuningConnection,
@@ -78,7 +78,7 @@ private:
 	// Data
 
 	TuningConfigController& m_configController;
-	TuningSignalManager& m_tuningSignalManager;
+	ClientLib::TuningSignalManager& m_tuningSignalManager;
 	TuningClientFilterStorage& m_tuningFilterStorage;
 	ClientLib::TuningUserManager& m_userManager;
 	ClientLib::TuningConnection& m_tuningConnection;

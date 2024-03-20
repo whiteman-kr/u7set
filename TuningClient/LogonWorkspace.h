@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../ClientLib/TuningUserManager.h"
+#include <ClientLib/TuningUserManager.h>
 
 class LogonWidget : public QWidget
 {

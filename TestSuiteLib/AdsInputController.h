@@ -1,8 +1,9 @@
 #pragma once
 
 #include "IInputController.h"
-#include "../ClientLib/AppSignalManager.h"
-#include "../ClientLib/AdsConnection.h"
+
+#include <ClientLib/AppSignalManager.h>
+#include <ClientLib/AdsConnection.h>
 
 
 namespace TestSuite

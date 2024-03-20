@@ -1,7 +1,7 @@
 #include <QStandardPaths>
 #include <QFileDialog>
-#include "../ClientLib/ClientTranslator.h"
-#include "../ClientLib/TuningUserManager.h"
+#include <ClientLib/ClientTranslator.h>
+#include <ClientLib/TuningUserManager.h>
 #include "../OnlineLib/TcpClientStatistics.h"
 #include "../UtilsLib/Ui/UiTools.h"
 #include "../lib/Ui/DialogAbout.h"
