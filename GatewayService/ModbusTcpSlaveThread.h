@@ -1,7 +1,7 @@
 #pragma once
 
 #include <thread>
-#include "../asio/include/asio.hpp"
+#include <asio.hpp>
 #include "../OnlineLib/CircularLogger.h"
 #include "ModbusProtocol.h"
 
