@@ -28,6 +28,8 @@ namespace Gateway
 		virtual void getRequiredSignalsHashes(std::set<Hash>* hashes) const override;
 		virtual void getEventSignalsHashes(std::set<Hash>* hashes) const override;
 
+		virtual void updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply) override;
+
 		HostAddressPort listeningAddr() const;
 		int modbusDeviceID() const;
 
@@ -35,7 +37,20 @@ namespace Gateway
 							   Modbus::RegisterValue* destBuffer, int maxRegsCount, QThread* thread);
 
 	private:
+		struct SignalState
+		{
+			SignalState(const ModbusFormat& frmt, const Address16& addr16);
+
+			ModbusFormat format;
+			Address16 modbusAddress;
+
+			bool reverseBytes = false;
+			double value = 0;
+		};
+
+	private:
 		bool init();
+		void updateRegister(const SignalState& state);
 
 	private:
 		const SoftwareInfo m_softwareInfo;
@@ -57,6 +72,8 @@ namespace Gateway
 
 		SimpleMutex m_regsMutex;
 		std::vector<Modbus::RegisterValue> m_registers;
+
+		std::map<Hash, SignalState> m_signalsStates;
 
 		friend class AppDataServiceClient;
 	};

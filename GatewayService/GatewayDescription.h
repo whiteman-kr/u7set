@@ -97,7 +97,7 @@ namespace Gateway
 		enum class ModbusSignalFormat
 		{
 			Unknown,
-			DiscreteUint16,
+			DiscreteBit,
 			AnalogFloat16,
 			AnalogFloat32,
 		};

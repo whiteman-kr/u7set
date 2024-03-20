@@ -20,14 +20,14 @@ namespace Gateway
 
 	bool ModbusFormat::isDiscrete() const
 	{
-		return signalFormat == E::ModbusSignalFormat::DiscreteUint16;
+		return signalFormat == E::ModbusSignalFormat::DiscreteBit;
 	}
 
 	int ModbusFormat::registersCount() const
 	{
 		switch(signalFormat)
 		{
-		case E::ModbusSignalFormat::DiscreteUint16:
+		case E::ModbusSignalFormat::DiscreteBit:
 		case E::ModbusSignalFormat::AnalogFloat16:
 			return 1;
 
@@ -289,7 +289,7 @@ namespace Gateway
 
 		static const std::map<E::ModbusSignalFormat, ::E::SignalType> signalsFormats =
 		{
-			{ E::ModbusSignalFormat::DiscreteUint16, ::E::SignalType::Discrete },
+			{ E::ModbusSignalFormat::DiscreteBit, ::E::SignalType::Discrete },
 			{ E::ModbusSignalFormat::AnalogFloat16, ::E::SignalType::Analog }
 		};
 

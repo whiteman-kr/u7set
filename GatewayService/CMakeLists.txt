@@ -44,6 +44,7 @@ add_executable(${TARGET}
 	ModbusTcpSlaveGatewayHandler.h
 	ModbusTcpSlaveThread.cpp
 	ModbusTcpSlaveThread.h
+	../Proto/AppSignal.proto
 )
 
 target_precompile_headers(${TARGET} PRIVATE
