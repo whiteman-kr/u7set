@@ -1,10 +1,9 @@
 #include "SimSignalInfo.h"
-#include "../../Simulator/SimAppSignalManager.h"
-#include "../../Simulator/SimTuningSignalManager.h"
-#include "../UtilsLib/Ui/UiTools.h"
 #include "SimIdeSimulator.h"
 #include "SimWidget.h"
 #include "ui_DialogSignalInfo.h"
+
+#include "../UtilsLib/Ui/UiTools.h"
 
 bool SimSignalInfo::showDialog(QString appSignalId,
 							   SimIdeSimulator* simuator,
@@ -60,7 +59,7 @@ SimSignalInfo::SimSignalInfo(const AppSignalParam& signal,
 					 &simuator->appSignalManager(),
 					 nullptr/*signalDataServer*/,
 					 {}/*appDataServices*/,
-					 simuator->tuningSignalManager(),
+					 simuator->tuningSignalManagerInterface(),
 					 m_tuningConnection,
 					 m_tuningAuthorization,
 					 false/*tuningEnabled*/,

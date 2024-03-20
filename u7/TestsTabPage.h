@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Simulator/Simulator.h"
+#include <Simulator/Simulator.h>
 #include "../lib/Ui/FilesTreeView.h"
 
 #include "GlobalMessanger.h"

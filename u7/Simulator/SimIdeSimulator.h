@@ -1,7 +1,9 @@
 #pragma once
 
-#include "../../Simulator/SimScopedLog.h"
 #include "../VFrame30/SchemaDetails.h"
+#include "../../UtilsLib/ILogFile.h"
+
+class ITuningSignalManager;
 
 namespace Sim
 {
@@ -11,11 +13,12 @@ namespace Sim
 	class LogicModule;
 	class OverrideSignals;
 	class Profiles;
-	struct Profile;
 	class Simulator;
 	class Software;
 	class Subsystem;
 	class TuningSignalManager;
+
+	struct Profile;
 }
 
 class SimIdeSimulator : public QObject
@@ -42,7 +45,7 @@ public:
 	[[nodiscard]] bool isPaused() const;
 	[[nodiscard]] bool isStopped() const;
 
-	[[nodiscard]] Sim::ScopedLog& log();
+	[[nodiscard]] ILogFile* log();
 
 	[[nodiscard]] bool isLoaded() const;
 	[[nodiscard]] QString buildPath() const;
@@ -53,15 +56,16 @@ public:
 	[[nodiscard]] const Sim::Connections& connections() const;
 	[[nodiscard]] Sim::Connections& connections();
 
-	[[nodiscard]] std::vector<std::shared_ptr<Sim::Subsystem>> subsystems() const;
-	[[nodiscard]] std::shared_ptr<Sim::LogicModule> logicModule(QString equipmentId) const;
-	[[nodiscard]] std::vector<std::shared_ptr<Sim::LogicModule>> logicModules() const;
+	[[nodiscard]] std::vector<Sim::Subsystem> subsystems() const;
+	
+	[[nodiscard]] std::optional<Sim::LogicModule> logicModule(QString equipmentId) const;
+	[[nodiscard]] std::vector<Sim::LogicModule> logicModules() const;
 
 	[[nodiscard]] Sim::AppSignalManager& appSignalManager();
 	[[nodiscard]] const Sim::AppSignalManager& appSignalManager() const;
 
-	[[nodiscard]] Sim::TuningSignalManager& tuningSignalManager();
-	[[nodiscard]] const Sim::TuningSignalManager& tuningSignalManager() const;
+	[[nodiscard]] ITuningSignalManager& tuningSignalManagerInterface();
+	[[nodiscard]] const ITuningSignalManager& tuningSignalManagerInterface() const;
 
 	[[nodiscard]] Sim::OverrideSignals& overrideSignals();
 	[[nodiscard]] const Sim::OverrideSignals& overrideSignals() const;
@@ -74,6 +78,7 @@ public:
 
 	bool setCurrentProfile(QString profileName);
 	[[nodiscard]] QString currentProfileName() const;
+
 	[[nodiscard]] const Sim::Profile& currentProfile() const;
 
 	[[nodiscard]] Sim::Control& control();

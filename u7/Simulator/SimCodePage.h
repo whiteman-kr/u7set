@@ -2,7 +2,7 @@
 #define SIMCODEPAGE_H
 
 #include "SimBasePage.h"
-#include "../../Simulator/SimLogicModule.h"
+#include <Simulator/SimLogicModule.h>
 
 
 enum class CodePageColumns
@@ -37,8 +37,8 @@ public slots:
 	void dataChanged();
 
 private:
-	std::shared_ptr<Sim::LogicModule> logicModule();
-	std::shared_ptr<Sim::LogicModule> logicModule() const;
+	std::optional<Sim::LogicModule> logicModule();
+	std::optional<Sim::LogicModule> logicModule() const;
 
 	// Data
 	//
@@ -95,8 +95,8 @@ public:
 	QString equipmnetId() const;
 
 private:
-	std::shared_ptr<Sim::LogicModule> logicModule();
-	std::shared_ptr<Sim::LogicModule> logicModule() const;
+	std::optional<Sim::LogicModule> logicModule();
+	std::optional<Sim::LogicModule> logicModule() const;
 
 private:
 	QString m_lmEquipmentId;

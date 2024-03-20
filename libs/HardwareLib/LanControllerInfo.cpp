@@ -1,5 +1,6 @@
 #include "./include/HardwareLib/LanControllerInfo.h"
 #include "../UtilsLib/DomXmlHelper.h"
+#include "../UtilsLib/XmlHelper.h"
 #include <QDomNode>
 // -----------------------------------------------------------------------------
 //

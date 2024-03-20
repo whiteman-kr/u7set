@@ -4,8 +4,8 @@
 #include "SimSchemaView.h"
 #include "SimWidget.h"
 
-#include "../../Simulator/SimAppSignalManager.h"
-#include "../../Simulator/SimSoftware.h"
+#include <Simulator/SimAppSignalManager.h>
+#include <Simulator/SimSoftware.h>
 #include "../VFrame30/IMatsSchemaItemAssociations.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/LogicSchema.h"
@@ -207,7 +207,7 @@ SimSchemaWidget::SimSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 								 QWidget* parent) :
 	VFrame30::ClientSchemaWidget(new SimSchemaView{schemaManager}, schema, schemaManager, parent),
 	m_simulator(simulator),
-	m_logController(simulator->log().logInterface())
+	m_logController(simulator->log())
 {
 	Q_ASSERT(m_simulator);
 	Q_ASSERT(schema);

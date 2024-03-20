@@ -1,9 +1,9 @@
 #include "SimSchemaView.h"
-#include "SimSchemaManager.h"
-#include "SimIdeSimulator.h"
 #include "ScriptSimApplication.h"
-#include "../../Simulator/SimOverrideSignals.h"
-#include "../../Simulator/SimSoftware.h"
+#include "SimIdeSimulator.h"
+#include "SimSchemaManager.h"
+#include <Simulator/SimOverrideSignals.h>
+#include <Simulator/SimSoftware.h>
 #include "../VFrame30/PropertyNames.h"
 
 
@@ -48,7 +48,7 @@ void SimSchemaView::setMonitorId(QString equipmentId, bool emitUpdate)
 	m_monitorId = equipmentId;
 
 	if (auto monitor = m_simulator->software().monitor(m_monitorId);
-		monitor != nullptr)
+		monitor .has_value() == true)
 	{
 		setGlobalScript(monitor->globalScript());
 		setMonitorBehavior(monitor->monitorBehavior());

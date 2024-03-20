@@ -419,6 +419,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QHeaderView>
 	<QHostInfo>
 	<QInputDialog>
+	<QJSEngine>
 	<QJsonArray>
 	<QJsonDocument>
 	<QJsonObject>

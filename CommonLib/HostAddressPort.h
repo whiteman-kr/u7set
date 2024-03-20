@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QtGlobal>
 #include <QHostAddress>
 
 class HostAddressPort

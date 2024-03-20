@@ -1,7 +1,7 @@
 #include "SimProjectWidget.h"
-#include "../Settings.h"
-#include "../../Simulator/SimConnections.h"
-#include "../../Simulator/SimSubsystem.h"
+#include <Simulator/SimConnections.h>
+#include <Simulator/SimControl.h>
+#include <Simulator/SimSubsystem.h>
 
 using namespace SimProjectTreeItems;
 
@@ -59,7 +59,7 @@ SimProjectWidget::SimProjectWidget(SimIdeSimulator* simulator, QWidget* parent) 
 
 	connect(m_simulator, &SimIdeSimulator::projectUpdated, this, &SimProjectWidget::projectUpdated);
 
-	connect(&(m_simulator->control()), &Sim::Control::statusUpdate, this, &SimProjectWidget::updateModuleStates);
+	connect(&m_simulator->control(), &Sim::Control::statusUpdate, this, &SimProjectWidget::updateModuleStates);
 
 	return;
 }
@@ -186,18 +186,18 @@ void SimProjectWidget::fillEquipmentTree()
 	//
 	auto subsystems = m_simulator->subsystems();
 
-	for (std::shared_ptr<Sim::Subsystem> ss : subsystems)
+	for (Sim::Subsystem& ss : subsystems)
 	{
 		QStringList sl;
-		sl << ss->subsystemId();
+		sl << ss.subsystemId();
 
 		QTreeWidgetItem* ssItem = new QTreeWidgetItem(m_treeWidget, sl);
 		m_treeWidget->addTopLevelItem(ssItem);
 
 		// Add LogicModules
 		//
-		auto logicModules = ss->logicModules();
-		for (std::shared_ptr<Sim::LogicModule> lm : logicModules)
+		auto logicModules = ss.logicModules();
+		for (const Sim::LogicModule& lm : logicModules)
 		{
 			LogicModuleTreeItem* lmItem = new LogicModuleTreeItem{ssItem, lm};
 			Q_UNUSED(lmItem);
@@ -212,9 +212,9 @@ void SimProjectWidget::fillEquipmentTree()
 	m_treeWidget->addTopLevelItem(topConnectionItem);
 
 	const Sim::Connections& connections = m_simulator->connections();
-	std::vector<Sim::ConnectionPtr> connectionList = connections.connections();
+	std::vector<Sim::Connection> connectionList = connections.connections();
 
-	for (const Sim::ConnectionPtr& c : connectionList)
+	for (const Sim::Connection& c : connectionList)
 	{
 		// Add Connection
 		//
@@ -272,12 +272,11 @@ namespace SimProjectTreeItems
 	}
 
 
-	LogicModuleTreeItem::LogicModuleTreeItem(QTreeWidgetItem* parent,
-											 std::shared_ptr<Sim::LogicModule> lm) :
+	LogicModuleTreeItem::LogicModuleTreeItem(QTreeWidgetItem* parent, const Sim::LogicModule& lm) :
 		BaseTreeItem(parent,
-					 QStringList{} << lm->equipmentId()
-								   << QString("n: %1, ch: %2").arg(lm->lmNumber()).arg(QChar('A' + static_cast<char>(lm->channel())))),
-		m_equipmentId(lm->equipmentId())
+					 QStringList{} << lm.equipmentId()
+								   << QString("n: %1, ch: %2").arg(lm.lmNumber()).arg(QChar('A' + static_cast<char>(lm.channel())))),
+		m_equipmentId(lm.equipmentId())
 	{
 		setData(0, Qt::UserRole, QVariant(m_equipmentId));
 		return;
@@ -348,9 +347,9 @@ namespace SimProjectTreeItems
 	void LogicModuleTreeItem::contextMenu(SimProjectWidget* simProjectWidget, QPoint globalMousePos)
 	{
 		auto lm = simProjectWidget->simulator()->logicModule(m_equipmentId);
-		if (lm == nullptr)
+		if (lm.has_value() == false)
 		{
-			Q_ASSERT(lm);
+			Q_ASSERT(lm.has_value());
 			return;
 		}
 
@@ -372,7 +371,7 @@ namespace SimProjectTreeItems
 			[simProjectWidget, equipmentId = m_equipmentId](bool checked)
 			{
 				auto lm = simProjectWidget->simulator()->logicModule(equipmentId);
-				if (lm != nullptr)
+				if (lm.has_value() == true)
 				{
 					lm->setPowerOff(checked);
 				}
@@ -386,21 +385,20 @@ namespace SimProjectTreeItems
 	}
 
 
-	ConnectionTreeItem::ConnectionTreeItem(QTreeWidgetItem* parent,
-										   const Sim::ConnectionPtr& connection) :
+	ConnectionTreeItem::ConnectionTreeItem(QTreeWidgetItem* parent, const Sim::Connection& connection) :
 		BaseTreeItem(parent,
-					 QStringList{} << connection->connectionId()
-								   << connection->typeStr()),
-		m_connectionId(connection->connectionId())
+					 QStringList{} << connection.connectionId()
+								   << connection.typeStr()),
+		m_connectionId(connection.connectionId())
 	{
 		setData(0, Qt::UserRole, QVariant(m_connectionId));
 
-		std::vector<Sim::ConnectionPort> ports = connection->ports();
+		std::vector<::ConnectionPortInfo> ports = connection.ports();
 
 		setToolTip(0, QObject::tr("ConnectionID: %1\n\tPort1: %2\n\tPort2: %3")
 						.arg(m_connectionId)
-						.arg(ports.size() >= 1 ? ports[0].portInfo().equipmentID : "")
-						.arg(ports.size() >= 2 ? ports[1].portInfo().equipmentID : ""));
+						.arg(ports.size() >= 1 ? ports[0].equipmentID : "")
+						.arg(ports.size() >= 2 ? ports[1].equipmentID : ""));
 
 		return;
 	}
@@ -408,7 +406,7 @@ namespace SimProjectTreeItems
 	void ConnectionTreeItem::updateState(SimProjectWidget* simProjectWidget, Sim::ControlStatus state)
 	{
 		auto connection = simProjectWidget->simulator()->connections().connection(m_connectionId);
-		if (connection == nullptr)
+		if (connection.isNull() == true)
 		{
 			this->setText(EquipmentTreeColumns::State, {});
 			return;
@@ -421,9 +419,9 @@ namespace SimProjectTreeItems
 		}
 		else
 		{
-			if (connection->enabled() == true)
+			if (connection.enabled() == true)
 			{
-				if (connection->timeout() == true)
+				if (connection.timeout() == true)
 				{
 					text = QObject::tr("Timeout");
 				}
@@ -471,7 +469,7 @@ namespace SimProjectTreeItems
 				simProjectWidget->simulator()->connections().disableConnection(connectionId, checked);
 			});
 		disableAction->setCheckable(true);
-		disableAction->setChecked(!c->enabled());
+		disableAction->setChecked(!c.enabled());
 
 		menu.exec(globalMousePos);
 		return;

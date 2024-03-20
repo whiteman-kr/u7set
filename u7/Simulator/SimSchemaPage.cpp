@@ -1,5 +1,6 @@
 #include "SimSchemaPage.h"
 #include "SimSchemaView.h"
+#include <Simulator/SimControl.h>
 
 
 SimSchemaPage::SimSchemaPage(std::shared_ptr<VFrame30::Schema> schema,

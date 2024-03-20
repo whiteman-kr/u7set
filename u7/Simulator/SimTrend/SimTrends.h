@@ -1,6 +1,6 @@
 #pragma once
 #include "../../../TrendView/TrendMainWindow.h"
-#include "../../../Simulator/SimAppSignalManager.h"
+#include <Simulator/SimAppSignalManager.h>
 
 
 class SimIdeSimulator;

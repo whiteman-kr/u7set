@@ -1,5 +1,5 @@
 #pragma once
-#include "../../Simulator/SimProfiles.h"
+#include <Simulator/SimProfiles.h>
 
 struct ConnectionPorts
 {

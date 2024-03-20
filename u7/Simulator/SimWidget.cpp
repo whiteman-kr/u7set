@@ -757,7 +757,7 @@ void SimWidget::runSimulation()
 	if (m_simulator->isLoaded() == false)
 	{
 		qDebug() << "SimWidget::runSimulation(): Project is not loaded";
-		m_simulator->log().writeError("Cannot start simulation, project is not loaded.");
+		m_simulator->log()->writeError("Cannot start simulation, project is not loaded.");
 		return;
 	}
 
@@ -870,7 +870,7 @@ void SimWidget::runSimulation()
 	}
 	else
 	{
-		m_simulator->appSignalManager().resetRam();		// It prevents from short show of previouse run results
+		m_simulator->appSignalManager().resetRam();		// It prevents from short show of previous run results
 
 		// Star simulation for all project
 		//
@@ -883,12 +883,12 @@ void SimWidget::runSimulation()
 
 		for (const auto& lm : lms)
 		{
-			equipmentIds << lm->equipmentId();
+			equipmentIds << lm.equipmentId();
 		}
 
 		if (equipmentIds.isEmpty() == true)
 		{
-			m_simulator->log().writeWarning(tr("Nothing to simulate, no LogicModules are found."));
+			m_simulator->log()->writeWarning(tr("Nothing to simulate, no LogicModules are found."));
 			// Nothing to simulate
 			//
 			return;
@@ -1133,7 +1133,7 @@ void SimWidget::openLogicModuleTabPage(QString lmEquipmentId)
 	// Create new SimLogicModulePage
 	//
 	auto logicModule = m_simulator->logicModule(lmEquipmentId);
-	if (logicModule == nullptr)
+	if (logicModule.has_value() == false)
 	{
 		assert(logicModule);
 		return;
@@ -1156,7 +1156,7 @@ void SimWidget::openLogicModuleTabPage(QString lmEquipmentId)
 void SimWidget::openCodeTabPage(QString lmEquipmentId)
 {
 	auto lm = m_simulator->logicModule(lmEquipmentId);
-	if (lm == nullptr)
+	if (lm.has_value() == false)
 	{
 		QMessageBox::critical(this, qAppName(), tr("Cannot find LogicModule %1").arg(lmEquipmentId));
 		return;
