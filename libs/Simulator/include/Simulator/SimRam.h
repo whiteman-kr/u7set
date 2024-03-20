@@ -15,8 +15,6 @@ namespace Sim
 {
 	class RamAreaInfo
 	{
-		friend class SimRamTests;
-
 	public:
 		RamAreaInfo() = default;
 		RamAreaInfo(const RamAreaInfo&) = default;
@@ -45,13 +43,13 @@ namespace Sim
 		E::LogicModuleRamAccess m_access = E::LogicModuleRamAccess::Read;
 		quint32 m_offset = 0xFFFFFFFF;	// In words
 		quint32 m_size = 0;				// In words
+
+		friend SimRamTests;
 	};
 
 
 	class RamArea final : public RamAreaInfo
 	{
-		friend class SimRamTests;
-
 	public:
 		RamArea(bool clearOnStartCycle);
 		RamArea(const RamArea&) = default;
@@ -113,6 +111,8 @@ namespace Sim
 		bool m_clearOnStartCycle = false;					// Clear memory area on start of work cycle
 		QByteArray m_data;
 		std::vector<OverrideRamRecord> m_overrideData;
+
+		friend SimRamTests;
 	};
 
 	template<typename CONTAINER>
@@ -366,6 +366,8 @@ namespace Sim
 
 		std::pmr::map<quint32, size_t> m_readAreas{&m_pool};	// key is area offset, value is index
 		std::pmr::map<quint32, size_t> m_writeAreas{&m_pool};	// key is area offset, value is index
+
+		friend SimRamTests;
 	};
 }
 
