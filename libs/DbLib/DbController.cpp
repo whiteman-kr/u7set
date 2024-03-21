@@ -86,6 +86,7 @@ DbController::DbController() :
 	connect(this, &DbController::signal_checkInTree, m_worker, &DbWorker::slot_checkInTree);
 	connect(this, &DbController::signal_checkOut, m_worker, &DbWorker::slot_checkOut);
 	connect(this, &DbController::signal_undoChanges, m_worker, &DbWorker::slot_undoChanges);
+	connect(this, &DbController::signal_undoChangesRecursively, m_worker, &DbWorker::slot_undoChangesRecursively);
 
 	connect(this, &DbController::signal_fileHasChildren, m_worker, &DbWorker::slot_fileHasChildren);
 
@@ -1665,6 +1666,24 @@ bool DbController::undoChanges(std::vector<DbFileInfo>& files, QWidget* parentWi
 	// Emit signal end wait for complete
 	//
 	emit signal_undoChanges(&files);
+
+	ok = waitForComplete(parentWidget, tr("Undo pending changes"));
+	return true;
+}
+
+bool DbController::undoChangesRecursively(const DbFileInfo& file, QWidget* parentWidget)
+{
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_undoChangesRecursively(file);
 
 	ok = waitForComplete(parentWidget, tr("Undo pending changes"));
 	return true;

@@ -137,6 +137,7 @@ public:
 	
 	bool undoChanges(DbFileInfo& file, QWidget* parentWidget);
 	bool undoChanges(std::vector<DbFileInfo>& files, QWidget* parentWidget);
+	bool undoChangesRecursively(const DbFileInfo& file, QWidget* parentWidget);
 
 	bool fileHasChildren(bool* hasChildren, DbFileInfo& file, QWidget* parentWidget);
 
@@ -268,6 +269,7 @@ signals:
 	void signal_checkInTree(std::vector<DbFileInfo>* parentFiles, std::vector<DbFileInfo>* outCheckedIn, QString comment);
 	void signal_checkOut(std::vector<DbFileInfo>* files);
 	void signal_undoChanges(std::vector<DbFileInfo>* files);
+	void signal_undoChangesRecursively(DbFileInfo file);
 
 	void signal_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo);
 
