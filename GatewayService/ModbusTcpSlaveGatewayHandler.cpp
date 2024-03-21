@@ -120,14 +120,7 @@ namespace Gateway
 			st.value = state.value();
 		}
 
-		m_regsMutex.lock();
-
-		for(const auto [hash, state] : m_signalsStates)
-		{
-			updateRegister(state);
-		}
-
-		m_regsMutex.unlock();
+		updateRegisters();
 	}
 
 	HostAddressPort ModbusTcpSlaveHandler::listeningAddr() const
@@ -161,8 +154,9 @@ namespace Gateway
 
 		m_regsMutex.lock(thread);
 
-		memcpy_s(reinterpret_cast<char*>(destBuffer), copyDestSizeBytes,
-				 reinterpret_cast<char*>(m_registers.data() + startRegAddr), copyDestSizeBytes);
+		std::memcpy(reinterpret_cast<char*>(destBuffer),
+					reinterpret_cast<char*>(m_registers.data() + startRegAddr),
+					copyDestSizeBytes);
 
 		m_regsMutex.unlock(thread);
 
@@ -213,68 +207,114 @@ namespace Gateway
 		return true;
 	}
 
-	void ModbusTcpSlaveHandler::updateRegister(const SignalState& state)
+	void ModbusTcpSlaveHandler::updateRegisters()
 	{
-		int regAddr = state.modbusAddress.offset();
+		m_regsMutex.lock();
 
-		if (regAddr >= TO_INT(m_registers.size()))
+		for(const auto [hash, state] : m_signalsStates)
 		{
-			Q_ASSERT(false);
-			return;
+			int regAddr = state.modbusAddress.offset();
+
+			if (regAddr >= TO_INT(m_registers.size()))
+			{
+				Q_ASSERT(false);
+				return;
+			}
+
+			switch(state.format.signalFormat)
+			{
+			case E::ModbusSignalFormat::DiscreteBit:
+				{
+					Modbus::RegisterValue& reg = m_registers[regAddr];
+
+					quint16 mask = 1 << state.modbusAddress.bit();
+
+					if (state.reverseBytes)
+					{
+						mask = reverseUint16(mask);
+					}
+
+					if (state.value == 0)
+					{
+						reg &= (~mask);
+					}
+					else
+					{
+						reg |= mask;
+					}
+				}
+				break;
+
+			case E::ModbusSignalFormat::AnalogFloat16:
+				{
+					Q_ASSERT(false);			// convertion function is unknown
+				}
+				break;
+
+			case E::ModbusSignalFormat::AnalogSInt16:
+				{
+					qint16 sint16 = static_cast<qint16>(state.value);
+
+					Modbus::RegisterValue regValue = std::bit_cast<Modbus::RegisterValue>(sint16);
+
+					if (state.reverseBytes)
+					{
+						regValue = reverseUint32(regValue);
+					}
+
+					m_registers[regAddr] = regValue;
+				}
+				break;
+
+			case E::ModbusSignalFormat::AnalogFloat32:
+				{
+					if (regAddr + 1 >= TO_INT(m_registers.size()))
+					{
+						Q_ASSERT(false);
+						return;
+					}
+
+					float fp32 = static_cast<float>(state.value);
+
+					quint32 uint32 = std::bit_cast<quint32>(fp32);
+
+					if (state.reverseBytes)
+					{
+						uint32 = reverseUint32(uint32);
+					}
+
+					m_registers[regAddr] = static_cast<Modbus::RegisterValue>(uint32 & 0xFFFF);
+					m_registers[regAddr + 1] = static_cast<Modbus::RegisterValue>((uint32 >> 16) & 0xFFFF);
+				}
+				break;
+
+			case E::ModbusSignalFormat::AnalogSInt32:
+				{
+					if (regAddr + 1 >= TO_INT(m_registers.size()))
+					{
+						Q_ASSERT(false);
+						return;
+					}
+
+					qint32 sint32 = static_cast<qint32>(state.value);
+
+					quint32 uint32 = std::bit_cast<quint32>(sint32);
+
+					if (state.reverseBytes)
+					{
+						uint32 = reverseUint32(uint32);
+					}
+
+					m_registers[regAddr] = static_cast<Modbus::RegisterValue>(uint32 & 0xFFFF);
+					m_registers[regAddr + 1] = static_cast<Modbus::RegisterValue>((uint32 >> 16) & 0xFFFF);
+				}
+				break;
+
+			default:
+				Q_ASSERT(false);
+			}
 		}
 
-		switch(state.format.signalFormat)
-		{
-		case E::ModbusSignalFormat::DiscreteBit:
-			{
-				Modbus::RegisterValue& reg = m_registers[regAddr];
-
-				quint16 mask = (~1) << state.modbusAddress.bit();
-
-				if (state.reverseBytes)
-				{
-					mask = reverseUint16(mask);
-				}
-
-				reg &= mask;
-
-				if (state.value != 0)
-				{
-					reg |= (~mask);
-				}
-			}
-			break;
-
-		case E::ModbusSignalFormat::AnalogFloat16:
-			{
-				Q_ASSERT(false);			// convertion function is unknown
-			}
-			break;
-
-		case E::ModbusSignalFormat::AnalogFloat32:
-			{
-				if (regAddr + 1 >= TO_INT(m_registers.size()))
-				{
-					Q_ASSERT(false);
-					return;
-				}
-
-				float fp32 = static_cast<float>(state.value);
-
-				quint32 uint32 = std::bit_cast<quint32>(fp32);
-
-				if (state.reverseBytes)
-				{
-					uint32 = reverseUint32(uint32);
-				}
-
-				m_registers[regAddr] = static_cast<Modbus::RegisterValue>(uint32 & 0xFFFF);
-				m_registers[regAddr + 1] = static_cast<Modbus::RegisterValue>((uint32 >> 16) & 0xFFFF);
-			}
-			break;
-
-		default:
-			Q_ASSERT(false);
-		}
+		m_regsMutex.unlock();
 	}
 }

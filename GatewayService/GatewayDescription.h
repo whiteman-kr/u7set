@@ -100,6 +100,8 @@ namespace Gateway
 			DiscreteBit,
 			AnalogFloat16,
 			AnalogFloat32,
+			AnalogSInt16,
+			AnalogSInt32,
 		};
 		Q_ENUM(ModbusSignalFormat)
 

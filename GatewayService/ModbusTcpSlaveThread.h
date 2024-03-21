@@ -56,7 +56,7 @@ namespace Modbus
 
 			int m_connectionNo = 0;
 
-			static inline const int RECEIVE_BUFFER_SIZE = 64;
+			static inline const int RECEIVE_BUFFER_SIZE = 1024;
 			char m_receiveBuffer[RECEIVE_BUFFER_SIZE];
 
 			static inline const int SEND_BUFFER_SIZE = 1024;

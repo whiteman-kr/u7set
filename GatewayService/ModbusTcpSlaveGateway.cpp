@@ -290,7 +290,10 @@ namespace Gateway
 		static const std::map<E::ModbusSignalFormat, ::E::SignalType> signalsFormats =
 		{
 			{ E::ModbusSignalFormat::DiscreteBit, ::E::SignalType::Discrete },
-			{ E::ModbusSignalFormat::AnalogFloat16, ::E::SignalType::Analog }
+			{ E::ModbusSignalFormat::AnalogFloat16, ::E::SignalType::Analog },
+			{ E::ModbusSignalFormat::AnalogFloat32, ::E::SignalType::Analog },
+			{ E::ModbusSignalFormat::AnalogSInt16, ::E::SignalType::Analog },
+			{ E::ModbusSignalFormat::AnalogSInt32, ::E::SignalType::Analog },
 		};
 
 		for(auto const& [modbusFormat, signalType] : signalsFormats)
@@ -709,7 +712,16 @@ namespace Gateway
 						}
 						else
 						{
-							analogRegs.emplace(addr16.offset() + i);
+							if (analogRegs.contains(addr16.offset() + i) == true)
+							{
+								log.logError(QString("analog signal %1 register %2 used by another analog signal").
+											 arg(signalID).arg(addr16.offset() + i));
+								result = false;
+							}
+							else
+							{
+								analogRegs.emplace(addr16.offset() + i);
+							}
 						}
 					}
 				}

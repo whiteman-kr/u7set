@@ -50,7 +50,7 @@ namespace Gateway
 
 	private:
 		bool init();
-		void updateRegister(const SignalState& state);
+		void updateRegisters();
 
 	private:
 		const SoftwareInfo m_softwareInfo;

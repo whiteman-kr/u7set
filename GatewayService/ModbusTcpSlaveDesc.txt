@@ -35,15 +35,15 @@ ModbusDeviceID = 20
 // be - Big Endian
 // le - Little Endian                                       
 
-SignalsFormat = AnalogFloat16 BE
+SignalsFormat = AnalogFloat32 BE
 
 1000 -> #SYSTEMID_RACKID_CH01_MD00_PI_TEMP		// regAddr -> AppSignalID
-1001 -> #SYSTEMID_RACKID_CH01_MD00_PI_BUILDNUMBER	
+1002 -> #SYSTEMID_RACKID_CH01_MD00_PI_BUILDNUMBER	
 
 
 [SignalList]
 
-SignalsFormat = DiscreteUint16 LE			// general discrete registers format, Big Endian 16 bit
+SignalsFormat = DiscreteBit LE			//	 general discrete registers format, Big Endian 16 bit
                                                 	
-1002, 3 -> #SYSTEMID_RACKID_CH01_MD00_PI_BLINK		// regAddr, bitNo = AppSignalID
-1002, (0x8000) -> #SYSTEMID_RACKID_CH01_MD00_PI_SORISSET	// regAddr, (mask) = AppSignalID
+1004, 3 -> #SYSTEMID_RACKID_CH01_MD00_PI_BLINK		// regAddr, bitNo = AppSignalID
+1004, (0x8000) -> #SYSTEMID_RACKID_CH01_MD00_PI_SORISSET	// regAddr, (mask) = AppSignalID

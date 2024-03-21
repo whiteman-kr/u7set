@@ -100,7 +100,7 @@ namespace Modbus
 		fn03Request.reverseBytes();
 
 		int regsStartAddr = fn03Request.regsStartAddr;
-		int regsCount = fn03Request.regsStartAddr;
+		int regsCount = fn03Request.regsCount;
 
 		Q_ASSERT(regsCount <= 127);
 
