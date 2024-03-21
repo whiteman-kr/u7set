@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "ModbusTcpSlaveGatewayHandler.h"
 #include "../Proto/Network.pb.h"
 
