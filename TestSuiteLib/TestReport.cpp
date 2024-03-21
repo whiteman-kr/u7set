@@ -18,9 +18,30 @@ namespace TestSuite
 
 	}
 
+	int TestReportGenerator::count() const 
+	{
+		return static_cast<int>(m_items.size());
+	}
+
 	int TestReportGenerator::count(const QString& /*tag*/) const
 	{
 		return 0;
+	}
+
+	QString TestReportGenerator::text(int index, QString* tag) const
+	{
+		if (index < 0 || index >= m_items.size()) 
+		{
+			Q_ASSERT(false);
+			return QString();
+		}
+
+		if (tag != nullptr) 
+		{
+			*tag = m_items[index].tag();
+		}
+
+		return m_items[index].message();
 	}
 
 	QString TestReportGenerator::text(const QString& tag, bool* found)

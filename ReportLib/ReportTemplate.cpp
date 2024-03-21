@@ -79,6 +79,7 @@ namespace ReportLib
 
         QString fontName{"Arial"};
         int fontSize{12};
+		bool fontBold{false};
         Qt::Alignment alignment{Qt::AlignLeft};
 
         if (reader.attributes().hasAttribute("FontName"))
@@ -97,7 +98,12 @@ namespace ReportLib
             }
         }
 
-        if (reader.attributes().hasAttribute("Alignment"))
+        if (reader.attributes().hasAttribute("FontBold"))
+        {
+			fontBold = reader.attributes().value("FontBold").toString().compare("True", Qt::CaseInsensitive) == 0;
+        }
+
+		if (reader.attributes().hasAttribute("Alignment"))
 		{
 			QString alignmentText = reader.attributes().value("Alignment").toString();
 
@@ -129,7 +135,7 @@ namespace ReportLib
         QXmlStreamReader::TokenType tt = reader.readNext();
         Q_ASSERT(tt == QXmlStreamReader::TokenType::EndElement);
 
-		m_format = {ReportFont{fontName, fontSize, QFont::Normal}, alignment};
+		m_format = {ReportFont{fontName, fontSize, fontBold ? QFont::Bold : QFont::Normal}, alignment};
 
 		return true;
 
@@ -142,12 +148,34 @@ namespace ReportLib
 
 	QString TextTemplate::propToText() const
 	{
-		if (tag().isEmpty() == true)
+		QString alStr;
+		switch (m_format.alignment())
 		{
-			return text();
+		case Qt::AlignLeft:
+			alStr = "Left";
+			break;
+		case Qt::AlignRight:
+			alStr = "Right";
+			break;
+		case Qt::AlignHCenter:
+			alStr = "Center";
+			break;
+		default:
+			alStr = "???";
 		}
 
-		return tag();
+		QString format = QObject::tr("[%1, %2, %3, %4]")
+						  .arg(m_format.font().family)
+						  .arg(m_format.font().pointSize)
+						  .arg(m_format.font().weight == QFont::Bold ? "Bold" : "Normal")
+						  .arg(alStr);
+
+		if (tag().isEmpty() == true)
+		{
+			return text() + format;
+		}
+
+		return tag() + format;
 	}
 
 	//
@@ -169,6 +197,7 @@ namespace ReportLib
 
         QString fontName{"Arial"};
         int fontSize{12};
+		bool fontBold{false};
         std::vector<TableFormat::ColumnFormat> columns;
 
         if (reader.attributes().hasAttribute("FontName"))
@@ -187,7 +216,12 @@ namespace ReportLib
             }
         }
 
-        if (reader.attributes().hasAttribute("Separator"))
+        if (reader.attributes().hasAttribute("FontBold"))
+        {
+			fontBold = reader.attributes().value("FontBold").toString().compare("True", Qt::CaseInsensitive) == 0;
+        }
+
+		if (reader.attributes().hasAttribute("Separator"))
         {
             m_separator = reader.attributes().value("Separator").toString();
         }
@@ -255,7 +289,7 @@ namespace ReportLib
             }
         }
 
-		m_format = {ReportFont{fontName, fontSize, QFont::Normal}, columns};
+		m_format = {ReportFont{fontName, fontSize, fontBold ? QFont::Bold : QFont::Normal}, columns};
 
         //QXmlStreamReader::TokenType tt = reader.readNext();
         //Q_ASSERT(tt == QXmlStreamReader::TokenType::EndElement);

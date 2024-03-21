@@ -441,6 +441,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0412.sql", "Upgrade to version 412, Update DiagDataService preset to v3"},
 	{":/DatabaseUpgrade/Upgrade0413.sql", "Upgrade to version 413, Add DiagLANDataSize to all LMs, config script has been changed to use this value"},
 	{":/DatabaseUpgrade/Upgrade0414.sql", "Upgrade to version 414, Added function api.undo_changes_recursively"},
+	{":/DatabaseUpgrade/Upgrade0415.sql", "Upgrade to version 415, TestSuite preset update, add FontBold and Section layout to report template"},
 };
 
 int DbWorker::counter = 0;
