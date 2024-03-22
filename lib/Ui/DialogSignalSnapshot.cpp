@@ -2166,7 +2166,7 @@ void DialogSignalSnapshot::buttonChooseTagsClicked()
 	int height = QSettings().value("DialogSignalSnapshot/tagsSelectorDialog/height", 400).toInt();
 	tagsSelectorDialog.resize(width, height);
 
-	ChooseTagsWidget te{m_appSignalManager->tags(), this};
+	ChooseTagsWidget te{m_appSignalManager->tags(), ' ', this};
 	te.setText(m_editTags->text());
 
 	connect(&te, &ChooseTagsWidget::okPressed, &tagsSelectorDialog, &QDialog::accept);

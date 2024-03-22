@@ -7279,9 +7279,9 @@ void EditSchemaWidget::editPaste()
 
 				m_editEngine->runSetProperty(VFrame30::PropertyNames::image, QVariant(image), selected);
 			}
-		}
 
-		return;
+			return;
+		}
 	}
 
 	// All other items receives only text

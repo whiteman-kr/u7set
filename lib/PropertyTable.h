@@ -255,6 +255,7 @@ namespace ExtWidgets
 		void onCellPasteKeyPressed();
 		void onShowErrorMessage (QString message);
 		void onPropertyFilterChanged();
+		void onPropertyFilterChooseTags();
 		void onTableContextMenuRequested(const QPoint &pos);
 		void onGroupByCategoryToggled(bool value);
 
@@ -309,6 +310,8 @@ namespace ExtWidgets
 		PropertyTableItemDelegate* m_itemDelegate = nullptr;
 
 		QList<std::shared_ptr<PropertyObject>> m_objects;
+
+		QStringList m_commonProperties;
 
 		QStringList m_propertyFilters;
 

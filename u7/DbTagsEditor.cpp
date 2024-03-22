@@ -56,7 +56,7 @@ DbTagsEditor::DbTagsEditor(DbController* dbController, bool showTags, bool showU
 		}
 	}
 
-    m_tagsWidget = new ChooseTagsWidget(tags, users, this);
+    m_tagsWidget = new ChooseTagsWidget(tags, users, ' ', this);
 
     connect(m_tagsWidget, &ChooseTagsWidget::okPressed, this, &DbTagsEditor::okButtonPressed);
     connect(m_tagsWidget, &ChooseTagsWidget::cancelPressed, this, &DbTagsEditor::cancelButtonPressed);
