@@ -183,6 +183,10 @@ class AppSignalParam
 	Q_PROPERTY(bool isInverted READ isInverted)
 	Q_PROPERTY(bool IsInverted READ isInverted)
 
+	/// \brief Signal is reserved
+	Q_PROPERTY(bool isReserved READ isReserved)
+	Q_PROPERTY(bool IsReserved READ isReserved)
+
 public:
 	AppSignalParam(const AppSignal& signal);
 
@@ -272,10 +276,10 @@ public:
 	[[nodiscard]] int precision() const;
 	void setPrecision(int value);
 
-	[[nodiscard]] double fineAaperture() const;
+	[[nodiscard]] double fineAperture() const;
 	void setFineAperture(double value);
 
-	[[nodiscard]] double coarseAaperture() const;
+	[[nodiscard]] double coarseAperture() const;
 	void setCoarseAperture(double value);
 
 	[[nodiscard]] double filteringTime() const;
@@ -292,6 +296,9 @@ public:
 
 	[[nodiscard]] bool isInverted() const;
 	void setInverted(bool value);
+
+	[[nodiscard]] bool isReserved() const;
+	void setReserved(bool value);
 
 	[[nodiscard]] TuningValue tuningDefaultValue() const;
 	[[nodiscard]] QVariant tuningDefaultValueToVariant() const;
@@ -364,6 +371,7 @@ private:
 		bool m_enableTuning = false;
 		bool m_endpoint = false;
 		bool m_inverted = false;
+		bool m_reserved = false;
 		TuningValue m_tuningDefaultValue;
 		TuningValue m_tuningLowBound;
 		TuningValue m_tuningHighBound;

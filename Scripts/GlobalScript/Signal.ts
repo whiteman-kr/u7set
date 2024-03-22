@@ -43,7 +43,9 @@ module Signal {
 		isDiscrete: boolean;
 
 		isEndpoint: boolean;
-
+		isInverted: boolean;
+		isReserved: boolean;
+		
 		// Functions
 		//
 		hasTag(tag: string): boolean;

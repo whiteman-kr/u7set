@@ -331,7 +331,7 @@ void AppSignalParam::setPrecision(int value)
 	m_data->m_precision = value;
 }
 
-double AppSignalParam::fineAaperture() const
+double AppSignalParam::fineAperture() const
 {
 	return m_data->m_fineAperture;
 }
@@ -342,7 +342,7 @@ void AppSignalParam::setFineAperture(double value)
 	m_data->m_fineAperture = value;
 }
 
-double AppSignalParam::coarseAaperture() const
+double AppSignalParam::coarseAperture() const
 {
 	return m_data->m_coarseAperture;
 }
@@ -406,6 +406,17 @@ void AppSignalParam::setInverted(bool value)
 {
 	detach();
 	m_data->m_inverted = value;
+}
+
+bool AppSignalParam::isReserved() const
+{
+	return m_data->m_reserved;
+}
+
+void AppSignalParam::setReserved(bool value)
+{
+	detach();
+	m_data->m_reserved = value;
 }
 
 TuningValue AppSignalParam::tuningDefaultValue() const
@@ -549,9 +560,11 @@ void AppSignalParam::PrivateData::load(const AppSignal& s)
 	m_fineAperture = s.fineAperture();
 	m_filteringTime = s.filteringTime();
 	m_spreadTolerance = s.spreadTolerance();
+	
 	m_enableTuning = s.enableTuning();
 	m_endpoint = s.isEndpoint();
 	m_inverted = s.invertSignal();
+	m_reserved = s.reserved();
 
 	m_tuningDefaultValue = s.tuningDefaultValue();
 	m_tuningLowBound = s.tuningLowBound();
@@ -599,6 +612,7 @@ void AppSignalParam::PrivateData::save(::Proto::AppSignal* message) const
 	message->set_specpropvalues(m_specPropValues.constData(), m_specPropValues.size());
 
 	message->set_invertsignal(m_inverted);
+	message->set_reserved(m_reserved);
 
 	// Signal properties calculated in compile-time
 

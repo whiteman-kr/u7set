@@ -1316,59 +1316,73 @@ void DialogSignalInfo::fillProperties()
 	columns << tr("Value");
 	ui->treeProperties->setHeaderLabels(columns);
 
-	QTreeWidgetItem* itemGroup1 = new QTreeWidgetItem(QStringList()<<tr("General"));
-
-	itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("AppSignalID") << m_signal.appSignalId()));
-	itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("EquipmentID") << m_signal.equipmentId()));
-
-	if (m_signalDataServer != nullptr)
+	// General
+	//
 	{
-		QStringList shortenIds;
-		QStringList dataServiceIds =  m_signalDataServer->dataServiceIds(m_signal.appSignalId());
-		for (const auto& ads : m_appDataServices)
+		QTreeWidgetItem* itemGroupGeneral = new QTreeWidgetItem(QStringList() << tr("General"));
+
+		itemGroupGeneral->addChild(new QTreeWidgetItem(QStringList() << tr("AppSignalID") << m_signal.appSignalId()));
+		itemGroupGeneral->addChild(new QTreeWidgetItem(QStringList() << tr("EquipmentID") << m_signal.equipmentId()));
+
+		if (m_signalDataServer != nullptr)
 		{
-			if (std::find(dataServiceIds.begin(), dataServiceIds.end(), ads.equipmentId) != dataServiceIds.end())
+			QStringList shortenIds;
+			QStringList dataServiceIds = m_signalDataServer->dataServiceIds(m_signal.appSignalId());
+			for (const auto& ads : m_appDataServices)
 			{
-				shortenIds.push_back(ads.shortenId);
+				if (std::find(dataServiceIds.begin(), dataServiceIds.end(), ads.equipmentId) != dataServiceIds.end())
+				{
+					shortenIds.push_back(ads.shortenId);
+				}
 			}
+
+			itemGroupGeneral->addChild(new QTreeWidgetItem(QStringList() << tr("Servers") << shortenIds.join("; ")));
 		}
 
-		itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("Servers") << shortenIds.join("; ")));
-	}
+		if (m_signal.isAnalog())
+		{
+			itemGroupGeneral->addChild(new QTreeWidgetItem(QStringList() << tr("Unit") << m_signal.unit()));
+		}
 
-	if (m_signal.isAnalog())
+		// Tags
+		//
+		itemGroupGeneral->addChild(new QTreeWidgetItem(QStringList() << tr("Tags") << m_signal.tagStringList().join(' ')));
+
+		ui->treeProperties->addTopLevelItem(itemGroupGeneral);
+		itemGroupGeneral->setExpanded(true);
+	} // General
+
+	// Format
+	//
 	{
-		itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("Unit") << m_signal.unit()));
-	}
+		QTreeWidgetItem* itemGroup2 = new QTreeWidgetItem(QStringList() << tr("Format"));
 
-	itemGroup1->addChild(new QTreeWidgetItem(QStringList() << tr("Tags") << m_signal.tagStringList().join(' ')));
-
-	ui->treeProperties->addTopLevelItem(itemGroup1);
-	itemGroup1->setExpanded(true);
-
-	QTreeWidgetItem* itemGroup2 = new QTreeWidgetItem(QStringList() << tr("Format"));
-
-	//if (m_signal.isAnalog())
-	//{
+		//if (m_signal.isAnalog())
+		//{
 		itemGroup2->addChild(new QTreeWidgetItem(QStringList() << tr("ByteOrder") << E::valueToString<E::ByteOrder>(m_signal.byteOrder())));
-	//}
-	ui->treeProperties->addTopLevelItem(itemGroup2);
-	itemGroup2->setExpanded(true);
+		//}
+		ui->treeProperties->addTopLevelItem(itemGroup2);
+		itemGroup2->setExpanded(true);
+	} // Format
 
+	// Parameters
+	//
 	{
 		QTreeWidgetItem* itemGroupParameters = new QTreeWidgetItem(QStringList() << tr("Parameters"));
 
 		if (m_signal.isAnalog() == true)
 		{
 			itemGroupParameters->addChild(new QTreeWidgetItem(QStringList() << tr("Precision") << QString::number(m_signal.precision())));
-			itemGroupParameters->addChild(new QTreeWidgetItem(QStringList() << tr("FineAperture") << QString::number(m_signal.fineAaperture(), 'f', m_signal.precision())));
-			itemGroupParameters->addChild(new QTreeWidgetItem(QStringList() << tr("CoarseAperture") << QString::number(m_signal.coarseAaperture(), 'f', m_signal.precision())));
+			itemGroupParameters->addChild(new QTreeWidgetItem(QStringList() << tr("FineAperture") << QString::number(m_signal.fineAperture(), 'f', m_signal.precision())));
+			itemGroupParameters->addChild(new QTreeWidgetItem(QStringList() << tr("CoarseAperture") << QString::number(m_signal.coarseAperture(), 'f', m_signal.precision())));
 			itemGroupParameters->addChild(new QTreeWidgetItem(QStringList() << tr("FilteringTime") << QString::number(m_signal.filteringTime(), 'f', m_signal.precision())));
 			itemGroupParameters->addChild(new QTreeWidgetItem(QStringList() << tr("SpreadTolerance") << QString::number(m_signal.spreadTolerance(), 'f', m_signal.precision())));
 		}
 
 		if (m_signal.isDiscrete() == true)
 		{
+			// Inverted
+			//
 			QStringList inverted;
 			inverted << tr("Inverted");
 			inverted << (m_signal.isInverted() ? tr("Yes") : tr("No"));
@@ -1376,9 +1390,19 @@ void DialogSignalInfo::fillProperties()
 			itemGroupParameters->addChild(new QTreeWidgetItem(inverted));
 		}
 
+		// Reserved
+		//
+		QStringList reserved;
+		reserved << tr("Reserved");
+		reserved << (m_signal.isReserved() ? tr("Yes") : tr("No"));
+
+		itemGroupParameters->addChild(new QTreeWidgetItem(reserved));
+
+		// --
+		//
 		ui->treeProperties->addTopLevelItem(itemGroupParameters);
 		itemGroupParameters->setExpanded(true);
-	}
+	} // Parameters
 
 	if (m_signal.isAnalog())
 	{
