@@ -29,9 +29,11 @@ namespace Gateway
 		{
 		case E::ModbusSignalFormat::DiscreteBit:
 		case E::ModbusSignalFormat::AnalogFloat16:
+		case E::ModbusSignalFormat::AnalogSInt16:
 			return 1;
 
 		case E::ModbusSignalFormat::AnalogFloat32:
+		case E::ModbusSignalFormat::AnalogSInt32:
 			return 2;
 
 		default:
@@ -643,9 +645,7 @@ namespace Gateway
 
 				if (existsSignals.contains(hash))
 				{
-					log.logError(QString("signal %1 is repeated in several signal lists").arg(signalID));
-					result = false;
-					continue;
+					log.logWarning(QString("signal %1 is repeated in several signal lists").arg(signalID));
 				}
 
 				existsSignals.insert(hash);

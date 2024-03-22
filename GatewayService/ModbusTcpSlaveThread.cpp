@@ -74,7 +74,8 @@ namespace Modbus
 				break;
 
 			default:
-				Q_ASSERT(false);
+				DEBUG_LOG_ERR(m_listener.log(), QString("TcpSlaveThread::Connection::onReceiveData: unknown modbus function code %1. Request ignored.").
+												arg(request.functionCode));
 			}
 
 			if (sendBytesCount > 0)
@@ -99,6 +100,8 @@ namespace Modbus
 
 		fn03Request.reverseBytes();
 
+		// Human readable value for regsStartAddr == 1 in request decremented by 1, i.e. send as 0!
+		//
 		int regsStartAddr = fn03Request.regsStartAddr;
 		int regsCount = fn03Request.regsCount;
 
@@ -239,33 +242,6 @@ namespace Modbus
 		if (exitIfStopRequested() == true)
 		{
 			return;
-		}
-
-		if (!error)
-		{
-			//			DEBUG_LOG_MSG(m_log, "Timer");
-			// if (m_receivedPerSecond == 0 && m_1second)
-			// {
-			// 	m_noReceiveCtr++;
-
-				   // 	if (m_noReceiveCtr >= NO_RUP_FRAMES_TIMEOUT)
-				   // 	{
-				   // 		qDebug() << C_STR(QString("No RUP frames received in %1 seconds").
-				   // 						  arg(NO_RUP_FRAMES_TIMEOUT));
-				   // 	}
-				   // }
-
-				   // if (isSocketWorkable() == false ||
-				   // 	m_noReceiveCtr >= NO_RUP_FRAMES_TIMEOUT ||
-				   // 	m_socketErrorCtr >= MAX_SOCKET_ERROR_COUNT)
-				   // {
-				   // 	closeSocket();
-				   // 	clearReceiverStatistics();
-				   // 	createAndBindSocket();
-				   // }
-
-				   // updateReceiverStatistics();
-				   // updateDataSourcesStatistics();
 		}
 
 		startTimer500ms();

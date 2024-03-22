@@ -73,7 +73,7 @@ namespace Gateway
 		SimpleMutex m_regsMutex;
 		std::vector<Modbus::RegisterValue> m_registers;
 
-		std::map<Hash, SignalState> m_signalsStates;
+		std::map<Hash, std::vector<SignalState>> m_signalsStates;
 
 		friend class AppDataServiceClient;
 	};

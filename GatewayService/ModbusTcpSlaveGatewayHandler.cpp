@@ -115,9 +115,12 @@ namespace Gateway
 				continue;
 			}
 
-			SignalState& st = it->second;
+			std::vector<SignalState>& states = it->second;
 
-			st.value = state.value();
+			for(SignalState& st : states)
+			{
+				st.value = state.value();
+			}
 		}
 
 		updateRegisters();
@@ -201,7 +204,18 @@ namespace Gateway
 			const QString& appSignalID = p.first;
 			const ModbusFormat& format = p.second;
 
-			m_signalsStates.emplace(calcHash(appSignalID), SignalState(format, addr16));
+			Hash hash = calcHash(appSignalID);
+
+			auto it = m_signalsStates.find(hash);
+
+			if (it == m_signalsStates.end())
+			{
+				auto [newIt, b] = m_signalsStates.emplace(hash, std::vector<SignalState>{});
+
+				it = newIt;
+			}
+
+			it->second.emplace_back(format, addr16);
 		}
 
 		return true;
@@ -211,107 +225,123 @@ namespace Gateway
 	{
 		m_regsMutex.lock();
 
-		for(const auto [hash, state] : m_signalsStates)
+		for(const auto [hash, states] : m_signalsStates)
 		{
-			int regAddr = state.modbusAddress.offset();
-
-			if (regAddr >= TO_INT(m_registers.size()))
+			for(const SignalState& state : states)
 			{
-				Q_ASSERT(false);
-				return;
-			}
+				// Human readable value for regsStartAddr == 1 in request decremented by 1, i.e. send as 0!
+				// So m_registers also indexed from 0
+				//
+				int regAddr = state.modbusAddress.offset() - 1;
 
-			switch(state.format.signalFormat)
-			{
-			case E::ModbusSignalFormat::DiscreteBit:
+				if (regAddr >= TO_INT(m_registers.size()))
 				{
-					Modbus::RegisterValue& reg = m_registers[regAddr];
-
-					quint16 mask = 1 << state.modbusAddress.bit();
-
-					if (state.reverseBytes)
-					{
-						mask = reverseUint16(mask);
-					}
-
-					if (state.value == 0)
-					{
-						reg &= (~mask);
-					}
-					else
-					{
-						reg |= mask;
-					}
+					Q_ASSERT(false);
+					return;
 				}
-				break;
 
-			case E::ModbusSignalFormat::AnalogFloat16:
+				switch(state.format.signalFormat)
 				{
-					Q_ASSERT(false);			// convertion function is unknown
+				case E::ModbusSignalFormat::DiscreteBit:
+					{
+						Modbus::RegisterValue& reg = m_registers[regAddr];
+
+						quint16 mask = 1 << state.modbusAddress.bit();
+
+						if (state.reverseBytes)
+						{
+							mask = reverseUint16(mask);
+						}
+
+						if (state.value == 0)
+						{
+							reg &= (~mask);
+						}
+						else
+						{
+							reg |= mask;
+						}
+					}
+					break;
+
+				case E::ModbusSignalFormat::AnalogFloat16:
+					{
+						Q_ASSERT(false);			// convertion function is unknown
+					}
+					break;
+
+				case E::ModbusSignalFormat::AnalogSInt16:
+					{
+						qint16 sint16 = static_cast<qint16>(state.value);
+
+						Modbus::RegisterValue regValue = std::bit_cast<Modbus::RegisterValue>(sint16);
+
+						if (state.reverseBytes)
+						{
+							regValue = reverseUint32(regValue);
+						}
+
+						m_registers[regAddr] = regValue;
+					}
+					break;
+
+				case E::ModbusSignalFormat::AnalogFloat32:
+					{
+						if (regAddr + 1 >= TO_INT(m_registers.size()))
+						{
+							Q_ASSERT(false);
+							return;
+						}
+
+						float fp32 = static_cast<float>(state.value);
+
+						quint32 uint32 = std::bit_cast<quint32>(fp32);
+
+						if (state.reverseBytes)
+						{
+							uint32 = reverseUint32(uint32);
+
+							m_registers[regAddr] = static_cast<Modbus::RegisterValue>(uint32 & 0xFFFF);
+							m_registers[regAddr + 1] = static_cast<Modbus::RegisterValue>((uint32 >> 16) & 0xFFFF);
+						}
+						else
+						{
+							m_registers[regAddr] = reverseUint16(static_cast<Modbus::RegisterValue>(uint32 & 0xFFFF));
+							m_registers[regAddr + 1] = reverseUint16(static_cast<Modbus::RegisterValue>((uint32 >> 16) & 0xFFFF));
+						}
+					}
+					break;
+
+				case E::ModbusSignalFormat::AnalogSInt32:
+					{
+						if (regAddr + 1 >= TO_INT(m_registers.size()))
+						{
+							Q_ASSERT(false);
+							return;
+						}
+
+						qint32 sint32 = static_cast<qint32>(state.value);
+
+						quint32 uint32 = std::bit_cast<quint32>(sint32);
+
+						if (state.reverseBytes)
+						{
+							uint32 = reverseUint32(uint32);
+
+							m_registers[regAddr] = static_cast<Modbus::RegisterValue>(uint32 & 0xFFFF);
+							m_registers[regAddr + 1] = static_cast<Modbus::RegisterValue>((uint32 >> 16) & 0xFFFF);
+						}
+						else
+						{
+							m_registers[regAddr] = reverseUint16(static_cast<Modbus::RegisterValue>(uint32 & 0xFFFF));
+							m_registers[regAddr + 1] = reverseUint16(static_cast<Modbus::RegisterValue>((uint32 >> 16) & 0xFFFF));
+						}
+					}
+					break;
+
+				default:
+					Q_ASSERT(false);
 				}
-				break;
-
-			case E::ModbusSignalFormat::AnalogSInt16:
-				{
-					qint16 sint16 = static_cast<qint16>(state.value);
-
-					Modbus::RegisterValue regValue = std::bit_cast<Modbus::RegisterValue>(sint16);
-
-					if (state.reverseBytes)
-					{
-						regValue = reverseUint32(regValue);
-					}
-
-					m_registers[regAddr] = regValue;
-				}
-				break;
-
-			case E::ModbusSignalFormat::AnalogFloat32:
-				{
-					if (regAddr + 1 >= TO_INT(m_registers.size()))
-					{
-						Q_ASSERT(false);
-						return;
-					}
-
-					float fp32 = static_cast<float>(state.value);
-
-					quint32 uint32 = std::bit_cast<quint32>(fp32);
-
-					if (state.reverseBytes)
-					{
-						uint32 = reverseUint32(uint32);
-					}
-
-					m_registers[regAddr] = static_cast<Modbus::RegisterValue>(uint32 & 0xFFFF);
-					m_registers[regAddr + 1] = static_cast<Modbus::RegisterValue>((uint32 >> 16) & 0xFFFF);
-				}
-				break;
-
-			case E::ModbusSignalFormat::AnalogSInt32:
-				{
-					if (regAddr + 1 >= TO_INT(m_registers.size()))
-					{
-						Q_ASSERT(false);
-						return;
-					}
-
-					qint32 sint32 = static_cast<qint32>(state.value);
-
-					quint32 uint32 = std::bit_cast<quint32>(sint32);
-
-					if (state.reverseBytes)
-					{
-						uint32 = reverseUint32(uint32);
-					}
-
-					m_registers[regAddr] = static_cast<Modbus::RegisterValue>(uint32 & 0xFFFF);
-					m_registers[regAddr + 1] = static_cast<Modbus::RegisterValue>((uint32 >> 16) & 0xFFFF);
-				}
-				break;
-
-			default:
-				Q_ASSERT(false);
 			}
 		}
 
