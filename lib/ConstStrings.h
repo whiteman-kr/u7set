@@ -443,6 +443,7 @@ namespace CfgFileId
 	inline const QString TUNING_GLOBALSCRIPT("TUNING_GLOBALSCRIPT");
 
 	inline const QString CLIENT_BEHAVIOR("CLIENT_BEHAVIOR");
+	inline const QString MONITOR_EQUIPMENT("MONITOR_EQUIPMENT");
 	inline const QString MATSUSERS("MATSUSERS_XML");
 	inline const QString LOGO("LOGO");
 
@@ -558,6 +559,7 @@ namespace File
 	inline const QString DIAG_SIGNAL_TYPES_XML("DiagSignalTypes.xml");
 	inline const QString DIAG_DATA_SOURCES_XML("DiagDataSources.xml");
 	inline const QString ACQUIRED_DIAG_SIGNALS_ASGS("AcquiredDiagSignals.asgs");
+	inline const QString MONITOR_EQUIPMENT("MonitorEquipment.dat");
 
 	inline const QString METROLOGY_ITEMS_XML("MetrologyItems.xml");
 	inline const QString METROLOGY_SIGNAL_SET("MetrologySignal.set");

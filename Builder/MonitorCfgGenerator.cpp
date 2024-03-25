@@ -105,6 +105,18 @@ namespace Builder
 			result = false;
 		}
 
+		// Add link to Common/MonitorEquipment.dat
+		//
+		if (BuildFile* file = m_buildResultWriter->getBuildFileByID(Directory::COMMON, CfgFileId::MONITOR_EQUIPMENT);
+			file != nullptr)
+		{
+			m_cfgXml->addLinkToFile(file);
+		}
+		else
+		{
+			result = false;
+		}
+
 		return result;
 	}
 

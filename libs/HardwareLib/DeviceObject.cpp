@@ -175,11 +175,11 @@ namespace Hardware
 
 	bool DeviceObject::SaveData(Proto::Envelope* message) const
 	{
-		bool ok = SaveData(message, false);
+		bool ok = SaveData(message, false, {});
 		return ok;
 	}
 
-	bool DeviceObject::SaveData(Proto::Envelope* message, bool saveTree) const
+	bool DeviceObject::SaveData(Proto::Envelope* message, bool saveTree, const std::function<bool(const DeviceObject&)>& predicate) const
 	{
 		const std::string& className = this->metaObject()->className();
 		quint32 classnamehash = ::ClassNameHashCode(className);
@@ -246,10 +246,17 @@ namespace Hardware
 		{
 			for (const std::shared_ptr<DeviceObject>& child : m_children)
 			{
+				if (predicate && predicate(*child) == false)
+				{
+					// If predicate is not present or it returns false, do not save this child.
+					//
+					continue;
+				}
+
 				::Proto::Envelope* childMessage = mutableDeviceObject->add_children();
 				Q_ASSERT(childMessage);
 
-				child->SaveData(childMessage, saveTree);
+				child->SaveData(childMessage, saveTree, predicate);
 			}
 		}
 
@@ -436,6 +443,15 @@ namespace Hardware
 
 	bool DeviceObject::SaveObjectTree(Proto::Envelope* message) const
 	{
+		// Empty predicate means that all objects should be saved
+		//
+		return SaveObjectTreeIf(message, {});
+	}
+
+	bool DeviceObject::SaveObjectTreeIf(Proto::Envelope* message, std::function<bool(const DeviceObject&)> predicate) const
+	{
+		// Empty predicate means that all objects should be saved
+		//
 		if (message == nullptr)
 		{
 			Q_ASSERT(message);
@@ -444,7 +460,14 @@ namespace Hardware
 
 		try
 		{
-			bool ok = this->SaveData(message, true);
+			if (predicate && predicate(*this) == false)
+			{
+				// Still return true as it is not an error.
+				//
+				return true;
+			}
+
+			bool ok = this->SaveData(message, true, predicate);
 			return ok;
 		}
 		catch (...)

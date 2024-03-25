@@ -57,7 +57,7 @@ namespace Hardware
 	//
 	class DeviceObject :
 		public PropertyObject,
-		public Proto::ObjectSerialization<DeviceObject, Proto::Envelope>,
+		public Proto::ObjectSerialization<DeviceObject>,
 		public DebugInstCounter<DeviceObject>,
 		public std::enable_shared_from_this<DeviceObject>
 	{
@@ -80,12 +80,12 @@ namespace Hardware
 
 		// Serialization
 		//
-		friend Proto::ObjectSerialization<DeviceObject, Proto::Envelope>;	// for call CreateObject from Proto::ObjectSerialization
+		friend Proto::ObjectSerialization<DeviceObject>;	// for call CreateObject from Proto::ObjectSerialization
 	protected:
 		// Implementing Proto::ObjectSerialization<DeviceObject>::SaveData, LoadData
 		//
 		virtual bool SaveData(Proto::Envelope* message) const override;
-		virtual bool SaveData(Proto::Envelope* message, bool saveTree) const;
+		virtual bool SaveData(Proto::Envelope* message, bool saveTree, const std::function<bool(const DeviceObject&)>& predicate) const;
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
 	private:
@@ -100,6 +100,7 @@ namespace Hardware
 		// Save object with ALL children
 		//
 		bool SaveObjectTree(Proto::Envelope* message) const;
+		bool SaveObjectTreeIf(Proto::Envelope* message, std::function<bool(const DeviceObject&)> predicate) const;
 
 		// Expand EquipmentIDTemplate for this and for all children
 		//
