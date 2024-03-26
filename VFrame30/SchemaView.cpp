@@ -180,18 +180,10 @@ namespace VFrame30
 		// Update all children
 		// !!! Do not make childWidgets as a reference, as we change this list in the loop !!!
 		//
-		QObjectList childWidgets = children();
+		QList<QWidget*> childWidgets = findChildren<QWidget*>(QString(), Qt::FindDirectChildrenOnly);
 
-		for (QObject* childObject : childWidgets)
+		for (QWidget* childWidget : childWidgets)
 		{
-			QWidget* childWidget = dynamic_cast<QWidget*>(childObject);
-
-			if (childWidget == nullptr)
-			{
-				assert(dynamic_cast<QWidget*>(childObject) != nullptr || dynamic_cast<TuningController*>(childObject) != nullptr);
-				continue;
-			}
-
 			QString objectName = childWidget->objectName();
 			QUuid widgetUuid = QUuid(objectName);
 

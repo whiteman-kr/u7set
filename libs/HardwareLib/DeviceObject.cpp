@@ -59,7 +59,7 @@ namespace Hardware
 	// DeviceObject
 	//
 	//
-	DeviceObject::DeviceObject(DeviceType deviceType, bool preset /*= false*/, QObject* parent /*= nullptr*/) noexcept :
+	DeviceObject::DeviceObject(DeviceType deviceType, bool preset /*= false*/, QObject* parent /*= nullptr*/) :
 		PropertyObject(parent),
 		m_deviceType(deviceType)
 	{
@@ -274,7 +274,7 @@ namespace Hardware
 		const auto& deviceobject = message.GetExtension(::Proto::deviceobject);
 
 		m_uuid = Proto::Read(deviceobject.uuid());
-		Q_ASSERT(m_uuid.isNull() == false);
+		Q_ASSERT(m_uuid.isNull() == false || deviceType() == DeviceType::Root);
 
 		Proto::Read(deviceobject.equipmentid(), &m_equipmentId);
 		Proto::Read(deviceobject.caption(), &m_caption);
@@ -543,185 +543,185 @@ namespace Hardware
 		return;
 	}
 
-	bool DeviceObject::hasParent() const noexcept
+	bool DeviceObject::hasParent() const
 	{
 		return m_parent.expired() == false;
 	}
 
-	std::shared_ptr<DeviceObject> DeviceObject::parent() noexcept
+	std::shared_ptr<DeviceObject> DeviceObject::parent()
 	{
 		return m_parent.lock();
 	}
 
-	const std::shared_ptr<DeviceObject> DeviceObject::parent() const noexcept
+	const std::shared_ptr<DeviceObject> DeviceObject::parent() const
 	{
 		return m_parent.lock();
 	}
 
-	DeviceType DeviceObject::deviceType() const noexcept
+	DeviceType DeviceObject::deviceType() const
 	{
 		return m_deviceType;
 	}
 
-	QString DeviceObject::deviceTypeName() const noexcept
+	QString DeviceObject::deviceTypeName() const
 	{
 		Q_ASSERT(static_cast<size_t>(m_deviceType) < std::size(Hardware::DeviceTypeNames));
 		return DeviceTypeNames[static_cast<size_t>(m_deviceType)];
 	}
 
-	QString DeviceObject::deviceTypeName(DeviceType type) noexcept
+	QString DeviceObject::deviceTypeName(DeviceType type)
 	{
 		Q_ASSERT(static_cast<size_t>(type) < std::size(Hardware::DeviceTypeNames));
 		return DeviceTypeNames[static_cast<size_t>(type)];
 	}
 
-	bool DeviceObject::isRoot() const noexcept
+	bool DeviceObject::isRoot() const
 	{
 		return deviceType() == DeviceType::Root;
 	}
 
-	bool DeviceObject::isSystem() const noexcept
+	bool DeviceObject::isSystem() const
 	{
 		return deviceType() == DeviceType::System;
 	}
 
-	bool DeviceObject::isRack() const noexcept
+	bool DeviceObject::isRack() const
 	{
 		return deviceType() == DeviceType::Rack;
 	}
 
-	bool DeviceObject::isChassis() const noexcept
+	bool DeviceObject::isChassis() const
 	{
 		return deviceType() == DeviceType::Chassis;
 	}
 
-	bool DeviceObject::isModule() const noexcept
+	bool DeviceObject::isModule() const
 	{
 		return deviceType() == DeviceType::Module;
 	}
 
-	bool DeviceObject::isController() const noexcept
+	bool DeviceObject::isController() const
 	{
 		return deviceType() == DeviceType::Controller;
 	}
 
-	bool DeviceObject::isWorkstation() const noexcept
+	bool DeviceObject::isWorkstation() const
 	{
 		return deviceType() == DeviceType::Workstation;
 	}
 
-	bool DeviceObject::isSoftware() const noexcept
+	bool DeviceObject::isSoftware() const
 	{
 		return deviceType() == DeviceType::Software;
 	}
 
-	bool DeviceObject::isAppSignal() const noexcept
+	bool DeviceObject::isAppSignal() const
 	{
 		return deviceType() == DeviceType::AppSignal;
 	}
 
-	bool DeviceObject::isDiagSignal() const noexcept
+	bool DeviceObject::isDiagSignal() const 
 	{
 		return deviceType() == DeviceType::DiagSignal;
 	}
 
-	std::shared_ptr<const DeviceRoot> DeviceObject::toRoot() const noexcept
+	std::shared_ptr<const DeviceRoot> DeviceObject::toRoot() const
 	{
 		Q_ASSERT(isRoot());
 		return toType<DeviceRoot>();
 	}
 
-	std::shared_ptr<Hardware::DeviceRoot> DeviceObject::toRoot() noexcept
+	std::shared_ptr<Hardware::DeviceRoot> DeviceObject::toRoot()
 	{
 		return toType<DeviceRoot>();
 	}
 
-	std::shared_ptr<const DeviceSystem> DeviceObject::toSystem() const noexcept
+	std::shared_ptr<const DeviceSystem> DeviceObject::toSystem() const
 	{
 		return toType<DeviceSystem>();
 	}
 
-	std::shared_ptr<DeviceSystem> DeviceObject::toSystem() noexcept
+	std::shared_ptr<DeviceSystem> DeviceObject::toSystem()
 	{
 		return toType<DeviceSystem>();
 	}
 
-	std::shared_ptr<const DeviceRack> DeviceObject::toRack() const noexcept
+	std::shared_ptr<const DeviceRack> DeviceObject::toRack() const
 	{
 		return toType<DeviceRack>();
 	}
 
-	std::shared_ptr<DeviceRack> DeviceObject::toRack() noexcept
+	std::shared_ptr<DeviceRack> DeviceObject::toRack()
 	{
 		return toType<DeviceRack>();
 	}
 
-	std::shared_ptr<const DeviceChassis> DeviceObject::toChassis() const noexcept
+	std::shared_ptr<const DeviceChassis> DeviceObject::toChassis() const
 	{
 		return toType<DeviceChassis>();
 	}
 
-	std::shared_ptr<DeviceChassis> DeviceObject::toChassis() noexcept
+	std::shared_ptr<DeviceChassis> DeviceObject::toChassis()
 	{
 		return toType<DeviceChassis>();
 	}
 
-	std::shared_ptr<const DeviceModule> DeviceObject::toModule() const noexcept
+	std::shared_ptr<const DeviceModule> DeviceObject::toModule() const
 	{
 		return toType<const DeviceModule>();
 	}
 
-	std::shared_ptr<DeviceModule> DeviceObject::toModule() noexcept
+	std::shared_ptr<DeviceModule> DeviceObject::toModule()
 	{
 		return toType<DeviceModule>();
 	}
 
-	std::shared_ptr<const DeviceController> DeviceObject::toController() const noexcept
+	std::shared_ptr<const DeviceController> DeviceObject::toController() const
 	{
 		return toType<const DeviceController>();
 	}
 
-	std::shared_ptr<DeviceController> DeviceObject::toController() noexcept
+	std::shared_ptr<DeviceController> DeviceObject::toController()
 	{
 		return toType<DeviceController>();
 	}
 
-	std::shared_ptr<const DeviceAppSignal> DeviceObject::toAppSignal() const noexcept
+	std::shared_ptr<const DeviceAppSignal> DeviceObject::toAppSignal() const
 	{
 		return toType<const DeviceAppSignal>();
 	}
 
-	std::shared_ptr<DeviceAppSignal> DeviceObject::toAppSignal() noexcept
+	std::shared_ptr<DeviceAppSignal> DeviceObject::toAppSignal()
 	{
 		return toType<DeviceAppSignal>();
 	}
 
-	std::shared_ptr<const Hardware::DiagSignal> DeviceObject::toDiagSignal() const noexcept
+	std::shared_ptr<const Hardware::DiagSignal> DeviceObject::toDiagSignal() const
 	{
 		return toType<const Hardware::DiagSignal>();
 	}
 
-	std::shared_ptr<Hardware::DiagSignal> DeviceObject::toDiagSignal() noexcept
+	std::shared_ptr<Hardware::DiagSignal> DeviceObject::toDiagSignal()
 	{
 		return toType<Hardware::DiagSignal>();
 	}
 
-	std::shared_ptr<const Workstation> DeviceObject::toWorkstation() const noexcept
+	std::shared_ptr<const Workstation> DeviceObject::toWorkstation() const
 	{
 		return toType<const Workstation>();
 	}
 
-	std::shared_ptr<Workstation> DeviceObject::toWorkstation() noexcept
+	std::shared_ptr<Workstation> DeviceObject::toWorkstation()
 	{
 		return toType<Workstation>();
 	}
 
-	std::shared_ptr<const Software> DeviceObject::toSoftware() const noexcept
+	std::shared_ptr<const Software> DeviceObject::toSoftware() const
 	{
 		return toType<const Software>();
 	}
 
-	std::shared_ptr<Software> DeviceObject::toSoftware() noexcept
+	std::shared_ptr<Software> DeviceObject::toSoftware()
 	{
 		return toType<Software>();
 	}
@@ -1058,6 +1058,24 @@ namespace Hardware
 		return {};
 	}
 
+	std::shared_ptr<const DeviceObject> DeviceObject::childByEquipmentId(const QString& id) const
+	{
+		if (equipmentId() == id)
+		{
+			return this->shared_from_this();
+		}
+
+		for (const auto& child : m_children)
+		{
+			auto r = child->childByEquipmentId(id);
+			if (r != nullptr)
+			{
+				return r;
+			}
+		}
+
+		return {};
+	}
 	bool DeviceObject::canAddChild(const DeviceType childType) const
 	{
 		if (childType == DeviceType::Software &&

@@ -64,7 +64,7 @@ namespace Hardware
 		Q_OBJECT
 
 	protected:
-		explicit DeviceObject(DeviceType deviceType, bool preset = false, QObject* parent = nullptr) noexcept;
+		explicit DeviceObject(DeviceType deviceType, bool preset = false, QObject* parent = nullptr);
 
 	public:
 		DeviceObject() = delete;
@@ -123,66 +123,66 @@ namespace Hardware
 		// Properties, etc
 		//
 	public:
-		[[nodiscard]] bool hasParent() const noexcept;
+		[[nodiscard]] bool hasParent() const;
 
-		[[nodiscard]] std::shared_ptr<DeviceObject> parent() noexcept;
-		[[nodiscard]] const std::shared_ptr<DeviceObject> parent() const noexcept;
+		[[nodiscard]] std::shared_ptr<DeviceObject> parent();
+		[[nodiscard]] const std::shared_ptr<DeviceObject> parent() const;
 
-		[[nodiscard]] DeviceType deviceType() const noexcept;
-		[[nodiscard]] QString deviceTypeName() const noexcept;
-		[[nodiscard]] static QString deviceTypeName(DeviceType type) noexcept;
+		[[nodiscard]] DeviceType deviceType() const;
+		[[nodiscard]] QString deviceTypeName() const;
+		[[nodiscard]] static QString deviceTypeName(DeviceType type);
 
-		[[nodiscard]] bool isRoot() const noexcept;
-		[[nodiscard]] bool isSystem() const noexcept;
-		[[nodiscard]] bool isRack() const noexcept;
-		[[nodiscard]] bool isChassis() const noexcept;
-		[[nodiscard]] bool isModule() const noexcept;
-		[[nodiscard]] bool isController() const noexcept;
-		[[nodiscard]] bool isWorkstation() const noexcept;
-		[[nodiscard]] bool isSoftware() const noexcept;
-		[[nodiscard]] bool isAppSignal() const noexcept;
-		[[nodiscard]] bool isDiagSignal() const noexcept;
+		[[nodiscard]] bool isRoot() const;
+		[[nodiscard]] bool isSystem() const;
+		[[nodiscard]] bool isRack() const;
+		[[nodiscard]] bool isChassis() const;
+		[[nodiscard]] bool isModule() const;
+		[[nodiscard]] bool isController() const;
+		[[nodiscard]] bool isWorkstation() const;
+		[[nodiscard]] bool isSoftware() const;
+		[[nodiscard]] bool isAppSignal() const;
+		[[nodiscard]] bool isDiagSignal() const;
 
-		[[nodiscard]] std::shared_ptr<const Hardware::DeviceRoot> toRoot() const noexcept;
-		[[nodiscard]] std::shared_ptr<Hardware::DeviceRoot> toRoot() noexcept;
+		[[nodiscard]] std::shared_ptr<const Hardware::DeviceRoot> toRoot() const;
+		[[nodiscard]] std::shared_ptr<Hardware::DeviceRoot> toRoot();
 
-		[[nodiscard]] std::shared_ptr<const Hardware::DeviceSystem> toSystem() const noexcept;
-		[[nodiscard]] std::shared_ptr<Hardware::DeviceSystem> toSystem() noexcept;
+		[[nodiscard]] std::shared_ptr<const Hardware::DeviceSystem> toSystem() const;
+		[[nodiscard]] std::shared_ptr<Hardware::DeviceSystem> toSystem();
 
-		[[nodiscard]] std::shared_ptr<const Hardware::DeviceRack> toRack() const noexcept;
-		[[nodiscard]] std::shared_ptr<Hardware::DeviceRack> toRack() noexcept;
+		[[nodiscard]] std::shared_ptr<const Hardware::DeviceRack> toRack() const;
+		[[nodiscard]] std::shared_ptr<Hardware::DeviceRack> toRack();
 
-		[[nodiscard]] std::shared_ptr<const Hardware::DeviceChassis> toChassis() const noexcept;
-		[[nodiscard]] std::shared_ptr<Hardware::DeviceChassis> toChassis() noexcept;
+		[[nodiscard]] std::shared_ptr<const Hardware::DeviceChassis> toChassis() const;
+		[[nodiscard]] std::shared_ptr<Hardware::DeviceChassis> toChassis();
 
-		[[nodiscard]] std::shared_ptr<const Hardware::DeviceModule> toModule() const noexcept;
-		[[nodiscard]] std::shared_ptr<Hardware::DeviceModule> toModule() noexcept;
+		[[nodiscard]] std::shared_ptr<const Hardware::DeviceModule> toModule() const;
+		[[nodiscard]] std::shared_ptr<Hardware::DeviceModule> toModule();
 
-		[[nodiscard]] std::shared_ptr<const Hardware::DeviceController> toController() const noexcept;
-		[[nodiscard]] std::shared_ptr<Hardware::DeviceController> toController() noexcept;
+		[[nodiscard]] std::shared_ptr<const Hardware::DeviceController> toController() const;
+		[[nodiscard]] std::shared_ptr<Hardware::DeviceController> toController();
 
-		[[nodiscard]] std::shared_ptr<const Hardware::DeviceAppSignal> toAppSignal() const noexcept;
-		[[nodiscard]] std::shared_ptr<Hardware::DeviceAppSignal> toAppSignal() noexcept;
+		[[nodiscard]] std::shared_ptr<const Hardware::DeviceAppSignal> toAppSignal() const;
+		[[nodiscard]] std::shared_ptr<Hardware::DeviceAppSignal> toAppSignal();
 
-		[[nodiscard]] std::shared_ptr<const Hardware::DiagSignal> toDiagSignal() const noexcept;
-		[[nodiscard]] std::shared_ptr<Hardware::DiagSignal> toDiagSignal() noexcept;
+		[[nodiscard]] std::shared_ptr<const Hardware::DiagSignal> toDiagSignal() const;
+		[[nodiscard]] std::shared_ptr<Hardware::DiagSignal> toDiagSignal();
 
-		[[nodiscard]] std::shared_ptr<const Hardware::Workstation> toWorkstation() const noexcept;
-		[[nodiscard]] std::shared_ptr<Hardware::Workstation> toWorkstation() noexcept;
+		[[nodiscard]] std::shared_ptr<const Hardware::Workstation> toWorkstation() const;
+		[[nodiscard]] std::shared_ptr<Hardware::Workstation> toWorkstation();
 
-		[[nodiscard]] std::shared_ptr<const Hardware::Software> toSoftware() const noexcept;
-		[[nodiscard]] std::shared_ptr<Hardware::Software> toSoftware() noexcept;
+		[[nodiscard]] std::shared_ptr<const Hardware::Software> toSoftware() const;
+		[[nodiscard]] std::shared_ptr<Hardware::Software> toSoftware();
 
 	private:
 		template <typename DT>
-		[[nodiscard]] std::shared_ptr<const DT> toType() const noexcept
+		[[nodiscard]] std::shared_ptr<const DT> toType() const
 		{
 			std::shared_ptr<const DT> result = std::dynamic_pointer_cast<const DT>(shared_from_this());
 			return result;
 		}
 
 		template <typename DT>
-		[[nodiscard]] std::shared_ptr<DT> toType() noexcept
+		[[nodiscard]] std::shared_ptr<DT> toType()
 		{
 			std::shared_ptr<DT> result = std::dynamic_pointer_cast<DT>(shared_from_this());
 			return result;
@@ -215,7 +215,9 @@ namespace Hardware
 		[[nodiscard]] const std::shared_ptr<DeviceObject>& child(int index) const;
 		[[nodiscard]] std::shared_ptr<DeviceObject> child(const QUuid& uuid) const;
 		[[nodiscard]] std::shared_ptr<DeviceObject> childByPresetUuid(const QUuid& presetObjectUuid) const;
+		
 		[[nodiscard]] std::shared_ptr<DeviceObject> childByEquipmentId(const QString& id);
+		[[nodiscard]] std::shared_ptr<const DeviceObject> childByEquipmentId(const QString& id) const;
 
 		[[nodiscard]] bool canAddChild(const DeviceType childType) const;
 

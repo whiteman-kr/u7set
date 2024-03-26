@@ -23,6 +23,11 @@ class QPaintEvent;
 class QTimerEvent;
 class QMouseEvent;
 
+namespace Hardware
+{
+	class ScriptEquipment;
+}
+
 
 namespace VFrame30
 {
@@ -475,23 +480,7 @@ namespace VFrame30
 		VFrame30::ISchemaViewHistory* m_schemaViewHistory = nullptr; // Can be nullptr if widget does not support history navigation
 
 	protected:
-		std::unique_ptr<TuningController> m_tuningController;
-
-		DiagStateController* m_diagStateController = nullptr;
-		std::unique_ptr<ScriptDiagStateController> m_scriptDiagStateController;
-
-		AppSignalController* m_appSignalController = nullptr;
-		std::unique_ptr<ScriptAppSignalController> m_scriptAppSignalController;
-
-		LogController* m_logController = nullptr;
-
-	private:
-		bool m_periodicUpdate = true; // Update widget every 250 ms
-		bool m_infoMode = false;      // Show some additional info like labels
-
-		QStringList m_highlightIds;   // Highlighted IDs, can be any, like AppSignalID, ConnectionID... depends on item
-
-		// --
+		// Scripting related
 		//
 		bool m_jsEngineGlobalsWereCreated = false;
 		std::unique_ptr<ScriptSchemaView> m_scriptSchemaView;
@@ -503,6 +492,26 @@ namespace VFrame30
 		QString m_globalScript;
 
 		std::unordered_map<int, QString> m_scriptTimers; // Key is value returned by QObject::startTimer, value is script timerId.
+
+		// Controllers and global script objects
+		//
+		std::unique_ptr<TuningController> m_tuningController;
+
+		DiagStateController* m_diagStateController = nullptr;
+		std::unique_ptr<ScriptDiagStateController> m_scriptDiagStateController;
+
+		AppSignalController* m_appSignalController = nullptr;
+		std::unique_ptr<ScriptAppSignalController> m_scriptAppSignalController;
+
+		LogController* m_logController = nullptr;
+
+		std::unique_ptr<Hardware::ScriptEquipment> m_scriptEquipment;
+
+	private:
+		bool m_periodicUpdate = true; // Update widget every 250 ms
+		bool m_infoMode = false;      // Show some additional info like labels
+
+		QStringList m_highlightIds;   // Highlighted IDs, can be any, like AppSignalID, ConnectionID... depends on item
 
 		mutable ITimeStats* m_timeStats = nullptr;
 

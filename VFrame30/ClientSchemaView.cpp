@@ -4,6 +4,9 @@
 #include "DrawParam.h"
 #include "PropertyNames.h"
 
+#include <HardwareLib/ScriptEquipment.h>
+#include <HardwareLib/DeviceRoot.h>
+
 
 namespace VFrame30
 {
@@ -382,6 +385,8 @@ namespace VFrame30
 		VFrame30::SchemaViewWidget(parent),
 		m_schemaManager(schemaManager),
 		m_schemaViewHistory(schemaViewHistory),
+		m_jsEngine{},
+		m_scriptEquipment{new Hardware::ScriptEquipment(m_jsEngine, this)},
 		m_timeStats(timeStats)
 	{
 		assert(schemaManager);

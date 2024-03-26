@@ -3,6 +3,10 @@
 #include "MonitorAppSettings.h"
 
 #include <Behavior/ClientBehaviorStorage.h>
+#include <HardwareLib/DeviceObject.h>
+
+
+MonitorConfigSettings::~MonitorConfigSettings() = default;
 
 
 MonitorConfigController::MonitorConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2, ILogFile* logFile) :
@@ -15,6 +19,10 @@ MonitorConfigController::MonitorConfigController(const SoftwareInfo& softwareInf
 
 bool MonitorConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& conf, const MonitorSettings& settings, const std::vector<OnlineLib::BuildFileInfo>& /*files*/)
 {
+	// This method is called from the main thread.
+	//
+	qDebug() << "MonitorConfigController::updateConfiguration, ThreadID: " << QThread::currentThreadId();
+
 	MonitorConfigSettings config{};
 
 	config.configInfo = conf;
@@ -143,7 +151,7 @@ bool MonitorConfigController::updateConfiguration(const ClientLib::Configuration
 		if (bool result = getFileBlockedById(CfgFileId::CLIENT_BEHAVIOR, &data, &errorString);
 			result == false)
 		{
-			m_logFile.writeError("Loading CLIENT_BEHAVIOR file error.");
+			m_logFile.writeError("Loading file CLIENT_BEHAVIOR error.");
 		}
 		else
 		{
@@ -182,6 +190,39 @@ bool MonitorConfigController::updateConfiguration(const ClientLib::Configuration
 		{
 			m_logFile.writeError(tr("MATS users storage loading failed."));
 			config.matsUsers.clear();
+		}
+	}
+
+	// Getting file Common/MonitorEquipment.dat
+	//
+	{
+		QByteArray data;
+		QString errorString;
+
+		if (bool result = getFileBlockedById(CfgFileId::MONITOR_EQUIPMENT, &data, &errorString);
+			result == false)
+		{
+			m_logFile.writeError("Loading file MONITOR_EQUIPMENT error.");
+		}
+		else
+		{
+			QElapsedTimer timer;
+			timer.start();
+
+			auto equipment = Hardware::DeviceObject::Create(data);
+
+			auto elapsedMs = timer.elapsed();
+
+			if (equipment == nullptr)
+			{
+				m_logFile.writeError("Parsing file MONITOR_EQUIPMENT error.");
+			}
+			else
+			{
+				m_logFile.writeMessage(QString("Received MONITOR_EQUIPMENT, size %1, parsed for %2 ms").arg(data.size()).arg(elapsedMs));
+
+				config.equipment = std::move(equipment);
+			}
 		}
 	}
 
