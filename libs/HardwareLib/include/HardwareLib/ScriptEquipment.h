@@ -39,6 +39,13 @@ namespace Hardware
 		/// 
 		QJSValue find(QString equipmentId) const;
 
+		/// @brief Returns the value of a property of a device object.
+		/// @param equipmentId The equipmentId of the device object.
+		/// @param propertyName The name of the property.
+		/// @return The value of the property, or an invalid QVariant if the property does not exist.
+		/// @note The search by equipmentId is case-sensitive.
+		QVariant deviceProperty(QString equipmentId, QString propertyName) const;
+
 	private:
 		void fillDeviceTable(const std::shared_ptr<DeviceObject>& parent, int recursionLevel = 0);
 

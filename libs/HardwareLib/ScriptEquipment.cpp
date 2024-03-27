@@ -56,6 +56,20 @@ namespace Hardware
 		return result;
 	}
 
+	QVariant ScriptEquipment::deviceProperty(QString equipmentId, QString propertyName) const
+	{
+		QVariant result;
+
+		auto it = m_deviceTable.find(equipmentId);
+		if (it != m_deviceTable.end())
+		{
+			Q_ASSERT(it->second != nullptr);
+			result = it->second->propertyValue(propertyName);
+		}
+
+		return result;
+	}
+
 	void ScriptEquipment::fillDeviceTable(const std::shared_ptr<DeviceObject>& parent, int recursionLevel /*= 0*/)
 	{
 		if (recursionLevel == 0)
