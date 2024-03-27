@@ -15,6 +15,9 @@ const char* AppSignalParamMimeType::value ="application/x-appsignalparam";		// D
 //
 // -------------------------------------------------------------------------------------------------
 
+AppSignalParam::PrivateData::PrivateData() = default;
+AppSignalParam::PrivateData::~PrivateData() = default;
+
 AppSignalParam::AppSignalParam() = default;
 
 AppSignalParam::AppSignalParam(const AppSignalParam&) = default;

@@ -343,6 +343,9 @@ private:
 
 	struct PrivateData
 	{
+		PrivateData();
+		~PrivateData();
+
 		bool load(const Proto::AppSignal& message);
 		void load(const AppSignal& signal);
 		void save(::Proto::AppSignal* message) const;
