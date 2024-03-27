@@ -1,4 +1,6 @@
 #include "DialogSignalInfo.h"
+
+#include "../AppSignalLib/AppSignalSpecPropValues.h"
 #include "../AppSignalLib/ComparatorSet.h"
 #include "../Proto/AppSignal.pb.h"
 #include "../UtilsLib/Ui/UiTools.h"
@@ -1403,6 +1405,31 @@ void DialogSignalInfo::fillProperties()
 		ui->treeProperties->addTopLevelItem(itemGroupParameters);
 		itemGroupParameters->setExpanded(true);
 	} // Parameters
+
+	// Specific Properties
+	//
+	const AppSignalSpecPropValues& specPropValues = m_signal.specificPropertyValues();
+
+	if (QVector<AppSignalSpecPropValue> specProperties = specPropValues.values();
+		specPropValues.values().isEmpty() == false)
+	{
+		std::sort(specProperties.begin(),
+				  specProperties.end(),
+				  [](const auto& l, const auto& r)
+				  {
+					  return l.name() < r.name();
+				  });
+
+		QTreeWidgetItem* topItem = new QTreeWidgetItem(QStringList() << tr("Specific Properties"));
+
+		for (const AppSignalSpecPropValue& specProp : specProperties)
+		{
+			topItem->addChild(new QTreeWidgetItem(QStringList() << specProp.name() << specProp.value().toString()));
+		}
+
+		ui->treeProperties->addTopLevelItem(topItem);
+		topItem->setExpanded(true);
+	} // Specific Properties
 
 	if (m_signal.isAnalog())
 	{

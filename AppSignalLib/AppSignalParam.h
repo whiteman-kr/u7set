@@ -6,6 +6,7 @@
 #include "TuningValue.h"
 
 class AppSignal;
+class AppSignalSpecPropValues;
 
 namespace Proto
 {
@@ -192,11 +193,14 @@ public:
 
 	// Shallow copy.
 	//
-	AppSignalParam() = default;
-	AppSignalParam(const AppSignalParam&) = default;
-	AppSignalParam(AppSignalParam&&) noexcept = default;
-	AppSignalParam& operator=(const AppSignalParam&) = default;
-	AppSignalParam& operator=(AppSignalParam&&) noexcept = default;
+	AppSignalParam();
+	
+	AppSignalParam(const AppSignalParam&);
+	AppSignalParam(AppSignalParam&&) noexcept;
+
+	AppSignalParam& operator=(const AppSignalParam&);
+	AppSignalParam& operator=(AppSignalParam&&) noexcept;
+
 
 	bool load(const Proto::AppSignal& message);
 	void load(const AppSignal& signal);
@@ -316,9 +320,20 @@ public:
 	[[nodiscard]] QStringList tagStringList() const;
 	void setTags(std::set<QString> tags);
 
-public slots:
-	/// \brief Check if signal has specified tag
-	[[nodiscard]] bool hasTag(const QString& tag) const;
+	const QString& specificPropertyStruct() const;
+	const QByteArray& protoSpecificPropertyValues() const;
+
+	const AppSignalSpecPropValues& specificPropertyValues() const;
+
+public:
+	/// @brief Check if signal has specified tag
+	Q_INVOKABLE bool hasTag(const QString& tag) const;
+	
+	/// @brief Get specific property value by name
+	Q_INVOKABLE QVariant specificPropertyValue(const QString& propertyName) const;
+
+	/// @brief Check if specific property exists
+	Q_INVOKABLE bool specificPropertyExists(const QString& propertyName) const;
 
 public:
 	static const int NO_UNIT_ID = 1;
@@ -378,6 +393,8 @@ private:
 
 		QString m_specPropStruct;
 		QByteArray m_specPropValues;
+		
+		std::unique_ptr<::AppSignalSpecPropValues> m_specificPropertyValues;
 
 		std::set<QString> m_tags;
 	};

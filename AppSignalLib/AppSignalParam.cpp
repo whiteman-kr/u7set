@@ -4,6 +4,7 @@
 
 #include "AppSignalParam.h"
 #include "AppSignal.h"
+#include "AppSignalSpecPropValues.h"
 
 const char* AppSignalParamMimeType::value ="application/x-appsignalparam";		// Data in format ::Proto::AppSignalParamSet
 
@@ -13,6 +14,14 @@ const char* AppSignalParamMimeType::value ="application/x-appsignalparam";		// D
 // AppSignalParam class implementation
 //
 // -------------------------------------------------------------------------------------------------
+
+AppSignalParam::AppSignalParam() = default;
+
+AppSignalParam::AppSignalParam(const AppSignalParam&) = default;
+AppSignalParam::AppSignalParam(AppSignalParam&&) noexcept = default;
+
+AppSignalParam& AppSignalParam::operator=(const AppSignalParam&) = default;
+AppSignalParam& AppSignalParam::operator=(AppSignalParam&&) noexcept = default;
 
 AppSignalParam::AppSignalParam(const AppSignal& signal)
 {
@@ -491,9 +500,43 @@ void AppSignalParam::setTags(std::set<QString> tags)
 	m_data->m_tags = std::move(tags);
 }
 
+const QString& AppSignalParam::specificPropertyStruct() const
+{
+	return m_data->m_specPropStruct;
+}
+
+const QByteArray& AppSignalParam::protoSpecificPropertyValues() const
+{
+	return m_data->m_specPropValues;
+}
+
+const AppSignalSpecPropValues& AppSignalParam::specificPropertyValues() const
+{
+	if (m_data->m_specificPropertyValues == nullptr)
+	{
+		m_data->m_specificPropertyValues = std::make_unique<AppSignalSpecPropValues>();
+		m_data->m_specificPropertyValues->create(*this);
+	}
+
+	return *m_data->m_specificPropertyValues;
+}
+
 bool AppSignalParam::hasTag(const QString& tag) const
 {
 	return m_data->m_tags.contains(tag);
+}
+
+QVariant AppSignalParam::specificPropertyValue(const QString& propertyName) const
+{
+	QVariant result;
+	specificPropertyValues().getValue(propertyName, &result);
+
+	return result;
+}
+
+bool AppSignalParam::specificPropertyExists(const QString& propertyName) const
+{
+	return specificPropertyValues().isExists(propertyName);
 }
 
 void AppSignalParam::detach()

@@ -20,6 +20,7 @@
 #include "DbProgress.h"
 #include <DbLib/DbControllerTools.h>
 #include <HardwareLib/DeviceAppSignal.h>
+#include "../AppSignalLib/AppSignalSpecPropValues.h"
 #include "../UtilsLib/WUtils.h"
 #include "../Proto/AppSignal.pb.h"
 

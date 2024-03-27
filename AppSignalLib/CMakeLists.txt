@@ -15,6 +15,8 @@ qt_add_library(${TARGET} STATIC
 	AppSignal.h
 	AppSignalParam.cpp
 	AppSignalParam.h
+	AppSignalSpecPropValues.cpp
+	AppSignalSpecPropValues.h
 	AppSignalState.cpp
 	AppSignalState.h
 	AppSignalStateFlags.cpp
