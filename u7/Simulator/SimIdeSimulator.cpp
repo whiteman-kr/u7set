@@ -1,14 +1,14 @@
 #include "SimIdeSimulator.h"
+#include "../../lib/ConstStrings.h"
 #include <Simulator/Simulator.h>
+#include <HardwareLib/DeviceRoot.h>
 
 SimIdeSimulator::SimIdeSimulator(ILogFile* log, bool allowDebugMessages, QObject* parent) :
 	m_simulator(new Sim::Simulator(log, allowDebugMessages, parent))
 {
 }
 
-SimIdeSimulator::~SimIdeSimulator()
-{
-}
+SimIdeSimulator::~SimIdeSimulator() = default;
 
 bool SimIdeSimulator::load(QString buildPath)
 {
@@ -48,6 +48,49 @@ bool SimIdeSimulator::load(QString buildPath)
 		}
 	}
 
+	// The monitor equipment is a filtered tree of all devices(excluding signals), 
+	// which is read from the file Common/MonitorEquipment.dat.
+	//
+	{
+		QFile file{buildPath + "/" + Directory::COMMON + "/" + File::MONITOR_EQUIPMENT};
+		if (file.open(QIODevice::ReadOnly) == false)
+		{
+			log()->writeError("File MONITOR_EQUIPMENT not found or cannot be read.");
+			ok = false;
+		}
+
+		QByteArray data;
+		data = file.readAll();
+
+		std::shared_ptr<Hardware::DeviceObject> rootDeviceObject;
+
+		if (data.isEmpty() == true)
+		{
+			log()->writeWarning("File MONITOR_EQUIPMENT is empty.");
+			
+			// Create fake object.
+			//
+			rootDeviceObject = std::make_shared<Hardware::DeviceRoot>();
+		}
+		else
+		{
+			rootDeviceObject = Hardware::DeviceObject::Create(data);
+		}
+
+		if (rootDeviceObject == nullptr)
+		{
+			log()->writeError("Parsing file MONITOR_EQUIPMENT error.");
+			ok = false;
+		}
+		else
+		{
+			log()->writeMessage(QString("Loaded MONITOR_EQUIPMENT, file %1, size %2").arg(file.fileName()).arg(data.size()));
+			m_monitorEquipment = rootDeviceObject;
+		}
+	}
+
+	// --
+	//
 	emit projectUpdated();
 	return ok;
 }
@@ -68,6 +111,11 @@ const VFrame30::SchemaDetailsSet& SimIdeSimulator::schemaDetails() const
 std::vector<VFrame30::SchemaDetails> SimIdeSimulator::schemasForLm(QString equipmentId) const
 {
 	return m_schemaDetails.schemasDetails(equipmentId);
+}
+
+std::shared_ptr<Hardware::DeviceObject> SimIdeSimulator::monitorEquipment() const
+{
+	return m_monitorEquipment;
 }
 
 bool SimIdeSimulator::isRunning() const

@@ -15,9 +15,7 @@
 #include <Behavior/ScriptMonitorBehavior.h>
 #include <Behavior/TuningClientBehavior.h>
 
-
 #include <QJSEngine>
-
 
 class QPaintEvent;
 class QTimerEvent;
@@ -25,9 +23,9 @@ class QMouseEvent;
 
 namespace Hardware
 {
+	class DeviceObject;
 	class ScriptEquipment;
 }
-
 
 namespace VFrame30
 {
@@ -474,6 +472,10 @@ namespace VFrame30
 
 		std::shared_ptr<const Behavior::TuningClientBehavior> tuningClientBehavior() const;
 		void setTuningClientBehavior(Behavior::TuningClientBehavior src);
+
+		// ScriptEquipment
+		//
+		void setMonitorEquipment(std::shared_ptr<Hardware::DeviceObject> monitorEquipment);
 
 	private:
 		VFrame30::SchemaManager* m_schemaManager = nullptr;

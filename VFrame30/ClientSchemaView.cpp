@@ -1361,4 +1361,10 @@ namespace VFrame30
 	{
 		m_tuningClientBehavior = std::make_shared<Behavior::TuningClientBehavior>(std::move(src));
 	}
+
+	void ClientSchemaView::setMonitorEquipment(std::shared_ptr<Hardware::DeviceObject> monitorEquipment)
+	{
+		m_scriptEquipment->setRoot(monitorEquipment ? monitorEquipment : std::make_shared<Hardware::DeviceRoot>());
+	}
+
 } // namespace VFrame30

@@ -597,6 +597,10 @@ void SimSchemaWidget::signalContextMenu(QStringList appSignals,
 
 void SimSchemaWidget::updateProject()
 {
+	// Update MonitorEquipment
+	//
+	clientSchemaView()->setMonitorEquipment(m_simulator->monitorEquipment());
+
 	// Set MonitorID
 	//
 	QSettings s;

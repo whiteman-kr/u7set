@@ -2,10 +2,12 @@
 #include "ScriptSimApplication.h"
 #include "SimIdeSimulator.h"
 #include "SimSchemaManager.h"
+
 #include <Simulator/SimOverrideSignals.h>
 #include <Simulator/SimSoftware.h>
-#include "../VFrame30/PropertyNames.h"
+#include <HardwareLib/ScriptEquipment.h>
 
+#include "../VFrame30/PropertyNames.h"
 
 
 // MonitorView
@@ -95,6 +97,17 @@ void SimSchemaView::updateScriptGlobalVars(QJSEngine& engine)
 		QJSEngine::setObjectOwnership(m_scriptAppSignalController.get(), QJSEngine::CppOwnership);
 
 		engine.globalObject().setProperty(VFrame30::PropertyNames::scriptGlobalVariableSignals, jsSignals);
+	}
+
+	// Create global variable "equipment"
+	//
+	{
+		Q_ASSERT(m_scriptEquipment);
+
+		QJSValue jsObject = engine.newQObject(m_scriptEquipment.get());
+		QJSEngine::setObjectOwnership(m_scriptEquipment.get(), QJSEngine::CppOwnership);
+
+		engine.globalObject().setProperty(VFrame30::PropertyNames::scriptGlobalVariableEquipment, jsObject);
 	}
 
 	return;

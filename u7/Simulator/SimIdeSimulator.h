@@ -21,6 +21,11 @@ namespace Sim
 	struct Profile;
 }
 
+namespace Hardware
+{
+	class DeviceObject;
+}
+
 class SimIdeSimulator : public QObject
 {
 	Q_OBJECT
@@ -36,9 +41,12 @@ public:
 	const VFrame30::SchemaDetailsSet& schemaDetails() const;
 	std::vector<VFrame30::SchemaDetails> schemasForLm(QString equipmentId) const;
 
+	std::shared_ptr<Hardware::DeviceObject> monitorEquipment() const;
+
 	// Form the Sim::Simulator
 	//
 public:
+
 	// Flow control
 	//
 	[[nodiscard]] bool isRunning() const;
@@ -107,6 +115,12 @@ public:
 
 private:
 	std::unique_ptr<Sim::Simulator> m_simulator;
+	
 	VFrame30::SchemaDetailsSet m_schemaDetails;
+
+	// The monitor equipment is a filtered tree of all devices (excluding signals), 
+	// which is read from the file 'Common/MonitorEquipment.dat.
+	//
+	std::shared_ptr<Hardware::DeviceObject> m_monitorEquipment;
 };
 

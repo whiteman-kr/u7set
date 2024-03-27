@@ -26,13 +26,13 @@ namespace Hardware
 
 	public slots:
 
-		/// @brief Returns the root object of the equipment.
+		/// @brief Returns the root object of the equipment (type ScriptDeviceObject).
 		/// @return The root ScriptDeviceObject of the equipment.
 		QJSValue root() const;
 
 		void setRoot(std::shared_ptr<DeviceObject> root);
 
-		/// @brief Finds an object by its equipmentId.
+		/// @brief Finds an object by its equipmentId (type ScriptDeviceObject).
 		/// @param equipmentId The equipmentId of the device object to find.
 		/// @return The ScriptDeviceObject with the specified equipmentId, or nullptr if no such object exists.
 		/// @note The search by equipmentId is case-sensitive.
