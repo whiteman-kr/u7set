@@ -169,7 +169,7 @@ namespace
 			changesetId = sl[2].toInt();
 			schemaId = sl[3];
 			fileId = sl[4].toInt();
-			zoom = std::clamp(sl[5].toDouble(), 50.0, 150.0);
+			zoom = std::clamp(sl[5].toDouble(), 50.0, 250.0);
 			return true;
 		}
 
@@ -260,18 +260,33 @@ void SchemasTabPage::restoreSession()
 	QString keyDir = QString("Session/%1-%2/SchemaEditor/")
 					 .arg(db()->currentProject().projectName())
 					 .arg(db()->currentUser().username());
-
+	
 	int schemaCount = settings.value(keyDir + "Count", 0).toInt();
 	QString currentSchemaRecord = settings.value(keyDir + "Current").toString();
+	QStringList records;
+	records.reserve(schemaCount);
+
+	for (int i = 0; i < schemaCount; i++)
+	{
+		QString key = keyDir + QString("Schema_%1").arg(i);
+		records.push_back(settings.value(key).toString());
+	}
+
+	// Clear settings records, in case of the crash the session will not be restored.
+	//
+	settings.remove(keyDir);
+
+	// Load schemas
+	//
 	int currentSchemaIndex = 0;
 
 	for (int i = 0; i < schemaCount; i++)
 	{
-		QString record = settings.value(keyDir + QString("Schema_%1").arg(i)).toString();
-
+		// Restore session, load schema, etc.
+		//
 		SessionSchema ss;
 
-		if (bool ok = ss.restoreSessionSchema(record);
+		if (bool ok = ss.restoreSessionSchema(records[i]);
 			ok == false)
 		{
 			continue;
@@ -300,7 +315,7 @@ void SchemasTabPage::restoreSession()
 		{
 			editWidget->setZoom(ss.zoom, false);
 
-			if (currentSchemaRecord == record)
+			if (currentSchemaRecord == records[i])
 			{
 				currentSchemaIndex = m_tabWidget->count() - 1;
 			}
