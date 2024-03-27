@@ -57,7 +57,6 @@ namespace Gateway
 
 			// ModbusTcpSlave specific settings
 
-			ModbusCoding,
 			ModbusDeviceID,
 			SignalsFormat,
 		};
@@ -85,14 +84,6 @@ namespace Gateway
 			Discrete_D			// Discrete parameters, format 'D'
 		};
 		Q_ENUM(SignalListDataType)
-
-		enum class ModbusCoding
-		{
-			Unknown,
-			ASCII,
-			RTU
-		};
-		Q_ENUM(ModbusCoding)
 
 		enum class ModbusSignalFormat
 		{

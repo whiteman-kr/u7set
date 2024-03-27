@@ -51,6 +51,8 @@ namespace Gateway
 		static const std::set<E::Setting> m_requiredSettings;
 		static const std::set<E::Setting> m_optionalSettings;
 
+		inline static const int MODBUS_DEFAULT_PORT = 502;
+
 	public:
 		ModbusTcpSlaveGateway();
 		ModbusTcpSlaveGateway(const QString& gwID, const QString& gwDesc);
@@ -66,10 +68,11 @@ namespace Gateway
 		HostAddressPort localGatewayIP2() const;
 		HostAddressPort remoteGatewayIP2() const;
 
-		E::ModbusCoding modbusCoding() const;
 		int modbusDeviceID() const;
 
-		void getRequiredSignalsHashes(std::set<Hash>* hashes);
+		void getRequiredSignalsHashes(std::set<Hash>* hashes) const;
+		void getEventSignalsHashes(std::set<Hash>* hashes) const;
+
 		const std::map<Address16, std::pair<QString, ModbusFormat>>& modbusSignals() const;
 
 	private:
@@ -87,12 +90,8 @@ namespace Gateway
 
 	private:
 		HostAddressPort m_localGatewayIP1;
-		HostAddressPort m_remoteGatewayIP1;
-
 		HostAddressPort m_localGatewayIP2;
-		HostAddressPort m_remoteGatewayIP2;
 
-		E::ModbusCoding m_modbusCoding = E::ModbusCoding::ASCII;
 		int m_modbusDeviceID = 0;
 
 		std::map<Address16, std::pair<QString, ModbusFormat>> m_modbusSignals;

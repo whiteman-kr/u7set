@@ -162,17 +162,18 @@ namespace Modbus
    //
    // --------------------------------------------------------------------------------------------------------
 
-	TcpSlaveThread::Listener::Listener(::Gateway::ModbusTcpSlaveHandler& handler,
+	TcpSlaveThread::Listener::Listener(const HostAddressPort& listeningIP,
+									   ::Gateway::ModbusTcpSlaveHandler& handler,
 										io_context& ioContext,
 										std::stop_token stopToken) :
+		m_listeningIP(listeningIP),
 		m_handler(handler),
 		m_ioContext(ioContext),
-		m_listeningAddr(handler.listeningAddr()),
 		m_stopToken(stopToken),
 		m_log(handler.log()),
 		m_timer(ioContext),
-		m_acceptor(ioContext, tcp::endpoint(ip::address::from_string(handler.listeningAddr().addressStr().toStdString()),
-											handler.listeningAddr().port()))
+		m_acceptor(ioContext, tcp::endpoint(ip::address::from_string(listeningIP.addressStr().toStdString()),
+											listeningIP.port()))
 	{
 	}
 
@@ -239,6 +240,8 @@ namespace Modbus
 
 	void TcpSlaveThread::Listener::onTimer500ms(const error_code& error)
 	{
+		Q_UNUSED(error);
+
 		if (exitIfStopRequested() == true)
 		{
 			return;
@@ -258,7 +261,7 @@ namespace Modbus
 										  std::placeholders::_1));
 
 		DEBUG_LOG_MSG(m_log, QString("Modbus::TcpSlaveThread wait conections on %1").
-							 arg(m_listeningAddr.addressPortStr()));
+							 arg(m_listeningIP.addressPortStr()));
 	}
 
 	void TcpSlaveThread::Listener::onAcceptConnection(ConnectionShared newConnection,
@@ -274,7 +277,8 @@ namespace Modbus
 		Q_ASSERT(m_newConnection == newConnection);
 		Q_ASSERT(m_acceptedConnections.contains(newConnection->connectionNo()) == false);
 
-		DEBUG_LOG_MSG(m_log, QString("Modbus::TcpSlaveThread accept new connection #%1 from %2").
+		DEBUG_LOG_MSG(m_log, QString("Modbus::TcpSlaveThread on %1 accept new connection #%2 from %3").
+							 arg(m_listeningIP.addressPortStr()).
 							 arg(newConnection->connectionNo()).
 							 arg(newConnection->peerAddress()));
 
@@ -293,7 +297,8 @@ namespace Modbus
    //
    // --------------------------------------------------------------------------------------------------------
 
-	TcpSlaveThread::TcpSlaveThread(::Gateway::ModbusTcpSlaveHandler& handler) :
+	TcpSlaveThread::TcpSlaveThread(const HostAddressPort& listeningIP, ::Gateway::ModbusTcpSlaveHandler& handler) :
+		m_listeningIP(listeningIP),
 		m_handler(handler),
 		m_log(handler.log())
 	{
@@ -325,7 +330,7 @@ namespace Modbus
 		{
 			io_context ioContext;
 
-			Listener listener(m_handler, ioContext, m_thread->get_stop_token());
+			Listener listener(m_listeningIP, m_handler, ioContext, m_thread->get_stop_token());
 
 			listener.run();
 		}

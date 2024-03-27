@@ -1131,14 +1131,14 @@ namespace Builder
 			cmdLine += " -e";
 		}
 
-		if (cfgSrvIp1.isEmpty() == true && cfgSrvIp2.isEmpty() == true)
+		if (cfgSrvIp1.isNull() == true && cfgSrvIp2.isNull() == true)
 		{
 			m_log->errALC5140(m_software->equipmentIdTemplate());
 			return QString();
 		}
 
-		cmdLine += " -cfgip1=" + (cfgSrvIp1.isEmpty() == false ? cfgSrvIp1.addressPortStr() :  cfgSrvIp2.addressPortStr());
-		cmdLine += " -cfgip2=" + (cfgSrvIp2.isEmpty() == false ? cfgSrvIp2.addressPortStr() :  cfgSrvIp1.addressPortStr());
+		cmdLine += " -cfgip1=" + (cfgSrvIp1.isNull() == false ? cfgSrvIp1.addressPortStr() :  cfgSrvIp2.addressPortStr());
+		cmdLine += " -cfgip2=" + (cfgSrvIp2.isNull() == false ? cfgSrvIp2.addressPortStr() :  cfgSrvIp1.addressPortStr());
 
 		cmdLine += " -id=" + m_software->equipmentIdTemplate();
 

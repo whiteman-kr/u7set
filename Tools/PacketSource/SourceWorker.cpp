@@ -37,7 +37,7 @@ void SourceWorker::process()
 		return;
 	}
 
-	if (pSource->info().appDataSrvIP.isEmpty() == true)
+	if (pSource->info().appDataSrvIP.isNull() == true)
 	{
 		emit finished();
 		return;

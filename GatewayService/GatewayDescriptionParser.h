@@ -71,7 +71,7 @@ namespace Gateway
 		static const QString END_SECTION;
 
 		static const QString EQUAL_SIGN;
-		static const QString POINTER_SIGN;
+		static const QString LEFT_POINTER_SIGN;
 		static const QString APP_SIGNAL_ID_START_SIGN;
 
 		static const QString ERR_SYNTAX;

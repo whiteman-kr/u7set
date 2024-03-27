@@ -13,6 +13,8 @@ namespace Gateway
 	{
 		Q_OBJECT
 
+		inline static const int GET_STATES_REQUEST_INTERVAL = 250;	// ms
+
 	public:
 		AppDataServiceClient(const SoftwareInfo& softwareInfo,
 							 const HostAddressPort& serverAddressPort1,
@@ -29,6 +31,8 @@ namespace Gateway
 
 		void onTimer();
 
+		void sendGetStatesRequest();
+
 		virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
 
 		void onGetAppSignalStateReply(const char* replyData, quint32 replyDataSize);
@@ -41,6 +45,8 @@ namespace Gateway
 		Handler* m_handler = nullptr;
 
 		QTimer m_timer;
+		bool m_needGetStates = false;
+		qint64 m_lastGetStatesRequestTime = 0;
 
 		Network::GetAppSignalStateRequest m_getStatesRequest;
 		Network::GetAppSignalStateReply m_getStatesReply;

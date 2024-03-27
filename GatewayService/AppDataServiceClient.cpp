@@ -30,7 +30,7 @@ namespace Gateway
 		}
 
 		m_timer.setTimerType(Qt::PreciseTimer);
-		m_timer.setInterval(200);
+		m_timer.setInterval(GET_STATES_REQUEST_INTERVAL);
 		m_timer.setSingleShot(false);
 
 		connect(&m_timer, &QTimer::timeout, this, &AppDataServiceClient::onTimer);
@@ -76,10 +76,18 @@ namespace Gateway
 	{
 		if (isClearToSendRequest() == false)
 		{
+			m_needGetStates = true;
 			return;
 		}
 
+		sendGetStatesRequest();
+	}
+
+	void AppDataServiceClient::sendGetStatesRequest()
+	{
 		sendRequest(ADS_GET_APP_SIGNAL_STATE_CONST_SIZE, m_getStatesRequest);
+		m_needGetStates = false;
+		m_lastGetStatesRequestTime = QDateTime::currentMSecsSinceEpoch();
 	}
 
 	void AppDataServiceClient::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
@@ -111,7 +119,7 @@ namespace Gateway
 
 		m_handler->updateSignalStates(m_getStatesReply);
 
-		if (m_getStatesReply.gatewaystatechangesqueuesize() != 0)
+		if (m_getStatesReply.gatewaystatechangesqueuesize() > 0)
 		{
 			sendRequest(ADS_GATEWAY_GET_APP_SIGNAL_STATE_CHANGES, m_gwGetStateChangesRequest);
 		}
@@ -127,7 +135,23 @@ namespace Gateway
 			return;
 		}
 
+		DEBUG_LOG_MSG(log(), QString("state changes %1").arg(m_gwGetStateChangesReply.appsignalstates_size()));
+
 		m_handler->processStateChanges(m_gwGetStateChangesReply);
+
+		if (m_needGetStates == true)
+		{
+			sendGetStatesRequest();
+		}
+		else
+		{
+			if (m_gwGetStateChangesReply.pendingstatescount() > 0 &&
+				(QDateTime::currentMSecsSinceEpoch() - m_lastGetStatesRequestTime <
+											static_cast<qint64>(GET_STATES_REQUEST_INTERVAL * 0.9)))
+			{
+				sendRequest(ADS_GATEWAY_GET_APP_SIGNAL_STATE_CHANGES, m_gwGetStateChangesRequest);
+			}
+		}
 
 		emit sendStateChanges();
 	}

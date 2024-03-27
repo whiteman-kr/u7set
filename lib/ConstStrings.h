@@ -415,7 +415,6 @@ namespace XmlAttribute
 	inline const QString SIGNALS_COUNT("SignalsCount");
 	inline const QString FOTIP_TUNING_DATA_UID("FotipTuningDataUID");
 
-	inline const QString MODBUS_CODING("ModbusCoding");
 	inline const QString MODBUS_DEVICE_ID("ModbusDeviceID");
 	inline const QString REG_ADDR("RegAddr");
 	inline const QString REG_BIT("RegBit");

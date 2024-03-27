@@ -160,7 +160,7 @@ namespace Gateway
 	const QString Parser::END_SECTION("]");
 
 	const QString Parser::EQUAL_SIGN("=");
-	const QString Parser::POINTER_SIGN("->");
+	const QString Parser::LEFT_POINTER_SIGN("<-");
 	const QString Parser::APP_SIGNAL_ID_START_SIGN("#");
 
 	const QString Parser::ERR_SYNTAX("syntax error");
@@ -197,7 +197,6 @@ namespace Gateway
 
 		// ModbusTcpSlave gateway specific settings
 		//
-		{ E::Setting::ModbusCoding,			E::SettingType::String	},
 		{ E::Setting::ModbusDeviceID,	E::SettingType::Int	},
 
 		// ModbusTcpSlave signal lists specific settings
@@ -696,14 +695,14 @@ namespace Gateway
 
 		// check addressSignalID token like:  address -> SignalID
 
-		qsizetype pointerSignIndex = toParse.indexOf(POINTER_SIGN);
+		qsizetype pointerSignIndex = toParse.indexOf(LEFT_POINTER_SIGN);
 
 		if (pointerSignIndex != -1)
 		{
 			plr->lineType = LineType::AddressSignalID;
 
 			QString addrStr = toParse.mid(0, pointerSignIndex).trimmed();
-			QString signalID = toParse.mid(pointerSignIndex + POINTER_SIGN.length()).trimmed();
+			QString signalID = toParse.mid(pointerSignIndex + LEFT_POINTER_SIGN.length()).trimmed();
 
 			if (addrStr.isEmpty() == true ||
 				signalID.isEmpty() == true)

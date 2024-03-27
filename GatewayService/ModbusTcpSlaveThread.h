@@ -70,7 +70,8 @@ namespace Modbus
 		class Listener
 		{
 		public:
-			Listener(::Gateway::ModbusTcpSlaveHandler& handler,
+			Listener(const HostAddressPort& listeningIP,
+					::Gateway::ModbusTcpSlaveHandler& handler,
 					io_context& ioContext,
 					std::stop_token stopToken);
 			virtual ~Listener();
@@ -94,10 +95,10 @@ namespace Modbus
 									const error_code& error);
 
 		private:
+			HostAddressPort m_listeningIP;
 			::Gateway::ModbusTcpSlaveHandler& m_handler;
 
 			io_context& m_ioContext;
-			HostAddressPort m_listeningAddr;
 			std::stop_token m_stopToken;
 			CircularLoggerShared m_log;
 
@@ -109,7 +110,7 @@ namespace Modbus
 		};
 
 	public:
-		TcpSlaveThread(::Gateway::ModbusTcpSlaveHandler& handler);
+		TcpSlaveThread(const HostAddressPort& listeningIP, ::Gateway::ModbusTcpSlaveHandler& handler);
 
 		void start();
 		void stop();
@@ -118,6 +119,7 @@ namespace Modbus
 		void run();
 
 	private:
+		HostAddressPort m_listeningIP;
 		::Gateway::ModbusTcpSlaveHandler& m_handler;
 		CircularLoggerShared m_log;
 
