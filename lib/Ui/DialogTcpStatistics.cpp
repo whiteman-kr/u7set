@@ -52,7 +52,7 @@ DialogTcpStatistics::DialogTcpStatistics(QWidget* parent) :
 	m_treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(m_treeWidget, &QTreeWidget::customContextMenuRequested,this, &DialogTcpStatistics::prepareContextMenu);
 
-	setMinimumSize(960, 250);
+	setMinimumSize(1080, 250);
 
 	update();
 
