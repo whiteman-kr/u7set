@@ -257,6 +257,7 @@ namespace VFrame30
 
 		if (m_preDrawScript.trimmed().isEmpty() == true)
 		{
+			m_lastScriptError.clear();
 			return true;
 		}
 

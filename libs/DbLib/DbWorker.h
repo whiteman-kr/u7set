@@ -120,6 +120,7 @@ public slots:
     void slot_checkOut(std::vector<DbFileInfo>* files);
     
 	void slot_undoChanges(std::vector<DbFileInfo>* files);
+	void slot_undoChangesRecursively(DbFileInfo file);
 
     void slot_fileHasChildren(bool* hasChildren, DbFileInfo* fileInfo);
 

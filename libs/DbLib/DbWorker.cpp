@@ -20,6 +20,7 @@
 #include "DbProgress.h"
 #include <DbLib/DbControllerTools.h>
 #include <HardwareLib/DeviceAppSignal.h>
+#include "../AppSignalLib/AppSignalSpecPropValues.h"
 #include "../UtilsLib/WUtils.h"
 #include "../Proto/AppSignal.pb.h"
 
@@ -440,6 +441,9 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0411.sql", "Upgrade to version 411, Create folder $root$/Schemas/VDU"},
 	{":/DatabaseUpgrade/Upgrade0412.sql", "Upgrade to version 412, Update DiagDataService preset to v3"},
 	{":/DatabaseUpgrade/Upgrade0413.sql", "Upgrade to version 413, Add DiagLANDataSize to all LMs, config script has been changed to use this value"},
+	{":/DatabaseUpgrade/Upgrade0414.sql", "Upgrade to version 414, Added function api.undo_changes_recursively"},
+	{":/DatabaseUpgrade/Upgrade0415.sql", "Upgrade to version 415, TestSuite preset update, add FontBold and Section layout to report template"},
+	{":/DatabaseUpgrade/Upgrade0416.sql", "Upgrade to version 416, Updated preset Monitor to version 6, set default value property SchemaTags to: AppLogic Monitor"},
 };
 
 int DbWorker::counter = 0;
@@ -4276,6 +4280,47 @@ void DbWorker::slot_undoChanges(std::vector<DbFileInfo>* files)
 		assert(updated == true);
 	}
 
+	return;
+}
+
+void DbWorker::slot_undoChangesRecursively(DbFileInfo file)
+{
+	// Init automatic variables.
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+											{
+												this->m_progress->setCompleted(true);			// set complete flag on return
+											});
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Error, database connection is closed."));
+		return;
+	}
+
+	// Log action
+	//
+	QString logMessage = QString("slot_undoChangesRecursively: FileID %1, FileName %2").arg(file.fileId()).arg(file.fileName());
+	addLogRecord(db, logMessage);
+
+	// Request
+	//
+	QString request = QString("SELECT * FROM api.undo_changes_recursively('%1', %2)")
+		.arg(sessionKey())
+		.arg(file.fileId());
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+	if (result == false)
+	{
+		emitError(db, tr("Error: ") + q.lastError().text());
+		return;
+	}
+	
 	return;
 }
 

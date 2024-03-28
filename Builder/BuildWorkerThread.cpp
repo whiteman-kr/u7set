@@ -1,7 +1,7 @@
 #include <HardwareLib/Subsystem.h>
 #include <HardwareLib/PropertyNames.h>
 
-#include "../Simulator/Simulator.h"
+#include <Simulator/Simulator.h>
 
 #include "AppDataServiceCfgGenerator.h"
 #include "AppLogicCompiler.h"
@@ -430,7 +430,6 @@ namespace Builder
 		{
 			LOG_MESSAGE(m_context->m_log, tr("Ok"));
 		}
-		
 
 		//
 		// Expand Devices StrId
@@ -450,9 +449,9 @@ namespace Builder
 		deviceRoot.reset();		// Use equipmentSet.root() instead
 
 		//
-		// Check same Uuids and same StrIds
+		// Checking for identical UUIDs and StrIDs
 		//
-		LOG_MESSAGE(m_context->m_log, tr("Checking for same Uuids and StrIds"));
+		LOG_MESSAGE(m_context->m_log, tr("Checking for identical UUIDs and StrIDs"));
 
 		if (bool ok = checkUuidAndStrId(m_context->m_equipmentSet->root().get());
 			ok == false)
@@ -469,6 +468,56 @@ namespace Builder
 			return false;
 		}
 
+		// Creating equipment file for Monitor: Filter out all AppSignal and DiagSignals objects (leave Root, System, Rack, Chassis,
+		// Modules, Controllers, Workstation, Software.
+		//
+		{
+			LOG_MESSAGE(m_context->m_log, tr("Creating Monitor equipment file"));
+
+			Proto::Envelope message;
+			auto predicate = [](const Hardware::DeviceObject& device) -> bool
+				{
+					if (device.isAppSignal() == true || device.isDiagSignal() == true)
+					{
+						return false;
+					}
+
+					return true;
+				};
+
+			// Save data to proto-structure.
+			//
+			bool saveOk = m_context->m_equipmentSet->root()->SaveObjectTreeIf(&message, predicate);
+			if (saveOk == false)
+			{
+				m_log->errINT1000("Failed to serialize Monitor Equipment data to proto-structure.");
+				return false;
+			}
+
+			// Save proto-structure to byte array.
+			//
+			QByteArray data;
+			saveOk = Hardware::DeviceObject::saveToByteArray(&data, message, Proto::ProtoCompress::Always);
+
+			if (saveOk == false)
+			{
+				m_log->errINT1000("Failed to serialize Monitor Equipment data from proto-structure to byte array.");
+				return false;
+			}
+
+			// Save byte array to a build file.
+			//
+			auto filePtr = m_context->m_buildResultWriter->addFile(Directory::COMMON, File::MONITOR_EQUIPMENT, CfgFileId::MONITOR_EQUIPMENT, "", data);
+			if (filePtr == nullptr)
+			{
+				// addFile has already logged the error.
+				//
+				return false;
+			}
+		}
+
+		// Done
+		//
 		LOG_MESSAGE(m_context->m_log, tr("Ok"));
 
 		return true;
@@ -1469,7 +1518,13 @@ namespace Builder
 
 	bool BuildWorkerThread::createSchemasAlbums()
 	{
+		// Schemas albums are created with options, which are set in function "Create Schemas albums".
+		//
 		SchemasReportOptions options = SchemasReportOptions::optionsForSchemasAlbum(&m_context->m_db);
+
+		// Schemas albums are generated for All tags
+		//
+		options.schemaTags().clear();
 
 		std::shared_ptr<ReportLib::ReportSchemaView> schemaView = std::make_shared<ReportLib::ReportSchemaView>(options.itemsLabels());
 
@@ -1489,6 +1544,7 @@ namespace Builder
 									  projectUserPassword(),
 									  {},
 									  QString()/*data will be saved to output buffers*/,
+									  true, /*generateToOutputData*/
 									  options,
 									  SchemasReportGenerator::defaultFileTypesParams(&m_context->m_db));
 
@@ -1507,7 +1563,7 @@ namespace Builder
 		{
 			if (errorMessage.isEmpty() == false)
 			{
-				m_log->writeMessage(errorMessage);
+				m_log->writeError(errorMessage);
 			}
 
 			thread->quit();

@@ -29,6 +29,3 @@ private:
 	SimIdeSimulator* m_simulator = nullptr;
 	QString m_monitorId;
 };
-
-
-

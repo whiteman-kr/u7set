@@ -1,6 +1,9 @@
 #include "SimConnectionPage.h"
 #include "../SimulatorTabPage.h"
-#include "../../Simulator/SimAppSignalManager.h"
+
+#include <Simulator/SimAppSignalManager.h>
+#include <Simulator/SimConnections.h>
+#include <Simulator/SimRam.h>
 
 SimConnectionPage::SimConnectionPage(SimIdeSimulator* simulator, QString connectionId, QWidget* parent) :
 	SimBasePage(simulator, parent),
@@ -82,7 +85,7 @@ SimConnectionPage::SimConnectionPage(SimIdeSimulator* simulator, QString connect
 	//
 	connect(m_simulator, &SimIdeSimulator::projectUpdated, this, &SimConnectionPage::updateData);
 	connect(&(m_simulator->control()), &Sim::Control::stateChanged, this, &SimConnectionPage::updateData);
-	connect(&(m_simulator->connections()), &Sim::Connections::connectionStateChanged, this, &SimConnectionPage::updateConnectionState);
+	connect(&m_simulator->connections(), &Sim::Connections::connectionStateChanged, this, &SimConnectionPage::updateConnectionState);
 
 	connect(m_disableButton, &QPushButton::toggled, this, &SimConnectionPage::disableConnection);
 
@@ -110,9 +113,9 @@ SimConnectionPage::~SimConnectionPage()
 void SimConnectionPage::disableConnection(bool disable)
 {
 	bool enable = !disable;
-	Sim::ConnectionPtr c = m_simulator->connections().connection(m_connectionId);
+	auto c = m_simulator->connections().connection(m_connectionId);
 
-	if (c == nullptr || enable == c->enabled())
+	if (c == nullptr || enable == c.enabled())
 	{
 		return;
 	}
@@ -161,12 +164,12 @@ void SimConnectionPage::updateConnectionState(QString connectionId, bool enabled
 
 void SimConnectionPage::updateData()
 {
-	Sim::ConnectionPtr c = m_simulator->connections().connection(m_connectionId);
+	auto c = m_simulator->connections().connection(m_connectionId);
 
 	if (c != nullptr)
 	{
-		m_connectionInfo = c->connectionInfo();
-		updateConnectionState(m_connectionId, c->enabled());
+		m_connectionInfo = c.connectionInfo();
+		updateConnectionState(m_connectionId, c.enabled());
 	}
 	else
 	{

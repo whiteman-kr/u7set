@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../../Simulator/SimConsoleLogFile.h"
-#include "../../Simulator/SimControl.h"
+#include <Simulator/SimConsoleLogFile.h>
+#include <Simulator/SimControl.h>
+
 #include "SimIdeSimulator.h"
 #include "SimSchemaManager.h"
 #include "../../VFrame30/AppSignalController.h"

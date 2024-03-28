@@ -1,14 +1,14 @@
 #include "SimIdeSimulator.h"
-#include "../../Simulator/Simulator.h"
+#include "../../lib/ConstStrings.h"
+#include <Simulator/Simulator.h>
+#include <HardwareLib/DeviceRoot.h>
 
 SimIdeSimulator::SimIdeSimulator(ILogFile* log, bool allowDebugMessages, QObject* parent) :
 	m_simulator(new Sim::Simulator(log, allowDebugMessages, parent))
 {
 }
 
-SimIdeSimulator::~SimIdeSimulator()
-{
-}
+SimIdeSimulator::~SimIdeSimulator() = default;
 
 bool SimIdeSimulator::load(QString buildPath)
 {
@@ -28,26 +28,69 @@ bool SimIdeSimulator::load(QString buildPath)
 	// Restore state of ArminKey, TuningKey.
 	//
 	for (auto lms = m_simulator->logicModules();
-		 auto lm : lms)
+		 auto& lm : lms)
 	{
 		auto it = std::find_if(oldLogicModules.begin(), oldLogicModules.end(), [&lm](const auto& oldLm)
 							   {
-								   return lm->equipmentId() == oldLm->equipmentId();
+								   return lm.equipmentId() == oldLm.equipmentId();
 							   });
 
 		if (it != oldLogicModules.end())
 		{
-			auto oldLm = *it;
+			auto& oldLm = *it;
 
-			lm->setArmingKey(oldLm->armingKey());
-			lm->setTuningKey(oldLm->tuningKey());
+			lm.setArmingKey(oldLm.armingKey());
+			lm.setTuningKey(oldLm.tuningKey());
 
-			lm->setSorSetSwitch1(oldLm->sorSetSwitch1());
-			lm->setSorSetSwitch2(oldLm->sorSetSwitch2());
-			lm->setSorSetSwitch3(oldLm->sorSetSwitch3());
+			lm.setSorSetSwitch1(oldLm.sorSetSwitch1());
+			lm.setSorSetSwitch2(oldLm.sorSetSwitch2());
+			lm.setSorSetSwitch3(oldLm.sorSetSwitch3());
 		}
 	}
 
+	// The monitor equipment is a filtered tree of all devices(excluding signals), 
+	// which is read from the file Common/MonitorEquipment.dat.
+	//
+	{
+		QFile file{buildPath + "/" + Directory::COMMON + "/" + File::MONITOR_EQUIPMENT};
+		if (file.open(QIODevice::ReadOnly) == false)
+		{
+			log()->writeError("File MONITOR_EQUIPMENT not found or cannot be read.");
+			ok = false;
+		}
+
+		QByteArray data;
+		data = file.readAll();
+
+		std::shared_ptr<Hardware::DeviceObject> rootDeviceObject;
+
+		if (data.isEmpty() == true)
+		{
+			log()->writeWarning("File MONITOR_EQUIPMENT is empty.");
+			
+			// Create fake object.
+			//
+			rootDeviceObject = std::make_shared<Hardware::DeviceRoot>();
+		}
+		else
+		{
+			rootDeviceObject = Hardware::DeviceObject::Create(data);
+		}
+
+		if (rootDeviceObject == nullptr)
+		{
+			log()->writeError("Parsing file MONITOR_EQUIPMENT error.");
+			ok = false;
+		}
+		else
+		{
+			log()->writeMessage(QString("Loaded MONITOR_EQUIPMENT, file %1, size %2").arg(file.fileName()).arg(data.size()));
+			m_monitorEquipment = rootDeviceObject;
+		}
+	}
+
+	// --
+	//
 	emit projectUpdated();
 	return ok;
 }
@@ -70,6 +113,11 @@ std::vector<VFrame30::SchemaDetails> SimIdeSimulator::schemasForLm(QString equip
 	return m_schemaDetails.schemasDetails(equipmentId);
 }
 
+std::shared_ptr<Hardware::DeviceObject> SimIdeSimulator::monitorEquipment() const
+{
+	return m_monitorEquipment;
+}
+
 bool SimIdeSimulator::isRunning() const
 {
 	return m_simulator->isRunning();
@@ -85,7 +133,7 @@ bool SimIdeSimulator::isStopped() const
 	return m_simulator->isStopped();
 }
 
-Sim::ScopedLog& SimIdeSimulator::log()
+ILogFile* SimIdeSimulator::log()
 {
 	return m_simulator->log();
 }
@@ -120,17 +168,17 @@ Sim::Connections& SimIdeSimulator::connections()
 	return m_simulator->connections();
 }
 
-std::vector<std::shared_ptr<Sim::Subsystem>> SimIdeSimulator::subsystems() const
+std::vector<Sim::Subsystem> SimIdeSimulator::subsystems() const
 {
 	return m_simulator->subsystems();
 }
 
-std::shared_ptr<Sim::LogicModule> SimIdeSimulator::logicModule(QString equipmentId) const
+std::optional<Sim::LogicModule> SimIdeSimulator::logicModule(QString equipmentId) const
 {
 	return m_simulator->logicModule(equipmentId);
 }
 
-std::vector<std::shared_ptr<Sim::LogicModule>> SimIdeSimulator::logicModules() const
+std::vector<Sim::LogicModule> SimIdeSimulator::logicModules() const
 {
 	return m_simulator->logicModules();
 }
@@ -145,14 +193,14 @@ const Sim::AppSignalManager& SimIdeSimulator::appSignalManager() const
 	return m_simulator->appSignalManager();
 }
 
-Sim::TuningSignalManager& SimIdeSimulator::tuningSignalManager()
+ITuningSignalManager& SimIdeSimulator::tuningSignalManagerInterface()
 {
-	return m_simulator->tuningSignalManager();
+	return m_simulator->tuningSignalManagerInterface();
 }
 
-const Sim::TuningSignalManager& SimIdeSimulator::tuningSignalManager() const
+const ITuningSignalManager& SimIdeSimulator::tuningSignalManagerInterface() const
 {
-	return m_simulator->tuningSignalManager();
+	return m_simulator->tuningSignalManagerInterface();
 }
 
 Sim::OverrideSignals& SimIdeSimulator::overrideSignals()
@@ -220,7 +268,7 @@ bool SimIdeSimulator::loadSchemaDetails(QString buildPath)
 
 	fileName += "Schemas.als/SchemaDetails.pbuf";
 
-	m_simulator->log().writeMessage(tr("Load logic schema details file: %1").arg(fileName));
+	m_simulator->log()->writeMessage(tr("Load logic schema details file: %1").arg(fileName));
 
 	bool ok = true;
 
@@ -228,7 +276,7 @@ bool SimIdeSimulator::loadSchemaDetails(QString buildPath)
 	{
 		// File not exists, can happen if project does not contain any schemas.
 		//
-		m_simulator->log().writeWarning(tr("Project build does not contain any schemas, file %1 not exist.").arg(fileName));
+		m_simulator->log()->writeWarning(tr("Project build does not contain any schemas, file %1 not exist.").arg(fileName));
 
 		ok = true;
 	}
@@ -238,7 +286,7 @@ bool SimIdeSimulator::loadSchemaDetails(QString buildPath)
 
 		if (ok == false)
 		{
-			m_simulator->log().writeError(tr("File loading error, file name %1.").arg(fileName));
+			m_simulator->log()->writeError(tr("File loading error, file name %1.").arg(fileName));
 		}
 	}
 

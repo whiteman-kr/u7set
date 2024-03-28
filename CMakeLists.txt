@@ -123,7 +123,6 @@ add_subdirectory(libs)
 add_subdirectory(TrendView)
 add_subdirectory(VFrame30)
 
-add_subdirectory(Simulator)
 add_subdirectory(SimulatorConsole)
 
 add_subdirectory(Builder)

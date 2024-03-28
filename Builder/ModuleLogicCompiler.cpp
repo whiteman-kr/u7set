@@ -17143,8 +17143,7 @@ namespace Builder
 
 				// Reserved signal %1 used on schema %2.
 				//
-				m_log->errALC5201(s->appSignalID(), ualItem->guid(), ualItem->schemaID());
-				result = false;
+				m_log->wrnALC5201(s->appSignalID(), ualItem->guid(), ualItem->schemaID());
 			}
 		}
 

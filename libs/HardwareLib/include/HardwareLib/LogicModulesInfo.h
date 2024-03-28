@@ -2,6 +2,8 @@
 
 #include "LanControllerInfo.h"
 
+class QDomNode;
+
 class LogicModuleInfo
 {
 public:

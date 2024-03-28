@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
 
 	// --
 	//
-	qDebug() << "GUI Thread ID: " << QThread::currentThreadId();
+	qDebug() << "main(), GUI ThreadID: " << QThread::currentThreadId();
 
 	qRegisterMetaType<TimeStamp>();
 	qRegisterMetaType<TimeSpan>();

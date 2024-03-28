@@ -49,7 +49,7 @@ private:
 	void updateActionsState();
 
 	bool loadTestLog();
-	bool saveTestLog();
+	void saveTestLog();
 
 	void updateStatusIndicator();
 

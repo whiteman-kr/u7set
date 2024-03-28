@@ -103,8 +103,6 @@ namespace Hardware
 		}
 
 		auto s = new ScriptDeviceSystem(m_deviceObject->toSystem());
-		assert(s);
-
 		return engine->newQObject(s);
 	}
 
@@ -124,8 +122,6 @@ namespace Hardware
 		}
 
 		auto r = new ScriptDeviceRack(m_deviceObject->toRack());
-		assert(r);
-
 		return engine->newQObject(r);
 	}
 
@@ -145,8 +141,6 @@ namespace Hardware
 		}
 
 		auto ch = new ScriptDeviceChassis(m_deviceObject->toChassis());
-		assert(ch);
-
 		return engine->newQObject(ch);
 	}
 
@@ -166,8 +160,6 @@ namespace Hardware
 		}
 
 		auto m = new ScriptDeviceModule(m_deviceObject->toModule());
-		assert(m);
-
 		return engine->newQObject(m);
 	}
 
@@ -187,12 +179,10 @@ namespace Hardware
 		}
 
 		auto c = new ScriptDeviceController(m_deviceObject->toController());
-		assert(c);
-
 		return engine->newQObject(c);
 	}
 
-	QJSValue ScriptDeviceObject::toWokstation()
+	QJSValue ScriptDeviceObject::toWorkstation()
 	{
 		QJSEngine* engine = qjsEngine(this);
 		if (engine == nullptr)
@@ -208,8 +198,6 @@ namespace Hardware
 		}
 
 		auto ws = new ScriptDeviceWorkstation(m_deviceObject->toWorkstation());
-		assert(ws);
-
 		return engine->newQObject(ws);
 	}
 
@@ -229,8 +217,6 @@ namespace Hardware
 		}
 
 		auto sw = new ScriptDeviceSoftware(m_deviceObject->toSoftware());
-		assert(sw);
-
 		return engine->newQObject(sw);
 	}
 
@@ -250,8 +236,6 @@ namespace Hardware
 		}
 
 		auto as = new ScriptDeviceAppSignal(m_deviceObject->toAppSignal());
-		assert(as);
-
 		return engine->newQObject(as);
 	}
 

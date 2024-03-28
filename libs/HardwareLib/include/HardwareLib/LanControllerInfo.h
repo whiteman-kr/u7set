@@ -1,10 +1,11 @@
 #pragma once
 
-#include "../UtilsLib/XmlHelper.h"
 #include "../CommonLib/HostAddressPort.h"
 #include "DataProtocols.h"
 
 class QDomNode;
+class XmlWriteHelper;
+class XmlReadHelper;
 
 namespace Network
 {

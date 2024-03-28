@@ -448,7 +448,7 @@ void DialogMatsUsersEditor::onListItemDoubleClicked(QTreeWidgetItem* item, int c
 	
 	QDialog tagsSelectorDialog{this, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint};
 
-	ChooseTagsWidget te{tags, {}, this};
+	ChooseTagsWidget te{tags, {}, ' ', this};
 	te.setText(item->text(static_cast<int>(DialogMatsUsersEditor::Columns::TuningTags)));
 
 	connect(&te, &ChooseTagsWidget::okPressed, &tagsSelectorDialog, &QDialog::accept);
