@@ -1518,7 +1518,13 @@ namespace Builder
 
 	bool BuildWorkerThread::createSchemasAlbums()
 	{
+		// Schemas albums are created with options, which are set in function "Create Schemas albums".
+		//
 		SchemasReportOptions options = SchemasReportOptions::optionsForSchemasAlbum(&m_context->m_db);
+
+		// Schemas albums are generated for All tags
+		//
+		options.schemaTags().clear();
 
 		std::shared_ptr<ReportLib::ReportSchemaView> schemaView = std::make_shared<ReportLib::ReportSchemaView>(options.itemsLabels());
 
@@ -1538,6 +1544,7 @@ namespace Builder
 									  projectUserPassword(),
 									  {},
 									  QString()/*data will be saved to output buffers*/,
+									  true, /*generateToOutputData*/
 									  options,
 									  SchemasReportGenerator::defaultFileTypesParams(&m_context->m_db));
 
@@ -1556,7 +1563,7 @@ namespace Builder
 		{
 			if (errorMessage.isEmpty() == false)
 			{
-				m_log->writeMessage(errorMessage);
+				m_log->writeError(errorMessage);
 			}
 
 			thread->quit();

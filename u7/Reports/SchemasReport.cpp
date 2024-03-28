@@ -171,6 +171,7 @@ void SchemasReportGeneratorThread::run(TaskType task,
 																m_userPassword,
 																files,
 																filePath,
+																false, /*generateToOutputData*/
 																m_options,
 																m_schemaTypesParams);
 
