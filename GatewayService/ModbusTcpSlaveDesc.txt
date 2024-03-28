@@ -13,37 +13,62 @@
 [Gateway]   
 
 GatewayType = ModbusTcpSlave            	// * gateway type
-GatewayID = KAES_5SUZR1				// * gateway identifier
+GatewayID = KAES_5SUZR1						// * gateway identifier
 GatewayDescription = KAES block 5 SUZR 1	//   free style gateway description	
 
 // ModbusTcpSlave gateway specifis settings
 
-LocalGatewayIP1 = 192.168.101.100:55002		// * IP and port of Modbus TCP server 1
-// LocalGatewayIP2
+LocalGatewayIP1 = 192.168.101.100:55002		// * IP and port of Modbus TCP server. Default port is 502.
+						// IP 0.0.0.0 - means that server receives connections on any local IP
+						
+//LocalGatewayIP2 = 127.0.0.1			// optional second channel IP
 
-RemoteGatewayIP1 = 192.160.101.1:502		// * local IP and port for connect Modbus TCP server 1
-// RemoteGatewayIP2
-
-
-ModbusCoding = RTU				// ASCII - two ASCII characters (2 bytes) on each 8-bit byte
-								// RTU - two 4-bit HEX char (byte) on each 8-bit byte (binary format)
 ModbusDeviceID = 20				
 
 [SignalList]
 
-// float16 - analog format float16
-// be - Big Endian
-// le - Little Endian                                       
+// Known signal formats:
+//		DiscreteBit
+//		AnalogFloat16
+//		AnalogFloat32
+//		AnalogSInt16
+//		AnalogSInt32
+//
+// Byte order:
+//		LE - Little Endian
+//		BE - Big Endian
+//
 
-SignalsFormat = AnalogFloat32 BE
+SignalsFormat = AnalogFloat32 LE
 
-1000 -> #SYSTEMID_RACKID_CH01_MD00_PI_TEMP		// regAddr -> AppSignalID
-1002 -> #SYSTEMID_RACKID_CH01_MD00_PI_BUILDNUMBER	
+// ModbusRegisterAddr <- AppSignalID
+
+1 <- #OUT_FLOAT1		
+3 <- #SYSTEMID_RACKID_CH01_MD00_PI_BUILDNUMBER	
+5 <- #OUT_SINT32_1
+
+[SignalList]
+
+SignalsFormat = AnalogSInt32 LE
+
+11 <- #OUT_SINT1
+13 <- #OUT_SINT2
+
+[SignalList]
+
+SignalsFormat = AnalogSInt32 BE
+
+21 <- #OUT_SINT1
+23 <- #OUT_SINT2
 
 
 [SignalList]
 
-SignalsFormat = DiscreteBit LE			//	 general discrete registers format, Big Endian 16 bit
+SignalsFormat = DiscreteBit LE		
+
+// ModbusRegisterAddr, bitNo <- AppSignalID  or
+// ModbusRegisterAddr, (bitMask) <- AppSignalID 
                                                 	
-1004, 3 -> #SYSTEMID_RACKID_CH01_MD00_PI_BLINK		// regAddr, bitNo = AppSignalID
-1004, (0x8000) -> #SYSTEMID_RACKID_CH01_MD00_PI_SORISSET	// regAddr, (mask) = AppSignalID
+1010, 0 <- #OUT_BLINK1		
+1010, 3 <- #SYSTEMID_RACKID_CH01_MD00_PI_BLINK
+1010, (0x8000) <- #SYSTEMID_RACKID_CH01_MD00_PI_SORISSET
