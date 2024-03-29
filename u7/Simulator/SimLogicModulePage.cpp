@@ -1,7 +1,8 @@
 #include "SimLogicModulePage.h"
 #include "SimSignalSnapshot.h"
 #include "SimWidget.h"
-#include "../../Simulator/SimAppSignalManager.h"
+
+#include <Simulator/SimAppSignalManager.h>
 
 #include <QTemporaryFile>
 #include <QDesktopServices>
@@ -213,7 +214,7 @@ SimLogicModulePage::SimLogicModulePage(SimIdeSimulator* simulator, VFrame30::App
 	//
 	simulatorStateChanged(m_simulator->control().state());
 	updateLogicModuleInfoInfo();
-	updateModuleStates(m_simulator->control().controlData());
+	updateModuleStates(m_simulator->control().status());
 
 	m_schemasList->resizeColumnToContents(0);
 
@@ -276,7 +277,7 @@ void SimLogicModulePage::simulatorStateChanged(Sim::SimControlState state)
 	m_disableButton.setDisabled(state == Sim::SimControlState::Stop);
 	m_sorResetSwitchButton.setDisabled(state == Sim::SimControlState::Stop);
 
-	updateModuleStates(m_simulator->control().controlData());
+	updateModuleStates(m_simulator->control().status());
 
 	return;
 }
@@ -284,7 +285,7 @@ void SimLogicModulePage::simulatorStateChanged(Sim::SimControlState state)
 void SimLogicModulePage::updateLogicModuleInfoInfo()
 {
 	auto lm = logicModule();
-	if (lm == nullptr)
+	if (lm.has_value() == false)
 	{
 		return;
 	}
@@ -359,14 +360,14 @@ void SimLogicModulePage::fillSchemaList()
 void SimLogicModulePage::projectUpdated()
 {
 	updateLogicModuleInfoInfo();
-	updateModuleStates(m_simulator->control().controlData());
+	updateModuleStates(m_simulator->control().status());
 	return;
 }
 
 void SimLogicModulePage::powerOff(bool toPowerOff)
 {
 	if (auto lm = logicModule();
-		lm != nullptr && lm->isPowerOff() != toPowerOff)
+		lm.has_value() == true && lm->isPowerOff() != toPowerOff)
 	{
 		lm->setPowerOff(toPowerOff);
 	}
@@ -377,7 +378,7 @@ void SimLogicModulePage::powerOff(bool toPowerOff)
 void SimLogicModulePage::armingKeyToggled(bool value)
 {
 	if (auto lm = logicModule();
-		lm != nullptr && lm->armingKey() != value)
+		lm.has_value() == true && lm->armingKey() != value)
 	{
 		lm->setArmingKey(value);
 	}
@@ -388,7 +389,7 @@ void SimLogicModulePage::armingKeyToggled(bool value)
 void SimLogicModulePage::tuningKeyToggled(bool value)
 {
 	if (auto lm = logicModule();
-		lm != nullptr && lm->tuningKey() != value)
+		lm.has_value() == true && lm->tuningKey() != value)
 	{
 		lm->setTuningKey(value);
 	}
@@ -399,7 +400,7 @@ void SimLogicModulePage::tuningKeyToggled(bool value)
 void SimLogicModulePage::sorResetSwitchPressed()
 {
 	if (auto lm = logicModule();
-		lm != nullptr)
+		lm.has_value() == true)
 	{
 		bool state = lm->testSorResetSwitch(true);
 		Q_UNUSED(state);
@@ -411,7 +412,7 @@ void SimLogicModulePage::sorResetSwitchPressed()
 void SimLogicModulePage::sorSwitch1Toggled(bool value)
 {
 	if (auto lm = logicModule();
-		lm != nullptr && lm->sorSetSwitch1() != value)
+		lm.has_value() == true && lm->sorSetSwitch1() != value)
 	{
 		lm->setSorSetSwitch1(value);
 	}
@@ -422,7 +423,7 @@ void SimLogicModulePage::sorSwitch1Toggled(bool value)
 void SimLogicModulePage::sorSwitch2Toggled(bool value)
 {
 	if (auto lm = logicModule();
-		lm != nullptr && lm->sorSetSwitch2() != value)
+		lm.has_value() == true && lm->sorSetSwitch2() != value)
 	{
 		lm->setSorSetSwitch2(value);
 	}
@@ -433,7 +434,7 @@ void SimLogicModulePage::sorSwitch2Toggled(bool value)
 void SimLogicModulePage::sorSwitch3Toggled(bool value)
 {
 	if (auto lm = logicModule();
-		lm != nullptr && lm->sorSetSwitch3() != value)
+		lm.has_value() == true && lm->sorSetSwitch3() != value)
 	{
 		lm->setSorSetSwitch3(value);
 	}
@@ -704,8 +705,8 @@ void SimLogicModulePage::updateModuleStates(Sim::ControlStatus state)
 	bool sorSwitch2 = false;
 	bool sorSwitch3 = false;
 
-	if (std::shared_ptr<Sim::LogicModule> lm = logicModule();
-		lm != nullptr)
+	if (auto lm = logicModule();
+		lm.has_value() == true)
 	{
 		runtimeMode = lm->runtimeMode();
 
@@ -812,12 +813,12 @@ QString SimLogicModulePage::equipmentId() const
 	return m_lmEquipmentId;
 }
 
-std::shared_ptr<Sim::LogicModule> SimLogicModulePage::logicModule()
+std::optional<Sim::LogicModule> SimLogicModulePage::logicModule()
 {
 	return m_simulator->logicModule(m_lmEquipmentId);
 }
 
-std::shared_ptr<Sim::LogicModule> SimLogicModulePage::logicModule() const
+std::optional<Sim::LogicModule> SimLogicModulePage::logicModule() const
 {
 	return m_simulator->logicModule(m_lmEquipmentId);
 }

@@ -11,7 +11,8 @@
 
 QString ChooseTagsWidget::m_filterText = QString();
 
-ChooseTagsWidget::ChooseTagsWidget(const QStringList &tags, QWidget* parent):
+ChooseTagsWidget::ChooseTagsWidget(const QStringList &tags, QChar separator, QWidget* parent):
+	m_separator(separator),
     QWidget(parent)
 {
     for (const QString& s : tags)
@@ -28,10 +29,12 @@ ChooseTagsWidget::ChooseTagsWidget(const QStringList &tags, QWidget* parent):
 
 ChooseTagsWidget::ChooseTagsWidget(const std::vector<std::pair<QString, QString>>& tags,
 								   const std::vector<OnlineLib::MatsUser>& users,
+								   QChar separator, 
 								   QWidget* parent) :
     QWidget(parent),
     m_tags(tags),
-	m_users(users)
+	m_users(users),
+    m_separator(separator)
 {
     if (m_tags.empty() == true && m_users.empty() == false)
 	{
@@ -241,7 +244,7 @@ void ChooseTagsWidget::updateChecks(const QString& text)
 {
     // Get exitsing tags
 
-    QStringList textTags = text.split(QRegularExpression("\\W+"), Qt::SkipEmptyParts);
+    QStringList textTags = text.split(m_separator, Qt::SkipEmptyParts);
     for (QString& t : textTags)
     {
         t = t.trimmed();
@@ -277,7 +280,7 @@ void ChooseTagsWidget::updateTags()
 
     // Get exitsing tags
 
-    QStringList tags = text.split(QRegularExpression("\\W+"), Qt::SkipEmptyParts);
+    QStringList tags = text.split(m_separator, Qt::SkipEmptyParts);
     for (QString& t : tags)
     {
         t = t.trimmed();
@@ -337,7 +340,7 @@ void ChooseTagsWidget::updateTags()
     }
 
     m_textEdit->blockSignals(true);
-    m_textEdit->setText(resultTags.join(' '));
+    m_textEdit->setText(resultTags.join(m_separator));
     m_textEdit->blockSignals(false);
 
     return;

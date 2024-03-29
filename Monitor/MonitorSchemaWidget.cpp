@@ -1,13 +1,15 @@
 #include "MonitorSchemaWidget.h"
-#include "../ClientLib/AppSignalManager.h"
-#include "../VFrame30/AppSignalController.h"
-#include "../VFrame30/IMatsSchemaItemAssociations.h"
-#include "../lib/ITimeStats.h"
 #include "Globals.h"
 #include "MonitorMainWindow.h"
 #include "MonitorSchemaManager.h"
 #include "MonitorSchemaView.h"
 #include "MonitorSignalInfo.h"
+
+#include "../VFrame30/AppSignalController.h"
+#include "../VFrame30/IMatsSchemaItemAssociations.h"
+#include "../lib/ITimeStats.h"
+
+#include <ClientLib/AppSignalManager.h>
 
 
 namespace
@@ -294,6 +296,8 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 	loopbacks.sort();
 	loopbacks.removeDuplicates();
 
+	QStringList equipmentIds; // Here will be added @equipmentId for appSignals and impactSignals.
+
 	// Compose menu
 	//
 	QSchemaMenu menu{this};
@@ -305,22 +309,58 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 	std::set<QString> signalsSchemasSet;
 	for (const QString& s : appSignals)
 	{
-		QStringList schemaIds = schemaManager()->configController().schemasByAppSignalId(s);
-
-		for (const QString& schemaId : schemaIds)
+		// Find by app signal id
+		//
+		for (QStringList schemaIds = schemaManager()->configController().schemasByAppSignalId(s); 
+			 const QString& schemaId : schemaIds)
 		{
 			signalsSchemasSet.insert(schemaId);
+		}
+
+		// Find by equipment id of input or output
+		//
+		bool found = false;
+		auto signalParam = appSignalManager().signalParam(s, &found);
+
+		if (found == true && (signalParam.isInput() == true || signalParam.isOutput() == true))
+		{
+			QString equipmentId = "@" + signalParam.equipmentId();
+			equipmentIds.push_back(equipmentId);
+
+			for (QStringList schemaIds = schemaManager()->configController().schemasByAppSignalId(equipmentId);
+				 const QString & schemaId : schemaIds)
+			{
+				signalsSchemasSet.insert(schemaId);
+			}
 		}
 	}
 
 	std::set<QString> impactSignalsSchemasSet;
 	for (const QString& s : impactSignals)
 	{
-		QStringList schemaIds = schemaManager()->configController().schemasByAppSignalId(s);
-
-		for (const QString& schemaId : schemaIds)
+		// Find by app signal id
+		//
+		for (QStringList schemaIds = schemaManager()->configController().schemasByAppSignalId(s);
+			 const QString& schemaId : schemaIds)
 		{
 			impactSignalsSchemasSet.insert(schemaId);
+		}
+
+		// Find by equipment id of input or output
+		//
+		bool found = false;
+		auto signalParam = appSignalManager().signalParam(s, &found);
+
+		if (found == true && (signalParam.isInput() == true || signalParam.isOutput() == true))
+		{
+			QString equipmentId = "@" + signalParam.equipmentId();
+			equipmentIds.push_back(equipmentId);
+
+			for (QStringList schemaIds = schemaManager()->configController().schemasByAppSignalId(equipmentId);
+				 const QString & schemaId : schemaIds)
+			{
+				impactSignalsSchemasSet.insert(schemaId);
+			}
 		}
 	}
 
@@ -335,6 +375,13 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 		}
 	}
 
+	// Join all appSignals, impactSignals, loopbacks, and equipmentIds
+	// for highlighting.
+	//
+	QStringList allIds = appSignals + impactSignals + loopbacks + equipmentIds;
+	allIds.sort();
+	allIds.removeDuplicates();
+
 	// --
 	//
 	if (signalsSchemasSet.empty() == true &&
@@ -347,11 +394,11 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 	{
 		for (const QString& schemaId : signalsSchemasSet)
 		{
-			auto f = [this, schemaId, &appSignals, &impactSignals, &loopbacks]()
+			auto f = [this, schemaId, &allIds]()
 			{
 				if (schemaId != this->schemaId())
 				{
-					setSchema(schemaId, appSignals + impactSignals + loopbacks, false);
+					setSchema(schemaId, allIds, false);
 				}
 			};
 
@@ -367,11 +414,11 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 
 		for (const QString& schemaId : impactSignalsSchemasSet)
 		{
-			auto f = [this, schemaId, &appSignals, &impactSignals, &loopbacks]()
+			auto f = [this, schemaId, &allIds]()
 			{
 				if (schemaId != this->schemaId())
 				{
-					setSchema(schemaId, appSignals + impactSignals + loopbacks, false);
+					setSchema(schemaId, allIds, false);
 				}
 			};
 
@@ -387,11 +434,11 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 
 		for (const QString& schemaId : loopbackSchemas)
 		{
-			auto f = [this, schemaId, &appSignals, &impactSignals, &loopbacks]()
+			auto f = [this, schemaId, &allIds]()
 			{
 				if (schemaId != this->schemaId())
 				{
-					setSchema(schemaId, appSignals + impactSignals + loopbacks, false);
+					setSchema(schemaId, allIds, false);
 				}
 			};
 

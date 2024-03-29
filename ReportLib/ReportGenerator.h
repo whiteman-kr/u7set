@@ -21,7 +21,10 @@ namespace ReportLib
 		ReportPrinter::Statistics statistics() const;
 
 	protected:
+		virtual int count() const = 0;
 		virtual int count(const QString& tag) const = 0;
+		
+		virtual QString text(int index, QString* tag) const = 0;
 		virtual QString text(const QString& tag, bool* ok) = 0;
 
 	private:

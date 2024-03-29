@@ -2459,7 +2459,7 @@ void ProjectDiffGenerator::comparePropertyObjects(const PropertyObject& sourceOb
 			}
 
 			diff.newValue = tp->value();
-			diff.newValueText = ExtWidgets::PropertyTools::propertyValueText(tp.get(), -1, maxDecimalPlaces);
+			diff.newValueText = ExtWidgets::PropertyTools::propertyValueText(tp.get(), -1, maxDecimalPlaces, true /*noNewLine*/);
 
 			result->push_back(diff);
 			continue;
@@ -2484,8 +2484,8 @@ void ProjectDiffGenerator::comparePropertyObjects(const PropertyObject& sourceOb
 		diff.oldValue = sp->value();
 		diff.newValue = tp->value();
 
-		diff.oldValueText = ExtWidgets::PropertyTools::propertyValueText(sp.get(), -1, maxDecimalPlaces);
-		diff.newValueText = ExtWidgets::PropertyTools::propertyValueText(tp.get(), -1, maxDecimalPlaces);
+		diff.oldValueText = ExtWidgets::PropertyTools::propertyValueText(sp.get(), -1, maxDecimalPlaces, true /*noNewLine*/);
+		diff.newValueText = ExtWidgets::PropertyTools::propertyValueText(tp.get(), -1, maxDecimalPlaces, true /*noNewLine*/);
 
 		// Both are enums
 		//

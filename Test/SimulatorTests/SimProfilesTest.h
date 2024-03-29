@@ -1,11 +1,12 @@
 #pragma once
 
 #include <QObject>
-#include "../../Simulator/SimProfiles.h"
+#include <Simulator/SimProfiles.h>
 
 class SimProfilesTest : public QObject
 {
 	Q_OBJECT
+
 public:
 	SimProfilesTest();
 

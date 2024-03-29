@@ -1,6 +1,8 @@
 #pragma once
 #include "SimIdeSimulator.h"
-#include "../../Simulator/SimControl.h"
+#include <Simulator/SimConnections.h>
+#include <Simulator/SimLogicModule.h>
+#include <Simulator/SimControlStatus.h>
 
 //
 // Widget for selection build and module
@@ -71,7 +73,7 @@ namespace SimProjectTreeItems
 	class LogicModuleTreeItem : public BaseTreeItem
 	{
 	public:
-		LogicModuleTreeItem(QTreeWidgetItem* parent, std::shared_ptr<Sim::LogicModule> lm);
+		LogicModuleTreeItem(QTreeWidgetItem* parent, const Sim::LogicModule& lm);
 
 		virtual void updateState(SimProjectWidget* simProjectWidget, Sim::ControlStatus state) override;
 		virtual void doubleClick(SimProjectWidget* simProjectWidget) override;
@@ -85,7 +87,7 @@ namespace SimProjectTreeItems
 	class ConnectionTreeItem : public BaseTreeItem
 	{
 	public:
-		ConnectionTreeItem(QTreeWidgetItem* parent, const Sim::ConnectionPtr& connection);
+		ConnectionTreeItem(QTreeWidgetItem* parent, const Sim::Connection& connection);
 
 		virtual void updateState(SimProjectWidget* simProjectWidget, Sim::ControlStatus state) override;
 		virtual void doubleClick(SimProjectWidget* simProjectWidget) override;

@@ -373,6 +373,9 @@ namespace XmlAttribute
 	inline const QString SEND_EVENTS("SendEvents");
 	inline const QString INCLUDE_APP_SIGNAL_ID("IncludeAppSignalID");
 
+	inline const QString SIGNAL_FORMAT("SignalFormat");
+	inline const QString BYTE_ORDER_ATTR("ByteOrder");
+
 	inline const QString SIGNAL_TYPE_ID("SignalTypeID");
 	inline const QString SYSTEM_SIGNAL_TYPE("SystemSignalType");
 	inline const QString DIAG_SIGNAL_TYPE("DiagSignalType");
@@ -411,6 +414,11 @@ namespace XmlAttribute
 	inline const QString USED_FRAMES_COUNT("UsedFramesCount");
 	inline const QString SIGNALS_COUNT("SignalsCount");
 	inline const QString FOTIP_TUNING_DATA_UID("FotipTuningDataUID");
+
+	inline const QString MODBUS_DEVICE_ID("ModbusDeviceID");
+	inline const QString REG_ADDR("RegAddr");
+	inline const QString REG_BIT("RegBit");
+	inline const QString FORMAT("Format");
 }
 
 namespace Latin1Char
@@ -443,6 +451,7 @@ namespace CfgFileId
 	inline const QString TUNING_GLOBALSCRIPT("TUNING_GLOBALSCRIPT");
 
 	inline const QString CLIENT_BEHAVIOR("CLIENT_BEHAVIOR");
+	inline const QString MONITOR_EQUIPMENT("MONITOR_EQUIPMENT");
 	inline const QString MATSUSERS("MATSUSERS_XML");
 	inline const QString LOGO("LOGO");
 
@@ -559,6 +568,7 @@ namespace File
 	inline const QString DIAG_SIGNAL_TYPES_XML("DiagSignalTypes.xml");
 	inline const QString DIAG_DATA_SOURCES_XML("DiagDataSources.xml");
 	inline const QString ACQUIRED_DIAG_SIGNALS_ASGS("AcquiredDiagSignals.asgs");
+	inline const QString MONITOR_EQUIPMENT("MonitorEquipment.dat");
 
 	inline const QString METROLOGY_ITEMS_XML("MetrologyItems.xml");
 	inline const QString METROLOGY_SIGNAL_SET("MetrologySignal.set");
@@ -600,6 +610,7 @@ namespace Separator
 	inline const QString MINUS("-");
 	inline const QString DOT(".");
 	inline const QString COMMA(",");
+	inline const QString SPACE(" ");
 	inline const QString COMMA_SPACE(", ");
 	inline const QString LINE("-------------------------------------------------------------------------------");
 	inline const QString DIR("/");

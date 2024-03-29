@@ -7,6 +7,8 @@
 #include "MonitorMainWindow.h"
 #include "MonitorSchemaManager.h"
 
+#include <HardwareLib/ScriptEquipment.h>
+
 
 //
 // MonitorView
@@ -92,6 +94,17 @@ void MonitorSchemaView::updateScriptGlobalVars(QJSEngine& engine)
 		engine.globalObject().setProperty(VFrame30::PropertyNames::scriptGlobalVariableSignals, jsSignals);
 	}
 
+	// Create global variable "equipment"
+	//
+	{
+		Q_ASSERT(m_scriptEquipment);
+
+		QJSValue jsObject = engine.newQObject(m_scriptEquipment.get());
+		QJSEngine::setObjectOwnership(m_scriptEquipment.get(), QJSEngine::CppOwnership);
+
+		engine.globalObject().setProperty(VFrame30::PropertyNames::scriptGlobalVariableEquipment, jsObject);
+	}
+
 	return;
 }
 
@@ -102,6 +115,8 @@ void MonitorSchemaView::configurationArrived(MonitorConfigSettings configuration
 	m_configurationId = configuration.configurationId;
 
 	setMonitorBehavior(std::move(configuration.monitorBehavior));
+
+	m_scriptEquipment->setRoot(configuration.equipment);
 
 	// This will update GlobalScripts and reevaluate them.
 	//

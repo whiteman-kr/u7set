@@ -17,18 +17,29 @@ namespace Hardware
 	class DeviceDiagSignal;
 
 
-	//
-	// DeviceObject script wrapper
-	//
+	/// @brief The ScriptDeviceObject class represents a device object in the script.
+	/// @details Instances of this class allow access to the device object properties and its children.
+	/// 
 	class ScriptDeviceObject : public QObject
 	{
 		Q_OBJECT
 
+		/// @brief Device object identifier.
 		Q_PROPERTY(QString equipmentId READ equipmentId)
+		
+		/// @brief Device object caption.
 		Q_PROPERTY(QString caption READ caption)
+
+		/// @brief Device object UUID.
 		Q_PROPERTY(QUuid uuid READ uuid)
+
+		/// @brief Device object type.
 		Q_PROPERTY(int deviceType READ deviceType)
+
+		/// @brief Device object place.
 		Q_PROPERTY(int place READ place)
+
+		/// @brief Number of children.
 		Q_PROPERTY(int childrenCount READ childrenCount)
 
 	public:
@@ -38,31 +49,68 @@ namespace Hardware
 		std::shared_ptr<DeviceObject> deviceObject();
 
 	public slots:
+		/// @brief Returns the parent object of the device object.
 		QJSValue parent();
+
+		/// @brief Returns the child object at the specified index.
 		QJSValue child(int index);
+
+		/// @brief Returns the child object with the specified equipmentId.
 		QJSValue childByEquipmentId(QString id);
 
+		/// @brief Cast object to ScriptDeviceSystem, return null if object is not DeviceSystem.
 		QJSValue toSystem();
-		QJSValue toRack();
-		QJSValue toChassis();
-		QJSValue toModule();
-		QJSValue toController();
-		QJSValue toWokstation();
-		QJSValue toSoftware();
-		QJSValue toAppSignal();
 
+		/// @brief Cast object to ScriptDeviceRack, return null if object is not DeviceRack.
+		QJSValue toRack();
+
+		/// @brief Cast object to ScriptDeviceChassis, return null if object is not DeviceChassis.
+		QJSValue toChassis();
+
+		/// @brief Cast object to ScriptDeviceModule, return null if object is not DeviceModule.
+		QJSValue toModule();
+
+		/// @brief Cast object to ScriptDeviceController, return null if object is not DeviceController.
+		QJSValue toController();
+
+		/// @brief Cast object to ScriptDeviceWorkstation, return null if object is not Workstation.
+		QJSValue toWorkstation();
+
+		/// @brief Cast object to ScriptDeviceSoftware, return null if object is not Software.
+		QJSValue toSoftware();
+
+		/// @brief Cast object to ScriptDeviceAppSignal, return null if object is not AppSignal.
+		QJSValue toAppSignal();
+		
+
+		/// @brief Returns true if the object is a ScriptDeviceRoot object.
 		bool isRoot() const;
+
+		/// @brief Returns true if the object is a ScriptDeviceSystem object.
 		bool isSystem() const;
+
+		/// @brief Returns true if the object is a ScriptDeviceRack object.
 		bool isRack() const;
+
+		/// @brief Returns true if the object is a ScriptDeviceChassis object.
 		bool isChassis() const;
+
+		/// @brief Returns true if the object is a ScriptDeviceModule object.
 		bool isModule() const;
+
+		/// @brief Returns true if the object is a ScriptDeviceController object.
 		bool isController() const;
+
+		/// @brief Returns true if the object is a ScriptWorkstation object.
 		bool isWorkstation() const;
+
+		/// @brief Returns true if the object is a ScriptSoftware object.
 		bool isSoftware() const;
+
+		/// @brief Returns true if the object is a ScriptAppSignal object.
 		bool isAppSignal() const;
 
-		// Properties
-		//
+		/// @brief Returns the value of the specified property.
 		QVariant propertyValue(const QString& caption) const;
 
 		int propertyInt(const QString& caption) const;

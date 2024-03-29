@@ -2393,7 +2393,7 @@ void EquipmentView::undoChangesSelectedDevices()
 void EquipmentView::undoChangesRecursively()
 {
 	QModelIndexList selected = selectionModel()->selectedRows();
-	if (selected.empty())
+	if (selected.size() != 1)
 	{
 		return;
 	}
@@ -2404,7 +2404,7 @@ void EquipmentView::undoChangesRecursively()
 
 	// Perform undo
 	//
-	equipmentModel()->undoChangesDeviceObject(selected);
+	equipmentModel()->undoChangesRecursively(selected.front());
 
 	// blocker will enable undoChangesDeviceObject::selectionChanged
 	//

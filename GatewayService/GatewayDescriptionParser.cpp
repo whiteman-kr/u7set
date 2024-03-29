@@ -1,5 +1,7 @@
 #include "GatewayDescriptionParser.h"
 #include "../UtilsLib/WUtils.h"
+#include "IvsImpulseGateway.h"
+#include "ModbusTcpSlaveGateway.h"
 
 namespace Gateway
 {
@@ -158,6 +160,7 @@ namespace Gateway
 	const QString Parser::END_SECTION("]");
 
 	const QString Parser::EQUAL_SIGN("=");
+	const QString Parser::LEFT_POINTER_SIGN("<-");
 	const QString Parser::APP_SIGNAL_ID_START_SIGN("#");
 
 	const QString Parser::ERR_SYNTAX("syntax error");
@@ -191,6 +194,14 @@ namespace Gateway
 		{ E::Setting::ListNo,				E::SettingType::Int		},
 		{ E::Setting::DataType,				E::SettingType::String	},
 		{ E::Setting::IncludeAppSignalID,	E::SettingType::Bool	},
+
+		// ModbusTcpSlave gateway specific settings
+		//
+		{ E::Setting::ModbusDeviceID,	E::SettingType::Int	},
+
+		// ModbusTcpSlave signal lists specific settings
+		//
+		{ E::Setting::SignalsFormat,		E::SettingType::String	},
 	};
 
 	const QRegularExpression Parser::m_anyWhitespaceSymbol("\\s");
@@ -330,7 +341,7 @@ namespace Gateway
 
 		if (errCount == 0)
 		{
-			result &= generateGatewaysRequiredFiles(m_signalSetAdapter);
+			result &= generateGatewaysRequiredFiles();
 		}
 
 		return result;
@@ -347,13 +358,13 @@ namespace Gateway
 		return m_gateways;
 	}
 
-	bool Parser::generateGatewaysRequiredFiles(SignalSetAdapter signalSetAdapter)
+	bool Parser::generateGatewaysRequiredFiles()
 	{
 		bool result = true;
 
 		for(GatewayShared gw : *m_gateways)
 		{
-			result &= gw->generateRequiredFiles(signalSetAdapter, m_log);
+			result &= gw->generateRequiredFiles(m_signalSetAdapter, m_log);
 		}
 
 		return result;
@@ -398,7 +409,7 @@ namespace Gateway
 					if (res == false ||
 						gatewayType == E::GatewayType::Unknown)
 					{
-						m_log.logError(plr.lineNo, QString("unknown GatewayType - '%1'").
+						m_log.logError(plr.lineNo, QString("unknown GatewayType '%1'").
 											arg(plr.value.toString()));
 						return ParseResult::CriticalError;
 					}
@@ -488,13 +499,15 @@ namespace Gateway
 						   arg(::E::valueToString<E::Setting>(plr.setting)));
 			}
 
-			sl->setSettingValue(plr.lineNo, plr.setting, plr.value);
+			sl->setSettingValue(plr.lineNo, plr.setting, plr.value, m_log);
 
 			return ParseResult::Ok;
 
 		case LineType::SignalID:
-			sl->m_signalIDs.push_back(plr.value.toString());
-			return ParseResult::Ok;
+			return appendAddressSignalID(sl, plr, false);
+
+		case LineType::AddressSignalID:
+			return appendAddressSignalID(sl, plr, true);
 
 		case LineType::Section:
 			switch(plr.section)
@@ -515,9 +528,60 @@ namespace Gateway
 				Q_ASSERT(false);
 				break;
 			}
+
+		default:
+			Q_ASSERT(false);
 		}
 
 		return ParseResult::Error;
+	}
+
+	Parser::ParseResult Parser::appendAddressSignalID(SignalListShared signalList, const ParseLineResult& plr, bool appendAddr)
+	{
+		QString appSignalID = plr.value.toString().trimmed();
+
+		const AppSignal* s = m_signalSetAdapter.getAppSignal(appSignalID);
+
+		if (s == nullptr)
+		{
+			m_log.logError(plr.lineNo, QString("signal '%1' not found").arg(appSignalID));
+			return ParseResult::Error;
+		}
+
+		std::optional<::E::SignalType> listSignalType = signalList->signalType();
+
+		if (listSignalType.has_value() == false)
+		{
+			m_log.logError(plr.lineNo, QString("required signal type of list is undefined, set list signal type (format) first"));
+			return ParseResult::CriticalError;
+		}
+
+		if (s->signalType() != listSignalType.value())
+		{
+			m_log.logError(plr.lineNo, QString("signal type of '%1' isn't corresponds to list signal type '%2'").
+									   arg(s->appSignalID()).arg(::E::valueToString(listSignalType.value())));
+			return ParseResult::Error;
+		}
+
+		QString errMsg;
+		bool res = true;
+
+		if (appendAddr == false)
+		{
+			res = signalList->appendSignalID(appSignalID, &errMsg);
+		}
+		else
+		{
+			res = signalList->appendAddressSignalID(plr.addressStr, appSignalID, &errMsg);
+		}
+
+		if (res == false)
+		{
+			m_log.logError(plr.lineNo, errMsg);
+			return ParseResult::Error;
+		}
+
+		return ParseResult::Ok;
 	}
 
 	bool Parser::parseLine(const QString& str, ParseLineResult* plr)
@@ -626,7 +690,37 @@ namespace Gateway
 
 			plr->setting = st;
 
-			return parseSettingValue(st, settingValueStr, plr);;
+			return parseSettingValue(st, settingValueStr, plr);
+		}
+
+		// check addressSignalID token like:  address -> SignalID
+
+		qsizetype pointerSignIndex = toParse.indexOf(LEFT_POINTER_SIGN);
+
+		if (pointerSignIndex != -1)
+		{
+			plr->lineType = LineType::AddressSignalID;
+
+			QString addrStr = toParse.mid(0, pointerSignIndex).trimmed();
+			QString signalID = toParse.mid(pointerSignIndex + LEFT_POINTER_SIGN.length()).trimmed();
+
+			if (addrStr.isEmpty() == true ||
+				signalID.isEmpty() == true)
+			{
+				plr->setError(ERR_SYNTAX);
+				return false;
+			}
+
+			if (signalID.contains(m_anyWhitespaceSymbol) == true)
+			{
+				plr->setError("signal identifier should not contain any whitespace symbols");
+				return false;
+			}
+
+			plr->addressStr = addrStr;
+			plr->value = QVariant(signalID);
+
+			return true;
 		}
 
 		// check signalID token
@@ -791,6 +885,9 @@ namespace Gateway
 		{
 		case E::GatewayType::IVS_Impulse:
 			return std::make_shared<IvsImpulseGateway>();
+
+		case E::GatewayType::ModbusTcpSlave:
+			return std::make_shared<ModbusTcpSlaveGateway>();
 
 		default:
 			Q_ASSERT(false);

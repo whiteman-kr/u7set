@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QtGlobal>
 #include <QHostAddress>
 
 class HostAddressPort
@@ -24,8 +23,12 @@ public:
 	bool operator!=(const HostAddressPort &other) const;
 	bool operator<(const HostAddressPort &other) const;
 
-	void setAddress(quint32 ip4Addr);
+	void clear();
 
+	void setAny();
+	bool isAny() const;
+
+	void setAddress(quint32 ip4Addr);
 	void setAddress(quint8* ip6Addr);
 	void setAddress(const Q_IPV6ADDR& ip6Addr);
 	void setAddress(const sockaddr* sockaddr);
@@ -55,8 +58,7 @@ public:
 
 	[[nodiscard]] QString portStr() const;
 
-	void clear();
-	[[nodiscard]] bool isEmpty() const;
+	[[nodiscard]] bool isNull() const;
 	[[nodiscard]] bool isSet() const;
 
 	static bool isValidIPv4(const QString& ipAddressStr);
@@ -145,6 +147,22 @@ inline bool HostAddressPort::operator<(const HostAddressPort& other) const
 	return addressPortStr() < other.addressPortStr();
 }
 
+inline void HostAddressPort::clear()
+{
+	m_hostAddress.clear();
+	m_port = 0;
+}
+
+inline void HostAddressPort::setAny()
+{
+	m_hostAddress = QHostAddress::AnyIPv4;
+}
+
+inline bool HostAddressPort::isAny() const
+{
+	return (m_hostAddress == QHostAddress::AnyIPv4);
+}
+
 inline void HostAddressPort::setAddress(quint32 ip4Addr)
 {
 	m_hostAddress.setAddress(ip4Addr);
@@ -200,6 +218,8 @@ inline bool HostAddressPort::setAddressPortStr(const QString& addressPortStr, qu
 {
 	QString addrStr;
 	quint16 port = 0;
+
+	m_hostAddress.clear();
 
 	bool result = HostAddressPort::splitAddressPortStr(addressPortStr, &addrStr, &port, defaultPort);
 
@@ -269,7 +289,12 @@ inline std::string HostAddressPort::toStdString() const
 
 inline QString HostAddressPort::addressPortStr() const
 {
-	return QString("%1:%2").arg(address().toString()).arg(port());
+	if (isSet() == true)
+	{
+		return QString("%1:%2").arg(address().toString()).arg(port());
+	}
+
+	return QString();
 }
 
 inline QString HostAddressPort::addressPortStrIfSet() const
@@ -302,20 +327,14 @@ inline QString HostAddressPort::portStr() const
 	return QString::number(m_port);
 }
 
-inline void HostAddressPort::clear()
+inline bool HostAddressPort::isNull() const
 {
-	m_hostAddress.setAddress(static_cast<quint32>(0));
-	m_port = 0;
-}
-
-inline bool HostAddressPort::isEmpty() const
-{
-	return m_hostAddress.toIPv4Address() == 0;
+	return m_hostAddress.isNull();
 }
 
 inline bool HostAddressPort::isSet() const
 {
-	return isEmpty() == false;
+	return isNull() == false;
 }
 
 inline bool HostAddressPort::isValidIPv4(const QString& ipAddressStr)
@@ -340,7 +359,7 @@ inline bool HostAddressPort::isValidPort(const QString& portStr)
 }
 
 inline bool HostAddressPort::splitAddressPortStr(const QString& addressPortStr, QString* addressStr,
-												 quint16 *port, quint16 defaultPort)
+												 quint16* port, quint16 defaultPort)
 {
 	if (addressStr == nullptr || port == nullptr)
 	{
@@ -351,7 +370,7 @@ inline bool HostAddressPort::splitAddressPortStr(const QString& addressPortStr, 
 	addressStr->clear();
 	*port = 0;
 
-	QStringList strList = addressPortStr.split(":", Qt::SkipEmptyParts);
+	QStringList strList = addressPortStr.split(":", Qt::KeepEmptyParts);
 
 	if (strList.size() == 0)
 	{
@@ -362,9 +381,21 @@ inline bool HostAddressPort::splitAddressPortStr(const QString& addressPortStr, 
 
 	if (strList.size() > 0)
 	{
-		*addressStr = strList.at(0);
+		const QString& addrStr = strList.at(0);
 
-		addrOk = isValidIPv4(*addressStr);
+		if (addrStr.isEmpty() == true)
+		{
+			return false;
+		}
+
+		if (isValidIPv4(addrStr) == false)
+		{
+			return false;
+		}
+
+		*addressStr = addrStr;
+
+		addrOk = true;
 	}
 
 	bool portOk = false;

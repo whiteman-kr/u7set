@@ -1,10 +1,10 @@
 #include "SimOverridePane.h"
-#include "../../Simulator/SimOverrideSignals.h"
 #include "SimOverrideValueWidget.h"
+#include <Simulator/SimOverrideSignals.h>
 
-#include <QStyledItemDelegate>
-#include <QStandardPaths>
 #include <QDrag>
+#include <QStandardPaths>
+#include <QStyledItemDelegate>
 
 SimOverridePane::SimOverridePane(Sim::Simulator* simulator, DbController* dbc, QWidget* parent) :
 	QWidget(parent),
@@ -130,8 +130,10 @@ void SimOverridePane::dropEvent(QDropEvent* event)
 		{
 			QString appSignalId = appSignalParam.appSignalId();
 
+			// get state without applied override.
+			//
 			AppSignalState state = m_simulator->appSignalManager().signalState(appSignalId, nullptr, false);
-			bool isAlreadyOverriden = m_simulator->overrideSignals().isSignalInOverrideList(appSignalId);
+			bool isAlreadyOverriden = m_simulator->overrideSignals().containsSignal(appSignalId);
 
 			signalIds << appSignalId;
 			signalValues.push_back(std::tuple{appSignalId, isAlreadyOverriden, state.value()});
@@ -171,7 +173,7 @@ void SimOverridePane::dropEvent(QDropEvent* event)
 
 		// SetInitialValues to currents.
 		//
-		std::vector<Sim::OverrideSignals::SetValueData> overrideData;
+		std::vector<Sim::OverrideSetValueData> overrideData;
 		overrideData.reserve(signalValues.size());
 
 		for (auto&[appSignalId, isAlreadyOverriden, value] : signalValues)
@@ -218,7 +220,7 @@ bool SimOverridePane::eventFilter(QObject* obj, QEvent* event)
 					return m_treeWidget->indexOfTopLevelItem(i1) < m_treeWidget->indexOfTopLevelItem(i2);
 				});
 
-				std::vector<Sim::OverrideSignals::SetValueData> overrideData;
+				std::vector<Sim::OverrideSetValueData> overrideData;
 				overrideData.reserve(selectedItems.size());
 
 				for (QTreeWidgetItem* selectedItem : selectedItems)
@@ -263,7 +265,7 @@ bool SimOverridePane::eventFilter(QObject* obj, QEvent* event)
 					return m_treeWidget->indexOfTopLevelItem(i1) < m_treeWidget->indexOfTopLevelItem(i2);
 				});
 
-				std::vector<Sim::OverrideSignals::SetValueData> overrideData;
+				std::vector<Sim::OverrideSetValueData> overrideData;
 				overrideData.reserve(selectedItems.size());
 
 				for (QTreeWidgetItem* selectedItem : selectedItems)
@@ -298,7 +300,7 @@ bool SimOverridePane::eventFilter(QObject* obj, QEvent* event)
 					return m_treeWidget->indexOfTopLevelItem(i1) < m_treeWidget->indexOfTopLevelItem(i2);
 				});
 
-				std::vector<Sim::OverrideSignals::SetValueData> overrideData;
+				std::vector<Sim::OverrideSetValueData> overrideData;
 				overrideData.reserve(selectedItems.size());
 
 				for (QTreeWidgetItem* selectedItem : selectedItems)
@@ -908,7 +910,7 @@ void SimOverridePane::addSignal()
 
 			// If signal already added to simulation, just select it
 			//
-			if (m_simulator->overrideSignals().isSignalInOverrideList(appSignalId) == true)
+			if (m_simulator->overrideSignals().containsSignal(appSignalId) == true)
 			{
 				selectSignal(appSignalId);
 				return;

@@ -28,7 +28,13 @@ DialogShortcuts::DialogShortcuts(QWidget* parent)
 
 	addShortcut(QKeySequence(Qt::CTRL | Qt::Key_B).toString() + ", " + QKeySequence(Qt::Key_F7).toString(), "Build project", section);
 	addShortcut(QKeySequence(Qt::CTRL | Qt::Key_K).toString(), "Locator", section);
-	addShortcut(QKeySequence(QKeySequence::Quit).toString(), "Exit the application", section);
+
+	QString exitShortcut = QKeySequence(QKeySequence::Quit).toString();
+	if (exitShortcut.isEmpty() == true) 
+	{
+		exitShortcut = "Alt+F4";
+	}
+	addShortcut(exitShortcut, "Exit the application", section);
 
 	section->setExpanded(true);
 
@@ -173,14 +179,6 @@ DialogShortcuts::DialogShortcuts(QWidget* parent)
 	section = addSection("Tags Editor Dialog");
 
 	addShortcut(QKeySequence(QKeySequence::Delete).toString(), "Delete tag", section);
-
-	section->setExpanded(true);
-
-	//
-	
-	section = addSection("Pending Changes Dialog");
-
-	addShortcut(QKeySequence(QKeySequence::Refresh).toString(), "Refresh pending changes", section);
 
 	section->setExpanded(true);
 

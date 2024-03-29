@@ -1,5 +1,5 @@
 #include "Main.h"
-#include "../ClientLib/TuningUserManager.h"
+#include <ClientLib/TuningUserManager.h>
 #include "../VFrame30/VFrame30Library.h"
 #include "MainWindow.h"
 #include "ScriptTuningClientApplication.h"

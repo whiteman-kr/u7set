@@ -8,7 +8,7 @@
 #include "../lib/Ui/DialogTcpStatistics.h"
 #include "../lib/Ui/DialogAlert.h"
 #include "../OnlineLib/TcpClientStatistics.h"
-#include "../ClientLib/ClientTranslator.h"
+#include <ClientLib/ClientTranslator.h>
 
 #include "AppLogOutputWidget.h"
 #include "TestListWidget.h"
@@ -49,7 +49,7 @@ private:
 	void updateActionsState();
 
 	bool loadTestLog();
-	bool saveTestLog();
+	void saveTestLog();
 
 	void updateStatusIndicator();
 

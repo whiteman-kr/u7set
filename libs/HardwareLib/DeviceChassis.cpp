@@ -28,9 +28,9 @@ namespace Hardware
 
 	}
 
-	bool DeviceChassis::SaveData(Proto::Envelope* message, bool saveTree) const
+	bool DeviceChassis::SaveData(Proto::Envelope* message, bool saveTree, const std::function<bool(const DeviceObject&)>& predicate) const
 	{
-		bool result = DeviceObject::SaveData(message, saveTree);
+		bool result = DeviceObject::SaveData(message, saveTree, predicate);
 		if (result == false || message->HasExtension(::Proto::deviceobject) == false)
 		{
 			Q_ASSERT(result);

@@ -23,6 +23,10 @@ qt_add_library(${TARGET} STATIC
 	../GatewayService/GatewayDescription.h
 	../GatewayService/GatewayDescriptionParser.cpp
 	../GatewayService/GatewayDescriptionParser.h
+	../GatewayService/IvsImpulseGateway.cpp
+	../GatewayService/IvsImpulseGateway.h
+	../GatewayService/ModbusTcpSlaveGateway.cpp
+	../GatewayService/ModbusTcpSlaveGateway.h
 	../lib/ConstStrings.h
 	../lib/DataSource.cpp
 	../lib/DataSource.h

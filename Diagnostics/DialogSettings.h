@@ -2,7 +2,8 @@
 
 #include <QDialog>
 #include "DiagnosticsAppSettings.h"
-#include "../ClientLib/ClientTranslator.h"
+
+#include <ClientLib/ClientTranslator.h>
 
 namespace Ui {
 	class DialogSettings;

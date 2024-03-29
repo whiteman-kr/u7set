@@ -128,7 +128,7 @@ namespace SimOverrideUI
 			return;
 		}
 
-		std::vector<Sim::OverrideSignals::SetValueData> overrideData;
+		std::vector<Sim::OverrideSetValueData> overrideData;
 		overrideData.reserve(m_signals.size());
 
 		for (const auto& signal : m_signals)

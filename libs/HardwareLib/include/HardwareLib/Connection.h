@@ -8,7 +8,7 @@ namespace Hardware
 {
 	class Connection :
 		public PropertyObject,
-		public Proto::ObjectSerialization<Connection, Proto::Envelope>
+		public Proto::ObjectSerialization<Connection>
 	{
 		Q_OBJECT
 
@@ -35,7 +35,7 @@ namespace Hardware
 		// Serialization
 		//
 	public:
-		friend Proto::ObjectSerialization<Connection, Proto::Envelope>;	// for call CreateObject from Proto::ObjectSerialization
+		friend Proto::ObjectSerialization<Connection>;	// for call CreateObject from Proto::ObjectSerialization
 
 	public:
 		// Implementing Proto::ObjectSerialization<DeviceObject>::SaveData, LoadData

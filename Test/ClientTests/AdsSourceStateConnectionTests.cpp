@@ -1,4 +1,4 @@
-#include "../../ClientLib/AdsSourceStateConnection.h"
+#include <ClientLib/AdsSourceStateConnection.h>
 #include "ConnectionPorts.h"
 
 

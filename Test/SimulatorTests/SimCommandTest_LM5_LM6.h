@@ -1,9 +1,13 @@
 #pragma once
 
-#include <memory>
 #include <QObject>
+#include <HardwareLib/LmDescription.h>
 
-#include <SimCommandProcessor_LM5_LM6.h>
+namespace Sim
+{
+	class DeviceEmulator;
+	class CommandProcessor_LM5_LM6;
+}
 
 class SimCommandTest_LM5_LM6 : public QObject
 {
@@ -11,6 +15,7 @@ class SimCommandTest_LM5_LM6 : public QObject
 
 public:
 	SimCommandTest_LM5_LM6();
+	~SimCommandTest_LM5_LM6() override;
 
 private slots:
 	void initTestCase();

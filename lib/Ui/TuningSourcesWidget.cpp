@@ -1,9 +1,10 @@
 #include "TuningSourcesWidget.h"
-#include "../ClientLib/TuningConnection.h"
-#include "../AppSignalLib/TuningSignalManager.h"
+#include <ClientLib/TuningConnection.h>
+#include <ClientLib/TuningSignalManager.h>
 #include "../UtilsLib/Ui/UiTools.h"
 
 #include <QTreeWidget>
+#include <QTimer>
 
 DialogTuningSourceInfo::DialogTuningSourceInfo(ClientLib::TuningConnection& connection, QWidget* parent, quint64 sourceId, Hash lanEquipmentHash) :
 	DialogSourceInfo(parent, lanEquipmentHash /*this is unique identifier, NOT sourceHash!*/),

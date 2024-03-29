@@ -11,9 +11,10 @@
 #include <QVector>
 
 #include "../Protobuf/google/protobuf/message_lite.h"
-#include "../Simulator/SimConsoleLogFile.h"
-#include "../Simulator/Simulator.h"
 #include "../lib/ConstStrings.h"
+
+#include <Simulator/SimConsoleLogFile.h>
+#include <Simulator/Simulator.h>
 
 static QtMessageHandler originalMessageHandler = 0;
 
@@ -58,7 +59,8 @@ void messageOutputHandler(QtMsgType type, const QMessageLogContext& context, con
 void showProgramUsageHint()
 {
 	std::cout << "Program usage:\n";
-	std::cout << "  SimulatorConsole [-build=build_dir] [-script=file] [-global_script=file] [-profile=profile_name] [-speed_factor=x0.1|x0.25|x0.5|x1|x2|x4|FF] [-verbose] [-enable_lan]\n";
+	std::cout << "  SimulatorConsole [-build=build_dir] [-script=file] [-global_script=file] [-profile=profile_name] "
+				 "[-speed_factor=x0.1|x0.25|x0.5|x1|x2|x4|FF] [-verbose] [-enable_lan]\n";
 	std::cout << "\n";
 	std::cout << "Create template simulation script:\n";
 	std::cout << "  SimulatorConsole [-create=file_name]\n";
@@ -145,7 +147,8 @@ bool runScript(QString scriptFileName, QString globalScriptFileName, qint64 time
 		}
 		else
 		{
-			std::cout << "WARNING: File " << File::GLOBAL_SCRIPT.toStdString() << " is not loaded." << "\n";
+			std::cout << "WARNING: File " << File::GLOBAL_SCRIPT.toStdString() << " is not loaded."
+					  << "\n";
 		}
 	}
 
@@ -168,10 +171,7 @@ bool runScript(QString scriptFileName, QString globalScriptFileName, qint64 time
 class ProtobufLibShutdowner
 {
 public:
-	~ProtobufLibShutdowner()
-	{
-		google::protobuf::ShutdownProtobufLibrary();
-	}
+	~ProtobufLibShutdowner() { google::protobuf::ShutdownProtobufLibrary(); }
 };
 
 int main(int argc, char* argv[])
@@ -287,18 +287,17 @@ int main(int argc, char* argv[])
 
 	if (speedFactorStr.isEmpty() == false)
 	{
-		std::map<QString, double> speedFactorStrToValue{
-			{".1", 0.1},
-			{".25", 0.25},
-			{".5", 0.5},
-			{".75", 0.75},
-			{"1", 1.0},
-			{"2", 2.0},
-			{"4", 4.0},
-			{"8", 8.0},
-			{"10", 10.0},
-			{"16", 16.0},
-			{"FF", 256.0}};
+		std::map<QString, double> speedFactorStrToValue{{".1", 0.1},
+														{".25", 0.25},
+														{".5", 0.5},
+														{".75", 0.75},
+														{"1", 1.0},
+														{"2", 2.0},
+														{"4", 4.0},
+														{"8", 8.0},
+														{"10", 10.0},
+														{"16", 16.0},
+														{"FF", 256.0}};
 
 		speedFactorStr.remove("x", Qt::CaseInsensitive);
 		if (speedFactorStr.startsWith("0.", Qt::CaseInsensitive) == true)
@@ -330,8 +329,7 @@ int main(int argc, char* argv[])
 	Sim::ConsoleLogFile consoleLog;
 	Sim::Simulator simulator{&consoleLog, g_verbose, nullptr}; // Log to console
 
-	if (bool ok = simulator.load(buildPath);
-		ok == false)
+	if (bool ok = simulator.load(buildPath); ok == false)
 	{
 		return EXIT_FAILURE;
 	}
@@ -372,13 +370,13 @@ int main(int argc, char* argv[])
 
 	// Check if any LM after simulation is in failure mode
 	//
-	std::vector<std::shared_ptr<Sim::LogicModule>> lms = simulator.logicModules();
+	auto lms = simulator.logicModules();
 
 	for (const auto& lm : lms)
 	{
-		if (lm->deviceState() == Sim::DeviceState::Fault)
+		if (lm.deviceState() == Sim::DeviceState::Fault)
 		{
-			QString message = QString("Simulation after-run check: LogicModule %1 is in FAULT mode").arg(lm->equipmentId());
+			QString message = QString("Simulation after-run check: LogicModule %1 is in FAULT mode").arg(lm.equipmentId());
 			std::cout << message.toStdString() << "\n";
 			ok = false;
 		}

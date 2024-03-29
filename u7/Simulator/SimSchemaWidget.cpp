@@ -4,8 +4,8 @@
 #include "SimSchemaView.h"
 #include "SimWidget.h"
 
-#include "../../Simulator/SimAppSignalManager.h"
-#include "../../Simulator/SimSoftware.h"
+#include <Simulator/SimAppSignalManager.h>
+#include <Simulator/SimSoftware.h>
 #include "../VFrame30/IMatsSchemaItemAssociations.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/LogicSchema.h"
@@ -207,7 +207,7 @@ SimSchemaWidget::SimSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 								 QWidget* parent) :
 	VFrame30::ClientSchemaWidget(new SimSchemaView{schemaManager}, schema, schemaManager, parent),
 	m_simulator(simulator),
-	m_logController(simulator->log().logInterface())
+	m_logController(simulator->log())
 {
 	Q_ASSERT(m_simulator);
 	Q_ASSERT(schema);
@@ -329,6 +329,17 @@ void SimSchemaWidget::contextMenuRequested(const QPoint& pos)
 		}
 	}
 
+	auto f = [sim = m_simulator](QString& s)
+		{
+			if (s.startsWith('@') == true)
+			{
+				s = sim->appSignalManager().equipmentToAppSignalId(s);
+			}
+		};
+
+	std::ranges::for_each(appSignals, f);
+	std::ranges::for_each(impactSignals, f);
+
 	signalContextMenu(appSignals, impactSignals, loopbackId, {});
 
 	return;
@@ -346,6 +357,8 @@ void SimSchemaWidget::signalContextMenu(QStringList appSignals,
 
 	impactSignals.sort();
 	impactSignals.removeDuplicates();
+
+	QStringList equipmentIds; // Here will be added @equipmentId for appSignals and impactSignals.
 
 	// --
 	//
@@ -368,25 +381,74 @@ void SimSchemaWidget::signalContextMenu(QStringList appSignals,
 	std::set<QString> signalsSchemasSet;
 	for (const QString& s : appSignals)
 	{
+		// Find schema by appSignalId
+		//
 		QStringList schemaIds = m_simulator->schemasByAppSignalId(s);
 
 		for (const QString& schemaId : schemaIds)
 		{
 			signalsSchemasSet.insert(schemaId);
 		}
+
+		// Find by equipment id of input or output
+		//
+		bool found = false;
+		auto signalParam = m_simulator->appSignalManager().signalParam(s, &found);
+
+		if (found == true && (signalParam.isInput() == true || signalParam.isOutput() == true))
+		{
+			QString equipmentId = "@" + signalParam.equipmentId();
+			equipmentIds.push_back(equipmentId);
+
+			for (QStringList schemaIds = m_simulator->schemaDetails().schemasByAppSignalId(equipmentId);
+				 const QString & schemaId : schemaIds)
+			{
+				signalsSchemasSet.insert(schemaId);
+			}
+		}
 	}
 
 	std::set<QString> impactSignalsSchemasSet;
 	for (const QString& s : impactSignals)
 	{
+		// Find by app signal id
+		//
 		QStringList schemaIds = m_simulator->schemasByAppSignalId(s);
 
 		for (const QString& schemaId : schemaIds)
 		{
 			impactSignalsSchemasSet.insert(schemaId);
 		}
+
+		// Find by equipment id of input or output
+		//
+		bool found = false;
+		auto signalParam = m_simulator->appSignalManager().signalParam(s, &found);
+
+		if (found == true && (signalParam.isInput() == true || signalParam.isOutput() == true))
+		{
+			QString equipmentId = "@" + signalParam.equipmentId();
+			equipmentIds.push_back(equipmentId);
+
+			for (QStringList schemaIds = m_simulator->schemaDetails().schemasByAppSignalId(equipmentId);
+				 const QString & schemaId : schemaIds)
+			{
+				impactSignalsSchemasSet.insert(schemaId);
+			}
+		}
 	}
 
+	// Join all appSignals, impactSignals, loopbacks, and equipmentIds
+	// for highlighting.
+	//
+	QStringList allIds = appSignals + impactSignals + equipmentIds;
+	allIds << loopbackId;
+
+	allIds.sort();
+	allIds.removeDuplicates();
+
+	// --
+	//
 	std::set<QString> loopbackSchemas;
 	if (loopbackId.isEmpty() == false)
 	{
@@ -410,9 +472,9 @@ void SimSchemaWidget::signalContextMenu(QStringList appSignals,
 		//
 		for (const QString& schemaId : signalsSchemasSet)
 		{
-			auto f = [schemaId, &appSignals, &impactSignals, loopbackId, thisSimWidget]() -> void
+			auto f = [schemaId, &allIds, thisSimWidget]() -> void
 			{
-				thisSimWidget->openSchemaTabPage(schemaId, (appSignals + impactSignals) << loopbackId);
+				thisSimWidget->openSchemaTabPage(schemaId, allIds);
 			};
 
 			QAction* a = schemasSubMenu->addAction(schemaId);
@@ -429,9 +491,9 @@ void SimSchemaWidget::signalContextMenu(QStringList appSignals,
 
 		for (const QString& schemaId : impactSignalsSchemasSet)
 		{
-			auto f = [schemaId, &appSignals, &impactSignals, loopbackId, thisSimWidget]() -> void
+			auto f = [schemaId, &allIds, thisSimWidget]() -> void
 			{
-				thisSimWidget->openSchemaTabPage(schemaId, (appSignals + impactSignals) << loopbackId);
+				thisSimWidget->openSchemaTabPage(schemaId, allIds);
 			};
 
 			QString actionCaption = (schema()->schemaId() == schemaId) ? QString("-> %1").arg(schemaId) : schemaId;
@@ -446,9 +508,9 @@ void SimSchemaWidget::signalContextMenu(QStringList appSignals,
 
 		for (const QString& schemaId : loopbackSchemas)
 		{
-			auto f = [schemaId, &appSignals, &impactSignals, loopbackId, thisSimWidget]() -> void
+			auto f = [schemaId, &allIds, thisSimWidget]() -> void
 			{
-				thisSimWidget->openSchemaTabPage(schemaId, (appSignals + impactSignals) << loopbackId);
+				thisSimWidget->openSchemaTabPage(schemaId, allIds);
 			};
 
 			QString actionCaption = (schema()->schemaId() == schemaId) ? QString("-> %1").arg(schemaId) : schemaId;
@@ -597,6 +659,10 @@ void SimSchemaWidget::signalContextMenu(QStringList appSignals,
 
 void SimSchemaWidget::updateProject()
 {
+	// Update MonitorEquipment
+	//
+	clientSchemaView()->setMonitorEquipment(m_simulator->monitorEquipment());
+
 	// Set MonitorID
 	//
 	QSettings s;

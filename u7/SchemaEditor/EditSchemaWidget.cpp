@@ -7096,6 +7096,7 @@ void EditSchemaWidget::editPaste()
 		}
 
 		std::list<SchemaItemPtr> itemList;
+		std::list<SchemaItemPtr> itemsToRemove;
 
 		bool schemaItemAfbIsPresent = false;
 		bool schemaItemUfbIsPresent = false;
@@ -7120,8 +7121,8 @@ void EditSchemaWidget::editPaste()
 			if (schemaItem->itemUnit() != schema()->unit())
 			{
 				continue;	// No transform, the problem is: we need to transform pos, height, points pos
-							// it's all ok, BUT also we need to trasform lineWeight, TextSize and maybe something else
-							// and these properties can variy from item to item.
+							// it's all ok, BUT also we need to transform lineWeight, TextSize and maybe something else
+							// and these properties can vary from item to item.
 			}
 
 			// --
@@ -7134,7 +7135,59 @@ void EditSchemaWidget::editPaste()
 			for (SchemaItemPtr& item : itemList)
 			{
 				VFrame30::ISchemaItemPropertiesPos* pos = item.get();
+				VFrame30::PosRectRotatable* rotatableItem = item->toType<VFrame30::PosRectRotatable>();
+				
+				if (rotatableItem != nullptr)
+				{
+					std::array<QPointF, 21> pointsForEnsuringVisible {
+						QPointF{schema()->docWidthRegional() / 2.0, schema()->docHeightRegional() / 2.0},
+						QPointF{.0, .0},
+						QPointF{schema()->docWidthRegional(), .0},
+						QPointF{schema()->docWidthRegional(), schema()->docHeightRegional()},
+						QPointF{.0, schema()->docHeightRegional()},
+						QPointF{schema()->docWidthRegional() / 2.0, .0},
+						QPointF{schema()->docWidthRegional(), schema()->docHeightRegional() / 2.0},
+						QPointF{schema()->docWidthRegional() / 2.0, schema()->docHeightRegional()},
+						QPointF{.0, schema()->docHeightRegional() / 2.0},
+						QPointF{.0, -pos->height()},
+						QPointF{-pos->width(), .0},
+						QPointF{.0, +pos->height()},
+						QPointF{+pos->width(), .0},
+						QPointF{schema()->docWidthRegional(), -pos->height()},
+						QPointF{schema()->docWidthRegional() - pos->width(), .0},
+						QPointF{schema()->docWidthRegional(), +pos->height()},
+						QPointF{schema()->docWidthRegional() - pos->width(), schema()->docHeightRegional()},
+						QPointF{schema()->docWidthRegional(), schema()->docHeightRegional() - pos->height()},
+						QPointF{schema()->docWidthRegional() - pos->width(), schema()->docHeightRegional()},
+						QPointF{.0, schema()->docHeightRegional() - pos->height()},
+						QPointF{-pos->width(), schema()->docHeightRegional()}
+					};
 
+					for (const QPointF& pointForApply : pointsForEnsuringVisible)
+					{
+						bool isVisible = rotatableItem->isIntersectRect(0, 0, schema()->docWidth(), schema()->docHeight());
+						if (isVisible == true)
+						{
+							break;
+						}
+
+						pos->setLeft(pointForApply.x());
+						pos->setTop(pointForApply.y());
+					}
+
+					bool isVisible = rotatableItem->isIntersectRect(0, 0, schema()->docWidth(), schema()->docHeight());
+					if (isVisible == false)
+					{
+						// I give up, just remove it.
+						//
+						itemsToRemove.push_back(item);
+					}
+					
+					continue;
+				}
+
+				// This is not rotatable item here everything is simple.
+				//
 				if (pos->left() + pos->width() > schema()->docWidthRegional())
 				{
 					pos->setLeft(schema()->docWidthRegional() - pos->width());
@@ -7178,6 +7231,16 @@ void EditSchemaWidget::editPaste()
 			}
 		}
 
+		if (itemsToRemove.empty() == false)
+		{
+			for (SchemaItemPtr& item : itemsToRemove)
+			{
+				itemList.remove(item);
+			}
+
+			QMessageBox::critical(this, qAppName(), tr("Some items cannot correctly be placed and were not added to the schema."));
+		}
+
 		if (itemList.empty() == false)
 		{
 			if (schema()->isUfbSchema() == true &&
@@ -7189,6 +7252,8 @@ void EditSchemaWidget::editPaste()
 				return;
 			}
 
+			// Add items
+			//
 			m_editEngine->runAddItem(itemList, editSchemaView()->activeLayer());
 
 			bool defaultsWereSet = setDefaultItemProperties(itemList);
@@ -7260,12 +7325,12 @@ void EditSchemaWidget::editPaste()
 
 				m_editEngine->runSetProperty(VFrame30::PropertyNames::image, QVariant(image), selected);
 			}
-		}
 
-		return;
+			return;
+		}
 	}
 
-	// All other itmes receives olny text
+	// All other items receives only text
 	//
 	if (mimeData->hasText() == false)
 	{

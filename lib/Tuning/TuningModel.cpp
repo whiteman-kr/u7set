@@ -33,7 +33,7 @@ int TuningModelHashSet::hashCount() const
 // TuningItemSorter
 //
 
-TuningModelSorter::TuningModelSorter(TuningModelColumns column, const TuningModel* model, TuningSignalManager& tuningSignalManager):
+TuningModelSorter::TuningModelSorter(TuningModelColumns column, const TuningModel* model, ClientLib::TuningSignalManager& tuningSignalManager):
 	m_column(column),
 	m_tuningSignalManager(tuningSignalManager),
 	m_model(model)
@@ -267,7 +267,7 @@ bool TuningModelSorter::sortFunction(const TuningModelHashSet& set1, const Tunin
 // TuningItemModel
 //
 
-TuningModel::TuningModel(TuningSignalManager& tuningSignalManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent)
+TuningModel::TuningModel(ClientLib::TuningSignalManager& tuningSignalManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent)
 	:QAbstractTableModel(parent),
 	m_tuningSignalManager(tuningSignalManager),
 	m_parentWidget(parent)
@@ -549,7 +549,7 @@ const TuningModelHashSet& TuningModel::hashSetByIndex(int row) const
 	return m_hashSets[row];
 }
 
-TuningSignalManager& TuningModel::tuningSignalManager()
+ClientLib::TuningSignalManager& TuningModel::tuningSignalManager()
 {
 	return m_tuningSignalManager;
 }

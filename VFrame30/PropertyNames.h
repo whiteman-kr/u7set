@@ -316,6 +316,7 @@ namespace VFrame30
 		inline static const QString scriptGlobalVariableView{"view"};
 		inline static const QString scriptGlobalVariableTuning{"tuning"};
 		inline static const QString scriptGlobalVariableSignals{"signals"};
+		inline static const QString scriptGlobalVariableEquipment{"equipment"};
 		inline static const QString scriptGlobalVariableLog{"log"};
 	};
 } // namespace VFrame30

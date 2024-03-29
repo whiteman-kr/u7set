@@ -466,7 +466,9 @@ namespace VFrame30
 			drawParam->clientSchemaView();
 
 		ILogFile* log = context()->log();
-
+		
+		// Run Schema PreDrawEvent scripts.
+		//
 		if (clientView != nullptr)
 		{
 			// Start stats
@@ -487,8 +489,8 @@ namespace VFrame30
 			{
 				using namespace std::chrono;
 				auto now = system_clock::now();
-				auto ellapsed = duration_cast<microseconds>(now - startTimePreDraw);
-				drawParam->timeStats()->addRecord("Schema", schemaId(), "preDrawEvent", ellapsed);
+				auto elapsed = duration_cast<microseconds>(now - startTimePreDraw);
+				drawParam->timeStats()->addRecord("Schema", schemaId(), "preDrawEvent", elapsed);
 			}
 		}
 

@@ -1,20 +1,22 @@
 #include "SimCommandTest_LM5_LM6.h"
+
+#include <Simulator/SimConsoleLogFile.h>
+
+#include "../../libs/Simulator/SimCommandProcessor_LM5_LM6.h"
+#include "../../libs/Simulator/SimDeviceEmulator.h"
+#include "../../libs/Simulator/SimException.h"
+#include "../../libs/Simulator/SimulatorPrivate.h"
+
 #include <QtTest>
-#include <algorithm>
-#include "../../Simulator/Simulator.h"
-#include "../../Simulator/SimConsoleLogFile.h"
-#include "../../Simulator/SimDeviceEmulator.h"
-#include "../../Simulator/SimException.h"
 
 
-SimCommandTest_LM5_LM6::SimCommandTest_LM5_LM6()
-{
-}
+SimCommandTest_LM5_LM6::SimCommandTest_LM5_LM6() = default;
+SimCommandTest_LM5_LM6::~SimCommandTest_LM5_LM6() = default;
 
 void SimCommandTest_LM5_LM6::initTestCase()
 {
 	Sim::ConsoleLogFile consoleLog;
-	Sim::Simulator simulator{&consoleLog, false, nullptr};
+	Sim::SimulatorPrivate simulator{&consoleLog, false, nullptr};
 
 	m_device = std::make_unique<Sim::DeviceEmulator>(&simulator);
 
@@ -37,7 +39,8 @@ void SimCommandTest_LM5_LM6::initTestCase()
 
 	// Create specific CommandProcessor
 	//
-	Sim::CommandProcessor_LM5_LM6* inst = dynamic_cast<Sim::CommandProcessor_LM5_LM6*>(Sim::CommandProcessor::createInstance(m_device.get()));
+	Sim::CommandProcessor_LM5_LM6* inst =
+		dynamic_cast<Sim::CommandProcessor_LM5_LM6*>(Sim::CommandProcessor::createInstance(m_device.get()));
 	m_cp.reset(inst);
 
 	QVERIFY(m_cp);
@@ -68,13 +71,9 @@ void SimCommandTest_LM5_LM6::cleanupTestCase()
 	m_cp.reset();
 }
 
-void SimCommandTest_LM5_LM6::init()
-{
-}
+void SimCommandTest_LM5_LM6::init() {}
 
-void SimCommandTest_LM5_LM6::cleanup()
-{
-}
+void SimCommandTest_LM5_LM6::cleanup() {}
 
 // Test command nop, opcode 1
 //
@@ -83,10 +82,10 @@ void SimCommandTest_LM5_LM6::test_command_nop()
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(0x0040);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
-	rc.w0 = qToBigEndian<quint16>(1 << 6);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>(1 << 6); // CommandOpCode
 
 	try
 	{
@@ -123,10 +122,10 @@ void SimCommandTest_LM5_LM6::test_command_reset()
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(0x0060);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
-	rc.w0 = qToBigEndian<quint16>((1 << 6) | 0b100000);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>((1 << 6) | 0b100000); // CommandOpCode
 
 	try
 	{
@@ -156,7 +155,7 @@ void SimCommandTest_LM5_LM6::test_command_reset()
 	{
 		QFAIL("");
 	}
-	
+
 	return;
 }
 
@@ -168,10 +167,10 @@ void SimCommandTest_LM5_LM6::test_command_set()
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(0x0050);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
-	rc.w0 = qToBigEndian<quint16>((1 << 6) | 0b010000);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>((1 << 6) | 0b010000); // CommandOpCode
 
 	try
 	{
@@ -213,10 +212,10 @@ void SimCommandTest_LM5_LM6::test_command_or()
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(0x0070);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
-	rc.w0 = qToBigEndian<quint16>((1 << 6) | 0b110000);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>((1 << 6) | 0b110000); // CommandOpCode
 
 	try
 	{
@@ -241,7 +240,7 @@ void SimCommandTest_LM5_LM6::test_command_or()
 		m_device->setAcc(0xFFFF);
 		m_cp->runCommand(command);
 		QCOMPARE(m_device->acc(), 1);
-		
+
 		m_device->setAcc(0x8000);
 		m_cp->runCommand(command);
 		QCOMPARE(m_device->acc(), 1);
@@ -270,10 +269,10 @@ void SimCommandTest_LM5_LM6::test_command_and()
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(0x0048);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
-	rc.w0 = qToBigEndian<quint16>((1 << 6) | 0b001000);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>((1 << 6) | 0b001000); // CommandOpCode
 
 	try
 	{
@@ -327,10 +326,10 @@ void SimCommandTest_LM5_LM6::test_command_not()
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(0x0068);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
-	rc.w0 = qToBigEndian<quint16>((1 << 6) | 0b101000);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>((1 << 6) | 0b101000); // CommandOpCode
 
 	try
 	{
@@ -350,7 +349,7 @@ void SimCommandTest_LM5_LM6::test_command_not()
 	{
 		m_device->setAcc(0xABCD);
 		m_cp->runCommand(command);
-		QCOMPARE(m_device->acc(), 0x5432);	// ~0xABCD = 0x5432
+		QCOMPARE(m_device->acc(), 0x5432); // ~0xABCD = 0x5432
 
 		m_device->setAcc(0x8000);
 		m_cp->runCommand(command);
@@ -384,10 +383,10 @@ void SimCommandTest_LM5_LM6::test_command_lshift0()
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(0x0058);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
-	rc.w0 = qToBigEndian<quint16>((1 << 6) | 0b011000);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>((1 << 6) | 0b011000); // CommandOpCode
 
 	try
 	{
@@ -437,10 +436,10 @@ void SimCommandTest_LM5_LM6::test_command_lshift1()
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(0x0078);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
-	rc.w0 = qToBigEndian<quint16>((1 << 6) | 0b111000);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>((1 << 6) | 0b111000); // CommandOpCode
 
 	try
 	{
@@ -494,25 +493,25 @@ void SimCommandTest_LM5_LM6::test_command_lshift1()
 //
 void SimCommandTest_LM5_LM6::test_command_startafb()
 {
-    const quint16 opcode = 2;
-    const quint16 afbOpCode = 1;
-    const quint16 afbInstance = 0;
+	const quint16 opcode = 2;
+	const quint16 afbOpCode = 1;
+	const quint16 afbInstance = 0;
 
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(opcode << 6);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
 
-	rc.w0 = qToBigEndian<quint16>((opcode << 6) | afbOpCode);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>((opcode << 6) | afbOpCode); // CommandOpCode
 	rc.w1 = qToBigEndian<quint16>(afbInstance << 6);
 
 	m_device->m_plainAppLogic.setRawData(rc.all.data(), sizeof(rc));
 
 	try
 	{
-		m_cp->parse_startafb(&command);				// <<<<<<< PARSE
+		m_cp->parse_startafb(&command); // <<<<<<< PARSE
 
 		m_cp->setCommandFuncPtr(&command);
 
@@ -548,10 +547,10 @@ void SimCommandTest_LM5_LM6::test_command_stop()
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(0x00C0);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
-	rc.w0 = qToBigEndian<quint16>(3 << 6);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>(3 << 6); // CommandOpCode
 
 	try
 	{
@@ -570,11 +569,11 @@ void SimCommandTest_LM5_LM6::test_command_stop()
 	try
 	{
 		m_device->setPhase(Sim::CyclePhase::IdrPhase);
-		m_cp->runCommand(command);		// IDS->ALP
+		m_cp->runCommand(command); // IDS->ALP
 		QCOMPARE(m_device->phase(), Sim::CyclePhase::AlpPhase);
 
 		m_device->setPhase(Sim::CyclePhase::AlpPhase);
-		m_cp->runCommand(command);		// IDT->ODT
+		m_cp->runCommand(command); // IDT->ODT
 		QCOMPARE(m_device->phase(), Sim::CyclePhase::ODT);
 	}
 	catch (...)
@@ -585,14 +584,16 @@ void SimCommandTest_LM5_LM6::test_command_stop()
 	try
 	{
 		m_device->setPhase(Sim::CyclePhase::ST);
-		m_cp->runCommand(command);		// ST->Exception
+		m_cp->runCommand(command); // ST->Exception
 		QVERIFY(false);
-	} catch (const Sim::SimException& e)
+	}
+	catch (const Sim::SimException& e)
 	{
 		// This exception is expected
 		//
 		Q_UNUSED(e)
-	} catch (...)
+	}
+	catch (...)
 	{
 		QFAIL("Unexpected execptiom STOP command");
 	}
@@ -600,14 +601,16 @@ void SimCommandTest_LM5_LM6::test_command_stop()
 	try
 	{
 		m_device->setPhase(Sim::CyclePhase::ODT);
-		m_cp->runCommand(command);		// ODT->Exception
+		m_cp->runCommand(command); // ODT->Exception
 		QVERIFY(false);
-	} catch (const Sim::SimException& e)
+	}
+	catch (const Sim::SimException& e)
 	{
 		// This exception is expected
 		//
 		Q_UNUSED(e)
-	} catch (...)
+	}
+	catch (...)
 	{
 		QFAIL("Unexpected execptiom STOP command");
 	}
@@ -621,19 +624,19 @@ void SimCommandTest_LM5_LM6::test_command_stop()
 //
 void SimCommandTest_LM5_LM6::test_command_mov()
 {
-    const quint16 opCode = 4;
+	const quint16 opCode = 4;
 
-    quint16 appLogicWordDataOffset = AppLogicWordDataOffset;
-    const quint16 dst = appLogicWordDataOffset + 10u;
-    const quint16 src = AppLogicWordDataOffset + 20u;
+	quint16 appLogicWordDataOffset = AppLogicWordDataOffset;
+	const quint16 dst = appLogicWordDataOffset + 10u;
+	const quint16 src = AppLogicWordDataOffset + 20u;
 
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(opCode << 6);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
-	rc.w0 = qToBigEndian<quint16>(opCode << 6);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>(opCode << 6); // CommandOpCode
 	rc.w1 = qToBigEndian(dst);
 	rc.w2 = qToBigEndian(src);
 
@@ -641,7 +644,7 @@ void SimCommandTest_LM5_LM6::test_command_mov()
 
 	try
 	{
-		m_cp->parse_mov(&command);				// <<<<<<< PARSE
+		m_cp->parse_mov(&command); // <<<<<<< PARSE
 		m_cp->setCommandFuncPtr(&command);
 
 		QCOMPARE(command.m_size, 3);
@@ -687,17 +690,17 @@ void SimCommandTest_LM5_LM6::test_command_mov_addr_acc()
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand((opCode << 6) | opExt);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
-	rc.w0 = qToBigEndian<quint16>((opCode << 6) | opExt);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>((opCode << 6) | opExt); // CommandOpCode
 	rc.w1 = qToBigEndian(dst);
 
 	m_device->m_plainAppLogic.setRawData(rc.all.data(), sizeof(rc));
 
 	try
 	{
-		m_cp->parse_mov_addr_acc(&command);				// <<<<<<< PARSE
+		m_cp->parse_mov_addr_acc(&command); // <<<<<<< PARSE
 		m_cp->setCommandFuncPtr(&command);
 
 		QCOMPARE(command.m_size, 2);
@@ -755,17 +758,17 @@ void SimCommandTest_LM5_LM6::test_command_mov_acc_addr()
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand((opCode << 6) | opExt);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
-	rc.w0 = qToBigEndian<quint16>((opCode << 6) | opExt);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>((opCode << 6) | opExt); // CommandOpCode
 	rc.w1 = qToBigEndian(src);
 
 	m_device->m_plainAppLogic.setRawData(rc.all.data(), sizeof(rc));
 
 	try
 	{
-		m_cp->parse_mov_acc_addr(&command);				// <<<<<<< PARSE
+		m_cp->parse_mov_acc_addr(&command); // <<<<<<< PARSE
 		m_cp->setCommandFuncPtr(&command);
 
 		QCOMPARE(command.m_size, 2);
@@ -813,18 +816,18 @@ void SimCommandTest_LM5_LM6::test_command_mov_acc_addr()
 //
 void SimCommandTest_LM5_LM6::test_command_movmem()
 {
-    const quint16 opCode = 5;
-    const quint16 dst = AppLogicWordDataOffset + 10;
-    const quint16 src = AppLogicWordDataOffset + 200;
-    const quint16 size = 16;
+	const quint16 opCode = 5;
+	const quint16 dst = AppLogicWordDataOffset + 10;
+	const quint16 src = AppLogicWordDataOffset + 200;
+	const quint16 size = 16;
 
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(opCode << 6);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
-	rc.w0 = qToBigEndian<quint16>(opCode << 6);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>(opCode << 6); // CommandOpCode
 	rc.w1 = qToBigEndian<quint16>(dst);
 	rc.w2 = qToBigEndian<quint16>(src);
 	rc.w3 = qToBigEndian<quint16>(size);
@@ -833,7 +836,7 @@ void SimCommandTest_LM5_LM6::test_command_movmem()
 
 	try
 	{
-		m_cp->parse_movmem(&command);				// <<<<<<< PARSE
+		m_cp->parse_movmem(&command); // <<<<<<< PARSE
 
 		m_cp->setCommandFuncPtr(&command);
 
@@ -888,10 +891,10 @@ void SimCommandTest_LM5_LM6::test_command_movc()
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(opCode << 6);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
-	rc.w0 = qToBigEndian<quint16>(opCode << 6);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>(opCode << 6); // CommandOpCode
 	rc.w1 = qToBigEndian(dst);
 	rc.w2 = qToBigEndian(data);
 
@@ -899,7 +902,7 @@ void SimCommandTest_LM5_LM6::test_command_movc()
 
 	try
 	{
-		m_cp->parse_movc(&command);				// <<<<<<< PARSE
+		m_cp->parse_movc(&command); // <<<<<<< PARSE
 
 		m_cp->setCommandFuncPtr(&command);
 
@@ -941,17 +944,17 @@ void SimCommandTest_LM5_LM6::test_command_movc_acc()
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand((opCode << 6) | opExt);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
-	rc.w0 = qToBigEndian<quint16>((opCode << 6) | opExt);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>((opCode << 6) | opExt); // CommandOpCode
 	rc.w1 = qToBigEndian(data);
 
 	m_device->m_plainAppLogic.setRawData(rc.all.data(), sizeof(rc));
 
 	try
 	{
-		m_cp->parse_movc_acc(&command);				// <<<<<<< PARSE
+		m_cp->parse_movc_acc(&command); // <<<<<<< PARSE
 
 		m_cp->setCommandFuncPtr(&command);
 
@@ -992,10 +995,10 @@ void SimCommandTest_LM5_LM6::test_command_movbc()
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(opCode << 6);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
-	rc.w0 = qToBigEndian<quint16>(opCode << 6);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>(opCode << 6); // CommandOpCode
 	rc.w1 = qToBigEndian(dst);
 	rc.w2 = qToBigEndian(data);
 	rc.w3 = qToBigEndian(bitNo);
@@ -1004,7 +1007,7 @@ void SimCommandTest_LM5_LM6::test_command_movbc()
 
 	try
 	{
-		m_cp->parse_movbc(&command);				// <<<<<<< PARSE
+		m_cp->parse_movbc(&command); // <<<<<<< PARSE
 
 		m_cp->setCommandFuncPtr(&command);
 
@@ -1046,19 +1049,19 @@ void SimCommandTest_LM5_LM6::test_command_movbc()
 void SimCommandTest_LM5_LM6::test_command_wrfb()
 {
 	const quint16 opcode = 8;
-    const quint16 src = AppLogicWordDataOffset + 200u;
-    const quint16 afbOpCode = 1;
-    const quint16 afbInstance = 0;
-    const quint16 afbPinOpCode = 1;
+	const quint16 src = AppLogicWordDataOffset + 200u;
+	const quint16 afbOpCode = 1;
+	const quint16 afbInstance = 0;
+	const quint16 afbPinOpCode = 1;
 
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(opcode << 6);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
 
-	rc.w0 = qToBigEndian<quint16>((opcode << 6) | afbOpCode);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>((opcode << 6) | afbOpCode); // CommandOpCode
 	rc.w1 = qToBigEndian<quint16>((afbInstance << 6) | afbPinOpCode);
 	rc.w2 = qToBigEndian(src);
 
@@ -1066,7 +1069,7 @@ void SimCommandTest_LM5_LM6::test_command_wrfb()
 
 	try
 	{
-		m_cp->parse_wrfb(&command);				// <<<<<<< PARSE
+		m_cp->parse_wrfb(&command); // <<<<<<< PARSE
 
 		m_cp->setCommandFuncPtr(&command);
 
@@ -1090,7 +1093,8 @@ void SimCommandTest_LM5_LM6::test_command_wrfb()
 
 		m_cp->runCommand(command);
 
-		quint16 afbData = m_device->afbComponentInstance(command.m_afbOpCode, command.m_afbInstance)->param(command.m_afbPinOpCode)->wordValue();
+		quint16 afbData =
+			m_device->afbComponentInstance(command.m_afbOpCode, command.m_afbInstance)->param(command.m_afbPinOpCode)->wordValue();
 
 		QCOMPARE(afbData, 0x123A);
 	}
@@ -1107,20 +1111,20 @@ void SimCommandTest_LM5_LM6::test_command_wrfb()
 //
 void SimCommandTest_LM5_LM6::test_command_rdfb()
 {
-    const quint16 opcode = 9;
-    const quint16 dst = AppLogicWordDataOffset + 15u;
-    const quint16 afbOpCode = 1;
-    const quint16 afbInstance = 0;
-    const quint16 afbPinOpCode = 1;
+	const quint16 opcode = 9;
+	const quint16 dst = AppLogicWordDataOffset + 15u;
+	const quint16 afbOpCode = 1;
+	const quint16 afbInstance = 0;
+	const quint16 afbPinOpCode = 1;
 
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(opcode << 6);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
 
-	rc.w0 = qToBigEndian<quint16>((opcode << 6) | afbOpCode);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>((opcode << 6) | afbOpCode); // CommandOpCode
 	rc.w1 = qToBigEndian<quint16>((afbInstance << 6) | afbPinOpCode);
 	rc.w2 = qToBigEndian(dst);
 
@@ -1128,7 +1132,7 @@ void SimCommandTest_LM5_LM6::test_command_rdfb()
 
 	try
 	{
-		m_cp->parse_rdfb(&command);				// <<<<<<< PARSE
+		m_cp->parse_rdfb(&command); // <<<<<<< PARSE
 
 		m_cp->setCommandFuncPtr(&command);
 
@@ -1167,16 +1171,16 @@ void SimCommandTest_LM5_LM6::test_command_rdfb()
 //
 void SimCommandTest_LM5_LM6::test_command_wrfbc()
 {
-    const quint16 opCode = 10;
-    const quint16 afbOpCode = 10;
-    const quint16 afbInstance = 1;
-    const quint16 afbPinOpCode = 1;
-    const quint16 data = 0x59BA;
+	const quint16 opCode = 10;
+	const quint16 afbOpCode = 10;
+	const quint16 afbInstance = 1;
+	const quint16 afbPinOpCode = 1;
+	const quint16 data = 0x59BA;
 
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(opCode << 6);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
 
@@ -1188,7 +1192,7 @@ void SimCommandTest_LM5_LM6::test_command_wrfbc()
 
 	try
 	{
-		m_cp->parse_wrfbc(&command);				// <<<<<<< PARSE
+		m_cp->parse_wrfbc(&command); // <<<<<<< PARSE
 
 		m_cp->setCommandFuncPtr(&command);
 
@@ -1209,7 +1213,8 @@ void SimCommandTest_LM5_LM6::test_command_wrfbc()
 	{
 		m_cp->runCommand(command);
 
-		quint16 afbData = m_device->afbComponentInstance(command.m_afbOpCode, command.m_afbInstance)->param(command.m_afbPinOpCode)->wordValue();
+		quint16 afbData =
+			m_device->afbComponentInstance(command.m_afbOpCode, command.m_afbInstance)->param(command.m_afbPinOpCode)->wordValue();
 		QCOMPARE(afbData, data);
 	}
 	catch (...)
@@ -1226,20 +1231,20 @@ void SimCommandTest_LM5_LM6::test_command_wrfbc()
 void SimCommandTest_LM5_LM6::test_command_wrfbb()
 {
 	const quint16 opcode = 11;
-    const quint16 src = AppLogicWordDataOffset + 90u;
+	const quint16 src = AppLogicWordDataOffset + 90u;
 	const quint16 bitNo = 5;
-    const quint16 afbOpCode = 4;
-    const quint16 afbInstance = 99;
-    const quint16 afbPinOpCode = 6;
+	const quint16 afbOpCode = 4;
+	const quint16 afbInstance = 99;
+	const quint16 afbPinOpCode = 6;
 
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(opcode << 6);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
 
-	rc.w0 = qToBigEndian<quint16>((opcode << 6) | afbOpCode);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>((opcode << 6) | afbOpCode); // CommandOpCode
 	rc.w1 = qToBigEndian<quint16>((afbInstance << 6) | afbPinOpCode);
 	rc.w2 = qToBigEndian<quint16>(src);
 	rc.w3 = qToBigEndian<quint16>(bitNo);
@@ -1248,7 +1253,7 @@ void SimCommandTest_LM5_LM6::test_command_wrfbb()
 
 	try
 	{
-		m_cp->parse_wrfbb(&command);				// <<<<<<< PARSE
+		m_cp->parse_wrfbb(&command); // <<<<<<< PARSE
 
 		m_cp->setCommandFuncPtr(&command);
 
@@ -1275,7 +1280,8 @@ void SimCommandTest_LM5_LM6::test_command_wrfbb()
 
 		m_cp->runCommand(command);
 
-		quint16 afbData = m_device->afbComponentInstance(command.m_afbOpCode, command.m_afbInstance)->param(command.m_afbPinOpCode)->wordValue();
+		quint16 afbData =
+			m_device->afbComponentInstance(command.m_afbOpCode, command.m_afbInstance)->param(command.m_afbPinOpCode)->wordValue();
 		QCOMPARE(afbData, 1);
 
 		// Write 0 and check
@@ -1287,7 +1293,6 @@ void SimCommandTest_LM5_LM6::test_command_wrfbb()
 
 		afbData = m_device->afbComponentInstance(command.m_afbOpCode, command.m_afbInstance)->param(command.m_afbPinOpCode)->wordValue();
 		QCOMPARE(afbData, 0);
-
 	}
 	catch (...)
 	{
@@ -1302,21 +1307,21 @@ void SimCommandTest_LM5_LM6::test_command_wrfbb()
 //
 void SimCommandTest_LM5_LM6::test_command_rdfbb()
 {
-    const quint16 opcode = 12;
-    const quint16 dst = AppLogicWordDataOffset + 15u;
-    const quint16 bitNo = 5;
-    const quint16 afbOpCode = 4;
-    const quint16 afbInstance = 12;
-    const quint16 afbPinOpCode = 6;
+	const quint16 opcode = 12;
+	const quint16 dst = AppLogicWordDataOffset + 15u;
+	const quint16 bitNo = 5;
+	const quint16 afbOpCode = 4;
+	const quint16 afbInstance = 12;
+	const quint16 afbPinOpCode = 6;
 
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(opcode << 6);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
 
-	rc.w0 = qToBigEndian<quint16>((opcode << 6) | afbOpCode);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>((opcode << 6) | afbOpCode); // CommandOpCode
 	rc.w1 = qToBigEndian<quint16>((afbInstance << 6) | afbPinOpCode);
 	rc.w2 = qToBigEndian<quint16>(dst);
 	rc.w3 = qToBigEndian<quint16>(bitNo);
@@ -1325,7 +1330,7 @@ void SimCommandTest_LM5_LM6::test_command_rdfbb()
 
 	try
 	{
-		m_cp->parse_rdfbb(&command);				// <<<<<<< PARSE
+		m_cp->parse_rdfbb(&command); // <<<<<<< PARSE
 
 		m_cp->setCommandFuncPtr(&command);
 
@@ -1369,20 +1374,20 @@ void SimCommandTest_LM5_LM6::test_command_rdfbb()
 //
 void SimCommandTest_LM5_LM6::test_command_rdfbcmp()
 {
-    const quint16 opCode = 13;
-    const quint16 afbOpCode = 4;
-    const quint16 afbInstance = 11;
-    const quint16 afbPinOpCode = 9;
-    const quint16 data = 0x9871;
+	const quint16 opCode = 13;
+	const quint16 afbOpCode = 4;
+	const quint16 afbInstance = 11;
+	const quint16 afbPinOpCode = 9;
+	const quint16 data = 0x9871;
 
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(opCode << 6);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
 
-	rc.w0 = qToBigEndian<quint16>((opCode << 6) | afbOpCode);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>((opCode << 6) | afbOpCode); // CommandOpCode
 	rc.w1 = qToBigEndian<quint16>((afbInstance << 6) | afbPinOpCode);
 	rc.w2 = qToBigEndian(data);
 
@@ -1390,7 +1395,7 @@ void SimCommandTest_LM5_LM6::test_command_rdfbcmp()
 
 	try
 	{
-		m_cp->parse_rdfbcmp(&command);				// <<<<<<< PARSE
+		m_cp->parse_rdfbcmp(&command); // <<<<<<< PARSE
 
 		m_cp->setCommandFuncPtr(&command);
 
@@ -1444,18 +1449,18 @@ void SimCommandTest_LM5_LM6::test_command_rdfbcmp()
 //
 void SimCommandTest_LM5_LM6::test_command_setmem()
 {
-    const quint16 opCode = 14;
-    const quint16 dst = AppLogicWordDataOffset + 10;
-    const quint16 data = 0x9876;
-    const quint16 size = 300;
+	const quint16 opCode = 14;
+	const quint16 dst = AppLogicWordDataOffset + 10;
+	const quint16 data = 0x9876;
+	const quint16 size = 300;
 
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(opCode << 6);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
-	rc.w0 = qToBigEndian<quint16>(opCode << 6);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>(opCode << 6); // CommandOpCode
 	rc.w1 = qToBigEndian<quint16>(dst);
 	rc.w2 = qToBigEndian<quint16>(data);
 	rc.w3 = qToBigEndian<quint16>(size);
@@ -1464,7 +1469,7 @@ void SimCommandTest_LM5_LM6::test_command_setmem()
 
 	try
 	{
-		m_cp->parse_movmem(&command);				// <<<<<<< PARSE
+		m_cp->parse_movmem(&command); // <<<<<<< PARSE
 
 		m_cp->setCommandFuncPtr(&command);
 
@@ -1503,20 +1508,20 @@ void SimCommandTest_LM5_LM6::test_command_setmem()
 //
 void SimCommandTest_LM5_LM6::test_command_movb()
 {
-    const quint16 opCode = 15;
-    const quint16 src = AppLogicWordDataOffset + 55u;
+	const quint16 opCode = 15;
+	const quint16 src = AppLogicWordDataOffset + 55u;
 	const quint16 srcBitNo = 15;
-    const quint16 dst = AppLogicWordDataOffset + 0u;
+	const quint16 dst = AppLogicWordDataOffset + 0u;
 	const quint16 dstBitNo = 2;
 
 
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(opCode << 6);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
-	rc.w0 = qToBigEndian<quint16>(opCode << 6);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>(opCode << 6); // CommandOpCode
 	rc.w1 = qToBigEndian<quint16>(dst);
 	rc.w2 = qToBigEndian<quint16>(src);
 	rc.w3 = qToBigEndian<quint16>((dstBitNo << 8) | srcBitNo);
@@ -1525,7 +1530,7 @@ void SimCommandTest_LM5_LM6::test_command_movb()
 
 	try
 	{
-		m_cp->parse_movb(&command);				// <<<<<<< PARSE
+		m_cp->parse_movb(&command); // <<<<<<< PARSE
 		m_cp->setCommandFuncPtr(&command);
 
 		QCOMPARE(command.m_size, 4);
@@ -1583,17 +1588,17 @@ void SimCommandTest_LM5_LM6::test_command_movb_acc_addr()
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand((opCode << 6) | opExt);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
-	rc.w0 = qToBigEndian<quint16>((opCode << 6) | opExt | srcBitNo);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>((opCode << 6) | opExt | srcBitNo); // CommandOpCode
 	rc.w1 = qToBigEndian<quint16>(src);
 
 	m_device->m_plainAppLogic.setRawData(rc.all.data(), sizeof(rc));
 
 	try
 	{
-		m_cp->parse_movb_acc_addr(&command);				// <<<<<<< PARSE
+		m_cp->parse_movb_acc_addr(&command); // <<<<<<< PARSE
 		m_cp->setCommandFuncPtr(&command);
 
 		QCOMPARE(command.m_size, 2);
@@ -1661,17 +1666,17 @@ void SimCommandTest_LM5_LM6::test_command_movb_addr_acc()
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand((opCode << 6) | opExt);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
-	rc.w0 = qToBigEndian<quint16>((opCode << 6) | opExt | dstBitNo);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>((opCode << 6) | opExt | dstBitNo); // CommandOpCode
 	rc.w1 = qToBigEndian<quint16>(dst);
 
 	m_device->m_plainAppLogic.setRawData(rc.all.data(), sizeof(rc));
 
 	try
 	{
-		m_cp->parse_movb_addr_acc(&command);				// <<<<<<< PARSE
+		m_cp->parse_movb_addr_acc(&command); // <<<<<<< PARSE
 		m_cp->setCommandFuncPtr(&command);
 
 		QCOMPARE(command.m_size, 2);
@@ -1741,17 +1746,17 @@ void SimCommandTest_LM5_LM6::test_command_appstart()
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(opcode << 6);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
-	rc.w0 = qToBigEndian<quint16>(opcode << 6);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>(opcode << 6); // CommandOpCode
 	rc.w1 = qToBigEndian(addr);
 
 	m_device->m_plainAppLogic.setRawData(rc.all.data(), sizeof(rc));
 
 	try
 	{
-		m_cp->parse_appstart(&command);				// <<<<<<< PARSE
+		m_cp->parse_appstart(&command); // <<<<<<< PARSE
 		m_cp->setCommandFuncPtr(&command);
 
 		QCOMPARE(command.m_size, 2);
@@ -1792,10 +1797,10 @@ void SimCommandTest_LM5_LM6::test_command_mov32()
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(opcode << 6);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
-	rc.w0 = qToBigEndian<quint16>(opcode << 6);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>(opcode << 6); // CommandOpCode
 	rc.w1 = qToBigEndian(dst);
 	rc.w2 = qToBigEndian(src);
 
@@ -1803,7 +1808,7 @@ void SimCommandTest_LM5_LM6::test_command_mov32()
 
 	try
 	{
-		m_cp->parse_mov32(&command);				// <<<<<<< PARSE
+		m_cp->parse_mov32(&command); // <<<<<<< PARSE
 		m_cp->setCommandFuncPtr(&command);
 
 		QCOMPARE(command.m_size, 3);
@@ -1846,10 +1851,10 @@ void SimCommandTest_LM5_LM6::test_command_movc32()
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(opcode << 6);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
-	rc.w0 = qToBigEndian<quint16>(opcode << 6);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>(opcode << 6); // CommandOpCode
 	rc.w1 = qToBigEndian(dst);
 	rc.dw23 = qToBigEndian(data);
 
@@ -1857,7 +1862,7 @@ void SimCommandTest_LM5_LM6::test_command_movc32()
 
 	try
 	{
-		m_cp->parse_movc32(&command);				// <<<<<<< PARSE
+		m_cp->parse_movc32(&command); // <<<<<<< PARSE
 
 		m_cp->setCommandFuncPtr(&command);
 
@@ -1891,20 +1896,20 @@ void SimCommandTest_LM5_LM6::test_command_movc32()
 //
 void SimCommandTest_LM5_LM6::test_command_wrfb32()
 {
-    const quint16 opcode = 20;
-    const quint16 src = AppLogicWordDataOffset + 200u;
-    const quint16 afbOpCode = 1;
-    const quint16 afbInstance = 0;
-    const quint16 afbPinOpCode = 1;
+	const quint16 opcode = 20;
+	const quint16 src = AppLogicWordDataOffset + 200u;
+	const quint16 afbOpCode = 1;
+	const quint16 afbInstance = 0;
+	const quint16 afbPinOpCode = 1;
 
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(opcode << 6);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
 
-	rc.w0 = qToBigEndian<quint16>((opcode << 6) | afbOpCode);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>((opcode << 6) | afbOpCode); // CommandOpCode
 	rc.w1 = qToBigEndian<quint16>((afbInstance << 6) | afbPinOpCode);
 	rc.w2 = qToBigEndian(src);
 
@@ -1912,7 +1917,7 @@ void SimCommandTest_LM5_LM6::test_command_wrfb32()
 
 	try
 	{
-		m_cp->parse_wrfb(&command);				// <<<<<<< PARSE
+		m_cp->parse_wrfb(&command); // <<<<<<< PARSE
 
 		m_cp->setCommandFuncPtr(&command);
 
@@ -1936,7 +1941,8 @@ void SimCommandTest_LM5_LM6::test_command_wrfb32()
 
 		m_cp->runCommand(command);
 
-		quint32 afbData = m_device->afbComponentInstance(command.m_afbOpCode, command.m_afbInstance)->param(command.m_afbPinOpCode)->dwordValue();
+		quint32 afbData =
+			m_device->afbComponentInstance(command.m_afbOpCode, command.m_afbInstance)->param(command.m_afbPinOpCode)->dwordValue();
 		QCOMPARE(afbData, static_cast<quint32>(0x123ABCAD));
 	}
 	catch (...)
@@ -1952,20 +1958,20 @@ void SimCommandTest_LM5_LM6::test_command_wrfb32()
 //
 void SimCommandTest_LM5_LM6::test_command_rdfb32()
 {
-    const quint16 opcode = 21;
-    const quint16 dst = AppLogicWordDataOffset + 15u;
-    const quint16 afbOpCode = 4;
-    const quint16 afbInstance = 7;
-    const quint16 afbPinOpCode = 3;
+	const quint16 opcode = 21;
+	const quint16 dst = AppLogicWordDataOffset + 15u;
+	const quint16 afbOpCode = 4;
+	const quint16 afbInstance = 7;
+	const quint16 afbPinOpCode = 3;
 
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(opcode << 6);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
 
-	rc.w0 = qToBigEndian<quint16>((opcode << 6) | afbOpCode);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>((opcode << 6) | afbOpCode); // CommandOpCode
 	rc.w1 = qToBigEndian<quint16>((afbInstance << 6) | afbPinOpCode);
 	rc.w2 = qToBigEndian(dst);
 
@@ -1973,7 +1979,7 @@ void SimCommandTest_LM5_LM6::test_command_rdfb32()
 
 	try
 	{
-		m_cp->parse_rdfb32(&command);				// <<<<<<< PARSE
+		m_cp->parse_rdfb32(&command); // <<<<<<< PARSE
 
 		m_cp->setCommandFuncPtr(&command);
 
@@ -2013,20 +2019,20 @@ void SimCommandTest_LM5_LM6::test_command_rdfb32()
 //
 void SimCommandTest_LM5_LM6::test_command_wrfbc32()
 {
-    const quint16 opCode = 22;
-    const quint16 afbOpCode = 22;
-    const quint16 afbInstance = 1;
-    const quint16 afbPinOpCode = 1;
-    const quint32 data = 0x59BA3214;
+	const quint16 opCode = 22;
+	const quint16 afbOpCode = 22;
+	const quint16 afbInstance = 1;
+	const quint16 afbPinOpCode = 1;
+	const quint32 data = 0x59BA3214;
 
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(opCode << 6);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
 
-	rc.w0 = qToBigEndian<quint16>((opCode << 6) | afbOpCode);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>((opCode << 6) | afbOpCode); // CommandOpCode
 	rc.w1 = qToBigEndian<quint16>((afbInstance << 6) | afbPinOpCode);
 	rc.dw23 = qToBigEndian<quint32>(data);
 
@@ -2034,7 +2040,7 @@ void SimCommandTest_LM5_LM6::test_command_wrfbc32()
 
 	try
 	{
-		m_cp->parse_wrfbc32(&command);				// <<<<<<< PARSE
+		m_cp->parse_wrfbc32(&command); // <<<<<<< PARSE
 
 		m_cp->setCommandFuncPtr(&command);
 
@@ -2055,7 +2061,8 @@ void SimCommandTest_LM5_LM6::test_command_wrfbc32()
 	{
 		m_cp->runCommand(command);
 
-		quint32 afbData = m_device->afbComponentInstance(command.m_afbOpCode, command.m_afbInstance)->param(command.m_afbPinOpCode)->dwordValue();
+		quint32 afbData =
+			m_device->afbComponentInstance(command.m_afbOpCode, command.m_afbInstance)->param(command.m_afbPinOpCode)->dwordValue();
 		QCOMPARE(afbData, data);
 	}
 	catch (...)
@@ -2071,20 +2078,20 @@ void SimCommandTest_LM5_LM6::test_command_wrfbc32()
 //
 void SimCommandTest_LM5_LM6::test_command_rdfbcmp32()
 {
-    const quint16 opCode = 23;
-    const quint16 afbOpCode = 4;
-    const quint16 afbInstance = 11;
-    const quint16 afbPinOpCode = 9;
-    const quint32 data = 0x9871ABCD;
+	const quint16 opCode = 23;
+	const quint16 afbOpCode = 4;
+	const quint16 afbInstance = 11;
+	const quint16 afbPinOpCode = 9;
+	const quint32 data = 0x9871ABCD;
 
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(opCode << 6);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
 
-	rc.w0 = qToBigEndian<quint16>((opCode << 6) | afbOpCode);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>((opCode << 6) | afbOpCode); // CommandOpCode
 	rc.w1 = qToBigEndian<quint16>((afbInstance << 6) | afbPinOpCode);
 	rc.dw23 = qToBigEndian<quint32>(data);
 
@@ -2092,7 +2099,7 @@ void SimCommandTest_LM5_LM6::test_command_rdfbcmp32()
 
 	try
 	{
-		m_cp->parse_rdfbcmp32(&command);				// <<<<<<< PARSE
+		m_cp->parse_rdfbcmp32(&command); // <<<<<<< PARSE
 
 		m_cp->setCommandFuncPtr(&command);
 
@@ -2145,17 +2152,17 @@ void SimCommandTest_LM5_LM6::test_command_rdfbcmp32()
 //
 void SimCommandTest_LM5_LM6::test_command_movcmpf()
 {
-    const quint16 opCode = 24;
-    const quint16 dst = AppLogicWordDataOffset + 10u;
+	const quint16 opCode = 24;
+	const quint16 dst = AppLogicWordDataOffset + 10u;
 	const quint16 bitNo = 13;
 
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(opCode << 6);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
-	rc.w0 = qToBigEndian<quint16>(opCode << 6);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>(opCode << 6); // CommandOpCode
 	rc.w1 = qToBigEndian<quint16>(dst);
 	rc.w2 = qToBigEndian<quint16>(bitNo);
 
@@ -2163,7 +2170,7 @@ void SimCommandTest_LM5_LM6::test_command_movcmpf()
 
 	try
 	{
-		m_cp->parse_movcmpf(&command);				// <<<<<<< PARSE
+		m_cp->parse_movcmpf(&command); // <<<<<<< PARSE
 		m_cp->setCommandFuncPtr(&command);
 
 		QCOMPARE(command.m_size, 3);
@@ -2222,10 +2229,10 @@ void SimCommandTest_LM5_LM6::test_command_pmov()
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(opcode << 6);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
-	rc.w0 = qToBigEndian<quint16>(opcode << 6);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>(opcode << 6); // CommandOpCode
 	rc.w1 = qToBigEndian(dst);
 	rc.w2 = qToBigEndian(src);
 
@@ -2233,7 +2240,7 @@ void SimCommandTest_LM5_LM6::test_command_pmov()
 
 	try
 	{
-		m_cp->parse_pmov(&command);				// <<<<<<< PARSE
+		m_cp->parse_pmov(&command); // <<<<<<< PARSE
 		m_cp->setCommandFuncPtr(&command);
 
 		QCOMPARE(command.m_size, 3);
@@ -2276,10 +2283,10 @@ void SimCommandTest_LM5_LM6::test_command_pmov32()
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(opcode << 6);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
-	rc.w0 = qToBigEndian<quint16>(opcode << 6);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>(opcode << 6); // CommandOpCode
 	rc.w1 = qToBigEndian(dst);
 	rc.w2 = qToBigEndian(src);
 
@@ -2287,7 +2294,7 @@ void SimCommandTest_LM5_LM6::test_command_pmov32()
 
 	try
 	{
-		m_cp->parse_pmov32(&command);				// <<<<<<< PARSE
+		m_cp->parse_pmov32(&command); // <<<<<<< PARSE
 		m_cp->setCommandFuncPtr(&command);
 
 		QCOMPARE(command.m_size, 3);
@@ -2323,18 +2330,18 @@ void SimCommandTest_LM5_LM6::test_command_pmov32()
 //
 void SimCommandTest_LM5_LM6::test_command_fillb()
 {
-    const quint16 opCode = 27;
-    const quint16 dst = AppLogicWordDataOffset + 90u;
-    const quint16 src = AppLogicWordDataOffset + 77u;
-    const quint16 srcBitNo = 7;
+	const quint16 opCode = 27;
+	const quint16 dst = AppLogicWordDataOffset + 90u;
+	const quint16 src = AppLogicWordDataOffset + 77u;
+	const quint16 srcBitNo = 7;
 
 	// Parse
 	//
 	LmCommand lmc = lmDescriptionCommand(opCode << 6);
-	Sim::DeviceCommand command{lmc};
+	Sim::EmulatorCommand command{lmc};
 
 	RawCommand rc;
-	rc.w0 = qToBigEndian<quint16>(opCode << 6);		// CommandOpCode
+	rc.w0 = qToBigEndian<quint16>(opCode << 6); // CommandOpCode
 	rc.w1 = qToBigEndian<quint16>(dst);
 	rc.w2 = qToBigEndian<quint16>(src);
 	rc.w3 = qToBigEndian<quint16>(srcBitNo);
@@ -2343,7 +2350,7 @@ void SimCommandTest_LM5_LM6::test_command_fillb()
 
 	try
 	{
-		m_cp->parse_fillb(&command);				// <<<<<<< PARSE
+		m_cp->parse_fillb(&command); // <<<<<<< PARSE
 
 		m_cp->setCommandFuncPtr(&command);
 
@@ -2395,5 +2402,3 @@ LmCommand SimCommandTest_LM5_LM6::lmDescriptionCommand(int code)
 {
 	return m_device->lmDescription().command(code);
 }
-
-

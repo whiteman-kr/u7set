@@ -2286,7 +2286,7 @@ void TuningFilterStorage::checkFilterSignals(const std::vector<Hash>& signalHash
 	m_root->checkSignals(signalHashes, notFoundSignalsAndFilters);
 }
 
-void TuningFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalManager& objects,
+void TuningFilterStorage::createSignalsAndEqipmentHashes(const ClientLib::TuningSignalManager& objects,
                                                          const std::vector<Hash>& allHashes,
                                                          TuningFilter* filter,
                                                          TuningFilter::Source source)

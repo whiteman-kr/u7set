@@ -7744,7 +7744,7 @@ namespace Builder
 
 	/// IssueCode: ALC5201
 	///
-	/// IssueType: Error
+	/// IssueType: Warning
 	///
 	/// Title:	   Reserved signal %1 used on schema %2.
 	///
@@ -7753,14 +7753,14 @@ namespace Builder
 	///		%2 SchemaID
 	///
 	/// Description:
-	///		Turn off Reserved property of signal.
+	///		Signal is marked as reserved and is being used in the logic schema.
 	///
-	void IssueLogger::errALC5201(QString appSignalID, QUuid itemUuid, QString schemaID)
+	void IssueLogger::wrnALC5201(QString appSignalID, QUuid itemUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, 5201, itemUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Warning0, 5201, itemUuid, schemaID);
 
-		LOG_ERROR(IssueType::AlCompiler, 5201,
-				  QString(tr("Reserved signal %1 used on schema %2.").arg(appSignalID).arg(schemaID)));
+		LOG_WARNING0(IssueType::AlCompiler, 5201, 
+					 QString(tr("Reserved signal %1 used on schema %2.").arg(appSignalID).arg(schemaID)));
 	}
 
 	/// IssueCode: ALC5202

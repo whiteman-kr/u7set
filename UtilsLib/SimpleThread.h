@@ -25,7 +25,6 @@ private:
 	friend class SimpleThread;
 };
 
-
 class SimpleThread : public QObject
 {
 	Q_OBJECT

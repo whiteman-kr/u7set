@@ -81,7 +81,7 @@ namespace Hardware
 	//
 	//
 	class DiagSignalTypeObject final : public PropertyObject,
-									   public Proto::ObjectSerialization<DiagSignalTypeObject, Proto::Envelope>,
+									   public Proto::ObjectSerialization<DiagSignalTypeObject>,
 									   public std::enable_shared_from_this<DiagSignalTypeObject>
 	{
 		Q_OBJECT
@@ -95,7 +95,7 @@ namespace Hardware
 		// Serialization
 		//
 	protected:
-		friend Proto::ObjectSerialization<DiagSignalTypeObject, Proto::Envelope>; // for call CreateObject from Proto::ObjectSerialization
+		friend Proto::ObjectSerialization<DiagSignalTypeObject>; // for call CreateObject from Proto::ObjectSerialization
 
 	public:
 		[[nodiscard]] static std::shared_ptr<DiagSignalTypeObject> CreateObject(QObject* parent = nullptr);

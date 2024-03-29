@@ -243,12 +243,17 @@ VduFontGenerator::~VduFontGenerator()
 
 void VduFontGenerator::onGenerateClicked()
 {
+
+	const QString genericExtension = "vdf";
+	const QString symbolExtension = "vds";
+	const QString textSymbolExtension = "vdst";
+
 	static QString lastDir{"."};
 
 	static QString lastFile;
 	if (lastFile.isEmpty() == true)
 	{
-		lastFile = tr("%1\\%2_%3.vduf").arg(lastDir).arg(m_font.family()).arg(m_font.pixelSize());
+		lastFile = tr("%1\\%2_%3.%4").arg(lastDir).arg(m_font.family()).arg(m_font.pixelSize()).arg(genericExtension);
 	} 
 	
 	if (m_generateDemoFiles->isChecked() == true)
@@ -263,7 +268,7 @@ void VduFontGenerator::onGenerateClicked()
 		}
 
 		lastDir = dir;
-		lastFile = tr("%1\\%2_%3.vduf").arg(lastDir).arg(m_font.family()).arg(m_font.pixelSize());
+		lastFile = tr("%1\\%2_%3.%4").arg(lastDir).arg(m_font.family()).arg(m_font.pixelSize()).arg(genericExtension);
 	}
 	else
 	{
@@ -307,14 +312,14 @@ void VduFontGenerator::onGenerateClicked()
 				return;
 			}
 
-			f = tr("%1\\%2.vdust").arg(lastDir).arg(fileNameSuffix);
+			f = tr("%1\\%2.%3").arg(lastDir).arg(fileNameSuffix).arg(textSymbolExtension);
 			if (s.saveToVdut(f) == false)
 			{
 				QMessageBox::critical(this, qAppName(), tr("Failed to save file: %1!").arg(f));
 				return;
 			}
 
-			f = tr("%1\\%2.vdusf").arg(lastDir).arg(fileNameSuffix);
+			f = tr("%1\\%2.%3").arg(lastDir).arg(fileNameSuffix).arg(symbolExtension);
 			if (s.saveToVdu(f) == false)
 			{
 				QMessageBox::critical(this, qAppName(), tr("Failed to save file: %1!").arg(f));

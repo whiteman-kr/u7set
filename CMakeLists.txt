@@ -116,7 +116,6 @@ add_subdirectory(UtilsLib)
 add_subdirectory(AppSignalLib)
 add_subdirectory(OnlineLib)
 add_subdirectory(ServiceLib)
-add_subdirectory(ClientLib)
 add_subdirectory(ReportLib)
 
 add_subdirectory(libs)
@@ -124,7 +123,6 @@ add_subdirectory(libs)
 add_subdirectory(TrendView)
 add_subdirectory(VFrame30)
 
-add_subdirectory(Simulator)
 add_subdirectory(SimulatorConsole)
 
 add_subdirectory(Builder)

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../Simulator/Simulator.h"
+#include <Simulator/Simulator.h>
 
 
 class SimOverridePane : public QWidget, protected HasDbController

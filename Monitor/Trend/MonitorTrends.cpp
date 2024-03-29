@@ -1,10 +1,11 @@
 #include "MonitorTrends.h"
 
-#include "../ClientLib/RtTrendTcpClient.h"
 #include "../TrendView/DialogChooseTrendSignals.h"
 #include "../TrendView/TrendSignalState.h"
 #include "../TrendView/TrendWidget.h"
 #include "../lib/ISignalHasTag.h"
+
+#include <ClientLib/RtTrendConnectionStatistics.h>
 
 std::list<MonitorTrendsWidget*> MonitorTrends::s_trendsList;
 
@@ -227,7 +228,7 @@ void MonitorTrendsWidget::timerEvent(QTimerEvent*)
 
 		// --
 		//
-		ClientLib::RtTrendTcpClient::Stat stat = m_realtimeDataProvider.statistics();
+		auto stat = m_realtimeDataProvider.statistics();
 
 		m_statusBarTextLabel->setText(stat.text);
 		m_statusBarQueueSizeLabel->setText("             ");
