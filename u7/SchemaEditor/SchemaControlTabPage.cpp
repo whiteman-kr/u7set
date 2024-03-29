@@ -2680,10 +2680,9 @@ std::shared_ptr<VFrame30::Schema> SchemaControlTabPage::createSchema(const DbFil
 		return {};
 	}
 
-	// If parent  or it's parent... is $root$/Schemas/ApplicatinLogic
+	// If parent  or it's parent... is $root$/Schemas/ApplicationLogic
 	// the create als
 	//
-
 	const std::map<int, std::function<std::shared_ptr<VFrame30::Schema>()>> createSchemaMap = {
 		{db()->systemFileId(DbDir::AppLogicDir), []() { return std::make_shared<VFrame30::LogicSchema>(); }},
 		{db()->systemFileId(DbDir::MonitorSchemasDir), []() { return std::make_shared<VFrame30::MonitorSchema>(); }},

@@ -1,13 +1,25 @@
-#include <stdint.h>
+// 29 Mar 2024 - Version 1.0 -  The first version of the file format.
+// 
+
+// SVDU schema file, extension *.vbs
+// Data stored in little-endian format.
+// The file is a binary file with the following high-level structure:
+// 1. Header
+// 2. SchemaItems
+// 3. Strings
+// 4. crc64
+//
+
 #include <stdbool.h>
+#include <stdint.h>
 
 // string_ref is an offset in a file to a string.
-// The string is a null terminated QChar string 
+// String consist of 16 bit size of string in symbols, followed with string data. Padding to 4 bytes.
+// The string is a null terminated QChar string.
 // (In Qt, Unicode characters are 16-bit entities without any markup or structure).
+// Note: String in file must be aligned to 4 bytes.
+//
 typedef uint32_t vdu_string_ref;
-
-// schema_item_ref is an offset in a file to a schema item.
-typedef uint32_t vdu_schema_item_ref;
 
 // Pack structs to 1 byte alignment
 //
@@ -15,10 +27,11 @@ typedef uint32_t vdu_schema_item_ref;
 
 struct VduSchemaFileProperties1
 {
-	uint16_t version; // 1
-	uint16_t width;
-	uint16_t height;
-	uint16_t reserve0;
+	uint16_t version;    // 1
+	uint16_t headerSize; // This header size
+	uint16_t width;      // In pixels
+	uint16_t height;     // In pixels
+	uint32_t reserve0;
 	uint32_t backgroundColor;
 	vdu_string_ref schemaId;
 	vdu_string_ref caption;
@@ -31,48 +44,62 @@ struct VduSchemaFileProperties1
 //
 struct VduSchemaFile
 {
+	// 1. Header and schema properties
+	//
 	char magic[4];        // "VDU\0"
 	uint16_t fileVersion; // 1
 	uint16_t reserve1;
 
 	struct VduSchemaFileProperties1 schemaProperties;
 	uint32_t reserve2[4];
-	
-	uint16_t count;
+
+	uint16_t schemaItemCount; // Number of schema items - each items is a VduSchemaFileSchemaItem1 + specific data
+							  // (VduSchemaFileSchemaItemLine1 | VduSchemaFileSchemaItemRect1 | ...).
 	uint16_t reserve3;
 
-	// items is an array of schema_item_ref.
-	// The size of the array is count.
-	// schema_item_ref is an offset in a file to a schema item.
+	// Next fields are present in a text description:
+	//
+
+	// 2. SchemaItems[schemaItemCount]
+	// SchemaItems: a list of schema items.
 	// Schema item is a struct that starts with VduSchemaFileSchemaItem1 and is followed
 	// by the data of the specific schema item like VduSchemaFileSchemaItemLine1, VduSchemaFileSchemaItemRect1, ...
 	//
-	// schema_item_ref items[count];
+
+	// 3. Strings
+	// Strings: a list of strings.
+	// see vdu_string_ref
+
+	// 4. crc64
+	// uint64_t crc64; // CRC64 of the file from the beginning to the end of the strings.
 };
 
 // VduSchemaFileSchemaItem1::itemType
-const uint16_t VduFileSchemaItemLineId = 1;
-const uint16_t VduFileSchemaItemRectId = 2;
-const uint16_t VduFileSchemaItemValueId = 3;
+//
+const uint16_t VduFileSchemaItemLineId = 0x4E4C;  // LN
+const uint16_t VduFileSchemaItemRectId = 0x4352;  // RC
+const uint16_t VduFileSchemaItemValueId = 0x4C56; // VL
 
 struct VduSchemaFileSchemaItem1
 {
-	uint16_t version;  // 1
-	uint16_t itemType; // VduFileSchemaItemLineId, VduFileSchemaItemRectId, ...
-	uint32_t size;
-	uint32_t reserve0;
-	uint32_t reserve1;
-	// This struct is followed by the data of the specific schema item like VduSchemaFileSchemaItemLine1, VduSchemaFileSchemaItemRect1, ...
-	//
+	uint16_t version;       // 1
+	uint16_t size;          // sizeof(VduSchemaFileSchemaItem1)
+	uint16_t itemType;      // VduFileSchemaItemLineId, VduFileSchemaItemRectId, ...
+	uint16_t reserve0;
+	uint16_t totalItemSize; // sizeof(VduSchemaFileSchemaItem1) + sizeof(VduSchemaFileSchemaItemLine1 | VduSchemaFileSchemaItemRect1 | ...)
+	uint16_t reserve1;      // sizeof(VduSchemaFileSchemaItem1) + sizeof(VduSchemaFileSchemaItemLine1 | VduSchemaFileSchemaItemRect1 | ...)
+	uint32_t reserve2;
+	uint32_t reserve3;
+	// This struct is followed by the data of the specific schema item like VduSchemaFileSchemaItemLine1, VduSchemaFileSchemaItemRect1, 
+	// VduSchemaFileSchemaItemValue1, ...
 };
 
 struct VduSchemaFileSchemaItemLine1
 {
 	uint16_t version;  // 1
 	uint16_t itemType; // VduFileSchemaItemLine, VduFileSchemaItemRect, ...
-	uint32_t size;
 	uint32_t reserve0;
-	
+
 	int16_t x1;
 	int16_t y1;
 	int16_t x2;
@@ -87,7 +114,6 @@ struct VduSchemaFileSchemaItemRect1
 {
 	uint16_t version;  // 1
 	uint16_t itemType; // VduFileSchemaItemLine, VduFileSchemaItemRect, ...
-	uint32_t size;
 	uint32_t reserve0;
 
 	uint16_t left;
@@ -105,20 +131,19 @@ struct VduSchemaFileSchemaItemRect1
 	uint32_t textColor;
 	uint32_t reserve2;
 
-	vdu_string_ref fontName;
+	uint16_t fontIndex; // Fonts are generated on build, each font is a folder with name as index, this folder contains font files.
+	uint16_t reserve3;
 	vdu_string_ref text;
-	uint32_t reserve3;
-
-	int16_t horzAlign;
-	int16_t vertAlign;
 	uint32_t reserve4;
+
+	int32_t align;      // HorzAlign | VertAlign
+	uint32_t reserve5;
 };
 
 struct VduSchemaFileSchemaItemValue1
 {
-	uint16_t version;  // 1
-	uint16_t itemType; // VduFileSchemaItemLine, VduFileSchemaItemRect, ...
-	uint32_t size;
+	uint16_t version;   // 1
+	uint16_t itemType;  // VduFileSchemaItemLine, VduFileSchemaItemRect, ...
 	uint32_t reserve0;
 
 	uint16_t left;
@@ -134,14 +159,17 @@ struct VduSchemaFileSchemaItemValue1
 	uint32_t lineColor;
 	uint32_t fillColor;
 	uint32_t textColor;
-	uint32_t reserve3;
 
-	vdu_string_ref fontName;
-	vdu_string_ref reserve4;
+	uint32_t reserve3[8]; // Reserved for different colors
+
+	uint16_t fontIndex;   // Fonts are generated on build, each font is a folder with name as index, this folder contains font files.
+	uint16_t reserve4;
+
 	uint32_t reserve5;
 	uint32_t reserve6;
+	uint32_t reserve7;
 
-	uint64_t appSignalHash;
+	uint32_t appSignalIndex;
 };
 
 

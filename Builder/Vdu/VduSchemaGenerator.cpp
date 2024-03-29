@@ -10,11 +10,11 @@
 #include <QPageSize>
 #include <QPainter>
 
+// #define VDU_DEBUG
+
 namespace Builder
 {
-	static const vdu_string_ref StringRefStub = 0x52525453;          // "STRR" - for debug, easy to find in hex editor.
-	static const vdu_schema_item_ref SchemaItemRefStub = 0x29495328; // "(SI)" - for debug, easy to find in hex editor.
-
+	static const vdu_string_ref StringRefStub = 0x52525453; // "STRR" - for debug, easy to find in hex editor.
 
 	bool VduSchemaGenerator::generateVduSchema(const VFrame30::VduSchema& schema, QByteArray& out, QStringList& outErrorMessages)
 	{
@@ -29,9 +29,8 @@ namespace Builder
 			return StringRefStub;               // "STRR" - for debug, easy to find in hex editor.
 		};
 
-		struct VduSchemaFile file
-		{
-		};
+		struct VduSchemaFile file;
+		std::memset(&file, 0, sizeof(file));
 
 		// Forming file.header
 		//
@@ -48,6 +47,7 @@ namespace Builder
 		{
 			VduSchemaFileProperties1& schemaProperties = file.schemaProperties;
 			schemaProperties.version = 1;
+			schemaProperties.headerSize = sizeof(schemaProperties);
 			schemaProperties.width = static_cast<uint16_t>(schema.docWidth());
 			schemaProperties.height = static_cast<uint16_t>(schema.docHeight());
 			schemaProperties.reserve0 = 0;
@@ -58,46 +58,28 @@ namespace Builder
 			schemaProperties.reserve2 = 0;
 		};
 
+		// Forming file.schemaItemCount
+		//
+		int totalSchemaItemCount = std::accumulate(schema.layers().begin(),
+												   schema.layers().end(),
+												   0,
+												   [](int sum, const auto& layer) -> int
+												   {
+													   return sum + static_cast<int>(layer->items().size());
+												   });
+
+		file.schemaItemCount = static_cast<uint16_t>(totalSchemaItemCount);
+
 		// Save data to output buffer.
 		//
 		out.clear();
 		out.append(reinterpret_cast<const char*>(&file), sizeof(file));
+
+#ifdef VDU_DEBUG
 		qDebug() << "out.append(reinterpret_cast<const char*>(&file), sizeof(file)); out.size() == " << out.size();
+#endif
 
-		// Forming file.items
-		//
 		{
-			auto schemaItemLess = [](const VFrame30::SchemaItem* lhs, const VFrame30::SchemaItem* rhs) -> bool
-			{
-				return lhs->guid() < rhs->guid();
-			};
-
-			std::map<const VFrame30::SchemaItem*, size_t, decltype(schemaItemLess)> itemRefs; // SchemaItem.guid() -> referenceOffset
-
-			auto addSchemaItemRef = [&itemRefs](const VFrame30::SchemaItem* item, size_t offset) -> vdu_schema_item_ref
-			{
-				itemRefs.insert(std::make_pair(item, offset));
-				return SchemaItemRefStub;
-			};
-
-			// Adding item references to the output buffer.
-			//
-			decltype(VduSchemaFile::count) itemCount = 0;
-			for (const auto& layer : schema.layers())
-			{
-				itemCount += static_cast<decltype(itemCount)>(layer->items().size());
-
-				for (const auto& item : layer->items())
-				{
-					vdu_schema_item_ref itemRef = addSchemaItemRef(item.get(), out.size());
-					out.append(reinterpret_cast<const char*>(&itemRef), sizeof(itemRef));
-				}
-			}
-
-			// Forming file.count in the output buffer.
-			//
-			out.replace(offsetof(VduSchemaFile, count), sizeof(file.count), reinterpret_cast<const char*>(&itemCount), sizeof(itemCount));
-
 			// Forming file.items in the output buffer.
 			//
 			for (const auto& layer : schema.layers())
@@ -116,37 +98,63 @@ namespace Builder
 						addStringRef(str, referenceOffset + out.size());
 					}
 
-					// Save item's offset
+					// Save item's data to the output buffer.
 					//
-					uint32_t itemOffset = static_cast<uint32_t>(out.size());
-					auto offsetOfTheItemReference = itemRefs[item.get()];
-
 					out.append(outSchemaItem);
-					out.replace(offsetOfTheItemReference, sizeof(vdu_schema_item_ref), reinterpret_cast<const char*>(&itemOffset), sizeof(vdu_schema_item_ref));
 				}
 			}
 		}
 
 		// Resolve strings:
-		// Append strings to the end of the file, the string is null terminated QChar array.
-		// Replace string_ref with offset to the string.
+		// String consist of 16 bit size of string in symbols, followed with string data. Padding to 4 bytes.
+		// The string is a null terminated QChar string.
+		// (In Qt, Unicode characters are 16-bit entities without any markup or structure).
+		// Note: String in file must be aligned to 4 bytes.
 		//
+
+		// Align to 4 bytes the beginning of string area.
+		//
+		for (size_t ps = 0, rest = 4 - (out.size() % 4); ps < rest; ps++)
+		{
+			out.push_back(char{0});
+		}
+
 		for (const auto& [str, offset] : strings)
 		{
 			uint32_t stringOffset = out.size();
+
+			// Write string size.
+			//
+			uint16_t stringSize = static_cast<uint16_t>(str.size());
+			out.append(reinterpret_cast<const char*>(&stringSize), sizeof(stringSize));
+
+			// Write string data.
+			//
 			out.append(reinterpret_cast<const char*>(str.constData()), (str.size() + 1) * sizeof(QChar)); // +1 for null terminator
 
 			// Replace string_ref with offset to the string.
 			//
 			out.replace(offset, sizeof(vdu_string_ref), reinterpret_cast<const char*>(&stringOffset), sizeof(stringOffset));
+
+			// Add padding bytes to strings (aligned to 4 bytes).
+			//
+			for (size_t ps = 0, rest = 4 - (out.size() % 4); ps < rest; ps++)
+			{
+				out.push_back(char{0});
+			}
 		}
 
-#if 0
-		QFile fileOut("D:/Temp/1/" + schema.schemaId() + ".sss");
-		fileOut.open(QIODevice::WriteOnly);
-		fileOut.write(out);
-		fileOut.close();
-#endif
+		// TODO: Calculate and write CRC64
+		// Temporary just write "TODO:CRC"
+		// Before wring CRC, align out buffer to 8 bytes.
+		//
+		for (size_t ps = 0, rest = 8 - (out.size() % 8); ps < rest; ps++)
+		{
+			out.push_back(char{0});
+		}
+
+		const char crc[] = "TODO:CRC";
+		out.append(crc, sizeof(crc) - 1);
 
 		return result;
 	}
@@ -165,10 +173,7 @@ namespace Builder
 			{
 			}
 
-			virtual VFrame30::DrawMode drawMode() const override
-			{
-				return VFrame30::DrawMode::Monitor;
-			}
+			virtual VFrame30::DrawMode drawMode() const override { return VFrame30::DrawMode::Monitor; }
 		};
 
 		auto oldContext = schema->context();
@@ -227,49 +232,56 @@ namespace Builder
 		return true;
 	}
 
-	bool VduSchemaGenerator::saveSchemaItem1(const VFrame30::SchemaItem& schemaItem, QByteArray& out, std::list<std::pair<QString, size_t>>& addedStringReferences)
+	bool VduSchemaGenerator::saveSchemaItem1(const VFrame30::SchemaItem& schemaItem,
+											 QByteArray& out,
+											 std::list<std::pair<QString, size_t>>& addedStringReferences)
 	{
-		decltype(VduSchemaFileSchemaItemRect1::itemType) itemType = 0;
+		// Get item type id and size of the specific item structure.
+		//
+		using ItemTypeId = decltype(VduSchemaFileSchemaItem1::itemType);
+		ItemTypeId itemType = 0;
 
-		do
+		using TotalItemSizeType = decltype(VduSchemaFileSchemaItem1::totalItemSize);
+		TotalItemSizeType specificItemSize = 0;
+
+		if (dynamic_cast<const VFrame30::SchemaItemVduLine*>(&schemaItem) != nullptr)
 		{
-			if (dynamic_cast<const VFrame30::SchemaItemVduLine*>(&schemaItem) != nullptr)
-			{
-				itemType = VduFileSchemaItemLineId;
-			}
+			itemType = VduFileSchemaItemLineId;
+			specificItemSize = sizeof(VduSchemaFileSchemaItemLine1);
+		}
 
-			if (dynamic_cast<const VFrame30::SchemaItemVduRect*>(&schemaItem) != nullptr)
-			{
-				itemType = VduFileSchemaItemRectId;
-			}
+		if (dynamic_cast<const VFrame30::SchemaItemVduRect*>(&schemaItem) != nullptr)
+		{
+			itemType = VduFileSchemaItemRectId;
+			specificItemSize = sizeof(VduSchemaFileSchemaItemRect1);
+		}
 
-			if (dynamic_cast<const VFrame30::SchemaItemVduValue*>(&schemaItem) != nullptr)
-			{
-				itemType = VduFileSchemaItemValueId;
-			}
-		} while (false);
+		if (dynamic_cast<const VFrame30::SchemaItemVduValue*>(&schemaItem) != nullptr)
+		{
+			itemType = VduFileSchemaItemValueId;
+			specificItemSize = sizeof(VduSchemaFileSchemaItemValue1);
+		}
 
-		if (itemType == 0)
+		if (itemType == 0 || specificItemSize == 0)
 		{
 			Q_ASSERT(itemType != 0);
+			Q_ASSERT(specificItemSize != 0);
 			return false;
 		}
 
-		VduSchemaFileSchemaItem1 fileSchemaItem{};
-		fileSchemaItem.version = 1;
-		fileSchemaItem.itemType = itemType;
-		fileSchemaItem.size = sizeof(fileSchemaItem);
-		fileSchemaItem.reserve0 = 0;
-		fileSchemaItem.reserve1 = 0;
+		// --
+		//
+		VduSchemaFileSchemaItem1 fileSchemaItem;
+		std::memset(&fileSchemaItem, 0, sizeof(fileSchemaItem));
 
+		fileSchemaItem.version = 1;
+		fileSchemaItem.size = sizeof(fileSchemaItem);
+		fileSchemaItem.itemType = itemType;
+		fileSchemaItem.totalItemSize = static_cast<TotalItemSizeType>(sizeof(VduSchemaFileSchemaItem1) + specificItemSize);
+		
 		// Save specific item, depending on itemType.
 		//
-		VduSchemaFileSchemaItemLine1 structLine{};
-		VduSchemaFileSchemaItemRect1 structRect{};
-		VduSchemaFileSchemaItemValue1 structValue{};
-
-		const char* specificItemPtr = nullptr;
-		size_t specificItemSize = 0;
+		QByteArray specificData;
 
 		switch (itemType)
 		{
@@ -277,12 +289,9 @@ namespace Builder
 			{
 				const auto& schemaItemVduLine = static_cast<const VFrame30::SchemaItemVduLine&>(schemaItem);
 
-				specificItemPtr = reinterpret_cast<const char*>(&structLine);
-				specificItemSize = sizeof(structLine);
+				VduSchemaFileSchemaItemLine1 structLine{};
 
 				structLine.itemType = itemType;
-				structLine.version = 1;
-				structLine.size = sizeof(structLine);
 
 				structLine.x1 = static_cast<decltype(structLine.x1)>(schemaItemVduLine.startXDocPt());
 				structLine.y1 = static_cast<decltype(structLine.y1)>(schemaItemVduLine.startYDocPt());
@@ -290,25 +299,25 @@ namespace Builder
 				structLine.y2 = static_cast<decltype(structLine.y2)>(schemaItemVduLine.endYDocPt());
 
 				structLine.color = schemaItemVduLine.lineColor().rgba();
+
+				specificData.append(reinterpret_cast<const char*>(&structLine), sizeof(structLine));
 			}
 			break;
 		case VduFileSchemaItemRectId:
 			{
 				const auto& schemaItemVduRect = static_cast<const VFrame30::SchemaItemVduRect&>(schemaItem);
 
-				specificItemPtr = reinterpret_cast<const char*>(&structRect);
-				specificItemSize = sizeof(structRect);
+				VduSchemaFileSchemaItemRect1 structRect{};
 
-				structRect.itemType = itemType;
 				structRect.version = 1;
-				structRect.size = sizeof(structRect);
+				structRect.itemType = itemType;
+				
+				using PosType = decltype(VduSchemaFileSchemaItemRect1::left);
 
-				// --
-				//
-				structRect.left = static_cast<decltype(structRect.left)>(schemaItemVduRect.leftDocPt());
-				structRect.top = static_cast<decltype(structRect.top)>(schemaItemVduRect.topDocPt());
-				structRect.width = static_cast<decltype(structRect.width)>(schemaItemVduRect.widthDocPt());
-				structRect.height = static_cast<decltype(structRect.height)>(schemaItemVduRect.heightDocPt());
+				structRect.left = static_cast<PosType>(schemaItemVduRect.leftDocPt());
+				structRect.top = static_cast<PosType>(schemaItemVduRect.topDocPt());
+				structRect.width = static_cast<PosType>(schemaItemVduRect.widthDocPt());
+				structRect.height = static_cast<PosType>(schemaItemVduRect.heightDocPt());
 
 				structRect.weight = static_cast<decltype(structRect.weight)>(schemaItemVduRect.weight());
 				structRect.fill = schemaItemVduRect.fill();
@@ -318,26 +327,27 @@ namespace Builder
 				structRect.fillColor = schemaItemVduRect.fillColor().rgba();
 				structRect.textColor = schemaItemVduRect.textColor().rgba();
 
-				addedStringReferences.emplace_back(schemaItemVduRect.fontName(), sizeof(fileSchemaItem) + offsetof(VduSchemaFileSchemaItemRect1, fontName));
-				addedStringReferences.emplace_back(schemaItemVduRect.text(), sizeof(fileSchemaItem) + offsetof(VduSchemaFileSchemaItemRect1, text));
+				// TODO: Set font index.
+				//
+				structRect.fontIndex = 0;
 
-				structRect.fontName = StringRefStub;
+				addedStringReferences.emplace_back(schemaItemVduRect.text(),
+												   sizeof(fileSchemaItem) + offsetof(VduSchemaFileSchemaItemRect1, text));
+
 				structRect.text = StringRefStub;
+
+				specificData.append(reinterpret_cast<const char*>(&structRect), sizeof(structRect));
 			}
 			break;
 		case VduFileSchemaItemValueId:
 			{
 				const auto& schemaItemVduValue = static_cast<const VFrame30::SchemaItemVduValue&>(schemaItem);
 
-				specificItemPtr = reinterpret_cast<const char*>(&structValue);
-				specificItemSize = sizeof(structValue);
+				VduSchemaFileSchemaItemValue1 structValue{};
 
-				structValue.itemType = itemType;
 				structValue.version = 1;
-				structValue.size = sizeof(structValue);
-
-				// --
-				//
+				structValue.itemType = itemType;
+				
 				structValue.left = static_cast<decltype(structValue.left)>(schemaItemVduValue.leftDocPt());
 				structValue.top = static_cast<decltype(structValue.top)>(schemaItemVduValue.topDocPt());
 				structValue.width = static_cast<decltype(structValue.width)>(schemaItemVduValue.widthDocPt());
@@ -350,29 +360,32 @@ namespace Builder
 				structValue.fillColor = schemaItemVduValue.fillColor().rgba();
 				structValue.textColor = schemaItemVduValue.textColor().rgba();
 
-				addedStringReferences.emplace_back(schemaItemVduValue.fontName(), sizeof(fileSchemaItem) + offsetof(VduSchemaFileSchemaItemValue1, fontName));
+				// TODO: Set font index.
+				//
+				structValue.fontIndex = 0;
 
-				structValue.fontName = StringRefStub;
-				
-				structValue.appSignalHash = ::calcHash(schemaItemVduValue.appSignalId());
+				// TODO: Set app signal index.
+				//
+				structValue.appSignalIndex = 0;
+
+				specificData.append(reinterpret_cast<const char*>(&structValue), sizeof(structValue));
 			}
 			break;
 		}
 
-		if (specificItemSize == 0)
+
+		// Forming output buffer.
+		//
+		if (specificData.isEmpty() == true)
 		{
-			Q_ASSERT(specificItemSize != 0);
-			fileSchemaItem.size += static_cast<decltype(fileSchemaItem.size)>(specificItemSize);
+			Q_ASSERT(specificData.isEmpty() == false);
 			return false;
 		}
 
 		out.clear();
-
-		// Forming output buffer.
-		//
 		out.append(reinterpret_cast<const char*>(&fileSchemaItem), sizeof(fileSchemaItem));
-		out.append(specificItemPtr, specificItemSize);
+		out.append(specificData);
 
 		return true;
 	}
-} // namespace vdu
+} // namespace Builder

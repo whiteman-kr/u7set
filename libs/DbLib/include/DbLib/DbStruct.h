@@ -20,7 +20,7 @@ enum class DbDir
 	MonitorSchemasDir,			// $root$/Schemas/Monitor
 	TuningSchemasDir,			// $root$/Schemas/Tuning
 	DiagSchemasDir,				// $root$/Schemas/Diagnostics
-	VduSchemasDir,				// $root$/Schemas/Diagnostics
+	VduSchemasDir,				// $root$/Schemas/VDU
 	HardwareConfigurationDir,	// $root$/HC
 	HardwarePresetsDir,			// $root$/HP
 	ModuleConfigurationDir,		// $root$/MC
@@ -69,6 +69,7 @@ namespace Db
 				{DbDir::MonitorSchemasDir, QStringLiteral("$root$/Schemas/Monitor")},			// Monitor Video Schemas
 				{DbDir::TuningSchemasDir, QStringLiteral("$root$/Schemas/Tuning")},				// TuningClient Schemas
 				{DbDir::DiagSchemasDir, QStringLiteral("$root$/Schemas/Diagnostics")},			// Diagnostics Schemas
+				{DbDir::VduSchemasDir, QStringLiteral("$root$/Schemas/VDU")},					// VDU Schemas
 				{DbDir::HardwareConfigurationDir, QStringLiteral("$root$/HC")},					// Hardware Configuration
 				{DbDir::HardwarePresetsDir, QStringLiteral("$root$/HP")},						// Hardware Presets
 				{DbDir::ModuleConfigurationDir, QStringLiteral("$root$/MC")},					// Module Configuration
