@@ -121,9 +121,10 @@ namespace Sim
 
 		mutable QReadWriteLock m_signalParamLock{QReadWriteLock::Recursive};
 		std::unordered_map<Hash, AppSignalParam> m_signalParams;
-		std::unordered_map<Hash, AppSignal> m_signalParamsExt;		// Except AppSignalParam, we need Signal as it has more information (like offset in memory)
+		std::unordered_map<Hash, AppSignal>	m_signalParamsExt;        // Except AppSignalParam, we need Signal as it has more information (like offset in memory)
 		std::unordered_map<Hash, Hash> m_customToAppSignalId;
-		std::unordered_map<QString, QStringList> m_tagToAppSignals;	// Key is tag - value is list of AppSignalIDs with this tag
+		std::unordered_map<QString, QString> m_signalIdByEquipmentId; // Key is EquipmentId - value is AppSignalID
+		std::unordered_map<QString, QStringList> m_tagToAppSignals;   // Key is tag - value is list of AppSignalIDs with this tag
 		std::set<QString> m_tags;
 
 		// SimRuntime data

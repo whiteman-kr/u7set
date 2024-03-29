@@ -522,7 +522,6 @@ namespace ClientLib
 		return result;
 	}
 
-
 	std::vector<std::shared_ptr<Comparator>> AppSignalManager::setpointsByInputSignalId(const QString& appSignalId) const
 	{
 		std::vector<std::shared_ptr<Comparator>> comparators = m_setpoints.getByInputSignalID(appSignalId);
