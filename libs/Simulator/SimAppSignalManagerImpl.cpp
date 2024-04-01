@@ -177,6 +177,7 @@ namespace Sim
 			m_signalParams.clear();
 			m_signalParamsExt.clear();
 			m_customToAppSignalId.clear();
+			m_signalIdByEquipmentId.clear();
 			m_tagToAppSignals.clear();
 			m_tags.clear();
 		}
@@ -229,12 +230,14 @@ namespace Sim
 		std::unordered_map<Hash, AppSignalParam> signalParams;
 		std::unordered_map<Hash, AppSignal> signalParamsExt;
 		std::unordered_map<Hash, Hash> customToAppSignalId;
+		std::unordered_map<QString, QString> signalIdByEquipmentId;
 		std::unordered_map<Hash, FlagsReadStruct> flagsStruct;
 		std::set<QString> allTags;
 
 		signalParams.reserve(message.appsignal_size());
 		signalParamsExt.reserve(message.appsignal_size());
 		customToAppSignalId.reserve(message.appsignal_size());
+		signalIdByEquipmentId.reserve(message.appsignal_size() / 64); // Only inputs and output will end up in this map.
 
 		for (int i = 0; i < message.appsignal_size(); ++i)
 		{
@@ -250,6 +253,11 @@ namespace Sim
 			signalParamsExt[hash].loadFromProto(signalMessage);
 
 			customToAppSignalId[::calcHash(signalParams[hash].customSignalId())] = hash;
+
+			if (signalParam.isInput() == true || signalParam.isOutput() == true)
+			{
+				signalIdByEquipmentId["@" + signalParam.equipmentId()] = signalParam.appSignalId();
+			}
 
 			// Add tags to m_signaIdsByTag
 			//
@@ -292,6 +300,7 @@ namespace Sim
 			m_signalParams = std::move(signalParams);
 			m_signalParamsExt = std::move(signalParamsExt);
 			m_customToAppSignalId = std::move(customToAppSignalId);
+			m_signalIdByEquipmentId = std::move(signalIdByEquipmentId);
 			m_tags = std::move(allTags);
 		}
 
@@ -1003,10 +1012,19 @@ static const AppSignalParam dummy;
 		return signalType(::calcHash(appSignalId), found);
 	}
 
-	QString AppSignalManagerImpl::equipmentToAppSignalId(const QString& /*equipmentId*/) const
+	QString AppSignalManagerImpl::equipmentToAppSignalId(const QString& equipmentId) const
 	{
-		Q_ASSERT(false);	// to do
-		return {};
+		QString result;
+
+		QReadLocker rl(&m_signalParamLock);
+
+		auto it = m_signalIdByEquipmentId.find(equipmentId);
+		if (it != m_signalIdByEquipmentId.end())
+		{
+			result = it->second;
+		}
+
+		return result;
 	}
 
 	std::vector<std::shared_ptr<Comparator>> AppSignalManagerImpl::setpointsByInputSignalId(const QString& /*appSignalId*/) const
