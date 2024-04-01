@@ -389,6 +389,7 @@ namespace Hardware
 		bool isLmOrBvb() const;
 		bool isOcm() const;
 		bool isBvb() const;
+		bool isVdu() const;
 
 		QString equipmentID() const;
 		const DeviceModule* deviceModule() const;
@@ -431,6 +432,8 @@ namespace Hardware
 
 		OptoModuleStorage& storage();
 		const OptoModuleStorage& storage() const;
+
+		bool writeVduConnectionsInfoFile(Builder::BuildResultWriter& resultWriter) const;
 
 	private:
 		void sortPortsByEquipmentIDAscending(QVector<OptoPort*>& getPorts);
@@ -544,6 +547,9 @@ namespace Hardware
 								   const QString& receiverLM,
 								   QUuid receiverUuid,
 								   SignalAddress16* addr);
+
+		bool writeVduConnectionsInfoFile(const QString& vduEquipmentID,
+										 Builder::BuildResultWriter& resultWriter) const;
 
 		std::shared_ptr<Connection> getConnection(const QString& connectionID) const;
 
