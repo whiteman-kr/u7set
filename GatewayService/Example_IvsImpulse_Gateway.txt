@@ -2,15 +2,17 @@
 
 //
 //	[Gateway], [SignalList], etc - sections
+// This is a Comment
+// 
+// [Gateway], [SignalList], etc - sections
 //
-//	Type = V, ID = N, etc - settings
+// Type = V, ID = N, etc - settings
 //
-//	Sections names and settings names are case insensitive
+// Sections names, settings names are case insensitive
 //
-//	Settings values are case sensitive
+// Settings values are case sensitive
 //
-//	Signal IDs are case sensitive
-//
+// * - required settings
 
 // ----------------------------------------------------------------------------------------------------------------
 //
@@ -28,8 +30,11 @@ GatewayDescription = description		// free style gateway description
 
 SystemID = 2						// global system identifier
 
-GatewayIP1 = 224.0.0.221:9090		// IP and port of IVS gateway channel 1
-GatewayIP2 = 224.0.1.222:9090	    // IP and port of IVS gateway channel 2
+LocalGatewayIP1 = 224.0.0.221:9090		// IP and port of IVS gateway channel 1
+RemoteGatewayIP1 = 224.0.0.1			
+
+LocalGatewayIP2 = 224.0.1.222:9090	    // IP and port of IVS gateway channel 2
+RemoteGatewayIP2 = 224.0.0.2			
 
 ListsVersion = 1					// version of exchange lists
 
@@ -45,10 +50,11 @@ DataType = A 					 	// data type: A, B, D
 
 // AppSignalIDs
 
-#LM2_LM1_TEMP2
-#LM1_RES04
-#LM2_LM1_TEMP3
-#LM2_LM1_TEMP4
+#OUT_FLOAT1		
+#SYSTEMID_RACKID_CH01_MD00_PI_BUILDNUMBER	
+#OUT_SINT32_1
+#OUT_SINT1
+#OUT_SINT2
 
 [SignalList]
 
@@ -57,17 +63,9 @@ SendEvents = false
 IncludeAppSignalID = 0
 DataType = B
 
-#SYSTEMID_RACK01_FSCC01_MD00_CTRLIN_ARMINGKEYLA
-#LM2_LM1_BLINK4
-#SYSTEMID_RACK01_FSCC01_MD00_CTRLIN_INL02B
-#SYSTEMID_RACK01_FSCC01_MD00_CTRLOUT_OUT02
-#SYSTEMID_RACK01_FSCC01_MD00_PI_BLINK
-#SYSTEMID_RACK01_FSCC01_MD00_PI_MODERUN
-#SYSTEMID_RACK01_FSCC01_MD00_PI_MODESTARTUP
-#LM2_LM1_BLINK3
-#OUT_BUS32_B00
-#OUT_BUS32_B11
-#OUT_BUS32_B03
+#OUT_BLINK1		
+#SYSTEMID_RACKID_CH01_MD00_PI_BLINK
+#SYSTEMID_RACKID_CH01_MD00_PI_SORISSET
 
 [SignalList]
 
@@ -76,15 +74,6 @@ SendEvents = false
 IncludeAppSignalID = 0
 DataType = D
 
-#OUT_BUS32_B00
-#OUT_BUS32_B11
-#OUT_BUS32_B03
-#SYSTEMID_RACK01_FSCC01_MD00_CTRLIN_INL02B
-#SYSTEMID_RACK01_FSCC01_MD00_CTRLOUT_OUT02
-#SYSTEMID_RACK01_FSCC01_MD00_PI_BLINK
-#SYSTEMID_RACK01_FSCC01_MD00_CTRLIN_ARMINGKEYLA
-#LM2_LM1_BLINK4
-#SYSTEMID_RACK01_FSCC01_MD00_PI_MODERUN
-#SYSTEMID_RACK01_FSCC01_MD00_PI_MODESTARTUP
-#LM2_LM1_BLINK3
-
+#OUT_BLINK1		
+#SYSTEMID_RACKID_CH01_MD00_PI_BLINK
+#SYSTEMID_RACKID_CH01_MD00_PI_SORISSET

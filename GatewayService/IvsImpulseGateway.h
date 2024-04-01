@@ -13,7 +13,7 @@ namespace Gateway
 		IvsImpulseSignalList();
 
 		virtual bool isKnownSetting(E::Setting st) const override;
-		virtual bool checkAndApplySettings(int lineNo, ParserLog& log) override;
+		virtual bool checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log) override;
 
 		int listNo() const;
 		E::SignalListDataType dataType() const;

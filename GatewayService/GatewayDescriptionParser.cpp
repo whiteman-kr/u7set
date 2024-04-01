@@ -332,7 +332,6 @@ namespace Gateway
 			break;
 
 		case E::Section::SignalList:
-			m_gateways->last()->m_signalLists.back()->checkAndApplySettings(0, m_log);
 			break;
 
 		default:
@@ -513,13 +512,11 @@ namespace Gateway
 			switch(plr.section)
 			{
 			case E::Section::Gateway:
-				sl->checkAndApplySettings(plr.lineNo, m_log);
 				m_gateways->append(std::make_shared<Gateway>());
 				parsingSection = E::Section::Gateway;
 				return ParseResult::Ok;
 
 			case E::Section::SignalList:
-				sl->checkAndApplySettings(plr.lineNo, m_log);
 				m_gateways->last()->appendSignalList();
 				parsingSection = E::Section::SignalList;
 				return ParseResult::Ok;
