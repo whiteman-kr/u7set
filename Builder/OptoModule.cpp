@@ -9,7 +9,7 @@
 #include "../lib/ConstStrings.h"
 #include "../UtilsLib/Crc.h"
 #include "../Builder/Context.h"
-#include "./Vdu/VduOptoConnectionsInfoFile.h"
+#include "./Vdu/VduOptoConnectionsInfoGenerator.h"
 
 #include "DeviceHelper.h"
 #include "UalItems.h"
@@ -2108,7 +2108,7 @@ namespace Hardware
 
 					result &= optoPort->init(optoPortController, i, m_lmDescription, log);
 
-					m_ports.insert(optoPortController->equipmentIdTemplate(), optoPort);
+					m_ports.emplace(optoPortController->equipmentIdTemplate(), optoPort);
 
 					findPortCount++;
 
@@ -2302,7 +2302,7 @@ namespace Hardware
 
 	void OptoModule::getOptoPorts(QList<OptoPortShared>& optoPortsList) const
 	{
-		for(const OptoPortShared& port : m_ports)
+		for(const auto& [equipmentID, port] : m_ports)
 		{
 			if (port == nullptr)
 			{
@@ -2314,7 +2314,7 @@ namespace Hardware
 		}
 	}
 
-	const HashedVector<QString, OptoPortShared>& OptoModule::ports() const
+	const std::map<QString, OptoPortShared>& OptoModule::ports() const
 	{
 		return m_ports;
 	}
@@ -2328,7 +2328,7 @@ namespace Hardware
 		{
 			// calculate tx buffers offsets for ports of LM module
 			//
-			for(OptoPortShared& port : m_ports)
+			for(auto& [equipID, port] : m_ports)
 			{
 				if (port == nullptr)
 				{
@@ -2401,7 +2401,7 @@ namespace Hardware
 
 			int txDataSizeW = 0;
 
-			for(OptoPortShared& port : m_ports)
+			for(auto& [equipID, port] : m_ports)
 			{
 				if (port == nullptr)
 				{
@@ -2470,13 +2470,20 @@ namespace Hardware
 		// checking ports addresses overlapping
 		// usefull for manual settings of ports
 		//
-		int portsCount = static_cast<int>(m_ports.count());
+		std::vector<OptoPortShared> ports;
+
+		for(const auto& [eqid, port] : m_ports)
+		{
+			ports.emplace_back(port);
+		}
+
+		int portsCount = static_cast<int>(ports.size());
 
 		bool result = true;
 
 		for(int i = 0; i < portsCount - 1; i++)
 		{
-			OptoPortShared port1 = m_ports[i];
+			OptoPortShared& port1 = ports[i];
 
 			if (port1 == nullptr)
 			{
@@ -2493,7 +2500,7 @@ namespace Hardware
 
 			for(int k = i + 1; k < portsCount; k++)
 			{
-				OptoPortShared port2 = m_ports[k];
+				OptoPortShared& port2 = ports[k];
 
 				if (port2 == nullptr)
 				{
@@ -2546,7 +2553,7 @@ namespace Hardware
 		{
 			// calculate rx buf offsets for ports of LM module
 			//
-			for(OptoPortShared& port : m_ports)
+			for(auto& [equipID, port] : m_ports)
 			{
 				if (port == nullptr)
 				{
@@ -2608,7 +2615,7 @@ namespace Hardware
 
 			int rxDataSizeW = 0;
 
-			for(OptoPortShared& port : m_ports)
+			for(auto& [equipID, port] : m_ports)
 			{
 				if (port == nullptr)
 				{
@@ -2696,7 +2703,7 @@ namespace Hardware
 	{
 		bool result = true;
 
-		for(OptoPortShared& port : m_ports)
+		for(auto& [equipID, port] : m_ports)
 		{
 			if (port == nullptr)
 			{
@@ -2713,7 +2720,7 @@ namespace Hardware
 
 	bool OptoModule::isSerialRxSignalExists(const QString& appSignalID) const
 	{
-		for(const OptoPortShared& port : m_ports)
+		for(auto& [equipID, port] : m_ports)
 		{
 			if (port == nullptr)
 			{
@@ -2735,7 +2742,7 @@ namespace Hardware
 
 		bool result = true;
 
-		for(OptoPortShared& port : m_ports)
+		for(auto& [equipID, port] : m_ports)
 		{
 			if (port == nullptr)
 			{
@@ -2754,7 +2761,7 @@ namespace Hardware
 
 		bool result = true;
 
-		for(OptoPortShared& port : m_ports)
+		for(auto& [equipID, port] : m_ports)
 		{
 			if (port == nullptr)
 			{
@@ -2791,25 +2798,6 @@ namespace Hardware
 	const OptoModuleStorage& OptoModule::storage() const
 	{
 		return m_storage;
-	}
-
-	bool OptoModule::writeVduConnectionsInfoFile(Builder::BuildResultWriter& resultWriter) const
-	{
-		if (isVdu() == false)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		QByteArray data;
-
-		VduOptoConnectionsInfoFileHeader header;
-
-		data.append(reinterpret_cast<const char*>(&header), sizeof(header));
-
-		resultWriter.addFile(Directory::VDUs, "OptoConnectionsInfo.vci", data, false);
-
-		return true;
 	}
 
 	void OptoModule::sortPortsByEquipmentIDAscending(QVector<OptoPort*>& ports)
@@ -3294,13 +3282,15 @@ namespace Hardware
 	}
 
 	bool OptoModuleStorage::writeVduConnectionsInfoFile(const QString& vduEquipmentID,
-														Builder::BuildResultWriter& resultWriter) const
+														Builder::Context* context) const
 	{
+		TEST_PTR_RETURN_FALSE(context);
+
 		OptoModuleShared optoModule = getOptoModule(vduEquipmentID);
 
 		TEST_PTR_RETURN_FALSE(optoModule);
 
-		return optoModule->writeVduConnectionsInfoFile(resultWriter);
+		return Builder::VduOptoConnectionsInfoGenerator().writeFiles(optoModule, context);
 	}
 
 	std::shared_ptr<Connection> OptoModuleStorage::getConnection(const QString& connectionID) const
@@ -3382,9 +3372,7 @@ namespace Hardware
 				continue;
 			}
 
-			const HashedVector<QString, Hardware::OptoPortShared>& ports = module->ports();
-
-			for(const Hardware::OptoPortShared& port : ports)
+			for(auto& [equipID, port] : module->ports())
 			{
 				associatedPorts.append(port);
 			}
@@ -4047,9 +4035,7 @@ namespace Hardware
 
 		m_lmAssociatedModules.insert(optoModule->lmID(), optoModule);
 
-		const HashedVector<QString, OptoPortShared>& ports = optoModule->ports();
-
-		for(const OptoPortShared& port : ports)
+		for(const auto& [equipID, port] : optoModule->ports())
 		{
 			m_ports.insert(port->equipmentID(), port);
 		}

@@ -10,5 +10,6 @@
 // Note: String in file must be aligned to 4 bytes.
 //
 typedef uint32_t vdu_string_ref;
+typedef uint32_t vdu_file_ref;
 
-inline const int VDU_OPTO_CONNECTIONS_COUNT = 8;
+inline const int VDU_OPTO_PORTS_COUNT = 8;

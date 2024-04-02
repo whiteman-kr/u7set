@@ -203,6 +203,8 @@ namespace Builder
 
 		QHash<QString, QHash<QString, QString>> m_buildFileIDMap;		// subDir (same as EquipmentID) => (FileID => FileName)
 	};
+
+	using BuildResultWriterShared = std::shared_ptr<BuildResultWriter>;
 }
 
 

@@ -601,6 +601,9 @@ namespace File
 
 	inline static const QString GLOBAL_SCRIPT = "GlobalScript.js";
 	inline static const QString GLOBAL_SCRIPT_FULL_PATH = "$root$/Tests/GlobalScript.js";
+
+	inline static const QString OPTO_CONNECTIONS_INFO_VCI = "OptoConnectionsInfo.vci";
+	inline static const QString OPTO_CONNECTIONS_INFO_TXT = "OptoConnectionsInfo.txt";
 }
 
 namespace Separator

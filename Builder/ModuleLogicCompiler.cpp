@@ -15900,9 +15900,7 @@ namespace Builder
 
 			bool initialCommentPrinted = false;
 
-			const HashedVector<QString, Hardware::OptoPortShared>& ports = module->ports();
-
-			for(const Hardware::OptoPortShared& port : ports)
+			for(const auto& [equipmentID, port] : module->ports())
 			{
 				if (port == nullptr)
 				{
@@ -17615,9 +17613,7 @@ namespace Builder
 
 			// write module's opto ports information
 			//
-			const HashedVector<QString, Hardware::OptoPortShared>& ports = module->ports();
-
-			for(const Hardware::OptoPortShared& port : ports)
+			for(const auto& [equipmentID, port] : module->ports())
 			{
 				port->writeInfo(file);
 			}

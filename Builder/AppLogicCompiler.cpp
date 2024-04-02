@@ -483,7 +483,7 @@ namespace Builder
 		//
 		result &= optoStorage->calculateRxBufAddresses(vduEquipmentID);
 
-		result &= optoStorage->writeVduConnectionsInfoFile(vduEquipmentID, *m_context->m_buildResultWriter);
+		result &= optoStorage->writeVduConnectionsInfoFile(vduEquipmentID, m_context);
 
 		return result;
 	}

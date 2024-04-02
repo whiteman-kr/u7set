@@ -185,7 +185,7 @@ bool ConnectionsInfoWriter::fill(ConnectionPortInfo* cpi, Hardware::SharedConnec
 	cpi->txDataSizeW = optoPort->txDataSizeW();
 	cpi->txDataID = optoPort->txDataID();
 
-	cpi->txSignals.reserve(optoPort->txSignals().count());
+	cpi->txSignals.reserve(optoPort->txSignals().size());
 
 	for(Hardware::TxRxSignalShared txSignal : optoPort->txSignals())
 	{
