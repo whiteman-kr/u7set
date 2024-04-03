@@ -29,73 +29,65 @@ namespace Gateway
 		return m_requiredSettings.contains(st);
 	}
 
-	bool IvsImpulseSignalList::checkAndApplySettings(int lineNo, ParserLog& log)
+	bool IvsImpulseSignalList::checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log)
 	{
 		bool result = true;
 
-		result &= SignalList::checkAndApplySettings(lineNo, log);
-
-		result &= Gateway::checkRequiredSettings(m_requiredSettings,
-												 m_settingsValues,
-												 lineNo, log);
+		// result &= Gateway::checkRequiredSettings(m_requiredSettings,
+		// 										 m_settingsValues,
+		// 										 lineNo, log);
 		RETURN_IF_FALSE(result);
 
-		for(const auto& p : m_settingsValues)
+		switch(st)
 		{
-			E::Setting st = p.first;
-			const SettingValue& sv = p.second;
+		case E::Setting::ListNo:
+			m_listNo = value.toInt();
+			break;
 
-			switch(st)
+		case E::Setting::DataType:
 			{
-			case E::Setting::ListNo:
-				m_listNo = sv.value.toInt();
-				break;
+				QString dataTypeStr = value.toString();
 
-			case E::Setting::DataType:
+				if (dataTypeStr == "A")
 				{
-					QString dataTypeStr = sv.value.toString();
-
-					if (dataTypeStr == "A")
+					m_dataType = E::SignalListDataType::Analog_A;
+					setSignalType(::E::SignalType::Analog);
+				}
+				else
+				{
+					if (dataTypeStr == "B")
 					{
-						m_dataType = E::SignalListDataType::Analog_A;
-						setSignalType(::E::SignalType::Analog);
+						m_dataType = E::SignalListDataType::Discrete_B;
+						setSignalType(::E::SignalType::Discrete);
 					}
 					else
 					{
-						if (dataTypeStr == "B")
+						if (dataTypeStr == "D")
 						{
-							m_dataType = E::SignalListDataType::Discrete_B;
+							m_dataType = E::SignalListDataType::Discrete_D;
 							setSignalType(::E::SignalType::Discrete);
 						}
 						else
 						{
-							if (dataTypeStr == "D")
-							{
-								m_dataType = E::SignalListDataType::Discrete_D;
-								setSignalType(::E::SignalType::Discrete);
-							}
-							else
-							{
-								log.logError(sv.lineNo, QString("unknown signal list data type '%1' use 'A', 'B' or 'D'").
-														arg(dataTypeStr));
-								result = false;
-							}
+							log.logError(lineNo, QString("unknown signal list data type '%1' use 'A', 'B' or 'D'").
+													arg(dataTypeStr));
+							result = false;
 						}
 					}
 				}
-				break;
-
-			case E::Setting::SendEvents:
-				m_sendEvents = sv.value.toBool();
-				break;
-
-			case E::Setting::IncludeAppSignalID:
-				m_includeAppSignalID = sv.value.toBool();
-				break;
-
-			default:
-				Q_ASSERT(false);
 			}
+			break;
+
+		case E::Setting::SendEvents:
+			m_sendEvents = value.toBool();
+			break;
+
+		case E::Setting::IncludeAppSignalID:
+			m_includeAppSignalID = value.toBool();
+			break;
+
+		default:
+			Q_ASSERT(false);
 		}
 
 		return result;

@@ -1,0 +1,79 @@
+//  this is a comment
+
+//
+//	[Gateway], [SignalList], etc - sections
+// This is a Comment
+// 
+// [Gateway], [SignalList], etc - sections
+//
+// Type = V, ID = N, etc - settings
+//
+// Sections names, settings names are case insensitive
+//
+// Settings values are case sensitive
+//
+// * - required settings
+
+// ----------------------------------------------------------------------------------------------------------------
+//
+//	IVS_Impulse gateway description EXAMPLE	
+//
+// ----------------------------------------------------------------------------------------------------------------
+
+[Gateway]   						// --- gateway description
+
+GatewayType = IVS_Impulse           // gateway type
+GatewayID = HAES_1B_AZ1				// gateway identifier
+GatewayDescription = description		// free style gateway description
+
+// IVS Impulse gateway specifis settings
+
+SystemID = 2						// global system identifier
+
+LocalGatewayIP1 = 224.0.0.221:9090		// IP and port of IVS gateway channel 1
+RemoteGatewayIP1 = 224.0.0.1			
+
+LocalGatewayIP2 = 224.0.1.222:9090	    // IP and port of IVS gateway channel 2
+RemoteGatewayIP2 = 224.0.0.2			
+
+ListsVersion = 1					// version of exchange lists
+
+TimeType = Plant					// possible values: Plant, Server, Local
+Period = 1000						// periodic send state period, milliseconds
+
+[SignalList]						// --- signal list description
+
+ListNo = 1							// signal list identifier
+SendEvents = On                 		// yes/no send events for signals from list
+IncludeAppSignalID = no		 	 	// yes/no  write AppSignalID in exchange list, default Off
+DataType = A 					 	// data type: A, B, D
+
+// AppSignalIDs
+
+#OUT_FLOAT1		
+#SYSTEMID_RACKID_CH01_MD00_PI_BUILDNUMBER	
+#OUT_SINT32_1
+#OUT_SINT1
+#OUT_SINT2
+
+[SignalList]
+
+ListNo = 2
+SendEvents = false
+IncludeAppSignalID = 0
+DataType = B
+
+#OUT_BLINK1		
+#SYSTEMID_RACKID_CH01_MD00_PI_BLINK
+#SYSTEMID_RACKID_CH01_MD00_PI_SORISSET
+
+[SignalList]
+
+ListNo = 3
+SendEvents = false
+IncludeAppSignalID = 0
+DataType = D
+
+#OUT_BLINK1		
+#SYSTEMID_RACKID_CH01_MD00_PI_BLINK
+#SYSTEMID_RACKID_CH01_MD00_PI_SORISSET

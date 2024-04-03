@@ -163,7 +163,6 @@ namespace Gateway
 
 		virtual bool isKnownSetting(E::Setting st) const;
 		virtual bool checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log);
-		virtual bool checkAndApplySettings(int lineNo, ParserLog& log);
 
 		virtual bool appendSignalID(const QString& appSignalID, QString* errMsg);
 		virtual bool appendAddressSignalID(const QString& addressStr, const QString& appSignalID, QString* errMsg);

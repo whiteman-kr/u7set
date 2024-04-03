@@ -143,13 +143,6 @@ namespace Gateway
 		return true;
 	}
 
-	bool SignalList::checkAndApplySettings(int lineNo, ParserLog &log)
-	{
-		Q_UNUSED(lineNo);
-		Q_UNUSED(log);
-		return true;
-	}
-
 	bool SignalList::appendSignalID(const QString& appSignalID, QString* errMsg)
 	{
 		Q_UNUSED(errMsg);
