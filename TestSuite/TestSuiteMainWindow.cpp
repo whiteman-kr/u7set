@@ -266,7 +266,7 @@ void TestSuiteMainWindow::createActions()
 
 	// --
 	//
-	m_reportToolbarAction = new QAction{QIcon(":/Images/Images/TestsReport.svg"), tr("Create Report"), this};
+	m_reportToolbarAction = new QAction{QIcon(":/Images/Images/TestsReport.svg"), tr("Report"), this};
 	connect(m_reportToolbarAction, &QAction::triggered, this, &TestSuiteMainWindow::on_m_report_clicked);
 
 	m_singleReportAction = new QAction(tr("Report..."), this);
