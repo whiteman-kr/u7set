@@ -55,6 +55,7 @@ namespace Builder
 		IssueLogger* m_log = nullptr;
 
 		int m_vduSignalIndex = 0;
+		int m_txtOffset = 0;
 
 		VduOptoConnectionsInfoFileHeader m_header;
 		std::vector<VduOptoPortInfo> m_optoPortsInfo;

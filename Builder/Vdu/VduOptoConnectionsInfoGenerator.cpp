@@ -51,7 +51,11 @@ namespace Builder
 		result &= fillHeader();
 
 		result &= writeVciFile();
-		result &= writeTxtFile();
+
+		if (m_context->m_projectProperties.generateExtraDebugInfo() == true)
+		{
+			result &= writeTxtFile();
+		}
 
 		return result;
 	}
@@ -499,11 +503,9 @@ namespace Builder
 
 	QString VduOptoConnectionsInfoGenerator::addrStr(int fieldSize, const QString& str)
 	{
-		static int offset = 0;
+		QString res = QString(" %1 | %2").arg(hex32(m_txtOffset)).arg(str);
 
-		QString res = QString(" %1 | %2").arg(hex32(offset)).arg(str);
-
-		offset += fieldSize;
+		m_txtOffset += fieldSize;
 
 		return res;
 	}

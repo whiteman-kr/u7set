@@ -16,7 +16,7 @@
 
 struct VduOptoConnectionsInfoFileHeader
 {
-	char magic[4];
+	char magic[4];							// 'VCI\0'
 	uint16_t fileVersion;
 
 	uint16_t optoPortsCount;
