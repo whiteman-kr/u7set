@@ -20,6 +20,8 @@ struct VduOptoConnectionsInfoFileHeader
 	uint16_t fileVersion;
 
 	uint16_t optoPortsCount;
+	uint16_t rxAppSignalsCount;
+	uint16_t txAppSignalsCount;
 
 	vdu_file_ref refOptoPortsInfo;
 	vdu_file_ref refRxAppSignalsInfo;
@@ -30,7 +32,6 @@ struct VduOptoConnectionsInfoFileHeader
 	//
 
 	uint32_t reserve1;
-	uint32_t reserve2;
 
 	// Next:
 	//
@@ -46,9 +47,9 @@ struct VduOptoPortInfo
 	uint16_t linkID;				// 0..999
 
 	uint16_t rxDataSizeW;			// received data size in words (2 bytes)
-	uint32_t rxDataUID;				// received DataUID from LM to VDU
-
 	uint16_t txDataSizeW;			// transmitted data size in words
+
+	uint32_t rxDataUID;				// received DataUID from LM to VDU
 	uint32_t txDataUID;				// transmitted DataUID from VDU to LM
 };
 
@@ -62,7 +63,7 @@ enum class VduSignalType
 
 struct VduAppSignalInfo
 {
-	uint16_t portIndex;
+	uint16_t optoPortIndex;
 	uint16_t signalIndex;
 
 	uint16_t vduSignalType;			// values of VduSignalType enum

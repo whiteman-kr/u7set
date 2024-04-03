@@ -899,6 +899,6 @@ namespace LmDescriptionName
 
 namespace BOM
 {
-	inline const QString UTF8("\xEF\xBB\xBF");
+	inline const QByteArray UTF8("\xEF\xBB\xBF");
 }
 

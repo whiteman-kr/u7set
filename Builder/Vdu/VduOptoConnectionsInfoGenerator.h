@@ -27,6 +27,10 @@ namespace Builder
 		bool writeVciFile();
 		bool writeTxtFile();
 
+		void printSignalsInfo(const std::vector<VduAppSignalInfo>& appSignals,
+							  const QString& line,
+							  QStringList& file);
+
 		bool fillSignalsInfo(int portIndex,
 							 const QVector<Hardware::TxRxSignalShared>& portSignals,
 							 std::vector<VduAppSignalInfo>& vduSignals);
@@ -40,7 +44,6 @@ namespace Builder
 		void recalcStringsRefs(uint32_t stringsOffsetInFile);
 
 		QString addrStr(int fieldSize, const QString& str);
-
 		QString hex32(qint64 v);
 		QString hex16(qint64 v);
 
