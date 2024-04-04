@@ -316,11 +316,6 @@ QVariant SchemaListModel::data(const QModelIndex& index, int role/* = Qt::Displa
 		return QVariant{};
 	}
 
-	if (role == Qt::ForegroundRole)
-	{
-		return excludedFromBuild(fileId) ? QBrush{Qt::darkGray} : QVariant{};
-	}
-
 	if (role == Qt::BackgroundRole)
 	{
 		if (file->state() == E::VcsState::CheckedOut)
@@ -348,13 +343,8 @@ QVariant SchemaListModel::data(const QModelIndex& index, int role/* = Qt::Displa
 
 	if (role == Qt::ForegroundRole)
 	{
-		if (column == Columns::IssuesColumn)
+		if (column == Columns::IssuesColumn && excludedFromBuild(fileId) == false)
 		{
-			//			if (excludedFromBuild(file->fileId()) == true)
-			//			{
-			//				return {};
-			//			}
-
 			QStringList fn = file->fileName().split('.');
 
 			if (fn.isEmpty() == false)
@@ -381,7 +371,7 @@ QVariant SchemaListModel::data(const QModelIndex& index, int role/* = Qt::Displa
 		}
 		else
 		{
-			return {};
+			return excludedFromBuild(fileId) ? QBrush{Qt::darkGray} : QVariant{};
 		}
 	}
 
