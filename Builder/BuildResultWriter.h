@@ -167,6 +167,9 @@ namespace Builder
 		BuildFile* getBuildFile(const QString& pathFileName) const;
 		BuildFile* getBuildFileByID(const QString& subDir /* same as EquipmentID or common dirs */, const QString& buildFileID) const;
 
+		bool isBuildFileExists(const QString& pathFileName) const;
+		bool isBuildFileByIDExists(const QString& subDir /* same as EquipmentID or common dirs */, const QString& buildFileID) const;
+
 		bool checkBuildFilePtr(const BuildFile* buildFile) const;
 
 		QString outputPath() const;

@@ -893,6 +893,30 @@ namespace Builder
 		return getBuildFile(buildFilePathName);
 	}
 
+	bool BuildResultWriter::isBuildFileExists(const QString& pathFileName) const
+	{
+		return (m_buildFiles.find(pathFileName) != m_buildFiles.end());
+	}
+
+	bool BuildResultWriter::isBuildFileByIDExists(const QString& subDir /* same as EquipmentID or common dirs */, const QString& buildFileID) const
+	{
+		if (m_buildFileIDMap.contains(subDir) == false)
+		{
+			return false;
+		}
+
+		const QHash<QString, QString>& subDirMap = m_buildFileIDMap[subDir];
+
+		QString buildFilePathName = subDirMap.value(buildFileID, QString());
+
+		if (buildFilePathName.isEmpty() == true)
+		{
+			return false;
+		}
+
+		return isBuildFileExists(buildFilePathName);
+	}
+
 	bool BuildResultWriter::checkBuildFilePtr(const BuildFile* buildFile) const
 	{
 		TEST_PTR_RETURN_FALSE(buildFile);

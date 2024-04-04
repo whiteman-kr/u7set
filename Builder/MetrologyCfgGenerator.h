@@ -19,6 +19,7 @@ namespace Builder
 		bool writeDatabaseInfo();
 		bool writeMetrologyItemsXml();
 		bool writeMetrologySignalSet();
+		bool linkComparatorsSet();
 
 		void getSignalLocation(Hardware::DeviceObject* pDeviceObject, Metrology::SignalLocation& l);
 
