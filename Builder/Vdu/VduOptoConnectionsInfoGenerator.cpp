@@ -336,15 +336,15 @@ namespace Builder
 															QStringList& file)
 	{
 		file << line;
-		file << QString("  Address   | portIndex | signalIndex | signalType | offsetW | bitNo  | reserv1 | refAppSignalID | refCustomAppSignalID | refCaption | refUnit    | reserv2");
+		file << QString("  Address   | signalIndex | portIndex | signalType | offsetW | bitNo  | reserv1 | refAppSignalID | refCustomAppSignalID | refCaption | refUnit    | reserv2");
 		file << line;
 
 		for(const VduAppSignalInfo& si : appSignals)
 		{
 			file << addrStr(sizeof(si),
-							QString("%1    | %2      | %3     | %4  | %5 | %6  | %7     | %8           | %9 | %10 | %11").
-							arg(hex16(si.optoPortIndex)).
+							QString("%1      | %2    | %3     | %4  | %5 | %6  | %7     | %8           | %9 | %10 | %11").
 							arg(hex16(si.signalIndex)).
+							arg(hex16(si.optoPortIndex)).
 							arg(hex16(si.vduSignalType)).
 							arg(hex16(si.valueOffsetW)).
 							arg(hex16(si.valueBitNo)).

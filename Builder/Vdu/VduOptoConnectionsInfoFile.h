@@ -63,8 +63,8 @@ enum class VduSignalType
 
 struct VduAppSignalInfo
 {
-	uint16_t optoPortIndex;
 	uint16_t signalIndex;
+	uint16_t optoPortIndex;
 
 	uint16_t vduSignalType;			// values of VduSignalType enum
 
