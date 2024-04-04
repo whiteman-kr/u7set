@@ -45,6 +45,7 @@ namespace Db
 		constexpr static const char* SuppressWarnings = "SuppressWarnings";						// A list of suppressed warnings on build
 		constexpr static const char* UppercaseAppSignalId = "UppercaseAppSignalID";
 		constexpr static const char* GenerateAppSignalsXml = "Generate AppSignals.xml";			// Generate file AppSignals.xml on build
+		constexpr static const char* GenerateAppSignalsExtXml = "Generate AppSignalsExt.xml";	// Generate file AppSignalsExt.xml on build
 		constexpr static const char* GenerateAppLogicDrawings = "Generate App Logic Drawings";	// Generate file AppLogicDrawings.pdf on build
 		constexpr static const char* GenerateExtraDebugInfo = "Generate Extra Debug Info";		// Generate extra debug information on build
 		constexpr static const char* RunSimTestsOnBuild = "Run Simulator Tests on Build";		// Run simulator based tests on build project
@@ -219,6 +220,9 @@ public:
 	[[nodiscard]] bool generateAppSignalsXml() const;
 	void setGenerateAppSignalsXml(bool value);
 
+	[[nodiscard]] bool generateAppSignalsExtXml() const;
+	void setGenerateAppSignalsExtXml(bool value);
+
 	[[nodiscard]] bool generateAppLogicDrawings() const;
 	void setGenerateAppLogicDrawings(bool value);
 
@@ -239,6 +243,7 @@ private:
 	int m_simTestsTimeout = -1;
 	bool m_uppercaseAppSignalId = true;
 	bool m_generateAppSignalsXml = false;
+	bool m_generateAppSignalsExtXml = false;
 	bool m_generateAppLogicDrawings = false;
 	bool m_generateExtraDebugInfo = false;
 	bool m_mismatchPresetVersionAsWarning = false; // If preset version mismatch is detected, treat it as a warning

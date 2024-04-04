@@ -50,6 +50,7 @@ namespace Builder
 		Context& operator=(Context&&) = delete;
 
 		bool generateAppSignalsXml() const;
+		bool generateAppSignalsExtXml() const;
 		bool generateExtraDebugInfo() const;
 
 	public:

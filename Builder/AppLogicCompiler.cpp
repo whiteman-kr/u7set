@@ -1288,6 +1288,11 @@ namespace Builder
 
 	bool ApplicationLogicCompiler::writeCommonAppSignalsExtXmlFile()
 	{
+		if (m_context->generateAppSignalsExtXml() == false)
+		{
+			return true;
+		}
+
 		SignalSet* sgSet = signalSet();
 
 		if (sgSet == nullptr)

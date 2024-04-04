@@ -518,7 +518,8 @@ bool DbController::getProjectProperties(DbProjectProperties* out, QWidget* paren
 	bool safetyProject = true;
 	QString suppressWarningsStr;
 	bool uppercaseAppSignalId = true;
-	bool generateAppSignalXml = false;
+	bool generateAppSignalsXml = false;
+	bool generateAppSignalsExtXml = false;
 	bool generateAppLogicDrawings = false;
 	bool generateExtraDebugInfo = false;
 	bool mismatchPresetVersionAsWarning = false;
@@ -533,7 +534,8 @@ bool DbController::getProjectProperties(DbProjectProperties* out, QWidget* paren
 
 	ok &= getProjectProperty(Db::ProjectProperty::SuppressWarnings, &suppressWarningsStr, parentWidget);
 	ok &= getProjectProperty(Db::ProjectProperty::UppercaseAppSignalId, &uppercaseAppSignalId, parentWidget);
-	ok &= getProjectProperty(Db::ProjectProperty::GenerateAppSignalsXml, &generateAppSignalXml, parentWidget);
+	ok &= getProjectProperty(Db::ProjectProperty::GenerateAppSignalsXml, &generateAppSignalsXml, parentWidget);
+	ok &= getProjectProperty(Db::ProjectProperty::GenerateAppSignalsExtXml, &generateAppSignalsExtXml, parentWidget);
 	ok &= getProjectProperty(Db::ProjectProperty::GenerateAppLogicDrawings, &generateAppLogicDrawings, parentWidget);
 	ok &= getProjectProperty(Db::ProjectProperty::GenerateExtraDebugInfo, &generateExtraDebugInfo, parentWidget);
 	ok &= getProjectProperty(Db::ProjectProperty::MismatchPresetVersionAsWarning, &mismatchPresetVersionAsWarning, parentWidget);
@@ -558,7 +560,8 @@ bool DbController::getProjectProperties(DbProjectProperties* out, QWidget* paren
 	out->setSafetyProject(safetyProject);
 	out->setSuppressWarnings(suppressWarningsStr);
 	out->setUppercaseAppSignalId(uppercaseAppSignalId);
-	out->setGenerateAppSignalsXml(generateAppSignalXml);
+	out->setGenerateAppSignalsXml(generateAppSignalsXml);
+	out->setGenerateAppSignalsExtXml(generateAppSignalsExtXml);
 	out->setGenerateAppLogicDrawings(generateAppLogicDrawings);
 	out->setGenerateExtraDebugInfo(generateExtraDebugInfo);
 	out->setMismatchPresetVersionAsWarning(mismatchPresetVersionAsWarning);
@@ -584,6 +587,7 @@ bool DbController::setProjectProperties(const DbProjectProperties& in, QWidget* 
 	ok &= setProjectProperty(Db::ProjectProperty::SuppressWarnings, in.suppressWarningsAsString(), parentWidget);
 	ok &= setProjectProperty(Db::ProjectProperty::UppercaseAppSignalId, in.uppercaseAppSignalId(), parentWidget);
 	ok &= setProjectProperty(Db::ProjectProperty::GenerateAppSignalsXml, in.generateAppSignalsXml(), parentWidget);
+	ok &= setProjectProperty(Db::ProjectProperty::GenerateAppSignalsExtXml, in.generateAppSignalsExtXml(), parentWidget);
 	ok &= setProjectProperty(Db::ProjectProperty::GenerateAppLogicDrawings, in.generateAppLogicDrawings(), parentWidget);
 	ok &= setProjectProperty(Db::ProjectProperty::GenerateExtraDebugInfo, in.generateExtraDebugInfo(), parentWidget);
 	ok &= setProjectProperty(Db::ProjectProperty::MismatchPresetVersionAsWarning, in.mismatchPresetVersionAsWarning(), parentWidget);
