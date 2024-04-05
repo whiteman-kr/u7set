@@ -1991,7 +1991,8 @@ void AppSignal::setTags(const std::set<QString>& tags)
 
 void AppSignal::setTagsStr(const QString& tagsStr)
 {
-	setTags(tagsStr.split(QRegularExpression("\\W+"), Qt::SkipEmptyParts)); 
+	static const auto re = QRegularExpression("\\W+");
+	setTags(tagsStr.split(re, Qt::SkipEmptyParts));
 }
 
 void AppSignal::appendTag(const QString& tag)

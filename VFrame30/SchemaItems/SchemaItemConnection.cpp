@@ -93,7 +93,8 @@ namespace VFrame30
 
 	void SchemaItemConnection::setConnectionIds(const QString& value)
 	{
-		m_connectionIds = value.split(QRegularExpression("\\W+"), Qt::SkipEmptyParts);
+		static const auto re = QRegularExpression("\\W+");
+		m_connectionIds = value.split(re, Qt::SkipEmptyParts);
 
 		if (double minHeight = minimumPossibleHeightDocPt(m_cachedGridSize, m_cachedPinGridStep);
 			heightDocPt() < minHeight)

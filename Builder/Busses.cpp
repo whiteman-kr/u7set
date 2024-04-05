@@ -928,6 +928,11 @@ namespace Builder
 			m_busses.insert(srcBus.busTypeId(), bus);
 		}
 
+		if (result == false)
+		{
+			return false;
+		}
+
 		QVector<BusShared> busInitOrder;
 
 		result = getBusInitOrder(&busInitOrder);

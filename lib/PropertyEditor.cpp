@@ -363,7 +363,9 @@ namespace ExtWidgets
 		}
 
 		QString text = t;
-		text.remove(QRegularExpression("[\\[,\\]]"));
+		static const QRegularExpression re{"[\\[,\\]]"};
+
+		text.remove(re);
 
 		QStringList l = text.split(";");
 		if (l.count() != 4)
@@ -2035,7 +2037,7 @@ namespace ExtWidgets
 
 		m_button->setEnabled(readOnly == false);
 
-		QRegularExpression regexp("\\[([1,2]?[0-9]{0,2};){3}[1,2]?[0-9]{0,2}\\]");
+		static const QRegularExpression regexp("\\[([1,2]?[0-9]{0,2};){3}[1,2]?[0-9]{0,2}\\]");
 		QRegularExpressionValidator* validator = new QRegularExpressionValidator(regexp, this);
 		m_lineEdit->setValidator(validator);
 

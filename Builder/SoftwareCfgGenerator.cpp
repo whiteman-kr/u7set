@@ -663,7 +663,8 @@ namespace Builder
 				continue;
 			}
 
-			auto schemaTagList = schemaTagsProperty->value().toString().split(QRegularExpression("\\W+"), Qt::SkipEmptyParts);
+			static const auto re = QRegularExpression("\\W+");
+			auto schemaTagList = schemaTagsProperty->value().toString().split(re, Qt::SkipEmptyParts);
 			for (QString& tag : schemaTagList)
 			{
 				if (vduSchema.tagsAsList().contains(tag.toLower()) == true)

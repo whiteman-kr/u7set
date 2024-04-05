@@ -198,6 +198,8 @@ namespace Builder
 			case E::SignalType::Analog:
 			case E::SignalType::Discrete:
 				{
+					// JsBusSignal has a parent QObject, so it will be deleted automatically
+					//
 					JsBusSignal* bsResult = new JsBusSignal(this, &bs, offset + bs.inbusAddr.offset(), busShared->busTypeID());
 					busSignals.push_back(QVariant::fromValue<JsBusSignal*>(bsResult));
 				}
