@@ -39,6 +39,7 @@ struct VduOptoConnectionsInfoFileHeader
 	// VduAppSignalInfo rxAppSignalInfo[]				// app signals received by VDU from LM
 	// VduAppSignalInfo txAppSignalInfo[]				// app signals transmitted from VDU to LM
 	// uint16_t strings[]
+	// uint64_t crc64;
 };
 
 struct VduOptoPortInfo

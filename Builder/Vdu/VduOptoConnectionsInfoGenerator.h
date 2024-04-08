@@ -44,8 +44,9 @@ namespace Builder
 		void recalcStringsRefs(uint32_t stringsOffsetInFile);
 
 		QString addrStr(int fieldSize, const QString& str);
-		QString hex32(qint64 v);
 		QString hex16(qint64 v);
+		QString hex32(qint64 v);
+		QString hex64(quint64 v);
 
 	private:
 		Context* m_context = nullptr;
@@ -63,5 +64,8 @@ namespace Builder
 		std::vector<VduAppSignalInfo> m_txAppSignals;
 
 		std::vector<char16_t> m_strings;			// first string always "empty string"!
+
+		uint64_t m_crc64 = 0;
+		uint64_t m_crc64Offset = 0;
 	};
 }

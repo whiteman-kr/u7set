@@ -1,6 +1,7 @@
 #include "WUtils.h"
 #include "Context.h"
 #include "VduOptoConnectionsInfoGenerator.h"
+#include "Crc.h"
 
 namespace Builder
 {
@@ -187,6 +188,11 @@ namespace Builder
 		data.append(reinterpret_cast<const char*>(m_strings.data()),
 					m_strings.size() * sizeof(char16_t));
 
+		m_crc64Offset = data.size();
+		m_crc64 = Crc64().add(data);
+
+		data.append(reinterpret_cast<const char*>(&m_crc64), sizeof(m_crc64));
+
 		return m_resultWriter->addFile(Directory::VDUs + Separator::DIR + m_vduModule->equipmentID(),
 									   File::OPTO_CONNECTIONS_INFO_VCI, data, false);
 	}
@@ -324,6 +330,12 @@ namespace Builder
 
 			file << addrStr(dataSizeW * sizeof(char16_t), printStr);
 		}
+
+		file << LINE;
+
+		Q_ASSERT(m_crc64Offset == m_txtOffset);
+
+		file << addrStr(sizeof(m_crc64), QString("CRC64 = %1").arg(hex64(m_crc64)));
 
 		file << LINE;
 
@@ -510,13 +522,19 @@ namespace Builder
 		return res;
 	}
 
+	QString VduOptoConnectionsInfoGenerator::hex16(qint64 v)
+	{
+		return QString("0x") + QString("%1").arg(v, 4, 16, QChar('0')).toUpper();
+	}
+
 	QString VduOptoConnectionsInfoGenerator::hex32(qint64 v)
 	{
 		return QString("0x") + QString("%1").arg(v, 8, 16, QChar('0')).toUpper();
 	}
 
-	QString VduOptoConnectionsInfoGenerator::hex16(qint64 v)
+	QString VduOptoConnectionsInfoGenerator::hex64(quint64 v)
 	{
-		return QString("0x") + QString("%1").arg(v, 4, 16, QChar('0')).toUpper();
+		return QString("0x") + QString("%1").arg(v, 16, 16, QChar('0')).toUpper();
 	}
+
 }
