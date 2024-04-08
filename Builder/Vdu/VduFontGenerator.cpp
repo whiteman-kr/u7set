@@ -149,7 +149,7 @@ namespace Builder
 			}
 		}
 
-		quint32 offset = symbols.size() * sizeof(VduSymbolHeader);
+		quint32 offset = static_cast<quint32>(symbols.size() * sizeof(VduSymbolHeader));
 
 		for (VduSymbol& s : symbols)
 		{
