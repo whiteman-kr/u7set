@@ -383,9 +383,7 @@ void SimSchemaWidget::signalContextMenu(QStringList appSignals,
 	{
 		// Find schema by appSignalId
 		//
-		QStringList schemaIds = m_simulator->schemasByAppSignalId(s);
-
-		for (const QString& schemaId : schemaIds)
+		for (const QString& schemaId : m_simulator->schemasByAppSignalId(s))
 		{
 			signalsSchemasSet.insert(schemaId);
 		}
@@ -413,9 +411,7 @@ void SimSchemaWidget::signalContextMenu(QStringList appSignals,
 	{
 		// Find by app signal id
 		//
-		QStringList schemaIds = m_simulator->schemasByAppSignalId(s);
-
-		for (const QString& schemaId : schemaIds)
+		for (const QString& schemaId : m_simulator->schemasByAppSignalId(s))
 		{
 			impactSignalsSchemasSet.insert(schemaId);
 		}

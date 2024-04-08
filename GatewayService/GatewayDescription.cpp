@@ -633,9 +633,11 @@ namespace Gateway
 			QString gatewayID;
 			QString datewayDescription;
 
-			xml.readEnumKeyAttribute<E::GatewayType>(XmlAttribute::GATEWAY_TYPE, &gatewayType);
-			xml.readStringAttribute(XmlAttribute::GATEWAY_ID, &gatewayID);
-			xml.readStringAttribute(XmlAttribute::GATEWAY_DESCRIPTION, &datewayDescription);
+			result &= xml.readEnumKeyAttribute<E::GatewayType>(XmlAttribute::GATEWAY_TYPE, &gatewayType);
+			result &= xml.readStringAttribute(XmlAttribute::GATEWAY_ID, &gatewayID);
+			result &= xml.readStringAttribute(XmlAttribute::GATEWAY_DESCRIPTION, &datewayDescription);
+
+			BREAK_IF_FALSE(result);
 
 			GatewayShared gw = createTypedGateway(gatewayType,
 												  gatewayID,

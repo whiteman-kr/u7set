@@ -622,6 +622,7 @@ namespace Separator
 	inline const QString BACK_DIR("\\");
 	inline const QString EMPTY_STR("");
 	inline const QString NEW_LINE("\n");
+	inline const QString UNDERSCORE("_");
 }
 
 namespace FormatStr

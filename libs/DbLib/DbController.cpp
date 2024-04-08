@@ -518,7 +518,8 @@ bool DbController::getProjectProperties(DbProjectProperties* out, QWidget* paren
 	bool safetyProject = true;
 	QString suppressWarningsStr;
 	bool uppercaseAppSignalId = true;
-	bool generateAppSignalXml = false;
+	bool generateAppSignalsXml = false;
+	bool generateAppSignalsExtXml = false;
 	bool generateAppLogicDrawings = false;
 	bool generateExtraDebugInfo = false;
 	bool mismatchPresetVersionAsWarning = false;
@@ -533,7 +534,8 @@ bool DbController::getProjectProperties(DbProjectProperties* out, QWidget* paren
 
 	ok &= getProjectProperty(Db::ProjectProperty::SuppressWarnings, &suppressWarningsStr, parentWidget);
 	ok &= getProjectProperty(Db::ProjectProperty::UppercaseAppSignalId, &uppercaseAppSignalId, parentWidget);
-	ok &= getProjectProperty(Db::ProjectProperty::GenerateAppSignalsXml, &generateAppSignalXml, parentWidget);
+	ok &= getProjectProperty(Db::ProjectProperty::GenerateAppSignalsXml, &generateAppSignalsXml, parentWidget);
+	ok &= getProjectProperty(Db::ProjectProperty::GenerateAppSignalsExtXml, &generateAppSignalsExtXml, parentWidget);
 	ok &= getProjectProperty(Db::ProjectProperty::GenerateAppLogicDrawings, &generateAppLogicDrawings, parentWidget);
 	ok &= getProjectProperty(Db::ProjectProperty::GenerateExtraDebugInfo, &generateExtraDebugInfo, parentWidget);
 	ok &= getProjectProperty(Db::ProjectProperty::MismatchPresetVersionAsWarning, &mismatchPresetVersionAsWarning, parentWidget);
@@ -558,7 +560,8 @@ bool DbController::getProjectProperties(DbProjectProperties* out, QWidget* paren
 	out->setSafetyProject(safetyProject);
 	out->setSuppressWarnings(suppressWarningsStr);
 	out->setUppercaseAppSignalId(uppercaseAppSignalId);
-	out->setGenerateAppSignalsXml(generateAppSignalXml);
+	out->setGenerateAppSignalsXml(generateAppSignalsXml);
+	out->setGenerateAppSignalsExtXml(generateAppSignalsExtXml);
 	out->setGenerateAppLogicDrawings(generateAppLogicDrawings);
 	out->setGenerateExtraDebugInfo(generateExtraDebugInfo);
 	out->setMismatchPresetVersionAsWarning(mismatchPresetVersionAsWarning);
@@ -584,6 +587,7 @@ bool DbController::setProjectProperties(const DbProjectProperties& in, QWidget* 
 	ok &= setProjectProperty(Db::ProjectProperty::SuppressWarnings, in.suppressWarningsAsString(), parentWidget);
 	ok &= setProjectProperty(Db::ProjectProperty::UppercaseAppSignalId, in.uppercaseAppSignalId(), parentWidget);
 	ok &= setProjectProperty(Db::ProjectProperty::GenerateAppSignalsXml, in.generateAppSignalsXml(), parentWidget);
+	ok &= setProjectProperty(Db::ProjectProperty::GenerateAppSignalsExtXml, in.generateAppSignalsExtXml(), parentWidget);
 	ok &= setProjectProperty(Db::ProjectProperty::GenerateAppLogicDrawings, in.generateAppLogicDrawings(), parentWidget);
 	ok &= setProjectProperty(Db::ProjectProperty::GenerateExtraDebugInfo, in.generateExtraDebugInfo(), parentWidget);
 	ok &= setProjectProperty(Db::ProjectProperty::MismatchPresetVersionAsWarning, in.mismatchPresetVersionAsWarning(), parentWidget);
@@ -1248,7 +1252,7 @@ bool DbController::getLatestVersion(const std::vector<DbFileInfo>& files,
 	emit signal_getLatestVersion(&files, out);
 
 	ok = waitForComplete(parentWidget, tr("Getting file"));
-	return out;
+	return ok;
 }
 
 bool DbController::getLatestVersion(const DbFileInfo& file, std::shared_ptr<DbFile>* out, QWidget* parentWidget)
@@ -1298,7 +1302,7 @@ bool DbController::getLatestTreeVersion(const DbFileInfo& file, std::vector<std:
 	emit signal_getLatestTreeVersion(file, out);
 
 	ok = waitForComplete(parentWidget, tr("Getting files"));
-	return out;
+	return ok;
 }
 
 bool DbController::getCheckedOutFiles(const DbFileInfo& parentFile, std::vector<DbFileInfo>* out, QWidget* parentWidget)
@@ -1338,7 +1342,7 @@ bool DbController::getCheckedOutFiles(const std::vector<DbFileInfo>* parentFiles
 	emit signal_getCheckedOutFiles(parentFiles, out);
 
 	ok = waitForComplete(parentWidget, tr("Getting checked out files"));
-	return out;
+	return ok;
 }
 
 bool DbController::getWorkcopy(const std::vector<DbFileInfo>& files,
@@ -1367,7 +1371,7 @@ bool DbController::getWorkcopy(const std::vector<DbFileInfo>& files,
 	emit signal_getWorkcopy(&files, out);
 
 	ok = waitForComplete(parentWidget, tr("Getting file workcopy"));
-	return out;
+	return ok;
 }
 
 bool DbController::getWorkcopy(const DbFileInfo& file, std::shared_ptr<DbFile>* out, QWidget* parentWidget)
@@ -1416,7 +1420,7 @@ bool DbController::setWorkcopy(const std::vector<std::shared_ptr<DbFile>>& files
 	emit signal_setWorkcopy(&files);
 
 	ok = waitForComplete(parentWidget, tr("Setting file workcopy"));
-	return true;
+	return ok;
 }
 
 bool DbController::setWorkcopy(const std::shared_ptr<DbFile>& file, QWidget* parentWidget)
@@ -1451,7 +1455,7 @@ bool DbController::getSpecificCopy(const std::vector<DbFileInfo>& files, int cha
 	emit signal_getSpecificCopy(&files, changesetId, out);
 
 	ok = waitForComplete(parentWidget, tr("Getting file copy"));
-	return out;
+	return ok;
 }
 
 bool DbController::getSpecificCopy(const DbFileInfo& file, int changesetId, std::shared_ptr<DbFile>* out, QWidget* parentWidget)
@@ -1501,7 +1505,7 @@ bool DbController::getSpecificCopy(const std::vector<DbFileInfo>& files, QDateTi
 	emit signal_getSpecificCopy(&files, date, out);
 
 	ok = waitForComplete(parentWidget, tr("Getting file copy"));
-	return out;
+	return ok;
 }
 
 bool DbController::getSpecificCopy(const DbFileInfo& file, QDateTime date, std::shared_ptr<DbFile>* out, QWidget* parentWidget)
@@ -1563,7 +1567,7 @@ bool DbController::checkIn(std::vector<DbFileInfo>& files, const QString& commen
 	emit signal_checkIn(&files, trimmedCommnet);
 
 	ok = waitForComplete(parentWidget, tr("Checking in files"));
-	return true;
+	return ok;
 }
 
 bool DbController::checkInTree(std::vector<DbFileInfo>& parentFiles, std::vector<DbFileInfo>* outCheckedIn, const QString& comment, QWidget* parentWidget)
@@ -1593,7 +1597,7 @@ bool DbController::checkInTree(std::vector<DbFileInfo>& parentFiles, std::vector
 	emit signal_checkInTree(&parentFiles, outCheckedIn, trimmedCommnet);
 
 	ok = waitForComplete(parentWidget, tr("Checking in files"));
-	return true;
+	return ok;
 }
 
 bool DbController::checkOut(DbFileInfo& file, QWidget* parentWidget)
@@ -1630,7 +1634,7 @@ bool DbController::checkOut(std::vector<DbFileInfo>& files, QWidget* parentWidge
 	emit signal_checkOut(&files);
 
 	ok = waitForComplete(parentWidget, tr("Checking out files"));
-	return true;
+	return ok;
 }
 
 
@@ -1668,7 +1672,7 @@ bool DbController::undoChanges(std::vector<DbFileInfo>& files, QWidget* parentWi
 	emit signal_undoChanges(&files);
 
 	ok = waitForComplete(parentWidget, tr("Undo pending changes"));
-	return true;
+	return ok;
 }
 
 bool DbController::undoChangesRecursively(const DbFileInfo& file, QWidget* parentWidget)
@@ -1686,7 +1690,7 @@ bool DbController::undoChangesRecursively(const DbFileInfo& file, QWidget* paren
 	emit signal_undoChangesRecursively(file);
 
 	ok = waitForComplete(parentWidget, tr("Undo pending changes"));
-	return true;
+	return ok;
 }
 
 bool DbController::fileHasChildren(bool* hasChildren, DbFileInfo& file, QWidget* parentWidget)
@@ -1712,7 +1716,7 @@ bool DbController::fileHasChildren(bool* hasChildren, DbFileInfo& file, QWidget*
 	emit signal_fileHasChildren(hasChildren, &file);
 
 	ok = waitForComplete(parentWidget, tr("Checking file children"));
-	return true;
+	return ok;
 }
 
 bool DbController::getProjectHistory(std::vector<DbChangeset>* out, QWidget* parentWidget)
@@ -1738,7 +1742,7 @@ bool DbController::getProjectHistory(std::vector<DbChangeset>* out, QWidget* par
 	emit signal_getHistory(out);
 
 	ok = waitForComplete(parentWidget, tr("Getting project history"));
-	return true;
+	return ok;
 }
 
 bool DbController::getFileHistory(const DbFileInfo& file, std::vector<DbChangeset>* out, QWidget* parentWidget)
@@ -1765,7 +1769,7 @@ bool DbController::getFileHistory(const DbFileInfo& file, std::vector<DbChangese
 	emit signal_getFileHistory(file, out);
 
 	ok = waitForComplete(parentWidget, tr("Getting file history"));
-	return true;
+	return ok;
 }
 
 bool DbController::getFileHistoryRecursive(const DbFileInfo& parentFile, std::vector<DbChangeset>* out, QWidget* parentWidget)
@@ -1792,7 +1796,7 @@ bool DbController::getFileHistoryRecursive(const DbFileInfo& parentFile, std::ve
 	emit signal_getFileHistoryRecursive(parentFile, out);
 
 	ok = waitForComplete(parentWidget, tr("Getting file history"));
-	return true;
+	return ok;
 }
 
 bool DbController::getChangesetDetails(int changeset, DbChangesetDetails* out, QWidget* parentWidget)
@@ -1818,7 +1822,7 @@ bool DbController::getChangesetDetails(int changeset, DbChangesetDetails* out, Q
 	emit signal_getChangesetDetails(changeset, out);
 
 	ok = waitForComplete(parentWidget, tr("Getting changeset %1 details").arg(changeset));
-	return true;
+	return ok;
 }
 
 bool DbController::addDeviceObject(Hardware::DeviceObject* device, int parentId, QWidget* parentWidget)
@@ -2543,7 +2547,7 @@ bool DbController::getSignalHistory(int signalID, std::vector<DbChangeset>* out,
 
 	ok = waitForComplete(parentWidget, tr("Getting signal history"));
 
-	return true;
+	return ok;
 }
 
 bool DbController::getSpecificSignals(const std::vector<int>& signalIDs, int changesetId,
@@ -2564,7 +2568,7 @@ bool DbController::getSpecificSignals(const std::vector<int>& signalIDs, int cha
 
 	ok = waitForComplete(parentWidget, tr("Getting specific signals"));
 
-	return true;
+	return ok;
 }
 
 bool DbController::getSpecificSignals(int changesetId, std::vector<AppSignal>* out, QWidget* parentWidget)
@@ -2584,7 +2588,7 @@ bool DbController::getSpecificSignals(int changesetId, std::vector<AppSignal>* o
 
 	ok = waitForComplete(parentWidget, tr("Getting specific signals"));
 
-	return true;
+	return ok;
 }
 
 bool DbController::getSpecificSignals(QDateTime date, std::vector<AppSignal>* out, QWidget* parentWidget)
@@ -2604,7 +2608,7 @@ bool DbController::getSpecificSignals(QDateTime date, std::vector<AppSignal>* ou
 
 	ok = waitForComplete(parentWidget, tr("Getting specific signals"));
 
-	return true;
+	return ok;
 }
 
 bool DbController::hasCheckedOutSignals(bool* hasCheckedOut, QWidget* parentWidget)
@@ -2624,7 +2628,7 @@ bool DbController::hasCheckedOutSignals(bool* hasCheckedOut, QWidget* parentWidg
 
 	ok = waitForComplete(parentWidget, tr("HasCheckedOutSignals checking"));
 
-	return true;
+	return ok;
 
 }
 

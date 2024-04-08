@@ -764,8 +764,8 @@ namespace Builder
 				QStringList errorMessages;
 				QByteArray nativeVduData;
 
-				bool genSchemaOk = Builder::VduSchemaGenerator::generateVduSchema(vdu->equipmentId(), 
-																				  *schema, 
+				bool genSchemaOk = Builder::VduSchemaGenerator::generateVduSchema(vdu->equipmentId(),
+																				  *schema,
 																				  vduSignals,
 																				  nativeVduData, *log);
 				if (genSchemaOk == false)
@@ -776,9 +776,7 @@ namespace Builder
 
 				// Save result.
 				//
-				QString nativeVduSchemaFileName = QString("%1.%2")
-											  .arg(schema->schemaId())
-											  .arg(Db::File::VduNativeFileExtension);
+				QString nativeVduSchemaFileName = QString("%1.%2").arg(schema->schemaId()).arg(Db::File::VduNativeFileExtension);
 
 				QString vduDir = Directory::VDUs + "/" + vdu->equipmentId() + "/Schemas";
 

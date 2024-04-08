@@ -21,6 +21,10 @@ namespace Gateway
 	{
 	}
 
+	Handler::~Handler()
+	{
+	}
+
 	void Handler::getRequiredSignalsHashes(std::set<Hash>* hashes) const
 	{
 		Q_UNUSED(hashes);
