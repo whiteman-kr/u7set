@@ -1266,8 +1266,10 @@ namespace Hardware
 	{
 		if (m_equipmentId != value)
 		{
+			static const QRegularExpression re{QStringLiteral("[^a-zA-Z0-9#$_()]")};
+
 			m_equipmentId = value;
-			m_equipmentId.replace(QRegularExpression(QStringLiteral("[^a-zA-Z0-9#$_()]")), QStringLiteral("#"));
+			m_equipmentId.replace(re, QStringLiteral("#"));
 		}
 	}
 
@@ -1410,7 +1412,8 @@ namespace Hardware
 
 	void DeviceObject::setTags(const QString& tags)
 	{
-		auto list = tags.split(QRegularExpression("\\W+"), Qt::SkipEmptyParts);
+		static const QRegularExpression re{"\\W+"};
+		auto list = tags.split(re, Qt::SkipEmptyParts);
 		return setTags(list);
 	}
 
@@ -1536,7 +1539,8 @@ R"DELIM({
 	{
 		// Split by comma, semicolon, return or space, remove empty parts.
 		//
-		m_presetProtectedProperties	= value.split(QRegularExpression(QStringLiteral("[,;\\n\\r\\s]")), Qt::SkipEmptyParts);
+		static const QRegularExpression re{QStringLiteral("[,;\\n\\r\\s]")};
+		m_presetProtectedProperties	= value.split(re, Qt::SkipEmptyParts);
 	}
 
 	const QStringList& DeviceObject::presetProtectedProperties() const

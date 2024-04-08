@@ -606,12 +606,12 @@ QWidget* SignalsTablePropEditor::createEditor(QWidget* parent, const QStyleOptio
 
 		if (m_propManager->name(col).right(2) == "ID")
 		{
-			QRegularExpression rx4ID(AppSignal::IDENTIFICATORS_VALIDATOR);
+			static QRegularExpression rx4ID(AppSignal::IDENTIFICATORS_VALIDATOR);
 			le->setValidator(new QRegularExpressionValidator(rx4ID, le));
 		}
 		else
 		{
-			QRegularExpression rx4Name("^.+$");
+			static QRegularExpression rx4Name("^.+$");
 			le->setValidator(new QRegularExpressionValidator(rx4Name, le));
 		}
 

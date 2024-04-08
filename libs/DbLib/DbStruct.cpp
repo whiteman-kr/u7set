@@ -191,7 +191,8 @@ QString DbProjectProperties::suppressWarningsAsString() const
 
 void DbProjectProperties::setSuppressWarnings(const QString& value)
 {
-	QStringList sl = value.split(QRegularExpression("\\W+"), Qt::SkipEmptyParts);
+	static const auto re = QRegularExpression("\\W+");
+	QStringList sl = value.split(re, Qt::SkipEmptyParts);
 
 	m_suppressWarnings.clear();
 	m_suppressWarnings.reserve(sl.size());

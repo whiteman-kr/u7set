@@ -585,7 +585,7 @@ std::pair<bool, QString> PropertyObject::parseSpecificPropertiesStruct(const QSt
 
 		// Regular expression was taken from https://forum.qt.io/topic/119076/qregexp-to-parse-a-csv-file
 		//
-		const QRegularExpression regExp(R"x((\;|\n|^)(?:"([^"]*(?:""[^"]*)*)"|([^"\;\n]*)))x");
+		thread_local const QRegularExpression regExp(R"x((\;|\n|^)(?:"([^"]*(?:""[^"]*)*)"|([^"\;\n]*)))x");
 
 		QRegularExpressionMatchIterator matchIt = regExp.globalMatch(row);
 		while (matchIt.hasNext())
