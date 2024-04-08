@@ -5168,6 +5168,8 @@ namespace Builder
 		result &= createNonAcquiredOutputBusesList();
 		result &= createNonAcquiredInternalBusesList();
 
+		result &= createDiscreteInvertedOutputSignalsList();
+
 		if (result == false)
 		{
 			LOG_INTERNAL_ERROR(m_log);
@@ -5225,6 +5227,8 @@ namespace Builder
 
 		sortSignalList(m_nonAcquiredOutputBuses);
 		sortSignalList(m_nonAcquiredInternalBuses);
+
+		sortSignalList(m_discreteInvertedOutputSignals);
 
 		return result;
 	}
