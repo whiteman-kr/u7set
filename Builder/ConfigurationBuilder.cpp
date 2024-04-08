@@ -712,6 +712,14 @@ namespace Builder
 					const int crcOffset = 172 * 2;
 
 					QString result = writer.storeCrc64(configFrame, 0, crcOffset, crcOffset);
+					if (result.isEmpty() == true) 
+					{
+						m_log->errINT1001(tr("%1: Fatal error, CRC64 for VDU %2 has invalid address (frame %3, offset %3)!")
+											  .arg(__FUNCTION__)
+											  .arg(vdu->equipmentId())
+											  .arg(configFrame)
+											  .arg(crcOffset));
+					}
 
 					writer.jsAddDescription(vdu->place(),
 											tr("%1;%2;%3;0;64;%4;0x%5")

@@ -2,6 +2,7 @@ VDU-1
 	24.05.2023	Version: 0	VDU-1_v0.u7devp RPCT-3550: Create VDU preset
 	24.05.2023	Version: 1	VDU-1_v1.u7devp RPCT-3550: FamilyType changed from 0x5700 to 0x7100
 	26.01.2024	Version: 2	VDU-1_v2.u7devp RPCT-3550: Added properties SchemaTags, StartSchemaID
+	08.04.2024	Version: 3	VDU-1_v3.u7devp RPCT-3872: Added property Fonts
 
 
 

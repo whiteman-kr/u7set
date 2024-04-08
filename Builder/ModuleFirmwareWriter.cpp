@@ -873,7 +873,10 @@ namespace Hardware
 		}
 
 		quint64 result = Crc::crc64(scriptFirmwareData->frames[frameIndex].data() + start, count);
-		setData64(frameIndex, offset, result);
+		if (setData64(frameIndex, offset, result) == false) 
+		{
+			return QString();
+		}
 
 		return QString::number(result, 16);
 	}
@@ -898,7 +901,10 @@ namespace Hardware
 		QByteArray bytes = dataString.toUtf8();
 
 		quint64 result = ::calcHash(bytes.data(), bytes.size());
-		setData64(frameIndex, offset, result);
+		if (setData64(frameIndex, offset, result) == false) 
+		{
+			return QString();
+		}
 
 		return QString::number(result, 16);
 
