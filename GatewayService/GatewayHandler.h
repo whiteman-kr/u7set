@@ -14,6 +14,7 @@ namespace Gateway
 				const GatewayServiceSettings& settings,
 				CircularLoggerShared log,
 				bool logGatewayPackets);
+		virtual ~Handler();
 
 		virtual void run() = 0;
 		virtual void shutdown() = 0;

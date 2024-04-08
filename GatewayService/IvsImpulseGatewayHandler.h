@@ -44,7 +44,7 @@ namespace Gateway
 						  CircularLoggerShared log,
 						  bool logGatewayPackets);
 
-		~IvsImpulseHandler();
+		virtual ~IvsImpulseHandler();
 
 		virtual void run() override;
 		virtual void shutdown() override;
