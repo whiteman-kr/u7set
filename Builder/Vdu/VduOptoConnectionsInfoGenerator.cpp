@@ -462,13 +462,18 @@ namespace Builder
 
 	vdu_string_ref VduOptoConnectionsInfoGenerator::appendString(const QString& str)
 	{
-		if (str.isEmpty() == true && m_strings.size() > 0)
+		Hash hash = calcHash(str);
+
+		auto it = m_stringRefs.find(hash);
+
+		if (it != m_stringRefs.end())
 		{
-			// first string always "empty string"!
-			return 0;
+			return it->second;
 		}
 
 		vdu_string_ref ref = static_cast<vdu_string_ref>(m_strings.size() * sizeof(char16_t));
+
+		m_stringRefs.emplace(hash, ref);
 
 		Q_ASSERT(str.length() < std::numeric_limits<char16_t>::max());
 
