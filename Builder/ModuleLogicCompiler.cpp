@@ -5168,6 +5168,8 @@ namespace Builder
 		result &= createNonAcquiredOutputBusesList();
 		result &= createNonAcquiredInternalBusesList();
 
+		result &= createDiscreteInvertedOutputSignalsList();
+
 		if (result == false)
 		{
 			LOG_INTERNAL_ERROR(m_log);
@@ -5225,6 +5227,8 @@ namespace Builder
 
 		sortSignalList(m_nonAcquiredOutputBuses);
 		sortSignalList(m_nonAcquiredInternalBuses);
+
+		sortSignalList(m_discreteInvertedOutputSignals);
 
 		return result;
 	}
@@ -17225,6 +17229,13 @@ namespace Builder
 
 	bool ModuleLogicCompiler::writeAsmFile(const AppLogicCode& code) const
 	{
+		if (code.optimized() == false &&
+			m_context->generateExtraDebugInfo() == false)
+		{
+			// no generate ASM code before optimization if GenerateExtraDebugInfo is OFF
+			return true;
+		}
+
 		QStringList asmCode;
 
 		code.getAsmCode(m_lmDescription, &asmCode);
@@ -17255,6 +17266,13 @@ namespace Builder
 	{
 		if (noCodeGenRequired() == true)
 		{
+			return true;
+		}
+
+		if (code.optimized() == false &&
+			m_context->generateExtraDebugInfo() == false)
+		{
+			// no generate statistics file before optimization if GenerateExtraDebugInfo is OFF
 			return true;
 		}
 

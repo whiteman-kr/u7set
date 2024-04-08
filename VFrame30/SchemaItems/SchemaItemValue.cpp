@@ -375,7 +375,7 @@ namespace VFrame30
 			return result;
 		}
 
-		QRegularExpression reStartIndex("\\$\\([a-zA-Z0-9]+"); // Search for $([SomeText])
+		thread_local const QRegularExpression reStartIndex("\\$\\([a-zA-Z0-9]+"); // Search for $([SomeText])
 
 		qsizetype index = 0;
 		while (index < result.size())
@@ -633,7 +633,8 @@ namespace VFrame30
 
 	void SchemaItemValue::setSignalIdsString(const QString& value)
 	{
-		m_signalIds = value.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
+		thread_local const auto re = QRegularExpression("\\s+");
+		m_signalIds = value.split(re, Qt::SkipEmptyParts);
 	}
 
 	QStringList SchemaItemValue::signalIds() const

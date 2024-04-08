@@ -1564,7 +1564,8 @@ bool MonitorSettingsGetter::readSettings(const Builder::Context* context,
 	result = DeviceHelper::getStrProperty(software, EquipmentPropNames::SCHEMA_TAGS, &schemaTags, log);
 	RETURN_IF_FALSE(result);
 
-	QStringList schemaTagList = schemaTags.split(QRegularExpression("\\W+"), Qt::SkipEmptyParts);
+	static const auto re = QRegularExpression("\\W+");
+	QStringList schemaTagList = schemaTags.split(re, Qt::SkipEmptyParts);
 
 	for (QString& tag : schemaTagList)
 	{
@@ -1824,7 +1825,8 @@ bool DiagnosticsSettingsGetter::readSettings(const Builder::Context* context,
 	result = DeviceHelper::getStrProperty(software, EquipmentPropNames::SCHEMA_TAGS, &schemaTags, log);
 	RETURN_IF_FALSE(result);
 
-	QStringList schemaTagList = schemaTags.split(QRegularExpression("\\W+"), Qt::SkipEmptyParts);
+	static const auto re = QRegularExpression("\\W+");
+	QStringList schemaTagList = schemaTags.split(re, Qt::SkipEmptyParts);
 
 	for (QString& tag : schemaTagList)
 	{
@@ -1878,7 +1880,7 @@ bool DiagnosticsSettingsGetter::readDiagDataServiceAndArchiveSettings(const Buil
 		}
 		else
 		{
-			const Hardware::Software* diagDataService = diagDataService = diagDataServiceDevice->toSoftware().get();
+			const Hardware::Software* diagDataService = diagDataServiceDevice->toSoftware().get();
 
 			if (diagDataService == nullptr)
 			{
@@ -2116,7 +2118,8 @@ bool TuningClientSettingsGetter::readSettings(const Builder::Context* context,
 
 	result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::SCHEMA_TAGS, &schemaTags, log);
 
-	QStringList schemaTagList = schemaTags.split(QRegularExpression("\\W+"), Qt::SkipEmptyParts);
+	static const auto re = QRegularExpression("\\W+");
+	QStringList schemaTagList = schemaTags.split(re, Qt::SkipEmptyParts);
 
 	schemaTags = schemaTagList.join(Separator::SEMICOLON);
 
@@ -2151,11 +2154,11 @@ bool TestSuiteSettingsGetter::readSettings(const Builder::Context* context,
 									  &cfgServiceID2, &cfgServiceIP2, log);
 
 
-	result = readAppDataServiceAndArchiveSettings(context, software);
+	result &= readAppDataServiceAndArchiveSettings(context, software);
 
 	RETURN_IF_FALSE(result);
 
-	result = readTuningServiceSettings(context, software);
+	result &= readTuningServiceSettings(context, software);
 
 	RETURN_IF_FALSE(result);
 

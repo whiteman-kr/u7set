@@ -21,17 +21,6 @@ std::pair<int, std::vector<int>> DbControllerTools::showSelectFolderDialog(DbCon
 	QDialog d(parentWidget, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
 	d.setWindowTitle(QObject::tr("Select parent"));
 
-	// --
-	//
-	QLabel* textLabel = new QLabel(QObject::tr("Select parent for new file"));
-
-	QTreeWidget* treeWidget = new QTreeWidget;
-	treeWidget->setSortingEnabled(true);
-	treeWidget->sortItems(0, Qt::SortOrder::AscendingOrder);
-	treeWidget->setSelectionMode(QAbstractItemView::SingleSelection);
-	treeWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
-	treeWidget->setHeaderLabel("File");
-
 	DbFileTree files;
 
 	if (bool ok = db->getFileListTree(&files, parentFileId, true, parentWidget);
@@ -47,6 +36,17 @@ std::pair<int, std::vector<int>> DbControllerTools::showSelectFolderDialog(DbCon
 
 	std::shared_ptr<DbFileInfo> schemaFile = files.rootFile();		// SchemaFile
 	Q_ASSERT(schemaFile->directoryAttribute() == true);
+
+	// --
+	//
+	QLabel* textLabel = new QLabel(QObject::tr("Select parent for new file"));
+
+	QTreeWidget* treeWidget = new QTreeWidget;
+	treeWidget->setSortingEnabled(true);
+	treeWidget->sortItems(0, Qt::SortOrder::AscendingOrder);
+	treeWidget->setSelectionMode(QAbstractItemView::SingleSelection);
+	treeWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
+	treeWidget->setHeaderLabel("File");
 
 	static QIcon staticFolderIcon(":/Images/Images/SchemaFolder.svg");
 	const QIcon* const ptrToIcon = &staticFolderIcon;

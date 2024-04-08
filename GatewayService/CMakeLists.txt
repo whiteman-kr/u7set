@@ -75,8 +75,8 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QApplication>
 	<QCommandLineParser>
 	<QCoreApplication>
-	<QDebug>
 	<QDateTime>
+	<QDebug>
 	<QElapsedTimer>
 	<QEventLoop>
 	<QFile>
@@ -92,20 +92,21 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QMutexLocker>
 	<QObject>
 	<QQueue>
+	<QRegularExpression>
 	<QSettings>
 	<QString>
 	<QStringList>
 	<QTextStream>
 	<QThread>
 	<QTimer>
-	<QtGlobal>
-	<QtNetwork/QHostAddress>
 	<QUdpSocket>
 	<QUuid>
 	<QVariant>
 	<QVector>
 	<QXmlStreamReader>
 	<QXmlStreamWriter>
+	<QtGlobal>
+	<QtNetwork/QHostAddress>
 
 	# Project includes
 	#

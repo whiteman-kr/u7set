@@ -726,49 +726,11 @@ namespace Builder
 				continue;
 			}
 
-			auto vduSignalsIt = context.m_vduSignals.find(vdu->equipmentId());
-			if (vduSignalsIt == context.m_vduSignals.end())
+			static const auto re = QRegularExpression("\\W+");
+			auto schemaTagList = schemaTagsProperty->value().toString().split(re, Qt::SkipEmptyParts);
+			for (QString& tag : schemaTagList)
 			{
-				// Signals for VDU %1 are not found.
-				//
-				log->errINT1000(QString("Internal error: VduSignals structure is not found for VDU %1").arg(vdu->equipmentId()));
-				result = false;
-				continue;
-			}
-			const auto& vduSignals = vduSignalsIt->second;
-
-			auto vduSchemaTagList = schemaTagsProperty->value().toString().split(QRegularExpression("\\W+"), Qt::SkipEmptyParts);
-
-			for (auto schema : schemas)
-			{
-				Q_ASSERT(schema);
-
-				// If schemaTags is empty, then all schemas are for this VDU
-				//
-				bool schemaHasTag = vduSchemaTagList.isEmpty();
-				schemaHasTag |= std::ranges::any_of(vduSchemaTagList,
-													[&schema](QString& tag)
-													{
-														return schema->tagsAsList().contains(tag.toLower());
-													});
-
-				if (schemaHasTag == false)
-				{
-					continue;
-				}
-
-				// Generate VDU schema.
-				//				
-				LOG_MESSAGE(log, tr("Converting schema %1 to VDU format.").arg(schema->schemaId()));
-
-				QStringList errorMessages;
-				QByteArray nativeVduData;
-
-				bool genSchemaOk = Builder::VduSchemaGenerator::generateVduSchema(vdu->equipmentId(), 
-																				  *schema, 
-																				  vduSignals,
-																				  nativeVduData, *log);
-				if (genSchemaOk == false)
+				if (vduSchema.tagsAsList().contains(tag.toLower()) == true)
 				{
 					result = false;
 					continue;

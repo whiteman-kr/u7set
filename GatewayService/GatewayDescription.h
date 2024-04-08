@@ -1,8 +1,5 @@
 #pragma once
 
-#include <QRegularExpression>
-#include "../CommonLib/HostAddressPort.h"
-
 class XmlWriteHelper;
 class XmlReadHelper;
 
