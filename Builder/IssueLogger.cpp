@@ -9263,6 +9263,35 @@ namespace Builder
 				  .arg(message));
 	}
 
+	/// IssueCode: EQP6400
+	///
+	/// IssueType: Error
+	///
+	/// Title: Application signal %1 is not found in VDU %2. The signal is referenced in schema %3, schema item %4.
+	///
+	/// Parameters:
+	///		%1 AppSignalID
+	///		%2 VDU EquipmentID
+	///		%3 SchemaID
+	///		%4 Schema item label
+	///
+	/// Description:
+	///		An application signal used in one of the schema items was not found in the VDU signal list.
+	///
+	void IssueLogger::errEQP6400(QString vduEquipmentId, QString appSignalId, QString schemaId, QString schemaItemLabel, QUuid itemUuid)
+	{
+		addSchemaIssue(OutputMessageLevel::Error, 6400, schemaId);
+		addItemsIssues(OutputMessageLevel::Error, 6400, itemUuid, schemaId);
+
+		LOG_ERROR(IssueType::Equipment,
+				  6400,
+				  tr("Application signal %1 is not found in VDU %2. The signal is referenced in schema %3, schema item %4.")
+				  .arg(appSignalId)
+				  .arg(vduEquipmentId)
+				  .arg(schemaId)
+				  .arg(schemaItemLabel));
+	}
+
 	// --
 	//
 	void IssueLogger::addItemsIssues(OutputMessageLevel level, int issueCode, const std::vector<QUuid>& itemsUuids)

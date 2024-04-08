@@ -52,6 +52,10 @@ qt_add_library(${TARGET} STATIC
 	./Vdu/VduSchemaFile.h
 	./Vdu/VduSchemaGenerator.cpp
 	./Vdu/VduSchemaGenerator.h
+	./Vdu/VduFontGenerator.cpp
+	./Vdu/VduFontGenerator.h
+	./Vdu/VduFontProvider.cpp
+	./Vdu/VduFontProvider.h
 	./Vdu/VduTypes.h
 	AppDataServiceCfgGenerator.cpp
 	AppDataServiceCfgGenerator.h

@@ -588,6 +588,10 @@ namespace Builder
 		void errEQP6302(QString schemaId, QString property, int lineNumber, QString message);                                     // Schema script property evaluation error.
 		void errEQP6303(QString schemaId, QString schemaItem, QUuid itemUuid, QString property, int lineNumber, QString message); // SchemaItem script property evaluation error.
 
+		// VDU related issues
+		//
+		void errEQP6400(QString vduEquipmentId, QString appSignalId, QString schemaId, QString schemaItemLabel, QUuid itemUuid);
+
 	public:
 		void addItemsIssues(OutputMessageLevel level, int issueCode, const std::vector<QUuid>& itemsUuids);
 		void addItemsIssues(OutputMessageLevel level, int issueCode, const std::vector<QUuid>& itemsUuids, const QString& schemaID);

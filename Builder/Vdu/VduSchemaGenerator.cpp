@@ -5,6 +5,7 @@
 #include "../../VFrame30/SchemaItems/SchemaItemVduValue.h"
 #include "../../VFrame30/SchemaView.h"
 #include "../../VFrame30/VduSchema.h"
+#include "../Context.h"
 #include "VduSchemaFile.h"
 
 #include <QPageSize>
@@ -16,10 +17,13 @@ namespace Builder
 {
 	static const vdu_string_ref StringRefStub = 0x52525453; // "STRR" - for debug, easy to find in hex editor.
 
-	bool VduSchemaGenerator::generateVduSchema(const VFrame30::VduSchema& schema, QByteArray& out, QStringList& outErrorMessages)
+	bool VduSchemaGenerator::generateVduSchema(QString vduEquipmentId, 
+											   const VFrame30::VduSchema& schema,
+											   const std::map<Hash, int>& appSignalHashToSignalIndex,
+											   QByteArray& out,
+											   IssueLogger& log)
 	{
 		bool result = true;
-		outErrorMessages.clear();
 
 		std::multimap<QString, size_t> strings; // string -> referenceOffset
 
@@ -89,7 +93,7 @@ namespace Builder
 					QByteArray outSchemaItem{};
 					std::list<std::pair<QString, size_t>> addedStringReferences;
 
-					saveSchemaItem1(*item, outSchemaItem, addedStringReferences);
+					saveSchemaItem1(vduEquipmentId, *item, appSignalHashToSignalIndex, outSchemaItem, addedStringReferences, log);
 
 					// Add added string references to the main string ref container.
 					//
@@ -232,9 +236,12 @@ namespace Builder
 		return true;
 	}
 
-	bool VduSchemaGenerator::saveSchemaItem1(const VFrame30::SchemaItem& schemaItem,
+	bool VduSchemaGenerator::saveSchemaItem1(QString vduEquipmentId,
+											 const VFrame30::SchemaItem& schemaItem,
+											 const std::map<Hash, int>& appSignalHashToSignalIndex,
 											 QByteArray& out,
-											 std::list<std::pair<QString, size_t>>& addedStringReferences)
+											 std::list<std::pair<QString, size_t>>& addedStringReferences,
+											 IssueLogger& log)
 	{
 		// Get item type id and size of the specific item structure.
 		//
@@ -278,7 +285,7 @@ namespace Builder
 		fileSchemaItem.size = sizeof(fileSchemaItem);
 		fileSchemaItem.itemType = itemType;
 		fileSchemaItem.totalItemSize = static_cast<TotalItemSizeType>(sizeof(VduSchemaFileSchemaItem1) + specificItemSize);
-		
+
 		// Save specific item, depending on itemType.
 		//
 		QByteArray specificData;
@@ -291,6 +298,7 @@ namespace Builder
 
 				VduSchemaFileSchemaItemLine1 structLine{};
 
+				structLine.version = 1;
 				structLine.itemType = itemType;
 
 				structLine.x1 = static_cast<decltype(structLine.x1)>(schemaItemVduLine.startXDocPt());
@@ -311,7 +319,7 @@ namespace Builder
 
 				structRect.version = 1;
 				structRect.itemType = itemType;
-				
+
 				using PosType = decltype(VduSchemaFileSchemaItemRect1::left);
 
 				structRect.left = static_cast<PosType>(schemaItemVduRect.leftDocPt());
@@ -347,7 +355,7 @@ namespace Builder
 
 				structValue.version = 1;
 				structValue.itemType = itemType;
-				
+
 				structValue.left = static_cast<decltype(structValue.left)>(schemaItemVduValue.leftDocPt());
 				structValue.top = static_cast<decltype(structValue.top)>(schemaItemVduValue.topDocPt());
 				structValue.width = static_cast<decltype(structValue.width)>(schemaItemVduValue.widthDocPt());
@@ -366,7 +374,20 @@ namespace Builder
 
 				// TODO: Set app signal index.
 				//
-				structValue.appSignalIndex = 0;
+				{
+					QString appSignalId = schemaItemVduValue.appSignalId();
+
+					auto sit = appSignalHashToSignalIndex.find(::calcHash(appSignalId));
+					if (sit == appSignalHashToSignalIndex.end())
+					{
+						// Signal not found.
+						//
+						log.errEQP6400(vduEquipmentId, appSignalId, schemaItem.parentSchema()->schemaId(), schemaItem.label(), schemaItem.guid());
+						return false;
+					}
+					
+					structValue.appSignalIndex = sit->second;
+				}
 
 				specificData.append(reinterpret_cast<const char*>(&structValue), sizeof(structValue));
 			}

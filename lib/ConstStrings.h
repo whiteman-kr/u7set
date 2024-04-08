@@ -182,6 +182,8 @@ namespace EquipmentPropNames
 	inline const QString START_SCHEMA_ID("StartSchemaID");
 	inline const QString SCHEMA_TAGS("SchemaTags");
 
+	inline const QString FONTS("Fonts");
+
 	// DeviceAppSigal properties
 	//
 	inline const QString APP_SIGNAL_ID_TEMPLATE("AppSignalIDTemplate");

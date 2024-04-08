@@ -23,6 +23,7 @@
 #include "SignalSet.h"
 #include "SubsystemStorage.h"
 #include "DbMatsUsers.h"
+#include "Vdu/VduFontProvider.h"
 
 namespace Builder
 {
@@ -106,6 +107,8 @@ namespace Builder
 		DbMatsUserStorage m_matsUsers;
 
 		std::shared_ptr<DiagSignalTypesStorage> m_diagSignalTypes;
+
+		VduFontProvider m_vduFontProvider;
 	};
 
 } // namespace Builder
