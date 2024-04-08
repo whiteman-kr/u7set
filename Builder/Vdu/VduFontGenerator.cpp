@@ -1,4 +1,4 @@
-#include "VDUFontGenerator.h"
+#include "VduFontGenerator.h"
 #include "../Context.h"
 
 #include <QImage>
