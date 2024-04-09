@@ -1,6 +1,6 @@
-#include "./include./TrendView/TrendSignalSet.h"
-#include "./include./TrendView/TrendSignalState.h"
-#include "./include./TrendView/TrendArchiveServer.h"
+#include "./include/TrendView/TrendSignalSet.h"
+#include "./include/TrendView/TrendSignalState.h"
+#include "./include/TrendView/TrendArchiveServer.h"
 #include <type_traits>
 
 

@@ -1,13 +1,6 @@
 #include "./include/TrendView/Trend.h"
 #include "TrendImpl.h"
 
-// #include "../UtilsLib/CUtils.h"
-// #include "./include/TrendView/TrendSignalSet.h"
-// #include "TrendScale.h"
-// #include <QPainter>
-// #include <vector>
-//
-
 namespace TrendLib
 {
 	Trend::Trend() :
