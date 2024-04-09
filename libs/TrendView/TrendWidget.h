@@ -2,7 +2,7 @@
 
 #include "./include/TrendView/Trend.h"
 #include "./include/TrendView/ITrendDataProvider.h"
-#include "./include/TrendView/Trendparam.h"
+#include "./include/TrendView/TrendParam.h"
 
 #include "TrendImpl.h"
 #include "TrendRuler.h"

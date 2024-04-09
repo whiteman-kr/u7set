@@ -92,7 +92,7 @@ target_precompile_headers(${TARGET} PRIVATE
 add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Gui Qt6::Svg Qt6::Widgets Qt6::PrintSupport)
-target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib AppSignalLib )
+target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib AppSignalLib)
 
 target_compile_definitions(${TARGET} PRIVATE TREND_VIEW_LIBRARY)
 

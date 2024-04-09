@@ -3,7 +3,7 @@
 
 #include <QDialog>
 #include <QAbstractTableModel>
-#include "./include./TrendView/TrendSignalSet.h"
+#include "./include/TrendView/TrendSignalSet.h"
 #include "TrendScale.h"
 
 namespace Ui {
