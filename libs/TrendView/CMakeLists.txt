@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(TrendView LANGUAGES CXX)
 
-include(../cmake/translations.cmake)
+include(../../cmake/translations.cmake)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -14,25 +14,30 @@ find_package(Qt6 REQUIRED COMPONENTS Gui Svg Widgets PrintSupport LinguistTools)
 set(TARGET TrendView)
 
 qt_add_library(${TARGET} STATIC
-	../lib/ISignalDataServer.h
-	../lib/ISignalHasTag.h
+	../../lib/ISignalDataServer.h
+	../../lib/ISignalHasTag.h
+	./include/TrendView/DialogChooseTrendSignals.h
+	./include/TrendView/ITrendDataProvider.h
+	./include/TrendView/Trend.h
+	./include/TrendView/TrendArchiveServer.h
+	./include/TrendView/TrendMainWindow.h
+	./include/TrendView/TrendParam.h
+	./include/TrendView/TrendSignal.h
+	./include/TrendView/TrendSignalSet.h
+	./include/TrendView/TrendSignalState.h
 	DialogChooseTrendSignals.cpp
-	DialogChooseTrendSignals.h
 	DialogTrendSignalPoint.cpp
 	DialogTrendSignalPoint.h
 	DialogTrendSignalPoints.cpp
 	DialogTrendSignalPoints.h
 	DialogTrendSignalProperties.cpp
 	DialogTrendSignalProperties.h
-	ITrendDataProvider.h
 	Trend.cpp
-	Trend.h
 	TrendArchiveServer.cpp
-	TrendArchiveServer.h
+	TrendImpl.cpp
+	TrendImpl.h
 	TrendMainWindow.cpp
-	TrendMainWindow.h
 	TrendParam.cpp
-	TrendParam.h
 	TrendRuler.cpp
 	TrendRuler.h
 	TrendScale.cpp
@@ -40,11 +45,8 @@ qt_add_library(${TARGET} STATIC
 	TrendSettings.cpp
 	TrendSettings.h
 	TrendSignal.cpp
-	TrendSignal.h
 	TrendSignalSet.cpp
-	TrendSignalSet.h
 	TrendSignalState.cpp
-	TrendSignalState.h
 	TrendSlider.cpp
 	TrendSlider.h
 	TrendWidget.cpp
@@ -57,7 +59,7 @@ qt_add_library(${TARGET} STATIC
 	DialogTrendSignalPoint.ui
 
 	TrendView.qrc
-	../Etc/Logo/RadiyLogo.qrc
+	../../Etc/Logo/RadiyLogo.qrc
 )
 
 target_precompile_headers(${TARGET} PRIVATE
@@ -68,6 +70,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QElapsedTimer>
 	<QGridLayout>
 	<QMessageBox>
+	<QPainter>
 	<QPrintDialog>
 	<QPrinter>
 	<QPushButton>
@@ -75,13 +78,13 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QToolBar>
 	<QFile>
 
-	"../CommonLib/Types.h"
-	"../CommonLib/Hash.h"
+	"../../CommonLib/Types.h"
+	"../../CommonLib/Hash.h"
 
-	"../Proto/Trends.pb.h"
+	"../../Proto/Trends.pb.h"
 
-	"../AppSignalLib/AppSignalParam.h"
-	"../AppSignalLib/AppSignalState.h"
+	"../../AppSignalLib/AppSignalParam.h"
+	"../../AppSignalLib/AppSignalState.h"
 )
 
 #Add translations
@@ -92,6 +95,9 @@ target_link_libraries(${TARGET} PUBLIC Qt6::Gui Qt6::Svg Qt6::Widgets Qt6::Print
 target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib AppSignalLib )
 
 target_compile_definitions(${TARGET} PRIVATE TREND_VIEW_LIBRARY)
-#target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+
+target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_code_coverage_options(${TARGET} CODE_COVERAGE)

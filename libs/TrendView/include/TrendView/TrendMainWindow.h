@@ -1,9 +1,11 @@
 #ifndef TRENDSMAINWINDOW_H
 #define TRENDSMAINWINDOW_H
 
+#include <vector>
+
 #include <QMainWindow>
-#include "TrendSlider.h"
-#include "../TrendView/Trend.h"
+
+#include "TrendSignal.h"
 
 class QComboBox;
 
@@ -14,7 +16,10 @@ namespace Ui
 
 namespace TrendLib
 {
+	class Trend;
 	class TrendWidget;
+	class TrendSlider;
+	class TrendSignalSet;
 
 	class TrendMainWindow : public QMainWindow
 	{
@@ -35,6 +40,10 @@ namespace TrendLib
 		/// Add, remove or reorder signals.
 		///
 		void updateSignals(const std::vector<TrendSignalParam>& trendsignals);
+
+		// Slider methods
+		//
+		bool isTimeInRange(const TimeStamp& value) const;
 
 	protected:
 		void createToolBar();
@@ -88,19 +97,46 @@ namespace TrendLib
 
 		void contextMenuRequested(const QPoint& pos);
 
+	signals:
+		void trendModeChanged();
+
 		// Properties
 		//
+	protected:
+		[[nodiscard]] TrendLib::Trend& trend();
+		[[nodiscard]] const TrendLib::Trend& trend() const;
+
 	public:
 		[[nodiscard]] TrendLib::TrendSignalSet& signalSet();
 		[[nodiscard]] const TrendLib::TrendSignalSet& signalSet() const;
 
-		[[nodiscard]] TrendLib::Trend& trend();
-		[[nodiscard]] const TrendLib::Trend& trend() const;
+		E::TrendViewMode viewMode() const;
+		void setViewMode(E::TrendViewMode value);
+
+		E::TrendScaleType scaleType() const;
+		void setScaleType(E::TrendScaleType value);
+
+		int laneCount() const;
+		void setLaneCount(int value);
+
+		E::TimeType timeType() const;
+		void setTimeType(E::TimeType value);
+
+		TimeStamp startTime() const;
+		void setStartTime(const TimeStamp& startTime);
+
+		TimeStamp finishTime() const;
+
+		qint64 duration() const;
+		void setLaneDuration(qint64 interval);
 
 		[[nodiscard]] E::TrendMode trendMode() const;
 		void setTrendMode(E::TrendMode value);
 
 		[[nodiscard]] bool isRealtimeAutoShift() const;
+
+		quint64 rulerStep() const;
+		void setRulerStep(quint64 value);
 
 	protected:
 		Ui::TrendsMainWindow *ui;
@@ -129,9 +165,10 @@ namespace TrendLib
 
 		TimeStamp m_lastRealtimeMaxValue;
 
+		TrendSlider* m_trendSlider = nullptr;
+
 	protected:
 		TrendLib::TrendWidget* m_trendWidget = nullptr;
-		TrendSlider* m_trendSlider = nullptr;
 
 		static const int singleStepSliderDivider = 50;
 

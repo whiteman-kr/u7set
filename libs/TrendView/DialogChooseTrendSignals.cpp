@@ -4,7 +4,7 @@
 #include <QStringListModel>
 #include <QClipboard>
 #include <QMenu>
-#include "DialogChooseTrendSignals.h"
+#include <./include/TrendView/DialogChooseTrendSignals.h>
 #include "ui_DialogChooseTrendSignals.h"
 
 namespace TrendLibInternal

@@ -69,5 +69,4 @@ namespace TrendLib
 	};
 }
 
-
 #endif // TRENDRULER_H

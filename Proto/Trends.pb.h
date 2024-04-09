@@ -240,8 +240,29 @@ class TrendStateRecord PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
+    kStatesRawBufferV2FieldNumber = 3,
     kStatesRawBufferV1FieldNumber = 4,
   };
+  // optional bytes states_raw_buffer_v2 = 3;
+  bool has_states_raw_buffer_v2() const;
+  private:
+  bool _internal_has_states_raw_buffer_v2() const;
+  public:
+  void clear_states_raw_buffer_v2();
+  const std::string& states_raw_buffer_v2() const;
+  void set_states_raw_buffer_v2(const std::string& value);
+  void set_states_raw_buffer_v2(std::string&& value);
+  void set_states_raw_buffer_v2(const char* value);
+  void set_states_raw_buffer_v2(const void* value, size_t size);
+  std::string* mutable_states_raw_buffer_v2();
+  std::string* release_states_raw_buffer_v2();
+  void set_allocated_states_raw_buffer_v2(std::string* states_raw_buffer_v2);
+  private:
+  const std::string& _internal_states_raw_buffer_v2() const;
+  void _internal_set_states_raw_buffer_v2(const std::string& value);
+  std::string* _internal_mutable_states_raw_buffer_v2();
+  public:
+
   // optional bytes states_raw_buffer_v1 = 4;
   bool has_states_raw_buffer_v1() const;
   private:
@@ -271,6 +292,7 @@ class TrendStateRecord PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr states_raw_buffer_v2_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr states_raw_buffer_v1_;
   friend struct ::TableStruct_Trends_2eproto;
 };
@@ -2493,7 +2515,7 @@ class TrendWidget PROTOBUF_FINAL :
 
 // optional bytes states_raw_buffer_v1 = 4;
 inline bool TrendStateRecord::_internal_has_states_raw_buffer_v1() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
   return value;
 }
 inline bool TrendStateRecord::has_states_raw_buffer_v1() const {
@@ -2501,7 +2523,7 @@ inline bool TrendStateRecord::has_states_raw_buffer_v1() const {
 }
 inline void TrendStateRecord::clear_states_raw_buffer_v1() {
   states_raw_buffer_v1_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000001u;
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline const std::string& TrendStateRecord::states_raw_buffer_v1() const {
   // @@protoc_insertion_point(field_get:Proto.TrendStateRecord.states_raw_buffer_v1)
@@ -2519,30 +2541,30 @@ inline const std::string& TrendStateRecord::_internal_states_raw_buffer_v1() con
   return states_raw_buffer_v1_.Get();
 }
 inline void TrendStateRecord::_internal_set_states_raw_buffer_v1(const std::string& value) {
-  _has_bits_[0] |= 0x00000001u;
+  _has_bits_[0] |= 0x00000002u;
   states_raw_buffer_v1_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void TrendStateRecord::set_states_raw_buffer_v1(std::string&& value) {
-  _has_bits_[0] |= 0x00000001u;
+  _has_bits_[0] |= 0x00000002u;
   states_raw_buffer_v1_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:Proto.TrendStateRecord.states_raw_buffer_v1)
 }
 inline void TrendStateRecord::set_states_raw_buffer_v1(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000001u;
+  _has_bits_[0] |= 0x00000002u;
   states_raw_buffer_v1_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:Proto.TrendStateRecord.states_raw_buffer_v1)
 }
 inline void TrendStateRecord::set_states_raw_buffer_v1(const void* value,
     size_t size) {
-  _has_bits_[0] |= 0x00000001u;
+  _has_bits_[0] |= 0x00000002u;
   states_raw_buffer_v1_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:Proto.TrendStateRecord.states_raw_buffer_v1)
 }
 inline std::string* TrendStateRecord::_internal_mutable_states_raw_buffer_v1() {
-  _has_bits_[0] |= 0x00000001u;
+  _has_bits_[0] |= 0x00000002u;
   return states_raw_buffer_v1_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* TrendStateRecord::release_states_raw_buffer_v1() {
@@ -2550,18 +2572,91 @@ inline std::string* TrendStateRecord::release_states_raw_buffer_v1() {
   if (!_internal_has_states_raw_buffer_v1()) {
     return nullptr;
   }
-  _has_bits_[0] &= ~0x00000001u;
+  _has_bits_[0] &= ~0x00000002u;
   return states_raw_buffer_v1_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void TrendStateRecord::set_allocated_states_raw_buffer_v1(std::string* states_raw_buffer_v1) {
   if (states_raw_buffer_v1 != nullptr) {
-    _has_bits_[0] |= 0x00000001u;
+    _has_bits_[0] |= 0x00000002u;
   } else {
-    _has_bits_[0] &= ~0x00000001u;
+    _has_bits_[0] &= ~0x00000002u;
   }
   states_raw_buffer_v1_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), states_raw_buffer_v1,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:Proto.TrendStateRecord.states_raw_buffer_v1)
+}
+
+// optional bytes states_raw_buffer_v2 = 3;
+inline bool TrendStateRecord::_internal_has_states_raw_buffer_v2() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool TrendStateRecord::has_states_raw_buffer_v2() const {
+  return _internal_has_states_raw_buffer_v2();
+}
+inline void TrendStateRecord::clear_states_raw_buffer_v2() {
+  states_raw_buffer_v2_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& TrendStateRecord::states_raw_buffer_v2() const {
+  // @@protoc_insertion_point(field_get:Proto.TrendStateRecord.states_raw_buffer_v2)
+  return _internal_states_raw_buffer_v2();
+}
+inline void TrendStateRecord::set_states_raw_buffer_v2(const std::string& value) {
+  _internal_set_states_raw_buffer_v2(value);
+  // @@protoc_insertion_point(field_set:Proto.TrendStateRecord.states_raw_buffer_v2)
+}
+inline std::string* TrendStateRecord::mutable_states_raw_buffer_v2() {
+  // @@protoc_insertion_point(field_mutable:Proto.TrendStateRecord.states_raw_buffer_v2)
+  return _internal_mutable_states_raw_buffer_v2();
+}
+inline const std::string& TrendStateRecord::_internal_states_raw_buffer_v2() const {
+  return states_raw_buffer_v2_.Get();
+}
+inline void TrendStateRecord::_internal_set_states_raw_buffer_v2(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  states_raw_buffer_v2_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void TrendStateRecord::set_states_raw_buffer_v2(std::string&& value) {
+  _has_bits_[0] |= 0x00000001u;
+  states_raw_buffer_v2_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Proto.TrendStateRecord.states_raw_buffer_v2)
+}
+inline void TrendStateRecord::set_states_raw_buffer_v2(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000001u;
+  states_raw_buffer_v2_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Proto.TrendStateRecord.states_raw_buffer_v2)
+}
+inline void TrendStateRecord::set_states_raw_buffer_v2(const void* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000001u;
+  states_raw_buffer_v2_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Proto.TrendStateRecord.states_raw_buffer_v2)
+}
+inline std::string* TrendStateRecord::_internal_mutable_states_raw_buffer_v2() {
+  _has_bits_[0] |= 0x00000001u;
+  return states_raw_buffer_v2_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* TrendStateRecord::release_states_raw_buffer_v2() {
+  // @@protoc_insertion_point(field_release:Proto.TrendStateRecord.states_raw_buffer_v2)
+  if (!_internal_has_states_raw_buffer_v2()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return states_raw_buffer_v2_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void TrendStateRecord::set_allocated_states_raw_buffer_v2(std::string* states_raw_buffer_v2) {
+  if (states_raw_buffer_v2 != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  states_raw_buffer_v2_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), states_raw_buffer_v2,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Proto.TrendStateRecord.states_raw_buffer_v2)
 }
 
 // -------------------------------------------------------------------

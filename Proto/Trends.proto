@@ -5,6 +5,7 @@ package Proto;
 message TrendStateRecord
 {
     optional bytes states_raw_buffer_v1 = 4;	// Version 1
+	optional bytes states_raw_buffer_v2 = 3;	// Version 2
 }
 
 message TrendArchiveHour				//  Reflected to c++ struct OneHourData

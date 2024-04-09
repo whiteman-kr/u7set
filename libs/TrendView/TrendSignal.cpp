@@ -1,4 +1,4 @@
-#include "TrendSignal.h"
+#include "./include/TrendView/TrendSignal.h"
 #include <type_traits>
 
 

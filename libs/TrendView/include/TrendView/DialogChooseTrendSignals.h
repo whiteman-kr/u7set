@@ -1,12 +1,18 @@
 #pragma once
 
-#include <QDialog>
-#include <QItemSelection>
-#include <QCompleter>
-#include "../lib/ISignalHasTag.h"
-#include "../TrendView/TrendSignal.h"
+#include <map>
+#include <vector>
 
-namespace Ui {
+#include "../lib/ISignalHasTag.h"
+#include <QCompleter>
+#include <QDialog>
+
+#include "TrendSignal.h"
+
+class QItemSelection;
+
+namespace Ui
+{
 	class DialogChooseTrendSignals;
 }
 
@@ -34,13 +40,13 @@ namespace TrendLibInternal
 		const ISignalHasTag* m_signalHasTag = nullptr;
 		std::vector<size_t> m_signalIndexes;
 		std::vector<TrendLib::TrendSignalParam> m_signals;
-		std::map<QString, std::vector<size_t>> m_startWithArrays;	// Key is startWith, in lowercase. Values are indexes in m_signals for stratWith
+		std::map<QString, std::vector<size_t>>
+			m_startWithArrays; // Key is startWith, in lowercase. Values are indexes in m_signals for stratWith
 	};
-}
+} // namespace TrendLibInternal
 
 namespace TrendLib
 {
-
 	class DialogChooseTrendSignals : public QDialog
 	{
 		Q_OBJECT
@@ -85,21 +91,21 @@ namespace TrendLib
 		void on_removeSignalButton_clicked();
 		void on_removeAllSignalsButton_clicked();
 
-		void on_filterEdit_textChanged(const QString &arg);
+		void on_filterEdit_textChanged(const QString& arg);
 		void on_filterEdit_editingFinished();
 
-		void on_tagsEdit_textChanged(const QString &arg);
+		void on_tagsEdit_textChanged(const QString& arg);
 		void on_tagsEdit_editingFinished();
 
-		void on_filteredSignals_doubleClicked(const QModelIndex &index);
+		void on_filteredSignals_doubleClicked(const QModelIndex& index);
 		void slot_filteredSignalsSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
-		void on_trendSignals_doubleClicked(const QModelIndex &index);
+		void on_trendSignals_doubleClicked(const QModelIndex& index);
 		void slot_trendSignalsSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
 		void on_buttonBox_accepted();
 
-		void on_trendSignals_customContextMenuRequested(const QPoint &pos);
+		void on_trendSignals_customContextMenuRequested(const QPoint& pos);
 
 		void on_upSignalButton_clicked();
 		void on_downSignalButton_clicked();
@@ -124,5 +130,4 @@ namespace TrendLib
 		QString s_allServers;
 		inline static QString s_lastServer;
 	};
-
-}
+} // namespace TrendLib

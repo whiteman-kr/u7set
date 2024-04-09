@@ -1,8 +1,11 @@
 #pragma once
 
-#include "Trend.h"
+#include "./include/TrendView/Trend.h"
+#include "./include/TrendView/ITrendDataProvider.h"
+#include "./include/TrendView/Trendparam.h"
+
+#include "TrendImpl.h"
 #include "TrendRuler.h"
-#include "ITrendDataProvider.h"
 #include <mutex>
 #include <condition_variable>
 #include <QPixmap>
@@ -27,7 +30,7 @@ namespace TrendLib
 		Q_OBJECT
 
 	public:
-		explicit RenderThread(Trend* trend, ITrendDataProvider* dataProvider, QObject* parent = nullptr);
+		explicit RenderThread(TrendImpl* trendImpl, ITrendDataProvider* dataProvider, QObject* parent = nullptr);
 		virtual ~RenderThread();
 
 	public:
@@ -40,7 +43,7 @@ namespace TrendLib
 		virtual void run() override;
 
 	private:
-		Trend* m_trend = nullptr;
+		TrendImpl* m_trendImpl = nullptr;
 
 		std::mutex m_mutex;
 		std::optional<TrendParam> m_drawParam;
@@ -91,7 +94,7 @@ namespace TrendLib
 		// Methods
 		//
 	public:
-		Trend::MouseOn mouseIsOver(const QPoint& mousePos, int* outLaneIndex, TimeStamp* timeStamp, int* rulerIndex, TrendSignalParam* outSignalId);
+		TrendImpl::MouseOn mouseIsOver(const QPoint& mousePos, int* outLaneIndex, TimeStamp* timeStamp, int* rulerIndex, TrendSignalParam* outSignalId);
 
 		void resetRulerHighlight();
 
@@ -126,6 +129,9 @@ namespace TrendLib
 
 		TrendLib::Trend& trend();
 		const TrendLib::Trend& trend() const;
+
+		TrendLib::TrendImpl& trendImpl();
+		const TrendLib::TrendImpl& trendImpl() const;
 
 		E::TrendViewMode viewMode() const;
 		void setViewMode(E::TrendViewMode value);
