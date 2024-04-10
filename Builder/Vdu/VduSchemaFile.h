@@ -78,7 +78,10 @@ struct VduSchemaFileSchemaItem1
 	uint16_t itemType;      // VduFileSchemaItemLineId, VduFileSchemaItemRectId, ...
 	uint16_t reserve0;
 	uint16_t totalItemSize; // sizeof(VduSchemaFileSchemaItem1) + sizeof(VduSchemaFileSchemaItemLine1 | VduSchemaFileSchemaItemRect1 | ...)
-	uint16_t reserve1;      // sizeof(VduSchemaFileSchemaItem1) + sizeof(VduSchemaFileSchemaItemLine1 | VduSchemaFileSchemaItemRect1 | ...)
+	
+	bool isStatic;			// If true, the item is static and can be cached.
+	bool reserveBool0;
+	
 	uint32_t reserve2;
 	uint32_t reserve3;
 	// This struct is followed by the data of the specific schema item like VduSchemaFileSchemaItemLine1, VduSchemaFileSchemaItemRect1, 

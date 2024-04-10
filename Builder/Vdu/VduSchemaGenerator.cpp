@@ -426,6 +426,7 @@ namespace Builder
 		fileSchemaItem.size = sizeof(fileSchemaItem);
 		fileSchemaItem.itemType = itemType;
 		fileSchemaItem.totalItemSize = static_cast<TotalItemSizeType>(sizeof(VduSchemaFileSchemaItem1) + specificItemSize);
+		fileSchemaItem.isStatic = schemaItem.IsStatic();
 
 		// Save specific item, depending on itemType.
 		//
