@@ -1,7 +1,7 @@
 #pragma once
 
+#include "../FontParam.h"
 #include "PosRectImpl.h"
-
 
 namespace VFrame30
 {
@@ -50,8 +50,7 @@ namespace VFrame30
 		QColor textColor() const;
 		void setTextColor(QColor color);
 
-		const QString& fontName() const;
-		void setFontName(const QString& value);
+		DECLARE_FONT_PROPERTIES(Font)
 
 		const QString& text() const;
 		void setText(const QString& value);
@@ -71,7 +70,8 @@ namespace VFrame30
 		QColor m_fillColor = qRgb(0xC0, 0xC0, 0xC0);
 		QColor m_textColor = qRgb(0x00, 0x00, 0x00);
 
-		QString m_fontName = QStringLiteral("Arial"); // FontName, should be something like "Arial_16"
+		FontParam m_font;
+
 		QString m_text;
 
 		E::HorzAlign m_horzAlign = E::HorzAlign::AlignHCenter;

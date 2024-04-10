@@ -13578,8 +13578,8 @@ class SchemaItemVduRect PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kFontNameFieldNumber = 16,
     kTextFieldNumber = 17,
+    kFontFieldNumber = 18,
     kWeightFieldNumber = 3,
     kFillFieldNumber = 4,
     kDrawrectFieldNumber = 5,
@@ -13589,26 +13589,6 @@ class SchemaItemVduRect PROTOBUF_FINAL :
     kTextColorFieldNumber = 12,
     kHorzAlignFieldNumber = 20,
   };
-  // optional string fontName = 16;
-  bool has_fontname() const;
-  private:
-  bool _internal_has_fontname() const;
-  public:
-  void clear_fontname();
-  const std::string& fontname() const;
-  void set_fontname(const std::string& value);
-  void set_fontname(std::string&& value);
-  void set_fontname(const char* value);
-  void set_fontname(const char* value, size_t size);
-  std::string* mutable_fontname();
-  std::string* release_fontname();
-  void set_allocated_fontname(std::string* fontname);
-  private:
-  const std::string& _internal_fontname() const;
-  void _internal_set_fontname(const std::string& value);
-  std::string* _internal_mutable_fontname();
-  public:
-
   // optional string text = 17;
   bool has_text() const;
   private:
@@ -13628,6 +13608,24 @@ class SchemaItemVduRect PROTOBUF_FINAL :
   void _internal_set_text(const std::string& value);
   std::string* _internal_mutable_text();
   public:
+
+  // optional .Proto.FontParam font = 18;
+  bool has_font() const;
+  private:
+  bool _internal_has_font() const;
+  public:
+  void clear_font();
+  const ::Proto::FontParam& font() const;
+  ::Proto::FontParam* release_font();
+  ::Proto::FontParam* mutable_font();
+  void set_allocated_font(::Proto::FontParam* font);
+  private:
+  const ::Proto::FontParam& _internal_font() const;
+  ::Proto::FontParam* _internal_mutable_font();
+  public:
+  void unsafe_arena_set_allocated_font(
+      ::Proto::FontParam* font);
+  ::Proto::FontParam* unsafe_arena_release_font();
 
   // optional int32 weight = 3;
   bool has_weight() const;
@@ -13742,8 +13740,8 @@ class SchemaItemVduRect PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr fontname_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr text_;
+  ::Proto::FontParam* font_;
   ::PROTOBUF_NAMESPACE_ID::int32 weight_;
   bool fill_;
   bool drawrect_;
@@ -13876,34 +13874,15 @@ class SchemaItemVduValue PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kFontNameFieldNumber = 16,
     kAppSignalIdFieldNumber = 17,
+    kFontFieldNumber = 18,
     kWeightFieldNumber = 3,
     kDrawrectFieldNumber = 5,
-    kTextColorFieldNumber = 12,
     kLineColorFieldNumber = 10,
     kFillColorFieldNumber = 11,
+    kTextColorFieldNumber = 12,
+    kPrecisionFieldNumber = 25,
   };
-  // optional string fontName = 16;
-  bool has_fontname() const;
-  private:
-  bool _internal_has_fontname() const;
-  public:
-  void clear_fontname();
-  const std::string& fontname() const;
-  void set_fontname(const std::string& value);
-  void set_fontname(std::string&& value);
-  void set_fontname(const char* value);
-  void set_fontname(const char* value, size_t size);
-  std::string* mutable_fontname();
-  std::string* release_fontname();
-  void set_allocated_fontname(std::string* fontname);
-  private:
-  const std::string& _internal_fontname() const;
-  void _internal_set_fontname(const std::string& value);
-  std::string* _internal_mutable_fontname();
-  public:
-
   // optional string appSignalId = 17;
   bool has_appsignalid() const;
   private:
@@ -13923,6 +13902,24 @@ class SchemaItemVduValue PROTOBUF_FINAL :
   void _internal_set_appsignalid(const std::string& value);
   std::string* _internal_mutable_appsignalid();
   public:
+
+  // optional .Proto.FontParam font = 18;
+  bool has_font() const;
+  private:
+  bool _internal_has_font() const;
+  public:
+  void clear_font();
+  const ::Proto::FontParam& font() const;
+  ::Proto::FontParam* release_font();
+  ::Proto::FontParam* mutable_font();
+  void set_allocated_font(::Proto::FontParam* font);
+  private:
+  const ::Proto::FontParam& _internal_font() const;
+  ::Proto::FontParam* _internal_mutable_font();
+  public:
+  void unsafe_arena_set_allocated_font(
+      ::Proto::FontParam* font);
+  ::Proto::FontParam* unsafe_arena_release_font();
 
   // optional int32 weight = 3;
   bool has_weight() const;
@@ -13948,19 +13945,6 @@ class SchemaItemVduValue PROTOBUF_FINAL :
   private:
   bool _internal_drawrect() const;
   void _internal_set_drawrect(bool value);
-  public:
-
-  // optional uint32 textColor = 12;
-  bool has_textcolor() const;
-  private:
-  bool _internal_has_textcolor() const;
-  public:
-  void clear_textcolor();
-  ::PROTOBUF_NAMESPACE_ID::uint32 textcolor() const;
-  void set_textcolor(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_textcolor() const;
-  void _internal_set_textcolor(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
   // optional uint32 lineColor = 10;
@@ -13989,6 +13973,32 @@ class SchemaItemVduValue PROTOBUF_FINAL :
   void _internal_set_fillcolor(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
+  // optional uint32 textColor = 12;
+  bool has_textcolor() const;
+  private:
+  bool _internal_has_textcolor() const;
+  public:
+  void clear_textcolor();
+  ::PROTOBUF_NAMESPACE_ID::uint32 textcolor() const;
+  void set_textcolor(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_textcolor() const;
+  void _internal_set_textcolor(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // optional uint32 precision = 25;
+  bool has_precision() const;
+  private:
+  bool _internal_has_precision() const;
+  public:
+  void clear_precision();
+  ::PROTOBUF_NAMESPACE_ID::uint32 precision() const;
+  void set_precision(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_precision() const;
+  void _internal_set_precision(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemVduValue)
  private:
   class _Internal;
@@ -13998,13 +14008,14 @@ class SchemaItemVduValue PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr fontname_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr appsignalid_;
+  ::Proto::FontParam* font_;
   ::PROTOBUF_NAMESPACE_ID::int32 weight_;
   bool drawrect_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 textcolor_;
   ::PROTOBUF_NAMESPACE_ID::uint32 linecolor_;
   ::PROTOBUF_NAMESPACE_ID::uint32 fillcolor_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 textcolor_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 precision_;
   friend struct ::TableStruct_VFrame30_2eproto;
 };
 // -------------------------------------------------------------------
@@ -31855,82 +31866,9 @@ inline void SchemaItemVduRect::set_textcolor(::PROTOBUF_NAMESPACE_ID::uint32 val
   // @@protoc_insertion_point(field_set:Proto.SchemaItemVduRect.textColor)
 }
 
-// optional string fontName = 16;
-inline bool SchemaItemVduRect::_internal_has_fontname() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
-  return value;
-}
-inline bool SchemaItemVduRect::has_fontname() const {
-  return _internal_has_fontname();
-}
-inline void SchemaItemVduRect::clear_fontname() {
-  fontname_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline const std::string& SchemaItemVduRect::fontname() const {
-  // @@protoc_insertion_point(field_get:Proto.SchemaItemVduRect.fontName)
-  return _internal_fontname();
-}
-inline void SchemaItemVduRect::set_fontname(const std::string& value) {
-  _internal_set_fontname(value);
-  // @@protoc_insertion_point(field_set:Proto.SchemaItemVduRect.fontName)
-}
-inline std::string* SchemaItemVduRect::mutable_fontname() {
-  // @@protoc_insertion_point(field_mutable:Proto.SchemaItemVduRect.fontName)
-  return _internal_mutable_fontname();
-}
-inline const std::string& SchemaItemVduRect::_internal_fontname() const {
-  return fontname_.Get();
-}
-inline void SchemaItemVduRect::_internal_set_fontname(const std::string& value) {
-  _has_bits_[0] |= 0x00000001u;
-  fontname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void SchemaItemVduRect::set_fontname(std::string&& value) {
-  _has_bits_[0] |= 0x00000001u;
-  fontname_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Proto.SchemaItemVduRect.fontName)
-}
-inline void SchemaItemVduRect::set_fontname(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000001u;
-  fontname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Proto.SchemaItemVduRect.fontName)
-}
-inline void SchemaItemVduRect::set_fontname(const char* value,
-    size_t size) {
-  _has_bits_[0] |= 0x00000001u;
-  fontname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Proto.SchemaItemVduRect.fontName)
-}
-inline std::string* SchemaItemVduRect::_internal_mutable_fontname() {
-  _has_bits_[0] |= 0x00000001u;
-  return fontname_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* SchemaItemVduRect::release_fontname() {
-  // @@protoc_insertion_point(field_release:Proto.SchemaItemVduRect.fontName)
-  if (!_internal_has_fontname()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000001u;
-  return fontname_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void SchemaItemVduRect::set_allocated_fontname(std::string* fontname) {
-  if (fontname != nullptr) {
-    _has_bits_[0] |= 0x00000001u;
-  } else {
-    _has_bits_[0] &= ~0x00000001u;
-  }
-  fontname_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), fontname,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItemVduRect.fontName)
-}
-
 // optional string text = 17;
 inline bool SchemaItemVduRect::_internal_has_text() const {
-  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
 }
 inline bool SchemaItemVduRect::has_text() const {
@@ -31938,7 +31876,7 @@ inline bool SchemaItemVduRect::has_text() const {
 }
 inline void SchemaItemVduRect::clear_text() {
   text_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000001u;
 }
 inline const std::string& SchemaItemVduRect::text() const {
   // @@protoc_insertion_point(field_get:Proto.SchemaItemVduRect.text)
@@ -31956,30 +31894,30 @@ inline const std::string& SchemaItemVduRect::_internal_text() const {
   return text_.Get();
 }
 inline void SchemaItemVduRect::_internal_set_text(const std::string& value) {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000001u;
   text_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void SchemaItemVduRect::set_text(std::string&& value) {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000001u;
   text_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:Proto.SchemaItemVduRect.text)
 }
 inline void SchemaItemVduRect::set_text(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000001u;
   text_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:Proto.SchemaItemVduRect.text)
 }
 inline void SchemaItemVduRect::set_text(const char* value,
     size_t size) {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000001u;
   text_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:Proto.SchemaItemVduRect.text)
 }
 inline std::string* SchemaItemVduRect::_internal_mutable_text() {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000001u;
   return text_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* SchemaItemVduRect::release_text() {
@@ -31987,18 +31925,101 @@ inline std::string* SchemaItemVduRect::release_text() {
   if (!_internal_has_text()) {
     return nullptr;
   }
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000001u;
   return text_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void SchemaItemVduRect::set_allocated_text(std::string* text) {
   if (text != nullptr) {
-    _has_bits_[0] |= 0x00000002u;
+    _has_bits_[0] |= 0x00000001u;
   } else {
-    _has_bits_[0] &= ~0x00000002u;
+    _has_bits_[0] &= ~0x00000001u;
   }
   text_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), text,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItemVduRect.text)
+}
+
+// optional .Proto.FontParam font = 18;
+inline bool SchemaItemVduRect::_internal_has_font() const {
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  PROTOBUF_ASSUME(!value || font_ != nullptr);
+  return value;
+}
+inline bool SchemaItemVduRect::has_font() const {
+  return _internal_has_font();
+}
+inline void SchemaItemVduRect::clear_font() {
+  if (font_ != nullptr) font_->Clear();
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline const ::Proto::FontParam& SchemaItemVduRect::_internal_font() const {
+  const ::Proto::FontParam* p = font_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Proto::FontParam&>(
+      ::Proto::_FontParam_default_instance_);
+}
+inline const ::Proto::FontParam& SchemaItemVduRect::font() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemVduRect.font)
+  return _internal_font();
+}
+inline void SchemaItemVduRect::unsafe_arena_set_allocated_font(
+    ::Proto::FontParam* font) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(font_);
+  }
+  font_ = font;
+  if (font) {
+    _has_bits_[0] |= 0x00000002u;
+  } else {
+    _has_bits_[0] &= ~0x00000002u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.SchemaItemVduRect.font)
+}
+inline ::Proto::FontParam* SchemaItemVduRect::release_font() {
+  _has_bits_[0] &= ~0x00000002u;
+  ::Proto::FontParam* temp = font_;
+  font_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::Proto::FontParam* SchemaItemVduRect::unsafe_arena_release_font() {
+  // @@protoc_insertion_point(field_release:Proto.SchemaItemVduRect.font)
+  _has_bits_[0] &= ~0x00000002u;
+  ::Proto::FontParam* temp = font_;
+  font_ = nullptr;
+  return temp;
+}
+inline ::Proto::FontParam* SchemaItemVduRect::_internal_mutable_font() {
+  _has_bits_[0] |= 0x00000002u;
+  if (font_ == nullptr) {
+    auto* p = CreateMaybeMessage<::Proto::FontParam>(GetArena());
+    font_ = p;
+  }
+  return font_;
+}
+inline ::Proto::FontParam* SchemaItemVduRect::mutable_font() {
+  // @@protoc_insertion_point(field_mutable:Proto.SchemaItemVduRect.font)
+  return _internal_mutable_font();
+}
+inline void SchemaItemVduRect::set_allocated_font(::Proto::FontParam* font) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete font_;
+  }
+  if (font) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(font);
+    if (message_arena != submessage_arena) {
+      font = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, font, submessage_arena);
+    }
+    _has_bits_[0] |= 0x00000002u;
+  } else {
+    _has_bits_[0] &= ~0x00000002u;
+  }
+  font_ = font;
+  // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItemVduRect.font)
 }
 
 // optional int32 horzAlign = 20;
@@ -32119,7 +32140,7 @@ inline void SchemaItemVduValue::set_drawrect(bool value) {
 
 // optional uint32 lineColor = 10;
 inline bool SchemaItemVduValue::_internal_has_linecolor() const {
-  bool value = (_has_bits_[0] & 0x00000020u) != 0;
+  bool value = (_has_bits_[0] & 0x00000010u) != 0;
   return value;
 }
 inline bool SchemaItemVduValue::has_linecolor() const {
@@ -32127,7 +32148,7 @@ inline bool SchemaItemVduValue::has_linecolor() const {
 }
 inline void SchemaItemVduValue::clear_linecolor() {
   linecolor_ = 0u;
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint32 SchemaItemVduValue::_internal_linecolor() const {
   return linecolor_;
@@ -32137,7 +32158,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint32 SchemaItemVduValue::linecolor() const {
   return _internal_linecolor();
 }
 inline void SchemaItemVduValue::_internal_set_linecolor(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000010u;
   linecolor_ = value;
 }
 inline void SchemaItemVduValue::set_linecolor(::PROTOBUF_NAMESPACE_ID::uint32 value) {
@@ -32147,7 +32168,7 @@ inline void SchemaItemVduValue::set_linecolor(::PROTOBUF_NAMESPACE_ID::uint32 va
 
 // optional uint32 fillColor = 11;
 inline bool SchemaItemVduValue::_internal_has_fillcolor() const {
-  bool value = (_has_bits_[0] & 0x00000040u) != 0;
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
   return value;
 }
 inline bool SchemaItemVduValue::has_fillcolor() const {
@@ -32155,7 +32176,7 @@ inline bool SchemaItemVduValue::has_fillcolor() const {
 }
 inline void SchemaItemVduValue::clear_fillcolor() {
   fillcolor_ = 0u;
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint32 SchemaItemVduValue::_internal_fillcolor() const {
   return fillcolor_;
@@ -32165,7 +32186,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint32 SchemaItemVduValue::fillcolor() const {
   return _internal_fillcolor();
 }
 inline void SchemaItemVduValue::_internal_set_fillcolor(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000020u;
   fillcolor_ = value;
 }
 inline void SchemaItemVduValue::set_fillcolor(::PROTOBUF_NAMESPACE_ID::uint32 value) {
@@ -32175,7 +32196,7 @@ inline void SchemaItemVduValue::set_fillcolor(::PROTOBUF_NAMESPACE_ID::uint32 va
 
 // optional uint32 textColor = 12;
 inline bool SchemaItemVduValue::_internal_has_textcolor() const {
-  bool value = (_has_bits_[0] & 0x00000010u) != 0;
+  bool value = (_has_bits_[0] & 0x00000040u) != 0;
   return value;
 }
 inline bool SchemaItemVduValue::has_textcolor() const {
@@ -32183,7 +32204,7 @@ inline bool SchemaItemVduValue::has_textcolor() const {
 }
 inline void SchemaItemVduValue::clear_textcolor() {
   textcolor_ = 0u;
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000040u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint32 SchemaItemVduValue::_internal_textcolor() const {
   return textcolor_;
@@ -32193,7 +32214,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint32 SchemaItemVduValue::textcolor() const {
   return _internal_textcolor();
 }
 inline void SchemaItemVduValue::_internal_set_textcolor(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000040u;
   textcolor_ = value;
 }
 inline void SchemaItemVduValue::set_textcolor(::PROTOBUF_NAMESPACE_ID::uint32 value) {
@@ -32201,82 +32222,9 @@ inline void SchemaItemVduValue::set_textcolor(::PROTOBUF_NAMESPACE_ID::uint32 va
   // @@protoc_insertion_point(field_set:Proto.SchemaItemVduValue.textColor)
 }
 
-// optional string fontName = 16;
-inline bool SchemaItemVduValue::_internal_has_fontname() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
-  return value;
-}
-inline bool SchemaItemVduValue::has_fontname() const {
-  return _internal_has_fontname();
-}
-inline void SchemaItemVduValue::clear_fontname() {
-  fontname_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline const std::string& SchemaItemVduValue::fontname() const {
-  // @@protoc_insertion_point(field_get:Proto.SchemaItemVduValue.fontName)
-  return _internal_fontname();
-}
-inline void SchemaItemVduValue::set_fontname(const std::string& value) {
-  _internal_set_fontname(value);
-  // @@protoc_insertion_point(field_set:Proto.SchemaItemVduValue.fontName)
-}
-inline std::string* SchemaItemVduValue::mutable_fontname() {
-  // @@protoc_insertion_point(field_mutable:Proto.SchemaItemVduValue.fontName)
-  return _internal_mutable_fontname();
-}
-inline const std::string& SchemaItemVduValue::_internal_fontname() const {
-  return fontname_.Get();
-}
-inline void SchemaItemVduValue::_internal_set_fontname(const std::string& value) {
-  _has_bits_[0] |= 0x00000001u;
-  fontname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void SchemaItemVduValue::set_fontname(std::string&& value) {
-  _has_bits_[0] |= 0x00000001u;
-  fontname_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Proto.SchemaItemVduValue.fontName)
-}
-inline void SchemaItemVduValue::set_fontname(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000001u;
-  fontname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Proto.SchemaItemVduValue.fontName)
-}
-inline void SchemaItemVduValue::set_fontname(const char* value,
-    size_t size) {
-  _has_bits_[0] |= 0x00000001u;
-  fontname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Proto.SchemaItemVduValue.fontName)
-}
-inline std::string* SchemaItemVduValue::_internal_mutable_fontname() {
-  _has_bits_[0] |= 0x00000001u;
-  return fontname_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* SchemaItemVduValue::release_fontname() {
-  // @@protoc_insertion_point(field_release:Proto.SchemaItemVduValue.fontName)
-  if (!_internal_has_fontname()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000001u;
-  return fontname_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void SchemaItemVduValue::set_allocated_fontname(std::string* fontname) {
-  if (fontname != nullptr) {
-    _has_bits_[0] |= 0x00000001u;
-  } else {
-    _has_bits_[0] &= ~0x00000001u;
-  }
-  fontname_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), fontname,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItemVduValue.fontName)
-}
-
 // optional string appSignalId = 17;
 inline bool SchemaItemVduValue::_internal_has_appsignalid() const {
-  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
 }
 inline bool SchemaItemVduValue::has_appsignalid() const {
@@ -32284,7 +32232,7 @@ inline bool SchemaItemVduValue::has_appsignalid() const {
 }
 inline void SchemaItemVduValue::clear_appsignalid() {
   appsignalid_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000001u;
 }
 inline const std::string& SchemaItemVduValue::appsignalid() const {
   // @@protoc_insertion_point(field_get:Proto.SchemaItemVduValue.appSignalId)
@@ -32302,30 +32250,30 @@ inline const std::string& SchemaItemVduValue::_internal_appsignalid() const {
   return appsignalid_.Get();
 }
 inline void SchemaItemVduValue::_internal_set_appsignalid(const std::string& value) {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000001u;
   appsignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void SchemaItemVduValue::set_appsignalid(std::string&& value) {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000001u;
   appsignalid_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:Proto.SchemaItemVduValue.appSignalId)
 }
 inline void SchemaItemVduValue::set_appsignalid(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000001u;
   appsignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:Proto.SchemaItemVduValue.appSignalId)
 }
 inline void SchemaItemVduValue::set_appsignalid(const char* value,
     size_t size) {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000001u;
   appsignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:Proto.SchemaItemVduValue.appSignalId)
 }
 inline std::string* SchemaItemVduValue::_internal_mutable_appsignalid() {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000001u;
   return appsignalid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* SchemaItemVduValue::release_appsignalid() {
@@ -32333,18 +32281,129 @@ inline std::string* SchemaItemVduValue::release_appsignalid() {
   if (!_internal_has_appsignalid()) {
     return nullptr;
   }
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000001u;
   return appsignalid_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void SchemaItemVduValue::set_allocated_appsignalid(std::string* appsignalid) {
   if (appsignalid != nullptr) {
-    _has_bits_[0] |= 0x00000002u;
+    _has_bits_[0] |= 0x00000001u;
   } else {
-    _has_bits_[0] &= ~0x00000002u;
+    _has_bits_[0] &= ~0x00000001u;
   }
   appsignalid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), appsignalid,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItemVduValue.appSignalId)
+}
+
+// optional .Proto.FontParam font = 18;
+inline bool SchemaItemVduValue::_internal_has_font() const {
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  PROTOBUF_ASSUME(!value || font_ != nullptr);
+  return value;
+}
+inline bool SchemaItemVduValue::has_font() const {
+  return _internal_has_font();
+}
+inline void SchemaItemVduValue::clear_font() {
+  if (font_ != nullptr) font_->Clear();
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline const ::Proto::FontParam& SchemaItemVduValue::_internal_font() const {
+  const ::Proto::FontParam* p = font_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Proto::FontParam&>(
+      ::Proto::_FontParam_default_instance_);
+}
+inline const ::Proto::FontParam& SchemaItemVduValue::font() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemVduValue.font)
+  return _internal_font();
+}
+inline void SchemaItemVduValue::unsafe_arena_set_allocated_font(
+    ::Proto::FontParam* font) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(font_);
+  }
+  font_ = font;
+  if (font) {
+    _has_bits_[0] |= 0x00000002u;
+  } else {
+    _has_bits_[0] &= ~0x00000002u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Proto.SchemaItemVduValue.font)
+}
+inline ::Proto::FontParam* SchemaItemVduValue::release_font() {
+  _has_bits_[0] &= ~0x00000002u;
+  ::Proto::FontParam* temp = font_;
+  font_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::Proto::FontParam* SchemaItemVduValue::unsafe_arena_release_font() {
+  // @@protoc_insertion_point(field_release:Proto.SchemaItemVduValue.font)
+  _has_bits_[0] &= ~0x00000002u;
+  ::Proto::FontParam* temp = font_;
+  font_ = nullptr;
+  return temp;
+}
+inline ::Proto::FontParam* SchemaItemVduValue::_internal_mutable_font() {
+  _has_bits_[0] |= 0x00000002u;
+  if (font_ == nullptr) {
+    auto* p = CreateMaybeMessage<::Proto::FontParam>(GetArena());
+    font_ = p;
+  }
+  return font_;
+}
+inline ::Proto::FontParam* SchemaItemVduValue::mutable_font() {
+  // @@protoc_insertion_point(field_mutable:Proto.SchemaItemVduValue.font)
+  return _internal_mutable_font();
+}
+inline void SchemaItemVduValue::set_allocated_font(::Proto::FontParam* font) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete font_;
+  }
+  if (font) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(font);
+    if (message_arena != submessage_arena) {
+      font = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, font, submessage_arena);
+    }
+    _has_bits_[0] |= 0x00000002u;
+  } else {
+    _has_bits_[0] &= ~0x00000002u;
+  }
+  font_ = font;
+  // @@protoc_insertion_point(field_set_allocated:Proto.SchemaItemVduValue.font)
+}
+
+// optional uint32 precision = 25;
+inline bool SchemaItemVduValue::_internal_has_precision() const {
+  bool value = (_has_bits_[0] & 0x00000080u) != 0;
+  return value;
+}
+inline bool SchemaItemVduValue::has_precision() const {
+  return _internal_has_precision();
+}
+inline void SchemaItemVduValue::clear_precision() {
+  precision_ = 0u;
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 SchemaItemVduValue::_internal_precision() const {
+  return precision_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 SchemaItemVduValue::precision() const {
+  // @@protoc_insertion_point(field_get:Proto.SchemaItemVduValue.precision)
+  return _internal_precision();
+}
+inline void SchemaItemVduValue::_internal_set_precision(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _has_bits_[0] |= 0x00000080u;
+  precision_ = value;
+}
+inline void SchemaItemVduValue::set_precision(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_precision(value);
+  // @@protoc_insertion_point(field_set:Proto.SchemaItemVduValue.precision)
 }
 
 // -------------------------------------------------------------------

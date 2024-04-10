@@ -956,8 +956,8 @@ struct SchemaItemVduLineDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT SchemaItemVduLineDefaultTypeInternal _SchemaItemVduLine_default_instance_;
 constexpr SchemaItemVduRect::SchemaItemVduRect(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : fontname_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , text_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  : text_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , font_(nullptr)
   , weight_(0)
   , fill_(false)
   , drawrect_(false)
@@ -977,13 +977,14 @@ struct SchemaItemVduRectDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT SchemaItemVduRectDefaultTypeInternal _SchemaItemVduRect_default_instance_;
 constexpr SchemaItemVduValue::SchemaItemVduValue(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : fontname_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , appsignalid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  : appsignalid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , font_(nullptr)
   , weight_(0)
   , drawrect_(false)
-  , textcolor_(0u)
   , linecolor_(0u)
-  , fillcolor_(0u){}
+  , fillcolor_(0u)
+  , textcolor_(0u)
+  , precision_(0u){}
 struct SchemaItemVduValueDefaultTypeInternal {
   constexpr SchemaItemVduValueDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -2028,8 +2029,8 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_VFrame30_2eproto::offsets[] PR
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduRect, linecolor_),
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduRect, fillcolor_),
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduRect, textcolor_),
-  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduRect, fontname_),
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduRect, text_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduRect, font_),
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduRect, horzalign_),
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduRect, vertalign_),
   2,
@@ -2052,15 +2053,17 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_VFrame30_2eproto::offsets[] PR
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduValue, linecolor_),
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduValue, fillcolor_),
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduValue, textcolor_),
-  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduValue, fontname_),
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduValue, appsignalid_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduValue, font_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduValue, precision_),
   2,
   3,
+  4,
   5,
   6,
-  4,
   0,
   1,
+  7,
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaDetailsSet, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -2208,11 +2211,11 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 888, 910, sizeof(::Proto::SchemaItemSlider)},
   { 927, 934, sizeof(::Proto::SchemaItemVduLine)},
   { 936, 951, sizeof(::Proto::SchemaItemVduRect)},
-  { 961, 973, sizeof(::Proto::SchemaItemVduValue)},
-  { 980, -1, sizeof(::Proto::SchemaDetailsSet)},
-  { 986, 996, sizeof(::Proto::TrendIndicatorSchemaItems)},
-  { 1001, 1022, sizeof(::Proto::SchemaDetails)},
-  { 1038, 1057, sizeof(::Proto::AfbParamObsolete)},
+  { 961, 974, sizeof(::Proto::SchemaItemVduValue)},
+  { 982, -1, sizeof(::Proto::SchemaDetailsSet)},
+  { 988, 998, sizeof(::Proto::TrendIndicatorSchemaItems)},
+  { 1003, 1024, sizeof(::Proto::SchemaDetails)},
+  { 1040, 1059, sizeof(::Proto::AfbParamObsolete)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -2535,53 +2538,54 @@ const char descriptor_table_protodef_VFrame30_2eproto[] PROTOBUF_SECTION_VARIABL
   "ed\030  \001(\t\022\033\n\023scriptSliderPressed\030! \001(\t\022\034\n"
   "\024scriptSliderReleased\030\" \001(\t\022\032\n\022scriptVal"
   "ueChanged\030# \001(\t\"6\n\021SchemaItemVduLine\022\016\n\006"
-  "weight\030\001 \001(\005\022\021\n\tlineColor\030\002 \001(\r\"\302\001\n\021Sche"
+  "weight\030\001 \001(\005\022\021\n\tlineColor\030\002 \001(\r\"\320\001\n\021Sche"
   "maItemVduRect\022\016\n\006weight\030\003 \001(\005\022\014\n\004fill\030\004 "
   "\001(\010\022\020\n\010drawrect\030\005 \001(\010\022\021\n\tlineColor\030\n \001(\r"
-  "\022\021\n\tfillColor\030\013 \001(\r\022\021\n\ttextColor\030\014 \001(\r\022\020"
-  "\n\010fontName\030\020 \001(\t\022\014\n\004text\030\021 \001(\t\022\021\n\thorzAl"
-  "ign\030\024 \001(\005\022\021\n\tvertAlign\030\025 \001(\005\"\226\001\n\022SchemaI"
-  "temVduValue\022\016\n\006weight\030\003 \001(\005\022\020\n\010drawrect\030"
-  "\005 \001(\010\022\021\n\tlineColor\030\n \001(\r\022\021\n\tfillColor\030\013 "
-  "\001(\r\022\021\n\ttextColor\030\014 \001(\r\022\020\n\010fontName\030\020 \001(\t"
-  "\022\023\n\013appSignalId\030\021 \001(\t\"@\n\020SchemaDetailsSe"
-  "t\022,\n\016schemasDetails\030\002 \003(\0132\024.Proto.Schema"
-  "Details\"\221\001\n\031TrendIndicatorSchemaItems\022\035\n"
-  "\010itemUuid\030\002 \001(\0132\013.Proto.Uuid\022\024\n\014samplePe"
-  "riod\030\003 \001(\005\022\020\n\010timeType\030\004 \001(\005\022\027\n\017duration"
-  "Seconds\030\005 \001(\005\022\024\n\014appSignalIds\030\006 \003(\t\"\374\002\n\r"
-  "SchemaDetails\022\017\n\007version\030\002 \001(\005\022\020\n\010schema"
-  "Id\030\004 \001(\t\022\017\n\007caption\030\005 \001(\t\022\031\n\021excludedfro"
-  "mBuild\030\006 \001(\010\022\023\n\013equipmentId\030\007 \001(\t\022\031\n\021lmD"
-  "escriptionFile\030\010 \001(\t\022\014\n\004path\030\t \001(\t\022\021\n\tsi"
-  "gnalIds\030\024 \003(\t\022\016\n\006labels\030\025 \003(\t\022\023\n\013connect"
-  "ions\030\026 \003(\t\022\032\n\005guids\030\027 \003(\0132\013.Proto.Uuid\022\022"
-  "\n\nschematags\030\030 \003(\t\022\021\n\tloopbacks\030\031 \003(\t\022\020\n"
-  "\010itemtags\030\032 \003(\t\022\026\n\016packedLogicIds\030\033 \003(\t\022"
-  "9\n\017trendIndicators\030\036 \003(\0132 .Proto.TrendIn"
-  "dicatorSchemaItems\"\303\003\n\020AfbParamObsolete\022"
-  "\037\n\007caption\030\001 \002(\0132\016.Proto.wstring\022\017\n\007visi"
-  "ble\030\007 \002(\010\022\027\n\014operandIndex\030\010 \001(\005:\0010\022\017\n\004si"
-  "ze\030\t \001(\005:\0010\022\033\n\014instantiator\030\n \001(\010:\005false"
-  "\022\023\n\004user\030\013 \001(\010:\005false\022%\n\rchangedScript\030\014"
-  " \001(\0132\016.Proto.wstring\022\036\n\005value\030\r \001(\0132\017.Pr"
-  "oto.qvariant\022%\n\014defaultvalue\030\016 \001(\0132\017.Pro"
-  "to.qvariant\022!\n\010lowlimit\030\017 \001(\0132\017.Proto.qv"
-  "ariant\022\"\n\thighlimit\030\020 \001(\0132\017.Proto.qvaria"
-  "nt\022\036\n\006opName\030\021 \001(\0132\016.Proto.wstring\022\"\n\004ty"
-  "pe\030\022 \001(\0162\024.Proto.FblSignalType\022(\n\ndataFo"
-  "rmat\030\023 \001(\0162\024.Proto.FblDataFormat*3\n\nSche"
-  "maUnit\022\013\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004I"
-  "nch\020\002*-\n\024ConnectionDirrection\022\t\n\005Input\020\000"
-  "\022\n\n\006Output\020\001*)\n\rFblSignalType\022\n\n\006Analog\020"
-  "\000\022\014\n\010Discrete\020\001*:\n\rFblDataFormat\022\017\n\013Unsi"
-  "gnedInt\020\000\022\r\n\tSignedInt\020\001\022\t\n\005Float\020\002:6\n\ns"
-  "chemaitem\022\017.Proto.Envelope\030\006 \001(\0132\021.Proto"
-  ".SchemaItem:.\n\006schema\022\017.Proto.Envelope\030d"
-  " \001(\0132\r.Proto.Schema:8\n\013schemalayer\022\017.Pro"
-  "to.Envelope\030e \001(\0132\022.Proto.SchemaLayer:B\n"
-  "\020schemaDetailsSet\022\017.Proto.Envelope\030i \001(\013"
-  "2\027.Proto.SchemaDetailsSet"
+  "\022\021\n\tfillColor\030\013 \001(\r\022\021\n\ttextColor\030\014 \001(\r\022\014"
+  "\n\004text\030\021 \001(\t\022\036\n\004font\030\022 \001(\0132\020.Proto.FontP"
+  "aram\022\021\n\thorzAlign\030\024 \001(\005\022\021\n\tvertAlign\030\025 \001"
+  "(\005\"\267\001\n\022SchemaItemVduValue\022\016\n\006weight\030\003 \001("
+  "\005\022\020\n\010drawrect\030\005 \001(\010\022\021\n\tlineColor\030\n \001(\r\022\021"
+  "\n\tfillColor\030\013 \001(\r\022\021\n\ttextColor\030\014 \001(\r\022\023\n\013"
+  "appSignalId\030\021 \001(\t\022\036\n\004font\030\022 \001(\0132\020.Proto."
+  "FontParam\022\021\n\tprecision\030\031 \001(\r\"@\n\020SchemaDe"
+  "tailsSet\022,\n\016schemasDetails\030\002 \003(\0132\024.Proto"
+  ".SchemaDetails\"\221\001\n\031TrendIndicatorSchemaI"
+  "tems\022\035\n\010itemUuid\030\002 \001(\0132\013.Proto.Uuid\022\024\n\014s"
+  "amplePeriod\030\003 \001(\005\022\020\n\010timeType\030\004 \001(\005\022\027\n\017d"
+  "urationSeconds\030\005 \001(\005\022\024\n\014appSignalIds\030\006 \003"
+  "(\t\"\374\002\n\rSchemaDetails\022\017\n\007version\030\002 \001(\005\022\020\n"
+  "\010schemaId\030\004 \001(\t\022\017\n\007caption\030\005 \001(\t\022\031\n\021excl"
+  "udedfromBuild\030\006 \001(\010\022\023\n\013equipmentId\030\007 \001(\t"
+  "\022\031\n\021lmDescriptionFile\030\010 \001(\t\022\014\n\004path\030\t \001("
+  "\t\022\021\n\tsignalIds\030\024 \003(\t\022\016\n\006labels\030\025 \003(\t\022\023\n\013"
+  "connections\030\026 \003(\t\022\032\n\005guids\030\027 \003(\0132\013.Proto"
+  ".Uuid\022\022\n\nschematags\030\030 \003(\t\022\021\n\tloopbacks\030\031"
+  " \003(\t\022\020\n\010itemtags\030\032 \003(\t\022\026\n\016packedLogicIds"
+  "\030\033 \003(\t\0229\n\017trendIndicators\030\036 \003(\0132 .Proto."
+  "TrendIndicatorSchemaItems\"\303\003\n\020AfbParamOb"
+  "solete\022\037\n\007caption\030\001 \002(\0132\016.Proto.wstring\022"
+  "\017\n\007visible\030\007 \002(\010\022\027\n\014operandIndex\030\010 \001(\005:\001"
+  "0\022\017\n\004size\030\t \001(\005:\0010\022\033\n\014instantiator\030\n \001(\010"
+  ":\005false\022\023\n\004user\030\013 \001(\010:\005false\022%\n\rchangedS"
+  "cript\030\014 \001(\0132\016.Proto.wstring\022\036\n\005value\030\r \001"
+  "(\0132\017.Proto.qvariant\022%\n\014defaultvalue\030\016 \001("
+  "\0132\017.Proto.qvariant\022!\n\010lowlimit\030\017 \001(\0132\017.P"
+  "roto.qvariant\022\"\n\thighlimit\030\020 \001(\0132\017.Proto"
+  ".qvariant\022\036\n\006opName\030\021 \001(\0132\016.Proto.wstrin"
+  "g\022\"\n\004type\030\022 \001(\0162\024.Proto.FblSignalType\022(\n"
+  "\ndataFormat\030\023 \001(\0162\024.Proto.FblDataFormat*"
+  "3\n\nSchemaUnit\022\013\n\007Display\020\000\022\016\n\nMillimeter"
+  "\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionDirrection\022\t\n\005"
+  "Input\020\000\022\n\n\006Output\020\001*)\n\rFblSignalType\022\n\n\006"
+  "Analog\020\000\022\014\n\010Discrete\020\001*:\n\rFblDataFormat\022"
+  "\017\n\013UnsignedInt\020\000\022\r\n\tSignedInt\020\001\022\t\n\005Float"
+  "\020\002:6\n\nschemaitem\022\017.Proto.Envelope\030\006 \001(\0132"
+  "\021.Proto.SchemaItem:.\n\006schema\022\017.Proto.Env"
+  "elope\030d \001(\0132\r.Proto.Schema:8\n\013schemalaye"
+  "r\022\017.Proto.Envelope\030e \001(\0132\022.Proto.SchemaL"
+  "ayer:B\n\020schemaDetailsSet\022\017.Proto.Envelop"
+  "e\030i \001(\0132\027.Proto.SchemaDetailsSet"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_VFrame30_2eproto_deps[4] = {
   &::descriptor_table_Afb_2eproto,
@@ -2591,7 +2595,7 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_VFrame30_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_VFrame30_2eproto = {
-  false, false, 12145, descriptor_table_protodef_VFrame30_2eproto, "VFrame30.proto", 
+  false, false, 12192, descriptor_table_protodef_VFrame30_2eproto, "VFrame30.proto", 
   &descriptor_table_VFrame30_2eproto_once, descriptor_table_VFrame30_2eproto_deps, 4, 59,
   schemas, file_default_instances, TableStruct_VFrame30_2eproto::offsets,
   file_level_metadata_VFrame30_2eproto, file_level_enum_descriptors_VFrame30_2eproto, file_level_service_descriptors_VFrame30_2eproto,
@@ -8070,6 +8074,12 @@ bool SchemaItem::IsInitialized() const {
   }
   if (_internal_has_busextractor()) {
     if (!busextractor_->IsInitialized()) return false;
+  }
+  if (_internal_has_vdurect()) {
+    if (!vdurect_->IsInitialized()) return false;
+  }
+  if (_internal_has_vduvalue()) {
+    if (!vduvalue_->IsInitialized()) return false;
   }
   return true;
 }
@@ -24542,10 +24552,11 @@ class SchemaItemVduRect::_Internal {
   static void set_has_textcolor(HasBits* has_bits) {
     (*has_bits)[0] |= 256u;
   }
-  static void set_has_fontname(HasBits* has_bits) {
+  static void set_has_text(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
   }
-  static void set_has_text(HasBits* has_bits) {
+  static const ::Proto::FontParam& font(const SchemaItemVduRect* msg);
+  static void set_has_font(HasBits* has_bits) {
     (*has_bits)[0] |= 2u;
   }
   static void set_has_horzalign(HasBits* has_bits) {
@@ -24556,6 +24567,10 @@ class SchemaItemVduRect::_Internal {
   }
 };
 
+const ::Proto::FontParam&
+SchemaItemVduRect::_Internal::font(const SchemaItemVduRect* msg) {
+  return *msg->font_;
+}
 SchemaItemVduRect::SchemaItemVduRect(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
@@ -24566,15 +24581,15 @@ SchemaItemVduRect::SchemaItemVduRect(const SchemaItemVduRect& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
       _has_bits_(from._has_bits_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  fontname_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (from._internal_has_fontname()) {
-    fontname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_fontname(), 
-      GetArena());
-  }
   text_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (from._internal_has_text()) {
     text_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_text(), 
       GetArena());
+  }
+  if (from._internal_has_font()) {
+    font_ = new ::Proto::FontParam(*from.font_);
+  } else {
+    font_ = nullptr;
   }
   ::memcpy(&weight_, &from.weight_,
     static_cast<size_t>(reinterpret_cast<char*>(&horzalign_) -
@@ -24583,12 +24598,11 @@ SchemaItemVduRect::SchemaItemVduRect(const SchemaItemVduRect& from)
 }
 
 void SchemaItemVduRect::SharedCtor() {
-fontname_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 text_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-    reinterpret_cast<char*>(&weight_) - reinterpret_cast<char*>(this)),
+    reinterpret_cast<char*>(&font_) - reinterpret_cast<char*>(this)),
     0, static_cast<size_t>(reinterpret_cast<char*>(&horzalign_) -
-    reinterpret_cast<char*>(&weight_)) + sizeof(horzalign_));
+    reinterpret_cast<char*>(&font_)) + sizeof(horzalign_));
 }
 
 SchemaItemVduRect::~SchemaItemVduRect() {
@@ -24599,8 +24613,8 @@ SchemaItemVduRect::~SchemaItemVduRect() {
 
 void SchemaItemVduRect::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
-  fontname_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   text_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (this != internal_default_instance()) delete font_;
 }
 
 void SchemaItemVduRect::ArenaDtor(void* object) {
@@ -24622,10 +24636,11 @@ void SchemaItemVduRect::Clear() {
   cached_has_bits = _has_bits_[0];
   if (cached_has_bits & 0x00000003u) {
     if (cached_has_bits & 0x00000001u) {
-      fontname_.ClearNonDefaultToEmpty();
+      text_.ClearNonDefaultToEmpty();
     }
     if (cached_has_bits & 0x00000002u) {
-      text_.ClearNonDefaultToEmpty();
+      GOOGLE_DCHECK(font_ != nullptr);
+      font_->Clear();
     }
   }
   if (cached_has_bits & 0x000000fcu) {
@@ -24698,17 +24713,6 @@ const char* SchemaItemVduRect::_InternalParse(const char* ptr, ::PROTOBUF_NAMESP
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional string fontName = 16;
-      case 16:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 130)) {
-          auto str = _internal_mutable_fontname();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.SchemaItemVduRect.fontName");
-          #endif  // !NDEBUG
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
       // optional string text = 17;
       case 17:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 138)) {
@@ -24717,6 +24721,13 @@ const char* SchemaItemVduRect::_InternalParse(const char* ptr, ::PROTOBUF_NAMESP
           #ifndef NDEBUG
           ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.SchemaItemVduRect.text");
           #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional .Proto.FontParam font = 18;
+      case 18:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 146)) {
+          ptr = ctx->ParseMessage(_internal_mutable_font(), ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -24802,24 +24813,22 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(12, this->_internal_textcolor(), target);
   }
 
-  // optional string fontName = 16;
-  if (cached_has_bits & 0x00000001u) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->_internal_fontname().data(), static_cast<int>(this->_internal_fontname().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Proto.SchemaItemVduRect.fontName");
-    target = stream->WriteStringMaybeAliased(
-        16, this->_internal_fontname(), target);
-  }
-
   // optional string text = 17;
-  if (cached_has_bits & 0x00000002u) {
+  if (cached_has_bits & 0x00000001u) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_text().data(), static_cast<int>(this->_internal_text().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
       "Proto.SchemaItemVduRect.text");
     target = stream->WriteStringMaybeAliased(
         17, this->_internal_text(), target);
+  }
+
+  // optional .Proto.FontParam font = 18;
+  if (cached_has_bits & 0x00000002u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        18, _Internal::font(this), target, stream);
   }
 
   // optional int32 horzAlign = 20;
@@ -24852,18 +24861,18 @@ size_t SchemaItemVduRect::ByteSizeLong() const {
 
   cached_has_bits = _has_bits_[0];
   if (cached_has_bits & 0x000000ffu) {
-    // optional string fontName = 16;
+    // optional string text = 17;
     if (cached_has_bits & 0x00000001u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-          this->_internal_fontname());
+          this->_internal_text());
     }
 
-    // optional string text = 17;
+    // optional .Proto.FontParam font = 18;
     if (cached_has_bits & 0x00000002u) {
       total_size += 2 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-          this->_internal_text());
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *font_);
     }
 
     // optional int32 weight = 3;
@@ -24955,10 +24964,10 @@ void SchemaItemVduRect::MergeFrom(const SchemaItemVduRect& from) {
   cached_has_bits = from._has_bits_[0];
   if (cached_has_bits & 0x000000ffu) {
     if (cached_has_bits & 0x00000001u) {
-      _internal_set_fontname(from._internal_fontname());
+      _internal_set_text(from._internal_text());
     }
     if (cached_has_bits & 0x00000002u) {
-      _internal_set_text(from._internal_text());
+      _internal_mutable_font()->::Proto::FontParam::MergeFrom(from._internal_font());
     }
     if (cached_has_bits & 0x00000004u) {
       weight_ = from.weight_;
@@ -25006,6 +25015,9 @@ void SchemaItemVduRect::CopyFrom(const SchemaItemVduRect& from) {
 }
 
 bool SchemaItemVduRect::IsInitialized() const {
+  if (_internal_has_font()) {
+    if (!font_->IsInitialized()) return false;
+  }
   return true;
 }
 
@@ -25013,14 +25025,13 @@ void SchemaItemVduRect::InternalSwap(SchemaItemVduRect* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   swap(_has_bits_[0], other->_has_bits_[0]);
-  fontname_.Swap(&other->fontname_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   text_.Swap(&other->text_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(SchemaItemVduRect, horzalign_)
       + sizeof(SchemaItemVduRect::horzalign_)
-      - PROTOBUF_FIELD_OFFSET(SchemaItemVduRect, weight_)>(
-          reinterpret_cast<char*>(&weight_),
-          reinterpret_cast<char*>(&other->weight_));
+      - PROTOBUF_FIELD_OFFSET(SchemaItemVduRect, font_)>(
+          reinterpret_cast<char*>(&font_),
+          reinterpret_cast<char*>(&other->font_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata SchemaItemVduRect::GetMetadata() const {
@@ -25040,22 +25051,30 @@ class SchemaItemVduValue::_Internal {
     (*has_bits)[0] |= 8u;
   }
   static void set_has_linecolor(HasBits* has_bits) {
-    (*has_bits)[0] |= 32u;
-  }
-  static void set_has_fillcolor(HasBits* has_bits) {
-    (*has_bits)[0] |= 64u;
-  }
-  static void set_has_textcolor(HasBits* has_bits) {
     (*has_bits)[0] |= 16u;
   }
-  static void set_has_fontname(HasBits* has_bits) {
-    (*has_bits)[0] |= 1u;
+  static void set_has_fillcolor(HasBits* has_bits) {
+    (*has_bits)[0] |= 32u;
+  }
+  static void set_has_textcolor(HasBits* has_bits) {
+    (*has_bits)[0] |= 64u;
   }
   static void set_has_appsignalid(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
+  static const ::Proto::FontParam& font(const SchemaItemVduValue* msg);
+  static void set_has_font(HasBits* has_bits) {
     (*has_bits)[0] |= 2u;
+  }
+  static void set_has_precision(HasBits* has_bits) {
+    (*has_bits)[0] |= 128u;
   }
 };
 
+const ::Proto::FontParam&
+SchemaItemVduValue::_Internal::font(const SchemaItemVduValue* msg) {
+  return *msg->font_;
+}
 SchemaItemVduValue::SchemaItemVduValue(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
@@ -25066,29 +25085,28 @@ SchemaItemVduValue::SchemaItemVduValue(const SchemaItemVduValue& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
       _has_bits_(from._has_bits_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  fontname_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (from._internal_has_fontname()) {
-    fontname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_fontname(), 
-      GetArena());
-  }
   appsignalid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (from._internal_has_appsignalid()) {
     appsignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_appsignalid(), 
       GetArena());
   }
+  if (from._internal_has_font()) {
+    font_ = new ::Proto::FontParam(*from.font_);
+  } else {
+    font_ = nullptr;
+  }
   ::memcpy(&weight_, &from.weight_,
-    static_cast<size_t>(reinterpret_cast<char*>(&fillcolor_) -
-    reinterpret_cast<char*>(&weight_)) + sizeof(fillcolor_));
+    static_cast<size_t>(reinterpret_cast<char*>(&precision_) -
+    reinterpret_cast<char*>(&weight_)) + sizeof(precision_));
   // @@protoc_insertion_point(copy_constructor:Proto.SchemaItemVduValue)
 }
 
 void SchemaItemVduValue::SharedCtor() {
-fontname_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 appsignalid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-    reinterpret_cast<char*>(&weight_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&fillcolor_) -
-    reinterpret_cast<char*>(&weight_)) + sizeof(fillcolor_));
+    reinterpret_cast<char*>(&font_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&precision_) -
+    reinterpret_cast<char*>(&font_)) + sizeof(precision_));
 }
 
 SchemaItemVduValue::~SchemaItemVduValue() {
@@ -25099,8 +25117,8 @@ SchemaItemVduValue::~SchemaItemVduValue() {
 
 void SchemaItemVduValue::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
-  fontname_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   appsignalid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (this != internal_default_instance()) delete font_;
 }
 
 void SchemaItemVduValue::ArenaDtor(void* object) {
@@ -25122,16 +25140,17 @@ void SchemaItemVduValue::Clear() {
   cached_has_bits = _has_bits_[0];
   if (cached_has_bits & 0x00000003u) {
     if (cached_has_bits & 0x00000001u) {
-      fontname_.ClearNonDefaultToEmpty();
-    }
-    if (cached_has_bits & 0x00000002u) {
       appsignalid_.ClearNonDefaultToEmpty();
     }
+    if (cached_has_bits & 0x00000002u) {
+      GOOGLE_DCHECK(font_ != nullptr);
+      font_->Clear();
+    }
   }
-  if (cached_has_bits & 0x0000007cu) {
+  if (cached_has_bits & 0x000000fcu) {
     ::memset(&weight_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&fillcolor_) -
-        reinterpret_cast<char*>(&weight_)) + sizeof(fillcolor_));
+        reinterpret_cast<char*>(&precision_) -
+        reinterpret_cast<char*>(&weight_)) + sizeof(precision_));
   }
   _has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -25185,17 +25204,6 @@ const char* SchemaItemVduValue::_InternalParse(const char* ptr, ::PROTOBUF_NAMES
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional string fontName = 16;
-      case 16:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 130)) {
-          auto str = _internal_mutable_fontname();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.SchemaItemVduValue.fontName");
-          #endif  // !NDEBUG
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
       // optional string appSignalId = 17;
       case 17:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 138)) {
@@ -25204,6 +25212,21 @@ const char* SchemaItemVduValue::_InternalParse(const char* ptr, ::PROTOBUF_NAMES
           #ifndef NDEBUG
           ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.SchemaItemVduValue.appSignalId");
           #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional .Proto.FontParam font = 18;
+      case 18:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 146)) {
+          ptr = ctx->ParseMessage(_internal_mutable_font(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional uint32 precision = 25;
+      case 25:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 200)) {
+          _Internal::set_has_precision(&has_bits);
+          precision_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -25250,41 +25273,45 @@ failure:
   }
 
   // optional uint32 lineColor = 10;
-  if (cached_has_bits & 0x00000020u) {
+  if (cached_has_bits & 0x00000010u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(10, this->_internal_linecolor(), target);
   }
 
   // optional uint32 fillColor = 11;
-  if (cached_has_bits & 0x00000040u) {
+  if (cached_has_bits & 0x00000020u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(11, this->_internal_fillcolor(), target);
   }
 
   // optional uint32 textColor = 12;
-  if (cached_has_bits & 0x00000010u) {
+  if (cached_has_bits & 0x00000040u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(12, this->_internal_textcolor(), target);
   }
 
-  // optional string fontName = 16;
-  if (cached_has_bits & 0x00000001u) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->_internal_fontname().data(), static_cast<int>(this->_internal_fontname().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Proto.SchemaItemVduValue.fontName");
-    target = stream->WriteStringMaybeAliased(
-        16, this->_internal_fontname(), target);
-  }
-
   // optional string appSignalId = 17;
-  if (cached_has_bits & 0x00000002u) {
+  if (cached_has_bits & 0x00000001u) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_appsignalid().data(), static_cast<int>(this->_internal_appsignalid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
       "Proto.SchemaItemVduValue.appSignalId");
     target = stream->WriteStringMaybeAliased(
         17, this->_internal_appsignalid(), target);
+  }
+
+  // optional .Proto.FontParam font = 18;
+  if (cached_has_bits & 0x00000002u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        18, _Internal::font(this), target, stream);
+  }
+
+  // optional uint32 precision = 25;
+  if (cached_has_bits & 0x00000080u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(25, this->_internal_precision(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -25304,19 +25331,19 @@ size_t SchemaItemVduValue::ByteSizeLong() const {
   (void) cached_has_bits;
 
   cached_has_bits = _has_bits_[0];
-  if (cached_has_bits & 0x0000007fu) {
-    // optional string fontName = 16;
+  if (cached_has_bits & 0x000000ffu) {
+    // optional string appSignalId = 17;
     if (cached_has_bits & 0x00000001u) {
       total_size += 2 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-          this->_internal_fontname());
+          this->_internal_appsignalid());
     }
 
-    // optional string appSignalId = 17;
+    // optional .Proto.FontParam font = 18;
     if (cached_has_bits & 0x00000002u) {
       total_size += 2 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-          this->_internal_appsignalid());
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *font_);
     }
 
     // optional int32 weight = 3;
@@ -25331,25 +25358,32 @@ size_t SchemaItemVduValue::ByteSizeLong() const {
       total_size += 1 + 1;
     }
 
-    // optional uint32 textColor = 12;
-    if (cached_has_bits & 0x00000010u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
-          this->_internal_textcolor());
-    }
-
     // optional uint32 lineColor = 10;
-    if (cached_has_bits & 0x00000020u) {
+    if (cached_has_bits & 0x00000010u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
           this->_internal_linecolor());
     }
 
     // optional uint32 fillColor = 11;
-    if (cached_has_bits & 0x00000040u) {
+    if (cached_has_bits & 0x00000020u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
           this->_internal_fillcolor());
+    }
+
+    // optional uint32 textColor = 12;
+    if (cached_has_bits & 0x00000040u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
+          this->_internal_textcolor());
+    }
+
+    // optional uint32 precision = 25;
+    if (cached_has_bits & 0x00000080u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
+          this->_internal_precision());
     }
 
   }
@@ -25385,12 +25419,12 @@ void SchemaItemVduValue::MergeFrom(const SchemaItemVduValue& from) {
   (void) cached_has_bits;
 
   cached_has_bits = from._has_bits_[0];
-  if (cached_has_bits & 0x0000007fu) {
+  if (cached_has_bits & 0x000000ffu) {
     if (cached_has_bits & 0x00000001u) {
-      _internal_set_fontname(from._internal_fontname());
+      _internal_set_appsignalid(from._internal_appsignalid());
     }
     if (cached_has_bits & 0x00000002u) {
-      _internal_set_appsignalid(from._internal_appsignalid());
+      _internal_mutable_font()->::Proto::FontParam::MergeFrom(from._internal_font());
     }
     if (cached_has_bits & 0x00000004u) {
       weight_ = from.weight_;
@@ -25399,13 +25433,16 @@ void SchemaItemVduValue::MergeFrom(const SchemaItemVduValue& from) {
       drawrect_ = from.drawrect_;
     }
     if (cached_has_bits & 0x00000010u) {
-      textcolor_ = from.textcolor_;
-    }
-    if (cached_has_bits & 0x00000020u) {
       linecolor_ = from.linecolor_;
     }
-    if (cached_has_bits & 0x00000040u) {
+    if (cached_has_bits & 0x00000020u) {
       fillcolor_ = from.fillcolor_;
+    }
+    if (cached_has_bits & 0x00000040u) {
+      textcolor_ = from.textcolor_;
+    }
+    if (cached_has_bits & 0x00000080u) {
+      precision_ = from.precision_;
     }
     _has_bits_[0] |= cached_has_bits;
   }
@@ -25426,6 +25463,9 @@ void SchemaItemVduValue::CopyFrom(const SchemaItemVduValue& from) {
 }
 
 bool SchemaItemVduValue::IsInitialized() const {
+  if (_internal_has_font()) {
+    if (!font_->IsInitialized()) return false;
+  }
   return true;
 }
 
@@ -25433,14 +25473,13 @@ void SchemaItemVduValue::InternalSwap(SchemaItemVduValue* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   swap(_has_bits_[0], other->_has_bits_[0]);
-  fontname_.Swap(&other->fontname_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   appsignalid_.Swap(&other->appsignalid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(SchemaItemVduValue, fillcolor_)
-      + sizeof(SchemaItemVduValue::fillcolor_)
-      - PROTOBUF_FIELD_OFFSET(SchemaItemVduValue, weight_)>(
-          reinterpret_cast<char*>(&weight_),
-          reinterpret_cast<char*>(&other->weight_));
+      PROTOBUF_FIELD_OFFSET(SchemaItemVduValue, precision_)
+      + sizeof(SchemaItemVduValue::precision_)
+      - PROTOBUF_FIELD_OFFSET(SchemaItemVduValue, font_)>(
+          reinterpret_cast<char*>(&font_),
+          reinterpret_cast<char*>(&other->font_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata SchemaItemVduValue::GetMetadata() const {

@@ -646,7 +646,7 @@ thread_local QCache<Hash, DrawTextCacheItem> cache{50'000'000};			// 50Mb of ima
 
 	bool DrawHelper::drawSvgCached(QPainter& painter, SchemaUnit unit, const QRectF& rect, const QString& svg, double zoom)
 	{
-		// Add some extra space for drawing, to avoid artifacts in the adges of the image.
+		// Add some extra space for drawing, to avoid artifacts in the edges of the image.
 		//
 		const int extraSizePx = 20;
 

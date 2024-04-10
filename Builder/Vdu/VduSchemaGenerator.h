@@ -24,7 +24,7 @@ namespace Builder
 									  const VFrame30::VduSchema& schema,
 									  const std::map<Hash, int>& appSignalHashToSignalIndex,
 									  QByteArray& out,
-									  IssueLogger& log);
+									  Context& context);
 
 		static bool generateVduBackgroundBitmap(std::shared_ptr<VFrame30::Schema> schema, QImage& out);
 
@@ -34,6 +34,6 @@ namespace Builder
 									const std::map<Hash, int>& appSignalHashToSignalIndex,
 									QByteArray& out,
 									std::list<std::pair<QString, size_t>>& addedStringReferences,
-									IssueLogger& log);
+									Context& context);
 	};
 } // namespace Builder

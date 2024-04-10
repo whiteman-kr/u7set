@@ -591,6 +591,7 @@ namespace Builder
 		// VDU related issues
 		//
 		void errEQP6400(QString vduEquipmentId, QString appSignalId, QString schemaId, QString schemaItemLabel, QUuid itemUuid);
+		void errEQP6401(QString vduEquipmentId, QString schemaId, QString itemLabel, QUuid itemUuid, QString font);
 
 	public:
 		void addItemsIssues(OutputMessageLevel level, int issueCode, const std::vector<QUuid>& itemsUuids);

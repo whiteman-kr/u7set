@@ -82,7 +82,7 @@ namespace Builder
 				QByteArray nativeVduData;
 
 				bool genSchemaOk =
-					Builder::VduSchemaGenerator::generateVduSchema(vdu->equipmentId(), *schema, vduSignals, nativeVduData, *log);
+					Builder::VduSchemaGenerator::generateVduSchema(vdu->equipmentId(), *schema, vduSignals, nativeVduData, context);
 
 				if (genSchemaOk == false)
 				{
@@ -153,8 +153,10 @@ namespace Builder
 											   const VFrame30::VduSchema& schema,
 											   const std::map<Hash, int>& appSignalHashToSignalIndex,
 											   QByteArray& out,
-											   IssueLogger& log)
+											   Context& context)
 	{
+		IssueLogger& log = *context.m_log;
+
 		bool result = true;
 
 		std::multimap<QString, size_t> strings; // string -> referenceOffset
@@ -225,7 +227,7 @@ namespace Builder
 					QByteArray outSchemaItem{};
 					std::list<std::pair<QString, size_t>> addedStringReferences;
 
-					saveSchemaItem1(vduEquipmentId, *item, appSignalHashToSignalIndex, outSchemaItem, addedStringReferences, log);
+					saveSchemaItem1(vduEquipmentId, *item, appSignalHashToSignalIndex, outSchemaItem, addedStringReferences, context);
 
 					// Add added string references to the main string ref container.
 					//
@@ -382,8 +384,10 @@ namespace Builder
 											 const std::map<Hash, int>& appSignalHashToSignalIndex,
 											 QByteArray& out,
 											 std::list<std::pair<QString, size_t>>& addedStringReferences,
-											 IssueLogger& log)
+											 Context& context)
 	{
+		IssueLogger& log = *context.m_log;
+
 		// Get item type id and size of the specific item structure.
 		//
 		using ItemTypeId = decltype(VduSchemaFileSchemaItem1::itemType);
@@ -477,9 +481,36 @@ namespace Builder
 				structRect.fillColor = schemaItemVduRect.fillColor().rgba();
 				structRect.textColor = schemaItemVduRect.textColor().rgba();
 
-				// TODO: Set font index.
+				// Set font index.
 				//
-				structRect.fontIndex = 0;
+				int fontIndex = context.m_vduFontProvider
+					.getFontIndex(vduEquipmentId,
+								  schemaItemVduRect.getFontName(),
+								  schemaItemVduRect.getFontSize(),
+								  schemaItemVduRect.getFontBold(),
+								  schemaItemVduRect.getFontItalic(),
+								  false);
+
+				if (fontIndex == -1)
+				{
+					// Font not found.
+					//
+					QString font = QString{"'%1, %2%3%4'"}
+						.arg(schemaItemVduRect.getFontName())
+						.arg(schemaItemVduRect.getFontSize())
+						.arg(schemaItemVduRect.getFontBold() ? ", bold" : "")
+						.arg(schemaItemVduRect.getFontItalic() ? ", italic" : "");
+
+					log.errEQP6401(vduEquipmentId,
+								   schemaItem.parentSchema()->schemaId(),
+								   schemaItem.label(),
+								   schemaItem.guid(),
+								   font);
+
+					return false;
+				}
+
+				structRect.fontIndex = fontIndex;
 
 				addedStringReferences.emplace_back(schemaItemVduRect.text(),
 												   sizeof(fileSchemaItem) + offsetof(VduSchemaFileSchemaItemRect1, text));
@@ -512,9 +543,38 @@ namespace Builder
 
 				// TODO: Set font index.
 				//
-				structValue.fontIndex = 0;
+				int fontIndex = context.m_vduFontProvider
+									.getFontIndex(vduEquipmentId,
+												  schemaItemVduValue.getFontName(),
+												  schemaItemVduValue.getFontSize(),
+												  schemaItemVduValue.getFontBold(),
+												  schemaItemVduValue.getFontItalic(),
+												  false);
 
-				// TODO: Set app signal index.
+				if (fontIndex == -1)
+				{
+					// Font not found.
+					//
+					QString font = QString{"'%1, %2%3%4'"}
+						.arg(schemaItemVduValue.getFontName())
+						.arg(schemaItemVduValue.getFontSize())
+						.arg(schemaItemVduValue.getFontBold() ? ", bold" : "")
+						.arg(schemaItemVduValue.getFontItalic() ? ", italic" : "");
+
+					log.errEQP6401(vduEquipmentId,
+								   schemaItem.parentSchema()->schemaId(),
+								   schemaItem.label(),
+								   schemaItem.guid(),
+								   font);
+
+					return false;
+				}
+
+				structValue.fontIndex = fontIndex;
+
+				structValue.decimalPlaces = schemaItemVduValue.precision();
+
+				// Set app signal index.
 				//
 				{
 					QString appSignalId = schemaItemVduValue.appSignalId();
