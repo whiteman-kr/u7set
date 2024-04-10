@@ -5,6 +5,7 @@
 #include "../../VFrame30/SchemaItems/SchemaItemVduValue.h"
 #include "../../VFrame30/SchemaView.h"
 #include "../../VFrame30/VduSchema.h"
+#include "../../UtilsLib/Crc.h"
 #include "../Context.h"
 #include "VduSchemaFile.h"
 
@@ -279,17 +280,26 @@ namespace Builder
 			}
 		}
 
-		// TODO: Calculate and write CRC64
-		// Temporary just write "TODO:CRC"
-		// Before wring CRC, align out buffer to 8 bytes.
+		// Calculate CRC64 for the whole file.
+		// Align to 8 bytes the end of string area.
 		//
 		for (size_t ps = 0, rest = 8 - (out.size() % 8); ps < rest; ps++)
 		{
 			out.push_back(char{0});
 		}
 
-		const char crc[] = "TODO:CRC";
-		out.append(crc, sizeof(crc) - 1);
+		quint64 crc = qToBigEndian(Crc::crc64(out.constData(), out.size()));
+		out.append(reinterpret_cast<const char*>(&crc), sizeof(crc));
+
+		// Check crc, crc on data with crc field must be 0.
+		//
+		quint64 checkCrc = Crc::crc64(out.constData(), out.size());
+		if (checkCrc != 0)
+		{
+			Q_ASSERT(checkCrc == 0);
+			log.errINT1000("Internal error: VduSchemaGenerator::generateVduSchema(...) CRC64 check failed!");
+			return false;
+		}
 
 		return result;
 	}

@@ -4,6 +4,7 @@
 #include <HardwareLib/DeviceModule.h>
 #include "../../VFrame30/Schema.h"
 #include "../../lib/ConstStrings.h"
+#include "../../UtilsLib/Crc.h"
 
 namespace
 {
@@ -201,17 +202,26 @@ namespace Builder
 			}
 		}
 
-		// TODO: Calculate and write CRC64
-		// Temporary just write "TODO:CRC"
-		// Before wring CRC, align out buffer to 8 bytes.
+		// Calculate CRC64 for the whole file.
+		// Align to 8 bytes the end of string area.
 		//
 		for (size_t ps = 0, rest = 8 - (out.size() % 8); ps < rest; ps++)
 		{
 			out.push_back(char{0});
 		}
 
-		const char crc[] = "TODO:CRC";
-		out.append(crc, sizeof(crc) - 1);
+		quint64 crc = qToBigEndian(Crc::crc64(out.constData(), out.size()));
+		out.append(reinterpret_cast<const char*>(&crc), sizeof(crc));
+		
+		// Check crc, crc on data with crc field must be 0.
+		//
+		quint64 checkCrc = Crc::crc64(out.constData(), out.size());
+		if (checkCrc != 0)
+		{
+			Q_ASSERT(checkCrc == 0);
+			log->errINT1000("Internal error: VduConfigFileWriter::generate(...) CRC64 check failed!");
+			return false;
+		}
 
 		return true;
 	}
@@ -356,6 +366,26 @@ namespace Builder
 
 			result += printAddress(0, schemaOffset + offsetof(VduConfigSchema1, crc64), sizeof(schema->crc64));
 			result += QString("  CRC64: 0x%1\n").arg(schema->crc64, 16, 16);
+		}
+
+		// Check crc, crc on data with crc field must be 0.
+		//
+		result += QString("\n");
+
+		quint64 crcFromFile = *reinterpret_cast<const quint64*>(data.constData() + data.size() - sizeof(quint64));
+		result += printAddress(0, data.size() - sizeof(crcFromFile), sizeof(crcFromFile));
+		result += QString("File CRC64: 0x%1\n").arg(crcFromFile, 16, 16, QChar{'0'});
+
+		result += QString("\n");
+
+		quint64 checkCrc = Crc::crc64(data.constData(), data.size());
+		if (checkCrc != 0)
+		{
+			result += QString("CRC64 applied for file (including CRC64), FAILED - 0x%1\n").arg(checkCrc, 16, 16, QChar{'0'});
+		}
+		else
+		{
+			result += QString("CRC64 applied for file (including CRC64), Ok - 0x%1\n").arg(checkCrc, 16, 16, QChar{'0'});
 		}
 
 		return result;
