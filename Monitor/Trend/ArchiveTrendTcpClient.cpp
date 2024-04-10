@@ -393,7 +393,7 @@ void ArchiveTrendTcpClient::processNext(const QByteArray& data)
 	//
 	if (m_nextReply.islastpart() == true)
 	{
-		qDebug() << "ARCHS_GET_APP_SIGNALS_STATES_NEXT Reqest->Reply time: " << m_startRequestTime.elapsed();
+		qDebug() << "ARCHS_GET_APP_SIGNALS_STATES_NEXT Request->Reply time: " << m_startRequestTime.elapsed();
 		m_logFile.writeMessage(QString("processNext(), Requested completed, time: %1 ms, request: %2")
 									.arg(m_startRequestTime.elapsed())
 									.arg(m_currentRequest.toString()));

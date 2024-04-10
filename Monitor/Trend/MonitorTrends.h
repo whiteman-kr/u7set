@@ -4,10 +4,10 @@
 #include "MonitorConfigController.h"
 #include "MonitorTrendArchiveConnections.h"
 
-#include "../TrendView/TrendMainWindow.h"
-
-#include <ClientLib/RtDataProvider.h>
 #include <ClientLib/AppSignalManager.h>
+#include <ClientLib/RtDataProvider.h>
+#include <TrendView/TrendArchiveServer.h>
+#include <TrendView/TrendMainWindow.h>
 
 class MonitorTrendsWidget;
 class QLabel;

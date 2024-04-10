@@ -5,7 +5,6 @@
 #include <ClientLib/ITestObserver.h>
 #include <ClientLib/RtDataProvider.h>
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../TrendView/TrendSignalState.h"
 
 namespace TestSuite
 {

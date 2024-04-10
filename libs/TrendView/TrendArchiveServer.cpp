@@ -1,5 +1,5 @@
-#include "TrendArchiveServer.h"
-#include "TrendSignal.h"
+#include "./include/TrendView/TrendArchiveServer.h"
+#include "./include/TrendView/TrendSignal.h"
 
 namespace TrendLib
 {

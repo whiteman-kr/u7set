@@ -1,9 +1,10 @@
 #pragma once
 
+#include <TrendView/TrendSignalState.h>
+
 #include "../lib/ISignalDataServer.h"
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
-#include "../TrendView/TrendSignalState.h"
 #include "./include/ClientLib/RtTrendConnectionStatistics.h"
 
 namespace ClientLib

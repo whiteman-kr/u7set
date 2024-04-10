@@ -1,51 +1,11 @@
-#include "TrendSignalSet.h"
+#include "./include/TrendView/TrendSignalSet.h"
+#include "./include/TrendView/TrendSignalState.h"
+#include "./include/TrendView/TrendArchiveServer.h"
 #include <type_traits>
-#include <ranges>
 
 
 namespace TrendLib
 {
-	bool OneHourData::save(const TimeStamp& timeStamp, Proto::TrendArchiveHour* message) const
-	{
-		if (message == nullptr)
-		{
-			Q_ASSERT(message);
-			return false;
-		}
-
-		bool ok = true;
-
-		message->set_time_stamp(timeStamp.timeStamp);
-		message->set_state(static_cast<int>(state));
-
-		message->mutable_records()->Reserve(static_cast<int>(data.size()));
-		for (const TrendStateRecord& record : data)
-		{
-			ok &= record.save(message->add_records());
-		}
-
-		return ok;
-	}
-
-	bool OneHourData::load(const Proto::TrendArchiveHour& message)
-	{
-		bool ok = true;
-
-		// message.time_stamp() -- is not read jere, it is required on one level lower, in TrendArchive as a key to map
-		state = static_cast<OneHourData::State>(message.state());
-
-		data.clear();
-		data.reserve(message.records_size());
-
-		for (int i = 0; i < message.records_size(); i++)
-		{
-			TrendStateRecord& record = data.emplace_back();
-			ok &= record.load(message.records(i));
-		}
-
-		return ok;
-	}
-
 	bool TrendArchive::save(TrendSignalPlusServerId trendSignalPlusServerId, Proto::TrendArchive* message) const
 	{
 		if (message == nullptr)
@@ -472,7 +432,7 @@ namespace TrendLib
 		return result;
 	}
 
-	int TrendSignalSet::discretesSignalsCount() const
+	int TrendSignalSet::discreteSignalsCount() const
 	{
 		QMutexLocker locker(&m_paramMutex);
 
@@ -1101,7 +1061,7 @@ namespace TrendLib
 		return;
 	}
 
-	void TrendSignalSet::clearArchiveWithouthRecord()
+	void TrendSignalSet::clearArchiveWithoutRecord()
 	{
 		QMutexLocker locker(&m_archiveMutex);
 

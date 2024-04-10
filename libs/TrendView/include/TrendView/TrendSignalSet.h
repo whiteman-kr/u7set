@@ -1,41 +1,29 @@
 #pragma once
+#include <list>
 #include <map>
+#include <memory>
+#include <optional>
 #include <span>
-#include <QMutex>
+#include <utility>
+#include <vector>
+
 #include <QElapsedTimer>
+#include <QMutex>
+
+#include "ITrendDataProvider.h"
 #include "TrendArchiveServer.h"
 #include "TrendSignal.h"
 #include "TrendSignalState.h"
-#include "ITrendDataProvider.h"
-
 
 namespace Proto
 {
-	class TrendArchiveHour;
 	class TrendArchive;
 	class TrendSignalSet;
-}
-
+} // namespace Proto
 
 namespace TrendLib
 {
-	struct OneHourData
-	{
-		enum class State
-		{
-			NoData,
-			Requested,
-			Received
-		};
-
-		State state = State::NoData;
-		std::vector<TrendStateRecord> data;
-
-		// Serialization
-		//
-		bool save(const TimeStamp& timeStamp, Proto::TrendArchiveHour* message) const;
-		bool load(const Proto::TrendArchiveHour& message);
-	};
+	struct OneHourData;
 
 	struct TrendArchive
 	{
@@ -43,20 +31,21 @@ namespace TrendLib
 
 		TrendArchive(TrendSignalPlusServerId trendSignalPlusServerId_) :
 			trendSignalPlusServerId(std::move(trendSignalPlusServerId_))
-		{}
+		{
+		}
 
 		TrendArchive(QString appSignalId, QString archiveServerId) :
-			trendSignalPlusServerId{.appSignalId = std::move(appSignalId),
-									.archiveServerId = std::move(archiveServerId)}
-		{}
+			trendSignalPlusServerId{.appSignalId = std::move(appSignalId), .archiveServerId = std::move(archiveServerId)}
+		{
+		}
 
 		TrendSignalPlusServerId trendSignalPlusServerId;
-		std::map<TimeStamp, std::shared_ptr<OneHourData>> m_hours;		// Key is rounded to hour (like 9:00, 14:00, ...)
-																		// DO NOT CHANGE type to unordered_map, as it is suppose to be ordered
-		QString realTimeActiveServiceId;		// Current active realtime service id, resets to "" when non vlid
-												// points arrived, and set to the new value for service with valid points
-		QElapsedTimer serviceUpdateTimer;		// If active service was not update too long, then switch to another server,
-												// This can happen when server shutdown process does not send non-valid point
+		std::map<TimeStamp, std::shared_ptr<OneHourData>> m_hours; // Key is rounded to hour (like 9:00, 14:00, ...)
+																   // DO NOT CHANGE type to unordered_map, as it is suppose to be ordered
+		QString realTimeActiveServiceId;                           // Current active real-time service id, resets to "" when non valid
+																   // points arrived, and set to the new value for service with valid points
+		QElapsedTimer serviceUpdateTimer; // If active service was not update too long, then switch to another server,
+										  // This can happen when server shutdown process does not send non-valid point
 
 		// Serialization
 		//
@@ -65,7 +54,8 @@ namespace TrendLib
 	};
 
 
-	class TrendSignalSet : public QObject, public ITrendDataProvider
+	class TrendSignalSet : public QObject,
+						   public ITrendDataProvider
 	{
 		Q_OBJECT
 
@@ -86,7 +76,7 @@ namespace TrendLib
 		void reorderSignals(std::span<const TrendSignalParam> targetOrder);
 
 		[[nodiscard]] TrendLib::TrendSignalParam signalParam(const QString& appSignalId, const QString& archiveServerId, bool* ok) const;
-		bool setSignalParam(const TrendLib::TrendSignalParam& signalParam);		// Update data
+		bool setSignalParam(const TrendLib::TrendSignalParam& signalParam); // Update data
 
 		[[nodiscard]] std::vector<TrendLib::TrendSignalParam> trendSignals() const;
 		[[nodiscard]] std::vector<TrendLib::TrendSignalParam> analogSignals() const;
@@ -95,11 +85,17 @@ namespace TrendLib
 		[[nodiscard]] std::vector<Hash> trendSignalsHashes(const QString& equipmentId = QString()) const;
 		[[nodiscard]] QStringList trendSignalIds() const;
 
-		[[nodiscard]] int discretesSignalsCount() const;
+		[[nodiscard]] int discreteSignalsCount() const;
 		[[nodiscard]] int analogSignalsCount() const;
 
-		bool getFullExistingTrendData(const TrendSignalParam& trendSignal, E::TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const;
-		bool getExistingTrendData(const TrendSignalParam& trendSignal, QDateTime from, QDateTime to, E::TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const;
+		bool getFullExistingTrendData(const TrendSignalParam& trendSignal,
+									  E::TimeType timeType,
+									  std::list<std::shared_ptr<OneHourData>>* outData) const;
+		bool getExistingTrendData(const TrendSignalParam& trendSignal,
+								  QDateTime from,
+								  QDateTime to,
+								  E::TimeType timeType,
+								  std::list<std::shared_ptr<OneHourData>>* outData) const;
 		std::optional<TrendStateItem> lastRealtimeState(Hash signalHash, E::TimeType timeType) const;
 
 		// ITrendDataProvider implementation
@@ -124,7 +120,7 @@ namespace TrendLib
 		/// Clear all archive data where request was not processed yet or there is not data.
 		/// This function is used when the new configuration is arriving, so the request can be sent again
 		///
-		void clearArchiveWithouthRecord();
+		void clearArchiveWithoutRecord();
 
 		// Add non valid points to all signals, useful in switching mode Archive/RealTime
 		//
@@ -135,7 +131,10 @@ namespace TrendLib
 
 		// --
 		//
-		void slot_archiveDataReceived(TrendSignalPlusServerId trendSignalPlusServerId, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> data);
+		void slot_archiveDataReceived(TrendSignalPlusServerId trendSignalPlusServerId,
+									  TimeStamp requestedHour,
+									  E::TimeType timeType,
+									  std::shared_ptr<TrendLib::OneHourData> data);
 		void slot_archiveRequestError(TrendSignalPlusServerId trendSignalPlusServerId, TimeStamp requestedHour, E::TimeType timeType);
 
 		void slot_realtimeDataReceived(QString sourceEquipmentId,
@@ -145,7 +144,7 @@ namespace TrendLib
 		void slot_realtimeRequestError(QString errorText);
 		void slot_realtimeConnectionLost(QString sourceEquipmentId);
 
-		void slot_trimData(E::TimeType timeType, TimeStamp trimFrom);	// Trim data from time trimFrom to the end (right).
+		void slot_trimData(E::TimeType timeType, TimeStamp trimFrom); // Trim data from time trimFrom to the end (right).
 
 	private:
 		void appendRealtimeDataToArchive(QString sourceEquipmentId,
@@ -161,16 +160,19 @@ namespace TrendLib
 		std::list<TrendSignalParam> m_signalParams;
 
 		mutable QMutex m_archiveMutex;
-		mutable std::map<TrendSignalPlusServerId, TrendArchive> m_archiveLocalTime;		// Key is "AppSignalID@ArchiveServerID", Example: #ABC01@USB_SHK_WS00_ARCHSRV
+		mutable std::map<TrendSignalPlusServerId, TrendArchive>
+			m_archiveLocalTime;             // Key is "AppSignalID@ArchiveServerID", Example: #ABC01@USB_SHK_WS00_ARCHSRV
 		mutable std::map<TrendSignalPlusServerId, TrendArchive> m_archiveSystemTime;
 		mutable std::map<TrendSignalPlusServerId, TrendArchive> m_archivePlantTime;
 
 		mutable QMutex m_lastRealtimePointsMutex;
-		std::map<Hash, TrendStateItem> m_lastRealtimePointsLocalTime;	// Key is hash form signal id, the value is last received realtime state.
-		std::map<Hash, TrendStateItem> m_lastRealtimePointsSystemTime;	// Key is hash form signal id, the value is last received realtime state.
-		std::map<Hash, TrendStateItem> m_lastRealtimePointsPlantTime;	// Key is hash form signal id, the value is last received realtime state.
+		std::map<Hash, TrendStateItem>
+			m_lastRealtimePointsLocalTime;  // Key is hash form signal id, the value is last received real-time state.
+		std::map<Hash, TrendStateItem>
+			m_lastRealtimePointsSystemTime; // Key is hash form signal id, the value is last received real-time state.
+		std::map<Hash, TrendStateItem>
+			m_lastRealtimePointsPlantTime;  // Key is hash form signal id, the value is last received real-time state.
 	};
-}
+} // namespace TrendLib
 
 Q_DECLARE_METATYPE(std::shared_ptr<TrendLib::OneHourData>)
-

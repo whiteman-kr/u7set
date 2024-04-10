@@ -1,7 +1,8 @@
 #pragma once
 
 #include "../AppSignalLib/IAppSignalManager.h"
-#include "../TrendView/TrendSignalSet.h"
+#include <TrendView/TrendSignalState.h>
+
 #include "SimOverrideSignalsImpl.h"
 #include "SimScopedLog.h"
 

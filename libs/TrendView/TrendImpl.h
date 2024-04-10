@@ -1,30 +1,16 @@
-#ifndef TREND_H
-#define TREND_H
+#pragma once
 
-#include "TrendSignal.h"
-#include "TrendSignalSet.h"
-#include "TrendParam.h"
+#include "./include/TrendView/TrendSignalSet.h"
+#include "./include/TrendView/TrendParam.h"
+
 #include "TrendRuler.h"
 
-class QPainter;
-
-namespace Proto
-{
-	class Trend;
-}
 
 namespace TrendLib
 {
-
-	class Trend
+	class TrendImpl
 	{
 	public:
-		Trend();
-
-		// Methods
-		//
-	public:
-
 		// Serialization
 		//
 		bool save(::Proto::Trend* message) const;
@@ -44,10 +30,7 @@ namespace TrendLib
 							const std::vector<TrendSignalParam>& discretes,
 							const std::vector<TrendSignalParam>& analogs) const;
 
-		void drawTimeGrid(QPainter* painter,
-						  const QRectF& laneRect,
-						  const QRectF& insideRect,
-						  const TrendParam& drawParam) const;
+		void drawTimeGrid(QPainter* painter, const QRectF& laneRect, const QRectF& insideRect, const TrendParam& drawParam) const;
 
 		void drawSignalsDecor(QPainter* painter,
 							  const QRectF& laneRect,
@@ -71,8 +54,14 @@ namespace TrendLib
 												 const std::vector<TrendSignalParam>& analogs) const;
 
 		void drawSignalTrend(QPainter* painter, const TrendSignalParam& signal, const TrendParam& drawParam) const;
-		void drawSignalTrendDiscrete(QPainter* painter, const TrendSignalParam& signal, const TrendParam& drawParam, const std::list<std::shared_ptr<OneHourData>>& signalData) const;
-		void drawSignalTrendAnalog(QPainter* painter, const TrendSignalParam& signal, const TrendParam& drawParam, const std::list<std::shared_ptr<OneHourData>>& signalData) const;
+		void drawSignalTrendDiscrete(QPainter* painter,
+									 const TrendSignalParam& signal,
+									 const TrendParam& drawParam,
+									 const std::list<std::shared_ptr<OneHourData>>& signalData) const;
+		void drawSignalTrendAnalog(QPainter* painter,
+								   const TrendSignalParam& signal,
+								   const TrendParam& drawParam,
+								   const std::list<std::shared_ptr<OneHourData>>& signalData) const;
 
 		void drawRulers(QPainter* painter, TrendParam drawParam) const;
 		TrendStateItem rulerSignalState(const TrendRuler& ruler, const TrendSignalParam& signal, E::TimeType timeType) const;
@@ -83,9 +72,9 @@ namespace TrendLib
 
 	public:
 		static void calcSignalRects(const QRectF& insideRect,
-							 const TrendParam& drawParam,
-							 std::vector<TrendSignalParam>* discretes,
-							 std::vector<TrendSignalParam>* analogs);
+									const TrendParam& drawParam,
+									std::vector<TrendSignalParam>* discretes,
+									std::vector<TrendSignalParam>* analogs);
 
 		static QRectF calcLaneRect(int laneIndex, const TrendParam& drawParam);
 		QRectF calcTrendArea(const QRectF& laneRect, const TrendParam& drawParam) const;
@@ -103,17 +92,27 @@ namespace TrendLib
 	public:
 		enum class MouseOn
 		{
-			Outside,			// Outside any possible rect
-			OutsideTrendArea,	// Outside lane but in the rect
-			InsideTrendArea,	// Inside lane rectangle
-			OnSignalDescription,// Over Signal Description (id + caption)
-			OnRuler,			// Over ruler
+			Outside,             // Outside any possible rect
+			OutsideTrendArea,    // Outside lane but in the rect
+			InsideTrendArea,     // Inside lane rectangle
+			OnSignalDescription, // Over Signal Description (id + caption)
+			OnRuler,             // Over ruler
 		};
 
-		Trend::MouseOn mouseIsOver(QPoint mousePos, const TrendParam& drawParam, int* laneIndex, TimeStamp* outTime, int* rulerIndex, TrendSignalParam* outSignal) const;
+		TrendImpl::MouseOn mouseIsOver(QPoint mousePos,
+									   const TrendParam& drawParam,
+									   int* laneIndex,
+									   TimeStamp* outTime,
+									   int* rulerIndex,
+									   TrendSignalParam* outSignal) const;
 
 	public:
-		static void drawText(QPainter* painter, const QString& str, const QRectF& rect, const TrendParam& drawParam, int flags, QRectF* boundingRect = nullptr);
+		static void drawText(QPainter* painter,
+							 const QString& str,
+							 const QRectF& rect,
+							 const TrendParam& drawParam,
+							 int flags,
+							 QRectF* boundingRect = nullptr);
 
 		// Properties
 		//
@@ -128,13 +127,11 @@ namespace TrendLib
 		const TrendLib::TrendRulerSet& rulerSet() const;
 
 	private:
-		QUuid m_uuid{};			// id of trend, used for SchemaItemIndicator, to identfy schemaitem
+		QUuid m_uuid{};                           // id of trend, used for SchemaItemIndicator, to identfy schemaitem
 
 		TrendLib::TrendSignalSet m_signalSet;
 		TrendLib::TrendRulerSet m_rulerSet;
 
-		const static double discreteSignalHeight;// = 5.0 / 8.0;		// if inches
+		const static double discreteSignalHeight; // = 5.0 / 8.0;		// if inches
 	};
-
-}
-#endif // TREND_H
+} // namespace TrendView

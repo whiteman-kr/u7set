@@ -1,11 +1,10 @@
 #ifndef TRENDSIGNAL_H
 #define TRENDSIGNAL_H
 
-#include <list>
-#include <bitset>
-#include <memory>
-#include "TrendArchiveServer.h"
+#include <set>
+#include <map>
 
+#include "TrendArchiveServer.h"
 
 using TrendColor = quint32;		// This is QRgb, the problem is this header is used buy other libs without GUI (simulator)
 

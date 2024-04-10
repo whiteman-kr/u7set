@@ -1,8 +1,14 @@
 #include "DialogTrendSignalProperties.h"
-#include "TrendMainWindow.h"
+
+#include "./include/TrendView/Trend.h"
+#include "./include/TrendView/TrendMainWindow.h"
+#include "./include/TrendView/TrendSignal.h"
+
+#include "TrendImpl.h"
+#include "TrendRuler.h"
+#include "TrendSlider.h"
 #include "TrendScale.h"
 #include "TrendSettings.h"
-#include "TrendSignal.h"
 #include "TrendWidget.h"
 #include "ui_TrendsMainWindow.h"
 
@@ -46,7 +52,9 @@ namespace TrendLib
 		m_trendWidget->setTimeType(static_cast<E::TimeType>(theSettings.m_timeType));
 		m_trendWidget->setLaneCount(theSettings.m_laneCount);
 
-		// Slider Widged
+		connect(m_trendWidget, &TrendWidget::trendModeChanged, this, &TrendMainWindow::trendModeChanged);
+
+		// Slider Widget
 		//
 		m_trendSlider = new TrendSlider(&m_trendWidget->rulerSet());
 
@@ -267,6 +275,13 @@ namespace TrendLib
 
 		return;
 	}
+
+	bool TrendMainWindow::isTimeInRange(const TimeStamp& value) const
+	{
+		Q_ASSERT(m_trendSlider);
+		return m_trendSlider->isTimeInRange(value);
+	}
+
 
 	void TrendMainWindow::createToolBar()
 	{
@@ -1039,9 +1054,9 @@ namespace TrendLib
 		TimeStamp timeStamp;
 		TrendSignalParam outSignal;
 
-		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(mousePos, &laneIndex, &timeStamp, &rulerIndex, &outSignal);
+		TrendImpl::MouseOn mouseOn = m_trendWidget->mouseIsOver(mousePos, &laneIndex, &timeStamp, &rulerIndex, &outSignal);
 
-		if (mouseOn != Trend::MouseOn::InsideTrendArea)
+		if (mouseOn != TrendImpl::MouseOn::InsideTrendArea)
 		{
 			return;
 		}
@@ -1049,7 +1064,7 @@ namespace TrendLib
 		qDebug() << "Add trend ruler on pos " << timeStamp.toDateTime();
 
 		TrendRuler ruler(timeStamp);
-		trend().rulerSet().addRuler(ruler);
+		trend().impl().rulerSet().addRuler(ruler);
 
 		update();
 
@@ -1065,13 +1080,13 @@ namespace TrendLib
 		}
 
 		if (rulerIndex < 0 ||
-			rulerIndex >= static_cast<int>(trend().rulerSet().rulers().size()))
+			rulerIndex >= static_cast<int>(trend().impl().rulerSet().rulers().size()))
 		{
 			Q_ASSERT(false);
 			return;
 		}
 
-		trend().rulerSet().deleteRuler(trend().rulerSet().at(rulerIndex).timeStamp());
+		trend().impl().rulerSet().deleteRuler(trend().impl().rulerSet().at(rulerIndex).timeStamp());
 		m_trendWidget->resetRulerHighlight();
 
 		update();
@@ -1088,7 +1103,7 @@ namespace TrendLib
 		}
 
 		if (rulerIndex < 0 ||
-			rulerIndex >= static_cast<int>(trend().rulerSet().rulers().size()))
+			rulerIndex >= std::ssize(trend().impl().rulerSet().rulers()))
 		{
 			Q_ASSERT(false);
 			return;
@@ -1096,7 +1111,7 @@ namespace TrendLib
 
 		// --
 		//
-		TrendRuler& mutableRuler = trend().rulerSet().at(rulerIndex);
+		TrendRuler& mutableRuler = trend().impl().rulerSet().at(rulerIndex);
 
 		QDialog d(this);
 		d.setWindowTitle(tr("Ruler Properties"));
@@ -1143,7 +1158,7 @@ namespace TrendLib
 			newDateTime.setTime(timeEdit->time());
 
 			TimeStamp ts(newDateTime);
-			mutableRuler.setTimeStamp(ts, trend().rulerSet().rulerStep());
+			mutableRuler.setTimeStamp(ts, trend().impl().rulerSet().rulerStep());
 
 			update();
 		}
@@ -1290,16 +1305,16 @@ namespace TrendLib
 		// pos - is cursor position within m_trendWidget
 		//
 		int analogsCount = signalSet().analogSignalsCount();
-		int discretesCount = signalSet().discretesSignalsCount();
+		int discretesCount = signalSet().discreteSignalsCount();
 
 		int outLaneIndex = -1;
 		int rulerIndex = -1;
 		TimeStamp timeStamp;
 		TrendSignalParam outSignal;
 
-		Trend::MouseOn mouseOn = m_trendWidget->mouseIsOver(pos, &outLaneIndex, &timeStamp, &rulerIndex, &outSignal);
+		TrendImpl::MouseOn mouseOn = m_trendWidget->mouseIsOver(pos, &outLaneIndex, &timeStamp, &rulerIndex, &outSignal);
 
-		if (mouseOn == Trend::MouseOn::OnSignalDescription)
+		if (mouseOn == TrendImpl::MouseOn::OnSignalDescription)
 		{
 			QMenu menu(this);
 
@@ -1390,8 +1405,8 @@ namespace TrendLib
 			return;
 		}
 
-		if (mouseOn == Trend::MouseOn::InsideTrendArea ||
-			mouseOn == Trend::MouseOn::OnRuler)
+		if (mouseOn == TrendImpl::MouseOn::InsideTrendArea ||
+			mouseOn == TrendImpl::MouseOn::OnRuler)
 		{
 			QMenu menu(this);
 
@@ -1402,14 +1417,14 @@ namespace TrendLib
 					});
 
 			QAction* deleteRulerAction = menu.addAction(tr("Delete Ruler"));
-			deleteRulerAction->setEnabled(mouseOn == Trend::MouseOn::OnRuler);
+			deleteRulerAction->setEnabled(mouseOn == TrendImpl::MouseOn::OnRuler);
 			connect(deleteRulerAction, &QAction::triggered, this, [rulerIndex, this]()
 					{
 						this->TrendMainWindow::actionDeleteRuler(rulerIndex);
 					});
 
 			QAction* rulerPropertiesAction = menu.addAction(tr("Ruler Properties..."));
-			rulerPropertiesAction->setEnabled(mouseOn == Trend::MouseOn::OnRuler);
+			rulerPropertiesAction->setEnabled(mouseOn == TrendImpl::MouseOn::OnRuler);
 			connect(rulerPropertiesAction, &QAction::triggered, this, [rulerIndex, this]()
 					{
 						this->TrendMainWindow::actionRulerProperties(rulerIndex);
@@ -1461,6 +1476,16 @@ namespace TrendLib
 		return;
 	}
 
+	TrendLib::Trend& TrendMainWindow::trend()
+	{
+		return m_trendWidget->trend();
+	}
+
+	const TrendLib::Trend& TrendMainWindow::trend() const
+	{
+		return m_trendWidget->trend();
+	}
+
 	TrendLib::TrendSignalSet& TrendMainWindow::signalSet()
 	{
 		return m_trendWidget->signalSet();
@@ -1471,14 +1496,69 @@ namespace TrendLib
 		return m_trendWidget->signalSet();
 	}
 
-	TrendLib::Trend& TrendMainWindow::trend()
+	E::TrendViewMode TrendMainWindow::viewMode() const
 	{
-		return m_trendWidget->trend();
+		return m_trendWidget->viewMode();
 	}
 
-	const TrendLib::Trend& TrendMainWindow::trend() const
+	void TrendMainWindow::setViewMode(E::TrendViewMode value)
 	{
-		return m_trendWidget->trend();
+		m_trendWidget->setViewMode(value);
+	}
+
+	E::TrendScaleType TrendMainWindow::scaleType() const
+	{
+		return m_trendWidget->scaleType();
+	}
+
+	void TrendMainWindow::setScaleType(E::TrendScaleType value)
+	{
+		m_trendWidget->setScaleType(value);
+	}
+
+	int TrendMainWindow::laneCount() const
+	{
+		return m_trendWidget->laneCount();
+	}
+
+	void TrendMainWindow::setLaneCount(int value)
+	{
+		m_trendWidget->setLaneCount(value);
+	}
+
+	E::TimeType TrendMainWindow::timeType() const
+	{
+		return m_trendWidget->timeType();
+	}
+
+	void TrendMainWindow::setTimeType(E::TimeType value)
+	{
+		m_trendWidget->setTimeType(value);
+	}
+
+	TimeStamp TrendMainWindow::startTime() const
+	{
+		return m_trendWidget->startTime();
+	}
+
+	void TrendMainWindow::setStartTime(const TimeStamp& startTime)
+	{
+		m_trendWidget->setStartTime(startTime);
+	}
+
+	TimeStamp TrendMainWindow::finishTime() const
+	{
+		return m_trendWidget->finishTime();
+	}
+
+	qint64 TrendMainWindow::duration() const
+	{
+		return m_trendWidget->duration();
+	}
+
+	void TrendMainWindow::setLaneDuration(qint64 interval)
+	{
+		m_trendWidget->setLaneDuration(interval);
 	}
 
 	E::TrendMode TrendMainWindow::trendMode() const
@@ -1497,6 +1577,16 @@ namespace TrendLib
 		Q_ASSERT(m_realtimeAutoShiftButton);
 
 		return m_realtimeAutoShiftButton->isChecked();
+	}
+
+	quint64 TrendMainWindow::rulerStep() const
+	{
+		return trend().impl().rulerSet().rulerStep();
+	}
+	
+	void TrendMainWindow::setRulerStep(quint64 value)
+	{
+		trend().impl().rulerSet().setRulerStep(value);
 	}
 
 } // namespace TrendLib

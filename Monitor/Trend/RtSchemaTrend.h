@@ -2,9 +2,9 @@
 #include <map>
 
 #include "../MonitorConfigController.h"
-#include "../../TrendView/TrendSignalSet.h"
 
 #include <ClientLib/RtDataProvider.h>
+#include <TrendView/TrendSignalSet.h>
 
 //
 // RtSignal: Data for RealTimeTrends on schemas, SchemaItemIndicator, type = Trend

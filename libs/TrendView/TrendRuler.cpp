@@ -75,7 +75,6 @@ namespace TrendLib
 		m_rulers.reserve(16);
 	}
 
-
 	bool TrendRulerSet::save(::Proto::TrendRulerSet* message) const
 	{
 		if (message == nullptr)
