@@ -18,9 +18,14 @@ namespace VFrame30
 	class VduSchema;
 }
 
+namespace Hardware
+{
+	class Software;
+	class EquipmentSet;
+}
+
 namespace Builder
 {
-
 	class SoftwareCfgGenerator : public QObject
 	{
 		Q_OBJECT
@@ -66,8 +71,6 @@ namespace Builder
 
 		static bool generalSoftwareCfgGeneration(Context* context);
 		static bool loadAllSchemas(Context* context);
-		static bool generateVduFonts(Context& context);
-		static bool generateVduSchemas(const std::vector<VFrame30::VduSchema*>& schemas, Context& context);
 		static void clearStaticData();
 
 		static bool writeSchemaScriptProperties(VFrame30::Schema* schema, QString dir, BuildResultWriter* buildResultWriter);

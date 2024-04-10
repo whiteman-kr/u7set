@@ -1,29 +1,30 @@
 #pragma once
 
-#include <memory>
-#include <unordered_set>
-
-#include <QJSEngine>
-
 #include <DbLib/DbController.h>
-#include <HardwareLib/Connection.h>
 #include <Simulator/SimProfiles.h>
 
 #include "../AppSignalLib/Bus.h"
 #include "../AppSignalLib/ComparatorSet.h"
-#include "../VFrame30/LogicSchema.h"
 #include "../lib/TuningDataStorage.h"
+
 #include "DiagSignalTypesStorage.h"
 
 #include "BuildResultWriter.h"
 #include "ConnectionStorage.h"
+#include "DbMatsUsers.h"
 #include "IssueLogger.h"
 #include "LmDescriptionSet.h"
 #include "OptoModule.h"
 #include "SignalSet.h"
 #include "SubsystemStorage.h"
-#include "DbMatsUsers.h"
 #include "Vdu/VduFontProvider.h"
+
+namespace VFrame30
+{
+	class Schema;
+	class VduSchema;
+	class LogicSchema;
+}
 
 namespace Builder
 {
@@ -49,6 +50,8 @@ namespace Builder
 		Context(Context&&) = delete;
 		Context& operator=(const Context&) = delete;
 		Context& operator=(Context&&) = delete;
+
+		~Context();
 
 		bool generateAppSignalsXml() const;
 		bool generateAppSignalsExtXml() const;
@@ -110,6 +113,17 @@ namespace Builder
 		std::shared_ptr<DiagSignalTypesStorage> m_diagSignalTypes;
 
 		VduFontProvider m_vduFontProvider;
+
+		// Generated VDU schemas
+		//
+		struct GeneratedVduSchema
+		{
+			std::shared_ptr<VFrame30::Schema> schema;
+			uint64_t crc64 = 0; // Generated CRC64 of the schema in VDU format
+		};
+
+		using VduSchemaList = std::list<GeneratedVduSchema>;
+		std::map<QString, VduSchemaList> m_vduSchemas;	// Key is VduEquipmentID, value is VduSchemas assigned to this VDU.
 	};
 
 } // namespace Builder

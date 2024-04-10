@@ -1,7 +1,9 @@
 #include "TuningClientCfgGenerator.h"
-#include "../OnlineLib/SoftwareSettings.h"
 #include "ScriptChecker.h"
 #include "SoftwareSettingsGetter.h"
+
+#include "../OnlineLib/SoftwareSettings.h"
+#include "../VFrame30/LogicSchema.h"
 
 #include <Behavior/ClientBehaviorStorage.h>
 #include <Behavior/TuningClientBehavior.h>

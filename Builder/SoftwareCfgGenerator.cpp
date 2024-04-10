@@ -1,17 +1,15 @@
 #include "SoftwareCfgGenerator.h"
 #include "../VFrame30/VduSchema.h"
+#include "../VFrame30/SchemaItems/SchemaItemAfb.h"
 #include "./Vdu/VduSchemaGenerator.h"
-#include "./Vdu/VduFontGenerator.h"
-#include "AppLogicCompiler.h"
 #include "DeviceHelper.h"
 #include "LanControllerInfoHelper.h"
 #include "ScriptChecker.h"
 
-#include "../OnlineLib/SoftwareSettings.h"
 #include "../VFrame30/SchemaLayer.h"
-#include "../VFrame30/PropertyNames.h"
 
 #include <HardwareLib/Workstation.h>
+#include <HardwareLib/Software.h>
 
 
 namespace Builder
@@ -564,14 +562,6 @@ namespace Builder
 		// Generate VDU schemas in vdu-native format, save them to build result /VDU/Schemas
 		//
 		{
-			// Generate VDU fonts. 
-			//
-			bool genVduFontsOk = generateVduFonts(*context);
-			if (genVduFontsOk == false)
-			{
-				returnResult = false;
-			}
-
 			// Get all VDU schemas
 			//
 			auto isVduSchema = [](const auto& pair)
@@ -596,7 +586,7 @@ namespace Builder
 			// Generate VDU schema in SVDU binary format. 
 			// context has all VDU devices.
 			//
-			bool genVduSchemasOk = generateVduSchemas(vduSchemas, *context);
+			bool genVduSchemasOk = VduSchemaGenerator::generateVduSchemas(vduSchemas, *context);
 			if (genVduSchemasOk == false)
 			{
 				returnResult = false;
@@ -604,212 +594,6 @@ namespace Builder
 		}
 
 		return returnResult;
-	}
-
-	bool SoftwareCfgGenerator::generateVduFonts(Context& context) 
-	{
-		IssueLogger* log = context.m_log;
-		Q_ASSERT(log);
-
-		bool result = true;
-		
-		for (const Hardware::DeviceModule* vdu : context.m_vduModules)
-		{
-			Q_ASSERT(vdu);
-
-			LOG_MESSAGE(log, tr("Generating fonts for VDU %1.").arg(vdu->equipmentId()));
-
-			auto fontsProperty = vdu->propertyByCaption(EquipmentPropNames::FONTS);
-			if (fontsProperty == nullptr)
-			{
-				// Property '%1.%2' is not found.
-				//
-				log->errCFG3020(vdu->equipmentId(), EquipmentPropNames::FONTS);
-				result = false;
-				continue;
-			}
-
-			// Parse fonts info from Fonts property
-			//
-			auto fontsValue = fontsProperty->value().toString();
-			if (fontsValue.isEmpty() == true) 
-			{
-				continue;
-			}
-			std::vector<VduFontInfo> fontsInfo;
-
-			QXmlStreamReader reader(fontsValue);
-
-			if (reader.readNextStartElement() == false)
-			{
-				reader.raiseError(QObject::tr("Internal error: Failed to load root element in Fonts property in VDU %1.").arg(vdu->equipmentId()));
-				log->errINT1000(reader.errorString());
-				continue;
-			}
-
-			if (reader.name() != QLatin1String("VduFonts"))
-			{
-				reader.raiseError(QObject::tr("Internal error: Error loading fonts for VDU %1: unknown tag %2.")
-									  .arg(vdu->equipmentId())
-									  .arg(reader.name()));
-				log->errINT1000(reader.errorString());
-				continue;
-			}
-
-			// Read signals
-			//
-			while (reader.readNextStartElement())
-			{
-				if (reader.name() == QLatin1String("VduFont"))
-				{
-					QString errorMessage;
-					VduFontInfo fi;
-					if (fi.load(reader, &errorMessage) == true)
-					{
-						fontsInfo.push_back(fi);
-					}
-					else
-					{
-						reader.raiseError(QObject::tr("Internal error: Error loading font for VDU %1: %2.").arg(vdu->equipmentId()).arg(errorMessage));
-						log->errINT1000(reader.errorString());
-					}
-				}
-				else
-				{
-					reader.raiseError(QObject::tr("Internal error: Error loading fonts for VDU %1: unknown tag %2.")
-										  .arg(vdu->equipmentId())
-										  .arg(reader.name()));
-					log->errINT1000(reader.errorString());
-				}
-				reader.skipCurrentElement();
-			}
-
-			result &= (reader.hasError() == false);
-
-			// Add parsed fonts info to VduFontProvider
-			//
-			context.m_vduFontProvider.setFontsInfo(vdu->equipmentId(), fontsInfo);
-
-			// Generate font files for loaded fonts
-			//
-			int fontIndex = 0;
-			for (const VduFontInfo& fi : fontsInfo) 
-			{
-				QString vduDir = Directory::VDUs + "/" + vdu->equipmentId() + tr("/Fonts/%1/").arg(fontIndex++);
-				result &= Builder::VduFontGenerator::generateVduFont(fi, vduDir, context.generateExtraDebugInfo(), context);
-			}
-		}
-
-		return result;
-	}
-
-	bool SoftwareCfgGenerator::generateVduSchemas(const std::vector<VFrame30::VduSchema*>& schemas, Context& context)
-	{
-		IssueLogger* log = context.m_log;
-		Q_ASSERT(log);
-
-		bool result = true;
-
-		for (const Hardware::DeviceModule* vdu : context.m_vduModules)
-		{
-			Q_ASSERT(vdu);
-
-			LOG_MESSAGE(log, tr("Generating schemas for VDU %1.").arg(vdu->equipmentId()));
-
-			auto schemaTagsProperty = vdu->propertyByCaption(EquipmentPropNames::SCHEMA_TAGS);
-			if (schemaTagsProperty == nullptr)
-			{
-				// Property '%1.%2' is not found.
-				//
-				log->errCFG3020(vdu->equipmentId(), EquipmentPropNames::SCHEMA_TAGS);
-				result = false;
-				continue;
-			}
-
-			auto vduSignalsIt = context.m_vduSignals.find(vdu->equipmentId());
-			if (vduSignalsIt == context.m_vduSignals.end())
-			{
-				// Signals for VDU %1 are not found.
-				//
-				log->errINT1000(QString("Internal error: VduSignals structure is not found for VDU %1").arg(vdu->equipmentId()));
-				result = false;
-				continue;
-			}
-			const auto& vduSignals = vduSignalsIt->second;
-
-			auto vduSchemaTagList = schemaTagsProperty->value().toString().split(QRegularExpression("\\W+"), Qt::SkipEmptyParts);
-
-			for (auto schema : schemas)
-			{
-				Q_ASSERT(schema);
-
-				// If schemaTags is empty, then all schemas are for this VDU
-				//
-				bool schemaHasTag = vduSchemaTagList.isEmpty();
-				schemaHasTag |= std::ranges::any_of(vduSchemaTagList,
-													[&schema](QString& tag)
-													{
-														return schema->tagsAsList().contains(tag.toLower());
-													});
-
-				if (schemaHasTag == false)
-				{
-					continue;
-				}
-
-				// Generate VDU schema.
-				//				
-				LOG_MESSAGE(log, tr("Converting schema %1 to VDU format.").arg(schema->schemaId()));
-
-				QStringList errorMessages;
-				QByteArray nativeVduData;
-
-				bool genSchemaOk = Builder::VduSchemaGenerator::generateVduSchema(vdu->equipmentId(),
-																				  *schema,
-																				  vduSignals,
-																				  nativeVduData, *log);
-				if (genSchemaOk == false)
-				{
-					result = false;
-					continue;
-				}
-
-				// Save result.
-				//
-				QString nativeVduSchemaFileName = QString("%1.%2").arg(schema->schemaId()).arg(Db::File::VduNativeFileExtension);
-
-				QString vduDir = Directory::VDUs + "/" + vdu->equipmentId() + "/Schemas";
-
-				context.m_buildResultWriter->addFile(vduDir, nativeVduSchemaFileName, nativeVduData);
-
-#if 1
-				// Generate background bitmap from the static data.
-				// 
-				{
-					QByteArray backgroundImageData;
-					QString backgroundBitmapFileName = QString("%1.bmp").arg(schema->schemaId());
-
-					QImage backgroundImage;
-
-					bool genBitmapOk = Builder::VduSchemaGenerator::generateVduBackgroundBitmap(schema->shared_from_this(), backgroundImage);
-					if (genBitmapOk == false)
-					{
-						log->errINT1001(tr("vdu::VduSchemaGenerator::generateVduBackgroundBitmap internal error, schema:").arg(schema->schemaId()));
-						result = false;
-						continue;
-					}
-
-					QBuffer buffer(&backgroundImageData);
-					buffer.open(QIODevice::WriteOnly);
-					backgroundImage.save(&buffer, "BMP");
-
-					context.m_buildResultWriter->addFile(vduDir, backgroundBitmapFileName, backgroundImageData);
-				}
-#endif
-			}
-		}
-
-		return result;
 	}
 
 	bool SoftwareCfgGenerator::writeSchemaScriptProperties(VFrame30::Schema* schema, QString dir, BuildResultWriter* buildResultWriter)

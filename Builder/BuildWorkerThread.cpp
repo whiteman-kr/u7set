@@ -24,6 +24,9 @@
 #include "TuningClientCfgGenerator.h"
 #include "TuningServiceCfgGenerator.h"
 
+#include "./Vdu/VduFontGenerator.h"
+#include "./Vdu/VduConfigFile.h"
+
 namespace
 {
 	class SimLogger : public ILogFile
@@ -1470,6 +1473,11 @@ namespace Builder
 		return ok;
 	}
 
+	bool BuildWorkerThread::taskGenerationVduFonts()
+	{
+		return VduFontGenerator::generationVduFonts(*m_context);
+	}
+
 	bool BuildWorkerThread::taskGenerationSoftwareConfiguration()
 	{
 		bool ok = buildSoftwareList(m_context.get());
@@ -1521,6 +1529,11 @@ namespace Builder
 		}
 
 		return true;
+	}
+
+	bool BuildWorkerThread::taskGenerationVduConfiguration()
+	{
+		return VduConfigFileWriter::generate(*m_context);
 	}
 
 	bool BuildWorkerThread::createSchemasAlbums()
