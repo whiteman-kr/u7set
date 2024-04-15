@@ -6,9 +6,15 @@
 #include <Behavior/MonitorBehavior.h>
 #include <SchemaClientLib/SchemaClientConfigController.h>
 
+namespace Hardware
+{
+	class DeviceObject;
+}
 
 struct MonitorConfigSettings
 {
+	~MonitorConfigSettings();
+
 	int configurationId = -1;		// Counter to detect that configuration was updated
 
 	ClientLib::ConfigurationInfo configInfo;
@@ -31,6 +37,10 @@ struct MonitorConfigSettings
 	bool tuningLogin = false;
 	QStringList tuningUserAccounts;
 	int tuningSessionTimeout = 0;
+
+	// Equipment
+	// 
+	std::shared_ptr<Hardware::DeviceObject> equipment;
 };
 
 

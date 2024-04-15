@@ -167,6 +167,9 @@ namespace Builder
 		BuildFile* getBuildFile(const QString& pathFileName) const;
 		BuildFile* getBuildFileByID(const QString& subDir /* same as EquipmentID or common dirs */, const QString& buildFileID) const;
 
+		bool isBuildFileExists(const QString& pathFileName) const;
+		bool isBuildFileByIDExists(const QString& subDir /* same as EquipmentID or common dirs */, const QString& buildFileID) const;
+
 		bool checkBuildFilePtr(const BuildFile* buildFile) const;
 
 		QString outputPath() const;
@@ -203,6 +206,8 @@ namespace Builder
 
 		QHash<QString, QHash<QString, QString>> m_buildFileIDMap;		// subDir (same as EquipmentID) => (FileID => FileName)
 	};
+
+	using BuildResultWriterShared = std::shared_ptr<BuildResultWriter>;
 }
 
 

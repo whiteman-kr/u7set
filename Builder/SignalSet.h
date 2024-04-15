@@ -72,4 +72,6 @@ namespace Builder
 		std::map<const AppSignal*, DeviceModuleShared> m_signalToLm;
 	};
 
+	using SignalSetShared = std::shared_ptr<SignalSet>;
+
 }

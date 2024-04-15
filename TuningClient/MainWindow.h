@@ -8,10 +8,10 @@
 #include "TuningConfigController.h"
 #include "LogonWorkspace.h"
 #include "DialogTuningSources.h"
-#include "../ClientLib/ClientTranslator.h"
-#include "../ClientLib/TuningConnection.h"
-#include "../ClientLib/TuningUserManager.h"
-#include "../ClientLib/TuningLog.h"
+#include <ClientLib/ClientTranslator.h>
+#include <ClientLib/TuningConnection.h>
+#include <ClientLib/TuningUserManager.h>
+#include <ClientLib/TuningLog.h>
 #include "../lib/Ui/DialogTcpStatistics.h"
 #include "../UtilsLib/LogFile.h"
 
@@ -29,8 +29,8 @@ public:
 	explicit MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent = 0);
 	~MainWindow();
 
-	TuningSignalManager& tuningSignalManager();
-	const TuningSignalManager& tuningSignalManager() const;
+	ClientLib::TuningSignalManager& tuningSignalManager();
+	const ClientLib::TuningSignalManager& tuningSignalManager() const;
 
 	ClientLib::TuningConnection& tuningConnection();
 	const ClientLib::TuningConnection& tuningConnection() const;
@@ -100,7 +100,7 @@ private:
 	// Base objects
 	//
 	TuningConfigController m_configController;
-	TuningSignalManager m_tuningSignalManager;
+	ClientLib::TuningSignalManager m_tuningSignalManager;
 	TuningClientFilterStorage m_filterStorage;
 	ClientLib::TuningUserManager m_userManager;
 

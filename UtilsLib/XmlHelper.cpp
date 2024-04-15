@@ -493,7 +493,9 @@ bool XmlReadHelper::readHostAddressPortAttribute(const QString& name, HostAddres
 
 	RETURN_IF_FALSE(result);
 
-	return addr->setAddressPortStr(addrStr, 0);
+	addr->setAddressPortStr(addrStr, 0);
+
+	return true;
 }
 
 bool XmlReadHelper::readQHostAddressAttribute(const QString& name, QHostAddress* addr)

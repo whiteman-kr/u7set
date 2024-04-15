@@ -8,6 +8,7 @@
 #include "../VFrame30/SchemaItems/SchemaItem.h"
 #include "../VFrame30/TuningSchema.h"
 #include "../VFrame30/UfbSchema.h"
+#include "../VFrame30/VduSchema.h"
 #include "../lib/StandardColors.h"
 #include "../lib/Ui/TagSelectorWidget.h"
 
@@ -315,11 +316,6 @@ QVariant SchemaListModel::data(const QModelIndex& index, int role/* = Qt::Displa
 		return QVariant{};
 	}
 
-	if (role == Qt::ForegroundRole)
-	{
-		return excludedFromBuild(fileId) ? QBrush{Qt::darkGray} : QVariant{};
-	}
-
 	if (role == Qt::BackgroundRole)
 	{
 		if (file->state() == E::VcsState::CheckedOut)
@@ -347,13 +343,8 @@ QVariant SchemaListModel::data(const QModelIndex& index, int role/* = Qt::Displa
 
 	if (role == Qt::ForegroundRole)
 	{
-		if (column == Columns::IssuesColumn)
+		if (column == Columns::IssuesColumn && excludedFromBuild(fileId) == false)
 		{
-			//			if (excludedFromBuild(file->fileId()) == true)
-			//			{
-			//				return {};
-			//			}
-
 			QStringList fn = file->fileName().split('.');
 
 			if (fn.isEmpty() == false)
@@ -380,7 +371,7 @@ QVariant SchemaListModel::data(const QModelIndex& index, int role/* = Qt::Displa
 		}
 		else
 		{
-			return {};
+			return excludedFromBuild(fileId) ? QBrush{Qt::darkGray} : QVariant{};
 		}
 	}
 
@@ -2679,16 +2670,16 @@ std::shared_ptr<VFrame30::Schema> SchemaControlTabPage::createSchema(const DbFil
 		return {};
 	}
 
-	// If parent  or it's parent... is $root$/Schemas/ApplicatinLogic
+	// If parent  or it's parent... is $root$/Schemas/ApplicationLogic
 	// the create als
 	//
-
 	const std::map<int, std::function<std::shared_ptr<VFrame30::Schema>()>> createSchemaMap = {
 		{db()->systemFileId(DbDir::AppLogicDir), []() { return std::make_shared<VFrame30::LogicSchema>(); }},
 		{db()->systemFileId(DbDir::MonitorSchemasDir), []() { return std::make_shared<VFrame30::MonitorSchema>(); }},
 		{db()->systemFileId(DbDir::TuningSchemasDir), []() { return std::make_shared<VFrame30::TuningSchema>(); }},
 		{db()->systemFileId(DbDir::UfblDir), []() { return std::make_shared<VFrame30::UfbSchema>(); }},
-		{db()->systemFileId(DbDir::DiagSchemasDir), []() { return std::make_shared<VFrame30::DiagSchema>(); }}
+		{db()->systemFileId(DbDir::DiagSchemasDir), []() { return std::make_shared<VFrame30::DiagSchema>(); }},
+		{db()->systemFileId(DbDir::VduSchemasDir), []() { return std::make_shared<VFrame30::VduSchema>(); }}
 	};
 
 	DbFileInfo lookForSystemParent = parentFile;
@@ -3371,6 +3362,12 @@ void SchemaControlTabPage::addFile()
 	{
 		defaultId = "DIAGSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
 		extension = Db::File::DvsFileExtension;
+	}
+
+	if (schema->isVduSchema() == true)
+	{
+		defaultId = "VDUSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
+		extension = Db::File::VduFileExtension;
 	}
 
 	Q_ASSERT(extension.isEmpty() == false);
@@ -4294,7 +4291,9 @@ void SchemaControlTabPage::compareObject(DbChangesetObject object, CompareData c
 		object.name().endsWith("." + QString(Db::File::TvsFileExtension)) == false &&
 		object.name().endsWith("." + QString(Db::File::TvsTemplExtension)) == false &&
 		object.name().endsWith("." + QString(Db::File::DvsFileExtension)) == false &&
-		object.name().endsWith("." + QString(Db::File::DvsTemplExtension)) == false)
+		object.name().endsWith("." + QString(Db::File::DvsTemplExtension)) == false &&
+		object.name().endsWith("." + QString(Db::File::VduFileExtension)) == false &&
+		object.name().endsWith("." + QString(Db::File::VduTemplExtension)) == false)
 	{
 		return;
 	}

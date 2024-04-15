@@ -6,8 +6,9 @@
 #include "TuningSignalInfo.h"
 #include "TuningSourcesHelper.h"
 
-#include "../ClientLib/TuningConnection.h"
-#include "../ClientLib/TuningUserManager.h"
+#include <ClientLib/TuningConnection.h>
+#include <ClientLib/TuningUserManager.h>
+
 #include "../VFrame30/DrawParam.h"
 #include "../lib/Ui/DialogWriteValues.h"
 
@@ -101,7 +102,7 @@ void SelectionControlDelegate::initStyleOption(QStyleOptionViewItem* option, con
 //
 // TuningItemModelMain
 //
-TuningModelClient::TuningModelClient(TuningSignalManager& tuningSignalManager, const ClientLib::TuningUserManager& userManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent):
+TuningModelClient::TuningModelClient(ClientLib::TuningSignalManager& tuningSignalManager, const ClientLib::TuningUserManager& userManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent):
 	TuningModel(tuningSignalManager, valueColumnsAppSignalIdSuffixes, parent),
 	m_userManager(userManager),
 	m_helper(m_userManager),
@@ -877,7 +878,7 @@ void TuningPageColumnsWidth::setWidth(TuningModelColumns column, int width)
 int TuningPage::m_instanceCounter = 0;
 
 TuningPage::TuningPage(TuningConfigController& configController,
-					   TuningSignalManager& tuningSignalManager,
+					   ClientLib::TuningSignalManager& tuningSignalManager,
 					   TuningClientFilterStorage& tuningFilterStorage,
 					   ClientLib::TuningUserManager& userManager,
 					   ClientLib::TuningConnection& tuningConnection,

@@ -8,10 +8,11 @@
 
 #include "../UtilsLib/LogFile.h"
 #include "../UtilsLib/Ui/UiTools.h"
-#include "../ClientLib/TuningLog.h"
 #include "../lib/Tuning/TuningFilter.h"
 #include "../lib/Ui/DialogAlert.h"
 #include "../lib/Ui/DialogAbout.h"
+
+#include <ClientLib/TuningLog.h>
 
 #include "Settings.h"
 #include "DialogSettings.h"
@@ -126,12 +127,12 @@ MainWindow::~MainWindow()
 	TuningClientAppSettings::instance().user().m_mainWindowState = saveState();
 }
 
-TuningSignalManager& MainWindow::tuningSignalManager()
+ClientLib::TuningSignalManager& MainWindow::tuningSignalManager()
 {
 	return m_tuningSignalManager;
 }
 
-const TuningSignalManager& MainWindow::tuningSignalManager() const
+const ClientLib::TuningSignalManager& MainWindow::tuningSignalManager() const
 {
 	return m_tuningSignalManager;
 }

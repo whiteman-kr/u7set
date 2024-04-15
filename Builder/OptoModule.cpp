@@ -9,7 +9,7 @@
 #include "../lib/ConstStrings.h"
 #include "../UtilsLib/Crc.h"
 #include "../Builder/Context.h"
-//#include "../Builder/AppLogicCompiler.h"
+#include "./Vdu/VduOptoConnectionsInfoGenerator.h"
 
 #include "DeviceHelper.h"
 #include "UalItems.h"
@@ -175,27 +175,44 @@ namespace Hardware
 			return false;
 		}
 
-		const DeviceModule* lm = DeviceHelper::getAssociatedLmOrBvb(m_controller);
+		const DeviceModule* lm = nullptr;
+
+		if (module->isVdu() == true)
+		{
+			lm = module;
+		}
+		else
+		{
+			lm = DeviceHelper::getAssociatedLmOrBvb(m_controller);
+		}
 
 		if (lm == nullptr)
 		{
-			Q_ASSERT(false);
+			LOG_INTERNAL_ERROR(log);
 			return false;
 		}
 
 		m_lmID = lm->equipmentIdTemplate();
 
-		if (m_optoModule.isLmOrBvb() == true)
+		if (m_optoModule.isLmOrBvb() == true ||
+			m_optoModule.isVdu() == true)
 		{
 			Q_ASSERT(m_optoModule.txDataSizeW() == m_optoModule.rxDataSizeW());
 			m_portBaseAddr = m_optoModule.moduleDataAddr() + portNo * m_optoModule.txDataSizeW();
+
+			// if (m_optoModule.isVdu() == true)
+			// {
+			// 	m_txBufOffset = 0;
+			// 	m_rxBufOffset = 0;
+			// }
 		}
 		else
 		{
 			m_portBaseAddr = m_optoModule.moduleDataAddr();
 		}
 
-		if (m_optoModule.isBvb() == true)
+		if (m_optoModule.isBvb() == true ||
+			m_optoModule.isVdu() == true)
 		{
 			return true;
 		}
@@ -238,7 +255,7 @@ namespace Hardware
 
 		Address16 addr(validitySignal->valueOffset(), validitySignal->valueBit());
 
-		if (module->isLogicModule() == true || module->isBvb() == true)
+		if (module->isLogicModule() == true)
 		{
 			addr.addWord(lmDescription->memory().m_txDiagDataOffset);
 		}
@@ -1222,7 +1239,16 @@ namespace Hardware
 
 	bool OptoPort::calculatePortRawDataSize()
 	{
-		const DeviceModule* lm = DeviceHelper::getAssociatedLmOrBvb(m_controller);
+		const DeviceModule* lm = nullptr;
+
+		if (m_optoModule.isVdu() == true)
+		{
+			lm = m_optoModule.deviceModule();
+		}
+		else
+		{
+			lm = DeviceHelper::getAssociatedLmOrBvb(m_controller);
+		}
 
 		TEST_PTR_RETURN_FALSE(lm);
 
@@ -1993,7 +2019,9 @@ namespace Hardware
 
 		bool result = true;
 
-		if (module->isLogicModule() == true	|| module->isBvb() == true)
+		if (module->isLogicModule() == true	||
+			module->isBvb() == true ||
+			module->isVdu() == true)
 		{
 			if (module->isLogicModule() == true)
 			{
@@ -2080,7 +2108,7 @@ namespace Hardware
 
 					result &= optoPort->init(optoPortController, i, m_lmDescription, log);
 
-					m_ports.insert(optoPortController->equipmentIdTemplate(), optoPort);
+					m_ports.emplace(optoPortController->equipmentIdTemplate(), optoPort);
 
 					findPortCount++;
 
@@ -2102,7 +2130,8 @@ namespace Hardware
 			return false;
 		}
 
-		if (isLmOrBvb() == true)
+		if (isLmOrBvb() == true ||
+			isVdu() == true)
 		{
 			m_lm = module;
 		}
@@ -2158,6 +2187,17 @@ namespace Hardware
 		}
 
 		return m_deviceModule->isBvb();
+	}
+
+	bool OptoModule::isVdu() const
+	{
+		if (m_deviceModule == nullptr)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		return m_deviceModule->isVdu();
 	}
 
 	QString OptoModule::equipmentID() const
@@ -2262,7 +2302,7 @@ namespace Hardware
 
 	void OptoModule::getOptoPorts(QList<OptoPortShared>& optoPortsList) const
 	{
-		for(const OptoPortShared& port : m_ports)
+		for(const auto& [equipmentID, port] : m_ports)
 		{
 			if (port == nullptr)
 			{
@@ -2274,7 +2314,7 @@ namespace Hardware
 		}
 	}
 
-	const HashedVector<QString, OptoPortShared>& OptoModule::ports() const
+	const std::map<QString, OptoPortShared>& OptoModule::ports() const
 	{
 		return m_ports;
 	}
@@ -2283,11 +2323,12 @@ namespace Hardware
 	{
 		bool result = true;
 
-		if (isLmOrBvb() == true)
+		if (isLmOrBvb() == true ||
+			isVdu() == true)
 		{
 			// calculate tx buffers offsets for ports of LM module
 			//
-			for(OptoPortShared& port : m_ports)
+			for(auto& [equipID, port] : m_ports)
 			{
 				if (port == nullptr)
 				{
@@ -2360,7 +2401,7 @@ namespace Hardware
 
 			int txDataSizeW = 0;
 
-			for(OptoPortShared& port : m_ports)
+			for(auto& [equipID, port] : m_ports)
 			{
 				if (port == nullptr)
 				{
@@ -2429,13 +2470,20 @@ namespace Hardware
 		// checking ports addresses overlapping
 		// usefull for manual settings of ports
 		//
-		int portsCount = static_cast<int>(m_ports.count());
+		std::vector<OptoPortShared> ports;
+
+		for(const auto& [eqid, port] : m_ports)
+		{
+			ports.emplace_back(port);
+		}
+
+		int portsCount = static_cast<int>(ports.size());
 
 		bool result = true;
 
 		for(int i = 0; i < portsCount - 1; i++)
 		{
-			OptoPortShared port1 = m_ports[i];
+			OptoPortShared& port1 = ports[i];
 
 			if (port1 == nullptr)
 			{
@@ -2452,7 +2500,7 @@ namespace Hardware
 
 			for(int k = i + 1; k < portsCount; k++)
 			{
-				OptoPortShared port2 = m_ports[k];
+				OptoPortShared& port2 = ports[k];
 
 				if (port2 == nullptr)
 				{
@@ -2500,11 +2548,12 @@ namespace Hardware
 
 	bool OptoModule::calculateRxBufAddresses()
 	{
-		if (isLmOrBvb() == true)
+		if (isLmOrBvb() == true ||
+			isVdu() == true)
 		{
 			// calculate rx buf offsets for ports of LM module
 			//
-			for(OptoPortShared& port : m_ports)
+			for(auto& [equipID, port] : m_ports)
 			{
 				if (port == nullptr)
 				{
@@ -2566,7 +2615,7 @@ namespace Hardware
 
 			int rxDataSizeW = 0;
 
-			for(OptoPortShared& port : m_ports)
+			for(auto& [equipID, port] : m_ports)
 			{
 				if (port == nullptr)
 				{
@@ -2654,7 +2703,7 @@ namespace Hardware
 	{
 		bool result = true;
 
-		for(OptoPortShared& port : m_ports)
+		for(auto& [equipID, port] : m_ports)
 		{
 			if (port == nullptr)
 			{
@@ -2671,7 +2720,7 @@ namespace Hardware
 
 	bool OptoModule::isSerialRxSignalExists(const QString& appSignalID) const
 	{
-		for(const OptoPortShared& port : m_ports)
+		for(auto& [equipID, port] : m_ports)
 		{
 			if (port == nullptr)
 			{
@@ -2693,7 +2742,7 @@ namespace Hardware
 
 		bool result = true;
 
-		for(OptoPortShared& port : m_ports)
+		for(auto& [equipID, port] : m_ports)
 		{
 			if (port == nullptr)
 			{
@@ -2712,7 +2761,7 @@ namespace Hardware
 
 		bool result = true;
 
-		for(OptoPortShared& port : m_ports)
+		for(auto& [equipID, port] : m_ports)
 		{
 			if (port == nullptr)
 			{
@@ -3232,6 +3281,18 @@ namespace Hardware
 		return false;
 	}
 
+	bool OptoModuleStorage::writeVduConnectionsInfoFile(const QString& vduEquipmentID,
+														Builder::Context* context) const
+	{
+		TEST_PTR_RETURN_FALSE(context);
+
+		OptoModuleShared optoModule = getOptoModule(vduEquipmentID);
+
+		TEST_PTR_RETURN_FALSE(optoModule);
+
+		return Builder::VduOptoConnectionsInfoGenerator().writeFiles(optoModule, context);
+	}
+
 	std::shared_ptr<Connection> OptoModuleStorage::getConnection(const QString& connectionID) const
 	{
 		return m_connections.value(connectionID, nullptr);
@@ -3311,9 +3372,7 @@ namespace Hardware
 				continue;
 			}
 
-			const HashedVector<QString, Hardware::OptoPortShared>& ports = module->ports();
-
-			for(const Hardware::OptoPortShared& port : ports)
+			for(auto& [equipID, port] : module->ports())
 			{
 				associatedPorts.append(port);
 			}
@@ -3912,38 +3971,48 @@ namespace Hardware
 
 		if (module->isLogicModule() != true &&
 			module->isOptoModule() != true &&
-			module->isBvb() != true)
+			module->isBvb() != true &&
+			module->isVdu() != true)
 		{
 			// this is not opto-module
 			//
 			return true;
 		}
 
-		TEST_PTR_LOG_RETURN_FALSE(module->parent(), m_log);
+		std::shared_ptr<LmDescription> lmDescription;
 
-		if (module->parent()->isChassis() == false)
+		if (module->isVdu() == true)
 		{
-			// Module %1 should be installed in chassis.
-			//
-			m_log->errCFG3042(module->equipmentIdTemplate(), module->uuid());
-			return false;
+			lmDescription = m_lmDescriptionSet->get(module);
 		}
-
-		// Get LogicModule description
-		//
-		TEST_PTR_LOG_RETURN_FALSE(m_lmDescriptionSet, m_log);
-
-		const DeviceModule* chassisLm = DeviceHelper::getAssociatedLmOrBvb(module);
-
-		if (chassisLm == nullptr)
+		else
 		{
-			// LM- or BVB-family module is not found is chassis %1
-			//
-			m_log->errALC5149(module->parent()->equipmentIdTemplate());
-			return false;
-		}
+			TEST_PTR_LOG_RETURN_FALSE(module->parent(), m_log);
 
-		std::shared_ptr<LmDescription> lmDescription = m_lmDescriptionSet->get(chassisLm);
+			if (module->parent()->isChassis() == false)
+			{
+				// Module %1 should be installed in chassis.
+				//
+				m_log->errCFG3042(module->equipmentIdTemplate(), module->uuid());
+				return false;
+			}
+
+			// Get LogicModule description
+			//
+			TEST_PTR_LOG_RETURN_FALSE(m_lmDescriptionSet, m_log);
+
+			const DeviceModule* chassisLm = DeviceHelper::getAssociatedLmOrBvb(module);
+
+			if (chassisLm == nullptr)
+			{
+				// LM- or BVB-family module is not found is chassis %1
+				//
+				m_log->errALC5149(module->parent()->equipmentIdTemplate());
+				return false;
+			}
+
+			lmDescription = m_lmDescriptionSet->get(chassisLm);
+		}
 
 		if (lmDescription == nullptr)
 		{
@@ -3966,9 +4035,7 @@ namespace Hardware
 
 		m_lmAssociatedModules.insert(optoModule->lmID(), optoModule);
 
-		const HashedVector<QString, OptoPortShared>& ports = optoModule->ports();
-
-		for(const OptoPortShared& port : ports)
+		for(const auto& [equipID, port] : optoModule->ports())
 		{
 			m_ports.insert(port->equipmentID(), port);
 		}

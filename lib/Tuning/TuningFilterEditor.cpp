@@ -13,7 +13,7 @@
 // DialogChooseTuningSignals
 //
 
-ChooseTuningSignalsWidget::ChooseTuningSignalsWidget(TuningSignalManager& signalManager, bool requestValuesEnabled, QWidget* parent)
+ChooseTuningSignalsWidget::ChooseTuningSignalsWidget(ClientLib::TuningSignalManager& signalManager, bool requestValuesEnabled, QWidget* parent)
 	:QWidget(parent),
 		m_signalManager(signalManager)
 {
@@ -1114,7 +1114,7 @@ void ChooseTuningSignalsWidget::setFilterValueItemText(QTreeWidgetItem* item, co
 // TuningFilterEditor
 //
 
-TuningFilterEditor::TuningFilterEditor(TuningFilterStorage& filterStorage, TuningSignalManager& signalManager,
+TuningFilterEditor::TuningFilterEditor(TuningFilterStorage& filterStorage, ClientLib::TuningSignalManager& signalManager,
 									   bool readOnly,
 									   bool requestValuesEnabled,
 									   bool typeTreeEnabled,

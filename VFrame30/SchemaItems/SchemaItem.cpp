@@ -257,6 +257,7 @@ namespace VFrame30
 
 		if (m_preDrawScript.trimmed().isEmpty() == true)
 		{
+			m_lastScriptError.clear();
 			return true;
 		}
 
@@ -943,7 +944,8 @@ namespace VFrame30
 		//tags.replace(';', QChar::LineFeed);
 		//tags.replace(',', QChar::LineFeed);	QChar::LineFeed
 
-		m_tags = tags.split(QRegularExpression("\\W+"), Qt::SkipEmptyParts);
+		static const auto re = QRegularExpression("\\W+");
+		m_tags = tags.split(re, Qt::SkipEmptyParts);
 
 		for (QString& t : m_tags)
 		{

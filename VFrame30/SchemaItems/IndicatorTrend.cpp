@@ -6,6 +6,8 @@
 #include "PropertyNames.h"
 #include "SchemaItemIndicator.h"
 
+#include <TrendView/TrendSignalSet.h>
+
 namespace VFrame30
 {
 	//

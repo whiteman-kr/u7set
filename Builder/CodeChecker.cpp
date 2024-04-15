@@ -224,6 +224,11 @@ namespace Builder
 
 		result = m_compiler.getTuningSignalsFramesInfo(&framesInfo);
 
+		if (result == false)
+		{
+			return false;
+		}
+
 		for(auto const& p : framesInfo)
 		{
 			MemArea tuningFrame;
@@ -252,7 +257,7 @@ namespace Builder
 
 		joiningSequentialAreas(&m_readAreas);
 
-		return true;
+		return result;
 	}
 
 	bool CodeChecker::initWritableAreas()

@@ -2,12 +2,13 @@
 
 #include "../lib/Ui/AppDataSourcesWidget.h"
 #include "../lib/Ui/TuningSourcesWidget.h"
-#include "../AppSignalLib/TuningSignalManager.h"
-#include "../ClientLib/AdsSourceStateConnection.h"
-#include "../ClientLib/TuningConnection.h"
 #include "../TestSuiteLib/TestSuiteConfigController.h"
-#include "../ClientLib/IRecentAppSignals.h"
 #include "../lib/Tuning/ITuningAuthorization.h"
+
+#include <ClientLib/TuningSignalManager.h>
+#include <ClientLib/AdsSourceStateConnection.h>
+#include <ClientLib/TuningConnection.h>
+#include <ClientLib/IRecentAppSignals.h>
 
 class DialogDataSources : public QDialog
 {
@@ -45,7 +46,7 @@ private:
 
 	// --
 	//
-	TuningSignalManager m_emptySignals{QString(), m_logFile};
+	ClientLib::TuningSignalManager m_emptySignals{QString(), m_logFile};
 	TuningAuthorizationStub m_authorization;
 	ClientLib::TuningLogStub m_tuningLogStub;
 

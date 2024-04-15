@@ -5,7 +5,7 @@
 #include "Indicator.h"
 #include "PosRectImpl.h"
 
-#include "../../TrendView/Trend.h"
+#include <TrendView/Trend.h>
 
 
 class AppSignalState;

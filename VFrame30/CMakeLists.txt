@@ -92,6 +92,12 @@ qt_add_library(${TARGET} STATIC
 	./SchemaItems/SchemaItemUfb.h
 	./SchemaItems/SchemaItemValue.cpp
 	./SchemaItems/SchemaItemValue.h
+	./SchemaItems/SchemaItemVduLine.cpp
+	./SchemaItems/SchemaItemVduLine.h
+	./SchemaItems/SchemaItemVduRect.cpp
+	./SchemaItems/SchemaItemVduRect.h
+	./SchemaItems/SchemaItemVduValue.cpp
+	./SchemaItems/SchemaItemVduValue.h
 
 	AppSignalController.cpp
 	AppSignalController.h
@@ -148,6 +154,8 @@ qt_add_library(${TARGET} STATIC
 	TuningSchema.h
 	UfbSchema.cpp
 	UfbSchema.h
+	VduSchema.cpp
+	VduSchema.h
 	VFrame30Library.cpp
 	VFrame30Library.h
 	VFrame30Types.h

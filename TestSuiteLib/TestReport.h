@@ -19,8 +19,10 @@ namespace TestSuite
 
 
 	private:
+		virtual int count() const override;
 		virtual int count(const QString& tag) const override;
 
+		virtual QString text(int index, QString* tag) const override;
 		virtual QString text(const QString& tag, bool* found) override;
 
 	private:

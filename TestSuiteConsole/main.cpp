@@ -15,6 +15,38 @@
 const int MajorVersion = U7SET_MAJOR_VERSION;
 const int MinorVersion = U7SET_MINOR_VERSION;
 
+void showVersion()
+{
+	SoftwareInfo si(E::SoftwareType::TestSuite, QString());
+
+	QStringList res;
+
+
+	res << QString(" %1 v%2.%3.%4 (%5)").arg("TestSuiteConsole")
+			   .arg(si.majorVersion())
+			   .arg(si.minorVersion())
+			   .arg(si.patchVersion())
+			   .arg(si.branchName());
+	res << QString();
+#ifdef QT_DEBUG
+	res << QString(" Build:          %1 Debug").arg(si.releaseType());
+#else
+	res << QString(" Build:          %1 Release").arg(si.releaseType());
+#endif
+	res << QString(" Branch name:    %1").arg(si.branchName());
+	res << QString(" Commit SHA:     %1").arg(si.commitHash());
+	res << QString(" Build date:     %1").arg(si.buildDate());
+	res << QString(" Build username: %1").arg(si.buildUserName());
+	res << QString(" Build hostname: %1").arg(si.buildHostname());
+	res << QString(" Pipeline ID:    %1").arg(si.pipelineID());
+
+	for (const QString& str : res) 
+	{
+		std::cout << str.toStdString() << std::endl;
+	}
+	std::cout << std::endl;
+}
+
 
 void showHelp()
 {
@@ -273,6 +305,8 @@ int main(int argc, char* argv[])
 {
 	ProtobufLibShutdowner protobufLibShutdowner;
 	Q_UNUSED(protobufLibShutdowner);
+
+	showVersion();
 
 	if (argc < 2)
 	{

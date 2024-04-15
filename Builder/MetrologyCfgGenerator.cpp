@@ -44,6 +44,7 @@ namespace Builder
 		result &= writeDatabaseInfo();
 		result &= writeMetrologyItemsXml();
 		result &= writeMetrologySignalSet();
+		result &= linkComparatorsSet();
 
 		return result;
 	}
@@ -256,11 +257,41 @@ namespace Builder
 
 	bool MetrologyCfgGenerator::writeMetrologySignalSet()
 	{
-		// Creating signal list
-		//
+		TEST_PTR_RETURN_FALSE(m_log);
+		TEST_PTR_LOG_RETURN_FALSE(m_signalSet, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(m_equipment, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(m_buildResultWriter, m_log);
+
 		bool result = true;
 
-		QVector<Metrology::SignalParam> signalsToWrite;
+		if (m_buildResultWriter->isBuildFileByIDExists(Directory::COMMON, CfgFileId::METROLOGY_SIGNAL_SET) == true)
+		{
+			BuildFile* metrologySignalSetFile = m_buildResultWriter->getBuildFileByID(Directory::COMMON, CfgFileId::METROLOGY_SIGNAL_SET);
+
+			if (metrologySignalSetFile == nullptr)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
+
+			result &= m_cfgXml->addLinkToFile(metrologySignalSetFile);
+
+			if (result == false)
+			{
+				// Can't link build file %1 into /%2/Configuration.xml.
+				//
+				m_log->errCMN0018(File::METROLOGY_SIGNAL_SET, equipmentID());
+				return false;
+			}
+
+			return result;
+		}
+
+		// Creating signal list
+		//
+		std::vector<Metrology::SignalParam> signalsToWrite;
+
+		signalsToWrite.reserve(m_signalSet->count());
 
 		for(const AppSignal* s : *m_signalSet)
 		{
@@ -340,7 +371,7 @@ namespace Builder
 
 			// append signal into list
 			//
-			signalsToWrite.append(Metrology::SignalParam(signal, location));
+			signalsToWrite.emplace_back(signal, location);
 		}
 
 		RETURN_IF_FALSE(result);
@@ -363,20 +394,25 @@ namespace Builder
 
 		protoMetrologySignalSet.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(data.data()));
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(), File::METROLOGY_SIGNAL_SET, CfgFileId::METROLOGY_SIGNAL_SET, "",  data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(Directory::COMMON, File::METROLOGY_SIGNAL_SET, CfgFileId::METROLOGY_SIGNAL_SET, "",  data);
 		TEST_PTR_RETURN_FALSE(buildFile);
 
 		result &= m_cfgXml->addLinkToFile(buildFile);
 
 		if (result == false)
 		{
-			// Can't link build file %1 into /%2/MetrologySignals.set.
+			// Can't link build file %1 into /%2/Configuration.xml.
 			//
-			m_log->errCMN0018(QString("%1").arg(File::METROLOGY_SIGNAL_SET), equipmentID());
+			m_log->errCMN0018(File::METROLOGY_SIGNAL_SET, equipmentID());
 			return false;
 		}
 
-		result &= m_cfgXml->addLinkToFile(Directory::COMMON, File::COMPARATORS_SET);
+		return result;
+	}
+
+	bool MetrologyCfgGenerator::linkComparatorsSet()
+	{
+		bool result = m_cfgXml->addLinkToFile(Directory::COMMON, File::COMPARATORS_SET);
 
 		if (result == false)
 		{

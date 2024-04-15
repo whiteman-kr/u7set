@@ -2,6 +2,7 @@
 
 #include "../OnlineLib/Tcp.h"
 #include "AppSignalState.h"
+#include "GatewayHandler.h"
 
 namespace Gateway
 {
@@ -12,12 +13,15 @@ namespace Gateway
 	{
 		Q_OBJECT
 
+		inline static const int GET_STATES_REQUEST_INTERVAL = 250;	// ms
+
 	public:
 		AppDataServiceClient(const SoftwareInfo& softwareInfo,
 							 const HostAddressPort& serverAddressPort1,
 							 const HostAddressPort& serverAddressPort2,
 							 const QString& clientDescription,
-							 IvsImpulseHandler& handler, CircularLoggerShared logger);
+							 Handler* handler,
+							 CircularLoggerShared logger);
 	private:
 		virtual void onClientThreadStarted() override;
 		virtual void onClientThreadFinished() override;
@@ -26,6 +30,8 @@ namespace Gateway
 		virtual void onDisconnection() override;
 
 		void onTimer();
+
+		void sendGetStatesRequest();
 
 		virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
 
@@ -36,16 +42,11 @@ namespace Gateway
 		void sendStateChanges();
 
 	private:
+		Handler* m_handler = nullptr;
+
 		QTimer m_timer;
-
-		// refs to IvsImpulseHandler data structs
-
-		std::vector<std::shared_ptr<IvsImpulseListInfo>>& m_lists;
-		AppSignalStates& m_states;
-		std::map<Hash, std::set<std::shared_ptr<IvsImpulseListInfo>>>& m_hashToLists;
-		std::atomic_bool& m_signalStatesUpdated;
-
-		//
+		bool m_needGetStates = false;
+		qint64 m_lastGetStatesRequestTime = 0;
 
 		Network::GetAppSignalStateRequest m_getStatesRequest;
 		Network::GetAppSignalStateReply m_getStatesReply;
@@ -61,7 +62,7 @@ namespace Gateway
 								   const HostAddressPort& serverAddressPort1,
 								   const HostAddressPort& serverAddressPort2,
 								   const QString& clientDescription,
-								   IvsImpulseHandler& handler,
+								   Handler* handler,
 								   CircularLoggerShared logger)
 		{
 			addWorker(new AppDataServiceClient(softwareInfo,

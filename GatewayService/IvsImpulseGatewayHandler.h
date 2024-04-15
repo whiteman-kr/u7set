@@ -44,10 +44,16 @@ namespace Gateway
 						  CircularLoggerShared log,
 						  bool logGatewayPackets);
 
-		~IvsImpulseHandler();
+		virtual ~IvsImpulseHandler();
 
 		virtual void run() override;
 		virtual void shutdown() override;
+
+		virtual void getRequiredSignalsHashes(std::set<Hash>* hashes) const override;
+		virtual void getEventSignalsHashes(std::set<Hash>* hashes) const override;
+
+		virtual void updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply) override;
+		void processStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply) override;
 
 	private:
 		bool init();

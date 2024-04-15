@@ -1,12 +1,13 @@
 #pragma once
 #include <QReadWriteLock>
 #include "../ReportLib/ReportTemplate.h"
-#include "../ClientLib/ConfigController.h"
 #include "../OnlineLib/SocketIO.h"
 #include "../OnlineLib/MatsUsers.h"
 #include "../UtilsLib/ILogFile.h"
 #include "TestScriptsStorage.h"
 #include "TestReport.h"
+
+#include <ClientLib/ConfigController.h>
 
 namespace TestSuite
 {

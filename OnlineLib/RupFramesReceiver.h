@@ -8,7 +8,8 @@
 #include "../UtilsLib/WUtils.h"
 #include "../CommonLib/HostAddressPort.h"
 
-#include "../asio/include/asio.hpp"
+#include <asio.hpp>
+
 
 using namespace asio;
 using namespace asio::ip;

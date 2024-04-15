@@ -27,9 +27,7 @@ void SignalStatesProcessor::ThreadsContainer::append(std::thread& thread)
 	auto p = m_threads.insert({thread_id, std::move(thread)});
 
 	Q_ASSERT(p.first->second.joinable() == true);
-	Q_ASSERT(thread.joinable() == false);
 }
-
 
 SignalStatesProcessor::SignalStatesProcessor()
 {

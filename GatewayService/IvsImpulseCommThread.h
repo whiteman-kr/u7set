@@ -6,6 +6,7 @@
 
 #include "GatewayDescription.h"
 #include "AppSignalState.h"
+#include "IvsImpulseGateway.h"
 #include "IvsImpulseDataProtocol.h"
 
 namespace Gateway

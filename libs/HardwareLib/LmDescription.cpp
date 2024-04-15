@@ -666,10 +666,11 @@ bool LmDescription::loadAfbs(const QDomElement& element, QString* errorMessage)
 QString LmDescription::lmDescriptionFile(const Hardware::DeviceModule* logicModule)
 {
 	if (logicModule == nullptr ||
-		logicModule->isFSCConfigurationModule() == false)
+		(logicModule->isFSCConfigurationModule() == false && logicModule->isVdu() == false))
 	{
 		assert(logicModule);
-		assert(logicModule->isFSCConfigurationModule());
+		assert(logicModule->isFSCConfigurationModule() || logicModule->isVdu());
+
 		return QString();
 	}
 

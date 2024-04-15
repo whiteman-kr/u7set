@@ -3,7 +3,7 @@
 #include "MainWindow.h"
 
 
-DialogFilterEditor::DialogFilterEditor(TuningSignalManager& tuningSignalManager, TuningFilterStorage& filterStorage, QWidget* parent):
+DialogFilterEditor::DialogFilterEditor(ClientLib::TuningSignalManager& tuningSignalManager, TuningFilterStorage& filterStorage, QWidget* parent):
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	m_tuningSignalManager(tuningSignalManager)
 {

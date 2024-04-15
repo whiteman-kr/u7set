@@ -145,7 +145,7 @@ QString ConfigSocket::cfgSrvInfo()
 
 	connectedState.append(tr("Equipment ID: %1\n").arg(m_softwareInfo.equipmentID()));
 
-	if (m_cfgSrvIP.isEmpty() == true)
+	if (m_cfgSrvIP.isNull() == true)
 	{
 		connectedState.append(tr("Not connected\n\n"));
 	}
@@ -184,7 +184,7 @@ QString ConfigSocket::appDataSrvInfo()
 		connectedState.append(tr("Equipment ID: %1\n").arg(m_appDataSrvEquipmentID));
 	}
 
-	if (m_appDataSrvIP.isEmpty() == true)
+	if (m_appDataSrvIP.isNull() == true)
 	{
 		connectedState.append(tr("Packets send to: Not loaded"));
 	}

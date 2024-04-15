@@ -6,6 +6,7 @@
 #include "TuningValue.h"
 
 class AppSignal;
+class AppSignalSpecPropValues;
 
 namespace Proto
 {
@@ -183,16 +184,23 @@ class AppSignalParam
 	Q_PROPERTY(bool isInverted READ isInverted)
 	Q_PROPERTY(bool IsInverted READ isInverted)
 
+	/// \brief Signal is reserved
+	Q_PROPERTY(bool isReserved READ isReserved)
+	Q_PROPERTY(bool IsReserved READ isReserved)
+
 public:
 	AppSignalParam(const AppSignal& signal);
 
 	// Shallow copy.
 	//
-	AppSignalParam() = default;
-	AppSignalParam(const AppSignalParam&) = default;
-	AppSignalParam(AppSignalParam&&) noexcept = default;
-	AppSignalParam& operator=(const AppSignalParam&) = default;
-	AppSignalParam& operator=(AppSignalParam&&) noexcept = default;
+	AppSignalParam();
+	
+	AppSignalParam(const AppSignalParam&);
+	AppSignalParam(AppSignalParam&&) noexcept;
+
+	AppSignalParam& operator=(const AppSignalParam&);
+	AppSignalParam& operator=(AppSignalParam&&) noexcept;
+
 
 	bool load(const Proto::AppSignal& message);
 	void load(const AppSignal& signal);
@@ -272,10 +280,10 @@ public:
 	[[nodiscard]] int precision() const;
 	void setPrecision(int value);
 
-	[[nodiscard]] double fineAaperture() const;
+	[[nodiscard]] double fineAperture() const;
 	void setFineAperture(double value);
 
-	[[nodiscard]] double coarseAaperture() const;
+	[[nodiscard]] double coarseAperture() const;
 	void setCoarseAperture(double value);
 
 	[[nodiscard]] double filteringTime() const;
@@ -293,6 +301,9 @@ public:
 	[[nodiscard]] bool isInverted() const;
 	void setInverted(bool value);
 
+	[[nodiscard]] bool isReserved() const;
+	void setReserved(bool value);
+
 	[[nodiscard]] TuningValue tuningDefaultValue() const;
 	[[nodiscard]] QVariant tuningDefaultValueToVariant() const;
 	void setTuningDefaultValue(const TuningValue& value);
@@ -309,9 +320,20 @@ public:
 	[[nodiscard]] QStringList tagStringList() const;
 	void setTags(std::set<QString> tags);
 
-public slots:
-	/// \brief Check if signal has specified tag
-	[[nodiscard]] bool hasTag(const QString& tag) const;
+	const QString& specificPropertyStruct() const;
+	const QByteArray& protoSpecificPropertyValues() const;
+
+	const AppSignalSpecPropValues& specificPropertyValues() const;
+
+public:
+	/// @brief Check if signal has specified tag
+	Q_INVOKABLE bool hasTag(const QString& tag) const;
+	
+	/// @brief Get specific property value by name
+	Q_INVOKABLE QVariant specificPropertyValue(const QString& propertyName) const;
+
+	/// @brief Check if specific property exists
+	Q_INVOKABLE bool specificPropertyExists(const QString& propertyName) const;
 
 public:
 	static const int NO_UNIT_ID = 1;
@@ -321,6 +343,9 @@ private:
 
 	struct PrivateData
 	{
+		PrivateData();
+		~PrivateData();
+
 		bool load(const Proto::AppSignal& message);
 		void load(const AppSignal& signal);
 		void save(::Proto::AppSignal* message) const;
@@ -364,12 +389,15 @@ private:
 		bool m_enableTuning = false;
 		bool m_endpoint = false;
 		bool m_inverted = false;
+		bool m_reserved = false;
 		TuningValue m_tuningDefaultValue;
 		TuningValue m_tuningLowBound;
 		TuningValue m_tuningHighBound;
 
 		QString m_specPropStruct;
 		QByteArray m_specPropValues;
+		
+		std::unique_ptr<::AppSignalSpecPropValues> m_specificPropertyValues;
 
 		std::set<QString> m_tags;
 	};

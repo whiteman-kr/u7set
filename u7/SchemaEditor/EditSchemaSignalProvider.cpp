@@ -230,7 +230,6 @@ E::SignalType EditSchemaAppSignalProvider::signalType(const QString& appSignalId
 
 QString EditSchemaAppSignalProvider::equipmentToAppSignalId(const QString& /*equipmentId*/) const
 {
-	Q_ASSERT(false);	// todo
 	return {};
 }
 

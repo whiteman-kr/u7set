@@ -1,10 +1,10 @@
 #ifndef SIMSIGNALINFO_H
 #define SIMSIGNALINFO_H
 
-#include "../lib/Ui/DialogSignalInfo.h"
 #include "../../VFrame30/AppSignalController.h"
-#include "../../Simulator/SimAppSignalManager.h"
 #include "../TuningConnectionStub.h"
+#include "../lib/Ui/DialogSignalInfo.h"
+#include <Simulator/SimAppSignalManager.h>
 
 class SimWidget;
 class SimIdeSimulator;

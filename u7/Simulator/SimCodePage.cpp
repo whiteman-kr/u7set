@@ -135,36 +135,33 @@ QVariant SimCodeModel::data(const QModelIndex& index, int role /*= Qt::DisplayRo
 void SimCodeModel::dataChanged()
 {
 	auto lm = logicModule();
-	if (lm == nullptr)
-	{
-		beginResetModel();
 
-		// It can be reloading rigt now
+	beginResetModel();
+	
+	if (lm.has_value() == false)
+	{
+		// It can be reloading right now
 		//
 		m_commands.clear();
 		m_offsetToCommand.clear();
-
-		endResetModel();
-		return;
 	}
-
+	else
 	{
-		beginResetModel();
-
 		m_commands = lm->appCommands();
 		m_offsetToCommand = lm->offsetToCommand();
-
-		endResetModel();
 	}
+
+	endResetModel();
+
 	return;
 }
 
-std::shared_ptr<Sim::LogicModule> SimCodeModel::logicModule()
+std::optional<Sim::LogicModule> SimCodeModel::logicModule()
 {
 	return m_simulator->logicModule(m_lmEquipmentId);
 }
 
-std::shared_ptr<Sim::LogicModule> SimCodeModel::logicModule() const
+std::optional<Sim::LogicModule> SimCodeModel::logicModule() const
 {
 	return m_simulator->logicModule(m_lmEquipmentId);
 }
@@ -225,12 +222,12 @@ QString SimCodePage::equipmnetId() const
 	return m_lmEquipmentId;
 }
 
-std::shared_ptr<Sim::LogicModule> SimCodePage::logicModule()
+std::optional<Sim::LogicModule> SimCodePage::logicModule()
 {
 	return m_simulator->logicModule(m_lmEquipmentId);
 }
 
-std::shared_ptr<Sim::LogicModule> SimCodePage::logicModule() const
+std::optional<Sim::LogicModule> SimCodePage::logicModule() const
 {
 	return m_simulator->logicModule(m_lmEquipmentId);
 }

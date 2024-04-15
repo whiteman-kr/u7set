@@ -75,7 +75,7 @@ namespace ExtWidgets
 		static QString propertyVectorText(QVariant& value);
 		static QString stringListText(const QVariant& value);
 		static QString colorVectorText(QVariant& value);
-		static QString propertyValueText(Property* p, int row, int maxDecimalPlaces);	// row is used for StringList
+		static QString propertyValueText(Property* p, int row, int maxDecimalPlaces, bool noNewLine);	// row is used for StringList
 
 	};
 

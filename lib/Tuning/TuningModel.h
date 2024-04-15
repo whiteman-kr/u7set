@@ -38,7 +38,7 @@ struct TuningModelHashSet
 class TuningModelSorter
 {
 public:
-	TuningModelSorter(TuningModelColumns column, const TuningModel* model, TuningSignalManager& tuningSignalManager);
+	TuningModelSorter(TuningModelColumns column, const TuningModel* model, ClientLib::TuningSignalManager& tuningSignalManager);
 
 	bool operator()(const TuningModelHashSet& set1, const TuningModelHashSet& set2) const
 	{
@@ -50,7 +50,7 @@ public:
 private:
 	TuningModelColumns m_column = TuningModelColumns::AppSignalID;
 
-	TuningSignalManager& m_tuningSignalManager;
+	ClientLib::TuningSignalManager& m_tuningSignalManager;
 
 	const TuningModel* m_model = nullptr;
 };
@@ -60,7 +60,7 @@ class TuningModel : public QAbstractTableModel
 	Q_OBJECT
 
 public:
-	TuningModel(TuningSignalManager& tuningSignalManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent);
+	TuningModel(ClientLib::TuningSignalManager& tuningSignalManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent);
 	~TuningModel();
 
 	TuningValue defaultValue(const AppSignalParam& asp) const;
@@ -73,7 +73,7 @@ public:
 	Hash hashByIndex(int row, int valueColumn) const;
 	const TuningModelHashSet& hashSetByIndex(int row) const;
 
-	TuningSignalManager& tuningSignalManager();
+	ClientLib::TuningSignalManager& tuningSignalManager();
 
 public:
 
@@ -122,7 +122,7 @@ private:
 	QWidget* m_parentWidget = nullptr;
 
 protected:
-	TuningSignalManager& m_tuningSignalManager;
+	ClientLib::TuningSignalManager& m_tuningSignalManager;
 
 	std::vector<Hash> m_allHashes;
 

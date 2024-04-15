@@ -117,6 +117,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_checkOutAction);
 	m_toolBar->addAction(m_checkInAction);
+	m_toolBar->addAction(m_undoChangesRecursivelyAction);
 	m_toolBar->addAction(m_undoChangesAction);
 	m_toolBar->addAction(m_historyAction);
 
@@ -440,8 +441,14 @@ void EquipmentTabPage::CreateActions()
 	m_checkInAction->setIcon(QIcon{":/Images/Images/SchemaCheckIn.svg"});
 	m_checkInAction->setEnabled(false);
 	connect(m_checkInAction, &QAction::triggered, m_equipmentView, &EquipmentView::checkInSelectedDevices);
+	
+	m_undoChangesRecursivelyAction = new QAction(tr("Undo Tree Changes..."), this);
+	m_undoChangesRecursivelyAction->setStatusTip(tr("Roll back all modifications made to this object and its child objects, if any, reverting them to their previous state. Object is removed if it was not checked in before."));
+	m_undoChangesRecursivelyAction->setIcon(QIcon{":/Images/Images/SchemaUndoTree.svg"});
+	m_undoChangesRecursivelyAction->setEnabled(false);
+	connect(m_undoChangesRecursivelyAction, &QAction::triggered, m_equipmentView, &EquipmentView::undoChangesRecursively);
 
-	m_undoChangesAction = new QAction(tr("Undo Changes..."), this);
+	m_undoChangesAction = new QAction(tr("Undo Object Changes..."), this);
 	m_undoChangesAction->setStatusTip(tr("Undo all pending changes for the object"));
 	m_undoChangesAction->setIcon(QIcon{":/Images/Images/SchemaUndo.svg"});
 	m_undoChangesAction->setEnabled(false);
@@ -575,6 +582,7 @@ void EquipmentTabPage::setActionState()
 	assert(m_deleteObjectAction);
 	assert(m_checkOutAction);
 	assert(m_checkInAction);
+	assert(m_undoChangesRecursivelyAction);
 	assert(m_undoChangesAction);
 	assert(m_historyAction);
 	assert(m_compareAction);
@@ -633,6 +641,7 @@ void EquipmentTabPage::setActionState()
 
 	m_checkOutAction->setEnabled(false);
 	//m_checkInAction->setEnabled(false);			// Check in is always true, as we perform check in is performed for the tree, and there is no iformation
+	m_undoChangesRecursivelyAction->setEnabled(false);
 	m_undoChangesAction->setEnabled(false);
 	m_historyAction->setEnabled(false);
 	m_compareAction->setEnabled(false);
@@ -957,6 +966,7 @@ void EquipmentTabPage::setActionState()
 
 	//m_checkInAction->setEnabled(canAnyBeCheckedIn);
 	m_checkOutAction->setEnabled(canAnyBeCheckedOut);
+	m_undoChangesRecursivelyAction->setEnabled(selectedIndexList.size() == 1);
 	m_undoChangesAction->setEnabled(canAnyBeCheckedIn);
 	m_historyAction->setEnabled(selectedIndexList.size() == 1);
 	m_compareAction->setEnabled(selectedIndexList.size() == 1);
@@ -1749,6 +1759,7 @@ void EquipmentTabPage::onEquipmentViewContextMenuRequested(const QPoint& /*pos*/
 		contextMenu.addSeparator();
 		contextMenu.addAction(m_checkOutAction);
 		contextMenu.addAction(m_checkInAction);
+		contextMenu.addAction(m_undoChangesRecursivelyAction);
 		contextMenu.addAction(m_undoChangesAction);
 		contextMenu.addAction(m_historyAction);
 		contextMenu.addAction(m_compareAction);
@@ -1776,6 +1787,7 @@ void EquipmentTabPage::onEquipmentViewContextMenuRequested(const QPoint& /*pos*/
 		contextMenu.addSeparator();
 		contextMenu.addAction(m_checkOutAction);
 		contextMenu.addAction(m_checkInAction);
+		contextMenu.addAction(m_undoChangesRecursivelyAction);
 		contextMenu.addAction(m_undoChangesAction);
 		contextMenu.addAction(m_historyAction);
 		contextMenu.addAction(m_compareAction);

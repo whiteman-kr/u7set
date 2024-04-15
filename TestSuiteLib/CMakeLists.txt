@@ -60,6 +60,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QReadLocker>
 	<QRegularExpression>
 	<QSettings>
+	<QTimer>
 	<QVariant>
 	<QWriteLocker>
 	<QXmlStreamWriter>

@@ -1,8 +1,9 @@
 #pragma once
 
 #include "../OnlineLib/Tcp.h"
-#include "../ClientLib/TuningSourceState.h"
 #include "../AppSignalLib/TuningSignalState.h"
+
+#include <ClientLib/TuningSourceState.h>
 
 
 class QTimer;

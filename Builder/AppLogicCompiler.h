@@ -50,6 +50,9 @@ namespace Builder
 		bool compileModulesLogicsPass1();
 		bool compileModulesLogicsPass2();
 
+		bool vduProcessingPass1(const Hardware::DeviceModule* vduModule);
+		bool vduProcessingPass2(const Hardware::DeviceModule* vduModule);
+
 		bool checkSignalsIDsAndHashes();
 
 		bool writeResourcesUsageReport();

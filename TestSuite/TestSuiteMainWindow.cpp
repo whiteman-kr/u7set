@@ -1,7 +1,7 @@
 #include <QStandardPaths>
 #include <QFileDialog>
-#include "../ClientLib/ClientTranslator.h"
-#include "../ClientLib/TuningUserManager.h"
+#include <ClientLib/ClientTranslator.h>
+#include <ClientLib/TuningUserManager.h>
 #include "../OnlineLib/TcpClientStatistics.h"
 #include "../UtilsLib/Ui/UiTools.h"
 #include "../lib/Ui/DialogAbout.h"
@@ -266,7 +266,7 @@ void TestSuiteMainWindow::createActions()
 
 	// --
 	//
-	m_reportToolbarAction = new QAction{QIcon(":/Images/Images/TestsReport.svg"), tr("Create Report"), this};
+	m_reportToolbarAction = new QAction{QIcon(":/Images/Images/TestsReport.svg"), tr("Report"), this};
 	connect(m_reportToolbarAction, &QAction::triggered, this, &TestSuiteMainWindow::on_m_report_clicked);
 
 	m_singleReportAction = new QAction(tr("Report..."), this);
@@ -754,8 +754,14 @@ bool TestSuiteMainWindow::loadTestLog()
 	return true;
 }
 
-bool TestSuiteMainWindow::saveTestLog()
+void TestSuiteMainWindow::saveTestLog()
 {
+	if (m_testSuite.testLog().empty() == true)
+	{
+		QMessageBox::warning(this, qAppName(), tr("Test log is empty. No information could be saved."));
+		return;
+	}
+
 	QString defaultFileName = QString("TestLog_%1.tsl").arg(QDateTime::currentDateTime().toString("ddMMyyyy_HHmmss"));
 
 	QString fileName = QFileDialog::getSaveFileName(this,
@@ -765,7 +771,7 @@ bool TestSuiteMainWindow::saveTestLog()
 
 	if (fileName.isEmpty() == true)
 	{
-		return false;
+		return;
 	}
 
 	QString errorMsg;
@@ -773,10 +779,10 @@ bool TestSuiteMainWindow::saveTestLog()
 	if (ok == false)
 	{
 		QMessageBox::critical(this, qAppName(), errorMsg);
-		return false;
+		return;
 	}
 
-	return true;
+	return;
 }
 
 void TestSuiteMainWindow::updateStatusIndicator()

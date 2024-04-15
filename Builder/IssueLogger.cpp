@@ -7744,7 +7744,7 @@ namespace Builder
 
 	/// IssueCode: ALC5201
 	///
-	/// IssueType: Error
+	/// IssueType: Warning
 	///
 	/// Title:	   Reserved signal %1 used on schema %2.
 	///
@@ -7753,14 +7753,14 @@ namespace Builder
 	///		%2 SchemaID
 	///
 	/// Description:
-	///		Turn off Reserved property of signal.
+	///		Signal is marked as reserved and is being used in the logic schema.
 	///
-	void IssueLogger::errALC5201(QString appSignalID, QUuid itemUuid, QString schemaID)
+	void IssueLogger::wrnALC5201(QString appSignalID, QUuid itemUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, 5201, itemUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Warning0, 5201, itemUuid, schemaID);
 
-		LOG_ERROR(IssueType::AlCompiler, 5201,
-				  QString(tr("Reserved signal %1 used on schema %2.").arg(appSignalID).arg(schemaID)));
+		LOG_WARNING0(IssueType::AlCompiler, 5201, 
+					 QString(tr("Reserved signal %1 used on schema %2.").arg(appSignalID).arg(schemaID)));
 	}
 
 	/// IssueCode: ALC5202
@@ -9261,6 +9261,35 @@ namespace Builder
 				  .arg(property)
 				  .arg(lineNumber)
 				  .arg(message));
+	}
+
+	/// IssueCode: EQP6400
+	///
+	/// IssueType: Error
+	///
+	/// Title: Application signal %1 is not found in VDU %2. The signal is referenced in schema %3, schema item %4.
+	///
+	/// Parameters:
+	///		%1 AppSignalID
+	///		%2 VDU EquipmentID
+	///		%3 SchemaID
+	///		%4 Schema item label
+	///
+	/// Description:
+	///		An application signal used in one of the schema items was not found in the VDU signal list.
+	///
+	void IssueLogger::errEQP6400(QString vduEquipmentId, QString appSignalId, QString schemaId, QString schemaItemLabel, QUuid itemUuid)
+	{
+		addSchemaIssue(OutputMessageLevel::Error, 6400, schemaId);
+		addItemsIssues(OutputMessageLevel::Error, 6400, itemUuid, schemaId);
+
+		LOG_ERROR(IssueType::Equipment,
+				  6400,
+				  tr("Application signal %1 is not found in VDU %2. The signal is referenced in schema %3, schema item %4.")
+				  .arg(appSignalId)
+				  .arg(vduEquipmentId)
+				  .arg(schemaId)
+				  .arg(schemaItemLabel));
 	}
 
 	// --

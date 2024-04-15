@@ -154,7 +154,7 @@ bool PS::Source::createWorker()
 		return false;
 	}
 
-	if (m_si.appDataSrvIP.isEmpty() == true)
+	if (m_si.appDataSrvIP.isNull() == true)
 	{
 		return false;
 	}

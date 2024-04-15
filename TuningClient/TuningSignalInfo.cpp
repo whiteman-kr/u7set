@@ -1,14 +1,14 @@
 #include "TuningSignalInfo.h"
 #include "ui_TuningSignalInfo.h"
 
-#include "../AppSignalLib/TuningSignalManager.h"
 #include "../AppSignalLib/TuningSignalState.h"
-#include "../ClientLib/TuningConnection.h"
+#include <ClientLib/TuningSignalManager.h>
+#include <ClientLib/TuningConnection.h>
 #include "Settings.h"
 #include <QActionGroup>
 
 TuningSignalInfo::TuningSignalInfo(TuningConfigController& configController,
-								   const TuningSignalManager& signalManager,
+								   const ClientLib::TuningSignalManager& signalManager,
 								   const ClientLib::TuningConnection& tuningConnection,
 								   Hash appSignalHash,
 								   E::AnalogFormat analogFormat,
@@ -134,7 +134,7 @@ void TuningSignalInfo::updateInfo()
 	}
 
 
-	// Fill the data that is received from TuningSignalManager
+	// Fill the data that is received from ClientLib::TuningSignalManager
 
 	TuningSignalState managerState = m_signalManager.state(m_appSignalHash, &found);
 	{

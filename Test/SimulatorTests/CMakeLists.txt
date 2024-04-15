@@ -30,6 +30,38 @@ add_executable(${TARGET}
 
 
 target_precompile_headers(${TARGET} PRIVATE
+	<algorithm>
+	<array>
+	<bit>
+	<cassert>
+	<cfenv>
+	<chrono>
+	<cmath>
+	<concepts>
+	<cstddef>
+	<cstring>
+	<deque>
+	<filesystem>
+	<functional>
+	<limits>
+	<map>
+	<memory>
+	<optional>
+	<queue>
+	<ranges>
+	<type_traits>
+	<unordered_map>
+	<variant>
+	<vector>
+
+	<QFuture>
+	<QJSEngine>
+	<QJSValue>
+	<QMutex>
+	<QObject>
+	<QReadWriteLock>
+	<QUdpSocket>
+
 	"../../CommonLib/Types.h"
 	"../../CommonLib/Hash.h"
 	"../../CommonLib/PropertyObject.h"

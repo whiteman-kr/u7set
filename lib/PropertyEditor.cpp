@@ -97,7 +97,7 @@ namespace ExtWidgets
 		return QString("QVector<QColor> [%1 items]").arg(static_cast<int>(v.size()));
 	}
 
-	QString PropertyTools::propertyValueText(Property* p, int row, int maxDecimalPlaces)
+	QString PropertyTools::propertyValueText(Property* p, int row, int maxDecimalPlaces, bool noNewLine)
 	{
 		QVariant value = p->value();
 
@@ -193,7 +193,10 @@ namespace ExtWidgets
 				val = QObject::tr("<%1 bytes>").arg(val.length());
 			}
 
-			val.replace("\n", " ");
+			if (noNewLine == true)
+			{
+				val.replace("\n", " ");
+			}
 
 			return val;
 		}
@@ -360,7 +363,9 @@ namespace ExtWidgets
 		}
 
 		QString text = t;
-		text.remove(QRegularExpression("[\\[,\\]]"));
+		static const QRegularExpression re{"[\\[,\\]]"};
+
+		text.remove(re);
 
 		QStringList l = text.split(";");
 		if (l.count() != 4)
@@ -2032,7 +2037,7 @@ namespace ExtWidgets
 
 		m_button->setEnabled(readOnly == false);
 
-		QRegularExpression regexp("\\[([1,2]?[0-9]{0,2};){3}[1,2]?[0-9]{0,2}\\]");
+		static const QRegularExpression regexp("\\[([1,2]?[0-9]{0,2};){3}[1,2]?[0-9]{0,2}\\]");
 		QRegularExpressionValidator* validator = new QRegularExpressionValidator(regexp, this);
 		m_lineEdit->setValidator(validator);
 
@@ -3732,7 +3737,7 @@ namespace ExtWidgets
 
 		if (po.sameValue == true)
 		{
-			text = PropertyTools::propertyValueText(po.property.get(), -1, maxDecimaplPlaces());
+			text = PropertyTools::propertyValueText(po.property.get(), -1, maxDecimaplPlaces(), true /*noNewLine*/);
 		}
 		else
 		{

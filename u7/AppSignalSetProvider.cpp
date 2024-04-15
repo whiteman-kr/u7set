@@ -437,26 +437,50 @@ bool AppSignalSetProvider::createNewSignals(const AppSignal& templateSignal,
 
 			if (signalsCount > 1)
 			{
-				suffix = QString("_%1").arg(s, 3, 10, QChar('0'));
+				suffix = QString("%1").arg(s, 3, 10, QChar('0'));
 			}
 
 			if (channelsCount > 1)
 			{
-				suffix += QString("_%1").arg(E::valueToString<E::Channel>(ch));
+				if (suffix.isEmpty() == false)
+				{
+					suffix += Separator::UNDERSCORE;
+				}
+
+				suffix += QString("%1").arg(E::valueToString<E::Channel>(ch));
 			}
 
-			QString appSignalID = newSignal.appSignalID() + suffix;
-			QString customAppSignalID = newSignal.customAppSignalID() + suffix;
+			QString appSignalID = newSignal.appSignalID();
+			QString customAppSignalID = newSignal.customAppSignalID();
+
+			if (suffix.isEmpty() == false)
+			{
+				appSignalID += Separator::UNDERSCORE + suffix;
+				customAppSignalID += Separator::UNDERSCORE + suffix;
+			}
 
 			if (uppercase)
 			{
 				appSignalID = appSignalID.toUpper();
-				//customAppSignalID = customAppSignalID.toUpper();
+			}
+
+			QString caption = templateSignal.caption();
+
+			if (caption.isEmpty() == true)
+			{
+				caption = QStringLiteral("Signal ") + customAppSignalID;
+			}
+			else
+			{
+				if (suffix.isEmpty() == false)
+				{
+					caption += Separator::SPACE + suffix;
+				}
 			}
 
 			newSignal.setAppSignalID(appSignalID);
 			newSignal.setCustomAppSignalID(customAppSignalID);
-			newSignal.setCaption("Signal " + customAppSignalID);
+			newSignal.setCaption(caption);
 		}
 
 		if (m_db->addSignals(templateSignal.signalType(), &newSignalsVector, m_parentWidget) == true)

@@ -21,6 +21,9 @@
 #include "../VFrame30/SchemaItems/SchemaItemTerminator.h"
 #include "../VFrame30/SchemaItems/SchemaItemUfb.h"
 #include "../VFrame30/SchemaItems/SchemaItemValue.h"
+#include "../VFrame30/SchemaItems/SchemaItemVduLine.h"
+#include "../VFrame30/SchemaItems/SchemaItemVduRect.h"
+#include "../VFrame30/SchemaItems/SchemaItemVduValue.h"
 #include "../VFrame30/SchemaLayer.h"
 #include "../VFrame30/Session.h"
 #include "../VFrame30/UfbSchema.h"
@@ -694,6 +697,36 @@ void EditSchemaWidget::createActions()
 				addItem(item);
 			});
 
+	// VDU items
+	//
+	m_addVduLineAction = new QAction(tr("VduLine"), this);
+	m_addVduLineAction->setEnabled(true);
+	m_addVduLineAction->setIcon(QIcon(":/Images/Images/SchemaLine.svg"));
+	connect(m_addVduLineAction, &QAction::triggered,
+			[this](bool)
+			{
+				addItem(std::make_shared<VFrame30::SchemaItemVduLine>(schema()->unit()));
+			});
+
+	m_addVduRectAction = new QAction(tr("VduRect"), this);
+	m_addVduRectAction->setEnabled(true);
+	m_addVduRectAction->setIcon(QIcon(":/Images/Images/SchemaRect.svg"));
+	connect(m_addVduRectAction, &QAction::triggered,
+			[this](bool)
+			{
+				addItem(std::make_shared<VFrame30::SchemaItemVduRect>(schema()->unit()));
+			});
+
+	m_addVduValueAction = new QAction(tr("VduValue"), this);
+	m_addVduValueAction->setEnabled(true);
+	m_addVduValueAction->setIcon(QIcon(":/Images/Images/SchemaItemValue.svg"));
+	connect(m_addVduValueAction, &QAction::triggered,
+			[this](bool)
+			{
+				addItem(std::make_shared<VFrame30::SchemaItemVduValue>(schema()->unit()));
+			});
+
+
 	//
 	// Edit
 	//
@@ -1085,12 +1118,20 @@ void EditSchemaWidget::createActions()
 
 	m_addSubMenu = new QMenu(tr("Add Item"), this);
 
+	if (isVduSchema() == false)
+	{
 		m_addSubMenu->addAction(m_addLineAction);
 		m_addSubMenu->addAction(m_addRectAction);
 		m_addSubMenu->addAction(m_addPathAction);
 		m_addSubMenu->addAction(m_addTextAction);
 		m_addSubMenu->addAction(m_addImageAction);
 		//m_addMenu->addAction(m_addFrameAction);
+	}
+	else
+	{
+		m_addSubMenu->addAction(m_addVduLineAction);
+		m_addSubMenu->addAction(m_addVduRectAction);
+	}
 
 		m_addSubMenu->addAction(m_addSeparatorAction0);
 
@@ -3266,6 +3307,11 @@ bool EditSchemaWidget::isTuningSchema() const
 bool EditSchemaWidget::isDiagSchema() const
 {
 	return schema()->isDiagSchema();
+}
+
+bool EditSchemaWidget::isVduSchema() const
+{
+	return schema()->isVduSchema();
 }
 
 std::shared_ptr<VFrame30::LogicSchema> EditSchemaWidget::logicSchema()
@@ -7050,6 +7096,7 @@ void EditSchemaWidget::editPaste()
 		}
 
 		std::list<SchemaItemPtr> itemList;
+		std::list<SchemaItemPtr> itemsToRemove;
 
 		bool schemaItemAfbIsPresent = false;
 		bool schemaItemUfbIsPresent = false;
@@ -7074,8 +7121,8 @@ void EditSchemaWidget::editPaste()
 			if (schemaItem->itemUnit() != schema()->unit())
 			{
 				continue;	// No transform, the problem is: we need to transform pos, height, points pos
-							// it's all ok, BUT also we need to trasform lineWeight, TextSize and maybe something else
-							// and these properties can variy from item to item.
+							// it's all ok, BUT also we need to transform lineWeight, TextSize and maybe something else
+							// and these properties can vary from item to item.
 			}
 
 			// --
@@ -7088,7 +7135,59 @@ void EditSchemaWidget::editPaste()
 			for (SchemaItemPtr& item : itemList)
 			{
 				VFrame30::ISchemaItemPropertiesPos* pos = item.get();
+				VFrame30::PosRectRotatable* rotatableItem = item->toType<VFrame30::PosRectRotatable>();
+				
+				if (rotatableItem != nullptr)
+				{
+					std::array<QPointF, 21> pointsForEnsuringVisible {
+						QPointF{schema()->docWidthRegional() / 2.0, schema()->docHeightRegional() / 2.0},
+						QPointF{.0, .0},
+						QPointF{schema()->docWidthRegional(), .0},
+						QPointF{schema()->docWidthRegional(), schema()->docHeightRegional()},
+						QPointF{.0, schema()->docHeightRegional()},
+						QPointF{schema()->docWidthRegional() / 2.0, .0},
+						QPointF{schema()->docWidthRegional(), schema()->docHeightRegional() / 2.0},
+						QPointF{schema()->docWidthRegional() / 2.0, schema()->docHeightRegional()},
+						QPointF{.0, schema()->docHeightRegional() / 2.0},
+						QPointF{.0, -pos->height()},
+						QPointF{-pos->width(), .0},
+						QPointF{.0, +pos->height()},
+						QPointF{+pos->width(), .0},
+						QPointF{schema()->docWidthRegional(), -pos->height()},
+						QPointF{schema()->docWidthRegional() - pos->width(), .0},
+						QPointF{schema()->docWidthRegional(), +pos->height()},
+						QPointF{schema()->docWidthRegional() - pos->width(), schema()->docHeightRegional()},
+						QPointF{schema()->docWidthRegional(), schema()->docHeightRegional() - pos->height()},
+						QPointF{schema()->docWidthRegional() - pos->width(), schema()->docHeightRegional()},
+						QPointF{.0, schema()->docHeightRegional() - pos->height()},
+						QPointF{-pos->width(), schema()->docHeightRegional()}
+					};
 
+					for (const QPointF& pointForApply : pointsForEnsuringVisible)
+					{
+						bool isVisible = rotatableItem->isIntersectRect(0, 0, schema()->docWidth(), schema()->docHeight());
+						if (isVisible == true)
+						{
+							break;
+						}
+
+						pos->setLeft(pointForApply.x());
+						pos->setTop(pointForApply.y());
+					}
+
+					bool isVisible = rotatableItem->isIntersectRect(0, 0, schema()->docWidth(), schema()->docHeight());
+					if (isVisible == false)
+					{
+						// I give up, just remove it.
+						//
+						itemsToRemove.push_back(item);
+					}
+					
+					continue;
+				}
+
+				// This is not rotatable item here everything is simple.
+				//
 				if (pos->left() + pos->width() > schema()->docWidthRegional())
 				{
 					pos->setLeft(schema()->docWidthRegional() - pos->width());
@@ -7132,6 +7231,16 @@ void EditSchemaWidget::editPaste()
 			}
 		}
 
+		if (itemsToRemove.empty() == false)
+		{
+			for (SchemaItemPtr& item : itemsToRemove)
+			{
+				itemList.remove(item);
+			}
+
+			QMessageBox::critical(this, qAppName(), tr("Some items cannot correctly be placed and were not added to the schema."));
+		}
+
 		if (itemList.empty() == false)
 		{
 			if (schema()->isUfbSchema() == true &&
@@ -7143,6 +7252,8 @@ void EditSchemaWidget::editPaste()
 				return;
 			}
 
+			// Add items
+			//
 			m_editEngine->runAddItem(itemList, editSchemaView()->activeLayer());
 
 			bool defaultsWereSet = setDefaultItemProperties(itemList);
@@ -7214,12 +7325,12 @@ void EditSchemaWidget::editPaste()
 
 				m_editEngine->runSetProperty(VFrame30::PropertyNames::image, QVariant(image), selected);
 			}
-		}
 
-		return;
+			return;
+		}
 	}
 
-	// All other itmes receives olny text
+	// All other items receives only text
 	//
 	if (mimeData->hasText() == false)
 	{

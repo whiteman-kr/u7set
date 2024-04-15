@@ -23,6 +23,9 @@
 #include "./SchemaItems/SchemaItemTerminator.h"
 #include "./SchemaItems/SchemaItemUfb.h"
 #include "./SchemaItems/SchemaItemValue.h"
+#include "./SchemaItems/SchemaItemVduLine.h"
+#include "./SchemaItems/SchemaItemVduRect.h"
+#include "./SchemaItems/SchemaItemVduValue.h"
 #include "DiagSchema.h"
 #include "LogicSchema.h"
 #include "MonitorSchema.h"
@@ -31,6 +34,7 @@
 #include "TuningSchema.h"
 #include "UfbSchema.h"
 #include "WiringSchema.h"
+#include "VduSchema.h"
 
 namespace VFrame30
 {
@@ -46,6 +50,7 @@ namespace VFrame30
 		SchemaFactory.Register<MonitorSchema>();
 		SchemaFactory.Register<TuningSchema>();
 		SchemaFactory.Register<WiringSchema>();
+		SchemaFactory.Register<VduSchema>();
 
 		// Registering VideoLayers
 		//
@@ -83,6 +88,10 @@ namespace VFrame30
 		SchemaItemFactory.Register<SchemaItemTransmitter>();
 		SchemaItemFactory.Register<SchemaItemUfb>();
 		SchemaItemFactory.Register<SchemaItemValue>();
+		
+		SchemaItemFactory.Register<SchemaItemVduLine>();
+		SchemaItemFactory.Register<SchemaItemVduRect>();
+		SchemaItemFactory.Register<SchemaItemVduValue>();
 
 		QMetaType::registerConverter<int, VFrame30::SchemaItemConst::ConstType>(IntToEnum<VFrame30::SchemaItemConst::ConstType>);
 

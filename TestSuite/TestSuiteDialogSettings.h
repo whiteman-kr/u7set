@@ -1,7 +1,7 @@
 #pragma once
 
 #include "AppConfigSettings.h"
-#include "../ClientLib/ClientTranslator.h"
+#include <ClientLib/ClientTranslator.h>
 
 namespace Ui {
 class TestSuiteDialogSettings;

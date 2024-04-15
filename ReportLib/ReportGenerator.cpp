@@ -84,6 +84,10 @@ namespace ReportLib
 
 	bool ReportGenerator::generateSection(ReportSection& section, const SectionTemplate& sectionTemplate)
 	{
+		
+		static QString firstTag = "$FIRST(";
+		static QString lastTag = "$LAST(";
+		static QString nextTag = "$NEXT(";
 
 		for (const std::shared_ptr<ObjectTemplate>& object : sectionTemplate.objects())
 		{
@@ -100,9 +104,6 @@ namespace ReportLib
 
 				if (tag.isEmpty() == false)
 				{
-					static QString firstTag = "$FIRST(";
-					static QString lastTag = "$LAST(";
-
 					if (tag.startsWith(firstTag) && tag.endsWith(")"))
 					{
 						// Show only first tag
@@ -148,17 +149,20 @@ namespace ReportLib
 						}
 						else
 						{
-							// Show all text with all tag instances
-							//
-							bool ok = false;
-							do
+							if (tag.startsWith(nextTag) == false)
 							{
-								QString s = text(t->tag(), &ok);
-								if (ok == true)
+								// Show all text with all all other tag instances EXCEPT %NEXT tag
+								//
+								bool ok = false;
+								do
 								{
-									section.addText(s + "\n", t->format());
-								}
-							} while (ok == true);
+									QString s = text(t->tag(), &ok);
+									if (ok == true)
+									{
+										section.addText(s + "\n", t->format());
+									}
+								} while (ok == true);
+							}
 						}
 					}
 				}
@@ -197,6 +201,38 @@ namespace ReportLib
 						table->insertRow(l);
 					}
 				}while (ok == true);
+			}
+		}
+
+		{
+			// Place all text with $NEXT(Tag) tag
+			//
+			QString tag;
+			int itemsCount = count();
+			for (int i = 0; i < itemsCount; i++) 
+			{
+				QString msg = text(i, &tag);
+
+				QString templateTag = QObject::tr("%1%2)").arg(nextTag).arg(tag);
+
+				for (const std::shared_ptr<ObjectTemplate>& object : sectionTemplate.objects())
+				{
+					if (object->type() == ReportObject::Type::Text)
+					{
+						const TextTemplate* t = dynamic_cast<const TextTemplate*>(object.get());
+						if (t == nullptr)
+						{
+							Q_ASSERT(t);
+							return false;
+						}
+
+						if (t->tag() == templateTag)
+						{
+							msg.replace("\\n", "\n");
+							section.addText(msg + "\n", t->format());
+						}
+					}
+				}
 			}
 		}
 

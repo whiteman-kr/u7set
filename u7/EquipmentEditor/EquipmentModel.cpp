@@ -372,13 +372,30 @@ void EquipmentModel::fetchMore(const QModelIndex& parentIndex)
 
 	std::vector<DbFileInfo> files;
 
+	// Remove all children
+	//
+	if (parentObject->childrenCount() != 0)
+	{
+		beginRemoveRows(parentIndex, 0, parentObject->childrenCount() - 1);
+		parentObject->deleteAllChildren();
+		endRemoveRows();
+	}
+
+	// Get ned data from the database
+	//
 	bool ok = dbController()->getFileList(&files, parentObjectFileInfo->fileId(), true, nullptr);
-	if (ok == false)
+
+	if (ok == false || files.empty() == true)
+	{
+		return; 
+	}
+
+	if (files.empty() == true)
+	{
 		return;
+	}
 
 	beginInsertRows(parentIndex, 0, static_cast<int>(files.size()) - 1);
-
-	parentObject->deleteAllChildren();
 
 	for (auto& fi : files)
 	{
@@ -999,6 +1016,151 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undoRowList)
 	return;
 }
 
+void EquipmentModel::undoChangesRecursively(QModelIndex modelIndex)
+{
+	if (modelIndex.isValid() == false)
+	{
+		assert(modelIndex.isValid());
+		return;
+	}
+
+	DbUser currentUser = dbController()->currentUser();
+
+	std::shared_ptr<Hardware::DeviceObject> device = deviceObject(modelIndex);
+	if (device == nullptr)
+	{
+		assert(device);
+		QMessageBox::critical(m_parentWidget, tr("Undo Changes"), tr("Error, cannot find device object."));
+		return;
+	}
+	
+	const DbFileInfo* fileInfo = device->data();
+	assert(fileInfo);
+
+	// Ask for confirmation.
+	//
+	auto mb = QMessageBox::question(
+		m_parentWidget,
+		tr("Undo Changes"),
+		tr("Do you want to undo pending changes for the object and all its sub-objects?\nAll changes will be lost."));
+
+	if (mb == QMessageBox::No)
+	{
+		return;
+	}
+
+	// Send command Undo changes to the database.
+	//
+	bool ok = dbController()->undoChangesRecursively(*fileInfo, nullptr);
+	if (ok == false)
+	{
+		return;
+	}
+	
+	refreshDeviceObject(QModelIndexList{} << modelIndex);
+
+	emit objectVcsStateChanged();
+
+	return;
+
+
+	//// If the file was just added it will be removed completely from the DB
+	////
+	//std::vector<DbFileInfo> latestFiles = files;
+
+	//latestFiles.erase(std::remove_if(latestFiles.begin(), latestFiles.end(),
+	//								 [](const DbFileInfo& fi)
+	//								 {
+	//									 return fi.deleted();
+	//								 }),
+	//				  latestFiles.end());
+
+	//// Get latest version of the object
+	////
+	//std::vector<std::shared_ptr<DbFile>> latestFilesVersion;
+
+	//if (latestFiles.empty() == false)
+	//{
+	//	ok = dbController()->getLatestVersion(latestFiles, &latestFilesVersion, nullptr);
+
+	//	if (ok == false)
+	//	{
+	//		// Can't update objects
+	//		//
+	//		return;
+	//	}
+	//}
+
+	//// Update FileInfo in devices and Update model
+	////
+	//for (QModelIndex& index : checkedOutList)
+	//{
+	//	std::shared_ptr<Hardware::DeviceObject> d = deviceObject(index);
+	//	assert(d);
+
+	//	const DbFileInfo* fileInfo = d->data();
+	//	Q_ASSERT(fileInfo);
+
+	//	// Set latest version to the object
+	//	//
+	//	auto foundFile = std::find_if(latestFilesVersion.begin(), latestFilesVersion.end(),
+	//								  [fileInfo](const std::shared_ptr<DbFile>& f)
+	//								  {
+	//									  return f->fileId() == fileInfo->fileId();
+	//								  });
+
+	//	if (foundFile != latestFilesVersion.end())
+	//	{
+	//		const std::shared_ptr<DbFile>& f = *foundFile;
+	//		d->Load(f->data());
+	//	}
+	//	else
+	//	{
+	//		// Apparently file was completely deleted from the database.
+	//		//
+	//	}
+
+	//	// Update fileInfo
+	//	//
+	//	bool updated = false;
+	//	for (DbFileInfo& fi : files)
+	//	{
+	//		if (fi.fileId() == fileInfo->fileId())
+	//		{
+	//			auto newFileInfo = std::make_shared<DbFileInfo>(fi, d->details());
+	//			d->setData(newFileInfo);
+
+	//			if (fi.deleted() == true)
+	//			{
+	//				QModelIndex pi = index.parent();
+	//				std::shared_ptr<Hardware::DeviceObject> po = deviceObject(pi);
+	//				assert(po);
+
+	//				int childIndex = po->childIndex(d);
+	//				assert(childIndex != -1);
+
+	//				beginRemoveRows(pi, childIndex, childIndex);
+	//				po->deleteChild(d);
+	//				endRemoveRows();
+	//			}
+	//			else
+	//			{
+	//				QModelIndex bottomRightIndex = this->index(index.row(), ColumnCount, index.parent());
+	//				emit dataChanged(index, bottomRightIndex);
+	//			}
+
+	//			updated = true;
+	//			break;
+	//		}
+	//	}
+	//	assert(updated == true);
+	//}
+
+	//emit objectVcsStateChanged();
+
+	//return;
+}
+
 void EquipmentModel::refreshDeviceObject(QModelIndexList& rowList)
 {
 	if (rowList.isEmpty() == true)
@@ -1026,52 +1188,54 @@ void EquipmentModel::refreshDeviceObject(QModelIndexList& rowList)
 
 			emit dataChanged(index, index);
 		}
-		else
+
+		// Refresh single object without children
+		//
+		const DbFileInfo* fi = d->data();
+		if (fi == nullptr)
 		{
-			// Refresh single object without children
-			//
-			const DbFileInfo* fi = d->data();
-			if (fi == nullptr)
-			{
-				Q_ASSERT(fi);
-				return;
-			}
-
-			// Get latest version of file info
-			//
-			std::shared_ptr<DbFileInfo> newFi = std::make_shared<DbFileInfo>();
-
-			bool ok = dbController()->getFileInfo(fi->fileId(), newFi.get(), nullptr);
-			if (ok == false)
-			{
-				Q_ASSERT(ok);
-				return;
-			}
-
-			d->setData(newFi);
-
-			std::shared_ptr<DbFile> freshFile;
-			ok = dbController()->getLatestVersion(*newFi, &freshFile, nullptr);
-			if (ok == false)
-			{
-				Q_ASSERT(ok);
-				return;
-			}
-
-			// Update object
-			//
-			ok = d->Load(freshFile->data());	// Refresh data in the object
-			if (ok == false)
-			{
-				Q_ASSERT(ok);
-				return;
-			}
-
-			// Update fileInfo and model
-			//
-			QModelIndex bottomRightIndex = this->index(index.row(), ColumnCount, index.parent());
-			emit dataChanged(index, bottomRightIndex);		// Notify view about data update
+			Q_ASSERT(fi);
+			return;
 		}
+
+		// Get latest version of file info
+		//
+		std::shared_ptr<DbFileInfo> newFi = std::make_shared<DbFileInfo>();
+
+		bool ok = dbController()->getFileInfo(fi->fileId(), newFi.get(), nullptr);
+		if (ok == false)
+		{
+			// File could be completely deleted from the database by other user or from the different workspace.
+			//
+			beginRemoveRows(index.parent(), index.row(), index.row());
+			d->parent()->deleteChild(d);
+			endRemoveRows();
+			continue;
+		}
+
+		d->setData(newFi);
+
+		std::shared_ptr<DbFile> freshFile;
+		ok = dbController()->getLatestVersion(*newFi, &freshFile, nullptr);
+		if (ok == false)
+		{
+			Q_ASSERT(ok);
+			return;
+		}
+
+		// Update object
+		//
+		ok = d->Load(freshFile->data());	// Refresh data in the object
+		if (ok == false)
+		{
+			Q_ASSERT(ok);
+			return;
+		}
+
+		// Update fileInfo and model
+		//
+		QModelIndex bottomRightIndex = this->index(index.row(), ColumnCount, index.parent());
+		emit dataChanged(index, bottomRightIndex);		// Notify view about data update
 	}
 
 	emit objectVcsStateChanged();

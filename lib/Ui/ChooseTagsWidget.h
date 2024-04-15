@@ -13,10 +13,11 @@ class ChooseTagsWidget : public QWidget
     Q_OBJECT
 
 public:
-    ChooseTagsWidget(const QStringList &tags, QWidget* parent);
+    ChooseTagsWidget(const QStringList &tags, QChar separator, QWidget* parent);
     
     ChooseTagsWidget(const std::vector<std::pair<QString, QString>>& tags,
 					 const std::vector<OnlineLib::MatsUser>& users,
+					 QChar separator, 
 					 QWidget* parent);
 
     virtual ~ChooseTagsWidget();
@@ -58,6 +59,7 @@ private:
     std::vector<std::pair<QString, QString>> m_tags;
     std::vector<OnlineLib::MatsUser> m_users;
 
+    QChar m_separator;
     QString m_objectName = "Tag";
     QString m_objectNames = "tags";
 };

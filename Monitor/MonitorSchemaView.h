@@ -32,6 +32,7 @@ public:
 
 protected:
 	virtual void paintEvent(QPaintEvent* event) override;
+	
 	virtual void updateScriptGlobalVars(QJSEngine& engine) override;
 
 public slots:

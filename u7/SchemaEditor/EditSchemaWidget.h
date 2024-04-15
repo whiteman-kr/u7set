@@ -305,6 +305,7 @@ public:
 	bool isMonitorSchema() const;
 	bool isTuningSchema() const;
 	bool isDiagSchema() const;
+	bool isVduSchema() const;
 
 	std::shared_ptr<VFrame30::LogicSchema> logicSchema();
 	const std::shared_ptr<VFrame30::LogicSchema> logicSchema() const;
@@ -478,6 +479,12 @@ private:
 		// 
 		QAction* m_addDiagSignalAction = nullptr;
 		
+		// VDU items
+		//
+		QAction* m_addVduLineAction = nullptr;
+		QAction* m_addVduRectAction = nullptr;
+		QAction* m_addVduValueAction = nullptr;
+
 	// Edit
 	//
 	QMenu* m_editSubMenu = nullptr;

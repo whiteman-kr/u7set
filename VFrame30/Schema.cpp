@@ -16,6 +16,7 @@
 #include "SchemaLayer.h"
 #include "TuningSchema.h"
 #include "UfbSchema.h"
+#include "VduSchema.h"
 
 
 namespace VFrame30
@@ -428,6 +429,9 @@ namespace VFrame30
 
 		if (schema == nullptr)
 		{
+			// Ups, you forgot to register schema type in SchemaFactory.
+			// Go to VFrame30Library.cpp and do it!
+			//
 			assert(schema);
 			return nullptr;
 		}
@@ -462,7 +466,9 @@ namespace VFrame30
 			drawParam->clientSchemaView();
 
 		ILogFile* log = context()->log();
-
+		
+		// Run Schema PreDrawEvent scripts.
+		//
 		if (clientView != nullptr)
 		{
 			// Start stats
@@ -483,8 +489,8 @@ namespace VFrame30
 			{
 				using namespace std::chrono;
 				auto now = system_clock::now();
-				auto ellapsed = duration_cast<microseconds>(now - startTimePreDraw);
-				drawParam->timeStats()->addRecord("Schema", schemaId(), "preDrawEvent", ellapsed);
+				auto elapsed = duration_cast<microseconds>(now - startTimePreDraw);
+				drawParam->timeStats()->addRecord("Schema", schemaId(), "preDrawEvent", elapsed);
 			}
 		}
 
@@ -1551,7 +1557,9 @@ namespace VFrame30
 		//tags.replace(';', QChar::LineFeed);
 		//tags.replace(',', QChar::LineFeed);	QChar::LineFeed
 
-		m_tags = tags.split(QRegularExpression("\\W+"), Qt::SkipEmptyParts);
+		static const auto re = QRegularExpression("\\W+");
+
+		m_tags = tags.split(re, Qt::SkipEmptyParts);
 
 		for (QString& t : m_tags)
 		{
@@ -1566,7 +1574,7 @@ namespace VFrame30
 		m_tags.clear();
 		m_tags.reserve(tags.size());
 
-		for (QString t : tags)
+		for (const QString& t : tags)
 		{
 			QString trimmed = t.trimmed();
 
@@ -1879,6 +1887,11 @@ namespace VFrame30
 	bool Schema::isDiagSchema() const
 	{
 		return dynamic_cast<const VFrame30::DiagSchema*>(this) != nullptr;
+	}
+	
+	bool Schema::isVduSchema() const
+	{
+		return dynamic_cast<const VFrame30::VduSchema*>(this) != nullptr;
 	}
 
 	LogicSchema* Schema::toLogicSchema()

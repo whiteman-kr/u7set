@@ -1,8 +1,9 @@
 #include "TuningWorkspace.h"
-#include "../ClientLib/TuningConnection.h"
 #include "Main.h"
 #include "MainWindow.h"
 #include "Settings.h"
+
+#include <ClientLib/TuningConnection.h>
 
 #include <QButtonGroup>
 #include <QTreeWidget>
@@ -139,7 +140,7 @@ void FilterButton::slot_toggled(bool checked)
 int TuningWorkspace::m_instanceCounter = 0;
 
 TuningWorkspace::TuningWorkspace(TuningConfigController& configController,
-								 TuningSignalManager& tuningSignalManager,
+								 ClientLib::TuningSignalManager& tuningSignalManager,
 								 TuningClientFilterStorage& tuningFilterStorage,
 								 ClientLib::TuningUserManager& userManager,
 								 ClientLib::TuningConnection& tuningConnection,

@@ -20,6 +20,7 @@ enum class DbDir
 	MonitorSchemasDir,			// $root$/Schemas/Monitor
 	TuningSchemasDir,			// $root$/Schemas/Tuning
 	DiagSchemasDir,				// $root$/Schemas/Diagnostics
+	VduSchemasDir,				// $root$/Schemas/VDU
 	HardwareConfigurationDir,	// $root$/HC
 	HardwarePresetsDir,			// $root$/HP
 	ModuleConfigurationDir,		// $root$/MC
@@ -44,6 +45,7 @@ namespace Db
 		constexpr static const char* SuppressWarnings = "SuppressWarnings";						// A list of suppressed warnings on build
 		constexpr static const char* UppercaseAppSignalId = "UppercaseAppSignalID";
 		constexpr static const char* GenerateAppSignalsXml = "Generate AppSignals.xml";			// Generate file AppSignals.xml on build
+		constexpr static const char* GenerateAppSignalsExtXml = "Generate AppSignalsExt.xml";	// Generate file AppSignalsExt.xml on build
 		constexpr static const char* GenerateAppLogicDrawings = "Generate App Logic Drawings";	// Generate file AppLogicDrawings.pdf on build
 		constexpr static const char* GenerateExtraDebugInfo = "Generate Extra Debug Info";		// Generate extra debug information on build
 		constexpr static const char* RunSimTestsOnBuild = "Run Simulator Tests on Build";		// Run simulator based tests on build project
@@ -68,6 +70,7 @@ namespace Db
 				{DbDir::MonitorSchemasDir, QStringLiteral("$root$/Schemas/Monitor")},			// Monitor Video Schemas
 				{DbDir::TuningSchemasDir, QStringLiteral("$root$/Schemas/Tuning")},				// TuningClient Schemas
 				{DbDir::DiagSchemasDir, QStringLiteral("$root$/Schemas/Diagnostics")},			// Diagnostics Schemas
+				{DbDir::VduSchemasDir, QStringLiteral("$root$/Schemas/VDU")},					// VDU Schemas
 				{DbDir::HardwareConfigurationDir, QStringLiteral("$root$/HC")},					// Hardware Configuration
 				{DbDir::HardwarePresetsDir, QStringLiteral("$root$/HP")},						// Hardware Presets
 				{DbDir::ModuleConfigurationDir, QStringLiteral("$root$/MC")},					// Module Configuration
@@ -100,6 +103,10 @@ namespace Db
 
 		constexpr static const char* DvsFileExtension = "dvs";						// Diagnostics schema file extnesion
 		constexpr static const char* DvsTemplExtension = "templ_dvs";				// Diagnostics schema template file extnesion
+
+		constexpr static const char* VduFileExtension = "vus";						// VDU schema file extnesion
+		constexpr static const char* VduTemplExtension = "templ_vus";				// VDU schema template file extnesion
+		constexpr static const char* VduNativeFileExtension = "vbs";				// VDU schema file extension in native VDU format
 
 		constexpr static const char* OclFileExtension = "ocl";						// (Optical) Connection Link
 		constexpr static const char* BusFileExtension = "bus_type";					// Bus type
@@ -213,6 +220,9 @@ public:
 	[[nodiscard]] bool generateAppSignalsXml() const;
 	void setGenerateAppSignalsXml(bool value);
 
+	[[nodiscard]] bool generateAppSignalsExtXml() const;
+	void setGenerateAppSignalsExtXml(bool value);
+
 	[[nodiscard]] bool generateAppLogicDrawings() const;
 	void setGenerateAppLogicDrawings(bool value);
 
@@ -233,6 +243,7 @@ private:
 	int m_simTestsTimeout = -1;
 	bool m_uppercaseAppSignalId = true;
 	bool m_generateAppSignalsXml = false;
+	bool m_generateAppSignalsExtXml = false;
 	bool m_generateAppLogicDrawings = false;
 	bool m_generateExtraDebugInfo = false;
 	bool m_mismatchPresetVersionAsWarning = false; // If preset version mismatch is detected, treat it as a warning

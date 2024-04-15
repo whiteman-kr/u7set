@@ -1,6 +1,7 @@
 #include "PropertyTable.h"
 #include "../AppSignalLib/TuningValue.h"
 #include "../lib/PropertyEditor.h"
+#include "../lib/Ui/ChooseTagsWidget.h"
 #include <QAbstractItemModel>
 #include <QClipboard>
 #include <QInputDialog>
@@ -634,7 +635,7 @@ namespace ExtWidgets
 				return QVariant();
 			}
 
-			return PropertyTools::propertyValueText(p.get(), row, m_propertyTable->maxDecimaplPlaces());
+			return PropertyTools::propertyValueText(p.get(), row, m_propertyTable->maxDecimaplPlaces(), true /*noNewLine*/);
 		}
 
 		return QVariant();
@@ -789,6 +790,10 @@ namespace ExtWidgets
 		m_editPropertyFilter = new QLineEdit();
 		connect(m_editPropertyFilter, &QLineEdit::editingFinished, this, &PropertyTable::onPropertyFilterChanged);
 
+		QToolButton* filterTagsButton = new QToolButton();
+		filterTagsButton->setText("...");
+		connect(filterTagsButton, &QToolButton::clicked, this, &PropertyTable::onPropertyFilterChooseTags);
+
 		// Property Filter Help
 
 		m_editPropertyFilter->setToolTip(tr("To filter properties, enter a caption fragment. Multiple fragments can be separated by semicolons."));
@@ -814,6 +819,7 @@ namespace ExtWidgets
 
 		toolsLayout->addWidget(new QLabel(tr("Property Filter:")));
 		toolsLayout->addWidget(m_editPropertyFilter);
+		toolsLayout->addWidget(filterTagsButton);
 		toolsLayout->addWidget(filterHelpButton);
 		toolsLayout->addStretch();
 		toolsLayout->addWidget(m_buttonGroupByCategory);
@@ -859,6 +865,7 @@ namespace ExtWidgets
 	void PropertyTable::clear()
 	{
 		m_tableModel.clear();
+		m_commonProperties.clear();
 	}
 
 	const QList<std::shared_ptr<PropertyObject>>& PropertyTable::objects() const
@@ -1170,7 +1177,7 @@ namespace ExtWidgets
 				continue;
 			}
 
-			result += PropertyTools::propertyValueText(p.get(), row, maxDecimaplPlaces());
+			result += PropertyTools::propertyValueText(p.get(), row, maxDecimaplPlaces(), false /*noNewLine*/);
 		}
 
 		QClipboard* clipboard = QApplication::clipboard();
@@ -1373,6 +1380,26 @@ namespace ExtWidgets
 		m_propertyFilters = str.split(';', Qt::SkipEmptyParts);
 
 		fillProperties();
+	}
+
+	void PropertyTable::onPropertyFilterChooseTags()
+	{
+		QDialog tagsSelectorDialog{this, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint};
+
+		ChooseTagsWidget te{m_commonProperties, ';', this};
+		te.setText(propertyFilter());
+
+		connect(&te, &ChooseTagsWidget::okPressed, &tagsSelectorDialog, &QDialog::accept);
+		connect(&te, &ChooseTagsWidget::cancelPressed, &tagsSelectorDialog, &QDialog::reject);
+
+		QHBoxLayout l;
+		l.addWidget(&te);
+		tagsSelectorDialog.setLayout(&l);
+
+		if (tagsSelectorDialog.exec() == QDialog::Accepted)
+		{
+			setPropertyFilter(te.text());
+		}
 	}
 
 	void PropertyTable::onTableContextMenuRequested(const QPoint &pos)
@@ -1779,25 +1806,6 @@ namespace ExtWidgets
 
 					const QString& propertyCaption = p->caption();
 
-					if (m_propertyFilters.empty() == false)
-					{
-						bool maskMatch = false;
-
-						for (const QString& filter : m_propertyFilters)
-						{
-							if (propertyCaption.contains(filter) == true)
-							{
-								maskMatch = true;
-								break;
-							}
-						}
-
-						if (maskMatch == false)
-						{
-							continue;
-						}
-					}
-
 					QString propertyName = propertyCaption;
 
 					// Add category if required
@@ -1875,6 +1883,11 @@ namespace ExtWidgets
 			}
 		}
 
+		 for (const auto& it : commonPropertyNames) 
+		{
+			m_commonProperties.push_back(it.second);
+		}
+
 		//commonPropertyNames is sorted by key
 
 		std::vector<PropertyTableObject> tableObjects;
@@ -1889,6 +1902,17 @@ namespace ExtWidgets
 			for (const auto& commonProperty : commonPropertyNames)
 			{
 				const QString& propertyCaption = commonProperty.second;
+
+				// Process filter
+				//
+				if (m_propertyFilters.empty() == false)
+				{
+					bool maskMatch = m_propertyFilters.contains(propertyCaption);
+					if (maskMatch == false)
+					{
+						continue;
+					}
+				}
 
 				std::shared_ptr<Property> p = object->propertyByCaption(propertyCaption);
 				if (p == nullptr)

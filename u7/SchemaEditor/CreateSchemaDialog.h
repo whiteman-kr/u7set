@@ -34,6 +34,7 @@ private:
 	bool isMonitorSchema() const;
 	bool isTuningSchema() const;
 	bool isDiagSchema() const;
+	bool isVduSchema() const;
 
 	std::shared_ptr<VFrame30::LogicSchema> logicSchema();
 	std::shared_ptr<VFrame30::UfbSchema> ufbSchema();

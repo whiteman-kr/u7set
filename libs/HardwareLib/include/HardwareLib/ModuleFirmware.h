@@ -165,7 +165,7 @@ namespace Hardware
 		int m_changesetId = 0;
 		int m_buildNumber = 0;
 
-		std::map<QString, ModuleFirmware> m_firmwares;
+		std::map<QString, ModuleFirmware> m_firmwares;	// Key is subsystemId
 	};
 }
 

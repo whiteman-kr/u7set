@@ -1,5 +1,5 @@
 #include "TuningClientFilterStorage.h"
-#include "../ClientLib/TuningConnection.h"
+#include <ClientLib/TuningConnection.h>
 #include "MainWindow.h"
 #include "TuningSourcesHelper.h"
 
@@ -32,7 +32,7 @@ void TuningClientFilterStorage::checkAndRemoveFilterSignals(const std::vector<Ha
 	}
 }
 
-void TuningClientFilterStorage::updateCounters(const TuningSignalManager& tunigSignals,
+void TuningClientFilterStorage::updateCounters(const ClientLib::TuningSignalManager& tunigSignals,
 											   const ClientLib::TuningConnection& tuningConnection,
 											   const std::vector<ClientLib::TuningSource>& sourceStates,
 											   TuningClientSettings::LmStatusFlagMode lmStatusFlagMode,

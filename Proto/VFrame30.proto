@@ -259,6 +259,10 @@ message SchemaItem
 	optional SchemaItemPushButton pushButton = 210;			// +SchemaItemControl
 	optional SchemaItemLineEdit lineEdit = 211;				// +SchemaItemControl
 	optional SchemaItemSlider slider = 212;					// +SchemaItemControl
+
+	optional SchemaItemVduLine vduLine = 300;				// +PosLineImpl
+	optional SchemaItemVduRect vduRect = 301;				// +PosLineImpl
+	optional SchemaItemVduValue vduValue = 302;				// +PosLineImpl
 }
 
 //
@@ -842,6 +846,53 @@ message SchemaItemSlider
 	optional string scriptSliderReleased = 34;
 	optional string scriptValueChanged = 35;
 }
+
+//
+// SchemaItemVduLine
+//
+message SchemaItemVduLine
+{
+	optional int32 weight = 1;
+	optional uint32 lineColor = 2;
+}
+
+//
+// SchemaItemVduRect
+//
+message SchemaItemVduRect
+{
+	optional int32 weight = 3;
+	optional bool fill = 4;
+	optional bool drawrect = 5;
+
+	optional uint32 lineColor = 10;
+	optional uint32 fillColor = 11;
+	optional uint32 textColor = 12;
+	
+	optional string fontName = 16;
+	optional string text = 17;
+
+	optional int32 horzAlign = 20;
+	optional int32 vertAlign = 21;
+}
+
+//
+// SchemaItemVduValue
+//
+message SchemaItemVduValue
+{
+	optional int32 weight = 3;
+	optional bool drawrect = 5;
+
+	optional uint32 lineColor = 10;
+	optional uint32 fillColor = 11;
+	optional uint32 textColor = 12;
+	
+	optional string fontName = 16;
+	optional string appSignalId = 17;
+}
+
+
 
 message SchemaDetailsSet
 {

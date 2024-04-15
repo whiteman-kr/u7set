@@ -14,9 +14,18 @@ namespace Gateway
 				const GatewayServiceSettings& settings,
 				CircularLoggerShared log,
 				bool logGatewayPackets);
+		virtual ~Handler();
 
 		virtual void run() = 0;
 		virtual void shutdown() = 0;
+
+		virtual void getRequiredSignalsHashes(std::set<Hash>* hashes) const;
+		virtual void getEventSignalsHashes(std::set<Hash>* hashes) const;
+
+		virtual void updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply);
+		virtual void processStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply);
+
+		CircularLoggerShared log();
 
 	protected:
 		const SoftwareInfo& m_swInfo;

@@ -15,6 +15,11 @@ namespace Builder
 		return m_projectProperties.generateAppSignalsXml();
 	}
 
+	bool Context::generateAppSignalsExtXml() const
+	{
+		return m_projectProperties.generateAppSignalsExtXml();
+	}
+
 	bool Context::generateExtraDebugInfo() const
 	{
 		return m_projectProperties.generateExtraDebugInfo();

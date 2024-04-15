@@ -188,6 +188,9 @@ constexpr SchemaItem::SchemaItem(
   , pushbutton_(nullptr)
   , lineedit_(nullptr)
   , slider_(nullptr)
+  , vduline_(nullptr)
+  , vdurect_(nullptr)
+  , vduvalue_(nullptr)
   , itemunit_(0)
 
   , isstatic_(false)
@@ -938,6 +941,58 @@ struct SchemaItemSliderDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT SchemaItemSliderDefaultTypeInternal _SchemaItemSlider_default_instance_;
+constexpr SchemaItemVduLine::SchemaItemVduLine(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : weight_(0)
+  , linecolor_(0u){}
+struct SchemaItemVduLineDefaultTypeInternal {
+  constexpr SchemaItemVduLineDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~SchemaItemVduLineDefaultTypeInternal() {}
+  union {
+    SchemaItemVduLine _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT SchemaItemVduLineDefaultTypeInternal _SchemaItemVduLine_default_instance_;
+constexpr SchemaItemVduRect::SchemaItemVduRect(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : fontname_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , text_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , weight_(0)
+  , fill_(false)
+  , drawrect_(false)
+  , linecolor_(0u)
+  , fillcolor_(0u)
+  , vertalign_(0)
+  , textcolor_(0u)
+  , horzalign_(0){}
+struct SchemaItemVduRectDefaultTypeInternal {
+  constexpr SchemaItemVduRectDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~SchemaItemVduRectDefaultTypeInternal() {}
+  union {
+    SchemaItemVduRect _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT SchemaItemVduRectDefaultTypeInternal _SchemaItemVduRect_default_instance_;
+constexpr SchemaItemVduValue::SchemaItemVduValue(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : fontname_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , appsignalid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , weight_(0)
+  , drawrect_(false)
+  , textcolor_(0u)
+  , linecolor_(0u)
+  , fillcolor_(0u){}
+struct SchemaItemVduValueDefaultTypeInternal {
+  constexpr SchemaItemVduValueDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~SchemaItemVduValueDefaultTypeInternal() {}
+  union {
+    SchemaItemVduValue _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT SchemaItemVduValueDefaultTypeInternal _SchemaItemVduValue_default_instance_;
 constexpr SchemaDetailsSet::SchemaDetailsSet(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : schemasdetails_(){}
@@ -1021,7 +1076,7 @@ struct AfbParamObsoleteDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT AfbParamObsoleteDefaultTypeInternal _AfbParamObsolete_default_instance_;
 }  // namespace Proto
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_VFrame30_2eproto[56];
+static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_VFrame30_2eproto[59];
 static const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* file_level_enum_descriptors_VFrame30_2eproto[4];
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_VFrame30_2eproto = nullptr;
 
@@ -1199,17 +1254,20 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_VFrame30_2eproto::offsets[] PR
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaItem, pushbutton_),
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaItem, lineedit_),
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaItem, slider_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItem, vduline_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItem, vdurect_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItem, vduvalue_),
   5,
-  45,
-  46,
-  44,
-  47,
-  0,
   48,
+  49,
+  47,
+  50,
+  0,
+  51,
   1,
   2,
   3,
-  49,
+  52,
   4,
   6,
   9,
@@ -1249,6 +1307,9 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_VFrame30_2eproto::offsets[] PR
   41,
   42,
   43,
+  44,
+  45,
+  46,
   PROTOBUF_FIELD_OFFSET(::Proto::PosRectImpl, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::Proto::PosRectImpl, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -1947,6 +2008,59 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_VFrame30_2eproto::offsets[] PR
   2,
   3,
   4,
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduLine, _has_bits_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduLine, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduLine, weight_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduLine, linecolor_),
+  0,
+  1,
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduRect, _has_bits_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduRect, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduRect, weight_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduRect, fill_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduRect, drawrect_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduRect, linecolor_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduRect, fillcolor_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduRect, textcolor_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduRect, fontname_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduRect, text_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduRect, horzalign_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduRect, vertalign_),
+  2,
+  3,
+  4,
+  5,
+  6,
+  8,
+  0,
+  1,
+  9,
+  7,
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduValue, _has_bits_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduValue, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduValue, weight_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduValue, drawrect_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduValue, linecolor_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduValue, fillcolor_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduValue, textcolor_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduValue, fontname_),
+  PROTOBUF_FIELD_OFFSET(::Proto::SchemaItemVduValue, appsignalid_),
+  2,
+  3,
+  5,
+  6,
+  4,
+  0,
+  1,
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::Proto::SchemaDetailsSet, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -2046,56 +2160,59 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 77, 85, sizeof(::Proto::LogicSchema)},
   { 88, 97, sizeof(::Proto::UfbSchema)},
   { 101, 112, sizeof(::Proto::SchemaLayer)},
-  { 118, 173, sizeof(::Proto::SchemaItem)},
-  { 223, 232, sizeof(::Proto::PosRectImpl)},
-  { 236, 243, sizeof(::Proto::PosRectRotatable)},
-  { 245, 254, sizeof(::Proto::PosLineImpl)},
-  { 258, -1, sizeof(::Proto::PosConnectionImpl)},
-  { 264, 282, sizeof(::Proto::SchemaItemRect)},
-  { 295, 307, sizeof(::Proto::SchemaItemLine)},
-  { 314, 326, sizeof(::Proto::SchemaItemPath)},
-  { 333, 339, sizeof(::Proto::SchemaItemImage)},
-  { 340, 348, sizeof(::Proto::SchemaItemFrame)},
-  { 351, 359, sizeof(::Proto::VFrameSetPoint)},
-  { 362, 396, sizeof(::Proto::IndicatorHistogramVert)},
-  { 425, 434, sizeof(::Proto::IndicatorArrowIndicator)},
-  { 438, 447, sizeof(::Proto::IndicatorTrendSignalParam)},
-  { 451, 466, sizeof(::Proto::IndicatorTrend)},
-  { 476, 486, sizeof(::Proto::SchemaItemIndicator)},
-  { 491, 503, sizeof(::Proto::FblConnectionPoint)},
-  { 510, -1, sizeof(::Proto::FblItem)},
-  { 516, 530, sizeof(::Proto::FblItemRect)},
-  { 539, 547, sizeof(::Proto::FblItemLine)},
-  { 550, 558, sizeof(::Proto::SchemaItemSignalColumn)},
-  { 561, 573, sizeof(::Proto::SchemaItemSignal)},
-  { 580, -1, sizeof(::Proto::SchemaItemInput)},
-  { 585, -1, sizeof(::Proto::SchemaItemOutput)},
-  { 590, -1, sizeof(::Proto::SchemaItemInOut)},
-  { 595, -1, sizeof(::Proto::SchemaItemLink)},
-  { 600, 612, sizeof(::Proto::SchemaItemAfb)},
-  { 619, 636, sizeof(::Proto::SchemaItemConst)},
-  { 648, 654, sizeof(::Proto::SchemaItemConnection)},
-  { 655, 661, sizeof(::Proto::SchemaItemTransmitter)},
-  { 662, 673, sizeof(::Proto::SchemaItemReceiver)},
-  { 679, 689, sizeof(::Proto::SchemaItemUfb)},
-  { 694, -1, sizeof(::Proto::SchemaItemTerminator)},
-  { 699, 717, sizeof(::Proto::SchemaItemValue)},
-  { 730, 744, sizeof(::Proto::SchemaItemImageValue)},
-  { 753, 770, sizeof(::Proto::SchemaItemDiagValue)},
-  { 782, 790, sizeof(::Proto::SchemaItemBus)},
-  { 793, -1, sizeof(::Proto::SchemaItemBusComposer)},
-  { 798, -1, sizeof(::Proto::SchemaItemBusExtractor)},
-  { 804, 810, sizeof(::Proto::SchemaItemLoopback)},
-  { 811, -1, sizeof(::Proto::SchemaItemLoopbackSource)},
-  { 816, -1, sizeof(::Proto::SchemaItemLoopbackTarget)},
-  { 821, 828, sizeof(::Proto::SchemaItemControl)},
-  { 830, 846, sizeof(::Proto::SchemaItemPushButton)},
-  { 857, 872, sizeof(::Proto::SchemaItemLineEdit)},
-  { 882, 904, sizeof(::Proto::SchemaItemSlider)},
-  { 921, -1, sizeof(::Proto::SchemaDetailsSet)},
-  { 927, 937, sizeof(::Proto::TrendIndicatorSchemaItems)},
-  { 942, 963, sizeof(::Proto::SchemaDetails)},
-  { 979, 998, sizeof(::Proto::AfbParamObsolete)},
+  { 118, 176, sizeof(::Proto::SchemaItem)},
+  { 229, 238, sizeof(::Proto::PosRectImpl)},
+  { 242, 249, sizeof(::Proto::PosRectRotatable)},
+  { 251, 260, sizeof(::Proto::PosLineImpl)},
+  { 264, -1, sizeof(::Proto::PosConnectionImpl)},
+  { 270, 288, sizeof(::Proto::SchemaItemRect)},
+  { 301, 313, sizeof(::Proto::SchemaItemLine)},
+  { 320, 332, sizeof(::Proto::SchemaItemPath)},
+  { 339, 345, sizeof(::Proto::SchemaItemImage)},
+  { 346, 354, sizeof(::Proto::SchemaItemFrame)},
+  { 357, 365, sizeof(::Proto::VFrameSetPoint)},
+  { 368, 402, sizeof(::Proto::IndicatorHistogramVert)},
+  { 431, 440, sizeof(::Proto::IndicatorArrowIndicator)},
+  { 444, 453, sizeof(::Proto::IndicatorTrendSignalParam)},
+  { 457, 472, sizeof(::Proto::IndicatorTrend)},
+  { 482, 492, sizeof(::Proto::SchemaItemIndicator)},
+  { 497, 509, sizeof(::Proto::FblConnectionPoint)},
+  { 516, -1, sizeof(::Proto::FblItem)},
+  { 522, 536, sizeof(::Proto::FblItemRect)},
+  { 545, 553, sizeof(::Proto::FblItemLine)},
+  { 556, 564, sizeof(::Proto::SchemaItemSignalColumn)},
+  { 567, 579, sizeof(::Proto::SchemaItemSignal)},
+  { 586, -1, sizeof(::Proto::SchemaItemInput)},
+  { 591, -1, sizeof(::Proto::SchemaItemOutput)},
+  { 596, -1, sizeof(::Proto::SchemaItemInOut)},
+  { 601, -1, sizeof(::Proto::SchemaItemLink)},
+  { 606, 618, sizeof(::Proto::SchemaItemAfb)},
+  { 625, 642, sizeof(::Proto::SchemaItemConst)},
+  { 654, 660, sizeof(::Proto::SchemaItemConnection)},
+  { 661, 667, sizeof(::Proto::SchemaItemTransmitter)},
+  { 668, 679, sizeof(::Proto::SchemaItemReceiver)},
+  { 685, 695, sizeof(::Proto::SchemaItemUfb)},
+  { 700, -1, sizeof(::Proto::SchemaItemTerminator)},
+  { 705, 723, sizeof(::Proto::SchemaItemValue)},
+  { 736, 750, sizeof(::Proto::SchemaItemImageValue)},
+  { 759, 776, sizeof(::Proto::SchemaItemDiagValue)},
+  { 788, 796, sizeof(::Proto::SchemaItemBus)},
+  { 799, -1, sizeof(::Proto::SchemaItemBusComposer)},
+  { 804, -1, sizeof(::Proto::SchemaItemBusExtractor)},
+  { 810, 816, sizeof(::Proto::SchemaItemLoopback)},
+  { 817, -1, sizeof(::Proto::SchemaItemLoopbackSource)},
+  { 822, -1, sizeof(::Proto::SchemaItemLoopbackTarget)},
+  { 827, 834, sizeof(::Proto::SchemaItemControl)},
+  { 836, 852, sizeof(::Proto::SchemaItemPushButton)},
+  { 863, 878, sizeof(::Proto::SchemaItemLineEdit)},
+  { 888, 910, sizeof(::Proto::SchemaItemSlider)},
+  { 927, 934, sizeof(::Proto::SchemaItemVduLine)},
+  { 936, 951, sizeof(::Proto::SchemaItemVduRect)},
+  { 961, 973, sizeof(::Proto::SchemaItemVduValue)},
+  { 980, -1, sizeof(::Proto::SchemaDetailsSet)},
+  { 986, 996, sizeof(::Proto::TrendIndicatorSchemaItems)},
+  { 1001, 1022, sizeof(::Proto::SchemaDetails)},
+  { 1038, 1057, sizeof(::Proto::AfbParamObsolete)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -2151,6 +2268,9 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_SchemaItemPushButton_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_SchemaItemLineEdit_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_SchemaItemSlider_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_SchemaItemVduLine_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_SchemaItemVduRect_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_SchemaItemVduValue_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_SchemaDetailsSet_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_TrendIndicatorSchemaItems_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::Proto::_SchemaDetails_default_instance_),
@@ -2190,7 +2310,7 @@ const char descriptor_table_protodef_VFrame30_2eproto[] PROTOBUF_SECTION_VARIABL
   "\001 \002(\0132\013.Proto.Uuid\022\034\n\004name\030\002 \002(\0132\016.Proto"
   ".wstring\022\017\n\007compile\030\003 \002(\010\022\014\n\004show\030\004 \002(\010\022"
   "\r\n\005print\030\005 \002(\010\022\036\n\005items\030\017 \003(\0132\017.Proto.En"
-  "velope\"\311\017\n\nSchemaItem\022\031\n\004uuid\030\001 \002(\0132\013.Pr"
+  "velope\"\317\020\n\nSchemaItem\022\031\n\004uuid\030\001 \002(\0132\013.Pr"
   "oto.Uuid\022\020\n\010isStatic\030\002 \002(\010\022\020\n\010isLocked\030\003"
   " \002(\010\022#\n\010itemUnit\030\004 \002(\0162\021.Proto.SchemaUni"
   "t\022\032\n\013acceptClick\030\005 \001(\010:\005false\022\023\n\013clickSc"
@@ -2240,215 +2360,228 @@ const char descriptor_table_protodef_VFrame30_2eproto[] PROTOBUF_SECTION_VARIABL
   "\001 \001(\0132\033.Proto.SchemaItemPushButton\022,\n\010li"
   "neEdit\030\323\001 \001(\0132\031.Proto.SchemaItemLineEdit"
   "\022(\n\006slider\030\324\001 \001(\0132\027.Proto.SchemaItemSlid"
-  "er\"[\n\013PosRectImpl\022\021\n\tleftDocPt\030\001 \002(\001\022\020\n\010"
-  "topDocPt\030\002 \002(\001\022\022\n\nwidthDocPt\030\003 \002(\001\022\023\n\013he"
-  "ightDocPt\030\004 \002(\001\"8\n\020PosRectRotatable\022\r\n\005a"
-  "ngle\030\002 \001(\001\022\025\n\rrotationpoint\030\003 \001(\005\"]\n\013Pos"
-  "LineImpl\022\023\n\013startXDocPt\030\001 \002(\001\022\023\n\013startYD"
-  "ocPt\030\002 \002(\001\022\021\n\tendXDocPt\030\003 \002(\001\022\021\n\tendYDoc"
-  "Pt\030\004 \002(\001\"7\n\021PosConnectionImpl\022\"\n\006points\030"
-  "\001 \003(\0132\022.Proto.SchemaPoint\"\261\002\n\016SchemaItem"
-  "Rect\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\022"
-  "\021\n\tfillColor\030\003 \002(\r\022\034\n\004text\030\004 \002(\0132\016.Proto"
-  ".wstring\022\021\n\ttextColor\030\005 \002(\r\022\036\n\004font\030\006 \002("
-  "\0132\020.Proto.FontParam\022\014\n\004fill\030\007 \002(\010\022\026\n\010dra"
-  "wrect\030\010 \001(\010:\004true\022\024\n\thorzAlign\030\t \001(\005:\0014\022"
-  "\026\n\tvertAlign\030\n \001(\005:\003128\022\027\n\010wordWrap\030\013 \001("
-  "\010:\005false\022\024\n\tlineStyle\030\014 \001(\005:\0011\022\025\n\ntextFo"
-  "rmat\030\r \001(\005:\0010\"\255\001\n\016SchemaItemLine\022\016\n\006weig"
-  "ht\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\022\024\n\tlineStyle"
-  "\030\003 \001(\005:\0011\022\030\n\014lineStyleCap\030\007 \001(\005:\00216\022\027\n\014l"
-  "ineCapStart\030\004 \001(\005:\0010\022\025\n\nlineCapEnd\030\005 \001(\005"
-  ":\0010\022\030\n\rlineCapFactor\030\006 \001(\001:\0012\"\255\001\n\016Schema"
-  "ItemPath\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 "
-  "\002(\r\022\024\n\tlineStyle\030\003 \001(\005:\0011\022\030\n\014lineStyleCa"
-  "p\030\007 \001(\005:\00216\022\027\n\014lineCapStart\030\004 \001(\005:\0010\022\025\n\n"
-  "lineCapEnd\030\005 \001(\005:\0010\022\030\n\rlineCapFactor\030\006 \001"
-  "(\001:\0012\"2\n\017SchemaItemImage\022\037\n\005image\030\001 \001(\0132"
-  "\020.Proto.ImageItem\"\\\n\017SchemaItemFrame\022\020\n\010"
-  "schemaId\030\001 \001(\t\022\030\n\nallowScale\030\002 \001(\010:\004true"
-  "\022\035\n\017keepAspectRatio\030\003 \001(\010:\004true\"R\n\016VFram"
-  "eSetPoint\022\r\n\005color\030\003 \001(\r\022\026\n\013colorSource\030"
-  "\004 \001(\005:\0010\022\031\n\021outputAppSignalId\030\024 \001(\t\"\250\006\n\026"
-  "IndicatorHistogramVert\022\027\n\014signalSource\030d"
-  " \001(\005:\0010\022\024\n\tprecision\030g \001(\005:\0012\022\031\n\014analogF"
-  "ormat\030h \001(\005:\003102\022\036\n\004font\030m \001(\0132\020.Proto.F"
-  "ontParam\022\027\n\010drawRect\030n \001(\010:\005false\022\025\n\nlin"
-  "eWeight\030o \001(\001:\0010\022\027\n\017backgroundColor\030t \001("
-  "\r\022\021\n\tlineColor\030u \001(\r\022\024\n\014signalColors\030v \003"
-  "(\r\022\022\n\nstartValue\030\001 \001(\001\022\020\n\010endValue\030\002 \001(\001"
-  "\022\020\n\010barWidth\030\020 \001(\001\022\022\n\nleftMargin\030\024 \001(\001\022\021"
-  "\n\ttopMargin\030\025 \001(\001\022\023\n\013rightMargin\030\026 \001(\001\022\024"
-  "\n\014bottomMargin\030\027 \001(\001\022\031\n\013drawBarRect\030  \001("
-  "\010:\004true\022\026\n\010drawGrid\030( \001(\010:\004true\022!\n\022drawG"
-  "ridForAllBars\030) \001(\010:\005false\022\034\n\016drawGridVa"
-  "lues\030* \001(\010:\004true\022&\n\027drawGridValueForAllB"
-  "ars\030+ \001(\010:\005false\022 \n\022drawGridValueUnits\030,"
-  " \001(\010:\004true\022\036\n\022linearGridMainStep\0302 \001(\001:\002"
-  "50\022\037\n\023linearGridSmallStep\0303 \001(\001:\00210\022\"\n\027l"
-  "ogarithmicGridMainStep\0304 \001(\001:\0011\022%\n\030logar"
-  "ithmicGridSmallStep\0305 \001(\001:\0030.5\022\030\n\rdrawSe"
-  "tpoints\030F \001(\005:\0010\022.\n\017customSetPoints\030H \003("
-  "\0132\025.Proto.VFrameSetPoint\022\024\n\tscaleType\030K "
-  "\001(\005:\0010\"f\n\027IndicatorArrowIndicator\022\022\n\nsta"
-  "rtValue\030\001 \001(\001\022\020\n\010endValue\030\002 \001(\001\022\022\n\nstart"
-  "Angle\030\020 \001(\001\022\021\n\tspanAngle\030\021 \001(\001\"c\n\031Indica"
-  "torTrendSignalParam\022\r\n\005color\030\002 \001(\007\022\022\n\nli"
-  "neWieght\030\003 \001(\005\022\020\n\010lowLimit\030\024 \001(\001\022\021\n\thigh"
-  "Limit\030\025 \001(\001\"\203\002\n\016IndicatorTrend\022\024\n\014sample"
-  "period\030Z \001(\005\022\020\n\010timeType\030[ \001(\005\022\020\n\010viewMo"
-  "de\030\\ \001(\005\022\021\n\tscaleType\030] \001(\005\022\021\n\tlaneCount"
-  "\030^ \001(\005\022\024\n\014backColor1st\030_ \001(\007\022\024\n\014backColo"
-  "r2nd\030` \001(\007\022\026\n\016redrawinterval\030d \001(\003\022\020\n\010du"
-  "ration\0303 \001(\003\022;\n\021trendSignalParams\030n \003(\0132"
-  " .Proto.IndicatorTrendSignalParam\"\350\001\n\023Sc"
-  "hemaItemIndicator\022\021\n\tsignalIds\030\001 \001(\t\022\017\n\004"
-  "type\030  \001(\r:\0010\022=\n\026indicatorHistogramVert\030"
-  "0 \001(\0132\035.Proto.IndicatorHistogramVert\022\?\n\027"
-  "indicatorArrowIndicator\0301 \001(\0132\036.Proto.In"
-  "dicatorArrowIndicator\022-\n\016indicatorTrend\030"
-  "2 \001(\0132\025.Proto.IndicatorTrend\"\351\001\n\022FblConn"
-  "ectionPoint\022!\n\005point\030\001 \001(\0132\022.Proto.Schem"
-  "aPoint\022/\n\ndirrection\030\002 \001(\0162\033.Proto.Conne"
-  "ctionDirrection\022\031\n\004uuid\030\003 \001(\0132\013.Proto.Uu"
-  "id\022\030\n\014operandIndex\030\004 \001(\005:\002-1\022\017\n\007caption\030"
-  "\005 \001(\t\022\"\n\rassociatedIos\030\006 \003(\0132\013.Proto.Uui"
-  "d\022\025\n\nsignalType\030\007 \001(\005:\0010\"4\n\007FblItem\022)\n\006p"
-  "oints\030\001 \003(\0132\031.Proto.FblConnectionPoint\"\325"
-  "\001\n\013FblItemRect\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineCo"
-  "lor\030\002 \002(\r\022\021\n\tfillColor\030\003 \002(\r\022\021\n\ttextColo"
-  "r\030\004 \002(\r\022\036\n\004font\030\005 \002(\0132\020.Proto.FontParam\022"
-  "\025\n\robsoleteLabel\030\006 \001(\t\022\020\n\010userText\030\007 \001(\t"
-  "\022\026\n\013userTextPos\030\010 \001(\005:\0011\022\034\n\020obsoleteLabe"
-  "lPos\030\t \001(\005:\002-1\"F\n\013FblItemLine\022\016\n\006weight\030"
-  "\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\022\024\n\tlineStyle\030\003 "
-  "\001(\005:\0011\"R\n\026SchemaItemSignalColumn\022\021\n\005widt"
-  "h\030\001 \001(\001:\00220\022\017\n\004data\030\002 \001(\005:\0010\022\024\n\thorzAlig"
-  "n\030\003 \001(\005:\0011\"\342\001\n\020SchemaItemSignal\022$\n\014appSi"
-  "gnalIDs\030\001 \003(\0132\016.Proto.wstring\022\024\n\tprecisi"
-  "on\030\002 \001(\005:\0012\022\031\n\014analogFormat\030\003 \001(\005:\003102\022."
-  "\n\007columns\030\004 \003(\0132\035.Proto.SchemaItemSignal"
-  "Column\022\027\n\tmultiLine\030\005 \001(\010:\004true\022\032\n\022impac"
-  "tAppSignalIDs\030\006 \003(\t\022\022\n\ncustomText\030\020 \001(\t\""
-  "\021\n\017SchemaItemInput\"\022\n\020SchemaItemOutput\"\021"
-  "\n\017SchemaItemInOut\"\020\n\016SchemaItemLink\"\204\002\n\r"
-  "SchemaItemAfb\022\'\n\006params\030\002 \003(\0132\027.Proto.Af"
-  "bParamObsolete\022 \n\010afbStrid\030\003 \001(\0132\016.Proto"
-  ".wstring\022\024\n\tprecision\030\004 \001(\005:\0012\0223\n\025deprec"
-  "ated_afbelement\030\005 \001(\0132\024.Proto.AfbElement"
-  "Xml\022\030\n\020deprecated_label\030\006 \001(\t\022(\n\nafbelem"
-  "ent\030\007 \001(\0132\024.Proto.AfbElementXml\022\031\n\021packe"
-  "dLogicInputs\030\010 \003(\t\"\236\002\n\017SchemaItemConst\022\017"
-  "\n\004type\030\001 \001(\005:\0010\022\024\n\tprecision\030\004 \001(\005:\0012\022\024\n"
-  "\thorzAlign\030\005 \001(\005:\0014\022\026\n\tvertAlign\030\006 \001(\005:\003"
-  "128\022\031\n\014analogFormat\030\010 \001(\005:\003102\022\023\n\010intVal"
-  "ue\030\002 \001(\005:\0010\022\016\n\006intRef\030\n \001(\t\022\036\n\023floatValu"
-  "e_obsolete\030\003 \001(\001:\0010\022\025\n\nfloatValue\030\t \001(\002:"
-  "\0010\022\020\n\010floatRef\030\013 \001(\t\022\030\n\rdiscreteValue\030\007 "
-  "\001(\005:\0010\022\023\n\013discreteRef\030\014 \001(\t\",\n\024SchemaIte"
-  "mConnection\022\024\n\014connectionid\030\001 \001(\t\",\n\025Sch"
-  "emaItemTransmitter\022\023\n\010pinCount\030\001 \001(\005:\0011\""
-  "\240\001\n\022SchemaItemReceiver\022\032\n\014showValidity\030\001"
-  " \001(\010:\004true\022\024\n\014appSignalIds\030\002 \001(\t\022\023\n\010data"
-  "Type\030\003 \001(\005:\0010\022\024\n\tprecision\030\004 \001(\005:\0012\022\031\n\014a"
-  "nalogFormat\030\005 \001(\005:\003102\022\022\n\ncustomText\030\020 \001"
-  "(\t\"\231\001\n\rSchemaItemUfb\022\023\n\013ufbSchemaId\030\001 \001("
-  "\t\022\022\n\nufbCaption\030\002 \001(\t\022\026\n\nufbVersion\030\003 \001("
-  "\005:\002-1\022\"\n\032specific_properties_struct\030\n \001("
-  "\t\022#\n\nproperties\030\013 \003(\0132\017.Proto.Property\"\026"
-  "\n\024SchemaItemTerminator\"\260\002\n\017SchemaItemVal"
-  "ue\022\021\n\tsignalIds\030\001 \001(\t\022\027\n\014signalSource\030\002 "
-  "\001(\005:\0010\022\022\n\nlineWeight\030\004 \001(\001\022\021\n\tlineColor\030"
-  "\005 \001(\r\022\021\n\tfillColor\030\006 \001(\r\022\021\n\ttextColor\030\007 "
-  "\001(\r\022\014\n\004text\030\010 \001(\t\022\036\n\004font\030\t \001(\0132\020.Proto."
-  "FontParam\022\026\n\010drawRect\030\n \001(\010:\004true\022\024\n\thor"
-  "zAlign\030\013 \001(\005:\0014\022\026\n\tvertAlign\030\014 \001(\005:\003128\022"
-  "\025\n\tprecision\030\r \001(\005:\002-1\022\031\n\014analogFormat\030\016"
-  " \001(\005:\003102\"\203\002\n\024SchemaItemImageValue\022\021\n\tsi"
-  "gnalIds\030\001 \001(\t\022\027\n\014signalSource\030\002 \001(\005:\0010\022\026"
-  "\n\016currentImageId\030\003 \001(\t\022\025\n\nlineWeight\030\006 \001"
-  "(\001:\0010\022\035\n\tlineColor\030\007 \001(\r:\n4278190080\022\035\n\t"
-  "fillColor\030\010 \001(\r:\n4278190272\022\027\n\010drawRect\030"
-  "\t \001(\010:\005false\022\027\n\010fillRect\030\n \001(\010:\005false\022 \n"
-  "\006images\030\016 \003(\0132\020.Proto.ImageItem\"\233\002\n\023Sche"
-  "maItemDiagValue\022\021\n\tsignalIds\030\001 \001(\t\022\022\n\nli"
-  "neWeight\030\004 \001(\001\022\021\n\tlineColor\030\005 \001(\r\022\021\n\tfil"
-  "lColor\030\006 \001(\r\022\021\n\ttextColor\030\007 \001(\r\022\014\n\004text\030"
-  "\010 \001(\t\022\036\n\004font\030\t \001(\0132\020.Proto.FontParam\022\026\n"
-  "\010drawRect\030\n \001(\010:\004true\022\024\n\thorzAlign\030\013 \001(\005"
-  ":\0014\022\026\n\tvertAlign\030\014 \001(\005:\003128\022\025\n\tprecision"
-  "\030\r \001(\005:\002-1\022\031\n\014analogFormat\030\016 \001(\005:\003102\"P\n"
-  "\rSchemaItemBus\022\021\n\tbusTypeId\030\002 \001(\t\022\023\n\013bus"
-  "TypeHash\030\003 \001(\006\022\027\n\003bus\030\005 \001(\0132\n.Proto.Bus\""
-  "\027\n\025SchemaItemBusComposer\"=\n\026SchemaItemBu"
-  "sExtractor\022#\n\nproperties\030\002 \003(\0132\017.Proto.P"
-  "roperty\"(\n\022SchemaItemLoopback\022\022\n\nloopbac"
-  "kId\030\002 \001(\t\"\032\n\030SchemaItemLoopbackSource\"\032\n"
-  "\030SchemaItemLoopbackTarget\"8\n\021SchemaItemC"
-  "ontrol\022\022\n\nstyleSheet\030\001 \001(\t\022\017\n\007toolTip\030\002 "
-  "\001(\t\"\220\002\n\024SchemaItemPushButton\022\014\n\004text\030\001 \001"
-  "(\t\022\021\n\tcheckable\030\002 \001(\010\022\026\n\016checkedDefault\030"
-  "\003 \001(\010\022\022\n\nautoRepeat\030\004 \001(\010\022\027\n\017autoRepeatD"
-  "elay\030\005 \001(\005\022\032\n\022autoRepeatInterval\030\006 \001(\005\022\031"
-  "\n\021scriptAfterCreate\030\025 \001(\t\022\025\n\rscriptClick"
-  "ed\030\026 \001(\t\022\025\n\rscriptPressed\030\027 \001(\t\022\026\n\016scrip"
-  "tReleased\030\030 \001(\t\022\025\n\rscriptToggled\030\031 \001(\t\"\370"
-  "\001\n\022SchemaItemLineEdit\022\014\n\004text\030\001 \001(\t\022\021\n\th"
-  "orzAlign\030\002 \001(\005\022\021\n\tvertAlign\030\003 \001(\005\022\021\n\tmax"
-  "Length\030\004 \001(\005\022\027\n\017placeholderText\030\005 \001(\t\022\020\n"
-  "\010readOnly\030\006 \001(\010\022\031\n\021scriptAfterCreate\030\025 \001"
-  "(\t\022\035\n\025scriptEditingFinished\030\026 \001(\t\022\033\n\023scr"
-  "iptReturnPressed\030\027 \001(\t\022\031\n\021scriptTextChan"
-  "ged\030\030 \001(\t\"\325\003\n\020SchemaItemSlider\022!\n\022invert"
-  "edAppearance\030\002 \001(\010:\005false\022\037\n\020invertedCon"
-  "trols\030\003 \001(\010:\005false\022\037\n\020enableMouseWheel\030\004"
-  " \001(\010:\005false\022\023\n\007maximum\030\006 \001(\005:\00299\022\022\n\007mini"
-  "mum\030\007 \001(\005:\0010\022\026\n\013orientation\030\n \001(\005:\0012\022\024\n\010"
-  "pageStep\030\014 \001(\005:\00210\022\025\n\nsingleStep\030\r \001(\005:\001"
-  "1\022\026\n\010tracking\030\020 \001(\010:\004true\022\027\n\014defaultValu"
-  "e\030\021 \001(\005:\0010\022\027\n\014tickInterval\030\024 \001(\005:\0010\022\027\n\014t"
-  "ickPosition\030\025 \001(\005:\0010\022\031\n\021scriptAfterCreat"
-  "e\030\037 \001(\t\022\031\n\021scriptSliderMoved\030  \001(\t\022\033\n\023sc"
-  "riptSliderPressed\030! \001(\t\022\034\n\024scriptSliderR"
-  "eleased\030\" \001(\t\022\032\n\022scriptValueChanged\030# \001("
-  "\t\"@\n\020SchemaDetailsSet\022,\n\016schemasDetails\030"
-  "\002 \003(\0132\024.Proto.SchemaDetails\"\221\001\n\031TrendInd"
-  "icatorSchemaItems\022\035\n\010itemUuid\030\002 \001(\0132\013.Pr"
-  "oto.Uuid\022\024\n\014samplePeriod\030\003 \001(\005\022\020\n\010timeTy"
-  "pe\030\004 \001(\005\022\027\n\017durationSeconds\030\005 \001(\005\022\024\n\014app"
-  "SignalIds\030\006 \003(\t\"\374\002\n\rSchemaDetails\022\017\n\007ver"
-  "sion\030\002 \001(\005\022\020\n\010schemaId\030\004 \001(\t\022\017\n\007caption\030"
-  "\005 \001(\t\022\031\n\021excludedfromBuild\030\006 \001(\010\022\023\n\013equi"
-  "pmentId\030\007 \001(\t\022\031\n\021lmDescriptionFile\030\010 \001(\t"
-  "\022\014\n\004path\030\t \001(\t\022\021\n\tsignalIds\030\024 \003(\t\022\016\n\006lab"
-  "els\030\025 \003(\t\022\023\n\013connections\030\026 \003(\t\022\032\n\005guids\030"
-  "\027 \003(\0132\013.Proto.Uuid\022\022\n\nschematags\030\030 \003(\t\022\021"
-  "\n\tloopbacks\030\031 \003(\t\022\020\n\010itemtags\030\032 \003(\t\022\026\n\016p"
-  "ackedLogicIds\030\033 \003(\t\0229\n\017trendIndicators\030\036"
-  " \003(\0132 .Proto.TrendIndicatorSchemaItems\"\303"
-  "\003\n\020AfbParamObsolete\022\037\n\007caption\030\001 \002(\0132\016.P"
-  "roto.wstring\022\017\n\007visible\030\007 \002(\010\022\027\n\014operand"
-  "Index\030\010 \001(\005:\0010\022\017\n\004size\030\t \001(\005:\0010\022\033\n\014insta"
-  "ntiator\030\n \001(\010:\005false\022\023\n\004user\030\013 \001(\010:\005fals"
-  "e\022%\n\rchangedScript\030\014 \001(\0132\016.Proto.wstring"
-  "\022\036\n\005value\030\r \001(\0132\017.Proto.qvariant\022%\n\014defa"
-  "ultvalue\030\016 \001(\0132\017.Proto.qvariant\022!\n\010lowli"
-  "mit\030\017 \001(\0132\017.Proto.qvariant\022\"\n\thighlimit\030"
-  "\020 \001(\0132\017.Proto.qvariant\022\036\n\006opName\030\021 \001(\0132\016"
-  ".Proto.wstring\022\"\n\004type\030\022 \001(\0162\024.Proto.Fbl"
-  "SignalType\022(\n\ndataFormat\030\023 \001(\0162\024.Proto.F"
-  "blDataFormat*3\n\nSchemaUnit\022\013\n\007Display\020\000\022"
-  "\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionD"
-  "irrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rFblS"
-  "ignalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*:\n\rF"
-  "blDataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\tSignedI"
-  "nt\020\001\022\t\n\005Float\020\002:6\n\nschemaitem\022\017.Proto.En"
-  "velope\030\006 \001(\0132\021.Proto.SchemaItem:.\n\006schem"
-  "a\022\017.Proto.Envelope\030d \001(\0132\r.Proto.Schema:"
-  "8\n\013schemalayer\022\017.Proto.Envelope\030e \001(\0132\022."
-  "Proto.SchemaLayer:B\n\020schemaDetailsSet\022\017."
-  "Proto.Envelope\030i \001(\0132\027.Proto.SchemaDetai"
-  "lsSet"
+  "er\022*\n\007vduLine\030\254\002 \001(\0132\030.Proto.SchemaItemV"
+  "duLine\022*\n\007vduRect\030\255\002 \001(\0132\030.Proto.SchemaI"
+  "temVduRect\022,\n\010vduValue\030\256\002 \001(\0132\031.Proto.Sc"
+  "hemaItemVduValue\"[\n\013PosRectImpl\022\021\n\tleftD"
+  "ocPt\030\001 \002(\001\022\020\n\010topDocPt\030\002 \002(\001\022\022\n\nwidthDoc"
+  "Pt\030\003 \002(\001\022\023\n\013heightDocPt\030\004 \002(\001\"8\n\020PosRect"
+  "Rotatable\022\r\n\005angle\030\002 \001(\001\022\025\n\rrotationpoin"
+  "t\030\003 \001(\005\"]\n\013PosLineImpl\022\023\n\013startXDocPt\030\001 "
+  "\002(\001\022\023\n\013startYDocPt\030\002 \002(\001\022\021\n\tendXDocPt\030\003 "
+  "\002(\001\022\021\n\tendYDocPt\030\004 \002(\001\"7\n\021PosConnectionI"
+  "mpl\022\"\n\006points\030\001 \003(\0132\022.Proto.SchemaPoint\""
+  "\261\002\n\016SchemaItemRect\022\016\n\006weight\030\001 \002(\001\022\021\n\tli"
+  "neColor\030\002 \002(\r\022\021\n\tfillColor\030\003 \002(\r\022\034\n\004text"
+  "\030\004 \002(\0132\016.Proto.wstring\022\021\n\ttextColor\030\005 \002("
+  "\r\022\036\n\004font\030\006 \002(\0132\020.Proto.FontParam\022\014\n\004fil"
+  "l\030\007 \002(\010\022\026\n\010drawrect\030\010 \001(\010:\004true\022\024\n\thorzA"
+  "lign\030\t \001(\005:\0014\022\026\n\tvertAlign\030\n \001(\005:\003128\022\027\n"
+  "\010wordWrap\030\013 \001(\010:\005false\022\024\n\tlineStyle\030\014 \001("
+  "\005:\0011\022\025\n\ntextFormat\030\r \001(\005:\0010\"\255\001\n\016SchemaIt"
+  "emLine\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002("
+  "\r\022\024\n\tlineStyle\030\003 \001(\005:\0011\022\030\n\014lineStyleCap\030"
+  "\007 \001(\005:\00216\022\027\n\014lineCapStart\030\004 \001(\005:\0010\022\025\n\nli"
+  "neCapEnd\030\005 \001(\005:\0010\022\030\n\rlineCapFactor\030\006 \001(\001"
+  ":\0012\"\255\001\n\016SchemaItemPath\022\016\n\006weight\030\001 \002(\001\022\021"
+  "\n\tlineColor\030\002 \002(\r\022\024\n\tlineStyle\030\003 \001(\005:\0011\022"
+  "\030\n\014lineStyleCap\030\007 \001(\005:\00216\022\027\n\014lineCapStar"
+  "t\030\004 \001(\005:\0010\022\025\n\nlineCapEnd\030\005 \001(\005:\0010\022\030\n\rlin"
+  "eCapFactor\030\006 \001(\001:\0012\"2\n\017SchemaItemImage\022\037"
+  "\n\005image\030\001 \001(\0132\020.Proto.ImageItem\"\\\n\017Schem"
+  "aItemFrame\022\020\n\010schemaId\030\001 \001(\t\022\030\n\nallowSca"
+  "le\030\002 \001(\010:\004true\022\035\n\017keepAspectRatio\030\003 \001(\010:"
+  "\004true\"R\n\016VFrameSetPoint\022\r\n\005color\030\003 \001(\r\022\026"
+  "\n\013colorSource\030\004 \001(\005:\0010\022\031\n\021outputAppSigna"
+  "lId\030\024 \001(\t\"\250\006\n\026IndicatorHistogramVert\022\027\n\014"
+  "signalSource\030d \001(\005:\0010\022\024\n\tprecision\030g \001(\005"
+  ":\0012\022\031\n\014analogFormat\030h \001(\005:\003102\022\036\n\004font\030m"
+  " \001(\0132\020.Proto.FontParam\022\027\n\010drawRect\030n \001(\010"
+  ":\005false\022\025\n\nlineWeight\030o \001(\001:\0010\022\027\n\017backgr"
+  "oundColor\030t \001(\r\022\021\n\tlineColor\030u \001(\r\022\024\n\014si"
+  "gnalColors\030v \003(\r\022\022\n\nstartValue\030\001 \001(\001\022\020\n\010"
+  "endValue\030\002 \001(\001\022\020\n\010barWidth\030\020 \001(\001\022\022\n\nleft"
+  "Margin\030\024 \001(\001\022\021\n\ttopMargin\030\025 \001(\001\022\023\n\013right"
+  "Margin\030\026 \001(\001\022\024\n\014bottomMargin\030\027 \001(\001\022\031\n\013dr"
+  "awBarRect\030  \001(\010:\004true\022\026\n\010drawGrid\030( \001(\010:"
+  "\004true\022!\n\022drawGridForAllBars\030) \001(\010:\005false"
+  "\022\034\n\016drawGridValues\030* \001(\010:\004true\022&\n\027drawGr"
+  "idValueForAllBars\030+ \001(\010:\005false\022 \n\022drawGr"
+  "idValueUnits\030, \001(\010:\004true\022\036\n\022linearGridMa"
+  "inStep\0302 \001(\001:\00250\022\037\n\023linearGridSmallStep\030"
+  "3 \001(\001:\00210\022\"\n\027logarithmicGridMainStep\0304 \001"
+  "(\001:\0011\022%\n\030logarithmicGridSmallStep\0305 \001(\001:"
+  "\0030.5\022\030\n\rdrawSetpoints\030F \001(\005:\0010\022.\n\017custom"
+  "SetPoints\030H \003(\0132\025.Proto.VFrameSetPoint\022\024"
+  "\n\tscaleType\030K \001(\005:\0010\"f\n\027IndicatorArrowIn"
+  "dicator\022\022\n\nstartValue\030\001 \001(\001\022\020\n\010endValue\030"
+  "\002 \001(\001\022\022\n\nstartAngle\030\020 \001(\001\022\021\n\tspanAngle\030\021"
+  " \001(\001\"c\n\031IndicatorTrendSignalParam\022\r\n\005col"
+  "or\030\002 \001(\007\022\022\n\nlineWieght\030\003 \001(\005\022\020\n\010lowLimit"
+  "\030\024 \001(\001\022\021\n\thighLimit\030\025 \001(\001\"\203\002\n\016IndicatorT"
+  "rend\022\024\n\014sampleperiod\030Z \001(\005\022\020\n\010timeType\030["
+  " \001(\005\022\020\n\010viewMode\030\\ \001(\005\022\021\n\tscaleType\030] \001("
+  "\005\022\021\n\tlaneCount\030^ \001(\005\022\024\n\014backColor1st\030_ \001"
+  "(\007\022\024\n\014backColor2nd\030` \001(\007\022\026\n\016redrawinterv"
+  "al\030d \001(\003\022\020\n\010duration\0303 \001(\003\022;\n\021trendSigna"
+  "lParams\030n \003(\0132 .Proto.IndicatorTrendSign"
+  "alParam\"\350\001\n\023SchemaItemIndicator\022\021\n\tsigna"
+  "lIds\030\001 \001(\t\022\017\n\004type\030  \001(\r:\0010\022=\n\026indicator"
+  "HistogramVert\0300 \001(\0132\035.Proto.IndicatorHis"
+  "togramVert\022\?\n\027indicatorArrowIndicator\0301 "
+  "\001(\0132\036.Proto.IndicatorArrowIndicator\022-\n\016i"
+  "ndicatorTrend\0302 \001(\0132\025.Proto.IndicatorTre"
+  "nd\"\351\001\n\022FblConnectionPoint\022!\n\005point\030\001 \001(\013"
+  "2\022.Proto.SchemaPoint\022/\n\ndirrection\030\002 \001(\016"
+  "2\033.Proto.ConnectionDirrection\022\031\n\004uuid\030\003 "
+  "\001(\0132\013.Proto.Uuid\022\030\n\014operandIndex\030\004 \001(\005:\002"
+  "-1\022\017\n\007caption\030\005 \001(\t\022\"\n\rassociatedIos\030\006 \003"
+  "(\0132\013.Proto.Uuid\022\025\n\nsignalType\030\007 \001(\005:\0010\"4"
+  "\n\007FblItem\022)\n\006points\030\001 \003(\0132\031.Proto.FblCon"
+  "nectionPoint\"\325\001\n\013FblItemRect\022\016\n\006weight\030\001"
+  " \002(\001\022\021\n\tlineColor\030\002 \002(\r\022\021\n\tfillColor\030\003 \002"
+  "(\r\022\021\n\ttextColor\030\004 \002(\r\022\036\n\004font\030\005 \002(\0132\020.Pr"
+  "oto.FontParam\022\025\n\robsoleteLabel\030\006 \001(\t\022\020\n\010"
+  "userText\030\007 \001(\t\022\026\n\013userTextPos\030\010 \001(\005:\0011\022\034"
+  "\n\020obsoleteLabelPos\030\t \001(\005:\002-1\"F\n\013FblItemL"
+  "ine\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\022\024"
+  "\n\tlineStyle\030\003 \001(\005:\0011\"R\n\026SchemaItemSignal"
+  "Column\022\021\n\005width\030\001 \001(\001:\00220\022\017\n\004data\030\002 \001(\005:"
+  "\0010\022\024\n\thorzAlign\030\003 \001(\005:\0011\"\342\001\n\020SchemaItemS"
+  "ignal\022$\n\014appSignalIDs\030\001 \003(\0132\016.Proto.wstr"
+  "ing\022\024\n\tprecision\030\002 \001(\005:\0012\022\031\n\014analogForma"
+  "t\030\003 \001(\005:\003102\022.\n\007columns\030\004 \003(\0132\035.Proto.Sc"
+  "hemaItemSignalColumn\022\027\n\tmultiLine\030\005 \001(\010:"
+  "\004true\022\032\n\022impactAppSignalIDs\030\006 \003(\t\022\022\n\ncus"
+  "tomText\030\020 \001(\t\"\021\n\017SchemaItemInput\"\022\n\020Sche"
+  "maItemOutput\"\021\n\017SchemaItemInOut\"\020\n\016Schem"
+  "aItemLink\"\204\002\n\rSchemaItemAfb\022\'\n\006params\030\002 "
+  "\003(\0132\027.Proto.AfbParamObsolete\022 \n\010afbStrid"
+  "\030\003 \001(\0132\016.Proto.wstring\022\024\n\tprecision\030\004 \001("
+  "\005:\0012\0223\n\025deprecated_afbelement\030\005 \001(\0132\024.Pr"
+  "oto.AfbElementXml\022\030\n\020deprecated_label\030\006 "
+  "\001(\t\022(\n\nafbelement\030\007 \001(\0132\024.Proto.AfbEleme"
+  "ntXml\022\031\n\021packedLogicInputs\030\010 \003(\t\"\236\002\n\017Sch"
+  "emaItemConst\022\017\n\004type\030\001 \001(\005:\0010\022\024\n\tprecisi"
+  "on\030\004 \001(\005:\0012\022\024\n\thorzAlign\030\005 \001(\005:\0014\022\026\n\tver"
+  "tAlign\030\006 \001(\005:\003128\022\031\n\014analogFormat\030\010 \001(\005:"
+  "\003102\022\023\n\010intValue\030\002 \001(\005:\0010\022\016\n\006intRef\030\n \001("
+  "\t\022\036\n\023floatValue_obsolete\030\003 \001(\001:\0010\022\025\n\nflo"
+  "atValue\030\t \001(\002:\0010\022\020\n\010floatRef\030\013 \001(\t\022\030\n\rdi"
+  "screteValue\030\007 \001(\005:\0010\022\023\n\013discreteRef\030\014 \001("
+  "\t\",\n\024SchemaItemConnection\022\024\n\014connectioni"
+  "d\030\001 \001(\t\",\n\025SchemaItemTransmitter\022\023\n\010pinC"
+  "ount\030\001 \001(\005:\0011\"\240\001\n\022SchemaItemReceiver\022\032\n\014"
+  "showValidity\030\001 \001(\010:\004true\022\024\n\014appSignalIds"
+  "\030\002 \001(\t\022\023\n\010dataType\030\003 \001(\005:\0010\022\024\n\tprecision"
+  "\030\004 \001(\005:\0012\022\031\n\014analogFormat\030\005 \001(\005:\003102\022\022\n\n"
+  "customText\030\020 \001(\t\"\231\001\n\rSchemaItemUfb\022\023\n\013uf"
+  "bSchemaId\030\001 \001(\t\022\022\n\nufbCaption\030\002 \001(\t\022\026\n\nu"
+  "fbVersion\030\003 \001(\005:\002-1\022\"\n\032specific_properti"
+  "es_struct\030\n \001(\t\022#\n\nproperties\030\013 \003(\0132\017.Pr"
+  "oto.Property\"\026\n\024SchemaItemTerminator\"\260\002\n"
+  "\017SchemaItemValue\022\021\n\tsignalIds\030\001 \001(\t\022\027\n\014s"
+  "ignalSource\030\002 \001(\005:\0010\022\022\n\nlineWeight\030\004 \001(\001"
+  "\022\021\n\tlineColor\030\005 \001(\r\022\021\n\tfillColor\030\006 \001(\r\022\021"
+  "\n\ttextColor\030\007 \001(\r\022\014\n\004text\030\010 \001(\t\022\036\n\004font\030"
+  "\t \001(\0132\020.Proto.FontParam\022\026\n\010drawRect\030\n \001("
+  "\010:\004true\022\024\n\thorzAlign\030\013 \001(\005:\0014\022\026\n\tvertAli"
+  "gn\030\014 \001(\005:\003128\022\025\n\tprecision\030\r \001(\005:\002-1\022\031\n\014"
+  "analogFormat\030\016 \001(\005:\003102\"\203\002\n\024SchemaItemIm"
+  "ageValue\022\021\n\tsignalIds\030\001 \001(\t\022\027\n\014signalSou"
+  "rce\030\002 \001(\005:\0010\022\026\n\016currentImageId\030\003 \001(\t\022\025\n\n"
+  "lineWeight\030\006 \001(\001:\0010\022\035\n\tlineColor\030\007 \001(\r:\n"
+  "4278190080\022\035\n\tfillColor\030\010 \001(\r:\n427819027"
+  "2\022\027\n\010drawRect\030\t \001(\010:\005false\022\027\n\010fillRect\030\n"
+  " \001(\010:\005false\022 \n\006images\030\016 \003(\0132\020.Proto.Imag"
+  "eItem\"\233\002\n\023SchemaItemDiagValue\022\021\n\tsignalI"
+  "ds\030\001 \001(\t\022\022\n\nlineWeight\030\004 \001(\001\022\021\n\tlineColo"
+  "r\030\005 \001(\r\022\021\n\tfillColor\030\006 \001(\r\022\021\n\ttextColor\030"
+  "\007 \001(\r\022\014\n\004text\030\010 \001(\t\022\036\n\004font\030\t \001(\0132\020.Prot"
+  "o.FontParam\022\026\n\010drawRect\030\n \001(\010:\004true\022\024\n\th"
+  "orzAlign\030\013 \001(\005:\0014\022\026\n\tvertAlign\030\014 \001(\005:\00312"
+  "8\022\025\n\tprecision\030\r \001(\005:\002-1\022\031\n\014analogFormat"
+  "\030\016 \001(\005:\003102\"P\n\rSchemaItemBus\022\021\n\tbusTypeI"
+  "d\030\002 \001(\t\022\023\n\013busTypeHash\030\003 \001(\006\022\027\n\003bus\030\005 \001("
+  "\0132\n.Proto.Bus\"\027\n\025SchemaItemBusComposer\"="
+  "\n\026SchemaItemBusExtractor\022#\n\nproperties\030\002"
+  " \003(\0132\017.Proto.Property\"(\n\022SchemaItemLoopb"
+  "ack\022\022\n\nloopbackId\030\002 \001(\t\"\032\n\030SchemaItemLoo"
+  "pbackSource\"\032\n\030SchemaItemLoopbackTarget\""
+  "8\n\021SchemaItemControl\022\022\n\nstyleSheet\030\001 \001(\t"
+  "\022\017\n\007toolTip\030\002 \001(\t\"\220\002\n\024SchemaItemPushButt"
+  "on\022\014\n\004text\030\001 \001(\t\022\021\n\tcheckable\030\002 \001(\010\022\026\n\016c"
+  "heckedDefault\030\003 \001(\010\022\022\n\nautoRepeat\030\004 \001(\010\022"
+  "\027\n\017autoRepeatDelay\030\005 \001(\005\022\032\n\022autoRepeatIn"
+  "terval\030\006 \001(\005\022\031\n\021scriptAfterCreate\030\025 \001(\t\022"
+  "\025\n\rscriptClicked\030\026 \001(\t\022\025\n\rscriptPressed\030"
+  "\027 \001(\t\022\026\n\016scriptReleased\030\030 \001(\t\022\025\n\rscriptT"
+  "oggled\030\031 \001(\t\"\370\001\n\022SchemaItemLineEdit\022\014\n\004t"
+  "ext\030\001 \001(\t\022\021\n\thorzAlign\030\002 \001(\005\022\021\n\tvertAlig"
+  "n\030\003 \001(\005\022\021\n\tmaxLength\030\004 \001(\005\022\027\n\017placeholde"
+  "rText\030\005 \001(\t\022\020\n\010readOnly\030\006 \001(\010\022\031\n\021scriptA"
+  "fterCreate\030\025 \001(\t\022\035\n\025scriptEditingFinishe"
+  "d\030\026 \001(\t\022\033\n\023scriptReturnPressed\030\027 \001(\t\022\031\n\021"
+  "scriptTextChanged\030\030 \001(\t\"\325\003\n\020SchemaItemSl"
+  "ider\022!\n\022invertedAppearance\030\002 \001(\010:\005false\022"
+  "\037\n\020invertedControls\030\003 \001(\010:\005false\022\037\n\020enab"
+  "leMouseWheel\030\004 \001(\010:\005false\022\023\n\007maximum\030\006 \001"
+  "(\005:\00299\022\022\n\007minimum\030\007 \001(\005:\0010\022\026\n\013orientatio"
+  "n\030\n \001(\005:\0012\022\024\n\010pageStep\030\014 \001(\005:\00210\022\025\n\nsing"
+  "leStep\030\r \001(\005:\0011\022\026\n\010tracking\030\020 \001(\010:\004true\022"
+  "\027\n\014defaultValue\030\021 \001(\005:\0010\022\027\n\014tickInterval"
+  "\030\024 \001(\005:\0010\022\027\n\014tickPosition\030\025 \001(\005:\0010\022\031\n\021sc"
+  "riptAfterCreate\030\037 \001(\t\022\031\n\021scriptSliderMov"
+  "ed\030  \001(\t\022\033\n\023scriptSliderPressed\030! \001(\t\022\034\n"
+  "\024scriptSliderReleased\030\" \001(\t\022\032\n\022scriptVal"
+  "ueChanged\030# \001(\t\"6\n\021SchemaItemVduLine\022\016\n\006"
+  "weight\030\001 \001(\005\022\021\n\tlineColor\030\002 \001(\r\"\302\001\n\021Sche"
+  "maItemVduRect\022\016\n\006weight\030\003 \001(\005\022\014\n\004fill\030\004 "
+  "\001(\010\022\020\n\010drawrect\030\005 \001(\010\022\021\n\tlineColor\030\n \001(\r"
+  "\022\021\n\tfillColor\030\013 \001(\r\022\021\n\ttextColor\030\014 \001(\r\022\020"
+  "\n\010fontName\030\020 \001(\t\022\014\n\004text\030\021 \001(\t\022\021\n\thorzAl"
+  "ign\030\024 \001(\005\022\021\n\tvertAlign\030\025 \001(\005\"\226\001\n\022SchemaI"
+  "temVduValue\022\016\n\006weight\030\003 \001(\005\022\020\n\010drawrect\030"
+  "\005 \001(\010\022\021\n\tlineColor\030\n \001(\r\022\021\n\tfillColor\030\013 "
+  "\001(\r\022\021\n\ttextColor\030\014 \001(\r\022\020\n\010fontName\030\020 \001(\t"
+  "\022\023\n\013appSignalId\030\021 \001(\t\"@\n\020SchemaDetailsSe"
+  "t\022,\n\016schemasDetails\030\002 \003(\0132\024.Proto.Schema"
+  "Details\"\221\001\n\031TrendIndicatorSchemaItems\022\035\n"
+  "\010itemUuid\030\002 \001(\0132\013.Proto.Uuid\022\024\n\014samplePe"
+  "riod\030\003 \001(\005\022\020\n\010timeType\030\004 \001(\005\022\027\n\017duration"
+  "Seconds\030\005 \001(\005\022\024\n\014appSignalIds\030\006 \003(\t\"\374\002\n\r"
+  "SchemaDetails\022\017\n\007version\030\002 \001(\005\022\020\n\010schema"
+  "Id\030\004 \001(\t\022\017\n\007caption\030\005 \001(\t\022\031\n\021excludedfro"
+  "mBuild\030\006 \001(\010\022\023\n\013equipmentId\030\007 \001(\t\022\031\n\021lmD"
+  "escriptionFile\030\010 \001(\t\022\014\n\004path\030\t \001(\t\022\021\n\tsi"
+  "gnalIds\030\024 \003(\t\022\016\n\006labels\030\025 \003(\t\022\023\n\013connect"
+  "ions\030\026 \003(\t\022\032\n\005guids\030\027 \003(\0132\013.Proto.Uuid\022\022"
+  "\n\nschematags\030\030 \003(\t\022\021\n\tloopbacks\030\031 \003(\t\022\020\n"
+  "\010itemtags\030\032 \003(\t\022\026\n\016packedLogicIds\030\033 \003(\t\022"
+  "9\n\017trendIndicators\030\036 \003(\0132 .Proto.TrendIn"
+  "dicatorSchemaItems\"\303\003\n\020AfbParamObsolete\022"
+  "\037\n\007caption\030\001 \002(\0132\016.Proto.wstring\022\017\n\007visi"
+  "ble\030\007 \002(\010\022\027\n\014operandIndex\030\010 \001(\005:\0010\022\017\n\004si"
+  "ze\030\t \001(\005:\0010\022\033\n\014instantiator\030\n \001(\010:\005false"
+  "\022\023\n\004user\030\013 \001(\010:\005false\022%\n\rchangedScript\030\014"
+  " \001(\0132\016.Proto.wstring\022\036\n\005value\030\r \001(\0132\017.Pr"
+  "oto.qvariant\022%\n\014defaultvalue\030\016 \001(\0132\017.Pro"
+  "to.qvariant\022!\n\010lowlimit\030\017 \001(\0132\017.Proto.qv"
+  "ariant\022\"\n\thighlimit\030\020 \001(\0132\017.Proto.qvaria"
+  "nt\022\036\n\006opName\030\021 \001(\0132\016.Proto.wstring\022\"\n\004ty"
+  "pe\030\022 \001(\0162\024.Proto.FblSignalType\022(\n\ndataFo"
+  "rmat\030\023 \001(\0162\024.Proto.FblDataFormat*3\n\nSche"
+  "maUnit\022\013\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004I"
+  "nch\020\002*-\n\024ConnectionDirrection\022\t\n\005Input\020\000"
+  "\022\n\n\006Output\020\001*)\n\rFblSignalType\022\n\n\006Analog\020"
+  "\000\022\014\n\010Discrete\020\001*:\n\rFblDataFormat\022\017\n\013Unsi"
+  "gnedInt\020\000\022\r\n\tSignedInt\020\001\022\t\n\005Float\020\002:6\n\ns"
+  "chemaitem\022\017.Proto.Envelope\030\006 \001(\0132\021.Proto"
+  ".SchemaItem:.\n\006schema\022\017.Proto.Envelope\030d"
+  " \001(\0132\r.Proto.Schema:8\n\013schemalayer\022\017.Pro"
+  "to.Envelope\030e \001(\0132\022.Proto.SchemaLayer:B\n"
+  "\020schemaDetailsSet\022\017.Proto.Envelope\030i \001(\013"
+  "2\027.Proto.SchemaDetailsSet"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_VFrame30_2eproto_deps[4] = {
   &::descriptor_table_Afb_2eproto,
@@ -2458,8 +2591,8 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_VFrame30_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_VFrame30_2eproto = {
-  false, false, 11605, descriptor_table_protodef_VFrame30_2eproto, "VFrame30.proto", 
-  &descriptor_table_VFrame30_2eproto_once, descriptor_table_VFrame30_2eproto_deps, 4, 56,
+  false, false, 12145, descriptor_table_protodef_VFrame30_2eproto, "VFrame30.proto", 
+  &descriptor_table_VFrame30_2eproto_once, descriptor_table_VFrame30_2eproto_deps, 4, 59,
   schemas, file_default_instances, TableStruct_VFrame30_2eproto::offsets,
   file_level_metadata_VFrame30_2eproto, file_level_enum_descriptors_VFrame30_2eproto, file_level_service_descriptors_VFrame30_2eproto,
 };
@@ -5450,22 +5583,22 @@ class SchemaItem::_Internal {
     (*has_bits)[0] |= 32u;
   }
   static void set_has_isstatic(HasBits* has_bits) {
-    (*has_bits)[1] |= 8192u;
+    (*has_bits)[1] |= 65536u;
   }
   static void set_has_islocked(HasBits* has_bits) {
-    (*has_bits)[1] |= 16384u;
+    (*has_bits)[1] |= 131072u;
   }
   static void set_has_itemunit(HasBits* has_bits) {
-    (*has_bits)[1] |= 4096u;
+    (*has_bits)[1] |= 32768u;
   }
   static void set_has_acceptclick(HasBits* has_bits) {
-    (*has_bits)[1] |= 32768u;
+    (*has_bits)[1] |= 262144u;
   }
   static void set_has_clickscript(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
   }
   static void set_has_iscommented(HasBits* has_bits) {
-    (*has_bits)[1] |= 65536u;
+    (*has_bits)[1] |= 524288u;
   }
   static void set_has_objectname(HasBits* has_bits) {
     (*has_bits)[0] |= 2u;
@@ -5477,7 +5610,7 @@ class SchemaItem::_Internal {
     (*has_bits)[0] |= 8u;
   }
   static void set_has_labelpos(HasBits* has_bits) {
-    (*has_bits)[1] |= 131072u;
+    (*has_bits)[1] |= 1048576u;
   }
   static void set_has_predrawscript(HasBits* has_bits) {
     (*has_bits)[0] |= 16u;
@@ -5634,9 +5767,21 @@ class SchemaItem::_Internal {
   static void set_has_slider(HasBits* has_bits) {
     (*has_bits)[1] |= 2048u;
   }
+  static const ::Proto::SchemaItemVduLine& vduline(const SchemaItem* msg);
+  static void set_has_vduline(HasBits* has_bits) {
+    (*has_bits)[1] |= 4096u;
+  }
+  static const ::Proto::SchemaItemVduRect& vdurect(const SchemaItem* msg);
+  static void set_has_vdurect(HasBits* has_bits) {
+    (*has_bits)[1] |= 8192u;
+  }
+  static const ::Proto::SchemaItemVduValue& vduvalue(const SchemaItem* msg);
+  static void set_has_vduvalue(HasBits* has_bits) {
+    (*has_bits)[1] |= 16384u;
+  }
   static bool MissingRequiredFields(const HasBits& has_bits) {
     return (((has_bits[0] & 0x00000020) ^ 0x00000020)
-       | ((has_bits[1] & 0x00007000) ^ 0x00007000)) != 0;
+       | ((has_bits[1] & 0x00038000) ^ 0x00038000)) != 0;
   }
 };
 
@@ -5795,6 +5940,18 @@ SchemaItem::_Internal::lineedit(const SchemaItem* msg) {
 const ::Proto::SchemaItemSlider&
 SchemaItem::_Internal::slider(const SchemaItem* msg) {
   return *msg->slider_;
+}
+const ::Proto::SchemaItemVduLine&
+SchemaItem::_Internal::vduline(const SchemaItem* msg) {
+  return *msg->vduline_;
+}
+const ::Proto::SchemaItemVduRect&
+SchemaItem::_Internal::vdurect(const SchemaItem* msg) {
+  return *msg->vdurect_;
+}
+const ::Proto::SchemaItemVduValue&
+SchemaItem::_Internal::vduvalue(const SchemaItem* msg) {
+  return *msg->vduvalue_;
 }
 void SchemaItem::clear_uuid() {
   if (uuid_ != nullptr) uuid_->Clear();
@@ -6030,6 +6187,21 @@ SchemaItem::SchemaItem(const SchemaItem& from)
   } else {
     slider_ = nullptr;
   }
+  if (from._internal_has_vduline()) {
+    vduline_ = new ::Proto::SchemaItemVduLine(*from.vduline_);
+  } else {
+    vduline_ = nullptr;
+  }
+  if (from._internal_has_vdurect()) {
+    vdurect_ = new ::Proto::SchemaItemVduRect(*from.vdurect_);
+  } else {
+    vdurect_ = nullptr;
+  }
+  if (from._internal_has_vduvalue()) {
+    vduvalue_ = new ::Proto::SchemaItemVduValue(*from.vduvalue_);
+  } else {
+    vduvalue_ = nullptr;
+  }
   ::memcpy(&itemunit_, &from.itemunit_,
     static_cast<size_t>(reinterpret_cast<char*>(&labelpos_) -
     reinterpret_cast<char*>(&itemunit_)) + sizeof(labelpos_));
@@ -6101,6 +6273,9 @@ void SchemaItem::SharedDtor() {
   if (this != internal_default_instance()) delete pushbutton_;
   if (this != internal_default_instance()) delete lineedit_;
   if (this != internal_default_instance()) delete slider_;
+  if (this != internal_default_instance()) delete vduline_;
+  if (this != internal_default_instance()) delete vdurect_;
+  if (this != internal_default_instance()) delete vduvalue_;
 }
 
 void SchemaItem::ArenaDtor(void* object) {
@@ -6286,7 +6461,7 @@ void SchemaItem::Clear() {
       loopbacktarget_->Clear();
     }
   }
-  if (cached_has_bits & 0x00000f00u) {
+  if (cached_has_bits & 0x00007f00u) {
     if (cached_has_bits & 0x00000100u) {
       GOOGLE_DCHECK(control_ != nullptr);
       control_->Clear();
@@ -6303,14 +6478,24 @@ void SchemaItem::Clear() {
       GOOGLE_DCHECK(slider_ != nullptr);
       slider_->Clear();
     }
+    if (cached_has_bits & 0x00001000u) {
+      GOOGLE_DCHECK(vduline_ != nullptr);
+      vduline_->Clear();
+    }
+    if (cached_has_bits & 0x00002000u) {
+      GOOGLE_DCHECK(vdurect_ != nullptr);
+      vdurect_->Clear();
+    }
+    if (cached_has_bits & 0x00004000u) {
+      GOOGLE_DCHECK(vduvalue_ != nullptr);
+      vduvalue_->Clear();
+    }
   }
-  if (cached_has_bits & 0x0000f000u) {
-    ::memset(&itemunit_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&acceptclick_) -
-        reinterpret_cast<char*>(&itemunit_)) + sizeof(acceptclick_));
-  }
-  if (cached_has_bits & 0x00030000u) {
-    iscommented_ = false;
+  itemunit_ = 0;
+  if (cached_has_bits & 0x001f0000u) {
+    ::memset(&isstatic_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&iscommented_) -
+        reinterpret_cast<char*>(&isstatic_)) + sizeof(iscommented_));
     labelpos_ = 2;
   }
   _has_bits_.Clear();
@@ -6704,6 +6889,27 @@ const char* SchemaItem::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID:
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
+      // optional .Proto.SchemaItemVduLine vduLine = 300;
+      case 300:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 98)) {
+          ptr = ctx->ParseMessage(_internal_mutable_vduline(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional .Proto.SchemaItemVduRect vduRect = 301;
+      case 301:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 106)) {
+          ptr = ctx->ParseMessage(_internal_mutable_vdurect(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional .Proto.SchemaItemVduValue vduValue = 302;
+      case 302:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 114)) {
+          ptr = ctx->ParseMessage(_internal_mutable_vduvalue(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
       default: {
       handle_unusual:
         if ((tag & 7) == 4 || tag == 0) {
@@ -6743,26 +6949,26 @@ failure:
 
   cached_has_bits = _has_bits_[1];
   // required bool isStatic = 2;
-  if (cached_has_bits & 0x00002000u) {
+  if (cached_has_bits & 0x00010000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(2, this->_internal_isstatic(), target);
   }
 
   // required bool isLocked = 3;
-  if (cached_has_bits & 0x00004000u) {
+  if (cached_has_bits & 0x00020000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(3, this->_internal_islocked(), target);
   }
 
   // required .Proto.SchemaUnit itemUnit = 4;
-  if (cached_has_bits & 0x00001000u) {
+  if (cached_has_bits & 0x00008000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteEnumToArray(
       4, this->_internal_itemunit(), target);
   }
 
   // optional bool acceptClick = 5 [default = false];
-  if (cached_has_bits & 0x00008000u) {
+  if (cached_has_bits & 0x00040000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(5, this->_internal_acceptclick(), target);
   }
@@ -6780,7 +6986,7 @@ failure:
 
   cached_has_bits = _has_bits_[1];
   // optional bool isCommented = 8 [default = false];
-  if (cached_has_bits & 0x00010000u) {
+  if (cached_has_bits & 0x00080000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(8, this->_internal_iscommented(), target);
   }
@@ -6842,7 +7048,7 @@ failure:
 
   cached_has_bits = _has_bits_[1];
   // optional int32 labelPos = 15 [default = 2];
-  if (cached_has_bits & 0x00020000u) {
+  if (cached_has_bits & 0x00100000u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(15, this->_internal_labelpos(), target);
   }
@@ -7139,6 +7345,30 @@ failure:
         212, _Internal::slider(this), target, stream);
   }
 
+  // optional .Proto.SchemaItemVduLine vduLine = 300;
+  if (cached_has_bits & 0x00001000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        300, _Internal::vduline(this), target, stream);
+  }
+
+  // optional .Proto.SchemaItemVduRect vduRect = 301;
+  if (cached_has_bits & 0x00002000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        301, _Internal::vdurect(this), target, stream);
+  }
+
+  // optional .Proto.SchemaItemVduValue vduValue = 302;
+  if (cached_has_bits & 0x00004000u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        302, _Internal::vduvalue(this), target, stream);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -7181,7 +7411,7 @@ size_t SchemaItem::ByteSizeLong() const {
   size_t total_size = 0;
 
   if ((((_has_bits_[0] & 0x00000020) ^ 0x00000020)
-       | ((_has_bits_[1] & 0x00007000) ^ 0x00007000)) == 0) {  // All required fields are present.
+       | ((_has_bits_[1] & 0x00038000) ^ 0x00038000)) == 0) {  // All required fields are present.
     // required .Proto.Uuid uuid = 1;
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
@@ -7491,7 +7721,7 @@ size_t SchemaItem::ByteSizeLong() const {
     }
 
   }
-  if (cached_has_bits & 0x00000f00u) {
+  if (cached_has_bits & 0x00007f00u) {
     // optional .Proto.SchemaItemControl control = 200;
     if (cached_has_bits & 0x00000100u) {
       total_size += 2 +
@@ -7520,20 +7750,41 @@ size_t SchemaItem::ByteSizeLong() const {
           *slider_);
     }
 
-  }
-  // optional bool acceptClick = 5 [default = false];
-  if (cached_has_bits & 0x00008000u) {
-    total_size += 1 + 1;
-  }
+    // optional .Proto.SchemaItemVduLine vduLine = 300;
+    if (cached_has_bits & 0x00001000u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *vduline_);
+    }
 
-  if (cached_has_bits & 0x00030000u) {
+    // optional .Proto.SchemaItemVduRect vduRect = 301;
+    if (cached_has_bits & 0x00002000u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *vdurect_);
+    }
+
+    // optional .Proto.SchemaItemVduValue vduValue = 302;
+    if (cached_has_bits & 0x00004000u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+          *vduvalue_);
+    }
+
+  }
+  if (cached_has_bits & 0x001c0000u) {
+    // optional bool acceptClick = 5 [default = false];
+    if (cached_has_bits & 0x00040000u) {
+      total_size += 1 + 1;
+    }
+
     // optional bool isCommented = 8 [default = false];
-    if (cached_has_bits & 0x00010000u) {
+    if (cached_has_bits & 0x00080000u) {
       total_size += 1 + 1;
     }
 
     // optional int32 labelPos = 15 [default = 2];
-    if (cached_has_bits & 0x00020000u) {
+    if (cached_has_bits & 0x00100000u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
           this->_internal_labelpos());
@@ -7717,24 +7968,33 @@ void SchemaItem::MergeFrom(const SchemaItem& from) {
       _internal_mutable_slider()->::Proto::SchemaItemSlider::MergeFrom(from._internal_slider());
     }
     if (cached_has_bits & 0x00001000u) {
-      itemunit_ = from.itemunit_;
+      _internal_mutable_vduline()->::Proto::SchemaItemVduLine::MergeFrom(from._internal_vduline());
     }
     if (cached_has_bits & 0x00002000u) {
-      isstatic_ = from.isstatic_;
+      _internal_mutable_vdurect()->::Proto::SchemaItemVduRect::MergeFrom(from._internal_vdurect());
     }
     if (cached_has_bits & 0x00004000u) {
-      islocked_ = from.islocked_;
+      _internal_mutable_vduvalue()->::Proto::SchemaItemVduValue::MergeFrom(from._internal_vduvalue());
     }
     if (cached_has_bits & 0x00008000u) {
-      acceptclick_ = from.acceptclick_;
+      itemunit_ = from.itemunit_;
     }
     _has_bits_[1] |= cached_has_bits;
   }
-  if (cached_has_bits & 0x00030000u) {
+  if (cached_has_bits & 0x001f0000u) {
     if (cached_has_bits & 0x00010000u) {
-      iscommented_ = from.iscommented_;
+      isstatic_ = from.isstatic_;
     }
     if (cached_has_bits & 0x00020000u) {
+      islocked_ = from.islocked_;
+    }
+    if (cached_has_bits & 0x00040000u) {
+      acceptclick_ = from.acceptclick_;
+    }
+    if (cached_has_bits & 0x00080000u) {
+      iscommented_ = from.iscommented_;
+    }
+    if (cached_has_bits & 0x00100000u) {
       labelpos_ = from.labelpos_;
     }
     _has_bits_[1] |= cached_has_bits;
@@ -24012,6 +24272,1184 @@ void SchemaItemSlider::InternalSwap(SchemaItemSlider* other) {
 
 // ===================================================================
 
+class SchemaItemVduLine::_Internal {
+ public:
+  using HasBits = decltype(std::declval<SchemaItemVduLine>()._has_bits_);
+  static void set_has_weight(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
+  static void set_has_linecolor(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
+};
+
+SchemaItemVduLine::SchemaItemVduLine(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:Proto.SchemaItemVduLine)
+}
+SchemaItemVduLine::SchemaItemVduLine(const SchemaItemVduLine& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message(),
+      _has_bits_(from._has_bits_) {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::memcpy(&weight_, &from.weight_,
+    static_cast<size_t>(reinterpret_cast<char*>(&linecolor_) -
+    reinterpret_cast<char*>(&weight_)) + sizeof(linecolor_));
+  // @@protoc_insertion_point(copy_constructor:Proto.SchemaItemVduLine)
+}
+
+void SchemaItemVduLine::SharedCtor() {
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&weight_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&linecolor_) -
+    reinterpret_cast<char*>(&weight_)) + sizeof(linecolor_));
+}
+
+SchemaItemVduLine::~SchemaItemVduLine() {
+  // @@protoc_insertion_point(destructor:Proto.SchemaItemVduLine)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void SchemaItemVduLine::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+}
+
+void SchemaItemVduLine::ArenaDtor(void* object) {
+  SchemaItemVduLine* _this = reinterpret_cast< SchemaItemVduLine* >(object);
+  (void)_this;
+}
+void SchemaItemVduLine::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void SchemaItemVduLine::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void SchemaItemVduLine::Clear() {
+// @@protoc_insertion_point(message_clear_start:Proto.SchemaItemVduLine)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    ::memset(&weight_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&linecolor_) -
+        reinterpret_cast<char*>(&weight_)) + sizeof(linecolor_));
+  }
+  _has_bits_.Clear();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* SchemaItemVduLine::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  _Internal::HasBits has_bits{};
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // optional int32 weight = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
+          _Internal::set_has_weight(&has_bits);
+          weight_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional uint32 lineColor = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
+          _Internal::set_has_linecolor(&has_bits);
+          linecolor_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  _has_bits_.Or(has_bits);
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* SchemaItemVduLine::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:Proto.SchemaItemVduLine)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  cached_has_bits = _has_bits_[0];
+  // optional int32 weight = 1;
+  if (cached_has_bits & 0x00000001u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(1, this->_internal_weight(), target);
+  }
+
+  // optional uint32 lineColor = 2;
+  if (cached_has_bits & 0x00000002u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(2, this->_internal_linecolor(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:Proto.SchemaItemVduLine)
+  return target;
+}
+
+size_t SchemaItemVduLine::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:Proto.SchemaItemVduLine)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    // optional int32 weight = 1;
+    if (cached_has_bits & 0x00000001u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_weight());
+    }
+
+    // optional uint32 lineColor = 2;
+    if (cached_has_bits & 0x00000002u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
+          this->_internal_linecolor());
+    }
+
+  }
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void SchemaItemVduLine::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:Proto.SchemaItemVduLine)
+  GOOGLE_DCHECK_NE(&from, this);
+  const SchemaItemVduLine* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<SchemaItemVduLine>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.SchemaItemVduLine)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.SchemaItemVduLine)
+    MergeFrom(*source);
+  }
+}
+
+void SchemaItemVduLine::MergeFrom(const SchemaItemVduLine& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:Proto.SchemaItemVduLine)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  cached_has_bits = from._has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    if (cached_has_bits & 0x00000001u) {
+      weight_ = from.weight_;
+    }
+    if (cached_has_bits & 0x00000002u) {
+      linecolor_ = from.linecolor_;
+    }
+    _has_bits_[0] |= cached_has_bits;
+  }
+}
+
+void SchemaItemVduLine::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:Proto.SchemaItemVduLine)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void SchemaItemVduLine::CopyFrom(const SchemaItemVduLine& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:Proto.SchemaItemVduLine)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool SchemaItemVduLine::IsInitialized() const {
+  return true;
+}
+
+void SchemaItemVduLine::InternalSwap(SchemaItemVduLine* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  swap(_has_bits_[0], other->_has_bits_[0]);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(SchemaItemVduLine, linecolor_)
+      + sizeof(SchemaItemVduLine::linecolor_)
+      - PROTOBUF_FIELD_OFFSET(SchemaItemVduLine, weight_)>(
+          reinterpret_cast<char*>(&weight_),
+          reinterpret_cast<char*>(&other->weight_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata SchemaItemVduLine::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
+class SchemaItemVduRect::_Internal {
+ public:
+  using HasBits = decltype(std::declval<SchemaItemVduRect>()._has_bits_);
+  static void set_has_weight(HasBits* has_bits) {
+    (*has_bits)[0] |= 4u;
+  }
+  static void set_has_fill(HasBits* has_bits) {
+    (*has_bits)[0] |= 8u;
+  }
+  static void set_has_drawrect(HasBits* has_bits) {
+    (*has_bits)[0] |= 16u;
+  }
+  static void set_has_linecolor(HasBits* has_bits) {
+    (*has_bits)[0] |= 32u;
+  }
+  static void set_has_fillcolor(HasBits* has_bits) {
+    (*has_bits)[0] |= 64u;
+  }
+  static void set_has_textcolor(HasBits* has_bits) {
+    (*has_bits)[0] |= 256u;
+  }
+  static void set_has_fontname(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
+  static void set_has_text(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
+  static void set_has_horzalign(HasBits* has_bits) {
+    (*has_bits)[0] |= 512u;
+  }
+  static void set_has_vertalign(HasBits* has_bits) {
+    (*has_bits)[0] |= 128u;
+  }
+};
+
+SchemaItemVduRect::SchemaItemVduRect(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:Proto.SchemaItemVduRect)
+}
+SchemaItemVduRect::SchemaItemVduRect(const SchemaItemVduRect& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message(),
+      _has_bits_(from._has_bits_) {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  fontname_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_fontname()) {
+    fontname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_fontname(), 
+      GetArena());
+  }
+  text_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_text()) {
+    text_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_text(), 
+      GetArena());
+  }
+  ::memcpy(&weight_, &from.weight_,
+    static_cast<size_t>(reinterpret_cast<char*>(&horzalign_) -
+    reinterpret_cast<char*>(&weight_)) + sizeof(horzalign_));
+  // @@protoc_insertion_point(copy_constructor:Proto.SchemaItemVduRect)
+}
+
+void SchemaItemVduRect::SharedCtor() {
+fontname_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+text_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&weight_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&horzalign_) -
+    reinterpret_cast<char*>(&weight_)) + sizeof(horzalign_));
+}
+
+SchemaItemVduRect::~SchemaItemVduRect() {
+  // @@protoc_insertion_point(destructor:Proto.SchemaItemVduRect)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void SchemaItemVduRect::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  fontname_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  text_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+}
+
+void SchemaItemVduRect::ArenaDtor(void* object) {
+  SchemaItemVduRect* _this = reinterpret_cast< SchemaItemVduRect* >(object);
+  (void)_this;
+}
+void SchemaItemVduRect::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void SchemaItemVduRect::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void SchemaItemVduRect::Clear() {
+// @@protoc_insertion_point(message_clear_start:Proto.SchemaItemVduRect)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    if (cached_has_bits & 0x00000001u) {
+      fontname_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000002u) {
+      text_.ClearNonDefaultToEmpty();
+    }
+  }
+  if (cached_has_bits & 0x000000fcu) {
+    ::memset(&weight_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&vertalign_) -
+        reinterpret_cast<char*>(&weight_)) + sizeof(vertalign_));
+  }
+  if (cached_has_bits & 0x00000300u) {
+    ::memset(&textcolor_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&horzalign_) -
+        reinterpret_cast<char*>(&textcolor_)) + sizeof(horzalign_));
+  }
+  _has_bits_.Clear();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* SchemaItemVduRect::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  _Internal::HasBits has_bits{};
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // optional int32 weight = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
+          _Internal::set_has_weight(&has_bits);
+          weight_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional bool fill = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
+          _Internal::set_has_fill(&has_bits);
+          fill_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional bool drawrect = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 40)) {
+          _Internal::set_has_drawrect(&has_bits);
+          drawrect_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional uint32 lineColor = 10;
+      case 10:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 80)) {
+          _Internal::set_has_linecolor(&has_bits);
+          linecolor_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional uint32 fillColor = 11;
+      case 11:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 88)) {
+          _Internal::set_has_fillcolor(&has_bits);
+          fillcolor_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional uint32 textColor = 12;
+      case 12:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 96)) {
+          _Internal::set_has_textcolor(&has_bits);
+          textcolor_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional string fontName = 16;
+      case 16:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 130)) {
+          auto str = _internal_mutable_fontname();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.SchemaItemVduRect.fontName");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional string text = 17;
+      case 17:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 138)) {
+          auto str = _internal_mutable_text();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.SchemaItemVduRect.text");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int32 horzAlign = 20;
+      case 20:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 160)) {
+          _Internal::set_has_horzalign(&has_bits);
+          horzalign_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int32 vertAlign = 21;
+      case 21:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 168)) {
+          _Internal::set_has_vertalign(&has_bits);
+          vertalign_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  _has_bits_.Or(has_bits);
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* SchemaItemVduRect::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:Proto.SchemaItemVduRect)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  cached_has_bits = _has_bits_[0];
+  // optional int32 weight = 3;
+  if (cached_has_bits & 0x00000004u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(3, this->_internal_weight(), target);
+  }
+
+  // optional bool fill = 4;
+  if (cached_has_bits & 0x00000008u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(4, this->_internal_fill(), target);
+  }
+
+  // optional bool drawrect = 5;
+  if (cached_has_bits & 0x00000010u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(5, this->_internal_drawrect(), target);
+  }
+
+  // optional uint32 lineColor = 10;
+  if (cached_has_bits & 0x00000020u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(10, this->_internal_linecolor(), target);
+  }
+
+  // optional uint32 fillColor = 11;
+  if (cached_has_bits & 0x00000040u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(11, this->_internal_fillcolor(), target);
+  }
+
+  // optional uint32 textColor = 12;
+  if (cached_has_bits & 0x00000100u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(12, this->_internal_textcolor(), target);
+  }
+
+  // optional string fontName = 16;
+  if (cached_has_bits & 0x00000001u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_fontname().data(), static_cast<int>(this->_internal_fontname().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Proto.SchemaItemVduRect.fontName");
+    target = stream->WriteStringMaybeAliased(
+        16, this->_internal_fontname(), target);
+  }
+
+  // optional string text = 17;
+  if (cached_has_bits & 0x00000002u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_text().data(), static_cast<int>(this->_internal_text().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Proto.SchemaItemVduRect.text");
+    target = stream->WriteStringMaybeAliased(
+        17, this->_internal_text(), target);
+  }
+
+  // optional int32 horzAlign = 20;
+  if (cached_has_bits & 0x00000200u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(20, this->_internal_horzalign(), target);
+  }
+
+  // optional int32 vertAlign = 21;
+  if (cached_has_bits & 0x00000080u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(21, this->_internal_vertalign(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:Proto.SchemaItemVduRect)
+  return target;
+}
+
+size_t SchemaItemVduRect::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:Proto.SchemaItemVduRect)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x000000ffu) {
+    // optional string fontName = 16;
+    if (cached_has_bits & 0x00000001u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_fontname());
+    }
+
+    // optional string text = 17;
+    if (cached_has_bits & 0x00000002u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_text());
+    }
+
+    // optional int32 weight = 3;
+    if (cached_has_bits & 0x00000004u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_weight());
+    }
+
+    // optional bool fill = 4;
+    if (cached_has_bits & 0x00000008u) {
+      total_size += 1 + 1;
+    }
+
+    // optional bool drawrect = 5;
+    if (cached_has_bits & 0x00000010u) {
+      total_size += 1 + 1;
+    }
+
+    // optional uint32 lineColor = 10;
+    if (cached_has_bits & 0x00000020u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
+          this->_internal_linecolor());
+    }
+
+    // optional uint32 fillColor = 11;
+    if (cached_has_bits & 0x00000040u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
+          this->_internal_fillcolor());
+    }
+
+    // optional int32 vertAlign = 21;
+    if (cached_has_bits & 0x00000080u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_vertalign());
+    }
+
+  }
+  if (cached_has_bits & 0x00000300u) {
+    // optional uint32 textColor = 12;
+    if (cached_has_bits & 0x00000100u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
+          this->_internal_textcolor());
+    }
+
+    // optional int32 horzAlign = 20;
+    if (cached_has_bits & 0x00000200u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_horzalign());
+    }
+
+  }
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void SchemaItemVduRect::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:Proto.SchemaItemVduRect)
+  GOOGLE_DCHECK_NE(&from, this);
+  const SchemaItemVduRect* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<SchemaItemVduRect>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.SchemaItemVduRect)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.SchemaItemVduRect)
+    MergeFrom(*source);
+  }
+}
+
+void SchemaItemVduRect::MergeFrom(const SchemaItemVduRect& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:Proto.SchemaItemVduRect)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  cached_has_bits = from._has_bits_[0];
+  if (cached_has_bits & 0x000000ffu) {
+    if (cached_has_bits & 0x00000001u) {
+      _internal_set_fontname(from._internal_fontname());
+    }
+    if (cached_has_bits & 0x00000002u) {
+      _internal_set_text(from._internal_text());
+    }
+    if (cached_has_bits & 0x00000004u) {
+      weight_ = from.weight_;
+    }
+    if (cached_has_bits & 0x00000008u) {
+      fill_ = from.fill_;
+    }
+    if (cached_has_bits & 0x00000010u) {
+      drawrect_ = from.drawrect_;
+    }
+    if (cached_has_bits & 0x00000020u) {
+      linecolor_ = from.linecolor_;
+    }
+    if (cached_has_bits & 0x00000040u) {
+      fillcolor_ = from.fillcolor_;
+    }
+    if (cached_has_bits & 0x00000080u) {
+      vertalign_ = from.vertalign_;
+    }
+    _has_bits_[0] |= cached_has_bits;
+  }
+  if (cached_has_bits & 0x00000300u) {
+    if (cached_has_bits & 0x00000100u) {
+      textcolor_ = from.textcolor_;
+    }
+    if (cached_has_bits & 0x00000200u) {
+      horzalign_ = from.horzalign_;
+    }
+    _has_bits_[0] |= cached_has_bits;
+  }
+}
+
+void SchemaItemVduRect::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:Proto.SchemaItemVduRect)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void SchemaItemVduRect::CopyFrom(const SchemaItemVduRect& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:Proto.SchemaItemVduRect)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool SchemaItemVduRect::IsInitialized() const {
+  return true;
+}
+
+void SchemaItemVduRect::InternalSwap(SchemaItemVduRect* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  swap(_has_bits_[0], other->_has_bits_[0]);
+  fontname_.Swap(&other->fontname_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  text_.Swap(&other->text_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(SchemaItemVduRect, horzalign_)
+      + sizeof(SchemaItemVduRect::horzalign_)
+      - PROTOBUF_FIELD_OFFSET(SchemaItemVduRect, weight_)>(
+          reinterpret_cast<char*>(&weight_),
+          reinterpret_cast<char*>(&other->weight_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata SchemaItemVduRect::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
+class SchemaItemVduValue::_Internal {
+ public:
+  using HasBits = decltype(std::declval<SchemaItemVduValue>()._has_bits_);
+  static void set_has_weight(HasBits* has_bits) {
+    (*has_bits)[0] |= 4u;
+  }
+  static void set_has_drawrect(HasBits* has_bits) {
+    (*has_bits)[0] |= 8u;
+  }
+  static void set_has_linecolor(HasBits* has_bits) {
+    (*has_bits)[0] |= 32u;
+  }
+  static void set_has_fillcolor(HasBits* has_bits) {
+    (*has_bits)[0] |= 64u;
+  }
+  static void set_has_textcolor(HasBits* has_bits) {
+    (*has_bits)[0] |= 16u;
+  }
+  static void set_has_fontname(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
+  static void set_has_appsignalid(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
+};
+
+SchemaItemVduValue::SchemaItemVduValue(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:Proto.SchemaItemVduValue)
+}
+SchemaItemVduValue::SchemaItemVduValue(const SchemaItemVduValue& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message(),
+      _has_bits_(from._has_bits_) {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  fontname_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_fontname()) {
+    fontname_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_fontname(), 
+      GetArena());
+  }
+  appsignalid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_appsignalid()) {
+    appsignalid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_appsignalid(), 
+      GetArena());
+  }
+  ::memcpy(&weight_, &from.weight_,
+    static_cast<size_t>(reinterpret_cast<char*>(&fillcolor_) -
+    reinterpret_cast<char*>(&weight_)) + sizeof(fillcolor_));
+  // @@protoc_insertion_point(copy_constructor:Proto.SchemaItemVduValue)
+}
+
+void SchemaItemVduValue::SharedCtor() {
+fontname_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+appsignalid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&weight_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&fillcolor_) -
+    reinterpret_cast<char*>(&weight_)) + sizeof(fillcolor_));
+}
+
+SchemaItemVduValue::~SchemaItemVduValue() {
+  // @@protoc_insertion_point(destructor:Proto.SchemaItemVduValue)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void SchemaItemVduValue::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  fontname_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  appsignalid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+}
+
+void SchemaItemVduValue::ArenaDtor(void* object) {
+  SchemaItemVduValue* _this = reinterpret_cast< SchemaItemVduValue* >(object);
+  (void)_this;
+}
+void SchemaItemVduValue::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void SchemaItemVduValue::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void SchemaItemVduValue::Clear() {
+// @@protoc_insertion_point(message_clear_start:Proto.SchemaItemVduValue)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    if (cached_has_bits & 0x00000001u) {
+      fontname_.ClearNonDefaultToEmpty();
+    }
+    if (cached_has_bits & 0x00000002u) {
+      appsignalid_.ClearNonDefaultToEmpty();
+    }
+  }
+  if (cached_has_bits & 0x0000007cu) {
+    ::memset(&weight_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&fillcolor_) -
+        reinterpret_cast<char*>(&weight_)) + sizeof(fillcolor_));
+  }
+  _has_bits_.Clear();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* SchemaItemVduValue::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  _Internal::HasBits has_bits{};
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // optional int32 weight = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
+          _Internal::set_has_weight(&has_bits);
+          weight_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional bool drawrect = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 40)) {
+          _Internal::set_has_drawrect(&has_bits);
+          drawrect_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional uint32 lineColor = 10;
+      case 10:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 80)) {
+          _Internal::set_has_linecolor(&has_bits);
+          linecolor_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional uint32 fillColor = 11;
+      case 11:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 88)) {
+          _Internal::set_has_fillcolor(&has_bits);
+          fillcolor_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional uint32 textColor = 12;
+      case 12:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 96)) {
+          _Internal::set_has_textcolor(&has_bits);
+          textcolor_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional string fontName = 16;
+      case 16:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 130)) {
+          auto str = _internal_mutable_fontname();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.SchemaItemVduValue.fontName");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional string appSignalId = 17;
+      case 17:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 138)) {
+          auto str = _internal_mutable_appsignalid();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.SchemaItemVduValue.appSignalId");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  _has_bits_.Or(has_bits);
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* SchemaItemVduValue::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:Proto.SchemaItemVduValue)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  cached_has_bits = _has_bits_[0];
+  // optional int32 weight = 3;
+  if (cached_has_bits & 0x00000004u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(3, this->_internal_weight(), target);
+  }
+
+  // optional bool drawrect = 5;
+  if (cached_has_bits & 0x00000008u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(5, this->_internal_drawrect(), target);
+  }
+
+  // optional uint32 lineColor = 10;
+  if (cached_has_bits & 0x00000020u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(10, this->_internal_linecolor(), target);
+  }
+
+  // optional uint32 fillColor = 11;
+  if (cached_has_bits & 0x00000040u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(11, this->_internal_fillcolor(), target);
+  }
+
+  // optional uint32 textColor = 12;
+  if (cached_has_bits & 0x00000010u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(12, this->_internal_textcolor(), target);
+  }
+
+  // optional string fontName = 16;
+  if (cached_has_bits & 0x00000001u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_fontname().data(), static_cast<int>(this->_internal_fontname().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Proto.SchemaItemVduValue.fontName");
+    target = stream->WriteStringMaybeAliased(
+        16, this->_internal_fontname(), target);
+  }
+
+  // optional string appSignalId = 17;
+  if (cached_has_bits & 0x00000002u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_appsignalid().data(), static_cast<int>(this->_internal_appsignalid().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Proto.SchemaItemVduValue.appSignalId");
+    target = stream->WriteStringMaybeAliased(
+        17, this->_internal_appsignalid(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:Proto.SchemaItemVduValue)
+  return target;
+}
+
+size_t SchemaItemVduValue::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:Proto.SchemaItemVduValue)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x0000007fu) {
+    // optional string fontName = 16;
+    if (cached_has_bits & 0x00000001u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_fontname());
+    }
+
+    // optional string appSignalId = 17;
+    if (cached_has_bits & 0x00000002u) {
+      total_size += 2 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_appsignalid());
+    }
+
+    // optional int32 weight = 3;
+    if (cached_has_bits & 0x00000004u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_weight());
+    }
+
+    // optional bool drawrect = 5;
+    if (cached_has_bits & 0x00000008u) {
+      total_size += 1 + 1;
+    }
+
+    // optional uint32 textColor = 12;
+    if (cached_has_bits & 0x00000010u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
+          this->_internal_textcolor());
+    }
+
+    // optional uint32 lineColor = 10;
+    if (cached_has_bits & 0x00000020u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
+          this->_internal_linecolor());
+    }
+
+    // optional uint32 fillColor = 11;
+    if (cached_has_bits & 0x00000040u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
+          this->_internal_fillcolor());
+    }
+
+  }
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void SchemaItemVduValue::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:Proto.SchemaItemVduValue)
+  GOOGLE_DCHECK_NE(&from, this);
+  const SchemaItemVduValue* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<SchemaItemVduValue>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:Proto.SchemaItemVduValue)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:Proto.SchemaItemVduValue)
+    MergeFrom(*source);
+  }
+}
+
+void SchemaItemVduValue::MergeFrom(const SchemaItemVduValue& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:Proto.SchemaItemVduValue)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  cached_has_bits = from._has_bits_[0];
+  if (cached_has_bits & 0x0000007fu) {
+    if (cached_has_bits & 0x00000001u) {
+      _internal_set_fontname(from._internal_fontname());
+    }
+    if (cached_has_bits & 0x00000002u) {
+      _internal_set_appsignalid(from._internal_appsignalid());
+    }
+    if (cached_has_bits & 0x00000004u) {
+      weight_ = from.weight_;
+    }
+    if (cached_has_bits & 0x00000008u) {
+      drawrect_ = from.drawrect_;
+    }
+    if (cached_has_bits & 0x00000010u) {
+      textcolor_ = from.textcolor_;
+    }
+    if (cached_has_bits & 0x00000020u) {
+      linecolor_ = from.linecolor_;
+    }
+    if (cached_has_bits & 0x00000040u) {
+      fillcolor_ = from.fillcolor_;
+    }
+    _has_bits_[0] |= cached_has_bits;
+  }
+}
+
+void SchemaItemVduValue::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:Proto.SchemaItemVduValue)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void SchemaItemVduValue::CopyFrom(const SchemaItemVduValue& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:Proto.SchemaItemVduValue)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool SchemaItemVduValue::IsInitialized() const {
+  return true;
+}
+
+void SchemaItemVduValue::InternalSwap(SchemaItemVduValue* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  swap(_has_bits_[0], other->_has_bits_[0]);
+  fontname_.Swap(&other->fontname_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  appsignalid_.Swap(&other->appsignalid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(SchemaItemVduValue, fillcolor_)
+      + sizeof(SchemaItemVduValue::fillcolor_)
+      - PROTOBUF_FIELD_OFFSET(SchemaItemVduValue, weight_)>(
+          reinterpret_cast<char*>(&weight_),
+          reinterpret_cast<char*>(&other->weight_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata SchemaItemVduValue::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
 class SchemaDetailsSet::_Internal {
  public:
 };
@@ -26322,6 +27760,15 @@ template<> PROTOBUF_NOINLINE ::Proto::SchemaItemLineEdit* Arena::CreateMaybeMess
 }
 template<> PROTOBUF_NOINLINE ::Proto::SchemaItemSlider* Arena::CreateMaybeMessage< ::Proto::SchemaItemSlider >(Arena* arena) {
   return Arena::CreateMessageInternal< ::Proto::SchemaItemSlider >(arena);
+}
+template<> PROTOBUF_NOINLINE ::Proto::SchemaItemVduLine* Arena::CreateMaybeMessage< ::Proto::SchemaItemVduLine >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::Proto::SchemaItemVduLine >(arena);
+}
+template<> PROTOBUF_NOINLINE ::Proto::SchemaItemVduRect* Arena::CreateMaybeMessage< ::Proto::SchemaItemVduRect >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::Proto::SchemaItemVduRect >(arena);
+}
+template<> PROTOBUF_NOINLINE ::Proto::SchemaItemVduValue* Arena::CreateMaybeMessage< ::Proto::SchemaItemVduValue >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::Proto::SchemaItemVduValue >(arena);
 }
 template<> PROTOBUF_NOINLINE ::Proto::SchemaDetailsSet* Arena::CreateMaybeMessage< ::Proto::SchemaDetailsSet >(Arena* arena) {
   return Arena::CreateMessageInternal< ::Proto::SchemaDetailsSet >(arena);
