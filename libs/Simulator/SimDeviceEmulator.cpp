@@ -1002,7 +1002,37 @@ namespace Sim
 								  false,
 								  QLatin1String("Output App Data"));
 
+		// Init memory for validity signals (set to 1).
+		//
+		ok &= initValiditySignals();
+
 		return ok;
+	}
+
+	// Write 1 to all validity of input signals 
+	//
+	bool DeviceEmulator::initValiditySignals()
+	{
+		bool result = true;
+		const Sim::AppSignalManagerImpl& appSignalManager = m_simulator->appSignalManager();
+
+		auto validityOffsets = appSignalManager.validityInputSignals(equipmentId());
+
+		for (const auto& offset : validityOffsets)
+		{
+			bool ok = m_ram.writeBit(offset.address.offset(), offset.address.bit(), 1, E::ByteOrder::BigEndian, offset.ramAccess);
+
+			if (ok == false)
+			{
+				m_log.writeError(QString("Error writing validity signal, offset %1, bit %2, RamAccess %2")
+									 .arg(offset.address.offset())
+									 .arg(offset.address.bit())
+									 .arg(E::valueToString(offset.ramAccess)));
+				result = false;
+			}
+		}
+
+		return result;
 	}
 
 	bool DeviceEmulator::initEeprom()

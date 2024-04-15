@@ -64,6 +64,16 @@ namespace Sim
 
 		bool getUpdateForRam(const QString& equipmentId, Sim::Ram* ram) const;
 
+		struct ValiditySignal
+		{
+			Hash signalHash;                   // Hash of the signal to which validity is applied (not the validity signal itself).
+			Address16 address;                 // Address of the validity signal.
+			E::LogicModuleRamAccess ramAccess; // The RAM type for address.
+		};
+
+		/// @brief Returns validity offsets for the input signals of the specified logic module equipment.
+		std::vector<ValiditySignal> validityInputSignals(const QString& lmEquipmentId) const;
+
 	public:
 		// Implementing IAppSignalManager - AppSignals
 		//
@@ -133,7 +143,7 @@ namespace Sim
 		mutable QReadWriteLock m_ramLock{QReadWriteLock::Recursive};
 		std::map<Hash, Ram> m_ram;									// key is hash EquipmentID
 		std::map<Hash, Times> m_ramTimes;							// RAM memory update time - key is hash EquipmentID
-		std::unordered_map<Hash, FlagsReadStruct> m_flagsStruct;	// Signnal has a set of flags, which are signals itself, this structure contains addressed for such flag signals
+		std::unordered_map<Hash, FlagsReadStruct> m_flagsStruct;	// Signal has a set of flags, which are signals itself, this structure contains addressed for such flag signals
 
 		// Realtime trends data
 		//

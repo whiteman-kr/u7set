@@ -206,6 +206,8 @@ namespace Sim
 		//
 	private:
 		bool initMemory();
+		bool initValiditySignals(); // Sets validity for input signals to 1. Users do not want to set many validities on simulation start.
+
 		bool initEeprom();
 		bool parseAppLogicCode();
 		bool parseCommand(const LmCommand& command, int programCounter);
