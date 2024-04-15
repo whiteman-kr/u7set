@@ -75,4 +75,23 @@ module E {
 		AlignVCenter = 0x80,	/**< AlignVCenter = 0x80*/
 		AlignBaseline = 0x100	/**< AlignBaseline = 0x100*/
 	}
+
+	export enum SoftwareType
+	{
+		Unknown = 8000,
+		BaseService = 8999,
+		Monitor = 9000,
+		ConfigurationService = 9001,
+		AppDataService = 9002,
+		ArchiveService = 9003,
+		TuningService = 9004,
+		DiagDataService = 9005,
+		TuningClient = 9006,
+		Metrology = 9007,
+		ServiceControlManager = 9008,
+		TestClient = 9009,
+		TestSuite = 9010,
+		GatewayService = 9011,
+		Diagnostics = 9012
+	};
 }
