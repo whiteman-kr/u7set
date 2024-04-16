@@ -110,6 +110,7 @@ public:
 	bool saveToProto(Network::DataSourceInfo* protoInfo) const;
 	bool loadFromProto(const Network::DataSourceInfo& proto);
 
+	static QString getTimeStr(qint64 timeMs);
 	//
 
 private:

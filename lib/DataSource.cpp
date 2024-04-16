@@ -390,6 +390,23 @@ bool DataSource::loadFromProto(const Network::DataSourceInfo& proto)
 	return true;
 }
 
+QString DataSource::getTimeStr(qint64 timeMs)
+{
+	QDateTime dt = QDateTime::fromMSecsSinceEpoch(timeMs, Qt::UTC, 0);
+
+	QDate date = dt.date();
+	QTime time = dt.time();
+
+	return 	QString(FormatStr::DATE_TIME_FORMAT_STR).
+		arg(time.hour(), 2, 10, QLatin1Char('0')).
+		arg(time.minute(), 2, 10, QLatin1Char('0')).
+		arg(time.second(), 2, 10, QLatin1Char('0')).
+		arg(time.msec(), 3, 10, QLatin1Char('0')).
+		arg(date.day(), 2, 10, QLatin1Char('0')).
+		arg(date.month(), 2, 10, QLatin1Char('0')).
+		arg(date.year(), 4, 10, QLatin1Char('0'));
+}
+
 quint64 DataSource::generateID() const
 {
 	if (m_lanControllersInfo().size() == 0)
@@ -698,23 +715,6 @@ QString DataSourceOnline::stateStr() const
 QString DataSourceOnline::rupFramePlantTimeStr() const
 {
 	return getTimeStr(m_lmTime);
-}
-
-QString DataSourceOnline::getTimeStr(qint64 timeMs)
-{
-	QDateTime dt = QDateTime::fromMSecsSinceEpoch(timeMs, Qt::UTC, 0);
-
-	QDate date = dt.date();
-	QTime time = dt.time();
-
-	return 	QString(FormatStr::DATE_TIME_FORMAT_STR).
-				arg(time.hour(), 2, 10, QLatin1Char('0')).
-				arg(time.minute(), 2, 10, QLatin1Char('0')).
-				arg(time.second(), 2, 10, QLatin1Char('0')).
-				arg(time.msec(), 3, 10, QLatin1Char('0')).
-				arg(date.day(), 2, 10, QLatin1Char('0')).
-				arg(date.month(), 2, 10, QLatin1Char('0')).
-				arg(date.year(), 4, 10, QLatin1Char('0'));
 }
 
 QString DataSourceOnline::getTimeStr(const Rup::TimeStamp& ts)

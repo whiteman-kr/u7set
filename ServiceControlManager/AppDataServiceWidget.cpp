@@ -277,7 +277,7 @@ DataSourcesStateModel::~DataSourcesStateModel()
 
 int DataSourcesStateModel::rowCount(const QModelIndex&) const
 {
-	return static_cast<int>(m_dataSource.count());
+	return static_cast<int>(m_dataSources.size());
 }
 
 int DataSourcesStateModel::columnCount(const QModelIndex&) const
@@ -289,12 +289,13 @@ int DataSourcesStateModel::columnCount(const QModelIndex&) const
 QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 {
 	int row = index.row();
-	if (row < 0 || row > m_dataSource.count())
+	if (row < 0 || row > rowCount())
 	{
 		return QVariant();
 	}
 
-	const AppDataSource& source = *m_dataSource[row];
+	const DataSource& source = m_dataSources[row].first;
+	const Network::AppDataSourceState& state = m_dataSources[row].second;
 
 	switch (role)
 	{
@@ -320,37 +321,38 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 										arg(source.lanControllersInfo()[0].rupAppDataUID,
 											sizeof(source.lanControllersInfo()[0].rupAppDataUID) * 2, 16, QChar('0')).toUpper();
 				case DSC_UNIQUE_ID: return "0x" + QString("%1").arg(source.moduleUniqueID(), sizeof(source.moduleUniqueID()) * 2, 16, QChar('0')).toUpper();
-				case DSC_STATE: return source.stateStr();
+				case DSC_STATE: return state.receivesdata() ? "Receive data" : "No data";
 
 				// DataSourceState
 				//
-				case DSC_UPTIME: return formatUptime(source.uptime());
-				case DSC_RECEIVED: return source.receivedDataSize();
-				case DSC_SPEED: return source.dataReceivingSpeed();
-				case DSC_RECEIVES_DATA: return source.receivesData();
-				case DSC_RECEIVED_DATA_ID: return "0x" + QString("%1").arg(source.receivedDataID(), sizeof(source.receivedDataID()) * 2, 16, QChar('0')).toUpper();
+				case DSC_UPTIME: return formatUptime(state.uptime());
+				case DSC_RECEIVED: return state.receiveddatasize();
+				case DSC_SPEED: return state.datareceivingspeed();
+				case DSC_RECEIVES_DATA: return state.receivesdata();
+				case DSC_RECEIVED_DATA_ID: return "0x" + QString("%1").arg(state.receiveddataid(),
+													sizeof(state.receiveddataid()) * 2, 16, QChar('0')).toUpper();
 
 				//
 
-				case DSC_RECEIVED_FRAMES_COUNT: return source.receivedFramesCount();
-				case DSC_RECEIVED_PACKET_COUNT: return source.receivedPacketCount();
-				case DSC_DATA_PROCESSING_ENABLED: return source.dataProcessingEnabled();
+				case DSC_RECEIVED_FRAMES_COUNT: return state.receivedframescount();
+				case DSC_RECEIVED_PACKET_COUNT: return state.receivedpacketcount();
+				case DSC_DATA_PROCESSING_ENABLED: return state.dataprocessingenabled();
 				case DSC_PROCESSED_PACKET_COUNT: return 0;
 				case DSC_LAST_PACKET_SYSTEM_TIME: return 0;
-				case DSC_RUP_FRAME_PLANT_TIME: return source.rupFramePlantTimeStr();
-				case DSC_RUP_FRAME_NUMERATOR: return source.rupFrameNumerator();
-				case DSC_SIGNAL_STATES_QUEUE_SIZE: return source.signalStatesQueueCurSize();
-				case DSC_SIGNAL_STATES_QUEUE_MAX_SIZE: return source.signalStatesQueueCurMaxSize();
-				case DSC_ACQUIRED_SIGNALS_COUNT: return source.acquiredSignalsCount();
+				case DSC_RUP_FRAME_PLANT_TIME: return source.getTimeStr(state.lmtime());
+				case DSC_RUP_FRAME_NUMERATOR: return state.rupframenumerator();
+				case DSC_SIGNAL_STATES_QUEUE_SIZE: return state.signalstatesqueuecursize();
+				case DSC_SIGNAL_STATES_QUEUE_MAX_SIZE: return state.signalstatesqueuecurmaxsize();
+				case DSC_ACQUIRED_SIGNALS_COUNT: return source.appSignalsCount();
 
-				case DSC_ERROR_PROTOCOL_VERSION: return source.errorProtocolVersion();
-				case DSC_ERROR_FRAMES_QUANTITY: return source.errorFramesQuantity();
-				case DSC_ERROR_FRAME_NOMBER: return source.errorFrameNo();
-				case DSC_LOST_PACKET_COUNT: return source.lostPacketCount();
-				case DSC_ERROR_DATA_ID: return source.errorDataID();
-				case DSC_ERROR_PLANT_TIME_FORMAT: return source.errorPlantTimeFormat();
-				case DSC_ERROR_DUPLICATE_PLANT_TIME: return source.errorDuplicatePlantTime();
-				case DSC_ERROR_NONMONOTONIC_PLANT_TIME: return source.errorNonmonotonicPlantTime();
+				case DSC_ERROR_PROTOCOL_VERSION: return state.errorprotocolversion();
+				case DSC_ERROR_FRAMES_QUANTITY: return state.errorframesquantity();
+				case DSC_ERROR_FRAME_NOMBER: return state.errorframeno();
+				case DSC_LOST_PACKET_COUNT: return state.lostpacketcount();
+				case DSC_ERROR_DATA_ID: return state.errordataid();
+				case DSC_ERROR_PLANT_TIME_FORMAT: return state.errorplanttimeformat();
+				case DSC_ERROR_DUPLICATE_PLANT_TIME: return state.errorduplicateplanttime();
+				case DSC_ERROR_NONMONOTONIC_PLANT_TIME: return state.errornonmonotonicplanttime();
 				default:
 					assert(false);
 				return QVariant();
@@ -379,7 +381,7 @@ QVariant DataSourcesStateModel::headerData(int section, Qt::Orientation orientat
 		{
 			return dataSourceColumnStr[section];
 		}
-		if (orientation == Qt::Vertical && section < m_dataSource.count())
+		if (orientation == Qt::Vertical && section < TO_INT(m_dataSources.size()))
 		{
 			return section + 1;
 		}
@@ -397,28 +399,35 @@ void DataSourcesStateModel::updateData(const QModelIndex& topLeft, const QModelI
 	emit dataChanged(topLeft, bottomRight, QVector<int>() << Qt::DisplayRole);
 }
 
-const AppDataSource* DataSourcesStateModel::getDataSource(int row) const
+const DataSource& DataSourcesStateModel::getDataSource(int row) const
 {
-	return m_dataSource[row];
+	return m_dataSources[row].first;
 }
 
 void DataSourcesStateModel::invalidateData()
 {
 	beginResetModel();
-	m_dataSource.clear();
+	m_dataSources.clear();
 	endResetModel();
 }
 
 void DataSourcesStateModel::reloadList()
 {
 	beginResetModel();
+
 	if (m_clientSocket != nullptr)
 	{
-		m_dataSource = m_clientSocket->dataSources();
-		std::sort(m_dataSource.begin(), m_dataSource.end(), [](const DataSource* ds1, const DataSource* ds2) {
-			return ds1->lanControllersInfo()[0].appDataIP32() < ds2->lanControllersInfo()[0].appDataIP32();
-		});
+		std::vector<DataSource> dss = m_clientSocket->getDataSources();
+
+		m_dataSources.clear();
+		m_dataSources.reserve(dss.size());
+
+		for(const DataSource& ds : dss)
+		{
+			m_dataSources.emplace_back(ds, Network::AppDataSourceState());
+		}
 	}
+
 	endResetModel();
 }
 
@@ -711,14 +720,13 @@ void AppDataServiceWidget::onAppDataSourceDoubleClicked(const QModelIndex &index
 	TEST_PTR_RETURN(m_tcpClientSocket);
 
 	int row = index.row();
-	const AppDataSource* ads = m_dataSourcesStateModel->getDataSource(row);
-
-	TEST_PTR_RETURN(ads);
+	const DataSource& ads = m_dataSourcesStateModel->getDataSource(row);
 
 	for (auto& sourceWidget : m_appDataSourceWidgetList)
 	{
 		TEST_PTR_CONTINUE(sourceWidget);
-		if (sourceWidget->id() == ads->moduleUniqueID() && sourceWidget->equipmentId() == ads->moduleEquipmentID())
+
+		if (sourceWidget->id() == ads.moduleUniqueID() && sourceWidget->equipmentId() == ads.moduleEquipmentID())
 		{
 			sourceWidget->show();
 			sourceWidget->raise();
@@ -728,7 +736,7 @@ void AppDataServiceWidget::onAppDataSourceDoubleClicked(const QModelIndex &index
 		}
 	}
 
-	AppDataSourceWidget* newWidget = new AppDataSourceWidget(ads->moduleUniqueID(), ads->moduleEquipmentID(), this);
+	AppDataSourceWidget* newWidget = new AppDataSourceWidget(ads.moduleUniqueID(), ads.moduleEquipmentID(), this);
 	newWidget->setClientSocket(m_tcpClientSocket);
 
 	newWidget->show();
