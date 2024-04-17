@@ -211,7 +211,7 @@ static const std::vector<dynamicPropertyFieldDefinition> dynamicPropertiesFieldL
 		QStringLiteral("Received data size, bytes"),
 		[](const Network::AppDataSourceState& state)
 		{
-			return state.receiveddatasize();
+			return static_cast<qint64>(state.receiveddatasize());
 		}
 	},
 
@@ -219,7 +219,7 @@ static const std::vector<dynamicPropertyFieldDefinition> dynamicPropertiesFieldL
 		QStringLiteral("Received frames count"),
 		[](const Network::AppDataSourceState& state)
 		{
-			return state.receivedframescount();
+			return static_cast<qint64>(state.receivedframescount());
 		}
 	},
 
@@ -227,7 +227,7 @@ static const std::vector<dynamicPropertyFieldDefinition> dynamicPropertiesFieldL
 		QStringLiteral("Received packets count"),
 		[](const Network::AppDataSourceState& state)
 		{
-			return state.receivedpacketcount();
+			return static_cast<qint64>(state.receivedpacketcount());
 		}
 	},
 
@@ -261,7 +261,7 @@ static const std::vector<dynamicPropertyFieldDefinition> dynamicPropertiesFieldL
 		QStringLiteral("Lost packet count"),
 		[](const Network::AppDataSourceState& state)
 		{
-			return state.lostpacketcount();
+			return static_cast<qint64>(state.lostpacketcount());
 		}
 	},
 
@@ -269,7 +269,7 @@ static const std::vector<dynamicPropertyFieldDefinition> dynamicPropertiesFieldL
 		QStringLiteral("Error protocol version"),
 		[](const Network::AppDataSourceState& state)
 		{
-			return state.errorprotocolversion();
+			return static_cast<qint64>(state.errorprotocolversion());
 		}
 	},
 
@@ -277,7 +277,7 @@ static const std::vector<dynamicPropertyFieldDefinition> dynamicPropertiesFieldL
 		QStringLiteral("Error frames quantity"),
 		[](const Network::AppDataSourceState& state)
 		{
-			return state.errorframesquantity();
+			return static_cast<qint64>(state.errorframesquantity());
 		}
 	},
 
@@ -285,7 +285,7 @@ static const std::vector<dynamicPropertyFieldDefinition> dynamicPropertiesFieldL
 		QStringLiteral("Error frame number"),
 		[](const Network::AppDataSourceState& state)
 		{
-			return state.errorframeno();
+			return static_cast<qint64>(state.errorframeno());
 		}
 	},
 
@@ -293,7 +293,7 @@ static const std::vector<dynamicPropertyFieldDefinition> dynamicPropertiesFieldL
 		QStringLiteral("Error frame CRC"),
 		[](const Network::AppDataSourceState& state)
 		{
-			return state.errorframecrc();
+			return static_cast<qint64>(state.errorframecrc());
 		}
 	},
 
@@ -301,7 +301,7 @@ static const std::vector<dynamicPropertyFieldDefinition> dynamicPropertiesFieldL
 		QStringLiteral("Error AppDataUID"),
 		[](const Network::AppDataSourceState& state)
 		{
-			return state.errordataid();
+			return static_cast<qint64>(state.errordataid());
 		}
 	},
 
@@ -309,7 +309,7 @@ static const std::vector<dynamicPropertyFieldDefinition> dynamicPropertiesFieldL
 		QStringLiteral("Error plant time format"),
 		[](const Network::AppDataSourceState& state)
 		{
-			return state.errorplanttimeformat();
+			return static_cast<qint64>(state.errorplanttimeformat());
 		}
 	},
 
@@ -317,7 +317,7 @@ static const std::vector<dynamicPropertyFieldDefinition> dynamicPropertiesFieldL
 		QStringLiteral("Error duplicate plant time"),
 		[](const Network::AppDataSourceState& state)
 		{
-			return state.errorduplicateplanttime();
+			return static_cast<qint64>(state.errorduplicateplanttime());
 		}
 	},
 
@@ -325,7 +325,7 @@ static const std::vector<dynamicPropertyFieldDefinition> dynamicPropertiesFieldL
 		QStringLiteral("Error non monotonic plant time"),
 		[](const Network::AppDataSourceState& state)
 		{
-			return state.errornonmonotonicplanttime();
+			return static_cast<qint64>(state.errornonmonotonicplanttime());
 		}
 	},
 };

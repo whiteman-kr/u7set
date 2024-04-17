@@ -326,7 +326,7 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 				// DataSourceState
 				//
 				case DSC_UPTIME: return formatUptime(state.uptime());
-				case DSC_RECEIVED: return state.receiveddatasize();
+				case DSC_RECEIVED: return static_cast<qint64>(state.receiveddatasize());
 				case DSC_SPEED: return state.datareceivingspeed();
 				case DSC_RECEIVES_DATA: return state.receivesdata();
 				case DSC_RECEIVED_DATA_ID: return "0x" + QString("%1").arg(state.receiveddataid(),
@@ -334,8 +334,8 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 
 				//
 
-				case DSC_RECEIVED_FRAMES_COUNT: return state.receivedframescount();
-				case DSC_RECEIVED_PACKET_COUNT: return state.receivedpacketcount();
+				case DSC_RECEIVED_FRAMES_COUNT: return static_cast<qint64>(state.receivedframescount());
+				case DSC_RECEIVED_PACKET_COUNT: return static_cast<qint64>(state.receivedpacketcount());
 				case DSC_DATA_PROCESSING_ENABLED: return state.dataprocessingenabled();
 				case DSC_PROCESSED_PACKET_COUNT: return 0;
 				case DSC_LAST_PACKET_SYSTEM_TIME: return 0;
@@ -345,14 +345,14 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 				case DSC_SIGNAL_STATES_QUEUE_MAX_SIZE: return state.signalstatesqueuecurmaxsize();
 				case DSC_ACQUIRED_SIGNALS_COUNT: return source.appSignalsCount();
 
-				case DSC_ERROR_PROTOCOL_VERSION: return state.errorprotocolversion();
-				case DSC_ERROR_FRAMES_QUANTITY: return state.errorframesquantity();
-				case DSC_ERROR_FRAME_NOMBER: return state.errorframeno();
-				case DSC_LOST_PACKET_COUNT: return state.lostpacketcount();
-				case DSC_ERROR_DATA_ID: return state.errordataid();
-				case DSC_ERROR_PLANT_TIME_FORMAT: return state.errorplanttimeformat();
-				case DSC_ERROR_DUPLICATE_PLANT_TIME: return state.errorduplicateplanttime();
-				case DSC_ERROR_NONMONOTONIC_PLANT_TIME: return state.errornonmonotonicplanttime();
+				case DSC_ERROR_PROTOCOL_VERSION: return static_cast<qint64>(state.errorprotocolversion());
+				case DSC_ERROR_FRAMES_QUANTITY: return static_cast<qint64>(state.errorframesquantity());
+				case DSC_ERROR_FRAME_NOMBER: return static_cast<qint64>(state.errorframeno());
+				case DSC_LOST_PACKET_COUNT: return static_cast<qint64>(state.lostpacketcount());
+				case DSC_ERROR_DATA_ID: return static_cast<qint64>(state.errordataid());
+				case DSC_ERROR_PLANT_TIME_FORMAT: return static_cast<qint64>(state.errorplanttimeformat());
+				case DSC_ERROR_DUPLICATE_PLANT_TIME: return static_cast<qint64>(state.errorduplicateplanttime());
+				case DSC_ERROR_NONMONOTONIC_PLANT_TIME: return static_cast<qint64>(state.errornonmonotonicplanttime());
 				default:
 					assert(false);
 				return QVariant();
