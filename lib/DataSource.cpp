@@ -407,6 +407,18 @@ QString DataSource::getTimeStr(qint64 timeMs)
 		arg(date.year(), 4, 10, QLatin1Char('0'));
 }
 
+QString DataSource::getTimeStr(const Rup::TimeStamp& ts)
+{
+	return 	QString(FormatStr::DATE_TIME_FORMAT_STR).
+		arg(ts.hour, 2, 10, QLatin1Char('0')).
+		arg(ts.minute, 2, 10, QLatin1Char('0')).
+		arg(ts.second, 2, 10, QLatin1Char('0')).
+		arg(ts.millisecond, 3, 10, QLatin1Char('0')).
+		arg(ts.day, 2, 10, QLatin1Char('0')).
+		arg(ts.month, 2, 10, QLatin1Char('0')).
+		arg(ts.year, 4, 10, QLatin1Char('0'));
+}
+
 quint64 DataSource::generateID() const
 {
 	if (m_lanControllersInfo().size() == 0)
@@ -715,18 +727,6 @@ QString DataSourceOnline::stateStr() const
 QString DataSourceOnline::rupFramePlantTimeStr() const
 {
 	return getTimeStr(m_lmTime);
-}
-
-QString DataSourceOnline::getTimeStr(const Rup::TimeStamp& ts)
-{
-	return 	QString(FormatStr::DATE_TIME_FORMAT_STR).
-				arg(ts.hour, 2, 10, QLatin1Char('0')).
-				arg(ts.minute, 2, 10, QLatin1Char('0')).
-				arg(ts.second, 2, 10, QLatin1Char('0')).
-				arg(ts.millisecond, 3, 10, QLatin1Char('0')).
-				arg(ts.day, 2, 10, QLatin1Char('0')).
-				arg(ts.month, 2, 10, QLatin1Char('0')).
-				arg(ts.year, 4, 10, QLatin1Char('0'));
 }
 
 void DataSourceOnline::clearStatistics()

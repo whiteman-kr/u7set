@@ -27,9 +27,11 @@ public:
 	void updateData(int firstRow, int lastRow, int firstColumn, int lastColumn);
 	void updateData(const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
-	void setClient(TcpAppDataClient* clientSocket) { m_clientSocket = clientSocket; }
+	void setClient(TcpAppDataClient* clientSocket);
 
 	const DataSource& getDataSource(int row) const;
+
+	void updateStates();
 
 public slots:
 	void invalidateData();

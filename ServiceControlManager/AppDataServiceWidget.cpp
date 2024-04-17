@@ -399,9 +399,22 @@ void DataSourcesStateModel::updateData(const QModelIndex& topLeft, const QModelI
 	emit dataChanged(topLeft, bottomRight, QVector<int>() << Qt::DisplayRole);
 }
 
+void DataSourcesStateModel::setClient(TcpAppDataClient* clientSocket)
+{
+	m_clientSocket = clientSocket;
+}
+
 const DataSource& DataSourcesStateModel::getDataSource(int row) const
 {
 	return m_dataSources[row].first;
+}
+
+void DataSourcesStateModel::updateStates()
+{
+	for(auto& [ds, state] : m_dataSources)
+	{
+		m_clientSocket->getDataSourceState(ds.moduleEquipmentID(), &state);
+	}
 }
 
 void DataSourcesStateModel::invalidateData()
@@ -644,22 +657,30 @@ void AppDataServiceWidget::updateSignalInfo()
 
 void AppDataServiceWidget::updateSourceStateColumns()
 {
+	m_dataSourcesStateModel->updateStates();
+
 	int firstVisibleRow = m_dataSourcesView->rowAt(0);
 
 	int lastVisibleRow = m_dataSourcesView->rowAt(m_dataSourcesView->height());
+
 	if (lastVisibleRow == -1)
 	{
 		lastVisibleRow = m_dataSourcesStateModel->rowCount() - 1;
 	}
 
-	for (int i = 0; i < DATA_SOURCE_STATE_COLUMN_COUNT; i++)
+	int firstVisibleColumn = m_dataSourcesView->columnAt(0);
+
+	int lastVisibleColumn = m_dataSourcesView->columnAt(m_dataSourcesView->width());
+
+	if (lastVisibleColumn == -1)
 	{
-		int currentColumn = dataSourceStateColumn[i];
-		m_dataSourcesStateModel->updateData(firstVisibleRow,
-											lastVisibleRow,
-											currentColumn,
-											currentColumn);
+		lastVisibleColumn = DATA_SOURCE_STATE_COLUMN_COUNT - 1;
 	}
+
+	m_dataSourcesStateModel->updateData(firstVisibleRow,
+										lastVisibleRow,
+										firstVisibleColumn,
+										lastVisibleColumn);
 }
 
 void AppDataServiceWidget::updateSignalStateColumns()

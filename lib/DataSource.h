@@ -111,6 +111,8 @@ public:
 	bool loadFromProto(const Network::DataSourceInfo& proto);
 
 	static QString getTimeStr(qint64 timeMs);
+	static QString getTimeStr(const Rup::TimeStamp& ts);
+
 	//
 
 private:
@@ -232,9 +234,6 @@ public:
 	qint64 errorDuplicatePlantTime() const { return m_errorDuplicatePlantTime; }
 	qint64 errorNonmonotonicPlantTime() const { return m_errorNonmonotonicPlantTime; }
 	qint64 errorPlantTimeFormat() const { return m_errorPlantTimeFormat; }
-
-	static QString getTimeStr(qint64 timeMs);
-	static QString getTimeStr(const Rup::TimeStamp& ts);
 
 	// Used by PacketViewer
 	//
