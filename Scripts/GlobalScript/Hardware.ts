@@ -9,7 +9,7 @@ module Hardware
         equipmentId: string;
         caption: string;
         uuid: any;
-        deviceType: number;
+        deviceType: E.DeviceType;
         place: number;
         childrenCount: number;
 
