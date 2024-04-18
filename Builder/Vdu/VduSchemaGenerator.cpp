@@ -452,6 +452,8 @@ namespace Builder
 				structLine.x2 = static_cast<decltype(structLine.x2)>(schemaItemVduLine.endXDocPt());
 				structLine.y2 = static_cast<decltype(structLine.y2)>(schemaItemVduLine.endYDocPt());
 
+				structLine.weight = static_cast<decltype(structLine.weight)>(schemaItemVduLine.weight());
+
 				structLine.color = schemaItemVduLine.lineColor().rgba();
 
 				specificData.append(reinterpret_cast<const char*>(&structLine), sizeof(structLine));
@@ -467,11 +469,12 @@ namespace Builder
 				structRect.itemType = itemType;
 
 				using PosType = decltype(VduSchemaFileSchemaItemRect1::left);
+				using SizeType = decltype(VduSchemaFileSchemaItemRect1::width);
 
 				structRect.left = static_cast<PosType>(schemaItemVduRect.leftDocPt());
 				structRect.top = static_cast<PosType>(schemaItemVduRect.topDocPt());
-				structRect.width = static_cast<PosType>(schemaItemVduRect.widthDocPt());
-				structRect.height = static_cast<PosType>(schemaItemVduRect.heightDocPt());
+				structRect.width = static_cast<SizeType>(schemaItemVduRect.widthDocPt());
+				structRect.height = static_cast<SizeType>(schemaItemVduRect.heightDocPt());
 
 				structRect.weight = static_cast<decltype(structRect.weight)>(schemaItemVduRect.weight());
 				structRect.fill = schemaItemVduRect.fill();
@@ -529,10 +532,13 @@ namespace Builder
 				structValue.version = 1;
 				structValue.itemType = itemType;
 
-				structValue.left = static_cast<decltype(structValue.left)>(schemaItemVduValue.leftDocPt());
-				structValue.top = static_cast<decltype(structValue.top)>(schemaItemVduValue.topDocPt());
-				structValue.width = static_cast<decltype(structValue.width)>(schemaItemVduValue.widthDocPt());
-				structValue.height = static_cast<decltype(structValue.height)>(schemaItemVduValue.heightDocPt());
+				using PosType = decltype(structValue.left);
+				using SizeType = decltype(structValue.width);
+
+				structValue.left = static_cast<PosType>(schemaItemVduValue.leftDocPt());
+				structValue.top = static_cast<PosType>(schemaItemVduValue.topDocPt());
+				structValue.width = static_cast<SizeType>(schemaItemVduValue.widthDocPt());
+				structValue.height = static_cast<SizeType>(schemaItemVduValue.heightDocPt());
 
 				structValue.weight = static_cast<decltype(structValue.weight)>(schemaItemVduValue.weight());
 				structValue.drawRect = schemaItemVduValue.drawRect();

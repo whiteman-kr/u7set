@@ -1,60 +1,25 @@
 #include "VduConfigFile.h"
 #include "../Context.h"
 
-#include <HardwareLib/DeviceModule.h>
+#include "../../UtilsLib/Crc.h"
 #include "../../VFrame30/Schema.h"
 #include "../../lib/ConstStrings.h"
-#include "../../UtilsLib/Crc.h"
+#include <HardwareLib/DeviceModule.h>
 
 namespace
 {
 	const QString VduConfigFileName = "VduConfig.bin";
 	const QString VduConfigDumpFileName = "VduConfig.dump";
-}
 
-namespace Builder
-{
-	bool VduConfigFileWriter::generate(Builder::Context& context)
+	/// \brief Generates the VDU config file for a specific VDU device.
+	/// \param vdu The VDU device module.
+	/// \param context The builder context.
+	/// \param out The generated file data.
+	/// \return True if the generation is successful, false otherwise.
+	bool generateVduConfig(const Hardware::DeviceModule& vdu, Builder::Context& context, QByteArray& out)
 	{
-		IssueLogger* log = context.m_log;
-		Q_ASSERT(log);
+		using namespace Builder;
 
-		bool result = true;
-
-		for (const Hardware::DeviceModule* vdu : context.m_vduModules)
-		{
-			Q_ASSERT(vdu);
-
-			LOG_MESSAGE(log, QString("Generating configuration for VDU %1.").arg(vdu->equipmentId()));
-
-			QByteArray out;
-			bool ok = generate(*vdu, context, out);
-
-			if (ok == true)
-			{
-				auto addedFile = context.m_buildResultWriter->addFile("/VDUs/" + vdu->equipmentId(), VduConfigFileName, out, false);
-				ok &= addedFile != nullptr;
-
-				// Write dump file
-				//
-				QString configDump = dump(out);
-				addedFile = context.m_buildResultWriter->addFile("/VDUs/" + vdu->equipmentId(), VduConfigDumpFileName, configDump, false);
-				
-				//QByteArray configDumpData = BOM::UTF8;
-				//configDumpData += configDump.toUtf8();
-				//addedFile = context.m_buildResultWriter->addFile("/VDUs/" + vdu->equipmentId(), VduConfigDumpFileName, configDumpData, false);
-
-				ok &= addedFile != nullptr;
-			}
-
-			result &= ok;
-		}
-
-		return result;
-	}
-
-	bool VduConfigFileWriter::generate(const Hardware::DeviceModule& vdu, Builder::Context& context, QByteArray& out)
-	{
 		auto log = context.m_log;
 
 		std::multimap<QString, size_t> strings; // string -> referenceOffset
@@ -114,8 +79,10 @@ namespace Builder
 			header.display0.height = propertyByCaption("Display0_Height", 0);
 			header.display0.mode = 0;
 
-			header.display0.startSchemaId = addStringRef(propertyByCaption("Display0_StartSchemaID", QString()), offsetof(VduConfigFile1, VduConfigFile1::display0.startSchemaId));
-			header.display0.displayName = addStringRef(propertyByCaption("Display0_Name", QString()), offsetof(VduConfigFile1, VduConfigFile1::display0.displayName));
+			header.display0.startSchemaId = addStringRef(propertyByCaption("Display0_StartSchemaID", QString()),
+														 offsetof(VduConfigFile1, VduConfigFile1::display0.startSchemaId));
+			header.display0.displayName =
+				addStringRef(propertyByCaption("Display0_Name", QString()), offsetof(VduConfigFile1, VduConfigFile1::display0.displayName));
 
 			// Write font count.
 			//
@@ -124,7 +91,7 @@ namespace Builder
 			// Write schema count.
 			//
 			header.schemaCount = static_cast<decltype(header.schemaCount)>(context.m_vduSchemas[vdu.equipmentId()].size());
-			
+
 			// Write header struct to the output buffer.
 			//
 			out.append(reinterpret_cast<const char*>(&header), sizeof(header));
@@ -142,7 +109,7 @@ namespace Builder
 					Q_ASSERT(b.schema);
 					return a.schema->caption() < b.schema->caption();
 				});
-			
+
 			for (const Context::GeneratedVduSchema& generatedSchema : vduSchemas)
 			{
 				Q_ASSERT(generatedSchema.schema);
@@ -212,7 +179,7 @@ namespace Builder
 
 		quint64 crc = qToBigEndian(Crc::crc64(out.constData(), out.size()));
 		out.append(reinterpret_cast<const char*>(&crc), sizeof(crc));
-		
+
 		// Check crc, crc on data with crc field must be 0.
 		//
 		quint64 checkCrc = Crc::crc64(out.constData(), out.size());
@@ -226,10 +193,15 @@ namespace Builder
 		return true;
 	}
 
-	// This function receives a QByteArray with the content of the file and returns a QString with the dump of the file.
-	//
-	QString VduConfigFileWriter::dump(QByteArray& data)
+	/// \brief Dumps the binary data to a text format.
+	/// \param data The data to be dumped.
+	/// \return The dumped data as a string.
+	///
+	/// This function receives a QByteArray with the content of the file and returns a QString with the dump of the file.
+	QString dumpVduConfig(QByteArray& data)
 	{
+		using namespace Builder;
+
 		if (data.size() < sizeof(VduConfigFile1) + 8)
 		{
 			return QString("Invalid file size");
@@ -272,9 +244,9 @@ namespace Builder
 		const VduConfigFile1* header = reinterpret_cast<const VduConfigFile1*>(data.constData());
 
 		auto printAddress = [](int indent, auto offset, auto size) -> QString
-			{
-				return QString{"%1%2:%3 "}.arg(QString(indent, ' ')).arg(offset, 4, 16, QChar{'0'}).arg(size, 4, 16, QChar{'0'});
-			};
+		{
+			return QString{"%1%2:%3 "}.arg(QString(indent, ' ')).arg(offset, 4, 16, QChar{'0'}).arg(size, 4, 16, QChar{'0'});
+		};
 
 		QString result;
 
@@ -286,11 +258,11 @@ namespace Builder
 
 		result += printAddress(0, offsetof(VduConfigFile1, size), sizeof(header->size));
 		result += QString("HeaderSize: %1\n").arg(header->size);
-		
+
 		result += printAddress(0, offsetof(VduConfigFile1, project), sizeof(header->project));
 		auto project = getStringRefValue(data, header->project);
 		result += QString("Project: %1\n").arg(project);
-		
+
 		result += printAddress(0, offsetof(VduConfigFile1, buildNo), sizeof(header->buildNo));
 		result += QString("BuildNo: %1\n").arg(header->buildNo);
 
@@ -304,10 +276,10 @@ namespace Builder
 
 		result += printAddress(0, offsetof(VduConfigFile1, displayCount), sizeof(header->displayCount));
 		result += QString("DisplayCount: %1\n").arg(header->displayCount);
-		
+
 		// File contains data for 4 displays, but used ony header->displayCount displays
 		//
-		for (int i = 0; i < VduConfigFile1::MaxDisplayCount/*header->displayCount*/; i++)
+		for (int i = 0; i < VduConfigFile1::MaxDisplayCount /*header->displayCount*/; i++)
 		{
 			const VduConfigDisplay1* display = &header->display0 + i;
 
@@ -322,11 +294,13 @@ namespace Builder
 			result += printAddress(0, sizeof(VduConfigDisplay1) * i + offsetof(VduConfigDisplay1, mode), sizeof(display->mode));
 			result += QString("Mode: %1\n").arg(display->mode);
 
-			result += printAddress(0, sizeof(VduConfigDisplay1) * i + offsetof(VduConfigDisplay1, startSchemaId), sizeof(display->startSchemaId));
+			result +=
+				printAddress(0, sizeof(VduConfigDisplay1) * i + offsetof(VduConfigDisplay1, startSchemaId), sizeof(display->startSchemaId));
 			auto startSchemaId = getStringRefValue(data, display->startSchemaId);
 			result += QString("StartSchemaID: %1\n").arg(startSchemaId);
 
-			result += printAddress(0, sizeof(VduConfigDisplay1) * i + offsetof(VduConfigDisplay1, displayName), sizeof(display->displayName));
+			result +=
+				printAddress(0, sizeof(VduConfigDisplay1) * i + offsetof(VduConfigDisplay1, displayName), sizeof(display->displayName));
 			auto displayName = getStringRefValue(data, display->displayName);
 			result += QString("DisplayName: %1\n").arg(displayName);
 		}
@@ -345,7 +319,8 @@ namespace Builder
 		//
 		for (int i = 0; i < header->schemaCount; i++)
 		{
-			const VduConfigSchema1* schema = reinterpret_cast<const VduConfigSchema1*>(data.constData() + header->size + i * sizeof(VduConfigSchema1));
+			const VduConfigSchema1* schema =
+				reinterpret_cast<const VduConfigSchema1*>(data.constData() + header->size + i * sizeof(VduConfigSchema1));
 			auto schemaOffset = header->size + i * sizeof(VduConfigSchema1);
 
 			result += QString("\nSchema %1\n").arg(i);
@@ -390,5 +365,42 @@ namespace Builder
 
 		return result;
 	}
+} // namespace
 
+namespace Builder
+{
+	bool VduConfigFileWriter::generate(Builder::Context& context)
+	{
+		IssueLogger* log = context.m_log;
+		Q_ASSERT(log);
+
+		bool result = true;
+
+		for (const Hardware::DeviceModule* vdu : context.m_vduModules)
+		{
+			Q_ASSERT(vdu);
+
+			LOG_MESSAGE(log, QString("Generating configuration for VDU %1.").arg(vdu->equipmentId()));
+
+			QByteArray out;
+			bool ok = generateVduConfig(*vdu, context, out);
+
+			if (ok == true)
+			{
+				auto addedFile = context.m_buildResultWriter->addFile("/VDUs/" + vdu->equipmentId(), VduConfigFileName, out, false);
+				ok &= addedFile != nullptr;
+
+				// Write dump file
+				//
+				QString configDump = dumpVduConfig(out);
+				addedFile = context.m_buildResultWriter->addFile("/VDUs/" + vdu->equipmentId(), VduConfigDumpFileName, configDump, false);
+
+				ok &= addedFile != nullptr;
+			}
+
+			result &= ok;
+		}
+
+		return result;
+	}
 } // namespace Builder

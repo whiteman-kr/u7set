@@ -95,11 +95,13 @@ struct VduSchemaFileSchemaItemLine1
 	uint16_t itemType; // VduFileSchemaItemLine, VduFileSchemaItemRect, ...
 	uint32_t reserve0;
 
-	int16_t x1;
-	int16_t y1;
-	int16_t x2;
-	int16_t y2;
-	uint32_t reserve1;
+	uint16_t x1;
+	uint16_t y1;
+	uint16_t x2;
+	uint16_t y2;
+
+	uint16_t weight;
+	uint16_t reserve1;
 
 	uint32_t color;
 	uint32_t reserve2;
@@ -168,6 +170,5 @@ struct VduSchemaFileSchemaItemValue1
 
 	uint32_t appSignalIndex;
 };
-
 
 #pragma pack(pop)
