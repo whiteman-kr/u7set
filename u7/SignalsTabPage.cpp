@@ -13,9 +13,9 @@
 #include <QStandardItemModel>
 #include <QAbstractItemModelTester>
 
-#include "../lib/WidgetUtils.h"
 #include "../lib/ConstStrings.h"
 #include "../lib/StandardColors.h"
+#include "../UtilsLib/Ui/WidgetUtils.h"
 #include "../UtilsLib/WUtils.h"
 #include "./Forms/ComparePropertyObjectDialog.h"
 

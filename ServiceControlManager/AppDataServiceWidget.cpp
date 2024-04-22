@@ -1,12 +1,11 @@
 #include "AppDataServiceWidget.h"
 #include "ScmTcpAppDataClient.h"
 #include "AppDataSourceWidget.h"
+#include "../UtilsLib/Ui/WidgetUtils.h"
+
 #include <QTableView>
-#include <QAction>
-#include <QHeaderView>
-#include <QStandardItemModel>
 #include <QSortFilterProxyModel>
-#include "../lib/WidgetUtils.h"
+#include <QStandardItemModel>
 
 const int DSC_EQUIPMENT_ID = 0,
 DSC_DATA_ID = 1,

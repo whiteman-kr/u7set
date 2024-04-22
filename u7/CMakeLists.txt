@@ -68,8 +68,6 @@ set (U7_SOURCES
 	../lib/Ui/TagSelectorWidget.h
 	../lib/Ui/TextEditCompleter.cpp
 	../lib/Ui/TextEditCompleter.h
-	../lib/WidgetUtils.cpp
-	../lib/WidgetUtils.h
 	AppSignalPropertyManager.cpp
 	AppSignalPropertyManager.h
 	AppSignalSetProvider.cpp
@@ -399,6 +397,18 @@ target_precompile_headers(${TARGET} PRIVATE
 	<vector>
 	<ranges>
 
+	#include <QHBoxLayout>
+	#include <QHeaderView>
+	#include <QListView>
+	#include <QPushButton>
+	#include <QScreen>
+	#include <QSettings>
+	#include <QStandardItemModel>
+	#include <QTableView>
+
+
+
+
 	<QAction>
 	<QActionGroup>
 	<QApplication>
@@ -447,10 +457,12 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QSortFilterProxyModel>
 	<QSpinBox>
 	<QSplitter>
+	<QStandardItem>
 	<QStandardItemModel>
 	<QStatusBar>
 	<QStringListModel>
 	<QSvgRenderer>
+	<QTableView>
 	<QTableWidget>
 	<QTextBrowser>
 	<QTextDocumentWriter>
