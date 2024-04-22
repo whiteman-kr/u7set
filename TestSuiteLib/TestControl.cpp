@@ -94,9 +94,9 @@ namespace TestSuite
 		std::vector<std::unique_ptr<TestController>> testControllers;
 		std::vector<std::unique_ptr<ScriptRunner>> runners;
 
-		TestScript* globalScript = nullptr;
+		// Find GlobalScript
 
-		// Build list of scripts to run
+		TestScript* globalScript = nullptr;
 
 		for (auto& script : m_configData.scripts)
 		{
@@ -105,6 +105,16 @@ namespace TestSuite
 				// GlobalScript found
 				//
 				globalScript = &script;
+				break;
+			}
+		}
+
+		// Build list of scripts to run
+
+		for (auto& script : m_configData.scripts)
+		{
+			if (script.isGlobalScript() == true)
+			{
 				continue;
 			}
 
