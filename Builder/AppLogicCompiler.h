@@ -67,6 +67,7 @@ namespace Builder
 		bool writeCommonAppSignalsExtXmlFile();
 		bool writeComparatorSetFile();
 		bool writeSubsystemsXml();
+		bool writeAppSignalsListCsv();
 
 		void clear();
 

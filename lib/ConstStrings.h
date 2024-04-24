@@ -559,6 +559,7 @@ namespace File
 	inline const QString ACQUIRED_APP_SIGNALS_ASGS("AcquiredAppSignals.asgs");
 	inline const QString APP_SIGNALS_XML("AppSignals.xml");
 	inline const QString APP_SIGNALS_EXT_XML("AppSignalsExt.xml");
+	inline const QString APP_SIGNALS_LIST_CSV("AppSignalsList.csv");
 	inline const QString COMPARATORS_SET("Comparators.set");
 	inline const QString APP_DATA_SOURCES_XML("AppDataSources.xml");
 	inline const QString TUNING_SOURCES_XML("TuningSources.xml");
@@ -622,7 +623,11 @@ namespace Separator
 	inline const QString BACK_DIR("\\");
 	inline const QString EMPTY_STR("");
 	inline const QString NEW_LINE("\n");
+	inline const QString CR("\r");					// Carriage Return
+	inline const QString LF("\n");					// Line Feed
+	inline const QString CR_LF("\r\n");
 	inline const QString UNDERSCORE("_");
+	inline const QString DOUBLE_QUOTES("\"");
 }
 
 namespace FormatStr

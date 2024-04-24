@@ -94,4 +94,21 @@ module E {
 		GatewayService = 9011,
 		Diagnostics = 9012
 	};
+
+	export enum DeviceType
+	{
+		Root,
+		System,
+		Rack,
+		Chassis,
+		Module,
+
+		Workstation,
+		Software,
+
+		Controller,
+
+		AppSignal,
+		DiagSignal,
+	};
 }

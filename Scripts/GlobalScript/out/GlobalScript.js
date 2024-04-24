@@ -88,6 +88,20 @@ var E;
         SoftwareType[SoftwareType["Diagnostics"] = 9012] = "Diagnostics";
     })(SoftwareType = E.SoftwareType || (E.SoftwareType = {}));
     ;
+    let DeviceType;
+    (function (DeviceType) {
+        DeviceType[DeviceType["Root"] = 0] = "Root";
+        DeviceType[DeviceType["System"] = 1] = "System";
+        DeviceType[DeviceType["Rack"] = 2] = "Rack";
+        DeviceType[DeviceType["Chassis"] = 3] = "Chassis";
+        DeviceType[DeviceType["Module"] = 4] = "Module";
+        DeviceType[DeviceType["Workstation"] = 5] = "Workstation";
+        DeviceType[DeviceType["Software"] = 6] = "Software";
+        DeviceType[DeviceType["Controller"] = 7] = "Controller";
+        DeviceType[DeviceType["AppSignal"] = 8] = "AppSignal";
+        DeviceType[DeviceType["DiagSignal"] = 9] = "DiagSignal";
+    })(DeviceType = E.DeviceType || (E.DeviceType = {}));
+    ;
 })(E || (E = {}));
 //declare var app: App.ScriptMonitorApplication;		// For Monitor script
 //declare var equipment: Hardware.ScriptEquipment;		// For Monitor script
