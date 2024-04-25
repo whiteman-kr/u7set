@@ -1,7 +1,7 @@
 #pragma once
 
-#include "./include/TrendView/TrendSignalSet.h"
-#include "./include/TrendView/TrendParam.h"
+#include <TrendView/TrendSignalSet.h>
+#include <TrendView/TrendParam.h>
 
 #include "TrendRuler.h"
 

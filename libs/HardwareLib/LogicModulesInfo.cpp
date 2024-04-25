@@ -1,4 +1,4 @@
-#include "./include/HardwareLib/LogicModulesInfo.h"
+#include <HardwareLib/LogicModulesInfo.h>
 #include "../lib/ConstStrings.h"
 #include "../UtilsLib/DomXmlHelper.h"
 

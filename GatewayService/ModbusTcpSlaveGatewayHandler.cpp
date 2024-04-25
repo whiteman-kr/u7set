@@ -1,7 +1,7 @@
 #include <string.h>
 
 #include "ModbusTcpSlaveGatewayHandler.h"
-#include "../Proto/Network.pb.h"
+#include <Network.pb.h>
 
 namespace Gateway
 {

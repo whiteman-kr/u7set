@@ -1,5 +1,5 @@
 #include "ProtoCommonHelper.h"
-#include "Common.pb.h"
+#include <Common.pb.h>
 
 namespace Proto
 {

@@ -3,8 +3,8 @@
 #include "../UtilsLib/Address16.h"
 #include "SimScopedLog.h"
 
-#include "./include/Simulator/SimRam.h"
-#include "./include/Simulator/SimOverrideSignals.h"
+#include <Simulator/SimRam.h>
+#include <Simulator/SimOverrideSignals.h>
 
 
 class QJSValue;

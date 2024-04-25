@@ -4,8 +4,8 @@
 #include "../OnlineLib/TcpConnectionState.h"
 #include "../UtilsLib/ILogFile.h"
 #include "../UtilsLib/SimpleThread.h"
-#include "./include/ClientLib/IAppSignalUpdater.h"
-#include "./include/ClientLib/IRecentAppSignals.h"
+#include <ClientLib/IAppSignalUpdater.h>
+#include <ClientLib/IRecentAppSignals.h>
 
 class SimpleThread;
 

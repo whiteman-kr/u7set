@@ -1,7 +1,7 @@
 #include "Bus.h"
 #include "PropertyNames.h"
-#include "../Proto/ProtoCommonHelper.h"
-#include "../Proto/Bus.pb.h"
+#include <ProtoCommonHelper.h>
+#include <Bus.pb.h>
 
 
 namespace AppSignalLib

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "./include/TrendView/Trend.h"
-#include "./include/TrendView/ITrendDataProvider.h"
-#include "./include/TrendView/TrendParam.h"
+#include <TrendView/Trend.h>
+#include <TrendView/ITrendDataProvider.h>
+#include <TrendView/TrendParam.h>
 
 #include "TrendImpl.h"
 #include "TrendRuler.h"

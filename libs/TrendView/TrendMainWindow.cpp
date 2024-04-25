@@ -1,8 +1,8 @@
 #include "DialogTrendSignalProperties.h"
 
-#include "./include/TrendView/Trend.h"
-#include "./include/TrendView/TrendMainWindow.h"
-#include "./include/TrendView/TrendSignal.h"
+#include <TrendView/Trend.h>
+#include <TrendView/TrendMainWindow.h>
+#include <TrendView/TrendSignal.h>
 
 #include "TrendImpl.h"
 #include "TrendRuler.h"

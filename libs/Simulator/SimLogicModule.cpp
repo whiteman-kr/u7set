@@ -1,4 +1,4 @@
-#include "./include/Simulator/SimLogicModule.h"
+#include <Simulator/SimLogicModule.h>
 #include "SimLogicModuleImpl.h"
 
 namespace Sim
