@@ -1,5 +1,5 @@
 #include "DragDropHelper.h"
-#include "../Proto/AppSignal.pb.h"
+#include <AppSignal.pb.h>
 #include <QApplication>
 #include <QMimeData>
 

@@ -1,14 +1,14 @@
-#include "./include/HardwareLib/HardwareLibrary.h"
-#include "./include/HardwareLib/DeviceRoot.h"
-#include "./include/HardwareLib/DeviceSystem.h"
-#include "./include/HardwareLib/DeviceRack.h"
-#include "./include/HardwareLib/DeviceChassis.h"
-#include "./include/HardwareLib/DeviceModule.h"
-#include "./include/HardwareLib/DeviceController.h"
-#include "./include/HardwareLib/DeviceAppSignal.h"
-#include "./include/HardwareLib/Workstation.h"
-#include "./include/HardwareLib/Software.h"
-#include "./include/HardwareLib/DiagSignal.h"
+#include <HardwareLib/HardwareLibrary.h>
+#include <HardwareLib/DeviceRoot.h>
+#include <HardwareLib/DeviceSystem.h>
+#include <HardwareLib/DeviceRack.h>
+#include <HardwareLib/DeviceChassis.h>
+#include <HardwareLib/DeviceModule.h>
+#include <HardwareLib/DeviceController.h>
+#include <HardwareLib/DeviceAppSignal.h>
+#include <HardwareLib/Workstation.h>
+#include <HardwareLib/Software.h>
+#include <HardwareLib/DiagSignal.h>
 #include "DeviceObjectFactory.h"
 
 namespace Hardware

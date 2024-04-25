@@ -110,7 +110,6 @@ message("-----------------------------------------")
 
 # Add projects.
 #
-add_subdirectory(Protobuf)
 add_subdirectory(CommonLib)
 add_subdirectory(UtilsLib)
 add_subdirectory(AppSignalLib)

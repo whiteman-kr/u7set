@@ -31,11 +31,8 @@ unix {
 }
 
 SOURCES += \
-    ../../Proto/ProtoSerialization.cpp \
     ../../lib/ScriptDeviceObject.cpp \
     main.cpp \
-    ../../Proto/network.pb.cc \
-    ../../Proto/serialization.pb.cc \
     ../../lib/CfgServerLoader.cpp \
     ../../lib/CommandLineParser.cpp \
     ../../lib/HostAddressPort.cpp \
@@ -76,10 +73,6 @@ SOURCES += \
     ../PacketSource/PacketSourceCore.cpp
 
 HEADERS += \
-    ../../Proto/ProtoSerialization.h \
-    ../../Proto/network.pb.h \
-    ../../Proto/serialization.pb.h \
-    ../../Builder/CfgFiles.h \
     ../../lib/CfgServerLoader.h \
     ../../lib/CommandLineParser.h \
     ../../lib/OrderedHash.h \

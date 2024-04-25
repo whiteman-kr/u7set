@@ -1,4 +1,4 @@
-#include "./include/TrendView/TrendSignalState.h"
+#include <TrendView/TrendSignalState.h>
 
 namespace
 {

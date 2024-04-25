@@ -111,9 +111,8 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../../CommonLib/Hash.h"
 	"../../CommonLib/PropertyObject.h"
 
-	"../../Proto/ProtoSerialization.h"
-	"../../Proto/Network.pb.h"	
-	#"../../Proto/AppSignal.pb.h"
+	<ProtoSerialization.h>
+	<Network.pb.h>
 
 	"../../AppSignalLib/AppSignalParam.h"
 	"../../AppSignalLib/AppSignalState.h"

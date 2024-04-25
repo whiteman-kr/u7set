@@ -5,9 +5,9 @@
 #include "SimAfb.h"
 #include "SimLans.h"
 
-#include "./include/Simulator/SimDeviceState.h"
-#include "./include/Simulator/SimDeviceCommand.h"
-#include "./include/Simulator/SimRam.h"
+#include <Simulator/SimDeviceState.h>
+#include <Simulator/SimDeviceCommand.h>
+#include <Simulator/SimRam.h>
 
 #include <HardwareLib/LmDescription.h>
 #include <HardwareLib/LogicModulesInfo.h>

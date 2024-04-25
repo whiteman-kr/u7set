@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SimDeviceEmulator.h"
-#include "./include/Simulator/SimControlStatus.h"
+#include <Simulator/SimControlStatus.h>
 
 
 namespace Sim

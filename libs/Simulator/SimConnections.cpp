@@ -1,4 +1,4 @@
-#include "./include/Simulator/SimConnections.h"
+#include <Simulator/SimConnections.h>
 #include "SimConnectionsImpl.h"
 
 namespace Sim

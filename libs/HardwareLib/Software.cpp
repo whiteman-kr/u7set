@@ -1,6 +1,6 @@
-#include "./include/HardwareLib/Software.h"
-#include "./include/HardwareLib/Workstation.h"
-#include "./include/HardwareLib/PropertyNames.h"
+#include <HardwareLib/Software.h>
+#include <HardwareLib/Workstation.h>
+#include <HardwareLib/PropertyNames.h>
 
 namespace Hardware
 {
