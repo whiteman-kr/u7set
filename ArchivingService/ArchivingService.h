@@ -1,15 +1,11 @@
 #pragma once
 
-#include "../ServiceLib/Service.h"
+#include <ServiceLib/Service.h>
 #include "../OnlineLib/CfgServerLoader.h"
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../UtilsLib/Queue.h"
 
-#include "TcpAppDataServer.h"
 #include "Archive.h"
-#include "TcpArchRequestsServer.h"
-#include "ArchRequest.h"
-#include "ArchWriterThread.h"
+
 
 class ArchivingService : public ServiceWorker
 {

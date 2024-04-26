@@ -3,8 +3,8 @@
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
-#include "./include/ClientLib/IAppSignalUpdater.h"
-#include "./include/ClientLib/IRecentAppSignals.h"
+#include <ClientLib/IAppSignalUpdater.h>
+#include <ClientLib/IRecentAppSignals.h>
 
 
 //		ADS_GET_APP_SIGNAL_STATE <------+

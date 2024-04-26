@@ -63,7 +63,8 @@ namespace Builder
 		std::vector<VduAppSignalInfo> m_rxAppSignals;
 		std::vector<VduAppSignalInfo> m_txAppSignals;
 
-		std::vector<char16_t> m_strings;			// first string always "empty string"!
+		std::vector<char16_t> m_strings;
+		std::map<Hash, vdu_string_ref> m_stringRefs;
 
 		uint64_t m_crc64 = 0;
 		uint64_t m_crc64Offset = 0;

@@ -1,4 +1,4 @@
-#include "./include/ClientLib/RtDataProvider.h"
+#include <ClientLib/RtDataProvider.h>
 #include "RtDataProviderPrivate.h"
 
 namespace ClientLib

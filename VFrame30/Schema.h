@@ -4,7 +4,6 @@
 #include "../CommonLib/DebugInstCounter.h"
 #include "../CommonLib/Factory.h"
 #include "../UtilsLib/ILogFile.h"
-//#include "../Proto/ProtoSerialization.h"
 
 
 namespace Afb

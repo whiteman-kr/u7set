@@ -26,15 +26,11 @@ TcpAppDataClient::~TcpAppDataClient()
 	}
 }
 
-
 void TcpAppDataClient::clearDataSources()
 {
-	for(auto source : m_appDataSources)
-	{
-		delete source;
-	}
-
+	m_appDataSourcesMutex.lock();
 	m_appDataSources.clear();
+	m_appDataSourcesMutex.unlock();
 }
 
 void TcpAppDataClient::startStateUpdating()
@@ -180,6 +176,75 @@ void TcpAppDataClient::processReply(quint32 requestID, const char* replyData, qu
 	}
 }
 
+std::vector<DataSource> TcpAppDataClient::getDataSources()
+{
+	std::vector<DataSource> dataSources;
+
+	m_appDataSourcesMutex.lock();
+
+	dataSources.reserve(m_appDataSources.size());
+
+	for(const auto& [id, pair] : m_appDataSources)
+	{
+		const DataSource& ds = pair.first;
+		dataSources.push_back(ds);
+	}
+
+	m_appDataSourcesMutex.unlock();
+
+	return dataSources;
+}
+
+bool TcpAppDataClient::getDataSource(const QString& equipmentID, DataSource* ds)
+{
+	TEST_PTR_RETURN_FALSE(ds);
+
+	bool find = false;
+
+	m_appDataSourcesMutex.lock();
+
+	for(const auto& [id, pair] : m_appDataSources)
+	{
+		const DataSource& dataSource = pair.first;
+
+		if (dataSource.moduleEquipmentID() == equipmentID)
+		{
+			*ds = dataSource;
+			find = true;
+			break;
+		}
+	}
+
+	m_appDataSourcesMutex.unlock();
+
+	return find;
+}
+
+bool TcpAppDataClient::getDataSourceState(const QString& equipmentID, Network::AppDataSourceState* state)
+{
+	TEST_PTR_RETURN_FALSE(state);
+
+	bool find = false;
+
+	m_appDataSourcesMutex.lock();
+
+	for(const auto& [id, pair] : m_appDataSources)
+	{
+		const DataSource& dataSource = pair.first;
+
+		if (dataSource.moduleEquipmentID() == equipmentID)
+		{
+			*state = pair.second;
+			find = true;
+			break;
+		}
+	}
+
+	m_appDataSourcesMutex.unlock();
+
+	return find;
+}
+
 QString TcpAppDataClient::configServiceConnectionState()
 {
 	if (m_getAppDataServiceState.cfgserviceisconnected())
@@ -226,19 +291,26 @@ void TcpAppDataClient::onGetAppDataSourcesInfoReply(const char* replyData, quint
 
 	int sourcesCount = m_getDataSourcesInfoReply.datasourceinfo_size();
 
+	m_appDataSourcesMutex.lock();
+
 	for(int i = 0; i < sourcesCount; i++)
 	{
-		AppDataSource* source = new AppDataSource(m_getDataSourcesInfoReply.datasourceinfo(i));
+		const Network::DataSourceInfo& dsi = m_getDataSourcesInfoReply.datasourceinfo(i);
 
-		if (m_appDataSources.contains(source->ID()))
+		if (m_appDataSources.contains(dsi.id()))
 		{
-			assert(false);
-			delete source;
+			Q_ASSERT(false);
 			continue;
 		}
 
-		m_appDataSources.insert(source->ID(), source);
+		auto [newIt, b] = m_appDataSources.emplace(dsi.id(), std::pair<DataSource, Network::AppDataSourceState>
+																	{DataSource(), Network::AppDataSourceState()});
+		DataSource& ds = newIt->second.first;
+
+		ds.loadFromProto(dsi);
 	}
+
+	m_appDataSourcesMutex.unlock();
 
 	emit dataSourcesInfoLoaded();
 }
@@ -261,19 +333,26 @@ void TcpAppDataClient::onGetAppDataSourcesStatesReply(const char* replyData, qui
 
 	int statesCount = m_getAppDataSourcesStatesReply.appdatasourcesstates_size();
 
+	m_appDataSourcesMutex.lock();
+
 	for(int i = 0; i < statesCount; i++)
 	{
-		auto id = m_getAppDataSourcesStatesReply.appdatasourcesstates(i).id();
-		if (!m_appDataSources.contains(id))
+		const Network::AppDataSourceState& state = m_getAppDataSourcesStatesReply.appdatasourcesstates(i);
+
+		auto it = m_appDataSources.find(state.id());
+
+		if (it == m_appDataSources.end())
 		{
-			assert(m_appDataSources.contains(id));
+			Q_ASSERT(false);
 			continue;
 		}
 
-		AppDataSource* source = m_appDataSources.value(id);
+		Network::AppDataSourceState& dataSourceState = it->second.second;
 
-		source->setState(m_getAppDataSourcesStatesReply.appdatasourcesstates(i));
+		dataSourceState = state;
 	}
+
+	m_appDataSourcesMutex.unlock();
 
 	emit dataSoursesStateUpdated();
 }

@@ -1,4 +1,4 @@
-#include "./include/Simulator/SimProfiles.h"
+#include <Simulator/SimProfiles.h>
 
 namespace Sim
 {

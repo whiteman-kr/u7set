@@ -1,7 +1,6 @@
 #include "GatewayHandler.h"
 #include "IvsImpulseGatewayHandler.h"
 #include "ModbusTcpSlaveGatewayHandler.h"
-#include "../ServiceLib/Service.h"
 
 namespace Gateway
 {

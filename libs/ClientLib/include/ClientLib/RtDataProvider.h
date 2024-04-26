@@ -1,8 +1,9 @@
 #pragma once
 
+#include <TrendView/TrendSignalState.h>
+
 #include "../OnlineLib/SoftwareInfo.h"
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../TrendView/TrendSignalState.h"
 #include "../UtilsLib/ILogFile.h"
 #include "../lib/ISignalDataServer.h"
 #include "RtTrendConnectionStatistics.h"
@@ -24,7 +25,7 @@ namespace ClientLib
 
 		RtDataProvider(const RtDataProvider&) = delete;
 		RtDataProvider(RtDataProvider&&) = delete;
-	
+
 		~RtDataProvider() override;
 
 		RtDataProvider& operator=(const RtDataProvider&) = delete;
@@ -32,10 +33,8 @@ namespace ClientLib
 
 	public:
 		void clear();
-		void createConnections(const SoftwareInfo& softwareInfo,
-							   const std::vector<SoftwareEndpoint::AppDataService>& appDataServices);
-		void updateConnections(const SoftwareInfo& softwareInfo,
-							   const std::vector<SoftwareEndpoint::AppDataService>& appDataServices);
+		void createConnections(const SoftwareInfo& softwareInfo, const std::vector<SoftwareEndpoint::AppDataService>& appDataServices);
+		void updateConnections(const SoftwareInfo& softwareInfo, const std::vector<SoftwareEndpoint::AppDataService>& appDataServices);
 
 		bool setData(E::RtTrendsSamplePeriod samplePeriod, const QStringList& trendSignals);
 		void setSamplePeriod(E::RtTrendsSamplePeriod samplePeriod);
@@ -46,7 +45,10 @@ namespace ClientLib
 		[[nodiscard]] bool allConnected(std::chrono::milliseconds timeout) const;
 
 	signals:
-		void dataReady(QString sourceEquipmentId, std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState);
+		void dataReady(QString sourceEquipmentId,
+					   std::shared_ptr<TrendLib::RealtimeData> data,
+					   TrendLib::TrendStateItem minState,
+					   TrendLib::TrendStateItem maxState);
 		void requestError(QString text);
 		void connectionLost(QString sourceEquipmentId);
 

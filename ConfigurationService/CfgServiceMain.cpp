@@ -1,4 +1,5 @@
 #include "ConfigurationService.h"
+#include <ServiceLib/ServiceStarter.h>
 #include "version.h"
 
 #define CIRCULAR_LOGGER_PTR_ASSERTING

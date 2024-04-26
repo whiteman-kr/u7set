@@ -100,7 +100,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../CommonLib/Types.h"
 	"../CommonLib/Hash.h"
 
-	"../Proto/Network.pb.h"	
+	<Network.pb.h>
 
 	"../AppSignalLib/AppSignal.h"
 )

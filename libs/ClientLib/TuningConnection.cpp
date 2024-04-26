@@ -2,7 +2,7 @@
 	#error Do not include this file in the project! Link ClientLib instead.
 #endif
 
-#include "./include/ClientLib/TuningConnection.h"
+#include <ClientLib/TuningConnection.h>
 #include "TuningConnectionPrivate.h"
 
 namespace ClientLib

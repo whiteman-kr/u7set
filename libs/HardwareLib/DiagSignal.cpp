@@ -1,6 +1,6 @@
-#include "./include/HardwareLib/DiagSignal.h"
-#include "./include/HardwareLib/DiagSignalType.h"
-#include "./include/HardwareLib/PropertyNames.h"
+#include <HardwareLib/DiagSignal.h>
+#include <HardwareLib/DiagSignalType.h>
+#include <HardwareLib/PropertyNames.h>
 
 
 namespace Hardware

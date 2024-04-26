@@ -7,11 +7,11 @@
 #include "../OnlineLib/TcpClientStatistics.h"
 #include "../lib/Tuning/ITuningAuthorization.h"
 
-#include "./include/ClientLib/IRecentAppSignals.h"
-#include "./include/ClientLib/ITuningLog.h"
-#include "./include/ClientLib/ITuningSignalUpdater.h"
-#include "./include/ClientLib/TuningSourceState.h"
-#include "./include/ClientLib/TuningWriteCommand.h"
+#include <ClientLib/IRecentAppSignals.h>
+#include <ClientLib/ITuningLog.h>
+#include <ClientLib/ITuningSignalUpdater.h>
+#include <ClientLib/TuningSourceState.h>
+#include <ClientLib/TuningWriteCommand.h>
 
 //
 //		  OnConnection

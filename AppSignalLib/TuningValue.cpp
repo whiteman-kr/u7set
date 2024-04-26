@@ -393,6 +393,11 @@ QString TuningValue::toString(E::AnalogFormat analogFormat, int precision) const
 	return "";
 }
 
+QString TuningValue::toTypedString(int precision) const
+{
+	return toString(E::AnalogFormat::f_9, precision);
+}
+
 void TuningValue::fromString(QString value, bool* ok)
 {
 	switch (m_type)

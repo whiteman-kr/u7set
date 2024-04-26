@@ -3,9 +3,9 @@
 #endif
 
 #include "BuildInfo.h"
-#include "../Proto/BuildInfo.pb.h"
 #include "../UtilsLib/WUtils.h"
 #include "../lib/ConstStrings.h"
+#include <BuildInfo.pb.h>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 

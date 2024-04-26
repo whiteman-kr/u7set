@@ -1,7 +1,7 @@
 #pragma once
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../lib/ISignalDataServer.h"
-#include "./include/ClientLib/RtTrendConnectionStatistics.h"
+#include <ClientLib/RtTrendConnectionStatistics.h>
 
 #include "RtTrendTcpClient.h"
 

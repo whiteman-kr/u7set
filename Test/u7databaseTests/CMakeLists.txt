@@ -65,8 +65,10 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../../CommonLib/AfbParamValue.h"
 	"../../CommonLib/DebugInstCounter.h"
 	"../../CommonLib/Factory.h"
-	"../../Proto/ProtoSerialization.h"
-	"../../Proto/AppSignal.pb.h"
+	
+	<ProtoSerialization.h>
+	<AppSignal.pb.h>
+
 	"../../AppSignalLib/AppSignal.h"
 	
 	<DbLib/DbController.h>

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Schema.h"
-#include "../TrendView/ITrendDataProvider.h"
+#include <TrendView/ITrendDataProvider.h>
 
 namespace VFrame30
 {

@@ -1,6 +1,6 @@
-#include "./include/HardwareLib/ScriptEquipment.h"
-#include "./include/HardwareLib/ScriptDeviceObject.h"
-#include "./include/HardwareLib/DeviceRoot.h"
+#include <HardwareLib/ScriptEquipment.h>
+#include <HardwareLib/ScriptDeviceObject.h>
+#include <HardwareLib/DeviceRoot.h>
 
 namespace Hardware
 {

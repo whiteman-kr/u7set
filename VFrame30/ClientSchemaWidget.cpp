@@ -1,7 +1,7 @@
 #include "ClientSchemaWidget.h"
 #include "PropertyNames.h"
 #include "Context.h"
-#include "../Proto/AppSignal.pb.h"
+#include <AppSignal.pb.h>
 
 namespace VFrame30
 {

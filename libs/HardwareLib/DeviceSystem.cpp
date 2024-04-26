@@ -1,5 +1,5 @@
-#include "./include/HardwareLib/DeviceSystem.h"
-#include "./include/HardwareLib/PropertyNames.h"
+#include <HardwareLib/DeviceSystem.h>
+#include <HardwareLib/PropertyNames.h>
 
 namespace Hardware
 {

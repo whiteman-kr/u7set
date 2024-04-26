@@ -68,8 +68,8 @@ namespace Sim
 		std::unordered_map<int, size_t> offsetToCommand() const;
 		const DeviceCommand& offsetToCommand(int offset) const;
 
-		[[nodiscard]] const Ram& ram() const;	// This RAM access is not protected by any mutext, use it only when no concurent thread is accessing it!
-		[[nodiscard]] Ram& mutableRam();		// This RAM access is not protected by any mutext, use it only when no concurent thread is accessing it!
+		[[nodiscard]] const Ram& ram() const;	// This RAM access is not protected by any mutex, use it only when no concurrent thread is accessing it!
+		[[nodiscard]] Ram& mutableRam();		// This RAM access is not protected by any mutex, use it only when no concurrent thread is accessing it!
 
 		[[nodiscard]] RuntimeMode runtimeMode() const;
 		[[nodiscard]] DeviceState deviceState() const;

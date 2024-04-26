@@ -1,4 +1,4 @@
-#include "./include/Simulator/SimRam.h"
+#include <Simulator/SimRam.h>
 
 namespace Sim
 {
@@ -237,7 +237,7 @@ namespace Sim
 			return false;
 		}
 
-		//bitNo &= 0x0F;	// This situaltion is excluded by prev condition (bitNo & ~0x0F) != 0
+		//bitNo &= 0x0F;	// This situation is excluded by prev condition (bitNo & ~0x0F) != 0
 		data &= 0x01;
 		int byteOffset = (offsetW - areaOffset) * 2;
 

@@ -1,8 +1,8 @@
 #include "DialogSignalInfo.h"
 
+#include <AppSignal.pb.h>
 #include "../AppSignalLib/AppSignalSpecPropValues.h"
 #include "../AppSignalLib/ComparatorSet.h"
-#include "../Proto/AppSignal.pb.h"
 #include "../UtilsLib/Ui/UiTools.h"
 #include "../lib/Ui/DialogWriteValues.h"
 #include "ui_DialogSignalInfo.h"

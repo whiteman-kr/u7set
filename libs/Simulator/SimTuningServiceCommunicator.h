@@ -7,7 +7,7 @@
 #include "SimScopedLog.h"
 #include "SimTuningRecord.h"
 
-#include "./include/Simulator/SimRam.h"
+#include <Simulator/SimRam.h>
 
 namespace Sim
 {

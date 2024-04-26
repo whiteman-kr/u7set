@@ -8,9 +8,9 @@
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
-#include "../Proto/Network.pb.h"
+#include <Network.pb.h>
 
-#include "./include/ClientLib/AppDataSourceState.h"
+#include <ClientLib/AppDataSourceState.h>
 
 namespace ClientLib
 {

@@ -200,12 +200,13 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../CommonLib/PropertyObject.h"
 	"../CommonLib/AfbParamValue.h"
 
-	"../Proto/ProtoSerialization.h"
-	"../Proto/ProtoCommonHelper.h"
-	"../Proto/Network.pb.h"
-	"../Proto/AppSignal.pb.h"
-	"../Proto/Bus.pb.h"
-
+	<ProtoSerialization.h>
+	<ProtoCommonHelper.h>
+	<AppSignal.pb.h>
+	<Bus.pb.h>
+	<Hardware.pb.h>
+	<Network.pb.h>
+	
 	"../AppSignalLib/AppSignal.h"
 	"../AppSignalLib/AppSignalParam.h"
 	"../AppSignalLib/AppSignalState.h"

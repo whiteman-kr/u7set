@@ -1,4 +1,4 @@
-#include "./include/Simulator/SimControlStatus.h"
+#include <Simulator/SimControlStatus.h>
 #include "SimControlImpl.h"
 #include "SimLogicModuleImpl.h"
 

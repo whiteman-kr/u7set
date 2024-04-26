@@ -3,8 +3,6 @@
 
 #include <QMainWindow>
 #include "../OnlineLib/UdpSocket.h"
-#include "../ServiceLib/Service.h"
-#include "../OnlineLib/Tcp.h"
 #include "ServiceTableModel.h"
 
 class QAction;

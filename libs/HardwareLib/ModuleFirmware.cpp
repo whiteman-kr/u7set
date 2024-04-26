@@ -2,7 +2,7 @@
 #error Do not include this file in the project! Link HardwareLib instead.
 #endif
 
-#include "./include/HardwareLib/ModuleFirmware.h"
+#include <HardwareLib/ModuleFirmware.h>
 #include "../UtilsLib/Crc.h"
 
 

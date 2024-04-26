@@ -4,12 +4,12 @@
 #include <HardwareLib/LmDescription.h>
 #include <HardwareLib/ModuleFirmware.h>
 
-#include "./include/Simulator/SimAppSignalManager.h"
-#include "./include/Simulator/SimConnections.h"
-#include "./include/Simulator/SimControl.h"
-#include "./include/Simulator/SimOverrideSignals.h"
-#include "./include/Simulator/SimProfiles.h"
-#include "./include/Simulator/SimSoftware.h"
+#include <Simulator/SimAppSignalManager.h>
+#include <Simulator/SimConnections.h>
+#include <Simulator/SimControl.h>
+#include <Simulator/SimOverrideSignals.h>
+#include <Simulator/SimProfiles.h>
+#include <Simulator/SimSoftware.h>
 
 #include "SimAppSignalManagerImpl.h"
 #include "SimConnectionsImpl.h"

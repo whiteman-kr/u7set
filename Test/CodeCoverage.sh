@@ -132,7 +132,7 @@ TEST_OUTPUT_FILE="Simulator.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # TrendView
-TEST_DIR="./build/TrendView/CMakeFiles/TrendView.dir"
+TEST_DIR="./build/libs/TrendView/CMakeFiles/TrendView.dir"
 TEST_OUTPUT_FILE="TrendView.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 

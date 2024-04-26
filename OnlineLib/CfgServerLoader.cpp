@@ -179,17 +179,9 @@ void CfgLoader::FileDownloadRequest::clear()
 	pathFileName = "";
 	etalonMD5 = "";
 	isAutoRequest = false;
+	isAsyncCall = false;
 	isTestCfgRequest = false;
 	fileData = nullptr;
-	errorCode = nullptr;
-}
-
-void CfgLoader::FileDownloadRequest::setErrorCode(Tcp::FileTransferResult result)
-{
-	if (errorCode != nullptr)
-	{
-		*errorCode = result;
-	}
 }
 
 // -------------------------------------------------------------------------------------
@@ -248,10 +240,8 @@ void CfgLoader::changeApp(const QString& appEquipmentID, int appInstance)
 	resetStatuses();
 }
 
-bool CfgLoader::getFileBlocked(QString pathFileName, QByteArray* fileData, QString* errorStr)
+bool CfgLoader::getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr)
 {
-	// execute in context of calling thread
-	//
 	TEST_PTR_RETURN_FALSE(fileData);
 	TEST_PTR_RETURN_FALSE(errorStr);
 
@@ -260,25 +250,24 @@ bool CfgLoader::getFileBlocked(QString pathFileName, QByteArray* fileData, QStri
 
 	bool result = false;
 
+	std::shared_ptr<QByteArray> localFileData = std::make_shared<QByteArray>();
+
 	m_getFileBlockedMutex.lock();
 
-	m_localFileData.clear();
+	emit signal_getFile(pathFileName, localFileData, false);
 
-	emit signal_getFile(pathFileName, &m_localFileData);
-
-	bool res = m_fileReadyCondition.wait(&m_getFileBlockedMutex, 6000);
+	bool res = m_fileReadyCondition.wait(&m_getFileBlockedMutex, 10000);
 
 	if (res == true)
 	{
-		*errorStr = getLastErrorStr();
-
-		if (errorStr->isEmpty() == true)
+		if (getLastError() == Tcp::FileTransferResult::Ok)
 		{
-			fileData->swap(m_localFileData);
+			fileData->swap(*localFileData.get());
 			result = true;
 		}
 		else
 		{
+			*errorStr = getLastErrorStr();
 			result = false;
 		}
 	}
@@ -293,24 +282,7 @@ bool CfgLoader::getFileBlocked(QString pathFileName, QByteArray* fileData, QStri
 	return result;
 }
 
-bool CfgLoader::getFile(QString pathFileName, QByteArray* fileData)
-{
-	// execute in context of calling thread
-	//
-	if (fileData == nullptr)
-	{
-		assert(false);
-		return false;
-	}
-
-	fileData->clear();
-
-	emit signal_getFile(pathFileName, fileData);
-
-	return true;
-}
-
-bool CfgLoader::getFileBlockedByID(QString fileID, QByteArray* fileData, QString* errorStr)
+bool CfgLoader::getFileBlockedByID(const QString& fileID, QByteArray* fileData, QString* errorStr)
 {
 	TEST_PTR_RETURN_FALSE(fileData);
 	TEST_PTR_RETURN_FALSE(errorStr);
@@ -326,11 +298,20 @@ bool CfgLoader::getFileBlockedByID(QString fileID, QByteArray* fileData, QString
 	return getFileBlocked(pathFileName, fileData, errorStr);
 }
 
-bool CfgLoader::getFileByID(QString fileID, QByteArray* fileData)
+bool CfgLoader::getFileAsync(const QString& pathFileName)
+{
+	std::shared_ptr<QByteArray> fileData = std::make_shared<QByteArray>();
+
+	emit signal_getFile(pathFileName, fileData, true);
+
+	return true;
+}
+
+bool CfgLoader::getFileAsyncByID(const QString& fileID)
 {
 	QString pathFileName = getFilePathNameByID(fileID);
 
-	return getFile(pathFileName, fileData);
+	return getFileAsync(pathFileName);
 }
 
 bool CfgLoader::hasFileID(QString fileID) const
@@ -408,7 +389,7 @@ void CfgLoader::slot_enableDownloadConfiguration()
 	m_enableDownloadConfiguration = true;
 }
 
-void CfgLoader::slot_getFile(QString fileName, QByteArray* fileData)
+void CfgLoader::slot_getFile(QString fileName, std::shared_ptr<QByteArray> fileData, bool asyncCall)
 {
 	if (fileData == nullptr)
 	{
@@ -420,27 +401,24 @@ void CfgLoader::slot_getFile(QString fileName, QByteArray* fileData)
 
 	if (m_configurationXmlReady == false)
 	{
-		m_lastError = Tcp::FileTransferResult::ConfigurationIsNotReady;
-		emitFileReady();
+		emitFileReady(fileName, Tcp::FileTransferResult::ConfigurationIsNotReady, nullptr, asyncCall);
 		return;
 	}
 
 	if (m_cfgFilesInfo.contains(fileName) == false)
 	{
-		m_lastError = Tcp::FileTransferResult::FileIsNotAccessible;
-		emitFileReady();
+		emitFileReady(fileName, Tcp::FileTransferResult::FileIsNotAccessible, nullptr, asyncCall);
 		return;
 	}
 
 	const CfgFileInfo& cfgFileInfo = m_cfgFilesInfo.value(fileName);
 
-	if (readCfgFileIfExists(fileName, fileData, cfgFileInfo.md5, cfgFileInfo.compressed) == true)
+	if (readCfgFileIfExists(fileName, fileData.get(), cfgFileInfo.md5, cfgFileInfo.compressed) == true)
 	{
 		logMessage(QString("file %1 already exists, md5 = %2").
 					arg(fileName).arg(cfgFileInfo.md5));
 
-		m_lastError = Tcp::FileTransferResult::Ok;
-		emitFileReady();
+		emitFileReady(fileName, Tcp::FileTransferResult::Ok, fileData, asyncCall);
 		return;
 	}
 
@@ -451,12 +429,12 @@ void CfgLoader::slot_getFile(QString fileName, QByteArray* fileData)
 
 	fdr.pathFileName = fileName;
 	fdr.isAutoRequest = false;			// manual request
+	fdr.isAsyncCall = asyncCall;
 	fdr.fileData = fileData;
-	fdr.errorCode = &m_lastError;
 	fdr.etalonMD5 = cfgFileInfo.md5;
 	fdr.needUncompress = cfgFileInfo.compressed;
 
-	m_downloadQueue.append(fdr);
+	m_downloadQueue.emplace_back(fdr);
 
 	if (isTransferInProgress() == false)
 	{
@@ -482,7 +460,7 @@ void CfgLoader::slot_onTimer()
 		m_configurationXmlReady == false ||
 		isTransferInProgress() ||
 		m_allFilesLoaded == true ||
-		m_downloadQueue.isEmpty() == false)
+		m_downloadQueue.empty() == false)
 	{
 		return;
 	}
@@ -506,7 +484,7 @@ void CfgLoader::slot_onTimer()
 			fdr.etalonMD5 = m_cfgFilesInfo[m_autoDownloadIndex].md5;
 			fdr.isAutoRequest = true;
 
-			m_downloadQueue.append(fdr);
+			m_downloadQueue.emplace_back(fdr);
 
 			startDownload();
 
@@ -569,15 +547,15 @@ void CfgLoader::shutdown()
 
 void CfgLoader::startDownload()
 {
-	if (m_downloadQueue.isEmpty())
+	if (m_downloadQueue.empty())
 	{
 		assert(false);
 		return;
 	}
 
-	m_currentDownloadRequest = m_downloadQueue.first();
+	m_currentDownloadRequest = m_downloadQueue.front();
 
-	m_downloadQueue.removeFirst();
+	m_downloadQueue.pop_front();
 
 	onStartDownload(m_currentDownloadRequest.pathFileName);
 
@@ -598,24 +576,11 @@ void CfgLoader::resetStatuses()
 
 void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResult errorCode, const QString md5)
 {
-	m_currentDownloadRequest.setErrorCode(errorCode);
-
-	//
-
-	emit signal_onEndFileDownload(fileName, errorCode);
-
-	if (errorCode != Tcp::FileTransferResult::Ok)
-	{
-		emit signal_onEndFileDownloadError(fileName, errorCode);
-	}
-
-	//
-
 	onEndDownload(fileName, errorCode);
 
 	if (errorCode != Tcp::FileTransferResult::Ok)
 	{
-		emitFileReady();
+		emitFileReady(fileName, errorCode, nullptr, m_currentDownloadRequest.isAsyncCall);
 		return;
 	}
 
@@ -629,10 +594,8 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 	{
 		if (m_currentDownloadRequest.etalonMD5 != md5)
 		{
-			assert(false);
-
-			m_currentDownloadRequest.setErrorCode(Tcp::FileTransferResult::FileDataCorrupted);
-			emitFileReady();
+			emitFileReady(fileName, Tcp::FileTransferResult::FileDataCorrupted,
+						  nullptr, m_currentDownloadRequest.isAsyncCall);
 			return;
 		}
 	}
@@ -710,19 +673,23 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 			if(m_currentDownloadRequest.fileData == nullptr)
 			{
 				assert(false);
-				m_currentDownloadRequest.setErrorCode(Tcp::FileTransferResult::InternalError);
-				emitFileReady();
+				emitFileReady(fileName, Tcp::FileTransferResult::InternalError,
+							  nullptr, m_currentDownloadRequest.isAsyncCall);
 			}
 			else
 			{
-				if (readCfgFile(fileName, m_currentDownloadRequest.fileData, m_currentDownloadRequest.needUncompress) == false)
+				if (readCfgFile(fileName, m_currentDownloadRequest.fileData.get(),
+								m_currentDownloadRequest.needUncompress) == false)
 				{
-					m_currentDownloadRequest.setErrorCode(Tcp::FileTransferResult::LocalFileReadingError);
-					emitFileReady();
+					emitFileReady(fileName, Tcp::FileTransferResult::LocalFileReadingError,
+								  nullptr, m_currentDownloadRequest.isAsyncCall);
 				}
 				else
 				{
-					emitFileReady();
+					Q_ASSERT(m_currentDownloadRequest.fileData != nullptr);
+					emitFileReady(fileName, Tcp::FileTransferResult::Ok,
+								  m_currentDownloadRequest.fileData, m_currentDownloadRequest.isAsyncCall);
+					m_currentDownloadRequest.fileData.reset();
 				}
 			}
 		}
@@ -733,7 +700,7 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 		m_allFilesLoaded = true;
 	}
 
-	if (m_downloadQueue.isEmpty() == false)
+	if (m_downloadQueue.empty() == false)
 	{
 		startDownload();
 	}
@@ -832,7 +799,7 @@ bool CfgLoader::readConfigurationXml()
 
 		if (xcfi.ID.isEmpty() == false)
 		{
-			m_fileIDPathMap.insert(xcfi.ID, xcfi.pathFileName);
+			m_fileIDPathMap.emplace(xcfi.ID, xcfi.pathFileName);
 		}
 	}
 
@@ -841,10 +808,6 @@ bool CfgLoader::readConfigurationXml()
 
 void CfgLoader::readSavedConfiguration()
 {
-	// if exists, read previously loaded configuration
-	//
-
-   // if ()
 }
 
 bool CfgLoader::readCfgFile(const QString& pathFileName, QByteArray* fileData, bool needUncompress)
@@ -959,18 +922,35 @@ void CfgLoader::configurationChanged()
 	emit signal_configurationChanged();
 }
 
-void CfgLoader::emitFileReady()
+void CfgLoader::emitFileReady(const QString& fileName,
+							  Tcp::FileTransferResult errorCode,
+							  std::shared_ptr<QByteArray> fileData,
+							  bool asyncCall)
 {
-	emit signal_fileReady();
+	m_lastError = errorCode;
 
-	m_fileReadyCondition.wakeAll();
+	if (asyncCall == true)
+	{
+		emit signal_fileReady(fileName, errorCode, fileData);
+	}
+	else
+	{
+		m_fileReadyCondition.wakeAll();
+	}
 }
 
-QString CfgLoader::getFilePathNameByID(QString fileID) const
+QString CfgLoader::getFilePathNameByID(const QString& fileID) const
 {
 	AUTO_LOCK(m_mutex);
 
-	return m_fileIDPathMap.value(fileID, QString());
+	auto it = m_fileIDPathMap.find(fileID);
+
+	if (it != m_fileIDPathMap.end())
+	{
+		return it->second;
+	}
+
+	return QString();
 }
 
 // -------------------------------------------------------------------------------------
@@ -1061,15 +1041,6 @@ bool CfgLoaderThread::getFileBlocked(const QString& pathFileName, QByteArray* fi
 	return m_cfgLoader->getFileBlocked(pathFileName, fileData, errorStr);
 }
 
-bool CfgLoaderThread::getFile(const QString& pathFileName, QByteArray* fileData)
-{
-	TEST_PTR_RETURN_FALSE(fileData);
-
-	AUTO_LOCK(m_mutex);
-
-	return m_cfgLoader->getFile(pathFileName, fileData);
-}
-
 bool CfgLoaderThread::getFileBlockedByID(const QString& fileID, QByteArray* fileData, QString* errorStr)
 {
 	TEST_PTR_RETURN_FALSE(fileData);
@@ -1080,13 +1051,18 @@ bool CfgLoaderThread::getFileBlockedByID(const QString& fileID, QByteArray* file
 	return m_cfgLoader->getFileBlockedByID(fileID, fileData, errorStr);
 }
 
-bool CfgLoaderThread::getFileByID(const QString& fileID, QByteArray* fileData)
+bool CfgLoaderThread::getFileAsync(const QString& pathFileName)
 {
-	TEST_PTR_RETURN_FALSE(fileData);
-
 	AUTO_LOCK(m_mutex);
 
-	return m_cfgLoader->getFileByID(fileID, fileData);
+	return m_cfgLoader->getFileAsync(pathFileName);
+}
+
+bool CfgLoaderThread::getFileAsyncByID(const QString& fileID)
+{
+	AUTO_LOCK(m_mutex);
+
+	return m_cfgLoader->getFileAsyncByID(fileID);
 }
 
 bool CfgLoaderThread::hasFileID(QString fileID) const
@@ -1182,8 +1158,7 @@ void CfgLoaderThread::initThread()
 	connect(m_cfgLoader, &CfgLoader::signal_unknownClientID, this, &CfgLoaderThread::signal_unknownClientID);
 	connect(m_cfgLoader, &CfgLoader::signal_wrongClientHostname, this, &CfgLoaderThread::signal_wrongClientHostname);
 
-	connect(m_cfgLoader, &CfgLoader::signal_onEndFileDownload, this, &CfgLoaderThread::signal_onEndFileDownload);
-	connect(m_cfgLoader, &CfgLoader::signal_onEndFileDownloadError, this, &CfgLoaderThread::signal_onEndFileDownloadError);
+	connect(m_cfgLoader, &CfgLoader::signal_fileReady, this, &CfgLoaderThread::signal_fileReady);
 }
 
 void CfgLoaderThread::shutdownThread(bool* restartThread)

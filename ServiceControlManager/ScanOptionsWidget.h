@@ -2,15 +2,14 @@
 #define SCANOPTIONSWIDGET_H
 
 #include <QDialog>
-#include <QSet>
 #include <QNetworkAddressEntry>
+#include <ServiceLib/Service.h>
 #include "../OnlineLib/SocketIO.h"
-#include "../ServiceLib/Service.h"
 
 class QLineEdit;
 class ServiceTableModel;
 class QUdpSocket;
-//class QTimer;
+
 
 class SubnetChecker : public QObject
 {
