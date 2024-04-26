@@ -1,7 +1,7 @@
 #include "../lib/DataSource.h"
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../Proto/Comparator.pb.h"
 
+#include <Comparator.pb.h>
 #include <HardwareLib/LmDescription.h>
 #include <HardwareLib/LogicModulesInfo.h>
 

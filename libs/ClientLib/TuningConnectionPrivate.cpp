@@ -4,7 +4,7 @@
 
 #include "TuningConnectionPrivate.h"
 #include "TuningTcpClient.h"
-#include "./include/ClientLib/TuningSignalManager.h"
+#include <ClientLib/TuningSignalManager.h>
 #include "../UtilsLib/SimpleThread.h"
 
 namespace ClientLib

@@ -121,7 +121,7 @@ target_precompile_headers(${TARGET} PRIVATE
 
 	"../UtilsLib/Ui/WidgetUtils.h"
 	
-	"../Proto/Network.pb.h"	
+	<Network.pb.h>
 
 	"../AppSignalLib/AppSignal.h"
 )

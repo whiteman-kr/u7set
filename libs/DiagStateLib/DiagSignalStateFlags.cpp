@@ -2,7 +2,7 @@
 #error Do not include this file in the project! Link DiagStateLib instead.
 #endif
 
-#include "DiagStateLib/DiagSignalStateFlags.h"
+#include <DiagStateLib/DiagSignalStateFlags.h>
 
 // -------------------------------------------------------------------------------------------------------------
 //

@@ -1,8 +1,9 @@
 #pragma once
 
-#include "../ServiceLib/ServiceStarter.h"
+#include <ServiceLib/Service.h>
 #include "../OnlineLib/SoftwareSettings.h"
-#include "CfgControlServer.h"
+#include "../OnlineLib/Tcp.h"
+#include "CfgChecker.h"
 
 // ------------------------------------------------------------------------------------
 //

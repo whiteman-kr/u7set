@@ -1,5 +1,5 @@
 #include "SchemaPoint.h"
-#include "../Proto/Common.pb.h"
+#include <Common.pb.h>
 
 namespace VFrame30
 {

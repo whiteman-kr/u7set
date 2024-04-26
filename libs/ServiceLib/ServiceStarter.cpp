@@ -2,8 +2,10 @@
 #error Do not include this file in the project! Link ServiceLib instead.
 #endif
 
-#include "Service.h"
-#include "ServiceStarter.h"
+#include <ServiceLib/Service.h>
+#include <ServiceLib/ServiceStarter.h>
+
+#include "../UtilsLib/WUtils.h"
 
 // -------------------------------------------------------------------------------------
 //

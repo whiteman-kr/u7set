@@ -11,11 +11,11 @@ find_package(Qt6 REQUIRED COMPONENTS Core Network Qml)
 set(TARGET ServiceLib)
 
 qt_add_library(${TARGET} STATIC
-	CommandLineParser.h
+	./include/ServiceLib/CommandLineParser.h
+	./include/ServiceLib/Service.h
+	./include/ServiceLib/ServiceStarter.h
 	CommandLineParser.cpp
-	Service.h
 	Service.cpp
-	ServiceStarter.h
 	ServiceStarter.cpp
 )
 
@@ -36,8 +36,8 @@ if(UNIX)
 endif(UNIX)
 
 target_precompile_headers(${TARGET} PRIVATE
-	"../CommonLib/Types.h"
-	"../Proto/Network.pb.h"	
+	"../../CommonLib/Types.h"
+	<Network.pb.h>
 )
 
 
@@ -45,6 +45,7 @@ target_link_libraries(${TARGET} PUBLIC Qt6::Core Qt6::Network Qt6::Qml)
 target_link_libraries(${TARGET} PUBLIC Protobuf OnlineLib CommonLib)
 
 target_compile_definitions(${TARGET} PRIVATE SERVICE_LIB_DOMAIN)
-#target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_code_coverage_options(${TARGET} CODE_COVERAGE)

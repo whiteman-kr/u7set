@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(Protobuf LANGUAGES CXX)
+project(Protobuf LANGUAGES CXX VERSION 3.15.6)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -36,39 +36,76 @@ if (MSVC)
 	)
 endif (MSVC)
 
+# Generate protobuf files
+#
+if(MSVC)
+	set(PROTOC_FILE ${CMAKE_CURRENT_SOURCE_DIR}/bin/protoc.exe)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+	set(PROTOC_FILE ${CMAKE_CURRENT_SOURCE_DIR}/bin/protoc)
+else()
+    message(FATAL_ERROR "Unsupported compiler. Only MSVC and GCC are supported.")
+endif()
+
+set(PROTO_FILES 
+    Afb.proto
+    AppSignal.proto
+    ArchSignal.proto
+    BuildInfo.proto
+    Bus.proto
+    Common.proto
+    Comparator.proto
+    Envelope.proto
+    Hardware.proto
+    Network.proto
+    Simulator.proto
+    Trends.proto
+    VFrame30.proto
+)
+
+# Iterate over each .proto file in PROTO_FILES
+foreach(proto_file ${PROTO_FILES})
+    # Get the base name of the .proto file
+    get_filename_component(proto_name ${proto_file} NAME_WE)
+
+    # Define the output file paths for the generated .pb.cc and .pb.h files
+    set(proto_cc "${CMAKE_CURRENT_BINARY_DIR}/${proto_name}.pb.cc")
+    set(proto_h "${CMAKE_CURRENT_BINARY_DIR}/${proto_name}.pb.h")
+
+    # Add a custom command to compile the .proto file if necessary
+    add_custom_command(
+        OUTPUT ${proto_cc} ${proto_h}
+        COMMAND ${PROTOC_FILE} --cpp_out=${CMAKE_CURRENT_BINARY_DIR} ${proto_file}
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        DEPENDS ${proto_file}
+        COMMENT "Generating ${proto_name}.pb.cc and ${proto_name}.pb.h"
+        VERBATIM
+		RESULT_VARIABLE PROTOC_RESULT
+    )
+
+	if(PROTOC_RESULT)
+		message(FATAL_ERROR "protoc command failed with error code ${PROTOC_RESULT}")
+	endif()
+
+    # Add the generated .pb.cc and .pb.h files to the respective lists
+    list(APPEND GENERATED_CC_FILES ${proto_cc})
+    list(APPEND GENERATED_H_FILES ${proto_h})
+endforeach()
+
+# Add a custom target to group the custom commands together
+add_custom_target(GenerateProtobufFiles DEPENDS ${GENERATED_CC_FILES} ${GENERATED_H_FILES})
+
+# --
+#
 set(TARGET Protobuf)
 
 qt_add_library(${TARGET} STATIC
-	../Proto/Afb.pb.cc
-	../Proto/Afb.pb.h
-	../Proto/AppSignal.pb.cc
-	../Proto/AppSignal.pb.h
-	../Proto/ArchSignal.pb.cc
-	../Proto/ArchSignal.pb.h
-	../Proto/BuildInfo.pb.cc
-	../Proto/BuildInfo.pb.h
-	../Proto/Bus.pb.cc
-	../Proto/Bus.pb.h
-	../Proto/Common.pb.cc
-	../Proto/Common.pb.h
-	../Proto/Comparator.pb.cc
-	../Proto/Comparator.pb.h
-	../Proto/Envelope.pb.cc
-	../Proto/Envelope.pb.h
-	../Proto/Hardware.pb.cc
-	../Proto/Hardware.pb.h
-	../Proto/Network.pb.cc
-	../Proto/Network.pb.h
-	../Proto/ProtoCommonHelper.cpp
-	../Proto/ProtoCommonHelper.h
-	../Proto/ProtoSerialization.cpp
-	../Proto/ProtoSerialization.h
-	../Proto/Simulator.pb.cc
-	../Proto/Simulator.pb.h
-	../Proto/Trends.pb.cc
-	../Proto/Trends.pb.h
-	../Proto/VFrame30.pb.cc
-	../Proto/VFrame30.pb.h
+	${GENERATED_CC_FILES}
+	${GENERATED_H_FILES}
+	
+	ProtoCommonHelper.cpp
+	ProtoCommonHelper.h
+	ProtoSerialization.h
+	ProtoSerialization.cpp
 
 	google/protobuf/any.cc
 	google/protobuf/any.h
@@ -197,10 +234,13 @@ qt_add_library(${TARGET} STATIC
 )
 
 target_precompile_headers(${TARGET} PRIVATE
-	"../CommonLib/Types.h"
-	"../CommonLib/Hash.h"
-	"../CommonLib/PropertyObject.h"	
+	"../../CommonLib/Types.h"
+	"../../CommonLib/Hash.h"
+	"../../CommonLib/PropertyObject.h"	
 )
+
+# Add the custom target as a dependency of your main target
+add_dependencies(${TARGET} GenerateProtobufFiles)
 
 if(Threads_FOUND)
 	target_compile_definitions(${TARGET} PRIVATE HAVE_PTHREAD)
@@ -209,4 +249,6 @@ endif()
 target_link_libraries(${TARGET} PUBLIC Threads::Threads Qt6::Core)
 target_link_libraries(${TARGET} PUBLIC CommonLib)
 
+target_include_directories(${TARGET} PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(${TARGET} INTERFACE ${CMAKE_BINARY_DIR})

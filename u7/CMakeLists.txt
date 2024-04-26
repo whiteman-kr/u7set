@@ -483,10 +483,10 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../CommonLib/DebugInstCounter.h"
 	"../CommonLib/Factory.h"
 
-	"../Proto/ProtoSerialization.h"
-	"../Proto/Hardware.pb.h"
-	"../Proto/AppSignal.pb.h"
-	"../Proto/Bus.pb.h"
+	<ProtoSerialization.h>
+	<Hardware.pb.h>
+	<AppSignal.pb.h>
+	<Bus.pb.h>
 
 	"../AppSignalLib/AppSignal.h"
 	"../AppSignalLib/AppSignalParam.h"

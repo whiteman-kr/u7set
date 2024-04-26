@@ -1,9 +1,8 @@
 #pragma once
 
 #include <QAbstractTableModel>
+#include <ServiceLib/Service.h>
 #include "../OnlineLib/UdpSocket.h"
-#include "../ServiceLib/Service.h"
-#include "../OnlineLib/Tcp.h"
 
 
 // For QueuedConnection (scan network)

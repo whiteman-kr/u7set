@@ -1,10 +1,10 @@
 #include "SimOverrideSignalsImpl.h"
 #include "SimulatorPrivate.h"
 
-#include "../Proto/Simulator.pb.h"
-#include "../Proto/ProtoCommonHelper.h"
+#include <Simulator.pb.h>
+#include <ProtoCommonHelper.h>
 
-#include "./include/Simulator/SimRam.h"
+#include <Simulator/SimRam.h>
 
 namespace Sim
 {

@@ -1,5 +1,5 @@
-#include "./include/HardwareLib/Afb.h"
-#include "../Proto/Afb.pb.h"
+#include <HardwareLib/Afb.h>
+#include <Afb.pb.h>
 
 namespace Afb
 {

@@ -1,6 +1,6 @@
 syntax = "proto2";
 
-import "Common.proto";
+//import "Common.proto";
 
 package Proto;
 

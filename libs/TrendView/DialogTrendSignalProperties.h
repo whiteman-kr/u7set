@@ -1,7 +1,7 @@
 #ifndef DIALOGTRENDSIGNALPROPERTIES_H
 #define DIALOGTRENDSIGNALPROPERTIES_H
 
-#include "./include/TrendView/TrendSignal.h"
+#include <TrendView/TrendSignal.h>
 
 #include <QDialog>
 #include <QLabel>

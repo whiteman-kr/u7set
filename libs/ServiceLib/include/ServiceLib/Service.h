@@ -1,20 +1,13 @@
 #pragma once
 
 #include <QObject>
-#include <QDebug>
-#include <QFile>
-#include <QFileInfo>
-#include <QCoreApplication>
-#include <QCommandLineParser>
-#include <QSettings>
-#include <iostream>
 
-#include "./qtservice/src/qtservice.h"
 #include "../UtilsLib/SimpleThread.h"
 #include "../OnlineLib/UdpSocket.h"
 #include "../OnlineLib/CircularLogger.h"
 #include "../OnlineLib/SoftwareInfo.h"
 #include "../OnlineLib/SoftwareSettings.h"
+
 #include "CommandLineParser.h"
 
 

@@ -1,10 +1,9 @@
 #pragma once
 
-#include <QString>
 #include <QStringList>
 #include <QSettings>
 #include <memory>
-#include "../UtilsLib/WUtils.h"
+#include <map>
 
 class CircularLogger;
 

@@ -1,4 +1,4 @@
-#include "./include/Simulator/SimConsoleLogFile.h"
+#include <Simulator/SimConsoleLogFile.h>
 
 Q_LOGGING_CATEGORY(u7sim, "u7.sim")
 

@@ -1,4 +1,4 @@
-#include "./include/HardwareLib/EquipmentSet.h"
+#include <HardwareLib/EquipmentSet.h>
 
 namespace Hardware
 {

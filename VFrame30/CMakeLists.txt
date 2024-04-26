@@ -230,9 +230,9 @@ target_precompile_headers(${TARGET} PRIVATE
 		"../CommonLib/PropertyObject.h"
 		"../CommonLib/AfbParamValue.h"
 
-		"../Proto/ProtoSerialization.h"
-		"../Proto/ProtoCommonHelper.h"
-		"../Proto/VFrame30.pb.h"
+		<ProtoSerialization.h>
+		<ProtoCommonHelper.h>
+		<VFrame30.pb.h>
 
 		"../AppSignalLib/AppSignalParam.h"
 		"../AppSignalLib/AppSignalState.h"

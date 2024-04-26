@@ -2,7 +2,7 @@
 
 #include <HardwareLib/LogicModulesInfo.h>
 #include "../CommonLib/Times.h"
-#include "./include/Simulator/SimRam.h"
+#include <Simulator/SimRam.h>
 
 #include "SimScopedLog.h"
 #include "SimTuningRecord.h"

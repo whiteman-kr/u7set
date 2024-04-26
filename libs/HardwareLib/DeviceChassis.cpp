@@ -1,6 +1,6 @@
-#include "./include/HardwareLib/DeviceChassis.h"
-#include "./include/HardwareLib/DeviceModule.h"
-#include "./include/HardwareLib/PropertyNames.h"
+#include <HardwareLib/DeviceChassis.h>
+#include <HardwareLib/DeviceModule.h>
+#include <HardwareLib/PropertyNames.h>
 
 namespace Hardware
 {
