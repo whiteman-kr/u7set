@@ -2,7 +2,8 @@
 #error Do not include this file in the project! Link ServiceLib instead.
 #endif
 
-#include "Service.h"
+#include <ServiceLib/Service.h>
+#include "./qtservice/src/qtservice.h"
 #include "../UtilsLib/WUtils.h"
 #include "../lib/ConstStrings.h"
 

@@ -1,6 +1,6 @@
-#include <QXmlStreamReader>
-#include <QMetaProperty>
 #include "ArchivingService.h"
+#include "TcpAppDataServer.h"
+#include "TcpArchRequestsServer.h"
 
 
 // -------------------------------------------------------------------------------

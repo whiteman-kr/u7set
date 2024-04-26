@@ -1,6 +1,6 @@
 #pragma once
 
-#include "./qtservice/src/qtservice.h"
+#include "../../qtservice/src/qtservice.h"
 #include "Service.h"
 
 // -------------------------------------------------------------------------------------

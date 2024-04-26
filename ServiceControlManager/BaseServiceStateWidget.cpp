@@ -1,7 +1,6 @@
 #include "BaseServiceStateWidget.h"
-#include <QAction>
-#include <QStatusBar>
 #include <QLabel>
+#include <QStatusBar>
 #include <QToolBar>
 #include <QMessageBox>
 #include <QApplication>
@@ -9,6 +8,7 @@
 #include <QHeaderView>
 #include <QStandardItemModel>
 #include "../lib/WidgetUtils.h"
+#include "../UtilsLib/WUtils.h"
 
 
 BaseServiceStateWidget::BaseServiceStateWidget(const SoftwareInfo& softwareInfo, const ServiceData& service, quint32 udpIp, quint16 udpPort, QWidget* parent) :
