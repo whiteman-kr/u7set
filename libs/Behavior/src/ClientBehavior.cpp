@@ -1,6 +1,6 @@
-#include "../include/Behavior/ClientBehavior.h"
-#include "../include/Behavior/MonitorBehavior.h"
-#include "../include/Behavior/TuningClientBehavior.h"
+#include <Behavior/ClientBehavior.h>
+#include <Behavior/MonitorBehavior.h>
+#include <Behavior/TuningClientBehavior.h>
 
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>

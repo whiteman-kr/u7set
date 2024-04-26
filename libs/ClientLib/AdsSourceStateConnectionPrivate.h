@@ -6,7 +6,7 @@
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../UtilsLib/ILogFile.h"
 #include "../OnlineLib/SoftwareInfo.h"
-#include "./include/ClientLib/AppDataSourceState.h"
+#include <ClientLib/AppDataSourceState.h>
 
 class SimpleThread;
 

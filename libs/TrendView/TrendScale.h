@@ -1,8 +1,8 @@
 #ifndef TRENDSCALE_H
 #define TRENDSCALE_H
 
-#include "./include/TrendView/TrendParam.h"
-#include "./include/TrendView/TrendSignal.h"
+#include <TrendView/TrendParam.h>
+#include <TrendView/TrendSignal.h>
 #include <optional>
 
 

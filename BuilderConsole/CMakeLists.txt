@@ -25,7 +25,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../CommonLib/Hash.h"
 	"../CommonLib/PropertyObject.h"
 
-	"../Proto/ProtoSerialization.h"
+	<ProtoSerialization.h>
 
 	"../AppSignalLib/AppSignal.h"
 )

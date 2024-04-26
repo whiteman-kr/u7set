@@ -181,7 +181,7 @@ private:
 
 	// Signals processing
 
-	void invertValue();
+	void invertValue(int channel);	// channel is value column number, if it is set to -1 - all columns are inverted
 	void addSelectedSignalsToFilter(TuningFilter* filter);
 	void restoreSignalsFromFilter(TuningFilter* filter);
 	void setToDefaults(const std::vector<Hash>& hashes);

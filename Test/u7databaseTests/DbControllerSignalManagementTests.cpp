@@ -1,5 +1,5 @@
 #include "DbControllerSignalManagementTests.h"
-#include "../Proto/AppSignal.pb.h"
+#include <AppSignal.pb.h>
 #include "../UtilsLib/WUtils.h"
 #include "Settings.h"
 

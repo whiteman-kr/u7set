@@ -1,7 +1,7 @@
 #include "../lib/DataSource.h"
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../Proto/Comparator.pb.h"
 
+#include <Comparator.pb.h>
 #include <HardwareLib/LmDescription.h>
 #include <HardwareLib/LogicModulesInfo.h>
 
@@ -74,6 +74,7 @@ namespace Builder
 			&ApplicationLogicCompiler::writeCommonAppSignalsExtXmlFile,
 			&ApplicationLogicCompiler::writeComparatorSetFile,
 			&ApplicationLogicCompiler::writeSubsystemsXml,
+			&ApplicationLogicCompiler::writeAppSignalsListCsv,
 		};
 
 		bool result = true;
@@ -1481,6 +1482,162 @@ namespace Builder
 		}
 
 		return result;
+	}
+
+	bool ApplicationLogicCompiler::writeAppSignalsListCsv()
+	{
+		TEST_PTR_RETURN_FALSE(m_context);
+
+		if (m_context->m_projectProperties.generateExtraDebugInfo() == false)
+		{
+			return true;
+		}
+
+		BuildResultWriter* brWriter = buildResultWriter();
+
+		TEST_PTR_RETURN_FALSE(brWriter);
+
+		SignalSet* sset = signalSet();
+
+		TEST_PTR_RETURN_FALSE(sset);
+
+		QString file;
+
+		static const QStringList fields(
+		{
+			AppSignalPropNames::APP_SIGNAL_ID,
+			AppSignalPropNames::CUSTOM_APP_SIGNAL_ID,
+			AppSignalPropNames::CAPTION,
+			AppSignalPropNames::EQUIPMENT_ID,
+			AppSignalPropNames::TYPE,
+			AppSignalPropNames::IN_OUT_TYPE,
+			AppSignalPropNames::ANALOG_SIGNAL_FORMAT,
+			AppSignalPropNames::BUS_TYPE_ID,
+			AppSignalPropNames::UNIT,
+			AppSignalPropNames::ACQUIRE,
+			AppSignalPropNames::ARCHIVE,
+			AppSignalPropNames::ENABLE_TUNING,
+			AppSignalPropNames::TUNING_DEFAULT_VALUE,
+			AppSignalPropNames::TUNING_LOW_BOUND,
+			AppSignalPropNames::TUNING_HIGH_BOUND,
+			AppSignalPropNames::TAGS,
+		});
+
+		file.append(Separator::DOUBLE_QUOTES + fields.join(QStringLiteral("\";\"")) + Separator::DOUBLE_QUOTES);
+
+		QString str;
+
+		auto appendStr = [&str](const QString& s, bool last = false)
+		{
+			str += Separator::DOUBLE_QUOTES;
+			str += s;
+			str += Separator::DOUBLE_QUOTES;
+			if (last == false)
+			{
+				str += Separator::SEMICOLON;
+			}
+		};
+
+		auto appendValue = [&str](const QString& s, bool last = false)
+		{
+			str += s;
+			if (last == false)
+			{
+				str += Separator::SEMICOLON;
+			}
+		};
+
+		auto appendEmptyStr = [&str](bool last = false)
+		{
+			str += QStringLiteral("\"\"");
+			if (last == false)
+			{
+				str += Separator::SEMICOLON;
+			}
+		};
+
+		auto appendEmptyValue = [&str](bool last = false)
+		{
+			if (last == false)
+			{
+				str += Separator::SEMICOLON;
+			}
+		};
+
+		for(const AppSignal* s : *sset)
+		{
+			TEST_PTR_CONTINUE(s);
+
+			if (s->excludeFromBuild() == true)
+			{
+				continue;
+			}
+
+			if (file.isEmpty() == false)
+			{
+				file.append(Separator::CR_LF);
+			}
+
+			str.clear();
+
+			appendStr(s->appSignalID());
+			appendStr(s->customAppSignalID());
+			appendStr(s->caption());
+			appendStr(s->equipmentID());
+			appendStr(E::valueToString(s->signalType()));
+			appendStr(E::valueToString(s->inOutType()));
+
+			if (s->signalType() == E::SignalType::Analog)
+			{
+				appendStr(E::valueToString(s->analogSignalFormat()));
+			}
+			else
+			{
+				appendEmptyStr();
+			}
+
+			if (s->signalType() == E::SignalType::Bus)
+			{
+				appendStr(s->busTypeID());
+			}
+			else
+			{
+				appendEmptyStr();
+			}
+
+			appendStr(s->unit());
+
+			appendStr(s->acquire() ? QStringLiteral("Acquire") : QStringLiteral("NotAcquire"));
+			appendStr(s->archive() ? QStringLiteral("Archive") : QStringLiteral("NotArchive"));
+
+			appendStr(s->enableTuning() ? QStringLiteral("Enable") : QStringLiteral("Disable"));
+
+			if (s->enableTuning())
+			{
+				appendValue(s->tuningDefaultValue().toTypedString());
+				appendValue(s->tuningLowBound().toTypedString());
+				appendValue(s->tuningHighBound().toTypedString());
+			}
+			else
+			{
+				appendEmptyValue();
+				appendEmptyValue();
+				appendEmptyValue();
+			}
+
+			appendStr(s->tags().join(Separator::SEMICOLON), true);
+
+			file.append(str);
+		}
+
+		QByteArray fileData;
+
+		fileData.append(BOM::UTF8);
+		fileData.append(file.toUtf8());
+
+		BuildFile* bf = brWriter->addFile(Directory::COMMON, File::APP_SIGNALS_LIST_CSV, "", "", fileData, false);
+
+		return (bf != nullptr);
 	}
 
 	void ApplicationLogicCompiler::clear()

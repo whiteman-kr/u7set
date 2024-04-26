@@ -1,4 +1,4 @@
-#include "./include/Simulator/SimDeviceState.h"
+#include <Simulator/SimDeviceState.h>
 
 namespace Sim
 {

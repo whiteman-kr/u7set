@@ -81,7 +81,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../../CommonLib/Types.h"
 	"../../CommonLib/Hash.h"
 
-	"../../Proto/Trends.pb.h"
+	<Trends.pb.h>
 
 	"../../AppSignalLib/AppSignalParam.h"
 	"../../AppSignalLib/AppSignalState.h"

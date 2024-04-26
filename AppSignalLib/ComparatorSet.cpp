@@ -3,8 +3,8 @@
 #endif
 
 #include "ComparatorSet.h"
-#include "../Proto/Comparator.pb.h"
-#include "../Proto/ProtoCommonHelper.h"
+#include <Comparator.pb.h>
+#include <ProtoCommonHelper.h>
 
 // ------------------------------------------------------------------------------------------------
 //

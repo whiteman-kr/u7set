@@ -2351,7 +2351,7 @@ void TuningPage::slot_tableCheckboxClicked(const QModelIndex& index)
 
 	if (columnType >= static_cast<int>(TuningModelColumns::ValueFirst) && columnType <= static_cast<int>(TuningModelColumns::ValueLast))
 	{
-		invertValue();
+		invertValue(columnType - static_cast<int>(TuningModelColumns::ValueFirst));
 	}
 }
 
@@ -2408,7 +2408,7 @@ bool TuningPage::eventFilter(QObject* object, QEvent* event)
 
 		if(pKeyEvent->key() == Qt::Key_Space)
 		{
-			invertValue();
+			invertValue(-1);
 			return true;
 		}
 	}
@@ -2416,8 +2416,14 @@ bool TuningPage::eventFilter(QObject* object, QEvent* event)
 	return QWidget::eventFilter(object, event);
 }
 
-void TuningPage::invertValue()
+void TuningPage::invertValue(int channel)
 {
+	if (channel != -1 && (channel < 0 || channel >= m_model->valueColumnsCount()))
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
 	QModelIndexList selection = m_objectList->selectionModel()->selectedRows();
 
 	std::vector<int> selectedRows;
@@ -2440,6 +2446,11 @@ void TuningPage::invertValue()
 
 		for (int c = 0; c < m_model->valueColumnsCount(); c++)
 		{
+			if (channel != -1 && channel != c) 
+			{
+				continue;
+			}
+
 			Hash hash = hashSet.hash[c];
 
 			if (hash == UNDEFINED_HASH)

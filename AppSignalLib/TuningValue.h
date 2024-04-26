@@ -63,6 +63,7 @@ public:
 
 	QString toString() const;
 	QString toString(E::AnalogFormat analogFormat, int precision) const;
+	QString toTypedString(int precision = 3) const;
 
 	void fromString(QString value, bool* ok = nullptr);
 

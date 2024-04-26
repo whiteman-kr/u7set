@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../CommonLib/Factory.h"
-#include "./include/HardwareLib/DeviceObject.h"
+#include <HardwareLib/DeviceObject.h>
 
 namespace Hardware
 {

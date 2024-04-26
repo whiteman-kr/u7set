@@ -2,7 +2,7 @@
 #error Do not include this file in the project! Link ClientLib instead.
 #endif
 
-#include "./include/ClientLib/ConfigController.h"
+#include <ClientLib/ConfigController.h>
 #include "../CommonLib/HostAddressPort.h"
 #include "../OnlineLib/CfgServerLoader.h"
 #include <QDomNode>

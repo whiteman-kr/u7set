@@ -122,7 +122,7 @@ namespace Sim
 
 		if (hasValidity == false)
 		{
-			result.valid = 1;		// All signals which do not have explicit validty signal are accounted as valid
+			result.valid = 1;		// All signals which do not have explicit validity signal are accounted as valid
 		}
 
 		return result;
@@ -739,7 +739,7 @@ namespace Sim
 									if (bool ok = ram.readSignedInt(actualAddress.offset(), &data, byteOrder, ramAccess, applyOverride);
 										ok == false)
 									{
-										m_log.writeError(QString("Get signal state error, AppSignlaId: %1, LogicModule %2")
+										m_log.writeError(QString("Get signal state error, AppSignalId: %1, LogicModule %2")
 														 .arg(appSignalId)
 														 .arg(logicModuleId));
 									}
@@ -811,6 +811,47 @@ namespace Sim
 		}
 
 		return true;
+	}
+
+	std::vector<AppSignalManagerImpl::ValiditySignal> AppSignalManagerImpl::validityInputSignals(const QString& lmEquipmentId) const
+	{
+		std::vector<AppSignalManagerImpl::ValiditySignal> result;
+		result.reserve(1024);
+
+		QReadLocker rl(&m_signalParamLock);
+
+		for (const auto& [h, s] : m_signalParamsExt)
+		{
+			if (s.isInput() == false || s.lmEquipmentID() != lmEquipmentId)
+			{
+				continue;
+			}
+
+			auto flagsIt = m_flagsStruct.find(s.hash());
+			if (flagsIt == m_flagsStruct.end())
+			{ 
+				continue;
+			}
+
+			const FlagsReadStruct& signalFlags = flagsIt->second;
+
+			auto beginFlagsIt = signalFlags.flagsSignalAddresses.begin();
+			auto endFlagsIt = signalFlags.flagsSignalAddresses.begin() + signalFlags.flagCount;
+
+			auto fit = std::find_if(beginFlagsIt,
+									endFlagsIt,
+									[](const auto& p)
+									{
+										return p.first == E::AppSignalStateFlagType::Validity && p.second.isValid() == true;
+									});
+
+			if (fit != endFlagsIt)
+			{
+				result.push_back(ValiditySignal{s.hash(), fit->second, E::LogicModuleRamAccess::Read});
+			}
+		}
+
+		return result;
 	}
 
 	int AppSignalManagerImpl::signalsCount() const

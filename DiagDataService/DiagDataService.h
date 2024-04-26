@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../ServiceLib/Service.h"
+#include <ServiceLib/Service.h>
 #include "../lib/DataSource.h"
 #include "../OnlineLib/CfgServerLoader.h"
 #include "../OnlineLib/SoftwareSettings.h"

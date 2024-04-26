@@ -1,5 +1,5 @@
-#include "./include/HardwareLib/DeviceAppSignal.h"
-#include "./include/HardwareLib/PropertyNames.h"
+#include <HardwareLib/DeviceAppSignal.h>
+#include <HardwareLib/PropertyNames.h>
 
 namespace Hardware
 {

@@ -69,8 +69,42 @@ var E;
         Alignment[Alignment["AlignVCenter"] = 128] = "AlignVCenter";
         Alignment[Alignment["AlignBaseline"] = 256] = "AlignBaseline"; /**< AlignBaseline = 0x100*/
     })(Alignment = E.Alignment || (E.Alignment = {}));
+    let SoftwareType;
+    (function (SoftwareType) {
+        SoftwareType[SoftwareType["Unknown"] = 8000] = "Unknown";
+        SoftwareType[SoftwareType["BaseService"] = 8999] = "BaseService";
+        SoftwareType[SoftwareType["Monitor"] = 9000] = "Monitor";
+        SoftwareType[SoftwareType["ConfigurationService"] = 9001] = "ConfigurationService";
+        SoftwareType[SoftwareType["AppDataService"] = 9002] = "AppDataService";
+        SoftwareType[SoftwareType["ArchiveService"] = 9003] = "ArchiveService";
+        SoftwareType[SoftwareType["TuningService"] = 9004] = "TuningService";
+        SoftwareType[SoftwareType["DiagDataService"] = 9005] = "DiagDataService";
+        SoftwareType[SoftwareType["TuningClient"] = 9006] = "TuningClient";
+        SoftwareType[SoftwareType["Metrology"] = 9007] = "Metrology";
+        SoftwareType[SoftwareType["ServiceControlManager"] = 9008] = "ServiceControlManager";
+        SoftwareType[SoftwareType["TestClient"] = 9009] = "TestClient";
+        SoftwareType[SoftwareType["TestSuite"] = 9010] = "TestSuite";
+        SoftwareType[SoftwareType["GatewayService"] = 9011] = "GatewayService";
+        SoftwareType[SoftwareType["Diagnostics"] = 9012] = "Diagnostics";
+    })(SoftwareType = E.SoftwareType || (E.SoftwareType = {}));
+    ;
+    let DeviceType;
+    (function (DeviceType) {
+        DeviceType[DeviceType["Root"] = 0] = "Root";
+        DeviceType[DeviceType["System"] = 1] = "System";
+        DeviceType[DeviceType["Rack"] = 2] = "Rack";
+        DeviceType[DeviceType["Chassis"] = 3] = "Chassis";
+        DeviceType[DeviceType["Module"] = 4] = "Module";
+        DeviceType[DeviceType["Workstation"] = 5] = "Workstation";
+        DeviceType[DeviceType["Software"] = 6] = "Software";
+        DeviceType[DeviceType["Controller"] = 7] = "Controller";
+        DeviceType[DeviceType["AppSignal"] = 8] = "AppSignal";
+        DeviceType[DeviceType["DiagSignal"] = 9] = "DiagSignal";
+    })(DeviceType = E.DeviceType || (E.DeviceType = {}));
+    ;
 })(E || (E = {}));
 //declare var app: App.ScriptMonitorApplication;		// For Monitor script
+//declare var equipment: Hardware.ScriptEquipment;		// For Monitor script
 //declare var app: App.ScriptTuningClientApplication;	// For TuningClient script
 // Global functions
 function showSignalValue(schemaItem, signalId) {
@@ -93,3 +127,68 @@ function showSignalValue(schemaItem, signalId) {
     }
     return;
 }
+var Hardware;
+(function (Hardware) {
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+})(Hardware || (Hardware = {}));
+var Qt;
+(function (Qt) {
+    let Orientation;
+    (function (Orientation) {
+        Orientation[Orientation["Horizontal"] = 1] = "Horizontal";
+        Orientation[Orientation["Vertical"] = 2] = "Vertical";
+    })(Orientation = Qt.Orientation || (Qt.Orientation = {}));
+})(Qt || (Qt = {}));
+var QMessageBox;
+(function (QMessageBox) {
+    let Icon;
+    (function (Icon) {
+        Icon[Icon["NoIcon"] = 0] = "NoIcon";
+        Icon[Icon["Information"] = 1] = "Information";
+        Icon[Icon["Warning"] = 2] = "Warning";
+        Icon[Icon["Critical"] = 3] = "Critical";
+        Icon[Icon["Question"] = 4] = "Question";
+    })(Icon = QMessageBox.Icon || (QMessageBox.Icon = {}));
+    let StandardButton;
+    (function (StandardButton) {
+        StandardButton[StandardButton["NoButton"] = 0] = "NoButton";
+        StandardButton[StandardButton["Ok"] = 1024] = "Ok";
+        StandardButton[StandardButton["Save"] = 2048] = "Save";
+        StandardButton[StandardButton["SaveAll"] = 4096] = "SaveAll";
+        StandardButton[StandardButton["Open"] = 8192] = "Open";
+        StandardButton[StandardButton["Yes"] = 16384] = "Yes";
+        StandardButton[StandardButton["YesToAll"] = 32768] = "YesToAll";
+        StandardButton[StandardButton["No"] = 65536] = "No";
+        StandardButton[StandardButton["NoToAll"] = 131072] = "NoToAll";
+        StandardButton[StandardButton["Abort"] = 262144] = "Abort";
+        StandardButton[StandardButton["Retry"] = 524288] = "Retry";
+        StandardButton[StandardButton["Ignore"] = 1048576] = "Ignore";
+        StandardButton[StandardButton["Close"] = 2097152] = "Close";
+        StandardButton[StandardButton["Cancel"] = 4194304] = "Cancel";
+        StandardButton[StandardButton["Discard"] = 8388608] = "Discard";
+        StandardButton[StandardButton["Help"] = 16777216] = "Help";
+        StandardButton[StandardButton["Apply"] = 33554432] = "Apply";
+        StandardButton[StandardButton["Reset"] = 67108864] = "Reset";
+        StandardButton[StandardButton["RestoreDefaults"] = 134217728] = "RestoreDefaults";
+    })(StandardButton = QMessageBox.StandardButton || (QMessageBox.StandardButton = {}));
+})(QMessageBox || (QMessageBox = {}));
+var QSlider;
+(function (QSlider) {
+    let TickPosition;
+    (function (TickPosition) {
+        TickPosition[TickPosition["NoTicks"] = 0] = "NoTicks";
+        TickPosition[TickPosition["TicksBothSides"] = 3] = "TicksBothSides";
+        TickPosition[TickPosition["TicksAbove"] = 1] = "TicksAbove";
+        TickPosition[TickPosition["TicksBelow"] = 2] = "TicksBelow";
+        TickPosition[TickPosition["TicksLeft"] = 1] = "TicksLeft";
+        TickPosition[TickPosition["TicksRight"] = 2] = "TicksRight"; /**< Draw tick marks to the right of the (vertical) slider.*/
+    })(TickPosition = QSlider.TickPosition || (QSlider.TickPosition = {}));
+})(QSlider || (QSlider = {}));

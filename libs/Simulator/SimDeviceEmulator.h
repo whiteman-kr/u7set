@@ -5,9 +5,9 @@
 #include "SimAfb.h"
 #include "SimLans.h"
 
-#include "./include/Simulator/SimDeviceState.h"
-#include "./include/Simulator/SimDeviceCommand.h"
-#include "./include/Simulator/SimRam.h"
+#include <Simulator/SimDeviceState.h>
+#include <Simulator/SimDeviceCommand.h>
+#include <Simulator/SimRam.h>
 
 #include <HardwareLib/LmDescription.h>
 #include <HardwareLib/LogicModulesInfo.h>
@@ -206,6 +206,8 @@ namespace Sim
 		//
 	private:
 		bool initMemory();
+		bool initValiditySignals(); // Sets validity for input signals to 1. Users do not want to set many validities on simulation start.
+
 		bool initEeprom();
 		bool parseAppLogicCode();
 		bool parseCommand(const LmCommand& command, int programCounter);

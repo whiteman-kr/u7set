@@ -1,4 +1,4 @@
-#include "../ServiceLib/ServiceStarter.h"
+#include <ServiceLib/ServiceStarter.h>
 #include "DiagDataService.h"
 #include "version.h"
 

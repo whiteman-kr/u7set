@@ -8,6 +8,6 @@
       "noImplicitThis": true,
       "noImplicitReturns" : true,
 //      "watch": true,
-      "out": "out/GlobalScript.js"
+      "outFile": "out/GlobalScript.js"
   }
 }

@@ -1,4 +1,4 @@
-#include "./include/HardwareLib/DeviceRoot.h"
+#include <HardwareLib/DeviceRoot.h>
 
 namespace Hardware
 {

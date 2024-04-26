@@ -2,7 +2,7 @@
 #error Do not include this file in the project! Link ClientLib instead.
 #endif
 
-#include "./include/ClientLib/AdsSourceStateConnection.h"
+#include <ClientLib/AdsSourceStateConnection.h>
 #include "AdsSourceStateConnectionPrivate.h"
 
 namespace ClientLib

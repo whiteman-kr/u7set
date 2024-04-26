@@ -8,6 +8,7 @@ declare var tuning: Signal.TuningController;
 declare var log: Log.LogController;
 
 //declare var app: App.ScriptMonitorApplication;		// For Monitor script
+//declare var equipment: Hardware.ScriptEquipment;		// For Monitor script
 //declare var app: App.ScriptTuningClientApplication;	// For TuningClient script
 
 // Global functions

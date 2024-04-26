@@ -30,7 +30,10 @@ public:
 
 	virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
 
-	QList<AppDataSource*> dataSources() { return m_appDataSources.values(); }
+	std::vector<DataSource> getDataSources();
+	bool getDataSource(const QString& equipmentID, DataSource* ds);
+	bool getDataSourceState(const QString& equipmentID, Network::AppDataSourceState* state);
+
 	const QVector<AppSignal>& signalParams() { return m_signalParams; }
 	const QVector<AppSignalState>& signalStates() { return m_states; }
 
@@ -93,7 +96,8 @@ private slots:
 	void updateStates();
 
 private:
-	QHash<quint64, AppDataSource*> m_appDataSources;		// id => AppDataSource
+	QMutex m_appDataSourcesMutex;
+	std::map<Hash, std::pair<DataSource, Network::AppDataSourceState>> m_appDataSources;		// id => pair <DataSourc, AppDataSourceState>
 
 	QVector<Hash> m_signalHashes;
 	QVector<AppSignal> m_signalParams;
