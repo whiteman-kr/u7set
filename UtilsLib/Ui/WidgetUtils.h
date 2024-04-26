@@ -22,8 +22,6 @@ public:
 								  bool showAllDefaultColumns = false);
 	virtual ~TableDataVisibilityController();
 
-	void editColumnsVisibilityAndOrder();
-
 	void saveColumnVisibility(int index, bool visible);
 	void saveColumnPosition(int index, int position);
 	void saveColumnWidth(int index, int width);
@@ -38,6 +36,8 @@ public:
 public slots:
 	void onColumnResized(int index, int oldSize, int newSize);
 	void onColumnMoved(int index, int oldVisualIndex, int newVisualIndex);
+
+	void editColumnsVisibilityAndOrder();
 
 	void saveAllHeaderGeomery();
 	void checkNewColumns();
@@ -78,14 +78,14 @@ private:
 	};
 
 private:
-	void saveColumnInfo(const ColumnInfo& ci);
+	void saveColumnInfo(const ColumnInfo& ci) const;
 	void loadColumnInfo(const QString& columnName, ColumnInfo* ci) const;
 	bool isValidColumnIndex(int index) const;
 
 private:
 	QTableView* m_tableView = nullptr;
-	QSettings m_settings;
-	HashedVector<QString, ColumnInfo> m_columnsInfo;			// Column Name => ColumnInfo
+	mutable QSettings m_settings;
+	HashedVector<QString, ColumnInfo> m_columnsInfo;			// ColumnName => ColumnInfo
 	QString m_settingBranchName;
 	QVector<int> m_defaultVisibleColumnSet;
 	bool m_showAllDefaultColumns;

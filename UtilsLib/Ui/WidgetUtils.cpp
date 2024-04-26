@@ -92,7 +92,6 @@ void setWindowPosition(QWidget* window, QString widgetKey)
 	window->setGeometry(windowRect);
 }
 
-
 // -------------------------------------------------------------------------------------------------------
 //
 // TableDataVisibilityController::ColumnInfo class implementation
@@ -216,8 +215,6 @@ TableDataVisibilityController::TableDataVisibilityController(QTableView* parent,
 	m_defaultVisibleColumnSet(defaultVisibleColumnSet),
 	m_showAllDefaultColumns(showAllDefaultColumns)
 {
-	connect(parent, &QObject::destroyed, this, &TableDataVisibilityController::saveAllHeaderGeomery, Qt::DirectConnection);
-
 	QHeaderView* horizontalHeader = m_tableView->horizontalHeader();
 
 	horizontalHeader->setContextMenuPolicy(Qt::ActionsContextMenu);
@@ -235,20 +232,11 @@ TableDataVisibilityController::TableDataVisibilityController(QTableView* parent,
 
 TableDataVisibilityController::~TableDataVisibilityController()
 {
-}
-
-void TableDataVisibilityController::editColumnsVisibilityAndOrder()
-{
-	EditColumnsVisibilityDialog dlg(m_tableView, this);
-
-	//Window geometry
+	// delete old-style columns settings
 	//
-	setWindowPosition(&dlg, m_settingBranchName + "ColumnsVisibilityDialog");
-
-	dlg.exec();
-
-	saveWindowPosition(&dlg, m_settingBranchName + "ColumnsVisibilityDialog");
-	saveAllHeaderGeomery();
+	m_settings.remove(QString("%1/ColumnPosition").arg(m_settingBranchName));
+	m_settings.remove(QString("%1/ColumnWidth").arg(m_settingBranchName));
+	m_settings.remove(QString("%1/ColumnVisibility").arg(m_settingBranchName));
 }
 
 void TableDataVisibilityController::saveColumnVisibility(int index, bool visible)
@@ -383,8 +371,25 @@ void TableDataVisibilityController::onColumnResized(int index, int oldSize, int 
 
 void TableDataVisibilityController::onColumnMoved(int index, int oldVisualIndex, int newVisualIndex)
 {
-	//saveColumnWidth(index, newSize);
-	Q_ASSERT(false);
+	Q_UNUSED(index);
+	Q_UNUSED(oldVisualIndex);
+	Q_UNUSED(newVisualIndex);
+
+	saveAllHeaderGeomery();
+}
+
+void TableDataVisibilityController::editColumnsVisibilityAndOrder()
+{
+	EditColumnsVisibilityDialog dlg(m_tableView, this);
+
+	//Window geometry
+	//
+	setWindowPosition(&dlg, m_settingBranchName + "ColumnsVisibilityDialog");
+
+	dlg.exec();
+
+	saveWindowPosition(&dlg, m_settingBranchName + "ColumnsVisibilityDialog");
+	saveAllHeaderGeomery();
 }
 
 void TableDataVisibilityController::saveAllHeaderGeomery()
@@ -396,11 +401,21 @@ void TableDataVisibilityController::saveAllHeaderGeomery()
 
 	auto header = m_tableView->horizontalHeader();
 
-	int columnCount = static_cast<int>(m_columnsInfo.size());
+	int columnCount = header->count();
 
 	for (int i = 0; i < columnCount; i++)
 	{
-		ColumnInfo& ci = m_columnsInfo[i];
+		QString columnName = header->model()->headerData(i, header->orientation(), Qt::DisplayRole).toString();
+
+		int index = m_columnsInfo.indexOf(columnName);
+
+		if (index == -1)
+		{
+			Q_ASSERT(false);
+			continue;
+		}
+
+		ColumnInfo& ci = m_columnsInfo[index];
 
 		ci.setVisible(!header->isSectionHidden(i));
 		ci.setPosition(header->visualIndex(i));
@@ -466,10 +481,11 @@ void TableDataVisibilityController::checkNewColumns()
 	relocateAllColumns();
 }
 
-void TableDataVisibilityController::saveColumnInfo(const ColumnInfo& ci)
+void TableDataVisibilityController::saveColumnInfo(const ColumnInfo& ci) const
 {
-	m_settings.setValue(QString("%1/%2").arg(m_settingBranchName).arg(ci.settingName()),
+	m_settings.setValue(QString("%1/Columns/%2").arg(m_settingBranchName).arg(ci.settingName()),
 						ci.saveParamsToString());
+	m_settings.sync();
 }
 
 void TableDataVisibilityController::loadColumnInfo(const QString& columnName, ColumnInfo* ci) const
@@ -478,10 +494,32 @@ void TableDataVisibilityController::loadColumnInfo(const QString& columnName, Co
 
 	ci->setColumnName(columnName);
 
-	QString paramsStr = m_settings.value(QString("%1/%2").arg(m_settingBranchName).arg(ci->settingName()),
+	QString paramsStr = m_settings.value(QString("%1/Columns/%2").arg(m_settingBranchName).arg(ci->settingName()),
 								QString()).toString();
 
-	ci->readParamsFromString(paramsStr);
+	if (paramsStr.isEmpty() == false)
+	{
+		ci->readParamsFromString(paramsStr);
+	}
+	else
+	{
+		// try read old format settings
+		//
+		int pos = m_settings.value(QString("%1/ColumnPosition/%2").arg(m_settingBranchName).arg(ci->settingName()), -1).toInt();
+		bool visible = m_settings.value(QString("%1/ColumnVisibility/%2").arg(m_settingBranchName).arg(ci->settingName()), true).toBool();
+		int width = m_settings.value(QString("%1/ColumnWidth/%2").arg(m_settingBranchName).arg(ci->settingName()), -1).toInt();
+
+		if (width == -1)
+		{
+			width = 50;
+		}
+
+		ci->setPosition(pos);
+		ci->setVisible(visible);
+		ci->setWidth(width);
+
+		saveColumnInfo(*ci);			// save in new format
+	}
 }
 
 bool TableDataVisibilityController::isValidColumnIndex(int index) const

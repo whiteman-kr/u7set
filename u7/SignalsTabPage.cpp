@@ -356,11 +356,11 @@ void SignalsTabPage::projectOpened()
 
 void SignalsTabPage::projectClosed()
 {
+	m_signalsColumnVisibilityController->saveAllHeaderGeomery();
+
 	m_signalsModel->prepareForReset();
 	m_signalSetProvider->onProjectClosed();
 	m_signalsModel->finishReset();
-
-	m_signalsColumnVisibilityController->saveAllHeaderGeomery();
 
 	this->setEnabled(false);
 
